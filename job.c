@@ -465,9 +465,9 @@ start_job_command (child)
   /* There may be some preceding whitespace left if there
      was nothing but a backslash on the first line.  */
   p = next_token (p);
-
+  
   /* Figure out an argument list from this command line.  */
-
+  
   {
     char *end;
     argv = construct_command_argv (p, &end, child->file);
@@ -479,6 +479,15 @@ start_job_command (child)
 	child->command_ptr = end;
       }
   }
+
+  if (touch_flag && !recursive)
+    {
+      /* Go on to the next command.  It might be the recursive one.
+	 We construct ARGV only to find the end of the command line.  */
+      free (argv[0]);
+      free ((char *) argv);
+      argv = 0;
+    }
 
   if (argv == 0)
     {
