@@ -25,7 +25,7 @@ override srcdir := .
 # Get most of the information from the Unix-compatible makefile.
 include compatMakefile
 
-extras := $(filter-out @%@,$(extras))
+extras := $(sort $(filter-out @%@,$(extras)) getloadavg.o)
 LOADLIBES := $(filter-out @%@,$(LOADLIBES))
 
 # Set `ARCH' to a string for the type of machine.
