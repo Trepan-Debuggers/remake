@@ -22,6 +22,9 @@ Boston, MA 02111-1307, USA.  */
 #ifdef	HAVE_DIRENT_H
 # include <dirent.h>
 # define NAMLEN(dirent) strlen((dirent)->d_name)
+# ifdef VMS
+extern char *vmsify PARAMS ((char *name, int type));
+# endif
 #else
 # define dirent direct
 # define NAMLEN(dirent) (dirent)->d_namlen
@@ -41,18 +44,18 @@ Boston, MA 02111-1307, USA.  */
 
 /* In GNU systems, <dirent.h> defines this macro for us.  */
 #ifdef _D_NAMLEN
-#undef NAMLEN
-#define NAMLEN(d) _D_NAMLEN(d)
+# undef NAMLEN
+# define NAMLEN(d) _D_NAMLEN(d)
 #endif
 
-#if (defined (POSIX) || defined (WINDOWS32)) && !defined (__GNU_LIBRARY__)
+#if (defined (POSIX) || defined (VMS) || defined (WINDOWS32)) && !defined (__GNU_LIBRARY__)
 /* Posix does not require that the d_ino field be present, and some
    systems do not provide it. */
-#define REAL_DIR_ENTRY(dp) 1
-#define FAKE_DIR_ENTRY(dp)
+# define REAL_DIR_ENTRY(dp) 1
+# define FAKE_DIR_ENTRY(dp)
 #else
-#define REAL_DIR_ENTRY(dp) (dp->d_ino != 0)
-#define FAKE_DIR_ENTRY(dp) (dp->d_ino = 1)
+# define REAL_DIR_ENTRY(dp) (dp->d_ino != 0)
+# define FAKE_DIR_ENTRY(dp) (dp->d_ino = 1)
 #endif /* POSIX */
 
 #ifdef __MSDOS__
@@ -156,7 +159,8 @@ vms_hash (name)
 
   while (*name)
     {
-      h = (h << 4) + *name++;
+      h = (h << 4) + (isupper (*name) ? tolower (*name) : *name);
+      name++;
       g = h & 0xf0000000;
       if (g)
 	{
@@ -333,12 +337,12 @@ find_directory (name)
       if (vmsstat_dir (name, &st) < 0)
 #else
 
-#ifdef WINDOWS32
+# ifdef WINDOWS32
       /* Remove any trailing '\'.  Windows32 stat fails even on valid
          directories if they end in '\'. */
       if (p[-1] == '\\')
         p[-1] = '\0';
-#endif
+# endif
       if (stat (name, &st) < 0)
 #endif
 	{
@@ -356,14 +360,14 @@ find_directory (name)
           w32_path = w32ify(name, 1);
           hash = ((unsigned int) st.st_dev << 16) | (unsigned int) st.st_ctime;
 #else
-#ifdef VMS
-	hash = ((unsigned int) st.st_dev << 16)
-		| ((unsigned int) st.st_ino[0]
-		+ (unsigned int) st.st_ino[1]
-		+ (unsigned int) st.st_ino[2]);
-#else
+# ifdef VMS
+          hash = (((unsigned int) st.st_dev << 16)
+                  | ((unsigned int) st.st_ino[0]
+                     + (unsigned int) st.st_ino[1]
+                     + (unsigned int) st.st_ino[2]));
+# else
 	  hash = ((unsigned int) st.st_dev << 16) | (unsigned int) st.st_ino;
-#endif
+# endif
 #endif
 	  hash %= DIRECTORY_BUCKETS;
 
@@ -372,13 +376,14 @@ find_directory (name)
             if (strieq(dc->path_key, w32_path))
 #else
 	    if (dc->dev == st.st_dev
-#ifdef VMS
+# ifdef VMS
 		&& dc->ino[0] == st.st_ino[0]
 		&& dc->ino[1] == st.st_ino[1]
-		&& dc->ino[2] == st.st_ino[2])
-#else
-		 && dc->ino == st.st_ino)
-#endif
+		&& dc->ino[2] == st.st_ino[2]
+# else
+                && dc->ino == st.st_ino
+# endif
+                )
 #endif /* WINDOWS32 */
 	      break;
 
@@ -413,24 +418,22 @@ find_directory (name)
               else
                 dc->fs_flags = FS_UNKNOWN;
 #else
-#ifdef VMS
+# ifdef VMS
 	      dc->ino[0] = st.st_ino[0];
 	      dc->ino[1] = st.st_ino[1];
 	      dc->ino[2] = st.st_ino[2];
-#else
+# else
 	      dc->ino = st.st_ino;
-#endif
+# endif
 #endif /* WINDOWS32 */
 	      dc->next = directories_contents[hash];
 	      directories_contents[hash] = dc;
 
 	      dc->dirstream = opendir (name);
 	      if (dc->dirstream == 0)
-		{
-		/* Couldn't open the directory.  Mark this by
-		   setting the `files' member to a nil pointer.  */
-		  dc->files = 0;
-		}
+                /* Couldn't open the directory.  Mark this by
+                   setting the `files' member to a nil pointer.  */
+                dc->files = 0;
 	      else
 		{
 		  /* Allocate an array of buckets for files and zero it.  */
@@ -553,6 +556,14 @@ dir_contents_file_exists_p (dir, filename)
       unsigned int len;
       register unsigned int i;
 
+#if defined(VMS) && defined(HAVE_DIRENT_H)
+      /* In VMS we get file versions too, which have to be stripped off */
+      {
+        char *p = strrchr (d->d_name, ';');
+        if (p)
+          *p = '\0';
+      }
+#endif
       if (!REAL_DIR_ENTRY (d))
 	continue;
 
@@ -636,6 +647,8 @@ file_exists_p (name)
 
 #ifdef VMS
   dirend = strrchr (name, ']');
+  if (dirend == 0)
+    dirend = strrchr (name, ':');
   dirend++;
   if (dirend == (char *)1)
     return dir_file_exists_p ("[]", name);
@@ -694,6 +707,8 @@ file_impossible (filename)
 
 #ifdef VMS
   dirend = strrchr (p, ']');
+  if (dirend == 0)
+    dirend = strrchr (name, ':');
   dirend++;
   if (dirend == (char *)1)
     dir = find_directory ("[]");

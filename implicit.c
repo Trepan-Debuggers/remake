@@ -163,6 +163,8 @@ pattern_search (file, archive, depth, recursions)
 	 bar/ in directory foo/, not empty in directory foo/bar/.)  */
 #ifdef VMS
       lastslash = strrchr (filename, ']');
+      if (lastslash == 0)
+	lastslash = strrchr (filename, ':');
 #else
       lastslash = strrchr (filename, '/');
 #if defined(__MSDOS__) || defined(WINDOWS32)
@@ -225,7 +227,9 @@ pattern_search (file, archive, depth, recursions)
 	     prefix and the target pattern does not contain a slash.  */
 
 #ifdef VMS
-	  check_lastslash = lastslash != 0 && strchr (target, ']') == 0;
+	  check_lastslash = lastslash != 0
+			    && ((strchr (target, ']') == 0)
+			        && (strchr (target, ':') == 0));
 #else
 	  check_lastslash = lastslash != 0 && strchr (target, '/') == 0;
 #endif

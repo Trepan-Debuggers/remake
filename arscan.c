@@ -78,7 +78,9 @@ VMS_get_member_info (module, rfa)
 
   mhd = (struct mhddef *) filename;
 
+#ifdef __DECC
   val = decc$fix_time (&mhd->mhd$l_datim);
+#endif
 
   for (i = 0; i < module->dsc$w_length; i++)
     filename[i] = _tolower ((unsigned char)module->dsc$a_pointer[i]);

@@ -1,3 +1,13 @@
+2000-01-21  Paul D. Smith  <psmith@gnu.org>
+
+	Installed patches for the VMS port.
+	Patches provided by: Hartmut Becker <Hartmut.Becker@compaq.com>
+
+	* readme.vms, arscan.c, config.h-vms, default.c, dir.c, file.c:
+	* implicit.c, job.c, make.h, makefile.com, makefile.vms, rule.c:
+	* variable.c, vmsdir.h, vmsfunctions.c, vmsify.c, glob/glob.c:
+	* glob/glob.h: Installed patches.  See readme.vms for details.
+
 2000-01-11  Paul D. Smith  <psmith@gnu.org>
 
 	Resolve PR/xxxx: don't automatically evaluate the $(call ...)

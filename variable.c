@@ -182,6 +182,63 @@ lookup_variable (name, length)
 	  return v;
     }
 
+#ifdef VMS
+  /* since we don't read envp[] on startup, try to get the
+     variable via getenv() here.  */
+
+    {
+      char *vname = alloca (length + 1);
+      char *value;
+      strncpy (vname, name, length);
+      vname[length] = 0;
+      value = getenv (vname);
+      if (value != 0)
+	{
+	  char *sptr;
+	  int scnt;
+
+	  sptr = value;
+	  scnt = 0;
+
+	  while ((sptr = strchr (sptr, '$')))
+	    {
+	      scnt++;
+	      sptr++;
+	    }
+
+	  if (scnt > 0)
+	    {
+	      char *nvalue;
+	      char *nptr;
+
+	      nvalue = alloca (length + scnt + 1);
+	      sptr = value;
+	      nptr = nvalue;
+
+	      while (*sptr)
+		{
+		  if (*sptr == '$')
+		    {
+		      *nptr++ = '$';
+		      *nptr++ = '$';
+		    }
+		  else
+		    {
+		      *nptr++ = *sptr;
+		    }
+		  sptr++;
+		}
+
+	      return define_variable (vname, length, nvalue, o_env, 1);
+
+	    }
+
+	  return define_variable (vname, length, value, o_env, 1);
+	}
+    }
+
+#endif /* VMS */
+
   return 0;
 }
 
@@ -457,6 +514,15 @@ define_automatic_variables ()
   /* Define the magic D and F variables in terms of
      the automatic variables they are variations of.  */
 
+#ifdef VMS
+  define_variable ("@D", 2, "$(dir $@)", o_automatic, 1);
+  define_variable ("%D", 2, "$(dir $%)", o_automatic, 1);
+  define_variable ("*D", 2, "$(dir $*)", o_automatic, 1);
+  define_variable ("<D", 2, "$(dir $<)", o_automatic, 1);
+  define_variable ("?D", 2, "$(dir $?)", o_automatic, 1);
+  define_variable ("^D", 2, "$(dir $^)", o_automatic, 1);
+  define_variable ("+D", 2, "$(dir $+)", o_automatic, 1);
+#else
   define_variable ("@D", 2, "$(patsubst %/,%,$(dir $@))", o_automatic, 1);
   define_variable ("%D", 2, "$(patsubst %/,%,$(dir $%))", o_automatic, 1);
   define_variable ("*D", 2, "$(patsubst %/,%,$(dir $*))", o_automatic, 1);
@@ -464,6 +530,7 @@ define_automatic_variables ()
   define_variable ("?D", 2, "$(patsubst %/,%,$(dir $?))", o_automatic, 1);
   define_variable ("^D", 2, "$(patsubst %/,%,$(dir $^))", o_automatic, 1);
   define_variable ("+D", 2, "$(patsubst %/,%,$(dir $+))", o_automatic, 1);
+#endif
   define_variable ("@F", 2, "$(notdir $@)", o_automatic, 1);
   define_variable ("%F", 2, "$(notdir $%)", o_automatic, 1);
   define_variable ("*F", 2, "$(notdir $*)", o_automatic, 1);

@@ -46,7 +46,12 @@ extern int MyExecute (char **);
    directories we could trust).  */
 char *default_shell = "command.com";
 #  else  /* __MSDOS__ */
+#   ifdef VMS
+#    include <descrip.h>
+char default_shell[] = "";
+#   else
 char default_shell[] = "/bin/sh";
+#   endif /* VMS */
 #  endif /* __MSDOS__ */
 int batch_mode_shell = 0;
 # endif /* _AMIGA */
@@ -70,7 +75,9 @@ static int amiga_batch_file;
 
 #ifdef VMS
 # include <time.h>
-# include <processes.h>
+# ifndef __GNUC__
+#   include <processes.h>
+# endif
 # include <starlet.h>
 # include <lib$routines.h>
 #endif
@@ -186,6 +193,7 @@ extern int start_remote_job_p PARAMS ((int));
 extern int remote_status PARAMS ((int *exit_code_ptr, int *signal_ptr,
 		int *coredump_ptr, int block));
 
+RETSIGTYPE child_handler PARAMS ((int));
 static void free_child PARAMS ((struct child *));
 static void start_job_command PARAMS ((struct child *child));
 static int load_too_high PARAMS ((void));
@@ -226,7 +234,6 @@ int w32_kill(int pid, int sig)
 }
 #endif /* WINDOWS32 */
 
-
 /* Write an error message describing the exit status given in
    EXIT_CODE, EXIT_SIG, and COREDUMP, for the target TARGET_NAME.
    Append "(ignored)" if IGNORED is nonzero.  */
@@ -272,6 +279,98 @@ vmsWaitForChildren(int *status)
     }
   return;
 }
+
+/* Set up IO redirection.  */
+
+char *
+vms_redirect (desc, fname, ibuf)
+    struct dsc$descriptor_s *desc;
+    char *fname;
+    char *ibuf;
+{
+  char *fptr;
+  extern char *vmsify ();
+
+  ibuf++;
+  while (isspace (*ibuf))
+    ibuf++;
+  fptr = ibuf;
+  while (*ibuf && !isspace (*ibuf))
+    ibuf++;
+  *ibuf = 0;
+  if (strcmp (fptr, "/dev/null") != 0)
+    {
+      strcpy (fname, vmsify (fptr, 0));
+      if (strchr (fname, '.') == 0)
+	strcat (fname, ".");
+    }
+  desc->dsc$w_length = strlen(fname);
+  desc->dsc$a_pointer = fname;
+  desc->dsc$b_dtype = DSC$K_DTYPE_T;
+  desc->dsc$b_class = DSC$K_CLASS_S;
+
+  if (*fname == 0)
+    printf ("Warning: Empty redirection\n");
+  return ibuf;
+}
+
+
+/*
+   found apostrophe at (p-1)
+
+   inc p until after closing apostrophe.  */
+
+static char *
+handle_apos (char *p)
+{
+  int alast;
+  int inside;
+
+#define SEPCHARS ",/()= "
+
+  inside = 0;
+
+  while (*p != 0)
+    {
+      if (*p == '"')
+	{
+	  if (inside)
+	    {
+	      while ((alast > 0)
+		    && (*p == '"'))
+		{
+		  p++;
+		  alast--;
+		}
+	      if (alast == 0)
+		inside = 0;
+	      else
+		{
+		  fprintf (stderr, "Syntax error, still inside '\"'\n");
+		  exit (3);
+		}
+	    }
+	  else
+	    {
+	      p++;
+	      if (strchr (SEPCHARS, *p))
+		break;
+	      inside = 1;
+	      alast = 1;
+	      while (*p == '"')
+		{
+		  alast++;
+		  p++;
+		}
+	    }
+	}
+      else
+	p++;
+    }
+
+  return p;
+}
+
 #endif
 
 
@@ -1603,6 +1702,76 @@ int vmsHandleChildTerm(struct child *child)
 
 #define MAXCMDLEN 200
 
+/* local helpers to make ctrl+c and ctrl+y working, see below */
+#include <iodef.h>
+#include <libclidef.h>
+#include <ssdef.h>
+
+static int ctrlMask= LIB$M_CLI_CTRLY;
+static int oldCtrlMask;
+static int setupYAstTried= 0;
+static int pidToAbort= 0;
+static int chan= 0;
+
+static void reEnableAst(void) {
+	lib$enable_ctrl (&oldCtrlMask,0);
+}
+
+static astHandler (void) {
+	if (pidToAbort) {
+		sys$forcex (&pidToAbort, 0, SS$_ABORT);
+		pidToAbort= 0;
+	}
+	kill (getpid(),SIGQUIT);
+}
+
+static void tryToSetupYAst(void) {
+	$DESCRIPTOR(inputDsc,"SYS$COMMAND");
+	int	status;
+	struct {
+		short int	status, count;
+		int	dvi;
+	} iosb;
+
+	setupYAstTried++;
+
+	if (!chan) {
+		status= sys$assign(&inputDsc,&chan,0,0);
+		if (!(status&SS$_NORMAL)) {
+			lib$signal(status);
+			return;
+		}
+	}
+	status= sys$qiow (0, chan, IO$_SETMODE|IO$M_CTRLYAST,&iosb,0,0,
+		astHandler,0,0,0,0,0);
+	if (status==SS$_ILLIOFUNC) {
+		sys$dassgn(chan);
+#ifdef	CTRLY_ENABLED_ANYWAY
+		fprintf (stderr, "-warning, CTRL-Y will leave "
+			"sub-process(es) around.\n");
+#else
+		return;
+#endif
+	}
+	if (status==SS$_NORMAL)
+		status= iosb.status;
+	if (!(status&SS$_NORMAL)) {
+		lib$signal(status);
+		return;
+	}
+
+	/* called from AST handler ? */
+	if (setupYAstTried>1)
+		return;
+	if (atexit(reEnableAst))
+		fprintf (stderr, "-warning, you may have to re-enable CTRL-Y"
+			"handling from DCL.\n");
+	status= lib$disable_ctrl (&ctrlMask, &oldCtrlMask);
+	if (!(status&SS$_NORMAL)) {
+		lib$signal(status);
+		return;
+	}
+}
 int
 child_execute_job (argv, child)
      char *argv;
@@ -1610,32 +1779,187 @@ child_execute_job (argv, child)
 {
   int i;
   static struct dsc$descriptor_s cmddsc;
-#ifndef DONTWAITFORCHILD
-  int spflags = 0;
-#else
+  static struct dsc$descriptor_s pnamedsc;
+  static struct dsc$descriptor_s ifiledsc;
+  static struct dsc$descriptor_s ofiledsc;
+  static struct dsc$descriptor_s efiledsc;
+  int have_redirection = 0;
+  int have_newline = 0;
+
   int spflags = CLI$M_NOWAIT;
-#endif
   int status;
-  char cmd[4096],*p,*c;
+  char *cmd = alloca (strlen (argv) + 512), *p, *q;
+  char ifile[256], ofile[256], efile[256];
   char comname[50];
+  char procname[100];
 
-/* Remove backslashes */
-  for (p = argv, c = cmd; *p; p++,c++)
+  /* Parse IO redirection.  */
+
+  ifile[0] = 0;
+  ofile[0] = 0;
+  efile[0] = 0;
+
+  if (debug_flag)
+    printf ("child_execute_job (%s)\n", argv);
+
+  while (isspace (*argv))
+    argv++;
+
+  if (*argv == 0)
+    return 0;
+
+  sprintf (procname, "GMAKE_%05x", getpid () & 0xfffff);
+  pnamedsc.dsc$w_length = strlen(procname);
+  pnamedsc.dsc$a_pointer = procname;
+  pnamedsc.dsc$b_dtype = DSC$K_DTYPE_T;
+  pnamedsc.dsc$b_class = DSC$K_CLASS_S;
+
+  /* Handle comments and redirection. */
+  for (p = argv, q = cmd; *p; p++, q++)
     {
-      if (*p == '\\') p++;
-	*c = *p;
+      switch (*p)
+	{
+	  case '#':
+	    *p-- = 0;
+	    *q-- = 0;
+	    break;
+	  case '\\':
+	    p++;
+	    if (*p == '\n')
+	      p++;
+	    if (isspace (*p))
+	      {
+		do { p++; } while (isspace (*p));
+		p--;
+	      }
+	    *q = *p;
+	    break;
+	  case '<':
+	    p = vms_redirect (&ifiledsc, ifile, p);
+	    *q = ' ';
+	    have_redirection = 1;
+	    break;
+	  case '>':
+	    have_redirection = 1;
+	    if (*(p-1) == '2')
+	      {
+		q--;
+		if (strncmp (p, ">&1", 3) == 0)
+		  {
+		    p += 3;
+		    strcpy (efile, "sys$output");
+		    efiledsc.dsc$w_length = strlen(efile);
+		    efiledsc.dsc$a_pointer = efile;
+		    efiledsc.dsc$b_dtype = DSC$K_DTYPE_T;
+		    efiledsc.dsc$b_class = DSC$K_CLASS_S;
+		  }
+		else
+		  {
+		    p = vms_redirect (&efiledsc, efile, p);
+		  }
+	      }
+	    else
+	      {
+		p = vms_redirect (&ofiledsc, ofile, p);
+	      }
+	    *q = ' ';
+	    break;
+	  case '\n':
+	    have_newline = 1;
+	  default:
+	    *q = *p;
+	    break;
+	}
     }
-  *c = *p;
+  *q = *p;
 
-  /* Check for maximum DCL length and create *.com file if neccesary.
-     Also create a .com file if the command is more than one line long.  */
+  if (strncmp (cmd, "builtin_", 8) == 0)
+    {
+      child->pid = 270163;
+      child->efn = 0;
+      child->cstatus = 1;
+
+      if (debug_flag)
+	printf ("BUILTIN [%s][%s]\n", cmd, cmd+8);
+
+      p = cmd + 8;
+
+      if ((*(p) == 'c')
+	  && (*(p+1) == 'd')
+	  && ((*(p+2) == ' ') || (*(p+2) == '\t')))
+	{
+	  p += 3;
+	  while ((*p == ' ') || (*p == '\t'))
+	    p++;
+	  if (debug_flag)
+	    printf ("BUILTIN CD %s\n", p);
+	  if (chdir (p))
+	    return 0;
+	  else
+	    return 1;
+	}
+      else if ((*(p) == 'r')
+	  && (*(p+1) == 'm')
+	  && ((*(p+2) == ' ') || (*(p+2) == '\t')))
+	{
+	  int in_arg;
+
+	  /* rm  */
+	  p += 3;
+	  while ((*p == ' ') || (*p == '\t'))
+	    p++;
+	  in_arg = 1;
+
+	  if (debug_flag)
+	    printf ("BUILTIN RM %s\n", p);
+	  while (*p)
+	    {
+	      switch (*p)
+		{
+		  case ' ':
+		  case '\t':
+		    if (in_arg)
+		      {
+			*p++ = ';';
+			in_arg = 0;
+		      }
+		    break;
+		  default:
+		    break;
+		}
+	      p++;
+	    }
+	}
+      else
+	{
+	  printf("Unknown builtin command '%s'\n", cmd);
+	  fflush(stdout);
+	  return 0;
+	}
+    }
+
+  /* Create a *.com file if either the command is too long for
+     lib$spawn, or the command contains a newline, or if redirection
+     is desired. Forcing commands with newlines into DCLs allows to
+     store search lists on user mode logicals.  */
 
   comname[0] = '\0';
 
-  if (strlen (cmd) > MAXCMDLEN || strchr (cmd, '\n'))
+  if (strlen (cmd) > MAXCMDLEN
+      || (have_redirection != 0)
+      || (have_newline != 0))
     {
       FILE *outfile;
-      char tmp;
+      char c;
+      char *sep;
+      int alevel = 0;	/* apostrophe level */
+
+      if (strlen (cmd) == 0)
+	{
+	  printf ("Error, empty command\n");
+	  fflush (stdout);
+	  return 0;
+	}
 
       strcpy (comname, "sys$scratch:CMDXXXXXX.COM");
       (void) mktemp (comname);
@@ -1644,27 +1968,81 @@ child_execute_job (argv, child)
       if (outfile == 0)
 	pfatal_with_name (comname);
 
-      fprintf (outfile, "$ ");
-      c = cmd;
-
-      while (c)
+      if (ifile[0])
 	{
-	  p = strchr (c, ',');
-	  if ((p == NULL) || (p-c > MAXCMDLEN))
-	    p = strchr (c, ' ');
-	  if (p != NULL)
-	    {
-	      p++;
-	      tmp = *p;
-	      *p = '\0';
-	    }
-	  else
-	    tmp = '\0';
-	  fprintf (outfile, "%s%s\n", c, (tmp == '\0')?"":" -");
-	  if (p != NULL)
-	    *p = tmp;
-	  c = p;
+	  fprintf (outfile, "$ assign/user %s sys$input\n", ifile);
+          DB (DB_JOBS, (_("Redirected input from %s\n"), ifile));
+	  ifiledsc.dsc$w_length = 0;
 	}
+
+      if (efile[0])
+	{
+	  fprintf (outfile, "$ define sys$error %s\n", efile);
+          DB (DB_JOBS, (_("Redirected error to %s\n"), efile));
+	  efiledsc.dsc$w_length = 0;
+	}
+
+      if (ofile[0])
+	{
+	  fprintf (outfile, "$ define sys$output %s\n", ofile);
+	  DB (DB_JOBS, (_("Redirected output to %s\n"), ofile));
+	  ofiledsc.dsc$w_length = 0;
+	}
+
+      p = sep = q = cmd;
+      for (c = '\n'; c; c = *q++)
+	{
+	  switch (c)
+	    {
+            case '\n':
+              /* At a newline, skip any whitespace around a leading $
+                 from the command and issue exactly one $ into the DCL. */
+              while (isspace (*p))
+                p++;
+              if (*p == '$')
+                p++;
+              while (isspace (*p))
+                p++;
+              fwrite (p, 1, q - p, outfile);
+              fputc ('$', outfile);
+              fputc (' ', outfile);
+              /* Reset variables. */
+              p = sep = q;
+              break;
+
+	      /* Nice places for line breaks are after strings, after
+		 comma or space and before slash. */
+            case '"':
+              q = handle_apos (q + 1);
+              sep = q;
+              break;
+            case ',':
+            case ' ':
+              sep = q;
+              break;
+            case '/':
+            case '\0':
+              sep = q - 1;
+              break;
+            default:
+              break;
+	    }
+	  if (sep - p > 78)
+	    {
+	      /* Enough stuff for a line. */
+	      fwrite (p, 1, sep - p, outfile);
+	      p = sep;
+	      if (*sep)
+		{
+		  /* The command continues.  */
+		  fputc ('-', outfile);
+		}
+	      fputc ('\n', outfile);
+	    }
+  	}
+
+      fwrite (p, 1, q - p, outfile);
+      fputc ('\n', outfile);
 
       fclose (outfile);
 
@@ -1681,31 +2059,98 @@ child_execute_job (argv, child)
   child->efn = 0;
   while (child->efn < 32 || child->efn > 63)
     {
-      status = lib$get_ef(&child->efn);
+      status = lib$get_ef ((unsigned long *)&child->efn);
       if (!(status & 1))
 	return 0;
     }
 
-  sys$clref(child->efn);
+  sys$clref (child->efn);
 
   vms_jobsefnmask |= (1 << (child->efn - 32));
 
+/*
+             LIB$SPAWN  [command-string]
+			[,input-file]
+			[,output-file]
+			[,flags]
+			[,process-name]
+			[,process-id] [,completion-status-address] [,byte-integer-event-flag-num]
+			[,AST-address] [,varying-AST-argument]
+			[,prompt-string] [,cli] [,table]
+*/
+
 #ifndef DONTWAITFORCHILD
-  status = lib$spawn(&cmddsc,0,0,&spflags,0,&child->pid,&child->cstatus,
-		       &child->efn,0,0);
+/*
+ *	Code to make ctrl+c and ctrl+y working.
+ *	The problem starts with the synchronous case where after lib$spawn is
+ *	called any input will go to the child. But with input re-directed,
+ *	both control characters won't make it to any of the programs, neither
+ *	the spawning nor to the spawned one. Hence the caller needs to spawn
+ *	with CLI$M_NOWAIT to NOT give up the input focus. A sys$waitfr
+ *	has to follow to simulate the wanted synchronous behaviour.
+ *	The next problem is ctrl+y which isn't caught by the crtl and
+ *	therefore isn't converted to SIGQUIT (for a signal handler which is
+ *	already established). The only way to catch ctrl+y, is an AST
+ *	assigned to the input channel. But ctrl+y handling of DCL needs to be
+ *	disabled, otherwise it will handle it. Not to mention the previous
+ *	ctrl+y handling of DCL needs to be re-established before make exits.
+ *	One more: At the time of LIB$SPAWN signals are blocked. SIGQUIT will
+ *	make it to the signal handler after the child "normally" terminates.
+ *	This isn't enough. It seems reasonable for simple command lines like
+ *	a 'cc foobar.c' spawned in a subprocess but it is unacceptable for
+ *	spawning make. Therefore we need to abort the process in the AST.
+ *
+ *	Prior to the spawn it is checked if an AST is already set up for
+ *	ctrl+y, if not one is set up for a channel to SYS$COMMAND. In general
+ *	this will work except if make is run in a batch environment, but there
+ *	nobody can press ctrl+y. During the setup the DCL handling of ctrl+y
+ *	is disabled and an exit handler is established to re-enable it.
+ *	If the user interrupts with ctrl+y, the assigned AST will fire, force
+ *	an abort to the subprocess and signal SIGQUIT, which will be caught by
+ *	the already established handler and will bring us back to common code.
+ *	After the spawn (now /nowait) a sys$waitfr simulates the /wait and
+ *	enables the ctrl+y be delivered to this code. And the ctrl+c too,
+ *	which the crtl converts to SIGINT and which is caught by the common
+ *	signal handler. Because signals were blocked before entering this code
+ *	sys$waitfr will always complete and the SIGQUIT will be processed after
+ *	it (after termination of the current block, somewhere in common code).
+ *	And SIGINT too will be delayed. That is ctrl+c can only abort when the
+ *	current command completes. Anyway it's better than nothing :-)
+ */
+
+  if (!setupYAstTried)
+    tryToSetupYAst();
+  status = lib$spawn (&cmddsc,					/* cmd-string  */
+		      (ifiledsc.dsc$w_length == 0)?0:&ifiledsc, /* input-file  */
+		      (ofiledsc.dsc$w_length == 0)?0:&ofiledsc, /* output-file */
+		      &spflags,					/* flags  */
+		      &pnamedsc,				/* proc name  */
+		      &child->pid, &child->cstatus, &child->efn,
+		      0, 0,
+		      0, 0, 0);
+  pidToAbort= child->pid;
+  status= sys$waitfr (child->efn);
+  pidToAbort= 0;
   vmsHandleChildTerm(child);
 #else
-  status = lib$spawn(&cmddsc,0,0,&spflags,0,&child->pid,&child->cstatus,
-		       &child->efn,vmsHandleChildTerm,child);
+  status = lib$spawn (&cmddsc,
+		      (ifiledsc.dsc$w_length == 0)?0:&ifiledsc,
+		      (ofiledsc.dsc$w_length == 0)?0:&ofiledsc,
+		      &spflags,
+		      &pnamedsc,
+		      &child->pid, &child->cstatus, &child->efn,
+		      vmsHandleChildTerm, child,
+		      0, 0, 0);
 #endif
 
   if (!(status & 1))
     {
-      printf(_("Error spawning, %d\n"),status);
-      fflush(stdout);
+      printf ("Error spawning, %d\n",status);
+      fflush (stdout);
     }
 
-  unlink (comname);
+  if (comname[0] && !ISDB (DB_JOBS)))
+    unlink (comname);
 
   return (status & 1);
 }
@@ -1748,6 +2193,10 @@ exec_command (argv, envp)
      char **argv, **envp;
 {
 #ifdef VMS
+  /* to work around a problem with signals and execve: ignore them */
+#ifdef SIGCHLD
+  signal (SIGCHLD,SIG_IGN);
+#endif
   /* Run the program.  */
   execve (argv[0], argv, envp);
   perror_with_name ("execve: ", argv[0]);
@@ -2337,7 +2786,11 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
        argument list.  */
 
     unsigned int shell_len = strlen (shell);
+#ifndef VMS
     static char minus_c[] = " -c ";
+#else
+    static char minus_c[] = "";
+#endif
     unsigned int line_len = strlen (line);
 
     char *new_line = (char *) alloca (shell_len + (sizeof (minus_c) - 1)
@@ -2480,6 +2933,7 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
 
   return new_argv;
 }
+#endif /* !VMS */
 
 /* Figure out the argument list necessary to run LINE as a command.  Try to
    avoid using a shell.  This routine handles only ' quoting, and " quoting
@@ -2503,6 +2957,48 @@ construct_command_argv (line, restp, file, batch_filename_ptr)
   char *shell, *ifs;
   char **argv;
 
+#ifdef VMS
+  char *cptr;
+  int argc;
+
+  argc = 0;
+  cptr = line;
+  for (;;)
+    {
+      while ((*cptr != 0)
+	     && (isspace (*cptr)))
+	cptr++;
+      if (*cptr == 0)
+	break;
+      while ((*cptr != 0)
+	     && (!isspace(*cptr)))
+	cptr++;
+      argc++;
+    }
+
+  argv = (char **)malloc (argc * sizeof (char *));
+  if (argv == 0)
+    abort ();
+
+  cptr = line;
+  argc = 0;
+  for (;;)
+    {
+      while ((*cptr != 0)
+	     && (isspace (*cptr)))
+	cptr++;
+      if (*cptr == 0)
+	break;
+      if (debug_flag)
+	printf ("argv[%d] = [%s]\n", argc, cptr);
+      argv[argc++] = cptr;
+      while ((*cptr != 0)
+	     && (!isspace(*cptr)))
+	cptr++;
+      if (*cptr != 0)
+	*cptr++ = 0;
+    }
+#else
   {
     /* Turn off --warn-undefined-variables while we expand SHELL and IFS.  */
     int save = warn_undefined_variables_flag;
@@ -2528,10 +3024,9 @@ construct_command_argv (line, restp, file, batch_filename_ptr)
 
   free (shell);
   free (ifs);
-
+#endif /* !VMS */
   return argv;
 }
-#endif /* !VMS */
 
 #if !defined(HAVE_DUP2) && !defined(_AMIGA)
 int
