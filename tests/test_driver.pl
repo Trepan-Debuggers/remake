@@ -12,7 +12,7 @@
 # this routine controls the whole mess; each test suite sets up a few
 # variables and then calls &toplevel, which does all the real work.
 
-# $Id: test_driver.pl,v 1.12 2004/05/16 19:16:55 psmith Exp $
+# $Id: test_driver.pl,v 1.13 2004/09/21 05:39:04 psmith Exp $
 
 
 # The number of test categories we've run
@@ -385,6 +385,7 @@ sub run_each_test
     $num_of_tmpfiles = 0;
     $description = "";
     $details = "";
+    $old_makefile = undef;
     $testname =~ s/^$scriptpath$pathsep//;
     $perl_testname = "$scriptpath$pathsep$testname";
     $testname =~ s/(\.pl|\.perl)$//;
