@@ -1,8 +1,18 @@
+1999-12-15  Paul D. Smith  <psmith@gnu.org>
+
+	* variable.c (print_variable): Print the variable with += if the
+	append flag is set.
+
+	* implicit.c (pattern_search): Remove the extra check of the
+	implicit flag added on 8/24/1998.  This causes problems and the
+	reason for the change was better resolved by the change made to
+	check_deps() on 8/26/1998.  This fixes PR/1423.
+
 1999-12-08  Paul D. Smith  <psmith@gnu.org>
 
 	* dir.c (dir_setup_glob): On 64 bit ReliantUNIX (5.44 and above)
 	in LFS mode, stat() is actually a macro for stat64().  Assignment
-	doesn't work in that case.  So, stat is a macro, make a local
+	doesn't work in that case.  So, if stat() is a macro, make a local
 	wrapper function to invoke it.
 	(local_stat): Wrapper function, if needed.
 	Reported by Andrej Borsenkow <Andrej.Borsenkow@mow.siemens.ru>.

@@ -1,3 +1,9 @@
+1999-12-15  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/targets/INTERMEDIATE: Add a test for PR/1423: make sure
+	.INTERMEDIATE settings on files don't disable them as implicit
+	intermediate possibilities.
+
 1999-12-01  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/features/double_colon: Add a test for PR/1476: Try

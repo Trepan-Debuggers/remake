@@ -323,8 +323,8 @@ update_file (file, depth)
       return 0;
     }
 
-  /* This loop runs until we start a double colon rule, or until the
-     chain is exhausted. */
+  /* This loop runs until we start commands for a double colon rule, or until
+     the chain is exhausted. */
   for (; f != 0; f = f->prev)
     {
       f->considered = considered;
