@@ -1,4 +1,4 @@
-/* Copyright (C) 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
+/* Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -42,6 +42,12 @@ struct variable
       origin ENUM_BITFIELD (3);	/* Variable origin.  */
     unsigned int recursive:1;	/* Gets recursively re-evaluated.  */
     unsigned int expanding:1;	/* Nonzero if currently being expanded.  */
+    enum
+      {
+	v_export,		/* Export this variable.  */
+	v_noexport,		/* Don't export this variable.  */
+	v_default		/* Decide in target_environment.  */
+      } export ENUM_BITFIELD (2);
   };
 
 /* Structure that represents a variable set.  */
@@ -83,7 +89,7 @@ extern void print_file_variables ();
 
 extern void merge_variable_set_lists ();
 
-extern int try_variable_definition ();
+extern struct variable *try_variable_definition ();
 
 extern struct variable *lookup_variable (), *define_variable ();
 extern struct variable *define_variable_for_file ();
