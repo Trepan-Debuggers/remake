@@ -138,7 +138,7 @@ rename_file (file, name)
     HASH (oldhash, *n);
   oldhash %= FILE_BUCKETS;
 
-  file_hash_enter (file, name, oldhash);
+  file_hash_enter (file, name, oldhash, file->name);
 }
 
 void
