@@ -2014,7 +2014,10 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
 		   since it was most likely used to line
 		   up the continued line with the previous one.  */
 		if (*p == '\t')
-		  strcpy (p, p + 1);
+                  /* Note these overlap and strcpy() is undefined for
+                     overlapping objects in ANSI C.  The strlen() _IS_ right,
+                     since we need to copy the nul byte too.  */
+		  bcopy (p + 1, p, strlen(p));
 
 		if (instring)
 		  goto string_char;
