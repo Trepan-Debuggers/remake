@@ -1,9 +1,9 @@
-/* Copyright (C) 1988, 1989, 1992 Free Software Foundation, Inc.
+/* Copyright (C) 1988, 1989, 1992, 1993 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 GNU Make is distributed in the hope that it will be useful,
@@ -59,6 +59,7 @@ remote_status (exit_code_ptr, signal_ptr, coredump_ptr, block)
      int *exit_code_ptr, *signal_ptr, *coredump_ptr;
      int block;
 {
+  errno = ECHILD;
   return -1;
 }
 
