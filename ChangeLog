@@ -1,3 +1,8 @@
+2005-03-04  Boris Kolpackov  <boris@kolpackov.net>
+
+	* imlicit.c (pattern_search): Mark files for which an implicit
+	rule has been found as targets. Fixes Savannah bug #12202.
+
 2005-03-04  Paul D. Smith  <psmith@gnu.org>
 
 	* AUTHORS: Update.

@@ -4,8 +4,10 @@ $description = "Test pattern rules.";
 
 $details = "";
 
-#  Make sure that multiple patterns where the same target can be built are
-#  searched even if the first one fails to match properly.
+#  TEST #1: Make sure that multiple patterns where the same target
+#           can be built are searched even if the first one fails
+#           to match properly.
+#
 
 run_make_test('
 .PHONY: all
@@ -33,7 +35,32 @@ a: void
 	@true
 
 3.implicit-phony:
-', '', '');
+',
+'',
+'');
+
+# TEST #2: make sure files that are built via implicit rules are marked
+#          as targets (Savannah bug #12202).
+#
+run_make_test('
+TARGETS := foo foo.out
+
+.PHONY: all foo.in
+
+all: $(TARGETS)
+
+%: %.in
+	@echo $@
+
+%.out: %
+	@echo $@
+
+foo.in: ; @:
+
+',
+'',
+'foo
+foo.out');
 
 
 # This tells the test driver that the perl test script executed properly.
