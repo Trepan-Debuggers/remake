@@ -348,6 +348,8 @@ in favor of those for `%s'.",
 	/* %%% Kludge so -W wins on a file that gets vpathized.  */
 	oldfile->last_mtime = file->last_mtime;
 
+      oldfile->mtime_before_update = file->mtime_before_update;
+
 #define MERGE(field) oldfile->field |= file->field
       MERGE (precious);
       MERGE (tried_implicit);
@@ -468,6 +470,7 @@ snap_deps ()
 	  /* Mark this file as phony and nonexistent.  */
 	  f2->phony = 1;
 	  f2->last_mtime = (FILE_TIMESTAMP) -1;
+	  f2->mtime_before_update = (FILE_TIMESTAMP) -1;
 	}
 
   for (f = lookup_file (".INTERMEDIATE"); f != 0; f = f->prev)

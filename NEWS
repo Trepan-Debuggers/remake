@@ -18,6 +18,11 @@ Version 3.78
   causes the text provided to be printed as a warning message, but make
   proceeds normally.
 
+* A new function, $(apply ...) is provided.  This allows users to create
+  their own parameterized macros and invoke them later.  This
+  implementation of this feature was provided by Han-Wen Nienhuys
+  <hanwen@cs.uu.nl>.
+
 * Make defines a new variable, .LIBPATTERNS.  This variable controls how
   library dependency expansion (dependencies like ``-lfoo'') is performed.
 
@@ -29,7 +34,7 @@ Version 3.78
   LD, AR, etc.).  Specifying this option forces -r (--no-builtin-rules)
   as well.
 
-* A "job server" feature, proposed by Howard Chu <hyc@highlandsun.com>.
+* A "job server" feature, suggested by Howard Chu <hyc@highlandsun.com>.
 
   On systems that support POSIX pipe(2) semantics, GNU make can now pass
   -jN options to submakes rather than forcing them all to use -j1.  The

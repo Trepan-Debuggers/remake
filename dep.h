@@ -38,8 +38,7 @@ struct dep
     struct dep *next;
     char *name;
     struct file *file;
-    unsigned short changed;
-    unsigned short deferred;    /* Only used in update_goal_chain().  */
+    int changed;
   };
 
 
