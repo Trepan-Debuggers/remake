@@ -350,7 +350,6 @@ update_file_1 (file, depth)
   int dep_status = 0;
   register struct dep *d, *lastd;
   int running = 0;
-  int maybe_make;
 
   DBF (DB_VERBOSE, _("Considering target file `%s'.\n"));
 
@@ -437,6 +436,7 @@ update_file_1 (file, depth)
   while (d != 0)
     {
       FILE_TIMESTAMP mtime;
+      int maybe_make;
 
       check_renamed (d->file);
 
@@ -492,7 +492,7 @@ update_file_1 (file, depth)
   /* Now we know whether this target needs updating.
      If it does, update all the intermediate files we depend on.  */
 
-  if (must_make)
+  if (must_make || always_make_flag)
     {
       for (d = file->deps; d != 0; d = d->next)
 	if (d->file->intermediate)
@@ -544,7 +544,7 @@ update_file_1 (file, depth)
       file->update_status = dep_status;
       notice_finished_file (file);
 
-      depth--;
+      --depth;
 
       DBF (DB_VERBOSE, _("Giving up on target file `%s'.\n"));
 
@@ -567,7 +567,7 @@ update_file_1 (file, depth)
        file's bookkeeping (updated, but not_started is bogus state).  */
     set_command_state (file, cs_not_started);
 
-  /* Now record which dependencies are more
+  /* Now record which prerequisites are more
      recent than this file, so we can define $?.  */
 
   deps_changed = 0;
@@ -636,11 +636,17 @@ update_file_1 (file, depth)
       DBF (DB_BASIC,
            _("Target `%s' is double-colon and has no prerequisites.\n"));
     }
-  else if (!noexist && file->is_target && !deps_changed && file->cmds == 0)
+  else if (!noexist && file->is_target && !deps_changed && file->cmds == 0
+           && !always_make_flag)
     {
       must_make = 0;
       DBF (DB_VERBOSE,
            _("No commands for `%s' and no prerequisites actually changed.\n"));
+    }
+  else if (!must_make && file->cmds != 0 && always_make_flag)
+    {
+      must_make = 1;
+      DBF (DB_VERBOSE, _("Making `%s' due to always-make flag.\n"));
     }
 
   if (!must_make)
@@ -839,7 +845,6 @@ check_dep (file, depth, this_mtime, must_make_ptr)
 {
   struct dep *d;
   int dep_status = 0;
-  int maybe_make;
 
   ++depth;
   start_updating (file);
@@ -888,12 +893,14 @@ check_dep (file, depth, this_mtime, must_make_ptr)
 	     recent than the file on whose behalf we are checking.  */
       else
 	{
-	  register struct dep *lastd;
+	  struct dep *lastd;
 
 	  lastd = 0;
 	  d = file->deps;
 	  while (d != 0)
 	    {
+              int maybe_make;
+
 	      if (is_updating (d->file))
 		{
 		  error (NILF, _("Circular %s <- %s dependency dropped."),

@@ -546,7 +546,7 @@ find_directory (name)
 	      if (dc->dirstream == 0)
                 /* Couldn't open the directory.  Mark this by
                    setting the `files' member to a nil pointer.  */
-		hash_free (&dc->dirfiles, 0);
+                dc->dirfiles.ht_vec = 0;
 	      else
 		{
 		  hash_init (&dc->dirfiles, DIRFILE_BUCKETS,

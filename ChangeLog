@@ -1,6 +1,26 @@
+2002-08-02  Paul D. Smith  <psmith@gnu.org>
+
+	* NEWS: Remove the mention of .TARGETS; we aren't going to publish
+	this one because it's too hard to get right.  We'll look at it for
+	a future release.
+
 2002-08-01  Paul D. Smith  <psmith@gnu.org>
 
-	Add new introspection variables .VARIABLES and .TARGETS.
+	* main.c (switches): Add a new option, -B (--always-make).  If
+	specified, make will rebuild all targets that it encounters even
+	if they don't appear to be out of date.
+	(always_make_flag): New flag.
+	* make.h: Extern always_make_flag.
+	* remake.c (update_file_1): Check always_make_flag; if it's set we
+	will always rebuild any target we can, even if none of its
+	prerequisites are newer.
+	* NEWS: Mention it.
+
+	* doc/make.texi (Shell Function): Make it clear that make
+	variables marked as "export" are not passed to instances of the
+	shell function.
+
+	Add new introspection variable .VARIABLES and .TARGETS.
 
 	* variable.c (handle_special_var): New function.  If the variable
 	reference passed in is "special" (.VARIABLES or .TARGETS),
@@ -22,6 +42,20 @@
 	variable is defined.
 	(target_environment): Use the "exportable" flag	instead of
 	re-checking the name here... an efficiency improvement.
+
+2002-07-31  Paul D. Smith  <psmith@gnu.org>
+
+	* config.h-vms.template: Updates to build on VMS.  Thanks to
+	Brian_Benning@aksteel.com for helping verify the build.
+	* makefile.com: Build the new hash.c file.
+	* hash.h: Use strcpmi(), not stricmp(), in the
+	HAVE_CASE_INSENSITIVE_FS case.
+
+2002-07-30  Paul D. Smith  <psmith@gnu.org>
+
+	* hash.h (ISTRING_COMPARE, return_ISTRING_COMPARE): Add missing
+	backslashes to the HAVE_CASE_INSENSITIVE_FS case.
+	Reported by <Brian_Benning@aksteel.com>.
 
 2002-07-10  Paul D. Smith  <psmith@gnu.org>
 

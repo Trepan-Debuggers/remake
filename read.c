@@ -380,7 +380,9 @@ eval_makefile (filename, flags)
 
   reading_file = curfile;
 
-  free(ebuf.bufstart);
+  fclose (ebuf.fp);
+
+  free (ebuf.bufstart);
   return r;
 }
 
@@ -2564,7 +2566,12 @@ readline (ebuf)
   if (ferror (ebuf->fp))
     pfatal_with_name (ebuf->floc.filenm);
 
-  return nlines ? nlines : -1;
+  /* If we found some lines, return how many.
+     If we didn't, but we did find _something_, that indicates we read the last
+     line of a file with no final newline; return 1.
+     If we read nothing, we're at EOF; return -1.  */
+
+  return nlines ? nlines : p == ebuf->bufstart ? -1 : 1;
 }
 
 /* Parse the next "makefile word" from the input buffer, and return info

@@ -44,10 +44,13 @@ Version 3.80
   list when a makefile is just being read (before any includes) is the
   name of the current makefile.
 
-* GNU make now supports some simple introspection capability: two new
-  built-in variables are defined: $(.VARIABLES) and $(.TARGETS).  These
-  expand to a complete list of variables and targets, respectively,
-  defined by all makefiles at the time the variables are expanded.
+* A new built-in variable is defined: $(.VARIABLES).  When it is
+  expanded it returns a complete list of variable names defined by all
+  makefiles at that moment.
+
+* A new command-line option is defined, -B or --always-make.  If
+  specified GNU make will consider all targets out-of-date even if they
+  would otherwise not be.
 
 * The arguments to $(call ...) functions were being stored in $1, $2,
   etc. as recursive variables, even though they are fully expanded

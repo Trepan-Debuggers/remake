@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.4 2002/08/01 13:16:57 psmith Exp $
+@set RCSID $Id: make.texi,v 1.5 2002/08/08 00:11:19 psmith Exp $
 @set EDITION 0.60
 @set VERSION 3.80
 @set UPDATED 08 July 2002
@@ -68,14 +68,21 @@ Published by the Free Software Foundation @*
 Boston, MA 02111-1307 USA @*
 ISBN @value{ISBN} @*
 
-Maintenance and updates since Version 3.76 by Paul D. Smith.
-
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
-any later version published by the Free Software Foundation; with no
-Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
-Texts.  A copy of the license is included in the section entitled
+any later version published by the Free Software Foundation; with the
+Invariant Sections being ``GNU General Public License'', the Front-Cover
+Texts being ``A GNU Manual'', and with the Back-Cover Texts being as in
+(a) below.  A copy of the license is included in the section entitled
 ``GNU Free Documentation License''.
+
+(a) The FSF's Back-Cover Text is:
+
+@quotation
+      You have freedom to copy and modify this GNU Manual, like GNU
+      software.  Copies published by the Free Software Foundation raise
+      funds for GNU development.
+@end quotation
 @sp 2
 Cover art by Etienne Suvasa.
 @end titlepage
@@ -1240,9 +1247,9 @@ variable definitions.
 @cindex makefiles, and special variables
 @cindex special variables
 
-GNU @code{make} also supports two other special variables.  Note that
-any value you assign to these variables will be ignored; they will
-always return their special value.
+GNU @code{make} also supports a special variable.  Note that any value
+you assign to this variable will be ignored; it will always return its
+special value.
 
 @vindex $(.VARIABLES)
 @vindex .VARIABLES @r{(list of variables)}
@@ -1254,15 +1261,15 @@ variables which have empty values, as well as built-in variables
 does not include any variables which are only defined in a
 target-specific context.
 
-@vindex $(.TARGETS)
-@vindex .TARGETS @r{(list of targets)}
-The second special variable is @code{.TARGETS}.  When expanded, the
-value consists of a list of all targets defined in all makefiles read
-up until that point.  Note it's not enough for a file to be simply
-mentioned in the makefile to be listed in this variable, even if it
-would match an implicit rule and become an ``implicit target''.  The
-file must appear as a target, on the left-hand side of a ``:'', to be
-considered a target for the purposes of this variable.
+@c @vindex $(.TARGETS)
+@c @vindex .TARGETS @r{(list of targets)}
+@c The second special variable is @code{.TARGETS}.  When expanded, the
+@c value consists of a list of all targets defined in all makefiles read
+@c up until that point.  Note it's not enough for a file to be simply
+@c mentioned in the makefile to be listed in this variable, even if it
+@c would match an implicit rule and become an ``implicit target''.  The
+@c file must appear as a target, on the left-hand side of a ``:'', to be
+@c considered a target for the purposes of this variable.
 
 @node Remaking Makefiles, Overriding Makefiles, Special Variables, Makefiles
 @section How Makefiles Are Remade
@@ -6542,10 +6549,12 @@ removes the trailing (carriage-return and) newline, if it's the last
 thing in the result.@refill
 
 The commands run by calls to the @code{shell} function are run when the
-function calls are expanded.  In most cases, this is when the makefile is
-read in.  The exception is that function calls in the commands of the rules
-are expanded when the commands are run, and this applies to @code{shell}
-function calls like all others.
+function calls are expanded (@pxref{Reading Makefiles, , How
+@code{make} Reads a Makefile}).  Because this function involves
+spawning a new shell, you should carefully consider the performance
+implications of using the @code{shell} function within recursively
+expanded variables vs. simply expanded variables (@pxref{Flavors, ,The
+Two Flavors of Variables}).
 
 Here are some examples of the use of the @code{shell} function:
 
@@ -7092,6 +7101,15 @@ Here is a table of all the options @code{make} understands:
 @itemx -m
 @cindex @code{-m}
 These options are ignored for compatibility with other versions of @code{make}.
+
+@item -B
+@cindex @code{-B}
+@itemx --always-make
+@cindex @code{--always-make}
+Consider all targets out-of-date.  GNU @code{make} proceeds to
+consider targets and their prerequisites using the normal algorithms;
+however, all these targets are remade, regardless of the status of
+their prerequisites.
 
 @item -C @var{dir}
 @cindex @code{-C}

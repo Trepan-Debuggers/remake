@@ -60,6 +60,7 @@ struct variable
     unsigned int per_target:1;	/* Nonzero if a target-specific variable.  */
     unsigned int append:1;	/* Nonzero if an appending target-specific
                                    variable.  */
+    unsigned int special:1;     /* Nonzero if this is a special variable. */
     unsigned int expanding:1;	/* Nonzero if currently being expanded.  */
     unsigned int exp_count:EXP_COUNT_BITS;
                                 /* If >1, allow this many self-referential

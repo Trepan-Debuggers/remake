@@ -173,10 +173,10 @@ extern void *hash_deleted_item;
 } while (0)
 
 #define ISTRING_COMPARE(X, Y, RESULT) do { \
-  _RESULT_ = stricmp ((X), (Y));
+  _RESULT_ = strcmpi ((X), (Y)); \
 } while (0)
 #define return_ISTRING_COMPARE(X, Y) do { \
-  return stricmp ((X), (Y));
+  return strcmpi ((X), (Y)); \
 } while (0)
 
 #else

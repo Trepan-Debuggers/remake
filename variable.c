@@ -177,9 +177,9 @@ define_variable_in_set (name, length, value, origin, recursive, set, flocp)
 
 /* If the variable passed in is "special", handle its special nature.
    Currently there are two such variables, both used for introspection:
-   .MAKE_VARS expands to a list of all the variables defined in this instance
+   .VARIABLES expands to a list of all the variables defined in this instance
    of make.
-   .MAKE_TARGETS expands to a list of all the targets defined in this
+   .TARGETS expands to a list of all the targets defined in this
    instance of make.
    Returns the variable reference passed in.  */
 
@@ -192,10 +192,33 @@ handle_special_var (var)
   static unsigned long last_var_count = 0;
 
 
-  if (streq (var->name, ".MAKE_TARGETS"))
+  /* This one actually turns out to be very hard, due to the way the parser
+     records targets.  The way it works is that target information is collected
+     internally until make knows the target is completely specified.  It unitl
+     it sees that some new construct (a new target or variable) is defined that
+     it knows the previous one is done.  In short, this means that if you do
+     this:
+
+       all:
+
+       TARGS := $(.TARGETS)
+
+     then $(TARGS) won't contain "all", because it's not until after the
+     variable is created that the previous target is completed.
+
+     Changing this would be a major pain.  I think a less complex way to do it
+     would be to pre-define the target files as soon as the first line is
+     parsed, then come back and do the rest of the definition as now.  That
+     would allow $(.TARGETS) to be correct without a major change to the way
+     the parser works.
+
+  if (streq (var->name, ".TARGETS"))
     var->value = build_target_list (var->value);
 
-  else if (streq (var->name, ".MAKE_VARS")
+  else
+  */
+
+  if (streq (var->name, ".VARIABLES")
       && global_variable_set.table.ht_fill != last_var_count)
     {
       unsigned long max = EXPANSION_INCREMENT (strlen (var->value));
@@ -207,6 +230,7 @@ handle_special_var (var)
       /* Make sure we have at least MAX bytes in the allocated buffer.  */
       var->value = xrealloc (var->value, max);
 
+      /* Walk through the hash of variables, constructing a list of names.  */
       p = var->value;
       len = 0;
       for (; vp < end; ++vp)
@@ -230,6 +254,10 @@ handle_special_var (var)
             *(p++) = ' ';
           }
       *(p-1) = '\0';
+
+      /* Remember how many variables are in our current count.  Since we never
+         remove variables from the list, this is a reliable way to know whether
+         the list is up to date or needs to be recomputed.  */
 
       last_var_count = global_variable_set.table.ht_fill;
     }
@@ -262,7 +290,7 @@ lookup_variable (name, length)
 
       v = (struct variable *) hash_find_item ((struct hash_table *) &set->table, &var_key);
       if (v)
-	return handle_special_var (v);
+	return v->special ? handle_special_var (v) : v;
     }
 
 #ifdef VMS
@@ -814,9 +842,10 @@ do_variable_definition (flocp, varname, value, origin, flavor, target_var)
           {
             /* Paste the old and new values together in VALUE.  */
 
-            unsigned int oldlen, newlen;
+            unsigned int oldlen, vallen;
+            char *val;
 
-            p = value;
+            val = value;
             if (v->recursive)
               /* The previous definition of the variable was recursive.
                  The new value is the unexpanded old and new values. */
@@ -827,14 +856,14 @@ do_variable_definition (flocp, varname, value, origin, flavor, target_var)
                  when it was set; and from the expanded new value.  Allocate
                  memory for the expansion as we may still need the rest of the
                  buffer if we're looking at a target-specific variable.  */
-              p = alloc_value = allocated_variable_expand (p);
+              val = alloc_value = allocated_variable_expand (val);
 
             oldlen = strlen (v->value);
-            newlen = strlen (p);
-            p = (char *) alloca (oldlen + 1 + newlen + 1);
+            vallen = strlen (val);
+            p = (char *) alloca (oldlen + 1 + vallen + 1);
             bcopy (v->value, p, oldlen);
             p[oldlen] = ' ';
-            bcopy (value, &p[oldlen + 1], newlen + 1);
+            bcopy (val, &p[oldlen + 1], vallen + 1);
           }
       }
     }
