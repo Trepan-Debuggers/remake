@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  16 February 2005
+  3 March 2005
 
 Copyright (C) 2002,2003,2004,2005  Free Software Foundation, Inc.
 See the end for copying conditions.
@@ -10,11 +10,23 @@ manual, which is contained in this distribution as the file doc/make.texi.
 See the README file and the GNU make manual for instructions for
 reporting bugs.
 
-Version 3.81beta2
+Version 3.81beta3
 
 * GNU make is ported to OS/2.
 
 * GNU make is ported to MinGW.
+
+* WARNING: Backward-incompatibility!
+  GNU make now implements a generic "second expansion" feature on the
+  prerequisites of both explicit and implicit (pattern) targets.  After
+  the rule has been parsed, the prerequisites are expanded a second
+  time, this time with all the automatic variables in scope.  This means
+  that in addition to using standard SysV $$@ in prerequisites lists,
+  you can also use complex functions such as $$(patsubst f%r,b%o,$$@) etc.
+  This behavior applies to implicit rules, as well, where the second
+  expansion occurs after the rule is matched.
+  However, this means that you need to double-quote any "$" in your
+  filenames; instead of "foo: boo$$bar" you must write "foo: foo$$$$bar"
 
 * New command-line option: -L (--check-symlink-times).  On systems that
   support symbolic links, if this option is given then GNU make will
@@ -41,6 +53,8 @@ Version 3.81beta2
    - .DEFAULT_TARGET: Contains the name of the default target make will
      use if no targets are provided on the command line.  It can be set
      to change the default target.
+   - New automatic variable: $| (added in 3.80, actually): contains all
+     the order-only prerequisites defined for the target.
 
 * New functions available in this release:
    - $(lastword ...) returns the last word in the list.  This gives

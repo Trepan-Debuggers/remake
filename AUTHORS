@@ -6,6 +6,8 @@ GNU make development up to version 3.75 by:
 
 Development starting with GNU make 3.76 by:
     Paul D. Smith <psmith@gnu.org>
+    Additional development starting with GNU make 3.81 by:
+        Boris Kolpackov <boris@kolpackov.net>
 
 
 GNU Make User's Manual
@@ -23,6 +25,7 @@ GNU make porting efforts:
 
   Port to VMS by:
       Klaus Kaempf <kkaempf@progis.de>
+      Hartmut Becker <Hartmut.Becker@hp.com>
       Archive support/Bug fixes by:
         John W. Eaton <jwe@bevo.che.wisc.edu>
         Martin Zinser <zinser@decus.decus.de>
@@ -30,11 +33,13 @@ GNU make porting efforts:
   Port to Amiga by:
       Aaron Digulla <digulla@fh-konstanz.de>
 
-
-  Port to MS-DOS (DJGPP) and MS-Windows 95/NT by:
+  Port to MS-DOS (DJGPP), OS/2, and MS-Windows (native/MinGW) by:
       DJ Delorie <dj@delorie.com>
       Rob Tulloh <rob_tulloh@tivoli.com>
       Eli Zaretskii <eliz@is.elta.co.il>
+      Jonathan Grant <jg@jguk.org>
+      Andreas Beuning <andreas.buening@nexgo.de>
+      Earnie Boyd <earnie@uses.sf.net>
 
 -----------------------------------
 Other contributors:
@@ -47,7 +52,9 @@ Other contributors:
   Jim Kelton <jim_kelton@tivoli.com>
   David Lubbren <uhay@rz.uni-karlsruhe.de>
   Tim Magill <tim.magill@telops.gte.com>
+  Markus Mauhart <qwe123@chello.at>
   Greg McGary <greg@mcgary.org>
+  Thomas Riedl <thomas.riedl@siemens.com>
   Han-Wen Nienhuys <hanwen@cs.uu.nl>
   Andreas Schwab <schwab@issan.informatik.uni-dortmund.de>
   Carl Staelin (Princeton University)

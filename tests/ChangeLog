@@ -1,4 +1,4 @@
-Thu Mar  3 18:34:06 2005  Boris Kolpackov  <boris@kolpackov.net>
+2005-03-03  Boris Kolpackov  <boris@kolpackov.net>
 
 	* scripts/features/se_implicit: Add a test for stem
 	termination bug. Add a test for stem triple-expansion bug.
@@ -10,7 +10,7 @@ Thu Mar  3 18:34:06 2005  Boris Kolpackov  <boris@kolpackov.net>
 	new way empty prerequisite list is handled.
 
 
-Tue Mar  1 10:15:25 2005  Boris Kolpackov  <boris@kolpackov.net>
+2005-03-01  Boris Kolpackov  <boris@kolpackov.net>
 
 	* scripts/features/statipattrules: Add a test for
 	Savannah bug #12180.

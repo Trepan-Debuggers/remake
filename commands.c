@@ -481,10 +481,15 @@ fatal_error_signal (int sig)
     exit (EXIT_FAILURE);
 #endif
 
+#ifdef WINDOWS32
+  /* Cannot call W32_kill with a pid (it needs a handle) */
+  exit (EXIT_FAILURE);
+#else
   /* Signal the same code; this time it will really be fatal.  The signal
      will be unblocked when we return and arrive then to kill us.  */
   if (kill (getpid (), sig) < 0)
     pfatal_with_name ("kill");
+#endif /* not WINDOWS32 */
 #endif /* not Amiga */
 #endif /* not __MSDOS__  */
 }
