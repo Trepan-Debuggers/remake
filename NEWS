@@ -87,8 +87,7 @@ Version 3.80
   is acceptable) and use it if it exists.  If not, NLS will be disabled.
   See ABOUT-NLS for more information.
 
-* Updated to autoconf 2.53 and automake 1.6.3.  Users should not be
-  impacted.
+* Updated to autoconf 2.54 and automake 1.7.  Users should not be impacted.
 
 Version 3.79.1
 
