@@ -1,5 +1,5 @@
 /* Reading and parsing of makefiles for GNU Make.
-Copyright (C) 1988, 89, 90, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
+Copyright (C) 1988,89,90,91,92,93,94,95,96 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -558,15 +558,16 @@ read_makefile (filename, flags)
 	      v->export = v_noexport;
 	    }
 	}
-      else if (word1eq ("include", 7) || word1eq ("-include", 8))
+      else if (word1eq ("include", 7) || word1eq ("-include", 8)
+	       || word1eq ("sinclude", 8))
 	{
 	  /* We have found an `include' line specifying a nested
 	     makefile to be read at this point.  */
 	  struct conditionals *save, new_conditionals;
 	  struct nameseq *files;
-	  /* "-include" (vs "include") says no
-	     error if the file does not exist.  */
-	  int noerror = p[0] == '-';
+	  /* "-include" (vs "include") says no error if the file does not
+	     exist.  "sinclude" is an alias for this from SGI.  */
+	  int noerror = p[0] != 'i';
 
 	  p = allocated_variable_expand (next_token (p + (noerror ? 9 : 8)));
 	  if (*p == '\0')
@@ -1615,7 +1616,7 @@ parse_file_seq (stringp, stopchar, size, strip)
 		  q1++;
 		  p1--;
 		}
-	      *q2++ = *q1++; 
+	      *q2++ = *q1++;
 	    }
 	  name = savestring (qbase, p1 - qbase);
 	  free (qbase);
