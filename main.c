@@ -786,7 +786,7 @@ main (argc, argv, envp)
   define_makeflags (1, 0);
 
   f = lookup_file (".IGNORE");
-  ignore_errors_flag
+  ignore_errors_flag |= f != 0 && f->is_target;
 
   f = lookup_file (".SILENT");
   silent_flag |= f != 0 && f->is_target;
