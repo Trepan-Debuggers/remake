@@ -67,7 +67,7 @@ extern int errno;
 #endif
 
 /* Some systems define _POSIX_VERSION but are not really POSIX.1.  */
-#if (defined (butterfly) || \
+#if (defined (butterfly) || defined (__arm) \
      (defined (__mips) && defined (_SYSTYPE_SVR3)) || \
      (defined (sequent) && defined (i386)))
 #undef POSIX
@@ -304,15 +304,7 @@ extern void user_access (), make_access (), child_access ();
 
 #if !defined (__GNU_LIBRARY__) && !defined (POSIX) && !defined (_POSIX_VERSION)
 
-#ifdef	HAVE_SIGSETMASK
-extern int sigsetmask ();
-extern int sigblock ();
-#endif
-extern int kill ();
-extern int atoi ();
 extern long int atol ();
-extern int unlink (), stat (), fstat ();
-extern int pipe (), close (), read (), write (), open ();
 extern long int lseek ();
 
 #endif	/* Not GNU C library or POSIX.  */
