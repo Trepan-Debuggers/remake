@@ -252,17 +252,28 @@ GPG = gpg
 DIST_ARCHIVES_SIG = $(addsuffix .sig,$(DIST_ARCHIVES))
 DIST_ARCHIVES_DIRECTIVE = $(addsuffix .directive.asc,$(DIST_ARCHIVES))
 
-sign-dist: $(DIST_ARCHIVES_SIG) $(DIST_ARCHIVES_DIRECTIVE)
+.PHONY: distsign
+distsign: $(DIST_ARCHIVES_SIG) $(DIST_ARCHIVES_DIRECTIVE)
 
-$(DIST_ARCHIVES_DIRECTIVE): directive.asc
+$(DIST_ARCHIVES_DIRECTIVE): .directive.asc
 	cp $< $@
 
 %.sig : %
 	@echo "Signing file '$<':"
 	$(GPG) -o $@ -b $<
 
-directive.asc:
+.directive.asc:
 	@echo "Creating directive file '$@':"
 	@echo 'directory: make' > .directive
 	$(GPG) -o $@ --clearsign .directive
 	@rm -f .directive
+
+# Upload the artifacts
+
+FTPPUT = ncftpput
+gnu-url = ftp-upload.gnu.org /incoming
+
+UPLOADS = upload-alpha upload-ftp
+.PHONY: $(UPLOADS)
+$(UPLOADS): $(DIST_ARCHIVES) $(DIST_ARCHIVES_SIG) $(DIST_ARCHIVES_DIRECTIVE)
+	$(FTPPUT) $(gnu-url)/$(@:upload-%=%) $^
