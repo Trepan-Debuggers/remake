@@ -32,6 +32,7 @@ ALLOCA='@ALLOCA@'
 LOADLIBES='@LIBS@'
 extras='@LIBOBJS@'
 REMOTE='@REMOTE@'
+GLOBLIB='@GLOBLIB@'
 
 # Common prefix for machine-independent installed files.
 prefix='@prefix@'
@@ -47,6 +48,10 @@ set -e
 
 # These are all the objects we need to link together.
 objs="%objs% remote-${REMOTE}.o ${extras} ${ALLOCA}"
+
+if [ x"$GLOBLIB" != x ]; then
+  objs="$objs %globobjs%"
+fi
 
 # Compile the source files into those objects.
 for file in `echo ${objs} | sed 's/\.o/.c/g'`; do

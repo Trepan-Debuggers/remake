@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.169 1999/03/26 04:04:45 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.170 1999/03/26 07:09:25 psmith Exp $
 @set EDITION 0.53
 @set VERSION 3.78
 @set UPDATED 22 March 1999
@@ -80,6 +80,8 @@ Published by the Free Software Foundation @*
 59 Temple Place -- Suite 330, @*
 Boston, MA 02111-1307 USA @*
 ISBN @value{ISBN} @*
+
+Maintenance and updates since Version 3.76 by Paul D. Smith.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -332,8 +334,11 @@ Implicit Rule for Archive Member Targets
 The @code{make} utility automatically determines which pieces of a large
 program need to be recompiled, and issues commands to recompile them.
 This manual describes GNU @code{make}, which was implemented by Richard
-Stallman and Roland McGrath.  GNU @code{make} conforms to section 6.2 of
-@cite{IEEE Standard 1003.2-1992} (POSIX.2).
+Stallman and Roland McGrath.  Development since Version 3.76 has been
+handled by Paul D. Smith.
+
+GNU @code{make} conforms to section 6.2 of @cite{IEEE Standard
+1003.2-1992} (POSIX.2).
 @cindex POSIX
 @cindex IEEE Standard 1003.2
 @cindex standards conformance
@@ -2184,10 +2189,11 @@ last-modification time, when the rule's commands were last executed.  It
 does so because one of the commands is a @code{touch} command to update the
 target file.
 
-The empty target file must have some dependencies.  When you ask to remake
-the empty target, the commands are executed if any dependency is more
-recent than the target; in other words, if a dependency has changed since
-the last time you remade the target.  Here is an example:
+The empty target file should have some dependencies (otherwise it
+doesn't make sense).  When you ask to remake the empty target, the
+commands are executed if any dependency is more recent than the target;
+in other words, if a dependency has changed since the last time you
+remade the target.  Here is an example:
 
 @example
 print: foo.c bar.c
@@ -2277,6 +2283,15 @@ intermediate files, except that they are never automatically deleted.
 @code{.SECONDARY} with no dependencies marks all file targets mentioned
 in the makefile as secondary.
 
+@findex .DELETE_ON_ERROR
+@item .DELETE_ON_ERROR
+@cindex removing targets on failure
+
+If @code{.DELETE_ON_ERROR} is mentioned as a target anywhere in the
+makefile, then @code{make} will delete the target of a rule if it has
+changed and its commands exit with a nonzero exit status, just as it
+does when it receives a signal.  @xref{Errors, ,Errors in Commands}.
+
 @findex .IGNORE
 @item .IGNORE
 
@@ -2295,7 +2310,7 @@ commands.  @xref{Errors, ,Errors in Commands}.
 @item .SILENT
 
 If you specify dependencies for @code{.SILENT}, then @code{make} will
-not the print commands to remake those particular files before executing
+not print the commands to remake those particular files before executing
 them.  The commands for @code{.SILENT} are not meaningful.
 
 If mentioned as a target with no dependencies, @code{.SILENT} says not
@@ -2853,8 +2868,8 @@ the makefile:
 @cindex @code{--just-print}
 @cindex @code{--dry-run}
 @cindex @code{--recon}
-When @code{make} is given the flag @samp{-n} or @samp{--just-print},
-echoing is all that happens, no execution.  @xref{Options Summary,
+When @code{make} is given the flag @samp{-n} or @samp{--just-print}
+it only echoes commands, it won't execute them.  @xref{Options Summary,
 ,Summary of Options}.  In this case and only this case, even the
 commands starting with @samp{@@} are printed.  This flag is useful for
 finding out which commands @code{make} thinks are necessary without
@@ -3563,8 +3578,8 @@ MAKEOVERRIDES =
 @cindex E2BIG
 This is not usually useful to do.  However, some systems have a small
 fixed limit on the size of the environment, and putting so much
-information in into the value of @code{MAKEFLAGS} can exceed it.
-If you see the error message @samp{Arg list too long}, this may be the problem.
+information into the value of @code{MAKEFLAGS} can exceed it.  If you
+see the error message @samp{Arg list too long}, this may be the problem.
 @findex .POSIX
 @cindex POSIX.2
 (For strict compliance with POSIX.2, changing @code{MAKEOVERRIDES} does
@@ -6007,6 +6022,7 @@ and the resulting message is displayed, but processing of the makefile
 continues.
 
 The result of the expansion of this function is the empty string.
+@end table
 
 @node Running, Implicit Rules, Functions, Top
 @chapter How to Run @code{make}
@@ -6974,7 +6990,7 @@ running the C preprocessor, @code{cpp}.  The precise command is
 @pindex .o
 @file{@var{n}} is made automatically from @file{@var{n}.o} by running
 the linker (usually called @code{ld}) via the C compiler.  The precise
-command used is @w{@samp{$(CC) $(LDFLAGS) @var{n}.o $(LOADLIBES)}}.
+command used is @w{@samp{$(CC) $(LDFLAGS) @var{n}.o $(LOADLIBES) $(LDLIBS)}}.
 
 This rule does the right thing for a simple program with only one
 source file.  It will also do the right thing if there are multiple
@@ -7708,9 +7724,9 @@ lib: foo.o bar.o lose.o win.o
 @end example
 
 Of the variables listed above, four have values that are single file
-names, and two have values that are lists of file names.  These six have
-variants that get just the file's directory name or just the file name
-within the directory.  The variant variables' names are formed by
+names, and three have values that are lists of file names.  These seven
+have variants that get just the file's directory name or just the file
+name within the directory.  The variant variables' names are formed by
 appending @samp{D} or @samp{F}, respectively.  These variants are
 semi-obsolete in GNU @code{make} since the functions @code{dir} and
 @code{notdir} can be used to get a similar effect (@pxref{File Name
@@ -8408,8 +8424,8 @@ in the normal way (@pxref{Suffix Rules}).  Thus a double-suffix rule
 Here is a summary of the features of GNU @code{make}, for comparison
 with and credit to other versions of @code{make}.  We consider the
 features of @code{make} in 4.2 BSD systems as a baseline.  If you are
-concerned with writing portable makefiles, you should use only the
-features of @code{make} @emph{not} listed here or in @ref{Missing}.
+concerned with writing portable makefiles, you should not use the
+features of @code{make} listed here, nor the ones in @ref{Missing}.
 
 Many features come from the version of @code{make} in System V.
 
@@ -9095,7 +9111,7 @@ These errors are not really @code{make} errors at all.  They mean that a
 program that @code{make} invoked as part of a command script returned a
 non-0 error code (@samp{Error @var{NN}}), which @code{make} interprets
 as failure, or it exited in some other abnormal fashion (with a
-signal of some type).
+signal of some type).  @xref{Errors, ,Errors in Commands}.
 
 If no @code{***} is attached to the message, then the subprocess failed
 but the rule in the makefile was prefixed with the @code{-} special
@@ -9110,7 +9126,7 @@ One of the most common reasons for this message is that you (or perhaps
 your oh-so-helpful editor, as is the case with many MS-Windows editors)
 have attempted to indent your command scripts with spaces instead of a
 TAB character.  Remember that every line in the command script must
-begin with a TAB character.  Eight spaces do not count.
+begin with a TAB character.  Eight spaces do not count.  @xref{Rule Syntax}.
 
 @item commands commence before first target.  Stop.
 @itemx missing rule before commands.  Stop.
@@ -9121,7 +9137,7 @@ must always be associated with a target.
 
 The second form is generated if the line has a semicolon as the first
 non-whitespace character; @code{make} interprets this to mean you left
-out the "target: dependency" section of a rule.
+out the "target: dependency" section of a rule.  @xref{Rule Syntax}.
 
 @item No rule to make target `@var{xxx}'.
 @itemx No rule to make target `@var{xxx}', needed by `@var{yyy}'.
@@ -9142,6 +9158,7 @@ command line, and @code{make} couldn't find any makefiles to read in.
 The latter means that some makefile was found, but it didn't contain any
 default target and none was given on the command line.  GNU @code{make}
 has nothing to do in these situations.
+@xref{Makefile Arguments, ,Arguments to Specify the Makefile}.@refill
 
 @item Makefile `@var{xxx}' was not found.
 @itemx Included makefile `@var{xxx}' was not found.
@@ -9154,6 +9171,7 @@ GNU @code{make} allows commands to be specified only once per target
 (except for double-colon rules).  If you give commands for a target
 which already has been defined to have commands, this warning is issued
 and the second set of commands will overwrite the first set.
+@xref{Multiple Rules, ,Multiple Rules for One Target}.
 
 @item Circular @var{xxx} <- @var{yyy} dependency dropped.
 This means that @code{make} detected a loop in the dependency graph:
@@ -9164,7 +9182,8 @@ dependencies, etc., one of them depended on @var{xxx} again.
 This means you've defined a normal (recursive) @code{make} variable
 @var{xxx} that, when its expanded, will refer to itself (@var{xxx}).
 This is not allowed; either use simply-expanded variables (@code{:=}) or
-use the append operator (@code{+=}).
+use the append operator (@code{+=}).  @xref{Using Variables, ,How to Use
+Variables}.
 
 @item Unterminated variable reference.  Stop.
 This means you forgot to provide the proper closing parenthesis
@@ -9173,7 +9192,7 @@ or brace in your variable or function reference.
 @item insufficient arguments to function `@var{xxx}'.  Stop.
 This means you haven't provided the requisite number of arguments for
 this function.  See the documentation of the function for a description
-of its arguments.
+of its arguments.  @xref{Functions, ,Functions for Transforming Text}.
 
 @item missing target pattern.  Stop.
 @itemx multiple target patterns.  Stop.
@@ -9181,7 +9200,8 @@ of its arguments.
 These are generated for malformed static pattern rules.  The first means
 there's no pattern in the target section of the rule, the second means
 there are multiple patterns in the target section, and the third means
-the target doesn't contain a pattern character (@code{%}).
+the target doesn't contain a pattern character (@code{%}).  @xref{Static
+Usage, ,Syntax of Static Pattern Rules}.
 
 @end table
 
@@ -9439,8 +9459,8 @@ dist: $(SRCS) $(AUX)
         -rm -rf `cat .fname`
         mkdir `cat .fname`
         ln $(SRCS) $(AUX) `cat .fname`
-        -rm -rf `cat .fname` .fname
         tar chZf `cat .fname`.tar.Z `cat .fname`
+        -rm -rf `cat .fname` .fname
 @end group
 
 @group

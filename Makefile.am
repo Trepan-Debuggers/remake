@@ -10,7 +10,7 @@ make_SOURCES =	main.c commands.c job.c dir.c file.c misc.c read.c remake.c \
 		commands.h dep.h filedef.h job.h make.h rule.h variable.h \
 		signame.c signame.h \
 		getopt.c getopt1.c getopt.h
-make_LDADD =	@LIBOBJS@ @ALLOCA@ glob/libglob.a
+make_LDADD =	@LIBOBJS@ @ALLOCA@ @GLOBLIB@
 
 info_TEXINFOS =	make.texinfo
 man_MANS =	make.1
