@@ -33,8 +33,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 extern int try_implicit_rule ();
 
 
-/* Incremented when a file has been remade.  */
-unsigned int files_remade = 0;
+/* Incremented when a command is started (under -n, when one would be).  */
+unsigned int commands_started = 0;
 
 static int update_file (), update_file_1 (), check_dep (), touch_file ();
 static void remake_file ();
@@ -65,6 +65,17 @@ update_goal_chain (goals, makefiles)
 
   goals = copy_dep_chain (goals);
 
+  {
+    /* Clear the `changed' flag of each goal in the chain.
+       We will use the flag below to notice when any commands
+       have actually been run for a target.  When no commands
+       have been run, we give an "up to date" diagnostic.  */
+
+    struct dep *g;
+    for (g = goals; g != 0; g = g->next)
+      g->changed = 0;
+  }
+
   if (makefiles)
     /* Only run one job at a time.  */
     job_slots = 1;
@@ -87,6 +98,7 @@ update_goal_chain (goals, makefiles)
       g = goals;
       while (g != 0)
 	{
+	  unsigned int ocommands_started;
 	  int x;
 	  time_t mtime = MTIME (g->file);
 	  check_renamed (g->file);
@@ -103,14 +115,26 @@ update_goal_chain (goals, makefiles)
 		touch_flag = question_flag = just_print_flag = 0;
 	    }
 
+	  /* Save the old value of `commands_started' so we can compare later.
+	     It will be incremented when any commands are actually run.  */
+	  ocommands_started = commands_started;
+
 	  x = update_file (g->file, makefiles ? 1 : 0);
 	  check_renamed (g->file);
+
+	  /* Set the goal's `changed' flag if any commands were started
+	     by calling update_file above.  We check this flag below to
+	     decide when to give an "up to date" diagnostic.  */
+	  g->changed += commands_started - ocommands_started;
+
 	  if (x != 0 || g->file->updated)
 	    {
 	      int stop = 0;
+
 	      /* If STATUS was not already 1, set it to 1 if
 		 updating failed, or to 0 if updating succeeded.
 		 Leave STATUS as it is if no updating was done.  */
+
 	      if (status < 1)
 		{
 		  if (g->file->update_status != 0)
@@ -135,9 +159,26 @@ update_goal_chain (goals, makefiles)
 		    }
 		}
 
-	      g->file = g->file->prev;
-	      if (stop || g->file == 0)
+	      if (stop)
 		{
+		  /* If we have found nothing whatever to do for the goal,
+		     print a message saying nothing needs doing.  */
+
+		  /* If the update_status is zero, we updated successfully
+		     or not at all.  G->changed will have been set above if
+		     any commands were actually run on behalf of this goal.  */
+		  if (g->file->update_status == 0 && !g->changed
+		      /* Never give a message under -s or -q.  */
+		      && !silent_flag && !question_flag)
+		    {
+		      if (g->file->phony || g->file->cmds == 0)
+			message ("Nothing to be done for `%s'.",
+				 g->file->name);
+		      else
+			message ("`%s' is up to date.", g->file->name);
+		      fflush (stdout);
+		    }
+
 		  /* This goal is finished.  Remove it from the chain.  */
 		  if (lastgoal == 0)
 		    goals = g->next;
@@ -191,7 +232,6 @@ update_file (file, depth)
 {
   register int status = 0;
   register struct file *f;
-  unsigned int ofiles_remade = files_remade;
 
   for (f = file; f != 0; f = f->prev)
     {
@@ -219,26 +259,6 @@ update_file (file, depth)
 	  abort ();
 	  break;
 	}
-    }
-
-  /* For a top level target, if we have found nothing whatever to do for it,
-     print a message saying nothing needs doing.  */
-
-  /* Give a message iff updated successfully, and never under -s or -q.  */
-  if (status == 0 && !silent_flag && !question_flag
-      /* files_remade will have been incremented iff we actually
-	 ran any commands (under -n, if we would have).  */
-      && files_remade == ofiles_remade
-      /* Only give the diagnostic for top-level targets.
-	 The makefile chain run is done with DEPTH==1 precisely
-	 to avoid this message.  */
-      && depth == 0)
-    {
-      if (file->phony || file->cmds == 0)
-	message ("Nothing to be done for `%s'.", file->name);
-      else
-	message ("`%s' is up to date.", file->name);
-      fflush (stdout);
     }
 
   return status;
