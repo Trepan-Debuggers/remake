@@ -190,7 +190,7 @@ clean: glob-clean
 	-rm -f make *.o core
 distclean: clean glob-realclean
 	-rm -f Makefile config.h config.status build.sh
-	-rm -f TAGS tags make.info* make-* make.dvi
+	-rm -f TAGS tags make.info* make.dvi
 	-rm -f make.?? make.??s make.log make.toc make.*aux
 realclean: distclean
 mostlyclean: clean
