@@ -55,8 +55,12 @@ ifdef AC_MACRODIR
 configure config.h.in: $(patsubst %,$(AC_MACRODIR)/%.m4,acspecific acgeneral)
 config.h.in: $(AC_MACRODIR)/acconfig.h
 endif
-configure: configure.in; autoconf $(ACFLAGS)
-config.h.in: configure.in; autoheader $(ACFLAGS)
+configure: configure.in aclocal.m4
+	autoconf $(ACFLAGS)
+	test -d CVS && cvs commit -m'autoconf $(ACFLAGS)' $@
+config.h.in: configure.in aclocal.m4
+	autoheader $(ACFLAGS)
+	test -d CVS && cvs commit -m'autoheader $(ACFLAGS)' $@
 
 ifdef customs
 defines := $(defines) -Ipmake/customs -Ipmake/lib/include
