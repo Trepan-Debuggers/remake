@@ -159,15 +159,16 @@ update_goal_chain (goals, makefiles)
 		    }
 		}
 
-	      if (stop)
+	      if (stop || g->file->updated)
 		{
 		  /* If we have found nothing whatever to do for the goal,
 		     print a message saying nothing needs doing.  */
 
-		  /* If the update_status is zero, we updated successfully
-		     or not at all.  G->changed will have been set above if
-		     any commands were actually run on behalf of this goal.  */
-		  if (g->file->update_status == 0 && !g->changed
+		  if (!makefiles
+		      /* If the update_status is zero, we updated successfully
+			 or not at all.  G->changed will have been set above if
+			 any commands were actually started for this goal.  */
+		      && g->file->update_status == 0 && !g->changed
 		      /* Never give a message under -s or -q.  */
 		      && !silent_flag && !question_flag)
 		    {
