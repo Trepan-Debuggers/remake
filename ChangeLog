@@ -1,3 +1,14 @@
+Tue Aug 27 01:06:34 1996  Roland McGrath  <roland@baalperazim.frob.com>
+
+	* Version 3.75 released.
+
+	* main.c (print_version): Print out bug-reporting address.
+
+Mon Aug 26 19:55:47 1996  Roland McGrath  <roland@baalperazim.frob.com>
+
+	* main.c (print_data_base): Don't declare ctime; headers do it for us
+ 	already.
+
 Sun Jul 28 15:37:09 1996  Rob Tulloh (tulloh@tivoli.com)
 
 	* w32/pathstuff.c: Turned convert_vpath_to_win32() into a
