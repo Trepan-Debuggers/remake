@@ -1300,7 +1300,7 @@ positive integral argument",
 	    {
 	      unsigned int i;
 	      sprintf (p, "%s--%s%s",
-		       cs->c == -1 ? "" : ", ",
+		       cs->c == -1 ? "  " : ", ",
 		       cs->long_name, arg);
 	      p += strlen (p);
 	      for (i = 0; i < (sizeof (long_option_aliases) /
@@ -1426,7 +1426,7 @@ define_makeflags (all, makefile)
   struct flag
     {
       struct flag *next;
-      struct command_switch *switch;
+      struct command_switch *cs;
       char *arg;
       unsigned int arglen;
     };
@@ -1435,7 +1435,7 @@ define_makeflags (all, makefile)
 #define	ADD_FLAG(ARG, LEN) \
   do {									      \
     struct flag *new = (struct flag *) alloca (sizeof (struct flag));	      \
-    new->switch = cs;							      \
+    new->cs = cs;							      \
     new->arg = (ARG);							      \
     new->arglen = (LEN);						      \
     new->next = flags;							      \
@@ -1543,14 +1543,14 @@ define_makeflags (all, makefile)
       do
 	{
 	  /* Add the flag letter or name to the string.  */
-	  if (flags->switch->c == -1)
+	  if (flags->cs->c == -1)
 	    {
 	      *p++ = '-';
-	      strcpy (p, flags->switch->long_name);
+	      strcpy (p, flags->cs->long_name);
 	      p += strlen (p);
 	    }
 	  else
-	    *p++ = flags->c;
+	    *p++ = flags->cs->c;
 	  if (flags->arg != 0)
 	    {
 	      /* A flag that takes an optional argument which in this case
@@ -1560,7 +1560,7 @@ define_makeflags (all, makefile)
 	      if (flags->arglen > 0)
 		{
 		  /* Add its argument too.  */
-		  *p++ = flags->switch->c == -1 ? '=' : ' ';
+		  *p++ = flags->cs->c == -1 ? '=' : ' ';
 		  bcopy (flags->arg, p, flags->arglen);
 		  p += flags->arglen;
 		}
@@ -1568,7 +1568,7 @@ define_makeflags (all, makefile)
 	      *p++ = ' ';
 	      *p++ = '-';
 	    }
-	  else if (flags->switch->c == -1)
+	  else if (flags->cs->c == -1)
 	    {
 	      /* Long options must each go in their own word,
 		 so we write the following space and dash.  */
