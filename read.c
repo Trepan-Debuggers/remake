@@ -552,6 +552,12 @@ read_makefile (filename, flags)
 				    | (noerror ? RM_DONTCARE : 0)));
 	    }
 
+	  /* Free any space allocated by conditional_line.  */
+	  if (conditionals->ignoring)
+	    free (conditionals->ignoring);
+	  if (conditionals->seen_else)
+	    free (conditionals->seen_else);
+
 	  /* Restore state.  */
 	  conditionals = save;
 	  reading_filename = filename;
