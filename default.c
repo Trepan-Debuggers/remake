@@ -317,25 +317,20 @@ set_default_suffixes ()
     }
 }
 
-/* Install the default pattern rules and enter
-   the default suffix rules as file rules.  */
+/* Enter the default suffix rules as file rules.  This used to be done in
+   install_default_implicit_rules, but that loses because we want the
+   suffix rules installed before reading makefiles, and thee pattern rules
+   installed after.  */
 
 void
-install_default_implicit_rules ()
+install_default_suffix_rules ()
 {
-  register struct pspec *p;
   register char **s;
   
   if (no_builtin_rules_flag)
     return;
 
-  for (p = default_pattern_rules; p->target != 0; ++p)
-    install_pattern_rule (p, 0);
-
-  for (p = default_terminal_rules; p->target != 0; ++p)
-    install_pattern_rule (p, 1);
-
-  for (s = default_suffix_rules; *s != 0; s += 2)
+ for (s = default_suffix_rules; *s != 0; s += 2)
     {
       register struct file *f = enter_file (s[0]);
       /* Don't clobber cmds given in a makefile if there were any.  */
@@ -347,6 +342,24 @@ install_default_implicit_rules ()
 	  f->cmds->command_lines = 0;
 	}
     }
+}
+
+
+/* Install the default pattern rules.  */
+
+void
+install_default_implicit_rules ()
+{
+  register struct pspec *p;
+  
+  if (no_builtin_rules_flag)
+    return;
+
+  for (p = default_pattern_rules; p->target != 0; ++p)
+    install_pattern_rule (p, 0);
+
+  for (p = default_terminal_rules; p->target != 0; ++p)
+    install_pattern_rule (p, 1);
 }
 
 void
