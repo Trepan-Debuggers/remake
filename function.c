@@ -21,9 +21,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "dep.h"
 #include "commands.h"
 #include "job.h"
-#include <errno.h>
-
-extern int errno;
 
 static char *string_glob ();
 
