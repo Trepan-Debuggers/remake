@@ -70,4 +70,55 @@ run_make_test('
 	@test "$(foo)" == "$$foo"
 ', '', '');
 
+
+# TEST #6 -- test expansion of pattern-specific simple variables
+#
+run_make_test('
+.PHONY: all
+
+all: inherit := good $$t
+all: bar baz
+
+b%: pattern := good $$t
+
+global := orginal $$t
+
+
+# normal target
+#
+ifdef rec
+bar: a = global: $(global) pattern: $(pattern) inherit: $(inherit)
+else
+bar: a := global: $(global) pattern: $(pattern) inherit: $(inherit)
+endif
+
+bar: ; @echo \'normal: $a;\'
+
+
+# pattern target
+#
+ifdef rec
+%z: a = global: $(global) pattern: $(pattern) inherit: $(inherit)
+else
+%z: a := global: $(global) pattern: $(pattern) inherit: $(inherit)
+endif
+
+%z: ; @echo \'pattrn: $a;\'
+
+
+global := new $$t
+',
+'',
+'normal: global: orginal $t pattern:  inherit: ;
+pattrn: global: orginal $t pattern:  inherit: ;');
+
+
+# TEST #7 -- test expansion of pattern-specific recursive variables
+#
+run_make_test(undef, # reuse previous makefile
+'rec=1',
+'normal: global: new $t pattern: good $t inherit: good $t;
+pattrn: global: new $t pattern: good $t inherit: good $t;');
+
+
 1;

@@ -495,10 +495,25 @@ initialize_file_variables (struct file *file, int reading)
           do
             {
               /* We found one, so insert it into the set.  */
-              struct variable *v = do_variable_definition (
-                &p->variable.fileinfo, p->variable.name,
-                p->variable.value, p->variable.origin,
-                p->variable.flavor, 1);
+
+              struct variable *v;
+
+              if (p->variable.flavor == f_simple)
+                {
+                  v = define_variable_loc (
+                    p->variable.name, strlen (p->variable.name),
+                    p->variable.value, p->variable.origin,
+                    0, &p->variable.fileinfo);
+
+                  v->flavor = f_simple;
+                }
+              else
+                {
+                  v = do_variable_definition (
+                    &p->variable.fileinfo, p->variable.name,
+                    p->variable.value, p->variable.origin,
+                    p->variable.flavor, 1);
+                }
 
               /* Also mark it as a per-target and copy export status. */
               v->per_target = p->variable.per_target;

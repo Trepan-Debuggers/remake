@@ -1,3 +1,10 @@
+2004-10-05  Boris Kolpackov  <boris@kolpackov.net>
+
+	* read.c (record_target_var): Expand simple pattern-specific
+	variable.
+	* variable.c (initialize_file_variables): Do not expand simple
+	pattern-specific variable.
+
 2004-09-28  Boris Kolpackov  <boris@kolpackov.net>
 
 	* remake.c (update_file_1): When rebuilding makefiles inherit
