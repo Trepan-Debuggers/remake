@@ -467,6 +467,11 @@ snap_deps ()
       for (f2 = d->file; f2 != 0; f2 = f2->prev)
 	f2->precious = 1;
 
+  for (f = lookup_file (".LOW_RESOLUTION_TIME"); f != 0; f = f->prev)
+    for (d = f->deps; d != 0; d = d->next)
+      for (f2 = d->file; f2 != 0; f2 = f2->prev)
+	f2->low_resolution_time = 1;
+
   for (f = lookup_file (".PHONY"); f != 0; f = f->prev)
     for (d = f->deps; d != 0; d = d->next)
       for (f2 = d->file; f2 != 0; f2 = f2->prev)
@@ -592,33 +597,32 @@ file_timestamp_now (int *resolution)
   /* Don't bother with high-resolution clocks if file timestamps have
      only one-second resolution.  The code below should work, but it's
      not worth the hassle of debugging it on hosts where it fails.  */
-  if (FILE_TIMESTAMP_HI_RES)
-    {
-#if HAVE_CLOCK_GETTIME && defined CLOCK_REALTIME
+#if FILE_TIMESTAMP_HI_RES
+# if HAVE_CLOCK_GETTIME && defined CLOCK_REALTIME
+  {
+    struct timespec timespec;
+    if (clock_gettime (CLOCK_REALTIME, &timespec) == 0)
       {
-	struct timespec timespec;
-	if (clock_gettime (CLOCK_REALTIME, &timespec) == 0)
-	  {
-	    r = 1;
-	    s = timespec.tv_sec;
-	    ns = timespec.tv_nsec;
-	    goto got_time;
-	  }
+	r = 1;
+	s = timespec.tv_sec;
+	ns = timespec.tv_nsec;
+	goto got_time;
       }
-#endif
-#if HAVE_GETTIMEOFDAY
+  }
+# endif
+# if HAVE_GETTIMEOFDAY
+  {
+    struct timeval timeval;
+    if (gettimeofday (&timeval, 0) == 0)
       {
-	struct timeval timeval;
-	if (gettimeofday (&timeval, 0) == 0)
-	  {
-	    r = 1000;
-	    s = timeval.tv_sec;
-	    ns = timeval.tv_usec * 1000;
-	    goto got_time;
-	  }
+	r = 1000;
+	s = timeval.tv_sec;
+	ns = timeval.tv_usec * 1000;
+	goto got_time;
       }
+  }
+# endif
 #endif
-    }
 
   r = 1000000000;
   s = time ((time_t *) 0);

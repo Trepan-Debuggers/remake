@@ -1,3 +1,53 @@
+2000-07-25  Paul D. Smith  <psmith@gnu.org>
+
+	* job.c (construct_command_argv_internal): Add "~" to the list of
+	sh_chars[] which disallow optimizing out the shell call.
+
+2000-07-23  Paul Eggert  <eggert@twinsun.com>
+
+	* NEWS, make.texinfo: Document .LOW_RESOLUTION_TIME, which
+	supersedes --disable-nsec-timestamps.
+	* make.texinfo: Consistently use "time stamp" instead of "timestamp".
+	* README: Remove --disable-nsec-timestamps.
+
+	* filedef.h (struct file.low_resolution_time): New member.
+	* file.c (snap_deps): Add support for .LOW_RESOLUTION_TIME.
+	* remake.c (update_file_1):
+	Avoid spurious rebuilds due to low resolution time stamps,
+	generalizing the earlier code that applied only to archive members.
+	(f_mtime): Archive members always have low resolution time stamps.
+
+	* configure.in: Remove --disable-nsec-timestamps, as this has
+	been superseded by .LOW_RESOLUTION_TIME.
+
+2000-07-23  Paul Eggert  <eggert@twinsun.com>
+
+	* configure.in (enable_nsec_timestamps): Renamed from
+	make_cv_nsec_timestamps, since enable/disable options
+	shouldn't be cached.
+
+2000-07-23  Bruno Haible  <haible@clisp.cons.org>
+       and  Paul Eggert  <eggert@twinsun.com>
+
+	* file.c (file_timestamp_now):
+	Use preprocessor-time check for FILE_TIMESTAMP_HI_RES
+	so that clock_gettime is not linked unless needed.
+
+	* filedef.h (FILE_TIMESTAMP_HI_RES):
+	Remove definition; "configure" now does this.
+
+	* configure.in (jm_AC_TYPE_UINTMAX_T): Move up,
+	to before high resolution file timestamp check,
+	since that check now uses uintmax_t.
+	(FILE_TIMESTAMP_HI_RES): Define to nonzero if the code should use
+	high resolution file timestamps.
+	(HAVE_CLOCK_GETTIME): Do not define if !FILE_TIMESTAMP_HI_RES,
+	so that we don't link in clock_gettime unnecessarily.
+
+2000-07-17  Paul D. Smith  <psmith@gnu.org>
+
+	* i18n/ja.po: New version of the translation file.
+
 2000-07-07  Paul D. Smith  <psmith@gnu.org>
 
 	* remake.c (f_mtime): If NO_FLOAT is defined, don't bother with
