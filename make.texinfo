@@ -4174,16 +4174,20 @@ it is this unexpanded text to which @code{make} appends the new text you
 specify.
 
 @example
+@group
 variable = value
 variable += more
+@end group
 @end example
 
 @noindent
 is roughly equivalent to:
 
 @example
+@group
 temp = value
 variable = $(temp) more
+@end group
 @end example
 
 @noindent
@@ -4213,15 +4217,16 @@ CFLAGS := $(CFLAGS) -pg # enable profiling
 @end example
 
 @noindent
-This is close, but not quite what we want.  Using @samp{:=} redefines
-@code{CFLAGS} as a simply-expanded variable; this means @code{make} expands
-the text @w{@samp{$(CFLAGS) -pg}} before setting the variable.  If
-@code{includes} is not yet defined, we get @w{@samp{ -O -pg}}, and a later
-definition of @code{includes} will have no effect.  Conversely, by using
-@samp{+=} we set @code{CFLAGS} to the @emph{unexpanded} value
-@w{@samp{$(includes) -O -pg}}.  Thus we preserve the reference to
-@code{includes}, so if that variable gets defined at any later point, a
-reference like @samp{$(CFLAGS)} still uses its value.
+This is pretty close, but not quite what we want.  Using @samp{:=}
+redefines @code{CFLAGS} as a simply-expanded variable; this means
+@code{make} expands the text @w{@samp{$(CFLAGS) -pg}} before setting the
+variable.  If @code{includes} is not yet defined, we get @w{@samp{ -O
+-pg}}, and a later definition of @code{includes} will have no effect.
+Conversely, by using @samp{+=} we set @code{CFLAGS} to the
+@emph{unexpanded} value @w{@samp{$(includes) -O -pg}}.  Thus we preserve
+the reference to @code{includes}, so if that variable gets defined at
+any later point, a reference like @samp{$(CFLAGS)} still uses its
+value.
 
 @node Override Directive, Defining, Appending, Using Variables
 @section The @code{override} Directive
