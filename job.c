@@ -213,6 +213,7 @@ reap_children (block, err)
 
       if (err && !child_died)
 	{
+	  /* We might block for a while, so let the user know why.  */
 	  fflush (stdout);
 	  error ("*** Waiting for unfinished jobs....");
 	}
