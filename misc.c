@@ -174,15 +174,25 @@ concat (s1, s2, s3)
 /* Print a message on stdout.  */
 
 void
-message (s1, s2, s3, s4, s5, s6)
+message (prefix, s1, s2, s3, s4, s5, s6)
+     int prefix;
      char *s1, *s2, *s3, *s4, *s5, *s6;
 {
-  if (makelevel == 0)
-    printf ("%s: ", program);
-  else
-    printf ("%s[%u]: ", program, makelevel);
-  printf (s1, s2, s3, s4, s5, s6);
-  putchar ('\n');
+  log_working_directory (1);
+
+  if (s1 != 0)
+    {
+      if (prefix)
+	{
+	  if (makelevel == 0)
+	    printf ("%s: ", program);
+	  else
+	    printf ("%s[%u]: ", program, makelevel);
+	}
+      printf (s1, s2, s3, s4, s5, s6);
+      putchar ('\n');
+    }
+
   fflush (stdout);
 }
 
@@ -193,6 +203,8 @@ void
 fatal (s1, s2, s3, s4, s5, s6)
      char *s1, *s2, *s3, *s4, *s5, *s6;
 {
+  log_working_directory (1);
+
   if (makelevel == 0)
     fprintf (stderr, "%s: *** ", program);
   else
@@ -211,6 +223,8 @@ void
 error (s1, s2, s3, s4, s5, s6)
      char *s1, *s2, *s3, *s4, *s5, *s6;
 {
+  log_working_directory (1);
+
   if (makelevel == 0)
     fprintf (stderr, "%s: ", program);
   else
@@ -226,6 +240,8 @@ makefile_error (file, lineno, s1, s2, s3, s4, s5, s6)
      unsigned int lineno;
      char *s1, *s2, *s3, *s4, *s5, *s6;
 {
+  log_working_directory (1);
+
   fprintf (stderr, "%s:%u: ", file, lineno);
   fprintf (stderr, s1, s2, s3, s4, s5, s6);
   putc ('\n', stderr);
@@ -238,6 +254,8 @@ makefile_fatal (file, lineno, s1, s2, s3, s4, s5, s6)
      unsigned int lineno;
      char *s1, *s2, *s3, *s4, *s5, *s6;
 {
+  log_working_directory (1);
+
   fprintf (stderr, "%s:%u: *** ", file, lineno);
   fprintf (stderr, s1, s2, s3, s4, s5, s6);
   fputs (".  Stop.\n", stderr);
