@@ -587,6 +587,13 @@ read_makefile (filename, flags)
       else if (try_variable_definition (filename, lineno, p, o_file))
 	/* This line has been dealt with.  */
 	;
+      else if (lb.buffer[0] == '\t')
+	/* This line starts with a tab but was not caught above
+	   because there was no preceding target, and the line
+	   might have been usable as a variable definition.
+	   But now it is definitely lossage.  */
+	makefile_fatal (filename, lineno,
+			"commands commence before first target");
       else
 	{
 	  /* This line describes some target files.  */
