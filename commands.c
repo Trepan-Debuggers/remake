@@ -25,7 +25,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 extern int remote_kill ();
 
-#if	!defined(POSIX) && !defined(__GNU_LIBRARY__)
+#ifndef	HAVE_UNISTD_H
 extern int getpid ();
 #endif
 
@@ -357,18 +357,23 @@ execute_file_commands (file)
   new_job (file);
 }
 
-#define	PROPAGATED_SIGNAL_MASK \
-  (sigmask (SIGTERM) | sigmask (SIGINT) | sigmask (SIGHUP) | sigmask (SIGQUIT))
-
 /* Handle fatal signals.  */
 
-int
+RETSIGTYPE
 fatal_error_signal (sig)
      int sig;
 {
   signal (sig, SIG_DFL);
-#ifndef USG
+#ifdef	POSIX
+  {
+    sigset_t set;
+    sigemptyset (&set);
+    (void) sigprocmask (SIG_SETMASK, &set, (sigset_t *) 0);
+  }
+#else
+#ifndef	SIGSETMASK_MISSING
   (void) sigsetmask (0);
+#endif
 #endif
 
   /* A termination signal won't be sent to the entire
@@ -385,7 +390,7 @@ fatal_error_signal (sig)
   /* If we got a signal that means the user
      wanted to kill make, remove pending targets.  */
 
-  if (PROPAGATED_SIGNAL_MASK & sigmask (sig))
+  if (sig == SIGTERM || sig == SIGINT || sig == SIGHUP || sig == SIGQUIT)
     {
       register struct child *c;
 
