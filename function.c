@@ -1381,11 +1381,7 @@ func_shell (o, argv, funcname)
 	  if (cc > 0)
 	    i += cc;
 	}
-#ifdef EINTR
-      while (cc > 0 || errno == EINTR);
-#else
-      while (cc > 0);
-#endif
+      while (cc > 0 || EINTR_SET);
 
       /* Close the read side of the pipe.  */
 #ifdef  __MSDOS__

@@ -1,6 +1,43 @@
+1999-08-01  Paul D. Smith  <psmith@gnu.org>
+
+	New jobserver algorithm to avoid a possible hole where we could
+	miss SIGCHLDs and get into a deadlock.  The original algorithm was
+	suggested by Roland McGrath with a nice refinement by Paul Eggert.
+	Many thanks as well to Tim Magill and Howard Chu, who also
+	provided many viable ideas and critiques.  We all had a fun week
+	dreaming up interesting ways to use and abuse UNIX syscalls :).
+
+	Previously we could miss a SIGCHLD if it happened after we reaped
+	the children but before we re-entered the blocking read.  If this
+	happened to all makes and/or all children, make would never wake
+	up.
+
+	We avoid this by having the SIGCHLD handler reset the blocking bit
+	on the jobserver pipe read FD (normally read does block in this
+	algorithm).  Now if the handler is called between the time we reap
+	and the time we read(), and there are no tokens available, the
+	read will merely return with EAGAIN instead of blocking.
+
+	* main.c (main): Set the blocking bit explicitly here.
+	* job.c (child_handler): If we have a jobserver pipe, set the
+	non-blocking bit for it.
+	(start_waiting_job): Move the token stuff back to new_job; if we
+	do it here then we're not controlling the number of remote jobs
+	started!
+	(new_job): Move the check for job slots to _after_ we've created a
+	child structure.  If the read returns without getting a token, set
+	the blocking bit then try to reap_children.
+
+	* make.h (EINTR_SET): Define to test errno if EINTR is available,
+	or 0 otherwise.  Just some code cleanup.
+	* arscan.c (ar_member_touch): Use it.
+	* function.c (func_shell): Use it.
+	* job.c (reap_children): Use it.
+	* remake.c (touch_file): Use it.
+
 1999-07-28  Paul D. Smith  <psmith@gnu.org>
 
-	* make.h: Define _() and N_() macros as a passthrough to initiate
+	* make.h: Define _() and N_() macros as passthrough to initiate
 	NLS support.
 	* <all>: Add _()/N_() around translatable strings.
 

@@ -918,13 +918,10 @@ touch_file (file)
 	  char buf;
 	  int status;
 
-#ifdef EINTR
 	  do
-#endif
 	    status = fstat (fd, &statbuf);
-#ifdef EINTR
-	  while (status < 0 && errno == EINTR);
-#endif
+	  while (status < 0 && EINTR_SET);
+
 	  if (status < 0)
 	    TOUCH_ERROR ("touch: fstat: ");
 	  /* Rewrite character 0 same as it already is.  */
