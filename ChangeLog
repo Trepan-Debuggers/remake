@@ -1,3 +1,19 @@
+1998-10-13  Paul D. Smith  <psmith@gnu.org>
+
+	* job.c (new_job): If the command list resolves to empty (through
+	variable expansion, for example), stop early rather than running
+	start_waiting_job().
+
+1998-10-12  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* rule.c (print_rule_data_base): Ignore num_pattern_rules if it is
+	zero.
+
+1998-10-09  Paul D. Smith  <psmith@gnu.org>
+
+	* read.c (read_makefile): Allow non-empty lines to expand to the
+	empty string after variable, etc., expansion, and be ignored.
+
 1998-09-21  Paul D. Smith  <psmith@gnu.org>
 
 	* job.c (construct_command_argv_internal): Only add COMMAND.COM
