@@ -1,5 +1,7 @@
 Fri Mar 24 00:32:32 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
+	* Version 3.72.12.
+
 	* main.c (handle_non_switch_argument): New function, broken out of
  	decode_switches.
 	(decode_switches): Set optind to 0 to reinitialize getopt, not to 1.
