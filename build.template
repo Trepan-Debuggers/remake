@@ -23,7 +23,8 @@
 
 srcdir='@srcdir@'
 CC='@CC@'
-CFLAGS="${CFLAGS--g}"
+CFLAGS='@CFLAGS@'
+LDFLAGS='@LDFLAGS@'
 defines='@DEFS@ -DLIBDIR="${libdir}" -DINCLUDEDIR="${includedir}"'
 ALLOCA='@ALLOCA@'
 LOADLIBES='@LIBS@'
