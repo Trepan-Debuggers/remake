@@ -2,7 +2,7 @@
 @setfilename make.info
 @synindex vr fn
 
-@c $Header: /sources/make/make/Attic/make.texinfo,v 1.62 1988/06/18 00:26:10 mcgrath Beta $
+@c $Header: /sources/make/make/Attic/make.texinfo,v 1.63 1988/06/18 01:16:59 mcgrath Beta $
 
 @ifinfo
 This file documents the GNU Make utility.
@@ -4381,7 +4381,7 @@ Variable expansion functions.  @xref{Functions}.
 The @samp{-c} command option to change directory.  @xref{Options}.
 
 The @samp{-o} option makes files seem artificially old.
-@xref{Avoiding Compilation}.
+Verbatim variable definitions made with @code{define}.  @xref{Defining}.
 
 @item
 Conditional lines.  @xref{Conditionals}.
