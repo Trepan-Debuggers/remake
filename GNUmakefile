@@ -105,6 +105,7 @@ CFLAGS = -g -W -Wunused -Wpointer-arith -Wreturn-type -Wswitch
 else
 CFLAGS = -g
 endif
+LDFLAGS = -g
 
 ifdef yescustoms
 REMOTE := -DCUSTOMS
@@ -194,9 +195,12 @@ build.sh.in: build.template
 version := \
   $(strip $(shell sed -e '/=/!d' -e 's/^.*"\(.*\)";$$/\1/' < version.c))
 tarfiles := make make-doc
-tarfiles := $(addsuffix -$(version).tar.Z,$(tarfiles))
+tarfiles := $(addsuffix -$(version).tar,$(tarfiles))
+tarfiles := $(tarfiles:%=%.Z) $(tarfiles:%=%.z)
 # Depend on default and doc so we don't ship anything that won't compile.
-dist: default info dvi tests $(tarfiles)
+dist: default info dvi tests tarfiles
+.PHONY: tarfiles
+tarfiles: $(tarfiles)
 
 dist: local-inst
 .PHONY: local-inst
@@ -224,14 +228,16 @@ $(alpha-dir)/%: %
 define make-tar
 @rm -fr make-$(version)
 ln -s . make-$(version)
-tar cvhf $(@:.Z=) $(addprefix make-$(version)/,$^)
+tar cvhf $@ $(addprefix make-$(version)/,$^)
 rm -f make-$(version)
-compress -f $(@:.Z=)
 endef
 
-make-doc-$(version).tar.Z: README-doc COPYING make.dvi make.info make.info*
+%.Z: %; compress -c $< > $@
+%.z: %; gzip -9 -c $< > $@
+
+make-doc-$(version).tar: README-doc COPYING make.dvi make.info make.info*
 	$(make-tar)
-make-$(version).tar.Z: README INSTALL COPYING ChangeLog NEWS \
+make-$(version).tar: README INSTALL COPYING ChangeLog NEWS \
           configure Makefile.in configure.in build.sh.in \
 	  $(srcs) remote-*.c $(globfiles) \
 	  make.texinfo gpl.texinfo make-stds.texi \
