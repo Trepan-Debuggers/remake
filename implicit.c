@@ -308,8 +308,7 @@ pattern_search (file, archive, depth, recursions)
 	  stem = filename
 	    + (rule->suffixes[matches[i]] - rule->targets[matches[i]]) - 1;
 	  stemlen = namelen - rule->lens[matches[i]] + 1;
-	  check_lastslash = (lastslash != 0
-			     && index (rule->targets[matches[i]], '/') == 0);
+	  check_lastslash = checked_lastslash[i];
 	  if (check_lastslash)
 	    {
 	      stem += lastslash - filename + 1;
@@ -331,6 +330,7 @@ pattern_search (file, archive, depth, recursions)
 		  register unsigned int i;
 		  if (check_lastslash)
 		    {
+		      /* Copy directory name from the original FILENAME.  */
 		      i = lastslash - filename + 1;
 		      bcopy (filename, depname, i);
 		    }
@@ -364,7 +364,16 @@ pattern_search (file, archive, depth, recursions)
 
 	      DEBUGP2 ("Trying %s dependency `%s'.\n",
 		       p == depname ? "implicit" : "rule", p);
-	      if (!rule->subdir && (lookup_file (p) != 0 || file_exists_p (p)))
+
+	      /* The DEP->changed flag says that this dependency resides in a
+		 nonexistent directory.  So we normally can skip looking for
+		 the file.  However, if CHECK_LASTSLASH is set, then the
+		 dependency file we are actually looking for is in a different
+		 directory (the one gotten by prepending FILENAME's directory),
+		 so it might actually exist.  */
+
+	      if ((!dep->changed || check_lastslash)
+		  && (lookup_file (p) != 0 || file_exists_p (p)))
 		{
 		  found_files[deps_found++] = savestring (p, strlen (p));
 		  continue;
@@ -532,6 +541,8 @@ pattern_search (file, archive, depth, recursions)
     file->stem = stem[stemlen] == '\0' ? stem : savestring (stem, stemlen);
   else
     {
+      /* We want to prepend the directory from
+	 the original FILENAME onto the stem.  */
       file->stem = (char *) xmalloc (((lastslash + 1) - filename)
 				     + stemlen + 1);
       bcopy (filename, file->stem, (lastslash + 1) - filename);
