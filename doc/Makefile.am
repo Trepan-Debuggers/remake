@@ -13,7 +13,7 @@ CLEANFILES = make*.html
 
 # Extra stuff to include in the distribution.
 
-EXTRA_DIST =	makedb.txt doxygen/Doxyfile doxygen/run_doxygen
+EXTRA_DIST =	doxygen/Doxyfile doxygen/run_doxygen
 
 ## ----------------------------- ##
 ## Other documentation formats.  ##
