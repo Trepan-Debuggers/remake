@@ -82,6 +82,7 @@ ar_scan (archive, function, arg)
 #ifdef AIAMAG
   FL_HDR fl_header;
 #endif
+  char *namemap = 0;
   register int desc = open (archive, O_RDONLY, 0);
   if (desc < 0)
     return -1;
@@ -153,7 +154,9 @@ ar_scan (archive, function, arg)
 	int uidval, gidval;
 	long int data_offset;
 #else
-	char name[sizeof member_header.ar_name + 1];
+	char namebuf[sizeof member_header.ar_name + 1];
+	char *name;
+	int is_namemap;		/* Nonzero if this entry maps long names.  */
 #endif
 	long int eltsize;
 	int eltmode;
@@ -216,15 +219,54 @@ ar_scan (archive, function, arg)
 	    return -2;
 	  }
 
+	name = namebuf;
 	bcopy (member_header.ar_name, name, sizeof member_header.ar_name);
 	{
 	  register char *p = name + sizeof member_header.ar_name;
-	  while (p > name && *--p == ' ')
+	  do
 	    *p = '\0';
+	  while (p > name && *--p == ' ');
 
+#ifndef AIAMAG
+	  /* If the member name is "//" or "ARFILENAMES/" this may be
+	     a list of file name mappings.  The maximum file name
+ 	     length supported by the standard archive format is 14
+ 	     characters.  This member will actually always be the
+ 	     first or second entry in the archive, but we don't check
+ 	     that.  */
+ 	  is_namemap = (!strcmp (name, "//")
+			|| !strcmp (name, "ARFILENAMES/"));
+#endif	/* Not AIAMAG. */
 	  /* On some systems, there is a slash after each member name.  */
 	  if (*p == '/')
 	    *p = '\0';
+
+#ifndef AIAMAG
+ 	  /* If the member name starts with a space or a slash, this
+ 	     is an index into the file name mappings (used by GNU ar).
+ 	     Otherwise if the member name looks like #1/NUMBER the
+ 	     real member name appears in the element data (used by
+ 	     4.4BSD).  */
+ 	  if (! is_namemap
+ 	      && (name[0] == ' ' || name[0] == '/')
+ 	      && namemap != 0)
+ 	    name = namemap + atoi (name + 1);
+ 	  else if (name[0] == '#'
+ 		   && name[1] == '1'
+ 		   && name[2] == '/')
+ 	    {
+ 	      int namesize = atoi (name + 3);
+ 
+ 	      name = (char *) alloca (namesize + 1);
+ 	      nread = read (desc, name, namesize);
+ 	      if (nread != namesize)
+ 		{
+ 		  close (desc);
+ 		  return -2;
+ 		}
+ 	      name[namesize] = '\0';
+ 	    }
+#endif /* Not AIAMAG. */
 	}
 
 #ifndef	M_XENIX
@@ -270,6 +312,40 @@ ar_scan (archive, function, arg)
 	    return -2;
 	  }
 #else
+
+ 	/* If this member maps archive names, we must read it in.  The
+ 	   name map will always precede any members whose names must
+ 	   be mapped.  */
+	if (is_namemap)
+ 	  {
+ 	    char *clear;
+ 	    char *limit;
+
+ 	    namemap = (char *) alloca (eltsize);
+ 	    nread = read (desc, namemap, eltsize);
+ 	    if (nread != eltsize)
+ 	      {
+ 		(void) close (desc);
+ 		return -2;
+ 	      }
+ 
+ 	    /* The names are separated by newlines.  Some formats have
+ 	       a trailing slash.  Null terminate the strings for
+ 	       convenience.  */
+ 	    limit = namemap + eltsize;
+ 	    for (clear = namemap; clear < limit; clear++)
+ 	      {
+ 		if (*clear == '\n')
+ 		  {
+ 		    *clear = '\0';
+ 		    if (clear[-1] == '/')
+ 		      clear[-1] = '\0';
+ 		  }
+ 	      }
+ 
+	    is_namemap = 0;
+ 	  }
+
 	member_offset += AR_HDR_SIZE + eltsize;
 	if (member_offset % 2 != 0)
 	  member_offset++;
@@ -294,7 +370,10 @@ ar_name_equal (name, mem)
   if (p != 0)
     name = p + 1;
 
-#if !defined (AIAMAG) && !defined (APOLLO)
+  /* We no longer use this kludge, since we
+     now support long archive member names.  */
+
+#if 0 && !defined (AIAMAG) && !defined (APOLLO)
 
   {
     /* `reallylongname.o' matches `reallylongnam.o'.
