@@ -191,24 +191,24 @@ construct_vpath_list (pattern, dirpath)
       if (len > 1 && p[-1] == '/')
 	--len;
 
-      if (len == 1 && *v == '.')
-	continue;
-
-      v = savestring (v, len);
-
-      /* Verify that the directory actually exists.  */
-
-      if (dir_file_exists_p (v, ""))
+      if (len > 1 || *v != '.')
 	{
-	  /* It does.  Put it in the list.  */
-	  vpath[elem++] = dir_name (v);
-	  free (v);
-	  if (len > maxvpath)
-	    maxvpath = len;
+	  v = savestring (v, len);
+
+	  /* Verify that the directory actually exists.  */
+
+	  if (dir_file_exists_p (v, ""))
+	    {
+	      /* It does.  Put it in the list.  */
+	      vpath[elem++] = dir_name (v);
+	      free (v);
+	      if (len > maxvpath)
+		maxvpath = len;
+	    }
+	  else
+	    /* The directory does not exist.  Omit from the list.  */
+	    free (v);
 	}
-      else
-	/* The directory does not exist.  Omit from the list.  */
-	free (v);
 
       /* Skip over colons and blanks between entries.  */
       while (*p == ':' || isblank (*p))
