@@ -723,7 +723,7 @@ read_makefile (filename, flags)
 	      else
 		break;
 	    }
-#ifdef __MS_DOS__
+#ifdef __MSDOS__
 	  /* For MS-DOS, skip a "C:\...".  */
 	  if (p != 0 && p[1] == '\\' && isalpha (p[-1]))
 	    p = 0;
@@ -1543,7 +1543,7 @@ parse_file_seq (stringp, stopchar, size, strip)
       /* Yes, find end of next name.  */
       q = p;
       p = find_char_unquote (q, stopchar, 1);
-#ifdef __MS_DOS__
+#ifdef __MSDOS__
       /* For MS-DOS, skip a "C:\...".  */
       if (stopchar == ':' && p != 0 && p[1] == '\\' && isalpha (p[-1]))
 	p = 0;
