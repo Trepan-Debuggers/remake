@@ -6,21 +6,24 @@
 @smallbook
 @c %**end of header
 
+@set EDITION 0.34 Beta
+@set VERSION 3.63 Beta
+@set UPDATED 23 July 1992
+@c !!!!! is there a reason not to use the full date in the title page? -rm
+@set UPDATE-MONTH July 1992
+
 @c finalout
 
 @c Combine the variable and function indices:
 @synindex vr fn
 
-@c !!set edition, date, version here and in *two* additional places.  
-@c Search for !!set
 @ifinfo
 This file documents the GNU Make utility, which determines
 automatically which pieces of a large program need to be recompiled,
 and issues the commands to recompile them.
 
-@c !!set edition, date, version
-This is Edition 0.34 Beta, last updated 23 July 1992,
-of @cite{The GNU Make Manual}, for @code{make}, Version 3.63 Beta.
+This is Edition @value{EDITION}, last updated @value{UPDATED},
+of @cite{The GNU Make Manual}, for @code{make}, Version @value{VERSION}.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 
@@ -49,12 +52,11 @@ entitled ``GNU General Public License'' must be approved for accuracy
 by the Foundation.
 @end ifinfo
 
-@c !!set edition, date, version
 @titlepage
 @title GNU Make
 @subtitle A Program for Directing Recompilation
-@subtitle Edition 0.34 Beta, for @code{make} Version 3.63 Beta.
-@subtitle July 1992
+@subtitle Edition @value{EDITION}, for @code{make} Version @value{VERSION}.
+@subtitle @value{UPDATE-MONTH}
 @author by Richard M. Stallman and Roland McGrath
 @page
 @vskip 0pt plus 1filll
@@ -88,14 +90,13 @@ Foundation.
 @node Top, Copying, (dir), (dir)
 @top Make
 
-@c !!set edition, date, version
 The GNU @code{make} utility automatically determines which pieces of a
 large program need to be recompiled, and issues the commands to
 recompile them.@refill
 
-This is Edition 0.34 Beta of the @cite{GNU Make Manual},
-last updated 23 July 1992
-for @code{make} Version 3.63 Beta.@refill
+This is Edition @value{EDITION} of the @cite{GNU Make Manual},
+last updated @value{UPDATED}
+for @code{make} Version @value{VERSION}.@refill
 
 This manual describes @code{make} and contains the following chapters:@refill
 @end ifinfo
@@ -513,22 +514,22 @@ executable file called @code{edit} depends on eight object files
 which, in turn, depend on eight C source and three header files.
 
 In this example, all the C files include @file{defs.h}, but only those
-defining editing commands include @file{commands.h}, and only low
+defining editing commands include @file{command.h}, and only low
 level files that change the editor buffer include @file{buffer.h}.
 
 @example
 @group
-edit : main.o kbd.o commands.o display.o \
+edit : main.o kbd.o command.o display.o \
        insert.o search.o files.o utils.o
-        cc -o edit main.o kbd.o commands.o display.o \
+        cc -o edit main.o kbd.o command.o display.o \
                    insert.o search.o files.o utils.o
 
 main.o : main.c defs.h
         cc -c main.c
 kbd.o : kbd.c defs.h command.h
         cc -c kbd.c
-commands.o : command.c defs.h command.h
-        cc -c commands.c
+command.o : command.c defs.h command.h
+        cc -c command.c
 display.o : display.c defs.h buffer.h
         cc -c display.c
 insert.o : insert.c defs.h buffer.h
@@ -540,7 +541,7 @@ files.o : files.c defs.h buffer.h command.h
 utils.o : utils.c defs.h
         cc -c utils.c
 clean :
-        rm edit  main.o kbd.o commands.o display.o \
+        rm edit  main.o kbd.o command.o display.o \
         insert.o search.o files.o utils.o
 @end group
 @end example
@@ -647,7 +648,7 @@ Thus, if we change the file @file{insert.c} and run @code{make},
 @code{make} will compile that file to update @file{insert.o}, and then
 link @file{edit}.  If we change the file @file{command.h} and run
 @code{make}, @code{make} will recompile the object files @file{kbd.o},
-@file{commands.o} and @file{files.o} and then link file @file{edit}.
+@file{command.o} and @file{files.o} and then link file @file{edit}.
 
 @node Variables Simplify, make Deduces, How Make Works, Introduction
 @section Variables Make Makefiles Simpler
@@ -657,9 +658,9 @@ In our example, we had to list all the object files twice in the rule for
 
 @example
 @group
-edit : main.o kbd.o commands.o display.o \
+edit : main.o kbd.o command.o display.o \
               insert.o search.o files.o utils.o
-        cc -o edit main.o kbd.o commands.o display.o \
+        cc -o edit main.o kbd.o command.o display.o \
                    insert.o search.o files.o utils.o
 @end group
 @end example
@@ -678,7 +679,7 @@ such a variable @code{objects} with a line like this in the makefile:@refill
 
 @example
 @group
-objects = main.o kbd.o commands.o display.o \
+objects = main.o kbd.o command.o display.o \
               insert.o search.o files.o utils.o
 @end group
 @end example
@@ -693,7 +694,7 @@ for the object files:
 
 @example
 @group
-objects = main.o kbd.o commands.o display.o \
+objects = main.o kbd.o command.o display.o \
               insert.o search.o files.o utils.o
 
 edit : $(objects)
@@ -702,8 +703,8 @@ main.o : main.c defs.h
         cc -c main.c
 kbd.o : kbd.c defs.h command.h
         cc -c kbd.c
-commands.o : command.c defs.h command.h
-        cc -c commands.c
+command.o : command.c defs.h command.h
+        cc -c command.c
 display.o : display.c defs.h buffer.h
         cc -c display.c
 insert.o : insert.c defs.h buffer.h
@@ -739,7 +740,7 @@ Here is the entire example, with both of these changes, and a variable
 
 @example
 @group
-objects =  main.o kbd.o commands.o display.o \
+objects =  main.o kbd.o command.o display.o \
  insert.o search.o files.o utils.o
 
 edit : $(objects)
@@ -747,7 +748,7 @@ edit : $(objects)
 
 main.o : defs.h
 kbd.o : defs.h command.h
-commands.o : defs.h command.h
+command.o : defs.h command.h
 display.o : defs.h buffer.h
 insert.o : defs.h buffer.h
 search.o : defs.h buffer.h
@@ -778,21 +779,21 @@ Here is what one looks like:
 
 @example
 @group
-objects =  main.o kbd.o commands.o display.o \
+objects =  main.o kbd.o command.o display.o \
  insert.o search.o files.o utils.o
 
 edit : $(objects)
         cc -o edit $(objects)
 
 $(objects) : defs.h
-kbd.o commands.o files.o : command.h
+kbd.o command.o files.o : command.h
 display.o insert.o search.o files.o : buffer.h
 @end group
 @end example
 
 @noindent
 Here @file{defs.h} is given as a dependency of all the object files;
-@file{commands.h} and @file{buffer.h} are dependencies of the specific
+@file{command.h} and @file{buffer.h} are dependencies of the specific
 object files listed for them.
 
 Whether this is better is a matter of taste: it is more compact, but some
@@ -1913,7 +1914,7 @@ This is useful in two cases.
 You want just dependencies, no commands.  For example:
 
 @example
-kbd.o commands.o files.o: command.h
+kbd.o command.o files.o: command.h
 @end example
 
 @noindent
