@@ -506,6 +506,10 @@ struct dirstream
     struct dirfile *elt;	/* Current elt in bucket.  */
   };
 
+/* Forward declarations.  */
+static __ptr_t open_dirstream __P ((const char *));
+static const char *read_dirstream __P ((__ptr_t));
+
 static __ptr_t
 open_dirstream (directory)
      const char *directory;
