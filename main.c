@@ -1027,8 +1027,8 @@ decode_switches (argc, argv)
   decode_env_switches ("MFLAGS", 6);
 
   other_args = (struct stringlist *) xmalloc (sizeof (struct stringlist));
-  other_args->max = argc;
-  other_args->list = (char **) xmalloc (argc * sizeof (char *));
+  other_args->max = argc + 1;
+  other_args->list = (char **) xmalloc ((argc + 1) * sizeof (char *));
   other_args->idx = 1;
   other_args->list[0] = savestring (argv[0], strlen (argv[0]));
 
