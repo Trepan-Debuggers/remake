@@ -16,7 +16,9 @@
 #define RETSIGTYPE void
 
 /* Define if you have the ANSI C header files.  */
+#ifndef STDC_HEADERS
 #define STDC_HEADERS
+#endif
 
 /* Define if `sys_siglist' is declared by <signal.h>.  */
 #define SYS_SIGLIST_DECLARED
@@ -49,7 +51,7 @@
 #define HAVE_LIMITS_H
 
 /* Define if you have the <sys/param.h> header file.  */
-#define HAVE_SYS_PARAM_H
+#undef HAVE_SYS_PARAM_H
 
 /* Define if you have the <fcntl.h> header file.  */
 #define HAVE_FCNTL_H
@@ -60,6 +62,7 @@
 /* Define if you have the <memory.h> header file.  */
 #define HAVE_MEMORY_H
 
-#define INCLUDEDIR "c:/djgpp/include"
-#define LIBDIR "c:/djgpp/lib"
+/* Define if you have the `strerror' function.  */
+#define HAVE_STRERROR
+
 #define SCCS_GET "get"
