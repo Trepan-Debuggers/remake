@@ -6,6 +6,10 @@
 @smallbook
 @c %**end of header
 
+@comment These are necessary only because of texinfo.tex bugs.
+@clear two-level-index
+@clear shorttitlepage
+
 @set EDITION 0.40
 @set VERSION 3.63 Beta
 @set UPDATED 14 January 1993
@@ -17,6 +21,7 @@
 
 @ifset two-level-index
 @tex
+\message{If you do not have the two-level texindex program, you will lose.}
 % trying for a two-level index
 % You need the rewritten texindex program for this to work.
 
