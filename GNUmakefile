@@ -223,7 +223,8 @@ endef
 
 make-doc-$(version).tar.Z: README-doc COPYING make.dvi make.info make.info*
 	$(make-tar)
-make-$(version).tar.Z: README COPYING ChangeLog CHANGES configure Makefile.in \
+make-$(version).tar.Z: README INSTALL COPYING ChangeLog CHANGES \
+          configure Makefile.in configure.in \
 	  $(srcs) remote-*.c $(globfiles) make.texinfo gpl.texinfo \
   	  make.cp* make.fn* make.ky* make.pg* make.toc make.tp* make.vr* \
 	  make.aux make.man texinfo.tex TAGS tags
