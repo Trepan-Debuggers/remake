@@ -1,5 +1,5 @@
 /* Reading and parsing of makefiles for GNU Make.
-Copyright (C) 1988, 89, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 90, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -631,7 +631,7 @@ read_makefile (filename, flags)
 	;
       else if (lb.buffer[0] == '\t')
 	{
-	  p = lb.buffer;
+	  p = collapsed;	/* Ignore comments.  */
 	  while (isblank (*p))
 	    ++p;
 	  if (*p == '\0')
