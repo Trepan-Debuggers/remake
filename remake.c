@@ -35,7 +35,7 @@ extern int try_implicit_rule ();
 /* Incremented when a file has been remade.  */
 static unsigned int files_remade = 0;
 
-static int update_file (), update_file_1 (), check_dep ();
+static int update_file (), update_file_1 (), check_dep (), touch_file ();
 static void remake_file ();
 static time_t name_mtime (), library_file_mtime ();
 extern time_t f_mtime ();
@@ -559,6 +559,22 @@ notice_finished_file (file)
 
   ++files_remade;
 
+  if (touch_flag
+      /* The update status will be:
+	 	-1	if no commands were run;
+		0	if some commands (+ or ${MAKE}) were run and won;
+		1	if some commands were run and lost.
+	 The only time we don't want to touch the target is if
+	 it had some recursive commands, and they lost.  */
+      && file->update_status != 1)
+    {
+      if (file->phony)
+	file->update_status = 0;
+      else
+	/* Should set file's modification date and do nothing else.  */
+	file->update_status = touch_file (file);
+    }
+
   if (!file->phony)
     {
       if (just_print_flag || question_flag
@@ -660,7 +676,7 @@ check_dep (file, depth, this_mtime, must_make_ptr)
   return dep_status;
 }
 
-/* Touch FILE.  Return zero if successful, nonzero if not.  */
+/* Touch FILE.  Return zero if successful, one if not.  */
 
 #define TOUCH_ERROR(call) return (perror_with_name (call, file->name), 1)
 
@@ -749,15 +765,7 @@ remake_file (file)
     {
       chop_commands (file->cmds);
 
-      if (touch_flag && !file->cmds->any_recurse)
-	{
-	  if (file->phony)
-	    file->update_status = 0;
-	  else
-	    /* Should set file's modification date and do nothing else.  */
-	    file->update_status = touch_file (file);
-	}
-      else
+      if (!touch_flag || file->cmds->any_recurse)
 	{
 	  execute_file_commands (file);
 	  return;
