@@ -130,6 +130,12 @@ set_file_variables (file)
   DEFINE_VARIABLE ("%D", 2, DIRONLY (percent));
   DEFINE_VARIABLE ("%F", 2, FILEONLY (percent));
 
+  /* Make sure that no dependencies are repeated.  This does not
+     really matter for the purpose of updating targets, but it
+     might make some names be listed twice for $^ and $?.  */
+
+  uniquize_deps (file->deps);
+
   /* Compute the values for $^ and $? and their F and D versions.  */
 
   {
