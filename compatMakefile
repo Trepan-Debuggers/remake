@@ -229,9 +229,14 @@ $(mandir)/$(manprefix)make.$(manext): make.man
 	$(INSTALL_DATA) $(srcdir)/make.man $@
 
 
-loadavg: getloadavg.c config.h
+loadavg: loadavg.c config.h
 	$(CC) $(defines) -DTEST -I. -I$(srcdir) $(CFLAGS) $(LDFLAGS) \
-	      $(srcdir)/getloadavg.c $(LOADLIBES) -o $@
+	      loadavg.c $(LOADLIBES) -o $@
+# We copy getloadavg.c into a different file rather than compiling it
+# directly because some compilers clobber getloadavg.o in the process.
+loadavg.c: getloadavg.c
+	ln $(srcdir)/getloadavg.c loadavg.c || \
+	cp $(srcdir)/getloadavg.c loadavg.c
 check-loadavg: loadavg
 	@echo The system uptime program believes the load average to be:
 	-uptime
@@ -247,6 +252,7 @@ distclean: clean glob-realclean
 	-rm -f Makefile config.h config.status build.sh stamp-config
 	-rm -f TAGS tags
 	-rm -f make.?? make.??s make.log make.toc make.*aux
+	-rm -f loadavg.c
 realclean: distclean
 mostlyclean: clean
 
