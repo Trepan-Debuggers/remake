@@ -1495,10 +1495,15 @@ define_makeflags (all, makefile)
 	  if (all)
 	    {
 	      struct stringlist *sl = *(struct stringlist **) cs->value_ptr;
-	      register unsigned int i;
 	      if (sl != 0)
-		for (i = 0; i < sl->idx; ++i)
-		  ADD_FLAG (sl->list[i], strlen (sl->list[i]));
+		{
+		  /* Add the elements in reverse order, because
+		     all the flags get reversed below; and the order
+		     matters for some switches (like -I).  */
+		  register unsigned int i = sl->idx;
+		  while (i-- > 0)
+		    ADD_FLAG (sl->list[i], strlen (sl->list[i]));
+		}
 	    }
 	  break;
 	}
