@@ -1,3 +1,21 @@
+Thu Dec 14 07:22:03 1995  Roland McGrath  <roland@duality.gnu.ai.mit.edu>
+
+	* dir.c (dir_setup_glob): Don't use lstat; glob never calls it anyway.
+	Avoid & before function names to silence bogus sunos4 compiler.
+
+	* configure.in: Remove check for `sysconf (_SC_OPEN_MAX)'.
+
+Tue Dec 12 05:48:31 1995  Roland McGrath  <roland@duality.gnu.ai.mit.edu>
+
+	* dir.c: [HAVE_D_NAMLEN]: Define this for __GNU_LIBRARY__ > 1.
+	(D_NAMLEN): Macro removed.
+	(FAKE_DIR_ENTRY): New macro.
+	(dir_contents_file_exists_p): Test HAVE_D_NAMLEN instead of using
+	D_NAMLEN macro.
+	(read_dirstream): Return a struct dirent * for new glob interface.
+	(init_dir): Function removed.
+	(dir_setup_glob): New function.
+
 Tue Dec 12 00:48:42 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
 	* Version 3.74.1.
