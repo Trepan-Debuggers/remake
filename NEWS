@@ -1,31 +1,31 @@
-GNU make NEWS                                               -*-indented-text-*-
-  History of user-visible changes.
-  03 October 2002
+Fork from version 3.80 
 
-Copyright (C) 2002, 2004  Free Software Foundation, Inc.
-See the end for copying conditions.
+* New options
+  --extended-errors (-E) call stack reporting, extended error reporting
+  --trace (-x) gives tracing information before a command is run.
+* Line numbers of commands in a target as they execute
+* --debugger enters debugger comamnds are
 
-All changes mentioned here are more fully described in the GNU make
-manual, which is contained in this distribution as the file make.texinfo.
+  execution
+   step, next, continue, skip
+   restart, quit, exit
 
-Please send remake bug reports to <rocky@panix.com>.
-See the README file and the GNU remake manual for details on sending bug
-reports.
-
-Version 3.80+dbg
+  breakpoints
+   break   target
+   delete  target
 
-Fork from version 3.80
+  data 
+   print   variable
+   examine string 
+   up, down, frame
+   where
 
-We now save line number information at run-time and have a call stack.
-On error we can give a stack trace if option --extended-errors (-E)
-was set.
+  debugger   
+   show, info
+   trace {on, off, toggle}
+   help
 
-Error messages which give a location now appear more often. 
-
-We also have POSIX shell "set -x" like call tracking with the option
---trace (-x).
-
-
+* Emacs debug interface makedb.el and a patched to gud.el
 
 
 Version 3.80
