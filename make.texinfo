@@ -7,13 +7,13 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.153 1995/08/15 00:03:06 roland Exp $
+@set RCSID $Id: make.texinfo,v 2.154 1995/08/22 18:45:01 hag Exp $
 @set EDITION 0.49
 @set VERSION 3.74 Beta
 @set UPDATED 14 August 1995
 @set UPDATE-MONTH August 1995
 @comment The ISBN number might need to change on next publication.
-@set ISBN 1-882114-50-7
+@set ISBN 1-882114-78-7
 
 @c finalout
 
@@ -71,8 +71,8 @@ by the Free Software Foundation.
 Copyright @copyright{} 1988, '89, '90, '91, '92, '93, '94, '95 Free Software Foundation, Inc.
 @sp 2
 Published by the Free Software Foundation @*
-675 Massachusetts Avenue, @*
-Cambridge, MA 02139 USA @*
+59 Temple Place -- Suite 330, @*
+Boston, MA 02111-1307 USA @*
 Printed copies are available for $20 each. @*
 ISBN @value{ISBN} @*
 
