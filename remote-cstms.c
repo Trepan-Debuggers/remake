@@ -70,9 +70,13 @@ start_remote_job (argv, envp, stdin_fd, is_remote, id_ptr, used_stdin)
   int pid;
 
   /* Find the current directory.  */
-  if (getwd (cwd) == 0)
+  if (getcwd (cwd, GET_PATH_MAX) == 0)
     {
+#ifndef	GETCWD_MISSING
+      perror_with_name ("exporting: getcwd: ", "");
+#else
       error ("exporting: getwd: %s", cwd);
+#endif
       return 1;
     }
 
