@@ -182,9 +182,6 @@
 /* Define if you have the getcwd function.  */
 #undef HAVE_GETCWD
 
-/* Define if you have the getdtablesize function.  */
-#undef HAVE_GETDTABLESIZE
-
 /* Define if you have the getgroups function.  */
 #undef HAVE_GETGROUPS
 
