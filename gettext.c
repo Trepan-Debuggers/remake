@@ -786,9 +786,14 @@ struct string_desc
 #else
 static nls_uint32 SWAP PARAMS ((nls_uint32 i));
 
+/* Apparently on some (non-32-bit?) systems it's important to use the right
+   prototype.  Reported for a CRAY T3E.  */
 static inline nls_uint32
-SWAP (i)
-     nls_uint32 i;
+#if __STDC__
+  SWAP (nls_uint32 i)
+#else
+  SWAP (i) nls_uint32 i;
+#endif
 {
   return (i << 24) | ((i & 0xff00) << 8) | ((i >> 8) & 0xff00) | (i >> 24);
 }

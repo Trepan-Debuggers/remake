@@ -1,3 +1,37 @@
+2001-01-17  Paul D. Smith  <psmith@gnu.org>
+
+	* variable.c (lookup_variable) [VMS]: When getting values from the
+	environment, allocate enough space for the _value_ plus escapes,
+	not enough space for the name plus escapes :-/.
+	Reported by John Fowler <jfowler@nyx.net>.
+
+	* remake.c (f_mtime): Removed the "***" prefix from the mod time
+	warnings that make generates, so it doesn't look like an error.
+	Reported by Karl Berry <karl@gnu.org>.
+
+
+	Fix for PR/2020:  Rework appended target-specific variables.  I'm
+	fairly confident this algorithm is finally correct.
+
+	* expand.c (allocated_variable_append): Rewrite.  Instead of
+	expanding each appended variable then adding all the expanded
+	strings together, we append all the unexpanded values going up
+	through the variable set contexts, then expand the final result.
+	This behaves just like non-target-specific appended variable
+	values, while the old way didn't in various corner cases.
+	(variable_append): New function: recursively append the unexpanded
+	value of a variable, walking from the outermost variable scope to
+	the innermost.
+	* variable.c (lookup_variable): Remove the code that looked up the
+	variable set list if the found variable was "append".  We don't
+	need this anymore.
+	(lookup_variable_in_set): Make this non-static so we can use it
+	elsewhere.
+	(try_variable_definition): Use lookup_variable_in_set() rather
+	than faking out current_variable_set_list by hand (cleanup).
+	* variable.h: Add a prototype for the now non-static
+	lookup_variable_in_set().
+
 2000-11-17  Paul D. Smith  <psmith@gnu.org>
 
 	* remake.c (f_mtime) [WINDOWS32]: On various advice, I changed the
@@ -10,6 +44,12 @@
 	buffer grow scenario just right.  Reworked the algorithm to avoid
 	the need for len or lastlen at all.  Problem description with
 	sample code chages provided by Chris Faylor <cgf@redhat.com>.
+
+2000-10-24  Paul D. Smith  <psmith@gnu.org>
+
+	* gettext.c (SWAP): Declare this with the prototype, otherwise
+	some systems don't work (non-32-bit?  Reported for Cray T3E).
+	Reported by Thorstein Thorsteinsson <thor@signe.teokem.lu.se>.
 
 2000-10-05  Paul D. Smith  <psmith@gnu.org>
 
