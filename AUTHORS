@@ -1,12 +1,16 @@
 -----------------------------------
 
-GNU make and the GNU Make User's Manual were created by:
+GNU make development up to version 3.75 by:
     Roland McGrath <roland@gnu.ai.mit.edu>
+
+
+GNU Make User's Manual written by:
     Richard M. Stallman <rms@gnu.ai.mit.edu>
 
-
-Development and maintenance up to GNU make 3.75 by:
+  User's Manual edited by:
     Roland McGrath <roland@gnu.ai.mit.edu>
+    Bob Chassell <bob@gnu.ai.mit.edu>
+    Melissa Weisshaus <melissa@gnu.ai.mit.edu>
 
 
 Development and maintenance starting with GNU make 3.76 by:
@@ -17,7 +21,7 @@ Development and maintenance starting with GNU make 3.76 by:
 GNU Make porting efforts:
 
   Port to VMS by:
-      Klaus Kaempf (kkaempf@progis.de)
+      Klaus Kaempf <kkaempf@progis.de>
 
 
   Port to Amiga by:

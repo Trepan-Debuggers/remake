@@ -9,6 +9,9 @@ Please send GNU make bug reports to bug-gnu-utils@prep.ai.mit.edu.
 
 Version 3.76
 
+* GNU make now uses automake to control Makefile.in generation.  This
+  should make it more consistent with the GNU standards.
+
 * VPATH functionality has been changed to incorporate the VPATH+ patch,
   previously maintained by Paul Smith <psmith@baynetworks.com>.  See the
   manual.

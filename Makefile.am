@@ -29,24 +29,23 @@ EXTRA_DIST = 	make.man $(BUILT_SOURCES) remote-cstms.c \
 SUBDIRS =	glob
 
 # Look for the make test suite, and run it if found.  Look in MAKE_TEST, or
-# in the srcdir and its parent and the distdir and its parent.
+# in the srcdir or the distdir, their parents, and their parents.
 #
 check-local:
-	@here=`pwd`; test=""; \
+	@here=`pwd`; testdir=""; \
 	  case "$(MAKE_TEST)" in "") \
 	    for d1 in $$here $(srcdir); do \
-	      for d2 in .. .; do \
+	      for d2 in ../.. .. .; do \
 		try=`ls -1 $$d1/$$d2/make-test-*/run_make_tests 2>/dev/null | tail -1`; \
-		case "$$try" in "") : ;; *) test="$$try" ;; esac; \
+		case "$$try" in "") : ;; *) testdir=`dirname $$try` ;; esac; \
             done; done ;; \
-	    *) test="$(MAKE_TEST)" ;; \
+	    *) testdir="$(MAKE_TEST)" ;; \
 	  esac; \
-	  case "$$test" in \
-	    "") echo "Couldn't find make-test-* test suite."; exit 1;; \
+	  case "$$testdir" in \
+	    "") echo "Couldn't find make-test-* test suite."; exit 0;; \
 	  esac; \
-	  testdir=`dirname $$test`; \
 	  echo "cd $$testdir && ./run_make_tests -make_path $$here/make"; \
-	  cd $$testdir && ./run_make_tests -make_path $$here/make"
+	  cd $$testdir && ./run_make_tests -make_path $$here/make
 
 # Install the w32 subdirectory
 #
