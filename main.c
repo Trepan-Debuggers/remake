@@ -28,7 +28,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #   include <dos/dos.h>
 #   include <proto/dos.h>
 #endif
-#ifdef WIN32
+#ifdef WINDOWS32
 #include <windows.h>
 #include "pathstuff.h"
 #endif
@@ -129,7 +129,7 @@ int just_print_flag;
 
 int debug_flag = 0;
 
-#ifdef WIN32
+#ifdef WINDOWS32
 /* Suspend make in main for a short time to allow debugger to attach */
 
 int suspend_flag = 0;
@@ -240,7 +240,7 @@ static const struct command_switch switches[] =
     { 'd', flag, (char *) &debug_flag, 1, 1, 0, 0, 0,
 	"debug", 0,
 	"Print lots of debugging information" },
-#ifdef WIN32
+#ifdef WINDOWS32
     { 'D', flag, (char *) &suspend_flag, 1, 1, 0, 0, 0,
         "suspend-for-debug", 0,
         "Suspend process to allow a debugger to attach" },
@@ -450,6 +450,96 @@ debug_signal_handler (sig)
   debug_flag = ! debug_flag;
 }
 
+#ifdef WINDOWS32
+/*
+ * HANDLE runtime exceptions by avoiding a requestor on the GUI. Capture
+ * exception and print it to stderr instead.
+ *
+ * If debug_flag not set, just print a simple message and exit.
+ * If debug_flag set, print a more verbose message.
+ * If compiled for DEBUG, let exception pass through to GUI so that
+ *   debuggers can attach.
+ */
+LONG WINAPI
+handle_runtime_exceptions( struct _EXCEPTION_POINTERS *exinfo )
+{
+  PEXCEPTION_RECORD exrec = exinfo->ExceptionRecord;
+  LPSTR cmdline = GetCommandLine();
+  LPSTR prg = strtok(cmdline, " ");
+  CHAR errmsg[1024];
+#ifdef USE_EVENT_LOG
+  HANDLE hEventSource;
+  LPTSTR lpszStrings[1];
+#endif
+
+  if (!debug_flag)
+    {
+      sprintf(errmsg, "%s: Interrupt/Exception caught ", prg);
+      sprintf(&errmsg[strlen(errmsg)],
+              "(code = 0x%x, addr = 0x%x)\r\n",
+              exrec->ExceptionCode, exrec->ExceptionAddress);
+      fprintf(stderr, errmsg);
+      exit(255);
+    }
+
+  sprintf(errmsg,
+          "\r\nUnhandled exception filter called from program %s\r\n", prg);
+  sprintf(&errmsg[strlen(errmsg)], "ExceptionCode = %x\r\n",
+          exrec->ExceptionCode);
+  sprintf(&errmsg[strlen(errmsg)], "ExceptionFlags = %x\r\n",
+          exrec->ExceptionFlags);
+  sprintf(&errmsg[strlen(errmsg)], "ExceptionAddress = %x\r\n",
+          exrec->ExceptionAddress);
+
+  if (exrec->ExceptionCode == EXCEPTION_ACCESS_VIOLATION
+      && exrec->NumberParameters >= 2)
+    sprintf(&errmsg[strlen(errmsg)],
+            "Access violation: %s operation at address %x\r\n",
+            exrec->ExceptionInformation[0] ? "write": "read",
+            exrec->ExceptionInformation[1]);
+
+  /* turn this on if we want to put stuff in the event log too */
+#ifdef USE_EVENT_LOG
+  hEventSource = RegisterEventSource(NULL, "GNU Make");
+  lpszStrings[0] = errmsg;
+
+  if (hEventSource != NULL)
+    {
+      ReportEvent(hEventSource,         /* handle of event source */
+                  EVENTLOG_ERROR_TYPE,  /* event type */
+                  0,                    /* event category */
+                  0,                    /* event ID */
+                  NULL,                 /* current user's SID */
+                  1,                    /* strings in lpszStrings */
+                  0,                    /* no bytes of raw data */
+                  lpszStrings,          /* array of error strings */
+                  NULL);                /* no raw data */
+
+      (VOID) DeregisterEventSource(hEventSource);
+    }
+#endif
+
+  /* Write the error to stderr too */
+  fprintf(stderr, errmsg);
+
+#ifdef DEBUG
+  return EXCEPTION_CONTINUE_SEARCH;
+#else
+  exit(255);
+#endif
+}
+#endif  /* WINDOWS32 */
+
+#ifdef  __MSDOS__
+
+static void
+msdos_return_to_initial_directory ()
+{
+  if (directory_before_chdir)
+    chdir (directory_before_chdir);
+}
+#endif
+
 #ifndef _AMIGA
 int
 main (argc, argv, envp)
@@ -465,15 +555,29 @@ int main (int argc, char ** argv)
   char **p;
   struct dep *read_makefiles;
   PATH_VAR (current_directory);
-#ifdef WIN32
+#ifdef WINDOWS32
   extern int no_default_sh_exe;
   char *unix_path = NULL;
-  char *win32_path = NULL;
+  char *windows32_path = NULL;
+
+  SetUnhandledExceptionFilter(handle_runtime_exceptions);
 #endif
 
   default_goal_file = 0;
   reading_filename = 0;
   reading_lineno_ptr = 0;
+
+#if defined (__MSDOS__) && !defined (_POSIX_SOURCE)
+  /* Request the most powerful version of `system', to
+     make up for the dumb default shell.  */
+  __system_flags = (__system_redirect
+		    | __system_use_shell
+		    | __system_allow_multiple_cmds
+		    | __system_allow_long_cmds
+		    | __system_handle_null_commands
+		    | __system_emulate_chdir);
+
+#endif
 
 #if !defined (HAVE_STRSIGNAL) && !defined (HAVE_SYS_SIGLIST)
   signame_init ();
@@ -547,8 +651,16 @@ int main (int argc, char ** argv)
 #ifdef __MSDOS__
       if (program == 0)
 	program = rindex (argv[0], '\\');
-      if (program == 0)
-	program = rindex (argv[0], ':');
+      else
+	{
+	  /* Some weird environments might pass us argv[0] with
+	     both kinds of slashes; we must find the rightmost.  */
+	  char *p = rindex (argv[0], '\\');
+	  if (p && p > program)
+	    program = p;
+	}
+      if (program == 0 && argv[0][1] == ':')
+	program = argv[0] + 1;
 #endif
       if (program == 0)
 	program = argv[0];
@@ -561,7 +673,7 @@ int main (int argc, char ** argv)
 
   /* Figure out where we are.  */
 
-#ifdef WIN32
+#ifdef WINDOWS32
   if (getcwd_fs (current_directory, GET_PATH_MAX) == 0)
 #else
   if (getcwd (current_directory, GET_PATH_MAX) == 0)
@@ -578,10 +690,14 @@ int main (int argc, char ** argv)
   else
     directory_before_chdir = savestring (current_directory,
 					 strlen (current_directory));
+#ifdef  __MSDOS__
+  /* Make sure we will return to the initial directory, come what may.  */
+  atexit (msdos_return_to_initial_directory);
+#endif
 
   /* Read in variables from the environment.  It is important that this be
-     done before $(MAKE) is are figured out so its definitions will not be
-     one from the environment.  */
+     done before $(MAKE) is figured out so its definitions will not be
+     from the environment.  */
 
 #ifndef _AMIGA
   for (i = 0; envp[i] != 0; ++i)
@@ -589,11 +705,11 @@ int main (int argc, char ** argv)
       register char *ep = envp[i];
       while (*ep != '=')
 	++ep;
-#ifdef WIN32
-      if (!strncmp(ep, "PATH", 4))
-        unix_path = &ep[5];
-      if (!strncmp(ep, "Path", 4))
-        win32_path = &ep[5];
+#ifdef WINDOWS32
+      if (!unix_path && !strncmp(envp[i], "PATH=", 5))
+        unix_path = ep+1;
+      if (!windows32_path && !strncmp(envp[i], "Path=", 5))
+        windows32_path = ep+1;
 #endif
       /* The result of pointer arithmetic is cast to unsigned int for
 	 machines where ptrdiff_t is a different size that doesn't widen
@@ -607,12 +723,12 @@ int main (int argc, char ** argv)
 	   be exported, because it was originally in the environment.  */
 	->export = v_export;
     }
-#ifdef WIN32
+#ifdef WINDOWS32
     /*
      * PATH defaults to Path iff PATH not found and Path is found.
      */
-    if (!unix_path && win32_path)
-      define_variable("PATH", 4, win32_path, o_env, 1)->export = v_export;
+    if (!unix_path && windows32_path)
+      define_variable("PATH", 4, windows32_path, o_env, 1)->export = v_export;
 #endif
 #else /* For Amiga, read the ENV: device, ignoring all dirs */
     {
@@ -655,7 +771,7 @@ int main (int argc, char ** argv)
   decode_env_switches ("MFLAGS", 6);
 #endif
   decode_switches (argc, argv, 0);
-#ifdef WIN32
+#ifdef WINDOWS32
   if (suspend_flag) {
         fprintf(stderr, "%s (pid = %d)\n", argv[0], GetCurrentProcessId());
         fprintf(stderr, "%s is suspending for 30 seconds...", argv[0]);
@@ -679,7 +795,7 @@ int main (int argc, char ** argv)
      so the result will run the same program regardless of the current dir.
      If it is a name with no slash, we can only hope that PATH did not
      find it in the current directory.)  */
-#ifdef WIN32
+#ifdef WINDOWS32
   /*
    * Convert from backslashes to forward slashes for
    * programs like sh which don't like them. Shouldn't
@@ -690,11 +806,11 @@ int main (int argc, char ** argv)
       strstr(argv[0], "..") ||
       !strncmp(argv[0], "//", 2))
     argv[0] = strdup(w32ify(argv[0],1));
-#else /* WIN32 */
+#else /* WINDOWS32 */
   if (current_directory[0] != '\0'
       && argv[0] != 0 && argv[0][0] != '/' && index (argv[0], '/') != 0)
     argv[0] = concat (current_directory, "/", argv[0]);
-#endif /* WIN32 */
+#endif /* WINDOWS32 */
 #endif
 
   /* The extra indirection through $(MAKE_COMMAND) is done
@@ -767,7 +883,7 @@ int main (int argc, char ** argv)
 	  free (dir);
       }
 
-#ifdef WIN32
+#ifdef WINDOWS32
   /*
    * THIS BLOCK OF CODE MUST COME AFTER chdir() CALL ABOVE IN ORDER
    * TO NOT CONFUSE THE DEPENDENCY CHECKING CODE IN implicit.c.
@@ -839,7 +955,7 @@ int main (int argc, char ** argv)
       }
     }
   }
-#endif /* WIN32 */
+#endif /* WINDOWS32 */
   /* Figure out the level of recursion.  */
   {
     struct variable *v = lookup_variable ("MAKELEVEL", 9);
@@ -868,7 +984,7 @@ int main (int argc, char ** argv)
     starting_directory = current_directory;
   else
     {
-#ifdef WIN32
+#ifdef WINDOWS32
       if (getcwd_fs (current_directory, GET_PATH_MAX) == 0)
 #else
       if (getcwd (current_directory, GET_PATH_MAX) == 0)
@@ -985,7 +1101,7 @@ int main (int argc, char ** argv)
 
   define_makeflags (0, 0);
 
-#ifdef WIN32
+#ifdef WINDOWS32
   /*
    * Now that makefiles are parsed, see if a Makefile gave a
    * value for SHELL and use that for default_shell instead if
@@ -1030,7 +1146,7 @@ int main (int argc, char ** argv)
     error("Resetting make for single job mode.");
     job_slots = 1;
   }
-#endif /* WIN32 */
+#endif /* WINDOWS32 */
 
   /* Define the default variables.  */
   define_default_variables ();
@@ -1041,6 +1157,28 @@ int main (int argc, char ** argv)
 
   read_makefiles
     = read_all_makefiles (makefiles == 0 ? (char **) 0 : makefiles->list);
+
+#ifdef __MSDOS__
+  /* We need to know what kind of shell we will be using.  */
+  {
+    extern int _is_unixy_shell (const char *_path);
+    struct variable *shv = lookup_variable("SHELL", 5);
+    extern int unixy_shell;
+    extern char *default_shell;
+
+    if (shv && *shv->value)
+      {
+	char *shell_path = recursively_expand(shv);
+
+	if (shell_path && _is_unixy_shell (shell_path))
+	  unixy_shell = 1;
+	else
+	  unixy_shell = 0;
+	if (shell_path)
+	  default_shell = shell_path;
+      }
+  }
+#endif /* __MSDOS__ */
 
   /* Decode switches again, in case the variables were set by the makefile.  */
   decode_env_switches ("MAKEFLAGS", 9);
@@ -1111,6 +1249,8 @@ int main (int argc, char ** argv)
 
       time_t *makefile_mtimes = 0;
       unsigned int mm_idx = 0;
+      char **nargv = argv;
+      char nargc = argc;
 
       if (debug_flag)
 	puts ("Updating makefiles....");
@@ -1193,52 +1333,47 @@ int main (int argc, char ** argv)
 	       in updating or could not be found at all.  */
 	    int any_failed = 0;
 	    register unsigned int i;
+            struct dep *d;
 
-	    for (i = 0; read_makefiles != 0; ++i)
-	      {
-		struct dep *d = read_makefiles;
-		read_makefiles = d->next;
-		if (d->file->updated)
-		  {
-		    /* This makefile was updated.  */
-		    if (d->file->update_status == 0)
-		      {
-			/* It was successfully updated.  */
-			any_remade |= (file_mtime_no_search (d->file)
-				       != makefile_mtimes[i]);
-		      }
-		    else if (! (d->changed & RM_DONTCARE))
-		      {
-			time_t mtime;
-			/* The update failed and this makefile was not
-			   from the MAKEFILES variable, so we care.  */
-			error ("Failed to remake makefile `%s'.",
-			       d->file->name);
-			mtime = file_mtime_no_search (d->file);
-			any_remade |= (mtime != (time_t) -1
-				       && mtime != makefile_mtimes[i]);
-		      }
-		  }
-		else
-		  /* This makefile was not found at all.  */
-		  if (! (d->changed & RM_DONTCARE))
-		    {
-		      /* This is a makefile we care about.  See how much.  */
-		      if (d->changed & RM_INCLUDED)
-			/* An included makefile.  We don't need
-			   to die, but we do want to complain.  */
-			error ("Included makefile `%s' was not found.",
-			       dep_name (d));
-		      else
-			{
-			  /* A normal makefile.  We must die later.  */
-			  error ("Makefile `%s' was not found", dep_name (d));
-			  any_failed = 1;
-			}
-		    }
-
-		free ((char *) d);
-	      }
+	    for (i = 0, d = read_makefiles; d != 0; ++i, d = d->next)
+              if (d->file->updated)
+                {
+                  /* This makefile was updated.  */
+                  if (d->file->update_status == 0)
+                    {
+                      /* It was successfully updated.  */
+                      any_remade |= (file_mtime_no_search (d->file)
+                                     != makefile_mtimes[i]);
+                    }
+                  else if (! (d->changed & RM_DONTCARE))
+                    {
+                      time_t mtime;
+                      /* The update failed and this makefile was not
+                         from the MAKEFILES variable, so we care.  */
+                      error ("Failed to remake makefile `%s'.",
+                             d->file->name);
+                      mtime = file_mtime_no_search (d->file);
+                      any_remade |= (mtime != (time_t) -1
+                                     && mtime != makefile_mtimes[i]);
+                    }
+                }
+              else
+                /* This makefile was not found at all.  */
+                if (! (d->changed & RM_DONTCARE))
+                  {
+                    /* This is a makefile we care about.  See how much.  */
+                    if (d->changed & RM_INCLUDED)
+                      /* An included makefile.  We don't need
+                         to die, but we do want to complain.  */
+                      error ("Included makefile `%s' was not found.",
+                             dep_name (d));
+                    else
+                      {
+                        /* A normal makefile.  We must die later.  */
+                        error ("Makefile `%s' was not found", dep_name (d));
+                        any_failed = 1;
+                      }
+                  }
 
 	    if (any_remade)
 	      goto re_exec;
@@ -1264,7 +1399,7 @@ int main (int argc, char ** argv)
 	      /* These names might have changed.  */
 	      register unsigned int i, j = 0;
 	      for (i = 1; i < argc; ++i)
-		if (!strcmp (argv[i], "-f")) /* XXX */
+		if (!strncmp (argv[i], "-f", 2)) /* XXX */
 		  {
 		    char *p = &argv[i][2];
 		    if (*p == '\0')
@@ -1274,6 +1409,25 @@ int main (int argc, char ** argv)
 		    ++j;
 		  }
 	    }
+
+          /* Add -o options for all makefiles that were remade */
+          {
+            register unsigned int i;
+            struct dep *d;
+
+            for (i = argc+1, d = read_makefiles; d != 0; d = d->next)
+              i += d->file->updated != 0;
+
+            nargv = (char **)xmalloc(i * sizeof(char *));
+            bcopy(argv, nargv, argc * sizeof(char *));
+
+            for (i = 0, d = read_makefiles; d != 0; ++i, d = d->next)
+              {
+                if (d->file->updated)
+                  nargv[nargc++] = concat("-o", dep_name(d), "");
+              }
+            nargv[nargc] = 0;
+          }
 
 	  if (directories != 0 && directories->idx > 0)
 	    {
@@ -1326,7 +1480,7 @@ int main (int argc, char ** argv)
 	    {
 	      char **p;
 	      fputs ("Re-executing:", stdout);
-	      for (p = argv; *p != 0; ++p)
+	      for (p = nargv; *p != 0; ++p)
 		printf (" %s", *p);
 	      puts ("");
 	    }
@@ -1335,9 +1489,9 @@ int main (int argc, char ** argv)
 	  fflush (stderr);
 
 #ifndef _AMIGA
-	  exec_command (argv, environ);
+	  exec_command (nargv, environ);
 #else
-	  exec_command (argv);
+	  exec_command (nargv);
 	  exit (0);
 #endif
 	  /* NOTREACHED */
@@ -1514,6 +1668,29 @@ handle_non_switch_argument (arg, env)
 	}
       lastgoal->name = 0;
       lastgoal->file = f;
+
+      {
+        /* Add this target name to the MAKECMDGOALS variable. */
+        struct variable *v;
+        char *value;
+
+        v = lookup_variable("MAKECMDGOALS", 12);
+        if (v == 0)
+          value = f->name;
+        else
+          {
+            /* Paste the old and new values together */
+            unsigned int oldlen, newlen;
+
+            oldlen = strlen(v->value);
+            newlen = strlen(f->name);
+            value = (char *)alloca(oldlen + 1 + newlen + 1);
+            bcopy(v->value, value, oldlen);
+            value[oldlen] = ' ';
+            bcopy(f->name, &value[oldlen + 1], newlen + 1);
+          }
+        define_variable("MAKECMDGOALS", 12, value, o_default, 0);
+      }
     }
 }
 

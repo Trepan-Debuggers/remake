@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.161 1996/06/22 21:21:30 roland Exp $
+@set RCSID $Id: make.texinfo,v 2.162 1997/04/07 07:23:28 psmith Exp $
 @set EDITION 0.51
 @set VERSION 3.75 Beta
 @set UPDATED 9 May 1996
@@ -25,6 +25,11 @@
 @syncodeindex pg cp
 
 @ifinfo
+@dircategory The GNU make utility
+@direntry
+     * GNU make: (make.info).           The GNU make utility.
+@end direntry
+
 This file documents the GNU Make utility, which determines
 automatically which pieces of a large program need to be recompiled,
 and issues the commands to recompile them.
@@ -95,7 +100,7 @@ Cover art by Etienne Suvasa.
 @page
 
 @ifinfo
-@node Top, Overview, (dir), (dir)
+@node Top, Overview, , (dir)
 @top Make
 
 The GNU @code{make} utility automatically determines which pieces of a
@@ -196,6 +201,7 @@ Searching Directories for Dependencies
                                   to every dependency.
 * Selective Search::            Specifying a search path
                                   for a specified class of names.
+* Search Algorithm::            When and how search paths are applied.
 * Commands/Search::             How to write shell commands that work together
                                   with search paths.
 * Implicit/Search::             How search paths affect implicit rules.
@@ -239,6 +245,8 @@ How to Use Variables
 * Defining::                    An alternate way to set a variable
                                   to a verbatim string.
 * Environment::                 Variable values can come from the environment.
+* Automatic::                   Some special variables have predefined
+                                  meanings for use with implicit rules.
 
 Advanced Features for Reference to Variables
 
@@ -288,7 +296,7 @@ Using Implicit Rules
 * Last Resort::                 How to defining commands for rules
                                   which cannot find any.
 * Suffix Rules::                The old-fashioned style of implicit rule.
-* Search Algorithm::            The precise algorithm for applying
+* Implicit Rule Search::        The precise algorithm for applying
                                   implicit rules.
 
 Defining and Redefining Pattern Rules
@@ -307,6 +315,7 @@ Using @code{make} to Update Archive Files
 
 * Archive Members::             Archive members as targets.
 * Archive Update::              The implicit rule for archive member targets.
+* Archive Pitfalls::            Dangers to watch out for when using archives.
 * Archive Suffix Rules::        You can write a special kind of suffix rule
                                   for updating archives.
 
@@ -1645,6 +1654,7 @@ just the search paths.
                                   to every dependency.
 * Selective Search::            Specifying a search path
                                   for a specified class of names.
+* Search Algorithm::            When and how search paths are applied.
 * Commands/Search::             How to write shell commands that work together
                                   with search paths.
 * Implicit/Search::             How search paths affect implicit rules.
@@ -1665,10 +1675,10 @@ rules.
 Thus, if a file that is listed as a target or dependency does not exist
 in the current directory, @code{make} searches the directories listed in
 @code{VPATH} for a file with that name.  If a file is found in one of
-them, that file becomes the dependency.  Rules may then specify the
-names of source files in the dependencies as if they all existed in the
-current directory.  @xref{Commands/Search, ,Writing Shell Commands with
-Directory Search}.
+them, that file may become the dependency (see below).  Rules may then
+specify the names of source files in the dependencies as if they all
+existed in the current directory.  @xref{Commands/Search, ,Writing Shell
+Commands with Directory Search}.
 
 In the @code{VPATH} variable, directory names are separated by colons or
 blanks.  The order in which directories are listed is the order followed
@@ -1701,7 +1711,7 @@ foo.o : src/foo.c
 assuming the file @file{foo.c} does not exist in the current directory but
 is found in the directory @file{src}.
 
-@node Selective Search, Commands/Search, General Search, Directory Search
+@node Selective Search, Search Algorithm, General Search, Directory Search
 @subsection The @code{vpath} Directive
 @findex vpath
 
@@ -1800,7 +1810,71 @@ vpath %   blish
 will look for a file ending in @samp{.c} in @file{foo}, then
 @file{bar}, then @file{blish}.
 
-@node Commands/Search, Implicit/Search, Selective Search, Directory Search
+@node Search Algorithm, Commands/Search, Selective Search, Directory Search
+@subsection How Directory Searches are Performed
+@cindex algorithm for directory search
+@cindex directory search algorithm
+
+When a dependency is found through directory search, regardless of type
+(general or selective), the pathname located may not be the one that
+@code{make} actually provides you in the dependency list.  Sometimes,
+the path discovered through directory search is thrown away.
+
+The algorithm @code{make} uses to decide whether to keep or abandon a
+path found via directory search is as follows:
+
+@enumerate
+@item
+If a target file does not exist at the path specified in the makefile,
+directory search is performed.
+
+@item
+If the directory search is successful that path is kept, and this file
+is tentatively stored as the target.
+
+@item
+All dependencies of this target are examined using this same method.
+
+@item
+After processing the dependencies, the target may or may not need to be
+rebuilt:
+
+@enumerate a
+@item
+If the target does @emph{not} need to be rebuilt, the path to the file
+found during directory search is used for any dependency lists which
+contain this target.
+
+@item
+If the target @emph{does} need to be rebuilt (is out-of-date), the
+pathname found during directory search is @emph{thrown away}, and the
+target is rebuilt using the filename specified in the makefile.
+@end enumerate
+@end enumerate
+
+This may seem overly complex, but in fact it is almost always exactly
+what you want.
+
+@cindex traditional directory search
+@cindex directory search, traditional
+Other versions of @code{make} use a simpler algorithm: if the file does
+not exist, and it is found via directory search, then that pathname is
+always used whether or not the target needs to be built.  Thus, if the
+target is rebuilt it is created at the pathname discovered during
+directory search.
+
+@vindex GPATH
+If, in fact, this is the behavior you want for some or all of your
+directories, you can use the @code{GPATH} variable to indicate this to
+@code{make}.
+
+@code{GPATH} has the same syntax and format as @code{VPATH} (that is, a
+space- or colon-delimited list of pathnames).  If an out-of-date target
+is found by directory search in a directory that also appears in
+@code{GPATH}, then that pathname is not thrown away.  The target is
+rebuilt using the expanded path.
+
+@node Commands/Search, Implicit/Search, Search Algorithm, Directory Search
 @subsection Writing Shell Commands with Directory Search
 @cindex shell command, and directory search
 @cindex directory search (@code{VPATH}), and shell commands
@@ -2112,7 +2186,7 @@ The commands specified for @code{.DEFAULT} are used for any target for
 which no rules are found (either explicit rules or implicit rules).
 @xref{Last Resort}.  If @code{.DEFAULT} commands are specified, every
 file mentioned as a dependency, but not as a target in a rule, will have
-these commands executed on its behalf.  @xref{Search Algorithm,
+these commands executed on its behalf.  @xref{Implicit Rule Search,
 ,Implicit Rule Search Algorithm}.
 
 @findex .PRECIOUS
@@ -2409,6 +2483,8 @@ from the corresponding @file{.c} file:
 @group
 objects = foo.o bar.o
 
+all: $(objects)
+
 $(objects): %.o: %.c
         $(CC) -c $(CFLAGS) $< -o $@@
 @end group
@@ -2603,7 +2679,8 @@ called @file{@var{name}.d} from a C source file called @file{@var{name}.c}:
 @group
 %.d: %.c
         $(SHELL) -ec '$(CC) -M $(CPPFLAGS) $< \
-                      | sed '\''s/\($*\)\.o[ :]*/\1 $@@/g'\'' > $@@'
+                      | sed '\''s/\($*\)\.o[ :]*/\1.o $@@ : /g'\'' > $@@; \
+                      [ -s $@@ ] || rm -f $@@'
 @end group
 @end smallexample
 
@@ -5284,8 +5361,8 @@ was given to those two functions.@refill
 
 @item $(word @var{n},@var{text})
 @findex word
-@cindex words, selecting
-@cindex selecting words
+@cindex word, selecting a
+@cindex selecting a word
 Returns the @var{n}th word of @var{text}.  The legitimate values of
 @var{n} start from 1.  If @var{n} is bigger than the number of words
 in @var{text}, the value is empty.  For example,
@@ -5296,6 +5373,25 @@ $(word 2, foo bar baz)
 
 @noindent
 returns @samp{bar}.
+
+@item $(wordlist @var{s},@var{e},@var{text})
+@findex wordlist
+@cindex words, selecting lists of
+@cindex selecting word lists
+Returns the list of words in @var{text} starting with word @var{s} and
+ending with word @var{e} (inclusive).  The legitimate values of @var{s}
+and @var{e} start from 1.  If @var{s} is bigger than the number of words
+in @var{text}, the value is empty.  If @var{e} is bigger than the number
+of words in @var{text}, words up to the end of @var{text} are returned.
+If @var{s} is greater than @var{e}, @code{make} swaps them for you.  For
+example,
+
+@example
+$(wordlist 2, 3, foo bar baz)
+@end example
+
+@noindent
+returns @samp{bar baz}.
 
 @c Following item phrased to prevent overfull hbox.  --RJC 17 Jul 92
 @item $(words @var{text})
@@ -5655,6 +5751,12 @@ the whole list.
 You can specify a different goal or goals with arguments to @code{make}.
 Use the name of the goal as an argument.  If you specify several goals,
 @code{make} processes each of them in turn, in the order you name them.
+
+@cindex @code{MAKECMDGOALS}
+@vindex MAKECMDGOALS
+@code{Make} will set the special variable @code{MAKECMDGOALS} to the
+list of goals you specified on the command line.  If no goals were given
+on the command line, this variable is empty.
 
 Any target in the makefile may be specified as a goal (unless it
 starts with @samp{-} or contains an @samp{=}, in which case it will be
@@ -6312,7 +6414,7 @@ retained for compatibility.
 * Last Resort::                 How to defining commands for rules
                                   which cannot find any.
 * Suffix Rules::                The old-fashioned style of implicit rule.
-* Search Algorithm::            The precise algorithm for applying
+* Implicit Rule Search::        The precise algorithm for applying
                                   implicit rules.
 @end menu
 
@@ -6370,7 +6472,7 @@ result of another implicit rule, we say that @dfn{chaining} is occurring.
 In general, @code{make} searches for an implicit rule for each target, and
 for each double-colon rule, that has no commands.  A file that is mentioned
 only as a dependency is considered a target whose rule specifies nothing,
-so implicit rule search happens for it.  @xref{Search Algorithm, ,Implicit Rule Search Algorithm}, for the
+so implicit rule search happens for it.  @xref{Implicit Rule Search, ,Implicit Rule Search Algorithm}, for the
 details of how the search is done.
 
 Note that explicit dependencies do not influence implicit rule search.
@@ -7508,7 +7610,7 @@ Commands, ,Defining Empty Commands}).@refill
 You can use a last-resort rule to override part of another makefile.
 @xref{Overriding Makefiles, , Overriding Part of Another Makefile}.
 
-@node Suffix Rules, Search Algorithm, Last Resort, Implicit Rules
+@node Suffix Rules, Implicit Rule Search, Last Resort, Implicit Rules
 @section Old-Fashioned Suffix Rules
 @cindex old-fashioned suffix rules
 @cindex suffix rule
@@ -7610,7 +7712,7 @@ before @code{make} reads any makefiles.  You can change the list of suffixes
 with a rule for the special target @code{.SUFFIXES}, but that does not alter
 this variable.
 
-@node Search Algorithm,  , Suffix Rules, Implicit Rules
+@node Implicit Rule Search,  , Suffix Rules, Implicit Rules
 @section Implicit Rule Search Algorithm
 @cindex implicit rule, search algorithm
 @cindex search algorithm, implicit rule
@@ -8158,6 +8260,10 @@ characters.  In other versions of @code{make}, they must begin with
 @item
 Keep track of the current level of @code{make} recursion using the
 variable @code{MAKELEVEL}.  @xref{Recursion, ,Recursive Use of @code{make}}.
+
+@item
+Provide any goals given on the command line in the variable
+@code{MAKECMDGOALS}.  @xref{Goals, ,Arguments to Specify the Goals}.
 
 @item
 Specify static pattern rules.  @xref{Static Pattern, ,Static Pattern Rules}.

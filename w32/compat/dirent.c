@@ -78,7 +78,7 @@ closedir(DIR *pDir)
 		return;
 	}
 
-	/* close the WIN32 directory handle */
+	/* close the WINDOWS32 directory handle */
 	if (pDir->dir_hDirHandle != INVALID_HANDLE_VALUE)
 		FindClose(pDir->dir_hDirHandle);
 
@@ -90,7 +90,7 @@ closedir(DIR *pDir)
 struct dirent *
 readdir(DIR* pDir)
 {
-	WIN32_FIND_DATA wfdFindData;
+	WINDOWS32_FIND_DATA wfdFindData;
 
 	if (!pDir) {
 		errno = EINVAL;
@@ -134,7 +134,7 @@ rewinddir(DIR* pDir)
 		return;
 	}
 
-	/* close the WIN32 directory handle */
+	/* close the WINDOWS32 directory handle */
 	if (pDir->dir_hDirHandle != INVALID_HANDLE_VALUE)
 		if (!FindClose(pDir->dir_hDirHandle))
 			errno = EBADF;

@@ -19,7 +19,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "make.h"
 #include "filedef.h"
 #include "variable.h"
-#ifdef WIN32
+#ifdef WINDOWS32
 #include "pathstuff.h"
 #endif
 
@@ -43,6 +43,10 @@ static struct vpath *vpaths;
 /* Structure for the general VPATH given in the variable.  */
 
 static struct vpath *general_vpath;
+
+/* Structure for GPATH given in the variable.  */
+
+static struct vpath *gpaths;
 
 static int selective_vpath_search PARAMS ((struct vpath *path, char **file, time_t *mtime_ptr));
 
@@ -96,6 +100,38 @@ build_vpath_lists ()
       /* Store the created path as the general path,
 	 and restore the old list of vpaths.  */
       general_vpath = vpaths;
+      vpaths = save_vpaths;
+    }
+
+  /* If there is a GPATH variable with a nonnull value, construct the
+     GPATH list from it.  We use variable_expand rather than just
+     calling lookup_variable so that it will be recursively expanded.  */
+
+  {
+    /* Turn off --warn-undefined-variables while we expand SHELL and IFS.  */
+    int save = warn_undefined_variables_flag;
+    warn_undefined_variables_flag = 0;
+
+    p = variable_expand ("$(strip $(GPATH))");
+
+    warn_undefined_variables_flag = save;
+  }
+
+  if (*p != '\0')
+    {
+      /* Save the list of vpaths.  */
+      struct vpath *save_vpaths = vpaths;
+
+      /* Empty `vpaths' so the new one will have no next, and `vpaths'
+	 will still be nil if P contains no existing directories.  */
+      vpaths = 0;
+
+      /* Parse P.  */
+      construct_vpath_list ("%", p);
+
+      /* Store the created path as the GPATH,
+	 and restore the old list of vpaths.  */
+      gpaths = vpaths;
       vpaths = save_vpaths;
     }
 }
@@ -173,8 +209,8 @@ construct_vpath_list (pattern, dirpath)
       return;
     }
 
-#ifdef WIN32
-    convert_vpath_to_win32(dirpath, ';');
+#ifdef WINDOWS32
+    convert_vpath_to_windows32(dirpath, ';');
 #endif
 
   /* Figure out the maximum number of VPATH entries and
@@ -209,6 +245,10 @@ construct_vpath_list (pattern, dirpath)
       len = p - v;
       /* Make sure there's no trailing slash,
 	 but still allow "/" as a directory.  */
+#ifdef __MSDOS__
+      /* We need also to leave alone a trailing slash in "d:/".  */
+      if (len > 3 || (len > 1 && v[1] != ':'))
+#endif
       if (len > 1 && p[-1] == '/')
 	--len;
 
@@ -270,6 +310,23 @@ construct_vpath_list (pattern, dirpath)
     }
 }
 
+/* Search the GPATH list for a directory where the name pointed to by FILE
+   exists.  If it is found, we set *FILE to the newly malloc'd name of the
+   existing file, *MTIME_PTR (if MTIME_PTR is not NULL) to its modtime (or
+   zero if no stat call was done), and return 1.  Otherwise we return 0.  */
+
+int
+gpath_search (file, mtime_ptr)
+     char **file;
+     time_t *mtime_ptr;
+{
+  if (gpaths != 0
+      && selective_vpath_search (gpaths, file, mtime_ptr))
+    return 1;
+
+  return 0;
+}
+
 /* Search the VPATH list whose pattern matches *FILE for a directory
    where the name pointed to by FILE exists.  If it is found, we set *FILE to
    the newly malloc'd name of the existing file, *MTIME_PTR (if MTIME_PTR is
@@ -287,8 +344,8 @@ vpath_search (file, mtime_ptr)
      there is nothing we can do.  */
 
   if (**file == '/'
-#ifdef WIN32
-      || **file == '\\' 
+#if defined (WINDOWS32) || defined (__MSDOS__)
+      || **file == '\\'
       || (*file)[1] == ':'
 #endif
       || (vpaths == 0 && general_vpath == 0))
@@ -343,9 +400,13 @@ selective_vpath_search (path, file, mtime_ptr)
      pointer to the name-within-directory and FLEN is its length.  */
 
   n = rindex (*file, '/');
-#ifdef WIN32
-  if (!n)
-    n = rindex(*file,, '\\');
+#if defined (WINDOWS32) || defined (__MSDOS__)
+  /* We need the rightmost slash or backslash.  */
+  {
+    char *bslash = rindex(*file, '\\');
+    if (!n || bslash > n)
+      n = bslash;
+  }
 #endif
   name_dplen = n != 0 ? n - *file : 0;
   filename = name_dplen > 0 ? n + 1 : *file;
@@ -378,6 +439,11 @@ selective_vpath_search (path, file, mtime_ptr)
 	  n += name_dplen;
 	}
 
+#if defined (WINDOWS32) || defined (__MSDOS__)
+      /* Cause the next if to treat backslash and slash alike.  */
+      if (n != name && n[-1] == '\\' )
+	n[-1] = '/';
+#endif
       /* Now add the name-within-directory at the end of NAME.  */
       if (n != name && n[-1] != '/')
 	{

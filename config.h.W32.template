@@ -34,6 +34,10 @@
 /* Define if you have <alloca.h> and it should be used (not on Ultrix).  */
 #undef HAVE_ALLOCA_H
 
+/* Define if you have the memmove function.  */
+#undef HAVE_MEMMOVE
+#define HAVE_MEMMOVE 1
+
 /* Define if you don't have vprintf but do have _doprnt.  */
 #undef HAVE_DOPRNT
 

@@ -231,6 +231,9 @@ signame_init ()
 #if defined (SIGINFO)
   init_sig (SIGINFO, "INFO", "Information request");
 #endif
+#if defined (SIGNOFP)
+  init_sig (SIGNOFP, "NOFP", "Floating point co-processor not available");
+#endif
 }
 
 /* Return the abbreviation for signal NUMBER.  */

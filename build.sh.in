@@ -45,7 +45,7 @@ includedir=${prefix}/include
 set -e
 
 # These are all the objects we need to link together.
-objs="commands.o job.o dir.o file.o misc.o main.o read.o remake.o rule.o implicit.o default.o variable.o expand.o function.o vpath.o version.o ar.o arscan.o signame.o getopt.o getopt1.o glob/libglob.a glob/glob.o glob/fnmatch.o remote-${REMOTE}.o ${extras} ${ALLOCA}"
+objs="commands.o job.o dir.o file.o misc.o main.o read.o remake.o rule.o implicit.o default.o variable.o expand.o function.o vpath.o version.o ar.o arscan.o signame.o getopt.o getopt1.o glob/glob.o glob/fnmatch.o remote-${REMOTE}.o ${extras} ${ALLOCA}"
 
 # Compile the source files into those objects.
 for file in `echo ${objs} | sed 's/\.o/.c/g'`; do

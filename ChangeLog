@@ -1,3 +1,146 @@
+Mon Apr  7 02:06:22 1997  Paul D. Smith  <psmith@baynetworks.com>
+
+	* Version 3.75.1
+
+	* compatMakefile (objs): Define & use theo $(GLOB) variable so
+	that it's removed correctly from build.sh.in when it's built.
+
+Fri Apr  4 20:21:18 1997  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* <lots>: Fixes to work in the DJGPP DOS environment.
+
+Mon Mar 31 02:42:52 1997  Paul D. Smith  <psmith@baynetworks.com>
+
+	* function.c (expand_function): Added new function $(wordlist).
+
+	* make.texinfo (Filename Functions): Document $(wordlist) function.
+
+	* vpath.c (build_vpath_lists): Construct the GPATH variable
+	information in the same manner we used to construct VPATH.
+	(gpath_search): New function to search GPATH.
+
+	* make.h: Declare the new function.
+
+	* remake.c (update_file_1): Call it, and keep VPATH if it's found.
+
+	* make.texinfo (Search Algorithm): Document GPATH variable.
+
+Sun Mar 30 20:57:16 1997  Paul D. Smith  <psmith@baynetworks.com>
+
+	* main.c (handle_non_switch_argument): Defined the MAKECMDGOALS
+	variable to contain the user options passed in on the cmd line.
+
+	* make.texinfo (Goals): Document MAKECMDGOALS variable.
+
+	* remake.c (f_mtime): Print a warning if we detect a clock skew
+	error, rather than failing.
+
+	* main.c (main): If we rebuild any makefiles and need to re-exec,
+	add "-o<mkfile>" options for each makefile rebuilt to avoid
+	infinite looping.
+
+Fri Mar 28 15:26:05 1997  Paul D. Smith  <psmith@baynetworks.com>
+
+	* job.c (construct_command_argv_internal): Track whether the last
+	arg in the cmd string was empty or not (Roland).
+	(construct_command_argv_internal): If the shell line is empty,
+	don't do anything (Roland).
+
+	* glob/glob.h,glob/glob.c,glob/fnmatch.c,glob/fnmatch.h: Install
+	the latest changes from the GLIBC version of glob (Ulrich Drepper).
+
+	* getloadavg.c,make-stds.texi: New version (Roland).
+
+	* (ALL): Changed WIN32 to W32 or WINDOWS32 (RMS).
+
+Mon Mar 24 15:33:34 1997  Rob Tulloh  <rob_tulloh@tivoli.com>
+
+	* README.W32: Describe preliminary FAT support.
+
+	* build_w32.bat: Use a variable for the final exe name.
+
+	* dir.c (find_directory): W32: Find the filesystem type.
+	(dir_contents_file_exists_p): W32: for FAT filesystems, always
+	rehash since FAT doesn't change directory mtime on change.
+
+	* main.c (handle_runtime_exceptions): W32: Add an
+ 	UnhandledExceptionFilter so that when make bombs due to ^C or a
+ 	bug, it won't cause a GUI requestor to pop up unless debug is
+ 	turned on.
+	(main): Call it.
+
+Mon Mar 24 00:57:34 1997  Paul D. Smith  <psmith@baynetworks.com>
+
+	* configure.in, config.h.in, config.ami, config.h-vms, config.h.w32:
+ 	Check for memmove() function.
+
+	* make.h (bcopy): If memmove() available, define bcopy() to use it.
+	Otherwise just use bcopy().  Don't use memcpy(); it's not guaranteed
+	to handle overlapping moves.
+
+	* read.c (read_makefile): Fix some uninitialized memory reads
+	(reported by Purify).
+
+	* job.c (construct_command_argv_internal): Use bcopy() not
+	strcpy(); strcpy() isn't guaranteed to handle overlapping moves.
+
+	* Makefile.in: Change install-info option ``--infodir'' to
+	``--info-dir'' for use with new texinfo.
+
+	* function.c (expand_function): $(basename) and $(suffix) should
+	only search for suffixes as far back as the last directory (e.g.,
+	only the final filename in the path).
+
+Sun Mar 23 00:13:05 1997  Paul D. Smith  <psmith@baynetworks.com>
+
+	* make.texinfo: Add @dircategory/@direntry information.
+	(Top): Remove previous reference to (dir) (from RMS).
+	(Static Usage): Add "all:" rule to example.
+	(Automatic Dependencies): fix .d file creation example.
+
+	* Install VPATH+ patch:
+
+	* filedef.h (struct file): Add in hname field to store the hashed
+        filename, and a flag to remember if we're using the vpath filename
+	or not.  Renamed a few functions for more clarity.
+
+	* file.c (lookup_file,enter_file,file_hash_enter): Store filenames
+	in the hash table based on their "hash name".  We can change this
+	while keeping the original target in "name".
+	(rehash_file): Renamed from "rename_file" to be more accurate.
+	Changes the hash name, but not the target name.
+
+	* remake.c (update_file_1): Modify -d output for more detailed
+ 	VPATH info.  If we don't need to rebuild, use the VPATH name.
+	(f_mtime): Don't search for vpath if we're ignoring it.  Call
+ 	renamed function rehash_file.  Call name_mtime instead of
+ 	file_mtime, to avoid infinite recursion since the file wasn't
+ 	actually renamed.
+
+	* implicit.c (pattern_search): if we find an implicit file in
+	VPATH, save the original name not the VPATH name.
+
+	* make.texinfo (Directory Search): Add a section on the new VPATH
+	functionality.
+
+Sun Dec  1 18:36:04 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* dir.c (file_exists_p, file_impossible, file_impossible_p): If
+	dirname is empty replace it by the name of the root directory.
+	Note that this doesn't work (yet) for W32, Amiga, or VMS.
+
+Tue Oct 08 13:57:03 1996  Rob Tulloh  <tulloh@tivoli.com>
+
+	* main.c (main): W32 bug fix for PATH vars.
+
+Tue Sep 17 1996  Paul Eggert  <eggert@twinsun.com>
+
+	* filedef.h (NEW_MTIME): Don't assume that time_t is a signed
+ 	32-bit quantity.
+
+	* make.h: (CHAR_BIT, INTEGER_TYPE_SIGNED, INTEGER_TYPE_MAXIMUM,
+ 	INTEGER_TYPE_MINIMUM): New macros.
+
 Tue Aug 27 01:06:34 1996  Roland McGrath  <roland@baalperazim.frob.com>
 
 	* Version 3.75 released.
@@ -11,17 +154,17 @@ Mon Aug 26 19:55:47 1996  Roland McGrath  <roland@baalperazim.frob.com>
 
 Sun Jul 28 15:37:09 1996  Rob Tulloh (tulloh@tivoli.com)
 
-	* w32/pathstuff.c: Turned convert_vpath_to_win32() into a
+	* w32/pathstuff.c: Turned convert_vpath_to_w32() into a
 	real function. This was done so that VPATH could contain
 	white space separated pathnames. Please note that directory
 	paths (in VPATH/vpath context) containing white space are not
-	supported (just as they are not under Unix). See README.WIN32
+	supported (just as they are not under Unix). See README.W32
 	for suggestions.
 
 	* w32/include/pathstuff.h: Added prototype for the new
-	function convert_vpath_to_win32. Deleted macro for same.
+	function convert_vpath_to_w32. Deleted macro for same.
 
-	* README.WIN32: Added some notes about why I chose not to try
+	* README.W32: Added some notes about why I chose not to try
 	and support pathnames which contain white space and some
 	workaround suggestions.
 
@@ -43,7 +186,7 @@ Thu Jul 25 19:53:31 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 
 	* vmsfunctions.c (vms_stat): `sys$dassgn (DevChan);' added by kkaempf.
 
-	* GNUmakefile (win32files): Add NMakefile.
+	* GNUmakefile (w32files): Add NMakefile.
 
 	* NMakefile (LDFLAGS_debug): Value fixed by tulloh.
 
@@ -61,7 +204,7 @@ Fri Jul 19 16:57:27 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 
 	* Version 3.74.6.
 
-	* GNUmakefile (win32files): New variable.
+	* GNUmakefile (w32files): New variable.
 	(distfiles): Add it.
 	* w32: Updated by Rob Tulloh.
 
@@ -132,22 +275,22 @@ Wed May 15 17:37:26 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 
 Wed May 15 10:14:14 CDT 1996  Rob Tulloh  <tulloh@tivoli.com>
 
-	* dir.c: WIN32 does not support inode. For now, fully qualified
+	* dir.c: W32 does not support inode. For now, fully qualified
 	pathname along with st_mtime will be keys for files.
 	Fixed problem where vpath can be confused when files
 	are added to a directory after the directory has already been
 	read in. The code now attempts to reread the directory if it
 	discovers that the datestamp on the directory has changed since
-	it was cached by make. This problem only seems to occur on WIN32
-	right now so it is lumped under port #ifdef WIN32.
+	it was cached by make. This problem only seems to occur on W32
+	right now so it is lumped under port #ifdef WINDOWS32.
 
-	* function.c: WIN32: call subproc library (CreateProcess()) instead of
+	* function.c: W32: call subproc library (CreateProcess()) instead of
 	fork/exec.
 
-	* job.c: WIN32: Added the code to do fork/exec/waitpid style processing
-	on WIN32 systems via calls to subproc library.
+	* job.c: W32: Added the code to do fork/exec/waitpid style processing
+	on W32 systems via calls to subproc library.
 
-	* main.c: WIN32: Several things added here. First, there is code
+	* main.c: W32: Several things added here. First, there is code
 	for dealing with PATH and SHELL defaults. Make tries to figure
 	out if the user has %PATH% set in the environment and sets it to
 	%Path% if it is not set already. Make also looks to see if sh.exe
@@ -160,65 +303,65 @@ Wed May 15 10:14:14 CDT 1996  Rob Tulloh  <tulloh@tivoli.com>
 	debugging recursive calls to make where problems appear only in the
 	sub-make.
 
-	* make.h: WIN32: A few macros and header files for WIN32 support.
+	* make.h: W32: A few macros and header files for W32 support.
 
-	* misc.c: WIN32: Added a function end_of_token_w32() to assist
+	* misc.c: W32: Added a function end_of_token_w32() to assist
 	in parsing code in read.c.
 
-	* read.c: WIN32: Fixes similar to MSDOS which allow colon to
+	* read.c: W32: Fixes similar to MSDOS which allow colon to
 	appear in filenames. Use of colon in filenames would otherwise
 	confuse make.
 
-	* remake.c: WIN32: Added include of io.h to eliminate compiler
+	* remake.c: W32: Added include of io.h to eliminate compiler
 	warnings. Added some code to default LIBDIR if it is not set
-	on WIN32.
+	on W32.
 
-	* variable.c: WIN32: Added support for detecting Path/PATH
+	* variable.c: W32: Added support for detecting Path/PATH
 	and converting them to semicolon separated lists for make's
 	internal use. New function sync_Path_environment()
 	which is called in job.c and function.c before creating a new
 	process. Caller must set Path in environment since we don't
 	have fork() to do this for us.
 
-	* vpath.c: WIN32: Added detection for filenames containing
+	* vpath.c: W32: Added detection for filenames containing
 	forward or backward slashes.
 
-	* NMakefile: WIN32: Visual C compatible makefile for use with nmake.
+	* NMakefile: W32: Visual C compatible makefile for use with nmake.
 	Use this to build GNU make the first time on Windows NT or Windows 95.
 
-	* README.WIN32: WIN32: Contains some helpful notes.
+	* README.W32: W32: Contains some helpful notes.
 
-	* build_w32.bat: WIN32: If you don't like nmake, use this the first
+	* build_w32.bat: W32: If you don't like nmake, use this the first
 	time you build GNU make on Windows NT or Windows 95.
 
-	* config.h.WIN32: WIN32 version of config.h
+	* config.h.W32: W32 version of config.h
 
-	* subproc.bat: WIN32: A bat file used to build the
+	* subproc.bat: W32: A bat file used to build the
 	subproc library from the top-level NMakefile. Needed because
 	WIndows 95 (nmake) doesn't allow you to cd in a make rule.
 
 	* w32/include/dirent.h
-	* w32/compat/dirent.c: WIN32: opendir, readdir, closedir, etc.
+	* w32/compat/dirent.c: W32: opendir, readdir, closedir, etc.
 
-	* w32/include/pathstuff.h: WIN32: used by files needed functions
+	* w32/include/pathstuff.h: W32: used by files needed functions
 	defined in pathstuff.c (prototypes).
 
-	* w32/include/sub_proc.h: WIN32: prototypes for subproc.lib functions.
+	* w32/include/sub_proc.h: W32: prototypes for subproc.lib functions.
 
-	* w32/include/w32err.h: WIN32: prototypes for w32err.c.
+	* w32/include/w32err.h: W32: prototypes for w32err.c.
 
-	* w32/pathstuff.c: WIN32: File and Path/Path conversion functions.
+	* w32/pathstuff.c: W32: File and Path/Path conversion functions.
 
-	* w32/subproc/build.bat: WIN32: build script for subproc library
+	* w32/subproc/build.bat: W32: build script for subproc library
 	if you don't wish to use nmake.
 
-	* w32/subproc/NMakefile: WIN32: Visual C compatible makefile for use
+	* w32/subproc/NMakefile: W32: Visual C compatible makefile for use
 	with nmake. Used to build subproc library.
 
-	* w32/subproc/misc.c: WIN32: subproc library support code
-	* w32/subproc/proc.h: WIN32: subproc library support code
-	* w32/subproc/sub_proc.c: WIN32: subproc library source code
-	* w32/subproc/w32err.c: WIN32: subproc library support code
+	* w32/subproc/misc.c: W32: subproc library support code
+	* w32/subproc/proc.h: W32: subproc library support code
+	* w32/subproc/sub_proc.c: W32: subproc library source code
+	* w32/subproc/w32err.c: W32: subproc library support code
 
 Mon May 13 14:37:42 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 

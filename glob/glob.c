@@ -1,19 +1,19 @@
-/* Copyright (C) 1991, 92, 93, 94, 95, 96 Free Software Foundation, Inc.
+/* Copyright (C) 1991, 92, 93, 94, 95, 96, 97 Free Software Foundation, Inc.
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Library General Public License as
-published by the Free Software Foundation; either version 2 of the
-License, or (at your option) any later version.
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Library General Public License as
+   published by the Free Software Foundation; either version 2 of the
+   License, or (at your option) any later version.
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Library General Public License for more details.
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Library General Public License for more details.
 
-You should have received a copy of the GNU Library General Public
-License along with this library; see the file COPYING.LIB.  If
-not, write to the Free Software Foundation, Inc., 675 Mass Ave,
-Cambridge, MA 02139, USA.  */
+   You should have received a copy of the GNU Library General Public
+   License along with this library; see the file COPYING.LIB.  If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /* AIX requires this to be the first thing in the file.  */
 #if defined (_AIX) && !defined (__GNUC__)
@@ -32,6 +32,10 @@ Cambridge, MA 02139, USA.  */
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+/* Outcomment the following line for production quality code.  */
+/* #define NDEBUG 1 */
+#include <assert.h>
 
 
 /* Comment out all this code if we are using the GNU C Library, and are not
@@ -52,11 +56,11 @@ Cambridge, MA 02139, USA.  */
 
 #ifndef ELIDE_CODE
 
-#ifdef	STDC_HEADERS
+#if defined(STDC_HEADERS) || defined(__GNU_LIBRARY__)
 #include <stddef.h>
 #endif
 
-#ifdef	HAVE_UNISTD_H
+#if defined HAVE_UNISTD_H || defined _LIBC
 #include <unistd.h>
 #ifndef POSIX
 #ifdef	_POSIX_VERSION
@@ -65,12 +69,15 @@ Cambridge, MA 02139, USA.  */
 #endif
 #endif
 
-#if !defined (_AMIGA) && !defined (VMS) && !defined(WIN32)
+#if !defined (_AMIGA) && !defined (VMS) && !defined(WINDOWS32)
 #include <pwd.h>
 #endif
 
 #if !defined(__GNU_LIBRARY__) && !defined(STDC_HEADERS)
 extern int errno;
+#endif
+#ifndef __set_errno
+#define __set_errno(val) errno = (val)
 #endif
 
 #ifndef	NULL
@@ -106,7 +113,7 @@ extern int errno;
 #endif
 
 
-#if (defined (POSIX) || defined (WIN32)) && !defined (__GNU_LIBRARY__)
+#if (defined (POSIX) || defined (WINDOWS32)) && !defined (__GNU_LIBRARY__)
 /* Posix does not require that the d_ino field be present, and some
    systems do not provide it. */
 #define REAL_DIR_ENTRY(dp) 1
@@ -156,7 +163,7 @@ extern void bcopy ();
   ((void) ((better_be_zero) == 0 ? (bzero((s), (n)), 0) : (abort(), 0)))
 #endif	/* Not ANSI_STRING.  */
 
-#ifndef	HAVE_STRCOLL
+#if !defined HAVE_STRCOLL && !defined _LIBC
 #define	strcoll	strcmp
 #endif
 
@@ -166,7 +173,7 @@ extern void bcopy ();
 __inline
 #endif
 #ifndef __SASC
-#ifdef WIN32
+#ifdef WINDOWS32
 static void *
 #else
 static char *
@@ -196,11 +203,11 @@ my_realloc (p, n)
 #include <alloca.h>
 #else	/* Not HAVE_ALLOCA_H.  */
 #ifndef	_AIX
-#ifdef WIN32
+#ifdef WINDOWS32
 #include <malloc.h>
 #else
 extern char *alloca ();
-#endif /* WIN32 */
+#endif /* WINDOWS32 */
 #endif	/* Not _AIX.  */
 #endif	/* sparc or HAVE_ALLOCA_H.  */
 #endif	/* GCC.  */
@@ -219,7 +226,7 @@ extern char *alloca ();
 #endif
 #endif
 
-#ifndef	STDC_HEADERS
+#if !(defined (STDC_HEADERS) || defined (__GNU_LIBRARY__))
 #undef	size_t
 #define	size_t	unsigned int
 #endif
@@ -251,6 +258,51 @@ static int glob_in_dir __P ((const char *pattern, const char *directory,
 static int prefix_array __P ((const char *prefix, char **array, size_t n));
 static int collated_compare __P ((const __ptr_t, const __ptr_t));
 
+
+/* Find the end of the sub-pattern in a brace expression.  We define
+   this as an inline function if the compiler permits.  */
+static
+#if __GNUC__ - 0 >= 2
+inline
+#endif
+const char *
+next_brace_sub (const char *begin)
+{
+  unsigned int depth = 0;
+  const char *cp = begin;
+
+  while (1)
+    {
+      if (depth == 0)
+	{
+	  if (*cp != ',' && *cp != '}' && *cp != '\0')
+	    {
+	      if (*cp == '{')
+		++depth;
+	      ++cp;
+	      continue;
+	    }
+	}
+      else
+	{
+	  while (*cp != '\0' && (*cp != '}' || depth > 0))
+	    {
+	      if (*cp == '}')
+		++depth;
+	      ++cp;
+	    }
+	  if (*cp == '\0')
+	    /* An incorrectly terminated brace expression.  */
+	    return NULL;
+
+	  continue;
+	}
+      break;
+    }
+
+  return cp;
+}
+
 /* Do glob searching for PATTERN, placing results in PGLOB.
    The bits defined above may be set in FLAGS.
    If a directory cannot be opened or read and ERRFUNC is not nil,
@@ -274,7 +326,7 @@ glob (pattern, flags, errfunc, pglob)
 
   if (pattern == NULL || pglob == NULL || (flags & ~__GLOB_FLAGS) != 0)
     {
-      errno = EINVAL;
+      __set_errno (EINVAL);
       return -1;
     }
 
@@ -283,38 +335,59 @@ glob (pattern, flags, errfunc, pglob)
       const char *begin = strchr (pattern, '{');
       if (begin != NULL)
 	{
+	  /* Allocate working buffer large enough for our work.  Note that
+	    we have at least an opening and closing brace.  */
 	  int firstc;
-	  size_t restlen;
-	  const char *p, *end, *next;
-	  unsigned int depth = 0;
-
-	  /* Find the end of the brace expression, by counting braces.
-	     While we're at it, notice the first comma at top brace level.  */
-	  end = begin + 1;
-	  next = NULL;
-	  while (1)
+	  char *alt_start;
+	  const char *p;
+	  const char *next;
+	  const char *rest;
+	  size_t rest_len;
+#ifdef __GNUC__
+	  char onealt[strlen (pattern) - 1];
+#else
+	  char *onealt = (char *) malloc (strlen (pattern) - 1);
+	  if (onealt == NULL)
 	    {
-	      switch (*end++)
-		{
-		case ',':
-		  if (depth == 0 && next == NULL)
-		    next = end;
-		  continue;
-		case '{':
-		  ++depth;
-		  continue;
-		case '}':
-		  if (depth-- == 0)
-		    break;
-		  continue;
-		case '\0':
-		  return glob (pattern, flags &~ GLOB_BRACE, errfunc, pglob);
-		}
-	      break;
+	      if (!(flags & GLOB_APPEND))
+		globfree (pglob);
+	      return GLOB_NOSPACE;
 	    }
-	  restlen = strlen (end) + 1;
+#endif
+
+	  /* We know the prefix for all sub-patterns.  */
+	  memcpy (onealt, pattern, begin - pattern);
+	  alt_start = &onealt[begin - pattern];
+
+	  /* Find the first sub-pattern and at the same time find the
+	     rest after the closing brace.  */
+	  next = next_brace_sub (begin + 1);
 	  if (next == NULL)
-	    next = end;
+	    {
+	      /* It is an illegal expression.  */
+#ifndef __GNUC__
+	      free (onealt);
+#endif
+	      return glob (pattern, flags & ~GLOB_BRACE, errfunc, pglob);
+	    }
+
+	  /* Now find the end of the whole brace expression.  */
+	  rest = next;
+	  while (*rest != '}')
+	    {
+	      rest = next_brace_sub (rest + 1);
+	      if (rest == NULL)
+		{
+		  /* It is an illegal expression.  */
+#ifndef __GNUC__
+		  free (onealt);
+#endif
+		  return glob (pattern, flags & ~GLOB_BRACE, errfunc, pglob);
+		}
+	    }
+	  /* Please note that we now can be sure the brace expression
+	     is well-formed.  */
+	  rest_len = strlen (++rest) + 1;
 
 	  /* We have a brace expression.  BEGIN points to the opening {,
 	     NEXT points past the terminator of the first element, and END
@@ -331,72 +404,47 @@ glob (pattern, flags, errfunc, pglob)
 	    }
 	  firstc = pglob->gl_pathc;
 
-	  /* In this loop P points to the beginning of the current element
-	     and NEXT points past its terminator.  */
 	  p = begin + 1;
 	  while (1)
 	    {
-	      /* Construct a whole name that is one of the brace
-		 alternatives in a temporary buffer.  */
 	      int result;
-	      size_t bufsz = (begin - pattern) + (next - 1 - p) + restlen;
-#ifdef __GNUC__
-	      char onealt[bufsz];
-#else
-	      char *onealt = malloc (bufsz);
-	      if (onealt == NULL)
-		{
-		  if (!(flags & GLOB_APPEND))
-		    globfree (pglob);
-		  return GLOB_NOSPACE;
-		}
-#endif
-	      memcpy (onealt, pattern, begin - pattern);
-	      memcpy (&onealt[begin - pattern], p, next - 1 - p);
-	      memcpy (&onealt[(begin - pattern) + (next - 1 - p)],
-		      end, restlen);
+
+	      /* Construct the new glob expression.  */
+	      memcpy (alt_start, p, next - p);
+	      memcpy (&alt_start[next - p], rest, rest_len);
+
 	      result = glob (onealt,
-			     ((flags & ~(GLOB_NOCHECK|GLOB_NOMAGIC)) |
-			      GLOB_APPEND), errfunc, pglob);
-#ifndef __GNUC__
-	      free (onealt);
-#endif
+			     ((flags & ~(GLOB_NOCHECK|GLOB_NOMAGIC))
+			      | GLOB_APPEND), errfunc, pglob);
 
 	      /* If we got an error, return it.  */
 	      if (result && result != GLOB_NOMATCH)
 		{
+#ifndef __GNUC__
+		  free (onealt);
+#endif
 		  if (!(flags & GLOB_APPEND))
 		    globfree (pglob);
 		  return result;
 		}
 
-	      /* Advance past this alternative and process the next.  */
-	      p = next;
-	      depth = 0;
-	    scan:
-	      switch (*p++)
-		{
-		case ',':
-		  if (depth == 0)
-		    {
-		      /* Found the next alternative.  Loop to glob it.  */
-		      next = p;
-		      continue;
-		    }
-		  goto scan;
-		case '{':
-		  ++depth;
-		  goto scan;
-		case '}':
-		  if (depth-- == 0)
-		    /* End of the brace expression.  Break out of the loop.  */
-		    break;
-		  goto scan;
-		}
+	      if (*next == '}')
+		/* We saw the last entry.  */
+		break;
+
+	      p = next + 1;
+	      next = next_brace_sub (p);
+	      assert (next != NULL);
 	    }
 
-	  if (pglob->gl_pathc == firstc &&
-	      !(flags & (GLOB_NOCHECK|GLOB_NOMAGIC)))
+#ifndef __GNUC__
+	  free (onealt);
+#endif
+
+	  if (pglob->gl_pathc != firstc)
+	    /* We found some entries.  */
+	    return 0;
+	  else if (!(flags & (GLOB_NOCHECK|GLOB_NOMAGIC)))
 	    return GLOB_NOMATCH;
 	}
     }
@@ -449,51 +497,123 @@ glob (pattern, flags, errfunc, pglob)
 #ifndef VMS
   if ((flags & GLOB_TILDE) && dirname[0] == '~')
     {
-      if (dirname[1] == '\0')
+      if (dirname[1] == '\0' || dirname[1] == '/')
 	{
 	  /* Look up home directory.  */
-	  dirname = getenv ("HOME");
+	  char *home_dir = getenv ("HOME");
 #ifdef _AMIGA
-	  if (dirname == NULL || dirname[0] == '\0')
-	    dirname = "SYS:";
+	  if (home_dir == NULL || home_dir[0] == '\0')
+	    home_dir = "SYS:";
 #else
-#ifdef WIN32
-	  if (dirname == NULL || dirname[0] == '\0')
-            dirname = "c:/users/default"; /* poor default */
+#ifdef WINDOWS32
+	  if (home_dir == NULL || home_dir[0] == '\0')
+            home_dir = "c:/users/default"; /* poor default */
 #else
-	  if (dirname == NULL || dirname[0] == '\0')
+	  if (home_dir == NULL || home_dir[0] == '\0')
 	    {
 	      extern char *getlogin __P ((void));
-	      char *name = getlogin ();
-	      if (name != NULL)
+	      extern int getlogin_r __P ((char *, size_t));
+	      int success;
+
+#if defined HAVE_GETLOGIN_R || defined _LIBC
+	      size_t buflen = sysconf (_SC_LOGIN_NAME_MAX) + 1;
+	      char *name;
+
+	      if (buflen == 0)
+		/* `sysconf' does not support _SC_LOGIN_NAME_MAX.  Try
+		   a moderate value.  */
+		buflen = 16;
+	      name = __alloca (buflen);
+
+	      success = getlogin_r (name, buflen) >= 0;
+#else
+	      char *name;
+	      success = (name = getlogin ()) != NULL;
+#endif
+	      if (success)
 		{
+#if defined HAVE_GETPWNAM_R || defined _LIBC
+		  size_t pwbuflen = sysconf (_SC_GETPW_R_SIZE_MAX);
+		  char *pwtmpbuf;
+		  struct passwd pwbuf, *p;
+
+		  pwtmpbuf = __alloca (pwbuflen);
+
+		  success = (__getpwnam_r (name, &pwbuf, pwtmpbuf,
+					   pwbuflen, &p) >= 0);
+#else
 		  struct passwd *p = getpwnam (name);
-		  if (p != NULL)
-		    dirname = p->pw_dir;
+		  success = p != NULL;
+#endif
+		  if (success)
+		    home_dir = p->pw_dir;
 		}
 	    }
-	  if (dirname == NULL || dirname[0] == '\0')
-	    dirname = (char *) "~"; /* No luck.  */
-#endif /* WIN32 */
+	  if (home_dir == NULL || home_dir[0] == '\0')
+	    home_dir = (char *) "~"; /* No luck.  */
+#endif /* WINDOWS32 */
 #endif
+	  /* Now construct the full directory.  */
+	  if (dirname[1] == '\0')
+	    dirname = home_dir;
+	  else
+	    {
+	      char *newp;
+	      size_t home_len = strlen (home_dir);
+	      newp = __alloca (home_len + dirlen);
+	      memcpy (newp, home_dir, home_len);
+	      memcpy (&newp[home_len], &dirname[1], dirlen);
+	      dirname = newp;
+	    }
 	}
+#if !defined _AMIGA && !defined WINDOWS32
       else
 	{
-#ifdef _AMIGA
-	  if (dirname == NULL || dirname[0] == '\0')
-	    dirname = "SYS:";
-#else
-#ifdef WIN32
-	  if (dirname == NULL || dirname[0] == '\0')
-            dirname = "c:/users/default"; /* poor default */
-#else
+	  char *end_name = strchr (dirname, '/');
+	  char *user_name;
+	  char *home_dir;
+
+	  if (end_name == NULL)
+	    user_name = dirname + 1;
+	  else
+	    {
+	      user_name = __alloca (end_name - dirname);
+	      memcpy (user_name, dirname + 1, end_name - dirname);
+	      user_name[end_name - dirname - 1] = '\0';
+	    }
+
 	  /* Look up specific user's home directory.  */
-	  struct passwd *p = getpwnam (dirname + 1);
-	  if (p != NULL)
-	    dirname = p->pw_dir;
-#endif /* WIN32 */
+	  {
+#if defined HAVE_GETPWNAM_R || defined _LIBC
+	    size_t buflen = sysconf (_SC_GETPW_R_SIZE_MAX);
+	    char *pwtmpbuf = __alloca (buflen);
+	    struct passwd pwbuf, *p;
+	    if (__getpwnam_r (user_name, &pwbuf, pwtmpbuf, buflen, &p) >= 0)
+	      home_dir = p->pw_dir;
+	    else
+	      home_dir = NULL;
+#else
+	    struct passwd *p = getpwnam (user_name);
+	    if (p != NULL)
+	      home_dir = p->pw_dir;
+	    else
+	      home_dir = NULL;
 #endif
+	  }
+	  /* If we found a home directory use this.  */
+	  if (home_dir != NULL)
+	    {
+	      char *newp;
+	      size_t home_len = strlen (home_dir);
+	      size_t rest_len = end_name == NULL ? 0 : strlen (end_name);
+	      newp = __alloca (home_len + rest_len + 1);
+	      memcpy (newp, home_dir, home_len);
+	      memcpy (&newp[home_len], end_name, rest_len);
+	      newp[home_len + rest_len] = '\0';
+	      dirname = newp;
+	    }
 	}
+#endif	/* Not Amiga && not Windows32.  */
     }
 #endif	/* Not VMS.  */
 
@@ -880,7 +1000,7 @@ glob_in_dir (pattern, directory, flags, errfunc, pglob)
 	(*pglob->gl_closedir) (stream);
       else
 	closedir ((DIR *) stream);
-      errno = save;
+      __set_errno (save);
     }
   return nfound == 0 ? GLOB_NOMATCH : 0;
 
@@ -891,7 +1011,7 @@ glob_in_dir (pattern, directory, flags, errfunc, pglob)
       (*pglob->gl_closedir) (stream);
     else
       closedir ((DIR *) stream);
-    errno = save;
+    __set_errno (save);
   }
   while (names != NULL)
     {
@@ -903,4 +1023,3 @@ glob_in_dir (pattern, directory, flags, errfunc, pglob)
 }
 
 #endif	/* Not ELIDE_CODE.  */
-

@@ -1,4 +1,4 @@
-This directory contains the 3.75 test release of GNU Make.
+This directory contains the 3.75.1 test release of GNU Make.
 All bugs reported for previous test releases have been fixed.
 Some bugs surely remain.
 
@@ -14,7 +14,7 @@ Some systems' Make programs are broken and cannot process the Makefile for
 GNU Make.  If you get errors from your system's Make when building GNU
 Make, try using `build.sh' instead.
 
-See README.WIN32 for details about GNU Make on Windows NT or 95.
+See README.W32 for details about GNU Make on Windows NT or 95.
 See README.Amiga for details about GNU Make on AmigaDOS.
 The MSDOS port of GNU Make is available as part of DJGPP; see the
 WWW page http://www.delorie.com/djgpp/ for more information.

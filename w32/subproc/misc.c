@@ -7,7 +7,7 @@
 
 /*
  * Description:  Convert a NULL string terminated UNIX environment block to
- *		an environment block suitable for a win32 system call
+ *		an environment block suitable for a windows32 system call
  *
  * Returns:  TRUE= success, FALSE=fail
  *

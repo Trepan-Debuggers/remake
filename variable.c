@@ -22,7 +22,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "job.h"
 #include "commands.h"
 #include "variable.h"
-#ifdef WIN32
+#ifdef WINDOWS32
 #include "pathstuff.h"
 #endif
 
@@ -354,7 +354,7 @@ merge_variable_set_lists (setlist0, setlist1)
 void
 define_automatic_variables ()
 {
-#ifdef WIN32
+#ifdef WINDOWS32
   extern char* default_shell;
 #else
   extern char default_shell[];
@@ -373,12 +373,39 @@ define_automatic_variables ()
 	   ? "" : remote_description);
   (void) define_variable ("MAKE_VERSION", 12, buf, o_default, 0);
 
+#ifdef  __MSDOS__
+  /* Allow to specify a special shell just for Make,
+     and use $COMSPEC as the default $SHELL when appropriate.  */
+  {
+    static char shell_str[] = "SHELL";
+    const int shlen = sizeof (shell_str) - 1;
+    struct variable *mshp = lookup_variable ("MAKESHELL", 9);
+    struct variable *comp = lookup_variable ("COMSPEC", 7);
+
+    /* Make $MAKESHELL override $SHELL even if -e is in effect.  */
+    if (mshp)
+      (void) define_variable (shell_str, shlen,
+			      mshp->value, o_env_override, 0);
+    else if (comp)
+      {
+	/* $COMSPEC shouldn't override $SHELL.  */
+	struct variable *shp = lookup_variable (shell_str, shlen);
+
+	if (!shp)
+	  (void) define_variable (shell_str, shlen, comp->value, o_env, 0);
+      }
+  }
+#endif
 
   /* This won't override any definition, but it
      will provide one if there isn't one there.  */
   v = define_variable ("SHELL", 5, default_shell, o_default, 0);
   v->export = v_export;		/* Always export SHELL.  */
 
+  /* On MSDOS we do use SHELL from environment, since
+     it isn't a standard environment variable on MSDOS,
+     so whoever sets it, does that on purpose.  */
+#ifndef __MSDOS__
   /* Don't let SHELL come from the environment.  */
   if (*v->value == '\0' || v->origin == o_env || v->origin == o_env_override)
     {
@@ -386,6 +413,7 @@ define_automatic_variables ()
       v->origin = o_file;
       v->value = savestring (default_shell, strlen (default_shell));
     }
+#endif
 
   /* Make sure MAKEFILES gets exported if it is set.  */
   v = define_variable ("MAKEFILES", 9, "", o_default, 0);
@@ -546,20 +574,20 @@ target_environment (file)
 	      && v->origin != o_env && v->origin != o_env_override)
 	    {
 	      char *value = recursively_expand (v);
-#ifdef WIN32
+#ifdef WINDOWS32
               if (strcmp(v->name, "Path") == 0 ||
                   strcmp(v->name, "PATH") == 0)
-                convert_Path_to_win32(value, ';');
+                convert_Path_to_windows32(value, ';');
 #endif
 	      result[nvariables++] = concat (v->name, "=", value);
 	      free (value);
 	    }
 	  else
-#ifdef WIN32
+#ifdef WINDOWS32
           {
             if (strcmp(v->name, "Path") == 0 ||
                 strcmp(v->name, "PATH") == 0)
-              convert_Path_to_win32(v->value, ';');
+              convert_Path_to_windows32(v->value, ';');
             result[nvariables++] = concat (v->name, "=", v->value);
           }
 #else
@@ -734,6 +762,88 @@ try_variable_definition (filename, lineno, line, origin)
 	}
     }
 
+#ifdef __MSDOS__
+  /* Many Unix Makefiles include a line saying "SHELL=/bin/sh", but
+     non-Unix systems don't conform to this default configuration (in
+     fact, most of them don't even have `/bin').  On the other hand,
+     $SHELL in the environment, if set, points to the real pathname of
+     the shell.
+     Therefore, we generally won't let lines like "SHELL=/bin/sh" from
+     the Makefile override $SHELL from the environment.  But first, we
+     look for the basename of the shell in the directory where SHELL=
+     points, and along the $PATH; if it is found in any of these places,
+     we define $SHELL to be the actual pathname of the shell.  Thus, if
+     you have bash.exe installed as d:/unix/bash.exe, and d:/unix is on
+     your $PATH, then SHELL=/usr/local/bin/bash will have the effect of
+     defining SHELL to be "d:/unix/bash.exe".  */
+  if (origin == o_file
+      && strcmp (expanded_name, "SHELL") == 0)
+    {
+      char shellpath[PATH_MAX];
+      extern char * __dosexec_find_on_path (const char *, char *[], char *);
+
+      /* See if we can find "/bin/sh.exe", "/bin/sh.com", etc.  */
+      if (__dosexec_find_on_path (value, (char **)0, shellpath))
+	{
+	  char *p;
+
+	  for (p = shellpath; *p; p++)
+	    {
+	      if (*p == '\\')
+		*p = '/';
+	    }
+	  v = define_variable (expanded_name, strlen (expanded_name),
+			       shellpath, origin, flavor == recursive);
+	}
+      else
+	{
+	  char *shellbase, *bslash;
+	  struct variable *pathv = lookup_variable ("PATH", 4);
+	  char *path_string;
+	  char *fake_env[2];
+	  size_t pathlen = 0;
+
+	  shellbase = rindex (value, '/');
+	  bslash = rindex (value, '\\');
+	  if (!shellbase || bslash > shellbase)
+	    shellbase = bslash;
+	  if (!shellbase && value[1] == ':')
+	    shellbase = value + 1;
+	  if (shellbase)
+	    shellbase++;
+	  else
+	    shellbase = value;
+
+	  /* Search for the basename of the shell (with standard
+	     executable extensions) along the $PATH.  */
+	  if (pathv)
+	    pathlen = strlen (pathv->value);
+	  path_string = (char *)xmalloc (5 + pathlen + 2 + 1);
+	  /* On MSDOS, current directory is considered as part of $PATH.  */
+	  sprintf (path_string, "PATH=.;%s", pathv ? pathv->value : "");
+	  fake_env[0] = path_string;
+	  fake_env[1] = (char *)0;
+	  if (__dosexec_find_on_path (shellbase, fake_env, shellpath))
+	    {
+	      char *p;
+
+	      for (p = shellpath; *p; p++)
+		{
+		  if (*p == '\\')
+		    *p = '/';
+		}
+	      v = define_variable (expanded_name, strlen (expanded_name),
+				   shellpath, origin, flavor == recursive);
+	    }
+	  else
+	    v = lookup_variable (expanded_name, strlen (expanded_name));
+
+	  free (path_string);
+	}
+    }
+  else
+#endif /* __MSDOS__ */
+
   v = define_variable (expanded_name, strlen (expanded_name),
 		       value, origin, flavor == recursive);
 
@@ -884,7 +994,7 @@ print_file_variables (file)
     print_variable_set (file->variables->set, "# ");
 }
 
-#ifdef WIN32
+#ifdef WINDOWS32
 void
 sync_Path_environment(void)
 {
@@ -902,9 +1012,9 @@ sync_Path_environment(void)
         free(environ_path);
 
     /*
-     * Create something WIN32 world can grok
+     * Create something WINDOWS32 world can grok
      */
-    convert_Path_to_win32(path, ';');
+    convert_Path_to_windows32(path, ';');
     environ_path = concat("Path", "=", path);
     putenv(environ_path);
     free(path);

@@ -397,7 +397,7 @@ end_of_token (s)
   return s;
 }
 
-#ifdef WIN32
+#ifdef WINDOWS32
 /*
  * Same as end_of_token, but take into account a stop character
  */

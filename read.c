@@ -30,7 +30,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "glob/glob.h"
 #endif
 
-#ifndef WIN32
+#ifndef WINDOWS32
 #ifndef _AMIGA
 #ifndef VMS
 #include <pwd.h>
@@ -38,7 +38,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 struct passwd *getpwnam PARAMS ((char *name));
 #endif
 #endif
-#endif /* !WIN32 */
+#endif /* !WINDOWS32 */
 
 /* A `struct linebuffer' is a structure which holds a line of text.
    `readline' reads a line from a stream into a linebuffer
@@ -81,7 +81,7 @@ static struct conditionals *conditionals = &toplevel_conditionals;
 
 static char *default_include_directories[] =
   {
-#if defined(WIN32) && !defined(INCLUDEDIR)
+#if defined(WINDOWS32) && !defined(INCLUDEDIR)
 /*
  * This completly up to the user when they install MSVC or other packages.
  * This is defined as a placeholder.
@@ -271,6 +271,7 @@ read_makefile (filename, flags)
   unsigned int commands_started;
   register char *p;
   char *p2;
+  int len;
   int ignoring = 0, in_ignored_define = 0;
   int no_targets = 0;		/* Set when reading a rule without targets.  */
   char *passed_filename = filename;
@@ -283,7 +284,7 @@ read_makefile (filename, flags)
   char *pattern = 0, *pattern_percent;
 
   int makefile_errno;
-#ifdef WIN32
+#if defined (WINDOWS32) || defined (__MSDOS__)
   int check_again;
 #endif
 
@@ -302,8 +303,9 @@ read_makefile (filename, flags)
 
 #ifdef	lint	/* Suppress `used before set' messages.  */
   two_colon = 0;
-  pattern_percent = 0;
 #endif
+  pattern_percent = 0;
+  commands_started = lineno;
 
   if (debug_flag)
     {
@@ -452,14 +454,28 @@ read_makefile (filename, flags)
       remove_comments (collapsed);
 
       /* strncmp is first to avoid dereferencing out into space.  */
-#define	word1eq(s, l) 	(!strncmp (s, p, l) \
-			 && (p[l] == '\0' || isblank (p[l])))
+#define	word1eq(s, l) 	(len == l && !strncmp (s, p, l))
       p = collapsed;
       while (isspace (*p))
 	++p;
       if (*p == '\0')
 	/* This line is completely empty.  */
 	continue;
+
+      /* Find the end of the first token */
+      for (p2 = p+1; *p2 != '\0' && !isspace(*p2); ++p2)
+        {}
+      len = p2 - p;
+
+      /* Find the start of the second token.  If it's a `:', jump past
+         preprocessor stuff since it can't be that--this allows targets named
+         `export', etc. */
+      while (isspace (*p2))
+        ++p2;
+      if (*p2 == '\0')
+        p2 = NULL;
+      else if (*p2 == ':')
+        goto check_var;
 
       /* We must first check for conditional and `define' directives before
 	 ignoring anything, since they control what we will do with
@@ -578,7 +594,29 @@ read_makefile (filename, flags)
 	      v->export = v_noexport;
 	    }
 	}
-      else if (word1eq ("include", 7) || word1eq ("-include", 8)
+      else if (word1eq ("vpath", 5))
+	{
+	  char *pattern;
+	  unsigned int len;
+	  p2 = variable_expand (p + 5);
+	  p = find_next_token (&p2, &len);
+	  if (p != 0)
+	    {
+	      pattern = savestring (p, len);
+	      p = find_next_token (&p2, &len);
+	      /* No searchpath means remove all previous
+		 selective VPATH's with the same pattern.  */
+	    }
+	  else
+	    /* No pattern means remove all previous selective VPATH's.  */
+	    pattern = 0;
+	  construct_vpath_list (pattern, p);
+	  if (pattern != 0)
+	    free (pattern);
+	}
+      else
+    check_var:
+        if (word1eq ("include", 7) || word1eq ("-include", 8)
 	       || word1eq ("sinclude", 8))
 	{
 	  /* We have found an `include' line specifying a nested
@@ -641,26 +679,6 @@ read_makefile (filename, flags)
 	  conditionals = save;
 	  reading_filename = filename;
 	  reading_lineno_ptr = &lineno;
-	}
-      else if (word1eq ("vpath", 5))
-	{
-	  char *pattern;
-	  unsigned int len;
-	  p2 = variable_expand (p + 5);
-	  p = find_next_token (&p2, &len);
-	  if (p != 0)
-	    {
-	      pattern = savestring (p, len);
-	      p = find_next_token (&p2, &len);
-	      /* No searchpath means remove all previous
-		 selective VPATH's with the same pattern.  */
-	    }
-	  else
-	    /* No pattern means remove all previous selective VPATH's.  */
-	    pattern = 0;
-	  construct_vpath_list (pattern, p);
-	  if (pattern != 0)
-	    free (pattern);
 	}
 #undef	word1eq
       else if (try_variable_definition (filename, lineno, p, o_file))
@@ -764,11 +782,6 @@ read_makefile (filename, flags)
 	      else
 		break;
 	    }
-#ifdef __MSDOS__
-	  /* For MS-DOS, skip a "C:\...".  */
-	  if (p != 0 && p[1] == '\\' && isalpha (p[-1]))
-	    p = 0;
-#endif
 #ifdef _AMIGA
 	  /* Here, the situation is quite complicated. Let's have a look
 	    at a couple of targets:
@@ -785,10 +798,10 @@ read_makefile (filename, flags)
 	  if (p && !(isspace(p[1]) || !p[1] || isspace(p[-1])))
 	    p = 0;
 #endif
-#ifdef WIN32
+#if defined (WINDOWS32) || defined (__MSDOS__)
           do {
             check_again = 0;
-            /* For WIN32, skip a "C:\..." or a "C:/..." */
+            /* For MSDOS and WINDOWS32, skip a "C:\..." or a "C:/..." */
             if (p != 0 && (p[1] == '\\' || p[1] == '/') && isalpha (p[-1])) {
               p = index(p + 1, ':');
               check_again = 1;
@@ -1462,7 +1475,11 @@ record_files (filenames, pattern, pattern_percent, deps, commands_started,
       /* See if this is first target seen whose name does
 	 not start with a `.', unless it contains a slash.  */
       if (default_goal_file == 0 && set_default
-	  && (*name != '.' || index (name, '/') != 0))
+	  && (*name != '.' || index (name, '/') != 0
+#ifdef __MSDOS__
+			   || index (name, '\\') != 0
+#endif
+	      ))
 	{
 	  int reject = 0;
 
@@ -1622,9 +1639,11 @@ parse_file_seq (stringp, stopchar, size, strip)
 	*p =' ';
 #endif
 #ifdef __MSDOS__
-      /* For MS-DOS, skip a "C:\...".  */
-      if (stopchar == ':' && p != 0 && p[1] == '\\' && isalpha (p[-1]))
-	p = 0;
+      /* For MS-DOS, skip a "C:\..." or a "C:/..." until we find a
+	 first colon which isn't followed by a slash or a backslash.  */
+      if (stopchar == ':')
+	while (p != 0 && (p[1] == '\\' || p[1] == '/') && isalpha (p[-1]))
+	  p = find_char_unquote (p + 1, stopchars, 1);
 #endif
 #ifdef _AMIGA
       if (stopchar == ':' && p && *p == ':' &&
@@ -1633,8 +1652,8 @@ parse_file_seq (stringp, stopchar, size, strip)
 	p = find_char_unquote (p+1, stopchars, 1);
       }
 #endif
-#ifdef WIN32
-      /* For WIN32, skip a "C:\..." or "C:/...". */
+#ifdef WINDOWS32
+      /* For WINDOWS32, skip a "C:\..." or "C:/...". */
       if (stopchar == ':' &&
           p != 0 &&
           (p[1] == '\\' || p[1] == '/') &&
@@ -1943,6 +1962,10 @@ construct_include_path (arg_dirs)
   register char **dirs = (char **) xmalloc ((5 + defsize) * sizeof (char *));
   register unsigned int idx = 0;
 
+#ifdef  __MSDOS__
+  defsize++;
+#endif
+
   /* First consider any dirs specified with -I switches.
      Ignore dirs that don't exist.  */
 
@@ -1973,6 +1996,22 @@ construct_include_path (arg_dirs)
       }
 
   /* Now add at the end the standard default dirs.  */
+
+#ifdef  __MSDOS__
+  {
+    /* The environment variable $DJDIR holds the root of the
+       DJGPP directory tree; add ${DJDIR}/include.  */
+    struct variable *djdir = lookup_variable ("DJDIR", 5);
+
+    if (djdir)
+      {
+	char *defdir = (char *) xmalloc (strlen (djdir->value) + 8 + 1);
+
+	strcat (strcpy (defdir, djdir->value), "/include");
+	dirs[idx++] = defdir;
+      }
+  }
+#endif
 
   for (i = 0; default_include_directories[i] != 0; ++i)
     if (stat (default_include_directories[i], &stbuf) == 0
@@ -2029,7 +2068,7 @@ tilde_expand (name)
 	  free (home_dir);
 	  home_dir = getenv ("HOME");
 	}
-#if !defined(_AMIGA) && !defined(WIN32)
+#if !defined(_AMIGA) && !defined(WINDOWS32)
       if (home_dir == 0 || home_dir[0] == '\0')
 	{
 	  extern char *getlogin ();
@@ -2042,7 +2081,7 @@ tilde_expand (name)
 		home_dir = p->pw_dir;
 	    }
 	}
-#endif /* !AMIGA && !WIN32 */
+#endif /* !AMIGA && !WINDOWS32 */
       if (home_dir != 0)
 	{
 	  char *new = concat (home_dir, "", name + 1);
@@ -2051,7 +2090,7 @@ tilde_expand (name)
 	  return new;
 	}
     }
-#if !defined(_AMIGA) && !defined(WIN32)
+#if !defined(_AMIGA) && !defined(WINDOWS32)
   else
     {
       struct passwd *pwent;
@@ -2069,7 +2108,7 @@ tilde_expand (name)
       else if (userend != 0)
 	*userend = '/';
     }
-#endif /* !AMIGA && !WIN32 */
+#endif /* !AMIGA && !WINDOWS32 */
 #endif /* !VMS */
   return 0;
 }

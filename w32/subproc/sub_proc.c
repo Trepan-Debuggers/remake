@@ -395,7 +395,7 @@ process_begin(
 	exec_handle = find_file(exec_path, &file_info);
 
 	/*
-	 * If we couldn't open the file, just assume that Win32 will be able
+	 * If we couldn't open the file, just assume that Windows32 will be able
 	 * to find and execute it.
 	 */
 	if (exec_handle == (HANDLE)HFILE_ERROR) {
@@ -578,7 +578,7 @@ proc_stdout_thread(sub_process *pproc)
 	for (;;) {
 		if (ReadFile( (HANDLE)pproc->sv_stdout[0], &c, 1, &nread, NULL) 
 					== FALSE) {
-/*			map_win32_error_to_string(GetLastError());*/
+/*			map_windows32_error_to_string(GetLastError());*/
 			_endthreadex(0);
 		}
 		if (nread == 0)
@@ -609,7 +609,7 @@ proc_stderr_thread(sub_process *pproc)
 
 	for (;;) {
 		if (ReadFile( (HANDLE)pproc->sv_stderr[0], &c, 1, &nread, NULL) == FALSE) {
-			map_win32_error_to_string(GetLastError());
+			map_windows32_error_to_string(GetLastError());
 			_endthreadex(0);
 		}
 		if (nread == 0)
@@ -718,7 +718,7 @@ process_pipe_io(
 			 	one second to collect all remaining output */
 		
 		if (wait_return == WAIT_FAILED) {
-/*			map_win32_error_to_string(GetLastError());*/
+/*			map_windows32_error_to_string(GetLastError());*/
 			pproc->last_err = GetLastError();
 			pproc->lerrno = E_SCALL;
 			goto done;
@@ -835,7 +835,7 @@ process_file_io(
 	wait_return = WaitForSingleObject(childhand, INFINITE);
 		
 	if (wait_return != WAIT_OBJECT_0) {
-/*		map_win32_error_to_string(GetLastError());*/
+/*		map_windows32_error_to_string(GetLastError());*/
 		pproc->last_err = GetLastError();
 		pproc->lerrno = E_SCALL;
 		goto done2;
@@ -883,7 +883,7 @@ process_cleanup(
 
 
 /*
- * Try to protect against WIN32 argument munging. This function takes
+ * Try to protect against WINDOWS32 argument munging. This function takes
  * an argv vector and outputs a 'protected' string as a return
  * value. The return code can be safely passed to CreateProcess().
  *

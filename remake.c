@@ -29,10 +29,14 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/file.h>
 #endif
 
+#ifdef  __MSDOS__
+#include "variable.h"
+#endif
+
 #ifdef VMS
 #include <starlet.h>
 #endif
-#ifdef WIN32
+#ifdef WINDOWS32
 #include <io.h>
 #endif
 
@@ -566,12 +570,62 @@ update_file_1 (file, depth)
 
   if (!must_make)
     {
-      DEBUGPR ("No need to remake target `%s'.\n");
+      if (debug_flag)
+        {
+          print_spaces(depth);
+          printf("No need to remake target `%s'", file->name);
+          if (!streq(file->name, file->hname))
+              printf("; using VPATH name `%s'", file->hname);
+          printf(".\n");
+          fflush(stdout);
+        }
+
       notice_finished_file (file);
+
+      /* Since we don't need to remake the file, convert it to use the
+         VPATH filename if we found one.  hfile will be either the
+         local name if no VPATH or the VPATH name if one was found.  */
+
+      while (file)
+        {
+          file->name = file->hname;
+          file = file->prev;
+        }
+
       return 0;
     }
 
   DEBUGPR ("Must remake target `%s'.\n");
+
+  /* It needs to be remade.  If it's VPATH and not GPATH, toss the VPATH */
+  if (!streq(file->name, file->hname))
+    {
+      char *name = file->name;
+
+      if (gpath_search (&name, NULL))
+        {
+          register struct file *fp = file;
+
+          /* Since we found the file on GPATH, convert it to use the
+             VPATH filename. */
+          while (fp)
+            {
+              fp->name = fp->hname;
+              fp = fp->prev;
+            }
+          DEBUGPR ("  Using VPATH `%s' due to GPATH.\n");
+        }
+      else
+        {
+          if (debug_flag)
+            {
+              print_spaces (depth);
+              printf("  Ignoring VPATH name `%s'.\n", file->hname);
+              fflush(stdout);
+            }
+          file->ignore_vpath = 1;
+        }
+    }
 
   /* Now, take appropriate actions to remake the file.  */
   remake_file (file);
@@ -1003,7 +1057,7 @@ f_mtime (file, search)
     {
       mtime = name_mtime (file->name);
 
-      if (mtime == (time_t) -1 && search)
+      if (mtime == (time_t) -1 && search && !file->ignore_vpath)
 	{
 	  /* If name_mtime failed, search VPATH.  */
 	  char *name = file->name;
@@ -1016,9 +1070,9 @@ f_mtime (file, search)
 		/* vpath_search and library_search store zero in MTIME
 		   if they didn't need to do a stat call for their work.  */
 		file->last_mtime = mtime;
-	      rename_file (file, name);
+	      rehash_file (file, name);
 	      check_renamed (file);
-	      return file_mtime (file);
+	      mtime = name_mtime (name);
 	    }
 	}
     }
@@ -1026,10 +1080,9 @@ f_mtime (file, search)
   {
     /* Files can have bogus timestamps that nothing newly made will be
        "newer" than.  Updating their dependents could just result in loops.
-       So notify the user of the anomaly by treating future files as
-       unrecoverably absent.  */
+       So notify the user of the anomaly with a warning.  */
 
-    static time_t now;
+    static time_t now = 0;
     if (mtime != -1 && mtime > now && ! file->updated)
       {
 	/* This file's time appears to be in the future.
@@ -1039,16 +1092,13 @@ f_mtime (file, search)
 	static unsigned long vms_now[2]; /* assumes 32 bit long ! */
 	sys$gettim (vms_now);
 	now = ((vms_now[0]>>24) & 0xff) + ((vms_now[1]<<8) & 0xffffff00);
-	if (mtime > now)
 #else
 	extern time_t time ();
-	if (mtime > time (&now))
+	time (&now);
 #endif
-	  {
-	    error ("*** File `%s' has modification time in the future",
-		   file->name);
-	    file->update_status = 2;
-	  }
+	if (mtime > now)
+          error ("*** Warning: File `%s' has modification time in the future",
+                 file->name);
       }
   }
 
@@ -1099,7 +1149,7 @@ library_search (lib, mtime_ptr)
       "/lib",
       "/usr/lib",
 #endif
-#if defined(WIN32) && !defined(LIBDIR)
+#if defined(WINDOWS32) && !defined(LIBDIR)
 /*
  * This is completely up to the user at product install time. Just define
  * a placeholder.
@@ -1144,6 +1194,30 @@ library_search (lib, mtime_ptr)
     }
 
   /* Now try the standard set of directories.  */
+
+#ifdef  __MSDOS__
+  {
+    /* The default library directory is at ${DJDIR}/lib.  */
+    struct variable *djdir = lookup_variable ("DJDIR", 5);
+
+    if (djdir)
+      {
+	size_t djdir_len = strlen (djdir->value);
+
+	if (djdir_len > sizeof(LIBDIR) + 8 + strlen(libname) + 4 + 2)
+	  buf = (char *) xrealloc (djdir_len + 1);
+	sprintf (buf, "%s/lib/lib%s.a", djdir->value, libname);
+	mtime = name_mtime (buf);
+	if (mtime != (time_t) -1)
+	  {
+	    *lib = buf;
+	    if (mtime_ptr != 0)
+	      *mtime_ptr = mtime;
+	    return 1;
+	  }
+      }
+  }
+#endif
 
   for (dp = dirs; *dp != 0; ++dp)
     {

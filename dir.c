@@ -44,7 +44,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define NAMLEN(d) _D_NAMLEN(d)
 #endif
 
-#if (defined (POSIX) || defined (WIN32)) && !defined (__GNU_LIBRARY__)
+#if (defined (POSIX) || defined (WINDOWS32)) && !defined (__GNU_LIBRARY__)
 /* Posix does not require that the d_ino field be present, and some
    systems do not provide it. */
 #define REAL_DIR_ENTRY(dp) 1
@@ -56,9 +56,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #ifdef __MSDOS__
 #include <ctype.h>
-#if (DJGPP > 1)
-#include <libc/dosio.h>
-int __opendir_flags = 0;
+#include <fcntl.h>
+
+/* If it's MSDOS that doesn't have _USE_LFN, disable LFN support.  */
+#ifndef _USE_LFN
+#define _USE_LFN 0
 #endif
 
 static char *
@@ -69,14 +71,11 @@ dosify (filename)
   char *df;
   int i;
 
-#if (DJGPP > 1)
-  if (_USE_LFN)
-    /* Using long file names; do no transformation.  */
+  if (filename == 0 || _USE_LFN)
     return filename;
-#endif
-  if (filename == 0)
-    return 0;
 
+  /* FIXME: what about filenames which violate
+     8+3 constraints, like "config.h.in", or ".emacs"?  */
   if (strpbrk (filename, "\"*+,;<=>?[\\]|") != 0)
     return filename;
 
@@ -106,7 +105,7 @@ dosify (filename)
 }
 #endif /* __MSDOS__ */
 
-#ifdef WIN32
+#ifdef WINDOWS32
 #include "pathstuff.h"
 #endif
 
@@ -206,9 +205,9 @@ struct directory_contents
     struct directory_contents *next;
 
     dev_t dev;			/* Device and inode numbers of this dir.  */
-#ifdef WIN32
+#ifdef WINDOWS32
     /*
-     * Inode means nothing on WIN32. Even file key information is
+     * Inode means nothing on WINDOWS32. Even file key information is
      * unreliable because it is random per file open and undefined
      * for remote filesystems. The most unique attribute I can
      * come up with is the fully qualified name of the directory. Beware
@@ -217,13 +216,17 @@ struct directory_contents
      */
     char *path_key;
     int   mtime;        /* controls check for stale directory cache */
+    int   fs_flags;     /* FS_FAT, FS_NTFS, ... */
+#define FS_FAT      0x1
+#define FS_NTFS     0x2
+#define FS_UNKNOWN  0x4
 #else
 #ifdef VMS
     ino_t ino[3];
 #else
     ino_t ino;
 #endif
-#endif /* WIN32 */
+#endif /* WINDOWS32 */
     struct dirfile **files;	/* Files in this directory.  */
     DIR *dirstream;		/* Stream reading this directory.  */
   };
@@ -279,8 +282,13 @@ find_directory (name)
   register unsigned int hash = 0;
   register char *p;
   register struct directory *dir;
-#ifdef WIN32
+#ifdef WINDOWS32
   char* w32_path;
+  char  fs_label[BUFSIZ];
+  char  fs_type[BUFSIZ];
+  long  fs_serno;
+  long  fs_flags;
+  long  fs_len;
 #endif
 #ifdef VMS
   if ((*name == '.') && (*(name+1) == 0))
@@ -327,7 +335,7 @@ find_directory (name)
 
 	  struct directory_contents *dc;
 
-#ifdef WIN32
+#ifdef WINDOWS32
           w32_path = w32ify(name, 1);
           hash = ((unsigned int) st.st_dev << 16) | (unsigned int) st.st_ctime;
 #else
@@ -343,7 +351,7 @@ find_directory (name)
 	  hash %= DIRECTORY_BUCKETS;
 
 	  for (dc = directories_contents[hash]; dc != 0; dc = dc->next)
-#ifdef WIN32
+#ifdef WINDOWS32
             if (!strcmp(dc->path_key, w32_path))
 #else
 	    if (dc->dev == st.st_dev
@@ -354,7 +362,7 @@ find_directory (name)
 #else
 		 && dc->ino == st.st_ino)
 #endif
-#endif /* WIN32 */
+#endif /* WINDOWS32 */
 	      break;
 
 	  if (dc == 0)
@@ -366,9 +374,27 @@ find_directory (name)
 
 	      /* Enter it in the contents hash table.  */
 	      dc->dev = st.st_dev;
-#ifdef WIN32
+#ifdef WINDOWS32
               dc->path_key = strdup(w32_path);
               dc->mtime = st.st_mtime;
+
+              /*
+               * NTFS is the only WINDOWS32 filesystem that bumps mtime
+               * on a directory when files are added/deleted from
+               * a directory.
+               */
+              w32_path[3] = '\0';
+              if (GetVolumeInformation(w32_path,
+                     fs_label, sizeof (fs_label),
+                     &fs_serno, &fs_len,
+                     &fs_flags, fs_type, sizeof (fs_type)) == FALSE)
+                dc->fs_flags = FS_UNKNOWN;
+              else if (!strcmp(fs_type, "FAT"))
+                dc->fs_flags = FS_FAT;
+              else if (!strcmp(fs_type, "NTFS"))
+                dc->fs_flags = FS_NTFS;
+              else
+                dc->fs_flags = FS_UNKNOWN;
 #else
 #ifdef VMS
 	      dc->ino[0] = st.st_ino[0];
@@ -377,16 +403,9 @@ find_directory (name)
 #else
 	      dc->ino = st.st_ino;
 #endif
-#endif /* WIN32 */
+#endif /* WINDOWS32 */
 	      dc->next = directories_contents[hash];
 	      directories_contents[hash] = dc;
-
-#if defined (__MSDOS__) && (DJGPP > 1)
-	      if (_USE_LFN)
-		/* We are using long filenames, so tell opendir not
-		   to mess with them.  */
-		__opendir_flags = __OPENDIR_PRESERVE_CASE;
-#endif
 
 	      dc->dirstream = opendir (name);
 	      if (dc->dirstream == 0)
@@ -432,7 +451,7 @@ dir_contents_file_exists_p (dir, filename)
   register char *p;
   register struct dirfile *df;
   register struct dirent *d;
-#ifdef WIN32
+#ifdef WINDOWS32
   struct stat st;
   int rehash = 0;
 #endif
@@ -483,11 +502,16 @@ dir_contents_file_exists_p (dir, filename)
 
   if (dir->dirstream == 0)
     {
-#ifdef WIN32
-      /* Check to see if directory has changed since last read */
+#ifdef WINDOWS32
+      /*
+       * Check to see if directory has changed since last read. FAT
+       * filesystems force a rehash always as mtime does not change
+       * on directories (ugh!).
+       */
       if (dir->path_key &&
-          stat(dir->path_key, &st) == 0 &&
-          st.st_mtime > dir->mtime) {
+          (dir->fs_flags & FS_FAT ||
+           (stat(dir->path_key, &st) == 0 &&
+            st.st_mtime > dir->mtime))) {
 
         /* reset date stamp to show most recent re-process */
         dir->mtime = st.st_mtime;
@@ -519,7 +543,7 @@ dir_contents_file_exists_p (dir, filename)
       for (i = 0; i < len; ++i)
 	HASHI (newhash, d->d_name[i]);
       newhash %= DIRFILE_BUCKETS;
-#ifdef WIN32
+#ifdef WINDOWS32
       /*
        * If re-reading a directory, check that this file isn't already
        * in the cache.
@@ -543,7 +567,7 @@ dir_contents_file_exists_p (dir, filename)
       dir->files[newhash] = df;
       df->name = savestring (d->d_name, len);
       df->impossible = 0;
-#ifdef WIN32
+#ifdef WINDOWS32
       }
 #endif
       /* Check if the name matches the one we're searching for.  */
@@ -599,12 +623,16 @@ file_exists_p (name)
     return dir_file_exists_p ("[]", name);
 #else /* !VMS */
   dirend = rindex (name, '/');
-#ifdef WIN32
-  if (!dirend)
-    dirend = rindex(name, '\\');
-#endif /* WIN32 */
-  if (dirend == 0)
-    return dir_file_exists_p (".", name);
+#if defined (WINDOWS32) || defined (__MSDOS__)
+  /* Forward and backslashes might be mixed.  We need the rightmost one.  */
+  {
+    char *bslash = rindex(name, '\\');
+    if (!dirend || bslash > dirend)
+      dirend = bslash;
+    /* The case of "d:file" is unhandled.  But I don't think
+       such names can happen here.  */
+  }
+#endif /* WINDOWS32 || __MSDOS__ */
   if (dirend == 0)
 #ifndef _AMIGA
     return dir_file_exists_p (".", name);
@@ -613,9 +641,14 @@ file_exists_p (name)
 #endif /* AMIGA */
 #endif /* VMS */
 
-  dirname = (char *) alloca (dirend - name + 1);
-  bcopy (name, dirname, dirend - name);
-  dirname[dirend - name] = '\0';
+  if (dirend == name)
+    dirname = "/";
+  else
+    {
+      dirname = (char *) alloca (dirend - name + 1);
+      bcopy (name, dirname, dirend - name);
+      dirname[dirend - name] = '\0';
+    }
   return dir_file_exists_p (dirname, dirend + 1);
 }
 
@@ -640,6 +673,16 @@ file_impossible (filename)
     dir = find_directory ("[]");
 #else
   dirend = rindex (p, '/');
+#if defined (WINDOWS32) || defined (__MSDOS__)
+  /* Forward and backslashes might be mixed.  We need the rightmost one.  */
+  {
+    char *bslash = rindex(p, '\\');
+    if (!dirend || bslash > dirend)
+      dirend = bslash;
+    /* The case of "d:file" is unhandled.  But I don't think
+       such names can happen here.  */
+  }
+#endif /* WINDOWS32 or __MSDOS__ */
   if (dirend == 0)
 #ifdef _AMIGA
     dir = find_directory ("");
@@ -649,9 +692,15 @@ file_impossible (filename)
 #endif /* VMS */
   else
     {
-      char *dirname = (char *) alloca (dirend - p + 1);
-      bcopy (p, dirname, dirend - p);
-      dirname[dirend - p] = '\0';
+      char *dirname;
+      if (dirend == p)
+	dirname = "/";
+      else
+	{
+	  dirname = (char *) alloca (dirend - p + 1);
+	  bcopy (p, dirname, dirend - p);
+	  dirname[dirend - p] = '\0';
+	}
       dir = find_directory (dirname);
       filename = p = dirend + 1;
     }
@@ -666,10 +715,10 @@ file_impossible (filename)
 	 structure for it, but leave it out of the contents hash table.  */
       dir->contents = (struct directory_contents *)
 	xmalloc (sizeof (struct directory_contents));
-#ifdef WIN32
+#ifdef WINDOWS32
       dir->contents->path_key = NULL;
       dir->contents->mtime = 0;
-#else  /* WIN32 */
+#else  /* WINDOWS32 */
 #ifdef VMS
       dir->contents->dev = 0;
       dir->contents->ino[0] = dir->contents->ino[1] =
@@ -677,7 +726,7 @@ file_impossible (filename)
 #else
       dir->contents->dev = dir->contents->ino = 0;
 #endif
-#endif /* WIN32 */
+#endif /* WINDOWS32 */
       dir->contents->files = 0;
       dir->contents->dirstream = 0;
     }
@@ -718,10 +767,16 @@ file_impossible_p (filename)
     dir = find_directory ("[]")->contents;
 #else
   dirend = rindex (filename, '/');
-#ifdef WIN32
-  if (!dirend)
-    dirend = rindex (filename, '\\');
-#endif /* WIN32 */
+#if defined (WINDOWS32) || defined (__MSDOS__)
+  /* Forward and backslashes might be mixed.  We need the rightmost one.  */
+  {
+    char *bslash = rindex(filename, '\\');
+    if (!dirend || bslash > dirend)
+      dirend = bslash;
+    /* The case of "d:file" is unhandled.  But I don't think
+       such names can happen here.  */
+  }
+#endif /* WINDOWS32 || __MSDOS__ */
   if (dirend == 0)
 #ifdef _AMIGA
     dir = find_directory ("")->contents;
@@ -731,9 +786,15 @@ file_impossible_p (filename)
 #endif /* VMS */
   else
     {
-      char *dirname = (char *) alloca (dirend - filename + 1);
-      bcopy (p, dirname, dirend - p);
-      dirname[dirend - p] = '\0';
+      char *dirname;
+      if (dirend == filename)
+	dirname = "/";
+      else
+	{
+	  dirname = (char *) alloca (dirend - filename + 1);
+	  bcopy (p, dirname, dirend - p);
+	  dirname[dirend - p] = '\0';
+	}
       dir = find_directory (dirname)->contents;
       p = filename = dirend + 1;
     }
@@ -791,10 +852,10 @@ print_dir_data_base ()
 	if (dir->contents == 0)
 	  printf ("# %s: could not be stat'd.\n", dir->name);
 	else if (dir->contents->files == 0)
-#ifdef WIN32
+#ifdef WINDOWS32
           printf ("# %s (key %s, mtime %d): could not be opened.\n",
                   dir->name, dir->contents->path_key,dir->contents->mtime);
-#else  /* WIN32 */
+#else  /* WINDOWS32 */
 #ifdef VMS
 	  printf ("# %s (device %d, inode [%d,%d,%d]): could not be opened.\n",
 		  dir->name, dir->contents->dev,
@@ -805,7 +866,7 @@ print_dir_data_base ()
 		  dir->name, (long int) dir->contents->dev,
 		  (long int) dir->contents->ino);
 #endif
-#endif /* WIN32 */
+#endif /* WINDOWS32 */
 	else
 	  {
 	    register unsigned int f = 0, im = 0;
@@ -817,10 +878,10 @@ print_dir_data_base ()
 		  ++im;
 		else
 		  ++f;
-#ifdef WIN32
+#ifdef WINDOWS32
             printf ("# %s (key %s, mtime %d): ",
                     dir->name, dir->contents->path_key, dir->contents->mtime);
-#else  /* WIN32 */
+#else  /* WINDOWS32 */
 #ifdef VMS
 	    printf ("# %s (device %d, inode [%d,%d,%d]): ",
 		    dir->name, dir->contents->dev,
@@ -830,7 +891,7 @@ print_dir_data_base ()
 	    printf ("# %s (device %d, inode %d): ",
 		    dir->name, dir->contents->dev, dir->contents->ino);
 #endif
-#endif /* WIN32 */
+#endif /* WINDOWS32 */
 	    if (f == 0)
 	      fputs ("No", stdout);
 	    else

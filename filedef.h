@@ -1,5 +1,5 @@
 /* Definition of target file data structures for GNU Make.
-Copyright (C) 1988, 89, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 90, 91, 92, 93, 94, 97 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -24,6 +24,8 @@ struct file
   {
     struct file *next;
     char *name;
+    char *hname;                /* Hashed filename */
+    char *vpath;                /* VPATH/vpath pathname */
     struct dep *deps;
     struct commands *cmds;	/* Commands to execute for this target.  */
     int command_flags;		/* Flags OR'd in for cmds; see commands.h.  */
@@ -77,6 +79,7 @@ struct file
     unsigned int secondary:1;
     unsigned int dontcare:1;	/* Nonzero if no complaint is to be made if
 				   this target cannot be remade.  */
+    unsigned int ignore_vpath:1;/* Nonzero if we threw out VPATH name */
   };
 
 /* Number of intermediate files entered.  */
@@ -88,7 +91,7 @@ extern struct file *default_goal_file, *suffix_file, *default_file;
 
 extern struct file *lookup_file (), *enter_file ();
 extern void remove_intermediates (), snap_deps ();
-extern void rename_file (), file_hash_enter ();
+extern void rehash_file (), file_hash_enter ();
 extern void set_command_state ();
 
 
@@ -109,11 +112,8 @@ extern time_t f_mtime ();
    trouble when the machine running make and the machine holding a file have
    different ideas about what time it is; and can also lose for `force'
    targets, which need to be considered newer than anything that depends on
-   them, even if said dependents' modtimes are in the future.
-
-   NOTE: This assumes 32-bit `time_t's, but I cannot think of a portable way
-   to produce the largest representable integer of a given signed type.  */
-#define NEW_MTIME	((time_t) 0x7fffffff)
+   them, even if said dependents' modtimes are in the future.  */
+#define NEW_MTIME	INTEGER_TYPE_MAXIMUM (time_t)
 
 
 #define check_renamed(file) \

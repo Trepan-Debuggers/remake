@@ -137,6 +137,19 @@ extern unsigned int get_path_max PARAMS ((void));
 #define	PATH_VAR(var)	char *var = (char *) alloca (GET_PATH_MAX)
 #endif
 
+#ifndef CHAR_BIT
+#define CHAR_BIT 8
+#endif
+
+/* Nonzero if the integer type T is signed.  */
+#define INTEGER_TYPE_SIGNED(t) ((t) -1 < 0)
+
+/* The minimum and maximum values for the integer type T.
+   Use ~ (t) 0, not -1, for portability to 1's complement hosts.  */
+#define INTEGER_TYPE_MINIMUM(t) \
+  (! INTEGER_TYPE_SIGNED (t) ? (t) 0 : ~ (t) 0 << (sizeof (t) * CHAR_BIT - 1))
+#define INTEGER_TYPE_MAXIMUM(t) (~ (t) 0 - INTEGER_TYPE_MINIMUM (t))
+
 #ifdef	STAT_MACROS_BROKEN
 #ifdef	S_ISREG
 #undef	S_ISREG
@@ -202,8 +215,8 @@ extern void exit PARAMS ((int));
 #ifndef	bzero
 #define bzero(s, n)	memset ((s), 0, (n))
 #endif
-#ifndef	bcopy
-#define bcopy(s, d, n)	memcpy ((d), (s), (n))
+#if defined(HAVE_MEMMOVE) && !defined(bcopy)
+#define bcopy(s, d, n)	memmove ((d), (s), (n))
 #endif
 
 #else	/* Not ANSI_STRING.  */
@@ -277,13 +290,13 @@ extern char *alloca ();
 #define	ENUM_BITFIELD(bits)
 #endif
 
-#if defined(__MSDOS__) || defined(WIN32)
+#if defined(__MSDOS__) || defined(WINDOWS32)
 #define PATH_SEPARATOR_CHAR ';'
 #else
 #define PATH_SEPARATOR_CHAR ':'
 #endif
 
-#ifdef WIN32
+#ifdef WINDOWS32
 #include <fcntl.h>
 #include <malloc.h>
 #define pipe(p) _pipe(p, 512, O_BINARY)
@@ -346,6 +359,7 @@ extern void create_pattern_rule ();
 extern void build_vpath_lists ();
 extern void construct_vpath_list ();
 extern int vpath_search ();
+extern int gpath_search ();
 
 extern void construct_include_path ();
 extern void uniquize_deps ();
@@ -364,7 +378,7 @@ extern void child_access ();
 /* We omit these declarations on non-POSIX systems which define _POSIX_VERSION,
    because such systems often declare the in header files anyway.  */
 
-#if !defined (__GNU_LIBRARY__) && !defined (POSIX) && !defined (_POSIX_VERSION) && !defined(WIN32)
+#if !defined (__GNU_LIBRARY__) && !defined (POSIX) && !defined (_POSIX_VERSION) && !defined(WINDOWS32)
 
 extern long int atol ();
 #ifndef VMS

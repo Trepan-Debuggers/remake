@@ -34,6 +34,9 @@
 /* Define if you have <alloca.h> and it should be used (not on Ultrix).  */
 /* #undef HAVE_ALLOCA_H 1 */
 
+/* Define if you have the memmove function.  */
+#define HAVE_MEMMOVE 1
+
 /* Define if you don't have vprintf but do have _doprnt.  */
 /* #undef HAVE_DOPRNT */
 
@@ -287,6 +290,6 @@
 #define PARAMS(protos)  protos
 #else /* Not C++ or ANSI C.  */
 #undef  PARAMS
-#define PARAMS(protos)  ()   
+#define PARAMS(protos)  ()
 #endif /* C++ or ANSI C.  */
 

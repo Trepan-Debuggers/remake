@@ -2,7 +2,7 @@
 #include "w32err.h"
 
 /*
- * Description: the win32 version of perror()
+ * Description: the windows32 version of perror()
  *
  * Returns:  a pointer to a static error
  *
@@ -10,7 +10,7 @@
  *      comp.os.ms-windows.programmer.win32
  */
 char * 
-map_win32_error_to_string (DWORD ercode) {
+map_windows32_error_to_string (DWORD ercode) {
 /* __declspec (thread) necessary if you will use multiple threads */
 __declspec (thread) static char szMessageBuffer[128];
  

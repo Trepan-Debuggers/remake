@@ -15,7 +15,7 @@
 
 struct dirent
 {
-  ino_t d_ino; 			/* unused - no equivalent on WIN32 */
+  ino_t d_ino; 			/* unused - no equivalent on WINDOWS32 */
   char d_name[NAME_MAX+1];
 };
 

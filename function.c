@@ -23,14 +23,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "job.h"
 #include "commands.h"
 
-#ifdef __MSDOS__
-#include <process.h>
-#include <fcntl.h>
-#endif
 #ifdef _AMIGA
 #include "amiga.h"
 #endif
-#ifdef WIN32
+#ifdef WINDOWS32
 #include <windows.h>
 #include <io.h>
 #include "sub_proc.h"
@@ -235,6 +231,7 @@ enum function
     function_firstword,
     function_word,
     function_words,
+    function_wordlist,
     function_findstring,
     function_strip,
     function_join,
@@ -271,6 +268,7 @@ static struct
     { "firstword", 9, function_firstword },
     { "word", 4, function_word },
     { "words", 5, function_words },
+    { "wordlist", 8, function_wordlist },
     { "findstring", 10, function_findstring },
     { "strip", 5, function_strip },
     { "join", 4, function_join },
@@ -336,7 +334,7 @@ expand_function (o, function, text, end)
      char *end;
 {
   char *p, *p2, *p3;
-  unsigned int i, len;
+  unsigned int i, j, len;
   int doneany = 0;
   int count;
   char endparen = *end, startparen = *end == ')' ? '(' : '{';
@@ -350,13 +348,16 @@ expand_function (o, function, text, end)
 #ifndef VMS /* not supported for vms yet */
     case function_shell:
       {
-#ifdef WIN32
+#ifdef WINDOWS32
         SECURITY_ATTRIBUTES saAttr;
         HANDLE hIn;
         HANDLE hErr;
         HANDLE hChildOutRd;
         HANDLE hChildOutWr;
         HANDLE hProcess;
+#endif
+#ifdef __MSDOS__
+	FILE *fpipe;
 #endif
 	char **argv;
 	char *error_prefix;
@@ -369,11 +370,13 @@ expand_function (o, function, text, end)
 	/* Expand the command line.  */
 	text = expand_argument (text, end);
 
+#ifndef __MSDOS__
 	/* Construct the argument list.  */
 	argv = construct_command_argv (text,
 				       (char **) NULL, (struct file *) 0);
 	if (argv == 0)
 	  break;
+#endif
 
 #ifndef _AMIGA
 	/* Using a target environment for `shell' loses in cases like:
@@ -400,8 +403,8 @@ expand_function (o, function, text, end)
 	else
 	  error_prefix = "";
 
-#if !defined(__MSDOS__) && !defined(_AMIGA) 
-# ifdef WIN32
+#ifndef _AMIGA
+# ifdef WINDOWS32
         saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
         saAttr.bInheritHandle = TRUE;
         saAttr.lpSecurityDescriptor = NULL;
@@ -451,30 +454,78 @@ expand_function (o, function, text, end)
 
         /* this will be closed almost right away */
         pipedes[1] = _open_osfhandle((long) hChildOutWr, O_APPEND);
-# else /* WIN32 */
-	if (pipe (pipedes) < 0)
-	  {
-	    perror_with_name (error_prefix, "pipe");
-	    break;
-	  }
+# else /* WINDOWS32 */
+#  ifdef __MSDOS__
+        {
+          /* MSDOS can't fork, but it has `popen'.
+             (Bwt, why isn't `popen' used in all the versions?)  */
+          struct variable *sh = lookup_variable ("SHELL", 5);
+          int e;
+          extern int dos_command_running, dos_status;
 
+          /* Make sure not to bother processing an empty line.  */
+          while (isblank (*text))
+            ++text;
+          if (*text == '\0')
+            break;
+
+          if (sh)
+            {
+              char buf[PATH_MAX + 7];
+              /* This makes sure $SHELL value is used by $(shell), even
+                 though the target environment is not passed to it.  */
+              sprintf (buf, "SHELL=%s", sh->value);
+              putenv (buf);
+            }
+
+          e = errno;
+          errno = 0;
+          dos_command_running = 1;
+          dos_status = 0;
+          fpipe = popen (text, "rt");
+          dos_command_running = 0;
+          if (!fpipe || dos_status)
+            {
+              pipedes[0] = -1;
+              pid = -1;
+              if (dos_status)
+                errno = EINTR;
+              else if (errno == 0)
+                errno = ENOMEM;
+              shell_function_completed = -1;
+            }
+          else
+            {
+              pipedes[0] = fileno (fpipe);
+              pid = 42;
+              errno = e;
+              shell_function_completed = 1;
+            }
+        }
+        if (pipedes[0] < 0)
+#  else /* ! __MSDOS__ */
+        if (pipe (pipedes) < 0)
+#  endif /* __MSDOS__ */
+          {
+            perror_with_name (error_prefix, "pipe");
+            break;
+          }
+
+#  ifndef  __MSDOS__
 	pid = vfork ();
 	if (pid < 0)
 	  perror_with_name (error_prefix, "fork");
 	else if (pid == 0)
 	  child_execute_job (0, pipedes[1], argv, envp);
 	else
-# endif /* WIN32 */
+#  endif /* ! __MSDOS__ */
+# endif /* WINDOWS32 */
 	  {
 	    /* We are the parent.  */
 
 	    char *buffer;
 	    unsigned int maxlen;
 	    int cc;
-
-	    /* Free the storage only the child needed.  */
-	    free (argv[0]);
-	    free ((char *) argv);
 #if 0
 	    for (i = 0; envp[i] != 0; ++i)
 	      free (envp[i]);
@@ -483,16 +534,21 @@ expand_function (o, function, text, end)
 
 	    /* Record the PID for reap_children.  */
 	    shell_function_pid = pid;
+#ifndef  __MSDOS__
 	    shell_function_completed = 0;
 
+	    /* Free the storage only the child needed.  */
+	    free (argv[0]);
+	    free ((char *) argv);
+
+	    /* Close the write side of the pipe.  */
+	    (void) close (pipedes[1]);
+#endif
 
 	    /* Set up and read from the pipe.  */
 
 	    maxlen = 200;
 	    buffer = (char *) xmalloc (maxlen + 1);
-
-	    /* Close the write side of the pipe.  */
-	    (void) close (pipedes[1]);
 
 	    /* Read from the pipe until it gets EOF.  */
 	    i = 0;
@@ -516,7 +572,12 @@ expand_function (o, function, text, end)
 #endif
 
 	    /* Close the read side of the pipe.  */
+#ifdef  __MSDOS__
+	    if (fpipe)
+	      (void) pclose (fpipe);
+#else
 	    (void) close (pipedes[0]);
+#endif
 
 	    /* Loop until child_handler sets shell_function_completed
 	       to the status of our child shell.  */
@@ -557,73 +618,16 @@ expand_function (o, function, text, end)
 
 	    free (buffer);
 	  }
-#else	/* MSDOS or Amiga */
-#ifndef _AMIGA
-         {
-	   /* MS-DOS can't do fork, but it can do spawn.  However, this
-	      means that we don't have an opportunity to reopen stdout to
-	      trap it.  Thus, we save our own stdout onto a new descriptor
-	      and dup a temp file's descriptor onto our stdout temporarily.
-	      After we spawn the shell program, we dup our own stdout back
-	      to the stdout descriptor.  The buffer reading is the same as
-	      above, except that we're now reading from a file.  */
-
-	   int save_stdout;
-	   int child_stdout;
-	   char tmp_output[FILENAME_MAX];
-	   FILE *child_stream;
-	   unsigned int maxlen = 200;
-	   int cc;
-	   char *buffer;
-
-	   strcpy (tmp_output, "shXXXXXX");
-	   mktemp (tmp_output);
-	   child_stdout = open (tmp_output,
-				O_WRONLY|O_CREAT|O_TRUNC|O_TEXT, 0644);
-	   save_stdout = dup (1);
-	   dup2 (child_stdout, 1);
-	   spawnvp (P_WAIT, argv[0], argv);
-	   dup2 (save_stdout, 1);
-	   close (child_stdout);
-	   close (save_stdout);
-
-	   child_stdout = open (tmp_output, O_RDONLY|O_TEXT, 0644);
-
-	   buffer = xmalloc (maxlen);
-	   i = 0;
-	   do
-	     {
-	       if (i == maxlen)
-		 {
-		   maxlen += 512;
-		   buffer = (char *) xrealloc (buffer, maxlen + 1);
-		 }
-
-	       cc = read (child_stdout, &buffer[i], maxlen - i);
-	       if (cc > 0)
-		 i += cc;
-	     } while (cc > 0);
-
-	   close (child_stdout);
-	   unlink (tmp_output);
-
-	   if (i > 0)
-	     {
-	       if (buffer[i - 1] == '\n')
-		 buffer[--i] = '\0';
-	       else
-		 buffer[i] = '\0';
-	       p = buffer;
-	       while ((p = index (p, '\n')) != 0)
-		 *p++ = ' ';
-	       o = variable_buffer_output (o, buffer, i);
-	     }
-	   free (buffer);
-	 }
-#else /* Amiga */
+#else	/* Amiga */
 	 {
 	   /* Amiga can't fork nor spawn, but I can start a program with
-	      redirection of my choice. The rest is the same as above. */
+	      redirection of my choice.   However, this means that we
+	      don't have an opportunity to reopen stdout to trap it.  Thus,
+	      we save our own stdout onto a new descriptor and dup a temp
+	      file's descriptor onto our stdout temporarily.  After we
+	      spawn the shell program, we dup our own stdout back to the
+	      stdout descriptor.  The buffer reading is the same as above,
+	      except that we're now reading from a file. */
 #include <dos/dos.h>
 #include <proto/dos.h>
 
@@ -696,7 +700,6 @@ expand_function (o, function, text, end)
 	   free (buffer);
 	 }
 #endif	/* Not Amiga.  */
-#endif	/* MSDOS or Amiga.  */
 
 	free (text);
 	break;
@@ -1194,6 +1197,91 @@ index argument");
       free (text);
       break;
 
+    case function_wordlist:
+      /* Get two comma-separated arguments and expand each one.  */
+      count = 0;
+      for (p = text; p < end; ++p)
+	{
+	  if (*p == startparen)
+	    ++count;
+	  else if (*p == endparen)
+	    --count;
+	  else if (*p == ',' && count <= 0)
+	    break;
+	}
+      if (p == end)
+	BADARGS ("wordlist");
+      text = expand_argument (text, p);
+
+      /* Check the first argument.  */
+      for (p2 = text; *p2 != '\0'; ++p2)
+	if (*p2 < '0' || *p2 > '9')
+	  {
+	    if (reading_filename != 0)
+	      makefile_fatal (reading_filename, *reading_lineno_ptr,
+			      "non-numeric first argument to `wordlist' function");
+	    else
+	      fatal ("non-numeric first argument to `wordlist' function");
+	  }
+      i = (unsigned int)atoi(text);
+      free (text);
+
+      /* Check the next argument */
+      for (p2 = p + 1; isblank(*p2); ++p2)
+        {}
+      count = 0;
+      for (p = p2; p < end; ++p)
+        {
+          if (*p == startparen)
+            ++count;
+          else if (*p == endparen)
+            --count;
+          else if (*p == ',' && count <= 0)
+            break;
+        }
+      if (p == end)
+        BADARGS ("wordlist");
+      text = expand_argument (p2, p);
+
+      for (p2 = text; *p2 != '\0'; ++p2)
+        if (*p2 < '0' || *p2 > '9')
+          {
+            if (reading_filename != 0)
+              makefile_fatal (reading_filename, *reading_lineno_ptr,
+                              "non-numeric second argument to `wordlist' function");
+            else
+              fatal ("non-numeric second argument to `wordlist' function");
+          }
+      j = (unsigned int)atoi(text);
+      free (text);
+
+      if (j > i)
+        j -= i;
+      else
+        {
+          unsigned int k;
+          k = j;
+          j = i - j;
+          i = k;
+        }
+      ++j;
+
+      /* Extract the requested words */
+      text = expand_argument (p + 1, end);
+      p2 = text;
+
+      while (((p = find_next_token (&p2, &len)) != 0) && --i)
+        {}
+      if (p)
+        {
+          while (--j && (find_next_token (&p2, &len) != 0))
+            {}
+          o = variable_buffer_output (o, p, p2 - p);
+        }
+
+      free (text);
+      break;
+
     case function_findstring:
       /* Get two comma-separated arguments and expand each one.  */
       count = 0;
@@ -1270,17 +1358,27 @@ index argument");
 	{
 	  p = p2 + len;
 #ifdef VMS
-	  while (p >= p2 && *p != (function == function_dir ? ']' : '.'))
+	  while (p >= p2 && *p != ']'
+                 && (function != function_basename || *p != '.'))
 #else
-	  while (p >= p2 && *p != (function == function_dir ? '/' : '.'))
+# ifdef __MSDOS__
+	  while (p >= p2 && *p != '/' && *p != '\\'
+                 && (function != function_basename || *p != '.'))
+# else
+	  while (p >= p2 && *p != '/'
+                 && (function != function_basename || *p != '.'))
+# endif
 #endif
 	    --p;
-	  if (p >= p2)
-	    {
-	      if (function == function_dir)
-		++p;
-	      o = variable_buffer_output (o, p2, p - p2);
-	    }
+	  if (p >= p2 && (function == function_dir))
+	    o = variable_buffer_output (o, p2, ++p - p2);
+          else if (p >= p2 && (*p == '.'))
+            o = variable_buffer_output (o, p2, p - p2);
+#if defined(WINDOWS32) || defined(__MSDOS__)
+        /* Handle the "d:foobar" case */
+          else if (p2[0] && p2[1] == ':' && function == function_dir)
+            o = variable_buffer_output (o, p2, 2);
+#endif
 	  else if (function == function_dir)
 #ifdef VMS
             o = variable_buffer_output (o, "[]", 2);
@@ -1315,17 +1413,34 @@ index argument");
 	{
 	  p = p2 + len;
 #ifdef VMS
-	  while (p >= p2 && *p != (function == function_notdir ? ']' : '.'))
+	  while (p >= p2 && *p != ']'
+                 && (function != function_suffix || *p != '.'))
 #else
-	  while (p >= p2 && *p != (function == function_notdir ? '/' : '.'))
+# ifdef __MSDOS__
+	  while (p >= p2 && *p != '/' && *p != '\\'
+                 && (function != function_suffix || *p != '.'))
+# else
+	  while (p >= p2 && *p != '/'
+                 && (function != function_suffix || *p != '.'))
+# endif
 #endif
 	    --p;
 	  if (p >= p2)
 	    {
 	      if (function == function_notdir)
-		++p;
+                ++p;
+              else if (*p != '.')
+                continue;
 	      o = variable_buffer_output (o, p, len - (p - p2));
 	    }
+#if defined(WINDOWS32) || defined(__MSDOS__)
+          /* Handle the case of "d:foo/bar". */
+          else if (function == function_notdir && p2[0] && p2[1] == ':')
+            {
+              p = p2 + 2;
+              o = variable_buffer_output (o, p, len - (p - p2));
+            }
+#endif
 	  else if (function == function_notdir)
 	    o = variable_buffer_output (o, p2, len);
 

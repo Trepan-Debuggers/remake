@@ -4,10 +4,10 @@
 #include "pathstuff.h"
 
 /*
- * Convert delimiter separated vpath to Canonical format. 
+ * Convert delimiter separated vpath to Canonical format.
  */
 char *
-convert_vpath_to_win32(char *Path, char to_delim)
+convert_vpath_to_windows32(char *Path, char to_delim)
 {
     char *etok;            /* token separator for old Path */
 
@@ -19,21 +19,21 @@ convert_vpath_to_win32(char *Path, char to_delim)
 		if (isblank(*etok))
 			*etok = to_delim;
 
-	return (convert_Path_to_win32(Path, to_delim));
+	return (convert_Path_to_windows32(Path, to_delim));
 }
 
 /*
- * Convert delimiter separated path to Canonical format. 
+ * Convert delimiter separated path to Canonical format.
  */
 char *
-convert_Path_to_win32(char *Path, char to_delim)
+convert_Path_to_windows32(char *Path, char to_delim)
 {
     char *etok;            /* token separator for old Path */
     char *p;            /* points to element of old Path */
 
     /* is this a multi-element Path ? */
     for (p = Path, etok = strpbrk(p, ":;");
-         etok; 
+         etok;
          etok = strpbrk(p, ":;"))
         if ((etok - p) == 1) {
             if (*(etok - 1) == ';' ||
@@ -48,7 +48,7 @@ convert_Path_to_win32(char *Path, char to_delim)
                 p = ++etok;
             } else
                 /* all finished, force abort */
-                p += strlen(p);    
+                p += strlen(p);
         } else {
             /* found another one, no drive letter */
             *etok = to_delim;
@@ -61,7 +61,7 @@ convert_Path_to_win32(char *Path, char to_delim)
 	*p = '\\';
 #endif
     return Path;
-} 
+}
 
 /*
  * Convert to forward slashes. Resolve to full pathname optionally
@@ -100,10 +100,10 @@ getcwd_fs(char* buf, int len)
 #ifdef unused
 /*
  * Convert delimiter separated pathnames (e.g. PATH) or single file pathname
- * (e.g. c:/foo, c:\bar) to NutC format. If we are handed a string that 
- * _NutPathToNutc() fails to convert, just return the path we were handed 
- * and assume the caller will know what to do with it (It was probably 
- * a mistake to try and convert it anyway due to some of the bizarre things 
+ * (e.g. c:/foo, c:\bar) to NutC format. If we are handed a string that
+ * _NutPathToNutc() fails to convert, just return the path we were handed
+ * and assume the caller will know what to do with it (It was probably
+ * a mistake to try and convert it anyway due to some of the bizarre things
  * that might look like pathnames in makefiles).
  */
 char *
@@ -119,8 +119,8 @@ convert_path_to_nutc(char *path)
     char *rval;
 
     /* is this a multi-element path ? */
-    for (p = path, etok = strpbrk(p, ":;"), count = 0; 
-         etok; 
+    for (p = path, etok = strpbrk(p, ":;"), count = 0;
+         etok;
          etok = strpbrk(p, ":;"))
         if ((etok - p) == 1) {
             if (*(etok - 1) == ';' ||
@@ -132,15 +132,15 @@ convert_path_to_nutc(char *path)
                 p = ++etok, count++;
             else
                 /* all finished, force abort */
-                p += strlen(p);    
-        } else 
+                p += strlen(p);
+        } else
             /* found another one, no drive letter */
             p = ++etok, count++;
 
     if (count) {
         count++;    /* x1;x2;x3 <- need to count x3 */
 
-        /* 
+        /*
          * Hazard a guess on how big the buffer needs to be.
          * We have to convert things like c:/foo to /c=/foo.
          */
@@ -154,10 +154,10 @@ convert_path_to_nutc(char *path)
          * a time. Single file pathnames will fail this and fall
          * to the logic below loop.
          */
-        for (p = path, etok = strpbrk(p, ":;"); 
-             etok; 
+        for (p = path, etok = strpbrk(p, ":;");
+             etok;
              etok = strpbrk(p, ":;")) {
-    
+
             /* don't trip up on device specifiers or empty path slots */
             if ((etok - p) == 1)
                 if (*(etok - 1) == ';' ||
@@ -165,14 +165,14 @@ convert_path_to_nutc(char *path)
                     p = ++etok;
                     continue;
                 } else if ((etok = strpbrk(etok+1, ":;")) == NULL)
-                    break;    /* thing found was a WIN32 pathname */
+                    break;    /* thing found was a WINDOWS32 pathname */
 
             /* save separator */
             sep = *etok;
 
             /* terminate the current path element -- temporarily */
             *etok = '\0';
-    
+
 #ifdef __NUTC__
             /* convert to NutC format */
             if (_NutPathToNutc(p, pathp, 0) == FALSE) {
@@ -187,20 +187,20 @@ convert_path_to_nutc(char *path)
             *pathp++ = '/';
             strcpy(pathp, &p[2]);
 #endif
-            
+
             pathp += strlen(pathp);
             *pathp++ = ':';     /* use Unix style path separtor for new path */
             *pathp   = '\0'; /* make sure we are null terminaed */
-    
+
             /* restore path separator */
             *etok = sep;
-    
+
             /* point p to first char of next path element */
             p = ++etok;
 
         }
     } else {
-        nutc_path_len = strlen(path) + 3; 
+        nutc_path_len = strlen(path) + 3;
         nutc_path = xmalloc(nutc_path_len);
         pathp = nutc_path;
         *pathp = '\0';
@@ -211,7 +211,7 @@ convert_path_to_nutc(char *path)
       * OK, here we handle the last element in PATH (e.g. c of a;b;c)
      * or the path was a single filename and will be converted
      * here. Note, testing p here assures that we don't trip up
-     * on paths like a;b; which have trailing delimiter followed by 
+     * on paths like a;b; which have trailing delimiter followed by
      * nothing.
      */
     if (*p != '\0') {
@@ -234,6 +234,6 @@ convert_path_to_nutc(char *path)
     rval = savestring(nutc_path, strlen(nutc_path));
     free(nutc_path);
     return rval;
-} 
+}
 
 #endif

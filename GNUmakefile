@@ -42,7 +42,9 @@ endif
 # Get most of the information from the Unix-compatible makefile.
 include compatMakefile
 
-MAKE = $(MAKE_COMMAND) $(MAKEOVERRIDES)
+MAKE 	= $(MAKE_COMMAND) $(MAKEOVERRIDES)
+
+CVS	= cvs
 
 # Remove autoconf magic.
 prefix = /usr/local
@@ -58,10 +60,10 @@ config.h.in: $(AC_MACRODIR)/acconfig.h
 endif
 configure: configure.in aclocal.m4
 	autoconf $(ACFLAGS)
-	test -d CVS && cvs commit -m'autoconf $(ACFLAGS)' $@
+	-test -d CVS && $(CVS) commit -m'autoconf $(ACFLAGS)' $@
 config.h.in: configure.in aclocal.m4
 	autoheader $(ACFLAGS)
-	test -d CVS && cvs commit -m'autoheader $(ACFLAGS)' $@
+	-test -d CVS && $(CVS) commit -m'autoheader $(ACFLAGS)' $@
 
 ifdef customs
 defines := $(defines) -Ipmake/customs -Ipmake/lib/include
@@ -154,7 +156,7 @@ $(globfiles): stamp-glob ;
 stamp-glob: $(libc-srcdir)/posix/glob.tar
 	-rm -f stamp-glob glob/*
 	tar xvf $< glob
-	cvs commit -m'Updated from libc' glob
+	$(CVS) commit -m'Updated from libc' glob
 	touch $@
 $(libc-srcdir)/posix/glob.tar: force
 	$(MAKE) -C $(@D) $(@F) no_deps=t
@@ -177,7 +179,7 @@ Makefile.in: compatMakefile $(nolib-deps:remote-%.dep=remote-stub.dep)
 	 echo '# Automatically generated dependencies.'; \
 	 sed -e 's/ [^ ]*\.dep//' -e 's=$(archpfx)==' $(filter-out $<,$^) \
 	) > $@
-	cvs commit -mRegenerated $@
+	$(CVS) commit -mRegenerated $@
 
 .SUFFIXES: .dep
 # Maintain the automatically-generated dependencies.
@@ -202,7 +204,7 @@ build.sh.in: build.template compatMakefile
 	    $< > $@.new
 	chmod a+x $@.new
 	mv -f $@.new $@
-	cvs commit -mRegenerated $@
+	$(CVS) commit -mRegenerated $@
 
 # Make the distribution tar files.
 
@@ -222,21 +224,22 @@ vmsfiles = config.h-vms makefile.com makefile.vms readme.vms \
 	   vmsdir.h vmsfunctions.c vmsify.c
 amigafiles = README.Amiga config.ami Makefile.ami SCOPTIONS SMakefile \
 	     amiga.c amiga.h make.lnk
-win32files = README.WIN32 build_w32.bat config.h.WIN32 subproc.bat NMakefile \
-	     $(addprefix w32/,pathstuff.c compat/dirent.c include/dirent.h \
-			      include/pathstuff.h include/sub_proc.h \
-			      include/w32err.h subproc/NMakefile \
-			      subproc/build.bat subproc/misc.c \
-			      subproc/proc.h subproc/sub_proc.c \
-			      subproc/w32err.c)
+dosfiles = README.DOS dosbuild.bat
+w32files = README.W32 build_w32.bat config.h.W32 subproc.bat NMakefile \
+	   $(addprefix w32/,pathstuff.c compat/dirent.c include/dirent.h \
+			    include/pathstuff.h include/sub_proc.h \
+			    include/w32err.h subproc/NMakefile \
+			    subproc/build.bat subproc/misc.c \
+			    subproc/proc.h subproc/sub_proc.c \
+			    subproc/w32err.c)
 distfiles=README INSTALL COPYING ChangeLog NEWS \
           configure Makefile.in configure.in build.sh.in mkinstalldirs \
 	  configh.dos configure.bat \
-	  $(amigafiles) $(vmsfiles) $(win32files) \
+	  $(amigafiles) $(vmsfiles) $(w32files) $(dosfiles) \
 	  aclocal.m4 acconfig.h $(srcs) remote-*.c $(globfiles) \
 	  make.texinfo make-stds.texi \
-	  make.?? make.??s make.toc make.aux make.man texinfo.tex TAGS tags \
-	  install-sh \
+	  $(wildcard make.?? make.??s make.toc make.aux) make.man texinfo.tex \
+	  TAGS tags install-sh \
 	  make.info make.info*
 
 ifndef dist-flavor
@@ -244,7 +247,7 @@ dist-flavor = alpha
 endif
 .PHONY: cvs-mark
 cvs-mark: $(distfiles)
-	cvs tag -F make-$(subst .,-,$(version))
+	$(CVS) tag -F make-$(subst .,-,$(version))
 
 dist: local-inst
 .PHONY: local-inst
@@ -268,7 +271,7 @@ $(alpha-dir)/%: %
 	sed 's/VERSION/$(version)/' < $< > $@
 # Make sure I don't edit it by accident.
 	chmod a-w $@
-	cvs commit -m'Regenerated for $(version)' $@
+	$(CVS) commit -m'Regenerated for $(version)' $@
 
 define make-tar
 @rm -fr make-$(version)

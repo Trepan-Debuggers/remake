@@ -1,9 +1,45 @@
-GNU make NEWS -- history of user-visible changes.  9 May 1996
+GNU make NEWS                                               -*-indented-text-*-
+  History of user-visible changes.
+  06 Apr 1996
 
-Copyright (C) 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
+Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
 See the end for copying conditions.
 
 Please send GNU make bug reports to bug-gnu-utils@prep.ai.mit.edu.
+
+Version 3.76
+
+* VPATH functionality has been changed to incorporate the VPATH+ patch,
+  previously maintained by Paul Smith <psmith@baynetworks.com>.  See the
+  manual.
+
+* Make defines a new variable, `MAKECMDGOALS', to contain the goals that
+  were specified on the command line, if any.  Modifying this variable
+  has no effect on the operation of make.
+
+* A new function, `$(wordlist S,E,TEXT)', is available: it returns a
+  list of words from number S to number E (inclusive) of TEXT.
+
+* Instead of an error, detection of future modification times gives a
+  warning and continues.
+
+* Fix the $(basename) and $(suffix) functions so they only operate on
+  the last filename, not the entire string:
+
+      Command              Old Result             New Result
+      -------              ----------             ----------
+    $(basename a.b)        a                      a
+    $(basename a.b/c)      a                      a.b/c
+    $(suffix a.b)          b                      b
+    $(suffix a.b/c)        b/c                    <empty>
+
+* Updates to the Windows 95/NT port from Rob Tulloh (see README.W32).
+
+* Eli Zaretskii has updated the port to 32-bit protected mode on MSDOS
+  and MS-Windows, building with the DJGPP v2 port of GNU C/C++ compiler
+  and utilities.  See README.DOS for details, and direct all questions
+  concerning this port to Eli Zaretskii <eliz@is.elta.co.il> or DJ
+  Delorie <dj@delorie.com>.
 
 Version 3.75
 
@@ -23,7 +59,7 @@ Version 3.75
   details, and direct all Amiga-related questions to <digulla@fh-konstanz.de>.
 
 * Rob Tulloh of Tivoli Systems has contributed a port to Windows NT or 95.
-  See README.WIN32 for details, and direct all Windows-related questions to
+  See README.W32 for details, and direct all Windows-related questions to
   <rob_tulloh@tivoli.com>.
 
 Version 3.73

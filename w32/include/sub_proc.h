@@ -4,11 +4,11 @@
 /*
  * Component Name: 
  *
- * $Date: 1996/07/19 21:41:24 $
+ * $Date: 1997/04/07 07:24:47 $
  *
  * $Source: /sources/make/make/w32/include/sub_proc.h,v $
  *
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  *
  * Description: 
  *
@@ -18,9 +18,9 @@
  * Licensed Material - Property of TIVOLI Systems, Inc.
  */
 
-/* $Id: sub_proc.h,v 1.2 1996/07/19 21:41:24 roland Exp $ */
+/* $Id: sub_proc.h,v 1.3 1997/04/07 07:24:47 psmith Exp $ */
 
-#ifdef WIN32
+#ifdef WINDOWS32
 
 #define EXTERN_DECL(entry, args) extern entry args
 #define VOID_DECL void

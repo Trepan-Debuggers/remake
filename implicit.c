@@ -152,7 +152,7 @@ pattern_search (file, archive, depth, recursions)
   register struct rule *rule;
   register struct dep *dep;
 
-  char *p;
+  char *p, *vp;
 
 #ifndef	NO_ARCHIVES
   if (archive || ar_name (filename))
@@ -167,6 +167,17 @@ pattern_search (file, archive, depth, recursions)
       lastslash = rindex (filename, ']');
 #else
       lastslash = rindex (filename, '/');
+#ifdef __MSDOS__
+      /* Handle backslashes (possibly mixed with forward slashes)
+	 and the case of "d:file".  */
+      {
+	char *bslash = rindex (filename, '\\');
+	if (lastslash == 0 || bslash > lastslash)
+	  lastslash = bslash;
+	if (lastslash == 0 && filename[0] && filename[1] == ':')
+	  lastslash = filename + 1;
+      }
+#endif
 #endif
       if (lastslash != 0 && lastslash[1] == '\0')
 	lastslash = 0;
@@ -388,10 +399,12 @@ pattern_search (file, archive, depth, recursions)
 		}
 	      /* This code, given FILENAME = "lib/foo.o", dependency name
 		 "lib/foo.c", and VPATH=src, searches for "src/lib/foo.c".  */
-	      if (vpath_search (&p, (time_t *) 0))
+	      vp = p;
+	      if (vpath_search (&vp, (time_t *) 0))
 		{
-		  DEBUGP2 ("Found dependency as `%s'.%s\n", p, "");
-		  found_files[deps_found++] = p;
+		  DEBUGP2 ("Found dependency `%s' as VPATH `%s'\n", p, vp);
+		  strcpy(vp, p);
+		  found_files[deps_found++] = vp;
 		  continue;
 		}
 
@@ -554,7 +567,7 @@ pattern_search (file, archive, depth, recursions)
       dep->next = file->deps;
       file->deps = dep;
     }
- 
+
   if (!checked_lastslash[foundrule])
     /* Always allocate new storage, since STEM might be
        on the stack for an intermediate file.  */

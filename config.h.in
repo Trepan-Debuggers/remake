@@ -35,6 +35,9 @@
 /* Define if you don't have vprintf but do have _doprnt.  */
 #undef HAVE_DOPRNT
 
+/* Define if your system has a working fnmatch function.  */
+#undef HAVE_FNMATCH
+
 /* Define if your system has its own `getloadavg' function.  */
 #undef HAVE_GETLOADAVG
 
@@ -127,9 +130,9 @@
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be
    automatically deduced at run-time.
-	STACK_DIRECTION > 0 => grows toward higher addresses
-	STACK_DIRECTION < 0 => grows toward lower addresses
-	STACK_DIRECTION = 0 => direction of growth unknown
+ STACK_DIRECTION > 0 => grows toward higher addresses
+ STACK_DIRECTION < 0 => grows toward lower addresses
+ STACK_DIRECTION = 0 => direction of growth unknown
  */
 #undef STACK_DIRECTION
 
@@ -181,6 +184,9 @@
 
 /* Define if you have the getgroups function.  */
 #undef HAVE_GETGROUPS
+
+/* Define if you have the memmove function.  */
+#undef HAVE_MEMMOVE
 
 /* Define if you have the mktemp function.  */
 #undef HAVE_MKTEMP

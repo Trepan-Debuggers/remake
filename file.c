@@ -87,7 +87,7 @@ lookup_file (name)
 
   for (f = files[hashval]; f != 0; f = f->next)
     {
-      if (strieq (f->name, name))
+      if (strieq (f->hname, name))
 	{
 	  return f;
 	}
@@ -128,7 +128,7 @@ enter_file (name)
   hashval %= FILE_BUCKETS;
 
   for (f = files[hashval]; f != 0; f = f->next)
-    if (strieq (f->name, name))
+    if (strieq (f->hname, name))
       break;
 
   if (f != 0 && !f->double_colon)
@@ -141,7 +141,7 @@ enter_file (name)
 
   new = (struct file *) xmalloc (sizeof (struct file));
   bzero ((char *) new, sizeof (struct file));
-  new->name = name;
+  new->name = new->hname = name;
   new->update_status = -1;
 
   if (f == 0)
@@ -162,16 +162,16 @@ enter_file (name)
   return new;
 }
 
-/* Rename FILE to NAME.  This is not as simple as resetting
-   the `name' member, since it must be put in a new hash bucket,
+/* Rehash FILE to NAME.  This is not as simple as resetting
+   the `hname' member, since it must be put in a new hash bucket,
    and possibly merged with an existing file called NAME.  */
 
 void
-rename_file (file, name)
+rehash_file (file, name)
      register struct file *file;
      char *name;
 {
-  char *oldname = file->name;
+  char *oldname = file->hname;
   register unsigned int oldhash;
   register char *n;
 
@@ -208,8 +208,11 @@ file_hash_enter (file, name, oldhash, oldname)
   /* Look for an existing file under the new name.  */
 
   for (oldfile = files[newbucket]; oldfile != 0; oldfile = oldfile->next)
-    if (strieq (oldfile->name, name))
+    if (strieq (oldfile->hname, name))
       break;
+
+  /* If the old file is the same as the new file, something's wrong.  */
+  assert (oldfile != file);
 
   if (oldhash != 0 && (newbucket != oldbucket || oldfile != 0))
     {
@@ -228,9 +231,9 @@ file_hash_enter (file, name, oldhash, oldname)
 
   /* Give FILE its new name.  */
 
-  file->name = name;
+  file->hname = name;
   for (f = file->double_colon; f != 0; f = f->prev)
-    f->name = name;
+    f->hname = name;
 
   if (oldfile == 0)
     {
@@ -319,6 +322,7 @@ in favor of those for `%s'.",
       MERGE (is_target);
       MERGE (cmd_target);
       MERGE (phony);
+      MERGE (ignore_vpath);
 #undef MERGE
 
       file->renamed = oldfile;
