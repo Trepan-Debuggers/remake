@@ -256,6 +256,16 @@ read_makefile (filename, type)
 
   /* First, get a stream to read.  */
 
+  /* Expand ~ in FILENAME unless it came from `include',
+     in which case it was already done.  */
+  if (type != 2 && filename[0] == '~')
+    {
+      char *expanded = tilde_expand (filename);
+      /* This is a possible memory leak, but I don't care.  */
+      if (expanded != 0)
+	filename = expanded;
+    }
+
   infile = fopen (filename, "r");
   /* Save the error code so we print the right message later.  */
   makefile_errno = errno;
@@ -1609,6 +1619,14 @@ construct_include_path (arg_dirs)
     while (*arg_dirs != 0)
       {
 	char *dir = *arg_dirs++;
+
+	if (dir[0] == '~')
+	  {
+	    char *expanded = tilde_expand (dir);
+	    if (expanded != 0)
+	      dir = expanded;
+	  }
+
 	if (stat (dir, &stbuf) == 0 && S_ISDIR (stbuf.st_mode))
 	  {
 	    if (idx == max - 1)
@@ -1619,6 +1637,8 @@ construct_include_path (arg_dirs)
 	      }
 	    dirs[idx++] = dir;
 	  }
+	else if (dir != arg_dirs[-1])
+	  free (dir);
       }
 
   /* Now add at the end the standard default dirs.  */
@@ -1648,6 +1668,64 @@ construct_include_path (arg_dirs)
   include_directories = dirs;
 }
 
+/* Expand ~ or ~USER at the beginning of NAME.
+   Return a newly malloc'd string or 0.  */
+
+char *
+tilde_expand (name)
+     char *name;
+{
+  if (name[1] == '/' || name[1] == '\0')
+    {
+      extern char *getenv ();
+      char *home_dir = allocated_variable_expand ("$(HOME)");
+      int is_variable = home_dir[0] != '\0';
+      if (!is_variable)
+	{
+	  free (home_dir);
+	  home_dir = getenv ("HOME");
+	}
+      if (home_dir == 0 || home_dir[0] == '\0')
+	{
+	  extern char *getlogin ();
+	  char *name = getlogin ();
+	  home_dir = 0;
+	  if (name != 0)
+	    {
+	      struct passwd *p = getpwnam (name);
+	      if (p != 0)
+		home_dir = p->pw_dir;
+	    }
+	}
+      if (home_dir != 0)
+	{
+	  char *new = concat (home_dir, "", name + 1);
+	  if (is_variable)
+	    free (home_dir);
+	  return new;
+	}
+    }
+  else
+    {
+      struct passwd *pwent;
+      char *userend = index (name + 1, '/');
+      if (userend != 0)
+	*userend = '\0';
+      pwent = getpwnam (name + 1);
+      if (pwent != 0)
+	{
+	  if (userend == 0)
+	    return savestring (pwent->pw_dir, strlen (pwent->pw_dir));
+	  else
+	    return concat (pwent->pw_dir, "/", userend + 1);
+	}
+      else if (userend != 0)
+	*userend = '/';
+    }
+
+  return 0;
+}
+
 /* Given a chain of struct nameseq's describing a sequence of filenames,
    in reverse of the intended order, return a new chain describing the
    result of globbing the filenames.  The new chain is in forward order.
@@ -1675,61 +1753,11 @@ multi_glob (chain, size)
 
       if (old->name[0] == '~')
 	{
-	  if (old->name[1] == '/' || old->name[1] == '\0')
+	  char *newname = tilde_expand (old->name);
+	  if (newname != 0)
 	    {
-	      extern char *getenv ();
-	      char *home_dir = allocated_variable_expand ("$(HOME)");
-	      int is_variable = home_dir[0] != '\0';
-	      if (!is_variable)
-		{
-		  free (home_dir);
-		  home_dir = getenv ("HOME");
-		}
-	      if (home_dir == 0 || home_dir[0] == '\0')
-		{
-		  extern char *getlogin ();
-		  char *name = getlogin ();
-		  home_dir = 0;
-		  if (name != 0)
-		    {
-		      struct passwd *p = getpwnam (name);
-		      if (p != 0)
-			home_dir = p->pw_dir;
-		    }
-		}
-	      if (home_dir != 0)
-		{
-		  char *new = concat (home_dir, "", old->name + 1);
-		  if (is_variable)
-		    free (home_dir);
-		  free (old->name);
-		  old->name = new;
-		}
-	    }
-	  else
-	    {
-	      struct passwd *pwent;
-	      char *userend = index (old->name + 1, '/');
-	      if (userend != 0)
-		*userend = '\0';
-	      pwent = getpwnam (old->name + 1);
-	      if (pwent != 0)
-		{
-		  if (userend == 0)
-		    {
-		      free (old->name);
-		      old->name = savestring (pwent->pw_dir,
-					      strlen (pwent->pw_dir));
-		    }
-		  else
-		    {
-		      char *new = concat (pwent->pw_dir, "/", userend + 1);
-		      free (old->name);
-		      old->name = new;
-		    }
-		}
-	      else if (userend != 0)
-		*userend = '/';
+	      free (old->name);
+	      old->name = newname;
 	    }
 	}
 
