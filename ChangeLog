@@ -1,3 +1,14 @@
+1999-07-08  Paul D. Smith  <psmith@gnu.org>
+
+	* main.c (switches): Define a new switch -R (or
+	--no-builtin-variables).  This option disables the defining of all
+	the GNU make builtin variables.
+	(main): If -R was given, force -r as well.
+	* default.c (define_default_variables): Test the new flag.
+	* make.h: Declare global flag.
+	* make.texinfo (Options Summary): Document the new option.
+	(Implicit Variables): Ditto.
+
 1999-07-06  Paul D. Smith  <psmith@gnu.org>
 
 	* make.texinfo (Options Summary): Correct examples in

@@ -24,6 +24,11 @@ Version 3.78
 * Make allows CRLF sequences as well as traditional LF, for
   compatibility with makefiles created on other operating systems.
 
+* Make accepts a new option: -R, or --no-builtin-variables.  This option
+  disables the definition of the rule-specific builtin variables (CC,
+  LD, AR, etc.).  Specifying this option forces -r (--no-builtin-rules)
+  as well.
+
 * A "job server" feature, proposed by Howard Chu <hyc@highlandsun.com>.
 
   On systems that support POSIX pipe(2) semantics, GNU make can now pass

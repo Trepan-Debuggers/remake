@@ -27,8 +27,8 @@ MA 02111-1307, USA.  */
 #include "getopt.h"
 #include <assert.h>
 #ifdef _AMIGA
-#   include <dos/dos.h>
-#   include <proto/dos.h>
+# include <dos/dos.h>
+# include <proto/dos.h>
 #endif
 #ifdef WINDOWS32
 #include <windows.h>
@@ -61,9 +61,9 @@ extern void print_vpath_data_base PARAMS ((void));
 extern int chdir ();
 #endif
 #ifndef	STDC_HEADERS
-#ifndef	sun			/* Sun has an incorrect decl in a header.  */
+# ifndef sun			/* Sun has an incorrect decl in a header.  */
 extern void exit PARAMS ((int)) __attribute__ ((noreturn));
-#endif
+# endif
 extern double atof ();
 #endif
 extern char *mktemp ();
@@ -163,9 +163,10 @@ int print_data_base_flag = 0;
 
 int question_flag = 0;
 
-/* Nonzero means do not use any of the builtin rules (-r).  */
+/* Nonzero means do not use any of the builtin rules (-r) / variables (-R).  */
 
 int no_builtin_rules_flag = 0;
+int no_builtin_variables_flag = 0;
 
 /* Nonzero means keep going even if remaking some file fails (-k).  */
 
@@ -317,6 +318,9 @@ static const struct command_switch switches[] =
     { 'r', flag, (char *) &no_builtin_rules_flag, 1, 1, 0, 0, 0,
 	"no-builtin-rules", 0,
 	"Disable the built-in implicit rules" },
+    { 'R', flag, (char *) &no_builtin_variables_flag, 1, 1, 0, 0, 0,
+	"no-builtin-variables", 0,
+	"Disable the built-in variable settings" },
     { 's', flag, (char *) &silent_flag, 1, 1, 0, 0, 0,
 	"silent", 0,
 	"Don't echo commands" },
@@ -1064,6 +1068,10 @@ int main (int argc, char ** argv)
   /* Let the user disable that with --no-print-directory.  */
   if (inhibit_print_directory_flag)
     print_directory_flag = 0;
+
+  /* If -R was given, set -r too (doesn't make sense otherwise!)  */
+  if (no_builtin_variables_flag)
+    no_builtin_rules_flag = 1;
 
   /* Construct the list of include directories to search.  */
 
