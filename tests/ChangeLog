@@ -1,5 +1,8 @@
 2004-11-28  Paul D. Smith  <psmith@gnu.org>
 
+	* scripts/options/dash-C [WINDOWS32]: Add a test for bug #10252;
+	this doesn't really test anything useful in UNIX but...
+
 	* scripts/variables/SHELL: New file: test proper handling of SHELL
 	according to POSIX rules.  Fixes bug #1276.
 

@@ -1,5 +1,8 @@
 2004-11-28  Paul D. Smith  <psmith@gnu.org>
 
+	* main.c (main) [WINDOWS32]: Remove any trailing slashes from -C
+	arguments.  Fixes bug #10252.
+
 	Fix for bug #1276: Handle SHELL according to POSIX requirements.
 
 	* main.c (main): Set SHELL to v_noexport by default.  Remember the
