@@ -1782,7 +1782,10 @@ define_makeflags (all, makefile)
 	}
     }
   else if (p == &flagstring[1])
-    --p;
+    {
+      words = 0;
+      --p;
+    }
   else if (p[-1] == '-')
     /* Kill the final space and dash.  */
     p -= 2;
