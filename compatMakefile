@@ -159,6 +159,7 @@ remote.o: remote.c remote-*.c
 	      $(CFLAGS) $(srcdir)/remote.c
 
 # For some losing Unix makes.
+SHELL = /bin/sh
 MAKE = make
 
 glob/libglob.a: force
