@@ -81,7 +81,7 @@ includedir = $(prefix)/include
 # Directory to install the man page in.
 mandir = $(prefix)/man/man$(manext)
 # Number to put on the man page filename.
-manext = l
+manext = 1
 
 # Install make setgid to this group so it can read /dev/kmem.
 group = kmem
@@ -171,7 +171,7 @@ $(bindir)/$(instname): make
 	mv $@.new $@
 
 $(mandir)/$(instname).$(manext): make.man
-	$(INSTALL_DATA) make.man $@
+	$(INSTALL_DATA) $(srcdir)/make.man $@
 
 .PHONY: clean realclean distclean mostlyclean
 clean: glob-clean
