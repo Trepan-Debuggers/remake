@@ -378,6 +378,25 @@ free_child (child)
   free ((char *) child);
 }
 
+#ifdef	POSIX
+extern sigset_t fatal_signal_set;
+
+static void
+unblock_sigs ()
+{
+  sigset_t empty;
+  sigemptyset (&empty);
+  sigprocmask (SIG_SETMASK, &empty, (sigset_t *) 0);
+}
+#else
+#ifndef	USG
+extern int fatal_signal_mask;
+#define	unblock_sigs()	sigsetmask (0)
+#else
+#define	unblock_sigs()
+#endif
+#endif
+
 /* Start a job to run the commands specified in CHILD.
    CHILD is updated to reflect the commands and ID of the child process.  */
 
@@ -539,15 +558,27 @@ start_job (child)
 
       /* Fork the child process.  */
 
+#ifdef	 POSIX
+      (void) sigprocmask (SIG_BLOCK, &fatal_signal_set, (sigset_t *) 0);
+#else
+#ifndef	USG
+      (void) sigblock (fatal_signal_mask);
+#endif
+#endif
+
       child->remote = 0;
       child->pid = vfork ();
       if (child->pid == 0)
-	/* We are the child side.  */
-	child_execute_job (child->good_stdin ? 0 : bad_stdin, 1,
-			   argv, child->environment);
+	{
+	  /* We are the child side.  */
+	  unblock_sigs ();
+	  child_execute_job (child->good_stdin ? 0 : bad_stdin, 1,
+			     argv, child->environment);
+	}
       else if (child->pid < 0)
 	{
 	  /* Fork failed!  */
+	  unblock_sigs ();
 	  perror_with_name (VFORK_NAME, "");
 	  goto error;
 	}
@@ -616,6 +647,7 @@ new_job (file)
       children = c;
       /* One more job slot is in use.  */
       ++job_slots_used;
+      unblock_sigs ();
       break;
 
     case cs_finished:
