@@ -85,6 +85,7 @@ extern struct file *default_goal_file, *suffix_file, *default_file;
 extern struct file *lookup_file (), *enter_file ();
 extern void remove_intermediates (), snap_deps ();
 extern void rename_file (), file_hash_enter ();
+extern void set_command_state ();
 
 
 extern time_t f_mtime ();
