@@ -2142,15 +2142,16 @@ readline (linebuffer, stream, flocp)
   char *buffer = linebuffer->buffer;
   register char *p = linebuffer->buffer;
   register char *end = p + linebuffer->size;
-  register int len, lastlen = 0;
-  register char *p2;
   register unsigned int nlines = 0;
-  register int backslash;
 
   *p = '\0';
 
   while (fgets (p, end - p, stream) != 0)
     {
+      char *p2;
+      unsigned long len;
+      int backslash;
+
       len = strlen (p);
       if (len == 0)
 	{
@@ -2164,51 +2165,42 @@ readline (linebuffer, stream, flocp)
 	  len = 1;
 	}
 
+      /* Jump past the text we just read.  */
       p += len;
+
+      /* If the last char isn't a newline, the whole line didn't fit into the
+         buffer.  Get some more buffer and try again.  */
       if (p[-1] != '\n')
 	{
-	  /* Probably ran out of buffer space.  */
-	  register unsigned int p_off = p - buffer;
+	  unsigned long p_off = p - buffer;
 	  linebuffer->size *= 2;
 	  buffer = (char *) xrealloc (buffer, linebuffer->size);
 	  p = buffer + p_off;
 	  end = buffer + linebuffer->size;
 	  linebuffer->buffer = buffer;
 	  *p = '\0';
-	  lastlen = len;
 	  continue;
 	}
 
+      /* We got a newline, so add one to the count of lines.  */
       ++nlines;
 
 #if !defined(WINDOWS32) && !defined(__MSDOS__)
       /* Check to see if the line was really ended with CRLF; if so ignore
          the CR.  */
-      if (len > 1 && p[-2] == '\r')
+      if ((p - buffer) > 1 && p[-2] == '\r')
         {
-          --len;
           --p;
           p[-1] = '\n';
         }
 #endif
 
-      if (len == 1 && p > buffer)
-	/* P is pointing at a newline and it's the beginning of
-	   the buffer returned by the last fgets call.  However,
-	   it is not necessarily the beginning of a line if P is
-	   pointing past the beginning of the holding buffer.
-	   If the buffer was just enlarged (right before the newline),
-	   we must account for that, so we pretend that the two lines
-	   were one line.  */
-	len += lastlen;
-      lastlen = len;
       backslash = 0;
-      for (p2 = p - 2; --len > 0; --p2)
+      for (p2 = p - 2; p2 >= buffer; --p2)
 	{
-	  if (*p2 == '\\')
-	    backslash = !backslash;
-	  else
+	  if (*p2 != '\\')
 	    break;
+          backslash = !backslash;
 	}
 
       if (!backslash)

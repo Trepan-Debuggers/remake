@@ -1,3 +1,16 @@
+2000-11-17  Paul D. Smith  <psmith@gnu.org>
+
+	* remake.c (f_mtime) [WINDOWS32]: On various advice, I changed the
+	WINDOWS32 port to assume timestamps can be up to 3 seconds away
+	before throwing a fit.
+
+2000-11-17  Paul D. Smith  <psmith@gnu.org>
+
+	* read.c (readline): CRLF calculations had a hole, if you hit the
+	buffer grow scenario just right.  Reworked the algorithm to avoid
+	the need for len or lastlen at all.  Problem description with
+	sample code chages provided by Chris Faylor <cgf@redhat.com>.
+
 2000-10-05  Paul D. Smith  <psmith@gnu.org>
 
 	* acinclude.m4 (AM_LC_MESSAGES): Remove undefined macro
