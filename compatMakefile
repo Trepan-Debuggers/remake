@@ -104,7 +104,7 @@ objs = commands.o job.o dir.o file.o getloadavg.o misc.o main.o read.o \
        function.o vpath.o version.o ar.o arscan.o $(GETOPT) $(extras)
 srcs = $(srcdir)/commands.c $(srcdir)/job.c $(srcdir)/dir.c		      \
        $(srcdir)/file.c $(srcdir)/getloadavg.c $(srcdir)/misc.c		      \
-       $(srcdir)/main.c $(srcdir)/read.c\ $(srcdir)/remake.c		      \
+       $(srcdir)/main.c $(srcdir)/read.c $(srcdir)/remake.c		      \
        $(srcdir)/remote.c $(srcdir)/rule.c $(srcdir)/implicit.c		      \
        $(srcdir)/default.c $(srcdir)/variable.c $(srcdir)/expand.c	      \
        $(srcdir)/function.c $(srcdir)/vpath.c $(srcdir)/version.c	      \
