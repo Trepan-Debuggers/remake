@@ -249,6 +249,7 @@ distclean: clean glob-realclean
 	-rm -f make.?? make.??s make.log make.toc make.*aux
 	-rm -f loadavg.c
 realclean: distclean
+	-rm -f make.info*
 mostlyclean: clean
 
 .PHONY: glob-clean glob-realclean
