@@ -358,14 +358,11 @@ files.  This directory should normally be @file{/usr/local/etc}, but
 write it as @file{$(prefix)/etc}.
 (If you are using Autoconf, write it as @samp{@@sysconfdir@@}.)
 
-@c rewritten to avoid overfull hbox --tower
-Do not install executables
-@c here
-in this directory (they probably
-belong in @file{$(libexecdir)} or @file{$(sbindir)}).  Also do not
-install files that are modified in the normal course of their use
-(programs whose purpose is to change the configuration of the system
-excluded).  Those probably belong in @file{$(localstatedir)}.
+Do not install executables here in this directory (they probably belong
+in @file{$(libexecdir)} or @file{$(sbindir)}).  Also do not install
+files that are modified in the normal course of their use (programs
+whose purpose is to change the configuration of the system excluded).
+Those probably belong in @file{$(localstatedir)}.
 
 @item sharedstatedir
 The directory for installing architecture-independent data files which
@@ -418,7 +415,7 @@ should normally be @file{/usr/local/include}, but write it as
 @file{$(prefix)/include}.
 (If you are using Autoconf, write it as @samp{@@includedir@@}.)
 
-Most compilers other than GCC do not look for header files in
+Most compilers other than GCC do not look for header files in directory
 @file{/usr/local/include}.  So installing the header files this way is
 only useful with GCC.  Sometimes this is not a problem because some
 libraries are only really intended to work with GCC.  But some libraries
