@@ -472,6 +472,7 @@ update_file_1 (file_t *file, unsigned int depth,
     {
       FILE_TIMESTAMP mtime;
       int maybe_make;
+      int dontcare = 0;
 
       check_renamed (d->file);
 
@@ -495,8 +496,22 @@ update_file_1 (file_t *file, unsigned int depth,
 
       d->file->parent = file;
       maybe_make = must_make;
-      dep_status |= check_dep (d->file, depth, this_mtime, &maybe_make,
+
+      /* Inherit dontcare flag from our parent. */
+      if (rebuilding_makefiles)
+        {
+          dontcare = d->file->dontcare;
+          d->file->dontcare = file->dontcare;
+        }
+
+
+      dep_status |= check_dep (d->file, depth, this_mtime, &maybe_make, 
 			       p_call_stack2);
+
+      /* Restore original dontcare flag. */
+      if (rebuilding_makefiles)
+        d->file->dontcare = dontcare;
+
       if (! d->ignore_mtime)
         must_make = maybe_make;
 
@@ -533,10 +548,26 @@ update_file_1 (file_t *file, unsigned int depth,
       for (d = file->deps; d != 0; d = d->next)
 	if (d->file->intermediate)
 	  {
+            int dontcare = 0;
+
 	    FILE_TIMESTAMP mtime = file_mtime (d->file);
 	    check_renamed (d->file);
 	    d->file->parent = file;
+
+            /* Inherit dontcare flag from our parent. */
+            if (rebuilding_makefiles)
+              {
+                dontcare = d->file->dontcare;
+                d->file->dontcare = file->dontcare;
+              }
+
+
 	    dep_status |= update_file (d->file, depth, p_call_stack);
+
+            /* Restore original dontcare flag. */
+            if (rebuilding_makefiles)
+              d->file->dontcare = dontcare;
+
 	    check_renamed (d->file);
 
 	    {
@@ -811,7 +842,8 @@ notice_finished_file (file_t *file)
 	have_nonrecursing:
 	  if (file->phony)
 	    file->update_status = 0;
-	  else
+          /* According to POSIX, -t doesn't affect targets with no cmds.  */
+	  else if (file->cmds != 0)
             {
               /* Should set file's modification date and do nothing else.  */
               file->update_status = touch_file (file);
@@ -1026,8 +1058,10 @@ touch_file (file_t *file)
 	{
 	  struct stat statbuf;
 	  char buf;
+          int e;
 
-	  if (fstat (fd, &statbuf) < 0)
+          EINTRLOOP (e, fstat (fd, &statbuf));
+	  if (e < 0)
 	    TOUCH_ERROR ("touch: fstat: ");
 	  /* Rewrite character 0 same as it already is.  */
 	  if (read (fd, &buf, 1) < 0)
@@ -1070,29 +1104,9 @@ remake_file (file_t *file, target_stack_node_t *p_call_stack)
 	file->update_status = 0;
       else
         {
-          const char *msg_noparent
-            = _("%sNo rule to make target `%s'%s");
-          const char *msg_parent
-            = _("%sNo rule to make target `%s', needed by `%s'%s");
-
           /* This is a dependency file we cannot remake.  Fail.  */
-          if (!keep_going_flag && !file->dontcare)
-            {
-              if (file->parent == 0)
-                fatal (&(file->floc), msg_noparent, "", file->name, "");
-
-              fatal (&(file->floc), msg_parent, "", file->name, 
-		     file->parent->name, "");
-            }
-
-          if (!file->dontcare)
-            {
-              if (file->parent == 0)
-                err (p_call_stack, msg_noparent, "*** ", file->name, ".");
-              else
-                err (p_call_stack, msg_parent, "*** ",
-		     file->name, file->parent->name, ".");
-            }
+          if (!rebuilding_makefiles || !file->dontcare)
+            complain (file);
           file->update_status = 2;
         }
     }
@@ -1264,6 +1278,14 @@ f_mtime (file_t *file, int search)
 	FILE_TIMESTAMP adjustment = FAT_ADJ_OFFSET << FILE_TIMESTAMP_LO_BITS;
 	if (ORDINARY_MTIME_MIN + adjustment <= adjusted_mtime)
 	  adjusted_mtime -= adjustment;
+#elif defined(__EMX__)
+	/* FAT filesystems round time to the nearest even second!
+	   Allow for any file (NTFS or FAT) to perhaps suffer from this
+	   brain damage.  */
+	FILE_TIMESTAMP adjustment = (((FILE_TIMESTAMP_S (adjusted_mtime) & 1) == 0
+		       && FILE_TIMESTAMP_NS (adjusted_mtime) == 0)
+		      ? (FILE_TIMESTAMP) 1 << FILE_TIMESTAMP_LO_BITS
+		      : 0);
 #endif
 
 	/* If the file's time appears to be in the future, update our
@@ -1323,8 +1345,10 @@ static FILE_TIMESTAMP
 name_mtime (char *name)
 {
   struct stat st;
+  int e;
 
-  if (stat (name, &st) != 0)
+  EINTRLOOP (e, stat (name, &st));
+  if (e != 0)
     {
       if (errno != ENOENT && errno != ENOTDIR)
         perror_with_name ("stat:", name);
@@ -1386,7 +1410,7 @@ library_search (char **lib, FILE_TIMESTAMP *mtime_ptr)
   while ((p = find_next_token (&p2, &len)) != 0)
     {
       static char *buf = NULL;
-      static int buflen = 0;
+      static unsigned int buflen = 0;
       static int libdir_maxlen = -1;
       char *libbuf = variable_expand ("");
 
