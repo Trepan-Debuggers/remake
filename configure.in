@@ -3,7 +3,7 @@
 AC_INIT([GNU make],[3.81beta1],[bug-make@gnu.org])
 
 AC_PREREQ(2.59)
-AC_REVISION([[$Id: configure.in,v 1.124 2004/03/04 13:42:52 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.125 2004/03/06 08:05:19 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -52,11 +52,17 @@ AC_HEADER_TIME
 AC_CHECK_HEADERS(stdlib.h locale.h unistd.h limits.h fcntl.h string.h \
 		 memory.h sys/param.h sys/time.h sys/timeb.h)
 
+# Set a flag if we have an ANSI C compiler
+if test "$ac_cv_prog_cc_stdc" != no; then
+  AC_DEFINE(HAVE_ANSI_COMPILER, 1,
+	      [Define if your compiler conforms to the ANSI C standard.])
+fi
+
+
 # Determine what kind of variadic function calls we support
 AC_CHECK_HEADERS(stdarg.h varargs.h, break)
 
 AM_PROG_CC_C_O
-AM_PROG_CC_STDC
 AC_C_CONST
 AC_TYPE_SIGNAL
 AC_TYPE_UID_T

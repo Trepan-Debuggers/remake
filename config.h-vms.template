@@ -306,6 +306,9 @@
 /* Define if you have the <ndir.h> header file.  */
 /* #undef HAVE_NDIR_H */
 
+/* Define if your compiler conforms to the ANSI C standard. */
+#define HAVE_ANSI_COMPILER 1
+
 /* Define to 1 if you have the <stdarg.h> header file. */
 #define HAVE_STDARG_H 1
 

@@ -56,6 +56,12 @@
 /* Define if you have the select function.  */
 #define HAVE_SELECT 1
 
+/* Define if your compiler conforms to the ANSI C standard. */
+#define HAVE_ANSI_COMPILER 1
+
+/* Define to 1 if you have the <stdarg.h> header file. */
+#define HAVE_STDARG_H 1
+
 /* Define if you have the vprintf library function.  */
 #undef HAVE_VPRINTF
 #define HAVE_VPRINTF 1

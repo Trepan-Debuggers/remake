@@ -205,7 +205,7 @@ concat (const char *s1, const char *s2, const char *s3)
 /* Print a message on stdout.  */
 
 void
-#if __STDC__ && USE_VARIADIC && HAVE_STDARG_H
+#if HAVE_ANSI_COMPILER && USE_VARIADIC && HAVE_STDARG_H
 message (int prefix, const char *fmt, ...)
 #else
 message (prefix, fmt, va_alist)
@@ -241,7 +241,7 @@ message (prefix, fmt, va_alist)
 /* Print an error message.  */
 
 void
-#if __STDC__ && USE_VARIADIC && HAVE_STDARG_H
+#if HAVE_ANSI_COMPILER && USE_VARIADIC && HAVE_STDARG_H
 error (const struct floc *flocp, const char *fmt, ...)
 #else
 error (flocp, fmt, va_alist)
@@ -274,7 +274,7 @@ error (flocp, fmt, va_alist)
 /* Print an error message and exit.  */
 
 void
-#if __STDC__ && USE_VARIADIC && HAVE_STDARG_H
+#if HAVE_ANSI_COMPILER && USE_VARIADIC && HAVE_STDARG_H
 fatal (const struct floc *flocp, const char *fmt, ...)
 #else
 fatal (flocp, fmt, va_alist)
