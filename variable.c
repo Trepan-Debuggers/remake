@@ -1,5 +1,5 @@
 /* Internals of variables for GNU Make.
-Copyright (C) 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -120,6 +120,7 @@ define_variable_in_set (name, length, value, origin, recursive, set)
   v->origin = origin;
   v->recursive = recursive;
   v->expanding = 0;
+  v->export = v_default;
   v->next = set->table[hashval];
   set->table[hashval] = v;
   return v;
@@ -441,8 +442,6 @@ target_environment (file)
   register unsigned nvariables;
   char **result;
 
-  int noexport = enter_file (".NOEXPORT")->is_target;
-
   /* Find the lowest number of buckets in any set in the list.  */
   s = file->variables;
   buckets = s->set->buckets;
@@ -471,28 +470,30 @@ target_environment (file)
 	      register struct variable_bucket *ov;
 	      register char *p = v->name;
 
-	      /* If `.NOEXPORT' was specified, only export command-line and
-		 environment variables.  This is a temporary (very ugly) hack
-		 until I fix this problem the right way in version 4.  Ick.  */
-	      if (noexport
-		  && (v->origin != o_command
+	      switch (v->export)
+		{
+		case v_default:
+		  if (v->origin != o_command
 		      && v->origin != o_env && v->origin != o_env_override
-		      && !(v->origin == o_file && getenv (p) != 0)))
-		continue;
+		      && !(v->origin == o_file && getenv (p) != 0))
+		    continue;
 
-	      if (v->origin == o_default
-		  || streq (p, "MAKELEVEL"))
-		continue;
+		  if (*p != '_' && (*p < 'A' || *p > 'Z')
+		      && (*p < 'a' || *p > 'z'))
+		    continue;
+		  for (++p; *p != '\0'; ++p)
+		    if (*p != '_' && (*p < 'a' || *p > 'z')
+			&& (*p < 'A' || *p > 'Z') && (*p < '0' || *p > '9'))
+		      break;
+		  if (*p != '\0')
+		    continue;
 
-	      if (*p != '_' && (*p < 'A' || *p > 'Z')
-		  && (*p < 'a' || *p > 'z'))
-		continue;
-	      for (++p; *p != '\0'; ++p)
-		if (*p != '_' && (*p < 'a' || *p > 'z')
-		    && (*p < 'A' || *p > 'Z') && (*p < '0' || *p > '9'))
+		case v_export:
 		  break;
-	      if (*p != '\0')
-		continue;
+
+		case v_noexport:
+		  continue;
+		}
 
 	      for (ov = table[j]; ov != 0; ov = ov->next)
 		if (streq (v->name, ov->variable->name))
@@ -542,9 +543,12 @@ target_environment (file)
    Any whitespace around the "=" or ":=" is removed.  The first form
    defines a variable that is recursively re-evaluated.  The second form
    defines a variable whose value is variable-expanded at the time of
-   definition and then is evaluated only once at the time of expansion.  */
+   definition and then is evaluated only once at the time of expansion.
 
-int
+   If a variable was defined, a pointer to its `struct variable' is returned.
+   If not, NULL is returned.  */
+
+struct variable *
 try_variable_definition (line, origin)
      char *line;
      enum variable_origin origin;
@@ -586,10 +590,9 @@ try_variable_definition (line, origin)
     --end;
   p = next_token (p);
 
-  (void) define_variable (beg, end - beg, recursive ? p : variable_expand (p),
+  return define_variable (beg, end - beg,
+			  recursive ? p : variable_expand (p),
 			  origin, recursive);
-
-  return 1;
 }
 
 /* Print information for variable V, prefixing it with PREFIX.  */
