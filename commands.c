@@ -300,7 +300,7 @@ chop_commands (cmds)
       int flags = 0;
 
       for (p = lines[idx];
-           isblank (*p) || *p == '-' || *p == '@' || *p == '+';
+           isblank ((unsigned char)*p) || *p == '-' || *p == '@' || *p == '+';
            ++p)
         switch (*p)
           {

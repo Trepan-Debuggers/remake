@@ -296,6 +296,7 @@ find_directory (name)
   register unsigned int hash = 0;
   register char *p;
   register struct directory *dir;
+  int r;
 #ifdef WINDOWS32
   char* w32_path;
   char  fs_label[BUFSIZ];
@@ -333,19 +334,28 @@ find_directory (name)
       /* The directory is not in the name hash table.
 	 Find its device and inode numbers, and look it up by them.  */
 
-#ifdef VMS
-      if (vmsstat_dir (name, &st) < 0)
-#else
-
-# ifdef WINDOWS32
+#ifdef WINDOWS32
       /* Remove any trailing '\'.  Windows32 stat fails even on valid
          directories if they end in '\'. */
       if (p[-1] == '\\')
         p[-1] = '\0';
-# endif
-      if (stat (name, &st) < 0)
 #endif
-	{
+
+#ifdef VMS
+      r = vmsstat_dir (name, &st);
+#else
+      r = stat (name, &st);
+#endif
+
+#ifdef WINDOWS32
+      /* Put back the trailing '\'.  If we don't, we're permanently
+         truncating the value!  */
+      if (p[-1] == '\0')
+        p[-1] = '\\';
+#endif
+
+      if (r < 0)
+        {
 	/* Couldn't stat the directory.  Mark this by
 	   setting the `contents' member to a nil pointer.  */
 	  dir->contents = 0;

@@ -1095,7 +1095,7 @@ f_mtime (file, search)
       free (memname);
 
       if (mtime == (FILE_TIMESTAMP) -1)
-	/* The archive doesn't exist, so it's members don't exist either.  */
+	/* The archive doesn't exist, so its members don't exist either.  */
 	return (FILE_TIMESTAMP) -1;
 
       memtime = ar_member_date (file->hname);
@@ -1148,9 +1148,27 @@ f_mtime (file, search)
 
        We only need to do this once, for now. */
 
-    static FILE_TIMESTAMP now = 0;
+    static FILE_TIMESTAMP now;
+
+    FILE_TIMESTAMP adjusted_mtime = mtime;
+#ifdef WINDOWS32
+    /* FAT filesystems round time to the nearest even second!
+       Allow for any file (NTFS or FAT) to perhaps suffer from this
+       brain damage.  */
+    if ((FILE_TIMESTAMP_S (adjusted_mtime) & 1) == 0
+	&& FILE_TIMESTAMP_NS (adjusted_mtime) == 0)
+      adjusted_mtime -= FILE_TIMESTAMPS_PER_S;
+#else
+#ifdef __MSDOS__
+    /* On DJGPP under Windows 98 and Windows NT, FAT filesystems can
+       set file times up to 3 seconds into the future!  The bug doesn't
+       occur in plain DOS or in Windows 95, but we play it safe.  */
+    adjusted_mtime -= 3 * FILE_TIMESTAMPS_PER_S;
+#endif
+#endif
+
     if (!clock_skew_detected
-        && mtime != (FILE_TIMESTAMP)-1 && mtime > now
+        && mtime != (FILE_TIMESTAMP)-1 && now < adjusted_mtime
         && !file->updated)
       {
 	/* This file's time appears to be in the future.
@@ -1158,22 +1176,7 @@ f_mtime (file, search)
 
 	now = file_timestamp_now ();
 
-#ifdef WINDOWS32
-	/*
-	 * FAT filesystems round time to nearest even second(!). Just
-	 * allow for any file (NTFS or FAT) to perhaps suffer from this
-	 * braindamage.
-	 */
-	if (mtime > now && (((mtime % 2) == 0) && ((mtime-1) > now)))
-#else
-#ifdef __MSDOS__
-	/* Scrupulous testing indicates that some Windows
-	   filesystems can set file times up to 3 sec into the future!  */
-	if (mtime > now + 3)
-#else
-        if (mtime > now)
-#endif
-#endif
+	if (now < adjusted_mtime)
           {
 	    char mtimebuf[FILE_TIMESTAMP_PRINT_LEN_BOUND + 1];
 	    char nowbuf[FILE_TIMESTAMP_PRINT_LEN_BOUND + 1];
@@ -1219,8 +1222,13 @@ name_mtime (name)
 {
   struct stat st;
 
-  if (stat (name, &st) < 0)
-    return (FILE_TIMESTAMP) -1;
+ while (stat (name, &st) != 0)
+   if (errno != EINTR)
+     {
+       if (errno != ENOENT && errno != ENOTDIR)
+         perror_with_name ("stat:", name);
+       return (FILE_TIMESTAMP) -1;
+     }
 
   return FILE_TIMESTAMP_STAT_MODTIME (st);
 }

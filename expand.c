@@ -367,7 +367,7 @@ variable_expand_string (line, string, length)
 	  break;
 
 	default:
-	  if (isblank (p[-1]))
+	  if (isblank ((unsigned char)p[-1]))
 	    break;
 
 	  /* A $ followed by a random char is a variable reference:

@@ -72,7 +72,18 @@ Boston, MA 02111-1307, USA.  */
    <sys/timeb.h>?  If any does not, configure should check for it.  */
 # include <sys/timeb.h>
 #endif
-#include <time.h>
+
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+
 #include <errno.h>
 
 #ifndef errno
