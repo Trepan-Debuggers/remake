@@ -304,9 +304,9 @@ static struct option long_option_aliases[] =
 
 #define	DESCRIPTION_COLUMN	30
 
-/* List of non-switch arguments.  */
+/* List of goal targets.  */
 
-struct stringlist *other_args = 0;
+static struct dep *goals, *lastgoal;
 
 /* The name we were invoked with.  */
 
@@ -391,11 +391,7 @@ main (argc, argv, envp)
   extern RETSIGTYPE fatal_error_signal (), child_handler ();
   register struct file *f;
   register unsigned int i;
-  register char *cmd_defs;
-  register unsigned int cmd_defs_len, cmd_defs_idx;
   char **p;
-  struct dep *goals = 0;
-  register struct dep *lastgoal;
   struct dep *read_makefiles;
   PATH_VAR (current_directory);
 
@@ -499,8 +495,8 @@ main (argc, argv, envp)
 					 strlen (current_directory));
 
   /* Read in variables from the environment.  It is important that this be
-     done before `MAKE' and `MAKEOVERRIDES' are figured out so their
-     definitions will not be ones from the environment.  */
+     done before $(MAKE) is are figured out so its definitions will not be
+     one from the environment.  */
 
   for (i = 0; envp[i] != 0; ++i)
     {
@@ -540,76 +536,6 @@ main (argc, argv, envp)
   if (print_version_flag)
     die (0);
 
-  /* Search for command line arguments that define variables,
-     and do the definitions.  Also save up the text of these
-     arguments in CMD_DEFS so we can put them into the values
-     of $(MAKEOVERRIDES) and $(MAKE).  */
-
-  cmd_defs_len = 200;
-  cmd_defs = (char *) xmalloc (cmd_defs_len);
-  cmd_defs_idx = 0;
-
-  for (i = 1; other_args->list[i] != 0; ++i)
-    {
-      if (other_args->list[i][0] == '\0')
-	/* Ignore empty arguments, so they can't kill enter_file.  */
-	continue;
-
-      /* Try a variable definition.  */
-      if (try_variable_definition ((char *) 0, 0,
-				   other_args->list[i], o_command))
-	{
-	  /* It succeeded.  The variable is already defined.
-	     Backslash-quotify it and append it to CMD_DEFS, then clobber it
-	     to 0 in the list so that it won't be taken for a goal target.  */
-	  register char *p = other_args->list[i];
-	  unsigned int l = strlen (p);
-	  if (cmd_defs_idx + (l * 2) + 1 > cmd_defs_len)
-	    {
-	      if (l * 2 > cmd_defs_len)
-		cmd_defs_len += l * 2;
-	      else
-		cmd_defs_len *= 2;
-	      cmd_defs = (char *) xrealloc (cmd_defs, cmd_defs_len);
-	    }
-	  
-	  while (*p != '\0')
-	    {
-	      if (index ("^;'\"*?[]$<>(){}|&~`\\ \t\r\n\f\v", *p) != 0)
-		cmd_defs[cmd_defs_idx++] = '\\';
-	      cmd_defs[cmd_defs_idx++] = *p++;
-	    }
-	  cmd_defs[cmd_defs_idx++] = ' ';
-	}
-      else
-	{
-	  /* It was not a variable definition, so it is a target to be made.
-	     Enter it as a file and add it to the dep chain of goals.  */
-	  f = enter_command_line_file (other_args->list[i]);
-	  f->cmd_target = 1;
-	  
-	  if (goals == 0)
-	    {
-	      goals = (struct dep *) xmalloc (sizeof (struct dep));
-	      lastgoal = goals;
-	    }
-	  else
-	    {
-	      lastgoal->next = (struct dep *) xmalloc (sizeof (struct dep));
-	      lastgoal = lastgoal->next;
-	    }
-	  lastgoal->name = 0;
-	  lastgoal->file = f;
-	}
-    }
-
-  if (cmd_defs_idx > 0)
-    {
-      cmd_defs[cmd_defs_idx - 1] = '\0';
-      (void) define_variable ("MAKEOVERRIDES", 13, cmd_defs, o_default, 0);
-    }
-  free (cmd_defs);
-
 #ifndef __MSDOS__
   /* Set the "MAKE_COMMAND" variable to the name we were invoked with.
      (If it is a relative pathname with a slash, prepend our directory name
@@ -622,16 +548,13 @@ main (argc, argv, envp)
     argv[0] = concat (current_directory, "/", argv[0]);
 #endif
 
+  /* The extra indirection through $(MAKE_COMMAND) is done
+     for hysterical raisins.  */
   (void) define_variable ("MAKE_COMMAND", 12, argv[0], o_default, 0);
+  (void) define_variable ("MAKE", 4, "$(MAKE_COMMAND)", o_default, 1);
 
-  /* Append the command-line variable definitions gathered above
-     so sub-makes will get them as command-line definitions.  */
-
-  (void) define_variable ("MAKE", 4,
-			  "$(MAKE_COMMAND) $(MAKEOVERRIDES)", o_default, 1);
 
   /* If there were -C flags, move ourselves about.  */
-
   if (directories != 0)
     for (i = 0; directories->list[i] != 0; ++i)
       {
@@ -1152,7 +1075,11 @@ init_switches ()
     return;
 
   p = options;
-  *p++ = '+';			/* Always permute.  */
+
+  /* Return switch and non-switch args in order, regardless of
+     POSIXLY_CORRECT.  Non-switch args are returned as option '\0'.  */
+  *p++ = '-';
+
   for (i = 0; switches[i].c != '\0'; ++i)
     {
       long_options[i].name = (switches[i].long_name == 0 ? "" :
@@ -1207,15 +1134,6 @@ decode_switches (argc, argv, env)
   register struct stringlist *sl;
   register int c;
 
-  if (!env)
-    {
-      other_args = (struct stringlist *) xmalloc (sizeof (struct stringlist));
-      other_args->max = argc + 1;
-      other_args->list = (char **) xmalloc ((argc + 1) * sizeof (char *));
-      other_args->idx = 1;
-      other_args->list[0] = argv[0];
-    }
-
   /* getopt does most of the parsing for us.
      First, get its vectors set up.  */
 
@@ -1230,7 +1148,34 @@ decode_switches (argc, argv, env)
   while ((c = getopt_long (argc, argv,
 			   options, long_options, (int *) 0)) != EOF)
     {
-      if (c == '?')
+      if (c == '\0')
+	{
+	  /* Non-option argument.  It might be a variable definition.  */
+	  if (! try_variable_definition ((char *) 0, 0, optarg, o_command)
+	      && ! env)
+	    {
+	      /* Not an option or variable definition; it must be a goal
+		 target!  Enter it as a file and add it to the dep chain of
+		 goals.  */
+	      struct file *f = enter_command_line_file (optarg);
+	      f->cmd_target = 1;
+	  
+	      if (goals == 0)
+		{
+		  goals = (struct dep *) xmalloc (sizeof (struct dep));
+		  lastgoal = goals;
+		}
+	      else
+		{
+		  lastgoal->next
+		    = (struct dep *) xmalloc (sizeof (struct dep));
+		  lastgoal = lastgoal->next;
+		}
+	      lastgoal->name = 0;
+	      lastgoal->file = f;
+	    }
+	}
+      else if (c == '?')
 	/* Bad option.  We will print a usage message and die later.
 	   But continue to parse the other options so the user can
 	   see all he did wrong.  */
@@ -1330,19 +1275,6 @@ positive integral argument",
 	      /* We've found the switch.  Stop looking.  */
 	      break;
 	    }
-    }
-
-  if (!env)
-    {
-      /* Collect the remaining args in the `other_args' string list.  */
-
-      while (optind < argc)
-	{
-	  char *arg = argv[optind++];
-	  if (arg[0] != '-' || arg[1] != '\0')
-	    other_args->list[other_args->idx++] = arg;
-	}
-      other_args->list[other_args->idx] = 0;
     }
 
   if (!env && (bad || print_usage_flag))
@@ -1449,7 +1381,7 @@ decode_env_switches (envar, len)
      unsigned int len;
 {
   char *varref = (char *) alloca (2 + len + 2);
-  char *value, *args;
+  char *value;
   int argc;
   char **argv;
 
@@ -1459,25 +1391,13 @@ decode_env_switches (envar, len)
   bcopy (envar, &varref[2], len);
   varref[2 + len] = ')';
   varref[2 + len + 1] = '\0';
-  value = variable_expand (varref);
+  value = allocated_variable_expand (varref);
 
   /* Skip whitespace, and check for an empty value.  */
   value = next_token (value);
   len = strlen (value);
   if (len == 0)
     return;
-
-  /* Make a copy of the value in ARGS, where we will munge it.
-     If it does not begin with a dash, prepend one.
-     We must allocate lasting storage for this (and we never free it) because
-     decode_switches may save pointers into it for string-valued switches.  */
-  args = (char *) xmalloc (1 + len + 2);
-  if (value[0] != '-')
-    args[0] = '-';
-  bcopy (value, value[0] == '-' ? args : &args[1], len + 1);
-  /* Write an extra null terminator so our loop below will
-     never be in danger of looking past the end of the string.  */
-  args[(value[0] == '-' ? 0 : 1) + len + 1] = '\0';
 
   /* Allocate a vector that is definitely big enough.  */
   argv = (char **) alloca ((1 + len + 1) * sizeof (char *));
@@ -1486,13 +1406,26 @@ decode_env_switches (envar, len)
      Prepend a spacer word.  */
   argv[0] = 0;
   argc = 1;
-  do
+  while ((argv[argc] = find_next_token (&value, (unsigned int *) 0)) != 0)
+    ++argc;
+
+  if (argc == 2 && argv[1][0] != '-')
     {
-      argv[argc++] = args;
-      args = end_of_token (args);
-      *args++ = '\0';
-    } while (*args != '\0');
-  argv[argc] = 0;
+      /* There is just one word in the value, and it is not a switch.
+	 Either this is the single-word form and we should prepend a dash
+	 before calling decode_switches, or this is the multi-word form and
+	 there is no dash because it is a variable definition.  */
+      if (try_variable_definition ((char *) 0, 0, argv[1], o_command))
+	/* It was indeed a variable definition, and now it has been
+	   processed.  There is nothing for decode_switches to do.  */
+	return;
+
+      /* It wasn't a variable definition, so it's some switches without a
+	 leading dash.  Add one and pass it along to decode_switches.  We
+	 need permanent storage for this in case decode_switches saves
+	 pointers into the value.  */
+      argv[1] = concat ("-", argv[1], "");
+    }
 
   /* Parse those words.  */
   decode_switches (argc, argv, 1);
