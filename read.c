@@ -421,7 +421,7 @@ read_makefile (filename, type)
 	    export_all_variables = 1;
 	  v = try_variable_definition (p2, o_file);
 	  if (v != 0)
-	    v->export = 1;
+	    v->export = v_export;
 	  else
 	    {
 	      unsigned int len;
