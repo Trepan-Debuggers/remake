@@ -8,7 +8,8 @@
 globsrc := $(wildcard glob/*.c)
 globhdr := $(wildcard glob/*.h)
 
-TEMPLATES = README README.DOS config.ami configh.dos config.h.W32 config.h-vms
+TEMPLATES = README README.DOS README.W32 \
+	    config.ami configh.dos config.h.W32 config.h-vms
 MTEMPLATES = Makefile.DOS SMakefile
 
 # We need this to ensure that README and build.sh.in are created on time to

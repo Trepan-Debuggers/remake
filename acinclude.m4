@@ -85,50 +85,123 @@ changequote([,])dnl
 ])dnl
 
 dnl ---------------------------------------------------------------------------
-dnl Got this from the GNU fileutils 3.16r distribution
+dnl Got this from the GNU tar 1.13.11 distribution
 dnl by Paul Eggert <eggert@twinsun.com>
 dnl ---------------------------------------------------------------------------
 
-dnl The problem is that the default compilation flags in Solaris 2.6 won't
-dnl let programs access large files;  you need to tell the compiler that
-dnl you actually want your programs to work on large files.  For more
-dnl details about this brain damage please see:
+dnl By default, many hosts won't let programs access large files;
+dnl one must use special compiler options to get large-file access to work.
+dnl For more details about this brain damage please see:
 dnl http://www.sas.com/standards/large.file/x_open.20Mar96.html
 
-AC_DEFUN(AC_LFS,
-[dnl
-  # If available, prefer support for large files unless the user specified
-  # one of the CPPFLAGS, LDFLAGS, or LIBS variables.
-  AC_MSG_CHECKING(whether large file support needs explicit enabling)
-  ac_getconfs=''
-  ac_result=yes
-  ac_set=''
-  ac_shellvars='CPPFLAGS LDFLAGS LIBS'
-  for ac_shellvar in $ac_shellvars; do
-    case $ac_shellvar in
-      CPPFLAGS) ac_lfsvar=LFS_CFLAGS ;;
-      *) ac_lfsvar=LFS_$ac_shellvar ;;
-    esac
-    eval test '"${'$ac_shellvar'+set}"' = set && ac_set=$ac_shellvar
-    (getconf $ac_lfsvar) >/dev/null 2>&1 || { ac_result=no; break; }
-    ac_getconf=`getconf $ac_lfsvar`
-    ac_getconfs=$ac_getconfs$ac_getconf
-    eval ac_test_$ac_shellvar=\$ac_getconf
-  done
-  case "$ac_result$ac_getconfs" in
-    yes) ac_result=no ;;
-  esac
-  case "$ac_result$ac_set" in
-    yes?*) ac_result="yes, but $ac_set is already set, so use its settings"
-  esac
-  AC_MSG_RESULT($ac_result)
-  case $ac_result in
-    yes)
-      for ac_shellvar in $ac_shellvars; do
-	eval $ac_shellvar=\$ac_test_$ac_shellvar
-      done ;;
-  esac
-])
+dnl Written by Paul Eggert <eggert@twinsun.com>.
+
+dnl Internal subroutine of AC_SYS_LARGEFILE.
+dnl AC_SYS_LARGEFILE_FLAGS(FLAGSNAME)
+AC_DEFUN(AC_SYS_LARGEFILE_FLAGS,
+  [AC_CACHE_CHECK([for $1 value to request large file support],
+     ac_cv_sys_largefile_$1,
+     [ac_cv_sys_largefile_$1=`($GETCONF LFS_$1) 2>/dev/null` || {
+	ac_cv_sys_largefile_$1=no
+	ifelse($1, CFLAGS,
+	  [case "$host_os" in
+	   # IRIX 6.2 and later require cc -n32.
+changequote(, )dnl
+	   irix6.[2-9]* | irix6.1[0-9]* | irix[7-9].* | irix[1-9][0-9]*)
+changequote([, ])dnl
+	     if test "$GCC" != yes; then
+	       ac_cv_sys_largefile_CFLAGS=-n32
+	     fi
+	     ac_save_CC="$CC"
+	     CC="$CC $ac_cv_sys_largefile_CFLAGS"
+	     AC_TRY_LINK(, , , ac_cv_sys_largefile_CFLAGS=no)
+	     CC="$ac_save_CC"
+	   esac])
+      }])])
+
+dnl Internal subroutine of AC_SYS_LARGEFILE.
+dnl AC_SYS_LARGEFILE_SPACE_APPEND(VAR, VAL)
+AC_DEFUN(AC_SYS_LARGEFILE_SPACE_APPEND,
+  [case $2 in
+   no) ;;
+   ?*)
+     case "[$]$1" in
+     '') $1=$2 ;;
+     *) $1=[$]$1' '$2 ;;
+     esac ;;
+   esac])
+
+dnl Internal subroutine of AC_SYS_LARGEFILE.
+dnl AC_SYS_LARGEFILE_MACRO_VALUE(C-MACRO, CACHE-VAR, COMMENT, CODE-TO-SET-DEFAULT)
+AC_DEFUN(AC_SYS_LARGEFILE_MACRO_VALUE,
+  [AC_CACHE_CHECK([for $1], $2,
+     [$2=no
+changequote(, )dnl
+      $4
+      for ac_flag in $ac_cv_sys_largefile_CFLAGS no; do
+	case "$ac_flag" in
+	-D$1)
+	  $2=1 ;;
+	-D$1=*)
+	  $2=`expr " $ac_flag" : '[^=]*=\(.*\)'` ;;
+	esac
+      done
+changequote([, ])dnl
+      ])
+   if test "[$]$2" != no; then
+     AC_DEFINE_UNQUOTED([$1], [$]$2, [$3])
+   fi])
+
+AC_DEFUN(AC_SYS_LARGEFILE,
+  [AC_REQUIRE([AC_CANONICAL_HOST])
+   AC_ARG_ENABLE(largefile,
+     [  --disable-largefile     omit support for large files])
+   if test "$enable_largefile" != no; then
+     AC_CHECK_TOOL(GETCONF, getconf)
+     AC_SYS_LARGEFILE_FLAGS(CFLAGS)
+     AC_SYS_LARGEFILE_FLAGS(LDFLAGS)
+     AC_SYS_LARGEFILE_FLAGS(LIBS)
+
+     for ac_flag in $ac_cv_sys_largefile_CFLAGS no; do
+       case "$ac_flag" in
+       no) ;;
+       -D_FILE_OFFSET_BITS=*) ;;
+       -D_LARGEFILE_SOURCE | -D_LARGEFILE_SOURCE=*) ;;
+       -D_LARGE_FILES | -D_LARGE_FILES=*) ;;
+       -D?* | -I?*)
+	 AC_SYS_LARGEFILE_SPACE_APPEND(CPPFLAGS, "$ac_flag") ;;
+       *)
+	 AC_SYS_LARGEFILE_SPACE_APPEND(CFLAGS, "$ac_flag") ;;
+       esac
+     done
+     AC_SYS_LARGEFILE_SPACE_APPEND(LDFLAGS, "$ac_cv_sys_largefile_LDFLAGS")
+     AC_SYS_LARGEFILE_SPACE_APPEND(LIBS, "$ac_cv_sys_largefile_LIBS")
+     AC_SYS_LARGEFILE_MACRO_VALUE(_FILE_OFFSET_BITS,
+       ac_cv_sys_file_offset_bits,
+       [Number of bits in a file offset, on hosts where this is settable.],
+       [case "$host_os" in
+	# HP-UX 10.20 and later
+	hpux10.[2-9][0-9]* | hpux1[1-9]* | hpux[2-9][0-9]*)
+	  ac_cv_sys_file_offset_bits=64 ;;
+	esac])
+     AC_SYS_LARGEFILE_MACRO_VALUE(_LARGEFILE_SOURCE,
+       ac_cv_sys_largefile_source,
+       [Define to make fseeko etc. visible, on some hosts.],
+       [case "$host_os" in
+	# HP-UX 10.20 and later
+	hpux10.[2-9][0-9]* | hpux1[1-9]* | hpux[2-9][0-9]*)
+	  ac_cv_sys_largefile_source=1 ;;
+	esac])
+     AC_SYS_LARGEFILE_MACRO_VALUE(_LARGE_FILES,
+       ac_cv_sys_large_files,
+       [Define for large files, on AIX-style hosts.],
+       [case "$host_os" in
+	# AIX 4.2 and later
+	aix4.[2-9]* | aix4.1[0-9]* | aix[5-9].* | aix[1-9][0-9]*)
+	  ac_cv_sys_large_files=1 ;;
+	esac])
+   fi
+  ])
 
 
 dnl ---------------------------------------------------------------------------
@@ -197,8 +270,9 @@ AC_DEFUN(jm_AC_TYPE_UINTMAX_T,
   AC_REQUIRE([jm_AC_HEADER_INTTYPES_H])
   if test $jm_ac_cv_header_inttypes_h = no; then
     AC_CACHE_CHECK([for unsigned long long], ac_cv_type_unsigned_long_long,
-    [AC_TRY_COMPILE([],
-      [unsigned long long i = (unsigned long long) -1;],
+    [AC_TRY_LINK([unsigned long long ull = 1; int i = 63;],
+      [unsigned long long ullmax = (unsigned long long) -1;
+       return ull << i | ull >> i | ullmax / ull | ullmax % ull;],
       ac_cv_type_unsigned_long_long=yes,
       ac_cv_type_unsigned_long_long=no)])
     if test $ac_cv_type_unsigned_long_long = yes; then
@@ -296,4 +370,101 @@ changequote([,]),dnl
   fi
   AC_DEFINE_UNQUOTED(SELECT_FD_SET_CAST,$ac_cast)
 fi
+])
+
+
+# The following is taken from automake 1.4,
+# except that it prefers the compiler option -Ae to "-Aa -D_HPUX_SOURCE"
+# because only the former supports 64-bit integral types on HP-UX 10.20.
+
+## ----------------------------------------- ##
+## ANSIfy the C compiler whenever possible.  ##
+## From Franc,ois Pinard                     ##
+## ----------------------------------------- ##
+
+# serial 2
+
+# @defmac AC_PROG_CC_STDC
+# @maindex PROG_CC_STDC
+# @ovindex CC
+# If the C compiler in not in ANSI C mode by default, try to add an option
+# to output variable @code{CC} to make it so.  This macro tries various
+# options that select ANSI C on some system or another.  It considers the
+# compiler to be in ANSI C mode if it handles function prototypes correctly.
+#
+# If you use this macro, you should check after calling it whether the C
+# compiler has been set to accept ANSI C; if not, the shell variable
+# @code{am_cv_prog_cc_stdc} is set to @samp{no}.  If you wrote your source
+# code in ANSI C, you can make an un-ANSIfied copy of it by using the
+# program @code{ansi2knr}, which comes with Ghostscript.
+# @end defmac
+
+AC_DEFUN(AM_PROG_CC_STDC,
+[AC_REQUIRE([AC_PROG_CC])
+AC_BEFORE([$0], [AC_C_INLINE])
+AC_BEFORE([$0], [AC_C_CONST])
+dnl Force this before AC_PROG_CPP.  Some cpp's, eg on HPUX, require
+dnl a magic option to avoid problems with ANSI preprocessor commands
+dnl like #elif.
+dnl FIXME: can't do this because then AC_AIX won't work due to a
+dnl circular dependency.
+dnl AC_BEFORE([$0], [AC_PROG_CPP])
+AC_MSG_CHECKING(for ${CC-cc} option to accept ANSI C)
+AC_CACHE_VAL(am_cv_prog_cc_stdc,
+[am_cv_prog_cc_stdc=no
+ac_save_CC="$CC"
+# Don't try gcc -ansi; that turns off useful extensions and
+# breaks some systems' header files.
+# AIX			-qlanglvl=ansi
+# Ultrix and OSF/1	-std1
+# HP-UX			-Aa -D_HPUX_SOURCE
+# SVR4			-Xc -D__EXTENSIONS__
+for ac_arg in "" -qlanglvl=ansi -std1 -Ae "-Aa -D_HPUX_SOURCE" "-Xc -D__EXTENSIONS__"
+do
+  CC="$ac_save_CC $ac_arg"
+  AC_TRY_COMPILE(
+[#include <stdarg.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+/* Most of the following tests are stolen from RCS 5.7's src/conf.sh.  */
+struct buf { int x; };
+FILE * (*rcsopen) (struct buf *, struct stat *, int);
+static char *e (p, i)
+     char **p;
+     int i;
+{
+  return p[i];
+}
+static char *f (char * (*g) (char **, int), char **p, ...)
+{
+  char *s;
+  va_list v;
+  va_start (v,p);
+  s = g (p, va_arg (v,int));
+  va_end (v);
+  return s;
+}
+int test (int i, double x);
+struct s1 {int (*f) (int a);};
+struct s2 {int (*f) (double a);};
+int pairnames (int, char **, FILE *(*)(struct buf *, struct stat *, int), int, int);
+int argc;
+char **argv;
+], [
+return f (e, argv, 0) != argv[0]  ||  f (e, argv, 1) != argv[1];
+],
+[am_cv_prog_cc_stdc="$ac_arg"; break])
+done
+CC="$ac_save_CC"
+])
+if test -z "$am_cv_prog_cc_stdc"; then
+  AC_MSG_RESULT([none needed])
+else
+  AC_MSG_RESULT($am_cv_prog_cc_stdc)
+fi
+case "x$am_cv_prog_cc_stdc" in
+  x|xno) ;;
+  *) CC="$CC $am_cv_prog_cc_stdc" ;;
+esac
 ])

@@ -79,7 +79,7 @@ static char *quote_as_word PARAMS ((char *out, char *in, int double_dollars));
 
 struct command_switch
   {
-    unsigned char c;		/* The switch character.  */
+    int c;			/* The switch character.  */
 
     enum			/* Type of the value.  */
       {
@@ -106,6 +106,9 @@ struct command_switch
                                 /* 0 means internal; don't display help.  */
   };
 
+/* True if C is a switch value that corresponds to a short option.  */
+
+#define short_option(c) ((c) <= CHAR_MAX)
 
 /* The structure used to hold the list of strings given
    in command switches of a type that takes string arguments.  */
@@ -281,7 +284,7 @@ static const struct command_switch switches[] =
 	(char *) &inf_jobs, (char *) &default_job_slots,
 	"jobs", "N",
 	_("Allow N jobs at once; infinite jobs with no arg") },
-    { 2, string, (char *) &jobserver_fds, 1, 1, 0, 0, 0,
+    { CHAR_MAX+1, string, (char *) &jobserver_fds, 1, 1, 0, 0, 0,
         "jobserver-fds", 0,
         0 },
     { 'k', flag, (char *) &keep_going_flag, 1, 1, 0,
@@ -336,13 +339,13 @@ static const struct command_switch switches[] =
     { 'w', flag, (char *) &print_directory_flag, 1, 1, 0, 0, 0,
 	"print-directory", 0,
 	_("Print the current directory") },
-    { 3, flag, (char *) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
+    { CHAR_MAX+2, flag, (char *) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
 	"no-print-directory", 0,
 	_("Turn off -w, even if it was turned on implicitly") },
     { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0,
 	"what-if", _("FILE"),
 	_("Consider FILE to be infinitely new") },
-    { 4, flag, (char *) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
+    { CHAR_MAX+3, flag, (char *) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
 	"warn-undefined-variables", 0,
 	_("Warn when an undefined variable is referenced") },
     { '\0', }
@@ -1790,7 +1793,7 @@ init_switches ()
 			      switches[i].long_name);
       long_options[i].flag = 0;
       long_options[i].val = switches[i].c;
-      if (isalnum (switches[i].c))
+      if (short_option (switches[i].c))
 	*p++ = switches[i].c;
       switch (switches[i].type)
 	{
@@ -1803,11 +1806,11 @@ init_switches ()
 	case string:
 	case positive_int:
 	case floating:
-	  if (isalnum (switches[i].c))
+	  if (short_option (switches[i].c))
 	    *p++ = ':';
 	  if (switches[i].noarg_value != 0)
 	    {
-	      if (isalnum (switches[i].c))
+	      if (short_option (switches[i].c))
 		*p++ = ':';
 	      long_options[i].has_arg = optional_argument;
 	    }
@@ -1932,7 +1935,7 @@ print_usage (bad)
 
       p = buf;
 
-      if (isalnum (cs->c))
+      if (short_option (cs->c))
 	{
 	  sprintf (buf, "  -%c%s", cs->c, shortarg);
 	  p += strlen (p);
@@ -1941,7 +1944,7 @@ print_usage (bad)
 	{
 	  unsigned int i;
 	  sprintf (p, "%s--%s%s",
-		   !isalnum (cs->c) ? "  " : ", ",
+		   !short_option (cs->c) ? "  " : ", ",
 		   cs->long_name, longarg);
 	  p += strlen (p);
 	  for (i = 0; i < (sizeof (long_option_aliases) /
@@ -2282,7 +2285,7 @@ define_makeflags (all, makefile)
       ++flagslen;		/* Just a single flag letter.  */	      \
     else								      \
       flagslen += 1 + 1 + 1 + 1 + 3 * (LEN); /* " -x foo" */		      \
-    if (!isalnum (cs->c))						      \
+    if (!short_option (cs->c))						      \
       /* This switch has no single-letter version, so we use the long.  */    \
       flagslen += 2 + strlen (cs->long_name);				      \
   } while (0)
@@ -2380,7 +2383,7 @@ define_makeflags (all, makefile)
   while (flags != 0)
     {
       /* Add the flag letter or name to the string.  */
-      if (!isalnum (flags->cs->c))
+      if (!short_option (flags->cs->c))
 	{
 	  *p++ = '-';
 	  strcpy (p, flags->cs->long_name);
@@ -2397,7 +2400,7 @@ define_makeflags (all, makefile)
 	  if (flags->arg[0] != '\0')
 	    {
 	      /* Add its argument too.  */
-	      *p++ = !isalnum (flags->cs->c) ? '=' : ' ';
+	      *p++ = !short_option (flags->cs->c) ? '=' : ' ';
 	      p = quote_as_word (p, flags->arg, 1);
 	    }
 	  ++words;
@@ -2405,7 +2408,7 @@ define_makeflags (all, makefile)
 	  *p++ = ' ';
 	  *p++ = '-';
 	}
-      else if (!isalnum (flags->cs->c))
+      else if (!short_option (flags->cs->c))
 	{
 	  ++words;
 	  /* Long options must each go in their own word,

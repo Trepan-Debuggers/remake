@@ -1,13 +1,14 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.76 1999/08/23 22:15:20 psmith Exp $])
+AC_REVISION([$Id: configure.in,v 1.77 1999/08/31 17:02:38 psmith Exp $])
 AC_PREREQ(2.13)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 
-AM_INIT_AUTOMAKE(make, 3.77.94)
+AM_INIT_AUTOMAKE(make, 3.77.95)
 AM_CONFIG_HEADER(config.h)
 
 dnl Regular configure stuff
 
+AC_CANONICAL_HOST
 AC_PROG_MAKE_SET
 AC_PROG_CC
 AC_PROG_INSTALL
@@ -21,7 +22,7 @@ AC_MINIX
 dnl This test must come as early as possible after the compiler configuration
 dnl tests, because the choice of the file model can (in principle) affect
 dnl whether functions and headers are available, whether they work, etc.
-AC_LFS
+AC_SYS_LARGEFILE
 
 AC_HEADER_STDC
 AC_HEADER_DIRENT
@@ -31,6 +32,7 @@ AC_TYPE_SIGNAL
 AC_CHECK_HEADERS(stdlib.h unistd.h limits.h sys/param.h fcntl.h string.h \
 		 memory.h sys/timeb.h)
 AC_PROG_CC_C_O
+AM_PROG_CC_STDC
 AC_C_CONST			dnl getopt needs this.
 AC_HEADER_STAT
 
@@ -66,9 +68,10 @@ AC_FUNC_VPRINTF
 AC_FUNC_STRCOLL
 AC_FUNC_CLOSEDIR_VOID
 AC_FUNC_SETVBUF_REVERSED
-AC_FUNC_GETLOADAVG
 AC_FUNC_SELECT
-AC_CHECK_LIB(kstat, kstat_open)
+
+AC_CHECK_LIB(kstat, kstat_open) dnl _Must_ come before AC_FUNC_GETLOADAVG.
+AC_FUNC_GETLOADAVG
 
 # Check out the wait reality.
 AC_CHECK_HEADERS(sys/wait.h)
@@ -207,7 +210,7 @@ esac
 
 
 MAINT_MAKEFILE=/dev/null
-if test -r $srcdir/maintMakefile; then
+if test -r "$srcdir/maintMakefile"; then
   MAINT_MAKEFILE="$srcdir/maintMakefile"
 fi
 AC_SUBST_FILE(MAINT_MAKEFILE)
