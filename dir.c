@@ -1,5 +1,5 @@
 /* Directory hashing for GNU Make.
-Copyright (C) 1988, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -28,7 +28,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #if defined (POSIX) || defined (DIRENT) || defined (__GNU_LIBRARY__)
 #include <dirent.h>
 #define direct dirent
+#ifndef	__GNU_LIBRARY__
 #define D_NAMLEN(d) strlen((d)->d_name)
+#else
+#define D_NAMLEN(d) ((d)->d_namlen)
+#endif
 #else /* not POSIX or DIRENT */
 #define D_NAMLEN(d) ((d)->d_namlen)
 #if defined (USG) && !defined (sgi)
