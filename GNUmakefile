@@ -204,7 +204,7 @@ build.sh.in: build.template compatMakefile
 # Figure out the version number from the source of `version.c'.
 version := \
   $(strip $(shell sed -e '/=/!d' -e 's/^.*"\(.*\)";$$/\1/' < version.c))
-tarfiles := make make-doc
+tarfiles := make # make-doc
 tarfiles := $(addsuffix -$(version).tar,$(tarfiles))
 tarfiles := $(tarfiles:%=%.gz) # no more compress $(tarfiles:%=%.Z)
 # Depend on default and doc so we don't ship anything that won't compile.
@@ -252,7 +252,8 @@ make-$(version).tar: README INSTALL COPYING ChangeLog NEWS \
 	  acconfig.h $(srcs) remote-*.c $(globfiles) \
 	  make.texinfo make-stds.texi \
 	  make.?? make.??s make.toc make.aux make.man texinfo.tex TAGS tags \
-	  install.sh
+	  install.sh \
+	  make.info make.info*
 	$(make-tar)
 
 ifneq (,)
