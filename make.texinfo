@@ -6,10 +6,10 @@
 @smallbook
 @c %**end of header
 
-@set EDITION 0.40
-@set VERSION 3.63 Beta
-@set UPDATED 14 January 1993
-@set UPDATE-MONTH January 1993
+@set EDITION 0.41
+@set VERSION 3.64 Beta
+@set UPDATED 8 March 1993
+@set UPDATE-MONTH March 1993
 
 @c finalout
 
@@ -7768,9 +7768,10 @@ strings.  We feel it is much cleaner to always use automatic variables
 and thus make this feature obsolete.@refill
 
 @item
-In some Unix @code{make}s, implicit rule search (@pxref{Implicit Rules, ,Using Implicit Rules}) is
-apparently done for @emph{all} targets, not just those without commands.
-This means you can do:@refill
+In some Unix @code{make}s, implicit rule search
+(@pxref{Implicit Rules, ,Using Implicit Rules}) is apparently done for
+@emph{all} targets, not just those without commands.  This means you can
+do:@refill
 
 @example
 @group
@@ -7791,6 +7792,26 @@ and doing such a thing simply does not fit the model.@refill
 GNU @code{make} does not include any built-in implicit rules for
 compiling or preprocessing EFL programs.  If we hear of anyone who is
 using EFL, we will gladly add them.
+
+@item
+It appears that in SVR4 @code{make}, a suffix rule can be specified with
+no commands, and it is treated as if it had empty commands
+(@pxref{Empty Commands}).  For example:
+
+@example
+.c.a:
+@end example
+
+@noindent
+will override the built-in @file{.c.a} suffix rule.
+
+We feel that it is cleaner for a rule without commands to always simply
+add to the dependency list for the target.  The above example can be
+easily rewritten to get the desired behavior in GNU @code{make}:
+
+@example
+.c.a: ;
+@end example
 @end itemize
 
 @comment The makefile standards are in a separate file that is also
