@@ -9,3 +9,7 @@ makedb*.html
 makedb.aux makedb.cp makedb.cps makedb.fn makedb.fns makedb.ky
 makedb.pg makedb.toc makedb.tp makedb.vr makedb.log
 makedb.dvi makedb.ps makedb.pdf
+makedb.info*
+stamp-vti
+version-makedb.texi
+gpl.texi
