@@ -61,13 +61,14 @@ libc_dir = /home/gd2/gnu/libc/$(ARCH)
 ifneq ($(wildcard $(libc_dir)),)
 ifneq ($(wildcard $(libc_dir)/works-for-make),)
 dash_m := -M
-CPPFLAGS := -I$(libc_dir)/include
-LDFLAGS := -nostdlib $(libc_dir)/lib/start.o
-LOADLIBES := $(LOADLIBES) \
-	     $(libc_dir)/lib/mcheck-init.o \
-	     $(libc_dir)/lib/libc.a \
-	     -lgcc \
-	     $(libc_dir)/lib/libc.a
+#CPPFLAGS := -I$(libc_dir)/include
+#LDFLAGS := -nostdlib $(libc_dir)/lib/start.o
+#LOADLIBES := $(LOADLIBES) \
+#	     $(libc_dir)/lib/mcheck-init.o \
+#	     $(libc_dir)/lib/libc.a \
+#	     -lgcc \
+#	     $(libc_dir)/lib/libc.a
+$(CC) := $(CC) -b glibc
 $(prog): $(libc_dir)/lib/libc.a
 
 # glob is in the C library.
