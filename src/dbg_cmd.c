@@ -31,6 +31,30 @@ Boston, MA 02111-1307, USA.  */
 #include <readline/readline.h>
 #include <readline/history.h>
 
+const char *WARRANTY = 
+"			    NO WARRANTY\n"
+"\n"
+"  11. BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY\n"
+"FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.  EXCEPT WHEN\n"
+"OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES\n"
+"PROVIDE THE PROGRAM \"AS IS\" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED\n"
+"OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF\n"
+"MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS\n"
+"TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.  SHOULD THE\n"
+"PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,\n"
+"REPAIR OR CORRECTION.\n"
+"\n"
+"  12. IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING\n"
+"WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR\n"
+"REDISTRIBUTE THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES,\n"
+"INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING\n"
+"OUT OF THE USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED\n"
+"TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY\n"
+"YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER\n"
+"PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE\n"
+"POSSIBILITY OF SUCH DAMAGES.\n";
+
+
 /* Common debugger command function prototype */
 typedef debug_return_t (*dbg_cmd_t) (char *);
 
@@ -58,17 +82,21 @@ typedef struct {
   const char short_name;	/* Index into short_cmd array. */
 } long_cmd_t;
 
-static debug_return_t dbg_cmd_show_var(char *psz_arg, int expand);
+static int            dbg_cmd_show_var(char *psz_arg, int expand);
 static debug_return_t dbg_cmd_set_var (char *psz_arg, int expand);
 
-static debug_return_t dbg_cmd_break           (char *psz_arg);
-static debug_return_t dbg_cmd_continue        (char *psz_arg);
-static debug_return_t dbg_cmd_delete          (char *psz_arg);
-static debug_return_t dbg_cmd_frame           (char *psz_arg);
+static debug_return_t dbg_cmd_break            (char *psz_arg);
+static debug_return_t dbg_cmd_comment          (char *psz_arg);
+static debug_return_t dbg_cmd_continue         (char *psz_arg);
+static debug_return_t dbg_cmd_delete           (char *psz_arg);
+static debug_return_t dbg_cmd_expand           (char *psz_arg);
+static debug_return_t dbg_cmd_frame            (char *psz_arg);
 static debug_return_t dbg_cmd_help             (char *psz_arg);
 #ifdef HISTORY_STUFF
 static debug_return_t dbg_cmd_history          (char *psz_arg);
 #endif
+static debug_return_t dbg_cmd_info             (char *psz_arg);
+static debug_return_t dbg_cmd_list             (char *psz_arg);
 static debug_return_t dbg_cmd_print            (char *psz_arg);
 static debug_return_t dbg_cmd_quit             (char *psz_arg);
 static debug_return_t dbg_cmd_restart          (char *psz_arg);
@@ -76,17 +104,18 @@ static debug_return_t dbg_cmd_set              (char *psz_arg);
 static debug_return_t dbg_cmd_set_var_noexpand (char *psz_arg);
 static debug_return_t dbg_cmd_shell            (char *psz_arg);
 static debug_return_t dbg_cmd_show_stack       (char *psz_arg);
-static debug_return_t dbg_cmd_show_var_expand  (char *psz_arg);
 static debug_return_t dbg_cmd_skip             (char *psz_arg);
 static debug_return_t dbg_cmd_frame_down       (char *psz_arg);
 static debug_return_t dbg_cmd_frame_up         (char *psz_arg);
 static debug_return_t dbg_cmd_frame_down       (char *psz_arg);
+static debug_return_t dbg_cmd_show             (char *psz_arg);
 static debug_return_t dbg_cmd_step             (char *psz_arg);
-static debug_return_t dbg_cmd_info             (char *psz_arg);
 static debug_return_t dbg_cmd_write_cmds       (char *psz_arg);
 
 long_cmd_t commands[] = {
+  { "backtrace",'T' },
   { "break",    'b' },
+  { "comment",  '#' },
   { "continue", 'c' },
   { "delete",   'd' },
   { "down",     'D' },
@@ -95,6 +124,7 @@ long_cmd_t commands[] = {
   { "frame"   , 'f' },
   { "help"    , 'h' },
   { "info"    , 'i' },
+  { "list"    , 'l' },
   { "next"    , 'n' },
   { "print"   , 'p' },
   { "quit"    , 'q' },
@@ -102,7 +132,7 @@ long_cmd_t commands[] = {
   { "set"     , '=' },
   { "setq"    , '"' },
   { "shell"   , '!' },
-  { "show"    , 'i' },
+  { "show"    , 'S' },
   { "skip"    , 'k' },
   { "step"    , 's' },
   { "where"   , 'T' },
@@ -112,6 +142,26 @@ long_cmd_t commands[] = {
 };
 
 short_cmd_t short_command[256] = { { NULL, '\0' }, };
+
+char *info_subcommands[] = {
+  "target",
+  "variables",
+  "warranty",
+  NULL
+};
+
+char *show_subcommands[] = {
+  "args",
+  "basename",
+  "ignore-errors",
+  "keep-going",
+  "silent",
+  "trace",
+  "version",
+  "warranty",
+  NULL
+};
+
 
 /* This is set to 1 when we are done with the read loop */
 static int done=0 ;
@@ -242,6 +292,17 @@ cmd_initialize(void)
   short_command['k'].doc = 
     _("Skip execution of next command or action.\n" );
 
+  short_command['l'].func = &dbg_cmd_list;
+  short_command['l'].use = _("list");
+  short_command['l'].doc = 
+    _("Show information about a target.\n" \
+      "\ttarget information is printed.\n" \
+      "\tAttributes 'depend', 'nonorder', 'attrs', 'state', 'time', 'vars'\n" \
+      "\tor 'prev' can be given after a target name.\n" \
+      "\tIf no variable or target name  is supplied, we try to use the\n" \
+      "\tcurrent target name.\n"				
+      );
+
   short_command['?'].func = &dbg_cmd_help;
   short_command['?'].use = short_command['h'].use;
   short_command['?'].doc = short_command['h'].doc;
@@ -257,11 +318,8 @@ cmd_initialize(void)
       "\tIf a variable name is given, the value is shown with embedded\n" \
       "\tvariable-references unexpanded. Don't include $ before a variable\n" \
       "\tname. See also \"examine\".\n\n" \
-      "\tIf a target name is given, information about target is printed.\n" \
-      "\tAttributes 'depend', 'nonorder', 'attrs', 'state', 'time', 'vars'\n" \
-      "\tor 'prev' can be given after a target name." \
-      "\tIf no variable or target name  is supplied, we try to use the " \
-      "\tcurrent target name.\n"				
+      "\tIf no variable is supplied, we try to use the\n" \
+      "\tlast value given.\n"				
       );
 
   short_command['q'].func = &dbg_cmd_quit;
@@ -286,6 +344,13 @@ cmd_initialize(void)
       "\tArgument N means do this N times (or until there's another\n " \
       "\treason to stop.");
 
+  short_command['S'].func = &dbg_cmd_show;
+  short_command['S'].use = _("show [thing]");
+  short_command['S'].doc = 
+    _("Show the state of thing.\n" \
+      "\tIf no 'thing' is specified, show everything there is to show.\n");
+
+
   short_command['T'].func = &dbg_cmd_show_stack;
   short_command['T'].doc  = _("Show target stack.");
   short_command['T'].use  = _("where");
@@ -306,11 +371,16 @@ cmd_initialize(void)
       "\tcreate the filename by prepending a directory name to the target\n"
       "\tname and then append \".sh\".");
 
-  short_command['x'].func = &dbg_cmd_show_var_expand;
+  short_command['x'].func = &dbg_cmd_expand;
   short_command['x'].use =  _("examine *string*");
   short_command['x'].doc  = 
     _("Show string with internal variables references expanded. See also \n" \
       "\t\"print\".");
+
+  short_command['#'].func = &dbg_cmd_comment;
+  short_command['#'].use =  _("comment *text*");
+  short_command['#'].doc  = 
+    _("Ignore this line.");
 
   short_command['!'].func = &dbg_cmd_shell;
   short_command['!'].use =  _("shell *string*");
@@ -418,6 +488,10 @@ static debug_return_t dbg_cmd_help (char *psz_arg)
 	     short_command[s].use, commands[i].short_name);
       printf("\t%s\n\n", short_command[s].doc);
     }
+
+    printf("Readline command line editing (emacs/vi mode) is available.\n");
+    printf("For more help, type h <cmd> or consult online-documentation.\n");
+    
   } else {
     short_cmd_t *p_command;
 
@@ -431,6 +505,19 @@ static debug_return_t dbg_cmd_help (char *psz_arg)
     }
     if (p_command) {
       printf("  %s:\n\t%s\n", p_command->use, p_command->doc);
+      if ( p_command->func == &dbg_cmd_info ) {
+	printf ("\tAvailable info subcommands are:\n\t");
+	for (i = 0; info_subcommands[i]; i++) {
+	  printf(" %s", info_subcommands[i]);
+	}
+	printf("\n");
+      } else if ( p_command->func == &dbg_cmd_show ) {
+	printf ("\tAvailable show subcommands are:\n\t");
+	for (i = 0; show_subcommands[i]; i++) {
+	  printf(" %s", show_subcommands[i]);
+	}
+	printf("\n");
+      }
     } else {
       printf("Invalid command %s. Try help for a list of commands\n", 
 	     psz_arg);
@@ -533,6 +620,12 @@ static debug_return_t dbg_cmd_delete (char *psz_target)
   return debug_read;
 }
 
+/* Comment line - ingore text on line. */
+static debug_return_t dbg_cmd_comment (char *psz_arg)
+{
+  return debug_read;
+}
+
 /* Continue running program. */
 static debug_return_t dbg_cmd_continue (char *psz_arg)
 {
@@ -541,21 +634,22 @@ static debug_return_t dbg_cmd_continue (char *psz_arg)
 }
 
 /* Give some help info. */
-static debug_return_t dbg_cmd_info (char *psz_arg)
+static debug_return_t dbg_cmd_show (char *psz_arg)
 {
   if (!psz_arg || 0==strlen(psz_arg)) {
-    dbg_cmd_info("basename");
-    dbg_cmd_info("ignore-errors");
-    dbg_cmd_info("keep-going");
-    dbg_cmd_info("silent");
-    dbg_cmd_info("target");
-    dbg_cmd_info("trace");
+    unsigned int i;
+    for (i=0; show_subcommands[i]; i++) {
+      if ( 0 != strcmp(show_subcommands[i], "warranty") )
+	dbg_cmd_show(show_subcommands[i]);
+    }
   } else {
-    if (0 == strcmp (psz_arg, "target")) {
-      if (p_stack_top && p_stack_top->p_target && p_stack_top->p_target->name)
-	printf("target: %s\n", p_stack_top->p_target->name);
-      else 
-	printf("target unknown\n");
+    if (0 == strcmp (psz_arg, "args")) {
+      unsigned int i;
+      printf("args:");
+      for (i = 0; global_argv[i]; i++) {
+	printf(" %s", global_argv[i]);
+      }
+      printf("\n");
     } else if (0 == strcmp (psz_arg, "basename")) {
       printf("basename: %s\n", var_to_on_off(basename_filenames));
     } else if (0 == strcmp (psz_arg, "ignore-errors")) {
@@ -566,8 +660,39 @@ static debug_return_t dbg_cmd_info (char *psz_arg)
       printf("silent: %s\n", var_to_on_off(silent_flag));
     } else if (0 == strcmp (psz_arg, "trace")) {
       printf("trace: %s\n", var_to_on_off(tracing));
+    } else if (0 == strcmp (psz_arg, "version")) {
+      printf("version: ");
+      print_version();
+    } else if (0 == strcmp (psz_arg, "warranty")) {
+      printf("warranty: ");
+      printf(WARRANTY);
     } else {
-      printf("Don't know how to show %s\n", psz_arg);
+      printf("Undefined show command \"%s\". Try \"help show\"\n", psz_arg);
+    }
+  }
+  
+  return debug_read;
+}
+
+/* Give some help info. */
+static debug_return_t dbg_cmd_info (char *psz_arg)
+{
+  if (!psz_arg || 0==strlen(psz_arg)) {
+    dbg_cmd_help("info");
+  } else {
+    if (0 == strcmp (psz_arg, "stack")) {
+      print_target_stack(p_stack_top, i_stack_pos);
+    } else if (0 == strcmp (psz_arg, "target")) {
+      if (p_stack_top && p_stack_top->p_target && p_stack_top->p_target->name)
+	printf("target: %s\n", p_stack_top->p_target->name);
+      else 
+	printf("target unknown\n");
+    } else if (0 == strcmp (psz_arg, "variables")) {
+      print_variable_data_base();
+    } else if (0 == strcmp (psz_arg, "warranty")) {
+      printf(WARRANTY);
+    } else {
+      printf("Undefined info command \"%s\". Try \"help info\"\n", psz_arg);
     }
   }
   
@@ -607,6 +732,34 @@ static debug_return_t dbg_cmd_trace (char *psz_arg)
 
 /* Show a variable or target definition. */
 static debug_return_t dbg_cmd_print (char *psz_args) 
+{
+  file_t *p_target;
+  char   *psz_name;
+  static char *psz_last_name = NULL;
+
+  if (!psz_args || 0==strlen(psz_args)) {
+    /* Use last target value */
+    if (psz_last_name)
+      psz_name = psz_last_name;
+    else {
+      printf("No current variable - must supply something to print\n");
+      return debug_read;
+    }
+  } else {
+    psz_name = get_word(&psz_args);
+  }
+  
+  if (dbg_cmd_show_var(psz_name, 0)) {
+    if (psz_last_name) free(psz_last_name);
+    psz_last_name = strdup(psz_name);
+  }
+  
+
+  return debug_read;
+}
+
+/* Show a variable or target definition. */
+static debug_return_t dbg_cmd_list (char *psz_args) 
 {
   file_t *p_target;
   char   *psz_name;
@@ -653,8 +806,6 @@ static debug_return_t dbg_cmd_print (char *psz_args)
     
     if (0 == i_mask) i_mask = PRINT_TARGET_ALL;
     print_target_props(p_target, i_mask);
-  } else {
-    dbg_cmd_show_var(psz_name, 0);
   }
   return debug_read;
 }
@@ -882,10 +1033,11 @@ static debug_return_t dbg_cmd_shell (char *psz_varname)
 /* Show a variable definition. Set "expand" to 1 if you want variable
    definitions inside the displayed value expanded.
 */
-static debug_return_t dbg_cmd_show_var (char *psz_varname, int expand) 
+static int dbg_cmd_show_var (char *psz_varname, int expand) 
 {
   if (!psz_varname || 0==strlen(psz_varname)) {
     printf(_("You need to supply a variable name.\n"));
+    return 0;
   } else {
     variable_t *p_v;
     initialize_file_variables (p_stack->p_target, 0);
@@ -900,18 +1052,35 @@ static debug_return_t dbg_cmd_show_var (char *psz_varname, int expand)
     } else {
       if (expand)
 	printf("%s\n", variable_expand(psz_varname));
-      else
+      else {
 	printf("Can't find variable %s\n", psz_varname);
+	return 0;
+      }
     }
   }
-  return debug_read;
+  return 1;
 }
 
 /* Show a variable definition;'t expand any variable references
    in the displayed value. */
-static debug_return_t dbg_cmd_show_var_expand (char *psz_string) 
+static debug_return_t dbg_cmd_expand (char *psz_string) 
 {
-  dbg_cmd_show_var(psz_string, 1);
+  static char *psz_last_string = NULL;
+
+  if (!psz_string || 0==strlen(psz_string)) {
+    /* Use last target value */
+    if (psz_last_string)
+      psz_string = psz_last_string;
+    else {
+      printf("No current expand string - must supply something to print\n");
+      return debug_read;
+    }
+  }
+  
+  if (dbg_cmd_show_var(psz_string, 1)) {
+    if (psz_last_string) free(psz_last_string);
+    psz_last_string = strdup(psz_string);
+  }
   return debug_read;
 }
 
@@ -1053,7 +1222,8 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
     debugger_stepping--;
     if (!p_target->tracing) return continue_execution;
   } else if (!debugger_on_error && !debugger_stepping 
-	     && !p_target->tracing) return continue_execution;
+	     && !p_target->tracing && -2 != err) 
+    return continue_execution;
   
   if (0 == i_init) {
     rl_initialize ();
@@ -1097,6 +1267,9 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
   if (err) {
     if (-1 == err) {
       printf("\n***Entering debugger because we encountered an error.\n");
+    } else if (-2 == err) {
+      printf("\nDebugged Makefile terminated.  "
+	     "Use q to quit or R to restart\n");
     } else {
       printf("\n***Entering debugger because we encountered a fatal error.\n");
       printf("***Exiting the debugger will exit make with exit code %d.\n", 
