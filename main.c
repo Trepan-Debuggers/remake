@@ -1279,7 +1279,7 @@ positive integral argument",
       fputs ("Options:\n", stderr);
       for (cs = switches; cs->c != '\0'; ++cs)
 	{
-	  char buf[1024], arg[50], *p;
+	  char buf[1024], shortarg[50], longarg[50], *p;
 
 	  if (cs->description[0] == '-')
 	    continue;
@@ -1287,13 +1287,15 @@ positive integral argument",
 	  switch (long_options[cs - switches].has_arg)
 	    {
 	    case no_argument:
-	      arg[0] = '\0';
+	      shortarg[0] = longarg[0] = '\0';
 	      break;
 	    case required_argument:
-	      sprintf (arg, " %s", cs->argdesc);
+	      sprintf (longarg, "=%s", cs->argdesc);
+	      sprintf (shortarg, " %s", cs->argdesc);
 	      break;
 	    case optional_argument:
-	      sprintf (arg, " [%s]", cs->argdesc);
+	      sprintf (longarg, "[=%s]", cs->argdesc);
+	      sprintf (shortarg, " [%s]", cs->argdesc);
 	      break;
 	    }
 
@@ -1301,7 +1303,7 @@ positive integral argument",
 
 	  if (isalnum (cs->c))
 	    {
-	      sprintf (buf, "  -%c%s", cs->c, arg);
+	      sprintf (buf, "  -%c%s", cs->c, shortarg);
 	      p += strlen (p);
 	    }
 	  if (cs->long_name != 0)
@@ -1309,14 +1311,15 @@ positive integral argument",
 	      unsigned int i;
 	      sprintf (p, "%s--%s%s",
 		       !isalnum (cs->c) ? "  " : ", ",
-		       cs->long_name, arg);
+		       cs->long_name, longarg);
 	      p += strlen (p);
 	      for (i = 0; i < (sizeof (long_option_aliases) /
 			       sizeof (long_option_aliases[0]));
 		   ++i)
 		if (long_option_aliases[i].val == cs->c)
 		  {
-		    sprintf (p, ", --%s%s", long_option_aliases[i].name, arg);
+		    sprintf (p, ", --%s%s",
+			     long_option_aliases[i].name, longarg);
 		    p += strlen (p);
 		  }
 	    }
@@ -1329,11 +1332,11 @@ positive integral argument",
 		  /* This is another switch that does the same
 		     one as the one we are processing.  We want
 		     to list them all together on one line.  */
-		  sprintf (p, ", -%c%s", ncs->c, arg);
+		  sprintf (p, ", -%c%s", ncs->c, shortarg);
 		  p += strlen (p);
 		  if (ncs->long_name != 0)
 		    {
-		      sprintf (p, ", --%s%s", ncs->long_name, arg);
+		      sprintf (p, ", --%s%s", ncs->long_name, longarg);
 		      p += strlen (p);
 		    }
 		}
