@@ -23,6 +23,9 @@ default:
 # Get most of the information from the Unix-compatible makefile.
 include compatMakefile
 
+extras := $(filter-out @%@,$(extras))
+LOADLIBES := $(filter-out @%@,$(LOADLIBES)) cygnus-is-scum.o
+
 # Set `ARCH' to a string for the type of machine.
 ifndef ARCH
 ifdef machine
@@ -51,10 +54,6 @@ $(archpfx)remote.dep: remote.c
 
 ifneq "$(defines)" "@DEFS@"
 CPPFLAGS = $(defines)
-endif
-
-ifeq "$(extras)" "@LIBOBJS@"
-extras := # nada
 endif
 
 ifneq "$(wildcard $(ARCH)/makefile)" ""
@@ -174,8 +173,8 @@ ETAGS = etags -T # for v19 etags
 # Run the tests.
 .PHONY: tests
 testdir := $(shell ls -d1 make-test-?.? | sort -n +0.10 -0.11 +0.12 | tail -1l)
-tests: $(testdir)/run_make_tests.pl $(prog)
-	cd $(<D); perl $(<F)
+tests:# $(testdir)/run_make_tests.pl $(prog)
+#	cd $(<D); perl $(<F)
 
 configure: /home/gd/gnu/autoconf/make.conf
 	cp $< $@
