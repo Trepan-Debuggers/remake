@@ -451,7 +451,7 @@ delete_target (file, on_behalf_of)
     }
 #endif
 
-  if (safe_stat (file->name, &st) == 0
+  if (stat (file->name, &st) == 0
       && S_ISREG (st.st_mode)
       && (time_t) st.st_mtime != file->last_mtime)
     {
@@ -464,7 +464,7 @@ delete_target (file, on_behalf_of)
 	perror_with_name ("unlink: ", file->name);
     }
 }
-     
+
 
 /* Delete all non-precious targets of CHILD unless they were already deleted.
    Set the flag in CHILD to say they've been deleted.  */

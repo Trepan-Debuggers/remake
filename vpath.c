@@ -1,5 +1,5 @@
 /* Implementation of pattern-matching file search paths for GNU Make.
-Copyright (C) 1988, 1989, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 91, 92, 93, 94, 95 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -419,7 +419,7 @@ selective_vpath_search (path, file, mtime_ptr)
 	  *n = '/';
 
 	  if (!exists_in_cache	/* Makefile-mentioned file need not exist.  */
-	      || safe_stat (name, &st) == 0) /* Does it really exist?  */
+	      || stat (name, &st) == 0) /* Does it really exist?  */
 	    {
 	      /* We have found a file.
 		 Store the name we found into *FILE for the caller.  */

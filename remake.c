@@ -1000,7 +1000,7 @@ name_mtime (name)
 {
   struct stat st;
 
-  if (safe_stat (name, &st) < 0)
+  if (stat (name, &st) < 0)
     return (time_t) -1;
 
   return (time_t) st.st_mtime;
