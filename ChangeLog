@@ -1,14 +1,57 @@
+1999-08-13  Paul D. Smith  <psmith@gnu.org>
+
+	* function.c (func_if): New function $(if ...) based on the
+	original by Han-Wen but reworked quite a bit.
+	(function_table): Add it.
+	* NEWS: Introduce it.
+	* make.texinfo (If Function): Document it.
+
+	* job.c (free_job_token): Check for EINTR when writing tokens to
+	the jobserver pipe.
+
+1999-08-12  Paul D. Smith  <psmith@gnu.org>
+
+	Argh.  Another jobserver algorithm change.  We conveniently forgot
+	that the blocking bit is shared by all users of the pipe, it's not
+	a per-process setting.  Since we have many make processes all
+	sharing the pipe we can't use the blocking bit as a signal handler
+	flag.  Instead, we'll dup the pipe's read FD and have the SIGCHLD
+	handler close the dup'd FD.  This will cause the read() to fail
+	with EBADF the next time we invoke it, so we know we need to reap
+	children.  We then re-dup and reap.
+
+	* main.c (main): Define the job_rfd variable to hold the dup'd FD.
+	Actually dup the read side of the pipe.  Don't bother setting the
+	blocking bit on the file descriptor.
+	* make.h: Declare the job_rfd variable.
+	* job.c (child_handler): If the dup'd jobserver pipe is open,
+	close it and assign -1 to job_rfd to notify the main program that
+	we got a SIGCHLD.
+	(start_job_command): Close the dup'd FD before exec'ing children.
+	Since we open and close this thing so often it doesn't seem
+	worth it to use the close-on-exec bit.
+	(new_job): Remove code for testing/setting the blocking bit.
+	Instead of EAGAIN, test for EBADF.  If the dup'd FD has been
+	closed, re-dup it before we reap children.
+
+	* function.c (func_shell): Be a little more accurate about the
+	length of the error string to allocate.
+
+	* expand.c (variable_expand_for_file): If there's no filenm info
+	(say, from a builtin command) then reset reading_file to 0.
+
 1999-08-09  Paul D. Smith  <psmith@gnu.org>
 
 	* maintMakefile: Use g in sed (s///g) to replace >1 variable per
 	line.
 
-	* Makefile.DOS.template: Fix mostlyclean-aminfo to remove the
-	right stuff.
+	* Makefile.DOS.template [__MSDOS__]: Fix mostlyclean-aminfo to
+	remove the right files.
 
 1999-08-01  Eli Zaretskii  <eliz@is.elta.co.il>
 
-	* function.c (msdos_openpipe): *Really* return a FILE ptr.
+	* function.c (msdos_openpipe) [__MSDOS__]: *Really* return a FILE
+	ptr.
 
 1999-08-01  Paul D. Smith  <psmith@gnu.org>
 
