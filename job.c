@@ -191,6 +191,11 @@ unsigned int job_slots_used = 0;
 
 static int good_stdin_used = 0;
 
+/* Specifies whether the current process's reserved job token is in use.
+   '+' means it's available, '-' means it isn't.  */
+
+static char my_job_token = '+';
+
 /* Chain of children waiting to run until the load average goes down.  */
 
 static struct child *waiting_jobs = 0;
@@ -198,6 +203,9 @@ static struct child *waiting_jobs = 0;
 /* Non-zero if we use a *real* shell (always so on Unix).  */
 
 int unixy_shell = 1;
+
+/* #define debug_flag 1 */
+
 
 #ifdef WINDOWS32
 /*
@@ -209,6 +217,40 @@ int w32_kill(int pid, int sig)
 }
 #endif /* WINDOWS32 */
 
+
+#ifndef MAKE_JOBSERVER
+# define free_job_token(c)
+#else
+static void
+free_job_token (child)
+     struct child *child;
+{
+  switch (child->job_token)
+  {
+    case '-':
+      /* If this child doesn't have a token, punt.  */
+      return;
+
+    case '+':
+      /* If this child has the reserved token, take it back.  */
+      my_job_token = '+';
+      break;
+
+    default:
+      /* Write any other job tokens back to the pipe.  */
+      write (job_fds[1], &child->job_token, 1);
+      break;
+  }
+
+  if (debug_flag)
+    printf ("Released token `%c' for child 0x%08lx (%s).\n",
+            child->job_token, (unsigned long int) child, child->file->name);
+
+  child->job_token = '-';
+}
+#endif
+
+
 /* Write an error message describing the exit status given in
    EXIT_CODE, EXIT_SIG, and COREDUMP, for the target TARGET_NAME.
    Append "(ignored)" if IGNORED is nonzero.  */
@@ -342,9 +384,10 @@ reap_children (block, err)
 	  any_remote |= c->remote;
 	  any_local |= ! c->remote;
 	  if (debug_flag)
-	    printf ("Live child 0x%08lx PID %ld%s\n",
-		    (unsigned long int) c,
-		    (long) c->pid, c->remote ? " (remote)" : "");
+	    printf ("Live child 0x%08lx (%s) PID %ld token %c%s\n",
+		    (unsigned long int) c, c->file->name,
+                    (long) c->pid, c->job_token,
+                    c->remote ? " (remote)" : "");
 #ifdef VMS
 	  break;
 #endif
@@ -507,10 +550,10 @@ reap_children (block, err)
       else
 	{
 	  if (debug_flag)
-	    printf ("Reaping %s child 0x%08lx PID %ld%s\n",
+	    printf ("Reaping %s child 0x%08lx PID %ld token %c%s\n",
 		    child_failed ? "losing" : "winning",
-		    (unsigned long int) c,
-		    (long) c->pid, c->remote ? " (remote)" : "");
+		    (unsigned long int) c, (long) c->pid, c->job_token,
+                    c->remote ? " (remote)" : "");
 
           if (c->sh_batch_file) {
             if (debug_flag)
@@ -607,9 +650,9 @@ reap_children (block, err)
 	    notice_finished_file (c->file);
 
 	  if (debug_flag)
-	    printf ("Removing child 0x%08lx PID %ld%s from chain.\n",
-		    (unsigned long int) c,
-		    (long) c->pid, c->remote ? " (remote)" : "");
+	    printf ("Removing child 0x%08lx PID %ld token %c%s from chain.\n",
+		    (unsigned long int) c, (long) c->pid, c->job_token,
+                    c->remote ? " (remote)" : "");
 
 	  /* Block fatal signals while frobnicating the list, so that
 	     children and job_slots_used are always consistent.  Otherwise
@@ -618,18 +661,9 @@ reap_children (block, err)
 	     live and call reap_children again.  */
 	  block_sigs ();
 
-#ifdef MAKE_JOBSERVER
 	  /* If this job has a token out, return it.  */
-          if (c->job_token)
-	    {
-	      assert(job_slots_used > 0);
-	      write (job_fds[1], &c->job_token, 1);
-	      if (debug_flag)
-		printf ("Released token `%c' for child 0x%08lx.\n",
-			c->job_token, (unsigned long int) c);
-	      c->job_token = 0;
-	    }
-#endif
+          free_job_token(c);
+
 	  /* There is now another slot open.  */
 	  if (job_slots_used > 0)
 	    --job_slots_used;
@@ -680,18 +714,10 @@ free_child (child)
       free ((char *) child->environment);
     }
 
-#ifdef MAKE_JOBSERVER
   /* If this child has a token it hasn't relinquished, give it up now.
      This can happen if the job completes immediately, mainly because
      all the command lines evaluated to empty strings.  */
-  if (child->job_token)
-    {
-      write (job_fds[1], &child->job_token, 1);
-      if (debug_flag)
-	printf ("Freed token `%c' for child 0x%08lx.\n",
-		child->job_token, (unsigned long int) child);
-    }
-#endif
+  free_job_token(child);
 
   free ((char *) child);
 }
@@ -764,7 +790,7 @@ start_job_command (child)
 	flags |= COMMANDS_RECURSE;
       else if (*p == '-')
 	child->noerror = 1;
-      else if (!isblank (*p) && *p != '+')
+      else if (!isblank (*p))
 	break;
       ++p;
     }
@@ -986,6 +1012,15 @@ start_job_command (child)
 	{
 	  /* We are the child side.  */
 	  unblock_sigs ();
+
+          /* If we aren't running a recursive command and we have a jobserver
+             pipe, close it before exec'ing.  */
+          if (!(flags & COMMANDS_RECURSE) && job_fds[0] >= 0)
+            {
+              close (job_fds[0]);
+              close (job_fds[1]);
+            }
+
 	  child_execute_job (child->good_stdin ? 0 : bad_stdin, 1,
                              argv, child->environment);
 	}
@@ -1139,47 +1174,54 @@ start_waiting_job (c)
   if (!c->remote)
     {
 #ifdef MAKE_JOBSERVER
-      /* If this is not a recurse command and we are controlling
-	 multiple jobs, and we don't yet have one, obtain a token before
-         starting child. */
-      if (job_fds[0] >= 0 && !f->cmds->any_recurse && !c->job_token)
-	{
-	  fd_set rfds;
+      /* If we are controlling multiple jobs, and we don't yet have one,
+       * obtain a token before starting the child. */
+      if (job_fds[0] >= 0)
+        {
+          while (c->job_token == '-')
+            /* If the reserved token is available, just use that.  */
+            if (my_job_token != '-')
+              {
+                c->job_token = my_job_token;
+                my_job_token = '-';
+              }
+            /* Read a token.  We set the non-blocking bit on this earlier, so
+               if there's no token to be read we'll return immediately.  */
+            else if (read (job_fds[0], &c->job_token, 1) < 1)
+              {
+                fd_set rfds;
+                int r;
 
-	  FD_ZERO(&rfds);
-	  FD_SET(job_fds[0], &rfds);
+                FD_ZERO(&rfds);
+                FD_SET(job_fds[0], &rfds);
 
-	  /* Read a token.  We set the non-blocking bit on this earlier,
-	     so if there's no token to be read we'll fall through to the
-	     select.  The select blocks until (a) there's data to read,
-	     in which case we come back around and try to grab the token
-	     before someone else does, or (b) a signal, such as SIGCHLD,
-	     is caught (because we installed a handler for it).  If the
-	     latter, call reap_children() to try to free up some slots.  */
+                /* The select blocks until (a) there's data to read, in which
+                   case we come back around and try to grab the token before
+                   someone else does, or (b) a signal (SIGCHLD), is reported
+                   (because we installed a handler for it).  If the latter,
+                   call reap_children() to try to free up some slots.  */
 
-	  while (read (job_fds[0], &c->job_token, 1) < 1)
-	    {
-	      int r = select (job_fds[0]+1, SELECT_FD_SET_CAST &rfds,
-                              NULL, NULL, NULL);
+                r = select (job_fds[0]+1, SELECT_FD_SET_CAST &rfds,
+                            NULL, NULL, NULL);
 
-	      if (r < 0)
-		{
+                if (r < 0)
+                  {
 #ifdef EINTR
-		  if (errno != EINTR)
-		    /* We should definitely handle this more gracefully!
-		       What kinds of things can happen here?  ^C closes the
-		       pipe?  Something else closes it?  */
-		    pfatal_with_name ("read jobs pipe");
+                    if (errno != EINTR)
+                      /* We should definitely handle this more gracefully!
+                         What kinds of things can happen here?  ^C closes the
+                         pipe?  Something else closes it?  */
+                      pfatal_with_name ("read jobs pipe");
 #endif
-		  /* We were interrupted; handle any dead children.  */
-		  reap_children (1, 0);
-		}
-	    }
+                    /* We were interrupted; handle any dead children.  */
+                    reap_children (1, 0);
+                  }
+              }
 
-	  assert(c->job_token != 0);
+          assert(c->job_token != '-');
 	  if (debug_flag)
-	    printf ("Obtained token `%c' for child 0x%08lx.\n",
-		    c->job_token, (unsigned long int) c);
+	    printf ("Obtained token `%c' for child 0x%08lx (%s).\n",
+		    c->job_token, (unsigned long int) c, c->file->name);
 	}
 #endif
       /* If we are running at least one job already and the load average
@@ -1203,9 +1245,10 @@ start_waiting_job (c)
     case cs_running:
       c->next = children;
       if (debug_flag)
-	printf ("Putting child 0x%08lx PID %ld%s on the chain.\n",
-		(unsigned long int) c,
-		(long) c->pid, c->remote ? " (remote)" : "");
+	printf ("Putting child 0x%08lx (%s) PID %ld token %c%s on the chain.\n",
+		(unsigned long int) c, c->file->name,
+                (long) c->pid, c->job_token,
+                c->remote ? " (remote)" : "");
       children = c;
       /* One more job slot is in use.  */
       ++job_slots_used;
@@ -1368,7 +1411,7 @@ new_job (file)
   c->command_ptr = 0;
   c->environment = 0;
   c->sh_batch_file = NULL;
-  c->job_token = 0;
+  c->job_token = '-';
 
   /* Fetch the first command line to be run.  */
   job_next_command (c);
