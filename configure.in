@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.48 1995/03/21 21:23:26 roland Exp $])
+AC_REVISION([$Id: configure.in,v 1.49 1995/08/17 19:09:57 roland Exp $])
 AC_PREREQ(2.1)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 AC_CONFIG_HEADER(config.h)
@@ -38,7 +38,7 @@ changequote([,])dnl
 fi
 AC_MSG_RESULT($ac_cv_check_symbol_$1)])dnl
 
-AC_CHECK_FUNCS(getdtablesize psignal mktemp \
+AC_CHECK_FUNCS(psignal mktemp \
 	       dup2 getcwd sigsetmask getgroups setlinebuf \
 	       seteuid setegid setreuid setregid strerror strsignal)
 AC_CHECK_SYMBOL(sys_siglist)
