@@ -12,6 +12,8 @@ Please send remake bug reports to <rocky@panix.com>.
 See the README file and the GNU remake manual for details on sending bug
 reports.
 
+Version 3.80+dbg-0.3cvs
+*  trace override silent
 Version 3.80+dbg-0.2
 *  Add ability to print specified attributes of a target, e.g. "time",
   "deps", "vars"... 
