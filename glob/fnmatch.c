@@ -1,4 +1,4 @@
-/* Copyright (C) 1991, 92, 93, 96, 97, 98 Free Software Foundation, Inc.
+/* Copyright (C) 1991, 92, 93, 96, 97, 98, 99 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    This library is free software; you can redistribute it and/or
@@ -29,7 +29,7 @@
 #include <fnmatch.h>
 #include <ctype.h>
 
-#if HAVE_STRING_H
+#if HAVE_STRING_H || defined _LIBC
 # include <string.h>
 #else
 # include <strings.h>
@@ -127,16 +127,35 @@ extern char *getenv ();
 extern int errno;
 # endif
 
+/* This function doesn't exist on most systems.  */
+
+# if !defined HAVE___STRCHRNUL && !defined _LIBC
+static char *
+__strchrnul (s, c)
+     register const char *s;
+     int c;
+{
+  c = (unsigned char)c;
+  while (*s && *s != c)
+    ++s;
+  return (char *)s;
+}
+# endif
+
 /* Match STRING against the filename pattern PATTERN, returning zero if
    it matches, nonzero if not.  */
-int
-fnmatch (pattern, string, flags)
+static int
+#ifdef _LIBC
+internal_function
+#endif
+internal_fnmatch (pattern, string, no_leading_period, flags)
      const char *pattern;
      const char *string;
+     int no_leading_period;
      int flags;
 {
   register const char *p = pattern, *n = string;
-  register char c;
+  register unsigned char c;
 
 /* Note that this evaluates C many times.  */
 # ifdef _LIBC
@@ -154,10 +173,11 @@ fnmatch (pattern, string, flags)
 	case '?':
 	  if (*n == '\0')
 	    return FNM_NOMATCH;
-	  else if ((flags & FNM_FILE_NAME) && *n == '/')
+	  else if (*n == '/' && (flags & FNM_FILE_NAME))
 	    return FNM_NOMATCH;
-	  else if ((flags & FNM_PERIOD) && *n == '.' &&
-		   (n == string || ((flags & FNM_FILE_NAME) && n[-1] == '/')))
+	  else if (*n == '.' && no_leading_period
+		   && (n == string
+		       || (n[-1] == '/' && (flags & FNM_FILE_NAME))))
 	    return FNM_NOMATCH;
 	  break;
 
@@ -170,18 +190,19 @@ fnmatch (pattern, string, flags)
 		return FNM_NOMATCH;
 	      c = FOLD (c);
 	    }
-	  if (FOLD (*n) != c)
+	  if (FOLD ((unsigned char) *n) != c)
 	    return FNM_NOMATCH;
 	  break;
 
 	case '*':
-	  if ((flags & FNM_PERIOD) && *n == '.' &&
-	      (n == string || ((flags & FNM_FILE_NAME) && n[-1] == '/')))
+	  if (*n == '.' && no_leading_period
+	      && (n == string
+		  || (n[-1] == '/' && (flags & FNM_FILE_NAME))))
 	    return FNM_NOMATCH;
 
 	  for (c = *p++; c == '?' || c == '*'; c = *p++)
 	    {
-	      if ((flags & FNM_FILE_NAME) && *n == '/')
+	      if (*n == '/' && (flags & FNM_FILE_NAME))
 		/* A slash does not match a wildcard under FNM_FILE_NAME.  */
 		return FNM_NOMATCH;
 	      else if (c == '?')
@@ -199,17 +220,65 @@ fnmatch (pattern, string, flags)
 	    }
 
 	  if (c == '\0')
-	    return 0;
+	    /* The wildcard(s) is/are the last element of the pattern.
+	       If the name is a file name and contains another slash
+	       this does mean it cannot match.  */
+	    return ((flags & FNM_FILE_NAME) && strchr (n, '/') != NULL
+		    ? FNM_NOMATCH : 0);
+	  else
+	    {
+	      const char *endp;
 
-	  {
-	    char c1 = (!(flags & FNM_NOESCAPE) && c == '\\') ? *p : c;
-	    c1 = FOLD (c1);
-	    for (--p; *n != '\0'; ++n)
-	      if ((c == '[' || FOLD (*n) == c1) &&
-		  fnmatch (p, n, flags & ~FNM_PERIOD) == 0)
-		return 0;
-	    return FNM_NOMATCH;
-	  }
+	      endp = __strchrnul (n, (flags & FNM_FILE_NAME) ? '/' : '\0');
+
+	      if (c == '[')
+		{
+		  int flags2 = ((flags & FNM_FILE_NAME)
+				? flags : (flags & ~FNM_PERIOD));
+
+		  for (--p; n < endp; ++n)
+		    if (internal_fnmatch (p, n,
+					  (no_leading_period
+					   && (n == string
+					       || (n[-1] == '/'
+						   && (flags
+						       & FNM_FILE_NAME)))),
+					  flags2)
+			== 0)
+		      return 0;
+		}
+	      else if (c == '/' && (flags & FNM_FILE_NAME))
+		{
+		  while (*n != '\0' && *n != '/')
+		    ++n;
+		  if (*n == '/'
+		      && (internal_fnmatch (p, n + 1, flags & FNM_PERIOD,
+					    flags) == 0))
+		    return 0;
+		}
+	      else
+		{
+		  int flags2 = ((flags & FNM_FILE_NAME)
+				? flags : (flags & ~FNM_PERIOD));
+
+		  if (c == '\\' && !(flags & FNM_NOESCAPE))
+		    c = *p;
+		  c = FOLD (c);
+		  for (--p; n < endp; ++n)
+		    if (FOLD ((unsigned char) *n) == c
+			&& (internal_fnmatch (p, n,
+					      (no_leading_period
+					       && (n == string
+						   || (n[-1] == '/'
+						       && (flags
+							   & FNM_FILE_NAME)))),
+					      flags2) == 0))
+		      return 0;
+		}
+	    }
+
+	  /* If we come here no match is possible with the wildcard.  */
+	  return FNM_NOMATCH;
 
 	case '[':
 	  {
@@ -224,8 +293,10 @@ fnmatch (pattern, string, flags)
 	    if (*n == '\0')
 	      return FNM_NOMATCH;
 
-	    if (*n == '.' && (flags & FNM_PERIOD) &&
-		(n == string || ((flags & FNM_FILE_NAME) && n[-1] == '/')))
+	    if (*n == '.' && no_leading_period && (n == string
+						   || (n[-1] == '/'
+						       && (flags
+							   & FNM_FILE_NAME))))
 	      return FNM_NOMATCH;
 
 	    if (*n == '/' && (flags & FNM_FILE_NAME))
@@ -239,13 +310,14 @@ fnmatch (pattern, string, flags)
 	    c = *p++;
 	    for (;;)
 	      {
-		int fn = FOLD (*n);
+		unsigned char fn = FOLD ((unsigned char) *n);
 
 		if (!(flags & FNM_NOESCAPE) && c == '\\')
 		  {
 		    if (*p == '\0')
 		      return FNM_NOMATCH;
-		    c = FOLD (*p++);
+		    c = FOLD ((unsigned char) *p);
+		    ++p;
 
 		    if (c == fn)
 		      goto matched;
@@ -258,6 +330,7 @@ fnmatch (pattern, string, flags)
 # if defined _LIBC || (defined HAVE_WCTYPE_H && defined HAVE_WCHAR_H)
 		    wctype_t wt;
 # endif
+		    const char *startp = p;
 
 		    for (;;)
 		      {
@@ -272,7 +345,15 @@ fnmatch (pattern, string, flags)
 			    p += 2;
 			    break;
 			  }
-			str[c1++] = 'c';
+			if (c < 'a' || c >= 'z')
+			  {
+			    /* This cannot possibly be a character class name.
+			       Match it as a normal range.  */
+			    p = startp;
+			    c = '[';
+			    goto normal_bracket;
+			  }
+			str[c1++] = c;
 		      }
 		    str[c1] = '\0';
 
@@ -282,47 +363,52 @@ fnmatch (pattern, string, flags)
 		      /* Invalid character class name.  */
 		      return FNM_NOMATCH;
 
-		    if (__iswctype (__btowc (*n), wt))
+		    if (__iswctype (__btowc ((unsigned char) *n), wt))
 		      goto matched;
 # else
-		    if ((STREQ (str, "alnum") && ISALNUM (*n))
-			|| (STREQ (str, "alpha") && ISALPHA (*n))
-			|| (STREQ (str, "blank") && ISBLANK (*n))
-			|| (STREQ (str, "cntrl") && ISCNTRL (*n))
-			|| (STREQ (str, "digit") && ISDIGIT (*n))
-			|| (STREQ (str, "graph") && ISGRAPH (*n))
-			|| (STREQ (str, "lower") && ISLOWER (*n))
-			|| (STREQ (str, "print") && ISPRINT (*n))
-			|| (STREQ (str, "punct") && ISPUNCT (*n))
-			|| (STREQ (str, "space") && ISSPACE (*n))
-			|| (STREQ (str, "upper") && ISUPPER (*n))
-			|| (STREQ (str, "xdigit") && ISXDIGIT (*n)))
+		    if ((STREQ (str, "alnum") && ISALNUM ((unsigned char) *n))
+			|| (STREQ (str, "alpha") && ISALPHA ((unsigned char) *n))
+			|| (STREQ (str, "blank") && ISBLANK ((unsigned char) *n))
+			|| (STREQ (str, "cntrl") && ISCNTRL ((unsigned char) *n))
+			|| (STREQ (str, "digit") && ISDIGIT ((unsigned char) *n))
+			|| (STREQ (str, "graph") && ISGRAPH ((unsigned char) *n))
+			|| (STREQ (str, "lower") && ISLOWER ((unsigned char) *n))
+			|| (STREQ (str, "print") && ISPRINT ((unsigned char) *n))
+			|| (STREQ (str, "punct") && ISPUNCT ((unsigned char) *n))
+			|| (STREQ (str, "space") && ISSPACE ((unsigned char) *n))
+			|| (STREQ (str, "upper") && ISUPPER ((unsigned char) *n))
+			|| (STREQ (str, "xdigit") && ISXDIGIT ((unsigned char) *n)))
 		      goto matched;
 # endif
 		  }
 		else if (c == '\0')
 		  /* [ (unterminated) loses.  */
 		  return FNM_NOMATCH;
-		else if (FOLD (c) == fn)
-		  goto matched;
-
-		cold = c;
-		c = *p++;
-
-		if (c == '-' && *p != ']')
+		else
 		  {
-		    /* It is a range.  */
-		    char cend = *p++;
-		    if (!(flags & FNM_NOESCAPE) && cend == '\\')
-		      cend = *p++;
-		    if (cend == '\0')
-		      return FNM_NOMATCH;
-
-		    if (cold <= fn && fn <= FOLD (cend))
+		  normal_bracket:
+		    if (FOLD (c) == fn)
 		      goto matched;
 
+		    cold = c;
 		    c = *p++;
+
+		    if (c == '-' && *p != ']')
+		      {
+			/* It is a range.  */
+			unsigned char cend = *p++;
+			if (!(flags & FNM_NOESCAPE) && cend == '\\')
+			  cend = *p++;
+			if (cend == '\0')
+			  return FNM_NOMATCH;
+
+			if (cold <= fn && fn <= FOLD (cend))
+			  goto matched;
+
+			c = *p++;
+		      }
 		  }
+
 		if (c == ']')
 		  break;
 	      }
@@ -363,7 +449,7 @@ fnmatch (pattern, string, flags)
 	  break;
 
 	default:
-	  if (c != FOLD (*n))
+	  if (c != FOLD ((unsigned char) *n))
 	    return FNM_NOMATCH;
 	}
 
@@ -380,6 +466,16 @@ fnmatch (pattern, string, flags)
   return FNM_NOMATCH;
 
 # undef FOLD
+}
+
+
+int
+fnmatch (pattern, string, flags)
+     const char *pattern;
+     const char *string;
+     int flags;
+{
+  return internal_fnmatch (pattern, string, flags & FNM_PERIOD, flags);
 }
 
 #endif	/* _LIBC or not __GNU_LIBRARY__.  */

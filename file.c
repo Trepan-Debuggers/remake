@@ -38,6 +38,9 @@ static struct file *files[FILE_BUCKETS];
 
 unsigned int num_intermediates = 0;
 
+/* Current value for pruning the scan of the goal chain (toggle 0/1).  */
+
+unsigned int considered = 0;
 
 /* Access the hash table of all file records.
    lookup_file  given a name, return the struct file * for that name,

@@ -1,4 +1,4 @@
-/* Copyright (C) 1991,92,93,94,95,96,97,98 Free Software Foundation, Inc.
+/* Copyright (C) 1991,92,93,94,95,96,97,98,99 Free Software Foundation, Inc.
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Library General Public License as
@@ -177,9 +177,9 @@ extern void bcopy ();
 
 #if !defined HAVE_MEMPCPY && __GLIBC__ - 0 == 2 && __GLIBC_MINOR__ >= 1
 # define HAVE_MEMPCPY	1
+# undef  mempcpy
 # define mempcpy(Dest, Src, Len) __mempcpy (Dest, Src, Len)
 #endif
-
 
 #ifndef	__GNU_LIBRARY__
 # ifdef	__GNUC__
@@ -240,11 +240,17 @@ extern char *alloca ();
 #endif
 
 #ifdef _LIBC
+# undef strdup
 # define strdup(str) __strdup (str)
 # define sysconf(id) __sysconf (id)
 # define closedir(dir) __closedir (dir)
 # define opendir(name) __opendir (name)
 # define readdir(str) __readdir (str)
+# define getpwnam_r(name, bufp, buf, len, res) \
+   __getpwnam_r (name, bufp, buf, len, res)
+# ifndef __stat
+#  define __stat(fname, buf) __xstat (_STAT_VER, fname, buf)
+# endif
 #endif
 
 #if !(defined STDC_HEADERS || defined __GNU_LIBRARY__)
@@ -274,6 +280,12 @@ extern char *alloca ();
 # undef	GLOB_PERIOD
 #endif
 #include <glob.h>
+
+#ifdef HAVE_GETLOGIN_R
+extern int getlogin_r __P ((char *, size_t));
+#else
+extern char *getlogin __P ((void));
+#endif
 
 static
 #if __GNUC__ - 0 >= 2
@@ -282,7 +294,7 @@ inline
 const char *next_brace_sub __P ((const char *begin));
 static int glob_in_dir __P ((const char *pattern, const char *directory,
 			     int flags,
-			     int (*errfunc) __P ((const char *, int)),
+			     int (*errfunc) (const char *, int),
 			     glob_t *pglob));
 static int prefix_array __P ((const char *prefix, char **array, size_t n));
 static int collated_compare __P ((const __ptr_t, const __ptr_t));
@@ -349,7 +361,7 @@ glob (pattern, flags, errfunc, pglob)
      glob_t *pglob;
 {
   const char *filename;
-  char *dirname;
+  const char *dirname;
   size_t dirlen;
   int status;
   int oldcount;
@@ -501,39 +513,40 @@ glob (pattern, flags, errfunc, pglob)
     {
       /* This can mean two things: a simple name or "~name".  The later
 	 case is nothing but a notation for a directory.  */
-      if ((flags & GLOB_TILDE) && pattern[0] == '~')
+      if ((flags & (GLOB_TILDE|GLOB_TILDE_CHECK)) && pattern[0] == '~')
 	{
-	  dirname = (char *) pattern;
+	  dirname = pattern;
 	  dirlen = strlen (pattern);
 
-          /* Set FILENAME to NULL as a special flag.  This is ugly but
-             other solutions would require much more code.  We test for
-             this special case below.  */
-          filename = NULL;
+	  /* Set FILENAME to NULL as a special flag.  This is ugly but
+	     other solutions would require much more code.  We test for
+	     this special case below.  */
+	  filename = NULL;
 	}
       else
 	{
-          filename = pattern;
+	  filename = pattern;
 #ifdef _AMIGA
-          dirname = (char *) "";
+	  dirname = "";
 #else
-          dirname = (char *) ".";
+	  dirname = ".";
 #endif
-          dirlen = 0;
-        }
+	  dirlen = 0;
+	}
     }
   else if (filename == pattern)
     {
       /* "/pattern".  */
-      dirname = (char *) "/";
+      dirname = "/";
       dirlen = 1;
       ++filename;
     }
   else
     {
+      char *newp;
       dirlen = filename - pattern;
 #if defined __MSDOS__ || defined WINDOWS32
-      if ((*filename == ':')
+      if (*filename == ':'
 	  || (filename > pattern + 1 && filename[-1] == ':'))
 	{
 	  char *drive_spec;
@@ -555,30 +568,31 @@ glob (pattern, flags, errfunc, pglob)
 	     from "d:/", since "d:" and "d:/" are not the same.*/
 	}
 #endif
-      dirname = (char *) __alloca (dirlen + 1);
+      newp = (char *) __alloca (dirlen + 1);
 #ifdef HAVE_MEMPCPY
-      *((char *) mempcpy (dirname, pattern, dirlen)) = '\0';
+      *((char *) mempcpy (newp, pattern, dirlen)) = '\0';
 #else
-      memcpy (dirname, pattern, dirlen);
-      dirname[dirlen] = '\0';
+      memcpy (newp, pattern, dirlen);
+      newp[dirlen] = '\0';
 #endif
+      dirname = newp;
       ++filename;
 
       if (filename[0] == '\0'
 #if defined __MSDOS__ || defined WINDOWS32
-          && dirname[dirlen-1] != ':'
-          && (dirlen < 3 || dirname[dirlen-2] != ':'
-	      || dirname[dirlen-1] != '/')
+          && dirname[dirlen - 1] != ':'
+	  && (dirlen < 3 || dirname[dirlen - 2] != ':'
+	      || dirname[dirlen - 1] != '/')
 #endif
-          && dirlen > 1)
-      /* "pattern/".  Expand "pattern", appending slashes.  */
-      {
-        int val = glob (dirname, flags | GLOB_MARK, errfunc, pglob);
-        if (val == 0)
-          pglob->gl_flags = ((pglob->gl_flags & ~GLOB_MARK)
-                             | (flags & GLOB_MARK));
-        return val;
-      }
+	  && dirlen > 1)
+	/* "pattern/".  Expand "pattern", appending slashes.  */
+	{
+	  int val = glob (dirname, flags | GLOB_MARK, errfunc, pglob);
+	  if (val == 0)
+	    pglob->gl_flags = ((pglob->gl_flags & ~GLOB_MARK)
+			       | (flags & GLOB_MARK));
+	  return val;
+	}
     }
 
   if (!(flags & GLOB_APPEND))
@@ -590,12 +604,12 @@ glob (pattern, flags, errfunc, pglob)
   oldcount = pglob->gl_pathc;
 
 #ifndef VMS
-  if ((flags & GLOB_TILDE) && dirname[0] == '~')
+  if ((flags & (GLOB_TILDE|GLOB_TILDE_CHECK)) && dirname[0] == '~')
     {
       if (dirname[1] == '\0' || dirname[1] == '/')
 	{
 	  /* Look up home directory.  */
-	  char *home_dir = getenv ("HOME");
+	  const char *home_dir = getenv ("HOME");
 # ifdef _AMIGA
 	  if (home_dir == NULL || home_dir[0] == '\0')
 	    home_dir = "SYS:";
@@ -607,45 +621,61 @@ glob (pattern, flags, errfunc, pglob)
 	  if (home_dir == NULL || home_dir[0] == '\0')
 	    {
 	      int success;
-#   if defined HAVE_GETLOGIN_R || defined _LIBC
-	      extern int getlogin_r __P ((char *, size_t));
-	      size_t buflen = sysconf (_SC_LOGIN_NAME_MAX) + 1;
 	      char *name;
+#   if defined HAVE_GETLOGIN_R || defined _LIBC
+	      size_t buflen = sysconf (_SC_LOGIN_NAME_MAX) + 1;
 
 	      if (buflen == 0)
 		/* `sysconf' does not support _SC_LOGIN_NAME_MAX.  Try
 		   a moderate value.  */
-		buflen = 16;
+		buflen = 20;
 	      name = (char *) __alloca (buflen);
 
 	      success = getlogin_r (name, buflen) >= 0;
 #   else
-	      extern char *getlogin __P ((void));
-	      char *name;
-
 	      success = (name = getlogin ()) != NULL;
 #   endif
 	      if (success)
 		{
+		  struct passwd *p;
 #   if defined HAVE_GETPWNAM_R || defined _LIBC
 		  size_t pwbuflen = sysconf (_SC_GETPW_R_SIZE_MAX);
 		  char *pwtmpbuf;
-		  struct passwd pwbuf, *p;
+		  struct passwd pwbuf;
+		  int save = errno;
 
+		  if (pwbuflen == -1)
+		    /* `sysconf' does not support _SC_GETPW_R_SIZE_MAX.
+		       Try a moderate value.  */
+		    pwbuflen = 1024;
 		  pwtmpbuf = (char *) __alloca (pwbuflen);
 
-		  success = (__getpwnam_r (name, &pwbuf, pwtmpbuf,
-					   pwbuflen, &p) >= 0);
+		  while (getpwnam_r (name, &pwbuf, pwtmpbuf, pwbuflen, &p)
+			 != 0)
+		    {
+		      if (errno != ERANGE)
+			{
+			  p = NULL;
+			  break;
+			}
+		      pwbuflen *= 2;
+		      pwtmpbuf = (char *) __alloca (pwbuflen);
+		      __set_errno (save);
+		    }
 #   else
-		  struct passwd *p = getpwnam (name);
-		  success = p != NULL;
+		  p = getpwnam (name);
 #   endif
-		  if (success)
+		  if (p != NULL)
 		    home_dir = p->pw_dir;
 		}
 	    }
 	  if (home_dir == NULL || home_dir[0] == '\0')
-	    home_dir = (char *) "~"; /* No luck.  */
+	    {
+	      if (flags & GLOB_TILDE_CHECK)
+		return GLOB_NOMATCH;
+	      else
+		home_dir = "~"; /* No luck.  */
+	    }
 #  endif /* WINDOWS32 */
 # endif
 	  /* Now construct the full directory.  */
@@ -670,40 +700,58 @@ glob (pattern, flags, errfunc, pglob)
       else
 	{
 	  char *end_name = strchr (dirname, '/');
-	  char *user_name;
-	  char *home_dir;
+	  const char *user_name;
+	  const char *home_dir;
 
 	  if (end_name == NULL)
 	    user_name = dirname + 1;
 	  else
 	    {
-	      user_name = (char *) __alloca (end_name - dirname);
+	      char *newp;
+	      newp = (char *) __alloca (end_name - dirname);
 # ifdef HAVE_MEMPCPY
-	      *((char *) mempcpy (user_name, dirname + 1, end_name - dirname))
+	      *((char *) mempcpy (newp, dirname + 1, end_name - dirname))
 		= '\0';
 # else
-	      memcpy (user_name, dirname + 1, end_name - dirname);
-	      user_name[end_name - dirname - 1] = '\0';
+	      memcpy (newp, dirname + 1, end_name - dirname);
+	      newp[end_name - dirname - 1] = '\0';
 # endif
+	      user_name = newp;
 	    }
 
 	  /* Look up specific user's home directory.  */
 	  {
+	    struct passwd *p;
 #  if defined HAVE_GETPWNAM_R || defined _LIBC
 	    size_t buflen = sysconf (_SC_GETPW_R_SIZE_MAX);
-	    char *pwtmpbuf = (char *) __alloca (buflen);
-	    struct passwd pwbuf, *p;
-	    if (__getpwnam_r (user_name, &pwbuf, pwtmpbuf, buflen, &p) >= 0)
-	      home_dir = p->pw_dir;
-	    else
-	      home_dir = NULL;
+	    char *pwtmpbuf;
+	    struct passwd pwbuf;
+	    int save = errno;
+
+	    if (buflen == -1)
+	      /* `sysconf' does not support _SC_GETPW_R_SIZE_MAX.  Try a
+		 moderate value.  */
+	      buflen = 1024;
+	    pwtmpbuf = (char *) __alloca (buflen);
+
+	    while (getpwnam_r (user_name, &pwbuf, pwtmpbuf, buflen, &p) != 0)
+	      {
+		if (errno != ERANGE)
+		  {
+		    p = NULL;
+		    break;
+		  }
+		buflen *= 2;
+		pwtmpbuf = __alloca (buflen);
+		__set_errno (save);
+	      }
 #  else
-	    struct passwd *p = getpwnam (user_name);
+	    p = getpwnam (user_name);
+#  endif
 	    if (p != NULL)
 	      home_dir = p->pw_dir;
 	    else
 	      home_dir = NULL;
-#  endif
 	  }
 	  /* If we found a home directory use this.  */
 	  if (home_dir != NULL)
@@ -722,6 +770,11 @@ glob (pattern, flags, errfunc, pglob)
 #  endif
 	      dirname = newp;
 	    }
+	  else
+	    if (flags & GLOB_TILDE_CHECK)
+	      /* We have to regard it as an error if we cannot find the
+		 home directory.  */
+	      return GLOB_NOMATCH;
 	}
 # endif	/* Not Amiga && not WINDOWS32.  */
     }
@@ -850,78 +903,80 @@ glob (pattern, flags, errfunc, pglob)
 	 flag was set we must return the list consisting of the disrectory
 	 names followed by the filename.  */
       if (pglob->gl_pathc == oldcount)
-	/* No matches.  */
-	if (flags & GLOB_NOCHECK)
-	  {
-	    size_t filename_len = strlen (filename) + 1;
-	    char **new_pathv;
-	    struct stat st;
+	{
+	  /* No matches.  */
+	  if (flags & GLOB_NOCHECK)
+	    {
+	      size_t filename_len = strlen (filename) + 1;
+	      char **new_pathv;
+	      struct stat st;
 
-	    /* This is an pessimistic guess about the size.  */
-	    pglob->gl_pathv
-	      = (char **) realloc (pglob->gl_pathv,
-				   (pglob->gl_pathc +
-				    ((flags & GLOB_DOOFFS) ?
-				     pglob->gl_offs : 0) +
-				    dirs.gl_pathc + 1) *
-				   sizeof (char *));
-	    if (pglob->gl_pathv == NULL)
-	      {
-		globfree (&dirs);
-		return GLOB_NOSPACE;
-	      }
+	      /* This is an pessimistic guess about the size.  */
+	      pglob->gl_pathv
+		= (char **) realloc (pglob->gl_pathv,
+				     (pglob->gl_pathc +
+				      ((flags & GLOB_DOOFFS) ?
+				       pglob->gl_offs : 0) +
+				      dirs.gl_pathc + 1) *
+				     sizeof (char *));
+	      if (pglob->gl_pathv == NULL)
+		{
+		  globfree (&dirs);
+		  return GLOB_NOSPACE;
+		}
 
-	    if (flags & GLOB_DOOFFS)
-	      while (pglob->gl_pathc < pglob->gl_offs)
-		pglob->gl_pathv[pglob->gl_pathc++] = NULL;
+	      if (flags & GLOB_DOOFFS)
+		while (pglob->gl_pathc < pglob->gl_offs)
+		  pglob->gl_pathv[pglob->gl_pathc++] = NULL;
 
-	    for (i = 0; i < dirs.gl_pathc; ++i)
-	      {
-		const char *dir = dirs.gl_pathv[i];
-		size_t dir_len = strlen (dir);
+	      for (i = 0; i < dirs.gl_pathc; ++i)
+		{
+		  const char *dir = dirs.gl_pathv[i];
+		  size_t dir_len = strlen (dir);
 
-		/* First check whether this really is a directory.  */
-		if (((flags & GLOB_ALTDIRFUNC)
-		     ? (*pglob->gl_stat) (dir, &st) : __stat (dir, &st)) != 0
-		    || !S_ISDIR (st.st_mode))
-		  /* No directory, ignore this entry.  */
-		  continue;
+		  /* First check whether this really is a directory.  */
+		  if (((flags & GLOB_ALTDIRFUNC)
+		       ? (*pglob->gl_stat) (dir, &st) : __stat (dir, &st)) != 0
+		      || !S_ISDIR (st.st_mode))
+		    /* No directory, ignore this entry.  */
+		    continue;
 
-		pglob->gl_pathv[pglob->gl_pathc] = malloc (dir_len + 1
-							   + filename_len);
-		if (pglob->gl_pathv[pglob->gl_pathc] == NULL)
-		  {
-		    globfree (&dirs);
-		    globfree (pglob);
-		    return GLOB_NOSPACE;
-		  }
+		  pglob->gl_pathv[pglob->gl_pathc] = malloc (dir_len + 1
+							     + filename_len);
+		  if (pglob->gl_pathv[pglob->gl_pathc] == NULL)
+		    {
+		      globfree (&dirs);
+		      globfree (pglob);
+		      return GLOB_NOSPACE;
+		    }
 
 #ifdef HAVE_MEMPCPY
-		mempcpy (mempcpy (mempcpy (pglob->gl_pathv[pglob->gl_pathc],
-					   dir, dir_len),
-				  "/", 1),
-			 filename, filename_len);
+		  mempcpy (mempcpy (mempcpy (pglob->gl_pathv[pglob->gl_pathc],
+					     dir, dir_len),
+				    "/", 1),
+			   filename, filename_len);
 #else
-		memcpy (pglob->gl_pathv[pglob->gl_pathc], dir, dir_len);
-		pglob->gl_pathv[pglob->gl_pathc][dir_len] = '/';
-		memcpy (&pglob->gl_pathv[pglob->gl_pathc][dir_len + 1],
-			filename, filename_len);
+		  memcpy (pglob->gl_pathv[pglob->gl_pathc], dir, dir_len);
+		  pglob->gl_pathv[pglob->gl_pathc][dir_len] = '/';
+		  memcpy (&pglob->gl_pathv[pglob->gl_pathc][dir_len + 1],
+			  filename, filename_len);
 #endif
-		++pglob->gl_pathc;
-	      }
+		  ++pglob->gl_pathc;
+		}
 
-	    pglob->gl_pathv[pglob->gl_pathc] = NULL;
-	    pglob->gl_flags = flags;
+	      pglob->gl_pathv[pglob->gl_pathc] = NULL;
+	      pglob->gl_flags = flags;
 
-	    /* Now we know how large the gl_pathv vector must be.  */
-	    new_pathv = (char **) realloc (pglob->gl_pathv,
-                                           ((pglob->gl_pathc + 1)
-                                            * sizeof (char *)));
-	    if (new_pathv != NULL)
-	      pglob->gl_pathv = new_pathv;
-	  }
-	else
-	  return GLOB_NOMATCH;
+	      /* Now we know how large the gl_pathv vector must be.  */
+	      new_pathv = (char **) realloc (pglob->gl_pathv,
+					     ((pglob->gl_pathc + 1)
+					      * sizeof (char *)));
+	      if (new_pathv != NULL)
+		pglob->gl_pathv = new_pathv;
+	    }
+	  else
+	    return GLOB_NOMATCH;
+	}
 
       globfree (&dirs);
     }
@@ -1092,6 +1147,8 @@ prefix_array (dirname, array, n)
 }
 
 
+/* We must not compile this function twice.  */
+#if !defined _LIBC || !defined NO_GLOB_PATTERN_P
 /* Return nonzero if PATTERN contains any metacharacters.
    Metacharacters can be quoted with backslashes if QUOTE is nonzero.  */
 int
@@ -1126,8 +1183,9 @@ __glob_pattern_p (pattern, quote)
 
   return 0;
 }
-#ifdef _LIBC
+# ifdef _LIBC
 weak_alias (__glob_pattern_p, glob_pattern_p)
+# endif
 #endif
 
 
@@ -1213,8 +1271,9 @@ glob_in_dir (pattern, directory, flags, errfunc, pglob)
 		    : (__ptr_t) opendir (directory));
 	  if (stream == NULL)
 	    {
-	      if ((errfunc != NULL && (*errfunc) (directory, errno))
-		  || (flags & GLOB_ERR))
+	      if (errno != ENOTDIR
+		  && ((errfunc != NULL && (*errfunc) (directory, errno))
+		      || (flags & GLOB_ERR)))
 		return GLOB_ABORTED;
 	      nfound = 0;
 	      meta = 0;
@@ -1317,10 +1376,12 @@ glob_in_dir (pattern, directory, flags, errfunc, pglob)
 
   save = errno;
   if (stream != NULL)
-    if (flags & GLOB_ALTDIRFUNC)
-      (*pglob->gl_closedir) (stream);
-    else
-      closedir ((DIR *) stream);
+    {
+      if (flags & GLOB_ALTDIRFUNC)
+	(*pglob->gl_closedir) (stream);
+      else
+	closedir ((DIR *) stream);
+    }
   __set_errno (save);
 
   return nfound == 0 ? GLOB_NOMATCH : 0;

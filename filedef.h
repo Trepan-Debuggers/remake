@@ -92,11 +92,17 @@ struct file
     unsigned int ignore_vpath:1;/* Nonzero if we threw out VPATH name.  */
     unsigned int pat_searched:1;/* Nonzero if we already searched for
                                    pattern-specific variables.  */
+    unsigned int considered:1;  /* equal to `considered' if file has been
+                                   considered on current scan of goal chain */
   };
 
 /* Number of intermediate files entered.  */
 
 extern unsigned int num_intermediates;
+
+/* Current value for pruning the scan of the goal chain (toggle 0/1).  */
+
+extern unsigned int considered;
 
 extern struct file *default_goal_file, *suffix_file, *default_file;
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 1991, 1992, 1993, 1996, 1997 Free Software Foundation, Inc.
+/* Copyright (C) 1991, 92, 93, 96, 97, 98, 99 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -24,8 +24,10 @@ extern "C" {
 #endif
 
 #if defined __cplusplus || (defined __STDC__ && __STDC__) || defined WINDOWS32
-# undef	__P
-# define __P(protos)	protos
+# if !defined __GLIBC__ || !defined __P
+#  undef	__P
+#  define __P(protos)	protos
+# endif
 #else /* Not C++ or ANSI C.  */
 # undef	__P
 # define __P(protos)	()
@@ -66,13 +68,13 @@ extern "C" {
    `fnmatch'.  Since this is not the case here it will never be
    returned but the conformance test suites still require the symbol
    to be defined.  */
-#if (_XOPEN_SOURCE - 0) == 500
+#ifdef _XOPEN_SOURCE
 # define FNM_NOSYS	(-1)
 #endif
 
-/* Match STRING against the filename pattern PATTERN,
+/* Match NAME against the filename pattern PATTERN,
    returning zero if it matches, FNM_NOMATCH if not.  */
-extern int fnmatch __P ((__const char *__pattern, __const char *__string,
+extern int fnmatch __P ((__const char *__pattern, __const char *__name,
 			 int __flags));
 
 #ifdef	__cplusplus

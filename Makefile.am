@@ -1,6 +1,6 @@
 # This is a -*-Makefile-*-, or close enough
 
-AUTOMAKE_OPTIONS = 1.3
+AUTOMAKE_OPTIONS = 1.4
 
 bin_PROGRAMS =	make
 
