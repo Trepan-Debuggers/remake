@@ -1,0 +1,64 @@
+$description = "Test implicit rule prerequisite evaluation code.";
+
+$details = "The makefile created by this test has a set of implicit rule
+ pairs with the first rule usually not applying because its prerequisites
+ cannot be made and the second rule which should succeed.";
+
+open(MAKEFILE,"> $makefile");
+
+# The contents of the Makefile ...
+
+print MAKEFILE <<EOF;
+
+.PHONY: all
+
+all: case.1 case.2 case.3
+
+a: void
+
+# 1 - existing file
+#
+%.1: void
+	\@false
+
+%.1: $makefile
+	\@true
+
+
+# 2 - phony
+#
+%.2: void
+	\@false
+
+%.2: 2.phony
+	\@true
+
+.PHONY: 2.phony
+
+
+# 3 - implicit-phony
+#
+%.3: void
+	\@false
+
+%.3: 3.implicit-phony
+	\@true
+
+3.implicit-phony:
+
+EOF
+
+close(MAKEFILE);
+
+&run_make_with_options($makefile,
+                       "",
+                       &get_logfile,
+                       0);
+
+
+# This makefile doesn't produce anything except exit code.
+#
+&compare_output("",&get_logfile(1));
+
+# This tells the test driver that the perl test script executed properly.
+1;

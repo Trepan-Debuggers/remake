@@ -1,3 +1,11 @@
+2004-09-21  Boris Kolpackov  <boris@kolpackov.net>
+
+	* file.c (snap_deps): Mark .PHONY prerequisites as targets.
+
+	* implicit.c (pattern_search): When considering an implicit rule's
+	prerequisite check that it is actually a target rather then
+	just an entry in the file hashtable.
+
 2004-09-21  Paul D. Smith  <psmith@gnu.org>
 
 	* read.c (readstring): Fix some logic errors in backslash handling.
