@@ -4,7 +4,7 @@
 #define LIBDIR "c:/djgpp/lib"
 
 /* Define if you have dirent.h.  */
-#define DIRENT
+#define HAVE_DIRENT_H
 
 /* Define if you have the strcoll function and it is properly defined.  */
 #define HAVE_STRCOLL
