@@ -1,3 +1,12 @@
+2002-11-16  Paul D. Smith  <psmith@gnu.org>
+
+	* NMakefile.template (OBJS): Add hash.c object file.
+	* SMakefile.template (srcs): Ditto.
+	* Makefile.ami (objs): Ditto.
+	* build_w32.bat: Ditto.
+
+	* Makefile.DOS.template: Remove extra dependencies.
+
 2002-10-25  Paul D. Smith  <psmith@gnu.org>
 
 	* expand.c (install_variable_buffer): New function.  Install a new
@@ -29,6 +38,9 @@
 	it for me.  Still have a bug in automake related to ansi2knr tho.
 
 2002-10-14  Paul D. Smith  <psmith@gnu.org>
+
+	* remake.c (notice_finished_file): Only touch targets if they have
+	at least one command (as per POSIX).  Resolve Bug #1418.
 
 	* *.c: Convert to using ANSI C-style function definitions.
 	* Makefile.am: Enable the ansi2knr feature of automake.

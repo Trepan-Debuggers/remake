@@ -119,14 +119,14 @@ CTAGS = ctags -w
 
 objs = commands.o job.o dir.o file.o misc.o main.o read.o remake.o	\
        rule.o implicit.o default.o variable.o expand.o function.o	\
-       vpath.o version.o ar.o arscan.o signame.o remote-$(REMOTE).o     \
-       $(GETOPT) $(ALLOCA) $(extras)
+       vpath.o version.o ar.o arscan.o signame.o hash.o                 \
+       remote-$(REMOTE).o $(GETOPT) $(ALLOCA) $(extras)
 srcs = $(srcdir)commands.c $(srcdir)job.c $(srcdir)dir.c             \
        $(srcdir)file.c $(srcdir)getloadavg.c $(srcdir)misc.c         \
        $(srcdir)main.c $(srcdir)read.c $(srcdir)remake.c             \
        $(srcdir)rule.c $(srcdir)implicit.c $(srcdir)default.c        \
        $(srcdir)variable.c $(srcdir)expand.c $(srcdir)function.c     \
-       $(srcdir)vpath.c $(srcdir)version.c                            \
+       $(srcdir)vpath.c $(srcdir)version.c $(srcdir)hash.c           \
        $(srcdir)remote-$(REMOTE).c                                     \
        $(srcdir)ar.c $(srcdir)arscan.c                                \
        $(srcdir)signame.c $(srcdir)signame.h $(GETOPT_SRC)            \
