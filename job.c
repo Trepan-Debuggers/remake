@@ -176,158 +176,48 @@ child_error (target_name, exit_code, exit_sig, coredump, ignored)
     }
 }
 
-extern void block_remote_children (), unblock_remote_children ();
+int child_died = 0;
 
-extern int fatal_signal_mask;
-
-#ifdef	USG
-/* Set nonzero in the interval when it's possible that we may see a dead
-   child that's not in the `children' chain.  */
-static int unknown_children_possible = 0;
-#endif
-
-
-/* Block the child termination signal and fatal signals.  */
-
-static void
-block_signals ()
-{
-#ifdef USG
-
-  /* Tell child_handler that it might see children that aren't yet
-     in the `children' chain.  */
-  unknown_children_possible = 1;
-
-  /* Ignoring SIGCLD makes wait always return -1.
-     Using the default action does the right thing.  */
-  (void) SIGNAL (SIGCLD, SIG_DFL);
-
-#else	/* Not USG.  */
-
-  /* Block the signals.  */
-  (void) sigblock (fatal_signal_mask | sigmask (SIGCHLD));
-
-#endif
-
-  block_remote_children ();
-}
-
-/* Unblock the child termination signal and fatal signals.  */
-static void
-unblock_signals ()
-{
-#ifdef	USG
-
-  (void) SIGNAL (SIGCLD, child_handler);
-
-  /* It should no longer be possible for children not in the chain to die.  */
-  unknown_children_possible = 0;
-
-#else	/* Not USG.  */
-
-  /* Unblock the signals.  */
-  (void) sigsetmask (sigblock (0) & ~(fatal_signal_mask | sigmask (SIGCHLD)));
-
-#endif
-
-  unblock_remote_children ();
-}
-
-static char *signals_blocked_p_stack = 0;
-static unsigned int signals_blocked_p_max;
-static unsigned int signals_blocked_p_depth;
-
-/* Make signals blocked in FLAG is nonzero, unblocked if FLAG is zero.
-   Push this setting on the signals_blocked_p_stack, so it can be
-   popped off by pop_signals_blocked_p.  */
-
-void
-push_signals_blocked_p (flag)
-     int flag;
-{
-  int blocked;
-
-  if (signals_blocked_p_stack == 0)
-    {
-      signals_blocked_p_max = 8;
-      signals_blocked_p_stack = (char *) xmalloc (8);
-      signals_blocked_p_depth = 1;
-      signals_blocked_p_stack[0] = flag;
-
-      blocked = 0;
-    }
-  else
-    {
-      if (signals_blocked_p_depth == signals_blocked_p_max)
-	{
-	  signals_blocked_p_max += 8;
-	  signals_blocked_p_stack
-	    = (char *) xrealloc(signals_blocked_p_stack,
-				signals_blocked_p_max);
-	}
-
-      blocked = (signals_blocked_p_depth > 0
-		 && signals_blocked_p_stack[signals_blocked_p_depth - 1]);
-
-      signals_blocked_p_stack[++signals_blocked_p_depth - 1] = flag;
-    }
-
-  if (blocked && !flag)
-    unblock_signals ();
-  else if (flag && !blocked)
-    block_signals ();
-}
-
-/* Pop the signals_blocked_p setting from the stack
-   and block or unblock signals as appropriate.  */
-
-void
-pop_signals_blocked_p ()
-{
-  int blocked, block;
-
-  blocked = (signals_blocked_p_depth > 0
-	     && signals_blocked_p_stack[signals_blocked_p_depth-- - 1]);
-
-  block = (signals_blocked_p_depth > 0
-	   && signals_blocked_p_stack[signals_blocked_p_depth - 1]);
-
-  if (block && !blocked)
-    block_signals ();
-  else if (blocked && !block)
-    unblock_signals ();
-}
-
-extern int shell_function_pid, shell_function_completed;
-
-/* Handle a child-termination signal (SIGCHLD, or SIGCLD for USG),
-   storing the returned status and the new command state (`cs_finished')
-   in the `file' member of the `struct child' for the dead child,
-   and removing the child from the chain.
-
-   If we were called as a signal handler, SIG should be SIGCHLD
-   (SIGCLD for USG).  If instead it is zero, we were called explicitly
-   and should block waiting for running children.
-   If SIG is < 0, - SIG is the maximum number of children to bury (record
-   status of and remove from the chain).  */
-
+/* Notice that a child died.
+   reap_children should be called when convenient.  */
 int
 child_handler (sig)
      int sig;
 {
+  child_died = 1;
+  return 0;
+}
+
+extern int shell_function_pid, shell_function_completed;
+
+/* Reap dead children, storing the returned status and the new command
+   state (`cs_finished') in the `file' member of the `struct child' for the
+   dead child, and removing the child from the chain.  If BLOCK nonzero,
+   reap at least one child, waiting for it to die if necessary.  If ERR is
+   nonzero, print an error message first.  */
+
+void
+reap_children (block, err)
+     int block, err;
+{
   WAIT_T status;
-  unsigned int dead_children = 0;
 
-  if (sig > 0)
-    block_signals ();
-
-  while (1)
+  while ((children != 0 || shell_function_pid != 0) &&
+	 (block || child_died))
     {
       int remote = 0;
       register int pid;
       int exit_code, exit_sig, coredump;
       register struct child *lastc, *c;
       int child_failed;
+
+      if (err && !child_died)
+	{
+	  fflush (stdout);
+	  error ("*** Waiting for unfinished jobs....");
+	}
+
+      child_died = 0;
 
       /* First, check for remote children.  */
       pid = remote_status (&exit_code, &exit_sig, &coredump, 0);
@@ -336,18 +226,11 @@ child_handler (sig)
 	  /* No remote children.  Check for local children.  */
 
 #ifdef	WAIT_NOHANG
-	  if (sig > 0)
+	  if (!block)
 	    pid = WAIT_NOHANG (&status);
 	  else
+#endif
 	    pid = wait (&status);
-#else	/* USG and don't HAVE_SYS_WAIT.  */
-	  /* System V cannot do non-blocking waits, so we have two
-	     choices if called as a signal handler: handle only one
-	     child (there may be more if the signal was blocked),
-	     or block waiting for more.  The latter option makes
-	     parallelism useless, so we must choose the former.  */
-	  pid = wait (&status);
-#endif	/* HAVE_SYS_WAIT or not USG.  */
 
 	  if (pid <= 0)
 	    /* No local children.  */
@@ -372,17 +255,7 @@ child_handler (sig)
 	    shell_function_completed = -1;
 	  else
 	    shell_function_completed = 1;
-
-	  /* Check if we have reached our quota of children.  */
-	  ++dead_children;
-	  if (sig < 0 && dead_children == -sig)
-	    break;
-#if	defined(USG) && !defined(HAVE_SYS_WAIT)
-	  else if (sig > 0)
-	    break;
-#endif
-	  else
-	    continue;
+	  break;
 	}
 
       child_failed = exit_sig != 0 || exit_code != 0;
@@ -396,20 +269,13 @@ child_handler (sig)
       if (c == 0)
 	{
 	  /* An unknown child died.  */
-#ifdef	USG
-	  if (!unknown_children_possible)
-	    {
-#endif
-	      char buf[100];
-	      sprintf (buf, "Unknown%s job %d", remote ? " remote" : "", pid);
-	      if (child_failed)
-		child_error (buf, exit_code, exit_sig, coredump,
-			     ignore_errors_flag);
-	      else
-		error ("%s finished.", buf);
-#ifdef	USG
-	    }
-#endif
+	  char buf[100];
+	  sprintf (buf, "Unknown%s job %d", remote ? " remote" : "", pid);
+	  if (child_failed)
+	    child_error (buf, exit_code, exit_sig, coredump,
+			 ignore_errors_flag);
+	  else
+	    error ("%s finished.", buf);
 	}
       else
 	{
@@ -436,8 +302,9 @@ child_handler (sig)
 		  child_failed = 0;
 		}
 
-	      /* If there are more commands to run, try to start them.  */
-	      start_job (c);
+	      if (!err)
+		/* If there are more commands to run, try to start them.  */
+		start_job (c);
 
 	      switch (c->file->command_state)
 		{
@@ -454,14 +321,15 @@ child_handler (sig)
 		  break;
 
 		default:
-		  error ("internal error: `%s' command_state \
-%d in child_handler", c->file->name);
+		  error ("internal error: `%s' has bogus command_state \
+%d in reap_children",
+			 c->file->name, c->file->command_state);
 		  abort ();
 		  break;
 		}
 	    }
 
-	  /* Set the state flag to say the commands have finished.  */
+	  /* Notice if the target of the commands has been changed.  */
 	  notice_finished_file (c->file);
 
 	  /* Remove the child from the chain and free it.  */
@@ -477,52 +345,11 @@ child_handler (sig)
 	  /* If the job failed, and the -k flag was not given, die.  */
 	  if (child_failed && !keep_going_flag)
 	    die (1);
-
-	  /* See if we have reached our quota for blocking.  */
-	  ++dead_children;
-	  if (sig < 0 && dead_children == -sig)
-	    break;
-#if	defined(USG) && !defined(HAVE_SYS_WAIT)
-	  else if (sig > 0)
-	    break;
-#endif
 	}
+
+      /* Only block for one child.  */
+      block = 0;
     }
-
-#ifdef	USG
-  if (sig > 0)
-    (void) SIGNAL (sig, child_handler);
-#endif
-
-  if (sig > 0)
-    unblock_signals ();
-
-  return 0;
-}
-
-
-/* Wait for N children, blocking if necessary.
-   If N is zero, wait until we run out of children.
-   If ERR is nonzero and we have any children to wait for,
-   print a message on stderr.  */
-
-void
-wait_for_children (n, err)
-     unsigned int n;
-     int err;
-{
-  push_signals_blocked_p (1);
-
-  if (err && (children != 0 || shell_function_pid != 0))
-    {
-      fflush (stdout);
-      error ("*** Waiting for unfinished jobs....");
-    }
-
-  /* Call child_handler to do the work.  */
-  (void) child_handler (- (int) n);
-
-  pop_signals_blocked_p ();
 }
 
 /* Free the storage allocated for CHILD.  */
@@ -754,13 +581,16 @@ new_job (file)
   char **lines;
   register unsigned int i;
 
+  /* Reap any children that might have finished recently.  */
+  reap_children (0, 0);
+
   /* Chop the commands up into lines if they aren't already.  */
   chop_commands (cmds);
 
   if (job_slots != 0)
     /* Wait for a job slot to be freed up.  */
     while (job_slots_used == job_slots)
-      wait_for_children (1, 0);
+      reap_children (1, 0);
 
   /* Expand the command lines and store the results in LINES.  */
   lines = (char **) xmalloc (cmds->ncommand_lines * sizeof (char *));
@@ -770,8 +600,6 @@ new_job (file)
 
   /* Start the command sequence, record it in a new
      `struct child', and add that to the chain.  */
-
-  push_signals_blocked_p (1);
 
   c = (struct child *) xmalloc (sizeof (struct child));
   c->file = file;
@@ -801,14 +629,12 @@ new_job (file)
       break;
     }
 
-  pop_signals_blocked_p ();
-
   if (job_slots == 1 && file->command_state == cs_running)
     {
       /* Since there is only one job slot, make things run linearly.
 	 Wait for the child to finish, setting the state to `cs_finished'.  */
       while (file->command_state != cs_finished)
-	wait_for_children (1, 0);
+	reap_children (1, 0);
     }
 }
 
@@ -833,9 +659,6 @@ child_execute_job (stdin_fd, stdout_fd, argv, envp)
     for (d = 3; d < max; ++d)
       (void) close (d);
   }
-
-  /* Don't block signals for the new process.  */
-  unblock_signals ();
 
   /* Run the command.  */
   exec_command (argv, envp);
