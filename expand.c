@@ -1,5 +1,5 @@
 /* Variable expansion functions for GNU Make.
-Copyright (C) 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -179,7 +179,7 @@ variable_expand (line)
 		    else if (*p == closeparen && --count < 0)
 		      break;
 		  }
-		/* If count is >= 0, there were unmatched opening parens
+		/* If COUNT is >= 0, there were unmatched opening parens
 		   or braces, so we go to the simple case of a variable name
 		   such as `$($(a)'.  */
 		if (count < 0)
