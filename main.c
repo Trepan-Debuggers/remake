@@ -357,9 +357,6 @@ main (argc, argv, envp)
      char **argv;
      char **envp;
 {
-#ifndef	HAVE_SYS_SIGLIST
-  extern void init_siglist ();
-#endif
   extern RETSIGTYPE fatal_error_signal (), child_handler ();
   register struct file *f;
   register unsigned int i;
@@ -377,7 +374,7 @@ main (argc, argv, envp)
   reading_lineno_ptr = 0;
   
 #ifndef	HAVE_SYS_SIGLIST
-  init_siglist ();
+  signame_init ();
 #endif
 
 #ifdef	POSIX
