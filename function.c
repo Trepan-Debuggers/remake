@@ -1,5 +1,5 @@
 /* Variable function expansion for GNU Make.
-Copyright (C) 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -131,7 +131,7 @@ patsubst_expand (o, text, pattern, replace, pattern_percent, replace_percent)
   pattern_prepercent_len = pattern_percent - pattern;
   pattern_postpercent_len = strlen (pattern_percent + 1);
 
-  while (t = find_next_token (&text, &len))
+  while ((t = find_next_token (&text, &len)) != 0)
     {
       int fail = 0;
 
@@ -496,7 +496,7 @@ expand_function (o, function, text, end)
 
 	/* Chop TEXT into words and put them in WORDS.  */
 	t = text;
-	while (p = find_next_token (&t, &len))
+	while ((p = find_next_token (&t, &len)) != 0)
 	  {
 	    if (wordi >= nwords - 1)
 	      {
