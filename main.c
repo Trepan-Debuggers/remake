@@ -1,5 +1,5 @@
 /* Argument parsing and main program of GNU Make.
-Copyright (C) 1988, 89, 90, 91, 94 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 90, 91, 94, 1995 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -1367,13 +1367,16 @@ positive integral argument",
   if (!env && (bad || print_usage_flag))
     {
       /* Print a nice usage message.  */
+      FILE *usageto;
 
       if (print_version_flag)
 	print_version ();
 
-      fprintf (stderr, "Usage: %s [options] [target] ...\n", program);
+      usageto = bad ? stderr : stdout;
 
-      fputs ("Options:\n", stderr);
+      fprintf (usageto, "Usage: %s [options] [target] ...\n", program);
+
+      fputs ("Options:\n", usageto);
       for (cs = switches; cs->c != '\0'; ++cs)
 	{
 	  char buf[1024], shortarg[50], longarg[50], *p;
@@ -1444,11 +1447,11 @@ positive integral argument",
 	       line with the description, leaving at least two spaces.
 	       Print it on its own line instead.  */
 	    {
-	      fprintf (stderr, "%s\n", buf);
+	      fprintf (usageto, "%s\n", buf);
 	      buf[0] = '\0';
 	    }
 
-	  fprintf (stderr, "%*s%s.\n",
+	  fprintf (usageto, "%*s%s.\n",
 		   - DESCRIPTION_COLUMN,
 		   buf, cs->description);
 	}
