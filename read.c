@@ -452,8 +452,8 @@ eval_buffer (char *buffer)
 static int
 eval (struct ebuffer *ebuf, int set_default)
 {
-  static char *collapsed = 0;
-  static unsigned int collapsed_length = 0;
+  char *collapsed = 0;
+  unsigned int collapsed_length = 0;
   unsigned int commands_len = 200;
   char *commands;
   unsigned int commands_idx = 0;
@@ -566,9 +566,7 @@ eval (struct ebuffer *ebuf, int set_default)
       if (collapsed_length < linelen+1)
 	{
 	  collapsed_length = linelen+1;
-	  if (collapsed != 0)
-	    free (collapsed);
-	  collapsed = (char *) xmalloc (collapsed_length);
+	  collapsed = (char *) xrealloc (collapsed, collapsed_length);
 	}
       strcpy (collapsed, line);
       /* Collapse continuation lines.  */
@@ -1034,11 +1032,13 @@ eval (struct ebuffer *ebuf, int set_default)
            of the unparsed section of p2, for later.  */
         if (*lb_next != '\0')
           {
-            unsigned int l = p2 - variable_buffer;
+            unsigned int l = p - variable_buffer;
+            unsigned int l2 = p2 - variable_buffer;
             plen = strlen (p2);
             (void) variable_buffer_output (p2+plen,
                                            lb_next, strlen (lb_next)+1);
-            p2 = variable_buffer + l;
+            p = variable_buffer + l;
+            p2 = variable_buffer + l2;
           }
 
         /* See if it's an "override" or "export" keyword; if so see if what
@@ -1069,9 +1069,11 @@ eval (struct ebuffer *ebuf, int set_default)
                after it.  */
             if (semip)
               {
+                unsigned int l = p - variable_buffer;
                 *(--semip) = ';';
                 variable_buffer_output (p2 + strlen (p2),
                                         semip, strlen (semip)+1);
+                p = variable_buffer + l;
               }
             record_target_var (filenames, p, two_colon, v_origin, exported,
                                fstart);
@@ -1234,6 +1236,8 @@ eval (struct ebuffer *ebuf, int set_default)
   /* At eof, record the last rule.  */
   record_waiting_files ();
 
+  if (collapsed)
+    free ((char *) collapsed);
   free ((char *) commands);
 
   return 1;

@@ -88,4 +88,25 @@ $answer = "it\n";
 $answer = "it\nworked\n";
 &compare_output($answer,&get_logfile(1));
 
+
+# TEST very recursive invocation of eval
+
+$makefile3 = &get_tmpfile;
+
+open(MAKEFILE,"> $makefile3");
+
+print MAKEFILE <<'EOF';
+..9 := 0 1 2 3 4 5 6 7 8 9
+rev=$(eval res:=)$(foreach word,$1,$(eval res:=${word} ${res}))${res}
+a:=$(call rev,${..9})
+all: ; @echo '[$(a)]'
+
+EOF
+
+close(MAKEFILE);
+
+&run_make_with_options($makefile3, "", &get_logfile);
+$answer = "[         9 8 7 6 5 4 3 2 1 0 ]\n";
+&compare_output($answer,&get_logfile(1));
+
 1;

@@ -66,7 +66,6 @@ close(MAKEFILE);
 
 &run_make_with_options($makefile, "", &get_logfile);
 $answer = "foo bar\ndefault file file\nb d f\n\n\nb\nbar foo baz\nfoo bar baz blarp quux \n";
-
 &compare_output($answer, &get_logfile(1));
 
 
@@ -94,10 +93,7 @@ EOF
 close(MAKEFILE);
 
 &run_make_with_options($makefile2, "", &get_logfile);
-
-# Create the answer to what should be produced by this Makefile
 $answer = "1 2 3 4 5 6 7 8 9\n1 2 3 4 5\n1 2 3\n1 2 3\n";
-
 &compare_output($answer,&get_logfile(1));
 
 1;

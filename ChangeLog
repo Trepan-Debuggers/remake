@@ -1,5 +1,13 @@
 2003-01-30  Paul D. Smith  <psmith@gnu.org>
 
+	* read.c (eval): eval() was not fully reentrant, because the
+	collapsed buffer was static.  Change it to be an automatic
+	variable so that eval() can be invoked recursively.
+	Fixes bug # 2238.
+	(eval): Apply patch # 1022: fix memory reference error on long
+	target-specific variable lines.
+	Patch provided by Steve Brown <Steve.Brown@macquarie.com>.
+
 	* function.c (check_numeric): Combine the is_numeric() function
 	into this function, since it's only called from one place.
 	Constify this function.  Have it print the incorrect string in the
