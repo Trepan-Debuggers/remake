@@ -38,9 +38,6 @@ set_file_variables (file)
   register char *p;
   char *at, *percent, *star, *less;
 
-#define	DEFINE_VARIABLE(name, len, value) \
-  (void) define_variable_for_file (name, len, value, o_automatic, 0, file)
-
 #ifndef	NO_ARCHIVES
   /* If the target is an archive member `lib(member)',
      then $@ is `lib' and $% is `member'.  */
@@ -48,24 +45,17 @@ set_file_variables (file)
   if (ar_name (file->name))
     {
       p = index (file->name, '(');
-      at = savestring (file->name, p - file->name);
-      ++p;
-      percent = savestring (p, strlen (p) - 1);
+      at = (char *) alloca (p - file->name + 1);
+      bcopy (file->name, at, p - file->name);
+      at[p - file->name] = '\0';
+      percent = p + 1;
     }
   else
 #endif	/* NO_ARCHIVES.  */
     {
-      at = savestring (file->name, strlen (file->name));
+      at = file->name;
       percent = "";
     }
-
-  DEFINE_VARIABLE ("@", 1, at);
-  DEFINE_VARIABLE ("%", 1, percent);
-
-#define	LASTSLASH(s)	rindex ((s), '/')
-#define	FILEONLY(s)	(p != 0 ? p + 1 : (s))
-#define	DIRONLY(s)	(p == 0 ? "./" : p == (s) ? "/" \
-			 : savestring ((s), (p - (s)) + 1))
 
   /* $* is the stem from an implicit or static pattern rule.  */
   if (file->stem == 0)
@@ -104,8 +94,6 @@ set_file_variables (file)
     }
   star = file->stem;
 
-  DEFINE_VARIABLE ("*", 1, star);
-
   /* $< is the first dependency.  */
   less = file->deps != 0 ? dep_name (file->deps) : "";
 
@@ -114,21 +102,15 @@ set_file_variables (file)
        In this case $< is the same as $@.  */
     less = at;
 
-  DEFINE_VARIABLE ("<", 1, less);
+#define	DEFINE_VARIABLE(name, len, value) \
+  (void) define_variable_for_file (name, len, value, o_automatic, 0, file)
 
-  /* Set up the D and F versions.  */
-  p = LASTSLASH (at);
-  DEFINE_VARIABLE ("@D", 2, DIRONLY (at));
-  DEFINE_VARIABLE ("@F", 2, FILEONLY (at));
-  p = LASTSLASH (star);
-  DEFINE_VARIABLE ("*D", 2, DIRONLY (star));
-  DEFINE_VARIABLE ("*F", 2, FILEONLY (star));
-  p = LASTSLASH (less);
-  DEFINE_VARIABLE ("<D", 2, DIRONLY (less));
-  DEFINE_VARIABLE ("<F", 2, FILEONLY (less));
-  p = LASTSLASH (percent);
-  DEFINE_VARIABLE ("%D", 2, DIRONLY (percent));
-  DEFINE_VARIABLE ("%F", 2, FILEONLY (percent));
+  /* Define the variables.  */
+
+  DEFINE_VARIABLE ("<", 1, less);
+  DEFINE_VARIABLE ("*", 1, star);
+  DEFINE_VARIABLE ("@", 1, at);
+  DEFINE_VARIABLE ("%", 1, percent);
 
   /* Make sure that no dependencies are repeated.  This does not
      really matter for the purpose of updating targets, but it
@@ -136,51 +118,34 @@ set_file_variables (file)
 
   uniquize_deps (file->deps);
 
-  /* Compute the values for $^ and $? and their F and D versions.  */
+  /* Compute the values for $^ and $?.  */
 
   {
     register unsigned int caret_len, qmark_len;
-    char *caret_value, *caretD_value, *caretF_value;
-    register char *cp, *cDp, *cFp;
-    char *qmark_value, *qmarkD_value, *qmarkF_value;
-    register char *qp, *qDp, *qFp;
+    char *caret_value;
+    register char *cp;
+    char *qmark_value;
+    register char *qp;
     register struct dep *d;
     unsigned int len;
-    unsigned int caretD_len, qmarkD_len;
 
     caret_len = qmark_len = 0;
-    caretD_len = qmarkD_len = 0;
     for (d = file->deps; d != 0; d = d->next)
       {
 	register unsigned int i = strlen (dep_name (d)) + 1;
 	caret_len += i;
-	caretD_len += (i <= 2 ? 3 : i);
 	if (d->changed)
-	  {
-	    qmark_len += i;
-	    qmarkD_len += (i <= 2 ? 3 : i);
-	  }
+	  qmark_len += i;
       }
 
     len = caret_len == 0 ? 1 : caret_len;
-    if (caretD_len == 0)
-      caretD_len = 1;
     cp = caret_value = (char *) alloca (len);
-    cDp = caretD_value = (char *) alloca (caretD_len);
-    cFp = caretF_value = (char *) alloca (len);
     len = qmark_len == 0 ? 1 : qmark_len;
-    if (qmarkD_len == 0)
-      qmarkD_len = 1;
     qp = qmark_value = (char *) alloca (len);
-    qDp = qmarkD_value = (char *) alloca (qmarkD_len);
-    qFp = qmarkF_value = (char *) alloca (len);
 
     for (d = file->deps; d != 0; d = d->next)
       {
-	char *c, *cD, *cF;
-	unsigned int Dlen, Flen;
-
-	c = dep_name (d);
+	char *c = dep_name (d);
 
 #ifndef	NO_ARCHIVES
 	if (ar_name (c))
@@ -196,46 +161,11 @@ set_file_variables (file)
 	cp += len;
 	*cp++ = ' ';
 
-	p = LASTSLASH (c);
-	if (p == 0)
-	  {
-	    cF = c;
-	    Flen = len;
-	    cD = "./";
-	    Dlen = 2;
-	  }
-	else if (p == c)
-	  {
-	    cD = c;
-	    Dlen = 1;
-	    cF = c + 1;
-	    Flen = len - 1;
-	  }
-	else
-	  {
-	    cF = p + 1;
-	    Flen = len - (p + 1 - c);
-	    cD = c;
-	    Dlen = p - c;
-	  }
-	bcopy (cD, cDp, Dlen);
-	cDp += Dlen;
-	*cDp++ = ' ';
-	bcopy (cF, cFp, Flen);
-	cFp += Flen;
-	*cFp++ = ' ';
-
 	if (d->changed)
 	  {
 	    bcopy (c, qp, len);
 	    qp += len;
 	    *qp++ = ' ';
-	    bcopy (cD, qDp, Dlen);
-	    qDp += Dlen;
-	    *qDp++ = ' ';
-	    bcopy (cF, qFp, Flen);
-	    qFp += Flen;
-	    *qFp++ = ' ';
 	  }
       }
 
@@ -243,22 +173,10 @@ set_file_variables (file)
 
     cp[cp > caret_value ? -1 : 0] = '\0';
     DEFINE_VARIABLE ("^", 1, caret_value);
-    cDp[cDp > caretD_value ? -1 : 0] = '\0';
-    DEFINE_VARIABLE ("^D", 2, caretD_value);
-    cFp[cFp > caretF_value ? -1 : 0] = '\0';
-    DEFINE_VARIABLE ("^F", 2, caretF_value);
 
     qp[qp > qmark_value ? -1 : 0] = '\0';
     DEFINE_VARIABLE ("?", 1, qmark_value);
-    qDp[qDp > qmarkD_value ? -1 : 0] = '\0';
-    DEFINE_VARIABLE ("?D", 2, qmarkD_value);
-    qFp[qFp > qmarkF_value ? -1 : 0] = '\0';
-    DEFINE_VARIABLE ("?F", 2, qmarkF_value);
   }
-
-#undef	LASTSLASH
-#undef	FILEONLY
-#undef	DIRONLY
 
 #undef	DEFINE_VARIABLE
 }
