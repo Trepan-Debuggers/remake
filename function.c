@@ -33,8 +33,8 @@ struct function_table_entry
   {
     const char *name;
     int len;
-    int required_arguments;
-    int expand_all_arguments;
+    int required_args;
+    int expand_args;
     char *(*func_ptr) PARAMS((char *output, char **argv, const char*funcname));
   };
 
@@ -315,7 +315,11 @@ expand_builtin_function (o, argc, argv, entry_p)
      char **argv;
      struct function_table_entry *entry_p;
 {
-  if (argc < entry_p->required_arguments && entry_p->required_arguments >= 0)
+  int min = (entry_p->required_args > 0
+             ? entry_p->required_args
+             : -entry_p->required_args);
+
+  if (argc < min)
     fatal (reading_file,
            "Insufficient number of arguments (%d) to function `%s'",
            argc, entry_p->name);
@@ -383,10 +387,12 @@ handle_function (op, stringp)
   /* Get some memory to store the arg pointers.  */
   argvp = argv = (char **) alloca (sizeof(char *) * (nargs + 2));
 
-  /* Chop the string into arguments, then store the end pointer and a nul.  */
+  /* Chop the string into arguments, then store the end pointer and a nul.
+     If REQUIRED_ARGS is positive, as soon as we hit that many assume the
+     rest of the string is part of the last argument.  */
   *argvp = argbeg;
   nargs = 1;
-  while (1)
+  while (entry_p->required_args > 0 && nargs < entry_p->required_args)
     {
       char *next = find_next_argument (openparen, closeparen, *argvp, p);
 
@@ -401,7 +407,7 @@ handle_function (op, stringp)
   *(++argvp) = 0;
 
   /* If we should expand, do it.  */
-  if (entry_p->expand_all_arguments)
+  if (entry_p->expand_args)
     {
       for (argvp=argv; argvp[1] != 0; ++argvp)
 	*argvp = expand_argument (*argvp, argvp[1]-1);
@@ -414,7 +420,7 @@ handle_function (op, stringp)
   *op = expand_builtin_function (*op, nargs, argv, entry_p);
 
   /* If we allocated memory for the expanded args, free it again.  */
-  if (entry_p->expand_all_arguments)
+  if (entry_p->expand_args)
     for (argvp=argv; *argvp != 0; ++argvp)
       free (*argvp);
 
@@ -1805,12 +1811,14 @@ func_call (o, argv, funcname)
    some efficiency by moving most often used functions to the start of the
    table.
 
-   REQUIRED_ARGUMENTS is the minimum number of arguments.  A function
-   can have more, but if they have less an error will be generated.
+   If REQUIRED_ARGS is positive, the function takes exactly that many
+   arguments.  All subsequent text is included with the last argument.  So,
+   since $(sort a,b,c) takes only one argument, it will be the full string
+   "a,b,c".  If the value is negative, it's the minimum number of arguments.
+   A function can have more, but if it has less an error is generated.
 
-   EXPAND_ALL_ARGUMENTS means that all arguments should be expanded
-   before invocation.  Functions that do namespace tricks (foreach)
-   don't automatically expand.  */
+   EXPAND_ARGS means that all arguments should be expanded before invocation.
+   Functions that do namespace tricks (foreach) don't automatically expand.  */
 
 static struct function_table_entry function_table[] =
 {
@@ -1837,7 +1845,7 @@ static struct function_table_entry function_table[] =
   { STRING_SIZE_TUPLE("words"),         1,  1,  func_words},
   { STRING_SIZE_TUPLE("origin"),        1,  1,  func_origin},
   { STRING_SIZE_TUPLE("foreach"),       3,  0,  func_foreach},
-  { STRING_SIZE_TUPLE("call"),          1,  1,  func_call},
+  { STRING_SIZE_TUPLE("call"),         -1,  1,  func_call},
   { STRING_SIZE_TUPLE("error"),         1,  1,  func_error},
   { STRING_SIZE_TUPLE("warning"),       1,  1,  func_error},
 #ifdef EXPERIMENTAL

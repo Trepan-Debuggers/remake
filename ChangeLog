@@ -38,6 +38,18 @@
 	dmalloc (http://www.dmalloc.com/) with make.  Use --enable-dmalloc
 	with configure to enable it.
 
+	* function.c (function_table_entry): Whoops!  The function.c
+	rewrite breaks backward compatibility: all text to a function is
+	broken into arguments, and extras are ignored.  So $(sort a,b,c)
+	returns "a"!  Etc.  Ouch.  Fix it by making a positive value in
+	the REQUIRED_ARGS field mean exactly that many arguments to the
+	function; any "extras" are considered part of the last argument as
+	before.  A negative value means at least that many, but may be
+	more: in this case all text is broken on commas.
+	(handle_function): Stop when we've seen REQUIRED_ARGS args, if >0.
+	(expand_builtin_function): Compare number of args to the absolute
+	value of REQUIRED_ARGS.
+
 1999-07-20  Paul D. Smith  <psmith@gnu.org>
 
 	* job.c (start_job_command): Ensure that the state of the target
@@ -263,6 +275,13 @@
 	each pass, toggle the global considered variable.  * filedef.h
 	(struct file): Per-file considered toggle bit.  * file.c: New
 	global toggle variable considered.
+
+1999-04-05  Paul D. Smith  <psmith@gnu.org>
+
+	* arscan.c (ar_scan): Added support for ARFZMAG (compressed
+	archives?) for Digital UNIX C++.  Information provided by
+	Patrick	E. Krogel <pekrogel@mtu.edu>.
+	(ar_member_touch): Ditto.
 
 1999-04-03  Paul D. Smith  <psmith@gnu.org>
 
