@@ -181,7 +181,8 @@ set_file_variables (file)
 #undef	DEFINE_VARIABLE
 }
 
-/* Chop CMDS up into individual command lines if necessary.  */
+/* Chop CMDS up into individual command lines if necessary.
+   Also set the `lines_flag' and `any_recurse' members.  */
 
 void
 chop_commands (cmds)
@@ -190,7 +191,7 @@ chop_commands (cmds)
   if (cmds != 0 && cmds->command_lines == 0)
     {
       /* Chop CMDS->commands up into lines in CMDS->command_lines.
-	 Also set the corresponding CMDS->lines_recurse elements,
+	 Also set the corresponding CMDS->lines_flags elements,
 	 and the CMDS->any_recurse flag.  */
       register char *p;
       unsigned int nlines, idx;
@@ -243,22 +244,36 @@ chop_commands (cmds)
       cmds->command_lines = lines;
 
       cmds->any_recurse = 0;
-      cmds->lines_recurse = (char *) xmalloc (nlines);
+      cmds->lines_flags = (char *) xmalloc (nlines);
       for (idx = 0; idx < nlines; ++idx)
 	{
-	  int recursive;
-	  p = lines[idx];
-	  while (isblank (*p) || *p == '-' || *p == '@')
-	    ++p;
-	  recursive = *p == '+';
-	  if (!recursive)
+	  int flags = 0;
+
+	  for (p = lines[idx];
+	       isblank (*p) || *p == '-' || *p == '@' || *p == '+';
+	       ++p)
+	    switch (*p)
+	      {
+	      case '+':
+		flags |= COMMANDS_RECURSE;
+		break;
+	      case '@':
+		flags |= COMMANDS_SILENT;
+		break;
+	      case '-':
+		flags |= COMMANDS_NOERROR;
+		break;
+	      }
+	  if (!(flags & COMMANDS_RECURSE))
 	    {
 	      unsigned int len = strlen (p);
-	      recursive = (sindex (p, len, "$(MAKE)", 7) != 0
-			   || sindex (p, len, "${MAKE}", 7) != 0);
+	      if (sindex (p, len, "$(MAKE)", 7) != 0
+		  || sindex (p, len, "${MAKE}", 7) != 0)
+		flags |= COMMANDS_RECURSE;
 	    }
-	  cmds->lines_recurse[idx] = recursive;
-	  cmds->any_recurse |= recursive;
+
+	  cmds->lines_flags[idx] = flags;
+	  cmds->any_recurse |= flags & COMMANDS_RECURSE;
 	}
     }
 }
