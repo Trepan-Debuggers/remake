@@ -205,8 +205,12 @@ static char *default_variables[] =
 #ifdef	_IBMR2
     "FC", "xlf",
 #else
+#ifdef	__convex__
+    "FC", "fc",
+#else
     "FC", "f77",
-#endif
+#endif /* __convex__ */
+#endif /* _IBMR2 */
     /* System V uses these, so explicit rules using them should work.
        However, there is no way to make implicit rules use them and FC.  */
     "F77", "$(FC)",
