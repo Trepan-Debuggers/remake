@@ -479,6 +479,7 @@ extern int batch_mode_shell;
 
 extern unsigned int job_slots;
 extern int job_fds[2];
+extern int job_rfd;
 #ifndef NO_FLOAT
 extern double max_load_average;
 #else

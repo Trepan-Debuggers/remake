@@ -699,7 +699,7 @@ int
 is_numeric (p)
      char *p;
 {
-  char *end = p + strlen (p) -1;
+  char *end = p + strlen (p) - 1;
   char *beg = p;
   strip_whitespace (&p, &end);
   while (p <= end)
@@ -817,9 +817,9 @@ func_foreach (o, argv, funcname)
      const char *funcname;
 {
   /* expand only the first two.  */
-  char *varname = expand_argument (argv[0], argv[1] -1);
+  char *varname = expand_argument (argv[0], argv[1] - 1);
   char *list = expand_argument (argv[1], argv[2] -1);
-  char *body = savestring (argv[2], argv[3] - argv[2] -1 );
+  char *body = savestring (argv[2], argv[3] - argv[2] - 1);
 
   int len =0;
   char *list_iterator = list;
@@ -1075,6 +1075,68 @@ func_sort (o, argv, funcname)
   return o;
 }
 
+/*
+  $(if condition,true-part[,false-part])
+
+  CONDITION is false iff it evaluates to an empty string.  White
+  space before and after condition are stripped before evaluation.
+
+  If CONDITION is true, then TRUE-PART is evaluated, otherwise FALSE-PART is
+  evaluated (if it exists).  Because only one of the two PARTs is evaluated,
+  you can use $(if ...) to create side-effects (with $(shell ...), for
+  example).
+*/
+
+static char *
+func_if (o, argv, funcname)
+     char *o;
+     char **argv;
+     const char *funcname;
+{
+  char *begp = argv[0];
+  char *endp = argv[1]-1;
+  int result = 0;
+
+  /* Find the result of the condition: if we have a value, and it's not
+     empty, the condition is true.  If we don't have a value, or it's the
+     empty string, then it's false.  */
+
+  strip_whitespace (&begp, &endp);
+
+  if (begp < endp)
+    {
+      char *expansion = expand_argument (begp, endp);
+
+      result = strlen (expansion);
+      free (expansion);
+    }
+
+  /* If the result is true (1) we want to eval the first argument, and if
+     it's false (0) we want to eval the second.  If the argument doesn't
+     exist we do nothing, otherwise expand it and add to the buffer.  */
+
+  argv += 1 + !result;
+
+  if (argv[0] != NULL && argv[1] != NULL)
+    {
+      char *expansion;
+      char **endp = argv+1;
+
+      /* If we're doing the else-clause, make sure we concatenate any
+         potential extra arguments into the last argument.  */
+      if (!result)
+        while (*endp && **endp != '\0')
+          ++endp;
+
+      expansion = expand_argument (*argv, *endp-1);
+
+      o = variable_buffer_output (o, expansion, strlen (expansion));
+      free (expansion);
+    }
+
+  return o;
+}
+
 static char *
 func_wildcard(o, argv, funcname)
      char *o;
@@ -1307,7 +1369,7 @@ func_shell (o, argv, funcname)
   /* For error messages.  */
   if (reading_file != 0)
     {
-      error_prefix = (char *) alloca (strlen(reading_file->filenm)+100);
+      error_prefix = (char *) alloca (strlen(reading_file->filenm)+11+4);
       sprintf (error_prefix,
 	       "%s:%lu: ", reading_file->filenm, reading_file->lineno);
     }
@@ -1546,54 +1608,6 @@ func_not (char* o, char **argv, char *funcname)
   o = variable_buffer_output (o,  result ? "1" : "", result);
   return o;
 }
-
-
-
-/*
- This is an experimental conditional function.
-
- Syntax:
-
-    $(if condition, true-part, false-part)
-
- This is fully not consistent with make's syntax, but more in line
- with `normal' programming languages.
-
- Semantics:
-
- - CONDITION is false iff it evaluates to an empty string.  White
- space before and after condition are stripped before evaluation.
-
- - If CONDITION is true, then TRUE-PART is evaluated, otherwise
- FALSE-PART is evaluated.  Because only one of the two PARTs is
- evaluated, you can use $(if ) to create side-effects with the
- $(shell ) function
-
- */
-static char *
-func_if (char* o, char **argv, char *funcname)
-{
-  char *begp = argv[0];
-  char *endp = argv[1]-2;
-  char *expansion =0;
-  int result = 0;
-
-  strip_whitespace (&begp, &endp);
-  if(begp <= endp)
-    expansion = expand_argument (begp, endp + 1);
-
-  result = expansion
-    ? strlen (expansion)
-    : 0;
-
-  result = !result;
-  free (expansion);
-
-  expansion = expand_argument (argv[1 + result], argv[2+result] -1);
-  o = variable_buffer_output (o, expansion, strlen (expansion));
-
-  return o;
-}
 #endif
 
 
@@ -1645,9 +1659,9 @@ static struct function_table_entry function_table[] =
   { STRING_SIZE_TUPLE("call"),         -1,  1,  func_call},
   { STRING_SIZE_TUPLE("error"),         1,  1,  func_error},
   { STRING_SIZE_TUPLE("warning"),       1,  1,  func_error},
+  { STRING_SIZE_TUPLE("if"),           -2,  0,  func_if},
 #ifdef EXPERIMENTAL
   { STRING_SIZE_TUPLE("eq"),            2,  1,  func_eq},
-  { STRING_SIZE_TUPLE("if"),            3,  0,  func_if},
   { STRING_SIZE_TUPLE("not"),           1,  1,  func_not},
 #endif
   { 0 }

@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.177 1999/07/28 06:23:54 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.178 1999/08/13 07:36:36 psmith Exp $
 @set EDITION 0.53
 @set VERSION 3.78
 @set UPDATED 14 April 1999
@@ -5200,6 +5200,7 @@ call, just as a variable might be substituted.
 * Text Functions::              General-purpose text manipulation functions.
 * File Name Functions::         Functions for manipulating file names.
 * Foreach Function::            Repeat some text with controlled variation.
+* If Function::                 Conditionally expand a value.
 * Call Function::               Expand a user-defined function.
 * Origin Function::             Find where a variable got its value.
 * Shell Function::              Substitute the output of a shell command.
@@ -5749,7 +5750,7 @@ that match the pattern.
 @xref{Wildcards, ,Using Wildcard Characters in File Names}.
 @end table
 
-@node Foreach Function, Call Function, File Name Functions, Functions
+@node Foreach Function, If Function, File Name Functions, Functions
 @section The @code{foreach} Function
 @findex foreach
 @cindex words, iterating over
@@ -5837,7 +5838,41 @@ might be useful if the value of @code{find_files} references the variable
 whose name is @samp{Esta escrito en espanol!} (es un nombre bastante largo,
 no?), but it is more likely to be a mistake.
 
-@node Call Function, Origin Function, Foreach Function, Functions
+@node If Function, Call Function, Foreach Function, Functions
+@section The @code{if} Function
+@findex if
+@cindex conditional expansion
+
+The @code{if} function provides support for conditional expansion in a
+functional context (as opposed to the GNU @code{make} makefile
+conditionals such as @code{ifeq} (@pxref{Conditional Syntax, ,Syntax of
+Conditionals}).
+
+An @code{if} function call can contain either two or three arguments:
+
+@example
+$(if @var{condition},@var{then-part}[,@var{else-part}])
+@end example
+
+The first argument, @var{condition}, first has all preceding and
+trailing whitespace stripped, then is expanded.  If it expands to any
+non-empty string, then the condition is considered to be true.  If it
+expands to an empty string, the condition is considered to be false.
+
+If the condition is true then the second argument, @var{then-part}, is
+evaluated and this is used as the result of the evaluation of the entire
+@code{if} function.
+
+If the condition is false then the third argument, @var{else-part}, is
+evaluated and this is the result of the @code{if} function.  If there is
+no third argument, the @code{if} function evaluates to nothing (the
+empty string).
+
+Note that only one of the @var{then-part} or the @var{else-part} will be
+evaluated, never both.  Thus, either can contain side-effects (such as
+@code{shell} function calls, etc.)
+
+@node Call Function, Origin Function, If Function, Functions
 @section The @code{call} Function
 @findex call
 @cindex functions, user defined
@@ -5851,7 +5886,7 @@ values.
 The syntax of the @code{call} function is:
 
 @example
-$(call @var{variable}, @var{param}, @var{param}, @dots{})
+$(call @var{variable},@var{param},@var{param},@dots{})
 @end example
 
 When @code{make} expands this function, it assigns each @var{param} to

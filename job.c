@@ -246,7 +246,9 @@ free_job_token (child)
 
     default:
       /* Write any other job tokens back to the pipe.  */
-      write (job_fds[1], &child->job_token, 1);
+      while (write (job_fds[1], &child->job_token, 1) != 1)
+        if (!EINTR_SET)
+          pfatal_with_name(_("write jobserver"));
       break;
   }
 
@@ -308,11 +310,10 @@ vmsWaitForChildren(int *status)
 
 /* Handle a dead child.  This handler may or may not ever be installed.
 
-   If we're using the jobserver blocking read, we need it.  First, installing
-   it ensures the read will interrupt on SIGCHLD.  Second, we reset the
-   blocking bit on the read side of the pipe to ensure we don't enter another
-   blocking read without reaping all the dead children.  In this case we
-   don't need the dead_children count.
+   If we're using the jobserver feature, we need it.  First, installing it
+   ensures the read will interrupt on SIGCHLD.  Second, we close the dup'd
+   read FD to ensure we don't enter another blocking read without reaping all
+   the dead children.  In this case we don't need the dead_children count.
 
    If we don't have either waitpid or wait3, then make is unreliable, but we
    use the dead_children count to reap children as best we can.  */
@@ -326,12 +327,10 @@ child_handler (sig)
   ++dead_children;
 
 #ifdef HAVE_JOBSERVER
-  if (job_fds[0] >= 0)
+  if (job_rfd >= 0)
     {
-      int fl = fcntl(job_fds[0], F_GETFL, 0);
-
-      if (fl >= 0)
-        fcntl(job_fds[0], F_SETFL, fl | O_NONBLOCK);
+      close (job_rfd);
+      job_rfd = -1;
     }
 #endif
 
@@ -1032,6 +1031,8 @@ start_job_command (child)
               close (job_fds[0]);
               close (job_fds[1]);
             }
+          if (job_rfd >= 0)
+            close (job_rfd);
 
 	  child_execute_job (child->good_stdin ? 0 : bad_stdin, 1,
                              argv, child->environment);
@@ -1386,22 +1387,17 @@ new_job (file)
           }
         /* Read a token.  As long as there's no token available we'll block.
            If we get a SIGCHLD we'll return with EINTR.  If one happened
-           before we got here we'll return immediately with EAGAIN because
-           the signal handler unsets the blocking bit.  */
-        else if (read (job_fds[0], &c->job_token, 1) < 1)
+           before we got here we'll return immediately with EBADF because
+           the signal handler closes the dup'd file descriptor.  */
+        else if (read (job_rfd, &c->job_token, 1) < 1)
           {
-            int fl;
-
-#if !defined(EAGAIN)
-# define EAGAIN EWOULDBLOCK
-#endif
-            if (errno != EINTR && errno != EAGAIN)
+            if (errno != EINTR && errno != EBADF)
               pfatal_with_name (_("read jobs pipe"));
 
-            /* Set the blocking bit on the read FD again, just in case.  */
-            fl = fcntl(job_fds[0], F_GETFL, 0);
-            if (fl >= 0)
-              fcntl(job_fds[0], F_SETFL, fl & ~O_NONBLOCK);
+            /* Re-dup the read side of the pipe, so the signal handler can
+               notify us if we miss a child.  */
+            if (job_rfd < 0)
+              job_rfd = dup (job_fds[0]);
 
             /* Something's done.  We don't want to block for a whole child,
                just reap whatever's there.  */

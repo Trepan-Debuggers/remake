@@ -205,6 +205,7 @@ static unsigned int inf_jobs = 0;
 /* File descriptors for the jobs pipe.  */
 
 int job_fds[2] = { -1, -1 };
+int job_rfd = -1;
 
 /* Maximum load average at which multiple jobs will be run.
    Negative values mean unlimited, while zero means limit to
@@ -1305,12 +1306,15 @@ int main (int argc, char ** argv)
         job_fds[0] = job_slots;
         job_slots = 0;
 
-        /* Make sure the pipe is open!  The parent might have closed it
-           because it didn't think we were a submake.  If so, print a warning
-           then default to -j1.  */
-        if (fcntl (job_fds[0], F_GETFL, 0) < 0
-            || fcntl (job_fds[1], F_GETFL, 0) < 0)
+        /* Create a duplicate pipe, that will be closed in the SIGCHLD
+           handler.  If this fails with EBADF, the parent has closed the pipe
+           on us because it didn't think we were a submake.  If so, print a
+           warning then default to -j1.  */
+        if ((job_rfd = dup (job_fds[0])) < 0)
           {
+            if (errno != EBADF)
+              pfatal_with_name (_("dup jobserver"));
+
             error (NILF,
                    _("warning: jobserver unavailable (using -j1).  Add `+' to parent make rule."));
             job_slots = 1;
@@ -1328,7 +1332,7 @@ int main (int argc, char ** argv)
       char buf[(sizeof("1024")*2)+1];
       char c = '0';
 
-      if (pipe (job_fds) < 0)
+      if (pipe (job_fds) < 0 || (job_rfd = dup (job_fds[0])) < 0)
 	pfatal_with_name (_("creating jobs pipe"));
 
       /* Every make assumes that it always has one job it can run.  For the
@@ -1350,14 +1354,6 @@ int main (int argc, char ** argv)
 
       sprintf(buf, "%d,%d", job_fds[0], job_fds[1]);
       job_slots_str = xstrdup(buf);
-    }
-
-  /* Be sure the blocking bit on the read FD is set to start with.  */
-  if (job_fds[0] >= 0)
-    {
-      int fl = fcntl(job_fds[0], F_GETFL, 0);
-      if (fl >= 0)
-        fcntl(job_fds[0], F_SETFL, fl & ~O_NONBLOCK);
     }
 #endif
 

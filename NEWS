@@ -12,16 +12,20 @@ Please send GNU make bug reports to bug-make@gnu.org.
 
 Version 3.78
 
-* Two new functions, $(error ...) and $(warning ...) are provided.  The
+* Two new functions, $(error ...) and $(warning ...) are available.  The
   former will cause make to fail and exit immediately upon expansion of
   the function, with the text provided as the error message.  The latter
   causes the text provided to be printed as a warning message, but make
   proceeds normally.
 
-* A new function, $(call ...) is provided.  This allows users to create
+* A new function $(call ...) is available.  This allows users to create
   their own parameterized macros and invoke them later.  Original
-  implementation of this feature was provided by Han-Wen Nienhuys
+  implementation of this function was provided by Han-Wen Nienhuys
   <hanwen@cs.uu.nl>.
+
+* A new function $(if ...) is available.  It provides if-then-else
+  capabilities in a builtin function.  Original implementation of this
+  function was provided by Han-Wen Nienhuys <hanwen@cs.uu.nl>.
 
 * Make defines a new variable, .LIBPATTERNS.  This variable controls how
   library dependency expansion (dependencies like ``-lfoo'') is performed.

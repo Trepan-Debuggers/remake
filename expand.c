@@ -442,7 +442,10 @@ variable_expand_for_file (line, file)
 
   save = current_variable_set_list;
   current_variable_set_list = file->variables;
-  reading_file = &file->cmds->fileinfo;
+  if (file->cmds && file->cmds->fileinfo.filenm)
+    reading_file = &file->cmds->fileinfo;
+  else
+    reading_file = 0;
   fnext = file->variables->next;
   /* See if there's a pattern-specific variable struct for this target.  */
   if (!file->pat_searched)
