@@ -1,3 +1,12 @@
+1999-07-24  Paul D. Smith  <psmith@gnu.org>
+
+	* Version 3.77.91 released.
+
+	* configure.in: Changes to the boostrapping code: if build.sh.in
+	doesn't exist configure spits an error and generates an empty
+	build.sh file which causes make to be confused.
+	* maintMakefile: Don't build README early.
+
 1999-07-23  Paul D. Smith  <psmith@gnu.org>
 
 	* job.c (my_job_token): This variable controls whether we've
