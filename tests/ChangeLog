@@ -1,3 +1,8 @@
+2002-10-05  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/variables/automatic: Add tests for $$(@), $${@}, $${@D},
+	and $${@F}.
+
 2002-09-23  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/features/escape: Test handling of escaped comment

@@ -1081,7 +1081,7 @@ eval (ebuf, set_default)
         have_sysv_atvar = 0;
         if (!posix_pedantic)
           for (p = strchr (p2, '$'); p != 0; p = strchr (p+1, '$'))
-            if (p[1] == '@' || (p[1] == '(' && p[2] == '@'))
+            if (p[1] == '@' || ((p[1] == '(' || p[1] == '{') && p[2] == '@'))
               {
                 have_sysv_atvar = 1;
                 break;
@@ -1862,7 +1862,7 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
          since we're just emulating a SysV function, and if we do that then
          why not emulate it completely (that's what SysV make does: it
          re-expands the entire prerequisite list, all the time, with $@
-         etc. in scope.  But, it would be a pain indeed to document this
+         etc. in scope).  But, it would be a pain indeed to document this
          ("iff you use $$@, your prerequisite lists is expanded twice...")
          Ouch.  Maybe better to make the code more complex.  */
 
@@ -1895,20 +1895,23 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
                 char *at;
                 int atlen;
 
-                /* If it's a '$@' or '$(@', it's escaped */
+                /* If it's '$@', '$(@', or '${@', it's escaped */
                 if ((++p)[0] == '$'
-                    && (p[1] == '@' || (p[1] == '(' && p[2] == '@')))
+                    && (p[1] == '@'
+                        || ((p[1] == '(' || p[1] == '{') && p[2] == '@')))
                   {
                     bcopy (p, s, strlen (p)+1);
                     continue;
                   }
 
-                /* Maybe found one.  Check.  p will point to '@' [for $@] or
-                   ')' [for $(@)] or 'D' [for $(@D)] or 'F' [for $(@F)].  */
-                if (p[0] != '@'
-                    && (p[0] != '(' || (++p)[0] != '@'
-                        || ((++p)[0] != ')'
-                            && (p[1] != ')' || (p[0] != 'D' && p[0] != 'F')))))
+                /* Maybe found one.  We like anything of any form matching @,
+                   [({]@[}):], or [({]@[DF][}):].  */
+
+                if (! (p[0] == '@'
+                       || ((p[0] == '(' || p[0] == '{') && (++p)[0] == '@'
+                           && (((++p)[0] == ')' || p[0] == '}' || p[0] == ':')
+                               || ((p[1] == ')' || p[1] == '}' || p[1] == ':')
+                                   && (p[0] == 'D' || p[0] == 'F'))))))
                   continue;
 
                 /* Found one.  Compute the length and string ptr.  Move p

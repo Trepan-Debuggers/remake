@@ -1,3 +1,12 @@
+2002-10-04  Paul D. Smith  <psmith@gnu.org>
+
+	* read.c (eval): Allow SysV $$@ variables to use {} braces as well
+	as () braces.
+	(record_files): Ditto.
+
+	* expand.c (variable_expand_string): In $(A:x=y) expansion limit
+	the search for the '=' to only within the enclosing parens.
+
 2002-10-03  Paul D. Smith  <psmith@gnu.org>
 
 	Version 3.80 released.

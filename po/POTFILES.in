@@ -20,5 +20,6 @@ remote-cstms.c
 rule.c
 signame.c
 variable.c
+variable.h
 vmsfunctions.c
 vpath.c
