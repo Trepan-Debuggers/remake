@@ -215,6 +215,7 @@ dnl From Steve Robbins <steve@nyongwa.montreal.qc.ca>
 
 dnl From a proposed change made on the autoconf list on 2 Feb 1999
 dnl http://sourceware.cygnus.com/ml/autoconf/1999-02/msg00001.html
+dnl Patch for AIX 3.2 by Lars Hecking <lhecking@nmrc.ucc.ie> on 17 May 1999
 
 AC_DEFUN(AC_FUNC_SELECT,
 [AC_CHECK_FUNCS(select)
@@ -223,7 +224,7 @@ if test "$ac_cv_func_select" = yes; then
   AC_MSG_CHECKING([argument types of select()])
   AC_CACHE_VAL(ac_cv_type_fd_set_size_t,dnl
     [AC_CACHE_VAL(ac_cv_type_fd_set,dnl
-      [for ac_cv_type_fd_set in 'fd_set' 'int'; do
+      [for ac_cv_type_fd_set in 'fd_set' 'int' 'void'; do
         for ac_cv_type_fd_set_size_t in 'int' 'size_t' 'unsigned long' 'unsigned'; do
           for ac_type_timeval in 'struct timeval' 'const struct timeval'; do
             AC_TRY_COMPILE(dnl

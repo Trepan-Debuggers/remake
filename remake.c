@@ -266,7 +266,7 @@ no_rule_error(file)
     = "%sNo rule to make target `%s', needed by `%s'%s";
   if (keep_going_flag || file->dontcare)
     {
-      if (!file->dontcare)
+      if (!file->dontcare && !file->shownerror)
         {
           if (file->parent == 0)
             error (NILF, msg_noparent, "*** ", file->name, ".");
@@ -355,13 +355,8 @@ update_file_1 (file, depth)
       if (file->update_status > 0)
 	{
 	  DEBUGPR ("Recently tried and failed to update file `%s'.\n");
-          if (!file->shownerror)
-            {
-              int dontcare = file->dontcare;
-              file->dontcare = 0;
-              no_rule_error(file);
-              file->dontcare = dontcare;
-            }
+          if (!file->shownerror && file->parent)
+            no_rule_error(file);
 	  return file->update_status;
 	}
 
