@@ -1,5 +1,5 @@
 set make=gnumake
-+if not exist config.h copy config.h.W32 config.h
+if not exist config.h copy config.h.W32 config.h
 cd w32\subproc
 echo "Creating the subproc library"
 %ComSpec% /c build.bat

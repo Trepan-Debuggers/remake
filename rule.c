@@ -69,7 +69,7 @@ void
 count_implicit_rule_limits (void)
 {
   char *name;
-  unsigned int namelen;
+  int namelen;
   register struct rule *rule, *lastrule;
 
   num_pattern_rules = max_pattern_targets = max_pattern_deps = 0;

@@ -316,9 +316,9 @@ construct_vpath_list (char *pattern, char *dirpath)
    in.  If it is found, return 1.  Otherwise we return 0.  */
 
 int
-gpath_search (char *file, int len)
+gpath_search (char *file, unsigned int len)
 {
-  register char **gp;
+  char **gp;
 
   if (gpaths && (len <= gpaths->maxlen))
     for (gp = gpaths->searchpath; *gp != NULL; ++gp)

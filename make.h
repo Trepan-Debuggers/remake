@@ -210,6 +210,7 @@ extern unsigned int get_path_max PARAMS ((void));
 #  define __printf__ printf
 # endif
 #endif
+#define UNUSED  __attribute__ ((unused))
 
 #if defined (STDC_HEADERS) || defined (__GNU_LIBRARY__)
 # include <stdlib.h>
@@ -468,7 +469,7 @@ extern void install_default_implicit_rules PARAMS ((void));
 extern void build_vpath_lists PARAMS ((void));
 extern void construct_vpath_list PARAMS ((char *pattern, char *dirpath));
 extern int vpath_search PARAMS ((char **file, FILE_TIMESTAMP *mtime_ptr));
-extern int gpath_search PARAMS ((char *file, int len));
+extern int gpath_search PARAMS ((char *file, unsigned int len));
 
 extern void construct_include_path PARAMS ((char **arg_dirs));
 

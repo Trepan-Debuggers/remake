@@ -415,7 +415,7 @@ vms_handle_apos (char *p)
 static unsigned int dead_children = 0;
 
 RETSIGTYPE
-child_handler (int sig)
+child_handler (int sig UNUSED)
 {
   ++dead_children;
 

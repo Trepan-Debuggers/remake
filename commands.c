@@ -127,7 +127,7 @@ set_file_variables (struct file *file)
 
   {
     static char *plus_value=0, *bar_value=0, *qmark_value=0;
-    static int qmark_max=0, plus_max=0, bar_max=0;
+    static unsigned int qmark_max=0, plus_max=0, bar_max=0;
 
     unsigned int qmark_len, plus_len, bar_len;
     char *cp;

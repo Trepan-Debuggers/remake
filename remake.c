@@ -1333,7 +1333,7 @@ library_search (char **lib, FILE_TIMESTAMP *mtime_ptr)
   while ((p = find_next_token (&p2, &len)) != 0)
     {
       static char *buf = NULL;
-      static int buflen = 0;
+      static unsigned int buflen = 0;
       static int libdir_maxlen = -1;
       char *libbuf = variable_expand ("");
 

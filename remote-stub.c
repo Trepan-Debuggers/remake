@@ -42,7 +42,7 @@ remote_cleanup (void)
 /* Return nonzero if the next job should be done remotely.  */
 
 int
-start_remote_job_p (int first_p)
+start_remote_job_p (int first_p UNUSED)
 {
   return 0;
 }
@@ -55,8 +55,9 @@ start_remote_job_p (int first_p)
    nonzero if it is remote (meaning *ID_PTR is a process ID).  */
 
 int
-start_remote_job (char **argv, char **envp, int stdin_fd,
-                  int *is_remote, int *id_ptr, int *used_stdin)
+start_remote_job (char **argv UNUSED, char **envp UNUSED, int stdin_fd UNUSED,
+                  int *is_remote UNUSED, int *id_ptr UNUSED,
+                  int *used_stdin UNUSED)
 {
   return -1;
 }
@@ -68,8 +69,8 @@ start_remote_job (char **argv, char **envp, int stdin_fd,
    0 if we would have to block and !BLOCK, or < 0 if there were none.  */
 
 int
-remote_status (int *exit_code_ptr, int *signal_ptr, int *coredump_ptr,
-               int block)
+remote_status (int *exit_code_ptr UNUSED, int *signal_ptr UNUSED,
+               int *coredump_ptr UNUSED, int block UNUSED)
 {
   errno = ECHILD;
   return -1;
@@ -95,7 +96,7 @@ unblock_remote_children (void)
 
 /* Send signal SIG to child ID.  Return 0 if successful, -1 if not.  */
 int
-remote_kill (int id, int sig)
+remote_kill (int id UNUSED, int sig UNUSED)
 {
   return -1;
 }

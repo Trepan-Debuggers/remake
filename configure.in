@@ -3,7 +3,7 @@
 AC_INIT([GNU make],[3.81rc1],[bug-make@gnu.org])
 
 AC_PREREQ(2.58)
-AC_REVISION([[$Id: configure.in,v 1.122 2004/02/23 06:25:54 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.123 2004/02/24 13:50:21 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -335,6 +335,9 @@ AC_SUBST_FILE(MAINT_MAKEFILE)
 # Allow building with dmalloc
 AM_WITH_DMALLOC
 
+# Forcibly disable SET_MAKE.  If it's set it breaks things like the test
+# scripts, etc.
+SET_MAKE=
 
 # Sanity check and inform the user of what we found
 

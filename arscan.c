@@ -737,9 +737,10 @@ ar_name_equal (char *name, char *mem, int truncated)
 #ifndef VMS
 /* ARGSUSED */
 static long int
-ar_member_pos (int desc, char *mem, int truncated,
-	       long int hdrpos, long int datapos, long int size,
-               long int date, int uid, int gid, int mode, char *name)
+ar_member_pos (int desc UNUSED, char *mem, int truncated,
+	       long int hdrpos, long int datapos UNUSED, long int size UNUSED,
+               long int date UNUSED, int uid UNUSED, int gid UNUSED,
+               int mode UNUSED, char *name)
 {
   if (!ar_name_equal (name, mem, truncated))
     return 0;
@@ -756,10 +757,11 @@ ar_member_pos (int desc, char *mem, int truncated,
 int
 ar_member_touch (char *arname, char *memname)
 {
-  register long int pos = ar_scan (arname, ar_member_pos, (long int) memname);
-  register int fd;
+  long int pos = ar_scan (arname, ar_member_pos, (long int) memname);
+  int fd;
   struct ar_hdr ar_hdr;
-  register int i;
+  int i;
+  unsigned int ui;
   struct stat statbuf;
 
   if (pos < 0)
@@ -786,8 +788,8 @@ ar_member_touch (char *arname, char *memname)
     goto lose;
 #if defined(ARFMAG) || defined(ARFZMAG) || defined(AIAMAG) || defined(WINDOWS32)
   /* Advance member's time to that time */
-  for (i = 0; i < sizeof ar_hdr.ar_date; i++)
-    ar_hdr.ar_date[i] = ' ';
+  for (ui = 0; ui < sizeof ar_hdr.ar_date; ui++)
+    ar_hdr.ar_date[ui] = ' ';
   sprintf (ar_hdr.ar_date, "%ld", (long int) statbuf.st_mtime);
 #ifdef AIAMAG
   ar_hdr.ar_date[strlen(ar_hdr.ar_date)] = ' ';

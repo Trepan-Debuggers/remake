@@ -122,9 +122,10 @@ ar_member_date (char *name)
 
 /* ARGSUSED */
 static long int
-ar_member_date_1 (int desc, char *mem, int truncated,
-		  long int hdrpos, long int datapos, long int size,
-                  long int date, int uid, int gid, int mode, char *name)
+ar_member_date_1 (int desc UNUSED, char *mem, int truncated,
+		  long int hdrpos UNUSED, long int datapos UNUSED,
+                  long int size UNUSED, long int date,
+                  int uid UNUSED, int gid UNUSED, int mode UNUSED, char *name)
 {
   return ar_name_equal (name, mem, truncated) ? date : 0;
 }
@@ -209,10 +210,10 @@ struct ar_glob_state
    element against the pattern in STATE.  */
 
 static long int
-ar_glob_match (int desc, char *mem, int truncated,
-	       long int hdrpos, long int datapos, long int size,
-               long int date, int uid, int gid, int mode,
-               struct ar_glob_state *state)
+ar_glob_match (int desc UNUSED, char *mem, int truncated UNUSED,
+	       long int hdrpos UNUSED, long int datapos UNUSED,
+               long int size UNUSED, long int date UNUSED, int uid UNUSED,
+               int gid UNUSED, int mode UNUSED, struct ar_glob_state *state)
 {
   if (fnmatch (state->pattern, mem, FNM_PATHNAME|FNM_PERIOD) == 0)
     {
