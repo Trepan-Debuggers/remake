@@ -53,21 +53,39 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #else
 #define REAL_DIR_ENTRY(dp) (dp->d_ino != 0)
 #endif /* POSIX */
-
+
 /* Hash table of directories.  */
 
-struct directory
+#ifndef	DIRECTORY_BUCKETS
+#define DIRECTORY_BUCKETS 199
+#endif
+
+struct directory_contents
   {
-    struct directory *next;
-    char *name;			/* Name of the directory.  */
+    struct directory_contents *next;
+
+    int dev, ino;		/* Device and inode numbers of this dir.  */
+
     struct dirfile **files;	/* Files in this directory.  */
     DIR *dirstream;		/* Stream reading this directory.  */
   };
 
-#ifndef	DIRECTORY_BUCKETS
-#define DIRECTORY_BUCKETS 23
-#endif
+/* Table of directory contents hashed by device and inode number.  */
+static struct directory_contents *directories_contents[DIRECTORY_BUCKETS];
 
+struct directory
+  {
+    struct directory *next;
+
+    char *name;			/* Name of the directory.  */
+
+    /* The directory's contents.  This data may be shared by several
+       entries in the hash table, which refer to the same directory
+       (identified uniquely by `dev' and `ino') under different names.  */
+    struct directory_contents *contents;
+  };
+
+/* Table of directories hashed by name.  */
 static struct directory *directories[DIRECTORY_BUCKETS];
 
 
@@ -88,9 +106,11 @@ struct dirfile
   };
 
 #ifndef	DIRFILE_BUCKETS
-#define DIRFILE_BUCKETS 1007
+#define DIRFILE_BUCKETS 107
 #endif
 
+static int dir_contents_file_exists_p ();
+
 /* Find the directory named NAME and return its `struct directory'.  */
 
 static struct directory *
@@ -111,54 +131,93 @@ find_directory (name)
 
   if (dir == 0)
     {
-      /* The directory was not found.  Create a new entry
-	 for it and start its directory stream reading.  */
+      struct stat st;
+
+      /* The directory was not found.  Create a new entry for it.  */
+
       dir = (struct directory *) xmalloc (sizeof (struct directory));
       dir->next = directories[hash];
       directories[hash] = dir;
       dir->name = savestring (name, p - name);
-      dir->dirstream = opendir (name);
-      if (dir->dirstream == 0)
-	/* Couldn't open the directory.  Mark this by
-	   setting the `files' member to a nil pointer.  */
-	dir->files = 0;
+
+      /* The directory is not in the name hash table.
+	 Find its device and inode numbers, and look it up by them.  */
+
+      if (stat (name, &st) < 0)
+	/* Couldn't stat the directory.  Mark this by
+	   setting the `contents' member to a nil pointer.  */
+	dir->contents = 0;
       else
 	{
-	  /* Allocate an array of hash buckets for files and zero it.  */
-	  dir->files = (struct dirfile **)
-	    xmalloc (sizeof (struct dirfile) * DIRFILE_BUCKETS);
-	  bzero ((char *) dir->files,
-		 sizeof (struct dirfile) * DIRFILE_BUCKETS);
+	  /* Search the contents hash table; device and inode are the key.  */
 
-	  /* Keep track of how many directories are open.  */
-	  ++open_directories;
-	  if (open_directories == MAX_OPEN_DIRECTORIES)
-	    /* Read the entire directory and then close it.  */
-	    (void) dir_file_exists_p (dir->name, (char *) 0);
+	  struct directory_contents *dc;
+
+	  hash = ((unsigned int) st.st_dev << 16) | (unsigned int) st.st_ino;
+	  hash %= DIRECTORY_BUCKETS;
+
+	  for (dc = directories_contents[hash]; dc != 0; dc = dc->next)
+	    if (dc->dev == st.st_dev && dc->ino == st.st_ino)
+	      break;
+
+	  if (dc == 0)
+	    {
+	      /* Nope; this really is a directory we haven't seen before.  */
+
+	      dc = (struct directory_contents *)
+		xmalloc (sizeof (struct directory_contents));
+
+	      /* Enter it in the contents hash table.  */
+	      dc->dev = st.st_dev;
+	      dc->ino = st.st_ino;
+	      dc->next = directories_contents[hash];
+	      directories_contents[hash] = dc;
+
+	      dc->dirstream = opendir (name);
+	      if (dc->dirstream == 0)
+		/* Couldn't open the directory.  Mark this by
+		   setting the `files' member to a nil pointer.  */
+		dc->files = 0;
+	      else
+		{
+		  /* Allocate an array of buckets for files and zero it.  */
+		  dc->files = (struct dirfile **)
+		    xmalloc (sizeof (struct dirfile *) * DIRFILE_BUCKETS);
+		  bzero ((char *) dc->files,
+			 sizeof (struct dirfile *) * DIRFILE_BUCKETS);
+
+		  /* Keep track of how many directories are open.  */
+		  ++open_directories;
+		  if (open_directories == MAX_OPEN_DIRECTORIES)
+		    /* We have too many directories open already.
+		       Read the entire directory and then close it.  */
+		    (void) dir_contents_file_exists_p (dc, (char *) 0);
+		}
+	    }
+
+	  /* Point the name-hashed entry for DIR at its contents data.  */
+	  dir->contents = dc;
 	}
     }
 
   return dir;
 }
 
-/* Return 1 if the name FILENAME in directory DIRNAME
-   is entered in the dir hash table.
+/* Return 1 if the name FILENAME is entered in DIR's hash table.
    FILENAME must contain no slashes.  */
 
-int
-dir_file_exists_p (dirname, filename)
-     register char *dirname;
+static int
+dir_contents_file_exists_p (dir, filename)
+     register struct directory_contents *dir;
      register char *filename;
 {
   register unsigned int hash;
   register char *p;
-  register struct directory *dir;
   register struct dirfile *df;
   register struct dirent *d;
-  dir = find_directory (dirname);
 
-  if (dir->files == 0)
-    /* The directory could not be opened.  */
+  if (dir == 0 || dir->files == 0)
+    /* The directory could not be stat'd or opened.  */
     return 0;
 
   hash = 0;
@@ -222,6 +281,19 @@ dir_file_exists_p (dirname, filename)
 
   return 0;
 }
+
+/* Return 1 if the name FILENAME in directory DIRNAME
+   is entered in the dir hash table.
+   FILENAME must contain no slashes.  */
+
+int
+dir_file_exists_p (dirname, filename)
+     register char *dirname;
+     register char *filename;
+{
+  return dir_contents_file_exists_p (find_directory (dirname)->contents,
+				     filename);
+}
 
 /* Return 1 if the file named NAME exists.  */
 
@@ -277,19 +349,30 @@ file_impossible (filename)
     HASH (hash, *p);
   hash %= DIRFILE_BUCKETS;
 
-  if (dir->files == 0)
+  if (dir->contents == 0)
+    {
+      /* The directory could not be stat'd.  We allocate a contents
+	 structure for it, but leave it out of the contents hash table.  */
+      dir->contents = (struct directory_contents *)
+	xmalloc (sizeof (struct directory_contents));
+      dir->contents->dev = dir->contents->ino = 0;
+      dir->contents->files = 0;
+    }
+
+  if (dir->contents->files == 0)
     {
       /* The directory was not opened; we must allocate the hash buckets.  */
-      dir->files = (struct dirfile **)
+      dir->contents->files = (struct dirfile **)
 	xmalloc (sizeof (struct dirfile) * DIRFILE_BUCKETS);
-      bzero ((char *) dir->files, sizeof (struct dirfile) * DIRFILE_BUCKETS);
+      bzero ((char *) dir->contents->files,
+	     sizeof (struct dirfile) * DIRFILE_BUCKETS);
     }
 
   /* Make a new entry and put it in the table.  */
 
   new = (struct dirfile *) xmalloc (sizeof (struct dirfile));
-  new->next = dir->files[hash];
-  dir->files[hash] = new;
+  new->next = dir->contents->files[hash];
+  dir->contents->files[hash] = new;
   new->name = savestring (filename, strlen (filename));
   new->impossible = 1;
 }
@@ -303,22 +386,22 @@ file_impossible_p (filename)
   char *dirend;
   register char *p = filename;
   register unsigned int hash;
-  register struct directory *dir;
+  register struct directory_contents *dir;
   register struct dirfile *next;
 
   dirend = rindex (filename, '/');
   if (dirend == 0)
-    dir = find_directory (".");
+    dir = find_directory (".")->contents;
   else
     {
       char *dirname = (char *) alloca (dirend - filename + 1);
       bcopy (p, dirname, dirend - p);
       dirname[dirend - p] = '\0';
-      dir = find_directory (dirname);
+      dir = find_directory (dirname)->contents;
       p = dirend + 1;
     }
 
-  if (dir->files == 0)
+  if (dir == 0 || dir->files == 0)
     /* There are no files entered for this directory.  */
     return 0;
 
@@ -358,20 +441,24 @@ print_dir_data_base ()
     for (dir = directories[i]; dir != 0; dir = dir->next)
       {
 	++dirs;
-	if (dir->files == 0)
-	  printf ("# %s: could not be opened.\n", dir->name);
+	if (dir->contents == 0)
+	  printf ("# %s: could not be stat'd.\n", dir->name);
+	else if (dir->contents->files == 0)
+	  printf ("# %s (device %d, inode %d): could not be opened.\n",
+		  dir->name, dir->contents->dev, dir->contents->ino);
 	else
 	  {
 	    register unsigned int f = 0, im = 0;
 	    register unsigned int j;
 	    register struct dirfile *df;
 	    for (j = 0; j < DIRFILE_BUCKETS; ++j)
-	      for (df = dir->files[j]; df != 0; df = df->next)
+	      for (df = dir->contents->files[j]; df != 0; df = df->next)
 		if (df->impossible)
 		  ++im;
 		else
 		  ++f;
-	    printf ("# %s: ", dir->name);
+	    printf ("# %s (device %d, inode %d): ",
+		    dir->name, dir->contents->dev, dir->contents->ino);
 	    if (f == 0)
 	      fputs ("No", stdout);
 	    else
@@ -382,7 +469,7 @@ print_dir_data_base ()
 	    else
 	      printf ("%u", im);
 	    fputs (" impossibilities", stdout);
-	    if (dir->dirstream == 0)
+	    if (dir->contents->dirstream == 0)
 	      puts (".");
 	    else
 	      puts (" so far.");
