@@ -55,6 +55,14 @@ extern int errno;
 #define	SYS_SIGLIST_DECLARED
 #endif
 
+#ifdef HAVE_SYS_SIGLIST
+#ifndef SYS_SIGLIST_DECLARED
+extern char *sys_siglist[];
+#endif
+#else
+#include "signame.h"
+#endif
+
 #ifndef	isblank
 #define	isblank(c)	((c) == ' ' || (c) == '\t')
 #endif
