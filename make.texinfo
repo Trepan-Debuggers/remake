@@ -7,10 +7,10 @@
 
 @c For publication, format makebook.texi instead of using this file directly.
 
-@set EDITION 0.43
-@set VERSION 3.68 Beta
-@set UPDATED 26 July 1993
-@set UPDATE-MONTH July 1993
+@set EDITION 0.44
+@set VERSION 3.69 Beta
+@set UPDATED 1 August 1993
+@set UPDATE-MONTH August 1993
 
 @c finalout
 
@@ -3271,12 +3271,11 @@ are not put into @code{MAKEFLAGS}; these options are not passed down.@refill
 @cindex @code{--jobs}, and recursion
 @cindex recursion, and @code{-j}
 @cindex job slots, and recursion
-The @samp{-j} option is a special case 
-(@pxref{Parallel, ,Parallel Execution}).  If you set
-it to some numeric value, @samp{-j 1} is always put into
+The @samp{-j} option is a special case (@pxref{Parallel, ,Parallel Execution}).
+If you set it to some numeric value, @samp{-j 1} is always put into
 @code{MAKEFLAGS} instead of the value you specified.  This is because if
-the @w{@samp{-j}} option were passed down to sub-@code{make}s, you would get
-many more jobs running in parallel than you asked for.  If you give
+the @w{@samp{-j}} option were passed down to sub-@code{make}s, you would
+get many more jobs running in parallel than you asked for.  If you give
 @samp{-j} with no numeric argument, meaning to run as many jobs as
 possible in parallel, this is passed down, since multiple infinities are
 no more than one.@refill
@@ -3299,8 +3298,10 @@ subsystem:
 
 @vindex MFLAGS
 A similar variable @code{MFLAGS} exists also, for historical compatibility.
-It has the same value as @code{MAKEFLAGS} except that a hyphen is added at
-the beginning if it is not empty.  @code{MFLAGS} was traditionally used
+It has the same value as @code{MAKEFLAGS} except that it always begins with
+a hyphen unless it is empty (@code{MAKEFLAGS} begins with a hyphen only when
+it begins with an option that has no single-letter version, such as
+@samp{--warn-undefined-variables}).  @code{MFLAGS} was traditionally used
 explicitly in the recursive @code{make} command, like this:
 
 @example
@@ -3316,12 +3317,19 @@ but now @code{MAKEFLAGS} makes this usage redundant.
 @cindex setting options in makefiles
 @cindex options, setting in makefiles
 The @code{MAKEFLAGS} and @code{MFLAGS} variables can also be useful if you
-want to have certain options, such as @samp{-k} 
-(@pxref{Options Summary, ,Summary of Options})
-set each time you run @code{make}.  Just put @samp{MAKEFLAGS=k} or
-@w{@samp{MFLAGS=-k}} in your environment.  These variables may also be
-set in makefiles, so a makefile can specify additional flags that should
-also be in effect for that makefile.@refill
+want to have certain options, such as @samp{-k} (@pxref{Options Summary,
+,Summary of Options}), set each time you run @code{make}.  You simply put a
+value for @code{MAKEFLAGS} or @code{MFLAGS} in your environment.  These
+variables may also be set in makefiles, so a makefile can specify additional
+flags that should also be in effect for that makefile.
+
+When @code{make} interprets the value of @code{MAKEFLAGS} or @code{MFLAGS}
+(either from the environment or from a makefile), it first prepends a hyphen
+if the value does not already begin with one.  Then it chops the value into
+words separated by blanks, and parses these words as if they were options
+given on the command line (except that @samp{-C}, @samp{-f}, @samp{-h},
+@samp{-o}, @samp{-W}, and their long-named versions are ignored; and there
+is no error for an invalid option).
 
 If you do put @code{MAKEFLAGS} or @code{MFLAGS} in your environment, you
 should be sure not to include any options that will drastically affect
