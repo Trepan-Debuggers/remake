@@ -47,3 +47,6 @@
 /* Define if you have the vprintf library function.  */
 #undef HAVE_VPRINTF
 #define HAVE_VPRINTF 1
+
+/* Build host information. */
+#define MAKE_HOST "DOS (DJGPP)"

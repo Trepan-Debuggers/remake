@@ -1316,13 +1316,6 @@ int main (int argc, char ** argv)
     if (jobserver_fds->idx > 1)
       fatal (NILF, _("internal error: multiple --jobserver-fds options"));
 
-    /* The combination of a pipe + !job_slots means we're using the
-       jobserver.  If !job_slots and we don't have a pipe, we can start
-       infinite jobs.  */
-
-    if (job_slots != 0)
-      fatal (NILF, _("internal error: --jobserver-fds unexpected"));
-
     /* Now parse the fds string and make sure it has the proper format.  */
 
     cp = jobserver_fds->list[0];
@@ -1331,12 +1324,21 @@ int main (int argc, char ** argv)
       fatal (NILF,
              _("internal error: invalid --jobserver-fds string `%s'"), cp);
 
+    /* The combination of a pipe + !job_slots means we're using the
+       jobserver.  If !job_slots and we don't have a pipe, we can start
+       infinite jobs.  If we see both a pipe and job_slots >0 that means the
+       user set -j explicitly.  This is broken; in this case obey the user
+       (ignore the jobserver pipe for this make) but print a message.  */
+
+    if (job_slots > 0)
+      error (NILF, _("warning: -jN set for submakes: ignoring jobserver."));
+
     /* Create a duplicate pipe, that will be closed in the SIGCHLD
        handler.  If this fails with EBADF, the parent has closed the pipe
        on us because it didn't think we were a submake.  If so, print a
        warning then default to -j1.  */
 
-    if ((job_rfd = dup (job_fds[0])) < 0)
+    else if ((job_rfd = dup (job_fds[0])) < 0)
       {
         if (errno != EBADF)
           pfatal_with_name (_("dup jobserver"));
@@ -1344,6 +1346,12 @@ int main (int argc, char ** argv)
         error (NILF,
                _("warning: jobserver unavailable (using -j1).  Add `+' to parent make rule."));
         job_slots = 1;
+      }
+
+    if (job_slots > 0)
+      {
+        close (job_fds[0]);
+        close (job_fds[1]);
         job_fds[0] = job_fds[1] = -1;
         free (jobserver_fds->list);
         free (jobserver_fds);
@@ -1354,7 +1362,7 @@ int main (int argc, char ** argv)
   /* If we have >1 slot but no jobserver-fds, then we're a top-level make.
      Set up the pipe and install the fds option for our children.  */
 
-  else if (job_slots > 1)
+  if (job_slots > 1)
     {
       char c = '+';
 
@@ -1681,6 +1689,15 @@ int main (int argc, char ** argv)
 
 	  fflush (stdout);
 	  fflush (stderr);
+
+          /* Close the jobserver pipes if we opened any.  */
+          if (job_fds[0] >= 0)
+            {
+              close (job_fds[0]);
+              close (job_fds[1]);
+            }
+          if (job_rfd >= 0)
+            close (job_rfd);
 
 #ifndef _AMIGA
 	  exec_command (nargv, environ);
@@ -2383,14 +2400,19 @@ define_makeflags (all, makefile)
   while (flags != 0)
     {
       /* Add the flag letter or name to the string.  */
-      if (!short_option (flags->cs->c))
+      if (short_option (flags->cs->c))
+	*p++ = flags->cs->c;
+      else
 	{
+          if (*p != '-')
+            {
+              *p++ = ' ';
+              *p++ = '-';
+            }
 	  *p++ = '-';
 	  strcpy (p, flags->cs->long_name);
 	  p += strlen (p);
 	}
-      else
-	*p++ = flags->cs->c;
       if (flags->arg != 0)
 	{
 	  /* A flag that takes an optional argument which in this case is
@@ -2509,6 +2531,7 @@ define_makeflags (all, makefile)
 static void
 print_version ()
 {
+  extern char *make_host;
   static int printed_version = 0;
 
   char *precede = print_data_base_flag ? "# " : "";
@@ -2517,7 +2540,7 @@ print_version ()
     /* Do it only once.  */
     return;
 
-  printf ("%sGNU Make version %s", precede, version_string);
+  printf ("%sGNU Make %s (%s)", precede, version_string, make_host);
   if (remote_description != 0 && *remote_description != '\0')
     printf ("-%s", remote_description);
 

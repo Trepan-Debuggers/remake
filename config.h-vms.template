@@ -341,3 +341,5 @@
 #define PARAMS(protos)  ()
 #endif /* C++ or ANSI C.  */
 
+/* Build host information. */
+#define MAKE_HOST "VMS"

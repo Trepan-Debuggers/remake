@@ -3,7 +3,12 @@
    (which it would do because make.h was found in $srcdir).  */
 #include <config.h>
 
+#ifndef MAKE_HOST
+# define MAKE_HOST "unknown"
+#endif
+
 char *version_string = VERSION;
+char *make_host = MAKE_HOST;
 
 /*
   Local variables:
