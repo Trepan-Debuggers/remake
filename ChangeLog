@@ -1,3 +1,45 @@
+Wed Mar 20 09:52:27 1996  Roland McGrath  <roland@charlie-brown.gnu.ai.mit.edu>
+
+	* GNUmakefile (vmsfiles): New variable.
+	(distfiles): Include $(vmsfiles).
+
+Tue Mar 19 20:21:34 1996  Roland McGrath  <roland@charlie-brown.gnu.ai.mit.edu>
+
+	Merged VMS port from Klaus Kaempf <kkaempf@didymus.rmi.de>.
+	* make.h (PARAMS): New macro.
+	* config.h-vms: New file.
+	* makefile.com: New file.
+	* makefile.vms: New file.
+	* readme.vms: New file.
+	* vmsdir.h: New file.
+	* vmsfunctions.c: New file.
+	* vmsify.c: New file.
+	* file.h: Renamed to filedef.h to avoid conflict with VMS system hdr.
+	* ar.c: Added prototypes and changes for VMS.
+	* commands.c: Likewise.
+	* commands.h: Likewise.
+	* default.c: Likewise.
+	* dep.h: Likewise.
+	* dir.c: Likewise.
+	* expand.c: Likewise.
+	* file.c: Likewise.
+	* function.c: Likewise.
+	* implicit.c: Likewise.
+	* job.c: Likewise.
+	* job.h: Likewise.
+	* main.c: Likewise.
+	* make.h: Likewise.
+	* misc.c: Likewise.
+	* read.c: Likewise.
+	* remake.c: Likewise.
+	* remote-stub.c: Likewise.
+	* rule.c: Likewise.
+	* rule.h: Likewise.
+	* variable.c: Likewise.
+	* variable.h: Likewise.
+	* vpath.c: Likewise.
+	* compatMakefile (srcs): Rename file.h to filedef.h.
+
 Sat Aug 19 23:11:00 1995  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
 
 	* remake.c (check_dep): For a secondary file, try implicit and
