@@ -502,7 +502,8 @@ main (argc, argv, envp)
 	continue;
 
       /* Try a variable definition.  */
-      if (try_variable_definition (other_args->list[i], o_command))
+      if (try_variable_definition ((char *) 0, 0,
+				   other_args->list[i], o_command))
 	{
 	  /* It succeeded.  The variable is already defined.
 	     Backslash-quotify it and append it to CMD_DEFS, then clobber it
