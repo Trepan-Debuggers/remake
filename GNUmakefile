@@ -172,6 +172,8 @@ $(archpfx)%.dep: %.c
 	$(mkdep) $< | sed 's,$*\.o,$(@:.dep=.o) $@,' > $@
 endif
 
+ETAGS = etags -T # for v19 etags
+
 # Run the tests.
 .PHONY: tests
 testdir := $(shell ls -d1 make-test-?.? | sort -n +0.10 -0.11 +0.12 | tail -1l)
