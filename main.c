@@ -1,4 +1,4 @@
-/* Copyright (C) 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
+/* Copyright (C) 1988, 89, 90, 91, 94 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -1705,7 +1705,7 @@ print_version ()
     printf ("-%s", remote_description);
 
   printf (", by Richard Stallman and Roland McGrath.\n\
-%sCopyright (C) 1988, 89, 90, 91, 92, 93 Free Software Foundation, Inc.\n\
+%sCopyright (C) 1988, 89, 90, 91, 92, 93, 94 Free Software Foundation, Inc.\n\
 %sThis is free software; see the source for copying conditions.\n\
 %sThere is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A\n\
 %sPARTICULAR PURPOSE.\n\n", precede, precede, precede, precede);
