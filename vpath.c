@@ -370,10 +370,24 @@ selective_vpath_search (path, file, mtime_ptr)
       else
 	bcopy (filename, n, flen + 1);
 
-      if (not_target)
-	/* Since *FILE is not a target, if the file is
-	   mentioned in a makefile, we consider it existent.  */
-	exists = lookup_file (name) != 0;
+      /* Check if the file is mentioned in a makefile.  If *FILE is not
+	 a target, that is enough for us to decide this file exists.
+	 If *FILE is a target, then the file must be mentioned in the
+	 makefile also as a target to be chosen.
+
+	 The restriction that *FILE must not be a target for a
+	 makefile-mentioned file to be chosen was added by an
+	 inadequately commented change in July 1990; I am not sure off
+	 hand what problem it fixes.
+
+	 In December 1993 I loosened of this restriction to allow a file
+	 to be chosen if it is mentioned as a target in a makefile.  This
+	 seem logical.  */
+      {
+	struct file *f = lookup_file (name);
+	if (f != 0)
+	  exists = not_target || f->is_target;
+      }
 
       if (!exists)
 	{
