@@ -1,4 +1,30 @@
+2004-01-21  Paul D. Smith  <psmith@gnu.org>
+
+	* job.c (load_too_high): Implement an algorithm to control the
+	"thundering herd" problem when using -l to control job creation
+	via the load average.  The system only recomputes the load once a
+	second but we can start many jobs in a second.  To solve this we
+	keep track of the number of jobs started in the last second and
+	apply a weight to try to guess what a correct load would be.
+	The algorithm was provided by Thomas Riedl <thomas.riedl@siemens.com>.
+	Also fixes bug #4693.
+	(reap_children): Decrease the job count for this second.
+	(start_job_command): Increase the job count for this second.
+
+	* read.c (conditional_line): Expand the text after ifn?def before
+	checking to see if it's a single word.  Fixes bug #7257.
+
+2004-01-09  Paul D. Smith  <psmith@gnu.org>
+
+	* file.c (print_file): Recurse to print all targets in
+	double-colon rules.  Fixes bug #4518, reported (with patch) by
+	Andrew Chatham <chatham@google.com>.
+
 2004-01-07  Paul D. Smith  <psmith@gnu.org>
+
+	* acinclude.m4: Remove make_FUNC_SETVBUF_REVERSED.
+	* configure.in: Change make_FUNC_SETVBUF_REVERSED to
+	AC_FUNC_SETVBUF_REVERSED.
 
 	* doc/make.texi (Target-specific): Fix Savannah bug #1772.
 	(MAKE Variable): Fix Savannah bug #4898.
@@ -11,6 +37,12 @@
 	remember which dependencies have the ignore_mtime flag set.
 	Original fix provided in Savannah patch #2349, by Benoit
 	Poulot-Cazajous <Benoit.Poulot-Cazajous@jaluna.com>.
+
+2003-11-22  Paul D. Smith  <psmith@gnu.org>
+
+	* README.W32.template (Outputs): Clarification on -j with
+	BATCH_MODE_ONLY_SEHLL suggested by Jonathan R. Grant
+	<jg-make@jguk.org>.
 
 2003-11-02  Paul D. Smith  <psmith@gnu.org>
 

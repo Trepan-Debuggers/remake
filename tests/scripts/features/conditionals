@@ -85,14 +85,21 @@ ifdef $(F)oo
 DEF2 = yes
 endif
 
-all:; @echo DEF=$(DEF) DEF2=$(DEF2)
+
+DEF3 = no
+FUNC = $1
+ifdef $(call FUNC,DEF)3
+  DEF3 = yes
+endif
+
+all:; @echo DEF=$(DEF) DEF2=$(DEF2) DEF3=$(DEF3)
 
 EOF
 
 close(MAKEFILE)
 
 &run_make_with_options($makefile2,"",&get_logfile,0);
-$answer = "DEF=yes DEF2=yes\n";
+$answer = "DEF=yes DEF2=yes DEF3=yes\n";
 &compare_output($answer,&get_logfile(1));
 
 

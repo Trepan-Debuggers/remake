@@ -1,3 +1,9 @@
+2004-01-21  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/conditionals: Test arguments to ifn?def which
+	contain whitespace (such as a function that is evaluated).  Bug
+	#7257.
+
 2004-01-07  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/features/order_only: Test order-only prerequisites in

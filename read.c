@@ -137,7 +137,6 @@ static void record_files PARAMS ((struct nameseq *filenames, char *pattern, char
 			int have_sysv_atvar,
                         const struct floc *flocp, int set_default));
 static void record_target_var PARAMS ((struct nameseq *filenames, char *defn,
-                                       int two_colon,
                                        enum variable_origin origin,
                                        int enabled,
                                        const struct floc *flocp));
@@ -505,7 +504,7 @@ eval (struct ebuffer *ebuf, int set_default)
 
   while (1)
     {
-      int linelen;
+      unsigned int linelen;
       char *line;
       int len;
       char *p;
@@ -1053,16 +1052,18 @@ eval (struct ebuffer *ebuf, int set_default)
         v_origin = o_file;
         exported = 0;
         if (wtype == w_static)
-          if (word1eq ("override"))
-            {
-              v_origin = o_override;
-              wtype = get_next_mword (p+len, NULL, &p, &len);
-            }
-          else if (word1eq ("export"))
-            {
-              exported = 1;
-              wtype = get_next_mword (p+len, NULL, &p, &len);
-            }
+          {
+            if (word1eq ("override"))
+              {
+                v_origin = o_override;
+                wtype = get_next_mword (p+len, NULL, &p, &len);
+              }
+            else if (word1eq ("export"))
+              {
+                exported = 1;
+                wtype = get_next_mword (p+len, NULL, &p, &len);
+              }
+          }
 
         if (wtype != w_eol)
           wtype = get_next_mword (p+len, NULL, NULL, NULL);
@@ -1079,8 +1080,7 @@ eval (struct ebuffer *ebuf, int set_default)
                                         semip, strlen (semip)+1);
                 p = variable_buffer + l;
               }
-            record_target_var (filenames, p, two_colon, v_origin, exported,
-                               fstart);
+            record_target_var (filenames, p, v_origin, exported, fstart);
             filenames = 0;
             continue;
           }
@@ -1457,17 +1457,20 @@ conditional_line (char *line, const struct floc *flocp)
       /* "Ifdef" or "ifndef".  */
       char *var;
       struct variable *v;
-      register char *p = end_of_token (line);
-      i = p - line;
+      register char *p;
+
+      /* Expand the thing we're looking up, so we can use indirect and
+         constructed variable names.  */
+      var = allocated_variable_expand (line);
+
+      /* Make sure there's only one variable name to test.  */
+      p = end_of_token (var);
+      i = p - var;
       p = next_token (p);
       if (*p != '\0')
 	return -1;
 
-      /* Expand the thing we're looking up, so we can use indirect and
-         constructed variable names.  */
-      line[i] = '\0';
-      var = allocated_variable_expand (line);
-
+      var[i] = '\0';
       v = lookup_variable (var, strlen (var));
       conditionals->ignoring[conditionals->if_cmds - 1]
 	= (v != 0 && *v->value != '\0') == notdef;
@@ -1651,7 +1654,7 @@ uniquize_deps (struct dep *chain)
    variable value list.  */
 
 static void
-record_target_var (struct nameseq *filenames, char *defn, int two_colon,
+record_target_var (struct nameseq *filenames, char *defn,
                    enum variable_origin origin, int exported,
                    const struct floc *flocp)
 {
