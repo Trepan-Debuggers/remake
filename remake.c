@@ -195,7 +195,7 @@ update_file (file, depth)
   for (f = file; f != 0; f = f->prev)
     {
       register struct dep *d;
-      char not_started = f->command_state == cs_not_started;
+      int not_started = f->command_state == cs_not_started;
 
       status |= update_file_1 (f, depth);
       check_renamed (f);
