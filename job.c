@@ -129,6 +129,7 @@ extern int start_remote_job_p ();
 extern int start_remote_job (), remote_status ();
 
 RETSIGTYPE child_handler ();
+void unblock_sigs ();
 static void free_child (), start_job_command ();
 static int load_too_high (), job_next_command ();
 
@@ -407,6 +408,11 @@ reap_children (block, err)
 			 by start_remote_job_p.  */
 		      c->remote = start_remote_job_p ();
 		      start_job_command (c);
+		      /* Fatal signals are left blocked in case we were
+			 about to put that child on the chain.  But it is
+			 already there, so it is safe for a fatal signal to
+			 arrive now; it will clean up this child's targets.  */
+		      unblock_sigs ();
 		      if (c->file->command_state == cs_running)
 			/* We successfully started the new command.
 			   Loop to reap more children.  */
@@ -509,7 +515,11 @@ unblock_sigs ()
 #endif
 
 /* Start a job to run the commands specified in CHILD.
-   CHILD is updated to reflect the commands and ID of the child process.  */
+   CHILD is updated to reflect the commands and ID of the child process.
+
+   NOTE: On return fatal signals are blocked!  The caller is responsible
+   for calling `unblock_sigs', once the new child is safely on the chain so
+   it can be cleaned up in the event of a fatal signal.  */
 
 static void
 start_job_command (child)
