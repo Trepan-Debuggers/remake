@@ -109,4 +109,29 @@ close(MAKEFILE);
 $answer = "[         9 8 7 6 5 4 3 2 1 0 ]\n";
 &compare_output($answer,&get_logfile(1));
 
+
+# TEST eval with no filename context.
+# The trick here is that because EVAR is taken from the environment, it must
+# be evaluated before every command is invoked.  Make sure that works, when
+# we have no file context for reading_file (bug # 6195)
+
+$makefile4 = &get_tmpfile;
+
+open(MAKEFILE,"> $makefile4");
+
+print MAKEFILE <<'EOF';
+EVAR = $(eval FOBAR = 1)
+all: ; @echo "OK"
+
+EOF
+
+close(MAKEFILE);
+
+$ENV{EVAR} = '1';
+&run_make_with_options($makefile4, "", &get_logfile);
+$answer = "OK\n";
+&compare_output($answer,&get_logfile(1));
+
+delete $ENV{EVAR};
+
 1;

@@ -678,6 +678,11 @@ func_words (char *o, char **argv, const char *funcname)
   return o;
 }
 
+/* Set begpp to point to the first non-whitespace character of the string,
+ * and endpp to point to the last non-whitespace character of the string.
+ * If the string is empty or contains nothing but whitespace, endpp will be
+ * begpp-1.
+ */
 static char *
 strip_whitespace (const char **begpp, const char **endpp)
 {
@@ -1134,7 +1139,7 @@ static char *
 func_if (char *o, char **argv, const char *funcname)
 {
   const char *begp = argv[0];
-  const char *endp = begp + strlen (argv[0]);
+  const char *endp = begp + strlen (argv[0]) - 1;
   int result = 0;
 
   /* Find the result of the condition: if we have a value, and it's not
@@ -1143,9 +1148,9 @@ func_if (char *o, char **argv, const char *funcname)
 
   strip_whitespace (&begp, &endp);
 
-  if (begp < endp)
+  if (begp <= endp)
     {
-      char *expansion = expand_argument (begp, NULL);
+      char *expansion = expand_argument (begp, endp+1);
 
       result = strlen (expansion);
       free (expansion);

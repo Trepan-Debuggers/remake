@@ -1,3 +1,12 @@
+2003-11-02  Paul D. Smith  <psmith@gnu.org>
+
+	* function.c (func_if): Strip all the trailing whitespace from the
+	condition, then don't expand it.  Fixed bug # 5798.
+
+	* expand.c (recursively_expand_for_file): If we're expanding a
+	variable with no file context, then use the variable's context.
+	Fixes bug # 6195.
+
 2003-10-21  Paul D. Smith  <psmith@gnu.org>
 
 	* main.c (log_working_directory): Add newlines to printf()s.

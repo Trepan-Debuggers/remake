@@ -97,6 +97,7 @@ recursively_expand_for_file (struct variable *v, struct file *file)
 {
   char *value;
   struct variable_set_list *save = 0;
+  int set_reading = 0;
 
   if (v->expanding)
     {
@@ -114,6 +115,13 @@ recursively_expand_for_file (struct variable *v, struct file *file)
       current_variable_set_list = file->variables;
     }
 
+  /* If we have no other file-reading context, use the variable's context. */
+  if (!reading_file)
+    {
+      set_reading = 1;
+      reading_file = &v->fileinfo;
+    }
+
   v->expanding = 1;
   if (v->append)
     value = allocated_variable_append (v);
@@ -121,6 +129,8 @@ recursively_expand_for_file (struct variable *v, struct file *file)
     value = allocated_variable_expand (v->value);
   v->expanding = 0;
 
+  if (set_reading)
+    reading_file = 0;
   if (file)
     current_variable_set_list = save;
 

@@ -1,3 +1,10 @@
+2003-11-02  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/functions/if: Test if on conditionals with trailing
+	whitespace--bug #5798.
+
+	* scripts/functions/eval: Test eval in a non-file context--bug #6195.
+
 2003-04-19  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/features/patspecific_vars: Test multiple patterns
