@@ -543,7 +543,9 @@ read_dirstream (stream)
 	  if (!df->impossible)
 	    return df->name;
 	}
-      ds->elt = ds->contents->files[++ds->bucket];
+      if (++ds->bucket == DIRFILE_BUCKETS)
+	break;
+      ds->elt = ds->contents->files[ds->bucket];
     }
 
   return 0;
