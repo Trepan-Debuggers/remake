@@ -1648,18 +1648,21 @@ readline (linebuffer, stream, filename, lineno)
 
   *p = '\0';
 
-  while (1)
+  while (fgets (p, end - p, stream) != 0)
     {
-      if (fgets (p, end - p, stream) == 0)
-	if (feof (stream))
-	  break;
-	else
-	  pfatal_with_name (filename);
-
       len = strlen (p);
       if (len == 0)
-	/* This only happens when the first thing on the line is a '\0'.  */
-	makefile_fatal (filename, lineno, "NUL not allowed in makefile");
+	{
+	  /* This only happens when the first thing on the line is a '\0'.
+	     It is a pretty hopeless case, but (wonder of wonders) Athena
+	     lossage strikes again!  (xmkmf puts NULs in its makefiles.)
+	     There is nothing really to be done; we synthesize a newline so
+	     the following line doesn't appear to be part of this line.  */
+	  makefile_error (filename, lineno,
+			  "warning: NUL character seen; rest of line ignored");
+	  p[0] = '\n';
+	  len = 1;
+	}
 
       p += len;
       if (p[-1] != '\n')
@@ -1714,6 +1717,9 @@ readline (linebuffer, stream, filename, lineno)
 	  linebuffer->buffer = buffer;
 	}
     }
+
+  if (ferror (stream))
+    pfatal_with_name (filename);
 
   return nlines;
 }
