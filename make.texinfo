@@ -5141,14 +5141,13 @@ create it.@refill
 
 Intermediate files are remade using their rules just like all other
 files.  The difference is that the intermediate file is deleted when
-@code{make} is finished.  Therefore, the intermediate file which did
-not exist before @code{make} also does not exist after @code{make}.
-The deletion is reported to you by printing a @samp{rm -f} command
-that shows what @code{make} is doing.  (You can optionally define an
-implicit rule so as to preserve certain intermediate files.  You can also
-list the target pattern of an implicit rule (such as @samp{%.o}) as a
-dependency file of the special target @code{.PRECIOUS} to preserve intermediate
-files whose target patterns match that file's name.)@refill
+@code{make} is finished.  Therefore, the intermediate file which did not
+exist before @code{make} also does not exist after @code{make}.  The
+deletion is reported to you by printing a @samp{rm -f} command that
+shows what @code{make} is doing.  (You can list the target pattern of an
+implicit rule (such as @samp{%.o}) as a dependency file of the special
+target @code{.PRECIOUS} to preserve intermediate files made by implicit
+rules whose target patterns match that file's name.)@refill
 @cindex intermediate files, preserving
 @cindex preserving intermediate files
 @cindex preserving with .PRECIOUS
