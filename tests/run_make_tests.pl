@@ -48,66 +48,104 @@ sub valid_option
    return 0;
 }
 
-sub run_make_with_options
+
+# This is an "all-in-one" function.  Arguments are as follows:
+#
+#  [0] (string):  The makefile to be tested.
+#  [1] (string):  Arguments to pass to make.
+#  [2] (string):  Answer we should get back.
+#  [3] (integer): Exit code we expect.  A missing code means 0 (success)
+
+sub run_make_test
 {
-   local ($filename,$options,$logname,$expected_code) = @_;
-   local($code);
-   local($command) = $make_path;
+  local ($makestring, $options, $answer, $err_code) = @_;
 
-   $expected_code = 0 unless defined($expected_code);
+  if (! defined($makefile)) {
+    $makefile = &get_tmpfile();
+  }
 
-   if ($filename)
-   {
-      $command .= " -f $filename";
-   }
+  # Replace @MAKEFILE@ with the makefile name and @MAKE@ with the path to
+  # make in both $makestring and $answer.
 
-   if ($options)
-   {
-      $command .= " $options";
-   }
+  $makestring =~ s/#MAKEFILE#/$makefile/g;
+  $makestring =~ s/#MAKE#/$make_name/g;
 
-   if ($valgrind) {
-     print VALGRIND "\n\nExecuting: $command\n";
-   }
+  $answer =~ s/#MAKEFILE#/$makefile/g;
+  $answer =~ s/#MAKE#/$make_name/g;
 
-   $code = &run_command_with_output($logname,$command);
+  open(MAKEFILE, "> $makefile") || die "Failed to open $makefile: $!\n";
+  print MAKEFILE $makestring, "\n";
+  close(MAKEFILE) || die "Failed to write $makefile: $!\n";
 
-   # Check to see if we have Purify errors.  If so, keep the logfile.
-   # For this to work you need to build with the Purify flag -exit-status=yes
+  &run_make_with_options($makefile, $options, &get_logfile(0), $err_code);
+  &compare_output($answer, &get_logfile(1));
 
-   if ($pure_log && -f $pure_log) {
-     if ($code & 0x7000) {
-       $code &= ~0x7000;
+  $makefile = undef;
+}
 
-       # If we have a purify log, save it
-       $tn = $pure_testname . ($num_of_logfiles ? ".$num_of_logfiles" : "");
-       print("Renaming purify log file to $tn\n") if $debug;
-       rename($pure_log, "$tn")
-	 || die "Can't rename $log to $tn: $!\n";
-       ++$purify_errors;
-     }
-     else {
-       unlink($pure_log);
-     }
-   }
+# The old-fashioned way...
+sub run_make_with_options {
+  local ($filename,$options,$logname,$expected_code,$input_file) = @_;
+  local($code);
+  local($command) = $make_path;
 
-   if ($code != $expected_code)
-   {
-      print "Error running $make_path ($code): $command\n";
-      $test_passed = 0;
-      # If it's a SIGINT, stop here
-      if ($code & 127) {
-        print STDERR "\nCaught signal ".($code & 127)."!\n";
-        exit($code);
-      }
-      return 0;
-   }
+  $expected_code = 0 unless defined($expected_code);
 
-   if ($profile & $vos)
-   {
-      system "add_profile $make_path";
-   }
-1;
+  # Reset to reflect this one test.
+  $test_passed = 1;
+
+  if ($filename) {
+    $command .= " -f $filename";
+  }
+
+  if ($options) {
+    $command .= " $options";
+  }
+
+  if ($valgrind) {
+    print VALGRIND "\n\nExecuting: $command\n";
+  }
+
+  if (defined($input_file)) {
+    $code = &run_command_with_input_output($input_file,$logname,$command);
+  } else {
+    $code = &run_command_with_output($logname,$command);
+  }
+
+  # Check to see if we have Purify errors.  If so, keep the logfile.
+  # For this to work you need to build with the Purify flag -exit-status=yes
+
+  if ($pure_log && -f $pure_log) {
+    if ($code & 0x7000) {
+      $code &= ~0x7000;
+
+      # If we have a purify log, save it
+      $tn = $pure_testname . ($num_of_logfiles ? ".$num_of_logfiles" : "");
+      print("Renaming purify log file to $tn\n") if $debug;
+      rename($pure_log, "$tn")
+        || die "Can't rename $log to $tn: $!\n";
+      ++$purify_errors;
+    } else {
+      unlink($pure_log);
+    }
+  }
+
+  if ($code != $expected_code) {
+    print "Error running $make_path (expected $expected_code; got $code): $command\n";
+    $test_passed = 0;
+    # If it's a SIGINT, stop here
+    if ($code & 127) {
+      print STDERR "\nCaught signal ".($code & 127)."!\n";
+      exit($code);
+    }
+    return 0;
+  }
+
+  if ($profile & $vos) {
+    system "add_profile $make_path";
+  }
+
+  1;
 }
 
 sub print_usage
@@ -169,6 +207,10 @@ sub set_more_defaults
    elsif ($osname =~ /^([^ ]*|[^ ]* [^ ]*)D(OS|os|ev) /) {
      $port_type = 'DOS';
    }
+   # Check for OS/2
+   elsif ($osname =~ m%OS/2%) {
+     $port_type = 'OS/2';
+   }
    # Everything else, right now, is UNIX.  Note that we should integrate
    # the VOS support into this as well and get rid of $vos; we'll do
    # that next time.
@@ -180,7 +222,7 @@ sub set_more_defaults
    # timestamps with second granularity (!!).  Change the sleep time
    # needed to force a file to be considered "old".
    #
-   $wtime = $port_type eq 'UNIX' ? 1 : 4;
+   $wtime = $port_type eq 'UNIX' ? 1 : $port_type eq 'OS/2' ? 2 : 4;
 
    # Find the full pathname of Make.  For DOS systems this is more
    # complicated, so we ask make itself.
