@@ -47,6 +47,10 @@ AC_COMPILE_CHECK(union wait, [#include <sys/types.h>
    conflicts with WEXITSTATUS et al, we don't want to use it at all.  */
 if (WEXITSTATUS (status) != 0) pid = -1;
 #endif
+#ifdef HAVE_WAITPID
+/* Make sure union wait works with waitpid.  */
+pid = waitpid (-1, &status, 0);
+#endif
 ],
 		 AC_DEFINE(HAVE_UNION_WAIT))
 
