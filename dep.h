@@ -58,12 +58,8 @@ extern struct dep *read_all_makefiles ();
 /* Flag bits for the second argument to `read_makefile'.
    These flags are saved in the `changed' field of each
    `struct dep' in the chain returned by `read_all_makefiles'.  */
-enum
-  {
-    RM_NO_DEFAULT_GOAL	= 1 << 0, /* Do not set default goal.  */
-    RM_INCLUDED		= 1 << 1, /* Search the makefile search path.  */
-    RM_DONTCARE		= 1 << 2, /* No error if it doesn't exist.  */
-    RM_NO_TILDE		= 1 << 3, /* Don't expand ~ in the file name.  */
-    RM_NOFLAG		= 0
-  };
-
+#define RM_NO_DEFAULT_GOAL	(1 << 0) /* Do not set default goal.  */
+#define RM_INCLUDED		(1 << 1) /* Search makefile search path.  */
+#define RM_DONTCARE		(1 << 2) /* No error if it doesn't exist.  */
+#define RM_NO_TILDE		(1 << 3) /* Don't expand ~ in file name.  */
+#define RM_NOFLAG		0
