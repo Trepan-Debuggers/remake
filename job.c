@@ -163,7 +163,7 @@ child_error (target_name, exit_code, exit_sig, coredump, ignored)
 {
   if (exit_sig == 0)
     error (ignored ? "[%s] Error %d (ignored)" :
-	   "*** [%s] Error %d%s",
+	   "*** [%s] Error %d",
 	   target_name, exit_code);
   else
     {
