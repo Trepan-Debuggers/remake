@@ -1,4 +1,5 @@
-/* Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+/* Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993
+	Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -107,14 +108,16 @@ ar_member_date (name)
 
 /* ARGSUSED */
 static long int
-ar_member_date_1 (desc, mem, hdrpos, datapos, size, date, uid, gid, mode, name)
+ar_member_date_1 (desc, mem, truncated,
+		  hdrpos, datapos, size, date, uid, gid, mode, name)
      int desc;
      char *mem;
+     int truncated;
      long int hdrpos, datapos, size, date;
      int uid, gid, mode;
      char *name;
 {
-  return ar_name_equal (name, mem) ? date : 0;
+  return ar_name_equal (name, mem, truncated) ? date : 0;
 }
 
 /* Set the archive-member NAME's modtime to now.  */
