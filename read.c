@@ -33,7 +33,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 struct passwd *getpwnam ();
 
 
-static void read_makefile ();
+static int read_makefile ();
 static unsigned int readline (), do_define ();
 static int conditional_line ();
 static void record_files ();
@@ -143,7 +143,8 @@ read_all_makefiles (makefiles)
       {
 	if (*p != '\0')
 	  *p++ = '\0';
-	read_makefile (name, RM_NO_DEFAULT_GOAL | RM_INCLUDED | RM_DONTCARE);
+	(void) read_makefile (name,
+			      RM_NO_DEFAULT_GOAL | RM_INCLUDED | RM_DONTCARE);
       }
 
     free (value);
@@ -157,7 +158,8 @@ read_all_makefiles (makefiles)
 	struct dep *tail = read_makefiles;
 	register struct dep *d;
 
-	read_makefile (*makefiles, 0);
+	if (! read_makefile (*makefiles, 0))
+	  perror_with_name ("", *makefiles);
 
 	/* Find the right element of read_makefiles.  */
 	d = read_makefiles;
@@ -181,7 +183,10 @@ read_all_makefiles (makefiles)
 	++p;
 
       if (*p != 0)
-	read_makefile (*p, 0);
+	{
+	  if (! read_makefile (*p, 0))
+	    perror_with_name ("", *p);
+	}
       else
 	{
 	  /* No default makefile was found.  Add the default makefiles to the
@@ -214,9 +219,11 @@ read_all_makefiles (makefiles)
 
    FLAGS contains bits as above.
 
-   FILENAME is added to the `read_makefiles' chain.  */
+   FILENAME is added to the `read_makefiles' chain.
 
-static void
+   Returns 1 if a file was found and read, 0 if not.  */
+
+static int
 read_makefile (filename, flags)
      char *filename;
      int flags;
@@ -314,19 +321,15 @@ read_makefile (filename, flags)
   deps->changed = flags;
   deps = 0;
 
-  /* If the makefile can't be found at all,
-     either ignore it or give up entirely.  */
+  /* If the makefile can't be found at all, give up entirely.  */
 
   if (infile == 0)
     {
-      if (! (flags & RM_DONTCARE))
-	{
-	  /* If we did some searching, errno has the error
-	     from the last attempt, rather from FILENAME itself.  */
-	  errno = makefile_errno;
-	  perror_with_name ("fopen: ", filename);
-	}
-      return;
+      /* If we did some searching, errno has the error from the last
+	 attempt, rather from FILENAME itself.  Restore it in case the
+	 caller wants to use it in a message.  */
+      errno = makefile_errno;
+      return 0;
     }
 
   reading_filename = filename;
@@ -548,8 +551,10 @@ read_makefile (filename, flags)
 	      free (files);
 	      files = next;
 
-	      read_makefile (name, (RM_INCLUDED | RM_NO_TILDE
-				    | (noerror ? RM_DONTCARE : 0)));
+	      if (! read_makefile (name, (RM_INCLUDED | RM_NO_TILDE
+					  | (noerror ? RM_DONTCARE : 0))))
+		makefile_error (filename, lineno,
+				"%s: %s", name, strerror (errno));
 	    }
 
 	  /* Free any space allocated by conditional_line.  */
@@ -737,6 +742,8 @@ read_makefile (filename, flags)
 
   reading_filename = 0;
   reading_lineno_ptr = 0;
+
+  return 1;
 }
 
 /* Execute a `define' directive.
