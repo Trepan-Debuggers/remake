@@ -155,6 +155,7 @@ This manual describes @code{make} and contains the following chapters:@refill
 * Archives::                    How @code{make} can update library archives.
 * Features::                    Features GNU @code{make} has over other @code{make}s.
 * Missing::                     What GNU @code{make} lacks from other @code{make}s.
+* Makefile Conventions::        Conventions for makefiles in GNU programs.
 * Quick Reference::             A quick reference for experienced users.
 * Complex Makefile::            A real example of a straightforward,
                                  but nontrivial, makefile.
@@ -7751,6 +7752,10 @@ compiling or preprocessing EFL programs.  If we hear of anyone who is
 using EFL, we will gladly add them.
 @end itemize
 
+@comment The makefile standards are in a separate file that is also
+@comment included by standards.texi.
+@include make-stds.texi
+
 @node Quick Reference, Complex Makefile, Missing, Top
 @appendix Quick Reference
 
@@ -8033,10 +8038,6 @@ a makefile to set flags.@*
 
 The default list of suffixes before @code{make} reads any makefiles.
 @end table
-
-@comment The makefile standards are in a separate file that is also
-@comment included by standards.texi.
-@include make-stds.texi
 
 @node Complex Makefile, Concept Index, Quick Reference, Top
 @appendix Complex Makefile Example
@@ -8323,8 +8324,3 @@ tar.zoo: $(SRCS) $(AUX)
 @summarycontents
 @contents
 @bye
-
-@c Local Variables:
-@c most-worried-author-on-the-planet: "roland"
-@c eval: (if (equal most-worried-author-on-the-planet (user-login-name)) (message "Hi, Roland!  Run `diff' to check editing."))
-@c End:
