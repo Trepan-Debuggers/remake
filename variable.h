@@ -97,9 +97,3 @@ extern char *subst_expand (), *patsubst_expand ();
 
 extern char **target_environment ();
 extern int export_all_variables;
-
-/* !!! compile frob */
-void
-enter_variable (struct variable *variable);
-struct variable *
-variable_global_linear_list ();
