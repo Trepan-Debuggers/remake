@@ -1,3 +1,19 @@
+Sun Jul 28 15:37:09 1996  Rob Tulloh (tulloh@tivoli.com)
+
+	* w32/pathstuff.c: Turned convert_vpath_to_win32() into a
+	real function. This was done so that VPATH could contain
+	white space separated pathnames. Please note that directory
+	paths (in VPATH/vpath context) containing white space are not
+	supported (just as they are not under Unix). See README.WIN32
+	for suggestions.
+
+	* w32/include/pathstuff.h: Added prototype for the new
+	function convert_vpath_to_win32. Deleted macro for same.
+
+	* README.WIN32: Added some notes about why I chose not to try
+	and support pathnames which contain white space and some
+	workaround suggestions.
+
 Thu Jul 25 19:53:31 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 
 	* GNUmakefile (mkdep-nolib): Use -MM option unconditionally.
