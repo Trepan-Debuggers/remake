@@ -193,10 +193,9 @@ read_all_makefiles (makefiles)
 	      d->name = 0;
 	      d->file = enter_file (*p);
 	      d->file->dontcare = 1;
-	      /* Setting the `changed' member to 1 will make failure to
-		 update or find this makefile as if it had come from the
-		 MAKEFILES variable: we don't care, so we won't die.  */
-	      d->changed = 1;
+	      /* Tell update_goal_chain to bail out as soon as this file is
+		 made, and main not to die if we can't make this file.  */
+	      d->changed = RM_DONTCARE;
 	      if (tail == 0)
 		read_makefiles = d;
 	      else
@@ -213,18 +212,14 @@ read_all_makefiles (makefiles)
 
 /* Read file FILENAME as a makefile and add its contents to the data base.
 
-   TYPE indicates what flavor of makefile this is: 0 => a default or -f
-   makefile (the basis for comparison); 1 => from the MAKEFILES variable:
-   cannot determine the default goal, is searched for in the search path,
-   and it's not an error if it doesn't exist; 2 => an included makefile:
-   is searched for in the search path.
+   FLAGS contains bits as above.
 
    FILENAME is added to the `read_makefiles' chain.  */
 
 static void
-read_makefile (filename, type)
+read_makefile (filename, flags)
      char *filename;
-     int type;
+     int flags;
 {
   static char *collapsed = 0;
   static unsigned int collapsed_length = 0;
@@ -254,7 +249,8 @@ read_makefile (filename, type)
       if (filenames != 0)						      \
 	record_files (filenames, pattern, pattern_percent, deps,	      \
 		      commands_started, commands, commands_idx,		      \
-		      two_colon, filename, lineno, type != 1);		      \
+		      two_colon, filename, lineno,			      \
+		      !(flags & RM_NO_DEFAULT_GOAL));		     	      \
       filenames = 0;							      \
       commands_idx = 0;							      \
       pattern = 0;							      \
@@ -268,7 +264,7 @@ read_makefile (filename, type)
 
   /* Expand ~ in FILENAME unless it came from `include',
      in which case it was already done.  */
-  if (type != 2 && filename[0] == '~')
+  if (!(flags & RM_NO_TILDE) && filename[0] == '~')
     {
       char *expanded = tilde_expand (filename);
       /* This is a possible memory leak, but I don't care.  */
@@ -281,10 +277,10 @@ read_makefile (filename, type)
   makefile_errno = errno;
 
   /* If the makefile wasn't found and it's either a makefile from
-     the `MAKEFILES' variable (type 1) or an included makefile (type 2),
+     the `MAKEFILES' variable or an included makefile,
      search the included makefile search path for this makefile.  */
 
-  if (infile == 0 && (type == 1 || type == 2) && *filename != '/')
+  if (infile == 0 && (flags & RM_INCLUDED) && *filename != '/')
     {
       register unsigned int i;
       for (i = 0; include_directories[i] != 0; ++i)
@@ -310,12 +306,12 @@ read_makefile (filename, type)
   if (deps->file == 0)
     {
       deps->file = enter_file (savestring (filename, strlen (filename)));
-      if (type == 1)
+      if (flags & RM_DONTCARE)
 	deps->file->dontcare = 1;
     }
   filename = deps->file->name;
   deps->file->precious = 1;
-  deps->changed = type;
+  deps->changed = flags;
   deps = 0;
 
   /* If the makefile can't be found at all,
@@ -323,7 +319,7 @@ read_makefile (filename, type)
 
   if (infile == 0)
     {
-      if (type != 1)
+      if (! (flags & RM_DONTCARE))
 	{
 	  /* If we did some searching, errno has the error
 	     from the last attempt, rather from FILENAME itself.  */
