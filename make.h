@@ -248,7 +248,7 @@ extern long int lseek ();
 extern char *getcwd ();
 #else
 extern char *getwd ();
-#define	getcwd (buf, len)	getwd (buf)
+#define	getcwd(buf, len)	getwd (buf)
 #endif
 
 #if !defined(__GNU_LIBRARY__) && (!defined(vfork) || !defined(POSIX))
