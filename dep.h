@@ -42,6 +42,9 @@ struct nameseq
 extern struct nameseq *multi_glob (), *parse_file_seq ();
 extern char *tilde_expand ();
 
+#ifndef NO_ARCHIVES
+extern struct nameseq *ar_glob ();
+#endif
 
 #ifndef	iAPX286
 #define dep_name(d) ((d)->name == 0 ? (d)->file->name : (d)->name)
