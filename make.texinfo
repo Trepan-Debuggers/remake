@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.175 1999/07/21 05:53:33 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.176 1999/07/26 05:07:01 psmith Exp $
 @set EDITION 0.53
 @set VERSION 3.78
 @set UPDATED 14 April 1999
@@ -38,7 +38,7 @@ This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Make Manual}, for @code{make}, Version @value{VERSION}.
 
 Copyright (C) 1988, '89, '90, '91, '92, '93, '94, '95, '96, '97, '98, '99
-	Free Software Foundation, Inc.
+        Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -3784,7 +3784,7 @@ a canned sequence apply to every line in the sequence.  So the rule:
 
 @example
 frob.out: frob.in
-	@@$(frobnicate)
+        @@$(frobnicate)
 @end example
 
 @noindent
@@ -3820,8 +3820,8 @@ from getting implicit commands (from implicit rules or the
 @ignore
 foo: stamp-foo ;
 stamp-foo: foo.in
-	create foo frm foo.in
-	touch $@
+        create foo frm foo.in
+        touch $@
 @end ignore
 
 You may be inclined to define empty command strings for targets that are
@@ -8955,6 +8955,8 @@ Conditionally evaluate part of the makefile.@*
 @xref{Conditionals}.
 
 @item include @var{file}
+@itemx -include @var{file}
+@itemx sinclude @var{file}
 
 Include another makefile.@*
 @xref{Include, ,Including Other Makefiles}.
@@ -8962,6 +8964,7 @@ Include another makefile.@*
 @item override @var{variable} = @var{value}
 @itemx override @var{variable} := @var{value}
 @itemx override @var{variable} += @var{value}
+@itemx override @var{variable} ?= @var{value}
 @itemx override define @var{variable}
 @itemx endef
 
@@ -8978,6 +8981,7 @@ Tell @code{make} to export all variables to child processes by default.@*
 @itemx export @var{variable} = @var{value}
 @itemx export @var{variable} := @var{value}
 @itemx export @var{variable} += @var{value}
+@itemx export @var{variable} ?= @var{value}
 @itemx unexport @var{variable}
 Tell @code{make} whether or not to export a particular variable to child
 processes.@*
@@ -9062,6 +9066,10 @@ Extract the @var{n}th word (one-origin) of @var{text}.@*
 Count the number of words in @var{text}.@*
 @xref{File Name Functions, ,Functions for File Names}.
 
+@item $(wordlist @var{s},@var{e},@var{text})
+Returns the list of words in @var{text} from @var{s} to @var{e}.@*
+@xref{File Name Functions, ,Functions for File Names}.
+
 @item $(firstword @var{names}@dots{})
 Extract the first word of @var{names}.@*
 @xref{File Name Functions, ,Functions for File Names}.
@@ -9070,6 +9078,18 @@ Extract the first word of @var{names}.@*
 Find file names matching a shell file name pattern (@emph{not} a
 @samp{%} pattern).@*
 @xref{Wildcard Function, ,The Function @code{wildcard}}.
+
+@item $(error @var{text}@dots{})
+
+When this function is evaluated, @code{make} generates a fatal error
+with the message @var{text}.@*
+@xref{Make Control Functions, ,Functions That Control Make}.
+
+@item $(warning @var{text}@dots{})
+
+When this function is evaluated, @code{make} generates a warning with
+the message @var{text}.@*
+@xref{Make Control Functions, ,Functions That Control Make}.
 
 @item $(shell @var{command})
 
@@ -9087,6 +9107,13 @@ defined.@*
 Evaluate @var{text} with @var{var} bound to each word in @var{words},
 and concatenate the results.@*
 @xref{Foreach Function, ,The @code{foreach} Function}.
+@end table
+
+@item $(call @var{var},@var{param},@dots{})
+
+Evaluate the variable @var{var} replacing any references to @var{$(1)},
+@var{$(2)} with the first, second, etc. @var{param} values.@*
+@xref{Call Function, ,The @code{call} Function}.
 @end table
 
 Here is a summary of the automatic variables.
@@ -9207,6 +9234,11 @@ effect on the operation of @code{make}.@*
 @item SUFFIXES
 
 The default list of suffixes before @code{make} reads any makefiles.
+
+@item .LIBPATTERNS
+Defines the naming of the libraries @code{make} searches for, and their
+order.@*
+@xref{Libraries/Search, ,Directory Search for Link Libraries}.
 @end table
 
 @node Make Errors, Complex Makefile, Quick Reference, Top
