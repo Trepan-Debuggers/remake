@@ -7,11 +7,12 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.150 1995/01/13 06:30:39 roland Alpha $
-@set EDITION 0.47
-@set VERSION 3.72 Beta
-@set UPDATED 1 November 1994
-@set UPDATE-MONTH November 1994
+@set RCSID $Id: make.texinfo,v 2.151 1995/04/05 03:29:01 roland Exp $
+@set EDITION 0.48
+@set VERSION 3.73 Beta
+@set UPDATED 4 April 1995
+@set UPDATE-MONTH April 1995
+@comment The ISBN number might need to change on next publication.
 @set ISBN 1-882114-50-7
 
 @c finalout
@@ -3294,23 +3295,20 @@ definitions just as if they appeared on the command line.
 
 @cindex @code{-C}, and recursion
 @cindex @code{-f}, and recursion
-@cindex @code{-I}, and recursion
 @cindex @code{-o}, and recursion
 @cindex @code{-W}, and recursion
 @cindex @code{--directory}, and recursion
 @cindex @code{--file}, and recursion
-@cindex @code{--include-dir}, and recursion
 @cindex @code{--old-file}, and recursion
 @cindex @code{--assume-old}, and recursion
 @cindex @code{--assume-new}, and recursion
 @cindex @code{--new-file}, and recursion
 @cindex recursion, and @code{-C}
 @cindex recursion, and @code{-f}
-@cindex recursion, and @code{-I}
 @cindex recursion, and @code{-o}
 @cindex recursion, and @code{-W}
-The options @samp{-C}, @samp{-f}, @samp{-I}, @samp{-o}, and @samp{-W}
-are not put into @code{MAKEFLAGS}; these options are not passed down.@refill
+The options @samp{-C}, @samp{-f}, @samp{-o}, and @samp{-W} are not put
+into @code{MAKEFLAGS}; these options are not passed down.@refill
 
 @cindex @code{-j}, and recursion
 @cindex @code{--jobs}, and recursion
