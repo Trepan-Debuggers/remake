@@ -79,7 +79,6 @@ extern double atof ();
 #endif
 
 static void print_data_base PARAMS ((void));
-static void print_version PARAMS ((void));
 static void decode_switches PARAMS ((int argc, char **argv, int env));
 static void decode_env_switches PARAMS ((char *envar, unsigned int len));
 static void define_makeflags PARAMS ((int all, int makefile));
@@ -2816,9 +2815,9 @@ define_makeflags (int all, int makefile)
     v->export = v_export;
 }
 
-/* Print version information.  */
-
-static void
+/*! Print version information.
+*/
+void
 print_version (void)
 {
   static int printed_version = 0;
