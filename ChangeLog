@@ -1,3 +1,7 @@
+Wed May 10 17:43:34 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* Version 3.73.3.
+
 Tue May  9 17:15:23 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
 	* compatMakefile ($(infodir)/make.info): Make sure $$dir is set in
