@@ -145,6 +145,17 @@ extern int wait ();
 
 #endif	/* Don't have `union wait'.  */
 
+/* How to set close-on-exec for a file descriptor.  */
+
+#if !defined F_SETFD
+# define CLOSE_ON_EXEC(_d)
+#else
+# ifndef FD_CLOEXEC
+#  define FD_CLOEXEC 1
+# endif
+# define CLOSE_ON_EXEC(_d) (void) fcntl ((_d), F_SETFD, FD_CLOEXEC)
+#endif
+
 #ifdef VMS
 static int vms_jobsefnmask = 0;
 #endif /* !VMS */
@@ -218,9 +229,6 @@ int w32_kill(int pid, int sig)
 #endif /* WINDOWS32 */
 
 
-#ifndef MAKE_JOBSERVER
-# define free_job_token(c)
-#else
 static void
 free_job_token (child)
      struct child *child;
@@ -248,7 +256,6 @@ free_job_token (child)
 
   child->job_token = '-';
 }
-#endif
 
 
 /* Write an error message describing the exit status given in
@@ -302,14 +309,13 @@ vmsWaitForChildren(int *status)
 /* Handle a dead child.  This handler may or may not ever be installed.
 
    If we're using the jobserver blocking read, we need it.  First, installing
-   it ensures the read will interrupt on SIGCHLD.  Second, we close the dup'd
-   read side of the pipe to ensure we don't enter another blocking read
-   without reaping all the dead children.  In this case we don't need the
-   dead_children count.
+   it ensures the read will interrupt on SIGCHLD.  Second, we reset the
+   blocking bit on the read side of the pipe to ensure we don't enter another
+   blocking read without reaping all the dead children.  In this case we
+   don't need the dead_children count.
 
    If we don't have either waitpid or wait3, then make is unreliable, but we
-   use the dead_children count to reap children as best we can.  In this case
-   job_rfd will never be >= 0.  */
+   use the dead_children count to reap children as best we can.  */
 
 static unsigned int dead_children = 0;
 
@@ -319,9 +325,15 @@ child_handler (sig)
 {
   ++dead_children;
 
-  if (job_rfd >= 0)
-    close (job_rfd);
-  job_rfd = -1;
+#ifdef HAVE_JOBSERVER
+  if (job_fds[0] >= 0)
+    {
+      int fl = fcntl(job_fds[0], F_GETFL, 0);
+
+      if (fl >= 0)
+        fcntl(job_fds[0], F_SETFL, fl | O_NONBLOCK);
+    }
+#endif
 
   if (debug_flag)
     printf (_("Got a SIGCHLD; %u unreaped children.\n"), dead_children);
@@ -330,11 +342,12 @@ child_handler (sig)
 
 extern int shell_function_pid, shell_function_completed;
 
-/* Reap dead children, storing the returned status and the new command
+/* Reap all dead children, storing the returned status and the new command
    state (`cs_finished') in the `file' member of the `struct child' for the
-   dead child, and removing the child from the chain.  If BLOCK nonzero,
-   reap at least one child, waiting for it to die if necessary.  If ERR is
-   nonzero, print an error message first.  */
+   dead child, and removing the child from the chain.  In addition, if BLOCK
+   nonzero, we block in this function until we've reaped at least one
+   complete child, waiting for it to die if necessary.  If ERR is nonzero,
+   print an error message first.  */
 
 void
 reap_children (block, err)
@@ -415,19 +428,18 @@ reap_children (block, err)
 	{
           /* A remote status command failed miserably.  Punt.  */
 	remote_status_lose:
-#ifdef	EINTR
-	  if (errno == EINTR)
+	  if (EINTR_SET)
 	    continue;
-#endif
+
 	  pfatal_with_name ("remote_status");
 	}
       else
 	{
 	  /* No remote children.  Check for local children.  */
-
 #if !defined(__MSDOS__) && !defined(_AMIGA) && !defined(WINDOWS32)
 	  if (any_local)
 	    {
+            local_wait:
 #ifdef VMS
 	      vmsWaitForChildren (&status);
 	      pid = c->pid;
@@ -446,15 +458,14 @@ reap_children (block, err)
 	  if (pid < 0)
 	    {
               /* The wait*() failed miserably.  Punt.  */
-#ifdef EINTR
-	      if (errno == EINTR)
-		continue;
-#endif
+	      if (EINTR_SET)
+		goto local_wait;
+
 	      pfatal_with_name ("wait");
 	    }
 	  else if (pid > 0)
 	    {
-	      /* We got one; chop the status word up.  */
+	      /* We got a child exit; chop the status word up.  */
 	      exit_code = WEXITSTATUS (status);
 	      exit_sig = WIFSIGNALED (status) ? WTERMSIG (status) : 0;
 	      coredump = WCOREDUMP (status);
@@ -1171,20 +1182,16 @@ start_waiting_job (c)
 
   c->remote = start_remote_job_p (1);
 
-  /* If not, start it locally.  */
-  if (!c->remote)
+  /* If we are running at least one job already and the load average
+     is too high, make this one wait.  */
+  if (!c->remote && job_slots_used > 0 && load_too_high ())
     {
-      /* If we are running at least one job already and the load average
-	 is too high, make this one wait.  */
-      if (job_slots_used > 0 && load_too_high ())
-	{
-	  /* Put this child on the chain of children waiting
-	     for the load average to go down.  */
-	  set_command_state (f, cs_running);
-	  c->next = waiting_jobs;
-	  waiting_jobs = c;
-	  return 0;
-	}
+      /* Put this child on the chain of children waiting for the load average
+         to go down.  */
+      set_command_state (f, cs_running);
+      c->next = waiting_jobs;
+      waiting_jobs = c;
+      return 0;
     }
 
   /* Start the first command; reap_children will run later command lines.  */
@@ -1379,19 +1386,25 @@ new_job (file)
           }
         /* Read a token.  As long as there's no token available we'll block.
            If we get a SIGCHLD we'll return with EINTR.  If one happened
-           before we got here we'll return with EBADF.  */
-        else if (read (job_rfd, &c->job_token, 1) < 1)
+           before we got here we'll return immediately with EAGAIN because
+           the signal handler unsets the blocking bit.  */
+        else if (read (job_fds[0], &c->job_token, 1) < 1)
           {
-            if (errno == EINTR)
-              ;
+            int fl;
 
-            /* If EBADF, we got a SIGCHLD before.  Otherwise, who knows?  */
-            else if (errno != EBADF)
+#if !defined(EAGAIN)
+# define EAGAIN EWOULDBLOCK
+#endif
+            if (errno != EINTR && errno != EAGAIN)
               pfatal_with_name (_("read jobs pipe"));
 
-            /* Something's done; reap it.  We don't force a block here; if
-               something strange happened and nothing's ready, just come back
-               and wait some more.  */
+            /* Set the blocking bit on the read FD again, just in case.  */
+            fl = fcntl(job_fds[0], F_GETFL, 0);
+            if (fl >= 0)
+              fcntl(job_fds[0], F_SETFL, fl & ~O_NONBLOCK);
+
+            /* Something's done.  We don't want to block for a whole child,
+               just reap whatever's there.  */
             reap_children (0, 0);
           }
 

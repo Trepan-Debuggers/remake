@@ -205,7 +205,6 @@ static unsigned int inf_jobs = 0;
 /* File descriptors for the jobs pipe.  */
 
 int job_fds[2] = { -1, -1 };
-int job_rfd = -1;
 
 /* Maximum load average at which multiple jobs will be run.
    Negative values mean unlimited, while zero means limit to
@@ -1353,15 +1352,13 @@ int main (int argc, char ** argv)
       job_slots_str = xstrdup(buf);
     }
 
-    /* If we have a jobserver pipe, dup(2) the read end.  We'll use that in
-       the child handler to note a child has died.  See job.c.  */
-
+  /* Be sure the blocking bit on the read FD is set to start with.  */
   if (job_fds[0] >= 0)
     {
-      job_rfds = dup (job_fds[0]);
-      CLOSE_ON_EXEC (job_rfds);
+      int fl = fcntl(job_fds[0], F_GETFL, 0);
+      if (fl >= 0)
+        fcntl(job_fds[0], F_SETFL, fl & ~O_NONBLOCK);
     }
-
 #endif
 
   /* Set up MAKEFLAGS and MFLAGS again, so they will be right.  */

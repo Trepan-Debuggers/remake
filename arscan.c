@@ -775,11 +775,8 @@ ar_member_touch (arname, memname)
   if (AR_HDR_SIZE != write (fd, (char *) &ar_hdr, AR_HDR_SIZE))
     goto lose;
   /* The file's mtime is the time we we want.  */
-#ifdef EINTR
-  while (fstat (fd, &statbuf) < 0 && errno == EINTR);
-#else
-  fstat (fd, &statbuf);
-#endif
+  while (fstat (fd, &statbuf) < 0 && EINTR_SET)
+    ;
 #if defined(ARFMAG) || defined(ARFZMAG) || defined(AIAMAG) || defined(WINDOWS32)
   /* Advance member's time to that time */
   for (i = 0; i < sizeof ar_hdr.ar_date; i++)

@@ -77,6 +77,14 @@ Boston, MA 02111-1307, USA.  */
 extern int errno;
 #endif
 
+/* A shortcut for EINTR checking.  Note you should never negate this!  That
+   very likely doesn't mean what you want if EINTR is not available.  */
+#ifdef EINTR
+# define EINTR_SET (errno == EINTR)
+#else
+# define EINTR_SET (0)
+#endif
+
 #ifndef isblank
 # define isblank(c)     ((c) == ' ' || (c) == '\t')
 #endif
