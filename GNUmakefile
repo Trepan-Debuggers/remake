@@ -147,7 +147,7 @@ $(prog): $(objs) $(globdep)
 globfiles = $(addprefix glob/,COPYING.LIB Makefile.in \
 			glob.c fnmatch.c glob.h fnmatch.h)
 $(globfiles): /home/gd/gnu/libc/posix/glob.tar
-	tar xvfm $< $@
+	tar xvf $< $@
 /home/gd/gnu/libc/posix/glob.tar: force
 	$(MAKE) -C $(@D) $(@F) no_deps=t
 .PHONY: force
