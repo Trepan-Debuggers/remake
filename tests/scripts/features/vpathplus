@@ -55,18 +55,19 @@ close(MAKEFILE);
 
 @touchedfiles = ();
 
+$off = -500;
+
 sub touchfiles {
   foreach (@_) {
-    sleep($wtime);
-    ($f = $_) =~ s,VP/,$VP,g;
-    &touch($f);
-    push(@touchedfiles, $f);
+    &utouch($off, $_);
+    $off += 10;
+    push(@touchedfiles, $_);
   }
 }
 
 # Run the general-case test
 
-&touchfiles("VP/foo.d", "VP/bar.d", "VP/foo.c", "VP/bar.c", "foo.b", "bar.d");
+&touchfiles("$VP/foo.d", "$VP/bar.d", "$VP/foo.c", "$VP/bar.c", "foo.b", "bar.d");
 
 &run_make_with_options($makefile,"general",&get_logfile);
 
@@ -79,7 +80,7 @@ cat ${VP}foo.c bar.c > foo.b 2>/dev/null || exit 1
 
 # Test rules that don't make the target correctly
 
-&touchfiles("VP/notarget.c", "notarget.b", "notarget.d");
+&touchfiles("$VP/notarget.c", "notarget.b", "notarget.d");
 
 &run_make_with_options($makefile,"notarget",&get_logfile,512);
 
@@ -92,7 +93,7 @@ $make_name: *** [notarget.b] Error 1
 
 # Test intermediate file handling (part 1)
 
-&touchfiles("VP/inter.d");
+&touchfiles("$VP/inter.d");
 
 &run_make_with_options($makefile,"intermediate",&get_logfile);
 
@@ -107,7 +108,11 @@ rm inter.b inter.c
 
 # Test intermediate file handling (part 2)
 
-&touchfiles("VP/inter.b", "VP/inter.d");
+&utouch(-20, "inter.a");
+&utouch(-10, "$VP/inter.b");
+&touch("$VP/inter.d");
+
+push(@touchedfiles, "$VP/inter.b", "$VP/inter.d");
 
 &run_make_with_options($makefile,"intermediate",&get_logfile);
 
