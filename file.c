@@ -271,7 +271,6 @@ in favor of those for `%s'.",
 	  while (d->next != 0)
 	    d = d->next;
 	  d->next = file->deps;
-	  uniquize_deps (oldfile->deps);
 	}
 
       merge_variable_set_lists (&oldfile->variables, file->variables);
