@@ -121,7 +121,9 @@ extern int start_remote_job (), remote_status ();
 static char *sys_siglist[NSIG];
 void init_siglist ();
 #else
+#ifndef	SYS_SIGLIST_DECLARED
 extern char *sys_siglist[];
+#endif
 #endif
 
 RETSIGTYPE child_handler ();
