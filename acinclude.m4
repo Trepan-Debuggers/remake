@@ -485,11 +485,62 @@ esac
 
 dnl ---------------------------------------------------------------------------
 dnl Enable internationalization support for GNU make.
-dnl Obtained from the libit 0.7 distribution
-dnl Modified to check for a system version of GNU gettext by
-dnl   Paul D. Smith <psmith@gnu.org>
+dnl Original obtained from the libit 0.7 distribution
+dnl Rewritten by Paul D. Smith <psmith@gnu.org>
+dnl This version is much more straightforward than the original (I think);
+dnl If the user doesn't disable NLS, check whether she asked for the
+dnl included gettext.  If so, we use that.  If not, test to see if the
+dnl system gettext is GNU.  If not, use the included gettext.  If so,
+dnl use the system gettext.  We are very strict about testing for GNU
+dnl gettext; not only must the library be GNU gettext, but the libintl.h
+dnl file must also be GNU.
 dnl
-AC_DEFUN(fp_WITH_GETTEXT, [
+AC_DEFUN(pds_CHECK_SYSTEM_GETTEXT, [
+
+  # OK.  What we're going to do is see if the system gettext is really
+  # GNU gettext, and we're going to make _sure_ (as we can) that if
+  # it's not we'll use the included gettext.
+
+  pds_keep_LIBS="$LIBS"
+
+  # Look around for gettext() and libintl.h on the system
+  AC_CHECK_HEADERS(locale.h)
+  AC_SEARCH_LIBS(gettext, intl)
+  if test "$ac_cv_search_gettext" = no; then
+    with_included_gettext=yes
+
+  else
+    # We only want to deal with GNU's gettext; if we don't have that
+    # we'll just use our own, thanks very much.
+    AC_CACHE_CHECK([whether system uses GNU gettext],
+                   pds_cv_system_gnu_gettext, [
+      AC_TRY_LINK([
+#include <libintl.h>
+#ifdef HAVE_LOCALE_H
+#include <locale.h>
+#endif
+], [
+#if __USE_GNU_GETTEXT
+  extern int _nl_msg_cat_cntr;
+  return _nl_msg_cat_cntr;
+#else
+not GNU gettext
+#endif
+],
+	pds_cv_system_gnu_gettext=yes, pds_cv_system_gnu_gettext=no)])
+
+    if test "x$pds_cv_system_gnu_gettext" = xyes; then
+      with_included_gettext=no
+      AC_DEFINE(HAVE_LIBINTL_H, 1, [Define if you have <libintl.h>.])
+    else
+      with_included_gettext=yes
+      LIBS="$fp_keep_LIBS"
+    fi
+  fi
+])
+
+
+AC_DEFUN(pds_WITH_GETTEXT, [
 
   AC_MSG_CHECKING(whether NLS is wanted)
   AC_ARG_ENABLE(nls,
@@ -500,41 +551,34 @@ AC_DEFUN(fp_WITH_GETTEXT, [
   AM_CONDITIONAL(USE_NLS, test $use_nls = yes)
 
   if test $enable_nls = yes; then
-    AC_DEFINE(ENABLE_NLS)
+    AC_DEFINE(ENABLE_NLS, 1, [Define if NLS is requested.])
 
     # We don't support catgets at all
     if test "x$with_catgets" != x; then
-      AC_MSG_WARN([catgets not supported, --with-catgets ignored])
+      AC_MSG_WARN([catgets not supported; --with-catgets ignored])
     fi
 
-    fp_keep_LIBS="$LIBS"
+    # Find out what the user wants.
 
-    # Look around for gettext() on the system
-    AC_SEARCH_LIBS(gettext, intl)
-    if test "$ac_cv_search_gettext" = no; then
-      with_included_gettext=yes
-    else
-      # We only want to deal with GNU's gettext; if we don't have that
-      # we'll just use our own, thanks very much.
-      AC_MSG_CHECKING(for GNU gettext)
-      AC_TRY_LINK(,[extern int _nl_msg_cat_cntr; return _nl_msg_cat_cntr;],
-		  with_included_gettext=no, with_included_gettext=yes)
-      case "$with_included_gettext" in
-	no)  AC_MSG_RESULT(yes) ;;
-	yes) AC_MSG_RESULT([no; using local copy]); LIBS="$fp_keep_LIBS" ;;
-      esac
+    AC_ARG_WITH(included-gettext,
+      [  --with-included-gettext use the GNU gettext library included here],
+      with_included_gettext=yes,
+      with_included_gettext=maybe)
+
+    if test "x$with_included_gettext" != xyes; then
+      pds_CHECK_SYSTEM_GETTEXT
     fi
+
+    AC_MSG_CHECKING([whether to use included gettext])
+    AC_MSG_RESULT($with_included_gettext)
 
     if test "$with_included_gettext" = yes; then
       LIBOBJS="$LIBOBJS gettext.o"
-      AC_DEFINE(HAVE_GETTEXT, 1, [Define if you have the gettext function.])
-      AC_DEFINE(HAVE_DCGETTEXT, 1, [Define if you have the dcgettext function.])
-    else
-      AC_CHECK_HEADERS(libintl.h)
-      AC_CHECK_FUNCS(dcgettext gettext)
     fi
 
-    AC_CHECK_HEADERS(locale.h)
+    AC_DEFINE(HAVE_GETTEXT, 1, [Define if you have the gettext function.])
+    AC_DEFINE(HAVE_DCGETTEXT, 1, [Define if you have the dcgettext function.])
+
     AC_CHECK_FUNCS(getcwd setlocale stpcpy)
     AM_LC_MESSAGES
 

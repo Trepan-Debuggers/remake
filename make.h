@@ -39,10 +39,27 @@ Boston, MA 02111-1307, USA.  */
 # define PARAMS(protos)  ()
 #endif /* C++ or ANSI C.  */
 
+/* Include libintl.h, if it was found: we don't even look for it unless we
+   want to use the system's gettext().  If not, use the included gettext.h.  */
 
-#include "gettext.h"
+#ifdef HAVE_LIBINTL_H
+# include <libintl.h>
+# ifdef HAVE_LOCALE_H
+#  include <locale.h>
+# endif
+#else
+# include "gettext.h"
+#endif
+
+#ifndef gettext_noop
+/* For automatic extraction of messages sometimes no real translation is
+   needed.  Instead the string itself is the result.  */
+# define gettext_noop(Str) (Str)
+#endif
+
 #define _(Text)     gettext (Text)
 #define N_(Text)    gettext_noop (Text)
+
 
 #if !HAVE_SETLOCALE
 # define setlocale(Category, Locale) /* empty */

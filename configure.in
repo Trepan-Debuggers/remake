@@ -1,9 +1,9 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.96 2000/06/07 05:43:37 psmith Exp $])
+AC_REVISION([$Id: configure.in,v 1.97 2000/06/14 22:29:30 psmith Exp $])
 AC_PREREQ(2.13)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 
-AM_INIT_AUTOMAKE(make, 3.79.1)
+AM_INIT_AUTOMAKE(make, 3.79.0.1)
 AM_CONFIG_HEADER(config.h)
 
 dnl Regular configure stuff
@@ -43,7 +43,7 @@ AC_HEADER_TIME
 dnl Handle internationalization
 
 ALL_LINGUAS="de es fr ja ko nl pl pt_BR ru"
-fp_WITH_GETTEXT
+pds_WITH_GETTEXT
 
 AC_STRUCT_ST_MTIM_NSEC
 jm_AC_TYPE_UINTMAX_T
@@ -133,7 +133,7 @@ pid = waitpid (-1, &status, 0);
 ],
 	    [make_cv_union_wait=yes], [make_cv_union_wait=no])])
 if test "$make_cv_union_wait" = yes; then
-  AC_DEFINE(HAVE_UNION_WAIT)
+  AC_DEFINE(HAVE_UNION_WAIT, 1, [Define this if you have the \`union wait' type in <sys/wait.h>.])
 fi
 AC_MSG_RESULT($make_cv_union_wait)
 
@@ -177,7 +177,8 @@ case "$ac_cv_func_waitpid/$ac_cv_func_wait3" in
 esac
 
 case "$ac_cv_func_pipe/$ac_cv_func_sigaction/$has_wait_nohang/$make_cv_job_server" in
-  yes/yes/yes/yes) AC_DEFINE(MAKE_JOBSERVER) ;;
+  yes/yes/yes/yes) AC_DEFINE(MAKE_JOBSERVER, 1,
+                     [Define this to enable job server support in GNU make.]);;
 esac
 
 dnl Allow building with dmalloc
@@ -213,7 +214,8 @@ if ( /usr/sccs/admin -n s.conftest || admin -n s.conftest ) >/dev/null 2>&1 &&
        make_cv_sys_get_minus_G=no
     fi])
   case "$make_cv_sys_get_minus_G" in
-    yes) AC_DEFINE(SCCS_GET_MINUS_G);;
+    yes) AC_DEFINE(SCCS_GET_MINUS_G, 1,
+           [Define this if the SCCS \`get' command understands the \`-G<file>' option.]);;
   esac
 fi
 rm -f s.conftest conftoast
