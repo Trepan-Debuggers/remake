@@ -1223,30 +1223,31 @@ decode_switches (argc, argv, env)
   /* Reset getopt's state.  */
   optind = 0;
 
-  c = 0;
   while (optind < argc)
     {
+      /* Parse the next argument.  */
+      c = getopt_long (argc, argv, options, long_options, (int *) 0);
       if (c == EOF)
 	{
 	  /* There are no more options according to getting getopt, but
 	     there are some arguments left.  Since we have asked for
 	     non-option arguments to be returned in order, I think this
 	     only happens when there is a "--" argument to prevent later
-	     argument from being options.  Since getopt has finished its
+	     arguments from being options.  Since getopt has finished its
 	     job, just update its state variables for the next argument and
 	     set C as if it had returned 1, indicating a non-option
 	     argument.  */
 	  optarg = argv[optind++];
 	  c = 1;
 	}
-      else
-	/* Parse the next argument.  */
-	c = getopt_long (argc, argv, options, long_options, (int *) 0);
 
       if (c == 1)
 	{
 	  /* Non-option argument.  It might be a variable definition.  */
 	  struct variable *v;
+	  if (optarg[0] == '-' && optarg[1] == '\0')
+	    /* Ignore plain `-' for compatibility.  */
+	    continue;
 	  v = try_variable_definition ((char *) 0, 0, optarg, o_command);
 	  if (v != 0)
 	    {
