@@ -1,5 +1,5 @@
 /* Definitions for using variables in GNU Make.
-Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 2002 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -16,6 +16,8 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
+
+#include "hash.h"
 
 /* Codes in a variable definition saying where the definition came from.
    Increasing numeric values signify less-overridable definitions.  */
@@ -50,8 +52,8 @@ enum variable_flavor
 
 struct variable
   {
-    struct variable *next;	/* Link in the chain.  */
     char *name;			/* Variable name.  */
+    int length;			/* strlen (name) */
     char *value;		/* Variable value.  */
     struct floc fileinfo;       /* Where the variable was defined.  */
     unsigned int recursive:1;	/* Gets recursively re-evaluated.  */
@@ -79,8 +81,7 @@ struct variable
 
 struct variable_set
   {
-    struct variable **table;	/* Hash table of variables.  */
-    unsigned int buckets;	/* Number of hash buckets in `table'.  */
+    struct hash_table table;	/* Hash table of variables.  */
   };
 
 /* Structure that represents a list of variable sets.  */
@@ -128,7 +129,8 @@ extern void print_variable_set PARAMS ((struct variable_set *set, char *prefix))
 extern void merge_variable_set_lists PARAMS ((struct variable_set_list **setlist0, struct variable_set_list *setlist1));
 extern struct variable *do_variable_definition PARAMS ((const struct floc *flocp, const char *name, char *value, enum variable_origin origin, enum variable_flavor flavor, int target_var));
 extern struct variable *try_variable_definition PARAMS ((const struct floc *flocp, char *line, enum variable_origin origin, int target_var));
-
+extern void init_hash_global_variable_set PARAMS ((void));
+extern void hash_init_function_table PARAMS ((void));
 extern struct variable *lookup_variable PARAMS ((const char *name, unsigned int length));
 extern struct variable *lookup_variable_in_set PARAMS ((const char *name,
                                                         unsigned int length,
@@ -173,3 +175,6 @@ extern struct variable *define_variable_in_set
 extern char **target_environment PARAMS ((struct file *file));
 
 extern int export_all_variables;
+
+#define MAKELEVEL_NAME "MAKELEVEL"
+#define MAKELEVEL_LENGTH (sizeof (MAKELEVEL_NAME) - 1)

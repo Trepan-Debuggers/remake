@@ -16,12 +16,12 @@ endif
 make_SOURCES =	ar.c arscan.c commands.c default.c dir.c expand.c file.c \
 		function.c getopt.c getopt1.c implicit.c job.c main.c \
 		misc.c read.c remake.c $(remote) rule.c signame.c \
-		variable.c version.c vpath.c
+		variable.c version.c vpath.c hash.c
 
 EXTRA_make_SOURCES = remote-stub.c remote-cstms.c
 
 noinst_HEADERS = commands.h dep.h filedef.h job.h make.h rule.h variable.h \
-		debug.h getopt.h gettext.h
+		debug.h getopt.h gettext.h hash.h
 
 make_LDADD =	@LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@ @LIBINTL@
 

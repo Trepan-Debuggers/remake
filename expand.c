@@ -100,7 +100,7 @@ recursively_expand_for_file (v, file)
      struct file *file;
 {
   char *value;
-  struct variable_set_list *save;
+  struct variable_set_list *save = 0;
 
   if (v->expanding)
     {
