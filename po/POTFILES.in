@@ -9,6 +9,7 @@ expand.c
 file.c
 function.c
 getopt.c
+hash.c
 implicit.c
 job.c
 main.c

@@ -41,8 +41,12 @@ void *hash_deleted_item = &hash_deleted_item;
    given size.  */
 
 void
-hash_init (struct hash_table* ht, unsigned long size,
-	   hash_func_t hash_1, hash_func_t hash_2, hash_cmp_func_t hash_cmp)
+hash_init (ht, size, hash_1, hash_2, hash_cmp)
+     struct hash_table* ht;
+     unsigned long size;
+     hash_func_t hash_1;
+     hash_func_t hash_2;
+     hash_cmp_func_t hash_cmp;
 {
   ht->ht_size = round_up_2 (size);
   ht->ht_empty_slots = ht->ht_size;
@@ -67,7 +71,11 @@ hash_init (struct hash_table* ht, unsigned long size,
 /* Load an array of items into `ht'.  */
 
 void
-hash_load (struct hash_table* ht, void *item_table, unsigned long cardinality, unsigned long size)
+hash_load (ht, item_table, cardinality, size)
+     struct hash_table* ht;
+     void *item_table;
+     unsigned long cardinality;
+     unsigned long size;
 {
   char *items = (char *) item_table;
   while (cardinality--)
@@ -83,7 +91,9 @@ hash_load (struct hash_table* ht, void *item_table, unsigned long cardinality, u
    ht_fill on insertion.  */
 
 void **
-hash_find_slot (struct hash_table* ht, void const *key)
+hash_find_slot (ht, key)
+     struct hash_table* ht;
+     void const *key;
 {
   void **slot;
   void **deleted_slot = 0;
@@ -118,14 +128,18 @@ hash_find_slot (struct hash_table* ht, void const *key)
 }
 
 void *
-hash_find_item (struct hash_table* ht, void const *key)
+hash_find_item (ht, key)
+     struct hash_table* ht;
+     void const *key;
 {
   void **slot = hash_find_slot (ht, key);
   return ((HASH_VACANT (*slot)) ? 0 : *slot);
 }
 
 void *
-hash_insert (struct hash_table* ht, void *item)
+hash_insert (ht, item)
+     struct hash_table* ht;
+     void *item;
 {
   void **slot = hash_find_slot (ht, item);
   void *old_item = slot ? *slot : 0;
@@ -134,7 +148,10 @@ hash_insert (struct hash_table* ht, void *item)
 }
 
 void *
-hash_insert_at (struct hash_table* ht, void *item, void const *slot)
+hash_insert_at (ht, item, slot)
+     struct hash_table* ht;
+     void *item;
+     void const *slot;
 {
   void *old_item = *(void **) slot;
   if (HASH_VACANT (old_item))
@@ -155,14 +172,18 @@ hash_insert_at (struct hash_table* ht, void *item, void const *slot)
 }
 
 void *
-hash_delete (struct hash_table* ht, void const *item)
+hash_delete (ht, item)
+     struct hash_table* ht;
+     void const *item;
 {
   void **slot = hash_find_slot (ht, item);
   return hash_delete_at (ht, slot);
 }
 
 void *
-hash_delete_at (struct hash_table* ht, void const *slot)
+hash_delete_at (ht, slot)
+     struct hash_table* ht;
+     void const *slot;
 {
   void *item = *(void **) slot;
   if (!HASH_VACANT (item))
@@ -176,7 +197,8 @@ hash_delete_at (struct hash_table* ht, void const *slot)
 }
 
 void
-hash_free_items (struct hash_table* ht)
+hash_free_items (ht)
+     struct hash_table* ht;
 {
   void **vec = ht->ht_vec;
   void **end = &vec[ht->ht_size];
@@ -192,7 +214,8 @@ hash_free_items (struct hash_table* ht)
 }
 
 void
-hash_delete_items (struct hash_table* ht)
+hash_delete_items (ht)
+     struct hash_table* ht;
 {
   void **vec = ht->ht_vec;
   void **end = &vec[ht->ht_size];
@@ -206,7 +229,9 @@ hash_delete_items (struct hash_table* ht)
 }
 
 void
-hash_free (struct hash_table* ht, int free_items)
+hash_free (ht, free_items)
+     struct hash_table* ht;
+     int free_items;
 {
   if (free_items)
     hash_free_items (ht);
@@ -221,7 +246,9 @@ hash_free (struct hash_table* ht, int free_items)
 }
 
 void
-hash_map (struct hash_table *ht, hash_map_func_t map)
+hash_map (ht, map)
+     struct hash_table *ht;
+     hash_map_func_t map;
 {
   void **slot;
   void **end = &ht->ht_vec[ht->ht_size];
@@ -234,7 +261,10 @@ hash_map (struct hash_table *ht, hash_map_func_t map)
 }
 
 void
-hash_map_arg (struct hash_table *ht, hash_map_arg_func_t map, void *arg)
+hash_map_arg (ht, map, arg)
+     struct hash_table *ht;
+     hash_map_arg_func_t map;
+     void *arg;
 {
   void **slot;
   void **end = &ht->ht_vec[ht->ht_size];
@@ -249,7 +279,8 @@ hash_map_arg (struct hash_table *ht, hash_map_arg_func_t map, void *arg)
 /* Double the size of the hash table in the event of overflow... */
 
 static void
-hash_rehash (struct hash_table* ht)
+hash_rehash (ht)
+     struct hash_table* ht;
 {
   unsigned long old_ht_size = ht->ht_size;
   void **old_vec = ht->ht_vec;
@@ -276,7 +307,9 @@ hash_rehash (struct hash_table* ht)
 }
 
 void
-hash_print_stats (struct hash_table *ht, FILE *out_FILE)
+hash_print_stats (ht, out_FILE)
+     struct hash_table *ht;
+     FILE *out_FILE;
 {
   /* GKM FIXME: honor NO_FLOAT */
   fprintf (out_FILE, _("Load=%ld/%ld=%.0f%%, "), ht->ht_fill, ht->ht_size,
@@ -292,7 +325,10 @@ hash_print_stats (struct hash_table *ht, FILE *out_FILE)
    user-supplied vector, or malloc one.  */
 
 void **
-hash_dump (struct hash_table *ht, void **vector_0, qsort_cmp_t compare)
+hash_dump (ht, vector_0, compare)
+     struct hash_table *ht;
+     void **vector_0;
+     qsort_cmp_t compare;
 {
   void **vector;
   void **slot;
@@ -315,7 +351,8 @@ hash_dump (struct hash_table *ht, void **vector_0, qsort_cmp_t compare)
 /* Round a given number up to the nearest power of 2. */
 
 static unsigned long
-round_up_2 (unsigned long n)
+round_up_2 (n)
+     unsigned long n;
 {
   n |= (n >> 1);
   n |= (n >> 2);

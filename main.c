@@ -105,9 +105,6 @@ struct command_switch
     char *default_value;/* Pointer to default value.  */
 
     char *long_name;		/* Long option name.  */
-    char *argdesc;		/* Descriptive word for argument.  */
-    char *description;		/* Description for usage message.  */
-                                /* 0 means internal; don't display help.  */
   };
 
 /* True if C is a switch value that corresponds to a short option.  */
@@ -258,115 +255,136 @@ int warn_undefined_variables_flag;
 
 int always_make_flag = 0;
 
+/* The usage output.  We write it this way to make life easier for the
+   translators, especially those trying to translate to right-to-left
+   languages like Hebrew.  */
+
+static const char *const usage[] =
+  {
+    N_("Options:\n"),
+    N_("\
+  -b, -m                      Ignored for compatibility.\n"),
+    N_("\
+  -B, --always-make           Unconditionally make all targets.\n"),
+    N_("\
+  -C DIRECTORY, --directory=DIRECTORY\n\
+                              Change to DIRECTORY before doing anything.\n"),
+    N_("\
+  -d                          Print lots of debugging information.\n"),
+    N_("\
+  --debug[=FLAGS]             Print various types of debugging information.\n"),
+    N_("\
+  -e, --environment-overrides\n\
+                              Environment variables override makefiles.\n"),
+    N_("\
+  -f FILE, --file=FILE, --makefile=FILE\n\
+                              Read FILE as a makefile.\n"),
+    N_("\
+  -h, --help                  Print this message and exit.\n"),
+    N_("\
+  -i, --ignore-errors         Ignore errors from commands.\n"),
+    N_("\
+  -I DIRECTORY, --include-dir=DIRECTORY\n\
+                              Search DIRECTORY for included makefiles.\n"),
+    N_("\
+  -j [N], --jobs[=N]          Allow N jobs at once; infinite jobs with no arg.\n"),
+    N_("\
+  -k, --keep-going            Keep going when some targets can't be made.\n"),
+    N_("\
+  -l [N], --load-average[=N], --max-load[=N]\n\
+                              Don't start multiple jobs unless load is below N.\n"),
+    N_("\
+  -n, --just-print, --dry-run, --recon\n\
+                              Don't actually run any commands; just print them.\n"),
+    N_("\
+  -o FILE, --old-file=FILE, --assume-old=FILE\n\
+                              Consider FILE to be very old and don't remake it.\n"),
+    N_("\
+  -p, --print-data-base       Print make's internal database.\n"),
+    N_("\
+  -q, --question              Run no commands; exit status says if up to date.\n"),
+    N_("\
+  -r, --no-builtin-rules      Disable the built-in implicit rules.\n"),
+    N_("\
+  -R, --no-builtin-variables  Disable the built-in variable settings.\n"),
+    N_("\
+  -s, --silent, --quiet       Don't echo commands.\n"),
+    N_("\
+  -S, --no-keep-going, --stop\n\
+                              Turns off -k.\n"),
+    N_("\
+  -t, --touch                 Touch targets instead of remaking them.\n"),
+    N_("\
+  -v, --version               Print the version number of make and exit.\n"),
+    N_("\
+  -w, --print-directory       Print the current directory.\n"),
+    N_("\
+  --no-print-directory        Turn off -w, even if it was turned on implicitly.\n"),
+    N_("\
+  -W FILE, --what-if=FILE, --new-file=FILE, --assume-new=FILE\n\
+                              Consider FILE to be infinitely new.\n"),
+    N_("\
+  --warn-undefined-variables  Warn when an undefined variable is referenced.\n"),
+    NULL
+  };
+
 /* The table of command switches.  */
 
 static const struct command_switch switches[] =
   {
-    { 'b', ignore, 0, 0, 0, 0, 0, 0,
-	0, 0,
-	N_("Ignored for compatibility") },
-    { 'B', flag, (char *) &always_make_flag, 1, 1, 0, 0, 0,
-	"always-make", 0,
-	N_("Unconditionally make all targets") },
-    { 'C', string, (char *) &directories, 0, 0, 0, 0, 0,
-	"directory", N_("DIRECTORY"),
-	N_("Change to DIRECTORY before doing anything") },
-    { 'd', flag, (char *) &debug_flag, 1, 1, 0, 0, 0,
-	0, 0,
-	N_("Print lots of debugging information") },
-    { CHAR_MAX+1, string, (char *) &db_flags, 1, 1, 0,
-        "basic", 0,
-	"debug", N_("FLAGS"),
-	N_("Print various types of debugging information") },
+    { 'b', ignore, 0, 0, 0, 0, 0, 0, 0 },
+    { 'B', flag, (char *) &always_make_flag, 1, 1, 0, 0, 0, "always-make" },
+    { 'C', string, (char *) &directories, 0, 0, 0, 0, 0, "directory" },
+    { 'd', flag, (char *) &debug_flag, 1, 1, 0, 0, 0, 0 },
+    { CHAR_MAX+1, string, (char *) &db_flags, 1, 1, 0, "basic", 0, "debug" },
 #ifdef WINDOWS32
-    { 'D', flag, (char *) &suspend_flag, 1, 1, 0, 0, 0,
-        "suspend-for-debug", 0,
-        N_("Suspend process to allow a debugger to attach") },
+    { 'D', flag, (char *) &suspend_flag, 1, 1, 0, 0, 0, "suspend-for-debug" },
 #endif
     { 'e', flag, (char *) &env_overrides, 1, 1, 0, 0, 0,
-	"environment-overrides", 0,
-	N_("Environment variables override makefiles") },
-    { 'f', string, (char *) &makefiles, 0, 0, 0, 0, 0,
-	"file", N_("FILE"),
-	N_("Read FILE as a makefile") },
-    { 'h', flag, (char *) &print_usage_flag, 0, 0, 0, 0, 0,
-	"help", 0,
-	N_("Print this message and exit") },
+        "environment-overrides", },
+    { 'f', string, (char *) &makefiles, 0, 0, 0, 0, 0, "file" },
+    { 'h', flag, (char *) &print_usage_flag, 0, 0, 0, 0, 0, "help" },
     { 'i', flag, (char *) &ignore_errors_flag, 1, 1, 0, 0, 0,
-	"ignore-errors", 0,
-	N_("Ignore errors from commands") },
+        "ignore-errors" },
     { 'I', string, (char *) &include_directories, 1, 1, 0, 0, 0,
-	"include-dir", N_("DIRECTORY"),
-	N_("Search DIRECTORY for included makefiles") },
-    { 'j',
-        positive_int, (char *) &job_slots, 1, 1, 0,
-	(char *) &inf_jobs, (char *) &default_job_slots,
-	"jobs", "N",
-	N_("Allow N jobs at once; infinite jobs with no arg") },
+        "include-dir" },
+    { 'j', positive_int, (char *) &job_slots, 1, 1, 0, (char *) &inf_jobs,
+        (char *) &default_job_slots, "jobs" },
     { CHAR_MAX+2, string, (char *) &jobserver_fds, 1, 1, 0, 0, 0,
-        "jobserver-fds", 0,
-        0 },
-    { 'k', flag, (char *) &keep_going_flag, 1, 1, 0,
-	0, (char *) &default_keep_going_flag,
-	"keep-going", 0,
-	N_("Keep going when some targets can't be made") },
+        "jobserver-fds" },
+    { 'k', flag, (char *) &keep_going_flag, 1, 1, 0, 0,
+        (char *) &default_keep_going_flag, "keep-going" },
 #ifndef NO_FLOAT
     { 'l', floating, (char *) &max_load_average, 1, 1, 0,
 	(char *) &default_load_average, (char *) &default_load_average,
-	"load-average", "N",
-	N_("Don't start multiple jobs unless load is below N") },
+	"load-average" },
 #else
     { 'l', positive_int, (char *) &max_load_average, 1, 1, 0,
 	(char *) &default_load_average, (char *) &default_load_average,
-	"load-average", "N",
-	N_("Don't start multiple jobs unless load is below N") },
+	"load-average" },
 #endif
-    { 'm', ignore, 0, 0, 0, 0, 0, 0,
-	0, 0,
-	"-b" },
-    { 'n', flag, (char *) &just_print_flag, 1, 1, 1, 0, 0,
-	"just-print", 0,
-	N_("Don't actually run any commands; just print them") },
-    { 'o', string, (char *) &old_files, 0, 0, 0, 0, 0,
-	"old-file", N_("FILE"),
-	N_("Consider FILE to be very old and don't remake it") },
+    { 'm', ignore, 0, 0, 0, 0, 0, 0, 0 },
+    { 'n', flag, (char *) &just_print_flag, 1, 1, 1, 0, 0, "just-print" },
+    { 'o', string, (char *) &old_files, 0, 0, 0, 0, 0, "old-file" },
     { 'p', flag, (char *) &print_data_base_flag, 1, 1, 0, 0, 0,
-	"print-data-base", 0,
-	N_("Print make's internal database") },
-    { 'q', flag, (char *) &question_flag, 1, 1, 1, 0, 0,
-	"question", 0,
-	N_("Run no commands; exit status says if up to date") },
+        "print-data-base" },
+    { 'q', flag, (char *) &question_flag, 1, 1, 1, 0, 0, "question" },
     { 'r', flag, (char *) &no_builtin_rules_flag, 1, 1, 0, 0, 0,
-	"no-builtin-rules", 0,
-	N_("Disable the built-in implicit rules") },
+      "no-builtin-rules" },
     { 'R', flag, (char *) &no_builtin_variables_flag, 1, 1, 0, 0, 0,
-	"no-builtin-variables", 0,
-	N_("Disable the built-in variable settings") },
-    { 's', flag, (char *) &silent_flag, 1, 1, 0, 0, 0,
-	"silent", 0,
-	N_("Don't echo commands") },
-    { 'S', flag_off, (char *) &keep_going_flag, 1, 1, 0,
-	0, (char *) &default_keep_going_flag,
-	"no-keep-going", 0,
-	N_("Turns off -k") },
-    { 't', flag, (char *) &touch_flag, 1, 1, 1, 0, 0,
-	"touch", 0,
-	N_("Touch targets instead of remaking them") },
-    { 'v', flag, (char *) &print_version_flag, 1, 1, 0, 0, 0,
-	"version", 0,
-	N_("Print the version number of make and exit") },
+	"no-builtin-variables" },
+    { 's', flag, (char *) &silent_flag, 1, 1, 0, 0, 0, "silent" },
+    { 'S', flag_off, (char *) &keep_going_flag, 1, 1, 0, 0,
+      (char *) &default_keep_going_flag, "no-keep-going" },
+    { 't', flag, (char *) &touch_flag, 1, 1, 1, 0, 0, "touch" },
+    { 'v', flag, (char *) &print_version_flag, 1, 1, 0, 0, 0, "version" },
     { 'w', flag, (char *) &print_directory_flag, 1, 1, 0, 0, 0,
-	"print-directory", 0,
-	N_("Print the current directory") },
+        "print-directory" },
     { CHAR_MAX+3, flag, (char *) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
-	"no-print-directory", 0,
-	N_("Turn off -w, even if it was turned on implicitly") },
-    { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0,
-	"what-if", N_("FILE"),
-	N_("Consider FILE to be infinitely new") },
+	"no-print-directory" },
+    { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0, "what-if" },
     { CHAR_MAX+4, flag, (char *) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
-	"warn-undefined-variables", 0,
-	N_("Warn when an undefined variable is referenced") },
+	"warn-undefined-variables" },
     { '\0', }
   };
 
@@ -384,12 +402,6 @@ static struct option long_option_aliases[] =
     { "recon",		no_argument,		0, 'n' },
     { "makefile",	required_argument,	0, 'f' },
   };
-
-/* The usage message prints the descriptions of options starting in
-   this column.  Make sure it leaves enough room for the longest
-   description to fit in less than 80 characters.  */
-
-#define	DESCRIPTION_COLUMN	30
 
 /* List of goal targets.  */
 
@@ -2104,7 +2116,7 @@ print_usage (bad)
      int bad;
 {
   extern char *make_host;
-  register const struct command_switch *cs;
+  const char *const *cpp;
   FILE *usageto;
 
   if (print_version_flag)
@@ -2114,93 +2126,16 @@ print_usage (bad)
 
   fprintf (usageto, _("Usage: %s [options] [target] ...\n"), program);
 
-  fputs (_("Options:\n"), usageto);
-  for (cs = switches; cs->c != '\0'; ++cs)
-    {
-      char buf[1024], shortarg[50], longarg[50], *p;
-
-      if (!cs->description || cs->description[0] == '-')
-	continue;
-
-      switch (long_options[cs - switches].has_arg)
-	{
-	case no_argument:
-	  shortarg[0] = longarg[0] = '\0';
-	  break;
-	case required_argument:
-	  sprintf (longarg, "=%s", gettext (cs->argdesc));
-	  sprintf (shortarg, " %s", gettext (cs->argdesc));
-	  break;
-	case optional_argument:
-	  sprintf (longarg, "[=%s]", gettext (cs->argdesc));
-	  sprintf (shortarg, " [%s]", gettext (cs->argdesc));
-	  break;
-	}
-
-      p = buf;
-
-      if (short_option (cs->c))
-	{
-	  sprintf (buf, "  -%c%s", cs->c, shortarg);
-	  p += strlen (p);
-	}
-      if (cs->long_name != 0)
-	{
-	  unsigned int i;
-	  sprintf (p, "%s--%s%s",
-		   !short_option (cs->c) ? "  " : ", ",
-		   cs->long_name, longarg);
-	  p += strlen (p);
-	  for (i = 0; i < (sizeof (long_option_aliases) /
-			   sizeof (long_option_aliases[0]));
-	       ++i)
-	    if (long_option_aliases[i].val == cs->c)
-	      {
-		sprintf (p, ", --%s%s",
-			 long_option_aliases[i].name, longarg);
-		p += strlen (p);
-	      }
-	}
-      {
-	const struct command_switch *ncs = cs;
-	while ((++ncs)->c != '\0')
-	  if (ncs->description
-              && ncs->description[0] == '-'
-              && ncs->description[1] == cs->c)
-	    {
-	      /* This is another switch that does the same
-		 one as the one we are processing.  We want
-		 to list them all together on one line.  */
-	      sprintf (p, ", -%c%s", ncs->c, shortarg);
-	      p += strlen (p);
-	      if (ncs->long_name != 0)
-		{
-		  sprintf (p, ", --%s%s", ncs->long_name, longarg);
-		  p += strlen (p);
-		}
-	    }
-      }
-
-      if (p - buf > DESCRIPTION_COLUMN - 2)
-	/* The list of option names is too long to fit on the same
-	   line with the description, leaving at least two spaces.
-	   Print it on its own line instead.  */
-	{
-	  fprintf (usageto, "%s\n", buf);
-	  buf[0] = '\0';
-	}
-
-      fprintf (usageto, "%*s%s.\n",
-	       - DESCRIPTION_COLUMN,
-	       buf, gettext (cs->description));
-    }
+  for (cpp = usage; *cpp; ++cpp)
+    fputs (_(*cpp), usageto);
 
   if (!remote_description || *remote_description == '\0')
-    fprintf (usageto, _("\nThis program built for %s"), make_host);
+    fprintf (usageto, _("\nThis program built for %s\n"), make_host);
   else
-    fprintf (usageto, "\nThis program built for %s (%s)", make_host, remote_description);
+    fprintf (usageto, _("\nThis program built for %s (%s)\n"),
+             make_host, remote_description);
 
-  fprintf (usageto, _("\nReport bugs to <bug-make@gnu.org>\n"));
+  fprintf (usageto, _("Report bugs to <bug-make@gnu.org>\n"));
 }
 
 /* Decode switches from ARGC and ARGV.

@@ -214,7 +214,6 @@ handle_special_var (var)
 
   if (streq (var->name, ".TARGETS"))
     var->value = build_target_list (var->value);
-
   else
   */
 
