@@ -454,9 +454,6 @@ main (argc, argv, envp)
   /* Initialize the directory hashing code.  */
   init_dir ();
 
-  /* Set up to access user data (files).  */
-  user_access ();
-
   /* Figure out where this program lives.  */
 
   if (argv[0] == 0)
@@ -471,6 +468,9 @@ main (argc, argv, envp)
       else
 	++program;
     }
+
+  /* Set up to access user data (files).  */
+  user_access ();
 
   /* Figure out where we are.  */
 
