@@ -12,6 +12,15 @@ Please send remake bug reports to <rocky@panix.com>.
 See the README file and the GNU remake manual for details on sending bug
 reports.
 
+Version 3.80+dbg-0.2
+  Add ability to print specified attributes of a target, e.g. "time",
+  "deps", "vars"... 
+
+  Improve reporting target locations.
+
+  Improve target stack tracking.
+
+
 Version 3.80+dbg-0.1
 
 Fork from version 3.80 
