@@ -7,13 +7,13 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.159 1996/05/09 17:07:56 roland Exp $
-@set EDITION 0.50
+@set RCSID $Id: make.texinfo,v 2.160 1996/05/09 17:25:54 roland Exp $
+@set EDITION 0.51
 @set VERSION 3.75 Beta
-@set UPDATED 20 March 1996
-@set UPDATE-MONTH March 1996
+@set UPDATED 9 May 1996
+@set UPDATE-MONTH May 1996
 @comment The ISBN number might need to change on next publication.
-@set ISBN 1-882114-78-7
+@set ISBN 1-882114-78-7 @c CHANGE THIS BEFORE PRINTING AGAIN! --roland 9may96
 
 @c finalout
 
@@ -1126,6 +1126,8 @@ directive instead of @code{include}, like this:
 
 This is acts like @code{include} in every way except that there is no
 error (not even a warning) if any of the @var{filenames} do not exist.
+For compatibility with some other @code{make} implementations,
+@code{sinclude} is another name for @w{@code{-include}}.
 
 @node MAKEFILES Variable, Remaking Makefiles, Include, Makefiles
 @section The Variable @code{MAKEFILES}
@@ -8074,7 +8076,8 @@ multiple members in a single archive file comes from SunOS 4 @code{make}.
 The @code{-include} directive to include makefiles with no error for a
 nonexistent file comes from SunOS 4 @code{make}.  (But note that SunOS 4
 @code{make} does not allow multiple makefiles to be specified in one
-@code{-include} directive.)
+@code{-include} directive.)  The same feature appears with the name
+@code{sinclude} in SGI @code{make} and perhaps others.
 @end itemize
 
 The remaining features are inventions new in GNU @code{make}:
