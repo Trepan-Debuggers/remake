@@ -395,25 +395,9 @@ char *
 end_of_token (s)
      char *s;
 {
-  register char *p = s;
-  register int backslash = 0;
-
-  while (*p != '\0' && (backslash || !isblank (*p)))
-    {
-      if (*p++ == '\\')
-	{
-	  backslash = !backslash;
-	  while (*p == '\\')
-	    {
-	      backslash = !backslash;
-	      ++p;
-	    }
-	}
-      else
-	backslash = 0;
-    }
-
-  return p;
+  while (*s != '\0' && !isblank (*s))
+    ++s;
+  return s;
 }
 
 /* Return the address of the first nonwhitespace or null in the string S.  */
