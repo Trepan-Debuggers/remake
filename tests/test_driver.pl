@@ -117,7 +117,8 @@ sub toplevel
     closedir (SCRIPTDIR);
     foreach $dir (@dirs)
     {
-      next if ! -d "$scriptpath/$dir" || $dir =~ /^\.\.?$/ || $dir eq 'CVS';
+      next if ($dir =~ /^\.\.?$/ || $dir eq 'CVS' || $dir eq 'RCS'
+               || ! -d "$scriptpath/$dir");
       push (@rmdirs, $dir);
       mkdir ("$workpath/$dir", 0777)
            || &error ("Couldn't mkdir $workpath/$dir: $!\n");
@@ -127,7 +128,7 @@ sub toplevel
       closedir (SCRIPTDIR);
       foreach $test (@files)
       {
-        next if $test =~ /^\.\.?$/ || $test =~ /~$/ || $test eq 'CVS';
+        next if $test =~ /~$/ || -d $test;
 	push (@TESTS, "$dir/$test");
       }
     }

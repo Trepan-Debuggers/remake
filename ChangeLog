@@ -87,6 +87,12 @@
 
 	* default.c (default_variables) [__MSDOS__]: Define CXX to gpp.
 
+2000-01-27  Paul D. Smith  <psmith@gnu.org>
+
+	* gettext.c: Some warning cleanups, and a fix for systems which
+	don't define HAVE_ALLOCA (the workaround code was included
+	twice).
+
 2000-01-25  Paul D. Smith  <psmith@gnu.org>
 
 	Change gettext support to use the simplified version in libit 0.7.

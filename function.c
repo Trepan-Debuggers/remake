@@ -492,9 +492,9 @@ func_notdir_suffix(o, argv, funcname)
   char *list_iterator = argv[0];
   char *p2 =0;
   int doneany =0;
-  int len=0;
+  unsigned int len=0;
 
-  int is_suffix = streq(funcname, "suffix");
+  int is_suffix = streq (funcname, "suffix");
   int is_notdir = !is_suffix;
   while ((p2 = find_next_token (&list_iterator, &len)) != 0)
     {
@@ -555,7 +555,7 @@ func_basename_dir(o, argv, funcname)
   int doneany=0;
   unsigned int len=0;
   char *p=0;
-  int is_basename= streq(funcname, "basename");
+  int is_basename= streq (funcname, "basename");
   int is_dir= !is_basename;
 
   while ((p2 = find_next_token (&p3, &len)) != 0)
@@ -563,7 +563,7 @@ func_basename_dir(o, argv, funcname)
 	  p = p2 + len;
 	  while (p >= p2 && (!is_basename  || *p != '.'))
 	    {
-	      if (IS_PATHSEP(*p))
+	      if (IS_PATHSEP (*p))
 		break;
 	      	    --p;
 	    }

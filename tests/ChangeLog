@@ -17,6 +17,11 @@
 	* scripts/targets/SECONDARY: Ditto.
 	* scripts/targets/INTERMEDIATE: Ditto.
 
+2000-01-27  Paul D. Smith  <psmith@gnu.org>
+
+	* test_driver.pl (toplevel): Don't try to run test scripts which
+	are really directories.
+
 2000-01-23  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/features/include: Remove a check; the fix caused more

@@ -62,9 +62,6 @@ static int library_search PARAMS ((char **lib, FILE_TIMESTAMP *mtime_ptr));
    should only make one goal at a time and return as soon as one goal whose
    `changed' member is nonzero is successfully made.  */
 
-/* We need to know this "lower down" for correct error handling.  */
-static int updating_makefiles = 0;
-
 int
 update_goal_chain (goals, makefiles)
      register struct dep *goals;
@@ -73,8 +70,6 @@ update_goal_chain (goals, makefiles)
   int t = touch_flag, q = question_flag, n = just_print_flag;
   unsigned int j = job_slots;
   int status = -1;
-
-  updating_makefiles = makefiles;
 
 #define	MTIME(file) (makefiles ? file_mtime_no_search (file) \
 		     : file_mtime (file))
