@@ -1049,15 +1049,15 @@ msgstr "\n# Make データベース終了 %s\n"
 
 #: main.c:2749
 msgid "Entering"
-msgstr "入ります"
+msgstr "ここに入ります: "
 
 #: main.c:2749
 msgid "Leaving"
-msgstr "出ます"
+msgstr "ここから出ます: "
 
 #: main.c:2768
 msgid "an unknown directory"
-msgstr "ディレクトリ不明"
+msgstr "不明なディレクトリ"
 
 #: main.c:2770
 #, c-format
