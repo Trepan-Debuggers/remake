@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  06 July 2002
+  10 July 2002
 
 Copyright (C) 2002  Free Software Foundation, Inc.
 See the end for copying conditions.
@@ -12,7 +12,7 @@ Please send GNU make bug reports to <bug-make@gnu.org>.
 See the README file and the GNU make manual for details on sending bug
 reports.
 
-Version <next>
+Version 3.80
 
 * A new feature exists: order-only prerequisites.  These prerequisites
   affect the order in which targets are built, but they do not impact
@@ -20,6 +20,13 @@ Version <next>
   they allow you to require target B be built before target A, without
   requiring that target A will always be rebuilt if target B is updated.
   Patch for this feature provided by Greg McGary <greg@mcgary.org>.
+
+* For compatibility with SysV make, GNU make now supports the peculiar
+  syntax $$@, $$(@D), and $$(@F) in the prerequisites list of a rule.
+  This syntax is only valid within explicit and static pattern rules: it
+  cannot be used in implicit (suffix or pattern) rules.  Edouard G. Parmelan
+  <egp@free.fr> provided a patch implementing this feature; however, I
+  decided to implemented it myself in a different way.
 
 * A new function is defined: $(quote ...).  The argument to this
   function is the _name_ of a variable.  The result of the function is

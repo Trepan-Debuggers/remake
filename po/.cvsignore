@@ -1,3 +1,4 @@
-*.gmo *.mo *.pot
+*.gmo *.mo *.pot *.po
 
 Makefile.in Makefile
+POTFILES

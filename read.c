@@ -132,7 +132,8 @@ static int conditional_line PARAMS ((char *line, const struct floc *flocp));
 static void record_files PARAMS ((struct nameseq *filenames, char *pattern, char *pattern_percent,
 			struct dep *deps, unsigned int cmds_started, char *commands,
 			unsigned int commands_idx, int two_colon,
-			const struct floc *flocp, int set_default));
+			int have_sysv_atvar,
+                        const struct floc *flocp, int set_default));
 static void record_target_var PARAMS ((struct nameseq *filenames, char *defn,
                                        int two_colon,
                                        enum variable_origin origin,
@@ -430,6 +431,7 @@ eval (ebuf, set_default)
   unsigned int cmds_started, tgts_started;
   int ignoring = 0, in_ignored_define = 0;
   int no_targets = 0;		/* Set when reading a rule without targets.  */
+  int have_sysv_atvar = 0;
   struct nameseq *filenames = 0;
   struct dep *deps = 0;
   long nlines = 0;
@@ -450,7 +452,7 @@ eval (ebuf, set_default)
 	  fi.lineno = tgts_started;                                           \
 	  record_files (filenames, pattern, pattern_percent, deps,            \
                         cmds_started, commands, commands_idx, two_colon,      \
-                        &fi, set_default);                                    \
+                        have_sysv_atvar, &fi, set_default);                   \
         }                                                                     \
       filenames = 0;							      \
       commands_idx = 0;							      \
@@ -1057,6 +1059,16 @@ eval (ebuf, set_default)
               }
           }
 
+        /* Do any of the prerequisites appear to have $@ etc.?  */
+        have_sysv_atvar = 0;
+        if (!posix_pedantic)
+          for (p = strchr (p2, '$'); p != 0; p = strchr (p+1, '$'))
+            if (p[1] == '@' || (p[1] == '(' && p[2] == '@'))
+              {
+                have_sysv_atvar = 1;
+                break;
+              }
+
         /* Is this a static pattern rule: `target: %targ: %dep; ...'?  */
         p = strchr (p2, ':');
         while (p != 0 && p[-1] == '\\')
@@ -1654,7 +1666,8 @@ record_target_var (filenames, defn, two_colon, origin, flocp)
 
 static void
 record_files (filenames, pattern, pattern_percent, deps, cmds_started,
-	      commands, commands_idx, two_colon, flocp, set_default)
+	      commands, commands_idx, two_colon, have_sysv_atvar,
+              flocp, set_default)
      struct nameseq *filenames;
      char *pattern, *pattern_percent;
      struct dep *deps;
@@ -1662,6 +1675,7 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
      char *commands;
      unsigned int commands_idx;
      int two_colon;
+     int have_sysv_atvar;
      const struct floc *flocp;
      int set_default;
 {
@@ -1684,15 +1698,21 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
 
   for (; filenames != 0; filenames = nextf)
     {
-
-      register char *name = filenames->name;
-      register struct file *f;
-      register struct dep *d;
+      char *name = filenames->name;
+      struct file *f;
+      struct dep *d;
       struct dep *this;
       char *implicit_percent;
 
       nextf = filenames->next;
       free (filenames);
+
+      /* Check for .POSIX.  We used to do this in snap_deps() but that's not
+         good enough: it doesn't happen until after the makefile is read,
+         which means we cannot use its value during parsing.  */
+
+      if (streq (name, ".POSIX"))
+        posix_pedantic = 1;
 
       implicit_percent = find_percent (name);
       implicit |= implicit_percent != 0;
@@ -1771,6 +1791,101 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
 		}
 	    }
 	}
+
+      /* If at least one of the dependencies uses $$@ etc. deal with that.
+         It would be very nice and very simple to just expand everything, but
+         it would break a lot of backward compatibility.  Maybe that's OK
+         since we're just emulating a SysV function, and if we do that then
+         why not emulate it completely (that's what SysV make does: it
+         re-expands the entire prerequisite list, all the time, with $@
+         etc. in scope.  But, it would be a pain indeed to document this
+         ("iff you use $$@, your prerequisite lists is expanded twice...")
+         Ouch.  Maybe better to make the code more complex.  */
+
+      if (have_sysv_atvar)
+        {
+          char *p;
+          int tlen = strlen (name);
+          char *fnp = strrchr (name, '/');
+          int dlen;
+          int flen;
+
+          if (fnp)
+            {
+              dlen = fnp - name;
+              ++fnp;
+              flen = strlen (fnp);
+            }
+          else
+            {
+              dlen = 0;
+              fnp = name;
+              flen = tlen;
+            }
+
+
+          for (d = this; d != 0; d = d->next)
+            for (p = strchr (d->name, '$'); p != 0; p = strchr (p+1, '$'))
+              {
+                char *s = p;
+                char *at;
+                int atlen;
+
+                /* If it's a '$@' or '$(@', it's escaped */
+                if ((++p)[0] == '$'
+                    && (p[1] == '@' || (p[1] == '(' && p[2] == '@')))
+                  {
+                    bcopy (p, s, strlen (p)+1);
+                    continue;
+                  }
+
+                /* Maybe found one.  Check.  p will point to '@' [for $@] or
+                   ')' [for $(@)] or 'D' [for $(@D)] or 'F' [for $(@F)].  */
+                if (p[0] != '@'
+                    && (p[0] != '(' || (++p)[0] != '@'
+                        || ((++p)[0] != ')'
+                            && (p[1] != ')' || (p[0] != 'D' && p[0] != 'F')))))
+                  continue;
+
+                /* Found one.  Compute the length and string ptr.  Move p
+                   past the variable reference.  */
+                switch (p[0])
+                  {
+                  case 'D':
+                    atlen = dlen;
+                    at = name;
+                    p += 2;
+                    break;
+
+                  case 'F':
+                    atlen = flen;
+                    at = fnp;
+                    p += 2;
+                    break;
+
+                  default:
+                    atlen = tlen;
+                    at = name;
+                    ++p;
+                    break;
+                  }
+
+                /* Get more space.  */
+                {
+                  int soff = s - d->name;
+                  int poff = p - d->name;
+                  d->name = (char *) xrealloc (d->name,
+                                               strlen (d->name) + atlen + 1);
+                  s = d->name + soff;
+                  p = d->name + poff;
+                }
+
+                /* Copy the string over.  */
+                bcopy(p, s+atlen, strlen (p)+1);
+                bcopy(at, s, atlen);
+                p = s + atlen - 1;
+              }
+        }
 
       if (!two_colon)
 	{

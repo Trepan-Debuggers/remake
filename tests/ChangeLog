@@ -1,3 +1,8 @@
+2002-07-10  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/variables/automatic: Add some tests for $$@, $$(@D), and
+	$$(@F).
+
 2002-07-09  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/variables/automatic: Create a test for automatic variables.
