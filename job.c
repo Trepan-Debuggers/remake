@@ -430,17 +430,15 @@ start_job_command (child)
 {
   static int bad_stdin = -1;
   register char *p;
-  char noprint = 0, recursive;
+  int flags = child->file->cmds->lines_flags[child->command_line - 1];
   char **argv;
 
-  recursive = child->file->cmds->lines_recurse[child->command_line - 1];
-
   p = child->command_ptr;
-  child->noerror = 0;
+  child->noerror = flags & COMMANDS_NOERROR;
   while (*p != '\0')
     {
       if (*p == '@')
-	noprint = 1;
+	flags |= COMMANDS_SILENT;
       else if (*p == '-')
 	child->noerror = 1;
       else if (!isblank (*p) && *p != '+')
@@ -449,7 +447,7 @@ start_job_command (child)
     }
 
   /* If -q was given, just say that updating `failed'.  */
-  if (question_flag && !recursive)
+  if (question_flag && !(flags & COMMANDS_RECURSE))
     goto error;
 
   /* There may be some preceding whitespace left if there
@@ -470,7 +468,7 @@ start_job_command (child)
       }
   }
 
-  if (touch_flag && !recursive)
+  if (touch_flag && !(flags & COMMANDS_RECURSE))
     {
       /* Go on to the next command.  It might be the recursive one.
 	 We construct ARGV only to find the end of the command line.  */
@@ -489,7 +487,7 @@ start_job_command (child)
 
   /* Print out the command.  */
 
-  if (just_print_flag || (!noprint && !silent_flag))
+  if (just_print_flag || (!(flags & COMMANDS_SILENT) && !silent_flag))
     puts (p);
 
   /* Tell update_goal_chain that a command has been started on behalf of
@@ -503,7 +501,7 @@ start_job_command (child)
 
   /* If -n was given, recurse to get the next line in the sequence.  */
 
-  if (just_print_flag && !recursive)
+  if (just_print_flag && !(flags & COMMANDS_RECURSE))
     {
       free (argv[0]);
       free ((char *) argv);
