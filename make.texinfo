@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.160 1996/05/09 17:25:54 roland Exp $
+@set RCSID $Id: make.texinfo,v 2.161 1996/06/22 21:21:30 roland Exp $
 @set EDITION 0.51
 @set VERSION 3.75 Beta
 @set UPDATED 9 May 1996
@@ -1599,7 +1599,7 @@ $(wildcard *.c)
 @end example
 
 We can change the list of C source files into a list of object files by
-replacing the @samp{.o} suffix with @samp{.c} in the result, like this:
+replacing the @samp{.c} suffix with @samp{.o} in the result, like this:
 
 @example
 $(patsubst %.c,%.o,$(wildcard *.c))
