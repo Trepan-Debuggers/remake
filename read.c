@@ -37,7 +37,6 @@ static int read_makefile ();
 static unsigned int readline (), do_define ();
 static int conditional_line ();
 static void record_files ();
-static char *find_semicolon ();
 
 
 /* A `struct linebuffer' is a structure which holds a line of text.
@@ -75,7 +74,7 @@ struct conditionals
 
 static struct conditionals toplevel_conditionals;
 static struct conditionals *conditionals = &toplevel_conditionals;
-  
+
 
 /* Default directories to search for include files in  */
 
@@ -657,9 +656,16 @@ read_makefile (filename, flags)
 
 	  record_waiting_files ();
 
-	  /* Look for a semicolon in the unexpanded line.  */
-	  cmdleft = find_semicolon (lb.buffer);
-	  if (cmdleft != 0)
+	  /* Search the line for an unquoted ; that is not after an
+             unquoted #.  */
+	  cmdleft = find_char_unquote (lb.buffer, ";#", 0);
+	  if (cmdleft != 0 && *cmdleft == '#')
+	    {
+	      /* We found a comment before a semicolon.  */
+	      *cmdleft = '\0';
+	      cmdleft = 0;
+	    }
+	  else if (cmdleft != 0)
 	    /* Found one.  Cut the line short there before expanding it.  */
 	    *cmdleft = '\0';
 
@@ -671,14 +677,11 @@ read_makefile (filename, flags)
 
 	  if (cmdleft == 0)
 	    /* Look for a semicolon in the expanded line.  */
-	    cmdleft = find_semicolon (p);
+	    cmdleft = find_char_unquote (p, ";", 0);
 
 	  if (cmdleft != 0)
 	    /* Cut the line short at the semicolon.  */
 	    *cmdleft = '\0';
-
-	  /* Remove comments from the line.  */
-	  remove_comments (p);
 
 	  p2 = next_token (p);
 	  if (*p2 == '\0')
@@ -1251,7 +1254,7 @@ record_files (filenames, pattern, pattern_percent, deps, commands_started,
 		d->name = savestring (buffer, o - buffer);
 	      }
 	  }
-      
+
       if (!two_colon)
 	{
 	  /* Single-colon.  Combine these dependencies
@@ -1491,19 +1494,6 @@ find_percent (pattern)
 {
   return find_char_unquote (pattern, "%", 0);
 }
-
-/* Search STRING for an unquoted ; that is not after an unquoted #.  */
-
-static char *
-find_semicolon (string)
-     char *string;
-{
-  char *match = find_char_unquote (string, ";#", 0);
-  if (match != 0 && *match == '#')
-    /* We found a comment before a semicolon.  No match.  */
-    match = 0;
-  return match;
-}
 
 /* Parse a string into a sequence of filenames represented as a
    chain of struct nameseq's in reverse order and return that chain.
@@ -1662,7 +1652,7 @@ parse_file_seq (stringp, stopchar, size, strip)
 	    /* Trace back from NEW1 (the end of the list) until N
 	       (the beginning of the list), rewriting each name
 	       with the full archive reference.  */
-	    
+
 	    while (new1 != n)
 	      {
 		name = concat (libname, new1->name, ")");
@@ -1764,7 +1754,7 @@ readline (linebuffer, stream, filename, lineno)
 	  else
 	    break;
 	}
-      
+
       if (!backslash)
 	{
 	  p[-1] = '\0';
@@ -1822,7 +1812,7 @@ construct_include_path (arg_dirs)
 	      dir = expanded;
 	  }
 
-	if (safe_stat (dir, &stbuf) == 0 && S_ISDIR (stbuf.st_mode))
+	if (stat (dir, &stbuf) == 0 && S_ISDIR (stbuf.st_mode))
 	  {
 	    if (idx == max - 1)
 	      {
@@ -1839,7 +1829,7 @@ construct_include_path (arg_dirs)
   /* Now add at the end the standard default dirs.  */
 
   for (i = 0; default_include_directories[i] != 0; ++i)
-    if (safe_stat (default_include_directories[i], &stbuf) == 0
+    if (stat (default_include_directories[i], &stbuf) == 0
 	&& S_ISDIR (stbuf.st_mode))
       dirs[idx++] = default_include_directories[i];
 
@@ -1885,7 +1875,7 @@ tilde_expand (name)
 
 	warn_undefined_variables_flag = save;
       }
-  
+
       is_variable = home_dir[0] != '\0';
       if (!is_variable)
 	{
@@ -1948,13 +1938,16 @@ multi_glob (chain, size)
      struct nameseq *chain;
      unsigned int size;
 {
+  extern void dir_setup_glob ();
   register struct nameseq *new = 0;
   register struct nameseq *old;
   struct nameseq *nexto;
+  glob_t gl;
+
+  dir_setup_glob (&gl);
 
   for (old = chain; old != 0; old = nexto)
     {
-      glob_t gl;
 #ifndef NO_ARCHIVES
       char *memname;
 #endif
@@ -1988,7 +1981,7 @@ multi_glob (chain, size)
 	memname = 0;
 #endif
 
-      switch (glob (old->name, GLOB_NOCHECK, NULL, &gl))
+      switch (glob (old->name, GLOB_NOCHECK|GLOB_ALTDIRFUNC, NULL, &gl))
 	{
 	case 0:			/* Success.  */
 	  {
