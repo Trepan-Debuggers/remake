@@ -426,8 +426,6 @@ fatal_error_signal (sig)
   if (kill (getpid (), sig) < 0)
     /* It shouldn't return, but if it does, die anyway.  */
     pfatal_with_name ("kill");
-
-  return 0;
 }
 
 /* Delete all non-precious targets of CHILD unless they were already deleted.
