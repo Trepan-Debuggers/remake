@@ -9,7 +9,7 @@
 
 @set EDITION 0.43
 @set VERSION 3.68 Beta
-@set UPDATED 22 July 1993
+@set UPDATED 23 July 1993
 @set UPDATE-MONTH July 1993
 
 @c finalout
@@ -1414,7 +1414,7 @@ appear on the line after the dependencies, with a tab character, or may
 appear on the same line, with a semicolon.  Either way, the effect is the
 same.  @xref{Commands, ,Writing the Commands in Rules}.
 
-@cindex dollar sign (@code{$}) in rules
+@cindex dollar sign (@code{$}), in rules
 @cindex @code{$}, in rules
 @cindex rule, and @code{$}
 Because dollar signs are used to start variable references, if you really
@@ -6796,7 +6796,7 @@ rules whose target patterns match that file's name;
 see @ref{Interrupts}.)@refill
 @cindex intermediate files, preserving
 @cindex preserving intermediate files
-@cindex preserving with .PRECIOUS
+@cindex preserving with @code{.PRECIOUS}
 @cindex @code{.PRECIOUS} intermediate files
 
 A chain can involve more than two implicit rules.  For example, it is
@@ -7895,7 +7895,7 @@ Use the @samp{-h} or @samp{--help} option to summarize the options to
 @code{make}.
 
 @item
-Simply-expand variables.  @xref{Flavors, ,The Two Flavors of Variables}.
+Simply-expanded variables.  @xref{Flavors, ,The Two Flavors of Variables}.
 
 @item
 Pass command-line variable assignments automatically through the
@@ -7955,7 +7955,7 @@ form @samp{-l@var{name}}.
 @item
 Allow suffixes for suffix rules 
 (@pxref{Suffix Rules, ,Old-Fashioned Suffix Rules}) to contain any
-characters.  In other version of @code{make}, they must begin with
+characters.  In other versions of @code{make}, they must begin with
 @samp{.} and not contain any @samp{/} characters.
 
 @item
@@ -8010,7 +8010,7 @@ Suffixes (used in suffix rules) that end with the character @samp{~}
 have a special meaning to System V @code{make}; 
 they refer to the SCCS file that corresponds
 to the file one would get without the @samp{~}.  For example, the
-suffix rule @samp{.c~.o} would make the file @file{@var{n}.o} file from
+suffix rule @samp{.c~.o} would make the file @file{@var{n}.o} from
 the SCCS file @file{s.@var{n}.c}.  For complete coverage, a whole
 series of such suffix rules is required.  
 @xref{Suffix Rules, ,Old-Fashioned Suffix Rules}.
@@ -8114,7 +8114,7 @@ special treatment.
 This appendix summarizes the directives, text manipulation functions,
 and special variables which GNU @code{make} understands.
 @xref{Special Targets}, @ref{Catalogue of Rules, ,Catalogue of Implicit Rules},
-and @ref{Options Summary, ,Summary of Options}.
+and @ref{Options Summary, ,Summary of Options},
 for other summaries.
 
 Here is a summary of the directives GNU @code{make} recognizes:
