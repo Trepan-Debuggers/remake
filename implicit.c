@@ -103,7 +103,7 @@ pattern_search (struct file *file, int archive,
 
   /* This buffer records all the dependencies actually found for a rule.  */
   char **found_files = (char **) alloca (max_pattern_deps * sizeof (char *));
-  /* This list notes if the associated dep has an "ignore_mtime" flag set.  */
+  /* Remember whether the associated dep has an "ignore_mtime" flag set.  */
   unsigned char *found_files_im = (unsigned char *) alloca (max_pattern_deps * sizeof (unsigned char));
   /* Number of dep names now in FOUND_FILES.  */
   unsigned int deps_found = 0;

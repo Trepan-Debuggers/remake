@@ -358,13 +358,12 @@ vms_redirect (struct dsc$descriptor_s *desc, char *fname, char *ibuf)
 }
 
 
-/*
-   found apostrophe at (p-1)
-
-   inc p until after closing apostrophe.  */
+/* found apostrophe at (p-1)
+   inc p until after closing apostrophe.
+ */
 
 static char *
-handle_apos (char *p)
+vms_handle_apos (char *p)
 {
   int alast;
   int inside;
@@ -2160,7 +2159,7 @@ child_execute_job (char *argv, struct child *child)
 	      /* Nice places for line breaks are after strings, after
 		 comma or space and before slash. */
             case '"':
-              q = handle_apos (q + 1);
+              q = vms_handle_apos (q + 1);
               sep = q;
               break;
             case ',':
@@ -2695,7 +2694,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
   char*  sh_chars;
   char** sh_cmds;
 #else  /* must be UNIX-ish */
-  static char sh_chars[] = "#;\"*?[]&|<>(){}$`^~";
+  static char sh_chars[] = "#;\"*?[]&|<>(){}$`^~!";
   static char *sh_cmds[] = { "cd", "eval", "exec", "exit", "login",
 			     "logout", "set", "umask", "wait", "while", "for",
 			     "case", "if", ":", ".", "break", "continue",
