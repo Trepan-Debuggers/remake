@@ -1,3 +1,14 @@
+2004-10-06  Paul D. Smith  <psmith@gnu.org>
+
+	Apply patch from Alessandro Vesely, provided with bug # 9748.
+	Fix use of tmpnam() to work with Borland C.
+
+	* job.c (construct_command_argv_internal) [WINDOWS32]: Remove
+	construction of a temporary filename, and call new function
+	create_batch_filename().
+	(create_batch_filename) [WINDOWS32]: New function to create a
+	temporary filename.
+
 2004-10-05  Boris Kolpackov  <boris@kolpackov.net>
 
 	* read.c (record_target_var): Expand simple pattern-specific
