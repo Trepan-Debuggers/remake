@@ -76,11 +76,13 @@ dist-hook:
 # --------------- Local CHECK Section
 
 check-local: check-regression check-loadavg
-	@banner="Regression passed: GNU Make $(VERSION) ($(MAKE_HOST)) built with $(CC)"; \
+	@banner=" Regression PASSED: GNU Make $(VERSION) ($(MAKE_HOST)) built with $(CC) "; \
 	dashes=`echo "$$banner" | sed s/./=/g`; \
+	echo; \
 	echo "$$dashes"; \
 	echo "$$banner"; \
-	echo "$$dashes"
+	echo "$$dashes"; \
+	echo
 
 .PHONY: check-loadavg check-regression
 

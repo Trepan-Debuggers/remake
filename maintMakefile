@@ -52,7 +52,7 @@ NMakefile: NMakefile.template .dep_segment Makefile
 #
 build.sh.in: build.template Makefile
 	rm -f $@
-	sed -e 's@%objs%@$(filter-out remote-%, $(make_OBJECTS)@g' \
+	sed -e 's@%objs%@$(filter-out remote-%,$(make_OBJECTS)@g' \
 	    -e 's@%globobjs%@$(patsubst %.c,%.o,$(globsrc)))@g' \
 	  $< > $@
 	chmod a-w+x $@

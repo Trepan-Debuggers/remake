@@ -74,9 +74,8 @@ debug this code, you can do `make check-loadavg' to see if it works
 properly on your system.  (You must run `configure' beforehand, but you
 need not build Make itself to run this test.)
 
-Another potential source of porting problems is the configure support
-enabling GNU make to access large files (LFS) on those operating systems
-that support them.  Please report any bugs that you find in this area.
-If you run into difficulties, then as a workaround you should be able to
-disable LFS by adding the `--disable-largefile' option to the
-`configure' script.
+Another potential source of porting problems is the support for large
+files (LFS) in configure for those operating systems that provide it.
+Please report any bugs that you find in this area.  If you run into
+difficulties, then as a workaround you should be able to disable LFS by
+adding the `--disable-largefile' option to the `configure' script.

@@ -60,6 +60,11 @@ Version 3.78
 
 * The Windows 95/98/NT (W32) version of GNU make now has native support
   for the Cygnus Cygwin release B20.1 shell (bash).
+
+* The GNU make regression test suite, long available separately "under
+  the table", has been integrated into the release.  You can invoke it
+  by running "make check" in the distribution.  Note that it requires
+  Perl (either Perl 4 or Perl 5) to run.
 
 Version 3.77
 
