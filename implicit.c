@@ -408,10 +408,13 @@ pattern_search (file, archive, depth, recursions)
 		      p = savestring (p, strlen (p));
 		      intermediate_patterns[deps_found]
 			= intermediate_file->name;
-		      found_files[deps_found] = p;
 		      intermediate_file->name = p;
 		      intermediate_files[deps_found] = intermediate_file;
 		      intermediate_file = 0;
+		      /* Allocate an extra copy to go in FOUND_FILES,
+			 because every elt of FOUND_FILES is consumed
+			 or freed later.  */
+		      found_files[deps_found] = savestring (p, strlen (p));
 		      ++deps_found;
 		      continue;
 		    }
