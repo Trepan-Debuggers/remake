@@ -1155,9 +1155,26 @@ decode_switches (argc, argv, env)
   /* Reset getopt's state.  */
   optind = 0;
 
-  while ((c = getopt_long (argc, argv,
-			   options, long_options, (int *) 0)) != EOF)
+  c = 0;
+  while (optind < argc)
     {
+      if (c == EOF)
+	{
+	  /* There are no more options according to getting getopt, but
+	     there are some arguments left.  Since we have asked for
+	     non-option arguments to be returned in order, I think this
+	     only happens when there is a "--" argument to prevent later
+	     argument from being options.  Since getopt has finished its
+	     job, just update its state variables for the next argument and
+	     set C as if it had returned 1, indicating a non-option
+	     argument.  */
+	  optarg = argv[optind++];
+	  c = 1;
+	}
+      else
+	/* Parse the next argument.  */
+	c = getopt_long (argc, argv, options, long_options, (int *) 0);
+
       if (c == 1)
 	{
 	  /* Non-option argument.  It might be a variable definition.  */
@@ -1402,7 +1419,7 @@ decode_env_switches (envar, len)
      unsigned int len;
 {
   char *varref = (char *) alloca (2 + len + 2);
-  char *value;
+  char *value, *p;
   int argc;
   char **argv;
 
@@ -1412,7 +1429,7 @@ decode_env_switches (envar, len)
   bcopy (envar, &varref[2], len);
   varref[2 + len] = ')';
   varref[2 + len + 1] = '\0';
-  value = allocated_variable_expand (varref);
+  value = variable_expand (varref);
 
   /* Skip whitespace, and check for an empty value.  */
   value = next_token (value);
@@ -1423,12 +1440,34 @@ decode_env_switches (envar, len)
   /* Allocate a vector that is definitely big enough.  */
   argv = (char **) alloca ((1 + len + 1) * sizeof (char *));
 
+  /* Allocate a buffer to copy the value into while we split it into words
+     and unquote it.  We must use permanent storage for this because
+     decode_switches may store pointers into the passed argument words.  */
+  p = (char *) xmalloc (2 * len);
+
   /* getopt will look at the arguments starting at ARGV[1].
      Prepend a spacer word.  */
   argv[0] = 0;
   argc = 1;
-  while ((argv[argc] = find_next_token (&value, (unsigned int *) 0)) != 0)
-    ++argc;
+  argv[argc] = p;
+  while (*value != '\0')
+    {
+      if (*value == '\\')
+	++value;		/* Skip the backslash.  */
+      else if (isblank (*value))
+	{
+	  /* End of the word.  */
+	  *p++ = '\0';
+	  argv[++argc] = p;
+	  do
+	    ++value;
+	  while (isblank (*value));
+	  continue;
+	}
+      *p++ = *value++;
+    }
+  *p = '\0';
+  argv[++argc] = 0;
 
   if (argc == 2 && argv[1][0] != '-')
     {
@@ -1463,6 +1502,29 @@ decode_env_switches (envar, len)
   decode_switches (argc, argv, 1);
 }
 
+/* Quote the string IN so that it will be interpreted as a single word with
+   no magic by the shell.  Write the result into OUT, returning the address
+   of the next character to be written.  Allocating space for OUT twice the
+   length of IN is always sufficient.  */
+
+static 
+#ifdef __GNUC__
+__inline__
+#endif
+char *
+shell_quote (out, in)
+     char *out, *in;
+{
+  while (*in != '\0')
+    {
+      if (index ("^;'\"*?[]$<>(){}|&~`\\ \t\r\n\f\v", *in) != 0)
+	*out++ = '\\';
+      *out++ = *in++;
+    }
+
+  return out;
+}
+
 /* Define the MAKEFLAGS and MFLAGS variables to reflect the settings of the
    command switches.  Include options with args if ALL is nonzero.
    Don't include options with the `no_makefile' flag set if MAKEFILE.  */
@@ -1503,7 +1565,7 @@ define_makeflags (all, makefile)
     if (new->arg == 0)							      \
       ++flagslen;		/* Just a single flag letter.  */	      \
     else								      \
-      flagslen += 1 + 1 + 1 + 1 + new->arglen; /* " -x foo" */		      \
+      flagslen += 1 + 1 + 1 + 1 + 2 * new->arglen; /* " -x foo" */	      \
     if (!isalnum (cs->c))						      \
       /* This switch has no single-letter version, so we use the long.  */    \
       flagslen += 2 + strlen (cs->long_name);				      \
@@ -1597,11 +1659,11 @@ define_makeflags (all, makefile)
       for (cv = command_variables; cv != 0; cv = cv->next)
 	{
 	  v = cv->variable;
-	  flagslen += strlen (v->name);
+	  flagslen += 2 * strlen (v->name);
 	  if (! v->recursive)
 	    ++flagslen;
 	  ++flagslen;
-	  flagslen += strlen (v->value);
+	  flagslen += 2 * strlen (v->value);
 	}
     }
 
@@ -1672,17 +1734,12 @@ define_makeflags (all, makefile)
 	}
       for (cv = command_variables; cv != 0; cv = cv->next)
 	{
-	  /* XXX Quoting? */
-	  unsigned int len;
 	  v = cv->variable;
-	  len = strlen (v->name);
-	  bcopy (v->name, p, len);
-	  p += len;
+	  p = shell_quote (p, v->name);
 	  if (! v->recursive)
 	    *p++ = ':';
-	  len = strlen (v->value);
-	  bcopy (v->value, p, len);
-	  p += len;
+	  *p++ = '=';
+	  p = shell_quote (p, v->value);
 	  *p++ = ' ';
 	  ++words;
 	}
