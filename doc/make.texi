@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.8 2002/09/18 04:35:52 psmith Exp $
+@set RCSID $Id: make.texi,v 1.9 2002/09/18 20:51:58 psmith Exp $
 @set EDITION 0.60
 @set VERSION 3.80
 @set UPDATED 08 July 2002
@@ -442,24 +442,36 @@ documentation!
 
 Before reporting a bug or trying to fix it yourself, try to isolate it
 to the smallest possible makefile that reproduces the problem.  Then
-send us the makefile and the exact results @code{make} gave you.  When
-generating this small makefile, be sure to not use any non-free or
-unusual tools in your commands: you can almost always emulate what
+send us the makefile and the exact results @code{make} gave you,
+including any error or warning messages.  Please don't paraphrase
+these messages: it's best to cut and paste them into your report.
+When generating this small makefile, be sure to not use any non-free
+or unusual tools in your commands: you can almost always emulate what
 such a tool would do with simple shell commands.  Finally, be sure to
 explain what you expected to occur; this will help us decide whether
 the problem was really in the documentation.
 
-Once you've got a precise problem, please send electronic mail to:
+Once you have a precise problem you can report it in one of two ways.
+Either send electronic mail to:
 
 @example
     bug-make@@gnu.org
 @end example
 
 @noindent
-Please include the version number of @code{make} you are using.  You can
-get this information with the command @samp{make --version}.
-Be sure also to include the type of machine and operating system you are
-using.
+or use our Web-based project management tool, at:
+
+@example
+    http://savannah.gnu.org/projects/make/
+@end example
+
+@noindent
+In addition to the information above, please be careful to include the
+version number of @code{make} you are using.  You can get this
+information with the command @samp{make --version}.  Be sure also to
+include the type of machine and operating system you are using.  One
+way to obtain this information is by looking at the final lines of
+output from the command @samp{make --help}.
 
 @node Introduction, Makefiles, Overview, Top
 @comment  node-name,  next,  previous,  up

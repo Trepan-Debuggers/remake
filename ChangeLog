@@ -1,3 +1,11 @@
+2002-09-18  Paul D. Smith  <psmith@gnu.org>
+
+	* doc/make.texi (Bugs): Update with some info on Savannah, etc.
+
+	* read.c (eval): Expansion of arguments to export/unexport was
+	ignoring all arguments after the first one.  Change the algorithm
+	to expand the whole line once, then parse the results.
+
 2002-09-17  Paul D. Smith  <psmith@gnu.org>
 
 	Fix Bug #940 (plus another bug I found while looking at this):
