@@ -21,6 +21,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 #include "config.h"
+#undef	HAVE_CONFIG_H
 #define HAVE_CONFIG_H
 
 #ifdef	CRAY
