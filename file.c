@@ -394,6 +394,8 @@ set_command_state (file, state)
 {
   struct dep *d;
 
+  file->command_state = state;
+
   for (d = file->also_make; d != 0; d = d->next)
     d->file->command_state = state;
 }
