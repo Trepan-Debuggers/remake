@@ -506,7 +506,12 @@ main (argc, argv, envp)
   /* Decode the switches.  */
 
   decode_env_switches ("MAKEFLAGS", 9);
+#if 0
+  /* People write things like:
+     	MFLAGS="CC=gcc -pipe" "CFLAGS=-g"
+     and we set the -p, -i and -e switches.  Doesn't seem quite right.  */
   decode_env_switches ("MFLAGS", 6);
+#endif
   decode_switches (argc, argv, 0);
 
   /* Print version information.  */
