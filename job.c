@@ -1024,7 +1024,6 @@ start_job_command (child)
 
 	dos_command_running = 1;
 	proc_return = system (cmdline);
-	dos_command_running = 0;
 	environ = parent_environ;
 	execute_by_shell = 0;	/* for the next time */
       }
@@ -1032,9 +1031,16 @@ start_job_command (child)
       {
 	dos_command_running = 1;
 	proc_return = spawnvpe (P_WAIT, argv[0], argv, child->environment);
-	dos_command_running = 0;
       }
 
+    /* Need to unblock signals before turning off
+       dos_command_running, so that child's signals
+       will be treated as such (see fatal_error_signal).  */
+    unblock_sigs ();
+    dos_command_running = 0;
+
+    /* If the child got a signal, dos_status has its
+       high 8 bits set, so be careful not to alter them.  */
     if (proc_return == -1)
       dos_status |= 0xff;
     else
