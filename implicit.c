@@ -371,7 +371,7 @@ pattern_search (file, archive, depth, recursions)
 		}
 	      /* This code, given FILENAME = "lib/foo.o", dependency name
 		 "lib/foo.c", and VPATH=src, searches for "src/lib/foo.c".  */
-	      if (vpath_search (&p))
+	      if (vpath_search (&p, (time_t *) 0))
 		{
 		  DEBUGP2 ("Found dependency as `%s'.%s\n", p, "");
 		  found_files[deps_found++] = p;
