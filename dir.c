@@ -357,6 +357,7 @@ file_impossible (filename)
 	xmalloc (sizeof (struct directory_contents));
       dir->contents->dev = dir->contents->ino = 0;
       dir->contents->files = 0;
+      dir->contents->dirstream = 0;
     }
 
   if (dir->contents->files == 0)
@@ -545,6 +546,8 @@ read_dirstream (stream)
 	}
       ds->elt = ds->contents->files[++ds->bucket];
     }
+
+  return 0;
 }
 
 void
