@@ -226,7 +226,7 @@ tarfiles: $(tarfiles)
 vmsfiles = config.h-vms makefile.com makefile.vms readme.vms \
 	   vmsdir.h vmsfunctionc.c vmsify.c
 amigafiles = README.Amiga config.ami Makefile.ami SCOPTIONS SMakefile \
-	     amiga.c make.lnk
+	     amiga.c amiga.h make.lnk
 distfiles=README INSTALL COPYING ChangeLog NEWS \
           configure Makefile.in configure.in build.sh.in mkinstalldirs \
 	  configh.dos configure.bat \
