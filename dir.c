@@ -526,7 +526,7 @@ open_dirstream (directory)
   new->bucket = 0;
   new->elt = new->contents->files[0];
 
-  return new;
+  return (__ptr_t) new;
 }
 
 static const char *
