@@ -81,7 +81,9 @@ sub run_make_test
     # Replace @MAKEFILE@ with the makefile name and @MAKE@ with the path to
     # make
     $makestring =~ s/#MAKEFILE#/$makefile/g;
+    $makestring =~ s/#MAKEPATH#/$mkpath/g;
     $makestring =~ s/#MAKE#/$make_name/g;
+    $makestring =~ s/#PWD#/$pwd/g;
 
     # Populate the makefile!
     open(MAKEFILE, "> $makefile") || die "Failed to open $makefile: $!\n";
@@ -93,7 +95,9 @@ sub run_make_test
 
   $answer && $answer !~ /\n$/s and $answer .= "\n";
   $answer =~ s/#MAKEFILE#/$makefile/g;
+  $answer =~ s/#MAKEPATH#/$mkpath/g;
   $answer =~ s/#MAKE#/$make_name/g;
+  $answer =~ s/#PWD#/$pwd/g;
 
   &run_make_with_options($makefile, $options, &get_logfile(0), $err_code);
   &compare_output($answer, &get_logfile(1));

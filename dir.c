@@ -1131,8 +1131,8 @@ read_dirstream (__ptr_t stream)
 	    }
 	  d = (struct dirent *) buf;
 #ifdef __MINGW32__
-# if __MINGW32_VERSION_MAJOR < 3 || (__MINGW32_VERSION_MAJOR == 3 && \
-				     __MINGW32_VERSION_MINOR == 0)
+# if __MINGW32_MAJOR_VERSION < 3 || (__MINGW32_MAJOR_VERSION == 3 && \
+				     __MINGW32_MINOR_VERSION == 0)
 	  d->d_name = xmalloc(len);
 # endif
 #endif

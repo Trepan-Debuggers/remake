@@ -2150,13 +2150,21 @@ handle_non_switch_argument (char *arg, int env)
   v = try_variable_definition (0, arg, o_command, 0);
   if (v != 0)
     {
-      /* It is indeed a variable definition.  Record a pointer to
-	 the variable for later use in define_makeflags.  */
-      struct command_variable *cv
-	= (struct command_variable *) xmalloc (sizeof (*cv));
-      cv->variable = v;
-      cv->next = command_variables;
-      command_variables = cv;
+      /* It is indeed a variable definition.  If we don't already have this
+	 one, record a pointer to the variable for later use in
+	 define_makeflags.  */
+      struct command_variable *cv;
+
+      for (cv = command_variables; cv != 0; cv = cv->next)
+        if (cv->variable == v)
+          break;
+
+      if (! cv) {
+        cv = (struct command_variable *) xmalloc (sizeof (*cv));
+        cv->variable = v;
+        cv->next = command_variables;
+        command_variables = cv;
+      }
     }
   else if (! env)
     {
@@ -2907,4 +2915,7 @@ log_working_directory (int entering)
       else
         printf (_("%s[%u]: Leaving directory `%s'\n"),
                 program, makelevel, starting_directory);
+
+  /* Flush stdout to be sure this comes before any stderr output.  */
+  fflush (stdout);
 }

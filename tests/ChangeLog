@@ -1,3 +1,8 @@
+2005-02-09  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/recursion: Test command line variable settings:
+	only one instance of a given variable should be provided.
+
 2004-11-30  Boris Kolpackov  <boris@kolpackov.net>
 
 	* tests/scripts/functions/abspath: New file: test `abspath'
