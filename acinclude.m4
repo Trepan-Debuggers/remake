@@ -243,9 +243,16 @@ if test "$ac_cv_func_select" = yes; then
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif],
-[extern select ($ac_cv_type_fd_set_size_t,
+[#ifdef __STDC__
+extern select ($ac_cv_type_fd_set_size_t,
  $ac_cv_type_fd_set *,  $ac_cv_type_fd_set *, $ac_cv_type_fd_set *,
- $ac_type_timeval *);],
+ $ac_type_timeval *);
+#else
+extern select ();
+  $ac_cv_type_fd_set_size_t s;
+  $ac_cv_type_fd_set *p;
+  $ac_type_timeval *t;
+#endif],
 [ac_found=yes ; break 3],ac_found=no)
           done
         done

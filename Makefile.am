@@ -31,13 +31,6 @@ MOSTLYCLEANFILES = loadavg.c
 CLEANFILES =	loadavg
 
 
-# --------------- Local BUILD Section
-
-build.sh:  $(top_builddir)/config.status $(srcdir)/build.sh.in
-        cd $(top_builddir) \
-	  && CONFIG_FILES=build.sh.in CONFIG_HEADERS= $(SHELL) ./config.status
-
-
 # --------------- Local INSTALL Section
 
 # If necessary, change the gid of the app and turn on the setgid flag.
