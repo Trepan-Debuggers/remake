@@ -3,7 +3,7 @@
 % Load plain if necessary, i.e., if running under initex.
 \expandafter\ifx\csname fmtname\endcsname\relax\input plain\fi
 %
-\def\texinfoversion{1999-03-20.16}%
+\def\texinfoversion{1999-03-23.17}%
 %
 % Copyright (C) 1985, 86, 88, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99
 % Free Software Foundation, Inc.
@@ -755,6 +755,23 @@ where each line of input produces a line of output.}
     \fi
   \fi
   \parindent = \defaultparindent
+}
+
+% @exampleindent NCHARS
+% We'll use ems for NCHARS like @paragraphindent.
+% It seems @exampleindent asis isn't necessary, but
+% I preserve it to make it similar to @paragraphindent.
+\def\exampleindent{\parsearg\doexampleindent}
+\def\doexampleindent#1{%
+  \def\temp{#1}%
+  \ifx\temp\asisword
+  \else
+    \ifx\temp\noneword
+      \lispnarrowing = 0pt
+    \else
+      \lispnarrowing = #1em
+    \fi
+  \fi
 }
 
 % @asis just yields its argument.  Used with @table, for example.
@@ -4075,9 +4092,15 @@ width0pt\relax} \fi
 %% contained text.  This is especially needed for [ and ]
 \def\opnr{{\sf\char`\(}\global\advance\parencount by 1 }
 \def\clnr{{\sf\char`\)}\global\advance\parencount by -1 }
-\def\ampnr{\&}
+\let\ampnr = \&
 \def\lbrb{{\bf\char`\[}}
 \def\rbrb{{\bf\char`\]}}
+
+% Active &'s sneak into the index arguments, so make sure it's defined.
+{
+  \catcode`& = 13
+  \global\let& = \ampnr
+}
 
 % First, defname, which formats the header line itself.
 % #1 should be the function name.
@@ -5587,9 +5610,6 @@ should work if nowhere else does.}
 % \normalbackslash outputs one backslash in fixed width font.
 \def\normalbackslash{{\tt\rawbackslashxx}}
 
-% Say @foo, not \foo, in error messages.
-\escapechar=`\@
-
 % \catcode 17=0   % Define control-q
 \catcode`\\=\active
 
@@ -5634,15 +5654,24 @@ should work if nowhere else does.}
 % Also back turn on active characters that might appear in the input
 % file name, in case not using a pre-dumped format.
 %
-@gdef@fixbackslash{@ifx\@eatinput @let\ = @normalbackslash @fi
-  @catcode`+=@active @catcode`@_=@active}
+@gdef@fixbackslash{%
+  @ifx\@eatinput @let\ = @normalbackslash @fi
+  @catcode`+=@active
+  @catcode`@_=@active
+}
 
-% These look ok in all fonts, so just make them not special.  The @rm below
-% makes sure that the current font starts out as the newly loaded cmr10
-@catcode`@%=@other @catcode`@&=@other @catcode`@#=@other
+% Say @foo, not \foo, in error messages.
+@escapechar = `@@
 
+% These look ok in all fonts, so just make them not special.  
+@catcode`@& = @other
+@catcode`@# = @other
+@catcode`@% = @other
+
+@c Set initial fonts.
 @textfonts
 @rm
+
 
 @c Local variables:
 @c eval: (add-hook 'write-file-hooks 'time-stamp)
