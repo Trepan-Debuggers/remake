@@ -387,12 +387,14 @@ define_automatic_variables ()
   define_variable ("<D", 2, "$(patsubst %/,%,$(dir $<))", o_automatic, 1);
   define_variable ("?D", 2, "$(patsubst %/,%,$(dir $?))", o_automatic, 1);
   define_variable ("^D", 2, "$(patsubst %/,%,$(dir $^))", o_automatic, 1);
+  define_variable ("+D", 2, "$(patsubst %/,%,$(dir $+))", o_automatic, 1);
   define_variable ("@F", 2, "$(notdir $@)", o_automatic, 1);
   define_variable ("%F", 2, "$(notdir $%)", o_automatic, 1);
   define_variable ("*F", 2, "$(notdir $*)", o_automatic, 1);
   define_variable ("<F", 2, "$(notdir $<)", o_automatic, 1);
   define_variable ("?F", 2, "$(notdir $?)", o_automatic, 1);
   define_variable ("^F", 2, "$(notdir $^)", o_automatic, 1);
+  define_variable ("+F", 2, "$(notdir $+)", o_automatic, 1);
 }
 
 int export_all_variables;
