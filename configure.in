@@ -66,6 +66,13 @@ AC_SUBST(REMOTE) REMOTE=stub
 AC_WITH(customs, [REMOTE=cstms
 LIBS="$LIBS libcustoms.a"])
 
+echo checking for location of SCCS get command
+if test -f /usr/sccs/get; then
+  AC_DEFINE(SCCS_GET, "/usr/sccs/get")
+else
+  AC_DEFINE(SCCS_GET, "get")
+fi
+
 AC_OUTPUT(Makefile build.sh glob/Makefile)
 
 dnl Local Variables:
