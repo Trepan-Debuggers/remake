@@ -2,7 +2,7 @@
 @setfilename make.info
 @synindex vr fn
 
-@c $Header: /sources/make/make/Attic/make.texinfo,v 2.1 1988/07/02 12:14:48 mcgrath Rel $
+@c $Header: /sources/make/make/Attic/make.texinfo,v 2.2 1988/07/02 17:49:14 mcgrath Rel $
 
 @ifinfo
 This file documents the GNU Make utility.
@@ -1489,17 +1489,17 @@ reasons:
 
 @itemize @bullet
 @item
-You may wish to override the usual implicit rule for a few files whose
-names cannot be categorized syntactically but can be given in an
-explicit list.
+You may wish to override the usual implicit rule for a few
+files whose names cannot be categorized syntactically but
+can be given in an explicit list.
 
 @item
-If you cannot be sure of the precise contents of the directories you
-are using, you may not be sure which other irrelevant files might lead
-@code{make} to use the wrong implicit rule.  The choice might depend
-on the order in which the implicit rule search is done.  With static
-pattern rules, there is no uncertainty: each rule applies to precisely
-the targets specified.
+If you cannot be sure of the precise contents of the directories
+you are using, you may not be sure which other irrelevant files
+might lead @code{make} to use the wrong implicit rule.  The choice
+might depend on the order in which the implicit rule search is done.
+With static pattern rules, there is no uncertainty: each rule applies
+to precisely the targets specified.
 @end itemize
 
 @node Multiple Rules, Double-Colon, Static Pattern, Rules
@@ -1603,14 +1603,14 @@ a @samp{#} at the start of a word starts a comment.
 @cindex silent operation
 @cindex @@ (in commands)
 @cindex -n
-Normally @code{make} prints each command line before it is executed.  We
-call this @dfn{echoing} because it gives the appearance that you are typing
-the commands yourself.
+Normally @code{make} prints each command line before it is executed.
+We call this @dfn{echoing} because it gives the appearance that you
+are typing the commands yourself.
 
 When a line starts with @samp{@@}, it is normally not echoed.  The
-@samp{@@} is discarded before the command is passed to the shell.  Typically
-you would use this for a command whose only effect is to print something,
-such as an @code{echo} command.
+@samp{@@} is discarded before the command is passed to the shell.
+Typically you would use this for a command whose only effect is to
+print something, such as an @code{echo} command.
 
 When @code{make} is given the flag @samp{-n}, echoing is all that happens,
 no execution.  @xref{Options}.  In this case and only this case, even the
@@ -1623,8 +1623,7 @@ actually doing them.
 The @samp{-s} flag to @code{make} prevents all echoing, as if all commands
 started with @samp{@@}.  A rule in the makefile for the special target
 @code{.SILENT} has the same effect (@pxref{Special Targets}).
-@code{.SILENT} is essentially obsolete since @samp{@@} is more
-general.@refill
+@code{.SILENT} is essentially obsolete since @samp{@@} is more general.@refill
 
 @node Execution, Errors, Echoing, Commands
 @section Command Execution
@@ -1662,8 +1661,8 @@ foo : bar/lose
 @end group
 
 @vindex SHELL
-The program used as the shell is taken from the variable @code{SHELL}.  By
-default, the program @file{/bin/sh} is used.
+The program used as the shell is taken from the variable @code{SHELL}.
+By default, the program @file{/bin/sh} is used.
 
 Unlike most variables, the variable @code{SHELL} will not be set from the
 environment, except in a recursive @code{make}.  This is because the
@@ -1678,7 +1677,7 @@ choices like this to affect the functioning of makefiles.
 @cindex error (in commands)
 After each shell command returns, @code{make} looks at its exit status.
 If the command completed successfully, the next command line is executed in
-a new shell, or after the last command line the rule is finished.
+a new shell, or after the last command line is executed, the rule is finished.
 
 If there is an error (the exit status is nonzero), @code{make} gives up on
 the current rule, and perhaps on all rules.
@@ -1701,7 +1700,9 @@ all commands of all rules.  A rule in the makefile for the special target
 obsolete because @samp{-} is more general.
 
 When errors are to be ignored, because of either a @samp{-} or the
-@samp{-i} flag, @code{make} treats an error return just like success.
+@samp{-i} flag, @code{make} treats an error return just like success,
+except that it prints out a message telling you the status code the
+command exited with and saying that the error has been ignored.
 
 @cindex -k
 When an error happens that @code{make} has not been told to ignore,
@@ -1807,7 +1808,7 @@ executed for recursive invocations.
 
 Also, any arguments that define variable values are added to @code{MAKE},
 so the sub-@code{make} gets them too.  Thus, if you do @samp{make
-CFLAGS=-O}, so that all C-compilations will be optimized, the
+CFLAGS=-O}, so that all C compilations will be optimized, the
 sub-@code{make} is run with @samp{cd subdir; /bin/make CFLAGS=-O}.@refill
 
 As a special feature, using the variable @code{MAKE} in the commands of a
@@ -1883,7 +1884,7 @@ The options @samp{-c}, @samp{-d}, @samp{-f}, @samp{-I}, @samp{-o}, and
 @samp{-p} are not put into @code{MAKEFLAGS}; these options are not passed
 down.@refill
 
-If you don't want to pass the other the flags down, you must change the
+If you don't want to pass the other flags down, you must change the
 value of @code{MAKEFLAGS}, like this:
 
 @example
@@ -1919,7 +1920,7 @@ make: Entering directory `/u/gnu/make'.
 @end example
 
 @noindent
-before doing anything else, and a line of this form:
+before doing anything else, and a line of the form:
 
 @example
 make: Leaving directory `/u/gnu/make'.
@@ -4539,8 +4540,9 @@ in an archive reference.  @xref{Automatic}.
 
 @item
 The automatic variables @code{$@@}, @code{$*}, @code{$<} and @code{$%} have
-corresponding forms such as @code{$(@@F)} and @code{$(@@D)} which with only
-the filename and only the directory.  @xref{Automatic}.@refill
+corresponding forms such as @code{$(@@F)} and @code{$(@@D)} which are the
+simple form (such as @code{$@@}) with only the filename and only the
+directory, respectively.  @xref{Automatic}.@refill
 
 @item
 Substitution variable references.  @xref{Reference}.
@@ -4558,7 +4560,7 @@ options are specified.  @xref{Recursion}.  I'm told that Unix System V
 An implicit suffix rule @samp{@var{x}.a:} makes
 @file{@var{lib}(@var{name}.o)} from @file{@var{name}.@var{x}}.  In GNU
 @code{make}, this is actually implemented by using one pattern rule for
-making library-archive files and rule-chaining.  @xref{Chained Rules}.@refill
+making library-archive files and rule chaining.  @xref{Chained Rules}.@refill
 @end itemize
 
 The Sun Unix (and probably System V) version of @code{make} fails to
@@ -4566,7 +4568,7 @@ support variable references using braces (@samp{@{} and @samp{@}}) rather
 than parantheses (@pxref{Reference}), and to set the @code{MFLAGS} variable
 to the list of options (the same list as in @code{MAKEFLAGS}).@refill
 
-The remaining new features are inventions new to GNU @code{make}.
+The remaining features are inventions new to GNU @code{make}.
 
 @itemize @bullet
 @item
@@ -4591,13 +4593,13 @@ come from the environment since environment variable
 definitions do not override those in makefiles.
 @itemize @bullet
 @item
-The @samp{-c} to change directory.  @xref{Options}.
+The @samp{-c} command option to change directories.  @xref{Options}.
 
 @item
 Simply-expanded variables.  @xref{Flavors}.
 
 @item
-Phony targets.  @xref{Phony Targets}.
+Phony targets with the special target @code{.PHONY}.  @xref{Phony Targets}.
 @xref{Recursion}.
 
 Variable expansion functions.  @xref{Functions}.
@@ -4626,16 +4628,13 @@ The automatic variable @code{$^} contains a list of all
 dependencies of the current target.  @xref{Automatic}.
 @item
 Included makefiles never determine the default goal.
-There is a fully complete default set of implicit rules using
-file with suffixes @samp{.out}, @samp{.a}, @samp{.o},
-@samp{.s}, @samp{.c}, @samp{.f}, @samp{.p}, @samp{.F},
-@samp{.e}, @samp{.r}, @samp{.y}, @samp{.ye}, @samp{.yr} and
-@samp{.l}.  @xref{Catalogue of Rules}.@refill
+There is a complete default set of implicit rules to operate on libraries,
+assembler, C, Fortran, Pascal, EFL, Ratfor, Yacc, and Lex sources and RCS
+and SCCS files.  @xref{Catalogue of Rules}.
 
 @item
-Leading sequences of @samp{./} are stripped from file names,
-so that @file{./@var{file}} and @file{@var{file}} are
-considered to be the same file.
+Leading sequences of @samp{./} are stripped from file names, so that
+@file{./@var{file}} and @file{@var{file}} are considered to be the same file.
 @item
 Stripping leading sequences of @samp{./} from file names, so that
 Dependencies of the form @samp{-l@var{name}} are searched for
@@ -4654,6 +4653,9 @@ execute commands.  It is reset to @samp{/bin/sh}.@refill
 
 @item
 Intermediate implicit files.  @xref{Chained Rules}.
+
+@item
+@item
 Special search method for library dependencies written in the form
 @samp{-l@var{name}}.  @xref{Libraries/Search}.
 
