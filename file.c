@@ -403,7 +403,7 @@ snap_deps ()
       else
 	for (d = f->deps; d != 0; d = d->next)
 	  for (f2 = d->file; f2 != 0; f2 = f2->prev)
-	    f2->command_flags |= COMMANDS_NOERROR;
+	    f2->command_flags |= COMMANDS_SILENT;
     }
 
   f = lookup_file (".POSIX");
