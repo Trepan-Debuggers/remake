@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.182 1999/09/06 05:21:56 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.183 1999/09/11 05:10:30 psmith Exp $
 @set EDITION 0.53
 @set VERSION 3.78
 @set UPDATED 14 April 1999
@@ -9455,7 +9455,7 @@ One of the most common reasons for this message is that you (or perhaps
 your oh-so-helpful editor, as is the case with many MS-Windows editors)
 have attempted to indent your command scripts with spaces instead of a
 TAB character.  In this case, @code{make} will use the second form of
-the error above. Remember that every line in the command script must
+the error above.  Remember that every line in the command script must
 begin with a TAB character.  Eight spaces do not count.  @xref{Rule
 Syntax}.
 

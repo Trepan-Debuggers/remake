@@ -49,4 +49,4 @@
 #define HAVE_VPRINTF 1
 
 /* Build host information. */
-#define MAKE_HOST "DOS (DJGPP)"
+#define MAKE_HOST "i386-pc-msdosdjgpp"

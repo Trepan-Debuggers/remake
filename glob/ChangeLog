@@ -1,3 +1,7 @@
+1999-09-06  Paul D. Smith  <psmith@gnu.org>
+
+	* fnmatch.c: Update to latest version from GLIBC.
+
 1999-07-21  Paul D. Smith  <psmith@gnu.org>
 
 	* glob.c, glob.h, fnmatch.c, fnmatch.h: Update to latest version
