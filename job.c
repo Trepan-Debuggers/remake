@@ -689,6 +689,8 @@ start_job_command (child)
     {
       /* Fork the child process.  */
 
+      char *parent_environ;
+
 #ifdef	 POSIX
       (void) sigprocmask (SIG_BLOCK, &fatal_signal_set, (sigset_t *) 0);
 #else
@@ -698,7 +700,9 @@ start_job_command (child)
 #endif
 
       child->remote = 0;
+      parent_environ = environ;
       child->pid = vfork ();
+      environ = parent_environ;	/* Restore value child may have clobbered.  */
       if (child->pid == 0)
 	{
 	  /* We are the child side.  */
@@ -1073,6 +1077,8 @@ child_execute_job (stdin_fd, stdout_fd, argv, envp)
   exec_command (argv, envp);
 }
 
+#if 0
+
 /* Search PATH for FILE.
    If successful, store the full pathname in PROGRAM and return 1.
    If not sucessful, return zero.  */
@@ -1171,6 +1177,7 @@ search_path (file, path, program)
 
   return 0;
 }
+#endif /* search_path commented out */
 
 /* Replace the current process with one running the command in ARGV,
    with environment ENVP.  This function does not return.  */
@@ -1180,71 +1187,54 @@ exec_command (argv, envp)
      char **argv, **envp;
 {
   char *shell, *path;
-  PATH_VAR (program);
-  register char **ep;
-
-  shell = path = 0;
-  for (ep = envp; *ep != 0; ++ep)
-    {
-      if (shell == 0 && !strncmp(*ep, "SHELL=", 6))
-	shell = &(*ep)[6];
-      else if (path == 0 && !strncmp(*ep, "PATH=", 5))
-	path = &(*ep)[5];
-      else if (path != 0 && shell != 0)
-	break;
-    }
 
   /* Be the user, permanently.  */
   child_access ();
 
-  if (!search_path (argv[0], path, program))
-    error ("%s: Command not found", argv[0]);
-  else
+  /* Run the program.  */
+  environ = envp;
+  execvp (argv[0], argv);
+  
+  switch (errno)
     {
-      /* Run the program.  */
-      execve (program, argv, envp);
+    case ENOENT:
+      error ("%s: Command not found", argv[0]);
+      break;
+    case ENOEXEC:
+      {
+	/* The file is not executable.  Try it as a shell script.  */
+	char *shell;
+	char **new_argv;
+	int argc;
 
-      if (errno == ENOEXEC)
-	{
-	  PATH_VAR (shell_program);
-	  char *shell_path;
-	  if (shell == 0)
-	    shell_path = default_shell;
-	  else
-	    {
-	      if (search_path (shell, path, shell_program))
-		shell_path = shell_program;
-	      else
-		{
-		  shell_path = 0;
-		  error ("%s: Shell program not found", shell);
-		}
-	    }
+	shell = getenv ("SHELL");
+	if (shell == 0)
+	  shell = default_shell;
 
-	  if (shell_path != 0)
-	    {
-	      char **new_argv;
-	      int argc;
+	argc = 1;
+	while (argv[argc] != 0)
+	  ++argc;
 
-	      argc = 1;
-	      while (argv[argc] != 0)
-		++argc;
+	new_argv = (char **) alloca ((1 + argc + 1) * sizeof (char *));
+	new_argv[0] = shell;
+	new_argv[1] = program;
+	while (argc > 0)
+	  {
+	    new_argv[1 + argc] = argv[argc];
+	    --argc;
+	  }
 
-	      new_argv = (char **) alloca ((1 + argc + 1) * sizeof (char *));
-	      new_argv[0] = shell_path;
-	      new_argv[1] = program;
-	      while (argc > 0)
-		{
-		  new_argv[1 + argc] = argv[argc];
-		  --argc;
-		}
+	execvp (shell, new_argv);
+	if (errno == ENOENT)
+	  error ("%s: Shell program not found", shell);
+	else
+	  perror_with_name ("execvp: ", shell);
+	break;
+      }
 
-	      execve (shell_path, new_argv, envp);
-	      perror_with_name ("execve: ", shell_path);
-	    }
-	}
-      else
-	perror_with_name ("execve: ", program);
+    default:
+      perror_with_name ("execvp: ", argv[0]);
+      break;
     }
 
   _exit (127);
