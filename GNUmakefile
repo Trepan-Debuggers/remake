@@ -1,6 +1,6 @@
 # GNU Make-specific makefile for GNU Make.
 
-# Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+# Copyright (C) 1990, 91, 92, 93, 94, 95 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 # 
 # GNU Make is free software; you can redistribute it and/or modify
@@ -50,6 +50,7 @@ exec_prefix = $(prefix)
 extras := $(filter-out getloadavg.o @%@,$(extras)) getloadavg.o
 LOADLIBES := $(filter-out @%@,$(LOADLIBES))
 ALLOCA := $(filter-out @%@,$(ALLOCA))
+CPPFLAGS := $(filter-out @%@,$(CPPFLAGS)) -DHAVE_CONFIG_H
 
 ifdef AC_MACRODIR
 configure config.h.in: $(patsubst %,$(AC_MACRODIR)/%.m4,acspecific acgeneral)
@@ -92,8 +93,6 @@ GLOB =
 
 else
 
-CPPFLAGS := $(filter-out @%@,$(CPPFLAGS)) -Iglob
-
 endif	 # works-for-make
 endif	 # $(libc_dir)
 endif	 # !no_libc
@@ -114,7 +113,7 @@ $(archpfx)load.o: load.c
 $(archpfx)load.dep: load.c
 	$(mkdep) $(LOAD_AVG) $< | sed 's,$*\.o,& $@,' > $@
 
-CPPFLAGS := -I$(ARCH) $(CPPFLAGS) -DHAVE_CONFIG_H $(filter-out @%@,$(defines))
+CPPFLAGS := -I$(ARCH) -DHAVE_CONFIG_H $(filter-out @%@,$(CPPFLAGS))
 
 ifneq "$(wildcard $(ARCH)/makefile)" ""
 include $(ARCH)/makefile
