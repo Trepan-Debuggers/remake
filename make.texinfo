@@ -8,8 +8,8 @@
 
 @set EDITION 0.37
 @set VERSION 3.63 Beta
-@set UPDATED 28 August 1992
-@set UPDATE-MONTH August 1992
+@set UPDATED 15 September 1992
+@set UPDATE-MONTH September 1992
 
 @c finalout
 
@@ -5126,6 +5126,7 @@ Silent operation; do not print the commands as they are executed.
 
 @item -S
 @itemx --no-keep-going
+@itemx --stop
 Cancel the effect of the @samp{-k} option.  This is never necessary
 except in a recursive @code{make} where @samp{-k} might be inherited
 from the top-level @code{make} via @code{MAKEFLAGS} (@pxref{Recursion, ,Recursive Use of @code{make}})
