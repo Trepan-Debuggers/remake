@@ -19,7 +19,8 @@ AC_UID_T			dnl Also does gid_t.
 AC_GETGROUPS_T
 AC_PID_T
 AC_RETSIGTYPE
-AC_HAVE_HEADERS(unistd.h limits.h sys/param.h fcntl.h string.h memory.h)
+AC_HAVE_HEADERS(unistd.h limits.h sys/param.h fcntl.h string.h memory.h \
+	        sys/timeb.h)
 AC_MINUS_C_MINUS_O
 AC_CONST			dnl getopt needs this.
 AC_STAT_MACROS_BROKEN
