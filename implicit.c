@@ -528,8 +528,6 @@ pattern_search (file, archive, depth, recursions)
       file->deps = dep;
     }
  
-  uniquize_deps (file->deps);
-
   if (!checked_lastslash[foundrule])
     file->stem = stem[stemlen] == '\0' ? stem : savestring (stem, stemlen);
   else
