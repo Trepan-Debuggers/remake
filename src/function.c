@@ -66,7 +66,7 @@ function_table_entry_hash_cmp (const void *xv, const void *yv)
   return_STRING_N_COMPARE (x->name, y->name, x->len);
 }
 
-static struct hash_table function_table;
+static hash_table_t function_table;
 
 
 /*! Store into VARIABLE_BUFFER at O the result of scanning TEXT and replacing
@@ -885,7 +885,7 @@ func_filter_filterout (char *o, char **argv, const char *funcname)
   struct a_pattern **pattail;
   struct a_pattern *pp;
 
-  struct hash_table a_word_table;
+  hash_table_t a_word_table;
   int is_filter = streq (funcname, "filter");
   char *pat_iterator = argv[0];
   char *word_iterator = argv[1];

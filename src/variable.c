@@ -348,7 +348,7 @@ lookup_variable (const char *name, unsigned int length)
       const struct variable_set *set = setlist->set;
       variable_t *v;
 
-      v = (variable_t *) hash_find_item ((struct hash_table *) &set->table, &var_key);
+      v = (variable_t *) hash_find_item ((hash_table_t *) &set->table, &var_key);
       if (v)
 	return v->special ? handle_special_var (v) : v;
     }
@@ -426,7 +426,7 @@ lookup_variable_in_set (const char *name, unsigned int length,
   var_key.name = (char *) name;
   var_key.length = length;
 
-  return (variable_t *) hash_find_item ((struct hash_table *) &set->table, &var_key);
+  return (variable_t *) hash_find_item ((hash_table_t *) &set->table, &var_key);
 }
 
 /*! Initialize FILE's variable set list.  If FILE already has a
@@ -783,7 +783,7 @@ target_environment (struct file *file)
 {
   struct variable_set_list *set_list;
   struct variable_set_list *s;
-  struct hash_table table;
+  hash_table_t table;
   variable_t **v_slot;
   variable_t **v_end;
   variable_t makelevel_key;

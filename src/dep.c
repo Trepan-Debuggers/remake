@@ -226,7 +226,7 @@ dep_hash_cmp (const void *x, const void *y)
 void
 uniquize_deps (dep_t *chain)
 {
-  struct hash_table deps;
+  hash_table_t deps;
   dep_t **depp;
 
   hash_init (&deps, 500, dep_hash_1, dep_hash_2, dep_hash_cmp);

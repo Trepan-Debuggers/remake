@@ -80,13 +80,14 @@ static FILE_TIMESTAMP name_mtime PARAMS ((char *name));
 static int library_search PARAMS ((char **lib, FILE_TIMESTAMP *mtime_ptr));
 
 
-/* Remake all the goals in the `struct dep' chain GOALS.  Return -1 if nothing
-   was done, 0 if all goals were updated successfully, or 1 if a goal failed.
-   If MAKEFILES is nonzero, these goals are makefiles, so -t, -q, and -n should
-   be disabled for them unless they were also command-line targets, and we
-   should only make one goal at a time and return as soon as one goal whose
-   `changed' member is nonzero is successfully made.  */
-
+/*! Remake all the goals in the `struct dep' chain GOALS.  Return -1
+   if nothing was done, 0 if all goals were updated successfully, or 1
+   if a goal failed.  If MAKEFILES is nonzero, these goals are
+   makefiles, so -t, -q, and -n should be disabled for them unless
+   they were also command-line targets, and we should only make one
+   goal at a time and return as soon as one goal whose `changed'
+   member is nonzero is successfully made.
+*/
 int
 update_goal_chain (dep_t *goals, int makefiles)
 {

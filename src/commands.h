@@ -44,10 +44,24 @@ typedef struct commands commands_t;
 #define	COMMANDS_SILENT		2 /* Silent: @.  */
 #define	COMMANDS_NOERROR	4 /* No errors: -.  */
 
+/*! Execute the commands to remake FILE.  If they are currently
+   executing, return or have already finished executing, just return.
+   Otherwise, fork off a child process to run the first command line
+   in the sequence.  
+*/
 extern void execute_file_commands PARAMS ((file_t *file, 
 					   target_stack_node_t *p_call_stack));
+/*! Print out the commands in CMDS.  */
 extern void print_commands PARAMS ((commands_t *cmds));
+
+/*! Delete all non-precious targets of CHILD unless they were already
+   deleted.  Set the flag in CHILD to say they've been deleted.  
+*/
 extern void delete_child_targets PARAMS ((child_t *child));
+
+/*! Chop CMDS up into individual command lines if necessary.  Also set
+   the `lines_flags' and `any_recurse' members.
+*/
 extern void chop_commands PARAMS ((commands_t *cmds));
 
 #endif /*COMMANDS_H*/

@@ -243,9 +243,9 @@ set_file_variables (file_t *file)
 #undef	DEFINE_VARIABLE
 }
 
-/* Chop CMDS up into individual command lines if necessary.
-   Also set the `lines_flags' and `any_recurse' members.  */
-
+/*! Chop CMDS up into individual command lines if necessary.  Also set
+   the `lines_flags' and `any_recurse' members.
+*/
 void
 chop_commands (commands_t *cmds)
 {
@@ -343,10 +343,11 @@ chop_commands (commands_t *cmds)
     }
 }
 
-/* Execute the commands to remake FILE.  If they are currently executing,
-   return or have already finished executing, just return.  Otherwise,
-   fork off a child process to run the first command line in the sequence.  */
-
+/*! Execute the commands to remake FILE.  If they are currently
+   executing, return or have already finished executing, just return.
+   Otherwise, fork off a child process to run the first command line
+   in the sequence.  
+*/
 void
 execute_file_commands (file_t *file, target_stack_node_t *p_call_stack)
 {
@@ -520,9 +521,9 @@ delete_target (struct file *file, char *on_behalf_of)
 }
 
 
-/* Delete all non-precious targets of CHILD unless they were already deleted.
-   Set the flag in CHILD to say they've been deleted.  */
-
+/*! Delete all non-precious targets of CHILD unless they were already
+   deleted.  Set the flag in CHILD to say they've been deleted.  
+*/
 void
 delete_child_targets (child_t *child)
 {
@@ -541,8 +542,8 @@ delete_child_targets (child_t *child)
   child->deleted = 1;
 }
 
-/* Print out the commands in CMDS.  */
-
+/*! Print out the commands in CMDS.
+*/
 void
 print_commands (commands_t *cmds)
 {

@@ -238,7 +238,7 @@ struct directory_contents
     ino_t ino;
 #endif
 #endif /* WINDOWS32 */
-    struct hash_table dirfiles;	/* Files in this directory.  */
+    hash_table_t dirfiles;	/* Files in this directory.  */
     DIR *dirstream;		/* Stream reading this directory.  */
   };
 
@@ -325,7 +325,7 @@ directory_contents_hash_cmp (const void *xv, const void *yv)
 }
 
 /* Table of directory contents hashed by device and inode number.  */
-static struct hash_table directory_contents;
+static hash_table_t directory_contents;
 
 struct directory
   {
@@ -357,7 +357,7 @@ directory_hash_cmp (const void *x, const void *y)
 }
 
 /* Table of directories hashed by name.  */
-static struct hash_table directories;
+static hash_table_t directories;
 
 /* Never have more than this many directories open at once.  */
 

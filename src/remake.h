@@ -45,10 +45,18 @@ extern FILE_TIMESTAMP f_mtime PARAMS ((file_t *file, int search));
   of all files listed in its `also_make' member.  Under -t, this
   function also touches FILE.
   
-  On return, FILE->update_status will no longer be -1 if it was.  */
-
+  On return, FILE->update_status will no longer be -1 if it was.
+*/
 extern void notice_finished_file PARAMS ((file_t *file));
 
+/*! Remake all the goals in the `struct dep' chain GOALS.  Return -1
+   if nothing was done, 0 if all goals were updated successfully, or 1
+   if a goal failed.  If MAKEFILES is nonzero, these goals are
+   makefiles, so -t, -q, and -n should be disabled for them unless
+   they were also command-line targets, and we should only make one
+   goal at a time and return as soon as one goal whose `changed'
+   member is nonzero is successfully made.
+*/
 extern int update_goal_chain PARAMS ((dep_t *goals, int makefiles));
 
 #endif /*REMAKE_H*/
