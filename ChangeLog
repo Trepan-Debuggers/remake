@@ -1,3 +1,24 @@
+2000-01-22  Paul D. Smith  <psmith@gnu.org>
+
+	Integrate GNU gettext support.
+
+	* configure.in: Add AM_GNU_GETTEXT.
+	* Makefile.am: Add options for setting LOCALEDIR, -Iintl, etc.
+	* acinclude.m4: Add gettext autoconf macros.
+	* acconfig.h: Add new gettext #defines.
+	* make.h: Include libintl.h.  Make sure _() and N_() macros are
+	declared.  Make gettext() an empty macro is NLS is disabled.
+	* main.c (struct command_switch switches[]): Can't initialize
+	static data with _() (gettext calls), so use N_() there then use
+	gettext() directly when printing the strings.
+	* remake.c (no_rule_error): The string constants can't be static
+	when initializing _() macros.
+	* file.c (print_file): Reformat a few strings to work better for
+	translation.
+	* po/POTFILES.in, po/Makefile.in.in: New files.  Take
+	Makefile.in.in from the latest GNU tar distribution, as that
+	version works better than the one that comes with gettext.
+
 2000-01-21  Paul D. Smith  <psmith@gnu.org>
 
 	Installed patches for the VMS port.

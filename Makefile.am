@@ -10,12 +10,16 @@ make_SOURCES =	main.c commands.c job.c dir.c file.c misc.c read.c remake.c \
 		commands.h dep.h filedef.h job.h make.h rule.h variable.h \
 		debug.h signame.c signame.h \
 		getopt.c getopt1.c getopt.h
-make_LDADD =	$(LIBOBJS) @ALLOCA@ $(GLOBLIB)
 
-info_TEXINFOS =	make.texinfo
+make_LDADD =	$(LIBOBJS) @ALLOCA@ $(GLOBLIB) @INTLLIBS@
+
 man_MANS =	make.1
+info_TEXINFOS =	make.texinfo
 
-INCLUDES =	$(GLOBINC) -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\"
+localedir =	$(datadir)/locale
+DEFS =		-DLOCALEDIR=\"$(localedir)\" -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\" @DEFS@
+
+INCLUDES =	-I. -I$(srcdir) $(GLOBINC) -I./intl -I$(top_srcdir)/intl
 
 EXTRA_DIST = 	README build.sh.in $(man_MANS) README.customs remote-cstms.c\
 		make-stds.texi texinfo.tex SCOPTIONS SMakefile\
@@ -23,9 +27,10 @@ EXTRA_DIST = 	README build.sh.in $(man_MANS) README.customs remote-cstms.c\
 		README.DOS Makefile.DOS configure.bat dosbuild.bat configh.dos\
 		README.W32 NMakefile config.h.W32 build_w32.bat subproc.bat\
 		readme.vms makefile.vms makefile.com config.h-vms vmsdir.h\
-		vmsfunctions.c vmsify.c
+		vmsfunctions.c vmsify.c\
+		ABOUT-NLS
 
-SUBDIRS =	$(GLOBDIR)
+SUBDIRS =	$(GLOBDIR) intl po
 
 MOSTLYCLEANFILES = loadavg.c
 CLEANFILES =	loadavg
@@ -90,7 +95,7 @@ check-local: check-regression check-loadavg
 #
 loadavg: loadavg.c config.h
 	@rm -f loadavg
-	$(LINK) $(DEFS) $(CPPFLAGS) -DTEST $(make_LDFLAGS) loadavg.c $(LIBS)
+	$(LINK) -DTEST $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(make_LDFLAGS) loadavg.c $(LIBS)
 
 # We copy getloadavg.c into a different file rather than compiling it
 # directly because some compilers clobber getloadavg.o in the process.

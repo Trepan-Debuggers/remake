@@ -256,103 +256,103 @@ static const struct command_switch switches[] =
   {
     { 'b', ignore, 0, 0, 0, 0, 0, 0,
 	0, 0,
-	_("Ignored for compatibility") },
+	N_("Ignored for compatibility") },
     { 'C', string, (char *) &directories, 0, 0, 0, 0, 0,
-	"directory", _("DIRECTORY"),
-	_("Change to DIRECTORY before doing anything") },
+	"directory", N_("DIRECTORY"),
+	N_("Change to DIRECTORY before doing anything") },
     { 'd', string, (char *) &db_flags, 1, 1, 0,
         "basic", 0,
-	"debug", _("FLAGS"),
-	_("Print different types of debugging information") },
+	"debug", N_("FLAGS"),
+	N_("Print different types of debugging information") },
 #ifdef WINDOWS32
     { 'D', flag, (char *) &suspend_flag, 1, 1, 0, 0, 0,
         "suspend-for-debug", 0,
-        _("Suspend process to allow a debugger to attach") },
+        N_("Suspend process to allow a debugger to attach") },
 #endif
     { 'e', flag, (char *) &env_overrides, 1, 1, 0, 0, 0,
 	"environment-overrides", 0,
-	_("Environment variables override makefiles") },
+	N_("Environment variables override makefiles") },
     { 'f', string, (char *) &makefiles, 0, 0, 0, 0, 0,
-	"file", _("FILE"),
-	_("Read FILE as a makefile") },
+	"file", N_("FILE"),
+	N_("Read FILE as a makefile") },
     { 'h', flag, (char *) &print_usage_flag, 0, 0, 0, 0, 0,
 	"help", 0,
-	_("Print this message and exit") },
+	N_("Print this message and exit") },
     { 'i', flag, (char *) &ignore_errors_flag, 1, 1, 0, 0, 0,
 	"ignore-errors", 0,
-	_("Ignore errors from commands") },
+	N_("Ignore errors from commands") },
     { 'I', string, (char *) &include_directories, 1, 1, 0, 0, 0,
-	"include-dir", _("DIRECTORY"),
-	_("Search DIRECTORY for included makefiles") },
+	"include-dir", N_("DIRECTORY"),
+	N_("Search DIRECTORY for included makefiles") },
     { 'j',
         positive_int, (char *) &job_slots, 1, 1, 0,
 	(char *) &inf_jobs, (char *) &default_job_slots,
 	"jobs", "N",
-	_("Allow N jobs at once; infinite jobs with no arg") },
+	N_("Allow N jobs at once; infinite jobs with no arg") },
     { CHAR_MAX+1, string, (char *) &jobserver_fds, 1, 1, 0, 0, 0,
         "jobserver-fds", 0,
         0 },
     { 'k', flag, (char *) &keep_going_flag, 1, 1, 0,
 	0, (char *) &default_keep_going_flag,
 	"keep-going", 0,
-	_("Keep going when some targets can't be made") },
+	N_("Keep going when some targets can't be made") },
 #ifndef NO_FLOAT
     { 'l', floating, (char *) &max_load_average, 1, 1, 0,
 	(char *) &default_load_average, (char *) &default_load_average,
 	"load-average", "N",
-	_("Don't start multiple jobs unless load is below N") },
+	N_("Don't start multiple jobs unless load is below N") },
 #else
     { 'l', positive_int, (char *) &max_load_average, 1, 1, 0,
 	(char *) &default_load_average, (char *) &default_load_average,
 	"load-average", "N",
-	_("Don't start multiple jobs unless load is below N") },
+	N_("Don't start multiple jobs unless load is below N") },
 #endif
     { 'm', ignore, 0, 0, 0, 0, 0, 0,
 	0, 0,
 	"-b" },
     { 'n', flag, (char *) &just_print_flag, 1, 1, 1, 0, 0,
 	"just-print", 0,
-	_("Don't actually run any commands; just print them") },
+	N_("Don't actually run any commands; just print them") },
     { 'o', string, (char *) &old_files, 0, 0, 0, 0, 0,
-	"old-file", _("FILE"),
-	_("Consider FILE to be very old and don't remake it") },
+	"old-file", N_("FILE"),
+	N_("Consider FILE to be very old and don't remake it") },
     { 'p', flag, (char *) &print_data_base_flag, 1, 1, 0, 0, 0,
 	"print-data-base", 0,
-	_("Print make's internal database") },
+	N_("Print make's internal database") },
     { 'q', flag, (char *) &question_flag, 1, 1, 1, 0, 0,
 	"question", 0,
-	_("Run no commands; exit status says if up to date") },
+	N_("Run no commands; exit status says if up to date") },
     { 'r', flag, (char *) &no_builtin_rules_flag, 1, 1, 0, 0, 0,
 	"no-builtin-rules", 0,
-	_("Disable the built-in implicit rules") },
+	N_("Disable the built-in implicit rules") },
     { 'R', flag, (char *) &no_builtin_variables_flag, 1, 1, 0, 0, 0,
 	"no-builtin-variables", 0,
-	_("Disable the built-in variable settings") },
+	N_("Disable the built-in variable settings") },
     { 's', flag, (char *) &silent_flag, 1, 1, 0, 0, 0,
 	"silent", 0,
-	_("Don't echo commands") },
+	N_("Don't echo commands") },
     { 'S', flag_off, (char *) &keep_going_flag, 1, 1, 0,
 	0, (char *) &default_keep_going_flag,
 	"no-keep-going", 0,
-	_("Turns off -k") },
+	N_("Turns off -k") },
     { 't', flag, (char *) &touch_flag, 1, 1, 1, 0, 0,
 	"touch", 0,
-	_("Touch targets instead of remaking them") },
+	N_("Touch targets instead of remaking them") },
     { 'v', flag, (char *) &print_version_flag, 1, 1, 0, 0, 0,
 	"version", 0,
-	_("Print the version number of make and exit") },
+	N_("Print the version number of make and exit") },
     { 'w', flag, (char *) &print_directory_flag, 1, 1, 0, 0, 0,
 	"print-directory", 0,
-	_("Print the current directory") },
+	N_("Print the current directory") },
     { CHAR_MAX+2, flag, (char *) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
 	"no-print-directory", 0,
-	_("Turn off -w, even if it was turned on implicitly") },
+	N_("Turn off -w, even if it was turned on implicitly") },
     { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0,
-	"what-if", _("FILE"),
-	_("Consider FILE to be infinitely new") },
+	"what-if", N_("FILE"),
+	N_("Consider FILE to be infinitely new") },
     { CHAR_MAX+3, flag, (char *) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
 	"warn-undefined-variables", 0,
-	_("Warn when an undefined variable is referenced") },
+	N_("Warn when an undefined variable is referenced") },
     { '\0', }
   };
 
@@ -566,28 +566,24 @@ handle_runtime_exceptions( struct _EXCEPTION_POINTERS *exinfo )
 
   if (! ISDB (DB_VERBOSE))
     {
-      sprintf(errmsg, _("%s: Interrupt/Exception caught "), prg);
-      sprintf(&errmsg[strlen(errmsg)],
-              "(code = 0x%x, addr = 0x%x)\r\n",
-              exrec->ExceptionCode, exrec->ExceptionAddress);
+      sprintf(errmsg,
+              _("%s: Interrupt/Exception caught (code = 0x%x, addr = 0x%x)\n"),
+              prg, exrec->ExceptionCode, exrec->ExceptionAddress);
       fprintf(stderr, errmsg);
       exit(255);
     }
 
   sprintf(errmsg,
-          _("\r\nUnhandled exception filter called from program %s\r\n"), prg);
-  sprintf(&errmsg[strlen(errmsg)], "ExceptionCode = %x\r\n",
-          exrec->ExceptionCode);
-  sprintf(&errmsg[strlen(errmsg)], "ExceptionFlags = %x\r\n",
-          exrec->ExceptionFlags);
-  sprintf(&errmsg[strlen(errmsg)], "ExceptionAddress = %x\r\n",
+          _("\nUnhandled exception filter called from program %s\nExceptionCode = %x\nExceptionFlags = %x\nExceptionAddress = %x\n"),
+          prg, exrec->ExceptionCode, exrec->ExceptionFlags,
           exrec->ExceptionAddress);
 
   if (exrec->ExceptionCode == EXCEPTION_ACCESS_VIOLATION
       && exrec->NumberParameters >= 2)
     sprintf(&errmsg[strlen(errmsg)],
-            _("Access violation: %s operation at address %x\r\n"),
-            exrec->ExceptionInformation[0] ? _("write"): _("read"),
+            (exrec->ExceptionInformation[0]
+             ? _("Access violation: write operation at address %x\n")
+             : _("Access violation: read operation at address %x\n")),
             exrec->ExceptionInformation[1]);
 
   /* turn this on if we want to put stuff in the event log too */
@@ -766,6 +762,11 @@ int main (int argc, char ** argv)
 		    | __system_emulate_chdir);
 
 #endif
+
+  /* Set up gettext/internationalization support.  */
+  setlocale (LC_ALL, "");
+  bindtextdomain (PACKAGE, LOCALEDIR);
+  textdomain (PACKAGE);
 
 #if !defined (HAVE_STRSIGNAL) && !defined (HAVE_SYS_SIGLIST)
   signame_init ();
@@ -2016,12 +2017,12 @@ print_usage (bad)
 	  shortarg[0] = longarg[0] = '\0';
 	  break;
 	case required_argument:
-	  sprintf (longarg, "=%s", cs->argdesc);
-	  sprintf (shortarg, " %s", cs->argdesc);
+	  sprintf (longarg, "=%s", gettext (cs->argdesc));
+	  sprintf (shortarg, " %s", gettext (cs->argdesc));
 	  break;
 	case optional_argument:
-	  sprintf (longarg, "[=%s]", cs->argdesc);
-	  sprintf (shortarg, " [%s]", cs->argdesc);
+	  sprintf (longarg, "[=%s]", gettext (cs->argdesc));
+	  sprintf (shortarg, " [%s]", gettext (cs->argdesc));
 	  break;
 	}
 
@@ -2080,7 +2081,7 @@ print_usage (bad)
 
       fprintf (usageto, "%*s%s.\n",
 	       - DESCRIPTION_COLUMN,
-	       buf, cs->description);
+	       buf, gettext (cs->description));
     }
 
   fprintf (usageto, _("\nReport bugs to <bug-make@gnu.org>.\n"));
