@@ -1,3 +1,18 @@
+Thu Jul 25 19:53:31 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
+
+	From Robert Hoehne <robert.hoehne@Mathematik.TU-Chemnitz.DE>:
+	* dir.c [__MSDOS__] [DJGPP > 1]: Include <libc/dosio.h> and defin
+	`__opendir_flags' initialized to 0.
+	[__MSDOS__] (dosify) [DJGPP > 1]: Return name unchanged if _USE_LFN.
+	(find_directory) [__MSDOS__ && DJGPP > 1]: If _USE_LGN, set
+	__opendir_flags to __OPENDIR_PRESERVE_CASE.
+
+	* vmsfunctions.c (vms_stat): `sys$dassgn (DevChan);' added by kkaempf.
+
+	* GNUmakefile (win32files): Add NMakefile.
+
+	* NMakefile (LDFLAGS_debug): Value fixed by tulloh.
+
 Sat Jul 20 12:32:10 1996  Klaus Kämpf (kkaempf@progis.de)
 
 	* remake.c (f_mtime) [VMS]: Add missing `if' conditional for future
