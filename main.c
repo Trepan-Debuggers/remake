@@ -577,6 +577,9 @@ main (argc, argv, envp)
       makelevel = 0;
   }
 
+  /* Always do -w in sub-makes and under -C.  */
+  print_directory_flag |= directories != 0 || makelevel > 0;
+
   /* Construct the list of include directories to search.  */
 
   construct_include_path (include_directories == 0 ? (char **) 0
