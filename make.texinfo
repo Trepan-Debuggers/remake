@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.147 1994/11/01 08:29:31 roland Exp $
+@set RCSID $Id: make.texinfo,v 2.148 1994/11/01 08:40:19 roland Alpha $
 @set EDITION 0.47 DRAFT
 @set VERSION 3.72 Beta
 @set UPDATED 1 November 1994
@@ -3130,7 +3130,7 @@ exported (unless you unexport them).
 on the command line, by putting them in the @code{MAKEFLAGS} variable.
 @iftex
 See the next section.
-@end iftext
+@end iftex
 @ifinfo
 @xref{Options/Recursion}.
 @end ifinfo
