@@ -46,6 +46,7 @@ static void log_working_directory ();
 static void print_data_base (), print_version ();
 static void decode_switches (), decode_env_switches ();
 static void define_makeflags ();
+static char *quote_as_word ();
 
 /* The structure that describes an accepted command switch.  */
 
@@ -563,6 +564,42 @@ main (argc, argv, envp)
   (void) define_variable ("MAKE_COMMAND", 12, argv[0], o_default, 0);
   (void) define_variable ("MAKE", 4, "$(MAKE_COMMAND)", o_default, 1);
 
+  if (command_variables != 0)
+    {
+      struct command_variable *cv;
+      struct variable *v;
+      unsigned int len = 0;
+      char *value, *p;
+
+      /* Figure out how much space will be taken up by the command-line
+	 variable definitions.  */
+      for (cv = command_variables; cv != 0; cv = cv->next)
+	{
+	  v = cv->variable;
+	  len += 2 * strlen (v->name);
+	  if (! v->recursive)
+	    ++len;
+	  ++len;
+	  len += 2 * strlen (v->value);
+	}
+
+      /* Now allocate a buffer big enough and fill it.  */
+      p = value = alloca (len);
+      for (cv = command_variables; cv != 0; cv = cv->next)
+	{
+	  v = cv->variable;
+	  p = quote_as_word (p, v->name, 0);
+	  if (! v->recursive)
+	    *p++ = ':';
+	  *p++ = '=';
+	  p = quote_as_word (p, v->value, 0);
+	  *p++ = ' ';
+	}
+      p[-1] = '\0';		/* Kill the final space and terminate.  */
+
+      /* Define the variable; this will not override any user definition.  */
+      (void) define_variable ("MAKEOVERRIDES", 13, value, o_env, 0);
+    }
 
   /* If there were -C flags, move ourselves about.  */
   if (directories != 0)
@@ -1503,22 +1540,23 @@ decode_env_switches (envar, len)
 }
 
 /* Quote the string IN so that it will be interpreted as a single word with
-   no magic by the shell.  Write the result into OUT, returning the address
-   of the next character to be written.  Allocating space for OUT twice the
-   length of IN is always sufficient.  */
+   no magic by the shell; if DOUBLE_DOLLARS is nonzero, also double dollar
+   signs to avoid variable expansion in make itself.  Write the result into
+   OUT, returning the address of the next character to be written.
+   Allocating space for OUT twice the length of IN (thrice if
+   DOUBLE_DOLLARS is nonzero) is always sufficient.  */
 
-static 
-#ifdef __GNUC__
-__inline__
-#endif
-char *
-shell_quote (out, in)
+static char *
+quote_as_word (out, in, double_dollars)
      char *out, *in;
+     int double_dollars;
 {
   while (*in != '\0')
     {
       if (index ("^;'\"*?[]$<>(){}|&~`\\ \t\r\n\f\v", *in) != 0)
 	*out++ = '\\';
+      if (*in == '$')
+	*out++ = '$';
       *out++ = *in++;
     }
 
@@ -1533,12 +1571,12 @@ static void
 define_makeflags (all, makefile)
      int all, makefile;
 {
+  static const char ref[] = "$(MAKEOVERRIDES)";
   register const struct command_switch *cs;
   char *flagstring;
   register char *p;
   unsigned int words;
   struct variable *v;
-  struct command_variable *cv;
 
   /* We will construct a linked list of `struct flag's describing
      all the flags which need to go in MAKEFLAGS.  Then, once we
@@ -1550,7 +1588,6 @@ define_makeflags (all, makefile)
       struct flag *next;
       const struct command_switch *cs;
       char *arg;
-      unsigned int arglen;
     };
   struct flag *flags = 0;
   unsigned int flagslen = 0;
@@ -1559,13 +1596,12 @@ define_makeflags (all, makefile)
     struct flag *new = (struct flag *) alloca (sizeof (struct flag));	      \
     new->cs = cs;							      \
     new->arg = (ARG);							      \
-    new->arglen = (LEN);						      \
     new->next = flags;							      \
     flags = new;							      \
     if (new->arg == 0)							      \
       ++flagslen;		/* Just a single flag letter.  */	      \
     else								      \
-      flagslen += 1 + 1 + 1 + 1 + 2 * new->arglen; /* " -x foo" */	      \
+      flagslen += 1 + 1 + 1 + 1 + 3 * (LEN); /* " -x foo" */		      \
     if (!isalnum (cs->c))						      \
       /* This switch has no single-letter version, so we use the long.  */    \
       flagslen += 2 + strlen (cs->long_name);				      \
@@ -1649,23 +1685,9 @@ define_makeflags (all, makefile)
 	  break;
 	}
 
-#undef	ADD_FLAG
+  flagslen += 4 + sizeof ref;	/* Four more for the possible " -- ".  */
 
-  if (all && command_variables != 0)
-    {
-      /* Now figure out how much space will be taken up
-	 by the command-line variable definitions.  */
-      flagslen += 4;		/* For the possible " -- ".  */
-      for (cv = command_variables; cv != 0; cv = cv->next)
-	{
-	  v = cv->variable;
-	  flagslen += 2 * strlen (v->name);
-	  if (! v->recursive)
-	    ++flagslen;
-	  ++flagslen;
-	  flagslen += 2 * strlen (v->value);
-	}
-    }
+#undef	ADD_FLAG
 
   /* Construct the value in FLAGSTRING.
      We allocate enough space for a preceding dash and trailing null.  */
@@ -1686,16 +1708,15 @@ define_makeflags (all, makefile)
 	*p++ = flags->cs->c;
       if (flags->arg != 0)
 	{
-	  /* A flag that takes an optional argument which in this case
-	     is omitted is specified by ARG being "" and ARGLEN being 0.
-	     We must distinguish because a following flag appended without
-	     an intervening " -" is considered the arg for the first.  */
-	  if (flags->arglen > 0)
+	  /* A flag that takes an optional argument which in this case is
+	     omitted is specified by ARG being "".  We must distinguish
+	     because a following flag appended without an intervening " -"
+	     is considered the arg for the first.  */
+	  if (flags->arg[0] != '\0')
 	    {
 	      /* Add its argument too.  */
 	      *p++ = !isalnum (flags->cs->c) ? '=' : ' ';
-	      bcopy (flags->arg, p, flags->arglen);
-	      p += flags->arglen;
+	      p = quote_as_word (p, flags->arg, 1);
 	    }
 	  ++words;
 	  /* Write a following space and dash, for the next flag.  */
@@ -1715,7 +1736,9 @@ define_makeflags (all, makefile)
 
   if (all && command_variables != 0)
     {
-      /* Now write all the command-line variable definitions.  */
+      /* Now write a reference to $(MAKEOVERRIDES), which contains all the
+	 command-line variable definitions.  */
+
       if (p == &flagstring[1])
 	/* No flags written, so elide the leading dash already written.  */
 	p = flagstring;
@@ -1732,23 +1755,14 @@ define_makeflags (all, makefile)
 	  *p++ = '-';
 	  *p++ = ' ';
 	}
-      for (cv = command_variables; cv != 0; cv = cv->next)
-	{
-	  v = cv->variable;
-	  p = shell_quote (p, v->name);
-	  if (! v->recursive)
-	    *p++ = ':';
-	  *p++ = '=';
-	  p = shell_quote (p, v->value);
-	  *p++ = ' ';
-	  ++words;
-	}
-      --p;			/* Kill the final space.  */
+
+      /* Copy in the string.  */
+      bcopy (ref, p, sizeof ref - 1);
+      p += sizeof ref - 1;
     }
   else if (p[-1] == '-')
     /* Kill the final space and dash.  */
     p -= 2;
-
   /* Terminate the string.  */
   *p = '\0';
 
@@ -1765,7 +1779,7 @@ define_makeflags (all, makefile)
 			  to redefine its value with the full set of
 			  switches.  Of course, an override or command
 			  definition will still take precedence.  */
-		       o_file, 0);
+		       o_file, 1);
   if (! all)
     /* The first time we are called, set MAKEFLAGS to always be exported.
        We should not do this again on the second call, because that is
@@ -1773,7 +1787,7 @@ define_makeflags (all, makefile)
     v->export = v_export;
   /* Since MFLAGS is not parsed for flags, there is no reason to
      override any makefile redefinition.  */
-  (void) define_variable ("MFLAGS", 6, flagstring, o_env, 0);
+  (void) define_variable ("MFLAGS", 6, flagstring, o_env, 1);
 }
 
 /* Print version information.  */
