@@ -1,5 +1,5 @@
 /* Basic dependency engine for GNU Make.
-Copyright (C) 1988, 89, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 90, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -556,7 +556,6 @@ update_file_1 (file, depth)
   if (!must_make)
     {
       DEBUGPR ("No need to remake target `%s'.\n");
-      file->update_status = 0;
       notice_finished_file (file);
       return 0;
     }
@@ -605,12 +604,12 @@ notice_finished_file (file)
 
   if (touch_flag
       /* The update status will be:
-	 	-1	if no commands were run;
-		0	if some commands (+ or ${MAKE}) were run and won;
+	 	-1	if this target was not remade;
+		0	if 0 or more commands (+ or ${MAKE}) were run and won;
 		1	if some commands were run and lost.
-	 The only time we don't want to touch the target is if
-	 it had some recursive commands, and they lost.  */
-      && file->update_status != 1)
+	 We touch the target if it has commands which either were not run
+	 or won when they ran (i.e. status is 0).  */
+      && file->update_status == 0)
     {
       if (file->cmds != 0 && file->cmds->any_recurse)
 	{
@@ -854,6 +853,9 @@ remake_file (file)
 	  execute_file_commands (file);
 	  return;
 	}
+      else
+	/* This tells notice_finished_file it is ok to touch the file.  */
+	file->update_status = 0;
     }
 
   /* This does the touching under -t.  */
