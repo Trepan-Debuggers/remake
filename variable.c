@@ -389,6 +389,7 @@ define_automatic_variables ()
 int export_all_variables;
 
 /* Create a new environment for FILE's commands.
+   If FILE is nil, this is for the `shell' function.
    The child's MAKELEVEL variable is incremented.  */
 
 char **
@@ -408,14 +409,18 @@ target_environment (file)
   char **result;
   unsigned int mklev_hash;
 
+  if (file == 0)
+    s = current_variable_set_list;
+  else
+    s = file->variables;
+
   /* Find the lowest number of buckets in any set in the list.  */
-  s = file->variables;
   buckets = s->set->buckets;
   for (s = s->next; s != 0; s = s->next)
     if (s->set->buckets < buckets)
       buckets = s->set->buckets;
 
-  /* Find the hash value of `MAKELEVEL' will fall into.  */
+  /* Find the hash value of the bucket `MAKELEVEL' will fall into.  */
   {
     char *p = "MAKELEVEL";
     mklev_hash = 0;
