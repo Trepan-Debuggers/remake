@@ -200,7 +200,9 @@ extern void abort (), exit ();
 #if	defined (sparc) || defined (HAVE_ALLOCA_H)
 #include <alloca.h>
 #else	/* Not sparc or HAVE_ALLOCA_H.  */
+#ifndef	_AIX
 extern char *alloca ();
+#endif	/* Not AIX.  */
 #endif	/* sparc or HAVE_ALLOCA_H.  */
 #endif	/* GCC.  */
 
