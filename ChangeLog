@@ -1,3 +1,7 @@
+Tue Oct 10 14:59:30 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* main.c (enter_command_line_file): Barf if NAME is "".
+
 Sat Sep  9 06:33:20 1995  Roland McGrath  <roland@whiz-bang.gnu.ai.mit.edu>
 
 	* commands.c (delete_target): Ignore unlink failure if it is ENOENT.
