@@ -478,9 +478,8 @@ update_file_1 (file, depth)
 
   if (dep_status != 0)
     {
-      set_command_state (file, cs_finished);
       file->update_status = dep_status;
-      file->updated = 1;
+      notice_finished_file (file);
 
       depth--;
 
@@ -549,9 +548,8 @@ update_file_1 (file, depth)
   if (!must_make)
     {
       DEBUGPR ("No need to remake target `%s'.\n");
-      set_command_state (file, cs_finished);
       file->update_status = 0;
-      file->updated = 1;
+      notice_finished_file (file);
       return 0;
     }
 
@@ -596,6 +594,7 @@ notice_finished_file (file)
      register struct file *file;
 {
   struct dep *d;
+  int ran = file->command_state == cs_running;
 
   file->command_state = cs_finished;
   file->updated = 1;
@@ -629,7 +628,7 @@ notice_finished_file (file)
 	}
     }
 
-  if (!file->phony)
+  if (ran && !file->phony)
     {
       struct file *f;
 
@@ -656,7 +655,7 @@ notice_finished_file (file)
 	d->file->updated = 1;
 	d->file->update_status = file->update_status;
 
-	if (!d->file->phony)
+	if (ran && !d->file->phony)
 	  /* Fetch the new modification time.
 	     We do this instead of just invalidating the cached time
 	     so that a vpath_search can happen.  Otherwise, it would
