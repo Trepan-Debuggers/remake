@@ -29,6 +29,7 @@ Boston, MA 02111-1307, USA.  */
 #include "commands.h"
 #include "variable.h"
 #include "rule.h"
+#include "debug.h"
 
 
 #ifndef WINDOWS32
@@ -149,8 +150,7 @@ read_all_makefiles (makefiles)
 {
   unsigned int num_makefiles = 0;
 
-  if (debug_flag)
-    puts (_("Reading makefiles..."));
+  DB (DB_BASIC, (_("Reading makefiles...\n")));
 
   /* If there's a non-null variable MAKEFILES, its value is a list of
      files to read first thing.  But don't let it prevent reading the
@@ -329,7 +329,7 @@ read_makefile (filename, flags)
   pattern_percent = 0;
   cmds_started = fileinfo.lineno;
 
-  if (debug_flag)
+  if (ISDB (DB_EXTRA))
     {
       printf (_("Reading makefile `%s'"), fileinfo.filenm);
       if (flags & RM_NO_DEFAULT_GOAL)

@@ -26,6 +26,8 @@ Boston, MA 02111-1307, USA.  */
 #include "filedef.h"
 #include "commands.h"
 #include "job.h"
+#include "debug.h"
+
 #include <sys/time.h>
 #include <netdb.h>
 
@@ -81,7 +83,7 @@ start_remote_job_p (first_p)
 	 Customs requires a privileged source port be used.  */
       make_access ();
 
-      if (debug_flag)
+      if (ISDB (DB_EXTRA))
         Rpc_Debug(1);
 
       /* Ping the daemon once to see if it is there.  */
@@ -122,8 +124,8 @@ start_remote_job_p (first_p)
   status = Customs_Host (EXPORT_SAME, &permit);
   if (status != RPC_SUCCESS)
     {
-      if (debug_flag)
-	printf ("Customs won't export: %s\n", Rpc_ErrorMessage (status));
+      DB (DB_EXTRA, (_("Customs won't export: %s\n"),
+                     Rpc_ErrorMessage (status)));
       return 0;
     }
 

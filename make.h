@@ -175,11 +175,9 @@ extern unsigned int get_path_max PARAMS ((void));
 #endif
 
 #ifdef VMS
-# include <stdio.h>
 # include <types.h>
 # include <unixlib.h>
 # include <unixio.h>
-# include <errno.h>
 # include <perror.h>
 #endif
 
@@ -465,7 +463,7 @@ extern const struct floc *reading_file;
 extern char **environ;
 
 extern int just_print_flag, silent_flag, ignore_errors_flag, keep_going_flag;
-extern int debug_flag, print_data_base_flag, question_flag, touch_flag;
+extern int print_data_base_flag, question_flag, touch_flag;
 extern int env_overrides, no_builtin_rules_flag, no_builtin_variables_flag;
 extern int print_version_flag, print_directory_flag;
 extern int warn_undefined_variables_flag, posix_pedantic, not_parallel;
@@ -499,10 +497,6 @@ extern int handling_fatal_signal;
 #ifndef MAX
 #define MAX(_a,_b) ((_a)>(_b)?(_a):(_b))
 #endif
-
-#define DEBUGPR(msg) \
-  do if (debug_flag) { print_spaces (depth); printf (msg, file->name); \
-                       fflush (stdout); } while (0)
 
 #ifdef VMS
 # ifndef EXIT_FAILURE

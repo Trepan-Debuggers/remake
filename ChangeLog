@@ -1,3 +1,14 @@
+1999-11-21  Paul D. Smith  <psmith@gnu.org>
+
+	Rework GNU make debugging to provide different levels of output.
+
+	* NEWS: mention it.
+	* debug.h: New file.  Define various debugging levels and macros.
+	* function.c, implicit.c, job.c, main.c, misc.c, read.c, remake.c
+	* remote-cstms.c, vmsfunctions.c: Replace all code depending on
+	debug_flag with invocations of debugging macros.
+	* make.h: Remove debug_flag and DEBUGPR, add db_level.
+
 1999-11-17  Paul D. Smith  <psmith@gnu.org>
 
 	* function.c (func_if): Find the end of the arg list by testing
