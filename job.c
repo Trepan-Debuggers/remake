@@ -1179,7 +1179,7 @@ construct_command_argv_internal (line, restp, shell, ifs)
      char *line, **restp;
      char *shell, *ifs;
 {
-  static char sh_chars[] = "#;\"*?[]&|<>(){}$`";
+  static char sh_chars[] = "#;\"*?[]&|<>(){}$`^";
   static char *sh_cmds[] = { "cd", "eval", "exec", "exit", "login",
 			     "logout", "set", "umask", "wait", "while", "for",
 			     "case", "if", ":", ".", "break", "continue",
