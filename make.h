@@ -537,3 +537,17 @@ extern int handling_fatal_signal;
 #ifdef HAVE_DMALLOC_H
 #include <dmalloc.h>
 #endif
+
+
+/* If we have broken SA_RESTART support, then wrap stat() and readdir() with
+   versions that handle EINTR.  Note that there are still plenty of system
+   calls that can fail with EINTR but this, reportedly, gets the vast
+   majority of failure cases.  If you still experience failures you'll need
+   to either get a system where SA_RESTART works, or you need to avoid -j.  */
+
+#ifdef HAVE_BROKEN_RESTART
+
+#define stat(_f,_b)     atomic_stat ((_f), (_b))
+#define readdir(_d)     atomic_readdir (_d)
+
+#endif
