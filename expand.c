@@ -286,7 +286,7 @@ variable_expand_string (line, string, length)
 		char *subst_beg, *subst_end, *replace_beg, *replace_end;
 
 		subst_beg = colon + 1;
-		subst_end = strchr (subst_beg, '=');
+		subst_end = lindex (subst_beg, end, '=');
 		if (subst_end == 0)
 		  /* There is no = in sight.  Punt on the substitution
 		     reference and treat this as a variable name containing

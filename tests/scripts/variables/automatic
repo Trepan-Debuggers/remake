@@ -60,6 +60,8 @@ print MAKEFILE <<'EOF';
 $(dir)/foo $(dir)/bar: $@.x $$@.x $$$@.x $$$$@.x $$(@D).x $$(@F).x
 
 $(dir)/x.z $(dir)/y.z: $(dir)/%.z : $@.% $$@.% $$$@.% $$$$@.% $$(@D).% $$(@F).%
+
+$(dir)/biz: $$(@).x $${@}.x $${@D}.x $${@F}.x
 EOF
 
 close(MAKEFILE);
@@ -70,6 +72,10 @@ $answer = ".x\n$dir/foo.x\n\$.x\n\$@.x\n$dir.x\nfoo.x\n$dir/bar.x\nbar.x\n";
 
 &run_make_with_options($makefile2, "$dir/x.z $dir/y.z", &get_logfile);
 $answer = ".x\n$dir/x.z.x\n\$.x\n\$@.x\n$dir.x\nx.z.x\n.y\n$dir/y.z.y\n\$.y\n\$@.y\n$dir.y\ny.z.y\n";
+&compare_output($answer, &get_logfile(1));
+
+&run_make_with_options($makefile2, "$dir/biz", &get_logfile);
+$answer = "$dir/biz.x\n$dir.x\nbiz.x\n";
 &compare_output($answer, &get_logfile(1));
 
 1;
