@@ -12,7 +12,14 @@ Please send GNU make bug reports to <bug-make@gnu.org>.
 See the README file and the GNU make manual for details on sending bug
 reports.
 
-Version 3.79.2
+Version <next>
+
+* The arguments to $(call ...) functions were being stored in $1, $2,
+  etc. as recursive variables, even though they are fully expanded
+  before assignment.  This means that escaped dollar signs ($$ etc.)
+  were not behaving properly.  Now the arguments are stored as simple
+  variables.  This may mean that if you added extra escaping to your
+  $(call ...) function arguments you will need to undo it now.
 
 * New pseudo-target .LOW_RESOLUTION_TIME, superseding the configure
   option --disable-nsec-timestamps.  You might need this if your build
@@ -20,8 +27,8 @@ Version 3.79.2
   "cp -p" (right now) doesn't preserve the subsecond portion of a time
   stamp.
 
-* Updated translations for French, Galician, Japanese, Korean, and Russian.
-  New translations for Danish and Turkish.
+* Updated translations for French, Galician, German, Japanese, Korean,
+  and Russian.  New translations for Danish and Turkish.
 
 Version 3.79.1
 

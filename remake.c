@@ -767,7 +767,7 @@ notice_finished_file (file)
 
       /* Propagate the change of modification time to all the double-colon
 	 entries for this file.  */
-      for (f = file->double_colon; f != 0; f = f->next)
+      for (f = file->double_colon; f != 0; f = f->prev)
 	f->last_mtime = file->last_mtime;
     }
 

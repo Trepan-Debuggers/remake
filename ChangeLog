@@ -1,3 +1,20 @@
+2002-04-20  Paul D. Smith  <psmith@gnu.org>
+
+	* function.c (func_call): Don't mark the argument variables $1,
+	etc. as recursive.  They've already been fully expanded so
+	there's no need to do it again, and doing so strips escaped $'s.
+	Reported by Sebastian Glita <glseba@yahoo.com>.
+
+	* remake.c (notice_finished_file): Walk through double-colon
+	entries via the prev field, not the next field!
+	Reported by Greg McGary <greg@mcgary.org>.
+
+	* main.c (main): If the user specifies -q and asks for a specific
+	target which is a makefile, we got an assert.  In that case it
+	turns out we should continue normally instead.
+
+	* i18n/de.po, i18n/fr.po: Installed an updated translation.
+
 2002-01-07  Paul D. Smith  <psmith@gnu.org>
 
 	* i18n/es.po, i18n/ru.po: Installed an updated translation.
