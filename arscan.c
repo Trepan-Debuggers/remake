@@ -283,9 +283,6 @@ ar_name_equal (name, mem)
      char *name, *mem;
 {
   char *p;
-  unsigned int namelen, memlen;
-  struct ar_hdr h;
-  unsigned int max = sizeof (h.ar_name);
 
   p = rindex (name, '/');
   if (p != 0)
@@ -293,20 +290,26 @@ ar_name_equal (name, mem)
 
 #if !defined (AIAMAG) && !defined (APOLLO)
 
-  /* `reallylongname.o' matches `reallylongnam.o'.
-     If member names have a trailing slash, that's `reallylongna.o'.  */
+  {
+    /* `reallylongname.o' matches `reallylongnam.o'.
+       If member names have a trailing slash, that's `reallylongna.o'.  */
 
-  if (strncmp (name, mem, max - 3))
-    return 0;
+    struct ar_hdr h;
+    unsigned int max = sizeof (h.ar_name);
+    unsigned int namelen, memlen;
 
-  namelen = strlen (name);
-  memlen = strlen (mem);
-  if (namelen > memlen && memlen >= max - 1
-      && name[namelen - 2] == '.' && name[namelen - 1] == 'o'
-      && mem[memlen - 2] == '.' && mem[memlen - 1] == 'o')
-    return 1;
+    if (strncmp (name, mem, max - 3))
+      return 0;
 
-  return !strcmp (name + max - 3, mem + max - 3);
+    namelen = strlen (name);
+    memlen = strlen (mem);
+    if (namelen > memlen && memlen >= max - 1
+	&& name[namelen - 2] == '.' && name[namelen - 1] == 'o'
+	&& mem[memlen - 2] == '.' && mem[memlen - 1] == 'o')
+      return 1;
+
+    return !strcmp (name + max - 3, mem + max - 3);
+  }
 
 #else	/* AIX or APOLLO.  */
 
