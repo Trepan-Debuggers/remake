@@ -2,18 +2,16 @@
 #define SUB_PROC_H
 
 /*
- * Component Name: 
+ * Component Name:
  *
- * $Date: 1997/08/27 20:34:23 $
+ * $Date: 2005/02/10 00:10:58 $
  *
  * $Source: /sources/make/make/w32/include/sub_proc.h,v $
  *
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  */
 
-/* $Id: sub_proc.h,v 1.4 1997/08/27 20:34:23 psmith Exp $ */
-
-#ifdef WINDOWS32
+/* $Id: sub_proc.h,v 1.5 2005/02/10 00:10:58 psmith Exp $ */
 
 #define EXTERN_DECL(entry, args) extern entry args
 #define VOID_DECL void
@@ -23,7 +21,7 @@ EXTERN_DECL(HANDLE process_init_fd, (HANDLE stdinh, HANDLE stdouth,
 	HANDLE stderrh));
 EXTERN_DECL(long process_begin, (HANDLE proc, char **argv, char **envp,
 	char *exec_path, char *as_user));
-EXTERN_DECL(long process_pipe_io, (HANDLE proc, char *stdin_data, 
+EXTERN_DECL(long process_pipe_io, (HANDLE proc, char *stdin_data,
 	int stdin_data_len));
 EXTERN_DECL(long process_file_io, (HANDLE proc));
 EXTERN_DECL(void process_cleanup, (HANDLE proc));
@@ -43,5 +41,4 @@ EXTERN_DECL(int process_outcnt, (HANDLE proc));
 EXTERN_DECL(int process_errcnt, (HANDLE proc));
 EXTERN_DECL(void process_pipes, (HANDLE proc, int pipes[3]));
 
-#endif
 #endif

@@ -4,6 +4,22 @@
 	Also, the ftp://ftp.gnu.org/GNUinfo site was removed so I'm
 	downloading the .texi files from Savannah now.
 
+	Fixed these issues reported by Markus Mauhart <qwe123@chello.at>:
+
+	* main.c (handle_non_switch_argument): Only add variables to
+	command_variables if they're not already there: duplicate settings
+	waste space and can be confusing to read.
+
+	* w32/include/sub_proc.h: Remove WINDOWS32.  It's not needed since
+	this header is never included by non-WINDOWS32 code, and it
+	requires <config.h> to define which isn't always included first.
+
+	* dir.c (read_dirstream) [MINGW]: Use proper macro names when
+	testing MINGW32 versions.
+
+	* main.c (log_working_directory): flush stdout to be sure the WD
+	change is printed before any stderr messages show up.
+
 2005-02-01  Paul D. Smith  <psmith@gnu.org>
 
 	* maintMakefile (po_repo): Update the GNU translation site URL.
