@@ -7,11 +7,11 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.144 1994/10/10 08:10:13 roland Exp $
-@set EDITION 0.46
+@set RCSID $Id: make.texinfo,v 2.145 1994/10/17 00:02:27 roland Exp $
+@set EDITION 0.47 DRAFT
 @set VERSION 3.72 Beta
-@set UPDATED 5 July 1994
-@set UPDATE-MONTH July 1994
+@set UPDATED 16 October 1994
+@set UPDATE-MONTH October 1994
 @set ISBN 1-882114-50-7
 
 @c finalout
@@ -2643,11 +2643,13 @@ with no further work from you.  @xref{Remaking Makefiles}.
 @cindex rule commands
 @cindex writing rule commands
 
-The commands of a rule consist of shell command lines to be executed one by
-one.  Each command line must start with a tab, except that the first
+The commands of a rule consist of shell command lines to be executed one
+by one.  Each command line must start with a tab, except that the first
 command line may be attached to the target-and-dependencies line with a
 semicolon in between.  Blank lines and lines of just comments may appear
-among the command lines; they are ignored.
+among the command lines; they are ignored.  (But beware, an apparently
+``blank'' line that begins with a tab is @emph{not} blank!  It is an
+empty command; @pxref{Empty Commands}.)
 
 Users use many different shell programs, but commands in makefiles are
 always interpreted by @file{/bin/sh} unless the makefile specifies
