@@ -116,6 +116,10 @@ extern int getdtablesize ();
 #else
 #include <sys/param.h>
 #define getdtablesize() NOFILE
+#if !defined (NOFILE) && defined (NOFILES_MAX)
+/* SCO 3.2 "devsys 4.2" defines NOFILES_{MIN,MAX} in lieu of NOFILE.  */
+#define NOFILE	NOFILES_MAX
+#endif
 #endif
 #endif
 
