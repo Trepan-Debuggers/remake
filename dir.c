@@ -725,7 +725,7 @@ file_impossible (filename)
     dir = find_directory ("[]");
 #else
   dirend = strrchr (p, '/');
-#if defined (WINDOWS32) || defined (__MSDOS__)
+# if defined (WINDOWS32) || defined (__MSDOS__)
   /* Forward and backslashes might be mixed.  We need the rightmost one.  */
   {
     char *bslash = strrchr(p, '\\');
@@ -735,13 +735,13 @@ file_impossible (filename)
     if (!dirend && p[0] && p[1] == ':')
       dirend = p + 1;
   }
-#endif /* WINDOWS32 or __MSDOS__ */
+# endif /* WINDOWS32 or __MSDOS__ */
   if (dirend == 0)
-#ifdef _AMIGA
+# ifdef _AMIGA
     dir = find_directory ("");
-#else /* !VMS && !AMIGA */
+# else /* !VMS && !AMIGA */
     dir = find_directory (".");
-#endif /* AMIGA */
+# endif /* AMIGA */
 #endif /* VMS */
   else
     {

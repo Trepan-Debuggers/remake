@@ -7,7 +7,7 @@ input texinfo                @c -*- Texinfo -*-
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.191 2001/01/21 06:49:12 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.192 2001/06/01 03:56:50 psmith Exp $
 @set EDITION 0.55
 @set VERSION 3.79
 @set UPDATED 04 April 2000
@@ -2223,7 +2223,7 @@ SUBDIRS = foo bar baz
 subdirs: $(SUBDIRS)
 
 $(SUBDIRS):
-        $(MAKE) -C $@
+        $(MAKE) -C $@@
 
 foo: baz
 @end group

@@ -1,8 +1,8 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  23 Jun 2000
+  30 May 2001
 
-Copyright (C) 1992,93,94,95,96,97,98,99,2000 Free Software Foundation, Inc.
+Copyright (C) 1992,93,94,95,96,97,98,99,2000,2001 Free Software Foundation, Inc.
 See the end for copying conditions.
 
 All changes mentioned here are more fully described in the GNU make
@@ -12,12 +12,17 @@ Please send GNU make bug reports to <bug-make@gnu.org>.
 See the README file and the GNU make manual for details on sending bug
 reports.
 
+Version 3.79.2
+
 * New pseudo-target .LOW_RESOLUTION_TIME, superseding the configure
   option --disable-nsec-timestamps.  You might need this if your build
   process depends on tools like "cp -p" preserving time stamps, since
   "cp -p" (right now) doesn't preserve the subsecond portion of a time
   stamp.
 
+* Updated translations for Galician, Japanese, and Russian, and a new
+  Turkish translation.
+
 Version 3.79.1
 
 * .SECONDARY with no prerequisites now prevents any target from being
