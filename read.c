@@ -239,9 +239,10 @@ read_makefile (filename, type)
 #define record_waiting_files()						      \
   do									      \
     { 									      \
-      record_files (filenames, pattern, pattern_percent, deps,		      \
-		    commands_started, commands, commands_idx,		      \
-		    two_colon, filename, lineno, type != 1);		      \
+      if (filenames != 0)						      \
+	record_files (filenames, pattern, pattern_percent, deps,	      \
+		      commands_started, commands, commands_idx,		      \
+		      two_colon, filename, lineno, type != 1);		      \
       filenames = 0;							      \
       commands_idx = 0;							      \
       pattern = 0;							      \
@@ -353,13 +354,11 @@ read_makefile (filename, type)
 	{
 	  int i = conditional_line (p, filename, lineno);
 	  if (i >= 0)
-	    {
-	      ignoring = i;
-	      continue;
-	    }
+	    ignoring = i;
 	  else
 	    makefile_fatal (filename, lineno,
 			    "invalid syntax in conditional");
+	  continue;
 	}
       else if (word1eq ("endef", 5))
 	{
@@ -367,6 +366,7 @@ read_makefile (filename, type)
 	    in_ignored_define = 0;
 	  else
 	    makefile_fatal (filename, lineno, "extraneous `endef'");
+	  continue;
 	}
       else if (word1eq ("define", 6))
 	{
@@ -378,11 +378,13 @@ read_makefile (filename, type)
 	      p = end_of_token (p2);
 	      lineno = do_define (p2, p - p2, o_file,
 				  lineno, infile, filename);
-	      continue;
 	    }
+	  continue;
 	}
+
       if (ignoring)
-	continue;
+	/* Ignore the line.  */
+	;
       else if (lb.buffer[0] == '\t')
 	{
 	  /* This line is a shell command.  */
@@ -405,6 +407,8 @@ read_makefile (filename, type)
 	  bcopy (p, &commands[commands_idx], len);
 	  commands_idx += len;
 	  commands[commands_idx++] = '\n';
+
+	  continue;
 	}
       else if (word1eq ("override", 8))
 	{
@@ -422,7 +426,6 @@ read_makefile (filename, type)
 	  else if (!try_variable_definition (p2, o_override))
 	    makefile_error (filename, lineno,
 			    "Empty `override' directive");
-	  continue;
 	}
       else if (word1eq ("export", 6))
 	{
@@ -508,7 +511,6 @@ read_makefile (filename, type)
 	  conditionals = save;
 	  reading_filename = filename;
 	  reading_lineno_ptr = &lineno;
-	  continue;
 	}
       else if (word1eq ("vpath", 5))
 	{
@@ -538,11 +540,11 @@ read_makefile (filename, type)
 	    free (pattern);
 	  if (p != 0)
 	    free (p);
-	  continue;
 	}
 #undef	word1eq
       else if (try_variable_definition (p, o_file))
-	continue;
+	/* This line has been dealt with.  */
+	;
       else
 	{
 	  /* This line describes some target files.  */
@@ -654,7 +656,14 @@ read_makefile (filename, type)
 	      commands_idx += len;
 	      commands[commands_idx++] = '\n';
 	    }
+
+	  continue;
 	}
+
+      /* We get here except in the case that we just read a rule line.
+	 Record now the last rule we read, so following spurious
+	 commands are properly diagnosed.  */
+      record_waiting_files ();
     }
 
   if (ignoring)
@@ -1324,9 +1333,8 @@ find_percent (pattern)
 	if (i % 2 == 0)
 	  /* All the backslashes quoted each other; the % was unquoted.  */
 	  return p;
-	else
-	  /* The % was quoted by a backslash.  Look for another.  */
-	  ++p;
+
+	/* The % was quoted by a backslash.  Look for another.  */
       }
     else
       /* No backslash in sight.  */
