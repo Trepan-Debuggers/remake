@@ -262,7 +262,7 @@ extern char *sindex (), *lindex ();
 extern int alpha_compare ();
 extern void print_spaces ();
 extern struct dep *copy_dep_chain ();
-extern char *find_percent ();
+extern char *find_char_unquote (), *find_percent ();
 
 #ifndef	NO_ARCHIVES
 extern int ar_name ();
