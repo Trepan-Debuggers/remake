@@ -3421,8 +3421,7 @@ Such problems would be especially likely with the variable @code{SHELL},
 which is normally present in the environment to specify the user's choice
 of interactive shell.  It would be very undesirable for this choice to
 affect @code{make}.  So @code{make} ignores the environment value of
-@code{SHELL} if the value of @code{MAKELEVEL} is zero (which is normally
-true except in recursive invocations of @code{make}).@refill
+@code{SHELL}.@refill
 
 @node Conditionals, Functions, Using Variables, Top
 @chapter Conditional Parts of Makefiles
