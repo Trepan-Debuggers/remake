@@ -7,9 +7,9 @@
 
 @c For publication, format makebook.texi instead of using this file directly.
 
-@set EDITION 0.42
-@set VERSION 3.66 Beta
-@set UPDATED 14 May 1993
+@set EDITION 0.43
+@set VERSION 3.68 Beta
+@set UPDATED 24 May 1993
 @set UPDATE-MONTH May 1993
 
 @c finalout
@@ -7689,6 +7689,12 @@ In fact, this is just what @code{make} does when it sees a suffix rule
 with @samp{.a} as the target suffix.  Any double-suffix rule
 @w{@samp{.@var{x}.a}} is converted to a pattern rule with the target
 pattern @samp{(%.o)} and a dependency pattern of @samp{%.@var{x}}.
+
+Since you might want to use @samp{.a} as the suffix for some other kind
+of file, @code{make} also converts archive suffix rules to pattern rules
+in the normal way (@pxref{Suffix Rules}).  Thus a double-suffix rule
+@w{@samp{.@var{x}.a}} produces two pattern rules: @samp{@w{(%.o):}
+@w{%.@var{x}}} and @samp{@w{%.a}: @w{%.@var{x}}}.@refill
 
 @node Features, Missing, Archives, Top
 @chapter Features of GNU @code{make}
