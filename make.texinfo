@@ -9,7 +9,7 @@
 
 @set EDITION 0.41
 @set VERSION 3.64 Beta
-@set UPDATED 14 April 1993
+@set UPDATED 16 April 1993
 @set UPDATE-MONTH April 1993
 
 @c finalout
@@ -3442,9 +3442,9 @@ For example, using this canned sequence:
 
 @example
 define frobnicate
-@echo "frobnicating target $@"
-frob-step-1 $< -o $@-step-1
-frob-step-2 $@-step-1 -o $@
+@@echo "frobnicating target $@@"
+frob-step-1 $< -o $@@-step-1
+frob-step-2 $@@-step-1 -o $@@
 endef
 @end example
 
