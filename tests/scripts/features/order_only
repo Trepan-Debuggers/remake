@@ -109,4 +109,39 @@ $answer = "touch baz\n";
 
 unlink(qw(foo baz));
 
+# Test order-only in pattern rules
+
+$makefile4 = &get_tmpfile;
+
+open(MAKEFILE,"> $makefile4");
+
+print MAKEFILE <<'EOF';
+%.w : %.x | baz
+	@echo '$$^ = $^'
+	@echo '$$| = $|'
+	touch $@
+
+all: foo.w
+
+.PHONY: baz
+foo.x baz:
+	touch $@
+EOF
+
+close(MAKEFILE);
+
+# TEST #7 -- make sure the parser was correct.
+
+&run_make_with_options($makefile4, "", &get_logfile);
+$answer = "touch foo.x\ntouch baz\n\$^ = foo.x\n\$| = baz\ntouch foo.w\n";
+&compare_output($answer,&get_logfile(1));
+
+# TEST #8 -- now we do it again: this time foo.w won't be built
+
+&run_make_with_options($makefile4, "", &get_logfile);
+$answer = "touch baz\n";
+&compare_output($answer,&get_logfile(1));
+
+unlink(qw(foo.w foo.x baz));
+
 1;

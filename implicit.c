@@ -103,6 +103,8 @@ pattern_search (struct file *file, int archive,
 
   /* This buffer records all the dependencies actually found for a rule.  */
   char **found_files = (char **) alloca (max_pattern_deps * sizeof (char *));
+  /* This list notes if the associated dep has an "ignore_mtime" flag set.  */
+  unsigned char *found_files_im = (unsigned char *) alloca (max_pattern_deps * sizeof (unsigned char));
   /* Number of dep names now in FOUND_FILES.  */
   unsigned int deps_found = 0;
 
@@ -397,6 +399,7 @@ pattern_search (struct file *file, int archive,
 	      if (lookup_file (p) != 0
 		  || ((!dep->changed || check_lastslash) && file_exists_p (p)))
 		{
+		  found_files_im[deps_found] = dep->ignore_mtime;
 		  found_files[deps_found++] = xstrdup (p);
 		  continue;
 		}
@@ -408,6 +411,7 @@ pattern_search (struct file *file, int archive,
 		  DBS (DB_IMPLICIT,
                        (_("Found prerequisite `%s' as VPATH `%s'\n"), p, vp));
 		  strcpy (vp, p);
+		  found_files_im[deps_found] = dep->ignore_mtime;
 		  found_files[deps_found++] = vp;
 		  continue;
 		}
@@ -437,11 +441,11 @@ pattern_search (struct file *file, int archive,
 		      intermediate_file->name = p;
 		      intermediate_files[deps_found] = intermediate_file;
 		      intermediate_file = 0;
+		      found_files_im[deps_found] = dep->ignore_mtime;
 		      /* Allocate an extra copy to go in FOUND_FILES,
 			 because every elt of FOUND_FILES is consumed
 			 or freed later.  */
-		      found_files[deps_found] = xstrdup (p);
-		      ++deps_found;
+		      found_files[deps_found++] = xstrdup (p);
 		      continue;
 		    }
 
@@ -541,7 +545,7 @@ pattern_search (struct file *file, int archive,
 	}
 
       dep = (struct dep *) xmalloc (sizeof (struct dep));
-      dep->ignore_mtime = 0;
+      dep->ignore_mtime = found_files_im[deps_found];
       s = found_files[deps_found];
       if (recursions == 0)
 	{

@@ -11,7 +11,7 @@ makebook*
 *.dep *.dvi *.toc *.aux *.log
 *.cp *.cps *.fn *.fns *.vr *.vrs *.tp *.tps *.ky *.kys *.pg *.pgs
 
-README README.DOS README.W32
+README README.DOS README.W32 README.OS2
 aclocal.m4 autom4te.cache
 config.h.in config.h config.status config.cache configure
 Makefile.in Makefile

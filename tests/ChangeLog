@@ -1,3 +1,8 @@
+2004-01-07  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/order_only: Test order-only prerequisites in
+	pattern rules (patch #2349).
+
 2003-11-02  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/functions/if: Test if on conditionals with trailing
