@@ -1,5 +1,5 @@
 /* Miscellaneous global declarations and portability cruft for GNU Make.
-Copyright (C) 1988,89,90,91,92,93,94,95,96 Free Software Foundation, Inc.
+Copyright (C) 1988,89,90,91,92,93,94,95,96,97 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -72,7 +72,7 @@ extern int errno;
 #include <unistd.h>
 /* Ultrix's unistd.h always defines _POSIX_VERSION, but you only get
    POSIX.1 behavior with `cc -YPOSIX', which predefines POSIX itself!  */
-#if defined (_POSIX_VERSION) && !defined (ultrix)
+#if defined (_POSIX_VERSION) && !defined (ultrix) && !defined (VMS)
 #define	POSIX
 #endif
 #endif
@@ -293,7 +293,11 @@ extern char *alloca ();
 #if defined(__MSDOS__) || defined(WINDOWS32)
 #define PATH_SEPARATOR_CHAR ';'
 #else
+#if defined(VMS)
+#define PATH_SEPARATOR_CHAR ','
+#else
 #define PATH_SEPARATOR_CHAR ':'
+#endif
 #endif
 
 #ifdef WINDOWS32

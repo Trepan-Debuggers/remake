@@ -4,21 +4,14 @@
 /*
  * Component Name: 
  *
- * $Date: 1997/04/07 07:24:47 $
+ * $Date: 1997/08/27 20:34:23 $
  *
  * $Source: /sources/make/make/w32/include/sub_proc.h,v $
  *
- * $Revision: 1.3 $
- *
- * Description: 
- *
- * (C) COPYRIGHT TIVOLI Systems, Inc. 1991-1994
- * Unpublished Work
- * All Rights Reserved
- * Licensed Material - Property of TIVOLI Systems, Inc.
+ * $Revision: 1.4 $
  */
 
-/* $Id: sub_proc.h,v 1.3 1997/04/07 07:24:47 psmith Exp $ */
+/* $Id: sub_proc.h,v 1.4 1997/08/27 20:34:23 psmith Exp $ */
 
 #ifdef WINDOWS32
 

@@ -5,12 +5,30 @@
 # Find the glob source files... this might be dangerous, but we're maintainers!
 #
 globsrc := $(wildcard glob/*.c)
+globhdr := $(wildcard glob/*.h)
+
+TEMPLATES = README config.ami configh.dos config.h.W32 config.h-vms
 
 # General rule for turning a .template into a regular file.
 #
-README : % : %.template configure.in
+$(TEMPLATES) : % : %.template configure.in
 	rm -f $@
-	sed 's/%VERSION%/$(version)/' < $< > $@
+	sed -e 's@%VERSION%@$(VERSION)@' \
+	    -e 's@%PACKAGE%@$(PACKAGE)@' \
+	  $< > $@
+	chmod a-w $@
+
+# Construct Makefile.DOS
+#
+Makefile.DOS: Makefile.DOS.template Makefile.am configure.in
+	rm -f $@
+	sed -e 's@%VERSION%@$(VERSION)@' \
+	    -e 's@%PROGRAMS%@$(bin_PROGRAMS)@' \
+	    -e 's@%SOURCES%@$(filter-out remote-%,$(make_SOURCES)) remote-$$(REMOTE).c@' \
+	    -e 's@%OBJECTS%@$(filter-out remote-%,$(make_OBJECTS)) remote-$$(REMOTE).o@' \
+	    -e 's@%GLOB_SOURCES%@$(globsrc) $(globhdr)@' \
+	    -e 's@%GLOB_OBJECTS%@$(globsrc:glob/%.c=%.o)@' \
+	  $< > $@
 	chmod a-w $@
 
 # Construct build.sh.in

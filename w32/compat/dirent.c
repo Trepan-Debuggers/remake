@@ -90,7 +90,7 @@ closedir(DIR *pDir)
 struct dirent *
 readdir(DIR* pDir)
 {
-	WINDOWS32_FIND_DATA wfdFindData;
+	WIN32_FIND_DATA wfdFindData;
 
 	if (!pDir) {
 		errno = EINVAL;

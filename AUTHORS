@@ -22,7 +22,7 @@ GNU Make porting efforts:
 
   Port to VMS by:
       Klaus Kaempf <kkaempf@progis.de>
-
+      Archive support/Bug fixes by John W. Eaton <jwe@bevo.che.wisc.edu>
 
   Port to Amiga by:
       Aaron Digulla <digulla@fh-konstanz.de>

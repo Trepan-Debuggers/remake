@@ -26,6 +26,10 @@ New (since 3.74) DOS-specific features:
 
    8. Can be built without (a previous version of) Make.
 
+   9. The build process requires only standard tools.  (Optional
+      targets like "install:" and "clean:" still need additional
+      programs, though, see below.)
+
 
 To build:
 
@@ -35,30 +39,61 @@ To build:
 
    2. Invoke the `configure.bat' batch file.
 
-      If it doesn't find a working Make, it will suggest to use the
-      `dosbuild.bat' batch file to build Make.  Either do as it
-      suggests or install another Make program (a pre-compiled binary
-      should be available from the usual DJGPP sites).
+      If you are building Make in-place, i.e. in the same directory
+      where its sources are kept, just type "configure.bat" and press
+      [Enter].  Otherwise, you need to supply the path to the source
+      directory as an argument to the batch file, like this:
 
-   3. If you have Make, the configure script will need a Unix-style
-      Sed program.  If you don't have that installed, you can find one
-      on one of the DJGPP mirror sites.
+		configure.bat c:/djgpp/gnu/make-3.76
+
+      Note the forward slashes: you MUST use them here.
+
+   3. If configure.bat doesn't find a working Make, it will suggest to
+      use the `dosbuild.bat' batch file to build Make.  Either do as it
+      suggests or install another Make program (a pre-compiled binary
+      should be available from the usual DJGPP sites) and rerun
+      configure.bat.
 
    4. If you will need to run Make on machines without an FPU, you
       might consider building a version of Make which doesn't issue
       floating-point instructions (they don't help much on MSDOS
-      anyway).  To this end, invoke the configure batch file like so:
-
-			configure no-float
+      anyway).  To this end, edit the Makefile created by
+      configure.bat and add -DNO_FLOAT to the value of CPPFLAGS.
 
    5. Invoke Make.
 
-   6. If you have a Unix-style shell installed, you can use the
-      `install' target.  You will also need GNU Fileutils and GNU
-      Sh-utils for this (they should be available from the DJGPP
-      sites).
+      If you are building from outside of the source directory, you
+      need to tell Make where the sources are, like this:
 
-   7. The `clean' targets require Unix-style `rm' program.
+	        make srcdir=c:/djgpp/gnu/make-3.76
+
+      (configure.bat will tell you this when it finishes).  You MUST
+      use a full, not relative, name of the source directory here, or
+      else Make might fail.
+
+   6. After Make finishes, if you have a Unix-style shell installed,
+      you can use the `install' target to install the package.  You
+      will also need GNU Fileutils and GNU Sh-utils for this (they
+      should be available from the DJGPP sites).
+
+      Without a Unix-style shell, you will have to install programs
+      and the docs manually.  Copy make.exe to a directory on your
+      PATH, make.i* info files to your Info directory, and update the
+      file `dir' in your Info directory by adding the following item
+      to the main menu:
+
+	* GNU make: (make.info).           The GNU make utility.
+
+      If you have the `install-info' program (from the GNU Texinfo
+      package), it will do that for you if you invoke it like this:
+
+	install-info --info-dir=c:/djgpp/info c:/djgpp/info/make.info
+
+      (If your Info directory is other than C:\DJGPP\INFO, change this
+      command accordingly.)
+
+   7. The `clean' targets also require Unix-style shell and `test' and
+      `rm' programs (from Fileutils and Sh-utils, accordingly). 
 
 
 
@@ -67,7 +102,8 @@ Notes:
 
    1. The shell issue.
 
-      This is probably the most significant improvement in this port.
+      This is probably the most significant improvement, first
+      introduced in the port of GNU Make 3.75.
 
       The original behavior of GNU Make is to invoke commands
       directly, as long as they don't include characters special to

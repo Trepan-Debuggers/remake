@@ -1,5 +1,5 @@
 /* Definition of target file data structures for GNU Make.
-Copyright (C) 1988, 89, 90, 91, 92, 93, 94, 97 Free Software Foundation, Inc.
+Copyright (C) 1988,89,90,91,92,93,94,97 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -112,9 +112,14 @@ extern time_t f_mtime ();
    trouble when the machine running make and the machine holding a file have
    different ideas about what time it is; and can also lose for `force'
    targets, which need to be considered newer than anything that depends on
-   them, even if said dependents' modtimes are in the future.  */
-#define NEW_MTIME	INTEGER_TYPE_MAXIMUM (time_t)
+   them, even if said dependents' modtimes are in the future.
 
+   If time_t is unsigned, its maximum value is the same as "(time_t) -1",
+   so use one less than that, because -1 is used for non-existing files.  */
+#define NEW_MTIME \
+     (INTEGER_TYPE_SIGNED (time_t) \
+      ? INTEGER_TYPE_MAXIMUM (time_t) \
+      : (INTEGER_TYPE_MAXIMUM (time_t) - 1))
 
 #define check_renamed(file) \
   while ((file)->renamed != 0) (file) = (file)->renamed /* No ; here.  */

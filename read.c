@@ -1,5 +1,5 @@
 /* Reading and parsing of makefiles for GNU Make.
-Copyright (C) 1988,89,90,91,92,93,94,95,96 Free Software Foundation, Inc.
+Copyright (C) 1988,89,90,91,92,93,94,95,96,97 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -907,13 +907,17 @@ do_define (name, namelen, origin, lineno, infile, filename)
   initbuffer (&lb);
   while (!feof (infile))
     {
+      unsigned int len;
+
       lineno += nlines;
       nlines = readline (&lb, infile, filename, lineno);
 
       collapse_continuations (lb.buffer);
 
       p = next_token (lb.buffer);
-      if ((p[5] == '\0' || isblank (p[5])) && !strncmp (p, "endef", 5))
+      len = strlen (p);
+      if ((len == 5 || (len > 5 && isblank (p[5])))
+          && !strncmp (p, "endef", 5))
 	{
 	  p += 5;
 	  remove_comments (p);
@@ -932,8 +936,7 @@ do_define (name, namelen, origin, lineno, infile, filename)
 	}
       else
 	{
-	  unsigned int len = strlen (lb.buffer);
-
+          len = strlen (lb.buffer);
 	  /* Increase the buffer size if necessary.  */
 	  if (idx + len + 1 > length)
 	    {

@@ -1,0 +1,51 @@
+                                                            -*-Indented-Text-*-
+GNU Make TODO List
+------------------
+
+This list comes both from the authors and from users of GNU make.
+
+They are listed in no particular order!
+
+Also, I don't gaurantee that all of them will be ultimately deemed "good
+ideas" and implemented.  These are just the ones that, at first blush,
+seem to have some merit (and that I can remember).
+
+However, if you see something here you really, really want, speak up.
+All other things being equal, I will tend to implement things that seem
+to maximize user satisfaction.
+
+Also, this list doesn't include things which I'm pretty sure would
+require serious, fundamental change to GNU make; those things belong on
+the mythical "Make 4.0" list.  I admit, that line can be somewhat fuzzy :)
+
+
+  * Per-target variable definitions (a la SunOS make's ":=" feature, but
+    note the syntax here will definitely be different!)
+
+  * Multi-token pattern rule matching (allow %1/%2.c : %1/obj/%2.o, etc.)
+
+  * More robust clock skew detection algorithm.
+
+  * Provide MAKETARGETS and MAKEVARIABLES variables, containing the
+    names of the targets and variables defined in the makefile.
+
+  * If the user asks for parallelization, rebuild any "include"'d files
+    in parallel as well (helps esp. when there are many .d files to be
+    built).
+
+  * Allow variables/functions to expand to other make rules which are
+    then interpreted, with newlines handled correctly.
+
+  * More intelligent submake handling when doing parallel makes:
+    currently each submake gets a "-j 1" option.  It would be good if
+    make was smart enough to give some/all its slots to the submake
+    (esp. if there is no other rule that can be run by the parent in
+    parallel, a common situation).  Doing this perfectly might be too
+    hard, but something less than perfect is certainly possible.
+
+  * Option to check more than timestamps to determine if targets have
+    changed (MD5 checksumming?)
+
+  * Some sort of operating-system independent way of handling paths
+    would be outstanding, so makefiles can be written for UNIX, VMS,
+    DOS, MS-Windows, Amiga, etc. with a minimum of specialization.

@@ -1,5 +1,5 @@
 /* Basic dependency engine for GNU Make.
-Copyright (C) 1988,89,90,91,92,93,94,95,96 Free Software Foundation, Inc.
+Copyright (C) 1988,89,90,91,92,93,94,95,96,97 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -55,10 +55,6 @@ static time_t name_mtime PARAMS ((char *name));
 static int library_search PARAMS ((char **lib, time_t *mtime_ptr));
 
 extern time_t f_mtime PARAMS ((struct file *file, int search));
-
-#ifdef VMS
-extern int vms_stat PARAMS ((char *name, struct stat *buf));
-#endif
 
 
 /* Remake all the goals in the `struct dep' chain GOALS.  Return -1 if nothing
@@ -782,7 +778,7 @@ check_dep (file, depth, this_mtime, must_make_ptr)
       check_renamed (file);
       mtime = file_mtime (file);
       check_renamed (file);
-      if (mtime > this_mtime)
+      if (mtime != (time_t) -1 && mtime > this_mtime)
 	*must_make_ptr = 1;
 	  /* Otherwise, update all non-intermediate files we depend on,
 	     if necessary, and see whether any of them is more
@@ -1079,24 +1075,24 @@ f_mtime (file, search)
        We only need to do this once, for now. */
 
     static time_t now = 0;
-    if (!clock_skew_detected && mtime != -1 && mtime > now && ! file->updated)
+    if (!clock_skew_detected
+        && mtime != (time_t)-1 && mtime > now
+        && !file->updated)
       {
 	/* This file's time appears to be in the future.
 	   Update our concept of the present, and compare again.  */
-#ifdef VMS
-	/* Handle vms 64bit to 32bit time hack introduced in vms_stat ... */
-	static unsigned long vms_now[2]; /* assumes 32 bit long ! */
-	sys$gettim (vms_now);
-	now = ((vms_now[0]>>24) & 0xff) + ((vms_now[1]<<8) & 0xffffff00);
-#else
+
 	extern time_t time ();
 	time (&now);
-#endif
+
 #ifdef WINDOWS32
 	/*
 	 * FAT filesystems round time to nearest even second(!). Just
 	 * allow for any file (NTFS or FAT) to perhaps suffer from this
 	 * braindamage.
+	 *
+	 * Apparently, this doesn't happen with the MS-DOS/DJGPP port,
+	 * although MS-DOS and MS-Windows 3.X/9X also use FAT filesystems.
 	 */
 	if (mtime > now && (((mtime % 2) == 0) && ((mtime-1) > now)))
 #else
@@ -1131,11 +1127,7 @@ name_mtime (name)
 {
   struct stat st;
 
-#ifdef VMS
-  if (vms_stat (name, &st) < 0)
-#else
   if (stat (name, &st) < 0)
-#endif
     return (time_t) -1;
 
   return (time_t) st.st_mtime;

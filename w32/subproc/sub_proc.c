@@ -319,15 +319,18 @@ find_file(char *exec_path, LPOFSTRUCT file_info)
 	char *fname;
 	char *ext;
 
-	if ((exec_handle = (HANDLE)OpenFile(exec_path, file_info,
-			OF_READ | OF_SHARE_COMPAT)) != (HANDLE)HFILE_ERROR) {
-		return(exec_handle);
-	}
-
 	fname = malloc(strlen(exec_path) + 5);
 	strcpy(fname, exec_path);
 	ext = fname + strlen(fname);
+
 	strcpy(ext, ".exe");
+	if ((exec_handle = (HANDLE)OpenFile(fname, file_info,
+			OF_READ | OF_SHARE_COMPAT)) != (HANDLE)HFILE_ERROR) {
+		free(fname);
+		return(exec_handle);
+	}
+
+	strcpy(ext, ".cmd");
 	if ((exec_handle = (HANDLE)OpenFile(fname, file_info,
 			OF_READ | OF_SHARE_COMPAT)) != (HANDLE)HFILE_ERROR) {
 		free(fname);
@@ -336,6 +339,13 @@ find_file(char *exec_path, LPOFSTRUCT file_info)
 
 	strcpy(ext, ".bat");
 	if ((exec_handle = (HANDLE)OpenFile(fname, file_info,
+			OF_READ | OF_SHARE_COMPAT)) != (HANDLE)HFILE_ERROR) {
+		free(fname);
+		return(exec_handle);
+	}
+
+	/* should .com come before this case? */
+	if ((exec_handle = (HANDLE)OpenFile(exec_path, file_info,
 			OF_READ | OF_SHARE_COMPAT)) != (HANDLE)HFILE_ERROR) {
 		free(fname);
 		return(exec_handle);
@@ -489,14 +499,8 @@ process_begin(
 	startInfo.hStdOutput = (HANDLE)pproc->sv_stdout[1];
 	startInfo.hStdError = (HANDLE)pproc->sv_stderr[1];
 
-	/*
-	 * See if we need to setuid to a different user.
-	 */
 	if (as_user) {
-		return -1;
-	}
-
-	if (as_user) {
+		if (envblk) free(envblk);
 		return -1;
 	} else {
 		if (CreateProcess(
@@ -514,6 +518,7 @@ process_begin(
 			pproc->last_err = GetLastError();
 			pproc->lerrno = E_FORK;
 			fprintf(stderr, "process_begin: CreateProcess(%s, %s, ...) failed.\n", exec_path, command_line);
+			if (envblk) free(envblk);
 			free( command_line );
 			return(-1);
 		}
@@ -538,6 +543,7 @@ process_begin(
 	}
 
 	free( command_line );
+	if (envblk) free(envblk);
 	pproc->lerrno=0;
 	return 0;
 }
@@ -1003,14 +1009,35 @@ make_command_line( char *shell_name, char *exec_path, char **argv)
 	char** nargv;
 	char*  buf;
 	int    i;
+	char** shargv = NULL;
+	char*  p = NULL;
+	char*  q = NULL;
+	int    j = 0;
  
 	if (shell_name) {
+		/* handle things like: #!/bin/sh -x */
+
+		/* count tokens */
+		q = strdup(shell_name);
+		for (j = 0, p = q; (p = strtok(p, " \t")) != NULL; p = NULL, j++);
+		free(q);
+
+		/* copy tokens */
+		q = strdup(shell_name);
+		shargv = (char **) malloc((j+1) * sizeof (char *));
+		for (j = 0, p = q; (p = strtok(p, " \t")) != NULL; p = NULL, j++)
+			shargv[j] = strdup(p);
+		shargv[j] = NULL;
+		free(q);
+
+		/* create argv */
 		for (i = 0; argv[i]; i++);
-		i += 2;
+		i += (j+1);
 		nargv = (char **) malloc(i * sizeof (char *));
-		nargv[0] = shell_name;
-		for (i = 1; argv[i-1]; i++)
-			nargv[i] = argv[i-1];
+		for (i = 0; shargv[i] != NULL; i++)
+			nargv[i] = shargv[i];
+		for (j = 0; argv[j]; j++, i++)
+			nargv[i] = argv[j];
 		nargv[i] = NULL;
 	} else
 		nargv = argv;
@@ -1018,8 +1045,12 @@ make_command_line( char *shell_name, char *exec_path, char **argv)
 	/* create string suitable for CreateProcess() */
 	buf = fix_command_line(nargv);
 
-	if (shell_name)
+	if (shell_name) {
+		for (j = 0; shargv[j]; j++)
+			free(shargv[j]);
+		free(shargv);
 		free(nargv);
+	}
 	
 	return buf;
 }

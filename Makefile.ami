@@ -22,11 +22,6 @@
 #	Makefile for GNU Make
 #
 
-# Ultrix 2.2 make doesn't expand the value of VPATH.
-VPATH = /make-3.74/
-# This must repeat the value, because configure will remove `VPATH = .'.
-srcdir = /make-3.74/
-
 CC = sc
 RM = delete
 

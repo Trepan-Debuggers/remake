@@ -1,3 +1,91 @@
+Tue Aug 26 11:59:15 1997  Paul D. Smith  <psmith@baynetworks.com>
+
+	* main.c (print_version): Add 97 to copyright years.
+
+	* read.c (do_define): Check the length of the array before looking
+	at a particular offset.
+
+	* job.c (construct_command_argv_internal): Examine the last byte
+	of the previous arg, not the byte after that.
+
+Sat Aug 23 1997  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* Makefile.DOS.template: New file (converted to Makefile.DOS in
+	the distribution).
+
+	* configure.bat: Rewrite to use Makefile.DOS instead of editing
+        Makefile.in.  Add support for building from outside of the source
+        directory.  Fail if the environment block is too small.
+
+	* configh.dos: Use <sys/config.h>.
+
+	* README.DOS: Update instructions.
+
+Fri Aug 22 1997  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* job.c (start_job_command): [__MSDOS__] Don't test for "/bin/sh"
+        literally, use value of unixy_shell instead.
+
+	* filedef.h (NEW_MTIME): Use 1 less than maximum possible value if
+        time_t is unsigned.
+
+Sat Aug 16 00:56:15 1997  John W. Eaton  <jwe@bevo.che.wisc.edu>
+
+        * vmsify.c (vmsify, case 11): After translating `..' elements, set
+        nstate to N_OPEN if there are still more elements to process.
+        (vmsify, case 2): After translating `foo/bar' up to the slash,
+        set nstate to N_OPEN, not N_DOT.
+
+Fri Aug  8 15:18:09 1997  John W. Eaton  <jwe@bevo.che.wisc.edu>
+
+        * dir.c (vmsstat_dir): Leave name unmodified on exit.
+        * make.h (PATH_SEPARATOR_CHAR): Set to comma for VMS.
+        * vpath.c: Fix comments to refer to path separator, not colon.
+        (selective_vpath_search): Avoid Unixy slash handling for VMS.
+
+Thu Aug  7 22:24:03 1997  John W. Eaton  <jwe@bevo.che.wisc.edu>
+
+	* ar.c: [VMS] Don't declare ar_member_touch.
+	Delete VMS version of ar_member_date.
+	Enable non-VMS versions of ar_member_date and ar_member_date_1 for
+	VMS too.
+	* arscan.c (VMS_get_member_info): New function.
+	(ar_scan): Provide version for VMS systems.
+	(ar_name_equal): Simply compare name and mem on VMS systems.
+	Don't define ar_member_pos or ar_member_touch on VMS systems.
+
+	* config.h-vms (pid_t, uid_t): Don't define.
+
+	* remake.c: Delete declaration of vms_stat.
+	(name_mtime): Don't call vms_stat.
+	(f_mtime): [VMS] Funky time value manipulation no longer necessary.
+
+	* file.c (print_file): [VMS] Use ctime, not cvt_time.
+
+	* make.h: [VMS] Don't define POSIX.
+
+	* makefile.com (filelist): Include ar and arscan.
+	Also include them in the link commands.
+	Don't define NO_ARCHIVES in cc command.
+
+	* makefile.vms (ARCHIVES, ARCHIVES_SRC): Uncomment.
+	(defines): Delete NO_ARCHIVES from list.
+
+	* remake.c (f_mtime): Only check to see if intermediate file is
+	out of date if it also exists (i.e., mtime != (time_t) -1).
+
+	* vmsdir.h (u_long, u_short): Skip typedefs if using DEC C.
+
+Fri Jun 20 23:02:07 1997  Rob Tulloh  <rob_tulloh@tivoli.com>
+
+	* w32/subproc/sub_proc.c: Get W32 sub_proc to handle shebang
+	(#!/bin/sh) in script files correctly.
+	Fixed a couple of memory leaks.
+	Fixed search order in find_file() (w32/subproc/sub_proc.c) so that
+	files with extensions are preferred over files without extensions.
+	Added search for files with .cmd extension too.
+	* w32/subproc/misc.c (arr2envblk): Fixed memory leak.
+
 Mon Aug 18 09:41:08 1997  Paul D. Smith  <psmith@baynetworks.com>
 
 	* Version 3.75.91

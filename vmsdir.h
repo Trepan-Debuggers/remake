@@ -4,8 +4,10 @@
 
 #define	MAXNAMLEN	255
 
+#ifndef __DECC
 typedef unsigned long u_long;
 typedef unsigned short u_short;
+#endif
 
 struct	direct {
   off_t d_off;

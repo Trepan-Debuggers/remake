@@ -1,5 +1,5 @@
 /* Target file hash table management for GNU Make.
-Copyright (C) 1988,89,90,91,92,93,94,95,96 Free Software Foundation, Inc.
+Copyright (C) 1988,89,90,91,92,93,94,95,96,97 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -541,9 +541,7 @@ print_file (f)
      struct file *f;
 {
   register struct dep *d;
-#ifdef VMS
-  extern char *cvt_time PARAMS ((unsigned long));
-#endif
+
   putchar ('\n');
   if (!f->is_target)
     puts ("# Not a target:");
@@ -579,13 +577,8 @@ print_file (f)
   else if (f->last_mtime == (time_t) -1)
     puts ("#  File does not exist.");
   else
-#ifdef VMS
-    printf ("#  Last modified %.24s (%0lx)\n",
-	    cvt_time(f->last_mtime), (unsigned long) f->last_mtime);
-#else
     printf ("#  Last modified %.24s (%ld)\n",
 	    ctime (&f->last_mtime), (long int) f->last_mtime);
-#endif
   printf ("#  File has%s been updated.\n",
 	  f->updated ? "" : " not");
   switch (f->command_state)

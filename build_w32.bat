@@ -10,59 +10,59 @@ echo off
 echo "Creating GNU make for Windows 95/NT"
 echo on
 if not exist .\WinDebug\nul mkdir .\WinDebug
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D TIVOLI /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c variable.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D TIVOLI /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c variable.c
 echo WinDebug\variable.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c rule.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c rule.c
 echo WinDebug\rule.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c remote-stub.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c remote-stub.c
 echo WinDebug\remote-stub.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c commands.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c commands.c
 echo WinDebug\commands.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c file.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c file.c
 echo WinDebug\file.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c getloadavg.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c getloadavg.c
 echo WinDebug\getloadavg.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c default.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c default.c
 echo WinDebug\default.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c signame.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c signame.c
 echo WinDebug\signame.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c expand.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c expand.c
 echo WinDebug\expand.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c dir.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c dir.c
 echo WinDebug\dir.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c main.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c main.c
 echo WinDebug\main.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c getopt1.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c getopt1.c
 echo WinDebug\getopt1.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c job.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c job.c
 echo WinDebug\job.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c read.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c read.c
 echo WinDebug\read.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c version.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c version.c
 echo WinDebug\version.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c getopt.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c getopt.c
 echo WinDebug\getopt.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c arscan.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c arscan.c
 echo WinDebug\arscan.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c remake.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c remake.c
 echo WinDebug\remake.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c misc.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c misc.c
 echo WinDebug\misc.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c ar.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c ar.c
 echo WinDebug\ar.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c function.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c function.c
 echo WinDebug\function.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c vpath.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c vpath.c
 echo WinDebug\vpath.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c implicit.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c implicit.c
 echo WinDebug\implicit.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c  .\w32\compat\dirent.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c  .\w32\compat\dirent.c
 echo WinDebug\dirent.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c  .\glob\glob.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c  .\glob\glob.c
 echo WinDebug\glob.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c  .\glob\fnmatch.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c  .\glob\fnmatch.c
 echo WinDebug\fnmatch.obj >>link.dbg
-cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c  .\w32\pathstuff.c
+cl.exe /nologo /MT /W3 /GX /Zi /YX /Od /I . /I glob /I w32/include /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c  .\w32\pathstuff.c
 echo WinDebug\pathstuff.obj >>link.dbg
 echo off
 echo "Linking WinDebug/%make%.exe"
@@ -73,59 +73,59 @@ if not exist .\WinDebug/%make%.exe echo "WinDebug build failed"
 if exist .\WinDebug/%make%.exe echo "WinDebug build succeeded!"
 if not exist .\WinRel\nul mkdir .\WinRel
 echo on
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /D TIVOLI /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c variable.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /D TIVOLI /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c variable.c
 echo WinRel\variable.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c rule.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c rule.c
 echo WinRel\rule.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c remote-stub.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c remote-stub.c
 echo WinRel\remote-stub.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c commands.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c commands.c
 echo WinRel\commands.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c file.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c file.c
 echo WinRel\file.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c getloadavg.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c getloadavg.c
 echo WinRel\getloadavg.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c default.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c default.c
 echo WinRel\default.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c signame.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c signame.c
 echo WinRel\signame.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c expand.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c expand.c
 echo WinRel\expand.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c dir.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c dir.c
 echo WinRel\dir.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c main.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c main.c
 echo WinRel\main.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c getopt1.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c getopt1.c
 echo WinRel\getopt1.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c job.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c job.c
 echo WinRel\job.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c read.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c read.c
 echo WinRel\read.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c version.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c version.c
 echo WinRel\version.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c getopt.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c getopt.c
 echo WinRel\getopt.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c arscan.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c arscan.c
 echo WinRel\arscan.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c remake.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c remake.c
 echo WinRel\remake.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c misc.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c misc.c
 echo WinRel\misc.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c ar.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c ar.c
 echo WinRel\ar.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c function.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c function.c
 echo WinRel\function.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c vpath.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c vpath.c
 echo WinRel\vpath.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c implicit.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c implicit.c
 echo WinRel\implicit.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c  .\w32\compat\dirent.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c  .\w32\compat\dirent.c
 echo WinRel\dirent.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c  .\glob\glob.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c  .\glob\glob.c
 echo WinRel\glob.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c  .\glob\fnmatch.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c  .\glob\fnmatch.c
 echo WinRel\fnmatch.obj >>link.rel
-cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c  .\w32\pathstuff.c
+cl.exe /nologo /MT /W3 /GX /YX /O2 /I . /I glob /I w32/include /D NDEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES /FR.\WinRel/ /Fp.\WinRel/%make%.pch /Fo.\WinRel/ /c  .\w32\pathstuff.c
 echo WinRel\pathstuff.obj >>link.rel
 echo off
 echo "Linking WinRel/%make%.exe"

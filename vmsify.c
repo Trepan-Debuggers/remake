@@ -330,9 +330,9 @@ vmsify (name, type)
 		else
 		  {
 		    strcpy (vptr, "[.");
-		    nstate = N_DOT;
 		    vptr += 2;
 		    copyto (&vptr, &fptr, '/', 1);
+		    nstate = N_OPEN;
 		    state = 9;
 		  }
 	      }
@@ -738,6 +738,7 @@ vmsify (name, type)
 	      s = strchr (vptr, ']');
 	      if (s != 0)
 		{
+		  nstate = N_OPEN;
 		  while (s > vptr)
 		    {
 		      s--;

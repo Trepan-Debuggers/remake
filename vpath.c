@@ -1,5 +1,5 @@
 /* Implementation of pattern-matching file search paths for GNU Make.
-Copyright (C) 1988, 89, 91, 92, 93, 94, 95, 96 Free Software Foundation, Inc.
+Copyright (C) 1988,89,91,92,93,94,95,96,97 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -145,14 +145,15 @@ build_vpath_lists ()
    variable.
 
    If SEARCHPATH is nil, remove all previous listings with the same
-   pattern.  If PATTERN is nil, remove all VPATH listings.
-   Existing and readable directories that are not "." given in the
-   searchpath separated by colons are loaded into the directory hash
-   table if they are not there already and put in the VPATH searchpath
-   for the given pattern with trailing slashes stripped off if present
-   (and if the directory is not the root, "/").
-   The length of the longest entry in the list is put in the structure as well.
-   The new entry will be at the head of the VPATHS chain.  */
+   pattern.  If PATTERN is nil, remove all VPATH listings.  Existing
+   and readable directories that are not "." given in the searchpath
+   separated by the path element separator (defined in make.h) are
+   loaded into the directory hash table if they are not there already
+   and put in the VPATH searchpath for the given pattern with trailing
+   slashes stripped off if present (and if the directory is not the
+   root, "/").  The length of the longest entry in the list is put in
+   the structure as well.  The new entry will be at the head of the
+   VPATHS chain.  */
 
 void
 construct_vpath_list (pattern, dirpath)
@@ -213,10 +214,10 @@ construct_vpath_list (pattern, dirpath)
     convert_vpath_to_windows32(dirpath, ';');
 #endif
 
-  /* Figure out the maximum number of VPATH entries and
-     put it in MAXELEM.  We start with 2, one before the
-     first colon and one nil, the list terminator and
-     increment our estimated number for each colon or blank we find.  */
+  /* Figure out the maximum number of VPATH entries and put it in
+     MAXELEM.  We start with 2, one before the first separator and one
+     nil (the list terminator) and increment our estimated number for
+     each separator or blank we find.  */
   maxelem = 2;
   p = dirpath;
   while (*p != '\0')
@@ -226,7 +227,7 @@ construct_vpath_list (pattern, dirpath)
   vpath = (char **) xmalloc (maxelem * sizeof (char *));
   maxvpath = 0;
 
-  /* Skip over any initial colons and blanks.  */
+  /* Skip over any initial separators and blanks.  */
   p = dirpath;
   while (*p == PATH_SEPARATOR_CHAR || isblank (*p))
     ++p;
@@ -271,7 +272,7 @@ construct_vpath_list (pattern, dirpath)
 	    free (v);
 	}
 
-      /* Skip over colons and blanks between entries.  */
+      /* Skip over separators and blanks between entries.  */
       while (*p == PATH_SEPARATOR_CHAR || isblank (*p))
 	++p;
     }
@@ -435,7 +436,9 @@ selective_vpath_search (path, file, mtime_ptr)
       /* Add the directory prefix already in *FILE.  */
       if (name_dplen > 0)
 	{
+#ifndef VMS
 	  *n++ = '/';
+#endif
 	  bcopy (*file, n, name_dplen);
 	  n += name_dplen;
 	}
@@ -446,12 +449,14 @@ selective_vpath_search (path, file, mtime_ptr)
 	n[-1] = '/';
 #endif
       /* Now add the name-within-directory at the end of NAME.  */
+#ifndef VMS
       if (n != name && n[-1] != '/')
 	{
 	  *n = '/';
 	  bcopy (filename, n + 1, flen + 1);
 	}
       else
+#endif
 	bcopy (filename, n, flen + 1);
 
       /* Check if the file is mentioned in a makefile.  If *FILE is not
@@ -464,7 +469,7 @@ selective_vpath_search (path, file, mtime_ptr)
 	 inadequately commented change in July 1990; I am not sure off
 	 hand what problem it fixes.
 
-	 In December 1993 I loosened of this restriction to allow a file
+	 In December 1993 I loosened this restriction to allow a file
 	 to be chosen if it is mentioned as a target in a makefile.  This
 	 seem logical.  */
       {
@@ -478,6 +483,9 @@ selective_vpath_search (path, file, mtime_ptr)
 	  /* That file wasn't mentioned in the makefile.
 	     See if it actually exists.  */
 
+#ifdef VMS
+	  exists_in_cache = exists = dir_file_exists_p (vpath[i], filename);
+#else
 	  /* Clobber a null into the name at the last slash.
 	     Now NAME is the name of the directory to look in.  */
 	  *n = '\0';
@@ -486,6 +494,7 @@ selective_vpath_search (path, file, mtime_ptr)
 	     construct_vpath_list or the code just above put it there.
 	     Does the file we seek exist in it?  */
 	  exists_in_cache = exists = dir_file_exists_p (name, filename);
+#endif
 	}
 
       if (exists)
@@ -498,8 +507,10 @@ selective_vpath_search (path, file, mtime_ptr)
 
 	  struct stat st;
 
+#ifndef VMS
 	  /* Put the slash back in NAME.  */
 	  *n = '/';
+#endif
 
 	  if (!exists_in_cache	/* Makefile-mentioned file need not exist.  */
 	      || stat (name, &st) == 0) /* Does it really exist?  */

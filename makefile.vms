@@ -1,4 +1,4 @@
-# Copyright (C) 1988, 1989, 1996 Free Software Foundation, Inc.
+# Copyright (C) 1988, 1989, 1996, 1997 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # VMS extensions from GNU Make 3.60 imported by
@@ -31,13 +31,13 @@ CFLAGS = $(defines) /debug/noopt/include=([],[.glob])
 #LDFLAGS = /deb
 LDFLAGS =
 
-defines = /define=("unlink=remove","HAVE_CONFIG_H","VMS","NO_ARCHIVES","allocated_variable_expand_for_file=alloc_var_expand_for_file")
+defines = /define=("unlink=remove","HAVE_CONFIG_H","VMS","allocated_variable_expand_for_file=alloc_var_expand_for_file")
 
 LOAD_AVG = /define="NO_LDAV"
 
 # If you don't want archive support, comment these out.
-#ARCHIVES = ,ar.obj,arscan.obj
-#ARCHIVES_SRC = ar.c arscan.c
+ARCHIVES = ,ar.obj,arscan.obj
+ARCHIVES_SRC = ar.c arscan.c
 
 # If your system needs extra libraries loaded in, define them here.
 # System V probably need -lPW for alloca.

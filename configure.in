@@ -1,9 +1,9 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.55 1997/08/18 18:11:14 psmith Exp $])
+AC_REVISION([$Id: configure.in,v 1.56 1997/08/27 20:31:08 psmith Exp $])
 AC_PREREQ(2.12)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 
-AM_INIT_AUTOMAKE(make, 3.75.91)
+AM_INIT_AUTOMAKE(make, 3.75.92)
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_SUBDIRS(glob)
 

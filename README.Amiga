@@ -3,7 +3,7 @@ Author: GNU, Amiga port by Aaron "Optimizer" Digulla
 Uploader: Aaron "Optimizer" Digulla (digulla@fh-konstanz.de)
 Type: dev/c
 
-This is a pure Amiga port of GNU make 3.74. It needs no extra libraries or
+This is a pure Amiga port of GNU make. It needs no extra libraries or
 anything. It has the following features (in addition to any features of
 GNU make):
 

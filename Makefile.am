@@ -18,26 +18,64 @@ INCLUDES =	-I$(srcdir)/glob -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\
 
 BUILT_SOURCES =	README build.sh.in
 
-EXTRA_DIST = 	make.man $(BUILT_SOURCES) remote-cstms.c \
-		make-stds.texi texinfo.tex SCOPTIONS SMakefile \
-		Makefile.ami README.Amiga config.ami amiga.c amiga.h \
-		NMakefile README.DOS configh.dos configure.bat makefile.com \
-		README.W32 build_w32.bat config.h.W32 subproc.bat make.lnk \
-		config.h-vms makefile.vms readme.vms vmsdir.h vmsfunctions.c \
-		vmsify.c
+EXTRA_DIST = 	make.man $(BUILT_SOURCES) remote-cstms.c\
+		make-stds.texi texinfo.tex SCOPTIONS SMakefile\
+		README.Amiga Makefile.ami config.ami make.lnk amiga.c amiga.h\
+		README.DOS Makefile.DOS configure.bat dosbuild.bat configh.dos\
+		README.W32 NMakefile config.h.W32 build_w32.bat subproc.bat\
+		readme.vms makefile.vms makefile.com config.h-vms vmsdir.h\
+		vmsfunctions.c vmsify.c
 
 SUBDIRS =	glob
 
-# Look for the make test suite, and run it if found.  Look in MAKE_TEST, or
-# in the srcdir or the distdir, their parents, and their parents.
+# --------------- Local DIST Section
+
+# Install the w32 subdirectory
 #
-check-local:
-	@here=`pwd`; testdir=""; \
+dist-hook:
+	(cd $(srcdir); \
+	 w32=`find w32 -follow \( -name CVS -prune \) -o -type f -print`; \
+	 tar chf - $$w32) \
+	| (cd $(distdir); tar xfBp -)
+
+
+# --------------- Local CHECK Section
+
+check-local: check-loadavg check-regression
+.PHONY: check-loadavg check-regression
+
+# > check-loadavg
+#
+loadavg: loadavg.c config.h
+	@rm -f loadavg
+	$(LINK) -DTEST $(make_LDFLAGS) loadavg.c $(LIBS)
+# We copy getloadavg.c into a different file rather than compiling it
+# directly because some compilers clobber getloadavg.o in the process.
+loadavg.c: getloadavg.c
+	ln $(srcdir)/getloadavg.c loadavg.c || \
+	cp $(srcdir)/getloadavg.c loadavg.c
+check-loadavg: loadavg
+	@echo The system uptime program believes the load average to be:
+	-uptime
+	@echo The GNU load average checking code believes:
+	-./loadavg
+
+# > check-regression
+#
+# Look for the make test suite, and run it if found.  Look in MAKE_TEST if
+# specified, or else in the srcdir or the distdir, their parents, and _their_
+# parents.
+#
+check-regression:
+	here=`pwd`; testdir=""; \
 	  case "$(MAKE_TEST)" in "") \
 	    for d1 in $$here $(srcdir); do \
 	      for d2 in ../.. .. .; do \
-		try=`ls -1 $$d1/$$d2/make-test-*/run_make_tests 2>/dev/null | tail -1`; \
-		case "$$try" in "") : ;; *) testdir=`dirname $$try` ;; esac; \
+		all=`echo $$d1/$$d2/make-test-[0-9]*/run_make_tests`; \
+		case "$$all" in \
+		  "$$d1/$$d2/make-test-[0-9]*/run_make_tests") : ;; \
+		  *) try=`for x in $$all; do echo $$x; done | sort | tail -1`;\
+		     testdir=`dirname $$try` ;; esac; \
             done; done ;; \
 	    *) testdir="$(MAKE_TEST)" ;; \
 	  esac; \
@@ -47,13 +85,8 @@ check-local:
 	  echo "cd $$testdir && ./run_make_tests -make_path $$here/make"; \
 	  cd $$testdir && ./run_make_tests -make_path $$here/make
 
-# Install the w32 subdirectory
-#
-dist-hook:
-	(cd $(srcdir); \
-	 w32=`find w32 -follow \( -name CVS -prune \) -o -type f -print`; \
-	 tar chf - $$w32) \
-	| (cd $(distdir); tar xfBp -)
+
+# --------------- Maintainer's Section
 
 if MAINT_MAKEFILE
 # Note this requires GNU make.  Not to worry, since it will only be included

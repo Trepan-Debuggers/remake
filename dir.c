@@ -1,5 +1,5 @@
 /* Directory hashing for GNU Make.
-Copyright (C) 1988, 89, 91, 92, 93, 94, 95, 96 Free Software Foundation, Inc.
+Copyright (C) 1988,89,91,92,93,94,95,96,97 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -179,13 +179,16 @@ vmsstat_dir (name, st)
     {
       *s++ = 0;
       st->st_dev = (char *)vms_hash (name);
+      h = vms_hash (s);
+      *(s-1) = ':';
     }
   else
     {
       st->st_dev = 0;
       s = name;
+      h = vms_hash (s);
     }
-  h = vms_hash (s);
+
   st->st_ino[0] = h & 0xff;
   st->st_ino[1] = h & 0xff00;
   st->st_ino[2] = h >> 16;

@@ -7,11 +7,11 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.163 1997/08/18 18:11:24 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.164 1997/08/27 20:31:18 psmith Exp $
 @set EDITION 0.51
-@set VERSION 3.75 Beta
-@set UPDATED 9 May 1996
-@set UPDATE-MONTH May 1996
+@set VERSION 3.76 Beta
+@set UPDATED 26 Aug 1997
+@set UPDATE-MONTH Aug 1997
 @comment The ISBN number might need to change on next publication.
 @set ISBN 1-882114-78-7 @c CHANGE THIS BEFORE PRINTING AGAIN! --roland 9may96
 
@@ -73,7 +73,7 @@ by the Free Software Foundation.
 @author Richard M. Stallman and Roland McGrath
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1988, '89, '90, '91, '92, '93, '94, '95, '96 Free Software Foundation, Inc.
+Copyright @copyright{} 1988, '89, '90, '91, '92, '93, '94, '95, '96, '97 Free Software Foundation, Inc.
 @sp 2
 Published by the Free Software Foundation @*
 59 Temple Place -- Suite 330, @*

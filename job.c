@@ -1,6 +1,5 @@
 /* Job execution and handling for GNU Make.
-Copyright (C) 1988, 89, 90, 91, 92, 93, 94, 95, 96
-	Free Software Foundation, Inc.
+Copyright (C) 1988,89,90,91,92,93,94,95,96,97 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -788,7 +787,12 @@ start_job_command (child)
   /* Optimize an empty command.  People use this for timestamp rules,
      and forking a useless shell all the time leads to inefficiency. */
 
-  if ((argv[0]      && !strcmp(argv[0], "/bin/sh"))
+  if (
+#ifdef __MSDOS__
+      unixy_shell	/* the test is complicated and we already did it */
+#else
+      (argv[0] && !strcmp(argv[0], "/bin/sh"))
+#endif
       && (argv[1]   && !strcmp(argv[1], "-c"))
       && (argv[2]   && !strcmp(argv[2], ":"))
       && argv[3] == NULL)
@@ -1866,7 +1870,7 @@ construct_command_argv_internal (line, restp, shell, ifs)
 	  if (*p == instring)
 	    {
 	      instring = 0;
-	      if (*ap == '\0')
+	      if (ap == new_argv[0] || *(ap-1) == '\0')
 		last_argument_was_empty = 1;
 	    }
 	  else if (*p == '\\' && p[1] == '\n')
