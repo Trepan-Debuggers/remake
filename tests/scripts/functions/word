@@ -1,5 +1,6 @@
 #                                                                    -*-perl-*-
-$description = "Test the word, words, and wordlist functions.\n";
+$description = "\
+Test the word, words, wordlist, firstword, and lastword functions.\n";
 
 $details = "\
 Produce a variable with a large number of words in it,
@@ -86,6 +87,42 @@ $answer = "$makefile2:8: *** non-numeric first argument to `wordlist' function: 
 &run_make_with_options($makefile2, 'wordlist-e3', &get_logfile, 512);
 $answer = "$makefile2:9: *** non-numeric second argument to `wordlist' function: ' 12a '.  Stop.\n";
 &compare_output($answer, &get_logfile(1));
+
+
+# TEST #8 -- test $(firstword )
+#
+run_make_test('
+void :=
+list := $(void) foo bar baz #
+
+a := $(word 1,$(list))
+b := $(firstword $(list))
+
+.PHONY: all
+
+all:
+	@test "$a" = "$b" && echo $a
+',
+'',
+'foo');
+
+
+# TEST #9 -- test $(lastword )
+#
+run_make_test('
+void :=
+list := $(void) foo bar baz #
+
+a := $(word $(words $(list)),$(list))
+b := $(lastword $(list))
+
+.PHONY: all
+
+all:
+	@test "$a" = "$b" && echo $a
+',
+'',
+'baz');
 
 # This tells the test driver that the perl test script executed properly.
 1;

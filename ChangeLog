@@ -1,3 +1,10 @@
+2004-10-21  Boris Kolpackov  <boris@kolpackov.net>
+
+	* function.c (func_lastword): New function: return last word
+	from the list of words.
+	* doc/make.texi: Document $(lastword ). Fix broken links in
+	Quick Reference section.
+
 2004-10-06  Paul D. Smith  <psmith@gnu.org>
 
 	Apply patch from Alessandro Vesely, provided with bug # 9748.

@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.19 2004/05/16 19:16:55 psmith Exp $
+@set RCSID $Id: make.texi,v 1.20 2004/10/21 17:42:25 bosk Exp $
 @set EDITION 0.61
 @set VERSION 3.80
 @set UPDATED 23 Feb 2003
@@ -1239,11 +1239,11 @@ If a makefile named @code{Makefile} has this content:
 
 @example
 @group
-name1 := $(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))
+name1 := $(lastword $(MAKEFILE_LIST))
 
 include inc.mk
 
-name2 := $(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))
+name2 := $(lastword $(MAKEFILE_LIST))
 
 all:
         @@echo name1 = $(name1)
@@ -5963,7 +5963,27 @@ $(firstword foo bar)
 produces the result @samp{foo}.  Although @code{$(firstword
 @var{text})} is the same as @code{$(word 1,@var{text})}, the
 @code{firstword} function is retained for its simplicity.@refill
+
+
+@item $(lastword @var{names}@dots{})
+@findex lastword
+@cindex words, extracting last
+The argument @var{names} is regarded as a series of names, separated
+by whitespace.  The value is the last name in the series.
+
+For example,
+
+@example
+$(lastword foo bar)
+@end example
+
+@noindent
+produces the result @samp{bar}.  Although @code{$(lastword
+@var{text})} is the same as @code{$(word $(words @var{text}),@var{text})},
+the @code{lastword} function was added for its simplicity and better
+performance.@refill
 @end table
+
 
 Here is a realistic example of the use of @code{subst} and
 @code{patsubst}.  Suppose that a makefile uses the @code{VPATH} variable
@@ -9636,7 +9656,7 @@ Remove all search paths previously specified in any @code{vpath}
 directive.
 @end table
 
-Here is a summary of the text manipulation functions (@pxref{Functions}):
+Here is a summary of the built-in functions (@pxref{Functions}):
 
 @table @code
 @item $(subst @var{from},@var{to},@var{text})
@@ -9667,6 +9687,26 @@ Select words in @var{text} that @emph{do not} match any of the @var{pattern} wor
 Sort the words in @var{list} lexicographically, removing duplicates.@*
 @xref{Text Functions, , Functions for String Substitution and Analysis}.
 
+@item $(word @var{n},@var{text})
+Extract the @var{n}th word (one-origin) of @var{text}.@*
+@xref{Text Functions, , Functions for String Substitution and Analysis}.
+
+@item $(words @var{text})
+Count the number of words in @var{text}.@*
+@xref{Text Functions, , Functions for String Substitution and Analysis}.
+
+@item $(wordlist @var{s},@var{e},@var{text})
+Returns the list of words in @var{text} from @var{s} to @var{e}.@*
+@xref{Text Functions, , Functions for String Substitution and Analysis}.
+
+@item $(firstword @var{names}@dots{})
+Extract the first word of @var{names}.@*
+@xref{Text Functions, , Functions for String Substitution and Analysis}.
+
+@item $(lastword @var{names}@dots{})
+Extract the last word of @var{names}.@*
+@xref{Text Functions, , Functions for String Substitution and Analysis}.
+
 @item $(dir @var{names}@dots{})
 Extract the directory part of each file name.@*
 @xref{File Name Functions, ,Functions for File Names}.
@@ -9693,22 +9733,6 @@ Prepend @var{prefix} to each word in @var{names}.@*
 
 @item $(join @var{list1},@var{list2})
 Join two parallel lists of words.@*
-@xref{File Name Functions, ,Functions for File Names}.
-
-@item $(word @var{n},@var{text})
-Extract the @var{n}th word (one-origin) of @var{text}.@*
-@xref{File Name Functions, ,Functions for File Names}.
-
-@item $(words @var{text})
-Count the number of words in @var{text}.@*
-@xref{File Name Functions, ,Functions for File Names}.
-
-@item $(wordlist @var{s},@var{e},@var{text})
-Returns the list of words in @var{text} from @var{s} to @var{e}.@*
-@xref{File Name Functions, ,Functions for File Names}.
-
-@item $(firstword @var{names}@dots{})
-Extract the first word of @var{names}.@*
 @xref{File Name Functions, ,Functions for File Names}.
 
 @item $(wildcard @var{pattern}@dots{})
