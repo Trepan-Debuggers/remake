@@ -39,7 +39,8 @@ Version 3.72
 * DJ Delorie has ported Make to MS-DOS using the GO32 extender.
   He is maintaining the DOS port, not the GNU Make maintainer;
   please direct bugs and questions for DOS to <djgpp@sun.soe.clarkson.edu>.
-  MS-DOS binaries are available for FTP from oak.oakland.edu:pub/msdos/djgpp.
+  MS-DOS binaries are available for FTP from ftp.simtel.net in
+  /pub/simtelnet/gnu/djgpp/.
 
 * The `MAKEFLAGS' variable (in the environment or in a makefile) can now
   contain variable definitions itself; these are treated just like

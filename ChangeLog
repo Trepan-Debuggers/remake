@@ -1,5 +1,7 @@
 Fri Jul 19 16:57:27 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 
+	* Version 3.74.6.
+
 	* GNUmakefile (win32files): New variable.
 	(distfiles): Add it.
 	* w32: Updated by Rob Tulloh.
