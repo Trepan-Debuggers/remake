@@ -15,14 +15,6 @@
 
 @c ISPELL CHECK: done, 14 Jan 1993 --bob
 
-@c Set the following only if you have the new `shorttitlepage' command:
-@c clear shorttitlepage
-@set shorttitlepage
-
-@c Set the following only if you have the new, two level index `texindex'
-@c clear two-level-index
-@set two-level-index
-
 @ifset two-level-index
 @tex
 % trying for a two-level index
