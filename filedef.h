@@ -131,8 +131,8 @@ extern void notice_finished_file PARAMS ((struct file *file));
 
 #define FILE_TIMESTAMP_S(ts) (((ts) - ORDINARY_MTIME_MIN) \
 			      >> FILE_TIMESTAMP_LO_BITS)
-#define FILE_TIMESTAMP_NS(ts) (((ts) - ORDINARY_MTIME_MIN) \
-			       & ((1 << FILE_TIMESTAMP_LO_BITS) - 1))
+#define FILE_TIMESTAMP_NS(ts) ((int) (((ts) - ORDINARY_MTIME_MIN) \
+				      & ((1 << FILE_TIMESTAMP_LO_BITS) - 1)))
 
 /* Upper bound on length of string "YYYY-MM-DD HH:MM:SS.NNNNNNNNN"
    representing a file timestamp.  The upper bound is not necessarily 19,
@@ -154,7 +154,7 @@ extern void notice_finished_file PARAMS ((struct file *file));
 
 extern FILE_TIMESTAMP file_timestamp_cons PARAMS ((char const *,
 						   time_t, int));
-extern FILE_TIMESTAMP file_timestamp_now PARAMS ((void));
+extern FILE_TIMESTAMP file_timestamp_now PARAMS ((int *));
 extern void file_timestamp_sprintf PARAMS ((char *p, FILE_TIMESTAMP ts));
 
 /* Return the mtime of file F (a struct file *), caching it.

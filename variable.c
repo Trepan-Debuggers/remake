@@ -201,9 +201,6 @@ lookup_variable (name, length)
 	  sptr = value;
 	  scnt = 0;
 
-          if (listp)
-            *listp = current_variable_set_list;
-
 	  while ((sptr = strchr (sptr, '$')))
 	    {
 	      scnt++;

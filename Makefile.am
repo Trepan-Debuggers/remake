@@ -57,6 +57,8 @@ all-local: $(srcdir)/stamp-pot
 $(srcdir)/stamp-pot: $(POTFILES)
 	@echo "$(POTFILES)" > $@
 
+MAINTAINERCLEANFILES = $(srcdir)/stamp-pot
+
 
 # --------------- Local INSTALL Section
 

@@ -44,7 +44,7 @@ Version 3.79
   explicitly within a make rule you may need to re-examine your use for
   correctness given this change.
 
-* A new psuedo-target .NOTPARALLEL is available.  If defined, the
+* A new pseudo-target .NOTPARALLEL is available.  If defined, the
   current makefile is run serially regardless of the value of -j.
   However, submakes are still eligible for parallel execution.
 

@@ -1,3 +1,43 @@
+2000-07-07  Paul D. Smith  <psmith@gnu.org>
+
+	* remake.c (f_mtime): If NO_FLOAT is defined, don't bother with
+	the offset calculation.
+	(name_mtime): Replace EINTR test with EINTR_SET macro.
+
+2000-07-07  Paul Eggert  <eggert@twinsun.com>
+
+	Fix for PR/1811:
+
+	* remake.c (update_file_1):
+	Avoid spurious rebuilds of archive members due to their
+	timestamp resolution being only one second.
+	(f_mtime): Avoid spurious warnings of timestamps in the future due to
+	the clock's resolution being lower than file timestamps'.
+	When warning about future timestamps, report only the discrepancy,
+	not the absolute value of the timestamp and the current time.
+
+	* file.c (file_timestamp_now): New arg RESOLUTION.
+	* filedef.h (file_timestamp_now): Likewise.
+	(FILE_TIMESTAMP_NS): Now returns int.  All uses changed.
+
+2000-07-05  Paul D. Smith  <psmith@gnu.org>
+
+	* variable.c (lookup_variable) [VMS]: Remove vestigial references
+	to listp.  Fixes PR/1793.
+
+2000-06-26  Paul Eggert  <eggert@twinsun.com>
+
+	* Makefile.am (MAINTAINERCLEANFILES): New macro, with stamp-pot in it.
+
+	* dir.c (vms_hash): Ensure ctype macro args are nonnegative.
+
+	* remake.c (f_mtime): Remove unused var memtime.
+
+2000-06-25  Martin Buchholz  <martin@xemacs.org>
+
+	* make.texinfo, NEWS, TODO.private: Minor spelling corrections.
+	Ran spell-check	on make.texinfo.
+
 2000-06-23  Paul D. Smith  <psmith@gnu.org>
 
 	* main.c (main): Replace EXIT_SUCCESS, EXIT_FAILURE, and
