@@ -505,9 +505,9 @@ read_makefile (filename, type)
 	  /* Parse the list of file names.  */
 	  p2 = p;
 	  files = multi_glob (parse_file_seq (&p2, '\0',
-					      sizeof (struct nameseq)),
-			      sizeof (struct nameseq),
-			      1);
+					      sizeof (struct nameseq),
+					      1),
+			      sizeof (struct nameseq));
 	  free (p);
 
 	  /* Save the state of conditionals and start
