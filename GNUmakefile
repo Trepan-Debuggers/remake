@@ -61,8 +61,8 @@ endif
 
 ifneq "$(wildcard $(ARCH)/makefile)" ""
 include $(ARCH)/makefile
-objs := $(sort $(objs) $(addprefix $(ARCH)/,$(ALLOCA) $(extras)))
 endif
+objs := $(sort $(objs) $(addprefix $(ARCH)/,$(ALLOCA) $(extras)))
 
 ifndef no_libc
 libc_dir = /home/gd2/gnu/libc/$(ARCH)
