@@ -20,10 +20,6 @@
 /* Define for DGUX with <sys/dg_sys_info.h>.  */
 #undef DGUX
 
-/* Define to the type of elements in the array set by `getgroups'.
-   Usually this is either `int' or `gid_t'.  */
-#undef GETGROUPS_T
-
 /* Define if the `getloadavg' function needs to be run setuid or setgid.  */
 #undef GETLOADAVG_PRIVILEGED
 
