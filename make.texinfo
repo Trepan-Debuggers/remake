@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.171 1999/04/25 04:31:01 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.172 1999/07/06 21:09:34 psmith Exp $
 @set EDITION 0.53
 @set VERSION 3.78
 @set UPDATED 14 April 1999
@@ -1193,6 +1193,13 @@ again.  (It will also attempt to update each of them over again, but
 normally this will not change them again, since they are already up to
 date.)@refill
 
+If you know that one or more of your makefiles cannot be remade and you
+want to keep @code{make} from performing an implicit rule search on
+them, perhaps for efficiency reasons, you can use any normal method of
+preventing implicit rule lookup to do so.  For example, you can write an
+explicit rule with the makefile as the target, and an empty command
+string (@pxref{Empty Commands, ,Using Empty Commands}).
+
 If the makefiles specify a double-colon rule to remake a file with
 commands but no dependencies, that file will always be remade
 (@pxref{Double-Colon}).  In the case of makefiles, a makefile that has a
@@ -1201,8 +1208,8 @@ time @code{make} is run, and then again after @code{make} starts over
 and reads the makefiles in again.  This would cause an infinite loop:
 @code{make} would constantly remake the makefile, and never do anything
 else.  So, to avoid this, @code{make} will @strong{not} attempt to
-remake makefiles which are specified as double-colon targets but have no
-dependencies.@refill
+remake makefiles which are specified as targets of a double-colon rule
+with commands but no dependencies.@refill
 
 If you do not specify any makefiles to be read with @samp{-f} or
 @samp{--file} options, @code{make} will try the default makefile names;
@@ -6632,10 +6639,11 @@ Some Files}.@refill
 @itemx --print-data-base
 @cindex @code{--print-data-base}
 Print the data base (rules and variable values) that results from
-reading the makefiles; then execute as usual or as otherwise
-specified.  This also prints the version information given by
-the @samp{-v} switch (see below).  To print the data base without
-trying to remake any files, use @w{@samp{make -p -f /dev/null}}.
+reading the makefiles; then execute as usual or as otherwise specified.
+This also prints the version information given by the @samp{-v} switch
+(see below).  To print the data base without trying to remake any files,
+use @w{@samp{make -qp}}.  To print the data base of predefined rules and
+variables, use @w{@samp{make -p -f /dev/null}}.
 
 @item -q
 @cindex @code{-q}
@@ -8722,8 +8730,8 @@ for the particular target that is being processed.
 This is not defined in GNU @code{make} because @samp{$$} should always
 stand for an ordinary @samp{$}.
 
-It is possible to get this functionality through the use of static pattern
-rules (@pxref{Static Pattern, ,Static Pattern Rules}).
+It is possible to get portions of this functionality through the use of
+static pattern rules (@pxref{Static Pattern, ,Static Pattern Rules}).
 The System V @code{make} rule:
 
 @example
@@ -9131,9 +9139,11 @@ but the rule in the makefile was prefixed with the @code{-} special
 character, so @code{make} ignored the error.
 
 @item missing separator.  Stop.
-This is @code{make}'s generic ``Huh?'' error message.  It means that
-@code{make} was completely unsuccessful at parsing this line of your
-makefile.  It basically means ``syntax error''.
+This means that @code{make} could not understand much of anything about
+the command line it just read.  GNU @code{make} looks for various kinds
+of separators (@code{:}, @code{=}, TAB characters, etc.) to help it
+decide what kind of commandline it's seeing.  This means it couldn't
+find a valid one.
 
 One of the most common reasons for this message is that you (or perhaps
 your oh-so-helpful editor, as is the case with many MS-Windows editors)
