@@ -3444,7 +3444,7 @@ construct_command_argv (char *line, char **restp, struct file *file,
             free (buf);
 	}
     }
-#endif __EMX__
+#endif /* __EMX__ */
 
     ifs = allocated_variable_expand_for_file ("$(IFS)", file);
 

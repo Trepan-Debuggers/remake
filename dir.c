@@ -1,6 +1,6 @@
 /* Directory hashing for GNU Make.
 Copyright (C) 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-2002 Free Software Foundation, Inc.
+2002,2003 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -249,6 +249,7 @@ directory_contents_hash_1 (const void *key_0)
   unsigned long hash;
 
 #ifdef WINDOWS32
+  hash = 0;
   ISTRING_HASH_1 (key->path_key, hash);
   hash ^= ((unsigned int) key->dev << 4) ^ (unsigned int) key->ctime;
 #else
@@ -271,6 +272,7 @@ directory_contents_hash_2 (const void *key_0)
   unsigned long hash;
 
 #ifdef WINDOWS32
+  hash = 0;
   ISTRING_HASH_2 (key->path_key, hash);
   hash ^= ((unsigned int) key->dev << 4) ^ (unsigned int) ~key->ctime;
 #else
