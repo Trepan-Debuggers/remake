@@ -450,8 +450,7 @@ print_file_data_base ()
 		    }
 		  break;
 		default:
-		  puts ("#  Invalid value in `command_state
-' member!");
+		  puts ("#  Invalid value in `command_state' member!");
 		  fflush (stdout);
 		  fflush (stderr);
 		  abort ();
