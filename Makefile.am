@@ -3,49 +3,19 @@
 AUTOMAKE_OPTIONS = dist-bzip2 check-news
 ACLOCAL_AMFLAGS	=  -I config
 
-SUBDIRS =	glob config po doc
-
-bin_PROGRAMS =	make
-
-if USE_CUSTOMS
-  remote =	remote-cstms.c
-else
-  remote =	remote-stub.c
-endif
-
-make_SOURCES =	ar.c arscan.c commands.c default.c dir.c \
-	        expand.c file.c \
-		function.c getopt.c getopt1.c  hash.c implicit.c job.c \
-	        main.c misc.c read.c remake.c $(remote) rule.c show.c \
-	        signame.c trace.c variable.c version.c vpath.c
-
-EXTRA_make_SOURCES = remote-stub.c remote-cstms.c
-
-noinst_HEADERS = commands.h dep.h filedef.h debug.h getopt.h gettext.h \
-	         hash.h job.h make.h rule.h show.h trace.h variable.h 
-
-make_LDADD =	@LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@ @LIBINTL@
+SUBDIRS =	glob config po doc src emacs
 
 man_MANS =	make.1
-
-DEFS =		-DLOCALEDIR=\"$(localedir)\" -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\" @DEFS@
-
-AM_CPPFLAGS =	$(GLOBINC)
-
 
 # Extra stuff to include in the distribution.
 # Note we need all the glob stuff here, rather than in glob/Makefile.am,
 # because often that directory isn't built on the systems used by the
 # maintainers.
 
-EXTRA_DIST =	README build.sh.in $(man_MANS)\
-		README.customs\
+EXTRA_DIST =	README build.sh.in $(man_MANS) \
+		README.customs README.makedb getloadavg.c \
 		SCOPTIONS SMakefile\
-		README.Amiga Makefile.ami config.ami make.lnk amiga.c amiga.h\
-		README.DOS Makefile.DOS configure.bat dosbuild.bat configh.dos\
-		README.W32 NMakefile config.h.W32 build_w32.bat subproc.bat\
-		readme.vms makefile.vms makefile.com config.h-vms \
-		vmsdir.h vmsfunctions.c vmsify.c
+		README.W32 TODO
 
 MAKE_HOST =	@MAKE_HOST@
 
@@ -90,6 +60,9 @@ install-exec-local:
 	   fi; \
 	 else true; fi
 
+doxygen:
+	-( cd ${top_srcdir}/doc/doxygen && /bin/sh ${srcdir}/run_doxygen )
+
 # --------------- Local DIST Section
 
 # Install the w32 and tests subdirectories
@@ -103,7 +76,7 @@ dist-hook:
 
 # --------------- Local CHECK Section
 
-check-local: check-regression check-loadavg
+check-local: check-regression 
 	@banner=" Regression PASSED: GNU Make $(VERSION) ($(MAKE_HOST)) built with $(CC) "; \
 	dashes=`echo "$$banner" | sed s/./=/g`; \
 	echo; \
@@ -112,24 +85,7 @@ check-local: check-regression check-loadavg
 	echo "$$dashes"; \
 	echo
 
-.PHONY: check-loadavg check-regression
-
-check-loadavg: loadavg
-	@echo The system uptime program believes the load average to be:
-	-uptime
-	@echo The GNU load average checking code thinks:
-	-./loadavg
-
-# The loadavg function is invoked during "make check" to test getloadavg.
-noinst_PROGRAMS = loadavg
-loadavg_SOURCES = loadavg.c
-loadavg_CFLAGS = -DTEST
-loadavg_LDADD = @GETLOADAVG_LIBS@
-
-loadavg.c: $(srcdir)/getloadavg.c
-	cp $(srcdir)/getloadavg.c loadavg.c
-
-# > check-regression
+# check-regression
 #
 # Look for the make test suite, and run it if found and we can find perl.
 # If we're building outside the tree, we use symlinks to make a local copy of
@@ -148,8 +104,8 @@ check-regression:
 		     rm -f tests/$$f; ln -s ../srctests/$$f tests; \
 		   done; fi ;; \
 	    esac; \
-	    echo "cd tests && $(PERL) ./run_make_tests.pl -make ../make $(MAKETESTFLAGS)"; \
-	    cd tests && $(PERL) ./run_make_tests.pl -make ../make $(MAKETESTFLAGS); \
+	    echo "cd tests && $(PERL) ./run_make_tests.pl -make ../src/make$(EXEEXT) $(MAKETESTFLAGS)"; \
+	    cd tests && $(PERL) ./run_make_tests.pl -make ../src/make$(EXEEXT) $(MAKETESTFLAGS); \
 	  else \
 	    echo "Can't find a working Perl ($(PERL)); the test suite requires Perl."; \
 	  fi; \

@@ -2,13 +2,15 @@
 
 AC_INIT(remake,3.80+dbg,rocky@panix.com)
 
+AM_PATH_LISPDIR
+
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.2 2004/04/04 02:03:56 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.3 2004/06/11 00:23:10 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
-AC_CONFIG_SRCDIR(vpath.c)
+AC_CONFIG_SRCDIR(src/vpath.c)
 AM_CONFIG_HEADER(config.h)
 
 # Automake setup
@@ -23,6 +25,17 @@ AC_PROG_CPP
 AC_CHECK_PROG(AR, ar, ar, ar)
 # Perl is needed for the test suite (only)
 AC_CHECK_PROG(PERL, perl, perl, perl)
+
+AC_PATH_PROG(EMACS, emacs, no)
+if test x$EMACS = xno ; then
+  emacs_lisp=no
+else 
+  $EMACS -batch -q -no-site-file -eval \
+  '(if (not (and (= emacs-major-version 21) (<= emacs-minor-version 3))) (error "This gud is for Emacs 21.0 to 21.3."))'
+  if test $? -ne 0 ; then
+    emacs_lisp=no
+  fi
+fi
 
 # Specialized system macros
 AC_CANONICAL_HOST
@@ -48,8 +61,7 @@ AC_HEADER_STDC
 AC_HEADER_DIRENT
 AC_HEADER_STAT
 AC_HEADER_TIME
-AC_CHECK_HEADERS(stdlib.h locale.h unistd.h limits.h fcntl.h string.h \
-		 memory.h sys/param.h sys/time.h sys/timeb.h)
+AC_CHECK_HEADERS(locale.h limits.h fcntl.h sys/param.h sys/time.h sys/timeb.h)
 
 AM_PROG_CC_C_O
 AM_PROG_CC_STDC
@@ -63,7 +75,8 @@ AC_TYPE_PID_T
 AC_CHECK_TYPE(uintmax_t,,[
   uintmax_t="unsigned long"
   AC_CHECK_TYPE(unsigned long long,[uintmax_t="unsigned long long"])
-  AC_DEFINE_UNQUOTED(uintmax_t,$uintmax_t,[Define uintmax_t if not defined in <stdint.h> or <inttypes.h>.])])
+  AC_DEFINE_UNQUOTED(uintmax_t,$uintmax_t,
+    [Define uintmax_t if not defined in <stdint.h> or <inttypes.h>.])])
 
 # Find out whether our struct stat returns nanosecond resolution timestamps.
 
@@ -72,12 +85,13 @@ AC_MSG_CHECKING([whether to use high resolution file timestamps])
 AC_CACHE_VAL(make_cv_file_timestamp_hi_res, [
   make_cv_file_timestamp_hi_res=no
   if test "$ac_cv_struct_st_mtim_nsec" != no; then
-    AC_TRY_COMPILE([
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #	if HAVE_INTTYPES_H
 #	 include <inttypes.h>
-#	endif],
-      [char a[0x7fffffff < (uintmax_t) -1 >> 30 ? 1 : -1];],
-      make_cv_file_timestamp_hi_res=yes)
+#	endif]],
+	              [[char a[0x7fffffff < (uintmax_t)-1 >> 30 ? 1 : -1];]])],
+      [make_cv_file_timestamp_hi_res=yes],
+      [])
   fi])
 AC_MSG_RESULT($make_cv_file_timestamp_hi_res)
 if test "$make_cv_file_timestamp_hi_res" = yes; then
@@ -104,16 +118,16 @@ fi
 # one.
 AC_CACHE_CHECK([for standard gettimeofday], ac_cv_func_gettimeofday,
   [ac_cv_func_gettimeofday=no
-   AC_TRY_RUN([#include <sys/time.h>
-	       int main ()
-	       {
-		 struct timeval t; t.tv_sec = -1; t.tv_usec = -1;
-		 exit (gettimeofday (&t, 0) != 0
-		       || t.tv_sec < 0 || t.tv_usec < 0);
-	       }],
-	      ac_cv_func_gettimeofday=yes,
-	      ac_cv_func_gettimeofday=no,
-	      ac_cv_func_gettimeofday="no (cross-compiling)")])
+   AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <sys/time.h>
+                  int main ()
+	          {
+		    struct timeval t; t.tv_sec = -1; t.tv_usec = -1;
+		    exit (gettimeofday (&t, 0) != 0
+		          || t.tv_sec < 0 || t.tv_usec < 0);
+	          }]])],
+		  [ac_cv_func_gettimeofday=yes],
+		  [ac_cv_func_gettimeofday=no],
+		  [ac_cv_func_gettimeofday="no (cross-compiling)"])])
 if test "$ac_cv_func_gettimeofday" = yes; then
   AC_DEFINE(HAVE_GETTIMEOFDAY, 1,
 	    [Define if you have a standard gettimeofday function])
@@ -130,7 +144,7 @@ make_FUNC_SETVBUF_REVERSED
 AC_FUNC_STRCOLL
 
 AC_FUNC_ALLOCA
-AC_FUNC_VFORK
+AC_FUNC_FORK([])
 AC_FUNC_VPRINTF
 AC_FUNC_CLOSEDIR_VOID
 
@@ -140,52 +154,76 @@ AC_FUNC_GETLOADAVG
 # doesn't.  So, we will.
 
 if test "$ac_cv_header_nlist_h" = yes; then
-  AC_TRY_COMPILE([#include <nlist.h>],
-      [struct nlist nl;
-       nl.n_name = "string";
-       return 0;],
-      make_cv_nlist_struct=yes,
-      make_cv_nlist_struct=no)
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <nlist.h>]],
+	[[struct nlist nl;
+          nl.n_name = "string";
+          return 0;]])],
+	[make_cv_nlist_struct=yes],
+	[make_cv_nlist_struct=no])
   if test "$make_cv_nlist_struct" = yes; then
     AC_DEFINE(NLIST_STRUCT, 1,
        [Define if struct nlist.n_name is a pointer rather than an array.])
   fi
 fi
 
-AC_DECL_SYS_SIGLIST
+AC_CHECK_DECLS([sys_siglist])
+
 
 # Check out the wait reality.
 AC_CHECK_HEADERS(sys/wait.h)
 AC_CHECK_FUNCS(waitpid wait3)
 AC_MSG_CHECKING(for union wait)
 AC_CACHE_VAL(make_cv_union_wait, [dnl
-AC_TRY_LINK([#include <sys/types.h>
-#include <sys/wait.h>],
-	    [union wait status; int pid; pid = wait (&status);
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
+#include <sys/wait.h>]],
+     [[union wait status; int pid; pid = wait (&status);
 #ifdef WEXITSTATUS
 /* Some POSIXoid systems have both the new-style macros and the old
    union wait type, and they do not work together.  If union wait
    conflicts with WEXITSTATUS et al, we don't want to use it at all.  */
-if (WEXITSTATUS (status) != 0) pid = -1;
+        if (WEXITSTATUS (status) != 0) pid = -1;
 #ifdef WTERMSIG
-/* If we have WEXITSTATUS and WTERMSIG, just use them on ints.  */
--- blow chunks here --
+        /* If we have WEXITSTATUS and WTERMSIG, just use them on ints.  */
+        -- blow chunks here --
 #endif
 #endif
 #ifdef HAVE_WAITPID
-/* Make sure union wait works with waitpid.  */
-pid = waitpid (-1, &status, 0);
+        /* Make sure union wait works with waitpid.  */
+        pid = waitpid (-1, &status, 0);
 #endif
-],
-	    [make_cv_union_wait=yes], [make_cv_union_wait=no])])
+      ]])],
+    [make_cv_union_wait=yes],
+    [make_cv_union_wait=no])])
 if test "$make_cv_union_wait" = yes; then
-  AC_DEFINE(HAVE_UNION_WAIT, 1, [Define this if you have the \`union wait' type in <sys/wait.h>.])
+  AC_DEFINE(HAVE_UNION_WAIT, 1,
+            [Define this if you have the \`union wait' type in <sys/wait.h>.])
 fi
 AC_MSG_RESULT($make_cv_union_wait)
 
 
+#
+# Check for readline to see if we can add debugging support.
+#
+AC_ARG_WITH(readline, 
+	    [  --with-readline         enable readline (for debugger)], 
+	    enable_readline=$withval, enable_readline=yes)
+
+AC_CHECK_HEADER(readline/readline.h, [], [enable_readline=no])
+
+if test "$enable_readline" = yes ; then 
+  AC_CHECK_LIB(readline, readline, 
+              [LIBS="$LIBS -lreadline -ltermcap"], 
+	      [enable_readline=no], -ltermcap)
+  if test "$enable_readline" = yes ; then 
+     AC_DEFINE(ENABLE_READLINE, 1, 
+     [Define this if you have libreadline. It is needed for the debugger.])
+  fi
+fi
+
+
 # See if the user wants to use pmake's "customs" distributed build capability
 
+AC_SUBST(REMOTE) REMOTE=stub
 use_customs=false
 AC_ARG_WITH(customs,
   AC_HELP_STRING([--with-customs=DIR],
@@ -201,6 +239,7 @@ AC_ARG_WITH(customs,
        CF_NETLIBS
        AC_CHECK_HEADER(customs.h,
 		       [use_customs=true
+		         REMOTE=cstms
 			 LIBS="$LIBS -lcustoms" LDFLAGS="$make_ldflags"],
 		       [with_customs=no
 			 CPPFLAGS="$make_cppflags" make_badcust=yes])
@@ -223,14 +262,21 @@ case "$ac_cv_func_waitpid/$ac_cv_func_wait3" in
 esac
 
 AC_CACHE_CHECK(for SA_RESTART, make_cv_sa_restart, [
-  AC_TRY_COMPILE([#include <signal.h>],
-      [return SA_RESTART;],
-      make_cv_sa_restart=yes,
-      make_cv_sa_restart=no)])
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <signal.h>]],
+      [[return SA_RESTART;]])],
+    [make_cv_sa_restart=yes],
+    [make_cv_sa_restart=no])])
+
 if test "$make_cv_sa_restart" != no; then
   AC_DEFINE(HAVE_SA_RESTART, 1,
      [Define if <signal.h> defines the SA_RESTART constant.])
 fi
+
+# enable make_cv_sa_restart for OS/2 so that the jobserver will be enabled,
+# but do it after HAVE_SA_RESTART has been defined.
+case "$host_os" in
+  os2*) make_cv_sa_restart=yes ;;
+esac
 
 case "$ac_cv_func_pipe/$ac_cv_func_sigaction/$make_cv_sa_restart/$has_wait_nohang/$make_cv_job_server" in
   yes/yes/yes/yes/yes)
@@ -246,7 +292,8 @@ if test -f /usr/sccs/get; then
 else
   make_cv_path_sccs_get=get
 fi])
-AC_DEFINE_UNQUOTED(SCCS_GET, ["$make_cv_path_sccs_get"], [Define to the name of the SCCS 'get' command.])
+AC_DEFINE_UNQUOTED(SCCS_GET, ["$make_cv_path_sccs_get"],
+	           [Define to the name of the SCCS 'get' command.])
 
 ac_clean_files="$ac_clean_files s.conftest conftoast" # Remove these later.
 if ( /usr/sccs/admin -n s.conftest || admin -n s.conftest ) >/dev/null 2>&1 &&
@@ -285,26 +332,11 @@ AC_CACHE_VAL(make_cv_sys_gnu_glob, [
 #endif
  ], [AC_MSG_RESULT(yes)
 make_cv_sys_gnu_glob=yes], [AC_MSG_RESULT([no; using local copy])
-AC_SUBST(GLOBINC) GLOBINC='-I$(srcdir)/glob'
-AC_SUBST(GLOBLIB) GLOBLIB=glob/libglob.a
+AC_SUBST(GLOBINC) GLOBINC='-I$(top_srcdir)/glob'
+AC_SUBST(GLOBLIB) GLOBLIB='$(top_srcdir)/glob/libglob.a'
 make_cv_sys_gnu_glob=no])])
 # Tell automake about this, so it can build the right .c files.
 AM_CONDITIONAL(USE_LOCAL_GLOB, test "$make_cv_sys_gnu_glob" = no)
-
-# PTX systems have a broken implementation of SA_RESTART.  I know of
-# no way to test for this behavior, so I'll just test for PTX
-
-case "$host" in
-  i386-sequent-sysv4)
-    AC_DEFINE(HAVE_BROKEN_RESTART, 1, [This system has SA_RESTART, but it doesn't work properly.])
-    echo ""
-    echo "WARNING: The SA_RESTART sigaction() flag does not work on PTX."
-    echo "         This causes 'make -j' to fail at random times."
-    echo "         I am installing a workaround, which is mostly but not 100%"
-    echo "         effective.  If you see random failures during 'make -j'"
-    echo "         you should either contact the bug list, or not use -j."
-    echo "" ;;
-esac
 
 # Let the makefile know what our build host is
 
@@ -323,6 +355,9 @@ AC_SUBST_FILE(MAINT_MAKEFILE)
 # Allow building with dmalloc
 AM_WITH_DMALLOC
 
+# Forcibly disable SET_MAKE.  If it's set it breaks things like the test
+# scripts, etc.
+SET_MAKE=
 
 # Sanity check and inform the user of what we found
 
@@ -370,7 +405,16 @@ esac
 # We only generate the build.sh if we have a build.sh.in; we won't have
 # one before we've created a distribution.
 
-AC_CONFIG_FILES(Makefile glob/Makefile po/Makefile.in config/Makefile doc/Makefile)
+AC_CONFIG_FILES([Makefile        \
+                 config/Makefile \
+		 doc/Makefile    \
+		 emacs/Makefile  \
+		 glob/Makefile   \
+                 po/Makefile.in  \
+		 src/Makefile
+		 ])
+
+AM_CONDITIONAL(INSTALL_EMACS_LISP, test "x$lispdir" != "x")
 
 if test -f $srcdir/build.sh.in; then
   AC_CONFIG_FILES(build.sh)

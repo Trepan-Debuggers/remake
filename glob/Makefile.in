@@ -76,6 +76,7 @@ CC = @CC@
 CPP = @CPP@
 DATADIRNAME = @DATADIRNAME@
 DEPDIR = @DEPDIR@
+EMACS = @EMACS@
 GENCAT = @GENCAT@
 GLIBC21 = @GLIBC21@
 GLOBINC = @GLOBINC@
@@ -100,6 +101,7 @@ PACKAGE = @PACKAGE@
 PERL = @PERL@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
+REMOTE = @REMOTE@
 STRIP = @STRIP@
 USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
 USE_NLS = @USE_NLS@
@@ -107,6 +109,7 @@ VERSION = @VERSION@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
+lispdir = @lispdir@
 
 AUTOMAKE_OPTIONS = foreign
 
