@@ -189,6 +189,13 @@ static char *default_variables[] =
     "C++", "g++",
     "CO", "co",
     "CPP", "$(CC) -E",
+#ifdef	CRAY
+    "CF77PPFLAGS", "-P",
+    "CF77PP", "/lib/cpp",
+    "CFT", "cft77",
+    "CF", "cf77",
+    "FC", "$(CF)",
+#else	/* Not CRAY.  */
 #ifdef	_IBMR2
     "FC", "xlf",
 #else
@@ -198,6 +205,7 @@ static char *default_variables[] =
        However, there is no way to make implicit rules use them and FC.  */
     "F77", "$(FC)",
     "F77FLAGS", "$(FFLAGS)",
+#endif	/* Cray.  */
 #if	defined (USG) || defined (ultrix)
     "GET", "get",
 #else
@@ -210,8 +218,13 @@ static char *default_variables[] =
 #ifdef	pyr
     "PC", "pascal",
 #else
+#ifdef	CRAY
+    "PC", "PASCAL",
+    "SEGLDR", "segldr",
+#else
     "PC", "pc",
-#endif
+#endif	/* CRAY.  */
+#endif	/* pyr.  */
     "YACC", "yacc",	/* Or "bison -y"  */
     "MAKEINFO", "makeinfo",
     "TEX", "tex",
