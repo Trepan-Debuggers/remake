@@ -14,13 +14,12 @@ AC_AIX
 AC_ISC_POSIX
 AC_MINIX
 AC_STDC_HEADERS
-AC_MEMORY_H
 AC_UNISTD_H
 AC_DIR_HEADER
 AC_UID_T			dnl Also does gid_t.
 AC_PID_T
 AC_RETSIGTYPE
-AC_HAVE_HEADERS(limits.h sys/param.h fcntl.h)
+AC_HAVE_HEADERS(limits.h sys/param.h fcntl.h string.h memory.h)
 AC_MINUS_C_MINUS_O
 AC_CONST			dnl getopt needs this.
 AC_USG
