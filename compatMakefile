@@ -154,7 +154,7 @@ make: $(objs)
 .c.o:
 	$(CC) $(defines) -c -I. -I$(srcdir) -I$(srcdir)/glob \
 	      $(CFLAGS) $< $(OUTPUT_OPTION)
-remote.o: remote.c remote-*.c
+remote.o: remote.c $(srcdir)/remote-*.c
 	$(CC) $(defines) $(REMOTE) -c -I. -I$(srcdir) \
 	      $(CFLAGS) $(srcdir)/remote.c
 
@@ -187,10 +187,9 @@ $(bindir)/$(instname): make
 	mv $@.new $@
 
 $(infodir)/$(instname).info: make.info
-	for file in $(srcdir)/make.info*; do \
-	  name="`basename $$file`"; \
+	for file in make.info*; do \
 	  $(INSTALL_DATA) $$file \
-	    `echo $@ | sed "s/$(instname).info\$$/$$name/"`; \
+	    `echo $@ | sed "s/$(instname).info\$$/$$file/"`; \
 	done
 
 $(mandir)/$(instname).$(manext): make.man
