@@ -21,7 +21,14 @@ Version 3.80+dbg-0.2
 * Improve target stack tracking.
 
 * Add "write" command - ability to write target commands to a file
-  with MAKE variables expanded, or show that inside a debugger session.
+  with MAKE variables expanded, or show that inside a debugger
+  session.
+
+* Separate info from show. Make these act more like they do n gdb
+
+* Stay in debugger when a makefile exits.
+
+* First debugger documentation.
 
 Version 3.80+dbg-0.1
 
