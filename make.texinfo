@@ -350,7 +350,7 @@ files should be recompiled, or how.  @xref{make Invocation, ,How to Run
 @code{make}}.
 
 @node Reading, Bugs, Preparing, Overview
-@section On Reading this Text   @c !!!!! I don't like this title --roland
+@section How to Read This Manual
 
 If you are new to @code{make}, or are looking for a general
 introduction, read the first few sections of each chapter, skipping the
@@ -586,11 +586,9 @@ work.  It is up to you to supply commands that will update the target
 file properly.  All @code{make} does is execute the commands you have
 specified when the target file needs to be updated.)
 
-The target @samp{clean} is not a file, but merely the name of an
-action; so @code{make} never does anything with it unless you tell it
-specifically.
-@c !!! 1st sentence in parens bad -rm
-(Note that this rule does not have any dependencies.
+The target @samp{clean} is not a file, but merely the name of an action;
+so @code{make} never does anything with it unless you tell it
+specifically.  (Note that this rule does not have any dependencies.
 @xref{Phony Targets}, to see how to prevent a real file called
 @file{clean} from causing confusion.  @xref{Errors, , Errors in
 Commands}, to see how to force @code{rm} to work in spite of errors.)
