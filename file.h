@@ -80,7 +80,7 @@ extern struct file *default_goal_file, *suffix_file, *default_file;
 
 extern struct file *lookup_file (), *enter_file ();
 extern void remove_intermediates (), snap_deps ();
-extern void rename_file ();
+extern void rename_file (), file_hash_enter ();
 
 
 extern time_t f_mtime ();
@@ -92,3 +92,8 @@ extern time_t f_mtime ();
 
 #define check_renamed(file) \
   while ((file)->renamed != 0) (file) = (file)->renamed /* No ; here.  */
+
+/* !!! compile frob */
+struct file *
+file_linear_list () ;
+
