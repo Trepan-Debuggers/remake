@@ -1,3 +1,12 @@
+2005-03-15  Boris Kolpackov  <boris@kolpackov.net>
+
+	* file.c (expand_deps): Factor out the second expansion and
+	prerequisite line parsing logic from snap_deps().
+
+	* file.c (snap_deps): Use expand_deps(). Expand and parse
+	prerequisites of the .SUFFIXES special target first. Fixes
+	Savannah bug #12320.
+
 2005-03-10  Boris Kolpackov  <boris@kolpackov.net>
 
 	* implicit.c (pattern_search): Mark an intermediate target as

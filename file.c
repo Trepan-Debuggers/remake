@@ -414,6 +414,104 @@ set_intermediate (const void *item)
   f->intermediate = 1;
 }
 
+/* Expand and parse each dependency line. */
+static void
+expand_deps (struct file *f)
+{
+  register struct dep *d, *d1;
+  struct dep *new = 0;
+  struct dep *old = f->deps;
+  unsigned int last_dep_has_cmds = f->updating;
+
+  f->updating = 0;
+  f->deps = 0;
+
+  /* We are going to do second expansion so initialize file
+     variables for the file. */
+  initialize_file_variables (f, 0);
+
+  for (d = old; d != 0; d = d->next)
+    {
+      if (d->name != 0)
+        {
+          char *p;
+          struct dep **d_ptr;
+
+          set_file_variables (f);
+
+          p = variable_expand_for_file (d->name, f);
+
+          /* Parse the dependencies.  */
+          new = (struct dep *)
+            multi_glob (
+              parse_file_seq (&p, '|', sizeof (struct dep), 1),
+              sizeof (struct dep));
+
+          if (*p)
+            {
+              /* Files that follow '|' are special prerequisites that
+                 need only exist in order to satisfy the dependency.
+                 Their modification times are irrelevant.  */
+
+              struct dep *d;
+              for (d_ptr = &new; *d_ptr; d_ptr = &(*d_ptr)->next)
+                ;
+              ++p;
+
+              *d_ptr = (struct dep *)
+                multi_glob (
+                  parse_file_seq (&p, '\0', sizeof (struct dep), 1),
+                  sizeof (struct dep));
+
+              for (d = *d_ptr; d != 0; d = d->next)
+                d->ignore_mtime = 1;
+            }
+
+          /* Enter them as files. */
+          for (d1 = new; d1 != 0; d1 = d1->next)
+            {
+              d1->file = lookup_file (d1->name);
+              if (d1->file == 0)
+                d1->file = enter_file (d1->name);
+              else
+                free (d1->name);
+              d1->name = 0;
+            }
+
+          /* Add newly parsed deps to f->deps. If this is the last
+             dependency line and this target has commands then put
+             it in front so the last dependency line (the one with
+             commands) ends up being the first. This is important
+             because people expect $< to hold first prerequisite
+             from the rule with commands. If it is not the last
+             dependency line or the rule does not have commands
+             then link it at the end so it appears in makefile
+             order.  */
+
+          if (new != 0)
+            {
+              if (d->next == 0 && last_dep_has_cmds)
+                {
+                  for (d_ptr = &new; *d_ptr; d_ptr = &(*d_ptr)->next)
+                        ;
+
+                  *d_ptr = f->deps;
+                  f->deps = new;
+                }
+              else
+                {
+                  for (d_ptr = &(f->deps); *d_ptr; d_ptr = &(*d_ptr)->next)
+                    ;
+
+                  *d_ptr = new;
+                }
+            }
+        }
+    }
+
+  free_ns_chain ((struct nameseq*)old);
+}
+
 /* For each dependency of each file, make the `struct dep' point
    at the appropriate `struct file' (which may have to be created).
 
@@ -425,7 +523,7 @@ snap_deps (void)
 {
   register struct file *f;
   register struct file *f2;
-  register struct dep *d, *d1;
+  register struct dep *d;
   register struct file **file_slot_0;
   register struct file **file_slot;
   register struct file **file_end;
@@ -433,105 +531,21 @@ snap_deps (void)
   /* Perform second expansion and enter each dependency
      name as a file. */
 
+  /* Expand .SUFFIXES first; it's dependencies are used for
+     $$* calculation. */
+  for (f = lookup_file (".SUFFIXES"); f != 0; f = f->prev)
+    expand_deps (f);
+
   /* We must use hash_dump (), because within this loop
      we might add new files to the table, possibly causing
      an in-situ table expansion.  */
   file_slot_0 = (struct file **) hash_dump (&files, 0, 0);
   file_end = file_slot_0 + files.ht_fill;
   for (file_slot = file_slot_0; file_slot < file_end; file_slot++)
-    for (f2 = *file_slot; f2 != 0; f2 = f2->prev)
+    for (f = *file_slot; f != 0; f = f->prev)
       {
-        struct dep *new = 0;
-        struct dep *old = f2->deps;
-        unsigned int last_dep_has_cmds = f2->updating;
-
-        f2->updating = 0;
-        f2->deps = 0;
-
-        /* We are going to do second expansion so initialize file
-           variables for the file. */
-        initialize_file_variables (f2, 0);
-
-        for (d = old; d != 0; d = d->next)
-          {
-            if (d->name != 0)
-              {
-                char *p;
-                struct dep **d_ptr;
-
-                set_file_variables (f2);
-
-                p = variable_expand_for_file (d->name, f2);
-
-                /* Parse the dependencies.  */
-                new = (struct dep *)
-                  multi_glob (
-                    parse_file_seq (&p, '|', sizeof (struct dep), 1),
-                    sizeof (struct dep));
-
-                if (*p)
-                  {
-                    /* Files that follow '|' are special prerequisites that
-                       need only exist in order to satisfy the dependency.
-                       Their modification times are irrelevant.  */
-
-                    struct dep *d;
-                    for (d_ptr = &new; *d_ptr; d_ptr = &(*d_ptr)->next)
-                      ;
-                    ++p;
-
-                    *d_ptr = (struct dep *)
-                      multi_glob (
-                        parse_file_seq (&p, '\0', sizeof (struct dep), 1),
-                        sizeof (struct dep));
-
-                    for (d = *d_ptr; d != 0; d = d->next)
-                      d->ignore_mtime = 1;
-                  }
-
-                /* Enter them as files. */
-                for (d1 = new; d1 != 0; d1 = d1->next)
-                  {
-                    d1->file = lookup_file (d1->name);
-                    if (d1->file == 0)
-                      d1->file = enter_file (d1->name);
-                    else
-                      free (d1->name);
-                    d1->name = 0;
-                  }
-
-                /* Add newly parsed deps to f2->deps. If this is the last
-                   dependency line and this target has commands then put
-                   it in front so the last dependency line (the one with
-                   commands) ends up being the first. This is important
-                   because people expect $< to hold first prerequisite
-                   from the rule with commands. If it is not the last
-                   dependency line or the rule does not have commands
-                   then link it at the end so it appears in makefile
-                   order.  */
-
-                if (new != 0)
-                  {
-                    if (d->next == 0 && last_dep_has_cmds)
-                    {
-                      for (d_ptr = &new; *d_ptr; d_ptr = &(*d_ptr)->next)
-                        ;
-
-                      *d_ptr = f2->deps;
-                      f2->deps = new;
-                    }
-                    else
-                    {
-                      for (d_ptr = &(f2->deps); *d_ptr; d_ptr = &(*d_ptr)->next)
-                        ;
-
-                      *d_ptr = new;
-                    }
-                  }
-              }
-          }
-
-        free_ns_chain ((struct nameseq*)old);
+        if (strcmp (f->name, ".SUFFIXES") != 0)
+          expand_deps (f);
       }
   free (file_slot_0);
 
