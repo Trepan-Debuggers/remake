@@ -124,36 +124,13 @@ void
 remove_comments (line)
      char *line;
 {
-  register char *p, *p2;
-  register int backslash;
-  register unsigned int bs_write;
+  char *comment;
 
-  while (1)
-    {
-      p = index (line, '#');
-      if (p == 0)
-	break;
+  comment = find_char_unquote (line, '#', 0);
 
-      backslash = 0;
-      bs_write = 0;
-      for (p2 = p - 1; p2 >= line && *p2 == '\\'; --p2)
-	{
-	  if (backslash)
-	    ++bs_write;
-	  backslash = !backslash;
-	}
-
-      if (!backslash)
-	{
-	  /* Cut off the line at the #.  */
-	  *p = '\0';
-	  break;
-	}
-
-      /* strcpy better copy left to right.  */
-      line = p;
-      strcpy (p2 + 1 + bs_write, line);
-    }
+  if (comment != 0)
+    /* Cut off the line at the #.  */
+    *comment = '\0';
 }
 
 /* Print N spaces (used by DEBUGPR for target-depth).  */
