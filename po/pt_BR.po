@@ -8,7 +8,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU make 3.78.90\n"
-"POT-Creation-Date: 2002-04-21 03:42-0400\n"
+"POT-Creation-Date: 2002-04-22 00:01-0400\n"
 "PO-Revision-Date: 2000-03-17 17:06+0300\n"
 "Last-Translator: Fábio Henrique F. Silva <fabiohfs@mail.com>\n"
 "Language-Team: Brazilian Portuguese <ldp-br@bazar.conectiva.com.br>\n"
@@ -686,7 +686,7 @@ msgstr "Usando os comandos padrões para `%s'.\n"
 msgid "Error, empty command\n"
 msgstr ""
 
-#: job.c:2031 main.c:1328
+#: job.c:2031 main.c:1321
 msgid "fopen (temporary file)"
 msgstr "fopen (arquivo temporário)"
 
@@ -914,131 +914,131 @@ msgstr "find_and_set_shell definiu o default_shell = %s\n"
 msgid "find_and_set_shell path search set default_shell = %s\n"
 msgstr "find_and_set_shell, caminho de pesquisa do default_shell = %s\n"
 
-#: main.c:1079
+#: main.c:1072
 #, c-format
 msgid "%s is suspending for 30 seconds..."
 msgstr "%s está suspenso por 30 segundos..."
 
-#: main.c:1081
+#: main.c:1074
 msgid "done sleep(30). Continuing.\n"
 msgstr "sleep(30) concluido. Continuando.\n"
 
-#: main.c:1289
+#: main.c:1282
 msgid "Makefile from standard input specified twice."
 msgstr "Makefile na entrada padrão especificado duas vezes."
 
-#: main.c:1334
+#: main.c:1327
 msgid "fwrite (temporary file)"
 msgstr "fwrite (arquivo temporário)"
 
-#: main.c:1420
+#: main.c:1413
 msgid "Do not specify -j or --jobs if sh.exe is not available."
 msgstr "Não especifique -j ou --jobs se o sh.exe não estiver disponível."
 
-#: main.c:1421
+#: main.c:1414
 msgid "Resetting make for single job mode."
 msgstr "Reiniciando o make para o modo de trabalho único."
 
-#: main.c:1458
+#: main.c:1451
 msgid "Parallel jobs (-j) are not supported on this platform."
 msgstr "Tarefas paralelas (-j) não são suportadas nesta plataforma."
 
-#: main.c:1459
+#: main.c:1452
 msgid "Resetting to single job (-j1) mode."
 msgstr "Reiniciando no modo de tarefa única (-j1)."
 
-#: main.c:1473
+#: main.c:1466
 msgid "internal error: multiple --jobserver-fds options"
 msgstr "erro interno: múltiplas opções --jobserver-fds"
 
-#: main.c:1481
+#: main.c:1474
 #, c-format
 msgid "internal error: invalid --jobserver-fds string `%s'"
 msgstr "erro interno: valor `%s' inválido para --jobserver-fds"
 
-#: main.c:1491
+#: main.c:1484
 msgid "warning: -jN forced in submake: disabling jobserver mode."
 msgstr "aviso: -jN forçado no submake: desabilitando o modo jobserver."
 
-#: main.c:1501
+#: main.c:1494
 msgid "dup jobserver"
 msgstr ""
 
-#: main.c:1504
+#: main.c:1497
 msgid ""
 "warning: jobserver unavailable: using -j1.  Add `+' to parent make rule."
 msgstr "aviso: jobserver indisponível: usando -j1. Inclua `+' na regra pai."
 
-#: main.c:1527
+#: main.c:1520
 msgid "creating jobs pipe"
 msgstr "criando canalização de tarefas"
 
-#: main.c:1536
+#: main.c:1529
 msgid "init jobserver pipe"
 msgstr "inicializando a canalização do jobserver"
 
-#: main.c:1621
+#: main.c:1614
 msgid "Updating makefiles....\n"
 msgstr "Atualizando os arquivos makefiles ...\n"
 
-#: main.c:1646
+#: main.c:1639
 #, c-format
 msgid "Makefile `%s' might loop; not remaking it.\n"
 msgstr "O arquivo `%s' pode estar em loop; não reprocessá-lo.\n"
 
-#: main.c:1721
+#: main.c:1714
 #, c-format
 msgid "Failed to remake makefile `%s'."
 msgstr "Problemas ao reprocessar o arquivo `%s'."
 
-#: main.c:1737
+#: main.c:1730
 #, c-format
 msgid "Included makefile `%s' was not found."
 msgstr "Arquivo `%s' incluido não foi encontrado."
 
-#: main.c:1742
+#: main.c:1735
 #, c-format
 msgid "Makefile `%s' was not found"
 msgstr "O arquivo `%s' não foi encontrado."
 
-#: main.c:1810
+#: main.c:1803
 msgid "Couldn't change back to original directory."
 msgstr "Não foi possível voltar ao diretório original."
 
-#: main.c:1844
+#: main.c:1837
 msgid "Re-executing:"
 msgstr "Re-executando:"
 
-#: main.c:1880
+#: main.c:1873
 msgid "unlink (temporary file): "
 msgstr "desvinculado (arquivos temporário): "
 
-#: main.c:1902
+#: main.c:1895
 msgid "No targets specified and no makefile found"
 msgstr "Nenhum alvo indicado e nenhum arquivo make encontrado"
 
-#: main.c:1904
+#: main.c:1897
 msgid "No targets"
 msgstr "Sem alvo"
 
-#: main.c:1909
+#: main.c:1902
 msgid "Updating goal targets....\n"
 msgstr "Atualizando os objetivos finais...\n"
 
-#: main.c:1935
+#: main.c:1928
 msgid "warning:  Clock skew detected.  Your build may be incomplete."
 msgstr "aviso: O relógio está errado. Sua compilação pode ficar incompleta."
 
-#: main.c:2090
+#: main.c:2083
 #, c-format
 msgid "Usage: %s [options] [target] ...\n"
 msgstr "Uso: %s [opções] [alvo] ...\n"
 
-#: main.c:2092
+#: main.c:2085
 msgid "Options:\n"
 msgstr "Opções:\n"
 
-#: main.c:2173
+#: main.c:2166
 msgid ""
 "\n"
 "Report bugs to <bug-make@gnu.org>.\n"
@@ -1046,17 +1046,17 @@ msgstr ""
 "\n"
 "Informe os problemas para <bug-make@gnu.org>.\n"
 
-#: main.c:2294
+#: main.c:2287
 #, c-format
 msgid "the `-%c' option requires a positive integral argument"
 msgstr "a opção `-%c' requer um argumento inteiro positivo"
 
-#: main.c:2718
+#: main.c:2711
 #, fuzzy, c-format
 msgid ""
 ", by Richard Stallman and Roland McGrath.\n"
 "%sBuilt for %s\n"
-"%sCopyright (C) 2001  Free Software Foundation, Inc.\n"
+"%sCopyright (C) 2002  Free Software Foundation, Inc.\n"
 "%sThis is free software; see the source for copying conditions.\n"
 "%sThere is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A\n"
 "%sPARTICULAR PURPOSE.\n"
@@ -1075,7 +1075,7 @@ msgstr ""
 "%sInforme os problemas para <bug-make@gnu.org>.\n"
 "\n"
 
-#: main.c:2743
+#: main.c:2736
 #, c-format
 msgid ""
 "\n"
@@ -1084,7 +1084,7 @@ msgstr ""
 "\n"
 "# Banco de dados do Make, impresso em %s"
 
-#: main.c:2752
+#: main.c:2745
 #, c-format
 msgid ""
 "\n"
@@ -1093,22 +1093,22 @@ msgstr ""
 "\n"
 "# Bando de dados do Make finalizado em %s\n"
 
-#: main.c:2828
+#: main.c:2821
 #, fuzzy
 msgid "Entering an unknown directory"
 msgstr "diretório desconhecido"
 
-#: main.c:2830
+#: main.c:2823
 #, fuzzy
 msgid "Leaving an unknown directory"
 msgstr "diretório desconhecido"
 
-#: main.c:2833
+#: main.c:2826
 #, fuzzy, c-format
 msgid "Entering directory `%s'\n"
 msgstr "diretório `%s'\n"
 
-#: main.c:2835
+#: main.c:2828
 #, fuzzy, c-format
 msgid "Leaving directory `%s'\n"
 msgstr "diretório `%s'\n"
@@ -1546,159 +1546,159 @@ msgstr ""
 "\n"
 "# %u valores para variável de padrões específicos"
 
-#: signame.c:97
+#: signame.c:89
 msgid "unknown signal"
 msgstr "sinal desconhecido"
 
-#: signame.c:108
+#: signame.c:99
 msgid "Hangup"
 msgstr ""
 
-#: signame.c:111
+#: signame.c:102
 msgid "Interrupt"
 msgstr "Interrupção"
 
-#: signame.c:114
+#: signame.c:105
 msgid "Quit"
 msgstr "Sair"
 
-#: signame.c:117
+#: signame.c:108
 msgid "Illegal Instruction"
 msgstr "Instrução ilegal"
 
-#: signame.c:120
+#: signame.c:111
 msgid "Trace/breakpoint trap"
 msgstr "Aviso Trace/breakpoint"
 
-#: signame.c:125
+#: signame.c:116
 msgid "Aborted"
 msgstr "Abortado"
 
-#: signame.c:128
+#: signame.c:119
 msgid "IOT trap"
 msgstr "Aviso IOT"
 
-#: signame.c:131
+#: signame.c:122
 msgid "EMT trap"
 msgstr "Aviso EMT"
 
-#: signame.c:134
+#: signame.c:125
 msgid "Floating point exception"
 msgstr "Exceção de ponto flutuante"
 
-#: signame.c:137
+#: signame.c:128
 msgid "Killed"
 msgstr "Finalizado"
 
-#: signame.c:140
+#: signame.c:131
 msgid "Bus error"
 msgstr "Erro de barramento"
 
-#: signame.c:143
+#: signame.c:134
 msgid "Segmentation fault"
 msgstr "Falha de segmentação"
 
-#: signame.c:146
+#: signame.c:137
 msgid "Bad system call"
 msgstr "Chamada de sistema inválida"
 
-#: signame.c:149
+#: signame.c:140
 msgid "Broken pipe"
 msgstr "Canalização interrompida"
 
-#: signame.c:152
+#: signame.c:143
 msgid "Alarm clock"
 msgstr "Despertador"
 
-#: signame.c:155
+#: signame.c:146
 msgid "Terminated"
 msgstr "Terminado"
 
-#: signame.c:158
+#: signame.c:149
 msgid "User defined signal 1"
 msgstr "Sinal 1 definido pelo usuário"
 
-#: signame.c:161
+#: signame.c:152
 msgid "User defined signal 2"
 msgstr "Sinal 2 definido pelo usuário"
 
-#: signame.c:166 signame.c:169
+#: signame.c:157 signame.c:160
 msgid "Child exited"
 msgstr "O Filho saiu"
 
-#: signame.c:172
+#: signame.c:163
 msgid "Power failure"
 msgstr "Falha na Energia Elétrica"
 
-#: signame.c:175
+#: signame.c:166
 msgid "Stopped"
 msgstr "Parado"
 
-#: signame.c:178
+#: signame.c:169
 msgid "Stopped (tty input)"
 msgstr "Parado (entrada tty)"
 
-#: signame.c:181
+#: signame.c:172
 msgid "Stopped (tty output)"
 msgstr "Parado (saida tty)"
 
-#: signame.c:184
+#: signame.c:175
 msgid "Stopped (signal)"
 msgstr "Parado (sinal)"
 
-#: signame.c:187
+#: signame.c:178
 msgid "CPU time limit exceeded"
 msgstr "Tempo de CPU excedido"
 
-#: signame.c:190
+#: signame.c:181
 msgid "File size limit exceeded"
 msgstr "Tamanho do arquivo excedido"
 
-#: signame.c:193
+#: signame.c:184
 msgid "Virtual timer expired"
 msgstr "Temporizador virtual expirou"
 
-#: signame.c:196
+#: signame.c:187
 msgid "Profiling timer expired"
 msgstr "Temporizador de perfil expirou"
 
-#: signame.c:202
+#: signame.c:193
 msgid "Window changed"
 msgstr "Janela alterada"
 
-#: signame.c:205
+#: signame.c:196
 msgid "Continued"
 msgstr "Continuação"
 
-#: signame.c:208
+#: signame.c:199
 msgid "Urgent I/O condition"
 msgstr "Condição de E/S urgente"
 
-#: signame.c:215 signame.c:224
+#: signame.c:206 signame.c:215
 msgid "I/O possible"
 msgstr "Possível E/S"
 
-#: signame.c:218
+#: signame.c:209
 msgid "SIGWIND"
 msgstr ""
 
-#: signame.c:221
+#: signame.c:212
 msgid "SIGPHONE"
 msgstr ""
 
-#: signame.c:227
+#: signame.c:218
 msgid "Resource lost"
 msgstr "Recursos perdido"
 
-#: signame.c:230
+#: signame.c:221
 msgid "Danger signal"
 msgstr "Sinal perigoso"
 
-#: signame.c:233
+#: signame.c:224
 msgid "Information request"
 msgstr "Solicitação de informação"
 
-#: signame.c:236
+#: signame.c:227
 msgid "Floating point co-processor not available"
 msgstr "Co-processador aritmético indisponível"
 

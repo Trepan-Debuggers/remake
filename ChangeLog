@@ -6,6 +6,12 @@
 
 	* README.cvs: New file.  Explain how to build GNU make from CVS.
 
+	* configure.in: Modify checking for the system glob library.
+	Use AC_EGREP_CPP instead of AC_TRY_CPP.  Remove the setting of
+	GLOBDIR (we will always put "glob" in SUBDIRS, so automake
+	etc. will manage it correctly).  Set an automake conditional
+	USE_LOCAL_GLOB to decide whether to compile the glob library.
+
 	* getloadavg.c (main): Include make.h in the "TEST" program to
 	avoid warnings.
 

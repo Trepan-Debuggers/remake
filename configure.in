@@ -4,7 +4,7 @@ AC_INIT(GNU make,3.79.2rc1,bug-make@gnu.org)
 
 AC_PREREQ(2.53)
 
-AC_REVISION([[$Id: configure.in,v 1.106 2002/04/21 23:57:24 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.107 2002/04/22 04:35:20 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -217,6 +217,8 @@ case "$ac_cv_func_pipe/$ac_cv_func_sigaction/$make_cv_sa_restart/$has_wait_nohan
               [Define this to enable job server support in GNU make.]);;
 esac
 
+# Find the SCCS commands, so we can include them in our default rules.
+
 AC_CACHE_CHECK(for location of SCCS get command, make_cv_path_sccs_get, [
 if test -f /usr/sccs/get; then
   make_cv_path_sccs_get=/usr/sccs/get
@@ -243,35 +245,38 @@ if ( /usr/sccs/admin -n s.conftest || admin -n s.conftest ) >/dev/null 2>&1 &&
 fi
 rm -f s.conftest conftoast
 
+# Check the system to see if it provides GNU glob.  If not, use our
+# local version.
+
 AC_MSG_CHECKING(if system libc has GNU glob)
 AC_CACHE_VAL(make_cv_sys_gnu_glob, [
- AC_TRY_CPP([
+ AC_EGREP_CPP(gnu glob,[
 #include <features.h>
 #include <glob.h>
 #include <fnmatch.h>
 
 #define GLOB_INTERFACE_VERSION 1
-#if defined _LIBC || !defined __GNU_LIBRARY__ || __GNU_LIBRARY__ <= 1
-# error no gnu glob
-#else
+#if !defined _LIBC && defined __GNU_LIBRARY__ && __GNU_LIBRARY__ > 1
 # include <gnu-versions.h>
-# if _GNU_GLOB_INTERFACE_VERSION != GLOB_INTERFACE_VERSION
-#  error no gnu glob
+# if _GNU_GLOB_INTERFACE_VERSION == GLOB_INTERFACE_VERSION
+#  gnu glob
 # endif
 #endif
- ], make_cv_sys_gnu_glob=yes, make_cv_sys_gnu_glob=no)])
-case $make_cv_sys_gnu_glob in
-  yes) AC_MSG_RESULT(yes) ;;
-  no)  AC_MSG_RESULT([no; using local copy])
-       AC_SUBST(GLOBDIR) GLOBDIR=glob
-       AC_SUBST(GLOBINC) GLOBINC='-I$(srcdir)/glob'
-       AC_SUBST(GLOBLIB) GLOBLIB=glob/libglob.a
-       ;;
-esac
+ ], [AC_MSG_RESULT(yes)
+make_cv_sys_gnu_glob=yes], [AC_MSG_RESULT([no; using local copy])
+AC_SUBST(GLOBINC) GLOBINC='-I$(srcdir)/glob'
+AC_SUBST(GLOBLIB) GLOBLIB=glob/libglob.a
+make_cv_sys_gnu_glob=no])])
+# Tell automake about this, so it can build the right .c files.
+AM_CONDITIONAL(USE_LOCAL_GLOB, test $make_cv_sys_gnu_glob = no)
+
+# Let the makefile know what our build host is
 
 AC_DEFINE_UNQUOTED(MAKE_HOST,"$host",[Build host information.])
 MAKE_HOST="$host"
 AC_SUBST(MAKE_HOST)
+
+# Include the Maintainer's Makefile section, if it's here.
 
 MAINT_MAKEFILE=/dev/null
 if test -r "$srcdir/maintMakefile"; then
