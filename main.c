@@ -1505,8 +1505,12 @@ define_makeflags (all, makefile)
 	  flags = flags->next;
 	} while (flags != 0);
 
-      /* Kill the final space and dash.  */
-      p[-2] = '\0';
+      if (p[-1] == '-')
+	/* Kill the final space and dash.  */
+	p -= 2;
+
+      /* Terminate the string.  */
+      *p = '\0';
     }
 
   /* On Sun, the value of MFLAGS starts with a `-' but the
