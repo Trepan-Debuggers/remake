@@ -1,3 +1,9 @@
+Sat Jan  6 16:24:44 1996  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* acconfig.h (HAVE_SYSCONF_OPEN_MAX): #undef removed.
+
+	* job.c (NGROUPS_MAX): Don't try to define this macro.
+
 Fri Dec 22 18:44:44 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
 	* compatMakefile (GETOPT, GETOPT_SRC, GLOB): Variables removed.
