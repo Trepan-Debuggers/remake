@@ -259,6 +259,7 @@ extern char *alloca ();
 
 extern void die ();
 extern void message (), fatal (), error ();
+extern void log_working_directory ();
 extern void makefile_error (), makefile_fatal ();
 extern void pfatal_with_name (), perror_with_name ();
 extern char *savestring (), *concat ();
