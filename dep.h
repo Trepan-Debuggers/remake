@@ -1,4 +1,4 @@
-/* Copyright (C) 1988, 1989, 1991 Free Software Foundation, Inc.
+/* Copyright (C) 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -19,7 +19,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    Each struct file's `deps' points to a chain of these,
    chained through the `next'.
 
-   Note that the first three words of this match a struct nameseq.  */
+   Note that the first two words of this match a struct nameseq.  */
 
 struct dep
   {
@@ -30,7 +30,7 @@ struct dep
   };
 
 
-/* Structure used in chains of names, for parsing and globbing */
+/* Structure used in chains of names, for parsing and globbing.  */
 
 struct nameseq
   {
