@@ -700,11 +700,16 @@ main (argc, argv, envp)
 	    /* This makefile is standard input.  Since we may re-exec
 	       and thus re-read the makefiles, we read standard input
 	       into a temporary file and read from that.  */
-	    static char name[] = "/tmp/GmXXXXXX";
 	    FILE *outfile;
 
 	    /* Make a unique filename.  */
+#ifdef HAVE_MKTEMP
+	    static char name[] = "/tmp/GmXXXXXX";
 	    (void) mktemp (name);
+#else
+	    static char name[L_tmpnam];
+	    (void) tmpnam ();
+#endif
 
 	    outfile = fopen (name, "w");
 	    if (outfile == 0)
