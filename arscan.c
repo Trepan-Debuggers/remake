@@ -40,6 +40,11 @@
 #ifndef	AR_HDR_SIZE
 #define	AR_HDR_SIZE	(sizeof (struct ar_hdr))
 #endif
+
+/* SCO Unix's compiler defines both of these.  */
+#ifdef	M_UNIX
+#undef	M_XENIX
+#endif
 
 /* Takes three arguments ARCHIVE, FUNCTION and ARG.
 
