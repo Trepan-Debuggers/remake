@@ -445,7 +445,7 @@ variable_expand_for_file (line, file)
      register struct file *file;
 {
   char *result;
-  struct variable_set_list *save, *fnext;
+  struct variable_set_list *save;
 
   if (file == 0)
     return variable_expand (line);
@@ -456,22 +456,9 @@ variable_expand_for_file (line, file)
     reading_file = &file->cmds->fileinfo;
   else
     reading_file = 0;
-  fnext = file->variables->next;
-  /* See if there's a pattern-specific variable struct for this target.  */
-  if (!file->pat_searched)
-    {
-      file->patvar = lookup_pattern_var(file->name);
-      file->pat_searched = 1;
-    }
-  if (file->patvar != 0)
-    {
-      file->patvar->vars->next = fnext;
-      file->variables->next = file->patvar->vars;
-    }
   result = variable_expand (line);
   current_variable_set_list = save;
   reading_file = 0;
-  file->variables->next = fnext;
 
   return result;
 }

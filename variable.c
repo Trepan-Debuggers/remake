@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 #include "job.h"
 #include "commands.h"
 #include "variable.h"
+#include "rule.h"
 #ifdef WINDOWS32
 #include "pathstuff.h"
 #endif
@@ -58,13 +59,14 @@ static struct variable *lookup_variable_in_set PARAMS ((char *name,
    that it should be recursively re-expanded.  */
 
 struct variable *
-define_variable_in_set (name, length, value, origin, recursive, set)
+define_variable_in_set (name, length, value, origin, recursive, set, flocp)
      char *name;
      unsigned int length;
      char *value;
      enum variable_origin origin;
      int recursive;
      struct variable_set *set;
+     const struct floc *flocp;
 {
   register unsigned int i;
   register unsigned int hashval;
@@ -99,6 +101,10 @@ define_variable_in_set (name, length, value, origin, recursive, set)
 	  if (v->value != 0)
 	    free (v->value);
 	  v->value = xstrdup (value);
+          if (flocp != 0)
+            v->fileinfo = *flocp;
+          else
+            v->fileinfo.filenm = 0;
 	  v->origin = origin;
 	  v->recursive = recursive;
 	}
@@ -110,6 +116,10 @@ define_variable_in_set (name, length, value, origin, recursive, set)
   v = (struct variable *) xmalloc (sizeof (struct variable));
   v->name = savestring (name, length);
   v->value = xstrdup (value);
+  if (flocp != 0)
+    v->fileinfo = *flocp;
+  else
+    v->fileinfo.filenm = 0;
   v->origin = origin;
   v->recursive = recursive;
   v->expanding = 0;
@@ -119,35 +129,6 @@ define_variable_in_set (name, length, value, origin, recursive, set)
   v->next = set->table[hashval];
   set->table[hashval] = v;
   return v;
-}
-
-/* Define a variable in the current variable set.  */
-
-struct variable *
-define_variable (name, length, value, origin, recursive)
-     char *name;
-     unsigned int length;
-     char *value;
-     enum variable_origin origin;
-     int recursive;
-{
-  return define_variable_in_set (name, length, value, origin, recursive,
-				 current_variable_set_list->set);
-}
-
-/* Define a variable in FILE's variable set.  */
-
-struct variable *
-define_variable_for_file (name, length, value, origin, recursive, file)
-     char *name;
-     unsigned int length;
-     char *value;
-     enum variable_origin origin;
-     int recursive;
-     struct file *file;
-{
-  return define_variable_in_set (name, length, value, origin, recursive,
-				 file->variables->set);
 }
 
 /* Lookup a variable whose name is a string starting at NAME
@@ -272,13 +253,17 @@ lookup_variable_in_set (name, length, set)
 
 /* Initialize FILE's variable set list.  If FILE already has a variable set
    list, the topmost variable set is left intact, but the the rest of the
-   chain is replaced with FILE->parent's setlist.  */
+   chain is replaced with FILE->parent's setlist.  If we're READing a
+   makefile, don't do the pattern variable search now, since the pattern
+   variable might not have been defined yet.  */
 
 void
-initialize_file_variables (file)
+initialize_file_variables (file, reading)
      struct file *file;
+     int reading;
 {
   register struct variable_set_list *l = file->variables;
+
   if (l == 0)
     {
       l = (struct variable_set_list *)
@@ -296,8 +281,34 @@ initialize_file_variables (file)
     l->next = &global_setlist;
   else
     {
-      initialize_file_variables (file->parent);
+      initialize_file_variables (file->parent, reading);
       l->next = file->parent->variables;
+    }
+
+  /* If we're not reading makefiles and we haven't looked yet, see if
+     we can find a pattern variable.  */
+
+  if (!reading && !file->pat_searched)
+    {
+      struct pattern_var *p = lookup_pattern_var (file->name);
+
+      file->pat_searched = 1;
+      if (p != 0)
+        {
+          /* If we found one, insert it between the current target's
+             variables and the next set, whatever it is.  */
+          file->pat_variables = (struct variable_set_list *)
+            xmalloc (sizeof (struct variable_set_list));
+          file->pat_variables->set = p->vars->set;
+        }
+    }
+
+  /* If we have a pattern variable match, set it up.  */
+
+  if (file->pat_variables != 0)
+    {
+      file->pat_variables->next = l->next;
+      l->next = file->pat_variables;
     }
 }
 
@@ -947,8 +958,9 @@ try_variable_definition (flocp, line, origin, target_var)
 	      if (*p == '\\')
 		*p = '/';
 	    }
-	  v = define_variable (expanded_name, strlen (expanded_name),
-			       shellpath, origin, flavor == f_recursive);
+	  v = define_variable_loc (expanded_name, strlen (expanded_name),
+                                   shellpath, origin, flavor == f_recursive,
+                                   flocp);
 	}
       else
 	{
@@ -987,8 +999,9 @@ try_variable_definition (flocp, line, origin, target_var)
 		  if (*p == '\\')
 		    *p = '/';
 		}
-	      v = define_variable (expanded_name, strlen (expanded_name),
-				   shellpath, origin, flavor == f_recursive);
+	      v = define_variable_loc (expanded_name, strlen (expanded_name),
+                                       shellpath, origin,
+                                       flavor == f_recursive, flocp);
 	    }
 	  else
 	    v = lookup_variable (expanded_name, strlen (expanded_name));
@@ -1009,15 +1022,16 @@ try_variable_definition (flocp, line, origin, target_var)
      * set new value for SHELL variable.
 	 */
     if (find_and_set_default_shell(value)) {
-       v = define_variable (expanded_name, strlen (expanded_name),
-                            default_shell, origin, flavor == f_recursive);
+       v = define_variable_loc (expanded_name, strlen (expanded_name),
+                                default_shell, origin, flavor == f_recursive,
+                                flocp);
        no_default_sh_exe = 0;
     }
   } else
 #endif
 
-  v = define_variable (expanded_name, strlen (expanded_name),
-		       value, origin, flavor == f_recursive);
+  v = define_variable_loc (expanded_name, strlen (expanded_name), value,
+                           origin, flavor == f_recursive, flocp);
 
   v->append = append;
 
@@ -1040,32 +1054,35 @@ print_variable (v, prefix)
   switch (v->origin)
     {
     case o_default:
-      origin = "default";
+      origin = _("default");
       break;
     case o_env:
-      origin = "environment";
+      origin = _("environment");
       break;
     case o_file:
-      origin = "makefile";
+      origin = _("makefile");
       break;
     case o_env_override:
-      origin = "environment under -e";
+      origin = _("environment under -e");
       break;
     case o_command:
-      origin = "command line";
+      origin = _("command line");
       break;
     case o_override:
-      origin = "`override' directive";
+      origin = _("`override' directive");
       break;
     case o_automatic:
-      origin = "automatic";
+      origin = _("automatic");
       break;
     case o_invalid:
     default:
       abort ();
     }
-  printf ("# %s\n", origin);
-
+  fputs ("# ", stdout);
+  fputs (origin, stdout);
+  if (v->fileinfo.filenm)
+    printf (" (from `%s', line %lu)", v->fileinfo.filenm, v->fileinfo.lineno);
+  putchar ('\n');
   fputs (prefix, stdout);
 
   /* Is this a `define'?  */

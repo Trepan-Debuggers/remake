@@ -48,6 +48,10 @@ struct file
     /* List of variable sets used for this file.  */
     struct variable_set_list *variables;
 
+    /* Pattern-specific variable reference for this target, or null if there
+       isn't one.  Also see the pat_searched flag, below.  */
+    struct variable_set_list *pat_variables;
+
     /* Immediate dependent that caused this target to be remade,
        or nil if there isn't one.  */
     struct file *parent;
@@ -55,10 +59,6 @@ struct file
     /* For a double-colon entry, this is the first double-colon entry for
        the same file.  Otherwise this is null.  */
     struct file *double_colon;
-
-    /* Pattern-specific variable reference for this target, or null if there
-       isn't one.  Also see the pat_searched flag, below.  */
-    struct pattern_var *patvar;
 
     short int update_status;	/* Status of the last attempt to update,
 				   or -1 if none has been made.  */

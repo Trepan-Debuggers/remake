@@ -609,7 +609,7 @@ read_makefile (filename, flags)
 		{
 		  v = lookup_variable (p, len);
 		  if (v == 0)
-		    v = define_variable (p, len, "", o_file, 0);
+		    v = define_variable_loc (p, len, "", o_file, 0, &fileinfo);
 		  v->export = v_export;
 		}
 	    }
@@ -626,7 +626,7 @@ read_makefile (filename, flags)
 	    {
 	      v = lookup_variable (p, len);
 	      if (v == 0)
-		v = define_variable (p, len, "", o_file, 0);
+		v = define_variable_loc (p, len, "", o_file, 0, &fileinfo);
 	      v->export = v_noexport;
 	    }
 	}
@@ -1116,7 +1116,8 @@ do_define (name, namelen, origin, infile, flocp)
 	    definition[0] = '\0';
 	  else
 	    definition[idx - 1] = '\0';
-	  (void) define_variable (var, strlen (var), definition, origin, 1);
+	  (void) define_variable_loc (var, strlen (var), definition, origin,
+                                      1, flocp);
 	  free (definition);
 	  freebuffer (&lb);
 	  return;
@@ -1454,7 +1455,7 @@ record_target_var (filenames, defn, two_colon, origin, flocp)
 
           /* Get a file reference for this file, and initialize it.  */
           f = enter_file (name);
-          initialize_file_variables (f);
+          initialize_file_variables (f, 1);
           vlist = f->variables;
           fname = f->name;
         }
@@ -1477,7 +1478,7 @@ record_target_var (filenames, defn, two_colon, origin, flocp)
           gv = lookup_variable (v->name, len);
           if (gv && (gv->origin == o_env_override || gv->origin == o_command))
             define_variable_in_set (v->name, len, gv->value, gv->origin,
-                                    gv->recursive, vlist->set);
+                                    gv->recursive, vlist->set, flocp);
         }
 
       /* Free name if not needed further.  */

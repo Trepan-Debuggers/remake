@@ -108,7 +108,7 @@ set_file_variables (file)
     less = at;
 
 #define	DEFINE_VARIABLE(name, len, value) \
-  (void) define_variable_for_file (name, len, value, o_automatic, 0, file)
+  (void) define_variable_for_file (name,len,value,o_automatic,0,file)
 
   /* Define the variables.  */
 
@@ -354,7 +354,7 @@ execute_file_commands (file)
 
   /* First set the automatic variables according to this file.  */
 
-  initialize_file_variables (file);
+  initialize_file_variables (file, 0);
 
   set_file_variables (file);
 
