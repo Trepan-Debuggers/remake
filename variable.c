@@ -954,7 +954,7 @@ print_variable (v, prefix)
      register struct variable *v;
      char *prefix;
 {
-  char *origin;
+  const char *origin;
 
   switch (v->origin)
     {
@@ -982,7 +982,6 @@ print_variable (v, prefix)
     case o_invalid:
     default:
       abort ();
-      break;
     }
   printf ("# %s\n", origin);
 
