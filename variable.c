@@ -807,11 +807,6 @@ target_environment (struct file *file)
   struct variable makelevel_key;
   char **result_0;
   char **result;
-  struct variable ev;
-
-  /* Set up a fake variable struct for the original SHELL value.  */
-  ev.name = "SHELL";
-  ev.value = env_shell;
 
   if (file == 0)
     set_list = current_variable_set_list;
@@ -868,12 +863,15 @@ target_environment (struct file *file)
 		break;
 
 	      case v_noexport:
-                if (!streq (v->name, "SHELL"))
-                  continue;
                 /* If this is the SHELL variable and it's not exported, then
                    add the value from our original environment.  */
-                v = &ev;
-                break;
+                if (streq (v->name, "SHELL"))
+                  {
+                    extern struct variable shell_var;
+                    v = &shell_var;
+                    break;
+                  }
+                continue;
 
 	      case v_ifset:
 		if (v->origin == o_default)
