@@ -7,10 +7,10 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set EDITION 0.44
-@set VERSION 3.69 Beta
-@set UPDATED 3 November 1993
-@set UPDATE-MONTH November 1993
+@set EDITION 0.45
+@set VERSION 3.70 Beta
+@set UPDATED 14 December 1993
+@set UPDATE-MONTH December 1993
 
 @c finalout
 
@@ -3764,20 +3764,39 @@ use the expansion functions much more efficiently
 (@pxref{Functions, ,Functions for Transforming Text}).
 
 @cindex spaces, in variable values
+@cindex whitespace, in variable values
 @cindex variables, spaces in values
-You can also use them to introduce controlled leading or trailing spaces
-into variable values.  Such spaces are discarded from your input before
-substitution of variable references and function calls; this means you can
-include leading or trailing spaces in a variable value by protecting them
-with variable references, like this:
+You can also use them to introduce controlled leading whitespace into
+variable values.  Leading whitespace characters are discarded from your
+input before substitution of variable references and function calls;
+this means you can include leading spaces in a variable value by
+protecting them with variable references, like this:
 
 @example
 nullstring :=
-space := $(nullstring) $(nullstring)
+space := $(nullstring) # end of the line
 @end example
 
 @noindent
-Here the value of the variable @code{space} is precisely one space.
+Here the value of the variable @code{space} is precisely one space.  The
+comment @w{@samp{# end of the line}} is included here just for clarity.
+Since trailing space characters are @emph{not} stripped from variable
+values, just a space at the end of the line would have the same effect
+(but be rather hard to read).  If you put whitespace at the end of a
+variable value, it is a good idea to put a comment like that at the end
+of the line to make your intent clear.  Conversely, if you do @emph{not}
+want any whitespace characters at the end of your variable value, you
+must remember not to put a random comment on the end of the line after
+some whitespace, such as this:
+
+@example
+dir := /foo/bar    # directory to put the frobs in
+@end example
+
+@noindent
+Here the value of the variable @code{dir} is @w{@samp{/foo/bar    }}
+(with four trailing spaces), which was probably not the intention.
+(Imagine something like @w{@samp{$(dir)/file}} with this definition!)
 
 @node Advanced, Values, Flavors, Using Variables
 @section Advanced Features for Reference to Variables
