@@ -188,7 +188,7 @@ installdirs:
 $(bindir)/$(instname): make
 	$(INSTALL_PROGRAM) make $@.new
 	@if $(install_setgid); then \
-	   if chgrp $(group) $@.new && chmod g+s $@.new; then
+	   if chgrp $(group) $@.new && chmod g+s $@.new; then \
 	     echo "chgrp $(group) $@.new && chmod g+s $@.new"; \
 	   else \
 	     echo "$@ needs to be owned by group $(group) and setgid;"; \
