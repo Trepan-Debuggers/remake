@@ -12,7 +12,7 @@
 # this routine controls the whole mess; each test suite sets up a few
 # variables and then calls &toplevel, which does all the real work.
 
-# $Id: test_driver.pl,v 1.2 2004/06/12 03:19:28 rockyb Exp $
+# $Id: test_driver.pl,v 1.3 2004/06/12 08:53:19 rockyb Exp $
 
 
 # The number of test categories we've run
@@ -148,7 +148,7 @@ sub toplevel
       closedir (SCRIPTDIR);
       foreach $test (@files)
       {
-        next if $test =~ /~$/ || -d $test;
+        next if $test =~ /(~|\.in|\.cvsignore)$/ || -d $test;
 	push (@TESTS, "$dir/$test");
       }
     }

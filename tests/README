@@ -43,7 +43,10 @@ relative paths and when make is called something other than "make" (like
 "gmake").
 
 Tests cannot end with a "~" character, as the test suite will ignore any
-that do (I was tired of having it run my Emacs backup files as test :)
+that do (I was tired of having it run my Emacs backup files as test. :)
+Tests cannot also end with in .in which are used by configure, or
+or be called .cvsignore which is ised by CVS.
+
 
 If you want to run the tests in parallel, you should use the mkshadow
 script included here to create temporary "copies" (via symbolic links)

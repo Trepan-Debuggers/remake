@@ -1,9 +1,10 @@
 # -*-Perl-*-
-# $Id: general,v 1.2 2004/06/12 03:18:07 rockyb Exp $
+# $Id: general.in,v 1.1 2004/06/12 08:53:20 rockyb Exp $
 $description = "The following checks general debugger operation.\n";
 
 $details = "check debugger operations: print, examine, break\n";
 
+return -1 if !"@ENABLE_READLINE@";
 # TEST #1
 # -------
 
