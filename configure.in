@@ -17,6 +17,7 @@ AC_STDC_HEADERS
 AC_UNISTD_H
 AC_DIR_HEADER
 AC_UID_T			dnl Also does gid_t.
+AC_GETGROUPS_T
 AC_PID_T
 AC_RETSIGTYPE
 AC_HAVE_HEADERS(limits.h sys/param.h fcntl.h string.h memory.h)
