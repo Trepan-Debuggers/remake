@@ -1,4 +1,4 @@
-/* Copyright (C) 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
+/* Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -216,9 +216,9 @@ fatal (s1, s2, s3, s4, s5, s6)
      char *s1, *s2, *s3, *s4, *s5, *s6;
 {
   if (makelevel == 0)
-    fprintf (stderr, "%s: ", program);
+    fprintf (stderr, "%s: *** ", program);
   else
-    fprintf (stderr, "%s[%u]: ", program, makelevel);
+    fprintf (stderr, "%s[%u]: *** ", program, makelevel);
   fprintf (stderr, s1, s2, s3, s4, s5, s6);
   fputs (".  Stop.\n", stderr);
 
@@ -260,7 +260,7 @@ makefile_fatal (file, lineno, s1, s2, s3, s4, s5, s6)
      unsigned int lineno;
      char *s1, *s2, *s3, *s4, *s5, *s6;
 {
-  fprintf (stderr, "%s:%u: ", file, lineno);
+  fprintf (stderr, "%s:%u: *** ", file, lineno);
   fprintf (stderr, s1, s2, s3, s4, s5, s6);
   fputs (".  Stop.\n", stderr);
 
