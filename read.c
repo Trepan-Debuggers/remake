@@ -79,6 +79,7 @@ static struct conditionals *conditionals = &toplevel_conditionals;
 
 static char *default_include_directories[] =
   {
+    INCLUDEDIR,
     "/usr/gnu/include",
     "/usr/local/include",
     "/usr/include",
