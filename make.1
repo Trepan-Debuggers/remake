@@ -127,10 +127,6 @@ is equivalent to
 .BR "\-C " /etc.
 This is typically used with recursive invocations of
 .IR make .
-.B \-e
-Give variables taken from the environment precedence
-over variables from makefiles.
-.TP 0.5i
 .TP 0.5i
 .B \-d
 Print debugging information in addition to normal processing.
@@ -140,6 +136,10 @@ which files actually need to be remade, which implicit rules are
 considered and which are applied---everything interesting about how
 .I make
 decides what to do.
+.TP 0.5i
+.B \-e
+Give variables taken from the environment precedence
+over variables from makefiles.
 .TP 0.5i
 .BI "\-f " file
 Use
