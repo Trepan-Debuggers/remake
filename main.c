@@ -1514,10 +1514,9 @@ int main (int argc, char ** argv)
 
 	    if (any_remade)
 	      goto re_exec;
-	    else if (any_failed)
+	    if (any_failed)
 	      die (2);
-	    else
-	      break;
+            break;
 	  }
 
 	case 0:

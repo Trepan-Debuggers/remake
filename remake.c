@@ -125,7 +125,7 @@ update_goal_chain (goals, makefiles)
       while (g != 0)
 	{
 	  /* Iterate over all double-colon entries for this file.  */
-	  struct file *file = g->file;
+	  struct file *file;
 	  int stop = 0, any_not_updated = 0;
 
 	  for (file = g->file->double_colon ? g->file->double_colon : g->file;
