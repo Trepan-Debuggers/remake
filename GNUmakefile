@@ -69,7 +69,7 @@ endif	 # !no_libc
 
 # We know the type of machine, so put the binaries in subdirectories.
 $(ARCH)/%.o: %.c
-	$(COMPILE.c) $< $(OUTPUT_OPTION)
+	$(COMPILE.c) -Iglob $< $(OUTPUT_OPTION)
 $(ARCH)/glob/libglob.a:
 	$(MAKE) -C $(@D) $(@F)
 .PHONY: $(ARCH)/glob/libglob.a
