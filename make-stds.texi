@@ -484,11 +484,18 @@ target need not rebuild any documentation files; Info files should
 normally be included in the distribution, and DVI files should be made
 only when explicitly asked for.
 
+By default, the Make rules should compile and link with @samp{-g}, so
+that executable programs have debugging symbols.  Users who don't mind
+being helpless can strip the executables later if they wish.
+
 @item install
 Compile the program and copy the executables, libraries, and so on to
 the file names where they should reside for actual use.  If there is a
 simple test to verify that a program is properly installed, this target
 should run that test.
+
+Do not strip executables when installing them.  Devil-may-care users can
+use the @code{strip} target to do that.
 
 If possible, write the @code{install} target rule so that it does not
 modify anything in the directory where the program was built, provided
@@ -539,6 +546,17 @@ create).
 
 This rule should not modify the directories where compilation is done,
 only the directories where files are installed.
+
+@item strip
+Strip the installed executable files---that is to say, the copies made
+in the installation directories by the @code{install} target.  This
+target should not alter the executable files in the directory where the
+program was built.
+
+Normally we do not recommend stripping an executable unless you are sure
+the program has no bugs.  However, it can be reasonable to install a
+stripped executable for actual execution while saving the unstripped
+executable elsewhere in case there is a bug.
 
 @comment The gratuitous blank line here is to make the table look better
 @comment in the printed Make manual.  Please leave it in.
