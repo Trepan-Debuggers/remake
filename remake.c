@@ -29,12 +29,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <fcntl.h>
 #endif
 
-
-#if	!defined(__GNU_LIBRARY__) && !defined(POSIX)
-extern int fstat ();
-extern time_t time ();
-#endif
-
 extern int try_implicit_rule ();
 
 
