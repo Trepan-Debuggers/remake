@@ -1,3 +1,11 @@
+Fri Jul 19 16:57:27 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
+
+	* GNUmakefile (win32files): New variable.
+	(distfiles): Add it.
+	* w32: Updated by Rob Tulloh.
+
+	* makefile.vms (LOADLIBES): Fix typo.
+
 Sun Jul 14 12:59:27 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 
 	* job.c (construct_command_argv_internal): Fix up #else, #endifs.
