@@ -2,7 +2,7 @@
 @setfilename make.info
 @synindex vr fn
 
-@c $Header: /sources/make/make/Attic/make.texinfo,v 2.6 1988/07/03 20:59:14 mcgrath Rel $
+@c $Header: /sources/make/make/Attic/make.texinfo,v 2.7 1988/07/04 13:41:43 mcgrath Exp $
 
 @ifinfo
 This file documents the GNU Make utility.
@@ -4586,12 +4586,15 @@ Here is a summary of the features of GNU @code{make}, for comparison
 with and credit to other versions of @code{make}.  We consider the features
 of @code{make} in BSD 4.2 systems as a baseline.
 
-The @code{VPATH} variable and its special meaning come from the @code{make}
-in BSD 4.3.  @xref{Directory Search}.
-
 Many features come from the version of @code{make} in System V:
 
 @itemize @bullet
+@item
+The @code{VPATH} variable and its special meaning.  @xref{Directory
+Search}.  This feature exists in System V @code{make}, but is undocumented.
+It is documented in 4.3 BSD @code{make} (which says it mimics System V's
+@code{VPATH} feature).@refill
+
 @item
 Included makefiles.  @xref{Include}.
 
@@ -4724,7 +4727,7 @@ any characters.  In other version of @code{make}, they must begin with
 @item
 The variable @code{MAKELEVEL} which keeps track of the current level
 of @code{make} recursion.  @xref{Recursion}.
-The @code{make} programs in various other systems support three features
+
 @item
 Static pattern rules.  @xref{Static Pattern}.
 
@@ -4770,6 +4773,14 @@ for the particular target that is being processed.
 
 This is not defined in GNU @code{make} because @samp{$$} should always
 stand for an ordinary @samp{$}.
+
+It is possible to get this functionality through the use of static pattern
+rules (@pxref{Static Pattern}).  The System V @code{make} rule:
+
+@example
+$(targets): $$@@.o lib.a
+@end example
+
 @noindent
 can be replaced with the GNU @code{make} static pattern rule:
 
