@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.151 1995/04/05 03:29:01 roland Exp $
+@set RCSID $Id: make.texinfo,v 2.152 1995/04/05 03:32:21 roland Exp $
 @set EDITION 0.48
 @set VERSION 3.73 Beta
 @set UPDATED 4 April 1995
@@ -32,7 +32,8 @@ and issues the commands to recompile them.
 This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Make Manual}, for @code{make}, Version @value{VERSION}.
 
-Copyright (C) 1988, '89, '90, '91, '92, '93, '94 Free Software Foundation, Inc.
+Copyright (C) 1988, '89, '90, '91, '92, '93, '94, '95
+	Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -67,7 +68,7 @@ by the Free Software Foundation.
 @author Richard M. Stallman and Roland McGrath
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1988, '89, '90, '91, '92, '93, '94 Free Software Foundation, Inc.
+Copyright @copyright{} 1988, '89, '90, '91, '92, '93, '94, '95 Free Software Foundation, Inc.
 @sp 2
 Published by the Free Software Foundation @*
 675 Massachusetts Avenue, @*
