@@ -142,10 +142,11 @@ rename_file (file, name)
 }
 
 void
-file_hash_enter (file, name, oldhash)
+file_hash_enter (file, name, oldhash, oldname)
      register struct file *file;
      char *name;
      unsigned int oldhash;
+     char *oldname;
 {
   register unsigned int newhash;
   struct file *oldfile;
@@ -213,16 +214,16 @@ file_hash_enter (file, name, oldhash)
 	      makefile_error (file->cmds->filename, file->cmds->lineno,
 			      "Commands were specified for \
 file `%s' at %s:%u,",
-			      oldfile->name, oldfile->cmds->filename,
+			      oldname, oldfile->cmds->filename,
 			      oldfile->cmds->lineno);
 	      makefile_error (file->cmds->filename, file->cmds->lineno,
 			      "but `%s' is now considered the same file \
 as `%s'.",
-			      oldfile->name, name);
+			      oldname, name);
 	      makefile_error (file->cmds->filename, file->cmds->lineno,
 			      "Commands for `%s' will be ignored \
 in favor of those for `%s'.",
-			      name, oldfile->name);
+			      name, oldname);
 	    }
 	}
 
@@ -489,27 +490,4 @@ print_file_data_base ()
 	      ((double) FILE_BUCKETS) / ((double) nfiles) * 100.0, per_bucket);
 #endif
     }
-}
-				/* !!! compile frob */
-struct file *
-file_linear_list ()
-{
-  register unsigned int bucket;
-  register struct file *f, *nextf;
-  struct file *chain = NULL;
-
-  for (bucket = 0; bucket < sizeof (files) / sizeof (files[0]); ++bucket)
-    for (f = files[bucket]; f != NULL; f = nextf)
-      {
-	nextf = f->next;
-	if (f->is_target)
-	  {
-	    if (f->cmds != NULL)
-	      f->cmds = (struct commands *) f->cmds->commands;
-	    f->next = chain;
-	    chain = f;
-	  }
-      }
-
-  return chain;
 }
