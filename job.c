@@ -794,6 +794,9 @@ start_job_command (child)
       ++p;
     }
 
+  /* Update the file's command flags with any new ones we found.  */
+  child->file->cmds->lines_flags[child->command_line - 1] |= flags;
+
   /* If -q was given, just say that updating `failed'.  The exit status of
      1 tells the user that -q is saying `something to do'; the exit status
      for a random error is 2.  */

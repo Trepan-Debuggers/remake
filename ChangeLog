@@ -1,3 +1,15 @@
+1999-10-12  Paul D. Smith  <psmith@gnu.org>
+
+	* remake.c (notice_finished_file): If we get here and -n is set,
+	look for any commands that aren't recursive.  If we find at least
+	one, we assume that command updates the target and set mtime of
+	the target to "very new".  If there are none, then we ran every
+	command there is, so check the mtime on this file just like we
+	would normally, rather than assuming it's "very new".
+
+	* job.c (start_job_command): Update lines_flags in the file's cmds
+	structure with any per-line tokens we found (`@', `-', `+').
+
 1999-10-08  Paul D. Smith  <psmith@gnu.org>
 
 	* variable.c (initialize_file_variables): Always recurse to

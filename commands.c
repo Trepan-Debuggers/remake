@@ -233,93 +233,97 @@ void
 chop_commands (cmds)
      register struct commands *cmds;
 {
-  if (cmds != 0 && cmds->command_lines == 0)
-    {
-      /* Chop CMDS->commands up into lines in CMDS->command_lines.
+  register char *p;
+  unsigned int nlines, idx;
+  char **lines;
+
+  /* If we don't have any commands,
+     or we already parsed them, never mind.  */
+
+  if (!cmds || cmds->command_lines != 0)
+    return;
+
+  /* Chop CMDS->commands up into lines in CMDS->command_lines.
 	 Also set the corresponding CMDS->lines_flags elements,
 	 and the CMDS->any_recurse flag.  */
-      register char *p;
-      unsigned int nlines, idx;
-      char **lines;
 
-      nlines = 5;
-      lines = (char **) xmalloc (5 * sizeof (char *));
-      idx = 0;
-      p = cmds->commands;
-      while (*p != '\0')
-	{
-	  char *end = p;
-	find_end:;
-	  end = index (end, '\n');
-	  if (end == 0)
-	    end = p + strlen (p);
-	  else if (end > p && end[-1] == '\\')
-	    {
-	      int backslash = 1;
-	      register char *b;
-	      for (b = end - 2; b >= p && *b == '\\'; --b)
-		backslash = !backslash;
-	      if (backslash)
-		{
-		  ++end;
-		  goto find_end;
-		}
-	    }
+  nlines = 5;
+  lines = (char **) xmalloc (5 * sizeof (char *));
+  idx = 0;
+  p = cmds->commands;
+  while (*p != '\0')
+    {
+      char *end = p;
+    find_end:;
+      end = index (end, '\n');
+      if (end == 0)
+        end = p + strlen (p);
+      else if (end > p && end[-1] == '\\')
+        {
+          int backslash = 1;
+          register char *b;
+          for (b = end - 2; b >= p && *b == '\\'; --b)
+            backslash = !backslash;
+          if (backslash)
+            {
+              ++end;
+              goto find_end;
+            }
+        }
 
-	  if (idx == nlines)
-	    {
-	      nlines += 2;
-	      lines = (char **) xrealloc ((char *) lines,
-					  nlines * sizeof (char *));
-	    }
-	  lines[idx++] = savestring (p, end - p);
-	  p = end;
-	  if (*p != '\0')
-	    ++p;
-	}
+      if (idx == nlines)
+        {
+          nlines += 2;
+          lines = (char **) xrealloc ((char *) lines,
+                                      nlines * sizeof (char *));
+        }
+      lines[idx++] = savestring (p, end - p);
+      p = end;
+      if (*p != '\0')
+        ++p;
+    }
 
-      if (idx != nlines)
-	{
-	  nlines = idx;
-	  lines = (char **) xrealloc ((char *) lines,
-				      nlines * sizeof (char *));
-	}
+  if (idx != nlines)
+    {
+      nlines = idx;
+      lines = (char **) xrealloc ((char *) lines,
+                                  nlines * sizeof (char *));
+    }
 
-      cmds->ncommand_lines = nlines;
-      cmds->command_lines = lines;
+  cmds->ncommand_lines = nlines;
+  cmds->command_lines = lines;
 
-      cmds->any_recurse = 0;
-      cmds->lines_flags = (char *) xmalloc (nlines);
-      for (idx = 0; idx < nlines; ++idx)
-	{
-	  int flags = 0;
+  cmds->any_recurse = 0;
+  cmds->lines_flags = (char *) xmalloc (nlines);
+  for (idx = 0; idx < nlines; ++idx)
+    {
+      int flags = 0;
 
-	  for (p = lines[idx];
-	       isblank (*p) || *p == '-' || *p == '@' || *p == '+';
-	       ++p)
-	    switch (*p)
-	      {
-	      case '+':
-		flags |= COMMANDS_RECURSE;
-		break;
-	      case '@':
-		flags |= COMMANDS_SILENT;
-		break;
-	      case '-':
-		flags |= COMMANDS_NOERROR;
-		break;
-	      }
-	  if (!(flags & COMMANDS_RECURSE))
-	    {
-	      unsigned int len = strlen (p);
-	      if (sindex (p, len, "$(MAKE)", 7) != 0
-		  || sindex (p, len, "${MAKE}", 7) != 0)
-		flags |= COMMANDS_RECURSE;
-	    }
+      for (p = lines[idx];
+           isblank (*p) || *p == '-' || *p == '@' || *p == '+';
+           ++p)
+        switch (*p)
+          {
+          case '+':
+            flags |= COMMANDS_RECURSE;
+            break;
+          case '@':
+            flags |= COMMANDS_SILENT;
+            break;
+          case '-':
+            flags |= COMMANDS_NOERROR;
+            break;
+          }
+      if (!(flags & COMMANDS_RECURSE))
+        {
+          unsigned int len = strlen (p);
+          if (sindex (p, len, "$(MAKE)", 7) != 0
+              || sindex (p, len, "${MAKE}", 7) != 0)
+            flags |= COMMANDS_RECURSE;
+        }
 
-	  cmds->lines_flags[idx] = flags;
-	  cmds->any_recurse |= flags & COMMANDS_RECURSE;
-	}
+      cmds->lines_flags[idx] = flags;
+      cmds->any_recurse |= flags & COMMANDS_RECURSE;
     }
 }
 
@@ -341,9 +345,7 @@ execute_file_commands (file)
       break;
   if (*p == '\0')
     {
-      /* We are all out of commands.
-	 If we have gotten this far, all the previous commands
-	 have run successfully, so we have winning update status.  */
+      /* If there are no commands, assume everything worked.  */
       set_command_state (file, cs_running);
       file->update_status = 0;
       notice_finished_file (file);
