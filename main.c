@@ -923,14 +923,17 @@ main (argc, argv, envp)
 
       switch (update_goal_chain (read_makefiles, 1))
 	{
+	case 1:
+	  assert ("Status indicates -q set while remaking makefiles!");
 	default:
-	  abort ();
+	  assert ("bogus status from update_goal_chain");
+	  break;
 	  
 	case -1:
 	  /* Did nothing.  */
 	  break;
 	  
-	case 1:
+	case 2:
 	  /* Failed to update.  Figure out if we care.  */
 	  {
 	    /* Nonzero if any makefile was successfully remade.  */
