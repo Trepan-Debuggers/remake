@@ -59,7 +59,9 @@ extern int errno;
 
 #ifdef	HAVE_UNISTD_H
 #include <unistd.h>
-#ifdef	_POSIX_VERSION
+/* Ultrix's unistd.h always defines _POSIX_VERSION, but you only get
+   POSIX.1 behavior with `cc -YPOSIX', which predefines POSIX itself!  */
+#if defined (_POSIX_VERSION) && !defined (ultrix)
 #define	POSIX
 #endif
 #endif
