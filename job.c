@@ -176,7 +176,7 @@ child_error (target_name, exit_code, exit_sig, coredump, ignored)
     }
 }
 
-int child_died = 0;
+static unsigned int dead_children = 0;
 
 /* Notice that a child died.
    reap_children should be called when convenient.  */
@@ -184,7 +184,11 @@ int
 child_handler (sig)
      int sig;
 {
-  child_died = 1;
+  ++dead_children;
+
+  if (debug_flag)
+    printf ("Got a SIGCHLD; %d unreaped children.\n", dead_children);
+
   return 0;
 }
 
@@ -203,7 +207,7 @@ reap_children (block, err)
   WAIT_T status;
 
   while ((children != 0 || shell_function_pid != 0) &&
-	 (block || child_died))
+	 (block || dead_children > 0))
     {
       int remote = 0;
       register int pid;
@@ -211,14 +215,33 @@ reap_children (block, err)
       register struct child *lastc, *c;
       int child_failed;
 
-      if (err && !child_died)
+      if (err && dead_children == 0)
 	{
 	  /* We might block for a while, so let the user know why.  */
 	  fflush (stdout);
 	  error ("*** Waiting for unfinished jobs....");
 	}
 
-      child_died = 0;
+      /* We have one less dead child to reap.
+	 The test and decrement are not atomic; if it is compiled into:
+	 	register = dead_children - 1;
+		dead_children = register;
+	 a SIGCHLD could come between the two instructions.
+	 child_handler increments dead_children.
+	 The second instruction here would lose that increment.  But the
+	 only effect of dead_children being wrong is that we might wait
+	 longer than necessary to reap a child, and lose some parallelism;
+	 and we might print the "Waiting for unfinished jobs" message above
+	 when not necessary.  */
+
+      if (dead_children != 0)
+	--dead_children;
+
+      if (debug_flag)
+	for (c = children; c != 0; c = c->next)
+	  printf ("Live child 0x%08lx PID %d%s\n",
+		  (unsigned long int) c,
+		  c->pid, c->remote ? " (remote)" : "");
 
       /* First, check for remote children.  */
       pid = remote_status (&exit_code, &exit_sig, &coredump, 0);
@@ -232,9 +255,10 @@ reap_children (block, err)
 	  else
 #endif
 	    pid = wait (&status);
-	  fprintf (stderr,"%sblocking wait returned %d\n", block?"":"non",pid);
 
-	  if (pid <= 0)
+	  if (pid < 0)
+	    pfatal_with_name ("wait");
+	  else if (pid == 0)
 	    /* No local children.  */
 	    break;
 	  else
@@ -281,6 +305,12 @@ reap_children (block, err)
 	}
       else
 	{
+	  if (debug_flag)
+	    printf ("Reaping %s child 0x%08lx PID %d%s\n",
+		    child_failed ? "losing" : "winning",
+		    (unsigned long int) c,
+		    c->pid, c->remote ? " (remote)" : "");
+
 	  /* If this child had the good stdin, say it is now free.  */
 	  if (c->good_stdin)
 	    good_stdin_used = 0;
@@ -307,6 +337,8 @@ reap_children (block, err)
 	      if (!err)
 		/* If there are more commands to run, try to start them.  */
 		start_job (c);
+	      else
+		c->file->command_state = cs_finished;
 
 	      switch (c->file->command_state)
 		{
@@ -334,6 +366,11 @@ reap_children (block, err)
 	  /* Notice if the target of the commands has been changed.  */
 	  notice_finished_file (c->file);
 
+	  if (debug_flag)
+	    printf ("Removing child 0x%08lx PID %d%s from chain.\n",
+		    (unsigned long int) c,
+		    c->pid, c->remote ? " (remote)" : "");
+
 	  /* Remove the child from the chain and free it.  */
 	  if (lastc == 0)
 	    children = c->next;
@@ -344,8 +381,9 @@ reap_children (block, err)
 	  /* There is now another slot open.  */
 	  --job_slots_used;
 
-	  /* If the job failed, and the -k flag was not given, die.  */
-	  if (child_failed && !keep_going_flag)
+	  /* If the job failed, and the -k flag was not given, die,
+	     unless we are already in the process of dying.  */
+	  if (!err && child_failed && !keep_going_flag)
 	    die (1);
 	}
 
@@ -645,6 +683,10 @@ new_job (file)
     {
     case cs_running:
       c->next = children;
+      if (debug_flag)
+	printf ("Putting child 0x%08lx PID %d%s on the chain.\n",
+		(unsigned long int) c,
+		c->pid, c->remote ? " (remote)" : "");
       children = c;
       /* One more job slot is in use.  */
       ++job_slots_used;
