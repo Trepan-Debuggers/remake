@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.38 1994/11/08 02:08:24 roland Exp $])
-AC_PREREQ(2.1)			dnl Minimum Autoconf version required.
-AC_INIT(vpath.c)		dnl A distinctive file to look for in srcdir.
+AC_REVISION([$Id: configure.in,v 1.39 1994/11/15 11:32:39 roland Exp $])
+AC_PREREQ(2.1)dnl		dnl Minimum Autoconf version required.
+AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 AC_CONFIG_HEADER(config.h)
 AC_CONFIG_SUBDIRS(glob)		dnl Run configure in glob subdirectory.
 
