@@ -529,8 +529,13 @@ start_job_command (child)
 {
   static int bad_stdin = -1;
   register char *p;
-  int flags = child->file->cmds->lines_flags[child->command_line - 1];
+  int flags;
   char **argv;
+
+  /* Combine the flags parsed for the line itself with
+     the flags specified globally for this target.  */
+  flags = (child->file->command_flags
+	   | child->file->cmds->lines_flags[child->command_line - 1]);
 
   p = child->command_ptr;
   child->noerror = flags & COMMANDS_NOERROR;
