@@ -363,7 +363,7 @@ define_automatic_variables ()
     }
 
   /* Make sure MAKEFILES gets exported if it is set.  */
-  v = define_variable ("MAKEFILES", 9, (char *) 0, o_default, 0);
+  v = define_variable ("MAKEFILES", 9, "", o_default, 0);
   v->export = v_ifset;
 }
 
