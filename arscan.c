@@ -25,6 +25,11 @@
 
 #ifndef	NO_ARCHIVES
 
+/* SCO Unix's compiler defines both of these.  */
+#ifdef	M_UNIX
+#undef	M_XENIX
+#endif
+
 /* On the sun386i and in System V rel 3, ar.h defines two different archive
    formats depending upon whether you have defined PORTAR (normal) or PORT5AR
    (System V Release 1).  There is no default, one or the other must be defined
@@ -32,7 +37,14 @@
 
 #if (!defined (PORTAR) || PORTAR == 0) && (!defined (PORT5AR) || PORT5AR == 0)
 #undef	PORTAR
+#ifdef M_XENIX
+/* According to Jim Sievert <jas1@rsvl.unisys.com>, for SCO XENIX defining
+   PORTAR to 1 gets the wrong archive format, and defining it to 0 gets the
+   right one.  */
+#define PORTAR 0
+#else
 #define PORTAR 1
+#endif
 #endif
 
 #include <ar.h>
@@ -40,11 +52,6 @@
 /* Cray's <ar.h> apparently defines this.  */
 #ifndef	AR_HDR_SIZE
 #define	AR_HDR_SIZE	(sizeof (struct ar_hdr))
-#endif
-
-/* SCO Unix's compiler defines both of these.  */
-#ifdef	M_UNIX
-#undef	M_XENIX
 #endif
 
 /* Takes three arguments ARCHIVE, FUNCTION and ARG.
