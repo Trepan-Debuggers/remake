@@ -79,11 +79,13 @@ $(prog): $(libc_dir)/libc.a
 globdep =
 globlib =
 
+# So is getopt.
+GETOPT =
+
 else
 
-globdep =
-globlib =
-objs := $(objs) glob/fnmatch.o glob/glob.o
+globdep = glob/libglob.a
+globlib = $(globdep)
 CPPFLAGS := $(CPPFLAGS) -Iglob
 
 endif
