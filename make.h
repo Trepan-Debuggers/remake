@@ -320,8 +320,9 @@ extern unsigned int job_slots;
 extern double max_load_average;
 
 extern char *program;
-
+extern char *starting_directory;
 extern unsigned int makelevel;
+
 extern unsigned int commands_started;
 
 
