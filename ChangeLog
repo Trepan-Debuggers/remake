@@ -1,4 +1,9 @@
-Thu Mar  3 18:28:15 2005  Boris Kolpackov  <boris@kolpackov.net>
+2005-03-04  Paul D. Smith  <psmith@gnu.org>
+
+	* AUTHORS: Update.
+	* doc/make.texi (Automatic Variables): Document $|.
+
+2005-03-03  Boris Kolpackov  <boris@kolpackov.net>
 
 	* read.c (record_files): Instead of substituting % with
 	actual stem value in dependency list replace it with $*.
@@ -11,7 +16,16 @@ Thu Mar  3 18:28:15 2005  Boris Kolpackov  <boris@kolpackov.net>
 	in dependency list replace it with $*. This fixes stem
 	triple expansion bug.
 
-Tue Mar  1 10:12:20 2005  Boris Kolpackov  <boris@kolpackov.net>
+2005-03-01  Paul D. Smith  <psmith@gnu.org>
+
+	* commands.c (fatal_error_signal) [WINDOWS32]: Don't call kill()
+	on Windows, as it takes a handle not a pid.  Just exit.
+	Fix from patch #3679, provided by Alessandro Vesely.
+
+	* configure.in: Update check for sys_siglist[] from autoconf manual.
+	* signame.c (strsignal): Update to use the new autoconf macro.
+
+2005-03-01  Boris Kolpackov  <boris@kolpackov.net>
 
 	* read.c (record_files): Add a check for the list of prerequisites
 	of a static pattern rule being empty. Fixes Savannah bug #12180.

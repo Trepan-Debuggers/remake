@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.25 2005/02/28 07:48:23 psmith Exp $
+@set RCSID $Id: make.texi,v 1.26 2005/03/04 12:52:33 psmith Exp $
 @set EDITION 0.61
 @set VERSION 3.80
 @set UPDATED 23 Feb 2003
@@ -5942,10 +5942,11 @@ returns @samp{bar}.
 @cindex selecting word lists
 Returns the list of words in @var{text} starting with word @var{s} and
 ending with word @var{e} (inclusive).  The legitimate values of @var{s}
-and @var{e} start from 1.  If @var{s} is bigger than the number of words
-in @var{text}, the value is empty.  If @var{e} is bigger than the number
-of words in @var{text}, words up to the end of @var{text} are returned.
-If @var{s} is greater than @var{e}, nothing is returned.  For example,
+start from 1; @var{e} may start from 0.  If @var{s} is bigger than the
+number of words in @var{text}, the value is empty.  If @var{e} is
+bigger than the number of words in @var{text}, words up to the end of
+@var{text} are returned.  If @var{s} is greater than @var{e}, nothing
+is returned.  For example,
 
 @example
 $(wordlist 2, 3, foo bar baz)
@@ -8496,7 +8497,9 @@ prerequisites which are archive members, only the member named is used
 (@pxref{Archives}).  A target has only one prerequisite on each other file
 it depends on, no matter how many times each file is listed as a
 prerequisite.  So if you list a prerequisite more than once for a target,
-the value of @code{$^} contains just one copy of the name.
+the value of @code{$^} contains just one copy of the name.  This list
+does @strong{not} contain any of the order-only prerequisites; for those
+see the @samp{$|} variable, below.
 @cindex prerequisites, list of all
 @cindex list of all prerequisites
 
@@ -8507,6 +8510,12 @@ This is like @samp{$^}, but prerequisites listed more than once are
 duplicated in the order they were listed in the makefile.  This is
 primarily useful for use in linking commands where it is meaningful to
 repeat library file names in a particular order.
+
+@vindex $|
+@vindex | @r{(automatic variable)}
+@item $|
+The names of all the order-only prerequisites, with spaces between
+them.
 
 @vindex $*
 @vindex * @r{(automatic variable)}

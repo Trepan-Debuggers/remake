@@ -1,9 +1,9 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT([GNU make],[3.81rc1],[bug-make@gnu.org])
+AC_INIT([GNU make],[3.81beta3],[bug-make@gnu.org])
 
 AC_PREREQ(2.59)
-AC_REVISION([[$Id: configure.in,v 1.133 2005/02/28 07:48:22 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.134 2005/03/04 12:52:32 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -167,7 +167,13 @@ if test "$ac_cv_header_nlist_h" = yes; then
   fi
 fi
 
-AC_CHECK_DECLS([sys_siglist])
+AC_CHECK_DECLS([sys_siglist],,,
+[#include <signal.h>
+/* NetBSD declares sys_siglist in unistd.h.  */
+#if HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+])
 
 
 # Check out the wait reality.

@@ -27,7 +27,7 @@ Boston, MA 02111-1307, USA.  */
    Otherwise create our own.
  */
 
-#if !defined(SYS_SIGLIST_DECLARED)
+#if !defined(HAVE_DECL_SYS_SIGLIST)
 
 /* Some systems do not define NSIG in <signal.h>.  */
 #ifndef	NSIG
@@ -226,7 +226,7 @@ signame_init (void)
   return 1;
 }
 
-#endif  /* SYS_SIGLIST_DECLARED */
+#endif  /* HAVE_DECL_SYS_SIGLIST */
 
 
 char *
@@ -234,7 +234,7 @@ strsignal (int signal)
 {
   static char buf[] = "Signal 12345678901234567890";
 
-#if !defined(SYS_SIGLIST_DECLARED)
+#if !defined(HAVE_DECL_SYS_SIGLIST)
   static char sig_initted = 0;
 
   if (!sig_initted)
