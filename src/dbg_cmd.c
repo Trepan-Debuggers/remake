@@ -52,32 +52,32 @@ typedef struct {
   const char short_name;	/* Index into short_cmd array. */
 } long_cmd_t;
 
-static debug_return_t com_show_var(char *psz_arg, int expand);
-static debug_return_t com_set_var (char *psz_arg, int expand);
+static debug_return_t dbg_cmd_show_var(char *psz_arg, int expand);
+static debug_return_t dbg_cmd_set_var (char *psz_arg, int expand);
 
-static debug_return_t com_break           (char *psz_arg);
-static debug_return_t com_continue        (char *psz_arg);
-static debug_return_t com_delete          (char *psz_arg);
-static debug_return_t com_frame           (char *psz_arg);
-static debug_return_t com_help             (char *psz_arg);
+static debug_return_t dbg_cmd_break           (char *psz_arg);
+static debug_return_t dbg_cmd_continue        (char *psz_arg);
+static debug_return_t dbg_cmd_delete          (char *psz_arg);
+static debug_return_t dbg_cmd_frame           (char *psz_arg);
+static debug_return_t dbg_cmd_help             (char *psz_arg);
 #ifdef HISTORY_STUFF
-static debug_return_t com_history          (char *psz_arg);
+static debug_return_t dbg_cmd_history          (char *psz_arg);
 #endif
-static debug_return_t com_print            (char *psz_arg);
-static debug_return_t com_quit             (char *psz_arg);
-static debug_return_t com_restart          (char *psz_arg);
-static debug_return_t com_set              (char *psz_arg);
-static debug_return_t com_set_var_noexpand (char *psz_arg);
-static debug_return_t com_shell            (char *psz_arg);
-static debug_return_t com_show_stack       (char *psz_arg);
-static debug_return_t com_show_var_expand  (char *psz_arg);
-static debug_return_t com_skip             (char *psz_arg);
-static debug_return_t com_frame_down       (char *psz_arg);
-static debug_return_t com_frame_up         (char *psz_arg);
-static debug_return_t com_frame_down       (char *psz_arg);
-static debug_return_t com_step             (char *psz_arg);
-static debug_return_t com_info             (char *psz_arg);
-static debug_return_t com_write_cmds       (char *psz_arg);
+static debug_return_t dbg_cmd_print            (char *psz_arg);
+static debug_return_t dbg_cmd_quit             (char *psz_arg);
+static debug_return_t dbg_cmd_restart          (char *psz_arg);
+static debug_return_t dbg_cmd_set              (char *psz_arg);
+static debug_return_t dbg_cmd_set_var_noexpand (char *psz_arg);
+static debug_return_t dbg_cmd_shell            (char *psz_arg);
+static debug_return_t dbg_cmd_show_stack       (char *psz_arg);
+static debug_return_t dbg_cmd_show_var_expand  (char *psz_arg);
+static debug_return_t dbg_cmd_skip             (char *psz_arg);
+static debug_return_t dbg_cmd_frame_down       (char *psz_arg);
+static debug_return_t dbg_cmd_frame_up         (char *psz_arg);
+static debug_return_t dbg_cmd_frame_down       (char *psz_arg);
+static debug_return_t dbg_cmd_step             (char *psz_arg);
+static debug_return_t dbg_cmd_info             (char *psz_arg);
+static debug_return_t dbg_cmd_write_cmds       (char *psz_arg);
 
 long_cmd_t commands[] = {
   { "break",    'b' },
@@ -128,7 +128,7 @@ on_off_toggle(const char *psz_arg, int *var)
   else if (strcmp (psz_arg, "toggle") == 0)
     *var = !*var;
   else 
-    printf("expecting \"on\", \"off\", or \"toggle\"; got \"%s\" \n",
+    printf(_("expecting \"on\", \"off\", or \"toggle\"; got \"%s\" \n"),
 	   psz_arg);
 }
 
@@ -158,65 +158,65 @@ get_int(const char *psz_arg, int *result)
 static void 
 cmd_initialize(void) 
 {
-  short_command['b'].func = &com_break;
+  short_command['b'].func = &dbg_cmd_break;
   short_command['b'].use  = _("break *target*");
   short_command['b'].doc  = _("Set a breakpoint at a target.");
 
-  short_command['c'].func = &com_continue;
+  short_command['c'].func = &dbg_cmd_continue;
   short_command['c'].use  = _("continue");
   short_command['c'].doc  = 
     _("Continue executing debugged Makefile until another breakpoint.");
 
-  short_command['d'].func = &com_delete;
+  short_command['d'].func = &dbg_cmd_delete;
   short_command['d'].use  = _("delete *target*");
   short_command['d'].doc  = _("Delete target breakpoint.");
 
-  short_command['D'].func = &com_frame_down;
+  short_command['D'].func = &dbg_cmd_frame_down;
   short_command['D'].use  = _("down [amount]");
   short_command['D'].doc  = 
     _("Select and print the target this one caused to be examined.\n" \
       "\tAn argument says how many targets down to go.");
 
-  short_command['f'].func = &com_frame;
+  short_command['f'].func = &dbg_cmd_frame;
   short_command['f'].use  = _("frame *n*");
   short_command['f'].doc  = 
     _("Move target frame to *n*; In contrast to \"up\" tor \"down\",\n" \
       "\tthis sets to an absolute postion. O is the top.");
 
-  short_command['h'].func = &com_help;
+  short_command['h'].func = &dbg_cmd_help;
   short_command['h'].use  = _("help [command]");
   short_command['h'].doc = 
     _("Display list of commands (i.e. this help text.)\n"		\
       "\twith an command name, give only the help for that command.");
 
 #ifdef HISTORY_STUFF
-  short_command['H'].func = &com_history;
+  short_command['H'].func = &dbg_cmd_history;
   short_command['H'].use  = _("history [num]");
   short_command['H'].doc = 
     _("Display the history of commands\n"		\
       "\twith an argument number, list that many history entries.");
 #endif
 
-  short_command['i'].func = &com_info;
+  short_command['i'].func = &dbg_cmd_info;
   short_command['i'].use = _("info [thing]");
   short_command['i'].doc = 
     _("Show the state of thing.\n" \
       "\tIf no 'thing' is specified, show everything there is to show.\n");
 
-  short_command['k'].func = &com_skip;
+  short_command['k'].func = &dbg_cmd_skip;
   short_command['k'].use = _("skip");
   short_command['k'].doc = 
     _("Skip execution of next command or action.\n" );
 
-  short_command['?'].func = &com_help;
+  short_command['?'].func = &dbg_cmd_help;
   short_command['?'].use = short_command['h'].use;
   short_command['?'].doc = short_command['h'].doc;
   
-  short_command['n'].func = &com_step;
+  short_command['n'].func = &dbg_cmd_step;
   short_command['n'].use = _("next [amount]");
   short_command['n'].doc = _("alias for step.");
 
-  short_command['p'].func = &com_print;
+  short_command['p'].func = &dbg_cmd_print;
   short_command['p'].use = _("print {*variable*|*target*}");
   short_command['p'].doc = 
     _("Show a variable definition or target information.\n" \
@@ -227,39 +227,39 @@ cmd_initialize(void)
       "\tIf no argument is supplied, we try to use the current target name." \
       );
 
-  short_command['q'].func = &com_quit;
+  short_command['q'].func = &dbg_cmd_quit;
   short_command['q'].use = _("quit [exit-status]");
   short_command['q'].doc = 
     _("Exit make. If a numeric argument is given, it will be the exit\n"\
       "\tstatus this program reports back. Otherwise exit with status 0." \
       );
 
-  short_command['Q'].func = &com_quit;
+  short_command['Q'].func = &dbg_cmd_quit;
   short_command['Q'].use  = _("exit");
   short_command['Q'].doc  = _("alias for quit.");
   
-  short_command['R'].func = &com_restart;
+  short_command['R'].func = &dbg_cmd_restart;
   short_command['R'].doc = _("Restart program.");
   short_command['R'].use = _("restart");
 
-  short_command['s'].func = &com_step;
+  short_command['s'].func = &dbg_cmd_step;
   short_command['s'].use = _("step [amount]");
   short_command['s'].doc = 
     _("Step execution until another stopping point is reached.\n" \
       "\tArgument N means do this N times (or until there's another\n " \
       "\treason to stop.");
 
-  short_command['T'].func = &com_show_stack;
+  short_command['T'].func = &dbg_cmd_show_stack;
   short_command['T'].doc  = _("Show target stack.");
   short_command['T'].use  = _("where");
 
-  short_command['u'].func = &com_frame_up;
+  short_command['u'].func = &dbg_cmd_frame_up;
   short_command['u'].use  = _("up [amount]");
   short_command['u'].doc  = 
     _("Select and print target that caused this one to be examined.\n" \
       "\tAn argument says how many targets up to go.");
 
-  short_command['w'].func = &com_write_cmds;
+  short_command['w'].func = &dbg_cmd_write_cmds;
   short_command['w'].use =  _("write [*target* [*filename*]]");
   short_command['w'].doc  = 
     _("writes the commands associated of a target to a file with MAKE\n" \
@@ -269,19 +269,20 @@ cmd_initialize(void)
       "\tcreate the filename by prepending a directory name to the target\n"
       "\tname and then append \".sh\".");
 
-  short_command['x'].func = &com_show_var_expand;
+  short_command['x'].func = &dbg_cmd_show_var_expand;
   short_command['x'].use =  _("examine *string*");
   short_command['x'].doc  = 
     _("Show string with internal variables references expanded. See also \n" \
       "\t\"print\".");
 
-  short_command['!'].func = &com_shell;
+  short_command['!'].func = &dbg_cmd_shell;
   short_command['!'].use =  _("shell *string*");
   short_command['!'].doc  = 
     _("Execute the rest of the line as a shell.");
 
-  short_command['='].func = &com_set;
-  short_command['='].use =  _("set {basename|trace|variable} *value*");
+  short_command['='].func = &dbg_cmd_set;
+  short_command['='].use =  
+    _("set {basename|trace|ignore-errors|variable} *value*");
   short_command['='].doc  = 
     _("set basename {on|off|toggle}\n"
       "\tset filename to show full name or basename.\n\n"
@@ -292,7 +293,7 @@ cmd_initialize(void)
       "\tinside VALUE are expanded before assignment occurs.\n"
       );
 
-  short_command['"'].func = &com_set_var_noexpand;
+  short_command['"'].func = &dbg_cmd_set_var_noexpand;
   short_command['"'].use =  _("setq *variable* *value*");
   short_command['"'].doc  = 
     _("Set MAKE variable to value. Variable definitions\n"
@@ -380,7 +381,7 @@ stripwhite (char *string)
 }
 
 /* Give some help info. */
-static debug_return_t com_help (char *psz_arg)
+static debug_return_t dbg_cmd_help (char *psz_arg)
 {
   unsigned int i;
 
@@ -416,7 +417,7 @@ static debug_return_t com_help (char *psz_arg)
 
 #if HISTORY_STUFF
 /* Give some help info. */
-static debug_return_t com_history (char *psz_arg)
+static debug_return_t dbg_cmd_history (char *psz_arg)
 {
   unsigned int i;
 
@@ -428,7 +429,7 @@ static debug_return_t com_history (char *psz_arg)
 #endif
 
 /* Show target call stack info. */
-static debug_return_t com_restart (char *psz_arg)
+static debug_return_t dbg_cmd_restart (char *psz_arg)
 {
   printf("Changing directory to %s and restarting...\n", 
 	 directory_before_chdir);
@@ -439,14 +440,14 @@ static debug_return_t com_restart (char *psz_arg)
 }
 
 /* Show target call stack info. */
-static debug_return_t com_show_stack (char *psz_arg)
+static debug_return_t dbg_cmd_show_stack (char *psz_arg)
 {
   print_target_stack (p_stack_top, i_stack_pos);
   return debug_read;
 }
 
 /* Terminate execution. */
-static debug_return_t com_quit (char *psz_arg)
+static debug_return_t dbg_cmd_quit (char *psz_arg)
 {
   if (!psz_arg || 0==strlen(psz_arg)) {
     exit(0);
@@ -460,7 +461,7 @@ static debug_return_t com_quit (char *psz_arg)
 }
 
 /* Set a breakpoint. */
-static debug_return_t com_break (char *psz_target)
+static debug_return_t dbg_cmd_break (char *psz_target)
 {
   file_t *p_target;
 
@@ -484,7 +485,7 @@ static debug_return_t com_break (char *psz_target)
 }
 
 /* Delete a breakpoint. */
-static debug_return_t com_delete (char *psz_target)
+static debug_return_t dbg_cmd_delete (char *psz_target)
 {
   file_t *p_target;
 
@@ -508,29 +509,38 @@ static debug_return_t com_delete (char *psz_target)
 }
 
 /* Continue running program. */
-static debug_return_t com_continue (char *psz_arg)
+static debug_return_t dbg_cmd_continue (char *psz_arg)
 {
   debugger_stepping = 0;
   return continue_execution;
 }
 
 /* Give some help info. */
-static debug_return_t com_info (char *psz_arg)
+static debug_return_t dbg_cmd_info (char *psz_arg)
 {
   if (!psz_arg || 0==strlen(psz_arg)) {
-    com_info("basename");
-    com_info("target");
-    com_info("trace");
+    dbg_cmd_info("basename");
+    dbg_cmd_info("ignore-errors");
+    dbg_cmd_info("keep-going");
+    dbg_cmd_info("silent");
+    dbg_cmd_info("target");
+    dbg_cmd_info("trace");
   } else {
     if (0 == strcmp (psz_arg, "target")) {
       if (p_stack_top && p_stack_top->p_target && p_stack_top->p_target->name)
 	printf("target: %s\n", p_stack_top->p_target->name);
       else 
 	printf("target unknown\n");
-    } else if (0 == strcmp (psz_arg, "trace")) {
-      printf("trace: %s\n", var_to_on_off(tracing));
     } else if (0 == strcmp (psz_arg, "basename")) {
       printf("basename: %s\n", var_to_on_off(basename_filenames));
+    } else if (0 == strcmp (psz_arg, "ignore-errors")) {
+      printf("ignore-errors: %s\n", var_to_on_off(ignore_errors_flag));
+    } else if (0 == strcmp (psz_arg, "keep-going")) {
+      printf("keep-going: %s\n", var_to_on_off(keep_going_flag));
+    } else if (0 == strcmp (psz_arg, "silent")) {
+      printf("silent: %s\n", var_to_on_off(silent_flag));
+    } else if (0 == strcmp (psz_arg, "trace")) {
+      printf("trace: %s\n", var_to_on_off(tracing));
     } else {
       printf("Don't know how to show %s\n", psz_arg);
     }
@@ -540,13 +550,13 @@ static debug_return_t com_info (char *psz_arg)
 }
 
 /* Skip over next comand or action. */
-static debug_return_t com_skip (char *psz_arg)
+static debug_return_t dbg_cmd_skip (char *psz_arg)
 {
   return skip_execution;
 }
 
 /* Step next command. */
-static debug_return_t com_step (char *psz_arg)
+static debug_return_t dbg_cmd_step (char *psz_arg)
 {
 
   if (!psz_arg || 0==strlen(psz_arg)) {
@@ -560,18 +570,18 @@ static debug_return_t com_step (char *psz_arg)
 }
 
 /* Continue running program. */
-static debug_return_t com_trace (char *psz_arg)
+static debug_return_t dbg_cmd_trace (char *psz_arg)
 {
   if (!psz_arg || 0==strlen(psz_arg))
     on_off_toggle("toggle", &tracing) ;
   else
     on_off_toggle(psz_arg, &tracing) ;
-  com_info("trace");
+  dbg_cmd_info("trace");
   return debug_read;
 }
 
 /* Show a variable or target definition. */
-static debug_return_t com_print (char *psz_object) 
+static debug_return_t dbg_cmd_print (char *psz_object) 
 {
   file_t *p_target;
 
@@ -588,25 +598,25 @@ static debug_return_t com_print (char *psz_object)
   if (p_target) {
     print_target ((const void *) p_target);
   } else {
-    com_show_var(psz_object, 0);
+    dbg_cmd_show_var(psz_object, 0);
   }
   return debug_read;
 }
 
 #define MAX_FILE_LENGTH 1000
 /* Write commands associated with a given target. */
-static debug_return_t com_write_cmds (char *psz_args) 
+static debug_return_t dbg_cmd_write_cmds (char *psz_args) 
 {
   file_t *p_target;
   char *psz_target;
   int b_stdout = 0;
 
-  if (!psz_target || 0==strlen(psz_target)) {
+  if (!psz_args || 0==strlen(psz_args)) {
     /* Use current target */
     if (p_stack && p_stack->p_target && p_stack->p_target->name)
       psz_target = p_stack->p_target->name;
     else {
-      printf("No current target - supply a target name\n");
+      printf("No current target - supply a target name.\n");
       return debug_read;
     }
   } else {
@@ -625,10 +635,21 @@ static debug_return_t com_write_cmds (char *psz_args)
 
     if (*psz_args) *psz_args++ = '\0';
   }
+
+  /* As a special case, we'll allow $@ for the current target. */
+  if ( 0 == strcmp("$@", psz_target) ) {
+    if (p_stack && p_stack->p_target && p_stack->p_target->name)
+      psz_target = p_stack->p_target->name;
+    else {
+      printf(_("No current target found for $@ - supply a target name.\n"));
+      return debug_read;
+    }
+  }
   
   p_target = lookup_file (psz_target);
   if (!p_target) {
-    printf("Target \"%s\" doesn't appear to be a target name.\n", psz_target);
+    printf(_("Target \"%s\" doesn't appear to be a target name.\n"), 
+	   psz_target);
   } else {
     variable_t *p_v = 
       lookup_variable ("SHELL", strlen ("SHELL"));
@@ -638,7 +659,7 @@ static debug_return_t com_write_cmds (char *psz_args)
     
     
     if (! p_target->cmds || ! p_target->cmds->commands) {
-      printf("Target \"%s\" doesn't have any commands associated with it.\n", 
+      printf(_("Target \"%s\" doesn't have commands associated with it.\n"), 
 	     psz_target);
       return debug_read;
     }
@@ -678,7 +699,7 @@ static debug_return_t com_write_cmds (char *psz_args)
 
   found_begin:
     if ( '\0' == *s ) {
-      printf("Null command string parsed\n");
+      printf(_("Null command string parsed\n"));
     } else {
       if (b_stdout) 
 	outfd = stdout;
@@ -696,7 +717,7 @@ static debug_return_t com_write_cmds (char *psz_args)
       fprintf (outfd, "%s\n", variable_expand(s));
       if (!b_stdout) {
 	fclose(outfd);
-	printf("File \"%s\" written.\n", filename);
+	printf(_("File \"%s\" written.\n"), filename);
       }
     }
     
@@ -706,10 +727,10 @@ static debug_return_t com_write_cmds (char *psz_args)
 
 /* Set a variable definition with all variable references in the value
    part of psz_string expanded. */
-static debug_return_t com_set (char *psz_args) 
+static debug_return_t dbg_cmd_set (char *psz_args) 
 {
   if (!psz_args || 0==strlen(psz_args)) {
-    printf("need to supply a variable name\n");
+    printf(_("You need to supply a variable name\n"));
   } else {
     variable_t *p_v;
     char *psz_varname;
@@ -732,19 +753,37 @@ static debug_return_t com_set (char *psz_args)
       *psz_args++;
 
     if (0 == strcmp (psz_varname, "variable")) {
-      return com_set_var(psz_args, 1);
-    } else if (0 == strcmp (psz_varname, "trace")) {
-      if (!psz_args || 0==strlen(psz_args))
-	on_off_toggle("toggle", &tracing);
-      else
-	on_off_toggle(psz_args, &tracing);
-      com_info("trace");
+      return dbg_cmd_set_var(psz_args, 1);
     } else if (0 == strcmp (psz_varname, "basename")) {
       if (!psz_args || 0==strlen(psz_args))
 	on_off_toggle("toggle", &basename_filenames);
       else
 	on_off_toggle(psz_args, &basename_filenames);
-      com_info("basename");
+      dbg_cmd_info("basename");
+    } else if (0 == strcmp (psz_varname, "ignore-errors")) {
+      if (!psz_args || 0==strlen(psz_args))
+	on_off_toggle("toggle", &ignore_errors_flag);
+      else
+	on_off_toggle(psz_args, &ignore_errors_flag);
+      dbg_cmd_info("ignore-errors");
+    } else if (0 == strcmp (psz_varname, "keep-going")) {
+      if (!psz_args || 0==strlen(psz_args))
+	on_off_toggle("toggle", &keep_going_flag);
+      else
+	on_off_toggle(psz_args, &keep_going_flag);
+      dbg_cmd_info("keep-going");
+    } else if (0 == strcmp (psz_varname, "silent")) {
+      if (!psz_args || 0==strlen(psz_args))
+	on_off_toggle("toggle", &silent_flag);
+      else
+	on_off_toggle(psz_args, &silent_flag);
+      dbg_cmd_info("silent");
+    } else if (0 == strcmp (psz_varname, "trace")) {
+      if (!psz_args || 0==strlen(psz_args))
+	on_off_toggle("toggle", &tracing);
+      else
+	on_off_toggle(psz_args, &tracing);
+      dbg_cmd_info("trace");
     }
   }
   return debug_read;
@@ -754,10 +793,10 @@ static debug_return_t com_set (char *psz_args)
 /* Set a variable. Set "expand' to 1 if you want variable 
    definitions inside the value getting passed in to be expanded
    before assigment. */
-static debug_return_t com_set_var (char *psz_args, int expand) 
+static debug_return_t dbg_cmd_set_var (char *psz_args, int expand) 
 {
   if (!psz_args || 0==strlen(psz_args)) {
-    printf("need to supply a variable name\n");
+    printf(_("You need to supply a variable name.\n"));
   } else {
     variable_t *p_v;
     char *psz_varname;
@@ -790,10 +829,10 @@ static debug_return_t com_set_var (char *psz_args, int expand)
 			     &(p_v->fileinfo));
       p_v->origin = e_origin;
       
-      printf("Variable %s now has value '%s'\n", psz_varname,
+      printf(_("Variable %s now has value '%s'\n"), psz_varname,
 	     psz_value);
     } else {
-      printf("Can't find variable %s\n", psz_varname);
+      printf(_("Can't find variable %s\n"), psz_varname);
     }
   }
   return debug_read;
@@ -801,14 +840,14 @@ static debug_return_t com_set_var (char *psz_args, int expand)
 
 /* Set a variable definition without variable references but don't 
    expand variable references in the value part of psz_string. */
-static debug_return_t com_set_var_noexpand (char *psz_string) 
+static debug_return_t dbg_cmd_set_var_noexpand (char *psz_string) 
 {
-  com_set_var(psz_string, 0);
+  dbg_cmd_set_var(psz_string, 0);
   return debug_read;
 }
 
 /* Run a shell command. */
-static debug_return_t com_shell (char *psz_varname) 
+static debug_return_t dbg_cmd_shell (char *psz_varname) 
 {
   system(psz_varname);
   return debug_read;
@@ -818,10 +857,10 @@ static debug_return_t com_shell (char *psz_varname)
 /* Show a variable definition. Set "expand" to 1 if you want variable
    definitions inside the displayed value expanded.
 */
-static debug_return_t com_show_var (char *psz_varname, int expand) 
+static debug_return_t dbg_cmd_show_var (char *psz_varname, int expand) 
 {
   if (!psz_varname || 0==strlen(psz_varname)) {
-    printf("need to supply a variable name\n");
+    printf(_("You need to supply a variable name.\n"));
   } else {
     variable_t *p_v = 
       lookup_variable (psz_varname, strlen (psz_varname));
@@ -843,14 +882,14 @@ static debug_return_t com_show_var (char *psz_varname, int expand)
 
 /* Show a variable definition;'t expand any variable references
    in the displayed value. */
-static debug_return_t com_show_var_expand (char *psz_string) 
+static debug_return_t dbg_cmd_show_var_expand (char *psz_string) 
 {
-  com_show_var(psz_string, 1);
+  dbg_cmd_show_var(psz_string, 1);
   return debug_read;
 }
 
 /* Move reported target frame postition up one. */
-static debug_return_t com_frame_down (char *psz_amount) 
+static debug_return_t dbg_cmd_frame_down (char *psz_amount) 
 {
   unsigned int i=0;
   int i_amount = 1;
@@ -863,7 +902,7 @@ static debug_return_t com_frame_down (char *psz_amount)
   }
 
   if (i_stack_pos - i_amount < 0) {
-    printf("Move down by %d would be below bottom-most frame position.\n",
+    printf(_("Move down by %d would be below bottom-most frame position.\n"),
 	   i_amount);
     return debug_read;
   }
@@ -883,7 +922,7 @@ static debug_return_t com_frame_down (char *psz_amount)
 }
 
 /* Move reported target frame postition up one. */
-static debug_return_t com_frame (char *psz_frame) 
+static debug_return_t dbg_cmd_frame (char *psz_frame) 
 {
   int i, i_frame;
 
@@ -903,7 +942,7 @@ static debug_return_t com_frame (char *psz_frame)
   }
 
   if (0 != i) {
-    printf("Can't set frame to position %d; %d is the highest position.",
+    printf(_("Can't set frame to position %d; %d is the highest position."),
 	   i_frame, i_frame - i);
     return debug_read;
   }
@@ -916,7 +955,7 @@ static debug_return_t com_frame (char *psz_frame)
 }
 
 /* Move reported target frame postition up one. */
-static debug_return_t com_frame_up (char *psz_amount) 
+static debug_return_t dbg_cmd_frame_up (char *psz_amount) 
 {
   unsigned int i_amount=1;
   unsigned int i = 0;
@@ -948,8 +987,13 @@ static debug_return_t com_frame_up (char *psz_amount)
 
 #endif /* HAVE_READLINE */
 
-#define PROMPT_LENGTH 200
-#define NEST_DEPTH    ((PROMPT_LENGTH / 2) - 40)
+#define PROMPT_LENGTH 300
+
+/* Should be less that PROMPT_LENGTH / 2 - strlen("remake ") + log(history) 
+   We will make it much less that since people can't count more than
+   10 or so nested <<<<>>>>'s easily.
+*/
+#define MAX_NEST_DEPTH 10
 
 debug_return_t
 enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
@@ -957,8 +1001,8 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
 #ifdef HAVE_READLINE
   char *line, *s;
   static int i_init = 0;
-  char open_depth[NEST_DEPTH];
-  char close_depth[NEST_DEPTH];
+  char open_depth[MAX_NEST_DEPTH];
+  char close_depth[MAX_NEST_DEPTH];
   unsigned int i;
   debug_return_t debug_return = continue_execution;
 
@@ -974,6 +1018,11 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
     rl_initialize ();
     cmd_initialize();
     i_init = 1;
+    /* where_history() returns 0 when no commands are initialized and
+       0 when the first one is set. Thus, if we don't add a dummy
+       initial command as we do below, we'll get history item 0 listed
+       twice.  I don't know a better way to fix. */
+    add_history (""); 
   }
 
   /* Set initial frame position reporting area: 0 is bottom. */
@@ -991,10 +1040,17 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
     psz_target_name = p_target->name;
   }
 
-  for (i=0; i<=makelevel && i < NEST_DEPTH; i++) {
+  for (i=0; i<=makelevel && i < MAX_NEST_DEPTH-5; i++) {
     open_depth[i]  = '<';
     close_depth[i] = '>';
   }
+
+  if ( MAX_NEST_DEPTH - 5 == i ) {
+    close_depth[i++] = open_depth[i]  = '.';
+    close_depth[i++] = open_depth[i]  = '.';
+    close_depth[i++] = open_depth[i]  = '.';
+  }
+  
   open_depth[i] = close_depth[i] = '\0';
 
   if (err) {
@@ -1029,7 +1085,7 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
       }
 
       if (0==strlen(line)) {
-	com_step("");
+	dbg_cmd_step("");
       }
       
       /* Remove leading and trailing whitespace from the line.
