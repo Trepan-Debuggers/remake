@@ -398,12 +398,19 @@
 
 1999-02-16  Glenn D. Wolf  <Glenn_Wolf@email.sps.mot.com>
 
-	* arscan.c (ar_scan): [VMS] Initialized VMS_member_date before
+	* arscan.c (ar_scan) [VMS]: Initialized VMS_member_date before
 	calling lbr$get_index since if the archive is empty,
 	VMS_get_member_info won't get called at all, and any leftover date
 	will be used.  This bug shows up if any member of any archive is
 	made, followed by a dependency check on a different, empty
 	archive.
+
+1998-12-13  Martin Zinser  <zinser@decus.decus.de>
+
+	* config.h-vms [VMS]: Set _POSIX_C_SOURCE.  Redefine the getopt
+	functions so we don't use the broken VMS versions.
+	* makefile.com [VMS]: Allow debugging.
+	* dir.c (dir_setup_glob) [VMS]: Don't extern stat() on VMS.
 
 1998-11-30  Paul D. Smith  <psmith@gnu.org>
 
@@ -877,7 +884,7 @@
 
 1998-05-11  Rob Tulloh  <rob_tulloh@tivoli.com>
 
-	* job.c (construct_command_argv_internal): [WINDOWS32] Turn off
+	* job.c (construct_command_argv_internal) [WINDOWS32]: Turn off
 	echo when using a batch file, and make sure the command ends in a
 	newline.
 
@@ -1010,8 +1017,8 @@
 
 Tue Oct 07 15:00:00 1997  Phil Brooks <phillip_brooks@hp.com>
 
-	* make.h: [WINDOWS32] make case sensitivity configurable
-	* dir.c: [WINDOWS32] make case sensitivity configurable
+	* make.h [WINDOWS32]: make case sensitivity configurable
+	* dir.c [WINDOWS32]: make case sensitivity configurable
 	* README.W32: Document case sensitivity
 	* config.ami: Share case warping code with Windows
 
@@ -1019,20 +1026,20 @@ Mon Oct  6 18:48:45 CDT 1997 Rob Tulloh <rob_tulloh@dev.tivoli.com>
 
 	* w32/subproc/sub_proc.c: Added support for MKS toolkit shell
 	(turn on HAVE_MKS_SHELL).
-	* read.c: [WINDOWS32] Fixed a problem with multiple target rules
+	* read.c [WINDOWS32]: Fixed a problem with multiple target rules
  	reported by Gilbert Catipon (gcatipon@tibco.com).  If multiple
  	path tokens in a rule did not have drive letters, make would
  	incorrectly concatenate the 2 tokens together.
-	* main.c/variable.c: [WINDOWS32] changed SHELL detection code to
+	* main.c/variable.c [WINDOWS32]: changed SHELL detection code to
  	follow what MSDOS did. In addition to watching for SHELL variable
  	updates, make's main will attempt to default the value of SHELL
  	before and after makefiles are parsed.
-	* job.c/job.h: [WINDOWS32] The latest changes made to enable use
+	* job.c/job.h [WINDOWS32]: The latest changes made to enable use
  	of the GNUWIN32 shell from make could cause make to fail due to a
  	concurrency condition between parent and child processes.  Make
  	now creates a batch file per job instead of trying to reuse the
  	same singleton batch file.
-	* job.c/job.h/function.c/config.h.W32: [WINDOWS32] Renamed macro
+	* job.c/job.h/function.c/config.h.W32 [WINDOWS32]: Renamed macro
  	from HAVE_CYGNUS_GNUWIN32_TOOLS to BATCH_MODE_ONLY_SHELL. Reworked
  	logic to reduce complexity. WINDOWS32 now uses the unixy_shell
  	variable to detect Bourne-shell compatible environments. There is
@@ -1048,19 +1055,19 @@ Mon Oct  6 18:48:45 CDT 1997 Rob Tulloh <rob_tulloh@dev.tivoli.com>
 
 Mon Oct  6 00:04:25 1997  Rob Tulloh <rob_tulloh@dev.tivoli.com>
 
-	* main.c: [WINDOWS32] The function define_variable() does not
+	* main.c [WINDOWS32]: The function define_variable() does not
  	handle NULL. Test before calling it to set Path.
-	* main.c: [WINDOWS32] Search Path again after makefiles have been
+	* main.c [WINDOWS32]: Search Path again after makefiles have been
 	parsed to detect sh.exe.
-	* job.c: [WINDOWS32] Added support for Cygnus GNU WIN32 tools.
+	* job.c [WINDOWS32]: Added support for Cygnus GNU WIN32 tools.
 	To use, turn on HAVE_CYGNUS_GNUWIN32_TOOLS in config.h.W32.
 	* config.h.W32: Added HAVE_CYGNUS_GNUWIN32_TOOLS macro.
 
 Sun Oct  5 22:43:59 1997  John W. Eaton <jwe@bevo.che.wisc.edu>
 
-	* glob/glob.c (glob_in_dir): [VMS] Globbing shouldn't be
+	* glob/glob.c (glob_in_dir) [VMS]: Globbing shouldn't be
 	case-sensitive.
-	* job.c (child_execute_job): [VMS] Use a VMS .com file if the
+	* job.c (child_execute_job) [VMS]: Use a VMS .com file if the
 	command contains a newline (e.g. from a define/enddef block).
 	* vmsify.c (vmsify): Return relative pathnames wherever possible.
 	* vmsify.c (vmsify): An input string like "../.." returns "[--]".
@@ -1070,22 +1077,22 @@ Wed Oct  1 15:45:09 1997  Rob Tulloh <rob_tulloh@tivoli.com>
 	* NMakefile: Changed nmake to $(MAKE).
 	* subproc.bat: Take the make command name from the command
 	line. If no command name was given, default to nmake.
-	* job.c: [WINDOWS32/MSDOS] Fix memory stomp: temporary file names
+	* job.c [MSDOS, WINDOWS32]: Fix memory stomp: temporary file names
 	are now always created in heap memory.
 	* w32/subproc/sub_proc.c: New implementation of make_command_line()
 	which is more compatible with different Bourne shell implementations.
 	Deleted the now obsolete fix_command_line() function.
-	* main.c: [WINDOWS32] Any arbitrary spelling of Path can be
+	* main.c [WINDOWS32]: Any arbitrary spelling of Path can be
 	detected. Make will ensure that the special spelling `Path' is
 	inserted into the environment when the path variable is propagated
 	within itself and to make's children.
-	* main.c: [WINDOWS32] Detection of sh.exe was occurring too
+	* main.c [WINDOWS32]: Detection of sh.exe was occurring too
 	soon. The 2nd check for the existence of sh.exe must come after
 	the call to read_all_makefiles().
 
 Fri Sep 26 01:14:18 1997  <zinser@axp602.gsi.de>
 
-	* makefile.com: [VMS] Fixed definition of sys.
+	* makefile.com [VMS]: Fixed definition of sys.
 	* readme.vms: Comments on what's changed lately.
 
 Fri Sep 26 01:14:18 1997  John W. Eaton <jwe@bevo.che.wisc.edu>
@@ -1136,7 +1143,7 @@ Fri Aug 29 02:01:27 1997  Paul D. Smith  <psmith@baynetworks.com>
 
 Thu Aug 28 19:39:06 1997  Rob Tulloh  <rob_tulloh@tivoli.com>
 
-	* job.c (exec_command): [WINDOWS32] If exec_command() is invoked
+	* job.c (exec_command) [WINDOWS32]: If exec_command() is invoked
  	from main() to re-exec make, the call to execvp() would
  	incorrectly return control to parent shell before the exec'ed
  	command could run to completion. I believe this is a feature of
@@ -1156,7 +1163,7 @@ Thu Aug 28 17:04:47 1997  Paul D. Smith  <psmith@baynetworks.com>
 
 	* configure.in: Check for pstat_getdynamic for getloadvg on HP.
 
-	* job.c (start_job_command): [VMS,_AMIGA] Don't perform empty
+	* job.c (start_job_command) [VMS, _AMIGA]: Don't perform empty
 	command optimization on these systems; it doesn't make sense.
 
 Wed Aug 27 17:09:32 1997  Paul D. Smith  <psmith@baynetworks.com>
@@ -1188,7 +1195,7 @@ Sat Aug 23 1997  Eli Zaretskii  <eliz@is.elta.co.il>
 
 Fri Aug 22 1997  Eli Zaretskii  <eliz@is.elta.co.il>
 
-	* job.c (start_job_command): [__MSDOS__] Don't test for "/bin/sh"
+	* job.c (start_job_command) [__MSDOS__]: Don't test for "/bin/sh"
         literally, use value of unixy_shell instead.
 
 	* filedef.h (NEW_MTIME): Use 1 less than maximum possible value if
@@ -1210,7 +1217,7 @@ Fri Aug  8 15:18:09 1997  John W. Eaton  <jwe@bevo.che.wisc.edu>
 
 Thu Aug  7 22:24:03 1997  John W. Eaton  <jwe@bevo.che.wisc.edu>
 
-	* ar.c: [VMS] Don't declare ar_member_touch.
+	* ar.c [VMS]: Don't declare ar_member_touch.
 	Delete VMS version of ar_member_date.
 	Enable non-VMS versions of ar_member_date and ar_member_date_1 for
 	VMS too.
@@ -1223,11 +1230,11 @@ Thu Aug  7 22:24:03 1997  John W. Eaton  <jwe@bevo.che.wisc.edu>
 
 	* remake.c: Delete declaration of vms_stat.
 	(name_mtime): Don't call vms_stat.
-	(f_mtime): [VMS] Funky time value manipulation no longer necessary.
+	(f_mtime) [VMS]: Funky time value manipulation no longer necessary.
 
 	* file.c (print_file): [VMS] Use ctime, not cvt_time.
 
-	* make.h: [VMS] Don't define POSIX.
+	* make.h [VMS]: Don't define POSIX.
 
 	* makefile.com (filelist): Include ar and arscan.
 	Also include them in the link commands.
@@ -1507,9 +1514,9 @@ Thu Jul 25 19:53:31 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 	when killing final space and dash before setting MFLAGS.
 
 	From Robert Hoehne <robert.hoehne@Mathematik.TU-Chemnitz.DE>:
-	* dir.c [__MSDOS__] [DJGPP > 1]: Include <libc/dosio.h> and defin
+	* dir.c [__MSDOS__ && DJGPP > 1]: Include <libc/dosio.h> and defin
 	`__opendir_flags' initialized to 0.
-	[__MSDOS__] (dosify) [DJGPP > 1]: Return name unchanged if _USE_LFN.
+	(dosify) [__MSDOS__ && DJGPP > 1]: Return name unchanged if _USE_LFN.
 	(find_directory) [__MSDOS__ && DJGPP > 1]: If _USE_LGN, set
 	__opendir_flags to __OPENDIR_PRESERVE_CASE.
 

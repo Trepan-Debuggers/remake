@@ -123,8 +123,12 @@
    with this defined.  */
 /* #undef _POSIX_1_SOURCE */
 
+#include <sys/types.h>
+#include <ctype.h>
+#include <signal.h>
+
 /* Define if you need to in order for stat and other things to work.  */
-/* #undef _POSIX_SOURCE */
+#define _POSIX_C_SOURCE 1
 
 /* Define as the return type of signal handlers (int or void).  */
 #define RETSIGTYPE void
@@ -320,6 +324,14 @@
 #define HAVE_VMSDIR_H 1
 #define INCLUDEDIR "sys$sysroot:[syslib]"
 #define LIBDIR "sys$sysroot:[syslib]"
+
+/* Avoid broken RTL functions on OpenVMS */
+#include <unixlib.h>
+#define getopt gnu_getopt
+#define optarg gnu_optarg
+#define optopt gnu_optopt
+#define optind gnu_optind
+#define opterr gnu_opterr
 
 #if defined (__cplusplus) || (defined (__STDC__) && __STDC__)
 #undef  PARAMS

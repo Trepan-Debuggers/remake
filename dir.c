@@ -1061,7 +1061,9 @@ void
 dir_setup_glob (gl)
      glob_t *gl;
 {
+#ifndef VMS
   extern int stat ();
+#endif
 
   /* Bogus sunos4 compiler complains (!) about & before functions.  */
   gl->gl_opendir = open_dirstream;
