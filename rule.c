@@ -24,7 +24,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "rule.h"
 
 static void freerule ();
-static int new_pattern_rule ();
 
 /* Chain of all pattern rules.  */
 
@@ -243,7 +242,7 @@ convert_to_pattern ()
    When an old rule is replaced, the new one is put at the end of the
    list.  Return nonzero if RULE is used; zero if not.  */
 
-static int
+int
 new_pattern_rule (rule, override)
      register struct rule *rule;
      int override;
