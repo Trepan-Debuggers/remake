@@ -43,7 +43,7 @@ AC_COMPILE_CHECK(union wait, [#include <sys/types.h>
 	 	 [union wait status; int pid; pid = wait (&status);
 #ifdef WEXITSTATUS
 /* Some POSIXoid systems have both the new-style macros and the old
-   `union wait' type, and they don't work together.  If `union wait'
+   union wait type, and they do not work together.  If union wait
    conflicts with WEXITSTATUS et al, we don't want to use it at all.  */
 if (WEXITSTATUS (status) != 0) pid = -1;
 #endif
