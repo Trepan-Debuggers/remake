@@ -31,23 +31,19 @@ char default_shell[] = "/bin/sh";
 
 extern int errno;
 
-#if	defined(POSIX) || defined(__GNU_LIBRARY__)
-#include <limits.h>
-#include <unistd.h>
+#ifndef	NGROUPS_MAX
+#ifdef	POSIX
 #define	GET_NGROUPS_MAX	sysconf (_SC_NGROUPS_MAX)
 #else	/* Not POSIX.  */
-#ifndef	USG
-#include <sys/param.h>
 #define	NGROUPS_MAX	NGROUPS
-#endif	/* Not USG.  */
 #endif	/* POSIX.  */
 
-#ifdef	POSIX
+#ifdef	HAVE_WAITPID
 #include <sys/wait.h>
 
 #define	WAIT_NOHANG(status)	waitpid(-1, (status), WNOHANG)
 
-#else	/* Not POSIX.  */
+#else	/* Don't have waitpid.  */
 
 #if	defined(HAVE_SYS_WAIT) || !defined(USG)
 #include <sys/wait.h>
@@ -64,7 +60,7 @@ extern int wait3 ();
 extern int wait ();
 #endif
 #endif	/* HAVE_SYS_WAIT || !USG */
-#endif	/* POSIX.  */
+#endif	/* Have waitpid.  */
 
 #if	defined(WTERMSIG) || (defined(USG) && !defined(HAVE_SYS_WAIT))
 #define	WAIT_T int
@@ -101,24 +97,16 @@ extern int wait ();
 #endif	/* WTERMSIG defined or USG and don't have <sys/wait.h>.  */
 
 
-#if	defined(__GNU_LIBRARY__) || defined(POSIX)
-
-#include <sys/types.h>
-#define	GID_T	gid_t
-
-#else	/* Not GNU C library.  */
-
-#define	GID_T	int
-
+#ifndef	HAVE_UNISTD_H
 extern int dup2 ();
 extern int execve ();
 extern void _exit ();
 extern int geteuid (), getegid ();
 extern int setgid (), getgid ();
-#endif	/* GNU C library.  */
+#endif
 
 #ifndef	getdtablesize
-#ifndef USG
+#ifndef GETDTABLESIZE_MISSING
 extern int getdtablesize ();
 #else
 #include <sys/param.h>
@@ -131,12 +119,12 @@ extern int start_remote_job_p ();
 extern int start_remote_job (), remote_status ();
 
 
-#if	(defined(USG) && !defined(HAVE_SIGLIST)) || defined(DGUX)
+#ifdef	SYS_SIGLIST_MISSING
 static char *sys_siglist[NSIG];
 void init_siglist ();
-#else	/* Not (USG and HAVE_SIGLIST), or DGUX.  */
+#else
 extern char *sys_siglist[];
-#endif	/* USG and not HAVE_SIGLIST, or DGUX.  */
+#endif
 
 int child_handler ();
 static void free_child (), start_job ();
@@ -182,7 +170,7 @@ static unsigned int dead_children = 0;
 
 /* Notice that a child died.
    reap_children should be called when convenient.  */
-int
+RETSIGTYPE
 child_handler (sig)
      int sig;
 {
@@ -433,7 +421,7 @@ unblock_sigs ()
   sigprocmask (SIG_SETMASK, &empty, (sigset_t *) 0);
 }
 #else
-#ifndef	USG
+#ifndef	SIGSETMASK_MISSING
 extern int fatal_signal_mask;
 #define	unblock_sigs()	sigsetmask (0)
 #else
@@ -605,7 +593,7 @@ start_job (child)
 #ifdef	 POSIX
       (void) sigprocmask (SIG_BLOCK, &fatal_signal_set, (sigset_t *) 0);
 #else
-#ifndef	USG
+#ifndef	SIGSETMASK_MISSING
       (void) sigblock (fatal_signal_mask);
 #endif
 #endif
@@ -623,7 +611,7 @@ start_job (child)
 	{
 	  /* Fork failed!  */
 	  unblock_sigs ();
-	  perror_with_name (VFORK_NAME, "");
+	  perror_with_name ("vfork", "");
 	  goto error;
 	}
     }
@@ -765,26 +753,26 @@ search_path (file, path, program)
     {
       unsigned int len;
 
-#if	!defined (USG) || defined (POSIX)
-#ifndef	POSIX
+#ifndef	GETGROUPS_MISSING
+#ifndef	HAVE_UNISTD_H
       extern int getgroups ();
 #endif
       static int ngroups = -1;
 #ifdef	NGROUPS_MAX
-      static GID_T groups[NGROUPS_MAX];
+      static gid_t groups[NGROUPS_MAX];
 #define	ngroups_max	NGROUPS_MAX
 #else
-      static GID_T *groups = 0;
+      static gid_t *groups = 0;
       static int ngroups_max;
       if (groups == 0)
 	{
 	  ngroups_max = GET_NGROUPS_MAX;
-	  groups = (GID_T *) malloc (ngroups_max * sizeof (GID_T));
+	  groups = (gid_t *) malloc (ngroups_max * sizeof (gid_t));
 	}
 #endif
       if (groups != 0 && ngroups == -1)
 	ngroups = getgroups (ngroups_max, groups);
-#endif	/* POSIX or not USG.  */
+#endif	/* getgroups missing.  */
 
       len = strlen (file) + 1;
       do
@@ -815,7 +803,7 @@ search_path (file, path, program)
 		perm = (st.st_mode & 0010);
 	      else
 		{
-#ifndef	USG
+#ifndef	GETGROUPS_MISSING
 		  register int i;
 		  for (i = 0; i < ngroups; ++i)
 		    if (groups[i] == st.st_gid)
@@ -823,7 +811,7 @@ search_path (file, path, program)
 		  if (i < ngroups)
 		    perm = (st.st_mode & 0010);
 		  else
-#endif	/* Not USG.  */
+#endif	/* getgroups missing.  */
 		    perm = (st.st_mode & 0001);
 		}
 
@@ -1198,7 +1186,7 @@ construct_command_argv (line, restp, file)
   return argv;
 }
 
-#if	(defined(USG) && !defined(HAVE_SIGLIST)) || defined(DGUX)
+#ifdef	SYS_SIGLIST_MISSING
 /* Initialize sys_siglist.  */
 
 void
@@ -1351,9 +1339,9 @@ init_siglist ()
 #endif
       }
 }
-#endif	/* USG and not HAVE_SIGLIST.  */
+#endif
 
-#if	defined(USG) && !defined(USGr3) && !defined(HAVE_DUP2)
+#ifdef	DUP2_MISSING
 int
 dup2 (old, new)
      int old, new;
@@ -1371,4 +1359,4 @@ dup2 (old, new)
 
   return fd;
 }
-#endif	/* USG and not USGr3 and not HAVE_DUP2.  */
+#endif
