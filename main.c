@@ -24,6 +24,14 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "commands.h"
 #include "getopt.h"
 #include <assert.h>
+#ifdef _AMIGA
+#   include <dos/dos.h>
+#   include <proto/dos.h>
+#endif
+
+#ifdef _AMIGA
+int __stack = 20000; /* Make sure we have 20K of stack space */
+#endif
 
 extern void init_dir PARAMS ((void));
 extern RETSIGTYPE fatal_error_signal PARAMS ((int sig));
@@ -584,17 +592,12 @@ int main (int argc, char ** argv)
 	    {
 		if (fib.fib_DirEntryType < 0) /* File */
 		{
-		    file = Open (fib.fib_FileName, MODE_OLDFILE);
-
-		    if (file)
-		    {
-			len = Read (file, buffer, sizeof (buffer)-1);
-			buffer[len] = 0;
-
+		    /* Define an empty variable. It will be filled in
+			variable_lookup(). Makes startup quite a bit
+			faster. */
 			define_variable (fib.fib_FileName,
 			    strlen (fib.fib_FileName),
-			    buffer, o_env, 1)->export = v_export;
-		    }
+			"", o_env, 1)->export = v_export;
 		}
 	    }
 	    UnLock (env);
@@ -745,7 +748,6 @@ int main (int argc, char ** argv)
       else
 	starting_directory = current_directory;
     }
-
 
   /* Read any stdin makefiles into temporary files.  */
 
@@ -1120,14 +1122,17 @@ int main (int argc, char ** argv)
 		break;
 	      }
 #else /* AMIGA */
-#   include <dos/dos.h>
-#   include <proto/dos.h>
 	  {
 	    char buffer[256];
 	    int len;
 
+	    len = GetVar ("MAKELEVEL", buffer, sizeof (buffer), GVF_GLOBAL_ONLY);
+
+	    if (len != -1)
+	    {
 	    sprintf (buffer, "%u", makelevel);
-	    SetVar ("MAKELEVEL", buffer, -1, GVF_LOCAL_ONLY);
+	      SetVar ("MAKELEVEL", buffer, -1, GVF_GLOBAL_ONLY);
+	    }
 	  }
 #endif
 
@@ -1864,7 +1869,6 @@ define_makeflags (all, makefile)
       flags = flags->next;
     }
 
-
   /* Define MFLAGS before appending variable definitions.  */
 
   if (p == &flagstring[1])
@@ -1880,7 +1884,6 @@ define_makeflags (all, makefile)
   /* Since MFLAGS is not parsed for flags, there is no reason to
      override any makefile redefinition.  */
   (void) define_variable ("MFLAGS", 6, flagstring, o_env, 1);
-
 
   if (all && command_variables != 0)
     {
