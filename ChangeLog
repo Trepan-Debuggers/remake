@@ -1,3 +1,14 @@
+2002-10-25  Paul D. Smith  <psmith@gnu.org>
+
+	* doc/make.texi (Quick Reference): Add references to $(eval ...)
+	and $(value ...).
+	(Recursion): Add a variable index entry for CURDIR.
+
+	* README.cvs: Update to appropriate versions.
+	* Makefile.am (nodist_loadavg_SOURCES): automake gurus point out I
+	don't need to copy loadavg.c: automake is smart enough to create
+	it for me.  Still have a bug in automake related to ansi2knr tho.
+
 2002-10-14  Paul D. Smith  <psmith@gnu.org>
 
 	* *.c: Convert to using ANSI C-style function definitions.
