@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.22 2004/11/30 19:51:24 bosk Exp $
+@set RCSID $Id: make.texi,v 1.23 2004/12/06 15:03:47 psmith Exp $
 @set EDITION 0.61
 @set VERSION 3.80
 @set UPDATED 23 Feb 2003
@@ -337,8 +337,6 @@ Makefile Conventions
 * Directory Variables::         Variables for Installation Directories
 * Standard Targets::            Standard Targets for Users
 * Install Command Categories::  Three categories of commands in the `install'
-
-Copying This Manual
 
 @end detailmenu
 @end menu
