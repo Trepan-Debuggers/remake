@@ -2,6 +2,10 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(vpath.c)		dnl A distinctive file to look for in srcdir.
 AC_CONFIG_HEADER(config.h)
 
+# We want these before the checks, so the checks can modify their values.
+test -z "$CFLAGS" && CFLAGS=-g AC_SUBST(CFLAGS)
+test -z "$LDFLAGS" && LDFLAGS=-g AC_SUBST(LDFLAGS)
+
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_RANLIB
@@ -19,6 +23,7 @@ AC_RETSIGTYPE
 AC_HAVE_HEADERS(limits.h sys/param.h fcntl.h)
 AC_MINUS_C_MINUS_O
 AC_CONST			dnl getopt needs this.
+AC_USG
 
 AC_SUBST(LIBOBJS)
 
@@ -31,25 +36,17 @@ AC_SETVBUF_REVERSED
 AC_GETLOADAVG
 AC_STRCOLL
 
-dnl Look for waitpid first.
-AC_COMPILE_CHECK(waitpid, [#include <sys/types.h>
+dnl Check out the wait reality.
+AC_HAVE_HEADERS(sys/wait.h) AC_HAVE_FUNCS(waitpid wait3)
+AC_COMPILE_CHECK(union wait, [#include <sys/types.h>
 #include <sys/wait.h>],
-		 [return waitpid (-1, (int *) 0, WNOHANG);],
-		 AC_DEFINE(HAVE_WAITPID),
-		 dnl No waitpid; try wait3.
-		 AC_COMPILE_CHECK(wait3, [#include <sys/wait.h>],
-				  [return wait3 (0, WNOHANG, 0);],
-				  AC_DEFINE(HAVE_SYS_WAIT)))
-
-AC_USG
+	 	 [union wait status; return wait (&status);],
+		 AC_DEFINE(HAVE_UNION_WAIT))
 
 # The presence of the following is not meant to imply
 # that make necessarily works on those systems.
 AC_DYNIX_SEQ
 AC_XENIX_DIR
-
-test -n "$CFLAGS" && CFLAGS=-g AC_SUBST(CFLAGS)
-test -n "$LDFLAGS" && LDFLAGS=-g AC_SUBST(LDFLAGS)
 
 AC_OUTPUT(Makefile build.sh glob/Makefile)
 
