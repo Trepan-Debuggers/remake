@@ -513,7 +513,9 @@ open_dirstream (directory)
   struct dirstream *new;
   struct directory *dir = find_directory (directory);
 
-  if (dir->contents == 0)
+  if (dir->contents == 0 || dir->contents->files == 0)
+    /* DIR->contents is nil if the directory could not be stat'd.
+       DIR->contents->files is nil if it could not be opened.  */
     return 0;
 
   /* Read all the contents of the directory now.  There is no benefit
