@@ -5,7 +5,7 @@
 @setchapternewpage odd
 @c %**end of header
 
-@c For publication, format makebook.texi instead of using this file directly.
+@c FSF publishers: format makebook.texi instead of using this file directly.
 
 @set EDITION 0.44
 @set VERSION 3.69 Beta
