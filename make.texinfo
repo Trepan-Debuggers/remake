@@ -9,7 +9,7 @@
 
 @set EDITION 0.41
 @set VERSION 3.64 Beta
-@set UPDATED 12 April 1993
+@set UPDATED 14 April 1993
 @set UPDATE-MONTH April 1993
 
 @c finalout
@@ -234,6 +234,8 @@ How to Use Variables
 * Advanced::                    Advanced features for referencing a variable.
 * Values::                      All the ways variables get their values.
 * Setting::                     How to set a variable in the makefile.
+* Appending::                   How to append more text to the old value
+                                  of a variable.
 * Override Directive::          How to set a variable in the makefile even if
                                   the user has set it with a command argument.
 * Defining::                    An alternate way to set a variable 
@@ -3147,6 +3149,23 @@ has the same result as:
 export @var{variable}
 @end example
 
+Likewise,
+
+@example
+export @var{variable} += value
+@end example
+
+@noindent
+is just like:
+
+@example
+@var{variable} += value
+export @var{variable}
+@end example
+
+@noindent
+@xref{Appending, ,Appending More Text to Variables}.
+
 You may notice that the @code{export} and @code{unexport} directives
 work in @code{make} in the same way they work in the shell, @code{sh}.
 
@@ -3409,6 +3428,41 @@ This is a realistic example, but this particular one is not needed in
 practice because @code{make} has an implicit rule to figure out these
 commands based on the file names involved 
 (@pxref{Implicit Rules, ,Using Implicit Rules}).
+
+@cindex @@, and @code{define}
+@cindex -, and @code{define}
+@cindex +, and @code{define}
+In command execution, each line of a canned sequence is treated just as
+if the line appeared on its own in the rule, preceded by a tab.  In
+particular, @code{make} invokes a separate subshell for each line.  You
+can use the special prefix characters that affect command lines
+(@samp{@@}, @samp{-}, and @samp{+}) on each line of a canned sequence.
+@xref{Commands, ,Writing the Commands in Rules}.
+For example, using this canned sequence:
+
+@example
+define frobnicate
+@echo "frobnicating target $@"
+frob-step-1 $< -o $@-step-1
+frob-step-2 $@-step-1 -o $@
+endef
+@end example
+
+@noindent
+@code{make} will not echo the first line, the @code{echo} command.
+But it @emph{will} echo the following two command lines.
+
+On the other hand, prefix characters on the command line that refers to
+a canned sequence apply to every line in the sequence.  So the rule:
+
+@example
+frob.out: frob.in
+	@$(frobnicate)
+@end example
+
+@noindent
+does not echo @emph{any} commands.
+(@xref{Echoing, ,Command Echoing}, for a full explanation of @samp{@@}.)
 
 @node Empty Commands,  , Sequences, Commands
 @section Using Empty Commands
@@ -4181,6 +4235,15 @@ or
 override @var{variable} := @var{value}
 @end example
 
+To append more text to a variable defined on the command line, use:
+
+@example
+override @var{variable} += @var{more text}
+@end example
+
+@noindent
+@xref{Appending, ,Appending More Text to Variables}.
+
 The @code{override} directive was not invented for escalation in the war
 between makefiles and command arguments.  It was invented so you can alter
 and add to values that the user specifies with command arguments.
@@ -4191,7 +4254,7 @@ switches with a command argument just as usual.  You could use this
 @code{override} directive:
 
 @example
-override CFLAGS := $(CFLAGS) -g
+override CFLAGS += -g
 @end example
 
 You can also use @code{override} directives with @code{define} directives.
@@ -4255,7 +4318,10 @@ two-lines = echo foo; echo $(bar)
 @end example
 
 @noindent
-since the shell will interpret the semicolon and the newline identically.
+since two commands separated by semicolon behave much like two separate
+shell commands.  However, note that using two separate lines means
+@code{make} will invoke the shell twice, running an independent subshell
+for each line.  @xref{Execution, ,Command Execution}.
 
 If you want variable definitions made with @code{define} to take
 precedence over command-line variable definitions, you can use the
@@ -4931,8 +4997,7 @@ value of the variable @code{CFLAGS}, which is passed automatically to the C
 compiler, like this:
 
 @example
-override CFLAGS := $(CFLAGS) \
-                   $(patsubst %,-I%,$(subst :, ,$(VPATH)))
+override CFLAGS += $(patsubst %,-I%,$(subst :, ,$(VPATH)))
 @end example
 
 @noindent
@@ -8011,6 +8076,7 @@ Include another makefile.@*
 
 @item override @var{variable} = @var{value}
 @itemx override @var{variable} := @var{value}
+@itemx override @var{variable} += @var{value}
 @itemx override define @var{variable}
 @itemx endef
 
@@ -8026,6 +8092,7 @@ Tell @code{make} to export all variables to child processes by default.@*
 @item export @var{variable}
 @itemx export @var{variable} = @var{value}
 @itemx export @var{variable} := @var{value}
+@itemx export @var{variable} += @var{value}
 @itemx unexport @var{variable}
 
 Tell @code{make} whether or not to export a particular variable to child
