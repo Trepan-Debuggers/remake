@@ -1,0 +1,65 @@
+/* Generated automatically from configure.in by autoheader.  DO NOT EDIT!  */
+
+#define INCLUDEDIR "c:/djgpp/include"
+#define LIBDIR "c:/djgpp/lib"
+
+/* Define if you have dirent.h.  */
+#define DIRENT
+
+/* Define if you have the strcoll function and it is properly defined.  */
+#define HAVE_STRCOLL
+
+/* Define if you have unistd.h.  */
+#define HAVE_UNISTD_H
+
+/* Define as the return type of signal handlers (int or void).  */
+#define RETSIGTYPE void
+
+/* Define if you have the ANSI C header files.  */
+#define STDC_HEADERS
+
+/* Define if `sys_siglist' is declared by <signal.h>.  */
+#define SYS_SIGLIST_DECLARED
+
+/* Define if you have getdtablesize.  */
+#define HAVE_GETDTABLESIZE
+
+/* Define if you have dup2.  */
+#define HAVE_DUP2
+
+/* Define if you have sys_siglist.  */
+#undef HAVE_SYS_SIGLIST
+
+/* Define if you have _sys_siglist.  */
+#undef HAVE__SYS_SIGLIST
+
+/* Define if you have psignal.  */
+#define HAVE_PSIGNAL
+
+/* Define if you have getcwd.  */
+#define HAVE_GETCWD
+
+/* Define if you have sigsetmask.  */
+#define HAVE_SIGSETMASK
+
+/* Define if you have setlinebuf.  */
+#define HAVE_SETLINEBUF
+
+/* Define if you have the <limits.h> header file.  */
+#define HAVE_LIMITS_H
+
+/* Define if you have the <sys/param.h> header file.  */
+#define HAVE_SYS_PARAM_H
+
+/* Define if you have the <fcntl.h> header file.  */
+#define HAVE_FCNTL_H
+
+/* Define if you have the <string.h> header file.  */
+#define HAVE_STRING_H
+
+/* Define if you have the <memory.h> header file.  */
+#define HAVE_MEMORY_H
+
+#define INCLUDEDIR "c:/djgpp/include"
+#define LIBDIR "c:/djgpp/lib"
+#define SCCS_GET "get"
