@@ -1,3 +1,7 @@
+2005-02-01  Paul D. Smith  <psmith@gnu.org>
+
+	* maintMakefile (po_repo): Update the GNU translation site URL.
+
 2004-12-01  Paul D. Smith  <psmith@gnu.org>
 
 	* main.c (main): Change char* env_shell to struct variable shell_var.

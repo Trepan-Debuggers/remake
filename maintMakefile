@@ -124,7 +124,7 @@ move_if_change =  if test -r $(target) && cmp -s $(target).t $(target); then \
 # Updating PO files.  #
 # ------------------- #
 
-po_repo = http://www2.iro.umontreal.ca/%7Egnutra/po/maint/$(PACKAGE)
+po_repo = http://www.iro.umontreal.ca/translation/maint/$(PACKAGE)
 .PHONY: do-po-update po-update
 do-po-update:
 	tmppo=/tmp/$(PACKAGE)-$(VERSION)-po &&\
