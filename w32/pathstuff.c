@@ -16,7 +16,7 @@ convert_vpath_to_windows32(char *Path, char to_delim)
 	 * contain blanks get trounced here. Use 8.3 format as a workaround.
 	 */
 	for (etok = Path; etok && *etok; etok++)
-		if (isblank(*etok))
+		if (isblank ((unsigned char) *etok))
 			*etok = to_delim;
 
 	return (convert_Path_to_windows32(Path, to_delim));
@@ -42,7 +42,7 @@ convert_Path_to_windows32(char *Path, char to_delim)
                 etok[0] = to_delim;
                 p = ++etok;
                 continue;    /* ignore empty bucket */
-            } else if (!isalpha(*p)) {
+            } else if (!isalpha ((unsigned char) *p)) {
                 /* found one to count, handle things like '.' */
                 *etok = to_delim;
                 p = ++etok;

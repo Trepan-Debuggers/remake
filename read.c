@@ -293,7 +293,6 @@ read_makefile (filename, flags)
   int len, reading_target;
   int ignoring = 0, in_ignored_define = 0;
   int no_targets = 0;		/* Set when reading a rule without targets.  */
-  int using_filename = 0;
   struct floc fileinfo;
   char *passed_filename = filename;
 
@@ -319,7 +318,6 @@ read_makefile (filename, flags)
 	  record_files (filenames, pattern, pattern_percent, deps,            \
                         cmds_started, commands, commands_idx, two_colon,      \
                         &fi, !(flags & RM_NO_DEFAULT_GOAL));                  \
-          using_filename |= commands_idx > 0;                                 \
         }                                                                     \
       filenames = 0;							      \
       commands_idx = 0;							      \
@@ -550,7 +548,7 @@ read_makefile (filename, flags)
 		 removed), so it could be a complex variable/function
 		 reference that might contain blanks.  */
 	      p = strchr (p2, '\0');
-	      while (isblank (p[-1]))
+	      while (isblank ((unsigned char)p[-1]))
 		--p;
 	      do_define (p2, p - p2, o_file, infile, &fileinfo);
 	    }
@@ -562,7 +560,8 @@ read_makefile (filename, flags)
 	  p2 = next_token (p + 8);
 	  if (*p2 == '\0')
 	    error (&fileinfo, _("empty `override' directive"));
-	  if (strneq (p2, "define", 6) && (isblank (p2[6]) || p2[6] == '\0'))
+	  if (strneq (p2, "define", 6)
+	      && (isblank ((unsigned char)p2[6]) || p2[6] == '\0'))
 	    {
 	      if (ignoring)
 		in_ignored_define = 1;
@@ -577,7 +576,7 @@ read_makefile (filename, flags)
 		     removed), so it could be a complex variable/function
 		     reference that might contain blanks.  */
 		  p = strchr (p2, '\0');
-		  while (isblank (p[-1]))
+		  while (isblank ((unsigned char)p[-1]))
 		    --p;
 		  do_define (p2, p - p2, o_override, infile, &fileinfo);
 		}
@@ -702,11 +701,12 @@ read_makefile (filename, flags)
 
               r = read_makefile (name, (RM_INCLUDED | RM_NO_TILDE
                                         | (noerror ? RM_DONTCARE : 0)));
-	      if (!r && !noerror)
-		error (&fileinfo, "%s: %s", name, strerror (errno));
-
-              if (r < 2)
-                free (name);
+	      if (!r)
+                {
+                  if (!noerror)
+                    error (&fileinfo, "%s: %s", name, strerror (errno));
+                  free (name);
+                }
 	    }
 
 	  /* Free any space allocated by conditional_line.  */
@@ -726,7 +726,7 @@ read_makefile (filename, flags)
       else if (lb.buffer[0] == '\t')
 	{
 	  p = collapsed;	/* Ignore comments.  */
-	  while (isblank (*p))
+	  while (isblank ((unsigned char)*p))
 	    ++p;
 	  if (*p == '\0')
 	    /* The line is completely blank; that is harmless.  */
@@ -1066,7 +1066,7 @@ read_makefile (filename, flags)
 
   reading_file = 0;
 
-  return 1+using_filename;
+  return 1;
 }
 
 /* Execute a `define' directive.
@@ -1108,7 +1108,7 @@ do_define (name, namelen, origin, infile, flocp)
 
       p = next_token (lb.buffer);
       len = strlen (p);
-      if ((len == 5 || (len > 5 && isblank (p[5])))
+      if ((len == 5 || (len > 5 && isblank ((unsigned char)p[5])))
           && strneq (p, "endef", 5))
 	{
 	  p += 5;
@@ -1300,7 +1300,7 @@ conditional_line (line, flocp)
 	{
 	  /* Strip blanks after the first string.  */
 	  char *p = line++;
-	  while (isblank (p[-1]))
+	  while (isblank ((unsigned char)p[-1]))
 	    --p;
 	  *p = '\0';
 	}
@@ -1824,7 +1824,7 @@ find_char_unquote (string, stopchars, blank)
   while (1)
     {
       while (*p != '\0' && strchr (stopchars, *p) == 0
-	     && (!blank || !isblank (*p)))
+	     && (!blank || !isblank ((unsigned char)*p)))
 	++p;
       if (*p == '\0')
 	break;
@@ -2257,7 +2257,7 @@ get_next_mword (buffer, delim, startp, length)
   char c;
 
   /* Skip any leading whitespace.  */
-  while (isblank(*p))
+  while (isblank ((unsigned char)*p))
     ++p;
 
   beg = p;

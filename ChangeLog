@@ -1,3 +1,100 @@
+2000-05-31  Paul Eggert  <eggert@twinsun.com>
+
+	* remake.c (name_mtime): Check for stat failures.  Retry if EINTR.
+
+2000-05-24  Paul D. Smith  <psmith@gnu.org>
+
+	* main.c (decode_switches): The "positive_int" switch uses atoi()
+	which succeeds for any input, and doesn't notice if extra,
+	non-digit text is after the number.  This causes make to mis-parse
+	command lines like "make -j 5foo" as "make -j5" (ignoring "foo"
+	completely) instead of "make -j0 5foo" (where "5foo" is a
+	target).  Fix this by checking the value by hand.  We could use
+	strtol() if we were sure of having it; this is the only
+	questionable use of atoi() I found so we'll just stick with that.
+	Fixes PR/1716.
+
+	* i18n/ja.po, i18n/nl.po, i18n/pt_BR.po: New translation files.
+	* configure.in (ALL_LINGUAS): Added pt_BR.
+
+2000-05-22  Paul Eggert  <eggert@twinsun.com>
+
+	* remake.c (f_mtime): Fix bug when handling future odd
+	timestamps in the WINDOWS32 case.  Do not bother initializing
+	static var to zero.  Simplify code that works around WINDOWS32
+	and __MSDOS__ time skew brain damage.
+
+2000-05-22  Paul Eggert  <eggert@twinsun.com>
+
+	* job.c: Don't include time.h, as make.h already does this.
+
+2000-05-22  Paul Eggert  <eggert@twinsun.com>
+
+	* configure.in (AC_CHECK_HEADERS): Add sys/time.h.
+	(AC_HEADER_TIME): Add.
+	(clock_gettime): Prefer -lrt to -lposix4, for Solaris 7.
+	(gettimeofday): Add check for standard version of gettimeofday.
+	This merges changes written by Paul D. Smith.
+
+	* file.c (file_timestamp_now):  Use gettimeofday if available
+	and if clock_gettime does not work.  Don't bother with
+	high-resolution clocks if file timestamps have only one-second
+	resolution.
+
+	* make.h <sys/time.h>: Include, conditionally on the usual
+	TIME_WITH_SYS_TIME and HAVE_SYS_TIME_H macros.  This is needed
+	for gettimeofday.
+
+2000-05-20  Paul D. Smith  <psmith@gnu.org>
+
+	* read.c (read_makefile): We weren't keeping makefile names around
+	unless there was a rule defined in them; but now we need to keep
+	them for variables as well.  Forget trying to be fancy: just keep
+	every makefile name we successfully open.
+
+	* remote-cstms.c (start_remote_job_p): Change DB_EXTRA (?) to DB_JOBS.
+
+2000-05-17  Paul Eggert  <eggert@twinsun.com>
+
+	* commands.c (chop_commands): Ensure ctype macro args are nonnegative.
+	* expand.c (variable_expand_string): Likewise.
+	* function.c (subst_expand, lookup_function, msdos_openpipe):
+	Likewise.
+	* job.c (vms_redirect, start_job_command, new_job, child_execute_job,
+	construct_command_argv_internal, construct_command_argv): Likewise.
+	* main.c (decode_env_switches, quote_for_env): Likewise.
+	* misc.c (collapse_continuations, end_of_token, end_of_token_w32,
+	next_token): Likewise.
+	* read.c (read_makefile, do_define, conditional_line,
+	find_char_unquote,get_next_mword): Likewise.
+	* variable.c (try_variable_definition): Likewise.
+	* vpath.c (construct_vpath_list): Likewise.
+	* w32/pathstuff.c (convert_vpath_to_windows32): Likewise.
+
+2000-05-10  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* main.c (main) [__MSDOS__]: Add SIGFPE to signals we block when
+	running child programs, to prevent Make from dying on Windows 9X
+	when the child triggers an FP exception.
+
+2000-05-08  Paul D. Smith  <psmith@gnu.org>
+
+	* dir.c (find_directory) [WINDOWS32]: If we strip a trailing "\"
+	from the directory name, remember to add it back.  The argument
+	might really be inside a longer string (e.g. %Path%) and if you
+	don't restore the "\" it'll be truncated permanently.  Fixes PR/1722.
+	Reported by <steven@surfcast.com>
+
+2000-05-02  Paul D. Smith  <psmith@gnu.org>
+
+	* job.c (construct_command_argv_internal) [WINDOWS32]: Added "rd"
+	and "rmdir" to the list of command.com commands.
+	Reported by Elod Horvath <Elod_Horvath@lnotes5.bankofny.com>
+
+2000-04-24  Paul D. Smith  <psmith@gnu.org>
+
+	* i18n/ja.po: New translation file from the Japanese language team.
+
 2000-04-18  Paul D. Smith  <psmith@gnu.org>
 
 	* remake.c (f_mtime): If ar_member_date() returns -1 (the member

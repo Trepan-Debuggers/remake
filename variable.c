@@ -859,7 +859,7 @@ try_variable_definition (flocp, line, origin, target_var)
     }
 
   beg = next_token (line);
-  while (end > beg && isblank (end[-1]))
+  while (end > beg && isblank ((unsigned char)end[-1]))
     --end;
   p = next_token (p);
 

@@ -120,7 +120,7 @@ collapse_continuations (line)
       if (backslash)
 	{
 	  in = next_token (in);
-	  while (out > line && isblank (out[-1]))
+	  while (out > line && isblank ((unsigned char)out[-1]))
 	    --out;
 	  *out++ = ' ';
 	}
@@ -478,7 +478,7 @@ char *
 end_of_token (s)
      char *s;
 {
-  while (*s != '\0' && !isblank (*s))
+  while (*s != '\0' && !isblank ((unsigned char)*s))
     ++s;
   return s;
 }
@@ -495,7 +495,8 @@ end_of_token_w32 (s, stopchar)
   register char *p = s;
   register int backslash = 0;
 
-  while (*p != '\0' && *p != stopchar && (backslash || !isblank (*p)))
+  while (*p != '\0' && *p != stopchar
+	 && (backslash || !isblank ((unsigned char)*p)))
     {
       if (*p++ == '\\')
         {
@@ -522,7 +523,7 @@ next_token (s)
 {
   register char *p = s;
 
-  while (isblank (*p))
+  while (isblank ((unsigned char)*p))
     ++p;
   return p;
 }

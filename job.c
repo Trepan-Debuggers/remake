@@ -74,7 +74,6 @@ static int amiga_batch_file;
 #endif /* Amiga.  */
 
 #ifdef VMS
-# include <time.h>
 # ifndef __GNUC__
 #   include <processes.h>
 # endif
@@ -295,10 +294,10 @@ vms_redirect (desc, fname, ibuf)
   extern char *vmsify ();
 
   ibuf++;
-  while (isspace (*ibuf))
+  while (isspace ((unsigned char)*ibuf))
     ibuf++;
   fptr = ibuf;
-  while (*ibuf && !isspace (*ibuf))
+  while (*ibuf && !isspace ((unsigned char)*ibuf))
     ibuf++;
   *ibuf = 0;
   if (strcmp (fptr, "/dev/null") != 0)
@@ -890,7 +889,7 @@ start_job_command (child)
 	flags |= COMMANDS_RECURSE;
       else if (*p == '-')
 	child->noerror = 1;
-      else if (!isblank (*p))
+      else if (!isblank ((unsigned char)*p))
 	break;
       ++p;
     }
@@ -1411,7 +1410,8 @@ new_job (file)
 
 			  /* Discard any preceding whitespace that has
 			     already been written to the output.  */
-			  while (out > ref && isblank (out[-1]))
+			  while (out > ref
+				 && isblank ((unsigned char)out[-1]))
 			    --out;
 
 			  /* Replace it all with a single space.  */
@@ -1806,7 +1806,7 @@ child_execute_job (argv, child)
 
   DB (DB_JOBS, ("child_execute_job (%s)\n", argv));
 
-  while (isspace (*argv))
+  while (isspace ((unsigned char)*argv))
     argv++;
 
   if (*argv == 0)
@@ -1831,9 +1831,9 @@ child_execute_job (argv, child)
 	    p++;
 	    if (*p == '\n')
 	      p++;
-	    if (isspace (*p))
+	    if (isspace ((unsigned char)*p))
 	      {
-		do { p++; } while (isspace (*p));
+		do { p++; } while (isspace ((unsigned char)*p));
 		p--;
 	      }
 	    *q = *p;
@@ -1993,11 +1993,11 @@ child_execute_job (argv, child)
             case '\n':
               /* At a newline, skip any whitespace around a leading $
                  from the command and issue exactly one $ into the DCL. */
-              while (isspace (*p))
+              while (isspace ((unsigned char)*p))
                 p++;
               if (*p == '$')
                 p++;
-              while (isspace (*p))
+              while (isspace ((unsigned char)*p))
                 p++;
               fwrite (p, 1, q - p, outfile);
               fputc ('$', outfile);
@@ -2397,9 +2397,9 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
   static char *sh_cmds_dos[] = { "break", "call", "cd", "chcp", "chdir", "cls",
 			     "copy", "ctty", "date", "del", "dir", "echo",
 			     "erase", "exit", "for", "goto", "if", "if", "md",
-			     "mkdir", "path", "pause", "prompt", "rem", "ren",
-			     "rename", "set", "shift", "time", "type",
-			     "ver", "verify", "vol", ":", 0 };
+			     "mkdir", "path", "pause", "prompt", "rd", "rem",
+                             "ren", "rename", "rmdir", "set", "shift", "time",
+                             "type", "ver", "verify", "vol", ":", 0 };
   static char sh_chars_sh[] = "#;\"*?[]&|<>(){}$`^";
   static char *sh_cmds_sh[] = { "cd", "eval", "exec", "exit", "login",
 			     "logout", "set", "umask", "wait", "while", "for",
@@ -2444,7 +2444,7 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
     *restp = NULL;
 
   /* Make sure not to bother processing an empty line.  */
-  while (isblank (*line))
+  while (isblank ((unsigned char)*line))
     ++line;
   if (*line == '\0')
     return 0;
@@ -2962,12 +2962,12 @@ construct_command_argv (line, restp, file, batch_filename_ptr)
   for (;;)
     {
       while ((*cptr != 0)
-	     && (isspace (*cptr)))
+	     && (isspace ((unsigned char)*cptr)))
 	cptr++;
       if (*cptr == 0)
 	break;
       while ((*cptr != 0)
-	     && (!isspace(*cptr)))
+	     && (!isspace((unsigned char)*cptr)))
 	cptr++;
       argc++;
     }
@@ -2981,14 +2981,14 @@ construct_command_argv (line, restp, file, batch_filename_ptr)
   for (;;)
     {
       while ((*cptr != 0)
-	     && (isspace (*cptr)))
+	     && (isspace ((unsigned char)*cptr)))
 	cptr++;
       if (*cptr == 0)
 	break;
       DB (DB_JOBS, ("argv[%d] = [%s]\n", argc, cptr));
       argv[argc++] = cptr;
       while ((*cptr != 0)
-	     && (!isspace(*cptr)))
+	     && (!isspace((unsigned char)*cptr)))
 	cptr++;
       if (*cptr != 0)
 	*cptr++ = 0;

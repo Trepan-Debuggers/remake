@@ -500,24 +500,29 @@ AC_DEFUN(fp_WITH_GETTEXT, [
   if test $enable_nls = yes; then
     AC_DEFINE(ENABLE_NLS)
 
-    AC_ARG_WITH(catgets,
-      [  --with-catgets          say that catgets is not supported],
-      [AC_MSG_WARN([catgets not supported, --with-catgets ignored])])
-
-    AC_CHECK_FUNCS(gettext)
-    AC_CHECK_LIB(intl, gettext, :)
-    if test $ac_cv_lib_intl_gettext$ac_cv_func_gettext != nono; then
-      AC_MSG_CHECKING(whether the included gettext is preferred)
-      AC_ARG_WITH(included-gettext,
-	[  --without-included-gettext avoid our provided version of gettext],
-	with_included_gettext=$withval, with_included_gettext=yes)
-      AC_MSG_RESULT($with_included_gettext)
-      if test $with_included_gettext$ac_cv_func_gettext = nono; then
-        LIBS="$LIBS -lintl"
-      fi
-    else
-      with_included_gettext=yes
+    # We don't support catgets at all
+    if test "x$with_catgets" != x; then
+      AC_MSG_WARN([catgets not supported, --with-catgets ignored])
     fi
+
+    fp_keep_LIBS="$LIBS"
+
+    # Look around for gettext() on the system
+    AC_SEARCH_LIBS(gettext, intl)
+    if test $ac_cv_search_gettext = no; then
+      with_included_gettext=yes
+    else
+      # We only want to deal with GNU's gettext; if we don't have that
+      # we'll just use our own, thanks very much.
+      AC_MSG_CHECKING(for GNU gettext)
+      AC_TRY_LINK(,[extern int _nl_msg_cat_cntr; return _nl_msg_cat_cntr;],
+		  with_included_gettext=no, with_included_gettext=yes)
+      case "$with_included_gettext" in
+	no)  AC_MSG_RESULT(yes) ;;
+	yes) AC_MSG_RESULT([no; using local copy]); LIBS="$fp_keep_LIBS" ;;
+      esac
+    fi
+
     if test $with_included_gettext = yes; then
       LIBOBJS="$LIBOBJS gettext.o"
       AC_DEFINE(HAVE_GETTEXT)

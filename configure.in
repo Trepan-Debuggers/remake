@@ -1,9 +1,9 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.95 2000/04/05 16:02:55 psmith Exp $])
+AC_REVISION([$Id: configure.in,v 1.96 2000/06/07 05:43:37 psmith Exp $])
 AC_PREREQ(2.13)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 
-AM_INIT_AUTOMAKE(make, 3.79)
+AM_INIT_AUTOMAKE(make, 3.79.1)
 AM_CONFIG_HEADER(config.h)
 
 dnl Regular configure stuff
@@ -32,12 +32,18 @@ AC_TYPE_UID_T			dnl Also does gid_t.
 AC_TYPE_PID_T
 AC_TYPE_SIGNAL
 AC_CHECK_HEADERS(stdlib.h unistd.h limits.h sys/param.h fcntl.h string.h \
-		 memory.h sys/timeb.h)
+		 memory.h sys/time.h sys/timeb.h)
 AC_PROG_CC_C_O
 AM_PROG_CC_STDC
 AC_C_CONST			dnl getopt needs this.
 AC_C_INLINE			dnl gettext needs this.
 AC_HEADER_STAT
+AC_HEADER_TIME
+
+dnl Handle internationalization
+
+ALL_LINGUAS="de es fr ja ko nl pl pt_BR ru"
+fp_WITH_GETTEXT
 
 AC_STRUCT_ST_MTIM_NSEC
 jm_AC_TYPE_UINTMAX_T
@@ -57,13 +63,38 @@ changequote([,])dnl
 fi
 AC_MSG_RESULT($ac_cv_check_symbol_$1)])dnl
 
-# clock_gettime is in -lposix4 in Solaris 2.6.
-AC_CHECK_LIB(posix4, clock_gettime)
+# Solaris 2.5.1 needs -lposix4 to get the clock_gettime function.
+# Solaris 7 prefers the library name -lrt to the obsolescent name -lposix4.
+AC_SEARCH_LIBS(clock_gettime, [rt posix4])
+if test $ac_cv_search_clock_gettime != no; then
+  AC_DEFINE(HAVE_CLOCK_GETTIME, 1,
+            [Define if you have the clock_gettime function.])
+fi
 
-AC_CHECK_FUNCS(memmove strchr memcpy strdup psignal mkstemp mktemp fdopen \
-	       clock_gettime dup2 getcwd sigsetmask sigaction getgroups \
-	       setlinebuf seteuid setegid setreuid setregid pipe \
-	       strerror strsignal)
+# See if we have a standard version of gettimeofday().  Since actual
+# implementations can differ, just make sure we have the most common
+# one.
+AC_CACHE_CHECK([for standard gettimeofday], ac_cv_func_gettimeofday,
+  [ac_cv_func_gettimeofday=no
+   AC_TRY_RUN([#include <sys/time.h>
+	       int main ()
+	       {
+		 struct timeval t; t.tv_sec = -1; t.tv_usec = -1;
+		 exit (gettimeofday (&t, 0) != 0
+		       || t.tv_sec < 0 || t.tv_usec < 0);
+	       }],
+	      ac_cv_func_gettimeofday=yes,
+	      ac_cv_func_gettimeofday=no,
+	      ac_cv_func_gettimeofday="no (cross-compiling)")])
+if test $ac_cv_func_gettimeofday = yes; then
+  AC_DEFINE(HAVE_GETTIMEOFDAY, 1,
+	    [Define if you have a standard gettimeofday function])
+fi
+
+AC_CHECK_FUNCS(	memmove memcpy strchr strdup psignal mkstemp mktemp fdopen \
+		dup2 getcwd sigsetmask sigaction getgroups setlinebuf \
+		seteuid setegid setreuid setregid pipe strerror strsignal)
+
 AC_CHECK_SYMBOL(sys_siglist)
 AC_FUNC_ALLOCA
 AC_FUNC_VFORK
@@ -107,11 +138,6 @@ fi
 AC_MSG_RESULT($make_cv_union_wait)
 
 AC_DECL_SYS_SIGLIST
-
-dnl Handle internationalization
-
-ALL_LINGUAS="de es fr ko nl pl ru"
-fp_WITH_GETTEXT
 
 # The presence of the following is not meant to imply
 # that make necessarily works on those systems.

@@ -853,6 +853,13 @@ int main (int argc, char ** argv)
   FATAL_SIG (SIGINT);
   FATAL_SIG (SIGTERM);
 
+#ifdef __MSDOS__
+  /* Windows 9X delivers FP exceptions in child programs to their
+     parent!  We don't want Make to die when a child divides by zero,
+     so we work around that lossage by catching SIGFPE.  */
+  FATAL_SIG (SIGFPE);
+#endif
+
 #ifdef	SIGDANGER
   FATAL_SIG (SIGDANGER);
 #endif
@@ -1195,7 +1202,7 @@ int main (int argc, char ** argv)
   /* Figure out the level of recursion.  */
   {
     struct variable *v = lookup_variable ("MAKELEVEL", 9);
-    if (v != 0 && *v->value != '\0' && *v->value != '-')
+    if (v != 0 && v->value[0] != '\0' && v->value[0] != '-')
       makelevel = (unsigned int) atoi (v->value);
     else
       makelevel = 0;
@@ -2249,9 +2256,16 @@ decode_switches (argc, argv, env)
 		  break;
 
 		case positive_int:
-		  if (optarg == 0 && argc > optind
-                      && ISDIGIT (argv[optind][0]))
-		    optarg = argv[optind++];
+                  /* See if we have an option argument; if we do require that
+                     it's all digits, not something like "10foo".  */
+		  if (optarg == 0 && argc > optind)
+                    {
+                      const char *cp;
+                      for (cp=argv[optind]; ISDIGIT (cp[0]); ++cp)
+                        ;
+                      if (cp[0] == '\0')
+                        optarg = argv[optind++];
+                    }
 
 		  if (!doit)
 		    break;
@@ -2259,11 +2273,16 @@ decode_switches (argc, argv, env)
 		  if (optarg != 0)
 		    {
 		      int i = atoi (optarg);
-		      if (i < 1)
+                      const char *cp;
+
+                      /* Yes, I realize we're repeating this in some cases.  */
+                      for (cp = optarg; ISDIGIT (cp[0]); ++cp)
+                        ;
+
+		      if (i < 1 || cp[0] != '\0')
 			{
-			  if (doit)
-			    error (NILF, _("the `-%c' option requires a positive integral argument"),
-				   cs->c);
+                          error (NILF, _("the `-%c' option requires a positive integral argument"),
+                                 cs->c);
 			  bad = 1;
 			}
 		      else
@@ -2355,14 +2374,14 @@ decode_env_switches (envar, len)
     {
       if (*value == '\\' && value[1] != '\0')
 	++value;		/* Skip the backslash.  */
-      else if (isblank (*value))
+      else if (isblank ((unsigned char)*value))
 	{
 	  /* End of the word.  */
 	  *p++ = '\0';
 	  argv[++argc] = p;
 	  do
 	    ++value;
-	  while (isblank (*value));
+	  while (isblank ((unsigned char)*value));
 	  continue;
 	}
       *p++ = *value++;
@@ -2395,7 +2414,7 @@ quote_for_env (out, in)
     {
       if (*in == '$')
 	*out++ = '$';
-      else if (isblank (*in) || *in == '\\')
+      else if (isblank ((unsigned char)*in) || *in == '\\')
         *out++ = '\\';
       *out++ = *in++;
     }

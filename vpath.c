@@ -222,7 +222,7 @@ construct_vpath_list (pattern, dirpath)
   maxelem = 2;
   p = dirpath;
   while (*p != '\0')
-    if (*p++ == PATH_SEPARATOR_CHAR || isblank (*p))
+    if (*p++ == PATH_SEPARATOR_CHAR || isblank ((unsigned char)*p))
       ++maxelem;
 
   vpath = (char **) xmalloc (maxelem * sizeof (char *));
@@ -230,7 +230,7 @@ construct_vpath_list (pattern, dirpath)
 
   /* Skip over any initial separators and blanks.  */
   p = dirpath;
-  while (*p == PATH_SEPARATOR_CHAR || isblank (*p))
+  while (*p == PATH_SEPARATOR_CHAR || isblank ((unsigned char)*p))
     ++p;
 
   elem = 0;
@@ -241,7 +241,8 @@ construct_vpath_list (pattern, dirpath)
 
       /* Find the end of this entry.  */
       v = p;
-      while (*p != '\0' && *p != PATH_SEPARATOR_CHAR && !isblank (*p))
+      while (*p != '\0' && *p != PATH_SEPARATOR_CHAR
+	     && !isblank ((unsigned char)*p))
 	++p;
 
       len = p - v;
@@ -274,7 +275,7 @@ construct_vpath_list (pattern, dirpath)
 	}
 
       /* Skip over separators and blanks between entries.  */
-      while (*p == PATH_SEPARATOR_CHAR || isblank (*p))
+      while (*p == PATH_SEPARATOR_CHAR || isblank ((unsigned char)*p))
 	++p;
     }
 
