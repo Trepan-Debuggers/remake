@@ -27,6 +27,7 @@ include compatMakefile
 
 extras := $(sort $(filter-out @%@,$(extras)) getloadavg.o)
 LOADLIBES := $(filter-out @%@,$(LOADLIBES))
+ALLOCA := $(filter-out @%@,$(ALLOCA))
 
 # Set `ARCH' to a string for the type of machine.
 ifndef ARCH
