@@ -499,6 +499,22 @@ static int user_uid = -1, user_gid = -1, make_uid = -1, make_gid = -1;
 #define	access_inited	(user_uid != -1)
 static enum { make, user } current_access;
 
+
+/* Under -d, write a message describing the current IDs.  */
+
+static void
+log_access (flavor)
+     char *flavor;
+{
+  if (! debug_flag)
+    return;
+
+  printf ("%s access: user %d (real %d), group %d (real %d)\n",
+	  flavor, geteuid (), getuid (), getegid (), getgid ());
+  fflush (stdout);
+}
+
+
 static void
 init_access ()
 {
@@ -511,6 +527,8 @@ init_access ()
   /* Do these ever fail?  */
   if (user_uid == -1 || user_gid == -1 || make_uid == -1 || make_gid == -1)
     pfatal_with_name ("get{e}[gu]id");
+
+  log_access ("Initialized");
 
   current_access = make;
 }
@@ -572,6 +590,8 @@ user_access ()
 
   current_access = user;
 
+  log_access ("User");
+
 #endif	/* GETLOADAVG_PRIVILEGED */
 }
 
@@ -608,6 +628,8 @@ make_access ()
 
   current_access = make;
 
+  log_access ("Make");
+
 #endif	/* GETLOADAVG_PRIVILEGED */
 }
 
@@ -616,6 +638,9 @@ make_access ()
 void
 child_access ()
 {
+  if (!access_inited)
+    abort ();
+
 #ifdef	GETLOADAVG_PRIVILEGED
 
   /* Set both the real and effective UID and GID to the user's.
@@ -636,6 +661,8 @@ child_access ()
   if (setregid (user_gid, user_gid) < 0)
     pfatal_with_name ("child_access: setregid");
 #endif
+
+  log_access ("Child");
 
 #endif	/* GETLOADAVG_PRIVILEGED */
 }
