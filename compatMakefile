@@ -3,7 +3,7 @@
 #
 # Copyright (C) 1988, 89, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
 # This file is part of GNU Make.
-# 
+#
 # GNU Make is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2, or (at your option)
@@ -13,7 +13,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with GNU Make; see the file COPYING.  If not, write to
 # the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -47,19 +47,6 @@ defines = @DEFS@ -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\"
 # Which flavor of remote job execution support to use.
 # The code is found in `remote-$(REMOTE).c'.
 REMOTE = @REMOTE@
-
-# If you are using the GNU C library, or have the GNU getopt functions in
-# your C library, you can comment these out.
-GETOPT = getopt.o getopt1.o
-GETOPT_SRC = $(srcdir)/getopt.c $(srcdir)/getopt1.c $(srcdir)/getopt.h
-
-# If you are using the GNU C library, or have the GNU glob functions in
-# your C library, you can comment this out.  GNU make uses special hooks
-# into the glob functions to be more efficient (by using make's directory
-# cache for globbing), so you must use the GNU functions even if your
-# system's C library has the 1003.2 glob functions already.  Also, the glob
-# functions in the AIX and HPUX C libraries are said to be buggy.
-GLOB = glob/libglob.a
 
 # If your system doesn't have alloca, or the one provided is bad, define this.
 ALLOCA = @ALLOCA@
@@ -123,7 +110,8 @@ CTAGS = ctags -w
 objs = commands.o job.o dir.o file.o misc.o main.o read.o remake.o	\
        rule.o implicit.o default.o variable.o expand.o function.o	\
        vpath.o version.o ar.o arscan.o signame.o remote-$(REMOTE).o	\
-       $(GLOB) $(GETOPT) $(ALLOCA) $(extras)
+       getopt.o getopt1.o glob/libglob.a
+       $(ALLOCA) $(extras)
 srcs = $(srcdir)/commands.c $(srcdir)/job.c $(srcdir)/dir.c		\
        $(srcdir)/file.c $(srcdir)/getloadavg.c $(srcdir)/misc.c		\
        $(srcdir)/main.c $(srcdir)/read.c $(srcdir)/remake.c		\
@@ -132,7 +120,7 @@ srcs = $(srcdir)/commands.c $(srcdir)/job.c $(srcdir)/dir.c		\
        $(srcdir)/vpath.c $(srcdir)/version.c				\
        $(srcdir)/remote-$(REMOTE).c					\
        $(srcdir)/ar.c $(srcdir)/arscan.c				\
-       $(srcdir)/signame.c $(srcdir)/signame.h $(GETOPT_SRC)		\
+       $(srcdir)/signame.c $(srcdir)/signame.h getopt.c getopt1.c	\
        $(srcdir)/commands.h $(srcdir)/dep.h $(srcdir)/file.h		\
        $(srcdir)/job.h $(srcdir)/make.h $(srcdir)/rule.h		\
        $(srcdir)/variable.h $(ALLOCA_SRC) $(srcdir)/config.h.in
