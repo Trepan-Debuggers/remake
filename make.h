@@ -40,6 +40,10 @@ extern int errno;
 #endif
 #endif
 
+#if !defined (HAVE_SYS_SIGLIST) && defined (HAVE__SYS_SIGLIST)
+#define	sys_siglist	_sys_siglist
+#endif
+
 #ifndef	isblank
 #define	isblank(c)	((c) == ' ' || (c) == '\t')
 #endif
