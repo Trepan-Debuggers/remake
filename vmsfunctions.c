@@ -73,13 +73,11 @@ readdir (dir)
   dnam->nam$l_rsa = dir->d_result;
   dnam->nam$b_rss = MAXNAMLEN;
 
-  if (debug_flag)
-    printf (".");
+  DB (DB_VERBOSE, ("."));
 
   if (!((i = sys$search (dfab)) & 1))
     {
-      if (debug_flag)
-	printf ("sys$search failed with %d\n", i);
+      DB (DB_VERBOSE, (_("sys$search failed with %d\n"), i));
       return (NULL);
     }
 
@@ -247,22 +245,6 @@ cvt_time (tval)
 
   return (str);
 }
-
-
-int
-strcmpi (s1, s2)
-    const char *s1;
-    const char *s2;
-{
-  while (*s1 != '\0' && toupper(*s1) == toupper(*s2))
-    {
-      s1++;
-      s2++;
-    }
-
-  return toupper(*(unsigned char *) s1) - toupper(*(unsigned char *) s2);
-}
-
 
 int
 strcmpi (s1, s2)

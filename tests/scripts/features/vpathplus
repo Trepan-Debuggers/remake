@@ -57,12 +57,10 @@ close(MAKEFILE);
 
 sub touchfiles {
   foreach (@_) {
+    sleep($wtime);
     ($f = $_) =~ s,VP/,$VP,g;
     &touch($f);
     push(@touchedfiles, $f);
-    # Sleep 2 seconds for DOS/Windows FAT volumes which have 2-second
-    # granularity of file times.
-    sleep(2);
   }
 }
 

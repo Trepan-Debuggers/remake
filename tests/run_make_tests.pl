@@ -129,6 +129,11 @@ sub set_more_defaults
    local($string);
    local($index);
 
+   # Make sure we're in the C locale for those systems that support it,
+   # so sorting, etc. is predictable.
+   #
+   $ENV{LANG} = 'C';
+
    # find the type of the port.  We do this up front to have a single
    # point of change if it needs to be tweaked.
    #
@@ -151,6 +156,12 @@ sub set_more_defaults
    else {
      $port_type = 'UNIX';
    }
+
+   # On DOS/Windows system the filesystem apparently can't track
+   # timestamps with second granularity (!!).  Change the sleep time
+   # needed to force a file to be considered "old".
+   #
+   $wtime = $port_type eq 'UNIX' ? 1 : 4;
 
    # Find the full pathname of Make.  For DOS systems this is more
    # complicated, so we ask make itself.

@@ -776,7 +776,10 @@ int main (int argc, char ** argv)
   textdomain (PACKAGE);
 
 #if !defined (HAVE_STRSIGNAL) && !defined (HAVE_SYS_SIGLIST)
-  signame_init ();
+  {
+    extern void signame_init ();
+    signame_init ();
+  }
 #endif
 
 #ifdef	POSIX

@@ -49,9 +49,7 @@ $answer = "$make_name: `foo.d' is up to date.\n";
 
 # TEST #3
 
-# Sleep 2 seconds for DOS/Windows FAT volumes which have 2-second
-# granularity of file times.
-sleep(2);
+sleep($wtime);
 &touch('foo.f');
 
 &run_make_with_options($makefile,'foo.d',&get_logfile);
@@ -74,9 +72,7 @@ $answer = "$make_name: `foo.c' is up to date.\n";
 
 # TEST #6
 
-# Sleep 2 seconds for DOS/Windows FAT volumes which have 2-second
-# granularity of file times.
-sleep(2);
+sleep($wtime);
 &touch('foo.f');
 
 &run_make_with_options($makefile,'foo.c',&get_logfile);

@@ -249,7 +249,10 @@ child_error (target_name, exit_code, exit_sig, coredump, ignored)
 
 #ifdef VMS
   if (!(exit_code & 1))
-      error (NILF, _("*** [%s] Error 0x%x%s"), target_name, exit_code, ((ignored)? _(" (ignored)") : ""));
+      error (NILF,
+             (ignored ? _("*** [%s] Error 0x%x (ignored)")
+              : _("*** [%s] Error 0x%x")),
+             target_name, exit_code);
 #else
   if (exit_sig == 0)
     error (NILF, ignored ? _("[%s] Error %d (ignored)") :
@@ -310,7 +313,7 @@ vms_redirect (desc, fname, ibuf)
   desc->dsc$b_class = DSC$K_CLASS_S;
 
   if (*fname == 0)
-    printf ("Warning: Empty redirection\n");
+    printf (_("Warning: Empty redirection\n"));
   return ibuf;
 }
 
@@ -346,7 +349,7 @@ handle_apos (char *p)
 		inside = 0;
 	      else
 		{
-		  fprintf (stderr, "Syntax error, still inside '\"'\n");
+		  fprintf (stderr, _("Syntax error, still inside '\"'\n"));
 		  exit (3);
 		}
 	    }
@@ -1559,7 +1562,8 @@ load_too_high ()
 	{
 	  if (errno == 0)
 	    /* An errno value of zero means getloadavg is just unsupported.  */
-	    error (NILF, _("cannot enforce load limits on this operating system"));
+	    error (NILF,
+                   _("cannot enforce load limits on this operating system"));
 	  else
 	    perror_with_name (_("cannot enforce load limit: "), "getloadavg");
 	}
@@ -1664,7 +1668,8 @@ int vmsHandleChildTerm(struct child *child)
 	    break;
 
 	  default:
-	    error (NILF, _("internal error: `%s' command_state"), c->file->name);
+	    error (NILF, _("internal error: `%s' command_state"),
+                   c->file->name);
 	    abort ();
 	    break;
 	  }
@@ -1747,8 +1752,8 @@ static void tryToSetupYAst(void) {
 	if (status==SS$_ILLIOFUNC) {
 		sys$dassgn(chan);
 #ifdef	CTRLY_ENABLED_ANYWAY
-		fprintf (stderr, "-warning, CTRL-Y will leave "
-			"sub-process(es) around.\n");
+		fprintf (stderr,
+                         _("-warning, CTRL-Y will leave sub-process(es) around.\n"));
 #else
 		return;
 #endif
@@ -1764,8 +1769,8 @@ static void tryToSetupYAst(void) {
 	if (setupYAstTried>1)
 		return;
 	if (atexit(reEnableAst))
-		fprintf (stderr, "-warning, you may have to re-enable CTRL-Y"
-			"handling from DCL.\n");
+		fprintf (stderr,
+                         _("-warning, you may have to re-enable CTRL-Y handling from DCL.\n"));
 	status= lib$disable_ctrl (&ctrlMask, &oldCtrlMask);
 	if (!(status&SS$_NORMAL)) {
 		lib$signal(status);
@@ -1799,8 +1804,7 @@ child_execute_job (argv, child)
   ofile[0] = 0;
   efile[0] = 0;
 
-  if (debug_flag)
-    printf ("child_execute_job (%s)\n", argv);
+  DB (DB_JOBS, ("child_execute_job (%s)\n", argv));
 
   while (isspace (*argv))
     argv++;
@@ -1879,8 +1883,7 @@ child_execute_job (argv, child)
       child->efn = 0;
       child->cstatus = 1;
 
-      if (debug_flag)
-	printf ("BUILTIN [%s][%s]\n", cmd, cmd+8);
+      DB (DB_JOBS, (_("BUILTIN [%s][%s]\n"), cmd, cmd+8));
 
       p = cmd + 8;
 
@@ -1891,8 +1894,7 @@ child_execute_job (argv, child)
 	  p += 3;
 	  while ((*p == ' ') || (*p == '\t'))
 	    p++;
-	  if (debug_flag)
-	    printf ("BUILTIN CD %s\n", p);
+	  DB (DB_JOBS, (_("BUILTIN CD %s\n"), p));
 	  if (chdir (p))
 	    return 0;
 	  else
@@ -1910,8 +1912,7 @@ child_execute_job (argv, child)
 	    p++;
 	  in_arg = 1;
 
-	  if (debug_flag)
-	    printf ("BUILTIN RM %s\n", p);
+	  DB (DB_JOBS, (_("BUILTIN RM %s\n"), p));
 	  while (*p)
 	    {
 	      switch (*p)
@@ -1932,7 +1933,7 @@ child_execute_job (argv, child)
 	}
       else
 	{
-	  printf("Unknown builtin command '%s'\n", cmd);
+	  printf(_("Unknown builtin command '%s'\n"), cmd);
 	  fflush(stdout);
 	  return 0;
 	}
@@ -1956,7 +1957,7 @@ child_execute_job (argv, child)
 
       if (strlen (cmd) == 0)
 	{
-	  printf ("Error, empty command\n");
+	  printf (_("Error, empty command\n"));
 	  fflush (stdout);
 	  return 0;
 	}
@@ -2145,11 +2146,11 @@ child_execute_job (argv, child)
 
   if (!(status & 1))
     {
-      printf ("Error spawning, %d\n",status);
+      printf (_("Error spawning, %d\n") ,status);
       fflush (stdout);
     }
 
-  if (comname[0] && !ISDB (DB_JOBS)))
+  if (comname[0] && !ISDB (DB_JOBS))
     unlink (comname);
 
   return (status & 1);
@@ -2397,7 +2398,7 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
 			     0 };
 #else
 #ifdef WINDOWS32
-  static char sh_chars_dos[] = "\"|<>";
+  static char sh_chars_dos[] = "\"|&<>";
   static char *sh_cmds_dos[] = { "break", "call", "cd", "chcp", "chdir", "cls",
 			     "copy", "ctty", "date", "del", "dir", "echo",
 			     "erase", "exit", "for", "goto", "if", "if", "md",
@@ -2989,8 +2990,7 @@ construct_command_argv (line, restp, file, batch_filename_ptr)
 	cptr++;
       if (*cptr == 0)
 	break;
-      if (debug_flag)
-	printf ("argv[%d] = [%s]\n", argc, cptr);
+      DB (DB_JOBS, ("argv[%d] = [%s]\n", argc, cptr));
       argv[argc++] = cptr;
       while ((*cptr != 0)
 	     && (!isspace(*cptr)))
