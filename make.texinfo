@@ -2213,12 +2213,12 @@ foo : bar/lose
 The program used as the shell is taken from the variable @code{SHELL}.
 By default, the program @file{/bin/sh} is used.
 
-Unlike most variables, the variable @code{SHELL} will not be set from
-the environment, except in a recursive @code{make}.  This is because the
-@code{SHELL} environment variable is used to specify your personal
-choice of shell program for interactive use.  It would be very bad for
-personal choices like this to affect the functioning of makefiles.
-@xref{Environment, ,Variables from the Environment}.
+Unlike most variables, the variable @code{SHELL} is never set from the
+environment.  This is because the @code{SHELL} environment variable is
+used to specify your personal choice of shell program for interactive
+use.  It would be very bad for personal choices like this to affect
+the functioning of makefiles.  @xref{Environment, ,Variables from the
+Environment}.
 
 @node Parallel, Errors, Execution, Commands
 @section Parallel Execution
@@ -3569,6 +3569,25 @@ test different conditions.  Here is a table of them:
 Expand all variable references in @var{arg1} and @var{arg2} and
 compare them.  If they are identical, the @var{text-if-true} is
 effective; otherwise, the @var{text-if-false}, if any, is effective.
+
+Often you want to test if a variable has a non-empty value.  When the
+value results from complex expansions of variables and functions,
+expansions you would consider empty may actually contain whitespace
+characters and thus are not seen as empty.  However, you can use the
+@code{strip} function to avoid interpreting whitespace as a non-empty
+value.  For example:
+
+@example
+@group
+ifeq ($(strip $(foo)),)
+@var{text-if-empty}
+endif
+@end group
+@end example
+
+@noindent
+will evaluate @var{text-if-empty} even if the expansion of
+@code{$(foo)} contains whitespace characters.
 
 @item ifneq (@var{arg1}, @var{arg2})
 @itemx ifneq '@var{arg1}' '@var{arg2}'
