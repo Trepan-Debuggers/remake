@@ -6477,7 +6477,8 @@ Here is a summary of the directives GNU @code{make} recognizes:
 @table @code
 @item define @var{variable}
 @itemx endef
-Define a multi-line, recursively-expanded variable.
+
+Define a multi-line, recursively-expanded variable.@*
 @xref{Sequences}.
 
 @item ifdef @var{variable}
@@ -6488,31 +6489,38 @@ Define a multi-line, recursively-expanded variable.
 @itemx ifneq "@var{a}" "@var{b}"
 @itemx else
 @itemx endif
-Conditionally evaluate part of the makefile.
+
+Conditionally evaluate part of the makefile.@*
 @xref{Conditionals}.
 
 @item include @var{file}
-Include another makefile.
+
+Include another makefile.@*
 @xref{Include}.
 
 @item override @var{variable} = @var{value}
 @itemx override @var{variable} := @var{value}
-Define a variable, overriding any previous definition.
+
+Define a variable, overriding any previous definition.@*
 @xref{Override Directive}.
 
 @item export
-Tell @code{make} to export all variables to child processes by default.
+
+Tell @code{make} to export all variables to child processes by default.@*
 @xref{Variables/Recursion}.
 
 @item export @var{variable}
 @itemx export @var{variable} = @var{value}
 @itemx export @var{variable} := @var{value}
 @itemx unexport @var{variable}
+
 Tell @code{make} whether or not to export a particular variable to child
-processes.  @xref{Variables/Recursion}.
+processes.@*
+@xref{Variables/Recursion}.
 
 @item vpath
-Specify a search path for files matching a @samp{%} pattern.
+
+Specify a search path for files matching a @samp{%} pattern.@*
 @xref{Selective Search}.
 @end table
 
@@ -6520,88 +6528,110 @@ Here is a summary of the text manipulation functions (@pxref{Functions}):
 
 @table @code
 @item $(subst @var{from},@var{to},@var{text})
-Replace @var{from} with @var{to} in @var{text}.
+
+Replace @var{from} with @var{to} in @var{text}.@*
 @xref{Text Functions}.
 
 @item $(patsubst @var{pattern},@var{replacement},@var{text})
-Replace words matching @var{pattern} with @var{replacement} in @var{text}.
+
+Replace words matching @var{pattern} with @var{replacement} in @var{text}.@*
 @xref{Text Functions}.
 
 @item $(strip @var{string})
-Remove excess whitespace characters from @var{string}.
+
+Remove excess whitespace characters from @var{string}.@*
 @xref{Text Functions}.
 
 @item $(findstring @var{find},@var{text})
-Locate @var{find} in @var{text}.
+
+Locate @var{find} in @var{text}.@*
 @xref{Text Functions}.
 
 @item $(filter @var{pattern}@dots{},@var{text})
-Select words in @var{text} that match one of the @var{pattern} words.
+
+Select words in @var{text} that match one of the @var{pattern} words.@*
 @xref{Text Functions}.
 
 @item $(filter-out @var{pattern}@dots{},@var{text})
-Select words in @var{text} that @emph{do not} match any of the @var{pattern} words.
+
+Select words in @var{text} that @emph{do not} match any of the @var{pattern} words.@*
 @xref{Text Functions}.
 
 @item $(sort @var{list})
-Sort the words in @var{list} lexicographically, removing duplicates.
+
+Sort the words in @var{list} lexicographically, removing duplicates.@*
 @xref{Text Functions}.
 
 @item $(dir @var{names})
-Extract the directory part of each file name.
+
+Extract the directory part of each file name.@*
 @xref{Filename Functions}.
 
 @item $(notdir @var{names})
-Extract the non-directory part of each file name.
+
+Extract the non-directory part of each file name.@*
 @xref{Filename Functions}.
 
 @item $(suffix @var{names})
-Extract the suffix (the last @samp{.} and following characters) of each file name.
+
+Extract the suffix (the last @samp{.} and following characters) of each file name.@*
 @xref{Filename Functions}.
 
 @item $(basename @var{names})
-Extract the base name (name without suffix) of each file name.
+
+Extract the base name (name without suffix) of each file name.@*
 @xref{Filename Functions}.
 
 @item $(addsuffix @var{suffix},@var{names})
-Append @var{suffix} to each word in @var{names}.
+
+Append @var{suffix} to each word in @var{names}.@*
 @xref{Filename Functions}.
 
 @item $(addprefix @var{prefix},@var{names})
-Prepend @var{prefix} to each word in @var{names}.
+
+Prepend @var{prefix} to each word in @var{names}.@*
 @xref{Filename Functions}.
 
 @item $(join @var{list1},@var{list2})
-Join two parallel lists of words.
+
+Join two parallel lists of words.@*
 @xref{Filename Functions}.
 
 @item $(word @var{n},@var{text})
-Extract the @var{n}th word (one-origin) of @var{text}.
+
+Extract the @var{n}th word (one-origin) of @var{text}.@*
 @xref{Filename Functions}.
 
 @item $(words @var{text})
-Count the number of words in @var{text}.
+
+Count the number of words in @var{text}.@*
 @xref{Filename Functions}.
 
 @item $(firstword @var{names})
-Extract the first word of @var{names}.
+
+Extract the first word of @var{names}.@*
 @xref{Filename Functions}.
 
 @item $(wildcard @var{pattern}@dots{})
-Find file names matching a shell file name pattern.
+
+Find file names matching a shell file name pattern.@*
 @xref{Wildcard Function}.
 
 @item $(shell @var{command})
-Execute a shell command and return its output.
+
+Execute a shell command and return its output.@*
 @xref{Shell Function}.
 
 @item $(origin @var{var})
-Return a string describing how the @code{make} variable @var{var} was defined.
+
+Return a string describing how the @code{make} variable @var{var} was
+defined.@*
 @xref{Origin Function}.
 
 @item $(foreach @var{var},@var{words},@var{text})
+
 Evaluate @var{text} with @var{var} bound to each word in @var{words},
-and concatenate the results.
+and concatenate the results.@*
 @xref{Foreach Function}.
 @end table
 
@@ -6610,46 +6640,58 @@ Here is a summary of the automatic variables.
 
 @table @code
 @item $@@
-The file name of the target.
+
+The file name of the target.@*
 
 @item $%
+
 The target member name, when the target is an archive member.
 
 @item $<
+
 The name of the first dependency.
 
 @item $?
+
 The names of all the dependencies that are
 newer than the target, with spaces between them.
 
 @item $^
+
 The names of all the dependencies, with spaces between them.
 
 @item $*
+
 The stem with which an implicit rule matches (@pxref{Pattern Match, ,How Patterns Match}).
 
 @item $(@@D)
 @itemx $(@@F)
+
 The directory part and the file-within-directory part of @code{$@@}.
 
 @item $(*D)
 @itemx $(*F)
+
 The directory part and the file-within-directory part of @code{$*}.
 
 @item $(%D)
 @itemx $(%F)
+
 The directory part and the file-within-directory part of @code{$%}.
 
 @item $(<D)
 @itemx $(<F)
+
 The directory part and the file-within-directory part of @code{$<}.
 
 @item $(^D)
 @itemx $(^F)
+
 The directory part and the file-within-directory part of @code{$^}.
 
 @item $(?D)
 @itemx $(?F)
+
 The directory part and the file-within-directory part of @code{$?}.
 @end table
 
@@ -6657,29 +6699,35 @@ These variables are used specially by GNU @code{make}:
 
 @table @code
 @item MAKEFILES
-Makefiles to be read on every invocation of @code{make}.
+
+Makefiles to be read on every invocation of @code{make}.@*
 @xref{MAKEFILES Variable}.
 
 @item VPATH
-Directory search path for files not found in the current directory.
+
+Directory search path for files not found in the current directory.@*
 @xref{General Search}.
 
 @item SHELL
+
 The name of the system default command interpreter, usually @file{/bin/sh}.
 
 @item MAKE
+
 The name with which @code{make} was invoked.
-Using this variable in commands has special meaning.
+Using this variable in commands has special meaning.@*
 @xref{MAKE Variable}.
 
 @item MAKELEVEL
-The number of levels of recursion (sub-@code{make}s).
+
+The number of levels of recursion (sub-@code{make}s).@*
 @xref{Variables/Recursion}.
 
 @item MAKEFLAGS
 @itemx MFLAGS
+
 The flags given to @code{make}.  You can set this in the environment or
-a makefile to set flags.
+a makefile to set flags.@*
 @xref{Options/Recursion}.
 
 @item SUFFIXES
