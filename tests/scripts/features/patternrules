@@ -1,0 +1,40 @@
+#                                                                    -*-perl-*-
+
+$description = "Test pattern rules.";
+
+$details = "";
+
+#  Make sure that multiple patterns where the same target can be built are
+#  searched even if the first one fails to match properly.
+
+run_make_test('
+.PHONY: all
+
+all: case.1 case.2 case.3
+a: void
+
+# 1 - existing file
+%.1: void
+	@false
+%.1: #MAKEFILE#
+	@true
+
+# 2 - phony
+%.2: void
+	@false
+%.2: 2.phony
+	@true
+.PHONY: 2.phony
+
+# 3 - implicit-phony
+%.3: void
+	@false
+%.3: 3.implicit-phony
+	@true
+
+3.implicit-phony:
+', '', '');
+
+
+# This tells the test driver that the perl test script executed properly.
+1;

@@ -1,8 +1,17 @@
+2004-09-22  Paul D. Smith  <psmith@gnu.org>
+
+	* run_make_tests.pl (run_make_test): Don't add newlines to the
+	makestring or answer if they are completely empty.
+
+	* scripts/features/patternrules: Rename from implicit_prereq_eval.
+
+	* scripts/test_template: Rework the template.
+
 2004-09-21  Boris Kolpackov  <boris@kolpackov.net>
 
 	* run_make_tests.pl: Change `#!/usr/local/bin/perl' to be
 	`#!/usr/bin/env perl'.
-	
+
 	* scripts/features/implicit_prereq_eval: Test implicit rule
 	prerequisite evaluation code.
 
