@@ -175,7 +175,17 @@ set_file_variables (file)
 	unsigned int Dlen, Flen;
 
 	c = dep_name (d);
-	len = strlen (c);
+
+#ifndef	NO_ARCHIVES
+	if (ar_name (c))
+	  {
+	    c = index (c, '(') + 1;
+	    len = strlen (c) - 1;
+	  }
+	else
+#endif
+	  len = strlen (c);
+
 	bcopy (c, cp, len);
 	cp += len;
 	*cp++ = ' ';
