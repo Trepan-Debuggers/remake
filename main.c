@@ -83,6 +83,7 @@ flags () {}
 struct command_switch
   {
     char c;			/* The switch character.  */
+
     enum			/* Type of the value.  */
       {
 	flag,			/* Turn int flag on.  */
@@ -221,7 +222,7 @@ static struct stringlist *new_files = 0;
 
 /* The table of command switches.  */
 
-static struct command_switch switches[] =
+static const struct command_switch switches[] =
   {
     { 'b', ignore, 0, 0, 0, 0, 0, 0,
 	0, 0,
@@ -293,7 +294,7 @@ static struct command_switch switches[] =
     { 'w', flag, (char *) &print_directory_flag, 1, 1, 0, 0, 0,
 	"print-directory", 0,
 	"Print the current directory" },
-    { -1, flag, (char *) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
+    { 1, flag, (char *) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
 	"no-print-directory", 0,
 	"Turn off -w, even if it was turned on implicitly" },
     { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0,
@@ -1072,7 +1073,9 @@ init_switches ()
       long_options[i].name = (switches[i].long_name == 0 ? "" :
 			      switches[i].long_name);
       long_options[i].flag = 0;
-      *p++ = long_options[i].val = switches[i].c;
+      long_options[i].val = switches[i].c;
+      if (isalnum (switches[i].c))
+	*p++ = switches[i].c;
       switch (switches[i].type)
 	{
 	case flag:
@@ -1085,10 +1088,12 @@ init_switches ()
 	case string:
 	case positive_int:
 	case floating:
-	  *p++ = ':';
+	  if (isalnum (switches[i].c))
+	    *p++ = ':';
 	  if (switches[i].noarg_value != 0)
 	    {
-	      *p++ = ':';
+	      if (isalnum (switches[i].c))
+		*p++ = ':';
 	      long_options[i].has_arg = optional_argument;
 	    }
 	  else
@@ -1114,7 +1119,7 @@ decode_switches (argc, argv, env)
      int env;
 {
   int bad = 0;
-  register struct command_switch *cs;
+  register const struct command_switch *cs;
   register struct stringlist *sl;
   register int c;
 
@@ -1292,7 +1297,7 @@ positive integral argument",
 
 	  p = buf;
 
-	  if (cs->c != -1)
+	  if (isalnum (cs->c))
 	    {
 	      sprintf (buf, "  -%c%s", cs->c, arg);
 	      p += strlen (p);
@@ -1301,7 +1306,7 @@ positive integral argument",
 	    {
 	      unsigned int i;
 	      sprintf (p, "%s--%s%s",
-		       cs->c == -1 ? "  " : ", ",
+		       !isalnum (cs->c) ? "  " : ", ",
 		       cs->long_name, arg);
 	      p += strlen (p);
 	      for (i = 0; i < (sizeof (long_option_aliases) /
@@ -1314,7 +1319,7 @@ positive integral argument",
 		  }
 	    }
 	  {
-	    struct command_switch *ncs = cs;
+	    const struct command_switch *ncs = cs;
 	    while ((++ncs)->c != '\0')
 	      if (ncs->description[0] == '-' &&
 		  ncs->description[1] == cs->c)
@@ -1416,7 +1421,7 @@ static void
 define_makeflags (all, makefile)
      int all, makefile;
 {
-  register struct command_switch *cs;
+  register const struct command_switch *cs;
   char *flagstring;
 
   /* We will construct a linked list of `struct flag's describing
@@ -1427,7 +1432,7 @@ define_makeflags (all, makefile)
   struct flag
     {
       struct flag *next;
-      struct command_switch *cs;
+      const struct command_switch *cs;
       char *arg;
       unsigned int arglen;
     };
@@ -1445,7 +1450,7 @@ define_makeflags (all, makefile)
       ++flagslen;		/* Just a single flag letter.  */	      \
     else								      \
       flagslen += 1 + 1 + 1 + 1 + new->arglen; /* " -x foo" */		      \
-    if (cs->c == -1)							      \
+    if (!isalnum (cs->c))						      \
       /* This switch has no single-letter version, so we use the long.  */    \
       flagslen += 2 + strlen (cs->long_name);				      \
   } while (0)
@@ -1544,7 +1549,7 @@ define_makeflags (all, makefile)
       do
 	{
 	  /* Add the flag letter or name to the string.  */
-	  if (flags->cs->c == -1)
+	  if (!isalnum (flags->cs->c))
 	    {
 	      *p++ = '-';
 	      strcpy (p, flags->cs->long_name);
@@ -1561,7 +1566,7 @@ define_makeflags (all, makefile)
 	      if (flags->arglen > 0)
 		{
 		  /* Add its argument too.  */
-		  *p++ = flags->cs->c == -1 ? '=' : ' ';
+		  *p++ = !isalnum (flags->cs->c) ? '=' : ' ';
 		  bcopy (flags->arg, p, flags->arglen);
 		  p += flags->arglen;
 		}
@@ -1569,7 +1574,7 @@ define_makeflags (all, makefile)
 	      *p++ = ' ';
 	      *p++ = '-';
 	    }
-	  else if (flags->cs->c == -1)
+	  else if (!isalnum (flags->cs->c))
 	    {
 	      /* Long options must each go in their own word,
 		 so we write the following space and dash.  */
