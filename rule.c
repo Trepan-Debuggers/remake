@@ -1,5 +1,5 @@
 /* Pattern and suffix rule internals for GNU Make.
-Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -107,21 +107,25 @@ count_implicit_rule_limits ()
 	      bcopy (dep->name, name, p - dep->name);
 	      name[p - dep->name] = '\0';
 
-	      if (!dir_file_exists_p (name, "."))
+	      /* In the deps of an implicit rule the `changed' flag
+		 actually indicates that the dependency is in a
+		 nonexistent subdirectory.  */
+
+	      dep->changed = !dir_file_exists_p (name, "");
+	      if (dep->changed && *name == '/')
 		{
-		  /* The name is absolute and the directory does not exist.  */
-		  if (*name == '/')
-		    {
-		      freerule (rule, lastrule);
-		      --num_pattern_rules;
-		      goto end_main_loop;
-		    }
-		  else
-		    /* The directory does not exist, but
-		       it might be found in a VPATH directory.  */
-		    rule->subdir = 1;
+		  /* The name is absolute and the directory does not exist.
+		     This rule can never possibly match, since this dependency
+		     can never possibly exist.  So just remove the rule from
+		     the list.  */
+		  freerule (rule, lastrule);
+		  --num_pattern_rules;
+		  goto end_main_loop;
 		}
 	    }
+	  else
+	    /* This dependency does not reside in a subdirectory.  */
+	    dep->changed = 0;
 	}
 
       if (ndeps > max_pattern_deps)
@@ -250,7 +254,6 @@ new_pattern_rule (rule, override)
   register struct rule *r, *lastrule;
   register unsigned int i, j;
 
-  rule->subdir = 0;
   rule->in_use = 0;
   rule->terminal = 0;
 
@@ -472,14 +475,14 @@ create_pattern_rule (targets, target_percents,
 void
 print_rule_data_base ()
 {
-  register unsigned int rules, terminal, subdir;
+  register unsigned int rules, terminal;
   register struct rule *r;
   register struct dep *d;
   register unsigned int i;
 
   puts ("\n# Implicit Rules");
 
-  rules = terminal = subdir = 0;
+  rules = terminal = 0;
   for (r = pattern_rules; r != 0; r = r->next)
     {
       ++rules;
@@ -503,12 +506,6 @@ print_rule_data_base ()
 	printf (" %s", dep_name (d));
       putchar ('\n');
 
-      if (r->subdir)
-	{
-	  ++subdir;
-	  puts ("#  references nonexistent subdirectory.");
-	}
-
       if (r->cmds != 0)
 	print_commands (r->cmds);
     }
@@ -522,12 +519,6 @@ print_rule_data_base ()
       printf (" (%.1f%%)", (double) terminal / (double) rules * 100.0);
 #endif
       puts (" terminal.");
-
-      printf ("# %u", subdir);
-#ifndef	NO_FLOAT
-      printf (" (%.1f%%)", (double) subdir / (double) rules * 100.0);
-#endif
-      puts (" reference nonexistent subdirectories.");
     }
 
   if (num_pattern_rules != rules)
