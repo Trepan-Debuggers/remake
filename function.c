@@ -1450,6 +1450,7 @@ func_shell (o, argv, funcname)
 	    i += cc;
 	}
       while (cc > 0 || EINTR_SET);
+      buffer[i] = '\0';
 
       /* Close the read side of the pipe.  */
 #ifdef  __MSDOS__

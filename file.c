@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #include "job.h"
 #include "commands.h"
 #include "variable.h"
+#include "debug.h"
 
 
 /* Hash table of files the makefile knows how to make.  */
@@ -410,18 +411,23 @@ remove_intermediates (sig)
 	    {
 	      if (sig)
 		error (NILF, _("*** Deleting intermediate file `%s'"), f->name);
-	      else if (!silent_flag)
-		{
-		  if (! doneany)
-		    {
-		      fputs ("rm ", stdout);
-		      doneany = 1;
-		    }
-		  else
-		    putchar (' ');
-		  fputs (f->name, stdout);
-		  fflush (stdout);
-		}
+	      else
+                {
+                  if (! doneany)
+                    DB (DB_BASIC, (_("Removing intermediate files...\n")));
+                  if (!silent_flag)
+                    {
+                      if (! doneany)
+                        {
+                          fputs ("rm ", stdout);
+                          doneany = 1;
+                        }
+                      else
+                        putchar (' ');
+                      fputs (f->name, stdout);
+                      fflush (stdout);
+                    }
+                }
 	      if (status < 0)
 		perror_with_name ("unlink: ", f->name);
 	    }

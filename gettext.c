@@ -671,9 +671,6 @@ _nl_explode_name (name, language, modifier, territory, codeset,
 /* Internal header for GNU gettext internationalization functions.
    Copyright (C) 1995, 1997 Free Software Foundation, Inc.  */
 
-#ifndef _GETTEXT_H
-#define _GETTEXT_H 1
-
 #include <stdio.h>
 
 #if HAVE_LIMITS_H || _LIBC
@@ -751,8 +748,6 @@ struct string_desc
   /* Offset of string in file.  */
   nls_uint32 offset;
 };
-
-#endif	/* gettext.h  */
 
 /* End of gettext.h */
 

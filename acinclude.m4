@@ -491,7 +491,6 @@ AC_DEFUN(pds_WITH_GETTEXT, [
     AC_DEFINE(HAVE_DCGETTEXT, 1, [Define if you have the dcgettext function.])
 
     AC_CHECK_FUNCS(getcwd setlocale stpcpy)
-    AM_LC_MESSAGES
 
     if test -z "$ALL_LINGUAS"; then
       AC_MSG_WARN(This package does not install translations yet.)
