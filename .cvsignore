@@ -6,10 +6,12 @@ make-3* make-test*
 stamp-*
 makebook*
 
-*.dep *.dvi *.toc *.aux
+.*gdbinit
+
+*.dep *.dvi *.toc *.aux *.log
 *.cp *.cps *.fn *.fns *.vr *.vrs *.tp *.tps *.ky *.kys *.pg *.pgs
 
 sun4 i386 i386-netbsd hp300-netbsd hp300 rs6000 sun3 news800 amiga
-hp700 hp834
+hp700 hp834 mips
 
 customs
