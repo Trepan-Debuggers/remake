@@ -1,3 +1,41 @@
+Sat Jun 22 14:56:05 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
+
+	* job.c (start_job_command): Call block_sigs.
+	(block_sigs): New function, broken out of start_job_command.
+	(reap_children): Block fatal signals around removing dead child from
+	chain and adjusting job_slots_used.
+
+	* remote-stub.c (remote_setup, remote_cleanup): New (empty) functions.
+	* main.c (main): Call remote_setup.
+	(die): Call remote_cleanup.
+
+	* job.c (reap_children): Quiescent value of shell_function_pid is
+	zero, not -1.
+
+	* main.c (print_version): Add 96 to copyright years.
+
+Sat Jun 15 20:30:01 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* read.c (find_char_unquote): Avoid calling strlen on every call
+	just to throw away the value most of the time.
+
+Sun Jun  2 12:24:01 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
+
+	* main.c (decode_env_switches): Prepend '-' to ARGV[1] if it contains
+	no '=', regardless of ARGC.
+	(define_makeflags): Elide leading '-' from MAKEFLAGS value if first
+	word is short option, regardless of WORDS.
+
+Wed May 22 17:24:51 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
+
+	* makefile.vms: Set LOADLIBES.
+	* makefile.com (link_using_library): Fix typo.
+
+Wed May 15 17:37:26 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
+
+	* dir.c (print_dir_data_base): Use %ld dev and ino and cast them to
+	long.
+
 Wed May 15 10:14:14 CDT 1996  Rob Tulloh  <tulloh@tivoli.com>
 
 	* dir.c: WIN32 does not support inode. For now, fully qualified
@@ -87,11 +125,6 @@ Wed May 15 10:14:14 CDT 1996  Rob Tulloh  <tulloh@tivoli.com>
 	* w32/subproc/proc.h: WIN32: subproc library support code
 	* w32/subproc/sub_proc.c: WIN32: subproc library source code
 	* w32/subproc/w32err.c: WIN32: subproc library support code
-
-Wed May 22 17:24:51 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
-
-	* makefile.vms: Set LOADLIBES.
-	* makefile.com (link_using_library): Fix typo.
 
 Mon May 13 14:37:42 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 
