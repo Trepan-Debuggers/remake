@@ -1,5 +1,5 @@
 /* Argument parsing and main program of GNU Make.
-Copyright (C) 1988,89,90,91,94,95,96,97,98 Free Software Foundation, Inc.
+Copyright (C) 1988,89,90,91,94,95,96,97,98,99 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -33,6 +33,9 @@ MA 02111-1307, USA.  */
 #ifdef WINDOWS32
 #include <windows.h>
 #include "pathstuff.h"
+#endif
+#if defined(MAKE_JOBSERVER) && defined(HAVE_FCNTL_H)
+# include <fcntl.h>
 #endif
 
 #ifdef _AMIGA
@@ -83,6 +86,7 @@ struct command_switch
 	flag,			/* Turn int flag on.  */
 	flag_off,		/* Turn int flag off.  */
 	string,			/* One string per switch.  */
+	int_string,		/* One string.  */
 	positive_int,		/* A positive integer.  */
 	floating,		/* A floating-point number (double).  */
 	ignore			/* Ignored.  */
@@ -190,9 +194,16 @@ static struct stringlist *makefiles = 0;
 unsigned int job_slots = 1;
 unsigned int default_job_slots = 1;
 
-/* Value of job_slots that means no limit.  */
+static char *job_slots_str = "1";
 
+#ifndef MAKE_JOBSERVER
+/* Value of job_slots that means no limit.  */
 static unsigned int inf_jobs = 0;
+#endif
+
+/* File descriptors for the jobs pipe.  */
+
+int job_fds[2] = { -1, -1 };
 
 /* Maximum load average at which multiple jobs will be run.
    Negative values mean unlimited, while zero means limit to
@@ -264,8 +275,13 @@ static const struct command_switch switches[] =
     { 'I', string, (char *) &include_directories, 1, 1, 0, 0, 0,
 	"include-dir", "DIRECTORY",
 	"Search DIRECTORY for included makefiles" },
-    { 'j', positive_int, (char *) &job_slots, 1, 1, 0,
+    { 'j',
+#ifndef MAKE_JOBSERVER
+        positive_int, (char *) &job_slots, 1, 1, 0,
 	(char *) &inf_jobs, (char *) &default_job_slots,
+#else
+        int_string, (char *)&job_slots_str, 1, 1, 0, "0", "1",
+#endif
 	"jobs", "N",
 	"Allow N jobs at once; infinite jobs with no arg" },
     { 'k', flag, (char *) &keep_going_flag, 1, 1, 0,
@@ -1144,13 +1160,19 @@ int main (int argc, char ** argv)
 	  }
     }
 
-#ifndef HAVE_WAIT_NOHANG
+#if defined(MAKE_JOBSERVER) || !defined(HAVE_WAIT_NOHANG)
+  /* If we don't have a hanging wait we have to fall back to old, broken
+     functionality here and rely on the signal handler and counting
+     children.
+
+     Also, if we're using the jobs pipe we need a signal handler so that
+     SIGCHLD is not ignored; we need it to interrupt select(2) in
+     job.c:start_waiting_job() if we're waiting on the pipe for a token.  */
   {
     extern RETSIGTYPE child_handler PARAMS ((int sig));
 
     /* Set up to handle children dying.  This must be done before
-       reading in the makefiles so that `shell' function calls will work.
-       Note we only do this if we have to.   */
+       reading in the makefiles so that `shell' function calls will work.  */
 # if defined SIGCHLD
     (void) signal (SIGCHLD, child_handler);
 # endif
@@ -1234,6 +1256,59 @@ int main (int argc, char ** argv)
   decode_env_switches ("MAKEFLAGS", 9);
 #if 0
   decode_env_switches ("MFLAGS", 6);
+#endif
+
+#ifdef MAKE_JOBSERVER
+  /* If extended jobs are available then the -j option can have one of 4
+     formats: (1) not specified: default is "1"; (2) specified with no
+     value: default is "0" (infinite); (3) specified with a single
+     value: this means the user wants N job slots; or (4) specified with
+     2 values separated by commas.  The latter means we're a submake and
+     the two values are the read and write FDs, respectively, for the
+     pipe.  Note this last form is undocumented for the user!
+   */
+  sscanf(job_slots_str, "%d", &job_slots);
+  {
+    char *cp = index(job_slots_str, ',');
+
+    if (cp && sscanf(cp+1, "%d", &job_fds[1]) == 1)
+      {
+	job_fds[0] = job_slots;
+	job_slots = 0;
+      }
+  }
+
+  /* In case #3 above, set up the pipe and set up the submake options
+     properly.  */
+
+  if (job_slots > 1)
+    {
+      char buf[(sizeof("1024")*2)+1];
+      char c = '0';
+
+      if (pipe(job_fds) < 0)
+	pfatal_with_name("creating jobs pipe");
+
+      /* Set the read FD to nonblocking; we'll use select() to wait
+	 for it in job.c.  */
+      fcntl (job_fds[0], F_SETFL, O_NONBLOCK);
+
+      for (; job_slots; --job_slots)
+	{
+	  write(job_fds[1], &c, 1);
+	  if (c == '9')
+	    c = 'a';
+	  else if (c == 'z')
+	    c = 'A';
+	  else if (c == 'Z')
+	    c = '0'; /* Start over again!!  */
+	  else
+	    ++c;
+	}
+
+      sprintf(buf, "%d,%d", job_fds[0], job_fds[1]);
+      job_slots_str = xstrdup(buf);
+    }
 #endif
 
   /* Set up MAKEFLAGS and MFLAGS again, so they will be right.  */
@@ -1650,6 +1725,7 @@ init_switches ()
 	  long_options[i].has_arg = no_argument;
 	  break;
 
+	case int_string:
 	case string:
 	case positive_int:
 	case floating:
@@ -1742,6 +1818,103 @@ handle_non_switch_argument (arg, env)
     }
 }
 
+/* Print a nice usage method.  */
+
+static void
+print_usage (bad)
+     int bad;
+{
+  register const struct command_switch *cs;
+  FILE *usageto;
+
+  if (print_version_flag)
+    print_version ();
+
+  usageto = bad ? stderr : stdout;
+
+  fprintf (usageto, "Usage: %s [options] [target] ...\n", program);
+
+  fputs ("Options:\n", usageto);
+  for (cs = switches; cs->c != '\0'; ++cs)
+    {
+      char buf[1024], shortarg[50], longarg[50], *p;
+
+      if (cs->description[0] == '-')
+	continue;
+
+      switch (long_options[cs - switches].has_arg)
+	{
+	case no_argument:
+	  shortarg[0] = longarg[0] = '\0';
+	  break;
+	case required_argument:
+	  sprintf (longarg, "=%s", cs->argdesc);
+	  sprintf (shortarg, " %s", cs->argdesc);
+	  break;
+	case optional_argument:
+	  sprintf (longarg, "[=%s]", cs->argdesc);
+	  sprintf (shortarg, " [%s]", cs->argdesc);
+	  break;
+	}
+
+      p = buf;
+
+      if (isalnum (cs->c))
+	{
+	  sprintf (buf, "  -%c%s", cs->c, shortarg);
+	  p += strlen (p);
+	}
+      if (cs->long_name != 0)
+	{
+	  unsigned int i;
+	  sprintf (p, "%s--%s%s",
+		   !isalnum (cs->c) ? "  " : ", ",
+		   cs->long_name, longarg);
+	  p += strlen (p);
+	  for (i = 0; i < (sizeof (long_option_aliases) /
+			   sizeof (long_option_aliases[0]));
+	       ++i)
+	    if (long_option_aliases[i].val == cs->c)
+	      {
+		sprintf (p, ", --%s%s",
+			 long_option_aliases[i].name, longarg);
+		p += strlen (p);
+	      }
+	}
+      {
+	const struct command_switch *ncs = cs;
+	while ((++ncs)->c != '\0')
+	  if (ncs->description[0] == '-' &&
+	      ncs->description[1] == cs->c)
+	    {
+	      /* This is another switch that does the same
+		 one as the one we are processing.  We want
+		 to list them all together on one line.  */
+	      sprintf (p, ", -%c%s", ncs->c, shortarg);
+	      p += strlen (p);
+	      if (ncs->long_name != 0)
+		{
+		  sprintf (p, ", --%s%s", ncs->long_name, longarg);
+		  p += strlen (p);
+		}
+	    }
+      }
+
+      if (p - buf > DESCRIPTION_COLUMN - 2)
+	/* The list of option names is too long to fit on the same
+	   line with the description, leaving at least two spaces.
+	   Print it on its own line instead.  */
+	{
+	  fprintf (usageto, "%s\n", buf);
+	  buf[0] = '\0';
+	}
+
+      fprintf (usageto, "%*s%s.\n",
+	       - DESCRIPTION_COLUMN,
+	       buf, cs->description);
+    }
+}
+
 /* Decode switches from ARGC and ARGV.
    They came from the environment if ENV is nonzero.  */
 
@@ -1804,6 +1977,20 @@ decode_switches (argc, argv, env)
 		case flag_off:
 		  if (doit)
 		    *(int *) cs->value_ptr = cs->type == flag;
+		  break;
+
+		case int_string:
+		  if (optarg == 0 && argc > optind
+		      && isdigit (argv[optind][0]))
+		    optarg = argv[optind++];
+
+		  if (!doit)
+		    break;
+
+		  if (optarg == 0)
+		    optarg = cs->noarg_value;
+
+		  *(char **)cs->value_ptr = optarg;
 		  break;
 
 		case string:
@@ -1891,96 +2078,7 @@ positive integral argument",
 
   if (!env && (bad || print_usage_flag))
     {
-      /* Print a nice usage message.  */
-      FILE *usageto;
-
-      if (print_version_flag)
-	print_version ();
-
-      usageto = bad ? stderr : stdout;
-
-      fprintf (usageto, "Usage: %s [options] [target] ...\n", program);
-
-      fputs ("Options:\n", usageto);
-      for (cs = switches; cs->c != '\0'; ++cs)
-	{
-	  char buf[1024], shortarg[50], longarg[50], *p;
-
-	  if (cs->description[0] == '-')
-	    continue;
-
-	  switch (long_options[cs - switches].has_arg)
-	    {
-	    case no_argument:
-	      shortarg[0] = longarg[0] = '\0';
-	      break;
-	    case required_argument:
-	      sprintf (longarg, "=%s", cs->argdesc);
-	      sprintf (shortarg, " %s", cs->argdesc);
-	      break;
-	    case optional_argument:
-	      sprintf (longarg, "[=%s]", cs->argdesc);
-	      sprintf (shortarg, " [%s]", cs->argdesc);
-	      break;
-	    }
-
-	  p = buf;
-
-	  if (isalnum (cs->c))
-	    {
-	      sprintf (buf, "  -%c%s", cs->c, shortarg);
-	      p += strlen (p);
-	    }
-	  if (cs->long_name != 0)
-	    {
-	      unsigned int i;
-	      sprintf (p, "%s--%s%s",
-		       !isalnum (cs->c) ? "  " : ", ",
-		       cs->long_name, longarg);
-	      p += strlen (p);
-	      for (i = 0; i < (sizeof (long_option_aliases) /
-			       sizeof (long_option_aliases[0]));
-		   ++i)
-		if (long_option_aliases[i].val == cs->c)
-		  {
-		    sprintf (p, ", --%s%s",
-			     long_option_aliases[i].name, longarg);
-		    p += strlen (p);
-		  }
-	    }
-	  {
-	    const struct command_switch *ncs = cs;
-	    while ((++ncs)->c != '\0')
-	      if (ncs->description[0] == '-' &&
-		  ncs->description[1] == cs->c)
-		{
-		  /* This is another switch that does the same
-		     one as the one we are processing.  We want
-		     to list them all together on one line.  */
-		  sprintf (p, ", -%c%s", ncs->c, shortarg);
-		  p += strlen (p);
-		  if (ncs->long_name != 0)
-		    {
-		      sprintf (p, ", --%s%s", ncs->long_name, longarg);
-		      p += strlen (p);
-		    }
-		}
-	  }
-
-	  if (p - buf > DESCRIPTION_COLUMN - 2)
-	    /* The list of option names is too long to fit on the same
-	       line with the description, leaving at least two spaces.
-	       Print it on its own line instead.  */
-	    {
-	      fprintf (usageto, "%s\n", buf);
-	      buf[0] = '\0';
-	    }
-
-	  fprintf (usageto, "%*s%s.\n",
-		   - DESCRIPTION_COLUMN,
-		   buf, cs->description);
-	}
-
+      print_usage(bad);
       die (bad ? 2 : 0);
     }
 }
@@ -2192,6 +2290,22 @@ define_makeflags (all, makefile)
 	    }
 	  break;
 #endif
+
+	case int_string:
+	  if (all)
+	    {
+	      char *vp = *(char **)cs->value_ptr;
+
+	      if (cs->default_value != 0
+		  && streq(vp, cs->default_value))
+		break;
+	      if (cs->noarg_value != 0
+		  && streq(vp, cs->noarg_value))
+		ADD_FLAG("", 0); /* Optional value omitted; see below.  */
+	      else
+		ADD_FLAG(vp, strlen(vp));
+	    }
+	  break;
 
 	case string:
 	  if (all)

@@ -1,5 +1,5 @@
 /* Job execution and handling for GNU Make.
-Copyright (C) 1988,89,90,91,92,93,94,95,96,97 Free Software Foundation, Inc.
+Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -257,10 +257,10 @@ vmsWaitForChildren(int *status)
 #endif
 
 
-/* If we can't use waitpid() or wait3(), then we use a signal handler
-   to track the number of SIGCHLD's we got.  This is less robust.  */
-
-#ifndef WAIT_NOHANG
+/* Count the number of dead children we have.  If we can use wait3() or
+   waitpid() then we'll never use this count: it's completely unnecessary.
+   But we need the handler installed to interrupt the select() call for
+   the jobs pipe, so we might as well keep it.  */
 
 static unsigned int dead_children = 0;
 
@@ -273,10 +273,9 @@ child_handler (sig)
   ++dead_children;
 
   if (debug_flag)
-    printf ("Got a SIGCHLD; %d unreaped children.\n", dead_children);
+    printf ("Got a SIGCHLD; %u unreaped children.\n", dead_children);
 }
 
-#endif /* WAIT_NOHANG */
 
 extern int shell_function_pid, shell_function_completed;
 
@@ -292,11 +291,15 @@ reap_children (block, err)
 {
   WAIT_T status;
 #ifdef WAIT_NOHANG
-  int dead_children = 1;  /* Initially, assume we have some.  */
+  /* Initially, assume we have some.  */
+  int reap_more = 1;
+# define REAP_MORE reap_more
+#else
+# define REAP_MORE dead_children
 #endif
 
   while ((children != 0 || shell_function_pid != 0) &&
-	 (block || dead_children))
+	 (block || REAP_MORE))
     {
       int remote = 0;
       register int pid;
@@ -312,8 +315,12 @@ reap_children (block, err)
 	  error (NILF, "*** Waiting for unfinished jobs....");
 	}
 
-#ifndef WAIT_NOHANG
-      /* We have one less dead child to reap.
+      /* We have one less dead child to reap.  As noted in
+	 child_handler() above, this count is completely unimportant for
+	 all modern, POSIX-y systems that support wait3() or waitpid().
+	 The rest of this comment below applies only to early, broken
+	 pre-POSIX systems.  We keep the count only because... it's there...
+
 	 The test and decrement are not atomic; if it is compiled into:
 	 	register = dead_children - 1;
 		dead_children = register;
@@ -327,7 +334,6 @@ reap_children (block, err)
 
       if (dead_children > 0)
 	--dead_children;
-#endif
 
       any_remote = 0;
       any_local = shell_function_pid != 0;
@@ -405,7 +411,7 @@ reap_children (block, err)
 	    {
 	      /* No local children are dead.  */
 #ifdef WAIT_NOHANG
-              dead_children = 0;
+              reap_more = 0;
 #endif
 	      if (block && any_remote)
 		{
@@ -612,6 +618,22 @@ reap_children (block, err)
 	     live and call reap_children again.  */
 	  block_sigs ();
 
+#ifdef MAKE_JOBSERVER
+	  /* If this job has a token out, return it.  */
+          if (c->job_token)
+	    {
+	      assert(job_slots_used > 0);
+	      write (job_fds[1], &c->job_token, 1);
+	      if (debug_flag)
+		printf ("Released token `%c' for child 0x%08lx.\n",
+			c->job_token, (unsigned long int) c);
+	      c->job_token = 0;
+	    }
+#endif
+	  /* There is now another slot open.  */
+	  if (job_slots_used > 0)
+	    --job_slots_used;
+
 	  /* Remove the child from the chain and free it.  */
 	  if (lastc == 0)
 	    children = c->next;
@@ -619,10 +641,6 @@ reap_children (block, err)
 	    lastc->next = c->next;
 	  if (! handling_fatal_signal) /* Don't bother if about to die.  */
 	    free_child (c);
-
-	  /* There is now another slot open.  */
-	  if (job_slots_used > 0)
-	    --job_slots_used;
 
 	  unblock_sigs ();
 
@@ -661,6 +679,19 @@ free_child (child)
 	free (*ep++);
       free ((char *) child->environment);
     }
+
+#ifdef MAKE_JOBSERVER
+  /* If this child has a token it hasn't relinquished, give it up now.
+     This can happen if the job completes immediately, mainly because
+     all the command lines evaluated to empty strings.  */
+  if (child->job_token)
+    {
+      write (job_fds[1], &child->job_token, 1);
+      if (debug_flag)
+	printf ("Freed token `%c' for child 0x%08lx.\n",
+		child->job_token, (unsigned long int) child);
+    }
+#endif
 
   free ((char *) child);
 }
@@ -1083,28 +1114,77 @@ static int
 start_waiting_job (c)
      struct child *c;
 {
+  struct file *f = c->file;
+
   /* If we can start a job remotely, we always want to, and don't care about
      the local load average.  We record that the job should be started
      remotely in C->remote for start_job_command to test.  */
 
   c->remote = start_remote_job_p (1);
 
-  /* If this job is to be started locally, and we are already running
-     some jobs, make this one wait if the load average is too high.  */
-  if (!c->remote && job_slots_used > 0 && load_too_high ())
+  /* If not, start it locally.  */
+  if (!c->remote)
     {
-      /* Put this child on the chain of children waiting
-	 for the load average to go down.  */
-      set_command_state (c->file, cs_running);
-      c->next = waiting_jobs;
-      waiting_jobs = c;
-      return 0;
+#ifdef MAKE_JOBSERVER
+      /* If this is not a recurse command and we are controlling
+	 multiple jobs, obtain a token before starting child. */
+      if (job_fds[0] >= 0 && !f->cmds->any_recurse)
+	{
+	  fd_set rfds;
+
+	  FD_ZERO(&rfds);
+	  FD_SET(job_fds[0], &rfds);
+
+	  /* Read a token.  We set the non-blocking bit on this earlier,
+	     so if there's no token to be read we'll fall through to the
+	     select.  The select block until (a) there's data to read,
+	     in which case we come back around and try to grab the token
+	     before someone else does, or (b) a signal, such as SIGCHLD,
+	     is caught (because we installed a handler for it).  If the
+	     latter, call reap_children() to try to free up some slots.  */
+
+	  while (read (job_fds[0], &c->job_token, 1) < 1)
+	    {
+	      int r = select (job_fds[0]+1, SELECT_FD_SET_CAST &rfds,
+                              NULL, NULL, NULL);
+
+	      if (r < 0)
+		{
+#ifdef EINTR
+		  if (errno != EINTR)
+		    /* We should definitely handle this more gracefully!
+		       What kinds of things can happen here?  ^C closes the
+		       pipe?  Something else closes it?  */
+		    pfatal_with_name ("read jobs pipe");
+#endif
+		  /* We were interrupted; handle any dead children.  */
+		  reap_children (1, 0);
+		}
+	    }
+
+	  assert(c->job_token != 0);
+	  if (debug_flag)
+	    printf ("Obtained token `%c' for child 0x%08lx.\n",
+		    c->job_token, (unsigned long int) c);
+	}
+#endif
+      /* If we are running at least one job already and the load average
+	 is too high, make this one wait.  */
+      if (job_slots_used > 0 && load_too_high ())
+	{
+	  /* Put this child on the chain of children waiting
+	     for the load average to go down.  */
+	  set_command_state (f, cs_running);
+	  c->next = waiting_jobs;
+	  waiting_jobs = c;
+	  return 0;
+	}
     }
 
   /* Start the first command; reap_children will run later command lines.  */
   start_job_command (c);
 
-  switch (c->file->command_state)
+  switch (f->command_state)
     {
     case cs_running:
       c->next = children;
@@ -1120,16 +1200,16 @@ start_waiting_job (c)
 
     case cs_not_started:
       /* All the command lines turned out to be empty.  */
-      c->file->update_status = 0;
+      f->update_status = 0;
       /* FALLTHROUGH */
 
     case cs_finished:
-      notice_finished_file (c->file);
+      notice_finished_file (f);
       free_child (c);
       break;
 
     default:
-      assert (c->file->command_state == cs_finished);
+      assert (f->command_state == cs_finished);
       break;
     }
 
@@ -1157,8 +1237,9 @@ new_job (file)
   /* Chop the commands up into lines if they aren't already.  */
   chop_commands (cmds);
 
+  /* Wait for a job slot to be freed up.  If we allow an infinite number
+     don't bother; also job_slots will == 0 if we're using the job pipe.  */
   if (job_slots != 0)
-    /* Wait for a job slot to be freed up.  */
     while (job_slots_used == job_slots)
       reap_children (1, 0);
 
@@ -1273,6 +1354,7 @@ new_job (file)
   c->command_ptr = 0;
   c->environment = 0;
   c->sh_batch_file = NULL;
+  c->job_token = 0;
 
   /* Fetch the first command line to be run.  */
   if (job_next_command (c))

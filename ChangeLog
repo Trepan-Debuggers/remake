@@ -1,3 +1,68 @@
+1999-04-25  Paul D. Smith  <psmith@gnu.org>
+
+	* make.texinfo: Updates to @dircategory and @direntry suggested by
+	Karl Berry <karl@cs.umb.edu>.
+
+1999-04-18  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* configh.dos.template: Update to recognize that version 2.02 of
+	DJGPP contains sys_siglist stuff.
+
+1999-04-14  Paul D. Smith  <psmith@gnu.org>
+
+	* make.texinfo (Options/Recursion): Document the job server.
+	(Parallel): Tweaks.
+
+1999-04-13  Paul D. Smith  <psmith@gnu.org>
+
+	Implement a new "job server" feature; the implementation was
+	suggested by Howard Chu <hyc@highlandsun.com>.
+
+	* configure.in (job-server): New disable option for job server
+	support--it's enabled by default.
+
+	* NEWS: Summarize the new feature.
+
+	* acconfig.h: New definition MAKE_JOBSERVER if job server support
+	is enabled.
+	* config.h-vms.template: Undef MAKE_JOBSERVER for this port.
+	* config.h.W32.template: Ditto.
+	* config.ami.template: Ditto.
+
+	* main.c (struct command_switch): Add a new type: int_string.
+	(switches[]) Use int_string for -j if MAKE_JOBSERVER.
+	(init_switches): Initialize the new int_string switch type.
+	(print_usage): New function, extracted from decode_switches().
+	(decode_switches): Call it.  Decode the new int_string switch type.
+	(define_makeflags): Add new int_string switch data to MAKEFLAGS.
+	(job_fds[]) Array to contain the pipe file descriptors.
+	(main): Parse the job_slots_str option results.  If necessary,
+	create the pipe and seed it with tokens.  Set the non-blocking bit
+	for the read fd.  Enable the signal handler for SIGCHLD even if we
+	have a non-hanging wait; it's needed to interrupt the select() in
+	job.c:start_waiting_job().
+
+	* make.h: Declare job_fds[].
+
+	* job.h (struct child): Add job_token field to store the token for
+	this job (if any).
+
+	* job.c (reap_children): When a child is fully reaped, release the
+	token back into the pipe.
+	(free_child): If the child to be freed still has a token, put it
+	back.
+	(new_job): Initialize the job_token member.
+	(start_waiting_job): For local jobs, if we're using the pipe, get
+	a token before we check the load, etc.  We do this by performing a
+	non-blocking read in a loop.  If the read fails, no token is
+	available.  Do a select on the fd to wait for a token.  We need to
+	re-enable the signal handler for SIGCHLD even if we have a
+	non-hanging waitpid() or wait3(), so that the signal will
+	interrupt the select() and we can wake up to reap children.
+	(child_handler): Re-enable the signal handler.  The count is still
+	kept although it's not needed or used unless you don't have
+	waitpid() or wait3().
+
 1999-04-03  Paul D. Smith  <psmith@gnu.org>
 
 	* remake.c (f_mtime): If: a) we found a file and b) we didn't

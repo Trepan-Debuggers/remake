@@ -1,5 +1,5 @@
 /* Miscellaneous global declarations and portability cruft for GNU Make.
-Copyright (C) 1988,89,90,91,92,93,94,95,96,97 Free Software Foundation, Inc.
+Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -458,6 +458,7 @@ extern int clock_skew_detected;
 extern int batch_mode_shell;
 
 extern unsigned int job_slots;
+extern int job_fds[2];
 #ifndef NO_FLOAT
 extern double max_load_average;
 #else

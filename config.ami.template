@@ -176,6 +176,13 @@
 /* Define this if the SCCS `get' command understands the `-G<file>' option.  */
 /* #undef SCCS_GET_MINUS_G */
 
+/* Define this to enable job server support in GNU make.  */
+/* #undef MAKE_JOBSERVER */
+
+/* Define to be the nanoseconds member of struct stat's st_mtim,
+   if it exists.  */
+/* #undef ST_MTIM_NSEC */
+
 /* Define this if the C library defines the variable `sys_siglist'.  */
 /* #undef HAVE_SYS_SIGLIST */
 
