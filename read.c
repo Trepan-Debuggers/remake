@@ -155,7 +155,6 @@ read_all_makefiles (makefiles)
 	  d = d->next;
 
 	/* Use the storage read_makefile allocates.  */
-	free (*makefiles);
 	*makefiles = dep_name (d);
 	++num_makefiles;
 	++makefiles;
@@ -613,9 +612,9 @@ read_makefile (filename, type)
 	    }
 
 	  filenames = multi_glob (parse_file_seq (&p2, ':',
-						  sizeof (struct nameseq)),
-				  sizeof (struct nameseq),
-				  1);
+						  sizeof (struct nameseq),
+						  1),
+				  sizeof (struct nameseq));
 	  if (*p2++ == '\0')
 	    makefile_fatal (filename, lineno, "missing separator");
 	  /* Is this a one-colon or two-colon entry?  */
