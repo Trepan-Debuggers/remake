@@ -227,10 +227,17 @@ vmsfiles = config.h-vms makefile.com makefile.vms readme.vms \
 	   vmsdir.h vmsfunctions.c vmsify.c
 amigafiles = README.Amiga config.ami Makefile.ami SCOPTIONS SMakefile \
 	     amiga.c amiga.h make.lnk
+win32files = README.WIN32 build_w32.bat config.h.WIN32 subproc.bat \
+	     $(addprefix w32/,pathstuff.c compat/dirent.c include/dirent.h \
+			      include/pathstuff.h include/sub_proc.h \
+			      include/w32err.h subproc/NMakefile \
+			      subproc/build.bat subproc/misc.c \
+			      subproc/proc.h subproc/sub_proc.c \
+			      subproc/w32err.c)
 distfiles=README INSTALL COPYING ChangeLog NEWS \
           configure Makefile.in configure.in build.sh.in mkinstalldirs \
 	  configh.dos configure.bat \
-	  $(amigafiles) $(vmsfiles) \
+	  $(amigafiles) $(vmsfiles) $(win32files) \
 	  aclocal.m4 acconfig.h $(srcs) remote-*.c $(globfiles) \
 	  make.texinfo make-stds.texi \
 	  make.?? make.??s make.toc make.aux make.man texinfo.tex TAGS tags \
