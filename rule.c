@@ -1,5 +1,5 @@
 /* Pattern and suffix rule internals for GNU Make.
-Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+Copyright (C) 1988,89,90,91,92,93, 1998 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -14,7 +14,8 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+Boston, MA 02111-1307, USA.  */
 
 #include "make.h"
 #include "dep.h"
@@ -664,8 +665,13 @@ print_rule_data_base ()
     }
 
   if (num_pattern_rules != rules)
-    fatal (NILF, "BUG: num_pattern_rules wrong!  %u != %u",
-	   num_pattern_rules, rules);
+    {
+      /* This can happen if a fatal error was detected while reading the
+         makefiles and thus count_implicit_rule_limits wasn't called yet.  */
+      if (num_pattern_rules != 0)
+        fatal ("BUG: num_pattern_rules wrong!  %u != %u",
+               num_pattern_rules, rules);
+    }
 
   puts ("\n# Pattern-specific variable values");
 

@@ -1274,11 +1274,16 @@ new_job (file)
   c->sh_batch_file = NULL;
 
   /* Fetch the first command line to be run.  */
-  job_next_command (c);
-
-  /* The job is now primed.  Start it running.
-     (This will notice if there are in fact no commands.)  */
-  (void)start_waiting_job (c);
+  if (job_next_command (c))
+    /* The job is now primed.  Start it running.  */
+    (void)start_waiting_job (c);
+  else
+    {
+      /* There were no commands (variable expands to empty?).  All done.  */
+      c->file->update_status = 0;
+      notice_finished_file(c->file);
+      free_child (c);
+    }
 
   if (job_slots == 1)
     /* Since there is only one job slot, make things run linearly.
