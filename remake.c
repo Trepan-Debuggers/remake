@@ -979,15 +979,6 @@ f_mtime (file, search)
 	}
     }
 
-  /* Store the mtime into all the entries for this file.  */
-  if (file->double_colon)
-    file = file->double_colon;
-  do
-    {
-      file->last_mtime = mtime;
-      file = file->prev;
-    } while (file != 0);
-
   {
     /* Files can have bogus timestamps that nothing newly made will be
        "newer" than.  Updating their dependents could just result in loops.
@@ -1008,6 +999,15 @@ f_mtime (file, search)
 	  }
       }
   }
+
+  /* Store the mtime into all the entries for this file.  */
+  if (file->double_colon)
+    file = file->double_colon;
+  do
+    {
+      file->last_mtime = mtime;
+      file = file->prev;
+    } while (file != 0);
 
   return mtime;
 }
