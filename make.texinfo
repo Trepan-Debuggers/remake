@@ -3,10 +3,15 @@
 @synindex vr fn
 
 @ignore
-$Header: /sources/make/make/Attic/make.texinfo,v 1.8 1988/05/01 14:49:57 mcgrath Beta $
+$Header: /sources/make/make/Attic/make.texinfo,v 1.9 1988/05/04 17:56:07 mcgrath Beta $
 
 $Log: make.texinfo,v $
-Revision 1.8  1988/05/01 14:49:57  mcgrath
+Revision 1.9  1988/05/04 17:56:07  mcgrath
+* Miscellaneous changes suggested by RMS.
+* The `define' directive makes recursive variables.
+* Removed the `expand' function.
+
+Revision 1.8  88/05/01  14:49:57  mcgrath
 Added Bugs section, replacing the paragraph in 
 the Overview chapter (Top node).
 
@@ -44,7 +49,7 @@ Revision 1.2  88/04/23  16:16:04  roland
   defined when the commands are executed (such as `$@').
 * Added `-w' switch to log directories to stdout.
 * Added selective VPATH lists and the `vpath' directive.
-* Added the previously undocumented `-lLIB' dependent syntax.
+* Added the previously undocumented `-lLIB' dependency syntax.
 * Added the `filter', `filter-out', `strip' and `join' expansion functions.
 * Added simply expanded vs. recursively expanded variables, `:=' variable
   assignments and changed most examples to use `:=' rather than `='.
@@ -64,7 +69,7 @@ this manual provided the copyright notice and this permission notice
 are preserved on all copies.
 
 @ignore
-Permission is granted to process this file through @TeX{} and print the
+Permission is granted to process this file through TeX and print the
 results, provided the printed document carries copying permission
 notice identical to this one except for the removal of this paragraph
 (this paragraph not being relevant to the printed manual).
@@ -177,11 +182,13 @@ be recompiled, or how.  @xref{Running}.
 @section Problems and Bugs
 
 If you have problems with GNU @code{make} or think you've found a bug,
-please report it to Roland McGrath; he will probably do something about
-it.  Before reporting a bug, make sure you've actually found a real bug.
+please report it to Roland McGrath; he will probably do something about it.
+
+Before reporting a bug, make sure you've actually found a real bug.
 Carefully re-read the documentation and see if it really says you can do
 what you're trying to do.  If it's not clear whether you should be able
 to do something or not, report that too; it's a bug in the documentation!
+
 Before reporting a bug or trying to fix it yourself, try to isolate it to
 the smallest possible makefile that reproduces the problem.  Then send me
 the makefile, the exact results @code{make} gave you and tell me what you
@@ -541,7 +548,7 @@ Another such occasion is when you want to automatically generate
 dependencies from source files; the dependencies can be put in a file
 that is included by the main makefile.  This practice is generally
 cleaner than that of somehow appending the dependencies to the end of the
-main makefile as has been traditionally done with other @code{make}s.
+main makefile as has been traditionally done with other versions of @code{make}.
 
 If the specified name does not start with a slash, and the file is not
 found in the current directory, several other directories are searched.
@@ -825,7 +832,7 @@ there is no need to write explicit rules for compiling the files.)
 @vindex VPATH
 @vindex vpath
 @cindex @code{vpath} pattern
-@cindex @code{vpath} searchpath
+@cindex @code{vpath} search path
 @cindex directory search
 
 For large systems, it is often desirable to put sources in a separate
@@ -883,39 +890,46 @@ The variable @code{CFLAGS} exists so you can specify flags for C
 compilation by changing its value; we use it here for consistency so it
 will affect all C compilations uniformly.  (@pxref{Implicit Variables}).
 
-The use of the @code{VPATH} variables is in fact a different form of a more
-flexible feature.  This feature, the @code{vpath} directive is in some
-ways more general than the @code{VPATH} variables and in some ways more
-specialized: it is not limited to the value of a variable, but it can be
-specialized to only certain filenames.  The @code{vpath} directive defines
-or removes a searchpath for a filename pattern.  It can be used in any of
-the following three syntaxes:
+A similar but more general feature is the @code{vpath} directive, which
+allows you to specify a search path for a particular class of filenames,
+those that match a particular pattern.  Thus you can supply certain
+search directories for one class of filenames and other directories (or
+none) for other filenames.
+
+There are three forms of the @code{vpath} directive:
 
 @table @code
-@item vpath
-This removes all @code{vpath} searchpaths for all patterns.
+@item vpath @var{pattern} @var{directories}
+Specify the search path @var{directories} for filenames that match
+@code{pattern}.  If another path was previously specified for the same
+pattern, the new path replaces it.  Note that it does @emph{not} add to
+the old path.@refill
+
 @item vpath @var{pattern}
-This removes the @code{vpath} searchpath for the given pattern.
-@item vpath @var{pattern} @var{searchpath}
-This sets the searchpath for @var{pattern} to @var{searchpath}.
-If there is already a searchpath for that pattern, the old one is replaced.
+Clear out the search path associated with @var{pattern}.
+
+@item vpath
+Clear all search paths previously specified with @code{vpath} directives.
 @end table
 
 A @code{vpath} pattern is a string containing a @samp{%} character.
-The string must match the filename of a dependent that is being searched
+The string must match the filename of a dependency that is being searched
 for, the @samp{%} character matching any sequence of zero or more
 characters (as in pattern rules; @pxref{Pattern Rules}).
 (Actually the @samp{%} may be left out, necessitating an exact match.)
-A @code{vpath} searchpath is a colon-separated list of directories to be
-searched, just like the searchpath used in the @code{VPATH} variable.
+A @code{vpath} search path is a colon-separated list of directories to be
+searched, just like the search path used in the @code{VPATH} variable.
 
-Dependents are searched for in all @code{vpath} searchpaths whose associated
-patterns match the dependent's name.  All @code{vpath} directives are
-processed sequentially, so they will be searched in the order they are
-presented in the makefiles.  After all @code{vpath} searchpaths are
-searched (unsuccessfully), the searchpath in the @code{VPATH} variable is
-searched.  The process of searching for file in these searchpaths is described
-in detail above, talking about the @code{VPATH} variable.@refill
+When a dependency needs to be sought outside of tfhe current directory,
+if the @var{pattern} in a @code{vpath} directive matches the name of the
+dependency file, then the @var{directories} in that directive are
+searched just like (and before) the directories in the @code{VPATH}
+variable.@refill
+
+If several @code{vpath} patterns match the dependency file's name, then
+@code{make} processes each matching @code{vpath} directive one by one,
+searching all the directories mentioned in each directive.  The @code{vpath}
+directives are processed in the order in which they appear in the makefiles.
 
 Often the dependencies include header files as well, which you don't want
 to mention in the commands.  The function @code{firstword} can be used to
@@ -949,13 +963,12 @@ variables as a matter of necessity; consequently they will use the file
 names found by directory search with no extra effort.
 
 There is a final rather obscure little feature of directory search.
-It is designed especially for libraries.  A dependent name of the form
+It is designed especially for libraries.  A dependency name of the form
 @code{-l@var{name}} will be searched for under the filename
 @samp{lib@var{name}.a} in the @samp{/lib} and @samp{/usr/lib} directories
-and then will be searched for in matching @code{vpath} searchpaths and in
-the @code{VPATH} searchpath.  However, the name will not be changed to
-the full filename under which the file is found.  This is meant to
-facilitate the use of libraries in makefiles.  For example,@refill
+and then will be searched for in matching @code{vpath} search paths and in
+the @code{VPATH} search path.  This is meant to facilitate the use of
+libraries in makefiles.  For example,@refill
 
 @example
 foo : foo.c -lcurses
@@ -966,9 +979,16 @@ foo : foo.c -lcurses
 would cause the command @samp{cc foo.c -lcurses -o foo} to be executed
 when @samp{foo} is older than @samp{foo.c} or any of
 @samp{/lib/libcurses.a} @samp{/usr/lib/libcurses.a} or the file
-@samp{libcurses.a} in any of the directories in @code{vpath} searchpaths
+@samp{libcurses.a} in any of the directories in @code{vpath} search paths
 whose associated patterns match @samp{libcurses.a} or in any of the
-directories in the @code{VPATH} searchpath.@refill
+directories in the @code{VPATH} search path.@refill
+
+As shown by the example above, the file name found by directory search is
+used only for comparing the file time with the target file's time.  It
+does not replace the file's name in later usage (such as in automatic
+variables like @code{$^}); the name remains unchanged, still starting
+with @samp{-l}.  This leads to the correct results because the linker
+will repeat the appropriate search when it processes its arguments.@refill
 
 @node Phony Targets, Empty Targets, Directory Search, Rules
 @section Phony Targets
@@ -1577,7 +1597,8 @@ If you are running @code{make} over a large directory tree, the @code{-w}
 option can make understanding the output a lot easier by showing each
 directory as it is entered and exited.  For example, if @code{make -w} is
 run in the directory @file{/u/gnu/make}, @code{make} will print a line of
-the form
+the form:
+
 @example
 make: Entering directory `/u/gnu/make'.
 @end example
@@ -1585,7 +1606,9 @@ before doing anything else, and a line of the form
 @example
 make: Leaving directory `/u/gnu/make'.
 @end example
-after finishing with the makefile.
+
+@noindent
+when processing is completed.
 
 @node Sequences,, Recursion, Commands
 @section Defining Canned Command Sequences
@@ -1622,21 +1645,18 @@ rule's target file name.
 
 To use the canned sequence, substitute the variable into the commands of a
 rule.  You can substitute it like any other variable (@pxref{Reference}).
-But usually substitution alone is not enough, because the commands in a
-canned sequence typically contain variable references that should be
-expanded each time the canned sequence is used.  To make this work, you
-need to use the @code{expand} function when you substitute the sequence
-(@pxref{Expand Function}).  Here is how it looks:
+Because the variable assignment made by a @code{define} is to a
+recursively expanded variable, variable references inside such a variable
+are expanded when the commands are run.  For example:
 
 @example
 foo.c : foo.y
-        $(expand $(run-yacc))
+        $(run-yacc)
 @end example
 
 @noindent
-The @code{expand} function will substitute @samp{foo.y} for the variable
-@samp{$^} when it occurs in @code{run-yacc}'s value, and @samp{foo.c} for
-@samp{$@@}.@refill
+@samp{foo.y} will substituted for the variable @samp{$^} when it occurs in
+@code{run-yacc}'s value, and @samp{foo.c} for @samp{$@@}.@refill
 
 This is a realistic example, but this particular one is not needed in
 practice because @code{make} has an implicit rule to figure out these
@@ -1747,22 +1767,24 @@ bar := $(foo:.o=.c)
 @end example
 
 @noindent
-sets @samp{bar} to @samp{a.c b.c c.c}.  (@xref{Setting}.)
+sets @samp{bar} to @samp{a.c b.c c.c}.  @xref{Setting}.
 
 @dfn{Conditional references} are references whose value depends on
 whether or not some variable is set.  They are inspired by the similar
 construct in the shell @samp{sh}.  The syntax of conditional references is:
 
 @table @code
-@item $(a:-b)
-This expands to the value of the variable @samp{a} if it is defined or to
-@samp{b} (a literal string) if it is not.
-@item $(a:+b)
-This expands to @samp{b} if the variable @samp{a} is
+@item $(@var{a}:-@var{b})
+This expands to the value of the variable @var{a} if it is defined or to
+@samp{@var{b}} (a literal string) if it is not.
+
+@item $(@var{a}:+@var{b})
+This expands to @samp{@var{b}} if the variable @var{a} is
 defined or nothing if it is not.
-@item $(a:b-c)
-This expands to @samp{b} if the variable @samp{a} is defined or to
-@samp{c} if it is not.
+
+@item $(@var{a}:@var{b}-@var{c})
+This expands to @samp{@var{b}} if the variable @var{a} is defined or to
+@samp{@var{c}} (a literal string) if it is not.
 @end table
 
 For the purpose of these conditional references, a variable is
@@ -1848,11 +1870,11 @@ CFLAGS = $(CFLAGS) -O
 
 @noindent
 because it will cause an infinite loop in the variable expansion.
-Another disadvantage is that variable-expansion functions
-(@pxref{Functions}) will be executed every time the variable is expanded
-and this wastes a lot of time.  This flavor of variable is the only sort
-used by other @code{make}s.@refill
-
+Another disadvantage is that functions (@pxref{Functions}) will be executed
+every time a variable calling a function is expanded and this wastes a lot
+of time.  As well as wasting time, this will give unpredictable results
+when using the @code{wildcard} function.  This flavor of variable is the
+only sort supported by other versions of @code{make}.@refill
 
 To avoid all the problems and inconveniences of recursively expanded
 variables, there is another flavor: @dfn{simply expanded} variables.
@@ -1886,6 +1908,7 @@ This method makes complicated makefile programming easier.  It allows you
 to redefine a variable using its own value (or its value processed in some
 way by one of the expansion functions; @pxref{Functions}) and to use the
 variable expansion functions much more efficiently.
+
 It also gives you a way to introduce leading or trailing spaces into variable
 values.  Such spaces are discarded from your input before substitution of
 variable references and function calls; this means you can include leading
@@ -1993,25 +2016,26 @@ is marked by a line containing just the word @code{endef}.
 @example
 define two-lines
 echo foo
-echo $100
+echo $(bar)
 endef
 @end example
 
-Aside from syntax, there are two differences between @code{define} and
-ordinary simply expanded variable assignments:
+Aside from the syntax, the only difference between @code{define} and
+ordinary recursive variable assignments is that the text in a
+@code{define} can be multiple lines.  The value in an ordinary assignment
+cannot contain a newline; but the newlines that separate the lines of the
+value in a @code{define} become part of thew variable's value (except for
+the final newline which is always present and is not considered part of
+the value.)@refill
 
-@itemize @bullet
-@item
-The value assigned in an ordinary simply expanded variable assignment is
-scanned for variable references and function calls, which are expanded.
-The @code{define} commands are used verbatim, with no replacement.
+Thus the previous example is functionally equivalent to:
 
-@item
-The value in an ordinary assignment cannot contain a newline.  The text in
-a @code{define} can be multiple lines; the newlines that separate the lines
-become part of the variable's value.  (The final newline which is always
-present does not become part of the variable value.)
-@end itemize
+@example
+two-lines = echo foo; echo $(bar)
+@end example
+
+@noindent
+since the shell will interpret the semicolon and the newline identically.
 
 @node Environment,, Defining, Variables
 @section Variables from the Environment
@@ -2060,8 +2084,8 @@ A @dfn{conditional} causes part of a makefile to be obeyed or ignored
 depending on the values of variables.  Conditionals can compare the value
 of one variable with another, or the value of a variable with a constant
 string.  Conditionals control what @code{make} actually ``sees'' in the
-makefile, so they can @emph{not} be used to control the behavior of anything
-that is processed after the makefile is read in (such as commands).
+makefile, so they can @emph{not} be used to control commands at the time
+of execution.@refill
 
 @menu
 * Example: Conditional Example.   An annotated example.
@@ -2268,8 +2292,6 @@ compute the files to operate on or the commands to use.
 @menu
 * Syntax: Function Syntax.  Syntax of function calls in general.
 * Text Functions::          Text manipulation functions.
-* Expand Function::         The function @code{expand} can search a variable's
-                             value for variable references.
 * Filename Functions::      Functions for manipulating file names.
 @end menu
 
@@ -2326,7 +2348,7 @@ bar:= $(subst $(space),$(comma),$(foo))
 Here the @code{subst} function replaces each space with a comma, through
 the value of @code{foo}, and substitutes the result.
 
-@node Text Functions, Expand Function, Function Syntax, Functions
+@node Text Functions, Filename Functions, Function Syntax, Functions
 @section Functions for String Substitution and Analysis
 
 Here are some functions that operate on substrings of a string:
@@ -2350,9 +2372,9 @@ substitutes the string @samp{fEEt on the strEEt}.
 @findex patsubst
 Finds whitespace-separated words in @var{text} that match @var{pattern}
 and replaces them with @var{replacement}.  @var{pattern} may contain a
-@key{%} which acts as a wildcard, matching any number of any characters
-within a word.  If @var{replacement} also contains a @key{%}, it is
-replaced by the text that matched the @key{%} in the pattern.
+@samp{%} which acts as a wildcard, matching any number of any characters
+within a word.  If @var{replacement} also contains a @samp{%}, the @samp{%}
+is replaced by the text that matched it in the pattern.
 Whitespace between words is folded into single space characters.
 
 @item $(findstring @var{find},@var{in})
@@ -2365,10 +2387,11 @@ application of @code{findstring}.
 
 @item $(filter @var{pattern},@var{text})
 @findex filter
-Filters out all whitespace-separated words in @var{text} that do @emph{not}
-match @var{pattern}.  The pattern is one using @key{%} as used in the
-@code{patsubst} function.  This can be used to separate out different
-types of strings (such as filenames) in a variable.  For example:@refill
+Removes all whitespace-separated words in @var{text} that do @emph{not}
+match @var{pattern}, returning only matching words.  The pattern is one
+using @samp{%} as used in the @code{patsubst} function.  This can be used
+to separate out different types of strings (such as filenames) in a variable.
+For example:@refill
 
 @example
 sources := foo.c bar.c ugh.h
@@ -2376,14 +2399,16 @@ foo: $(sources)
 	cc $(filter %.c,$(sources)) -o foo
 @end example
 
+@noindent
 says that @file{foo} depends of @file{foo.c}, @file{bar.c} and
 @file{ugh.h} but only @file{foo.c} and @file{bar.c} should be specified
 in the command to the compiler.@refill
 
 @item $(filter-out @var{pattern},@var{text})
 @findex filter-out
-Filters out all whitespace-separated words in @var{text} that @emph{do}
-match @var{pattern}.  This is the exact opposite of @code{filter}.
+Removes all whitespace-separated words in @var{text} that @emph{do}
+match @var{pattern}, returning only matching words.  This is the exact
+opposite of the @code{filter} function.@refill
 @end table
 
 Here is a realistic example of use of @code{subst}.  Suppose that a
@@ -2415,12 +2440,13 @@ The effect is to append the text @samp{-Isrc -I../headers} to the
 previously given value of @code{CFLAGS}.
 
 @findex strip
-Another function, @code{strip} simply strips leading and trailing
+Another function, @code{strip}, simply removes leading and trailing
 whitespace from its argument and replaces each internal sequence of one
-or more whitespace characters with a sing space.  This function can be
+or more whitespace characters with a single space.  This function can be
 very useful when used in conjunction with conditionals.  When comparing
 something with the null string @samp{""} using @code{ifeq} or @code{ifneq},
 you usually want a string of just whitespace to match the null string.
+Thus,
 
 @example
 .PHONY: all
@@ -2431,43 +2457,12 @@ all:;@@echo 'Nothing to make!'
 endif
 @end example
 
-
-@node Expand Function, Filename Functions, Text Functions, Functions
-@section Rescanning Text for Variable References
-
-@table @code
-@item $(expand @var{text})
-@findex expand
-Expands the text @var{text} twice.  This is to say, after variable
-references and function calls written in @var{text} are expanded,
-producing the argument text, that text is scanned over again for
-variable references and function calls.
-@end table
-
-For an example, suppose the following variable values have been set up:
-
-@example
-foo:=cross$$(intermediate)
-intermediate:=bar
-@end example
-
 @noindent
-where the double @samp{$} is used in setting @code{foo} in order to prevent
-variable substitution from occurring when @code{foo} is set, thus getting
-an actual dollar sign into the value of @code{foo}.
+would probably not have the desired results, while replacing
+@samp{"$(needs_made)"} with @samp{"$(strip $(needs_made))"} in the
+@code{ifneq} directive would.@refill
 
-Now if we expand @code{foo} in the usual way, with @samp{$(foo)}, the
-result is @samp{cross$(intermediate)}.
-
-The effect of @samp{$(expand $(foo))} is to rescan that string
-@samp{cross$(intermediate)}, which appears as the expanded argument string.
-In the process, variable substitution operates on the variable
-@code{intermediate}.  The ultimate result is @samp{crossbar}.
-
-The @code{expand} function is most often useful with canned sequences of
-commands (@xref{Sequences}).
-
-@node Filename Functions,, Expand Function, Functions
+@node Filename Functions,, Text Functions, Functions
 @section Functions for File Names
 
 Several of the built-in expansion functions relate specifically to
@@ -2577,21 +2572,16 @@ produces the result @samp{src/foo src/bar}.
 
 @item $(join @var{list1},@var{list2})
 @findex join
-The two lists of whitespace-separated words are joined together, with a
-one-to-one correspondence between words in @var{list1} and @var{list2}.
-For example,
-
-@example
-$(join a/ b/ c/,d e f g)
-@end example
-
-@noindent
-produces the result @samp{a/d b/e c/f g}.  Note that extraneous words in
-either list are just appended to the output.  Whitespace between the
-words in the lists is not preserved; it is replaced with a single space.
+Concatenates the two arguments word by word: the two first words (one
+from each argument) concatenated form the first word of the result, the
+two second words form the second word of the result, and so on.  So the
+@var{n}th word of the result comes from the @var{n}th word of each
+argument.  If one argument has more words that the other, the extra
+words are copied unchanged into the result.  Whitespace between the words
+in the lists is not preserved; it is replaced with a single space.
 This function can reverse the effect of the @code{dir} and @code{notdir}
-functions, after other processing has been done on the separated lists of
-directories and files.@refill
+functions, after other processing has been done on the separated lists
+of directories and files.@refill
 
 @item $(firstword @var{names})
 @findex firstword
@@ -3419,8 +3409,8 @@ The deletion is reported to you by printing a @code{rm -f} command
 that shows what @code{make} is doing.  (You can optionally define an
 implicit rule so as to preserve certain intermediate files.  You can also
 list the target pattern of an implicit rule (such as @code{%.o}) as a
-dependent of the special target @code{.PRECIOUS} to preserve intermediate
-files whose target patterns match that dependent.)@refill
+dependency file of the special target @code{.PRECIOUS} to preserve intermediate
+files whose target patterns match that file's name.)@refill
 
 A chain can involve more than two implicit rules.  For example, it is
 possible to make a file @file{foo} from @file{RCS/foo.y,v} by running RCS,
