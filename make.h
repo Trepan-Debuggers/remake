@@ -249,7 +249,7 @@ extern int pipe (), close (), read (), write (), open ();
 extern long int lseek ();
 #endif	/* GNU C library or POSIX.  */
 
-#ifndef	GETCWD_MISSING
+#ifdef	HAVE_GETCWD
 extern char *getcwd ();
 #else
 extern char *getwd ();
