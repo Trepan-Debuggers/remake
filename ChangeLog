@@ -1,3 +1,13 @@
+1999-04-03  Paul D. Smith  <psmith@gnu.org>
+
+	* remake.c (f_mtime): If: a) we found a file and b) we didn't
+	create it and c) it's not marked as an implicit target and d) it
+	is marked as an intermediate target, then it was so marked due to
+	an .INTERMEDIATE special target, but it already existed in the
+	directory.  In this case, unset the intermediate flag so we won't
+	delete it when make is done.  It feels like it would be cleaner to
+	put this check in update_file_1() but I worry it'll get missed...
+
 1999-04-01  Paul D. Smith  <psmith@gnu.org>
 
 	* job.c (construct_command_argv_internal): Use bcopy() to copy

@@ -1140,11 +1140,22 @@ f_mtime (file, search)
   /* Store the mtime into all the entries for this file.  */
   if (file->double_colon)
     file = file->double_colon;
+
   do
     {
+      /* If this file is not implicit but it is intermediate then it was
+	 made so by the .INTERMEDIATE target.  If this file has never
+	 been built by us but was found now, it existed before make
+	 started.  So, turn off the intermediate bit so make doesn't
+	 delete it, since it didn't create it.  */
+      if (mtime != (FILE_TIMESTAMP)-1 && file->command_state == cs_not_started
+	  && !file->tried_implicit && file->intermediate)
+	file->intermediate = 0;
+
       file->last_mtime = mtime;
       file = file->prev;
-    } while (file != 0);
+    }
+  while (file != 0);
 
   return mtime;
 }
