@@ -3367,10 +3367,15 @@ when processing is completed.
 @cindex @code{-w}, and recursion
 @cindex @code{--print-directory}, and @code{--directory}
 @cindex @code{--print-directory}, and recursion
+@cindex @code{--no-print-directory}
+@cindex @code{--print-directory}, disabling
+@cindex @code{-w}, disabling
 Normally, you do not need to specify this option because @samp{make}
 does it for you: @samp{-w} is turned on automatically when you use the
-@samp{-C} option, and in sub-@code{make}s (unless you also use
-@samp{-s}, which says to be silent).
+@samp{-C} option, and in sub-@code{make}s.  @code{make} will not
+automatically turn on @samp{-w} if you also use @samp{-s}, which says to
+be silent, or if you use @samp{--no-print-directory} to explicitly
+disable it.
 
 @node Sequences, Empty Commands, Recursion, Commands
 @section Defining Canned Command Sequences
@@ -5899,6 +5904,13 @@ from complicated nests of recursive @code{make} commands.
 @xref{Recursion, ,Recursive Use of @code{make}}.  (In practice, you
 rarely need to specify this option since @samp{make} does it for you;
 see @ref{-w Option, ,The @samp{--print-directory} Option}.)
+
+@itemx --no-print-directory
+@cindex @code{--no-print-directory}
+Disable printing of the working directory under @code{-w}.
+This option is useful when @code{-w} is turned on automatically,
+but you do not want to see the extra messages.
+@xref{-w Option, ,The @samp{--print-directory} Option}.
 
 @item -W @var{file}
 @cindex @code{-W}
