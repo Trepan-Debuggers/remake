@@ -411,7 +411,7 @@ variable_expand (char *line)
    variable-expansion that is in progress.  */
 
 char *
-expand_argument (char *str, char *end)
+expand_argument (const char *str, const char *end)
 {
   char *tmp;
 
@@ -419,13 +419,11 @@ expand_argument (char *str, char *end)
     return xstrdup("");
 
   if (!end || *end == '\0')
-    tmp = str;
-  else
-    {
-      tmp = (char *) alloca (end - str + 1);
-      bcopy (str, tmp, end - str);
-      tmp[end - str] = '\0';
-    }
+    return allocated_variable_expand ((char *)str);
+
+  tmp = (char *) alloca (end - str + 1);
+  bcopy (str, tmp, end - str);
+  tmp[end - str] = '\0';
 
   return allocated_variable_expand (tmp);
 }

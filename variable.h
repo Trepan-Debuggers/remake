@@ -104,7 +104,7 @@ extern char *variable_expand PARAMS ((char *line));
 extern char *allocated_variable_expand_for_file PARAMS ((char *line, struct file *file));
 #define	allocated_variable_expand(line) \
   allocated_variable_expand_for_file (line, (struct file *) 0)
-extern char *expand_argument PARAMS ((char *str, char *end));
+extern char *expand_argument PARAMS ((const char *str, const char *end));
 extern char *variable_expand_string PARAMS ((char *line, char *string,
                                              long length));
 extern void install_variable_buffer PARAMS ((char **bufp, unsigned int *lenp));
