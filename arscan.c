@@ -82,9 +82,10 @@ ar_scan (archive, function, arg)
 {
 #ifdef AIAMAG
   FL_HDR fl_header;
+#else
+  int long_name = 0;
 #endif
   char *namemap = 0;
-  int long_name = 0;
   register int desc = open (archive, O_RDONLY, 0);
   if (desc < 0)
     return -1;
@@ -191,8 +192,6 @@ ar_scan (archive, function, arg)
 	
 	name[name_len] = 0;
 
-	long_name = 1;
-
 	sscanf (member_header.ar_date, "%12ld", &dateval);
 	sscanf (member_header.ar_uid, "%12d", &uidval);
 	sscanf (member_header.ar_gid, "%12d", &gidval);
@@ -203,7 +202,8 @@ ar_scan (archive, function, arg)
 	    ++data_offset;
 
 	fnval =
-	  (*function) (desc, name, member_offset, data_offset, eltsize,
+	  (*function) (desc, name, 0,
+		       member_offset, data_offset, eltsize,
 		       dateval, uidval, gidval,
 		       eltmode, arg);
 
