@@ -26,8 +26,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 extern char *version_string;
 
-extern struct dep *read_all_makefiles ();
-
 extern void print_variable_data_base ();
 extern void print_dir_data_base ();
 extern void print_rule_data_base ();
@@ -920,7 +918,7 @@ main (argc, argv, envp)
 			any_remade |= (file_mtime_no_search (d->file)
 				       != makefile_mtimes[i]);
 		      }
-		    else if (d->changed != 1)
+		    else if (! (d->changed & RM_DONTCARE))
 		      {
 			time_t mtime;
 			/* The update failed and this makefile was not
@@ -934,23 +932,20 @@ main (argc, argv, envp)
 		  }
 		else
 		  /* This makefile was not found at all.  */
-		  switch (d->changed)
+		  if (! (d->changed & RM_DONTCARE))
 		    {
-		    case 0:
-		      /* A normal makefile.  We must die later.  */
-		      error ("Makefile `%s' was not found", dep_name (d));
-		      any_failed = 1;
-		      break;
-		    case 1:
-		      /* A makefile from the MAKEFILES variable.
-			 We don't care.  */
-		      break;
-		    case 2:
-		      /* An included makefile.  We don't need
-			 to die, but we do want to complain.  */
-		      error ("Included makefile `%s' was not found.",
-			     dep_name (d));
-		      break;
+		      /* This is a makefile we care about.  See how much.  */
+		      if (d->changed & RM_INCLUDED)
+			/* An included makefile.  We don't need
+			   to die, but we do want to complain.  */
+			error ("Included makefile `%s' was not found.",
+			       dep_name (d));
+		      else
+			{
+			  /* A normal makefile.  We must die later.  */
+			  error ("Makefile `%s' was not found", dep_name (d));
+			  any_failed = 1;
+			}
 		    }
 
 		free ((char *) d);
