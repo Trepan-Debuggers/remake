@@ -1577,9 +1577,10 @@ file, and the @emph{file name} of the library looks like
 @file{lib@var{name}.a}, not like @samp{-l@var{name}}.)@refill
 
 When a dependency's name has the form @samp{-l@var{name}}, @code{make}
-handles it specially by searching for the file @samp{lib@var{name}.a} in
-the directories @samp{/lib} and @samp{/usr/lib}, and then using matching
-@code{vpath} search paths and the @code{VPATH} search path.@refill
+handles it specially by searching for the file @file{lib@var{name}.a} in
+the directories @file{/lib}, @file{/usr/lib}, and @file{/usr/local/lib},
+and then using matching @code{vpath} search paths and the @code{VPATH}
+search path.@refill
 
 For example,
 
