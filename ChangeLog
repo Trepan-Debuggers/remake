@@ -1,3 +1,8 @@
+Fri Dec 22 18:44:44 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* compatMakefile (GETOPT, GETOPT_SRC, GLOB): Variables removed.
+	(objs, srcs): Include their values here instead of references.
+
 Thu Dec 14 06:21:29 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
 	* Version 3.74.2.
