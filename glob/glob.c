@@ -37,8 +37,15 @@ Cambridge, MA 02139, USA.  */
    program understand `configure --with-gnu-libc' and omit the object files,
    it is simpler to just do this in the source for each such file.  */
 
-#if defined (_LIBC) || !defined (__GNU_LIBRARY__)
+#define GLOB_INTERFACE_VERSION 1
+#if !defined (_LIBC) && defined (__GNU_LIBRARY__) && __GNU_LIBRARY__ > 1
+#include <gnu-versions.h>
+#if _GNU_GLOB_INTERFACE_VERSION == GLOB_INTERFACE_VERSION
+#define ELIDE_CODE
+#endif
+#endif
 
+#ifndef ELIDE_CODE
 
 #ifdef	STDC_HEADERS
 #include <stddef.h>
@@ -52,6 +59,8 @@ Cambridge, MA 02139, USA.  */
 #endif
 #endif
 #endif
+
+#include <pwd.h>
 
 #if !defined(__GNU_LIBRARY__) && !defined(STDC_HEADERS)
 extern int errno;
@@ -211,10 +220,6 @@ extern char *alloca ();
 #undef	GLOB_PERIOD
 #include <glob.h>
 
-__ptr_t (*__glob_opendir_hook) __P ((const char *directory));
-const char *(*__glob_readdir_hook) __P ((__ptr_t stream));
-void (*__glob_closedir_hook) __P ((__ptr_t stream));
-
 static int glob_pattern_p __P ((const char *pattern, int quote));
 static int glob_in_dir __P ((const char *pattern, const char *directory,
 			     int flags,
@@ -248,6 +253,56 @@ glob (pattern, flags, errfunc, pglob)
     {
       errno = EINVAL;
       return -1;
+    }
+
+  if (flags & GLOB_BRACE)
+    {
+      const char *begin = strchr (pattern, '{');
+      if (begin != NULL)
+	{
+	  const char *end = strchr (begin + 1, '}');
+	  if (end != NULL && end != begin + 1)
+	    {
+	      size_t restlen = strlen (end + 1) + 1;
+	      const char *p, *comma;
+	      char *buf;
+	      size_t bufsz = 0;
+	      int firstc;
+	      if (!(flags & GLOB_APPEND))
+		{
+		  pglob->gl_pathc = 0;
+		  pglob->gl_pathv = NULL;
+		}
+	      firstc = pglob->gl_pathc;
+	      for (p = begin + 1;; p = comma + 1)
+		{
+		  int result;
+		  comma = strchr (p, ',');
+		  if (comma == NULL)
+		    comma = strchr (p, '\0');
+		  if ((begin - pattern) + (comma - p) + 1 > bufsz)
+		    {
+		      if (bufsz * 2 < comma - p + 1)
+			bufsz *= 2;
+		      else
+			bufsz = comma - p + 1;
+		      buf = __alloca (bufsz);
+		    }
+		  memcpy (buf, pattern, begin - pattern);
+		  memcpy (buf + (begin - pattern), p, comma - p);
+		  memcpy (buf + (begin - pattern) + (comma - p), end, restlen);
+		  result = glob (buf, (flags & ~(GLOB_NOCHECK|GLOB_NOMAGIC) |
+				       GLOB_APPEND), errfunc, pglob);
+		  if (result && result != GLOB_NOMATCH)
+		    return result;
+		  if (*comma == '\0')
+		    break;
+		}
+	      if (pglob->gl_pathc == firstc &&
+		  !(flags & (GLOB_NOCHECK|GLOB_NOMAGIC)))
+		return GLOB_NOMATCH;
+	    }
+	}
     }
 
   /* Find the filename.  */
@@ -290,6 +345,45 @@ glob (pattern, flags, errfunc, pglob)
     }
 
   oldcount = pglob->gl_pathc;
+
+  pglob->gl_flags = flags;
+  if (!(flags & GLOB_ALTDIRFUNC))
+    {
+      pglob->gl_closedir = (void (*) __P ((void *))) &closedir;
+      pglob->gl_readdir = (struct dirent *(*) __P ((void *))) &readdir;
+      pglob->gl_opendir = (__ptr_t (*) __P ((const char *))) &opendir;
+      pglob->gl_lstat = &lstat;
+      pglob->gl_stat = &stat;
+    }
+
+  if ((flags & GLOB_TILDE) && dirname[0] == '~')
+    {
+      if (dirname[1] == '\0')
+	{
+	  /* Look up home directory.  */
+	  dirname = getenv ("HOME");
+	  if (dirname == NULL || dirname[0] == '\0')
+	    {
+	      extern char *getlogin ();
+	      char *name = getlogin ();
+	      if (name != NULL)
+		{
+		  struct passwd *p = getpwnam (name);
+		  if (p != NULL)
+		    dirname = p->pw_dir;
+		}
+	    }
+	  if (dirname == NULL || dirname[0] == '\0')
+	    dirname = (char *) "~"; /* No luck.  */
+	}
+      else
+	{
+	  /* Look up specific user's home directory.  */
+	  struct passwd *p = getpwnam (dirname + 1);
+	  if (p != NULL)
+	    dirname = p->pw_dir;
+	}
+    }
 
   if (glob_pattern_p (dirname, !(flags & GLOB_NOESCAPE)))
     {
@@ -581,8 +675,7 @@ glob_in_dir (pattern, directory, flags, errfunc, pglob)
     {
       flags |= GLOB_MAGCHAR;
 
-      stream = (__glob_opendir_hook ? (*__glob_opendir_hook) (directory)
-		: (__ptr_t) opendir (directory));
+      stream = (*pglob->gl_opendir) (directory);
       if (stream == NULL)
 	{
 	  if ((errfunc != NULL && (*errfunc) (directory, errno)) ||
@@ -594,29 +687,18 @@ glob_in_dir (pattern, directory, flags, errfunc, pglob)
 	  {
 	    const char *name;
 	    size_t len;
-
-	    if (__glob_readdir_hook)
-	      {
-		name = (*__glob_readdir_hook) (stream);
-		if (name == NULL)
-		  break;
-		len = 0;
-	      }
-	    else
-	      {
-		struct dirent *d = readdir ((DIR *) stream);
-		if (d == NULL)
-		  break;
-		if (! REAL_DIR_ENTRY (d))
-		  continue;
-		name = d->d_name;
+	    struct dirent *d = (*pglob->gl_readdir) (stream);
+	    if (d == NULL)
+	      break;
+	    if (! REAL_DIR_ENTRY (d))
+	      continue;
+	    name = d->d_name;
 #ifdef	HAVE_D_NAMLEN
-		len = d->d_namlen;
+	    len = d->d_namlen;
 #else
-		len = 0;
+	    len = 0;
 #endif
-	      }
-		
+
 	    if (fnmatch (pattern, name,
 			 (!(flags & GLOB_PERIOD) ? FNM_PERIOD : 0) |
 			 ((flags & GLOB_NOESCAPE) ? FNM_NOESCAPE : 0)) == 0)
@@ -637,6 +719,10 @@ glob_in_dir (pattern, directory, flags, errfunc, pglob)
 	      }
 	  }
     }
+
+  if (nfound == 0 && (flags & GLOB_NOMAGIC) &&
+      ! glob_pattern_p (pattern, !(flags & GLOB_NOESCAPE)))
+    flags |= GLOB_NOCHECK;
 
   if (nfound == 0 && (flags & GLOB_NOCHECK))
     {
@@ -673,10 +759,7 @@ glob_in_dir (pattern, directory, flags, errfunc, pglob)
   if (stream != NULL)
     {
       int save = errno;
-      if (__glob_closedir_hook)
-	(*__glob_closedir_hook) (stream);
-      else
-	(void) closedir ((DIR *) stream);
+      (*pglob->gl_closedir) (stream);
       errno = save;
     }
   return nfound == 0 ? GLOB_NOMATCH : 0;
@@ -684,10 +767,7 @@ glob_in_dir (pattern, directory, flags, errfunc, pglob)
  memory_error:
   {
     int save = errno;
-    if (__glob_closedir_hook)
-      (*__glob_closedir_hook) (stream);
-    else
-      (void) closedir ((DIR *) stream);
+    (*pglob->gl_closedir) (stream);
     errno = save;
   }
   while (names != NULL)
