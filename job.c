@@ -23,9 +23,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "variable.h"
 #include <assert.h>
 
-/* Default path to search for executables.  */
-static char default_path[] = ":/bin:/usr/bin";
-
 /* Default shell to use.  */
 char default_shell[] = "/bin/sh";
 
@@ -689,7 +686,7 @@ start_job_command (child)
     {
       /* Fork the child process.  */
 
-      char *parent_environ;
+      char **parent_environ;
 
 #ifdef	 POSIX
       (void) sigprocmask (SIG_BLOCK, &fatal_signal_set, (sigset_t *) 0);
@@ -1079,6 +1076,9 @@ child_execute_job (stdin_fd, stdout_fd, argv, envp)
 
 #if 0
 
+/* Default path to search for executables.  */
+static char default_path[] = ":/bin:/usr/bin";
+
 /* Search PATH for FILE.
    If successful, store the full pathname in PROGRAM and return 1.
    If not sucessful, return zero.  */
@@ -1186,8 +1186,6 @@ void
 exec_command (argv, envp)
      char **argv, **envp;
 {
-  char *shell, *path;
-
   /* Be the user, permanently.  */
   child_access ();
 
@@ -1203,6 +1201,7 @@ exec_command (argv, envp)
     case ENOEXEC:
       {
 	/* The file is not executable.  Try it as a shell script.  */
+	extern char *getenv ();
 	char *shell;
 	char **new_argv;
 	int argc;
