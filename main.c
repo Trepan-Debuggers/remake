@@ -1027,8 +1027,8 @@ decode_switches (argc, argv)
   decode_env_switches ("MFLAGS", 6);
 
   other_args = (struct stringlist *) xmalloc (sizeof (struct stringlist));
-  other_args->max = 5;
-  other_args->list = (char **) xmalloc (5 * sizeof (char *));
+  other_args->max = argc;
+  other_args->list = (char **) xmalloc (argc * sizeof (char *));
   other_args->idx = 1;
   other_args->list[0] = savestring (argv[0], strlen (argv[0]));
 
@@ -1081,14 +1081,11 @@ decode_switches (argc, argv)
       else if (c == 1)
 	{
 	  /* This is a non-option argument.  */
-	  if (other_args->idx == other_args->max - 1)
-	    {
-	      other_args->max += 5;
-	      other_args->list = (char **)
-		xrealloc ((char *) other_args->list,
-			  other_args->max * sizeof (char *));
-	    }
 	  other_args->list[other_args->idx++] = optarg;
+	  if (getenv ("POSIXLY_CORRECT") != 0)
+	    /* POSIX.2 says all the options must come first.
+	       All the remaining args are non-options.  */
+	    break;
 	}
       else
 	for (cs = switches; cs->c != '\0'; ++cs)
@@ -1133,6 +1130,9 @@ decode_switches (argc, argv)
 		  break;
 
 		case positive_int:
+		  if (optarg == 0 && argc > optind
+		      && isdigit (argv[optind][0]))
+		    optarg = argv[optind++];
 		  if (optarg != 0)
 		    {
 		      int i = atoi (optarg);
@@ -1152,10 +1152,12 @@ positive integral argument",
 		  break;
 
 		case floating:
-		  if (optarg != 0)
-		    *(double *) cs->value_ptr = atof (optarg);
-		  else
-		    *(double *) cs->value_ptr = *(double *) cs->noarg_value;
+		  *(double *) cs->value_ptr
+		    = (optarg != 0 ? atof (optarg)
+		       : (optind < argc && (isdigit (argv[optind][0])
+					    || argv[optind][0] == '.'))
+		       ? atof (argv[optind++])
+		       : *(double *) cs->noarg_value);
 		  break;
 		}
 	    
@@ -1164,8 +1166,9 @@ positive integral argument",
 	    }
     }
 
-  if (other_args != 0)
-    other_args->list[other_args->idx] = 0;
+  while (optind < argc)
+    other_args->list[other_args->idx++] = argv[optind++];
+  other_args->list[other_args->idx] = 0;
 
   if (bad)
     {
