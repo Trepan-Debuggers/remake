@@ -26,9 +26,9 @@ Version 3.80
   This syntax is only valid within explicit and static pattern rules: it
   cannot be used in implicit (suffix or pattern) rules.  Edouard G. Parmelan
   <egp@free.fr> provided a patch implementing this feature; however, I
-  decided to implemented it in a different way.
+  decided to implement it in a different way.
 
-* A new function is defined: $(quote ...).  The argument to this
+* A new function is defined: $(value ...).  The argument to this
   function is the _name_ of a variable.  The result of the function is
   the value of the variable, without having been expanded.
 
@@ -58,6 +58,10 @@ Version 3.80
   were not behaving properly.  Now the arguments are stored as simple
   variables.  This may mean that if you added extra escaping to your
   $(call ...) function arguments you will need to undo it now.
+
+* The variable invoked by $(call ...) can now be recursive: unlike other
+  variables it can reference itself and this will not produce an error
+  when it is used as the first argument to $(call ...) (but only then).
 
 * New pseudo-target .LOW_RESOLUTION_TIME, superseding the configure
   option --disable-nsec-timestamps.  You might need this if your build

@@ -108,6 +108,37 @@ repository: it is not unheard of for code that is known to be broken to
 be checked in.  Use at your own risk.
 
 
+System-specific Notes
+---------------------
+
+It has been reported that the XLC 1.2 compiler on AIX 3.2 is buggy such
+that if you compile make with `cc -O' on AIX 3.2, it will not work correctly.
+It is said that using `cc' without `-O' does work.
+
+One area that is often a problem in configuration and porting is the code
+to check the system's current load average.  To make it easier to test and
+debug this code, you can do `make check-loadavg' to see if it works
+properly on your system.  (You must run `configure' beforehand, but you
+need not build Make itself to run this test.)
+
+Another potential source of porting problems is the support for large
+files (LFS) in configure for those operating systems that provide it.
+Please report any bugs that you find in this area.  If you run into
+difficulties, then as a workaround you should be able to disable LFS by
+adding the `--disable-largefile' option to the `configure' script.
+
+On systems that support micro- and nano-second timestamp values and
+where stat(2) provides this information, GNU make will use it when
+comparing timestamps to get the most accurate possible result.  However,
+note that many current implementations of tools that *set* timestamps do
+not preserve micro- or nano-second granularity.  This means that "cp -p"
+and other similar tools (tar, etc.) may not exactly duplicate timestamps
+with micro- and nano-second granularity on some systems.  If your build
+system contains rules that depend on proper behavior of tools like "cp
+-p", you should consider using the .LOW_RESOLUTION_TIME pseudo-target to
+force make to treat them properly.  See the manual for details.
+
+
 Ports
 -----
 
@@ -131,34 +162,3 @@ Please note there are two _separate_ ports of GNU make for Microsoft
 systems: a native Windows tool built with (for example) MSVC or Cygwin,
 and a DOS-based tool built with DJGPP.  Please be sure you are looking
 at the right README!
-
-
-System-specific Notes
----------------------
-
-It has been reported that the XLC 1.2 compiler on AIX 3.2 is buggy such
-that if you compile make with `cc -O' on AIX 3.2, it will not work correctly.
-It is said that using `cc' without `-O' does work.
-
-One area that is often a problem in configuration and porting is the code
-to check the system's current load average.  To make it easier to test and
-debug this code, you can do `make check-loadavg' to see if it works
-properly on your system.  (You must run `configure' beforehand, but you
-need not build Make itself to run this test.)
-
-Another potential source of porting problems is the support for large
-files (LFS) in configure for those operating systems that provide it.
-Please report any bugs that you find in this area.  If you run into
-difficulties, then as a workaround you should be able to disable LFS by
-adding the `--disable-largefile' option to the `configure' script.
-
-On systems that support micro- and nano-second timestamp values and
-where stat(2) provides this information, GNU make will use it when
-comparing timestamps to get the most accurate possible result.  However,
-at the moment there is no system call (that I'm aware of) that will
-allow you to *set* a timestamp to a micro- or nano-second granularity.
-This means that "cp -p" and other similar tools (tar, etc.) cannot
-exactly duplicate timestamps with micro- and nano-second granularity.
-If your build system contains rules that depend on proper behavior of
-tools like "cp -p", you should configure make to not use micro- and
-nano-second timestamps with the --disable-nsec-timestamps flag.
