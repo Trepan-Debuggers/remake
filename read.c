@@ -30,6 +30,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "glob/glob.h"
 #endif
 
+#ifndef WIN32
 #ifndef _AMIGA
 #ifndef VMS
 #include <pwd.h>
@@ -37,6 +38,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 struct passwd *getpwnam PARAMS ((char *name));
 #endif
 #endif
+#endif /* !WIN32 */
 
 /* A `struct linebuffer' is a structure which holds a line of text.
    `readline' reads a line from a stream into a linebuffer
@@ -79,6 +81,13 @@ static struct conditionals *conditionals = &toplevel_conditionals;
 
 static char *default_include_directories[] =
   {
+#if defined(WIN32) && !defined(INCLUDEDIR)
+/*
+ * This completly up to the user when they install MSVC or other packages.
+ * This is defined as a placeholder.
+ */
+#define INCLUDEDIR "."
+#endif
     INCLUDEDIR,
 #ifndef _AMIGA
     "/usr/gnu/include",
@@ -274,6 +283,9 @@ read_makefile (filename, flags)
   char *pattern = 0, *pattern_percent;
 
   int makefile_errno;
+#ifdef WIN32
+  int check_again;
+#endif
 
 #define record_waiting_files()						      \
   do									      \
@@ -772,6 +784,16 @@ read_makefile (filename, flags)
 	  */
 	  if (p && !(isspace(p[1]) || !p[1] || isspace(p[-1])))
 	    p = 0;
+#endif
+#ifdef WIN32
+          do {
+            check_again = 0;
+            /* For WIN32, skip a "C:\..." or a "C:/..." */
+            if (p != 0 && (p[1] == '\\' || p[1] == '/') && isalpha (p[-1])) {
+              p = index(p + 1, ':');
+              check_again = 1;
+            }
+          } while (check_again);
 #endif
 	  if (p != 0)
 	    {
@@ -1599,6 +1621,17 @@ parse_file_seq (stringp, stopchar, size, strip)
 	p = find_char_unquote (p+1, stopchars, 1);
       }
 #endif
+#ifdef WIN32
+      /* For WIN32, skip a "C:\..." or "C:/...". */
+      if (stopchar == ':' &&
+          p != 0 &&
+          (p[1] == '\\' || p[1] == '/') &&
+          isalpha (p[-1])) {
+        p = end_of_token_w32(++p, ':');
+        if (*p == '\0' && p[-1] == ':')
+          p--;
+      }
+#endif
       if (p == 0)
 	p = q + strlen (q);
 
@@ -1984,7 +2017,7 @@ tilde_expand (name)
 	  free (home_dir);
 	  home_dir = getenv ("HOME");
 	}
-#ifndef _AMIGA
+#if !defined(_AMIGA) && !defined(WIN32)
       if (home_dir == 0 || home_dir[0] == '\0')
 	{
 	  extern char *getlogin ();
@@ -1997,7 +2030,7 @@ tilde_expand (name)
 		home_dir = p->pw_dir;
 	    }
 	}
-#endif /* !AMIGA */
+#endif /* !AMIGA && !WIN32 */
       if (home_dir != 0)
 	{
 	  char *new = concat (home_dir, "", name + 1);
@@ -2006,7 +2039,7 @@ tilde_expand (name)
 	  return new;
 	}
     }
-#ifndef _AMIGA
+#if !defined(_AMIGA) && !defined(WIN32)
   else
     {
       struct passwd *pwent;
@@ -2024,7 +2057,7 @@ tilde_expand (name)
       else if (userend != 0)
 	*userend = '/';
     }
-#endif /* !AMIGA */
+#endif /* !AMIGA && !WIN32 */
 #endif /* !VMS */
   return 0;
 }

@@ -32,6 +32,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifdef VMS
 #include <starlet.h>
 #endif
+#ifdef WIN32
+#include <io.h>
+#endif
 
 extern int try_implicit_rule PARAMS ((struct file *file, unsigned int depth));
 
@@ -1103,6 +1106,13 @@ library_search (lib, mtime_ptr)
 #ifndef _AMIGA
       "/lib",
       "/usr/lib",
+#endif
+#if defined(WIN32) && !defined(LIBDIR)
+/*
+ * This is completely up to the user at product install time. Just define
+ * a placeholder.
+ */
+#define LIBDIR "."
 #endif
       LIBDIR,			/* Defined by configuration.  */
       0

@@ -44,7 +44,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define NAMLEN(d) _D_NAMLEN(d)
 #endif
 
-#if defined (POSIX) && !defined (__GNU_LIBRARY__)
+#if (defined (POSIX) || defined (WIN32)) && !defined (__GNU_LIBRARY__)
 /* Posix does not require that the d_ino field be present, and some
    systems do not provide it. */
 #define REAL_DIR_ENTRY(dp) 1
@@ -96,6 +96,10 @@ dosify (filename)
   return dos_filename;
 }
 #endif /* __MSDOS__ */
+
+#ifdef WIN32
+#include "pathstuff.h"
+#endif
 
 #ifdef _AMIGA
 #include <ctype.h>
@@ -193,11 +197,24 @@ struct directory_contents
     struct directory_contents *next;
 
     dev_t dev;			/* Device and inode numbers of this dir.  */
+#ifdef WIN32
+    /*
+     * Inode means nothing on WIN32. Even file key information is
+     * unreliable because it is random per file open and undefined
+     * for remote filesystems. The most unique attribute I can
+     * come up with is the fully qualified name of the directory. Beware
+     * though, this is also unreliable. I'm open to suggestion on a better
+     * way to emulate inode.
+     */
+    char *path_key;
+    int   mtime;        /* controls check for stale directory cache */
+#else
 #ifdef VMS
     ino_t ino[3];
 #else
     ino_t ino;
 #endif
+#endif /* WIN32 */
     struct dirfile **files;	/* Files in this directory.  */
     DIR *dirstream;		/* Stream reading this directory.  */
   };
@@ -253,6 +270,9 @@ find_directory (name)
   register unsigned int hash = 0;
   register char *p;
   register struct directory *dir;
+#ifdef WIN32
+  char* w32_path;
+#endif
 #ifdef VMS
   if ((*name == '.') && (*(name+1) == 0))
     name = "[]";
@@ -298,6 +318,10 @@ find_directory (name)
 
 	  struct directory_contents *dc;
 
+#ifdef WIN32
+          w32_path = w32ify(name, 1);
+          hash = ((unsigned int) st.st_dev << 16) | (unsigned int) st.st_ctime;
+#else
 #ifdef VMS
 	hash = ((unsigned int) st.st_dev << 16)
 		| ((unsigned int) st.st_ino[0]
@@ -306,9 +330,13 @@ find_directory (name)
 #else
 	  hash = ((unsigned int) st.st_dev << 16) | (unsigned int) st.st_ino;
 #endif
+#endif
 	  hash %= DIRECTORY_BUCKETS;
 
 	  for (dc = directories_contents[hash]; dc != 0; dc = dc->next)
+#ifdef WIN32
+            if (!strcmp(dc->path_key, w32_path))
+#else
 	    if (dc->dev == st.st_dev
 #ifdef VMS
 		&& dc->ino[0] == st.st_ino[0]
@@ -317,6 +345,7 @@ find_directory (name)
 #else
 		 && dc->ino == st.st_ino)
 #endif
+#endif /* WIN32 */
 	      break;
 
 	  if (dc == 0)
@@ -328,6 +357,10 @@ find_directory (name)
 
 	      /* Enter it in the contents hash table.  */
 	      dc->dev = st.st_dev;
+#ifdef WIN32
+              dc->path_key = strdup(w32_path);
+              dc->mtime = st.st_mtime;
+#else
 #ifdef VMS
 	      dc->ino[0] = st.st_ino[0];
 	      dc->ino[1] = st.st_ino[1];
@@ -335,6 +368,7 @@ find_directory (name)
 #else
 	      dc->ino = st.st_ino;
 #endif
+#endif /* WIN32 */
 	      dc->next = directories_contents[hash];
 	      directories_contents[hash] = dc;
 
@@ -382,6 +416,10 @@ dir_contents_file_exists_p (dir, filename)
   register char *p;
   register struct dirfile *df;
   register struct dirent *d;
+#ifdef WIN32
+  struct stat st;
+  int rehash = 0;
+#endif
 
   if (dir == 0 || dir->files == 0)
     {
@@ -429,6 +467,24 @@ dir_contents_file_exists_p (dir, filename)
 
   if (dir->dirstream == 0)
     {
+#ifdef WIN32
+      /* Check to see if directory has changed since last read */
+      if (dir->path_key &&
+          stat(dir->path_key, &st) == 0 &&
+          st.st_mtime > dir->mtime) {
+
+        /* reset date stamp to show most recent re-process */
+        dir->mtime = st.st_mtime;
+
+        /* make sure directory can still be opened */
+        dir->dirstream = opendir(dir->path_key);
+
+        if (dir->dirstream)
+          rehash = 1;
+        else
+          return 0; /* couldn't re-read - fail */
+      } else
+#endif
     /* The directory has been all read in.  */
       return 0;
     }
@@ -447,12 +503,33 @@ dir_contents_file_exists_p (dir, filename)
       for (i = 0; i < len; ++i)
 	HASHI (newhash, d->d_name[i]);
       newhash %= DIRFILE_BUCKETS;
+#ifdef WIN32
+      /*
+       * If re-reading a directory, check that this file isn't already
+       * in the cache.
+       */
+      if (rehash) {
+        for (df = dir->files[newhash]; df != 0; df = df->next)
+          if (streq(df->name, d->d_name))
+            break;
+      } else
+        df = 0;
+
+      /*
+       * If re-reading a directory, don't cache files that have
+       * already been discovered.
+       */
+      if (!df) {
+#endif
 
       df = (struct dirfile *) xmalloc (sizeof (struct dirfile));
       df->next = dir->files[newhash];
       dir->files[newhash] = df;
       df->name = savestring (d->d_name, len);
       df->impossible = 0;
+#ifdef WIN32
+      }
+#endif
       /* Check if the name matches the one we're searching for.  */
       if (filename != 0
 	  && newhash == hash && strieq (d->d_name, filename))
@@ -506,6 +583,10 @@ file_exists_p (name)
     return dir_file_exists_p ("[]", name);
 #else /* !VMS */
   dirend = rindex (name, '/');
+#ifdef WIN32
+  if (!dirend)
+    dirend = rindex(name, '\\');
+#endif /* WIN32 */
   if (dirend == 0)
     return dir_file_exists_p (".", name);
   if (dirend == 0)
@@ -569,6 +650,10 @@ file_impossible (filename)
 	 structure for it, but leave it out of the contents hash table.  */
       dir->contents = (struct directory_contents *)
 	xmalloc (sizeof (struct directory_contents));
+#ifdef WIN32
+      dir->contents->path_key = NULL;
+      dir->contents->mtime = 0;
+#else  /* WIN32 */
 #ifdef VMS
       dir->contents->dev = 0;
       dir->contents->ino[0] = dir->contents->ino[1] =
@@ -576,6 +661,7 @@ file_impossible (filename)
 #else
       dir->contents->dev = dir->contents->ino = 0;
 #endif
+#endif /* WIN32 */
       dir->contents->files = 0;
       dir->contents->dirstream = 0;
     }
@@ -616,6 +702,10 @@ file_impossible_p (filename)
     dir = find_directory ("[]")->contents;
 #else
   dirend = rindex (filename, '/');
+#ifdef WIN32
+  if (!dirend)
+    dirend = rindex (filename, '\\');
+#endif /* WIN32 */
   if (dirend == 0)
 #ifdef _AMIGA
     dir = find_directory ("")->contents;
@@ -685,6 +775,10 @@ print_dir_data_base ()
 	if (dir->contents == 0)
 	  printf ("# %s: could not be stat'd.\n", dir->name);
 	else if (dir->contents->files == 0)
+#ifdef WIN32
+          printf ("# %s (key %s, mtime %d): could not be opened.\n",
+                  dir->name, dir->contents->path_key,dir->contents->mtime);
+#else  /* WIN32 */
 #ifdef VMS
 	  printf ("# %s (device %d, inode [%d,%d,%d]): could not be opened.\n",
 		  dir->name, dir->contents->dev,
@@ -694,6 +788,7 @@ print_dir_data_base ()
 	  printf ("# %s (device %d, inode %d): could not be opened.\n",
 		  dir->name, dir->contents->dev, dir->contents->ino);
 #endif
+#endif /* WIN32 */
 	else
 	  {
 	    register unsigned int f = 0, im = 0;
@@ -705,6 +800,10 @@ print_dir_data_base ()
 		  ++im;
 		else
 		  ++f;
+#ifdef WIN32
+            printf ("# %s (key %s, mtime %d): ",
+                    dir->name, dir->contents->path_key, dir->contents->mtime);
+#else  /* WIN32 */
 #ifdef VMS
 	    printf ("# %s (device %d, inode [%d,%d,%d]): ",
 		    dir->name, dir->contents->dev,
@@ -714,6 +813,7 @@ print_dir_data_base ()
 	    printf ("# %s (device %d, inode %d): ",
 		    dir->name, dir->contents->dev, dir->contents->ino);
 #endif
+#endif /* WIN32 */
 	    if (f == 0)
 	      fputs ("No", stdout);
 	    else

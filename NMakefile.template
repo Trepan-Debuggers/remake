@@ -1,0 +1,135 @@
+# NOTE: If you have no `make' program at all to process this makefile, run
+# `build_w32.bat' instead.
+#
+# Copyright (C) 1988, 89, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
+# This file is part of GNU Make.
+#
+# GNU Make is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# GNU Make is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Make; see the file COPYING.  If not, write to
+# the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+#
+#       NMakefile for GNU Make
+#
+
+LINK = link
+CC = cl
+
+OUTDIR=.
+MAKEFILE=NMakefile
+SUBPROC_MAKEFILE=NMakefile
+
+CFLAGS_any = /nologo /MT /W3 /GX /Zi /YX /I . /I glob /I w32/include /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES
+CFLAGS_debug = $(CFLAGS_any) /Od /D _DEBUG /FR.\WinDebug/ /Fp.\WinDebug/make.pch /Fo.\WinDebug/ /Fd.\WinDebug/make.pdb
+CFLAGS_release = $(CFLAGS_any) /O2 /D NDEBUG /FR.\WinRel/ /Fp.\WinRel/make.pch /Fo.\WinRel/ 
+
+LDFLAGS_debug = w32\subproc\WinDebug\subproc.lib /NOLOGO /SUBSYSTEM:console\
+	/INCREMENTAL:no /PDB:WinRel/make.pdb /MACHINE:I386 /OUT:WinDebug/make.exe
+LDFLAGS_release = w32\subproc\WinRel\subproc.lib /NOLOGO /SUBSYSTEM:console\
+	/INCREMENTAL:no /MACHINE:I386 /OUT:WinRel/make.exe
+
+all: subproc Release Debug
+
+#
+# Make sure we build the subproc library first. It has it's own
+# makefile. To be portable to Windows 95, we put the instructions
+# on how to build the library into a batch file. On NT, we could
+# simply have done foo && bar && dog, but this doesn't port.
+#
+subproc: w32/subproc/WinDebug/subproc.lib w32/subproc/WinRel/subproc.lib
+
+w32/subproc/WinDebug/subproc.lib w32/subproc/WinRel/subproc.lib:
+	subproc.bat $(SUBPROC_MAKEFILE)
+
+Release: 
+	nmake /f $(MAKEFILE) LDFLAGS="$(LDFLAGS_release)" CFLAGS="$(CFLAGS_release)" OUTDIR=WinRel WinRel/make.exe
+Debug: 
+	nmake /f $(MAKEFILE) LDFLAGS="$(LDFLAGS_debug)" CFLAGS="$(CFLAGS_debug)" OUTDIR=WinDebug WinDebug/make.exe
+
+clean:
+	rmdir /s /q WinDebug WinRel
+
+$(OUTDIR):
+	if not exist .\$@\nul mkdir .\$@
+
+LIBS = kernel32.lib user32.lib advapi32.lib
+
+OBJS = \
+	$(OUTDIR)/ar.obj \
+	$(OUTDIR)/arscan.obj \
+	$(OUTDIR)/commands.obj \
+	$(OUTDIR)/default.obj \
+	$(OUTDIR)/dir.obj \
+	$(OUTDIR)/expand.obj \
+	$(OUTDIR)/file.obj \
+	$(OUTDIR)/function.obj \
+	$(OUTDIR)/getloadavg.obj \
+	$(OUTDIR)/getopt.obj \
+	$(OUTDIR)/getopt1.obj \
+	$(OUTDIR)/implicit.obj \
+	$(OUTDIR)/job.obj \
+	$(OUTDIR)/main.obj \
+	$(OUTDIR)/misc.obj \
+	$(OUTDIR)/read.obj \
+	$(OUTDIR)/remake.obj \
+	$(OUTDIR)/remote-stub.obj \
+	$(OUTDIR)/rule.obj \
+	$(OUTDIR)/signame.obj \
+	$(OUTDIR)/variable.obj \
+	$(OUTDIR)/version.obj \
+	$(OUTDIR)/vpath.obj \
+	$(OUTDIR)/glob.obj \
+	$(OUTDIR)/fnmatch.obj \
+	$(OUTDIR)/dirent.obj \
+	$(OUTDIR)/pathstuff.obj
+
+$(OUTDIR)/make.exe: $(OUTDIR) $(OBJS)
+	$(LINK) @<<
+		$(LDFLAGS) $(LIBS) $(OBJS)
+<<
+
+.c{$(OUTDIR)}.obj:
+	$(CC) $(CFLAGS) /c $<
+	
+$(OUTDIR)/ar.obj : ar.c make.h filedef.h dep.h
+$(OUTDIR)/arscan.obj : arscan.c make.h
+$(OUTDIR)/commands.obj : commands.c
+$(OUTDIR)/default.obj : default.c make.h rule.h dep.h filedef.h job.h commands.h variable.h
+$(OUTDIR)/dir.obj :  dir.c make.h
+$(OUTDIR)/expand.obj : expand.c make.h filedef.h job.h commands.h variable.h
+$(OUTDIR)/file.obj : file.c make.h dep.h filedef.h job.h commands.h variable.h
+$(OUTDIR)/function.obj : function.c make.h filedef.h variable.h dep.h job.h commands.h
+$(OUTDIR)/getloadavg.obj : getloadavg.c
+$(OUTDIR)/getopt.obj : getopt.c
+$(OUTDIR)/getopt1.obj : getopt1.c getopt.h
+$(OUTDIR)/implicit.obj : implicit.c make.h rule.h dep.h filedef.h
+$(OUTDIR)/job.obj : job.c make.h job.h filedef.h commands.h variable.h
+$(OUTDIR)/main.obj : main.c make.h dep.h filedef.h variable.h job.h commands.h getopt.h
+$(OUTDIR)/misc.obj : misc.c make.h dep.h
+$(OUTDIR)/read.obj : read.c make.h dep.h filedef.h job.h commands.h variable.h glob/glob.h
+$(OUTDIR)/remake.obj : remake.c make.h filedef.h job.h commands.h dep.h
+$(OUTDIR)/remote-stub.obj : remote-stub.c make.h filedef.h job.h commands.h
+$(OUTDIR)/rule.obj : rule.c make.h dep.h filedef.h job.h commands.h variable.h rule.h
+$(OUTDIR)/signame.obj : signame.c signame.h
+$(OUTDIR)/variable.obj : variable.c make.h dep.h filedef.h job.h commands.h variable.h
+$(OUTDIR)/version.obj : version.c
+$(OUTDIR)/vpath.obj : vpath.c make.h filedef.h variable.h
+$(OUTDIR)/glob.obj : glob/glob.c
+	$(CC) $(CFLAGS) /c $?
+$(OUTDIR)/fnmatch.obj : glob/fnmatch.c
+	$(CC) $(CFLAGS) /c $?
+$(OUTDIR)/dirent.obj : w32/compat/dirent.c
+	$(CC) $(CFLAGS) /c $?
+$(OUTDIR)/pathstuff.obj : w32/pathstuff.c
+	$(CC) $(CFLAGS) /c $?
+

@@ -19,6 +19,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "make.h"
 #include "filedef.h"
 #include "variable.h"
+#ifdef WIN32
+#include "pathstuff.h"
+#endif
 
 
 /* Structure used to represent a selective VPATH searchpath.  */
@@ -170,6 +173,10 @@ construct_vpath_list (pattern, dirpath)
       return;
     }
 
+#ifdef WIN32
+    convert_vpath_to_win32(dirpath, ';');
+#endif
+
   /* Figure out the maximum number of VPATH entries and
      put it in MAXELEM.  We start with 2, one before the
      first colon and one nil, the list terminator and
@@ -279,7 +286,12 @@ vpath_search (file, mtime_ptr)
   /* If there are no VPATH entries or FILENAME starts at the root,
      there is nothing we can do.  */
 
-  if (**file == '/' || (vpaths == 0 && general_vpath == 0))
+  if (**file == '/'
+#ifdef WIN32
+      || **file == '\\' 
+      || (*file)[1] == ':'
+#endif
+      || (vpaths == 0 && general_vpath == 0))
     return 0;
 
   for (v = vpaths; v != 0; v = v->next)
@@ -331,6 +343,10 @@ selective_vpath_search (path, file, mtime_ptr)
      pointer to the name-within-directory and FLEN is its length.  */
 
   n = rindex (*file, '/');
+#ifdef WIN32
+  if (!n)
+    n = rindex(*file,, '\\');
+#endif
   name_dplen = n != 0 ? n - *file : 0;
   filename = name_dplen > 0 ? n + 1 : *file;
   if (name_dplen > 0)

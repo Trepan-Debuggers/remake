@@ -1,0 +1,49 @@
+Port of GNU make to Windows NT and Windows 95 
+Builds natively with MSVC 2.x or MSVC 4.x compilers.
+
+To build with nmake on Windows NT or Windows 95:
+
+	1. Make sure cl.exe is in your %Path%. Example:
+	
+		set Path=%Path%;c:/msdev/bin
+
+	2. Make sure %include% is set to msvc include directory. Example:
+
+		set include=c:/msdev/include
+
+	3. Make sure %lib% is set to msvc lib directory. Example:
+
+		set lib=c:/msdev/lib
+
+	4. nmake /f NMakefile
+
+
+There is a bat file (build_w32.bat) for folks who have fear of nmake.
+	
+Outputs:
+
+	WinDebug/make.exe
+	WinRel/make.exe
+
+Notes:
+
+	This port prefers you have a working sh.exe somewhere on your
+	system. If you don't have sh.exe, port falls back to
+	MSDOS mode for launching programs (via a batch file).
+	The MSDOS mode style execution has not been tested too
+	carefully though (I use GNU bash as sh.exe).
+
+	I verified all functionality with a slightly modified version
+	of make-test-0.4.5 (modifications to get test suite to run
+	on Windows NT). All tests pass in an environment that includes
+	sh.exe. 
+
+	I did not provide a Visual C project file with this port as
+	the project file would not be considered freely distributable
+	(or so I think). It is easy enough to create one though if
+	you know how to use Visual C. 
+
+	I build the program statically to avoid problems locating DLL's
+	on machines that may not have MSVC runtime installed. If you
+	prefer, you can change make to build with shared libraries by
+	changing /MT to /MD in the NMakefile (or build_w32.bat). 

@@ -22,6 +22,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "job.h"
 #include "commands.h"
 #include "variable.h"
+#ifdef WIN32
+#include "pathstuff.h"
+#endif
 
 /* Hash table of all global variable definitions.  */
 
@@ -351,7 +354,11 @@ merge_variable_set_lists (setlist0, setlist1)
 void
 define_automatic_variables ()
 {
+#ifdef WIN32
+  extern char* default_shell;
+#else
   extern char default_shell[];
+#endif
   register struct variable *v;
   char buf[200];
 
@@ -539,11 +546,25 @@ target_environment (file)
 	      && v->origin != o_env && v->origin != o_env_override)
 	    {
 	      char *value = recursively_expand (v);
+#ifdef WIN32
+              if (strcmp(v->name, "Path") == 0 ||
+                  strcmp(v->name, "PATH") == 0)
+                convert_Path_to_win32(value, ';');
+#endif
 	      result[nvariables++] = concat (v->name, "=", value);
 	      free (value);
 	    }
 	  else
+#ifdef WIN32
+          {
+            if (strcmp(v->name, "Path") == 0 ||
+                strcmp(v->name, "PATH") == 0)
+              convert_Path_to_win32(v->value, ';');
+            result[nvariables++] = concat (v->name, "=", v->value);
+          }
+#else
 	    result[nvariables++] = concat (v->name, "=", v->value);
+#endif
 	}
     }
   result[nvariables] = (char *) xmalloc (100);
@@ -862,3 +883,30 @@ print_file_variables (file)
   if (file->variables != 0)
     print_variable_set (file->variables->set, "# ");
 }
+
+#ifdef WIN32
+void
+sync_Path_environment(void)
+{
+    char* path = allocated_variable_expand("$(Path)");
+    static char* environ_path = NULL;
+
+    if (!path)
+        return;
+
+    /*
+     * If done this before, don't leak memory unnecessarily.
+     * Free the previous entry before allocating new one.
+     */
+    if (environ_path)
+        free(environ_path);
+
+    /*
+     * Create something WIN32 world can grok
+     */
+    convert_Path_to_win32(path, ';');
+    environ_path = concat("Path", "=", path);
+    putenv(environ_path);
+    free(path);
+}
+#endif

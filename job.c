@@ -25,12 +25,17 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <assert.h>
 
 /* Default shell to use.  */
+#ifdef WIN32
+char *default_shell = "sh.exe";
+int no_default_sh_exe = 1;
+#else  /* WIN32 */
 #ifndef _AMIGA
 char default_shell[] = "/bin/sh";
 #else
 char default_shell[] = "";
 extern int MyExecute (char **);
 #endif
+#endif /* WIN32 */
 
 #ifdef __MSDOS__
 #include <process.h>
@@ -40,6 +45,7 @@ static char *dos_bname;
 static char *dos_bename;
 static int dos_batch_file;
 #endif /* MSDOS.  */
+
 #ifdef _AMIGA
 #include <proto/dos.h>
 static int amiga_pid = 123;
@@ -54,6 +60,20 @@ static int amiga_batch_file;
 #include <starlet.h>
 #include <lib$routines.h>
 #endif
+
+#ifdef WIN32
+#include <windows.h>
+#include <io.h>
+#include <process.h>
+#include "sub_proc.h"
+#include "w32err.h"
+#include "pathstuff.h"
+
+/* this stuff used if no sh.exe is around */
+static char *dos_bname;
+static char *dos_bename;
+static int dos_batch_file;
+#endif /* WIN32 */
 
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
@@ -171,6 +191,16 @@ static int good_stdin_used = 0;
 /* Chain of children waiting to run until the load average goes down.  */
 
 static struct child *waiting_jobs = 0;
+
+#ifdef WIN32
+/*
+ * The macro which references this function is defined in make.h.
+ */
+int w32_kill(int pid, int sig)
+{
+       return ((process_kill(pid, sig) == TRUE) ? 0 : -1);
+}
+#endif /* WIN32 */
 
 /* Write an error message describing the exit status given in
    EXIT_CODE, EXIT_SIG, and COREDUMP, for the target TARGET_NAME.
@@ -312,7 +342,7 @@ reap_children (block, err)
 	}
       else if (pid == 0)
 	{
-#if !defined(__MSDOS__) && !defined(_AMIGA)
+#if !defined(__MSDOS__) && !defined(_AMIGA) && !defined(WIN32)
 	  /* No remote children.  Check for local children.  */
 
 	  if (any_local)
@@ -366,7 +396,7 @@ reap_children (block, err)
 	      exit_sig = WIFSIGNALED (status) ? WTERMSIG (status) : 0;
 	      coredump = WCOREDUMP (status);
 	    }
-#else	/* MSDOS.  */
+#else	/* MSDOS, Amiga, WIN32.  */
 #ifdef __MSDOS__
 	  /* Life is very different on MSDOS.  */
 	  pid = dos_pid - 1;
@@ -374,14 +404,49 @@ reap_children (block, err)
 	  exit_code = dos_status;
 	  exit_sig = 0;
 	  coredump = 0;
-#else
+#endif /* __MSDOS__ */
+#ifdef _AMIGA
 	  /* Same on Amiga */
 	  pid = amiga_pid - 1;
 	  status = amiga_status;
 	  exit_code = amiga_status;
 	  exit_sig = 0;
 	  coredump = 0;
-#endif
+#endif /* _AMIGA */
+#ifdef WIN32
+         {
+           HANDLE hPID;
+           int err;
+    
+           /* wait for anything to finish */
+           if (hPID = process_wait_for_any()) {
+    
+             /* was an error found on this process? */
+             err = process_last_err(hPID);
+    
+             /* get exit data */
+             exit_code = process_exit_code(hPID);
+    
+             if (err)
+               fprintf(stderr, "make (e=%d): %s",
+                       exit_code, map_win32_error_to_string(exit_code));
+    
+             exit_sig = process_signal(hPID);
+    
+             /* cleanup process */
+             process_cleanup(hPID);
+    
+             if (dos_batch_file) {
+               remove (dos_bname);
+               remove (dos_bename);
+               dos_batch_file = 0;
+             }
+    
+             coredump = 0;
+           }
+           pid = (int) hPID;
+         }
+#endif /* WIN32 */
 #endif	/* Not MSDOS.  */
 	}
       else
@@ -715,6 +780,7 @@ start_job_command (child)
   fflush (stdout);
   fflush (stderr);
 
+#ifndef WIN32
 #ifndef _AMIGA
 #ifndef VMS
 
@@ -745,6 +811,7 @@ start_job_command (child)
     }
 
 #endif /* !AMIGA */
+#endif /* !WIN32 */
 
   /* Decide whether to give this child the `good' standard input
      (one that points to the terminal or whatever), or the `bad' one
@@ -764,7 +831,7 @@ start_job_command (child)
     child->environment = target_environment (child->file);
 #endif
 
-#if !defined(__MSDOS__) && !defined(_AMIGA)
+#if !defined(__MSDOS__) && !defined(_AMIGA) && !defined(WIN32)
 
 #ifndef VMS
   /* start_waiting_job has set CHILD->remote if we can start a remote job.  */
@@ -848,7 +915,8 @@ start_job_command (child)
        dos_status = 0;
      remove (dos_bename);
    }
-#else
+#endif /* __MSDOS__ */
+#ifdef _AMIGA
   amiga_status = MyExecute (argv);
 
   ++dead_children;
@@ -859,6 +927,37 @@ start_job_command (child)
      DeleteFile (amiga_bname);        /* Ignore errors.  */
   }
 #endif	/* Not Amiga */
+#ifdef WIN32
+  {
+      HANDLE hPID;
+      char* arg0;
+
+      /* make UNC paths safe for CreateProcess -- backslash format */
+      arg0 = argv[0];
+      if (arg0 && arg0[0] == '/' && arg0[1] == '/')
+        for ( ; arg0 && *arg0; arg0++)
+          if (*arg0 == '/')
+            *arg0 = '\\';
+
+      /* make sure CreateProcess() has Path it needs */
+      sync_Path_environment();
+
+      hPID = process_easy(argv, child->environment);
+
+      if (hPID != INVALID_HANDLE_VALUE)
+        child->pid = (int) hPID;
+      else {
+        int i;
+        unblock_sigs();
+        fprintf(stderr,
+          "process_easy() failed failed to launch process (e=%d)\n",
+          process_last_err(hPID));
+               for (i = 0; argv[i]; i++)
+                 fprintf(stderr, "%s ", argv[i]);
+               fprintf(stderr, "\nCounted %d args in failed launch\n", i);
+      }
+  } 
+#endif /* WIN32 */
 #endif	/* Not MSDOS.  */
 
   /* We are the parent side.  Set the state to
@@ -1177,6 +1276,7 @@ start_waiting_jobs ()
   return;
 }
 
+#ifndef WIN32
 #ifdef VMS
 #include <descrip.h>
 #include <clidef.h>
@@ -1414,6 +1514,7 @@ child_execute_job (stdin_fd, stdout_fd, argv, envp)
 }
 #endif /* !AMIGA */
 #endif /* !VMS */
+#endif /* !WIN32 */
 
 #ifndef _AMIGA
 /* Replace the current process with one running the command in ARGV,
@@ -1532,12 +1633,30 @@ construct_command_argv_internal (line, restp, shell, ifs)
 			     "unset", "unsetenv", "version",
 			     0 };
 #else
+#ifdef WIN32
+  static char sh_chars_dos[] = "\"|<>";
+  static char *sh_cmds_dos[] = { "break", "call", "cd", "chcp", "chdir", "cls",
+			     "copy", "ctty", "date", "del", "dir", "echo",
+			     "erase", "exit", "for", "goto", "if", "if", "md",
+			     "mkdir", "path", "pause", "prompt", "rem", "ren",
+			     "rename", "set", "shift", "time", "type",
+			     "ver", "verify", "vol", ":", 0 };
+  static char sh_chars_sh[] = "#;\"*?[]&|<>(){}$`^";
+  static char *sh_cmds_sh[] = { "cd", "eval", "exec", "exit", "login",
+			     "logout", "set", "umask", "wait", "while", "for",
+			     "case", "if", ":", ".", "break", "continue",
+			     "export", "read", "readonly", "shift", "times",
+			     "trap", "switch", "test", 0 };
+  char*  sh_chars;
+  char** sh_cmds;
+#else  /* WIN32 */
   static char sh_chars[] = "#;\"*?[]&|<>(){}$`^";
   static char *sh_cmds[] = { "cd", "eval", "exec", "exit", "login",
 			     "logout", "set", "umask", "wait", "while", "for",
 			     "case", "if", ":", ".", "break", "continue",
 			     "export", "read", "readonly", "shift", "times",
 			     "trap", "switch", 0 };
+#endif /* WIN32 */
 #endif
   register int i;
   register char *p;
@@ -1545,6 +1664,17 @@ construct_command_argv_internal (line, restp, shell, ifs)
   char *end;
   int instring, word_has_equals, seen_nonequals;
   char **new_argv = 0;
+#ifdef WIN32
+  int slow_flag = 0;
+
+  if (no_default_sh_exe) {
+    sh_cmds = sh_cmds_dos;
+    sh_chars = sh_chars_dos;
+  } else {
+    sh_cmds = sh_cmds_sh;
+    sh_chars = sh_chars_sh;
+  }
+#endif
 
   if (restp != NULL)
     *restp = NULL;
@@ -1559,6 +1689,20 @@ construct_command_argv_internal (line, restp, shell, ifs)
   if (shell == 0)
     shell = default_shell;
   else if (strcmp (shell, default_shell))
+#ifdef WIN32
+  {
+    char *s1 = _fullpath(NULL, shell, 0);
+    char *s2 = _fullpath(NULL, default_shell, 0);
+
+    slow_flag = strcmp((s1 ? s1 : ""), (s2 ? s2 : ""));
+
+    if (s1);
+      free(s1);
+    if (s2);
+      free(s2);
+  }
+  if (slow_flag)
+#endif /* WIN32 */
     goto slow;
 
   if (ifs != 0)
@@ -1750,8 +1894,31 @@ construct_command_argv_internal (line, restp, shell, ifs)
       free (new_argv[0]);
       free ((void *)new_argv);
     }
+#ifdef WIN32
+  /*
+   * Not eating this whitespace caused things like
+   *
+   *    sh -c "\n"
+   *
+   * which gave the shell fits. I think we have to eat
+   * whitespace here, but this code should be considered
+   * suspicious if things start failing....
+   */
 
-#ifdef __MSDOS__
+  /* Make sure not to bother processing an empty line.  */
+  while (isspace (*line))
+    ++line;
+  if (*line == '\0')
+    return 0;
+#endif
+
+#if defined(__MSDOS__) || defined(WIN32)
+#ifdef WIN32
+   /*
+    * only come here if no sh.exe command
+    */
+   if (no_default_sh_exe)
+#endif
    {
      FILE *batch;
      dos_batch_file = 1;
@@ -1807,6 +1974,13 @@ construct_command_argv_internal (line, restp, shell, ifs)
      new_argv[1] = 0;
    }
 #else	/* Not MSDOS or Amiga  */
+#ifdef WIN32
+  /*
+   * This is technically an else to the above 'if (no_default_sh_exe)',
+   * but (IMHO) coding if-else across ifdef is dangerous.
+   */
+  if (!no_default_sh_exe) 
+#endif
   {
     /* SHELL may be a multi-word command.  Construct a command line
        "SHELL -c LINE", with all special chars in LINE escaped.
@@ -1896,6 +2070,16 @@ construct_command_argv (line, restp, file)
     warn_undefined_variables_flag = 0;
 
     shell = allocated_variable_expand_for_file ("$(SHELL)", file);
+#ifdef WIN32
+    /*
+     * Convert to forward slashes so that construct_command_argv_internal()
+     * is not confused.
+     */
+    if (shell) {
+      char *p = w32ify(shell, 0); 
+      strcpy(shell, p);
+    }
+#endif
     ifs = allocated_variable_expand_for_file ("$(IFS)", file);
 
     warn_undefined_variables_flag = save;

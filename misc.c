@@ -397,6 +397,37 @@ end_of_token (s)
   return s;
 }
 
+#ifdef WIN32
+/*
+ * Same as end_of_token, but take into account a stop character
+ */
+char *
+end_of_token_w32 (s, stopchar)
+     char *s;
+     char stopchar;
+{
+  register char *p = s;
+  register int backslash = 0;
+
+  while (*p != '\0' && *p != stopchar && (backslash || !isblank (*p)))
+    {
+      if (*p++ == '\\')
+        {
+          backslash = !backslash;
+          while (*p == '\\')
+            {
+              backslash = !backslash;
+              ++p;
+            }
+        }
+      else
+        backslash = 0;
+    }
+
+  return p;
+}
+#endif
+
 /* Return the address of the first nonwhitespace or null in the string S.  */
 
 char *

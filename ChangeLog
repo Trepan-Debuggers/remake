@@ -1,3 +1,93 @@
+Wed May 15 10:14:14 CDT 1996  Rob Tulloh  <tulloh@tivoli.com>
+
+	* dir.c: WIN32 does not support inode. For now, fully qualified
+	pathname along with st_mtime will be keys for files.
+	Fixed problem where vpath can be confused when files
+	are added to a directory after the directory has already been
+	read in. The code now attempts to reread the directory if it
+	discovers that the datestamp on the directory has changed since
+	it was cached by make. This problem only seems to occur on WIN32
+	right now so it is lumped under port #ifdef WIN32.
+
+	* function.c: WIN32: call subproc library (CreateProcess()) instead of
+	fork/exec.
+
+	* job.c: WIN32: Added the code to do fork/exec/waitpid style processing
+	on WIN32 systems via calls to subproc library.
+
+	* main.c: WIN32: Several things added here. First, there is code
+	for dealing with PATH and SHELL defaults. Make tries to figure
+	out if the user has %PATH% set in the environment and sets it to
+	%Path% if it is not set already. Make also looks to see if sh.exe
+	is anywhere to be found. Code path through job.c will change
+	based on existence of a working Bourne shell. The checking for
+	default shell is done twice: once before makefiles are read in
+	and again after. Fall back to MSDOS style execution mode if no sh.exe
+	is found. Also added some debug support that allows user to pause make
+	with -D switch and attach a debugger. This is especially useful for
+	debugging recursive calls to make where problems appear only in the
+	sub-make.
+
+	* make.h: WIN32: A few macros and header files for WIN32 support.
+
+	* misc.c: WIN32: Added a function end_of_token_w32() to assist
+	in parsing code in read.c.
+
+	* read.c: WIN32: Fixes similar to MSDOS which allow colon to
+	appear in filenames. Use of colon in filenames would otherwise
+	confuse make.
+
+	* remake.c: WIN32: Added include of io.h to eliminate compiler
+	warnings. Added some code to default LIBDIR if it is not set
+	on WIN32.
+
+	* variable.c: WIN32: Added support for detecting Path/PATH
+	and converting them to semicolon separated lists for make's
+	internal use. New function sync_Path_environment()
+	which is called in job.c and function.c before creating a new
+	process. Caller must set Path in environment since we don't
+	have fork() to do this for us.
+
+	* vpath.c: WIN32: Added detection for filenames containing
+	forward or backward slashes.
+
+	* NMakefile: WIN32: Visual C compatible makefile for use with nmake.
+	Use this to build GNU make the first time on Windows NT or Windows 95.
+
+	* README.WIN32: WIN32: Contains some helpful notes.
+
+	* build_w32.bat: WIN32: If you don't like nmake, use this the first
+	time you build GNU make on Windows NT or Windows 95.
+
+	* config.h.WIN32: WIN32 version of config.h
+
+	* subproc.bat: WIN32: A bat file used to build the
+	subproc library from the top-level NMakefile. Needed because
+	WIndows 95 (nmake) doesn't allow you to cd in a make rule.
+
+	* w32/include/dirent.h
+	* w32/compat/dirent.c: WIN32: opendir, readdir, closedir, etc.
+
+	* w32/include/pathstuff.h: WIN32: used by files needed functions
+	defined in pathstuff.c (prototypes).
+
+	* w32/include/sub_proc.h: WIN32: prototypes for subproc.lib functions.
+
+	* w32/include/w32err.h: WIN32: prototypes for w32err.c.
+
+	* w32/pathstuff.c: WIN32: File and Path/Path conversion functions.
+
+	* w32/subproc/build.bat: WIN32: build script for subproc library
+	if you don't wish to use nmake.
+
+	* w32/subproc/NMakefile: WIN32: Visual C compatible makefile for use
+	with nmake. Used to build subproc library.
+
+	* w32/subproc/misc.c: WIN32: subproc library support code
+	* w32/subproc/proc.h: WIN32: subproc library support code
+	* w32/subproc/sub_proc.c: WIN32: subproc library source code
+	* w32/subproc/w32err.c: WIN32: subproc library support code
+
 Wed May 22 17:24:51 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 
 	* makefile.vms: Set LOADLIBES.
