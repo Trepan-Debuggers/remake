@@ -22,14 +22,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "dep.h"
 #include "file.h"
 
-#ifdef	__GNUC__
-#define	max(a, b) \
-  ({ register int __a = (a), __b = (b); __a > __b ? __a : __b; })
-#else
-#define max(a, b) ((a) > (b) ? (a) : (b))
-#endif
-
-
 /* Hash table of all global variable definitions.  */
 
 #ifndef	VARIABLE_BUCKETS
