@@ -55,7 +55,7 @@ AC_MACRODIR = /home/gd/gnu/autoconf/autoconf
 endif
 ACFLAGS := -m $(AC_MACRODIR)
 configure config.h.in: $(patsubst %,$(AC_MACRODIR)/%.m4,acspecific acgeneral)
-config.h.in: /home/gd/gnu/autoconf/acconfig.h
+config.h.in: $(AC_MACRODIR)/acconfig.h
 configure: configure.in; autoconf $(ACFLAGS)
 config.h.in: configure.in; autoheader $(ACFLAGS)
 
