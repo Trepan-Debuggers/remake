@@ -396,6 +396,7 @@ read_makefile (filename, flags)
 	 attempt, rather from FILENAME itself.  Restore it in case the
 	 caller wants to use it in a message.  */
       errno = makefile_errno;
+      free (commands);
       return 0;
     }
 

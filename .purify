@@ -1,0 +1,5 @@
+suppress plk malloc; setvbuf "libc*"; main "main.c"
+suppress mlk malloc; xmalloc "misc.c"; decode_env_switches "main.c"
+suppress plk malloc; xmalloc "misc.c"; decode_env_switches "main.c"
+suppress mlk malloc; xmalloc "misc.c"; concat "misc.c"; decode_env_switches "main.c"
+suppress plk malloc; xmalloc "misc.c"; concat "misc.c"; decode_env_switches "main.c"
