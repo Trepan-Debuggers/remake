@@ -251,7 +251,7 @@ variable_expand (line)
 			p = savestring (subst_beg, subst_len);
 			p1 = savestring (replace_beg, replace_len);
 			o = patsubst_expand (o, value, p, p1,
-					     index (p, '%'), index (p1, '%'));
+					     (char *) 0, (char *) 0);
 			free (p);
 			free (p1);
 		      }
