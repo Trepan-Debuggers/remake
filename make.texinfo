@@ -6,20 +6,21 @@
 @smallbook
 @c %**end of header
 
-@set EDITION 0.38-1/2
+@set EDITION 0.39
 @set VERSION 3.63 Beta
-@set UPDATED 10 December 1992
+@set UPDATED 15 December 1992
 @set UPDATE-MONTH December 1992
 
 @c finalout
 
 @c Combine the variable and function indices:
-@synindex vr fn
+@syncodeindex vr fn
 @c Combine the program and concept indices:
-@synindex pg cp
+@syncodeindex pg cp
 
 @tex
 % trying for a two-level index
+% You need the rewritten texindex program for this to work.
 
 \gdef\singleindexerfoo#1, #2\par{%
 % Use a box register to test if #2 is empty.
@@ -1108,8 +1109,10 @@ source files automatically; the dependencies can be put in a file that
 is included by the main makefile.  This practice is generally cleaner
 than that of somehow appending the dependencies to the end of the main
 makefile as has been traditionally done with other versions of
-@code{make}.@c !!! xref to auto deps
+@code{make}.  @xref{Automatic Dependencies}.
 @cindex dependencies, automatic generation
+@cindex automatic generation of dependencies
+@cindex generating dependencies automatically
 
 @cindex @code{-I}
 @cindex @code{--include-dir}
@@ -1321,6 +1324,8 @@ the makefile (often with a target called @samp{all}).
                                   the target name.
 * Double-Colon::                How to use a special kind of rule to allow
                                   several independent rules for one target.
+* Automatic Dependencies::      How to automatically generate rules giving
+                                 dependencies from the source files themselves.
 @end menu
 
 @ifinfo
@@ -1438,7 +1443,7 @@ The wildcard characters in @code{make} are @samp{*}, @samp{?} and
 specifies a list of all the files (in the working directory) whose names
 end in @samp{.c}.@refill
 
-@cindex ~ (tilde)
+@cindex @code{~} (tilde)
 @cindex tilde (@code{~})
 @cindex home directory
 The character @samp{~} at the beginning of a file name also has special
@@ -2479,6 +2484,122 @@ Each double-colon rule should specify commands; if it does not, an
 implicit rule will be used if one applies.  
 @xref{Implicit Rules, ,Using Implicit Rules}.
 
+@node Automatic Dependencies,  , Double-Colon, Rules
+@section Generating Dependencies Automatically
+@cindex dependencies, automatic generation
+@cindex automatic generation of dependencies
+@cindex generating dependencies automatically
+
+In the makefile for a program, often many of the rules you need to write
+are ones that simply say that some object file depends on some header
+file.  For example, if @file{main.c} uses @file{defs.h} via an
+@code{#include}, you would write:
+
+@example
+main.o: defs.h
+@end example
+
+@noindent
+You need this rule so that @code{make} knows that it must remake
+@file{main.o} whenever @file{defs.h} changes.  You can see that for a
+large program you would have to write dozens of such rules in your
+makefile.  And, you must always be very careful to update the makefile
+every time you add or remove an @code{#include}.
+@cindex @code{#include}
+
+@cindex @code{-M} (to compiler)
+To avoid this hassle, most modern C compilers can write these rules for
+you, by looking at the @code{#include} lines in the source files.
+Usually this is done with the @samp{-M} option to the compiler.
+For example, the command:
+
+@example
+cc -M main.c
+@end example
+
+@noindent
+generates the output:
+
+@example
+main.o : main.c defs.h
+@end example
+
+@noindent
+Thus you no longer have to write all those rules yourself.
+The compiler will do it for you.
+
+@cindex @code{make depend}
+With old @code{make} programs, it was traditional practice to use this
+compiler feature to generate dependencies on demand with a command like
+@samp{make depend}.  That command would create a file @file{depend}
+containing all the automatically-generated dependencies; then the
+makefile could use @code{include} to read them in (@pxref{Include}).
+
+In GNU @code{make}, the feature of remaking makefiles makes this
+practice obsolete---you need never tell @code{make} explicitly to
+regenerate the dependencies, because it always regenerates any makefile
+that is out of date.  @xref{Remaking Makefiles}.
+
+The practice we recommend for automatic dependency generation is to have
+one makefile corresponding to each source file.  For each source file
+@file{@var{name}.c} there is a makefile @file{@var{name}.d} which lists
+what files the object file @file{@var{name}.o} depends on.  That way
+only the source files that have changed need to be rescanned to produce
+the new dependencies.
+
+Here is the pattern rule to generate a file of dependencies (i.e., a makefile)
+called @file{@var{name}.d} from a C source file called @file{@var{name}.c}:
+
+@example
+@group
+%.d: %.c
+	$(CC) -M $(CPPFLAGS) $< | sed 's/$*.o/& $@@/g' > $@@
+@end group
+@end example
+
+@noindent
+@xref{Pattern Rules}, for information on defining pattern rules.
+@cindex @code{sed} (shell command)
+The purpose of the @code{sed} command is to translate (for example):
+
+@example
+main.o : main.c defs.h
+@end example
+
+@noindent
+into:
+
+@example
+main.o main.d : main.c defs.h
+@end example
+
+@noindent
+@cindex @code{.d}
+This makes each @samp{.d} file depend on all the source and header files
+that the corresponding @samp{.o} file depends on.  @code{make} then
+knows it must regenerate the dependencies whenever any of the source or
+header files changes.
+
+Once you've defined the rule to remake the @samp{.d} files,
+you then use the @code{include} directive to read them all in.
+@xref{Include}.  For example:
+
+@example
+@group
+sources = foo.c bar.c
+
+include $(sources:.c=.d)
+@end group
+@end example
+
+@noindent
+(This example uses a substitution variable reference to translate the
+list of source files @samp{foo.c bar.c} into a list of dependency
+makefiles, @samp{foo.d bar.d}.  @xref{Substitution Refs}, for full
+information on subtitution references.)  Since the @samp{.d} files are
+makefiles like any others, @code{make} will remake them as necessary
+with no further work from you.  @xref{Remaking Makefiles}.
+
 @node Commands, Using Variables, Rules, Top
 @chapter Writing the Commands in Rules
 @cindex commands, how to write
@@ -2845,8 +2966,6 @@ subsystem:
 You can write recursive @code{make} commands just by copying this example,
 but there are many things to know about how they work and why, and about
 how the sub-@code{make} relates to the top-level @code{make}.
-
-@c !!! example of many subdirs + many subdir targets
 
 @menu
 * MAKE Variable::               The special effects of using @samp{$(MAKE)}.
