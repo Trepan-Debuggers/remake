@@ -325,6 +325,10 @@ struct stringlist *other_args = 0;
 
 char *program;
 
+/* Our current directory after processing all -C options.  */
+
+char *starting_directory;
+
 /* Value of the MAKELEVEL variable at startup (or 0).  */
 
 unsigned int makelevel;
@@ -596,6 +600,25 @@ main (argc, argv, envp)
 
   construct_include_path (include_directories == 0 ? (char **) 0
 			  : include_directories->list);
+
+  /* Figure out where we are now, after chdir'ing.  */
+  if (directories == 0)
+    /* We didn't move, so we're still in the same place.  */
+    starting_directory = current_directory;
+  else
+    {
+      if (getcwd (current_directory, GET_PATH_MAX) == 0)
+	{
+#ifdef	HAVE_GETCWD
+	  perror_with_name ("getcwd: ", "");
+#else
+	  error ("getwd: %s", current_directory);
+#endif
+	  starting_directory = 0;
+	}
+      else
+	starting_directory = current_directory;
+    }
 
   /* Tell the user where he is.  */
 
@@ -1344,7 +1367,7 @@ decode_env_switches (envar, len)
   args[(value[0] == '-' ? 0 : 1) + len + 1] = '\0';
 
   /* Allocate a vector that is definitely big enough.  */
-  argv = (char **) alloca (1 + len * sizeof (char *));
+  argv = (char **) alloca ((1 + len + 1) * sizeof (char *));
 
   /* getopt will look at the arguments starting at ARGV[1].
      Prepend a spacer word.  */
@@ -1619,7 +1642,6 @@ log_working_directory (entering)
      int entering;
 {
   static int entered = 0;
-  PATH_VAR (pwdbuf);
   char *message = entering ? "Entering" : "Leaving";
 
   if (entering)
@@ -1637,15 +1659,8 @@ log_working_directory (entering)
   else
     printf ("%s[%u]: %s ", program, makelevel, message);
 
-  if (getcwd (pwdbuf, GET_PATH_MAX) == 0)
-    {
-#ifdef	HAVE_GETCWD
-      perror_with_name ("getcwd: ", "");
-#else
-      error ("getwd: %s", pwdbuf);
-#endif
-      puts ("an unknown directory");
-    }
+  if (starting_directory == 0)
+    puts ("an unknown directory");
   else
-    printf ("directory `%s'\n", pwdbuf);
+    printf ("directory `%s'\n", starting_directory);
 }
