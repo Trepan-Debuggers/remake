@@ -7070,8 +7070,8 @@ in that way.  Instead, if the target name ends with a recognized suffix
 the target name minus the suffix.  For example, if the target name is
 @samp{foo.c}, then @samp{$*} is set to @samp{foo}, since @samp{.c} is a
 suffix.  GNU @code{make} does this bizarre thing only for compatibility
-with other implementations of @code{make}.  You should generally never use
-@samp{$*} except in implicit rules or static pattern rules.@refill
+with other implementations of @code{make}.  You should generally avoid
+using @samp{$*} except in implicit rules or static pattern rules.@refill
 
 If the target name in an explicit rule does not end with a recognized
 suffix, @samp{$*} is set to the empty string for that rule.
