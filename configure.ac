@@ -6,7 +6,7 @@ AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.4 2004/06/12 03:22:41 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.5 2004/06/12 08:54:42 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -214,11 +214,16 @@ if test "$enable_readline" = yes ; then
   AC_CHECK_LIB(readline, readline, 
               [LIBS="$LIBS -lreadline -ltermcap"], 
 	      [enable_readline=no], -ltermcap)
-  if test "$enable_readline" = yes ; then 
-     AC_DEFINE(ENABLE_READLINE, 1, 
-     [Define this if you have libreadline. It is needed for the debugger.])
-  fi
 fi
+
+if test "$enable_readline" = yes ; then 
+   AC_DEFINE(ENABLE_READLINE, 1, 
+   [Define this if you have libreadline. It is needed for the debugger.])
+ else 
+   AC_MSG_WARN([libreadline is needed for the debugger. I'll build "make"])
+   AC_MSG_WARN([with trace support, but you won't be able enter the debugger.])
+fi
+AC_SUBST(ENABLE_READLINE)
 
 
 # See if the user wants to use pmake's "customs" distributed build capability
@@ -411,7 +416,8 @@ AC_CONFIG_FILES([Makefile        \
 		 emacs/Makefile  \
 		 glob/Makefile   \
                  po/Makefile.in  \
-		 src/Makefile
+		 src/Makefile    \
+		 tests/scripts/debugger/general
 		 ])
 
 AM_CONDITIONAL(INSTALL_EMACS_LISP, test "x$lispdir" != "x")
