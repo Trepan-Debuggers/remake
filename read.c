@@ -413,6 +413,40 @@ read_makefile (filename, type)
 			    "Empty `override' directive");
 	  continue;
 	}
+      else if (word1eq ("export", 6))
+	{
+	  struct variable *v;
+	  p2 = next_token (p + 6);
+	  v = try_variable_definition (p2, o_file);
+	  if (v != 0)
+	    v->export = 1;
+	  else
+	    {
+	      unsigned int len;
+	      for (p = find_next_token (&p2, &len); p != 0;
+		   p = find_next_token (&p2, &len))
+		{
+		  v = lookup_variable (p, len);
+		  if (v == 0)
+		    v = define_variable (p, len, "", o_file, 0);
+		  v->export = v_export;
+		}
+	    }
+	}
+      else if (word1eq ("unexport", 8))
+	{
+	  unsigned int len;
+	  struct variable *v;
+	  p2 = next_token (p + 8);
+	  for (p = find_next_token (&p2, &len); p != 0;
+	       p = find_next_token (&p2, &len))
+	    {
+	      v = lookup_variable (p, len);
+	      if (v == 0)
+		v = define_variable (p, len, "", o_file, 0);
+	      v->export = v_noexport;
+	    }
+	}
       else if (word1eq ("include", 7))
 	{
 	  /* We have found an `include' line specifying a nested
