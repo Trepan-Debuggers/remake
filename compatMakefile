@@ -39,6 +39,7 @@ LDFLAGS = @LDFLAGS@
 #				without complaint but produce losing code,
 #				so beware.
 # NeXT 1.0a uses an old version of GCC, which required -D__inline=inline.
+# See also `config.h'.
 defines = @DEFS@ -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\"
 
 # Which flavor of remote job execution support to use.
@@ -134,7 +135,7 @@ srcs = $(srcdir)/commands.c $(srcdir)/job.c $(srcdir)/dir.c		\
 
 
 .SUFFIXES:
-.SUFFIXES: .o .c .h .ps .dvi .texinfo
+.SUFFIXES: .o .c .h .ps .dvi .info .texinfo
 
 .PHONY: all check info dvi
 all: make
@@ -196,9 +197,11 @@ $(bindir)/$(instname): make
 	mv $@.new $@
 
 $(infodir)/$(instname).info: make.info
-	for file in make.info*; do \
+	if [ -r ./make.info ]; then dir=.; else dir=$(srcdir); fi; \
+	for file in $${dir}/make.info*; do \
+	  name="`basename $$file`"; \
 	  $(INSTALL_DATA) $$file \
-	    `echo $@ | sed "s,$(instname).info\$$,$$file,"`; \
+	    `echo $@ | sed "s,$(instname).info\$$,$$name,"`; \
 	done
 
 $(mandir)/$(instname).$(manext): make.man
