@@ -1,4 +1,17 @@
+1999-03-05  Paul D. Smith  <psmith@gnu.org>
+
+	* Makefile.am, configure.in: Use AC_SUBST_FILE to insert the
+	maintMakefile instead of "include", to avoid automake 1.4
+	incompatibility.
+
 1999-03-04  Paul D. Smith  <psmith@gnu.org>
+
+	* amiga.c, amiga.h, ar.c, arscan.c, commands.c, commands.h,
+	* default.c, dep.h, dir.c, expand.c, file.c, filedef.h, functions.c,
+	* implicit.c, job.c, job.h, main.c, make.h, misc.c, read.c, remake.c
+	* remote-cstms.c, remote-stub.c, rule.h, variable.c, variable.h,
+	* vpath.c, Makefile.ami, NMakefile.template, build.template,
+	* makefile.vms: Updated FSF address in the copyright notice.
 
 	* variable.c (try_variable_definition): If we see a conditional
 	variable and we decide to set it, re-type it as recursive so it

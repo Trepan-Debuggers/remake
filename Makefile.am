@@ -127,10 +127,4 @@ check-regression: all
 
 # --------------- Maintainer's Section
 
-if MAINT_MAKEFILE
-# Note this requires GNU make.  Not to worry, since it will only be included
-# in the Makefile if we're in the maintainer's environment.
-# Ulp!  Need a leading space to "hide" this include from automake's new (in
-# 1.4) include feature :(
- include $(srcdir)/maintMakefile
-endif
+@MAINT_MAKEFILE@
