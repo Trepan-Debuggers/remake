@@ -1,4 +1,4 @@
-# -*-Makefile-*-, or close enough
+# This is a -*-Makefile-*-, or close enough
 
 AUTOMAKE_OPTIONS = 1.3
 

@@ -2136,7 +2136,7 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
 #ifdef __MSDOS__
                 /* A dot is only special as part of the "..."
                    wildcard.  */
-                if (strncmp (p + 1, ".\\.\\.", 5) == 0)
+                if (strneq (p + 1, ".\\.\\.", 5))
                   {
                     *ap++ = '.';
                     *ap++ = '.';
@@ -2354,7 +2354,7 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
              || index (sh_chars, *p) != 0))
 	  *ap++ = '\\';
 #ifdef __MSDOS__
-        else if (unixy_shell && strncmp (p, "...", 3) == 0)
+        else if (unixy_shell && strneq (p, "...", 3))
           {
             /* The case of `...' wildcard again.  */
             strcpy (ap, "\\.\\.\\");

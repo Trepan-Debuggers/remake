@@ -403,7 +403,7 @@ vmsify (name, type)
 		      {
 			if (*(s2-1) == '.')	/* ends in '.]' */
 			  {
-			    if (strncmp (fptr, "000000", 6) != 0)
+			    if (!strneq (fptr, "000000", 6))
 			      rooted = 0;
 			  }
 			else
@@ -661,7 +661,7 @@ vmsify (name, type)
 			    nstate = N_OPEN;
 			    break;
 			  }
-		      } 
+		      }
 		  }
 	      }
 	    else
@@ -840,7 +840,7 @@ vmsify (name, type)
 
 	}
       while (state > 0);
-      
+
 
     }
 

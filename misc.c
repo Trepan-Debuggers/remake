@@ -352,9 +352,13 @@ pfatal_with_name (name)
 }
 
 /* Like malloc but get fatal error if memory is exhausted.  */
+/* Don't bother if we're using dmalloc; it provides these for us.  */
+
+#ifndef HAVE_DMALLOC_H
 
 #undef xmalloc
 #undef xrealloc
+#undef xstrdup
 
 char *
 xmalloc (size)
@@ -372,7 +376,10 @@ xrealloc (ptr, size)
      char *ptr;
      unsigned int size;
 {
-  char *result = (char *) realloc (ptr, size);
+  char *result;
+
+  /* Some older implementations of realloc() don't conform to ANSI.  */
+  result = ptr ? realloc (ptr, size) : malloc (size);
   if (result == 0)
     fatal (NILF, "virtual memory exhausted");
   return result;
@@ -401,9 +408,11 @@ xstrdup (ptr)
 #endif
 }
 
+#endif  /* HAVE_DMALLOC_H */
+
 char *
 savestring (str, length)
-     char *str;
+     const char *str;
      unsigned int length;
 {
   register char *out = (char *) xmalloc (length + 1);
@@ -419,21 +428,28 @@ savestring (str, length)
 
 char *
 sindex (big, blen, small, slen)
-     char *big;
+     const char *big;
      unsigned int blen;
-     char *small;
+     const char *small;
      unsigned int slen;
 {
-  register unsigned int b;
-
-  if (blen < 1)
+  if (!blen)
     blen = strlen (big);
-  if (slen < 1)
+  if (!slen)
     slen = strlen (small);
 
-  for (b = 0; b < blen; ++b)
-    if (big[b] == *small && !strncmp (&big[b + 1], small + 1, slen - 1))
-      return (&big[b]);
+  if (slen && blen >= slen)
+    {
+      register unsigned int b;
+
+      /* Quit when there's not enough room left for the small string.  */
+      --slen;
+      blen -= slen;
+
+      for (b = 0; b < blen; ++b, ++big)
+        if (*big == *small && strneq (big + 1, small + 1, slen))
+          return (char *)big;
+    }
 
   return 0;
 }
@@ -446,12 +462,12 @@ sindex (big, blen, small, slen)
 
 char *
 lindex (s, limit, c)
-     register char *s, *limit;
+     register const char *s, *limit;
      int c;
 {
   while (s < limit)
     if (*s++ == c)
-      return s - 1;
+      return (char *)(s - 1);
 
   return 0;
 }
@@ -547,7 +563,7 @@ copy_dep_chain (d)
       c = (struct dep *) xmalloc (sizeof (struct dep));
       bcopy ((char *) d, (char *) c, sizeof (struct dep));
       if (c->name != 0)
-	c->name = savestring (c->name, strlen (c->name));
+	c->name = xstrdup (c->name);
       c->next = 0;
       if (firstnew == 0)
 	firstnew = lastnew = c;

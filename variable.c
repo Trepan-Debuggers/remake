@@ -77,7 +77,7 @@ define_variable_in_set (name, length, value, origin, recursive, set)
 
   for (v = set->table[hashval]; v != 0; v = v->next)
     if (*v->name == *name
-	&& !strncmp (v->name + 1, name + 1, length - 1)
+	&& strneq (v->name + 1, name + 1, length - 1)
 	&& v->name[length] == '\0')
       break;
 
@@ -98,7 +98,7 @@ define_variable_in_set (name, length, value, origin, recursive, set)
 	{
 	  if (v->value != 0)
 	    free (v->value);
-	  v->value = savestring (value, strlen (value));
+	  v->value = xstrdup (value);
 	  v->origin = origin;
 	  v->recursive = recursive;
 	}
@@ -109,7 +109,7 @@ define_variable_in_set (name, length, value, origin, recursive, set)
 
   v = (struct variable *) xmalloc (sizeof (struct variable));
   v->name = savestring (name, length);
-  v->value = savestring (value, strlen (value));
+  v->value = xstrdup (value);
   v->origin = origin;
   v->recursive = recursive;
   v->expanding = 0;
@@ -176,7 +176,7 @@ lookup_variable (name, length)
 
       for (v = set->table[hashval]; v != 0; v = v->next)
 	if (*v->name == *name
-	    && !strncmp (v->name + 1, name + 1, length - 1)
+	    && strneq (v->name + 1, name + 1, length - 1)
 	    && v->name[length] == 0)
 	  return v;
     }
@@ -205,7 +205,7 @@ lookup_variable_in_set (name, length, set)
 
   for (v = set->table[hash]; v != 0; v = v->next)
     if (*v->name == *name
-        && !strncmp (v->name + 1, name + 1, length - 1)
+        && strneq (v->name + 1, name + 1, length - 1)
         && v->name[length] == 0)
       return v;
 
@@ -446,7 +446,7 @@ define_automatic_variables ()
     {
       free (v->value);
       v->origin = o_file;
-      v->value = savestring (default_shell, strlen (default_shell));
+      v->value = xstrdup (default_shell);
     }
 #endif
 

@@ -378,7 +378,7 @@ read_makefile (filename, flags)
   deps->file = lookup_file (filename);
   if (deps->file == 0)
     {
-      deps->file = enter_file (savestring (filename, strlen (filename)));
+      deps->file = enter_file (xstrdup (filename));
       if (flags & RM_DONTCARE)
 	deps->file->dontcare = 1;
     }
@@ -468,7 +468,7 @@ read_makefile (filename, flags)
       remove_comments (collapsed);
 
       /* Compare a word, both length and contents. */
-#define	word1eq(s, l) 	(len == l && !strncmp (s, p, l))
+#define	word1eq(s, l) 	(len == l && strneq (s, p, l))
       p = collapsed;
       while (isspace (*p))
 	++p;
@@ -551,7 +551,7 @@ read_makefile (filename, flags)
 	  p2 = next_token (p + 8);
 	  if (*p2 == '\0')
 	    error (&fileinfo, "empty `override' directive");
-	  if (!strncmp (p2, "define", 6) && (isblank (p2[6]) || p2[6] == '\0'))
+	  if (strneq (p2, "define", 6) && (isblank (p2[6]) || p2[6] == '\0'))
 	    {
 	      if (ignoring)
 		in_ignored_define = 1;
@@ -857,7 +857,7 @@ read_makefile (filename, flags)
                 /* There's no need to be ivory-tower about this: check for
                    one of the most common bugs found in makefiles...  */
                 fatal (&fileinfo, "missing separator%s",
-                       strncmp(lb.buffer, "        ", 8) ? ""
+                       !strneq(lb.buffer, "        ", 8) ? ""
                        : " (did you mean TAB instead of 8 spaces?)");
               continue;
             }
@@ -902,7 +902,7 @@ read_makefile (filename, flags)
           wtype = get_next_mword(p2, NULL, &p, &len);
           v_origin = o_file;
           if (wtype == w_static && (len == (sizeof("override")-1)
-                                    && !strncmp(p, "override", len)))
+                                    && strneq(p, "override", len)))
             {
               v_origin = o_override;
               (void)get_next_mword(p+len, NULL, &p, &len);
@@ -1089,7 +1089,7 @@ do_define (name, namelen, origin, infile, flocp)
       p = next_token (lb.buffer);
       len = strlen (p);
       if ((len == 5 || (len > 5 && isblank (p[5])))
-          && !strncmp (p, "endef", 5))
+          && strneq (p, "endef", 5))
 	{
 	  p += 5;
 	  remove_comments (p);
@@ -1750,7 +1750,7 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
 	      for (d2 = suffix_file->deps; d2 != 0; d2 = d2->next)
 		{
 		  register unsigned int len = strlen (dep_name (d2));
-		  if (strncmp (name, dep_name (d2), len))
+		  if (!strneq (name, dep_name (d2), len))
 		    continue;
 		  if (streq (name + len, dep_name (d)))
 		    {
@@ -1946,7 +1946,7 @@ parse_file_seq (stringp, stopchar, size, strip)
  * Savestring called because q may be read-only string constant.
  */
 	{
-	  char *qbase = savestring(q, strlen(q));
+	  char *qbase = xstrdup (q);
 	  char *pbase = qbase + (p-q);
 	  char *q1 = qbase;
 	  char *q2 = q1;
@@ -2544,7 +2544,7 @@ tilde_expand (name)
       if (pwent != 0)
 	{
 	  if (userend == 0)
-	    return savestring (pwent->pw_dir, strlen (pwent->pw_dir));
+	    return xstrdup (pwent->pw_dir);
 	  else
 	    return concat (pwent->pw_dir, "/", userend + 1);
 	}
@@ -2662,8 +2662,7 @@ multi_glob (chain, size)
 #endif /* !NO_ARCHIVES */
 		  {
 		    struct nameseq *elt = (struct nameseq *) xmalloc (size);
-		    elt->name = savestring (gl.gl_pathv[i],
-					    strlen (gl.gl_pathv[i]));
+		    elt->name = xstrdup (gl.gl_pathv[i]);
 		    elt->next = new;
 		    new = elt;
 		  }

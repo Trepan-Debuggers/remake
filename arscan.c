@@ -699,9 +699,9 @@ ar_name_equal (name, mem, truncated)
 #else
       struct ar_hdr hdr;
 #if !defined (__hpux) && !defined (cray)
-      return !strncmp (name, mem, sizeof(hdr.ar_name) - 1);
+      return strneq (name, mem, sizeof(hdr.ar_name) - 1);
 #else
-      return !strncmp (name, mem, sizeof(hdr.ar_name) - 2);
+      return strneq (name, mem, sizeof(hdr.ar_name) - 2);
 #endif /* !__hpux && !cray */
 #endif /* !AIAMAG */
     }

@@ -46,6 +46,11 @@ Boston, MA 02111-1307, USA.  */
 # define signal bsdsignal
 #endif
 
+/* If we're compiling for the dmalloc debugger, turn off string inlining.  */
+#if defined(HAVE_DMALLOC_H) && defined(__GNUC__)
+# define __NO_STRING_INLINES
+#endif
+
 #define _GNU_SOURCE 1
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -284,13 +289,12 @@ extern char *alloca ();
    ((a) == (b) || \
     (*(a) == *(b) && (*(a) == '\0' || !strcmp ((a) + 1, (b) + 1))))
 # ifdef HAVE_CASE_INSENSITIVE_FS
+/* This is only used on Windows/DOS platforms, so we assume strcmpi().  */
 #  define strieq(a, b) \
     ((a) == (b) || \
      (tolower(*(a)) == tolower(*(b)) && (*(a) == '\0' || !strcmpi ((a) + 1, (b) + 1))))
 # else
-#  define strieq(a, b) \
-    ((a) == (b) || \
-     (*(a) == *(b) && (*(a) == '\0' || !strcmp ((a) + 1, (b) + 1))))
+#  define strieq(a, b) streq(a, b)
 # endif
 #else
 /* Buggy compiler can't handle this.  */
@@ -371,7 +375,7 @@ extern void die PARAMS ((int)) __attribute__ ((noreturn));
 extern void log_working_directory PARAMS ((int));
 extern void pfatal_with_name PARAMS ((char *)) __attribute__ ((noreturn));
 extern void perror_with_name PARAMS ((char *, char *));
-extern char *savestring PARAMS ((char *, unsigned int));
+extern char *savestring PARAMS ((const char *, unsigned int));
 extern char *concat PARAMS ((char *, char *, char *));
 extern char *xmalloc PARAMS ((unsigned int));
 extern char *xrealloc PARAMS ((char *, unsigned int));
@@ -381,8 +385,9 @@ extern char *next_token PARAMS ((char *));
 extern char *end_of_token PARAMS ((char *));
 extern void collapse_continuations PARAMS ((char *));
 extern void remove_comments PARAMS((char *));
-extern char *sindex PARAMS ((char *, unsigned int, char *, unsigned int));
-extern char *lindex PARAMS ((char *, char *, int));
+extern char *sindex PARAMS ((const char *, unsigned int, \
+                             const char *, unsigned int));
+extern char *lindex PARAMS ((const char *, const char *, int));
 extern int alpha_compare PARAMS ((const void *, const void *));
 extern void print_spaces PARAMS ((unsigned int));
 extern char *find_char_unquote PARAMS ((char *, char *, int));
@@ -506,4 +511,10 @@ extern int handling_fatal_signal;
 # ifndef EXIT_TROUBLE
 #  define EXIT_TROUBLE 1
 # endif
+#endif
+
+/* Set up heap debugging library dmalloc.  */
+
+#ifdef HAVE_DMALLOC_H
+#include <dmalloc.h>
 #endif

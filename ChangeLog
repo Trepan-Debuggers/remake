@@ -1,3 +1,36 @@
+1999-07-21  Paul D. Smith  <psmith@gnu.org>
+
+	* various: Changed !strncmp() calls to strneq() macros.
+
+	* misc.c (sindex): Make slightly more efficient.
+
+	* dir.c (file_impossible): Change savestring(X,strlen(X)) to xstrdup().
+	* implicit.c (pattern_search): Ditto.
+	* main.c (enter_command_line_file): Ditto.
+	(main): Ditto.
+	* misc.c (copy_dep_chain): Ditto.
+	* read.c (read_makefile): Ditto.
+	(parse_file_seq): Ditto.
+	(tilde_expand): Ditto.
+	(multi_glob): Ditto.
+	* rule.c (install_pattern_rule): Ditto.
+	* variable.c (define_variable_in_set): Ditto.
+	(define_automatic_variables): Ditto.
+	* vpath.c (construct_vpath_list): Ditto.
+
+	* misc.c (xrealloc): If PTR is NULL, call malloc to conform to
+	the standard--some older versions of realloc are non-standard so
+	make xrealloc DTRT.
+	* main.c (main): Call xrealloc() directly instead of testing for
+	NULL.
+
+	* function.c (func_sort): Don't try to free NULL; some older,
+	non-standard versions of free() don't like it.
+
+	* configure.in (--enable-dmalloc): Install some support for using
+	dmalloc (http://www.dmalloc.com) with make.  Use --enable-dmalloc
+	with configure.
+
 1999-07-20  Paul D. Smith  <psmith@gnu.org>
 
 	* job.c (start_job_command): Ensure that the state of the target
@@ -29,10 +62,11 @@
 	* read.c (read_makefile): Fix some potential memory stomps parsing
 	`define' directives where no variable name is given.
 
-	* function.c (func_apply): Various code cleanup and tightening.
-	(function_table): Add "apply" as a valid builtin function.
+	* function.c (func_call): Rename from func_apply.  Various code
+	cleanup and tightening.
+	(function_table): Add "call" as a valid builtin function.
 
-	* make.texinfo (Apply Function): Document it.
+	* make.texinfo (Call Function): Document it.
 
 	* NEWS: Announce it.
 

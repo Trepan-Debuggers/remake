@@ -171,14 +171,14 @@ patsubst_expand (o, text, pattern, replace, pattern_percent, replace_percent)
       if (!fail && pattern_prepercent_len > 0
 	  && (*t != *pattern
 	      || t[pattern_prepercent_len - 1] != pattern_percent[-1]
-	      || strncmp (t + 1, pattern + 1, pattern_prepercent_len - 1)))
+	      || !strneq (t + 1, pattern + 1, pattern_prepercent_len - 1)))
 	fail = 1;
 
       /* Does the suffix match? */
       if (!fail && pattern_postpercent_len > 0
 	  && (t[len - 1] != pattern_percent[pattern_postpercent_len]
 	      || t[len - pattern_postpercent_len] != pattern_percent[1]
-	      || strncmp (&t[len - pattern_postpercent_len],
+	      || !strneq (&t[len - pattern_postpercent_len],
 			  &pattern_percent[1], pattern_postpercent_len - 1)))
 	fail = 1;
 
@@ -266,7 +266,7 @@ pattern_matches (pattern, percent, str)
   strlength = strlen (str);
 
   if (strlength < (percent - pattern) + sfxlen
-      || strncmp (pattern, str, percent - pattern))
+      || !strneq (pattern, str, percent - pattern))
     return 0;
 
   return !strcmp (percent + 1, str + (strlength - sfxlen));
@@ -1154,6 +1154,8 @@ func_sort (o, argv, funcname)
   char *t = argv[0];
   char *p=0;
   int len;
+  int i;
+
   while ((p = find_next_token (&t, &len)) != 0)
     {
       if (wordi >= nwords - 1)
@@ -1165,29 +1167,29 @@ func_sort (o, argv, funcname)
       words[wordi++] = savestring (p, len);
     }
 
-  if (wordi > 0)
+  if (!wordi)
+    return o;
+
+  /* Now sort the list of words.  */
+  qsort ((char *) words, wordi, sizeof (char *), alpha_compare);
+
+  /* Now write the sorted list.  */
+  for (i = 0; i < wordi; ++i)
     {
-      int i;
-      /* Now sort the list of words.  */
-      qsort ((char *) words, wordi, sizeof (char *), alpha_compare);
-
-      /* Now write the sorted list.  */
-      for (i = 0; i < wordi; ++i)
-	{
-	  len = strlen (words[i]);
-	  if (i == wordi - 1 || strlen (words[i + 1]) != len
-	      || strcmp (words[i], words[i + 1]))
-	    {
-	      o = variable_buffer_output (o, words[i], len);
-	      o = variable_buffer_output (o, " ", 1);
-	    }
-	  free (words[i]);
-	}
-      /* Kill the last space.  */
-      --o;
+      len = strlen (words[i]);
+      if (i == wordi - 1 || strlen (words[i + 1]) != len
+          || strcmp (words[i], words[i + 1]))
+        {
+          o = variable_buffer_output (o, words[i], len);
+          o = variable_buffer_output (o, " ", 1);
+        }
+      free (words[i]);
     }
+  /* Kill the last space.  */
+  --o;
 
-  free ((char *) words);
+  free (words);
+
   return o;
 }
 
@@ -1724,7 +1726,7 @@ func_if (char* o, char **argv, char *funcname)
    assigned to $1, $2, ... $N.  $0 is the name of the function.  */
 
 char *
-func_apply (o, argv, funcname)
+func_call (o, argv, funcname)
      char *o;
      char **argv;
      const char *funcname;
@@ -1735,7 +1737,7 @@ func_apply (o, argv, funcname)
   int i;
   const struct function_table_entry *entry_p;
 
-  /* Applying nothing is a no-op.  */
+  /* Calling nothing is a no-op.  */
   if (*argv[0] == '\0')
     return o;
 
@@ -1835,7 +1837,7 @@ static struct function_table_entry function_table[] =
   { STRING_SIZE_TUPLE("words"),         1,  1,  func_words},
   { STRING_SIZE_TUPLE("origin"),        1,  1,  func_origin},
   { STRING_SIZE_TUPLE("foreach"),       3,  0,  func_foreach},
-  { STRING_SIZE_TUPLE("apply"),         1,  1,  func_apply},
+  { STRING_SIZE_TUPLE("call"),          1,  1,  func_call},
   { STRING_SIZE_TUPLE("error"),         1,  1,  func_error},
   { STRING_SIZE_TUPLE("warning"),       1,  1,  func_error},
 #ifdef EXPERIMENTAL

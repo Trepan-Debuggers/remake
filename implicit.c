@@ -247,11 +247,11 @@ pattern_search (file, archive, depth, recursions)
 	  if (check_lastslash)
 	    {
 	      if (stem > (lastslash + 1)
-		  && strncmp (target, lastslash + 1, stem - lastslash - 1))
+		  && !strneq (target, lastslash + 1, stem - lastslash - 1))
 		continue;
 	    }
 	  else if (stem > filename
-		   && strncmp (target, filename, stem - filename))
+		   && !strneq (target, filename, stem - filename))
 	    continue;
 
 	  /* Check that the rule pattern matches the text after the stem.
@@ -400,7 +400,7 @@ pattern_search (file, archive, depth, recursions)
 		  && (((fp = lookup_file (p)) != 0 && !fp->intermediate)
                       || file_exists_p (p)))
 		{
-		  found_files[deps_found++] = savestring (p, strlen (p));
+		  found_files[deps_found++] = xstrdup (p);
 		  continue;
 		}
 	      /* This code, given FILENAME = "lib/foo.o", dependency name
@@ -432,7 +432,7 @@ pattern_search (file, archive, depth, recursions)
 		  if (pattern_search (intermediate_file, 0, depth + 1,
 				      recursions + 1))
 		    {
-		      p = savestring (p, strlen (p));
+		      p = xstrdup (p);
 		      intermediate_patterns[deps_found]
 			= intermediate_file->name;
 		      intermediate_file->name = p;
@@ -441,7 +441,7 @@ pattern_search (file, archive, depth, recursions)
 		      /* Allocate an extra copy to go in FOUND_FILES,
 			 because every elt of FOUND_FILES is consumed
 			 or freed later.  */
-		      found_files[deps_found] = savestring (p, strlen (p));
+		      found_files[deps_found] = xstrdup (p);
 		      ++deps_found;
 		      continue;
 		    }
