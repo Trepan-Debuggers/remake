@@ -140,8 +140,10 @@ make: $(objs)
 	$(CC) $(LDFLAGS) $(objs) $(LOADLIBES) -o make.new
 	mv -f make.new make
 
-.c.o:;\
-$(CC) $(CFLAGS) $(defines) -c -I$(srcdir) -I$(srcdir)/glob $< $(OUTPUT_OPTION)
+# -I. is needed to find config.h in the build directory.
+.c.o:
+	$(CC) $(CFLAGS) $(defines) -c -I. \
+	      -I$(srcdir) -I$(srcdir)/glob $< $(OUTPUT_OPTION)
 remote.o: remote.c
 	$(CC) $(CFLAGS) $(defines) $(REMOTE) -c -I$(srcdir) $(srcdir)/remote.c
 
@@ -150,7 +152,7 @@ MAKE = make
 
 glob/libglob.a: force
 	cd glob; $(MAKE) CC='$(CC)' CFLAGS='$(CFLAGS) -I..' \
-			 CPPFLAGS='$(defines)' \
+			 CPPFLAGS='$(CPPFLAGS) -DHAVE_CONFIG_H' \
 			 libglob.a
 force:
 
