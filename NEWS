@@ -50,6 +50,16 @@ Version 3.78
 * The confusing term "dependency" has been replaced by the more accurate
   and standard term "prerequisite", both in the manual and in all GNU make
   output.
+
+* GNU make supports the "big archive" library format introduced in AIX 4.3.
+
+* GNU make supports large files on AIX, HP-UX, and IRIX.  These changes
+  were provided by Paul Eggert <eggert@twinsun.com>.  (Large file
+  support for Solaris and Linux was introduced in 3.77, but the
+  configuration had issues: these have also been resolved).
+
+* The Windows 95/98/NT (W32) version of GNU make now has native support
+  for the Cygnus Cygwin release B20.1 shell (bash).
 
 Version 3.77
 
