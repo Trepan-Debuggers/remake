@@ -28,4 +28,34 @@ $answer = "echo >> intermediate\necho >> final\n";
 
 unlink('orig', 'intermediate', 'final');
 
+# TEST2
+# We consider the actual updated timestamp of targets with all
+# recursive commands, even with -n.
+
+$makefile2 = &get_tmpfile;
+
+open(MAKEFILE, "> $makefile2");
+
+print MAKEFILE <<'EOF';
+.SUFFIXES:
+BAR =     # nothing
+FOO = +$(BAR)
+a: b; echo > $@
+b: c; $(FOO)
+EOF
+
+close(MAKEFILE);
+
+&touch('a', 'b');
+sleep(1);
+&touch('c');
+
+&run_make_with_options($makefile2, "", &get_logfile);
+$answer = "$make_name: `a' is up to date.\n";
+&compare_output($answer, &get_logfile(1));
+
+&run_make_with_options($makefile2, "-n", &get_logfile);
+$answer = "$make_name: `a' is up to date.\n";
+&compare_output($answer, &get_logfile(1));
+
 1;

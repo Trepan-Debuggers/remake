@@ -93,15 +93,6 @@ update_goal_chain (goals, makefiles)
       g->changed = 0;
   }
 
-#if 0
-  /* Only run one job at a time when building makefiles.
-     No one seems to know why this was done, and no one can think of a good
-     reason to do it.  Hopefully an obvious one won't appear as soon as we
-     release the next version :-/.  */
-  if (makefiles)
-    job_slots = 1;
-#endif
-
   /* All files start with the considered bit 0, so the global value is 1.  */
   considered = 1;
 
@@ -746,12 +737,23 @@ notice_finished_file (file)
   if (ran && !file->phony)
     {
       struct file *f;
+      int i = 0;
 
-      if (just_print_flag || question_flag
-	  || (file->is_target && file->cmds == 0))
-	file->last_mtime = NEW_MTIME;
-      else
-	file->last_mtime = 0;
+      /* If -n or -q and all the commands are recursive, we ran them so
+         really check the target's mtime again.  Otherwise, assume the target
+         would have been updated. */
+
+      if (question_flag || just_print_flag)
+        for (i = file->cmds->ncommand_lines; i > 0; --i)
+          if (! (file->cmds->lines_flags[i-1] & COMMANDS_RECURSE))
+            break;
+
+      /* If there were no commands at all, it's always new. */
+
+      else if (file->is_target && file->cmds == 0)
+	i = 1;
+
+      file->last_mtime = i == 0 ? 0 : NEW_MTIME;
 
       /* Propagate the change of modification time to all the double-colon
 	 entries for this file.  */
@@ -970,20 +972,21 @@ remake_file (file)
 	   Pretend it was successfully remade.  */
 	file->update_status = 0;
       else
-        no_rule_error(file);
+        no_rule_error (file);
     }
   else
     {
       chop_commands (file->cmds);
 
+      /* The normal case: start some commands.  */
       if (!touch_flag || file->cmds->any_recurse)
 	{
 	  execute_file_commands (file);
 	  return;
 	}
-      else
-	/* This tells notice_finished_file it is ok to touch the file.  */
-	file->update_status = 0;
+
+      /* This tells notice_finished_file it is ok to touch the file.  */
+      file->update_status = 0;
     }
 
   /* This does the touching under -t.  */

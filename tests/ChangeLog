@@ -1,3 +1,8 @@
+1999-10-13  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/options/dash-n: Add a test for PR/1379: "-n doesn't
+	behave properly when used with recursive targets".
+
 1999-10-08  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/features/targetvars: Add a check for PR/1378:
