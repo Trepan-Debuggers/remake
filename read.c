@@ -334,8 +334,9 @@ read_makefile (filename, type)
       if (*p == '\0' && lb.buffer[0] != '\t')
 	continue;
 
-#define	word1eq(s, l) 	((p[l] == '\0' || isblank (p[l])) && \
-			 !strncmp (s, p, l))
+      /* strncmp is first to avoid dereferencing out into space.  */
+#define	word1eq(s, l) 	(!strncmp (s, p, l) \
+			 && (p[l] == '\0' || isblank (p[l])))
       if (!in_ignored_define
 	  && word1eq ("ifdef", 5) || word1eq ("ifndef", 6)
 	  || word1eq ("ifeq", 4) || word1eq ("ifneq", 5)
