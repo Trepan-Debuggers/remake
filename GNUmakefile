@@ -79,7 +79,9 @@ CC := $(CC) -b glibc
 # getopt is in libc.
 GETOPT =
 
-CPPFLAGS := -DSTDC_HEADERS -DHAVE_UNISTD_H -DHAVE_GLOB_H
+CPPFLAGS := -DSTDC_HEADERS -DHAVE_UNISTD_H -DHAVE_GLOB_H \
+	    -DHAVE_GETDTABLESIZE -DHAVE_SYS_SIGLIST -DHAVE_DUP2 \
+	    -DHAVE_GETCWD -DHAVE_SIGSETMASK -DHAVE_GETGROUPS -DHAVE_SETLINEBUF
 
 else
 
@@ -179,7 +181,7 @@ tests:# $(testdir)/run_make_tests.pl $(prog)
 #	cd $(<D); perl $(<F)
 
 configure: /home/gd/gnu/autoconf/make.conf
-	cp $< $@
+	-cp $< $@
 /home/gd/gnu/autoconf/%: force;$(MAKE) -C $(@D) $(@F)
 
 # Make the distribution tar files.
