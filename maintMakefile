@@ -44,8 +44,13 @@ build.sh.in: build.template Makefile.am
 # you shouldn't remove configure, etc., but this makefile is only available
 # in a full development distribution, so they'll only be removed then.
 #
-MAINTAINERCLEANFILES =  $(TEMPLATES) Makefile.DOS build.sh.in \
-			configure Makefile.in stamp-h.in
+# And _I_ want them to be removed ;)
+#
+maintFILES = configure aclocal.m4 config.h.in Makefile.in \
+	     stamp-h.in glob/stamp-h.in
+
+MAINTAINERCLEANFILES =  $(TEMPLATES) missing Makefile.DOS build.sh.in \
+			$(maintFILES)
 
 # Put the alpha distribution files up for anonymous FTP.
 #

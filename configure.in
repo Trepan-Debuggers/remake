@@ -1,9 +1,9 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.58 1997/09/16 14:17:28 psmith Exp $])
+AC_REVISION([$Id: configure.in,v 1.59 1997/09/19 19:48:46 psmith Exp $])
 AC_PREREQ(2.12)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 
-AM_INIT_AUTOMAKE(make, 3.76)
+AM_INIT_AUTOMAKE(make, 3.76.1)
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_SUBDIRS(glob)
 
@@ -114,10 +114,7 @@ if ( /usr/sccs/admin -n s.conftest || admin -n s.conftest ) >/dev/null 2>&1 &&
 fi
 rm -f s.conftest conftoast
 
-AC_OUTPUT(Makefile build.sh, [
-# Makefile uses this timestamp file to know when to remake Makefile,
-# build.sh, and glob/Makefile.
-touch stamp-config])
+AC_OUTPUT(Makefile build.sh)
 
 dnl Local Variables:
 dnl comment-start: "dnl "

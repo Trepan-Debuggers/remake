@@ -28,6 +28,9 @@ EXTRA_DIST = 	make.man $(BUILT_SOURCES) remote-cstms.c\
 
 SUBDIRS =	glob
 
+MOSTLYCLEANFILES = loadavg.c
+CLEANFILES =	loadavg
+
 # --------------- Local DIST Section
 
 # Install the w32 subdirectory
@@ -66,7 +69,7 @@ check-loadavg: loadavg
 # specified, or else in the srcdir or the distdir, their parents, and _their_
 # parents.
 #
-check-regression:
+check-regression: all
 	here=`pwd`; testdir=""; \
 	  case "$(MAKE_TEST)" in "") \
 	    for d1 in $$here $(srcdir); do \
