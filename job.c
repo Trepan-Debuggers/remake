@@ -222,6 +222,10 @@ static struct child *waiting_jobs = 0;
 
 int unixy_shell = 1;
 
+/* Number of jobs started in the current second.  */
+
+unsigned long job_counter = 0;
+
 
 #ifdef WINDOWS32
 /*
@@ -572,6 +576,10 @@ reap_children (int block, int err)
 	      exit_code = WEXITSTATUS (status);
 	      exit_sig = WIFSIGNALED (status) ? WTERMSIG (status) : 0;
 	      coredump = WCOREDUMP (status);
+
+              /* If we have started jobs in this second, remove one.  */
+              if (job_counter)
+                --job_counter;
 
 #ifdef __EMX__
 	      /* the SIGCHLD handler must not be used on OS/2 because, unlike
@@ -1349,6 +1357,9 @@ start_job_command (struct child *child)
 #endif /* WINDOWS32 */
 #endif	/* __MSDOS__ or Amiga or WINDOWS32 */
 
+  /* Bump the number of jobs started in this second.  */
+  ++job_counter;
+
   /* We are the parent side.  Set the state to
      say the commands are running and return.  */
 
@@ -1692,17 +1703,61 @@ job_next_command (struct child *child)
   return 1;
 }
 
+/* Determine if the load average on the system is too high to start a new job.
+   The real system load average is only recomputed once a second.  However, a
+   very parallel make can easily start tens or even hundreds of jobs in a
+   second, which brings the system to its knees for a while until that first
+   batch of jobs clears out.
+
+   To avoid this we use a weighted algorithm to try to account for jobs which
+   have been started since the last second, and guess what the load average
+   would be now if it were computed.
+
+   This algorithm was provided by Thomas Riedl <thomas.riedl@siemens.com>,
+   who writes:
+
+!      calculate something load-oid and add to the observed sys.load,
+!      so that latter can catch up:
+!      - every job started increases jobctr;
+!      - every dying job decreases a positive jobctr;
+!      - the jobctr value gets zeroed every change of seconds,
+!        after its value*weight_b is stored into the 'backlog' value last_sec
+!      - weight_a times the sum of jobctr and last_sec gets
+!        added to the observed sys.load.
+!
+!      The two weights have been tried out on 24 and 48 proc. Sun Solaris-9
+!      machines, using a several-thousand-jobs-mix of cpp, cc, cxx and smallish
+!      sub-shelled commands (rm, echo, sed...) for tests.
+!      lowering the 'direct influence' factor weight_a (e.g. to 0.1)
+!      resulted in significant excession of the load limit, raising it
+!      (e.g. to 0.5) took bad to small, fast-executing jobs and didn't
+!      reach the limit in most test cases.
+!
+!      lowering the 'history influence' weight_b (e.g. to 0.1) resulted in
+!      exceeding the limit for longer-running stuff (compile jobs in
+!      the .5 to 1.5 sec. range),raising it (e.g. to 0.5) overrepresented
+!      small jobs' effects.
+
+ */
+
+#define LOAD_WEIGHT_A           0.25
+#define LOAD_WEIGHT_B           0.25
+
 static int
 load_too_high (void)
 {
 #if defined(__MSDOS__) || defined(VMS) || defined(_AMIGA)
   return 1;
 #else
-  double load;
+  static double last_sec;
+  static time_t last_now;
+  double load, guess;
+  time_t now;
 
   if (max_load_average < 0)
     return 0;
 
+  /* Find the real system load average.  */
   make_access ();
   if (getloadavg (&load, 1) != 1)
     {
@@ -1722,9 +1777,27 @@ load_too_high (void)
     }
   user_access ();
 
-  DB (DB_JOBS, ("Current system load = %f (max requested = %f)\n",
-                load, max_load_average));
-  return load >= max_load_average;
+  /* If we're in a new second zero the counter and correct the backlog
+     value.  Only keep the backlog for one extra second; after that it's 0.  */
+  now = time (NULL);
+  if (last_now < now)
+    {
+      if (last_now == now - 1)
+        last_sec = LOAD_WEIGHT_B * job_counter;
+      else
+        last_sec = 0.0;
+
+      job_counter = 0;
+      last_now = now;
+    }
+
+  /* Try to guess what the load would be right now.  */
+  guess = load + (LOAD_WEIGHT_A * (job_counter + last_sec));
+
+  DB (DB_JOBS, ("Estimated system load = %f (actual = %f) (max requested = %f)\n",
+                guess, load, max_load_average));
+
+  return guess >= max_load_average;
 #endif
 }
 

@@ -751,6 +751,9 @@ print_file (const void *item)
 
   if (f->cmds != 0)
     print_commands (f->cmds);
+
+  if (f->prev)
+    print_file ((const void *) f->prev);
 }
 
 void

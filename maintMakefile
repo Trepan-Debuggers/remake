@@ -1,10 +1,11 @@
 # Maintainer-only makefile segment.  This contains things that are relevant
 # only if you have the full copy of the GNU make sources from the CVS
 # tree, not a dist copy.
-#
+
+# We like mondo-warnings!
+AM_CFLAGS += -Wall -W
 
 # Find the glob source files... this might be dangerous, but we're maintainers!
-#
 globsrc := $(wildcard glob/*.c)
 globhdr := $(wildcard glob/*.h)
 

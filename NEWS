@@ -1,16 +1,15 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  17 April 2003
+  21 January 2004
 
-Copyright (C) 2002,2003  Free Software Foundation, Inc.
+Copyright (C) 2002,2003,2004  Free Software Foundation, Inc.
 See the end for copying conditions.
 
 All changes mentioned here are more fully described in the GNU make
 manual, which is contained in this distribution as the file doc/make.texi.
 
 Please send GNU make bug reports to <bug-make@gnu.org>.
-See the README file and the GNU make manual for details on sending bug
-reports.
+See the README file and the GNU make manual for details on reporting bugs.
 
 Version 3.81rc1
 
@@ -26,10 +25,16 @@ Version 3.81rc1
 * In a recursive $(call ...) context, any extra arguments from the outer
   call are now masked in the context of the inner call.
 
+* Implemented a solution for the "thundering herd" problem with "-j -l".
+  This version of GNU make uses an algorithm suggested by Thomas Riedl
+  <thomas.riedl@siemens.com> to track the number of jobs started in the
+  last second and adjust GNU make's view of the system's load average
+  accordingly.
+
 * Enhancements for POSIX compatibility:
    - Only touch targets (under -t) if they have at least one command.
 
-* Updated to autoconf 2.57, automake 1.7.6, and gettext 0.12.1.  Users
+* Updated to autoconf 2.58, automake 1.8, and gettext 0.13.1.  Users
   should not be impacted.
 
 

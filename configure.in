@@ -2,9 +2,8 @@
 
 AC_INIT([GNU make],[3.81rc1],[bug-make@gnu.org])
 
-AC_PREREQ(2.57)
-
-AC_REVISION([[$Id: configure.in,v 1.120 2003/07/31 13:04:32 psmith Exp $]])
+AC_PREREQ(2.58)
+AC_REVISION([[$Id: configure.in,v 1.121 2004/01/21 06:33:00 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -130,7 +129,7 @@ AC_CHECK_FUNCS(	memcpy memmove strchr strdup mkstemp mktemp fdopen \
 		seteuid setegid setlinebuf setreuid setregid setvbuf pipe \
 		strerror strsignal)
 
-make_FUNC_SETVBUF_REVERSED
+AC_FUNC_SETVBUF_REVERSED
 
 # strcoll() is used by the GNU glob library
 AC_FUNC_STRCOLL

@@ -70,7 +70,7 @@ GNU make and sh.exe:
 
 GNU make and brain-dead shells (BATCH_MODE_ONLY_SHELL):
 
-	Some versions of Bourne shell does not behave well when invoked
+	Some versions of Bourne shell do not behave well when invoked
 	as 'sh -c' from CreateProcess().  The main problem is they seem
 	to have a hard time handling quoted strings correctly. This can
 	be circumvented by writing commands to be executed to a batch
@@ -83,7 +83,9 @@ GNU make and brain-dead shells (BATCH_MODE_ONLY_SHELL):
 
 	A native Windows32 system with no Bourne shell will also run
 	in batch mode.  All command lines will be put into batch files
-	and executed via $(COMSPEC) (%COMSPEC%).
+	and executed via $(COMSPEC) (%COMSPEC%).  Note that parallel
+        builds (-j) require a working Bourne shell; they will not work
+        with COM.
 
 GNU make and Cygnus GNU Windows32 tools:
 
