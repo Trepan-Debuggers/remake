@@ -1,5 +1,5 @@
 /* Command processing for GNU Make.
-Copyright (C) 1988, 1989, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 91, 92, 93, 94, 95 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -459,7 +459,8 @@ delete_target (file, on_behalf_of)
 	error ("*** [%s] Deleting file `%s'", on_behalf_of, file->name);
       else
 	error ("*** Deleting file `%s'", file->name);
-      if (unlink (file->name) < 0)
+      if (unlink (file->name) < 0
+	  && errno != ENOENT)	/* It disappeared; so what.  */
 	perror_with_name ("unlink: ", file->name);
     }
 }
