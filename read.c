@@ -122,9 +122,19 @@ read_all_makefiles (makefiles)
      default makefiles and don't let the default goal come from there.  */
 
   {
-    char *value = allocated_variable_expand ("$(MAKEFILES)");
+    char *value;
     char *name, *p;
     unsigned int length;
+
+    {
+      /* Turn off --warn-undefined-variables while we expand MAKEFILES.  */
+      int save = warn_undefined_variables_flag;
+      warn_undefined_variables_flag = 0;
+
+      value = allocated_variable_expand ("$(MAKEFILES)");
+
+      warn_undefined_variables_flag = save;
+    }
 
     /* Set NAME to the start of next token and LENGTH to its length.
        MAKEFILES is updated for finding remaining tokens.  */
@@ -1766,8 +1776,20 @@ tilde_expand (name)
   if (name[1] == '/' || name[1] == '\0')
     {
       extern char *getenv ();
-      char *home_dir = allocated_variable_expand ("$(HOME)");
-      int is_variable = home_dir[0] != '\0';
+      char *home_dir;
+      int is_variable;
+
+      {
+	/* Turn off --warn-undefined-variables while we expand HOME.  */
+	int save = warn_undefined_variables_flag;
+	warn_undefined_variables_flag = 0;
+
+	home_dir = allocated_variable_expand ("$(HOME)");
+
+	warn_undefined_variables_flag = save;
+      }
+  
+      is_variable = home_dir[0] != '\0';
       if (!is_variable)
 	{
 	  free (home_dir);
