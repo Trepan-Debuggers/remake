@@ -440,7 +440,7 @@ and nothing should be directly installed into these two directories.
 @table @samp
 @item prefix
 A prefix used in constructing the default values of the variables listed
-below.  The default value of @code{prefix} should be @file{/usr/local}
+below.  The default value of @code{prefix} should be @file{/usr/local}.
 When building the complete GNU system, the prefix will be empty and
 @file{/usr} will be a symbolic link to @file{/}.
 
@@ -585,19 +585,17 @@ Unix-style man pages are installed in one of the following:
 
 @table @samp
 @item mandir
-The directory for installing the man pages (if any) for this package.
-It should include the suffix for the proper section of the
-manual---usually @samp{1} for a utility.  It will normally be
-@file{/usr/local/man/man1}, but you should write it as
-@file{$(prefix)/man/man1}. 
+The top-level directory for installing the man pages (if any) for this
+package.  It will normally be @file{/usr/local/man}, but you should
+write it as @file{$(prefix)/man}.
 
 @item man1dir
-The directory for installing section 1 man pages.
+The directory for installing section 1 man pages.  Write it as
+@file{$(mandir)/man1}.
 @item man2dir
-The directory for installing section 2 man pages.
+The directory for installing section 2 man pages.  Write it as
+@file{$(mandir)/man2}.
 @item @dots{}
-Use these names instead of @samp{mandir} if the package needs to install man
-pages in more than one section of the manual.
 
 @strong{Don't make the primary documentation for any GNU software be a
 man page.  Write a manual in Texinfo instead.  Man pages are just for
