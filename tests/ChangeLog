@@ -1,11 +1,17 @@
+2000-02-07  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/escape: Add a test for backslash-escaped spaces
+	in a target name (PR/1586).
+
 2000-02-04  Paul D. Smith  <psmith@gnu.org>
 
-	* scripts/features/patspecific_vars: Add a test for PR/1407.
+	* scripts/features/patspecific_vars: Add a test for pattern-specific
+	target variables inherited from the parent target (PR/1407).
 
 2000-02-02  Paul D. Smith  <psmith@gnu.org>
 
 	* run_make_tests.pl (set_more_defaults): Hard-code the LANG to C
-	to make sure porting order, etc. is predictable.
+	to make sure sorting order, etc. is predictable.
 	Reported by Andreas Jaeger <aj@suse.de>.
 
 	* run_make_tests.pl (set_more_defaults): Set the $wtime variable
@@ -32,7 +38,7 @@
 
 	* scripts/functions/call: Add a test for PR/1517 and PR/1527: make
 	sure $(call ...) doesn't eval its arguments and that you can
-	invoke foreach from it without infinitely looping.
+	invoke foreach from it without looping forever.
 
 1999-12-15  Paul D. Smith  <psmith@gnu.org>
 

@@ -1,11 +1,17 @@
+#                                                                    -*-perl-*-
 $description = "Test various types of escaping in makefiles.";
 
-$details = "Make sure that escaping of `:' works in target names.";
+$details = "\
+Make sure that escaping of `:' works in target names.
+Also make sure escaping of whitespace works in target names";
 
 open(MAKEFILE,"> $makefile");
 
-print MAKEFILE '$(path)foo : ; @echo cp $^ $@
-';
+print MAKEFILE <<'EOF';
+$(path)foo : ; @echo cp $^ $@
+
+foo\ bar: ; @echo 'touch "$@"'
+EOF
 
 close(MAKEFILE);
 
@@ -32,6 +38,12 @@ $answer = "cp p:foo\n";
 
 &run_make_with_options($makefile, "'path=p\\\\:'", &get_logfile, 512);
 $answer = "$makefile:1: *** target pattern contains no `%'.  Stop.\n";
+&compare_output($answer,&get_logfile(1));
+
+# TEST 5: This one should work
+
+&run_make_with_options($makefile, "'foo bar'", &get_logfile, 0);
+$answer = "touch \"foo bar\"\n";
 &compare_output($answer,&get_logfile(1));
 
 # This tells the test driver that the perl test script executed properly.

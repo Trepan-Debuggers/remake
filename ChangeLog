@@ -1,12 +1,22 @@
+2000-02-09  Paul D. Smith  <psmith@gnu.org>
+
+	* Version 3.78.91 released.
+
 2000-02-07  Paul D. Smith  <psmith@gnu.org>
+
+	* read.c (read_makefile): Reset *p2 to ':', not *colonp.  If any
+	filenames contained backslashes the resulting output (without
+	backslashes) will be shorter, so setting *colonp doesn't change
+	the right character.  Fix for PR/1586.
 
 	For += target-specific variables we need to remember which
 	variable set we found the variable in, so we can start looking
-	there in the next iteration (otherwise we'll see it again in
-	recursively_expand and fail!).  This is getting to be a hack; if
-	it gets any worse we'll have to rethink this entire algorithm;
-	probably implementing expansion of these separately from the
-	"normal" expansion, instead of alongside.
+	from there in the next iteration (otherwise we might see it again
+	in recursively_expand and fail!).  This is turning into a hack; if
+	it gets any worse we'll have to rethink this entire algorithm...
+	implementing expansion of these references separately from the
+	"normal" expansion, say, instead of using the same codepath.
+	Actually, it's already "worse enough" :-/.
 
 	* variable.h (recursively_expand_setlist): Rename
 	recursively_expand to add a struct variable_set_list argument, and
@@ -15,8 +25,7 @@
 	variable_set_list argument, and make a macro for lookup_variable.
 
 	* expand.c (recursively_expand_setlist): Take an extra struct
-	variable_set_list argument and pass it to
-	allocated_variable_append().
+	variable_set_list argument and pass it to allocated_variable_append().
 	(reference_variable): Use lookup_variable_setlist() and pass the
 	returned variable_set_list to recursively_expand_setlist.
 	(allocated_variable_append): Take an extra setlist argument and
@@ -24,7 +33,7 @@
 	expansion.  If it's null, use current_variable_set_list as before.
 
 	* variable.c (lookup_variable_setlist): If the LISTP argument is
-	not nil, return the list where we found the variable in it.
+	not nil, set it to the list containing the variable we found.
 
 2000-02-04  Paul D. Smith  <psmith@gnu.org>
 
@@ -92,6 +101,10 @@
 	* gettext.c: Some warning cleanups, and a fix for systems which
 	don't define HAVE_ALLOCA (the workaround code was included
 	twice).
+
+2000-01-26  Paul D. Smith  <psmith@gnu.org>
+
+	* Version 3.78.90 released.
 
 2000-01-25  Paul D. Smith  <psmith@gnu.org>
 
