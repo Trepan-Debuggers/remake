@@ -481,6 +481,8 @@ dep_name (dep)
 }
 #endif
 
+#ifdef	GETLOADAVG_PRIVILEGED
+
 #ifndef	HAVE_UNISTD_H
 extern int getuid (), getgid (), geteuid (), getegid ();
 #ifdef	USG
@@ -511,11 +513,15 @@ init_access ()
   current_access = make;
 }
 
+#endif	/* GETLOADAVG_PRIVILEGED */
+
 /* Give the process appropriate permissions for access to
    user data (i.e., to stat files, or to spawn a child process).  */
 void
 user_access ()
 {
+#ifdef	GETLOADAVG_PRIVILEGED
+
   if (!access_inited)
     init_access ();
 
@@ -563,6 +569,8 @@ user_access ()
 #endif
 
   current_access = user;
+
+#endif	/* GETLOADAVG_PRIVILEGED */
 }
 
 /* Give the process appropriate permissions for access to
@@ -570,6 +578,8 @@ user_access ()
 void
 make_access ()
 {
+#ifdef	GETLOADAVG_PRIVILEGED
+
   if (!access_inited)
     init_access ();
 
@@ -595,6 +605,8 @@ make_access ()
 #endif
 
   current_access = make;
+
+#endif	/* GETLOADAVG_PRIVILEGED */
 }
 
 /* Give the process appropriate permissions for a child process.
@@ -602,6 +614,8 @@ make_access ()
 void
 child_access ()
 {
+#ifdef	GETLOADAVG_PRIVILEGED
+
   /* Set both the real and effective UID and GID to the user's.
      They cannot be changed back to make's.  */
 
@@ -620,6 +634,8 @@ child_access ()
   if (setregid (user_gid, user_gid) < 0)
     pfatal_with_name ("child_access: setregid");
 #endif
+
+#endif	/* GETLOADAVG_PRIVILEGED */
 }
 
 #ifdef NEED_GET_PATH_MAX
