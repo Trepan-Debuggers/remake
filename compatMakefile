@@ -19,7 +19,10 @@
 #	Makefile for GNU Make
 #
 
-CFLAGS = $(defines) -g
+srcdir = @srcdir@
+VPATH = $(srcdir)
+
+CFLAGS = -g
 LDFLAGS = -g
 
 # Define these for your system as follows:
@@ -49,7 +52,7 @@ LOAD_AVG =
 # If you are using the GNU C library, or have the GNU getopt functions in
 # your C library, you can comment these out.
 GETOPT = getopt.o getopt1.o
-GETOPT_SRC = getopt.c getopt1.c getopt.h
+GETOPT_SRC = $(srcdir)/getopt.c $(srcdir)/getopt1.c $(srcdir)/getopt.h
 
 # If your system doesn't have alloca, or the one provided is bad,
 # get it from the Emacs distribution and define this.
@@ -89,6 +92,8 @@ group = kmem
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 # Program to install the man page.
 INSTALL_DATA = @INSTALL_DATA@
+# Generic install program.
+INSTALL = @INSTALL@
 
 # Programs to make tags files.
 ETAGS = etags -tw
@@ -97,10 +102,16 @@ CTAGS = ctags -tw
 objs = commands.o job.o dir.o file.o getloadavg.o misc.o main.o read.o \
        remake.o remote.o rule.o implicit.o default.o variable.o expand.o \
        function.o vpath.o version.o ar.o arscan.o $(GETOPT) $(extras)
-srcs = commands.c job.c dir.c file.c getloadavg.c misc.c main.c read.c \
-       remake.c remote.c rule.c implicit.c default.c variable.c expand.c \
-       function.c vpath.c version.c ar.c arscan.c $(GETOPT_SRC) \
-       commands.h dep.h file.h job.h make.h rule.h variable.h
+srcs = $(srcdir)/commands.c $(srcdir)/job.c $(srcdir)/dir.c		      \
+       $(srcdir)/file.c $(srcdir)/getloadavg.c $(srcdir)/misc.c		      \
+       $(srcdir)/main.c $(srcdir)/read.c\ $(srcdir)/remake.c		      \
+       $(srcdir)/remote.c $(srcdir)/rule.c $(srcdir)/implicit.c		      \
+       $(srcdir)/default.c $(srcdir)/variable.c $(srcdir)/expand.c	      \
+       $(srcdir)/function.c $(srcdir)/vpath.c $(srcdir)/version.c	      \
+       $(srcdir)/ar.c $(srcdir)/arscan.c $(GETOPT_SRC)			      \
+       $(srcdir)/commands.h $(srcdir)/dep.h $(srcdir)/file.h		      \
+       $(srcdir)/job.h $(srcdir)/make.h $(srcdir)/rule.h		      \
+       $(srcdir)/variable.h
 
 
 .SUFFIXES:
@@ -131,19 +142,21 @@ make: $(objs)
 	$(CC) $(LDFLAGS) $(objs) $(LOADLIBES) -o make.new
 	mv -f make.new make
 
-getloadavg.o: getloadavg.c
-	$(CC) $(CFLAGS) $(LOAD_AVG) -c getloadavg.c
+.c.o:
+	$(CC) $(CFLAGS) $(defines) -c -I$(srcdir) $< $(OUTPUT_OPTION)
 remote.o: remote.c
-	$(CC) $(CFLAGS) $(REMOTE) -c remote.c
+	$(CC) $(CFLAGS) $(defines) $(REMOTE) -c -I$(srcdir) $remote.c<
 
 # For some losing Unix makes.
 MAKE = make
 
 glob/libglob.a: force
-	cd glob; $(MAKE) CC='$(CC)' CFLAGS='$(CFLAGS) -I..' libglob.a
+	cd glob; $(MAKE) CC='$(CC)' CFLAGS='$(CFLAGS) -I..' \
+			 CPPFLAGS='$(defines)' \
+			 srcdir=$(srcdir)/glob libglob.a
 force:
 
-tagsrcs = $(srcs) remote-*.c *.h
+tagsrcs = $(srcs) $(srcdir)/remote-*.c
 TAGS: $(tagsrcs)
 	$(ETAGS) $(tagsrcs)
 tags: $(tagsrcs)
@@ -172,6 +185,11 @@ realclean: clean glob-realclean
 .PHONY: glob-clean glob-realclean
 glob-clean glob-realclean:
 	cd glob; $(MAKE) $@
+
+Makefile: config.status $(srcdir)/Makefile.in
+	$(SHELL) config.status
+config.status: $(srcdir)/configure
+	$(SHELL) $(srcdir)/configure
 
 # Automatically generated dependencies will be put at the end of the file.
 
