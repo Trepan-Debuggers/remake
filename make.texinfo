@@ -19,8 +19,8 @@ automatically which pieces of a large program need to be recompiled,
 and issues the commands to recompile them.
 
 @c !!set edition, date, version
-This is Edition 0.31 Beta, last updated 9 March 1991,
-of @cite{The GNU Make Manual}, for @code{make}, Version 3.61 Beta.
+This is Edition 0.32 Beta, last updated 11 March 1991,
+of @cite{The GNU Make Manual}, for @code{make}, Version 3.63 Beta.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 
@@ -53,7 +53,7 @@ by the Foundation.
 @titlepage
 @title GNU Make
 @subtitle A Program for Directing Recompilation
-@subtitle Edition 0.31 Beta, for @code{make} Version 3.61 Beta.
+@subtitle Edition 0.32 Beta, for @code{make} Version 3.63 Beta.
 @subtitle March 1992
 @author by Richard M. Stallman and Roland McGrath
 @page
@@ -93,9 +93,9 @@ The GNU @code{make} utility automatically determines which pieces of a
 large program need to be recompiled, and issues the commands to
 recompile them.@refill
 
-This is Edition 0.31 Beta of the @cite{GNU Make Manual},
-last updated 9 March 1992,
-for @code{make} Version 3.61 Beta.@refill
+This is Edition 0.32 Beta of the @cite{GNU Make Manual},
+last updated 11 March 1992,
+for @code{make} Version 3.63 Beta.@refill
 
 This manual describes @code{make} and contains the following chapters:@refill
 @end ifinfo
@@ -1798,10 +1798,11 @@ Rules, , Old-Fashioned Suffix Rules}.
 
 @item .DEFAULT
 The commands specified for @code{.DEFAULT} are used for any target for
-which no other commands are known (either explicitly or through an
-implicit rule).  If @code{.DEFAULT} commands are specified, every
-nonexistent file mentioned as a dependency will have these commands
-executed on its behalf.  @xref{Search Algorithm, ,Implicit Rule Search Algorithm}.
+which no rules are found (either explicit rules or implicit rules).  If
+@code{.DEFAULT} commands are specified, every file mentioned as a
+dependency, but not as a target in a rule, will have these commands
+executed on its behalf.  @xref{Search Algorithm, ,Implicit Rule Search
+Algorithm}.
 
 @item .PRECIOUS
 @cindex precious targets
@@ -5679,24 +5680,32 @@ would cancel the rule that runs the assembler:
 @node Last Resort, Suffix Rules, Pattern Rules, Implicit Rules
 @section Defining Last-Resort Default Rules
 
-@findex .DEFAULT
-You can define a last-resort implicit rule by writing a rule for the target
-@code{.DEFAULT}.  Such a rule's commands are used for all targets and
-dependencies that have no commands of their own and for which no other
-implicit rule applies.  Naturally, there is no @code{.DEFAULT} rule unless
-you write one.
+You can define a last-resort implicit rule by writing a terminal
+match-anything pattern rule with no dependencies (@pxref{Match-Anything
+Rules}).  This is just like any other pattern rule; the only thing
+special about it is that it will match any target.  So such a rule's
+commands are used for all targets and dependencies that have no commands
+of their own and for which no other implicit rule applies.
 
 For example, when testing a makefile, you might not care if the source
 files contain real data, only that they exist.  Then you might do this:
 
 @example
-.DEFAULT:
+%::
         touch $@@
 @end example
 
 @noindent
 to cause all the source files needed (as dependencies) to be created
 automatically.
+
+@findex .DEFAULT
+You can instead define commands to be used for targets for which there
+are no rules at all, even ones which don't specify commands.  You do
+this by writing a rule for the target @code{.DEFAULT}.  Such a rule's
+commands are used for all dependencies which do not appear as targets in
+any explicit rule, and for which no implicit rule applies.  Naturally,
+there is no @code{.DEFAULT} rule unless you write one.
 
 If you give @code{.DEFAULT} with no commands or dependencies:
 
@@ -5708,10 +5717,10 @@ If you give @code{.DEFAULT} with no commands or dependencies:
 the commands previously stored for @code{.DEFAULT} are cleared.
 Then @code{make} acts as if you had never defined @code{.DEFAULT} at all.
 
-If you do not want a target to get the commands from @code{.DEFAULT}, but
-you also
-do not want any commands to be run for the target, you can give it empty
-commands.  @xref{Empty Commands, ,Defining Empty Commands}.
+If you do not want a target to get the commands from a match-anything
+pattern rule or @code{.DEFAULT}, but you also do not want any commands
+to be run for the target, you can give it empty commands.  @xref{Empty
+Commands, ,Defining Empty Commands}.@refill
 
 @node Suffix Rules, Search Algorithm, Last Resort, Implicit Rules
 @section Old-Fashioned Suffix Rules
