@@ -777,8 +777,16 @@ touch_file (file)
 	{
 	  struct stat statbuf;
 	  char buf;
+	  int status;
 
-	  if (fstat (fd, &statbuf) < 0)
+#ifdef EINTR
+	  do
+#endif
+	    status = fstat (fd, &statbuf);
+#ifdef EINTR
+	  while (status < 0 && errno == EINTR);
+#endif
+	  if (status < 0)
 	    TOUCH_ERROR ("touch: fstat: ");
 	  /* Rewrite character 0 same as it already is.  */
 	  if (read (fd, &buf, 1) < 0)
@@ -971,7 +979,7 @@ name_mtime (name)
 {
   struct stat st;
 
-  if (stat (name, &st) < 0)
+  if (safe_stat (name, &st) < 0)
     return (time_t) -1;
 
   return (time_t) st.st_mtime;
