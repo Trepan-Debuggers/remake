@@ -2,6 +2,21 @@
 
 	* scripts/features/patspecific_vars: Add a test for PR/1407.
 
+2000-02-02  Paul D. Smith  <psmith@gnu.org>
+
+	* run_make_tests.pl (set_more_defaults): Hard-code the LANG to C
+	to make sure porting order, etc. is predictable.
+	Reported by Andreas Jaeger <aj@suse.de>.
+
+	* run_make_tests.pl (set_more_defaults): Set the $wtime variable
+	depending on the OS.  Eli Zaretskii <eliz@is.elta.co.il> reports
+	this seems to need to be *4* on DOS/Windows, not just 2.  Keep it
+	1 for other systems.
+	* scripts/features/vpathplus (touchfiles): Use the $wtime value
+	instead of hardcoding 2.
+	* scripts/targets/SECONDARY: Ditto.
+	* scripts/targets/INTERMEDIATE: Ditto.
+
 2000-01-23  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/features/include: Remove a check; the fix caused more

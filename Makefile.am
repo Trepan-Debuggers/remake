@@ -47,7 +47,7 @@ MAKE_HOST =	@MAKE_HOST@
 
 # --------------- Internationalization Section
 
-POTFILES     =	$(SRCS) remote-cstms.c
+POTFILES     =	$(SRCS) remote-cstms.c vmsfunctions.c
 
 localedir    =	$(prefix)/share/locale
 aliaspath    =	$(localedir):.

@@ -27,6 +27,38 @@
 	pat_variables info; it's done earlier now to ensure the parent's
 	pattern variables are set up correctly as well.
 
+2000-02-03  Paul D. Smith  <psmith@gnu.org>
+
+	* job.c (sh_chars_dos) [WINDOWS32]: Add "&" as a shell
+	metacharacter for the W32 DOS shell.
+	Reported by Warren Jones <wjones@tc.fluke.com>.
+
+2000-02-02  Paul D. Smith  <psmith@gnu.org>
+
+	Fixes for the OpenVMS port from Hartmut Becker <becker@rto.dec.com>
+
+	* config.h-vms [VMS]: Define LOCALEDIR to something; needed for
+	the expansion of bindtextdomain() even though it's a no-op.
+	* vmsfunctions.c (strcmpi): Remove duplicate definition of strcmpi().
+	(readdir): Use DB() instead of testing debug_flag.
+	* dir.c (file_impossible) [VMS]: Search "p" not "name".
+	* job.c [VMS]: Switch from debug_flag to the new DB macro.  Add
+	some i18n _() macros (even though VMS doesn't yet support it).
+
+	* function.c (patsubst_expand): Change "len" to not be unsigned to
+	avoid type mismatches.
+
+	* main.c (main): Declare signame_init() if we're going to call it.
+
+2000-01-29  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* Makefile.DOS.template: Track changes in Makefile.in
+	(install-recursive, uninstall-recursive): Add missing targets.
+	(DESTDIR): Define.
+	(install-binPROGRAMS, uninstall-binPROGRAMS): Use $(DESTDIR).
+
+	* default.c (default_variables) [__MSDOS__]: Define CXX to gpp.
+
 2000-01-25  Paul D. Smith  <psmith@gnu.org>
 
 	Change gettext support to use the simplified version in libit 0.7.

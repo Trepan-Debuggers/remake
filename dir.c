@@ -708,7 +708,7 @@ file_impossible (filename)
 #ifdef VMS
   dirend = strrchr (p, ']');
   if (dirend == 0)
-    dirend = strrchr (name, ':');
+    dirend = strrchr (p, ':');
   dirend++;
   if (dirend == (char *)1)
     dir = find_directory ("[]");

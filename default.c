@@ -384,7 +384,11 @@ static char *default_variables[] =
     "AS", "as",
 #ifdef GCC_IS_NATIVE
     "CC", "gcc",
+# ifdef __MSDOS__
+    "CXX", "gpp",	/* g++ is an invalid name on MSDOS */
+# else
     "CXX", "gcc",
+# endif /* __MSDOS__ */
 #else
     "CC", "cc",
     "CXX", "g++",
