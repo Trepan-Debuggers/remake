@@ -1,3 +1,12 @@
+2002-10-03  Paul D. Smith  <psmith@gnu.org>
+
+	Update to automake 1.7.
+
+	* Makefile.am (AUTOMAKE_OPTIONS): Update to require 1.7.
+	(pdf): Remove this target as automake now provides one.
+
+	* configure.in: Change AM_CONFIG_HEADER to AC_CONFIG_HEADERS.
+
 2002-09-30  Martin P.J. Zinser  <zinser@decus.de>
 
 	* makefile.com: Updates for GNU make 3.80.
