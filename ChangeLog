@@ -1,3 +1,30 @@
+1999-12-08  Paul D. Smith  <psmith@gnu.org>
+
+	* dir.c (dir_setup_glob): On 64 bit ReliantUNIX (5.44 and above)
+	in LFS mode, stat() is actually a macro for stat64().  Assignment
+	doesn't work in that case.  So, stat is a macro, make a local
+	wrapper function to invoke it.
+	(local_stat): Wrapper function, if needed.
+	Reported by Andrej Borsenkow <Andrej.Borsenkow@mow.siemens.ru>.
+
+1999-12-02  Paul D. Smith  <psmith@gnu.org>
+
+	* remake.c (update_file): Move the considered test outside the
+	double-colon loop, _but_ make sure we test the double_colon target
+	not the "current" target.  If we stop early because one
+	double-colon target is running, mark all the rest considered and
+	try to start their prerequisites (so they're marked considered).
+	Fix for PR/1476 suggested by Tim Magill <tim.magill@telops.gte.com>.
+
+1999-11-22  Rob Tulloh  <rob_tulloh@dev.tivoli.com>
+
+	* function.c (windows32_openpipe, func_shell): Correct Windows32
+	problem where $(shell nosuchfile) would incorrectly exit make. The
+	fix is to print the error and let make continue.
+	Reported by David Masterson <David.Masterson@kla-tencor.com>.
+
+	* w32/subproc/misc.c (arr2envblk): Memory leak fix.
+
 1999-11-21  Paul D. Smith  <psmith@gnu.org>
 
 	Rework GNU make debugging to provide different levels of output.
@@ -8,6 +35,12 @@
 	* remote-cstms.c, vmsfunctions.c: Replace all code depending on
 	debug_flag with invocations of debugging macros.
 	* make.h: Remove debug_flag and DEBUGPR, add db_level.
+
+1999-11-18  Paul Eggert  <eggert@twinsun.com>
+
+	* acinclude.m4 (AC_SYS_LARGEFILE_FLAGS): Work around a problem
+	with the QNX 4.25 shell, which doesn't propagate exit status of
+	failed commands inside shell assignments.
 
 1999-11-17  Paul D. Smith  <psmith@gnu.org>
 

@@ -311,41 +311,50 @@ update_file (file, depth)
   register int status = 0;
   register struct file *f;
 
-  for (f = file->double_colon ? file->double_colon : file; f != 0; f = f->prev)
+  f = file->double_colon ? file->double_colon : file;
+
+  /* Prune the dependency graph: if we've already been here on _this_
+     pass through the dependency graph, we don't have to go any further.
+     We won't reap_children until we start the next pass, so no state
+     change is possible below here until then.  */
+  if (f->considered == considered)
     {
-      /* Prune the dependency graph: if we've already been here on _this_
-         pass through the dependency graph, we don't have to go any further.
-         We won't reap_children until we start the next pass, so no state
-         change is possible below here until then.  */
-      if (f->considered == considered)
-        {
-          DBF (DB_VERBOSE, _("Pruning file `%s'.\n"));
-          continue;
-        }
+      DBF (DB_VERBOSE, _("Pruning file `%s'.\n"));
+      return 0;
+    }
+
+  /* This loop runs until we start a double colon rule, or until the
+     chain is exhausted. */
+  for (; f != 0; f = f->prev)
+    {
       f->considered = considered;
 
       status |= update_file_1 (f, depth);
       check_renamed (f);
 
       if (status != 0 && !keep_going_flag)
-	return status;
+	break;
 
-      switch (f->command_state)
-	{
-	case cs_finished:
-	  /* The file is done being remade.  */
-	  break;
-
-	case cs_running:
-	case cs_deps_running:
+      if (f->command_state == cs_running
+          || f->command_state == cs_deps_running)
+        {
 	  /* Don't run the other :: rules for this
 	     file until this rule is finished.  */
-	  return 0;
+          status = 0;
+          break;
+        }
+    }
 
-	default:
-	  assert (f->command_state == cs_running);
-	  break;
-	}
+  /* Process the remaining rules in the double colon chain so they're marked
+     considered.  Start their prerequisites, too.  */
+  for (; f != 0 ; f = f->prev)
+    {
+      struct dep *d;
+
+      f->considered = considered;
+
+      for (d = f->deps; d != 0; d = d->next)
+        status |= update_file (d->file, depth + 1);
     }
 
   return status;

@@ -1,43 +1,107 @@
-$description = "The following test creates a makefile to test Double-Colon\n"
-              ."Rules.  They are rules which are written with '::' instead\n"
-              ."of ':' after the target names.  This tells make that each \n"
-              ."of these rules are independent of the others and each rule's\n"
-              ."commands are executed if the target is older than any \n"
-              ."dependencies of that rule.";
+#                                                                    -*-perl-*-
+$description = "Test handling of double-colon rules.";
 
-$details = "The makefile created by this test contains two double-colon \n"
-          ."rules for foo; each with their own commands.  When make is run,\n"
-          ."each command should be executed in the sequence that they are \n"
-          ."found.  The command is a simple echo statement.";
+$details = "\
+We test these features:
 
-open(MAKEFILE,"> $makefile");
+  - Multiple commands for the same (double-colon) target
+  - Different prerequisites for targets: only out-of-date
+    ones are rebuilt.
+  - Double-colon targets that aren't the goal target.
+
+Then we do the same thing for parallel builds: double-colon
+targets should always be built serially.";
 
 # The Contents of the MAKEFILE ...
 
-print MAKEFILE "foo:: bar.h \n"
-              ."\t\@echo Executing rule foo FIRST\n"
-              ."foo2: bar.h \n"
-              ."foo:: bar2.h \n"
-              ."\t\@echo Executing rule foo SECOND\n";
+open(MAKEFILE,"> $makefile");
 
-# END of Contents of MAKEFILE
+print MAKEFILE <<'EOF';
+
+all: baz
+
+foo:: f1.h ; @echo foo FIRST
+foo:: f2.h ; @echo foo SECOND
+
+bar:: ; @echo aaa; sleep 1; echo aaa done
+bar:: ; @echo bbb
+
+baz:: ; @echo aaa
+baz:: ; @echo bbb
+
+biz:: ; @echo aaa
+biz:: two ; @echo bbb
+
+two: ; @echo two
+
+f1.h f2.h: ; @echo $@
+
+EOF
 
 close(MAKEFILE);
 
-&touch("bar.h","bar2.h");
+# TEST 0: A simple double-colon rule that isn't the goal target.
 
-&run_make_with_options($makefile,
-                       "",
-                       &get_logfile,
-                       0);
+&run_make_with_options($makefile, "all", &get_logfile, 0);
+$answer = "aaa\nbbb\n";
+&compare_output($answer, &get_logfile(1));
 
+# TEST 1: As above, in parallel
 
-$answer = "Executing rule foo FIRST\n"
-         ."Executing rule foo SECOND\n";
+&run_make_with_options($makefile, "-j10 all", &get_logfile, 0);
+$answer = "aaa\nbbb\n";
+&compare_output($answer, &get_logfile(1));
 
-&compare_output($answer,&get_logfile(1));
+# TEST 2: A simple double-colon rule that is the goal target
 
-unlink("bar.h","bar2.h");
+&run_make_with_options($makefile, "bar", &get_logfile, 0);
+$answer = "aaa\naaa done\nbbb\n";
+&compare_output($answer, &get_logfile(1));
+
+# TEST 3: As above, in parallel
+
+&run_make_with_options($makefile, "-j10 bar", &get_logfile, 0);
+$answer = "aaa\naaa done\nbbb\n";
+&compare_output($answer, &get_logfile(1));
+
+# TEST 4: Each double-colon rule is supposed to be run individually
+
+&touch('f2.h');
+&touch('foo');
+
+&run_make_with_options($makefile, "foo", &get_logfile, 0);
+$answer = "f1.h\nfoo FIRST\n";
+&compare_output($answer, &get_logfile(1));
+
+# TEST 5: Again, in parallel.
+
+&run_make_with_options($makefile, "-j10 foo", &get_logfile, 0);
+$answer = "f1.h\nfoo FIRST\n";
+&compare_output($answer, &get_logfile(1));
+
+# TEST 6: Each double-colon rule is supposed to be run individually
+
+&touch('f1.h');
+unlink('f2.h');
+&touch('foo');
+
+&run_make_with_options($makefile, "foo", &get_logfile, 0);
+$answer = "f2.h\nfoo SECOND\n";
+&compare_output($answer, &get_logfile(1));
+
+# TEST 7: Again, in parallel.
+
+&run_make_with_options($makefile, "-j10 foo", &get_logfile, 0);
+$answer = "f2.h\nfoo SECOND\n";
+&compare_output($answer, &get_logfile(1));
+
+# TEST 8: I don't grok why this is different than the above, but it is...
+
+&run_make_with_options($makefile, "-j10 biz", &get_logfile, 0);
+$answer = "aaa\ntwo\nbbb\n";
+&compare_output($answer, &get_logfile(1));
+
+unlink('foo','f1.h','f2.h');
 
 1;
 

@@ -1,5 +1,5 @@
 /* Builtin function expansion for GNU Make.
-Copyright (C) 1988,89,91,92,93,94,95,96,97 Free Software Foundation, Inc.
+Copyright (C) 1988,1989,1991-1997,1999 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -1232,30 +1232,42 @@ windows32_openpipe (int *pipedes, int *pid_p, char **command_argv, char **envp)
   if (!CreatePipe(&hChildOutRd, &hChildOutWr, &saAttr, 0))
     fatal (NILF, _("CreatePipe() failed (e=%d)\n"), GetLastError());
 
-
-
   hProcess = process_init_fd(hIn, hChildOutWr, hErr);
 
   if (!hProcess)
     fatal (NILF, _("windows32_openpipe (): process_init_fd() failed\n"));
 
-  else
-    process_register(hProcess);
-
   /* make sure that CreateProcess() has Path it needs */
   sync_Path_environment();
 
-  if (!process_begin(hProcess, command_argv, envp, command_argv[0], NULL))
+  if (!process_begin(hProcess, command_argv, envp, command_argv[0], NULL)) {
+    /* register process for wait */
+    process_register(hProcess);
+
+    /* set the pid for returning to caller */
     *pid_p = (int) hProcess;
-  else
-    fatal (NILF, _("windows32_openpipe (): unable to launch process (e=%d)\n"),
-	   process_last_err(hProcess));
 
   /* set up to read data from child */
   pipedes[0] = _open_osfhandle((long) hChildOutRd, O_RDONLY);
 
   /* this will be closed almost right away */
   pipedes[1] = _open_osfhandle((long) hChildOutWr, O_APPEND);
+  } else {
+    /* reap/cleanup the failed process */
+	process_cleanup(hProcess);
+
+    /* close handles which were duplicated, they weren't used */
+	CloseHandle(hIn);
+	CloseHandle(hErr);
+
+	/* close pipe handles, they won't be used */
+	CloseHandle(hChildOutRd);
+	CloseHandle(hChildOutWr);
+
+    /* set status for return */
+    pipedes[0] = pipedes[1] = -1;
+    *pid_p = -1;
+  }
 }
 #endif
 
@@ -1374,6 +1386,13 @@ func_shell (o, argv, funcname)
 
 #ifdef WINDOWS32
   windows32_openpipe (pipedes, &pid, command_argv, envp);
+
+  if (pipedes[0] < 0) {
+	/* open of the pipe failed, mark as failed execution */
+    shell_function_completed = -1;
+
+	return o;
+  } else
 #else /* WINDOWS32 */
 
 # ifdef __MSDOS__

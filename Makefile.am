@@ -8,7 +8,7 @@ make_SOURCES =	main.c commands.c job.c dir.c file.c misc.c read.c remake.c \
 		rule.c implicit.c default.c variable.c expand.c function.c \
 		vpath.c version.c ar.c arscan.c remote-$(REMOTE).c \
 		commands.h dep.h filedef.h job.h make.h rule.h variable.h \
-		signame.c signame.h \
+		debug.h signame.c signame.h \
 		getopt.c getopt1.c getopt.h
 make_LDADD =	$(LIBOBJS) @ALLOCA@ $(GLOBLIB)
 

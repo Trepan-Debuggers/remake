@@ -101,7 +101,10 @@ dnl AC_SYS_LARGEFILE_FLAGS(FLAGSNAME)
 AC_DEFUN(AC_SYS_LARGEFILE_FLAGS,
   [AC_CACHE_CHECK([for $1 value to request large file support],
      ac_cv_sys_largefile_$1,
-     [ac_cv_sys_largefile_$1=`($GETCONF LFS_$1) 2>/dev/null` || {
+     [if ($GETCONF LFS_$1) >conftest.1 2>conftest.2 && test ! -s conftest.2
+      then
+        ac_cv_sys_largefile_$1=`cat conftest.1`
+      else
 	ac_cv_sys_largefile_$1=no
 	ifelse($1, CFLAGS,
 	  [case "$host_os" in
@@ -127,7 +130,8 @@ changequote([, ])dnl
 	     AC_TRY_LINK(, , , ac_cv_sys_largefile_CFLAGS=no)
 	     CC="$ac_save_CC"
 	   fi])
-      }])])
+      fi
+      rm -f conftest*])])
 
 dnl Internal subroutine of AC_SYS_LARGEFILE.
 dnl AC_SYS_LARGEFILE_SPACE_APPEND(VAR, VAL)

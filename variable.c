@@ -114,6 +114,7 @@ define_variable_in_set (name, length, value, origin, recursive, set)
   v->recursive = recursive;
   v->expanding = 0;
   v->per_target = 0;
+  v->append = 0;
   v->export = v_default;
   v->next = set->table[hashval];
   set->table[hashval] = v;

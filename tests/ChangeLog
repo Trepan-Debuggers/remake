@@ -1,3 +1,9 @@
+1999-12-01  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/double_colon: Add a test for PR/1476: Try
+	double-colon rules as non-goal targets and during parallel builds
+	to make sure they're handled serially.
+
 1999-11-17  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/functions/if: Add a test for PR/1429: put some text
