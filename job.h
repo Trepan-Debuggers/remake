@@ -49,3 +49,14 @@ extern void child_execute_job ();
 extern void exec_command ();
 
 extern unsigned int job_slots_used;
+
+#ifdef POSIX
+extern void unblock_sigs ();
+#else
+#ifdef	HAVE_SIGSETMASK
+extern int fatal_signal_mask;
+#define	unblock_sigs()	sigsetmask (0)
+#else
+#define	unblock_sigs()
+#endif
+#endif
