@@ -104,7 +104,7 @@ CTAGS = ctags -tw
 
 objs = commands.o job.o dir.o file.o misc.o main.o read.o remake.o	\
        remote.o rule.o implicit.o default.o variable.o expand.o		\
-       function.o vpath.o version.o ar.o arscan.o			\
+       function.o vpath.o version.o ar.o arscan.o signame.o		\
        $(GLOB) $(GETOPT) $(ALLOCA) $(extras)
 srcs = $(srcdir)/commands.c $(srcdir)/job.c $(srcdir)/dir.c		\
        $(srcdir)/file.c $(srcdir)/getloadavg.c $(srcdir)/misc.c		\
@@ -112,10 +112,11 @@ srcs = $(srcdir)/commands.c $(srcdir)/job.c $(srcdir)/dir.c		\
        $(srcdir)/remote.c $(srcdir)/rule.c $(srcdir)/implicit.c		\
        $(srcdir)/default.c $(srcdir)/variable.c $(srcdir)/expand.c	\
        $(srcdir)/function.c $(srcdir)/vpath.c $(srcdir)/version.c	\
-       $(srcdir)/ar.c $(srcdir)/arscan.c $(GETOPT_SRC)			\
+       $(srcdir)/ar.c $(srcdir)/arscan.c				\
+       $(srcdir)/signame.c $(srcdir)/signame.h $(GETOPT_SRC)		\
        $(srcdir)/commands.h $(srcdir)/dep.h $(srcdir)/file.h		\
        $(srcdir)/job.h $(srcdir)/make.h $(srcdir)/rule.h		\
-       $(srcdir)/variable.h $(ALLOCA_SRC)
+       $(srcdir)/variable.h $(ALLOCA_SRC) $(srcdir)/config.h.in
 
 
 .SUFFIXES:
@@ -145,7 +146,8 @@ make: $(objs)
 	$(CC) $(CFLAGS) $(defines) -c -I. \
 	      -I$(srcdir) -I$(srcdir)/glob $< $(OUTPUT_OPTION)
 remote.o: remote.c
-	$(CC) $(CFLAGS) $(defines) $(REMOTE) -c -I$(srcdir) $(srcdir)/remote.c
+	$(CC) $(CFLAGS) $(defines) $(REMOTE) -c -I. \
+	      -I$(srcdir) $(srcdir)/remote.c
 
 # For some losing Unix makes.
 MAKE = make
