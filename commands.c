@@ -151,7 +151,7 @@ set_file_variables (file)
 	caretD_len += (i <= 2 ? 3 : i);
 	if (d->changed)
 	  {
-	  qmark_len += i;
+	    qmark_len += i;
 	    qmarkD_len += (i <= 2 ? 3 : i);
 	  }
       }
