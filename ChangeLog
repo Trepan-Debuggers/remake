@@ -1,3 +1,20 @@
+2000-06-23  Paul D. Smith  <psmith@gnu.org>
+
+	* Version 3.79.1 released.
+
+	* configure.in: Add a new option, --disable-nsec-timestamps, to
+	avoid using sub-second timestamps on systems that support it.  It
+	can lead to problems, e.g. if your makefile relies on "cp -p".
+	* README.template: Document the issue with "cp -p".
+
+2000-06-22  Paul D. Smith  <psmith@gnu.org>
+
+	* job.c (start_job_command): Increment commands_started before the
+	special check for ":" (empty command) to avoid spurious "is up to
+	date" messages.  Also move the test for question_flag after we
+	expand arguments, and only stop if the expansion provided an
+	actual command to run, not just whitespace.  This fixes PR/1780.
+
 2000-06-21  Paul D. Smith  <psmith@gnu.org>
 
 	* read.c (read_makefile): If we find a semicolon in the target

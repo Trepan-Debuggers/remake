@@ -121,3 +121,14 @@ files (LFS) in configure for those operating systems that provide it.
 Please report any bugs that you find in this area.  If you run into
 difficulties, then as a workaround you should be able to disable LFS by
 adding the `--disable-largefile' option to the `configure' script.
+
+On systems that support micro- and nano-second timestamp values and
+where stat(2) provides this information, GNU make will use it when
+comparing timestamps to get the most accurate possible result.  However,
+at the moment there is no system call (that I'm aware of) that will
+allow you to *set* a timestamp to a micro- or nano-second granularity.
+This means that "cp -p" and other similar tools (tar, etc.) cannot
+exactly duplicate timestamps with micro- and nano-second granularity.
+If your build system contains rules that depend on proper behavior of
+tools like "cp -p", you should configure make to not use micro- and
+nano-second timestamps with the --disable-nsec-timestamps flag.
