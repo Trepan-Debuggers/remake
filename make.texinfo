@@ -2,7 +2,7 @@
 @setfilename make.info
 @synindex vr fn
 
-@c $Header: /sources/make/make/Attic/make.texinfo,v 2.2 1988/07/02 17:49:14 mcgrath Rel $
+@c $Header: /sources/make/make/Attic/make.texinfo,v 2.3 1988/07/03 13:07:42 mcgrath Exp $
 
 @ifinfo
 This file documents the GNU Make utility.
@@ -2090,6 +2090,7 @@ sets @samp{bar} to @samp{a.c b.c c.c}.  @xref{Setting}.
 
 @subsection Recursive References
 @cindex recursive variable reference
+@cindex variable reference, recursive
 
 Variables may be referenced inside a variable reference.  This is called
 a @dfn{recursive variable reference}.  For example,
@@ -2139,6 +2140,74 @@ but it works: @samp{$($($(z)))} expands to @samp{$($(y))} which becomes
 @samp{$($(subst 1,2,$(x)))} which changes @samp{variable1} to
 @samp{variable2} in @samp{$(x)} and finally expands to @samp{$(variable2)},
 a simple variable reference that becomes @samp{Hello}.@refill
+
+Recursive variable references need not be as simple as @samp{$($(a))}.
+They can contain several variable references:
+
+@example
+a_dirs := dira dirb
+1_dirs := dir1 dir2
+
+a_files := filea fileb
+1_files := file1 file2
+
+ifeq "$(use_a)" "yes"
+a1 := a
+else
+a1 := 1
+endif
+
+ifeq "$(use_dirs)" "yes"
+df := dirs
+else
+df := files
+endif
+
+dirs := $($(a1)_$(df))
+@end example
+
+@noindent
+will give @samp{dirs} the value of @samp{a_dirs}, @samp{1_dirs},
+@samp{a_files} or @samp{1_files} depending on the settings of @samp{use_a}
+and @samp{use_dirs}.@refill
+
+Recursive variable references can also be part of a modified reference:
+
+@example
+a_objects := a.o b.o c.o
+1_objects := 1.o 2.o 3.o
+
+sources := $($(a1)_object:.o=.c)
+@end example
+
+@noindent
+defines @samp{sources} as either @samp{a.c b.c c.c} or @samp{1.c 2.c 3.c},
+depending on the value of @samp{a1}.
+
+The only restriction on this sort of use of recursive variable references
+is that they cannot specify part of a function invokation.  This is because
+the search for an initial word matching defined function is done before the
+check for a variable name containing a dollar sign.  Thus,
+
+@example
+ifdef do_sort
+func := sort
+else
+func := strip
+endif
+
+bar := a   d b g  q  c
+
+foo := $($(func) $(bar))
+@end example
+
+@noindent
+attempts to give @samp{foo} the value of the variable @samp{sort a   d b g
+q  c} or @samp{strip a   d b g  q  c}, rather than giving @samp{a   d b g
+q  c} as the argument to either the @code{sort} or the @code{strip}
+function.  This is an implementation restriction which may be removed in
+the future if the need arises, but this is not likely since there are not
+really any two functions you would want to give the same arguments.@refill
 
 Recursive variable references are a complicated concept needed only for
 very complex makefile programming.  You need not worry about them in
@@ -4659,6 +4728,9 @@ Intermediate implicit files.  @xref{Chained Rules}.
 Special search method for library dependencies written in the form
 @samp{-l@var{name}}.  @xref{Libraries/Search}.
 
+@item
+Allowing suffixes for suffix rules (@pxref{Suffix Rules}) to contain
+any characters.  In other version of @code{make}, they must begin with
 @samp{.} and not contain any @samp{/} characters.
 
 @item
