@@ -70,12 +70,14 @@ extern char *sys_siglist[];
 
 /* Table of abbreviations for signals.  Note:  A given number can
    appear more than once with different abbreviations.  */
+#define SIG_TABLE_SIZE  (NSIG*2)
+
 typedef struct
   {
     int number;
     const char *abbrev;
   } num_abbrev;
-static num_abbrev sig_table[NSIG*2];
+static num_abbrev sig_table[SIG_TABLE_SIZE];
 /* Number of elements of sig_table used.  */
 static int sig_table_nelts = 0;
 
@@ -88,10 +90,18 @@ init_sig (number, abbrev, name)
      const char *name;
 {
 #ifndef HAVE_SYS_SIGLIST
-  sys_siglist[number] = name;
+  /* If this value is ever greater than NSIG it seems like it'd be a bug in
+     the system headers, but... better safe than sorry.  We know, for
+     example, that this isn't always true on VMS.  */
+
+  if (number >= 0 && number < NSIG)
+    sys_siglist[number] = name;
 #endif
-  sig_table[sig_table_nelts].number = number;
-  sig_table[sig_table_nelts++].abbrev = abbrev;
+  if (sig_table_nelts < SIG_TABLE_SIZE)
+    {
+      sig_table[sig_table_nelts].number = number;
+      sig_table[sig_table_nelts++].abbrev = abbrev;
+    }
 }
 
 void

@@ -177,6 +177,7 @@ ar_scan (archive, function, arg)
 
   VMS_function = function;
 
+  VMS_member_date = (time_t) -1;
   lbr$get_index (&VMS_lib_idx, &index, VMS_get_member_info, 0);
 
   /* Undo the damage.  */

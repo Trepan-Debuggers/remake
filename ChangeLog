@@ -1,3 +1,38 @@
+1999-02-19  Paul D. Smith  <psmith@gnu.org>
+
+	* configure.in: Check to see if the GNU glob library is already
+	installed on the system.  If so, _don't_ add -I./glob to the
+	compile line.  Using the system glob code with the local headers
+	is very bad mojo!
+	Rewrite SCCS macros to use more autoconf facilities.
+
+	* Makefile.am: Move -Iglob out of INCLUDES; it'll get added to
+	CPPFLAGS by configure now.
+	Automake 1.4 introduced its own "include" feature which conflicts
+	with the maintMakefile stuff.  A hack that seems to work is add a
+	space before the include :-/.
+
+	* build.template: Move -Iglob out of the compile line; it'll get
+	added to CPPFLAGS by configure now.
+
+1999-02-16  Glenn D. Wolf  <Glenn_Wolf@email.sps.mot.com>
+
+	* arscan.c (ar_scan): [VMS] Initialized VMS_member_date before
+	calling lbr$get_index since if the archive is empty,
+	VMS_get_member_info won't get called at all, and any leftover date
+	will be used.  This bug shows up if any member of any archive is
+	made, followed by a dependency check on a different, empty
+	archive.
+
+1998-11-30  Paul D. Smith  <psmith@gnu.org>
+
+	* signame.c (init_sig): Check the sizes of signals being set up to
+	avoid array overwrites (if the system headers have problems).
+
+1998-11-17  Paul D. Smith  <psmith@gnu.org>
+
+	* read.c (record_files): Clean up some indentation.
+
 1998-10-13  Paul D. Smith  <psmith@gnu.org>
 
 	* job.c (new_job): If the command list resolves to empty (through
