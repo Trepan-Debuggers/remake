@@ -30,10 +30,8 @@ srcdir = @srcdir@
 CC = @CC@
 
 CFLAGS = @CFLAGS@
+CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
-
-# How to invoke ranlib.  This is only used by the `glob' subdirectory.
-RANLIB = @RANLIB@
 
 # Define these for your system as follows:
 #	-DNO_ARCHIVES		To disable `ar' archive support.
@@ -77,9 +75,9 @@ LOADLIBES = @LIBS@
 extras = @LIBOBJS@
 
 # Common prefix for machine-independent installed files.
-prefix = /usr/local
+prefix = @prefix@
 # Common prefix for machine-dependent installed files.
-exec_prefix = $(prefix)
+exec_prefix = @exec_prefix@
 
 # Directory to install `make' in.
 bindir = $(exec_prefix)/bin
@@ -166,17 +164,14 @@ make: $(objs)
 # -I. is needed to find config.h in the build directory.
 .c.o:
 	$(CC) $(defines) -c -I. -I$(srcdir) -I$(srcdir)/glob \
-	      $(CFLAGS) $< $(OUTPUT_OPTION)
+	      $(CPPFLAGS) $(CFLAGS) $< $(OUTPUT_OPTION)
 
 # For some losing Unix makes.
 SHELL = /bin/sh
 MAKE = make
 
 glob/libglob.a: FORCE config.h
-	cd glob; $(MAKE) CC='$(CC)' CFLAGS='$(CFLAGS) -I..' \
-			 CPPFLAGS='$(CPPFLAGS) -DHAVE_CONFIG_H' \
-			 RANLIB='$(RANLIB)' \
-			 libglob.a
+	cd glob; $(MAKE) libglob.a
 FORCE:
 
 tagsrcs = $(srcs) $(srcdir)/remote-*.c
@@ -250,6 +245,7 @@ clean: glob-clean
 	-rm -f make loadavg *.o core make.info* make.dvi
 distclean: clean glob-realclean
 	-rm -f Makefile config.h config.status build.sh stamp-config
+	-rm -f config.log config.cache
 	-rm -f TAGS tags
 	-rm -f make.?? make.??s make.log make.toc make.*aux
 	-rm -f loadavg.c
