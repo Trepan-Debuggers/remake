@@ -2040,8 +2040,11 @@ define_makeflags (all, makefile)
     /* No flags.  */
     flagstring[0] = '\0';
   else if (p[-1] == '-')
-    /* Kill the final space and dash.  */
-    p[-2] = '\0';
+    {
+      /* Kill the final space and dash.  */
+      p -= 2;
+      *p = '\0';
+    }
   else
     /* Terminate the string.  */
     *p = '\0';
