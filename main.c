@@ -925,9 +925,9 @@ main (argc, argv, envp)
       switch (update_goal_chain (read_makefiles, 1))
 	{
 	case 1:
-	  assert ("Status indicates -q set while remaking makefiles!");
 	default:
-	  assert ("bogus status from update_goal_chain");
+#define BOGUS_UPDATE_STATUS 1
+	  assert (BOGUS_UPDATE_STATUS);
 	  break;
 	  
 	case -1:
