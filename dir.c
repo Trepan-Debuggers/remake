@@ -616,14 +616,14 @@ read_dirstream (stream)
 		  if (sizeof *d - sizeof d->d_name + len > bufsz)
 		    bufsz = sizeof *d - sizeof d->d_name + len;
 		  buf = xmalloc (bufsz);
-		  d = (struct dirent *) buf;
-		  d->d_ino = 1;
-#ifdef HAVE_D_NAMLEN
-		  d->d_namlen = len - 1;
-#endif
-		  memcpy (d->d_name, df->name, len);
-		  return d;
 		}
+	      d = (struct dirent *) buf;
+	      FAKE_DIR_ENTRY (d);
+#ifdef HAVE_D_NAMLEN
+	      d->d_namlen = len - 1;
+#endif
+	      memcpy (d->d_name, df->name, len);
+	      return d;
 	    }
 	}
       if (++ds->bucket == DIRFILE_BUCKETS)
