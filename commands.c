@@ -318,12 +318,19 @@ execute_file_commands (file)
   new_job (file);
 }
 
+/* This is set while we are inside fatal_error_signal,
+   so things can avoid nonreentrant operations.  */
+
+int handling_fatal_signal = 0;
+
 /* Handle fatal signals.  */
 
 RETSIGTYPE
 fatal_error_signal (sig)
      int sig;
 {
+  handling_fatal_signal = 1;
+
   signal (sig, SIG_DFL);
 #ifdef	POSIX
   {
