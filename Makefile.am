@@ -12,7 +12,7 @@ SRCS	     =  ar.c arscan.c commands.c dir.c expand.c file.c function.c \
 		rule.c signame.c variable.c vpath.c
 
 make_SOURCES =	$(SRCS) default.c remote-$(REMOTE).c version.c \
-		getopt.c getopt1.c
+		getopt1.c
 
 noinst_HEADERS = commands.h dep.h filedef.h job.h make.h rule.h variable.h \
 		debug.h signame.h getopt.h gettext.h

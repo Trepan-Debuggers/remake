@@ -56,6 +56,15 @@ char *alloca ();
 # endif
 #endif
 
+#if defined STDC_HEADERS || defined _LIBC
+#else
+char *getenv ();
+# ifdef HAVE_MALLOC_H
+# else
+void free ();
+# endif
+#endif
+
 #if defined _LIBC || defined HAVE_ARGZ_H
 # include <argz.h>
 #endif
@@ -64,6 +73,10 @@ char *alloca ();
 
 #if defined STDC_HEADERS || defined _LIBC
 # include <stdlib.h>
+#else
+# ifdef HAVE_MEMORY_H
+#  include <memory.h>
+# endif
 #endif
 
 /* Interrupt of l10nflist.c */
@@ -248,7 +261,7 @@ pop (x)
   return x;
 }
 
-struct loaded_l10nfile *
+static struct loaded_l10nfile *
 _nl_make_l10nflist (l10nfile_list, dirlist, dirlist_len, mask, language,
 		    territory, codeset, normalized_codeset, modifier, special,
 		    sponsor, revision, filename, do_allocate)
@@ -2207,10 +2220,10 @@ void free ();
 #endif
 
 /* Contains the default location of the message catalogs.  */
-static const char _nl_default_dirname[];
+/* static const char _nl_default_dirname[]; */
 
 /* List with bindings of specific domains.  */
-static struct binding *_nl_domain_bindings;
+/* static struct binding *_nl_domain_bindings; */
 
 /* Names for the libintl functions are a problem.  They must not clash
    with existing names and they should follow ANSI C.  But this source
@@ -2473,10 +2486,10 @@ GETTEXT (msgid)
 #endif
 
 /* Name of the default text domain.  */
-static const char _nl_default_default_domain[];
+/* static const char _nl_default_default_domain[]; */
 
 /* Default text domain in which entries for gettext(3) are to be found.  */
-static const char *_nl_current_default_domain;
+/* static const char *_nl_current_default_domain; */
 
 /* Names for the libintl functions are a problem.  They must not clash
    with existing names and they should follow ANSI C.  But this source

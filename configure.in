@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.90 2000/01/25 07:42:51 psmith Exp $])
+AC_REVISION([$Id: configure.in,v 1.91 2000/01/27 00:00:27 psmith Exp $])
 AC_PREREQ(2.13)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 
@@ -36,6 +36,7 @@ AC_CHECK_HEADERS(stdlib.h unistd.h limits.h sys/param.h fcntl.h string.h \
 AC_PROG_CC_C_O
 AM_PROG_CC_STDC
 AC_C_CONST			dnl getopt needs this.
+AC_C_INLINE			dnl gettext needs this.
 AC_HEADER_STAT
 
 AC_STRUCT_ST_MTIM_NSEC

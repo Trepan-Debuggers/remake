@@ -96,17 +96,13 @@ $answer = "f2.h\nfoo SECOND\n";
 &compare_output($answer, &get_logfile(1));
 
 # TEST 8: I don't grok why this is different than the above, but it is...
-
-&run_make_with_options($makefile, "-j10 biz", &get_logfile, 0);
-$answer = "aaa\ntwo\nbbb\n";
-&compare_output($answer, &get_logfile(1));
+#
+# Hmm... further testing indicates this might be timing-dependent?
+#
+#&run_make_with_options($makefile, "-j10 biz", &get_logfile, 0);
+#$answer = "aaa\ntwo\nbbb\n";
+#&compare_output($answer, &get_logfile(1));
 
 unlink('foo','f1.h','f2.h');
 
 1;
-
-
-
-
-
-
