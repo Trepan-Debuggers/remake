@@ -1,3 +1,7 @@
+Fri Jan 12 18:09:36 1996  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* job.c: Don't declare unblock_sigs; job.h already does.
+
 Sat Jan  6 16:24:44 1996  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
 	* acconfig.h (HAVE_SYSCONF_OPEN_MAX): #undef removed.
