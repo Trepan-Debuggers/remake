@@ -6,9 +6,6 @@ Produce a variable with a large number of words in it,
 determine the number of words, and then read each one back.\n";
 
 open(MAKEFILE,"> $makefile");
-
-# The Contents of the MAKEFILE ...
-
 print MAKEFILE <<'EOF';
 string  := word.pl general_test2.pl   FORCE.pl word.pl generic_test.perl MAKEFILES_variable.pl
 string2 := $(string) $(string) $(string) $(string) $(string) $(string) $(string)
@@ -28,18 +25,9 @@ all:
 	@echo $(wordlist 100, 110, $(string))
 	@echo $(wordlist 7, 10, $(string2))
 EOF
-
-
-
-# END of Contents of MAKEFILE
-
 close(MAKEFILE);
 
 &run_make_with_options($makefile, "", &get_logfile);
-
-# Create the answer to what should be produced by this Makefile
-
-# COMPARE RESULTS
 $answer = "6\n"
          ."2058\n"
          ."word.pl\n"
@@ -51,13 +39,52 @@ $answer = "6\n"
 	 ."word.pl general_test2.pl FORCE.pl word.pl generic_test.perl MAKEFILES_variable.pl\n"
 	 ."generic_test.perl MAKEFILES_variable.pl\n"
 	 ."\n"
-	 ."word.pl general_test2.pl FORCE.pl word.pl\n"
-;
+	 ."word.pl general_test2.pl FORCE.pl word.pl\n";
+&compare_output($answer, &get_logfile(1));
 
-# In this call to compare output, you should use the call &get_logfile(1)
-# to send the name of the last logfile created.  You may also use
-# the special call &get_logfile(1) which returns the same as &get_logfile(1).
 
+# Test error conditions
+
+$makefile2 = &get_tmpfile;
+
+open(MAKEFILE, "> $makefile2");
+print MAKEFILE <<'EOF';
+FOO = foo bar biz baz
+
+word-e1: ; @echo $(word ,$(FOO))
+word-e2: ; @echo $(word abc ,$(FOO))
+word-e3: ; @echo $(word 1a,$(FOO))
+
+wordlist-e1: ; @echo $(wordlist ,,$(FOO))
+wordlist-e2: ; @echo $(wordlist abc ,,$(FOO))
+wordlist-e3: ; @echo $(wordlist 1, 12a ,$(FOO))
+
+EOF
+
+close(MAKEFILE);
+
+&run_make_with_options($makefile2, 'word-e1', &get_logfile, 512);
+$answer = "$makefile2:3: *** non-numeric first argument to `word' function: ''.  Stop.\n";
+&compare_output($answer, &get_logfile(1));
+
+&run_make_with_options($makefile2, 'word-e2', &get_logfile, 512);
+$answer = "$makefile2:4: *** non-numeric first argument to `word' function: 'abc '.  Stop.\n";
+&compare_output($answer, &get_logfile(1));
+
+&run_make_with_options($makefile2, 'word-e3', &get_logfile, 512);
+$answer = "$makefile2:5: *** non-numeric first argument to `word' function: '1a'.  Stop.\n";
+&compare_output($answer, &get_logfile(1));
+
+&run_make_with_options($makefile2, 'wordlist-e1', &get_logfile, 512);
+$answer = "$makefile2:7: *** non-numeric first argument to `wordlist' function: ''.  Stop.\n";
+&compare_output($answer, &get_logfile(1));
+
+&run_make_with_options($makefile2, 'wordlist-e2', &get_logfile, 512);
+$answer = "$makefile2:8: *** non-numeric first argument to `wordlist' function: 'abc '.  Stop.\n";
+&compare_output($answer, &get_logfile(1));
+
+&run_make_with_options($makefile2, 'wordlist-e3', &get_logfile, 512);
+$answer = "$makefile2:9: *** non-numeric second argument to `wordlist' function: ' 12a '.  Stop.\n";
 &compare_output($answer, &get_logfile(1));
 
 # This tells the test driver that the perl test script executed properly.
