@@ -598,7 +598,7 @@ main (argc, argv, envp)
 	}
 
       /* Now allocate a buffer big enough and fill it.  */
-      p = value = alloca (len);
+      p = value = (char *) alloca (len);
       for (cv = command_variables; cv != 0; cv = cv->next)
 	{
 	  v = cv->variable;
