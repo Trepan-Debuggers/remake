@@ -53,8 +53,7 @@ CPPFLAGS = $(defines)
 
 ifneq "$(wildcard $(ARCH)/makefile)" ""
 include $(ARCH)/makefile
-
-	objs := $(sort $(objs) $(addprefix $(ARCH)/,$(ALLOCA) $(extras)))
+objs := $(sort $(objs) $(addprefix $(ARCH)/,$(ALLOCA) $(extras)))
 endif
 
 ifndef no_libc
