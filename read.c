@@ -455,29 +455,45 @@ read_makefile (filename, type)
 	{
 	  /* We have found an `include' line specifying a nested
 	     makefile to be read at this point.  */
-	  struct conditionals *save = conditionals;
-	  struct conditionals new_conditionals;
+	  struct conditionals *save, new_conditionals;
+	  struct nameseq *files;
+
 	  p = allocated_variable_expand (next_token (p + 8));
 	  if (*p == '\0')
 	    {
-	      makefile_error (filename, lineno, "no filename for `include'");
+	      makefile_error (filename, lineno, "no file name for `include'");
 	      continue;
 	    }
-	  p2 = end_of_token (p);
-	  if (*p2 != '\0')
-	    {
-	      *p2++ = '\0';
-	      if (*next_token (p2) != '\0')
-		makefile_error (filename, lineno,
-				"extraneous text after `include'");
-	    }
+
+	  /* Parse the list of file names.  */
+	  p2 = p;
+	  files = multi_glob (parse_file_seq (&p2, '\0',
+					      sizeof (struct nameseq), 1),
+			      sizeof (struct nameseq));
+	  free (p);
+
+	  /* Save the state of conditionals and start
+	     the included makefile with a clean slate.  */
+	  save = conditionals;
 	  bzero ((char *) &new_conditionals, sizeof new_conditionals);
 	  conditionals = &new_conditionals;
+
 	  /* Record the rules that are waiting so they will determine
 	     the default goal before those in the included makefile.  */
 	  record_waiting_files ();
-	  read_makefile (p, 2);
-	  free (p);
+
+	  /* Read each included makefile.  */
+	  while (files != 0)
+	    {
+	      struct nameseq *next = files->next;
+	      char *name = files->name;
+	      free (files);
+	      files = next;
+
+	      read_makefile (name, 2);
+	    }
+
+	  /* Restore state.  */
 	  conditionals = save;
 	  reading_filename = filename;
 	  reading_lineno_ptr = &lineno;
