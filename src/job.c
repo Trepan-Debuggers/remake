@@ -319,6 +319,14 @@ child_error (child_t *p_child, target_stack_node_t *p_call_stack,
 	 target_name, strsignal (exit_sig),
 	 coredump ? _(" (core dumped)") : "");
 #endif /* VMS */
+
+  /* If have enabled debugging but haven't entered the debugger above
+     because we haven't set to debug on error, enter the debugger now.
+     FIXME: Add be another variable/option to control entry here as
+     well?
+   */
+  if (! (debugger_on_error & DEBUGGER_ON_ERROR) && debugger_enabled )
+    enter_debugger(p_call_stack, p_child->file, exit_code);
 }
 
 #ifdef VMS
