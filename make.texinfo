@@ -1572,8 +1572,8 @@ foo.o : foo.c defs.h hack.h
 
 @noindent
 @c !!! following paragraph rewritten to avoid overfull hbox
-In this example, the value of @samp{$^} would be something such as
-@samp{src/foo.c ../headers/defs.h hack.h}; use 
+In this example, the value of @samp{$^} would be a value such as
+@samp{src/foo.c ../headers/defs.h hack.h}; you would use 
 @samp{$(firstword $^)} to extract just @samp{src/foo.c}.@refill
 
 @node Implicit/Search, Libraries/Search, Commands/Search, Directory Search
