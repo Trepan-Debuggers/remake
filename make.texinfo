@@ -1,7 +1,7 @@
 \input texinfo                @c -*- Texinfo -*-
 @c %**start of header 
 @setfilename make.info
-@settitle Make
+@settitle GNU @code{make}
 @setchapternewpage odd
 @smallbook
 @c %**end of header
@@ -19,7 +19,7 @@ automatically which pieces of a large program need to be recompiled,
 and issues the commands to recompile them.
 
 @c !!set edition, date, version
-This is Edition 0.33 Beta, last updated 12 June 1992,
+This is Edition 0.33 Beta, last updated 6 July 1992,
 of @cite{The GNU Make Manual}, for @code{make}, Version 3.63 Beta.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
@@ -355,26 +355,33 @@ introduction, read the first few sections of each chapter, skipping the
 later sections.  In each chapter, the first few sections contain
 introductory or general information and the later sections contain
 specialized or technical information.  The exception is the second
-chapter, @cite{An Introduction to Makefiles}, all of which is introductory.
-(@xref{Introduction, ,An Introduction to Makefiles}.)
+chapter, @ref{Introduction, ,An Introduction to Makefiles}, all of which
+is introductory.
+
+If you are familiar with other @code{make} programs, @ref{Features}
+lists the enhancements GNU @code{make} has, and @ref{Missing} explains
+the few things GNU @code{make} lacks that others have.
+
+For a quick summary, @pxref{Summary} and @ref{Special Targets}.
 
 @node Bugs,  , Reading, Overview
 @section Problems and Bugs
 
 If you have problems with GNU @code{make} or think you've found a bug,
-please report it to the developers; we cannot promise to do
-anything but we might well want to fix it.
+please report it to the developers; we cannot promise to do anything but
+we might well want to fix it.
 
 Before reporting a bug, make sure you've actually found a real bug.
 Carefully reread the documentation and see if it really says you can do
 what you're trying to do.  If it's not clear whether you should be able
-to do something or not, report that too; it's a bug in the documentation!
+to do something or not, report that too; it's a bug in the
+documentation!
 
-Before reporting a bug or trying to fix it yourself, try to isolate it to
-the smallest possible makefile that reproduces the problem.  Then send
-us the makefile and the exact results @code{make} gave you.  Also say what
-you expected to occur; this will help us decide whether the problem
-was really in the documentation.
+Before reporting a bug or trying to fix it yourself, try to isolate it
+to the smallest possible makefile that reproduces the problem.  Then
+send us the makefile and the exact results @code{make} gave you.  Also
+say what you expected to occur; this will help us decide whether the
+problem was really in the documentation.
 
 Once you've got a precise problem, please send electronic mail either
 through the Internet or via UUCP:
@@ -394,10 +401,10 @@ Please include the version number of @code{make} you are using.  You can
 get this information with the command @samp{make -v -f
 /dev/null}.@refill
 
-Non-bug suggestions are always welcome as well.
-If you have questions about things that are unclear in the documentation
-or are just obscure features, contact Roland McGrath; he will try to help
-you out, although he may not have the time to fix the problem.@refill
+Non-bug suggestions are always welcome as well.  If you have questions
+about things that are unclear in the documentation or are just obscure
+features, contact Roland McGrath; he will try to help you out, although
+he may not have the time to fix the problem.@refill
 
 You can send electronic mail to Roland McGrath either through the
 Internet or via UUCP:
@@ -416,15 +423,16 @@ Internet or via UUCP:
 @comment  node-name,  next,  previous,  up
 @chapter An Introduction to Makefiles
 
-You need a file called a @dfn{makefile} to tell @code{make} what to
-do.  Most often, the makefile tells @code{make} how to compile and
-link a program.
+You need a file called a @dfn{makefile} to tell @code{make} what to do.
+Most often, the makefile tells @code{make} how to compile and link a
+program.
 
-In this chapter, we will discuss a simple makefile that describes how
-to compile and link a text editor which consists of eight C source
-files and three header files.  The makefile also tells @code{make} how
-to remove certain files when asked.  To see a more complex example of
-a makefile, see @ref{Complex Makefile}.
+In this chapter, we will discuss a simple makefile that describes how to
+compile and link a text editor which consists of eight C source files
+and three header files.  The makefile can also tell @code{make} how to
+run miscellaneous commands when explicitly asked (for example, to remove
+certain files as a clean-up operation).  To see a more complex example
+of a makefile, see @ref{Complex Makefile}.
 
 When @code{make} recompiles the editor, each changed C source file
 must be recompiled.  If a header file has changed, each C source file
@@ -460,9 +468,9 @@ A simple makefile consists of ``rules'' with the following shape:
 @end group
 @end example
 
-A @dfn{target} is the name of a file that is generated by a program.
-Examples of targets are executable or object files, or the name of an
-action to carry out, such as @samp{clean}.
+A @dfn{target} is usually the name of a file that is generated by a
+program; examples of targets are executable or object files.  A target
+can also be the name of an action to carry out, such as @samp{clean}.
 
 A @dfn{dependency} is a file that is used as input to create the
 target.  A target often depends on several files.  
@@ -473,10 +481,10 @@ A rule may have more than one command, each on its own line.
 every command line!  This is an obscurity that catches the unwary.
 
 Often a command is in a rule with dependencies and serves to create a
-target file if any of the dependencies change.  However, a command
-need not be part of a rule that has dependencies.  For example, the
-rule containing the delete command associated with the target
-@samp{clean} does not have dependencies.
+target file if any of the dependencies change.  However, the rule that
+specifies commands for the target need not have dependencies.  For
+example, the rule containing the delete command associated with the
+target @samp{clean} does not have dependencies.
 
 A @dfn{rule}, then, explains how and when to remake certain files
 which are the targets of the particular rule.  @code{make} carries out
@@ -540,17 +548,19 @@ type:
 make
 @end example
 
+@group
 To use this makefile to delete the executable file and all the object
 files from the directory, type:
 
 @example
 make clean
 @end example
+@end group
 
 In the example makefile, the targets include the executable file
 @samp{edit}, and the object files @samp{main.o} and @samp{kbd.o}.  The
 dependencies are files such as @samp{main.c} and @samp{defs.h}.
-Commands include @samp{cc -c main.c} and @samp{cc -c kbd.c}.
+Commands include @w{@samp{cc -c main.c}} and @w{@samp{cc -c kbd.c}}.
 
 When a target is a file, it needs to be recompiled or relinked if any
 of its dependencies changes.  In addition, any dependencies that are
@@ -608,9 +618,10 @@ dependencies, is more recent than the object file, or if the object
 file does not exist.
 
 The other rules are processed because their targets appear as
-dependencies of the goal.  If another rule does not have any
-dependency, it is not processed, unless you tell @code{make} to do so
-(with a command such as @code{make clean}).
+dependencies of the goal.  If some other rule is not depended on by the
+goal (or anything it depends on, etc.), that rule is not processed,
+unless you tell @code{make} to do so (with a command such as
+@w{@code{make clean}}).
 
 Before recompiling an object file, @code{make} considers updating its
 dependencies, the source file and header files.  This makefile does not
@@ -1209,7 +1220,7 @@ in File Names}) and a name of the form @file{@var{a}(@var{m})}
 represents member @var{m} in archive file @var{a} (@pxref{Archive
 Members, ,Archive Members as Targets}).  Usually there is only one
 target per rule, but occasionally there is a reason to have more;
-@xref{Multiple Targets, , Multiple Targets in a Rule}.@refill
+@pxref{Multiple Targets, , Multiple Targets in a Rule}.@refill
 
 The @var{command} lines start with a tab character.  The first command may
 appear on the line after the dependencies, with a tab character, or may
@@ -1227,12 +1238,13 @@ and how to update them when necessary.
 
 The criterion for being out of date is specified in terms of the
 @var{dependencies}, which consist of file names separated by spaces.
-(Wildcards and archive members are allowed here too.)  A target is out of
-date if it does not exist or if it is older than any of the dependencies
-(by comparison of last-modification times).  The idea is that the contents
-of the target file are computed based on information in the dependencies,
-so if any of the dependencies changes, the contents of the existing target
-file are no longer necessarily valid.
+(Wildcards and archive members (@pxref{Archives}) are allowed here too.)
+A target is out of date if it does not exist or if it is older than any
+of the dependencies (by comparison of last-modification times).  The
+idea is that the contents of the target file are computed based on
+information in the dependencies, so if any of the dependencies changes,
+the contents of the existing target file are no longer necessarily
+valid.
 
 How to update is specified by @var{commands}.  These are lines to be
 executed by the shell (normally @samp{sh}), but with some extra features
@@ -1276,8 +1288,8 @@ specific file whose name consists of @samp{foo}, an asterisk, and
 @node Wildcard Examples, Wildcard Pitfall, Wildcards, Wildcards
 @subsection Wildcard Examples
 
-Wildcards can be used in the commands of a rule.  For example, here is a
-rule to delete all the object files:
+Wildcards can be used in the commands of a rule, where they are expanded
+by the shell.  For example, here is a rule to delete all the object files:
 
 @example
 clean:
@@ -1431,12 +1443,12 @@ current directory; however, @code{VPATH} specifies a search list that
 @code{make} applies for all files, including files which are targets of
 rules.
 
-Thus, if a files that is listed as a dependency does not exist in the
+Thus, if a file that is listed as a dependency does not exist in the
 current directory, @code{make} searches the directories listed in
 @code{VPATH} for a file with that name.  If a file is found in one of
 them, that file becomes the dependency.  Rules may then specify the
 names of source files in the dependencies as if they all existed in the
-current directory.
+current directory.  @xref{Commands/Search}.
 
 In the @code{VPATH} variable, directory names are separated by colons.
 The order in which directories are listed is the order followed by
@@ -1498,12 +1510,12 @@ Clear all search paths previously specified with @code{vpath} directives.
 @end table
 
 A @code{vpath} pattern is a string containing a @samp{%} character.  The
-string must match the file name of a dependency that is being searched for,
-the @samp{%} character matching any sequence of zero or more characters (as
-in pattern rules; @pxref{Pattern Rules, ,Defining and Redefining Pattern Rules}).  For example, @code{%.h}
-matches files that end in @code{.h}.
-(If there is no @samp{%}, the
-pattern must match the dependency, which is not useful very often.)
+string must match the file name of a dependency that is being searched
+for, the @samp{%} character matching any sequence of zero or more
+characters (as in pattern rules; @pxref{Pattern Rules, ,Defining and
+Redefining Pattern Rules}).  For example, @code{%.h} matches files that
+end in @code{.h}.  (If there is no @samp{%}, the pattern must match the
+dependency exactly, which is not useful very often.)
 
 @samp{%} characters in a @code{vpath} directive's pattern can be quoted
 with preceding backslashes (@samp{\}).  Backslashes that would otherwise
