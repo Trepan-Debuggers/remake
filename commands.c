@@ -1,5 +1,5 @@
 /* Command processing for GNU Make.
-Copyright (C) 1988, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -74,13 +74,28 @@ set_file_variables (file)
 	 any suffix in the .SUFFIXES list stripped off for
 	 explicit rules.  We store this in the `stem' member.  */
       register struct dep *d;
+      char *name;
+      unsigned int len;
+
+#ifndef	NO_ARCHIVES
+      if (ar_name (file->name))
+	{
+	  name = index (file->name, '(') + 1;
+	  len = strlen (name) - 1;
+	}
+      else
+#endif
+	{
+	  name = file->name;
+	  len = strlen (name);
+	}
+
       for (d = enter_file (".SUFFIXES")->deps; d != 0; d = d->next)
 	{
-	  unsigned int len = strlen (file->name);
 	  unsigned int slen = strlen (dep_name (d));
-	  if (len > slen && streq (dep_name (d), file->name + len - slen))
+	  if (len > slen && !strncmp (dep_name (d), name + len - slen, slen))
 	    {
-	      file->stem = savestring (file->name, len - slen);
+	      file->stem = savestring (name, len - slen);
 	      break;
 	    }
 	}
