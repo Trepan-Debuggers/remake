@@ -168,6 +168,7 @@ $(bindir)/$(instname): make
 	mv $@.new $@
 
 $(mandir)/$(instname).$(manext): make.man
+	-@rm -f $@
 	cp make.man $@
 
 .PHONY: clean realclean
