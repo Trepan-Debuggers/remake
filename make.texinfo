@@ -3,10 +3,14 @@
 @synindex vr fn
 
 @ignore
-$Header: /sources/make/make/Attic/make.texinfo,v 1.50 1988/05/22 14:49:44 mcgrath Beta $
+$Header: /sources/make/make/Attic/make.texinfo,v 1.51 1988/05/26 17:55:55 mcgrath Exp $
 
 $Log: make.texinfo,v $
-Revision 1.50  1988/05/22 14:49:44  mcgrath
+Revision 1.51  1988/05/26 17:55:55  mcgrath
+* Removed built-in .? -> .s suffix rules.
+* Misc cleanup, etc.
+
+Revision 1.50  88/05/22  14:49:44  mcgrath
 Major Beta release before release 2.0.
 
 Revision 1.24  88/05/22  13:39:08  mcgrath
@@ -2801,15 +2805,14 @@ produces the result @samp{foo}.
 
 @item $(wildcard @var{pattern})
 @findex wildcard
-The argument @var{pattern} is a file name pattern, typically
-containing wildcards characters.  The result of @code{wildcard} is a
-space-separated list of the names of existing files that match the
-pattern.
+The argument @var{pattern} is a file name pattern, typically containing
+wildcard characters.  The result of @code{wildcard} is a space-separated
+list of the names of existing files that match the pattern.
 
-Wildcard are expanded automatically in rules (@pxref{Wildcards}).  But
-it does not normally take place when a variable is set, or inside the
-arguments of other functions.  Those occasions are when the
-@code{wildcard} function is useful.
+Wildcards are expanded automatically in rules (@pxref{Wildcards}).
+But they are not normally expanded when a variable is set, or inside the
+arguments of other functions.  Those occasions are when the @code{wildcard}
+function is useful.
 @end table
 
 @node Running, Implicit, Functions, Top
@@ -2890,6 +2893,7 @@ file that you wish to remake.  For example, consider a directory containing
 a several programs, with a makefile that starts like this:
 
 @example
+.PHONY: all
 all: size nm ld ar as
 @end example
 
@@ -2909,8 +2913,16 @@ request it explicitly with @samp{make clean}.  Here is a list of typical
 phony and empty target names:
 
 @table @file
+@item all
+Make all the top-level targets the makefile knows about.
+
 @item clean
 Delete all files that the makefile could remake.
+
+@item clobber
+Delete absolutely everything the makefile could remake (whereas
+@samp{make clean} often leaves intact some files that might take a
+long time to remake).
 
 @item install
 Copy the executable file into a directory that users typically search for
@@ -2921,6 +2933,9 @@ Print listings of the source files that have changed.
 
 @item tar
 Create a tar file of the source files.
+
+@item shar
+Create a shell archive (shar file) of the source files.
 @end table
 
 @node Avoid Compilation, Instead of Execution, Goals, Running
@@ -3055,8 +3070,8 @@ you can enclose spaces and other special characters in the value of a
 variable when you override it.)
 
 The variable @code{CFLAGS} is only one of many standard variables that
-exist just so that you can change them this way.  @xref{Implicit
-Variables}, for a complete list.
+exist just so that you can change them this way.
+@xref{Implicit Variables}, for a complete list.
 
 You can also program the makefile to look at additional variables of your
 own, giving the user ability to control other aspects of how the makefile
@@ -3118,8 +3133,7 @@ Here is a table of all the options @code{make} understands:
 
 @table @samp
 @item -b
-This option is ignored for compatibility with other versions of
-@code{make}.
+This option is ignored for compatibility with other versions of @code{make}.
 
 @item -c @var{dir}
 Change to directory @var{dir} before executing the rules.  If multiple
@@ -3376,38 +3390,29 @@ running the linker @code{ld} via the C compiler.  The precise command
 used is @samp{$(CC) $(LDFLAGS) @dots{} $(LOADLIBES)}.@refill
 
 This rule does the right thing for a simple program with only one source
-file.  In more complicated cases, you must write an explicit command for
-linking.
+file.  It will also do the right thing if there are multiple object files
+(presumably coming from various other source files), the first of which has
+a name matching that of the executable file.  Thus,
 
-@item Compiling C into assembler code
-@file{@var{n}.s} will be made automatically from @file{@var{n}.c}
-with the command @samp{$(CC) -S $(CFLAGS)}.@refill
+@example
+x: y.o z.o
+@end example
 
-It would be possible for @code{make} to convert @file{@var{n}.c} into
-@file{@var{n}.o} by way of @file{@var{n}.s}, using this rule and the
-rule for running the assembler.  But that is not what @code{make}
-does, because the rule for compiling @file{@var{n}.c} into
-@file{@var{n}.o} directly comes earlier in the order of rules.  The
-upshot is that the file @file{@var{n}.s} is not created or changed
-when @file{@var{n}.o} is being remade.  This rule is used only if you
-explicitly specify @file{@var{n}.s} as a goal or needed dependency.
+@noindent
+when @file{x.c}, @file{y.c} and @file{z.c} all exist will execute:
 
-This is a deliberate decision, for the sake of compatibility with Unix
-@code{make}.@refill
+@example
+cc -c x.c -o x.o
+cc -c y.c -o y.o
+cc -c z.c -o z.o
+cc x.o y.o z.o -o x
+rm -f x.o
+rm -f y.o
+rm -f z.o
+@end example
 
-If you want @code{make} update @file{@var{n}.s} on the way to updating
-@file{@var{n}.o}, you can request this by canceling the other rule
-that allows direct compilation.  @xref{Canceling Rules}.@refill
-
-@item Compiling Pascal, Fortran, EFL or Ratfor into assembler code
-@file{@var{n}.s} will be made automatically from @file{@var{n}.p},
-@file{@var{n}.e}, @file{@var{n}.r}, @file{@var{n}.F} or @file{@var{n}.F}
-by running the appropriate compiler with the @samp{-S} flag
-instead of the @samp{-c} flag.@refill
-
-For compatibility with Unix @code{make}, these rules apply only if you
-expressly request @code{make} to update @file{@var{n}.s}.  See the
-information immediately above.
+@noindent
+In more complicated cases, you must write an explicit command for linking.
 
 @item Yacc for C programs
 @file{@var{n}.c} will be made automatically from @file{@var{n}.y} by
@@ -3449,9 +3454,9 @@ Any file @file{@var{n}} will be extracted if necessary from an SCCS
 file named either @file{s.@var{n}} or @file{SCCS/s.@var{n}}.  The
 precise command used is @samp{$(GET) $(GFLAGS)}.
 
-I recommend that you avoid the use of SCCS.  RCS is widely held to be
-superior, and RCS is also free.  By choosing free software in place of
-comparable proprietary software, you support the free software
+We recommend that you avoid the use of SCCS.  RCS is widely held to be
+superior, and is also free.  By choosing free software in place of
+comparable (or lesser) proprietary software, you support the free software
 movement.
 @end table
 
@@ -3499,8 +3504,8 @@ Program for extracting a file from RCS; default @samp{co}.
 
 @item FC
 @vindex FC
-Program for compiling or preprocessing Fortran programs (or Ratfor or
-EFL programs); default @samp{f77}.
+Program for compiling or preprocessing Fortran, Ratfor,
+and EFL programs; default @samp{f77}.
 
 @item GET
 @vindex GET
@@ -3517,18 +3522,17 @@ Program for compiling Pascal programs; default @samp{pc}.
 
 @item YACC
 @vindex YACC
-Program to use to turn Yacc grammars into C programs; default
-@samp{yacc}.
+Program to use to turn Yacc grammars into C programs; default @samp{yacc}.
 
 @item YACCR
 @vindex YACCR
-Program to use to turn Yacc grammars into Ratfor programs; default
-@samp{yacc -r}.
+Program to use to turn Yacc grammars into Ratfor
+programs; default @samp{yacc -r}.
 
 @item YACCE
 @vindex YACCE
-Program to use to turn Yacc grammars into EFL programs; default
-@samp{yacc -e}.
+Program to use to turn Yacc grammars into EFL
+programs; default @samp{yacc -e}.
 
 @item RANLIB
 @vindex RANLIB
@@ -3537,48 +3541,46 @@ Program to use to update the symbol-directory of an archive
 @end table
 
 Here is a table of variables whose values are additional arguments for the
-programs above:
+programs above.  The default values for all of these is the empty string.
 
 @table @code
 @item ASFLAGS
 @vindex ASFLAGS
-Extra flags to give to the assembler (when explicitly invoked
-on a @samp{.s} file).
+Extra flags to give to the assembler (when explicitly
+invoked on a @samp{.s} file).
 
 @item CFLAGS
 @vindex CFLAGS
-Extra flags to give to the C compiler; default is empty.
+Extra flags to give to the C compiler.
 
 @item EFLAGS
 @vindex EFLAGS
-Extra flags to give to the Fortran compiler for EFL programs; default
-is empty.
+Extra flags to give to the Fortran compiler for EFL programs.
 
 @item FFLAGS
 @vindex FFLAGS
-Extra flags to give to the Fortran compiler; default is empty.
+Extra flags to give to the Fortran compiler.
 
 @item LFLAGS
 @vindex LFLAGS
-Extra flags to give to Lex; default is empty.
+Extra flags to give to Lex.
 
 @item LDFLAGS
 @vindex LDFLAGS
 Extra flags to give to compilers when they are supposed to invoke the
-linker, @samp{ld}; default is empty.
+linker, @samp{ld} (actually the value of the variable @code{LD}).
 
 @item PFLAGS
 @vindex PFLAGS
-Extra flags to give to the Pascal compiler; default is empty.
+Extra flags to give to the Pascal compiler.
 
 @item RFLAGS
 @vindex RFLAGS
-Extra flags to give to the Fortran compiler for Ratfor programs;
-default is empty.
+Extra flags to give to the Fortran compiler for Ratfor programs.
 
 @item YFLAGS
 @vindex YFLAGS
-Extra flags to give to Yacc; default is empty.
+Extra flags to give to Yacc.
 @end table
 
 @node Chained Rules, Pattern Rules, Implicit Variables, Implicit
