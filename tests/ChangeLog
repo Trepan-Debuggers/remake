@@ -1,5 +1,8 @@
 2002-09-10  Paul D. Smith  <psmith@gnu.org>
 
+	* test_driver.pl (compare_output): Match the new format for time
+	skew error messages.
+
 	* scripts/features/export: Created.  Add tests for export/unexport
 	capabilities, including exporting/unexporting expanded variables.
 
