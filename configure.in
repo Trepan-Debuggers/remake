@@ -54,13 +54,7 @@ pid = waitpid (-1, &status, 0);
 ],
 		 AC_DEFINE(HAVE_UNION_WAIT))
 
-AC_COMPILE_CHECK(sys_siglist declaration in signal.h or unistd.h,
-		 [#include <signal.h>
-/* NetBSD declares sys_siglist in <unistd.h>.  */
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif], [char *msg = *(sys_siglist + 1);],
-		 AC_DEFINE(SYS_SIGLIST_DECLARED))
+AC_SYS_SIGLIST_DECLARED
 
 # The presence of the following is not meant to imply
 # that make necessarily works on those systems.
