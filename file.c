@@ -1,4 +1,5 @@
-/* Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+/* Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993
+	Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -174,7 +175,8 @@ file_hash_enter (file, name, oldhash, oldname)
      unsigned int oldhash;
      char *oldname;
 {
-  register unsigned int newhash;
+  unsigned int oldbucket = oldhash % FILE_BUCKETS;
+  register unsigned int newhash, newbucket;
   struct file *oldfile;
   register char *n;
   register struct file *f;
@@ -182,27 +184,25 @@ file_hash_enter (file, name, oldhash, oldname)
   newhash = 0;
   for (n = name; *n != '\0'; ++n)
     HASH (newhash, *n);
-  newhash %= FILE_BUCKETS;
+  newbucket = newhash % FILE_BUCKETS;
 
   /* Look for an existing file under the new name.  */
 
-  for (oldfile = files[newhash]; oldfile != 0; oldfile = oldfile->next)
+  for (oldfile = files[newbucket]; oldfile != 0; oldfile = oldfile->next)
     if (streq (oldfile->name, name))
       break;
 
-  if (oldhash != 0 && (newhash != oldhash || oldfile != 0))
+  if (oldhash != 0 && (newbucket != oldbucket || oldfile != 0))
     {
       /* Remove FILE from its hash bucket.  */
 
       struct file *lastf = 0;
 
-      oldhash %= FILE_BUCKETS;
-
-      for (f = files[oldhash]; f != file; f = f->next)
+      for (f = files[oldbucket]; f != file; f = f->next)
 	lastf = f;
 
       if (lastf == 0)
-	files[oldhash] = f->next;
+	files[oldbucket] = f->next;
       else
 	lastf->next = f->next;
     }
@@ -216,11 +216,11 @@ file_hash_enter (file, name, oldhash, oldname)
     {
       /* There is no existing file with the new name.  */
 
-      if (newhash != oldhash)
+      if (newbucket != oldbucket)
 	{
 	  /* Put FILE in its new hash bucket.  */
-	  file->next = files[newhash];
-	  files[newhash] = file;
+	  file->next = files[newbucket];
+	  files[newbucket] = file;
 	}
     }
   else
