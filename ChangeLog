@@ -1,3 +1,7 @@
+Fri Mar  1 12:04:47 1996  Roland McGrath  <roland@charlie-brown.gnu.ai.mit.edu>
+
+	* Version 3.74.3.
+
 Wed Feb 28 03:56:20 1996  Roland McGrath  <roland@charlie-brown.gnu.ai.mit.edu>
 
 	* default.c (default_terminal_rules): Remove + prefix from RCS cmds.
