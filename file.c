@@ -395,7 +395,7 @@ set_command_state (file, state)
   struct dep *d;
 
   for (d = file->also_make; d != 0; d = d->next)
-    d->command_state = state;
+    d->file->command_state = state;
 }
 
 /* Print the data base of files.  */
