@@ -1343,11 +1343,15 @@ record_files (filenames, pattern, pattern_percent, deps, commands_started,
 			    "target file `%s' has both : and :: entries",
 			    f->name);
 	  f = enter_file (name);
-	  /* If there was an existing entry and it was a
-	     double-colon entry, enter_file will have returned a
-	     new one, making it the prev pointer of the old one.  */
+	  /* If there was an existing entry and it was a double-colon
+	     entry, enter_file will have returned a new one, making it the
+	     prev pointer of the old one, and setting its double_colon
+	     pointer to the first one.  */
+	  if (f->double_colon == 0)
+	    /* This is the first entry for this name, so we must
+	       set its double_colon pointer to itself.  */
+	    f->double_colon = f;
 	  f->is_target = 1;
-	  f->double_colon = 1;
 	  f->deps = this;
 	  f->cmds = cmds;
 	}
