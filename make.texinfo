@@ -1630,6 +1630,7 @@ names found by directory search with no extra effort.
 @node Libraries/Search,  , Implicit/Search, Directory Search
 @subsection Directory Search for Link Libraries
 @cindex link libraries, directory search
+@cindex libraries for linking, directory search
 @cindex directory search, link libraries
 
 Directory search applies in a special way to libraries used with the
