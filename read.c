@@ -1411,83 +1411,80 @@ record_files (filenames, pattern, pattern_percent, deps, commands_started,
     }
 }
 
+/* Search STRING for an unquoted STOPCHAR or blank (if BLANK is nonzero).
+   Backslashes quote STOPCHAR, blanks if BLANK is nonzero, and backslash.
+   Quoting backslashes are removed from STRING by compacting it into
+   itself.  Returns a pointer to the first unquoted STOPCHAR if there is
+   one, or nil if there are none.  */
+
+char *
+find_char_unquote (string, stopchar, blank)
+     char *string;
+     int stopchar;
+     int blank;
+{
+  unsigned int string_len = strlen (string);
+  register char *p = string;
+
+  while (1)
+    {
+      if (blank)
+	{
+	  while (*p != '\0' && *p != stopchar && !isblank (*p))
+	    ++p;
+	  if (*p == '\0')
+	    break;
+	}
+      else
+	{
+	  p = index (p, stopchar);
+	  if (p == 0)
+	    break;
+	}
+      if (p > string && p[-1] == '\\')
+	{
+	  /* Search for more backslashes.  */
+	  register int i = -2;
+	  while (&p[i] >= string && p[i] == '\\')
+	    --i;
+	  ++i;
+	  /* The number of backslashes is now -I.
+	     Copy P over itself to swallow half of them.  */
+	  bcopy (&p[i / 2], &p[i], (string_len - (p - string)) - (i / 2) + 1);
+	  p += i / 2;
+	  if (i % 2 == 0)
+	    /* All the backslashes quoted each other; the STOPCHAR was
+	       unquoted.  */
+	    return p;
+
+	  /* The STOPCHAR was quoted by a backslash.  Look for another.  */
+	}
+      else
+	/* No backslash in sight.  */
+	return p;
+    }
+
+  /* Never hit a STOPCHAR or blank (with BLANK nonzero).  */
+  return 0;
+}
+
+/* Search PATTERN for an unquoted %.  */
+
+char *
+find_percent (pattern)
+     char *pattern;
+{
+  return find_char_unquote (pattern, '%', 0);
+}
+
 /* Search STRING for an unquoted ; that is not after an unquoted #.  */
 
 static char *
 find_semicolon (string)
      char *string;
 {
-  char *found, *p;
-
-  found = index (string, ';');
-  while (found != 0 && found[-1] == '\\')
-    {
-      register char *q = &found[-1];
-      register int backslash = 0;
-      while (*q-- == '\\')
-	backslash = !backslash;
-      if (backslash)
-	found = index (found + 1, ';');
-      else
-	break;
-    }
-  if (found == 0)
-    return 0;
-
-  /* Look for a comment character (#) before the ; we found.  */
-  p = lindex (string, found, '#');
-  while (p != 0 && p[-1] == '\\')
-    {
-      register char *q = &p[-1];
-      register int backslash = 0;
-      while (*q-- == '\\')
-	backslash = !backslash;
-      if (backslash)
-	p = lindex (p + 1, found, '#');
-      else
-	break;
-    }
-  if (p == 0)
-    return found;
-  return 0;
-}
-
-/* Search PATTERN for an unquoted %.  Backslashes quote % and backslash.
-   Quoting backslashes are removed from PATTERN by compacting it into
-   itself.  Returns a pointer to the first unquoted % if there is one,
-   or nil if there are none.  */
-
-char *
-find_percent (pattern)
-     char *pattern;
-{
-  unsigned int pattern_len = strlen (pattern);
-  register char *p = pattern;
-
-  while ((p = index (p, '%')) != 0)
-    if (p > pattern && p[-1] == '\\')
-      {
-	/* Search for more backslashes.  */
-	register int i = -2;
-	while (&p[i] >= pattern && p[i] == '\\')
-	  --i;
-	++i;
-	/* The number of backslashes is now -I.
-	   Copy P over itself to swallow half of them.  */
-	bcopy (&p[i / 2], &p[i], (pattern_len - (p - pattern)) - (i / 2) + 1);
-	p += i / 2;
-	if (i % 2 == 0)
-	  /* All the backslashes quoted each other; the % was unquoted.  */
-	  return p;
-
-	/* The % was quoted by a backslash.  Look for another.  */
-      }
-    else
-      /* No backslash in sight.  */
-      return p;
-
-  /* Never hit a %.  */
-  return 0;
+  return (find_char_unquote (string, '#', 0) == 0
+	  ? find_char_unquote (string, ';', 0) : 0);
 }
 
 /* Parse a string into a sequence of filenames represented as a
@@ -1527,18 +1524,9 @@ parse_file_seq (stringp, stopchar, size, strip)
 	break;
       /* Yes, find end of next name.  */
       q = p;
-      while (1)
-	{
-	  c = *p++;
-	  if (c == '\0')
-	    break;
-	  else if (c == '\\' &&
-	           (*p == '\\' || isblank (*p) || *p == stopchar))
-	    ++p;
-	  else if (isblank (c) || c == stopchar)
-	    break;
-	}
-      p--;
+      p = find_char_unquote (q, stopchar, 1);
+      if (p == 0)
+	p = q + strlen (q)
 
       if (strip)
 	/* Skip leading `./'s.  */
