@@ -24,8 +24,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "getopt.h"
 
 
-extern char *version_string;
-
 extern void print_variable_data_base ();
 extern void print_dir_data_base ();
 extern void print_rule_data_base ();
@@ -1669,7 +1667,6 @@ print_version ()
 {
   static int printed_version = 0;
 
-  extern char *remote_description;
   char *precede = print_data_base_flag ? "# " : "";
 
   if (printed_version)
