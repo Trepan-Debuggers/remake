@@ -500,9 +500,7 @@ target_environment (file)
   return result;
 }
 
-/* Try to interpret LINE (a null-terminated string)
-   as a variable definition.  If it is one, define the
-   variable and return 1.  Otherwise return 0.
+/* Try to interpret LINE (a null-terminated string) as a variable definition.
 
    ORIGIN may be o_file, o_override, o_env, o_env_override,
    or o_command specifying that the variable definition comes
@@ -528,9 +526,9 @@ try_variable_definition (line, origin)
   register char *beg;
   register char *end;
   register int recursive;
+  char *name, *expanded_name;
+  struct variable *v;
 
-  if (*p == '\t')
-    return 0;
   while (1)
     {
       c = *p++;
@@ -560,9 +558,18 @@ try_variable_definition (line, origin)
     --end;
   p = next_token (p);
 
-  return define_variable (beg, end - beg,
-			  recursive ? p : variable_expand (p),
-			  origin, recursive);
+  /* Expand the name, so "$(foo)bar = baz" works.  */
+  name = savestring (beg, end - beg);
+  expanded_name = allocated_variable_expand (name);
+  free (name);
+
+  v = define_variable (expanded_name, strlen (expanded_name),
+		       recursive ? p : variable_expand (p),
+		       origin, recursive);
+
+  free (expanded_name);
+
+  return v;
 }
 
 /* Print information for variable V, prefixing it with PREFIX.  */
