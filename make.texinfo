@@ -19,10 +19,10 @@ automatically which pieces of a large program need to be recompiled,
 and issues the commands to recompile them.
 
 @c !!set edition, date, version
-This is Edition 0.30 Beta, last updated 20 December 1991,
+This is Edition 0.31 Beta, last updated 9 March 1991,
 of @cite{The GNU Make Manual}, for @code{make}, Version 3.61 Beta.
 
-Copyright (C) 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -53,12 +53,12 @@ by the Foundation.
 @titlepage
 @title GNU Make
 @subtitle A Program for Directing Recompilation
-@subtitle Edition 0.30 Beta, for @code{make} Version 3.61 Beta.
-@subtitle December 1991
+@subtitle Edition 0.31 Beta, for @code{make} Version 3.61 Beta.
+@subtitle March 1992
 @author by Richard M. Stallman and Roland McGrath
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
+Copyright @copyright{} 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 @sp 2
 Published by the Free Software Foundation @*
 675 Massachusetts Avenue, @*
@@ -93,8 +93,8 @@ The GNU @code{make} utility automatically determines which pieces of a
 large program need to be recompiled, and issues the commands to
 recompile them.@refill
 
-This is Edition 0.30 Beta of the @cite{GNU Make Manual},
-last updated 20 December 1991,
+This is Edition 0.31 Beta of the @cite{GNU Make Manual},
+last updated 9 March 1992,
 for @code{make} Version 3.61 Beta.@refill
 
 This manual describes @code{make} and contains the following chapters:@refill
@@ -374,11 +374,23 @@ us the makefile and the exact results @code{make} gave you.  Also say what
 you expected to occur; this will help us decide whether the problem
 was really in the documentation.
 
-Once you've got a precise problem, send email to (Internet)
-@samp{bug-gnu-utils@@prep.ai.mit.edu} or (UUCP)
-@samp{mit-eddie!prep.ai.mit.edu!bug-gnu-utils}.  Please include the version
-number of @code{make} you are using.  You can get this information with the
-command @samp{make -v -f /dev/null}.@refill
+Once you've got a precise problem, please send electronic mail either
+through the Internet or via UUCP:
+
+@example
+@group
+@r{Internet address:}
+    bug-gnu-utils@@prep.ai.mit.edu
+
+@r{UUCP path:}
+    mit-eddie!prep.ai.mit.edu!bug-gnu-utils
+@end group
+@end example
+
+@noindent
+Please include the version number of @code{make} you are using.  You can
+get this information with the command @samp{make -v -f
+/dev/null}.@refill
 
 Non-bug suggestions are always welcome as well.
 If you have questions about things that are unclear in the documentation
@@ -1074,6 +1086,7 @@ to make the target @samp{foo} (and other targets), you can write a
 makefile called @file{GNUmakefile} that contains:
 
 @c !!! following is confusing.
+@c !!! Check with Roland --rjc 9mar92
 
 @example
 foo:
@@ -1103,13 +1116,18 @@ certain files, called the rule's @dfn{targets} (usually only one per rule).
 It lists the other files that are the @dfn{dependencies} of the target, and
 @dfn{commands} to use to create or update the target.
 
+@c !!! Check with Roland; 
+@c     what is meant by "contains slashes"; need xref.  --rjc 9mar92
 The order of rules is not significant, except for determining the
 @dfn{default goal}: the target for @code{make} to consider, if you do
 not otherwise specify one.  The default goal is the target of the first
-rule in the first makefile, except that targets starting with a period
-do not count unless they contain slashes as well; also, a target that
-defines a pattern rule (@pxref{Pattern Rules, ,Defining and Redefining Pattern Rules}) or a suffix rule
-(@pxref{Suffix Rules, ,Old-Fashioned Suffix Rules}) has no effect on the default goal.
+rule in the first makefile.  If the first rule has multiple targets,
+only the first target is taken as the default.  There are two
+exceptions: a target starting with a period is not a default unless it
+contains slashes as well; and, a target that defines a pattern rule or a
+suffix rule has no effect on the default goal.  (@xref{Pattern Rules,
+,Defining and Redefining Pattern Rules}, and see @ref{Suffix Rules,
+,Old-Fashioned Suffix Rules}.)
 
 Therefore, we usually write the makefile so that the first rule is the
 one for compiling the entire program or all the programs described by
@@ -1408,25 +1426,35 @@ you do not need to change the individual rules, just the search paths.
 @node General Search, Selective Search, Directory Search, Directory Search
 @subsection @code{VPATH}: Search Path for All Dependencies
 
+@c !!! Check with Roland  --rjc 9mar92
 The value of the @code{make} variable @code{VPATH} specifies a list of
-directories which @code{make} should search (in the order specified) for
-dependency files.  The directory names are separated by colons.  For
-example:
+directories which @code{make} should search.  Most often, the
+directories are expected to contain dependency files that are not in the
+current directory; however, @code{VPATH} specifies a search list that
+@code{make} applies for all files, including files which are targets of
+rules.
+
+Thus, if a files that is listed as a dependency does not exist in the
+current directory, @code{make} searches the directories listed in
+@code{VPATH} for a file with that name.  If a file is found in one of
+them, that file becomes the dependency.  Rules may then specify the
+names of source files as if they all existed in the current directory.
+
+In the @code{VPATH} variable, directory names are separated by colons.
+The order in which directories are listed is the order followed by
+@code{make} in its search.
+
+For example,
 
 @example
 VPATH = src:../headers
 @end example
 
 @noindent
-specifies a path containing two directories, @file{src} and @file{../headers}.
+specifies a path containing two directories, @file{src} and
+@file{../headers}, which @code{make} searches in that order.
 
-Whenever a file listed as a dependency does not exist in the current
-directory, the directories listed in @code{VPATH} are searched for a file
-with that name.  If a file is found in one of them, that file becomes the
-dependency.  Rules may then specify the names of source files as if they
-all existed in the current directory.
-
-Using the value of @code{VPATH} set in the previous example, a rule like this:
+With this value of @code{VPATH}, the following rule,
 
 @example
 foo.o : foo.c
@@ -1545,8 +1573,8 @@ foo.o : foo.c defs.h hack.h
 @noindent
 @c !!! following paragraph rewritten to avoid overfull hbox
 In this example, the value of @samp{$^} would be something such as
-@samp{src/foo.c ../headers/defs.h hack.h}, from which
-@samp{$(firstword $^)} extracts just @samp{src/foo.c}.@refill
+@samp{src/foo.c ../headers/defs.h hack.h}; use 
+@samp{$(firstword $^)} to extract just @samp{src/foo.c}.@refill
 
 @node Implicit/Search, Libraries/Search, Commands/Search, Directory Search
 @subsection Directory Search and Implicit Rules
@@ -2100,6 +2128,7 @@ always interpreted by @file{/bin/sh} unless the makefile specifies
 otherwise.  @xref{Execution, ,Command Execution}.
 
 @c !!! for a comment, can a # be followed by a space? --text implies no.
+@c !!! Check with Roland  --rjc 9mar92
 Whether comments can be written on command lines, and what syntax they use,
 is under the control of the shell that is in use.  If it is @file{/bin/sh},
 a @samp{#} at the start of a word starts a comment.
@@ -2428,7 +2457,8 @@ As a special feature, using the variable @code{MAKE} in the commands of a
 rule alters the effects of the @samp{-t}, @samp{-n} or @samp{-q} option.
 (@xref{Instead of Execution, ,Instead of Executing the Commands}.)@refill
 
-@c !!! check whether the following is correct.
+@c !!! Check with Roland  --rjc 9mar92
+@c     Is the following correct?
 Consider the command @samp{make -t} in the above example.  (The
 @samp{make -t} option marks targets as up to date without actually
 doing anything.)  Following the usual
@@ -2546,8 +2576,8 @@ subsystem:
 @noindent
 but now @code{MAKEFLAGS} makes this usage redundant.
 
-@cindex setting options from the environment
-@cindex options, setting from the environment
+@cindex setting options from environment
+@cindex options, setting from environment
 @cindex setting options in makefiles
 @cindex options, setting in makefiles
 The @code{MAKEFLAGS} and @code{MFLAGS} variables can also be useful if you
@@ -2681,6 +2711,11 @@ A @dfn{variable} is a name defined within @code{make} to represent a string
 of text, called the variable's @dfn{value}.  These values can be
 substituted by explicit request into targets, dependencies, commands and
 other parts of the makefile.
+
+@c !!! Check with Roland --rjc 9mar92 
+Note that these expansions occur when a makefile is read,
+@strong{before} expansion using @samp{%} replacement.
+@xref{Pattern Rules, ,Defining and Redefining Pattern Rules}.
 
 Variables can represent lists of file names, options to pass to compilers,
 programs to run, directories to look in for source files, directories to
@@ -2841,6 +2876,39 @@ x := later
 
 When a simply expanded variable is referenced, its value is substituted
 verbatim.
+
+@c !!! Check with Roland whether correct variables are in upper or lower case.
+@c     --rjc 9mar92 
+Here is a somewhat more complicated example, illustrating the use of
+@samp{:=} in conjunction with the @code{shell} function.
+(@xref{Shell Function, , The @code{shell} Function}.)  This example
+also shows use of the variable @code{MAKELEVEL}, which is changed
+when it is passed down from level to level.
+(@xref{Variables/Recursion, , Communicating Variables to a
+Sub-@code{make}}, for information about @code{MAKELEVEL}.)
+
+@example
+@group
+ifeq (0,$@{MAKELEVEL@})
+cur-dir   := $(shell pwd)
+whoami    := $(shell whoami)
+host-type := $(shell arch)
+make := $@{MAKE@} host-type=$@{host-type@} whoami=$@{whoami@}
+endif
+@end group
+@end example
+
+@noindent 
+An advantage of this use of @samp{:=} is that a typical
+`descend into a directory' command then looks like this:
+
+@example
+@group
+$@{SUBDIRS@}:
+      @{MAKE@} cur-dir=$@{cur-dir@}/$@@ -C $@@ all
+@end group
+@end example
+@c end insert 9mar92
 
 Simply expanded variables generally make complicated makefile programming
 more predictable because they work like variables in most programming
@@ -3677,11 +3745,41 @@ says that @file{foo} depends of @file{foo.c}, @file{bar.c} and
 @file{ugh.h} but only @file{foo.c} and @file{bar.c} should be specified
 in the command to the compiler.@refill
 
+@c !!! Roland says the following needs improvement --rjc 9mar92
+Also, the function iterates over all whitespace separated tokens in
+@var{pattern}.  This means that @var{pattern} could be
+@code{$(sources)} where @code{sources} is defined by
+@code{sources=main1.c foo.c bar.c}.
+@var{text} can be expanded similarly.
+
 @item $(filter-out @var{pattern},@var{text})
 @findex filter-out
 Removes all whitespace-separated words in @var{text} that @emph{do}
 match @var{pattern}, returning only the words that match.  This is the
 exact opposite of the @code{filter} function.@refill
+
+@c !!! Roland says the following needs improvement --rjc 9mar92
+Also, since @code{filter-out} iterates over all whitespace separated
+tokens in @var{pattern}, you can use a variable such as
+@code{$(sources)}, defined by @code{sources=main1.c foo.c bar.c}, to
+list all the words to remove from @var{text}.
+
+For example, given:
+
+@example
+@group
+objects=main1.o foo.o main2.o bar.o
+mains=main1.o main2.o
+@end group
+@end example
+
+@noindent
+the following generates a list which contains all the object files not
+in @samp{mains}:
+
+@example
+$(filter-out $(mains),$(objects))
+@end example
 
 @item $(sort @var{list})
 @findex sort
@@ -3695,6 +3793,11 @@ $(sort foo bar lose)
 
 @noindent
 returns the value @samp{bar foo lose}.
+
+@cindex removing duplicate words
+@cindex duplicate words, removing
+Incidentally, since @code{sort} removes duplicate words, you can use
+it for this purpose even if you don't care about the sort order.
 @end table
 
 Here is a realistic example of the use of @code{subst} and @code{patsubst}.
@@ -3761,6 +3864,11 @@ file name.  The argument of the function is regarded as a series of file
 names, separated by whitespace.  (Leading and trailing whitespace is
 ignored.)  Each file name in the series is transformed in the same way and
 the results are concatenated with single spaces between them.
+
+@c !!! Check with Roland --rjc 9mar92 
+Note that these expansions occur when a makefile is read,
+@strong{before} expansion using @samp{%} replacement.
+@xref{Pattern Rules, ,Defining and Redefining Pattern Rules}.
 
 @table @code
 @item $(dir @var{names})
@@ -4002,13 +4110,13 @@ are probably not what you intended.  For example,
 
 @c !!! used smallexample here
 @smallexample
-files := $(foreach Es escrito en espanol!,b c ch,$(find_files))
+files := $(foreach Esta escrito en espanol!,b c ch,$(find_files))
 @end smallexample
 
 @noindent
 might be useful if the value of @code{find_files} references the variable
-whose name is @samp{Es escrito en espanol!} (es un nombre bastante largo,
-que no?), but it is more likely to be a mistake.
+whose name is @samp{Esta escrito en espanol!} (es un nombre bastante largo,
+no?), but it is more likely to be a mistake.
 
 @node Origin Function, Shell Function, Foreach Function, Functions
 @section The @code{origin} Function
@@ -5151,6 +5259,7 @@ rules whose target patterns match that file's name.)@refill
 @cindex intermediate files, preserving
 @cindex preserving intermediate files
 @cindex preserving with .PRECIOUS
+@cindex @code{.PRECIOUS} files
 
 A chain can involve more than two implicit rules.  For example, it is
 possible to make a file @file{foo} from @file{RCS/foo.y,v} by running RCS,
@@ -5181,6 +5290,12 @@ character @samp{%} (exactly one of them).  The target is considered a
 pattern for matching file names; the @samp{%} can match any nonempty
 substring, while other characters match only themselves.  The dependencies
 likewise use @samp{%} to show how their names relate to the target name.
+
+@c !!! Check with Roland --rjc 9mar92
+Note that expansion using @samp{%} occurs @strong{after} any variable or
+function expansions, which take place when the makefile is read.
+@xref{Filename Functions, , Functions for File Names}, and also see
+@ref{Using Variables, , How to Use Variables}.
 
 Thus, a pattern rule @samp{%.o : %.c} says how to make any file
 @file{@var{stem}.o} from another file @file{@var{stem}.c}.@refill
@@ -5450,8 +5565,14 @@ as @samp{%.c}, it expands to @samp{test.c}.@refill
 
 When the target pattern does not contain a slash (and usually it does not),
 directory names in the file names are removed from the file name before it
-is compared with the target prefix and suffix.  The directory names, along
-with the slash that ends them, are added back to the stem.  Thus,
+is compared with the target prefix and suffix.  
+After the comparison of the file name to the target pattern, the
+directory names, along with the slash that ends them, are added on
+to the dependency file names generated from the pattern rule's
+dependency patterns and the file name. The directories are ignored
+only for the purpose of finding an implicit rule to use, not in the
+application of that rule.
+Thus,
 @samp{e%t} does match the file name @file{src/eat}, with @samp{src/a} as
 the stem.  When dependencies are turned into file names, the directories
 from the stem are added at the front, while the rest of the stem is
@@ -6110,12 +6231,21 @@ Various new built-in implicit rules.  @xref{Catalogue of Rules, ,Catalogue of Im
 @end itemize
 
 @node Missing, Complex Makefile, Features, Top
-@chapter Missing Features of GNU @code{make}
+@chapter Incompatibilities and Missing Features of GNU @code{make}
 
 The @code{make} programs in various other systems support a few features
 that are not implemented in GNU @code{make}.  Draft 11.1 of the POSIX.2
 standard which specifies @code{make} does not require any of these
 features.@refill
+
+GNU @code{make} has one known incompatibility with the POSIX.2
+specification: In GNU @code{make} the @samp{$?} automatic variable
+(@pxref{Automatic, ,Automatic Variables}) always contains the list of
+changed dependencies.  In POSIX.2, elements of @samp{$?} which are
+archive members (@pxref{Archive Members}) are just the member name, not
+the complete name.  For example, @file{foo.o} rather than
+@file{lib.a(foo.o)}.  Version 4 of GNU @code{make} will behave as
+POSIX.2 specifies.@refill
 
 @itemize @bullet
 @item
