@@ -19,7 +19,7 @@ automatically which pieces of a large program need to be recompiled,
 and issues the commands to recompile them.
 
 @c !!set edition, date, version
-This is Edition 0.33 Beta, last updated 11 May 1992,
+This is Edition 0.33 Beta, last updated 12 June 1992,
 of @cite{The GNU Make Manual}, for @code{make}, Version 3.63 Beta.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
@@ -54,7 +54,7 @@ by the Foundation.
 @title GNU Make
 @subtitle A Program for Directing Recompilation
 @subtitle Edition 0.33 Beta, for @code{make} Version 3.63 Beta.
-@subtitle May 1992
+@subtitle June 1992
 @author by Richard M. Stallman and Roland McGrath
 @page
 @vskip 0pt plus 1filll
@@ -94,7 +94,7 @@ large program need to be recompiled, and issues the commands to
 recompile them.@refill
 
 This is Edition 0.33 Beta of the @cite{GNU Make Manual},
-last updated 11 May 1992,
+last updated 12 June 1992,
 for @code{make} Version 3.63 Beta.@refill
 
 This manual describes @code{make} and contains the following chapters:@refill
@@ -630,18 +630,6 @@ link @file{edit}.  If we change the file @file{command.h} and run
 @code{make}, @code{make} will recompile the object files @file{kbd.o},
 @file{commands.o} and @file{files.o} and then link file @file{edit}.
 
-@c !!! Roland, is this correct? 8 jun 92 --rjc
-Note that @code{make} goes through a two stage process: first,
-@code{make} uses the dependency list to determine @emph{whether} to
-remake a target; second, if the target needs to be remade, @code{make}
-goes through the list of pattern rules (for a target with no commands),
-looking for the pattern rule that seems to match.  In the second stage,
-@code{make} forgets the information in the dependency list and only uses
-the information in the pattern rules.  Sometimes, people expect that
-@code{make} will use information in the dependency list to figure out
-what commands to use to make the target; but @code{make} does not do
-this.
-
 @node Variables Simplify, make Deduces, How Make Works, Introduction
 @section Variables Make Makefiles Simpler
 
@@ -1098,9 +1086,6 @@ For example, if you have a makefile called @file{Makefile} that says how
 to make the target @samp{foo} (and other targets), you can write a
 makefile called @file{GNUmakefile} that contains:
 
-@c !!! following is confusing.
-@c !!! Check with Roland --rjc 9mar92
-
 @example
 foo:
         frobnicate > foo
@@ -1486,15 +1471,15 @@ is found in the directory @file{src}.
 
 Similar to the @code{VPATH} variable but more selective is the @code{vpath}
 directive (note lower case), which allows you to specify a search path for a particular class
-of filenames, those that match a particular pattern.  Thus you can supply
-certain search directories for one class of filenames and other directories
-(or none) for other filenames.
+of file names, those that match a particular pattern.  Thus you can supply
+certain search directories for one class of file names and other directories
+(or none) for other file names.
 
 There are three forms of the @code{vpath} directive:
 
 @table @code
 @item vpath @var{pattern} @var{directories}
-Specify the search path @var{directories} for filenames that match
+Specify the search path @var{directories} for file names that match
 @code{pattern}.  If another path was previously specified for the same
 pattern, the new path is effectively appended to the old path.@refill
 
@@ -1510,7 +1495,7 @@ Clear all search paths previously specified with @code{vpath} directives.
 @end table
 
 A @code{vpath} pattern is a string containing a @samp{%} character.  The
-string must match the filename of a dependency that is being searched for,
+string must match the file name of a dependency that is being searched for,
 the @samp{%} character matching any sequence of zero or more characters (as
 in pattern rules; @pxref{Pattern Rules, ,Defining and Redefining Pattern Rules}).  For example, @code{%.h}
 matches files that end in @code{.h}.
@@ -1985,7 +1970,7 @@ $(objects): %.o: %.c
 Each target specified must match the target pattern; a warning is issued
 for each target that does not.  If you have a list of files, only some of
 which will match the pattern, you can use the @code{filter} function to
-remove nonmatching filenames (@pxref{Text Functions, ,Functions for String Substitution and Analysis}):
+remove nonmatching file names (@pxref{Text Functions, ,Functions for String Substitution and Analysis}):
 
 @example
 files = foo.elc bar.o lose.o
@@ -2139,7 +2124,7 @@ always interpreted by @file{/bin/sh} unless the makefile specifies
 otherwise.  @xref{Execution, ,Command Execution}.
 
 The shell that is in use determines whether comments can be written on
-command lines, and what syntax they use When the shell is
+command lines, and what syntax they use.  When the shell is
 @file{/bin/sh}, a @samp{#} starts a comment that extends to the end of
 the line.  The @samp{#} does not have to be at the beginning of a line.
 Text on a line before a @samp{#} is not part of the comment.
@@ -2197,13 +2182,13 @@ When it is time to execute commands to update a target, they are executed
 by making a new subshell for each line.  (In practice, @code{make} may
 take shortcuts that do not affect the results.)
 
-@c !!! this is important, should be emphasized
-This implies that shell commands such as @code{cd} that set variables local
-to each process will not affect the following command lines.  If you want
-to use @code{cd} to affect the next command, put the two on a single line
-with a semicolon between them.  Then @code{make} will consider them a
-single command and pass them, together, to a shell which will execute them
-in sequence.  For example:
+@strong{Please note:} this implies that shell commands such as
+@code{cd} that set variables local to each process will not affect the
+following command lines.  If you want to use @code{cd} to affect the
+next command, put the two on a single line with a semicolon between
+them.  Then @code{make} will consider them a single command and pass
+them, together, to a shell which will execute them in sequence.  For
+example:
 
 @example
 foo : bar/lose
@@ -2464,9 +2449,12 @@ so the sub-@code{make} gets them too.  Thus, if you do @samp{make
 CFLAGS=-O}, so that all C compilations will be optimized, the
 sub-@code{make} is run with @samp{cd subdir; /bin/make CFLAGS=-O}.@refill
 
-As a special feature, using the variable @code{MAKE} in the commands of a
-rule alters the effects of the @samp{-t}, @samp{-n} or @samp{-q} option.
-(@xref{Instead of Execution, ,Instead of Executing the Commands}.)@refill
+As a special feature, using the variable @code{MAKE} in the commands
+of a rule alters the effects of the @samp{-t}, @samp{-n} or @samp{-q}
+option.  Using the @code{MAKE} variable has the same effect as using a
+@samp{+} character at the beginning of the command line.
+@xref{Instead of Execution, ,Instead of Executing the
+Commands}.@refill
 
 Consider the command @samp{make -t} in the above example.  (The
 @samp{-t} option marks targets as up to date without actually running
@@ -2477,18 +2465,15 @@ really want it to do is run @samp{cd subdir; make -t}; but that would
 require executing the command, and @samp{-t} says not to execute
 commands.@refill
 
-@c !!! Check with Roland; re-written to say this is
-@c !!! is per-command line, not per-rule. --rjc
-@c !!! Roland: this needs an example rule. 
-The special feature makes this do what you want: whenever the line of a
-command contains
-the variable @code{MAKE}, the flags @samp{-t}, @samp{-n} and
-@samp{-q} do not apply to that rule.  The commands of that rule are
-executed normally despite the presence of a flag that causes most
-commands not to be run.  The usual @code{MAKEFLAGS} mechanism passes the
-flags to the sub-@code{make} (@pxref{Options/Recursion, ,Communicating
-Options to a Sub-@code{make}}), so your request to touch the files, or
-print the commands, is propagated to the subsystem.@refill
+The special feature makes this do what you want: whenever a command
+line of a rule contains the variable @code{MAKE}, the flags @samp{-t},
+@samp{-n} and @samp{-q} do not apply to that line.  Command lines
+containing @code{MAKE} are executed normally despite the presence of a
+flag that causes most commands not to be run.  The usual
+@code{MAKEFLAGS} mechanism passes the flags to the sub-@code{make}
+(@pxref{Options/Recursion, ,Communicating Options to a
+Sub-@code{make}}), so your request to touch the files, or print the
+commands, is propagated to the subsystem.@refill
 
 @node Variables/Recursion, Options/Recursion, MAKE Variable, Recursion
 @subsection Communicating Variables to a Sub-@code{make}
@@ -2503,6 +2488,11 @@ the sub-@code{make} as defaults, but do not override what is specified
 in the sub-@code{make}'s makefile unless the @samp{-e} switch is used
 (@pxref{Options Summary, ,Summary of Options}).@refill
 
+The way this works is that @code{make} adds each variable and its value
+to the environment for running each command.  The sub-@code{make}, in
+turn, uses the environment to initialize its table of variable values.
+@xref{Environment, ,Variables from the Environment}.
+
 By default, a variable is only passed down if its name consists only of
 letters, numbers and underscores.  Some shells cannot cope with
 environment variable names consisting of characters other than letters,
@@ -2512,15 +2502,6 @@ Variables are @emph{not} normally passed down if they were created by
 default by @code{make} (@pxref{Implicit Variables, ,Variables Used by
 Implicit Rules}).  The sub-@code{make} will define these for
 itself.@refill
-
-@c !!! The following is confusing.  `This' appears to refer to the
-@c !!! statement "Variables are @emph{not} normally passed down..." of the
-@c !!! preceding paragraph.  It sounds as if these two paragraphs
-@c !!! contradict each other.
-The way this works is that @code{make} adds each variable and its value
-to the environment for running each command.  The sub-@code{make}, in
-turn, uses the environment to initialize its table of variable values.
-@xref{Environment, ,Variables from the Environment}.
 
 @findex export
 If you want to send or @dfn{export} specific variables to a
@@ -2615,7 +2596,7 @@ another way if run directly by you.@refill
 @vindex MAKEFILES
 You can use the variable @code{MAKEFILES} to cause all sub-@code{make}
 commands to use additional makefiles.  The value of @code{MAKEFILES} is
-a whitespace-separated list of filenames.  This variable, if defined in
+a whitespace-separated list of file names.  This variable, if defined in
 the outer-level makefile, is passed down through the environment as
 usual; then it serves as a list of extra makefiles for the
 sub-@code{make} to read before the usual or specified ones.
@@ -2809,21 +2790,14 @@ target file actually does exist, its dependencies may not be remade.
 @cindex recursive variable expansion
 @cindex simple variable expansion
 
-@c !!! Check with Roland; is this OK now?  --rjc
-A @dfn{variable} is a name defined within @code{make} to represent a string
-of text, called the variable's @dfn{value}.  These values can be
+A @dfn{variable} is a name defined in a makefile to represent a string
+of text, called the variable's @dfn{value}.  These values are
 substituted by explicit request into targets, dependencies, commands
-and other parts of the makefile, where they are expanded
-when the makefile is read.
+and other parts of the makefile.
 
-More precisely, variables and functions in all parts of a makefile are
+Variables and functions in all parts of a makefile are
 expanded when read, except for the shell commands in rules and the
 right-hand sides of variable definitions using @samp{=}.
-
-Note that these expansions occur when the makefile is read.
-This means, for example, that these expansions occur
-@strong{before} expansion using @samp{%} replacement.
-(@xref{Pattern Rules, ,Defining and Redefining Pattern Rules}.)
 
 Variables can represent lists of file names, options to pass to compilers,
 programs to run, directories to look in for source files, directories to
@@ -2985,8 +2959,6 @@ x := later
 When a simply expanded variable is referenced, its value is substituted
 verbatim.
 
-@c !!! Check with Roland whether correct variables are in upper or lower case.
-@c     --rjc 9mar92 
 Here is a somewhat more complicated example, illustrating the use of
 @samp{:=} in conjunction with the @code{shell} function.
 (@xref{Shell Function, , The @code{shell} Function}.)  This example
@@ -3001,7 +2973,7 @@ ifeq (0,$@{MAKELEVEL@})
 cur-dir   := $(shell pwd)
 whoami    := $(shell whoami)
 host-type := $(shell arch)
-make := $@{MAKE@} host-type=$@{host-type@} whoami=$@{whoami@}
+MAKE := $@{MAKE@} host-type=$@{host-type@} whoami=$@{whoami@}
 endif
 @end group
 @end example
@@ -3012,11 +2984,10 @@ An advantage of this use of @samp{:=} is that a typical
 
 @example
 @group
-$@{SUBDIRS@}:
-      @{MAKE@} cur-dir=$@{cur-dir@}/$@@ -C $@@ all
+$@{subdirs@}:
+      $@{MAKE@} cur-dir=$@{cur-dir@}/$@@ -C $@@ all
 @end group
 @end example
-@c end insert 9mar92
 
 Simply expanded variables generally make complicated makefile programming
 more predictable because they work like variables in most programming
@@ -3614,12 +3585,11 @@ If the variable @var{variable-name} has a non-empty value, the
 if any, is effective.  Variables that have never been defined have an
 empty value.
 
-@c !!! Roland, is this correct?  8 Jun 92 --rjc
 Note that @code{ifdef} only tests whether a variable has a value.  It
 does not expand the variable to see if that value is nonempty.
-Consequently, tests using @code{ifdef} returns true for all definitions
-except those like @code{FOO =}. To test for an empty value, use
-@code{ifeq ($(FOO),)}.
+Consequently, tests using @code{ifdef} return true for all definitions
+except those like @code{foo =}. To test for an empty value, use
+@code{ifeq ($(foo),)}.
 
 @item ifndef @var{variable-name}
 If the variable @var{variable-name} has an empty value, the
@@ -3838,45 +3808,34 @@ $(findstring a,b c)
 produce the values @samp{a} and @samp{}, respectively.  @xref{Testing
 Flags}, for a practical application of @code{findstring}.@refill
 
-@item $(filter @var{pattern},@var{text})
+@item $(filter @var{pattern}@dots{},@var{text})
 @findex filter
 Removes all whitespace-separated words in @var{text} that do
-@emph{not} match @var{pattern}, returning only matching words.  The
-pattern is written using @samp{%}, just like the patterns used in
-@code{patsubst} function above.@refill
+@emph{not} match any of the @var{pattern} words, returning only
+matching words.  The patterns are written using @samp{%}, just like
+the patterns used in the @code{patsubst} function above.@refill
 
 The @code{filter} function can be used to separate out different types
-of strings (such as filenames) in a variable.  For example:
+of strings (such as file names) in a variable.  For example:
 
 @example
-sources := foo.c bar.c ugh.h
+sources := foo.c bar.c baz.s ugh.h
 foo: $(sources)
-        cc $(filter %.c,$(sources)) -o foo
+        cc $(filter %.c %.s,$(sources)) -o foo
 @end example
 
 @noindent
-says that @file{foo} depends of @file{foo.c}, @file{bar.c} and
-@file{ugh.h} but only @file{foo.c} and @file{bar.c} should be specified
-in the command to the compiler.@refill
+says that @file{foo} depends of @file{foo.c}, @file{bar.c},
+@file{baz.s} and @file{ugh.h} but only @file{foo.c}, @file{bar.c} and
+@file{baz.s} should be specified in the command to the
+compiler.@refill
 
-@c !!! Roland says the following needs improvement --rjc 9mar92
-Also, the function iterates over all whitespace separated tokens in
-@var{pattern}.  This means that @var{pattern} could be
-@code{$(sources)} where @code{sources} is defined by
-@code{sources=main1.c foo.c bar.c}.
-@var{text} can be expanded similarly.
-
-@item $(filter-out @var{pattern},@var{text})
+@item $(filter-out @var{pattern}@dots{},@var{text})
 @findex filter-out
 Removes all whitespace-separated words in @var{text} that @emph{do}
-match @var{pattern}, returning only the words that @emph{do not} match.
-This is the exact opposite of the @code{filter} function.@refill
-
-@c !!! Roland says the following needs improvement --rjc 9mar92
-Also, since @code{filter-out} iterates over all whitespace separated
-tokens in @var{pattern}, you can use a variable such as
-@code{$(sources)}, defined by @code{sources=main1.c foo.c bar.c}, to
-list all the words to remove from @var{text}.
+match the @var{pattern} words, returning only the words that @emph{do
+not} match.  This is the exact opposite of the @code{filter}
+function.@refill
 
 For example, given:
 
@@ -3934,9 +3893,8 @@ each directory name into a @samp{-I} flag.  These can be added to the
 value of the variable @code{CFLAGS}, which is passed automatically to the C
 compiler, like this:
 
-@c !!! used smallexample here
 @smallexample
-override CFLAGS:= $(CFLAGS) $(patsubst %,-I%,$(subst :, ,$(VPATH)))
+override CFLAGS := $(CFLAGS) $(patsubst %,-I%,$(subst :, ,$(VPATH)))
 @end smallexample
 
 @noindent
@@ -3978,11 +3936,6 @@ file name.  The argument of the function is regarded as a series of file
 names, separated by whitespace.  (Leading and trailing whitespace is
 ignored.)  Each file name in the series is transformed in the same way and
 the results are concatenated with single spaces between them.
-
-@c !!! Check with Roland --rjc 9mar92 
-Note that these expansions occur when a makefile is read,
-@strong{before} expansion using @samp{%} replacement.
-@xref{Pattern Rules, ,Defining and Redefining Pattern Rules}.
 
 @table @code
 @item $(dir @var{names})
@@ -4222,7 +4175,6 @@ You must take care when using complex variable expressions that result in
 variable names because many strange things are valid variable names, but
 are probably not what you intended.  For example,
 
-@c !!! used smallexample here
 @smallexample
 files := $(foreach Esta escrito en espanol!,b c ch,$(find_files))
 @end smallexample
@@ -4973,6 +4925,23 @@ only as a dependency is considered a target whose rule specifies nothing,
 so implicit rule search happens for it.  @xref{Search Algorithm, ,Implicit Rule Search Algorithm}, for the
 details of how the search is done.
 
+Note that explicit dependencies do not influence implicit rule search.
+For example, consider this explicit rule:
+
+@example
+foo.o: foo.p
+@end example
+
+@noindent
+The dependency on @file{foo.p} does not necessarily mean that
+@code{make} will remake @file{foo.o} according to the implicit rule to
+make an object file, a @file{.o} file, from a Pascal source file, a
+@file{.p} file.  For example, if @file{foo.c} also exists, the implicit
+rule to make an object file from a C source file is used instead,
+because it appears before the Pascal rule in the list predefined
+implicit rules (@pxref{Catalogue of Rules, , Catalogue of Implicit
+Rules}).  
+
 If you do not want an implicit rule to be used for a target that has no
 commands, you can give that target empty commands by writing a semicolon.
 @xref{Empty Commands, ,Defining Empty Commands}.
@@ -5436,11 +5405,11 @@ pattern for matching file names; the @samp{%} can match any nonempty
 substring, while other characters match only themselves.  The dependencies
 likewise use @samp{%} to show how their names relate to the target name.
 
-@c !!! Check with Roland --rjc 9mar92
-Note that expansion using @samp{%} occurs @strong{after} any variable or
-function expansions, which take place when the makefile is read.
-@xref{Filename Functions, , Functions for File Names}, and also see
-@ref{Using Variables, , How to Use Variables}.
+Note that expansion using @samp{%} in pattern rules occurs
+@strong{after} any variable or function expansions, which take place
+when the makefile is read.  @xref{Using Variables, , How to Use
+Variables}, and also see @ref{Functions, ,Functions for Transforming
+Text}.
 
 Thus, a pattern rule @samp{%.o : %.c} says how to make any file
 @file{@var{stem}.o} from another file @file{@var{stem}.c}.@refill
@@ -5729,7 +5698,7 @@ pattern @samp{c%r} gives the file name @file{src/car}.@refill
 
 @cindex match-anything rule
 @cindex terminal rule
-When a pattern rule's target is just @samp{%}, it matches any filename
+When a pattern rule's target is just @samp{%}, it matches any file name
 whatever.  We call these rules @dfn{match-anything} rules.  They are very
 useful, but it can take a lot of time for @code{make} to think about them,
 because it must consider every such rule for each file name listed either
