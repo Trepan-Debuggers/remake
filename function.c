@@ -1,5 +1,5 @@
 /* Variable function expansion for GNU Make.
-Copyright (C) 1988, 1989, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 91, 92, 93, 94, 95 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -24,6 +24,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #ifdef __MSDOS__
 #include <process.h>
+#include <fcntl.h>
 #endif
 
 static char *string_glob ();
