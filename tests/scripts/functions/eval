@@ -57,4 +57,35 @@ $answer = "A = A B = B\n";
 
 &compare_output($answer,&get_logfile(1));
 
+# Test to make sure eval'ing inside conditionals works properly
+
+$makefile3 = &get_tmpfile;
+
+open(MAKEFILE,"> $makefile3");
+
+print MAKEFILE <<'EOF';
+FOO = foo
+
+all:: ; @echo it
+
+define Y
+  all:: ; @echo worked
+endef
+
+ifdef BAR
+$(eval $(Y))
+endif
+
+EOF
+
+close(MAKEFILE);
+
+&run_make_with_options($makefile3, "", &get_logfile);
+$answer = "it\n";
+&compare_output($answer,&get_logfile(1));
+
+&run_make_with_options($makefile3, "BAR=1", &get_logfile);
+$answer = "it\nworked\n";
+&compare_output($answer,&get_logfile(1));
+
 1;

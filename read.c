@@ -272,6 +272,34 @@ read_all_makefiles (char **makefiles)
   return read_makefiles;
 }
 
+/* Install a new conditional and return the previous one.  */
+
+static struct conditionals *
+install_conditionals (struct conditionals *new)
+{
+  struct conditionals *save = conditionals;
+
+  bzero ((char *) new, sizeof (*new));
+  conditionals = new;
+
+  return save;
+}
+
+/* Free the current conditionals and reinstate a saved one.  */
+
+static void
+restore_conditionals (struct conditionals *saved)
+{
+  /* Free any space allocated by conditional_line.  */
+  if (conditionals->ignoring)
+    free (conditionals->ignoring);
+  if (conditionals->seen_else)
+    free (conditionals->seen_else);
+
+  /* Restore state.  */
+  conditionals = saved;
+}
+
 static int
 eval_makefile (char *filename, int flags)
 {
@@ -388,6 +416,8 @@ int
 eval_buffer (char *buffer)
 {
   struct ebuffer ebuf;
+  struct conditionals *saved;
+  struct conditionals new;
   const struct floc *curfile;
   int r;
 
@@ -402,7 +432,11 @@ eval_buffer (char *buffer)
   curfile = reading_file;
   reading_file = &ebuf.floc;
 
+  saved = install_conditionals (&new);
+
   r = eval (&ebuf, 1);
+
+  restore_conditionals (saved);
 
   reading_file = curfile;
 
@@ -412,13 +446,8 @@ eval_buffer (char *buffer)
 
 /* Read file FILENAME as a makefile and add its contents to the data base.
 
-   SET_DEFAULT is true if we are allowed to set the default goal.
+   SET_DEFAULT is true if we are allowed to set the default goal.  */
 
-   FILENAME is added to the `read_makefiles' chain.
-
-   Returns 0 if a file was not found or not read.
-   Returns 1 if FILENAME was found and read.
-   Returns 2 if FILENAME was read, and we kept a reference (don't free it).  */
 
 static int
 eval (struct ebuffer *ebuf, int set_default)
@@ -782,9 +811,7 @@ eval (struct ebuffer *ebuf, int set_default)
 
 	  /* Save the state of conditionals and start
 	     the included makefile with a clean slate.  */
-	  save = conditionals;
-	  bzero ((char *) &new_conditionals, sizeof new_conditionals);
-	  conditionals = &new_conditionals;
+	  save = install_conditionals (&new_conditionals);
 
 	  /* Record the rules that are waiting so they will determine
 	     the default goal before those in the included makefile.  */
@@ -810,14 +837,8 @@ eval (struct ebuffer *ebuf, int set_default)
                 }
 	    }
 
-	  /* Free any space allocated by conditional_line.  */
-	  if (conditionals->ignoring)
-	    free (conditionals->ignoring);
-	  if (conditionals->seen_else)
-	    free (conditionals->seen_else);
-
-	  /* Restore state.  */
-	  conditionals = save;
+	  /* Restore conditional state.  */
+	  restore_conditionals (save);
 
           goto rule_complete;
 	}
