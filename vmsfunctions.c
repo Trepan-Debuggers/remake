@@ -195,6 +195,7 @@ vms_stat (name, buf)
 
   status = sys$qiow(0,DevChan,IO$_ACCESS,&iosb,0,0,
                         &FibDesc,&FileName,0,0,&Atr,0);
+  sys$dassgn (DevChan);
   if (!(status & 1))
     return -1;
   status = iosb[0];
