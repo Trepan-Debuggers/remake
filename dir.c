@@ -490,3 +490,67 @@ print_dir_data_base ()
     printf ("%u", impossible);
   printf (" impossibilities in %u directories.\n", dirs);
 }
+
+/* Hooks for globbing.  */
+
+#include <glob.h>
+
+/* Structure describing state of iterating through a directory hash table.  */
+
+struct dirstream
+  {
+    struct directory_contents *contents; /* The directory being read.  */
+
+    unsigned int bucket;	/* Current hash bucket.  */
+    struct dirfile *elt;	/* Current elt in bucket.  */
+  };
+
+static __ptr_t
+open_dirstream (directory)
+     const char *directory;
+{
+  struct dirstream *new;
+  struct directory *dir = find_directory (directory);
+
+  if (dir->contents == 0)
+    return 0;
+
+  /* Read all the contents of the directory now.  There is no benefit
+     in being lazy, since glob will want to see every file anyway.  */
+
+  (void) dir_contents_file_exists_p (dir->contents, (char *) 0);
+
+  new = (struct dirstream *) xmalloc (sizeof (struct dirstream));
+  new->contents = dir->contents;
+  new->bucket = 0;
+  new->elt = new->contents->files[0];
+
+  return new;
+}
+
+static const char *
+read_dirstream (stream)
+     __ptr_t stream;
+{
+  struct dirstream *const ds = (struct dirstream *) stream;
+  register struct dirfile *df;
+
+  while (ds->bucket < DIRFILE_BUCKETS)
+    {
+      while ((df = ds->elt) != 0)
+	{
+	  ds->elt = df->next;
+	  if (!df->impossible)
+	    return df->name;
+	}
+      ds->elt = ds->contents->files[++ds->bucket];
+    }
+}
+
+void
+init_dir ()
+{
+  __glob_opendir_hook = open_dirstream;
+  __glob_readdir_hook = read_dirstream;
+  __glob_closedir_hook = free;
+}
