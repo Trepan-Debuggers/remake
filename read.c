@@ -287,7 +287,7 @@ read_makefile (filename, flags)
   unsigned int commands_len = 200;
   char *commands;
   unsigned int commands_idx = 0;
-  unsigned int cmds_started;
+  unsigned int cmds_started, tgts_started;
   char *p;
   char *p2;
   int len, reading_target;
@@ -313,9 +313,13 @@ read_makefile (filename, flags)
     { 									      \
       if (filenames != 0)						      \
         {                                                                     \
+	  int lineno = fileinfo.lineno;                                       \
+	  struct floc fi;                                                     \
+	  fi.filenm = fileinfo.filenm;                                        \
+	  fi.lineno = tgts_started;                                           \
 	  record_files (filenames, pattern, pattern_percent, deps,            \
                         cmds_started, commands, commands_idx, two_colon,      \
-                        &fileinfo, !(flags & RM_NO_DEFAULT_GOAL)); 	      \
+                        &fi, !(flags & RM_NO_DEFAULT_GOAL));                  \
           using_filename |= commands_idx > 0;                                 \
         }                                                                     \
       filenames = 0;							      \
@@ -327,7 +331,7 @@ read_makefile (filename, flags)
   fileinfo.lineno = 1;
 
   pattern_percent = 0;
-  cmds_started = fileinfo.lineno;
+/*  cmds_started = fileinfo.lineno; */
 
   if (ISDB (DB_VERBOSE))
     {
@@ -755,6 +759,7 @@ read_makefile (filename, flags)
 	  /* Record the previous rule.  */
 
 	  record_waiting_files ();
+          tgts_started = fileinfo.lineno;
 
 	  /* Search the line for an unquoted ; that is not after an
              unquoted #.  */
@@ -1540,7 +1545,7 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
       char *implicit_percent;
 
       nextf = filenames->next;
-      free ((char *) filenames);
+      free (filenames);
 
       implicit_percent = find_percent (name);
       implicit |= implicit_percent != 0;
@@ -1608,6 +1613,12 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
 		    continue;
 		  o = patsubst_expand (buffer, name, pattern, d->name,
 				       pattern_percent, percent);
+                  /* If the name expanded to the empty string, that's
+                     illegal.  */
+                  if (o == buffer)
+                    fatal (flocp,
+                           _("target `%s' leaves prerequisite pattern empty"),
+                           name);
 		  free (d->name);
 		  d->name = savestring (buffer, o - buffer);
 		}
@@ -1627,7 +1638,8 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
 	  /* If CMDS == F->CMDS, this target was listed in this rule
 	     more than once.  Just give a warning since this is harmless.  */
 	  if (cmds != 0 && cmds == f->cmds)
-	    error (flocp, _("target `%s' given more than once in the same rule."),
+	    error (flocp,
+                   _("target `%s' given more than once in the same rule."),
                    f->name);
 
 	  /* Check for two single-colon entries both with commands.
@@ -1636,7 +1648,8 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
 	  else if (cmds != 0 && f->cmds != 0 && f->is_target)
 	    {
 	      error (&cmds->fileinfo,
-                     _("warning: overriding commands for target `%s'"), f->name);
+                     _("warning: overriding commands for target `%s'"),
+                     f->name);
 	      error (&f->cmds->fileinfo,
                      _("warning: ignoring old commands for target `%s'"),
                      f->name);
