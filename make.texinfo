@@ -74,7 +74,7 @@ Copyright @copyright{} 1988, 1989, 1990, 1991, 1992 Free Software Foundation, In
 Published by the Free Software Foundation @*
 675 Massachusetts Avenue, @*
 Cambridge, MA 02139 USA @*
-Printed copies are available for $15 each.
+Printed copies are available for $20 each.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
