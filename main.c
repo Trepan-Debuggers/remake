@@ -396,6 +396,8 @@ main (argc, argv, envp)
   PATH_VAR (current_directory);
   char *directory_before_chdir;
 
+mcheck(0);
+
   default_goal_file = 0;
   reading_filename = 0;
   reading_lineno_ptr = 0;
