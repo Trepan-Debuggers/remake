@@ -558,8 +558,8 @@ try_variable_definition (filename, lineno, line, origin)
   register char *p = line;
   register char *beg;
   register char *end;
-  register int recursive;
-  char *name, *expanded_name;
+  enum { bogus, simple, recursive, append } flavor = bogus;
+  char *name, *expanded_name, *value;
   struct variable *v;
 
   while (1)
@@ -569,32 +569,38 @@ try_variable_definition (filename, lineno, line, origin)
 	return 0;
       if (c == '=')
 	{
-	  recursive = 1;
+	  end = p - 1;
+	  flavor = recursive;
 	  break;
 	}
       else if (c == ':')
 	if (*p == '=')
 	  {
-	    ++p;
-	    recursive = 0;
+	    end = p++ - 1;
+	    flavor = simple;
 	    break;
 	  }
 	else
+	  /* A colon other than := is a rule line, not a variable defn.  */
 	  return 0;
+      else if (c == '+' && *p == '=')
+	{
+	  end = p++ - 1;
+	  flavor = append;
+	  break;
+	}
     }
 
-  beg = next_token (line);
-  end = p - 1;
-  if (!recursive)
-    --end;
   while (isblank (end[-1]))
     --end;
+  beg = next_token (line);
   p = next_token (p);
 
   /* Expand the name, so "$(foo)bar = baz" works.  */
-  name = savestring (beg, end - beg);
+  name = (char *) alloca (end - beg + 1);
+  bcopy (beg, name, end - beg);
+  name[end - beg] = '\0';
   expanded_name = allocated_variable_expand (name);
-  free (name);
 
   if (expanded_name[0] == '\0')
     {
@@ -604,9 +610,61 @@ try_variable_definition (filename, lineno, line, origin)
 	makefile_fatal (filename, lineno, "empty variable name");
     }
 
+  /* Calculate the variable's new value in VALUE.  */
+
+  switch (flavor)
+    {
+    case bogus:
+      /* Should not be possible.  */
+      abort ();
+      break;
+    case simple:
+      /* A simple variable definition "var := value".  Expand the value.  */
+      value = variable_expand (p);
+      break;
+    case recursive:
+      /* A recursive variable definition "var = value".
+	 The value is used verbatim.  */
+      value = p;
+      break;
+    case append:
+      /* An appending variable definition "var += value".
+	 Extract the old value and append the new one.  */
+      v = lookup_variable (expanded_name, strlen (expanded_name));
+      if (v == 0)
+	{
+	  /* There was no old value.
+	     This becomes a normal recursive definition.  */
+	  value = p;
+	  flavor = recursive;
+	}
+      else
+	{
+	  /* Paste the old and new values together in VALUE.  */
+
+	  unsigned int oldlen, newlen;
+
+	  if (v->recursive)
+	    /* The previous definition of the variable was recursive.
+	       The new value comes from the unexpanded old and new values.  */
+	    flavor = recursive;
+	  else
+	    /* The previous definition of the variable was simple.
+	       The new value comes from the old value, which was expanded
+	       when it was set; and from the expanded new value.  */
+	    p = variable_expand (p);
+
+	  oldlen = strlen (v->value);
+	  newlen = strlen (p);
+	  value = (char *) alloca (oldlen + 1 + newlen + 1);
+	  bcopy (v->value, value, oldlen);
+	  value[oldlen] = ' ';
+	  bcopy (p, &value[oldlen + 1], newlen + 1);
+	}
+    }
+
   v = define_variable (expanded_name, strlen (expanded_name),
-		       recursive ? p : variable_expand (p),
-		       origin, recursive);
+		       value, origin, flavor == recursive);
 
   free (expanded_name);
 
