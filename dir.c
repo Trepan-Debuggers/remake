@@ -18,33 +18,26 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "make.h"
 
-#if defined (USGr3) && !defined (DIRENT)
-#define DIRENT
-#endif /* USGr3 */
-#if defined (Xenix) && !defined (SYSNDIR)
-#define SYSNDIR
-#endif /* Xenix */
-
-#if defined (POSIX) || defined (DIRENT) || defined (__GNU_LIBRARY__)
+#if	defined (POSIX) || defined (DIRENT) || defined (__GNU_LIBRARY__)
 #include <dirent.h>
 #ifndef	__GNU_LIBRARY__
 #define D_NAMLEN(d) strlen((d)->d_name)
-#else
+#else	/* GNU C library.  */
 #define D_NAMLEN(d) ((d)->d_namlen)
-#endif
-#else /* not POSIX or DIRENT */
+#endif	/* Not GNU C library.  */
+#else	/* Not POSIX or DIRENT.  */
 #define direct dirent
 #define D_NAMLEN(d) ((d)->d_namlen)
-#if defined (USG) && !defined (sgi)
-#if defined (SYSNDIR)
+#ifdef	SYSNDIR
 #include <sys/ndir.h>
-#else /* SYSNDIR */
-#include "ndir.h"
-#endif /* not SYSNDIR */
-#else /* not USG */
+#endif	/* SYSNDIR */
+#ifdef	SYSDIR
 #include <sys/dir.h>
-#endif /* USG */
-#endif /* POSIX or DIRENT or __GNU_LIBRARY__ */
+#endif	/* SYSDIR */
+#ifdef NDIR
+#include <ndir.h>
+#endif	/* NDIR */
+#endif	/* POSIX or DIRENT or __GNU_LIBRARY__.  */
 
 #if defined (POSIX) && !defined (__GNU_LIBRARY__)
 /* Posix does not require that the d_ino field be present, and some
