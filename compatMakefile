@@ -81,7 +81,7 @@ instname = make
 # Directory to install `make' in.
 bindir = $(exec_prefix)/bin
 # Directory to install the man page in.
-mandir = $(prefix)/man/manl
+mandir = $(prefix)/man/man$(manext)
 # Number to put on the man page filename.
 manext = l
 
