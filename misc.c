@@ -596,3 +596,22 @@ child_access ()
   if (setgid (user_gid) < 0)
     pfatal_with_name ("setgid");
 }
+
+#ifdef NEED_GET_PATH_MAX
+unsigned int
+get_path_max ()
+{
+  static unsigned int value;
+
+  if (value == 0)
+    {
+      long int x = pathconf ("/", _PC_PATH_MAX);
+      if (x > 0)
+	value = x;
+      else
+	return MAXPATHLEN;
+    }
+
+  return value;
+}
+#endif
