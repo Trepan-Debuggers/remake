@@ -30,7 +30,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#ifdef USG
+#if	defined (USG) || defined (POSIX)
 #include <fcntl.h>
 #else
 #include <sys/file.h>
