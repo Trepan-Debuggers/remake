@@ -347,6 +347,9 @@ reap_children (block, err)
 		  if (c->file->update_status != 0)
 		    /* We failed to start the commands.  */
 		    delete_child_targets (c);
+
+		  /* Tell update_file that some actual work has been done.  */
+		  ++files_remade;
 		  break;
 
 		default:
