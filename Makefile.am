@@ -80,7 +80,7 @@ check-local: check-loadavg check-regression
 #
 loadavg: loadavg.c config.h
 	@rm -f loadavg
-	$(LINK) -I. -I$(srcdir) -DHAVE_CONFIG_H -DTEST $(make_LDFLAGS) loadavg.c $(LIBS)
+	$(LINK) $(DEFS) $(CPPFLAGS) -DTEST $(make_LDFLAGS) loadavg.c $(LIBS)
 
 # We copy getloadavg.c into a different file rather than compiling it
 # directly because some compilers clobber getloadavg.o in the process.

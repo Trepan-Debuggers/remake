@@ -14,38 +14,107 @@ However, if you see something here you really, really want, speak up.
 All other things being equal, I will tend to implement things that seem
 to maximize user satisfaction.
 
-Also, this list doesn't include things which I'm pretty sure would
-require serious, fundamental change to GNU make; those things belong on
-the mythical "Make 4.0" list.  I admit, that line can be somewhat fuzzy :)
+If you want to implement some of them yourself, barring the ones I've
+marked below, have at it!  Please contact me first to let me know you're
+working on it, and give me some info about the design--and, critically,
+information about any user-visible syntax change, etc.
 
 
-  * Per-target variable definitions (a la SunOS make's ":=" feature, but
-    note the syntax here will definitely be different!)
+The Top Item
+------------
 
-  * Multi-token pattern rule matching (allow %1/%2.c : %1/obj/%2.o, etc.)
+If you know perl (or want to learn DejaGNU or similar), the number one
+priority on my list of things I don't have time to do right now is
+fixing up the GNU make test suite.  Most importantly it needs to be made
+"parallelizable", so more than one regression can run at the same time
+(essentially, make the "work" directory local).  Also, the CWD during
+the test should be in the work directory; right now sometimes tests leak
+files into the main directory which causes subsequent tests to fail
+(some tests may need to be tweaked).  Beyond that, any cleanup done to
+make writing, reading, or handling tests simpler would be great!  Please
+feel free to make whatever changes you like to the current tests, given
+some high-level goals, and that you'll port the current tests to
+whatever you do :).
 
-  * More robust clock skew detection algorithm.
+If someone does this work I'll be able to start including the test suite
+with make itself, which would be very cool.
 
-  * Provide MAKETARGETS and MAKEVARIABLES variables, containing the
+
+The Rest of the List
+--------------------
+
+ 1) Allow variables/functions to expand to other make rules which are
+    then interpreted, with newlines handled correctly.  This is a
+    biggee, and is on my plate.  I already have partially-working code.
+
+ 2) Option to check more than timestamps to determine if targets have
+    changed.  This is also a very big one.  It's _close_ to my plate :),
+    and I have very definite ideas about how I want it done.  Please
+    pick something else unless you must have this feature.  If you try
+    it, please work _extremely_ closely with me on it.
+
+ 2a) Possibly a special case of this is the .KEEP_STATE feature of Sun's
+     make.  Some great folks at W U. in Canada did an implementation of
+     this for a class project.  Their approach is reasonable and
+     workable, but doesn't really fit into my ideas for #2.  Maybe
+     that's OK.  I have paperwork for their work so if you want to do
+     this one talk to me to get what they've already done.
+
+ 3) Currently you can use "%.foo %.bar : %.baz" to mean that one
+    invocation of the rule builds both targets.  GNU make needs a way to
+    do that for explicit rules, too.  I heard a rumor that some versions
+    of make all you to say "a.foo + a.bar : a.baz" to do this (i.e., a
+    "+" means one invocation builds both).  Don't know if this is the
+    best syntax or not... what if you say "a.foo + a.bar a.bam : a.baz";
+    what does that mean?
+
+ 4) Multi-token pattern rule matching (allow %1/%2.c : %1/obj/%2.o,
+    etc., or something like that).  I have an implementation of this
+    already, it just needs some refinement... maybe.  Additionally I
+    think it only works for static pattern rules; it might need to be
+    fixed up to work with normal pattern rules, too.
+
+ 5) More robust clock skew detection algorithm: less false hits.  I have
+    some notes on this from various discussions.
+
+ 6) Provide MAKETARGETS and MAKEVARIABLES variables, containing the
     names of the targets and variables defined in the makefile.
 
-  * If the user asks for parallelization, rebuild any "include"'d files
-    in parallel as well (helps esp. when there are many .d files to be
-    built).
+    Actually, I now think a $(targets ...) function, at least, would be
+    better than a MAKETARGETS variable.  The argument would be types of
+    targets to list: "phony" is the most useful one.  I suppose
+    "default" might also be useful.  Maybe some others; check the
+    bitfields to see what might be handy.  This one is pretty easy.
 
-  * Allow variables/functions to expand to other make rules which are
-    then interpreted, with newlines handled correctly.
-
-  * More intelligent submake handling when doing parallel makes:
-    currently each submake gets a "-j 1" option.  It would be good if
-    make was smart enough to give some/all its slots to the submake
-    (esp. if there is no other rule that can be run by the parent in
-    parallel, a common situation).  Doing this perfectly might be too
-    hard, but something less than perfect is certainly possible.
-
-  * Option to check more than timestamps to determine if targets have
-    changed (MD5 checksumming?)
-
-  * Some sort of operating-system independent way of handling paths
+ 7) Some sort of operating-system independent way of handling paths
     would be outstanding, so makefiles can be written for UNIX, VMS,
     DOS, MS-Windows, Amiga, etc. with a minimum of specialization.
+
+    Or, perhaps related/instead of, some sort of meta-quoting syntax so
+    make can deal with filenames containing spaces, colons, etc.  I
+    dunno, maybe something like $[...]?  This may well not be worth
+    doing until #1 is done.
+
+ 9) Right now the .PRECIOUS, .INTERMEDIATE, and .SECONDARY
+    psuedo-targets have different capabilities.  For example, .PRECIOUS
+    can take a "%", the others can't.  Etc.  These should all work the
+    same, insofar as that makes sense.
+
+10) A syntax that specifies a build order _without_ implying a
+    dependency relationship.  That is, a way to say "A must be built
+    before B" that doesn't force B to be built when A changes.  This is
+    very important for parallel builds: sometimes you need some stuff
+    done first but you don't want to rebuild everything because of it.
+
+11) Improved debugging/logging/etc. capabilities.  This area is in
+    desparate need of work; the current -d, -s, etc. options are simply
+    insufficient.  We need different levels of output: some that are
+    much less verbose.  E.g., maybe just print one line about why make
+    decides to rebuild each target.  Also, we could use something like
+    the -E option for preprocessors; this would print out makefiles
+    after resolving all includes, immediate variable reverences, etc.
+    Also, a way to turn on and off obeying the "@" token for scripts
+    that's independent of -n (so we could have them in effect for -n,
+    and have them not in effect without -n).
+
+    Maybe other things.  Contact me about the user interface.

@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.183 1999/09/11 05:10:30 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.184 1999/09/14 00:18:00 psmith Exp $
 @set EDITION 0.53
 @set VERSION 3.78
 @set UPDATED 14 April 1999
@@ -5568,10 +5568,10 @@ respectively.  @xref{Testing Flags}, for a practical application of
 @cindex filtering words
 @cindex words, filtering
 @item $(filter @var{pattern}@dots{},@var{text})
-Removes all whitespace-separated words in @var{text} that do
-@emph{not} match any of the @var{pattern} words, returning only
-matching words.  The patterns are written using @samp{%}, just like
-the patterns used in the @code{patsubst} function above.@refill
+Returns all whitespace-separated words in @var{text} that @emph{do} match
+any of the @var{pattern} words, removing any words that @emph{do not}
+match.  The patterns are written using @samp{%}, just like the patterns
+used in the @code{patsubst} function above.@refill
 
 The @code{filter} function can be used to separate out different types
 of strings (such as file names) in a variable.  For example:
@@ -5592,6 +5592,11 @@ compiler.@refill
 @findex filter-out
 @cindex filtering out words
 @cindex words, filtering out
+Returns all whitespace-separated words in @var{text} that @emph{do not}
+match any of the @var{pattern} words, removing the words that @emph{do}
+match one or more.  This is the exact opposite of the @code{filter}
+function.@refill
+
 Removes all whitespace-separated words in @var{text} that @emph{do}
 match the @var{pattern} words, returning only the words that @emph{do
 not} match.  This is the exact opposite of the @code{filter}
