@@ -81,8 +81,8 @@ else
   AC_DEFINE(SCCS_GET, "get")
 fi
 ac_clean_files="$ac_clean_files s.conftest conftoast" # Remove these later.
-if ( /usr/sccs/admin -n s.conftest >/dev/null 2>&1 ||
-     admin -n s.conftest >/dev/null 2>&1 ) && test -f s.conftest; then
+if ( /usr/sccs/admin -n s.conftest || admin -n s.conftest ) >/dev/null 2>&1 &&
+   test -f s.conftest; then
   # We successfully created an SCCS file.
   echo checking if SCCS get command understands -G
   if $SCCS_GET s.conftest -Gconftoast >/dev/null 2>&1 &&
