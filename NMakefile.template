@@ -34,7 +34,8 @@ CFLAGS_debug = $(CFLAGS_any) /Od /D _DEBUG /FR.\WinDebug/ /Fp.\WinDebug/make.pch
 CFLAGS_release = $(CFLAGS_any) /O2 /D NDEBUG /FR.\WinRel/ /Fp.\WinRel/make.pch /Fo.\WinRel/ 
 
 LDFLAGS_debug = w32\subproc\WinDebug\subproc.lib /NOLOGO /SUBSYSTEM:console\
-	/INCREMENTAL:no /PDB:WinRel/make.pdb /MACHINE:I386 /OUT:WinDebug/make.exe /DEBUG
+	/INCREMENTAL:no /PDB:WinDebug/make.pdb /MACHINE:I386 \
+	/OUT:WinDebug/make.exe /DEBUG
 LDFLAGS_release = w32\subproc\WinRel\subproc.lib /NOLOGO /SUBSYSTEM:console\
 	/INCREMENTAL:no /MACHINE:I386 /OUT:WinRel/make.exe
 
