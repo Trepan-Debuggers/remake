@@ -15,7 +15,7 @@ make_LDADD =	@LIBOBJS@ @ALLOCA@ glob/libglob.a
 info_TEXINFOS =	make.texinfo
 man_MANS =	make.1
 
-INCLUDES =	-I$(srcdir)/glob -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\"
+INCLUDES =	-DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\"
 
 BUILT_SOURCES =	README build.sh.in
 
@@ -130,5 +130,7 @@ check-regression: all
 if MAINT_MAKEFILE
 # Note this requires GNU make.  Not to worry, since it will only be included
 # in the Makefile if we're in the maintainer's environment.
-include $(srcdir)/maintMakefile
+# Ulp!  Need a leading space to "hide" this include from automake's new (in
+# 1.4) include feature :(
+ include $(srcdir)/maintMakefile
 endif

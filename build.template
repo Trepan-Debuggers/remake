@@ -51,7 +51,7 @@ objs="%objs% remote-${REMOTE}.o ${extras} ${ALLOCA}"
 for file in `echo ${objs} | sed 's/\.o/.c/g'`; do
   echo compiling ${file}...
   $CC $defines $CPPFLAGS $CFLAGS \
-      -c -I. -I${srcdir} -I${srcdir}/glob ${srcdir}/$file
+      -c -I. -I${srcdir} ${srcdir}/$file
 done
 
 # The object files were actually all put in the current directory.

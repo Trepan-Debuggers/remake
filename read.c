@@ -1597,16 +1597,13 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
 
 	  if (f->double_colon)
 	    fatal (flocp,
-			    "target file `%s' has both : and :: entries",
-			    f->name);
+                   "target file `%s' has both : and :: entries", f->name);
 
 	  /* If CMDS == F->CMDS, this target was listed in this rule
 	     more than once.  Just give a warning since this is harmless.  */
 	  if (cmds != 0 && cmds == f->cmds)
-	    error
-	      (flocp,
-	       "target `%s' given more than once in the same rule.",
-	       f->name);
+	    error (flocp, "target `%s' given more than once in the same rule.",
+                   f->name);
 
 	  /* Check for two single-colon entries both with commands.
 	     Check is_target so that we don't lose on files such as .c.o
@@ -1614,11 +1611,10 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
 	  else if (cmds != 0 && f->cmds != 0 && f->is_target)
 	    {
 	      error (&cmds->fileinfo,
-			      "warning: overriding commands for target `%s'",
-			      f->name);
+                     "warning: overriding commands for target `%s'", f->name);
 	      error (&f->cmds->fileinfo,
-			      "warning: ignoring old commands for target `%s'",
-			      f->name);
+                     "warning: ignoring old commands for target `%s'",
+                     f->name);
 	    }
 
 	  f->is_target = 1;
@@ -1699,8 +1695,7 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
 	     we don't lose on default suffix rules or makefiles.  */
 	  if (f != 0 && f->is_target && !f->double_colon)
 	    fatal (flocp,
-			    "target file `%s' has both : and :: entries",
-			    f->name);
+                   "target file `%s' has both : and :: entries", f->name);
 	  f = enter_file (name);
 	  /* If there was an existing entry and it was a double-colon
 	     entry, enter_file will have returned a new one, making it the

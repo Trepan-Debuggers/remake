@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.61 1998/10/03 05:40:09 psmith Exp $])
-AC_PREREQ(2.12)dnl		dnl Minimum Autoconf version required.
+AC_REVISION([$Id: configure.in,v 1.62 1999/02/19 18:07:51 psmith Exp $])
+AC_PREREQ(2.13)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 
 AM_INIT_AUTOMAKE(make, 3.77.90)
@@ -16,7 +16,6 @@ AC_PROG_INSTALL
 AC_CHECK_PROG(AR, ar, ar, ar)
 AC_PROG_RANLIB
 AC_PROG_CPP			dnl Later checks need this.
-dnl AC_ARG_PROGRAM -- implied by AM_INIT_AUTOMAKE; gives errors if run twice.
 AC_AIX
 AC_ISC_POSIX
 AC_MINIX
@@ -127,25 +126,50 @@ AC_ARG_WITH(customs,
      ;;
 esac])
 
-echo checking for location of SCCS get command
+AC_CACHE_CHECK(for location of SCCS get command, make_cv_path_sccs_get, [
 if test -f /usr/sccs/get; then
-  SCCS_GET=/usr/sccs/get
-  AC_DEFINE(SCCS_GET, "/usr/sccs/get")
+  make_cv_path_sccs_get=/usr/sccs/get
 else
-  SCCS_GET=get
-  AC_DEFINE(SCCS_GET, "get")
-fi
+  make_cv_path_sccs_get=get
+fi])
+AC_DEFINE_UNQUOTED(SCCS_GET,["$make_cv_path_sccs_get"])
+
 ac_clean_files="$ac_clean_files s.conftest conftoast" # Remove these later.
 if ( /usr/sccs/admin -n s.conftest || admin -n s.conftest ) >/dev/null 2>&1 &&
    test -f s.conftest; then
   # We successfully created an SCCS file.
-  echo checking if SCCS get command understands -G
-  if $SCCS_GET -Gconftoast s.conftest >/dev/null 2>&1 &&
-     test -f conftoast; then
-    AC_DEFINE(SCCS_GET_MINUS_G)
-  fi
+  AC_CACHE_CHECK(if SCCS get command understands -G, make_cv_sys_get_minus_G, [
+    if $make_cv_path_sccs_get -Gconftoast s.conftest >/dev/null 2>&1 &&
+       test -f conftoast; then
+       make_cv_sys_get_minus_G=yes
+    else
+       make_cv_sys_get_minus_G=no
+    fi])
+  case "$make_cv_sys_get_minus_G" in
+    yes) AC_DEFINE(SCCS_GET_MINUS_G);;
+  esac
 fi
 rm -f s.conftest conftoast
+
+AC_MSG_CHECKING(if system libc has GNU glob)
+AC_CACHE_VAL(make_cv_sys_gnu_glob, [
+ AC_TRY_CPP([
+#include <glob.h>
+#include <fnmatch.h>
+
+#define GLOB_INTERFACE_VERSION 1
+#if !defined _LIBC && defined __GNU_LIBRARY__ && __GNU_LIBRARY__ > 1
+# include <gnu-versions.h>
+# if _GNU_GLOB_INTERFACE_VERSION == GLOB_INTERFACE_VERSION
+#  error have gnu glob
+# endif
+#endif
+ ], make_cv_sys_gnu_glob=no, make_cv_sys_gnu_glob=yes)])
+case "$make_cv_sys_gnu_glob" in
+  yes) AC_MSG_RESULT(yes) ;;
+  no)  AC_MSG_RESULT([no; using local copy])
+       CPPFLAGS="$CPPFLAGS -I$srcdir/glob" ;;
+esac
 
 AC_OUTPUT(Makefile glob/Makefile build.sh)
 
@@ -173,8 +197,8 @@ case "$ac_cv_func_waitpid/$ac_cv_func_wait3" in
   no/no) echo
          echo "WARNING: Your system has neither waitpid() nor wait3()."
          echo "         Without one of these, signal handling is unreliable."
-         echo "         You should be aware that run GNU make with -j could"
-         echo "         result in erratic behavior."
+         echo "         You should be aware that running GNU make with -j"
+         echo "         could result in erratic behavior."
          echo ;;
 esac
 
