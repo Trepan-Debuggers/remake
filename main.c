@@ -1677,10 +1677,11 @@ int main (int argc, char ** argv)
       switch (update_goal_chain (read_makefiles, 1))
 	{
 	case 1:
-	default:
-#define BOGUS_UPDATE_STATUS 0
-	  assert (BOGUS_UPDATE_STATUS);
-	  break;
+          /* The only way this can happen is if the user specified -q and asked
+           * for one of the makefiles to be remade as a target on the command
+           * line.  Since we're not actually updating anything with -q we can
+           * treat this as "did nothing".
+           */
 
 	case -1:
 	  /* Did nothing.  */
@@ -1860,6 +1861,11 @@ int main (int argc, char ** argv)
 	  exit (0);
 #endif
 	  /* NOTREACHED */
+
+	default:
+#define BOGUS_UPDATE_STATUS 0
+	  assert (BOGUS_UPDATE_STATUS);
+	  break;
 	}
 
       db_level = orig_db_level;

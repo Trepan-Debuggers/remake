@@ -1876,7 +1876,7 @@ func_call (o, argv, funcname)
       char num[11];
 
       sprintf (num, "%d", i);
-      define_variable (num, strlen (num), *argv, o_automatic, 1);
+      define_variable (num, strlen (num), *argv, o_automatic, 0);
     }
 
   /* Expand the body in the context of the arguments, adding the result to
