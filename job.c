@@ -32,31 +32,43 @@ Boston, MA 02111-1307, USA.  */
 
 /* Default shell to use.  */
 #ifdef WINDOWS32
+
 char *default_shell = "sh.exe";
 int no_default_sh_exe = 1;
 int batch_mode_shell = 1;
-#else  /* WINDOWS32 */
-# ifdef _AMIGA
+
+#elif defined (_AMIGA)
+
 char default_shell[] = "";
 extern int MyExecute (char **);
-# else /* _AMIGA */
-#  ifdef __MSDOS__
+int batch_mode_shell = 0;
+
+#elif defined (__MSDOS__)
+
 /* The default shell is a pointer so we can change it if Makefile
    says so.  It is without an explicit path so we get a chance
    to search the $PATH for it (since MSDOS doesn't have standard
    directories we could trust).  */
 char *default_shell = "command.com";
-#  else  /* __MSDOS__ */
-#   ifdef VMS
-#    include <descrip.h>
-char default_shell[] = "";
-#   else
-char default_shell[] = "/bin/sh";
-#   endif /* VMS */
-#  endif /* __MSDOS__ */
 int batch_mode_shell = 0;
-# endif /* _AMIGA */
-#endif /* WINDOWS32 */
+
+#elif defined (__EMX__)
+
+const char *default_shell = "/bin/sh";
+int batch_mode_shell = 0;
+
+#elif defined (VMS)
+
+# include <descrip.h>
+char default_shell[] = "";
+int batch_mode_shell = 0;
+
+#else
+
+char default_shell[] = "/bin/sh";
+int batch_mode_shell = 0;
+
+#endif
 
 #ifdef __MSDOS__
 # include <process.h>
@@ -91,9 +103,7 @@ static int amiga_batch_file;
 # include "pathstuff.h"
 #endif /* WINDOWS32 */
 
-#ifdef HAVE_FCNTL_H
-# include <fcntl.h>
-#else
+#ifdef __EMX__
 # include <sys/file.h>
 #endif
 
@@ -157,17 +167,6 @@ extern int wait ();
 
 #endif	/* Don't have `union wait'.  */
 
-/* How to set close-on-exec for a file descriptor.  */
-
-#if !defined F_SETFD
-# define CLOSE_ON_EXEC(_d)
-#else
-# ifndef FD_CLOEXEC
-#  define FD_CLOEXEC 1
-# endif
-# define CLOSE_ON_EXEC(_d) (void) fcntl ((_d), F_SETFD, FD_CLOEXEC)
-#endif
-
 #ifdef VMS
 static int vms_jobsefnmask = 0;
 #endif /* !VMS */
@@ -228,11 +227,57 @@ int unixy_shell = 1;
 /*
  * The macro which references this function is defined in make.h.
  */
-int w32_kill(int pid, int sig)
+int
+w32_kill(int pid, int sig)
 {
   return ((process_kill(pid, sig) == TRUE) ? 0 : -1);
 }
 #endif /* WINDOWS32 */
+
+#ifdef __EMX__
+/* returns whether path is assumed to be a unix like shell. */
+int
+_is_unixy_shell (const char *path)
+{
+  /* list of non unix shells */
+  const char *known_os2shells[] = {
+    "cmd.exe",
+    "cmd",
+    "4os2.exe",
+    "4os2",
+    "4dos.exe",
+    "4dos",
+    "command.com",
+    "command",
+    NULL
+  };
+
+  /* find the rightmost '/' or '\\' */
+  const char *name = strrchr (path, '/');
+  const char *p = strrchr (path, '\\');
+  unsigned i;
+
+  if (name && p)    /* take the max */
+    name = (name > p) ? name : p;
+  else if (p)       /* name must be 0 */
+    name = p;
+  else if (!name)   /* name and p must be 0 */
+    name = path;
+
+  if (*name == '/' || *name == '\\') name++;
+
+  i = 0;
+  while (known_os2shells[i] != NULL) {
+    if (stricmp (name, known_os2shells[i]) == 0) /* strcasecmp() */
+      return 0; /* not a unix shell */
+    i++;
+  }
+
+  /* in doubt assume a unix like shell */
+  return 1;
+}
+#endif /* __EMX__ */
+
 
 /* Write an error message describing the exit status given in
    EXIT_CODE, EXIT_SIG, and COREDUMP, for the target TARGET_NAME.
@@ -384,6 +429,7 @@ handle_apos (char *p)
 
 static unsigned int dead_children = 0;
 
+#ifndef __EMX__ /* Don't use SIGCHLD handler on OS/2. */
 RETSIGTYPE
 child_handler (int sig)
 {
@@ -397,7 +443,7 @@ child_handler (int sig)
 
   DB (DB_JOBS, (_("Got a SIGCHLD; %u unreaped children.\n"), dead_children));
 }
-
+#endif  /* !__EMX__ */
 
 extern int shell_function_pid, shell_function_completed;
 
@@ -527,6 +573,18 @@ reap_children (int block, int err)
 	      exit_code = WEXITSTATUS (status);
 	      exit_sig = WIFSIGNALED (status) ? WTERMSIG (status) : 0;
 	      coredump = WCOREDUMP (status);
+
+#ifdef __EMX__
+	      /* the SIGCHLD handler must not be used on OS/2 because, unlike
+		 on UNIX systems, it had to call wait() itself.  Therefore
+		 job_rfd has to be closed here.  */
+	      if (job_rfd >= 0)
+		{
+		  close (job_rfd);
+		  job_rfd = -1;
+		}
+#endif
+
 	    }
 	  else
 	    {
@@ -773,10 +831,12 @@ free_child (struct child *child)
   if (job_fds[1] >= 0 && children)
     {
       char token = '+';
+      int r;
 
       /* Write a job token back to the pipe.  */
 
-      if (write (job_fds[1], &token, 1) != 1)
+      EINTRLOOP (r, write (job_fds[1], &token, 1));
+      if (r != 1)
 	pfatal_with_name (_("write jobserver"));
 
       DB (DB_JOBS, (_("Released token for child 0x%08lx (%s).\n"),
@@ -832,6 +892,10 @@ unblock_sigs (void)
 #endif
 
 #ifdef MAKE_JOBSERVER
+# ifdef __EMX__
+/* Never install the SIGCHLD handler for EMX!!! */
+#  define set_child_handler_action_flags(x)
+# else
 /* Set the child handler action flags to FLAGS.  */
 static void
 set_child_handler_action_flags (int flags)
@@ -847,6 +911,7 @@ set_child_handler_action_flags (int flags)
   sigaction (SIGCLD, &sa, NULL);
 #endif
 }
+#endif  /* !__EMX__ */
 #endif
 
 
@@ -996,7 +1061,7 @@ start_job_command (struct child *child)
 
 #if !defined(VMS) && !defined(_AMIGA)
   if (
-#ifdef __MSDOS__
+#if defined __MSDOS__ || defined (__EMX__)
       unixy_shell	/* the test is complicated and we already did it */
 #else
       (argv[0] && !strcmp (argv[0], "/bin/sh"))
@@ -1119,6 +1184,40 @@ start_job_command (struct child *child)
 #else
 
       parent_environ = environ;
+
+# ifdef __EMX__
+      /* If we aren't running a recursive command and we have a jobserver
+         pipe, close it before exec'ing.  */
+      if (!(flags & COMMANDS_RECURSE) && job_fds[0] >= 0)
+	{
+	  CLOSE_ON_EXEC (job_fds[0]);
+	  CLOSE_ON_EXEC (job_fds[1]);
+	}
+      if (job_rfd >= 0)
+	CLOSE_ON_EXEC (job_rfd);
+
+      /* Never use fork()/exec() here! Use spawn() instead in exec_command() */
+      child->pid = child_execute_job (child->good_stdin ? 0 : bad_stdin, 1,
+                                      argv, child->environment);
+      if (child->pid < 0)
+	{
+	  /* spawn failed!  */
+	  unblock_sigs ();
+	  perror_with_name ("spawn", "");
+	  goto error;
+	}
+
+      /* undo CLOSE_ON_EXEC() after the child process has been started */
+      if (!(flags & COMMANDS_RECURSE) && job_fds[0] >= 0)
+	{
+	  fcntl (job_fds[0], F_SETFD, 0);
+	  fcntl (job_fds[1], F_SETFD, 0);
+	}
+      if (job_rfd >= 0)
+	fcntl (job_rfd, F_SETFD, 0);
+
+#else  /* !__EMX__ */
+
       child->pid = vfork ();
       environ = parent_environ;	/* Restore value child may have clobbered.  */
       if (child->pid == 0)
@@ -1146,6 +1245,7 @@ start_job_command (struct child *child)
 	  perror_with_name ("vfork", "");
 	  goto error;
 	}
+# endif  /* !__EMX__ */
 #endif /* !VMS */
     }
 
@@ -2175,10 +2275,13 @@ child_execute_job (char *argv, struct child *child)
 		      &child->pid, &child->cstatus, &child->efn,
 		      0, 0,
 		      0, 0, 0);
-  pidToAbort= child->pid;
-  status= sys$waitfr (child->efn);
-  pidToAbort= 0;
-  vmsHandleChildTerm(child);
+  if (status & 1)
+    {
+      pidToAbort= child->pid;
+      status= sys$waitfr (child->efn);
+      pidToAbort= 0;
+      vmsHandleChildTerm(child);
+    }
 #else
   status = lib$spawn (&cmddsc,
 		      (ifiledsc.dsc$w_length == 0)?0:&ifiledsc,
@@ -2194,6 +2297,14 @@ child_execute_job (char *argv, struct child *child)
     {
       printf (_("Error spawning, %d\n") ,status);
       fflush (stdout);
+      switch (status)
+        {
+        case 0x1c:
+          errno = EPROCLIM;
+          break;
+        default:
+          errno = EFAIL;
+        }
     }
 
   if (comname && !ISDB (DB_JOBS))
@@ -2204,12 +2315,60 @@ child_execute_job (char *argv, struct child *child)
 
 #else /* !VMS */
 
-#if !defined (_AMIGA) && !defined (__MSDOS__)
+/* EMX: Start a child process. This function returns the new pid.  */
+# if defined __MSDOS__ ||  defined __EMX__
+int
+child_execute_job (int stdin_fd, int stdout_fd, char **argv, char **envp)
+{
+  int pid;
+  /* stdin_fd == 0 means: nothing to do for stdin;
+     stdout_fd == 1 means: nothing to do for stdout */
+  int save_stdin = (stdin_fd != 0) ? dup (0) : 0;
+  int save_stdout = (stdout_fd != 1) ? dup (1): 1;
+
+  /* < 0 only if dup() failed */
+  if (save_stdin < 0)
+    fatal (NILF, _("could not duplicate stdin\n"));
+  if (save_stdout < 0)
+    fatal (NILF, _("could not duplicate stdout\n"));
+
+  /* Close unnecessary file handles for the child.  */
+  if (save_stdin != 0)
+    CLOSE_ON_EXEC (save_stdin);
+  if (save_stdout != 1)
+    CLOSE_ON_EXEC (save_stdout);
+
+  /* Connect the pipes to the child process.  */
+  if (stdin_fd != 0)
+    (void) dup2 (stdin_fd, 0);
+  if (stdout_fd != 1)
+    (void) dup2 (stdout_fd, 1);
+
+  /* stdin_fd and stdout_fd must be closed on exit because we are
+     still in the parent process */
+  if (stdin_fd != 0)
+    CLOSE_ON_EXEC (stdin_fd);
+  if (stdout_fd != 1)
+    CLOSE_ON_EXEC (stdout_fd);
+
+  /* Run the command.  */
+  pid = exec_command (argv, envp);
+
+  /* Restore stdout/stdin of the parent process.  */
+  if (stdin_fd != 0 && dup2 (save_stdin, 0) != 0)
+    fatal (NILF, _("restoring of stdin failed\n"));
+  if (stdout_fd != 1 && dup2 (save_stdout, 1) != 1)
+    fatal (NILF, _("restoring of stdout failed\n"));
+
+  return pid;
+}
+
+#elif !defined (_AMIGA) && !defined (__MSDOS__)
+
 /* UNIX:
    Replace the current process with one executing the command in ARGV.
    STDIN_FD and STDOUT_FD are used as the process's stdin and stdout; ENVP is
    the environment of the new program.  This function does not return.  */
-
 void
 child_execute_job (int stdin_fd, int stdout_fd, char **argv, char **envp)
 {
@@ -2233,7 +2392,12 @@ child_execute_job (int stdin_fd, int stdout_fd, char **argv, char **envp)
 /* Replace the current process with one running the command in ARGV,
    with environment ENVP.  This function does not return.  */
 
-void
+/* EMX: This function returns the pid of the child process.  */
+# ifdef __EMX__
+int
+# else
+ void
+# endif
 exec_command (char **argv, char **envp)
 {
 #ifdef VMS
@@ -2301,12 +2465,32 @@ exec_command (char **argv, char **envp)
 
 #else  /* !WINDOWS32 */
 
+# ifdef __EMX__
+  int pid;
+# endif
+
   /* Be the user, permanently.  */
   child_access ();
+
+# ifdef __EMX__
+
+  /* Run the program.  */
+  pid = spawnvpe (P_NOWAIT, argv[0], argv, envp);
+
+  if (pid >= 0)
+    return pid;
+
+  /* the file might have a strange shell extension */
+  if (errno == ENOENT)
+    errno = ENOEXEC;
+
+# else
 
   /* Run the program.  */
   environ = envp;
   execvp (argv[0], argv);
+
+# endif /* !__EMX__ */
 
   switch (errno)
     {
@@ -2321,7 +2505,14 @@ exec_command (char **argv, char **envp)
 	char **new_argv;
 	int argc;
 
+# ifdef __EMX__
+        /* Do not use $SHELL from the environment */
+	shell = lookup_variable ("SHELL", 5);
+	if (shell)
+	  shell = shell->value;
+# else
 	shell = getenv ("SHELL");
+# endif
 	if (shell == 0)
 	  shell = default_shell;
 
@@ -2338,7 +2529,13 @@ exec_command (char **argv, char **envp)
 	    --argc;
 	  }
 
+# ifdef __EMX__
+	pid = spawnvpe (P_NOWAIT, shell, new_argv, envp);
+	if (pid >= 0)
+          break;
+# else
 	execvp (shell, new_argv);
+# endif
 	if (errno == ENOENT)
 	  error (NILF, _("%s: Shell program not found"), shell);
 	else
@@ -2346,12 +2543,23 @@ exec_command (char **argv, char **envp)
 	break;
       }
 
+# ifdef __EMX__
+    case EINVAL:
+      /* this nasty error was driving me nuts :-( */
+      error (NILF, _("spawnvpe: environment space might be exhausted"));
+      /* FALLTHROUGH */
+# endif
+
     default:
       perror_with_name ("execvp: ", argv[0]);
       break;
     }
 
+# ifdef __EMX__
+  return pid;
+# else
   _exit (127);
+# endif
 #endif /* !WINDOWS32 */
 #endif /* !VMS */
 }
@@ -2428,16 +2636,43 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 
   char *sh_chars;
   char **sh_cmds;
-#else
-#ifdef _AMIGA
+#elif defined (__EMX__)
+  static char sh_chars_dos[] = "*?[];|<>%^&()";
+  static char *sh_cmds_dos[] = { "break", "call", "cd", "chcp", "chdir", "cls",
+				 "copy", "ctty", "date", "del", "dir", "echo",
+				 "erase", "exit", "for", "goto", "if", "md",
+				 "mkdir", "path", "pause", "prompt", "rd",
+				 "rmdir", "rem", "ren", "rename", "set",
+				 "shift", "time", "type", "ver", "verify",
+				 "vol", ":", 0 };
+
+  static char sh_chars_os2[] = "*?[];|<>%^()\"'&";
+  static char *sh_cmds_os2[] = { "call", "cd", "chcp", "chdir", "cls", "copy",
+			     "date", "del", "detach", "dir", "echo",
+			     "endlocal", "erase", "exit", "for", "goto", "if",
+			     "keys", "md", "mkdir", "move", "path", "pause",
+			     "prompt", "rd", "rem", "ren", "rename", "rmdir",
+			     "set", "setlocal", "shift", "start", "time",
+                             "type", "ver", "verify", "vol", ":", 0 };
+
+  static char sh_chars_sh[]  = "#;\"*?[]&|<>(){}$`^";
+  static char *sh_cmds_sh[]  = { "echo", "cd", "eval", "exec", "exit", "login",
+				 "logout", "set", "umask", "wait", "while",
+				 "for", "case", "if", ":", ".", "break",
+				 "continue", "export", "read", "readonly",
+				 "shift", "times", "trap", "switch", "unset",
+                                 0 };
+  char *sh_chars;
+  char **sh_cmds;
+
+#elif defined (_AMIGA)
   static char sh_chars[] = "#;\"|<>()?*$`";
   static char *sh_cmds[] = { "cd", "eval", "if", "delete", "echo", "copy",
 			     "rename", "set", "setenv", "date", "makedir",
 			     "skip", "else", "endif", "path", "prompt",
 			     "unset", "unsetenv", "version",
 			     0 };
-#else
-#ifdef WINDOWS32
+#elif defined (WINDOWS32)
   static char sh_chars_dos[] = "\"|&<>";
   static char *sh_cmds_dos[] = { "break", "call", "cd", "chcp", "chdir", "cls",
 			     "copy", "ctty", "date", "del", "dir", "echo",
@@ -2464,8 +2699,6 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 			     "case", "if", ":", ".", "break", "continue",
 			     "export", "read", "readonly", "shift", "times",
 			     "trap", "switch", 0 };
-#endif /* WINDOWS32 */
-#endif /* Amiga */
 #endif /* __MSDOS__ */
   register int i;
   register char *p;
@@ -2513,7 +2746,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
   if (slow_flag)
     goto slow;
 #else  /* not WINDOWS32 */
-#ifdef __MSDOS__
+#if defined (__MSDOS__) || defined (__EMX__)
   else if (stricmp (shell, default_shell))
     {
       extern int _is_unixy_shell (const char *_path);
@@ -2521,6 +2754,10 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
       message (1, _("$SHELL changed (was `%s', now `%s')"), default_shell, shell);
       unixy_shell = _is_unixy_shell (shell);
       default_shell = shell;
+      /* we must allocate a copy of shell: construct_command_argv() will free
+       * shell after this function returns.  */
+      default_shell = xmalloc (strlen (shell) + 1);
+      strcpy (default_shell, shell);
     }
   if (unixy_shell)
     {
@@ -2531,11 +2768,17 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
     {
       sh_chars = sh_chars_dos;
       sh_cmds  = sh_cmds_dos;
-    }
-#else  /* not __MSDOS__ */
+# ifdef __EMX__
+      if (_osmode == OS2_MODE)
+        {
+          sh_chars = sh_chars_os2;
+          sh_cmds = sh_cmds_os2;
+        }
+# endif
+#else  /* !__MSDOS__ */
   else if (strcmp (shell, default_shell))
     goto slow;
-#endif /* not __MSDOS__ */
+#endif /* !__MSDOS__ && !__EMX__ */
 #endif /* not WINDOWS32 */
 
   if (ifs != 0)
@@ -2838,6 +3081,11 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 				      + (line_len * 2) + 1);
     char *command_ptr = NULL; /* used for batch_mode_shell mode */
 
+# ifdef __EMX__ /* is this necessary? */
+    if (!unixy_shell)
+      minus_c[1] = '/'; /* " /c " */
+# endif
+
     ap = new_line;
     bcopy (shell, ap, shell_len);
     ap += shell_len;
@@ -2951,18 +3199,118 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
       new_argv = construct_command_argv_internal (new_line, (char **) NULL,
                                                   (char *) 0, (char *) 0,
                                                   (char **) 0);
-#ifdef  __MSDOS__
+# ifdef __EMX__
+    else if (!unixy_shell)
+      {
+	/* new_line is local, must not be freed therefore */
+	char *p, *q;
+	int quote;
+	size_t index;
+	size_t len;
+
+	/* handle quotes
+	   We have to remove all double quotes and to split the line
+	   into distinct arguments because of the strange handling
+	   of builtin commands by cmd: 'echo "bla"' prints "bla"
+	   (with quotes) while 'c:\bin\echo.exe "bla"' prints bla
+	   (without quotes). Some programs like autoconf rely
+	   on the second behaviour. */
+
+	len = strlen (new_line) + 1;
+
+	/* More than 1 arg per character is impossible.  */
+	new_argv = (char **) xmalloc (len * sizeof (char *));
+
+	/* All the args can fit in a buffer as big as new_line is.   */
+	new_argv[0] = (char *) xmalloc (len);
+
+	index = 0;
+	quote = 0;
+	q = new_line;
+	p = new_argv[index];
+	while(*q != '\0')
+	  {
+	    /* searching for closing quote */
+	    if (quote)
+	      {
+		if (*q == quote)
+		  {
+		    /* remove the quote */
+		    while(*q == quote) /* do not ask */
+		      q++;
+		    quote = 0;
+		  }
+		else /* normal character: copy it */
+		  *p++ = *q++;
+	      }
+
+	    /* searching for opening quote */
+	    else if (*q == '\"'
+#  ifndef NO_CMD_DEFAULT
+		     || *q == '\''
+#  endif
+		     )
+	      {
+		/* remove opening quote */
+		quote = *q;
+		while(*q == quote) /* do not ask */
+		  q++;
+	      }
+
+	    /* spaces outside of a quoted string: remove them
+	       and start a new argument */
+	    else if (*q == ' ' || *q == '\t')
+	      {
+		*p++ = '\0'; /* trailing '\0' for last argument */
+
+		/* remove all successive spaces */
+		do
+		  {
+		    q++;
+		  }
+		while(*q == ' ' || *q == '\t');
+
+		/* start new argument */
+		index++;
+		new_argv[index] = p;
+	      }
+
+	    /* normal character (no space) outside a quoted string*/
+	    else
+	      *p++ = *q++;
+	  } /* end while() */
+
+	*p = '\0'; /* trailing '\0' for the last argument */
+	new_argv[index + 1] = NULL;
+
+#  ifndef NO_CMD_DEFAULT
+	/* special case: echo x="y"
+	   (e.g. autoconf uses this to determine whether make works)
+	   this is pure idioty but cmd works this way:
+	   if 'echo' and 'x="y"' are two different arguments cmd
+	   will print '"x="y""' but if they are only one argument
+	   cmd will print 'bla="blurb"' as it should be
+	   note: if we do not allow cmd to be the default shell
+	   we do not need this kind of voodoo */
+	if (index == 3 && strcasecmp(new_argv[2], "echo") == 0)
+	  {
+	    new_argv[2][4] = ' ';
+	    new_argv[3] = NULL;
+	  }
+#  endif
+      }
+#elif defined(__MSDOS__)
     else
       {
-      /* With MSDOS shells, we must construct the command line here
-         instead of recursively calling ourselves, because we
-         cannot backslash-escape the special characters (see above).  */
-      new_argv = (char **) xmalloc (sizeof (char *));
-      line_len = strlen (new_line) - shell_len - sizeof (minus_c) + 1;
-      new_argv[0] = xmalloc (line_len + 1);
-      strncpy (new_argv[0],
-               new_line + shell_len + sizeof (minus_c) - 1, line_len);
-      new_argv[0][line_len] = '\0';
+        /* With MSDOS shells, we must construct the command line here
+           instead of recursively calling ourselves, because we
+           cannot backslash-escape the special characters (see above).  */
+        new_argv = (char **) xmalloc (sizeof (char *));
+        line_len = strlen (new_line) - shell_len - sizeof (minus_c) + 1;
+        new_argv[0] = xmalloc (line_len + 1);
+        strncpy (new_argv[0],
+                 new_line + shell_len + sizeof (minus_c) - 1, line_len);
+        new_argv[0][line_len] = '\0';
       }
 #else
     else
@@ -3049,10 +3397,55 @@ construct_command_argv (char *line, char **restp, struct file *file,
      * is not confused.
      */
     if (shell) {
-      char *p = w32ify(shell, 0);
-      strcpy(shell, p);
+      char *p = w32ify (shell, 0);
+      strcpy (shell, p);
     }
 #endif
+#ifdef __EMX__
+    {
+      static const char *unixroot = NULL;
+      static const char *last_shell = "";
+      static int init = 0;
+      if (init == 0)
+	{
+	  unixroot = getenv ("UNIXROOT");
+	  /* unixroot must be NULL or not empty */
+	  if (unixroot && unixroot[0] == '\0') unixroot = NULL;
+	  init = 1;
+	}
+
+      /* if we have an unixroot drive and if shell is not default_shell
+         (which means it's either cmd.exe or the test has already been
+         performed) and if shell is an absolute path without drive letter,
+         try whether it exists e.g.: if "/bin/sh" does not exist use
+         "$UNIXROOT/bin/sh" instead.  */
+      if (unixroot && shell && strcmp (shell, last_shell) != 0
+	  && (shell[0] == '/' || shell[0] == '\\'))
+	{
+	  /* trying a new shell, check whether it exists */
+	  size_t size = strlen (shell);
+	  char *buf = xmalloc (size + 7);
+	  memcpy (buf, shell, size);
+	  memcpy (buf + size, ".exe", 5); /* including the trailing '\0' */
+          if (access (shell, F_OK) != 0 && access (buf, F_OK) != 0)
+	    {
+	      /* try the same for the unixroot drive */
+	      memmove (buf + 2, buf, size + 5);
+	      buf[0] = unixroot[0];
+	      buf[1] = unixroot[1];
+	      if (access (buf, F_OK) == 0)
+		/* we have found a shell! */
+		/* free(shell); */
+		shell = buf;
+	      else
+		free (buf);
+	    }
+	  else
+            free (buf);
+	}
+    }
+#endif __EMX__
+
     ifs = allocated_variable_expand_for_file ("$(IFS)", file);
 
     warn_undefined_variables_flag = save;

@@ -1200,6 +1200,14 @@ f_mtime (struct file *file, int search)
 	FILE_TIMESTAMP adjustment = FAT_ADJ_OFFSET << FILE_TIMESTAMP_LO_BITS;
 	if (ORDINARY_MTIME_MIN + adjustment <= adjusted_mtime)
 	  adjusted_mtime -= adjustment;
+#elif defined(__EMX__)
+	/* FAT filesystems round time to the nearest even second!
+	   Allow for any file (NTFS or FAT) to perhaps suffer from this
+	   brain damage.  */
+	FILE_TIMESTAMP adjustment = (((FILE_TIMESTAMP_S (adjusted_mtime) & 1) == 0
+		       && FILE_TIMESTAMP_NS (adjusted_mtime) == 0)
+		      ? (FILE_TIMESTAMP) 1 << FILE_TIMESTAMP_LO_BITS
+		      : 0);
 #endif
 
 	/* If the file's time appears to be in the future, update our

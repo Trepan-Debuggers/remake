@@ -349,15 +349,12 @@ extern int strcmpi (const char *,const char *);
 #define S_(msg1,msg2,num)   ngettext (msg1,msg2,num)
 
 /* Handle other OSs.  */
-
-#if defined(__MSDOS__) || defined(WINDOWS32)
+#if defined(HAVE_DOS_PATHS)
 # define PATH_SEPARATOR_CHAR ';'
+#elif defined(VMS)
+# define PATH_SEPARATOR_CHAR ','
 #else
-# if defined(VMS)
-#  define PATH_SEPARATOR_CHAR ','
-# else
-#  define PATH_SEPARATOR_CHAR ':'
-# endif
+# define PATH_SEPARATOR_CHAR ':'
 #endif
 
 #ifdef WINDOWS32
@@ -536,6 +533,42 @@ extern int handling_fatal_signal;
 
 #ifdef HAVE_DMALLOC_H
 #include <dmalloc.h>
+#endif
+
+#ifndef initialize_main
+# ifdef __EMX__
+#  define initialize_main(pargc, pargv) \
+                          { _wildcard(pargc, pargv); _response(pargc, pargv); }
+# else
+#  define initialize_main(pargc, pargv)
+# endif
+#endif
+
+
+#ifdef __EMX__
+# if !HAVE_STRCASECMP
+#  define strcasecmp stricmp
+# endif
+
+# if !defined chdir
+#  define chdir _chdir2
+# endif
+# if !defined getcwd
+#  define getcwd _getcwd2
+# endif
+
+/* NO_CHDIR2 causes make not to use _chdir2() and _getcwd2() instead of
+   chdir() and getcwd(). This avoids some error messages for the
+   make testsuite but restricts the drive letter support. */
+# ifdef NO_CHDIR2
+#  warning NO_CHDIR2: usage of drive letters restricted
+#  undef chdir
+#  undef getcwd
+# endif
+#endif
+
+#ifndef initialize_main
+# define initialize_main(pargc, pargv)
 #endif
 
 

@@ -27,8 +27,8 @@ Boston, MA 02111-1307, USA.  */
 
 /* Define GCC_IS_NATIVE if gcc is the native development environment on
    your system (gcc/bison/flex vs cc/yacc/lex).  */
-#ifdef __MSDOS__
-#define GCC_IS_NATIVE
+#if defined(__MSDOS__) || defined(__EMX__)
+# define GCC_IS_NATIVE
 #endif
 
 
@@ -41,6 +41,10 @@ static char default_suffixes[]
   = ".exe .olb .ln .obj .c .cxx .cc .pas .p .for .f .r .y .l .mar \
 .s .ss .i .ii .mod .sym .def .h .info .dvi .tex .texinfo .texi .txinfo \
 .w .ch .cweb .web .com .sh .elc .el";
+#elif defined(__EMX__)
+  = ".out .a .ln .o .c .cc .C .cpp .p .f .F .r .y .l .s .S \
+.mod .sym .def .h .info .dvi .tex .texinfo .texi .txinfo \
+.w .ch .web .sh .elc .el .obj .exe .dll .lib";
 #else
   = ".out .a .ln .o .c .cc .C .cpp .p .f .F .r .y .l .s .S \
 .mod .sym .def .h .info .dvi .tex .texinfo .texi .txinfo \
@@ -153,6 +157,8 @@ static char *default_suffix_rules[] =
     "$(COMPILE.cc)/noprep/noobj/machine /list=$@ $<",
     ".cc.obj",
     "$(COMPILE.cc) /obj=$@ $<",
+    ".cxx.obj",
+    "$(COMPILE.cxx) /obj=$@ $<",
     ".for.obj",
     "$(COMPILE.for) /obj=$@ $<",
     ".pas.obj",

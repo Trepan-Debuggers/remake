@@ -589,6 +589,10 @@ dir_contents_file_exists_p (struct directory_contents *dir, char *filename)
   filename = downcase (filename);
 #endif
 
+#ifdef __EMX__
+  _fnlwr(filename); /* lower case for FAT drives */
+#endif
+
 #ifdef VMS
   filename = vmsify (filename,0);
 #endif

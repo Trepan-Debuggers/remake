@@ -1450,6 +1450,7 @@ func_shell (char *o, char **argv, const char *funcname)
     error_prefix = "";
 
 #ifdef WINDOWS32
+
   windows32_openpipe (pipedes, &pid, command_argv, envp);
 
   if (pipedes[0] < 0) {
@@ -1458,21 +1459,35 @@ func_shell (char *o, char **argv, const char *funcname)
 
 	return o;
   } else
-#else /* WINDOWS32 */
 
-# ifdef __MSDOS__
+#elif defined(__MSDOS__)
+
   fpipe = msdos_openpipe (pipedes, &pid, argv[0]);
   if (pipedes[0] < 0)
     {
       perror_with_name (error_prefix, "pipe");
       return o;
     }
-# else
+
+#else
+
   if (pipe (pipedes) < 0)
     {
       perror_with_name (error_prefix, "pipe");
       return o;
     }
+
+# ifdef __EMX__
+
+  /* close some handles that are unnecessary for the child process */
+  CLOSE_ON_EXEC(pipedes[1]);
+  CLOSE_ON_EXEC(pipedes[0]);
+  /* Never use fork()/exec() here! Use spawn() instead in exec_command() */
+  pid = child_execute_job (0, pipedes[1], command_argv, envp);
+  if (pid < 0)
+    perror_with_name (error_prefix, "spawn");
+
+# else /* ! __EMX__ */
 
   pid = vfork ();
   if (pid < 0)
@@ -1480,9 +1495,10 @@ func_shell (char *o, char **argv, const char *funcname)
   else if (pid == 0)
     child_execute_job (0, pipedes[1], command_argv, envp);
   else
-# endif /* ! __MSDOS__ */
 
-#endif /* WINDOWS32 */
+# endif
+
+#endif
     {
       /* We are the parent.  */
 
@@ -1517,7 +1533,7 @@ func_shell (char *o, char **argv, const char *funcname)
 	      buffer = (char *) xrealloc (buffer, maxlen + 1);
 	    }
 
-	  cc = read (pipedes[0], &buffer[i], maxlen - i);
+	  EINTRLOOP (cc, read (pipedes[0], &buffer[i], maxlen - i));
 	  if (cc <= 0)
 	    break;
 	}
@@ -1531,8 +1547,8 @@ func_shell (char *o, char **argv, const char *funcname)
       (void) close (pipedes[0]);
 #endif
 
-      /* Loop until child_handler sets shell_function_completed
-	 to the status of our child shell.  */
+      /* Loop until child_handler or reap_children()  sets
+         shell_function_completed to the status of our child shell.  */
       while (shell_function_completed == 0)
 	reap_children (1, 0);
 
