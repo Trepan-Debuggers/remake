@@ -150,11 +150,11 @@ make: $(objs)
 
 # -I. is needed to find config.h in the build directory.
 .c.o:
-	$(CC) $(CFLAGS) $(defines) -c -I. \
-	      -I$(srcdir) -I$(srcdir)/glob $< $(OUTPUT_OPTION)
+	$(CC) $(defines) -c -I. -I$(srcdir) -I$(srcdir)/glob \
+	      $(CFLAGS) $< $(OUTPUT_OPTION)
 remote.o: remote.c
-	$(CC) $(CFLAGS) $(defines) $(REMOTE) -c -I. \
-	      -I$(srcdir) $(srcdir)/remote.c
+	$(CC) $(defines) $(REMOTE) -c -I. -I$(srcdir) \
+	      $(CFLAGS) $(srcdir)/remote.c
 
 # For some losing Unix makes.
 MAKE = make
