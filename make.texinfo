@@ -8,7 +8,7 @@
 
 @set EDITION 0.35 Beta
 @set VERSION 3.63 Beta
-@set UPDATED 14 August 1992
+@set UPDATED 18 August 1992
 @set UPDATE-MONTH August 1992
 
 @c finalout
@@ -100,7 +100,7 @@ for @code{make} Version @value{VERSION}.@refill
 This manual describes @code{make} and contains the following chapters:@refill
 @end ifinfo
 
-@c !!! Edit descriptions.
+@c !!!!! Edit descriptions.
 @menu
 * Overview::                    Introducing @code{make}.
 * Copying::                     Your rights and freedoms.
@@ -111,7 +111,7 @@ This manual describes @code{make} and contains the following chapters:@refill
 * Using Variables::             How to Use Variables
 * Conditionals::                Conditional Parts of Makefiles
 * Functions::                   Functions for Transforming Text
-* Running::                     How to Run @code{make}
+* make Invocation::             How to Run @code{make}
 * Implicit Rules::              Using Implicit Rules
 * Archives::                    Using @code{make} to Update Archive Files
 * Features::                    Features of GNU @code{make}
@@ -346,7 +346,8 @@ decide which of the files need to be updated.  For each of those files, it
 issues the commands recorded in the data base.
 
 You can provide command line arguments to @code{make} to control which
-files should be recompiled, or how.  @xref{Running, ,How to Run @code{make}}.
+files should be recompiled, or how.  @xref{make Invocation, ,How to Run
+@code{make}}.
 
 @node Reading, Bugs, Preparing, Overview
 @section On Reading this Text
@@ -4476,7 +4477,7 @@ sets @code{files} to the expansion of @samp{*.c}.  Unless @code{make} is
 using a very strange shell, this has the same result as @samp{$(wildcard
 *.c)}.@refill
 
-@node Running, Implicit Rules, Functions, Top
+@node make Invocation, Implicit Rules, Functions, Top
 @chapter How to Run @code{make}
 
 A makefile that says how to recompile a program can be used in more
