@@ -2030,8 +2030,35 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
 		  }
 	      }
 	    else if (p[1] != '\0')
-	      /* Copy and skip the following char.  */
-	      *ap++ = *++p;
+              {
+#if defined(__MSDOS__) || defined(WINDOWS32)
+                /* Only remove backslashes before characters special
+                   to Unixy shells.  All other backslashes are copied
+                   verbatim, since they are probably DOS-style
+                   directory separators.  This still leaves a small
+                   window for problems, but at least it should work
+                   for the vast majority of naive users.  */
+
+#ifdef __MSDOS__
+                /* A dot is only special as part of the "..."
+                   wildcard.  */
+                if (strncmp (p + 1, ".\\.\\.", 5) == 0)
+                  {
+                    *ap++ = '.';
+                    *ap++ = '.';
+                    p += 4;
+                  }
+                else
+#endif
+                  if (p[1] != '\\' && p[1] != '\'' && !isspace (p[1])
+                      && (index (sh_chars_sh, p[1]) == 0))
+                    /* back up one notch, to copy the backslash */
+                    --p;
+
+#endif  /* __MSDOS__ || WINDOWS32 */
+                /* Copy and skip the following char.  */
+                *ap++ = *++p;
+              }
 	    break;
 
 	  case '\'':

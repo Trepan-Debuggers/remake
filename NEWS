@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  22 Feb 1999
+  22 Mar 1999
 
 Copyright (C) 1992,93,94,95,96,97,98,1999 Free Software Foundation, Inc.
 See the end for copying conditions.
@@ -11,6 +11,12 @@ manual, which is contained in this distribution as the file make.texinfo.
 Please send GNU make bug reports to bug-make@gnu.org.
 
 Version 3.78
+
+* Two new functions, $(error ...) and $(warning ...) are provided.  The
+  former will cause make to fail and exit immediately upon expansion of
+  the function, with the text provided as the error message.  The latter
+  causes the text provided to be printed as a warning message, but make
+  proceeds normally.
 
 * Make defines a new variable, .LIBPATTERNS.  This variable controls how
   the link library dependency expansion (dependencies like ``-lfoo'') is

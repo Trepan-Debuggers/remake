@@ -1,3 +1,31 @@
+1999-03-22  Paul D. Smith  <psmith@gnu.org>
+
+	* make.texinfo (Functions): Add a new section documenting the new
+	$(error ...) and $(warning ...) functions.  Also updated copyright
+	dates.
+	* NEWS: Updated for the new functions.
+	* function.c (func_error): Implement the new $(error ...) and
+	$(warning ...) functions.
+	(function_table): Insert new functions into the table.
+	(func_firstword): Don't call find_next_token() with argv[0]
+	itself, since that function modifies the pointer.
+	* function.c: Cleanups and slight changes to the new method of
+	calling functions.
+
+1999-03-20  Han-Wen Nienhuys  <hanwen@cs.uu.nl>
+
+	* function.c: Rewrite to use one C function per make function,
+	instead of a huge switch statement.  Also allows some cleanup of
+	multi-architecture issues.
+
+1999-03-19  Eli Zaretskii  <eliz@is.elta.co.il>
+1999-03-19  Rob Tulloh  <rob_tulloh@dev.tivoli.com>
+
+	* job.c (construct_command_argv_internal): Don't treat _all_
+	backslashes as escapes, only those which really escape a special
+	character.  This allows most normal "\" directory separators to be
+	treated normally.
+
 1999-03-05  Paul D. Smith  <psmith@gnu.org>
 
 	* configure.in: Check for a system strdup().
@@ -17,7 +45,7 @@
 1999-03-04  Paul D. Smith  <psmith@gnu.org>
 
 	* amiga.c, amiga.h, ar.c, arscan.c, commands.c, commands.h,
-	* default.c, dep.h, dir.c, expand.c, file.c, filedef.h, functions.c,
+	* default.c, dep.h, dir.c, expand.c, file.c, filedef.h, function.c,
 	* implicit.c, job.c, job.h, main.c, make.h, misc.c, read.c, remake.c
 	* remote-cstms.c, remote-stub.c, rule.h, variable.c, variable.h,
 	* vpath.c, Makefile.ami, NMakefile.template, build.template,
