@@ -131,6 +131,9 @@ Stick to the generally supported options for these programs.  For
 example, don't use @samp{mkdir -p}, convenient as it may be, because
 most systems don't support it.
 
+It is a good idea to avoid creating symbolic links in makefiles, since a
+few systems don't support them.
+
 The Makefile rules for building and installation can also use compilers
 and related programs, but should do so via @code{make} variables so that the
 user can substitute alternatives.  Here are some of the programs we
