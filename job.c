@@ -1682,7 +1682,7 @@ construct_command_argv_internal (line, restp, shell, ifs)
   register char *p;
   register char *ap;
   char *end;
-  int instring, word_has_equals, seen_nonequals;
+  int instring, word_has_equals, seen_nonequals, last_argument_was_empty;
   char **new_argv = 0;
 #ifdef WIN32
   int slow_flag = 0;
@@ -1741,7 +1741,7 @@ construct_command_argv_internal (line, restp, shell, ifs)
 
   /* I is how many complete arguments have been found.  */
   i = 0;
-  instring = word_has_equals = seen_nonequals = 0;
+  instring = word_has_equals = seen_nonequals = last_argument_was_empty = 0;
   for (p = line; *p != '\0'; ++p)
     {
       if (ap > end)
@@ -1753,7 +1753,11 @@ construct_command_argv_internal (line, restp, shell, ifs)
 	  /* Inside a string, just copy any char except a closing quote
 	     or a backslash-newline combination.  */
 	  if (*p == instring)
-	    instring = 0;
+	    {
+	      instring = 0;
+	      if (*ap == '\0')
+		last_argument_was_empty = 1;
+	    }
 	  else if (*p == '\\' && p[1] == '\n')
 	    goto swallow_escaped_newline;
 	  else if (*p == '\n' && restp != NULL)
@@ -1846,6 +1850,7 @@ construct_command_argv_internal (line, restp, shell, ifs)
 	       Terminate the text of the argument.  */
 	    *ap++ = '\0';
 	    new_argv[++i] = ap;
+	    last_argument_was_empty = 0;
 
 	    /* Update SEEN_NONEQUALS, which tells us if every word
 	       heretofore has contained an `='.  */
@@ -1887,7 +1892,7 @@ construct_command_argv_internal (line, restp, shell, ifs)
   /* Terminate the last argument and the argument list.  */
 
   *ap = '\0';
-  if (new_argv[i][0] != '\0')
+  if (new_argv[i][0] != '\0' || last_argument_was_empty)
     ++i;
   new_argv[i] = 0;
 
@@ -2053,6 +2058,9 @@ construct_command_argv_internal (line, restp, shell, ifs)
 	  *ap++ = '\\';
 	*ap++ = *p;
       }
+    if (ap == new_line + shell_len + sizeof (minus_c) - 1)
+      /* Line was empty.  */
+      return 0;
     *ap = '\0';
 
     new_argv = construct_command_argv_internal (new_line, (char **) NULL,
