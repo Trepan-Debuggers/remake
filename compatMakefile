@@ -213,8 +213,10 @@ glob-clean glob-realclean:
 
 Makefile: config.status $(srcdir)/Makefile.in
 	$(SHELL) config.status
-config.h: config.status $(srcdir)/config.h.in
+config.h: stamp-config ;
+stamp-config: config.status $(srcdir)/config.h.in
 	$(SHELL) config.status
+	touch stamp-config
 
 configure: configure.in
 	autoconf $(ACFLAGS)
