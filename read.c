@@ -154,7 +154,7 @@ read_all_makefiles (makefiles)
 	while (d->next != tail)
 	  d = d->next;
 
-	/* Use the storage read_filename allocates.  */
+	/* Use the storage read_makefile allocates.  */
 	free (*makefiles);
 	*makefiles = dep_name (d);
 	++num_makefiles;
