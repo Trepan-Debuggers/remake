@@ -41,29 +41,27 @@ char default_shell[] = "/bin/sh";
 #endif	/* POSIX.  */
 #endif
 
+#ifdef	HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
+
 #ifdef	HAVE_WAITPID
-#include <sys/wait.h>
-
-#define	WAIT_NOHANG(status)	waitpid(-1, (status), WNOHANG)
-
+#define	WAIT_NOHANG(status)	waitpid (-1, (status), WNOHANG)
 #else	/* Don't have waitpid.  */
-
-#if	defined(HAVE_SYS_WAIT) || !defined(USG)
-#include <sys/wait.h>
-
+#ifdef	HAVE_WAIT3
 #ifndef	wait3
 extern int wait3 ();
 #endif
-#define	WAIT_NOHANG(status) \
-  wait3((union wait *) (status), WNOHANG, (struct rusage *) 0)
+#define	WAIT_NOHANG(status)	wait3 ((status), WNOHANG, (struct rusage *) 0)
+#endif	/* Have wait3.  */
+#endif	/* Have waitpid.  */
 
 #if	!defined (wait) && !defined (POSIX)
 extern int wait ();
 #endif
-#endif	/* HAVE_SYS_WAIT || !USG */
-#endif	/* Have waitpid.  */
 
-#if	defined(WTERMSIG) || (defined(USG) && !defined(HAVE_SYS_WAIT))
+#ifndef	HAVE_UNION_WAIT
+
 #define	WAIT_T int
 
 #ifndef	WTERMSIG
@@ -82,12 +80,18 @@ extern int wait ();
 #define WIFEXITED(x) (WTERMSIG (x) == 0)
 #endif
 
-#else	/* WTERMSIG not defined and have <sys/wait.h> or not USG.  */
+#else	/* Have `union wait'.  */
 
 #define WAIT_T union wait
+#ifndef	WTERMSIG
 #define WTERMSIG(x)	((x).w_termsig)
+#endif
+#ifndef	WCOREDUMP
 #define WCOREDUMP(x)	((x).w_coredump)
+#endif
+#ifndef WEXITSTATUS
 #define WEXITSTATUS(x)	((x).w_retcode)
+#endif
 #ifndef	WIFSIGNALED
 #define	WIFSIGNALED(x)	(WTERMSIG(x) != 0)
 #endif
@@ -95,7 +99,7 @@ extern int wait ();
 #define	WIFEXITED(x)	(WTERMSIG(x) == 0)
 #endif
 
-#endif	/* WTERMSIG defined or USG and don't have <sys/wait.h>.  */
+#endif	/* Don't have `union wait'.  */
 
 
 #ifndef	HAVE_UNISTD_H
