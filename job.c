@@ -310,8 +310,6 @@ extern int shell_function_pid, shell_function_completed;
    complete child, waiting for it to die if necessary.  If ERR is nonzero,
    print an error message first.  */
 
-static int rc_block, rc_reap_all, rc_got_block, rc_start_rfd, rc_end_rfd;
-
 void
 reap_children (block, err)
      int block, err;
@@ -325,11 +323,6 @@ reap_children (block, err)
 #else
 # define REAP_MORE dead_children
 #endif
-
-  rc_block = block;
-  rc_reap_all = 0;
-  rc_got_block = 0;
-  rc_start_rfd = job_rfd;
 
   /* As long as:
 
@@ -451,7 +444,6 @@ reap_children (block, err)
 	    {
 	      /* No local children are dead.  */
               reap_more = 0;
-              rc_reap_all = 1;
 
 	      if (!block || !any_remote)
                 break;
@@ -677,10 +669,8 @@ reap_children (block, err)
 
       /* Only block for one child.  */
       block = 0;
-      rc_block = block;
     }
 
-  rc_end_rfd = job_rfd;
   return;
 }
 
@@ -691,11 +681,12 @@ free_child (child)
      register struct child *child;
 {
   /* If this child is the only one it was our "free" job, so don't put a
-     token back for it.  */
+     token back for it.  This child has already been removed from the list,
+     so if there any left this wasn't the last one.  */
 
-  if (job_fds[1] >= 0 && (child != children || child->next != 0))
+  if (job_fds[1] >= 0 && children)
     {
-      char *token = '+';
+      char token = '+';
 
       /* Write a job token back to the pipe.  */
 
@@ -874,7 +865,7 @@ start_job_command (child)
 	   ? "%s" : (char *) 0, p);
 
   /* Optimize an empty command.  People use this for timestamp rules,
-     and forking a useless shell all the time leads to inefficiency. */
+     so avoid forking a useless shell.  */
 
 #if !defined(VMS) && !defined(_AMIGA)
   if (
@@ -1361,6 +1352,7 @@ new_job (file)
 
   /* Wait for a job slot to be freed up.  If we allow an infinite number
      don't bother; also job_slots will == 0 if we're using the jobserver.  */
+
   if (job_slots != 0)
     while (job_slots_used == job_slots)
       reap_children (1, 0);
@@ -1369,41 +1361,49 @@ new_job (file)
   /* If we are controlling multiple jobs make sure we have a token before
      starting the child. */
 
-  else if (job_fds[0] >= 0)
-    if (children == 0)
-    {
-      char token = '-';
+  /* This can be inefficient.  There's a decent chance that this job won't
+     actually have to run any subprocesses: the command script may be empty
+     or otherwise optimized away.  It would be nice if we could defer
+     obtaining a token until just before we need it, in start_job_command.
+     To do that we'd need to keep track of whether we'd already obtained a
+     token (since start_job_command is called for each line of the job, not
+     just once).  Also more thought needs to go into the entire algorithm;
+     this is where the old parallel job code waits, so...  */
 
-      while (token == '-')
+  else if (job_fds[0] >= 0)
+    while (1)
+      {
+        char token;
+
         /* If we don't already have a job started, use our "free" token.  */
-        if (children == 0)
-          token = '+';
+        if (!children)
+          break;
 
         /* Read a token.  As long as there's no token available we'll block.
            If we get a SIGCHLD we'll return with EINTR.  If one happened
            before we got here we'll return immediately with EBADF because
            the signal handler closes the dup'd file descriptor.  */
 
-        else if (read (job_rfd, &c->job_token, 1) < 1)
+        if (read (job_rfd, &token, 1) == 1)
           {
-            if (errno != EINTR && errno != EBADF)
-              pfatal_with_name (_("read jobs pipe"));
-
-            /* Re-dup the read side of the pipe, so the signal handler can
-               notify us if we miss a child.  */
-            if (job_rfd < 0)
-              job_rfd = dup (job_fds[0]);
-
-            /* Something's done.  We don't want to block for a whole child,
-               just reap whatever's there.  */
-            reap_children (0, 0);
+            if (debug_flag)
+              printf (_("Obtained token for child 0x%08lx (%s).\n"),
+                      (unsigned long int) c, c->file->name);
+            break;
           }
 
-      assert (c->job_token != '-');
-      if (debug_flag)
-        printf (_("Obtained token for child 0x%08lx (%s).\n"),
-                (unsigned long int) c, c->file->name);
-    }
+        if (errno != EINTR && errno != EBADF)
+          pfatal_with_name (_("read jobs pipe"));
+
+        /* Re-dup the read side of the pipe, so the signal handler can
+           notify us if we miss a child.  */
+        if (job_rfd < 0)
+          job_rfd = dup (job_fds[0]);
+
+        /* Something's done.  We don't want to block for a whole child,
+           just reap whatever's there.  */
+        reap_children (0, 0);
+      }
 #endif
 
   /* The job is now primed.  Start it running.

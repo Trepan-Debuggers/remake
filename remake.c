@@ -316,19 +316,19 @@ update_file (file, depth)
   register int status = 0;
   register struct file *f;
 
-  /* Prune the dependency graph: if we've already been here on _this_ pass
-     through the dependency graph, we don't have to go any further.  We won't
-     reap_children until we start the next pass, so no state change is
-     possible below here until then.  */
-  if (file->considered == considered)
-    {
-      DEBUGPR (_("Pruning file `%s'.\n"));
-      return 0;
-    }
-  file->considered = considered;
-
   for (f = file->double_colon ? file->double_colon : file; f != 0; f = f->prev)
     {
+      /* Prune the dependency graph: if we've already been here on _this_
+         pass through the dependency graph, we don't have to go any further.
+         We won't reap_children until we start the next pass, so no state
+         change is possible below here until then.  */
+      if (f->considered == considered)
+        {
+          DEBUGPR (_("Pruning file `%s'.\n"));
+          continue;
+        }
+      f->considered = considered;
+
       status |= update_file_1 (f, depth);
       check_renamed (f);
 

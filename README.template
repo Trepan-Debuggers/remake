@@ -1,6 +1,7 @@
 This directory contains the %VERSION% release of GNU Make.
-All bugs reported for previous releases have been fixed.
-Some bugs surely remain.
+
+See the file NEWS for the user-visible changes from previous releases.
+In addition, there have been bugs fixed.
 
 For general building and installation instructions, see the file INSTALL.
 
@@ -23,6 +24,8 @@ site.  There is information there about ordering hardcopy documentation.
   http://www.gnu.org/
   http://www.gnu.org/doc/doc.html
   http://www.gnu.org/manual/manual.html
+
+You can also find the latest versions of GNU Make from there.
 
 Please send GNU make bug reports to bug-make@gnu.org.  Please see the
 section of the manual entitles `Problems and Bugs' for information on
@@ -61,9 +64,5 @@ debug this code, you can do `make check-loadavg' to see if it works
 properly on your system.  (You must run `configure' beforehand, but you
 need not build Make itself to run this test.)
 
-See the file NEWS for what has changed since previous releases.
-
-GNU Make is fully documented in make.texinfo.  See the section entitled
-`Problems and Bugs' for information on submitting bug reports.
 
 GNU Make is free software.  See the file COPYING for copying conditions.

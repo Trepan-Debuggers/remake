@@ -46,7 +46,6 @@ struct child
 
     unsigned int good_stdin:1;	/* Nonzero if this child has a good stdin.  */
     unsigned int deleted:1;	/* Nonzero if targets have been deleted.  */
-    char job_token;		/* The token read from the job pipe.  */
   };
 
 extern struct child *children;

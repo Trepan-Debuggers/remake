@@ -22,3 +22,5 @@ sun4 i386 i386-netbsd hp300-netbsd hp300 rs6000 sun3 news800 amiga
 hp700 hp834 mips sol2 i486-linux
 
 customs
+
+install-sh mkinstalldirs
