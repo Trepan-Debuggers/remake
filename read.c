@@ -1182,10 +1182,15 @@ record_files (filenames, pattern, pattern_percent, deps, commands_started,
 		  moredeps = this;
 		}
 
-	      d = firstdeps;
-	      while (d->next != 0)
-		d = d->next;
-	      d->next = moredeps;
+	      if (firstdeps == 0)
+		firstdeps = moredeps;
+	      else
+		{
+		  d = firstdeps;
+		  while (d->next != 0)
+		    d = d->next;
+		  d->next = moredeps;
+		}
 
 	      f->deps = firstdeps;
 	    }
