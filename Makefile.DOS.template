@@ -395,7 +395,25 @@ maintainer-clean:  maintainer-clean-recursive maintainer-clean-am
 	@echo "it deletes files that may require special tools to rebuild."
 	rm -f config.status
 
-.PHONY: default mostlyclean-hdr distclean-hdr clean-hdr  maintainer-clean-hdr mostlyclean-binPROGRAMS distclean-binPROGRAMS  clean-binPROGRAMS maintainer-clean-binPROGRAMS uninstall-binPROGRAMS  install-binPROGRAMS mostlyclean-compile distclean-compile clean-compile  maintainer-clean-compile install-info-am uninstall-info  mostlyclean-aminfo distclean-aminfo clean-aminfo  maintainer-clean-aminfo install-data-recursive uninstall-data-recursive  install-exec-recursive uninstall-exec-recursive installdirs-recursive  uninstalldirs-recursive all-recursive check-recursive  installcheck-recursive info-recursive dvi-recursive  mostlyclean-recursive distclean-recursive clean-recursive  maintainer-clean-recursive tags tags-recursive mostlyclean-tags  distclean-tags clean-tags maintainer-clean-tags distdir info dvi  check-local installcheck all-recursive-am all-am install-exec-am  install-data-am uninstall-am install-exec install-data install  uninstall all installdirs mostlyclean-generic distclean-generic  clean-generic maintainer-clean-generic clean mostlyclean distclean  maintainer-clean
+.PHONY: default mostlyclean-hdr distclean-hdr clean-hdr \
+maintainer-clean-hdr mostlyclean-binPROGRAMS distclean-binPROGRAMS \
+clean-binPROGRAMS maintainer-clean-binPROGRAMS uninstall-binPROGRAMS \
+install-binPROGRAMS mostlyclean-compile distclean-compile clean-compile \
+maintainer-clean-compile install-info-am uninstall-info \
+mostlyclean-aminfo distclean-aminfo clean-aminfo \
+maintainer-clean-aminfo install-data-recursive uninstall-data-recursive \
+install-exec-recursive uninstall-exec-recursive installdirs-recursive \
+uninstalldirs-recursive all-recursive check-recursive \
+installcheck-recursive info-recursive dvi-recursive \
+mostlyclean-recursive distclean-recursive clean-recursive \
+maintainer-clean-recursive tags tags-recursive mostlyclean-tags \
+distclean-tags clean-tags maintainer-clean-tags distdir \
+mostlyclean-depend distclean-depend clean-depend \
+maintainer-clean-depend info dvi check-local installcheck \
+all-recursive-am all-am install-exec-am install-data-am uninstall-am \
+install-exec install-data install uninstall all installdirs \
+mostlyclean-generic distclean-generic clean-generic \
+maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
 
 # --------------- Local DIST Section
