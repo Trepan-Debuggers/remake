@@ -1380,8 +1380,9 @@ int main (int argc, char ** argv)
 	    status = EXIT_SUCCESS;
 	    break;
 	  case 2:
-	    /* Updating failed.  */
-	    status = EXIT_FAILURE;
+	    /* Updating failed.  POSIX.2 specifies exit status >1 for this;
+	       but in VMS, there is only success and failure.  */
+	    status = EXIT_FAILURE ? 2 : EXIT_FAILURE;
 	    break;
 	  case 1:
 	    /* We are under -q and would run some commands.  */
