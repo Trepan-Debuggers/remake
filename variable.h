@@ -93,7 +93,7 @@ extern struct variable *lookup_variable (), *define_variable ();
 extern struct variable *define_variable_for_file ();
 
 extern int pattern_matches ();
-extern char *subst_expand (), *patsubst_expand ();
+extern char *subst_expand (), *patsubst_expand (), *recursively_expand ();
 
 extern char **target_environment ();
 extern int export_all_variables;
