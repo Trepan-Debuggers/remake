@@ -716,3 +716,23 @@ get_path_max ()
   return value;
 }
 #endif
+
+/* On some systems, stat can return EINTR.  */
+
+int
+safe_stat (name, buf)
+     char *name;
+     struct stat *buf;
+{
+  int ret;
+
+#ifdef EINTR
+  do
+#endif
+    ret = stat (name, buf);
+#ifdef EINTR
+  while (ret < 0 && errno == EINTR);
+#endif
+
+  return  ret;
+}
