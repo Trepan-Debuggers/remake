@@ -45,6 +45,8 @@ include compatMakefile
 MAKE = $(MAKE_COMMAND) $(MAKEOVERRIDES)
 
 # Remove autoconf magic.
+prefix = /usr/local
+exec_prefix = $(prefix)
 extras := $(filter-out getloadavg.o @%@,$(extras)) getloadavg.o
 LOADLIBES := $(filter-out @%@,$(LOADLIBES))
 ALLOCA := $(filter-out @%@,$(ALLOCA))
@@ -86,7 +88,7 @@ GLOB =
 
 else
 
-CPPFLAGS := $(CPPFLAGS) -Iglob
+CPPFLAGS := $(filter-out @%@,$(CPPFLAGS)) -Iglob
 
 endif	 # works-for-make
 endif	 # $(libc_dir)
@@ -96,9 +98,7 @@ endif	 # !no_libc
 $(ARCH)/%.o: %.c
 	$(COMPILE.c) -Iglob $< $(OUTPUT_OPTION)
 $(ARCH)/glob/libglob.a: FORCE
-	$(MAKE) -C $(@D) $(@F) \
-		CC='$(CC)' CFLAGS='$(CFLAGS) -I..' \
-		CPPFLAGS='$(CPPFLAGS) -DHAVE_CONFIG_H'
+	$(MAKE) -C $(@D) $(@F)
 FORCE:
 objs := $(addprefix $(ARCH)/,$(objs))
 prog := $(ARCH)/make
