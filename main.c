@@ -785,17 +785,8 @@ main (argc, argv, envp)
 
   define_makeflags (1, 0);
 
-  f = lookup_file (".IGNORE");
-  ignore_errors_flag |= f != 0 && f->is_target;
-
-  f = lookup_file (".SILENT");
-  silent_flag |= f != 0 && f->is_target;
-
-  f = lookup_file (".POSIX");
-  posix_pedantic = f != 0 && f->is_target;
-
-  /* Make each `struct dep' point at the
-     `struct file' for the file depended on.  */
+  /* Make each `struct dep' point at the `struct file' for the file
+     depended on.  Also do magic for special targets.  */
 
   snap_deps ();
 
