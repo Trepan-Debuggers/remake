@@ -372,10 +372,6 @@ main (argc, argv, envp)
 
   /* Figure out where we are.  */
 
-#ifdef	USG
-  /* In some System V's, `getcwd' spawns a child running /bin/pwd.  */
-  push_signals_blocked_p (1);
-#endif
   if (getwd (current_directory) == 0)
     {
 #ifdef	USG
@@ -385,9 +381,6 @@ main (argc, argv, envp)
 #endif
       current_directory[0] = '\0';
     }
-#ifdef	USG
-  pop_signals_blocked_p ();
-#endif
 
   /* Read in variables from the environment.  It is important that this be
      done before `MAKE' and `MAKEOVERRIDES' are figured out so their
@@ -1324,16 +1317,18 @@ die (status)
 
   if (!dying)
     {
+      int err;
+
       dying = 1;
 
       if (print_version_flag && !printed_version)
 	print_version ();
 
       /* Wait for children to die.  */
-      wait_for_children (0, status != 0);
+      for (err = status != 0; job_slots_used > 0; err = 0)
+	reap_children (0, err);
 
       /* Remove the intermediate files.  */
-
       remove_intermediates (0);
 
       if (print_directory_flag)
@@ -1369,10 +1364,6 @@ log_working_directory (entering)
   else
     printf ("%s[%u]: %s ", program, makelevel, message);
 
-#ifdef	USG
-  /* In some System V's, `getcwd' spawns a child running /bin/pwd.  */
-  push_signals_blocked_p (1);
-#endif
   if (getwd (pwdbuf) == 0)
     {
 #ifdef	USG
@@ -1384,7 +1375,4 @@ log_working_directory (entering)
     }
   else
     printf ("directory `%s'\n", pwdbuf);
-#ifdef	USG
-  pop_signals_blocked_p ();
-#endif
 }
