@@ -1,0 +1,81 @@
+#                                                                    -*-perl-*-
+$description = "Test the abspath functions.";
+
+$details = "";
+
+run_make_test('
+ifneq ($(realpath $(abspath .)),$(CURDIR))
+  $(error )
+endif
+
+ifneq ($(realpath $(abspath ./)),$(CURDIR))
+  $(error )
+endif
+
+ifneq ($(realpath $(abspath .///)),$(CURDIR))
+  $(error )
+endif
+
+ifneq ($(abspath /),/)
+  $(error )
+endif
+
+ifneq ($(abspath ///),/)
+  $(error )
+endif
+
+ifneq ($(abspath /.),/)
+  $(error )
+endif
+
+ifneq ($(abspath ///.),/)
+  $(error )
+endif
+
+ifneq ($(abspath /./),/)
+  $(error )
+endif
+
+ifneq ($(abspath /.///),/)
+  $(error )
+endif
+
+ifneq ($(abspath /..),/)
+  $(error )
+endif
+
+ifneq ($(abspath ///..),/)
+  $(error )
+endif
+
+ifneq ($(abspath /../),/)
+  $(error )
+endif
+
+ifneq ($(abspath /..///),/)
+  $(error )
+endif
+
+
+ifneq ($(abspath /foo/bar/..),/foo)
+  $(error )
+endif
+
+ifneq ($(abspath /foo/bar/../../../baz),/baz)
+  $(error )
+endif
+
+ifneq ($(abspath /foo/bar/../ /..),/foo /)
+  $(error )
+endif
+
+
+.PHONY: all
+all: ; @:
+',
+'',
+'');
+
+
+# This tells the test driver that the perl test script executed properly.
+1;

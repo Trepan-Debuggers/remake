@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.21 2004/11/28 23:11:23 psmith Exp $
+@set RCSID $Id: make.texi,v 1.22 2004/11/30 19:51:24 bosk Exp $
 @set EDITION 0.61
 @set VERSION 3.80
 @set UPDATED 23 Feb 2003
@@ -6188,6 +6188,27 @@ wildcard characters (as in shell file name patterns).  The result of
 @code{wildcard} is a space-separated list of the names of existing files
 that match the pattern.
 @xref{Wildcards, ,Using Wildcard Characters in File Names}.
+
+@item $(realpath @var{names}@dots{})
+@findex realpath
+@cindex realpath
+@cindex file name, realpath of
+For each file name in @var{names} return the canonical absolute name.
+A canonical name does not contain any @code{.} or @code{..} components,
+nor any repeated path separators (@code{/}) or symlinks. In case of a
+failure the empty string is returned. Consult the @code{realpath(3)}
+documentation for a list of possible failure causes.
+
+@item $(abspath @var{names}@dots{})
+@findex abspath
+@cindex abspath
+@cindex file name, abspath of
+For each file name in @var{names} return an absolute name that does
+not contain any @code{.} or @code{..} components, nor any repeated path
+separators (@code{/}). Note that in contrast to @code{realpath}
+function, @code{abspath} does not resolve symlinks and does not require
+the file names to refer to an existing file or directory. Use the
+@code{wildcard} function to test for existence.
 @end table
 
 @node Foreach Function, If Function, File Name Functions, Functions
@@ -9755,6 +9776,17 @@ Join two parallel lists of words.@*
 Find file names matching a shell file name pattern (@emph{not} a
 @samp{%} pattern).@*
 @xref{Wildcard Function, ,The Function @code{wildcard}}.
+
+@item $(realpath @var{names}@dots{})
+For each file name in @var{names}, expand to an absolute name that
+does not contain any @code{.}, @code{..}, nor symlinks.@*
+@xref{File Name Functions, ,Functions for File Names}.
+
+@item $(abspath @var{names}@dots{})
+For each file name in @var{names}, expand to an absolute name that
+does not contain any @code{.} or @code{..} components, but preserves
+symlinks.@*
+@xref{File Name Functions, ,Functions for File Names}.
 
 @item $(error @var{text}@dots{})
 
