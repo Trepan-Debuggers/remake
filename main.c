@@ -1134,7 +1134,7 @@ main (argc, argv, envp)
 
 /* Parsing of arguments, decoding of switches.  */
 
-static char options[sizeof (switches) / sizeof (switches[0]) * 3];
+static char options[1 + sizeof (switches) / sizeof (switches[0]) * 3];
 static struct option long_options[(sizeof (switches) / sizeof (switches[0])) +
 				  (sizeof (long_option_aliases) /
 				   sizeof (long_option_aliases[0]))];
@@ -1152,6 +1152,7 @@ init_switches ()
     return;
 
   p = options;
+  *p++ = '+';			/* Always permute.  */
   for (i = 0; switches[i].c != '\0'; ++i)
     {
       long_options[i].name = (switches[i].long_name == 0 ? "" :
