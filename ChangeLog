@@ -1,3 +1,22 @@
+2000-01-23  Paul D. Smith  <psmith@gnu.org>
+
+	* main.c (decode_debug_flags): If debug_flag is set, enable all
+	debugging levels.
+	(debug_flag): Resurrect this flag variable.
+	(switches): Make -d give the old behavior of turning on all
+	debugging.  Change --debug alone to emit basic debugging and take
+	optional arguments to expand debugging.
+	* NEWS: Document the new debugging options.
+
+	* remake.c (no_rule_error): Remove this function.  This tries to
+	fix a real problem--see the description with the introduction of
+	this function below.  However, the cure is worse than the disease
+	and this approach won't work.
+	(remake_file): Put the code from no_rule_error back here.
+	(update_file_1): Remove call to no_rule_error.
+
+	* filedef.h (struct file): Remove mfile_status field.
+
 2000-01-22  Paul D. Smith  <psmith@gnu.org>
 
 	Integrate GNU gettext support.
@@ -18,6 +37,7 @@
 	* po/POTFILES.in, po/Makefile.in.in: New files.  Take
 	Makefile.in.in from the latest GNU tar distribution, as that
 	version works better than the one that comes with gettext.
+	* NEWS: Mention i18n ability.
 
 2000-01-21  Paul D. Smith  <psmith@gnu.org>
 
