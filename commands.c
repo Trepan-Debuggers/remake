@@ -329,6 +329,10 @@ RETSIGTYPE
 fatal_error_signal (sig)
      int sig;
 {
+#ifdef	__MSDOS__
+  remove_intermediates (1);
+  exit (1);
+#else	/* Not MSDOS.  */
   handling_fatal_signal = 1;
 
   /* Set the handling for this signal to the default.
@@ -385,6 +389,7 @@ fatal_error_signal (sig)
      will be unblocked when we return and arrive then to kill us.  */
   if (kill (getpid (), sig) < 0)
     pfatal_with_name ("kill");
+#endif	/* MSDOS.  */
 }
 
 /* Delete FILE unless it's precious or not actually a file (phony),
