@@ -162,7 +162,8 @@ ifeq ($(mkdep),$(mkdep-nolib))
 nolib-deps = $(depfiles)
 else
 %.dep: %.c
-	$(mkdep-nolib) $< | sed -e 's,$*\.o,$(@:.dep=.o) $@,' > $@
+	$(mkdep-nolib) $< | sed -e 's,$*\.o,$(@:.dep=.o) $@,' > $(@:.dep=.dtm)
+	mv -f $(@:.dep=.dtm) $@
 nolib-deps = $(patsubst $(archpfx)%,%,$(depfiles))
 endif
 # The distributed Makefile.in should contain deps for remote-stub only.
