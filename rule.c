@@ -252,7 +252,7 @@ new_pattern_rule (rule, override)
   rule->next = 0;
 
   /* Search for an identical rule.  */
-  lastrule = pattern_rules;
+  lastrule = 0;
   for (r = pattern_rules; r != 0; lastrule = r, r = r->next)
     for (i = 0; rule->targets[i] != 0; ++i)
       {
