@@ -197,6 +197,7 @@ build.sh.in: build.template compatMakefile
 	       $(patsubst $(archpfx)%,%,$(objs)))\
 	       $(patsubst %.c,%.o,$(filter %.c,$(globfiles)))@' \
 	    $< > $@.new
+	chmod a+x $@.new
 	mv -f $@.new $@
 
 # Make the distribution tar files.
