@@ -176,7 +176,7 @@ update_goal_chain (struct dep *goals)
                       /* If -q just triggered, stop immediately.  It doesn't
                          matter how much more we run, since we already know
                          the answer to return.  */
-                      stop = (!keep_going_flag && !question_flag
+                      stop = (question_flag && !keep_going_flag
                               && !rebuilding_makefiles);
                     }
                   else
@@ -307,8 +307,9 @@ update_file (struct file *file, unsigned int depth)
       status |= update_file_1 (f, depth);
       check_renamed (f);
 
+      /* If we got an error, don't bother with double_colon etc.  */
       if (status != 0 && !keep_going_flag)
-	break;
+	return status;
 
       if (f->command_state == cs_running
           || f->command_state == cs_deps_running)

@@ -1,5 +1,7 @@
 2005-02-28  Paul D. Smith  <psmith@gnu.org>
 
+	* scripts/options/dash-q: Add a test for Savannah bug # 7144.
+
 	* scripts/options/symlinks: New file to test checking of symlink
 	timestamps.  Can't use filename dash-L because it conflicts with
 	dash-l on case-insensitive filesystems.
