@@ -246,13 +246,15 @@ construct_vpath_list (pattern, dirpath)
 }
 
 /* Search the VPATH list whose pattern matches *FILE for a directory
-   where the name pointed to by FILE exists.  If it is found, the pointer
-   in FILE is set to the newly malloc'd name of the existing file and
-   we return 1.  Otherwise we return 0.  */
+   where the name pointed to by FILE exists.  If it is found, we set *FILE to
+   the newly malloc'd name of the existing file, *MTIME_PTR (if MTIME_PTR is
+   not NULL) to its modtime (or zero if no stat call was done), and return 1.
+   Otherwise we return 0.  */
 
 int
-vpath_search (file)
+vpath_search (file, mtime_ptr)
      char **file;
+     time_t *mtime_ptr;
 {
   register struct vpath *v;
 
@@ -264,11 +266,11 @@ vpath_search (file)
 
   for (v = vpaths; v != 0; v = v->next)
     if (pattern_matches (v->pattern, v->percent, *file))
-      if (selective_vpath_search (v, file))
+      if (selective_vpath_search (v, file, mtime_ptr))
 	return 1;
 
   if (general_vpath != 0
-      && selective_vpath_search (general_vpath, file))
+      && selective_vpath_search (general_vpath, file, mtime_ptr))
     return 1;
 
   return 0;
@@ -276,14 +278,16 @@ vpath_search (file)
 
 
 /* Search the given VPATH list for a directory where the name pointed
-   to by FILE exists.  If it is found, the pointer in FILE
-   is set to the newly malloc'd name of the existing file and we return 1.
+   to by FILE exists.  If it is found, we set *FILE to the newly malloc'd
+   name of the existing file, *MTIME_PTR (if MTIME_PTR is not NULL) to
+   its modtime (or zero if no stat call was done), and we return 1.
    Otherwise we return 0.  */
 
 static int
-selective_vpath_search (path, file)
+selective_vpath_search (path, file, mtime_ptr)
      struct vpath *path;
      char **file;
+     time_t *mtime_ptr;
 {
   int not_target;
   char *name, *n;
@@ -323,6 +327,8 @@ selective_vpath_search (path, file)
   /* Try each VPATH entry.  */
   for (i = 0; vpath[i] != 0; ++i)
     {
+      int exists_in_cache = 0;
+
       n = name;
 
       /* Put the next VPATH entry into NAME at N and increment N past it.  */
@@ -360,20 +366,38 @@ selective_vpath_search (path, file)
 	  /* We know the directory is in the hash table now because either
 	     construct_vpath_list or the code just above put it there.
 	     Does the file we seek exist in it?  */
-	  exists = dir_file_exists_p (name, filename);
+	  exists_in_cache = exists = dir_file_exists_p (name, filename);
 	}
 
       if (exists)
 	{
-	  /* We have found a file.
-	     Store the name we found into *FILE for the caller.  */
+	  /* The file is in the directory cache.
+	     Now check that it actually exists in the filesystem.
+	     The cache may be out of date.  When vpath thinks a file
+	     exists, but stat fails for it, confusion results in the
+	     higher levels.  */
+
+	  struct stat st;
 
 	  /* Put the slash back in NAME.  */
 	  *n = '/';
 
-	  *file = savestring (name, (n + 1 - name) + flen);
+	  if (!exists_in_cache	/* Makefile-mentioned file need not exist.  */
+	      || stat (name, &st) == 0)	/* Does it really exist?  */
+	    {
+	      /* We have found a file.
+		 Store the name we found into *FILE for the caller.  */
 
-	  return 1;
+	      *file = savestring (name, (n + 1 - name) + flen);
+
+	      if (mtime_ptr != 0)
+		/* Store the modtime into *MTIME_PTR for the caller.
+		   If we have had no need to stat the file here,
+		   we record a zero modtime to indicate this.  */
+		*mtime_ptr = exists_in_cache ? st.st_mtime : (time_t) 0;
+
+	      return 1;
+	    }
 	}
     }
 
