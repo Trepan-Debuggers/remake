@@ -25,9 +25,6 @@ LDFLAGS = -g
 # Define these for your system as follows:
 #	-DUSGr3			SVR3 (also define USG)
 #	-DHPUX			HP-UX (also define USG and USGr3 appropriately)
-#	-DHAVE_VFORK		USG, but have vfork
-#	-DVFORK_MISSING		Not USG, but no vfork
-#	-DNO_MINUS_C_MINUS_O	cc can't handle "cc -c foo.c -o foo.o"
 #	-DNO_ARCHIVES		To disable `ar' archive support.
 #	-DNO_FLOAT		To avoid using floating-point numbers.
 #	-DENUM_BITFIELDS	If the compiler isn't GCC but groks enum foo:2.
