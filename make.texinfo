@@ -2,7 +2,7 @@
 @setfilename make.info
 @synindex vr fn
 
-@c $Header: /sources/make/make/Attic/make.texinfo,v 1.63 1988/06/18 01:16:59 mcgrath Beta $
+@c $Header: /sources/make/make/Attic/make.texinfo,v 1.64 1988/06/19 16:15:50 mcgrath Beta $
 
 @ifinfo
 This file documents the GNU Make utility.
@@ -1835,7 +1835,7 @@ programs to run, directories to look in for source files, directories to
 write output in, or anything else you can imagine.
 
 A variable name may be any sequence characters not containing @samp{:},
-@samp{#}, @samp{=}, tab characters or leading or trailing spaces.  However,
+@samp{#}, @samp{=}, leading or trailing whitespace.  However,
 variable names containing characters other than letters, numbers and
 underscores should be avoided, as they may be given special meanings in the
 future, and they are not passed through the environment to a
@@ -1901,6 +1901,7 @@ name.  Thus, you could reference the variable @code{x} with @samp{$x}.
 However, this practice is strongly discouraged, except with the automatic
 variables (@pxref{Automatic}).
 
+
 @subsection Modified References
 @cindex modified variable reference
 @cindex substitution variable reference
@@ -1923,6 +1924,66 @@ bar := $(foo:.o=.c)
 
 @noindent
 sets @samp{bar} to @samp{a.c b.c c.c}.  @xref{Setting}.
+
+@subsection Recursive References
+@cindex recursive variable reference
+
+Variables may be referenced inside a variable reference.  This is called
+a @dfn{recursive variable reference}.  For example,
+
+@example
+x = y
+y = z
+a := $($(x))
+@end example
+
+@noindent
+defines @samp{a} as @samp{z}: the @samp{$(x)} inside @samp{$($(x))} expands
+to @samp{y}, so @samp{$($(x))} expands to @samp{$(y)} which in turn expands
+to @samp{z}.@refill
+
+Recursive variable references can get yet more recursive.  For example,
+
+@example
+x = $(y)
+y = z
+z = Hello
+a := $($(x))
+@end example
+
+@noindent
+defines @samp{a} as @samp{Hello}: @samp{$($(x))} becomes @samp{$($(y))}
+which becomes @samp{$(z)} which becomes @samp{Hello}.  This sort of
+recursion can go on for as many levels as you like (and can comprehend),
+though it's not clear that very many levels of recursion are useful.@refill
+
+Recursive variable references can also contain modified references and
+function invokations (@pxref{Functions}), just like any other reference.
+For example, using the @code{subst} function (@pxref{Text Functions}):
+
+@example
+x = variable1
+variable2 := Hello
+y = $(subst 1,2,$(x))
+z = y
+a := $($($(z)))
+@end example
+
+@noindent
+eventually defines @samp{a} as @samp{Hello}.  It is doubtful that anyone
+would ever want to write a recursive reference as convoluted as this one,
+but it works: @samp{$($($(z)))} expands to @samp{$($(y))} which becomes
+@samp{$($(subst 1,2,$(x)))} which changes @samp{variable1} to
+@samp{variable2} in @samp{$(x)} and finally expands to @samp{$(variable2)},
+a simple variable reference that becomes @samp{Hello}.@refill
+
+Recursive variable references are a complicated concept needed only for
+very complex makefile programming.  You need not worry about them in
+general, except to know that making a variable with a dollar sign in its
+name might have strange results.  Note also that @dfn{recursive variable
+references} are quite different from @dfn{recursive variables}
+(@pxref{Flavors}), though both are used together in complex ways when
+doing makefile programming.@refill
 
 @node Values, Flavors, Reference, Variables
 @section How Variables Get Their Values
