@@ -1,5 +1,5 @@
 /* Job execution and handling for GNU Make.
-Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -45,8 +45,6 @@ char default_shell[] = "/bin/sh";
 
 #if	defined(HAVE_SYS_WAIT) || !defined(USG)
 #include <sys/wait.h>
-#include <sys/time.h>
-#include <sys/resource.h>
 
 #ifndef	wait3
 extern int wait3 ();
@@ -759,7 +757,7 @@ load_too_high ()
       static int lossage = 0;
       /* Complain only once for the same error.  */
       if (lossage == 0 || errno != lossage)
-	perror_with_name ("getloadavg", "");
+	perror_with_name ("cannot enforce load limit", "getloadavg");
       lossage = errno;
       load = 0;
     }
