@@ -206,6 +206,7 @@ chop_commands (cmds)
       idx = strlen (cmds->commands) + 1;
       p = (char *) alloca (idx);
       bcopy (cmds->commands, p, idx);
+      idx = 0;
       while (*p != '\0')
 	{
 	  char *end = find_char_unquote (p, '\n', 0);
