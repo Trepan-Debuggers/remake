@@ -333,7 +333,7 @@ struct file *default_file;
 #ifdef	POSIX
 sigset_t fatal_signal_set;
 #else
-#ifndef	SIGSETMASK_MISSING
+#ifdef	HAVE_SIGSETMASK
 int fatal_signal_mask;
 #endif
 #endif
@@ -344,7 +344,7 @@ main (argc, argv, envp)
      char **argv;
      char **envp;
 {
-#ifdef	SYS_SIGLIST_MISSING
+#ifndef	HAVE_SYS_SIGLIST
   extern void init_siglist ();
 #endif
   extern RETSIGTYPE fatal_error_signal (), child_handler ();
@@ -363,7 +363,7 @@ main (argc, argv, envp)
   reading_filename = 0;
   reading_lineno_ptr = 0;
   
-#ifdef	SYS_SIGLIST_MISSING
+#ifndef	HAVE_SYS_SIGLIST
   init_siglist ();
 #endif
 
@@ -371,7 +371,7 @@ main (argc, argv, envp)
   sigemptyset (&fatal_signal_set);
 #define	ADD_SIG(sig)	sigaddset (&fatal_signal_set, sig)
 #else
-#ifndef	SIGSETMASK_MISSING
+#ifdef	HAVE_SIGSETMASK
   fatal_signal_mask = 0;
 #define	ADD_SIG(sig)	fatal_signal_mask |= sigmask (sig)
 #else
@@ -404,7 +404,7 @@ main (argc, argv, envp)
 
   /* Make sure stdout is line-buffered.  */
 
-#ifndef	SETLINEBUF_MISSING
+#ifdef	HAVE_SETLINEBUF
   setlinebuf (stdout);
 #else
 #ifndef	SETVBUF_REVERSED
@@ -437,7 +437,7 @@ main (argc, argv, envp)
 
   if (getcwd (current_directory, GET_PATH_MAX) == 0)
     {
-#ifndef	GETCWD_MISSING
+#ifdef	HAVE_GETCWD
       perror_with_name ("getcwd: ", "");
 #else
       error ("getwd: %s", current_directory);
@@ -1487,7 +1487,7 @@ log_working_directory (entering)
 
   if (getcwd (pwdbuf, GET_PATH_MAX) == 0)
     {
-#ifndef	GETCWD_MISSING
+#ifdef	HAVE_GETCWD
       perror_with_name ("getcwd: ", "");
 #else
       error ("getwd: %s", pwdbuf);
