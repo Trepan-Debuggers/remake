@@ -3,10 +3,13 @@
 @synindex vr fn
 
 @ignore
-$Header: /sources/make/make/Attic/make.texinfo,v 1.5 1988/04/23 22:01:48 roland Beta $
+$Header: /sources/make/make/Attic/make.texinfo,v 1.6 1988/04/24 00:57:23 roland Beta $
 
 $Log: make.texinfo,v $
-Revision 1.5  1988/04/23 22:01:48  roland
+Revision 1.6  1988/04/24 00:57:23  roland
+Removed $($@) automatic macro.
+
+Revision 1.5  88/04/23  22:01:48  roland
 * Added paragraph about reporting bugs.
 * Documented -v (print version info) flag.
 * Corrected a couple typos (probably made a couple more :-).
@@ -3543,9 +3546,6 @@ The stem with which an implicit rule matches (@pxref{Pattern Match}).
 If the target is @file{dir/a.foo.b} and the target pattern is
 @file{a.%.b} then the stem is @file{dir/foo}.  The stem is useful for
 constructing names of related files.@refill
-
-@item $($@@)
-The same as @code{$@@}, for compatibility with some other versions
 of @code{make}.
 @end table
 
