@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.42 1994/11/28 20:48:43 roland Alpha $])
+AC_REVISION([$Id: configure.in,v 1.43 1995/01/15 13:23:03 roland Alpha $])
 AC_PREREQ(2.1)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 AC_CONFIG_HEADER(config.h)
@@ -66,6 +66,10 @@ AC_TRY_LINK([#include <sys/types.h>
    union wait type, and they do not work together.  If union wait
    conflicts with WEXITSTATUS et al, we don't want to use it at all.  */
 if (WEXITSTATUS (status) != 0) pid = -1;
+#ifdef WTERMSIG
+/* If we have WEXITSTATUS and WTERMSIG, just use them on ints.  */
+-- blow chunks here --
+#endif
 #endif
 #ifdef HAVE_WAITPID
 /* Make sure union wait works with waitpid.  */
