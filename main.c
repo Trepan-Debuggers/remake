@@ -397,6 +397,15 @@ enter_command_line_file (name)
   return enter_file (savestring (name, strlen (name)));
 }
 
+/* Toggle -d on receipt of SIGUSR1.  */
+
+static RETSIGTYPE
+debug_signal_handler (sig)
+     int sig;
+{
+  debug_flag = ! debug_flag;
+}
+
 int
 main (argc, argv, envp)
      int argc;
@@ -742,6 +751,11 @@ main (argc, argv, envp)
 #endif
 #ifdef SIGCLD
   (void) signal (SIGCLD, child_handler);
+#endif
+
+  /* Let the user send us SIGUSR1 to toggle the -d flag during the run.  */
+#ifdef SIGUSR1
+  (void) signal (SIGUSR1, debug_signal_handler);
 #endif
 
   /* Define the initial list of suffixes for old-style rules.  */
