@@ -97,6 +97,35 @@ dosify (filename)
 }
 #endif /* __MSDOS__ */
 
+#ifdef _AMIGA
+#include <ctype.h>
+
+static char *
+amigafy (filename)
+     char *filename;
+{
+  static char amiga_filename[136];
+  char *df;
+  int i;
+
+  if (filename == 0)
+    return 0;
+
+  df = amiga_filename;
+
+  /* First, transform the name part.  */
+  for (i = 0; *filename != '\0'; ++i)
+  {
+    *df++ = tolower (*filename);
+    ++filename;
+  }
+
+  *df = 0;
+
+  return amiga_filename;
+}
+#endif /* _AMIGA */
+
 #ifdef VMS
 
 static int
@@ -232,11 +261,11 @@ find_directory (name)
 #endif
 
   for (p = name; *p != '\0'; ++p)
-    HASH (hash, *p);
+    HASHI (hash, *p);
   hash %= DIRECTORY_BUCKETS;
 
   for (dir = directories[hash]; dir != 0; dir = dir->next)
-    if (streq (dir->name, name))
+    if (strieq (dir->name, name))
       break;
 
   if (dir == 0)
@@ -363,6 +392,10 @@ dir_contents_file_exists_p (dir, filename)
   filename = dosify (filename);
 #endif
 
+#ifdef _AMIGA
+  filename = amigafy (filename);
+#endif
+
 #ifdef VMS
   filename = vmsify (filename,0);
 #endif
@@ -384,7 +417,7 @@ dir_contents_file_exists_p (dir, filename)
 
       for (df = dir->files[hash]; df != 0; df = df->next)
 	{
-	  if (streq (df->name, filename))
+	  if (strieq (df->name, filename))
 	    {
 	      return !df->impossible;
 	    }
@@ -412,7 +445,7 @@ dir_contents_file_exists_p (dir, filename)
 
       len = NAMLEN (d);
       for (i = 0; i < len; ++i)
-	HASH (newhash, d->d_name[i]);
+	HASHI (newhash, d->d_name[i]);
       newhash %= DIRFILE_BUCKETS;
 
       df = (struct dirfile *) xmalloc (sizeof (struct dirfile));
@@ -422,7 +455,7 @@ dir_contents_file_exists_p (dir, filename)
       df->impossible = 0;
       /* Check if the name matches the one we're searching for.  */
       if (filename != 0
-	  && newhash == hash && streq (d->d_name, filename))
+	  && newhash == hash && strieq (d->d_name, filename))
 	{
 	  return 1;
 	}
@@ -471,11 +504,17 @@ file_exists_p (name)
   dirend++;
   if (dirend == (char *)1)
     return dir_file_exists_p ("[]", name);
-#else
+#else /* !VMS */
   dirend = rindex (name, '/');
   if (dirend == 0)
     return dir_file_exists_p (".", name);
-#endif
+  if (dirend == 0)
+#ifndef _AMIGA
+    return dir_file_exists_p (".", name);
+#else /* !VMS && !AMIGA */
+    return dir_file_exists_p ("", name);
+#endif /* AMIGA */
+#endif /* VMS */
 
   dirname = (char *) alloca (dirend - name + 1);
   bcopy (name, dirname, dirend - name);
@@ -505,8 +544,12 @@ file_impossible (filename)
 #else
   dirend = rindex (p, '/');
   if (dirend == 0)
+#ifdef _AMIGA
+    dir = find_directory ("");
+#else /* !VMS && !AMIGA */
     dir = find_directory (".");
-#endif
+#endif /* AMIGA */
+#endif /* VMS */
   else
     {
       char *dirname = (char *) alloca (dirend - p + 1);
@@ -517,7 +560,7 @@ file_impossible (filename)
     }
 
   for (hash = 0; *p != '\0'; ++p)
-    HASH (hash, *p);
+    HASHI (hash, *p);
   hash %= DIRFILE_BUCKETS;
 
   if (dir->contents == 0)
@@ -574,8 +617,12 @@ file_impossible_p (filename)
 #else
   dirend = rindex (filename, '/');
   if (dirend == 0)
+#ifdef _AMIGA
+    dir = find_directory ("")->contents;
+#else /* !VMS && !AMIGA */
     dir = find_directory (".")->contents;
-#endif
+#endif /* AMIGA */
+#endif /* VMS */
   else
     {
       char *dirname = (char *) alloca (dirend - filename + 1);
@@ -592,6 +639,9 @@ file_impossible_p (filename)
 #ifdef __MSDOS__
   p = filename = dosify (p);
 #endif
+#ifdef _AMIGA
+  p = filename = amigafy (p);
+#endif
 #ifdef VMS
   p = filename = vmsify (p, 1);
 #endif
@@ -601,7 +651,7 @@ file_impossible_p (filename)
   hash %= DIRFILE_BUCKETS;
 
   for (next = dir->files[hash]; next != 0; next = next->next)
-    if (streq (filename, next->name))
+    if (strieq (filename, next->name))
       return next->impossible;
 
   return 0;
