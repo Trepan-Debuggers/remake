@@ -137,11 +137,12 @@ srcs = $(srcdir)/commands.c $(srcdir)/job.c $(srcdir)/dir.c		\
 .SUFFIXES:
 .SUFFIXES: .o .c .h .ps .dvi .info .texinfo
 
-.PHONY: all check info dvi
 all: make
 check: # No tests.
 info: make.info
 dvi: make.dvi
+# Some makes apparently use .PHONY as the default goal is it is before `all'.
+.PHONY: all check info dvi
 
 make.info: make.texinfo
 	$(MAKEINFO) -I$(srcdir) $(srcdir)/make.texinfo -o make.info
@@ -211,7 +212,9 @@ $(infodir)/make.info: make.info
 # Run install-info only if it exists.
 # Use `if' instead of just prepending `-' to the
 # line so we notice real errors from install-info.
-	if install-info --version >/dev/null 2>&1; then \
+# We use `$(SHELL) -c' because some shells do not
+# fail gracefully when there is an unknown command.
+        if $(SHELL) -c 'install-info --version' >/dev/null 2>&1; then \
 	  install-info --infodir=$(infodir) $$d/foo.info; \
 	else true; fi
 
