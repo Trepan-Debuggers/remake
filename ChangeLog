@@ -1,3 +1,13 @@
+Sat Jul 20 12:32:10 1996  Klaus Kämpf (kkaempf@progis.de)
+
+	* remake.c (f_mtime) [VMS]: Add missing `if' conditional for future
+	modtime check.
+	* config.h-vms, makefile.vms, readme.vms, vmsify.c: Update address.
+
+Sat Jul 20 05:29:43 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
+
+	* configure.in: Require autoconf 2.10 or later.
+
 Fri Jul 19 16:57:27 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 
 	* Version 3.74.6.
