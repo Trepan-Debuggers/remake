@@ -185,7 +185,7 @@ $(mandir)/$(instname).$(manext): make.man
 clean: glob-clean
 	-rm -f make *.o core
 realclean: clean glob-realclean
-	-rm -f TAGS tags make.info* make-* make.dvi *~
+	-rm -f TAGS tags make.info* make-* make.dvi
 	-rm -f make.?? make.??s make.log make.toc make.*aux
 
 .PHONY: glob-clean glob-realclean
