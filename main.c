@@ -1510,7 +1510,7 @@ define_makeflags (all, makefile)
 	      else
 		{
 		  char *buf = (char *) alloca (100);
-		  sprintf (buf, "%f", *(double *) cs->value_ptr);
+		  sprintf (buf, "%g", *(double *) cs->value_ptr);
 		  ADD_FLAG (buf, strlen (buf));
 		}
 	    }
@@ -1592,9 +1592,14 @@ define_makeflags (all, makefile)
       *p = '\0';
     }
 
-  /* On Sun, the value of MFLAGS starts with a `-' but the
-     value of MAKEFLAGS lacks the `-'.  Be compatible.  */
-  (void) define_variable ("MAKEFLAGS", 9, &flagstring[1], o_env, 0);
+  (void) define_variable ("MAKEFLAGS", 9,
+			  /* On Sun, the value of MFLAGS starts with a `-' but
+			     the value of MAKEFLAGS lacks the `-'.
+			     Be compatible with this unless FLAGSTRING starts
+			     with a long option `--foo', since removing the
+			     first dash would result in the bogus `-foo'.  */
+			  flagstring[1] == '-' ? flagstring : &flagstring[1],
+			  o_env, 0);
   (void) define_variable ("MFLAGS", 6, flagstring, o_env, 0);
 }
 
