@@ -7200,12 +7200,16 @@ named @file{foo.o}.  In connection with such usage, the automatic variables
 @end menu
 
 @node Archive Suffix Rules
-@subsection
-@c !!! new section here for .X.a
+@subsection Suffix Rules for Archive Files
+@cindex suffix rule, for archive
+@cindex archive, suffix rule
+@cindex @code{.a} (archives)
+
+!!!
 
 @node Archive Symbols,  ,  , Archive Update
 @subsection Updating Archive Symbol Directories
-@cindex __.SYMDEF
+@cindex @code{__.SYMDEF}
 @cindex updating archive symbol directories
 @cindex archive symbol directory updating
 @cindex symbol directories, updating archive 
