@@ -1,11 +1,25 @@
+2002-07-09  Paul D. Smith  <psmith@gnu.org>
+
+	* doc/make.texi (Prerequisite Types): Add a new section describing
+	order-only prerequisites.
+
+	* read.c (uniquize_deps): If we have the same file as both a
+	normal and order-only prereq, get rid of the order-only prereq,
+	since the normal one supersedes it.
+
 2002-07-08  Paul D. Smith  <psmith@gnu.org>
+
+	* AUTHORS: Added Greg McGary to the AUTHORS file.
+	* NEWS: Blurbed order-only prerequisites.
+	* file.c (print_file): Show order-only deps properly when printing
+	the database.
 
 	* maintMakefile: Add "update" targets for wget'ing the latest
 	versions of various external files.  Taken from Makefile.maint in
 	autoconf, etc.
 
-	* dosbuild.bat: Somehow we got _extra_ ^M's.  Remove them.
-	Reported by Eli Zaretskii  <eliz@is.elta.co.il>.
+	* dosbuild.bat: Somehow we got _double_ ^M's.  Remove them.
+	Reported by Eli Zaretskii <eliz@is.elta.co.il>.
 
 2002-07-07  Paul D. Smith  <psmith@gnu.org>
 
@@ -22,7 +36,7 @@
 	* implicit.c (pattern_search): Some systems apparently run short
 	of stack space, and using alloca() in this function caused an
 	overrun.  I modified it to use xmalloc() on the two variables
-	which seemed like they might get large.  Bug #476.
+	which seemed like they might get large.  Fixes Bug #476.
 
 	* main.c (print_version): Update copyright notice to conform with
 	GNU standards.

@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.1 2002/07/08 02:26:48 psmith Exp $
+@set RCSID $Id: make.texi,v 1.2 2002/07/09 06:35:56 psmith Exp $
 @set EDITION 0.60
 @set VERSION 3.80
 @set UPDATED 08 July 2002
@@ -158,6 +158,7 @@ Writing Rules
 
 * Rule Example::                An example explained.
 * Rule Syntax::                 General syntax explained.
+* Prerequisite Types::          There are two types of prerequisites.
 * Wildcards::                   Using wildcard characters such as `*'.
 * Directory Search::            Searching other directories for source files.
 * Phony Targets::               Using a target that is not a real file's name.
@@ -1473,6 +1474,7 @@ the makefile (often with a target called @samp{all}).
 @menu
 * Rule Example::                An example explained.
 * Rule Syntax::                 General syntax explained.
+* Prerequisite Types::          There are two types of prerequisites.
 * Wildcards::                   Using wildcard characters such as `*'.
 * Directory Search::            Searching other directories for source files.
 * Phony Targets::               Using a target that is not a real file's name.
@@ -1524,7 +1526,7 @@ added to the prerequisites.
 @end itemize
 @end ifinfo
 
-@node Rule Syntax, Wildcards, Rule Example, Rules
+@node Rule Syntax, Prerequisite Types, Rule Example, Rules
 @section Rule Syntax
 
 @cindex rule syntax
@@ -1593,7 +1595,49 @@ How to update is specified by @var{commands}.  These are lines to be
 executed by the shell (normally @samp{sh}), but with some extra features
 (@pxref{Commands, ,Writing the Commands in Rules}).
 
-@node Wildcards, Directory Search, Rule Syntax, Rules
+@node Prerequisite Types, Wildcards, Rule Syntax, Rules
+@comment  node-name,  next,  previous,  up
+@section Types of Prerequisites
+@cindex prerequisite types
+@cindex types of prerequisites
+
+@cindex prerequisites, normal
+@cindex normal prerequisites
+@cindex prerequisites, order-only
+@cindex order-only prerequisites
+There are actually two different types of prerequisites understood by
+GNU @code{make}: normal prerequisites such as described in the
+previous section, and @dfn{order-only} prerequisites.  A normal
+prerequisite actually makes two statements: first, it imposes an order
+of execution of build commands: any commands necessary to build any of
+a target's prerequisites will be fully executed before any commands
+necessary to build the target.  Second, it imposes a dependency
+relationship: if any prerequisite is newer than the target, then the
+target is considered out-of-date and must be rebuilt.
+
+Normally, this is exactly what you want: if a target's prerequisite is
+updated, then the target should also be updated.
+
+Occasionally, however, you have a situation where you want to impose a
+specific ordering on the rules to be invoked @emph{without} forcing
+the target to be updated if one of those rules is executed.  In that
+case, you want to define @dfn{order-only} prerequisites.  Order-only
+prerequisites can be specified by placing a pipe symbol (@code{|})
+in the prerequisites list: any prerequisites to the left of the pipe
+symbol are normal; any prerequisites to the right are order-only:
+
+@example
+@var{targets} : @var{normal-prerequisites} | @var{order-only-prerequisites}
+@end example
+
+The normal prerequisites section may of course be empty.  Also, you
+may still declare multiple lines of prerequisites for the same target:
+they are appended appropriately.  Note that if you declare the same
+file to be both a normal and an order-only prerequisite, the normal
+prerequisite takes precedence (since they are a strict superset of the
+behavior of an order-only prerequisite).
+
+@node Wildcards, Directory Search, Prerequisite Types, Rules
 @section Using Wildcard Characters in File Names
 @cindex wildcard
 @cindex file name with wildcards
