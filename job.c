@@ -417,31 +417,31 @@ reap_children (block, err)
          {
            HANDLE hPID;
            int err;
-    
+
            /* wait for anything to finish */
            if (hPID = process_wait_for_any()) {
-    
+
              /* was an error found on this process? */
              err = process_last_err(hPID);
-    
+
              /* get exit data */
              exit_code = process_exit_code(hPID);
-    
+
              if (err)
                fprintf(stderr, "make (e=%d): %s",
                        exit_code, map_win32_error_to_string(exit_code));
-    
+
              exit_sig = process_signal(hPID);
-    
+
              /* cleanup process */
              process_cleanup(hPID);
-    
+
              if (dos_batch_file) {
                remove (dos_bname);
                remove (dos_bename);
                dos_batch_file = 0;
              }
-    
+
              coredump = 0;
            }
            pid = (int) hPID;
@@ -601,7 +601,9 @@ reap_children (block, err)
 
 	  /* If the job failed, and the -k flag was not given, die,
 	     unless we are already in the process of dying.  */
-	  if (!err && child_failed && !keep_going_flag)
+	  if (!err && child_failed && !keep_going_flag &&
+	      /* fatal_error_signal will die with the right signal.  */
+	      !handling_fatal_signal)
 	    die (2);
 	}
 
@@ -636,6 +638,10 @@ free_child (child)
   free ((char *) child);
 }
 
+#ifdef POSIX
+extern sigset_t fatal_signal_set;
+#endif
+
 void
 block_sigs ()
 {
@@ -656,8 +662,6 @@ unblock_sigs ()
   return;
 }
 #else
-extern sigset_t fatal_signal_set;
-
 void
 unblock_sigs ()
 {
@@ -971,7 +975,7 @@ start_job_command (child)
                  fprintf(stderr, "%s ", argv[i]);
                fprintf(stderr, "\nCounted %d args in failed launch\n", i);
       }
-  } 
+  }
 #endif /* WIN32 */
 #endif	/* Not MSDOS.  */
 
@@ -1994,7 +1998,7 @@ construct_command_argv_internal (line, restp, shell, ifs)
    * This is technically an else to the above 'if (no_default_sh_exe)',
    * but (IMHO) coding if-else across ifdef is dangerous.
    */
-  if (!no_default_sh_exe) 
+  if (!no_default_sh_exe)
 #endif
   {
     /* SHELL may be a multi-word command.  Construct a command line
@@ -2091,7 +2095,7 @@ construct_command_argv (line, restp, file)
      * is not confused.
      */
     if (shell) {
-      char *p = w32ify(shell, 0); 
+      char *p = w32ify(shell, 0);
       strcpy(shell, p);
     }
 #endif
