@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.133 1994/04/21 02:33:10 roland Exp $
+@set RCSID $Id: make.texinfo,v 2.134 1994/04/21 22:23:37 roland Alpha $
 @set EDITION 0.45
 @set VERSION 3.71 Beta
 @set UPDATED 20 April 1994
@@ -3575,7 +3575,7 @@ they have particular specialized uses.  @xref{Automatic Variables}.
 * Defining::                    An alternate way to set a variable 
                                   to a verbatim string.
 * Environment::                 Variable values can come from the environment.
-* Automatic Variables::         Some special variables have predefined
+* Automatic::                   Some special variables have predefined
                                   meanings for use with implicit rules.
 @end menu
 
