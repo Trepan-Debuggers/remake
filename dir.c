@@ -248,7 +248,8 @@ struct directory_contents
   };
 
 static unsigned long
-directory_contents_hash_1 (void const *key_0)
+directory_contents_hash_1 (key_0)
+    const void *key_0;
 {
   struct directory_contents const *key = (struct directory_contents const *) key_0;
   unsigned long hash;
@@ -270,7 +271,8 @@ directory_contents_hash_1 (void const *key_0)
 }
 
 static unsigned long
-directory_contents_hash_2 (void const *key_0)
+directory_contents_hash_2 (key_0)
+    const void *key_0;
 {
   struct directory_contents const *key = (struct directory_contents const *) key_0;
   unsigned long hash;
@@ -293,7 +295,9 @@ directory_contents_hash_2 (void const *key_0)
 }
 
 static int
-directory_contents_hash_cmp (void const *xv, void const *yv)
+directory_contents_hash_cmp (xv, yv)
+    const void *xv;
+    const void *yv;
 {
   struct directory_contents const *x = (struct directory_contents const *) xv;
   struct directory_contents const *y = (struct directory_contents const *) yv;
@@ -341,19 +345,23 @@ struct directory
   };
 
 static unsigned long
-directory_hash_1 (void const *key)
+directory_hash_1 (key)
+    const void *key;
 {
   return_ISTRING_HASH_1 (((struct directory const *) key)->name);
 }
 
 static unsigned long
-directory_hash_2 (void const *key)
+directory_hash_2 (key)
+    const void *key;
 {
   return_ISTRING_HASH_2 (((struct directory const *) key)->name);
 }
 
 static int
-directory_hash_cmp (void const *x, void const *y)
+directory_hash_cmp (x, y)
+    const void *x;
+    const void *y;
 {
   return_ISTRING_COMPARE (((struct directory const *) x)->name,
 			  ((struct directory const *) y)->name);
@@ -379,19 +387,23 @@ struct dirfile
   };
 
 static unsigned long
-dirfile_hash_1 (void const *key)
+dirfile_hash_1 (key)
+    const void *key;
 {
   return_ISTRING_HASH_1 (((struct dirfile const *) key)->name);
 }
 
 static unsigned long
-dirfile_hash_2 (void const *key)
+dirfile_hash_2 (key)
+    const void *key;
 {
   return_ISTRING_HASH_2 (((struct dirfile const *) key)->name);
 }
 
 static int
-dirfile_hash_cmp (void const *xv, void const *yv)
+dirfile_hash_cmp (xv, yv)
+    const void *xv;
+    const void *yv;
 {
   struct dirfile const *x = ((struct dirfile const *) xv);
   struct dirfile const *y = ((struct dirfile const *) yv);

@@ -33,21 +33,25 @@ Boston, MA 02111-1307, USA.  */
 /* Hash table of all global variable definitions.  */
 
 static unsigned long
-variable_hash_1 (void const *keyv)
+variable_hash_1 (keyv)
+    const void *keyv;
 {
   struct variable const *key = (struct variable const *) keyv;
   return_STRING_N_HASH_1 (key->name, key->length);
 }
 
 static unsigned long
-variable_hash_2 (void const *keyv)
+variable_hash_2 (keyv)
+    const void *keyv;
 {
   struct variable const *key = (struct variable const *) keyv;
   return_STRING_N_HASH_2 (key->name, key->length);
 }
 
 static int
-variable_hash_cmp (void const *xv, void const *yv)
+variable_hash_cmp (xv, yv)
+    const void *xv;
+    const void *yv;
 {
   struct variable const *x = (struct variable const *) xv;
   struct variable const *y = (struct variable const *) yv;
