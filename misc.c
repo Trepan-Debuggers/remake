@@ -308,7 +308,7 @@ char *
 xmalloc (size)
      unsigned int size;
 {
-  char *result = malloc (size);
+  char *result = (char *) malloc (size);
   if (result == 0)
     fatal ("virtual memory exhausted");
   return result;
@@ -320,7 +320,7 @@ xrealloc (ptr, size)
      char *ptr;
      unsigned int size;
 {
-  char *result = realloc (ptr, size);
+  char *result = (char *) realloc (ptr, size);
   if (result == 0)
     fatal ("virtual memory exhausted");
   return result;
