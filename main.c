@@ -237,7 +237,7 @@ static struct command_switch switches[] =
     { 'h', usage_and_exit, 
 	0, 0, 0, 0, 0, 0,
 	"help", 0,
-	"Print this message and exit." },
+	"Print this message and exit" },
     { 'i', flag, (char *) &ignore_errors_flag, 1, 1, 0, 0, 0,
 	"ignore-errors", 0,
 	"Ignore errors from commands" },
@@ -310,6 +310,12 @@ static struct option long_option_aliases[] =
     { "recon",		no_argument,		0, 'n' },
     { "makefile",	required_argument,	0, 'f' },
   };
+
+/* The usage message prints the descriptions of options starting in
+   this column.  Make sure it leaves enough room for the longest
+   description to fit in less than 80 characters.  */
+
+#define	DESCRIPTION_COLUMN	30
 
 /* List of non-switch arguments.  */
 
@@ -1174,7 +1180,12 @@ positive integral argument",
   if (bad)
     {
       /* Print a nice usage message.  */
+
+      if (print_version_flag)
+	print_version ();
+
       fprintf (stderr, "Usage: %s [options] [target] ...\n", program);
+
       fputs ("Options:\n", stderr);
       for (cs = switches; cs->c != '\0'; ++cs)
 	{
@@ -1231,13 +1242,18 @@ positive integral argument",
 		}
 	  }
 
-	  if (p - buf >= 30)
+	  if (p - buf > DESCRIPTION_COLUMN - 2)
+	    /* The list of option names is too long to fit on the same
+	       line with the description, leaving at least two spaces.
+	       Print it on its own line instead.  */
 	    {
 	      fprintf (stderr, "%s\n", buf);
 	      buf[0] = '\0';
 	    }
 
-	  fprintf (stderr, "%-30s%s.\n", buf, cs->description);
+	  fprintf (stderr, "%*s%s.\n",
+		   - DESCRIPTION_COLUMN,
+		   buf, cs->description);
 	}
 
       die (1);
@@ -1393,15 +1409,19 @@ define_makeflags (pf, makefile)
   (void) define_variable ("MFLAGS", 6, flags, o_env, 0);
 }
 
-static int printed_version = 0;
-
 /* Print version information.  */
 
 static void
 print_version ()
 {
+  static int printed_version = 0;
+
   extern char *remote_description;
   char *precede = print_data_base_flag ? "# " : "";
+
+  if (printed_version)
+    /* Do it only once.  */
+    return;
 
   printf ("%sGNU Make version %s", precede, version_string);
   if (remote_description != 0 && *remote_description != '\0')
@@ -1455,7 +1475,7 @@ die (status)
 
       dying = 1;
 
-      if (print_version_flag && !printed_version)
+      if (print_version_flag)
 	print_version ();
 
       /* Wait for children to die.  */
