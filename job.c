@@ -1,5 +1,6 @@
 /* Job execution and handling for GNU Make.
-Copyright (C) 1988, 89, 90, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 90, 91, 92, 93, 94, 95, 96
+	Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -115,7 +116,6 @@ extern int start_remote_job_p ();
 extern int start_remote_job (), remote_status ();
 
 RETSIGTYPE child_handler ();
-void unblock_sigs ();
 static void free_child (), start_job_command ();
 static int load_too_high (), job_next_command ();
 
