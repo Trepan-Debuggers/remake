@@ -168,7 +168,7 @@ pattern_search (file, archive, depth, recursions)
       lastslash = rindex (filename, ']');
 #else
       lastslash = rindex (filename, '/');
-#ifdef __MSDOS__
+#if defined(__MSDOS__) || defined(WINDOWS32)
       /* Handle backslashes (possibly mixed with forward slashes)
 	 and the case of "d:file".  */
       {
