@@ -275,7 +275,7 @@ extern char *alloca ();
 # endif /* HAVE_ALLOCA_H.  */
 #endif /* GCC.  */
 
-#if ST_MTIM_NSEC
+#ifdef ST_MTIM_NSEC
 # if HAVE_INTTYPES_H
 #  include <inttypes.h>
 # endif

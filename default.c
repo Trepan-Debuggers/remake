@@ -396,10 +396,10 @@ static char *default_variables[] =
 
     /* This expands to $(CO) $(COFLAGS) $< $@ if $@ does not exist,
        and to the empty string if $@ does exist.  */
-    "CHECKOUT,v",
-    "+$(if $(wildcard $@),,$(CO) $(COFLAGS) $< $@)",
-
+    "CHECKOUT,v", "+$(if $(wildcard $@),,$(CO) $(COFLAGS) $< $@)",
     "CO", "co",
+    "COFLAGS", "",
+
     "CPP", "$(CC) -E",
 #ifdef	CRAY
     "CF77PPFLAGS", "-P",
