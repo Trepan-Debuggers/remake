@@ -223,7 +223,7 @@ fatal (s1, s2, s3, s4, s5, s6)
   fprintf (stderr, s1, s2, s3, s4, s5, s6);
   fputs (".  Stop.\n", stderr);
 
-  die (1);
+  die (2);
 }
 
 /* Print error message.  `s1' is printf control string, `s2' is arg for it. */
@@ -265,7 +265,7 @@ makefile_fatal (file, lineno, s1, s2, s3, s4, s5, s6)
   fprintf (stderr, s1, s2, s3, s4, s5, s6);
   fputs (".  Stop.\n", stderr);
 
-  die (1);
+  die (2);
 }
 
 #ifndef HAVE_STRERROR
