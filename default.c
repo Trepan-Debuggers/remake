@@ -63,9 +63,9 @@ static struct pspec default_terminal_rules[] =
 
     /* SCCS.  */
     { "%", "s.%",
-	"$(GET) $(GFLAGS) -G $@ $<" },
+	"$(GET) $(GFLAGS) $< $(SCCS_OUTPUT_OPTION)" },
     { "%", "SCCS/s.%",
-	"$(GET) $(GFLAGS) -G $@ $<" },
+	"$(GET) $(GFLAGS) $< $(SCCS_OUTPUT_OPTION)" },
 
     { 0, 0, 0 }
   };
@@ -293,6 +293,10 @@ static char *default_variables[] =
 #else	/* Xenix.  */
     "OUTPUT_OPTION", "-Fo$@",
 #endif	/* Not Xenix.  */
+#endif
+
+#ifdef	SCCS_GET_MINUS_G
+    "SCCS_OUTPUT_OPTION", "-G$@",
 #endif
 
     0, 0
