@@ -3,10 +3,13 @@
 @synindex vr fn
 
 @ignore
-$Header: /sources/make/make/Attic/make.texinfo,v 1.16 1988/05/15 18:58:00 mcgrath Exp $
+$Header: /sources/make/make/Attic/make.texinfo,v 1.17 1988/05/18 16:26:55 mcgrath Exp $
 
 $Log: make.texinfo,v $
-Revision 1.16  1988/05/15 18:58:00  mcgrath
+Revision 1.17  1988/05/18 16:26:55  mcgrath
+Fixed a couple Texinfo bugs.
+
+Revision 1.16  88/05/15  18:58:00  mcgrath
 Miscellaneous changes by Richard Stallman, added `$$@' to the
 list of unsupported features.
 
@@ -186,7 +189,7 @@ be recompiled, or how.  @xref{Running}.
 		 variables, functions, special targets and directives.
 @end menu
 
-@node Bugs,, Top, Top
+@node Bugs, Simple, Top, Top
 @section Problems and Bugs
 
 If you have problems with GNU @code{make} or think you've found a bug,
@@ -861,7 +864,7 @@ you do not need to change the individual rules, just the search paths.
 @end menu
 
 @node General Search, Selective Search, Directory Search, Directory Search
-@subsection @core{VPATH}: Search Path for All Dependencies
+@subsection @code{VPATH}: Search Path for All Dependencies
 
 The value of the variable @code{VPATH} is a list of directories which
 @code{make} should search (in the order specified) for dependency files.
