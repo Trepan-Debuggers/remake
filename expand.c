@@ -104,7 +104,28 @@ recursively_expand (v)
   return value;
 }
 
-/* Expand a simple reference to variable NAME, which LENGTH chars long.  */
+/* Warn that NAME is an undefined variable.  */
+
+#ifdef __GNUC__
+__inline
+#endif
+static void
+warn_undefined (name, length)
+     char *name;
+     unsigned int length;
+{
+  if (warn_undefined_variables_flag)
+    {
+      static const char warnmsg[] = "warning: undefined variable `%.*s'";
+      if (reading_filename != 0)
+	makefile_error (reading_filename, *reading_lineno_ptr,
+			warnmsg, length, name);
+      else
+	error (warnmsg, length, name);
+    }
+}
+
+/* Expand a simple reference to variable NAME, which is LENGTH chars long.  */
 
 #ifdef __GNUC__
 __inline
@@ -116,6 +137,9 @@ reference_variable (o, name, length)
      unsigned int length;
 {
   register struct variable *v = lookup_variable (name, length);
+
+  if (v == 0)
+    warn_undefined (name, length);
 
   if (v != 0 && *v->value != '\0')
     {
@@ -254,6 +278,8 @@ variable_expand (line)
 		char *subst_beg, *subst_end, *replace_beg, *replace_end;
 
 		v = lookup_variable (beg, colon - beg);
+		if (v == 0)
+		  warn_undefined (beg, colon - beg);
 
 		subst_beg = colon + 1;
 		count = 0;
