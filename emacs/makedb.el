@@ -1,5 +1,5 @@
 ;;; makedb.el --- GNU Make debugger mode via GUD and makedb
-;;; $Id: makedb.el,v 1.2 2004/06/17 02:37:27 rockyb Exp $
+;;; $Id: makedb.el,v 1.3 2004/06/24 08:48:46 rockyb Exp $
 
 ;; Copyright (C) 2004 Rocky Bernstein (rocky@panix.com) 
 
@@ -29,15 +29,39 @@
 ;; Codes:
 (require 'gud)
 ;; ======================================================================
-;; bashdb functions
+;; makedb functions
 
-;;; History of argument lists passed to bashdb.
 ;; History of argument lists passed to makedb.
 (defvar gud-makedb-history nil)
 
 ;; Convert a command line as would be typed normally to run a script
 ;; into one that invokes an Emacs-enabled debugging session.
 ;; "--debugger" in inserted as the first switch.
+
+(defun gud-makedb-massage-args (file args)
+  (let* ((new-args (list "--debugger"))
+	 (seen-e nil)
+	 (shift (lambda ()
+		  (setq new-args (cons (car args) new-args))
+		  (setq args (cdr args)))))
+    
+    ;; Pass all switches and -e scripts through.
+    (while (and args
+		(string-match "^-" (car args))
+		(not (equal "-" (car args)))
+		(not (equal "--" (car args))))
+      (funcall shift))
+    
+    (if (or (not args)
+	    (string-match "^-" (car args)))
+	(error "Can't use stdin as the script to debug"))
+    ;; This is the program name.
+    (funcall shift)
+
+  (while args
+    (funcall shift))
+  
+  (nreverse new-args)))
 
 ;; There's no guarantee that Emacs will hand the filter the entire
 ;; marker at once; it could be broken up across several strings.  We
@@ -91,35 +115,6 @@
 
     output))
 
-;; Convert a command line as would be typed normally to run a script
-;; into one that invokes an Emacs-enabled debugging session.
-;; "--debugger" in inserted as the first switch.
-
-(defun gud-makedb-massage-args (file args)
-  (let* ((new-args (list "--debugger -f Makefile"))
-	 (seen-e nil)
-	 (shift (lambda ()
-		  (setq new-args (cons (car args) new-args))
-		  (setq args (cdr args)))))
-    
-    ;; Pass all switches and -e scripts through.
-    (while (and args
-		(string-match "^-" (car args))
-		(not (equal "-" (car args)))
-		(not (equal "--" (car args))))
-      (funcall shift))
-    
-    (if (or (not args)
-	    (string-match "^-" (car args)))
-	(error "Can't use stdin as the script to debug"))
-    ;; This is the program name.
-    (funcall shift)
-
-  (while args
-    (funcall shift))
-  
-  (nreverse new-args)))
-
 (defun gud-makedb-find-file (f)
   (save-excursion
     (let ((buf (find-file-noselect f 'nowarn)))
@@ -127,7 +122,7 @@
       buf)))
 
 
-(defcustom gud-makedb-command-name "make --debugger"
+(defcustom gud-makedb-command-name "make -f Makefile"
   "File name for executing make debugger."
   :type 'string
   :group 'gud)
@@ -160,10 +155,10 @@ and source-file directory for your debugger."
   (gud-def gud-finish "finish"     "\C-f" "Finish executing current function.")
   (gud-def gud-up     "up %p"      "<" "Up N stack frames (numeric arg).")
   (gud-def gud-down   "down %p"    ">" "Down N stack frames (numeric arg).")
-  (gud-def gud-print  "pe %e"      "\C-p" "Evaluate bash expression at point.")
+  (gud-def gud-print  "pe %e"      "\C-p" "Evaluate make expression at point.")
 
   ;; Is this right?
-  (gud-def gud-statement "eval %e" "\C-e" "Execute Bash statement at point.")
+  (gud-def gud-statement "eval %e" "\C-e" "Execute make statement at point.")
 
   (local-set-key [menu-bar debug tbreak] '("Temporary Breakpoint" . gud-tbreak))
   (local-set-key [menu-bar debug finish] '("Finish Function" . gud-finish))
