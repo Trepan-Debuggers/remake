@@ -1,4 +1,4 @@
-/* Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+/* Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -527,7 +527,8 @@ user_access ()
      We now want to set the effective user and group IDs to the real IDs,
      which are the IDs of the process that exec'd make.  */
 
-#if	defined (USG) || defined (POSIX)
+#ifndef	HAVE_SETREUID
+
   /* System V has only the setuid/setgid calls to set user/group IDs.
      There is an effective ID, which can be set by setuid/setgid.
      It can be set (unless you are root) only to either what it already is
@@ -535,21 +536,30 @@ user_access ()
      the real ID (return by getuid/getgid, now in user_uid/user_gid),
      or the saved set ID (what the effective ID was before this set-ID
      executable (make) was exec'd).  */
+
   if (setuid (user_uid) < 0)
-    pfatal_with_name ("setuid");
-  if (setgid (user_gid) < 0)
-    pfatal_with_name ("setgid");
+    pfatal_with_name ("user_access: setuid");
+
 #else
+
   /* In 4BSD, the setreuid/setregid calls set both the real and effective IDs.
      They may be set to themselves or each other.  So you have two alternatives
      at any one time.  If you use setuid/setgid, the effective will be set to
      the real, leaving only one alternative.  Using setreuid/setregid, however,
      you can toggle between your two alternatives by swapping the values in a
      single setreuid or setregid call.  */
+
   if (setreuid (make_uid, user_uid) < 0)
-    pfatal_with_name ("setreuid");
+    pfatal_with_name ("user_access: setreuid");
+
+#endif
+
+#ifndef	HAVE_SETREGID
+  if (setgid (user_gid) < 0)
+    pfatal_with_name ("user_access: setgid");
+#else
   if (setregid (make_gid, user_gid) < 0)
-    pfatal_with_name ("setregid");
+    pfatal_with_name ("user_access: setregid");
 #endif
 
   current_access = user;
@@ -568,16 +578,20 @@ make_access ()
 
   /* See comments in user_access, above.  */
 
-#if	defined (USG) || defined (POSIX)
+#ifndef	HAVE_SETREUID
   if (setuid (make_uid) < 0)
-    pfatal_with_name ("setuid");
-  if (setgid (make_gid) < 0)
-    pfatal_with_name ("setgid");
+    pfatal_with_name ("make_access: setuid");
 #else
   if (setreuid (user_uid, make_uid) < 0)
-    pfatal_with_name ("setreuid");
+    pfatal_with_name ("make_access: setreuid");
+#endif
+
+#ifndef	HAVE_SETREGID
+  if (setgid (make_gid) < 0)
+    pfatal_with_name ("make_access: setgid");
+#else
   if (setregid (user_gid, make_gid) < 0)
-    pfatal_with_name ("setregid");
+    pfatal_with_name ("make_access: setregid");
 #endif
 
   current_access = make;
@@ -592,9 +606,9 @@ child_access ()
      They cannot be changed back to make's.  */
 
   if (setuid (user_uid) < 0)
-    pfatal_with_name ("setuid");
+    pfatal_with_name ("child_access: setuid");
   if (setgid (user_gid) < 0)
-    pfatal_with_name ("setgid");
+    pfatal_with_name ("child_access: setgid");
 }
 
 #ifdef NEED_GET_PATH_MAX
