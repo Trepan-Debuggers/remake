@@ -1385,11 +1385,24 @@ parse_file_seq (stringp, stopchar, size, strip)
       p--;
 
       if (strip)
-	while (q[0] == '.' && q[1] == '/' && q[2] != '\0' && !isblank (q[2]))
-	  q += 2;
+	{
+	  /* Skip leading `./'s.  */
+	  while (p - q > 2 && q[0] == '.' && q[1] == '/')
+	    {
+	      q += 2;		/* Skip "./".  */
+	      while (q < p && *q == '/')
+		/* Skip following slashes: ".//foo" is "foo", not "/foo".  */
+		++q;
+	    }
+	}
 
       /* Extract the filename just found, and skip it.  */
-      name = savestring (q, p - q);
+
+      if (q == p)
+	/* ".///" was stripped to "".  */
+	name = savestring ("./", 2);
+      else
+	name = savestring (q, p - q);
 
       /* Add it to the front of the chain.  */
       new1 = (struct nameseq *) xmalloc (size);
