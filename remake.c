@@ -593,7 +593,9 @@ update_file_1 (file, depth)
 
 /* Set FILE's `updated' flag and re-check its mtime and the mtime's of all
    files listed in its `also_make' member.  Under -t, this function also
-   touches FILE.  */
+   touches FILE.
+
+   On return, FILE->update_status will no longer be -1 if it was.  */
 
 void
 notice_finished_file (file)
@@ -668,6 +670,10 @@ notice_finished_file (file)
 	     never be done because the target is already updated.  */
 	  (void) f_mtime (d->file, 0);
       }
+  else if (file->update_status == -1)
+    /* Nothing was done for FILE, but it needed nothing done.
+       So mark it now as "succeeded".  */
+    file->update_status = 0;
 }
 
 /* Check whether another file (whose mtime is THIS_MTIME)
