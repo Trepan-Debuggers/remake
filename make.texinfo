@@ -8,8 +8,8 @@
 
 @set EDITION 0.37
 @set VERSION 3.63 Beta
-@set UPDATED 15 September 1992
-@set UPDATE-MONTH September 1992
+@set UPDATED 13 November 1992
+@set UPDATE-MONTH November 1992
 
 @c finalout
 
@@ -100,7 +100,6 @@ for @code{make} Version @value{VERSION}.@refill
 This manual describes @code{make} and contains the following chapters:@refill
 @end ifinfo
 
-@c !!!!! Edit descriptions.
 @menu
 * Overview::                    Overview of @code{make}.
 * Copying::                     Your rights and freedoms.
@@ -2669,9 +2668,8 @@ how the sub-@code{make} relates to the top-level @code{make}.
 * MAKE Variable::               The special effects of using @samp{$(MAKE)}.
 * Variables/Recursion::         How to communicate variables to a sub-@code{make}.
 * Options/Recursion::           How to communicate options to a sub-@code{make}.
-* -w Option::                   How to use the @samp{-w} or @samp{--print-directory} 
-                                  option to debug
-                                  makefiles with recursive @code{make} commands.
+* -w Option::                   How the @samp{-w} or @samp{--print-directory} option
+                                 helps debug use of recursive @code{make} commands.
 @end menu
 
 @node MAKE Variable, Variables/Recursion,  , Recursion
@@ -4123,21 +4121,23 @@ $(patsubst %.c,%.o,x.c.c bar.c)
 @noindent
 produces the value @samp{x.c.o bar.o}.
 
-@c !!!! This needs more work.
-There are shorthand representations for the @code{patsubst} function.
+Substitution references (@pxref{Substitution Refs, ,Substitution
+References}) are a simpler way to get the effect of the @code{patsubst}
+function:
 
 @example
-$(@var{var}:%@var{pattern}=@var{replacement})  
+$(@var{var}:@var{pattern}=@var{replacement})  
 @end example
 
 @noindent
 is equivalent to 
 
 @example
-$(patsubst %@var{pattern},@var{replacement},$(@var{var})
+$(patsubst @var{pattern},@var{replacement},$(@var{var}))
 @end example
 
-and
+The second shorthand simplifies one of the most common uses of
+@code{patsubst}: replacing the suffix at the end of file names.
 
 @example
 $(@var{var}:@var{suffix}=@var{replacement}) 
@@ -4148,6 +4148,27 @@ is equivalent to
 
 @example
 $(patsubst %@var{suffix},%@var{replacement},$(@var{var}))
+@end example
+
+@noindent
+For example, you might have a list of object files:
+
+@example
+objects = foo.o bar.o baz.o
+@end example
+
+@noindent
+To get the list of corresponding source files, you could simply write:
+
+@example
+$(objects:.o=.c)
+@end example
+
+@noindent
+instead of using the general form:
+
+@example
+$(patsubst %.o,%.c,$(objects))
 @end example
 
 @item $(strip @var{string})
@@ -4375,7 +4396,7 @@ $(basename src/foo.c hacks)
 @noindent
 produces the result @samp{src/foo hacks}.
 
-@c !!! plural convention with dots (be consistent)
+@c plural convention with dots (be consistent)
 @item $(addsuffix @var{suffix},@var{names}@dots{})
 @findex addsuffix
 The argument @var{names} is regarded as a series of names, separated
@@ -6555,6 +6576,7 @@ main use is as subroutine libraries for linking.
 @menu
 * Archive Members::             Archive members as targets.
 * Archive Update::              The implicit rule for archive member targets.
+* !!! ::                        the .X.a kludge
 @end menu
 
 @node Archive Members, Archive Update,  , Archives
@@ -6730,7 +6752,7 @@ Execution of recursive commands to run @code{make} via the variable
 @code{MAKE} even if @samp{-n}, @samp{-q} or @samp{-t} is specified.
 @xref{Recursion, ,Recursive Use of @code{make}}.
 
-@c !!!! what about the kludge for this???
+@c !!! what about the kludge for this???
 @item
 Support for suffix @samp{.a} in suffix rules.  In GNU @code{make},
 this is actually implemented by chaining with one pattern rule for
