@@ -498,9 +498,15 @@ main (argc, argv, envp)
   for (i = 0; envp[i] != 0; ++i)
     {
       register char *ep = envp[i];
-      while (*ep++ != '=')
-	;
-      (void) define_variable (envp[i], ep - envp[i] - 1, ep, o_env, 1);
+      while (*ep != '=')
+	++ep;
+      define_variable (envp[i], ep - envp[i], ep + 1, o_env, 1)
+	/* Force exportation of every variable culled from the environment.
+	   We used to rely on target_environment's v_default code to do this.
+	   But that does not work for the case where an environment variable
+	   is redefined in a makefile with `override'; it should then still
+	   be exported, because it was originally in the environment.  */
+	->export = v_export;
     }
 
   /* Decode the switches.  */
