@@ -573,14 +573,17 @@ update_file_1 (file, depth)
 
   switch (file->update_status)
     {
-    case 1:
+    case 2:
       DEBUGPR ("Failed to remake target file `%s'.\n");
       break;
     case 0:
       DEBUGPR ("Successfully remade target file `%s'.\n");
       break;
+    case 1:
+      DEBUGPR ("Target file `%s' needs remade under -q.\n");
+      break;
     default:
-      assert (file->update_status == 0 || file->update_status == 1);
+      assert (file->update_status >= 0 && file->update_status <= 2);
       break;
     }
 
