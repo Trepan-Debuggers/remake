@@ -179,7 +179,7 @@ tests:# $(testdir)/run_make_tests.pl $(prog)
 #	cd $(<D); MAKELEVEL=0 perl $(<F)
 
 build.sh.in: build.template
-	sed -e 's@%objs%@$(filter-out $(GLOB) $(ALLOCA) $(extras),\
+	sed -e 's@%objs%@$(filter-out remote-% $(GLOB) $(ALLOCA) $(extras),\
 	       $(patsubst $(archpfx)%,%,$(objs)))\
 	       $(patsubst %.c,%.o,$(filter %.c,$(globfiles)))@' \
 	    $< > $@.new
