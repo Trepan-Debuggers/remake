@@ -367,11 +367,9 @@ fatal_error_signal (sig)
   if (sig == SIGTERM)
     {
       register struct child *c;
-      push_signals_blocked_p (1);
       for (c = children; c != 0; c = c->next)
 	if (!c->remote)
 	  (void) kill (c->pid, SIGTERM);
-      pop_signals_blocked_p ();
     }
 
   /* If we got a signal that means the user
@@ -380,7 +378,6 @@ fatal_error_signal (sig)
   if (PROPAGATED_SIGNAL_MASK & sigmask (sig))
     {
       register struct child *c;
-      push_signals_blocked_p (1);
 
       /* Remote children won't automatically get signals sent
 	 to the process group, so we must send them.  */
@@ -391,15 +388,15 @@ fatal_error_signal (sig)
       for (c = children; c != 0; c = c->next)
 	delete_child_targets (c);
 
-      pop_signals_blocked_p ();
-
       /* Clean up the children.  We don't just use the call below because
 	 we don't want to print the "Waiting for children" message.  */
-      wait_for_children (0, 0);
+      while (job_slots_used > 0)
+	reap_children (1, 0);
     }
   else
     /* Wait for our children to die.  */
-    wait_for_children (0, 1);
+    while (job_slots_used > 0)
+      reap_children (1, 1);
 
   /* Delete any non-precious intermediate files that were made.  */
 
