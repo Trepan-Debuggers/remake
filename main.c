@@ -365,6 +365,34 @@ int fatal_signal_mask;
 #endif
 #endif
 
+static struct file *
+enter_command_line_file (name)
+     char *name;
+{
+  /* This is also done in parse_file_seq, so this is redundant
+     for names read from makefiles.  It is here for names passed
+     on the command line.  */
+  while (name[0] == '.' && name[1] == '/' && name[2] != '\0')
+    {
+      name += 2;
+      while (*name == '/')
+	/* Skip following slashes: ".//foo" is "foo", not "/foo".  */
+	++name;
+    }
+  
+  if (*name == '\0')
+    {
+      /* It was all slashes!  Move back to the dot and truncate
+	 it after the first slash, so it becomes just "./".  */
+      do
+	--name;
+      while (name[0] != '.');
+      name[2] = '\0';
+    }
+
+  return enter_file (savestring (name, strlen (name)));
+}
+
 int
 main (argc, argv, envp)
      int argc;
@@ -550,7 +578,7 @@ main (argc, argv, envp)
 	{
 	  /* It was not a variable definition, so it is a target to be made.
 	     Enter it as a file and add it to the dep chain of goals.  */
-	  f = enter_file (other_args->list[i]);
+	  f = enter_command_line_file (other_args->list[i]);
 	  f->cmd_target = 1;
 	  
 	  if (goals == 0)
@@ -663,9 +691,6 @@ main (argc, argv, envp)
 	    static char name[] = "/tmp/GmXXXXXX";
 	    FILE *outfile;
 
-	    /* Free the storage allocated for "-".  */
-	    free (makefiles->list[i]);
-
 	    /* Make a unique filename.  */
 	    (void) mktemp (name);
 
@@ -686,7 +711,10 @@ main (argc, argv, envp)
 
 	    /* Replace the name that read_all_makefiles will
 	       see with the name of the temporary file.  */
-	    makefiles->list[i] = savestring (name, sizeof name - 1);
+	    {
+	      makefiles->list[i] = (char *) alloca (sizeof (name));
+	      bcopy (name, makefiles->list[i], sizeof (name));
+	    }
 
 	    /* Make sure the temporary file will not be remade.  */
 	    f = enter_file (savestring (name, sizeof name - 1));
@@ -776,7 +804,7 @@ main (argc, argv, envp)
   if (old_files != 0)
     for (p = old_files->list; *p != 0; ++p)
       {
-	f = enter_file (*p);
+	f = enter_command_line_file (*p);
 	f->last_mtime = (time_t) 1;
 	f->updated = 1;
 	f->update_status = 0;
@@ -788,7 +816,7 @@ main (argc, argv, envp)
       now = time ((time_t *) 0);
       for (p = new_files->list; *p != 0; ++p)
 	{
-	  f = enter_file (*p);
+	  f = enter_command_line_file (*p);
 	  f->last_mtime = now;
 	}
     }
@@ -1135,7 +1163,7 @@ decode_switches (argc, argv, env)
       other_args->max = argc + 1;
       other_args->list = (char **) xmalloc ((argc + 1) * sizeof (char *));
       other_args->idx = 1;
-      other_args->list[0] = savestring (argv[0], strlen (argv[0]));
+      other_args->list[0] = argv[0];
     }
 
   /* getopt does most of the parsing for us.
@@ -1205,7 +1233,7 @@ decode_switches (argc, argv, env)
 			xrealloc ((char *) sl->list,
 				  sl->max * sizeof (char *));
 		    }
-		  sl->list[sl->idx++] = savestring (optarg, strlen (optarg));
+		  sl->list[sl->idx++] = optarg;
 		  sl->list[sl->idx] = 0;
 		  break;
 
