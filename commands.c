@@ -386,7 +386,7 @@ fatal_error_signal (sig)
 #ifdef _AMIGA
   remove_intermediates (1);
   if (sig == SIGINT)
-     fputs ("*** Break.\n", stderr);
+     fputs (_("*** Break.\n"), stderr);
 
   exit (10);
 #else /* not Amiga */
@@ -478,10 +478,10 @@ delete_target (file, on_behalf_of)
       if (ar_member_date (file->name) != FILE_TIMESTAMP_S (file->last_mtime))
 	{
 	  if (on_behalf_of)
-	    error (NILF, "*** [%s] Archive member `%s' may be bogus; not deleted",
+	    error (NILF, _("*** [%s] Archive member `%s' may be bogus; not deleted"),
 		   on_behalf_of, file->name);
 	  else
-	    error (NILF, "*** Archive member `%s' may be bogus; not deleted",
+	    error (NILF, _("*** Archive member `%s' may be bogus; not deleted"),
 		   file->name);
 	}
       return;
@@ -493,9 +493,9 @@ delete_target (file, on_behalf_of)
       && FILE_TIMESTAMP_STAT_MODTIME (st) != file->last_mtime)
     {
       if (on_behalf_of)
-	error (NILF, "*** [%s] Deleting file `%s'", on_behalf_of, file->name);
+	error (NILF, _("*** [%s] Deleting file `%s'"), on_behalf_of, file->name);
       else
-	error (NILF, "*** Deleting file `%s'", file->name);
+	error (NILF, _("*** Deleting file `%s'"), file->name);
       if (unlink (file->name) < 0
 	  && errno != ENOENT)	/* It disappeared; so what.  */
 	perror_with_name ("unlink: ", file->name);
@@ -533,12 +533,12 @@ print_commands (cmds)
 {
   register char *s;
 
-  fputs ("#  commands to execute", stdout);
+  fputs (_("#  commands to execute"), stdout);
 
   if (cmds->fileinfo.filenm == 0)
-    puts (" (built-in):");
+    puts (_(" (built-in):"));
   else
-    printf (" (from `%s', line %lu):\n",
+    printf (_(" (from `%s', line %lu):\n"),
             cmds->fileinfo.filenm, cmds->fileinfo.lineno);
 
   s = cmds->commands;

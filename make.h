@@ -40,6 +40,13 @@ Boston, MA 02111-1307, USA.  */
 #endif /* C++ or ANSI C.  */
 
 
+/* For now, set gettext macro to a no-op.  */
+#undef _
+#undef N_
+#define _(s)    s
+#define N_(s)   s
+
+
 #ifdef  CRAY
 /* This must happen before #include <signal.h> so
    that the declaration therein is changed.  */

@@ -304,7 +304,7 @@ fatal (flocp, fmt, va_alist)
   VA_PRINTF (stderr, fmt, args);
   VA_END (args);
 
-  fputs (".  Stop.\n", stderr);
+  fputs (_(".  Stop.\n"), stderr);
 
   die (2);
 }
@@ -326,7 +326,7 @@ strerror (errnum)
   if (errno < sys_nerr)
     return sys_errlist[errnum];
 
-  sprintf (buf, "Unknown error %d", errnum);
+  sprintf (buf, _("Unknown error %d"), errnum);
   return buf;
 }
 #endif
@@ -366,7 +366,7 @@ xmalloc (size)
 {
   char *result = (char *) malloc (size);
   if (result == 0)
-    fatal (NILF, "virtual memory exhausted");
+    fatal (NILF, _("virtual memory exhausted"));
   return result;
 }
 
@@ -381,7 +381,7 @@ xrealloc (ptr, size)
   /* Some older implementations of realloc() don't conform to ANSI.  */
   result = ptr ? realloc (ptr, size) : malloc (size);
   if (result == 0)
-    fatal (NILF, "virtual memory exhausted");
+    fatal (NILF, _("virtual memory exhausted"));
   return result;
 }
 
@@ -399,7 +399,7 @@ xstrdup (ptr)
 #endif
 
   if (result == 0)
-    fatal (NILF, "virtual memory exhausted");
+    fatal (NILF, _("virtual memory exhausted"));
 
 #ifdef HAVE_STRDUP
   return result;
@@ -650,7 +650,7 @@ log_access (flavor)
      but we write this one to stderr because it might be
      run in a child fork whose stdout is piped.  */
 
-  fprintf (stderr, "%s access: user %lu (real %lu), group %lu (real %lu)\n",
+  fprintf (stderr, _("%s access: user %lu (real %lu), group %lu (real %lu)\n"),
 	   flavor, (unsigned long) geteuid (), (unsigned long) getuid (),
            (unsigned long) getegid (), (unsigned long) getgid ());
   fflush (stderr);
@@ -671,7 +671,7 @@ init_access ()
   if (user_uid == -1 || user_gid == -1 || make_uid == -1 || make_gid == -1)
     pfatal_with_name ("get{e}[gu]id");
 
-  log_access ("Initialized");
+  log_access (_("Initialized"));
 
   current_access = make;
 #endif

@@ -301,22 +301,22 @@ file_hash_enter (file, name, oldhash, oldname)
 		 but give a message to let the user know what's going on.  */
 	      if (oldfile->cmds->fileinfo.filenm != 0)
                 error (&file->cmds->fileinfo,
-                                "Commands were specified for \
-file `%s' at %s:%lu,",
+                                _("Commands were specified for \
+file `%s' at %s:%lu,"),
                                 oldname, oldfile->cmds->fileinfo.filenm,
                                 oldfile->cmds->fileinfo.lineno);
 	      else
 		error (&file->cmds->fileinfo,
-				"Commands for file `%s' were found by \
-implicit rule search,",
+				_("Commands for file `%s' were found by \
+implicit rule search,"),
 				oldname);
 	      error (&file->cmds->fileinfo,
-			      "but `%s' is now considered the same file \
-as `%s'.",
+			      _("but `%s' is now considered the same file \
+as `%s'."),
 			      oldname, name);
 	      error (&file->cmds->fileinfo,
-			      "Commands for `%s' will be ignored \
-in favor of those for `%s'.",
+			      _("Commands for `%s' will be ignored \
+in favor of those for `%s'."),
 			      name, oldname);
 	    }
 	}
@@ -336,12 +336,12 @@ in favor of those for `%s'.",
       merge_variable_set_lists (&oldfile->variables, file->variables);
 
       if (oldfile->double_colon && file->is_target && !file->double_colon)
-	fatal (NILF, "can't rename single-colon `%s' to double-colon `%s'",
+	fatal (NILF, _("can't rename single-colon `%s' to double-colon `%s'"),
 	       oldname, name);
       if (!oldfile->double_colon  && file->double_colon)
 	{
 	  if (oldfile->is_target)
-	    fatal (NILF, "can't rename double-colon `%s' to single-colon `%s'",
+	    fatal (NILF, _("can't rename double-colon `%s' to single-colon `%s'"),
 		   oldname, name);
 	  else
 	    oldfile->double_colon = file->double_colon;
@@ -408,7 +408,7 @@ remove_intermediates (sig)
 	  if (!f->dontcare)
 	    {
 	      if (sig)
-		error (NILF, "*** Deleting intermediate file `%s'", f->name);
+		error (NILF, _("*** Deleting intermediate file `%s'"), f->name);
 	      else if (!silent_flag)
 		{
 		  if (! doneany)
@@ -612,7 +612,7 @@ print_file (f)
 
   putchar ('\n');
   if (!f->is_target)
-    puts ("# Not a target:");
+    puts (_("# Not a target:"));
   printf ("%s:%s", f->name, f->double_colon ? ":" : "");
 
   for (d = f->deps; d != 0; d = d->next)
@@ -620,45 +620,45 @@ print_file (f)
   putchar ('\n');
 
   if (f->precious)
-    puts ("#  Precious file (dependency of .PRECIOUS).");
+    puts (_("#  Precious file (dependency of .PRECIOUS)."));
   if (f->phony)
-    puts ("#  Phony target (dependency of .PHONY).");
+    puts (_("#  Phony target (dependency of .PHONY)."));
   if (f->cmd_target)
-    puts ("#  Command-line target.");
+    puts (_("#  Command-line target."));
   if (f->dontcare)
-    puts ("#  A default or MAKEFILES makefile.");
-  printf ("#  Implicit rule search has%s been done.\n",
-	  f->tried_implicit ? "" : " not");
+    puts (_("#  A default or MAKEFILES makefile."));
+  printf (_("#  Implicit rule search has%s been done.\n"),
+	  f->tried_implicit ? "" : _(" not"));
   if (f->stem != 0)
-    printf ("#  Implicit/static pattern stem: `%s'\n", f->stem);
+    printf (_("#  Implicit/static pattern stem: `%s'\n"), f->stem);
   if (f->intermediate)
-    puts ("#  File is an intermediate dependency.");
+    puts (_("#  File is an intermediate dependency."));
   if (f->also_make != 0)
     {
-      fputs ("#  Also makes:", stdout);
+      fputs (_("#  Also makes:"), stdout);
       for (d = f->also_make; d != 0; d = d->next)
 	printf (" %s", dep_name (d));
       putchar ('\n');
     }
   if (f->last_mtime == 0)
-    puts ("#  Modification time never checked.");
+    puts (_("#  Modification time never checked."));
   else if (f->last_mtime == (FILE_TIMESTAMP) -1)
-    puts ("#  File does not exist.");
+    puts (_("#  File does not exist."));
   else
     {
       char buf[FILE_TIMESTAMP_PRINT_LEN_BOUND + 1];
       file_timestamp_sprintf (buf, f->last_mtime);
-      printf ("#  Last modified %s\n", buf);
+      printf (_("#  Last modified %s\n"), buf);
     }
-  printf ("#  File has%s been updated.\n",
-	  f->updated ? "" : " not");
+  printf (_("#  File has%s been updated.\n"),
+	  f->updated ? "" : _(" not"));
   switch (f->command_state)
     {
     case cs_running:
-      puts ("#  Commands currently running (THIS IS A BUG).");
+      puts (_("#  Commands currently running (THIS IS A BUG)."));
       break;
     case cs_deps_running:
-      puts ("#  Dependencies commands running (THIS IS A BUG).");
+      puts (_("#  Dependencies commands running (THIS IS A BUG)."));
       break;
     case cs_not_started:
     case cs_finished:
@@ -667,24 +667,24 @@ print_file (f)
 	case -1:
 	  break;
 	case 0:
-	  puts ("#  Successfully updated.");
+	  puts (_("#  Successfully updated."));
 	  break;
 	case 1:
 	  assert (question_flag);
-	  puts ("#  Needs to be updated (-q is set).");
+	  puts (_("#  Needs to be updated (-q is set)."));
 	  break;
 	case 2:
-	  puts ("#  Failed to be updated.");
+	  puts (_("#  Failed to be updated."));
 	  break;
 	default:
-	  puts ("#  Invalid value in `update_status' member!");
+	  puts (_("#  Invalid value in `update_status' member!"));
 	  fflush (stdout);
 	  fflush (stderr);
 	  abort ();
 	}
       break;
     default:
-      puts ("#  Invalid value in `command_state' member!");
+      puts (_("#  Invalid value in `command_state' member!"));
       fflush (stdout);
       fflush (stderr);
       abort ();
@@ -703,7 +703,7 @@ print_file_data_base ()
   register unsigned int i, nfiles, per_bucket;
   register struct file *file;
 
-  puts ("\n# Files");
+  puts (_("\n# Files"));
 
   per_bucket = nfiles = 0;
   for (i = 0; i < FILE_BUCKETS; ++i)
@@ -726,12 +726,12 @@ print_file_data_base ()
     }
 
   if (nfiles == 0)
-    puts ("\n# No files.");
+    puts (_("\n# No files."));
   else
     {
-      printf ("\n# %u files in %u hash buckets.\n", nfiles, FILE_BUCKETS);
+      printf (_("\n# %u files in %u hash buckets.\n"), nfiles, FILE_BUCKETS);
 #ifndef	NO_FLOAT
-      printf ("# average %.3f files per bucket, max %u files in one bucket.\n",
+      printf (_("# average %.3f files per bucket, max %u files in one bucket.\n"),
 	      ((double) nfiles) / ((double) FILE_BUCKETS), per_bucket);
 #endif
     }

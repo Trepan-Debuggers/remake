@@ -47,7 +47,7 @@ ar_name (name)
     return 0;
 
   if (p[1] == '(' && end[-1] == ')')
-    fatal (NILF, "attempt to use unsupported feature: `%s'", name);
+    fatal (NILF, _("attempt to use unsupported feature: `%s'"), name);
 
   return 1;
 }
@@ -138,7 +138,7 @@ int
 ar_touch (name)
      char *name;
 {
-  error (NILF, "touch archive member is not available on VMS");
+  error (NILF, _("touch archive member is not available on VMS"));
   return -1;
 }
 #else
@@ -170,24 +170,24 @@ ar_touch (name)
   switch (ar_member_touch (arname, memname))
     {
     case -1:
-      error (NILF, "touch: Archive `%s' does not exist", arname);
+      error (NILF, _("touch: Archive `%s' does not exist"), arname);
       break;
     case -2:
-      error (NILF, "touch: `%s' is not a valid archive", arname);
+      error (NILF, _("touch: `%s' is not a valid archive"), arname);
       break;
     case -3:
       perror_with_name ("touch: ", arname);
       break;
     case 1:
       error (NILF,
-             "touch: Member `%s' does not exist in `%s'", memname, arname);
+             _("touch: Member `%s' does not exist in `%s'"), memname, arname);
       break;
     case 0:
       val = 0;
       break;
     default:
       error (NILF,
-             "touch: Bad return code from ar_member_touch on `%s'", name);
+             _("touch: Bad return code from ar_member_touch on `%s'"), name);
     }
 
   if (!arname_used)

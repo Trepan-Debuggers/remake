@@ -226,8 +226,8 @@ update_goal_chain (goals, makefiles)
 		  /* Never give a message under -s or -q.  */
 		  && !silent_flag && !question_flag)
 		message (1, ((file->phony || file->cmds == 0)
-			     ? "Nothing to be done for `%s'."
-			     : "`%s' is up to date."),
+			     ? _("Nothing to be done for `%s'.")
+			     : _("`%s' is up to date.")),
 			 file->name);
 
 	      /* This goal is finished.  Remove it from the chain.  */
@@ -274,9 +274,9 @@ no_rule_error(file)
   struct file *file;
 {
   static const char msg_noparent[]
-    = "%sNo rule to make target `%s'%s";
+    = _("%sNo rule to make target `%s'%s");
   static const char msg_parent[]
-    = "%sNo rule to make target `%s', needed by `%s'%s";
+    = _("%sNo rule to make target `%s', needed by `%s'%s");
 
   if (keep_going_flag || file->dontcare)
     {
@@ -326,7 +326,7 @@ update_file (file, depth)
      possible below here until then.  */
   if (file->considered == considered)
     {
-      DEBUGPR ("Pruning file `%s'.\n");
+      DEBUGPR (_("Pruning file `%s'.\n"));
       return 0;
     }
   file->considered = considered;
@@ -373,18 +373,18 @@ update_file_1 (file, depth)
   register struct dep *d, *lastd;
   int running = 0;
 
-  DEBUGPR ("Considering target file `%s'.\n");
+  DEBUGPR (_("Considering target file `%s'.\n"));
 
   if (file->updated)
     {
       if (file->update_status > 0)
 	{
-	  DEBUGPR ("Recently tried and failed to update file `%s'.\n");
+	  DEBUGPR (_("Recently tried and failed to update file `%s'.\n"));
           no_rule_error(file);
 	  return file->update_status;
 	}
 
-      DEBUGPR ("File `%s' was considered already.\n");
+      DEBUGPR (_("File `%s' was considered already.\n"));
       return 0;
     }
 
@@ -394,10 +394,10 @@ update_file_1 (file, depth)
     case cs_deps_running:
       break;
     case cs_running:
-      DEBUGPR ("Still updating file `%s'.\n");
+      DEBUGPR (_("Still updating file `%s'.\n"));
       return 0;
     case cs_finished:
-      DEBUGPR ("Finished updating file `%s'.\n");
+      DEBUGPR (_("Finished updating file `%s'.\n"));
       return file->update_status;
     default:
       abort ();
@@ -418,7 +418,7 @@ update_file_1 (file, depth)
   check_renamed (file);
   noexist = this_mtime == (FILE_TIMESTAMP) -1;
   if (noexist)
-    DEBUGPR ("File `%s' does not exist.\n");
+    DEBUGPR (_("File `%s' does not exist.\n"));
 
   must_make = noexist;
 
@@ -428,15 +428,15 @@ update_file_1 (file, depth)
   if (!file->phony && file->cmds == 0 && !file->tried_implicit)
     {
       if (try_implicit_rule (file, depth))
-	DEBUGPR ("Found an implicit rule for `%s'.\n");
+	DEBUGPR (_("Found an implicit rule for `%s'.\n"));
       else
-	DEBUGPR ("No implicit rule found for `%s'.\n");
+	DEBUGPR (_("No implicit rule found for `%s'.\n"));
       file->tried_implicit = 1;
     }
   if (file->cmds == 0 && !file->is_target
       && default_file != 0 && default_file->cmds != 0)
     {
-      DEBUGPR ("Using default commands for `%s'.\n");
+      DEBUGPR (_("Using default commands for `%s'.\n"));
       file->cmds = default_file->cmds;
     }
 
@@ -456,7 +456,7 @@ update_file_1 (file, depth)
 
       if (d->file->updating)
 	{
-	  error (NILF, "Circular %s <- %s dependency dropped.",
+	  error (NILF, _("Circular %s <- %s dependency dropped."),
 		 file->name, d->file->name);
 	  /* We cannot free D here because our the caller will still have
 	     a reference to it when we were called recursively via
@@ -534,13 +534,13 @@ update_file_1 (file, depth)
 
   file->updating = 0;
 
-  DEBUGPR ("Finished dependencies of target file `%s'.\n");
+  DEBUGPR (_("Finished dependencies of target file `%s'.\n"));
 
   if (running)
     {
       set_command_state (file, cs_deps_running);
       --depth;
-      DEBUGPR ("The dependencies of `%s' are being made.\n");
+      DEBUGPR (_("The dependencies of `%s' are being made.\n"));
       return 0;
     }
 
@@ -553,11 +553,11 @@ update_file_1 (file, depth)
 
       depth--;
 
-      DEBUGPR ("Giving up on target file `%s'.\n");
+      DEBUGPR (_("Giving up on target file `%s'.\n"));
 
       if (depth == 0 && keep_going_flag
 	  && !just_print_flag && !question_flag)
-	error (NILF, "Target `%s' not remade because of errors.", file->name);
+	error (NILF, _("Target `%s' not remade because of errors."), file->name);
 
       return dep_status;
     }
@@ -602,10 +602,10 @@ update_file_1 (file, depth)
 	{
 	  print_spaces (depth);
 	  if (d_mtime == (FILE_TIMESTAMP) -1)
-	    printf ("Dependency `%s' does not exist.\n", dep_name (d));
+	    printf (_("Dependency `%s' does not exist.\n"), dep_name (d));
 	  else
-	    printf ("Dependency `%s' is %s than dependent `%s'.\n",
-		    dep_name (d), d->changed ? "newer" : "older", file->name);
+	    printf (_("Dependency `%s' is %s than dependent `%s'.\n"),
+		    dep_name (d), d->changed ? _("newer") : _("older"), file->name);
 	  fflush (stdout);
 	}
     }
@@ -616,12 +616,12 @@ update_file_1 (file, depth)
   if (file->double_colon && file->deps == 0)
     {
       must_make = 1;
-      DEBUGPR ("Target `%s' is double-colon and has no dependencies.\n");
+      DEBUGPR (_("Target `%s' is double-colon and has no dependencies.\n"));
     }
   else if (!noexist && file->is_target && !deps_changed && file->cmds == 0)
     {
       must_make = 0;
-      DEBUGPR ("No commands for `%s' and no dependencies actually changed.\n");
+      DEBUGPR (_("No commands for `%s' and no dependencies actually changed.\n"));
     }
 
   if (!must_make)
@@ -629,9 +629,9 @@ update_file_1 (file, depth)
       if (debug_flag)
         {
           print_spaces(depth);
-          printf("No need to remake target `%s'", file->name);
+          printf(_("No need to remake target `%s'"), file->name);
           if (!streq(file->name, file->hname))
-              printf("; using VPATH name `%s'", file->hname);
+              printf(_("; using VPATH name `%s'"), file->hname);
           printf(".\n");
           fflush(stdout);
         }
@@ -651,7 +651,7 @@ update_file_1 (file, depth)
       return 0;
     }
 
-  DEBUGPR ("Must remake target `%s'.\n");
+  DEBUGPR (_("Must remake target `%s'.\n"));
 
   /* It needs to be remade.  If it's VPATH and not reset via GPATH, toss the
      VPATH.  */
@@ -660,7 +660,7 @@ update_file_1 (file, depth)
       if (debug_flag)
         {
           print_spaces (depth);
-          printf("  Ignoring VPATH name `%s'.\n", file->hname);
+          printf(_("  Ignoring VPATH name `%s'.\n"), file->hname);
           fflush(stdout);
         }
       file->ignore_vpath = 1;
@@ -671,20 +671,20 @@ update_file_1 (file, depth)
 
   if (file->command_state != cs_finished)
     {
-      DEBUGPR ("Commands of `%s' are being run.\n");
+      DEBUGPR (_("Commands of `%s' are being run.\n"));
       return 0;
     }
 
   switch (file->update_status)
     {
     case 2:
-      DEBUGPR ("Failed to remake target file `%s'.\n");
+      DEBUGPR (_("Failed to remake target file `%s'.\n"));
       break;
     case 0:
-      DEBUGPR ("Successfully remade target file `%s'.\n");
+      DEBUGPR (_("Successfully remade target file `%s'.\n"));
       break;
     case 1:
-      DEBUGPR ("Target file `%s' needs remade under -q.\n");
+      DEBUGPR (_("Target file `%s' needs remade under -q.\n"));
       break;
     default:
       assert (file->update_status >= 0 && file->update_status <= 2);
@@ -823,15 +823,15 @@ check_dep (file, depth, this_mtime, must_make_ptr)
       if (!file->phony && file->cmds == 0 && !file->tried_implicit)
 	{
 	  if (try_implicit_rule (file, depth))
-	    DEBUGPR ("Found an implicit rule for `%s'.\n");
+	    DEBUGPR (_("Found an implicit rule for `%s'.\n"));
 	  else
-	    DEBUGPR ("No implicit rule found for `%s'.\n");
+	    DEBUGPR (_("No implicit rule found for `%s'.\n"));
 	  file->tried_implicit = 1;
 	}
       if (file->cmds == 0 && !file->is_target
 	  && default_file != 0 && default_file->cmds != 0)
 	{
-	  DEBUGPR ("Using default commands for `%s'.\n");
+	  DEBUGPR (_("Using default commands for `%s'.\n"));
 	  file->cmds = default_file->cmds;
 	}
 
@@ -855,7 +855,7 @@ check_dep (file, depth, this_mtime, must_make_ptr)
 	    {
 	      if (d->file->updating)
 		{
-		  error (NILF, "Circular %s <- %s dependency dropped.",
+		  error (NILF, _("Circular %s <- %s dependency dropped."),
 			 file->name, d->file->name);
 		  if (lastd == 0)
 		    {
@@ -1152,7 +1152,7 @@ f_mtime (file, search)
 
 	    file_timestamp_sprintf (mtimebuf, mtime);
 	    file_timestamp_sprintf (nowbuf, now);
-            error (NILF, "*** Warning: File `%s' has modification time in the future (%s > %s)",
+            error (NILF, _("*** Warning: File `%s' has modification time in the future (%s > %s)"),
                    file->name, mtimebuf, nowbuf);
             clock_skew_detected = 1;
           }
@@ -1266,7 +1266,7 @@ library_search (lib, mtime_ptr)
 	  {
 	    /* Give a warning if there is no pattern, then remove the
 	       pattern so it's ignored next time.  */
-	    error (NILF, ".LIBPATTERNS element `%s' is not a pattern", p);
+	    error (NILF, _(".LIBPATTERNS element `%s' is not a pattern"), p);
 	    for (; len; --len, ++p)
 	      *p = ' ';
 	    *p = c;

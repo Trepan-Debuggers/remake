@@ -249,33 +249,33 @@ static const struct command_switch switches[] =
   {
     { 'b', ignore, 0, 0, 0, 0, 0, 0,
 	0, 0,
-	"Ignored for compatibility" },
+	_("Ignored for compatibility") },
     { 'C', string, (char *) &directories, 0, 0, 0, 0, 0,
 	"directory", "DIRECTORY",
-	"Change to DIRECTORY before doing anything" },
+	_("Change to DIRECTORY before doing anything") },
     { 'd', flag, (char *) &debug_flag, 1, 1, 0, 0, 0,
 	"debug", 0,
-	"Print lots of debugging information" },
+	_("Print lots of debugging information") },
 #ifdef WINDOWS32
     { 'D', flag, (char *) &suspend_flag, 1, 1, 0, 0, 0,
         "suspend-for-debug", 0,
-        "Suspend process to allow a debugger to attach" },
+        _("Suspend process to allow a debugger to attach") },
 #endif
     { 'e', flag, (char *) &env_overrides, 1, 1, 0, 0, 0,
 	"environment-overrides", 0,
-	"Environment variables override makefiles" },
+	_("Environment variables override makefiles") },
     { 'f', string, (char *) &makefiles, 0, 0, 0, 0, 0,
 	"file", "FILE",
-	"Read FILE as a makefile" },
+	_("Read FILE as a makefile") },
     { 'h', flag, (char *) &print_usage_flag, 0, 0, 0, 0, 0,
 	"help", 0,
-	"Print this message and exit" },
+	_("Print this message and exit") },
     { 'i', flag, (char *) &ignore_errors_flag, 1, 1, 0, 0, 0,
 	"ignore-errors", 0,
-	"Ignore errors from commands" },
+	_("Ignore errors from commands") },
     { 'I', string, (char *) &include_directories, 1, 1, 0, 0, 0,
 	"include-dir", "DIRECTORY",
-	"Search DIRECTORY for included makefiles" },
+	_("Search DIRECTORY for included makefiles") },
     { 'j',
 #ifndef MAKE_JOBSERVER
         positive_int, (char *) &job_slots, 1, 1, 0,
@@ -284,68 +284,68 @@ static const struct command_switch switches[] =
         int_string, (char *)&job_slots_str, 1, 1, 0, "0", "1",
 #endif
 	"jobs", "N",
-	"Allow N jobs at once; infinite jobs with no arg" },
+	_("Allow N jobs at once; infinite jobs with no arg") },
     { 'k', flag, (char *) &keep_going_flag, 1, 1, 0,
 	0, (char *) &default_keep_going_flag,
 	"keep-going", 0,
-	"Keep going when some targets can't be made" },
+	_("Keep going when some targets can't be made") },
 #ifndef NO_FLOAT
     { 'l', floating, (char *) &max_load_average, 1, 1, 0,
 	(char *) &default_load_average, (char *) &default_load_average,
 	"load-average", "N",
-	"Don't start multiple jobs unless load is below N" },
+	_("Don't start multiple jobs unless load is below N") },
 #else
     { 'l', positive_int, (char *) &max_load_average, 1, 1, 0,
 	(char *) &default_load_average, (char *) &default_load_average,
 	"load-average", "N",
-	"Don't start multiple jobs unless load is below N" },
+	_("Don't start multiple jobs unless load is below N") },
 #endif
     { 'm', ignore, 0, 0, 0, 0, 0, 0,
 	0, 0,
 	"-b" },
     { 'n', flag, (char *) &just_print_flag, 1, 1, 1, 0, 0,
 	"just-print", 0,
-	"Don't actually run any commands; just print them" },
+	_("Don't actually run any commands; just print them") },
     { 'o', string, (char *) &old_files, 0, 0, 0, 0, 0,
 	"old-file", "FILE",
-	"Consider FILE to be very old and don't remake it" },
+	_("Consider FILE to be very old and don't remake it") },
     { 'p', flag, (char *) &print_data_base_flag, 1, 1, 0, 0, 0,
 	"print-data-base", 0,
-	"Print make's internal database" },
+	_("Print make's internal database") },
     { 'q', flag, (char *) &question_flag, 1, 1, 1, 0, 0,
 	"question", 0,
-	"Run no commands; exit status says if up to date" },
+	_("Run no commands; exit status says if up to date") },
     { 'r', flag, (char *) &no_builtin_rules_flag, 1, 1, 0, 0, 0,
 	"no-builtin-rules", 0,
-	"Disable the built-in implicit rules" },
+	_("Disable the built-in implicit rules") },
     { 'R', flag, (char *) &no_builtin_variables_flag, 1, 1, 0, 0, 0,
 	"no-builtin-variables", 0,
-	"Disable the built-in variable settings" },
+	_("Disable the built-in variable settings") },
     { 's', flag, (char *) &silent_flag, 1, 1, 0, 0, 0,
 	"silent", 0,
-	"Don't echo commands" },
+	_("Don't echo commands") },
     { 'S', flag_off, (char *) &keep_going_flag, 1, 1, 0,
 	0, (char *) &default_keep_going_flag,
 	"no-keep-going", 0,
-	"Turns off -k" },
+	_("Turns off -k") },
     { 't', flag, (char *) &touch_flag, 1, 1, 1, 0, 0,
 	"touch", 0,
-	"Touch targets instead of remaking them" },
+	_("Touch targets instead of remaking them") },
     { 'v', flag, (char *) &print_version_flag, 1, 1, 0, 0, 0,
 	"version", 0,
-	"Print the version number of make and exit" },
+	_("Print the version number of make and exit") },
     { 'w', flag, (char *) &print_directory_flag, 1, 1, 0, 0, 0,
 	"print-directory", 0,
-	"Print the current directory" },
+	_("Print the current directory") },
     { 2, flag, (char *) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
 	"no-print-directory", 0,
-	"Turn off -w, even if it was turned on implicitly" },
+	_("Turn off -w, even if it was turned on implicitly") },
     { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0,
 	"what-if", "FILE",
-	"Consider FILE to be infinitely new" },
+	_("Consider FILE to be infinitely new") },
     { 3, flag, (char *) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
 	"warn-undefined-variables", 0,
-	"Warn when an undefined variable is referenced" },
+	_("Warn when an undefined variable is referenced") },
     { '\0', }
   };
 
@@ -438,7 +438,7 @@ enter_command_line_file (name)
      char *name;
 {
   if (name[0] == '\0')
-    fatal (NILF, "empty string invalid as file name");
+    fatal (NILF, _("empty string invalid as file name"));
 
   if (name[0] == '~')
     {
@@ -504,7 +504,7 @@ handle_runtime_exceptions( struct _EXCEPTION_POINTERS *exinfo )
 
   if (!debug_flag)
     {
-      sprintf(errmsg, "%s: Interrupt/Exception caught ", prg);
+      sprintf(errmsg, _("%s: Interrupt/Exception caught "), prg);
       sprintf(&errmsg[strlen(errmsg)],
               "(code = 0x%x, addr = 0x%x)\r\n",
               exrec->ExceptionCode, exrec->ExceptionAddress);
@@ -513,7 +513,7 @@ handle_runtime_exceptions( struct _EXCEPTION_POINTERS *exinfo )
     }
 
   sprintf(errmsg,
-          "\r\nUnhandled exception filter called from program %s\r\n", prg);
+          _("\r\nUnhandled exception filter called from program %s\r\n"), prg);
   sprintf(&errmsg[strlen(errmsg)], "ExceptionCode = %x\r\n",
           exrec->ExceptionCode);
   sprintf(&errmsg[strlen(errmsg)], "ExceptionFlags = %x\r\n",
@@ -524,8 +524,8 @@ handle_runtime_exceptions( struct _EXCEPTION_POINTERS *exinfo )
   if (exrec->ExceptionCode == EXCEPTION_ACCESS_VIOLATION
       && exrec->NumberParameters >= 2)
     sprintf(&errmsg[strlen(errmsg)],
-            "Access violation: %s operation at address %x\r\n",
-            exrec->ExceptionInformation[0] ? "write": "read",
+            _("Access violation: %s operation at address %x\r\n"),
+            exrec->ExceptionInformation[0] ? _("write"): _("read"),
             exrec->ExceptionInformation[1]);
 
   /* turn this on if we want to put stuff in the event log too */
@@ -590,7 +590,7 @@ find_and_set_default_shell(char *token)
     sprintf(sh_path, "%s", search_token);
     default_shell = xstrdup(w32ify(sh_path,0));
     if (debug_flag)
-      printf("find_and_set_shell setting default_shell = %s\n", default_shell);
+      printf(_("find_and_set_shell setting default_shell = %s\n"), default_shell);
     sh_found = 1;
   } else {
     char *p;
@@ -632,7 +632,7 @@ find_and_set_default_shell(char *token)
       }
 
       if (debug_flag && sh_found)
-        printf("find_and_set_shell path search set default_shell = %s\n", default_shell);
+        printf(_("find_and_set_shell path search set default_shell = %s\n"), default_shell);
     }
   }
 
@@ -929,9 +929,9 @@ int main (int argc, char ** argv)
 #ifdef WINDOWS32
   if (suspend_flag) {
         fprintf(stderr, "%s (pid = %d)\n", argv[0], GetCurrentProcessId());
-        fprintf(stderr, "%s is suspending for 30 seconds...", argv[0]);
+        fprintf(stderr, _("%s is suspending for 30 seconds..."), argv[0]);
         Sleep(30 * 1000);
-        fprintf(stderr, "done sleep(30). Continuing.\n");
+        fprintf(stderr, _("done sleep(30). Continuing.\n"));
   }
 #endif
 
@@ -1130,17 +1130,17 @@ int main (int argc, char ** argv)
 #endif
 
             if (stdin_nm)
-              fatal (NILF, "Makefile from standard input specified twice.");
+              fatal (NILF, _("Makefile from standard input specified twice."));
 
 	    outfile = fopen (name, "w");
 	    if (outfile == 0)
-	      pfatal_with_name ("fopen (temporary file)");
+	      pfatal_with_name (_("fopen (temporary file)"));
 	    while (!feof (stdin))
 	      {
 		char buf[2048];
 		unsigned int n = fread (buf, 1, sizeof(buf), stdin);
 		if (n > 0 && fwrite (buf, 1, n, outfile) != n)
-		  pfatal_with_name ("fwrite (temporary file)");
+		  pfatal_with_name (_("fwrite (temporary file)"));
 	      }
 	    (void) fclose (outfile);
 
@@ -1244,8 +1244,8 @@ int main (int argc, char ** argv)
     no_default_sh_exe = !find_and_set_default_shell(NULL);
 
   if (no_default_sh_exe && job_slots != 1) {
-    error (NILF, "Do not specify -j or --jobs if sh.exe is not available.");
-    error (NILF, "Resetting make for single job mode.");
+    error (NILF, _("Do not specify -j or --jobs if sh.exe is not available."));
+    error (NILF, _("Resetting make for single job mode."));
     job_slots = 1;
   }
 #endif /* WINDOWS32 */
@@ -1307,7 +1307,7 @@ int main (int argc, char ** argv)
             || fcntl (job_fds[1], F_GETFL, 0) < 0)
           {
             error (NILF,
-                   "warning: jobserver unavailable (using -j1).  Add `+' to parent make rule.");
+                   _("warning: jobserver unavailable (using -j1).  Add `+' to parent make rule."));
             job_slots = 1;
             job_fds[0] = job_fds[1] = -1;
             job_slots_str = "1";
@@ -1324,7 +1324,7 @@ int main (int argc, char ** argv)
       char c = '0';
 
       if (pipe (job_fds) < 0)
-	pfatal_with_name ("creating jobs pipe");
+	pfatal_with_name (_("creating jobs pipe"));
 
       /* Set the read FD to nonblocking; we'll use select() to wait
 	 for it in job.c.  */
@@ -1419,7 +1419,7 @@ int main (int argc, char ** argv)
       int nargc = argc;
 
       if (debug_flag)
-	puts ("Updating makefiles....");
+	puts (_("Updating makefiles...."));
 
       /* Remove any makefiles we don't want to try to update.
 	 Also record the current modtimes so we can compare them later.  */
@@ -1444,7 +1444,7 @@ int main (int argc, char ** argv)
 			 you write your makefiles.)  */
 
 		      if (debug_flag)
-			printf ("Makefile `%s' might loop; not remaking it.\n",
+			printf (_("Makefile `%s' might loop; not remaking it.\n"),
 				f->name);
 
 		      if (last == 0)
@@ -1518,7 +1518,7 @@ int main (int argc, char ** argv)
                         FILE_TIMESTAMP mtime;
                         /* The update failed and this makefile was not
                            from the MAKEFILES variable, so we care.  */
-                        error (NILF, "Failed to remake makefile `%s'.",
+                        error (NILF, _("Failed to remake makefile `%s'."),
                                d->file->name);
                         mtime = file_mtime_no_search (d->file);
                         any_remade |= (mtime != (FILE_TIMESTAMP) -1
@@ -1533,12 +1533,12 @@ int main (int argc, char ** argv)
                       if (d->changed & RM_INCLUDED)
                         /* An included makefile.  We don't need
                            to die, but we do want to complain.  */
-                        error (NILF, "Included makefile `%s' was not found.",
+                        error (NILF, _("Included makefile `%s' was not found."),
                                dep_name (d));
                       else
                         {
                           /* A normal makefile.  We must die later.  */
-                          error (NILF, "Makefile `%s' was not found",
+                          error (NILF, _("Makefile `%s' was not found"),
                                  dep_name (d));
                           any_failed = 1;
                         }
@@ -1606,7 +1606,7 @@ int main (int argc, char ** argv)
 	      else
 		bad = 1;
 	      if (bad)
-		fatal (NILF, "Couldn't change back to original directory.");
+		fatal (NILF, _("Couldn't change back to original directory."));
 	    }
 
 #ifndef _AMIGA
@@ -1640,7 +1640,7 @@ int main (int argc, char ** argv)
 	  if (debug_flag)
 	    {
 	      char **p;
-	      fputs ("Re-executing:", stdout);
+	      fputs (_("Re-executing:"), stdout);
 	      for (p = nargv; *p != 0; ++p)
 		printf (" %s", *p);
 	      puts ("");
@@ -1665,7 +1665,7 @@ int main (int argc, char ** argv)
   /* If there is a temp file from reading a makefile from stdin, get rid of
      it now.  */
   if (stdin_nm && unlink(stdin_nm) < 0 && errno != ENOENT)
-    perror_with_name("unlink (temporary file): ", stdin_nm);
+    perror_with_name(_("unlink (temporary file): "), stdin_nm);
 
   {
     int status;
@@ -1687,15 +1687,15 @@ int main (int argc, char ** argv)
     if (!goals)
       {
         if (read_makefiles == 0)
-          fatal (NILF, "No targets specified and no makefile found");
+          fatal (NILF, _("No targets specified and no makefile found"));
 
-        fatal (NILF, "No targets");
+        fatal (NILF, _("No targets"));
       }
 
     /* Update the goals.  */
 
     if (debug_flag)
-      puts ("Updating goal targets....");
+      puts (_("Updating goal targets...."));
 
     switch (update_goal_chain (goals, 0))
     {
@@ -1720,7 +1720,7 @@ int main (int argc, char ** argv)
 
     /* If we detected some clock skew, generate one last warning */
     if (clock_skew_detected)
-      error (NILF, "*** Warning:  Clock skew detected.  Your build may be incomplete.");
+      error (NILF, _("*** Warning:  Clock skew detected.  Your build may be incomplete."));
 
     /* Exit.  */
     die (status);
@@ -1879,7 +1879,7 @@ print_usage (bad)
 
   fprintf (usageto, "Usage: %s [options] [target] ...\n", program);
 
-  fputs ("Options:\n", usageto);
+  fputs (_("Options:\n"), usageto);
   for (cs = switches; cs->c != '\0'; ++cs)
     {
       char buf[1024], shortarg[50], longarg[50], *p;
@@ -2080,8 +2080,8 @@ decode_switches (argc, argv, env)
 		      if (i < 1)
 			{
 			  if (doit)
-			    error (NILF, "the `-%c' option requires a \
-positive integral argument",
+			    error (NILF, _("the `-%c' option requires a \
+positive integral argument"),
 				   cs->c);
 			  bad = 1;
 			}
@@ -2520,13 +2520,13 @@ print_version ()
   if (remote_description != 0 && *remote_description != '\0')
     printf ("-%s", remote_description);
 
-  printf (", by Richard Stallman and Roland McGrath.\n\
+  printf (_(", by Richard Stallman and Roland McGrath.\n\
 %sCopyright (C) 1988, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99\n\
 %s\tFree Software Foundation, Inc.\n\
 %sThis is free software; see the source for copying conditions.\n\
 %sThere is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A\n\
 %sPARTICULAR PURPOSE.\n\n\
-%sReport bugs to <bug-make@gnu.org>.\n\n",
+%sReport bugs to <bug-make@gnu.org>.\n\n"),
 	  precede, precede, precede, precede, precede, precede);
 
   printed_version = 1;
@@ -2544,7 +2544,7 @@ print_data_base ()
   time_t when;
 
   when = time ((time_t *) 0);
-  printf ("\n# Make data base, printed on %s", ctime (&when));
+  printf (_("\n# Make data base, printed on %s"), ctime (&when));
 
   print_variable_data_base ();
   print_dir_data_base ();
@@ -2553,7 +2553,7 @@ print_data_base ()
   print_vpath_data_base ();
 
   when = time ((time_t *) 0);
-  printf ("\n# Finished Make data base on %s\n", ctime (&when));
+  printf (_("\n# Finished Make data base on %s\n"), ctime (&when));
 }
 
 /* Exit with STATUS, cleaning up as necessary.  */
@@ -2608,7 +2608,7 @@ log_working_directory (entering)
      int entering;
 {
   static int entered = 0;
-  char *msg = entering ? "Entering" : "Leaving";
+  char *msg = entering ? _("Entering") : _("Leaving");
 
   /* Print nothing without the flag.  Don't print the entering message
      again if we already have.  Don't print the leaving message if we
@@ -2627,7 +2627,7 @@ log_working_directory (entering)
     printf ("%s[%u]: %s ", program, makelevel, msg);
 
   if (starting_directory == 0)
-    puts ("an unknown directory");
+    puts (_("an unknown directory"));
   else
-    printf ("directory `%s'\n", starting_directory);
+    printf (_("directory `%s'\n"), starting_directory);
 }

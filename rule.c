@@ -664,10 +664,10 @@ print_rule_data_base ()
     }
 
   if (rules == 0)
-    puts ("\n# No implicit rules.");
+    puts (_("\n# No implicit rules."));
   else
     {
-      printf ("\n# %u implicit rules, %u", rules, terminal);
+      printf (_("\n# %u implicit rules, %u"), rules, terminal);
 #ifndef	NO_FLOAT
       printf (" (%.1f%%)", (double) terminal / (double) rules * 100.0);
 #else
@@ -676,7 +676,7 @@ print_rule_data_base ()
 	printf (" (%d.%d%%)", f/10, f%10);
       }
 #endif
-      puts (" terminal.");
+      puts (_(" terminal."));
     }
 
   if (num_pattern_rules != rules)
@@ -684,11 +684,11 @@ print_rule_data_base ()
       /* This can happen if a fatal error was detected while reading the
          makefiles and thus count_implicit_rule_limits wasn't called yet.  */
       if (num_pattern_rules != 0)
-        fatal (NILF, "BUG: num_pattern_rules wrong!  %u != %u",
+        fatal (NILF, _("BUG: num_pattern_rules wrong!  %u != %u"),
                num_pattern_rules, rules);
     }
 
-  puts ("\n# Pattern-specific variable values");
+  puts (_("\n# Pattern-specific variable values"));
 
   {
     struct pattern_var *p;
@@ -703,10 +703,10 @@ print_rule_data_base ()
       }
 
     if (rules == 0)
-      puts ("\n# No pattern-specific variable values.");
+      puts (_("\n# No pattern-specific variable values."));
     else
       {
-        printf ("\n# %u pattern-specific variable values", rules);
+        printf (_("\n# %u pattern-specific variable values"), rules);
       }
   }
 }

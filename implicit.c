@@ -36,7 +36,7 @@ try_implicit_rule (file, depth)
      struct file *file;
      unsigned int depth;
 {
-  DEBUGPR ("Looking for an implicit rule for `%s'.\n");
+  DEBUGPR (_("Looking for an implicit rule for `%s'.\n"));
 
   /* The order of these searches was previously reversed.  My logic now is
      that since the non-archive search uses more information in the target
@@ -51,7 +51,7 @@ try_implicit_rule (file, depth)
      archive member name to search for implicit rules.  */
   if (ar_name (file->name))
     {
-      DEBUGPR ("Looking for archive-member implicit rule for `%s'.\n");
+      DEBUGPR (_("Looking for archive-member implicit rule for `%s'.\n"));
       if (pattern_search (file, 1, depth, 0))
 	return 1;
     }
@@ -199,7 +199,7 @@ pattern_search (file, archive, depth, recursions)
 	 don't use it here.  */
       if (rule->in_use)
 	{
-	  DEBUGP2 ("Avoiding implicit rule recursion.%s%s\n", "", "");
+	  DEBUGP2 (_("Avoiding implicit rule recursion.%s%s\n"), "", "");
 	  continue;
 	}
 
@@ -335,7 +335,7 @@ pattern_search (file, archive, depth, recursions)
 	      stemlen -= (lastslash - filename) + 1;
 	    }
 
-	  DEBUGP2 ("Trying pattern rule with stem `%.*s'.\n",
+	  DEBUGP2 (_("Trying pattern rule with stem `%.*s'.\n"),
 		   (int) stemlen, stem);
 
 	  /* Try each dependency; see if it "exists".  */
@@ -376,16 +376,16 @@ pattern_search (file, archive, depth, recursions)
 		     "impossible", then the rule fails and don't
 		     bother trying it on the second pass either
 		     since we know that will fail too.  */
-		  DEBUGP2 ("Rejecting impossible %s dependency `%s'.\n",
-			   p == depname ? "implicit" : "rule", p);
+		  DEBUGP2 (_("Rejecting impossible %s dependency `%s'.\n"),
+			   p == depname ? _("implicit") : _("rule"), p);
 		  tryrules[i] = 0;
 		  break;
 		}
 
 	      intermediate_files[deps_found] = 0;
 
-	      DEBUGP2 ("Trying %s dependency `%s'.\n",
-		       p == depname ? "implicit" : "rule", p);
+	      DEBUGP2 (_("Trying %s dependency `%s'.\n"),
+		       p == depname ? _("implicit") : _("rule"), p);
 
 	      /* The DEP->changed flag says that this dependency resides in a
 		 nonexistent directory.  So we normally can skip looking for
@@ -408,7 +408,7 @@ pattern_search (file, archive, depth, recursions)
 	      vp = p;
 	      if (vpath_search (&vp, (FILE_TIMESTAMP *) 0))
 		{
-		  DEBUGP2 ("Found dependency `%s' as VPATH `%s'\n", p, vp);
+		  DEBUGP2 (_("Found dependency `%s' as VPATH `%s'\n"), p, vp);
 		  strcpy(vp, p);
 		  found_files[deps_found++] = vp;
 		  continue;
@@ -424,8 +424,8 @@ pattern_search (file, archive, depth, recursions)
 		    intermediate_file
 		      = (struct file *) alloca (sizeof (struct file));
 
-		  DEBUGP2 ("Looking for a rule with %s file `%s'.\n",
-			   "intermediate", p);
+		  DEBUGP2 (_("Looking for a rule with %s file `%s'.\n"),
+			   _("intermediate"), p);
 
 		  bzero ((char *) intermediate_file, sizeof (struct file));
 		  intermediate_file->name = p;

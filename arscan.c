@@ -70,7 +70,7 @@ VMS_get_member_info (module, rfa)
 			   &bufdesc.dsc$w_length, 0);
   if (! status)
     {
-      error (NILF, "lbr$set_module failed to extract module info, status = %d",
+      error (NILF, _("lbr$set_module failed to extract module info, status = %d"),
 	     status);
 
       lbr$close (&VMS_lib_idx);
@@ -152,7 +152,7 @@ ar_scan (archive, function, arg)
 
   if (! status)
     {
-      error (NILF, "lbr$ini_control failed with status = %d",status);
+      error (NILF, _("lbr$ini_control failed with status = %d"),status);
       return -2;
     }
 
@@ -163,7 +163,7 @@ ar_scan (archive, function, arg)
 
   if (! status)
     {
-      error (NILF, "unable to open library `%s' to lookup member `%s'",
+      error (NILF, _("unable to open library `%s' to lookup member `%s'"),
 	     archive, (char *)arg);
       return -1;
     }
@@ -820,11 +820,11 @@ describe_member (desc, name, truncated,
 {
   extern char *ctime ();
 
-  printf ("Member `%s'%s: %ld bytes at %ld (%ld).\n",
-	  name, truncated ? " (name might be truncated)" : "",
+  printf (_("Member `%s'%s: %ld bytes at %ld (%ld).\n"),
+	  name, truncated ? _(" (name might be truncated)") : "",
 	  size, hdrpos, datapos);
-  printf ("  Date %s", ctime (&date));
-  printf ("  uid = %d, gid = %d, mode = 0%o.\n", uid, gid, mode);
+  printf (_("  Date %s"), ctime (&date));
+  printf (_("  uid = %d, gid = %d, mode = 0%o.\n"), uid, gid, mode);
 
   return 0;
 }
