@@ -174,7 +174,7 @@ endif
 .PHONY: tests
 testdir := $(firstword $(wildcard make-test-?.?))
 tests: $(testdir)/run_make_tests.pl $(prog)
-#	cd $(<D); perl $(<F)
+	cd $(<D); perl $(<F)
 
 # Make the distribution tar files.
 
