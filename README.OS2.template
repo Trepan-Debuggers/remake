@@ -46,7 +46,7 @@ II. ***** REQUIREMENTS FOR THE COMPILATION *****
 A standard Unix like build environment:
 
  - sh compatible shell (ksh, bash, ash, but tested only with pdksh 5.2.14
-   (release 2)
+   release 2)
    If you use pdksh it is recommended to update to 5.2.14 release 2. Older
    versions may not work! You can get this version at
    http://www.math.ohio-state.edu/~ilya/software/os2/pdksh-5.2.14-bin-2.zip
@@ -59,12 +59,12 @@ A standard Unix like build environment:
  - gawk
  - grep
  - sed
- - GNU make 3.79.1 (special OS/2 patched version)
+ - GNU make 3.79.1 (special OS/2 patched version) or higher
  - perl 5.005 or higher
  - GNU texinfo (you can use 3.1 (gnuinfo.zip), but I recommend 4.0)
 
 If you want to recreate the configuration files (developers only!)
-you need also: GNU m4 1.4, autoconf 2.57, automake 1.7.2 (or compatible)
+you need also: GNU m4 1.4, autoconf 2.59, automake 1.8.2 (or compatible)
 
 
 III. ***** COMPILATION AND INSTALLATION *****
@@ -147,12 +147,12 @@ none.
 To run the testsuite do the following:
 
   export CPPFLAGS="-D__ST_MT_ERRNO__ -DNO_CMD_DEFAULT -DNO_CHDIR2"
-  export CFLAGS="-Zomf -O2 -s -Zmt"
-  export LDFLAGS="-Zcrtdll -Zmt -s -Zlinker /exepack:2 -Zlinker /pm:vio -Zstack 0x8000"
+  export CFLAGS="-Zomf -O2 -Zmt"
+  export LDFLAGS="-Zcrtdll -s -Zlinker /exepack:2 -Zlinker /pm:vio -Zstack 0x8000"
   export RANLIB="echo"
   ./configure --prefix=x:/usr --disable-nls
   make AR=emxomfar
-  make checks
+  make check
 
 All tests should work fine with the exception of "default_names" which
 is because OS/2 file systems are not case sensitive ("makefile" and

@@ -1277,8 +1277,8 @@ do_define (char *name, unsigned int namelen,
       unsigned int len;
       char *line;
 
-      ebuf->floc.lineno += nlines;
       nlines = readline (ebuf);
+      ebuf->floc.lineno += nlines;
 
       /* If there is nothing left to eval, we're done. */
       if (nlines < 0)

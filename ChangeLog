@@ -1,3 +1,54 @@
+2004-03-20  Paul D. Smith  <psmith@gnu.org>
+
+	* variable.c (do_variable_definition): Don't append from the
+	global set if a previous non-appending target-specific variable
+	definition exists.  Reported by Oliver Schmidt <oschmidt@gmx.net>
+	(with fix).
+
+	* expand.c (reference_variable): Don't give up on variables with
+	no value that have the target-specific append flag set: they might
+	have a value after all.  Reported by Oliver Schmidt
+	<oschmidt@gmx.net> (with fix) and also by Maksim A. Nikulin
+	<nikulin@dx1cmd.inp.nsk.su>.
+
+	* rule.c (count_implicit_rule_limits): Don't delete patterns which
+	refer to absolute pathnames in directories that don't exist: some
+	portion of the makefile could create those directories before we
+	match the pattern.  Fixes bugs #775 and #108.
+
+	Fixes from Jonathan R. Grant  <jg-make@jguk.org>:
+
+	* main.c (main): Free makefile_mtimes if we have any.
+	* README.W32.template: Update documentation for the current status
+	of the MS-Windows port.
+	* NMakefile.template (MAKE): Add "MAKE = nmake".  A conflicting
+	environment variable is sometimes already defined which causes the
+	build to fail.
+	* main.c (debug_signal_handler): Only define this function if
+	SIGUSR1 is available.
+
+	Fixes for OS/2 from Andreas Beuning <andreas.buening@nexgo.de>:
+
+	* configure.in [OS/2]: Relocate setting of HAVE_SA_RESTART for OS/2.
+	* README.OS2.template: Documentation updates.
+	* build.template: Add LIBINTL into LOADLIBES.  Add $CFLAGS to the
+	link line for safety.
+	* maintMakefile (build.sh.in): Remove an extraneous ")".
+	* job.c (child_execute_job): Close saved FDs.
+	* job.c (exec_command) [OS/2]: exec_command(): If the command
+	can't be exec'ed and if the shell is not Unix-sh, then try again
+	with argv = { "cmd", "/c", ... }. Normally, this code is never
+	reached for the cmd shell unless the command really doesn't exist.
+	(construct_command_argv_internal) [OS/2]: The code for cmd
+	handling now uses new_argv = { "cmd", "/c", "original line", NULL}.
+	The CMD builtin commands are case insensitive so use strcasecmp().
+
+2004-03-19  Paul D. Smith  <psmith@gnu.org>
+
+	* read.c (do_define): Re-order line counter increment so the count
+	is accurate (we were losing one line per define).  Reported by
+	Dave Yost <Dave@Yost.com>.
+
 2004-03-06  Paul D. Smith  <psmith@gnu.org>
 
 	* configure.in (HAVE_ANSI_COMPILER): Define if we have an ANSI/ISO

@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 # -*-perl-*-
 
 # Modification history:
@@ -11,6 +11,22 @@
 
 # this routine controls the whole mess; each test suite sets up a few
 # variables and then calls &toplevel, which does all the real work.
+
+# $Id: test_driver.pl,v 1.11 2004/03/22 15:11:49 psmith Exp $
+
+
+# The number of test categories we've run
+$categories_run = 0;
+# The number of test categroies that have passed
+$categories_passed = 0;
+# The total number of individual tests that have been run
+$total_tests_run = 0;
+# The total number of individual tests that have passed
+$total_tests_passed = 0;
+# The number of tests in this category that have been run
+$tests_run = 0;
+# The number of tests in this category that have passed
+$tests_passed = 0;
 
 sub toplevel
 {
@@ -150,17 +166,24 @@ sub toplevel
 
   $| = 1;
 
-  if ($num_failed)
+  $categories_failed = $categories_run - $categories_passed;
+  $total_tests_failed = $total_tests_run - $total_tests_passed;
+
+  if ($total_tests_failed)
   {
-    print "\n$num_failed Test";
-    print "s" unless $num_failed == 1;
+    print "\n$total_tests_failed Test";
+    print "s" unless $total_tests_failed == 1;
+    print " in $categories_failed Categor";
+    print ($categories_failed == 1 ? "y" : "ies");
     print " Failed (See .$diffext files in $workdir dir for details) :-(\n\n";
     return 0;
   }
   else
   {
-    print "\n$counter Test";
-    print "s" unless $counter == 1;
+    print "\n$total_tests_passed Test";
+    print "s" unless $total_tests_passed == 1;
+    print " in $categories_passed Categor";
+    print ($categories_passed == 1 ? "y" : "ies");
     print " Complete ... No Failures :-)\n\n";
     return 1;
   }
@@ -348,12 +371,12 @@ sub print_banner
 
 sub run_each_test
 {
-  $counter = 0;
+  $categories_run = 0;
 
   foreach $testname (sort @TESTS)
   {
-    $counter++;
-    $test_passed = 1;       # reset by test on failure
+    ++$categories_run;
+    $passed = 1;       # reset by test on failure
     $num_of_logfiles = 0;
     $num_of_tmpfiles = 0;
     $description = "";
@@ -390,11 +413,17 @@ sub run_each_test
     print $output;
 
     # Run the actual test!
-    #
+    $tests_run = 0;
+    $tests_passed = 0;
     $code = do $perl_testname;
+
+    $total_tests_run += $tests_run;
+    $total_tests_passed += $tests_passed;
+
+    # How did it go?
     if (!defined($code))
     {
-      $test_passed = 0;
+      $passed = 0;
       if (length ($@))
       {
         warn "\n*** Test died ($testname): $@\n";
@@ -405,15 +434,16 @@ sub run_each_test
       }
     }
     elsif ($code == -1) {
-      $test_passed = 0;
+      $passed = 0;
     }
     elsif ($code != 1 && $code != -1) {
-      $test_passed = 0;
+      $passed = 0;
       warn "\n*** Test returned $code\n";
     }
 
-    if ($test_passed) {
-      $status = "ok";
+    if ($passed) {
+      ++$categories_passed;
+      $status = "ok     ($tests_passed passed)";
       for ($i = $num_of_tmpfiles; $i; $i--)
       {
         &delete ($tmp_filename . &num_suffix ($i) );
@@ -426,12 +456,11 @@ sub run_each_test
       }
     }
     elsif ($code > 0) {
-      $status = "FAILED";
-      $num_failed++;
+      $status = "FAILED ($tests_passed/$tests_run passed)";
     }
     elsif ($code < 0) {
       $status = "N/A";
-      --$counter;
+      --$categories_run;
     }
 
     # If the verbose option has been specified, then a short description
@@ -591,12 +620,15 @@ sub compare_output
   $slurp =~ s/^.*modification time .*in the future.*\n//gm;
   $slurp =~ s/^.*Clock skew detected.*\n//gm;
 
+  ++$tests_run;
+
   if ($slurp eq $answer)
   {
     if ($debug)
     {
       print "ok\n";
     }
+    ++$tests_passed;
     return 1;
   }
   else
@@ -605,7 +637,7 @@ sub compare_output
     {
       print "DIFFERENT OUTPUT\n";
     }
-    $test_passed = 0;
+    $passed = 0;
     &create_file (&get_basefile, $answer);
 
     if ($debug)

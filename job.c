@@ -469,7 +469,7 @@ reap_children (int block, int err)
          && (block || REAP_MORE))
     {
       int remote = 0;
-      register int pid;
+      pid_t pid;
       int exit_code, exit_sig, coredump;
       register struct child *lastc, *c;
       int child_failed;
@@ -611,29 +611,34 @@ reap_children (int block, int err)
           {
             HANDLE hPID;
             int err;
+            exit_code = 0;
+            exit_sig = 0;
+            coredump = 0;
 
             /* wait for anything to finish */
-            if (hPID = process_wait_for_any()) {
+            hPID = process_wait_for_any();
+            if (hPID)
+              {
 
-              /* was an error found on this process? */
-              err = process_last_err(hPID);
+                /* was an error found on this process? */
+                err = process_last_err(hPID);
 
-              /* get exit data */
-              exit_code = process_exit_code(hPID);
+                /* get exit data */
+                exit_code = process_exit_code(hPID);
 
-              if (err)
-                fprintf(stderr, "make (e=%d): %s",
-                  exit_code, map_windows32_error_to_string(exit_code));
+                if (err)
+                  fprintf(stderr, "make (e=%d): %s",
+                          exit_code, map_windows32_error_to_string(exit_code));
 
-              /* signal */
-              exit_sig = process_signal(hPID);
+                /* signal */
+                exit_sig = process_signal(hPID);
 
-              /* cleanup process */
-              process_cleanup(hPID);
+                /* cleanup process */
+                process_cleanup(hPID);
 
-              coredump = 0;
-            }
-            pid = (int) hPID;
+                coredump = 0;
+              }
+            pid = (pid_t) hPID;
           }
 #endif /* WINDOWS32 */
 	}
@@ -2400,11 +2405,22 @@ child_execute_job (int stdin_fd, int stdout_fd, char **argv, char **envp)
   /* Run the command.  */
   pid = exec_command (argv, envp);
 
-  /* Restore stdout/stdin of the parent process.  */
-  if (stdin_fd != 0 && dup2 (save_stdin, 0) != 0)
-    fatal (NILF, _("restoring of stdin failed\n"));
-  if (stdout_fd != 1 && dup2 (save_stdout, 1) != 1)
-    fatal (NILF, _("restoring of stdout failed\n"));
+  /* Restore stdout/stdin of the parent and close temporary FDs.  */
+  if (stdin_fd != 0)
+    {
+      if (dup2 (save_stdin, 0) != 0)
+        fatal (NILF, _("Could not restore stdin\n"));
+      else
+        close (save_stdin);
+    }
+
+  if (stdout_fd != 1)
+    {
+      if (dup2 (save_stdout, 1) != 1)
+        fatal (NILF, _("Could not restore stdout\n"));
+      else
+        close (save_stdout);
+    }
 
   return pid;
 }
@@ -2482,7 +2498,8 @@ exec_command (char **argv, char **envp)
     }
 
   /* wait and reap last child */
-  while (hWaitPID = process_wait_for_any())
+  hWaitPID = process_wait_for_any();
+  while (hWaitPID)
     {
       /* was an error found on this process? */
       err = process_last_err(hWaitPID);
@@ -2550,6 +2567,7 @@ exec_command (char **argv, char **envp)
 	char *shell;
 	char **new_argv;
 	int argc;
+        int i=1;
 
 # ifdef __EMX__
         /* Do not use $SHELL from the environment */
@@ -2568,12 +2586,27 @@ exec_command (char **argv, char **envp)
 	while (argv[argc] != 0)
 	  ++argc;
 
+# ifdef __EMX__
+        if (!unixy_shell)
+          ++argc;
+# endif
+
 	new_argv = (char **) alloca ((1 + argc + 1) * sizeof (char *));
 	new_argv[0] = shell;
-	new_argv[1] = argv[0];
+
+# ifdef __EMX__
+        if (!unixy_shell)
+          {
+            new_argv[1] = "/c";
+            ++i;
+            --argc;
+          }
+# endif
+
+        new_argv[i] = argv[0];
 	while (argc > 0)
 	  {
-	    new_argv[1 + argc] = argv[argc];
+	    new_argv[i + argc] = argv[argc];
 	    --argc;
 	  }
 
@@ -3010,8 +3043,16 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 	      {
 		register int j;
 		for (j = 0; sh_cmds[j] != 0; ++j)
-		  if (streq (sh_cmds[j], new_argv[0]))
-		    goto slow;
+                  {
+                    if (streq (sh_cmds[j], new_argv[0]))
+                      goto slow;
+# ifdef __EMX__
+                    /* Non-Unix shells are case insensitive.  */
+                    if (!unixy_shell
+                        && strcasecmp (sh_cmds[j], new_argv[0]) == 0)
+                      goto slow;
+# endif
+                  }
 	      }
 
 	    /* Ignore multiple whitespace chars.  */
@@ -3247,103 +3288,59 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
       new_argv = construct_command_argv_internal (new_line, (char **) NULL,
                                                   (char *) 0, (char *) 0,
                                                   (char **) 0);
-# ifdef __EMX__
+#ifdef __EMX__
     else if (!unixy_shell)
       {
-	/* new_line is local, must not be freed therefore */
-	char *p, *q;
-	int quote;
-	size_t index;
-	size_t len;
+	/* new_line is local, must not be freed therefore
+           We use line here instead of new_line because we run the shell
+           manually.  */
+        size_t line_len = strlen (line);
+        memcpy (new_line, line, line_len + 1);
 
-	/* handle quotes
-	   We have to remove all double quotes and to split the line
-	   into distinct arguments because of the strange handling
-	   of builtin commands by cmd: 'echo "bla"' prints "bla"
-	   (with quotes) while 'c:\bin\echo.exe "bla"' prints bla
-	   (without quotes). Some programs like autoconf rely
-	   on the second behaviour. */
+# ifndef NO_CMD_DEFAULT
+        if (strnicmp (new_line, "echo", 4) == 0
+            && (new_line[4] == ' ' || new_line[4] == '\t'))
+          {
+            /* the builtin echo command: handle it separately */
+            size_t echo_len = line_len - 5;
+            char *echo_line = new_line + 5;
 
-	len = strlen (new_line) + 1;
+            /* special case: echo 'x="y"'
+               cmd works this way: a string is printed as is, i.e., no quotes
+               are removed. But autoconf uses a command like echo 'x="y"' to
+               determine whether make works. autoconf expects the output x="y"
+               so we will do exactly that.
+               Note: if we do not allow cmd to be the default shell
+               we do not need this kind of voodoo */
+            if (echo_line[0] == '\''
+                && echo_line[echo_len - 1] == '\''
+                && strncmp (echo_line + 1, "ac_maketemp=",
+                            strlen ("ac_maketemp=")) == 0)
+              {
+                /* remove the enclosing quotes */
+                memmove (echo_line, echo_line + 1, echo_len - 2);
+                echo_line[echo_len - 2] = '\0';
+              }
+          }
+# endif
 
-	/* More than 1 arg per character is impossible.  */
-	new_argv = (char **) xmalloc (len * sizeof (char *));
+        {
+          /* Let the shell decide what to do. Put the command line into the
+             2nd command line argument and hope for the best ;-)  */
+          size_t sh_len = strlen (shell);
 
-	/* All the args can fit in a buffer as big as new_line is.   */
-	new_argv[0] = (char *) xmalloc (len);
-
-	index = 0;
-	quote = 0;
-	q = new_line;
-	p = new_argv[index];
-	while(*q != '\0')
-	  {
-	    /* searching for closing quote */
-	    if (quote)
-	      {
-		if (*q == quote)
-		  {
-		    /* remove the quote */
-                    q++;
-		    quote = 0;
-		  }
-		else /* normal character: copy it */
-		  *p++ = *q++;
-	      }
-
-	    /* searching for opening quote */
-	    else if (*q == '\"'
-#  ifndef NO_CMD_DEFAULT
-		     || *q == '\''
-#  endif
-		     )
-	      {
-		/* remove opening quote */
-		quote = *q;
-                q++;
-	      }
-
-	    /* spaces outside of a quoted string: remove them
-	       and start a new argument */
-	    else if (*q == ' ' || *q == '\t')
-	      {
-		*p++ = '\0'; /* trailing '\0' for last argument */
-
-		/* remove all successive spaces */
-		do
-		  {
-		    q++;
-		  }
-		while(*q == ' ' || *q == '\t');
-
-		/* start new argument */
-		index++;
-		new_argv[index] = p;
-	      }
-
-	    /* normal character (no space) outside a quoted string*/
-	    else
-	      *p++ = *q++;
-	  } /* end while() */
-
-	*p = '\0'; /* trailing '\0' for the last argument */
-	new_argv[index + 1] = NULL;
-
-#  ifndef NO_CMD_DEFAULT
-	/* special case: echo x="y"
-	   (e.g. autoconf uses this to determine whether make works)
-	   this is pure idioty but cmd works this way:
-	   if 'echo' and 'x="y"' are two different arguments cmd
-	   will print '"x="y""' but if they are only one argument
-	   cmd will print 'bla="blurb"' as it should be
-	   note: if we do not allow cmd to be the default shell
-	   we do not need this kind of voodoo */
-	if (index == 3 && strcasecmp(new_argv[2], "echo") == 0)
-	  {
-	    new_argv[2][4] = ' ';
-	    new_argv[3] = NULL;
-	  }
-#  endif
+          /* exactly 3 arguments + NULL */
+          new_argv = (char **) xmalloc (4 * sizeof (char *));
+          /* Exactly strlen(shell) + strlen("/c") + strlen(line) + 3 times
+             the trailing '\0' */
+          new_argv[0] = (char *) malloc (sh_len + line_len + 5);
+          memcpy (new_argv[0], shell, sh_len + 1);
+          new_argv[1] = new_argv[0] + sh_len + 1;
+          memcpy (new_argv[1], "/c", 3);
+          new_argv[2] = new_argv[1] + 3;
+          memcpy (new_argv[2], new_line, line_len);
+          new_argv[3] = NULL;
+        }
       }
 #elif defined(__MSDOS__)
     else

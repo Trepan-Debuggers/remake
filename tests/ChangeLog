@@ -1,3 +1,9 @@
+2004-03-22  Paul D. Smith  <psmith@gnu.org>
+
+	* test_driver.pl (run_each_test, toplevel, compare_output): Change
+	to track both the testing categories _AND_ the number of
+	individual tests, and report both sets of numbers.
+
 2004-02-21  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/functions/origin: Set our own environment variable

@@ -56,7 +56,7 @@ NMakefile: NMakefile.template .dep_segment Makefile
 build.sh.in: build.template Makefile
 	rm -f $@
 	sed -e 's@%objs%@$(patsubst %.o,%.$${OBJEXT},$(filter-out remote-%,$(make_OBJECTS)))@g' \
-	    -e 's@%globobjs%@$(patsubst %.c,%.$${OBJEXT},$(globsrc)))@g' \
+	    -e 's@%globobjs%@$(patsubst %.c,%.$${OBJEXT},$(globsrc))@g' \
 	  $< > $@
 	chmod a-w+x $@
 
@@ -246,8 +246,10 @@ po-check:
 ## ------------------------- ##
 
 # This target creates the upload artifacts.
+# Sign it with my key.
 
 GPG = gpg
+GPGFLAGS = -u 6338B6D4
 
 DIST_ARCHIVES_SIG = $(addsuffix .sig,$(DIST_ARCHIVES))
 DIST_ARCHIVES_DIRECTIVE = $(addsuffix .directive.asc,$(DIST_ARCHIVES))
@@ -260,12 +262,12 @@ $(DIST_ARCHIVES_DIRECTIVE): .directive.asc
 
 %.sig : %
 	@echo "Signing file '$<':"
-	$(GPG) -o $@ -b $<
+	$(GPG) $(GPGFLAGS) -o $@ -b $<
 
 .directive.asc:
 	@echo "Creating directive file '$@':"
 	@echo 'directory: make' > .directive
-	$(GPG) -o $@ --clearsign .directive
+	$(GPG) $(GPGFLAGS) -o $@ --clearsign .directive
 	@rm -f .directive
 
 # Upload the artifacts
