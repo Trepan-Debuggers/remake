@@ -1,5 +1,5 @@
 /* Target file hash table management for GNU Make.
-Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -114,6 +114,7 @@ enter_file (name)
   else
     {
       /* There is already a double-colon entry for this file.  */
+      new->double_colon = f;
       while (f->prev != 0)
 	f = f->prev;
       f->prev = new;
@@ -188,7 +189,8 @@ file_hash_enter (file, name, oldhash, oldname)
 
   /* Give FILE its new name.  */
 
-  for (f = file; f != 0; f = f->prev)
+  file->name = name;
+  for (f = file->double_colon; f != 0; f = f->prev)
     f->name = name;
 
   if (oldfile == 0)
