@@ -1,5 +1,14 @@
 Thu May  9 13:54:49 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 
+	* main.c (main): Use unsigned for fread return.
+
+	* read.c (parse_file_seq): Use `int' for char arg to avoid widening
+	conflict issues.
+	* dep.h: Fix prototype.
+
+	* function.c (expand_function) [_AMIGA]: Fix some typos.
+	(patsubst_expand): Make len vars unsigned.
+
 	* GNUmakefile (globfiles): Add AmigaDOS support files.
 	(distfiles): Add $(amigafiles).
 	(amigafiles): New variable.
