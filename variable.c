@@ -238,8 +238,7 @@ initialize_file_variables (file)
     l->next = &global_setlist;
   else
     {
-      if (file->parent->variables == 0)
-	initialize_file_variables (file->parent);
+      initialize_file_variables (file->parent);
       l->next = file->parent->variables;
     }
 }

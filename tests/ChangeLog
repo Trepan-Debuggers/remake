@@ -1,3 +1,8 @@
+1999-10-08  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/targetvars: Add a check for PR/1378:
+	"Target-specific vars don't inherit correctly"
+
 1999-09-29  Paul D. Smith  <psmith@gnu.org>
 
 	* test_driver.pl (get_osname): Change $fancy_file_names to
