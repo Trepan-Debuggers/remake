@@ -70,11 +70,11 @@ endif	 # !no_libc
 # We know the type of machine, so put the binaries in subdirectories.
 $(ARCH)/%.o: %.c
 	$(COMPILE.c) -Iglob $< $(OUTPUT_OPTION)
-$(ARCH)/glob/libglob.a:
+$(ARCH)/glob/libglob.a: FORCE
 	$(MAKE) -C $(@D) $(@F) \
 		CC='$(CC)' CFLAGS='$(CFLAGS) -I..' \
 		CPPFLAGS='$(CPPFLAGS) -DHAVE_CONFIG_H'
-.PHONY: $(ARCH)/glob/libglob.a
+FORCE:
 objs := $(addprefix $(ARCH)/,$(objs))
 prog := $(ARCH)/make
 
