@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.16 2003/11/03 22:04:12 psmith Exp $
+@set RCSID $Id: make.texi,v 1.17 2004/01/08 03:17:08 psmith Exp $
 @set EDITION 0.61
 @set VERSION 3.81
 @set UPDATED 02 May 2003
@@ -38,7 +38,8 @@ and issues the commands to recompile them.
 This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Make Manual}, for @code{make}, Version @value{VERSION}.
 
-Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2002, 2003
+Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
+1998, 1999, 2000, 2002, 2003, 2004
 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
@@ -57,11 +58,11 @@ Texts.  A copy of the license is included in the section entitled
 @subtitle A Program for Directing Recompilation
 @subtitle GNU @code{make} Version @value{VERSION}
 @subtitle @value{UPDATE-MONTH}
-@author Richard M. Stallman, Roland McGrath, Paul Smith
+@author Richard M. Stallman, Roland McGrath, Paul D. Smith
 @page
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-1996, 1997, 1998, 1999, 2000, 2002 Free Software Foundation, Inc.
+1996, 1997, 1998, 1999, 2000, 2002, 2003, 2004 Free Software Foundation, Inc.
 @sp 2
 Published by the Free Software Foundation @*
 59 Temple Place -- Suite 330, @*
@@ -350,7 +351,7 @@ The @code{make} utility automatically determines which pieces of a large
 program need to be recompiled, and issues commands to recompile them.
 This manual describes GNU @code{make}, which was implemented by Richard
 Stallman and Roland McGrath.  Development since Version 3.76 has been
-handled by Paul Smith.
+handled by Paul D. Smith.
 
 GNU @code{make} conforms to section 6.2 of @cite{IEEE Standard
 1003.2-1992} (POSIX.2).
@@ -3675,7 +3676,11 @@ a rule alters the effects of the @samp{-t} (@samp{--touch}), @samp{-n}
 (@samp{--just-print}), or @samp{-q} (@w{@samp{--question}}) option.
 Using the @code{MAKE} variable has the same effect as using a @samp{+}
 character at the beginning of the command line.  @xref{Instead of
-Execution, ,Instead of Executing the Commands}.@refill
+Execution, ,Instead of Executing the Commands}.  This special feature
+is only enabled if the @code{MAKE} variable appears directly in the
+command script: it does not apply if the @code{MAKE} variable is
+referenced through expansion of another variable.  In the latter case
+you must use the @samp{+} token to get these special effects.@refill
 
 Consider the command @samp{make -t} in the above example.  (The
 @samp{-t} option marks targets as up to date without actually running
@@ -5225,10 +5230,11 @@ environment if the @samp{-e} option is in force) will take precedence.
 Specifying the @code{override} directive will allow the target-specific
 variable value to be preferred.
 
-There is one more special feature of target-specific variables: when you
-define a target-specific variable, that variable value is also in effect
-for all prerequisites of this target (unless those prerequisites override
-it with their own target-specific variable value).  So, for example, a
+There is one more special feature of target-specific variables: when
+you define a target-specific variable that variable value is also in
+effect for all prerequisites of this target, and all their
+prerequisites, etc. (unless those prerequisites override that variable
+with their own target-specific variable value).  So, for example, a
 statement like this:
 
 @example
@@ -5240,7 +5246,16 @@ prog : prog.o foo.o bar.o
 will set @code{CFLAGS} to @samp{-g} in the command script for
 @file{prog}, but it will also set @code{CFLAGS} to @samp{-g} in the
 command scripts that create @file{prog.o}, @file{foo.o}, and
-@file{bar.o}, and any command scripts which create their prerequisites.
+@file{bar.o}, and any command scripts which create their
+prerequisites.
+
+Be aware that a given prerequisite will only be built once per
+invocation of make, at most.  If the same file is a prerequisite of
+multiple targets, and each of those targets has a different value for
+the same target-specific variable, then the first target to be built
+will cause that prerequisite to be built and the prerequisite will
+inherit the target-specific value from the first target.  It will
+ignore the target-specific values from any other targets.
 
 @node Pattern-specific,  , Target-specific, Using Variables
 @section Pattern-specific Variable Values

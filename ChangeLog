@@ -1,5 +1,12 @@
 2004-01-07  Paul D. Smith  <psmith@gnu.org>
 
+	* doc/make.texi (Target-specific): Fix Savannah bug #1772.
+	(MAKE Variable): Fix Savannah bug #4898.
+
+	* job.c (construct_command_argv_internal): Add "!" to the list of
+	shell escape chars.  POSIX sh allows it to appear before a
+	command, to negate the exit code.  Fixes bug #6404.
+
 	* implicit.c (pattern_search): When matching an implicit rule,
 	remember which dependencies have the ignore_mtime flag set.
 	Original fix provided in Savannah patch #2349, by Benoit
