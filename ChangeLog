@@ -1,8 +1,26 @@
+2002-08-08  Paul D. Smith  <psmith@gnu.org>
+
+	* configure.in: Require a newer version of gettext.
+
+	* misc.c (perror_with_name): Translate the format string (for
+	right-to-left language support).
+	(pfatal_with_name): Ditto.
+
+	* main.c: Create a static array of strings to store the usage
+	text.  This is done to facilitate translations.
+	(struct command_switch): Remove argdesc and description fields.
+	(switches): Remove values for obsolete fields.
+	(print_usage): Print each element of the usage array.
+
+	* hash.c: Change function definitions to be K&R style.
+
 2002-08-02  Paul D. Smith  <psmith@gnu.org>
 
 	* NEWS: Remove the mention of .TARGETS; we aren't going to publish
 	this one because it's too hard to get right.  We'll look at it for
 	a future release.
+	* main.c (main): Don't create the .TARGETS variable.
+	* variable.c (handle_special_var): Don't handle .TARGETS.
 
 2002-08-01  Paul D. Smith  <psmith@gnu.org>
 
