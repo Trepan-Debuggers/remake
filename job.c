@@ -594,8 +594,12 @@ start_job_command (child)
       /* This line has no commands.  Go to the next.  */
       if (job_next_command (child))
 	start_job_command (child);
-      child->file->update_status = 0;
-      notice_finished_file (child->file);
+      else
+	{
+	  /* No more commands.  All done.  */
+	  child->file->update_status = 0;
+	  notice_finished_file (child->file);
+	}
       return;
     }
 
