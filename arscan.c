@@ -415,8 +415,14 @@ ar_name_equal (name, mem, truncated)
 
   if (truncated)
     {
+#ifdef AIAMAG
+      /* TRUNCATED should never be set on this system.  */
+      abort ();
+#else
       struct ar_hdr hdr;
-      return !strncmp (name, mem, sizeof (hdr.ar_name) - 1);
+      return !strncmp (name, mem,
+		       sizeof (hdr.ar_name) - 1);
+#endif
     }
 
   return !strcmp (name, mem);
