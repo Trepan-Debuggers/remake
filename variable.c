@@ -1,5 +1,5 @@
 /* Internals of variables for GNU Make.
-Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -358,7 +358,7 @@ define_automatic_variables ()
   v->export = v_export;
 
   /* Don't let SHELL come from the environment.  */
-  if (*v->value == '\0' || (v->origin == o_env))
+  if (*v->value == '\0' || v->origin == o_env || v->origin == o_env_override)
     {
       free (v->value);
       v->origin = o_file;
