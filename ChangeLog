@@ -1334,6 +1334,15 @@
 
 	* i18n/ja.po: Installed an updated translation.
 
+2001-09-06  Paul Eggert  <eggert@twinsun.com>
+
+	* configure.in (AC_CHECK_HEADERS): Add sys/resource.h.
+	(AC_CHECK_FUNCS): Add getrlimit, setrlimit.
+
+	* main.c: Include <sys/resource.h> if it, getrlimit, and setrlimit
+	are available.
+	(main): Get rid of any avoidable limit on stack size.
+
 2001-09-04  Paul D. Smith  <psmith@gnu.org>
 
 	* i18n/da.po: Installed an updated translation.

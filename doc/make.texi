@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.23 2004/12/06 15:03:47 psmith Exp $
+@set RCSID $Id: make.texi,v 1.24 2005/02/16 05:03:42 psmith Exp $
 @set EDITION 0.61
 @set VERSION 3.80
 @set UPDATED 23 Feb 2003
@@ -2423,8 +2423,10 @@ prog3 : prog3.o sort.o utils.o
 @end example
 
 @noindent
-Now you can say just @samp{make} to remake all three programs, or specify
-as arguments the ones to remake (as in @samp{make prog1 prog3}).
+Now you can say just @samp{make} to remake all three programs, or
+specify as arguments the ones to remake (as in @samp{make prog1
+prog3}).  Phoniness is not inherited: the prerequisites of a phony
+target are not themselves phony, unless explicitly declared to be so.
 
 When one phony target is a prerequisite of another, it serves as a subroutine
 of the other.  For example, here @samp{make cleanall} will delete the

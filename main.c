@@ -46,6 +46,14 @@ MA 02111-1307, USA.  */
 # include <fcntl.h>
 #endif
 
+#if defined(HAVE_SYS_RESOURCE_H) && defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
+# define SET_STACK_SIZE
+#endif
+
+#ifdef SET_STACK_SIZE
+# include <sys/resource.h>
+#endif
+
 #ifdef _AMIGA
 int __stack = 20000; /* Make sure we have 20K of stack space */
 #endif
@@ -879,6 +887,20 @@ main (int argc, char **argv, char **envp)
   /* start off assuming we have no shell */
   unixy_shell = 0;
   no_default_sh_exe = 1;
+#endif
+
+#ifdef SET_STACK_SIZE
+ /* Get rid of any avoidable limit on stack size.  */
+  {
+    struct rlimit rlim;
+
+    /* Set the stack limit huge so that alloca does not fail.  */
+    if (getrlimit (RLIMIT_STACK, &rlim) == 0)
+      {
+        rlim.rlim_cur = rlim.rlim_max;
+        setrlimit (RLIMIT_STACK, &rlim);
+      }
+  }
 #endif
 
   /* Needed for OS/2 */
