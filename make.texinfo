@@ -9,7 +9,7 @@
 
 @set EDITION 0.43
 @set VERSION 3.68 Beta
-@set UPDATED 9 July 1993
+@set UPDATED 14 July 1993
 @set UPDATE-MONTH July 1993
 
 @c finalout
