@@ -905,10 +905,18 @@ static debug_return_t dbg_cmd_write_cmds (char *psz_args)
       if (p_v) {
 	fprintf(outfd, "#!%s\n", variable_expand(p_v->value));
       }
-      fprintf(outfd, "#%s/%s:%lu\n", starting_directory,
-	      p_target->floc.filenm, p_target->floc.lineno);
+      if (!p_target->floc.filenm && p_target->cmds->fileinfo.filenm) {
+	/* Fake the location based on the commands - it's better than
+	   nothing...
+	*/
+	fprintf(outfd, "#%s/%s:%lu\n", starting_directory,
+		p_target->cmds->fileinfo.filenm, 
+		p_target->cmds->fileinfo.lineno-1);
+      } else {
+	fprintf(outfd, "#%s/%s:%lu\n", starting_directory,
+		p_target->floc.filenm, p_target->floc.lineno);
+      }
       
-
       initialize_file_variables (p_target, 0);
       set_file_variables (p_target);
 
