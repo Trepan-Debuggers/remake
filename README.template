@@ -70,7 +70,7 @@ information on submitting useful and complete bug reports.
 You can also use the online bug tracking system in the Savannah GNU Make
 project to submit new problem reports or search for existing ones:
 
-  http://savannah.gnu.org/bugs/?group_id=71
+  http://savannah.gnu.org/bugs/?group=make
 
 If you need help using GNU make, try these forums:
 
@@ -79,11 +79,11 @@ If you need help using GNU make, try these forums:
   news:gnu.utils.help
   news:gnu.utils.bug
 
-  http://savannah.gnu.org/support/?group_id=71
+  http://savannah.gnu.org/support/?group=make
 
 You may also find interesting patches to GNU Make available here:
 
-  http://savannah.gnu.org/patch/?group_id=71
+  http://savannah.gnu.org/patch/?group=make
 
 Note these patches are provided by our users as a service and we make no
 statements regarding their correctness.  Please contact the authors
@@ -97,7 +97,7 @@ CVS Access
 The GNU make source repository is available via anonymous CVS from the
 GNU Subversions CVS server; look here for details:
 
-  http://savannah.gnu.org/cvs/?group_id=71
+  http://savannah.gnu.org/cvs/?group=make
 
 Please note: you won't be able to build GNU make from CVS without
 installing appropriate maintainer's tools, such as GNU m4, automake,
@@ -112,8 +112,14 @@ System-specific Notes
 ---------------------
 
 It has been reported that the XLC 1.2 compiler on AIX 3.2 is buggy such
-that if you compile make with `cc -O' on AIX 3.2, it will not work correctly.
-It is said that using `cc' without `-O' does work.
+that if you compile make with `cc -O' on AIX 3.2, it will not work
+correctly.  It is said that using `cc' without `-O' does work.
+
+The standard /bin/sh on SunOS 4.1.3_U1 and 4.1.4 is broken and cannot be
+used to configure GNU make.  Please install a different shell such as
+bash or pdksh in order to run "configure".  See this message for more
+information:
+  http://mail.gnu.org/archive/html/bug-autoconf/2003-10/msg00190.html
 
 One area that is often a problem in configuration and porting is the code
 to check the system's current load average.  To make it easier to test and

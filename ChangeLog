@@ -1,3 +1,17 @@
+2004-03-04  Paul D. Smith  <psmith@gnu.org>
+
+	* README.template: Add a note about broken /bin/sh on SunOS
+	4.1.3_U1 & 4.1.4.  Fix up Savannah links.
+
+	* misc.c (message, error, fatal): Don't use "..." if we're using
+	varargs.  ansi2knr should handle this but it doesn't work: it
+	translates "..." to va_dcl etc. but _AFTER_ the preprocessor is
+	done.  On many systems (SunOS for example) va_dcl is a #define.
+	So, force the use of the non-"..." version on pre-ANSI compilers.
+
+	* maintMakefile (sign-dist): Create some rules to help automate
+	the new GNU ftp upload method.
+
 2004-02-24  Paul D. Smith  <psmith@gnu.org>
 
 	* config.h.W32.template: Add HAVE_STDARG_H

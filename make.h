@@ -387,7 +387,7 @@ struct floc
 #define STRING_SIZE_TUPLE(_s) (_s), (sizeof (_s)-1)
 
 
-/* We have to have both stdarg.h or varargs.h AND v*printf or doprnt to use
+/* We have to have stdarg.h or varargs.h AND v*printf or doprnt to use
    variadic versions of these functions.  */
 
 #if HAVE_STDARG_H || HAVE_VARARGS_H
@@ -396,7 +396,7 @@ struct floc
 # endif
 #endif
 
-#if __STDC__ && USE_VARIADIC
+#if __STDC__ && USE_VARIADIC && HAVE_STDARG_H
 extern void message (int prefix, const char *fmt, ...)
                      __attribute__ ((__format__ (__printf__, 2, 3)));
 extern void error (const struct floc *flocp, const char *fmt, ...)

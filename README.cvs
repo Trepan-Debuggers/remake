@@ -23,10 +23,10 @@ There is no password; just hit the ENTER key if you are asked for one.
 Building From CVS
 -----------------
 
-To build GNU make from CVS, you will need Autoconf 2.57 (or better),
-Automake 1.7.3 (or better), and Gettext 0.11.5 (or better), and any
-tools that those utilities require (GNU m4, Perl, etc.).  You will also
-need a copy of wget.
+To build GNU make from CVS, you will need Autoconf, Automake, and
+Gettext, and any tools that those utilities require (GNU m4, Perl,
+etc.).  See the configure.in file to find the minimum versions of each
+of these tools.  You will also need a copy of wget.
 
 After checking out the code, you will need to perform these steps to get
 to the point where you can run "make".
