@@ -183,6 +183,42 @@ foo.c: ; @echo $@
 foo.o: {foo.c} foo.c
 ');
 
+# Test #7: Test stem from the middle of the name.
+#
+run_make_test('
+foobarbaz:
+
+foo%baz: % $$*.1
+	@echo $*
+
+bar bar.1:
+	@echo $@
+
+',
+'',
+'bar
+bar.1
+bar
+');
+
+# Test #8: Make sure stem triple-expansion does not happen.
+#
+run_make_test('
+foo$$bar:
+
+f%r: % $$*.1
+	@echo \'$*\'
+
+oo$$ba oo$$ba.1:
+	@echo \'$@\'
+
+',
+'',
+'oo$ba
+oo$ba.1
+oo$ba
+');
+
 
 # This tells the test driver that the perl test script executed properly.
 1;

@@ -1,3 +1,16 @@
+Thu Mar  3 18:28:15 2005  Boris Kolpackov  <boris@kolpackov.net>
+
+	* read.c (record_files): Instead of substituting % with
+	actual stem value in dependency list replace it with $*.
+	This fixes stem triple expansion bug.
+
+	* implicit.c (pattern_search): Copy stem to a separate
+	buffer and make it a properly terminated string. Assign
+	this buffer instead of STEM (which is not terminated) to
+	f->stem. Instead of substituting % with actual stem value
+	in dependency list replace it with $*. This fixes stem
+	triple expansion bug.
+
 Tue Mar  1 10:12:20 2005  Boris Kolpackov  <boris@kolpackov.net>
 
 	* read.c (record_files): Add a check for the list of prerequisites

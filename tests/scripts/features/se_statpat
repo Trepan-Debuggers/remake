@@ -102,5 +102,23 @@ baz.a.1
 baz.a.2
 ');
 
+
+# Test #4: Make sure stem triple-expansion does not happen.
+#
+run_make_test('
+foo$$bar: f%r: % $$*.1
+	@echo \'$*\'
+
+oo$$ba oo$$ba.1:
+	@echo \'$@\'
+
+',
+'',
+'oo$ba
+oo$ba.1
+oo$ba
+');
+
+
 # This tells the test driver that the perl test script executed properly.
 1;

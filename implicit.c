@@ -271,6 +271,8 @@ pattern_search (struct file *file, int archive,
   struct idep **id_ptr;
   struct dep **d_ptr;
 
+  PATH_VAR (stem_str); /* @@ Need to get rid of stem, stemlen, etc. */
+
 #ifndef	NO_ARCHIVES
   if (archive || ar_name (filename))
     lastslash = 0;
@@ -466,8 +468,11 @@ pattern_search (struct file *file, int archive,
 	  DBS (DB_IMPLICIT, (_("Trying pattern rule with stem `%.*s'.\n"),
                              (int) stemlen, stem));
 
+          strncpy (stem_str, stem, stemlen);
+          stem_str[stemlen] = '\0';
+
           /* Temporary assign STEM to file->stem and set file variables. */
-          file->stem = stem;
+          file->stem = stem_str;
           set_file_variables (file);
 
 	  /* Try each dependency; see if it "exists".  */
@@ -503,7 +508,18 @@ pattern_search (struct file *file, int archive,
                   if (p == 0)
                     break; /* No more words */
 
-                  /* If the dependency name has %, substitute the stem.  */
+                  /* If the dependency name has %, substitute the stem.
+                     Watch out, we are going to do something very smart
+                     here. If we just replace % with the stem value,
+                     later, when we do the second expansion, we will
+                     re-expand this stem value once again. This is not
+                     good especially if you have certain characters in
+                     your setm (like $).
+
+                     Instead, we will replace % with $* and allow the
+                     second expansion to take care of it for us. This
+                     way (since $* is a simple variable) there won't
+                     be additional re-expansion of the stem.*/
 
                   for (p2 = p; p2 < p + len && *p2 != '%'; ++p2);
 
@@ -511,9 +527,9 @@ pattern_search (struct file *file, int archive,
                     {
                       register unsigned int i = p2 - p;
                       bcopy (p, depname, i);
-                      bcopy (stem, depname + i, stemlen);
-                      bcopy (p2 + 1, depname + i + stemlen, len - i - 1);
-                      depname[len + stemlen - 1] = '\0';
+                      bcopy ("$*", depname + i, 2);
+                      bcopy (p2 + 1, depname + i + 2, len - i - 1);
+                      depname[len + 2 - 1] = '\0';
 
                       if (check_lastslash)
                         add_dir = 1;
