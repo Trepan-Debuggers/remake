@@ -72,25 +72,27 @@ build_vpath_lists ()
     int save = warn_undefined_variables_flag;
     warn_undefined_variables_flag = 0;
 
-    p = variable_expand ("$(VPATH)");
+    p = variable_expand ("$(strip $(VPATH))");
 
     warn_undefined_variables_flag = save;
   }
 
   if (*p != '\0')
     {
+      /* Save the list of vpaths.  */
+      struct vpath *save_vpaths = vpaths;
+
+      /* Empty `vpaths' so the new one will have no next, and `vpaths'
+	 will still be nil if P contains no existing directories.  */
+      vpaths = 0;
+
+      /* Parse P.  */
       construct_vpath_list ("%", p);
-      /* VPATHS will be nil if there have been no previous `vpath'
-	 directives and none of the given directories exists.  */
-      if (vpaths == 0)
-	general_vpath = 0;
-      else
-	{
-	  general_vpath = vpaths;
-	  /* It was just put into the linked list,
-	     but we don't want it there, so we must remove it.  */
-	  vpaths = general_vpath->next;
-	}
+
+      /* Store the created path as the general path,
+	 and restore the old list of vpaths.  */
+      general_vpath = vpaths;
+      vpaths = save_vpaths;
     }
 }
 
@@ -251,8 +253,12 @@ construct_vpath_list (pattern, dirpath)
       path->patlen = strlen (pattern);
     }
   else
-    /* There were no entries, so free whatever space we allocated.  */
-    free ((char *) vpath);
+    {
+      /* There were no entries, so free whatever space we allocated.  */
+      free ((char *) vpath);
+      if (pattern != 0)
+	free (pattern);
+    }
 }
 
 /* Search the VPATH list whose pattern matches *FILE for a directory
