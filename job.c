@@ -233,7 +233,7 @@ reap_children (block, err)
       for (c = children; c != 0; c = c->next)
 	{
 	  any_remote |= c->remote;
-	  any_locate != ! c->remote;
+	  any_local |= ! c->remote;
 	  if (debug_flag)
 	    printf ("Live child 0x%08lx PID %d%s\n",
 		    (unsigned long int) c,
