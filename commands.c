@@ -203,27 +203,14 @@ chop_commands (cmds)
 
       nlines = 5;
       lines = (char **) xmalloc (5 * sizeof (char *));
-      idx = 0;
-      p = cmds->commands;
+      idx = strlen (cmds->commands) + 1;
+      p = (char *) alloca (idx);
+      bcopy (cmds->commands, p, idx);
       while (*p != '\0')
 	{
-	  char *end = p;
-	find_end:;
-	  end = index (end, '\n');
+	  char *end = find_char_unquote (p, '\n', 0);
 	  if (end == 0)
 	    end = p + strlen (p);
-	  else if (end > p && end[-1] == '\\')
-	    {
-	      int backslash = 1;
-	      register char *b;
-	      for (b = end - 2; b >= p && *b == '\\'; --b)
-		backslash = !backslash;
-	      if (backslash)
-		{
-		  ++end;
-		  goto find_end;
-		}
-	    }
 
 	  if (idx == nlines)
 	    {
