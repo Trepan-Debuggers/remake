@@ -95,7 +95,7 @@ extern void free ();
 #if	defined(__GNU_LIBRARY__) || defined(POSIX) || defined(_IBMR2)
 #include <unistd.h>
 #else
-extern int read (), close (), write (), fstat ();
+extern int read (), open (), close (), write (), fstat ();
 extern long int lseek (), atol ();
 extern int atoi ();
 #endif
