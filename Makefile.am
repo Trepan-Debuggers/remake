@@ -114,11 +114,11 @@ check-local: check-regression check-loadavg
 
 .PHONY: check-loadavg check-regression
 
-check-loadavg: loadavg
+check-loadavg: loadavg$(EXEEXT)
 	@echo The system uptime program believes the load average to be:
 	-uptime
 	@echo The GNU load average checking code thinks:
-	-./loadavg
+	-./loadavg$(EXEEXT)
 
 # The loadavg function is invoked during "make check" to test getloadavg.
 noinst_PROGRAMS = loadavg

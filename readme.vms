@@ -1,3 +1,54 @@
+This is the VMS version of GNU Make, updated by Hartmut Becker
+
+Changes are based on GNU make 3.80. Latest changes are for OpenVMS/I64
+and new VMS CRTLs.
+
+This version was tested on OpenVMS/I64 V8.2 (field test) with hp C
+X7.1-024 OpenVMS/Alpha V7.3-2 with Compaq C V6.5-001 and OpenVMS/VAX 7.1
+with Compaq C V6.2-003 There are still some warning and informational
+message issued by the compilers.
+
+Build instructions
+Make a 1st version
+       $ @makefile.com
+       $ rena make.exe 1st-make.exe
+Use the 1st version to generate a 2nd version
+       $ mc sys$disk:[]1st-make clean
+       $ mc sys$disk:[]1st-make
+Verify your 2nd version
+       $ rena make.exe 2nd-make.exe
+       $ mc sys$disk:[]2nd-make clean
+       $ mc sys$disk:[]2nd-make
+
+Changes:
+
+. In default.c define variable ARCH as IA64 for VMS on Itanium systems.
+
+. In makefile.vms avoid name collision for glob and globfree.
+
+In newer version of the VMS CRTL there are glob and globfree implemented.
+Compiling and linking may result in
+
+  %ILINK-W-MULDEFLNKG, symbol DECC$GLOBFREE has subsequent linkage definition
+       in module DECC$SHR file SYS$COMMON:[SYSLIB]DECC$SHR.EXE;1
+  %ILINK-W-MULDEF, symbol DECC$GLOBFREE multiply defined
+       in module DECC$SHR file SYS$COMMON:[SYSLIB]DECC$SHR.EXE;1
+
+linker messages (and similar for DECC$GLOB). The messages just say, that
+globfree is a known CRTL whose name was mapped by the compiler to
+DECC$GLOBFREE.  This is done in glob.c as well, so this name is defined
+twice. One possible solution is to use the VMS versions of glob and
+globfree. However, then the build environment needs to figure out if
+there is a new CRTL supporting these or not. This adds complexity. Even
+more, these functions return VMS file specifications, which is not
+expected by the other make sources. There is a switch at run time (a VMS
+logical DECC$GLOB_UNIX_STYLE), which can be set to get Unix style
+names. This may conflict with other software. The recommended solution
+for this is to set this switch just prior to calling main: in an
+initialization routine. This adds more complexity and more VMS specific
+code. It is easier to tell the compiler NOT to map the routine names
+with a simple change in makefile.vms.
+
 This is the VMS port of GNU Make done by Hartmut.Becker@compaq.com.
 
 It is based on the specific version 3.77k and on 3.78.1. 3.77k was done

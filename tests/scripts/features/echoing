@@ -54,13 +54,10 @@ $answer = "echo This makefile did not clean the dir... good\n"
 # -------
 
 &run_make_with_options($makefile,"clean",&get_logfile,0);
-$answer = "";
-&compare_output($answer,&get_logfile(1));
-
-if (-f $example)
-{
-   $test_passed = 0;
+if (-f $example) {
+  $test_passed = 0;
 }
+&compare_output('',&get_logfile(1));
 
 # TEST #3
 # -------

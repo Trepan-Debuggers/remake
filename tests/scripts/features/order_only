@@ -144,4 +144,15 @@ $answer = "touch baz\n";
 
 unlink(qw(foo.w foo.x baz));
 
+# TEST #9 -- make sure that $< is set correctly in the face of order-only
+# prerequisites in pattern rules.
+
+run_make_test('
+%r: | baz ; @echo $< $^ $|
+bar: foo
+foo:;@:
+baz:;@:
+', '', "foo foo baz\n");
+
+
 1;

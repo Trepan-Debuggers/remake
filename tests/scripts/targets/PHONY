@@ -27,7 +27,7 @@ print MAKEFILE ".PHONY : clean \n";
 print MAKEFILE "all: \n";
 print MAKEFILE "\t\@echo This makefile did not clean the dir ... good\n";
 print MAKEFILE "clean: \n";
-print MAKEFILE "\t$delete_command $example clean\n"; 
+print MAKEFILE "\t$delete_command $example clean\n";
 
 # END of Contents of MAKEFILE
 
@@ -36,20 +36,19 @@ close(MAKEFILE);
 &touch($example);
 
 # Create a file named "clean".  This is the same name as the target clean
-# and tricks the target into thinking that it is up to date.  (Unless you 
+# and tricks the target into thinking that it is up to date.  (Unless you
 # use the .PHONY target.
 &touch("clean");
 
 $answer = "$delete_command $example clean\n";
 &run_make_with_options($makefile,"clean",&get_logfile);
 
-&compare_output($answer,&get_logfile(1)); 
-
-if (-f $example)
-{
-   $test_passed = 0;
+if (-f $example) {
+  $test_passed = 0;
 }
- 
+
+&compare_output($answer,&get_logfile(1));
+
 1;
 
 

@@ -73,19 +73,20 @@ static int library_search PARAMS ((char **lib, FILE_TIMESTAMP *mtime_ptr));
 
 /* Remake all the goals in the `struct dep' chain GOALS.  Return -1 if nothing
    was done, 0 if all goals were updated successfully, or 1 if a goal failed.
-   If MAKEFILES is nonzero, these goals are makefiles, so -t, -q, and -n should
-   be disabled for them unless they were also command-line targets, and we
-   should only make one goal at a time and return as soon as one goal whose
-   `changed' member is nonzero is successfully made.  */
+
+   If rebuilding_makefiles is nonzero, these goals are makefiles, so -t, -q,
+   and -n should be disabled for them unless they were also command-line
+   targets, and we should only make one goal at a time and return as soon as
+   one goal whose `changed' member is nonzero is successfully made.  */
 
 int
-update_goal_chain (struct dep *goals, int makefiles)
+update_goal_chain (struct dep *goals)
 {
   int t = touch_flag, q = question_flag, n = just_print_flag;
   unsigned int j = job_slots;
   int status = -1;
 
-#define	MTIME(file) (makefiles ? file_mtime_no_search (file) \
+#define	MTIME(file) (rebuilding_makefiles ? file_mtime_no_search (file) \
 		     : file_mtime (file))
 
   /* Duplicate the chain so we can remove things from it.  */
@@ -135,7 +136,7 @@ update_goal_chain (struct dep *goals, int makefiles)
 	      unsigned int ocommands_started;
 	      int x;
 	      check_renamed (file);
-	      if (makefiles)
+	      if (rebuilding_makefiles)
 		{
 		  if (file->cmd_target)
 		    {
@@ -152,7 +153,7 @@ update_goal_chain (struct dep *goals, int makefiles)
 		 actually run.  */
 	      ocommands_started = commands_started;
 
-	      x = update_file (file, makefiles ? 1 : 0);
+	      x = update_file (file, rebuilding_makefiles ? 1 : 0);
 	      check_renamed (file);
 
 	      /* Set the goal's `changed' flag if any commands were started
@@ -176,7 +177,7 @@ update_goal_chain (struct dep *goals, int makefiles)
                          matter how much more we run, since we already know
                          the answer to return.  */
                       stop = (!keep_going_flag && !question_flag
-                              && !makefiles);
+                              && !rebuilding_makefiles);
                     }
                   else
                     {
@@ -192,10 +193,10 @@ update_goal_chain (struct dep *goals, int makefiles)
                              as a command-line target), don't change STATUS.
                              If STATUS is changed, we will get re-exec'd, and
                              enter an infinite loop.  */
-                          if (!makefiles
+                          if (!rebuilding_makefiles
                               || (!just_print_flag && !question_flag))
                             status = 0;
-                          if (makefiles && file->dontcare)
+                          if (rebuilding_makefiles && file->dontcare)
                             /* This is a default makefile; stop remaking.  */
                             stop = 1;
                         }
@@ -218,7 +219,7 @@ update_goal_chain (struct dep *goals, int makefiles)
 	      /* If we have found nothing whatever to do for the goal,
 		 print a message saying nothing needs doing.  */
 
-	      if (!makefiles
+	      if (!rebuilding_makefiles
 		  /* If the update_status is zero, we updated successfully
 		     or not at all.  G->changed will have been set above if
 		     any commands were actually started for this goal.  */
@@ -257,7 +258,7 @@ update_goal_chain (struct dep *goals, int makefiles)
         considered = !considered;
     }
 
-  if (makefiles)
+  if (rebuilding_makefiles)
     {
       touch_flag = t;
       question_flag = q;
@@ -321,19 +322,44 @@ update_file (struct file *file, unsigned int depth)
 
   /* Process the remaining rules in the double colon chain so they're marked
      considered.  Start their prerequisites, too.  */
-  for (; f != 0 ; f = f->prev)
-    {
-      struct dep *d;
+  if (file->double_colon)
+    for (; f != 0 ; f = f->prev)
+      {
+        struct dep *d;
 
-      f->considered = considered;
+        f->considered = considered;
 
-      for (d = f->deps; d != 0; d = d->next)
-        status |= update_file (d->file, depth + 1);
-    }
+        for (d = f->deps; d != 0; d = d->next)
+          status |= update_file (d->file, depth + 1);
+      }
 
   return status;
 }
 
+/* Show a message stating the target failed to build.  */
+
+static void
+complain (const struct file *file)
+{
+  const char *msg_noparent
+    = _("%sNo rule to make target `%s'%s");
+  const char *msg_parent
+    = _("%sNo rule to make target `%s', needed by `%s'%s");
+
+  if (!keep_going_flag)
+    {
+      if (file->parent == 0)
+        fatal (NILF, msg_noparent, "", file->name, "");
+
+      fatal (NILF, msg_parent, "", file->name, file->parent->name, "");
+    }
+
+  if (file->parent == 0)
+    error (NILF, msg_noparent, "*** ", file->name, ".");
+  else
+    error (NILF, msg_parent, "*** ", file->name, file->parent->name, ".");
+}
+
 /* Consider a single `struct file' and update it as appropriate.  */
 
 static int
@@ -353,6 +379,17 @@ update_file_1 (struct file *file, unsigned int depth)
 	{
 	  DBF (DB_VERBOSE,
                _("Recently tried and failed to update file `%s'.\n"));
+
+          /* If the file we tried to make is marked dontcare then no message
+             was printed about it when it failed during the makefile rebuild.
+             If we're trying to build it again in the normal rebuild, print a
+             message now.  */
+          if (file->dontcare && !rebuilding_makefiles)
+            {
+              file->dontcare = 0;
+              complain (file);
+            }
+
 	  return file->update_status;
 	}
 
@@ -1008,28 +1045,9 @@ remake_file (struct file *file)
 	file->update_status = 0;
       else
         {
-          const char *msg_noparent
-            = _("%sNo rule to make target `%s'%s");
-          const char *msg_parent
-            = _("%sNo rule to make target `%s', needed by `%s'%s");
-
           /* This is a dependency file we cannot remake.  Fail.  */
-          if (!keep_going_flag && !file->dontcare)
-            {
-              if (file->parent == 0)
-                fatal (NILF, msg_noparent, "", file->name, "");
-
-              fatal (NILF, msg_parent, "", file->name, file->parent->name, "");
-            }
-
-          if (!file->dontcare)
-            {
-              if (file->parent == 0)
-                error (NILF, msg_noparent, "*** ", file->name, ".");
-              else
-                error (NILF, msg_parent, "*** ",
-                       file->name, file->parent->name, ".");
-            }
+          if (!rebuilding_makefiles || !file->dontcare)
+            complain (file);
           file->update_status = 2;
         }
     }

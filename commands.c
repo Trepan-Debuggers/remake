@@ -41,6 +41,7 @@ extern int getpid ();
 static void
 set_file_variables (struct file *file)
 {
+  struct dep *d;
   char *at, *percent, *star, *less;
 
 #ifndef	NO_ARCHIVES
@@ -105,8 +106,14 @@ set_file_variables (struct file *file)
     }
   star = file->stem;
 
-  /* $< is the first dependency.  */
-  less = file->deps != 0 ? dep_name (file->deps) : "";
+  /* $< is the first not order-only dependency.  */
+  less = "";
+  for (d = file->deps; d != 0; d = d->next)
+    if (!d->ignore_mtime)
+      {
+        less = dep_name (d);
+        break;
+      }
 
   if (file->cmds == default_file->cmds)
     /* This file got its commands from .DEFAULT.
@@ -134,7 +141,6 @@ set_file_variables (struct file *file)
     char *caret_value;
     char *qp;
     char *bp;
-    struct dep *d;
     unsigned int len;
 
     /* Compute first the value for $+, which is supposed to contain

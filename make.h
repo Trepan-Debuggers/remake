@@ -496,7 +496,7 @@ extern int print_data_base_flag, question_flag, touch_flag, always_make_flag;
 extern int env_overrides, no_builtin_rules_flag, no_builtin_variables_flag;
 extern int print_version_flag, print_directory_flag;
 extern int warn_undefined_variables_flag, posix_pedantic, not_parallel;
-extern int clock_skew_detected;
+extern int clock_skew_detected, rebuilding_makefiles;
 
 /* can we run commands via 'sh -c xxx' or must we use batch files? */
 extern int batch_mode_shell;

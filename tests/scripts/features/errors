@@ -52,19 +52,18 @@ $answer = "$delete_command cleanit\n"
 
 &run_make_with_options($makefile,"",&get_logfile);
 
+# If make acted as planned, it should ignore the error from the first
+# command in the target and execute the second which deletes the file "foo"
+# This file, therefore, should not exist if the test PASSES.
+if (-f "foo") {
+  $test_passed = 0;
+}
+
 # The output for this on VOS is too hard to replicate, so we only check it
 # on unix.
 if (!$vos)
 {
    &compare_output($answer,&get_logfile(1));
-}
-
-# If make acted as planned, it should ignore the error from the first
-# command in the target and execute the second which deletes the file "foo"
-# This file, therefore, should not exist if the test PASSES.
-if (-f "foo")
-{
-   $test_passed = 0;
 }
 
 
@@ -80,14 +79,12 @@ $answer = "$delete_command cleanit\n"
 
 &run_make_with_options($makefile,"clean2 -i",&get_logfile);
 
-if (!$vos)
-{
-   &compare_output($answer,&get_logfile(1));
+if (-f "foo") {
+  $test_passed = 0;
 }
 
-if (-f "foo")
-{
-   $test_passed = 0;
+if (!$vos) {
+   &compare_output($answer,&get_logfile(1));
 }
 
 1;

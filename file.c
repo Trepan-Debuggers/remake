@@ -342,6 +342,10 @@ remove_intermediates (int sig)
     if (! HASH_VACANT (*file_slot))
       {
 	register struct file *f = *file_slot;
+        /* Is this file eligible for automatic deletion?
+           Yes, IFF: it's marked intermediate, it's not secondary, it wasn't
+           given on the command-line, and it's either a -include makefile or
+           it's not precious.  */
 	if (f->intermediate && (f->dontcare || !f->precious)
 	    && !f->secondary && !f->cmd_target)
 	  {
@@ -679,7 +683,7 @@ print_file (const void *item)
   if (f->cmd_target)
     puts (_("#  Command-line target."));
   if (f->dontcare)
-    puts (_("#  A default or MAKEFILES makefile."));
+    puts (_("#  A default, MAKEFILES, or -include/sinclude makefile."));
   puts (f->tried_implicit
         ? _("#  Implicit rule search has been done.")
         : _("#  Implicit rule search has not been done."));
