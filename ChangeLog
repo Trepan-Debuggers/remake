@@ -1,5 +1,12 @@
 2002-10-03  Paul D. Smith  <psmith@gnu.org>
 
+	Version 3.80 released.
+
+	* dir.c: Change hash functions to use K&R function definition style.
+	* function.c: Ditto.
+	* read.c: Ditto.
+	* variable.c: Ditto.
+
 	Update to automake 1.7.
 
 	* Makefile.am (AUTOMAKE_OPTIONS): Update to require 1.7.

@@ -34,19 +34,23 @@ Boston, MA 02111-1307, USA.  */
 /* Hash table of files the makefile knows how to make.  */
 
 static unsigned long
-file_hash_1 (void const *key)
+file_hash_1 (key)
+    const void *key;
 {
   return_ISTRING_HASH_1 (((struct file const *) key)->hname);
 }
 
 static unsigned long
-file_hash_2 (void const *key)
+file_hash_2 (key)
+    const void *key;
 {
   return_ISTRING_HASH_2 (((struct file const *) key)->hname);
 }
 
 static int
-file_hash_cmp (void const *x, void const *y)
+file_hash_cmp (x, y)
+    const void *x;
+    const void *y;
 {
   return_ISTRING_COMPARE (((struct file const *) x)->hname,
 			  ((struct file const *) y)->hname);

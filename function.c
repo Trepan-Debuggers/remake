@@ -41,21 +41,25 @@ struct function_table_entry
   };
 
 static unsigned long
-function_table_entry_hash_1 (void const *keyv)
+function_table_entry_hash_1 (keyv)
+    const void *keyv;
 {
   struct function_table_entry const *key = (struct function_table_entry const *) keyv;
   return_STRING_N_HASH_1 (key->name, key->len);
 }
 
 static unsigned long
-function_table_entry_hash_2 (void const *keyv)
+function_table_entry_hash_2 (keyv)
+    const void *keyv;
 {
   struct function_table_entry const *key = (struct function_table_entry const *) keyv;
   return_STRING_N_HASH_2 (key->name, key->len);
 }
 
 static int
-function_table_entry_hash_cmp (void const *xv, void const *yv)
+function_table_entry_hash_cmp (xv, yv)
+    const void *xv;
+    const void *yv;
 {
   struct function_table_entry const *x = (struct function_table_entry const *) xv;
   struct function_table_entry const *y = (struct function_table_entry const *) yv;
@@ -896,19 +900,23 @@ struct a_word
 };
 
 static unsigned long
-a_word_hash_1 (void const *key)
+a_word_hash_1 (key)
+    const void *key;
 {
   return_STRING_HASH_1 (((struct a_word const *) key)->str);
 }
 
 static unsigned long
-a_word_hash_2 (void const *key)
+a_word_hash_2 (key)
+    const void *key;
 {
   return_STRING_HASH_2 (((struct a_word const *) key)->str);
 }
 
 static int
-a_word_hash_cmp (void const *x, void const *y)
+a_word_hash_cmp (x, y)
+    const void *x;
+    const void *y;
 {
   int result = ((struct a_word const *) x)->length - ((struct a_word const *) y)->length;
   if (result)

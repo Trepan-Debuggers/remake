@@ -272,7 +272,7 @@ read_all_makefiles (makefiles)
   return read_makefiles;
 }
 
-int
+static int
 eval_makefile (filename, flags)
      char *filename;
      int flags;
@@ -1551,19 +1551,23 @@ conditional_line (line, flocp)
 /* Remove duplicate dependencies in CHAIN.  */
 
 static unsigned long
-dep_hash_1 (void const *key)
+dep_hash_1 (key)
+    const void *key;
 {
   return_STRING_HASH_1 (dep_name ((struct dep const *) key));
 }
 
 static unsigned long
-dep_hash_2 (void const *key)
+dep_hash_2 (key)
+    const void *key;
 {
   return_STRING_HASH_2 (dep_name ((struct dep const *) key));
 }
 
 static int
-dep_hash_cmp (void const *x, void const *y)
+dep_hash_cmp (x, y)
+    const void *x;
+    const void *y;
 {
   struct dep *dx = (struct dep *) x;
   struct dep *dy = (struct dep *) y;
