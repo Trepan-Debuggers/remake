@@ -1203,7 +1203,7 @@ windows32_openpipe (int *pipedes, int *pid_p, char **command_argv, char **envp)
 
 
 #ifdef __MSDOS__
-int
+FILE *
 msdos_openpipe (int* pipedes, int *pidp, char *text)
 {
   FILE *fpipe=0;
