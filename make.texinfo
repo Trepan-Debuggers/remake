@@ -2544,7 +2544,7 @@ If there is an error (the exit status is nonzero), @code{make} gives up on
 the current rule, and perhaps on all rules.
 
 Sometimes the failure of a certain command does not indicate a problem.
-For example, you may use the @code{mkdir} command to insure that a
+For example, you may use the @code{mkdir} command to ensure that a
 directory exists.  If the directory already exists, @code{mkdir} will
 report an error, but you probably want @code{make} to continue regardless.
 
