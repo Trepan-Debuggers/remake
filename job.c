@@ -592,6 +592,7 @@ start_job_command (child)
 
   if (argv == 0)
     {
+    next_command:
       /* This line has no commands.  Go to the next.  */
       if (job_next_command (child))
 	start_job_command (child);
@@ -624,10 +625,7 @@ start_job_command (child)
     {
       free (argv[0]);
       free ((char *) argv);
-      if (job_next_command (child))
-	start_job_command (child);
-      child->file->update_status = 0;
-      return;
+      goto next_command;
     }
 
   /* Flush the output streams so they won't have things written twice.  */
