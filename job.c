@@ -595,6 +595,7 @@ start_job_command (child)
       if (job_next_command (child))
 	start_job_command (child);
       child->file->update_status = 0;
+      notice_finished_file (child->file);
       return;
     }
 
