@@ -840,7 +840,7 @@ f_mtime (file, search)
      register struct file *file;
      int search;
 {
-  register time_t mtime;
+  time_t mtime;
 
   /* File's mtime is not known; must get it from the system.  */
 
@@ -912,11 +912,15 @@ f_mtime (file, search)
 	{
 	  /* If name_mtime failed, search VPATH.  */
 	  char *name = file->name;
-	  if (vpath_search (&name)
+	  if (vpath_search (&name, &mtime)
 	      /* Last resort, is it a library (-lxxx)?  */
 	      || (name[0] == '-' && name[1] == 'l'
-		  && library_search (&name)))
+		  && library_search (&name, &mtime)))
 	    {
+	      if (mtime != 0)
+		/* vpath_search and library_search store zero in MTIME
+		   if they didn't need to do a stat call for their work.  */
+		file->last_mtime = mtime;
 	      rename_file (file, name);
 	      check_renamed (file);
 	      return file_mtime (file);
@@ -955,8 +959,9 @@ name_mtime (name)
    directories.  */
 
 static int
-library_search (lib)
+library_search (lib, mtime_ptr)
      char **lib;
+     time_t *mtime_ptr;
 {
   static char *dirs[] =
     {
@@ -967,6 +972,7 @@ library_search (lib)
     };
 
   char *libname = &(*lib)[2];	/* Name without the `-l'.  */
+  time_t mtime;
 
   /* Buffer to construct possible names in.  */
   char *buf = xmalloc (sizeof (LIBDIR) + 8 + strlen (libname) + 4 + 2 + 1);
@@ -975,16 +981,19 @@ library_search (lib)
   /* Look first for `libNAME.a' in the current directory.  */
 
   sprintf (buf, "lib%s.a", libname);
-  if (name_mtime (buf) != (time_t) -1)
+  mtime = name_mtime (buf);
+  if (mtime != (time_t) -1)
     {
       *lib = buf;
+      if (mtime_ptr != 0)
+	*mtime_ptr = mtime;
       return 1;
     }
 
   /* Now try VPATH search on that.  */
 
   file = buf;
-  if (vpath_search (&file))
+  if (vpath_search (&file, mtime_ptr))
     {
       free (buf);
       *lib = file;
@@ -996,9 +1005,12 @@ library_search (lib)
   for (dp = dirs; *dp != 0; ++dp)
     {
       sprintf (buf, "%s/lib%s.a", *dp, libname);
-      if (name_mtime (buf) != (time_t) -1)
+      mtime = name_mtime (buf);
+      if (mtime != (time_t) -1)
 	{
 	  *lib = buf;
+	  if (mtime_ptr != 0)
+	    *mtime_ptr = mtime;
 	  return 1;
 	}
     }
