@@ -58,7 +58,11 @@ extern int child_execute_job PARAMS ((char *argv, struct child *child));
 #else
 extern void child_execute_job PARAMS ((int stdin_fd, int stdout_fd, char **argv, char **envp));
 #endif
+#ifdef _AMIGA
+extern void exec_command PARAMS ((char **argv));
+#else
 extern void exec_command PARAMS ((char **argv, char **envp));
+#endif
 
 extern unsigned int job_slots_used;
 
