@@ -1,3 +1,22 @@
+Fri Mar 24 00:32:32 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* main.c (handle_non_switch_argument): New function, broken out of
+ 	decode_switches.
+	(decode_switches): Set optind to 0 to reinitialize getopt, not to 1.
+	When getopt_long returns EOF, break the loop and handle remaining args
+ 	with a simple second loop.
+
+	* remake.c (remake_file): Set update_status to 2 instead of 1 for
+ 	no rule to make.  Mention parent (dependent) in error message.
+	(update_file_1): Handle FILE->update_status == 2 in -d printout.
+	* job.c (start_job_command, reap_children): Set update_status to 2
+ 	instead of 1 for failed commands.
+
+Tue Mar 21 16:23:38 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* job.c (search_path): Function removed (was already #if 0'd out).
+	* configure.in: Remove AC_TYPE_GETGROUPS; nothing needs it any more.
+
 Fri Mar 17 15:57:40 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
 	* configure.bat: Write @CPPFLAGS@ translation.
