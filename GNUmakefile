@@ -25,7 +25,7 @@ override srcdir := .
 # Get most of the information from the Unix-compatible makefile.
 include compatMakefile
 
-extras := $(sort $(filter-out @%@,$(extras)) getloadavg.o)
+extras := $(filter-out getloadavg.o @%@,$(extras)) getloadavg.o
 LOADLIBES := $(filter-out @%@,$(LOADLIBES))
 ALLOCA := $(filter-out @%@,$(ALLOCA))
 
@@ -60,8 +60,6 @@ GLOB =
 
 else
 
-globdep = glob/libglob.a
-globlib = $(globdep)
 CPPFLAGS := $(CPPFLAGS) -Iglob
 
 endif	 # works-for-make
@@ -71,6 +69,9 @@ endif	 # !no_libc
 # We know the type of machine, so put the binaries in subdirectories.
 $(ARCH)/%.o: %.c
 	$(COMPILE.c) $< $(OUTPUT_OPTION)
+$(ARCH)/glob/libglob.a:
+	$(MAKE) -C $(@D) $(@F)
+.PHONY: $(ARCH)/glob/libglob.a
 objs := $(addprefix $(ARCH)/,$(objs))
 prog := $(ARCH)/make
 
@@ -90,7 +91,7 @@ CPPFLAGS := -I$(ARCH) $(CPPFLAGS) $(filter-out @%@,$(defines))
 ifneq "$(wildcard $(ARCH)/makefile)" ""
 include $(ARCH)/makefile
 endif
-objs := $(sort $(objs) $(addprefix $(ARCH)/,$(ALLOCA) $(extras)))
+objs := $(objs) $(addprefix $(ARCH)/,$(ALLOCA) $(extras))
 
 else # Not ARCH
 prog := make
@@ -116,7 +117,7 @@ mkdep-nolib = $(mkdep)
 endif
 mkdep = $(CC) -M $(CPPFLAGS)
 
-depfiles = $(objs:.o=.dep)
+depfiles = $(patsubst %.o,%.dep,$(filter %.o,$(objs)))
 
 
 ifdef yescustoms
@@ -185,7 +186,7 @@ version := \
 tarfiles := make make-doc
 tarfiles := $(addsuffix -$(version).tar.Z,$(tarfiles))
 # Depend on default and doc so we don't ship anything that won't compile.
-dist: default doc tests $(tarfiles)
+dist: default info dvi tests $(tarfiles)
 
 dist: local-inst
 .PHONY: local-inst
@@ -223,8 +224,7 @@ make-doc-$(version).tar.Z: README-doc COPYING make.dvi make.info make.info*
 make-$(version).tar.Z: README INSTALL COPYING ChangeLog NEWS \
           configure Makefile.in configure.in \
 	  $(srcs) remote-*.c $(globfiles) make.texinfo gpl.texinfo \
-  	  make.cp* make.fn* make.ky* make.pg* make.toc make.tp* make.vr* \
-	  make.aux make.man texinfo.tex TAGS tags
+	  make.?? make.??s make.toc make.aux make.man texinfo.tex TAGS tags
 	$(make-tar)
 
 ifneq (,)
