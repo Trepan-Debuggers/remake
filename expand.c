@@ -91,11 +91,13 @@ initialize_variable_output ()
 
 /* Recursively expand V.  The returned string is malloc'd.  */
 
-static char *allocated_variable_append PARAMS ((struct variable *v));
+static char *allocated_variable_append PARAMS ((struct variable *v,
+                                                struct variable_set_list *l));
 
 char *
-recursively_expand (v)
+recursively_expand_setlist (v, list)
      register struct variable *v;
+     struct variable_set_list *list;
 {
   char *value;
 
@@ -107,7 +109,7 @@ recursively_expand (v)
 
   v->expanding = 1;
   if (v->append)
-    value = allocated_variable_append (v);
+    value = allocated_variable_append (v, list);
   else
     value = allocated_variable_expand (v->value);
   v->expanding = 0;
@@ -141,8 +143,11 @@ reference_variable (o, name, length)
      char *name;
      unsigned int length;
 {
-  register struct variable *v = lookup_variable (name, length);
+  register struct variable *v;
+  struct variable_set_list *setlist;
   char *value;
+
+  v = lookup_variable_setlist (name, length, &setlist);
 
   if (v == 0)
     warn_undefined (name, length);
@@ -150,7 +155,7 @@ reference_variable (o, name, length)
   if (v == 0 || *v->value == '\0')
     return o;
 
-  value = (v->recursive ? recursively_expand (v) : v->value);
+  value = (v->recursive ? recursively_expand_setlist (v, setlist) : v->value);
 
   o = variable_buffer_output (o, value, strlen (value));
 
@@ -467,8 +472,9 @@ variable_expand_for_file (line, file)
     context of the next variable set, then we append the expanded value.  */
 
 static char *
-allocated_variable_append (v)
+allocated_variable_append (v, list)
      struct variable *v;
+     struct variable_set_list *list;
 {
   struct variable_set_list *save;
   int len = strlen (v->name);
@@ -480,9 +486,12 @@ allocated_variable_append (v)
 
   variable_buffer = 0;
 
-  assert(current_variable_set_list->next != 0);
+  if (!list)
+    list = current_variable_set_list;
+
+  assert(list->next != 0);
   save = current_variable_set_list;
-  current_variable_set_list = current_variable_set_list->next;
+  current_variable_set_list = list->next;
 
   var[0] = '$';
   var[1] = '(';
