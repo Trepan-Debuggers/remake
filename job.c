@@ -1390,9 +1390,19 @@ construct_command_argv (line, restp, file)
      char *line, **restp;
      struct file *file;
 {
-  char *shell = allocated_variable_expand_for_file ("$(SHELL)", file);
-  char *ifs = allocated_variable_expand_for_file ("$(IFS)", file);
+  char *shell, *ifs;
   char **argv;
+
+  {
+    /* Turn off --warn-undefined-variables while we expand SHELL and IFS.  */
+    int save = warn_undefined_variables_flag;
+    warn_undefined_variables_flag = 0;
+
+    shell = allocated_variable_expand_for_file ("$(SHELL)", file);
+    ifs = allocated_variable_expand_for_file ("$(IFS)", file);
+
+    warn_undefined_variables_flag = save;
+  }
 
   argv = construct_command_argv_internal (line, restp, shell, ifs);
 
