@@ -163,6 +163,11 @@ the file names where they should reside for actual use.  If there is a
 simple test to verify that a program is properly installed, this target
 should run that test.
 
+If possible, write the @code{install} target rule so that it does not
+modify anything in the directory where the program was built, provided
+@samp{make all} has just been done.  This is convenient for building the
+program under one user name and installing it under another.
+
 The commands should create all the directories in which files are to be
 installed, if they don't already exist.  This includes the directories
 specified as the values of the variables @code{prefix} and
@@ -204,6 +209,9 @@ $(infodir)/foo.info: foo.info
 Delete all the installed files that the @samp{install} target would
 create (but not the noninstalled files such as @samp{make all} would
 create).
+
+This rule should not modify the directories where compilation is done,
+only the directories where files are installed.
 
 @comment The gratuitous blank line here is to make the table look better
 @comment in the printed Make manual.  Please leave it in.
@@ -327,6 +335,9 @@ installdirs: mkinstalldirs
                                 $(libdir) $(infodir) \
                                 $(mandir)
 @end smallexample
+
+This rule should not modify the directories where compilation is done.
+It should do nothing but create installation directories.
 @end table
 
 @node Command Variables
