@@ -429,11 +429,11 @@ ar_name_equal (name, mem, truncated)
       struct ar_hdr hdr;
       return !strncmp (name, mem,
 		       sizeof (hdr.ar_name) - 
-#ifndef __hpux
+#if !defined (__hpux) && !defined (cray)
 		       1
 #else
 		       2
-#endif /* __hpux */
+#endif /* !__hpux && !cray */
 		       );
 #endif
     }
