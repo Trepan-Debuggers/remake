@@ -4,7 +4,13 @@
 
 @ignore
 $Log: make.texinfo,v $
-Revision 1.2  1988/04/23 16:16:04  roland
+Revision 1.3  1988/04/23 17:40:09  roland
+* Bumped revision number to be the same as the source.
+* Note that the `patsubst' expansion function and expansions
+  of the form `$(a:-b)', etc. (from Sun sh) were in revision
+  1.2 but were accidently omitted from the log entry.
+
+Revision 1.2  88/04/23  16:16:04  roland
 * Added RCS log.
 * Changed the copyrights from Richard Stallman to Free Software Foundation.
 * Added Roland McGrath to the authors on the title page.
