@@ -124,24 +124,33 @@ construct_vpath_list (pattern, dirpath)
       /* Remove matching listings.  */
       register struct vpath *path, *lastpath;
 
-      lastpath = vpaths;
-      for (path = vpaths; path != 0; lastpath = path, path = path->next)
-	if (pattern == 0
-	    || (((percent == 0 && path->percent == 0)
-		 || (percent - pattern == path->percent - path->pattern))
-		&& streq (pattern, path->pattern)))
-	  {
-	    /* Remove it from the linked list.  */
-	    if (lastpath == vpaths)
-	      vpaths = path->next;
-	    else
-	      lastpath->next = path->next;
+      lastpath = 0;
+      path = vpaths;
+      while (path != 0)
+	{
+	  struct vpath *next = path->next;
 
-	    /* Free its unused storage.  */
-	    free (path->pattern);
-	    free ((char *) path->searchpath);
-	    free ((char *) path);
-	  }
+	  if (pattern == 0
+	      || (((percent == 0 && path->percent == 0)
+		   || (percent - pattern == path->percent - path->pattern))
+		  && streq (pattern, path->pattern)))
+	    {
+	      /* Remove it from the linked list.  */
+	      if (lastpath == 0)
+		vpaths = path->next;
+	      else
+		lastpath->next = next;
+
+	      /* Free its unused storage.  */
+	      free (path->pattern);
+	      free ((char *) path->searchpath);
+, 1993	      free ((char *) path);
+	    }
+
+	  lastpath = next;
+	  path = next;
+	}
+
       if (pattern != 0)
 	free (pattern);
       return;
