@@ -63,7 +63,7 @@ you need to run programs that are a part of your package during the
 make, please make sure that it uses @file{./} if the program is built as
 part of the make or @file{$(srcdir)/} if the file is an unchanging part
 of the source code.  Without one of these prefixes, the current search
-path is used.  
+path is used.
 
 The distinction between @file{./} and @file{$(srcdir)/} is important
 when using the @samp{--srcdir} option to @file{configure}.  A rule of
@@ -405,7 +405,7 @@ Unix-style man pages are installed in one of the following:
 @item mandir
 The top-level directory for installing the man pages (if any) for this
 package.  It will normally be @file{/usr/local/man}, but you should
-write it as @file{$(prefix)/man}. 
+write it as @file{$(prefix)/man}.
 (If you are using Autoconf, write it as @samp{@@mandir@@}.)
 
 @item man1dir
@@ -551,10 +551,10 @@ only the directories where files are installed.
 Like @code{install}, but strip the executable files while installing
 them.  The definition of this target can be very simple:
 
-@example
+@smallexample
 install-strip:
         $(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' install
-@end example
+@end smallexample
 
 Normally we do not recommend stripping an executable unless you are sure
 the program has no bugs.  However, it can be reasonable to install a
@@ -634,7 +634,7 @@ run the @code{makeinfo} program, which is part of the Texinfo
 distribution.
 
 @item dvi
-Generate DVI files for all Texinfo documentation.  
+Generate DVI files for all Texinfo documentation.
 For example:
 
 @smallexample
@@ -669,7 +669,7 @@ distribution file for GCC version 1.40 is called @file{gcc-1.40.tar.gz}.
 
 The @code{dist} target should explicitly depend on all non-source files
 that are in the distribution, to make sure they are up to date in the
-distribution.  
+distribution.
 @ifset CODESTD
 @xref{Releases, , Making Releases}.
 @end ifset
@@ -691,7 +691,7 @@ in which they are useful.
 @item installcheck
 Perform installation tests (if any).  The user must build and install
 the program before running the tests.  You should not assume that
-@file{$(bindir)} is in the search path.  
+@file{$(bindir)} is in the search path.
 
 @item installdirs
 It's useful to add a target named @samp{installdirs} to create the
