@@ -1,3 +1,8 @@
+2003-07-18  Paul D. Smith  <psmith@gnu.org>
+
+	* dir.c (directory_contents_hash_1, directory_contents_hash_1)
+	[WINDOWS32]: Initialize hash.
+
 2003-04-30  Paul D. Smith  <psmith@gnu.org>
 
 	* build.template: Make some changes to maybe allow this script to

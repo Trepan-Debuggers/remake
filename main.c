@@ -1,6 +1,6 @@
 /* Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
-2002 Free Software Foundation, Inc.
+2002, 2003 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -41,7 +41,7 @@ MA 02111-1307, USA.  */
 # include <sys/types.h>
 # include <sys/wait.h>
 #endif
-#if defined(MAKE_JOBSERVER) && defined(HAVE_FCNTL_H)
+#ifdef HAVE_FCNTL_H
 # include <fcntl.h>
 #endif
 

@@ -7,11 +7,11 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.12 2003/05/02 01:45:00 psmith Exp $
-@set EDITION 0.60
-@set VERSION 3.80
-@set UPDATED 08 July 2002
-@set UPDATE-MONTH July 2002
+@set RCSID $Id: make.texi,v 1.13 2003/07/19 02:46:25 psmith Exp $
+@set EDITION 0.61
+@set VERSION 3.81
+@set UPDATED 02 May 2003
+@set UPDATE-MONTH May 2003
 @comment The ISBN number might need to change on next publication.
 @set ISBN 1-882114-81-7 @c From Brian Youmans <3diff@gnu.org>, 25 Apr 2000
 
@@ -38,7 +38,7 @@ and issues the commands to recompile them.
 This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Make Manual}, for @code{make}, Version @value{VERSION}.
 
-Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2002
+Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2002, 2003
 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
@@ -1671,9 +1671,9 @@ executed by the shell (normally @samp{sh}), but with some extra features
 There are actually two different types of prerequisites understood by
 GNU @code{make}: normal prerequisites such as described in the
 previous section, and @dfn{order-only} prerequisites.  A normal
-prerequisite actually makes two statements: first, it imposes an order
-of execution of build commands: any commands necessary to build any of
-a target's prerequisites will be fully executed before any commands
+prerequisite makes two statements: first, it imposes an order of
+execution of build commands: any commands necessary to build any of a
+target's prerequisites will be fully executed before any commands
 necessary to build the target.  Second, it imposes a dependency
 relationship: if any prerequisite is newer than the target, then the
 target is considered out-of-date and must be rebuilt.
