@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.143 1994/09/09 06:59:08 roland Alpha $
+@set RCSID $Id: make.texinfo,v 2.144 1994/10/10 08:10:13 roland Exp $
 @set EDITION 0.46
 @set VERSION 3.72 Beta
 @set UPDATED 5 July 1994
@@ -7110,6 +7110,14 @@ the value of @code{$^} contains just one copy of the name.
 @cindex dependencies, list of all
 @cindex list of all dependencies
 
+@vindex $+
+@vindex + @r{(automatic variable)}
+@item $+
+This is like @samp{$^}, but dependencies listed more than once are
+duplicated in the order they were listed in the makefile.  This is
+primarily useful for use in linking commands where it is meaningful to
+repeat library file names in a particular order.
+
 @vindex $*
 @vindex * @r{(automatic variable)}
 @item $*
@@ -7934,8 +7942,9 @@ same time.  @xref{Chained Rules, ,Chains of Implicit Rules}.
 
 @item
 The automatic variable @code{$^} containing a list of all dependencies
-of the current target.  We did not invent this, but we have no idea who did.
-@xref{Automatic, ,Automatic Variables}.
+of the current target.  We did not invent this, but we have no idea who
+did.  @xref{Automatic, ,Automatic Variables}.  The automatic variable
+@code{$+} is a simple extension of @code{$^}.
 
 @item
 The ``what if'' flag (@samp{-W} in GNU @code{make}) was (as far as we know)
@@ -8403,9 +8412,11 @@ For dependencies which are archive members, only
 the member named is used (@pxref{Archives}).
 
 @item $^
+@itemx $+
 The names of all the dependencies, with spaces between them.  For
 dependencies which are archive members, only the member named is used
-(@pxref{Archives}).
+(@pxref{Archives}).  The value of @code{$^} omits duplicate
+dependencies, while @code{$+} retains them and preserves their order.
 
 @item $*
 The stem with which an implicit rule matches 
@@ -8430,6 +8441,10 @@ The directory part and the file-within-directory part of @code{$<}.
 @item $(^D)
 @itemx $(^F)
 The directory part and the file-within-directory part of @code{$^}.
+
+@item $(+D)
+@itemx $(+F)
+The directory part and the file-within-directory part of @code{$+}.
 
 @item $(?D)
 @itemx $(?F)
