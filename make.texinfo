@@ -9,7 +9,7 @@
 
 @set EDITION 0.43
 @set VERSION 3.68 Beta
-@set UPDATED 25 July 1993
+@set UPDATED 26 July 1993
 @set UPDATE-MONTH July 1993
 
 @c finalout
@@ -7471,7 +7471,7 @@ Remove from the list all rules with no commands.
 @item
 For each pattern rule in the list:
 
-@enumerate
+@enumerate a
 @item
 Find the stem @var{s}, which is the nonempty part of @var{t} or @var{n}
 matched by the @samp{%} in the target pattern.@refill
@@ -7494,7 +7494,7 @@ then this rule applies.
 If no pattern rule has been found so far, try harder.
 For each pattern rule in the list:
 
-@enumerate
+@enumerate a
 @item
 If the rule is terminal, ignore it and go on to the next rule.
 
