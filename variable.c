@@ -381,12 +381,12 @@ define_automatic_variables ()
   /* Define the magic D and F variables in terms of
      the automatic variables they are variations of.  */
 
-  define_variable ("@D", 2, "$(dir $@)", o_automatic, 1);
-  define_variable ("%D", 2, "$(dir $%)", o_automatic, 1);
-  define_variable ("*D", 2, "$(dir $*)", o_automatic, 1);
-  define_variable ("<D", 2, "$(dir $<)", o_automatic, 1);
-  define_variable ("?D", 2, "$(dir $?)", o_automatic, 1);
-  define_variable ("^D", 2, "$(dir $^)", o_automatic, 1);
+  define_variable ("@D", 2, "$(patsubst %/,%,$(dir $@))", o_automatic, 1);
+  define_variable ("%D", 2, "$(patsubst %/,%,$(dir $%))", o_automatic, 1);
+  define_variable ("*D", 2, "$(patsubst %/,%,$(dir $*))", o_automatic, 1);
+  define_variable ("<D", 2, "$(patsubst %/,%,$(dir $<))", o_automatic, 1);
+  define_variable ("?D", 2, "$(patsubst %/,%,$(dir $?))", o_automatic, 1);
+  define_variable ("^D", 2, "$(patsubst %/,%,$(dir $^))", o_automatic, 1);
   define_variable ("@F", 2, "$(notdir $@)", o_automatic, 1);
   define_variable ("%F", 2, "$(notdir $%)", o_automatic, 1);
   define_variable ("*F", 2, "$(notdir $*)", o_automatic, 1);
