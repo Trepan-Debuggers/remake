@@ -107,6 +107,8 @@ extern char *allocated_variable_expand_for_file PARAMS ((char *line, struct file
 extern char *expand_argument PARAMS ((char *str, char *end));
 extern char *variable_expand_string PARAMS ((char *line, char *string,
                                              long length));
+extern void install_variable_buffer PARAMS ((char **bufp, unsigned int *lenp));
+extern void restore_variable_buffer PARAMS ((char *buf, unsigned int len));
 
 /* function.c */
 extern int handle_function PARAMS ((char **op, char **stringp));

@@ -1,5 +1,24 @@
 2002-10-25  Paul D. Smith  <psmith@gnu.org>
 
+	* expand.c (install_variable_buffer): New function.  Install a new
+	variable_buffer context and return the previous one.
+	(restore_variable_buffer): New function.  Free the current
+	variable_buffer context and put a previously saved one back.
+	* variable.h: Prototypes for {install,restore}_variable_buffer.
+	* function.c (func_eval): Push a new variable_buffer context
+	before we eval, then restore the old one when we're done.
+	Fixes Bug #1517.
+
+	* read.c (install_conditionals): New function.  Install a new
+	conditional context and return the previous one.
+	(restore_conditionals): New function.  Free the current
+	conditional context and put a previously saved one back.
+	(eval): Use the {install,restore}_conditionals for "include"
+	handling.
+	(eval_buffer): Use {install,restore}_conditionals to preserve the
+	present conditional state before we evaluate the buffer.
+	Fixes Bug #1516.
+
 	* doc/make.texi (Quick Reference): Add references to $(eval ...)
 	and $(value ...).
 	(Recursion): Add a variable index entry for CURDIR.
