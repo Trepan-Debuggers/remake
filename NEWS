@@ -13,13 +13,15 @@ See the README file and the GNU remake manual for details on sending bug
 reports.
 
 Version 3.80+dbg-0.2
-  Add ability to print specified attributes of a target, e.g. "time",
+*  Add ability to print specified attributes of a target, e.g. "time",
   "deps", "vars"... 
 
-  Improve reporting target locations.
+* Improve reporting target locations.
 
-  Improve target stack tracking.
+* Improve target stack tracking.
 
+* Add "write" command - ability to write target commands to a file
+  with MAKE variables expanded, or show that inside a debugger session.
 
 Version 3.80+dbg-0.1
 
