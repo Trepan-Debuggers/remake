@@ -7,11 +7,11 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.158 1996/03/20 00:58:43 roland Exp $
+@set RCSID $Id: make.texinfo,v 2.159 1996/05/09 17:07:56 roland Exp $
 @set EDITION 0.50
 @set VERSION 3.75 Beta
-@set UPDATED 28 February 1996
-@set UPDATE-MONTH February 1996
+@set UPDATED 20 March 1996
+@set UPDATE-MONTH March 1996
 @comment The ISBN number might need to change on next publication.
 @set ISBN 1-882114-78-7
 
