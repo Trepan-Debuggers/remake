@@ -140,23 +140,33 @@ set_file_variables (file)
     register char *qp, *qDp, *qFp;
     register struct dep *d;
     unsigned int len;
+    unsigned int caretD_len, qmarkD_len;
 
     caret_len = qmark_len = 0;
+    caretD_len = qmarkD_len = 0;
     for (d = file->deps; d != 0; d = d->next)
       {
 	register unsigned int i = strlen (dep_name (d)) + 1;
 	caret_len += i;
+	caretD_len += (i <= 2 ? 3 : i);
 	if (d->changed)
+	  {
 	  qmark_len += i;
+	    qmarkD_len += (i <= 2 ? 3 : i);
+	  }
       }
 
     len = caret_len == 0 ? 1 : caret_len;
+    if (caretD_len == 0)
+      caretD_len = 1;
     cp = caret_value = (char *) xmalloc (len);
-    cDp = caretD_value = (char *) xmalloc (len);
+    cDp = caretD_value = (char *) xmalloc (caretD_len);
     cFp = caretF_value = (char *) xmalloc (len);
     len = qmark_len == 0 ? 1 : qmark_len;
+    if (qmarkD_len == 0)
+      qmarkD_len = 1;
     qp = qmark_value = (char *) xmalloc (len);
-    qDp = qmarkD_value = (char *) xmalloc (len);
+    qDp = qmarkD_value = (char *) xmalloc (qmarkD_len);
     qFp = qmarkF_value = (char *) xmalloc (len);
 
     for (d = file->deps; d != 0; d = d->next)
