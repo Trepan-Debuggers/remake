@@ -2,7 +2,7 @@
 @setfilename make.info
 @synindex vr fn
 
-@c $Header: /sources/make/make/Attic/make.texinfo,v 1.61 1988/06/18 00:19:49 mcgrath Beta $
+@c $Header: /sources/make/make/Attic/make.texinfo,v 1.62 1988/06/18 00:26:10 mcgrath Beta $
 
 @ifinfo
 This file documents the GNU Make utility.
@@ -4335,7 +4335,7 @@ options are specified.  @xref{Recursion}.  I'm told that Unix System V
 An implicit suffix rule @samp{@var{x}.a:} makes
 @file{@var{lib}(@var{name}.o)} from @file{@var{name}.@var{x}}.  In GNU
 @code{make}, this is actually implemented by using one pattern rule for
-making library-archive files and rule-chaining.  @xref{Chaining}.@refill
+making library-archive files and rule-chaining.  @xref{Chained Rules}.@refill
 @end itemize
 
 The Sun Unix (and probably System V) version of @code{make} fails to
@@ -4381,7 +4381,7 @@ Variable expansion functions.  @xref{Functions}.
 The @samp{-c} command option to change directory.  @xref{Options}.
 
 The @samp{-o} option makes files seem artificially old.
-@xref{Avoiding Recompilation}.
+@xref{Avoiding Compilation}.
 
 @item
 Conditional lines.  @xref{Conditionals}.
@@ -4416,7 +4416,7 @@ considered to be the same file.
 @item
 Stripping leading sequences of @samp{./} from file names, so that
 Dependencies of the form @samp{-l@var{name}} are searched for
-as library archives.  @xref{Library Search}.
+as library archives.  @xref{Libraries/Search}.
 same file.
 
 Suffixes for suffix rules (@pxref{Suffix Rules}) may contain
