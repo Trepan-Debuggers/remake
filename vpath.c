@@ -158,8 +158,9 @@ construct_vpath_list (pattern, dirpath)
 	      free ((char *) path->searchpath);
 	      free ((char *) path);
 	    }
+	  else
+	    lastpath = path;
 
-	  lastpath = path;
 	  path = next;
 	}
 
