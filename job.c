@@ -35,9 +35,6 @@ static int dos_status;
 static char *dos_bname;
 static char *dos_bename;
 static int dos_batch_file;
-#define PATH_SEPARATOR_CHAR ';'
-#else /* Not MSDOS.  */
-#define PATH_SEPARATOR_CHAR ':'
 #endif /* MSDOS.  */
 
 
