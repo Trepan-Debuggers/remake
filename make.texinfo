@@ -7,11 +7,12 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.141 1994/07/08 18:33:15 roland Published $
+@set RCSID $Id: make.texinfo,v 2.142 1994/07/20 12:30:52 roland Alpha $
 @set EDITION 0.46
 @set VERSION 3.72 Beta
 @set UPDATED 5 July 1994
 @set UPDATE-MONTH July 1994
+@set ISBN 1-882114-50-7
 
 @c finalout
 
@@ -71,7 +72,7 @@ Published by the Free Software Foundation @*
 675 Massachusetts Avenue, @*
 Cambridge, MA 02139 USA @*
 Printed copies are available for $20 each. @*
-ISBN 1-882114-16-7 @*
+ISBN @value{ISBN} @*
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
