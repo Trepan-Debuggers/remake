@@ -311,6 +311,8 @@ extern unsigned int makelevel;
 
 extern unsigned int commands_started;
 
+extern int handling_fatal_signal;
+
 
 #define DEBUGPR(msg) \
   do if (debug_flag) { print_spaces (depth); printf (msg, file->name); \
