@@ -517,8 +517,20 @@ ar_scan (archive, function, arg)
 	  break;
 
 	if (nread != AR_HDR_SIZE
-#ifdef ARFMAG
-	    || bcmp (member_header.ar_fmag, ARFMAG, 2)
+#if defined(ARFMAG) || defined(ARFZMAG)
+	    || (
+# ifdef ARFMAG
+                bcmp (member_header.ar_fmag, ARFMAG, 2)
+# else
+                1
+# endif
+                &&
+# ifdef ARFZMAG
+                bcmp (member_header.ar_fmag, ARFZMAG, 2)
+# else
+                1
+# endif
+               )
 #endif
 	    )
 	  {
@@ -768,7 +780,7 @@ ar_member_touch (arname, memname)
 #else
   fstat (fd, &statbuf);
 #endif
-#if defined(ARFMAG) || defined(AIAMAG)
+#if defined(ARFMAG) || defined(ARFZMAG) || defined(AIAMAG)
   /* Advance member's time to that time */
   for (i = 0; i < sizeof ar_hdr.ar_date; i++)
     ar_hdr.ar_date[i] = ' ';
