@@ -1,9 +1,9 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT([GNU make],[3.81beta1],[bug-make@gnu.org])
+AC_INIT([GNU make],[3.81beta2],[bug-make@gnu.org])
 
 AC_PREREQ(2.59)
-AC_REVISION([[$Id: configure.in,v 1.130 2004/12/06 15:03:45 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.131 2005/02/16 05:03:42 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -50,7 +50,7 @@ AC_HEADER_DIRENT
 AC_HEADER_STAT
 AC_HEADER_TIME
 AC_CHECK_HEADERS(stdlib.h locale.h unistd.h limits.h fcntl.h string.h \
-		 memory.h sys/param.h sys/time.h sys/timeb.h)
+		 memory.h sys/param.h sys/resource.h sys/time.h sys/timeb.h)
 
 # Set a flag if we have an ANSI C compiler
 if test "$ac_cv_prog_cc_stdc" != no; then
@@ -136,7 +136,7 @@ fi
 AC_CHECK_FUNCS(	memcpy memmove strchr strdup mkstemp mktemp fdopen \
 	        bsd_signal dup2 getcwd realpath sigsetmask sigaction \
                 getgroups seteuid setegid setlinebuf setreuid setregid \
-                setvbuf pipe strerror strsignal)
+                getrlimit setrlimit setvbuf pipe strerror strsignal)
 
 AC_FUNC_SETVBUF_REVERSED
 
