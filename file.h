@@ -90,6 +90,17 @@ extern time_t f_mtime ();
 #define file_mtime(f) file_mtime_1 ((f), 1)
 #define file_mtime_no_search(f) file_mtime_1 ((f), 0)
 
+/* Modtime value to use for `infinitely new'.  We used to get the current time
+   from the system and use that whenever we wanted `new'.  But that causes
+   trouble when the machine running make and the machine holding a file have
+   different ideas about what time it is; and can also lose for `force'
+   targets, which need to be considered newer than anything that depends on
+   them, even if said dependents' modtimes are in the future.
+
+   NOTE: This assumes 32-bit `time_t's, but I cannot think of a portable way
+   to produce the largest representable integer of a given signed type.  */
+#define NEW_MTIME	((time_t) 0x7fffffff)
+
 
 #define check_renamed(file) \
   while ((file)->renamed != 0) (file) = (file)->renamed /* No ; here.  */
