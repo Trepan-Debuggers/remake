@@ -195,25 +195,10 @@ update_file (file, depth)
 
   for (f = file; f != 0; f = f->prev)
     {
-      register struct dep *d;
       int not_started = f->command_state == cs_not_started;
 
       status |= update_file_1 (f, depth);
       check_renamed (f);
-
-      for (d = f->also_make; d != 0; d = d->next)
-	{
-	  check_renamed (d->file);
-	  d->file->command_state = f->command_state;
-	  d->file->update_status = f->update_status;
-	  d->file->updated = f->updated;
-	  if (debug_flag)
-	    {
-	      print_spaces (depth);
-	      printf ("File `%s' was also made by making `%s'.\n",
-		      d->file->name, f->name);
-	    }
-	}
 
       if (status != 0 && !keep_going_flag)
 	return status;
@@ -552,8 +537,9 @@ update_file_1 (file, depth)
   return file->update_status;
 }
 
-/* Set FILE's `updated' flag and re-check its mtime and the mtime's
-   of all files listed in its `also_make' member.  */
+/* Set FILE's `updated' flag and re-check its mtime and the mtime's of all
+   files listed in its `also_make' member.  Under -t, this function also
+   touches FILE.  */
 
 void
 notice_finished_file (file)
@@ -604,19 +590,24 @@ notice_finished_file (file)
 	file->last_mtime = 0;
     }
 
-  for (d = file->also_make; d != 0; d = d->next)
-    {
-      d->file->command_state = cs_finished;
-      d->file->updated = 1;
-      d->file->update_status = file->update_status;
+  if (file->update_status != -1)
+    /* We actually tried to update FILE, which has
+       updated its also_make's as well (if it worked).
+       If it didn't work, it wouldn't work again for them.
+       So mark them as updated with the same status.  */
+    for (d = file->also_make; d != 0; d = d->next)
+      {
+	d->file->command_state = cs_finished;
+	d->file->updated = 1;
+	d->file->update_status = file->update_status;
 
-      if (!d->file->phony)
-	/* Fetch the new modification time.
-	   We do this instead of just invalidating the cached time
-	   so that a vpath_search can happen.  Otherwise, it would
-	   never be done because the target is already updated.  */
-	(void) file_mtime (d->file);
-    }
+	if (!d->file->phony)
+	  /* Fetch the new modification time.
+	     We do this instead of just invalidating the cached time
+	     so that a vpath_search can happen.  Otherwise, it would
+	     never be done because the target is already updated.  */
+	  (void) f_mtime (d->file);
+      }
 }
 
 /* Check whether another file (whose mtime is THIS_MTIME)
@@ -792,6 +783,7 @@ remake_file (file)
 	}
     }
 
+  /* This does the touching under -t.  */
   notice_finished_file (file);
 }
 
