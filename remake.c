@@ -614,7 +614,7 @@ notice_finished_file (file)
     {
       if (just_print_flag || question_flag
 	  || (file->is_target && file->cmds == 0))
-	file->last_mtime = time ((time_t *) 0);
+	file->last_mtime = NEW_MTIME;
       else
 	file->last_mtime = 0;
     }
