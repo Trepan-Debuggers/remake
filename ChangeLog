@@ -1,3 +1,60 @@
+1999-07-23  Paul D. Smith  <psmith@gnu.org>
+
+	* job.c (my_job_token): This variable controls whether we've
+	handed our personal token to a subprocess or not.  Note we could
+	probably infer this from the value of job_slots_used, but it's
+	clearer to just keep it separately.  Job_slots_used isn't really
+	relevant when running the job server.
+	(free_job_token): New function: free a job token.  If we don't
+	have one, no-op.  If we have the personal token, reclaim it.  If
+	we have another token, write it back to the pipe.
+	(reap_children): Call free_job_token.
+	(free_child): Call free_job_token.
+	(start_job_command): Remove duplicate test for '+' in the command.
+	If we don't appear to be running a recursive make, close the
+	jobserver filedescriptors.
+	(start_waiting_job): If our personal token is available, use that
+	instead of going to the server pipe.
+	(*): Add the token value to many debugging statements, and print
+	the child target name in addition to the ptr hex value.
+	Change the default "no token" value from '\0' to '-' so it looks
+	better in the output.
+
+	* main.c (main): Install the child_handler with sigaction()
+	instead of signal() if we have it.  On SysV systems, signal() uses
+	SysV semantics which are a pain.  But sigaction() always does what
+	we want.
+	(main): If we got job server FDs from the environment, test them
+	to see if they're open.  If not, the parent make closed them
+	because it didn't think we were a submake.  Print a warning and
+	suggestion to use "+" on the submake invocation, and hard-set to
+	-j1 for this instance of make.
+	(main): Change the algorithm for assigning slots to be more
+	robust.  Previously make checked to see if it thought a subprocess
+	was a submake and if so, didn't give it a token.  Since make's
+	don't consume tokens we could spawn many of makes fighting for a
+	small number of tokens.  Plus this is unreliable because submakes
+	might not be recognized by the parent (see above) then all the
+	tokens could be used up by unrecognized makes, and no one could
+	run.  Now every make consumes a token from its parent.  However,
+	the make can also use this token to spawn a child.  If the make
+	wants more than one, it goes to the jobserver pipe.  Thus there
+	will never be more than N makes running for -jN, and N*2 processes
+	(N makes and their N children).  Every make can always run at
+	least one job, and we'll never deadlock.  (Note the closing of the
+	pipe for non-submakes also solves this, but this is still a better
+	algorithm.)  So!  Only put N-1 tokens into the pipe, since the
+	topmost make keeps one for itself.
+
+	* configure.in: Find sigaction.  Disable job server support unless
+	the system provides it, in addition to either waitpid() or
+	wait3().
+
+1999-07-22  Rob Tulloh  <rob_tulloh@dev.tivoli.com>
+
+	* arscan.c (ar_member_touch) [WINDOWS32]: The ar_date field is a
+	string on Windows, not a timestamp.
+
 1999-07-21  Paul D. Smith  <psmith@gnu.org>
 
 	* Version 3.77.90 released.
@@ -111,21 +168,24 @@
 	already have one; if we're waiting on the load to go down
 	start_waiting_job() might get called twice on the same file.
 
-	* remake.c (update_goal_chain): If we try to update a goal and it
-	doesn't complete (e.g., parallel builds) remember that by setting
-	the `deferred' flag in the goal structure.  Later when we're
-	determining the return value we consider a goal updated if either
-	the mtime has changed _or_ this flag was set.  We need this
-	because the mtime doesn't change during the update_file() function
-	if we started a job running; instead it's set during the
-	reap_children() call.  So, the code doesn't know it was updated
-	and returns a status of -1 (nothing done).  This is OK during
-	"normal" builds since our caller (main) treats these cases
-	identically in that case, but if you're building makefiles the
-	difference is very important (whether we re-exec or not).
-
-	* dep.h: Add a `deferred' flag to track whether a goal was run but
-	not completed (parallel builds).
+	* filedef.h (struct file): Add new field, mtime_before_update.
+	When notice_finished_file runs it assigns the cached last_mtime to
+	this field.
+	* remake.c (update_goal_chain): Notice that a file wasn't updated
+	by asking if it changed (g->changed) and comparing the current
+	cached time (last_mtime) with the previous one, stored in
+	mtime_before_update.  The previous check ("did last_mtime changed
+	during the run of update_file?") fails for parallel builds because
+	last_mtime is set during reap_children, before update_file is run.
+	This causes update_goal_chain to always return -1 (nothing
+	rebuilt) when running parallel (-jN).  This is OK during "normal"
+	builds since our caller (main) treats these cases identically in
+	that case, but if when rebuilding makefiles the difference is very
+	important, as it controls whether we re-exec or not.
+	* file.c (file_hash_enter): Copy the mtime_before_update field.
+	(snap_deps): Initialize mtime_before_update to -1.
+	* main.c (main): Initialize mtime_before_update on old (-o) and
+	new (-W) files.
 
 1999-07-08  Paul D. Smith  <psmith@gnu.org>
 

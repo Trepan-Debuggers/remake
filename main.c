@@ -1172,19 +1172,32 @@ int main (int argc, char ** argv)
      functionality here and rely on the signal handler and counting
      children.
 
-     Also, if we're using the jobs pipe we need a signal handler so that
+     If we're using the jobs pipe we need a signal handler so that
      SIGCHLD is not ignored; we need it to interrupt select(2) in
-     job.c:start_waiting_job() if we're waiting on the pipe for a token.  */
+     job.c:start_waiting_job() if we're waiting on the pipe for a token.
+
+     Use sigaction where possible as it's more reliable.  */
   {
     extern RETSIGTYPE child_handler PARAMS ((int sig));
 
     /* Set up to handle children dying.  This must be done before
        reading in the makefiles so that `shell' function calls will work.  */
+
+#ifndef HAVE_SIGACTION
+# define HANDLESIG(s) signal(s, child_handler)
+#else
+# define HANDLESIG(s) sigaction(s, &sa, NULL)
+    struct sigaction sa;
+
+    bzero ((char *)&sa, sizeof (struct sigaction));
+    sa.sa_handler = child_handler;
+#endif
+
 # if defined SIGCHLD
-    (void) signal (SIGCHLD, child_handler);
+    (void) HANDLESIG (SIGCHLD);
 # endif
 # if defined SIGCLD && SIGCLD != SIGCHLD
-    (void) signal (SIGCLD, child_handler);
+    (void) HANDLESIG (SIGCLD);
 # endif
   }
 #endif
@@ -1267,21 +1280,38 @@ int main (int argc, char ** argv)
 
 #ifdef MAKE_JOBSERVER
   /* If extended jobs are available then the -j option can have one of 4
-     formats: (1) not specified: default is "1"; (2) specified with no
-     value: default is "0" (infinite); (3) specified with a single
-     value: this means the user wants N job slots; or (4) specified with
-     2 values separated by commas.  The latter means we're a submake and
-     the two values are the read and write FDs, respectively, for the
-     pipe.  Note this last form is undocumented for the user!
-   */
+     formats: (1) not specified: default is "1"; (2) specified with no value:
+     default is "0" (infinite); (3) specified with a single value: this means
+     the user wants N job slots; or (4) specified with 2 values separated by
+     a comma.  The latter means we're a submake; the two values are the read
+     and write FDs, respectively, for the pipe.  Note this last form is
+     undocumented for the user!  */
+
   sscanf(job_slots_str, "%d", &job_slots);
   {
     char *cp = index(job_slots_str, ',');
 
+    /* In case #4, get the FDs.  */
     if (cp && sscanf(cp+1, "%d", &job_fds[1]) == 1)
       {
-	job_fds[0] = job_slots;
-	job_slots = 0;
+        /* Set up the first FD and set job_slots to 0.  The combination of a
+           pipe + !job_slots means we're using the jobserver.  If !job_slots
+           and we don't have a pipe, we can start infinite jobs.  */
+        job_fds[0] = job_slots;
+        job_slots = 0;
+
+        /* Make sure the pipe is open!  The parent might have closed it
+           because it didn't think we were a submake.  If so, print a warning
+           then default to -j1.  */
+        if (fcntl (job_fds[0], F_GETFL, 0) < 0
+            || fcntl (job_fds[1], F_GETFL, 0) < 0)
+          {
+            error (NILF,
+                   "warning: jobserver unavailable (using -j1).  Add `+' to parent make rule.");
+            job_slots = 1;
+            job_fds[0] = job_fds[1] = -1;
+            job_slots_str = "1";
+          }
       }
   }
 
@@ -1293,14 +1323,18 @@ int main (int argc, char ** argv)
       char buf[(sizeof("1024")*2)+1];
       char c = '0';
 
-      if (pipe(job_fds) < 0)
-	pfatal_with_name("creating jobs pipe");
+      if (pipe (job_fds) < 0)
+	pfatal_with_name ("creating jobs pipe");
 
       /* Set the read FD to nonblocking; we'll use select() to wait
 	 for it in job.c.  */
       fcntl (job_fds[0], F_SETFL, O_NONBLOCK);
 
-      for (; job_slots; --job_slots)
+      /* Every make assumes that it always has one job it can run.  For the
+         submakes it's the token they were given by their parent.  For the
+         top make, we just subtract one from the number the user wants.  */
+
+      while (--job_slots)
 	{
 	  write(job_fds[1], &c, 1);
 	  if (c == '9')
