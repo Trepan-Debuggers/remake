@@ -644,8 +644,8 @@ start_waiting_job (c)
       break;
 
     case cs_finished:
-      free_child (c);
       notice_finished_file (c->file);
+      free_child (c);
       break;
 
     default:
