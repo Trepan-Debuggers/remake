@@ -83,19 +83,24 @@ ar_member_date (name)
 
   ar_parse_name (name, &arname, &memname);
 
-  /* Make sure we know the modtime of the archive itself because
-     we are likely to be called just before commands to remake a
-     member are run, and they will change the archive itself.  */
+  /* Make sure we know the modtime of the archive itself because we are
+     likely to be called just before commands to remake a member are run,
+     and they will change the archive itself.
+
+     But we must be careful not to enter_file the archive itself if it does
+     not exist, because pattern_search assumes that files found in the data
+     base exist or can be made.  */
   {
     struct file *arfile;
     arfile = lookup_file (arname);
-    if (arfile == 0)
+    if (arfile == 0 && file_exists_p (arname))
       {
 	arfile = enter_file (arname);
 	arname_used = 1;
       }
 
-    (void) f_mtime (arfile, 0);
+    if (arfile != 0)
+      (void) f_mtime (arfile, 0);
   }
 
   val = ar_scan (arname, ar_member_date_1, (long int) memname);
