@@ -667,6 +667,22 @@ func_firstword (char *o, char **argv, const char *funcname UNUSED)
   return o;
 }
 
+static char *
+func_lastword (char *o, char **argv, const char *funcname UNUSED)
+{
+  unsigned int i;
+  char *words = argv[0];    /* Use a temp variable for find_next_token */
+  char *p = 0;
+  char *t;
+
+  while ((t = find_next_token (&words, &i)))
+    p = t;
+
+  if (p != 0)
+    o = variable_buffer_output (o, p, i);
+
+  return o;
+}
 
 static char *
 func_words (char *o, char **argv, const char *funcname UNUSED)
@@ -1754,6 +1770,7 @@ static struct function_table_entry function_table_init[] =
   { STRING_SIZE_TUPLE("findstring"),    2,  2,  1,  func_findstring},
   { STRING_SIZE_TUPLE("firstword"),     0,  1,  1,  func_firstword},
   { STRING_SIZE_TUPLE("join"),          2,  2,  1,  func_join},
+  { STRING_SIZE_TUPLE("lastword"),      0,  1,  1,  func_lastword},
   { STRING_SIZE_TUPLE("patsubst"),      3,  3,  1,  func_patsubst},
   { STRING_SIZE_TUPLE("shell"),         0,  1,  1,  func_shell},
   { STRING_SIZE_TUPLE("sort"),          0,  1,  1,  func_sort},

@@ -1,3 +1,7 @@
+2004-10-21  Boris Kolpackov  <boris@kolpackov.net>
+
+	* scripts/functions/word: Test $(firstword ) and $(lastword ).
+
 2004-10-05  Boris Kolpackov  <boris@kolpackov.net>
 
 	* scripts/features/patspecific_vars: Test simple/recursive
