@@ -3457,7 +3457,7 @@ a canned sequence apply to every line in the sequence.  So the rule:
 
 @example
 frob.out: frob.in
-	@$(frobnicate)
+	@@$(frobnicate)
 @end example
 
 @noindent
