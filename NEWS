@@ -6,11 +6,14 @@ Copyright (C) 2002  Free Software Foundation, Inc.
 See the end for copying conditions.
 
 All changes mentioned here are more fully described in the GNU make
-manual, which is contained in this distribution as the file make.texinfo.
+manual, which is contained in this distribution as the file doc/make.texi.
 
 Please send GNU make bug reports to <bug-make@gnu.org>.
 See the README file and the GNU make manual for details on sending bug
 reports.
+
+Version 3.81a1
+
 
 Version 3.80
 

@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.10 2002/10/13 18:50:10 psmith Exp $
+@set RCSID $Id: make.texi,v 1.11 2002/10/25 18:42:52 psmith Exp $
 @set EDITION 0.60
 @set VERSION 3.80
 @set UPDATED 08 July 2002
@@ -3627,13 +3627,17 @@ also find it useful to declare targets that invoke recursive
 @code{make} commands as @samp{.PHONY} (for more discussion on when
 this is useful, see @ref{Phony Targets}).
 
-For your convenience, GNU @code{make} sets the variable @code{CURDIR} to
-the pathname of the current working directory for you.  If @code{-C} is
-in effect, it will contain the path of the new directory, not the
-original.  The value has the same precedence it would have if it were
+@vindex @code{CURDIR}
+For your convenience, when GNU @code{make} starts (after it has
+processed any @code{-C} options) it sets the variable @code{CURDIR} to
+the pathname of the current working directory.  This value is never
+touched by @code{make} again: in particular note that if you include
+files from other directories the value of @code{CURDIR} does not
+change.  The value has the same precedence it would have if it were
 set in the makefile (by default, an environment variable @code{CURDIR}
 will not override this value).  Note that setting this variable has no
-effect on the operation of @code{make}
+impact on the operation of @code{make} (it does not cause @code{make}
+to change its working directory, for example).
 
 @menu
 * MAKE Variable::               The special effects of using @samp{$(MAKE)}.
@@ -9726,6 +9730,18 @@ and concatenate the results.@*
 Evaluate the variable @var{var} replacing any references to @code{$(1)},
 @code{$(2)} with the first, second, etc. @var{param} values.@*
 @xref{Call Function, ,The @code{call} Function}.
+
+@item $(eval @var{text})
+
+Evaluate @var{text} then read the results as makefile commands.
+Expands to the empty string.@*
+@xref{Eval Function, ,The @code{eval} Function}.
+
+@item $(value @var{var})
+
+Evaluates to the contents of the variable @var{var}, with no expansion
+performed on it.@*
+@xref{Value Function, ,The @code{value} Function}.
 @end table
 
 Here is a summary of the automatic variables.
