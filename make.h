@@ -48,6 +48,7 @@ extern int errno;
 
 #if !defined (HAVE_SYS_SIGLIST) && defined (HAVE__SYS_SIGLIST)
 #define	sys_siglist	_sys_siglist
+#define	HAVE_SYS_SIGLIST	/* Now we have it.  */
 #endif
 
 #ifndef	isblank
