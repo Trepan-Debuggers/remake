@@ -73,6 +73,10 @@ update_goal_chain (goals, makefiles)
     {
       register struct dep *g, *lastgoal;
 
+      /* Start jobs that are waiting for the load to go down.  */
+
+      start_waiting_jobs ();
+
       /* Wait for a child to die.  */
 
       reap_children (1, 0);
