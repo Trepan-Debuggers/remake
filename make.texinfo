@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.131 1994/04/21 01:21:39 roland Exp $
+@set RCSID $Id: make.texinfo,v 2.132 1994/04/21 01:35:11 roland Exp $
 @set EDITION 0.45
 @set VERSION 3.71 Beta
 @set UPDATED 20 April 1994
@@ -2542,6 +2542,11 @@ main.o : main.c defs.h
 @noindent
 Thus you no longer have to write all those rules yourself.
 The compiler will do it for you.
+
+Note that such a dependency constitutes mentioning @file{main.o} in a
+makefile, so it can never be considered an intermediate file by implicit
+rule search.  This means that @code{make} won't ever remove the file
+after using it; @pxref{Chained Rules, ,Chains of Implicit Rules}.
 
 @cindex @code{make depend}
 With old @code{make} programs, it was traditional practice to use this
