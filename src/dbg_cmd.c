@@ -245,14 +245,17 @@ cmd_initialize(void)
   short_command['n'].doc = _("alias for step.");
 
   short_command['p'].func = &dbg_cmd_print;
-  short_command['p'].use = _("print {*variable*|*target*}");
+  short_command['p'].use = _("print {*variable*|*target* [attrs...]}");
   short_command['p'].doc = 
     _("Show a variable definition or target information.\n" \
       "\tIf a variable name is given, the value is shown with embedded\n" \
       "\tvariable-references unexpanded. Don't include $ before a variable\n" \
       "\tname. See also \"examine\".\n\n" \
       "\tIf a target name is given, information about target is printed.\n" \
-      "\tIf no argument is supplied, we try to use the current target name." \
+      "\tAttributes 'depend', 'nonorder', 'attrs', 'state', 'time', 'vars'\n" \
+      "\tor 'prev' can be given after a target name." \
+      "\tIf no variable or target name  is supplied, we try to use the " \
+      "\tcurrent target name.\n"				
       );
 
   short_command['q'].func = &dbg_cmd_quit;
@@ -597,24 +600,55 @@ static debug_return_t dbg_cmd_trace (char *psz_arg)
 }
 
 /* Show a variable or target definition. */
-static debug_return_t dbg_cmd_print (char *psz_object) 
+static debug_return_t dbg_cmd_print (char *psz_args) 
 {
   file_t *p_target;
+  char   *psz_name;
 
-  if (!psz_object || 0==strlen(psz_object))
+  if (!psz_args || 0==strlen(psz_args))
     /* Use current target */
     if (p_stack && p_stack->p_target && p_stack->p_target->name)
-      psz_object = p_stack->p_target->name;
+      psz_args = p_stack->p_target->name;
     else {
       printf("No current target - must supply something to print\n");
       return debug_read;
     }
 
-  p_target = lookup_file (psz_object);
+  psz_name = get_word(&psz_args);
+  
+  p_target = lookup_file (psz_name);
   if (p_target) {
-    print_target ((const void *) p_target);
+    print_target_mask_t i_mask = 0;
+    char *psz_word;
+    
+    while(psz_word = get_word(&psz_args)) {
+      if (0 == strlen(psz_word)) {
+	break;
+      } else if (0 == strcmp(psz_word, "depend")) {
+	i_mask |= PRINT_TARGET_DEPEND;
+      } else if (0 == strcmp(psz_word, "nonorder")) {
+	i_mask |= PRINT_TARGET_NONORDER;
+      } else if (0 == strcmp(psz_word, "attrs")) {
+	i_mask |= PRINT_TARGET_ATTRS;
+      } else if (0 == strcmp(psz_word, "time")) {
+	i_mask |= PRINT_TARGET_TIME;
+      } else if (0 == strcmp(psz_word, "state")) {
+	i_mask |= PRINT_TARGET_STATE;
+      } else if (0 == strcmp(psz_word, "vars")) {
+	i_mask |= PRINT_TARGET_VARS;
+      } else if (0 == strcmp(psz_word, "cmds")) {
+	i_mask |= PRINT_TARGET_CMDS;
+      } else if (0 == strcmp(psz_word, "prev")) {
+	i_mask |= PRINT_TARGET_PREV;
+      } else {
+	printf("Don't understand attribute '%s' - ignored\n", psz_word);
+      }
+    }
+    
+    if (0 == i_mask) i_mask = PRINT_TARGET_ALL;
+    print_target_props(p_target, i_mask);
   } else {
-    dbg_cmd_show_var(psz_object, 0);
+    dbg_cmd_show_var(psz_name, 0);
   }
   return debug_read;
 }
@@ -847,12 +881,14 @@ static debug_return_t dbg_cmd_show_var (char *psz_varname, int expand)
   if (!psz_varname || 0==strlen(psz_varname)) {
     printf(_("You need to supply a variable name.\n"));
   } else {
-    variable_t *p_v = 
-      lookup_variable (psz_varname, strlen (psz_varname));
+    variable_t *p_v;
+    initialize_file_variables (p_stack->p_target, 0);
+    set_file_variables (p_stack->p_target);
+    p_v = lookup_variable (psz_varname, strlen (psz_varname));
     if (p_v) {
-      if (expand) 
+      if (expand) {
 	print_variable_expand(p_v);
-      else
+      } else
 	print_variable(p_v);
       printf("\n");
     } else {

@@ -514,120 +514,148 @@ file_timestamp_sprintf (char *p, FILE_TIMESTAMP ts)
   *p = '\0';
 }
 
-/* Print the data base of files.  */
 
+/*! 
+Print the data base of files.
+*/
 void
 print_target (const void *item)
 {
-  file_t *f = (file_t *) item;
+  file_t *p_target = (file_t *) item;
+  print_target_props(p_target, PRINT_TARGET_ALL);
+}
+
+/*! Print some or all properties of the data base of files.
+*/
+void
+print_target_props (file_t *p_target, print_target_mask_t i_mask)
+{
   dep_t *d;
   dep_t *ood = 0;
 
   putchar ('\n');
-  if (!f->is_target)
+  if (!p_target->is_target)
     puts (_("# Not a target:"));
-  printf ("%s:%s", f->name, f->double_colon ? ":" : "");
+  printf ("%s:%s", p_target->name, p_target->double_colon ? ":" : "");
 
-  /* Print all normal dependencies; note any order-only deps.  */
-  for (d = f->deps; d != 0; d = d->next)
-    if (! d->ignore_mtime)
-      printf (" %s", dep_name (d));
-    else if (! ood)
-      ood = d;
-
-  /* Print order-only deps, if we have any.  */
-  if (ood)
-    {
-      printf (" | %s", dep_name (ood));
-      for (d = ood->next; d != 0; d = d->next)
-        if (d->ignore_mtime)
-          printf (" %s", dep_name (d));
-    }
-
+  if (i_mask & PRINT_TARGET_DEPEND) {
+    
+    /* Print all normal dependencies; note any order-only deps.  */
+    for (d = p_target->deps; d != 0; d = d->next)
+      if (! d->ignore_mtime)
+	printf (" %s", dep_name (d));
+      else if (! ood)
+	ood = d;
+  }
+  
+  if (i_mask & PRINT_TARGET_ORDER) {
+    /* Print order-only deps, if we have any.  */
+    if (ood)
+      {
+	printf (" | %s", dep_name (ood));
+	for (d = ood->next; d != 0; d = d->next)
+	  if (d->ignore_mtime)
+	    printf (" %s", dep_name (d));
+      }
+  }
+  
   putchar ('\n');
 
-  if (f->precious)
-    puts (_("#  Precious file (prerequisite of .PRECIOUS)."));
-  if (f->phony)
-    puts (_("#  Phony target (prerequisite of .PHONY)."));
-  if (f->cmd_target)
-    puts (_("#  Command-line target."));
-  if (f->dontcare)
-    puts (_("#  A default, MAKEFILES, or -include/sinclude makefile."));
-  puts (f->tried_implicit
-        ? _("#  Implicit rule search has been done.")
-        : _("#  Implicit rule search has not been done."));
-  if (f->stem != 0)
-    printf (_("#  Implicit/static pattern stem: `%s'\n"), f->stem);
-  if (f->intermediate)
-    puts (_("#  File is an intermediate prerequisite."));
-  if (f->also_make != 0)
-    {
-      fputs (_("#  Also makes:"), stdout);
-      for (d = f->also_make; d != 0; d = d->next)
-	printf (" %s", dep_name (d));
-      putchar ('\n');
-    }
-  if (f->last_mtime == UNKNOWN_MTIME)
-    puts (_("#  Modification time never checked."));
-  else if (f->last_mtime == NONEXISTENT_MTIME)
-    puts (_("#  File does not exist."));
-  else if (f->last_mtime == OLD_MTIME)
-    puts (_("#  File is very old."));
-  else
-    {
-      char buf[FILE_TIMESTAMP_PRINT_LEN_BOUND + 1];
-      file_timestamp_sprintf (buf, f->last_mtime);
-      printf (_("#  Last modified %s\n"), buf);
-    }
-  puts (f->updated
-        ? _("#  File has been updated.") : _("#  File has not been updated."));
-  switch (f->command_state)
-    {
-    case cs_running:
-      puts (_("#  Commands currently running (THIS IS A BUG)."));
-      break;
-    case cs_deps_running:
-      puts (_("#  Dependencies commands running (THIS IS A BUG)."));
-      break;
-    case cs_not_started:
-    case cs_finished:
-      switch (f->update_status)
-	{
-	case -1:
-	  break;
-	case 0:
-	  puts (_("#  Successfully updated."));
-	  break;
-	case 1:
-	  assert (question_flag);
-	  puts (_("#  Needs to be updated (-q is set)."));
-	  break;
-	case 2:
-	  puts (_("#  Failed to be updated."));
-	  break;
-	default:
-	  puts (_("#  Invalid value in `update_status' member!"));
-	  fflush (stdout);
-	  fflush (stderr);
-	  abort ();
-	}
-      break;
-    default:
-      puts (_("#  Invalid value in `command_state' member!"));
-      fflush (stdout);
-      fflush (stderr);
-      abort ();
-    }
+  if (i_mask & PRINT_TARGET_ATTRS) {
+    
+    if (p_target->precious)
+      puts (_("#  Precious file (prerequisite of .PRECIOUS)."));
+    if (p_target->phony)
+      puts (_("#  Phony target (prerequisite of .PHONY)."));
+    if (p_target->cmd_target)
+      puts (_("#  Command-line target."));
+    if (p_target->dontcare)
+      puts (_("#  A default, MAKEFILES, or -include/sinclude makefile."));
+    puts (p_target->tried_implicit
+	  ? _("#  Implicit rule search has been done.")
+	  : _("#  Implicit rule search has not been done."));
+    if (p_target->stem != 0)
+      printf (_("#  Implicit/static pattern stem: `%s'\n"), p_target->stem);
+    if (p_target->intermediate)
+      puts (_("#  File is an intermediate prerequisite."));
+    if (p_target->also_make != 0)
+      {
+	fputs (_("#  Also makes:"), stdout);
+	for (d = p_target->also_make; d != 0; d = d->next)
+	  printf (" %s", dep_name (d));
+	putchar ('\n');
+      }
+  }
 
-  if (f->variables != 0)
-    print_file_variables (f);
+  if (i_mask & PRINT_TARGET_TIME) {
+    
+    if (p_target->last_mtime == UNKNOWN_MTIME)
+      puts (_("#  Modification time never checked."));
+    else if (p_target->last_mtime == NONEXISTENT_MTIME)
+      puts (_("#  File does not exist."));
+    else if (p_target->last_mtime == OLD_MTIME)
+      puts (_("#  File is very old."));
+    else
+      {
+	char buf[FILE_TIMESTAMP_PRINT_LEN_BOUND + 1];
+	file_timestamp_sprintf (buf, p_target->last_mtime);
+	printf (_("#  Last modified %s\n"), buf);
+      }
+    puts (p_target->updated
+	  ? _("#  File has been updated.")
+	  : _("#  File has not been updated."));
+  }
 
-  if (f->cmds != 0)
-    print_commands (f->cmds);
+  if (i_mask & PRINT_TARGET_STATE) {
+    
+    switch (p_target->command_state)
+      {
+      case cs_running:
+	puts (_("#  Commands currently running (THIS IS A BUG)."));
+	break;
+      case cs_deps_running:
+	puts (_("#  Dependencies commands running (THIS IS A BUG)."));
+	break;
+      case cs_not_started:
+      case cs_finished:
+	switch (p_target->update_status)
+	  {
+	  case -1:
+	    break;
+	  case 0:
+	    puts (_("#  Successfully updated."));
+	    break;
+	  case 1:
+	    assert (question_flag);
+	    puts (_("#  Needs to be updated (-q is set)."));
+	    break;
+	  case 2:
+	    puts (_("#  Failed to be updated."));
+	    break;
+	  default:
+	    puts (_("#  Invalid value in `update_status' member!"));
+	    fflush (stdout);
+	    fflush (stderr);
+	    abort ();
+	  }
+	break;
+      default:
+	puts (_("#  Invalid value in `command_state' member!"));
+	fflush (stdout);
+	fflush (stderr);
+	abort ();
+      }
+  }
+  
 
-  if (f->prev)
-    print_target ((const void *) f->prev);
+  if (p_target->variables != 0 && i_mask & PRINT_TARGET_VARS)
+    print_file_variables (p_target);
+
+  if (p_target->cmds != 0 && i_mask & PRINT_TARGET_CMDS)
+    print_commands (p_target->cmds);
+
+  if (p_target->prev && i_mask & PRINT_TARGET_PREV)
+    print_target_props (p_target->prev, i_mask);
 }
 
 void
