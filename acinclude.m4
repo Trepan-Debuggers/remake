@@ -86,7 +86,7 @@ changequote([,])dnl
 
 dnl ---------------------------------------------------------------------------
 dnl Got this from the GNU fileutils 3.16r distribution
-dnl by Paul Eggert <egger@twinsun.com>
+dnl by Paul Eggert <eggert@twinsun.com>
 dnl ---------------------------------------------------------------------------
 
 dnl The problem is that the default compilation flags in Solaris 2.6 won't
@@ -128,4 +128,83 @@ AC_DEFUN(AC_LFS,
 	eval $ac_shellvar=\$ac_test_$ac_shellvar
       done ;;
   esac
+])
+
+
+dnl ---------------------------------------------------------------------------
+dnl From Paul Eggert <eggert@twinsun.com>
+
+dnl Define HAVE_INTTYPES_H if <inttypes.h> exists,
+dnl doesn't clash with <sys/types.h>, and declares uintmax_t.
+
+AC_DEFUN(jm_AC_HEADER_INTTYPES_H,
+[
+  if test x = y; then
+    dnl This code is deliberately never run via ./configure.
+    dnl FIXME: this is a gross hack to make autoheader put an entry
+    dnl for `HAVE_INTTYPES_H' in config.h.in.
+    AC_CHECK_FUNCS(INTTYPES_H)
+  fi
+  AC_CACHE_CHECK([for inttypes.h], jm_ac_cv_header_inttypes_h,
+  [AC_TRY_COMPILE(
+    [#include <sys/types.h>
+#include <inttypes.h>],
+    [uintmax_t i = (uintmax_t) -1;],
+    jm_ac_cv_header_inttypes_h=yes,
+    jm_ac_cv_header_inttypes_h=no)])
+  if test $jm_ac_cv_header_inttypes_h = yes; then
+    ac_kludge=HAVE_INTTYPES_H
+    AC_DEFINE_UNQUOTED($ac_kludge)
+  fi
+])
+
+
+dnl ---------------------------------------------------------------------------
+dnl From Paul Eggert <eggert@twinsun.com>
+
+AC_DEFUN(AC_STRUCT_ST_MTIM_NSEC,
+ [AC_CACHE_CHECK([for nanoseconds member of struct stat.st_mtim],
+   ac_cv_struct_st_mtim_nsec,
+   [ac_save_CPPFLAGS="$CPPFLAGS"
+    ac_cv_struct_st_mtim_nsec=no
+    # tv_nsec -- the usual case
+    # _tv_nsec -- Solaris 2.6, if
+    #	(defined _XOPEN_SOURCE && _XOPEN_SOURCE_EXTENDED == 1
+    #	 && !defined __EXTENSIONS__)
+    # st__tim.tv_nsec -- UnixWare 2.1.2
+    for ac_val in tv_nsec _tv_nsec st__tim.tv_nsec; do
+      CPPFLAGS="$ac_save_CPPFLAGS -DST_MTIM_NSEC=$ac_val"
+      AC_TRY_COMPILE([#include <sys/types.h>
+#include <sys/stat.h>], [struct stat s; s.st_mtim.ST_MTIM_NSEC;],
+        [ac_cv_struct_st_mtim_nsec=$ac_val; break])
+    done
+    CPPFLAGS="$ac_save_CPPFLAGS"])
+
+  if test $ac_cv_struct_st_mtim_nsec != no; then
+    AC_DEFINE_UNQUOTED(ST_MTIM_NSEC, $ac_cv_struct_st_mtim_nsec)
+  fi
+ ]
+)
+
+dnl ---------------------------------------------------------------------------
+dnl From Paul Eggert <eggert@twinsun.com>
+
+dnl Define uintmax_t to `unsigned long' or `unsigned long long'
+dnl if <inttypes.h> does not exist.
+
+AC_DEFUN(jm_AC_TYPE_UINTMAX_T,
+[
+  AC_REQUIRE([jm_AC_HEADER_INTTYPES_H])
+  if test $jm_ac_cv_header_inttypes_h = no; then
+    AC_CACHE_CHECK([for unsigned long long], ac_cv_type_unsigned_long_long,
+    [AC_TRY_COMPILE([],
+      [unsigned long long i = (unsigned long long) -1;],
+      ac_cv_type_unsigned_long_long=yes,
+      ac_cv_type_unsigned_long_long=no)])
+    if test $ac_cv_type_unsigned_long_long = yes; then
+      AC_DEFINE(uintmax_t, unsigned long long)
+    else
+      AC_DEFINE(uintmax_t, unsigned long)
+    fi
+  fi
 ])

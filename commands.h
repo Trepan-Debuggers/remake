@@ -21,8 +21,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 struct commands
   {
-    char *filename;		/* File that contains commands.  */
-    unsigned int lineno;	/* Line number in file.  */
+    struct floc fileinfo;	/* Where commands were defined.  */
     char *commands;		/* Commands text.  */
     unsigned int ncommand_lines;/* Number of command lines.  */
     char **command_lines;	/* Commands chopped up into lines.  */

@@ -157,7 +157,7 @@ start_remote_job (argv, envp, stdin_fd, is_remote, id_ptr, used_stdin)
   retsock = Rpc_UdpCreate (True, 0);
   if (retsock < 0)
     {
-      error ("exporting: Couldn't create return socket.");
+      error (NILF, "exporting: Couldn't create return socket.");
       return 1;
     }
 
@@ -202,7 +202,7 @@ start_remote_job (argv, envp, stdin_fd, is_remote, id_ptr, used_stdin)
     {
       (void) close (retsock);
       (void) close (sock);
-      error ("exporting to %s: %s",
+      error (NILF, "exporting to %s: %s",
              host ? host->h_name : inet_ntoa (permit.addr),
              Rpc_ErrorMessage (status));
       return 1;
@@ -211,14 +211,14 @@ start_remote_job (argv, envp, stdin_fd, is_remote, id_ptr, used_stdin)
     {
       (void) close (retsock);
       (void) close (sock);
-      error ("exporting to %s: %s",
+      error (NILF, "exporting to %s: %s",
              host ? host->h_name : inet_ntoa (permit.addr),
              msg);
       return 1;
     }
   else
     {
-      error ("*** exported to %s (id %u)",
+      error (NILF, "*** exported to %s (id %u)",
 	      host ? host->h_name : inet_ntoa (permit.addr),
 	      permit.id);
     }

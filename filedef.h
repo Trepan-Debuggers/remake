@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+
 /* Structure that represents the info on one file
    that the makefile says how to make.
    All of these are chained together through `next'.  */
@@ -32,7 +33,7 @@ struct file
     char *stem;			/* Implicit stem, if an implicit
     				   rule has been used */
     struct dep *also_make;	/* Targets that are made by making this.  */
-    time_t last_mtime;		/* File's modtime, if already known.  */
+    FILE_TIMESTAMP last_mtime;	/* File's modtime, if already known.  */
     struct file *prev;		/* Previous entry for same file name;
 				   used when there are multiple double-colon
 				   entries for the same file.  */
@@ -96,11 +97,62 @@ extern unsigned int num_intermediates;
 extern struct file *default_goal_file, *suffix_file, *default_file;
 
 
-extern struct file *lookup_file (), *enter_file ();
-extern void remove_intermediates (), snap_deps ();
-extern void rename_file (), rehash_file (), file_hash_enter ();
-extern void set_command_state ();
+extern struct file *lookup_file PARAMS ((char *name));
+extern struct file *enter_file PARAMS ((char *name));
+extern void remove_intermediates PARAMS ((int sig));
+extern void snap_deps PARAMS ((void));
+extern void rename_file PARAMS ((struct file *file, char *name));
+extern void rehash_file PARAMS ((struct file *file, char *name));
+extern void file_hash_enter PARAMS ((struct file *file, char *name,
+                                     unsigned int oldhash, char *oldname));
+extern void set_command_state PARAMS ((struct file *file, int state));
+extern void notice_finished_file PARAMS ((struct file *file));
 
+
+#if ST_MTIM_NSEC
+# define FILE_TIMESTAMP_STAT_MODTIME(st) \
+    FILE_TIMESTAMP_FROM_S_AND_NS ((st).st_mtim.tv_sec, \
+                                  (st).st_mtim.ST_MTIM_NSEC)
+# define FILE_TIMESTAMPS_PER_S \
+    MIN ((FILE_TIMESTAMP) 1000000000, \
+         (INTEGER_TYPE_MAXIMUM (FILE_TIMESTAMP) \
+         / INTEGER_TYPE_MAXIMUM (time_t)))
+#else
+# define FILE_TIMESTAMP_STAT_MODTIME(st) ((st).st_mtime)
+# define FILE_TIMESTAMPS_PER_S 1
+#endif
+
+#define FILE_TIMESTAMP_FROM_S_AND_NS(s, ns) \
+    ((s) * FILE_TIMESTAMPS_PER_S \
+     + (ns) * FILE_TIMESTAMPS_PER_S / 1000000000)
+#define FILE_TIMESTAMP_DIV(a, b) ((a)/(b) - ((a)%(b) < 0))
+#define FILE_TIMESTAMP_MOD(a, b) ((a)%(b) + ((a)%(b) < 0) * (b))
+#define FILE_TIMESTAMP_S(ts) FILE_TIMESTAMP_DIV ((ts), FILE_TIMESTAMPS_PER_S)
+#define FILE_TIMESTAMP_NS(ts) \
+    (((FILE_TIMESTAMP_MOD ((ts), FILE_TIMESTAMPS_PER_S) * 1000000000) \
+       + (FILE_TIMESTAMPS_PER_S - 1)) \
+      / FILE_TIMESTAMPS_PER_S)
+
+/* Upper bound on length of string "YYYY-MM-DD HH:MM:SS.NNNNNNNNN"
+   representing a file timestamp.  The upper bound is not necessarily 19,
+   since the year might be less than -999 or greater than 9999.
+
+   Subtract one for the sign bit if in case file timestamps can be negative;
+   subtract FLOOR_LOG2_SECONDS_PER_YEAR to yield an upper bound on how many
+   file timestamp bits might affect the year;
+   302 / 1000 is log10 (2) rounded up;
+   add one for integer division truncation;
+   add one more for a minus sign if file timestamps can be negative;
+   add 4 to allow for any 4-digit epoch year (e.g. 1970);
+   add 25 to allow for "-MM-DD HH:MM:SS.NNNNNNNNN".  */
+#define FLOOR_LOG2_SECONDS_PER_YEAR 24
+#define FILE_TIMESTAMP_PRINT_LEN_BOUND \
+  (((sizeof (FILE_TIMESTAMP) * CHAR_BIT - 1 - FLOOR_LOG2_SECONDS_PER_YEAR) \
+    * 302 / 1000) \
+   + 1 + 1 + 4 + 25)
+
+extern FILE_TIMESTAMP file_timestamp_now PARAMS ((void));
+extern void file_timestamp_sprintf PARAMS ((char *p, FILE_TIMESTAMP ts));
 
 /* Return the mtime of file F (a struct file *), caching it.
    The value is -1 if the file does not exist.  */
@@ -110,9 +162,9 @@ extern void set_command_state ();
    we don't find it.
    The value is -1 if the file does not exist.  */
 #define file_mtime_no_search(f) file_mtime_1 ((f), 0)
-extern time_t f_mtime ();
+extern FILE_TIMESTAMP f_mtime PARAMS ((struct file *file, int search));
 #define file_mtime_1(f, v) \
-  ((f)->last_mtime != (time_t) 0 ? (f)->last_mtime : f_mtime ((f), v))
+  ((f)->last_mtime ? (f)->last_mtime : f_mtime ((f), v))
 
 /* Modtime value to use for `infinitely new'.  We used to get the current time
    from the system and use that whenever we wanted `new'.  But that causes
@@ -121,12 +173,13 @@ extern time_t f_mtime ();
    targets, which need to be considered newer than anything that depends on
    them, even if said dependents' modtimes are in the future.
 
-   If time_t is unsigned, its maximum value is the same as "(time_t) -1",
-   so use one less than that, because -1 is used for non-existing files.  */
+   If FILE_TIMESTAMP is unsigned, its maximum value is the same as
+   ((FILE_TIMESTAMP) -1), so use one less than that, because -1 is
+   used for non-existing files.  */
 #define NEW_MTIME \
-     (INTEGER_TYPE_SIGNED (time_t) \
-      ? INTEGER_TYPE_MAXIMUM (time_t) \
-      : (INTEGER_TYPE_MAXIMUM (time_t) - 1))
+     (INTEGER_TYPE_SIGNED (FILE_TIMESTAMP) \
+      ? INTEGER_TYPE_MAXIMUM (FILE_TIMESTAMP) \
+      : (INTEGER_TYPE_MAXIMUM (FILE_TIMESTAMP) - 1))
 
 #define check_renamed(file) \
   while ((file)->renamed != 0) (file) = (file)->renamed /* No ; here.  */

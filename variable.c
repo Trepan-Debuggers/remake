@@ -676,9 +676,8 @@ target_environment (file)
    returned.  */
 
 struct variable *
-try_variable_definition (filename, lineno, line, origin)
-     char *filename;
-     unsigned int lineno;
+try_variable_definition (flocp, line, origin)
+     const struct floc *flocp;
      char *line;
      enum variable_origin origin;
 {
@@ -766,7 +765,7 @@ try_variable_definition (filename, lineno, line, origin)
   expanded_name = allocated_variable_expand (name);
 
   if (expanded_name[0] == '\0')
-    makefile_fatal (filename, lineno, "empty variable name");
+    fatal (flocp, "empty variable name");
 
   /* Calculate the variable's new value in VALUE.  */
 

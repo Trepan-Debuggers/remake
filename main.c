@@ -22,6 +22,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "variable.h"
 #include "job.h"
 #include "commands.h"
+#include "rule.h"
 #include "getopt.h"
 #include <assert.h>
 #ifdef _AMIGA
@@ -41,7 +42,6 @@ extern void init_dir PARAMS ((void));
 extern void remote_setup PARAMS ((void));
 extern void remote_cleanup PARAMS ((void));
 extern RETSIGTYPE fatal_error_signal PARAMS ((int sig));
-extern RETSIGTYPE child_handler PARAMS ((int sig));
 
 extern void print_variable_data_base PARAMS ((void));
 extern void print_dir_data_base PARAMS ((void));
@@ -49,18 +49,22 @@ extern void print_rule_data_base PARAMS ((void));
 extern void print_file_data_base PARAMS ((void));
 extern void print_vpath_data_base PARAMS ((void));
 
+#if defined HAVE_WAITPID || defined HAVE_WAIT3
+# define HAVE_WAIT_NOHANG
+#endif
+
 #ifndef	HAVE_UNISTD_H
 extern int chdir ();
 #endif
 #ifndef	STDC_HEADERS
 #ifndef	sun			/* Sun has an incorrect decl in a header.  */
-extern void exit ();
+extern void exit PARAMS ((int)) __attribute__ ((noreturn));
 #endif
 extern double atof ();
 #endif
 extern char *mktemp ();
 
-static void print_data_base PARAMS((void));
+static void print_data_base PARAMS ((void));
 static void print_version PARAMS ((void));
 static void decode_switches PARAMS ((int argc, char **argv, int env));
 static void decode_env_switches PARAMS ((char *envar, unsigned int len));
@@ -413,7 +417,7 @@ enter_command_line_file (name)
      char *name;
 {
   if (name[0] == '\0')
-    fatal ("empty string invalid as file name");
+    fatal (NILF, "empty string invalid as file name");
 
   if (name[0] == '~')
     {
@@ -664,8 +668,7 @@ int main (int argc, char ** argv)
 #endif
 
   default_goal_file = 0;
-  reading_filename = 0;
-  reading_lineno_ptr = 0;
+  reading_file = 0;
 
 #if defined (__MSDOS__) && !defined (_POSIX_SOURCE)
   /* Request the most powerful version of `system', to
@@ -721,6 +724,20 @@ int main (int argc, char ** argv)
 #endif
 
 #undef	FATAL_SIG
+
+  /* Do not ignore the child-death signal.  This must be done before
+     any children could possibly be created; otherwise, the wait
+     functions won't work on systems with the SVR4 ECHILD brain
+     damage, if our invoker is ignoring this signal.  */
+
+#ifdef HAVE_WAIT_NOHANG
+# if defined SIGCHLD
+  (void) signal (SIGCHLD, SIG_DFL);
+# endif
+# if defined SIGCLD && SIGCLD != SIGCHLD
+  (void) signal (SIGCLD, SIG_DFL);
+# endif
+#endif
 
   /* Make sure stdout is line-buffered.  */
 
@@ -782,7 +799,7 @@ int main (int argc, char ** argv)
 #ifdef	HAVE_GETCWD
       perror_with_name ("getcwd: ", "");
 #else
-      error ("getwd: %s", current_directory);
+      error (NILF, "getwd: %s", current_directory);
 #endif
       current_directory[0] = '\0';
       directory_before_chdir = 0;
@@ -1051,7 +1068,7 @@ int main (int argc, char ** argv)
 #ifdef	HAVE_GETCWD
 	  perror_with_name ("getcwd: ", "");
 #else
-	  error ("getwd: %s", current_directory);
+	  error (NILF, "getwd: %s", current_directory);
 #endif
 	  starting_directory = 0;
 	}
@@ -1089,7 +1106,7 @@ int main (int argc, char ** argv)
 #endif
 
             if (stdin_nm)
-              fatal("Makefile from standard input specified twice.");
+              fatal (NILF, "Makefile from standard input specified twice.");
 
 	    outfile = fopen (name, "w");
 	    if (outfile == 0)
@@ -1126,14 +1143,20 @@ int main (int argc, char ** argv)
 	  }
     }
 
-  /* Set up to handle children dying.  This must be done before
-     reading in the makefiles so that `shell' function calls will work.  */
+#ifndef HAVE_WAIT_NOHANG
+  {
+    extern RETSIGTYPE child_handler PARAMS ((int sig));
 
-#ifdef SIGCHLD
-  (void) signal (SIGCHLD, child_handler);
-#endif
-#ifdef SIGCLD
-  (void) signal (SIGCLD, child_handler);
+    /* Set up to handle children dying.  This must be done before
+       reading in the makefiles so that `shell' function calls will work.
+       Note we only do this if we have to.   */
+# if defined SIGCHLD
+    (void) signal (SIGCHLD, child_handler);
+# endif
+# if defined SIGCLD && SIGCLD != SIGCHLD
+    (void) signal (SIGCLD, child_handler);
+# endif
+  }
 #endif
 
   /* Let the user send us SIGUSR1 to toggle the -d flag during the run.  */
@@ -1178,8 +1201,8 @@ int main (int argc, char ** argv)
     no_default_sh_exe = !find_and_set_default_shell(NULL);
 
   if (no_default_sh_exe && job_slots != 1) {
-    error("Do not specify -j or --jobs if sh.exe is not available.");
-    error("Resetting make for single job mode.");
+    error (NILF, "Do not specify -j or --jobs if sh.exe is not available.");
+    error (NILF, "Resetting make for single job mode.");
     job_slots = 1;
   }
 #endif /* WINDOWS32 */
@@ -1251,7 +1274,7 @@ int main (int argc, char ** argv)
     for (p = old_files->list; *p != 0; ++p)
       {
 	f = enter_command_line_file (*p);
-	f->last_mtime = (time_t) 1;
+	f->last_mtime = (FILE_TIMESTAMP) 1;
 	f->updated = 1;
 	f->update_status = 0;
 	f->command_state = cs_finished;
@@ -1273,7 +1296,7 @@ int main (int argc, char ** argv)
     {
       /* Update any makefiles if necessary.  */
 
-      time_t *makefile_mtimes = 0;
+      FILE_TIMESTAMP *makefile_mtimes = 0;
       unsigned int mm_idx = 0;
       char **nargv = argv;
       int nargc = argc;
@@ -1323,11 +1346,12 @@ int main (int argc, char ** argv)
 	    if (f == NULL || !f->double_colon)
 	      {
 		if (makefile_mtimes == 0)
-		  makefile_mtimes = (time_t *) xmalloc (sizeof (time_t));
+		  makefile_mtimes = (FILE_TIMESTAMP *)
+		    xmalloc (sizeof (FILE_TIMESTAMP));
 		else
-		  makefile_mtimes = (time_t *)
+		  makefile_mtimes = (FILE_TIMESTAMP *)
 		    xrealloc ((char *) makefile_mtimes,
-			      (mm_idx + 1) * sizeof (time_t));
+			      (mm_idx + 1) * sizeof (FILE_TIMESTAMP));
 		makefile_mtimes[mm_idx++] = file_mtime_no_search (d->file);
 		last = d;
 		d = d->next;
@@ -1373,13 +1397,13 @@ int main (int argc, char ** argv)
                     }
                   else if (! (d->changed & RM_DONTCARE))
                     {
-                      time_t mtime;
+                      FILE_TIMESTAMP mtime;
                       /* The update failed and this makefile was not
                          from the MAKEFILES variable, so we care.  */
-                      error ("Failed to remake makefile `%s'.",
+                      error (NILF, "Failed to remake makefile `%s'.",
                              d->file->name);
                       mtime = file_mtime_no_search (d->file);
-                      any_remade |= (mtime != (time_t) -1
+                      any_remade |= (mtime != (FILE_TIMESTAMP) -1
                                      && mtime != makefile_mtimes[i]);
                     }
                 }
@@ -1391,12 +1415,12 @@ int main (int argc, char ** argv)
                     if (d->changed & RM_INCLUDED)
                       /* An included makefile.  We don't need
                          to die, but we do want to complain.  */
-                      error ("Included makefile `%s' was not found.",
+                      error (NILF, "Included makefile `%s' was not found.",
                              dep_name (d));
                     else
                       {
                         /* A normal makefile.  We must die later.  */
-                        error ("Makefile `%s' was not found", dep_name (d));
+                        error (NILF, "Makefile `%s' was not found", dep_name (d));
                         any_failed = 1;
                       }
                   }
@@ -1461,7 +1485,7 @@ int main (int argc, char ** argv)
 	      else
 		bad = 1;
 	      if (bad)
-		fatal ("Couldn't change back to original directory.");
+		fatal (NILF, "Couldn't change back to original directory.");
 	    }
 
 #ifndef _AMIGA
@@ -1570,14 +1594,14 @@ int main (int argc, char ** argv)
     else
       {
 	if (read_makefiles == 0)
-	  fatal ("No targets specified and no makefile found");
+	  fatal (NILF, "No targets specified and no makefile found");
 	else
-	  fatal ("No targets");
+	  fatal (NILF, "No targets");
       }
 
     /* If we detected some clock skew, generate one last warning */
     if (clock_skew_detected)
-      error("*** Warning:  Clock skew detected.  Your build may be incomplete.");
+      error (NILF, "*** Warning:  Clock skew detected.  Your build may be incomplete.");
 
     /* Exit.  */
     die (status);
@@ -1661,7 +1685,7 @@ handle_non_switch_argument (arg, env)
   if (arg[0] == '-' && arg[1] == '\0')
     /* Ignore plain `-' for compatibility.  */
     return;
-  v = try_variable_definition ((char *) 0, 0, arg, o_command);
+  v = try_variable_definition (0, arg, o_command);
   if (v != 0)
     {
       /* It is indeed a variable definition.  Record a pointer to
@@ -1825,7 +1849,7 @@ decode_switches (argc, argv, env)
 		      if (i < 1)
 			{
 			  if (doit)
-			    error ("the `-%c' option requires a \
+			    error (NILF, "the `-%c' option requires a \
 positive integral argument",
 				   cs->c);
 			  bad = 1;

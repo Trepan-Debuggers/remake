@@ -102,7 +102,7 @@ extern void initialize_file_variables PARAMS ((struct file *file));
 extern void print_file_variables PARAMS ((struct file *file));
 extern void print_variable_set PARAMS ((struct variable_set *set, char *prefix));
 extern void merge_variable_set_lists PARAMS ((struct variable_set_list **setlist0, struct variable_set_list *setlist1));
-extern struct variable *try_variable_definition PARAMS ((char *filename, unsigned int lineno, char *line, enum variable_origin origin));
+extern struct variable *try_variable_definition PARAMS ((const struct floc *flocp, char *line, enum variable_origin origin));
 
 extern struct variable *lookup_variable PARAMS ((char *name, unsigned int length));
 extern struct variable *define_variable PARAMS ((char *name, unsigned int length, char *value,

@@ -62,3 +62,10 @@ extern void install_pattern_rule PARAMS ((struct pspec *p, int terminal));
 extern int new_pattern_rule PARAMS ((struct rule *rule, int override));
 extern struct pattern_var *create_pattern_var PARAMS ((char *target, char *suffix));
 extern struct pattern_var *lookup_pattern_var PARAMS ((char *target));
+extern void count_implicit_rule_limits PARAMS ((void));
+extern void convert_to_pattern PARAMS ((void));
+extern void create_pattern_rule PARAMS ((char **targets,
+                                         char **target_percents, int terminal,
+                                         struct dep *deps,
+                                         struct commands *commands,
+                                         int override));

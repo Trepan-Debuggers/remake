@@ -95,17 +95,9 @@ recursively_expand (v)
   char *value;
 
   if (v->expanding)
-    {
-      /* Expanding V causes infinite recursion.  Lose.  */
-      if (reading_filename == 0)
-	fatal ("Recursive variable `%s' references itself (eventually)",
-	       v->name);
-      else
-	makefile_fatal
-	  (reading_filename, *reading_lineno_ptr,
-	   "Recursive variable `%s' references itself (eventually)",
-	   v->name);
-    }
+    /* Expanding V causes infinite recursion.  Lose.  */
+    fatal (reading_file,
+           "Recursive variable `%s' references itself (eventually)", v->name);
 
   v->expanding = 1;
   value = allocated_variable_expand (v->value);
@@ -125,14 +117,8 @@ warn_undefined (name, length)
      unsigned int length;
 {
   if (warn_undefined_variables_flag)
-    {
-      static const char warnmsg[] = "warning: undefined variable `%.*s'";
-      if (reading_filename != 0)
-	makefile_error (reading_filename, *reading_lineno_ptr,
-			warnmsg, length, name);
-      else
-	error (warnmsg, length, name);
-    }
+    error (reading_file,
+           "warning: undefined variable `%.*s'", (int)length, name);
 }
 
 /* Expand a simple reference to variable NAME, which is LENGTH chars long.  */
@@ -243,14 +229,8 @@ variable_expand_string (line, string, length)
 
 	    end = index (beg, closeparen);
 	    if (end == 0)
-	      {
-		/* Unterminated variable reference.  */
-		if (reading_filename != 0)
-		  makefile_fatal (reading_filename, *reading_lineno_ptr,
-				  "unterminated variable reference");
-		else
-		  fatal ("unterminated variable reference");
-	      }
+              /* Unterminated variable reference.  */
+              fatal (reading_file, "unterminated variable reference");
 	    p1 = lindex (beg, end, '$');
 	    if (p1 != 0)
 	      {
@@ -460,8 +440,7 @@ variable_expand_for_file (line, file)
 
   save = current_variable_set_list;
   current_variable_set_list = file->variables;
-  reading_filename = file->cmds->filename;
-  reading_lineno_ptr = &file->cmds->lineno;
+  reading_file = &file->cmds->fileinfo;
   fnext = file->variables->next;
   /* See if there's a pattern-specific variable struct for this target.  */
   if (!file->pat_searched)
@@ -476,8 +455,7 @@ variable_expand_for_file (line, file)
     }
   result = variable_expand (line);
   current_variable_set_list = save;
-  reading_filename = 0;
-  reading_lineno_ptr = 0;
+  reading_file = 0;
   file->variables->next = fnext;
 
   return result;

@@ -468,7 +468,7 @@ install_default_suffix_rules ()
       if (f->cmds == 0)
 	{
 	  f->cmds = (struct commands *) xmalloc (sizeof (struct commands));
-	  f->cmds->filename = 0;
+	  f->cmds->fileinfo.filenm = 0;
 	  f->cmds->commands = s[1];
 	  f->cmds->command_lines = 0;
 	}

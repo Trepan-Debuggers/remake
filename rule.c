@@ -416,8 +416,8 @@ install_pattern_rule (p, terminal)
     {
       r->terminal = terminal;
       r->cmds = (struct commands *) xmalloc (sizeof (struct commands));
-      r->cmds->filename = 0;
-      r->cmds->lineno = 0;
+      r->cmds->fileinfo.filenm = 0;
+      r->cmds->fileinfo.lineno = 0;
       /* These will all be string literals, but we malloc space for them
 	 anyway because somebody might want to free them later.  */
       r->cmds->commands = savestring (p->commands, strlen (p->commands));
@@ -664,7 +664,7 @@ print_rule_data_base ()
     }
 
   if (num_pattern_rules != rules)
-    fatal ("BUG: num_pattern_rules wrong!  %u != %u",
+    fatal (NILF, "BUG: num_pattern_rules wrong!  %u != %u",
 	   num_pattern_rules, rules);
 
   puts ("\n# Pattern-specific variable values");

@@ -20,17 +20,52 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "dep.h"
 
 
+/* Variadic functions.  We go through contortions to allow proper function
+   prototypes for both ANSI and pre-ANSI C compilers, and also for those
+   which support stdarg.h vs. varargs.h, and finally those which have
+   vfprintf(), etc. and those who have _doprnt... or nothing.
+
+   This fancy stuff all came from GNU fileutils, except for the VA_PRINTF and
+   VA_END macros used here since we have multiple print functions.  */
+
+#if HAVE_VPRINTF || HAVE_DOPRNT
+# define HAVE_STDVARARGS 1
+# if __STDC__
+#  include <stdarg.h>
+#  define VA_START(args, lastarg) va_start(args, lastarg)
+# else
+#  include <varargs.h>
+#  define VA_START(args, lastarg) va_start(args)
+# endif
+# if HAVE_VPRINTF
+#  define VA_PRINTF(fp, lastarg, args) vfprintf((fp), (lastarg), (args))
+# else
+#  define VA_PRINTF(fp, lastarg, args) _doprnt((lastarg), (args), (fp))
+# endif
+# define VA_END(args) va_end(args)
+#else
+/* # undef HAVE_STDVARARGS */
+# define va_alist a1, a2, a3, a4, a5, a6, a7, a8
+# define va_dcl char *a1, *a2, *a3, *a4, *a5, *a6, *a7, *a8;
+# define VA_START(args, lastarg)
+# define VA_END(args)
+#endif
+
+
 /* Compare strings *S1 and *S2.
    Return negative if the first is less, positive if it is greater,
    zero if they are equal.  */
 
 int
-alpha_compare (s1, s2)
-     char **s1, **s2;
+alpha_compare (v1, v2)
+     const void *v1, *v2;
 {
-  if (**s1 != **s2)
-    return **s1 - **s2;
-  return strcmp (*s1, *s2);
+  const char *s1 = *((char **)v1);
+  const char *s2 = *((char **)v2);
+
+  if (*s1 != *s2)
+    return *s1 - *s2;
+  return strcmp (s1, s2);
 }
 
 /* Discard each backslash-newline combination from LINE.
@@ -173,13 +208,22 @@ concat (s1, s2, s3)
 /* Print a message on stdout.  */
 
 void
-message (prefix, s1, s2, s3, s4, s5, s6)
+#if __STDC__ && HAVE_STDVARARGS
+message (int prefix, const char *fmt, ...)
+#else
+message (prefix, fmt, va_alist)
      int prefix;
-     char *s1, *s2, *s3, *s4, *s5, *s6;
+     const char *fmt;
+     va_dcl
+#endif
 {
+#if HAVE_STDVARARGS
+  va_list args;
+#endif
+
   log_working_directory (1);
 
-  if (s1 != 0)
+  if (fmt != 0)
     {
       if (prefix)
 	{
@@ -188,78 +232,77 @@ message (prefix, s1, s2, s3, s4, s5, s6)
 	  else
 	    printf ("%s[%u]: ", program, makelevel);
 	}
-      printf (s1, s2, s3, s4, s5, s6);
+      VA_START (args, fmt);
+      VA_PRINTF (stdout, fmt, args);
+      VA_END (args);
       putchar ('\n');
     }
 
   fflush (stdout);
 }
 
-/* Print an error message and exit.  */
-
-/* VARARGS1 */
-void
-fatal (s1, s2, s3, s4, s5, s6)
-     char *s1, *s2, *s3, *s4, *s5, *s6;
-{
-  log_working_directory (1);
-
-  if (makelevel == 0)
-    fprintf (stderr, "%s: *** ", program);
-  else
-    fprintf (stderr, "%s[%u]: *** ", program, makelevel);
-  fprintf (stderr, s1, s2, s3, s4, s5, s6);
-  fputs (".  Stop.\n", stderr);
-
-  die (2);
-}
-
-/* Print error message.  `s1' is printf control string, `s2' is arg for it. */
-
-/* VARARGS1 */
+/* Print an error message.  */
 
 void
-error (s1, s2, s3, s4, s5, s6)
-     char *s1, *s2, *s3, *s4, *s5, *s6;
+#if __STDC__ && HAVE_STDVARARGS
+error (const struct floc *flocp, const char *fmt, ...)
+#else
+error (flocp, fmt, va_alist)
+     const struct floc *flocp;
+     const char *fmt;
+     va_dcl
+#endif
 {
+#if HAVE_STDVARARGS
+  va_list args;
+#endif
+
   log_working_directory (1);
 
-  if (makelevel == 0)
+  if (flocp && flocp->filenm)
+    fprintf (stderr, "%s:%lu: ", flocp->filenm, flocp->lineno);
+  else if (makelevel == 0)
     fprintf (stderr, "%s: ", program);
   else
     fprintf (stderr, "%s[%u]: ", program, makelevel);
-  fprintf (stderr, s1, s2, s3, s4, s5, s6);
+
+  VA_START(args, fmt);
+  VA_PRINTF (stderr, fmt, args);
+  VA_END (args);
+
   putc ('\n', stderr);
   fflush (stderr);
 }
 
-void
-makefile_error (file, lineno, s1, s2, s3, s4, s5, s6)
-     char *file;
-     unsigned int lineno;
-     char *s1, *s2, *s3, *s4, *s5, *s6;
-{
-  log_working_directory (1);
-
-  fprintf (stderr, "%s:%u: ", file, lineno);
-  fprintf (stderr, s1, s2, s3, s4, s5, s6);
-  putc ('\n', stderr);
-  fflush (stderr);
-}
+/* Print an error message and exit.  */
 
 void
-makefile_fatal (file, lineno, s1, s2, s3, s4, s5, s6)
-     char *file;
-     unsigned int lineno;
-     char *s1, *s2, *s3, *s4, *s5, *s6;
+#if __STDC__ && HAVE_STDVARARGS
+fatal (const struct floc *flocp, const char *fmt, ...)
+#else
+fatal (flocp, fmt, va_alist)
+     const struct floc *flocp;
+     const char *fmt;
+     va_dcl
+#endif
 {
-  if (!file)
-    fatal(s1, s2, s3, s4, s5, s6);
+#if HAVE_STDVARARGS
+  va_list args;
+#endif
 
   log_working_directory (1);
 
-  fprintf (stderr, "%s:%u: *** ", file, lineno);
-  fprintf (stderr, s1, s2, s3, s4, s5, s6);
+  if (flocp && flocp->filenm)
+    fprintf (stderr, "%s:%lu: *** ", flocp->filenm, flocp->lineno);
+  else if (makelevel == 0)
+    fprintf (stderr, "%s: *** ", program);
+  else
+    fprintf (stderr, "%s[%u]: *** ", program, makelevel);
+
+  VA_START(args, fmt);
+  VA_PRINTF (stderr, fmt, args);
+  VA_END (args);
+
   fputs (".  Stop.\n", stderr);
 
   die (2);
@@ -293,7 +336,7 @@ void
 perror_with_name (str, name)
      char *str, *name;
 {
-  error ("%s%s: %s", str, name, strerror (errno));
+  error (NILF, "%s%s: %s", str, name, strerror (errno));
 }
 
 /* Print an error message from errno and exit.  */
@@ -302,7 +345,7 @@ void
 pfatal_with_name (name)
      char *name;
 {
-  fatal ("%s: %s", name, strerror (errno));
+  fatal (NILF, "%s: %s", name, strerror (errno));
 
   /* NOTREACHED */
 }
@@ -318,7 +361,7 @@ xmalloc (size)
 {
   char *result = (char *) malloc (size);
   if (result == 0)
-    fatal ("virtual memory exhausted");
+    fatal (NILF, "virtual memory exhausted");
   return result;
 }
 
@@ -330,7 +373,7 @@ xrealloc (ptr, size)
 {
   char *result = (char *) realloc (ptr, size);
   if (result == 0)
-    fatal ("virtual memory exhausted");
+    fatal (NILF, "virtual memory exhausted");
   return result;
 }
 
