@@ -416,7 +416,7 @@ delete_target (file, on_behalf_of)
     }
 #endif
 
-  if (stat (file->name, &st) == 0
+  if (safe_stat (file->name, &st) == 0
       && S_ISREG (st.st_mode)
       && (time_t) st.st_mtime != file->last_mtime)
     {
