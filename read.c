@@ -683,25 +683,23 @@ eval (ebuf, set_default)
               else
                 {
                   unsigned int len;
+                  char *ap;
+
+                  /* Expand the line so we can use indirect and constructed
+                     variable names in an export command.  */
+                  p2 = ap = allocated_variable_expand (p2);
+
                   for (p = find_next_token (&p2, &len); p != 0;
                        p = find_next_token (&p2, &len))
                     {
-                      char *var;
-                      int l;
-
-                      /* Expand the thing we're looking up, so we can use
-                         indirect and constructed variable names.  */
-                      p[len] = '\0';
-                      var = allocated_variable_expand (p);
-                      l = strlen (var);
-
-                      v = lookup_variable (var, l);
+                      v = lookup_variable (p, len);
                       if (v == 0)
-                        v = define_variable_loc (var, l, "", o_file, 0,
+                        v = define_variable_loc (p, len, "", o_file, 0,
                                                  fstart);
                       v->export = v_export;
-                      free (var);
                     }
+
+                  free (ap);
                 }
             }
           goto rule_complete;
@@ -715,26 +713,23 @@ eval (ebuf, set_default)
             {
               unsigned int len;
               struct variable *v;
+              char *ap;
+
+              /* Expand the line so we can use indirect and constructed
+                 variable names in an unexport command.  */
+              p2 = ap = allocated_variable_expand (p2);
+
               for (p = find_next_token (&p2, &len); p != 0;
                    p = find_next_token (&p2, &len))
                 {
-                  char *var;
-                  int l;
-
-                  /* Expand the thing we're looking up, so we can use
-                     indirect and constructed variable names.  */
-                  p[len] = '\0';
-                  var = allocated_variable_expand (p);
-                  l = strlen (var);
-
-                  v = lookup_variable (var, l);
+                  v = lookup_variable (p, len);
                   if (v == 0)
-                    v = define_variable_loc (var, l, "", o_file, 0, fstart);
+                    v = define_variable_loc (p, len, "", o_file, 0, fstart);
 
                   v->export = v_noexport;
-
-                  free (var);
                 }
+
+              free (ap);
             }
           goto rule_complete;
 	}

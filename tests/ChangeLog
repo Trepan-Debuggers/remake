@@ -1,3 +1,8 @@
+2002-09-18  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/export: Test export/unexport of multiple
+	variables in a single command.
+
 2002-09-17  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/features/targetvars: Tests for Bug #940: test
