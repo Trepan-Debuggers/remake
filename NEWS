@@ -21,6 +21,10 @@ Version 3.75
 
 * Aaron Digulla has contributed a port to AmigaDOS.  See README.Amiga for
   details, and direct all Amiga-related questions to <digulla@fh-konstanz.de>.
+
+* Rob Tulloh of Tivoli Systems has contributed a port to Windows NT or 95.
+  See README.WIN32 for details, and direct all Windows-related questions to
+  <rob_tulloh@tivoli.com>.
 
 Version 3.73
 
