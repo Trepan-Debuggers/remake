@@ -521,7 +521,7 @@ update_file_1 (file, depth)
       must_make = 1;
       DEBUGPR ("Target `%s' is double-colon and has no dependencies.\n");
     }
-  else if (file->is_target && !deps_changed && file->cmds == 0)
+  else if (!noexist && file->is_target && !deps_changed && file->cmds == 0)
     {
       must_make = 0;
       DEBUGPR ("No commands for `%s' and no dependencies actually changed.\n");
