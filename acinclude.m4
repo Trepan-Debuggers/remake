@@ -512,7 +512,7 @@ AC_DEFUN(pds_CHECK_SYSTEM_GETTEXT, [
   else
     # We only want to deal with GNU's gettext; if we don't have that
     # we'll just use our own, thanks very much.
-    AC_CACHE_CHECK([whether system uses GNU gettext],
+    AC_CACHE_CHECK([whether the system has GNU gettext],
                    pds_cv_system_gnu_gettext, [
       AC_TRY_LINK([
 #include <libintl.h>
