@@ -204,7 +204,7 @@ reap_children (block, err)
       int exit_code, exit_sig, coredump;
       register struct child *lastc, *c;
       int child_failed;
-      int any_remote;
+      int any_remote, any_local;
 
       if (err && dead_children == 0)
 	{
@@ -229,9 +229,11 @@ reap_children (block, err)
 	--dead_children;
 
       any_remote = 0;
+      any_local = shell_function_pid != -1;
       for (c = children; c != 0; c = c->next)
 	{
 	  any_remote |= c->remote;
+	  any_locate != ! c->remote;
 	  if (debug_flag)
 	    printf ("Live child 0x%08lx PID %d%s\n",
 		    (unsigned long int) c,
@@ -256,12 +258,17 @@ reap_children (block, err)
 	{
 	  /* No remote children.  Check for local children.  */
 
+	  if (any_local)
+	    {
 #ifdef	WAIT_NOHANG
-	  if (!block)
-	    pid = WAIT_NOHANG (&status);
-	  else
+	      if (!block)
+		pid = WAIT_NOHANG (&status);
+	      else
 #endif
-	    pid = wait (&status);
+		pid = wait (&status);
+	    }
+	  else
+	    pid = 0;
 
 	  if (pid < 0)
 	    {
