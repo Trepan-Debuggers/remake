@@ -337,7 +337,8 @@ main (argc, argv, envp)
   /* Make sure stdout is line-buffered.  */
 
 #if	(defined (USGr3) || defined (HPUX) || defined (hpux) \
-	 || defined (M_XENIX) || defined (APOLLO) || defined (DGUX))
+	 || defined (M_XENIX) || defined (APOLLO) || defined (DGUX) \
+	 || defined (__IBMR2) || defined (POSIX))
   setvbuf (stdout, (char *) 0, _IOLBF, BUFSIZ);
 #else	/* Not USGr3 and not HPUX et al.  */
 #ifdef	USG
