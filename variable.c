@@ -1,5 +1,5 @@
 /* Internals of variables for GNU Make.
-Copyright (C) 1988, 89, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 90, 91, 92, 93, 94, 96 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -366,7 +366,7 @@ define_automatic_variables ()
 	   ? "" : remote_description);
   (void) define_variable ("MAKE_VERSION", 12, buf, o_default, 0);
 
-  
+
   /* This won't override any definition, but it
      will provide one if there isn't one there.  */
   v = define_variable ("SHELL", 5, default_shell, o_default, 0);
@@ -610,6 +610,34 @@ try_variable_definition (filename, lineno, line, origin)
 	  end = p++ - 1;
 	  flavor = append;
 	  break;
+	}
+      else if (c == '$')
+	{
+	  /* This might begin a variable expansion reference.  Make sure we
+	     don't misrecognize chars inside the reference as =, := or +=.  */
+	  char closeparen;
+	  int count;
+	  c = *p++;
+	  if (c == '(')
+	    closeparen = ')';
+	  else if (c == '{')
+	    closeparen = '}';
+	  else
+	    continue;		/* Nope.  */
+
+	  /* P now points past the opening paren or brace.
+	     Count parens or braces until it is matched.  */
+	  count = 0;
+	  for (; *p != '\0'; ++p)
+	    {
+	      if (*p == c)
+		++count;
+	      else if (*p == closeparen && --count < 0)
+		{
+		  ++p;
+		  break;
+		}
+	    }
 	}
     }
 
