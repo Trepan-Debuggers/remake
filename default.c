@@ -1,5 +1,5 @@
 /* Data base of default implicit rules for GNU Make.
-Copyright (C) 1988, 89, 90, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
+Copyright (C) 1988,89,90,91,92,93,94,95,96 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -63,9 +63,9 @@ static struct pspec default_terminal_rules[] =
   {
     /* RCS.  */
     { "%", "%,v",
-	"+$(CHECKOUT,v)" },
+	"$(CHECKOUT,v)" },
     { "%", "RCS/%,v",
-	"+$(CHECKOUT,v)" },
+	"$(CHECKOUT,v)" },
 
     /* SCCS.  */
     { "%", "s.%",
@@ -214,8 +214,8 @@ static char *default_variables[] =
     /* This expands to $(CO) $(COFLAGS) $< $@ if $@ does not exist,
        and to the empty string if $@ does exist.  */
     "CHECKOUT,v",
-    "$(patsubst $@-noexist,$(CO) $(COFLAGS) $< $@,\
-		$(filter-out $@,$(firstword $(wildcard $@) $@-noexist)))",
+    "+$(patsubst $@-noexist,$(CO) $(COFLAGS) $< $@,\
+		 $(filter-out $@,$(firstword $(wildcard $@) $@-noexist)))",
 
     "CO", "co",
     "CPP", "$(CC) -E",
