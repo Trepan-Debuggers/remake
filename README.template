@@ -1,0 +1,11 @@
+This directory contains the VERSION test release of GNU Make.
+All bugs reported for previous test releases have been fixed.
+Some bugs probably remain.
+
+To install, edit the file Makefile as directed in the comments,
+and run `make install'.
+
+GNU Make is fully documented in make.texinfo.  See the section entitled `Bugs'
+for information on submitting bug reports.
+
+GNU Make is free software.  See the file COPYING for copying conditions.
