@@ -1068,14 +1068,10 @@ child_execute_job (stdin_fd, stdout_fd, argv, envp)
     (void) dup2 (stdin_fd, 0);
   if (stdout_fd != 1)
     (void) dup2 (stdout_fd, 1);
-
-  /* Free up file descriptors.  */
-  {
-    register int d;
-    int max = getdtablesize ();
-    for (d = 3; d < max; ++d)
-      (void) close (d);
-  }
+  if (stdin_fd != 0)
+    (void) close (stdin_fd);
+  if (stdout_fd != 1)
+    (void) close (stdout_fd);
 
   /* Run the command.  */
   exec_command (argv, envp);
