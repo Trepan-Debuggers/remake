@@ -1,5 +1,10 @@
 Mon Dec 11 22:26:15 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
+	* Version 3.74.1.
+
+	* misc.c (collapse_continuations): Fix skipping of trailing \s so
+	it can never dereference before the beginning of the array.
+
 	* read.c (find_semicolon): Function removed.
 	(read_makefile): Don't use find_semicolon or remove_comments for
 	rule lines.  Use find_char_unquote directly and handle quoted comments
