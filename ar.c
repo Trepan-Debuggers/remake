@@ -17,9 +17,12 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "make.h"
-#include "file.h"
 
 #ifndef	NO_ARCHIVES
+
+#include "file.h"
+#include "dep.h"
+#include <fnmatch.h>
 
 /* Defined in arscan.c.  */
 extern long int ar_scan ();
@@ -174,5 +177,99 @@ ar_touch (name)
 
   return val;
 }
+
+/* State of an `ar_glob' run, passed to `ar_glob_match'.  */
 
-#endif
+struct ar_glob_state
+  {
+    char *arname;
+    char *pattern;
+    unsigned int size;
+    struct nameseq *chain;
+    unsigned int n;
+  };
+
+/* This function is called by `ar_scan' to match one archive
+   element against the pattern in STATE.  */
+
+static long int
+ar_glob_match (desc, mem, truncated,
+	       hdrpos, datapos, size, date, uid, gid, mode,
+	       state)
+     int desc;
+     char *mem;
+     int truncated;
+     long int hdrpos, datapos, size, date;
+     int uid, gid, mode;
+     struct ar_glob_state *state;
+{
+  if (fnmatch (state->pattern, mem, FNM_PATHNAME|FNM_PERIOD) == 0)
+    {
+      /* We have a match.  Add it to the chain.  */
+      struct nameseq *new = (struct nameseq *) xmalloc (state->size);
+      new->name = concat (state->arname, mem, ")");
+      new->next = state->chain;
+      state->chain = new;
+      ++state->n;
+    }
+
+  return 0L;
+}
+
+/* Alphabetic sorting function for `qsort'.  */
+
+static int
+ar_glob_alphacompare (a, b)
+     char **a, **b;
+{
+  return strcmp (*a, *b);
+}
+
+
+/* Glob for MEMBER_PATTERN in archive ARNAME.
+   Return a malloc'd chain of matching elements (or nil if none).  */
+
+struct nameseq *
+ar_glob (arname, member_pattern, size)
+     char *arname, *member_pattern;
+     unsigned int size;
+{
+  struct ar_glob_state state;
+  char **names;
+  struct nameseq *n;
+  unsigned int i;
+
+  /* Scan the archive for matches.
+     ar_glob_match will accumulate them in STATE.chain.  */
+  i = strlen (arname);
+  state.arname = (char *) alloca (i + 2);
+  bcopy (arname, state.arname, i);
+  state.arname[i] = '(';
+  state.arname[i + 1] = '\0';
+  state.pattern = member_pattern;
+  state.size = size;
+  state.chain = 0;
+  state.n = 0;
+  (void) ar_scan (arname, ar_glob_match, (long int) &state);
+
+  if (state.chain == 0)
+    return 0;
+
+  /* Now put the names into a vector for sorting.  */
+  names = (char **) alloca (state.n * sizeof (char *));
+  i = 0;
+  for (n = state.chain; n != 0; n = n->next)
+    names[i++] = n->name;
+
+  /* Sort them alphabetically.  */
+  qsort ((char *) names, i, sizeof (*names), ar_glob_alphacompare);
+
+  /* Put them back into the chain in the sorted order.  */
+  i = 0;
+  for (n = state.chain; n != 0; n = n->next)
+    n->name = names[i++];
+
+  return state.chain;
+}
+
+#endif	/* Not NO_ARCHIVES.  */
