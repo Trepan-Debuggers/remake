@@ -1,5 +1,5 @@
 /* Data base of default implicit rules for GNU Make.
-Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -157,25 +157,25 @@ static char *default_suffix_rules[] =
     "$(PREPROCESS.S) $< > $@",
 
     ".texinfo.info",
-    "$(MAKEINFO) $< -o $@",
+    "$(MAKEINFO) $(MAKEINFO_FLAGS) $< -o $@",
 
     ".texi.info",
-    "$(MAKEINFO) $< -o $@",
+    "$(MAKEINFO) $(MAKEINFO_FLAGS) $< -o $@",
 
     ".txinfo.info",
-    "$(MAKEINFO) $< -o $@",
+    "$(MAKEINFO) $(MAKEINFO_FLAGS) $< -o $@",
 
     ".tex.dvi",
     "$(TEX) $<",
 
     ".texinfo.dvi",
-    "$(TEXI2DVI) $<",
+    "$(TEXI2DVI) $(TEXI2DVI_FLAGS) $<",
 
     ".texi.dvi",
-    "$(TEXI2DVI) $<",
+    "$(TEXI2DVI) $(TEXI2DVI_FLAGS) $<",
 
     ".txinfo.dvi",
-    "$(TEXI2DVI) $<",
+    "$(TEXI2DVI) $(TEXI2DVI_FLAGS) $<",
 
     ".w.c",
     "$(CTANGLE) $< - $@",	/* The `-' says there is no `.ch' file.  */
