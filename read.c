@@ -143,7 +143,7 @@ read_all_makefiles (makefiles)
       {
 	if (*p != '\0')
 	  *p++ = '\0';
-	read_makefile (name, 1);
+	read_makefile (name, RM_NO_DEFAULT_GOAL | RM_INCLUDED | RM_DONTCARE);
       }
 
     free (value);
@@ -503,17 +503,22 @@ read_makefile (filename, flags)
 	      v->export = v_noexport;
 	    }
 	}
-      else if (word1eq ("include", 7))
+      else if (word1eq ("include", 7) || word1eq ("-include", 8))
 	{
 	  /* We have found an `include' line specifying a nested
 	     makefile to be read at this point.  */
 	  struct conditionals *save, new_conditionals;
 	  struct nameseq *files;
+	  /* "-include" (vs "include") says no
+	     error if the file does not exist.  */
+	  int noerror = p[0] == '-';
 
-	  p = allocated_variable_expand (next_token (p + 8));
+	  p = allocated_variable_expand (next_token (p + (noerror ? 9 : 8)));
 	  if (*p == '\0')
 	    {
-	      makefile_error (filename, lineno, "no file name for `include'");
+	      makefile_error (filename, lineno,
+			      "no file name for `%sinclude'",
+			      noerror ? "-" : "");
 	      continue;
 	    }
 
@@ -543,7 +548,8 @@ read_makefile (filename, flags)
 	      free (files);
 	      files = next;
 
-	      read_makefile (name, 2);
+	      read_makefile (name, (RM_INCLUDED | RM_NO_TILDE
+				    | (noerror ? RM_DONTCARE : 0)));
 	    }
 
 	  /* Restore state.  */
