@@ -23,23 +23,23 @@
 \gdef\singleindexerfoo#1, #2\par{%
 % Use a box register to test if #2 is empty.
 \setbox0=\hbox{#2}%
-\ifvoid0{                       % A one-level entry.
-\doind{\indexname}{#1}}\else{   % A two-level entry.
-\dosubind{\indexname}{#1}{#2}
-}\fi}%
-\gdef\singleindexer#1{\singleindexerfoo#1, \par}%
+\ifvoid0{%                      % A one-level entry.
+\doind{\indexname}{#1}}\else{%  % A two-level entry.
+\dosubind{\indexname}{#1}{#2}%
+}\fi}
+\gdef\singleindexer#1{\singleindexerfoo#1, \par}
 
 % This version writes two sort strings.
 \gdef\dosubind #1#2#3{%
-{\count10=\lastpenalty %
-{\indexdummies % Must do this here, since \bf, etc expand at this stage
+{\count10=\lastpenalty%
+{\indexdummies% Must do this here, since \bf, etc expand at this stage
 \escapechar=`\\%
 {\let\folio=0%
 \def\rawbackslashxx{\indexbackslash}%
 %
 % Now process the index-string once, with all font commands turned off,
 % to get the string to sort the index by.
-{\indexnofonts
+{\indexnofonts%
 \xdef\tempa{#2}%
 \xdef\tempb{#3}%
 }%
