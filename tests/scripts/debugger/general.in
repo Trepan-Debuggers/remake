@@ -1,5 +1,5 @@
 # -*-Perl-*-
-# $Id: general.in,v 1.3 2004/06/18 01:59:42 rockyb Exp $
+# $Id: general.in,v 1.4 2004/06/27 02:05:39 rockyb Exp $
 $description = "The following checks general debugger operation.\n";
 
 $details = "check debugger operations: print, examine, break\n";
@@ -33,13 +33,14 @@ open(DBG_CMDS,"> $debug_cmdfile");
 # The Contents of the DEBUG COMMAND FILE ...
 
 print DBG_CMDS <<\EOF;
+# This is a comment.
 print MAKE
 examine $(BAZ)
-print foo
+list foo
 break foo
 step
 continue
-print foo
+list foo
 where
 quit
 EOF
@@ -54,14 +55,16 @@ close(DBG_CMDS);
 
 $answer = '
 work/debugger/general.mk:5: foo
-makedb<0> (null):0 MAKE = $(MAKE_COMMAND)
+makedb<0> 
+work/debugger/general.mk:5: foo
+makedb<1> (null):0 MAKE = $(MAKE_COMMAND)
 
 
 work/debugger/general.mk:5: foo
-makedb<1> bar
+makedb<2> bar
 
 work/debugger/general.mk:5: foo
-makedb<2> 
+makedb<3> 
 foo: baz
 #  Implicit rule search has not been done.
 #  File does not exist.
@@ -72,14 +75,14 @@ foo: baz
 	
 
 work/debugger/general.mk:5: foo
-makedb<3> Breakpoint on target foo set.
+makedb<4> Breakpoint on target foo set.
 
 work/debugger/general.mk:5: foo
-makedb<4> 
-work/debugger/general.mk:8: baz
 makedb<5> 
-work/debugger/general.mk:6: foo
+work/debugger/general.mk:8: baz
 makedb<6> 
+work/debugger/general.mk:6: foo
+makedb<7> 
 foo: baz
 #  Implicit rule search has not been done.
 #  Implicit/static pattern stem: `\'
@@ -109,12 +112,12 @@ foo: baz
 	
 
 work/debugger/general.mk:6: foo
-makedb<7> 
+makedb<8> 
 =>#0  foo at work/debugger/general.mk:6
   #1  all at work/debugger/general.mk:4
 
 work/debugger/general.mk:6: foo
-makedb<8> ';
+makedb<9> ';
 
 # COMPARE RESULTS
 
