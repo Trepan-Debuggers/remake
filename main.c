@@ -1904,16 +1904,16 @@ int main (int argc, char ** argv)
         /* Nothing happened.  */
       case 0:
         /* Updated successfully.  */
-        status = EXIT_SUCCESS;
+        status = MAKE_SUCCESS;
+        break;
+      case 1:
+        /* We are under -q and would run some commands.  */
+        status = MAKE_TROUBLE;
         break;
       case 2:
         /* Updating failed.  POSIX.2 specifies exit status >1 for this;
            but in VMS, there is only success and failure.  */
-        status = EXIT_FAILURE ? 2 : EXIT_FAILURE;
-        break;
-      case 1:
-        /* We are under -q and would run some commands.  */
-        status = EXIT_FAILURE;
+        status = MAKE_FAILURE;
         break;
       default:
         abort ();

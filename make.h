@@ -532,25 +532,13 @@ extern int handling_fatal_signal;
 #endif
 
 #ifdef VMS
-# ifndef EXIT_FAILURE
-#  define EXIT_FAILURE 3
-# endif
-# ifndef EXIT_SUCCESS
-#  define EXIT_SUCCESS 1
-# endif
-# ifndef EXIT_TROUBLE
-#  define EXIT_TROUBLE 2
-# endif
+#  define MAKE_SUCCESS 1
+#  define MAKE_TROUBLE 2
+#  define MAKE_FAILURE 3
 #else
-# ifndef EXIT_FAILURE
-#  define EXIT_FAILURE 2
-# endif
-# ifndef EXIT_SUCCESS
-#  define EXIT_SUCCESS 0
-# endif
-# ifndef EXIT_TROUBLE
-#  define EXIT_TROUBLE 1
-# endif
+#  define MAKE_SUCCESS 0
+#  define MAKE_TROUBLE 1
+#  define MAKE_FAILURE 2
 #endif
 
 /* Set up heap debugging library dmalloc.  */
