@@ -195,7 +195,7 @@ $(bindir)/$(binprefix)make: make
 	   else \
 	     echo "$@ needs to be owned by group $(group) and setgid;"; \
 	     echo "otherwise the \`-l' option will probably not work."; \
-	     echo "You may need special priveleges to install $@."; \
+	     echo "You may need special privileges to install $@."; \
 	   fi; \
 	 else true; fi
 # Some systems can't deal with renaming onto a running binary.
