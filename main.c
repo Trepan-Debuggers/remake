@@ -415,7 +415,6 @@ main (argc, argv, envp)
      char **argv;
      char **envp;
 {
-  extern void init_dir ();
   extern RETSIGTYPE fatal_error_signal (), child_handler ();
   register struct file *f;
   register unsigned int i;
@@ -478,9 +477,6 @@ main (argc, argv, envp)
   setvbuf (stdout, _IOLBF, xmalloc (BUFSIZ), BUFSIZ);
 #endif	/* setvbuf reversed.  */
 #endif	/* setlinebuf missing.  */
-
-  /* Initialize the directory hashing code.  */
-  init_dir ();
 
   /* Figure out where this program lives.  */
 
