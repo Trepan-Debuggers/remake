@@ -62,11 +62,15 @@ close(MAKEFILE);
 $answer = "$makefile2:1: *** target `foo' leaves prerequisite pattern empty.  Stop.\n";
 &compare_output($answer, &get_logfile(1));
 
+# TEST #5 -- bug #12180: core dump on a stat pattern rule with an empty
+#                        prerequisite list.
+#
+run_make_test('
+foo.x bar.x: %.x : ; @echo $@
+
+',
+'',
+'foo.x
+');
 
 1;
-
-
-
-
-
-

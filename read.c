@@ -1915,7 +1915,7 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
 		 the target pattern, the target's name and the dependencies'
 		 patterns into plain dependency names.  */
 
-              if (find_percent (this->name) != 0)
+              if (this != 0 && find_percent (this->name) != 0)
                 {
                   PATH_VAR (stem);
                   char *o;
