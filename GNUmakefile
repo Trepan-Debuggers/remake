@@ -168,13 +168,10 @@ Makefile.in: compatMakefile $(nolib-deps)
 .SUFFIXES: .dep
 # Maintain the automatically-generated dependencies.
 ifndef	   no_deps
-include $(archpfx)depend
-$(archpfx)depend: GNUmakefile compatMakefile
-	(for file in $(depfiles); \
-	 do echo include $$file; done) > $@
+include $(depfiles)
+endif
 $(archpfx)%.dep: %.c
 	$(mkdep) $< | sed 's,$*\.o,$(@:.dep=.o) $@,' > $@
-endif
 
 ETAGS = etags -T # for v19 etags
 
