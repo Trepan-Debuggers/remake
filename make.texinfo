@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.130 1994/04/21 00:59:00 roland Exp $
+@set RCSID $Id: make.texinfo,v 2.131 1994/04/21 01:21:39 roland Exp $
 @set EDITION 0.45
 @set VERSION 3.71 Beta
 @set UPDATED 20 April 1994
@@ -1551,7 +1551,7 @@ necessary.
 
 But what if you delete all the @samp{.o} files?  When a wildcard matches
 no files, it is left as it is, so then @file{foo} will depend on the
-oddly-named file @file{*.o}.  Since so such file is likely to exist,
+oddly-named file @file{*.o}.  Since no such file is likely to exist,
 @code{make} will give you an error saying it cannot figure out how to
 make @file{*.o}.  This is not what you want!
 
