@@ -151,15 +151,16 @@ $(prog): $(objs) $(globdep) #$(addprefix $(ARCH)/,gmalloc.o mcheck.o)
 	$(CC) $(LDFLAGS) $^ $(globlib) $(LOADLIBES) -o $@.new
 	mv -f $@.new $@
 
+libc-srcdir = /home/gd/gnu/libc
 globfiles = $(addprefix glob/,COPYING.LIB configure.in configure Makefile.in \
 			configure.bat glob.c fnmatch.c glob.h fnmatch.h)
 $(globfiles): stamp-glob ;
-stamp-glob: /home/gd/gnu/libc/posix/glob.tar
+stamp-glob: $(libc-srcdir)/posix/glob.tar
 	-rm -f stamp-glob glob/*
 	tar xvf $< glob
 	cvs commit -m'Updated from libc' glob
 	touch $@
-/home/gd/gnu/libc/posix/glob.tar: force
+$(libc-srcdir)/posix/glob.tar: force
 	$(MAKE) -C $(@D) $(@F) no_deps=t
 .PHONY: force
 force:
