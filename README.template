@@ -2,11 +2,17 @@ This directory contains the VERSION test release of GNU Make.
 All bugs reported for previous test releases have been fixed.
 Some bugs surely remain.
 
-For building and installation instructions, see the file INSTALL.
+For general building and installation instructions, see the file INSTALL.
+If you need to build GNU Make and have no other `make' program to use,
+you can use the shell script `build.sh' instead.  To do this, first run
+`configure' as described in INSTALL.  Then, instead of typing `make' to
+build the program, type `sh build.sh'.  This should compile the program
+in the current directory.  Then you will have a Make program that you can
+use for `make install', or whatever else.
 
 See the file NEWS for what has changed since previous releases.
 
 GNU Make is fully documented in make.texinfo.  See the section entitled
-`Bugs' for information on submitting bug reports.
+`Problems and Bugs' for information on submitting bug reports.
 
 GNU Make is free software.  See the file COPYING for copying conditions.
