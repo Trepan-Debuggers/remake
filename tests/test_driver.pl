@@ -588,10 +588,8 @@ sub compare_output
 
   # For make, get rid of any time skew error before comparing--too bad this
   # has to go into the "generic" driver code :-/
-  $slurp =~ s/^.*modification time .*in the future.*\n//g;
-  $slurp =~ s/\n.*modification time .*in the future.*//g;
-  $slurp =~ s/^.*Clock skew detected.*\n//g;
-  $slurp =~ s/\n.*Clock skew detected.*//g;
+  $slurp =~ s/^.*modification time .*in the future.*\n//gm;
+  $slurp =~ s/^.*Clock skew detected.*\n//gm;
 
   if ($slurp eq $answer)
   {
