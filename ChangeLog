@@ -1,7 +1,10 @@
-Tue Mar  7 17:31:06 1995  Roland McGrath  <roland@geech.gnu.ai.mit.edu>
+Wed Mar  8 13:10:57 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
-	* compatMakefile (configure, config.h.in): Uncomment these rules.
-  	Commit the files to CVS if there is a CVS directory.
+	* Version 3.72.9.
+
+	* main.c (decode_switches): Reset optind to 1 instead of 0.
+
+Tue Mar  7 17:31:06 1995  Roland McGrath  <roland@geech.gnu.ai.mit.edu>
 
 	* main.c (decode_switches): If non-option arg is "-", ignore it.
 
