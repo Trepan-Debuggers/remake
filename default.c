@@ -48,11 +48,11 @@ static struct pspec default_pattern_rules[] =
 
 static struct pspec default_terminal_rules[] =
   {
-    /* RCS.  These commands are not echoed because RCS makes enough noise.  */
+    /* RCS.  */
     "%", "%,v",
-    "@test -f $@ || $(CO) $(COFLAGS) $< $@",
+    "$(CHECKOUT,v)",
     "%", "RCS/%,v",
-    "@test -f $@ || $(CO) $(COFLAGS) $< $@",
+    "$(CHECKOUT,v)",
 
     /* SCCS.  */
     "%", "s.%",
@@ -60,7 +60,7 @@ static struct pspec default_terminal_rules[] =
     "%", "SCCS/s.%",
     "$(GET) $(GFLAGS) $<",
 
-    0, 0, 0
+    0, 0, 0,
   };
 
 static char *default_suffix_rules[] =
@@ -128,8 +128,7 @@ static char *default_suffix_rules[] =
     ".y.ln",
     "$(YACC.y) $< \n $(LINT.c) -C$* y.tab.c \n $(RM) y.tab.c",
     ".l.ln",
-    "@$(RM) $*.c \n $(LEX.l) $< > $*.c \n\
-$(LINT.c) -i $*.c -o $@ \n $(RM) $*.c",
+    "@$(RM) $*.c\n $(LEX.l) $< > $*.c\n$(LINT.c) -i $*.c -o $@\n $(RM) $*.c",
 
     ".y.c",
     "$(YACC.y) $< \n mv -f y.tab.c $@",
@@ -177,8 +176,8 @@ $(LINT.c) -i $*.c -o $@ \n $(RM) $*.c",
     ".web.tex",
     "$(WEAVE) $<",
 
-    0}
-;
+    0, 0,
+  };
 
 static char *default_variables[] =
   {
@@ -187,6 +186,13 @@ static char *default_variables[] =
     "AS", "as",
     "CC", "cc",
     "C++", "g++",
+
+    /* This expands to $(CO) $(COFLAGS) $< $@ if $@ does not exist,
+       and to the empty string if $@ does exist.  */
+    "CHECKOUT,v",
+    "$(patsubst $@-noexist,$(CO) $(COFLAGS) $< $@,\
+		$(filter-out $@,$(firstword $(wildcard $@) $@-noexist)))",
+
     "CO", "co",
     "CPP", "$(CC) -E",
 #ifdef	CRAY
