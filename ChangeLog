@@ -1,3 +1,9 @@
+2004-02-04  Paul D. Smith  <psmith@gnu.org>
+
+	* job.c (vms_handle_apos) [VMS]: Fix various string handling
+	situations in VMS DCL.  Fixes Savannah bug #5533.  Fix provided by
+	Hartmut Becker <Hartmut.Becker@hp.com>.
+
 2004-01-21  Paul D. Smith  <psmith@gnu.org>
 
 	* job.c (load_too_high): Implement an algorithm to control the
