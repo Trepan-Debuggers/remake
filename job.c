@@ -1795,7 +1795,7 @@ child_execute_job (argv, child)
   int status;
   char *cmd = alloca (strlen (argv) + 512), *p, *q;
   char ifile[256], ofile[256], efile[256];
-  char comname[50];
+  char *comname = 0;
   char procname[100];
 
   /* Parse IO redirection.  */
@@ -1944,8 +1944,6 @@ child_execute_job (argv, child)
      is desired. Forcing commands with newlines into DCLs allows to
      store search lists on user mode logicals.  */
 
-  comname[0] = '\0';
-
   if (strlen (cmd) > MAXCMDLEN
       || (have_redirection != 0)
       || (have_newline != 0))
@@ -1962,12 +1960,9 @@ child_execute_job (argv, child)
 	  return 0;
 	}
 
-      strcpy (comname, "sys$scratch:CMDXXXXXX.COM");
-      (void) mktemp (comname);
-
-      outfile = fopen (comname, "w");
+      outfile = open_tmpfile (&comname, "sys$scratch:CMDXXXXXX.COM");
       if (outfile == 0)
-	pfatal_with_name (comname);
+	pfatal_with_name (_("fopen (temporary file)"));
 
       if (ifile[0])
 	{
@@ -2150,7 +2145,7 @@ child_execute_job (argv, child)
       fflush (stdout);
     }
 
-  if (comname[0] && !ISDB (DB_JOBS))
+  if (comname && !ISDB (DB_JOBS))
     unlink (comname);
 
   return (status & 1);
@@ -2465,10 +2460,10 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
 
     slow_flag = strcmp((s1 ? s1 : ""), (s2 ? s2 : ""));
 
-    if (s1);
-      free(s1);
-    if (s2);
-      free(s2);
+    if (s1)
+      free (s1);
+    if (s2)
+      free (s2);
   }
   if (slow_flag)
     goto slow;

@@ -65,7 +65,8 @@ EOM
 
 close(MAKEFILE);
 
-&touch('a','b');
+&touch('b');
+&touch('a');
 sleep(2);
 &touch('c');
 

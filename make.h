@@ -407,6 +407,7 @@ extern int alpha_compare PARAMS ((const void *, const void *));
 extern void print_spaces PARAMS ((unsigned int));
 extern char *find_char_unquote PARAMS ((char *, char *, int));
 extern char *find_percent PARAMS ((char *));
+extern FILE *open_tmpfile PARAMS ((char **, const char *));
 
 #ifndef NO_ARCHIVES
 extern int ar_name PARAMS ((char *));

@@ -1,36 +1,37 @@
-$description = "The following test creates a makefile to test the -k option.\n"
-              ."Normally, make gives up immediately if an error happens \n"
-              ."that make has not been told to ignore.  However, if the -k\n"
-              ."option is specified, make continues to consider the other\n"
-              ."dependencies of the pending targets.";
+#                                                                    -*-perl-*-
 
-$details = "The makefile created in this test is a simulation of building \n"
-          ."a small product.  However, the trick to this one is that one \n"
-          ."of the dependencies of the main target does not exist.  \n"
-          ."Without the -k option, make would fail immediately and not \n"
-          ."build any part of the target.  What we are looking for here, \n"
-          ."is that make builds the rest of the dependencies even though \n"
-          ."it knows that at the end it will fail to rebuild the main target.";
+$description = "Test the make -k (don't stop on error) option.\n";
+
+$details = "\
+The makefile created in this test is a simulation of building
+a small product.  However, the trick to this one is that one
+of the dependencies of the main target does not exist.
+Without the -k option, make would fail immediately and not
+build any part of the target.  What we are looking for here,
+is that make builds the rest of the dependencies even though
+it knows that at the end it will fail to rebuild the main target.";
 
 open(MAKEFILE,"> $makefile");
 
 # The Contents of the MAKEFILE ...
 
-print MAKEFILE "VPATH = $workdir\n";
-print MAKEFILE "edit:  main.o kbd.o commands.o display.o \n";
-print MAKEFILE "\t\@echo cc -o edit main.o kbd.o commands.o display.o \n";
+print MAKEFILE <<EOF;
+VPATH = $workdir
+edit:  main.o kbd.o commands.o display.o
+\t\@echo cc -o edit main.o kbd.o commands.o display.o
 
-print MAKEFILE "main.o : main.c defs.h\n";
-print MAKEFILE "\t\@echo cc -c main.c\n";
+main.o : main.c defs.h
+\t\@echo cc -c main.c
 
-print MAKEFILE "kbd.o : kbd.c defs.h command.h\n";
-print MAKEFILE "\t\@echo cc -c kbd.c\n";
+kbd.o : kbd.c defs.h command.h
+\t\@echo cc -c kbd.c
 
-print MAKEFILE "commands.o : command.c defs.h command.h\n";
-print MAKEFILE "\t\@echo cc -c commands.c\n";
+commands.o : command.c defs.h command.h
+\t\@echo cc -c commands.c
 
-print MAKEFILE "display.o : display.c defs.h buffer.h\n";
-print MAKEFILE "\t\@echo cc -c display.c\n";
+display.o : display.c defs.h buffer.h
+\t\@echo cc -c display.c
+EOF
 
 # END of Contents of MAKEFILE
 
@@ -45,29 +46,55 @@ close(MAKEFILE);
 
 &touch(@files_to_touch);
 
-if ($vos)
-{
-   $error_code = 3307;
+if ($vos) {
+  $error_code = 3307;
 }
-else
-{
-   $error_code = 512;
+else {
+  $error_code = 512;
 }
 
-&run_make_with_options($makefile,"-k",&get_logfile,$error_code);
+&run_make_with_options($makefile, "-k", &get_logfile, $error_code);
 
 # Create the answer to what should be produced by this Makefile
-$answer = "cc -c main.c\n"
-         ."$make_name: *** No rule to make target `kbd.c', needed by `kbd.o'.\n"
-         ."cc -c commands.c\n"
-         ."cc -c display.c\n"
-         ."$make_name: Target `edit' not remade because of errors.\n";
+$answer = "cc -c main.c
+$make_name: *** No rule to make target `kbd.c', needed by `kbd.o'.
+cc -c commands.c
+cc -c display.c
+$make_name: Target `edit' not remade because of errors.\n";
 
 # COMPARE RESULTS
 
-if (&compare_output($answer,&get_logfile(1)))
-{
-  unlink @files_to_touch;
-}
+&compare_output($answer, &get_logfile(1));
+
+unlink(@files_to_touch) unless $keep;
+
+
+# TEST 1: Make sure that top-level targets that depend on targets that
+# previously failed to build, aren't attempted.  Regression for PR/1634.
+
+$makefile2 = &get_tmpfile;
+
+open(MAKEFILE, "> $makefile2");
+print MAKEFILE <<'EOF';
+.SUFFIXES:
+
+all: exe1 exe2; @echo making $@
+
+exe1 exe2: lib; @echo cp $^ $@
+
+lib: foo.o; @echo cp $^ $@
+
+foo.o: ; exit 1
+EOF
+
+close(MAKEFILE);
+
+&run_make_with_options($makefile2, "-k", &get_logfile, $error_code);
+
+$answer = "exit 1
+$make_name: *** [foo.o] Error 1
+$make_name: Target `all' not remade because of errors.\n";
+
+&compare_output($answer, &get_logfile(1));
 
 1;

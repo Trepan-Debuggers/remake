@@ -19,6 +19,13 @@ Some systems' Make programs are broken and cannot process the Makefile for
 GNU Make.  If you get errors from your system's Make when building GNU
 Make, try using `build.sh' instead.
 
+
+GNU Make is free software.  See the file COPYING for copying conditions.
+
+
+Documentation
+-------------
+
 GNU make is fully documented in the GNU Make manual, which is contained
 in this distribution as the file make.texinfo.  You can also find
 on-line and preformatted (PostScript and DVI) versions at the FSF's web
@@ -29,6 +36,10 @@ site.  There is information there about ordering hardcopy documentation.
   http://www.gnu.org/manual/manual.html
 
 You can also find the latest versions of GNU Make from there.
+
+
+Bug Reporting
+-------------
 
 You can send GNU make bug reports to <bug-make@gnu.org>.  Please see the
 section of the GNU make manual entitled `Problems and Bugs' for
@@ -49,16 +60,35 @@ If you need help using GNU make, try these forums:
   news:gnu.utils.help
   news:gnu.utils.bug
 
-Also:
+
+CVS Access
+----------
+
+The GNU make source repository is available via anonymous CVS from the
+GNU Subversions CVS server; look here for details:
+
+  http://www.gnu.org/software/devel.html
+
+Please note: you won't be able to build GNU make from CVS without
+installing appropriate maintainer's tools, such as automake, autoconf,
+GNU make, and GCC.  There are no instructions on this included with the
+tree, so you must be familiar with the installation and use of these
+tools.  We make no guarantees about the contents or quality of the
+latest code in the CVS repository: it is not unheard of for code that is
+known to be broken to be checked in.  Use at your own risk.
+
+
+Ports
+-----
 
   - See README.customs for details on integrating GNU make with the
     Customs distributed build environment from the Pmake distribution.
 
   - See readme.vms for details about GNU Make on OpenVMS.
 
-  - See README.W32 for details about GNU Make on Windows NT, 95, or 98.
-
   - See README.Amiga for details about GNU Make on AmigaDOS.
+
+  - See README.W32 for details about GNU Make on Windows NT, 95, or 98.
 
   - See README.DOS for compilation instructions on MS-DOS and MS-Windows
     using DJGPP tools.
@@ -67,8 +97,10 @@ Also:
     of DJGPP; see the WWW page http://www.delorie.com/djgpp/ for more
     information.
 
-
-GNU Make is free software.  See the file COPYING for copying conditions.
+Please note there are two _separate_ ports of GNU make for Microsoft
+systems: a native Windows tool built with (for example) MSVC or Cygwin,
+and a DOS-based tool built with DJGPP.  Please be sure you are looking
+at the right README!
 
 
 System-specific Notes

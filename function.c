@@ -1536,7 +1536,10 @@ func_shell (char *o, char **argv, const char *funcname)
   if (command_argv == 0)
     return o;
 
-
+  /* Note the mktemp() is a security hole, but this only runs on Amiga.
+     Ideally we would use main.c:open_tmpfile(), but this uses a special
+     Open(), not fopen(), and I'm not familiar enough with the code to mess
+     with it.  */
   strcpy (tmp_output, "t:MakeshXXXXXXXX");
   mktemp (tmp_output);
   child_stdout = Open (tmp_output, MODE_NEWFILE);
@@ -1662,7 +1665,7 @@ static struct function_table_entry function_table[] =
   { STRING_SIZE_TUPLE("words"),         1,  1,  1,  func_words},
   { STRING_SIZE_TUPLE("origin"),        1,  1,  1,  func_origin},
   { STRING_SIZE_TUPLE("foreach"),       3,  3,  0,  func_foreach},
-  { STRING_SIZE_TUPLE("call"),          1,  0,  0,  func_call},
+  { STRING_SIZE_TUPLE("call"),          1,  0,  1,  func_call},
   { STRING_SIZE_TUPLE("error"),         1,  1,  1,  func_error},
   { STRING_SIZE_TUPLE("warning"),       1,  1,  1,  func_error},
   { STRING_SIZE_TUPLE("if"),            2,  3,  0,  func_if},
@@ -1824,60 +1827,38 @@ func_call (o, argv, funcname)
   int i;
   const struct function_table_entry *entry_p;
 
-  fname = expand_argument (argv[0], NULL);
-
   /* There is no way to define a variable with a space in the name, so strip
      leading and trailing whitespace as a favor to the user.  */
-  cp = fname;
-  while (*cp != '\0' && isspace ((unsigned char)*cp))
-    ++cp;
-  argv[0] = cp;
+  fname = argv[0];
+  while (*fname != '\0' && isspace ((unsigned char)*fname))
+    ++fname;
 
-  cp += strlen(cp) - 1;
-  while (cp > argv[0] && isspace ((unsigned char)*cp))
+  cp = fname + strlen(fname) - 1;
+  while (cp > fname && isspace ((unsigned char)*cp))
     --cp;
   cp[1] = '\0';
 
   /* Calling nothing is a no-op */
-  if (*argv[0] == '\0')
-    {
-      free (fname);
-      return o;
-    }
+  if (*fname == '\0')
+    return o;
 
   /* Are we invoking a builtin function?  */
 
-  entry_p = lookup_function (function_table, argv[0]);
+  entry_p = lookup_function (function_table, fname);
 
   if (entry_p)
     {
-      char **av;
-
-      free (fname);
-
       /* How many arguments do we have?  */
       for (i=0; argv[i+1]; ++i)
   	;
 
-      /* If we need to expand arguments, do it now.  */
-      if (entry_p->expand_args)
-        for (av=argv+1; *av; ++av)
-          *av = expand_argument (*av, NULL);
-
-      o = expand_builtin_function (o, i, argv+1, entry_p);
-
-      /* What we expanded we must free...  */
-      if (entry_p->expand_args)
-        for (av=argv+1; *av; ++av)
-          free (*av);
-
-      return o;
+      return expand_builtin_function (o, i, argv+1, entry_p);
     }
 
   /* Not a builtin, so the first argument is the name of a variable to be
      expanded and interpreted as a function.  Create the variable
      reference.  */
-  flen = strlen (argv[0]);
+  flen = strlen (fname);
 
   body = alloca (flen + 4);
   body[0] = '$';
@@ -1905,6 +1886,5 @@ func_call (o, argv, funcname)
 
   pop_variable_scope ();
 
-  free (fname);
   return o + strlen(o);
 }
