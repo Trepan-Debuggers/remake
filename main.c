@@ -639,6 +639,7 @@ main (argc, argv, envp)
 	    f = enter_file (savestring (name, sizeof name - 1));
 	    f->updated = 1;
 	    f->update_status = 0;
+	    f->command_state = cs_finished;
 	    /* Let it be removed when we're done.  */
 	    f->intermediate = 1;
 	    /* But don't mention it.  */
@@ -1033,7 +1034,6 @@ decode_switches (argc, argv)
 
   /* Fill in the string and vector for getopt.  */
   p = options;
-  *p++ = '-';			/* Non-option args are returned in order.  */
   for (i = 0; switches[i].c != '\0'; ++i)
     {
       long_options[i].name = (switches[i].long_name == 0 ? "" :
@@ -1079,15 +1079,6 @@ decode_switches (argc, argv)
 	   But continue to parse the other options so the user can
 	   see all he did wrong.  */
 	bad = 1;
-      else if (c == 1)
-	{
-	  /* This is a non-option argument.  */
-	  other_args->list[other_args->idx++] = optarg;
-	  if (getenv ("POSIXLY_CORRECT") != 0)
-	    /* POSIX.2 says all the options must come first.
-	       All the remaining args are non-options.  */
-	    break;
-	}
       else
 	for (cs = switches; cs->c != '\0'; ++cs)
 	  if (cs->c == c)
@@ -1172,7 +1163,11 @@ positive integral argument",
     }
 
   while (optind < argc)
-    other_args->list[other_args->idx++] = argv[optind++];
+    {
+      char *arg = argv[optind++];
+      if (arg[0] != '-' || arg[1] != '\0')
+	other_args->list[other_args->idx++] = arg;
+    }
   other_args->list[other_args->idx] = 0;
 
   if (bad)
