@@ -490,7 +490,11 @@ target_environment (file)
       for (b = table[i]; b != 0; b = b->next)
 	{
 	  register struct variable *v = b->variable;
-	  result[nvariables++] = concat (v->name, "=", v->value);
+	  /* If V is recursively expanded, expand its value.  */
+	  char *value = v->recursive ? recursively_expand (v) : v->value;
+	  result[nvariables++] = concat (v->name, "=", value);
+	  if (v->recursive)
+	    free (value);
 	}
     }
   result[nvariables] = (char *) xmalloc (100);
