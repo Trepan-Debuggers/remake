@@ -413,8 +413,6 @@ main (argc, argv, envp)
   PATH_VAR (current_directory);
   char *directory_before_chdir;
 
-mcheck();
-
   default_goal_file = 0;
   reading_filename = 0;
   reading_lineno_ptr = 0;
@@ -969,12 +967,17 @@ mcheck();
 	  }
 
 	case 0:
-	re_exec:;
+	re_exec:
 	  /* Updated successfully.  Re-exec ourselves.  */
+
+	  remove_intermediates (0);
+
+	  if (print_data_base_flag)
+	    print_data_base ();
+
 	  if (print_directory_flag)
 	    log_working_directory (0);
-	  if (debug_flag)
-	    puts ("Re-execing myself....");
+
 	  if (makefiles != 0)
 	    {
 	      /* These names might have changed.  */
@@ -990,6 +993,7 @@ mcheck();
 		    ++j;
 		  }
 	    }
+
 	  if (directories != 0 && directories->idx > 0)
 	    {
 	      char bad;
@@ -1008,8 +1012,7 @@ mcheck();
 	      if (bad)
 		fatal ("Couldn't change back to original directory.");
 	    }
-	  fflush (stdout);
-	  fflush (stderr);
+
 	  for (p = environ; *p != 0; ++p)
 	    if (!strncmp (*p, "MAKELEVEL=", 10))
 	      {
@@ -1022,6 +1025,19 @@ mcheck();
 		sprintf (*p, "MAKELEVEL=%u", makelevel);
 		break;
 	      }
+
+	  if (debug_flag)
+	    {
+	      char **p;
+	      fputs ("Re-executing:", stdout);
+	      for (p = argv; *p != 0; ++p)
+		printf (" %s", *p);
+	      puts ("");
+	    }
+
+	  fflush (stdout);
+	  fflush (stderr);
+
 	  exec_command (argv, environ);
 	  /* NOTREACHED */
 	}
