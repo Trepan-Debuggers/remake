@@ -19,7 +19,7 @@ automatically which pieces of a large program need to be recompiled,
 and issues the commands to recompile them.
 
 @c !!set edition, date, version
-This is Edition 0.33 Beta, last updated 6 July 1992,
+This is Edition 0.33 Beta, last updated 16 July 1992,
 of @cite{The GNU Make Manual}, for @code{make}, Version 3.63 Beta.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
@@ -54,7 +54,7 @@ by the Foundation.
 @title GNU Make
 @subtitle A Program for Directing Recompilation
 @subtitle Edition 0.33 Beta, for @code{make} Version 3.63 Beta.
-@subtitle June 1992
+@subtitle July 1992
 @author by Richard M. Stallman and Roland McGrath
 @page
 @vskip 0pt plus 1filll
@@ -94,12 +94,13 @@ large program need to be recompiled, and issues the commands to
 recompile them.@refill
 
 This is Edition 0.33 Beta of the @cite{GNU Make Manual},
-last updated 12 June 1992,
+last updated 16 July 1992
 for @code{make} Version 3.63 Beta.@refill
 
 This manual describes @code{make} and contains the following chapters:@refill
 @end ifinfo
 
+@c !!! Edit descriptions.
 @menu
 * Copying::                     GNU GENERAL PUBLIC LICENSE
 * Overview::                    Introducing @code{make}.
@@ -1079,7 +1080,7 @@ without running them.  The commands for @file{foo} will be those
 specified by the existing contents of @file{mfile}.
 
 @node Overriding Makefiles,  , Remaking Makefiles, Makefiles
-@section Overriding Part of One Makefile with Another Makefile
+@section Overriding Part of Another Makefile
 
 @cindex overriding makefiles
 Sometimes it is useful to have a makefile that is mostly just like
@@ -1648,6 +1649,8 @@ will repeat the appropriate search when it processes this argument.@refill
 
 A phony target is one that is not really the name of a file.  It is just a
 name for some commands to be executed when you make an explicit request.
+There are two reasons to use a phony target: to avoid a conflict with
+file of the same name, and to improve performance.
 
 If you write a rule whose commands will not create the target file, the
 commands will be executed every time the target comes up for remaking.
@@ -1662,9 +1665,6 @@ clean:
 Because the @code{rm} command does not create a file named @file{clean},
 probably no such file will ever exist.  Therefore, the @code{rm} command
 will be executed every time you say @samp{make clean}.
-
-@c !!!! want to mention that using .PHONY is a performance win because
-@c implicit rule serach is not done for phony targets --roland
 
 @findex .PHONY
 The phony target will cease to work if anything ever does create a file
@@ -1681,6 +1681,12 @@ declare the target to be phony, using the special target @code{.PHONY}
 @noindent
 Once this is done, @samp{make clean} will run the commands regardless of
 whether there is a file named @file{clean}.
+
+Since @code{make} knows that phony targets do not name actual files
+that could be remade from other files, @code{make} skips the implicit
+rule search for phony targets (@pxref{Implicit}).  This is why
+declaring a target phony is good for performance, even if you are not
+worried about the actual file existing.
 
 Thus, you first write the line that states that @code{clean} is a
 phony target, then you write the rule, like this:
@@ -3439,12 +3445,14 @@ because you know that no makefile will use them for other things.  (But
 this is not totally reliable; some makefiles set @code{CFLAGS} explicitly
 and therefore are not affected by the value in the environment.)
 
-@c !!!! this is completely wrong --roland
-When @code{make} is invoked recursively, variables defined in the outer
-invocation are automatically passed to inner invocations through the
-environment (@pxref{Recursion, ,Recursive Use of @code{make}}).  This is the main purpose of turning
-environment variables into @code{make} variables, and it requires no
-attention from you.@refill
+When @code{make} is invoked recursively, variables defined in the
+outer invocation can be passed to inner invocations through the
+environment (@pxref{Recursion, ,Recursive Use of @code{make}}).  By
+default, only variables that came from the environment or the command
+line are passed to recursive invocations.  You can use the
+@code{export} directive to pass other variables.
+@xref{Variables/Recursion, , Communicating Variables to a
+Sub-@code{make}}, for full details.
 
 Other use of variables from the environment is not recommended.  It is not
 wise for makefiles to depend for their functioning on environment variables
@@ -3515,11 +3523,11 @@ is not used.  It is optional to have an @code{else} in a conditional.
 The @code{endif} directive ends the conditional.  Every conditional must
 end with an @code{endif}.  Unconditional makefile text follows.
 
-@c !!!! this is repeated below --roland
-Conditionals work at the textual level: the lines of the conditional are
-treated as part of the makefile, or ignored, according to the condition.
-This is why the larger syntactic units of the makefile, such as rules, may
-cross the beginning or the end of the conditional.
+As this example illustrates, conditionals work at the textual level:
+the lines of the conditional are treated as part of the makefile, or
+ignored, according to the condition.  This is why the larger syntactic
+units of the makefile, such as rules, may cross the beginning or the
+end of the conditional.
 
 When the variable @code{CC} has the value @samp{gcc}, the above example has
 this effect:
@@ -3664,12 +3672,17 @@ arguments.  Extra spaces are allowed and ignored at the beginning of the
 line, and spaces or tabs at the end.  A comment starting with @samp{#} may
 appear at the end of the line.
 
-@c !!!! repeated above
-Conditionals work at the textual level.  The lines of the
-@var{text-if-true} are read as part of the makefile if the condition is
-true; if the condition is false, those lines are ignored completely.  It
-follows that syntactic units of the makefile, such as rules, may safely be
-split across the beginning or the end of the conditional.@refill
+Conditionals affect which lines of the makefile @code{make} uses.  If
+the condition is true, @code{make} reads the lines of the
+@var{text-if-true} as part of the makefile; if the condition is false,
+@code{make} ignores those lines completely.  It follows that syntactic
+units of the makefile, such as rules, may safely be split across the
+beginning or the end of the conditional.@refill
+
+@code{make} evaluates conditionals when it reads a makefile.
+Consequently, you cannot use automatic variables in the tests of
+conditionals because they are not defined until commands are run
+(@pxref{Automatic}).
 
 To prevent intolerable confusion, it is not permitted to start a
 conditional in one makefile and end it in another.  However, you may
@@ -3894,7 +3907,6 @@ function.@refill
 
 For example, given:
 
-@noindent @c !!!! will this do what I want? --roland
 @example
 @group
 objects=main1.o foo.o main2.o bar.o
@@ -4135,7 +4147,6 @@ of the names are ignored.
 
 For example,
 
-@noindent @c !!!! ? --roland
 @example
 $(firstword foo bar)
 @end example
@@ -4385,10 +4396,10 @@ using a very strange shell, this has the same result as @samp{$(wildcard
 @node Running, Implicit Rules, Functions, Top
 @chapter How to Run @code{make}
 
-A makefile that says how to recompile a program can be used in more than
-one way.  The simplest use is to recompile every file that is out of date.
-This is what @code{make} will do if run with no arguments.
-@c !!!! this is misleading --roland
+A makefile that says how to recompile a program can be used in more
+than one way.  The simplest use is to recompile every file that is out
+of date.  Usually, makefiles are written so that if you run
+@code{make} with no arguments, it does just that.
 
 But you might want to update only some of the files; you might want to use
 a different compiler or different compiler options; you might want just to
@@ -5041,9 +5052,6 @@ only predefined suffix rules in effect will be those named by one or two
 of the suffixes that are on the list you specify; rules whose suffixes
 fail to be on the list are disabled.@refill
 
-@c !!!! do we want to document $(COMPILE.c) et al? --roland
-@c !!!! and $(TARGET_ARCH)?
-
 @table @asis
 @item Compiling C programs
 @file{@var{n}.o} will be made automatically from @file{@var{n}.c} with
@@ -5216,6 +5224,29 @@ superior, and is also free.  By choosing free software in place of
 comparable (or inferior) proprietary software, you support the free
 software movement.
 @end table
+
+Usually, you want to change only the variables listed in the table
+above, which are documented in the following section.
+
+However, the commands in built-in implicit rules actually use
+variables such as @code{COMPILE.c}, @code{LINK.p}, and
+@code{PREPROCESS.S}, whose values contain the commands listed above.
+
+@code{make} follows the convention that the rule to compile a
+@file{.@var{x}} source file uses the variable @code{COMPILE.@var{x}}.
+Similarly, the rule to produce an executable from a @file{.@var{x}}
+file uses @code{LINK.@var{x}}; and the rule to preprocess a
+@file{.@var{x}} file uses @code{PREPROCESS.@var{x}}.
+
+Every rule that produces an object file uses the variable
+@code{OUTPUT_OPTION}.  @code{make} defines this variable either to
+contain @samp{-o $@@}, or to be empty, depending on a compile-time
+option.  You need the @samp{-o} option to ensure that the output goes
+into the right file when the source file is in a different directory,
+as when using @code{VPATH} (@pxref{Directory Search}).  However,
+compilers on some systems do not accept a @samp{-o} switch for object
+files.  If you use such a system, and use @code{VPATH}, some
+compilations will put their output in the wrong place.
 
 @node Implicit Variables, Chained Rules, Catalogue of Rules, Implicit Rules
 @section Variables Used by Implicit Rules
@@ -5491,12 +5522,10 @@ Thus, a pattern rule @samp{%.o : %.c} says how to make any file
 @subsection Introduction to Pattern Rules
 @cindex pattern rule
 
-@c !!!! this paragraph is a repeat of the first paragraph of prev node
-You define an implicit rule by writing a @dfn{pattern rule}.  A pattern
-rule looks like an ordinary rule, except that its target contains the
-character @samp{%} (exactly one of them).  The target is considered a
-pattern for matching file names; the @samp{%} can match any nonempty
-substring, while other characters match only themselves.
+A pattern rule contains the character @samp{%} (exactly one of them)
+in the target; otherwise, it looks exactly like an ordinary rule.  The
+target is a pattern for matching file names; the @samp{%} matches any
+nonempty substring, while other characters match only themselves.
 
 For example, @samp{%.c} as a pattern matches any file name that ends in
 @samp{.c}.  @samp{s.%.c} as a pattern matches any file name that starts
@@ -6507,9 +6536,8 @@ We feel that such usage is broken.  The dependency properties of
 and doing such a thing simply does not fit the model.@refill
 @end itemize
 
-@node Summary, Complex Makefile, Missing, Top
-@appendix Summary of Directives, Functions, and Special Variables
-@c !!!! this title is too long for the page
+@node Quick Reference, Complex Makefile, Missing, Top
+@appendix Quick Reference
 
 This appendix summarizes the directives, text manipulation functions,
 and special variables which GNU @code{make} understands.
@@ -6819,26 +6847,12 @@ distribution kits.
 # Copyright (C) 1991 Free Software Foundation, Inc.
 @end group
 
-@c !!!! must we have all this copying info? --roland
 @group
 # This program is free software; you can redistribute
 # it and/or modify it under the terms of the GNU
-# General Public License as published by the Free
-# Software Foundation; either version 2, or (at your
-# option) any later version.
-@end group
-
-# This program is distributed in the hope that it will
-# be useful, but WITHOUT ANY WARRANTY; without even
-# the implied warranty of MERCHANTABILITY or FITNESS
-# FOR A PARTICULAR PURPOSE.  
-# See the GNU General Public License for more details.
-
-@group
-# You should have received a copy of the GNU General
-# Public License along with this program; if not,
-# write to the Free Software Foundation, Inc., 
-# 675 Mass Ave, Cambridge, MA 02139, USA.
+# General Public License @dots{}
+@dots{}
+@dots{}
 @end group
 
 SHELL = /bin/sh
