@@ -173,9 +173,13 @@ TAGS: $(tagsrcs)
 tags: $(tagsrcs)
 	$(CTAGS) $(tagsrcs)
 
-.PHONY: install
-install: $(bindir)/$(instname) $(infodir)/$(instname).info \
+.PHONY: install installdirs
+install: installdirs \
+	 $(bindir)/$(instname) $(infodir)/$(instname).info \
 	 $(mandir)/$(instname).$(manext)
+
+installdirs:
+	${srcdir}/mkinstalldirs
 
 $(bindir)/$(instname): make
 	$(INSTALL_PROGRAM) make $@.new
