@@ -105,6 +105,14 @@ AC_DEFUN(AC_SYS_LARGEFILE_FLAGS,
 	ac_cv_sys_largefile_$1=no
 	ifelse($1, CFLAGS,
 	  [case "$host_os" in
+	   # HP-UX 10.20 requires -D__STDC_EXT__ with gcc 2.95.1.
+changequote(, )dnl
+	   hpux10.[2-9][0-9]* | hpux1[1-9]* | hpux[2-9][0-9]*)
+changequote([, ])dnl
+	     if test "$GCC" = yes; then
+	       ac_cv_sys_largefile_CFLAGS=-D__STDC_EXT__
+	     fi
+	     ;;
 	   # IRIX 6.2 and later require cc -n32.
 changequote(, )dnl
 	   irix6.[2-9]* | irix6.1[0-9]* | irix[7-9].* | irix[1-9][0-9]*)
@@ -112,11 +120,13 @@ changequote([, ])dnl
 	     if test "$GCC" != yes; then
 	       ac_cv_sys_largefile_CFLAGS=-n32
 	     fi
+	   esac
+	   if test "$ac_cv_sys_largefile_CFLAGS" != no; then
 	     ac_save_CC="$CC"
 	     CC="$CC $ac_cv_sys_largefile_CFLAGS"
 	     AC_TRY_LINK(, , , ac_cv_sys_largefile_CFLAGS=no)
 	     CC="$ac_save_CC"
-	   esac])
+	   fi])
       }])])
 
 dnl Internal subroutine of AC_SYS_LARGEFILE.

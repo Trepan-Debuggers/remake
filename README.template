@@ -3,6 +3,9 @@ This directory contains the %VERSION% release of GNU Make.
 See the file NEWS for the user-visible changes from previous releases.
 In addition, there have been bugs fixed.
 
+Please check the system-specific notes below for any caveats related to
+your operating system.
+
 For general building and installation instructions, see the file INSTALL.
 
 If you need to build GNU Make and have no other `make' program to use,
@@ -27,9 +30,9 @@ site.  There is information there about ordering hardcopy documentation.
 
 You can also find the latest versions of GNU Make from there.
 
-Please send GNU make bug reports to bug-make@gnu.org.  Please see the
-section of the manual entitles `Problems and Bugs' for information on
-submitting bug reports.
+You can send GNU make bug reports to bug-make@gnu.org.  Please see the
+section of the GNU make manual entitled `Problems and Bugs' for
+information on submitting useful and complete bug reports.
 
 If you need help using GNU make, try these forums:
 
@@ -43,7 +46,7 @@ Also:
   - See README.customs for details on integrating GNU make with the
     Customs distributed build environment from the Pmake distribution.
 
-  - See README.W32 for details about GNU Make on Windows NT or 95.
+  - See README.W32 for details about GNU Make on Windows NT, 95, or 98.
 
   - See README.Amiga for details about GNU Make on AmigaDOS.
 
@@ -53,6 +56,13 @@ Also:
     A precompiled binary of the MSDOS port of GNU Make is available as part
     of DJGPP; see the WWW page http://www.delorie.com/djgpp/ for more
     information.
+
+
+GNU Make is free software.  See the file COPYING for copying conditions.
+
+
+System-specific Notes
+---------------------
 
 It has been reported that the XLC 1.2 compiler on AIX 3.2 is buggy such
 that if you compile make with `cc -O' on AIX 3.2, it will not work correctly.
@@ -64,5 +74,9 @@ debug this code, you can do `make check-loadavg' to see if it works
 properly on your system.  (You must run `configure' beforehand, but you
 need not build Make itself to run this test.)
 
-
-GNU Make is free software.  See the file COPYING for copying conditions.
+Another potential source of porting problems is the configure support
+enabling GNU make to access large files (LFS) on those operating systems
+that support them.  Please report any bugs that you find in this area.
+If you run into difficulties, then as a workaround you should be able to
+disable LFS by adding the `--disable-largefile' option to the
+`configure' script.

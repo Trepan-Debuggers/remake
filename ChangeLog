@@ -1,3 +1,17 @@
+1999-09-10  Paul Eggert  <eggert@twinsun.com>
+
+        * acinclude.m4 (AC_SYS_LARGEFILE_FLAGS): If on HP-UX 10.20 or
+        later, and using GCC, define __STDC_EXT__; this works around a
+        bug in GCC 2.95.1.
+
+1999-09-08  Paul D. Smith  <psmith@gnu.org>
+
+	* main.c (print_version): Ugh.  GLIBC's configure tries to check
+	make version strings and is too aggressive with their matching
+	expressions.  I've struck a deal with them to leave the version
+	output as-is for 3.78, and they'll change their configure checks
+	so that I can change this back in the future.
+
 1999-09-07  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* job.c (construct_command_argv_internal) [__MSDOS__]: Add "echo"

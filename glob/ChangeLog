@@ -1,3 +1,8 @@
+1999-09-08  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* glob.c (prefix_array) [__MSDOS__,WINDOWS32]: Keep the trailing
+	slash unless DIRNAME is just "x:/".
+
 1999-09-06  Paul D. Smith  <psmith@gnu.org>
 
 	* fnmatch.c: Update to latest version from GLIBC.
