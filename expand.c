@@ -103,6 +103,30 @@ recursively_expand (v)
 
   return value;
 }
+
+/* Expand a simple reference to variable NAME, which LENGTH chars long.  */
+
+#ifdef __GNUC__
+__inline
+#endif
+static char *
+reference_variable (o, name, length)
+     char *o;
+     char *name;
+     unsigned int length;
+{
+  register struct variable *v = lookup_variable (name, length);
+
+  if (v != 0 && *v->value != '\0')
+    {
+      char *value = (v->recursive ? recursively_expand (v) : v->value);
+      o = variable_buffer_output (o, value, strlen (value));
+      if (v->recursive)
+	free (value);
+    }
+
+  return o;
+}
 
 /* Scan LINE for variable references and expansion-function calls.
    Build in `variable_buffer' the result of expanding the references and calls.
@@ -151,6 +175,7 @@ variable_expand (line)
 	    register char *beg = p + 1;
 	    char *op, *begp;
 	    char *end;
+	    char *colon = 0;
 
 	    op = o;
 	    begp = p;
@@ -167,7 +192,7 @@ variable_expand (line)
 	    p1 = index (beg, closeparen);
 	    if (p1 != 0)
 	      p1 = lindex (beg, p1, '$');
-	    if (p1 != 0)
+	    if (p1 != 0 && lindex (beg, p1, ':') == 0)
 	      {
 		/* BEG now points past the opening paren or brace.
 		   Count parens or braces until it is matched.  */
@@ -178,22 +203,41 @@ variable_expand (line)
 		      ++count;
 		    else if (*p == closeparen && --count < 0)
 		      break;
+		    else if (colon == 0 && count == 0 && *p == ':')
+		      /* Record where we found a colon, which
+			 indicates a substitution reference.
+			 We want to expand the text before the
+			 reference only.  */
+		      colon = p;
 		  }
 		/* If COUNT is >= 0, there were unmatched opening parens
 		   or braces, so we go to the simple case of a variable name
 		   such as `$($(a)'.  */
 		if (count < 0)
 		  {
-		    char *name = expand_argument (beg, p);
-		    static char start[3] = { '$', }, end[2];
-		    start[1] = openparen;
-		    end[0] = closeparen;
-		    p1 = concat (start, name, end);
-		    free (name);
-		    name = allocated_variable_expand (p1);
-		    o = variable_buffer_output (o, name, strlen (name));
-		    free (name);
-		    break;
+		    char *name = expand_argument (beg, colon == 0 ? p : colon);
+		    unsigned int namelen = strlen (name);
+		    if (colon == 0)
+		      {
+			/* This is a simple reference to the expanded name.  */
+			o = reference_variable (o, name, namelen);
+			free (name);
+			break;
+		      }
+		    else
+		      {
+			/* This is a substitution reference to the expanded
+			   name.  We replace the pending text with a copy
+			   containing the expanded name in place of the
+			   original name, and then fall through to
+			   the normal substitution reference code below.  */
+			unsigned int restlen = strlen (colon) + 1;
+			beg = (char *) alloca (namelen + restlen);
+			bcopy (name, beg, namelen);
+			bcopy (colon, &beg[namelen], restlen);
+			/* Point COLON into the new copy.  */
+			colon = &beg[namelen];
+		      }
 		  }
 	      }
 
@@ -201,17 +245,17 @@ variable_expand (line)
 	       it does not contain any variable references inside.
 	       There are several things it could be.  */
 
-	    p = index (beg, ':');
-	    if (p != 0 && lindex (beg, p, closeparen) == 0)
+	    if (colon == 0)
+	      colon = index (beg, ':');
+	    if (colon != 0 && lindex (beg, colon, closeparen) == 0)
 	      {
 		/* This is a substitution reference: $(FOO:A=B).  */
 		int count;
-		char *subst_beg, *replace_beg;
-		unsigned int subst_len, replace_len;
+		char *subst_beg, *subst_end, *replace_beg, *replace_end;
 
-		v = lookup_variable (beg, p - beg);
+		v = lookup_variable (beg, colon - beg);
 
-		subst_beg = p + 1;
+		subst_beg = colon + 1;
 		count = 0;
 		for (p = subst_beg; *p != '\0'; ++p)
 		  {
@@ -225,7 +269,7 @@ variable_expand (line)
 		if (count > 0)
 		  /* There were unmatched opening parens.  */
 		  return initialize_variable_output ();
-		subst_len = p - subst_beg;
+		subst_end = p;
 
 		replace_beg = p + 1;
 		count = 0;
@@ -240,27 +284,29 @@ variable_expand (line)
 		  /* There were unmatched opening parens.  */
 		  return initialize_variable_output ();
 		end = p;
-		replace_len = p - replace_beg;
+		replace_end = p;
+
+		p = expand_argument (subst_beg, subst_end);
+		p1 = expand_argument (replace_beg, replace_end);
 
 		if (v != 0 && *v->value != '\0')
 		  {
 		    char *value = (v->recursive ? recursively_expand (v)
 				   : v->value);
-		    if (lindex (subst_beg, subst_beg + subst_len, '%') != 0)
-		      {
-			p = savestring (subst_beg, subst_len);
-			p1 = savestring (replace_beg, replace_len);
-			o = patsubst_expand (o, value, p, p1,
-					     (char *) 0, (char *) 0);
-			free (p);
-			free (p1);
-		      }
+		    char *percent = find_percent (p);
+		    if (percent != 0)
+		      o = patsubst_expand (o, value, p, p1,
+					   percent, (char *) 0);
 		    else
-		      o = subst_expand (o, value, subst_beg, replace_beg,
-					subst_len, replace_len, 0, 1);
+		      o = subst_expand (o, value,
+					p, p1, strlen (p), strlen (p1),
+					0, 1);
 		    if (v->recursive)
 		      free (value);
 		  }
+
+		free (p);
+		free (p1);
 	      }
 
 	    /* No, this must be an ordinary variable reference.  */
@@ -270,16 +316,7 @@ variable_expand (line)
 		end = index (beg, closeparen);
 		if (end == 0)
 		  return initialize_variable_output ();
-		v = lookup_variable (beg, end - beg);
-
-		if (v != 0 && *v->value != '\0')
-		  {
-		    char *value = (v->recursive ? recursively_expand (v)
-				   : v->value);
-		    o = variable_buffer_output (o, value, strlen (value));
-		    if (v->recursive)
-		      free (value);
-		  }
+		o = reference_variable (o, beg, end - beg);
 	      }
 
 	    /* Advance p past the variable reference to resume scan.  */
@@ -333,12 +370,18 @@ char *
 expand_argument (str, end)
      char *str, *end;
 {
-  char *tmp = savestring (str, end - str);
-  char *value = allocated_variable_expand (tmp);
+  char *tmp;
 
-  free (tmp);
+  if (*end == '\0')
+    tmp = str;
+  else
+    {
+      tmp = (char *) alloca (end - str + 1);
+      bcopy (str, tmp, end - str);
+      tmp[end - str] = '\0';
+    }
 
-  return value;
+  return allocated_variable_expand (tmp);
 }
 
 /* Expand LINE for FILE.  Error messages refer to the file and line where
