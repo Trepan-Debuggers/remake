@@ -56,6 +56,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #ifdef __MSDOS__
 #include <ctype.h>
+#if (DJGPP > 1)
+#include <libc/dosio.h>
+int __opendir_flags = 0;
+#endif
 
 static char *
 dosify (filename)
@@ -65,6 +69,11 @@ dosify (filename)
   char *df;
   int i;
 
+#if (DJGPP > 1)
+  if (_USE_LFN)
+    /* Using long file names; do no transformation.  */
+    return filename;
+#endif
   if (filename == 0)
     return 0;
 
@@ -371,6 +380,13 @@ find_directory (name)
 #endif /* WIN32 */
 	      dc->next = directories_contents[hash];
 	      directories_contents[hash] = dc;
+
+#if defined (__MSDOS__) && (DJGPP > 1)
+	      if (_USE_LFN)
+		/* We are using long filenames, so tell opendir not
+		   to mess with them.  */
+		__opendir_flags = __OPENDIR_PRESERVE_CASE;
+#endif
 
 	      dc->dirstream = opendir (name);
 	      if (dc->dirstream == 0)
