@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.136 1994/05/02 23:00:39 roland Exp $
+@set RCSID $Id: make.texinfo,v 2.137 1994/05/11 01:42:43 roland Alpha $
 @set EDITION 0.45
 @set VERSION 3.71 Beta
 @set UPDATED 20 April 1994
@@ -1247,13 +1247,12 @@ include one in the other, and add more targets or variable definitions.
 However, if the two makefiles give different commands for the same
 target, @code{make} will not let you just do this.  But there is another way.
 
-@cindex @code{.DEFAULT}, used to override
+@cindex match-anything rule, used to override
 In the containing makefile (the one that wants to include the other),
-you can use the @code{.DEFAULT} special target to say that to remake
-any target that cannot be made from the information in the containing
-makefile, @code{make} should look in another makefile.  
-@xref{Last Resort, , Defining Last-Resort Default Rules}, 
-for more information on @code{.DEFAULT}.
+you can use a match-anything pattern rule to say that to remake any
+target that cannot be made from the information in the containing
+makefile, @code{make} should look in another makefile.
+@xref{Pattern Rules}, for more information on pattern rules.
 
 For example, if you have a makefile called @file{Makefile} that says how
 to make the target @samp{foo} (and other targets), you can write a
@@ -1263,18 +1262,27 @@ makefile called @file{GNUmakefile} that contains:
 foo:
         frobnicate > foo
 
-.DEFAULT:
+%: force
         @@$(MAKE) -f Makefile $@@
+force: ;
 @end example
 
 If you say @samp{make foo}, @code{make} will find @file{GNUmakefile},
 read it, and see that to make @file{foo}, it needs to run the command
 @samp{frobnicate > foo}.  If you say @samp{make bar}, @code{make} will
 find no way to make @file{bar} in @file{GNUmakefile}, so it will use the
-commands from @code{.DEFAULT}: @samp{make -f Makefile bar}.  If
+commands from the pattern rule: @samp{make -f Makefile bar}.  If
 @file{Makefile} provides a rule for updating @file{bar}, @code{make}
 will apply the rule.  And likewise for any other target that
-@file{GNUmakefile} does not say how to make.@refill
+@file{GNUmakefile} does not say how to make.
+
+The way this works is that the pattern rule has a pattern of just
+@samp{%}, so it matches any target whatever.  The rule specifies a
+dependency @file{force}, to guarantee that the commands will be run even
+if the target file already exists.  We give @file{force} target empty
+commands to prevent @code{make} from searching for an implicit rule to
+build it---otherwise it would apply the same match-anything rule to
+@file{force} itself and create a dependency loop!
 
 @node Rules, Commands, Makefiles, Top
 @chapter Writing Rules
