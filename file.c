@@ -765,6 +765,55 @@ print_file_data_base ()
   hash_print_stats (&files, stdout);
 }
 
+#define EXPANSION_INCREMENT(_l)  ((((_l) / 500) + 1) * 500)
+
+char *
+build_target_list (value)
+     char *value;
+{
+  static unsigned long last_targ_count = 0;
+
+  if (files.ht_fill != last_targ_count)
+    {
+      unsigned long max = EXPANSION_INCREMENT (strlen (value));
+      unsigned long len;
+      char *p;
+      struct file **fp = (struct file **) files.ht_vec;
+      struct file **end = &fp[files.ht_size];
+
+      /* Make sure we have at least MAX bytes in the allocated buffer.  */
+      value = xrealloc (value, max);
+
+      p = value;
+      len = 0;
+      for (; fp < end; ++fp)
+        if (!HASH_VACANT (*fp) && (*fp)->is_target)
+          {
+            struct file *f = *fp;
+            int l = strlen (f->name);
+
+            len += l + 1;
+            if (len > max)
+              {
+                unsigned long off = p - value;
+
+                max += EXPANSION_INCREMENT (l + 1);
+                value = xrealloc (value, max);
+                p = &value[off];
+              }
+
+            bcopy (f->name, p, l);
+            p += l;
+            *(p++) = ' ';
+          }
+      *(p-1) = '\0';
+
+      last_targ_count = files.ht_fill;
+    }
+
+  return value;
+}
+
 void
 init_hash_files ()
 {

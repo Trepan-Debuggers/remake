@@ -26,7 +26,7 @@ Version 3.80
   This syntax is only valid within explicit and static pattern rules: it
   cannot be used in implicit (suffix or pattern) rules.  Edouard G. Parmelan
   <egp@free.fr> provided a patch implementing this feature; however, I
-  decided to implemented it myself in a different way.
+  decided to implemented it in a different way.
 
 * A new function is defined: $(quote ...).  The argument to this
   function is the _name_ of a variable.  The result of the function is
@@ -43,6 +43,11 @@ Version 3.80
   order in which they were encountered.  So, the last filename in the
   list when a makefile is just being read (before any includes) is the
   name of the current makefile.
+
+* GNU make now supports some simple introspection capability: two new
+  built-in variables are defined: $(.VARIABLES) and $(.TARGETS).  These
+  expand to a complete list of variables and targets, respectively,
+  defined by all makefiles at the time the variables are expanded.
 
 * The arguments to $(call ...) functions were being stored in $1, $2,
   etc. as recursive variables, even though they are fully expanded

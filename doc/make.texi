@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.3 2002/07/10 12:59:07 psmith Exp $
+@set RCSID $Id: make.texi,v 1.4 2002/08/01 13:16:57 psmith Exp $
 @set EDITION 0.60
 @set VERSION 3.80
 @set UPDATED 08 July 2002
@@ -149,6 +149,7 @@ Writing Makefiles
 * Include::                     How one makefile can use another makefile.
 * MAKEFILES Variable::          The environment can specify extra makefiles.
 * MAKEFILE_LIST Variable::      Discover which makefiles have been read.
+* Special Variables::           Other special variables.
 * Remaking Makefiles::          How makefiles get remade.
 * Overriding Makefiles::        How to override part of one makefile
                                   with another makefile.
@@ -929,6 +930,7 @@ reading a data base called the @dfn{makefile}.
 * Include::                     How one makefile can use another makefile.
 * MAKEFILES Variable::          The environment can specify extra makefiles.
 * MAKEFILE_LIST Variable::      Discover which makefiles have been read.
+* Special Variables::           Other special variables.
 * Remaking Makefiles::          How makefiles get remade.
 * Overriding Makefiles::        How to override part of one makefile
                                   with another makefile.
@@ -1184,7 +1186,7 @@ This is a very bad idea, because such makefiles will fail to work if run by
 anyone else.  It is much better to write explicit @code{include} directives
 in the makefiles.  @xref{Include, , Including Other Makefiles}.
 
-@node MAKEFILE_LIST Variable, Remaking Makefiles, MAKEFILES Variable, Makefiles
+@node MAKEFILE_LIST Variable, Special Variables, MAKEFILES Variable, Makefiles
 @comment  node-name,  next,  previous,  up
 @section The Variable @code{MAKEFILE_LIST}
 @cindex makefiles, and @code{MAKEFILE_LIST} variable
@@ -1232,7 +1234,37 @@ name2 = inc.mk
 Variables}, for more information on simply-expanded (@code{:=})
 variable definitions.
 
-@node Remaking Makefiles, Overriding Makefiles, MAKEFILE_LIST Variable, Makefiles
+@node Special Variables, Remaking Makefiles, MAKEFILE_LIST Variable, Makefiles
+@comment  node-name,  next,  previous,  up
+@section Other Special Variables
+@cindex makefiles, and special variables
+@cindex special variables
+
+GNU @code{make} also supports two other special variables.  Note that
+any value you assign to these variables will be ignored; they will
+always return their special value.
+
+@vindex $(.VARIABLES)
+@vindex .VARIABLES @r{(list of variables)}
+The first special variable is @code{.VARIABLES}.  When expanded, the
+value consists of a list of the @emph{names} of all global variables
+defined in all makefiles read up until that point.  This includes
+variables which have empty values, as well as built-in variables
+(@pxref{Implicit Variables, , Variables Used by Implicit Rules}), but
+does not include any variables which are only defined in a
+target-specific context.
+
+@vindex $(.TARGETS)
+@vindex .TARGETS @r{(list of targets)}
+The second special variable is @code{.TARGETS}.  When expanded, the
+value consists of a list of all targets defined in all makefiles read
+up until that point.  Note it's not enough for a file to be simply
+mentioned in the makefile to be listed in this variable, even if it
+would match an implicit rule and become an ``implicit target''.  The
+file must appear as a target, on the left-hand side of a ``:'', to be
+considered a target for the purposes of this variable.
+
+@node Remaking Makefiles, Overriding Makefiles, Special Variables, Makefiles
 @section How Makefiles Are Remade
 
 @cindex updating makefiles

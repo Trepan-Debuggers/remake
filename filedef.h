@@ -111,6 +111,7 @@ extern void rehash_file PARAMS ((struct file *file, char *name));
 extern void set_command_state PARAMS ((struct file *file, int state));
 extern void notice_finished_file PARAMS ((struct file *file));
 extern void init_hash_files PARAMS ((void));
+extern char *build_target_list PARAMS ((char *old_list));
 
 #if FILE_TIMESTAMP_HI_RES
 # define FILE_TIMESTAMP_STAT_MODTIME(fname, st) \

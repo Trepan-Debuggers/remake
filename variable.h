@@ -57,17 +57,19 @@ struct variable
     char *value;		/* Variable value.  */
     struct floc fileinfo;       /* Where the variable was defined.  */
     unsigned int recursive:1;	/* Gets recursively re-evaluated.  */
-    unsigned int expanding:1;	/* Nonzero if currently being expanded.  */
-    unsigned int exp_count:EXP_COUNT_BITS;
-                                /* If >1, allow this many self-referential
-                                   expansions */
     unsigned int per_target:1;	/* Nonzero if a target-specific variable.  */
     unsigned int append:1;	/* Nonzero if an appending target-specific
                                    variable.  */
+    unsigned int expanding:1;	/* Nonzero if currently being expanded.  */
+    unsigned int exp_count:EXP_COUNT_BITS;
+                                /* If >1, allow this many self-referential
+                                   expansions.  */
 
     enum variable_origin
       origin ENUM_BITFIELD (3);	/* Variable origin.  */
 
+    unsigned int exportable:1;  /* Nonzero if the variable _could_ be
+                                   exported.  */
     enum variable_export
       {
 	v_export,		/* Export this variable.  */
