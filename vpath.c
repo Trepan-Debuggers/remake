@@ -1,4 +1,4 @@
-/* Copyright (C) 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
+/* Copyright (C) 1988, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -144,7 +144,7 @@ construct_vpath_list (pattern, dirpath)
 	      /* Free its unused storage.  */
 	      free (path->pattern);
 	      free ((char *) path->searchpath);
-, 1993	      free ((char *) path);
+	      free ((char *) path);
 	    }
 
 	  lastpath = next;
