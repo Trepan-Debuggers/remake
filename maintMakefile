@@ -11,10 +11,10 @@ globhdr := $(wildcard glob/*.h)
 TEMPLATES = README README.DOS config.ami configh.dos config.h.W32 config.h-vms
 MTEMPLATES = Makefile.DOS SMakefile
 
-# We need this to ensure that README is created on time to avoid errors
-# by automake.
+# We need this to ensure that README and build.sh.in are created on time to
+# avoid errors by automake.
 #
-Makefile.in: README
+#Makefile.in: README build.sh.in
 
 # General rule for turning a .template into a regular file.
 #

@@ -1,9 +1,9 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.72 1999/07/23 22:46:49 psmith Exp $])
+AC_REVISION([$Id: configure.in,v 1.73 1999/07/24 04:55:08 psmith Exp $])
 AC_PREREQ(2.13)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 
-AM_INIT_AUTOMAKE(make, 3.77.90)
+AM_INIT_AUTOMAKE(make, 3.77.91)
 AM_CONFIG_HEADER(config.h)
 
 dnl Regular configure stuff
@@ -57,8 +57,8 @@ AC_CHECK_LIB(posix4, clock_gettime)
 
 AC_CHECK_FUNCS(memmove strdup psignal mktemp pstat_getdynamic \
 	       clock_gettime dup2 getcwd sigsetmask sigaction getgroups \
-	       setlinebuf seteuid setegid setreuid setregid \
-	       strerror strsignal pipe)
+	       setlinebuf seteuid setegid setreuid setregid pipe \
+	       strerror strsignal)
 AC_CHECK_SYMBOL(sys_siglist)
 AC_FUNC_ALLOCA
 AC_FUNC_VFORK
@@ -212,11 +212,13 @@ if test -r $srcdir/maintMakefile; then
 fi
 AC_SUBST_FILE(MAINT_MAKEFILE)
 
-dnl build.sh is also an AC_OUTPUT, but we can't specify it here because
-dnl it's built from build.template and autoconf will crap out.  So, we
-dnl build it in the makefiles themselves.
-
 AC_OUTPUT(build.sh Makefile glob/Makefile)
+
+dnl If we don't yet have build.sh.in, build.sh is a bogus 0-length file
+dnl so remove it.
+
+test -f build.sh.in || rm -f build.sh
+
 
 case "$make_badcust" in
   yes) echo
