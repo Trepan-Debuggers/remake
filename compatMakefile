@@ -91,15 +91,15 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
 
 # Programs to make tags files.
-ETAGS = etags -t
-CTAGS = ctags -t
+ETAGS = etags -tw
+CTAGS = ctags -tw
 
 objs = commands.o job.o dir.o file.o getloadavg.o misc.o main.o read.o \
        remake.o remote.o rule.o implicit.o default.o variable.o expand.o \
-       function.o vpath.o version.o $(GETOPT) $(extras)
+       function.o vpath.o version.o ar.o arscan.o $(GETOPT) $(extras)
 srcs = commands.c job.c dir.c file.c getloadavg.c misc.c main.c read.c \
        remake.c remote.c rule.c implicit.c default.c variable.c expand.c \
-       function.c vpath.c version.c $(GETOPT_SRC) \
+       function.c vpath.c version.c ar.c arscan.c $(GETOPT_SRC) \
        commands.h dep.h file.h job.h make.h rule.h variable.h
 
 
