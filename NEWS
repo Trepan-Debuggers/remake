@@ -18,6 +18,9 @@ Version 3.75
 
 * The new directive `sinclude' is now recognized as another name for
   `-include', for compatibility with some other Makes.
+
+* Aaron Digulla has contributed a port to AmigaDOS.  See README.Amiga for
+  details, and direct all Amiga-related questions to <digulla@fh-konstanz.de>.
 
 Version 3.73
 
