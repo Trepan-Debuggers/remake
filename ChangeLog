@@ -1,5 +1,12 @@
 1999-09-01  Paul D. Smith  <psmith@gnu.org>
 
+	* function.c (IS_PATHSEP) [WINDOWS32]: Allow backslash separators
+	for W32 platforms.
+	* read.c (record_files) [WINDOWS32]: Allow backslash separators
+	for W32 platforms.
+	* implicit.c (pattern_search) [WINDOWS32]: Allow backslash
+	separators for W32 platforms.
+
 	* configure.in (MAKE_HOST): Define it to be the canonical build
 	host info, now that we need AC_CANONICAL_HOST anyway (for large
 	file support).

@@ -692,7 +692,9 @@ read_makefile (filename, flags)
 					  | (noerror ? RM_DONTCARE : 0)))
 		  && ! noerror)
 		error (&fileinfo, "%s: %s", name, strerror (errno));
-              free(name);
+
+              /* We can't free NAME here, in case some of the commands,
+                 etc. still contain references to the filename.  */
 	    }
 
 	  /* Free any space allocated by conditional_line.  */
@@ -1725,7 +1727,7 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
 	 not start with a `.', unless it contains a slash.  */
       if (default_goal_file == 0 && set_default
 	  && (*name != '.' || index (name, '/') != 0
-#ifdef __MSDOS__
+#if defined(__MSDOS__) || defined(WINDOWS32)
 			   || index (name, '\\') != 0
 #endif
 	      ))

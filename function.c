@@ -472,7 +472,7 @@ func_origin(o, argv, funcname)
 #ifdef VMS
 #define IS_PATHSEP(c) ((c) == ']')
 #else
-#ifdef __MSDOS__
+#if defined(__MSDOS__) || defined(WINDOWS32)
 #define IS_PATHSEP(c) ((c) == '/' || (c) == '\\')
 #else
 #define IS_PATHSEP(c) ((c) == '/')
