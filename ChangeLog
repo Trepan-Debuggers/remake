@@ -1,3 +1,7 @@
+Fri Mar 17 15:57:40 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* configure.bat: Write @CPPFLAGS@ translation.
+
 Mon Mar 13 00:45:59 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
 	* read.c (parse_file_seq): Rearranged `l(a b)' -> `l(a) l(b)' loop
