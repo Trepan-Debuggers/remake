@@ -55,9 +55,9 @@ extern int errno;
 #endif
 #endif
 
-#ifdef butterfly
-/* The BBN Butterfly has <unistd.h> that defines _POSIX_VERSION,
-   but isn't really a POSIX.1 system.  */
+/* Some systems define _POSIX_VERSION but are not really POSIX.1.  */
+#if (defined (butterfly) || \
+     (defined (__mips) && defined (_SYSTYPE_SVR3)))
 #undef POSIX
 #endif
 
