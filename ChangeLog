@@ -1,3 +1,12 @@
+2000-08-21  Paul D. Smith  <paul@paulandlesley.org>
+
+	* variable.c (try_variable_definition): Change how we handle
+	target-specific append variable defns: instead of just setting the
+	value, expand it as an append _but_ only within the current
+	target's context.  Otherwise we lose all but the last value if the
+	variable is appended more than once within the current target
+	context.  Fixes PR/1831.
+
 2000-07-25  Paul D. Smith  <psmith@gnu.org>
 
 	* job.c (construct_command_argv_internal): Add "~" to the list of

@@ -900,51 +900,56 @@ try_variable_definition (flocp, line, origin, target_var)
       value = p;
       break;
     case f_append:
-      /* If we have += but we're in a target variable context, defer the
-         append until the context expansion.  */
-      if (target_var)
-        {
-          append = 1;
-          flavor = f_recursive;
-          value = p;
-          break;
-        }
+      {
+        struct variable_set_list *saved_next = current_variable_set_list->next;
 
-      /* An appending variable definition "var += value".
-	 Extract the old value and append the new one.  */
-      v = lookup_variable (expanded_name, strlen (expanded_name));
-      if (v == 0)
-	{
-	  /* There was no old value.
-	     This becomes a normal recursive definition.  */
-	  value = p;
-	  flavor = f_recursive;
-	}
-      else
-	{
-	  /* Paste the old and new values together in VALUE.  */
+        /* If we have += but we're in a target variable context, we want to
+           append only with other variables in the context of this target.  */
+        if (target_var)
+          {
+            append = 1;
+            current_variable_set_list->next = 0;
+          }
 
-	  unsigned int oldlen, newlen;
+        /* An appending variable definition "var += value".
+           Extract the old value and append the new one.  */
+        v = lookup_variable (expanded_name, strlen (expanded_name));
 
-	  if (v->recursive)
-	    /* The previous definition of the variable was recursive.
-	       The new value comes from the unexpanded old and new values.  */
-	    flavor = f_recursive;
-	  else
-	    /* The previous definition of the variable was simple.
-	       The new value comes from the old value, which was expanded
-	       when it was set; and from the expanded new value.  Allocate
-               memory for the expansion as we may still need the rest of the
-               buffer if we're looking at a target-specific variable.  */
-	    p = alloc_value = allocated_variable_expand (p);
+        current_variable_set_list->next = saved_next;
 
-	  oldlen = strlen (v->value);
-	  newlen = strlen (p);
-	  value = (char *) alloca (oldlen + 1 + newlen + 1);
-	  bcopy (v->value, value, oldlen);
-	  value[oldlen] = ' ';
-	  bcopy (p, &value[oldlen + 1], newlen + 1);
-	}
+        if (v == 0)
+          {
+            /* There was no old value.
+               This becomes a normal recursive definition.  */
+            value = p;
+            flavor = f_recursive;
+          }
+        else
+          {
+            /* Paste the old and new values together in VALUE.  */
+
+            unsigned int oldlen, newlen;
+
+            if (v->recursive)
+              /* The previous definition of the variable was recursive.
+                 The new value is the unexpanded old and new values. */
+              flavor = f_recursive;
+            else
+              /* The previous definition of the variable was simple.
+                 The new value comes from the old value, which was expanded
+                 when it was set; and from the expanded new value.  Allocate
+                 memory for the expansion as we may still need the rest of the
+                 buffer if we're looking at a target-specific variable.  */
+              p = alloc_value = allocated_variable_expand (p);
+
+            oldlen = strlen (v->value);
+            newlen = strlen (p);
+            value = (char *) alloca (oldlen + 1 + newlen + 1);
+            bcopy (v->value, value, oldlen);
+            value[oldlen] = ' ';
+            bcopy (p, &value[oldlen + 1], newlen + 1);
+          }
+      }
     }
 
 #ifdef __MSDOS__
@@ -1032,21 +1037,23 @@ try_variable_definition (flocp, line, origin, target_var)
 #endif /* __MSDOS__ */
 #ifdef WINDOWS32
   if ((origin == o_file || origin == o_override)
-      && strcmp (expanded_name, "SHELL") == 0) {
-    extern char* default_shell;
+      && strcmp (expanded_name, "SHELL") == 0)
+    {
+      extern char* default_shell;
 
     /*
      * Call shell locator function. If it returns TRUE, then
 	 * set no_default_sh_exe to indicate sh was found and
      * set new value for SHELL variable.
 	 */
-    if (find_and_set_default_shell(value)) {
-       v = define_variable_loc (expanded_name, strlen (expanded_name),
-                                default_shell, origin, flavor == f_recursive,
-                                flocp);
-       no_default_sh_exe = 0;
+      if (find_and_set_default_shell(value)) {
+        v = define_variable_loc (expanded_name, strlen (expanded_name),
+                                 default_shell, origin, flavor == f_recursive,
+                                 flocp);
+        no_default_sh_exe = 0;
+      }
     }
-  } else
+  else
 #endif
 
   v = define_variable_loc (expanded_name, strlen (expanded_name), value,
