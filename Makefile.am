@@ -30,6 +30,8 @@ SUBDIRS =	glob
 MOSTLYCLEANFILES = loadavg.c
 CLEANFILES =	loadavg
 
+MAKE_HOST = @MAKE_HOST@
+
 
 # --------------- Local INSTALL Section
 
@@ -66,7 +68,7 @@ install-exec-local:
 #
 dist-hook:
 	(cd $(srcdir); \
-	 sub=`find w32 tests -follow \( -name CVS -prune \) -o \( -name \*.orig -o -name \*.rej -o -name \*~ -prune \) -o -type f -print`; \
+	 sub=`find w32 tests -follow \( -name CVS -prune -o -name work -prune \) -o \( -name \*.orig -o -name \*.rej -o -name \*~ -prune \) -o -type f -print`; \
 	 tar chf - $$sub) \
 	| (cd $(distdir); tar xfBp -)
 
@@ -74,6 +76,12 @@ dist-hook:
 # --------------- Local CHECK Section
 
 check-local: check-regression check-loadavg
+	@banner="Regression passed: GNU Make $(VERSION) ($(MAKE_HOST)) built with $(CC)"; \
+	dashes=`echo "$$banner" | sed s/./=/g`; \
+	echo "$$dashes"; \
+	echo "$$banner"; \
+	echo "$$dashes"
+
 .PHONY: check-loadavg check-regression
 
 # > check-loadavg
@@ -107,14 +115,14 @@ check-regression:
 	@if test -f "$(srcdir)/tests/run_make_tests"; then \
 	  if $(PERL) -v >/dev/null 2>&1; then \
 	    case `cd $(srcdir); pwd` in `pwd`) : ;; \
-	      *) mkdir tests; \
+	      *) test -d tests || mkdir tests; \
 		 if ln -s "$(srcdir)/tests" srctests; then \
 		   for f in run_make_tests run_make_tests.pl test_driver.pl scripts; do \
 		     rm -f tests/$$f; ln -s ../srctests/$$f tests; \
 		   done; fi ;; \
 	    esac; \
-	    echo "cd tests && ./run_make_tests -make ../make $(MAKETESTFLAGS)"; \
-	    cd tests && ./run_make_tests -make ../make $(MAKETESTFLAGS); \
+	    echo "cd tests && $(PERL) ./run_make_tests.pl -make ../make $(MAKETESTFLAGS)"; \
+	    cd tests && $(PERL) ./run_make_tests.pl -make ../make $(MAKETESTFLAGS); \
 	  else \
 	    echo "Can't find a working Perl ($(PERL)); the test suite requires Perl."; \
 	  fi; \

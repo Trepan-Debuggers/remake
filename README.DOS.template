@@ -30,6 +30,9 @@ New (since 3.74) DOS-specific features:
       targets like "install:" and "clean:" still need additional
       programs, though, see below.)
 
+  10. Beginning with v3.78, the test suite works in the DJGPP
+      environment (requires Perl and auxiliary tools; see below).
+
 
 To build:
 
@@ -100,6 +103,9 @@ To build:
    7. The `clean' targets also require Unix-style shell, and GNU Sed
       and `rm' programs (the latter from Fileutils).
 
+   8. To run the test suite, type "make check".  This requires a Unix
+      shell (I used the DJGPP port of Bash 2.03), Perl, Fileutils and
+      Sh-utils.
 
 
 Notes:

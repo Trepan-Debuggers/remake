@@ -53,6 +53,7 @@ CPP = gcc -E
 LIBOBJS =
 MAKEINFO = ${bindir}/makeinfo
 PACKAGE = make
+PERL = perl
 RANLIB = ranlib
 REMOTE = stub
 VERSION = %VERSION%
@@ -80,6 +81,8 @@ mkinstalldirs = ${bindir}/gmkdir -p
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES =  build.sh
 PROGRAMS =  $(bin_PROGRAMS)
+
+MAKE_HOST = i386-pc-msdosdjgpp
 
 
 DEFS =  -I. -I$(srcdir) -I.
@@ -295,7 +298,8 @@ libglob.a: $(libglob_a_OBJECTS)
 	$(AR) cru libglob.a $(libglob_a_OBJECTS) $(libglob_a_LIBADD)
 	$(RANLIB) libglob.a
 
-mostlyclean-recursive clean-recursive distclean-recursive  maintainer-clean-recursive:
+mostlyclean-recursive clean-recursive distclean-recursive \
+maintainer-clean-recursive check-recursive:
 ifeq ($(words $(SUBDIRS)), 1)
 	@echo Making $(shell echo $@ | sed s/-recursive//) in $(SUBDIRS)
 	$(MAKE) -C $(SUBDIRS) -f ../Makefile $(shell echo $@ | sed s/-recursive//)-am
@@ -364,8 +368,8 @@ distdir: $(DISTFILES)
 
 info: $(INFO_DEPS) info-recursive
 dvi: $(DVIS) dvi-recursive
-check: all-am
-	$(MAKE) check-recursive check-local
+check: all-am check-recursive check-local
+	@:
 installcheck: installcheck-recursive
 all-recursive-am: config.h
 	$(MAKE) all-recursive
@@ -439,7 +443,7 @@ maintainer-clean-compile install-info-am uninstall-info \
 mostlyclean-aminfo distclean-aminfo clean-aminfo \
 maintainer-clean-aminfo install-data-recursive uninstall-data-recursive \
 install-exec-recursive uninstall-exec-recursive installdirs-recursive \
-uninstalldirs-recursive all-recursive check-recursive \
+uninstalldirs-recursive all-recursive check-recursive check-am \
 installcheck-recursive info-recursive dvi-recursive \
 mostlyclean-recursive distclean-recursive clean-recursive \
 maintainer-clean-recursive tags tags-recursive mostlyclean-tags \
@@ -464,8 +468,23 @@ dist-hook:
 
 # --------------- Local CHECK Section
 
+# Note: check-loadavg is NOT a prerequisite of check-local, since
+# there's no uptime utility, and the test it does doesn't make sense
+# on MSDOS anyway.
 check-local: check-loadavg check-regression
-.PHONY: check-loadavg check-regression
+	@echo "=========================" \
+	echo "Regression passed: GNU Make $(VERSION) ($(MAKE_HOST)) built with $(CC)"; \
+	echo "========================="
+
+.PHONY: check-loadavg check-shell check-regression
+
+# > check-shell
+#
+# check-shell is designed to fail if they don't have a Unixy shell
+# installed.  The test suite requires such a shell.
+check-shell:
+	@echo If Make says Error -1, you do not have Unix-style shell installed
+	@foo=bar.exe :
 
 # > check-loadavg
 #
@@ -490,23 +509,22 @@ check-loadavg: loadavg
 # parents.
 #
 check-regression:
-	here=`pwd`; testdir=""; \
-	  case "$(MAKE_TEST)" in "") \
-	    for d1 in $$here $(srcdir); do \
-	      for d2 in ../.. .. .; do \
-		all=`echo $$d1/$$d2/make-test-[0-9]*/run_make_tests`; \
-		case "$$all" in \
-		  "$$d1/$$d2/make-test-[0-9]*/run_make_tests") : ;; \
-		  *) try=`for x in $$all; do echo $$x; done | sort | tail -1`;\
-		     testdir=`dirname $$try` ;; esac; \
-            done; done ;; \
-	    *) testdir="$(MAKE_TEST)" ;; \
-	  esac; \
-	  case "$$testdir" in \
-	    "") echo "Couldn't find make-test-* test suite."; exit 0;; \
-	  esac; \
-	  echo "cd $$testdir && ./run_make_tests -make_path $$here/make"; \
-	  cd $$testdir && ./run_make_tests -make_path $$here/make
+	@if test -f "$(srcdir)/tests/run_make_tests"; then \
+	  if $(PERL) -v >/dev/null 2>&1; then \
+	    case `cd $(srcdir); pwd` in `pwd`) : ;; \
+	      *) test -d tests || mkdir tests; \
+		 for f in run_make_tests run_make_tests.pl test_driver.pl scripts; do \
+		   rm -rf tests/$$f; cp -pr $(srcdir)/tests/$$f tests; \
+		 done ;; \
+	    esac; \
+	    echo "cd tests && $(PERL) ./run_make_tests.pl -make ../make.exe $(MAKETESTFLAGS)"; \
+	    cd tests && $(PERL) ./run_make_tests.pl -make ../make.exe $(MAKETESTFLAGS); \
+	  else \
+	    echo "Can't find a working Perl ($(PERL)); the test suite requires Perl."; \
+	  fi; \
+	 else \
+	  echo "Can't find the GNU Make test suite ($(srcdir)/tests)."; \
+	 fi
 
 # --------------- Maintainer's Section
 

@@ -1,3 +1,19 @@
+1999-09-15  Paul D. Smith  <psmith@gnu.org>
+
+	* configure.in (MAKE_HOST): AC_SUBST this so it will go into the
+	makefile.
+	* Makefile.am (check-local): Print a success banner if the check
+	succeeds.
+	(check-regression): A bit of fine-tuning.
+
+1999-09-15  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* README.DOS.template: Document requirements for the test suite.
+	* Makefile.DOS.template: Updates to allow the test suite to run
+	from "make check".
+
+	* main.c (main): Handle it if argv[0] isn't an absolute path.
+
 1999-09-13  Paul D. Smith  <psmith@gnu.org>
 
 	* Version 3.77.96 released.
