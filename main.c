@@ -27,8 +27,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 extern char *version_string;
 
-extern int fatal_error_signal ();
-
 extern struct dep *read_all_makefiles ();
 
 extern void print_variable_data_base ();
@@ -37,10 +35,11 @@ extern void print_rule_data_base ();
 extern void print_file_data_base ();
 extern void print_vpath_data_base ();
 
-#if	!defined(__GNU_LIBRARY__) && !defined(POSIX)
+#ifndef	HAVE_UNISTD_H
 extern int chdir ();
+#endif
+#ifndef	STDC_HEADERS
 extern void exit ();
-extern time_t time ();
 extern double atof ();
 #endif
 extern char *mktemp ();
@@ -334,7 +333,7 @@ struct file *default_file;
 #ifdef	POSIX
 sigset_t fatal_signal_set;
 #else
-#ifndef	USG
+#ifndef	SIGSETMASK_MISSING
 int fatal_signal_mask;
 #endif
 #endif
@@ -345,10 +344,10 @@ main (argc, argv, envp)
      char **argv;
      char **envp;
 {
-#if	(defined(USG) && !defined(HAVE_SIGLIST)) || defined(DGUX)
+#ifdef	SYS_SIGLIST_MISSING
   extern void init_siglist ();
 #endif
-  extern int child_handler ();
+  extern RETSIGTYPE fatal_error_signal (), child_handler ();
   register struct file *f;
   register unsigned int i;
   register char *cmd_defs;
@@ -364,7 +363,7 @@ main (argc, argv, envp)
   reading_filename = 0;
   reading_lineno_ptr = 0;
   
-#if	(defined(USG) && !defined(HAVE_SIGLIST)) || defined(DGUX)
+#ifdef	SYS_SIGLIST_MISSING
   init_siglist ();
 #endif
 
@@ -372,7 +371,7 @@ main (argc, argv, envp)
   sigemptyset (&fatal_signal_set);
 #define	ADD_SIG(sig)	sigaddset (&fatal_signal_set, sig)
 #else
-#ifndef	USG
+#ifndef	SIGSETMASK_MISSING
   fatal_signal_mask = 0;
 #define	ADD_SIG(sig)	fatal_signal_mask |= sigmask (sig)
 #else
@@ -381,9 +380,8 @@ main (argc, argv, envp)
 #endif
 
 #define	FATAL_SIG(sig)							      \
-  if (SIGNAL ((sig), (SIGHANDLER) fatal_error_signal)			      \
-      == (SIGHANDLER) SIG_IGN)						      \
-    (void) SIGNAL ((sig), SIG_IGN);					      \
+  if (signal ((sig), fatal_error_signal) == SIG_IGN)			      \
+    (void) signal ((sig), SIG_IGN);					      \
   else									      \
     ADD_SIG (sig);
 
@@ -420,6 +418,11 @@ main (argc, argv, envp)
 
   /* Make sure stdout is line-buffered.  */
 
+#ifndef	SETLINEBUF_MISSING
+  setlinebuf (stdout);
+#else
+
+  /* XXX This should be decided by an autoconf test program.  */
 #if	(defined (USGr3) || defined (HPUX) || defined (hpux) \
 	 || defined (M_XENIX) || defined (APOLLO) || defined (DGUX) \
 	 || defined (__IBMR2) || defined (POSIX))
@@ -431,10 +434,10 @@ main (argc, argv, envp)
 #else
   setvbuf (stdout, _IOLBF, (char *) 0, BUFSIZ);
 #endif
-#else	/* Not USG.  */
-  setlinebuf (stdout);
 #endif	/* USG.  */
 #endif	/* USGr3.  */
+
+#endif	/* setlinebuf missing.  */
 
   /* Set up to access user data (files).  */
   user_access ();
@@ -456,9 +459,9 @@ main (argc, argv, envp)
 
   /* Figure out where we are.  */
 
-  if (getwd (current_directory) == 0)
+  if (getcwd (current_directory, GET_PATH_MAX) == 0)
     {
-#ifdef	USG
+#ifndef	GETCWD_MISSING
       perror_with_name ("getcwd: ", "");
 #else
       error ("getwd: %s", current_directory);
@@ -662,9 +665,9 @@ main (argc, argv, envp)
      reading in the makefiles so that `shell' function calls will work.  */
 
 #if	defined (SIGCHLD) && !defined (USG)
-  (void) SIGNAL (SIGCHLD, child_handler);
+  (void) signal (SIGCHLD, child_handler);
 #else
-  (void) SIGNAL (SIGCLD, child_handler);
+  (void) signal (SIGCLD, child_handler);
 #endif
 
   /* Define the initial list of suffixes for old-style rules.  */
@@ -1503,9 +1506,9 @@ log_working_directory (entering)
   else
     printf ("%s[%u]: %s ", program, makelevel, message);
 
-  if (getwd (pwdbuf) == 0)
+  if (getcwd (pwdbuf, GET_PATH_MAX) == 0)
     {
-#ifdef	USG
+#ifndef	GETCWD_MISSING
       perror_with_name ("getcwd: ", "");
 #else
       error ("getwd: %s", pwdbuf);
