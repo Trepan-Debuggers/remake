@@ -292,14 +292,6 @@ extern char *getwd ();
 #define	getcwd(buf, len)	getwd (buf)
 #endif
 
-#if !defined(__GNU_LIBRARY__) && (!defined(vfork) || !defined(POSIX))
-#ifdef	POSIX
-extern pid_t vfork ();
-#else
-extern int vfork ();
-#endif
-#endif
-
 extern char **environ;
 
 extern char *reading_filename;
