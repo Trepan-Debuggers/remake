@@ -190,90 +190,99 @@ commands.
 
   makedb<7> help
   Available commands are: 
-    break *target*            (b):
- 	Set a breakpoint at a target.
+  break *target*            (b):
+	Set a breakpoint at a target.
 
-    continue                  (c):
+  continue                  (c):
 	Continue executing debugged Makefile until another breakpoint.
 
-    delete *target*           (d):
+  delete *target*           (d):
 	Delete target breakpoint.
 
-    down [amount]             (D):
+  down [amount]             (D):
 	Select and print the target this one caused to be examined.
 	An argument says how many targets down to go.
 
-    examine *string*          (x):
+  examine *string*          (x):
 	Show string with internal variables references expanded. See also 
 	"print".
 
-    quit [exit-status]        (q):
+  quit [exit-status]        (q):
 	Exit make. If a numeric argument is given, it will be the exit
 	status this program reports back. Otherwise exit with status 0.
- 
-    frame *n*                 (f):
-	Move target frame to *n*; In contrast to "up" tor "down",
-	this sets to an absolute position. O is the top.
 
-    help [command]            (h):
+  frame *n*                 (f):
+	Move target frame to *n*; In contrast to "up" tor "down",
+	this sets to an absolute postion. O is the top.
+
+  help [command]            (h):
 	Display list of commands (i.e. this help text.)
 	with an command name, give only the help for that command.
 
-    info [thing]              (i):
+  info [thing]              (i):
 	Show the state of thing.
 	If no 'thing' is specified, show everything there is to show.
 
 
-    next [amount]             (n):
+  next [amount]             (n):
 	alias for step.
 
-    print {*variable*|*target*} (p):
+  print {*variable*|*target*} (p):
 	Show a variable definition or information about a target.
 	If a variable name is given, the value is shown with the
 	variable-reference names. Don't include $ before a variable 
 	name. See also "examine".
 	If a target name is given, information about target is printed.
 
-    quit [exit-status]        (q):
+  quit [exit-status]        (q):
 	Exit make. If a numeric argument is given, it will be the exit
 	status this program reports back. Otherwise exit with status 0.
 
-    restart                   (R):
+  restart                   (R):
 	Restart program.
 
-    set *variable* *value*    (=):
+  set {variable|basename|trace} *value* (=):
+	
+  set variable *var* *value*
 	Set MAKE variable to value. Variable definitions
 	inside VALUE are expanded before assignment occurs.
 
-    setq *variable* *value*   ("):
+  set basename {on|off|toggle}
+	set filename to show full name or basename
+
+  set trace {on|off|toggle}
+	set tracing status
+
+
+  setq *variable* *value*   ("):
 	Set MAKE variable to value. Variable definitions
 	inside VALUE are not expanded before assignment occurs.
 
-    shell *string*            (!):
+  shell *string*            (!):
 	Execute the rest of the line as a shell.
 
-    info [thing]              (i):
+  info [thing]              (i):
 	Show the state of thing.
 	If no 'thing' is specified, show everything there is to show.
 
 
-    skip                      (k):
+  skip                      (k):
 	Skip execution of next command or action.
 
 
-    step [amount]             (s):
+  step [amount]             (s):
 	Step execution until another stopping point is reached.
 	Argument N means do this N times (or until there's another
  	reason to stop.
 
-    trace [on|off|toggle]     (t):
-	toggle or set tracing on or off. With no argument the value is toggled.
-
-
-    where                     (T):
+  where                     (T):
 	Show target stack.
 
-    up [amount]               (u):
+  write [*target*]          (w):
+	writes the commands associated of a target to a file with MAKE
+	variables expanded. If no target given use the current one.
+
+  up [amount]               (u):
 	Select and print target that caused this one to be examined.
 	An argument says how many targets up to go.
 
