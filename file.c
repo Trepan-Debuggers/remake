@@ -391,7 +391,8 @@ snap_deps ()
 	ignore_errors_flag = 1;
       else
 	for (d = f->deps; d != 0; d = d->next)
-	  d->file->command_flags |= COMMANDS_NOERROR;
+	  for (f2 = d->file; f2 != 0; f2 = f2->prev)
+	    f2->command_flags |= COMMANDS_NOERROR;
     }
 
   f = lookup_file (".SILENT");
@@ -401,7 +402,8 @@ snap_deps ()
 	silent_flag = 1;
       else
 	for (d = f->deps; d != 0; d = d->next)
-	  d->file->command_flags |= COMMANDS_SILENT;
+	  for (f2 = d->file; f2 != 0; f2 = f2->prev)
+	    f2->command_flags |= COMMANDS_NOERROR;
     }
 
   f = lookup_file (".POSIX");
