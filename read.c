@@ -1,4 +1,5 @@
-/* Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+/* Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993
+	Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -343,6 +344,8 @@ read_makefile (filename, type)
       p = collapsed;
       while (isspace (*p))
 	++p;
+      /* We cannot consider a line containing just a tab to be empty
+	 because it might constitute an empty command for a target.  */
       if (*p == '\0' && lb.buffer[0] != '\t')
 	continue;
 
@@ -418,33 +421,34 @@ read_makefile (filename, type)
 	  unsigned int len;
 
 	  if (no_targets)
+	    /* Ignore the commands in a rule with no targets.  */
+	    continue;
+
+	  /* If there is no preceding rule line, don't treat this line
+	     as a command, even though it begins with a tab character.
+	     SunOS 4 make appears to behave this way.  */
+
+	  if (filenames != 0)
 	    {
-	      /* Ignore the commands in a rule with no targets.  */
-	      no_targets = 0;
+	      /* Append this command line to the line being accumulated.  */
+	      p = lb.buffer;
+	      if (commands_idx == 0)
+		commands_started = lineno;
+	      len = strlen (p);
+	      if (len + 1 + commands_idx > commands_len)
+		{
+		  commands_len = (len + 1 + commands_idx) * 2;
+		  commands = (char *) xrealloc (commands, commands_len);
+		}
+	      bcopy (p, &commands[commands_idx], len);
+	      commands_idx += len;
+	      commands[commands_idx++] = '\n';
+
 	      continue;
 	    }
-
-	  if (filenames == 0)
-	    makefile_fatal (filename, lineno,
-			    "commands with no associated target");
-
-	  /* Add this command line to end of the line being accumulated.  */
-	  p = lb.buffer;
-	  if (commands_idx == 0)
-	    commands_started = lineno;
-	  len = strlen (p);
-	  if (len + 1 + commands_idx > commands_len)
-	    {
-	      commands_len = (len + 1 + commands_idx) * 2;
-	      commands = (char *) xrealloc (commands, commands_len);
-	    }
-	  bcopy (p, &commands[commands_idx], len);
-	  commands_idx += len;
-	  commands[commands_idx++] = '\n';
-
-	  continue;
 	}
-      else if (word1eq ("export", 6))
+
+      if (word1eq ("export", 6))
 	{
 	  struct variable *v;
 	  p2 = next_token (p + 6);
