@@ -1,5 +1,5 @@
 \input texinfo                @c -*- Texinfo -*-
-@c %**start of header 
+@c %**start of header
 @setfilename make.info
 @settitle GNU @code{make}
 @setchapternewpage odd
@@ -7,11 +7,11 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.155 1995/10/10 20:18:24 roland Exp $
-@set EDITION 0.49
-@set VERSION 3.74 Beta
-@set UPDATED 14 August 1995
-@set UPDATE-MONTH August 1995
+@set RCSID $Id: make.texinfo,v 2.156 1996/03/01 17:02:26 roland Exp $
+@set EDITION 0.50
+@set VERSION 3.75 Beta
+@set UPDATED 28 February 1996
+@set UPDATE-MONTH February 1996
 @comment The ISBN number might need to change on next publication.
 @set ISBN 1-882114-78-7
 
@@ -168,7 +168,7 @@ Writing Rules
 * Directory Search::            Searching other directories for source files.
 * Phony Targets::               Using a target that is not a real file's name.
 * Force Targets::               You can use a target without commands
-                                  or dependencies to mark other 
+                                  or dependencies to mark other
                                   targets as phony.
 * Empty Targets::               When only the date matters and the
                                   files are empty.
@@ -176,7 +176,7 @@ Writing Rules
 * Multiple Targets::            When to make use of several targets in a rule.
 * Multiple Rules::              How to use several rules with the same target.
 * Static Pattern::              Static pattern rules apply to multiple targets
-                                  and can vary the dependencies according to 
+                                  and can vary the dependencies according to
                                   the target name.
 * Double-Colon::                How to use a special kind of rule to allow
                                   several independent rules for one target.
@@ -192,9 +192,9 @@ Using Wildcard Characters in File Names
 
 Searching Directories for Dependencies
 
-* General Search::              Specifying a search path that applies 
+* General Search::              Specifying a search path that applies
                                   to every dependency.
-* Selective Search::            Specifying a search path 
+* Selective Search::            Specifying a search path
                                   for a specified class of names.
 * Commands/Search::             How to write shell commands that work together
                                   with search paths.
@@ -211,7 +211,7 @@ Writing the Commands in Rules
 * Echoing::                     How to control when commands are echoed.
 * Execution::                   How commands are executed.
 * Parallel::                    How commands can be executed in parallel.
-* Errors::                      What happens after a command execution error. 
+* Errors::                      What happens after a command execution error.
 * Interrupts::                  What happens when a command is interrupted.
 * Recursion::                   Invoking @code{make} from makefiles.
 * Sequences::                   Defining canned sequences of commands.
@@ -236,13 +236,13 @@ How to Use Variables
                                   of a variable.
 * Override Directive::          How to set a variable in the makefile even if
                                   the user has set it with a command argument.
-* Defining::                    An alternate way to set a variable 
+* Defining::                    An alternate way to set a variable
                                   to a verbatim string.
 * Environment::                 Variable values can come from the environment.
 
 Advanced Features for Reference to Variables
 
-* Substitution Refs::           Referencing a variable with 
+* Substitution Refs::           Referencing a variable with
                                   substitutions on the value.
 * Computed Names::              Computing the name of the variable to refer to.
 
@@ -264,16 +264,16 @@ Functions for Transforming Text
 How to Run @code{make}
 
 * Makefile Arguments::          How to specify which makefile to use.
-* Goals::                       How to use goal arguments to specify which 
+* Goals::                       How to use goal arguments to specify which
                                   parts of the makefile to use.
 * Instead of Execution::        How to use mode flags to specify what
-                                  kind of thing to do with the commands 
-                                  in the makefile other than simply 
+                                  kind of thing to do with the commands
+                                  in the makefile other than simply
                                   execute them.
 * Avoiding Compilation::        How to avoid recompiling certain files.
-* Overriding::                  How to override a variable to specify 
+* Overriding::                  How to override a variable to specify
                                   an alternate compiler and other things.
-* Testing::                     How to proceed past some errors, to 
+* Testing::                     How to proceed past some errors, to
                                   test compilation.
 * Options Summary::             Summary of Options
 
@@ -285,10 +285,10 @@ Using Implicit Rules
 * Implicit Variables::          How to change what predefined rules do.
 * Chained Rules::               How to use a chain of implicit rules.
 * Pattern Rules::               How to define new implicit rules.
-* Last Resort::                 How to defining commands for rules 
+* Last Resort::                 How to defining commands for rules
                                   which cannot find any.
 * Suffix Rules::                The old-fashioned style of implicit rule.
-* Search Algorithm::            The precise algorithm for applying 
+* Search Algorithm::            The precise algorithm for applying
                                   implicit rules.
 
 Defining and Redefining Pattern Rules
@@ -376,11 +376,11 @@ introduction, read the first few sections of each chapter, skipping the
 later sections.  In each chapter, the first few sections contain
 introductory or general information and the later sections contain
 specialized or technical information.
-@ifinfo        
+@ifinfo
 The exception is the second chapter, @ref{Introduction, ,An
 Introduction to Makefiles}, all of which is introductory.
 @end ifinfo
-@iftex 
+@iftex
 The exception is @ref{Introduction, ,An Introduction to Makefiles},
 all of which is introductory.
 @end iftex
@@ -435,7 +435,7 @@ get this information with the command @samp{make --version}.
 Be sure also to include the type of machine and operating system you are
 using.  If possible, include the contents of the file @file{config.h}
 that is generated by the configuration process.
- 
+
 @node Introduction, Makefiles, Overview, Top
 @comment  node-name,  next,  previous,  up
 @chapter An Introduction to Makefiles
@@ -499,7 +499,7 @@ can also be the name of an action to carry out, such as @samp{clean}
 (@pxref{Phony Targets}).
 
 A @dfn{dependency} is a file that is used as input to create the
-target.  A target often depends on several files.  
+target.  A target often depends on several files.
 
 @cindex tabs in rules
 A @dfn{command} is an action that @code{make} carries out.
@@ -599,7 +599,7 @@ of its dependencies change.  In addition, any dependencies that are
 themselves automatically generated should be updated first.  In this
 example, @file{edit} depends on each of the eight object files; the
 object file @file{main.o} depends on the source file @file{main.c} and
-on the header file @file{defs.h}.  
+on the header file @file{defs.h}.
 
 A shell command follows each line that contains a target and
 dependencies.  These shell commands say how to update the target file.
@@ -612,7 +612,7 @@ you have specified when the target file needs to be updated.)
 @cindex shell command
 
 The target @samp{clean} is not a file, but merely the name of an
-action.  Since you 
+action.  Since you
 normally
 do not want to carry out the actions in this rule, @samp{clean} is not a dependency of any other rule.
 Consequently, @code{make} never does anything with it unless you tell
@@ -733,7 +733,7 @@ objects = main.o kbd.o command.o display.o \
 @noindent
 Then, each place we want to put a list of the object file names, we can
 substitute the variable's value by writing @samp{$(objects)}
-(@pxref{Using Variables, ,How to Use Variables}).  
+(@pxref{Using Variables, ,How to Use Variables}).
 
 Here is how the complete simple makefile looks when you use a variable
 for the object files:
@@ -1056,7 +1056,7 @@ comment starting with @samp{#} is allowed at the end of the line.  If
 the file names contain any variable or function references, they are
 expanded.  @xref{Using Variables, ,How to Use Variables}.
 
-For example, if you have three @file{.mk} files, @file{a.mk}, 
+For example, if you have three @file{.mk} files, @file{a.mk},
 @file{b.mk}, and @file{c.mk}, and @code{$(bar)} expands to
 @code{bish bash}, then the following expression
 
@@ -1077,7 +1077,7 @@ makefile in which the directive appears.
 
 One occasion for using @code{include} directives is when several programs,
 handled by individual makefiles in various directories, need to use a
-common set of variable definitions 
+common set of variable definitions
 (@pxref{Setting, ,Setting Variables}) or pattern rules
 (@pxref{Pattern Rules, ,Defining and Redefining Pattern Rules}).
 
@@ -1102,10 +1102,10 @@ First, any directories you have specified with the @samp{-I} or
 @samp{--include-dir} option are searched
 (@pxref{Options Summary, ,Summary of Options}).
 Then the following directories (if they exist)
-are searched, in this order: 
+are searched, in this order:
 @file{@var{prefix}/include} (normally @file{/usr/local/include})
 @file{/usr/gnu/include},
-@file{/usr/local/include}, @file{/usr/include}.  
+@file{/usr/local/include}, @file{/usr/include}.
 
 If an included makefile cannot be found in any of these directories, a
 warning message is generated, but it is not an immediately fatal error;
@@ -1314,7 +1314,7 @@ the makefile (often with a target called @samp{all}).
 * Directory Search::            Searching other directories for source files.
 * Phony Targets::               Using a target that is not a real file's name.
 * Force Targets::               You can use a target without commands
-                                  or dependencies to mark other 
+                                  or dependencies to mark other
                                   targets as phony.
 * Empty Targets::               When only the date matters and the
                                   files are empty.
@@ -1322,7 +1322,7 @@ the makefile (often with a target called @samp{all}).
 * Multiple Targets::            When to make use of several targets in a rule.
 * Multiple Rules::              How to use several rules with the same target.
 * Static Pattern::              Static pattern rules apply to multiple targets
-                                  and can vary the dependencies according to 
+                                  and can vary the dependencies according to
                                   the target name.
 * Double-Colon::                How to use a special kind of rule to allow
                                   several independent rules for one target.
@@ -1388,8 +1388,8 @@ or like this:
 The @var{targets} are file names, separated by spaces.  Wildcard
 characters may be used (@pxref{Wildcards, ,Using Wildcard Characters
 in File Names}) and a name of the form @file{@var{a}(@var{m})}
-represents member @var{m} in archive file @var{a} 
-(@pxref{Archive Members, ,Archive Members as Targets}).  
+represents member @var{m} in archive file @var{a}
+(@pxref{Archive Members, ,Archive Members as Targets}).
 Usually there is only one
 target per rule, but occasionally there is a reason to have more
 (@pxref{Multiple Targets, , Multiple Targets in a Rule}).@refill
@@ -1406,7 +1406,7 @@ same.  @xref{Commands, ,Writing the Commands in Rules}.
 @cindex rule, and @code{$}
 Because dollar signs are used to start variable references, if you really
 want a dollar sign in a rule you must write two of them, @samp{$$}
-(@pxref{Using Variables, ,How to Use Variables}).  
+(@pxref{Using Variables, ,How to Use Variables}).
 You may split a long line by inserting a backslash
 followed by a newline, but this is not required, as @code{make} places no
 limit on the length of a line in a makefile.
@@ -1627,7 +1627,7 @@ there is no need to write explicit rules for compiling the files.
 @section Searching Directories for Dependencies
 @vindex VPATH
 @findex vpath
-@cindex vpath 
+@cindex vpath
 @cindex search path for dependencies (@code{VPATH})
 @cindex directory search (@code{VPATH})
 
@@ -1639,9 +1639,9 @@ among directories, you do not need to change the individual rules,
 just the search paths.
 
 @menu
-* General Search::              Specifying a search path that applies 
+* General Search::              Specifying a search path that applies
                                   to every dependency.
-* Selective Search::            Specifying a search path 
+* Selective Search::            Specifying a search path
                                   for a specified class of names.
 * Commands/Search::             How to write shell commands that work together
                                   with search paths.
@@ -1714,7 +1714,7 @@ There are three forms of the @code{vpath} directive:
 @table @code
 @item vpath @var{pattern} @var{directories}
 Specify the search path @var{directories} for file names that match
-@var{pattern}.  
+@var{pattern}.
 
 The search path, @var{directories}, is a list of directories to be
 searched, separated by colons or blanks, just like the search path used
@@ -1752,7 +1752,7 @@ that are not in danger of quoting @samp{%} characters go unmolested.@refill
 When a dependency fails to exist in the current directory, if the
 @var{pattern} in a @code{vpath} directive matches the name of the
 dependency file, then the @var{directories} in that directive are searched
-just like (and before) the directories in the @code{VPATH} variable.  
+just like (and before) the directories in the @code{VPATH} variable.
 
 For example,
 
@@ -1773,7 +1773,7 @@ appear in the makefile; multiple directives with the same pattern are
 independent of each other.
 
 @need 750
-Thus, 
+Thus,
 
 @example
 @group
@@ -1809,7 +1809,7 @@ Therefore, you must write the commands with care so that they will look for
 the dependency in the directory where @code{make} finds it.
 
 This is done with the @dfn{automatic variables} such as @samp{$^}
-(@pxref{Automatic, ,Automatic Variables}).  
+(@pxref{Automatic, ,Automatic Variables}).
 For instance, the value of @samp{$^} is a
 list of all the dependencies of the rule, including the names of
 the directories in which they were found, and the value of
@@ -1865,9 +1865,9 @@ directory search with no extra effort.
 @subsection Directory Search for Link Libraries
 @cindex link libraries, and directory search
 @cindex libraries for linking, directory search
-@cindex directory search (@code{VPATH}), and link libraries 
-@cindex @code{VPATH}, and link libraries 
-@cindex search path for dependencies (@code{VPATH}), and link libraries 
+@cindex directory search (@code{VPATH}), and link libraries
+@cindex @code{VPATH}, and link libraries
+@cindex search path for dependencies (@code{VPATH}), and link libraries
 @cindex @code{-l} (library search)
 
 Directory search applies in a special way to libraries used with the
@@ -2036,7 +2036,7 @@ There is nothing special about the name @samp{FORCE}, but that is one name
 commonly used this way.
 
 As you can see, using @samp{FORCE} this way has the same results as using
-@samp{.PHONY: clean}.  
+@samp{.PHONY: clean}.
 
 Using @samp{.PHONY} is more explicit and more efficient.  However,
 other versions of @code{make} do not support @samp{.PHONY}; thus
@@ -2100,7 +2100,7 @@ time is.  @xref{Phony Targets, ,Phony Targets}.
 @item .SUFFIXES
 
 The dependencies of the special target @code{.SUFFIXES} are the list
-of suffixes to be used in checking for suffix rules.  
+of suffixes to be used in checking for suffix rules.
 @xref{Suffix Rules, , Old-Fashioned Suffix Rules}.
 
 @findex .DEFAULT
@@ -2256,11 +2256,11 @@ the target.  If the target is older than any dependency from any rule,
 the commands are executed.
 
 There can only be one set of commands to be executed for a file.
-If more than one rule gives commands for the same file, 
+If more than one rule gives commands for the same file,
 @code{make} uses the last set given and prints an error message.
 (As a special case, if the file's name begins with a dot, no
 error message is printed.  This odd behavior is only for
-compatibility with other implementations of @code{make}.)  
+compatibility with other implementations of @code{make}.)
 There is no reason to
 write your makefiles this way; that is why @code{make} gives you
 an error message.@refill
@@ -2502,7 +2502,7 @@ differs depending on which dependency files caused the update, and such
 cases are rare.
 
 Each double-colon rule should specify commands; if it does not, an
-implicit rule will be used if one applies.  
+implicit rule will be used if one applies.
 @xref{Implicit Rules, ,Using Implicit Rules}.
 
 @node Automatic Dependencies,  , Double-Colon, Rules
@@ -2580,7 +2580,7 @@ called @file{@var{name}.d} from a C source file called @file{@var{name}.c}:
 @group
 %.d: %.c
         $(SHELL) -ec '$(CC) -M $(CPPFLAGS) $< \
-                      | sed '\''s/$*\\.o[ :]*/& $@@/g'\'' > $@@'
+                      | sed '\''s/\($*\)\.o[ :]*/\1 $@@/g'\'' > $@@'
 @end group
 @end smallexample
 
@@ -2596,7 +2596,7 @@ status from the compiler.
 @cindex @code{-MM} (to GNU compiler)
 With the GNU C compiler, you may wish to use the @samp{-MM} flag instead
 of @samp{-M}.  This omits dependencies on system header files.
-@xref{Preprocessor Options, , Options Controlling the Preprocessor, 
+@xref{Preprocessor Options, , Options Controlling the Preprocessor,
 gcc.info, Using GNU CC}, for details.
 
 @cindex @code{sed} (shell command)
@@ -2671,7 +2671,7 @@ Text on a line before a @samp{#} is not part of the comment.
 * Echoing::                     How to control when commands are echoed.
 * Execution::                   How commands are executed.
 * Parallel::                    How commands can be executed in parallel.
-* Errors::                      What happens after a command execution error. 
+* Errors::                      What happens after a command execution error.
 * Interrupts::                  What happens when a command is interrupted.
 * Recursion::                   Invoking @code{make} from makefiles.
 * Sequences::                   Defining canned sequences of commands.
@@ -2718,7 +2718,7 @@ actually doing them.
 The @samp{-s} or @samp{--silent}
 flag to @code{make} prevents all echoing, as if all commands
 started with @samp{@@}.  A rule in the makefile for the special target
-@code{.SILENT} without dependencies has the same effect 
+@code{.SILENT} without dependencies has the same effect
 (@pxref{Special Targets, ,Special Built-in Target Names}).
 @code{.SILENT} is essentially obsolete since @samp{@@} is more flexible.@refill
 
@@ -2832,7 +2832,7 @@ status), and errors are not ignored for that command
 the remaining command lines to remake the same target will not be run.
 If a command fails and the @samp{-k} or @samp{--keep-going}
 option was not given
-(@pxref{Options Summary, ,Summary of Options}), 
+(@pxref{Options Summary, ,Summary of Options}),
 @code{make} aborts execution.  If make
 terminates for any reason (including a signal) with child processes
 running, it waits for them to finish before actually exiting.@refill
@@ -2875,7 +2875,7 @@ By default, there is no load limit.
 After each shell command returns, @code{make} looks at its exit status.
 If the command completed successfully, the next command line is executed
 in a new shell; after the last command line is finished, the rule is
-finished. 
+finished.
 
 If there is an error (the exit status is nonzero), @code{make} gives up on
 the current rule, and perhaps on all rules.
@@ -2888,7 +2888,7 @@ report an error, but you probably want @code{make} to continue regardless.
 @cindex @code{-} (in commands)
 To ignore errors in a command line, write a @samp{-} at the beginning of
 the line's text (after the initial tab).  The @samp{-} is discarded before
-the command is passed to the shell for execution.  
+the command is passed to the shell for execution.
 
 For example,
 
@@ -3319,14 +3319,6 @@ If you do not want to pass the other flags down, you must change the
 value of @code{MAKEFLAGS}, like this:
 
 @example
-MAKEFLAGS=
-subsystem:
-        cd subdir; $(MAKE)
-@end example
-
-or like this:
-
-@example
 subsystem:
         cd subdir; $(MAKE) MAKEFLAGS=
 @end example
@@ -3484,7 +3476,7 @@ always named @file{y.tab.c}.  The second command moves the output to the
 rule's target file name.
 
 To use the canned sequence, substitute the variable into the commands of a
-rule.  You can substitute it like any other variable 
+rule.  You can substitute it like any other variable
 (@pxref{Reference, ,Basics of Variable References}).
 Because variables defined by @code{define} are recursively expanded
 variables, all the variable references you wrote inside the @code{define}
@@ -3501,7 +3493,7 @@ foo.c : foo.y
 
 This is a realistic example, but this particular one is not needed in
 practice because @code{make} has an implicit rule to figure out these
-commands based on the file names involved 
+commands based on the file names involved
 (@pxref{Implicit Rules, ,Using Implicit Rules}).
 
 @cindex @@, and @code{define}
@@ -3561,7 +3553,7 @@ but this would be confusing because such a line looks empty.
 You may be wondering why you would want to define a command string that
 does nothing.  The only reason this is useful is to prevent a target
 from getting implicit commands (from implicit rules or the
-@code{.DEFAULT} special target; @pxref{Implicit Rules} and 
+@code{.DEFAULT} special target; @pxref{Implicit Rules} and
 @pxref{Last Resort, ,Defining Last-Resort Default Rules}).@refill
 
 @c !!! another reason is for canonical stamp files:
@@ -3606,7 +3598,7 @@ A variable name may be any sequence of characters not containing @samp{:},
 variable names containing characters other than letters, numbers, and
 underscores should be avoided, as they may be given special meanings in the
 future, and with some shells they cannot be passed through the environment to a
-sub-@code{make} 
+sub-@code{make}
 (@pxref{Variables/Recursion, ,Communicating Variables to a Sub-@code{make}}).
 
 Variable names are case-sensitive.  The names @samp{foo}, @samp{FOO},
@@ -3632,7 +3624,7 @@ they have particular specialized uses.  @xref{Automatic, ,Automatic Variables}.
                                   of a variable.
 * Override Directive::          How to set a variable in the makefile even if
                                   the user has set it with a command argument.
-* Defining::                    An alternate way to set a variable 
+* Defining::                    An alternate way to set a variable
                                   to a verbatim string.
 * Environment::                 Variable values can come from the environment.
 * Automatic::                   Some special variables have predefined
@@ -3749,7 +3741,7 @@ because it will cause an infinite loop in the variable expansion.
 @cindex loops in variable expansion
 @cindex variables, loops in expansion
 
-Another disadvantage is that any functions 
+Another disadvantage is that any functions
 (@pxref{Functions, ,Functions for Transforming Text})
 referenced in the definition will be executed every time the variable is
 expanded.  This makes @code{make} run slower; worse, it causes the
@@ -3764,7 +3756,7 @@ variables, there is another flavor: simply expanded variables.
 @cindex variables, simply expanded
 @cindex :=
 @dfn{Simply expanded variables} are defined by lines using @samp{:=}
-(@pxref{Setting, ,Setting Variables}).  
+(@pxref{Setting, ,Setting Variables}).
 The value of a simply expanded variable is scanned
 once and for all, expanding any references to other variables and
 functions, when the variable is defined.  The actual value of the simply
@@ -3810,7 +3802,7 @@ endif
 @end group
 @end example
 
-@noindent 
+@noindent
 An advantage of this use of @samp{:=} is that a typical
 `descend into a directory' command then looks like this:
 
@@ -3825,7 +3817,7 @@ Simply expanded variables generally make complicated makefile programming
 more predictable because they work like variables in most programming
 languages.  They allow you to redefine a variable using its own value (or
 its value processed in some way by one of the expansion functions) and to
-use the expansion functions much more efficiently 
+use the expansion functions much more efficiently
 (@pxref{Functions, ,Functions for Transforming Text}).
 
 @cindex spaces, in variable values
@@ -3871,7 +3863,7 @@ This section describes some advanced features you can use to reference
 variables in more flexible ways.
 
 @menu
-* Substitution Refs::           Referencing a variable with 
+* Substitution Refs::           Referencing a variable with
                                   substitutions on the value.
 * Computed Names::              Computing the name of the variable to refer to.
 @end menu
@@ -3997,7 +3989,7 @@ which becomes @samp{$(z)} which becomes @samp{Hello}.
 Nested variable references can also contain modified references and
 function invocations (@pxref{Functions, ,Functions for Transforming Text}),
 just like any other reference.
-For example, using the @code{subst} function 
+For example, using the @code{subst} function
 (@pxref{Text Functions, ,Functions for String Substitution and Analysis}):
 
 @example
@@ -4191,7 +4183,7 @@ to read.
 Most variable names are considered to have the empty string as a value if
 you have never set them.  Several variables have built-in initial values
 that are not empty, but you can set them in the usual ways
-(@pxref{Implicit Variables, ,Variables Used by Implicit Rules}).  
+(@pxref{Implicit Variables, ,Variables Used by Implicit Rules}).
 Several special variables are set
 automatically to a new value for each rule; these are called the
 @dfn{automatic} variables (@pxref{Automatic, ,Automatic Variables}).
@@ -4333,7 +4325,7 @@ value.
 @cindex overriding with @code{override}
 @cindex variables, overriding
 
-If a variable has been set with a command argument 
+If a variable has been set with a command argument
 (@pxref{Overriding, ,Overriding Variables}),
 then ordinary assignments in the makefile are ignored.  If you want to set
 the variable in the makefile even though it was set with a command
@@ -4401,7 +4393,7 @@ See the next section for information about @code{define}.
 Another way to set the value of a variable is to use the @code{define}
 directive.  This directive has an unusual syntax which allows newline
 characters to be included in the value, which is convenient for defining
-canned sequences of commands 
+canned sequences of commands
 (@pxref{Sequences, ,Defining Canned Command Sequences}).
 
 The @code{define} directive is followed on the same line by the name of the
@@ -4748,7 +4740,7 @@ not attempt to terminate the conditional inside the included file.
 
 You can write a conditional that tests @code{make} command flags such as
 @samp{-t} by using the variable @code{MAKEFLAGS} together with the
-@code{findstring} function 
+@code{findstring} function
 (@pxref{Text Functions, , Functions for String Substitution and Analysis}).
 This is useful when @code{touch} is not enough to make a file appear up
 to date.
@@ -4921,11 +4913,11 @@ References}) are a simpler way to get the effect of the @code{patsubst}
 function:
 
 @example
-$(@var{var}:@var{pattern}=@var{replacement})  
+$(@var{var}:@var{pattern}=@var{replacement})
 @end example
 
 @noindent
-is equivalent to 
+is equivalent to
 
 @example
 $(patsubst @var{pattern},@var{replacement},$(@var{var}))
@@ -4935,11 +4927,11 @@ The second shorthand simplifies one of the most common uses of
 @code{patsubst}: replacing the suffix at the end of file names.
 
 @example
-$(@var{var}:@var{suffix}=@var{replacement}) 
+$(@var{var}:@var{suffix}=@var{replacement})
 @end example
 
 @noindent
-is equivalent to 
+is equivalent to
 
 @example
 $(patsubst %@var{suffix},%@var{replacement},$(@var{var}))
@@ -5092,8 +5084,8 @@ it for this purpose even if you don't care about the sort order.
 Here is a realistic example of the use of @code{subst} and
 @code{patsubst}.  Suppose that a makefile uses the @code{VPATH} variable
 to specify a list of directories that @code{make} should search for
-dependency files 
-(@pxref{General Search, , @code{VPATH} Search Path for All Dependencies}).  
+dependency files
+(@pxref{General Search, , @code{VPATH} Search Path for All Dependencies}).
 This example shows how to
 tell the C compiler to search for header files in the same list of
 directories.@refill
@@ -5286,7 +5278,7 @@ returns @samp{bar}.
 @item $(words @var{text})
 @findex words
 @cindex words, finding number
-Returns the number of words in @var{text}.  
+Returns the number of words in @var{text}.
 Thus, the last word of @var{text} is
 @w{@code{$(word $(words @var{text}),@var{text})}}.@refill
 
@@ -5523,7 +5515,7 @@ Here the redefinition takes place if @samp{$(origin bletch)} returns either
 @cindex shell command, function for
 
 The @code{shell} function is unlike any other function except the
-@code{wildcard} function 
+@code{wildcard} function
 (@pxref{Wildcard Function, ,The Function @code{wildcard}}) in that it
 communicates with the world outside of @code{make}.
 
@@ -5589,16 +5581,16 @@ determines that some target is not already up to date.
 
 @menu
 * Makefile Arguments::          How to specify which makefile to use.
-* Goals::                       How to use goal arguments to specify which 
+* Goals::                       How to use goal arguments to specify which
                                   parts of the makefile to use.
 * Instead of Execution::        How to use mode flags to specify what
-                                  kind of thing to do with the commands 
-                                  in the makefile other than simply 
+                                  kind of thing to do with the commands
+                                  in the makefile other than simply
                                   execute them.
 * Avoiding Compilation::        How to avoid recompiling certain files.
-* Overriding::                  How to override a variable to specify 
+* Overriding::                  How to override a variable to specify
                                   an alternate compiler and other things.
-* Testing::                     How to proceed past some errors, to 
+* Testing::                     How to proceed past some errors, to
                                   test compilation.
 * Options Summary::             Summary of Options
 @end menu
@@ -5793,7 +5785,7 @@ words, neither compilation nor output will occur.
 
 ``What if''.  Each @samp{-W} flag is followed by a file name.  The given
 files' modification times are recorded by @code{make} as being the present
-time, although the actual modification times remain the same.  
+time, although the actual modification times remain the same.
 You can use the @samp{-W} flag in conjunction with the @samp{-n} flag
 to see what would happen if you were to modify specific files.@refill
 @end table
@@ -6294,10 +6286,10 @@ retained for compatibility.
 * Implicit Variables::          How to change what predefined rules do.
 * Chained Rules::               How to use a chain of implicit rules.
 * Pattern Rules::               How to define new implicit rules.
-* Last Resort::                 How to defining commands for rules 
+* Last Resort::                 How to defining commands for rules
                                   which cannot find any.
 * Suffix Rules::                The old-fashioned style of implicit rule.
-* Search Algorithm::            The precise algorithm for applying 
+* Search Algorithm::            The precise algorithm for applying
                                   implicit rules.
 @end menu
 
@@ -6579,8 +6571,8 @@ the list of implicit rule suffixes with:@refill
 @cindex @code{lint}, rule to run
 @pindex .ln
 @file{@var{n}.ln} is made from @file{@var{n}.c} by running @code{lint}.
-The precise command is @w{@samp{$(LINT) $(LINTFLAGS) $(CPPFLAGS) -i}}.  
-The same command is used on the C code produced from 
+The precise command is @w{@samp{$(LINT) $(LINTFLAGS) $(CPPFLAGS) -i}}.
+The same command is used on the C code produced from
 @file{@var{n}.y} or @file{@var{n}.l}.@refill
 
 @item @TeX{} and Web
@@ -6627,8 +6619,8 @@ Any file @file{@var{n}} is extracted if necessary from an RCS file
 named either @file{@var{n},v} or @file{RCS/@var{n},v}.  The precise
 command used is @w{@samp{$(CO) $(COFLAGS)}}.  @file{@var{n}} will not be
 extracted from RCS if it already exists, even if the RCS file is
-newer.  The rules for RCS are terminal 
-(@pxref{Match-Anything Rules, ,Match-Anything Pattern Rules}), 
+newer.  The rules for RCS are terminal
+(@pxref{Match-Anything Rules, ,Match-Anything Pattern Rules}),
 so RCS files cannot be generated from another source; they must
 actually exist.@refill
 
@@ -6912,7 +6904,7 @@ deletion is reported to you by printing a @samp{rm -f} command that
 shows what @code{make} is doing.  (You can list the target pattern of an
 implicit rule (such as @samp{%.o}) as a dependency of the special
 target @code{.PRECIOUS} to preserve intermediate files made by implicit
-rules whose target patterns match that file's name; 
+rules whose target patterns match that file's name;
 see @ref{Interrupts}.)@refill
 @cindex intermediate files, preserving
 @cindex preserving intermediate files
@@ -7797,7 +7789,7 @@ named @file{file.o}.  In connection with such usage, the automatic variables
 @cindex @code{__.SYMDEF}
 @cindex updating archive symbol directories
 @cindex archive symbol directory updating
-@cindex symbol directories, updating archive 
+@cindex symbol directories, updating archive
 @cindex directories, updating archive symbol
 
 An archive file that is used as a library usually contains a special member
@@ -7913,8 +7905,8 @@ Many features come from the version of @code{make} in System V.
 
 @itemize @bullet
 @item
-The @code{VPATH} variable and its special meaning. 
-@xref{Directory Search, , Searching Directories for Dependencies}.  
+The @code{VPATH} variable and its special meaning.
+@xref{Directory Search, , Searching Directories for Dependencies}.
 This feature exists in System V @code{make}, but is undocumented.
 It is documented in 4.3 BSD @code{make} (which says it mimics System V's
 @code{VPATH} feature).@refill
@@ -7998,7 +7990,7 @@ did.  @xref{Automatic, ,Automatic Variables}.  The automatic variable
 
 @item
 The ``what if'' flag (@samp{-W} in GNU @code{make}) was (as far as we know)
-invented by Andrew Hume in @code{mk}.  
+invented by Andrew Hume in @code{mk}.
 @xref{Instead of Execution, ,Instead of Executing the Commands}.
 
 @item
@@ -8044,7 +8036,7 @@ The remaining features are inventions new in GNU @code{make}:
 Use the @samp{-v} or @samp{--version} option to print version and
 copyright information.
 
-@item 
+@item
 Use the @samp{-h} or @samp{--help} option to summarize the options to
 @code{make}.
 
@@ -8061,7 +8053,7 @@ Use the @samp{-C} or @samp{--directory} command option to change
 directory.  @xref{Options Summary, ,Summary of Options}.
 
 @item
-Make verbatim variable definitions with @code{define}.  
+Make verbatim variable definitions with @code{define}.
 @xref{Defining, ,Defining Variables Verbatim}.
 
 @item
@@ -8072,7 +8064,7 @@ different syntax in his @code{mk} program.  This seems to be a case of
 parallel discovery.  @xref{Phony Targets, ,Phony Targets}.
 
 @item
-Manipulate text by calling functions.  
+Manipulate text by calling functions.
 @xref{Functions, ,Functions for Transforming Text}.
 
 @item
@@ -8103,11 +8095,11 @@ same file.@refill
 
 @item
 Use a special search method for library dependencies written in the
-form @samp{-l@var{name}}.  
+form @samp{-l@var{name}}.
 @xref{Libraries/Search, ,Directory Search for Link Libraries}.
 
 @item
-Allow suffixes for suffix rules 
+Allow suffixes for suffix rules
 (@pxref{Suffix Rules, ,Old-Fashioned Suffix Rules}) to contain any
 characters.  In other versions of @code{make}, they must begin with
 @samp{.} and not contain any @samp{/} characters.
@@ -8120,11 +8112,11 @@ variable @code{MAKELEVEL}.  @xref{Recursion, ,Recursive Use of @code{make}}.
 Specify static pattern rules.  @xref{Static Pattern, ,Static Pattern Rules}.
 
 @item
-Provide selective @code{vpath} search.  
+Provide selective @code{vpath} search.
 @xref{Directory Search, ,Searching Directories for Dependencies}.
 
 @item
-Provide computed variable references.  
+Provide computed variable references.
 @xref{Reference, ,Basics of Variable References}.
 
 @item
@@ -8133,7 +8125,7 @@ System V @code{make} has a very, very limited form of this
 functionality in that it will check out SCCS files for makefiles.
 
 @item
-Various new built-in implicit rules.  
+Various new built-in implicit rules.
 @xref{Catalogue of Rules, ,Catalogue of Implicit Rules}.
 
 @item
@@ -8143,7 +8135,7 @@ The built-in variable @samp{MAKE_VERSION} gives the version number of
 
 @node Missing, Makefile Conventions, Features, Top
 @chapter Incompatibilities and Missing Features
-@cindex incompatibilities 
+@cindex incompatibilities
 @cindex missing features
 @cindex features, missing
 
@@ -8160,22 +8152,22 @@ being an object file which defines the linker symbol @var{entry}.@refill
 
 This feature was not put into GNU @code{make} because of the
 nonmodularity of putting knowledge into @code{make} of the internal
-format of archive file symbol tables.  
+format of archive file symbol tables.
 @xref{Archive Symbols, ,Updating Archive Symbol Directories}.
 
 @item
 Suffixes (used in suffix rules) that end with the character @samp{~}
-have a special meaning to System V @code{make}; 
+have a special meaning to System V @code{make};
 they refer to the SCCS file that corresponds
 to the file one would get without the @samp{~}.  For example, the
 suffix rule @samp{.c~.o} would make the file @file{@var{n}.o} from
 the SCCS file @file{s.@var{n}.c}.  For complete coverage, a whole
-series of such suffix rules is required.  
+series of such suffix rules is required.
 @xref{Suffix Rules, ,Old-Fashioned Suffix Rules}.
 
 In GNU @code{make}, this entire series of cases is handled by two
 pattern rules for extraction from SCCS, in combination with the
-general feature of rule chaining.  
+general feature of rule chaining.
 @xref{Chained Rules, ,Chains of Implicit Rules}.
 
 @item
@@ -8187,7 +8179,7 @@ This is not defined in GNU @code{make} because @samp{$$} should always
 stand for an ordinary @samp{$}.
 
 It is possible to get this functionality through the use of static pattern
-rules (@pxref{Static Pattern, ,Static Pattern Rules}).  
+rules (@pxref{Static Pattern, ,Static Pattern Rules}).
 The System V @code{make} rule:
 
 @example
@@ -8469,7 +8461,7 @@ dependencies which are archive members, only the member named is used
 dependencies, while @code{$+} retains them and preserves their order.
 
 @item $*
-The stem with which an implicit rule matches 
+The stem with which an implicit rule matches
 (@pxref{Pattern Match, ,How Patterns Match}).
 
 @item $(@@D)
@@ -8512,7 +8504,7 @@ Makefiles to be read on every invocation of @code{make}.@*
 @item VPATH
 
 Directory search path for files not found in the current directory.@*
-@xref{General Search, , @code{VPATH} Search Path for All Dependencies}.  
+@xref{General Search, , @code{VPATH} Search Path for All Dependencies}.
 
 @item SHELL
 
@@ -8615,60 +8607,60 @@ INSTALLDATA = /usr/local/bin/install -c -m 644
 # Things you might add to DEFS:
 # -DSTDC_HEADERS        If you have ANSI C headers and
 #                       libraries.
-# -DPOSIX               If you have POSIX.1 headers and 
+# -DPOSIX               If you have POSIX.1 headers and
 #                       libraries.
-# -DBSD42               If you have sys/dir.h (unless 
-#                       you use -DPOSIX), sys/file.h, 
+# -DBSD42               If you have sys/dir.h (unless
+#                       you use -DPOSIX), sys/file.h,
 #                       and st_blocks in `struct stat'.
-# -DUSG                 If you have System V/ANSI C 
-#                       string and memory functions 
-#                       and headers, sys/sysmacros.h, 
-#                       fcntl.h, getcwd, no valloc, 
-#                       and ndir.h (unless 
+# -DUSG                 If you have System V/ANSI C
+#                       string and memory functions
+#                       and headers, sys/sysmacros.h,
+#                       fcntl.h, getcwd, no valloc,
+#                       and ndir.h (unless
 #                       you use -DDIRENT).
-# -DNO_MEMORY_H         If USG or STDC_HEADERS but do not 
+# -DNO_MEMORY_H         If USG or STDC_HEADERS but do not
 #                       include memory.h.
-# -DDIRENT              If USG and you have dirent.h 
+# -DDIRENT              If USG and you have dirent.h
 #                       instead of ndir.h.
-# -DSIGTYPE=int         If your signal handlers 
+# -DSIGTYPE=int         If your signal handlers
 #                       return int, not void.
-# -DNO_MTIO             If you lack sys/mtio.h 
+# -DNO_MTIO             If you lack sys/mtio.h
 #                       (magtape ioctls).
-# -DNO_REMOTE           If you do not have a remote shell 
+# -DNO_REMOTE           If you do not have a remote shell
 #                       or rexec.
 # -DUSE_REXEC           To use rexec for remote tape
-#                       operations instead of 
+#                       operations instead of
 #                       forking rsh or remsh.
-# -DVPRINTF_MISSING     If you lack vprintf function 
+# -DVPRINTF_MISSING     If you lack vprintf function
 #                       (but have _doprnt).
-# -DDOPRNT_MISSING      If you lack _doprnt function.  
-#                       Also need to define 
+# -DDOPRNT_MISSING      If you lack _doprnt function.
+#                       Also need to define
 #                       -DVPRINTF_MISSING.
 # -DFTIME_MISSING       If you lack ftime system call.
 # -DSTRSTR_MISSING      If you lack strstr function.
 # -DVALLOC_MISSING      If you lack valloc function.
-# -DMKDIR_MISSING       If you lack mkdir and 
+# -DMKDIR_MISSING       If you lack mkdir and
 #                       rmdir system calls.
 # -DRENAME_MISSING      If you lack rename system call.
-# -DFTRUNCATE_MISSING   If you lack ftruncate 
+# -DFTRUNCATE_MISSING   If you lack ftruncate
 #                       system call.
-# -DV7                  On Version 7 Unix (not 
+# -DV7                  On Version 7 Unix (not
 #                       tested in a long time).
-# -DEMUL_OPEN3          If you lack a 3-argument version 
-#                       of open, and want to emulate it 
+# -DEMUL_OPEN3          If you lack a 3-argument version
+#                       of open, and want to emulate it
 #                       with system calls you do have.
 # -DNO_OPEN3            If you lack the 3-argument open
-#                       and want to disable the tar -k 
+#                       and want to disable the tar -k
 #                       option instead of emulating open.
-# -DXENIX               If you have sys/inode.h 
+# -DXENIX               If you have sys/inode.h
 #                       and need it 94 to be included.
 
 DEFS =  -DSIGTYPE=int -DDIRENT -DSTRSTR_MISSING \
         -DVPRINTF_MISSING -DBSD42
-# Set this to rtapelib.o unless you defined NO_REMOTE, 
+# Set this to rtapelib.o unless you defined NO_REMOTE,
 # in which case make it empty.
 RTAPELIB = rtapelib.o
-LIBS = 
+LIBS =
 DEF_AR_FILE = /dev/rmt8
 DEFBLOCKING = 20
 
@@ -8682,9 +8674,9 @@ LDFLAGS = -g
 
 @group
 prefix = /usr/local
-# Prefix for each installed program, 
+# Prefix for each installed program,
 # normally empty or `g'.
-binprefix = 
+binprefix =
 
 # The directory to install tar in.
 bindir = $(prefix)/bin
@@ -8782,7 +8774,7 @@ shar: $(SRCS) $(AUX)
         shar $(SRCS) $(AUX) | compress \
           > tar-`sed -e '/version_string/!d' \
                      -e 's/[^0-9.]*\([0-9.]*\).*/\1/' \
-                     -e q 
+                     -e q
                      version.c`.shar.Z
 @end group
 
@@ -8791,7 +8783,7 @@ dist: $(SRCS) $(AUX)
         echo tar-`sed \
              -e '/version_string/!d' \
              -e 's/[^0-9.]*\([0-9.]*\).*/\1/' \
-             -e q 
+             -e q
              version.c` > .fname
         -rm -rf `cat .fname`
         mkdir `cat .fname`
