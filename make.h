@@ -396,7 +396,7 @@ struct floc
 # endif
 #endif
 
-#if __STDC__ && USE_VARIADIC && HAVE_STDARG_H
+#if HAVE_ANSI_COMPILER && USE_VARIADIC && HAVE_STDARG_H
 extern void message (int prefix, const char *fmt, ...)
                      __attribute__ ((__format__ (__printf__, 2, 3)));
 extern void error (const struct floc *flocp, const char *fmt, ...)

@@ -146,6 +146,9 @@
 /* Define if the `S_IS*' macros in <sys/stat.h> do not work properly.  */
 /* #undef STAT_MACROS_BROKEN */
 
+/* Define if your compiler conforms to the ANSI C standard. */
+#define HAVE_ANSI_COMPILER 1
+
 /* Define if you have the ANSI C header files.	*/
 #define STDC_HEADERS
 

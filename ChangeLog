@@ -1,3 +1,14 @@
+2004-03-06  Paul D. Smith  <psmith@gnu.org>
+
+	* configure.in (HAVE_ANSI_COMPILER): Define if we have an ANSI/ISO
+	compiler.
+	* make.h: Convert uses of __STDC__ to HAVE_ANSI_COMPILER.
+	* misc.c (message,error,fatal): Ditto.
+	* configh.dos.template: Define HAVE_ANSI_COMPILER.
+	* config.h.W32.template: Ditto.
+	* config.h-vms.template: Ditto.
+	* config.ami.template: Ditto.
+
 2004-03-04  Paul D. Smith  <psmith@gnu.org>
 
 	* README.template: Add a note about broken /bin/sh on SunOS
