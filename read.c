@@ -658,8 +658,7 @@ read_makefile (filename, flags)
 	  if (*p == '\0')
 	    {
 	      error (&fileinfo,
-			      _("no file name for `%sinclude'"),
-			      noerror ? "-" : "");
+                     _("no file name for `%sinclude'"), noerror ? "-" : "");
 	      continue;
 	    }
 
@@ -692,8 +691,7 @@ read_makefile (filename, flags)
 	      if (! read_makefile (name, (RM_INCLUDED | RM_NO_TILDE
 					  | (noerror ? RM_DONTCARE : 0)))
 		  && ! noerror)
-		error (&fileinfo,
-				"%s: %s", name, strerror (errno));
+		error (&fileinfo, "%s: %s", name, strerror (errno));
               free(name);
 	    }
 
@@ -1442,7 +1440,7 @@ record_target_var (filenames, defn, two_colon, origin, flocp)
 
       /* Make the new variable context current and define the variable.  */
       current_variable_set_list = vlist;
-      v = try_variable_definition(flocp, defn, origin);
+      v = try_variable_definition (flocp, defn, origin);
       if (!v)
         error (flocp, _("Malformed per-target variable definition"));
       v->per_target = 1;
@@ -1455,10 +1453,10 @@ record_target_var (filenames, defn, two_colon, origin, flocp)
           int len = strlen(v->name);
 
           current_variable_set_list = global;
-          gv = lookup_variable(v->name, len);
+          gv = lookup_variable (v->name, len);
           if (gv && (gv->origin == o_env_override || gv->origin == o_command))
-            define_variable_in_set(v->name, len, gv->value, gv->origin,
-                                     gv->recursive, vlist->set);
+            define_variable_in_set (v->name, len, gv->value, gv->origin,
+                                    gv->recursive, vlist->set);
         }
 
       /* Free name if not needed further.  */

@@ -32,10 +32,6 @@ Boston, MA 02111-1307, USA.  */
 #include <sys/file.h>
 #endif
 
-#ifdef  __MSDOS__
-#include "variable.h"
-#endif
-
 #ifdef VMS
 #include <starlet.h>
 #endif

@@ -12,6 +12,21 @@
 
 	* make.texinfo (Quick Reference): Update with the new features.
 
+1999-07-25  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* remake.c [__MSDOS__]: Don't include variables.h, it's already
+	included.
+
+	* function.c (msdos_openpipe) [__MSDOS__]: Return FILE ptr.
+	(func_shell) [__MSDOS__]: Fix the argument list.
+
+	* Makefile.DOS.template: Update from Makefile.in.
+
+	* README.DOS.template: Configure command fixed.
+
+	* configh.dos.template: Update to provide definitions for
+	uintmax_t, fd_set_size_t, and HAVE_SELECT.
+
 1999-07-24  Paul D. Smith  <psmith@gnu.org>
 
 	* Version 3.77.91 released.

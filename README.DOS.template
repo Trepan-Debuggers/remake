@@ -5,7 +5,7 @@ Builds with DJGPP v2 port of GNU C/C++ compiler and utilities.
 
 New (since 3.74) DOS-specific features:
 
-   1. Supports long filenames when run from DOS box on Windows 95.
+   1. Supports long filenames when run from DOS box on Windows 9x.
 
    2. Supports both stock DOS COMMAND.COM and Unix-style shells
       (details in ``Notes'' below).
@@ -48,9 +48,10 @@ To build:
       [Enter].  Otherwise, you need to supply the path to the source
       directory as an argument to the batch file, like this:
 
-		configure.bat c:/djgpp/gnu/make-%VERSION%
+	c:\djgpp\gnu\make-%VERSION%\configure.bat c:/djgpp/gnu/make-%VERSION%
 
-      Note the forward slashes: you MUST use them here.
+      Note the forward slashes in the source path argument: you MUST
+      use them here.
 
    3. If configure.bat doesn't find a working Make, it will suggest to
       use the `dosbuild.bat' batch file to build Make.  Either do as it
@@ -228,9 +229,9 @@ Notes:
 
    4. Letter-case in filenames.
 
-      If you run Make on Windows 95, you should be aware of the
+      If you run Make on Windows 9x, you should be aware of the
       letter-case issue.  Make is internally case-sensitive, but all
-      file operations are case-insensitive on Windows 95, so
+      file operations are case-insensitive on Windows 9x, so
       e.g. files `FAQ', `faq' and `Faq' all refer to the same file, as
       far as Windows is concerned.  The underlying DJGPP C library
       functions honor the letter-case of the filenames they get from
@@ -240,8 +241,8 @@ Notes:
       converted to lower case are explained in the DJGPP libc docs,
       under the `_preserve_fncase' and `_lfn_gen_short_fname'
       functions, but as a thumb rule, any filename that is stored in
-      upper case in the directory, is a legal DOS 8+3 filename and
-      doesn't include characters illegal on MSDOS FAT filesystems,
+      upper case in the directory, is a valid DOS 8+3 filename and
+      doesn't include characters invalid on MSDOS FAT filesystems,
       will be automatically down-cased.)  User reports that I have
       indicate that this default behavior is generally what you'd
       expect; however, your input is most welcome.
