@@ -3,3 +3,9 @@
 
 /* Define this if the SCCS `get' command understands the `-G<file>' option.  */
 #undef SCCS_GET_MINUS_G
+
+/* Define this if the C library defines the variable `sys_siglist'.  */
+#undef HAVE_SYS_SIGLIST
+
+/* Define this if the C library defines the variable `_sys_siglist'.  */
+#undef HAVE__SYS_SIGLIST
