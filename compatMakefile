@@ -262,5 +262,10 @@ config.h.in: configure.in
 # This tells versions [3.59,3.63) of GNU make not to export all variables.
 .NOEXPORT:
 
+# The automatically generated dependencies below may omit config.h
+# because it is included with ``#include <config.h>'' rather than
+# ``#include "config.h"''.  So we add the explicit dependency to make sure.
+$(objs): config.h
+
 # Automatically generated dependencies will be put at the end of the file.
 
