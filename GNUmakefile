@@ -31,7 +31,7 @@ override srcdir := .
 override CC := $(CC)
 
 ifeq ($(ARCH),hp300)
-customs=yes
+#customs=yes
 endif
 ifdef customs
 override REMOTE := cstms
