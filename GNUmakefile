@@ -155,7 +155,7 @@ globfiles = $(addprefix glob/,COPYING.LIB configure.in configure Makefile.in \
 			configure.bat glob.c fnmatch.c glob.h fnmatch.h)
 $(globfiles): stamp-glob ;
 stamp-glob: /home/gd/gnu/libc/posix/glob.tar
-	-rm -f $(globfiles)
+	-rm -f stamp-glob glob/*
 	tar xvf $< glob
 	cvs commit -m'Updated from libc' glob
 	touch $@
@@ -224,7 +224,7 @@ tarfiles: $(tarfiles)
 distfiles=README INSTALL COPYING ChangeLog NEWS \
           configure Makefile.in configure.in build.sh.in mkinstalldirs \
 	  configh.dos configure.bat \
-	  acconfig.h $(srcs) remote-*.c $(globfiles) \
+	  aclocal.m4 acconfig.h $(srcs) remote-*.c $(globfiles) \
 	  make.texinfo make-stds.texi \
 	  make.?? make.??s make.toc make.aux make.man texinfo.tex TAGS tags \
 	  install-sh \
