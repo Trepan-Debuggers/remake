@@ -1,9 +1,18 @@
 Sat Jun 22 14:56:05 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 
+	* read.c (conditional_line): Strip ws in `ifeq (a , b)' so it is the
+	same as `ifeq (a, b)'.
+
+	* job.c (reap_children): Don't call die if handling_fatal_signal.
+
+	* file.c (file_hash_enter): Allow renaming :: to : when latter is
+	non-target, or : to :: when former is non-target.
+
 	* job.c (start_job_command): Call block_sigs.
 	(block_sigs): New function, broken out of start_job_command.
 	(reap_children): Block fatal signals around removing dead child from
 	chain and adjusting job_slots_used.
+	* job.h: Declare block_sigs.
 
 	* remote-stub.c (remote_setup, remote_cleanup): New (empty) functions.
 	* main.c (main): Call remote_setup.
