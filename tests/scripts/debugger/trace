@@ -1,8 +1,9 @@
-# $Id: trace,v 1.1 2004/06/11 23:51:25 rockyb Exp $
 # -*-Perl-*-
-$description = "The following test check tracing.\n";
+# $Id: trace,v 1.2 2004/06/12 03:18:34 rockyb Exp $
+$description = "The following checks tracing.\n";
 
-$details = "To tracing a makefile \n";
+$details = "We test line tracing, showing a target stack, line numbers\n"
+         . "when we have multiple commands in a target\n";
 
 # TEST #1
 # -------
@@ -12,7 +13,7 @@ open(MAKEFILE,"> $makefile");
 # The Contents of the MAKEFILE ...
 
 print MAKEFILE <<\EOF;
-# Test #1 tracing
+# Test #1 simple tracing
 all: foo
 
 foo:
@@ -36,14 +37,16 @@ FOO here
 
 &compare_output($answer,&get_logfile(1));
 
-# TEST #2
+# TEST #2 Test #2 tracing with multiple commands and show call stack
+# dump
 # -------
+
 open(MAKEFILE,"> $makefile");
 
 # The Contents of the MAKEFILE ...
 
 print MAKEFILE <<\EOF;
-# Test #2 tracing
+# Test #2 tracing with multiple commands and show call stack dump
 all: foo
 foo:
 	@echo hi > /dev/null
@@ -53,6 +56,7 @@ EOF
 
 close(MAKEFILE);
 
+# We used option --trace in test 1, use short option name -x this time.
 &run_make_with_options($makefile, "-E -x -i --basename-filenames",
 		       &get_logfile);
 
