@@ -23,8 +23,6 @@ CFLAGS = $(defines) -g
 LDFLAGS = -g
 
 # Define these for your system as follows:
-#	-DUSGr3			SVR3 (also define USG)
-#	-DHPUX			HP-UX (also define USG and USGr3 appropriately)
 #	-DNO_ARCHIVES		To disable `ar' archive support.
 #	-DNO_FLOAT		To avoid using floating-point numbers.
 #	-DENUM_BITFIELDS	If the compiler isn't GCC but groks enum foo:2.
@@ -96,10 +94,10 @@ INSTALL_DATA = @INSTALL_DATA@
 ETAGS = etags -t
 CTAGS = ctags -t
 
-objs = commands.o job.o dir.o file.o load.o misc.o main.o read.o \
+objs = commands.o job.o dir.o file.o getloadavg.o misc.o main.o read.o \
        remake.o remote.o rule.o implicit.o default.o variable.o expand.o \
        function.o vpath.o version.o $(GETOPT) $(extras)
-srcs = commands.c job.c dir.c file.c load.c misc.c main.c read.c \
+srcs = commands.c job.c dir.c file.c getloadavg.c misc.c main.c read.c \
        remake.c remote.c rule.c implicit.c default.c variable.c expand.c \
        function.c vpath.c version.c $(GETOPT_SRC) \
        commands.h dep.h file.h job.h make.h rule.h variable.h
@@ -133,8 +131,8 @@ make: $(objs)
 	$(CC) $(LDFLAGS) $(objs) $(LOADLIBES) -o make.new
 	mv -f make.new make
 
-load.o: load.c
-	$(CC) $(CFLAGS) $(LOAD_AVG) -c load.c
+getloadavg.o: getloadavg.c
+	$(CC) $(CFLAGS) $(LOAD_AVG) -c getloadavg.c
 remote.o: remote.c
 	$(CC) $(CFLAGS) $(REMOTE) -c remote.c
 
