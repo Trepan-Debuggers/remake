@@ -48,7 +48,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif /* POSIX */
 
 #ifdef __MSDOS__
-#inlcude <ctype.h>
+#include <ctype.h>
 
 static char *
 dosify (filename)
