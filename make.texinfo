@@ -9,7 +9,7 @@
 
 @set EDITION 0.44
 @set VERSION 3.69 Beta
-@set UPDATED 6 September 1993
+@set UPDATED 17 September 1993
 @set UPDATE-MONTH September 1993
 
 @c finalout
@@ -1558,10 +1558,11 @@ expansion happens in the rule for @file{foo}, so that each @emph{existing}
 @samp{.o} file becomes a dependency of @file{foo} and will be recompiled if
 necessary.
 
-But what if you delete all the @samp{.o} files?  Then @samp{*.o} will
-expand into @emph{nothing}.  The target @file{foo} will have no
-dependencies and would be remade by linking no object files.  This is not
-what you want!
+But what if you delete all the @samp{.o} files?  When a wildcard matches
+no files, it is left as it is, so then @file{foo} will depend on the
+oddly-named file @file{*.o}.  Since so such file is likely to exist,
+@code{make} will give you an error saying it cannot figure out how to
+make @file{*.o}.  This is not what you want!
 
 Actually it is possible to obtain the desired result with wildcard
 expansion, but you need more sophisticated techniques, including the
@@ -1583,12 +1584,17 @@ arguments of a function.  If you want to do wildcard expansion in such
 places, you need to use the @code{wildcard} function, like this:
 
 @example
-$(wildcard @var{pattern})
+$(wildcard @var{pattern}@dots{})
 @end example
 
 @noindent
-This string, used anywhere in a makefile, is replaced by a space-separated
-list of names of existing files that match the pattern @var{pattern}.
+This string, used anywhere in a makefile, is replaced by a
+space-separated list of names of existing files that match one of the
+given file name patterns.  If no existing file name matches a pattern,
+then that pattern is omitted from the output of the @code{wildcard}
+function.  Note that this is different from how unmatched wildcards
+behave in rules, where they are used verbatim rather than ignored
+(@pxref{Wildcard Pitfall}).
 
 One use of the @code{wildcard} function is to get a list of all the C source
 files in a directory, like this:
