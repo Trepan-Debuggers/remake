@@ -6,7 +6,7 @@ AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.5 2004/06/12 08:54:42 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.6 2004/06/12 17:41:14 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -206,25 +206,27 @@ AC_MSG_RESULT($make_cv_union_wait)
 #
 AC_ARG_WITH(readline, 
 	    [  --with-readline         enable readline (for debugger)], 
-	    enable_readline=$withval, enable_readline=yes)
+	    have_readline=$withval, enable_readline=yes)
 
-AC_CHECK_HEADER(readline/readline.h, [], [enable_readline=no])
+AC_CHECK_HEADER(readline/readline.h, [], [have_readline=no])
 
 if test "$enable_readline" = yes ; then 
   AC_CHECK_LIB(readline, readline, 
               [LIBS="$LIBS -lreadline -ltermcap"], 
-	      [enable_readline=no], -ltermcap)
+	      [have_readline=no], -ltermcap)
 fi
 
 if test "$enable_readline" = yes ; then 
-   AC_DEFINE(ENABLE_READLINE, 1, 
+   AC_DEFINE(HAVE_READLINE, 1, 
    [Define this if you have libreadline. It is needed for the debugger.])
+   HAVE_READLINE=1
  else 
    AC_MSG_WARN([libreadline is needed for the debugger. I'll build "make"])
-   AC_MSG_WARN([with trace support, but you won't be able enter the debugger.])
+   AC_MSG_WARN([with trace support, but you won't be able enter the])
+   AC_MSG_WARN([debugger.])
 fi
-AC_SUBST(ENABLE_READLINE)
 
+AC_SUBST(HAVE_READLINE)
 
 # See if the user wants to use pmake's "customs" distributed build capability
 
