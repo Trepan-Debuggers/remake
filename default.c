@@ -212,7 +212,7 @@ static char *default_variables[] =
     "F77", "$(FC)",
     "F77FLAGS", "$(FFLAGS)",
 #endif	/* Cray.  */
-#if	defined (USG) || defined (ultrix)
+#if	defined (USG) || defined (ultrix) || defined (_IBMR2)
     "GET", "get",
 #else
     "GET", "/usr/sccs/get",
