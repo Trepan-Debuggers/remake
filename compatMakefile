@@ -183,14 +183,19 @@ install: installdirs \
 	 $(mandir)/$(instname).$(manext)
 
 installdirs:
-	$(SHELL) ${srcdir}/mkinstalldirs
+	$(SHELL) ${srcdir}/mkinstalldirs $(bindir) $(infodir) $(mandir)
 
 $(bindir)/$(instname): make
 	$(INSTALL_PROGRAM) make $@.new
-# These are necessary for load-average checking to work on most Unix machines.
-	if $(install_setgid); then \
-	  chgrp $(group) $@.new && chmod g+s $@.new; \
-	else true; fi
+	@if $(install_setgid); then \
+	   if chgrp $(group) $@.new && chmod g+s $@.new; then
+	     echo "chgrp $(group) $@.new && chmod g+s $@.new"; \
+	   else \
+	     echo "$@ needs to be owned by group $(group) and setgid;"; \
+	     echo "otherwise the \`-l' option will probably not work."; \
+	     echo "You may need special priveleges to install $@."; \
+	   fi; \
+	 else true; fi
 # Some systems can't deal with renaming onto a running binary.
 	-rm -f $@.old
 	-mv $@ $@.old
