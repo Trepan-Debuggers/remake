@@ -38,6 +38,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	SIGNAL(sig, handler) \
   ((SIGHANDLER) signal((sig), (SIGHANDLER) (handler)))
 
+#ifdef	CRAY
+#define	signal	bsdsignal
+#endif
+
 #ifndef	sigmask
 #define	sigmask(sig)	(1 << ((sig) - 1))
 #endif
