@@ -1,4 +1,4 @@
-/* Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993
+/* Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994
 	Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -209,6 +209,13 @@ extern void bcopy ();
 
 #endif	/* ANSI_STRING.  */
 #undef	ANSI_STRING
+
+/* SCO Xenix has a buggy macro definition in <string.h>.  */
+#undef	strerror
+
+#ifndef ANSI_STRING
+extern char *strerror ();
+#endif
 
 
 #ifdef	__GNUC__
