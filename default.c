@@ -151,13 +151,13 @@ static char *default_suffix_rules[] =
     "$(PREPROCESS.S) $< > $@",
 
     ".texinfo.info",
-    "$(MAKEINFO) $<",
+    "$(MAKEINFO) $< -o $@",
 
     ".texi.info",
-    "$(MAKEINFO) $<",
+    "$(MAKEINFO) $< -o $@",
 
     ".txinfo.info",
-    "$(MAKEINFO) $<",
+    "$(MAKEINFO) $< -o $@",
 
     ".tex.dvi",
     "$(TEX) $<",
