@@ -55,11 +55,11 @@ unlink('foo.el', 'bar.c', 'lose.c');
 
 $makefile2 = &get_tmpfile;
 open(MAKEFILE, "> $makefile2");
-print MAKEFILE "foo: foo%: % ; \@echo $@\n";
+print MAKEFILE "foo: foo%: % ; \@echo \$@\n";
 close(MAKEFILE);
 
-&run_make_with_options($makefile2, '', &get_logfile, 512);
-$answer = "$makefile2:1: *** target `foo' leaves prerequisite pattern empty.  Stop.\n";
+&run_make_with_options($makefile2, '', &get_logfile);
+$answer = "foo\n";
 &compare_output($answer, &get_logfile(1));
 
 # TEST #5 -- bug #12180: core dump on a stat pattern rule with an empty

@@ -1,6 +1,18 @@
+Thu Mar  3 18:34:06 2005  Boris Kolpackov  <boris@kolpackov.net>
+
+	* scripts/features/se_implicit: Add a test for stem
+	termination bug. Add a test for stem triple-expansion bug.
+
+	* scripts/features/se_statpat: Add a test for stem
+	triple-expansion bug.
+
+	* scripts/features/statipattrules: Change test #4 to reflect
+	new way empty prerequisite list is handled.
+
+
 Tue Mar  1 10:15:25 2005  Boris Kolpackov  <boris@kolpackov.net>
 
-	* tests/scripts/features/statipattrules: Add a test for
+	* scripts/features/statipattrules: Add a test for
 	Savannah bug #12180.
 
 2005-02-28  Paul D. Smith  <psmith@gnu.org>
