@@ -242,12 +242,12 @@ reconstructed with this Makefile.  This typically includes everything
 deleted by @code{distclean}, plus more: C source files produced by
 Bison, tags tables, Info files, and so on.
 
-The reason we say ``almost everything'' is that @samp{make
-maintainer-clean} should not delete @file{configure} even if
-@file{configure} can be remade using a rule in the Makefile.  More
-generally, @samp{make maintainer-clean} should not delete anything that
-needs to exist in order to run @file{configure} and then begin to build
-the program.  This is the only exception; @code{maintainer-clean} should
+The reason we say ``almost everything'' is that running the command
+@samp{make maintainer-clean} should not delete @file{configure} even if
+it can be remade using a rule in the Makefile.  More generally,
+@samp{make maintainer-clean} should not delete anything that needs to
+exist in order to run @file{configure} and then begin to build the
+program.  This is the only exception; @code{maintainer-clean} should
 delete everything else that can be rebuilt.
 
 The @samp{maintainer-clean} is intended to be used by a maintainer of
@@ -257,13 +257,13 @@ Since these files are normally included in the distribution, we don't
 take care to make them easy to reconstruct.  If you find you need to
 unpack the full distribution again, don't blame us.
 
-To help make users aware of this, the commands for
-@code{maintainer-clean} should start with these two:
+To help make users aware of this, the commands for the special 
+@code{maintainer-clean} target should start with these two:
 
-@example
-@@echo "This command is intended for maintainers to use;"
-@@echo "it deletes files that may require special tools to rebuild."
-@end example
+@smallexample
+@@echo "This command is intended for maintainers to use; it"
+@@echo "deletes files that may require special tools to rebuild."
+@end smallexample
 
 @item TAGS
 Update a tags table for this program.
