@@ -3,10 +3,14 @@
 @synindex vr fn
 
 @ignore
-$Header: /sources/make/make/Attic/make.texinfo,v 1.9 1988/05/04 17:56:07 mcgrath Beta $
+$Header: /sources/make/make/Attic/make.texinfo,v 1.15 1988/05/11 21:30:52 mcgrath Exp $
 
 $Log: make.texinfo,v $
-Revision 1.9  1988/05/04 17:56:07  mcgrath
+Revision 1.15  1988/05/11 21:30:52  mcgrath
+* Made `$<' automatic variable be the first dependency of any rule.
+* Bumped revision number to correspond to `make.c'.
+
+Revision 1.9  88/05/04  17:56:07  mcgrath
 * Miscellaneous changes suggested by RMS.
 * The `define' directive makes recursive variables.
 * Removed the `expand' function.
@@ -3548,8 +3552,7 @@ example, if the target is @file{foo.a(bar.o)} then @samp{$%} is
 when the target is not an archive member.
 
 @item $<
-The name of the first implicit dependency, when an implicit rule is
-being applied.
+The name of the first dependency.
 
 @item $?
 The names of all the dependencies that are newer than the target, with
