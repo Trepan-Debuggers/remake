@@ -1,6 +1,6 @@
 # This is a -*-Makefile-*-, or close enough
 
-AUTOMAKE_OPTIONS = dist-bzip2 check-news ansi2knr
+AUTOMAKE_OPTIONS = 1.7.6 dist-bzip2 check-news ansi2knr
 ACLOCAL_AMFLAGS	=  -I config
 
 SUBDIRS =	glob config po doc

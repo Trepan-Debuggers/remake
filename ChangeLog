@@ -1,3 +1,13 @@
+2003-10-21  Paul D. Smith  <psmith@gnu.org>
+
+	* main.c (log_working_directory): Add newlines to printf()s.
+
+	* README.cvs: Add a note to ignore warnings during autoreconf.
+
+	* maintMakefile (po_repo): Set a new URL for PO file updates.
+	(get-config/config.guess get-config/config.sub): Get these files
+	from the Savannah config project instead of ftp.gnu.org.
+
 2003-07-18  Paul D. Smith  <psmith@gnu.org>
 
 	* dir.c (directory_contents_hash_1, directory_contents_hash_1)
@@ -1131,5 +1141,25 @@
 	* make.texinfo, NEWS, TODO.private: Minor spelling corrections.
 	Ran spell-check	on make.texinfo.
 
+2000-06-23  Paul D. Smith  <psmith@gnu.org>
+
+	* main.c (main): Replace EXIT_SUCCESS, EXIT_FAILURE, and
+	EXIT_TROUBLE with MAKE_SUCCESS, MAKE_FAILURE, and MAKE_TROUBLE.
+	* make.h: Define these macros.
+
+	* Version 3.79.1 released.
+
+	* configure.in: Add a new option, --disable-nsec-timestamps, to
+	avoid using sub-second timestamps on systems that support it.  It
+	can lead to problems, e.g. if your makefile relies on "cp -p".
+	* README.template: Document the issue with "cp -p".
+
+	* config.guess, config.sub: Updated.
+
 
-See ChangeLog.2 for earlier changes.
+
+See ChangeLog.2, available in the CVS repository at:
+
+	http://savannah.gnu.org/cvs/?group=make
+
+for earlier changes.

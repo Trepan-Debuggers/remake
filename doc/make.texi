@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.14 2003/07/31 13:04:33 psmith Exp $
+@set RCSID $Id: make.texi,v 1.15 2003/10/22 04:35:27 psmith Exp $
 @set EDITION 0.61
 @set VERSION 3.81
 @set UPDATED 02 May 2003
@@ -969,10 +969,10 @@ length in later chapters.@refill
 @cindex explicit rule, definition of
 @item
 An @dfn{explicit rule} says when and how to remake one or more files,
-called the rule's targets.  It lists the other files that the targets
-depend on, call the @dfn{prerequisites} of the target, and may also give
-commands to use to create or update the targets.  @xref{Rules, ,Writing
-Rules}.
+called the rule's @dfn{targets}.  It lists the other files that the
+targets depend on, called the @dfn{prerequisites} of the target, and
+may also give commands to use to create or update the targets.
+@xref{Rules, ,Writing Rules}.
 
 @cindex rule, implicit, definition of
 @cindex implicit rule, definition of
