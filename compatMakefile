@@ -99,8 +99,8 @@ INSTALL = @INSTALL@
 ETAGS = etags -tw
 CTAGS = ctags -tw
 
-objs = commands.o job.o dir.o file.o getloadavg.o misc.o main.o read.o \
-       remake.o remote.o rule.o implicit.o default.o variable.o expand.o \
+objs = commands.o job.o dir.o file.o misc.o main.o read.o remake.o	\
+       remote.o rule.o implicit.o default.o variable.o expand.o		\
        function.o vpath.o version.o ar.o arscan.o $(GETOPT) $(extras)
 srcs = $(srcdir)/commands.c $(srcdir)/job.c $(srcdir)/dir.c		      \
        $(srcdir)/file.c $(srcdir)/getloadavg.c $(srcdir)/misc.c		      \
@@ -145,7 +145,7 @@ make: $(objs)
 .c.o:
 	$(CC) $(CFLAGS) $(defines) -c -I$(srcdir) $< $(OUTPUT_OPTION)
 remote.o: remote.c
-	$(CC) $(CFLAGS) $(defines) $(REMOTE) -c -I$(srcdir) $remote.c<
+	$(CC) $(CFLAGS) $(defines) $(REMOTE) -c -I$(srcdir) $(srcdir)/remote.c
 
 # For some losing Unix makes.
 MAKE = make
@@ -175,12 +175,15 @@ $(bindir)/$(instname): make
 $(mandir)/$(instname).$(manext): make.man
 	$(INSTALL_DATA) make.man $@
 
-.PHONY: clean realclean
+.PHONY: clean realclean distclean mostlyclean
 clean: glob-clean
 	-rm -f make *.o core
 realclean: clean glob-realclean
 	-rm -f TAGS tags make.info* make-* make.dvi
 	-rm -f make.?? make.??s make.log make.toc make.*aux
+distclean: realclean
+	-rm -f configure Makefile
+mostlyclean: clean
 
 .PHONY: glob-clean glob-realclean
 glob-clean glob-realclean:
