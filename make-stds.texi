@@ -123,8 +123,8 @@ The @code{configure} script and the Makefile rules for building and
 installation should not use any utilities directly except these:
 
 @example
-cat cmp cp echo egrep expr grep
-ln mkdir mv pwd rm rmdir sed test touch
+cat cmp cp echo egrep expr false grep
+ln mkdir mv pwd rm rmdir sed test touch true
 @end example
 
 Stick to the generally supported options for these programs.  For
@@ -516,8 +516,8 @@ that don't have the Unix man page documentation system installed.
 The way to install Info files is to copy them into @file{$(infodir)}
 with @code{$(INSTALL_DATA)} (@pxref{Command Variables}), and then run
 the @code{install-info} program if it is present.  @code{install-info}
-is a script that edits the Info @file{dir} file to add or update the
-menu entry for the given Info file; it will be part of the Texinfo package.
+is a program that edits the Info @file{dir} file to add or update the
+menu entry for the given Info file; it is part of the Texinfo package.
 Here is a sample rule to install an Info file:
 
 @comment This example has been carefully formatted for the Make manual.
@@ -535,7 +535,7 @@ $(infodir)/foo.info: foo.info
 # fail gracefully when there is an unknown command.
         if $(SHELL) -c 'install-info --version' \
            >/dev/null 2>&1; then \
-          install-info --infodir=$(infodir) $$d/foo.info; \
+          install-info --dir-file=$(infodir)/dir $(infodir)/foo.info; \
         else true; fi
 @end smallexample
 
