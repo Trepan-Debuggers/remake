@@ -1,3 +1,8 @@
+1999-09-13  Paul D. Smith  <psmith@gnu.org>
+
+	* Makefile.am (loadavg): Use CPPFLAGS, etc. to make sure we get
+	all the right #defines to compile.
+
 1999-09-10  Paul Eggert  <eggert@twinsun.com>
 
         * acinclude.m4 (AC_SYS_LARGEFILE_FLAGS): If on HP-UX 10.20 or

@@ -1,3 +1,16 @@
+1999-09-12  Paul D. Smith  <psmith@gnu.org>
+
+	* fnmatch.c: Last GLIBC version wouldn't compile outside of GLIBC
+	(undefined reference to internal_function).  Update to the latest
+	version
+
+1999-09-11  Paul Eggert  <eggert@twinsun.com>
+
+	* glob.h (glob): If #defining to glob64, do this before
+	declaring it, so that all declarations and uses match, and
+	do not declare glob64, to avoid a declaration clash.
+	(globfree): Likewise with globfree64.
+
 1999-09-08  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* glob.c (prefix_array) [__MSDOS__,WINDOWS32]: Keep the trailing
