@@ -1,0 +1,74 @@
+# $Id: trace,v 1.1 2004/06/11 23:51:25 rockyb Exp $
+# -*-Perl-*-
+$description = "The following test check tracing.\n";
+
+$details = "To tracing a makefile \n";
+
+# TEST #1
+# -------
+
+open(MAKEFILE,"> $makefile");
+
+# The Contents of the MAKEFILE ...
+
+print MAKEFILE <<\EOF;
+# Test #1 tracing
+all: foo
+
+foo:
+	@echo FOO here
+EOF
+# END of Contents of MAKEFILE
+
+close(MAKEFILE);
+
+&run_make_with_options($makefile,"--trace --basename-filenames",
+                       &get_logfile);
+
+# Create the answer to what should be produced by this Makefile
+
+$answer = "work/debugger/trace.mk:4 foo
+work/debugger/trace.mk:5 foo
+FOO here
+";
+
+# COMPARE RESULTS
+
+&compare_output($answer,&get_logfile(1));
+
+# TEST #2
+# -------
+open(MAKEFILE,"> $makefile");
+
+# The Contents of the MAKEFILE ...
+
+print MAKEFILE <<\EOF;
+# Test #2 tracing
+all: foo
+foo:
+	@echo hi > /dev/null
+	@exit 5
+EOF
+# END of Contents of MAKEFILE
+
+close(MAKEFILE);
+
+&run_make_with_options($makefile, "-E -x -i --basename-filenames",
+		       &get_logfile);
+
+# Create the answer to what should be produced by this Makefile
+
+$answer = "work/debugger/trace.mk:3 foo
+work/debugger/trace.mk:4 foo
+work/debugger/trace.mk:5 foo
+work/debugger/trace.mk:5: [foo] Error 5 (ignored)
+
+#0  foo at work/debugger/trace.mk:5
+#1  all at work/debugger/trace.mk:2
+";
+
+# COMPARE RESULTS
+
+&compare_output($answer,&get_logfile(1));
+
+
