@@ -21,6 +21,8 @@ chapter
 @end ifclear
 @end iftex
 describes conventions for writing the Makefiles for GNU programs.
+Using Automake will help you write a Makefile that follows these
+conventions.
 
 @menu
 * Makefile Basics::		General Conventions for Makefiles
@@ -257,6 +259,18 @@ $(INSTALL_PROGRAM) foo $(bindir)/foo
 $(INSTALL_DATA) libfoo.a $(libdir)/libfoo.a
 @end example
 
+Optionally, you may prepend the value of @code{DESTDIR} to the target
+filename.  Doing this allows the installer to create a snapshot of the
+installation to be copied onto the real target filesystem later.  Do not
+set the value of @code{DESTDIR} in your Makefile, and do not include it
+in any installed files.  With support for @code{DESTDIR}, the above
+examples become:
+
+@example
+$(INSTALL_PROGRAM) foo $(DESTDIR)$(bindir)/foo
+$(INSTALL_DATA) libfoo.a $(DESTDIR)$(libdir)/libfoo.a
+@end example
+
 @noindent
 Always use a file name, not a directory name, as the second argument of
 the installation commands.  Use a separate command for each file to be
@@ -283,6 +297,10 @@ When building the complete GNU system, the prefix will be empty and
 @file{/usr} will be a symbolic link to @file{/}.
 (If you are using Autoconf, write it as @samp{@@prefix@@}.)
 
+Running @samp{make install} with a different value of @code{prefix}
+from the one used to build the program should @var{not} recompile
+the program.
+
 @item exec_prefix
 A prefix used in constructing the default values of some of the
 variables listed below.  The default value of @code{exec_prefix} should
@@ -292,6 +310,10 @@ be @code{$(prefix)}.
 Generally, @code{$(exec_prefix)} is used for directories that contain
 machine-specific files (such as executables and subroutine libraries),
 while @code{$(prefix)} is used directly for other directories.
+
+Running @samp{make install} with a different value of @code{exec_prefix}
+from the one used to build the program should @var{not} recompile the
+program.
 @end table
 
 Executable programs are installed in one of the following directories.
@@ -568,12 +590,12 @@ Here is a sample rule to install an Info file:
 @comment This example has been carefully formatted for the Make manual.
 @comment Please do not reformat it without talking to roland@gnu.ai.mit.edu.
 @smallexample
-$(infodir)/foo.info: foo.info
+$(DESTDIR)$(infodir)/foo.info: foo.info
         $(POST_INSTALL)
 # There may be a newer info file in . than in srcdir.
         -if test -f foo.info; then d=.; \
          else d=$(srcdir); fi; \
-        $(INSTALL_DATA) $$d/foo.info $@@; \
+        $(INSTALL_DATA) $$d/foo.info $(DESTDIR)$@@; \
 # Run install-info only if it exists.
 # Use `if' instead of just prepending `-' to the
 # line so we notice real errors from install-info.
@@ -581,8 +603,8 @@ $(infodir)/foo.info: foo.info
 # fail gracefully when there is an unknown command.
         if $(SHELL) -c 'install-info --version' \
            >/dev/null 2>&1; then \
-          install-info --dir-file=$(infodir)/dir \
-                       $(infodir)/foo.info; \
+          install-info --dir-file=$(DESTDIR)$(infodir)/dir \
+                       $(DESTDIR)$(infodir)/foo.info; \
         else true; fi
 @end smallexample
 
