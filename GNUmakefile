@@ -167,8 +167,9 @@ endif
 
 # Run the tests.
 .PHONY: tests
-tests:
-	$(MAKE) -C tests
+testdir := $(firstword $(wildcard make-test-?.?))
+tests: $(testdir)/run_make_tests.pl $(prog)
+#	cd $(<D); perl $(<F)
 
 # Make the distribution tar files.
 
@@ -176,7 +177,7 @@ tests:
 # Figure out the version number from the source of `version.c'.
 version := \
   $(strip $(shell sed -e '/=/!d' -e 's/^.*"\(.*\)";$$/\1/' < version.c))
-tarfiles := make make-doc make-tests
+tarfiles := make make-doc
 tarfiles := $(addsuffix -$(version).tar.Z,$(tarfiles))
 # Depend on default and doc so we don't ship anything that won't compile.
 dist: default doc tests $(tarfiles)
@@ -187,7 +188,7 @@ local-inst: $(prog)
 	install -c -g kmem -o $(USER) -m 2755 $< /usr/local/gnubin/make
 
 # Put the alpha distribution files in the anonymous FTP directory.
-alpha-files = $(tarfiles) GNUmakefile compatMakefile
+alpha-files = $(tarfiles) GNUmakefile compatMakefile $(testdir).tar.Z
 dist: alpha
 .PHONY: alpha
 alpha-dir := ~ftp/gnu
@@ -217,6 +218,7 @@ make-$(version).tar.Z: README COPYING ChangeLog CHANGES TAGS tags Makefile \
 	  make.aux make.man texinfo.tex
 	$(make-tar)
 
+ifneq (,)
 tests := $(filter-out %~,$(wildcard tests/*))
 make-tests-$(version).tar.Z: $(tests)
 	@rm -fr make-tests-$(version)
@@ -224,5 +226,6 @@ make-tests-$(version).tar.Z: $(tests)
 	tar cvhf $(@:.Z=) $(patsubst tests/%,make-tests-$(version)/%,$^)
 	rm -f make-tests-$(version)
 	compress -f $(@:.Z=)
+endif
 
 $(archpfx)loadtest: $(archpfx)load.o
