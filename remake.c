@@ -639,7 +639,7 @@ notice_finished_file (file)
 	f->last_mtime = file->last_mtime;
     }
 
-  if (file->update_status != -1)
+  if (ran && file->update_status != -1)
     /* We actually tried to update FILE, which has
        updated its also_make's as well (if it worked).
        If it didn't work, it wouldn't work again for them.
