@@ -353,6 +353,10 @@ snap_deps ()
 	  f2->phony = 1;
 	  f2->last_mtime = (time_t) -1;
 	}
+
+  f = lookup_file (".EXPORT_ALL_VARIABLES");
+  if (f != 0 && f->is_target)
+    export_all_variables = 1;
 }
 
 /* Print the data base of files.  */
