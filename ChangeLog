@@ -1,4 +1,27 @@
+2004-02-23  Jonathan Grant  <jg-make@jguk.org>
+
+	* README.W32.template: Add a notation about -j with BATCH_MODE_ONLY.
+	* build_w32.bat: Remove extra "+".
+
+2004-02-23  Paul D. Smith  <psmith@gnu.org>
+
+	* make.h: Create an UNUSED macro to mark unused parameters.
+	* (many): Clean up warnings by applying UNUSED, fixing
+	signed/unsigned incompatibilities, etc.
+
+	* acinclude.m4 (AC_STRUCT_ST_MTIM_NSEC): Add quoting to silence
+	autoconf warnings.
+	* filedef.h: Name the command_state enumeration.
+	* file.c (set_command_state): Use the enumeration in the function
+	argument.
+
+	* configure.in: Explicitly set SET_MAKE to empty, to disable
+	MAKE=make even when no make already exists.  Fix bug #3823.
+
 2004-02-22  Paul D. Smith  <psmith@gnu.org>
+
+	* maintMakefile: Perl script to clean up all non-CVS files.  Use
+	it on all the subdirectories for the cvs-clean target.
 
 	* main.c (decode_switches): Require non-empty strings for all our
 	string command-line options.  Fixes Debian bug # 164165.

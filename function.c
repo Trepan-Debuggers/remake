@@ -395,7 +395,7 @@ string_glob (char *line)
  */
 
 static char *
-func_patsubst (char *o, char **argv, const char *funcname)
+func_patsubst (char *o, char **argv, const char *funcname UNUSED)
 {
   o = patsubst_expand (o, argv[2], argv[0], argv[1], (char *) 0, (char *) 0);
   return o;
@@ -403,7 +403,7 @@ func_patsubst (char *o, char **argv, const char *funcname)
 
 
 static char *
-func_join (char *o, char **argv, const char *funcname)
+func_join (char *o, char **argv, const char *funcname UNUSED)
 {
   int doneany = 0;
 
@@ -443,7 +443,7 @@ func_join (char *o, char **argv, const char *funcname)
 
 
 static char *
-func_origin (char *o, char **argv, const char *funcname)
+func_origin (char *o, char **argv, const char *funcname UNUSED)
 {
   /* Expand the argument.  */
   register struct variable *v = lookup_variable (argv[0], strlen (argv[0]));
@@ -638,7 +638,7 @@ func_addsuffix_addprefix (char *o, char **argv, const char *funcname)
 }
 
 static char *
-func_subst (char *o, char **argv, const char *funcname)
+func_subst (char *o, char **argv, const char *funcname UNUSED)
 {
   o = subst_expand (o, argv[2], argv[0], argv[1], strlen (argv[0]),
 		    strlen (argv[1]), 0, 0);
@@ -648,7 +648,7 @@ func_subst (char *o, char **argv, const char *funcname)
 
 
 static char *
-func_firstword (char *o, char **argv, const char *funcname)
+func_firstword (char *o, char **argv, const char *funcname UNUSED)
 {
   unsigned int i;
   char *words = argv[0];    /* Use a temp variable for find_next_token */
@@ -662,7 +662,7 @@ func_firstword (char *o, char **argv, const char *funcname)
 
 
 static char *
-func_words (char *o, char **argv, const char *funcname)
+func_words (char *o, char **argv, const char *funcname UNUSED)
 {
   int i = 0;
   char *word_iterator = argv[0];
@@ -711,7 +711,7 @@ check_numeric (const char *s, const char *message)
 
 
 static char *
-func_word (char *o, char **argv, const char *funcname)
+func_word (char *o, char **argv, const char *funcname UNUSED)
 {
   char *end_p=0;
   int i=0;
@@ -737,7 +737,7 @@ func_word (char *o, char **argv, const char *funcname)
 }
 
 static char *
-func_wordlist (char *o, char **argv, const char *funcname)
+func_wordlist (char *o, char **argv, const char *funcname UNUSED)
 {
   int start, count;
 
@@ -774,7 +774,7 @@ func_wordlist (char *o, char **argv, const char *funcname)
 }
 
 static char*
-func_findstring (char *o, char **argv, const char *funcname)
+func_findstring (char *o, char **argv, const char *funcname UNUSED)
 {
   /* Find the first occurrence of the first string in the second.  */
   int i = strlen (argv[0]);
@@ -785,7 +785,7 @@ func_findstring (char *o, char **argv, const char *funcname)
 }
 
 static char *
-func_foreach (char *o, char **argv, const char *funcname)
+func_foreach (char *o, char **argv, const char *funcname UNUSED)
 {
   /* expand only the first two.  */
   char *varname = expand_argument (argv[0], NULL);
@@ -1005,7 +1005,7 @@ func_filter_filterout (char *o, char **argv, const char *funcname)
 
 
 static char *
-func_strip (char *o, char **argv, const char *funcname)
+func_strip (char *o, char **argv, const char *funcname UNUSED)
 {
   char *p = argv[0];
   int doneany =0;
@@ -1074,7 +1074,7 @@ func_error (char *o, char **argv, const char *funcname)
   chop argv[0] into words, and sort them.
  */
 static char *
-func_sort (char *o, char **argv, const char *funcname)
+func_sort (char *o, char **argv, const char *funcname UNUSED)
 {
   char **words = 0;
   int nwords = 0;
@@ -1136,7 +1136,7 @@ func_sort (char *o, char **argv, const char *funcname)
 */
 
 static char *
-func_if (char *o, char **argv, const char *funcname)
+func_if (char *o, char **argv, const char *funcname UNUSED)
 {
   const char *begp = argv[0];
   const char *endp = begp + strlen (argv[0]) - 1;
@@ -1177,7 +1177,7 @@ func_if (char *o, char **argv, const char *funcname)
 }
 
 static char *
-func_wildcard (char *o, char **argv, const char *funcname)
+func_wildcard (char *o, char **argv, const char *funcname UNUSED)
 {
 
 #ifdef _AMIGA
@@ -1198,7 +1198,7 @@ func_wildcard (char *o, char **argv, const char *funcname)
 */
 
 static char *
-func_eval (char *o, char **argv, const char *funcname)
+func_eval (char *o, char **argv, const char *funcname UNUSED)
 {
   char *buf;
   unsigned int len;
@@ -1217,7 +1217,7 @@ func_eval (char *o, char **argv, const char *funcname)
 
 
 static char *
-func_value (char *o, char **argv, const char *funcname)
+func_value (char *o, char **argv, const char *funcname UNUSED)
 {
   /* Look up the variable.  */
   struct variable *v = lookup_variable (argv[0], strlen (argv[0]));
@@ -1417,10 +1417,10 @@ msdos_openpipe (int* pipedes, int *pidp, char *text)
 #else
 #ifndef _AMIGA
 static char *
-func_shell (char *o, char **argv, const char *funcname)
+func_shell (char *o, char **argv, const char *funcname UNUSED)
 {
   char* batch_filename = NULL;
-  int i;
+  unsigned int i;
 
 #ifdef __MSDOS__
   FILE *fpipe;
@@ -1911,7 +1911,7 @@ handle_function (char **op, char **stringp)
    assigned to $1, $2, ... $N.  $0 is the name of the function.  */
 
 static char *
-func_call (char *o, char **argv, const char *funcname)
+func_call (char *o, char **argv, const char *funcname UNUSED)
 {
   static int max_args = 0;
   char *fname;

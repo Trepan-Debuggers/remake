@@ -79,7 +79,8 @@ GNU make and brain-dead shells (BATCH_MODE_ONLY_SHELL):
 	To work around this difficulty, this version of make supports
 	a batch mode.  When BATCH_MODE_ONLY_SHELL is defined at compile
 	time, make forces all command lines to be executed via script
-	files instead of by command line.
+	files instead of by command line.  In this mode you must have a
+	working sh.exe in order to use parallel builds (-j).
 
 	A native Windows32 system with no Bourne shell will also run
 	in batch mode.  All command lines will be put into batch files

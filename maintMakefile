@@ -80,7 +80,8 @@ build.sh.in: build.template Makefile
 maintFILES = configure aclocal.m4 config.h.in Makefile.in stamp-h.in
 
 CVS-CLEAN-FILES +=	$(maintFILES) $(TEMPLATES) $(MTEMPLATES) NMakefile \
-			build.sh.in .deps .dep_segment ABOUT-NLS
+			build.sh.in .deps .dep_segment ABOUT-NLS \
+			ansi2knr.*
 
 # This rule tries to clean the tree right down to how it looks when you do a
 # virgin CVS checkout.
