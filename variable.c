@@ -1,5 +1,5 @@
 /* Internals of variables for GNU Make.
-Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -605,9 +605,9 @@ try_variable_definition (filename, lineno, line, origin)
 	}
     }
 
-  while (isblank (end[-1]))
-    --end;
   beg = next_token (line);
+  while (end > beg && isblank (end[-1]))
+    --end;
   p = next_token (p);
 
   /* Expand the name, so "$(foo)bar = baz" works.  */
