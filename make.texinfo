@@ -3,10 +3,13 @@
 @synindex vr fn
 
 @ignore
-$Header: /sources/make/make/Attic/make.texinfo,v 1.53 1988/06/03 00:07:30 mcgrath Beta $
+$Header: /sources/make/make/Attic/make.texinfo,v 1.54 1988/06/10 11:43:00 mcgrath Beta $
 
 $Log: make.texinfo,v $
-Revision 1.53  1988/06/03 00:07:30  mcgrath
+Revision 1.54  1988/06/10 11:43:00  mcgrath
+Added more stuff about `foreach'.
+
+Revision 1.53  88/06/03  00:07:30  mcgrath
 * Fixed a typo in the `Missing' section.
 * Added an example of how to replace the System V $$@ feature
   using static pattern rules.
@@ -2712,6 +2715,73 @@ To increase readability and lessen complexity, it is a good idea to put the
 For this to work properly, you must use a recursively expanded variable, so
 it will be expanded when the @code{foreach} function is invoked, not when
 the variable is defined.@refill
+
+This simple example sets the variable @samp{files} to the list of
+all files in the directories in the list @samp{dirs}.
+
+@example
+find_files = $(wildcard $(dir)/*)
+dirs := a b c d
+files := $(foreach dir,$(dirs),$(find_files))
+@end example
+
+Note that the variable @samp{find_files} is made recursive.  It is then
+used to perform a function that results in a value, rather than to simply
+@emph{be} a value.  This example has the same result (except for setting
+@samp{find_files} and @samp{dirs}) as:
+
+@example
+files := $(wildcard a/* b/* c/* d/*)
+dir =
+@end example
+
+The variable @samp{dir} is made a recursive variable with a null value by
+virtue of not being set beforehand, and then being used in the
+@code{foreach} function.  If, before the invokation of @code{foreach},
+@samp{dir} had been defined by the line:
+
+@example
+dir := foo
+@end example
+
+@noindent
+then it would have that same value and the property of being a simply
+expanded variable after the @code{foreach} function was finished.
+Note also that @samp{dir} would remain a simply expanded variable
+throughout the invokation of @code{foreach}.
+
+Because it is expanded before other processing is done, the @var{var}
+argument to @code{foreach} need not be a variable name.  It can be a
+variable expression resulting in the name.  Thus,
+
+@example
+dir := a
+var = $(whatsthevar)
+foo := dar
+whatsthevar := $(subst a,i,$(foo))
+files := $(foreach $(var),$(dirs),$(find_files))
+@end example
+
+@noindent
+is ultimately equivalent to the first example.  You must take care when
+using complex variable expressions that result in variable names because
+many strange things are legal variable names, and these might not be what
+you intended.  For example,
+
+@example
+files := $(foreach Es escrito en espanol!,b c ch,$(find_files))
+@end example
+
+@noindent
+will work as expected if @samp{find_files} references the variable
+@samp{Es escrito en espanol!} (es un nombre bastante largo, no?), but
+somehow this seems unlikely (pero qualquiera cosa es posible).
+You might be inclined to use variable names such as this so as not to
+disturb other variables, because variables with names containing whitespace
+can be referenced but not defined in the conventional manner
+(@pxref{Defining}).  But this is not necessary, since the @code{foreach}
+function always preserves the value and flavor (@pxref{Flavors}) of its
+control variable (the one named by the @var{var} argument).@refill
 
 @node Filename Functions,, Foreach Function, Functions
 @section Functions for File Names
