@@ -198,3 +198,6 @@ extern FILE_TIMESTAMP f_mtime PARAMS ((struct file *file, int search));
 
 #define check_renamed(file) \
   while ((file)->renamed != 0) (file) = (file)->renamed /* No ; here.  */
+
+/* Have we snapped deps yet?  */
+extern int snapped_deps;

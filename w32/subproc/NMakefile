@@ -23,6 +23,7 @@
 #
 LIB = lib
 CC = cl
+MAKE = nmake
 
 OUTDIR=.
 MAKEFILE=NMakefile

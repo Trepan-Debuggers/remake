@@ -366,7 +366,6 @@ extern int strcmpi (const char *,const char *);
 
 extern void sync_Path_environment(void);
 extern int kill(int pid, int sig);
-extern int safe_stat(char *file, struct stat *sb);
 extern char *end_of_token_w32(char *s, char stopchar);
 extern int find_and_set_default_shell(char *token);
 
@@ -420,7 +419,7 @@ extern char *xrealloc PARAMS ((char *, unsigned int));
 extern char *xstrdup PARAMS ((const char *));
 extern char *find_next_token PARAMS ((char **, unsigned int *));
 extern char *next_token PARAMS ((const char *));
-extern char *end_of_token PARAMS ((char *));
+extern char *end_of_token PARAMS ((const char *));
 extern void collapse_continuations PARAMS ((char *));
 extern void remove_comments PARAMS((char *));
 extern char *lindex PARAMS ((const char *, const char *, int));
@@ -496,7 +495,7 @@ extern char **environ;
 extern int just_print_flag, silent_flag, ignore_errors_flag, keep_going_flag;
 extern int print_data_base_flag, question_flag, touch_flag, always_make_flag;
 extern int env_overrides, no_builtin_rules_flag, no_builtin_variables_flag;
-extern int print_version_flag, print_directory_flag;
+extern int print_version_flag, print_directory_flag, check_symlink_flag;
 extern int warn_undefined_variables_flag, posix_pedantic, not_parallel;
 extern int clock_skew_detected, rebuilding_makefiles;
 

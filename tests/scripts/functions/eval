@@ -158,4 +158,14 @@ $(eval $(FOO))
 ', '', 'hello
 world');
 
+
+# We don't allow new target/prerequisite relationships to be defined within a
+# command script, because these are evaluated after snap_deps() and that
+# causes lots of problems (like core dumps!)
+# See Savannah bug # 12124.
+
+run_make_test('deps: ; $(eval deps: foo)', '',
+              '#MAKEFILE#:1: *** prerequisites cannot be defined in command scripts.  Stop.',
+              512);
+
 1;

@@ -31,6 +31,15 @@ Boston, MA 02111-1307, USA.  */
 #include "hash.h"
 
 
+/* Remember whether snap_deps has been invoked: we need this to be sure we
+   don't add new rules (via $(eval ...)) afterwards.  In the future it would
+   be nice to support this, but it means we'd need to re-run snap_deps() or
+   at least its functionality... it might mean changing snap_deps() to be run
+   per-file, so we can invoke it after the eval... or remembering which files
+   in the hash have been snapped (a new boolean flag?) and having snap_deps()
+   only work on files which have not yet been snapped. */
+int snapped_deps = 0;
+
 /* Hash table of files the makefile knows how to make.  */
 
 static unsigned long
@@ -611,6 +620,9 @@ snap_deps (void)
   f = lookup_file (".NOTPARALLEL");
   if (f != 0 && f->is_target)
     not_parallel = 1;
+
+  /* Remember that we've done this. */
+  snapped_deps = 1;
 }
 
 /* Set the `command_state' member of FILE and all its `also_make's.  */

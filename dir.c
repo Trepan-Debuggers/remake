@@ -122,11 +122,7 @@ dosify (char *filename)
 static char *
 downcase (char *filename)
 {
-#ifdef _AMIGA
-  static char new_filename[136];
-#else
-  static char new_filename[PATH_MAX];
-#endif
+  static PATH_VAR (new_filename);
   char *df;
   int i;
 
@@ -1152,10 +1148,10 @@ read_dirstream (__ptr_t stream)
 }
 
 static void
-ansi_free(void *p)
+ansi_free (void *p)
 {
-    if (p)
-      free(p);
+  if (p)
+    free(p);
 }
 
 /* On 64 bit ReliantUNIX (5.44 and above) in LFS mode, stat() is actually a

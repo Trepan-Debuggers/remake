@@ -38,7 +38,7 @@ sub valid_option
      return 1;
    }
 
-# This doesn't work--it _should_!  Someone needs to fix this badly.
+# This doesn't work--it _should_!  Someone badly needs to fix this.
 #
 #   elsif ($option =~ /^-work([-_]?dir)?$/)
 #   {
@@ -241,20 +241,15 @@ sub set_more_defaults
    # On DOS/Windows system the filesystem apparently can't track
    # timestamps with second granularity (!!).  Change the sleep time
    # needed to force a file to be considered "old".
-   #
    $wtime = $port_type eq 'UNIX' ? 1 : $port_type eq 'OS/2' ? 2 : 4;
 
    print "Port type: $port_type\n" if $debug;
    print "Make path: $make_path\n" if $debug;
 
    # Find the full pathname of Make.  For DOS systems this is more
-   # complicated, so we ask make itself.  The following shell code does not
-   # work on W32 (MinGW/MSYS)
-
-   if ($port_type ne 'W32') {
-     $make_path = `sh -c 'echo "all:;\@echo \\\$(MAKE)" | $make_path -f-'`;
-     chop $make_path;
-   }
+   # complicated, so we ask make itself.
+   $make_path = `sh -c 'echo "all:;\@echo \\\$(MAKE)" | $make_path -f-'`;
+   chop $make_path;
    print "Make\t= `$make_path'\n" if $debug;
 
    $string = `$make_path -v -f /dev/null 2> /dev/null`;

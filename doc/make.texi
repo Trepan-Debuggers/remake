@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.24 2005/02/16 05:03:42 psmith Exp $
+@set RCSID $Id: make.texi,v 1.25 2005/02/28 07:48:23 psmith Exp $
 @set EDITION 0.61
 @set VERSION 3.80
 @set UPDATED 23 Feb 2003
@@ -6750,6 +6750,13 @@ and the resulting message is displayed, but processing of the makefile
 continues.
 
 The result of the expansion of this function is the empty string.
+
+@item $(info @var{text}@dots{})
+@findex info
+@cindex printing messages
+This function does nothing more than print its (expanded) argument(s)
+to standard output.  No makefile name or line number is added.  The
+result of the expansion of this function is the empty string.
 @end table
 
 @node Running, Implicit Rules, Functions, Top
@@ -7365,6 +7372,16 @@ Specifies that no new jobs (commands) should be started if there are
 other jobs running and the load average is at least @var{load} (a
 floating-point number).  With no argument, removes a previous load
 limit.  @xref{Parallel, ,Parallel Execution}.
+
+@item -L
+@cindex @code{-L}
+@itemx --check-symlink-times
+@cindex @code{--check-symlink-times}
+On systems that support symbolic links, this option causes @code{make}
+to consider the timestamps on any symbolic links in addition to the
+timestamp on the file referenced by those links.  When this option is
+provided, the most recent timestamp among the file and the symbolic
+links is taken as the modification time for this target file.
 
 @item -n
 @cindex @code{-n}

@@ -1,23 +1,41 @@
-Mon Feb 28 00:31:14 2005  Boris Kolpackov  <boris@kolpackov.net>
+2005-02-28  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/options/symlinks: New file to test checking of symlink
+	timestamps.  Can't use filename dash-L because it conflicts with
+	dash-l on case-insensitive filesystems.
+
+	* scripts/variables/MAKEFILE_LIST, scripts/variables/MFILE_LIST:
+	Rename MAKEFILE_LIST test to MFILE_LIST, for systems that need 8.3
+	unique filenames.
+
+2005-02-28  Boris Kolpackov  <boris@kolpackov.net>
 
 	* scripts/variables/DEFAULT_TARGET: Test the .DEFAULT_TARGET
 	special variable.
 
-Sun Feb 27 23:33:32 2005  Boris Kolpackov  <boris@kolpackov.net>
+2005-02-27  Boris Kolpackov  <boris@kolpackov.net>
 
 	* scripts/features/se_explicit: Test the second expansion in
 	explicit rules.
-
 	* scripts/features/se_implicit: Test the second expansion in
 	implicit rules.
-
 	* scripts/features/se_statpat: Test the second expansion in
 	static pattern rules.
-
-	* tests/scripts/variables/automatic: Fix to work with the second
+	* scripts/variables/automatic: Fix to work with the second
 	expansion.
 
 	* scripts/misc/general4: Add a test for bug #12091.
+
+2005-02-27  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/functions/eval: Check that eval of targets within
+	command scripts fails.  See Savannah bug # 12124.
+
+2005-02-26  Paul D. Smith  <psmith@gnu.org>
+
+	* test_driver.pl (compare_output): If a basic comparison of the
+	log and answer doesn't match, try harder: change all backslashes
+	to slashes and all CRLF to LF.  This helps on DOS/Windows systems.
 
 2005-02-09  Paul D. Smith  <psmith@gnu.org>
 

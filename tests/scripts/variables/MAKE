@@ -1,3 +1,5 @@
+#								     -*-perl-*-
+
 $description = "The following test creates a makefile to test MAKE \n"
               ."(very generic)";
 
@@ -26,7 +28,7 @@ $answer = "$mkpath\n$mkpath -f $makefile foo\n"
 
 &run_make_with_options($makefile,"",&get_logfile,0);
 
-&delete("foo");
+&rmfiles("foo");
 # COMPARE RESULTS
 &compare_output($answer,&get_logfile(1));
 

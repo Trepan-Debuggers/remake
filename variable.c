@@ -1048,7 +1048,7 @@ do_variable_definition (const struct floc *flocp, const char *varname,
   if ((origin == o_file || origin == o_override)
       && strcmp (varname, "SHELL") == 0)
     {
-      char shellpath[PATH_MAX];
+      PATH_VAR (shellpath);
       extern char * __dosexec_find_on_path (const char *, char *[], char *);
 
       /* See if we can find "/bin/sh.exe", "/bin/sh.com", etc.  */
