@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.7 2002/09/10 07:27:29 psmith Exp $
+@set RCSID $Id: make.texi,v 1.8 2002/09/18 04:35:52 psmith Exp $
 @set EDITION 0.60
 @set VERSION 3.80
 @set UPDATED 08 July 2002
@@ -3653,6 +3653,7 @@ is @samp{cd subdir && /bin/make}.  If you use a special version of
 executed for recursive invocations.
 @cindex @code{cd} (shell command)
 
+@cindex +, and commands
 As a special feature, using the variable @code{MAKE} in the commands of
 a rule alters the effects of the @samp{-t} (@samp{--touch}), @samp{-n}
 (@samp{--just-print}), or @samp{-q} (@w{@samp{--question}}) option.
@@ -6932,6 +6933,7 @@ target that is not up to date.
 It is an error to use more than one of these three flags in the same
 invocation of @code{make}.
 
+@cindex +, and command execution
 The @samp{-n}, @samp{-t}, and @samp{-q} options do not affect command
 lines that begin with @samp{+} characters or contain the strings
 @samp{$(MAKE)} or @samp{$@{MAKE@}}.  Note that only the line containing

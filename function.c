@@ -1837,7 +1837,7 @@ expand_builtin_function (o, argc, argv, entry_p)
      char **argv;
      struct function_table_entry *entry_p;
 {
-  if (argc < entry_p->minimum_args)
+  if (argc < (int)entry_p->minimum_args)
     fatal (reading_file,
            _("Insufficient number of arguments (%d) to function `%s'"),
            argc, entry_p->name);
