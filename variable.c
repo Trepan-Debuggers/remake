@@ -47,15 +47,6 @@ static struct variable_set global_variable_set
 static struct variable_set_list global_setlist
   = { 0, &global_variable_set };
 struct variable_set_list *current_variable_set_list = &global_setlist;
-
-/* The next two describe the variable output buffer.
-   This buffer is used to hold the variable-expansion of a line of the
-   makefile.  It is made bigger with realloc whenever it is too small.
-   variable_buffer_length is the size currently allocated.
-   variable_buffer is the address of the buffer.  */
-
-static unsigned int variable_buffer_length;
-static char *variable_buffer;
 
 /* Implement variables.  */
 
@@ -380,49 +371,6 @@ define_automatic_variables ()
     }
 }
 
-/* Subroutine of variable_expand and friends:
-   The text to add is LENGTH chars starting at STRING to the variable_buffer.
-   The text is added to the buffer at PTR, and the updated pointer into
-   the buffer is returned as the value.  Thus, the value returned by
-   each call to variable_buffer_output should be the first argument to
-   the following call.  */
-
-char *
-variable_buffer_output (ptr, string, length)
-     char *ptr, *string;
-     unsigned int length;
-{
-  register unsigned int newlen = length + (ptr - variable_buffer);
-
-  if (newlen > variable_buffer_length)
-    {
-      unsigned int offset = ptr - variable_buffer;
-      variable_buffer_length = max (2 * variable_buffer_length, newlen + 100);
-      variable_buffer = (char *) xrealloc (variable_buffer,
-					   variable_buffer_length);
-      ptr = variable_buffer + offset;
-    }
-
-  bcopy (string, ptr, length);
-  return ptr + length;
-}
-
-/* Return a pointer to the beginning of the variable buffer.  */
-
-char *
-initialize_variable_output ()
-{
-  /* If we don't have a variable output buffer yet, get one.  */
-
-  if (variable_buffer == 0)
-    {
-      variable_buffer_length = 200;
-      variable_buffer = (char *) xmalloc (variable_buffer_length);
-    }
-
-  return variable_buffer;
-}
-
 int export_all_variables;
 
 /* Create a new environment for FILE's commands.
@@ -745,45 +693,4 @@ print_file_variables (file)
 {
   if (file->variables != 0)
     print_variable_set (file->variables->set, "# ");
-}
-
-struct output_state
-  {
-    char *buffer;
-    unsigned int length;
-  };
-
-/* Save the current variable output state and return a pointer
-   to storage describing it.  Then reset the output state.  */
-
-char *
-save_variable_output ()
-{
-  struct output_state *state;
-
-  state = (struct output_state *) xmalloc (sizeof (struct output_state));
-  state->buffer = variable_buffer;
-  state->length = variable_buffer_length;
-
-  variable_buffer = 0;
-  variable_buffer_length = 0;
-
-  return (char *) state;
-}
-
-/* Restore the variable output state saved in SAVE.  */
-
-void
-restore_variable_output (save)
-     char *save;
-{
-  register struct output_state *state = (struct output_state *) save;
-
-  if (variable_buffer != 0)
-    free (variable_buffer);
-
-  variable_buffer = state->buffer;
-  variable_buffer_length = state->length;
-
-  free ((char *) state);
 }
