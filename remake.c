@@ -22,7 +22,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "dep.h"
 #include "file.h"
 
-#if !defined (USG) && !defined (POSIX)
+#if !defined (USG) && !defined (POSIX) && !defined (eta10)
 #ifndef	sgi
 #include <sys/file.h>
 #endif
@@ -639,7 +639,7 @@ notice_finished_file (file)
 	     We do this instead of just invalidating the cached time
 	     so that a vpath_search can happen.  Otherwise, it would
 	     never be done because the target is already updated.  */
-	  (void) f_mtime (d->file);
+	  (void) f_mtime (d->file, 0);
       }
 }
 
