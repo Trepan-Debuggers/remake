@@ -184,10 +184,7 @@ extern char *alloca ();
 #endif
 
 #ifndef __GNU_LIBRARY__
-#define __lstat lstat
-#ifndef HAVE_LSTAT
-#define lstat stat
-#endif
+#define __stat stat
 #ifdef STAT_MACROS_BROKEN
 #undef S_ISDIR
 #endif
@@ -346,16 +343,6 @@ glob (pattern, flags, errfunc, pglob)
 
   oldcount = pglob->gl_pathc;
 
-  pglob->gl_flags = flags;
-  if (!(flags & GLOB_ALTDIRFUNC))
-    {
-      pglob->gl_closedir = (void (*) __P ((void *))) &closedir;
-      pglob->gl_readdir = (struct dirent *(*) __P ((void *))) &readdir;
-      pglob->gl_opendir = (__ptr_t (*) __P ((const char *))) &opendir;
-      pglob->gl_lstat = &lstat;
-      pglob->gl_stat = &stat;
-    }
-
   if ((flags & GLOB_TILDE) && dirname[0] == '~')
     {
       if (dirname[1] == '\0')
@@ -508,7 +495,8 @@ glob (pattern, flags, errfunc, pglob)
       int i;
       struct stat st;
       for (i = oldcount; i < pglob->gl_pathc; ++i)
-	if (__lstat (pglob->gl_pathv[i], &st) == 0 &&
+	if (((flags & GLOB_ALTDIRFUNC) ?
+	     *pglob->gl_stat : __stat) (pglob->gl_pathv[i], &st) == 0 &&
 	    S_ISDIR (st.st_mode))
 	  {
  	    size_t len = strlen (pglob->gl_pathv[i]) + 2;
@@ -675,7 +663,9 @@ glob_in_dir (pattern, directory, flags, errfunc, pglob)
     {
       flags |= GLOB_MAGCHAR;
 
-      stream = (*pglob->gl_opendir) (directory);
+      stream = ((flags & GLOB_ALTDIRFUNC) ?
+		(*pglob->gl_opendir) (directory) :
+		opendir (directory));
       if (stream == NULL)
 	{
 	  if ((errfunc != NULL && (*errfunc) (directory, errno)) ||
@@ -687,7 +677,9 @@ glob_in_dir (pattern, directory, flags, errfunc, pglob)
 	  {
 	    const char *name;
 	    size_t len;
-	    struct dirent *d = (*pglob->gl_readdir) (stream);
+	    struct dirent *d = ((flags & GLOB_ALTDIRFUNC) ?
+				(*pglob->gl_readdir) (stream) :
+				readdir (stream));
 	    if (d == NULL)
 	      break;
 	    if (! REAL_DIR_ENTRY (d))
@@ -759,7 +751,10 @@ glob_in_dir (pattern, directory, flags, errfunc, pglob)
   if (stream != NULL)
     {
       int save = errno;
-      (*pglob->gl_closedir) (stream);
+      if (flags & GLOB_ALTDIRFUNC)
+	(*pglob->gl_closedir) (stream);
+      else
+	closedir (stream);
       errno = save;
     }
   return nfound == 0 ? GLOB_NOMATCH : 0;
@@ -767,7 +762,10 @@ glob_in_dir (pattern, directory, flags, errfunc, pglob)
  memory_error:
   {
     int save = errno;
-    (*pglob->gl_closedir) (stream);
+    if (flags & GLOB_ALTDIRFUNC)
+      (*pglob->gl_closedir) (stream);
+    else
+      closedir (stream);
     errno = save;
   }
   while (names != NULL)
@@ -779,4 +777,5 @@ glob_in_dir (pattern, directory, flags, errfunc, pglob)
   return GLOB_NOSPACE;
 }
 
-#endif	/* _LIBC or not __GNU_LIBRARY__.  */
+#endif	/* Not ELIDE_CODE.  */
+
