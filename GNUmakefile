@@ -246,7 +246,7 @@ make-doc-$(version).tar: README-doc COPYING make.dvi make.info make.info*
 make-$(version).tar: README INSTALL COPYING ChangeLog NEWS \
           configure Makefile.in configure.in build.sh.in mkinstalldirs \
 	  $(srcs) remote-*.c $(globfiles) \
-	  make.texinfo gpl.texinfo make-stds.texi \
+	  make.texinfo make-stds.texi \
 	  make.?? make.??s make.toc make.aux make.man texinfo.tex TAGS tags
 	$(make-tar)
 
