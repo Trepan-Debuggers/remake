@@ -22,6 +22,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "variable.h"
 #include "job.h"
 #include <time.h>
+#include "getopt.h"
 
 
 extern char *version_string;
@@ -81,15 +82,15 @@ flags () {}
 
 struct command_switch
   {
-    char c;		/* The switch character.  */
-    enum		/* Type of the value.  */
+    char c;			/* The switch character.  */
+    enum			/* Type of the value.  */
       {
-	flag,		/* Turn int flag on.  */
-	flag_off,	/* Turn int flag off.  */
-	string,		/* One string per switch, may be in the same word.  */
-	positive_int,	/* A positive integer.  */
-	floating,	/* A floating-point number (double).  */
-	ignore		/* Ignored.  */
+	flag,			/* Turn int flag on.  */
+	flag_off,		/* Turn int flag off.  */
+	string,			/* One string per switch.  */
+	positive_int,		/* A positive integer.  */
+	floating,		/* A floating-point number (double).  */
+	ignore			/* Ignored.  */
       } type;
 
     char *value_ptr;	/* Pointer to the value-holding variable.  */
@@ -100,6 +101,10 @@ struct command_switch
 
     char *noarg_value;	/* Pointer to value used if no argument is given.  */
     char *default_value;/* Pointer to default value.  */
+
+    char *long_name;		/* Long option name.  */
+    char *argdesc;		/* Descriptive word for argument.  */
+    char *description;		/* Description for usage message.  */
   };
 
 
@@ -213,33 +218,80 @@ static struct stringlist *new_files = 0;
 
 static struct command_switch switches[] =
   {
-    { 'b', ignore, 0, 0, 0, 0, 0, 0 },
-    { 'C', string, (char *) &directories, 0, 0, 0, 0, 0 },
-    { 'd', flag, (char *) &debug_flag, 1, 1, 0, 0, 0 },
-    { 'e', flag, (char *) &env_overrides, 1, 1, 0, 0, 0 },
-    { 'f', string, (char *) &makefiles, 0, 0, 0, 0, 0 },
-    { 'i', flag, (char *) &ignore_errors_flag, 1, 1, 0, 0, 0 },
-    { 'I', string, (char *) &include_directories, 0, 0, 0, 0, 0 },
+    { 'b', ignore, 0, 0, 0, 0, 0, 0,
+	0, 0,
+	"Ignored for compatibility" },
+    { 'C', string, (char *) &directories, 0, 0, 0, 0, 0,
+	"directory", "DIRECTORY",
+	"Change to DIRECTORY before doing anything" },
+    { 'd', flag, (char *) &debug_flag, 1, 1, 0, 0, 0,
+	"debug", 0,
+	"Print lots of debugging information" },
+    { 'e', flag, (char *) &env_overrides, 1, 1, 0, 0, 0,
+	"environment-overrides", 0,
+	"Environment variables override makefiles" },
+    { 'f', string, (char *) &makefiles, 0, 0, 0, 0, 0,
+	"file", "FILE",
+	"Read FILE as a makefile" },
+    { 'i', flag, (char *) &ignore_errors_flag, 1, 1, 0, 0, 0,
+	"ignore-errors", 0,
+	"Ignore errors from commands" },
+    { 'I', string, (char *) &include_directories, 0, 0, 0, 0, 0,
+	"include-path", "DIRECTORY",
+	"Search DIRECTORY for included makefiles" },
     { 'j', positive_int, (char *) &job_slots, 1, 1, 0,
-	(char *) &inf_jobs, (char *) &default_job_slots },
+	(char *) &inf_jobs, (char *) &default_job_slots,
+	"jobs", "N",
+	"Allow N jobs at once; infinite jobs with no arg" },
     { 'k', flag, (char *) &keep_going_flag, 1, 1, 0,
-	0, (char *) &default_keep_going_flag },
+	0, (char *) &default_keep_going_flag,
+	"keep-going", 0,
+	"Keep going when some targets can't be made" },
     { 'l', floating, (char *) &max_load_average, 1, 1, 0,
-	(char *) &default_load_average, (char *) &default_load_average },
-    { 'm', ignore, 0, 0, 0, 0, 0, 0 },
-    { 'n', flag, (char *) &just_print_flag, 1, 1, 1, 0, 0 },
-    { 'o', string, (char *) &old_files, 0, 0, 0, 0, 0 },
-    { 'p', flag, (char *) &print_data_base_flag, 1, 1, 0, 0, 0 },
-    { 'q', flag, (char *) &question_flag, 1, 1, 1, 0, 0 },
-    { 'r', flag, (char *) &no_builtin_rules_flag, 1, 1, 0, 0, 0 },
-    { 's', flag, (char *) &silent_flag, 1, 1, 0, 0, 0 },
+	(char *) &default_load_average, (char *) &default_load_average,
+	"load-average", "N",
+	"Don't start multiple jobs unless load is below N" },
+    { 'm', ignore, 0, 0, 0, 0, 0, 0,
+	0, 0,
+	"Ignored for compatibility" },
+    { 'n', flag, (char *) &just_print_flag, 1, 1, 1, 0, 0,
+	"just-print", 0,
+	"Don't actually run any commands; just print them" },
+    { 'o', string, (char *) &old_files, 0, 0, 0, 0, 0,
+	"old-file", "FILE",
+	"Consider FILE to be very old and don't remake it" },
+    { 'p', flag, (char *) &print_data_base_flag, 1, 1, 0, 0, 0,
+	"print-data-base", 0,
+	"Print make's internal database" },
+    { 'q', flag, (char *) &question_flag, 1, 1, 1, 0, 0,
+	"question", 0,
+	"Run no commands; exit status says if up to date" },
+    { 'r', flag, (char *) &no_builtin_rules_flag, 1, 1, 0, 0, 0,
+	"no-builtin-rules", 0,
+	"Disable the built-in implicit rules" },
+    { 's', flag, (char *) &silent_flag, 1, 1, 0, 0, 0,
+	"silent", 0,
+	"Don't echo commands" },
+    { 'q', flag, (char *) &silent_flag, 1, 1, 0, 0, 0,
+	"quiet", 0,
+	"Same as -s" },
     { 'S', flag_off, (char *) &keep_going_flag, 1, 1, 0,
-	0, (char *) &default_keep_going_flag },
-    { 't', flag, (char *) &touch_flag, 1, 1, 1, 0, 0 },
-    { 'v', flag, (char *) &print_version_flag, 0, 0, 0, 0, 0 },
-    { 'w', flag, (char *) &print_directory_flag, 1, 1, 0, 0, 0 },
-    { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0 },
-    { '\0', ignore, 0, 0, 0, 0, 0 }
+	0, (char *) &default_keep_going_flag,
+	"dont-keep-going", 0,
+	"Turns off -k" },
+    { 't', flag, (char *) &touch_flag, 1, 1, 1, 0, 0,
+	"touch", 0,
+	"Touch targets instead of remaking them" },
+    { 'v', flag, (char *) &print_version_flag, 0, 0, 0, 0, 0,
+	"version", 0,
+	"Print the version number of make" },
+    { 'w', flag, (char *) &print_directory_flag, 1, 1, 0, 0, 0,
+	"print-directory", 0,
+	"Print the current directory" },
+    { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0,
+	"what-if", "FILE",
+	"Consider FILE to be infinitely new" },
+    { '\0', }
   };
 
 /* List of non-switch arguments.  */
@@ -952,10 +1004,12 @@ decode_switches (argc, argv)
 {
   char bad = 0;
   register unsigned int i;
-  register char *sw;
   register struct command_switch *cs;
   register struct stringlist *sl;
-  char *arg;
+  char *p;
+  char options[sizeof (switches) / sizeof (switches[0]) * 3];
+  struct option long_options[sizeof (switches) / sizeof (switches[0])];
+  register int c;
 
   decode_env_switches ("MAKEFLAGS", 9);
   decode_env_switches ("MFLAGS", 6);
@@ -966,149 +1020,50 @@ decode_switches (argc, argv)
   other_args->idx = 1;
   other_args->list[0] = savestring (argv[0], strlen (argv[0]));
 
-  for (i = 1; i < argc; i++)
+  /* Fill in the string and vector for getopt.  */
+  p = options;
+  *p++ = '-';			/* Non-option args are returned in order.  */
+  for (i = 0; switches[i].c != '\0'; ++i)
     {
-      sw = argv[i];
-      if (*sw++ == '-')
-	while (*sw != '\0')
-	  {
-	    for (cs = switches; cs->c != '\0'; ++cs)
-	      if (cs->c == *sw)
-		{
-		  ++sw;
-		  switch (cs->type)
-		    {
-		    default:
-		      abort ();
-		    case ignore:
-		      break;
-		    case flag:
-		    case flag_off:
-		      *(int *) cs->value_ptr = cs->type == flag;
-		      break;
-		    case string:
-		      if (*sw == '\0')
-			{
-			  arg = argv[++i];
-			  if (arg == 0)
-			    {
-			      arg = cs->noarg_value;
-			      if (arg == 0)
-				{
-				  error ("argument required for `-%c' option",
-					 cs->c);
-				  bad = 1;
-				  break;
-				}
-			    }
-			}
-		      else
-			arg = sw;
-
-		      sl = *(struct stringlist **) cs->value_ptr;
-		      if (sl == 0)
-			{
-			  sl = (struct stringlist *)
-			    xmalloc (sizeof (struct stringlist));
-			  sl->max = 5;
-			  sl->idx = 0;
-			  sl->list = (char **) xmalloc (5 * sizeof (char *));
-			  *(struct stringlist **) cs->value_ptr = sl;
-			}
-		      else if (sl->idx == sl->max - 1)
-			{
-			  sl->max += 5;
-			  sl->list = (char **)
-			    xrealloc ((char *) sl->list,
-				      sl->max * sizeof (char *));
-			}
-		      sl->list[sl->idx++] = savestring (arg, strlen (arg));
-		      sl->list[sl->idx] = 0;
-		      sw = "";
-		      break;
-
-		    case positive_int:
-		      if (*sw == '\0')
-			arg = argv[++i];
-		      else
-			arg = sw;
-		      if (arg != 0 && isdigit (*arg))
-			{
-			  int i = atoi (arg);
-			  if (arg == sw)
-			    while (isdigit (*sw))
-			      ++sw;
-			  if (i < 1)
-			    {
-			      error ("the `-%c' option requires a \
-positive integral argument",
-				     cs->c);
-			      bad = 1;
-			    }
-			  else
-			    *(unsigned int *) cs->value_ptr = i;
-			}
-		      else
-			{
-			  if (cs->noarg_value != 0)
-			    *(unsigned int *) cs->value_ptr
-			      = *(unsigned int *) cs->noarg_value;
-			  else
-			    {
-			      error ("the `-%c' option requires an argument",
-				     cs->c);
-			      bad = 1;
-			    }
-
-			  if (arg == argv[i])
-			    /* We moved to the next arg, so move back.  */
-			    --i;
-			}
-		      break;
-
-		    case floating:
-		      if (*sw == '\0')
-			arg = argv[++i];
-		      else
-			arg = sw;
-		      if (arg != 0 && (*arg == '.' || isdigit (*arg)))
-			{
-			  *(double *) cs->value_ptr = atof (arg);
-			  if (arg == sw)
-			    while (*sw == '.' || isdigit (*sw))
-			      ++sw;
-			}
-		      else
-			{
-			  if (cs->noarg_value != 0)
-			    *(double *) cs->value_ptr
-			      = *(double *) cs->noarg_value;
-			  else
-			    {
-			      error ("the `-%c' option requires an argument",
-				     cs->c);
-			      bad = 1;
-			    }
-
-			  if (arg == argv[i])
-			    /* We moved to the next arg, so move back.  */
-			    --i;
-			}
-		      break;
-		    }
-
-		  /* We've found the switch.  Stop looking.  */
-		  break;
-		}
-		  
-	    if (cs->c == '\0')
-	      {
-		error ("unknown option `-%c'", *sw++);
-		bad = 1;
-	      }
-	  }
-      else
+      long_options[i].name = switches[i].long_name;
+      *p++ = switches[i].c;
+      switch (switches[i].type)
 	{
+	case flag:
+	case flag_off:
+	case ignore:
+	  long_options[i].has_arg = no_argument;
+	  break;
+
+	case string:
+	case positive_int:
+	case floating:
+	  *p++ = ':';
+	  if (switches[i].noarg_value != 0)
+	    {
+	      *p++ = ':';
+	      long_options[i].has_arg = optional_argument;
+	    }
+	  else
+	    long_options[i].has_arg = required_argument;
+	  break;
+	}
+    }
+  *p = '\0';
+  long_options[i].name = 0;
+
+  /* getopt does most of the parsing for us.  */
+  while ((c = getopt_long (argc, argv,
+			   options, long_options, (int *) 0)) != EOF)
+    {
+      if (c == '?')
+	/* Bad option.  We will print a usage message and die later.
+	   But continue to parse the other options so the user can
+	   see all he did wrong.  */
+	bad = 1;
+      else if (c == 1)
+	{
+	  /* This is a non-option argument.  */
 	  if (other_args->idx == other_args->max - 1)
 	    {
 	      other_args->max += 5;
@@ -1116,15 +1071,126 @@ positive integral argument",
 		xrealloc ((char *) other_args->list,
 			  other_args->max * sizeof (char *));
 	    }
-	  other_args->list[other_args->idx++] = argv[i];
+	  other_args->list[other_args->idx++] = optarg;
 	}
+      else
+	for (cs = switches; cs->c != '\0'; ++cs)
+	  {
+	    if (cs->c == c)
+	      switch (cs->type)
+		{
+		default:
+		  abort ();
+
+		case ignore:
+		  break;
+
+		case flag:
+		case flag_off:
+		  *(int *) cs->value_ptr = cs->type == flag;
+		  break;
+
+		case string:
+		  if (optarg == 0)
+		    optarg = cs->noarg_value;
+
+		  sl = *(struct stringlist **) cs->value_ptr;
+		  if (sl == 0)
+		    {
+		      sl = (struct stringlist *)
+			xmalloc (sizeof (struct stringlist));
+		      sl->max = 5;
+		      sl->idx = 0;
+		      sl->list = (char **) xmalloc (5 * sizeof (char *));
+		      *(struct stringlist **) cs->value_ptr = sl;
+		    }
+		  else if (sl->idx == sl->max - 1)
+		    {
+		      sl->max += 5;
+		      sl->list = (char **)
+			xrealloc ((char *) sl->list,
+				  sl->max * sizeof (char *));
+		    }
+		  sl->list[sl->idx++] = savestring (optarg, strlen (optarg));
+		  sl->list[sl->idx] = 0;
+		  break;
+
+		case positive_int:
+		  if (optarg != 0)
+		    {
+		      int i = atoi (optarg);
+		      if (i < 1)
+			{
+			  error ("the `-%c' option requires a \
+positive integral argument",
+				 cs->c);
+			  bad = 1;
+			}
+		      else
+			*(unsigned int *) cs->value_ptr = i;
+		    }
+		  else
+		    *(unsigned int *) cs->value_ptr
+		      = *(unsigned int *) cs->noarg_value;
+		  break;
+
+		case floating:
+		  if (optarg != 0)
+		    *(double *) cs->value_ptr = atof (optarg);
+		  else
+		    *(double *) cs->value_ptr = *(double *) cs->noarg_value;
+		  break;
+		}
+	    
+	    /* We've found the switch.  Stop looking.  */
+	    break;
+	  }
     }
 
   if (other_args != 0)
     other_args->list[other_args->idx] = 0;
 
   if (bad)
-    die (1);
+    {
+      /* Print a nice usage message.  */
+      fprintf (stderr, "Usage: %s [options] [target] ...\n", program);
+      fputs ("Options:\n", stderr);
+      for (cs = switches; cs->c != '\0'; ++cs)
+	{
+	  char buf[100], arg[50];
+
+	  switch (long_options[cs - switches].has_arg)
+	    {
+	    case no_argument:
+	      arg[0] = '\0';
+	      break;
+	    case required_argument:
+	      sprintf (arg, " %s", cs->argdesc);
+	      break;
+	    case optional_argument:
+	      sprintf (arg, " [%s]", cs->argdesc);
+	      break;
+	    }
+
+	  if (cs->long_name == 0)
+	    sprintf (buf, "  -%c%s",
+		     cs->c, arg);
+	  else
+	    sprintf (buf, "  -%c%s, --%s%s",
+		     cs->c, arg,
+		     cs->long_name, arg);
+
+	  if (strlen (buf) >= 30)
+	    {
+	      fprintf (stderr, "%s\n", buf);
+	      buf[0] = '\0';
+	    }
+
+	  fprintf (stderr, "%-30s%s.\n", buf, cs->description);
+	}
+
+      die (1);
+    }
 }
 
 static void
@@ -1366,12 +1432,12 @@ log_working_directory (entering)
   PATH_VAR (pwdbuf);
   char *message = entering ? "Entering" : "Leaving";
 
-  if (entered && entering)
+  if (entering)
+    entered = 1;
+  else if (!entered)
     /* Don't print the leaving message if we
        haven't printed the entering message.  */
     return;
-  else
-    entered = 1;
 
   if (print_data_base_flag)
     fputs ("# ", stdout);
