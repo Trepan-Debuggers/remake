@@ -93,6 +93,11 @@ INSTALL_DATA = @INSTALL_DATA@
 # Generic install program.
 INSTALL = @INSTALL@
 
+# Program to format Texinfo source into Info files.
+MAKEINFO = makeinfo
+# Program to format Texinfo source into DVI files.
+TEXI2DVI = texi2dvi
+
 # Programs to make tags files.
 ETAGS = etags -tw
 CTAGS = ctags -tw
@@ -116,23 +121,17 @@ srcs = $(srcdir)/commands.c $(srcdir)/job.c $(srcdir)/dir.c		\
 .SUFFIXES:
 .SUFFIXES: .o .c .h .ps .dvi .texinfo
 
-.PHONY: all doc check
+.PHONY: all check info dvi
 all: make
-doc: make.info make.dvi
 check: # No tests.
-
-# Take your pick.
-#makeinfo = emacs -batch -f batch-texinfo-format make.texinfo
-makeinfo = makeinfo make.texinfo
+info: make.info
+dvi: make.dvi
 
 make.info: make.texinfo
-	$(makeinfo)
-
+	$(MAKEINFO) $(srcdir)/make.texinfo
 
 make.dvi: make.texinfo
-	-tex make.texinfo
-	texindex make.cp make.fn make.ky make.pg make.tp make.vr
-	-tex make.texinfo
+	$(TEXI2DVI) $(srcdir)/make.texinfo
 
 make.ps: make.dvi
 	dvi2ps make.dvi > make.ps
@@ -177,11 +176,10 @@ $(mandir)/$(instname).$(manext): make.man
 .PHONY: clean realclean distclean mostlyclean
 clean: glob-clean
 	-rm -f make *.o core
-realclean: clean glob-realclean
-	-rm -f TAGS tags make.info* make-* make.dvi
+distclean: clean glob-realclean
+	-rm -f Makefile config.h TAGS tags make.info* make-* make.dvi
 	-rm -f make.?? make.??s make.log make.toc make.*aux
-distclean: realclean
-	-rm -f configure Makefile
+realclean: distclean
 mostlyclean: clean
 
 .PHONY: glob-clean glob-realclean
