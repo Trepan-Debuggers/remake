@@ -1512,7 +1512,6 @@ parse_file_seq (stringp, stopchar, size, strip)
   register char *p = *stringp;
   char *q;
   char *name;
-  register int c;
 
   while (1)
     {
@@ -1526,7 +1525,7 @@ parse_file_seq (stringp, stopchar, size, strip)
       q = p;
       p = find_char_unquote (q, stopchar, 1);
       if (p == 0)
-	p = q + strlen (q)
+	p = q + strlen (q);
 
       if (strip)
 	/* Skip leading `./'s.  */
