@@ -1,3 +1,7 @@
+2005-02-09  Paul D. Smith  <psmith@gnu.org>
+
+	* LINGUAS: Added a new translation for Irish (ga).
+
 2005-02-01  Paul D. Smith  <psmith@gnu.org>
 
 	* LINGUAS: Added a new translation for Finnish (fi).

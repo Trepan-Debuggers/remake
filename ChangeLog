@@ -1,3 +1,9 @@
+2005-02-09  Paul D. Smith  <psmith@gnu.org>
+
+	* maintMakefile: Update the CVS download URL to simplify them.
+	Also, the ftp://ftp.gnu.org/GNUinfo site was removed so I'm
+	downloading the .texi files from Savannah now.
+
 2005-02-01  Paul D. Smith  <psmith@gnu.org>
 
 	* maintMakefile (po_repo): Update the GNU translation site URL.
