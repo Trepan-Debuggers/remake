@@ -41,8 +41,7 @@ struct child
 extern struct child *children;
 
 extern void new_job ();
-extern void wait_for_children ();
-extern void push_signals_blocked_p (), pop_signals_blocked_p ();
+extern void reap_children ();
 
 extern char **construct_command_argv ();
 extern void child_execute_job ();
