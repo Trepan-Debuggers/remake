@@ -1,5 +1,5 @@
 /* Basic dependency engine for GNU Make.
-Copyright (C) 1988,89,90,91,92,93,94,95,96,97 Free Software Foundation, Inc.
+Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -153,6 +153,13 @@ update_goal_chain (goals, makefiles)
 
 	      x = update_file (file, makefiles ? 1 : 0);
 	      check_renamed (file);
+
+              /* If we don't know what the file's last mtime was, find it.  */
+              if (! file->last_mtime)
+                {
+                  (void) f_mtime (file, 0);
+                  check_renamed (file);
+                }
 
 	      /* Set the goal's `changed' flag if any commands were started
 		 by calling update_file above.  We check this flag below to
@@ -553,7 +560,8 @@ update_file_1 (file, depth)
 
       if (depth == 0 && keep_going_flag
 	  && !just_print_flag && !question_flag)
-	error (NILF, _("Target `%s' not remade because of errors."), file->name);
+	error (NILF,
+               _("Target `%s' not remade because of errors."), file->name);
 
       return dep_status;
     }
@@ -736,12 +744,12 @@ notice_finished_file (file)
 	}
     }
 
+  if (file->mtime_before_update == 0)
+    file->mtime_before_update = file->last_mtime;
+
   if (ran && !file->phony)
     {
       struct file *f;
-
-      assert(file->mtime_before_update == 0);
-      file->mtime_before_update = file->last_mtime;
 
       if (just_print_flag || question_flag
 	  || (file->is_target && file->cmds == 0))

@@ -1,3 +1,24 @@
+1999-09-03  Paul D. Smith  <psmith@gnu.org>
+
+	* remake.c (notice_finished_file): Always set mtime_before_update
+	if it's not been set, not just if we ran some rules.  Otherwise we
+	may have a situation where a target's prerequisite was rebuilt but
+	not changed, so this target's rules weren't run, then
+	update_goal_chain() sees mtime_before_update != last_mtime and
+	thinks that the top-level target changed when it really didn't.
+	This can cause an infinite loop when remaking makefiles.
+	(update_goal_chain): If we get back to the top and we don't know
+	what the goal's last_mtime was, find it now.  We need to know so
+	we can compare it to mtime_before_update later (this is only
+	crucial when remaking makefiles--should we only do it then?)
+
+1999-09-02  Paul D. Smith  <psmith@gnu.org>
+
+	* read.c (read_makefile): If "override" appears as the first
+	prerequisite, look further to ensure this is really a
+	target-specific variable definition, and not just some
+	prerequisite named "override".
+
 1999-09-01  Paul D. Smith  <psmith@gnu.org>
 
 	* function.c (IS_PATHSEP) [WINDOWS32]: Allow backslash separators

@@ -1331,7 +1331,8 @@ int main (int argc, char ** argv)
        (ignore the jobserver pipe for this make) but print a message.  */
 
     if (job_slots > 0)
-      error (NILF, _("warning: -jN set for submakes: ignoring jobserver."));
+      error (NILF,
+             _("warning: -jN forced in submake: disabling jobserver mode."));
 
     /* Create a duplicate pipe, that will be closed in the SIGCHLD
        handler.  If this fails with EBADF, the parent has closed the pipe
@@ -1344,7 +1345,7 @@ int main (int argc, char ** argv)
           pfatal_with_name (_("dup jobserver"));
 
         error (NILF,
-               _("warning: jobserver unavailable (using -j1).  Add `+' to parent make rule."));
+               _("warning: jobserver unavailable: using -j1.  Add `+' to parent make rule."));
         job_slots = 1;
       }
 
