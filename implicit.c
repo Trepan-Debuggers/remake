@@ -1,5 +1,5 @@
 /* Implicit rule searching for GNU Make.
-Copyright (C) 1988,89,90,91,92,93,94,97 Free Software Foundation, Inc.
+Copyright (C) 1988,89,90,91,92,93,94,97,2000 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -117,6 +117,7 @@ pattern_search (file, archive, depth, recursions)
   /* The start and length of the stem of FILENAME for the current rule.  */
   register char *stem = 0;
   register unsigned int stemlen = 0;
+  register unsigned int fullstemlen = 0;
 
   /* Buffer in which we store all the rules that are possibly applicable.  */
   struct rule **tryrules
@@ -582,18 +583,23 @@ pattern_search (file, archive, depth, recursions)
     }
 
   if (!checked_lastslash[foundrule])
-    /* Always allocate new storage, since STEM might be
-       on the stack for an intermediate file.  */
-    file->stem = savestring (stem, stemlen);
+    {
+      /* Always allocate new storage, since STEM might be
+         on the stack for an intermediate file.  */
+      file->stem = savestring (stem, stemlen);
+      fullstemlen = stemlen;
+    }
   else
     {
+      int dirlen = (lastslash + 1) - filename;
+
       /* We want to prepend the directory from
 	 the original FILENAME onto the stem.  */
-      file->stem = (char *) xmalloc (((lastslash + 1) - filename)
-				     + stemlen + 1);
-      bcopy (filename, file->stem, (lastslash + 1) - filename);
-      bcopy (stem, file->stem + ((lastslash + 1) - filename), stemlen);
-      file->stem[((lastslash + 1) - filename) + stemlen] = '\0';
+      fullstemlen = dirlen + stemlen;
+      file->stem = (char *) xmalloc (fullstemlen + 1);
+      bcopy (filename, file->stem, dirlen);
+      bcopy (stem, file->stem + dirlen, stemlen);
+      file->stem[fullstemlen] = '\0';
     }
 
   file->cmds = rule->cmds;
@@ -606,12 +612,12 @@ pattern_search (file, archive, depth, recursions)
       if (i != matches[foundrule])
 	{
 	  struct dep *new = (struct dep *) xmalloc (sizeof (struct dep));
-	  new->name = p = (char *) xmalloc (rule->lens[i] + stemlen + 1);
+	  new->name = p = (char *) xmalloc (rule->lens[i] + fullstemlen + 1);
 	  bcopy (rule->targets[i], p,
 		 rule->suffixes[i] - rule->targets[i] - 1);
 	  p += rule->suffixes[i] - rule->targets[i] - 1;
-	  bcopy (stem, p, stemlen);
-	  p += stemlen;
+	  bcopy (file->stem, p, fullstemlen);
+	  p += fullstemlen;
 	  bcopy (rule->suffixes[i], p,
 		 rule->lens[i] - (rule->suffixes[i] - rule->targets[i]) + 1);
 	  new->file = enter_file (new->name);

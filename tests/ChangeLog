@@ -1,3 +1,19 @@
+2000-06-19  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/functions/addsuffix: Test for an empty final argument.
+	Actually this bug might have happened for any function, but this
+	one was handy.
+
+2000-06-17  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* scripts/options/general: If parallel jobs are not supported,
+	expect a warning message from Make.
+
+2000-06-15  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* scripts/options/general: Don't try -jN with N != 1 if parallel
+	jobs are not supported.
+
 2000-05-24  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/options/general: Test general option processing (PR/1716).

@@ -39,6 +39,11 @@ Boston, MA 02111-1307, USA.  */
 # define PARAMS(protos)  ()
 #endif /* C++ or ANSI C.  */
 
+/* Specify we want GNU source code.  This must be defined before any
+   system headers are included.  */
+
+#define _GNU_SOURCE 1
+
 /* Include libintl.h, if it was found: we don't even look for it unless we
    want to use the system's gettext().  If not, use the included gettext.h.  */
 
@@ -77,7 +82,6 @@ Boston, MA 02111-1307, USA.  */
 # define __NO_STRING_INLINES
 #endif
 
-#define _GNU_SOURCE 1
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <signal.h>

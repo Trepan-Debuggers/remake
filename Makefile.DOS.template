@@ -15,26 +15,25 @@ VPATH = $(srcdir)
 prefix = /dev/env/DJDIR
 exec_prefix = ${prefix}
 
-bindir = ${exec_prefix}/bin
-datadir = ${prefix}/share
-libdir = ${prefix}/lib
-infodir = ${prefix}/info
-# DJGPP doesn't have separate man tree, use info instead.
-mandir = ${prefix}/info
-includedir = ${prefix}/include
+bindir = /bin
+datadir = /share
+libdir = /lib
+infodir = /info
+mandir = /man
+includedir = /include
 oldincludedir = c:/djgpp/include
 
-DESTDIR =
+DESTDIR = /dev/env/DJDIR
 
 pkgdatadir = $(datadir)/make
 pkglibdir = $(libdir)/make
 pkgincludedir = $(includedir)/make
-localedir = $(prefix)/share/locale
+localedir = $(datadir)/locale
 
-INSTALL = ${bindir}/ginstall -c
-INSTALL_PROGRAM = ${bindir}/ginstall -c
-INSTALL_DATA = ${bindir}/ginstall -c -m 644
-INSTALL_SCRIPT = ${bindir}/ginstall -c
+INSTALL = ${exec_prefix}/bin/ginstall -c
+INSTALL_PROGRAM = ${exec_prefix}/bin/ginstall -c
+INSTALL_DATA = ${exec_prefix}/bin/ginstall -c -m 644
+INSTALL_SCRIPT = ${exec_prefix}/bin/ginstall -c
 transform = s,x,x,
 
 # This will fail even if they don't have a Unix-like shell (stock DOS
@@ -52,7 +51,7 @@ AR = ar
 CC = gcc
 CPP = gcc -E
 LIBOBJS =
-MAKEINFO = ${bindir}/makeinfo
+MAKEINFO = ${exec_prefix}/bin/makeinfo
 PACKAGE = make
 PERL = perl
 RANLIB = ranlib
@@ -78,7 +77,7 @@ BUILT_SOURCES =	README build.sh-in
 EXTRA_DIST = 	$(BUILT_SOURCES) $(man_MANS) README.customs remote-cstms.c  make-stds.texi texinfo.tex SCOPTIONS SMakefile  Makefile.ami README.Amiga config.ami amiga.c amiga.h  NMakefile README.DOS configh.dos configure.bat makefile.com  README.W32 build_w32.bat config.h-W32 subproc.bat make.lnk  config.h-vms makefile.vms readme.vms vmsdir.h vmsfunctions.c  vmsify.c
 
 SUBDIRS =	glob
-mkinstalldirs = ${bindir}/gmkdir -p
+mkinstalldirs = ${exec_prefix}/bin/gmkdir -p
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES =  build.sh
 PROGRAMS =  $(bin_PROGRAMS)

@@ -95,6 +95,15 @@ To build from sources:
       will also need GNU Fileutils and GNU Sed for this (they should
       be available from the DJGPP sites).
 
+      By default, GNU make will install into your DJGPP installation
+      area.  If you wish to use a different directory, override the
+      DESTDIR variable when invoking "make install", like this:
+
+		make install DESTDIR=c:/other/dir
+
+      This causes the make executable to be placed in c:/other/dir/bin,
+      the man pages in c:/other/dir/man, etc.
+
       Without a Unix-style shell, you will have to install programs
       and the docs manually.  Copy make.exe to a directory on your
       PATH, make.i* info files to your Info directory, and update the

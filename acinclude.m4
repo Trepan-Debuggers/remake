@@ -534,7 +534,7 @@ not GNU gettext
       AC_DEFINE(HAVE_LIBINTL_H, 1, [Define if you have <libintl.h>.])
     else
       with_included_gettext=yes
-      LIBS="$fp_keep_LIBS"
+      LIBS="$pds_keep_LIBS"
     fi
   fi
 ])

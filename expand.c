@@ -17,9 +17,10 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#include "make.h"
+
 #include <assert.h>
 
-#include "make.h"
 #include "filedef.h"
 #include "job.h"
 #include "commands.h"
@@ -425,6 +426,9 @@ expand_argument (str, end)
      char *str, *end;
 {
   char *tmp;
+
+  if (str == end)
+    return xstrdup("");
 
   if (!end || *end == '\0')
     tmp = str;
