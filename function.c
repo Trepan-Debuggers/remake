@@ -527,7 +527,7 @@ expand_function (o, function, text, end)
 	  {
 	    if (wordi >= nwords - 1)
 	      {
-		nwords += 5;
+		nwords *= 2;
 		words = (char **) xrealloc ((char *) words,
 					    nwords * sizeof (char *));
 	      }	
