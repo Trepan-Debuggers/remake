@@ -122,14 +122,14 @@ extern unsigned int get_path_max ();
 #define	PATH_VAR(var)	char *var = (char *) alloca (GET_PATH_MAX)
 #endif
 
-#ifdef	uts
+#ifdef	STAT_MACROS_BROKEN
 #ifdef	S_ISREG
 #undef	S_ISREG
 #endif
 #ifdef	S_ISDIR
 #undef	S_ISDIR
 #endif
-#endif	/* uts.  */
+#endif	/* STAT_MACROS_BROKEN.  */
 
 #ifndef	S_ISREG
 #define	S_ISREG(mode)	(((mode) & S_IFMT) == S_IFREG)
