@@ -162,7 +162,7 @@ ifeq ($(mkdep),$(mkdep-nolib))
 nolib-deps = $(depfiles)
 else
 %.dep: %.c
-	$(mkdep-nolib) $< | sed 's,$*\.o,$(@:.dep=.o) $@,' > $@
+	$(mkdep-nolib) $< | sed -e 's,$*\.o,$(@:.dep=.o) $@,' > $@
 nolib-deps = $(patsubst $(archpfx)%,%,$(depfiles))
 endif
 # The distributed Makefile.in should contain deps for remote-stub only.
@@ -188,7 +188,7 @@ testdir := $(shell ls -d1 make-test-?.? | sort -n +0.10 -0.11 +0.12 | tail -1l)
 tests:# $(testdir)/run_make_tests.pl $(prog)
 #	cd $(<D); MAKELEVEL=0 perl $(<F)
 
-build.sh.in: build.template
+build.sh.in: build.template compatMakefile
 	sed -e 's@%objs%@$(filter-out remote-% $(GLOB) $(ALLOCA) $(extras),\
 	       $(patsubst $(archpfx)%,%,$(objs)))\
 	       $(patsubst %.c,%.o,$(filter %.c,$(globfiles)))@' \
