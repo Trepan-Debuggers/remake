@@ -256,7 +256,7 @@ variable_expand (line)
 	       any variable references inside are now expanded.
 	       Is the resultant text a substitution reference?  */
 
-	    colon = index (beg, ':');
+	    colon = lindex (beg, end, ':');
 	    if (colon != 0)
 	      {
 		/* This looks like a substitution reference: $(FOO:A=B).  */
