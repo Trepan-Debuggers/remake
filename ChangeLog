@@ -1,3 +1,13 @@
+Wed Apr 26 17:15:57 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* file.c (remove_intermediates): Fix inverted test to bail under
+ 	-n for signal case.  Bail under -q or -t.  
+	Skip files with update_status==-1.
+
+	* job.c (job_next_command): Skip empty lines.
+	(new_job): Don't test the return of job_next_command.
+	Just let start_waiting_job handle the case of empty commands.
+
 Wed Apr 19 03:25:54 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
 	* function.c [__MSDOS__]: Include <fcntl.h>.  From DJ Delorie.
