@@ -347,11 +347,20 @@ define_automatic_variables ()
 {
   extern char default_shell[];
   register struct variable *v;
-  char buf[100];
+  char buf[200];
 
   sprintf (buf, "%u", makelevel);
   (void) define_variable ("MAKELEVEL", 9, buf, o_env, 0);
 
+  sprintf (buf, "%s%s%s",
+	   version_string,
+	   (remote_description == 0 || remote_description[0] == '\0')
+	   ? "" : "-",
+	   (remote_description == 0 || remote_description[0] == '\0')
+	   ? "" : remote_description);
+  (void) define_variable ("MAKE_VERSION", 12, buf, o_default, 0);
+
+  
   /* This won't override any definition, but it
      will provide one if there isn't one there.  */
   v = define_variable ("SHELL", 5, default_shell, o_default, 0);
