@@ -23,10 +23,12 @@ Boston, MA 02111-1307, USA.  */
 #include <assert.h>
 
 #include "job.h"
+#include "expand.h"
 #include "debug.h"
 #include "dbg_cmd.h"
 #include "remake.h"
 #include "commands.h"
+#include "remote-stub.h"
 
 /* alloca is in stdlib.h */
 #ifdef HAVE_STDLIB_H
@@ -195,14 +197,7 @@ extern int getgid ();
 # endif
 #endif
 
-extern char *allocated_variable_expand_for_file PARAMS ((char *line, struct file *file));
-
 extern int getloadavg PARAMS ((double loadavg[], int nelem));
-extern int start_remote_job PARAMS ((char **argv, char **envp, int stdin_fd,
-		int *is_remote, int *id_ptr, int *used_stdin));
-extern int start_remote_job_p PARAMS ((int));
-extern int remote_status PARAMS ((int *exit_code_ptr, int *signal_ptr,
-		int *coredump_ptr, int block));
 
 RETSIGTYPE child_handler PARAMS ((int));
 static void free_child PARAMS ((child_t *));
