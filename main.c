@@ -993,10 +993,6 @@ main (argc, argv, envp)
 	  }
       }
 
-    /* Print the data base under -p.  */
-    if (print_data_base_flag)
-      print_data_base ();
-
     if (goals == 0)
       {
 	if (read_makefiles == 0)
@@ -1349,8 +1345,12 @@ decode_env_switches (envar, len)
   args[(value[0] == '-' ? 0 : 1) + len + 1] = '\0';
 
   /* Allocate a vector that is definitely big enough.  */
-  argv = (char **) alloca (len * sizeof (char *));
-  argc = 0;
+  argv = (char **) alloca (1 + len * sizeof (char *));
+
+  /* getopt will look at the arguments starting at ARGV[1].
+     Prepend a spacer word.  */
+  argv[0] = 0;
+  argc = 1;
   do
     {
       argv[argc++] = args;
@@ -1590,6 +1590,9 @@ die (status)
 
       /* Remove the intermediate files.  */
       remove_intermediates (0);
+
+      if (print_data_base_flag)
+	print_data_base ();
 
       if (print_directory_flag)
 	log_working_directory (0);
