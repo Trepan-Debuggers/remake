@@ -1778,6 +1778,24 @@ define_makeflags (all, makefile)
       flags = flags->next;
     }
 
+
+  /* Define MFLAGS before appending variable definitions.  */
+
+  if (p == &flagstring[1])
+    /* No flags.  */
+    flagstring[0] = '\0';
+  else if (p[-1] == '-')
+    /* Kill the final space and dash.  */
+    p[-2] = '\0';
+  else
+    /* Terminate the string.  */
+    *p = '\0';
+
+  /* Since MFLAGS is not parsed for flags, there is no reason to
+     override any makefile redefinition.  */
+  (void) define_variable ("MFLAGS", 6, flagstring, o_env, 1);
+
+
   if (all && command_variables != 0)
     {
       /* Now write a reference to $(MAKEOVERRIDES), which contains all the
@@ -1842,9 +1860,6 @@ define_makeflags (all, makefile)
        We should not do this again on the second call, because that is
        after reading makefiles which might have done `unexport MAKEFLAGS'. */
     v->export = v_export;
-  /* Since MFLAGS is not parsed for flags, there is no reason to
-     override any makefile redefinition.  */
-  (void) define_variable ("MFLAGS", 6, flagstring, o_env, 1);
 }
 
 /* Print version information.  */
