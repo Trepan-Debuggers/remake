@@ -4,9 +4,6 @@
 /* Version of this package (needed by automake) */
 #undef VERSION
 
-/* Define to 1 if NLS is requested.  */
-#undef ENABLE_NLS
-
 /* Define if your locale.h file contains LC_MESSAGES.  */
 #undef HAVE_LC_MESSAGES
 
@@ -15,12 +12,6 @@
 
 /* Define to the name of the SCCS `get' command.  */
 #undef SCCS_GET
-
-/* Define this if the SCCS `get' command understands the `-G<file>' option.  */
-#undef SCCS_GET_MINUS_G
-
-/* Define this to enable job server support in GNU make.  */
-#undef MAKE_JOBSERVER
 
 /* Define to be the nanoseconds member of struct stat's st_mtim,
    if it exists.  */
@@ -31,9 +22,6 @@
 
 /* Define this if the C library defines the variable `_sys_siglist'.  */
 #undef HAVE__SYS_SIGLIST
-
-/* Define this if you have the `union wait' type in <sys/wait.h>.  */
-#undef HAVE_UNION_WAIT
 
 /* Define to `unsigned long' or `unsigned long long'
    if <inttypes.h> doesn't define.  */

@@ -400,7 +400,7 @@ remove_intermediates (sig)
 	    /* If nothing would have created this file yet,
 	       don't print an "rm" command for it.  */
             continue;
- 	  else if (just_print_flag)
+ 	  if (just_print_flag)
   	    status = 0;
 	  else
 	    {

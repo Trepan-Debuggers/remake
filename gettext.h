@@ -17,14 +17,8 @@
    along with this program; if not, write to the Free Software Foundation,
    Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* Include libintl.h, if it was found: we don't even look for it unless we
-   want to use the system's gettext().  If not, the rest of the file contains
-   the headers necessary for our own gettext.c.  */
-
-#ifdef HAVE_LIBINTL_H
-# include <libintl.h>
-
-#else
+#ifndef _GETTEXT_H
+#define _GETTEXT_H 1
 
 /* We define an additional symbol to signal that we use the GNU
    implementation of gettext.  */
@@ -166,12 +160,6 @@ extern int _nl_msg_cat_cntr;
 }
 #endif
 
-#endif  /* !HAVE_LIBINTL_H */
-
-#ifndef gettext_noop
-/* For automatical extraction of messages sometimes no real
-   translation is needed.  Instead the string itself is the result.  */
-# define gettext_noop(Str) (Str)
-#endif
+#endif  /* _GETTEXT_H */
 
 /* End of libgettext.h */
