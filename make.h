@@ -318,6 +318,7 @@ extern double max_load_average;
 extern char *program;
 extern char *starting_directory;
 extern unsigned int makelevel;
+extern char *version_string, *remote_description;
 
 extern unsigned int commands_started;
 
