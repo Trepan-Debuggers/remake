@@ -7,11 +7,11 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.139 1994/05/17 03:50:09 roland Beta $
-@set EDITION 0.45
-@set VERSION 3.71 Beta
-@set UPDATED 11 May 1994
-@set UPDATE-MONTH May 1994
+@set RCSID $Id: make.texinfo,v 2.140 1994/07/05 21:27:09 roland Exp $
+@set EDITION 0.46
+@set VERSION 3.72 Beta
+@set UPDATED 5 July 1994
+@set UPDATE-MONTH July 1994
 
 @c finalout
 
@@ -5581,7 +5581,9 @@ dependencies of goals, or dependencies of dependencies of goals, etc.
 By default, the goal is the first target in the makefile (not counting
 targets that start with a period).  Therefore, makefiles are usually
 written so that the first target is for compiling the entire program or
-programs they describe.
+programs they describe.  If the first rule in the makefile has several
+targets, only the first target in the rule becomes the default goal, not
+the whole list.
 
 You can specify a different goal or goals with arguments to @code{make}.
 Use the name of the goal as an argument.  If you specify several goals,
@@ -7620,6 +7622,7 @@ main use is as subroutine libraries for linking.
 @menu
 * Archive Members::             Archive members as targets.
 * Archive Update::              The implicit rule for archive member targets.
+* Archive Pitfalls::            Dangers to watch out for when using archives.
 * Archive Suffix Rules::        You can write a special kind of suffix rule
                                   for updating archives.
 @end menu
@@ -7676,7 +7679,7 @@ example, @w{@samp{foolib(*.o)}} expands to all existing members of the
 @file{foolib} archive whose names end in @samp{.o}; perhaps
 @samp{@w{foolib(hack.o)} @w{foolib(kludge.o)}}.
 
-@node Archive Update, Archive Suffix Rules, Archive Members, Archives
+@node Archive Update
 @section Implicit Rule for Archive Member Targets
 
 Recall that a target that looks like @file{@var{a}(@var{m})} stands for the
@@ -7766,7 +7769,24 @@ files into the archive, as described in the preceding section.
 This is not necessary when using the GNU @code{ar} program, which
 updates the @file{__.SYMDEF} member automatically.
 
-@node Archive Suffix Rules,  , Archive Update, Archives
+@node Archive Pitfalls
+@section Dangers When Using Archives
+@cindex archive, and parallel execution
+@cindex parallel execution, and archive update
+@cindex archive, and @code{-j}
+@cindex @code{-j}, and archive update
+
+It is important to be careful when using parallel execution (the
+@code{-j} switch; @pxref{Parallel, ,Parallel Execution}) and archives.
+If multiple @code{ar} commands run at the same time on the same archive
+file, they will not know about each other and can corrupt the file.
+
+Possibly a future version of @code{make} will provide a mechanism to
+circumvent this problem by serializing all commands that operate on the
+same archive file.  But for the time being, you must either write your
+makefiles to avoid this problem in some other way, or not use @code{-j}.
+
+@node Archive Suffix Rules, Archive Update, Archive Pitfalls, Archives
 @section Suffix Rules for Archive Files
 @cindex suffix rule, for archive
 @cindex archive, suffix rule for
