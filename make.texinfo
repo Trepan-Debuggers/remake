@@ -6379,7 +6379,7 @@ Various new built-in implicit rules.  @xref{Catalogue of Rules, ,Catalogue of Im
 @end itemize
 
 @node Missing, Summary, Features, Top
-@chapter Incompatibilities and Missing Features of GNU @code{make}
+@chapter Incompatibilities and Missing Features
 
 The @code{make} programs in various other systems support a few features
 that are not implemented in GNU @code{make}.  Draft 11.1 of the POSIX.2
