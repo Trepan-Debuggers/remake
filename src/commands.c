@@ -42,7 +42,7 @@ extern int getpid ();
 
 /* Set FILE's automatic variables up.  */
 
-static void
+void
 set_file_variables (file_t *file)
 {
   char *at, *percent, *star, *less;

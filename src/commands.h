@@ -64,4 +64,8 @@ extern void delete_child_targets PARAMS ((child_t *child));
 */
 extern void chop_commands PARAMS ((commands_t *cmds));
 
+/*! Set FILE's automatic variables up.  */
+extern void set_file_variables PARAMS((file_t *file));
+
+
 #endif /*COMMANDS_H*/
