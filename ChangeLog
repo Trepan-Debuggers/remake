@@ -1,3 +1,25 @@
+1999-07-09  Paul D. Smith  <psmith@gnu.org>
+
+	* job.c (start_waiting_job): Don't get a second job token if we
+	already have one; if we're waiting on the load to go down
+	start_waiting_job() might get called twice on the same file.
+
+	* remake.c (update_goal_chain): If we try to update a goal and it
+	doesn't complete (e.g., parallel builds) remember that by setting
+	the `deferred' flag in the goal structure.  Later when we're
+	determining the return value we consider a goal updated if either
+	the mtime has changed _or_ this flag was set.  We need this
+	because the mtime doesn't change during the update_file() function
+	if we started a job running; instead it's set during the
+	reap_children() call.  So, the code doesn't know it was updated
+	and returns a status of -1 (nothing done).  This is OK during
+	"normal" builds since our caller (main) treats these cases
+	identically in that case, but if you're building makefiles the
+	difference is very important (whether we re-exec or not).
+
+	* dep.h: Add a `deferred' flag to track whether a goal was run but
+	not completed (parallel builds).
+
 1999-07-08  Paul D. Smith  <psmith@gnu.org>
 
 	* main.c (switches): Define a new switch -R (or
