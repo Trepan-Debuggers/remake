@@ -33,7 +33,7 @@ LDFLAGS = -g
 #				without complaint but produce losing code,
 #				so beware.
 # NeXT 1.0a uses an old version of GCC, which required -D__inline=inline.
-defines = @DEFS@ -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\"
+defines = -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\"
 
 # If you are using the GNU C library, or have the GNU getopt functions in
 # your C library, you can comment these out.
@@ -188,6 +188,13 @@ glob-clean glob-realclean:
 
 Makefile: config.status $(srcdir)/Makefile.in
 	$(SHELL) config.status
+config.h: config.status $(srcdir)/config.h.in
+	$(SHELL) config.status
+
+configure: configure.in
+	autoconf
+config.h.in: configure.in
+	autohead
 
 # Automatically generated dependencies will be put at the end of the file.
 
