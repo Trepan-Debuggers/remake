@@ -25,13 +25,11 @@ Building From CVS
 
 To build GNU make from CVS, you will need Autoconf 2.53 (or better),
 Automake 1.6.1 (or better), and Gettext 0.11.3-pre2 (or better), and any
-tools that those utilities require (GNU m4, Perl, etc.).
+tools that those utilities require (GNU m4, Perl, etc.).  You will also
+need a copy of wget.
 
 After checking out the code, you will need to perform these steps to get
-to the point where you can run "configure" then "make".
-
-Hopefully at some point in the (near) future this will all be obsolete
-and you can just run "autoreconf" and have it DTRT.
+to the point where you can run "make".
 
 
  1) $ autopoint
@@ -70,12 +68,23 @@ and you can just run "autoreconf" and have it DTRT.
     Generate a "configure" script from configure.in and acinclude.m4.
 
 
+ 6) $ ./configure
+
+    Generate a Makefile
+
+
+ 7) $ make update
+
+    Use wget to retrieve various other files that GNU make relies on,
+    but does not keep in its own source tree.
+
+
 At this point you have successfully brought your CVS copy of the GNU
 make source directory up to the point where it can be treated
 more-or-less like the official package you would get from ftp.gnu.org.
 That is, you can just run:
 
-  $ ./configure && make && make check && make install
+  $ make && make check && make install
 
 to build and install GNU make.
 
@@ -127,6 +136,7 @@ autoheader
 automake --add-missing
 autoconf
 ./configure
+make update
 make
 make check
 make distcheck

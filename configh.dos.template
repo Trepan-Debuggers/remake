@@ -2,12 +2,6 @@
 /* Many things are defined already by a system header.  */
 #include <sys/config.h>
 
-/* Name of this package (needed by automake) */
-#define PACKAGE "%PACKAGE%"
-
-/* Version of this package (needed by automake) */
-#define VERSION "%VERSION%"
-
 #if __DJGPP__ > 2 || __DJGPP_MINOR__ > 1
 
 /* Define if `sys_siglist' is declared by <signal.h>.  */
@@ -23,20 +17,32 @@
 
 #endif
 
+/* Use high resolution file timestamps if nonzero. */
+#define FILE_TIMESTAMP_HI_RES 0
+
+/* Define to 1 if you have `alloca', as a function or macro. */
+#define HAVE_ALLOCA 1
+
 /* Define if you have the fdopen function.  */
 #define HAVE_FDOPEN 1
 
-/* Define if you have sigsetmask.  */
-#define HAVE_SIGSETMASK 1
+/* Define to 1 if you have the `getgroups' function. */
+#define HAVE_GETGROUPS 1
 
 /* Define if you have the <memory.h> header file.  */
 #define HAVE_MEMORY_H 1
 
-/* Define if you have the memmove function.  */
-#define HAVE_MEMMOVE 1
-
 /* Define if you have the mkstemp function.  */
 #define HAVE_MKSTEMP 1
+
+/* Define to 1 if you have the `mktemp' function. */
+#define HAVE_MKTEMP 1
+
+/* Define to 1 if you have the `setlinebuf' function. */
+#define HAVE_SETLINEBUF 1
+
+/* Define to 1 if you have the `setvbuf' function. */
+#define HAVE_SETVBUF 1
 
 #define SCCS_GET "get"
 
@@ -53,6 +59,33 @@
 /* Define if you have the vprintf library function.  */
 #undef HAVE_VPRINTF
 #define HAVE_VPRINTF 1
+
+/* Name of the package */
+#define PACKAGE "%PACKAGE%"
+
+/* Define to the address where bug reports for this package should be sent. */
+#define PACKAGE_BUGREPORT "bug-%PACKAGE%@gnu.org"
+
+/* Define to the full name of this package. */
+#define PACKAGE_NAME "GNU %PACKAGE%"
+
+/* Define to the full name and version of this package. */
+#define PACKAGE_STRING "GNU %PACKAGE% %VERSION%"
+
+/* Define to the one symbol short name of this package. */
+#define PACKAGE_TARNAME "%PACKAGE%"
+
+/* Define to the version of this package. */
+#define PACKAGE_VERSION "%VERSION%"
+
+/* Define to 1 if the C compiler supports function prototypes. */
+#define PROTOTYPES 1
+
+/* Define to 1 if `sys_siglist' is declared by <signal.h> or <unistd.h>. */
+#define SYS_SIGLIST_DECLARED 1
+
+/* Version number of package */
+#define VERSION "%VERSION%"
 
 /* Build host information. */
 #define MAKE_HOST "i386-pc-msdosdjgpp"

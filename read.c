@@ -251,6 +251,7 @@ read_all_makefiles (makefiles)
 	      d->name = 0;
 	      d->file = enter_file (*p);
 	      d->file->dontcare = 1;
+              d->ignore_mtime = 0;
 	      /* Tell update_goal_chain to bail out as soon as this file is
 		 made, and main not to die if we can't make this file.  */
 	      d->changed = RM_DONTCARE;
@@ -347,6 +348,7 @@ eval_makefile (filename, flags)
     free (filename);
   filename = deps->file->name;
   deps->changed = flags;
+  deps->ignore_mtime = 0;
 
   /* If the makefile can't be found at all, give up entirely.  */
 
@@ -1117,8 +1119,24 @@ eval (ebuf, set_default)
 
         /* Parse the dependencies.  */
         deps = (struct dep *)
-          multi_glob (parse_file_seq (&p2, '\0', sizeof (struct dep), 1),
+          multi_glob (parse_file_seq (&p2, '|', sizeof (struct dep), 1),
                       sizeof (struct dep));
+        if (*p2)
+          {
+            /* Files that follow '|' are special prerequisites that
+               need only exist in order to satisfy the dependency.
+               Their modification times are irrelevant.  */
+            struct dep **deps_ptr = &deps;
+            struct dep *d;
+            for (deps_ptr = &deps; *deps_ptr; deps_ptr = &(*deps_ptr)->next)
+              ;
+            ++p2;
+            *deps_ptr = (struct dep *)
+              multi_glob (parse_file_seq (&p2, '\0', sizeof (struct dep), 1),
+                          sizeof (struct dep));
+            for (d = *deps_ptr; d != 0; d = d->next)
+              d->ignore_mtime = 1;
+          }
 
         commands_idx = 0;
         if (cmdleft != 0)
@@ -1506,7 +1524,8 @@ uniquize_deps (chain)
       last = d;
       next = d->next;
       while (next != 0)
-	if (streq (dep_name (d), dep_name (next)))
+	if (streq (dep_name (d), dep_name (next))
+            && d->ignore_mtime == next->ignore_mtime)
 	  {
 	    struct dep *n = next->next;
 	    last->next = n;
@@ -2825,10 +2844,13 @@ multi_glob (chain, size)
 		    if (found == 0)
 		      {
 			/* No matches.  Use MEMNAME as-is.  */
-			struct nameseq *elt
-			  = (struct nameseq *) xmalloc (size);
 			unsigned int alen = strlen (gl.gl_pathv[i]);
 			unsigned int mlen = strlen (memname);
+			struct nameseq *elt
+			  = (struct nameseq *) xmalloc (size);
+                        if (size > sizeof (struct nameseq))
+                          bzero (((char *) elt) + sizeof (struct nameseq),
+                                 size - sizeof (struct nameseq));
 			elt->name = (char *) xmalloc (alen + 1 + mlen + 2);
 			bcopy (gl.gl_pathv[i], elt->name, alen);
 			elt->name[alen] = '(';
@@ -2857,6 +2879,9 @@ multi_glob (chain, size)
 #endif /* !NO_ARCHIVES */
 		  {
 		    struct nameseq *elt = (struct nameseq *) xmalloc (size);
+                    if (size > sizeof (struct nameseq))
+                      bzero (((char *) elt) + sizeof (struct nameseq),
+                             size - sizeof (struct nameseq));
 		    elt->name = xstrdup (gl.gl_pathv[i]);
 		    elt->next = new;
 		    new = elt;

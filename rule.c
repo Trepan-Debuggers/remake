@@ -230,6 +230,7 @@ convert_suffix_rule (target, source, cmds)
       deps = (struct dep *) xmalloc (sizeof (struct dep));
       deps->next = 0;
       deps->name = depname;
+      deps->ignore_mtime = 0;
     }
 
   create_pattern_rule (names, percents, 0, deps, cmds, 0);

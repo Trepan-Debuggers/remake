@@ -546,6 +546,7 @@ pattern_search (file, archive, depth, recursions)
 	}
 
       dep = (struct dep *) xmalloc (sizeof (struct dep));
+      dep->ignore_mtime = 0;
       s = found_files[deps_found];
       if (recursions == 0)
 	{
@@ -611,6 +612,8 @@ pattern_search (file, archive, depth, recursions)
       if (i != matches[foundrule])
 	{
 	  struct dep *new = (struct dep *) xmalloc (sizeof (struct dep));
+	  /* GKM FIMXE: handle '|' here too */
+	  new->ignore_mtime = 0;
 	  new->name = p = (char *) xmalloc (rule->lens[i] + fullstemlen + 1);
 	  bcopy (rule->targets[i], p,
 		 rule->suffixes[i] - rule->targets[i] - 1);

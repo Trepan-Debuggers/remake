@@ -24,6 +24,12 @@ Boston, MA 02111-1307, USA.  */
 #include "job.h"
 #include "commands.h"
 
+#if VMS
+# define FILE_LIST_SEPARATOR ','
+#else
+# define FILE_LIST_SEPARATOR ' '
+#endif
+
 extern int remote_kill PARAMS ((int id, int sig));
 
 #ifndef	HAVE_UNISTD_H
@@ -36,7 +42,6 @@ static void
 set_file_variables (file)
      register struct file *file;
 {
-  register char *p;
   char *at, *percent, *star, *less;
 
 #ifndef	NO_ARCHIVES
@@ -46,6 +51,8 @@ set_file_variables (file)
   if (ar_name (file->name))
     {
       unsigned int len;
+      char *p;
+
       p = strchr (file->name, '(');
       at = (char *) alloca (p - file->name + 1);
       bcopy (file->name, at, p - file->name);
@@ -120,12 +127,14 @@ set_file_variables (file)
   /* Compute the values for $^, $+, and $?.  */
 
   {
-    register unsigned int qmark_len, plus_len;
+    unsigned int qmark_len, plus_len, bar_len;
     char *caret_value, *plus_value;
-    register char *cp;
+    char *cp;
     char *qmark_value;
-    register char *qp;
-    register struct dep *d;
+    char *bar_value;
+    char *qp;
+    char *bp;
+    struct dep *d;
     unsigned int len;
 
     /* Compute first the value for $+, which is supposed to contain
@@ -133,36 +142,35 @@ set_file_variables (file)
 
     plus_len = 0;
     for (d = file->deps; d != 0; d = d->next)
-      plus_len += strlen (dep_name (d)) + 1;
+      if (! d->ignore_mtime)
+	plus_len += strlen (dep_name (d)) + 1;
+    if (plus_len == 0)
+      plus_len++;
 
-    len = plus_len == 0 ? 1 : plus_len;
-    cp = plus_value = (char *) alloca (len);
+    cp = plus_value = (char *) alloca (plus_len);
 
     qmark_len = plus_len;	/* Will be this or less.  */
     for (d = file->deps; d != 0; d = d->next)
-      {
-	char *c = dep_name (d);
+      if (! d->ignore_mtime)
+        {
+          char *c = dep_name (d);
 
 #ifndef	NO_ARCHIVES
-	if (ar_name (c))
-	  {
-	    c = strchr (c, '(') + 1;
-	    len = strlen (c) - 1;
-	  }
-	else
+          if (ar_name (c))
+            {
+              c = strchr (c, '(') + 1;
+              len = strlen (c) - 1;
+            }
+          else
 #endif
-	  len = strlen (c);
+            len = strlen (c);
 
-	bcopy (c, cp, len);
-	cp += len;
-#if VMS
-        *cp++ = ',';
-#else
-	*cp++ = ' ';
-#endif
-	if (! d->changed)
-	  qmark_len -= len + 1;	/* Don't space in $? for this one.  */
-      }
+          bcopy (c, cp, len);
+          cp += len;
+          *cp++ = FILE_LIST_SEPARATOR;
+          if (! d->changed)
+            qmark_len -= len + 1;	/* Don't space in $? for this one.  */
+        }
 
     /* Kill the last space and define the variable.  */
 
@@ -175,11 +183,18 @@ set_file_variables (file)
 
     uniquize_deps (file->deps);
 
-    /* Compute the values for $^ and $?.  */
+    bar_len = 0;
+    for (d = file->deps; d != 0; d = d->next)
+      if (d->ignore_mtime)
+	bar_len += strlen (dep_name (d)) + 1;
+    if (bar_len == 0)
+      bar_len++;
+
+    /* Compute the values for $^, $?, and $|.  */
 
     cp = caret_value = plus_value; /* Reuse the buffer; it's big enough.  */
-    len = qmark_len == 0 ? 1 : qmark_len;
-    qp = qmark_value = (char *) alloca (len);
+    qp = qmark_value = (char *) alloca (qmark_len);
+    bp = bar_value = (char *) alloca (bar_len);
 
     for (d = file->deps; d != 0; d = d->next)
       {
@@ -195,23 +210,24 @@ set_file_variables (file)
 #endif
 	  len = strlen (c);
 
-	bcopy (c, cp, len);
-	cp += len;
-#if VMS
-	*cp++ = ',';
-#else
-	*cp++ = ' ';
-#endif
-	if (d->changed)
-	  {
-	    bcopy (c, qp, len);
-	    qp += len;
-#if VMS
-	    *qp++ = ',';
-#else
-	    *qp++ = ' ';
-#endif
+        if (d->ignore_mtime)
+          {
+	    bcopy (c, bp, len);
+	    bp += len;
+	    *bp++ = FILE_LIST_SEPARATOR;
 	  }
+	else
+	  {
+            bcopy (c, cp, len);
+            cp += len;
+            *cp++ = FILE_LIST_SEPARATOR;
+            if (d->changed)
+              {
+                bcopy (c, qp, len);
+                qp += len;
+                *qp++ = FILE_LIST_SEPARATOR;
+              }
+          }
       }
 
     /* Kill the last spaces and define the variables.  */
@@ -221,6 +237,9 @@ set_file_variables (file)
 
     qp[qp > qmark_value ? -1 : 0] = '\0';
     DEFINE_VARIABLE ("?", 1, qmark_value);
+
+    bp[bp > bar_value ? -1 : 0] = '\0';
+    DEFINE_VARIABLE ("|", 1, bar_value);
   }
 
 #undef	DEFINE_VARIABLE
