@@ -16,7 +16,7 @@ Version 3.73
   See INSTALL for details.
 
 * You can now send a SIGUSR1 signal to Make to toggle printing of debugging
-  output enable by -d, at any time during the run.
+  output enabled by -d, at any time during the run.
 
 Version 3.72
 
