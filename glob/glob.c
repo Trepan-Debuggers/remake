@@ -37,6 +37,8 @@
 /* #define NDEBUG 1 */
 #include <assert.h>
 
+#include <stdio.h>		/* Needed on stupid SunOS for assert.  */
+
 
 /* Comment out all this code if we are using the GNU C Library, and are not
    actually compiling the library itself.  This code is part of the GNU C
@@ -250,7 +252,6 @@ extern char *alloca ();
 #undef	GLOB_PERIOD
 #include <glob.h>
 
-static int glob_pattern_p __P ((const char *pattern, int quote));
 static int glob_in_dir __P ((const char *pattern, const char *directory,
 			     int flags,
 			     int (*errfunc) __P ((const char *, int)),
@@ -266,7 +267,8 @@ static
 inline
 #endif
 const char *
-next_brace_sub (const char *begin)
+next_brace_sub (begin)
+     const char *begin;
 {
   unsigned int depth = 0;
   const char *cp = begin;
@@ -288,7 +290,7 @@ next_brace_sub (const char *begin)
 	  while (*cp != '\0' && (*cp != '}' || depth > 0))
 	    {
 	      if (*cp == '}')
-		++depth;
+		--depth;
 	      ++cp;
 	    }
 	  if (*cp == '\0')
@@ -308,7 +310,7 @@ next_brace_sub (const char *begin)
    If a directory cannot be opened or read and ERRFUNC is not nil,
    it is called with the pathname that caused the error, and the
    `errno' value from the failing call; if it returns non-zero
-   `glob' returns GLOB_ABEND; if it returns zero, the error is ignored.
+   `glob' returns GLOB_ABORTED; if it returns zero, the error is ignored.
    If memory cannot be allocated for PGLOB, GLOB_NOSPACE is returned.
    Otherwise, `glob' returns zero.  */
 int
@@ -511,11 +513,9 @@ glob (pattern, flags, errfunc, pglob)
 #else
 	  if (home_dir == NULL || home_dir[0] == '\0')
 	    {
-	      extern char *getlogin __P ((void));
-	      extern int getlogin_r __P ((char *, size_t));
 	      int success;
-
 #if defined HAVE_GETLOGIN_R || defined _LIBC
+	      extern int getlogin_r __P ((char *, size_t));
 	      size_t buflen = sysconf (_SC_LOGIN_NAME_MAX) + 1;
 	      char *name;
 
@@ -523,11 +523,13 @@ glob (pattern, flags, errfunc, pglob)
 		/* `sysconf' does not support _SC_LOGIN_NAME_MAX.  Try
 		   a moderate value.  */
 		buflen = 16;
-	      name = __alloca (buflen);
+	      name = (char *) __alloca (buflen);
 
 	      success = getlogin_r (name, buflen) >= 0;
 #else
+	      extern char *getlogin __P ((void));
 	      char *name;
+
 	      success = (name = getlogin ()) != NULL;
 #endif
 	      if (success)
@@ -537,7 +539,7 @@ glob (pattern, flags, errfunc, pglob)
 		  char *pwtmpbuf;
 		  struct passwd pwbuf, *p;
 
-		  pwtmpbuf = __alloca (pwbuflen);
+		  pwtmpbuf = (char *) __alloca (pwbuflen);
 
 		  success = (__getpwnam_r (name, &pwbuf, pwtmpbuf,
 					   pwbuflen, &p) >= 0);
@@ -560,7 +562,7 @@ glob (pattern, flags, errfunc, pglob)
 	    {
 	      char *newp;
 	      size_t home_len = strlen (home_dir);
-	      newp = __alloca (home_len + dirlen);
+	      newp = (char *) __alloca (home_len + dirlen);
 	      memcpy (newp, home_dir, home_len);
 	      memcpy (&newp[home_len], &dirname[1], dirlen);
 	      dirname = newp;
@@ -577,7 +579,7 @@ glob (pattern, flags, errfunc, pglob)
 	    user_name = dirname + 1;
 	  else
 	    {
-	      user_name = __alloca (end_name - dirname);
+	      user_name = (char *) __alloca (end_name - dirname);
 	      memcpy (user_name, dirname + 1, end_name - dirname);
 	      user_name[end_name - dirname - 1] = '\0';
 	    }
@@ -586,7 +588,7 @@ glob (pattern, flags, errfunc, pglob)
 	  {
 #if defined HAVE_GETPWNAM_R || defined _LIBC
 	    size_t buflen = sysconf (_SC_GETPW_R_SIZE_MAX);
-	    char *pwtmpbuf = __alloca (buflen);
+	    char *pwtmpbuf = (char *) __alloca (buflen);
 	    struct passwd pwbuf, *p;
 	    if (__getpwnam_r (user_name, &pwbuf, pwtmpbuf, buflen, &p) >= 0)
 	      home_dir = p->pw_dir;
@@ -606,18 +608,18 @@ glob (pattern, flags, errfunc, pglob)
 	      char *newp;
 	      size_t home_len = strlen (home_dir);
 	      size_t rest_len = end_name == NULL ? 0 : strlen (end_name);
-	      newp = __alloca (home_len + rest_len + 1);
+	      newp = (char *) __alloca (home_len + rest_len + 1);
 	      memcpy (newp, home_dir, home_len);
 	      memcpy (&newp[home_len], end_name, rest_len);
 	      newp[home_len + rest_len] = '\0';
 	      dirname = newp;
 	    }
 	}
-#endif	/* Not Amiga && not Windows32.  */
+#endif	/* Not Amiga && not WINDOWS32.  */
     }
 #endif	/* Not VMS.  */
 
-  if (glob_pattern_p (dirname, !(flags & GLOB_NOESCAPE)))
+  if (__glob_pattern_p (dirname, !(flags & GLOB_NOESCAPE)))
     {
       /* The directory name contains metacharacters, so we
 	 have to glob for the directory, and then glob for
@@ -648,7 +650,7 @@ glob (pattern, flags, errfunc, pglob)
 	      {
 		globfree (&dirs);
 		globfree (&files);
-		return GLOB_ABEND;
+		return GLOB_ABORTED;
 	      }
 	  }
 #endif /* SHELL.  */
@@ -844,8 +846,8 @@ prefix_array (dirname, array, n)
 
 /* Return nonzero if PATTERN contains any metacharacters.
    Metacharacters can be quoted with backslashes if QUOTE is nonzero.  */
-static int
-glob_pattern_p (pattern, quote)
+int
+__glob_pattern_p (pattern, quote)
      const char *pattern;
      int quote;
 {
@@ -876,6 +878,9 @@ glob_pattern_p (pattern, quote)
 
   return 0;
 }
+#ifdef _LIBC
+weak_alias (__glob_pattern_p, glob_pattern_p)
+#endif
 
 
 /* Like `glob', but PATTERN is a final pathname component,
@@ -900,7 +905,7 @@ glob_in_dir (pattern, directory, flags, errfunc, pglob)
   struct globlink *names = NULL;
   size_t nfound = 0;
 
-  if (!glob_pattern_p (pattern, !(flags & GLOB_NOESCAPE)))
+  if (!__glob_pattern_p (pattern, !(flags & GLOB_NOESCAPE)))
     {
       stream = NULL;
       flags |= GLOB_NOCHECK;
@@ -916,7 +921,7 @@ glob_in_dir (pattern, directory, flags, errfunc, pglob)
 	{
 	  if ((errfunc != NULL && (*errfunc) (directory, errno)) ||
 	      (flags & GLOB_ERR))
-	    return GLOB_ABEND;
+	    return GLOB_ABORTED;
 	}
       else
 	while (1)
@@ -958,7 +963,7 @@ glob_in_dir (pattern, directory, flags, errfunc, pglob)
     }
 
   if (nfound == 0 && (flags & GLOB_NOMAGIC) &&
-      ! glob_pattern_p (pattern, !(flags & GLOB_NOESCAPE)))
+      ! __glob_pattern_p (pattern, !(flags & GLOB_NOESCAPE)))
     flags |= GLOB_NOCHECK;
 
   if (nfound == 0 && (flags & GLOB_NOCHECK))

@@ -1,3 +1,72 @@
+Mon Aug 18 09:41:08 1997  Paul D. Smith  <psmith@baynetworks.com>
+
+	* Version 3.75.91
+
+Fri Aug 15 13:50:54 1997  Paul D. Smith  <psmith@baynetworks.com>
+
+	* read.c (do_define): Remember to count the newline after the endef.
+
+Thu Aug 14 23:14:37 1997  Paul D. Smith  <psmith@baynetworks.com>
+
+	* many: Rewrote builds to use Automake 1.2.
+
+	* AUTHORS: New file.
+	* maintMakefile: Contains maintainer-only make snippets.
+	* GNUmakefile: This now only runs the initial auto* tools.
+	* COPYING,texinfo.tex,mkinstalldirs,install-sh: Removed (obtained
+	automatically by automake).
+	* compatMakefile: Removed (not needed anymore).
+	* README,build.sh.in: Removed (built from templates).
+	* config.h.in,Makefile.in: Removed (built by tools).
+
+Wed Aug 13 02:22:08 1997  Paul D. Smith  <psmith@baynetworks.com>
+
+	* make.texinfo: Updates for DOS/Windows information (Eli Zaretskii)
+	* README,README.DOS: Ditto.
+
+	* remake.c (update_file_1,f_mtime): Fix GPATH handling.
+	* vpath.c (gpath_search): Ditto.
+
+	* file.c (rename_file): New function: rehash, but also rename to
+	the hashname.
+	* filedef.h: Declare it.
+
+	* variable.c (merge_variable_set_lists): Remove free() of variable
+	set; since various files can share variable sets we don't want to
+	free them here.
+
+Tue Aug 12 10:51:54 1997  Paul D. Smith  <psmith@baynetworks.com>
+
+	* configure.in: Require autoconf 2.12
+
+	* make.texinfo: Replace all "cd subdir; $(MAKE)" examples with a
+	more stylistically correct "cd subdir && $(MAKE)".
+
+	* main.c: Global variable `clock_skew_detected' defined.
+	(main): Print final warning if it's set.
+	* make.h: Declare it.
+	* remake.c (f_mtime): Test and set it.
+
+	* job.c (start_job_command): Add special optimizations for
+ 	"do-nothing" rules, containing just the shell no-op ":".  This is
+ 	useful for timestamp files and can make a real difference if you
+ 	have a lot of them (requested by Fergus Henderson <fjh@cs.mu.oz.au>).
+
+	* configure.in,Makefile.in: Rewrote to use the new autoconf
+	program_transform_name macro.
+
+	* function.c (function_strip): Strip newlines as well as spaces
+	and TABs.
+
+Fri Jun  6 23:41:04 1997  Rob Tulloh <rob_tulloh@tivoli.com>
+
+	* remake.c (f_mtime): Datestamps on FAT-based files are rounded to
+	even seconds when stored, so if the date check fails on WINDOWS32
+	 systems, see if this "off-by-one" error is the problem.
+
+	* General: If your TZ environment variable is not set correctly
+	then all your timestamps will be off by hours.  So, set it!
+
 Mon Apr  7 02:06:22 1997  Paul D. Smith  <psmith@baynetworks.com>
 
 	* Version 3.75.1

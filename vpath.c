@@ -310,19 +310,20 @@ construct_vpath_list (pattern, dirpath)
     }
 }
 
-/* Search the GPATH list for a directory where the name pointed to by FILE
-   exists.  If it is found, we set *FILE to the newly malloc'd name of the
-   existing file, *MTIME_PTR (if MTIME_PTR is not NULL) to its modtime (or
-   zero if no stat call was done), and return 1.  Otherwise we return 0.  */
+/* Search the GPATH list for a pathname string that matches the one passed
+   in.  If it is found, return 1.  Otherwise we return 0.  */
 
 int
-gpath_search (file, mtime_ptr)
-     char **file;
-     time_t *mtime_ptr;
+gpath_search (file, len)
+     char *file;
+     int len;
 {
-  if (gpaths != 0
-      && selective_vpath_search (gpaths, file, mtime_ptr))
-    return 1;
+  register char **gp;
+
+  if (gpaths && (len <= gpaths->maxlen))
+    for (gp = gpaths->searchpath; *gp != NULL; ++gp)
+      if (!strncmp(*gp, file, len) && (*gp)[len] == '\0')
+        return 1;
 
   return 0;
 }

@@ -1,3 +1,9 @@
+/* Name of this package (needed by automake) */
+#undef PACKAGE
+
+/* Version of this package (needed by automake) */
+#undef VERSION
+
 /* Define to the name of the SCCS `get' command.  */
 #undef SCCS_GET
 

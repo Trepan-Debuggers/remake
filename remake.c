@@ -597,34 +597,17 @@ update_file_1 (file, depth)
 
   DEBUGPR ("Must remake target `%s'.\n");
 
-  /* It needs to be remade.  If it's VPATH and not GPATH, toss the VPATH */
+  /* It needs to be remade.  If it's VPATH and not reset via GPATH, toss the
+     VPATH */
   if (!streq(file->name, file->hname))
     {
-      char *name = file->name;
-
-      if (gpath_search (&name, NULL))
+      if (debug_flag)
         {
-          register struct file *fp = file;
-
-          /* Since we found the file on GPATH, convert it to use the
-             VPATH filename. */
-          while (fp)
-            {
-              fp->name = fp->hname;
-              fp = fp->prev;
-            }
-          DEBUGPR ("  Using VPATH `%s' due to GPATH.\n");
+          print_spaces (depth);
+          printf("  Ignoring VPATH name `%s'.\n", file->hname);
+          fflush(stdout);
         }
-      else
-        {
-          if (debug_flag)
-            {
-              print_spaces (depth);
-              printf("  Ignoring VPATH name `%s'.\n", file->hname);
-              fflush(stdout);
-            }
-          file->ignore_vpath = 1;
-        }
+      file->ignore_vpath = 1;
     }
 
   /* Now, take appropriate actions to remake the file.  */
@@ -1070,6 +1053,17 @@ f_mtime (file, search)
 		/* vpath_search and library_search store zero in MTIME
 		   if they didn't need to do a stat call for their work.  */
 		file->last_mtime = mtime;
+
+              /* If we found it in VPATH, see if it's in GPATH too; if so,
+                 change the name right now; if not, defer until after the
+                 dependencies are updated. */
+              if (gpath_search (name, strlen(name) - strlen(file->name) - 1))
+                {
+                  rename_file (file, name);
+                  check_renamed (file);
+                  return file_mtime (file);
+                }
+
 	      rehash_file (file, name);
 	      check_renamed (file);
 	      mtime = name_mtime (name);
@@ -1080,10 +1074,12 @@ f_mtime (file, search)
   {
     /* Files can have bogus timestamps that nothing newly made will be
        "newer" than.  Updating their dependents could just result in loops.
-       So notify the user of the anomaly with a warning.  */
+       So notify the user of the anomaly with a warning.
+
+       We only need to do this once, for now. */
 
     static time_t now = 0;
-    if (mtime != -1 && mtime > now && ! file->updated)
+    if (!clock_skew_detected && mtime != -1 && mtime > now && ! file->updated)
       {
 	/* This file's time appears to be in the future.
 	   Update our concept of the present, and compare again.  */
@@ -1096,9 +1092,21 @@ f_mtime (file, search)
 	extern time_t time ();
 	time (&now);
 #endif
-	if (mtime > now)
-          error ("*** Warning: File `%s' has modification time in the future",
-                 file->name);
+#ifdef WINDOWS32
+	/*
+	 * FAT filesystems round time to nearest even second(!). Just
+	 * allow for any file (NTFS or FAT) to perhaps suffer from this
+	 * braindamage.
+	 */
+	if (mtime > now && (((mtime % 2) == 0) && ((mtime-1) > now)))
+#else
+        if (mtime > now)
+#endif
+          {
+            error("*** Warning: File `%s' has modification time in the future",
+                  file->name);
+            clock_skew_detected = 1;
+          }
       }
   }
 

@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.162 1997/04/07 07:23:28 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.163 1997/08/18 18:11:24 psmith Exp $
 @set EDITION 0.51
 @set VERSION 3.75 Beta
 @set UPDATED 9 May 1996
@@ -37,7 +37,7 @@ and issues the commands to recompile them.
 This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Make Manual}, for @code{make}, Version @value{VERSION}.
 
-Copyright (C) 1988, '89, '90, '91, '92, '93, '94, '95, '96
+Copyright (C) 1988, '89, '90, '91, '92, '93, '94, '95, '96, '97
 	Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
@@ -264,7 +264,7 @@ Functions for Transforming Text
 
 * Syntax of Functions::         How to write a function call.
 * Text Functions::              General-purpose text manipulation functions.
-* Filename Functions::          Functions for manipulating file names.
+* File Name Functions::         Functions for manipulating file names.
 * Foreach Function::            Repeat some text with controlled variation.
 * Origin Function::             Find where a variable got its value.
 * Shell Function::              Substitute the output of a shell command.
@@ -1102,6 +1102,8 @@ makefile as has been traditionally done with other versions of
 
 @cindex @code{-I}
 @cindex @code{--include-dir}
+@cindex included makefiles, default directries
+@cindex default directries for included makefiles
 @findex /usr/gnu/include
 @findex /usr/local/include
 @findex /usr/include
@@ -1112,7 +1114,10 @@ First, any directories you have specified with the @samp{-I} or
 (@pxref{Options Summary, ,Summary of Options}).
 Then the following directories (if they exist)
 are searched, in this order:
-@file{@var{prefix}/include} (normally @file{/usr/local/include})
+@file{@var{prefix}/include} (normally @file{/usr/local/include}
+@footnote{GNU Make compiled for MS-DOS and MS-Windows behaves as if
+@var{prefix} has been defined to be the root of the DJGPP tree
+hierarchy.})
 @file{/usr/gnu/include},
 @file{/usr/local/include}, @file{/usr/include}.
 
@@ -1464,7 +1469,10 @@ significance.  If alone, or followed by a slash, it represents your home
 directory.  For example @file{~/bin} expands to @file{/home/you/bin}.
 If the @samp{~} is followed by a word, the string represents the home
 directory of the user named by that word.  For example @file{~john/bin}
-expands to @file{/home/john/bin}.@refill
+expands to @file{/home/john/bin}.  On systems which don't have a home
+directory for each user (such as MS-DOS or MS-Windows), this
+functionality can be simulated by setting the environment variable
+@var{HOME}.@refill
 
 Wildcard expansion happens automatically in targets, in dependencies,
 and in commands (where the shell does the expansion).  In other
@@ -1578,6 +1586,24 @@ expansion, but you need more sophisticated techniques, including the
 These are described in the following section.
 @end iftex
 
+@cindex wildcards and MS-DOS/MS-Windows backslashes
+@cindex backslashes in pathnames and wildcard expansion
+
+Microsoft operating systems (MS-DOS and MS-Windows) use backslashes to
+separate directories in pathnames, like so:
+
+@example
+  c:\foo\bar\baz.c
+@end example
+
+This is equivalent to the Unix-style @file{c:/foo/bar/baz.c} (the
+@file{c:} part is the so-called drive letter).  When @code{make} runs on
+these systems, it supports backslashes as well as the Unix-style forward
+slashes in pathnames.  However, this support does @emph{not} include the
+wildcard expansion, where backslash is a quote character.  Therefore,
+you @emph{must} use Unix-style slashes in these cases.
+
+
 @node Wildcard Function,  , Wildcard Pitfall, Wildcards
 @subsection The Function @code{wildcard}
 @findex wildcard
@@ -1676,13 +1702,15 @@ Thus, if a file that is listed as a target or dependency does not exist
 in the current directory, @code{make} searches the directories listed in
 @code{VPATH} for a file with that name.  If a file is found in one of
 them, that file may become the dependency (see below).  Rules may then
-specify the names of source files in the dependencies as if they all
+specify the names of files in the dependency list as if they all
 existed in the current directory.  @xref{Commands/Search, ,Writing Shell
 Commands with Directory Search}.
 
 In the @code{VPATH} variable, directory names are separated by colons or
 blanks.  The order in which directories are listed is the order followed
-by @code{make} in its search.
+by @code{make} in its search.  (On MS-DOS and MS-Windows, semi-colons
+are used as separators of directory names in @code{VPATH}, since the
+colon can be used in the pathname itself, after the drive letter.)
 
 For example,
 
@@ -1715,11 +1743,12 @@ is found in the directory @file{src}.
 @subsection The @code{vpath} Directive
 @findex vpath
 
-Similar to the @code{VPATH} variable but more selective is the @code{vpath}
-directive (note lower case), which allows you to specify a search path for a particular class
-of file names, those that match a particular pattern.  Thus you can supply
-certain search directories for one class of file names and other directories
-(or none) for other file names.
+Similar to the @code{VPATH} variable, but more selective, is the
+@code{vpath} directive (note lower case), which allows you to specify a
+search path for a particular class of file names: those that match a
+particular pattern.  Thus you can supply certain search directories for
+one class of file names and other directories (or none) for other file
+names.
 
 There are three forms of the @code{vpath} directive:
 
@@ -1729,8 +1758,8 @@ Specify the search path @var{directories} for file names that match
 @var{pattern}.
 
 The search path, @var{directories}, is a list of directories to be
-searched, separated by colons or blanks, just like the search path used
-in the @code{VPATH} variable.
+searched, separated by colons (semi-colons on MS-DOS and MS-Windows) or
+blanks, just like the search path used in the @code{VPATH} variable.
 
 @item vpath @var{pattern}
 Clear out the search path associated with @var{pattern}.
@@ -1817,7 +1846,7 @@ will look for a file ending in @samp{.c} in @file{foo}, then
 
 When a dependency is found through directory search, regardless of type
 (general or selective), the pathname located may not be the one that
-@code{make} actually provides you in the dependency list.  Sometimes,
+@code{make} actually provides you in the dependency list.  Sometimes
 the path discovered through directory search is thrown away.
 
 The algorithm @code{make} uses to decide whether to keep or abandon a
@@ -1829,7 +1858,7 @@ If a target file does not exist at the path specified in the makefile,
 directory search is performed.
 
 @item
-If the directory search is successful that path is kept, and this file
+If the directory search is successful, that path is kept and this file
 is tentatively stored as the target.
 
 @item
@@ -1843,17 +1872,20 @@ rebuilt:
 @item
 If the target does @emph{not} need to be rebuilt, the path to the file
 found during directory search is used for any dependency lists which
-contain this target.
+contain this target.  In short, if @code{make} doesn't need to rebuild
+the target then you use the path found via directory search.
 
 @item
 If the target @emph{does} need to be rebuilt (is out-of-date), the
 pathname found during directory search is @emph{thrown away}, and the
-target is rebuilt using the filename specified in the makefile.
+target is rebuilt using the file name specified in the makefile.  In
+short, if @code{make} must rebuild, then the target is rebuilt locally,
+not in the directory found via directory search.
 @end enumerate
 @end enumerate
 
-This may seem overly complex, but in fact it is almost always exactly
-what you want.
+This algorithm may seem complex, but in practice it is quite often
+exactly what you want.
 
 @cindex traditional directory search
 @cindex directory search, traditional
@@ -1958,7 +1990,9 @@ handles it specially by searching for the file @file{lib@var{name}.a} in
 the current directory, in directories specified by matching @code{vpath}
 search paths and the @code{VPATH} search path, and then in the
 directories @file{/lib}, @file{/usr/lib}, and @file{@var{prefix}/lib}
-(normally @file{/usr/local/lib}).
+(normally @file{/usr/local/lib}, but MS-DOS/MS-Windows versions of
+@code{make} behave as if @var{prefix} is defined to be the root of the
+DJGPP installation tree).
 
 For example,
 
@@ -2834,13 +2868,15 @@ by making a new subshell for each line.  (In practice, @code{make} may
 take shortcuts that do not affect the results.)
 
 @cindex @code{cd} (shell command)
-@strong{Please note:} this implies that shell commands such as
-@code{cd} that set variables local to each process will not affect the
-following command lines.  If you want to use @code{cd} to affect the
-next command, put the two on a single line with a semicolon between
-them.  Then @code{make} will consider them a single command and pass
-them, together, to a shell which will execute them in sequence.  For
-example:
+@strong{Please note:} this implies that shell commands such as @code{cd}
+that set variables local to each process will not affect the following
+command lines. @footnote{On MS-DOS, the value of current working
+directory is @strong{global}, so changing it @emph{will} affect the
+following command lines on those systems.}  If you want to use @code{cd}
+to affect the next command, put the two on a single line with a
+semicolon between them.  Then @code{make} will consider them a single
+command and pass them, together, to a shell which will execute them in
+sequence.  For example:
 
 @example
 foo : bar/lose
@@ -2871,13 +2907,75 @@ foo : bar/lose
 The program used as the shell is taken from the variable @code{SHELL}.
 By default, the program @file{/bin/sh} is used.
 
+@vindex COMSPEC
+On MS-DOS, if @code{SHELL} is not set, the value of the variable
+@code{COMSPEC} (which is always set) is used instead.
+
+@cindex @code{SHELL}, MS-DOS specifics
+The processing of lines that set the variable @code{SHELL} in Makefiles
+is different on MS-DOS.  The stock shell, @file{command.com}, is
+ridiculously limited in its functionality and many users of @code{make}
+tend to install a replacement shell.  Therefore, on MS-DOS, @code{make}
+examines the value of @code{SHELL}, and changes its behavior based on
+whether it points to a Unix-style or DOS-style shell.  This allows
+reasonable functionality even if @code{SHELL} points to
+@file{command.com}.
+
+If @code{SHELL} points to a Unix-style shell, @code{make} on MS-DOS
+additionally checks whether that shell can indeed be found; if not, it
+ignores the line that sets @code{SHELL}.  In MS-DOS, GNU @code{make}
+searches for the shell in the following places:
+
+@enumerate
+@item
+In the precise place pointed to by the value of @code{SHELL}.  For
+example, if the makefile specifies @samp{SHELL = /bin/sh}, @code{make}
+will look in the directory @file{/bin} on the current drive.
+
+@item
+In the current directory.
+
+@item
+In each of the directories in the @code{PATH} variable, in order.
+
+@end enumerate
+
+In every directory it examines, @code{make} will first look for the
+specific file (@file{sh} in the example above).  If this is not found,
+it will also look in that directory for that file with one of the known
+extensions which identify executable files.  For example @file{.exe},
+@file{.com}, @file{.bat}, @file{.btm}, @file{.sh}, and some others.
+
+If any of these attempts is successful, the value of @code{SHELL} will
+be set to the full pathname of the shell as found.  However, if none of
+these is found, the value of @code{SHELL} will not be changed, and thus
+the line that sets it will be effectively ignored.  This is so
+@code{make} will only support features specific to a Unix-style shell if
+such a shell is actually installed on the system where @code{make} runs.
+
+Note that this extended search for the shell is limited to the cases
+where @code{SHELL} is set from the Makefile; if it is set in the
+environment or command line, you are expected to set it to the full
+pathname of the shell, exactly as things are on Unix.
+
+The effect of the above DOS-specific processing is that a Makefile that
+says @samp{SHELL = /bin/sh} (as many Unix makefiles do), will work
+on MS-DOS unaltered if you have e.g. @file{sh.exe} installed in some
+directory along your @code{PATH}.
+
 @cindex environment, @code{SHELL} in
 Unlike most variables, the variable @code{SHELL} is never set from the
 environment.  This is because the @code{SHELL} environment variable is
 used to specify your personal choice of shell program for interactive
-use.  It would be very bad for personal choices like this to affect
-the functioning of makefiles.  @xref{Environment, ,Variables from the
-Environment}.
+use.  It would be very bad for personal choices like this to affect the
+functioning of makefiles.  @xref{Environment, ,Variables from the
+Environment}.  However, on MS-DOS and MS-Windows the value of
+@code{SHELL} in the environment @strong{is} used, since on those systems
+most users do not set this variable, and therefore it is most likely set
+specifically to be used by @code{make}.  On MS-DOS, if the setting of
+@code{SHELL} is not suitable for @code{make}, you can set the variable
+@code{MAKESHELL} to the shell that @code{make} should use; this will
+override the value of @code{SHELL}.
 
 @node Parallel, Errors, Execution, Commands
 @section Parallel Execution
@@ -2893,6 +2991,9 @@ Normally, @code{make} will execute only one command at a time, waiting
 for it to finish before executing the next.  However, the @samp{-j} or
 @samp{--jobs} option tells @code{make} to execute many commands
 simultaneously.@refill
+
+On MS-DOS, the @samp{-j} option has no effect, since that system doesn't
+support multi-processing.
 
 If the @samp{-j} option is followed by an integer, this is the number of
 commands to execute at once; this is called the number of @dfn{job slots}.
@@ -3110,7 +3211,7 @@ subdirectory.  You can do it by writing this:
 
 @example
 subsystem:
-        cd subdir; $(MAKE)
+        cd subdir && $(MAKE)
 @end example
 
 @noindent
@@ -3146,13 +3247,13 @@ not the explicit command name @samp{make}, as shown here:
 @example
 @group
 subsystem:
-        cd subdir; $(MAKE)
+        cd subdir && $(MAKE)
 @end group
 @end example
 
 The value of this variable is the file name with which @code{make} was
 invoked.  If this file name was @file{/bin/make}, then the command executed
-is @samp{cd subdir; /bin/make}.  If you use a special version of
+is @samp{cd subdir && /bin/make}.  If you use a special version of
 @code{make} to run the top-level makefile, the same special version will be
 executed for recursive invocations.
 @cindex @code{cd} (shell command)
@@ -3169,7 +3270,7 @@ Consider the command @samp{make -t} in the above example.  (The
 any commands; see @ref{Instead of Execution}.)  Following the usual
 definition of @samp{-t}, a @samp{make -t} command in the example would
 create a file named @file{subsystem} and do nothing else.  What you
-really want it to do is run @samp{@w{cd subdir;} @w{make -t}}; but that would
+really want it to do is run @samp{@w{cd subdir &&} @w{make -t}}; but that would
 require executing the command, and @samp{-t} says not to execute
 commands.@refill
 @cindex @code{-t}, and recursion
@@ -3420,7 +3521,7 @@ value of @code{MAKEFLAGS}, like this:
 
 @example
 subsystem:
-        cd subdir; $(MAKE) MAKEFLAGS=
+        cd subdir && $(MAKE) MAKEFLAGS=
 @end example
 
 @vindex MAKEOVERRIDES
@@ -3459,7 +3560,7 @@ this:
 
 @example
 subsystem:
-        cd subdir; $(MAKE) $(MFLAGS)
+        cd subdir && $(MAKE) $(MFLAGS)
 @end example
 
 @noindent
@@ -4585,7 +4686,9 @@ Such problems would be especially likely with the variable @code{SHELL},
 which is normally present in the environment to specify the user's choice
 of interactive shell.  It would be very undesirable for this choice to
 affect @code{make}.  So @code{make} ignores the environment value of
-@code{SHELL}.@refill
+@code{SHELL} (except on MS-DOS and MS-Windows, where @code{SHELL} is
+usually not set.  @xref{Execution, ,Special handling of SHELL on
+MS-DOS}.)@refill
 
 @node Conditionals, Functions, Using Variables, Top
 @chapter Conditional Parts of Makefiles
@@ -4882,7 +4985,7 @@ call, just as a variable might be substituted.
 @menu
 * Syntax of Functions::         How to write a function call.
 * Text Functions::              General-purpose text manipulation functions.
-* Filename Functions::          Functions for manipulating file names.
+* File Name Functions::         Functions for manipulating file names.
 * Foreach Function::            Repeat some text with controlled variation.
 * Origin Function::             Find where a variable got its value.
 * Shell Function::              Substitute the output of a shell command.
@@ -4951,7 +5054,7 @@ bar:= $(subst $(space),$(comma),$(foo))
 Here the @code{subst} function replaces each space with a comma, through
 the value of @code{foo}, and substitutes the result.
 
-@node Text Functions, Filename Functions, Syntax of Functions, Functions
+@node Text Functions, File Name Functions, Syntax of Functions, Functions
 @section Functions for String Substitution and Analysis
 @cindex functions, for text
 
@@ -5215,7 +5318,7 @@ used so that the new value is assigned even if the previous value of
 @code{CFLAGS} was specified with a command argument (@pxref{Override
 Directive, , The @code{override} Directive}).
 
-@node Filename Functions, Foreach Function, Text Functions, Functions
+@node File Name Functions, Foreach Function, Text Functions, Functions
 @section Functions for File Names
 @cindex functions, for file names
 @cindex file name functions
@@ -5282,11 +5385,11 @@ file names.
 For example,
 
 @example
-$(suffix src/foo.c hacks)
+$(suffix src/foo.c src-1.0/bar.c hacks)
 @end example
 
 @noindent
-produces the result @samp{.c}.
+produces the result @samp{.c .c}.
 
 @item $(basename @var{names}@dots{})
 @findex basename
@@ -5294,15 +5397,16 @@ produces the result @samp{.c}.
 @cindex file name, basename of
 Extracts all but the suffix of each file name in @var{names}.  If the
 file name contains a period, the basename is everything starting up to
-(and not including) the last period.  Otherwise, the basename is the
-entire file name.  For example,
+(and not including) the last period.  Periods in the directory part are
+ignored.  If there is no period, the basename is the entire file name.
+For example,
 
 @example
-$(basename src/foo.c hacks)
+$(basename src/foo.c src-1.0/bar hacks)
 @end example
 
 @noindent
-produces the result @samp{src/foo hacks}.
+produces the result @samp{src/foo src-1.0/bar hacks}.
 
 @c plural convention with dots (be consistent)
 @item $(addsuffix @var{suffix},@var{names}@dots{})
@@ -5429,7 +5533,7 @@ that match the pattern.
 @xref{Wildcards, ,Using Wildcard Characters in File Names}.
 @end table
 
-@node Foreach Function, Origin Function, Filename Functions, Functions
+@node Foreach Function, Origin Function, File Name Functions, Functions
 @section The @code{foreach} Function
 @findex foreach
 @cindex words, iterating over
@@ -6197,6 +6301,7 @@ argument, @code{make} runs as many jobs simultaneously as possible.  If
 there is more than one @samp{-j} option, the last one is effective.
 @xref{Parallel, ,Parallel Execution},
 for more information on how commands are run.
+Note that this option is ignored on MS-DOS.
 
 @item -k
 @cindex @code{-k}
@@ -7355,7 +7460,7 @@ variants that get just the file's directory name or just the file name
 within the directory.  The variant variables' names are formed by
 appending @samp{D} or @samp{F}, respectively.  These variants are
 semi-obsolete in GNU @code{make} since the functions @code{dir} and
-@code{notdir} can be used to get a similar effect (@pxref{Filename
+@code{notdir} can be used to get a similar effect (@pxref{File Name
 Functions, , Functions for File Names}).  Note, however, that the
 @samp{F} variants all omit the trailing slash which always appears in
 the output of the @code{dir} function.  Here is a table of the variants:
@@ -8529,43 +8634,43 @@ Sort the words in @var{list} lexicographically, removing duplicates.@*
 
 @item $(dir @var{names}@dots{})
 Extract the directory part of each file name.@*
-@xref{Filename Functions, ,Functions for File Names}.
+@xref{File Name Functions, ,Functions for File Names}.
 
 @item $(notdir @var{names}@dots{})
 Extract the non-directory part of each file name.@*
-@xref{Filename Functions, ,Functions for File Names}.
+@xref{File Name Functions, ,Functions for File Names}.
 
 @item $(suffix @var{names}@dots{})
 Extract the suffix (the last @samp{.} and following characters) of each file name.@*
-@xref{Filename Functions, ,Functions for File Names}.
+@xref{File Name Functions, ,Functions for File Names}.
 
 @item $(basename @var{names}@dots{})
 Extract the base name (name without suffix) of each file name.@*
-@xref{Filename Functions, ,Functions for File Names}.
+@xref{File Name Functions, ,Functions for File Names}.
 
 @item $(addsuffix @var{suffix},@var{names}@dots{})
 Append @var{suffix} to each word in @var{names}.@*
-@xref{Filename Functions, ,Functions for File Names}.
+@xref{File Name Functions, ,Functions for File Names}.
 
 @item $(addprefix @var{prefix},@var{names}@dots{})
 Prepend @var{prefix} to each word in @var{names}.@*
-@xref{Filename Functions, ,Functions for File Names}.
+@xref{File Name Functions, ,Functions for File Names}.
 
 @item $(join @var{list1},@var{list2})
 Join two parallel lists of words.@*
-@xref{Filename Functions, ,Functions for File Names}.
+@xref{File Name Functions, ,Functions for File Names}.
 
 @item $(word @var{n},@var{text})
 Extract the @var{n}th word (one-origin) of @var{text}.@*
-@xref{Filename Functions, ,Functions for File Names}.
+@xref{File Name Functions, ,Functions for File Names}.
 
 @item $(words @var{text})
 Count the number of words in @var{text}.@*
-@xref{Filename Functions, ,Functions for File Names}.
+@xref{File Name Functions, ,Functions for File Names}.
 
 @item $(firstword @var{names}@dots{})
 Extract the first word of @var{names}.@*
-@xref{Filename Functions, ,Functions for File Names}.
+@xref{File Name Functions, ,Functions for File Names}.
 
 @item $(wildcard @var{pattern}@dots{})
 Find file names matching a shell file name pattern (@emph{not} a
@@ -8668,6 +8773,12 @@ Directory search path for files not found in the current directory.@*
 The name of the system default command interpreter, usually @file{/bin/sh}.
 You can set @code{SHELL} in the makefile to change the shell used to run
 commands.  @xref{Execution, ,Command Execution}.
+
+@item MAKESHELL
+
+On MS-DOS only, the name of the command interpreter that is to be used
+by @code{make}. This value takes precedence over the value of
+@code{SHELL}.  @xref{Execution, ,MAKESHELL variable}.
 
 @item MAKE
 

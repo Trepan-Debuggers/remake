@@ -187,6 +187,23 @@ rehash_file (file, name)
   file_hash_enter (file, name, oldhash, file->name);
 }
 
+/* Rename FILE to NAME.  This is not as simple as resetting
+   the `name' member, since it must be put in a new hash bucket,
+   and possibly merged with an existing file called NAME.  */
+
+void
+rename_file (file, name)
+     register struct file *file;
+     char *name;
+{
+  rehash_file(file, name);
+  while (file)
+    {
+      file->name = file->hname;
+      file = file->prev;
+    }
+}
+
 void
 file_hash_enter (file, name, oldhash, oldname)
      register struct file *file;

@@ -333,8 +333,6 @@ merge_variable_set_lists (setlist0, setlist1)
 
       merge_variable_sets (list0->set, next->set);
 
-      free ((char *) next);
-
       last0 = list0;
       list0 = list0->next;
     }

@@ -1,14 +1,21 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.54 1997/04/07 18:02:17 psmith Exp $])
-AC_PREREQ(2.10)dnl		dnl Minimum Autoconf version required.
+AC_REVISION([$Id: configure.in,v 1.55 1997/08/18 18:11:14 psmith Exp $])
+AC_PREREQ(2.12)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
-AC_CONFIG_HEADER(config.h)
-AC_CONFIG_SUBDIRS(glob)		dnl Run configure in glob subdirectory.
+
+AM_INIT_AUTOMAKE(make, 3.75.91)
+AM_CONFIG_HEADER(config.h)
+AC_CONFIG_SUBDIRS(glob)
+
+AM_CONDITIONAL(MAINT_MAKEFILE, test -r $srcdir/maintMakefile)
+
+dnl Regular configure stuff
 
 AC_PROG_MAKE_SET
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_CPP			dnl Later checks need this.
+AC_ARG_PROGRAM
 AC_AIX
 AC_ISC_POSIX
 AC_MINIX

@@ -376,7 +376,7 @@ extern void child_access ();
 #endif
 
 /* We omit these declarations on non-POSIX systems which define _POSIX_VERSION,
-   because such systems often declare the in header files anyway.  */
+   because such systems often declare them in header files anyway.  */
 
 #if !defined (__GNU_LIBRARY__) && !defined (POSIX) && !defined (_POSIX_VERSION) && !defined(WINDOWS32)
 
@@ -407,6 +407,7 @@ extern int debug_flag, print_data_base_flag, question_flag, touch_flag;
 extern int env_overrides, no_builtin_rules_flag, print_version_flag;
 extern int print_directory_flag, warn_undefined_variables_flag;
 extern int posix_pedantic;
+extern int clock_skew_detected;
 
 extern unsigned int job_slots;
 #ifndef NO_FLOAT

@@ -392,6 +392,12 @@ struct file *default_file;
    This turns on pedantic compliance with POSIX.2.  */
 
 int posix_pedantic;
+
+/* Nonzero if some rule detected clock skew; we keep track so (a) we only
+   print one warning about it during the run, and (b) we can print a final
+   warning at the end of the run. */
+
+int clock_skew_detected;
 
 /* Mask of signals that are being caught with fatal_error_signal.  */
 
@@ -1553,6 +1559,10 @@ int main (int argc, char ** argv)
 	else
 	  fatal ("No targets");
       }
+
+    /* If we detected some clock skew, generate one last warning */
+    if (clock_skew_detected)
+      error("*** Warning:  Clock skew detected.  Your build may be incomplete.");
 
     /* Exit.  */
     die (status);

@@ -75,10 +75,10 @@ Notes:
       When shell features like redirection or filename wildcards are
       involved, Make calls the shell.
 
-      This port supports both DOS shells (the stock COMMAND.COM and
-      its 4DOS/NDOS replacements), and Unix-style shells (tested with
-      the venerable Stewartson's `ms_sh' 2.3 and the recent DJGPP port
-      of `bash' by Daisuke Aoyama <jack@st.rim.or.jp>).
+      This port supports both DOS shells (the stock COMMAND.COM and its
+      4DOS/NDOS replacements), and Unix-style shells (tested with the
+      venerable Stewartson's `ms_sh' 2.3 and the DJGPP port of `bash' by
+      Daisuke Aoyama <jack@st.rim.or.jp>).
 
       When the $SHELL variable points to a Unix-style shell, Make
       works just like you'd expect on Unix, calling the shell for any
@@ -204,8 +204,8 @@ Notes:
       doesn't include characters illegal on MSDOS FAT filesystems,
       will be automatically down-cased.)  User reports that I have
       indicate that this default behavior is generally what you'd
-      expect; however, since this is the first DJGPP port of Make that
-      supports long filenames, your input is most welcome.
+      expect; however, since support for long filenames in the DJGPP
+      port of GNU Make is relatively new, your input is most welcome.
 
       In any case, if you hit a situation where you must force Make to
       get the 8+3 DOS filenames in upper case, set FNCASE=y in the
@@ -218,7 +218,7 @@ Notes:
       make implicit assumptions about the pathname syntax.  In
       particular, the directories are assumed to be separated by `/',
       and any pathname which doesn't begin with a `/' is assumed to be
-      releative to the current directory.  This port attempts to
+      relative to the current directory.  This port attempts to
       support DOS-style pathnames which might include the drive letter
       and use backslashes instead of forward slashes.  However, this
       support is not complete; I feel that pursuing this support too

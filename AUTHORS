@@ -1,0 +1,46 @@
+-----------------------------------
+
+GNU make and the GNU Make User's Manual were created by:
+    Roland McGrath <roland@gnu.ai.mit.edu>
+    Richard M. Stallman <rms@gnu.ai.mit.edu>
+
+
+Development and maintenance up to GNU make 3.75 by:
+    Roland McGrath <roland@gnu.ai.mit.edu>
+
+
+Development and maintenance starting with GNU make 3.76 by:
+    Paul D. Smith <psmith@gnu.ai.mit.edu>
+
+
+-----------------------------------
+GNU Make porting efforts:
+
+  Port to VMS by:
+      Klaus Kaempf (kkaempf@progis.de)
+
+
+  Port to Amiga by:
+      Aaron Digulla <digulla@fh-konstanz.de>
+
+
+  Port to MS-DOS (DJGPP) and MS-Windows 95/NT by:
+      DJ Delorie <dj@delorie.com>
+      Rob Tulloh <rob_tulloh@tivoli.com>
+      Eli Zaretskii <eliz@is.elta.co.il>
+
+-----------------------------------
+Other contributors:
+
+  Janet Carson <janet_carson@tivoli.com>
+  Paul Eggert  <eggert@twinsun.com>
+  Klaus Heinz <kamar@ease.rhein-main.de>
+  Michael Joosten
+  Jim Kelton <jim_kelton@tivoli.com>
+  David Lubbren <uhay@rz.uni-karlsruhe.de>
+  Andreas Schwab <schwab@issan.informatik.uni-dortmund.de>
+  Carl Staelin (Princeton University)
+  Ian Stewartson (Data Logic Limited)
+
+With suggestions/comments/bug reports from a cast of ... well ...
+hundreds, anyway :)

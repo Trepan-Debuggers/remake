@@ -474,7 +474,7 @@ read_makefile (filename, flags)
         ++p2;
       if (*p2 == '\0')
         p2 = NULL;
-      else if (*p2 == ':')
+      else if (p2[0] == ':' && p2[1] == '\0')
         goto check_var;
 
       /* We must first check for conditional and `define' directives before
@@ -928,7 +928,7 @@ do_define (name, namelen, origin, lineno, infile, filename)
 	  (void) define_variable (var, strlen (var), definition, origin, 1);
 	  free (definition);
 	  freebuffer (&lb);
-	  return lineno;
+	  return (lineno + nlines);
 	}
       else
 	{

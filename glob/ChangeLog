@@ -1,3 +1,24 @@
+Tue Aug 12 10:52:34 1997  Paul D. Smith  <psmith@baynetworks.com>
+
+	* configure.in: Require autoconf 2.12.
+
+	* glob: Updates from latest GNU libc glob code.
+
+	* glob.c,glob.h,fnmatch.h: Change all WIN32 references to WINDOWS32.
+
+	* glob.h: OSF4 defines macros in such a way that GLOB_ALTDIRFUNC
+	is not defined.  Added a test to the #if which defines it if
+	_GNU_SOURCE is defined; that's set by both glob.c and GNU make.
+
+	* glob.c: SunOS4 w/ cc needs #include <stdio.h>, since assert.h
+	requires stderr but doesn't include stdio.h :-/.
+	(next_brace_sub): De-protoize function definition.
+	(glob): Cast __alloca(); on SunOS4 it uses the default return type
+	of int.
+	(glob): Irix defines getlogin_r() to return a char*; move the
+	extern for that into the _LIBC area since it isn't used except in
+	LIBC anyway.  Likewise, move extern getlogin() into the "else".
+
 Sat Jul 20 21:55:31 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 
 	Win32 hacks from <Rob_Tulloh@tivoli.com>.

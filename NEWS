@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  06 Apr 1996
+  18 Aug 1997
 
 Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
 See the end for copying conditions.
@@ -21,7 +21,8 @@ Version 3.76
   list of words from number S to number E (inclusive) of TEXT.
 
 * Instead of an error, detection of future modification times gives a
-  warning and continues.
+  warning and continues.  The warning is repeated just before GNU make
+  exits, so it is less likely to be lost.
 
 * Fix the $(basename) and $(suffix) functions so they only operate on
   the last filename, not the entire string:
@@ -32,6 +33,8 @@ Version 3.76
     $(basename a.b/c)      a                      a.b/c
     $(suffix a.b)          b                      b
     $(suffix a.b/c)        b/c                    <empty>
+
+* The $(strip) function now removes newlines as well as TABs and spaces.
 
 * Updates to the Windows 95/NT port from Rob Tulloh (see README.W32).
 

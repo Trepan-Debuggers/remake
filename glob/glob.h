@@ -1,4 +1,4 @@
-/* Copyright (C) 1991, 1992, 1995, 1996 Free Software Foundation, Inc.
+/* Copyright (C) 1991, 1992, 1995, 1996, 1997 Free Software Foundation, Inc.
 
    This file is part of the GNU C Library.  Its master source is NOT part of
    the C library, however.  The master source lives in /gd/gnu/lib.
@@ -19,7 +19,6 @@
    Boston, MA 02111-1307, USA.  */
 
 #ifndef	_GLOB_H
-
 #define	_GLOB_H	1
 
 #ifdef	__cplusplus
@@ -55,7 +54,7 @@ extern "C"
 			 GLOB_PERIOD|GLOB_ALTDIRFUNC|GLOB_BRACE|     \
 			 GLOB_NOMAGIC|GLOB_TILDE)
 
-#if !defined (_POSIX_C_SOURCE) || _POSIX_C_SOURCE < 2 || defined (_BSD_SOURCE)
+#if !defined (_POSIX_C_SOURCE) || _POSIX_C_SOURCE < 2 || defined (_BSD_SOURCE) || defined (_GNU_SOURCE)
 #define	GLOB_MAGCHAR	(1 << 8)/* Set in gl_flags if any metachars seen.  */
 #define GLOB_ALTDIRFUNC	(1 << 9)/* Use gl_opendir et al functions.  */
 #define GLOB_BRACE	(1 << 10)/* Expand "{a,b}" to "a" "b".  */
@@ -65,8 +64,14 @@ extern "C"
 
 /* Error returns from `glob'.  */
 #define	GLOB_NOSPACE	1	/* Ran out of memory.  */
-#define	GLOB_ABEND	2	/* Read error.  */
+#define	GLOB_ABORTED	2	/* Read error.  */
 #define	GLOB_NOMATCH	3	/* No matches found.  */
+
+#ifdef _GNU_SOURCE
+/* Previous versions of this file defined GLOB_ABEND instead of
+   GLOB_ABORTED.  Provide a compatibility definition here.  */
+# define GLOB_ABEND GLOB_ABORTED
+#endif
 
 /* Structure describing a globbing run.  */
 #if !defined (_AMIGA) && !defined (VMS) /* Buggy compiler.   */
@@ -103,6 +108,16 @@ extern int glob __P ((const char *__pattern, int __flags,
 /* Free storage allocated in PGLOB by a previous `glob' call.  */
 extern void globfree __P ((glob_t *__pglob));
 
+
+#ifdef _GNU_SOURCE
+/* Return nonzero if PATTERN contains any metacharacters.
+   Metacharacters can be quoted with backslashes if QUOTE is nonzero.
+
+   This function is not part of the interface specified by POSIX.2
+   but several programs want to use it.  */
+extern int __glob_pattern_p __P ((__const char *__pattern, int __quote));
+extern int glob_pattern_p __P ((__const char *__pattern, int __quote));
+#endif
 
 #ifdef	__cplusplus
 }

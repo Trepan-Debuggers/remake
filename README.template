@@ -1,4 +1,4 @@
-This directory contains the VERSION test release of GNU Make.
+This directory contains the %VERSION% test release of GNU Make.
 All bugs reported for previous test releases have been fixed.
 Some bugs surely remain.
 
@@ -16,8 +16,9 @@ Make, try using `build.sh' instead.
 
 See README.W32 for details about GNU Make on Windows NT or 95.
 See README.Amiga for details about GNU Make on AmigaDOS.
-The MSDOS port of GNU Make is available as part of DJGPP; see the
-WWW page http://www.delorie.com/djgpp/ for more information.
+A precompiled binary of the MSDOS port of GNU Make is available as part
+of DJGPP; see the WWW page http://www.delorie.com/djgpp/ for more
+information.
 
 It has been reported that the XLC 1.2 compiler on AIX 3.2 is buggy such
 that if you compile make with `cc -O' on AIX 3.2, it will not work correctly.

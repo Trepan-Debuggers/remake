@@ -1,0 +1,33 @@
+# Maintainer-only makefile segment.  This contains things that are relevant
+# only if you have the full copy of the GNU make sources, not a dist copy.
+#
+
+# Find the glob source files... this might be dangerous, but we're maintainers!
+#
+globsrc := $(wildcard glob/*.c)
+
+# General rule for turning a .template into a regular file.
+#
+README : % : %.template configure.in
+	rm -f $@
+	sed 's/%VERSION%/$(version)/' < $< > $@
+	chmod a-w $@
+
+# Construct build.sh.in
+#
+build.sh.in: build.template Makefile.am
+	rm -f $@
+	sed -e 's@%objs%@$(filter-out remote-%, $(make_OBJECTS)\
+	       $(patsubst %.c,%.o,$(globsrc)))@' \
+	    $< > $@
+	chmod a-w+x $@
+
+# Put the alpha distribution files up for anonymous FTP.
+#
+ALPHA	:= ~ftp/gnu
+TARFILE	:= $(distdir).tar.gz
+
+.PHONY: alpha
+alpha: $(ALPHA) $(TARFILE)
+	@rm -f $(ALPHA)/$(TARFILE)
+	cp -p $(TARFILE) $(ALPHA)
