@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.79.1\n"
 "POT-Creation-Date: 2000-06-23 12:21-0400\n"
-"PO-Revision-Date: 2001-06-12 16:56+02:00\n"
+"PO-Revision-Date: 2001-09-02 18:21+02:00\n"
 "Last-Translator: Byrial Ole Jensen <byrial@image.dk>\n"
 "Language-Team: Danish <dansk@klid.dk>\n"
 "MIME-Version: 1.0\n"
@@ -20,12 +20,12 @@ msgstr "forsøg på at bruge en ikke understøttet facilitet: '%s'"
 
 #: ar.c:141
 msgid "touch archive member is not available on VMS"
-msgstr "berør arkivmedlem er ikke tilgængelig på VMS"
+msgstr "'berør arkivmedlem' er ikke tilgængelig på VMS"
 
 #: ar.c:173
 #, c-format
 msgid "touch: Archive `%s' does not exist"
-msgstr "berør: Arkiv '%s' findes ikke"
+msgstr "berør: Arkivet '%s' findes ikke"
 
 #: ar.c:176
 #, c-format
@@ -35,7 +35,7 @@ msgstr "berør: '%s' er ikke et gyldigt arkiv"
 #: ar.c:183
 #, c-format
 msgid "touch: Member `%s' does not exist in `%s'"
-msgstr "berør: Medlem '%s' findes ikke i '%s'"
+msgstr "berør: Medlemmet '%s' findes ikke i '%s'"
 
 #: ar.c:190
 #, c-format
@@ -55,7 +55,7 @@ msgstr "lbr$ini_control fejlede med status = %d"
 #: arscan.c:166
 #, c-format
 msgid "unable to open library `%s' to lookup member `%s'"
-msgstr "kan ikke åbne bibliotek '%s' for at søge medlem '%s'"
+msgstr "kan ikke åbne biblioteket '%s' for at søge medlemmet '%s'"
 
 #: arscan.c:838
 #, c-format
@@ -83,22 +83,22 @@ msgstr "*** Afbrydelse.\n"
 #: commands.c:486
 #, c-format
 msgid "*** [%s] Archive member `%s' may be bogus; not deleted"
-msgstr "*** [%s] Arkivmedlem '%s' er måske falsk; ikke slettet"
+msgstr "*** [%s] Arkivmedlemmet '%s' er måske falsk; ikke slettet"
 
 #: commands.c:489
 #, c-format
 msgid "*** Archive member `%s' may be bogus; not deleted"
-msgstr "*** Arkivmedlem '%s' er måske falsk; ikke slettet"
+msgstr "*** Arkivmedlemmet '%s' er måske falsk; ikke slettet"
 
 #: commands.c:501
 #, c-format
 msgid "*** [%s] Deleting file `%s'"
-msgstr "*** [%s] Sletter fil '%s'"
+msgstr "*** [%s] Sletter filen '%s'"
 
 #: commands.c:503
 #, c-format
 msgid "*** Deleting file `%s'"
-msgstr "*** Sletter fil '%s'"
+msgstr "*** Sletter filen '%s'"
 
 #: commands.c:541
 msgid "#  commands to execute"
@@ -534,7 +534,7 @@ msgstr "*** [%s] Fejl %d"
 
 #: job.c:264
 msgid " (core dumped)"
-msgstr " (core smidt)"
+msgstr " (core-fil efterladt)"
 
 #: job.c:316
 msgid "Warning: Empty redirection\n"
@@ -698,7 +698,7 @@ msgstr "make høstede børne-pid %d, venter endnu på pid %d\n"
 #: job.c:2274
 #, c-format
 msgid "%s: Command not found"
-msgstr "%s: Kommado ikke fundet"
+msgstr "%s: Kommando ikke fundet"
 
 #: job.c:2303
 #, c-format
@@ -830,7 +830,7 @@ msgstr "Udskriv det aktuelle katalog"
 
 #: main.c:352
 msgid "Turn off -w, even if it was turned on implicitly"
-msgstr "Slå -w fra, selv hvis den var slået automatisk til"
+msgstr "Slå -w fra, selv hvis det var slået til automatisk"
 
 #: main.c:355
 msgid "Consider FILE to be infinitely new"
@@ -852,7 +852,7 @@ msgstr "ukendt fejlsøgningsniveau-specifikation '%s'"
 #: main.c:576
 #, c-format
 msgid "%s: Interrupt/Exception caught (code = 0x%x, addr = 0x%x)\n"
-msgstr "%s: Interrupt/Undtagelse fanget (kode = 0x%x, addr = 0x%x)\n"
+msgstr "%s: Interrupt/undtagelse fanget (kode = 0x%x, addr = 0x%x)\n"
 
 #: main.c:583
 #, c-format
@@ -924,12 +924,12 @@ msgstr "Sætter tilbage til enkelt job-tilstand (-j1)."
 
 #: main.c:1468
 msgid "internal error: multiple --jobserver-fds options"
-msgstr "internt fejl: flere --jobserver-fds tilvalg"
+msgstr "intern fejl: flere '--jobserver-fds'-tilvalg"
 
 #: main.c:1476
 #, c-format
 msgid "internal error: invalid --jobserver-fds string `%s'"
-msgstr "intern fejl: ugyldig --jobserver-fds streng '%s'"
+msgstr "intern fejl: ugyldig '--jobserver-fds'-streng '%s'"
 
 #: main.c:1486
 msgid "warning: -jN forced in submake: disabling jobserver mode."
@@ -958,7 +958,7 @@ msgstr "Opdaterer makefiler....\n"
 #: main.c:1642
 #, c-format
 msgid "Makefile `%s' might loop; not remaking it.\n"
-msgstr "Makefilen '%s' går muligvis i løkke; genskaber den ikke.\n"
+msgstr "Makefilen '%s' får måske make til at gå i ring; genskaber den ikke.\n"
 
 #. The update failed and this makefile was not
 #. from the MAKEFILES variable, so we care.
@@ -970,7 +970,7 @@ msgstr "Genskabelse af makefilen '%s' mislykkedes."
 #: main.c:1732
 #, c-format
 msgid "Included makefile `%s' was not found."
-msgstr "Indkluderet makefil '%s' blev ikke fundet."
+msgstr "Inkluderet makefil '%s' blev ikke fundet."
 
 #. A normal makefile.  We must die later.
 #: main.c:1737
@@ -1050,11 +1050,13 @@ msgstr ""
 "%sSend fejlmeldinger (på engelsk) til <bug-make@gnu.org>.\n"
 "\n"
 
+# %s giver dato og klokkeslæt
 #: main.c:2734
 #, c-format
 msgid "\n# Make data base, printed on %s"
 msgstr "\n# Makedatabase, udskrevet %s"
 
+# %s giver dato og klokkeslæt
 #: main.c:2743
 #, c-format
 msgid "\n# Finished Make data base on %s\n"
@@ -1125,7 +1127,7 @@ msgstr " (ikke nødvendig)"
 
 #: read.c:343
 msgid " (no ~ expansion)"
-msgstr " (ingen ~-udvikling)"
+msgstr " (ingen ~-udfoldning)"
 
 #: read.c:523
 msgid "invalid syntax in conditional"
@@ -1150,7 +1152,7 @@ msgstr "ugyldigt 'override'-direktiv"
 #: read.c:670
 #, c-format
 msgid "no file name for `%sinclude'"
-msgstr "ingen filnavn for '%sinclude'"
+msgstr "intet filnavn for '%sinclude'"
 
 #. This line starts with a tab but was not caught above
 #. because there was no preceding target, and the line
@@ -1323,7 +1325,7 @@ msgstr "Ingen implicit regel for '%s' fundet.\n"
 #: remake.c:416 remake.c:836
 #, c-format
 msgid "Using default commands for `%s'.\n"
-msgstr "Bruger standardkommondoer for '%s'.\n"
+msgstr "Bruger standardkommandoer for '%s'.\n"
 
 #: remake.c:436 remake.c:860
 #, c-format
@@ -1408,12 +1410,12 @@ msgstr "Genskabelse af målfil '%s' mislykkedes.\n"
 #: remake.c:673
 #, c-format
 msgid "Successfully remade target file `%s'.\n"
-msgstr "Målfil '%s' genskabt med godt resultat.\n"
+msgstr "Målfil '%s' genskabt.\n"
 
 #: remake.c:676
 #, c-format
 msgid "Target file `%s' needs remade under -q.\n"
-msgstr "Målfil '%s' behøver at blive genskabt med -q.\n"
+msgstr "Med -q trænger målfilen '%s' til at blive genskabt.\n"
 
 #: remake.c:977
 #, c-format
@@ -1428,7 +1430,7 @@ msgstr "%sIngen regel til at skabe mål '%s' som behøves af '%s'%s"
 #: remake.c:1191
 #, c-format
 msgid "*** Warning: File `%s' has modification time in the future (%s > %s)"
-msgstr "*** Advarsel: Filen '%s'-s ændringstid er i fremtiden (%s > %s)"
+msgstr "*** Advarsel: Ændringstiden for filen '%s' er i fremtiden (%s > %s)"
 
 #. Give a warning if there is no pattern, then remove the
 #. pattern so it's ignored next time.
@@ -1651,7 +1653,7 @@ msgstr "miljø med -e"
 
 #: variable.c:1091
 msgid "command line"
-msgstr "kommadolinje"
+msgstr "kommandolinje"
 
 #: variable.c:1094
 msgid "`override' directive"
