@@ -1,7 +1,7 @@
 # -*-Makefile-*- template for DJGPP
 # Makefile.in generated automatically by automake 1.2 from Makefile.am
 
-# Copyright (C) 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-1998, 1999 Free Software Foundation, Inc.
 # This Makefile.DOS is free software; the Free Software Foundation
 # gives unlimited permission to copy, distribute and modify it.
 
@@ -118,7 +118,11 @@ HEADERS = $(wildcard $(srcdir)/*.h)
 default: all
 
 .SUFFIXES:
-.SUFFIXES: .c .dvi .info .o .ps .texi .texinfo
+.SUFFIXES: .S .c .dvi .info .o .ps .s .texi .texinfo .txi
+
+mostlyclean-hdr:
+
+clean-hdr:
 
 distclean-hdr:
 	-rm -f config.h
@@ -141,9 +145,15 @@ install-binPROGRAMS: $(bin_PROGRAMS)
 
 uninstall-binPROGRAMS:
 	$(NORMAL_UNINSTALL)
-	list='$(bin_PROGRAMS)'; for p in $$list; do    rm -f $(bindir)/`echo $$p|sed '$(transform)'`;  done
+	list='$(bin_PROGRAMS)'; for p in $$list; do    rm -f $(bindir)/`echo $$p|sed '$(transform)'`.exe;  done
 
 .c.o:
+	$(COMPILE) -c $<
+
+.s.o:
+	$(COMPILE) -c $<
+
+.S.o:
 	$(COMPILE) -c $<
 
 clean-noinstLIBRARIES:
@@ -155,7 +165,7 @@ mostlyclean-compile:
 clean-compile:
 
 distclean-compile:
-	-rm -f *.tab.c
+	-rm -f *.tab.c *_tab.c
 
 maintainer-clean-compile:
 
@@ -188,6 +198,12 @@ DVIPS = dvips
 .texinfo.dvi:
 	TEXINPUTS="$(srcdir);$$TEXINPUTS"    MAKEINFO='$(MAKEINFO) -I $(srcdir)' $(TEXI2DVI) $<
 
+.txi.info:
+	$(MAKEINFO) $(srcdir)/$< -o ./$@
+
+.txi.dvi:
+	TEXINPUTS="$(srcdir);$$TEXINPUTS"    MAKEINFO='$(MAKEINFO) -I $(srcdir)' $(TEXI2DVI) $<
+
 .dvi.ps:
 	$(DVIPS) $< -o $@
 
@@ -208,7 +224,7 @@ dist-info: $(INFO_DEPS)
 	for base in $(INFO_DEPS); do    d=$(srcdir);    for file in `cd $$d && eval echo $$base*`; do      test -f $(distdir)/$$file      || ln $$d/$$file $(distdir)/$$file 2> /dev/null      || cp -p $$d/$$file $(distdir)/$$file;    done;  done
 
 mostlyclean-aminfo:
-	rm -f make.aux make.cp make.cps make.dvi make.fn make.fns make.ky    make.kys make.ps make.log make.pg make.toc make.tp make.tps make.vr make.vrs    make.op make.tr make.cv make.cn
+	cd $(srcdir) && for i in $(INFO_DEPS) make.i; do rm -f `eval echo $$i*`; done
 
 clean-aminfo:
 

@@ -1203,15 +1203,11 @@ windows32_openpipe (int *pipedes, int *pid_p, char **command_argv, char **envp)
 
 
 #ifdef __MSDOS__
-/*
-  untested
-*/
 int
 msdos_openpipe (int* pipedes, int *pidp, char *text)
 {
   FILE *fpipe=0;
-  /* MSDOS can't fork, but it has `popen'.
-     (Bwt, why isn't `popen' used in all the versions?) */
+  /* MSDOS can't fork, but it has `popen'.  */
   struct variable *sh = lookup_variable ("SHELL", 5);
   int e;
   extern int dos_command_running, dos_status;
@@ -1235,6 +1231,9 @@ msdos_openpipe (int* pipedes, int *pidp, char *text)
   errno = 0;
   dos_command_running = 1;
   dos_status = 0;
+  /* If dos_status becomes non-zero, it means the child process
+     was interrupted by a signal, like SIGINT or SIGQUIT.  See
+     fatal_error_signal in commands.c.  */
   fpipe = popen (text, "rt");
   dos_command_running = 0;
   if (!fpipe || dos_status)
@@ -1250,7 +1249,7 @@ msdos_openpipe (int* pipedes, int *pidp, char *text)
   else
     {
       pipedes[0] = fileno (fpipe);
-      *pidp = 42;		/* uh? The meaning of Life?*/
+      *pidp = 42; /* Yes, the Meaning of Life, the Universe, and Everything! */
       errno = e;
       shell_function_completed = 1;
     }
@@ -1308,11 +1307,9 @@ func_shell (o, argv, funcname)
   /* For error messages.  */
   if (reading_file != 0)
     {
-       error_prefix = (char *) alloca (strlen(reading_file->filenm)+100);
-
+      error_prefix = (char *) alloca (strlen(reading_file->filenm)+100);
       sprintf (error_prefix,
 	       "%s:%lu: ", reading_file->filenm, reading_file->lineno);
-
     }
   else
     error_prefix = "";
@@ -1322,11 +1319,11 @@ func_shell (o, argv, funcname)
 #else /* WINDOWS32 */
 
 # ifdef __MSDOS__
-  fpipe = msdos_openpipe (pipedes, argv[0], command_argv, envp);
-  if (!fpipe || pipedes[0] < 0)
+  fpipe = msdos_openpipe (pipedes, &pid, argv[0]);
+  if (pipedes[0] < 0)
     {
-      	perror_with_name (error_prefix, "pipe");
-	return o;
+      perror_with_name (error_prefix, "pipe");
+      return o;
     }
 # else
   if (pipe (pipedes) < 0)

@@ -33,3 +33,17 @@
 #define HAVE_MEMMOVE 1
 
 #define SCCS_GET "get"
+
+/* Define to `unsigned long' or `unsigned long long'
+   if <inttypes.h> doesn't define.  */
+#define uintmax_t unsigned long long
+
+/* Define the type of the first arg to select().  */
+#define fd_set_size_t int
+
+/* Define if you have the select function.  */
+#define HAVE_SELECT 1
+
+/* Define if you have the vprintf library function.  */
+#undef HAVE_VPRINTF
+#define HAVE_VPRINTF 1

@@ -205,6 +205,7 @@ static unsigned int inf_jobs = 0;
 /* File descriptors for the jobs pipe.  */
 
 int job_fds[2] = { -1, -1 };
+int job_rfd = -1;
 
 /* Maximum load average at which multiple jobs will be run.
    Negative values mean unlimited, while zero means limit to
@@ -251,7 +252,7 @@ static const struct command_switch switches[] =
 	0, 0,
 	_("Ignored for compatibility") },
     { 'C', string, (char *) &directories, 0, 0, 0, 0, 0,
-	"directory", "DIRECTORY",
+	"directory", _("DIRECTORY"),
 	_("Change to DIRECTORY before doing anything") },
     { 'd', flag, (char *) &debug_flag, 1, 1, 0, 0, 0,
 	"debug", 0,
@@ -265,7 +266,7 @@ static const struct command_switch switches[] =
 	"environment-overrides", 0,
 	_("Environment variables override makefiles") },
     { 'f', string, (char *) &makefiles, 0, 0, 0, 0, 0,
-	"file", "FILE",
+	"file", _("FILE"),
 	_("Read FILE as a makefile") },
     { 'h', flag, (char *) &print_usage_flag, 0, 0, 0, 0, 0,
 	"help", 0,
@@ -274,7 +275,7 @@ static const struct command_switch switches[] =
 	"ignore-errors", 0,
 	_("Ignore errors from commands") },
     { 'I', string, (char *) &include_directories, 1, 1, 0, 0, 0,
-	"include-dir", "DIRECTORY",
+	"include-dir", _("DIRECTORY"),
 	_("Search DIRECTORY for included makefiles") },
     { 'j',
 #ifndef MAKE_JOBSERVER
@@ -307,7 +308,7 @@ static const struct command_switch switches[] =
 	"just-print", 0,
 	_("Don't actually run any commands; just print them") },
     { 'o', string, (char *) &old_files, 0, 0, 0, 0, 0,
-	"old-file", "FILE",
+	"old-file", _("FILE"),
 	_("Consider FILE to be very old and don't remake it") },
     { 'p', flag, (char *) &print_data_base_flag, 1, 1, 0, 0, 0,
 	"print-data-base", 0,
@@ -341,7 +342,7 @@ static const struct command_switch switches[] =
 	"no-print-directory", 0,
 	_("Turn off -w, even if it was turned on implicitly") },
     { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0,
-	"what-if", "FILE",
+	"what-if", _("FILE"),
 	_("Consider FILE to be infinitely new") },
     { 3, flag, (char *) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
 	"warn-undefined-variables", 0,
@@ -1168,31 +1169,36 @@ int main (int argc, char ** argv)
     }
 
 #if defined(MAKE_JOBSERVER) || !defined(HAVE_WAIT_NOHANG)
-  /* If we don't have a hanging wait we have to fall back to old, broken
+  /* Set up to handle children dying.  This must be done before
+     reading in the makefiles so that `shell' function calls will work.
+
+     If we don't have a hanging wait we have to fall back to old, broken
      functionality here and rely on the signal handler and counting
      children.
 
      If we're using the jobs pipe we need a signal handler so that
-     SIGCHLD is not ignored; we need it to interrupt select(2) in
-     job.c:start_waiting_job() if we're waiting on the pipe for a token.
+     SIGCHLD is not ignored; we need it to interrupt the read(2) of the
+     jobserver pipe in job.c if we're waiting for a token.
 
-     Use sigaction where possible as it's more reliable.  */
+     If none of these are true, we don't need a signal handler at all.  */
   {
     extern RETSIGTYPE child_handler PARAMS ((int sig));
 
-    /* Set up to handle children dying.  This must be done before
-       reading in the makefiles so that `shell' function calls will work.  */
-
-#ifndef HAVE_SIGACTION
-# define HANDLESIG(s) signal(s, child_handler)
-#else
-# define HANDLESIG(s) sigaction(s, &sa, NULL)
+# if defined HAVE_SIGACTION
     struct sigaction sa;
 
     bzero ((char *)&sa, sizeof (struct sigaction));
     sa.sa_handler = child_handler;
-#endif
+#  if defined SA_INTERRUPT
+    /* This is supposed to be the default, but what the heck... */
+    sa.sa_flags = SA_INTERRUPT;
+#  endif
+#  define HANDLESIG(s) sigaction(s, &sa, NULL)
+# else
+#  define HANDLESIG(s) signal(s, child_handler)
+# endif
 
+    /* OK, now actually install the handlers.  */
 # if defined SIGCHLD
     (void) HANDLESIG (SIGCHLD);
 # endif
@@ -1287,12 +1293,12 @@ int main (int argc, char ** argv)
      and write FDs, respectively, for the pipe.  Note this last form is
      undocumented for the user!  */
 
-  sscanf(job_slots_str, "%d", &job_slots);
+  sscanf (job_slots_str, "%d", &job_slots);
   {
-    char *cp = index(job_slots_str, ',');
+    char *cp = index (job_slots_str, ',');
 
     /* In case #4, get the FDs.  */
-    if (cp && sscanf(cp+1, "%d", &job_fds[1]) == 1)
+    if (cp && sscanf (cp+1, "%d", &job_fds[1]) == 1)
       {
         /* Set up the first FD and set job_slots to 0.  The combination of a
            pipe + !job_slots means we're using the jobserver.  If !job_slots
@@ -1326,10 +1332,6 @@ int main (int argc, char ** argv)
       if (pipe (job_fds) < 0)
 	pfatal_with_name (_("creating jobs pipe"));
 
-      /* Set the read FD to nonblocking; we'll use select() to wait
-	 for it in job.c.  */
-      fcntl (job_fds[0], F_SETFL, O_NONBLOCK);
-
       /* Every make assumes that it always has one job it can run.  For the
          submakes it's the token they were given by their parent.  For the
          top make, we just subtract one from the number the user wants.  */
@@ -1350,6 +1352,16 @@ int main (int argc, char ** argv)
       sprintf(buf, "%d,%d", job_fds[0], job_fds[1]);
       job_slots_str = xstrdup(buf);
     }
+
+    /* If we have a jobserver pipe, dup(2) the read end.  We'll use that in
+       the child handler to note a child has died.  See job.c.  */
+
+  if (job_fds[0] >= 0)
+    {
+      job_rfds = dup (job_fds[0]);
+      CLOSE_ON_EXEC (job_rfds);
+    }
+
 #endif
 
   /* Set up MAKEFLAGS and MFLAGS again, so they will be right.  */
@@ -1533,7 +1545,8 @@ int main (int argc, char ** argv)
                       if (d->changed & RM_INCLUDED)
                         /* An included makefile.  We don't need
                            to die, but we do want to complain.  */
-                        error (NILF, _("Included makefile `%s' was not found."),
+                        error (NILF,
+                               _("Included makefile `%s' was not found."),
                                dep_name (d));
                       else
                         {
@@ -1877,7 +1890,7 @@ print_usage (bad)
 
   usageto = bad ? stderr : stdout;
 
-  fprintf (usageto, "Usage: %s [options] [target] ...\n", program);
+  fprintf (usageto, _("Usage: %s [options] [target] ...\n"), program);
 
   fputs (_("Options:\n"), usageto);
   for (cs = switches; cs->c != '\0'; ++cs)

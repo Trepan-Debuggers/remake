@@ -299,20 +299,29 @@ vmsWaitForChildren(int *status)
 #endif
 
 
-/* Count the number of dead children we have.  If we can use wait3() or
-   waitpid() then we'll never use this count: it's completely unnecessary.
-   But we need the handler installed to interrupt the select() call for
-   the jobs pipe, so we might as well keep it.  */
+/* Handle a dead child.  This handler may or may not ever be installed.
+
+   If we're using the jobserver blocking read, we need it.  First, installing
+   it ensures the read will interrupt on SIGCHLD.  Second, we close the dup'd
+   read side of the pipe to ensure we don't enter another blocking read
+   without reaping all the dead children.  In this case we don't need the
+   dead_children count.
+
+   If we don't have either waitpid or wait3, then make is unreliable, but we
+   use the dead_children count to reap children as best we can.  In this case
+   job_rfd will never be >= 0.  */
 
 static unsigned int dead_children = 0;
 
-/* Notice that a child died.
-   reap_children should be called when convenient.  */
 RETSIGTYPE
 child_handler (sig)
      int sig;
 {
   ++dead_children;
+
+  if (job_rfd >= 0)
+    close (job_rfd);
+  job_rfd = -1;
 
   if (debug_flag)
     printf (_("Got a SIGCHLD; %u unreaped children.\n"), dead_children);
@@ -927,12 +936,7 @@ start_job_command (child)
 	  /* Set the descriptor to close on exec, so it does not litter any
 	     child's descriptor table.  When it is dup2'd onto descriptor 0,
 	     that descriptor will not close on exec.  */
-#ifdef F_SETFD
-#ifndef FD_CLOEXEC
-#define FD_CLOEXEC 1
-#endif
-	  (void) fcntl (bad_stdin, F_SETFD, FD_CLOEXEC);
-#endif
+	  CLOSE_ON_EXEC (bad_stdin);
 	}
     }
 
@@ -1170,57 +1174,6 @@ start_waiting_job (c)
   /* If not, start it locally.  */
   if (!c->remote)
     {
-#ifdef MAKE_JOBSERVER
-      /* If we are controlling multiple jobs, and we don't yet have one,
-       * obtain a token before starting the child. */
-      if (job_fds[0] >= 0)
-        {
-          while (c->job_token == '-')
-            /* If the reserved token is available, just use that.  */
-            if (my_job_token != '-')
-              {
-                c->job_token = my_job_token;
-                my_job_token = '-';
-              }
-            /* Read a token.  We set the non-blocking bit on this earlier, so
-               if there's no token to be read we'll return immediately.  */
-            else if (read (job_fds[0], &c->job_token, 1) < 1)
-              {
-                fd_set rfds;
-                int r;
-
-                FD_ZERO(&rfds);
-                FD_SET(job_fds[0], &rfds);
-
-                /* The select blocks until (a) there's data to read, in which
-                   case we come back around and try to grab the token before
-                   someone else does, or (b) a signal (SIGCHLD), is reported
-                   (because we installed a handler for it).  If the latter,
-                   call reap_children() to try to free up some slots.  */
-
-                r = select (job_fds[0]+1, SELECT_FD_SET_CAST &rfds,
-                            NULL, NULL, NULL);
-
-                if (r < 0)
-                  {
-#ifdef EINTR
-                    if (errno != EINTR)
-                      /* We should definitely handle this more gracefully!
-                         What kinds of things can happen here?  ^C closes the
-                         pipe?  Something else closes it?  */
-                      pfatal_with_name (_("read jobs pipe"));
-#endif
-                    /* We were interrupted; handle any dead children.  */
-                    reap_children (1, 0);
-                  }
-              }
-
-          assert(c->job_token != '-');
-	  if (debug_flag)
-	    printf (_("Obtained token `%c' for child 0x%08lx (%s).\n"),
-		    c->job_token, (unsigned long int) c, c->file->name);
-	}
-#endif
       /* If we are running at least one job already and the load average
 	 is too high, make this one wait.  */
       if (job_slots_used > 0 && load_too_high ())
@@ -1290,12 +1243,6 @@ new_job (file)
 
   /* Chop the commands up into lines if they aren't already.  */
   chop_commands (cmds);
-
-  /* Wait for a job slot to be freed up.  If we allow an infinite number
-     don't bother; also job_slots will == 0 if we're using the job pipe.  */
-  if (job_slots != 0)
-    while (job_slots_used == job_slots)
-      reap_children (1, 0);
 
   /* Expand the command lines and store the results in LINES.  */
   lines = (char **) xmalloc (cmds->ncommand_lines * sizeof (char *));
@@ -1412,6 +1359,48 @@ new_job (file)
 
   /* Fetch the first command line to be run.  */
   job_next_command (c);
+
+  /* Wait for a job slot to be freed up.  If we allow an infinite number
+     don't bother; also job_slots will == 0 if we're using the jobserver.  */
+  if (job_slots != 0)
+    while (job_slots_used == job_slots)
+      reap_children (1, 0);
+#ifdef MAKE_JOBSERVER
+  /* If we are controlling multiple jobs, and we don't yet have one,
+     obtain a token before starting the child. */
+  else if (job_fds[0] >= 0)
+    {
+      while (c->job_token == '-')
+        /* If the reserved token is available, just use that.  */
+        if (my_job_token == '+')
+          {
+            c->job_token = my_job_token;
+            my_job_token = '-';
+          }
+        /* Read a token.  As long as there's no token available we'll block.
+           If we get a SIGCHLD we'll return with EINTR.  If one happened
+           before we got here we'll return with EBADF.  */
+        else if (read (job_rfd, &c->job_token, 1) < 1)
+          {
+            if (errno == EINTR)
+              ;
+
+            /* If EBADF, we got a SIGCHLD before.  Otherwise, who knows?  */
+            else if (errno != EBADF)
+              pfatal_with_name (_("read jobs pipe"));
+
+            /* Something's done; reap it.  We don't force a block here; if
+               something strange happened and nothing's ready, just come back
+               and wait some more.  */
+            reap_children (0, 0);
+          }
+
+      assert(c->job_token != '-');
+      if (debug_flag)
+        printf (_("Obtained token `%c' for child 0x%08lx (%s).\n"),
+                c->job_token, (unsigned long int) c, c->file->name);
+    }
+#endif
 
   /* The job is now primed.  Start it running.
      (This will notice if there are in fact no commands.)  */
