@@ -125,10 +125,8 @@ rename_file (file, name)
      char *name;
 {
   char *oldname = file->name;
-  register unsigned int oldhash, newhash;
+  register unsigned int oldhash;
   register char *n;
-  register struct file *f;
-  struct file *oldfile;
 
   while (file->renamed != 0)
     file = file->renamed;
@@ -139,6 +137,20 @@ rename_file (file, name)
   for (n = oldname; *n != '\0'; ++n)
     HASH (oldhash, *n);
   oldhash %= FILE_BUCKETS;
+
+  file_hash_enter (file, name, oldhash);
+}
+
+void
+file_hash_enter (file, name, oldhash)
+     register struct file *file;
+     char *name;
+     unsigned int oldhash;
+{
+  register unsigned int newhash;
+  struct file *oldfile;
+  register char *n;
+  register struct file *f;
 
   newhash = 0;
   for (n = name; *n != '\0'; ++n)
@@ -151,7 +163,7 @@ rename_file (file, name)
     if (streq (oldfile->name, name))
       break;
 
-  if (newhash != oldhash || oldfile != 0)
+  if (oldhash != 0 && (newhash != oldhash || oldfile != 0))
     {
       /* Remove FILE from its hash bucket.  */
 
@@ -199,16 +211,18 @@ rename_file (file, name)
 		 one given in the rule explicitly mentioning this name,
 		 but give a message to let the user know what's going on.  */
 	      makefile_error (file->cmds->filename, file->cmds->lineno,
-			      "Commands were specified for file `%s' at %s:%u,",
-			      oldname, oldfile->cmds->filename, oldfile->cmds->lineno);
+			      "Commands were specified for \
+file `%s' at %s:%u,",
+			      oldfile->name, oldfile->cmds->filename,
+			      oldfile->cmds->lineno);
 	      makefile_error (file->cmds->filename, file->cmds->lineno,
 			      "but `%s' is now considered the same file \
 as `%s'.",
-			      oldname, name);
+			      oldfile->name, name);
 	      makefile_error (file->cmds->filename, file->cmds->lineno,
 			      "Commands for `%s' will be ignored \
 in favor of those for `%s'.",
-			      name, oldname);
+			      name, oldfile->name);
 	    }
 	}
 
@@ -475,4 +489,27 @@ print_file_data_base ()
 	      ((double) FILE_BUCKETS) / ((double) nfiles) * 100.0, per_bucket);
 #endif
     }
+}
+				/* !!! compile frob */
+struct file *
+file_linear_list ()
+{
+  register unsigned int bucket;
+  register struct file *f, *nextf;
+  struct file *chain = NULL;
+
+  for (bucket = 0; bucket < sizeof (files) / sizeof (files[0]); ++bucket)
+    for (f = files[bucket]; f != NULL; f = nextf)
+      {
+	nextf = f->next;
+	if (f->is_target)
+	  {
+	    if (f->cmds != NULL)
+	      f->cmds = (struct commands *) f->cmds->commands;
+	    f->next = chain;
+	    chain = f;
+	  }
+      }
+
+  return chain;
 }
