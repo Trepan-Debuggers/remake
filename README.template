@@ -10,6 +10,10 @@ build the program, type `sh build.sh'.  This should compile the program
 in the current directory.  Then you will have a Make program that you can
 use for `make install', or whatever else.
 
+Some systems' Make programs are broken and cannot process the Makefile for
+GNU Make.  If you get errors from your system's Make when building GNU
+Make, try using `build.sh' instead.
+
 It has been reported that the XLC 1.2 compiler on AIX 3.2 is buggy such
 that if you compile make with `cc -O' on AIX 3.2, it will not work correctly.
 It is said that using `cc' without `-O' does work.
