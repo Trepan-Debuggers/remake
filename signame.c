@@ -86,9 +86,8 @@ static int
 signame_init ()
 {
   int i;
-  char *u = _("unknown signal");
 
-  undoc = xstrdup(u);
+  undoc = xstrdup (_("unknown signal"));
 
   /* Initialize signal names.  */
   for (i = 0; i < NSIG; i++)

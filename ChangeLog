@@ -13,6 +13,12 @@
 	the root and make the root's variable list the parent of our
 	variable list.
 
+2002-09-13  Paul D. Smith  <psmith@gnu.org>
+
+	* doc/make.texi (MAKE Variable): Add some indexing for "+".
+
+	* hash.c (round_up_2): Get rid of a warning.
+
 2002-09-12  Paul D. Smith  <psmith@gnu.org>
 
 	* Makefile.am (loadavg_SOURCES, loadavg.c): Tiptoe around automake

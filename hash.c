@@ -359,7 +359,11 @@ round_up_2 (n)
   n |= (n >> 4);
   n |= (n >> 8);
   n |= (n >> 16);
+
+#if !defined(HAVE_LIMITS_H) || ULONG_MAX > 4294967295
+  /* We only need this on systems where unsigned long is >32 bits.  */
   n |= (n >> 32);
+#endif
 
   return n + 1;
 }
