@@ -9,8 +9,8 @@
 
 @set EDITION 0.44
 @set VERSION 3.69 Beta
-@set UPDATED 21 October 1993
-@set UPDATE-MONTH October 1993
+@set UPDATED 3 November 1993
+@set UPDATE-MONTH November 1993
 
 @c finalout
 
@@ -7467,9 +7467,10 @@ Suffix rules are not mentioned in this algorithm because suffix rules are
 converted to equivalent pattern rules once the makefiles have been read in.
 
 For an archive member target of the form
-@samp{@var{archive}(@var{member})}, the following algorithm is run twice,
-first using @samp{(@var{member})} as the target @var{t}, and second using
-the entire target if the first run found no rule.@refill
+@samp{@var{archive}(@var{member})}, the following algorithm is run
+twice, first using the entire target name @var{t}, and second using
+@samp{(@var{member})} as the target @var{t} if the first run found no
+rule.@refill
 
 @enumerate
 @item
