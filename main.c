@@ -389,7 +389,6 @@ main (argc, argv, envp)
   register char *cmd_defs;
   register unsigned int cmd_defs_len, cmd_defs_idx;
   char **p;
-  time_t now;
   struct dep *goals = 0;
   register struct dep *lastgoal;
   struct dep *read_makefiles;
@@ -816,8 +815,8 @@ main (argc, argv, envp)
   build_vpath_lists ();
 
   /* Mark files given with -o flags as very old (00:00:01.00 Jan 1, 1970)
-     and as having been updated already, and files given with -W flags
-     as brand new (time-stamp of now).  */
+     and as having been updated already, and files given with -W flags as
+     brand new (time-stamp as far as possible into the future).  */
 
   if (old_files != 0)
     for (p = old_files->list; *p != 0; ++p)
@@ -831,11 +830,10 @@ main (argc, argv, envp)
 
   if (new_files != 0)
     {
-      now = time ((time_t *) 0);
       for (p = new_files->list; *p != 0; ++p)
 	{
 	  f = enter_command_line_file (*p);
-	  f->last_mtime = now;
+	  f->last_mtime = NEW_MTIME;
 	}
     }
 
