@@ -656,24 +656,50 @@ static debug_return_t com_write_cmds (char *psz_args)
       snprintf(filename, MAX_FILE_LENGTH, "/tmp/%s.sh", psz_target);
     }
     
+    /* Skip leading space, MAKE's comamnd prefixes:
+          echo suppression  @,
+	  ignore-error  -, 
+	  and recursion +
+    */
+    while (*s != '\0')
+      {
+	switch (*s) {
+	case '@':
+	case '+':
+	case '-':
+	  ++s;
+	  break;
+	default:
+	  if (!isblank ((unsigned char)*s))
+	    goto found_begin;
+	  ++s;
+	}
+      }
 
-    if (b_stdout) 
-      outfd = stdout;
-    else if (!(outfd = fopen (filename, "w"))) {
-      perror ("write target");
-      return debug_read;
+  found_begin:
+    if ( '\0' == *s ) {
+      printf("Null command string parsed\n");
+    } else {
+      if (b_stdout) 
+	outfd = stdout;
+      else if (!(outfd = fopen (filename, "w"))) {
+	perror ("write target");
+	return debug_read;
+      }
+      
+      if (p_v) {
+	fprintf(outfd, "#!%s\n", variable_expand(p_v->value));
+      }
+      fprintf(outfd, "#%s/%s:%lu\n", starting_directory,
+	      p_target->floc.filenm, p_target->floc.lineno);
+      
+      fprintf (outfd, "%s\n", variable_expand(s));
+      if (!b_stdout) {
+	fclose(outfd);
+	printf("File \"%s\" written.\n", filename);
+      }
     }
     
-    if (p_v) {
-      fprintf(outfd, "#!%s\n", variable_expand(p_v->value));
-    }
-    fprintf(outfd, "#%s/%s:%lu\n", starting_directory,
-	    p_target->floc.filenm, p_target->floc.lineno);
-    fprintf (outfd, "%s\n", variable_expand(s));
-    if (!b_stdout) {
-      fclose(outfd);
-      printf("File \"%s\" written.\n", filename);
-    }
   }
   return debug_read;
 }
