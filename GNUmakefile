@@ -30,6 +30,12 @@ extras := $(filter-out getloadavg.o @%@,$(extras)) getloadavg.o
 LOADLIBES := $(filter-out @%@,$(LOADLIBES))
 ALLOCA := $(filter-out @%@,$(ALLOCA))
 
+ifdef customs
+REMOTE := -DCUSTOMS -Ipmake/customs -Ipmake/lib/include
+LOADLIBES := $(addprefix pmake/customs/,customslib.o rpc.o xlog.o) \
+	     pmake/lib/sprite/libsprite.a
+endif
+
 # Set `ARCH' to a string for the type of machine.
 ifndef ARCH
 ifdef machine
@@ -84,9 +90,9 @@ $(archpfx)load.o: load.c
 	$(COMPILE.c) $(LOAD_AVG) $< -o $@
 $(archpfx)load.dep: load.c
 	$(mkdep) $(LOAD_AVG) $< | sed 's,$*\.o,& $@,' > $@
-$(archpfx)remote.o: remote.c
+$(archpfx)remote.o: remote.c remote-*.c
 	$(COMPILE.c) $(REMOTE) $< -o $@
-$(archpfx)remote.dep: remote.c
+$(archpfx)remote.dep: remote.c remote-*.c
 	$(mkdep) $(REMOTE) $< | sed 's,$*\.o,& $@,' > $@
 
 CPPFLAGS := -I$(ARCH) $(CPPFLAGS) -DHAVE_CONFIG_H $(filter-out @%@,$(defines))
@@ -106,11 +112,6 @@ else
 CFLAGS = -g
 endif
 LDFLAGS = -g
-
-ifdef yescustoms
-REMOTE := -DCUSTOMS
-LOADLIBES := libcustoms.a
-endif
 
 # Define the command to make dependencies.
 ifneq	"$(findstring gcc,$(CC))" ""
