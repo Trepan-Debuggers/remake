@@ -225,6 +225,40 @@ ar_glob_alphacompare (a, b)
   return strcmp (*a, *b);
 }
 
+/* Return nonzero if PATTERN contains any metacharacters.
+   Metacharacters can be quoted with backslashes if QUOTE is nonzero.  */
+static int
+glob_pattern_p (pattern, quote)
+     const char *pattern;
+     const int quote;
+{
+  register const char *p;
+  int open = 0;
+
+  for (p = pattern; *p != '\0'; ++p)
+    switch (*p)
+      {
+      case '?':
+      case '*':
+	return 1;
+
+      case '\\':
+	if (quote)
+	  ++p;
+	break;
+
+      case '[':
+	open = 1;
+	break;
+
+      case ']':
+	if (open)
+	  return 1;
+	break;
+      }
+
+  return 0;
+}
 
 /* Glob for MEMBER_PATTERN in archive ARNAME.
    Return a malloc'd chain of matching elements (or nil if none).  */
@@ -238,6 +272,9 @@ ar_glob (arname, member_pattern, size)
   char **names;
   struct nameseq *n;
   unsigned int i;
+
+  if (! glob_pattern_p (member_pattern, 1))
+    return 0;
 
   /* Scan the archive for matches.
      ar_glob_match will accumulate them in STATE.chain.  */
