@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  13 Apr 1999
+  21 Jul 1999
 
 Copyright (C) 1992,93,94,95,96,97,98,1999 Free Software Foundation, Inc.
 See the end for copying conditions.
@@ -18,15 +18,15 @@ Version 3.78
   causes the text provided to be printed as a warning message, but make
   proceeds normally.
 
-* A new function, $(apply ...) is provided.  This allows users to create
-  their own parameterized macros and invoke them later.  This
+* A new function, $(call ...) is provided.  This allows users to create
+  their own parameterized macros and invoke them later.  Original
   implementation of this feature was provided by Han-Wen Nienhuys
   <hanwen@cs.uu.nl>.
 
 * Make defines a new variable, .LIBPATTERNS.  This variable controls how
   library dependency expansion (dependencies like ``-lfoo'') is performed.
 
-* Make allows CRLF sequences as well as traditional LF, for
+* Make accepts CRLF sequences as well as traditional LF, for
   compatibility with makefiles created on other operating systems.
 
 * Make accepts a new option: -R, or --no-builtin-variables.  This option
