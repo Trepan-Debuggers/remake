@@ -2328,9 +2328,9 @@ child_execute_job (int stdin_fd, int stdout_fd, char **argv, char **envp)
 
   /* < 0 only if dup() failed */
   if (save_stdin < 0)
-    fatal (NILF, _("could not duplicate stdin\n"));
+    fatal (NILF, _("no more file handles: could not duplicate stdin\n"));
   if (save_stdout < 0)
-    fatal (NILF, _("could not duplicate stdout\n"));
+    fatal (NILF, _("no more file handles: could not duplicate stdout\n"));
 
   /* Close unnecessary file handles for the child.  */
   if (save_stdin != 0)
@@ -2510,6 +2510,8 @@ exec_command (char **argv, char **envp)
 	shell = lookup_variable ("SHELL", 5);
 	if (shell)
 	  shell = shell->value;
+        else
+          shell = 0;
 # else
 	shell = getenv ("SHELL");
 # endif
@@ -2655,7 +2657,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 			     "set", "setlocal", "shift", "start", "time",
                              "type", "ver", "verify", "vol", ":", 0 };
 
-  static char sh_chars_sh[]  = "#;\"*?[]&|<>(){}$`^";
+  static char sh_chars_sh[]  = "#;\"*?[]&|<>(){}$`^~'";
   static char *sh_cmds_sh[]  = { "echo", "cd", "eval", "exec", "exit", "login",
 				 "logout", "set", "umask", "wait", "while",
 				 "for", "case", "if", ":", ".", "break",
@@ -2751,7 +2753,8 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
     {
       extern int _is_unixy_shell (const char *_path);
 
-      message (1, _("$SHELL changed (was `%s', now `%s')"), default_shell, shell);
+      DB (DB_BASIC, (_("$SHELL changed (was `%s', now `%s')\n"),
+                     default_shell, shell));
       unixy_shell = _is_unixy_shell (shell);
       default_shell = shell;
       /* we must allocate a copy of shell: construct_command_argv() will free
@@ -3236,8 +3239,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 		if (*q == quote)
 		  {
 		    /* remove the quote */
-		    while(*q == quote) /* do not ask */
-		      q++;
+                    q++;
 		    quote = 0;
 		  }
 		else /* normal character: copy it */
@@ -3253,8 +3255,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 	      {
 		/* remove opening quote */
 		quote = *q;
-		while(*q == quote) /* do not ask */
-		  q++;
+                q++;
 	      }
 
 	    /* spaces outside of a quoted string: remove them
