@@ -103,6 +103,20 @@
 	invocation's arguments that aren't used by this one, so that this
 	invocation doesn't "inherit" them accidentally.
 
+2002-12-05  Paul D. Smith  <psmith@gnu.org>
+
+	* function.c (subst_expand): Valery Khamenia reported a
+	pathological performance hit when doing substitutions on very
+	large values with lots of words: turns out we were invoking
+	strlen() a ridiculous number of times.  Instead of having each
+	call to sindex() call strlen() again, keep track of how much of
+	the text we've seen and pass the length to sindex().
+
+2002-11-19  Paul D. Smith  <psmith@gnu.org>
+
+	* README.cvs, configure.in: Upgrade to require autoconf 2.56.
+
+
 2002-11-16  Paul D. Smith  <psmith@gnu.org>
 
 	* NMakefile.template (OBJS): Add hash.c object file.

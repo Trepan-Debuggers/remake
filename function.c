@@ -80,13 +80,14 @@ subst_expand (char *o, char *text, char *subst, char *replace,
               unsigned int slen, unsigned int rlen,
               int by_word, int suffix_only)
 {
-  register char *t = text;
-  register char *p;
+  char *t = text;
+  unsigned int tlen = strlen (text);
+  char *p;
 
   if (slen == 0 && !by_word && !suffix_only)
     {
       /* The first occurrence of "" in any string is its end.  */
-      o = variable_buffer_output (o, t, strlen (t));
+      o = variable_buffer_output (o, t, tlen);
       if (rlen > 0)
 	o = variable_buffer_output (o, replace, rlen);
       return o;
@@ -100,11 +101,11 @@ subst_expand (char *o, char *text, char *subst, char *replace,
 	p = end_of_token (next_token (t));
       else
 	{
-	  p = sindex (t, 0, subst, slen);
+	  p = sindex (t, tlen, subst, slen);
 	  if (p == 0)
 	    {
 	      /* No more matches.  Output everything left on the end.  */
-	      o = variable_buffer_output (o, t, strlen (t));
+	      o = variable_buffer_output (o, t, tlen);
 	      return o;
 	    }
 	}
@@ -127,8 +128,12 @@ subst_expand (char *o, char *text, char *subst, char *replace,
 	/* Output the replacement string.  */
 	o = variable_buffer_output (o, replace, rlen);
 
-      /* Advance T past the string to be replaced.  */
-      t = p + slen;
+      /* Advance T past the string to be replaced; adjust tlen.  */
+      {
+        char *nt = p + slen;
+        tlen -= nt - t;
+        t = nt;
+      }
     } while (*t != '\0');
 
   return o;

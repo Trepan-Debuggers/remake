@@ -20,6 +20,11 @@
 	* scripts/functions/eval: Test using $(eval ...) inside
 	conditionals (Bug #1516).
 
+2002-10-14  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/options/dash-t: Add a test for handling -t on targets
+	with no commands (Bug #1418).
+
 2002-10-13  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/features/targetvars: Add a test for exporting

@@ -748,7 +748,8 @@ notice_finished_file (struct file *file)
 	have_nonrecursing:
 	  if (file->phony)
 	    file->update_status = 0;
-	  else
+          /* According to POSIX, -t doesn't affect targets with no cmds.  */
+	  else if (file->cmds != 0)
             {
               /* Should set file's modification date and do nothing else.  */
               file->update_status = touch_file (file);
