@@ -308,7 +308,7 @@ main (argc, argv, envp)
 
 #ifdef	POSIX
   sigemptyset (&fatal_signal_set);
-#define	ADD_SIG(sig)	sigaddset (sig, &fatal_signal_set)
+#define	ADD_SIG(sig)	sigaddset (&fatal_signal_set, sig)
 #else
 #ifndef	USG
   fatal_signal_mask = 0;
