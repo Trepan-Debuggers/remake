@@ -30,10 +30,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "glob/glob.h"
 #endif
 
+#ifndef _AMIGA
 #ifndef VMS
 #include <pwd.h>
 #else
 struct passwd *getpwnam PARAMS ((char *name));
+#endif
 #endif
 
 /* A `struct linebuffer' is a structure which holds a line of text.
@@ -114,7 +116,6 @@ static void record_files PARAMS ((struct nameseq *filenames, char *pattern, char
 			struct dep *deps, unsigned int commands_started, char *commands,
 			unsigned int commands_idx, int two_colon, char *filename,
 			unsigned int lineno, int set_default));
-static char *find_semicolon PARAMS  ((char *s));
 
 /* Read in all the makefiles and return the chain of their names.  */
 
@@ -188,12 +189,16 @@ read_all_makefiles (makefiles)
   if (num_makefiles == 0)
     {
       static char *default_makefiles[] =
-#if VMS
+#ifdef VMS
 	/* all lower case since readdir() (the vms version) 'lowercasifies' */
 	{ "makefile.vms", "gnumakefile", "makefile", 0 };
 #else
+#ifdef _AMIGA
+	{ "GNUmakefile", "Makefile", "SMakefile", 0 };
+#else /* !Amiga && !VMS */
 	{ "GNUmakefile", "makefile", "Makefile", 0 };
-#endif
+#endif /* AMIGA */
+#endif /* VMS */
       register char **p = default_makefiles;
       while (*p != 0 && !file_exists_p (*p))
 	++p;
@@ -285,6 +290,7 @@ read_makefile (filename, flags)
 
 #ifdef	lint	/* Suppress `used before set' messages.  */
   two_colon = 0;
+  pattern_percent = 0;
 #endif
 
   if (debug_flag)
@@ -1581,7 +1587,6 @@ parse_file_seq (stringp, stopchar, size, strip)
       if (p && *p == ',')
 	*p =' ';
 #endif
-
 #ifdef __MSDOS__
       /* For MS-DOS, skip a "C:\...".  */
       if (stopchar == ':' && p != 0 && p[1] == '\\' && isalpha (p[-1]))
@@ -1619,7 +1624,11 @@ parse_file_seq (stringp, stopchar, size, strip)
 #ifdef VMS
 	continue;
 #else
+#ifdef _AMIGA
+	name = savestring ("", 0);
+#else
 	name = savestring ("./", 2);
+#endif
 #endif
       else
 #ifdef VMS
@@ -1988,7 +1997,7 @@ tilde_expand (name)
 		home_dir = p->pw_dir;
 	    }
 	}
-#endif
+#endif /* !AMIGA */
       if (home_dir != 0)
 	{
 	  char *new = concat (home_dir, "", name + 1);
@@ -2015,6 +2024,7 @@ tilde_expand (name)
       else if (userend != 0)
 	*userend = '/';
     }
+#endif /* !AMIGA */
 #endif /* !VMS */
   return 0;
 }
@@ -2075,7 +2085,7 @@ multi_glob (chain, size)
 	}
       else
 	memname = 0;
-#endif
+#endif /* !NO_ARCHIVES */
 
       switch (glob (old->name, GLOB_NOCHECK|GLOB_ALTDIRFUNC, NULL, &gl))
 	{
@@ -2122,7 +2132,7 @@ multi_glob (chain, size)
 		    free (memname);
 		  }
 		else
-#endif
+#endif /* !NO_ARCHIVES */
 		  {
 		    struct nameseq *elt = (struct nameseq *) xmalloc (size);
 		    elt->name = savestring (gl.gl_pathv[i],
@@ -2147,7 +2157,6 @@ multi_glob (chain, size)
 	  break;
 	}
     }
-#endif
 
   return new;
 }
