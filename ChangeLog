@@ -1,3 +1,31 @@
+1999-07-06  Paul D. Smith  <psmith@gnu.org>
+
+	* make.texinfo (Options Summary): Correct examples in
+	--print-data-base option summary (problem reported by David Morse
+	<morse@nichimen.com>).
+
+	* arscan.c: Add support for archives in Windows (VC++).  Frank
+	Libbrecht <frankl@abzx.belgium.hp.com> provided info on how to do
+	this.
+	* NMakefile.template (CFLAGS_any): Remove NO_ARCHIVES from the
+	compile line.
+	* build_w32.bat: Ditto.
+
+	* remake.c (no_rule_error): Fix -include/sinclude so it doesn't
+	give errors if you try to -include the same file twice.
+	(updating_makefiles): New variable: we need to know this info in
+	no_rule_error() so we know whether to print an error or not.
+	(update_file_1): Unconditionally call no_rule_error(), don't try
+	to play games with the dontcare flag.
+
+1999-06-14  Paul D. Smith  <psmith@gnu.org>
+
+	* make.texinfo (Remaking Makefiles): Add a description of how to
+	prevent implicit rule searches for makefiles.
+
+	* make.1: Remove statement that make continues processing when -v
+	is given.
+
 1999-06-14  Paul D. Smith  <psmith@gnu.org>
 
 	* read.c (read_makefile): Cast -1 arguments to

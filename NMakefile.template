@@ -30,7 +30,7 @@ OUTDIR=.
 MAKEFILE=NMakefile
 SUBPROC_MAKEFILE=NMakefile
 
-CFLAGS_any = /nologo /MT /W3 /GX /Zi /YX /I . /I glob /I w32/include /D WIN32 /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES
+CFLAGS_any = /nologo /MT /W3 /GX /Zi /YX /I . /I glob /I w32/include /D WIN32 /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H
 CFLAGS_debug = $(CFLAGS_any) /Od /D DEBUG /D _DEBUG /FR.\WinDebug/ /Fp.\WinDebug/make.pch /Fo.\WinDebug/ /Fd.\WinDebug/make.pdb
 CFLAGS_release = $(CFLAGS_any) /O2 /D NDEBUG /FR.\WinRel/ /Fp.\WinRel/make.pch /Fo.\WinRel/
 

@@ -85,10 +85,11 @@ struct file
     unsigned int secondary:1;
     unsigned int dontcare:1;	/* Nonzero if no complaint is to be made if
 				   this target cannot be remade.  */
-    unsigned int shownerror:1;  /* Nonzero if we printed an error */
-    unsigned int ignore_vpath:1;/* Nonzero if we threw out VPATH name */
+    unsigned int mfile_status:1;/* Nonzero if update_status was obtained
+                                   while remaking a makefile.  */
+    unsigned int ignore_vpath:1;/* Nonzero if we threw out VPATH name.  */
     unsigned int pat_searched:1;/* Nonzero if we already searched for
-                                   pattern-specific variables */
+                                   pattern-specific variables.  */
   };
 
 /* Number of intermediate files entered.  */

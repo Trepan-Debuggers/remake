@@ -231,7 +231,25 @@ ar_scan (archive, function, arg)
 # define __AR_BIG__
 #endif
 
-#include <ar.h>
+#ifndef WINDOWS32
+# include <ar.h>
+#else
+/* These should allow us to read Windows (VC++) libraries (according to Frank
+ * Libbrecht <frankl@abzx.belgium.hp.com>)
+ */
+# include <windows.h>
+# include <windef.h>
+# include <io.h>
+# define ARMAG      IMAGE_ARCHIVE_START
+# define SARMAG     IMAGE_ARCHIVE_START_SIZE
+# define ar_hdr     _IMAGE_ARCHIVE_MEMBER_HEADER
+# define ar_name    Name
+# define ar_mode    Mode
+# define ar_size    Size
+# define ar_date    Date
+# define ar_uid     UserID
+# define ar_gid     GroupID
+#endif
 
 /* Cray's <ar.h> apparently defines this.  */
 #ifndef	AR_HDR_SIZE
