@@ -19,7 +19,7 @@ automatically which pieces of a large program need to be recompiled,
 and issues the commands to recompile them.
 
 @c !!set edition, date, version
-This is Edition 0.33 Beta, last updated 3 May 1992,
+This is Edition 0.33 Beta, last updated 4 May 1992,
 of @cite{The GNU Make Manual}, for @code{make}, Version 3.63 Beta.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
@@ -94,7 +94,7 @@ large program need to be recompiled, and issues the commands to
 recompile them.@refill
 
 This is Edition 0.33 Beta of the @cite{GNU Make Manual},
-last updated 3 May 1992,
+last updated 4 May 1992,
 for @code{make} Version 3.63 Beta.@refill
 
 This manual describes @code{make} and contains the following chapters:@refill
@@ -2491,10 +2491,10 @@ the sub-@code{make} as defaults, but do not override what is specified
 in the sub-@code{make}'s makefile unless the @samp{-e} switch is used
 (@pxref{Options Summary, ,Summary of Options}).@refill
 
-By default, a variable is passed down if its name consists only of letters,
-numbers and underscores.  Some shells cannot cope with environment
-variable names consisting of characters other than letters, numbers,
-and underscores.
+By default, a variable is only passed down if its name consists only of
+letters, numbers and underscores.  Some shells cannot cope with
+environment variable names consisting of characters other than letters,
+numbers, and underscores.
 
 Variable are @emph{not} normally passed down if they were created by
 default by @code{make} (@pxref{Implicit Variables, ,Variables Used by
@@ -2549,6 +2549,31 @@ export @var{variable}
 
 You may notice that the @code{export} and @code{unexport} directives
 work in @code{make} just like they work in the shell, @code{sh}.
+
+If you want all variables to be exported by default, you can use
+@code{export} by itself:
+
+@example
+export
+@end example
+
+@noindent
+This tells @code{make} that variables which are not explicitly mentioned
+in an @code{export} or @code{unexport} directive should be exported.
+Any variable given in an @code{unexport} directive will still @emph{not}
+be exported.  If you use @code{export} by itself to export variables by
+default, variables whose names contain characters other than
+alphanumerics and underscores will not be exported unless specifically
+mentioned in an @code{export} directive.@refill
+
+Likewise, you can use @code{unexport} by itself to tell @code{make}
+@emph{not} to export variables by default.  Since this is the default
+behavior, you would only need to do this if @code{export} had been used
+by itself earlier (in an included makefile, perhaps).  You
+@strong{cannot} use @code{export} and @code{unexport} by themselves to
+have variables exported for some commands and not for others.  The last
+@code{export} or @code{unexport} directive that appears by itself
+determines the behavior for the entire run of @code{make}.@refill
 
 @vindex MAKELEVEL
 As a special feature, the variable @code{MAKELEVEL} is changed when it
