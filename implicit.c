@@ -1,5 +1,5 @@
 /* Implicit rule searching for GNU Make.
-Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -176,7 +176,7 @@ pattern_search (file, archive, depth, recursions)
 	 don't use it here.  */
       if (rule->in_use)
 	{
-	  DEBUGP2 ("Avoiding implicit rule recursion.\n", 0, 0);
+	  DEBUGP2 ("Avoiding implicit rule recursion.%s%s\n", "", "");
 	  continue;
 	}
 
@@ -317,7 +317,7 @@ pattern_search (file, archive, depth, recursions)
 	    }
 
 	  DEBUGP2 ("Trying pattern rule with stem `%.*s'.\n",
-		   stemlen, stem);
+		   (int) stemlen, stem);
 
 	  /* Try each dependency; see if it "exists".  */
 
@@ -364,7 +364,7 @@ pattern_search (file, archive, depth, recursions)
 
 	      DEBUGP2 ("Trying %s dependency `%s'.\n",
 		       p == depname ? "implicit" : "rule", p);
-	      if (!rule->subdir && lookup_file (p) != 0 || file_exists_p (p))
+	      if (!rule->subdir && (lookup_file (p) != 0 || file_exists_p (p)))
 		{
 		  found_files[deps_found++] = savestring (p, strlen (p));
 		  continue;
@@ -373,7 +373,7 @@ pattern_search (file, archive, depth, recursions)
 		 "lib/foo.c", and VPATH=src, searches for "src/lib/foo.c".  */
 	      if (vpath_search (&p))
 		{
-		  DEBUGP2 ("Found dependent as `%s'.\n", p, 0);
+		  DEBUGP2 ("Found dependency as `%s'.%s\n", p, "");
 		  found_files[deps_found++] = p;
 		  continue;
 		}
@@ -388,8 +388,8 @@ pattern_search (file, archive, depth, recursions)
 		    intermediate_file
 		      = (struct file *) alloca (sizeof (struct file));
 
-		  DEBUGP2 ("Looking for a rule with intermediate file `%s'.\n",
-			   p, 0);
+		  DEBUGP2 ("Looking for a rule with %s file `%s'.\n",
+			   "intermediate", p);
 
 		  bzero ((char *) intermediate_file, sizeof (struct file));
 		  intermediate_file->name = p;
