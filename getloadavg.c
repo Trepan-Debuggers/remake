@@ -498,9 +498,7 @@ static kvm_t *kd;
    or -1 if an error occurred.  */
 
 int
-getloadavg (loadavg, nelem)
-     double loadavg[];
-     int nelem;
+getloadavg (double loadavg[], int nelem)
 {
   int elem = 0;			/* Return value.  */
 
@@ -994,9 +992,7 @@ getloadavg (loadavg, nelem)
 #include "make.h"
 
 int
-main (argc, argv)
-     int argc;
-     char **argv;
+main (int argc, char **argv)
 {
   int naptime = 0;
 

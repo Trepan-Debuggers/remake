@@ -70,8 +70,7 @@ extern char *vmsify PARAMS ((char *name, int type));
 #endif
 
 static char *
-dosify (filename)
-     char *filename;
+dosify (char *filename)
 {
   static char dos_filename[14];
   char *df;
@@ -121,8 +120,7 @@ dosify (filename)
 
 #ifdef HAVE_CASE_INSENSITIVE_FS
 static char *
-downcase (filename)
-     char *filename;
+downcase (char *filename)
 {
 #ifdef _AMIGA
   static char new_filename[136];
@@ -153,8 +151,7 @@ downcase (filename)
 #ifdef VMS
 
 static int
-vms_hash (name)
-    char *name;
+vms_hash (char *name)
 {
   int h = 0;
   int g;
@@ -176,9 +173,7 @@ vms_hash (name)
 
 /* fake stat entry for a directory */
 static int
-vmsstat_dir (name, st)
-    char *name;
-    struct stat *st;
+vmsstat_dir (char *name, struct stat *st)
 {
   char *s;
   int h;
@@ -248,8 +243,7 @@ struct directory_contents
   };
 
 static unsigned long
-directory_contents_hash_1 (key_0)
-    const void *key_0;
+directory_contents_hash_1 (const void *key_0)
 {
   struct directory_contents const *key = (struct directory_contents const *) key_0;
   unsigned long hash;
@@ -271,8 +265,7 @@ directory_contents_hash_1 (key_0)
 }
 
 static unsigned long
-directory_contents_hash_2 (key_0)
-    const void *key_0;
+directory_contents_hash_2 (const void *key_0)
 {
   struct directory_contents const *key = (struct directory_contents const *) key_0;
   unsigned long hash;
@@ -295,9 +288,7 @@ directory_contents_hash_2 (key_0)
 }
 
 static int
-directory_contents_hash_cmp (xv, yv)
-    const void *xv;
-    const void *yv;
+directory_contents_hash_cmp (const void *xv, const void *yv)
 {
   struct directory_contents const *x = (struct directory_contents const *) xv;
   struct directory_contents const *y = (struct directory_contents const *) yv;
@@ -345,23 +336,19 @@ struct directory
   };
 
 static unsigned long
-directory_hash_1 (key)
-    const void *key;
+directory_hash_1 (const void *key)
 {
   return_ISTRING_HASH_1 (((struct directory const *) key)->name);
 }
 
 static unsigned long
-directory_hash_2 (key)
-    const void *key;
+directory_hash_2 (const void *key)
 {
   return_ISTRING_HASH_2 (((struct directory const *) key)->name);
 }
 
 static int
-directory_hash_cmp (x, y)
-    const void *x;
-    const void *y;
+directory_hash_cmp (const void *x, const void *y)
 {
   return_ISTRING_COMPARE (((struct directory const *) x)->name,
 			  ((struct directory const *) y)->name);
@@ -387,23 +374,19 @@ struct dirfile
   };
 
 static unsigned long
-dirfile_hash_1 (key)
-    const void *key;
+dirfile_hash_1 (const void *key)
 {
   return_ISTRING_HASH_1 (((struct dirfile const *) key)->name);
 }
 
 static unsigned long
-dirfile_hash_2 (key)
-    const void *key;
+dirfile_hash_2 (const void *key)
 {
   return_ISTRING_HASH_2 (((struct dirfile const *) key)->name);
 }
 
 static int
-dirfile_hash_cmp (xv, yv)
-    const void *xv;
-    const void *yv;
+dirfile_hash_cmp (const void *xv, const void *yv)
 {
   struct dirfile const *x = ((struct dirfile const *) xv);
   struct dirfile const *y = ((struct dirfile const *) yv);
@@ -423,8 +406,7 @@ static struct directory *find_directory PARAMS ((char *name));
 /* Find the directory named NAME and return its `struct directory'.  */
 
 static struct directory *
-find_directory (name)
-     register char *name;
+find_directory (char *name)
 {
   register char *p;
   register struct directory *dir;
@@ -584,9 +566,7 @@ find_directory (name)
    FILENAME must contain no slashes.  */
 
 static int
-dir_contents_file_exists_p (dir, filename)
-     register struct directory_contents *dir;
-     register char *filename;
+dir_contents_file_exists_p (struct directory_contents *dir, char *filename)
 {
   unsigned int hash;
   struct dirfile *df;
@@ -724,9 +704,7 @@ dir_contents_file_exists_p (dir, filename)
    FILENAME must contain no slashes.  */
 
 int
-dir_file_exists_p (dirname, filename)
-     register char *dirname;
-     register char *filename;
+dir_file_exists_p (char *dirname, char *filename)
 {
   return dir_contents_file_exists_p (find_directory (dirname)->contents,
 				     filename);
@@ -735,8 +713,7 @@ dir_file_exists_p (dirname, filename)
 /* Return 1 if the file named NAME exists.  */
 
 int
-file_exists_p (name)
-     register char *name;
+file_exists_p (char *name)
 {
   char *dirend;
   char *dirname;
@@ -798,8 +775,7 @@ file_exists_p (name)
    as an intermediate file, and it has failed.  */
 
 void
-file_impossible (filename)
-     register char *filename;
+file_impossible (char *filename)
 {
   char *dirend;
   register char *p = filename;
@@ -882,8 +858,7 @@ file_impossible (filename)
 /* Return nonzero if FILENAME has been marked impossible.  */
 
 int
-file_impossible_p (filename)
-     char *filename;
+file_impossible_p (char *filename)
 {
   char *dirend;
   register char *p = filename;
@@ -964,8 +939,7 @@ file_impossible_p (filename)
    directory hash table that matches DIR.  */
 
 char *
-dir_name (dir)
-     char *dir;
+dir_name (char *dir)
 {
   return find_directory (dir)->name;
 }
@@ -973,7 +947,7 @@ dir_name (dir)
 /* Print the data base of directories.  */
 
 void
-print_dir_data_base ()
+print_dir_data_base (void)
 {
   register unsigned int files;
   register unsigned int impossible;
@@ -1096,8 +1070,7 @@ static __ptr_t open_dirstream PARAMS ((const char *));
 static struct dirent *read_dirstream PARAMS ((__ptr_t));
 
 static __ptr_t
-open_dirstream (directory)
-     const char *directory;
+open_dirstream (const char *directory)
 {
   struct dirstream *new;
   struct directory *dir = find_directory ((char *)directory);
@@ -1120,8 +1093,7 @@ open_dirstream (directory)
 }
 
 static struct dirent *
-read_dirstream (stream)
-     __ptr_t stream;
+read_dirstream (__ptr_t stream)
 {
   struct dirstream *const ds = (struct dirstream *) stream;
   struct directory_contents *dc = ds->contents;
@@ -1164,8 +1136,7 @@ read_dirstream (stream)
 }
 
 static void
-ansi_free(p)
-  void *p;
+ansi_free(void *p)
 {
     if (p)
       free(p);
@@ -1177,21 +1148,19 @@ ansi_free(p)
  */
 #ifndef stat
 # ifndef VMS
-extern int stat ();
+extern int stat PARAMS ((const char *path, struct stat *sbuf));
 # endif
 # define local_stat stat
 #else
-static int local_stat (path, buf)
-    char *path;
-    struct stat *buf;
+static int
+local_stat (const char *path, struct stat *buf)
 {
   return stat (path, buf);
 }
 #endif
 
 void
-dir_setup_glob (gl)
-     glob_t *gl;
+dir_setup_glob (glob_t *gl)
 {
   /* Bogus sunos4 compiler complains (!) about & before functions.  */
   gl->gl_opendir = open_dirstream;
@@ -1203,7 +1172,7 @@ dir_setup_glob (gl)
 }
 
 void
-hash_init_directories ()
+hash_init_directories (void)
 {
   hash_init (&directories, DIRECTORY_BUCKETS,
 	     directory_hash_1, directory_hash_2, directory_hash_cmp);

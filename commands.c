@@ -39,8 +39,7 @@ extern int getpid ();
 /* Set FILE's automatic variables up.  */
 
 static void
-set_file_variables (file)
-     register struct file *file;
+set_file_variables (struct file *file)
 {
   char *at, *percent, *star, *less;
 
@@ -258,8 +257,7 @@ set_file_variables (file)
    Also set the `lines_flags' and `any_recurse' members.  */
 
 void
-chop_commands (cmds)
-     register struct commands *cmds;
+chop_commands (struct commands *cmds)
 {
   register char *p;
   unsigned int nlines, idx;
@@ -360,8 +358,7 @@ chop_commands (cmds)
    fork off a child process to run the first command line in the sequence.  */
 
 void
-execute_file_commands (file)
-     struct file *file;
+execute_file_commands (struct file *file)
 {
   register char *p;
 
@@ -398,8 +395,7 @@ int handling_fatal_signal = 0;
 /* Handle fatal signals.  */
 
 RETSIGTYPE
-fatal_error_signal (sig)
-     int sig;
+fatal_error_signal (int sig)
 {
 #ifdef __MSDOS__
   extern int dos_status, dos_command_running;
@@ -493,9 +489,7 @@ fatal_error_signal (sig)
    and it has changed on disk since we last stat'd it.  */
 
 static void
-delete_target (file, on_behalf_of)
-     struct file *file;
-     char *on_behalf_of;
+delete_target (struct file *file, char *on_behalf_of)
 {
   struct stat st;
 
@@ -540,8 +534,7 @@ delete_target (file, on_behalf_of)
    Set the flag in CHILD to say they've been deleted.  */
 
 void
-delete_child_targets (child)
-     struct child *child;
+delete_child_targets (struct child *child)
 {
   struct dep *d;
 
@@ -561,8 +554,7 @@ delete_child_targets (child)
 /* Print out the commands in CMDS.  */
 
 void
-print_commands (cmds)
-     register struct commands *cmds;
+print_commands (struct commands *cmds)
 {
   register char *s;
 

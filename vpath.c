@@ -157,8 +157,7 @@ build_vpath_lists ()
    VPATHS chain.  */
 
 void
-construct_vpath_list (pattern, dirpath)
-     char *pattern, *dirpath;
+construct_vpath_list (char *pattern, char *dirpath)
 {
   register unsigned int elem;
   register char *p;
@@ -317,9 +316,7 @@ construct_vpath_list (pattern, dirpath)
    in.  If it is found, return 1.  Otherwise we return 0.  */
 
 int
-gpath_search (file, len)
-     char *file;
-     int len;
+gpath_search (char *file, int len)
 {
   register char **gp;
 
@@ -338,9 +335,7 @@ gpath_search (file, len)
    Otherwise we return 0.  */
 
 int
-vpath_search (file, mtime_ptr)
-     char **file;
-     FILE_TIMESTAMP *mtime_ptr;
+vpath_search (char **file, FILE_TIMESTAMP *mtime_ptr)
 {
   register struct vpath *v;
 
@@ -375,10 +370,8 @@ vpath_search (file, mtime_ptr)
    Otherwise we return 0.  */
 
 static int
-selective_vpath_search (path, file, mtime_ptr)
-     struct vpath *path;
-     char **file;
-     FILE_TIMESTAMP *mtime_ptr;
+selective_vpath_search (struct vpath *path, char **file,
+                        FILE_TIMESTAMP *mtime_ptr)
 {
   int not_target;
   char *name, *n;
@@ -545,7 +538,7 @@ selective_vpath_search (path, file, mtime_ptr)
 /* Print the data base of VPATH search paths.  */
 
 void
-print_vpath_data_base ()
+print_vpath_data_base (void)
 {
   register unsigned int nvpaths;
   register struct vpath *v;

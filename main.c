@@ -478,9 +478,7 @@ int fatal_signal_mask;
 typedef RETSIGTYPE (*bsd_signal_ret_t) ();
 
 static bsd_signal_ret_t
-bsd_signal (sig, func)
-     int sig;
-     bsd_signal_ret_t func;
+bsd_signal (int sig, bsd_signal_ret_t func)
 {
   struct sigaction act, oact;
   act.sa_handler = func;
@@ -495,7 +493,7 @@ bsd_signal (sig, func)
 #endif
 
 static void
-initialize_global_hash_tables ()
+initialize_global_hash_tables (void)
 {
   init_hash_global_variable_set ();
   init_hash_files ();
@@ -504,8 +502,7 @@ initialize_global_hash_tables ()
 }
 
 static struct file *
-enter_command_line_file (name)
-     char *name;
+enter_command_line_file (char *name)
 {
   if (name[0] == '\0')
     fatal (NILF, _("empty string invalid as file name"));
@@ -544,14 +541,13 @@ enter_command_line_file (name)
 /* Toggle -d on receipt of SIGUSR1.  */
 
 static RETSIGTYPE
-debug_signal_handler (sig)
-     int sig;
+debug_signal_handler (int sig)
 {
   db_level = db_level ? DB_NONE : DB_BASIC;
 }
 
 static void
-decode_debug_flags ()
+decode_debug_flags (void)
 {
   char **pp;
 
@@ -688,7 +684,7 @@ handle_runtime_exceptions( struct _EXCEPTION_POINTERS *exinfo )
  */
 
 int
-find_and_set_default_shell(char *token)
+find_and_set_default_shell (char *token)
 {
   int sh_found = 0;
   char* search_token;
@@ -775,20 +771,18 @@ find_and_set_default_shell(char *token)
 #ifdef  __MSDOS__
 
 static void
-msdos_return_to_initial_directory ()
+msdos_return_to_initial_directory (void)
 {
   if (directory_before_chdir)
     chdir (directory_before_chdir);
 }
 #endif
 
-extern char *mktemp ();
-extern int mkstemp ();
+extern char *mktemp PARAMS ((char *template));
+extern int mkstemp PARAMS ((char *template));
 
 FILE *
-open_tmpfile(name, template)
-     char **name;
-     const char *template;
+open_tmpfile(char **name, const char *template)
 {
   int fd;
 
@@ -827,14 +821,12 @@ open_tmpfile(name, template)
 }
 
 
-#ifndef _AMIGA
+#ifdef _AMIGA
 int
-main (argc, argv, envp)
-     int argc;
-     char **argv;
-     char **envp;
+main (int argc, char **argv)
 #else
-int main (int argc, char ** argv)
+int
+main (int argc, char **argv, char **envp)
 #endif
 {
   static char *stdin_nm = 0;
@@ -1985,7 +1977,7 @@ static struct option long_options[(sizeof (switches) / sizeof (switches[0])) +
 
 /* Fill in the string and vector for getopt.  */
 static void
-init_switches ()
+init_switches (void)
 {
   register char *p;
   register int c;
@@ -2042,9 +2034,7 @@ init_switches ()
 }
 
 static void
-handle_non_switch_argument (arg, env)
-     char *arg;
-     int env;
+handle_non_switch_argument (char *arg, int env)
 {
   /* Non-option argument.  It might be a variable definition.  */
   struct variable *v;
@@ -2112,8 +2102,7 @@ handle_non_switch_argument (arg, env)
 /* Print a nice usage method.  */
 
 static void
-print_usage (bad)
-     int bad;
+print_usage (int bad)
 {
   extern char *make_host;
   const char *const *cpp;
@@ -2142,10 +2131,7 @@ print_usage (bad)
    They came from the environment if ENV is nonzero.  */
 
 static void
-decode_switches (argc, argv, env)
-     int argc;
-     char **argv;
-     int env;
+decode_switches (int argc, char **argv, int env)
 {
   int bad = 0;
   register const struct command_switch *cs;
@@ -2309,9 +2295,7 @@ decode_switches (argc, argv, env)
    decode_switches.  */
 
 static void
-decode_env_switches (envar, len)
-     char *envar;
-     unsigned int len;
+decode_env_switches (char *envar, unsigned int len)
 {
   char *varref = (char *) alloca (2 + len + 2);
   char *value, *p;
@@ -2382,8 +2366,7 @@ decode_env_switches (envar, len)
    Allocating space for OUT twice the length of IN is always sufficient.  */
 
 static char *
-quote_for_env (out, in)
-     char *out, *in;
+quote_for_env (char *out, char *in)
 {
   while (*in != '\0')
     {
@@ -2402,8 +2385,7 @@ quote_for_env (out, in)
    Don't include options with the `no_makefile' flag set if MAKEFILE.  */
 
 static void
-define_makeflags (all, makefile)
-     int all, makefile;
+define_makeflags (int all, int makefile)
 {
   static const char ref[] = "$(MAKEOVERRIDES)";
   static const char posixref[] = "$(-*-command-variables-*-)";
@@ -2665,7 +2647,7 @@ define_makeflags (all, makefile)
 /* Print version information.  */
 
 static void
-print_version ()
+print_version (void)
 {
   static int printed_version = 0;
 
@@ -2699,7 +2681,7 @@ print_version ()
 /* Print a bunch of information about this and that.  */
 
 static void
-print_data_base ()
+print_data_base (void)
 {
   time_t when;
 
@@ -2719,8 +2701,7 @@ print_data_base ()
 /* Exit with STATUS, cleaning up as necessary.  */
 
 void
-die (status)
-     int status;
+die (int status)
 {
   static char dying = 0;
 
@@ -2764,8 +2745,7 @@ die (status)
    left (according to ENTERING) the current directory.  */
 
 void
-log_working_directory (entering)
-     int entering;
+log_working_directory (int entering)
 {
   static int entered = 0;
 

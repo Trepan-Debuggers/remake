@@ -33,25 +33,21 @@ Boston, MA 02111-1307, USA.  */
 /* Hash table of all global variable definitions.  */
 
 static unsigned long
-variable_hash_1 (keyv)
-    const void *keyv;
+variable_hash_1 (const void *keyv)
 {
   struct variable const *key = (struct variable const *) keyv;
   return_STRING_N_HASH_1 (key->name, key->length);
 }
 
 static unsigned long
-variable_hash_2 (keyv)
-    const void *keyv;
+variable_hash_2 (const void *keyv)
 {
   struct variable const *key = (struct variable const *) keyv;
   return_STRING_N_HASH_2 (key->name, key->length);
 }
 
 static int
-variable_hash_cmp (xv, yv)
-    const void *xv;
-    const void *yv;
+variable_hash_cmp (const void *xv, const void *yv)
 {
   struct variable const *x = (struct variable const *) xv;
   struct variable const *y = (struct variable const *) yv;
@@ -79,7 +75,7 @@ struct variable_set_list *current_variable_set_list = &global_setlist;
 /* Implement variables.  */
 
 void
-init_hash_global_variable_set ()
+init_hash_global_variable_set (void)
 {
   hash_init (&global_variable_set.table, VARIABLE_BUCKETS,
 	     variable_hash_1, variable_hash_2, variable_hash_cmp);
@@ -93,14 +89,10 @@ init_hash_global_variable_set ()
    that it should be recursively re-expanded.  */
 
 struct variable *
-define_variable_in_set (name, length, value, origin, recursive, set, flocp)
-     const char *name;
-     unsigned int length;
-     char *value;
-     enum variable_origin origin;
-     int recursive;
-     struct variable_set *set;
-     const struct floc *flocp;
+define_variable_in_set (const char *name, unsigned int length,
+                        char *value, enum variable_origin origin,
+                        int recursive, struct variable_set *set,
+                        const struct floc *flocp)
 {
   struct variable *v;
   struct variable **var_slot;
@@ -190,8 +182,7 @@ define_variable_in_set (name, length, value, origin, recursive, set, flocp)
 #define EXPANSION_INCREMENT(_l)  ((((_l) / 500) + 1) * 500)
 
 static struct variable *
-handle_special_var (var)
-     struct variable *var;
+handle_special_var (struct variable *var)
 {
   static unsigned long last_var_count = 0;
 
@@ -275,9 +266,7 @@ handle_special_var (var)
    on the variable, or nil if no such variable is defined.  */
 
 struct variable *
-lookup_variable (name, length)
-     const char *name;
-     unsigned int length;
+lookup_variable (const char *name, unsigned int length)
 {
   const struct variable_set_list *setlist;
   struct variable var_key;
@@ -361,10 +350,8 @@ lookup_variable (name, length)
    on the variable, or nil if no such variable is defined.  */
 
 struct variable *
-lookup_variable_in_set (name, length, set)
-     const char *name;
-     unsigned int length;
-     const struct variable_set *set;
+lookup_variable_in_set (const char *name, unsigned int length,
+                        const struct variable_set *set)
 {
   struct variable var_key;
 
@@ -384,9 +371,7 @@ lookup_variable_in_set (name, length, set)
    since the pattern variable might not have been defined yet.  */
 
 void
-initialize_file_variables (file, reading)
-     struct file *file;
-     int reading;
+initialize_file_variables (struct file *file, int reading)
 {
   register struct variable_set_list *l = file->variables;
 
@@ -450,8 +435,7 @@ initialize_file_variables (file, reading)
    and free all its storage.  */
 
 static void
-free_variable_name_and_value (item)
-     void *item;
+free_variable_name_and_value (const void *item)
 {
   struct variable *v = (struct variable *) item;
   free (v->name);
@@ -459,7 +443,7 @@ free_variable_name_and_value (item)
 }
 
 void
-pop_variable_scope ()
+pop_variable_scope (void)
 {
   struct variable_set_list *setlist = current_variable_set_list;
   struct variable_set *set = setlist->set;
@@ -474,7 +458,7 @@ pop_variable_scope ()
 }
 
 struct variable_set_list *
-create_new_variable_set ()
+create_new_variable_set (void)
 {
   register struct variable_set_list *setlist;
   register struct variable_set *set;
@@ -494,7 +478,7 @@ create_new_variable_set ()
 /* Create a new variable set and push it on the current setlist.  */
 
 struct variable_set_list *
-push_new_variable_scope ()
+push_new_variable_scope (void)
 {
   return (current_variable_set_list = create_new_variable_set());
 }
@@ -502,8 +486,8 @@ push_new_variable_scope ()
 /* Merge SET1 into SET0, freeing unused storage in SET1.  */
 
 static void
-merge_variable_sets (to_set, from_set)
-     struct variable_set *to_set, *from_set;
+merge_variable_sets (struct variable_set *to_set,
+                     struct variable_set *from_set)
 {
   struct variable **from_var_slot = (struct variable **) from_set->table.ht_vec;
   struct variable **from_var_end = from_var_slot + from_set->table.ht_size;
@@ -528,8 +512,8 @@ merge_variable_sets (to_set, from_set)
 /* Merge SETLIST1 into SETLIST0, freeing unused storage in SETLIST1.  */
 
 void
-merge_variable_set_lists (setlist0, setlist1)
-     struct variable_set_list **setlist0, *setlist1;
+merge_variable_set_lists (struct variable_set_list **setlist0,
+                          struct variable_set_list *setlist1)
 {
   register struct variable_set_list *list0 = *setlist0;
   struct variable_set_list *last0 = 0;
@@ -558,7 +542,7 @@ merge_variable_set_lists (setlist0, setlist1)
    of their structures so we can change their values quickly.  */
 
 void
-define_automatic_variables ()
+define_automatic_variables (void)
 {
 #ifdef WINDOWS32
   extern char* default_shell;
@@ -661,8 +645,7 @@ int export_all_variables;
    The child's MAKELEVEL variable is incremented.  */
 
 char **
-target_environment (file)
-     struct file *file;
+target_environment (struct file *file)
 {
   struct variable_set_list *set_list;
   register struct variable_set_list *s;
@@ -794,13 +777,9 @@ target_environment (file)
    See the try_variable_definition() function for details on the parameters. */
 
 struct variable *
-do_variable_definition (flocp, varname, value, origin, flavor, target_var)
-     const struct floc *flocp;
-     const char *varname;
-     char *value;
-     enum variable_origin origin;
-     enum variable_flavor flavor;
-     int target_var;
+do_variable_definition (const struct floc *flocp, const char *varname,
+                        char *value, enum variable_origin origin,
+                        enum variable_flavor flavor, int target_var)
 {
   char *p, *alloc_value = NULL;
   struct variable *v;
@@ -1026,11 +1005,8 @@ do_variable_definition (flocp, varname, value, origin, flavor, target_var)
    returned.  */
 
 struct variable *
-try_variable_definition (flocp, line, origin, target_var)
-     const struct floc *flocp;
-     char *line;
-     enum variable_origin origin;
-     int target_var;
+try_variable_definition (const struct floc *flocp, char *line,
+                         enum variable_origin origin, int target_var)
 {
   register int c;
   register char *p = line;
@@ -1128,10 +1104,10 @@ try_variable_definition (flocp, line, origin, target_var)
 /* Print information for variable V, prefixing it with PREFIX.  */
 
 static void
-print_variable (v, prefix)
-     register struct variable *v;
-     char *prefix;
+print_variable (const void *item, void *arg)
 {
+  const struct variable *v = (struct variable *) item;
+  const char *prefix = (char *) arg;
   const char *origin;
 
   switch (v->origin)
@@ -1202,9 +1178,7 @@ print_variable (v, prefix)
    the actual variable definitions (everything else is comments).  */
 
 void
-print_variable_set (set, prefix)
-     register struct variable_set *set;
-     char *prefix;
+print_variable_set (struct variable_set *set, char *prefix)
 {
   hash_map_arg (&set->table, print_variable, prefix);
 
@@ -1217,7 +1191,7 @@ print_variable_set (set, prefix)
 /* Print the data base of variables.  */
 
 void
-print_variable_data_base ()
+print_variable_data_base (void)
 {
   puts (_("\n# Variables\n"));
 
@@ -1228,8 +1202,7 @@ print_variable_data_base ()
 /* Print all the local variables of FILE.  */
 
 void
-print_file_variables (file)
-     struct file *file;
+print_file_variables (struct file *file)
 {
   if (file->variables != 0)
     print_variable_set (file->variables->set, "# ");
@@ -1237,27 +1210,27 @@ print_file_variables (file)
 
 #ifdef WINDOWS32
 void
-sync_Path_environment(void)
+sync_Path_environment (void)
 {
-    char* path = allocated_variable_expand("$(Path)");
-    static char* environ_path = NULL;
+  char *path = allocated_variable_expand ("$(Path)");
+  static char *environ_path = NULL;
 
-    if (!path)
-        return;
+  if (!path)
+    return;
 
-    /*
-     * If done this before, don't leak memory unnecessarily.
-     * Free the previous entry before allocating new one.
-     */
-    if (environ_path)
-        free(environ_path);
+  /*
+   * If done this before, don't leak memory unnecessarily.
+   * Free the previous entry before allocating new one.
+   */
+  if (environ_path)
+    free (environ_path);
 
-    /*
-     * Create something WINDOWS32 world can grok
-     */
-    convert_Path_to_windows32(path, ';');
-    environ_path = concat("Path", "=", path);
-    putenv(environ_path);
-    free(path);
+  /*
+   * Create something WINDOWS32 world can grok
+   */
+  convert_Path_to_windows32 (path, ';');
+  environ_path = concat ("Path", "=", path);
+  putenv (environ_path);
+  free (path);
 }
 #endif

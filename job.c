@@ -239,10 +239,8 @@ int w32_kill(int pid, int sig)
    Append "(ignored)" if IGNORED is nonzero.  */
 
 static void
-child_error (target_name, exit_code, exit_sig, coredump, ignored)
-     char *target_name;
-     int exit_code, exit_sig, coredump;
-     int ignored;
+child_error (char *target_name, int exit_code, int exit_sig, int coredump,
+             int ignored)
 {
   if (ignored && silent_flag)
     return;
@@ -286,10 +284,7 @@ vmsWaitForChildren(int *status)
 /* Set up IO redirection.  */
 
 char *
-vms_redirect (desc, fname, ibuf)
-    struct dsc$descriptor_s *desc;
-    char *fname;
-    char *ibuf;
+vms_redirect (struct dsc$descriptor_s *desc, char *fname, char *ibuf)
 {
   char *fptr;
   extern char *vmsify ();
@@ -390,8 +385,7 @@ handle_apos (char *p)
 static unsigned int dead_children = 0;
 
 RETSIGTYPE
-child_handler (sig)
-     int sig;
+child_handler (int sig)
 {
   ++dead_children;
 
@@ -415,8 +409,7 @@ extern int shell_function_pid, shell_function_completed;
    print an error message first.  */
 
 void
-reap_children (block, err)
-     int block, err;
+reap_children (int block, int err)
 {
   WAIT_T status;
   /* Initially, assume we have some.  */
@@ -771,8 +764,7 @@ reap_children (block, err)
 /* Free the storage allocated for CHILD.  */
 
 static void
-free_child (child)
-     register struct child *child;
+free_child (struct child *child)
 {
   /* If this child is the only one it was our "free" job, so don't put a
      token back for it.  This child has already been removed from the list,
@@ -818,7 +810,7 @@ extern sigset_t fatal_signal_set;
 #endif
 
 void
-block_sigs ()
+block_sigs (void)
 {
 #ifdef POSIX
   (void) sigprocmask (SIG_BLOCK, &fatal_signal_set, (sigset_t *) 0);
@@ -831,7 +823,7 @@ block_sigs ()
 
 #ifdef	POSIX
 void
-unblock_sigs ()
+unblock_sigs (void)
 {
   sigset_t empty;
   sigemptyset (&empty);
@@ -842,8 +834,7 @@ unblock_sigs ()
 #ifdef MAKE_JOBSERVER
 /* Set the child handler action flags to FLAGS.  */
 static void
-set_child_handler_action_flags (flags)
-     int flags;
+set_child_handler_action_flags (int flags)
 {
   struct sigaction sa;
   bzero ((char *) &sa, sizeof sa);
@@ -867,8 +858,7 @@ set_child_handler_action_flags (flags)
    it can be cleaned up in the event of a fatal signal.  */
 
 static void
-start_job_command (child)
-     register struct child *child;
+start_job_command (struct child *child)
 {
 #ifndef _AMIGA
   static int bad_stdin = -1;
@@ -1284,8 +1274,7 @@ start_job_command (child)
    the load was too high and the child was put on the `waiting_jobs' chain.  */
 
 static int
-start_waiting_job (c)
-     struct child *c;
+start_waiting_job (struct child *c)
 {
   struct file *f = c->file;
 
@@ -1344,8 +1333,7 @@ start_waiting_job (c)
 /* Create a `struct child' for FILE and start its commands running.  */
 
 void
-new_job (file)
-     register struct file *file;
+new_job (struct file *file)
 {
   register struct commands *cmds = file->cmds;
   register struct child *c;
@@ -1587,8 +1575,7 @@ new_job (file)
    Returns nonzero if there is another command.  */
 
 static int
-job_next_command (child)
-     struct child *child;
+job_next_command (struct child *child)
 {
   while (child->command_ptr == 0 || *child->command_ptr == '\0')
     {
@@ -1607,7 +1594,7 @@ job_next_command (child)
 }
 
 static int
-load_too_high ()
+load_too_high (void)
 {
 #if defined(__MSDOS__) || defined(VMS) || defined(_AMIGA)
   return 1;
@@ -1645,7 +1632,7 @@ load_too_high ()
 /* Start jobs that are waiting for the load to be lower.  */
 
 void
-start_waiting_jobs ()
+start_waiting_jobs (void)
 {
   struct child *job;
 
@@ -1844,9 +1831,7 @@ static void tryToSetupYAst(void) {
 	}
 }
 int
-child_execute_job (argv, child)
-     char *argv;
-     struct child *child;
+child_execute_job (char *argv, struct child *child)
 {
   int i;
   static struct dsc$descriptor_s cmddsc;
@@ -2226,9 +2211,7 @@ child_execute_job (argv, child)
    the environment of the new program.  This function does not return.  */
 
 void
-child_execute_job (stdin_fd, stdout_fd, argv, envp)
-     int stdin_fd, stdout_fd;
-     char **argv, **envp;
+child_execute_job (int stdin_fd, int stdout_fd, char **argv, char **envp)
 {
   if (stdin_fd != 0)
     (void) dup2 (stdin_fd, 0);
@@ -2251,8 +2234,7 @@ child_execute_job (stdin_fd, stdout_fd, argv, envp)
    with environment ENVP.  This function does not return.  */
 
 void
-exec_command (argv, envp)
-     char **argv, **envp;
+exec_command (char **argv, char **envp)
 {
 #ifdef VMS
   /* to work around a problem with signals and execve: ignore them */
@@ -2374,8 +2356,7 @@ exec_command (argv, envp)
 #endif /* !VMS */
 }
 #else /* On Amiga */
-void exec_command (argv)
-     char **argv;
+void exec_command (char **argv)
 {
   MyExecute (argv);
 }
@@ -2402,10 +2383,8 @@ void clean_tmp (void)
    IFS is the value of $IFS, or nil (meaning the default).  */
 
 static char **
-construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
-     char *line, **restp;
-     char *shell, *ifs;
-     char **batch_filename_ptr;
+construct_command_argv_internal (char *line, char **restp, char *shell,
+                                 char *ifs, char **batch_filename_ptr)
 {
 #ifdef __MSDOS__
   /* MSDOS supports both the stock DOS shell and ports of Unixy shells.
@@ -3011,10 +2990,8 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
    variable expansion for $(SHELL) and $(IFS).  */
 
 char **
-construct_command_argv (line, restp, file, batch_filename_ptr)
-     char *line, **restp;
-     struct file *file;
-     char** batch_filename_ptr;
+construct_command_argv (char *line, char **restp, struct file *file,
+                        char **batch_filename_ptr)
 {
   char *shell, *ifs;
   char **argv;
@@ -3091,8 +3068,7 @@ construct_command_argv (line, restp, file, batch_filename_ptr)
 
 #if !defined(HAVE_DUP2) && !defined(_AMIGA)
 int
-dup2 (old, new)
-     int old, new;
+dup2 (int old, int new)
 {
   int fd;
 

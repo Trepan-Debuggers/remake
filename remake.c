@@ -79,9 +79,7 @@ static int library_search PARAMS ((char **lib, FILE_TIMESTAMP *mtime_ptr));
    `changed' member is nonzero is successfully made.  */
 
 int
-update_goal_chain (goals, makefiles)
-     register struct dep *goals;
-     int makefiles;
+update_goal_chain (struct dep *goals, int makefiles)
 {
   int t = touch_flag, q = question_flag, n = just_print_flag;
   unsigned int j = job_slots;
@@ -282,9 +280,7 @@ update_goal_chain (goals, makefiles)
    each is considered in turn.  */
 
 static int
-update_file (file, depth)
-     struct file *file;
-     unsigned int depth;
+update_file (struct file *file, unsigned int depth)
 {
   register int status = 0;
   register struct file *f;
@@ -341,9 +337,7 @@ update_file (file, depth)
 /* Consider a single `struct file' and update it as appropriate.  */
 
 static int
-update_file_1 (file, depth)
-     struct file *file;
-     unsigned int depth;
+update_file_1 (struct file *file, unsigned int depth)
 {
   register FILE_TIMESTAMP this_mtime;
   int noexist, must_make, deps_changed;
@@ -722,8 +716,7 @@ update_file_1 (file, depth)
    On return, FILE->update_status will no longer be -1 if it was.  */
 
 void
-notice_finished_file (file)
-     register struct file *file;
+notice_finished_file (struct file *file)
 {
   struct dep *d;
   int ran = file->command_state == cs_running;
@@ -837,11 +830,8 @@ notice_finished_file (file)
    Return nonzero if any updating failed.  */
 
 static int
-check_dep (file, depth, this_mtime, must_make_ptr)
-     struct file *file;
-     unsigned int depth;
-     FILE_TIMESTAMP this_mtime;
-     int *must_make_ptr;
+check_dep (struct file *file, unsigned int depth,
+           FILE_TIMESTAMP this_mtime, int *must_make_ptr)
 {
   struct dep *d;
   int dep_status = 0;
@@ -952,8 +942,7 @@ check_dep (file, depth, this_mtime, must_make_ptr)
 #define TOUCH_ERROR(call) return (perror_with_name (call, file->name), 1)
 
 static int
-touch_file (file)
-     register struct file *file;
+touch_file (struct file *file)
 {
   if (!silent_flag)
     message (0, "touch %s", file->name);
@@ -1003,8 +992,7 @@ touch_file (file)
    Return the status from executing FILE's commands.  */
 
 static void
-remake_file (file)
-     struct file *file;
+remake_file (struct file *file)
 {
   if (file->cmds == 0)
     {
@@ -1070,9 +1058,7 @@ remake_file (file)
    FILE.  */
 
 FILE_TIMESTAMP
-f_mtime (file, search)
-     register struct file *file;
-     int search;
+f_mtime (struct file *file, int search)
 {
   FILE_TIMESTAMP mtime;
 
@@ -1268,8 +1254,7 @@ f_mtime (file, search)
 /* Return the mtime of the file or archive-member reference NAME.  */
 
 static FILE_TIMESTAMP
-name_mtime (name)
-     register char *name;
+name_mtime (char *name)
 {
   struct stat st;
 
@@ -1289,9 +1274,7 @@ name_mtime (name)
    directories.  */
 
 static int
-library_search (lib, mtime_ptr)
-     char **lib;
-     FILE_TIMESTAMP *mtime_ptr;
+library_search (char **lib, FILE_TIMESTAMP *mtime_ptr)
 {
   static char *dirs[] =
     {

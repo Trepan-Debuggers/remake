@@ -79,7 +79,7 @@ build.sh.in: build.template Makefile
 maintFILES = configure aclocal.m4 config.h.in Makefile.in stamp-h.in
 
 CVS-CLEAN-FILES +=	$(maintFILES) $(TEMPLATES) $(MTEMPLATES) NMakefile \
-			missing build.sh.in .dep_segment
+			missing build.sh.in .dep_segment po-check-?
 
 # This rule tries to clean the tree right down to how it looks when you do a
 # virgin CVS checkout.
@@ -218,10 +218,11 @@ changelog-check:
 	fi
 
 # Verify that all source files using _() are listed in po/POTFILES.in.
+# Ignore make.h; it defines _().
 po-check:
 	if test -f po/POTFILES.in; then \
 	  grep -E -v '^(#|$$)' po/POTFILES.in | sort > $@-1; \
-	  grep -E -l '\b_\(' *.c | sort > $@-2; \
+	  grep -E -l '\b_\(' *.c *.h | grep -v make.h | sort > $@-2; \
 	  diff -u $@-1 $@-2 || exit 1; \
 	  rm -f $@-1 $@-2; \
 	fi

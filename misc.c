@@ -60,8 +60,7 @@ Boston, MA 02111-1307, USA.  */
    zero if they are equal.  */
 
 int
-alpha_compare (v1, v2)
-     const void *v1, *v2;
+alpha_compare (const void *v1, const void *v2)
 {
   const char *s1 = *((char **)v1);
   const char *s2 = *((char **)v2);
@@ -76,8 +75,7 @@ alpha_compare (v1, v2)
    This is done by copying the text at LINE into itself.  */
 
 void
-collapse_continuations (line)
-     char *line;
+collapse_continuations (char *line)
 {
   register char *in, *out, *p;
   register int backslash;
@@ -158,8 +156,7 @@ collapse_continuations (line)
    This is done by copying the text at LINE onto itself.  */
 
 void
-remove_comments (line)
-     char *line;
+remove_comments (char *line)
 {
   char *comment;
 
@@ -173,8 +170,7 @@ remove_comments (line)
 /* Print N spaces (used in debug for target-depth).  */
 
 void
-print_spaces (n)
-     unsigned int n;
+print_spaces (unsigned int n)
 {
   while (n-- > 0)
     putchar (' ');
@@ -185,8 +181,7 @@ print_spaces (n)
    concatenate those of s1, s2, s3.  */
 
 char *
-concat (s1, s2, s3)
-     const char *s1, *s2, *s3;
+concat (const char *s1, const char *s2, const char *s3)
 {
   unsigned int len1, len2, len3;
   char *result;
@@ -316,8 +311,7 @@ fatal (flocp, fmt, va_alist)
 #undef	strerror
 
 char *
-strerror (errnum)
-     int errnum;
+strerror (int errnum)
 {
   extern int errno, sys_nerr;
 #ifndef __DECC
@@ -336,8 +330,7 @@ strerror (errnum)
 /* Print an error message from errno.  */
 
 void
-perror_with_name (str, name)
-     const char *str, *name;
+perror_with_name (const char *str, const char *name)
 {
   error (NILF, _("%s%s: %s"), str, name, strerror (errno));
 }
@@ -345,8 +338,7 @@ perror_with_name (str, name)
 /* Print an error message from errno and exit.  */
 
 void
-pfatal_with_name (name)
-     const char *name;
+pfatal_with_name (const char *name)
 {
   fatal (NILF, _("%s: %s"), name, strerror (errno));
 
@@ -363,8 +355,7 @@ pfatal_with_name (name)
 #undef xstrdup
 
 char *
-xmalloc (size)
-     unsigned int size;
+xmalloc (unsigned int size)
 {
   char *result = (char *) malloc (size);
   if (result == 0)
@@ -374,9 +365,7 @@ xmalloc (size)
 
 
 char *
-xrealloc (ptr, size)
-     char *ptr;
-     unsigned int size;
+xrealloc (char *ptr, unsigned int size)
 {
   char *result;
 
@@ -389,8 +378,7 @@ xrealloc (ptr, size)
 
 
 char *
-xstrdup (ptr)
-     const char *ptr;
+xstrdup (const char *ptr)
 {
   char *result;
 
@@ -413,9 +401,7 @@ xstrdup (ptr)
 #endif  /* HAVE_DMALLOC_H */
 
 char *
-savestring (str, length)
-     const char *str;
-     unsigned int length;
+savestring (const char *str, unsigned int length)
 {
   register char *out = (char *) xmalloc (length + 1);
   if (length > 0)
@@ -429,11 +415,8 @@ savestring (str, length)
    beginning of the first occurrence, or return nil if none found.  */
 
 char *
-sindex (big, blen, small, slen)
-     const char *big;
-     unsigned int blen;
-     const char *small;
-     unsigned int slen;
+sindex (const char *big, unsigned int blen,
+        const char *small, unsigned int slen)
 {
   if (!blen)
     blen = strlen (big);
@@ -463,9 +446,7 @@ sindex (big, blen, small, slen)
    instead of at the first null.  */
 
 char *
-lindex (s, limit, c)
-     register const char *s, *limit;
-     int c;
+lindex (const char *s, const char *limit, int c)
 {
   while (s < limit)
     if (*s++ == c)
@@ -477,8 +458,7 @@ lindex (s, limit, c)
 /* Return the address of the first whitespace or null in the string S.  */
 
 char *
-end_of_token (s)
-     char *s;
+end_of_token (char *s)
 {
   while (*s != '\0' && !isblank ((unsigned char)*s))
     ++s;
@@ -490,9 +470,7 @@ end_of_token (s)
  * Same as end_of_token, but take into account a stop character
  */
 char *
-end_of_token_w32 (s, stopchar)
-     char *s;
-     char stopchar;
+end_of_token_w32 (char *s, char stopchar)
 {
   register char *p = s;
   register int backslash = 0;
@@ -520,8 +498,7 @@ end_of_token_w32 (s, stopchar)
 /* Return the address of the first nonwhitespace or null in the string S.  */
 
 char *
-next_token (s)
-     const char *s;
+next_token (const char *s)
 {
   while (isblank ((unsigned char)*s))
     ++s;
@@ -532,9 +509,7 @@ next_token (s)
    length of the token into *LENGTHPTR if LENGTHPTR is not nil.  */
 
 char *
-find_next_token (ptr, lengthptr)
-     char **ptr;
-     unsigned int *lengthptr;
+find_next_token (char **ptr, unsigned int *lengthptr)
 {
   char *p = next_token (*ptr);
   char *end;
@@ -552,8 +527,7 @@ find_next_token (ptr, lengthptr)
    with the same contents as the old one.  */
 
 struct dep *
-copy_dep_chain (d)
-     register struct dep *d;
+copy_dep_chain (struct dep *d)
 {
   register struct dep *c;
   struct dep *firstnew = 0;
@@ -581,8 +555,7 @@ copy_dep_chain (d)
 /* The losing compiler on this machine can't handle this macro.  */
 
 char *
-dep_name (dep)
-     struct dep *dep;
+dep_name (struct dep *dep)
 {
   return dep->name == 0 ? dep->file->name : dep->name;
 }
@@ -641,8 +614,7 @@ static enum { make, user } current_access;
 /* Under -d, write a message describing the current IDs.  */
 
 static void
-log_access (flavor)
-     char *flavor;
+log_access (char *flavor)
 {
   if (! ISDB (DB_JOBS))
     return;
@@ -659,7 +631,7 @@ log_access (flavor)
 
 
 static void
-init_access ()
+init_access (void)
 {
 #ifndef VMS
   user_uid = getuid ();
@@ -683,7 +655,7 @@ init_access ()
 /* Give the process appropriate permissions for access to
    user data (i.e., to stat files, or to spawn a child process).  */
 void
-user_access ()
+user_access (void)
 {
 #ifdef	GETLOADAVG_PRIVILEGED
 
@@ -759,7 +731,7 @@ user_access ()
 /* Give the process appropriate permissions for access to
    make data (i.e., the load average).  */
 void
-make_access ()
+make_access (void)
 {
 #ifdef	GETLOADAVG_PRIVILEGED
 
@@ -807,7 +779,7 @@ make_access ()
 /* Give the process appropriate permissions for a child process.
    This is like user_access, but you can't get back to make_access.  */
 void
-child_access ()
+child_access (void)
 {
 #ifdef	GETLOADAVG_PRIVILEGED
 
@@ -840,7 +812,7 @@ child_access ()
 
 #ifdef NEED_GET_PATH_MAX
 unsigned int
-get_path_max ()
+get_path_max (void)
 {
   static unsigned int value;
 
@@ -864,9 +836,7 @@ get_path_max ()
 #undef readdir
 
 int
-atomic_stat(file, buf)
-     const char *file;
-     struct stat *buf;
+atomic_stat (const char *file, struct stat *buf)
 {
   int r;
 
@@ -878,8 +848,7 @@ atomic_stat(file, buf)
 }
 
 struct dirent *
-atomic_readdir(dir)
-     DIR *dir;
+atomic_readdir (DIR *dir)
 {
   struct dirent *r;
 

@@ -34,23 +34,19 @@ Boston, MA 02111-1307, USA.  */
 /* Hash table of files the makefile knows how to make.  */
 
 static unsigned long
-file_hash_1 (key)
-    const void *key;
+file_hash_1 (const void *key)
 {
   return_ISTRING_HASH_1 (((struct file const *) key)->hname);
 }
 
 static unsigned long
-file_hash_2 (key)
-    const void *key;
+file_hash_2 (const void *key)
 {
   return_ISTRING_HASH_2 (((struct file const *) key)->hname);
 }
 
 static int
-file_hash_cmp (x, y)
-    const void *x;
-    const void *y;
+file_hash_cmp (const void *x, const void *y)
 {
   return_ISTRING_COMPARE (((struct file const *) x)->hname,
 			  ((struct file const *) y)->hname);
@@ -70,8 +66,7 @@ static int all_secondary = 0;
    enter_file   similar, but create one if there is none.  */
 
 struct file *
-lookup_file (name)
-     char *name;
+lookup_file (char *name)
 {
   register struct file *f;
   struct file file_key;
@@ -128,8 +123,7 @@ lookup_file (name)
 }
 
 struct file *
-enter_file (name)
-     char *name;
+enter_file (char *name)
 {
   register struct file *f;
   register struct file *new;
@@ -195,9 +189,7 @@ enter_file (name)
    and possibly merged with an existing file called NAME.  */
 
 void
-rename_file (from_file, to_hname)
-     register struct file *from_file;
-     char *to_hname;
+rename_file (struct file *from_file, char *to_hname)
 {
   rehash_file (from_file, to_hname);
   while (from_file)
@@ -212,9 +204,7 @@ rename_file (from_file, to_hname)
    and possibly merged with an existing file called NAME.  */
 
 void
-rehash_file (from_file, to_hname)
-     register struct file *from_file;
-     char *to_hname;
+rehash_file (struct file *from_file, char *to_hname)
 {
   struct file file_key;
   struct file **file_slot;
@@ -333,8 +323,7 @@ rehash_file (from_file, to_hname)
    the message will go to stderr rather than stdout.  */
 
 void
-remove_intermediates (sig)
-     int sig;
+remove_intermediates (int sig)
 {
   register struct file **file_slot;
   register struct file **file_end;
@@ -410,7 +399,7 @@ remove_intermediates (sig)
    and various other special targets.  */
 
 void
-snap_deps ()
+snap_deps (void)
 {
   register struct file *f;
   register struct file *f2;
@@ -525,9 +514,7 @@ snap_deps ()
 /* Set the `command_state' member of FILE and all its `also_make's.  */
 
 void
-set_command_state (file, state)
-     struct file *file;
-     int state;
+set_command_state (struct file *file, int state)
 {
   struct dep *d;
 
@@ -540,10 +527,7 @@ set_command_state (file, state)
 /* Convert an external file timestamp to internal form.  */
 
 FILE_TIMESTAMP
-file_timestamp_cons (fname, s, ns)
-     char const *fname;
-     time_t s;
-     int ns;
+file_timestamp_cons (const char *fname, time_t s, int ns)
 {
   int offset = ORDINARY_MTIME_MIN + (FILE_TIMESTAMP_HI_RES ? ns : 0);
   FILE_TIMESTAMP product = (FILE_TIMESTAMP) s << FILE_TIMESTAMP_LO_BITS;
@@ -565,8 +549,7 @@ file_timestamp_cons (fname, s, ns)
 /* Return the current time as a file timestamp, setting *RESOLUTION to
    its resolution.  */
 FILE_TIMESTAMP
-file_timestamp_now (resolution)
-     int *resolution;
+file_timestamp_now (int *resolution)
 {
   int r;
   time_t s;
@@ -606,7 +589,9 @@ file_timestamp_now (resolution)
   s = time ((time_t *) 0);
   ns = 0;
 
+#if FILE_TIMESTAMP_HI_RES
  got_time:
+#endif
   *resolution = r;
   return file_timestamp_cons (0, s, ns);
 }
@@ -614,9 +599,7 @@ file_timestamp_now (resolution)
 /* Place into the buffer P a printable representation of the file
    timestamp TS.  */
 void
-file_timestamp_sprintf (p, ts)
-     char *p;
-     FILE_TIMESTAMP ts;
+file_timestamp_sprintf (char *p, FILE_TIMESTAMP ts)
 {
   time_t t = FILE_TIMESTAMP_S (ts);
   struct tm *tm = localtime (&t);
@@ -648,9 +631,9 @@ file_timestamp_sprintf (p, ts)
 /* Print the data base of files.  */
 
 static void
-print_file (f)
-     struct file *f;
+print_file (const void *item)
 {
+  struct file *f = (struct file *)f;
   struct dep *d;
   struct dep *ood = 0;
 
@@ -759,7 +742,7 @@ print_file (f)
 }
 
 void
-print_file_data_base ()
+print_file_data_base (void)
 {
   puts (_("\n# Files"));
 
@@ -772,8 +755,7 @@ print_file_data_base ()
 #define EXPANSION_INCREMENT(_l)  ((((_l) / 500) + 1) * 500)
 
 char *
-build_target_list (value)
-     char *value;
+build_target_list (char *value)
 {
   static unsigned long last_targ_count = 0;
 
@@ -819,7 +801,7 @@ build_target_list (value)
 }
 
 void
-init_hash_files ()
+init_hash_files (void)
 {
   hash_init (&files, 1000, file_hash_1, file_hash_2, file_hash_cmp);
 }

@@ -1,6 +1,6 @@
 # This is a -*-Makefile-*-, or close enough
 
-AUTOMAKE_OPTIONS = 1.7 dist-bzip2 check-news
+AUTOMAKE_OPTIONS = 1.7 dist-bzip2 check-news ansi2knr
 ACLOCAL_AMFLAGS	=  -I config
 
 SUBDIRS =	glob config po doc
@@ -121,7 +121,7 @@ check-loadavg: loadavg
 
 # The loadavg function is invoked during "make check" to test getloadavg.
 noinst_PROGRAMS = loadavg
-loadavg_SOURCES = loadavg.c
+nodist_loadavg_SOURCES = loadavg.c
 loadavg_CFLAGS = -DTEST
 loadavg_LDADD = @GETLOADAVG_LIBS@
 

@@ -39,8 +39,7 @@ extern int ar_member_touch PARAMS ((char *arname, char *memname));
    the attempt to use this unsupported feature.  */
 
 int
-ar_name (name)
-     char *name;
+ar_name (char *name)
 {
   char *p = strchr (name, '(');
   char *end;
@@ -64,8 +63,7 @@ ar_name (name)
    put the malloc'd member name in *MEMNAME_P if MEMNAME_P is non-nil.  */
 
 void
-ar_parse_name (name, arname_p, memname_p)
-     char *name, **arname_p, **memname_p;
+ar_parse_name (char *name, char **arname_p, char **memname_p)
 {
   char *p = strchr (name, '('), *end = name + strlen (name) - 1;
 
@@ -82,8 +80,7 @@ static long int ar_member_date_1 PARAMS ((int desc, char *mem, int truncated, lo
 /* Return the modtime of NAME.  */
 
 time_t
-ar_member_date (name)
-     char *name;
+ar_member_date (char *name)
 {
   char *arname;
   int arname_used = 0;
@@ -125,14 +122,9 @@ ar_member_date (name)
 
 /* ARGSUSED */
 static long int
-ar_member_date_1 (desc, mem, truncated,
-		  hdrpos, datapos, size, date, uid, gid, mode, name)
-     int desc;
-     char *mem;
-     int truncated;
-     long int hdrpos, datapos, size, date;
-     int uid, gid, mode;
-     char *name;
+ar_member_date_1 (int desc, char *mem, int truncated,
+		  long int hdrpos, long int datapos, long int size,
+                  long int date, int uid, int gid, int mode, char *name)
 {
   return ar_name_equal (name, mem, truncated) ? date : 0;
 }
@@ -141,16 +133,14 @@ ar_member_date_1 (desc, mem, truncated,
 
 #ifdef VMS
 int
-ar_touch (name)
-     char *name;
+ar_touch (char *name)
 {
   error (NILF, _("touch archive member is not available on VMS"));
   return -1;
 }
 #else
 int
-ar_touch (name)
-     char *name;
+ar_touch (char *name)
 {
   char *arname, *memname;
   int arname_used = 0;
@@ -219,15 +209,10 @@ struct ar_glob_state
    element against the pattern in STATE.  */
 
 static long int
-ar_glob_match (desc, mem, truncated,
-	       hdrpos, datapos, size, date, uid, gid, mode,
-	       state)
-     int desc;
-     char *mem;
-     int truncated;
-     long int hdrpos, datapos, size, date;
-     int uid, gid, mode;
-     struct ar_glob_state *state;
+ar_glob_match (int desc, char *mem, int truncated,
+	       long int hdrpos, long int datapos, long int size,
+               long int date, int uid, int gid, int mode,
+               struct ar_glob_state *state)
 {
   if (fnmatch (state->pattern, mem, FNM_PATHNAME|FNM_PERIOD) == 0)
     {
@@ -245,11 +230,9 @@ ar_glob_match (desc, mem, truncated,
 /* Return nonzero if PATTERN contains any metacharacters.
    Metacharacters can be quoted with backslashes if QUOTE is nonzero.  */
 static int
-glob_pattern_p (pattern, quote)
-     const char *pattern;
-     const int quote;
+glob_pattern_p (const char *pattern, int quote)
 {
-  register const char *p;
+  const char *p;
   int open = 0;
 
   for (p = pattern; *p != '\0'; ++p)
@@ -281,9 +264,7 @@ glob_pattern_p (pattern, quote)
    Return a malloc'd chain of matching elements (or nil if none).  */
 
 struct nameseq *
-ar_glob (arname, member_pattern, size)
-     char *arname, *member_pattern;
-     unsigned int size;
+ar_glob (char *arname, char *member_pattern, unsigned int size)
 {
   struct ar_glob_state state;
   char **names;
