@@ -49,6 +49,10 @@ extern int errno;
 #if !defined (HAVE_SYS_SIGLIST) && defined (HAVE__SYS_SIGLIST)
 #define	sys_siglist	_sys_siglist
 #define	HAVE_SYS_SIGLIST	/* Now we have it.  */
+
+/* It was declared in <signal.h>, with who knows what type.
+   Don't declare it again and risk conflicting.  */
+#define	SYS_SIGLIST_DECLARED
 #endif
 
 #ifndef	isblank
