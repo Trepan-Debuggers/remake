@@ -1435,8 +1435,7 @@ func_shell (o, argv, funcname)
       buffer = (char *) xmalloc (maxlen + 1);
 
       /* Read from the pipe until it gets EOF.  */
-      i = 0;
-      do
+      for (i = 0; ; i += cc)
 	{
 	  if (i == maxlen)
 	    {
@@ -1444,12 +1443,10 @@ func_shell (o, argv, funcname)
 	      buffer = (char *) xrealloc (buffer, maxlen + 1);
 	    }
 
-	  errno = 0;
 	  cc = read (pipedes[0], &buffer[i], maxlen - i);
-	  if (cc > 0)
-	    i += cc;
+	  if (cc <= 0)
+	    break;
 	}
-      while (cc > 0 || EINTR_SET);
       buffer[i] = '\0';
 
       /* Close the read side of the pipe.  */

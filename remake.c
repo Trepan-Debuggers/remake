@@ -933,13 +933,8 @@ touch_file (file)
 	{
 	  struct stat statbuf;
 	  char buf;
-	  int status;
 
-	  do
-	    status = fstat (fd, &statbuf);
-	  while (status < 0 && EINTR_SET);
-
-	  if (status < 0)
+	  if (fstat (fd, &statbuf) < 0)
 	    TOUCH_ERROR ("touch: fstat: ");
 	  /* Rewrite character 0 same as it already is.  */
 	  if (read (fd, &buf, 1) < 0)
@@ -1239,13 +1234,12 @@ name_mtime (name)
 {
   struct stat st;
 
-  while (stat (name, &st) != 0)
-    if (!EINTR_SET)
-      {
-        if (errno != ENOENT && errno != ENOTDIR)
-          perror_with_name ("stat:", name);
-        return NONEXISTENT_MTIME;
-      }
+  if (stat (name, &st) != 0)
+    {
+      if (errno != ENOENT && errno != ENOTDIR)
+        perror_with_name ("stat:", name);
+      return NONEXISTENT_MTIME;
+    }
 
   return FILE_TIMESTAMP_STAT_MODTIME (name, st);
 }

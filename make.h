@@ -111,14 +111,6 @@ Boston, MA 02111-1307, USA.  */
 extern int errno;
 #endif
 
-/* A shortcut for EINTR checking.  Note you should be careful when negating
-   this!  That might not mean what you want if EINTR is not available.  */
-#ifdef EINTR
-# define EINTR_SET (errno == EINTR)
-#else
-# define EINTR_SET (0)
-#endif
-
 #ifndef isblank
 # define isblank(c)     ((c) == ' ' || (c) == '\t')
 #endif
@@ -147,6 +139,10 @@ extern int errno;
 
 #ifndef sigmask
 # define sigmask(sig)   (1 << ((sig) - 1))
+#endif
+
+#ifndef HAVE_SA_RESTART
+# define SA_RESTART 0
 #endif
 
 #ifdef  HAVE_LIMITS_H

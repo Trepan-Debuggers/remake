@@ -1,3 +1,45 @@
+2001-05-06  Paul D. Smith  <psmith@gnu.org>
+
+	Modify the EINTR handling.
+
+	* job.c (new_job): Reorganize the jobserver algorithm.  Reorder
+	the way in which we manage the file descriptor/signal handler race
+	trap to be more efficient.
+
+2001-05-06  Paul Eggert  <eggert@twinsun.com>
+
+	Restart almost all system calls that are interrupted, instead
+	of worrying about EINTR.  The lone exception is the read() for
+	job tokens.
+
+	* configure.in (HAVE_SA_RESTART): New macro.
+	(MAKE_JOBSERVER): Define to 1 only if HAVE_SA_RESTART.
+	* main.c (main): Use SA_RESTART instead of the old,
+	nonstandard SA_INTERRUPT.
+
+	* configure.in (AC_CHECK_FUNCS): Add bsd_signal.
+	* main.c (bsd_signal): New function or macro,
+	if the implementation doesn't supply it.
+	(The bsd_signal function will be in POSIX 1003.1-200x.)
+	(HANDLESIG): Remove.
+	(main, FATAL_SIG): Use bsd_signal instead of signal or HANDLESIG.
+
+	* make.h (EINTR_SET): Remove.
+	(SA_RESTART): New macro.
+
+	* arscan.c (ar_member_touch): Don't worry about EINTR.
+	* function.c (func_shell): Likewise.
+	* job.c (reap_children, free_child, new_job): Likewise.
+	* main.c (main): Likewise.
+	* remake.c (touch_file, name_mtime): Likewise.
+
+	* arscan.c (ar_member_touch): Fix bug uncovered by EINTR removal;
+	if fstat failed with errno!=EINTR, the error was ignored.
+
+	* job.c (set_child_handler_action_flags): New function.
+	(new_job): Use it to temporarily clear the SIGCHLD action flags
+	while reading the token.
+
 2001-05-02  Paul D. Smith  <psmith@gnu.org>
 
 	* job.c (start_job_command): Don't add define/endef per-line flags
@@ -10,6 +52,19 @@
 	values.
 	(VMS_get_member_info): Calculate the timezone differences correctly.
 	Reported by John Fowler <jfowler@nyx.net>.
+
+
+2001-03-14  Paul D. Smith  <psmith@gnu.org>
+
+	* variable.c (lookup_variable) [VMS]: Null-terminate the variable
+	value before invoking define_variable().
+	Reported by John Fowler <jfowler@nyx.net>.
+
+2001-02-07  Paul D. Smith  <psmith@gnu.org>
+
+	* read.c (record_target_var): If we reset the variable due to a
+	command-line variable setting overriding it, turn off the "append"
+	flag.
 
 2001-01-17  Paul D. Smith  <psmith@gnu.org>
 

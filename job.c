@@ -436,8 +436,8 @@ reap_children (block, err)
 
      we'll keep reaping children.  */
 
-  while ((children != 0 || shell_function_pid != 0) &&
-	 (block || REAP_MORE))
+  while ((children != 0 || shell_function_pid != 0)
+         && (block || REAP_MORE))
     {
       int remote = 0;
       register int pid;
@@ -500,9 +500,6 @@ reap_children (block, err)
 	{
           /* A remote status command failed miserably.  Punt.  */
 	remote_status_lose:
-	  if (EINTR_SET)
-	    continue;
-
 	  pfatal_with_name ("remote_status");
 	}
       else
@@ -511,7 +508,6 @@ reap_children (block, err)
 #if !defined(__MSDOS__) && !defined(_AMIGA) && !defined(WINDOWS32)
 	  if (any_local)
 	    {
-            local_wait:
 #ifdef VMS
 	      vmsWaitForChildren (&status);
 	      pid = c->pid;
@@ -529,10 +525,6 @@ reap_children (block, err)
 
 	  if (pid < 0)
 	    {
-              /* EINTR?  Try again. */
-	      if (EINTR_SET)
-		goto local_wait;
-
               /* The wait*() failed miserably.  Punt.  */
 	      pfatal_with_name ("wait");
 	    }
@@ -737,7 +729,7 @@ reap_children (block, err)
            update_status to its also_make files.  */
         notice_finished_file (c->file);
 
-      DB (DB_JOBS, (_("Removing child 0x%08lx PID %ld %s from chain.\n"),
+      DB (DB_JOBS, (_("Removing child 0x%08lx PID %ld%s from chain.\n"),
                     (unsigned long int) c, (long) c->pid,
                     c->remote ? _(" (remote)") : ""));
 
@@ -792,9 +784,8 @@ free_child (child)
 
       /* Write a job token back to the pipe.  */
 
-      while (write (job_fds[1], &token, 1) != 1)
-        if (!EINTR_SET)
-          pfatal_with_name (_("write jobserver"));
+      if (write (job_fds[1], &token, 1) != 1)
+	pfatal_with_name (_("write jobserver"));
 
       DB (DB_JOBS, (_("Released token for child 0x%08lx (%s).\n"),
                     (unsigned long int) child, child->file->name));
@@ -847,6 +838,26 @@ unblock_sigs ()
   sigprocmask (SIG_SETMASK, &empty, (sigset_t *) 0);
 }
 #endif
+
+#ifdef MAKE_JOBSERVER
+/* Set the child handler action flags to FLAGS.  */
+static void
+set_child_handler_action_flags (flags)
+     int flags;
+{
+  struct sigaction sa;
+  bzero ((char *) &sa, sizeof sa);
+  sa.sa_handler = child_handler;
+  sa.sa_flags = flags;
+#if defined SIGCHLD
+  sigaction (SIGCHLD, &sa, NULL);
+#endif
+#if defined SIGCLD && SIGCLD != SIGCHLD
+  sigaction (SIGCLD, &sa, NULL);
+#endif
+}
+#endif
+
 
 /* Start a job to run the commands specified in CHILD.
    CHILD is updated to reflect the commands and ID of the child process.
@@ -1489,34 +1500,73 @@ new_job (file)
     while (1)
       {
         char token;
+	int got_token;
+	int saved_errno;
+
+        DB (DB_JOBS, ("Need a job token; we %shave children\n",
+                      children ? "" : "don't "));
 
         /* If we don't already have a job started, use our "free" token.  */
         if (!children)
           break;
 
         /* Read a token.  As long as there's no token available we'll block.
-           If we get a SIGCHLD we'll return with EINTR.  If one happened
-           before we got here we'll return immediately with EBADF because
-           the signal handler closes the dup'd file descriptor.  */
+           We enable interruptible system calls before the read(2) so that if
+           we get a SIGCHLD while we're waiting, we'll return with EINTR and
+           we can process the death(s) and return tokens to the free pool.
 
-        if (read (job_rfd, &token, 1) == 1)
+           Once we return from the read, we immediately reinstate restartable
+           system calls.  This allows us to not worry about checking for
+           EINTR on all the other system calls in the program.
+
+           There is one other twist: there is a span between the time
+           reap_children() does its last check for dead children and the time
+           the read(2) call is entered, below, where if a child dies we won't
+           notice.  This is extremely serious as it could cause us to
+           deadlock, given the right set of events.
+
+           To avoid this, we do the following: before we reap_children(), we
+           dup(2) the read FD on the jobserver pipe.  The read(2) call below
+           uses that new FD.  In the signal handler, we close that FD.  That
+           way, if a child dies during the section mentioned above, the
+           read(2) will be invoked with an invalid FD and will return
+           immediately with EBADF.  */
+
+        /* Make sure we have a dup'd FD.  */
+        if (job_rfd < 0)
+          {
+            DB (DB_JOBS, ("Duplicate the job FD\n"));
+            job_rfd = dup (job_fds[0]);
+          }
+
+        /* Reap anything that's currently waiting.  */
+        reap_children (0, 0);
+
+        /* If our "free" token has become available, use it.  */
+        if (!children)
+          break;
+
+        /* Set interruptible system calls, and read() for a job token.  */
+	set_child_handler_action_flags (0);
+	got_token = read (job_rfd, &token, 1);
+	saved_errno = errno;
+	set_child_handler_action_flags (SA_RESTART);
+
+        /* If we got one, we're done here.  */
+	if (got_token == 1)
           {
             DB (DB_JOBS, (_("Obtained token for child 0x%08lx (%s).\n"),
                           (unsigned long int) c, c->file->name));
             break;
           }
 
+        /* If the error _wasn't_ expected (EINTR or EBADF), punt.  Otherwise,
+           go back and reap_children(), and try again.  */
+	errno = saved_errno;
         if (errno != EINTR && errno != EBADF)
           pfatal_with_name (_("read jobs pipe"));
-
-        /* Re-dup the read side of the pipe, so the signal handler can
-           notify us if we miss a child.  */
-        if (job_rfd < 0)
-          job_rfd = dup (job_fds[0]);
-
-        /* Something's done.  We don't want to block for a whole child,
-           just reap whatever's there.  */
-        reap_children (0, 0);
+        if (errno == EBADF)
+          DB (DB_JOBS, ("Read returned EBADF.\n"));
       }
 #endif
 

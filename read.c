@@ -1490,8 +1490,11 @@ record_target_var (filenames, defn, two_colon, origin, flocp)
           current_variable_set_list = global;
           gv = lookup_variable (v->name, len);
           if (gv && (gv->origin == o_env_override || gv->origin == o_command))
-            define_variable_in_set (v->name, len, gv->value, gv->origin,
-                                    gv->recursive, vlist->set, flocp);
+            {
+              v = define_variable_in_set (v->name, len, gv->value, gv->origin,
+                                          gv->recursive, vlist->set, flocp);
+              v->append = 0;
+            }
         }
 
       /* Free name if not needed further.  */

@@ -448,6 +448,27 @@ int fatal_signal_mask;
 #endif
 #endif
 
+#if !defined HAVE_BSD_SIGNAL && !defined bsd_signal
+# if !defined HAVE_SIGACTION
+#  define bsd_signal signal
+# else
+static RETSIGTYPE
+(*bsd_signal) PARAMS ((int)) (sig, func)
+     int sig;
+     RETSIGTYPE (*func) PARAMS ((int));
+{
+  struct sigaction act, oact;
+  act.sa_handler = func;
+  act.sa_flags = SA_RESTART;
+  sigemptyset (&act.sa_mask);
+  sigaddset (&act.sa_mask, sig);
+  if (sigaction (sig, &act, &oact) != 0)
+    return SIG_ERR;
+  return oact.sa_handler;
+}
+# endif
+#endif
+
 static struct file *
 enter_command_line_file (name)
      char *name;
@@ -839,8 +860,8 @@ int main (int argc, char ** argv)
 #endif
 
 #define	FATAL_SIG(sig)							      \
-  if (signal ((sig), fatal_error_signal) == SIG_IGN)			      \
-    (void) signal ((sig), SIG_IGN);					      \
+  if (bsd_signal (sig, fatal_error_signal) == SIG_IGN)			      \
+    bsd_signal (sig, SIG_IGN);						      \
   else									      \
     ADD_SIG (sig);
 
@@ -879,10 +900,10 @@ int main (int argc, char ** argv)
 
 #ifdef HAVE_WAIT_NOHANG
 # if defined SIGCHLD
-  (void) signal (SIGCHLD, SIG_DFL);
+  (void) bsd_signal (SIGCHLD, SIG_DFL);
 # endif
 # if defined SIGCLD && SIGCLD != SIGCHLD
-  (void) signal (SIGCLD, SIG_DFL);
+  (void) bsd_signal (SIGCLD, SIG_DFL);
 # endif
 #endif
 
@@ -1345,34 +1366,18 @@ int main (int argc, char ** argv)
      If none of these are true, we don't need a signal handler at all.  */
   {
     extern RETSIGTYPE child_handler PARAMS ((int sig));
-
-# if defined HAVE_SIGACTION
-    struct sigaction sa;
-
-    bzero ((char *)&sa, sizeof (struct sigaction));
-    sa.sa_handler = child_handler;
-#  if defined SA_INTERRUPT
-    /* This is supposed to be the default, but what the heck... */
-    sa.sa_flags = SA_INTERRUPT;
-#  endif
-#  define HANDLESIG(s) sigaction (s, &sa, NULL)
-# else
-#  define HANDLESIG(s) signal (s, child_handler)
-# endif
-
-    /* OK, now actually install the handlers.  */
 # if defined SIGCHLD
-    (void) HANDLESIG (SIGCHLD);
+    bsd_signal (SIGCHLD, child_handler);
 # endif
 # if defined SIGCLD && SIGCLD != SIGCHLD
-    (void) HANDLESIG (SIGCLD);
+    bsd_signal (SIGCLD, child_handler);
 # endif
   }
 #endif
 
   /* Let the user send us SIGUSR1 to toggle the -d flag during the run.  */
 #ifdef SIGUSR1
-  (void) signal (SIGUSR1, debug_signal_handler);
+  bsd_signal (SIGUSR1, debug_signal_handler);
 #endif
 
   /* Define the initial list of suffixes for old-style rules.  */
@@ -1527,9 +1532,8 @@ int main (int argc, char ** argv)
          want job_slots to be 0 to indicate we're using the jobserver.  */
 
       while (--job_slots)
-        while (write (job_fds[1], &c, 1) != 1)
-          if (!EINTR_SET)
-            pfatal_with_name (_("init jobserver pipe"));
+        if (write (job_fds[1], &c, 1) != 1)
+	  pfatal_with_name (_("init jobserver pipe"));
 
       /* Fill in the jobserver_fds struct for our children.  */
 

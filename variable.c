@@ -207,6 +207,7 @@ lookup_variable (name, length)
                 sptr++;
               }
 
+            *nptr = '\0';
             return define_variable (vname, length, nvalue, o_env, 1);
 
           }
