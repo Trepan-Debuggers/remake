@@ -8,15 +8,20 @@
 
 @set EDITION 0.40
 @set VERSION 3.63 Beta
-@set UPDATED 11 January 1993
+@set UPDATED 14 January 1993
 @set UPDATE-MONTH January 1993
 
 @c finalout
 
-@c Combine the variable and function indices:
-@syncodeindex vr fn
-@c Combine the program and concept indices:
-@syncodeindex pg cp
+@c ISPELL CHECK: done, 14 Jan 1993 --bob
+
+@c Set the following only if you have the new `shorttitlepage' command:
+@c clear shorttitlepage
+@set shorttitlepage
+
+@c Set the following only if you have the new, two level index `texindex'
+@c clear two-level-index
+@set two-level-index
 
 @ifset two-level-index
 @tex
@@ -56,6 +61,11 @@
 @end tex
 @end ifset
 
+@c Combine the variable and function indices:
+@syncodeindex vr fn
+@c Combine the program and concept indices:
+@syncodeindex pg cp
+
 @ifinfo
 This file documents the GNU Make utility, which determines
 automatically which pieces of a large program need to be recompiled,
@@ -64,7 +74,7 @@ and issues the commands to recompile them.
 This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Make Manual}, for @code{make}, Version @value{VERSION}.
 
-Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+Copyright (C) 1988, '89, '90, '91, '92, '93 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -91,6 +101,9 @@ entitled ``GNU General Public License'' must be approved for accuracy
 by the Foundation.
 @end ifinfo
 
+@ifset shorttitlepage
+@shorttitlepage GNU Make
+@end ifset
 @titlepage
 @title GNU Make
 @subtitle A Program for Directing Recompilation
@@ -99,7 +112,7 @@ by the Foundation.
 @author by Richard M. Stallman and Roland McGrath
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+Copyright @copyright{} 1988, '89, '90, '91, '92, '93 Free Software Foundation, Inc.
 @sp 2
 Published by the Free Software Foundation @*
 675 Massachusetts Avenue, @*
@@ -122,6 +135,8 @@ manual into another language, under the above conditions for modified
 versions, except that the text of the translation of the section
 entitled ``GNU General Public License'' must be approved for accuracy by the
 Foundation.
+@sp 2
+Cover art by Etienne Suvasa.
 @end titlepage
 @page
 
@@ -4119,6 +4134,7 @@ newlines that separate the lines of the value in a @code{define} become
 part of the variable's value (except for the final newline which precedes
 the @code{endef} and is not considered part of the value).@refill
 
+@need 800
 The previous example is functionally equivalent to this:
 
 @example
