@@ -529,9 +529,9 @@ allocated_variable_append (const variable_t *v)
   return retval;
 }
 
-/* Like variable_expand_for_file, but the returned string is malloc'd.
-   This function is called a lot.  It wants to be efficient.  */
-
+/*! Like variable_expand_for_file, but the returned string is malloc'd.
+  This function is called a lot.  It wants to be efficient.
+  */
 char *
 allocated_variable_expand_for_file (char *line, file_t *file)
 {
