@@ -6,9 +6,9 @@
 @smallbook
 @c %**end of header
 
-@set EDITION 0.39
+@set EDITION 0.40
 @set VERSION 3.63 Beta
-@set UPDATED 6 January 1993
+@set UPDATED 11 January 1993
 @set UPDATE-MONTH January 1993
 
 @c finalout
@@ -350,10 +350,14 @@ Implicit Rule for Archive Member Targets
 @comment  node-name,  next,  previous,  up
 @chapter Overview of @code{make}
 
-The @code{make} utility automatically determines which pieces of a
-large program need to be recompiled, and issues commands to
-recompile them.  This manual describes GNU @code{make}, which was
-implemented by Richard Stallman and Roland McGrath.
+The @code{make} utility automatically determines which pieces of a large
+program need to be recompiled, and issues commands to recompile them.
+This manual describes GNU @code{make}, which was implemented by Richard
+Stallman and Roland McGrath.  GNU @code{make} conforms to section 6.2 of
+@cite{IEEE Standard 1003.2-1992} (POSIX.2).
+@cindex POSIX
+@cindex IEEE Standard 1003.2
+@cindex standards conformance
 
 Our examples show C programs, since they are most common, but you can use
 @code{make} with any programming language whose compiler can be run with a
@@ -1139,6 +1143,9 @@ makefile as has been traditionally done with other versions of
 
 @cindex @code{-I}
 @cindex @code{--include-dir}
+@findex /usr/gnu/include
+@findex /usr/local/include
+@findex /usr/include
 If the specified name does not start with a slash, and the file is not
 found in the current directory, several other directories are searched.
 First, any directories you have specified with the @samp{-I} or
@@ -1148,13 +1155,16 @@ Then the following directories (if they exist)
 are searched, in this order: 
 @file{@var{prefix}/include} (normally @file{/usr/local/include})
 @file{/usr/gnu/include},
-@file{/usr/local/include}, @file{/usr/include}.  If an included makefile
-cannot be found in any of these directories, a warning message is
-generated, but it is not a fatal error; processing of the makefile
-containing the @code{include} continues.@refill
-@findex /usr/gnu/include
-@findex /usr/local/include
-@findex /usr/include
+@file{/usr/local/include}, @file{/usr/include}.  
+
+If an included makefile cannot be found in any of these directories, a
+warning message is generated, but it is not an immediately fatal error;
+processing of the makefile containing the @code{include} continues.
+Once it has finished reading makefiles, @code{make} will try to remake
+any that are out of date or don't exist.
+@xref{Remaking Makefiles, ,How Makefiles Are Remade}.
+Only after it has tried to find a way to remake a makefile and failed,
+will @code{make} diagnose the missing makefile as a fatal error.
 
 @node MAKEFILES Variable, Remaking Makefiles, Include, Makefiles
 @section The Variable @code{MAKEFILES}
@@ -2133,10 +2143,18 @@ these commands executed on its behalf.  @xref{Search Algorithm,
 @cindex precious targets
 @cindex preserving with @code{.PRECIOUS}
 
-The targets which @code{.PRECIOUS} depends on are given the following special
-treatment: if @code{make} is killed or interrupted during the
+The targets which @code{.PRECIOUS} depends on are given the following
+special treatment: if @code{make} is killed or interrupted during the
 execution of their commands, the target is not deleted.
 @xref{Interrupts, ,Interrupting or Killing @code{make}}.
+Also, if the target is an intermediate file, it will not be deleted
+after it is no longer needed, as is normally done.
+@xref{Chained Rules, ,Chains of Implicit Rules}.
+
+You can also list the target pattern of an implicit rule (such as
+@samp{%.o}) as a dependency file of the special target @code{.PRECIOUS}
+to preserve intermediate files whose target patterns match that file's
+name.
 
 @findex .IGNORE
 @item .IGNORE
@@ -6611,10 +6629,11 @@ attaches to every file made by this pattern rule.  These unvarying
 dependencies are useful occasionally.
 
 @c !!! The following sentence should be rewritten.  --bob
-It is allowed for a pattern rule to have no dependencies that contain
-@samp{%} or to have no dependencies at all.  This is effectively a general
-wildcard.  It provides a way to make any file that matches the target pattern.
-@xref{Last Resort}.
+@c rewritten by roland; does it win now?
+A pattern rule need not have any dependencies that contain @samp{%}, or
+in fact any dependencies at all.  Such a rule is effectively a general
+wildcard.  It provides a way to make any file that matches the target
+pattern.  @xref{Last Resort}.
 
 @c !!! The end of of this paragraph should be rewritten.  --bob
 Pattern rules may have more than one target.  Unlike normal rules, this
@@ -6721,7 +6740,10 @@ Here is a table of automatic variables:
 @vindex @@ @r{(automatic variable)}
 @item $@@
 The file name of the target of the rule.  If the target is an archive
-member, then @samp{$@@} is the name of the archive file.
+member, then @samp{$@@} is the name of the archive file.  In a pattern
+rule that has multiple targets (@pxref{Pattern Intro, ,Introduction to
+Pattern Rules}), @samp{$@@} is the name of whichever target caused the
+rule's commands to be run.
 
 @vindex $%
 @vindex % @r{(automatic variable)}
@@ -7660,7 +7682,7 @@ Various new built-in implicit rules.
 @xref{Catalogue of Rules, ,Catalogue of Implicit Rules}.
 @end itemize
 
-@node Missing, Quick Reference, Features, Top
+@node Missing, Makefile Conventions, Features, Top
 @chapter Incompatibilities and Missing Features
 @cindex incompatibilities 
 @cindex missing features
@@ -7756,7 +7778,7 @@ using EFL, we will gladly add them.
 @comment included by standards.texi.
 @include make-stds.texi
 
-@node Quick Reference, Complex Makefile, Missing, Top
+@node Quick Reference, Complex Makefile, Makefile Conventions, Top
 @appendix Quick Reference
 
 This appendix summarizes the directives, text manipulation functions,
