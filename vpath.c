@@ -66,7 +66,17 @@ build_vpath_lists ()
   /* If there is a VPATH variable with a nonnull value, construct the
      general VPATH list from it.  We use variable_expand rather than just
      calling lookup_variable so that it will be recursively expanded.  */
-  p = variable_expand ("$(VPATH)");
+
+  {
+    /* Turn off --warn-undefined-variables while we expand SHELL and IFS.  */
+    int save = warn_undefined_variables_flag;
+    warn_undefined_variables_flag = 0;
+
+    p = variable_expand ("$(VPATH)");
+
+    warn_undefined_variables_flag = save;
+  }
+
   if (*p != '\0')
     {
       construct_vpath_list ("%", p);
