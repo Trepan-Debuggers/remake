@@ -14,6 +14,10 @@ reports.
 
 Version 3.79
 
+* GNU make optionally supports internationalization and locales via the
+  GNU gettext (or local gettext if suitable) package.  See the ABOUT-NLS
+  file for more information on configuring GNU make for NLS.
+
 * Previously, GNU make quoted variables such as MAKEFLAGS and
   MAKEOVERRIDES for proper parsing by the shell.  This allowed them to
   be used within make build scripts.  However, using them there is not
