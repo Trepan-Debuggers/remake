@@ -322,7 +322,7 @@ extern double max_load_average;
 extern char *program;
 
 extern unsigned int makelevel;
-extern unsigned int files_remade;
+extern unsigned int commands_started;
 
 
 #define DEBUGPR(msg) \
