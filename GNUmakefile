@@ -210,17 +210,18 @@ tarfiles := make # make-doc
 tarfiles := $(addsuffix -$(version).tar,$(tarfiles))
 tarfiles := $(tarfiles:%=%.gz) # no more compress $(tarfiles:%=%.Z)
 # Depend on default and doc so we don't ship anything that won't compile.
-dist: default info dvi tests tarfiles
+dist: rcs-mark default info dvi tests tarfiles
 .PHONY: tarfiles
 tarfiles: $(tarfiles)
 
 ifndef dist-flavor
 dist-flavor = alpha
 endif
-.PHONY: rcs-mark-alpha rcs-mark-beta
-dist: rcs-mark-$(dist-flavor)
-rcs-mark-alpha:;rcs -sAlpha -Nmake-$(version) RCS/[!=]*,v
-rcs-mark-beta:;rcs -sBeta -Nmake-$(version) RCS/[!=]*,v
+.PHONY: rcs-mark rcs-mark-alpha rcs-mark-beta
+rcs-mark: rcs-mark-$(dist-flavor)
+rcs-mark-alpha:;rcs -sAlpha -Nmake-$(version-): RCS/[!=]*,v
+rcs-mark-beta:;rcs -sBeta -Nmake-$(version-): RCS/[!=]*,v
+version- = $(subst .,-,$(version))
 
 dist: local-inst
 .PHONY: local-inst
