@@ -1,4 +1,4 @@
-/* Copyright (C) 1988, 1989, 1991 Free Software Foundation, Inc.
+/* Copyright (C) 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -344,11 +344,6 @@ selective_vpath_search (path, file)
 	  /* Clobber a null into the name at the last slash.
 	     Now NAME is the name of the directory to look in.  */
 	  *n = '\0';
-
-	  /* Make sure the directory exists and we know its contents.  */
-	  if (name_dplen > 0 && !dir_file_exists_p (name, ""))
-	    /* It doesn't exist.  */
-	    continue;
 
 	  /* We know the directory is in the hash table now because either
 	     construct_vpath_list or the code just above put it there.
