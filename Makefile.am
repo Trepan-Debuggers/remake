@@ -10,12 +10,12 @@ make_SOURCES =	main.c commands.c job.c dir.c file.c misc.c read.c remake.c \
 		commands.h dep.h filedef.h job.h make.h rule.h variable.h \
 		signame.c signame.h \
 		getopt.c getopt1.c getopt.h
-make_LDADD =	@LIBOBJS@ @ALLOCA@ @GLOBLIB@
+make_LDADD =	$(LIBOBJS) @ALLOCA@ $(GLOBLIB)
 
 info_TEXINFOS =	make.texinfo
 man_MANS =	make.1
 
-INCLUDES =	@GLOBINC@ -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\"
+INCLUDES =	$(GLOBINC) -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\"
 
 EXTRA_DIST = 	README build.sh.in $(man_MANS) README.customs remote-cstms.c\
 		make-stds.texi texinfo.tex SCOPTIONS SMakefile\
@@ -25,12 +25,12 @@ EXTRA_DIST = 	README build.sh.in $(man_MANS) README.customs remote-cstms.c\
 		readme.vms makefile.vms makefile.com config.h-vms vmsdir.h\
 		vmsfunctions.c vmsify.c
 
-SUBDIRS =	glob
+SUBDIRS =	$(GLOBDIR)
 
 MOSTLYCLEANFILES = loadavg.c
 CLEANFILES =	loadavg
 
-MAKE_HOST = @MAKE_HOST@
+MAKE_HOST =	@MAKE_HOST@
 
 
 # --------------- Local INSTALL Section

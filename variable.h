@@ -45,6 +45,8 @@ struct variable
     unsigned int recursive:1;	/* Gets recursively re-evaluated.  */
     unsigned int expanding:1;	/* Nonzero if currently being expanded.  */
     unsigned int per_target:1;	/* Nonzero if a target-specific variable.  */
+    unsigned int append:1;	/* Nonzero if an appending target-specific
+                                   variable.  */
     enum variable_export
       {
 	v_export,		/* Export this variable.  */
@@ -103,7 +105,7 @@ extern void initialize_file_variables PARAMS ((struct file *file));
 extern void print_file_variables PARAMS ((struct file *file));
 extern void print_variable_set PARAMS ((struct variable_set *set, char *prefix));
 extern void merge_variable_set_lists PARAMS ((struct variable_set_list **setlist0, struct variable_set_list *setlist1));
-extern struct variable *try_variable_definition PARAMS ((const struct floc *flocp, char *line, enum variable_origin origin));
+extern struct variable *try_variable_definition PARAMS ((const struct floc *flocp, char *line, enum variable_origin origin, int target_var));
 
 extern struct variable *lookup_variable PARAMS ((char *name, unsigned int length));
 extern struct variable *define_variable PARAMS ((char *name, unsigned int length, char *value,

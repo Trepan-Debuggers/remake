@@ -124,5 +124,31 @@ close(MAKEFILE);
 $answer = "foo bar\n";
 &compare_output($answer, &get_logfile(1));
 
+# TEST #9
+# For PR/1380: Using += assignment in target-specific variables sometimes fails
+
+$makefile3 = &get_tmpfile;
+
+open(MAKEFILE,"> $makefile3");
+print MAKEFILE <<'EOF';
+.PHONY: all one
+all: FOO += baz
+all: one; @echo $(FOO)
+
+FOO = bar
+
+one: FOO += biz
+one: ; @echo $(FOO)
+EOF
+close(MAKEFILE);
+
+&run_make_with_options("$makefile3", "", &get_logfile);
+$answer = "bar baz biz\nbar baz\n";
+&compare_output($answer, &get_logfile(1));
+
+&run_make_with_options("$makefile3", "one", &get_logfile);
+$answer = "bar biz\n";
+&compare_output($answer, &get_logfile(1));
+
 
 1;

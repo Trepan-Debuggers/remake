@@ -18,14 +18,14 @@ all:
 \t\@echo \$(if ,\$(shell echo hi),false)
 \t\@echo \$(if \$(call NEQ,a,b),true,false)
 \t\@echo \$(if \$(call NEQ,a,a),true,false)
-\t\@echo \$(if z,true,fal,se)
-\t\@echo \$(if ,true,fal,se)
+\t\@echo \$(if z,true,fal,se) hi
+\t\@echo \$(if ,true,fal,se)there
 EOMAKE
 
 close(MAKEFILE);
 
 &run_make_with_options($makefile, "", &get_logfile);
-$answer = "false\n\n\ntrue\ntrue\nfalse\ntrue\nfalse\ntrue\nfal,se\n";
+$answer = "false\n\n\ntrue\ntrue\nfalse\ntrue\nfalse\ntrue hi\nfal,sethere\n";
 &compare_output($answer, &get_logfile(1));
 
 1;

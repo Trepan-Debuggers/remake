@@ -17,6 +17,8 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#include <assert.h>
+
 #include "make.h"
 #include "filedef.h"
 #include "job.h"
@@ -89,6 +91,8 @@ initialize_variable_output ()
 
 /* Recursively expand V.  The returned string is malloc'd.  */
 
+static char *allocated_variable_append PARAMS ((struct variable *v));
+
 char *
 recursively_expand (v)
      register struct variable *v;
@@ -102,7 +106,10 @@ recursively_expand (v)
            v->name);
 
   v->expanding = 1;
-  value = allocated_variable_expand (v->value);
+  if (v->append)
+    value = allocated_variable_append (v);
+  else
+    value = allocated_variable_expand (v->value);
   v->expanding = 0;
 
   return value;
@@ -135,17 +142,20 @@ reference_variable (o, name, length)
      unsigned int length;
 {
   register struct variable *v = lookup_variable (name, length);
+  char *value;
 
   if (v == 0)
     warn_undefined (name, length);
 
-  if (v != 0 && *v->value != '\0')
-    {
-      char *value = (v->recursive ? recursively_expand (v) : v->value);
-      o = variable_buffer_output (o, value, strlen (value));
-      if (v->recursive)
-	free (value);
-    }
+  if (v == 0 || *v->value == '\0')
+    return o;
+
+  value = (v->recursive ? recursively_expand (v) : v->value);
+
+  o = variable_buffer_output (o, value, strlen (value));
+
+  if (v->recursive)
+    free (value);
 
   return o;
 }
@@ -466,6 +476,54 @@ variable_expand_for_file (line, file)
   return result;
 }
 
+/* Like allocated_variable_expand, but we first expand this variable in the
+    context of the next variable set, then we append the expanded value.  */
+
+static char *
+allocated_variable_append (v)
+     struct variable *v;
+{
+  struct variable_set_list *save;
+  int len = strlen (v->name);
+  char *var = alloca (len + 4);
+  char *value;
+
+  char *obuf = variable_buffer;
+  unsigned int olen = variable_buffer_length;
+
+  variable_buffer = 0;
+
+  assert(current_variable_set_list->next != 0);
+  save = current_variable_set_list;
+  current_variable_set_list = current_variable_set_list->next;
+
+  var[0] = '$';
+  var[1] = '(';
+  strcpy (&var[2], v->name);
+  var[len+2] = ')';
+  var[len+3] = '\0';
+
+  value = variable_expand_for_file (var, 0);
+
+  current_variable_set_list = save;
+
+  value += strlen (value);
+  value = variable_buffer_output (value, " ", 1);
+  value = variable_expand_string (value, v->value, (long)-1);
+
+  value = variable_buffer;
+
+#if 0
+  /* Waste a little memory and save time.  */
+  value = xrealloc (value, strlen (value))
+#endif
+
+  variable_buffer = obuf;
+  variable_buffer_length = olen;
+
+  return value;
+}
+
 /* Like variable_expand_for_file, but the returned string is malloc'd.
    This function is called a lot.  It wants to be efficient.  */
 

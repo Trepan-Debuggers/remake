@@ -540,6 +540,10 @@ snap_deps ()
   f = lookup_file (".POSIX");
   if (f != 0 && f->is_target)
     posix_pedantic = 1;
+
+  f = lookup_file (".NOTPARALLEL");
+  if (f != 0 && f->is_target)
+    not_parallel = 1;
 }
 
 /* Set the `command_state' member of FILE and all its `also_make's.  */

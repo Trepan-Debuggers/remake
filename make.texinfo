@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.185 1999/09/23 18:23:38 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.186 1999/11/17 07:34:05 psmith Exp $
 @set EDITION 0.54
 @set VERSION 3.78.1
 @set UPDATED 09 September 1999
@@ -2471,6 +2471,16 @@ Simply by being mentioned as a target, this tells @code{make} to
 export all variables to child processes by default.
 @xref{Variables/Recursion, ,Communicating Variables to a
 Sub-@code{make}}.
+
+@findex .NOTPARALLEL
+@item .NOTPARALLEL
+@cindex parallel execution, overriding
+
+If @code{.NOTPARALLEL} is mentioned as a target, then this invocation of
+@code{make} will be run serially, even if the @samp{-j} option is
+given.  Any recursively invoked @code{make} command will still be run in
+parallel if its makefile doesn't contain this target.  Any prerequisites
+on this target are ignored.
 @end table
 
 Any defined implicit rule suffix also counts as a special target if it

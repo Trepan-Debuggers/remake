@@ -419,6 +419,11 @@ struct file *default_file;
 
 int posix_pedantic;
 
+/* Nonzero if we have seen the `.NOTPARALLEL' target.
+   This turns off parallel builds for this invocation of make.  */
+
+int not_parallel;
+
 /* Nonzero if some rule detected clock skew; we keep track so (a) we only
    print one warning about it during the run, and (b) we can print a final
    warning at the end of the run. */
@@ -1776,7 +1781,8 @@ int main (int argc, char ** argv)
 
     /* If we detected some clock skew, generate one last warning */
     if (clock_skew_detected)
-      error (NILF, _("*** Warning:  Clock skew detected.  Your build may be incomplete."));
+      error (NILF,
+             _("warning:  Clock skew detected.  Your build may be incomplete."));
 
     /* Exit.  */
     die (status);
@@ -1860,7 +1866,7 @@ handle_non_switch_argument (arg, env)
   if (arg[0] == '-' && arg[1] == '\0')
     /* Ignore plain `-' for compatibility.  */
     return;
-  v = try_variable_definition (0, arg, o_command);
+  v = try_variable_definition (0, arg, o_command, 0);
   if (v != 0)
     {
       /* It is indeed a variable definition.  Record a pointer to

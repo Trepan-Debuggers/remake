@@ -1,5 +1,5 @@
 /* Convert between signal names and numbers.
-   Copyright (C) 1990, 1992, 1993, 1995, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1990,92,93,95,96,99 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -17,22 +17,9 @@
    write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+
+/* In the GNU make version, all the headers we need are provided by make.h.  */
 #include "make.h"
-
-#include <stdio.h>
-#include <sys/types.h>		/* Some systems need this for <signal.h>.  */
-#include <signal.h>
-
-#ifdef HAVE_STRING_H
-#include <string.h>
-#endif
-
-/* Some systems declare `sys_siglist in <unistd.h>; if
-   configure defined SYS_SIGLIST_DECLARED, it may expect
-   to find the declaration there.  */
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 
 /* Some systems do not define NSIG in <signal.h>.  */
