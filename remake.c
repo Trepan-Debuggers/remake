@@ -37,7 +37,8 @@ static unsigned int files_remade = 0;
 
 static int update_file (), update_file_1 (), check_dep (), touch_file ();
 static void remake_file ();
-static time_t name_mtime (), library_file_mtime ();
+static time_t name_mtime ();
+static int library_search ();
 extern time_t f_mtime ();
 
 /* Remake all the goals in the `struct dep' chain GOALS.  Return -1 if nothing
@@ -858,26 +859,24 @@ f_mtime (file, search)
 	{
 	  /* If name_mtime failed, search VPATH.  */
 	  char *name = file->name;
-	  if (vpath_search (&name))
+	  if (vpath_search (&name)
+	      /* Last resort, is it a library (-lxxx)?  */
+	      || (name[0] == '-' && name[1] == 'l'
+		  && library_search (&name)))
 	    {
 	      rename_file (file, name);
 	      check_renamed (file);
 	      return file_mtime (file);
 	    }
-	  else
-	    /* Last resort, is it a library (-lxxx)?  */
-	    if (name[0] == '-' && name[1] == 'l')
-	      mtime = library_file_mtime (&name[2]);
 	}
     }
 
   /* Store the mtime into all the entries for this file.  */
-
-  while (file != 0)
+  do
     {
       file->last_mtime = mtime;
       file = file->prev;
-    }
+    } while (file != 0);
 
   return mtime;
 }
@@ -898,40 +897,45 @@ name_mtime (name)
 }
 
 
-/* Return the mtime of a library file specified as -lLIBNAME,
-   searching for a suitable library file in the system library directories
-   and the VPATH directories.  */
+/* Search for a library file specified as -lLIBNAME, searching for a
+   suitable library file in the system library directories and the VPATH
+   directories.  */
 
-static time_t
-library_file_mtime (lib)
-     char *lib;
+static int
+library_search (lib)
+     char **lib;
 {
-  time_t mtime;
-  char *name;
+  static char *dirs[] =
+    {
+      "/usr/lib",
+      "/lib",
+      LIBDIR,			/* Defined by configuration.  */
+      0
+    };
 
-  name = concat ("/usr/lib/lib", lib, ".a");
-  mtime = name_mtime (name);
-  if (mtime == (time_t) -1)
-    mtime = name_mtime (name + 4);
-  if (mtime == (time_t) -1)
+  char *libname = &(*lib)[2];
+  char *buf = xmalloc (sizeof (LIBDIR) + 8 + strlen (libname) + 4 + 2 + 1);
+  char **dp;
+
+  for (dp = dirs; *dp != 0; ++dp)
     {
-      char *local = concat ("/usr/local/lib/lib", lib,  ".a");
-      mtime = name_mtime (local);
-      free (local);
-    }
-  if (mtime == (time_t) -1)
-    mtime = name_mtime (name + 9);
-  if (mtime == (time_t) -1)
-    {
-      char *newname = name + 9;
-      if (vpath_search (&newname))
+      sprintf (buf, "%s/lib%s.a", *dp, libname);
+      if (name_mtime (buf) != (time_t) -1)
 	{
-	  mtime = name_mtime (newname);
-	  free (newname);
+	  *lib = buf;
+	  return 1;
 	}
     }
 
-  free (name);
+  sprintf (buf, "lib%s.a", libname);
+  libname = buf;
+  if (vpath_search (&libname))
+    {
+      free (buf);
+      *lib = libname;
+      return 1;
+    }
 
-  return mtime;
+  free (buf);
+  return 0;
 }
