@@ -575,7 +575,7 @@ Commands}, to see how to force @code{rm} to work in spite of errors.)
 
 @node How Make Works, Variables Simplify, Simple Makefile, Introduction
 @comment  node-name,  next,  previous,  up
-@section How @code{make} Processes This Makefile
+@section How @code{make} Processes a Makefile
 
 By default, @code{make} starts with the first rule (not counting rules
 whose target names start with @samp{.}).  This is called the
@@ -583,8 +583,9 @@ whose target names start with @samp{.}).  This is called the
 strives ultimately to update.  @xref{Goals, , Arguments to Specify the
 Goals}.)
 
-In the simple example, the default goal is to update the executable
-program @file{edit}; therefore, we put that rule first.
+In the simple example of the previous section, the default goal is to
+update the executable program @file{edit}; therefore, we put that rule
+first.
 
 Thus, when you give the command:
 
@@ -594,8 +595,7 @@ make
 
 @noindent
 @code{make} reads the makefile in the current directory and begins by
-processing the first rule.  In the example of the simple makefile
-shown in the preceding section, this rule is for relinking
+processing the first rule.  In the example, this rule is for relinking
 @file{edit}; but before @code{make} can fully process this rule, it
 must process the rules for the files that @file{edit} depends on,
 which in this case are the object files.  Each of these files is
@@ -629,6 +629,18 @@ Thus, if we change the file @file{insert.c} and run @code{make},
 link @file{edit}.  If we change the file @file{command.h} and run
 @code{make}, @code{make} will recompile the object files @file{kbd.o},
 @file{commands.o} and @file{files.o} and then link file @file{edit}.
+
+@c !!! Roland, is this correct? 8 jun 92 --rjc
+Note that @code{make} goes through a two stage process: first,
+@code{make} uses the dependency list to determine @emph{whether} to
+remake a target; second, if the target needs to be remade, @code{make}
+goes through the list of pattern rules (for a target with no commands),
+looking for the pattern rule that seems to match.  In the second stage,
+@code{make} forgets the information in the dependency list and only uses
+the information in the pattern rules.  Sometimes, people expect that
+@code{make} will use information in the dependency list to figure out
+what commands to use to make the target; but @code{make} does not do
+this.
 
 @node Variables Simplify, make Deduces, How Make Works, Introduction
 @section Variables Make Makefiles Simpler
@@ -1117,18 +1129,16 @@ certain files, called the rule's @dfn{targets} (usually only one per rule).
 It lists the other files that are the @dfn{dependencies} of the target, and
 @dfn{commands} to use to create or update the target.
 
-@c !!! Check with Roland; 
-@c     what is meant by "contains slashes"; need xref.  --rjc 9mar92
 The order of rules is not significant, except for determining the
 @dfn{default goal}: the target for @code{make} to consider, if you do
 not otherwise specify one.  The default goal is the target of the first
 rule in the first makefile.  If the first rule has multiple targets,
 only the first target is taken as the default.  There are two
 exceptions: a target starting with a period is not a default unless it
-contains slashes as well; and, a target that defines a pattern rule or a
-suffix rule has no effect on the default goal.  (@xref{Pattern Rules,
-,Defining and Redefining Pattern Rules}, and see @ref{Suffix Rules,
-,Old-Fashioned Suffix Rules}.)
+contains one or more slashes, @samp{/}, as well; and, a target that
+defines a pattern rule or a suffix rule has no effect on the default
+goal.  (@xref{Pattern Rules, ,Defining and Redefining Pattern Rules},
+and see @ref{Suffix Rules, ,Old-Fashioned Suffix Rules}.)
 
 Therefore, we usually write the makefile so that the first rule is the
 one for compiling the entire program or all the programs described by
@@ -1427,9 +1437,8 @@ you do not need to change the individual rules, just the search paths.
 @node General Search, Selective Search, Directory Search, Directory Search
 @subsection @code{VPATH}: Search Path for All Dependencies
 
-@c !!! Check with Roland  --rjc 9mar92
 The value of the @code{make} variable @code{VPATH} specifies a list of
-directories which @code{make} should search.  Most often, the
+directories that @code{make} should search.  Most often, the
 directories are expected to contain dependency files that are not in the
 current directory; however, @code{VPATH} specifies a search list that
 @code{make} applies for all files, including files which are targets of
@@ -2129,11 +2138,11 @@ Users use many different shell programs, but commands in makefiles are
 always interpreted by @file{/bin/sh} unless the makefile specifies
 otherwise.  @xref{Execution, ,Command Execution}.
 
-@c !!! for a comment, can a # be followed by a space? --text implies no.
-@c !!! Check with Roland  --rjc 9mar92
-Whether comments can be written on command lines, and what syntax they use,
-is under the control of the shell that is in use.  If it is @file{/bin/sh},
-a @samp{#} at the start of a word starts a comment.
+The shell that is in use determines whether comments can be written on
+command lines, and what syntax they use When the shell is
+@file{/bin/sh}, a @samp{#} starts a comment that extends to the end of
+the line.  The @samp{#} does not have to be at the beginning of a line.
+Text on a line before a @samp{#} is not part of the comment.
 
 @menu
 * Echoing::                     How to control when commands are echoed.
@@ -2461,16 +2470,19 @@ rule alters the effects of the @samp{-t}, @samp{-n} or @samp{-q} option.
 
 Consider the command @samp{make -t} in the above example.  (The
 @samp{-t} option marks targets as up to date without actually running
-any commands; @pxref{Instead of Execution}.)  Following the usual
+any commands; see @ref{Instead of Execution}.)  Following the usual
 definition of @samp{-t}, a @samp{make -t} command in the example would
 create a file named @file{subsystem} and do nothing else.  What you
 really want it to do is run @samp{cd subdir; make -t}; but that would
 require executing the command, and @samp{-t} says not to execute
 commands.@refill
 
-@strong{ !! This is wrong.  It is per-command line, not per-rule. --roland }
-The special feature makes this do what you want: whenever a rule's
-commands use the variable @code{MAKE}, the flags @samp{-t}, @samp{-n} and
+@c !!! Check with Roland; re-written to say this is
+@c !!! is per-command line, not per-rule. --rjc
+@c !!! Roland: this needs an example rule. 
+The special feature makes this do what you want: whenever the line of a
+command contains
+the variable @code{MAKE}, the flags @samp{-t}, @samp{-n} and
 @samp{-q} do not apply to that rule.  The commands of that rule are
 executed normally despite the presence of a flag that causes most
 commands not to be run.  The usual @code{MAKEFLAGS} mechanism passes the
@@ -2496,20 +2508,23 @@ letters, numbers and underscores.  Some shells cannot cope with
 environment variable names consisting of characters other than letters,
 numbers, and underscores.
 
-Variable are @emph{not} normally passed down if they were created by
+Variables are @emph{not} normally passed down if they were created by
 default by @code{make} (@pxref{Implicit Variables, ,Variables Used by
 Implicit Rules}).  The sub-@code{make} will define these for
 itself.@refill
 
+@c !!! The following is confusing.  `This' appears to refer to the
+@c !!! statement "Variables are @emph{not} normally passed down..." of the
+@c !!! preceding paragraph.  It sounds as if these two paragraphs
+@c !!! contradict each other.
 The way this works is that @code{make} adds each variable and its value
 to the environment for running each command.  The sub-@code{make}, in
 turn, uses the environment to initialize its table of variable values.
 @xref{Environment, ,Variables from the Environment}.
 
 @findex export
-If you want specific variables to be passed down, or @dfn{exported} to
-sub-@code{make}s, you can use the @code{export} directive to tell
-@code{make} this:
+If you want to send or @dfn{export} specific variables to a
+sub-@code{make}, use the @code{export} directive, like this:
 
 @example
 export @var{variable} @var{variable-2} @dots{}
@@ -2517,8 +2532,8 @@ export @var{variable} @var{variable-2} @dots{}
 
 @noindent
 @findex unexport
-If you want a variable @emph{not} to be exported, you can tell
-@code{make} so with the @code{unexport} directive:
+If you want to @emph{prevent} a variable from being exported, use the
+@code{unexport} directive, like this:
 
 @example
 unexport @var{variable} @var{variable-2} @dots{}
@@ -2532,15 +2547,15 @@ time by doing:
 export @var{variable} = value
 @end example
 
-or:
 @noindent
+or:
 
 @example
 export @var{variable} := value
 @end example
 
 @noindent
-This works just like:
+This has the same result as:
 
 @example
 @var{variable} = value
@@ -2548,7 +2563,7 @@ export @var{variable}
 @end example
 
 You may notice that the @code{export} and @code{unexport} directives
-work in @code{make} just like they work in the shell, @code{sh}.
+work in @code{make} in the same way they work in the shell, @code{sh}.
 
 If you want all variables to be exported by default, you can use
 @code{export} by itself:
@@ -2794,15 +2809,21 @@ target file actually does exist, its dependencies may not be remade.
 @cindex recursive variable expansion
 @cindex simple variable expansion
 
+@c !!! Check with Roland; is this OK now?  --rjc
 A @dfn{variable} is a name defined within @code{make} to represent a string
 of text, called the variable's @dfn{value}.  These values can be
-substituted by explicit request into targets, dependencies, commands and
-other parts of the makefile.
+substituted by explicit request into targets, dependencies, commands
+and other parts of the makefile, where they are expanded
+when the makefile is read.
 
-@c !!! Check with Roland --rjc 9mar92 
-Note that these expansions occur when a makefile is read,
+More precisely, variables and functions in all parts of a makefile are
+expanded when read, except for the shell commands in rules and the
+right-hand sides of variable definitions using @samp{=}.
+
+Note that these expansions occur when the makefile is read.
+This means, for example, that these expansions occur
 @strong{before} expansion using @samp{%} replacement.
-@xref{Pattern Rules, ,Defining and Redefining Pattern Rules}.
+(@xref{Pattern Rules, ,Defining and Redefining Pattern Rules}.)
 
 Variables can represent lists of file names, options to pass to compilers,
 programs to run, directories to look in for source files, directories to
@@ -3592,6 +3613,13 @@ If the variable @var{variable-name} has a non-empty value, the
 @var{text-if-true} is effective; otherwise, the @var{text-if-false},
 if any, is effective.  Variables that have never been defined have an
 empty value.
+
+@c !!! Roland, is this correct?  8 Jun 92 --rjc
+Note that @code{ifdef} only tests whether a variable has a value.  It
+does not expand the variable to see if that value is nonempty.
+Consequently, tests using @code{ifdef} returns true for all definitions
+except those like @code{FOO =}. To test for an empty value, use
+@code{ifeq ($(FOO),)}.
 
 @item ifndef @var{variable-name}
 If the variable @var{variable-name} has an empty value, the
