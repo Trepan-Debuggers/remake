@@ -2,7 +2,7 @@
 @setfilename make.info
 @synindex vr fn
 
-@c $Header: /sources/make/make/Attic/make.texinfo,v 1.56 1988/06/18 00:13:50 mcgrath Beta $
+@c $Header: /sources/make/make/Attic/make.texinfo,v 1.61 1988/06/18 00:19:49 mcgrath Beta $
 
 @ifinfo
 This file documents the GNU Make utility.
@@ -4272,7 +4272,7 @@ running @code{ranlib}.  The rules for updating the members are not shown
 here; most likely you can omit them and use the implicit rule which copies
 files into the archive, as described in the preceding section.
 
-@node Features, Missing, Archive, Top
+@node Features, Missing, Archives, Top
 @chapter Features of GNU @code{make}
 
 GNU @code{make} contains many features not in any other @code{make}
