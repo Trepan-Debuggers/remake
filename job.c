@@ -117,11 +117,13 @@ extern int geteuid (), getegid ();
 extern int setgid (), getgid ();
 #endif	/* GNU C library.  */
 
+#ifndef	getdtablesize
 #ifndef USG
 extern int getdtablesize ();
 #else
 #include <sys/param.h>
 #define getdtablesize() NOFILE
+#endif
 #endif
 
 extern void wait_to_start_job ();
