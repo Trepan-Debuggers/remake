@@ -1,5 +1,5 @@
 /* Variable function expansion for GNU Make.
-Copyright (C) 1988, 1989, 1991 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -355,8 +355,6 @@ expand_function (o, function, text, end)
 	    break;
 	  }
 
-	push_signals_blocked_p (1);
-
 	pid = vfork ();
 	if (pid < 0)
 	  perror_with_name (error_prefix, "fork");
@@ -403,7 +401,7 @@ expand_function (o, function, text, end)
 	    /* Loop until child_handler sets shell_function_completed
 	       to the status of our child shell.  */
 	    while (shell_function_completed == 0)
-	      wait_for_children (1, 0);
+	      reap_children (1, 0);
 
 	    shell_function_pid = 0;
 
@@ -439,8 +437,6 @@ expand_function (o, function, text, end)
 	    free ((char *) argv);
 	    free (buffer);
 	  }
-
-	pop_signals_blocked_p ();
 
 	free (text);
 	break;
