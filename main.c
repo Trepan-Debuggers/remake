@@ -1139,7 +1139,7 @@ int main (int argc, char ** argv)
 	    while (!feof (stdin))
 	      {
 		char buf[2048];
-		unsigned int n = fread (buf, 1, sizeof(buf), stdin);
+		unsigned int n = fread (buf, 1, sizeof (buf), stdin);
 		if (n > 0 && fwrite (buf, 1, n, outfile) != n)
 		  pfatal_with_name (_("fwrite (temporary file)"));
 	      }
@@ -1156,7 +1156,7 @@ int main (int argc, char ** argv)
 	    }
 
 	    /* Make sure the temporary file will not be remade.  */
-            stdin_nm = savestring (name, sizeof(name) -1);
+            stdin_nm = savestring (name, sizeof (name) -1);
 	    f = enter_file (stdin_nm);
 	    f->updated = 1;
 	    f->update_status = 0;
@@ -1193,9 +1193,9 @@ int main (int argc, char ** argv)
     /* This is supposed to be the default, but what the heck... */
     sa.sa_flags = SA_INTERRUPT;
 #  endif
-#  define HANDLESIG(s) sigaction(s, &sa, NULL)
+#  define HANDLESIG(s) sigaction (s, &sa, NULL)
 # else
-#  define HANDLESIG(s) signal(s, child_handler)
+#  define HANDLESIG(s) signal (s, child_handler)
 # endif
 
     /* OK, now actually install the handlers.  */
@@ -1329,7 +1329,7 @@ int main (int argc, char ** argv)
 
   if (job_slots > 1)
     {
-      char buf[(sizeof("1024")*2)+1];
+      char buf[(sizeof ("1024")*2)+1];
       char c = '0';
 
       if (pipe (job_fds) < 0 || (job_rfd = dup (job_fds[0])) < 0)
@@ -1341,7 +1341,7 @@ int main (int argc, char ** argv)
 
       while (--job_slots)
 	{
-	  write(job_fds[1], &c, 1);
+	  write (job_fds[1], &c, 1);
 	  if (c == '9')
 	    c = 'a';
 	  else if (c == 'z')
@@ -1352,8 +1352,8 @@ int main (int argc, char ** argv)
 	    ++c;
 	}
 
-      sprintf(buf, "%d,%d", job_fds[0], job_fds[1]);
-      job_slots_str = xstrdup(buf);
+      sprintf (buf, "%d,%d", job_fds[0], job_fds[1]);
+      job_slots_str = xstrdup (buf);
     }
 #endif
 
@@ -1590,9 +1590,9 @@ int main (int argc, char ** argv)
           /* Add -o option for the stdin temporary file, if necessary.  */
           if (stdin_nm)
             {
-              nargv = (char **)xmalloc((nargc + 2) * sizeof(char *));
-              bcopy((char *)argv, (char *)nargv, argc * sizeof(char *));
-              nargv[nargc++] = concat("-o", stdin_nm, "");
+              nargv = (char **) xmalloc ((nargc + 2) * sizeof (char *));
+              bcopy ((char *) argv, (char *) nargv, argc * sizeof (char *));
+              nargv[nargc++] = concat ("-o", stdin_nm, "");
               nargv[nargc] = 0;
             }
 
@@ -1670,8 +1670,8 @@ int main (int argc, char ** argv)
 
   /* If there is a temp file from reading a makefile from stdin, get rid of
      it now.  */
-  if (stdin_nm && unlink(stdin_nm) < 0 && errno != ENOENT)
-    perror_with_name(_("unlink (temporary file): "), stdin_nm);
+  if (stdin_nm && unlink (stdin_nm) < 0 && errno != ENOENT)
+    perror_with_name (_("unlink (temporary file): "), stdin_nm);
 
   {
     int status;
@@ -1849,7 +1849,7 @@ handle_non_switch_argument (arg, env)
         struct variable *v;
         char *value;
 
-        v = lookup_variable("MAKECMDGOALS", 12);
+        v = lookup_variable ("MAKECMDGOALS", 12);
         if (v == 0)
           value = f->name;
         else
@@ -1857,14 +1857,14 @@ handle_non_switch_argument (arg, env)
             /* Paste the old and new values together */
             unsigned int oldlen, newlen;
 
-            oldlen = strlen(v->value);
-            newlen = strlen(f->name);
-            value = (char *)alloca(oldlen + 1 + newlen + 1);
-            bcopy(v->value, value, oldlen);
+            oldlen = strlen (v->value);
+            newlen = strlen (f->name);
+            value = (char *) alloca (oldlen + 1 + newlen + 1);
+            bcopy (v->value, value, oldlen);
             value[oldlen] = ' ';
-            bcopy(f->name, &value[oldlen + 1], newlen + 1);
+            bcopy (f->name, &value[oldlen + 1], newlen + 1);
           }
-        define_variable("MAKECMDGOALS", 12, value, o_default, 0);
+        define_variable ("MAKECMDGOALS", 12, value, o_default, 0);
       }
     }
 }
@@ -2041,7 +2041,7 @@ decode_switches (argc, argv, env)
 		  if (optarg == 0)
 		    optarg = cs->noarg_value;
 
-		  *(char **)cs->value_ptr = optarg;
+		  *(char **) cs->value_ptr = optarg;
 		  break;
 
 		case string:
@@ -2129,7 +2129,7 @@ positive integral argument"),
 
   if (!env && (bad || print_usage_flag))
     {
-      print_usage(bad);
+      print_usage (bad);
       die (bad ? 2 : 0);
     }
 }
@@ -2345,16 +2345,16 @@ define_makeflags (all, makefile)
 	case int_string:
 	  if (all)
 	    {
-	      char *vp = *(char **)cs->value_ptr;
+	      char *vp = *(char **) cs->value_ptr;
 
 	      if (cs->default_value != 0
-		  && streq(vp, cs->default_value))
+		  && streq (vp, cs->default_value))
 		break;
 	      if (cs->noarg_value != 0
-		  && streq(vp, cs->noarg_value))
-		ADD_FLAG("", 0); /* Optional value omitted; see below.  */
+		  && streq (vp, cs->noarg_value))
+		ADD_FLAG ("", 0); /* Optional value omitted; see below.  */
 	      else
-		ADD_FLAG(vp, strlen(vp));
+		ADD_FLAG (vp, strlen (vp));
 	    }
 	  break;
 
