@@ -40,6 +40,14 @@ defines = @DEFS@ -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\"
 GETOPT = getopt.o getopt1.o
 GETOPT_SRC = $(srcdir)/getopt.c $(srcdir)/getopt1.c $(srcdir)/getopt.h
 
+# If you are using the GNU C library, or have the GNU glob functions in
+# your C library, you can comment this out.  GNU make uses special hooks
+# into the glob functions to be more efficient (by using make's directory
+# cache for globbing), so you must use the GNU functions even if your
+# system's C library has the 1003.2 glob functions already.  Also, the glob
+# functions in the AIX and HPUX C libraries are said to be buggy.
+GLOB = glob/libglob.a
+
 # If your system doesn't have alloca, or the one provided is bad,
 # get it from the Emacs distribution and define this.
 ALLOCA = @ALLOCA@
@@ -91,7 +99,7 @@ CTAGS = ctags -tw
 
 objs = commands.o job.o dir.o file.o misc.o main.o read.o remake.o	\
        remote.o rule.o implicit.o default.o variable.o expand.o		\
-       function.o vpath.o version.o ar.o arscan.o glob/libglob.a	\
+       function.o vpath.o version.o ar.o arscan.o $(GLOB)		\
        $(GETOPT) $(ALLOCA) $(extras)
 srcs = $(srcdir)/commands.c $(srcdir)/job.c $(srcdir)/dir.c		      \
        $(srcdir)/file.c $(srcdir)/getloadavg.c $(srcdir)/misc.c		      \
