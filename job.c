@@ -2667,7 +2667,7 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
 	      }
 	    else if (p[1] != '\0')
               {
-#if defined(__MSDOS__) || defined(WINDOWS32)
+#ifdef HAVE_DOS_PATHS
                 /* Only remove backslashes before characters special
                    to Unixy shells.  All other backslashes are copied
                    verbatim, since they are probably DOS-style
@@ -2691,8 +2691,8 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
                       && (strchr (sh_chars_sh, p[1]) == 0))
                     /* back up one notch, to copy the backslash */
                     --p;
+#endif  /* HAVE_DOS_PATHS */
 
-#endif  /* __MSDOS__ || WINDOWS32 */
                 /* Copy and skip the following char.  */
                 *ap++ = *++p;
               }

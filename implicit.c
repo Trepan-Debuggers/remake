@@ -168,7 +168,7 @@ pattern_search (file, archive, depth, recursions)
 	lastslash = strrchr (filename, ':');
 #else
       lastslash = strrchr (filename, '/');
-#if defined(__MSDOS__) || defined(WINDOWS32)
+#ifdef HAVE_DOS_PATHS
       /* Handle backslashes (possibly mixed with forward slashes)
 	 and the case of "d:file".  */
       {

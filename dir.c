@@ -744,7 +744,7 @@ file_exists_p (name)
     return dir_file_exists_p ("[]", name);
 #else /* !VMS */
   dirend = strrchr (name, '/');
-#if defined (WINDOWS32) || defined (__MSDOS__)
+#ifdef HAVE_DOS_PATHS
   /* Forward and backslashes might be mixed.  We need the rightmost one.  */
   {
     char *bslash = strrchr(name, '\\');
@@ -754,7 +754,7 @@ file_exists_p (name)
     if (!dirend && name[0] && name[1] == ':')
       dirend = name + 1;
   }
-#endif /* WINDOWS32 || __MSDOS__ */
+#endif /* HAVE_DOS_PATHS */
   if (dirend == 0)
 #ifndef _AMIGA
     return dir_file_exists_p (".", name);
@@ -768,7 +768,7 @@ file_exists_p (name)
     dirname = "/";
   else
     {
-#if defined (WINDOWS32) || defined (__MSDOS__)
+#ifdef HAVE_DOS_PATHS
   /* d:/ and d: are *very* different...  */
       if (dirend < name + 3 && name[1] == ':' &&
 	  (*dirend == '/' || *dirend == '\\' || *dirend == ':'))
@@ -803,7 +803,7 @@ file_impossible (filename)
     dir = find_directory ("[]");
 #else
   dirend = strrchr (p, '/');
-# if defined (WINDOWS32) || defined (__MSDOS__)
+# ifdef HAVE_DOS_PATHS
   /* Forward and backslashes might be mixed.  We need the rightmost one.  */
   {
     char *bslash = strrchr(p, '\\');
@@ -813,7 +813,7 @@ file_impossible (filename)
     if (!dirend && p[0] && p[1] == ':')
       dirend = p + 1;
   }
-# endif /* WINDOWS32 or __MSDOS__ */
+# endif /* HAVE_DOS_PATHS */
   if (dirend == 0)
 # ifdef _AMIGA
     dir = find_directory ("");
@@ -829,7 +829,7 @@ file_impossible (filename)
 	dirname = "/";
       else
 	{
-#if defined (WINDOWS32) || defined (__MSDOS__)
+#ifdef HAVE_DOS_PATHS
 	  /* d:/ and d: are *very* different...  */
 	  if (dirend < p + 3 && p[1] == ':' &&
 	      (*dirend == '/' || *dirend == '\\' || *dirend == ':'))
@@ -885,7 +885,7 @@ file_impossible_p (filename)
     dir = find_directory ("[]")->contents;
 #else
   dirend = strrchr (filename, '/');
-#if defined (WINDOWS32) || defined (__MSDOS__)
+#ifdef HAVE_DOS_PATHS
   /* Forward and backslashes might be mixed.  We need the rightmost one.  */
   {
     char *bslash = strrchr(filename, '\\');
@@ -895,7 +895,7 @@ file_impossible_p (filename)
     if (!dirend && filename[0] && filename[1] == ':')
       dirend = filename + 1;
   }
-#endif /* WINDOWS32 || __MSDOS__ */
+#endif /* HAVE_DOS_PATHS */
   if (dirend == 0)
 #ifdef _AMIGA
     dir = find_directory ("")->contents;
@@ -911,7 +911,7 @@ file_impossible_p (filename)
 	dirname = "/";
       else
 	{
-#if defined (WINDOWS32) || defined (__MSDOS__)
+#ifdef HAVE_DOS_PATHS
 	  /* d:/ and d: are *very* different...  */
 	  if (dirend < filename + 3 && filename[1] == ':' &&
 	      (*dirend == '/' || *dirend == '\\' || *dirend == ':'))
