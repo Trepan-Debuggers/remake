@@ -63,9 +63,9 @@ static struct pspec default_terminal_rules[] =
 
     /* SCCS.  */
     { "%", "s.%",
-	"$(GET) $(GFLAGS) $< -G $@" },
+	"$(GET) $(GFLAGS) -G $@ $<" },
     { "%", "SCCS/s.%",
-	"$(GET) $(GFLAGS) $< -G $@" },
+	"$(GET) $(GFLAGS) -G $@ $<" },
 
     { 0, 0, 0 }
   };
