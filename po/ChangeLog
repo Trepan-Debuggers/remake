@@ -1,11 +1,12 @@
 2002-04-21  Paul D. Smith  <psmith@gnu.org>
 
-	* POTFILES.in, LINGUAS, Makevars: Created.
+	* LINGUAS, hr.po: Added new translation: Croatian.
+
 	* da.po, de.po, es.po, fr.po, gl.po, he.po, ja.po, ko.po, nl.po,
 	pl.po, pt_BR.po, ru.po, tr.po: Moved from i18n to here.
 	* .cvsignore: Moved from i18n to here.
 
-	* LINGUAS: Created.
+	* POTFILES.in, LINGUAS, Makevars: Created.
 
 2002-04-21  gettextize  <bug-gnu-gettext@gnu.org>
 

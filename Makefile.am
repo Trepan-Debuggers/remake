@@ -3,7 +3,7 @@
 AUTOMAKE_OPTIONS = 1.6 dist-bzip2
 ACLOCAL_AMFLAGS	=  -I config
 
-SUBDIRS =	$(GLOBDIR) po
+SUBDIRS =	glob config po
 
 bin_PROGRAMS =	make
 
@@ -33,7 +33,12 @@ DEFS =		-DLOCALEDIR=\"$(localedir)\" -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(inc
 AM_CPPFLAGS =	$(GLOBINC)
 
 
-EXTRA_DIST =	build.sh.in $(man_MANS)\
+# Extra stuff to include in the distribution.
+# Note we need all the glob stuff here, rather than in glob/Makefile.am,
+# because often that directory isn't built on the systems used by the
+# maintainers.
+
+EXTRA_DIST =	README build.sh.in $(man_MANS)\
 		README.customs\
 		make-stds.texi SCOPTIONS SMakefile\
 		README.Amiga Makefile.ami config.ami make.lnk amiga.c amiga.h\

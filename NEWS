@@ -28,7 +28,8 @@ Version <next>
   stamp.
 
 * Updated translations for French, Galician, German, Japanese, Korean,
-  and Russian.  New translations for Danish, Hebrew, and Turkish.
+  and Russian.  New translations for Croatian, Danish, Hebrew, and
+  Turkish.
 
 * Updated internationalization support to Gettext 0.11.1.
   GNU make now uses Gettext's "external" feature, and does not include

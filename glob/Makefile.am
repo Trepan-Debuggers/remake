@@ -2,9 +2,13 @@
 
 AUTOMAKE_OPTIONS =	1.6 foreign
 
-noinst_LIBRARIES =	libglob.a
+# Only build the library when the system doesn't already have GNU glob.
+if USE_LOCAL_GLOB
+  noinst_LIBRARIES =	libglob.a
+endif
 
 libglob_a_SOURCES =	glob.c glob.h fnmatch.c fnmatch.h
+
 
 EXTRA_DIST =		COPYING.LIB Makefile.ami SCOPTIONS SMakefile \
 			configure.bat

@@ -1,3 +1,9 @@
+2002-04-22  Paul D. Smith  <psmith@gnu.org>
+
+	* Makefile.am: Use automake 1.6.
+	Use new automake condition USE_LOCAL_GLOB to decide whether or not
+	to build the local GNU glob library or use the system one.
+
 1999-09-12  Paul D. Smith  <psmith@gnu.org>
 
 	* fnmatch.c: Last GLIBC version wouldn't compile outside of GLIBC

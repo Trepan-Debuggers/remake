@@ -57,11 +57,20 @@ build.sh.in: build.template Makefile
 	  $< > $@
 	chmod a-w+x $@
 
+
 # Use automake to build a dependency list file, for "foreign" makefiles like
 # Makefile.DOS.
 #
+# Automake used to have a --generate-deps flag, but it's gone now, so we have
+# to do it ourselves.
+#
 .dep_segment: Makefile.am maintMakefile $(DEP_FILES)
-	$(AUTOMAKE) --generate-deps --build-dir=. --srcdir-name=.
+	cat $(DEP_FILES) \
+	  | sed -e '/^[^:]*\.[ch] *:/d' \
+		-e 's, /usr/[^ ]*,,g' \
+		-e 's, $(srcdir)/, ,g' \
+		-e '/^ \\$$/d' \
+	  > $@
 
 # Get rid of everything "else".
 #

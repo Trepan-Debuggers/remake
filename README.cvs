@@ -44,7 +44,8 @@ and you can just run "autoreconf" and have it DTRT.
 
     The mv commands are necessary because gettextize doesn't realize
     that the things it's adding to those files already exist in it.
-
+    Hopefully there will be a better solution for this in upcoming
+    versions of Gettext.
 
 
  2) $ aclocal -I config
@@ -100,7 +101,43 @@ and, if you like:
 
   $ make dist-bzip2
 
-After you do this you should be sure to run "make distcheck" to be sure
-that the package file is correct.
+Even better, you should run this:
 
-That's it!
+  $ make distcheck
+
+Which will build both .gz and .bz2 package files, then unpack them into
+a temporary location, try to build them, and repack them, verifying that
+everything works, you get the same results, _and_ no extraneous files
+are left over after the "distclean" rule--whew!!  Now, _that_ is why
+converting to Automake is worth the trouble!  A big "huzzah!" to Tom
+T. and the AutoToolers!
+
+
+That's it, you're done!
+
+
+Appendix A - For The Brave
+--------------------------
+
+For those of you who trust me implicitly, or are just brave (or
+foolhardy), here is a canned sequence of commands to build a GNU make
+distribution package from a virgin CVS source checkout (assuming all the
+prerequisites are available of course).
+
+This list is eminently suitable for a quick swipe o' the old mouse and a
+swift click o' mouse-2 into an xterm.  I even grudgingly removed my use
+of "advanced shell features" like {}.  Go for it!
+
+
+gettextize --no-changelog
+mv config/Makefile.am~ config/Makefile.am
+mv Makefile.am~ Makefile.am
+mv configure.in~ configure.in
+aclocal -I config
+automake --add-missing
+autoconf
+autoheader
+./configure
+make
+make check
+make distcheck
