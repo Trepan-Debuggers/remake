@@ -22,12 +22,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "dep.h"
 #include "file.h"
 
-#if !defined (USG) && !defined (POSIX) && !defined (eta10)
-#ifndef	sgi
-#include <sys/file.h>
-#endif
-#else
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
+#else
+#include <sys/file.h>
 #endif
 
 extern int try_implicit_rule ();
