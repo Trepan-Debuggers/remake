@@ -265,7 +265,7 @@ int
 pattern_matches (pattern, percent, word)
      register char *pattern, *percent, *word;
 {
-  unsigned int len;
+  unsigned int sfxlen, wordlen;
 
   if (percent == 0)
     {
@@ -278,13 +278,14 @@ pattern_matches (pattern, percent, word)
 	return streq (pattern, word);
     }
 
-  len = strlen (percent + 1);
+  sfxlen = strlen (percent + 1);
+  wordlen = strlen (word);
 
-  if (strlen (word) < (percent - pattern) + len
+  if (wordlen < (percent - pattern) + sfxlen
       || strncmp (pattern, word, percent - pattern))
     return 0;
 
-  return !strcmp (percent + 1, word + (strlen (word) - len));
+  return !strcmp (percent + 1, word + (wordlen - sfxlen));
 }
 
 int shell_function_pid = 0, shell_function_completed;
