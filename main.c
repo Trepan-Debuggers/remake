@@ -699,7 +699,8 @@ int
 find_and_set_default_shell (char *token)
 {
   int sh_found = 0;
-  char* search_token;
+  char *search_token;
+  char *tokend;
   PATH_VAR(sh_path);
   extern char *default_shell;
 
@@ -708,8 +709,25 @@ find_and_set_default_shell (char *token)
   else
     search_token = token;
 
-  if (!no_default_sh_exe &&
-      (token == NULL || !strcmp(search_token, default_shell))) {
+
+  /* If the user explicitly requests the DOS cmd shell, obey that request.
+     However, make sure that's what they really want by requiring the value
+     of SHELL either equal, or have a final path element of, "cmd" or
+     "cmd.exe" case-insensitive.  */
+  tokend = search_token + strlen (search_token) - 3;
+  if (((tokend == search_token
+        || (tokend > search_token
+            && (tokend[-1] == '/' || tokend[-1] == '\\')))
+       && strcmpi (tokend, "cmd"))
+      || ((tokend - 4 == search_token
+           || (tokend - 4 > search_token
+               && (tokend[-5] == '/' || tokend[-5] == '\\')))
+          && strcmpi (tokend - 4, "cmd.exe"))) {
+    batch_mode_shell = 1;
+    unixy_shell = 0;
+    sh_found = 0;
+  } else if (!no_default_sh_exe &&
+             (token == NULL || !strcmp (search_token, default_shell))) {
     /* no new information, path already set or known */
     sh_found = 1;
   } else if (file_exists_p(search_token)) {

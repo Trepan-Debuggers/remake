@@ -346,13 +346,11 @@ chop_commands (struct commands *cmds)
             flags |= COMMANDS_NOERROR;
             break;
           }
-      if (!(flags & COMMANDS_RECURSE))
-        {
-          unsigned int len = strlen (p);
-          if (sindex (p, len, "$(MAKE)", 7) != 0
-              || sindex (p, len, "${MAKE}", 7) != 0)
-            flags |= COMMANDS_RECURSE;
-        }
+
+      /* If no explicit '+' was given, look for MAKE variable references.  */
+      if (!(flags & COMMANDS_RECURSE)
+          && (strstr (p, "$(MAKE)") != 0 || strstr (p, "${MAKE}") != 0))
+        flags |= COMMANDS_RECURSE;
 
       cmds->lines_flags[idx] = flags;
       cmds->any_recurse |= flags & COMMANDS_RECURSE;

@@ -412,34 +412,6 @@ savestring (const char *str, unsigned int length)
   return out;
 }
 
-/* Search string BIG (length BLEN) for an occurrence of
-   string SMALL (length SLEN).  Return a pointer to the
-   beginning of the first occurrence, or return nil if none found.  */
-
-char *
-sindex (const char *big, unsigned int blen,
-        const char *small, unsigned int slen)
-{
-  if (!blen)
-    blen = strlen (big);
-  if (!slen)
-    slen = strlen (small);
-
-  if (slen && blen >= slen)
-    {
-      register unsigned int b;
-
-      /* Quit when there's not enough room left for the small string.  */
-      --slen;
-      blen -= slen;
-
-      for (b = 0; b < blen; ++b, ++big)
-        if (*big == *small && strneq (big + 1, small + 1, slen))
-          return (char *)big;
-    }
-
-  return 0;
-}
 
 /* Limited INDEX:
    Search through the string STRING, which ends at LIMIT, for the character C.
