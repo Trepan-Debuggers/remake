@@ -1,0 +1,71 @@
+$description = "The following test creates a makefile to test static \n"
+              ."pattern rules.  Static pattern rules are rules which \n"
+              ."specify multiple targets and construct the dependency \n"
+              ."names for each target based on the target name. ";
+
+$details = "The makefile created in this test has three targets.  The \n"
+          ."filter command is used to get those target names ending in \n"
+          .".o and statically creates a compile command with the target\n"
+          ."name and the target name with .c.  It also does the same thing\n"
+          ."for another target filtered with .elc and creates a command\n"
+          ."to emacs a .el file";
+
+open(MAKEFILE,"> $makefile");
+
+# The Contents of the MAKEFILE ...
+
+print MAKEFILE "files = foo.elc bar.o lose.o   \n\n" 
+              ."\$(filter %.o,\$(files)): %.o: %.c\n"
+              ."\t\@echo CC -c \$(CFLAGS) \$< -o \$@ \n"
+              ."\$(filter %.elc,\$(files)): %.elc: %.el \n"
+              ."\t\@echo emacs \$< \n";
+
+# END of Contents of MAKEFILE
+
+close(MAKEFILE);
+
+&touch("bar.c","lose.c");
+
+#   TEST #1
+#   -------
+
+&run_make_with_options($makefile,
+                       "",
+                       &get_logfile,
+                       0);
+
+# Create the answer to what should be produced by this Makefile
+$answer = "CC -c bar.c -o bar.o\n";
+&compare_output($answer,&get_logfile(1));
+
+
+#  TEST #2
+#  -------
+&run_make_with_options($makefile,"lose.o",&get_logfile);
+
+$answer = "CC -c lose.c -o lose.o\n";
+
+&compare_output($answer,&get_logfile(1));  
+
+
+#   TEST #3
+#   -------
+&touch("foo.el");
+
+&run_make_with_options($makefile,"foo.elc",&get_logfile);
+
+$answer = "emacs foo.el\n";
+
+&compare_output($answer,&get_logfile(1));  
+
+
+
+unlink("foo.el","bar.c","lose.c");
+
+1;
+
+
+
+
+
+

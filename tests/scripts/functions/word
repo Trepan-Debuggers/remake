@@ -1,0 +1,70 @@
+$description = "The following test creates a makefile to test the word, words,\n"
+              ."and wordlist functions.\n";
+
+$details = "The word function will return the number of words in a variable or\n"
+          ."the word specified. The test will produce a variable with a large\n"
+          ."number of words in it, determine the number of word and then read\n"
+          ."each one back.\n";
+
+open(MAKEFILE,"> $makefile");
+
+# The Contents of the MAKEFILE ...
+
+print MAKEFILE "string  := word.pl general_test2.pl   FORCE.pl word.pl generic_test.perl MAKEFILES_variable.pl \n"
+              ."string2 := \$(string) \$(string) \$(string) \$(string) \$(string) \$(string) \$(string)\n"
+              ."string3 := \$(string2) \$(string2) \$(string2) \$(string2) \$(string2) \$(string2) \$(string2)\n"
+              ."string4 := \$(string3) \$(string3) \$(string3) \$(string3) \$(string3) \$(string3) \$(string3)\n"
+              ."all: \n"
+              ."\t\@echo \$(words \$(string)) \n"
+              ."\t\@echo \$(words \$(string4)) \n"
+              ."\t\@echo \$(word 1, \$(string)) \n"
+              ."\t\@echo \$(word 100, \$(string)) \n"
+              ."\t\@echo \$(word 1, \$(string)) \n"
+              ."\t\@echo \$(word 1000, \$(string3)) \n"
+              ."\t\@echo \$(wordlist 3, 4, \$(string)) \n"
+              ."\t\@echo \$(wordlist 4, 3, \$(string)) \n"
+              ."\t\@echo \$(wordlist 1, 6, \$(string)) \n"
+              ."\t\@echo \$(wordlist 7, 5, \$(string)) \n"
+              ."\t\@echo \$(wordlist 100, 110, \$(string)) \n"
+              ."\t\@echo \$(wordlist 7, 10, \$(string2)) \n"
+;
+
+
+
+# END of Contents of MAKEFILE
+
+close(MAKEFILE);
+
+&run_make_with_options($makefile,"",&get_logfile,0);
+
+# Create the answer to what should be produced by this Makefile
+
+# COMPARE RESULTS
+$answer = "6\n"
+         ."2058\n"
+         ."word.pl\n"
+         ."\n"
+         ."word.pl\n"
+         ."\n"
+	 ."FORCE.pl word.pl\n"
+	 ."FORCE.pl word.pl\n"
+	 ."word.pl general_test2.pl FORCE.pl word.pl generic_test.perl MAKEFILES_variable.pl\n"
+	 ."generic_test.perl MAKEFILES_variable.pl\n"
+	 ."\n"
+	 ."word.pl general_test2.pl FORCE.pl word.pl\n"
+;
+
+# In this call to compare output, you should use the call &get_logfile(1)
+# to send the name of the last logfile created.  You may also use
+# the special call &get_logfile(1) which returns the same as &get_logfile(1).
+
+&compare_output($answer,&get_logfile(1));
+
+# This tells the test driver that the perl test script executed properly.
+1;
+
+
+
+
+
+

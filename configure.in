@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.79 1999/09/11 05:44:56 psmith Exp $])
+AC_REVISION([$Id: configure.in,v 1.80 1999/09/14 02:03:23 psmith Exp $])
 AC_PREREQ(2.13)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 
@@ -18,6 +18,9 @@ AC_PROG_CPP			dnl Later checks need this.
 AC_AIX
 AC_ISC_POSIX
 AC_MINIX
+
+AC_CHECK_PROG(PERL, perl, perl, perl)	dnl Needed for the test suite (only)
+
 
 dnl This test must come as early as possible after the compiler configuration
 dnl tests, because the choice of the file model can (in principle) affect

@@ -1,7 +1,15 @@
 1999-09-13  Paul D. Smith  <psmith@gnu.org>
 
+	* Version 3.77.96 released.
+
 	* Makefile.am (loadavg): Use CPPFLAGS, etc. to make sure we get
 	all the right #defines to compile.
+	(check-regression): Look for the regression test suite in the make
+	package itself.  If we're building remotely, use symlinks to make
+	a local copy.
+	(dist-hook): Put the test suite into the tar file.
+
+	* configure.in: Look for perl for the test suite.
 
 1999-09-10  Paul Eggert  <eggert@twinsun.com>
 
