@@ -14,7 +14,7 @@ AC_DIR_HEADER
 AC_UID_T			dnl Also does gid_t.
 AC_PID_T
 AC_RETSIGTYPE
-AC_HAVE_HEADERS(limits.h sys/param.h)
+AC_HAVE_HEADERS(limits.h sys/param.h fcntl.h)
 AC_MINUS_C_MINUS_O
 
 AC_SUBST(LIBOBJS)
