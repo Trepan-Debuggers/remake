@@ -1,5 +1,10 @@
 2004-09-21  Paul D. Smith  <psmith@gnu.org>
 
+	* read.c (readstring): Fix some logic errors in backslash handling.
+	(eval): Remove some unnecessary processing in buffer handling.
+	(record_target_var): Assert that parse_variable_definition() succeeded.
+	Reported by: Markus Mauhart <qwe123@chello.at>.
+
 	* misc.c: Removed the sindex() function.  All instances of this
 	function were trivially replaceable by the standard strstr()
 	function, and that function will always have better (or certainly

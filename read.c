@@ -846,21 +846,11 @@ eval (struct ebuffer *ebuf, int set_default)
 	/* This line has been dealt with.  */
 	goto rule_complete;
 
+      /* This line starts with a tab but was not caught above because there
+         was no preceding target, and the line might have been usable as a
+         variable definition.  But now we know it is definitely lossage.  */
       if (line[0] == '\t')
-	{
-	  p = collapsed;	/* Ignore comments, etc.  */
-	  while (isblank ((unsigned char)*p))
-	    ++p;
-	  if (*p == '\0')
-	    /* The line is completely blank; that is harmless.  */
-	    continue;
-
-	  /* This line starts with a tab but was not caught above
-	     because there was no preceding target, and the line
-	     might have been usable as a variable definition.
-	     But now we know it is definitely lossage.  */
-	  fatal(fstart, _("commands commence before first target"));
-	}
+        fatal(fstart, _("commands commence before first target"));
 
       /* This line describes some target files.  This is complicated by
          the existence of target-specific variables, because we can't
@@ -1033,13 +1023,11 @@ eval (struct ebuffer *ebuf, int set_default)
            of the unparsed section of p2, for later.  */
         if (*lb_next != '\0')
           {
-            unsigned int l = p - variable_buffer;
-            unsigned int l2 = p2 - variable_buffer;
+            unsigned int l = p2 - variable_buffer;
             plen = strlen (p2);
             (void) variable_buffer_output (p2+plen,
                                            lb_next, strlen (lb_next)+1);
-            p = variable_buffer + l;
-            p2 = variable_buffer + l2;
+            p2 = variable_buffer + l;
           }
 
         /* See if it's an "override" or "export" keyword; if so see if what
@@ -1683,10 +1671,11 @@ record_target_var (struct nameseq *filenames, char *defn,
           /* Get a reference for this pattern-specific variable struct.  */
           p = create_pattern_var (name, percent);
           p->variable.fileinfo = *flocp;
+          /* I don't think this can fail since we already determined it was a
+             variable definition.  */
           v = parse_variable_definition (&p->variable, defn);
+          assert (v != 0);
           v->value = xstrdup (v->value);
-          if (!v)
-            error (flocp, _("Malformed pattern-specific variable definition"));
           fname = p->target;
         }
       else
@@ -2483,35 +2472,42 @@ parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip)
 static unsigned long
 readstring (struct ebuffer *ebuf)
 {
-  char *p;
+  char *eol;
 
   /* If there is nothing left in this buffer, return 0.  */
-  if (ebuf->bufnext > ebuf->bufstart + ebuf->size)
+  if (ebuf->bufnext >= ebuf->bufstart + ebuf->size)
     return -1;
 
   /* Set up a new starting point for the buffer, and find the end of the
      next logical line (taking into account backslash/newline pairs).  */
 
-  p = ebuf->buffer = ebuf->bufnext;
+  eol = ebuf->buffer = ebuf->bufnext;
 
   while (1)
     {
       int backslash = 0;
+      char *bol = eol;
+      char *p;
 
-      /* Find the next newline.  Keep track of backslashes as we look.  */
-      for (; *p != '\n' && *p != '\0'; ++p)
-        if (*p == '\\')
-          backslash = !backslash;
+      /* Find the next newline.  At EOS, stop.  */
+      eol = p = strchr (eol , '\n');
+      if (!eol)
+        {
+          ebuf->bufnext = ebuf->bufstart + ebuf->size + 1;
+          return 0;
+        }
 
-      /* If we got to the end of the string or a newline with no backslash,
-         we're done. */
-      if (*p == '\0' || !backslash)
+      /* Found a newline; if it's escaped continue; else we're done.  */
+      while (p > bol && *(--p) == '\\')
+        backslash = !backslash;
+      if (!backslash)
         break;
+      ++eol;
     }
 
   /* Overwrite the newline char.  */
-  *p = '\0';
-  ebuf->bufnext = p+1;
+  *eol = '\0';
+  ebuf->bufnext = eol+1;
 
   return 0;
 }

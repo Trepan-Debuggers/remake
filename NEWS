@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  06 March 2004
+  21 September 2004
 
 Copyright (C) 2002,2003,2004  Free Software Foundation, Inc.
 See the end for copying conditions.
@@ -30,6 +30,11 @@ Version 3.81beta1
   <thomas.riedl@siemens.com> to track the number of jobs started in the
   last second and adjust GNU make's view of the system's load average
   accordingly.
+
+* On DOS and MS Windows systems, explicitly setting SHELL to a pathname
+  ending in "cmd" or "cmd.exe" (case-insensitive) will force GNU make to
+  use the DOS command interpreter in batch mode even if a UNIX-like
+  shell could be found on the system.
 
 * Enhancements for POSIX compatibility:
    - Only touch targets (under -t) if they have at least one command.
