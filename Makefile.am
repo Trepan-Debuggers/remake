@@ -95,7 +95,7 @@ install-exec-local:
 #
 dist-hook:
 	(cd $(srcdir); \
-	 sub=`find w32 tests -follow \( -name CVS -prune -o -name work -prune \) -o \( -name \*.orig -o -name \*.rej -o -name \*~ -prune \) -o -type f -print`; \
+	 sub=`find w32 tests -follow \( -name CVS -prune -o -name .cvsignore -o -name work -prune \) -o \( -name \*.orig -o -name \*.rej -o -name \*~ -prune \) -o -type f -print`; \
 	 tar chf - $$sub) \
 	| (cd $(distdir); tar xfBp -)
 
