@@ -214,6 +214,8 @@ $(alpha-dir)/%: %
 # Implicit rule to make README and README-doc.
 %: %.template version.c
 	sed 's/VERSION/$(version)/' < $< > $@
+# Make sure I don't edit it by accident.
+	chmod a-w $@
 
 define make-tar
 @rm -fr make-$(version)
