@@ -48,11 +48,11 @@ static struct pspec default_pattern_rules[] =
 
 static struct pspec default_terminal_rules[] =
   {
-    /* RCS.  */
+    /* RCS.  These commands are not echoed because RCS makes enough noise.  */
     "%", "%,v",
-    "test -f $@ || $(CO) $(COFLAGS) $< $@",
+    "@test -f $@ || $(CO) $(COFLAGS) $< $@",
     "%", "RCS/%,v",
-    "test -f $@ || $(CO) $(COFLAGS) $< $@",
+    "@test -f $@ || $(CO) $(COFLAGS) $< $@",
 
     /* SCCS.  */
     "%", "s.%",
