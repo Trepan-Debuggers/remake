@@ -945,23 +945,17 @@ new_job (file)
   c->environment = 0;
 
   /* Fetch the first command line to be run.  */
-  if (! job_next_command (c))
-    {
-      /* There were no commands!  */
-      free_child (c);
-      c->file->update_status = 0;
-    }
-  else
-    {
-      /* The job is now primed.  Start it running.  */
-      start_waiting_job (c);
+  job_next_command (c);
 
-      if (job_slots == 1)
-	/* Since there is only one job slot, make things run linearly.
-	   Wait for the child to die, setting the state to `cs_finished'.  */
-	while (file->command_state == cs_running)
-	  reap_children (1, 0);
-    }
+  /* The job is now primed.  Start it running.
+     (This will notice if there are in fact no commands.)  */
+  start_waiting_job (c);
+
+  if (job_slots == 1)
+    /* Since there is only one job slot, make things run linearly.
+       Wait for the child to die, setting the state to `cs_finished'.  */
+    while (file->command_state == cs_running)
+      reap_children (1, 0);
 }
 
 /* Move CHILD's pointers to the next command for it to execute.
@@ -971,7 +965,7 @@ static int
 job_next_command (child)
      struct child *child;
 {
-  if (child->command_ptr == 0 || *child->command_ptr == '\0')
+  while (child->command_ptr == 0 || *child->command_ptr == '\0')
     {
       /* There are no more lines in the expansion of this line.  */
       if (child->command_line == child->file->cmds->ncommand_lines)
