@@ -7,6 +7,8 @@
 	can lead to problems, e.g. if your makefile relies on "cp -p".
 	* README.template: Document the issue with "cp -p".
 
+	* config.guess, config.sub: Updated.
+
 2000-06-22  Paul D. Smith  <psmith@gnu.org>
 
 	* job.c (start_job_command): Increment commands_started before the

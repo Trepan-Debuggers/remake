@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  27 Mar 2000
+  23 Jun 2000
 
 Copyright (C) 1992,93,94,95,96,97,98,99,2000 Free Software Foundation, Inc.
 See the end for copying conditions.
@@ -14,8 +14,15 @@ reports.
 
 Version 3.79.1
 
-* .SECONDARY with no prerequisites now causes all targets to be treated
-  as .SECONDARY, not just those listed in the makefile.
+* .SECONDARY with no prerequisites now prevents any target from being
+  removed because make thinks it's an intermediate file, not just those
+  listed in the makefile.
+
+* New configure option --disable-nsec-timestamps will keep make from
+  using sub-second timestamps on systems which support it.  If your
+  build process depends on proper timestamp-preserving behavior of tools
+  like "cp -p" you might need this option, since "cp -p" (right now)
+  doesn't preserve the sub-second portion of the timestamp.
 
 Version 3.79
 
