@@ -18,16 +18,6 @@ AC_HAVE_HEADERS(limits.h sys/param.h)
 AC_MINUS_C_MINUS_O
 
 AC_SUBST(LIBOBJS)
-ifdef([notdef],
-# Apparently some systems have a buggy glob function in their C library.
-# So forget them and always use ours.
-AC_COMPILE_CHECK(POSIX.2 glob functions,
-		 [#include <glob.h>],
-		 [glob (0, 0, 0, 0);],
-		 AC_DEFINE(HAVE_GLOB_H),
-		 [LIBOBJS="$LIBOBJS glob/libglob.a"])
-)
-LIBOBJS="$LIBOBJS glob/libglob.a"
 
 AC_HAVE_FUNCS(getdtablesize sys_siglist _sys_siglist \
 	      dup2 getcwd sigsetmask getgroups setlinebuf)
