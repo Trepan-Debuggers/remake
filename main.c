@@ -39,7 +39,9 @@ extern void print_vpath_data_base ();
 extern int chdir ();
 #endif
 #ifndef	STDC_HEADERS
+#ifndef	sun			/* Sun has an incorrect decl in a header.  */
 extern void exit ();
+#endif
 extern double atof ();
 #endif
 extern char *mktemp ();
