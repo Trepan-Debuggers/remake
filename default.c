@@ -34,33 +34,33 @@ static char default_suffixes[]
 
 static struct pspec default_pattern_rules[] =
   {
-    "(%)", "%",
-    "$(AR) $(ARFLAGS) $@ $<",
+    { "(%)", "%",
+	"$(AR) $(ARFLAGS) $@ $<" },
 
     /* The X.out rules are only in BSD's default set because
        BSD Make has no null-suffix rules, so `foo.out' and
        `foo' are the same thing.  */
-    "%.out", "%",
-    "@rm -f $@ \n cp $< $@",
+    { "%.out", "%",
+	"@rm -f $@ \n cp $< $@" },
 
-    0, 0, 0
+    { 0, 0, 0 }
   };
 
 static struct pspec default_terminal_rules[] =
   {
     /* RCS.  */
-    "%", "%,v",
-    "+$(CHECKOUT,v)",
-    "%", "RCS/%,v",
-    "+$(CHECKOUT,v)",
+    { "%", "%,v",
+	"+$(CHECKOUT,v)" },
+    { "%", "RCS/%,v",
+	"+$(CHECKOUT,v)" },
 
     /* SCCS.  */
-    "%", "s.%",
-    "$(GET) $(GFLAGS) $<",
-    "%", "SCCS/s.%",
-    "$(GET) $(GFLAGS) $<",
+    { "%", "s.%",
+	"$(GET) $(GFLAGS) $<" },
+    { "%", "SCCS/s.%",
+	"$(GET) $(GFLAGS) $<" },
 
-    0, 0, 0,
+    { 0, 0, 0 }
   };
 
 static char *default_suffix_rules[] =
