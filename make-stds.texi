@@ -236,17 +236,34 @@ normally don't want to recompile.  For example, the @samp{mostlyclean}
 target for GCC does not delete @file{libgcc.a}, because recompiling it
 is rarely necessary and takes a lot of time.
 
-@item realclean
-Delete everything from the current directory that can be reconstructed
-with this Makefile.  This typically includes everything deleted by
-@code{distclean}, plus more: C source files produced by Bison, tags tables,
-Info files, and so on.
+@item maintainer-clean
+Delete almost everything from the current directory that can be
+reconstructed with this Makefile.  This typically includes everything
+deleted by @code{distclean}, plus more: C source files produced by
+Bison, tags tables, Info files, and so on.
 
-One exception, however: @samp{make realclean} should not delete
-@file{configure} even if @file{configure} can be remade using a rule in
-the Makefile.  More generally, @samp{make realclean} should not delete
-anything that needs to exist in order to run @file{configure}
-and then begin to build the program.
+The reason we say ``almost everything'' is that @samp{make
+maintainer-clean} should not delete @file{configure} even if
+@file{configure} can be remade using a rule in the Makefile.  More
+generally, @samp{make maintainer-clean} should not delete anything that
+needs to exist in order to run @file{configure} and then begin to build
+the program.  This is the only exception; @code{maintainer-clean} should
+delete everything else that can be rebuilt.
+
+The @samp{maintainer-clean} is intended to be used by a maintainer of
+the package, not by ordinary users.  You may need special tools to
+reconstruct some of the files that @samp{make maintainer-clean} deletes.
+Since these files are normally included in the distribution, we don't
+take care to make them easy to reconstruct.  If you find you need to
+unpack the full distribution again, don't blame us.
+
+To help make users aware of this, the commands for
+@code{maintainer-clean} should start with these two:
+
+@example
+@@echo "This command is intended for maintainers to use;"
+@@echo "it deletes files that may require special tools to rebuild."
+@end example
 
 @item TAGS
 Update a tags table for this program.
