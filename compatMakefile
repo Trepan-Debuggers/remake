@@ -33,7 +33,7 @@ LDFLAGS = -g
 #				without complaint but produce losing code,
 #				so beware.
 # NeXT 1.0a uses an old version of GCC, which required -D__inline=inline.
-defines = @DEFS@ -DLIBDIR=\"$(libdir)\"
+defines = @DEFS@ -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\"
 
 # If you are using the GNU C library, or have the GNU getopt functions in
 # your C library, you can comment these out.
@@ -68,6 +68,8 @@ instname = make
 bindir = $(exec_prefix)/bin
 # Directory to find libraries in for `-lXXX'.
 libdir = $(exec_prefix)/lib
+# Directory to search by default for included makefiles.
+includedir = $(prefix)/include
 # Directory to install the man page in.
 mandir = $(prefix)/man/man$(manext)
 # Number to put on the man page filename.
