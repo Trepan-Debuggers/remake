@@ -438,7 +438,9 @@ reap_children (block, err)
 	    }
 
 	  if (! handling_fatal_signal)
-	    /* Notice if the target of the commands has been changed.  */
+	    /* Notice if the target of the commands has been changed.
+	       This also propagates its values for command_state and
+	       update_status to its also_make files.  */
 	    notice_finished_file (c->file);
 
 	  if (debug_flag)
@@ -546,7 +548,7 @@ start_job_command (child)
   if (question_flag && !(flags & COMMANDS_RECURSE))
     {  
       child->file->update_status = 1;
-      set_command_state (child->file, cs_finished);
+      notice_finished_file (child->file);
       return;
     }
 
@@ -726,7 +728,7 @@ start_job_command (child)
 
  error:
   child->file->update_status = 2;
-  set_command_state (child->file, cs_finished);
+  notice_finished_file (child->file);
 }
 
 /* Try to start a child running.
@@ -955,7 +957,7 @@ job_next_command (child)
 	{
 	  /* There are no more lines to be expanded.  */
 	  child->command_ptr = 0;
-	  set_command_state (child->file, cs_finished);
+	  child->file->command_state = cs_finished;
 	  child->file->update_status = 0;
 	  return 0;
 	}
