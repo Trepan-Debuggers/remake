@@ -24,12 +24,10 @@
 srcdir='@srcdir@'
 CC='@CC@'
 CFLAGS="${CFLAGS--g}"
-defines='@DEFS@ -DLIBDIR=\"${libdir}\" -DINCLUDEDIR=\"${includedir}\"'
+defines='@DEFS@ -DLIBDIR="${libdir}" -DINCLUDEDIR="${includedir}"'
 ALLOCA='@ALLOCA@'
 LOADLIBES='@LIBS@'
 extras='@LIBOBJS@'
-
-objs="%objs% ${extras} ${ALLOCA}"
 
 # Common prefix for machine-independent installed files.
 prefix=/usr/local
@@ -40,9 +38,23 @@ libdir=${exec_prefix}/lib
 # Directory to search by default for included makefiles.
 includedir=${prefix}/include
 
+# Exit as soon as any command fails.
+set -e
+
+globobjs="%globobjs%"
+
+# To make life simpler, just copy the glob sources into this directory.
+for file in `echo ${globobjs} | sed 's/\.o/.c/g'`; do
+  ln ${srcdir}/glob/$file $file || cp ${srcdir}/glob/$file $file
+done
+
+objs="%objs% ${globobjs} ${extras} ${ALLOCA}"
+
 for file in `echo ${objs} | sed 's/\.o/.c/g'`; do
+  echo compiling ${file}...
   $CC $CFLAGS $defines -c -I. -I${srcdir} -I${srcdir}/glob ${srcdir}/$file
 done
 
+echo linking make
 $CC $LDFLAGS $objs $LOADLIBES -o make.new
 mv -f make.new make
