@@ -240,7 +240,7 @@ static struct command_switch switches[] =
     { 'i', flag, (char *) &ignore_errors_flag, 1, 1, 0, 0, 0,
 	"ignore-errors", 0,
 	"Ignore errors from commands" },
-    { 'I', string, (char *) &include_directories, 1, 0, 0, 0, 0,
+    { 'I', string, (char *) &include_directories, 1, 1, 0, 0, 0,
 	"include-dir", "DIRECTORY",
 	"Search DIRECTORY for included makefiles" },
     { 'j', positive_int, (char *) &job_slots, 1, 1, 0,
@@ -283,7 +283,7 @@ static struct command_switch switches[] =
     { 't', flag, (char *) &touch_flag, 1, 1, 1, 0, 0,
 	"touch", 0,
 	"Touch targets instead of remaking them" },
-    { 'v', flag, (char *) &print_version_flag, 1, 0, 0, 0, 0,
+    { 'v', flag, (char *) &print_version_flag, 1, 1, 0, 0, 0,
 	"version", 0,
 	"Print the version number of make" },
     { 'w', flag, (char *) &print_directory_flag, 1, 1, 0, 0, 0,
@@ -1319,7 +1319,7 @@ decode_env_switches (envar, len)
      char *envar;
      unsigned int len;
 {
-  char *varref = alloca (2 + len + 2);
+  char *varref = (char *) alloca (2 + len + 2);
   char *value, *args;
   int argc;
   char **argv;
@@ -1364,95 +1364,155 @@ decode_env_switches (envar, len)
 }
 
 /* Define the MAKEFLAGS and MFLAGS variables to reflect the settings of the
-   command switches.  Include positive_int and floating options if PF.
+   command switches.  Include options with args if ALL is nonzero.
    Don't include options with the `no_makefile' flag set if MAKEFILE.  */
 
 static void
-define_makeflags (pf, makefile)
-     int pf, makefile;
+define_makeflags (all, makefile)
+     int all, makefile;
 {
   register struct command_switch *cs;
-  char flags[200];
-  register unsigned int i;
+  char *flagstring;
 
-  i = 0;
+  /* We will construct a linked list of `struct flag's describing
+     all the flags which need to go in MAKEFLAGS.  Then, once we
+     know how many there are and their lengths, we can put them all
+     together in a string.  */
+
+  struct flag
+    {
+      struct flag *next;
+      int c;
+      char *arg;
+      unsigned int arglen;
+    };
+  struct flag *flags = 0;
+  unsigned int flagslen = 0;
+#define	ADD_FLAG(ARG, LEN) \
+  do {									      \
+    struct flag *new = (struct flag *) alloca (sizeof (struct flag));	      \
+    new->c = cs->c;							      \
+    new->arg = (ARG);							      \
+    new->arglen = (LEN);						      \
+    new->next = flags;							      \
+    flags = new;							      \
+    if (new->arg == 0)							      \
+      ++flagslen;		/* Just a single flag letter.  */	      \
+    else								      \
+      flagslen += 1 + 1 + 1 + 1 + new->arglen; /* " -x foo" */		      \
+  } while (0)
+
   for (cs = switches; cs->c != '\0'; ++cs)
     if (cs->toenv && (!makefile || !cs->no_makefile))
-      {
-	if (i == 0 || flags[i - 1] == ' ')
-	  flags[i++] = '-';
-	switch (cs->type)
-	  {
-	  default:
-	    abort ();
+      switch (cs->type)
+	{
+	default:
+	  abort ();
 
-	  case ignore:
-	    break;
+	case ignore:
+	  break;
 
-	  case flag:
-	  case flag_off:
-	    if (!*(int *) cs->value_ptr == (cs->type == flag_off)
-		&& (cs->default_value == 0
-		    || *(int *) cs->value_ptr != *(int *) cs->default_value))
-	      flags[i++] = cs->c;
-	    break;
+	case flag:
+	case flag_off:
+	  if (!*(int *) cs->value_ptr == (cs->type == flag_off)
+	      && (cs->default_value == 0
+		  || *(int *) cs->value_ptr != *(int *) cs->default_value))
+	    ADD_FLAG (0, 0);
+	  break;
 
-	  case positive_int:
-	    if (pf)
-	      {
-		if ((cs->default_value != 0
-		     && (*(unsigned int *) cs->value_ptr
-			 == *(unsigned int *) cs->default_value)))
-		  break;
-		else if (cs->noarg_value != 0
-			 && (*(unsigned int *) cs->value_ptr ==
-			     *(unsigned int *) cs->noarg_value))
-		  flags[i++] = cs->c;
-		else
-		  {
-		    unsigned int value;
-		    if (cs->c == 'j')
-		      value = 1;
-		    else
-		      value = *(unsigned int *) cs->value_ptr;
-		    sprintf (&flags[i], "%c%u ", cs->c, value);
-		    i += strlen (&flags[i]);
-		  }
-	      }
-	    break;
+	case positive_int:
+	  if (all)
+	    {
+	      if ((cs->default_value != 0
+		   && (*(unsigned int *) cs->value_ptr
+		       == *(unsigned int *) cs->default_value)))
+		break;
+	      else if (cs->noarg_value != 0
+		       && (*(unsigned int *) cs->value_ptr ==
+			   *(unsigned int *) cs->noarg_value))
+		ADD_FLAG (0, 0);
+	      else if (cs->c == 'j')
+		/* Special case for `-j'.  */
+		ADD_FLAG ("1", 1);
+	      else
+		{
+		  char *buf = (char *) alloca (30);
+		  sprintf (buf, "%u", *(unsigned int *) cs->value_ptr);
+		  ADD_FLAG (buf, strlen (buf));
+		}
+	    }
+	  break;
 
-	  case floating:
-	    if (pf)
-	      {
-		if (cs->default_value != 0
-		    && (*(double *) cs->value_ptr
-			== *(double *) cs->default_value))
-		  break;
-		else if (cs->noarg_value != 0
-			 && (*(double *) cs->value_ptr
-			     == *(double *) cs->noarg_value))
-		  flags[i++] = cs->c;
-		else
-		  {
-		    sprintf (&flags[i], "%c%f ",
-			     cs->c, *(double *) cs->value_ptr);
-		    i += strlen (&flags[i]);
-		  }
-	      }
-	    break;
-	  }
-      }
+	case floating:
+	  if (all)
+	    {
+	      if (cs->default_value != 0
+		  && (*(double *) cs->value_ptr
+		      == *(double *) cs->default_value))
+		break;
+	      else if (cs->noarg_value != 0
+		       && (*(double *) cs->value_ptr
+			   == *(double *) cs->noarg_value))
+		ADD_FLAG (0, 0);
+	      else
+		{
+		  char *buf = (char *) alloca (100);
+		  sprintf (buf, "%f", *(double *) cs->value_ptr);
+		  ADD_FLAG (buf, strlen (buf));
+		}
+	    }
+	  break;
 
-  if (i == 0)
-    flags[0] = flags[1] = '\0';
-  else if (flags[i - 1] == ' ' || flags[i - 1] == '-')
-    flags[i - 1] = '\0';
-  flags[i] = '\0';
+	case string:
+	  if (all)
+	    {
+	      struct stringlist *sl = *(struct stringlist **) cs->value_ptr;
+	      register unsigned int i;
+	      if (sl != 0)
+		for (i = 0; i < sl->idx; ++i)
+		  ADD_FLAG (sl->list[i], strlen (sl->list[i]));
+	    }
+	  break;
+	}
+
+#undef	ADD_FLAG
+
+  if (flags == 0)
+    /* No flags.  Use a string of two nulls so [1] works below.  */
+    flagstring = "\0";
+  else
+    {
+      /* Construct the value in FLAGSTRING.
+	 We allocate enough space for a preceding dash and trailing null.  */
+      register char *p;
+      flagstring = (char *) alloca (1 + flagslen + 1);
+      p = flagstring;
+      *p++ = '-';
+      do
+	{
+	  /* Add the flag letter to the string.  */
+	  *p++ = flags->c;
+	  if (flags->arg != 0)
+	    {
+	      /* Add its argument too.  */
+	      *p++ = ' ';
+	      bcopy (flags->arg, p, flags->arglen);
+	      p += flags->arglen;
+	      /* Write a following space and dash, for the next flag.  */
+	      *p++ = ' ';
+	      *p++ = '-';
+	    }
+	  flags = flags->next;
+	} while (flags != 0);
+
+      /* Kill the final space and dash.  */
+      p[-2] = '\0';
+    }
 
   /* On Sun, the value of MFLAGS starts with a `-' but the
      value of MAKEFLAGS lacks the `-'.  Be compatible.  */
-  (void) define_variable ("MAKEFLAGS", 9, &flags[1], o_env, 0);
-  (void) define_variable ("MFLAGS", 6, flags, o_env, 0);
+  (void) define_variable ("MAKEFLAGS", 9, &flagstring[1], o_env, 0);
+  (void) define_variable ("MFLAGS", 6, flagstring, o_env, 0);
 }
 
 /* Print version information.  */
