@@ -9,7 +9,7 @@
 
 @set EDITION 0.45
 @set VERSION 3.71 Beta
-@set UPDATED 17 January 1994
+@set UPDATED 19 January 1994
 @set UPDATE-MONTH January 1994
 
 @c finalout
@@ -29,7 +29,7 @@ and issues the commands to recompile them.
 This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Make Manual}, for @code{make}, Version @value{VERSION}.
 
-Copyright (C) 1988, '89, '90, '91, '92, '93 Free Software Foundation, Inc.
+Copyright (C) 1988, '89, '90, '91, '92, '93, '94 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -64,7 +64,7 @@ by the Free Software Foundation.
 @author Richard M. Stallman and Roland McGrath
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1988, '89, '90, '91, '92, '93 Free Software Foundation, Inc.
+Copyright @copyright{} 1988, '89, '90, '91, '92, '93, '94 Free Software Foundation, Inc.
 @sp 2
 Published by the Free Software Foundation @*
 675 Massachusetts Avenue, @*
@@ -3323,34 +3323,37 @@ subsystem:
 @end example
 
 @noindent
-but now @code{MAKEFLAGS} makes this usage redundant.
+but now @code{MAKEFLAGS} makes this usage redundant.  If you want your
+makefiles to be compatible with old @code{make} programs, use this
+technique; it will work fine with more modern @code{make} versions too.
 
 @cindex setting options from environment
 @cindex options, setting from environment
 @cindex setting options in makefiles
 @cindex options, setting in makefiles
-The @code{MAKEFLAGS} and @code{MFLAGS} variables can also be useful if you
-want to have certain options, such as @samp{-k} (@pxref{Options Summary,
-,Summary of Options}), set each time you run @code{make}.  You simply put a
-value for @code{MAKEFLAGS} or @code{MFLAGS} in your environment.  These
-variables may also be set in makefiles, so a makefile can specify additional
-flags that should also be in effect for that makefile.
+The @code{MAKEFLAGS} variable can also be useful if you want to have
+certain options, such as @samp{-k} (@pxref{Options Summary, ,Summary of
+Options}), set each time you run @code{make}.  You simply put a value for
+@code{MAKEFLAGS} in your environment.  You can also set @code{MAKEFLAGS} in
+a makefile, to specify additional flags that should also be in effect for
+that makefile.  (Note that you cannot use @code{MFLAGS} this way.  That
+variable is set only for compatibility; @code{make} does not interpret a
+value you set for it in any way.)
 
-When @code{make} interprets the value of @code{MAKEFLAGS} or @code{MFLAGS}
-(either from the environment or from a makefile), it first prepends a hyphen
-if the value does not already begin with one.  Then it chops the value into
-words separated by blanks, and parses these words as if they were options
-given on the command line (except that @samp{-C}, @samp{-f}, @samp{-h},
+When @code{make} interprets the value of @code{MAKEFLAGS} (either from the
+environment or from a makefile), it first prepends a hyphen if the value
+does not already begin with one.  Then it chops the value into words
+separated by blanks, and parses these words as if they were options given
+on the command line (except that @samp{-C}, @samp{-f}, @samp{-h},
 @samp{-o}, @samp{-W}, and their long-named versions are ignored; and there
 is no error for an invalid option).
 
-If you do put @code{MAKEFLAGS} or @code{MFLAGS} in your environment, you
-should be sure not to include any options that will drastically affect
-the actions of @code{make} and undermine the purpose of makefiles and of
-@code{make} itself.  For instance, the @samp{-t}, @samp{-n}, and
-@samp{-q} options, if put in one of these variables, could have
-disastrous consequences and would certainly have at least surprising and
-probably annoying effects.@refill
+If you do put @code{MAKEFLAGS} in your environment, you should be sure not
+to include any options that will drastically affect the actions of
+@code{make} and undermine the purpose of makefiles and of @code{make}
+itself.  For instance, the @samp{-t}, @samp{-n}, and @samp{-q} options, if
+put in one of these variables, could have disastrous consequences and would
+certainly have at least surprising and probably annoying effects.@refill
 
 @node -w Option,  , Options/Recursion, Recursion
 @subsection The @samp{--print-directory} Option
@@ -6095,7 +6098,8 @@ Silent operation; do not print the commands as they are executed.
 
 Cancel the effect of the @samp{-k} option.  This is never necessary
 except in a recursive @code{make} where @samp{-k} might be inherited
-from the top-level @code{make} via @code{MAKEFLAGS} (@pxref{Recursion, ,Recursive Use of @code{make}})
+from the top-level @code{make} via @code{MAKEFLAGS}
+(@pxref{Recursion, ,Recursive Use of @code{make}})
 or if you set @samp{-k} in @code{MAKEFLAGS} in your environment.@refill
 
 @item -t
@@ -8409,7 +8413,6 @@ The number of levels of recursion (sub-@code{make}s).@*
 @xref{Variables/Recursion}.
 
 @item MAKEFLAGS
-@itemx MFLAGS
 
 The flags given to @code{make}.  You can set this in the environment or
 a makefile to set flags.@*
