@@ -428,6 +428,9 @@ main (argc, argv, envp)
 #endif	/* setvbuf reversed.  */
 #endif	/* setlinebuf missing.  */
 
+  /* Initialize the directory hashing code.  */
+  init_dir ();
+
   /* Set up to access user data (files).  */
   user_access ();
 
