@@ -3,10 +3,14 @@
 @synindex vr fn
 
 @ignore
-$Header: /sources/make/make/Attic/make.texinfo,v 1.7 1988/04/30 15:24:24 mcgrath Beta $
+$Header: /sources/make/make/Attic/make.texinfo,v 1.8 1988/05/01 14:49:57 mcgrath Beta $
 
 $Log: make.texinfo,v $
-Revision 1.7  1988/04/30 15:24:24  mcgrath
+Revision 1.8  1988/05/01 14:49:57  mcgrath
+Added Bugs section, replacing the paragraph in 
+the Overview chapter (Top node).
+
+Revision 1.7  88/04/30  15:24:24  mcgrath
 * Removed `roland@rtsg.lbl.gov' address.
 * Doubled up @'s in addresses to fix Makeinfo errors.
 
@@ -105,7 +109,7 @@ into another language, under the above conditions for modified versions.
 @end titlepage
 @page
 
-@node Top, Simple,, (DIR)
+@node Top, Bugs,, (DIR)
 @chapter Overview of @code{make}
 
 The purpose of the @code{make} utility is to determine automatically which
@@ -114,13 +118,6 @@ recompile them.  This manual describes the GNU implementation of
 @code{make}.
 
 GNU @code{make} was implemented by Richard Stallman and Roland McGrath.
-If you have problems with @code{make} or think you've found a bug,
-please report it to Roland McGrath; he will probably do something about
-it.  Please include the version of @code{make} you are using (the command
-@code{make -v -f /dev/null} will tell you this) and a small makefile that
-reproduces the bug.  Send electronic mail to Internet address
-@samp{roland@@wheaties.ai.mit.edu}@.
-Questions and suggestions are also welcome.@refill
 
 Our examples show C programs, since they are most common, but you can use
 @code{make} with any programming language whose compiler can be run with a
@@ -153,28 +150,54 @@ be recompiled, or how.  @xref{Running}.
 @end iftex
 
 @menu
+* Bugs::	If you have problems, or think you've found a bug.
 * Simple::	A simple example explained.
 * Makefiles::	The data base contains rules and variable definitions.
 * Rules::	A rule says how and when to remake one file.
-* Commands::    A rule contains shell commands that say how to remake.
+* Commands::	A rule contains shell commands that say how to remake.
 * Variables::	A variable holds a text string for substitution into rules.
 * Conditionals::Makefiles that do one thing or another depending on
-		 variable values.
-* Functions::   Functions can do text-processing within @code{make}.
+		variable values.
+* Functions::	Functions can do text-processing within @code{make}.
 
-* Running::     How to run @code{make}; how you can adjust the way
-                 @code{make} uses the makefile.
+* Running::	How to run @code{make}; how you can adjust the way
+		@code{make} uses the makefile.
 
 * Implicit::	Implicit rules take over if the makefile doesn't say
-		 how a file is to be remade.
-* Archives::    How to use @code{make} to update archive files.
-* Missing::     Features of other @code{make}s not supported by GNU @code{make}.
+		how a file is to be remade.
+* Archives::	How to use @code{make} to update archive files.
+* Missing::	Features of other @code{make}s not supported by GNU @code{make}.
+
 * Concept Index::Index of cross-references to where concepts are discussed.
-* Name Index::  Index of cross-references for names of @code{make}'s
-                 variables, functions, special targets and directives.
+* Name Index::	Index of cross-references for names of @code{make}'s
+		variables, functions, special targets and directives.
 @end menu
 
-@node Simple,,Top, Top
+@node Bugs,, Top, Top
+@section Problems and Bugs
+
+If you have problems with GNU @code{make} or think you've found a bug,
+please report it to Roland McGrath; he will probably do something about
+it.  Before reporting a bug, make sure you've actually found a real bug.
+Carefully re-read the documentation and see if it really says you can do
+what you're trying to do.  If it's not clear whether you should be able
+to do something or not, report that too; it's a bug in the documentation!
+Before reporting a bug or trying to fix it yourself, try to isolate it to
+the smallest possible makefile that reproduces the problem.  Then send me
+the makefile, the exact results @code{make} gave you and tell me what you
+expected to get.  You may be misunderstanding the documentation and
+thinking you can do something you can't, in which case I need to know
+what you thought so I can fix the documentation.@refill
+
+Once you've got a precise problem, send me electronic mail at Internet
+address @samp{roland@@wheaties.ai.mit.edu} or UUCP path
+@samp{mit-eddie!wheaties.ai.mit.edu!roland}.  Please include the version
+number of @code{make} you are using.  You can get this information with
+the command @samp{make -v -f /dev/null}.@refill
+
+Non-bug questions and suggestions are always welcome as well.
+
+@node Simple, Makefiles, Bugs, Top
 @section Simple Example of @code{make}
 
 Suppose we have a text editor consisting of eight C source files and three
