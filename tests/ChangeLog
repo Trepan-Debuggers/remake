@@ -1,3 +1,18 @@
+2000-04-11  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/functions/strip: Test empty value to strip (PR/1689).
+
+2000-04-08  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* scripts/features/reinvoke: Sleep before updating the target
+	files in the first test, to ensure its time stamp really gets
+	newer; otherwise Make might re-exec more than once.
+
+2000-04-07  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* scripts/features/double_colon: Don't run the parallel tests if
+	parallel jobs aren't supported.
+
 2000-04-04  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/functions/word: wordlist doesn't swap arguments anymore.

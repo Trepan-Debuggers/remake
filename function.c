@@ -1642,33 +1642,33 @@ static struct function_table_entry function_table[] =
  /* Name/size */                    /* MIN MAX EXP? Function */
   { STRING_SIZE_TUPLE("addprefix"),     2,  2,  1,  func_addsuffix_addprefix},
   { STRING_SIZE_TUPLE("addsuffix"),     2,  2,  1,  func_addsuffix_addprefix},
-  { STRING_SIZE_TUPLE("basename"),      1,  1,  1,  func_basename_dir},
-  { STRING_SIZE_TUPLE("dir"),           1,  1,  1,  func_basename_dir},
-  { STRING_SIZE_TUPLE("notdir"),        1,  1,  1,  func_notdir_suffix},
+  { STRING_SIZE_TUPLE("basename"),      0,  1,  1,  func_basename_dir},
+  { STRING_SIZE_TUPLE("dir"),           0,  1,  1,  func_basename_dir},
+  { STRING_SIZE_TUPLE("notdir"),        0,  1,  1,  func_notdir_suffix},
   { STRING_SIZE_TUPLE("subst"),         3,  3,  1,  func_subst},
-  { STRING_SIZE_TUPLE("suffix"),        1,  1,  1,  func_notdir_suffix},
+  { STRING_SIZE_TUPLE("suffix"),        0,  1,  1,  func_notdir_suffix},
   { STRING_SIZE_TUPLE("filter"),        2,  2,  1,  func_filter_filterout},
   { STRING_SIZE_TUPLE("filter-out"),    2,  2,  1,  func_filter_filterout},
   { STRING_SIZE_TUPLE("findstring"),    2,  2,  1,  func_findstring},
-  { STRING_SIZE_TUPLE("firstword"),     1,  1,  1,  func_firstword},
+  { STRING_SIZE_TUPLE("firstword"),     0,  1,  1,  func_firstword},
   { STRING_SIZE_TUPLE("join"),          2,  2,  1,  func_join},
   { STRING_SIZE_TUPLE("patsubst"),      3,  3,  1,  func_patsubst},
-  { STRING_SIZE_TUPLE("shell"),         1,  1,  1,  func_shell},
-  { STRING_SIZE_TUPLE("sort"),          1,  1,  1,  func_sort},
-  { STRING_SIZE_TUPLE("strip"),         1,  1,  1,  func_strip},
-  { STRING_SIZE_TUPLE("wildcard"),      1,  1,  1,  func_wildcard},
+  { STRING_SIZE_TUPLE("shell"),         0,  1,  1,  func_shell},
+  { STRING_SIZE_TUPLE("sort"),          0,  1,  1,  func_sort},
+  { STRING_SIZE_TUPLE("strip"),         0,  1,  1,  func_strip},
+  { STRING_SIZE_TUPLE("wildcard"),      0,  1,  1,  func_wildcard},
   { STRING_SIZE_TUPLE("word"),          2,  2,  1,  func_word},
   { STRING_SIZE_TUPLE("wordlist"),      3,  3,  1,  func_wordlist},
-  { STRING_SIZE_TUPLE("words"),         1,  1,  1,  func_words},
-  { STRING_SIZE_TUPLE("origin"),        1,  1,  1,  func_origin},
+  { STRING_SIZE_TUPLE("words"),         0,  1,  1,  func_words},
+  { STRING_SIZE_TUPLE("origin"),        0,  1,  1,  func_origin},
   { STRING_SIZE_TUPLE("foreach"),       3,  3,  0,  func_foreach},
   { STRING_SIZE_TUPLE("call"),          1,  0,  1,  func_call},
-  { STRING_SIZE_TUPLE("error"),         1,  1,  1,  func_error},
-  { STRING_SIZE_TUPLE("warning"),       1,  1,  1,  func_error},
+  { STRING_SIZE_TUPLE("error"),         0,  1,  1,  func_error},
+  { STRING_SIZE_TUPLE("warning"),       0,  1,  1,  func_error},
   { STRING_SIZE_TUPLE("if"),            2,  3,  0,  func_if},
 #ifdef EXPERIMENTAL
   { STRING_SIZE_TUPLE("eq"),            2,  2,  1,  func_eq},
-  { STRING_SIZE_TUPLE("not"),           1,  1,  1,  func_not},
+  { STRING_SIZE_TUPLE("not"),           0,  1,  1,  func_not},
 #endif
   { 0 }
 };
@@ -1687,6 +1687,13 @@ expand_builtin_function (o, argc, argv, entry_p)
     fatal (reading_file,
            _("Insufficient number of arguments (%d) to function `%s'"),
            argc, entry_p->name);
+
+  /* I suppose technically some function could do something with no
+     arguments, but so far none do, so just test it for all functions here
+     rather than in each one.  We can change it later if necessary.  */
+
+  if (!argc)
+    return o;
 
   if (!entry_p->func_ptr)
     fatal (reading_file, _("Unimplemented on this platform: function `%s'"),

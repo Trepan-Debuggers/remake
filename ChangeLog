@@ -1,3 +1,45 @@
+2000-04-18  Paul D. Smith  <psmith@gnu.org>
+
+	* remake.c (f_mtime): If ar_member_date() returns -1 (the member
+	doesn't exist), then return (FILE_TIMESTAMP)-1 rather than
+	returning the timestamp calculated from the value -1.  Fixes PR/1696.
+	Reported by Gilles Bourhis <Gilles.Bourhis@univ-rennes1.fr>.
+
+2000-04-17  Paul D. Smith  <psmith@gnu.org>
+
+	* config.h.W32.template: Add LOCALEDIR macro resolving to "".
+	* w32/subproc/sub_proc.c (process_begin): Remove reference to
+	debug_flag; change it to a DB() call.  Fixes PR/1700.
+	Reported by Jim Smith <jwksmith@attglobal.net>
+
+2000-04-17  Bruno Haible  <haible@clisp.cons.org>
+
+	* arscan.c [BeOS]: Add replacement for nonexistent <ar.h> from GNU
+	binutils.
+
+2000-04-11  Paul D. Smith  <psmith@gnu.org>
+
+	* function.c (expand_builtin_function): If no arguments were
+	provided, just quit early rather than changing each function to
+	test for this.
+	(function_table[]): Change the min # of arguments to 0 for all
+	those functions for which it makes sense (currently everything
+	that used to take a minimum of 1 argument, except $(call ...)).
+	Fixes PR/1689.
+
+2000-04-09  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* README.DOS: Add instructions to install a binary distro.
+	Mention latest versions of Windows.
+
+2000-04-07  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* main.c (main): Rename TMP_TEMPLATE into DEFAULT_TMPDIR, and use
+	it for the directory of the temporary file.  If P_tmpdir is
+	defined, use it in preference to "/tmp/".  Try $TMPDIR, $TEMP, and
+	$TMP in the environment before defaulting to DEFAULT_TMPDIR.
+	(print_version): Add year 2000 to the Copyright line.
+
 2000-04-04  Paul D. Smith  <psmith@gnu.org>
 
 	* Version 3.79 released.

@@ -34,6 +34,8 @@ all:
 	@echo '$(strip  $(TEST2) )'
 	@echo '$(strip  $(TEST3) )'
 
+space: ; @echo '$(strip ) $(strip  	   )'
+
 EOMAKE
 
 # END of Contents of MAKEFILE
@@ -41,13 +43,15 @@ EOMAKE
 close(MAKEFILE);
 
 &run_make_with_options($makefile,"",&get_logfile);
-
-# Create the answer to what should be produced by this Makefile
 $answer = "\"Is this TERMINAL fun? What makes you believe is this terminal fun? JAPAN is a WONDERFUL planet -- I wonder if we will ever reach their level of COMPARATIVE SHOPPING...\"
 try this and this
 and these test out some blank lines
 ";
+&compare_output($answer,&get_logfile(1));
 
+
+&run_make_with_options($makefile,"space",&get_logfile);
+$answer = " \n";
 &compare_output($answer,&get_logfile(1));
 
 1;

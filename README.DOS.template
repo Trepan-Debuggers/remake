@@ -34,11 +34,22 @@ New (since 3.74) DOS-specific features:
       environment (requires Perl and auxiliary tools; see below).
 
 
-To build:
+To install a binary distribution:
+
+   Simply unzip the makNNNb.zip file (where NNN is the version number)
+   preserving the directory structure (-d switch if you use PKUNZIP).
+   If you are installing Make on Windows 9X or Windows 2000, use an
+   unzip program that supports long filenames in zip files.  After
+   unzipping, make sure the directory with make.exe is on your PATH,
+   and that's all you need to use Make.
+
+
+To build from sources:
 
    1. Unzip the archive, preserving the directory structure (-d switch
-      if you use PKUNZIP).  If you build Make on Windows 95, use an
-      unzip program that supports long filenames in zip files.
+      if you use PKUNZIP).  If you build Make on Windows 9X or Windows
+      2000, use an unzip program that supports long filenames in zip
+      files.
 
       If you are unpacking an official GNU source distribution, use
       either DJTAR (which is part of the DJGPP development
