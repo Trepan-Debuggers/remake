@@ -45,9 +45,9 @@ NMakefile: NMakefile.template .dep_segment Makefile.am maintMakefile
 #
 build.sh.in: build.template Makefile.am maintMakefile
 	rm -f $@
-	sed -e 's@%objs%@$(filter-out remote-%, $(make_OBJECTS)\
-	       $(patsubst %.c,%.o,$(globsrc)))@' \
-	    $< > $@
+	sed -e 's@%objs%@$(filter-out remote-%, $(make_OBJECTS)@' \
+	    -e 's@%globobjs%@$(patsubst %.c,%.o,$(globsrc)))@' \
+	  $< > $@
 	chmod a-w+x $@
 
 # Use automake to build a dependency list file, for "foreign" makefiles like
@@ -63,8 +63,7 @@ build.sh.in: build.template Makefile.am maintMakefile
 # And _I_ want them to be removed ;)
 #
 maintFILES = configure aclocal.m4 config.h.in Makefile.in stamp-h.in \
-	     glob/configure glob/aclocal.m4 glob/config.h.in glob/Makefile.in \
-	     glob/stamp-h.in
+	     glob/Makefile.in
 
 MAINTAINERCLEANFILES =  $(maintFILES) $(TEMPLATES) $(MTEMPLATES) NMakefile \
 			missing build.sh.in .dep_segment

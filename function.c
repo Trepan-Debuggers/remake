@@ -440,10 +440,7 @@ string_glob (line)
 		      (&line, '\0', sizeof (struct nameseq),
 		       /* We do not want parse_file_seq to strip `./'s.
 			  That would break examples like:
-			  $(patsubst ./%.c,obj/%.o,$(wildcard ./*.c)).  */
-
-		       /* Yep, and the preceding comment triggers a GCC
-                          warning.  Nothing wrong though.  */
+			  $(patsubst ./%.c,obj/%.o,$(wildcard ./?*.c)).  */
 		       0),
 		      sizeof (struct nameseq));
 

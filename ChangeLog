@@ -1,3 +1,18 @@
+1999-03-26  Paul D. Smith  <psmith@gnu.org>
+
+	* configure.in: Substitute GLOBLIB if we need the link the
+	glob/libglob.a library.
+	* Makefile.am (make_LDADD): Use the subst variable GLOBLIB so we
+	don't link the local libglob.a at all if we don't need it.
+	* build.template: Don't compile glob/*.o unless we want globlib.
+	* maintMakefile (build.sh.in): Substitute the glob/*.o files
+	separately.
+
+1999-03-25  Paul D. Smith  <psmith@gnu.org>
+
+	* make.texinfo: Various typos and additions, pointed out by James
+	G. Sack <jsack@dornfeld.com>.
+
 1999-03-22  Paul D. Smith  <psmith@gnu.org>
 
 	* make.texinfo (Functions): Add a new section documenting the new
