@@ -53,6 +53,10 @@ ifneq "$(defines)" "@DEFS@"
 CPPFLAGS = $(defines)
 endif
 
+ifeq "$(extras)" "@LIBOBJS@"
+extras := # nada
+endif
+
 ifneq "$(wildcard $(ARCH)/makefile)" ""
 include $(ARCH)/makefile
 objs := $(sort $(objs) $(addprefix $(ARCH)/,$(ALLOCA) $(extras)))
