@@ -40,10 +40,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <signal.h>
 #include <stdio.h>
 #include <ctype.h>
+#ifdef HAVE_SYS_TIMEB_H
 /* SCO 3.2 "devsys 4.2" has a prototype for `ftime' in <time.h> that bombs
    unless <sys/timeb.h> has been included first.  Does every system have a
    <sys/timeb.h>?  If any does not, configure should check for it.  */
 #include <sys/timeb.h>
+#endif
 #include <time.h>
 #include <errno.h>
 
