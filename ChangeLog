@@ -1,3 +1,12 @@
+2001-06-13  Paul D. Smith  <psmith@gnu.org>
+
+	* i18n/da.po, configure.in (ALL_LINGUAS): Installed a new
+	translation.
+
+2001-06-11  Paul D. Smith  <psmith@gnu.org>
+
+	* i18n/ko.po: Installed a new translation.
+
 2001-05-06  Paul D. Smith  <psmith@gnu.org>
 
 	Modify the EINTR handling.
