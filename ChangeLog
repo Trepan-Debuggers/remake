@@ -1,3 +1,18 @@
+2005-02-28  Paul D. Smith  <psmith@gnu.org>
+
+	* doc/make.texi (Text Functions): Update docs to allow the end
+	ordinal for $(wordlist ...) to be 0.
+	* function.c (func_wordlist): Fail if the start ordinal for
+	$(wordlist ...) is <1.  Matches documentation.
+	Resolves Savannah support request #103195.
+
+	* remake.c (update_goal_chain): Fix logic for stopping in -q:
+	previously we were stopping when !-q, exactly the opposite.  This
+	has been wrong since version 1.34, in 1994!
+	(update_file): If we got an error don't break out to run more
+	double-colon rules: just return immediately.
+	Fixes Savannah bug #7144.
+
 2005-02-27  Paul D. Smith  <psmith@gnu.org>
 
 	* misc.c (end_of_token): Make argument const.
