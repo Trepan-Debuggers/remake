@@ -152,6 +152,7 @@ construct_vpath_list (pattern, dirpath)
      first colon and one nil, the list terminator and
      increment our estimated number for each colon or blank we find.  */
   maxelem = 2;
+  p = dirpath;
   while (*p != '\0')
     if (*p++ == ':' || isblank (*p))
       ++maxelem;
