@@ -224,7 +224,7 @@ dist: cvs-mark default info dvi tests tarfiles
 tarfiles: $(tarfiles)
 
 vmsfiles = config.h-vms makefile.com makefile.vms readme.vms \
-	   vmsdir.h vmsfunctionc.c vmsify.c
+	   vmsdir.h vmsfunctions.c vmsify.c
 amigafiles = README.Amiga config.ami Makefile.ami SCOPTIONS SMakefile \
 	     amiga.c amiga.h make.lnk
 distfiles=README INSTALL COPYING ChangeLog NEWS \
