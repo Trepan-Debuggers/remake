@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.142 1994/07/20 12:30:52 roland Alpha $
+@set RCSID $Id: make.texinfo,v 2.143 1994/09/09 06:59:08 roland Alpha $
 @set EDITION 0.46
 @set VERSION 3.72 Beta
 @set UPDATED 5 July 1994
@@ -7788,7 +7788,7 @@ circumvent this problem by serializing all commands that operate on the
 same archive file.  But for the time being, you must either write your
 makefiles to avoid this problem in some other way, or not use @code{-j}.
 
-@node Archive Suffix Rules, Archive Update, Archive Pitfalls, Archives
+@node Archive Suffix Rules, , Archive Pitfalls, Archives
 @section Suffix Rules for Archive Files
 @cindex suffix rule, for archive
 @cindex archive, suffix rule for
