@@ -1,3 +1,9 @@
+Tue Mar 28 13:25:46 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* main.c (main): Fixed braino in assert.
+
+	* Version 3.72.13.
+
 Mon Mar 27 05:29:12 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
 	* main.c: Avoid string in assert expression.  Some systems are broken.
