@@ -1,5 +1,9 @@
 Sat Jun 22 14:56:05 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 
+	* configure.in: Don't check for _sys_siglist.
+	* make.h [HAVE__SYS_SIGLIST]: Don't test this; just punt if there is
+	no strsignal or sys_siglist.
+
 	* read.c (conditional_line): Strip ws in `ifeq (a , b)' so it is the
 	same as `ifeq (a, b)'.
 
