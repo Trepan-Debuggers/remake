@@ -366,6 +366,20 @@ default, it should be @file{/usr/local/info}, but it should be written
 as @file{$(prefix)/info}.
 (If you are using Autoconf, write it as @samp{@@infodir@@}.)
 
+@item lispdir
+The directory for installing any Emacs Lisp files in this package.  By
+default, it should be @file{/usr/local/share/emacs/site-lisp}, but it
+should be written as @file{$(prefix)/share/emacs/site-lisp}.
+
+If you are using Autoconf, write the default as @samp{@@lispdir@@}.
+In order to make @samp{@@lispdir@@} work, you need the following lines
+in your @file{configure.in} file:
+
+@example
+lispdir='$@{datadir@}/emacs/site-lisp'
+AC_SUBST(lispdir)
+@end example
+
 @item includedir
 @c rewritten to avoid overfull hbox --roland
 The directory for installing header files to be included by user
