@@ -240,6 +240,7 @@ read_makefile (filename, flags)
   char *p2;
   int ignoring = 0, in_ignored_define = 0;
   int no_targets = 0;		/* Set when reading a rule without targets.  */
+  char *passed_filename = filename;
 
   struct nameseq *filenames = 0;
   struct dep *deps;
@@ -288,7 +289,6 @@ read_makefile (filename, flags)
   if (!(flags & RM_NO_TILDE) && filename[0] == '~')
     {
       char *expanded = tilde_expand (filename);
-      /* This is a possible memory leak, but I don't care.  */
       if (expanded != 0)
 	filename = expanded;
     }
@@ -330,6 +330,8 @@ read_makefile (filename, flags)
       if (flags & RM_DONTCARE)
 	deps->file->dontcare = 1;
     }
+  if (filename != passed_filename)
+    free (filename);
   filename = deps->file->name;
   deps->changed = flags;
   deps = 0;
