@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.188 2000/04/22 02:11:18 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.189 2000/06/20 05:48:40 psmith Exp $
 @set EDITION 0.55
 @set VERSION 3.79
 @set UPDATED 04 April 2000
@@ -2396,10 +2396,11 @@ these commands executed on its behalf.  @xref{Implicit Rule Search,
 The targets which @code{.PRECIOUS} depends on are given the following
 special treatment: if @code{make} is killed or interrupted during the
 execution of their commands, the target is not deleted.
-@xref{Interrupts, ,Interrupting or Killing @code{make}}.
-Also, if the target is an intermediate file, it will not be deleted
-after it is no longer needed, as is normally done.
-@xref{Chained Rules, ,Chains of Implicit Rules}.
+@xref{Interrupts, ,Interrupting or Killing @code{make}}.  Also, if the
+target is an intermediate file, it will not be deleted after it is no
+longer needed, as is normally done.  @xref{Chained Rules, ,Chains of
+Implicit Rules}.  In this latter respect it overlaps with the
+@code{.SECONDARY} special target.
 
 You can also list the target pattern of an implicit rule (such as
 @samp{%.o}) as a prerequisite file of the special target @code{.PRECIOUS}
@@ -2423,8 +2424,9 @@ The targets which @code{.SECONDARY} depends on are treated as
 intermediate files, except that they are never automatically deleted.
 @xref{Chained Rules, ,Chains of Implicit Rules}.
 
-@code{.SECONDARY} with no prerequisites marks all file targets mentioned
-in the makefile as secondary.
+@code{.SECONDARY} with no prerequisites causes all targets to be treated
+as secondary (i.e., no target is removed because it is considered
+intermediate).
 
 @findex .DELETE_ON_ERROR
 @item .DELETE_ON_ERROR
@@ -6829,7 +6831,7 @@ space-separated.
 
 @table @code
 @item a (@i{all})
-All types of debugging output is enabled.  This is equivalent to using
+All types of debugging output are enabled.  This is equivalent to using
 @samp{-d}.
 
 @item b (@i{basic})
