@@ -51,15 +51,12 @@ close(MAKEFILE);
 
 &run_make_with_options($makefile,"",&get_logfile,0);
 
-# Create the answer to what should be produced by this Makefile
 $answer = "arg1 NOT equal arg2
 arg2 equals arg5
 arg3 NOT equal arg4
 variable is undefined
 arg4 is defined
 ";
-
-# COMPARE RESULTS
 
 &compare_output($answer,&get_logfile(1));
 
@@ -91,6 +88,8 @@ endif
 all:; @echo DEF=$(DEF) DEF2=$(DEF2)
 
 EOF
+
+close(MAKEFILE)
 
 &run_make_with_options($makefile2,"",&get_logfile,0);
 $answer = "DEF=yes DEF2=yes\n";

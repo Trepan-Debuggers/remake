@@ -131,6 +131,8 @@ all:
 
 EOF
 
+close(MAKEFILE);
+
 &run_make_with_options($makefile2,"",&get_logfile,0);
 $answer = "foo=f-ok bar=b-ok\nfoo=f-ok bar=b-ok\n";
 &compare_output($answer,&get_logfile(1));
@@ -163,6 +165,8 @@ all:
 	@echo foo=$$foo bar=$$bar
 
 EOF
+
+close(MAKEFILE);
 
 &run_make_with_options($makefile3,"",&get_logfile,0);
 $answer = "foo=f-ok bar=b-ok\nfoo= bar=\n";

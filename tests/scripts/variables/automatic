@@ -62,6 +62,8 @@ $(dir)/foo $(dir)/bar: $@.x $$@.x $$$@.x $$$$@.x $$(@D).x $$(@F).x
 $(dir)/x.z $(dir)/y.z: $(dir)/%.z : $@.% $$@.% $$$@.% $$$$@.% $$(@D).% $$(@F).%
 EOF
 
+close(MAKEFILE);
+
 &run_make_with_options($makefile2, "$dir/foo $dir/bar", &get_logfile);
 $answer = ".x\n$dir/foo.x\n\$.x\n\$@.x\n$dir.x\nfoo.x\n$dir/bar.x\nbar.x\n";
 &compare_output($answer, &get_logfile(1));
