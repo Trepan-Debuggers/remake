@@ -234,6 +234,8 @@ read_makefile (filename, type)
   int two_colon;
   char *pattern = 0, *pattern_percent;
 
+  int makefile_errno;
+
 #define record_waiting_files()						      \
   do									      \
     { 									      \
@@ -252,6 +254,8 @@ read_makefile (filename, type)
   /* First, get a stream to read.  */
 
   infile = fopen (filename, "r");
+  /* Save the error code so we print the right message later.  */
+  makefile_errno = errno;
 
   /* If the makefile wasn't found and it's either a makefile from
      the `MAKEFILES' variable (type 1) or an included makefile (type 2),
@@ -297,7 +301,12 @@ read_makefile (filename, type)
   if (infile == 0)
     {
       if (type != 1)
-	perror_with_name ("fopen: ", filename);
+	{
+	  /* If we did some searching, errno has the error
+	     from the last attempt, rather from FILENAME itself.  */
+	  errno = makefile_errno;
+	  perror_with_name ("fopen: ", filename);
+	}
       return;
     }
 
