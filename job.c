@@ -246,6 +246,10 @@ child_error (child_t *p_child, target_stack_node_t *p_call_stack,
   if (ignored && silent_flag)
     return;
 
+  /* Adjust for the command line we were on. */
+  if (p_call_stack) 
+    p_call_stack->p_target->floc.lineno += p_child->command_line - 1;
+
 #ifdef VMS
   if (!(exit_code & 1))
     err (p_call_stack,
@@ -1346,10 +1350,9 @@ start_waiting_job (c)
 void
 new_job (file_t *file, target_stack_node_t *p_call_stack)
 {
-  register struct commands *cmds = file->cmds;
-  register struct child *c;
+  struct commands *cmds = file->cmds;
   char **lines;
-  register unsigned int i;
+  unsigned int i;
 
   /* Let any previously decided-upon jobs that are waiting
      for the load to go down start before this new one.  */
@@ -1465,121 +1468,137 @@ new_job (file_t *file, target_stack_node_t *p_call_stack)
 
   /* Start the command sequence, record it in a new
      `struct child', and add that to the chain.  */
+  
+  {
+    struct child *c = (struct child *) xmalloc (sizeof (struct child));
+    target_stack_node_t *p_call_stack_cmd = NULL;
+    bzero ((char *)c, sizeof (struct child));
+    c->fileinfo      = cmds->fileinfo;
+    c->file          = file;   
+    c->command_lines = lines;
+    c->sh_batch_file = NULL;
+    c->tracing       = file->tracing;
+    
+    /* Fetch the first command line to be run.  */
+    if (job_next_command (c)) {
+      file_t *p_target = (file_t *) xmalloc (sizeof(file_t));
 
-  c = (struct child *) xmalloc (sizeof (struct child));
-  bzero ((char *)c, sizeof (struct child));
-  c->fileinfo      = cmds->fileinfo;
-  c->file          = file;   /* FIXME?: Could remove as it is in fileinfo */
-  c->command_lines = lines;
-  c->sh_batch_file = NULL;
-  c->tracing       = file->tracing;
+      *p_target = *(p_call_stack->p_target);
+      p_target->floc.lineno = c->fileinfo.lineno; 
+      
+      p_call_stack_cmd = trace_push_target (p_call_stack,  p_target);
 
-  /* Fetch the first command line to be run.  */
-  job_next_command (c);
-
-  /* Wait for a job slot to be freed up.  If we allow an infinite number
-     don't bother; also job_slots will == 0 if we're using the jobserver.  */
-
-  if (job_slots != 0)
-    while (job_slots_used == job_slots)
-      reap_children (1, 0, p_call_stack);
-
+      /* From here on we want to refer to the new stack top. */
+      p_call_stack = p_call_stack_cmd;
+    }
+  
+    
+    /* Wait for a job slot to be freed up.  If we allow an infinite number
+       don't bother; also job_slots will == 0 if we're using the jobserver.  */
+    
+    if (job_slots != 0)
+      while (job_slots_used == job_slots)
+	reap_children (1, 0, p_call_stack);
+    
 #ifdef MAKE_JOBSERVER
-  /* If we are controlling multiple jobs make sure we have a token before
-     starting the child. */
-
-  /* This can be inefficient.  There's a decent chance that this job won't
-     actually have to run any subprocesses: the command script may be empty
-     or otherwise optimized away.  It would be nice if we could defer
-     obtaining a token until just before we need it, in start_job_command.
-     To do that we'd need to keep track of whether we'd already obtained a
-     token (since start_job_command is called for each line of the job, not
-     just once).  Also more thought needs to go into the entire algorithm;
-     this is where the old parallel job code waits, so...  */
-
-  else if (job_fds[0] >= 0)
-    while (1)
-      {
-        char token;
-	int got_token;
-	int saved_errno;
-
-        DB (DB_JOBS, ("Need a job token; we %shave children\n",
-                      children ? "" : "don't "));
-
-        /* If we don't already have a job started, use our "free" token.  */
-        if (!children)
-          break;
-
-        /* Read a token.  As long as there's no token available we'll block.
-           We enable interruptible system calls before the read(2) so that if
-           we get a SIGCHLD while we're waiting, we'll return with EINTR and
-           we can process the death(s) and return tokens to the free pool.
-
-           Once we return from the read, we immediately reinstate restartable
-           system calls.  This allows us to not worry about checking for
-           EINTR on all the other system calls in the program.
-
-           There is one other twist: there is a span between the time
-           reap_children() does its last check for dead children and the time
-           the read(2) call is entered, below, where if a child dies we won't
-           notice.  This is extremely serious as it could cause us to
-           deadlock, given the right set of events.
-
-           To avoid this, we do the following: before we reap_children(), we
-           dup(2) the read FD on the jobserver pipe.  The read(2) call below
-           uses that new FD.  In the signal handler, we close that FD.  That
-           way, if a child dies during the section mentioned above, the
-           read(2) will be invoked with an invalid FD and will return
-           immediately with EBADF.  */
-
-        /* Make sure we have a dup'd FD.  */
-        if (job_rfd < 0)
-          {
-            DB (DB_JOBS, ("Duplicate the job FD\n"));
-            job_rfd = dup (job_fds[0]);
-          }
-
-        /* Reap anything that's currently waiting.  */
-        reap_children (0, 0, p_call_stack);
-
-        /* If our "free" token has become available, use it.  */
-        if (!children)
-          break;
-
-        /* Set interruptible system calls, and read() for a job token.  */
-	set_child_handler_action_flags (0);
-	got_token = read (job_rfd, &token, 1);
-	saved_errno = errno;
-	set_child_handler_action_flags (SA_RESTART);
-
-        /* If we got one, we're done here.  */
-	if (got_token == 1)
-          {
-            DB (DB_JOBS, (_("Obtained token for child 0x%08lx (%s).\n"),
-                          (unsigned long int) c, c->file->name));
-            break;
-          }
-
-        /* If the error _wasn't_ expected (EINTR or EBADF), punt.  Otherwise,
-           go back and reap_children(), and try again.  */
-	errno = saved_errno;
-        if (errno != EINTR && errno != EBADF)
-          pfatal_with_name (_("read jobs pipe"));
-        if (errno == EBADF)
-          DB (DB_JOBS, ("Read returned EBADF.\n"));
-      }
+    /* If we are controlling multiple jobs make sure we have a token before
+       starting the child. */
+    
+    /* This can be inefficient.  There's a decent chance that this job won't
+       actually have to run any subprocesses: the command script may be empty
+       or otherwise optimized away.  It would be nice if we could defer
+       obtaining a token until just before we need it, in start_job_command.
+       To do that we'd need to keep track of whether we'd already obtained a
+       token (since start_job_command is called for each line of the job, not
+       just once).  Also more thought needs to go into the entire algorithm;
+       this is where the old parallel job code waits, so...  */
+    
+    else if (job_fds[0] >= 0)
+      while (1)
+	{
+	  char token;
+	  int got_token;
+	  int saved_errno;
+	  
+	  DB (DB_JOBS, ("Need a job token; we %shave children\n",
+			children ? "" : "don't "));
+	  
+	  /* If we don't already have a job started, use our "free" token.  */
+	  if (!children)
+	    break;
+	  
+	  /* Read a token.  As long as there's no token available we'll block.
+	     We enable interruptible system calls before the read(2) so that if
+	     we get a SIGCHLD while we're waiting, we'll return with EINTR and
+	     we can process the death(s) and return tokens to the free pool.
+	     
+	     Once we return from the read, we immediately reinstate restartable
+	     system calls.  This allows us to not worry about checking for
+	     EINTR on all the other system calls in the program.
+	     
+	     There is one other twist: there is a span between the time
+	     reap_children() does its last check for dead children and the time
+	     the read(2) call is entered, below, where if a child dies we won't
+	     notice.  This is extremely serious as it could cause us to
+	     deadlock, given the right set of events.
+	     
+	     To avoid this, we do the following: before we reap_children(), we
+	     dup(2) the read FD on the jobserver pipe.  The read(2) call below
+	     uses that new FD.  In the signal handler, we close that FD.  That
+	     way, if a child dies during the section mentioned above, the
+	     read(2) will be invoked with an invalid FD and will return
+	     immediately with EBADF.  */
+	  
+	  /* Make sure we have a dup'd FD.  */
+	  if (job_rfd < 0)
+	    {
+	      DB (DB_JOBS, ("Duplicate the job FD\n"));
+	      job_rfd = dup (job_fds[0]);
+	    }
+	  
+	  /* Reap anything that's currently waiting.  */
+	  reap_children (0, 0, p_call_stack);
+	  
+	  /* If our "free" token has become available, use it.  */
+	  if (!children)
+	    break;
+	  
+	  /* Set interruptible system calls, and read() for a job token.  */
+	  set_child_handler_action_flags (0);
+	  got_token = read (job_rfd, &token, 1);
+	  saved_errno = errno;
+	  set_child_handler_action_flags (SA_RESTART);
+	  
+	  /* If we got one, we're done here.  */
+	  if (got_token == 1)
+	    {
+	      DB (DB_JOBS, (_("Obtained token for child 0x%08lx (%s).\n"),
+			    (unsigned long int) c, c->file->name));
+	      break;
+	    }
+	  
+	  /* If the error _wasn't_ expected (EINTR or EBADF), punt.  Otherwise,
+	     go back and reap_children(), and try again.  */
+	  errno = saved_errno;
+	  if (errno != EINTR && errno != EBADF)
+	    pfatal_with_name (_("read jobs pipe"));
+	  if (errno == EBADF)
+	    DB (DB_JOBS, ("Read returned EBADF.\n"));
+	}
 #endif
+    
+    /* The job is now primed.  Start it running.
+       (This will notice if there are in fact no commands.)  */
+    (void) start_waiting_job (c);
+    
+    if (job_slots == 1 || not_parallel)
+      /* Since there is only one job slot, make things run linearly.
+	 Wait for the child to die, setting the state to `cs_finished'.  */
+      while (file->command_state == cs_running)
+	reap_children (1, 0, p_call_stack);
 
-  /* The job is now primed.  Start it running.
-     (This will notice if there are in fact no commands.)  */
-  (void) start_waiting_job (c);
-
-  if (job_slots == 1 || not_parallel)
-    /* Since there is only one job slot, make things run linearly.
-       Wait for the child to die, setting the state to `cs_finished'.  */
-    while (file->command_state == cs_running)
-      reap_children (1, 0, p_call_stack);
+    if (p_call_stack_cmd) trace_pop_target(p_call_stack_cmd);
+  }
 
   return;
 }
@@ -1600,9 +1619,11 @@ job_next_command (child)
 	  child->command_ptr = 0;
 	  return 0;
 	}
-      else
+      else {
 	/* Get the next line to run.  */
 	child->command_ptr = child->command_lines[child->command_line++];
+      }
+      
     }
   return 1;
 }

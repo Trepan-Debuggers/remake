@@ -1,6 +1,6 @@
 /* Miscellaneous global declarations and portability cruft for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
-2002 Free Software Foundation, Inc.
+2002, 2004 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -383,10 +383,12 @@ extern int no_default_sh_exe;
 extern int unixy_shell;
 #endif  /* WINDOWS32 */
 
+typedef unsigned long int lineno_t;
+
 struct floc
   {
-    char *filenm;
-    unsigned long lineno;
+    char    *filenm;
+    lineno_t lineno;
   };
 
 typedef struct floc floc_t;

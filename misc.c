@@ -1,6 +1,6 @@
 /* Miscellaneous generic support functions for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1997,
-2002 Free Software Foundation, Inc.
+2002, 2004 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -309,7 +309,7 @@ err (p_call, fmt, va_alist)
   VA_END (args);
 
   putc ('\n', stderr);
-  if (extended_errors) show_call_stack(p_call);
+  if (p_call && extended_errors) show_call_stack(p_call->p_parent);
   fflush (stderr);
 }
 
@@ -380,7 +380,7 @@ fatal_err (flocp, fmt, va_alist)
   VA_END (args);
 
   fputs (_(".  Stop.\n"), stderr);
-  if (extended_errors) show_call_stack(p_call);
+  if (p_call && extended_errors) show_call_stack(p_call->p_parent);
   die (2);
 }
 

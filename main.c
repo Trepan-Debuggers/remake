@@ -318,8 +318,6 @@ static const char *const usage[] =
     N_("\
   -r, --no-builtin-rules      Disable the built-in implicit rules.\n"),
     N_("\
-  -x, --trace                 Trace command execution\n"),
-    N_("\
   -R, --no-builtin-variables  Disable the built-in variable settings.\n"),
     N_("\
   -s, --silent, --quiet       Don't echo commands.\n"),
@@ -339,6 +337,8 @@ static const char *const usage[] =
                               Consider FILE to be infinitely new.\n"),
     N_("\
   --warn-undefined-variables  Warn when an undefined variable is referenced.\n"),
+    N_("\
+  -x, --trace                 Trace command execution\n"),
     N_("\
   --show--variables  Show variable expansions.\n"),
     NULL
