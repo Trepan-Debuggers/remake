@@ -558,7 +558,8 @@ try_variable_definition (line, origin)
   p = next_token (p);
 
   return define_variable (beg, end - beg,
-			  recursive ? p : variable_expand (p),
+			  /* !!! compile frob */
+			  (recursive && !compiling) ? p : variable_expand (p),
 			  origin, recursive);
 }
 
@@ -694,4 +695,78 @@ print_file_variables (file)
 {
   if (file->variables != 0)
     print_variable_set (file->variables->set, "# ");
+}
+
+	
+/* !!!! compile frobbing: frobbed try_variable_definition.  */
+
+void
+enter_variable (struct variable *variable)
+{
+  struct variable_set *set = &global_variable_set;
+  register unsigned int hashval;
+  register char *p;
+  register struct variable *v;
+
+  hashval = 0;
+  for (p = variable->name; *p != '\0'; ++p)
+    HASH (hashval, *p);
+  hashval %= set->buckets;
+
+  for (v = set->table[hashval]; v != 0; v = v->next)
+    if (streq (v->name, variable->name))
+      break;
+
+  if (v == 0)
+    {
+      variable->next = set->table[hashval];
+      set->table[hashval] = variable;
+    }
+  else
+    {
+      if (env_overrides && v->origin == o_env)
+	/* V came from in the environment.  Since it was defined
+	   before the switches were parsed, it wasn't affected by -e.  */
+	v->origin = o_env_override;
+
+      /* A variable of this name is already defined.
+	 If the old definition is from a stronger source
+	 than this one, don't redefine it.  */
+      if ((int) variable->origin >= (int) v->origin)
+	{
+	  v->value = variable->value;
+	  v->origin = variable->origin;
+	  v->recursive = variable->recursive;
+	  if (v->export == v_default || variable->export != v_default)
+	    v->export = variable->export;
+	}
+    }
+}
+
+struct variable *
+variable_global_linear_list ()
+{
+  struct variable_set *set = &global_variable_set;
+  register unsigned int bucket;
+  register struct variable *v, *nextv;
+  struct variable *chain = NULL;
+
+  for (bucket = 0; bucket < set->buckets; ++bucket)
+    for (v = set->table[bucket]; v != NULL; v = nextv)
+      {
+	nextv = v->next;
+	switch (v->origin)
+	  {
+	  case o_file:
+	  case o_command:
+	  case o_override:
+	    v->next = chain;
+	    chain = v;
+	    break;
+	  default:
+	    break;
+	  }
+      }
+
+  return chain;
 }
