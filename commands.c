@@ -1,5 +1,5 @@
 /* Command processing for GNU Make.
-Copyright (C) 1988, 89, 91, 92, 93, 94, 95 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 91, 92, 93, 94, 95, 96 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -434,10 +434,12 @@ fatal_error_signal (sig)
 
   remove_intermediates (1);
 
+#ifdef SIGQUIT
   if (sig == SIGQUIT)
     /* We don't want to send ourselves SIGQUIT, because it will
        cause a core dump.  Just exit instead.  */
     exit (EXIT_FAILURE);
+#endif
 
   /* Signal the same code; this time it will really be fatal.  The signal
      will be unblocked when we return and arrive then to kill us.  */
