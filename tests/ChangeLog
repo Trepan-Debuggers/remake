@@ -1,3 +1,8 @@
+2000-06-22  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/options/dash-q: New file; test the -q option.  Includes
+	a test for PR/1780.
+
 2000-06-21  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/features/targetvars: Added a test for PR/1709: allowing

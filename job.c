@@ -898,20 +898,6 @@ start_job_command (child)
   /* Update the file's command flags with any new ones we found.  */
   child->file->cmds->lines_flags[child->command_line - 1] |= flags;
 
-  /* If -q was given, just say that updating `failed'.  The exit status of
-     1 tells the user that -q is saying `something to do'; the exit status
-     for a random error is 2.  */
-  if (question_flag && !(flags & COMMANDS_RECURSE))
-    {
-      child->file->update_status = 1;
-      notice_finished_file (child->file);
-      return;
-    }
-
-  /* There may be some preceding whitespace left if there
-     was nothing but a backslash on the first line.  */
-  p = next_token (p);
-
   /* Figure out an argument list from this command line.  */
 
   {
@@ -930,13 +916,31 @@ start_job_command (child)
       }
   }
 
+  /* If -q was given, say that updating `failed' if there was any text on the
+     command line, or `succeeded' otherwise.  The exit status of 1 tells the
+     user that -q is saying `something to do'; the exit status for a random
+     error is 2.  */
+  if (argv != 0 && question_flag && !(flags & COMMANDS_RECURSE))
+    {
+#ifndef VMS
+      free (argv[0]);
+      free ((char *) argv);
+#endif
+      child->file->update_status = 1;
+      notice_finished_file (child->file);
+      return;
+    }
+
   if (touch_flag && !(flags & COMMANDS_RECURSE))
     {
       /* Go on to the next command.  It might be the recursive one.
 	 We construct ARGV only to find the end of the command line.  */
 #ifndef VMS
-      free (argv[0]);
-      free ((char *) argv);
+      if (argv)
+        {
+          free (argv[0]);
+          free ((char *) argv);
+        }
 #endif
       argv = 0;
     }
@@ -968,8 +972,20 @@ start_job_command (child)
   message (0, (just_print_flag || (!(flags & COMMANDS_SILENT) && !silent_flag))
 	   ? "%s" : (char *) 0, p);
 
+  /* Tell update_goal_chain that a command has been started on behalf of
+     this target.  It is important that this happens here and not in
+     reap_children (where we used to do it), because reap_children might be
+     reaping children from a different target.  We want this increment to
+     guaranteedly indicate that a command was started for the dependency
+     chain (i.e., update_file recursion chain) we are processing.  */
+
+  ++commands_started;
+
   /* Optimize an empty command.  People use this for timestamp rules,
-     so avoid forking a useless shell.  */
+     so avoid forking a useless shell.  Do this after we increment
+     commands_started so make still treats this special case as if it
+     performed some action (makes a difference as to what messages are
+     printed, etc.  */
 
 #if !defined(VMS) && !defined(_AMIGA)
   if (
@@ -988,15 +1004,6 @@ start_job_command (child)
       goto next_command;
     }
 #endif  /* !VMS && !_AMIGA */
-
-  /* Tell update_goal_chain that a command has been started on behalf of
-     this target.  It is important that this happens here and not in
-     reap_children (where we used to do it), because reap_children might be
-     reaping children from a different target.  We want this increment to
-     guaranteedly indicate that a command was started for the dependency
-     chain (i.e., update_file recursion chain) we are processing.  */
-
-  ++commands_started;
 
   /* If -n was given, recurse to get the next line in the sequence.  */
 
