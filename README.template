@@ -4,6 +4,8 @@ Some bugs surely remain.
 
 For building and installation instructions, see the file INSTALL.
 
+See the file NEWS for what has changed since previous releases.
+
 GNU Make is fully documented in make.texinfo.  See the section entitled
 `Bugs' for information on submitting bug reports.
 
