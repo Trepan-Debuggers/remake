@@ -213,7 +213,7 @@ static struct stringlist *old_files = 0;
 /* List of files given with -W switches.  */
 
 static struct stringlist *new_files = 0;
-
+
 /* The table of command switches.  */
 
 static struct command_switch switches[] =
@@ -237,7 +237,7 @@ static struct command_switch switches[] =
 	"ignore-errors", 0,
 	"Ignore errors from commands" },
     { 'I', string, (char *) &include_directories, 0, 0, 0, 0, 0,
-	"include-path", "DIRECTORY",
+	"include-dir", "DIRECTORY",
 	"Search DIRECTORY for included makefiles" },
     { 'j', positive_int, (char *) &job_slots, 1, 1, 0,
 	(char *) &inf_jobs, (char *) &default_job_slots,
@@ -253,7 +253,7 @@ static struct command_switch switches[] =
 	"Don't start multiple jobs unless load is below N" },
     { 'm', ignore, 0, 0, 0, 0, 0, 0,
 	0, 0,
-	"Ignored for compatibility" },
+	"-b" },
     { 'n', flag, (char *) &just_print_flag, 1, 1, 1, 0, 0,
 	"just-print", 0,
 	"Don't actually run any commands; just print them" },
@@ -272,12 +272,9 @@ static struct command_switch switches[] =
     { 's', flag, (char *) &silent_flag, 1, 1, 0, 0, 0,
 	"silent", 0,
 	"Don't echo commands" },
-    { 'q', flag, (char *) &silent_flag, 1, 1, 0, 0, 0,
-	"quiet", 0,
-	"Same as -s" },
     { 'S', flag_off, (char *) &keep_going_flag, 1, 1, 0,
 	0, (char *) &default_keep_going_flag,
-	"dont-keep-going", 0,
+	"no-keep-going", 0,
 	"Turns off -k" },
     { 't', flag, (char *) &touch_flag, 1, 1, 1, 0, 0,
 	"touch", 0,
@@ -294,11 +291,24 @@ static struct command_switch switches[] =
     { '\0', }
   };
 
+/* Secondary long names for options.  */
+
+static struct option long_option_aliases[] =
+  {
+    { "quiet",		no_argument,		0, 's' },
+    { "new",		required_argument,	0, 'W' },
+    { "assume-new",	required_argument,	0, 'W' },
+    { "assume-old",	required_argument,	0, 'o' },
+    { "max-load",	optional_argument,	0, 'l' },
+    { "dry-run",	no_argument,		0, 'n' },
+    { "recon",		no_argument,		0, 'n' },
+    { "makefile",	required_argument,	0, 'f' },
+  };
+
 /* List of non-switch arguments.  */
 
 struct stringlist *other_args = 0;
-
-
+
 /* The name we were invoked with.  */
 
 char *program;
@@ -1008,7 +1018,9 @@ decode_switches (argc, argv)
   register struct stringlist *sl;
   char *p;
   char options[sizeof (switches) / sizeof (switches[0]) * 3];
-  struct option long_options[sizeof (switches) / sizeof (switches[0])];
+  struct option long_options[(sizeof (switches) / sizeof (switches[0])) +
+			     (sizeof (long_option_aliases) /
+			      sizeof (long_option_aliases[0]))];
   register int c;
 
   decode_env_switches ("MAKEFLAGS", 9);
@@ -1050,6 +1062,10 @@ decode_switches (argc, argv)
 	}
     }
   *p = '\0';
+  for (c = 0; c < (sizeof (long_option_aliases) /
+		   sizeof (long_option_aliases[0]));
+       ++c)
+    long_options[i++] = long_option_aliases[c];
   long_options[i].name = 0;
 
   /* getopt does most of the parsing for us.  */
@@ -1157,7 +1173,10 @@ positive integral argument",
       fputs ("Options:\n", stderr);
       for (cs = switches; cs->c != '\0'; ++cs)
 	{
-	  char buf[100], arg[50];
+	  char buf[1024], arg[50];
+
+	  if (cs->description[0] == '-')
+	    continue;
 
 	  switch (long_options[cs - switches].has_arg)
 	    {
@@ -1172,15 +1191,42 @@ positive integral argument",
 	      break;
 	    }
 
-	  if (cs->long_name == 0)
-	    sprintf (buf, "  -%c%s",
-		     cs->c, arg);
-	  else
-	    sprintf (buf, "  -%c%s, --%s%s",
-		     cs->c, arg,
-		     cs->long_name, arg);
+	  p = buf;
+	  sprintf (buf, "  -%c%s", cs->c, arg);
+	  p += strlen (p);
+	  if (cs->long_name != 0)
+	    {
+	      sprintf (p, ", --%s%s", cs->long_name, arg);
+	      p += strlen (p);
+	      for (i = 0; i < (sizeof (long_option_aliases) /
+			       sizeof (long_option_aliases[0]));
+		   ++i)
+		if (long_option_aliases[i].val == cs->c)
+		  {
+		    sprintf (p, ", --%s%s", long_option_aliases[i].name, arg);
+		    p += strlen (p);
+		  }
+	    }
+	  {
+	    struct command_switch *ncs = cs;
+	    while ((++ncs)->c != '\0')
+	      if (ncs->description[0] == '-' &&
+		  ncs->description[1] == cs->c)
+		{
+		  /* This is another switch that does the same
+		     one as the one we are processing.  We want
+		     to list them all together on one line.  */
+		  sprintf (p, ", -%c%s", ncs->c, arg);
+		  p += strlen (p);
+		  if (ncs->long_name != 0)
+		    {
+		      sprintf (p, ", --%s%s", ncs->long_name, arg);
+		      p += strlen (p);
+		    }
+		}
+	  }
 
-	  if (strlen (buf) >= 30)
+	  if (p - buf >= 30)
 	    {
 	      fprintf (stderr, "%s\n", buf);
 	      buf[0] = '\0';
