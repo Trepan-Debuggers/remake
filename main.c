@@ -266,7 +266,7 @@ int rebuilding_makefiles = 0;
 
 /* Remember the original value of the SHELL variable, from the environment.  */
 
-const char *env_shell = 0;
+struct variable shell_var;
 
 
 /* The usage output.  We write it this way to make life easier for the
@@ -1084,7 +1084,8 @@ main (int argc, char **argv, char **envp)
           if (strncmp (envp[i], "SHELL=", 6) == 0)
             {
               v->export = v_noexport;
-              env_shell = xstrdup (ep + 1);
+              shell_var.name = "SHELL";
+              shell_var.value = xstrdup (ep + 1);
             }
         }
     }

@@ -1,3 +1,8 @@
+2004-12-01  Paul D. Smith  <psmith@gnu.org>
+
+	* main.c (main): Change char* env_shell to struct variable shell_var.
+	* variable.c (target_environment): Use new shell_var.
+
 2004-11-30  Paul D. Smith  <psmith@gnu.org>
 
 	* configure.in: The old way we avoided creating build.sh from
