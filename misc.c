@@ -126,7 +126,7 @@ remove_comments (line)
 {
   char *comment;
 
-  comment = find_char_unquote (line, '#', 0);
+  comment = find_char_unquote (line, "#", 0);
 
   if (comment != 0)
     /* Cut off the line at the #.  */
