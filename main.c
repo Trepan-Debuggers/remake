@@ -303,6 +303,7 @@ static struct option long_option_aliases[] =
     { "quiet",		no_argument,		0, 's' },
     { "stop",		no_argument,		0, 'S' },
     { "new",		required_argument,	0, 'W' },
+    { "new-file",	required_argument,	0, 'W' },
     { "assume-new",	required_argument,	0, 'W' },
     { "assume-old",	required_argument,	0, 'o' },
     { "max-load",	optional_argument,	0, 'l' },
@@ -546,30 +547,25 @@ main (argc, argv, envp)
       cmd_defs[cmd_defs_idx - 1] = '\0';
       (void) define_variable ("MAKEOVERRIDES", 13, cmd_defs, o_override, 0);
     }
+  free (cmd_defs);
 
-  /* Set the "MAKE" variable to the name we were invoked with.
+  /* Set the "MAKE_COMMAND" variable to the name we were invoked with.
      (If it is a relative pathname with a slash, prepend our directory name
      so the result will run the same program regardless of the current dir.
      If it is a name with no slash, we can only hope that PATH did not
-     find it in the current directory.)
-
-     Append the command-line variable definitions gathered above
-     so sub-makes will get them as command-line definitions.  */
+     find it in the current directory.)  */
 
   if (current_directory[0] != '\0'
       && argv[0] != 0 && argv[0][0] != '/' && index (argv[0], '/') != 0)
     argv[0] = concat (current_directory, "/", argv[0]);
 
-  if (cmd_defs_idx > 0)
-    {
-      char *str = concat (argv[0], " ", cmd_defs);
-      (void) define_variable ("MAKE", 4, str, o_env, 0);
-      free (str);
-    }
-  else
-    (void) define_variable ("MAKE", 4, argv[0], o_env, 0);
+  (void) define_variable ("MAKE_COMMAND", 12, argv[0], o_env, 0);
 
-  free (cmd_defs);
+  /* Append the command-line variable definitions gathered above
+     so sub-makes will get them as command-line definitions.  */
+
+  (void) define_variable ("MAKE", 4,
+			  "$(MAKE_COMMAND) $(MAKEOVERRIDES)", o_env, 1);
 
   /* If there were -c flags, move ourselves about.  */
 
