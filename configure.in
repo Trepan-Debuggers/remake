@@ -81,6 +81,9 @@ else
 fi
 
 AC_OUTPUT(Makefile build.sh glob/Makefile)
+# Makefile uses this timestamp file to know when to remake Makefile,
+# build.sh, and glob/Makefile.
+touch stamp-config
 
 dnl Local Variables:
 dnl comment-start: "dnl "
