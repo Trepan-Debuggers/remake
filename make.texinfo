@@ -8,9 +8,9 @@
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
 @set EDITION 0.45
-@set VERSION 3.70 Beta
-@set UPDATED 14 December 1993
-@set UPDATE-MONTH December 1993
+@set VERSION 3.71 Beta
+@set UPDATED 17 January 1994
+@set UPDATE-MONTH January 1994
 
 @c finalout
 
@@ -6528,10 +6528,11 @@ or can be made) with @samp{$(CTANGLE)}.@refill
 @pindex .info
 @pindex .texi
 @pindex .txinfo
-@file{@var{n}.dvi} is made from @file{@var{n}.texinfo}, @file{@var{n}.texi},
-or @file{@var{n}.txinfo}, with the @samp{$(TEXI2DVI)} command.
-@file{@var{n}.info} is made from @file{@var{n}.texinfo}, @file{@var{n}.texi},
-or @file{@var{n}.txinfo}, with the @samp{$(MAKEINFO)} command.@refill
+@file{@var{n}.dvi} is made from @file{@var{n}.texinfo},
+@file{@var{n}.texi}, or @file{@var{n}.txinfo}, with the command
+@w{@samp{$(TEXI2DVI) $(TEXI2DVI_FLAGS)}}.  @file{@var{n}.info} is made from
+@file{@var{n}.texinfo}, @file{@var{n}.texi}, or @file{@var{n}.txinfo}, with
+the command @w{@samp{$(MAKEINFO) $(MAKEINFO_FLAGS)}}.
 
 @item RCS
 @cindex RCS, rule to extract from
