@@ -221,11 +221,19 @@ dist: cvs-mark default info dvi tests tarfiles
 .PHONY: tarfiles
 tarfiles: $(tarfiles)
 
+distfiles=README INSTALL COPYING ChangeLog NEWS \
+          configure Makefile.in configure.in build.sh.in mkinstalldirs \
+	  acconfig.h $(srcs) remote-*.c $(globfiles) \
+	  make.texinfo make-stds.texi \
+	  make.?? make.??s make.toc make.aux make.man texinfo.tex TAGS tags \
+	  install-sh \
+	  make.info make.info*
+
 ifndef dist-flavor
 dist-flavor = alpha
 endif
 .PHONY: cvs-mark
-cvs-mark:
+cvs-mark: $(distfiles)
 	cvs tag -F make-$(subst .,-,$(version))
 
 dist: local-inst
@@ -250,6 +258,7 @@ $(alpha-dir)/%: %
 	sed 's/VERSION/$(version)/' < $< > $@
 # Make sure I don't edit it by accident.
 	chmod a-w $@
+	cvs commit -m'Regenerated for $(version)' $@
 
 define make-tar
 @rm -fr make-$(version)
@@ -261,15 +270,7 @@ endef
 %.Z: %; compress -c $< > $@
 %.gz: %; gzip -9 -c -v $< > $@
 
-make-doc-$(version).tar: README-doc COPYING make.dvi make.info make.info*
-	$(make-tar)
-make-$(version).tar: README INSTALL COPYING ChangeLog NEWS \
-          configure Makefile.in configure.in build.sh.in mkinstalldirs \
-	  acconfig.h $(srcs) remote-*.c $(globfiles) \
-	  make.texinfo make-stds.texi \
-	  make.?? make.??s make.toc make.aux make.man texinfo.tex TAGS tags \
-	  install-sh \
-	  make.info make.info*
+make-$(version).tar: $(distfiles)
 	$(make-tar)
 
 ifneq (,)
