@@ -17,10 +17,10 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "make.h"
-#include "commands.h"
+#include "filedef.h"
 #include "job.h"
+#include "commands.h"
 #include "dep.h"
-#include "file.h"
 #include <assert.h>
 
 #ifdef HAVE_FCNTL_H
@@ -29,17 +29,30 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/file.h>
 #endif
 
-extern int try_implicit_rule ();
+#ifdef VMS
+#include <starlet.h>
+#endif
+
+extern int try_implicit_rule PARAMS ((struct file *file, unsigned int depth));
 
 
 /* Incremented when a command is started (under -n, when one would be).  */
 unsigned int commands_started = 0;
 
-static int update_file (), update_file_1 (), check_dep (), touch_file ();
-static void remake_file ();
-static time_t name_mtime ();
-static int library_search ();
-extern time_t f_mtime ();
+static int update_file PARAMS ((struct file *file, unsigned int depth));
+static int update_file_1 PARAMS ((struct file *file, unsigned int depth));
+static int check_dep PARAMS ((struct file *file, unsigned int depth, time_t this_mtime, int *must_make_ptr));
+static int touch_file PARAMS ((struct file *file));
+static void remake_file PARAMS ((struct file *file));
+static time_t name_mtime PARAMS ((char *name));
+static int library_search PARAMS ((char **lib, time_t *mtime_ptr));
+
+extern time_t f_mtime PARAMS ((struct file *file, int search));
+
+#ifdef VMS
+extern int vms_stat PARAMS ((char *name, struct stat *buf));
+#endif
+
 
 /* Remake all the goals in the `struct dep' chain GOALS.  Return -1 if nothing
    was done, 0 if all goals were updated successfully, or 1 if a goal failed.
@@ -100,6 +113,7 @@ update_goal_chain (goals, makefiles)
 	  /* Iterate over all double-colon entries for this file.  */
 	  struct file *file = g->file;
 	  int stop, any_not_updated = 0;
+
 	  for (file = g->file->double_colon ? g->file->double_colon : g->file;
 	       file != NULL;
 	       file = file->prev)
@@ -108,7 +122,6 @@ update_goal_chain (goals, makefiles)
 	      int x;
 	      time_t mtime = MTIME (file);
 	      check_renamed (file);
-
 	      if (makefiles)
 		{
 		  if (file->cmd_target)
@@ -229,7 +242,6 @@ update_goal_chain (goals, makefiles)
       just_print_flag = n;
       job_slots = j;
     }
-
   return status;
 }
 
@@ -1015,12 +1027,28 @@ f_mtime (file, search)
        unrecoverably absent.  */
 
     static time_t now;
+#ifdef VMS
+    /* Handle vms 64bit to 32bit time hack introduced in vms_stat() ... */
+    static unsigned long vms_now[2]; /* assumes 32 bit long ! */
+    static int vms_now_set = 0;
+
+    if (!vms_now_set)
+      {
+	sys$gettim(vms_now);
+	now = ((vms_now[0]>>24) & 0xff) + ((vms_now[1]<<8) & 0xffffff00);
+	vms_now_set = 1;
+      }
+#endif
     if (mtime > now && ! file->updated)
       {
 	/* This file's time appears to be in the future.
 	   Update our concept of the present, and compare again.  */
+#ifndef VMS
 	extern time_t time ();
 	if (mtime > time (&now))
+#else
+	if ((mtime != -1) && (mtime > now))
+#endif
 	  {
 	    error ("*** File `%s' has modification time in the future",
 		   file->name);
@@ -1050,7 +1078,11 @@ name_mtime (name)
 {
   struct stat st;
 
+#ifdef VMS
+  if (vms_stat (name, &st) < 0)
+#else
   if (stat (name, &st) < 0)
+#endif
     return (time_t) -1;
 
   return (time_t) st.st_mtime;

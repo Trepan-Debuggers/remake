@@ -18,9 +18,9 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "make.h"
-#include "commands.h"
 #include "job.h"
-#include "file.h"
+#include "filedef.h"
+#include "commands.h"
 #include "variable.h"
 #include <assert.h>
 
@@ -35,6 +35,13 @@ static char *dos_bname;
 static char *dos_bename;
 static int dos_batch_file;
 #endif /* MSDOS.  */
+
+#ifdef VMS
+#include <time.h>
+#include <processes.h>
+#include <starlet.h>
+#include <lib$routines.h>
+#endif
 
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
@@ -102,22 +109,40 @@ extern int wait ();
 
 #endif	/* Don't have `union wait'.  */
 
+#ifdef VMS
+static int vms_jobsefnmask=0;
+#endif /* !VMS */
 
 #ifndef	HAVE_UNISTD_H
 extern int dup2 ();
 extern int execve ();
 extern void _exit ();
-extern int geteuid (), getegid ();
-extern int setgid (), getgid ();
+#ifndef VMS
+extern int geteuid ();
+extern int getegid ();
+extern int setgid ();
+extern int getgid ();
+#endif
 #endif
 
-extern int getloadavg ();
-extern int start_remote_job_p ();
-extern int start_remote_job (), remote_status ();
+extern char *allocated_variable_expand_for_file PARAMS ((char *line, struct file *file));
 
-RETSIGTYPE child_handler ();
-static void free_child (), start_job_command ();
-static int load_too_high (), job_next_command ();
+extern int getloadavg PARAMS ((double loadavg[], int nelem));
+extern int start_remote_job PARAMS ((char **argv, char **envp, int stdin_fd,
+		int *is_remote, int *id_ptr, int *used_stdin));
+extern int start_remote_job_p PARAMS ((void));
+extern int remote_status PARAMS ((int *exit_code_ptr, int *signal_ptr,
+		int *coredump_ptr, int block));
+
+RETSIGTYPE child_handler PARAMS ((int));
+static void free_child PARAMS ((struct child *));
+static void start_job_command PARAMS ((struct child *child));
+static int load_too_high PARAMS ((void));
+static int job_next_command PARAMS ((struct child *));
+static int start_waiting_job PARAMS ((struct child *));
+#ifdef VMS
+static void vmsWaitForChildren PARAMS ((int *));
+#endif
 
 /* Chain of all live (or recently deceased) children.  */
 
@@ -148,6 +173,10 @@ child_error (target_name, exit_code, exit_sig, coredump, ignored)
   if (ignored && silent_flag)
     return;
 
+#ifdef VMS
+  if (!(exit_code & 1))
+      error("*** [%s] Error 0x%x%s", target_name, exit_code, ((ignored)? " (ignored)" : ""));
+#else
   if (exit_sig == 0)
     error (ignored ? "[%s] Error %d (ignored)" :
 	   "*** [%s] Error %d",
@@ -156,9 +185,30 @@ child_error (target_name, exit_code, exit_sig, coredump, ignored)
     error ("*** [%s] %s%s",
 	   target_name, strsignal (exit_sig),
 	   coredump ? " (core dumped)" : "");
+#endif
 }
 
 static unsigned int dead_children = 0;
+
+#ifdef VMS
+/* Wait for nchildren children to terminate */
+static void
+vmsWaitForChildren(int *status)
+{
+  while (1)
+    {
+      if (!vms_jobsefnmask)
+	{
+	  *status = 0;
+	  return;
+	}
+
+      *status = sys$wflor (32, vms_jobsefnmask);
+    }
+  return;
+}
+#endif
+
 
 /* Notice that a child died.
    reap_children should be called when convenient.  */
@@ -215,7 +265,7 @@ reap_children (block, err)
 	 and we might print the "Waiting for unfinished jobs" message above
 	 when not necessary.  */
 
-      if (dead_children != 0)
+      if (dead_children > 0)
 	--dead_children;
 
       any_remote = 0;
@@ -228,6 +278,9 @@ reap_children (block, err)
 	    printf ("Live child 0x%08lx PID %d%s\n",
 		    (unsigned long int) c,
 		    c->pid, c->remote ? " (remote)" : "");
+#ifdef VMS
+	  break;
+#endif
 	}
 
       /* First, check for remote children.  */
@@ -235,6 +288,7 @@ reap_children (block, err)
 	pid = remote_status (&exit_code, &exit_sig, &coredump, 0);
       else
 	pid = 0;
+
       if (pid < 0)
 	{
 	remote_status_lose:
@@ -251,19 +305,24 @@ reap_children (block, err)
 
 	  if (any_local)
 	    {
-#ifdef	WAIT_NOHANG
+#ifdef VMS
+	      vmsWaitForChildren (&status);
+	      pid = c->pid;
+#else
+#ifdef WAIT_NOHANG
 	      if (!block)
 		pid = WAIT_NOHANG (&status);
 	      else
 #endif
 		pid = wait (&status);
+#endif /* !VMS */
 	    }
 	  else
 	    pid = 0;
 
 	  if (pid < 0)
 	    {
-#ifdef	EINTR
+#ifdef EINTR
 	      if (errno == EINTR)
 		continue;
 #endif
@@ -442,7 +501,8 @@ reap_children (block, err)
 	    free_child (c);
 
 	  /* There is now another slot open.  */
-	  --job_slots_used;
+	  if (job_slots_used > 0)
+	    --job_slots_used;
 
 	  /* If the job failed, and the -k flag was not given, die,
 	     unless we are already in the process of dying.  */
@@ -453,6 +513,7 @@ reap_children (block, err)
       /* Only block for one child.  */
       block = 0;
     }
+  return;
 }
 
 /* Free the storage allocated for CHILD.  */
@@ -514,7 +575,11 @@ start_job_command (child)
   static int bad_stdin = -1;
   register char *p;
   int flags;
+#ifdef VMS
+  char *argv;
+#else
   char **argv;
+#endif
 
   /* Combine the flags parsed for the line itself with
      the flags specified globally for this target.  */
@@ -523,6 +588,7 @@ start_job_command (child)
 
   p = child->command_ptr;
   child->noerror = flags & COMMANDS_NOERROR;
+
   while (*p != '\0')
     {
       if (*p == '@')
@@ -553,8 +619,12 @@ start_job_command (child)
   /* Figure out an argument list from this command line.  */
 
   {
-    char *end;
+    char *end = 0;
+#ifdef VMS
+    argv = p;
+#else
     argv = construct_command_argv (p, &end, child->file);
+#endif
     if (end == NULL)
       child->command_ptr = NULL;
     else
@@ -568,8 +638,10 @@ start_job_command (child)
     {
       /* Go on to the next command.  It might be the recursive one.
 	 We construct ARGV only to find the end of the command line.  */
+#ifndef VMS
       free (argv[0]);
       free ((char *) argv);
+#endif
       argv = 0;
     }
 
@@ -608,8 +680,10 @@ start_job_command (child)
 
   if (just_print_flag && !(flags & COMMANDS_RECURSE))
     {
+#ifndef VMS
       free (argv[0]);
       free ((char *) argv);
+#endif
       goto next_command;
     }
 
@@ -617,6 +691,8 @@ start_job_command (child)
 
   fflush (stdout);
   fflush (stderr);
+
+#ifndef VMS
 
   /* Set up a bad standard input that reads from a broken pipe.  */
 
@@ -652,6 +728,8 @@ start_job_command (child)
   if (child->good_stdin)
     good_stdin_used = 1;
 
+#endif /* !VMS */
+
   child->deleted = 0;
 
   /* Set up the environment for the child.  */
@@ -660,6 +738,7 @@ start_job_command (child)
 
 #ifndef	__MSDOS__
 
+#ifndef VMS
   /* start_waiting_job has set CHILD->remote if we can start a remote job.  */
   if (child->remote)
     {
@@ -680,6 +759,7 @@ start_job_command (child)
 	}
     }
   else
+#endif /* !VMS */
     {
       /* Fork the child process.  */
 
@@ -694,6 +774,17 @@ start_job_command (child)
 #endif
 
       child->remote = 0;
+
+#ifdef VMS
+
+      if (!child_execute_job (argv, child)) {
+        /* Fork failed!  */
+        perror_with_name ("vfork", "");
+        goto error;
+      }
+
+#else
+
       parent_environ = environ;
       child->pid = vfork ();
       environ = parent_environ;	/* Restore value child may have clobbered.  */
@@ -711,9 +802,11 @@ start_job_command (child)
 	  perror_with_name ("vfork", "");
 	  goto error;
 	}
+#endif /* !VMS */
     }
 
 #else	/* MSDOS.  */
+
   dos_status = spawnvpe (P_WAIT, argv[0], argv, child->environment);
   ++dead_children;
   child->pid = dos_pid++;
@@ -735,15 +828,17 @@ start_job_command (child)
   set_command_state (child->file, cs_running);
 
   /* Free the storage used by the child's argument list.  */
-
+#ifndef VMS
   free (argv[0]);
   free ((char *) argv);
+#endif
 
   return;
 
  error:
   child->file->update_status = 2;
   notice_finished_file (child->file);
+  return;
 }
 
 /* Try to start a child running.
@@ -949,13 +1044,15 @@ new_job (file)
 
   /* The job is now primed.  Start it running.
      (This will notice if there are in fact no commands.)  */
-  start_waiting_job (c);
+  (void)start_waiting_job (c);
 
   if (job_slots == 1)
     /* Since there is only one job slot, make things run linearly.
        Wait for the child to die, setting the state to `cs_finished'.  */
     while (file->command_state == cs_running)
       reap_children (1, 0);
+
+  return;
 }
 
 /* Move CHILD's pointers to the next command for it to execute.
@@ -984,10 +1081,9 @@ job_next_command (child)
 static int
 load_too_high ()
 {
-#ifdef	__MSDOS__
+#if defined(__MSDOS__) || defined(VMS)
   return 1;
 #else
-  extern int getloadavg ();
   double load;
 
   if (max_load_average < 0)
@@ -1036,10 +1132,226 @@ start_waiting_jobs ()
 
       /* Try to start that job.  We break out of the loop as soon
 	 as start_waiting_job puts one back on the waiting list.  */
-    } while (start_waiting_job (job) && waiting_jobs != 0);
+    }
+  while (start_waiting_job (job) && waiting_jobs != 0);
+
+  return;
 }
 
-/* Replace the current process with one executing the command in ARGV.
+#ifdef VMS
+#include <descrip.h>
+#include <clidef.h>
+
+/* This is called as an AST when a child process dies (it won't get
+   interrupted by anything except a higher level AST).
+*/
+int vmsHandleChildTerm(struct child *child)
+{
+    int status;
+    register struct child *lastc, *c;
+    int child_failed;
+
+    vms_jobsefnmask &= ~(1 << (child->efn - 32));
+
+    lib$free_ef(&child->efn);
+
+    (void) sigblock (fatal_signal_mask);
+
+    child_failed = !(child->cstatus & 1 || ((child->cstatus & 7) == 0));
+
+    /* Search for a child matching the deceased one.  */
+    lastc = 0;
+#if defined(RECURSIVEJOBS) /* I've had problems with recursive stuff and process handling */
+    for (c = children; c != 0 && c != child; lastc = c, c = c->next);
+#else
+    c = child;
+#endif
+
+    if (child_failed && !c->noerror && !ignore_errors_flag)
+      {
+	/* The commands failed.  Write an error message,
+	   delete non-precious targets, and abort.  */
+	child_error (c->file->name, c->cstatus, 0, 0, 0);
+	c->file->update_status = 1;
+	delete_child_targets (c);
+      }
+    else
+      {
+	if (child_failed)
+	  {
+	    /* The commands failed, but we don't care.  */
+	    child_error (c->file->name, c->cstatus, 0, 0, 1);
+	    child_failed = 0;
+	  }
+
+#if defined(RECURSIVEJOBS) /* I've had problems with recursive stuff and process handling */
+	/* If there are more commands to run, try to start them.  */
+	start_job (c);
+
+	switch (c->file->command_state)
+	  {
+	  case cs_running:
+	    /* Successfully started.  */
+	    break;
+
+	  case cs_finished:
+	    if (c->file->update_status != 0) {
+		/* We failed to start the commands.  */
+		delete_child_targets (c);
+	    }
+	    break;
+
+	  default:
+	    error ("internal error: `%s' command_state \
+%d in child_handler", c->file->name);
+	    abort ();
+	    break;
+	  }
+#endif /* RECURSIVEJOBS */
+      }
+
+    /* Set the state flag to say the commands have finished.  */
+    c->file->command_state = cs_finished;
+    notice_finished_file (c->file);
+
+#if defined(RECURSIVEJOBS) /* I've had problems with recursive stuff and process handling */
+    /* Remove the child from the chain and free it.  */
+    if (lastc == 0)
+      children = c->next;
+    else
+      lastc->next = c->next;
+    free_child (c);
+#endif /* RECURSIVEJOBS */
+
+    /* There is now another slot open.  */
+    if (job_slots_used > 0)
+      --job_slots_used;
+
+    /* If the job failed, and the -k flag was not given, die.  */
+    if (child_failed && !keep_going_flag)
+      die (EXIT_FAILURE);
+
+    (void) sigsetmask (sigblock (0) & ~(fatal_signal_mask));
+
+    return 1;
+}
+
+/* VMS:
+   Spawn a process executing the command in ARGV and return its pid. */
+
+#define MAXCMDLEN 200
+
+int
+child_execute_job (argv, child)
+     char *argv;
+     struct child *child;
+{
+  int i;
+  static struct dsc$descriptor_s cmddsc;
+#ifndef DONTWAITFORCHILD
+  int spflags = 0;
+#else
+  int spflags = CLI$M_NOWAIT;
+#endif
+  int status;
+  char cmd[4096],*p,*c;
+  char comname[50];
+
+/* Remove backslashes */
+  for (p = argv, c = cmd; *p; p++,c++)
+    {
+      if (*p == '\\') p++;
+	*c = *p;
+    }
+  *c = *p;
+
+  /* check for maximum dcl length and create *.com file if neccesary */
+
+  comname[0] = '\0';
+
+  if (strlen (cmd) > MAXCMDLEN)
+    {
+      FILE *outfile;
+      char tmp;
+
+      strcpy (comname, "sys$scratch:CMDXXXXXX.COM");
+      (void) mktemp (comname);
+
+      outfile = fopen (comname, "w");
+      if (outfile == 0)
+	pfatal_with_name (comname);
+
+      fprintf (outfile, "$ ");
+      c = cmd;
+
+      while (c)
+	{
+	  p = strchr (c, ',');
+	  if ((p == NULL) || (p-c > MAXCMDLEN))
+	    p = strchr (c, ' ');
+	  if (p != NULL)
+	    {
+	      p++;
+	      tmp = *p;
+	      *p = '\0';
+	    }
+	  else
+	    tmp = '\0';
+	  fprintf (outfile, "%s%s\n", c, (tmp == '\0')?"":" -");
+	  if (p != NULL)
+	    *p = tmp;
+	  c = p;
+	}
+
+      fclose (outfile);
+
+      sprintf (cmd, "$ @%s", comname);
+
+      if (debug_flag)
+	printf ("Executing %s instead\n", cmd);
+    }
+
+  cmddsc.dsc$w_length = strlen(cmd);
+  cmddsc.dsc$a_pointer = cmd;
+  cmddsc.dsc$b_dtype = DSC$K_DTYPE_T;
+  cmddsc.dsc$b_class = DSC$K_CLASS_S;
+
+  child->efn = 0;
+  while (child->efn < 32 || child->efn > 63)
+    {
+      status = lib$get_ef(&child->efn);
+      if (!(status & 1))
+	return 0;
+    }
+
+  sys$clref(child->efn);
+
+  vms_jobsefnmask |= (1 << (child->efn - 32));
+
+#ifndef DONTWAITFORCHILD
+  status = lib$spawn(&cmddsc,0,0,&spflags,0,&child->pid,&child->cstatus,
+		       &child->efn,0,0);
+  vmsHandleChildTerm(child);
+#else
+  status = lib$spawn(&cmddsc,0,0,&spflags,0,&child->pid,&child->cstatus,
+		       &child->efn,vmsHandleChildTerm,child);
+#endif
+
+  if (!(status & 1))
+    {
+      printf("Error spawning, %d\n",status);
+      fflush(stdout);
+    }
+
+  unlink (comname);
+
+  return (status & 1);
+}
+
+#else /* !VMS */
+
+/* UNIX:
+   Replace the current process with one executing the command in ARGV.
    STDIN_FD and STDOUT_FD are used as the process's stdin and stdout; ENVP is
    the environment of the new program.  This function does not return.  */
 
@@ -1060,6 +1372,7 @@ child_execute_job (stdin_fd, stdout_fd, argv, envp)
   /* Run the command.  */
   exec_command (argv, envp);
 }
+#endif /* !VMS */
 
 /* Replace the current process with one running the command in ARGV,
    with environment ENVP.  This function does not return.  */
@@ -1068,6 +1381,12 @@ void
 exec_command (argv, envp)
      char **argv, **envp;
 {
+#ifdef VMS
+    /* Run the program.  */
+    execve (argv[0], argv, envp);
+    perror_with_name ("execve: ", argv[0]);
+    _exit (EXIT_FAILURE);
+#else
   /* Be the user, permanently.  */
   child_access ();
 
@@ -1119,8 +1438,10 @@ exec_command (argv, envp)
     }
 
   _exit (127);
+#endif /* !VMS */
 }
 
+#ifndef VMS
 /* Figure out the argument list necessary to run LINE as a command.  Try to
    avoid using a shell.  This routine handles only ' quoting, and " quoting
    when no backslash, $ or ` characters are seen in the quotes.  Starting
@@ -1364,7 +1685,7 @@ construct_command_argv_internal (line, restp, shell, ifs)
     {
       /* Free the old argument list we were working on.  */
       free (new_argv[0]);
-      free (new_argv);
+      free ((void *)new_argv);
     }
 
 #ifdef __MSDOS__
@@ -1496,6 +1817,7 @@ construct_command_argv (line, restp, file)
 
   return argv;
 }
+#endif /* !VMS */
 
 #ifndef	HAVE_DUP2
 int

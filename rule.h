@@ -49,5 +49,5 @@ extern struct file *suffix_file;
 extern unsigned int maxsuffix;
 
 
-extern void install_pattern_rule ();
-int new_pattern_rule ();
+extern void install_pattern_rule PARAMS ((struct pspec *p, int terminal));
+extern int new_pattern_rule PARAMS ((struct rule *rule, int override));

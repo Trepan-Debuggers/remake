@@ -17,9 +17,10 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "make.h"
-#include "commands.h"
 #include "dep.h"
-#include "file.h"
+#include "filedef.h"
+#include "job.h"
+#include "commands.h"
 #include "variable.h"
 
 /* This is POSIX.2, but most systems using -DPOSIX probably don't have it.  */
@@ -29,15 +30,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "glob/glob.h"
 #endif
 
+#ifndef VMS
 #include <pwd.h>
-struct passwd *getpwnam ();
-
-
-static int read_makefile ();
-static unsigned int readline (), do_define ();
-static int conditional_line ();
-static void record_files ();
-
+#else
+struct passwd *getpwnam PARAMS ((char *name));
+#endif
 
 /* A `struct linebuffer' is a structure which holds a line of text.
    `readline' reads a line from a stream into a linebuffer
@@ -104,6 +101,18 @@ unsigned int *reading_lineno_ptr;
 /* The chain of makefiles read by read_makefile.  */
 
 static struct dep *read_makefiles = 0;
+
+static int read_makefile PARAMS ((char *filename, int flags));
+static unsigned int readline PARAMS ((struct linebuffer *linebuffer, FILE *stream,
+			char *filename, unsigned int lineno));
+static unsigned int do_define PARAMS ((char *name, unsigned int namelen, enum variable_origin origin,
+			unsigned int lineno, FILE *infile, char *filename));
+static int conditional_line PARAMS ((char *line, char *filename, unsigned int lineno));
+static void record_files PARAMS ((struct nameseq *filenames, char *pattern, char *pattern_percent,
+			struct dep *deps, unsigned int commands_started, char *commands,
+			unsigned int commands_idx, int two_colon, char *filename,
+			unsigned int lineno, int set_default));
+static char *find_semicolon PARAMS  ((char *s));
 
 /* Read in all the makefiles and return the chain of their names.  */
 
@@ -138,6 +147,7 @@ read_all_makefiles (makefiles)
     /* Set NAME to the start of next token and LENGTH to its length.
        MAKEFILES is updated for finding remaining tokens.  */
     p = value;
+
     while ((name = find_next_token (&p, &length)) != 0)
       {
 	if (*p != '\0')
@@ -176,7 +186,12 @@ read_all_makefiles (makefiles)
   if (num_makefiles == 0)
     {
       static char *default_makefiles[] =
+#if VMS
+	/* all lower case since readdir() (the vms version) 'lowercasifies' */
+	{ "makefile.vms", "gnumakefile", "makefile", 0 };
+#else
 	{ "GNUmakefile", "makefile", "Makefile", 0 };
+#endif
       register char **p = default_makefiles;
       while (*p != 0 && !file_exists_p (*p))
 	++p;
@@ -302,7 +317,6 @@ read_makefile (filename, flags)
   /* If the makefile wasn't found and it's either a makefile from
      the `MAKEFILES' variable or an included makefile,
      search the included makefile search path for this makefile.  */
-
   if (infile == 0 && (flags & RM_INCLUDED) && *filename != '/')
     {
       register unsigned int i;
@@ -586,7 +600,7 @@ read_makefile (filename, flags)
 	    {
 	      struct nameseq *next = files->next;
 	      char *name = files->name;
-	      free (files);
+	      free ((char *)files);
 	      files = next;
 
 	      if (! read_makefile (name, (RM_INCLUDED | RM_NO_TILDE
@@ -1303,7 +1317,7 @@ record_files (filenames, pattern, pattern_percent, deps, commands_started,
 		{
 		  struct dep *nextd = d->next;
  		  free (d->name);
- 		  free (d);
+ 		  free ((char *)d);
 		  d = nextd;
 		}
 	      f->deps = 0;
@@ -1520,9 +1534,16 @@ parse_file_seq (stringp, stopchar, size, strip)
   register char *p = *stringp;
   char *q;
   char *name;
-  char stopchars[2];
+  char stopchars[3];
+
+#ifdef VMS
+  stopchars[0] = ',';
+  stopchars[1] = stopchar;
+  stopchars[2] = '\0';
+#else
   stopchars[0] = stopchar;
   stopchars[1] = '\0';
+#endif
 
   while (1)
     {
@@ -1532,9 +1553,16 @@ parse_file_seq (stringp, stopchar, size, strip)
 	break;
       if (*p == stopchar)
 	break;
+
       /* Yes, find end of next name.  */
       q = p;
       p = find_char_unquote (q, stopchars, 1);
+#ifdef VMS
+	/* convert comma separated list to space separated */
+      if (p && *p == ',')
+	*p =' ';
+#endif
+
 #ifdef __MSDOS__
       /* For MS-DOS, skip a "C:\...".  */
       if (stopchar == ':' && p != 0 && p[1] == '\\' && isalpha (p[-1]))
@@ -1544,8 +1572,13 @@ parse_file_seq (stringp, stopchar, size, strip)
 	p = q + strlen (q);
 
       if (strip)
+#ifdef VMS
+	/* Skip leading `[]'s.  */
+	while (p - q > 2 && q[0] == '[' && q[1] == ']')
+#else
 	/* Skip leading `./'s.  */
 	while (p - q > 2 && q[0] == '.' && q[1] == '/')
+#endif
 	  {
 	    q += 2;		/* Skip "./".  */
 	    while (q < p && *q == '/')
@@ -1556,10 +1589,40 @@ parse_file_seq (stringp, stopchar, size, strip)
       /* Extract the filename just found, and skip it.  */
 
       if (q == p)
-	/* ".///" was stripped to "".  */
+	/* ".///" was stripped to "". */
+#ifdef VMS
+	continue;
+#else
 	name = savestring ("./", 2);
+#endif
       else
+#ifdef VMS
+/* VMS filenames can have a ':' in them but they have to be '\'ed but we need
+ *  to remove this '\' before we can use the filename.
+ * Savestring called because q may be read-only string constant.
+ */
+	{
+	  char *qbase = savestring(q, strlen(q));
+	  char *pbase = qbase + (p-q);
+	  char *q1 = qbase;
+	  char *q2 = q1;
+	  char *p1 = pbase;
+
+	  while (q1 != pbase)
+	    {
+	      if (*q1 == '\\' && *(q1+1) == ':')
+		{
+		  q1++;
+		  p1--;
+		}
+	      *q2++ = *q1++; 
+	    }
+	  name = savestring (qbase, p1 - qbase);
+	  free (qbase);
+	}
+#else
 	name = savestring (q, p - q);
+#endif
 
       /* Add it to the front of the chain.  */
       new1 = (struct nameseq *) xmalloc (size);
@@ -1787,8 +1850,11 @@ construct_include_path (arg_dirs)
      char **arg_dirs;
 {
   register unsigned int i;
+#ifdef VAXC		/* just don't ask ... */
+  stat_t stbuf;
+#else
   struct stat stbuf;
-
+#endif
   /* Table to hold the dirs.  */
 
   register unsigned int defsize = (sizeof (default_include_directories)
@@ -1860,6 +1926,7 @@ char *
 tilde_expand (name)
      char *name;
 {
+#ifndef VMS
   if (name[1] == '/' || name[1] == '\0')
     {
       extern char *getenv ();
@@ -1919,7 +1986,7 @@ tilde_expand (name)
       else if (userend != 0)
 	*userend = '/';
     }
-
+#endif /* !VMS */
   return 0;
 }
 
@@ -2037,7 +2104,7 @@ multi_glob (chain, size)
 	      }
 	    globfree (&gl);
 	    free (old->name);
-	    free (old);
+	    free ((char *)old);
 	    break;
 	  }
 

@@ -17,20 +17,23 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "make.h"
-#include "commands.h"
 #include "dep.h"
-#include "file.h"
+#include "filedef.h"
 #include "variable.h"
 #include "job.h"
+#include "commands.h"
 #include "getopt.h"
 #include <assert.h>
 
+extern void init_dir PARAMS ((void));
+extern RETSIGTYPE fatal_error_signal PARAMS ((int sig));
+extern RETSIGTYPE child_handler PARAMS ((int sig));
 
-extern void print_variable_data_base ();
-extern void print_dir_data_base ();
-extern void print_rule_data_base ();
-extern void print_file_data_base ();
-extern void print_vpath_data_base ();
+extern void print_variable_data_base PARAMS ((void));
+extern void print_dir_data_base PARAMS ((void));
+extern void print_rule_data_base PARAMS ((void));
+extern void print_file_data_base PARAMS ((void));
+extern void print_vpath_data_base PARAMS ((void));
 
 #ifndef	HAVE_UNISTD_H
 extern int chdir ();
@@ -43,10 +46,12 @@ extern double atof ();
 #endif
 extern char *mktemp ();
 
-static void print_data_base (), print_version ();
-static void decode_switches (), decode_env_switches ();
-static void define_makeflags ();
-static char *quote_as_word ();
+static void print_data_base PARAMS((void));
+static void print_version PARAMS ((void));
+static void decode_switches PARAMS ((int argc, char **argv, int env));
+static void decode_env_switches PARAMS ((char *envar, unsigned int len));
+static void define_makeflags PARAMS ((int all, int makefile));
+static char *quote_as_word PARAMS ((char *out, char *in, int double_dollars));
 
 /* The structure that describes an accepted command switch.  */
 
@@ -415,7 +420,6 @@ main (argc, argv, envp)
      char **argv;
      char **envp;
 {
-  extern RETSIGTYPE fatal_error_signal (), child_handler ();
   register struct file *f;
   register unsigned int i;
   char **p;
@@ -486,7 +490,11 @@ main (argc, argv, envp)
     program = "make";
   else
     {
+#ifdef VMS
+      program = rindex (argv[0], ']');
+#else
       program = rindex (argv[0], '/');
+#endif
 #ifdef __MSDOS__
       if (program == 0)
 	program = rindex (argv[0], '\\');
@@ -560,7 +568,7 @@ main (argc, argv, envp)
   if (print_version_flag)
     die (0);
 
-#ifndef __MSDOS__
+#if !defined(__MSDOS__) && !defined(VMS)
   /* Set the "MAKE_COMMAND" variable to the name we were invoked with.
      (If it is a relative pathname with a slash, prepend our directory name
      so the result will run the same program regardless of the current dir.
@@ -699,7 +707,12 @@ main (argc, argv, envp)
 
 	    /* Make a unique filename.  */
 #ifdef HAVE_MKTEMP
+
+#ifdef VMS
+	    static char name[] = "sys$scratch:GmXXXXXX";
+#else
 	    static char name[] = "/tmp/GmXXXXXX";
+#endif
 	    (void) mktemp (name);
 #else
 	    static char name[L_tmpnam];
@@ -1101,15 +1114,15 @@ main (argc, argv, envp)
 	    /* Nothing happened.  */
 	  case 0:
 	    /* Updated successfully.  */
-	    status = 0;
+	    status = EXIT_SUCCESS;
 	    break;
 	  case 2:
 	    /* Updating failed.  */
-	    status = 2;
+	    status = EXIT_FAILURE;
 	    break;
 	  case 1:
 	    /* We are under -q and would run some commands.  */
-	    status = 1;
+	    status = EXIT_FAILURE;
 	    break;
 	  default:
 	    abort ();
@@ -1589,7 +1602,11 @@ quote_as_word (out, in, double_dollars)
 {
   while (*in != '\0')
     {
+#ifdef VMS
+      if (index ("^;'\"*?$<>(){}|&~`\\ \t\r\n\f\v", *in) != 0)
+#else
       if (index ("^;'\"*?[]$<>(){}|&~`\\ \t\r\n\f\v", *in) != 0)
+#endif
 	*out++ = '\\';
       if (double_dollars && *in == '$')
 	*out++ = '$';

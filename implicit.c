@@ -19,9 +19,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "make.h"
 #include "rule.h"
 #include "dep.h"
-#include "file.h"
+#include "filedef.h"
 
-static int pattern_search ();
+static int pattern_search PARAMS ((struct file *file, int archive, unsigned int depth,
+		unsigned int recursions));
 
 /* For a FILE which has no commands specified, try to figure out some
    from the implicit pattern rules.
@@ -162,7 +163,11 @@ pattern_search (file, archive, depth, recursions)
       /* Set LASTSLASH to point at the last slash in FILENAME
 	 but not counting any slash at the end.  (foo/bar/ counts as
 	 bar/ in directory foo/, not empty in directory foo/bar/.)  */
+#ifdef VMS
+      lastslash = rindex (filename, ']');
+#else
       lastslash = rindex (filename, '/');
+#endif
       if (lastslash != 0 && lastslash[1] == '\0')
 	lastslash = 0;
     }
@@ -210,7 +215,11 @@ pattern_search (file, archive, depth, recursions)
 	  /* Set CHECK_LASTSLASH if FILENAME contains a directory
 	     prefix and the target pattern does not contain a slash.  */
 
+#ifdef VMS
+	  check_lastslash = lastslash != 0 && index (target, ']') == 0;
+#else
 	  check_lastslash = lastslash != 0 && index (target, '/') == 0;
+#endif
 	  if (check_lastslash)
 	    {
 	      /* In that case, don't include the

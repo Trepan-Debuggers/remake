@@ -33,6 +33,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 # ifdef HAVE_NDIR_H
 #  include <ndir.h>
 # endif
+# ifdef HAVE_VMSDIR_H
+#  include "vmsdir.h"
+# endif /* HAVE_VMSDIR_H */
 #endif
 
 /* In GNU systems, <dirent.h> defines this macro for us.  */
@@ -92,7 +95,63 @@ dosify (filename)
   *df = 0;
   return dos_filename;
 }
-#endif
+#endif /* __MSDOS__ */
+
+#ifdef VMS
+
+static int
+vms_hash (name)
+    char *name;
+{
+  int h = 0;
+  int g;
+
+  while (*name)
+    {
+      h = (h << 4) + *name++;
+      g = h & 0xf0000000;
+      if (g)
+	{
+	  h = h ^ (g >> 24);
+	  h = h ^ g;
+	}
+    }
+  return h;
+}
+
+/* fake stat entry for a directory */
+static int
+vmsstat_dir (name, st)
+    char *name;
+    struct stat *st;
+{
+  char *s;
+  int h;
+  DIR *dir;
+
+  dir = opendir (name);
+  if (dir == 0)
+    return -1;
+  closedir (dir);
+  s = strchr (name, ':');	/* find device */
+  if (s)
+    {
+      *s++ = 0;
+      st->st_dev = (char *)vms_hash (name);
+    }
+  else
+    {
+      st->st_dev = 0;
+      s = name;
+    }
+  h = vms_hash (s);
+  st->st_ino[0] = h & 0xff;
+  st->st_ino[1] = h & 0xff00;
+  st->st_ino[2] = h >> 16;
+
+  return 0;
+}
+#endif /* VMS */
 
 /* Hash table of directories.  */
 
@@ -104,8 +163,12 @@ struct directory_contents
   {
     struct directory_contents *next;
 
-    int dev, ino;		/* Device and inode numbers of this dir.  */
-
+    dev_t dev;			/* Device and inode numbers of this dir.  */
+#ifdef VMS
+    ino_t ino[3];
+#else
+    ino_t ino;
+#endif
     struct dirfile **files;	/* Files in this directory.  */
     DIR *dirstream;		/* Stream reading this directory.  */
   };
@@ -149,7 +212,8 @@ struct dirfile
 #define DIRFILE_BUCKETS 107
 #endif
 
-static int dir_contents_file_exists_p ();
+static int dir_contents_file_exists_p PARAMS ((struct directory_contents *dir, char *filename));
+static struct directory *find_directory PARAMS ((char *name));
 
 /* Find the directory named NAME and return its `struct directory'.  */
 
@@ -160,6 +224,12 @@ find_directory (name)
   register unsigned int hash = 0;
   register char *p;
   register struct directory *dir;
+#ifdef VMS
+  if ((*name == '.') && (*(name+1) == 0))
+    name = "[]";
+  else
+    name = vmsify (name,1);
+#endif
 
   for (p = name; *p != '\0'; ++p)
     HASH (hash, *p);
@@ -183,21 +253,41 @@ find_directory (name)
       /* The directory is not in the name hash table.
 	 Find its device and inode numbers, and look it up by them.  */
 
+#ifdef VMS
+      if (vmsstat_dir (name, &st) < 0)
+#else
       if (stat (name, &st) < 0)
+#endif
+	{
 	/* Couldn't stat the directory.  Mark this by
 	   setting the `contents' member to a nil pointer.  */
-	dir->contents = 0;
+	  dir->contents = 0;
+	}
       else
 	{
 	  /* Search the contents hash table; device and inode are the key.  */
 
 	  struct directory_contents *dc;
 
+#ifdef VMS
+	hash = ((unsigned int) st.st_dev << 16)
+		| ((unsigned int) st.st_ino[0]
+		+ (unsigned int) st.st_ino[1]
+		+ (unsigned int) st.st_ino[2]);
+#else
 	  hash = ((unsigned int) st.st_dev << 16) | (unsigned int) st.st_ino;
+#endif
 	  hash %= DIRECTORY_BUCKETS;
 
 	  for (dc = directories_contents[hash]; dc != 0; dc = dc->next)
-	    if (dc->dev == st.st_dev && dc->ino == st.st_ino)
+	    if (dc->dev == st.st_dev
+#ifdef VMS
+		&& dc->ino[0] == st.st_ino[0]
+		&& dc->ino[1] == st.st_ino[1]
+		&& dc->ino[2] == st.st_ino[2])
+#else
+		 && dc->ino == st.st_ino)
+#endif
 	      break;
 
 	  if (dc == 0)
@@ -209,15 +299,23 @@ find_directory (name)
 
 	      /* Enter it in the contents hash table.  */
 	      dc->dev = st.st_dev;
+#ifdef VMS
+	      dc->ino[0] = st.st_ino[0];
+	      dc->ino[1] = st.st_ino[1];
+	      dc->ino[2] = st.st_ino[2];
+#else
 	      dc->ino = st.st_ino;
+#endif
 	      dc->next = directories_contents[hash];
 	      directories_contents[hash] = dc;
 
 	      dc->dirstream = opendir (name);
 	      if (dc->dirstream == 0)
+		{
 		/* Couldn't open the directory.  Mark this by
 		   setting the `files' member to a nil pointer.  */
-		dc->files = 0;
+		  dc->files = 0;
+		}
 	      else
 		{
 		  /* Allocate an array of buckets for files and zero it.  */
@@ -257,19 +355,26 @@ dir_contents_file_exists_p (dir, filename)
   register struct dirent *d;
 
   if (dir == 0 || dir->files == 0)
+    {
     /* The directory could not be stat'd or opened.  */
-    return 0;
-
+      return 0;
+    }
 #ifdef __MSDOS__
   filename = dosify (filename);
+#endif
+
+#ifdef VMS
+  filename = vmsify (filename,0);
 #endif
 
   hash = 0;
   if (filename != 0)
     {
       if (*filename == '\0')
+	{
 	/* Checking if the directory exists.  */
-	return 1;
+	  return 1;
+	}
 
       for (p = filename; *p != '\0'; ++p)
 	HASH (hash, *p);
@@ -278,16 +383,22 @@ dir_contents_file_exists_p (dir, filename)
       /* Search the list of hashed files.  */
 
       for (df = dir->files[hash]; df != 0; df = df->next)
-	if (streq (df->name, filename))
-	  return !df->impossible;
+	{
+	  if (streq (df->name, filename))
+	    {
+	      return !df->impossible;
+	    }
+	}
     }
 
   /* The file was not found in the hashed list.
      Try to read the directory further.  */
 
   if (dir->dirstream == 0)
+    {
     /* The directory has been all read in.  */
-    return 0;
+      return 0;
+    }
 
   while ((d = readdir (dir->dirstream)) != 0)
     {
@@ -309,11 +420,12 @@ dir_contents_file_exists_p (dir, filename)
       dir->files[newhash] = df;
       df->name = savestring (d->d_name, len);
       df->impossible = 0;
-
       /* Check if the name matches the one we're searching for.  */
       if (filename != 0
 	  && newhash == hash && streq (d->d_name, filename))
-	return 1;
+	{
+	  return 1;
+	}
     }
 
   /* If the directory has been completely read in,
@@ -324,7 +436,6 @@ dir_contents_file_exists_p (dir, filename)
       closedir (dir->dirstream);
       dir->dirstream = 0;
     }
-
   return 0;
 }
 
@@ -355,9 +466,16 @@ file_exists_p (name)
     return ar_member_date (name) != (time_t) -1;
 #endif
 
+#ifdef VMS
+  dirend = rindex (name, ']');
+  dirend++;
+  if (dirend == (char *)1)
+    return dir_file_exists_p ("[]", name);
+#else
   dirend = rindex (name, '/');
   if (dirend == 0)
     return dir_file_exists_p (".", name);
+#endif
 
   dirname = (char *) alloca (dirend - name + 1);
   bcopy (name, dirname, dirend - name);
@@ -379,9 +497,16 @@ file_impossible (filename)
   register struct directory *dir;
   register struct dirfile *new;
 
+#ifdef VMS
+  dirend = rindex (p, ']');
+  dirend++;
+  if (dirend == (char *)1)
+    dir = find_directory ("[]");
+#else
   dirend = rindex (p, '/');
   if (dirend == 0)
     dir = find_directory (".");
+#endif
   else
     {
       char *dirname = (char *) alloca (dirend - p + 1);
@@ -401,7 +526,13 @@ file_impossible (filename)
 	 structure for it, but leave it out of the contents hash table.  */
       dir->contents = (struct directory_contents *)
 	xmalloc (sizeof (struct directory_contents));
+#ifdef VMS
+      dir->contents->dev = 0;
+      dir->contents->ino[0] = dir->contents->ino[1] =
+	dir->contents->ino[2] = 0;
+#else
       dir->contents->dev = dir->contents->ino = 0;
+#endif
       dir->contents->files = 0;
       dir->contents->dirstream = 0;
     }
@@ -436,9 +567,15 @@ file_impossible_p (filename)
   register struct directory_contents *dir;
   register struct dirfile *next;
 
+#ifdef VMS
+  dirend = rindex (filename, ']');
+  if (dirend == 0)
+    dir = find_directory ("[]")->contents;
+#else
   dirend = rindex (filename, '/');
   if (dirend == 0)
     dir = find_directory (".")->contents;
+#endif
   else
     {
       char *dirname = (char *) alloca (dirend - filename + 1);
@@ -454,6 +591,9 @@ file_impossible_p (filename)
 
 #ifdef __MSDOS__
   p = filename = dosify (p);
+#endif
+#ifdef VMS
+  p = filename = vmsify (p, 1);
 #endif
 
   for (hash = 0; *p != '\0'; ++p)
@@ -495,8 +635,15 @@ print_dir_data_base ()
 	if (dir->contents == 0)
 	  printf ("# %s: could not be stat'd.\n", dir->name);
 	else if (dir->contents->files == 0)
+#ifdef VMS
+	  printf ("# %s (device %d, inode [%d,%d,%d]): could not be opened.\n",
+		  dir->name, dir->contents->dev,
+		  dir->contents->ino[0], dir->contents->ino[1],
+		  dir->contents->ino[2]);
+#else
 	  printf ("# %s (device %d, inode %d): could not be opened.\n",
 		  dir->name, dir->contents->dev, dir->contents->ino);
+#endif
 	else
 	  {
 	    register unsigned int f = 0, im = 0;
@@ -508,8 +655,15 @@ print_dir_data_base ()
 		  ++im;
 		else
 		  ++f;
+#ifdef VMS
+	    printf ("# %s (device %d, inode [%d,%d,%d]): ",
+		    dir->name, dir->contents->dev,
+			dir->contents->ino[0], dir->contents->ino[1],
+			dir->contents->ino[2]);
+#else
 	    printf ("# %s (device %d, inode %d): ",
 		    dir->name, dir->contents->dev, dir->contents->ino);
+#endif
 	    if (f == 0)
 	      fputs ("No", stdout);
 	    else
@@ -557,15 +711,15 @@ struct dirstream
   };
 
 /* Forward declarations.  */
-static __ptr_t open_dirstream __P ((const char *));
-static struct dirent *read_dirstream __P ((__ptr_t));
+static __ptr_t open_dirstream PARAMS ((const char *));
+static struct dirent *read_dirstream PARAMS ((__ptr_t));
 
 static __ptr_t
 open_dirstream (directory)
      const char *directory;
 {
   struct dirstream *new;
-  struct directory *dir = find_directory (directory);
+  struct directory *dir = find_directory ((char *)directory);
 
   if (dir->contents == 0 || dir->contents->files == 0)
     /* DIR->contents is nil if the directory could not be stat'd.

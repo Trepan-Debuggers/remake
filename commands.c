@@ -18,12 +18,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "make.h"
 #include "dep.h"
-#include "commands.h"
-#include "file.h"
+#include "filedef.h"
 #include "variable.h"
 #include "job.h"
+#include "commands.h"
 
-extern int remote_kill ();
+extern int remote_kill PARAMS ((int id, int sig));
 
 #ifndef	HAVE_UNISTD_H
 extern int getpid ();
@@ -154,8 +154,11 @@ set_file_variables (file)
 
 	bcopy (c, cp, len);
 	cp += len;
+#if VMS
+        *cp++ = ',';
+#else
 	*cp++ = ' ';
-
+#endif
 	if (! d->changed)
 	  qmark_len -= len + 1;	/* Don't space in $? for this one.  */
       }
@@ -193,13 +196,20 @@ set_file_variables (file)
 
 	bcopy (c, cp, len);
 	cp += len;
+#if VMS
+	*cp++ = ',';
+#else
 	*cp++ = ' ';
-
+#endif
 	if (d->changed)
 	  {
 	    bcopy (c, qp, len);
 	    qp += len;
+#if VMS
+	    *qp++ = ',';
+#else
 	    *qp++ = ' ';
+#endif
 	  }
       }
 
@@ -413,7 +423,7 @@ fatal_error_signal (sig)
   if (sig == SIGQUIT)
     /* We don't want to send ourselves SIGQUIT, because it will
        cause a core dump.  Just exit instead.  */
-    exit (1);
+    exit (EXIT_FAILURE);
 
   /* Signal the same code; this time it will really be fatal.  The signal
      will be unblocked when we return and arrive then to kill us.  */

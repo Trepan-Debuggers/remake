@@ -17,7 +17,7 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "make.h"
-#include "file.h"
+#include "filedef.h"
 #include "variable.h"
 
 
@@ -41,7 +41,7 @@ static struct vpath *vpaths;
 
 static struct vpath *general_vpath;
 
-static int selective_vpath_search ();
+static int selective_vpath_search PARAMS ((struct vpath *path, char **file, time_t *mtime_ptr));
 
 /* Reverse the chain of selective VPATH lists so they
    will be searched in the order given in the makefiles

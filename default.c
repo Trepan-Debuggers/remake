@@ -19,7 +19,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "make.h"
 #include "rule.h"
 #include "dep.h"
-#include "file.h"
+#include "filedef.h"
+#include "job.h"
 #include "commands.h"
 #include "variable.h"
 
@@ -35,9 +36,15 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    a `.c' or `.p' or ... file rather than from a .s file.  */
 
 static char default_suffixes[]
+#ifdef VMS
+  = ".exe .olb .ln .obj .c .cc .pas .p .for .f .r .y .l .mar \
+.mod .sym .def .h .info .dvi .tex .texinfo .texi .txinfo \
+.w .ch .cweb .web .com .sh .elc .el";
+#else
   = ".out .a .ln .o .c .cc .C .p .f .F .r .y .l .s .S \
 .mod .sym .def .h .info .dvi .tex .texinfo .texi .txinfo \
 .w .ch .web .sh .elc .el";
+#endif
 
 static struct pspec default_pattern_rules[] =
   {
@@ -47,9 +54,13 @@ static struct pspec default_pattern_rules[] =
     /* The X.out rules are only in BSD's default set because
        BSD Make has no null-suffix rules, so `foo.out' and
        `foo' are the same thing.  */
+#ifdef VMS
+    { "%.exe", "%",
+        "copy $< $@" },
+#else
     { "%.out", "%",
 	"@rm -f $@ \n cp $< $@" },
-
+#endif
     /* Syntax is "ctangle foo.w foo.ch foo.c".  */
     { "%.c", "%.w %.ch",
 	"$(CTANGLE) $^ $@" },
@@ -61,6 +72,20 @@ static struct pspec default_pattern_rules[] =
 
 static struct pspec default_terminal_rules[] =
   {
+#ifdef VMS
+    /* RCS.  */
+    { "%", "%$$5lv", /* Multinet style */
+        "if f$$search($@) .nes. \"\" then +$(CHECKOUT,v)" },
+    { "%", "[.$$rcs]%$$5lv", /* Multinet style */
+        "if f$$search($@) .nes. \"\" then +$(CHECKOUT,v)" },
+    { "%", "%_v", /* Normal style */
+        "if f$$search($@) .nes. \"\" then +$(CHECKOUT,v)" },
+    { "%", "[.rcs]%_v", /* Normal style */
+        "if f$$search($@) .nes. \"\" then +$(CHECKOUT,v)" },
+
+    /* SCCS.  */
+	/* ain't no SCCS on vms */
+#else
     /* RCS.  */
     { "%", "%,v",
 	"$(CHECKOUT,v)" },
@@ -72,12 +97,53 @@ static struct pspec default_terminal_rules[] =
 	"$(GET) $(GFLAGS) $(SCCS_OUTPUT_OPTION) $<" },
     { "%", "SCCS/s.%",
 	"$(GET) $(GFLAGS) $(SCCS_OUTPUT_OPTION) $<" },
-
+#endif /* !VMS */
     { 0, 0, 0 }
   };
 
 static char *default_suffix_rules[] =
   {
+#ifdef VMS
+    ".obj.exe",
+    "$(LINK.obj) $^ $(LOADLIBES) $(LDLIBS) /exe=$@",
+    ".mar.exe",
+    "$(LINK.mar) $^ $(LOADLIBES) $(LDLIBS) /exe=$@",
+    ".c.exe",
+    "$(COMPILE.c) $^ \n $(LINK.obj) $(subst .c,.obj,$^) $(LOADLIBES) $(LDLIBS) /exe=$@",
+    ".cc.exe",
+    "$(COMPILE.cc) $^ \n $(LINK.obj) $(subst .cc,.obj,$^) $(LOADLIBES) $(LDLIBS) /exe=$@",
+    ".for.exe",
+    "$(COMPILE.for) $^ \n $(LINK.obj) $(subst .for,.obj,$^) $(LOADLIBES) $(LDLIBS) /exe=$@",
+    ".pas.exe",
+    "$(COMPILE.pas) $^ \n $(LINK.obj) $(subst .pas,.obj,$^) $(LOADLIBES) $(LDLIBS) /exe=$@",
+
+    ".com",
+    "copy $< >$@",
+
+    ".mar.obj",
+    "$(COMPILE.mar) /obj=$@ $<",
+    ".c.obj",
+    "$(COMPILE.c) /obj=$@ $<",
+    ".cc.obj",
+    "$(COMPILE.cc) /obj=$@ $<",
+    ".for.obj",
+    "$(COMPILE.for) /obj=$@ $<",
+    ".pas.obj",
+    "$(COMPILE.pas) /obj=$@ $<",
+
+    ".y.c",
+    "$(YACC.y) $< \n rename y_tab.c $@",
+    ".l.c",
+    "$(LEX.l) $< \n rename lexyy.c $@",
+
+    ".texinfo.info",
+    "$(MAKEINFO) $<",
+
+    ".tex.dvi",
+    "$(TEX) $<",
+
+#else /* ! VMS */
+
     ".o",
     "$(LINK.o) $^ $(LOADLIBES) $(LDLIBS) -o $@",
     ".s",
@@ -195,11 +261,52 @@ static char *default_suffix_rules[] =
     ".web.tex",
     "$(WEAVE) $<",
 
+#endif /* !VMS */
+
     0, 0,
   };
 
 static char *default_variables[] =
   {
+#ifdef VMS
+    "AR", "library/obj",
+    "ARFLAGS", "/replace",
+    "AS", "macro",
+    "CC", "cc",
+    "C++", "gcc/plus",
+    "CXX", "gcc/plus",
+    "CO", "co",
+    "CPP", "$(CC) /preprocess_only",
+    "FC", "fortran",
+    /* System V uses these, so explicit rules using them should work.
+       However, there is no way to make implicit rules use them and FC.  */
+    "F77", "$(FC)",
+    "F77FLAGS", "$(FFLAGS)",
+    "LD", "link",
+    "LEX", "lex",
+    "PC", "pascal",
+    "YACC", "yacc",	/* Or "bison -y"  */
+    "MAKEINFO", "makeinfo",
+    "TEX", "tex",
+    "TEXINDEX", "texindex",
+
+    "RM", "delete/nolog",
+
+    "LINK.obj", "$(LD) $(LDFLAGS)",
+    "COMPILE.c", "$(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH)",
+    "COMPILE.cc", "$(C++) $(C++FLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c",
+    "YACC.y", "$(YACC) $(YFLAGS)",
+    "LEX.l", "$(LEX) $(LFLAGS)",
+    "COMPILE.for", "$(FC) $(FFLAGS) $(TARGET_ARCH)",
+    "COMPILE.pas", "$(PC) $(PFLAGS) $(CPPFLAGS) $(TARGET_ARCH)",
+    "COMPILE.mar", "$(AS) $(ASFLAGS) $(TARGET_MACH)",
+    "LINT.c", "$(LINT) $(LINTFLAGS) $(CPPFLAGS) $(TARGET_ARCH)",
+
+    "MV", "rename/new_version",
+    "CP", "copy",
+
+#else /* !VMS */
+
     "AR", "ar",
     "ARFLAGS", "rv",
     "AS", "as",
@@ -310,6 +417,7 @@ static char *default_variables[] =
     "SCCS_OUTPUT_OPTION", "-G$@",
 #endif
 
+#endif /* !VMS */
     0, 0
   };
 

@@ -40,11 +40,16 @@ struct nameseq
   };
 
 
-extern struct nameseq *multi_glob (), *parse_file_seq ();
-extern char *tilde_expand ();
+extern struct nameseq *multi_glob PARAMS ((struct nameseq *chain, unsigned int size));
+#ifdef VMS
+extern struct nameseq *parse_file_seq ();
+#else
+extern struct nameseq *parse_file_seq PARAMS ((char **stringp, char stopchar, unsigned int size, int strip));
+#endif
+extern char *tilde_expand PARAMS ((char *name));
 
 #ifndef NO_ARCHIVES
-extern struct nameseq *ar_glob ();
+extern struct nameseq *ar_glob PARAMS ((char *arname, char *member_pattern, unsigned int size));
 #endif
 
 #ifndef	iAPX286
@@ -54,7 +59,7 @@ extern struct nameseq *ar_glob ();
 extern char *dep_name ();
 #endif
 
-extern struct dep *read_all_makefiles ();
+extern struct dep *read_all_makefiles PARAMS ((char **makefiles));
 
 /* Flag bits for the second argument to `read_makefile'.
    These flags are saved in the `changed' field of each

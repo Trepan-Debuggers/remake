@@ -1,5 +1,5 @@
 /* Miscellaneous global declarations and portability cruft for GNU Make.
-Copyright (C) 1988, 89, 90, 91, 92, 93, 94, 95 Free Software Foundation, Inc.
+Copyright (C) 1988,89,90,91,92,93,94,95,96 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -27,6 +27,17 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <config.h>
 #undef	HAVE_CONFIG_H
 #define HAVE_CONFIG_H
+
+
+/* Use prototypes if available.  */
+#if defined (__cplusplus) || (defined (__STDC__) && __STDC__)
+#undef  PARAMS
+#define PARAMS(protos)  protos
+#else /* Not C++ or ANSI C.  */
+#undef  PARAMS
+#define PARAMS(protos)  ()
+#endif /* C++ or ANSI C.  */
+
 
 #ifdef	CRAY
 /* This must happen before #include <signal.h> so
@@ -67,9 +78,7 @@ extern int errno;
 #endif
 
 /* Some systems define _POSIX_VERSION but are not really POSIX.1.  */
-#if (defined (butterfly) || defined (__arm) || \
-     (defined (__mips) && defined (_SYSTYPE_SVR3)) || \
-     (defined (sequent) && defined (i386)))
+#if (defined (butterfly) || defined (__arm) || (defined (__mips) && defined (_SYSTYPE_SVR3)) || (defined (sequent) && defined (i386)))
 #undef POSIX
 #endif
 
@@ -132,7 +141,7 @@ extern char *sys_siglist[];
 #define	PATH_VAR(var)	char var[PATH_MAX]
 #else
 #define	NEED_GET_PATH_MAX
-extern unsigned int get_path_max ();
+extern unsigned int get_path_max PARAMS ((void));
 #define	GET_PATH_MAX	(get_path_max ())
 #define	PATH_VAR(var)	char *var = (char *) alloca (GET_PATH_MAX)
 #endif
@@ -153,8 +162,16 @@ extern unsigned int get_path_max ();
 #define	S_ISDIR(mode)	(((mode) & S_IFMT) == S_IFDIR)
 #endif
 
+#ifdef VMS
+#include <stdio.h>
+#include <types.h>
+#include <unixlib.h>
+#include <unixio.h>
+#include <errno.h>
+#include <perror.h>
+#endif
 
-#if	(defined (STDC_HEADERS) || defined (__GNU_LIBRARY__))
+#if	(defined (STDC_HEADERS) || defined (__GNU_LIBRARY__) || defined(VMS))
 #include <stdlib.h>
 #include <string.h>
 #define	ANSI_STRING
@@ -170,10 +187,12 @@ extern unsigned int get_path_max ();
 #include <memory.h>
 #endif
 
-extern char *malloc (), *realloc ();
-extern void free ();
+extern char *malloc PARAMS ((int));
+extern char *realloc PARAMS ((char *, int));
+extern void free PARAMS ((char *));
 
-extern void abort (), exit ();
+extern void abort PARAMS ((void));
+extern void exit PARAMS ((int));
 
 #endif	/* Standard headers.  */
 
@@ -214,8 +233,8 @@ extern void bcopy ();
 /* SCO Xenix has a buggy macro definition in <string.h>.  */
 #undef	strerror
 
-#ifndef ANSI_STRING
-extern char *strerror ();
+#if !defined(ANSI_STRING) && !defined(__DECC)
+extern char *strerror PARAMS ((int errnum));
 #endif
 
 
@@ -258,19 +277,30 @@ extern char *alloca ();
 #endif
 
 extern void die ();
-extern void message (), fatal (), error ();
+extern void message ();
+extern void fatal ();
+extern void error ();
 extern void log_working_directory ();
-extern void makefile_error (), makefile_fatal ();
-extern void pfatal_with_name (), perror_with_name ();
-extern char *savestring (), *concat ();
-extern char *xmalloc (), *xrealloc ();
-extern char *find_next_token (), *next_token (), *end_of_token ();
-extern void collapse_continuations (), remove_comments ();
-extern char *sindex (), *lindex ();
+extern void makefile_error ();
+extern void makefile_fatal ();
+extern void pfatal_with_name ();
+extern void perror_with_name ();
+extern char *savestring ();
+extern char *concat ();
+extern char *xmalloc ();
+extern char *xrealloc ();
+extern char *find_next_token ();
+extern char *next_token ();
+extern char *end_of_token ();
+extern void collapse_continuations ();
+extern void remove_comments ();
+extern char *sindex ();
+extern char *lindex ();
 extern int alpha_compare ();
 extern void print_spaces ();
 extern struct dep *copy_dep_chain ();
-extern char *find_char_unquote (), *find_percent ();
+extern char *find_char_unquote ();
+extern char *find_percent ();
 
 #ifndef	NO_ARCHIVES
 extern int ar_name ();
@@ -280,16 +310,22 @@ extern time_t ar_member_date ();
 #endif
 
 extern void dir_load ();
-extern int dir_file_exists_p (), file_exists_p (), file_impossible_p ();
+extern int dir_file_exists_p ();
+extern int file_exists_p ();
+extern int file_impossible_p ();
 extern void file_impossible ();
 extern char *dir_name ();
 
 extern void define_default_variables ();
-extern void set_default_suffixes (), install_default_suffix_rules ();
-extern void install_default_implicit_rules (), count_implicit_rule_limits ();
-extern void convert_to_pattern (), create_pattern_rule ();
+extern void set_default_suffixes ();
+extern void install_default_suffix_rules ();
+extern void install_default_implicit_rules ();
+extern void count_implicit_rule_limits ();
+extern void convert_to_pattern ();
+extern void create_pattern_rule ();
 
-extern void build_vpath_lists (), construct_vpath_list ();
+extern void build_vpath_lists ();
+extern void construct_vpath_list ();
 extern int vpath_search ();
 
 extern void construct_include_path ();
@@ -298,8 +334,9 @@ extern void uniquize_deps ();
 extern int update_goal_chain ();
 extern void notice_finished_file ();
 
-extern void user_access (), make_access (), child_access ();
-
+extern void user_access ();
+extern void make_access ();
+extern void child_access ();
 
 #ifdef	HAVE_VFORK_H
 #include <vfork.h>
@@ -311,12 +348,17 @@ extern void user_access (), make_access (), child_access ();
 #if !defined (__GNU_LIBRARY__) && !defined (POSIX) && !defined (_POSIX_VERSION)
 
 extern long int atol ();
+#ifndef VMS
 extern long int lseek ();
+#endif
 
 #endif	/* Not GNU C library or POSIX.  */
 
 #ifdef	HAVE_GETCWD
 extern char *getcwd ();
+#ifdef VMS
+extern char *getwd PARAMS ((char *));
+#endif
 #else
 extern char *getwd ();
 #define	getcwd(buf, len)	getwd (buf)
@@ -349,3 +391,26 @@ extern int handling_fatal_signal;
 #define DEBUGPR(msg) \
   do if (debug_flag) { print_spaces (depth); printf (msg, file->name); \
 		       fflush (stdout); } while (0)
+
+#ifdef VMS
+# ifndef EXIT_FAILURE
+#  define EXIT_FAILURE 3
+# endif
+# ifndef EXIT_SUCCESS
+#  define EXIT_SUCCESS 1
+# endif
+# ifndef EXIT_TROUBLE
+#  define EXIT_TROUBLE 2
+# endif
+#else
+# ifndef EXIT_FAILURE
+#  define EXIT_FAILURE 2
+# endif
+# ifndef EXIT_SUCCESS
+#  define EXIT_SUCCESS 0
+# endif
+# ifndef EXIT_TROUBLE
+#  define EXIT_TROUBLE 1
+# endif
+#endif
+

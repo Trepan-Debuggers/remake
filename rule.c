@@ -17,13 +17,14 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "make.h"
-#include "commands.h"
 #include "dep.h"
-#include "file.h"
+#include "filedef.h"
+#include "job.h"
+#include "commands.h"
 #include "variable.h"
 #include "rule.h"
 
-static void freerule ();
+static void freerule PARAMS ((struct rule *rule, struct rule *lastrule));
 
 /* Chain of all pattern rules.  */
 
@@ -96,9 +97,13 @@ count_implicit_rule_limits ()
       for (dep = rule->deps; dep != 0; dep = dep->next)
 	{
 	  unsigned int len = strlen (dep->name);
-	  char *p = rindex (dep->name, '/');
-	  char *p2 = p != 0 ? index (dep->name, '%') : 0;
 
+#ifdef VMS
+	  char *p = rindex (dep->name, ']');
+#else
+	  char *p = rindex (dep->name, '/');
+#endif
+	  char *p2 = p != 0 ? index (dep->name, '%') : 0;
 	  ndeps++;
 
 	  if (len > max_pattern_dep_length)
@@ -125,7 +130,11 @@ count_implicit_rule_limits ()
 		 nonexistent subdirectory.  */
 
 	      dep->changed = !dir_file_exists_p (name, "");
+#ifdef VMS
+	      if (dep->changed && *name == ']')
+#else
 	      if (dep->changed && *name == '/')
+#endif
 		{
 		  /* The name is absolute and the directory does not exist.
 		     This rule can never possibly match, since this dependency
@@ -173,7 +182,11 @@ convert_suffix_rule (target, source, cmds)
     /* Special case: TARGET being nil means we are defining a
        `.X.a' suffix rule; the target pattern is always `(%.o)'.  */
     {
+#ifdef VMS
+      targname = savestring ("(%.obj)", 7);
+#else
       targname = savestring ("(%.o)", 5);
+#endif
       targpercent = targname + 1;
     }
   else

@@ -271,7 +271,9 @@ strerror (errnum)
      int errnum;
 {
   extern int errno, sys_nerr;
+#ifndef __DECC
   extern char *sys_errlist[];
+#endif
   static char buf[] = "Unknown error 12345678901234567890";
 
   if (errno < sys_nerr)
@@ -540,6 +542,7 @@ log_access (flavor)
 static void
 init_access ()
 {
+#ifndef VMS
   user_uid = getuid ();
   user_gid = getgid ();
 
@@ -553,6 +556,7 @@ init_access ()
   log_access ("Initialized");
 
   current_access = make;
+#endif
 }
 
 #endif	/* GETLOADAVG_PRIVILEGED */

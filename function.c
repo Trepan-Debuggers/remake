@@ -17,17 +17,18 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "make.h"
+#include "filedef.h"
 #include "variable.h"
 #include "dep.h"
-#include "commands.h"
 #include "job.h"
+#include "commands.h"
 
 #ifdef __MSDOS__
 #include <process.h>
 #include <fcntl.h>
 #endif
 
-static char *string_glob ();
+static char *string_glob PARAMS ((char *line));
 
 /* Store into VARIABLE_BUFFER at O the result of scanning TEXT and replacing
    each occurrence of SUBST with REPLACE. TEXT is null-terminated.  SLEN is
@@ -35,7 +36,7 @@ static char *string_glob ();
    nonzero, substitutions are done only on matches which are complete
    whitespace-delimited words.  If SUFFIX_ONLY is nonzero, substitutions are
    done only at the ends of whitespace-delimited words.  */
-   
+
 char *
 subst_expand (o, text, subst, replace, slen, rlen, by_word, suffix_only)
      char *o;
@@ -337,7 +338,8 @@ expand_function (o, function, text, end)
     default:
       abort ();
       break;
-      
+
+#ifndef VMS /* not supported for vms yet */
     case function_shell:
       {
 	char **argv, **envp;
@@ -349,12 +351,13 @@ expand_function (o, function, text, end)
 	text = expand_argument (text, end);
 
 	/* Construct the argument list.  */
-	argv = construct_command_argv (text, (char *) NULL, (struct file *) 0);
+	argv = construct_command_argv (text,
+				       (char **) NULL, (struct file *) 0);
 	if (argv == 0)
 	  break;
 
 	/* Using a target environment for `shell' loses in cases like:
-	   	export var = $(shell echo foobie) 
+	   	export var = $(shell echo foobie)
 	   because target_environment hits a loop trying to expand $(var)
 	   to put it in the environment.  This is even more confusing when
 	   var was not explicitly exported, but just appeared in the
@@ -498,7 +501,7 @@ expand_function (o, function, text, end)
 	   unsigned int maxlen = 200;
 	   int cc;
 	   char *buffer;
- 
+
 	   strcpy (tmp_output, "shXXXXXX");
 	   mktemp (tmp_output);
 	   child_stdout = open (tmp_output,
@@ -509,9 +512,9 @@ expand_function (o, function, text, end)
 	   dup2 (save_stdout, 1);
 	   close (child_stdout);
 	   close (save_stdout);
- 
+
 	   child_stdout = open (tmp_output, O_RDONLY|O_TEXT, 0644);
- 
+
 	   buffer = xmalloc (maxlen);
 	   i = 0;
 	   do
@@ -521,15 +524,15 @@ expand_function (o, function, text, end)
 		   maxlen += 512;
 		   buffer = (char *) xrealloc (buffer, maxlen + 1);
 		 }
- 
+
 	       cc = read (child_stdout, &buffer[i], maxlen - i);
 	       if (cc > 0)
 		 i += cc;
 	     } while (cc > 0);
- 
+
 	   close (child_stdout);
 	   unlink (tmp_output);
- 
+
 	   if (i > 0)
 	     {
 	       if (buffer[i - 1] == '\n')
@@ -548,6 +551,7 @@ expand_function (o, function, text, end)
 	free (text);
 	break;
       }
+#endif /* !VMS */
 
     case function_origin:
       /* Expand the argument.  */
@@ -590,7 +594,7 @@ expand_function (o, function, text, end)
 
       free (text);
       break;
-      
+
     case function_sort:
       /* Expand the argument.  */
       text = expand_argument (text, end);
@@ -610,7 +614,7 @@ expand_function (o, function, text, end)
 		nwords *= 2;
 		words = (char **) xrealloc ((char *) words,
 					    nwords * sizeof (char *));
-	      }	
+	      }
 	    words[wordi++] = savestring (p, len);
 	  }
 
@@ -640,7 +644,7 @@ expand_function (o, function, text, end)
 
       free (text);
       break;
-      
+
     case function_foreach:
       {
 	/* Get three comma-separated arguments but
@@ -733,7 +737,7 @@ expand_function (o, function, text, end)
 	if (p == end)
 	  BADARGS (function == function_filter ? "filter" : "filter-out");
 	p2 = expand_argument (text, p);
-	
+
 	text = expand_argument (p + 1, end);
 
 	/* Chop TEXT up into words and then run each pattern through.  */
@@ -792,7 +796,7 @@ expand_function (o, function, text, end)
 	free (text);
       }
       break;
-      
+
     case function_patsubst:
       /* Get three comma-separated arguments and expand each one.  */
       count = 0;
@@ -825,9 +829,9 @@ expand_function (o, function, text, end)
       text = expand_argument (text, p2);
       p3 = expand_argument (p2 + 1, p);
       p2 = expand_argument (p + 1, end);
-      
+
       o = patsubst_expand (o, p2, text, p3, (char *) 0, (char *) 0);
-      
+
       free (text);
       free (p3);
       free (p2);
@@ -850,7 +854,7 @@ expand_function (o, function, text, end)
       text = expand_argument (text, p);
 
       p = expand_argument (p + 1, end);
-      
+
       {
 	/* Write each word of the first argument directly followed
 	   by the corresponding word of the second argument.
@@ -866,11 +870,11 @@ expand_function (o, function, text, end)
 	    tp = find_next_token (&p2, &tlen);
 	    if (tp != 0)
 	      o = variable_buffer_output (o, tp, tlen);
-	    
+
 	    pp = find_next_token (&p3, &plen);
 	    if (pp != 0)
 	      o = variable_buffer_output (o, pp, plen);
-	    
+
 	    if (tp != 0 || pp != 0)
 	      {
 		o = variable_buffer_output (o, " ", 1);
@@ -882,11 +886,11 @@ expand_function (o, function, text, end)
 	  /* Kill the last blank.  */
 	  --o;
       }
-      
+
       free (text);
       free (p);
       break;
-      
+
     case function_strip:
       /* Expand the argument.  */
       text = expand_argument (text, end);
@@ -901,19 +905,19 @@ expand_function (o, function, text, end)
       if (doneany)
 	/* Kill the last space.  */
 	--o;
-      
+
       free (text);
       break;
-      
+
     case function_wildcard:
       text = expand_argument (text, end);
-      
+
       p = string_glob (text);
       o = variable_buffer_output (o, p, strlen (p));
-      
+
       free (text);
       break;
-      
+
     case function_subst:
       /* Get three comma-separated arguments and expand each one.  */
       count = 0;
@@ -946,14 +950,14 @@ expand_function (o, function, text, end)
       text = expand_argument (text, p2);
       p3 = expand_argument (p2 + 1, p);
       p2 = expand_argument (p + 1, end);
-      
+
       o = subst_expand (o, p2, text, p3, strlen (text), strlen (p3), 0, 0);
-      
+
       free (text);
       free (p3);
       free (p2);
       break;
-      
+
     case function_firstword:
       /* Expand the argument.  */
       text = expand_argument (text, end);
@@ -963,10 +967,10 @@ expand_function (o, function, text, end)
       p = find_next_token (&p2, &i);
       if (p != 0)
 	o = variable_buffer_output (o, p, i);
-      
+
       free (text);
       break;
-      
+
     case function_word:
       /* Get two comma-separated arguments and expand each one.  */
       count = 0;
@@ -1058,11 +1062,11 @@ index argument");
       i = strlen (text);
       if (sindex (p, 0, text, i) != 0)
 	o = variable_buffer_output (o, text, i);
-      
+
       free (p);
       free (text);
       break;
-      
+
     case function_addsuffix:
     case function_addprefix:
       /* Get two comma-separated arguments and expand each one.  */
@@ -1082,7 +1086,7 @@ index argument");
       i = strlen (text);
 
       p2 = expand_argument (p + 1, end);
-      
+
       p3 = p2;
       while ((p = find_next_token (&p3, &len)) != 0)
 	{
@@ -1097,11 +1101,11 @@ index argument");
       if (doneany)
 	/* Kill last space.  */
 	--o;
-      
+
       free (p2);
       free (text);
       break;
-      
+
     case function_dir:
     case function_basename:
       /* Expand the argument.  */
@@ -1111,7 +1115,11 @@ index argument");
       while ((p2 = find_next_token (&p3, &len)) != 0)
 	{
 	  p = p2 + len;
+#ifdef VMS
+	  while (p >= p2 && *p != (function == function_dir ? ']' : '.'))
+#else
 	  while (p >= p2 && *p != (function == function_dir ? '/' : '.'))
+#endif
 	    --p;
 	  if (p >= p2)
 	    {
@@ -1120,7 +1128,11 @@ index argument");
 	      o = variable_buffer_output (o, p2, p - p2);
 	    }
 	  else if (function == function_dir)
+#ifdef VMS
+            o = variable_buffer_output (o, "[]", 2);
+#else
             o = variable_buffer_output (o, "./", 2);
+#endif
 	  else
 	    /* The entire name is the basename.  */
 	    o = variable_buffer_output (o, p2, len);
@@ -1131,10 +1143,10 @@ index argument");
       if (doneany)
 	/* Kill last space.  */
 	--o;
-      
+
       free (text);
       break;
-      
+
     case function_notdir:
     case function_suffix:
       /* Expand the argument.  */
@@ -1144,7 +1156,11 @@ index argument");
       while ((p2 = find_next_token (&p3, &len)) != 0)
 	{
 	  p = p2 + len;
+#ifdef VMS
+	  while (p >= p2 && *p != (function == function_notdir ? ']' : '.'))
+#else
 	  while (p >= p2 && *p != (function == function_notdir ? '/' : '.'))
+#endif
 	    --p;
 	  if (p >= p2)
 	    {

@@ -70,31 +70,40 @@ struct variable_set_list
 
 extern struct variable_set_list *current_variable_set_list;
 
-
-extern void push_new_variable_scope (), pop_variable_scope ();
-
-extern int handle_function ();
-
-extern char *variable_buffer_output ();
-extern char *variable_expand (), *variable_expand_for_file ();
-extern char *allocated_variable_expand_for_file ();
+/* expand.c */
+extern char *variable_buffer_output PARAMS ((char *ptr, char *string, unsigned int length));
+extern char *variable_expand PARAMS ((char *line));
+extern char *variable_expand_for_file PARAMS ((char *line, struct file *file));
+extern char *allocated_variable_expand_for_file PARAMS ((char *line, struct file *file));
 #define	allocated_variable_expand(line) \
   allocated_variable_expand_for_file (line, (struct file *) 0)
-extern char *expand_argument ();
+extern char *expand_argument PARAMS ((char *str, char *end));
 
-extern void define_automatic_variables ();
-extern void initialize_file_variables ();
-extern void print_file_variables ();
+/* function.c */
+extern int handle_function PARAMS ((char **op, char **stringp));
+extern int pattern_matches PARAMS ((char *pattern, char *percent, char *word));
+extern char *subst_expand PARAMS ((char *o, char *text, char *subst, char *replace,
+		unsigned int slen, unsigned int rlen, int by_word, int suffix_only));
+extern char *patsubst_expand PARAMS ((char *o, char *text, char *pattern, char *replace,
+		char *pattern_percent, char *replace_percent));
 
-extern void merge_variable_set_lists ();
+/* expand.c */
+extern char *recursively_expand PARAMS ((struct variable *v));
 
-extern struct variable *try_variable_definition ();
+/* variable.c */
+extern void push_new_variable_scope PARAMS ((void));
+extern void pop_variable_scope PARAMS ((void));
+extern void define_automatic_variables PARAMS ((void));
+extern void initialize_file_variables PARAMS ((struct file *file));
+extern void print_file_variables PARAMS ((struct file *file));
+extern void merge_variable_set_lists PARAMS ((struct variable_set_list **setlist0, struct variable_set_list *setlist1));
+extern struct variable *try_variable_definition PARAMS ((char *filename, unsigned int lineno, char *line, enum variable_origin origin));
 
-extern struct variable *lookup_variable (), *define_variable ();
-extern struct variable *define_variable_for_file ();
+extern struct variable *lookup_variable PARAMS ((char *name, unsigned int length));
+extern struct variable *define_variable PARAMS ((char *name, unsigned int length, char *value,
+		enum variable_origin origin, int recursive));
+extern struct variable *define_variable_for_file PARAMS ((char *name, unsigned int length,
+		char *value, enum variable_origin origin, int recursive, struct file *file));
+extern char **target_environment PARAMS ((struct file *file));
 
-extern int pattern_matches ();
-extern char *subst_expand (), *patsubst_expand (), *recursively_expand ();
-
-extern char **target_environment ();
 extern int export_all_variables;

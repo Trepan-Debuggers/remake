@@ -17,10 +17,11 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "make.h"
+#include "dep.h"
+#include "filedef.h"
+#include "job.h"
 #include "commands.h"
 #include "variable.h"
-#include "dep.h"
-#include "file.h"
 
 /* Hash table of all global variable definitions.  */
 
@@ -39,6 +40,11 @@ static struct variable_set global_variable_set
 static struct variable_set_list global_setlist
   = { 0, &global_variable_set };
 struct variable_set_list *current_variable_set_list = &global_setlist;
+
+static struct variable *define_variable_in_set PARAMS ((char *name, unsigned int length,
+							char *value, enum variable_origin origin,
+							int recursive, struct variable_set *set));
+
 
 /* Implement variables.  */
 

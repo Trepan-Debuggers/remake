@@ -17,9 +17,10 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "make.h"
-#include "commands.h"
 #include "dep.h"
-#include "file.h"
+#include "filedef.h"
+#include "job.h"
+#include "commands.h"
 #include "variable.h"
 #include <assert.h>
 
@@ -55,6 +56,10 @@ lookup_file (name)
   /* This is also done in parse_file_seq, so this is redundant
      for names read from makefiles.  It is here for names passed
      on the command line.  */
+#ifdef VMS
+  while (name[0] == '[' && name[1] == ']' && name[2] != '\0')
+      name += 2;
+#endif
   while (name[0] == '.' && name[1] == '/' && name[2] != '\0')
     {
       name += 2;
@@ -65,7 +70,11 @@ lookup_file (name)
 
   if (*name == '\0')
     /* It was all slashes after a dot.  */
+#ifdef VMS
+    name = "[]";
+#else
     name = "./";
+#endif
 
   hashval = 0;
   for (n = name; *n != '\0'; ++n)
@@ -73,8 +82,12 @@ lookup_file (name)
   hashval %= FILE_BUCKETS;
 
   for (f = files[hashval]; f != 0; f = f->next)
-    if (streq (f->name, name))
-      return f;
+    {
+      if (streq (f->name, name))
+	{
+	  return f;
+	}
+    }
   return 0;
 }
 
@@ -85,9 +98,25 @@ enter_file (name)
   register struct file *f, *new;
   register char *n;
   register unsigned int hashval;
+#ifdef VMS
+  char *lname, *ln;
+#endif
 
   if (*name == '\0')
     abort ();
+
+#ifdef VMS
+  lname = (char *)malloc (strlen (name) + 1);
+  for (n = name, ln = lname; *n != '\0'; ++n, ++ln)
+    {
+      if (isupper(*n))
+	*ln = tolower(*n);
+      else
+	*ln = *n;
+    }
+  *ln = 0;
+  name = lname;
+#endif
 
   hashval = 0;
   for (n = name; *n != '\0'; ++n)
@@ -99,7 +128,12 @@ enter_file (name)
       break;
 
   if (f != 0 && !f->double_colon)
-    return f;
+    {
+#ifdef VMS
+      free(lname);
+#endif
+      return f;
+    }
 
   new = (struct file *) xmalloc (sizeof (struct file));
   bzero ((char *) new, sizeof (struct file));
@@ -477,7 +511,9 @@ print_file (f)
      struct file *f;
 {
   register struct dep *d;
-
+#ifdef VMS
+  extern char *cvt_time PARAMS ((unsigned long));
+#endif
   putchar ('\n');
   if (!f->is_target)
     puts ("# Not a target:");
@@ -513,8 +549,13 @@ print_file (f)
   else if (f->last_mtime == (time_t) -1)
     puts ("#  File does not exist.");
   else
+#ifdef VMS
+    printf ("#  Last modified %.24s (%0lx)\n",
+	    cvt_time(f->last_mtime), (unsigned long) f->last_mtime);
+#else
     printf ("#  Last modified %.24s (%ld)\n",
 	    ctime (&f->last_mtime), (long int) f->last_mtime);
+#endif
   printf ("#  File has%s been updated.\n",
 	  f->updated ? "" : " not");
   switch (f->command_state)
@@ -601,3 +642,5 @@ print_file_data_base ()
 #endif
     }
 }
+
+/* EOF */
