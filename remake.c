@@ -1,4 +1,5 @@
-/* Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+/* Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993
+   	Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -959,7 +960,7 @@ library_search (lib)
 
   for (dp = dirs; *dp != 0; ++dp)
     {
-      sprintf (buf, "%s/lib%s.a", *dp, libname);
+      sprintf (buf, "%s/lib%s.a", *dp, &(*lib)[2]);
       if (name_mtime (buf) != (time_t) -1)
 	{
 	  *lib = buf;
