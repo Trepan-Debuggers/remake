@@ -18,6 +18,7 @@ Fork from version 3.80
    print   variable
    examine string 
    up, down, frame
+   set, setq
    where
 
   debugger   
