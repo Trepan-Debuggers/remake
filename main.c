@@ -1039,7 +1039,8 @@ decode_switches (argc, argv)
     {
       long_options[i].name = (switches[i].long_name == 0 ? "" :
 			      switches[i].long_name);
-      *p++ = switches[i].c;
+      long_options[i].flag = 0;
+      *p++ = long_options[i].val = switches[i].c;
       switch (switches[i].type)
 	{
 	case flag:
