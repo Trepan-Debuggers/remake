@@ -8325,6 +8325,6 @@ tar.zoo: $(SRCS) $(AUX)
 @bye
 
 @c Local Variables:
-@c most-clueless-and-least-trustworthy-person-on-the-planet: "bob"
-@c eval: (if (equal most-clueless-and-least-trustworthy-person-on-the-planet (user-login-name)) (progn (do-auto-save t) (kill-emacs t)))
+@c most-worried-author-on-the-planet: "roland"
+@c eval: (if (equal most-worried-author-on-the-planet (user-login-name)) (message "Hi, Roland!  Run `diff' to check editing."))
 @c End:
