@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  10 July 2002
+  10 September 2002
 
 Copyright (C) 2002  Free Software Foundation, Inc.
 See the end for copying conditions.
@@ -28,6 +28,12 @@ Version 3.80
   <egp@free.fr> provided a patch implementing this feature; however, I
   decided to implement it in a different way.
 
+* The argument to the "ifdef" conditional is now expanded before it's
+  tested, so it can be a constructed variable name.
+
+  Similarly, the arguments to "export" (when not used in a variable
+  definition context) and "unexport" are also now expanded.
+
 * A new function is defined: $(value ...).  The argument to this
   function is the _name_ of a variable.  The result of the function is
   the value of the variable, without having been expanded.
@@ -36,7 +42,8 @@ Version 3.80
   function should expand to makefile commands, which will then be
   evaluated as if they had appeared in the makefile.  In combination
   with define/endef multiline variable definitions this is an extremely
-  powerful capability.  The $(quote ...) function is also useful here.
+  powerful capability.  The $(value ...) function is also sometimes
+  useful here.
 
 * A new built-in variable is defined, $(MAKEFILE_LIST).  It contains a
   list of each makefile GNU make has read, or started to read, in the
@@ -73,14 +80,14 @@ Version 3.80
   and Russian.  New translations for Croatian, Danish, Hebrew, and
   Turkish.
 
-* Updated internationalization support to Gettext 0.11.1.
+* Updated internationalization support to Gettext 0.11.5.
   GNU make now uses Gettext's "external" feature, and does not include
   any internationalization code itself.  Configure will search your
   system for an existing implementation of GNU Gettext (only GNU Gettext
   is acceptable) and use it if it exists.  If not, NLS will be disabled.
   See ABOUT-NLS for more information.
 
-* Updated to autoconf 2.53 and automake 1.6.1.  Users should not be
+* Updated to autoconf 2.53 and automake 1.6.3.  Users should not be
   impacted.
 
 Version 3.79.1
