@@ -1900,17 +1900,14 @@ multi_glob (chain, size)
 		      }
 		    else
 		      {
-			free (old->name);
-			free (old);
-
 			/* Find the end of the FOUND chain.  */
-			old = found;
-			while (old->next != 0)
-			  old = old->next;
+			struct nameseq *f = found;
+			while (f->next != 0)
+			  f = f->next;
 
 			/* Attach the chain being built to the end of the FOUND
 			   chain, and make FOUND the new NEW chain.  */
-			old->next = new;
+			f->next = new;
 			new = found;
 		      }
 
