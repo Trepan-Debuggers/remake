@@ -163,7 +163,6 @@ rename_file (file, name)
   oldhash = 0;
   for (n = oldname; *n != '\0'; ++n)
     HASH (oldhash, *n);
-  oldhash %= FILE_BUCKETS;
 
   file_hash_enter (file, name, oldhash, file->name);
 }
@@ -196,6 +195,8 @@ file_hash_enter (file, name, oldhash, oldname)
       /* Remove FILE from its hash bucket.  */
 
       struct file *lastf = 0;
+
+      oldhash %= FILE_BUCKETS;
 
       for (f = files[oldhash]; f != file; f = f->next)
 	lastf = f;
@@ -238,11 +239,17 @@ file_hash_enter (file, name, oldhash, oldname)
 	      /* We have two sets of commands.  We will go with the
 		 one given in the rule explicitly mentioning this name,
 		 but give a message to let the user know what's going on.  */
-	      makefile_error (file->cmds->filename, file->cmds->lineno,
-			      "Commands were specified for \
+	      if (oldfile->cmds->filename != 0)
+		makefile_error (file->cmds->filename, file->cmds->lineno,
+				"Commands were specified for \
 file `%s' at %s:%u,",
-			      oldname, oldfile->cmds->filename,
-			      oldfile->cmds->lineno);
+				oldname, oldfile->cmds->filename,
+				oldfile->cmds->lineno);
+	      else
+		makefile_error (file->cmds->filename, file->cmds->lineno,
+				"Commands for file `%s' were found by \
+implicit rule search,",
+				oldname);
 	      makefile_error (file->cmds->filename, file->cmds->lineno,
 			      "but `%s' is now considered the same file \
 as `%s'.",
