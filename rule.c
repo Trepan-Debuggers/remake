@@ -397,7 +397,7 @@ freerule (rule, lastrule)
       abort ();
     else
       pattern_rules = next;
-  else
+  else if (lastrule != 0)
     lastrule->next = next;
   if (last_pattern_rule == rule)
     last_pattern_rule = lastrule;
