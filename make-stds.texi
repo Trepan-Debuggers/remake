@@ -441,7 +441,7 @@ should normally be @file{/usr/local/sbin}, but write it as
 @comment This paragraph adjusted to avoid overfull hbox --roland 5jul94
 The directory for installing executable programs to be run by other
 programs rather than by users.  This directory should normally be
-@file{/usr/local/libexec}, but write @file{$(exec_prefix)/libexec}.
+@file{/usr/local/libexec}, but write it as @file{$(exec_prefix)/libexec}.
 @end table
 
 Data files used by the program during its execution are divided into
