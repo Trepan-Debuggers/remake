@@ -1656,7 +1656,15 @@ define_makeflags (all, makefile)
 			     with a long option `--foo', since removing the
 			     first dash would result in the bogus `-foo'.  */
 			  flagstring[1] == '-' ? flagstring : &flagstring[1],
-			  o_env, 0);
+			  /* This used to use o_env, but that lost when a
+			     makefile defined MAKEFLAGS.  Makefiles set
+			     MAKEFLAGS to add switches, but we still want
+			     to redefine its value with the full set of
+			     switches.  Of course, an override or command
+			     definition will still take precedence.  */
+			  o_file, 0);
+  /* Since MFLAGS is not parsed for flags, there is no reason to
+     override any makefile redefinition.  */
   (void) define_variable ("MFLAGS", 6, flagstring, o_env, 0);
 }
 
