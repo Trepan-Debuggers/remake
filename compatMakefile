@@ -116,10 +116,10 @@ srcs = $(srcdir)/commands.c $(srcdir)/job.c $(srcdir)/dir.c		\
 .SUFFIXES:
 .SUFFIXES: .o .c .h .ps .dvi .texinfo
 
-.PHONY: all doc
+.PHONY: all doc check
 all: make
 doc: make.info make.dvi
-
+check: # No tests.
 
 # Take your pick.
 #makeinfo = emacs -batch -f batch-texinfo-format make.texinfo
