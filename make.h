@@ -268,9 +268,9 @@ extern void file_impossible ();
 extern char *dir_name ();
 
 extern void define_default_variables ();
-extern void set_default_suffixes (), install_default_implicit_rules ();
-extern void convert_to_pattern (), count_implicit_rule_limits ();
-extern void create_pattern_rule ();
+extern void set_default_suffixes (), install_default_suffix_rules ();
+extern void install_default_implicit_rules (), count_implicit_rule_limits ();
+extern void convert_to_pattern (), create_pattern_rule ();
 
 extern void build_vpath_lists (), construct_vpath_list ();
 extern int vpath_search ();
