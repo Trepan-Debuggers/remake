@@ -47,7 +47,9 @@ variable_buffer_output (ptr, string, length)
   if (newlen > variable_buffer_length)
     {
       unsigned int offset = ptr - variable_buffer;
-      variable_buffer_length = max (2 * variable_buffer_length, newlen + 100);
+      variable_buffer_length = (newlen + 100 > 2 * variable_buffer_length
+				? newlen + 100
+				: 2 * variable_buffer_length);
       variable_buffer = (char *) xrealloc (variable_buffer,
 					   variable_buffer_length);
       ptr = variable_buffer + offset;
