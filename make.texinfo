@@ -2,7 +2,7 @@
 @setfilename make.info
 @synindex vr fn
 
-@c $Header: /sources/make/make/Attic/make.texinfo,v 2.8 1988/07/10 00:51:51 mcgrath Rel $
+@c $Header: /sources/make/make/Attic/make.texinfo,v 2.9 1988/07/10 17:52:55 mcgrath Rel $
 
 @ifinfo
 This file documents the GNU Make utility.
@@ -2092,6 +2092,12 @@ sets @samp{bar} to @samp{a.c b.c c.c}.  @xref{Setting}.
 @cindex recursive variable reference
 @cindex variable reference, recursive
 
+Recursive variable references are a complicated concept needed only for
+very complex makefile programming.  You need not worry about them in
+general, except to know that making a variable with a dollar sign in its
+name might have strange results.  However, if you are the worrisome type or
+are actually interested in what they do, read on.
+
 Variables may be referenced inside a variable reference.  This is called
 a @dfn{recursive variable reference}.  For example,
 
@@ -2209,13 +2215,9 @@ function.  This is an implementation restriction which may be removed in
 the future if the need arises, but this is not likely since there are not
 really any two functions you would want to give the same arguments.@refill
 
-Recursive variable references are a complicated concept needed only for
-very complex makefile programming.  You need not worry about them in
-general, except to know that making a variable with a dollar sign in its
-name might have strange results.  Note also that @dfn{recursive variable
-references} are quite different from @dfn{recursive variables}
-(@pxref{Flavors}), though both are used together in complex ways when
-doing makefile programming.@refill
+Note that @dfn{recursive variable references} are quite different from
+@dfn{recursively expanded variables} (@pxref{Flavors}), though both are
+used together in complex ways when doing makefile programming.@refill
 
 @node Values, Flavors, Reference, Variables
 @section How Variables Get Their Values
@@ -4778,9 +4780,9 @@ $(targets): %: %.o lib.a
 In System V and 4.3 BSD @code{make}, files found by @code{VPATH} search
 (@pxref{Directory Search}) have their names changed inside command strings.
 We feel it is much cleaner to always use automatic variables and thus
-obviate the need for this feature.  However, this feature may be
-implemented in the near future for the sake of compatibility.  (In fact, it
-may be implemented before anyone but the author reads this paragraph.)
+obviate the need for this feature.  We are still debating whether to
+implement this for the sake of compatibility or to leave it out to avoid
+such terrible ugliness.@refill
 @end itemize
 
 @node Concept Index, Name Index, Missing, Top
