@@ -153,7 +153,7 @@ MAKE = make
 glob/libglob.a: force
 	cd glob; $(MAKE) CC='$(CC)' CFLAGS='$(CFLAGS) -I..' \
 			 CPPFLAGS='$(defines)' \
-			 srcdir=$(srcdir)/glob libglob.a
+			 libglob.a
 force:
 
 tagsrcs = $(srcs) $(srcdir)/remote-*.c
