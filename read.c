@@ -524,12 +524,7 @@ read_makefile (filename, type)
 	      pattern = savestring (p, len);
 	      p = find_next_token (&p2, &len);
 	      if (p != 0)
-		{
-		  p = savestring (p, len);
-		  if (find_next_token (&p2, (unsigned int *) 0) != 0)
-		    makefile_error (filename, lineno,
-				    "extraneous text after `vpath' directive");
-		}
+		p = savestring (p, len);
 	      /* No searchpath means remove all previous
 		 selective VPATH's with the same pattern.  */
 	    }
