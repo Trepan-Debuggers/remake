@@ -27,12 +27,11 @@ I get:
   make: Nothing to be done for `all'.
 
 Already I've learned something I didn't know before: in
-automake-produced Makefiles, even though "all" is listed as the first
-target, it often isn't the first target to trigger! It appears that
-Makefile.in (actually $(srcdir)/Makefile.in of line 225 of Makefile)
-is -- and don't ask me why. I imagine that as folks start using
-this, the may be able to *understand* "make" better and perhaps even
-write better or more efficient Makefiles.
+automake-produced Makefiles. It appears that Makefile.in (actually
+$(srcdir)/Makefile.in of line 225 of Makefile) is the first target
+which has commands. I imagine that as folks start using this, the may
+be able to *understand* "make" better and perhaps even write better or
+more efficient Makefiles.
 
 If you want a longer trace example, try doing this the top-level
 directory.  Although you'll get more output, I think you'll find this
@@ -51,7 +50,8 @@ target? The "where" command shows you the target call stack:
 
   makedb<0> where
 
-  =>#0  Makefile.in at /remake/src/Makefile:225
+  =>#0  Makefile.in at /remake/src/Makefile:228
+    #1  Makefile at /remake/src/Makefile:231
 
   /remake/src/Makefile:225: Makefile.in
 
