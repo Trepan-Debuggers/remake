@@ -15,7 +15,7 @@ make_LDADD =	@LIBOBJS@ @ALLOCA@ @GLOBLIB@
 info_TEXINFOS =	make.texinfo
 man_MANS =	make.1
 
-INCLUDES =	-DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\"
+INCLUDES =	@GLOBINC@ -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\"
 
 EXTRA_DIST = 	README build.sh.in $(man_MANS) README.customs remote-cstms.c\
 		make-stds.texi texinfo.tex SCOPTIONS SMakefile\

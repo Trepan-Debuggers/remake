@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.84 1999/09/23 18:23:35 psmith Exp $])
+AC_REVISION([$Id: configure.in,v 1.85 1999/10/14 23:20:13 psmith Exp $])
 AC_PREREQ(2.13)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 
@@ -206,7 +206,7 @@ AC_CACHE_VAL(make_cv_sys_gnu_glob, [
 case "$make_cv_sys_gnu_glob" in
   yes) AC_MSG_RESULT(yes) ;;
   no)  AC_MSG_RESULT([no; using local copy])
-       CPPFLAGS="$CPPFLAGS -I$srcdir/glob"
+       AC_SUBST(GLOBINC) GLOBINC='-I$(srcdir)/glob'
        AC_SUBST(GLOBLIB) GLOBLIB=glob/libglob.a
        ;;
 esac

@@ -1,11 +1,22 @@
+1999-10-13  Paul D. Smith  <psmith@gnu.org>
+
+	* configure.in (make_cv_sys_gnu_glob): We used to add the -Iglob
+	flag to CPPFLAGS, but that loses if the user specifies his own
+	CPPFLAGS; this one gets added _after_ his and if he happens to
+	have an old or broken glob.h--boom.  Instead, put it in GLOBINC
+	and SUBST it.
+
+	* Makefile.am (INCLUDES): Add @GLOBINC@ to the INCLUDES macro;
+	these things get on the compile line well before the user's
+	CPPFLAGS.
+
 1999-10-12  Paul D. Smith  <psmith@gnu.org>
 
 	* remake.c (notice_finished_file): If we get here and -n is set,
-	look for any commands that aren't recursive.  If we find at least
-	one, we assume that command updates the target and set mtime of
-	the target to "very new".  If there are none, then we ran every
-	command there is, so check the mtime on this file just like we
-	would normally, rather than assuming it's "very new".
+	see if all the command lines are marked recursive.  If so, then we
+	ran every command there is, so check the mtime on this file just
+	like we would normally.  If not, we assume the command we didn't
+	run would updates the target and set mtime of the target to "very new".
 
 	* job.c (start_job_command): Update lines_flags in the file's cmds
 	structure with any per-line tokens we found (`@', `-', `+').
