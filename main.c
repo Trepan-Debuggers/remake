@@ -312,6 +312,10 @@ struct stringlist *other_args = 0;
 
 char *program;
 
+/* Our current directory before processing any -C options.  */
+
+char *directory_before_chdir;
+
 /* Our current directory after processing all -C options.  */
 
 char *starting_directory;
@@ -394,7 +398,6 @@ main (argc, argv, envp)
   register struct dep *lastgoal;
   struct dep *read_makefiles;
   PATH_VAR (current_directory);
-  char *directory_before_chdir;
 
   default_goal_file = 0;
   reading_filename = 0;
@@ -464,6 +467,12 @@ main (argc, argv, envp)
   else 
     {
       program = rindex (argv[0], '/');
+#ifdef __MSDOS__
+      if (program == 0)
+	program = rindex (argv[0], '\\');
+      if (program == 0)
+	program = rindex (argv[0], ':');
+#endif
       if (program == 0)
 	program = argv[0];
       else
@@ -601,6 +610,7 @@ main (argc, argv, envp)
     }
   free (cmd_defs);
 
+#ifndef __MSDOS__
   /* Set the "MAKE_COMMAND" variable to the name we were invoked with.
      (If it is a relative pathname with a slash, prepend our directory name
      so the result will run the same program regardless of the current dir.
@@ -610,6 +620,7 @@ main (argc, argv, envp)
   if (current_directory[0] != '\0'
       && argv[0] != 0 && argv[0][0] != '/' && index (argv[0], '/') != 0)
     argv[0] = concat (current_directory, "/", argv[0]);
+#endif
 
   (void) define_variable ("MAKE_COMMAND", 12, argv[0], o_default, 0);
 
@@ -1754,6 +1765,13 @@ die (status)
       int err;
 
       dying = 1;
+
+      /* Try to move back to the original directory.  This is essential on
+	 MS-DOS (where there is really only one process), and on Unix it
+	 puts core files in the original directory instead of the -C
+	 directory.  */
+      if (directory_before_chdir != 0)
+	chdir (directory_before_chdir);
 
       if (print_version_flag)
 	print_version ();
