@@ -1715,7 +1715,7 @@ func_shell (char *o, char **argv, const char *funcname)
   equality. Return is string-boolean, ie, the empty string is false.
  */
 static char *
-func_eq (char* o, char **argv, char *funcname)
+func_eq (char *o, char **argv, char *funcname)
 {
   int result = ! strcmp (argv[0], argv[1]);
   o = variable_buffer_output (o,  result ? "1" : "", result);
@@ -1727,9 +1727,9 @@ func_eq (char* o, char **argv, char *funcname)
   string-boolean not operator.
  */
 static char *
-func_not (char* o, char **argv, char *funcname)
+func_not (char *o, char **argv, char *funcname)
 {
-  char * s = argv[0];
+  char *s = argv[0];
   int result = 0;
   while (isspace ((unsigned char)*s))
     s++;
@@ -1739,6 +1739,161 @@ func_not (char* o, char **argv, char *funcname)
 }
 #endif
 
+
+/* Return the absolute name of file NAME which does not contain any `.',
+   `..' components nor any repeated path separators ('/').   */
+
+static char *
+abspath (const char *name, char *apath)
+{
+  char *dest;
+  const char *start, *end, *apath_limit;
+
+  if (name[0] == '\0' || apath == NULL)
+    return NULL;
+
+  apath_limit = apath + PATH_MAX;
+
+  if (name[0] != '/')
+    {
+      /* It is unlikely we would make it until here but just to make sure. */
+      if (!starting_directory)
+	return NULL;
+
+      strcpy (apath, starting_directory);
+
+      dest = strchr (apath, '\0');
+    }
+  else
+    {
+      apath[0] = '/';
+      dest = apath + 1;
+    }
+
+  for (start = end = name; *start != '\0'; start = end)
+    {
+      unsigned long len;
+
+      /* Skip sequence of multiple path-separators.  */
+      while (*start == '/')
+	++start;
+
+      /* Find end of path component.  */
+      for (end = start; *end != '\0' && *end != '/'; ++end)
+        ;
+
+      len = end - start;
+
+      if (len == 0)
+	break;
+      else if (len == 1 && start[0] == '.')
+	/* nothing */;
+      else if (len == 2 && start[0] == '.' && start[1] == '.')
+	{
+	  /* Back up to previous component, ignore if at root already.  */
+	  if (dest > apath + 1)
+	    while ((--dest)[-1] != '/');
+	}
+      else
+	{
+	  if (dest[-1] != '/')
+            *dest++ = '/';
+
+	  if (dest + len >= apath_limit)
+            return NULL;
+
+	  dest = memcpy (dest, start, len);
+          dest += len;
+	  *dest = '\0';
+	}
+    }
+
+  /* Unless it is root strip trailing separator.  */
+  if (dest > apath + 1 && dest[-1] == '/')
+    --dest;
+
+  *dest = '\0';
+
+  return apath;
+}
+
+
+static char *
+func_realpath (char *o, char **argv, const char *funcname UNUSED)
+{
+  /* Expand the argument.  */
+  char *p = argv[0];
+  char *path = 0;
+  int doneany = 0;
+  unsigned int len = 0;
+
+  char in[PATH_MAX];
+  char out[PATH_MAX];
+
+  while ((path = find_next_token (&p, &len)) != 0)
+    {
+      if (len < PATH_MAX)
+        {
+          strncpy (in, path, len);
+          in[len] = '\0';
+
+          if
+          (
+#ifdef HAVE_REALPATH
+            realpath (in, out)
+#else
+            abspath (in, out)
+#endif
+          )
+            {
+              o = variable_buffer_output (o, out, strlen (out));
+              o = variable_buffer_output (o, " ", 1);
+              doneany = 1;
+            }
+        }
+    }
+
+  /* Kill last space.  */
+  if (doneany)
+    --o;
+
+ return o;
+}
+
+static char *
+func_abspath (char *o, char **argv, const char *funcname UNUSED)
+{
+  /* Expand the argument.  */
+  char *p = argv[0];
+  char *path = 0;
+  int doneany = 0;
+  unsigned int len = 0;
+
+  char in[PATH_MAX];
+  char out[PATH_MAX];
+
+  while ((path = find_next_token (&p, &len)) != 0)
+    {
+      if (len < PATH_MAX)
+        {
+          strncpy (in, path, len);
+          in[len] = '\0';
+
+          if (abspath (in, out))
+            {
+              o = variable_buffer_output (o, out, strlen (out));
+              o = variable_buffer_output (o, " ", 1);
+              doneany = 1;
+            }
+        }
+    }
+
+  /* Kill last space.  */
+  if (doneany)
+    --o;
+
+ return o;
+}
 
 /* Lookup table for builtin functions.
 
@@ -1758,6 +1913,7 @@ static char *func_call PARAMS ((char *o, char **argv, const char *funcname));
 static struct function_table_entry function_table_init[] =
 {
  /* Name/size */                    /* MIN MAX EXP? Function */
+  { STRING_SIZE_TUPLE("abspath"),       0,  1,  1,  func_abspath},
   { STRING_SIZE_TUPLE("addprefix"),     2,  2,  1,  func_addsuffix_addprefix},
   { STRING_SIZE_TUPLE("addsuffix"),     2,  2,  1,  func_addsuffix_addprefix},
   { STRING_SIZE_TUPLE("basename"),      0,  1,  1,  func_basename_dir},
@@ -1772,6 +1928,7 @@ static struct function_table_entry function_table_init[] =
   { STRING_SIZE_TUPLE("join"),          2,  2,  1,  func_join},
   { STRING_SIZE_TUPLE("lastword"),      0,  1,  1,  func_lastword},
   { STRING_SIZE_TUPLE("patsubst"),      3,  3,  1,  func_patsubst},
+  { STRING_SIZE_TUPLE("realpath"),      0,  1,  1,  func_realpath},
   { STRING_SIZE_TUPLE("shell"),         0,  1,  1,  func_shell},
   { STRING_SIZE_TUPLE("sort"),          0,  1,  1,  func_sort},
   { STRING_SIZE_TUPLE("strip"),         0,  1,  1,  func_strip},

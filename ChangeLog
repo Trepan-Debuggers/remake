@@ -1,3 +1,16 @@
+2004-11-30  Boris Kolpackov  <boris@kolpackov.net>
+
+	Implementation of `realpath' and `abspath' built-in functions.
+
+	* configure.in: Check for realpath.
+	* function.c (abspath): Return an absolute file name that does
+	not contain any `.' or `..' components, nor repeated `/'.
+	* function.c (func_abspath): For each name call abspath.
+	* function.c (func_realpath): For each name call realpath
+	from libc or delegate to abspath if realpath is not available.
+	* doc/make.texi (Functions for File Names): Document new functions.
+	* doc/make.texi (Quick Reference): Ditto.
+
 2004-11-28  Paul D. Smith  <psmith@gnu.org>
 
 	* main.c (main) [WINDOWS32]: Remove any trailing slashes from -C

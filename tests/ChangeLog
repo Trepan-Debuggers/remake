@@ -1,3 +1,11 @@
+2004-11-30  Boris Kolpackov  <boris@kolpackov.net>
+
+	* tests/scripts/functions/abspath: New file: test `abspath'
+	built-in function.
+
+	* tests/scripts/functions/realpath: New file: test `realpath'
+	built-in function.
+
 2004-11-28  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/options/dash-C [WINDOWS32]: Add a test for bug #10252;
