@@ -88,27 +88,6 @@ enter_file (name)
   if (*name == '\0')
     abort ();
 
-  /* This is also done in parse_file_seq, so this is redundant
-     for names read from makefiles.  It is here for names passed
-     on the command line.  */
-  while (name[0] == '.' && name[1] == '/' && name[2] != '\0')
-    {
-      name += 2;
-      while (*name == '/')
-	/* Skip following slashes: ".//foo" is "foo", not "/foo".  */
-	++name;
-    }
-
-  if (*name == '\0')
-    {
-      /* It was all slashes!  Move back to the dot and truncate
-	 it after the first slash, so it becomes just "./".  */
-      do
-	--name;
-      while (name[0] != '.');
-      name[2] = '\0';
-    }
-
   hashval = 0;
   for (n = name; *n != '\0'; ++n)
     HASH (hashval, *n);
