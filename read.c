@@ -1091,7 +1091,16 @@ conditional_line (line, filename, lineno)
       if (*line == '\0')
 	return -1;
 
-      *line++ = '\0';
+      if (termin == ',')
+	{
+	  /* Strip blanks after the first string.  */
+	  char *p = line++;
+	  while (isblank (p[-1]))
+	    --p;
+	  *p = '\0';
+	}
+      else
+	*line++ = '\0';
 
       s2 = variable_expand (s1);
       /* We must allocate a new copy of the expanded string because
