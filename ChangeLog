@@ -1,3 +1,18 @@
+2002-09-17  Paul D. Smith  <psmith@gnu.org>
+
+	Fix Bug #940 (plus another bug I found while looking at this):
+
+	* read.c (record_target_var): enter_file() will add a new entry if
+	it's a double-colon target: we don't want to do that in this
+	situation.  Invoke lookup_file() and only enter_file() if it does
+	not already exist.  If the file we get back is a double-colon then
+	add this variable to the "root" double-colon target.
+
+	* variable.c (initialize_file_variables): If this file is a
+	double-colon target but is not the "root" target, then initialize
+	the root and make the root's variable list the parent of our
+	variable list.
+
 2002-09-12  Paul D. Smith  <psmith@gnu.org>
 
 	* Makefile.am (loadavg_SOURCES, loadavg.c): Tiptoe around automake

@@ -1671,8 +1671,16 @@ record_target_var (filenames, defn, two_colon, origin, flocp)
         {
           struct file *f;
 
-          /* Get a file reference for this file, and initialize it.  */
-          f = enter_file (name);
+          /* Get a file reference for this file, and initialize it.
+             We don't want to just call enter_file() because that allocates a
+             new entry if the file is a double-colon, which we don't want in
+             this situation.  */
+          f = lookup_file (name);
+          if (!f)
+            f = enter_file (name);
+          else if (f->double_colon)
+            f = f->double_colon;
+
           initialize_file_variables (f, 1);
           vlist = f->variables;
           fname = f->name;
