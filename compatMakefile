@@ -31,6 +31,9 @@ CC = @CC@
 CFLAGS = @CFLAGS@
 LDFLAGS = @LDFLAGS@
 
+# How to invoke ranlib.  This is only used by the `glob' subdirectory.
+RANLIB = @RANLIB@
+
 # Define these for your system as follows:
 #	-DNO_ARCHIVES		To disable `ar' archive support.
 #	-DNO_FLOAT		To avoid using floating-point numbers.
@@ -169,6 +172,7 @@ MAKE = make
 glob/libglob.a: FORCE config.h
 	cd glob; $(MAKE) CC='$(CC)' CFLAGS='$(CFLAGS) -I..' \
 			 CPPFLAGS='$(CPPFLAGS) -DHAVE_CONFIG_H' \
+			 RANLIB='$(RANLIB)' \
 			 libglob.a
 FORCE:
 
