@@ -62,7 +62,7 @@ sub toplevel
   $cwd = ".";                 # don't we wish we knew
   $cwdslash = "";             # $cwd . $pathsep, but "" rather than "./"
 
-  &get_osname;  # sets $osname, $vos, $pathsep, and $fancy_file_names
+  &get_osname;  # sets $osname, $vos, $pathsep, and $short_filenames
 
   &set_defaults;  # suite-defined
 
@@ -173,12 +173,12 @@ sub get_osname
 
   # See if the filesystem supports long file names with multiple
   # dots.  DOS doesn't.
-  $fancy_file_names = 1;
+  $short_filenames = 0;
   (open (TOUCHFD, "> fancy.file.name") && close (TOUCHFD))
-      || ($fancy_file_names = 0);
-  unlink ("fancy.file.name") || ($fancy_file_names = 0);
+      || ($short_filenames = 1);
+  unlink ("fancy.file.name") || ($short_filenames = 1);
 
-  if ($fancy_file_names) {
+  if (! $short_filenames) {
     # Thanks go to meyering@cs.utexas.edu (Jim Meyering) for suggesting a
     # better way of doing this.  (We used to test for existence of a /mnt
     # dir, but that apparently fails on an SGI Indigo (whatever that is).)
@@ -190,7 +190,7 @@ sub get_osname
     chdir (".ostest") || &error ("Couldn't chdir to .ostest: $!\n", 1);
   }
 
-  if ($fancy_file_names && -f "ick")
+  if (! $short_filenames && -f "ick")
   {
     $osname = "vos";
     $vos = 1;
@@ -219,7 +219,7 @@ sub get_osname
     $pathsep = "/";
   }
 
-  if ($fancy_file_names) {
+  if (! $short_filenames) {
     chdir ("..") || &error ("Couldn't chdir to ..: $!\n", 1);
     unlink (".ostest>ick");
     rmdir (".ostest") || &error ("Couldn't rmdir .ostest: $!\n", 1);
@@ -363,7 +363,7 @@ sub run_each_test
     $testpath = "$workpath$pathsep$testname";
     # Leave enough space in the extensions to append a number, even
     # though it needs to fit into 8+3 limits.
-    if ($port_host eq 'DOS') {
+    if ($short_filenames) {
       $logext = 'l';
       $diffext = 'd';
       $baseext = 'b';
