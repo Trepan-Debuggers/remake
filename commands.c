@@ -371,7 +371,7 @@ fatal_error_signal (sig)
     (void) sigprocmask (SIG_SETMASK, &set, (sigset_t *) 0);
   }
 #else
-#ifndef	SIGSETMASK_MISSING
+#ifdef	HAVE_SIGSETMASK
   (void) sigsetmask (0);
 #endif
 #endif
