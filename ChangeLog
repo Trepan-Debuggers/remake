@@ -1,5 +1,8 @@
 Thu May  9 13:54:49 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 
+	* commands.c (fatal_error_signal) [SIGQUIT]: Make SIGQUIT check
+	conditional.
+
 	* main.c (main): Use unsigned for fread return.
 
 	* read.c (parse_file_seq): Use `int' for char arg to avoid widening
