@@ -1,13 +1,9 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.45 1995/02/05 23:50:12 roland Alpha $])
+AC_REVISION([$Id: configure.in,v 1.46 1995/02/13 16:50:03 roland Exp $])
 AC_PREREQ(2.1)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 AC_CONFIG_HEADER(config.h)
 AC_CONFIG_SUBDIRS(glob)		dnl Run configure in glob subdirectory.
-
-# We want these before the checks, so the checks can modify their values.
-test -z "$CFLAGS" && CFLAGS=-g AC_SUBST(CFLAGS)
-test -z "$LDFLAGS" && LDFLAGS=-g AC_SUBST(LDFLAGS)
 
 AC_PROG_MAKE_SET
 AC_PROG_CC
