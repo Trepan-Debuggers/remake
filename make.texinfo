@@ -8127,22 +8127,18 @@ Tell @code{make} to export all variables to child processes by default.@*
 @itemx export @var{variable} := @var{value}
 @itemx export @var{variable} += @var{value}
 @itemx unexport @var{variable}
-
 Tell @code{make} whether or not to export a particular variable to child
 processes.@*
 @xref{Variables/Recursion, , Communicating Variables to a Sub-@code{make}}.
 
 @item vpath @var{pattern} @var{path}
-
 Specify a search path for files matching a @samp{%} pattern.@*
 @xref{Selective Search, , The @code{vpath} Directive}.
 
 @item vpath @var{pattern}
-
 Remove all search paths previously specified for @var{pattern}.
 
 @item vpath
-
 Remove all search paths previously specified in any @code{vpath}
 directive.
 @end table
@@ -8151,92 +8147,74 @@ Here is a summary of the text manipulation functions (@pxref{Functions}):
 
 @table @code
 @item $(subst @var{from},@var{to},@var{text})
-
 Replace @var{from} with @var{to} in @var{text}.@*
 @xref{Text Functions, , Functions for String Substitution and Analysis}.
 
 @item $(patsubst @var{pattern},@var{replacement},@var{text})
-
 Replace words matching @var{pattern} with @var{replacement} in @var{text}.@*
 @xref{Text Functions, , Functions for String Substitution and Analysis}.
 
 @item $(strip @var{string})
-
 Remove excess whitespace characters from @var{string}.@*
 @xref{Text Functions, , Functions for String Substitution and Analysis}.
 
 @item $(findstring @var{find},@var{text})
-
 Locate @var{find} in @var{text}.@*
 @xref{Text Functions, , Functions for String Substitution and Analysis}.
 
 @item $(filter @var{pattern}@dots{},@var{text})
-
 Select words in @var{text} that match one of the @var{pattern} words.@*
 @xref{Text Functions, , Functions for String Substitution and Analysis}.
 
 @item $(filter-out @var{pattern}@dots{},@var{text})
-
 Select words in @var{text} that @emph{do not} match any of the @var{pattern} words.@*
 @xref{Text Functions, , Functions for String Substitution and Analysis}.
 
 @item $(sort @var{list})
-
 Sort the words in @var{list} lexicographically, removing duplicates.@*
 @xref{Text Functions, , Functions for String Substitution and Analysis}.
 
 @item $(dir @var{names}@dots{})
-
 Extract the directory part of each file name.@*
 @xref{Filename Functions, ,Functions for File Names}.
 
 @item $(notdir @var{names}@dots{})
-
 Extract the non-directory part of each file name.@*
 @xref{Filename Functions, ,Functions for File Names}.
 
 @item $(suffix @var{names}@dots{})
-
 Extract the suffix (the last @samp{.} and following characters) of each file name.@*
 @xref{Filename Functions, ,Functions for File Names}.
 
 @item $(basename @var{names}@dots{})
-
 Extract the base name (name without suffix) of each file name.@*
 @xref{Filename Functions, ,Functions for File Names}.
 
 @item $(addsuffix @var{suffix},@var{names}@dots{})
-
 Append @var{suffix} to each word in @var{names}.@*
 @xref{Filename Functions, ,Functions for File Names}.
 
 @item $(addprefix @var{prefix},@var{names}@dots{})
-
 Prepend @var{prefix} to each word in @var{names}.@*
 @xref{Filename Functions, ,Functions for File Names}.
 
 @item $(join @var{list1},@var{list2})
-
 Join two parallel lists of words.@*
 @xref{Filename Functions, ,Functions for File Names}.
 
 @item $(word @var{n},@var{text})
-
 Extract the @var{n}th word (one-origin) of @var{text}.@*
 @xref{Filename Functions, ,Functions for File Names}.
 
 @item $(words @var{text})
-
 Count the number of words in @var{text}.@*
 @xref{Filename Functions, ,Functions for File Names}.
 
 @item $(firstword @var{names}@dots{})
-
 Extract the first word of @var{names}.@*
 @xref{Filename Functions, ,Functions for File Names}.
 
 @item $(wildcard @var{pattern}@dots{})
-
 Find file names matching a shell file name pattern (@emph{not} a
 @samp{%} pattern).@*
 @xref{Wildcard Function, ,The Function @code{wildcard}}.
