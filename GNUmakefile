@@ -1,6 +1,6 @@
 # GNU Make-specific makefile for GNU Make.
 
-# Copyright (C) 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+# Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 # 
 # GNU Make is free software; you can redistribute it and/or modify
@@ -153,6 +153,7 @@ $(globfiles): stamp-glob ;
 stamp-glob: /home/gd/gnu/libc/posix/glob.tar
 	-rm -rf glob
 	tar xvf $< glob
+	cvs commit -m'Updated from libc' glob
 	touch $@
 /home/gd/gnu/libc/posix/glob.tar: force
 	$(MAKE) -C $(@D) $(@F) no_deps=t
@@ -175,6 +176,7 @@ Makefile.in: compatMakefile $(nolib-deps:remote-%.dep=remote-stub.dep)
 	 echo '# Automatically generated dependencies.'; \
 	 sed -e 's/ [^ ]*\.dep//' -e 's=$(archpfx)==' $(filter-out $<,$^) \
 	) > $@
+	cvs commit -mRegenerated $@
 
 .SUFFIXES: .dep
 # Maintain the automatically-generated dependencies.
@@ -199,6 +201,7 @@ build.sh.in: build.template compatMakefile
 	    $< > $@.new
 	chmod a+x $@.new
 	mv -f $@.new $@
+	cvs commit -mRegenerated $@
 
 # Make the distribution tar files.
 
@@ -210,18 +213,16 @@ tarfiles := make # make-doc
 tarfiles := $(addsuffix -$(version).tar,$(tarfiles))
 tarfiles := $(tarfiles:%=%.gz) # no more compress $(tarfiles:%=%.Z)
 # Depend on default and doc so we don't ship anything that won't compile.
-dist: rcs-mark default info dvi tests tarfiles
+dist: cvs-mark default info dvi tests tarfiles
 .PHONY: tarfiles
 tarfiles: $(tarfiles)
 
 ifndef dist-flavor
 dist-flavor = alpha
 endif
-.PHONY: rcs-mark rcs-mark-alpha rcs-mark-beta
-rcs-mark: rcs-mark-$(dist-flavor)
-rcs-mark-alpha: RCS/[!=]*,v;rcs -sAlpha -Nmake-$(version-): $^
-rcs-mark-beta: RCS/[!=]*,v;rcs -sBeta -Nmake-$(version-): $^
-version- = $(subst .,-,$(version))
+.PHONY: cvs-mark
+cvs-mark:
+	cvs tag -F make-$(subst .,-,$(version))
 
 dist: local-inst
 .PHONY: local-inst
