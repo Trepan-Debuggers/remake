@@ -1,7 +1,5 @@
 # -*-Makefile-*-, or close enough
 
-AUTOMAKE_OPTIONS = 1.7.3
-
 TEXI2HTML = texi2html
 TEXI2HTML_FLAGS = -split_chapter
 

@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.13 2003/07/19 02:46:25 psmith Exp $
+@set RCSID $Id: make.texi,v 1.14 2003/07/31 13:04:33 psmith Exp $
 @set EDITION 0.61
 @set VERSION 3.81
 @set UPDATED 02 May 2003
@@ -4184,10 +4184,12 @@ from getting implicit commands (from implicit rules or the
 
 @c !!! another reason is for canonical stamp files:
 @ignore
+@example
 foo: stamp-foo ;
 stamp-foo: foo.in
         create foo frm foo.in
         touch $@
+@end example
 @end ignore
 
 You may be inclined to define empty command strings for targets that are

@@ -1,6 +1,6 @@
 # This is a -*-Makefile-*-, or close enough
 
-AUTOMAKE_OPTIONS = 1.7.3 dist-bzip2 check-news ansi2knr
+AUTOMAKE_OPTIONS = dist-bzip2 check-news ansi2knr
 ACLOCAL_AMFLAGS	=  -I config
 
 SUBDIRS =	glob config po doc
@@ -60,6 +60,13 @@ html:
 # --------------- Internationalization Section
 
 localedir =	$(datadir)/locale
+
+# We need this due to a bug in gettext 0.12.1 Makefile.in.in: without this I
+# can't run distcheck because this file is created but not removed during
+# distclean.
+
+distclean-local:
+	test "$(srcdir)" = . || rm -f po/stamp-po
 
 # --------------- Local INSTALL Section
 
