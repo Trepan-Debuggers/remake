@@ -381,24 +381,32 @@ snap_deps ()
 	}
 
   f = lookup_file (".EXPORT_ALL_VARIABLES");
-  export_all_variables = f != 0 && f->is_target;
+  if (f != 0 && f->is_target)
+    export_all_variables = 1;
 
   f = lookup_file (".IGNORE");
-  if (f->deps == 0)
-    ignore_errors_flag |= f != 0 && f->is_target;
-  else
-    for (d = f->deps; d != 0; d = d->next)
-      d->file->command_flags |= COMMANDS_NOERROR;
+  if (f != 0 && f->is_target)
+    {
+      if (f->deps == 0)
+	ignore_errors_flag = 1;
+      else
+	for (d = f->deps; d != 0; d = d->next)
+	  d->file->command_flags |= COMMANDS_NOERROR;
+    }
 
   f = lookup_file (".SILENT");
-  if (f->deps == 0)
-    silent_flag |= f != 0 && f->is_target;
-  else
-    for (d = f->deps; d != 0; d = d->next)
-      d->file->command_flags |= COMMANDS_SILENT;
+  if (f != 0 && f->is_target)
+    {
+      if (f->deps == 0)
+	silent_flag = 1;
+      else
+	for (d = f->deps; d != 0; d = d->next)
+	  d->file->command_flags |= COMMANDS_SILENT;
+    }
 
   f = lookup_file (".POSIX");
-  posix_pedantic = f != 0 && f->is_target;
+  if (f != 0 && f->is_target)
+    posix_pedantic = 1;
 }
 
 /* Set the `command_state' member of FILE and all its `also_make's.  */
