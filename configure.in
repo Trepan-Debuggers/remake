@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION($Id: configure.in,v 1.32 1994/03/28 22:58:08 roland Exp $)
+AC_REVISION($Id: configure.in,v 1.33 1994/03/28 23:31:37 roland Exp $)
 AC_INIT(vpath.c)		dnl A distinctive file to look for in srcdir.
 AC_CONFIG_HEADER(config.h)
 
@@ -7,6 +7,7 @@ AC_CONFIG_HEADER(config.h)
 test -z "$CFLAGS" && CFLAGS=-g AC_SUBST(CFLAGS)
 test -z "$LDFLAGS" && LDFLAGS=-g AC_SUBST(LDFLAGS)
 
+AC_SET_MAKE
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_RANLIB
