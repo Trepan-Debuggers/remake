@@ -423,15 +423,17 @@ variable is normally inserted by the @code{configure} shell script.
 For example:
 
 @example
+@c I have changed some of the comments here slightly to fix an overfull
+@c hbox, so the make manual can format correctly. --roland
 # Common prefix for installation directories.
 # NOTE: This directory must exist when you start the install.
 prefix = /usr/local
 exec_prefix = $(prefix)
-# Directory in which to put the executable for the command `gcc'.
+# Where to put the executable for the command `gcc'.
 bindir = $(exec_prefix)/bin
-# Directory in which to put the directories used by the compiler.
+# Where to put the directories used by the compiler.
 libdir = $(exec_prefix)/lib
-# Directory in which to put the Info files.
+# Where to put the Info files.
 infodir = $(prefix)/info
 @end example
 
