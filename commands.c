@@ -331,18 +331,9 @@ fatal_error_signal (sig)
 {
   handling_fatal_signal = 1;
 
+  /* Set the handling for this signal to the default.
+     It is blocked now while we run this handler.  */
   signal (sig, SIG_DFL);
-#ifdef	POSIX
-  {
-    sigset_t set;
-    sigemptyset (&set);
-    (void) sigprocmask (SIG_SETMASK, &set, (sigset_t *) 0);
-  }
-#else
-#ifdef	HAVE_SIGSETMASK
-  (void) sigsetmask (0);
-#endif
-#endif
 
   /* A termination signal won't be sent to the entire
      process group, but it means we want to kill the children.  */
@@ -390,9 +381,9 @@ fatal_error_signal (sig)
        cause a core dump.  Just exit instead.  */
     exit (1);
 
-  /* Signal the same code; this time it will really be fatal.  */
+  /* Signal the same code; this time it will really be fatal.  The signal
+     will be unblocked when we return and arrive then to kill us.  */
   if (kill (getpid (), sig) < 0)
-    /* It shouldn't return, but if it does, die anyway.  */
     pfatal_with_name ("kill");
 }
 
