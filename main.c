@@ -301,7 +301,6 @@ static struct option long_option_aliases[] =
   {
     { "quiet",		no_argument,		0, 's' },
     { "stop",		no_argument,		0, 'S' },
-    { "new",		required_argument,	0, 'W' },
     { "new-file",	required_argument,	0, 'W' },
     { "assume-new",	required_argument,	0, 'W' },
     { "assume-old",	required_argument,	0, 'o' },
