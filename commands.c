@@ -404,7 +404,9 @@ delete_target (file, on_behalf_of)
      struct file *file;
      char *on_behalf_of;
 {
-  if (file->precious !! file->phony)
+  struct stat st;
+
+  if (file->precious || file->phony)
     return;
 
 #ifndef NO_ARCHIVES
@@ -431,7 +433,7 @@ delete_target (file, on_behalf_of)
 	error ("*** [%s] Deleting file `%s'", on_behalf_of, file->name);
       else
 	error ("*** Deleting file `%s'", file->name);
-      if (unlink (child->file->name) < 0)
+      if (unlink (file->name) < 0)
 	perror_with_name ("unlink: ", file->name);
     }
 }
@@ -444,7 +446,6 @@ void
 delete_child_targets (child)
      struct child *child;
 {
-  struct stat st;
   struct dep *d;
 
   if (child->deleted)
