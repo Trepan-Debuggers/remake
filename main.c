@@ -718,6 +718,7 @@ main (argc, argv, envp)
 	f->last_mtime = (time_t) 1;
 	f->updated = 1;
 	f->update_status = 0;
+	f->command_state = cs_finished;
       }
 
   if (new_files != 0)
@@ -922,7 +923,12 @@ main (argc, argv, envp)
 	  for (p = environ; *p != 0; ++p)
 	    if (!strncmp (*p, "MAKELEVEL=", 10))
 	      {
-		*p = (char *) alloca (40);
+		/* The SGI compiler apparently can't understand
+		   the concept of storing the result of a function
+		   in something other than a local variable.  */
+		char *sgi_loses;
+		sgi_loses = (char *) alloca (40);
+		*p = sgi_loses;
 		sprintf (*p, "MAKELEVEL=%u", makelevel);
 		break;
 	      }
