@@ -308,12 +308,16 @@ ar_name_equal (name, mem)
 
     namelen = strlen (name);
     memlen = strlen (mem);
+
     if (namelen > memlen && memlen >= max - 1
 	&& name[namelen - 2] == '.' && name[namelen - 1] == 'o'
 	&& mem[memlen - 2] == '.' && mem[memlen - 1] == 'o')
       return 1;
 
-    return !strcmp (name + max - 3, mem + max - 3);
+    if (namelen != memlen)
+      return 0;
+
+    return (namelen < max - 3 || !strcmp (name + max - 3, mem + max - 3));
   }
 
 #else	/* AIX or APOLLO.  */
