@@ -1,4 +1,4 @@
-/* Copyright (C) 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
+/* Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -302,7 +302,8 @@ update_file_1 (file, depth)
       else
 	{
 	  DEBUGPR ("No implicit rule found for `%s'.\n");
-	  if (default_file != 0 && default_file->cmds != 0)
+	  if (!file->is_target
+	      && default_file != 0 && default_file->cmds != 0)
 	    {
 	      DEBUGPR ("Using default commands for `%s'.\n");
 	      file->cmds = default_file->cmds;
@@ -712,7 +713,7 @@ remake_file (file)
       else
 	{
 	  /* This is a dependency file we cannot remake.  Fail.  */
-	  static char noway[] = "*** No way to make target";
+	  static char noway[] = "*** No rule to make target";
 	  if (keep_going_flag || file->dontcare)
 	    {
 	      if (!file->dontcare)
