@@ -1,5 +1,5 @@
 /* Pattern and suffix rule internals for GNU Make.
-Copyright (C) 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -254,8 +254,12 @@ new_pattern_rule (rule, override)
   lastrule = pattern_rules;
   for (r = pattern_rules; r != 0; lastrule = r, r = r->next)
     for (i = 0; rule->targets[i] != 0; ++i)
-      for (j = 0; r->targets[j] != 0; ++j)
-	if (streq (rule->targets[i], r->targets[j]))
+      {
+	for (j = 0; r->targets[j] != 0; ++j)
+	  if (!streq (rule->targets[i], r->targets[j]))
+	    break;
+	if (r->targets[j] == 0)
+	  /* All the targets matched.  */
 	  {
 	    register struct dep *d, *d2;
 	    for (d = rule->deps, d2 = r->deps;
@@ -274,7 +278,7 @@ new_pattern_rule (rule, override)
 		  else
 		    last_pattern_rule->next = rule;
 		  last_pattern_rule = rule;
-
+		  
 		  /* We got one.  Stop looking.  */
 		  goto matched;
 		}
@@ -285,6 +289,7 @@ new_pattern_rule (rule, override)
 		  return 0;
 		}
 	  }
+      }
 
  matched:;
 
