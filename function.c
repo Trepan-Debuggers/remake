@@ -37,7 +37,7 @@ struct function_table_entry
     unsigned char minimum_args;
     unsigned char maximum_args;
     char expand_args;
-    char *(*func_ptr) PARAMS((char *output, char **argv, const char*funcname));
+    char *(*func_ptr) PARAMS ((char *output, char **argv, const char *fname));
   };
 
 
@@ -231,7 +231,7 @@ lookup_function (table, s)
      const struct function_table_entry *table;
      const char *s;
 {
-  int len = strlen(s);
+  int len = strlen (s);
 
   for (; table->name != NULL; ++table)
     if (table->len <= len
@@ -386,7 +386,7 @@ func_patsubst (o, argv, funcname)
 
 
 static char *
-func_join(o, argv, funcname)
+func_join (o, argv, funcname)
      char *o;
      char **argv;
      const char *funcname;
@@ -429,7 +429,7 @@ func_join(o, argv, funcname)
 
 
 static char *
-func_origin(o, argv, funcname)
+func_origin (o, argv, funcname)
      char *o;
      char **argv;
      const char *funcname;
@@ -483,7 +483,7 @@ func_origin(o, argv, funcname)
 
 
 static char *
-func_notdir_suffix(o, argv, funcname)
+func_notdir_suffix (o, argv, funcname)
      char *o;
      char **argv;
      const char *funcname;
@@ -518,7 +518,7 @@ func_notdir_suffix(o, argv, funcname)
 	}
 #if defined(WINDOWS32) || defined(__MSDOS__)
       /* Handle the case of "d:foo/bar".  */
-      else if (streq(funcname, "notdir") && p2[0] && p2[1] == ':')
+      else if (streq (funcname, "notdir") && p2[0] && p2[1] == ':')
 	{
 	  p = p2 + 2;
 	  o = variable_buffer_output (o, p, len - (p - p2));
@@ -544,7 +544,7 @@ func_notdir_suffix(o, argv, funcname)
 
 
 static char *
-func_basename_dir(o, argv, funcname)
+func_basename_dir (o, argv, funcname)
      char *o;
      char **argv;
      const char *funcname;
@@ -603,7 +603,7 @@ func_basename_dir(o, argv, funcname)
 }
 
 static char *
-func_addsuffix_addprefix(o, argv, funcname)
+func_addsuffix_addprefix (o, argv, funcname)
      char *o;
      char **argv;
      const char *funcname;
@@ -636,7 +636,7 @@ func_addsuffix_addprefix(o, argv, funcname)
 }
 
 static char *
-func_subst(o, argv, funcname)
+func_subst (o, argv, funcname)
      char *o;
      char **argv;
      const char *funcname;
@@ -649,7 +649,7 @@ func_subst(o, argv, funcname)
 
 
 static char *
-func_firstword(o, argv, funcname)
+func_firstword (o, argv, funcname)
      char *o;
      char **argv;
      const char *funcname;
@@ -666,7 +666,7 @@ func_firstword(o, argv, funcname)
 
 
 static char *
-func_words(o, argv, funcname)
+func_words (o, argv, funcname)
      char *o;
      char **argv;
      const char *funcname;
@@ -724,7 +724,7 @@ check_numeric (s, message)
 
 
 static char *
-func_word(o, argv, funcname)
+func_word (o, argv, funcname)
      char *o;
      char **argv;
      const char *funcname;
@@ -758,45 +758,42 @@ func_wordlist (o, argv, funcname)
      char **argv;
      const char *funcname;
 {
-  int i=0;
-  int j=0;
+  int start, count;
 
-  /* Check the first argument.  */
+  /* Check the arguments.  */
   check_numeric (argv[0],
 		 _("non-numeric first argument to `wordlist' function"));
-  i =atoi(argv[0]);
   check_numeric (argv[1],
 		 _("non-numeric second argument to `wordlist' function"));
 
-  j = atoi(argv[1]);
+  start = atoi (argv[0]);
+  count = atoi (argv[1]) - start + 1;
 
+  if (count > 0)
+    {
+      char *p;
+      char *end_p = argv[2];
 
-  {
-    char *p;
-    char *end_p = argv[2];
+      /* Find the beginning of the "start"th word.  */
+      while (((p = find_next_token (&end_p, 0)) != 0) && --start)
+        ;
 
-    int start = (i < j) ? i : j;
-    int count = j -i ;
-    if (count < 0)
-      count = - count;
-    count ++;
+      if (p)
+        {
+          /* Find the end of the "count"th word from start.  */
+          while (--count && (find_next_token (&end_p, 0) != 0))
+            ;
 
+          /* Return the stuff in the middle.  */
+          o = variable_buffer_output (o, p, end_p - p);
+        }
+    }
 
-
-    while (((p = find_next_token (&end_p, 0)) != 0) && --start)
-      {}
-    if (p)
-      {
-	while (--count && (find_next_token (&end_p, 0) != 0))
-	  {}
-	o = variable_buffer_output (o, p, end_p - p);
-      }
-  }
   return o;
 }
 
 static char*
-func_findstring(o, argv, funcname)
+func_findstring (o, argv, funcname)
      char *o;
      char **argv;
      const char *funcname;
@@ -888,7 +885,7 @@ func_filter_filterout (o, argv, funcname)
   /* Chop ARGV[1] up into words and then run each pattern through.  */
   while ((p = find_next_token (&word_iterator, &len)) != 0)
     {
-      struct a_word *w = (struct a_word *)alloca(sizeof(struct a_word));
+      struct a_word *w = (struct a_word *)alloca (sizeof (struct a_word));
       if (wordhead == 0)
 	wordhead = w;
       else
@@ -944,7 +941,7 @@ func_filter_filterout (o, argv, funcname)
 
 
 static char *
-func_strip(o, argv, funcname)
+func_strip (o, argv, funcname)
      char *o;
      char **argv;
      const char *funcname;
@@ -992,18 +989,18 @@ func_error (o, argv, funcname)
      another special case where function arguments aren't broken up,
      just create a format string that puts them back together.  */
   for (len=0, argvp=argv; *argvp != 0; ++argvp)
-    len += strlen(*argvp) + 2;
+    len += strlen (*argvp) + 2;
 
   p = msg = alloca (len + 1);
 
   for (argvp=argv; argvp[1] != 0; ++argvp)
     {
-      strcpy(p, *argvp);
-      p += strlen(*argvp);
+      strcpy (p, *argvp);
+      p += strlen (*argvp);
       *(p++) = ',';
       *(p++) = ' ';
     }
-  strcpy(p, *argvp);
+  strcpy (p, *argvp);
 
   if (*funcname == 'e')
     fatal (reading_file, "%s", msg);
@@ -1128,7 +1125,7 @@ func_if (o, argv, funcname)
 }
 
 static char *
-func_wildcard(o, argv, funcname)
+func_wildcard (o, argv, funcname)
      char *o;
      char **argv;
      const char *funcname;
@@ -1197,11 +1194,11 @@ windows32_openpipe (int *pipedes, int *pid_p, char **command_argv, char **envp)
   HANDLE hProcess;
 
 
-  saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+  saAttr.nLength = sizeof (SECURITY_ATTRIBUTES);
   saAttr.bInheritHandle = TRUE;
   saAttr.lpSecurityDescriptor = NULL;
 
-  if (DuplicateHandle(GetCurrentProcess(),
+  if (DuplicateHandle (GetCurrentProcess(),
 		      GetStdHandle(STD_INPUT_HANDLE),
 		      GetCurrentProcess(),
 		      &hIn,
@@ -1371,7 +1368,7 @@ func_shell (o, argv, funcname)
   /* For error messages.  */
   if (reading_file != 0)
     {
-      error_prefix = (char *) alloca (strlen(reading_file->filenm)+11+4);
+      error_prefix = (char *) alloca (strlen (reading_file->filenm)+11+4);
       sprintf (error_prefix,
 	       "%s:%lu: ", reading_file->filenm, reading_file->lineno);
     }
@@ -1470,8 +1467,8 @@ func_shell (o, argv, funcname)
       if (batch_filename) {
 	DB (DB_VERBOSE, (_("Cleaning up temporary batch file %s\n"),
                        batch_filename));
-	remove(batch_filename);
-	free(batch_filename);
+	remove (batch_filename);
+	free (batch_filename);
       }
       shell_function_pid = 0;
 
@@ -1623,7 +1620,7 @@ func_not (char* o, char **argv, char *funcname)
 #endif
 
 
-#define STRING_SIZE_TUPLE(_s) (_s), (sizeof(_s)-1)
+#define STRING_SIZE_TUPLE(_s) (_s), (sizeof (_s)-1)
 
 /* Lookup table for builtin functions.
 
@@ -1637,7 +1634,7 @@ func_not (char* o, char **argv, char *funcname)
    EXPAND_ARGS means that all arguments should be expanded before invocation.
    Functions that do namespace tricks (foreach) don't automatically expand.  */
 
-static char *func_call PARAMS((char *o, char **argv, const char *funcname));
+static char *func_call PARAMS ((char *o, char **argv, const char *funcname));
 
 
 static struct function_table_entry function_table[] =
@@ -1751,7 +1748,7 @@ handle_function (op, stringp)
   *stringp = end;
 
   /* Get some memory to store the arg pointers.  */
-  argvp = argv = (char **) alloca (sizeof(char *) * (nargs + 2));
+  argvp = argv = (char **) alloca (sizeof (char *) * (nargs + 2));
 
   /* Chop the string into arguments, then a nul.  As soon as we hit
      MAXIMUM_ARGS (if it's >0) assume the rest of the string is part of the
@@ -1833,7 +1830,7 @@ func_call (o, argv, funcname)
   while (*fname != '\0' && isspace ((unsigned char)*fname))
     ++fname;
 
-  cp = fname + strlen(fname) - 1;
+  cp = fname + strlen (fname) - 1;
   while (cp > fname && isspace ((unsigned char)*cp))
     --cp;
   cp[1] = '\0';
@@ -1886,5 +1883,5 @@ func_call (o, argv, funcname)
 
   pop_variable_scope ();
 
-  return o + strlen(o);
+  return o + strlen (o);
 }

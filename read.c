@@ -313,7 +313,6 @@ read_makefile (filename, flags)
     { 									      \
       if (filenames != 0)						      \
         {                                                                     \
-	  int lineno = fileinfo.lineno;                                       \
 	  struct floc fi;                                                     \
 	  fi.filenm = fileinfo.filenm;                                        \
 	  fi.lineno = tgts_started;                                           \
@@ -331,7 +330,7 @@ read_makefile (filename, flags)
   fileinfo.lineno = 1;
 
   pattern_percent = 0;
-/*  cmds_started = fileinfo.lineno; */
+  cmds_started = tgts_started = fileinfo.lineno;
 
   if (ISDB (DB_VERBOSE))
     {

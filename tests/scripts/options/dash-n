@@ -50,6 +50,11 @@ EOF
 close(MAKEFILE);
 
 &touch('b');
+# Sometimes, on my Solaris 2.5.1 box with a NetApp filesystem NFS-mounted,
+# just touching b first then a isn't good enough: the nsec field in the
+# stat result shows b is _newer_ than a once every 5 or 6 tries!!!  I've
+# no idea what this is about, but that's why there's a sleep(1) here...
+sleep(1);
 &touch('a');
 sleep(1);
 &touch('c');
