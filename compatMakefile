@@ -1,7 +1,7 @@
 # NOTE: If you have no `make' program at all to process this makefile, run
 # `build.sh' instead.
 #
-# Copyright (C) 1988, 89, 91, 92, 93, 94 Free Software Foundation, Inc.
+# Copyright (C) 1988, 89, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 # 
 # GNU Make is free software; you can redistribute it and/or modify
@@ -117,8 +117,8 @@ MAKEINFO = makeinfo
 TEXI2DVI = texi2dvi
 
 # Programs to make tags files.
-ETAGS = etags -tw
-CTAGS = ctags -tw
+ETAGS = etags -w
+CTAGS = ctags -w
 
 objs = commands.o job.o dir.o file.o misc.o main.o read.o remake.o	\
        rule.o implicit.o default.o variable.o expand.o function.o	\
