@@ -30,7 +30,7 @@ Already I've learned something I didn't know before: in
 automake-produced Makefiles, even though "all" is listed as the first
 target, it often isn't the first target to trigger! It appears that
 Makefile.in (actually $(srcdir)/Makefile.in of line 225 of Makefile)
-is -- and I don't ask me why. I imagine that as folks start using
+is -- and don't ask me why. I imagine that as folks start using
 this, the may be able to *understand* "make" better and perhaps even
 write better or more efficient Makefiles.
 
@@ -101,7 +101,7 @@ set a *breakpoint* on those targets. Like this:
 
   /remake/src/Makefile:225: Makefile.in
 
-  The restart command was used to restart execution since we've alreay
+  The restart command was used to restart execution since we've already
   passed considering the "all-am" target. So let's "continue" execution
   and see what happens
 
@@ -113,7 +113,7 @@ set a *breakpoint* on those targets. Like this:
   =>#0  all-am at /remake/src/Makefile:383
     #1  all at /remake/src/Makefile:221
 
-Note that now we have stopped at this unintersting target. What is
+Note that now we have stopped at this uninteresting target. What is
 it? 
 
   /remake/src/Makefile:383: all-am
@@ -146,7 +146,7 @@ also with the "print" command.
 
   (null):0 MAKE = $(MAKE_COMMAND)
 
-The (null):0 means this is a builtin definition. However there is
+The (null):0 means this is a built-in definition. However there is
 another print which does full expansion of the variables. So if I run
 x (examine) instead I get: 
 
@@ -181,7 +181,7 @@ variable and the expression. That is, "set MAKE = $(MAKE_COMMAND)" gives
 
   Variable MAKE now has value '= /remake/src/./make'
 
-which is probably not what you want. Down the line, I'll probaby have
+which is probably not what you want. Down the line, I'll probably have
 a better command parser.
 
 To close the tour of the debugger I'll finish with a list of debugger
@@ -213,7 +213,7 @@ commands.
  
     frame *n*                 (f):
 	Move target frame to *n*; In contrast to "up" tor "down",
-	this sets to an absolute postion. O is the top.
+	this sets to an absolute position. O is the top.
 
     help [command]            (h):
 	Display list of commands (i.e. this help text.)
@@ -232,7 +232,7 @@ commands.
 	If a variable name is given, the value is shown with the
 	variable-reference names. Don't include $ before a variable 
 	name. See also "examine".
-	If a target name is given, information tabout target is printed.
+	If a target name is given, information about target is printed.
 
     quit [exit-status]        (q):
 	Exit make. If a numeric argument is given, it will be the exit
@@ -284,7 +284,7 @@ the tarball is remake.el which uses on gud.el to provide running the
 debugger inside GNU Emacs just as the way you'd do with perl, gdb, my
 bash debugger. I also have a patched gud.el which contains the remake
 debugger support. For front-end support such as this, I added "up" and
-"down" debugger commands to postion you up or down in the Makefile
+"down" debugger commands to position you up or down in the Makefile
 source.
 
 
@@ -294,7 +294,7 @@ source.
  > invocations, or eval expansions, etc. that happen during the parsing of
  > the makefiles?
 
-Actually, sort of. there isan debug-on-error mode. In fact, there is
+Actually, sort of. there is an debug-on-error mode. In fact, there is
 an optional argument on the command line to
 --debugger (-X) so you could specify what level of debugging you
 want. Right now I have 
