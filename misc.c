@@ -135,7 +135,7 @@ remove_comments (line)
 
       backslash = 0;
       bs_write = 0;
-      for (p2 = p - 1; p2 > line && *p2 == '\\'; --p2)
+      for (p2 = p - 1; p2 >= line && *p2 == '\\'; --p2)
 	{
 	  if (backslash)
 	    ++bs_write;
