@@ -20,6 +20,8 @@
 .PHONY: default
 default:
 
+override srcdir := .
+
 # Get most of the information from the Unix-compatible makefile.
 include compatMakefile
 
@@ -127,7 +129,7 @@ $(prog): $(objs) $(globdep)
 	$(CC) $(LDFLAGS) $^ $(globlib) $(LOADLIBES) -o $@.new
 	mv -f $@.new $@
 
-globfiles = $(addprefix glob/,COPYING.LIB Makefile \
+globfiles = $(addprefix glob/,COPYING.LIB Makefile.in \
 			glob.c fnmatch.c glob.h fnmatch.h)
 $(globfiles): /home/gd/gnu/libc/posix/glob.tar
 	tar xvfm $< $@
