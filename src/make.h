@@ -1,6 +1,6 @@
 /* Miscellaneous global declarations and portability cruft for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
-2002 Free Software Foundation, Inc.
+2002, 2004 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -498,10 +498,13 @@ extern char *directory_before_chdir;
 /*! Value of the MAKELEVEL variable at startup (or 0).  */
 extern unsigned int makelevel;
 
-/*! If nonzero, use absolute filenames in giving locations. This helps
-    the debugger when we change directories.
+/*! If nonzero, the basename of filenames is in giving locations. Normally,
+    giving a file directory location helps a debugger frontend
+    when we change directories. For regression tests it is helpful to 
+    list just the basename part as that doesn't change from installation
+    to installation. Users may have their preferences too.
 */
-extern int absolute_filenames;
+extern int basename_filenames;
 
 extern char *version_string, *remote_description, *make_host;
 

@@ -179,10 +179,13 @@ unsigned int debugger_on_error = 0;
 */
 unsigned int debugger_enabled;
 
-/*! If nonzero, use absolute filenames in giving locations. This helps
-    the debugger when we change directories.
+/*! If nonzero, the basename of filenames is in giving locations. Normally,
+    giving a file directory location helps a debugger frontend
+    when we change directories. For regression tests it is helpful to 
+    list just the basename part as that doesn't change from installation
+    to installation. Users may have their preferences too.
 */
-int absolute_filenames = 0;
+int basename_filenames = 0;
 
 #ifdef WINDOWS32
 /* Suspend make in main for a short time to allow debugger to attach */
@@ -319,6 +322,8 @@ static const char *const usage[] =
     N_("\
   -B, --always-make            Unconditionally make all targets.\n"),
     N_("\
+  --basename-filenames         Show files as basename only.\n"),
+    N_("\
   -C DIRECTORY, --directory=DIRECTORY\n\
                                Change to DIRECTORY before doing anything.\n"),
     N_("\
@@ -396,9 +401,11 @@ static const struct command_switch switches[] =
   {
     { 'b', ignore, 0, 0, 0, 0, 0, 0, 0 },
     { 'B', flag, (char *) &always_make_flag, 1, 1, 0, 0, 0, "always-make" },
+    { CHAR_MAX+1, flag, (char *) &basename_filenames, 1, 1, 0, 0, 0, 
+      "basename-filenames" },
     { 'C', string, (char *) &directories, 0, 0, 0, 0, 0, "directory" },
     { 'd', flag, (char *) &debug_flag, 1, 1, 0, 0, 0, 0 },
-    { CHAR_MAX+1, string, (char *) &db_flags, 1, 1, 0, "basic", 0, "debug" },
+    { CHAR_MAX+2, string, (char *) &db_flags, 1, 1, 0, "basic", 0, "debug" },
 #ifdef WINDOWS32
     { 'D', flag, (char *) &suspend_flag, 1, 1, 0, 0, 0, "suspend-for-debug" },
 #endif
@@ -414,7 +421,7 @@ static const struct command_switch switches[] =
         "include-dir" },
     { 'j', positive_int, (char *) &job_slots, 1, 1, 0, (char *) &inf_jobs,
         (char *) &default_job_slots, "jobs" },
-    { CHAR_MAX+2, string, (char *) &jobserver_fds, 1, 1, 0, 0, 0,
+    { CHAR_MAX+3, string, (char *) &jobserver_fds, 1, 1, 0, 0, 0,
         "jobserver-fds" },
     { 'k', flag, (char *) &keep_going_flag, 1, 1, 0, 0,
         (char *) &default_keep_going_flag, "keep-going" },
@@ -450,9 +457,9 @@ static const struct command_switch switches[] =
     { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0, "what-if" },
     { 'V', flag, (char *) &show_variable_definitions, 1, 1, 0, 0, 0,
 	"show-variables" },
-    { CHAR_MAX+3, flag, (char *) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
+    { CHAR_MAX+4, flag, (char *) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
 	"no-print-directory" },
-    { CHAR_MAX+4, flag, (char *) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
+    { CHAR_MAX+5, flag, (char *) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
 	"warn-undefined-variables" },
     { 0 }
   };

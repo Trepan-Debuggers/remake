@@ -385,7 +385,7 @@ print_file_target_prefix (const file_t *p_target)
 extern void 
 print_floc_prefix (const floc_t *p_floc) 
 {
-  if (absolute_filenames) 
+  if (!basename_filenames) 
     printf("%s/", starting_directory);
   printf("%s:%lu", p_floc->filenm, p_floc->lineno);
 }
@@ -423,9 +423,9 @@ print_target_stack (target_stack_node_t *p, int pos)
       if (pos != -1) {
 	printf("%s", (i == pos) ? "=>" : "  ");
       }
-      printf ("#%u  %s at %s/%s:%lu\n", i,
-	      p->p_target->name, starting_directory, p_floc->filenm, 
-	      p_floc->lineno);
+      printf ("#%u  %s at ", i, p->p_target->name);
+      print_floc_prefix(p_floc);
+      printf ("\n");
     }
     i++;
   }

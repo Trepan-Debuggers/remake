@@ -840,10 +840,11 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
     {
       char prompt[PROMPT_LENGTH];
       
-      if (p_target_loc) 
-	printf ("\n%s/%s:%lu: %s\n", 
-		starting_directory, p_target_loc->filenm, 
-		p_target_loc->lineno, psz_target_name);
+      if (p_target_loc) {
+	printf ("\n");
+	print_floc_prefix(p_target_loc);
+	printf (": %s\n", psz_target_name);
+      }
       
       snprintf(prompt, PROMPT_LENGTH, "makedb%s%d%s ", 
 	       open_depth, where_history(), close_depth);
