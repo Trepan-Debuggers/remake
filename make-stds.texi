@@ -495,7 +495,7 @@ simple test to verify that a program is properly installed, this target
 should run that test.
 
 Do not strip executables when installing them.  Devil-may-care users can
-use the @code{strip} target to do that.
+use the @code{install-strip} target to do that.
 
 If possible, write the @code{install} target rule so that it does not
 modify anything in the directory where the program was built, provided
@@ -547,11 +547,14 @@ create).
 This rule should not modify the directories where compilation is done,
 only the directories where files are installed.
 
-@item strip
-Strip the installed executable files---that is to say, the copies made
-in the installation directories by the @code{install} target.  This
-target should not alter the executable files in the directory where the
-program was built.
+@item install-strip
+Like @code{install}, but strip the executable files while installing
+them.  The definition of this target can be very simple:
+
+@example
+install-strip:
+        $(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' install
+@end example
 
 Normally we do not recommend stripping an executable unless you are sure
 the program has no bugs.  However, it can be reasonable to install a
