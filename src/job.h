@@ -84,7 +84,11 @@ typedef struct child child_t;
 
 extern struct child *children;
 
+/*!
+ Create a `struct child' for FILE and start its commands running.
+*/
 extern void new_job PARAMS ((file_t *file, target_stack_node_t *p_call_stack));
+
 extern void reap_children PARAMS ((int block, int err, 
 				   target_stack_node_t *p_call_stack));
 extern void start_waiting_jobs PARAMS ((target_stack_node_t *p_call_stack));

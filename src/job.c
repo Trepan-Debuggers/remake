@@ -1474,8 +1474,9 @@ start_waiting_job (child_t *c, target_stack_node_t *p_call_stack)
   return 1;
 }
 
-/* Create a `struct child' for FILE and start its commands running.  */
-
+/*!
+ Create a `struct child' for FILE and start its commands running.
+*/
 void
 new_job (file_t *file, target_stack_node_t *p_call_stack)
 {
