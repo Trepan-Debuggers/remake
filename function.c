@@ -1141,7 +1141,7 @@ string_glob (line)
   register struct nameseq *chain;
   register unsigned int idx;
 
-  chain = multi_glob (parse_file_seq (&line, '\0', sizeof (struct nameseq), 0),
+  chain = multi_glob (parse_file_seq (&line, '\0', sizeof (struct nameseq)),
 		      sizeof (struct nameseq));
 
   if (result == 0)
