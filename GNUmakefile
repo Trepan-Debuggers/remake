@@ -125,7 +125,8 @@ prog := make
 endif
 
 ifneq	"$(findstring gcc,$(CC))" ""
-CFLAGS = -g -W -Wunused -Wpointer-arith -Wreturn-type -Wswitch
+CFLAGS = -g -Wall -Wtraditional -Wid-clash-31 -Wpointer-arith \
+	    -Wbad-function-cast -Wconversion 
 else
 CFLAGS = -g
 endif
