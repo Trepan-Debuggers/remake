@@ -718,11 +718,11 @@ find_and_set_default_shell (char *token)
   if (((tokend == search_token
         || (tokend > search_token
             && (tokend[-1] == '/' || tokend[-1] == '\\')))
-       && strcmpi (tokend, "cmd"))
+       && !strcmpi (tokend, "cmd"))
       || ((tokend - 4 == search_token
            || (tokend - 4 > search_token
                && (tokend[-5] == '/' || tokend[-5] == '\\')))
-          && strcmpi (tokend - 4, "cmd.exe"))) {
+          && !strcmpi (tokend - 4, "cmd.exe"))) {
     batch_mode_shell = 1;
     unixy_shell = 0;
     sh_found = 0;
@@ -1071,8 +1071,11 @@ main (int argc, char **argv, char **envp)
 	   We used to rely on target_environment's v_default code to do this.
 	   But that does not work for the case where an environment variable
 	   is redefined in a makefile with `override'; it should then still
-	   be exported, because it was originally in the environment.  */
-	->export = v_export;
+	   be exported, because it was originally in the environment.
+           Another wrinkle is that POSIX says the value of SHELL set in the
+           makefile should not change the value of SHELL given to
+           subprocesses, which seems silly to me but...  */
+	->export = strncmp(envp[i], "SHELL=", 6) ? v_noexport : v_export;
     }
 #ifdef WINDOWS32
     /*
