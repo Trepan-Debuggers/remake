@@ -48,6 +48,9 @@ AC_USG
 AC_DYNIX_SEQ
 AC_XENIX_DIR
 
+test -n "$CFLAGS" && CFLAGS=-g AC_SUBST(CFLAGS)
+test -n "$LDFLAGS" && LDFLAGS=-g AC_SUBST(LDFLAGS)
+
 AC_OUTPUT(Makefile build.sh glob/Makefile)
 
 dnl Local Variables:
