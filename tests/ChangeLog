@@ -1,3 +1,8 @@
+Tue Mar  1 10:15:25 2005  Boris Kolpackov  <boris@kolpackov.net>
+
+	* tests/scripts/features/statipattrules: Add a test for
+	Savannah bug #12180.
+
 2005-02-28  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/options/dash-q: Add a test for Savannah bug # 7144.
