@@ -47,6 +47,49 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define REAL_DIR_ENTRY(dp) (dp->d_ino != 0)
 #endif /* POSIX */
 
+#ifdef __MSDOS__
+#inlcude <ctype.h>
+
+static char *
+dosify (filename)
+     char *filename;
+{
+  static char dos_filename[14];
+  char *df;
+  int i;
+
+  if (filename == 0)
+    return 0;
+
+  if (strpbrk (filename, "\"*+,;<=>?[\\]|") != 0)
+    return filename;
+
+  df = dos_filename;
+
+  /* First, transform the name part.  */
+  for (i = 0; *filename != '\0' && i < 8 && *filename != '.'; ++i)
+    *df++ = tolower (*filename++);
+
+  /* Now skip to the next dot.  */
+  while (*filename != '\0' && *filename != '.')
+    ++filename;
+  if (*filename != '\0')
+    {
+      *df++ = *filename++;
+      for (i = 0; *filename != '\0' && i < 3 && *filename != '.'; ++i)
+	*df++ = tolower (*filename++);
+    }
+
+  /* Look for more dots.  */
+  while (*filename != '\0' && *filename != '.')
+    ++filename;
+  if (*filename == '.')
+    return filename;
+  *df = 0;
+  return dos_filename;
+}
+#endif
+
 /* Hash table of directories.  */
 
 #ifndef	DIRECTORY_BUCKETS
@@ -212,6 +255,10 @@ dir_contents_file_exists_p (dir, filename)
   if (dir == 0 || dir->files == 0)
     /* The directory could not be stat'd or opened.  */
     return 0;
+
+#ifdef __MSDOS__
+  filename = dosify (filename);
+#endif
 
   hash = 0;
   if (filename != 0)
@@ -403,6 +450,10 @@ file_impossible_p (filename)
   if (dir == 0 || dir->files == 0)
     /* There are no files entered for this directory.  */
     return 0;
+
+#ifdef __MSDOS__
+  p = filename = dosify (p);
+#endif
 
   for (hash = 0; *p != '\0'; ++p)
     HASH (hash, *p);
