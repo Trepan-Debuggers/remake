@@ -113,7 +113,8 @@ pattern_search (file, archive, depth, recursions)
 
   /* Buffer in which we store all the rules that are possibly applicable.  */
   struct rule **tryrules
-    = (struct rule **) alloca (num_pattern_rules * sizeof (struct rule *));
+    = (struct rule **) alloca (num_pattern_rules * max_pattern_targets
+			       * sizeof (struct rule *));
 
   /* Number of valid elements in TRYRULES.  */
   unsigned int nrules;
@@ -164,9 +165,6 @@ pattern_search (file, archive, depth, recursions)
   nrules = 0;
   for (rule = pattern_rules; rule != 0; rule = rule->next)
     {
-      int specific_rule_may_have_matched = 0;
-      int check_lastslash;
-
       /* If the pattern rule has deps but no commands, ignore it.
 	 Users cancel built-in rules by redefining them without commands.  */
       if (rule->deps != 0 && rule->cmds == 0)
@@ -184,6 +182,7 @@ pattern_search (file, archive, depth, recursions)
 	{
 	  char *target = rule->targets[i];
 	  char *suffix = rule->suffixes[i];
+	  int check_lastslash;
 
 	  /* Rules that can match any filename and are not terminal
 	     are ignored if we're recursing, so that they cannot be
@@ -237,29 +236,21 @@ pattern_search (file, archive, depth, recursions)
 
 	  /* Record if we match a rule that not all filenames will match.  */
 	  if (target[1] != '\0')
-	    specific_rule_may_have_matched = 1;
+	    specific_rule_matched = 1;
 
-	  /* We have a matching target.  Don't search for any more.  */
-	  break;
+	  /* A rule with no dependencies and no commands exists solely to set
+	     specific_rule_matched when it matches.  Don't try to use it.  */
+	  if (rule->deps == 0 && rule->cmds == 0)
+	    continue;
+
+	  /* Record this rule in TRYRULES and the index of the matching
+	     target in MATCHES.  If several targets of the same rule match,
+	     that rule will be in TRYRULES more than once.  */
+	  tryrules[nrules] = rule;
+	  matches[nrules] = i;
+	  checked_lastslash[nrules] = check_lastslash;
+	  ++nrules;
 	}
-
-      /* None of the targets matched.  */
-      if (rule->targets[i] == 0)
-	continue;
-
-      specific_rule_matched |= specific_rule_may_have_matched;
-
-      /* A rule with no dependencies and no commands exists solely to set
-	 specific_rule_matched when it matches.  Don't try to use it.  */
-      if (rule->deps == 0 && rule->cmds == 0)
-	continue;
-
-      /* Record this rule in TRYRULES and the index
-	 of the (first) matching target in MATCHES.  */
-      tryrules[nrules] = rule;
-      matches[nrules] = i;
-      checked_lastslash[nrules] = check_lastslash;
-      ++nrules;
     }
 
   /* If we have found a matching rule that won't match all filenames,
