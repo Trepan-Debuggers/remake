@@ -1221,7 +1221,7 @@ decode_switches (argc, argv, env)
      but not for options from the environment.  */
   opterr = !env;
   /* Reset getopt's state.  */
-  optind = 0;
+  optind = 1;
 
   while (optind < argc)
     {
