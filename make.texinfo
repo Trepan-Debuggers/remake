@@ -1137,6 +1137,17 @@ any that are out of date or don't exist.
 Only after it has tried to find a way to remake a makefile and failed,
 will @code{make} diagnose the missing makefile as a fatal error.
 
+If you want @code{make} to simply ignore a makefile which does not exist
+and cannot be remade, with no error message, use the @w{@code{-include}}
+directive instead of @code{include}, like this:
+
+@example
+-include @var{filenames}@dots{}
+@end example
+
+This is acts like @code{include} in every way except that there is no
+error (not even a warning) if any of the @var{filenames} do not exist.
+
 @node MAKEFILES Variable, Remaking Makefiles, Include, Makefiles
 @section The Variable @code{MAKEFILES}
 @cindex makefile, and @code{MAKEFILES} variable
@@ -7859,6 +7870,12 @@ The @samp{+=} syntax to append to the value of a variable comes from SunOS
 The syntax @w{@samp{@var{archive}(@var{mem1} @var{mem2}@dots{})}} to list
 multiple members in a single archive file comes from SunOS 4 @code{make}.
 @xref{Archive Members}.
+
+@item
+The @code{-include} directive to include makefiles with no error for a
+nonexistent file comes from SunOS 4 @code{make}.  (But note that SunOS 4
+@code{make} does not allow multiple makefiles to be specified in one
+@code{-include} directive.)
 @end itemize
 
 The remaining features are inventions new in GNU @code{make}:
