@@ -1,5 +1,5 @@
 /* Data base of default implicit rules for GNU Make.
-Copyright (C) 1988, 89, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 90, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -209,13 +209,7 @@ static char *default_suffix_rules[] =
 static char *default_variables[] =
   {
     "AR", "ar",
-#ifndef __hpux
     "ARFLAGS", "rv",
-#else
-    /* HPUX ar's f flag says to truncate the file names to archive member
-       name length in comparisons, so replacement notices the equality.  */
-    "ARFLAGS", "rfv",
-#endif
     "AS", "as",
 #ifdef GCC_IS_NATIVE
     "CC", "gcc",
