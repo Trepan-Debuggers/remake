@@ -21,7 +21,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "file.h"
 #include "variable.h"
 #include "job.h"
-#include <time.h>
 #include "getopt.h"
 
 
