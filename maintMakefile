@@ -18,7 +18,7 @@ MTEMPLATES = Makefile.DOS SMakefile
 
 # General rule for turning a .template into a regular file.
 #
-$(TEMPLATES) : % : %.template configure.in
+$(TEMPLATES) : % : %.template Makefile
 	rm -f $@
 	sed -e 's@%VERSION%@$(VERSION)@g' \
 	    -e 's@%PACKAGE%@$(PACKAGE)@g' \
@@ -27,7 +27,7 @@ $(TEMPLATES) : % : %.template configure.in
 
 # Construct Makefiles by adding on dependencies, etc.
 #
-$(MTEMPLATES) : % : %.template .dep_segment Makefile.am maintMakefile
+$(MTEMPLATES) : % : %.template .dep_segment Makefile
 	rm -f $@
 	sed -e 's@%VERSION%@$(VERSION)@g' \
 	    -e 's@%PROGRAMS%@$(bin_PROGRAMS)@g' \
@@ -40,7 +40,7 @@ $(MTEMPLATES) : % : %.template .dep_segment Makefile.am maintMakefile
 	  cat $(word 2,$^) >>$@
 	chmod a-w $@
 
-NMakefile: NMakefile.template .dep_segment Makefile.am maintMakefile
+NMakefile: NMakefile.template .dep_segment Makefile
 	rm -f $@
 	cp $< $@
 	echo >>$@; echo '# --------------- DEPENDENCIES' >>$@; echo '#' >>$@; \
@@ -49,7 +49,7 @@ NMakefile: NMakefile.template .dep_segment Makefile.am maintMakefile
 
 # Construct build.sh.in
 #
-build.sh.in: build.template Makefile.am maintMakefile
+build.sh.in: build.template Makefile
 	rm -f $@
 	sed -e 's@%objs%@$(filter-out remote-%, $(make_OBJECTS)@g' \
 	    -e 's@%globobjs%@$(patsubst %.c,%.o,$(globsrc)))@g' \

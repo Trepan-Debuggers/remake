@@ -1,4 +1,21 @@
-1999-08-13  Paul D. Smith  <psmith@gnu.org>
+1999-08-20  Paul D. Smith  <psmith@gnu.org>
+
+	* variable.c (try_variable_definition): Allocate for variable
+	expansion in f_append with a simple variable: if we're looking at
+	target-specific variables we don't want to trash the buffer.
+	Noticed by Reiner Beninga <Reiner.Beninga@mchp.siemens.de>.
+
+1999-08-16  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* main.c (main) [__MSDOS__]: Mirror any backslashes in argv[0], to
+	avoid problems in shell commands that use backslashes as escape
+	characters.
+
+1999-08-16  Paul D. Smith  <psmith@gnu.org>
+
+	* Version 3.77.93 released.
+
+1999-08-13  Paul D. Smith  <psmith@gnu.org
 
 	* function.c (func_if): New function $(if ...) based on the
 	original by Han-Wen but reworked quite a bit.
@@ -11,9 +28,9 @@
 
 1999-08-12  Paul D. Smith  <psmith@gnu.org>
 
-	Argh.  Another jobserver algorithm change.  We conveniently forgot
-	that the blocking bit is shared by all users of the pipe, it's not
-	a per-process setting.  Since we have many make processes all
+	Another jobserver algorithm change.  We conveniently forgot that
+	the blocking bit is shared by all users of the pipe, it's not a
+	per-process setting.  Since we have many make processes all
 	sharing the pipe we can't use the blocking bit as a signal handler
 	flag.  Instead, we'll dup the pipe's read FD and have the SIGCHLD
 	handler close the dup'd FD.  This will cause the read() to fail

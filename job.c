@@ -90,7 +90,7 @@ static int amiga_batch_file;
 #endif
 
 #ifdef HAVE_WAITPID
-# define WAIT_NOHANG (status)	waitpid (-1, (status), WNOHANG)
+# define WAIT_NOHANG(status)	waitpid (-1, (status), WNOHANG)
 #else	/* Don't have waitpid.  */
 # ifdef HAVE_WAIT3
 #  ifndef wait3
@@ -326,13 +326,11 @@ child_handler (sig)
 {
   ++dead_children;
 
-#ifdef HAVE_JOBSERVER
   if (job_rfd >= 0)
     {
       close (job_rfd);
       job_rfd = -1;
     }
-#endif
 
   if (debug_flag)
     printf (_("Got a SIGCHLD; %u unreaped children.\n"), dead_children);
@@ -348,18 +346,34 @@ extern int shell_function_pid, shell_function_completed;
    complete child, waiting for it to die if necessary.  If ERR is nonzero,
    print an error message first.  */
 
+static int rc_block, rc_reap_all, rc_got_block, rc_start_rfd, rc_end_rfd;
+
 void
 reap_children (block, err)
      int block, err;
 {
   WAIT_T status;
-#ifdef WAIT_NOHANG
   /* Initially, assume we have some.  */
   int reap_more = 1;
+
+#ifdef WAIT_NOHANG
 # define REAP_MORE reap_more
 #else
 # define REAP_MORE dead_children
 #endif
+
+  rc_block = block;
+  rc_reap_all = 0;
+  rc_got_block = 0;
+  rc_start_rfd = job_rfd;
+
+  /* As long as:
+
+       We have at least one child outstanding OR a shell function in progress,
+         AND
+       We're blocking for a complete child OR there are more children to reap
+
+     we'll keep reaping children.  */
 
   while ((children != 0 || shell_function_pid != 0) &&
 	 (block || REAP_MORE))
@@ -456,10 +470,11 @@ reap_children (block, err)
 
 	  if (pid < 0)
 	    {
-              /* The wait*() failed miserably.  Punt.  */
+              /* EINTR?  Try again. */
 	      if (EINTR_SET)
 		goto local_wait;
 
+              /* The wait*() failed miserably.  Punt.  */
 	      pfatal_with_name ("wait");
 	    }
 	  else if (pid > 0)
@@ -472,26 +487,25 @@ reap_children (block, err)
 	  else
 	    {
 	      /* No local children are dead.  */
-#ifdef WAIT_NOHANG
               reap_more = 0;
-#endif
-	      if (block && any_remote)
-		{
-		  /* Now try a blocking wait for a remote child.  */
-		  pid = remote_status (&exit_code, &exit_sig, &coredump, 1);
-		  if (pid < 0)
-		    goto remote_status_lose;
-		  else if (pid == 0)
-		    /* No remote children either.  Finally give up.  */
-		    break;
-		  else
-		    /* We got a remote child.  */
-		    remote = 1;
-		}
-	      else
-		break;
+              rc_reap_all = 1;
+
+	      if (!block || !any_remote)
+                break;
+
+              /* Now try a blocking wait for a remote child.  */
+              pid = remote_status (&exit_code, &exit_sig, &coredump, 1);
+              if (pid < 0)
+                goto remote_status_lose;
+              else if (pid == 0)
+                /* No remote children either.  Finally give up.  */
+                break;
+
+              /* We got a remote child.  */
+              remote = 1;
 	    }
 #endif /* !__MSDOS__, !Amiga, !WINDOWS32.  */
+
 #ifdef __MSDOS__
 	  /* Life is very different on MSDOS.  */
 	  pid = dos_pid - 1;
@@ -703,8 +717,10 @@ reap_children (block, err)
 
       /* Only block for one child.  */
       block = 0;
+      rc_block = block;
     }
 
+  rc_end_rfd = job_rfd;
   return;
 }
 
