@@ -41,20 +41,6 @@ static int dos_batch_file;
 #include <sys/file.h>
 #endif
 
-
-/* If NGROUPS_MAX == 0 then try other methods for finding a real value.  */
-#if defined (NGROUPS_MAX) && NGROUPS_MAX == 0
-#undef NGROUPS_MAX
-#endif /* NGROUPS_MAX == 0 */
-
-#ifndef	NGROUPS_MAX
-#ifdef	POSIX
-#define	GET_NGROUPS_MAX	sysconf (_SC_NGROUPS_MAX)
-#else	/* Not POSIX.  */
-#define	NGROUPS_MAX	NGROUPS
-#endif	/* POSIX.  */
-#endif
-
 #if defined (HAVE_SYS_WAIT_H) || defined (HAVE_UNION_WAIT)
 #include <sys/wait.h>
 #endif
