@@ -98,3 +98,4 @@ extern int pattern_matches ();
 extern char *subst_expand (), *patsubst_expand ();
 
 extern char **target_environment ();
+extern int export_all_variables;
