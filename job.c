@@ -544,7 +544,7 @@ start_job_command (child)
      1 tells the user that -q is saying `something to do'; the exit status
      for a random error is 2.  */
   if (question_flag && !(flags & COMMANDS_RECURSE))
-    {  
+    {
       child->file->update_status = 1;
       notice_finished_file (child->file);
       return;
@@ -553,9 +553,9 @@ start_job_command (child)
   /* There may be some preceding whitespace left if there
      was nothing but a backslash on the first line.  */
   p = next_token (p);
-  
+
   /* Figure out an argument list from this command line.  */
-  
+
   {
     char *end;
     argv = construct_command_argv (p, &end, child->file);
@@ -592,10 +592,12 @@ start_job_command (child)
       return;
     }
 
-  /* Print out the command.  */
+  /* Print out the command.  If silent, we call `message' with an empty
+     string so it can log the working directory before the command's own
+     error messages appear.  */
 
-  if (just_print_flag || (!(flags & COMMANDS_SILENT) && !silent_flag))
-    puts (p);
+  message ((just_print_flag || (!(flags & COMMANDS_SILENT) && !silent_flag))
+	   ? "" : "%s\n", p);
 
   /* Tell update_goal_chain that a command has been started on behalf of
      this target.  It is important that this happens here and not in
@@ -619,7 +621,7 @@ start_job_command (child)
 
   fflush (stdout);
   fflush (stderr);
-  
+
   /* Set up a bad standard input that reads from a broken pipe.  */
 
   if (bad_stdin == -1)
@@ -1076,7 +1078,7 @@ exec_command (argv, envp)
   /* Run the program.  */
   environ = envp;
   execvp (argv[0], argv);
-  
+
   switch (errno)
     {
     case ENOENT:
@@ -1402,14 +1404,14 @@ construct_command_argv_internal (line, restp, shell, ifs)
        "SHELL -c LINE", with all special chars in LINE escaped.
        Then recurse, expanding this command line to get the final
        argument list.  */
-    
+
     unsigned int shell_len = strlen (shell);
     static char minus_c[] = " -c ";
     unsigned int line_len = strlen (line);
-    
+
     char *new_line = (char *) alloca (shell_len + (sizeof (minus_c) - 1)
 				      + (line_len * 2) + 1);
-    
+
     ap = new_line;
     bcopy (shell, ap, shell_len);
     ap += shell_len;
@@ -1450,7 +1452,7 @@ construct_command_argv_internal (line, restp, shell, ifs)
 	*ap++ = *p;
       }
     *ap = '\0';
-    
+
     new_argv = construct_command_argv_internal (new_line, (char **) NULL,
 						(char *) 0, (char *) 0);
   }
