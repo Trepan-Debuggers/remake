@@ -1,3 +1,11 @@
+2002-09-10  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/export: Created.  Add tests for export/unexport
+	capabilities, including exporting/unexporting expanded variables.
+
+	* scripts/features/conditionals: Add a test for expanded variables
+	in ifdef conditionals.
+
 2002-09-04  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/features/reinvoke: Change touch/sleep combos to utouch

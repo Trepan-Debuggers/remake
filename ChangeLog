@@ -1,6 +1,28 @@
+2002-09-10  Paul D. Smith  <psmith@gnu.org>
+
+	* read.c (eval): Expand variable lists given to export and
+	unexport, so that "export $(LIST_OF_VARIABLES)" (etc.) works.
+	(conditional_line): Ditto for "ifdef".  Fixes bug #103.
+
+	* doc/make.texi (Variables/Recursion): Document this.
+	(Conditional Syntax): And here.
+
 2002-09-09  Paul D. Smith  <psmith@gnu.org>
 
 	* configure.in: Check for memmove().
+
+2002-09-07  Paul D. Smith  <psmith@gnu.org>
+
+	* configure.in (HAVE_BROKEN_RESTART): Define this on PTX systems;
+	Michael Sterrett <msterret@coat.com> reports that while it has
+	SA_RESTART, it does not work properly.
+
+	* misc.c (atomic_stat): If HAVE_BROKEN_RESTART, create a function
+	that invokes stat() and loops to do it again if it returns EINTR.
+	(atomic_readdir): Ditto, with readdir().
+
+	* make.h (stat, readdir): If HAVE_BROKEN_RESTART, alias stat()
+	and readdir() to atomic_stat() and atomic_readdir().
 
 2002-09-04  Paul D. Smith  <psmith@gnu.org>
 

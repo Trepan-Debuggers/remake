@@ -63,5 +63,39 @@ arg4 is defined
 
 &compare_output($answer,&get_logfile(1));
 
+
+# Test expansion of variables inside ifdef.
+
+$makefile2 = &get_tmpfile;
+
+open(MAKEFILE, "> $makefile2");
+
+print MAKEFILE <<'EOF';
+
+foo = 1
+
+FOO = foo
+F = f
+
+DEF = no
+DEF2 = no
+
+ifdef $(FOO)
+DEF = yes
+endif
+
+ifdef $(F)oo
+DEF2 = yes
+endif
+
+all:; @echo DEF=$(DEF) DEF2=$(DEF2)
+
+EOF
+
+&run_make_with_options($makefile2,"",&get_logfile,0);
+$answer = "DEF=yes DEF2=yes\n";
+&compare_output($answer,&get_logfile(1));
+
+
 # This tells the test driver that the perl test script executed properly.
 1;

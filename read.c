@@ -593,7 +593,7 @@ eval (ebuf, set_default)
 	      || word1eq ("ifeq") || word1eq ("ifneq")
 	      || word1eq ("else") || word1eq ("endif")))
 	{
-	  int i = conditional_line (p, fstart);
+ 	  int i = conditional_line (p, fstart);
 	  if (i < 0)
 	    fatal (fstart, _("invalid syntax in conditional"));
 
@@ -686,11 +686,21 @@ eval (ebuf, set_default)
                   for (p = find_next_token (&p2, &len); p != 0;
                        p = find_next_token (&p2, &len))
                     {
-                      v = lookup_variable (p, len);
+                      char *var;
+                      int l;
+
+                      /* Expand the thing we're looking up, so we can use
+                         indirect and constructed variable names.  */
+                      p[len] = '\0';
+                      var = allocated_variable_expand (p);
+                      l = strlen (var);
+
+                      v = lookup_variable (var, l);
                       if (v == 0)
-                        v = define_variable_loc (p, len, "", o_file, 0,
+                        v = define_variable_loc (var, l, "", o_file, 0,
                                                  fstart);
                       v->export = v_export;
+                      free (var);
                     }
                 }
             }
@@ -708,10 +718,22 @@ eval (ebuf, set_default)
               for (p = find_next_token (&p2, &len); p != 0;
                    p = find_next_token (&p2, &len))
                 {
-                  v = lookup_variable (p, len);
+                  char *var;
+                  int l;
+
+                  /* Expand the thing we're looking up, so we can use
+                     indirect and constructed variable names.  */
+                  p[len] = '\0';
+                  var = allocated_variable_expand (p);
+                  l = strlen (var);
+
+                  v = lookup_variable (var, l);
                   if (v == 0)
-                    v = define_variable_loc (p, len, "", o_file, 0, fstart);
+                    v = define_variable_loc (var, l, "", o_file, 0, fstart);
+
                   v->export = v_noexport;
+
+                  free (var);
                 }
             }
           goto rule_complete;
@@ -1410,15 +1432,24 @@ conditional_line (line, flocp)
   if (cmdname[notdef ? 3 : 2] == 'd')
     {
       /* "Ifdef" or "ifndef".  */
+      char *var;
       struct variable *v;
       register char *p = end_of_token (line);
       i = p - line;
       p = next_token (p);
       if (*p != '\0')
 	return -1;
-      v = lookup_variable (line, i);
+
+      /* Expand the thing we're looking up, so we can use indirect and
+         constructed variable names.  */
+      line[i] = '\0';
+      var = allocated_variable_expand (line);
+
+      v = lookup_variable (var, strlen (var));
       conditionals->ignoring[conditionals->if_cmds - 1]
 	= (v != 0 && *v->value != '\0') == notdef;
+
+      free (var);
     }
   else
     {
