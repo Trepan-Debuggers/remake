@@ -5428,6 +5428,7 @@ The makefile tells @code{make} how to tell whether a target is up to date,
 and how to update each target.  But updating the targets is not always
 what you want.  Certain options specify other activities for @code{make}.
 
+@comment Extra blank lines make it print better.
 @table @samp
 @item -n
 @itemx --just-print
@@ -5437,6 +5438,7 @@ what you want.  Certain options specify other activities for @code{make}.
 @cindex @code{--dry-run}
 @cindex @code{--recon}
 @cindex @code{-n}
+
 ``No-op''.  The activity is to print what commands would be used to make
 the targets up to date, but not actually execute them.
 
@@ -5446,6 +5448,7 @@ the targets up to date, but not actually execute them.
 @cindex touching files
 @cindex target, touching
 @cindex @code{-t}
+
 ``Touch''.  The activity is to mark the targets as up to date without
 actually changing them.  In other words, @code{make} pretends to compile
 the targets but does not really change their contents.
@@ -5455,6 +5458,7 @@ the targets but does not really change their contents.
 @cindex @code{--question}
 @cindex @code{-q}
 @cindex question mode
+
 ``Question''.  The activity is to find out silently whether the targets
 are up to date already; but execute no commands in either case.  In other
 words, neither compilation nor output will occur.
@@ -5469,6 +5473,7 @@ words, neither compilation nor output will occur.
 @cindex @code{--new-file}
 @cindex what if
 @cindex files, assuming new
+
 ``What if''.  Each @samp{-W} flag is followed by a file name.  The given
 files' modification times are recorded by @code{make} as being the present
 time, although the actual modification times remain the same.  
