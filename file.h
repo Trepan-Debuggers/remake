@@ -92,8 +92,3 @@ extern time_t f_mtime ();
 
 #define check_renamed(file) \
   while ((file)->renamed != 0) (file) = (file)->renamed /* No ; here.  */
-
-/* !!! compile frob */
-struct file *
-file_linear_list () ;
-
