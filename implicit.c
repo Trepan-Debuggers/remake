@@ -36,6 +36,14 @@ try_implicit_rule (file, depth)
 {
   DEBUGPR ("Looking for an implicit rule for `%s'.\n");
 
+  /* The order of these searches was previously reversed.  My logic now is
+     that since the non-archive search uses more information in the target
+     (the archive search omits the archive name), it is more specific and
+     should come first.  */
+
+  if (pattern_search (file, 0, depth, 0))
+    return 1;
+
 #ifndef	NO_ARCHIVES
   /* If this is an archive member reference, use just the
      archive member name to search for implicit rules.  */
@@ -47,7 +55,7 @@ try_implicit_rule (file, depth)
     }
 #endif
 
-  return pattern_search (file, 0, depth, 0);
+  return 0;
 }
 
 #define DEBUGP2(msg, a1, a2)						      \
