@@ -142,7 +142,6 @@ srcs = $(srcdir)/commands.c $(srcdir)/job.c $(srcdir)/dir.c		\
 .SUFFIXES: .o .c .h .ps .dvi .info .texinfo
 
 all: make
-check: # No tests.
 info: make.info
 dvi: make.dvi
 # Some makes apparently use .PHONY as the default goal is it is before `all'.
