@@ -9,7 +9,7 @@
 
 @set EDITION 0.44
 @set VERSION 3.69 Beta
-@set UPDATED 1 August 1993
+@set UPDATED 19 August 1993
 @set UPDATE-MONTH August 1993
 
 @c finalout
@@ -7984,6 +7984,10 @@ functionality in that it will check out SCCS files for makefiles.
 @item
 Various new built-in implicit rules.  
 @xref{Catalogue of Rules, ,Catalogue of Implicit Rules}.
+
+@item
+The built-in variable @samp{MAKE_VERSION} gives the version number of
+@code{make}.
 @end itemize
 
 @node Missing, Makefile Conventions, Features, Top
