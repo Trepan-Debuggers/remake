@@ -148,6 +148,7 @@ globfiles = $(addprefix glob/,COPYING.LIB Makefile.in \
 			glob.c fnmatch.c glob.h fnmatch.h)
 $(globfiles): stamp-glob ;
 stamp-glob: /home/gd/gnu/libc/posix/glob.tar
+	-rm -rf glob
 	tar xvf $< glob
 	touch $@
 /home/gd/gnu/libc/posix/glob.tar: force
