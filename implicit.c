@@ -340,8 +340,6 @@ pattern_search (file, archive, depth, recursions)
 	  deps_found = 0;
 	  for (dep = rule->deps; dep != 0; dep = dep->next)
 	    {
-              struct file *fp;
-
 	      /* If the dependency name has a %, substitute the stem.  */
 	      p = strchr (dep_name (dep), '%');
 	      if (p != 0)
@@ -395,12 +393,9 @@ pattern_search (file, archive, depth, recursions)
 		 dependency file we are actually looking for is in a different
 		 directory (the one gotten by prepending FILENAME's directory),
 		 so it might actually exist.  */
-              /* If we find a file but the intermediate flag is set, then it
-                 was put here by a .INTERMEDIATE: rule so ignore it.  */
 
 	      if ((!dep->changed || check_lastslash)
-		  && (((fp = lookup_file (p)) != 0 && !fp->intermediate)
-                      || file_exists_p (p)))
+		  && (lookup_file (p) != 0 || file_exists_p (p)))
 		{
 		  found_files[deps_found++] = xstrdup (p);
 		  continue;
