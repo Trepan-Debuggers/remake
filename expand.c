@@ -292,7 +292,8 @@ variable_expand (line)
 			  }
 			else
 			  {
-			    pattern = alloca (subst_end - subst_beg + 1);
+			    pattern = (char *) alloca (subst_end - subst_beg
+						       + 1);
 			    bcopy (subst_beg, pattern, subst_end - subst_beg);
 			    pattern[subst_end - subst_beg] = '\0';
 			  }
@@ -307,8 +308,9 @@ variable_expand (line)
 			      }
 			    else
 			      {
-				replace = alloca (replace_end - replace_beg
-						  + 1);
+				replace = (char *) alloca (replace_end
+							   - replace_beg
+							   + 1);
 				bcopy (replace_beg, replace,
 				       replace_end - replace_beg);
 				replace[replace_end - replace_beg] = '\0';
