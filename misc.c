@@ -879,11 +879,11 @@ atomic_stat(file, buf)
 
 struct dirent *
 atomic_readdir(dir)
-     DIR *file;
+     DIR *dir;
 {
   struct dirent *r;
 
-  while ((r = readdir (file, buf)) == NULL)
+  while ((r = readdir (dir)) == NULL)
     if (errno != EINTR)
       break;
 

@@ -547,7 +547,16 @@ extern int handling_fatal_signal;
 
 #ifdef HAVE_BROKEN_RESTART
 
+/* Here we make an assumption that a system with a broken SA_RESTART has
+   dirent.h.  Right now the only system I know of in this category is PTX, and
+   it does have dirent.h.
+*/
+#include <dirent.h>
+
 #define stat(_f,_b)     atomic_stat ((_f), (_b))
 #define readdir(_d)     atomic_readdir (_d)
+
+extern int atomic_stat PARAMS ((const char *file, struct stat *buf));
+extern struct dirent *atomic_readdir PARAMS ((DIR *dir));
 
 #endif

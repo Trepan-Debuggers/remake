@@ -1,6 +1,6 @@
 *.gz *.Z *.tar *.tgz
 =*
-TODO COPYING*
+TODO COPYING* ABOUT-NLS
 make-3* make-test*
 *.info *.info-*
 stamp-*
@@ -12,7 +12,8 @@ makebook*
 *.cp *.cps *.fn *.fns *.vr *.vrs *.tp *.tps *.ky *.kys *.pg *.pgs
 
 README README.DOS README.W32
-aclocal.m4 config.h.in config.h config.status config.cache configure
+aclocal.m4 autom4te.cache
+config.h.in config.h config.status config.cache configure
 Makefile.in Makefile
 build.sh.in build.sh
 SMakefile NMakefile Makefile.DOS
