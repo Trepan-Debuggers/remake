@@ -1262,8 +1262,8 @@ eval (struct ebuffer *ebuf, int set_default)
 
                 if (!reject)
                   {
-                    (void) define_variable (
-                      ".DEFAULT_TARGET", 15, t->name, o_file, 0);
+                    (void) define_variable_global (
+                      ".DEFAULT_TARGET", 15, t->name, o_file, 0, NILF);
                     break;
                   }
               }

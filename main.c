@@ -1553,7 +1553,7 @@ main (int argc, char **argv, char **envp)
 
   {
     struct variable *v = define_variable (
-      ".DEFAULT_TARGET", 15, "", o_default, 0);
+      ".DEFAULT_TARGET", 15, "", o_file, 0);
 
     default_target_name = &v->value;
   }

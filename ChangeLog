@@ -1,3 +1,12 @@
+2005-03-09  Boris Kolpackov  <boris@kolpackov.net>
+
+	* main.c (main): Use o_file instead of o_default when defining
+	the .DEFAULT_TARGET special variable.
+
+	* read.c (eval): Use define_variable_global() instead of
+	define_variable() when setting new value for the .DEFAULT_TARGET
+	special variable. Fixes Savannah bug #12266.
+
 2005-03-04  Boris Kolpackov  <boris@kolpackov.net>
 
 	* imlicit.c (pattern_search): Mark files for which an implicit
