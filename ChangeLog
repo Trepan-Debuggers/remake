@@ -2,6 +2,13 @@ Fri Mar  1 12:04:47 1996  Roland McGrath  <roland@charlie-brown.gnu.ai.mit.edu>
 
 	* Version 3.74.3.
 
+	* dir.c: Use canonical code from autoconf manual for dirent include.
+	[_D_NAMLEN]: Redefine NAMLEN using this.
+	(dir_contents_file_exists_p): Use NAMLEN macro.
+	(read_dirstream) [_DIRENT_HAVE_D_NAMLEN]: Only set d_namlen #if this.
+
+	* compatMakefile (objs): Add missing backslash.
+
 Wed Feb 28 03:56:20 1996  Roland McGrath  <roland@charlie-brown.gnu.ai.mit.edu>
 
 	* default.c (default_terminal_rules): Remove + prefix from RCS cmds.
