@@ -28,6 +28,19 @@ static char default_path[] = ":/bin:/usr/bin";
 /* Default shell to use.  */
 char default_shell[] = "/bin/sh";
 
+#ifdef __MSDOS__
+#include <process.h>
+static int dos_pid = 123;
+static int dos_status;
+static char *dos_bname;
+static char *dos_bename;
+static int dos_batch_file;
+#define PATH_SEPARATOR_CHAR ';'
+#else /* Not MSDOS.  */
+#define PATH_SEPARATOR_CHAR ':'
+#endif /* MSDOS.  */
+
+
 /* If NGROUPS_MAX == 0 then try other methods for finding a real value.  */
 #if defined (NGROUPS_MAX) && NGROUPS_MAX == 0
 #undef NGROUPS_MAX
@@ -260,6 +273,7 @@ reap_children (block, err)
 	}
       else if (pid == 0)
 	{
+#ifndef	__MSDOS__
 	  /* No remote children.  Check for local children.  */
 
 	  if (any_local)
@@ -308,6 +322,14 @@ reap_children (block, err)
 	      exit_sig = WIFSIGNALED (status) ? WTERMSIG (status) : 0;
 	      coredump = WCOREDUMP (status);
 	    }
+#else	/* MSDOS.  */
+	  /* Life is very different on MSDOS.  */
+	  pid = dos_pid - 1;
+	  status = dos_status;
+	  exit_code = dos_status;
+	  exit_sig = 0;
+	  coredump = 0;
+#endif	/* Not MSDOS.  */
 	}
       else
 	/* We got a remote child.  */
@@ -475,6 +497,13 @@ free_child (child)
 }
 
 #ifdef	POSIX
+#ifdef	__MSDOS__
+void
+unblock_sigs ()
+{
+  return;
+}
+#else
 extern sigset_t fatal_signal_set;
 
 void
@@ -484,6 +513,7 @@ unblock_sigs ()
   sigemptyset (&empty);
   sigprocmask (SIG_SETMASK, &empty, (sigset_t *) 0);
 }
+#endif
 #endif
 
 /* Start a job to run the commands specified in CHILD.
@@ -618,6 +648,8 @@ start_job_command (child)
   if (child->environment == 0)
     child->environment = target_environment (child->file);
 
+#ifndef	__MSDOS__
+
   /* start_waiting_job has set CHILD->remote if we can start a remote job.  */
   if (child->remote)
     {
@@ -666,6 +698,22 @@ start_job_command (child)
 	  goto error;
 	}
     }
+
+#else	/* MSDOS.  */
+  dos_status = spawnvpe (P_WAIT, argv[0], argv, child->environment);
+  ++dead_children;
+  child->pid = dos_pid++;
+  if (dos_batch_file)
+   {
+     dos_batch_file = 0;
+     remove (dos_bname);	/* Ignore errors.  */
+     if (access (dos_bename, 0))
+       dos_status = 1;
+     else
+       dos_status = 0;
+     remove (dos_bename);
+   }
+#endif	/* Not MSDOS.  */
 
   /* We are the parent side.  Set the state to
      say the commands are running and return.  */
@@ -924,6 +972,9 @@ job_next_command (child)
 static int
 load_too_high ()
 {
+#ifdef	__MSDOS__
+  return 1;
+#else
   extern int getloadavg ();
   double load;
 
@@ -949,6 +1000,7 @@ load_too_high ()
   user_access ();
 
   return load >= max_load_average;
+#endif
 }
 
 /* Start jobs that are waiting for the load to be lower.  */
@@ -1012,7 +1064,13 @@ search_path (file, path, program)
   if (path == 0 || path[0] == '\0')
     path = default_path;
 
-  if (index (file, '/') != 0)
+  if (
+#ifdef __MSDOS__
+      strpbrk (file, "/\\:")
+#else
+      index (file, '/') 
+#endif
+      != 0)
     {
       strcpy (program, file);
       return 1;
@@ -1049,7 +1107,7 @@ search_path (file, path, program)
 	  int perm;
 	  char *p;
 
-	  p = index (path, ':');
+	  p = index (path, PATH_SEPARATOR_CHAR);
 	  if (p == 0)
 	    p = path + strlen (path);
 
@@ -1189,12 +1247,22 @@ construct_command_argv_internal (line, restp, shell, ifs)
      char *line, **restp;
      char *shell, *ifs;
 {
+#ifdef __MSDOS__
+  static char sh_chars[] = "\"|<>";
+  static char *sh_cmds[] = { "break", "call", "cd", "chcp", "chdir", "cls",
+			     "copy", "ctty", "date", "del", "dir", "echo",
+			     "erase", "exit", "for", "goto", "if", "if", "md",
+			     "mkdir", "path", "pause", "prompt", "rem", "ren",
+			     "rename", "set", "shift", "time", "type",
+			     "ver", "verify", "vol", ":", 0 };
+#else
   static char sh_chars[] = "#;\"*?[]&|<>(){}$`^";
   static char *sh_cmds[] = { "cd", "eval", "exec", "exit", "login",
 			     "logout", "set", "umask", "wait", "while", "for",
 			     "case", "if", ":", ".", "break", "continue",
 			     "export", "read", "readonly", "shift", "times",
 			     "trap", "switch", 0 };
+#endif
   register int i;
   register char *p;
   register char *ap;
@@ -1402,6 +1470,34 @@ construct_command_argv_internal (line, restp, shell, ifs)
       free (new_argv);
     }
 
+#ifdef __MSDOS__
+   {
+     FILE *batch;
+     dos_batch_file = 1;
+     if (dos_bname == 0)
+       {
+	 dos_bname = tempnam (".", "mk");
+	 for (i = 0; dos_bname[i] != '\0'; ++i)
+	   if (dos_bname[i] == '/')
+	     dos_bname[i] = '\\';
+	 dos_bename = (char *) xmalloc (strlen (dos_bname) + 5);
+	 strcpy (dos_bename, dos_bname);
+	 strcat (dos_bname, ".bat");
+	 strcat (dos_bename, ".err");
+       }
+     batch = fopen(bename, "w"); /* Create a file.  */
+     if (batch != NULL)
+       fclose (batch);
+     batch = fopen (dos_bname, "w");
+     fputs ("@echo off\n", batch);
+     fputs (line, batch);
+     fprintf (batch, "\nif errorlevel 1 del %s\n", dos_bename);
+     fclose (batch);
+     new_argv = (char **) xmalloc(2 * sizeof(char *));
+     new_argv[0] = strdup (bname);
+     new_argv[1] = 0;
+   }
+#else	/* Not MSDOS.  */
   {
     /* SHELL may be a multi-word command.  Construct a command line
        "SHELL -c LINE", with all special chars in LINE escaped.
@@ -1459,6 +1555,7 @@ construct_command_argv_internal (line, restp, shell, ifs)
     new_argv = construct_command_argv_internal (new_line, (char **) NULL,
 						(char *) 0, (char *) 0);
   }
+#endif	/* MSDOS.  */
 
   return new_argv;
 }
