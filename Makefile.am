@@ -2,40 +2,60 @@
 
 AUTOMAKE_OPTIONS = 1.4
 
+SUBDIRS =	$(GLOBDIR) i18n
+
 bin_PROGRAMS =	make
 
-make_SOURCES =	main.c commands.c job.c dir.c file.c misc.c read.c remake.c \
-		rule.c implicit.c default.c variable.c expand.c function.c \
-		vpath.c version.c ar.c arscan.c remote-$(REMOTE).c \
-		commands.h dep.h filedef.h job.h make.h rule.h variable.h \
-		debug.h signame.c signame.h \
-		getopt.c getopt1.c getopt.h
+# These source files also have gettext references
+SRCS	     =  ar.c arscan.c commands.c dir.c expand.c file.c function.c \
+		getopt.c implicit.c job.c main.c misc.c read.c remake.c \
+		rule.c signame.c variable.c vpath.c
 
-make_LDADD =	$(LIBOBJS) @ALLOCA@ $(GLOBLIB) @INTLLIBS@
+make_SOURCES =	$(SRCS) default.c remote-$(REMOTE).c version.c \
+		getopt.c getopt1.c
+
+noinst_HEADERS = commands.h dep.h filedef.h job.h make.h rule.h variable.h \
+		debug.h signame.h getopt.h gettext.h
+
+make_LDADD =	$(LIBOBJS) @ALLOCA@ $(GLOBLIB)
 
 man_MANS =	make.1
 info_TEXINFOS =	make.texinfo
 
-localedir =	$(datadir)/locale
-DEFS =		-DLOCALEDIR=\"$(localedir)\" -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\" @DEFS@
+DEFS =		-DALIASPATH=\"$(aliaspath)\" -DLOCALEDIR=\"$(localedir)\" -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\" @DEFS@
 
-INCLUDES =	-I. -I$(srcdir) $(GLOBINC) -I./intl -I$(top_srcdir)/intl
+INCLUDES =	-I. -I$(srcdir) $(GLOBINC)
 
 EXTRA_DIST = 	README build.sh.in $(man_MANS) README.customs remote-cstms.c\
-		make-stds.texi texinfo.tex SCOPTIONS SMakefile\
+		make-stds.texi SCOPTIONS SMakefile\
 		README.Amiga Makefile.ami config.ami make.lnk amiga.c amiga.h\
 		README.DOS Makefile.DOS configure.bat dosbuild.bat configh.dos\
 		README.W32 NMakefile config.h.W32 build_w32.bat subproc.bat\
 		readme.vms makefile.vms makefile.com config.h-vms vmsdir.h\
 		vmsfunctions.c vmsify.c\
-		ABOUT-NLS
-
-SUBDIRS =	$(GLOBDIR) intl po
+		gettext.c\
+		glob/COPYING.LIB glob/ChangeLog glob/Makefile.am\
+		glob/Makefile.ami glob/Makefile.in glob/SCOPTIONS\
+		glob/SMakefile glob/configure.bat glob/fnmatch.c\
+		glob/fnmatch.h glob/glob.c glob/glob.h
 
 MOSTLYCLEANFILES = loadavg.c
 CLEANFILES =	loadavg
 
 MAKE_HOST =	@MAKE_HOST@
+
+
+# --------------- Internationalization Section
+
+POTFILES     =	$(SRCS) remote-cstms.c
+
+localedir    =	$(prefix)/share/locale
+aliaspath    =	$(localedir):.
+
+all-local: $(srcdir)/stamp-pot
+
+$(srcdir)/stamp-pot: $(POTFILES)
+	@echo "$(POTFILES)" > $@
 
 
 # --------------- Local INSTALL Section
