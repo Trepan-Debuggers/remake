@@ -887,13 +887,13 @@ load_too_high ()
 void
 start_waiting_jobs ()
 {
+  struct child *job;
+
   if (waiting_jobs == 0)
     return;
 
   do
     {
-      struct child *job;
-
       /* Check for recently deceased descendants.  */
       reap_children (0, 0);
 
