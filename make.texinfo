@@ -6,7 +6,7 @@
 @smallbook
 @c %**end of header
 
-@finalout
+@c finalout
 
 @c Combine the variable and function indices:
 @synindex vr fn
@@ -102,8 +102,8 @@ This manual describes @code{make} and contains the following chapters:@refill
 
 @c !!! Edit descriptions.
 @menu
-* Copying::                     GNU GENERAL PUBLIC LICENSE
 * Overview::                    Introducing @code{make}.
+* Copying::                     Your rights and freedoms.
 * Introduction::                An introduction to makefiles.
 * Makefiles::                   Writing Makefiles
 * Rules::                       Writing Rules
@@ -116,8 +116,7 @@ This manual describes @code{make} and contains the following chapters:@refill
 * Archives::                    Using @code{make} to Update Archive Files
 * Features::                    Features of GNU @code{make}
 * Missing::                     Missing Features of GNU @code{make}
-* Summary::                     Summary of Directives, Special Targets,
-                                  and Special Variables
+* Quick Reference::             Quick Reference
 * Complex Makefile::            Complex Makefile
 * Concept Index::               Index of Concepts
 * Name Index::                  Index of Functions, Variables, & Directives
@@ -302,6 +301,7 @@ Implicit Rule for Archive Member Targets
 @include gpl.texinfo
 
 @node Overview, Introduction, Copying, Top
+@comment  node-name,  next,  previous,  up
 @chapter Overview of @code{make}
 
 The @code{make} utility automatically determines which pieces of a
@@ -321,7 +321,7 @@ from others whenever the others change.
 * Bugs::                        Problems and Bugs
 @end menu
 
-@node Preparing, Reading, Overview, Overview
+@node Preparing, Reading, Overview , Overview
 @ifinfo
 @heading Preparing and Running Make
 @end ifinfo
@@ -363,7 +363,7 @@ If you are familiar with other @code{make} programs, @ref{Features}
 lists the enhancements GNU @code{make} has, and @ref{Missing} explains
 the few things GNU @code{make} lacks that others have.
 
-For a quick summary, @pxref{Summary} and @ref{Special Targets}.
+For a quick summary, @pxref{Options Summary} and @ref{Special Targets}.
 
 @node Bugs,  , Reading, Overview
 @section Problems and Bugs
@@ -454,7 +454,7 @@ together to produce the new executable editor.
 @end menu
 
 
-@node Parts of Makefiles, Simple Makefile, Introduction, Introduction
+@node Parts of Makefiles, Simple Makefile,  , Introduction
 @comment  node-name,  next,  previous,  up
 @section The Parts of a Makefile 
 
@@ -549,14 +549,12 @@ type:
 make
 @end example
 
-@group
 To use this makefile to delete the executable file and all the object
 files from the directory, type:
 
 @example
 make clean
 @end example
-@end group
 
 In the example makefile, the targets include the executable file
 @samp{edit}, and the object files @samp{main.o} and @samp{kbd.o}.  The
@@ -855,7 +853,7 @@ reading a data base called the @dfn{makefile}.
                                  with another makefile.
 @end menu
 
-@node Makefile Contents, Makefile Names, Makefiles, Makefiles
+@node Makefile Contents, Makefile Names,  , Makefiles
 @section What Makefiles Contain
 
 Makefiles contain four kinds of things: @dfn{rules}, @dfn{variable
@@ -1165,7 +1163,7 @@ the makefile.  @xref{Goals, ,Arguments to Specify the Goals}.
 @end menu
 
 @ifinfo
-@node Rule Example, Rule Syntax, Rules, Rules
+@node Rule Example, Rule Syntax,  , Rules
 @section Rule Example
 
 Here is an example of a rule:
@@ -1286,7 +1284,7 @@ specific file whose name consists of @samp{foo}, an asterisk, and
                                   it does not normally take place.
 @end menu
 
-@node Wildcard Examples, Wildcard Pitfall, Wildcards, Wildcards
+@node Wildcard Examples, Wildcard Pitfall,  , Wildcards
 @subsection Wildcard Examples
 
 Wildcards can be used in the commands of a rule, where they are expanded
@@ -1434,7 +1432,7 @@ you do not need to change the individual rules, just the search paths.
 * Libraries/Search::            Directory search for link libraries.
 @end menu
 
-@node General Search, Selective Search, Directory Search, Directory Search
+@node General Search, Selective Search,  , Directory Search
 @subsection @code{VPATH}: Search Path for All Dependencies
 
 The value of the @code{make} variable @code{VPATH} specifies a list of
@@ -1684,7 +1682,7 @@ whether there is a file named @file{clean}.
 
 Since @code{make} knows that phony targets do not name actual files
 that could be remade from other files, @code{make} skips the implicit
-rule search for phony targets (@pxref{Implicit}).  This is why
+rule search for phony targets (@pxref{Implicit Rules}).  This is why
 declaring a target phony is good for performance, even if you are not
 worried about the actual file existing.
 
@@ -1851,6 +1849,7 @@ for @code{.SILENT} are not meaningful.
 use the more selective ways to silence specific commands.
 @xref{Echoing, ,Command Echoing}.
 
+@c !!! overful hbox here
 @item .EXPORT_ALL_VARIABLES
 Simply by being mentioned as a target, @code{.EXPORT_ALL_VARIABLES}
 tells @code{make} to export all variables to child processes by default.
@@ -1941,7 +1940,7 @@ be @emph{analogous}, but not necessarily @emph{identical}.
 * Static vs Implicit::          When are they better than implicit rules?
 @end menu
 
-@node Static Usage, Static vs Implicit, Static Pattern, Static Pattern
+@node Static Usage, Static vs Implicit,  , Static Pattern
 @subsection Syntax of Static Pattern Rules
 
 Here is the syntax of a static pattern rule:
@@ -2171,7 +2170,7 @@ Text on a line before a @samp{#} is not part of the comment.
 * Empty Commands::              Defining useful, do-nothing commands.
 @end menu
 
-@node Echoing, Execution, Commands, Commands
+@node Echoing, Execution,  , Commands
 @section Command Echoing
 
 @cindex echoing (of commands)
@@ -2457,19 +2456,19 @@ how the sub-@code{make} relates to the top-level @code{make}.
                                   makefiles with recursive @code{make} commands.
 @end menu
 
-@node MAKE Variable, Variables/Recursion, Recursion, Recursion
+@node MAKE Variable, Variables/Recursion,  , Recursion
 @subsection How the @code{MAKE} Variable Works
 @vindex MAKE
 
 Recursive @code{make} commands should always use the variable @code{MAKE},
 not the explicit command name @samp{make}, as shown here:
 
-@group
 @example
+@group
 subsystem:
         cd subdir; $(MAKE)
-@end example
 @end group
+@end example
 
 The value of this variable is the file name with which @code{make} was
 invoked.  If this file name was @file{/bin/make}, then the command executed
@@ -2807,7 +2806,7 @@ but this would be confusing because such a line looks empty.
 You may be wondering why you would want to define a command string that
 does nothing.  The only reason this is useful is to prevent a target
 from getting implicit commands (from implicit rules or the
-@code{.DEFAULT} special target; @pxref{Implicit Rules} and @ref{Last
+@code{.DEFAULT} special target; @pxref{Implicit Rules} and @pxref{Last
 Resort, ,Defining Last-Resort Default Rules}).@refill
 
 You may be inclined to define empty command strings for targets that are
@@ -2863,7 +2862,7 @@ command options (@pxref{Overriding, ,Overriding Variables}).
 * Environment::                 Variable values can come from the environment.
 @end menu
 
-@node Reference, Flavors, Using Variables, Using Variables
+@node Reference, Flavors,  , Using Variables
 @section Basics of Variable References
 
 To substitute a variable's value, write a dollar sign followed by the name
@@ -3057,7 +3056,7 @@ variables in more flexible ways.
 * Computed Names::              Computing the name of the variable to refer to.
 @end menu
 
-@node Substitution Refs, Computed Names, Advanced, Advanced
+@node Substitution Refs, Computed Names,  , Advanced
 @subsection Substitution References
 @cindex modified variable reference
 @cindex substitution variable reference
@@ -3095,17 +3094,17 @@ equivalent to @samp{$(patsubst @var{a},@var{b},$(@var{var}))}.
 @xref{Text Functions, ,Functions for String Substitution and Analysis},
 for a description of the @code{patsubst} function.@refill
 
-@group
-For example:
-
 @example
+@group
+@exdent For example:
+
 foo := a.o b.o c.o
 bar := $(foo:%.o=%.c)
+@end group
 @end example
 
 @noindent
 sets @samp{bar} to @samp{a.c b.c c.c}.
-@end group
 
 @node Computed Names,  , Substitution Refs, Advanced
 @subsection Computed Variable Names
@@ -3483,7 +3482,7 @@ commands at the time of execution.@refill
 * Testing Flags::               Conditionals that test flags.
 @end menu
 
-@node Conditional Example, Conditional Syntax, Conditionals, Conditionals
+@node Conditional Example, Conditional Syntax,  , Conditionals
 @section Example of a Conditional
 
 The following example of a conditional tells @code{make} to use one set of libraries if the
@@ -3742,7 +3741,7 @@ call, just as a variable might be substituted.
 * Shell Function::              Substitute the output of a shell command.
 @end menu
 
-@node Syntax of Functions, Text Functions, Functions, Functions
+@node Syntax of Functions, Text Functions,  , Functions
 @section Function Call Syntax
 @cindex $ (function call)
 @cindex arguments
@@ -4134,10 +4133,12 @@ $(word 2, foo bar baz)
 @noindent
 returns @samp{bar}.
 
+@c Following item phrased to prevent overful hbox.  --RJC 17 Jul 92
 @item $(words @var{text})
 @findex words
-Returns the number of words in @var{text}.  Thus, @w{@code{$(word
-$(words @var{text}),@var{text})}} is the last word of @var{text}.@refill
+Returns the number of words in @var{text}.  
+Thus, the last word of @var{text} is
+@w{@code{$(word $(words @var{text}),@var{text})}}.@refill
 
 @item $(firstword @var{names})
 @findex firstword
@@ -4340,13 +4341,13 @@ it.
 If you want to override a previous definition of @code{bletch} if it came
 from the environment, even under @samp{-e}, you could instead write:
 
-@group
 @example
+@group
 ifneq "$(findstring environment,$(origin bletch))" ""
 bletch = barf, gag, etc.
 endif
-@end example
 @end group
+@end example
 
 Here the redefinition takes place if @samp{$(origin bletch)} returns either
 @samp{environment} or @samp{environment override}.
@@ -4424,7 +4425,7 @@ things or many others.
 * Options Summary::             Summary of Options
 @end menu
 
-@node Makefile Arguments, Goals, Running, Running
+@node Makefile Arguments, Goals,  , Running
 @section Arguments to Specify the Makefile
 
 The way to specify the name of the makefile is with the @samp{-f} option.
@@ -4951,7 +4952,7 @@ You can define your own implicit rules by writing @dfn{pattern rules}.
                                   implicit rules.
 @end menu
 
-@node Using Implicit, Catalogue of Rules, Implicit Rules, Implicit Rules
+@node Using Implicit, Catalogue of Rules,  , Implicit Rules
 @section Using Implicit Rules
 
 To allow @code{make} to find a customary method for updating a target file,
@@ -5094,6 +5095,7 @@ program.  The precise command used is as follows:@refill
 @samp{$(FC) -F $(FFLAGS) $(RFLAGS)}.
 @end table
 
+@c !!! overfull hbox here
 @item Compiling Modula-2 programs
 @file{@var{n}.sym} will be made from @file{@var{n}.def} with a command
 of the form @samp{$(M2C) $(M2FLAGS) $(DEFFLAGS)}.  @file{@var{n}.o}
@@ -5518,7 +5520,7 @@ Thus, a pattern rule @samp{%.o : %.c} says how to make any file
 * Canceling Rules::             How to override or cancel built-in rules.
 @end menu
 
-@node Pattern Intro, Pattern Examples, Pattern Rules, Pattern Rules
+@node Pattern Intro, Pattern Examples,  , Pattern Rules
 @subsection Introduction to Pattern Rules
 @cindex pattern rule
 
@@ -5662,7 +5664,7 @@ empty when the target is not an archive member.
 @item $<
 The name of the first dependency.  if the target got its commands from
 an implicit rule, this will be the first dependency added by the
-implicit rule (@pxref{Implicit}).
+implicit rule (@pxref{Implicit Rules}).
 
 @item $?
 The names of all the dependencies that are newer than the target, with
@@ -5701,12 +5703,13 @@ the dependencies that have changed.  For example, suppose that an archive
 named @file{lib} is supposed to contain copies of several object files.
 This rule copies just the changed object files into the archive:
 
-@group
 @example
+@group
 lib: foo.o bar.o lose.o win.o
         ar r lib $?
-@end example
 @end group
+@end example
+
 
 Of the variables listed above, four have values that are single file
 names, and two have values that are lists of file names.  These six
@@ -6151,7 +6154,7 @@ main use is as subroutine libraries for linking.
 * Archive Update::              The implicit rule for archive member targets.
 @end menu
 
-@node Archive Members, Archive Update, Archives, Archives
+@node Archive Members, Archive Update,  , Archives
 @section Archive Members as Targets
 @cindex archive member targets
 
@@ -6234,7 +6237,7 @@ named @file{foo.o}.  In connection with such usage, the automatic variables
 * Archive Symbols::             How to update archive symbol directories.
 @end menu
 
-@node Archive Symbols,  , Archive Update, Archive Update
+@node Archive Symbols,  ,  , Archive Update
 @subsection Updating Archive Symbol Directories
 @cindex __.SYMDEF
 
@@ -6459,7 +6462,7 @@ functionality in that it will check out SCCS files for makefiles.
 Various new built-in implicit rules.  @xref{Catalogue of Rules, ,Catalogue of Implicit Rules}.
 @end itemize
 
-@node Missing, Summary, Features, Top
+@node Missing, Quick Reference, Features, Top
 @chapter Incompatibilities and Missing Features
 
 The @code{make} programs in various other systems support a few features
@@ -6802,7 +6805,7 @@ The default list of suffixes before @code{make} reads any makefiles.
 @end table
 
 @c !!! this is a pretty lame example --roland
-@node Complex Makefile, Concept Index, Summary, Top
+@node Complex Makefile, Concept Index, Quick Reference, Top
 @appendix A Complex Makefile Example
 
 Here is the makefile for the GNU @code{tar} program.  This is a
