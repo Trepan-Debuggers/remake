@@ -505,7 +505,7 @@ extern int max_load_average;
 extern char *program;
 extern char *starting_directory;
 extern unsigned int makelevel;
-extern char *version_string, *remote_description;
+extern char *version_string, *remote_description, *make_host;
 
 extern unsigned int commands_started;
 

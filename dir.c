@@ -1130,6 +1130,12 @@ read_dirstream (__ptr_t stream)
 	      buf = xmalloc (bufsz);
 	    }
 	  d = (struct dirent *) buf;
+#ifdef __MINGW32__
+# if __MINGW32_VERSION_MAJOR < 3 || (__MINGW32_VERSION_MAJOR == 3 && \
+				     __MINGW32_VERSION_MINOR == 0)
+	  d->d_name = xmalloc(len);
+# endif
+#endif
 	  FAKE_DIR_ENTRY (d);
 #ifdef _DIRENT_HAVE_D_NAMLEN
 	  d->d_namlen = len - 1;
