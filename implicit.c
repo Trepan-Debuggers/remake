@@ -513,7 +513,14 @@ pattern_search (file, archive, depth, recursions)
       if (recursions == 0)
 	{
 	  dep->name = 0;
-	  dep->file = enter_file (s);	
+	  dep->file = lookup_file (s);
+	  if (dep->file == 0)
+	    /* enter_file consumes S's storage.  */
+	    dep->file = enter_file (s);
+	  else
+	    /* A copy of S is already allocated in DEP->file->name.
+	       So we can free S.  */
+	    free (s);
 	}
       else
 	{
