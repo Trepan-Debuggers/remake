@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.66 1999/03/26 07:09:19 psmith Exp $])
+AC_REVISION([$Id: configure.in,v 1.67 1999/03/30 06:19:18 psmith Exp $])
 AC_PREREQ(2.13)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 
@@ -181,7 +181,11 @@ if test -r $srcdir/maintMakefile; then
 fi
 AC_SUBST_FILE(MAINT_MAKEFILE)
 
-AC_OUTPUT(Makefile glob/Makefile build.sh)
+dnl build.sh is also an AC_OUTPUT, but we can't specify it here because
+dnl it's built from build.template and autoconf will crap out.  So, we
+dnl build it in the makefiles themselves.
+
+AC_OUTPUT(Makefile glob/Makefile)
 
 case "$make_badcust" in
   yes) echo

@@ -1,3 +1,20 @@
+1999-03-30  Paul D. Smith  <psmith@gnu.org>
+
+	* configure.in: Don't put build.sh here, since build.sh.in doesn't
+	exist initially.  This cause autoreconf and automake to fail when
+	run on a clean CVS checkout.  Instead, we create build.sh in the
+	Makefile (see below).
+
+	* Makefile.am: Remove BUILT_SOURCES; this is no longer relevant.
+	Put those files directly into EXTRA_DIST so they're distributed.
+	Create a local build rule to create build.sh.
+	Create a local maintainer-clean rule to delete all the funky
+	maintainers files.
+
+	* maintMakefile: Makefile.in depends on README, since automake
+	fails if it doesn't exist.  Also don't remove glob/Makefile.in
+	here, as it causes problems.
+
 1999-03-26  Paul D. Smith  <psmith@gnu.org>
 
 	* configure.in: Substitute GLOBLIB if we need the link the

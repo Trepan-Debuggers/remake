@@ -17,9 +17,7 @@ man_MANS =	make.1
 
 INCLUDES =	-DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\"
 
-BUILT_SOURCES =	README build.sh.in
-
-EXTRA_DIST = 	$(BUILT_SOURCES) $(man_MANS) README.customs remote-cstms.c\
+EXTRA_DIST = 	README build.sh.in $(man_MANS) README.customs remote-cstms.c\
 		make-stds.texi texinfo.tex SCOPTIONS SMakefile\
 		README.Amiga Makefile.ami config.ami make.lnk amiga.c amiga.h\
 		README.DOS Makefile.DOS configure.bat dosbuild.bat configh.dos\
@@ -31,6 +29,13 @@ SUBDIRS =	glob
 
 MOSTLYCLEANFILES = loadavg.c
 CLEANFILES =	loadavg
+
+
+# --------------- Local BUILD Section
+
+build.sh:  $(top_builddir)/config.status $(srcdir)/build.sh.in
+        cd $(top_builddir) \
+	  && CONFIG_FILES=build.sh.in CONFIG_HEADERS= $(SHELL) ./config.status
 
 
 # --------------- Local INSTALL Section
@@ -123,6 +128,12 @@ check-regression: all
 	  esac; \
 	  echo "cd $$testdir && ./run_make_tests -make $$here/make $(MAKETESTFLAGS)"; \
 	  cd $$testdir && ./run_make_tests -make $$here/make $(MAKETESTFLAGS)
+
+
+# --------------- Local CLEAN section
+
+maintainer-clean-local:
+	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
 
 
 # --------------- Maintainer's Section

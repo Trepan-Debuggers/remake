@@ -1,5 +1,6 @@
 # Maintainer-only makefile segment.  This contains things that are relevant
-# only if you have the full copy of the GNU make sources, not a dist copy.
+# only if you have the full copy of the GNU make sources from the CVS
+# tree, not a dist copy.
 #
 
 # Find the glob source files... this might be dangerous, but we're maintainers!
@@ -9,6 +10,11 @@ globhdr := $(wildcard glob/*.h)
 
 TEMPLATES = README README.DOS config.ami configh.dos config.h.W32 config.h-vms
 MTEMPLATES = Makefile.DOS SMakefile
+
+# We need this to ensure that README is created on time to avoid errors
+# by automake.
+#
+Makefile.in: README
 
 # General rule for turning a .template into a regular file.
 #
@@ -62,8 +68,7 @@ build.sh.in: build.template Makefile.am maintMakefile
 #
 # And _I_ want them to be removed ;)
 #
-maintFILES = configure aclocal.m4 config.h.in Makefile.in stamp-h.in \
-	     glob/Makefile.in
+maintFILES = configure aclocal.m4 config.h.in Makefile.in stamp-h.in
 
 MAINTAINERCLEANFILES =  $(maintFILES) $(TEMPLATES) $(MTEMPLATES) NMakefile \
 			missing build.sh.in .dep_segment
