@@ -1,14 +1,45 @@
+1999-09-16  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/reinvoke: Remove invocations of "touch" in
+	makefiles.  See the comments on the touch function rewrite below.
+	Note that UNIX touch behaves the same way if the file already
+	exists: it sets the time to the _local_ time.  We don't want
+	this.  This is probably a good tip for makefile writers in
+	general, actually... where practical.
+	* scripts/options/dash-l: Ditto.
+	* scripts/options/dash-n: Ditto.
+
+	* test_driver.pl (run_each_test): In retrospect, I don't like the
+	.lN/.bN/.dN postfix required by DOS.  So, for non-DOS systems I
+	changed it back to use .log, .base, and .diff.
+
+	* run_make_tests.pl (set_more_defaults): Move the check for the
+	make pathname to here from set_defaults (that's too early since it
+	happens before the command line processing).
+	Create a new variable $port_type, calculated from $osname, to
+	specify what kind of system we're running on.  We should integrate
+	the VOS stuff here, too.
+	(valid_option): Comment out the workdir/-work stuff so people
+	won't be fooled into thinking it works... someone needs to fix
+	this, though!
+
+	* scripts/functions/origin: Use $port_type instead of $osname.
+	* scripts/functions/foreach: Ditto.
+	* scripts/features/default_names: Ditto.
+
 1999-09-15  Paul D. Smith  <psmith@gnu.org>
 
 	* test_driver.pl (touch): Rewrite this function.  Previously it
 	used to use utime() to hard-set the time based on the current
-	local clock.  This fails badly on networked filesystems where the
-	FS server clock is skewed from the local clock: normally modifying
-	a file causes it to get a mod time based on the _server's_ clock.
-	Hard-setting it based on the _local_ clock causes gratuitous
-	errors and makes the tests unreliable except on local filesystems.
-	The new function will simply modify the file, allowing the
-	filesystem to set the mod time as it sees fit.
+	local clock, or, if the file didn't exist, it merely created it.
+	This mirrors exactly what real UNIX touch does, but it fails badly
+	on networked filesystems where the FS server clock is skewed from
+	the local clock: normally modifying a file causes it to get a mod
+	time based on the _server's_ clock.  Hard-setting it based on the
+	_local_ clock causes gratuitous errors and makes the tests
+	unreliable except on local filesystems.  The new function will
+	simply modify the file, allowing the filesystem to set the mod
+	time as it sees fit.
 
 	* scripts/features/parallelism: The second test output could
 	change depending on how fast some scripts completed; use "sleep"

@@ -104,8 +104,8 @@ To build:
       and `rm' programs (the latter from Fileutils).
 
    8. To run the test suite, type "make check".  This requires a Unix
-      shell (I used the DJGPP port of Bash 2.03), Perl, Fileutils and
-      Sh-utils.
+      shell (I used the DJGPP port of Bash 2.03), Perl, Sed, Fileutils
+      and Sh-utils.
 
 
 Notes:

@@ -15,12 +15,13 @@ defined per the following list:
 'override'             defined by override in makefile
 'automatic'            Automatic variable\n";
 
-# On WIN32 systems, HOME is meaningless. SystemRoot should be defined though.
-# With DJGPP, HOME is not guaranteed to be defined.  Use DJDIR instead.
+# On WIN32 systems, HOME is meaningless. SystemRoot should be defined
+# though.  With DJGPP, HOME is not guaranteed to be defined.  Use DJDIR
+# instead.
 #
-$homevar = (($osname =~ /Windows/i)
-	    ? "SystemRoot"
-	    : (($osname =~ /DOS/i) ? "DJDIR" : "HOME"));
+$homevar = (($port_type eq 'Windows') ? "SystemRoot"
+	    : (($port_type eq 'DOS') ? "DJDIR"
+	       : "HOME"));
 
 open(MAKEFILE,"> $makefile");
 

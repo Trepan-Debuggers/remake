@@ -9,7 +9,6 @@
 #                         [-verbose]
 #                         [-keep]
 #                         [-make <make prog>]
-#                         [-work <work dir>]
 #                        (and others)
 
 require "test_driver.pl";
@@ -27,11 +26,14 @@ sub valid_option
       }
       return 1;
    }
-   elsif ($option =~ /^-work([-_]?dir)?$/)
-   {
-      $workdir = shift @argv;
-      return 1;
-   }
+
+# This doesn't work--it _should_!  Someone needs to fix this badly.
+#
+#   elsif ($option =~ /^-work([-_]?dir)?$/)
+#   {
+#      $workdir = shift @argv;
+#      return 1;
+#   }
 
    return 0;
 }
@@ -120,22 +122,42 @@ sub set_defaults
    $make_path = "make";
    $tmpfilesuffix = "mk";
    $pwd = &get_this_pwd;
-
-   # Find the full pathname of Make.  For DOS systems this is more
-   # complicated, so we ask make itself.
-
-   open(MAKEFILE,"> makefile.tmp");
-   print MAKEFILE 'all: ; @echo $(MAKE)' . "\n";
-   close(MAKEFILE);
-   $make_path = `$make_path -f makefile.tmp`;
-   chop $make_path;
-   unlink "makefile.tmp";
 }
 
 sub set_more_defaults
 {
    local($string);
    local($index);
+
+   # find the type of the port.  We do this up front to have a single
+   # point of change if it needs to be tweaked.
+   #
+   # This is probably not specific enough.
+   #
+   if ($osname =~ /Windows/i) {
+     $port_type = 'W32';
+   }
+   # Bleah, the osname is so variable on DOS.  This kind of bites.
+   # Well, as far as I can tell if we check for some text at the
+   # beginning of the line with either no spaces or a single space, then
+   # a D, then either "OS", "os", or "ev" and a space.  That should
+   # match and be pretty specific.
+   elsif ($osname =~ /^([^ ]*|[^ ]* [^ ]*)D(OS|os|ev) /) {
+     $port_type = 'DOS';
+   }
+   # Everything else, right now, is UNIX.  Note that we should integrate
+   # the VOS support into this as well and get rid of $vos; we'll do
+   # that next time.
+   else {
+     $port_type = 'UNIX';
+   }
+
+   # Find the full pathname of Make.  For DOS systems this is more
+   # complicated, so we ask make itself.
+
+   $make_path = `sh -c 'echo "all:;\@echo \$(MAKE)" | $make_path -f-'`;
+   chop $make_path;
+   print "Make\t= `$make_path'\n" if $debug;
 
    $string = `$make_path -v -f /dev/null 2> /dev/null`;
 

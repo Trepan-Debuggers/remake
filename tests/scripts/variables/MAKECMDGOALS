@@ -1,4 +1,6 @@
-$description = "The following test creates a makefile to test the MAKECMDGOALS variable.";
+#                                                                    -*-perl-*-
+
+$description = "Test the MAKECMDGOALS variable.";
 
 $details = "\
 We construct a makefile with various targets, all of which print out

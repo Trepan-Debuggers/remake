@@ -2403,6 +2403,7 @@ define_makeflags (all, makefile)
   /* Construct the value in FLAGSTRING.
      We allocate enough space for a preceding dash and trailing null.  */
   flagstring = (char *) alloca (1 + flagslen + 1);
+  bzero (flagstring, 1 + flagslen + 1);
   p = flagstring;
   words = 1;
   *p++ = '-';

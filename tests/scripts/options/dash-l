@@ -25,7 +25,7 @@ SHELL = /bin/sh
 
 define test
 if [ ! -f test-file ]; then \
-  touch test-file; sleep 2; rm -f test-file; \
+  echo >> test-file; sleep 2; rm -f test-file; \
 else \
   echo $@ FAILED; \
 fi

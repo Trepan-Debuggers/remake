@@ -153,7 +153,7 @@ sub toplevel
   {
     print "\n$num_failed Test";
     print "s" unless $num_failed == 1;
-    print " Failed (See .diff files in $workdir dir for details) :-(\n\n";
+    print " Failed (See .$diffext files in $workdir dir for details) :-(\n\n";
     return 0;
   }
   else
@@ -363,9 +363,21 @@ sub run_each_test
     $testpath = "$workpath$pathsep$testname";
     # Leave enough space in the extensions to append a number, even
     # though it needs to fit into 8+3 limits.
-    $log_filename = "$testpath.l";
-    $diff_filename = "$testpath.d";
-    $base_filename = "$testpath.b";
+    if ($port_host eq 'DOS') {
+      $logext = 'l';
+      $diffext = 'd';
+      $baseext = 'b';
+      $extext = '';
+   }
+    else {
+      $logext = 'log';
+      $diffext = 'diff';
+      $baseext = 'base';
+      $extext = '.';
+    }
+    $log_filename = "$testpath.$logext";
+    $diff_filename = "$testpath.$diffext";
+    $base_filename = "$testpath.$baseext";
     $tmp_filename = "$testpath.$tmpfilesuffix";
 
     &setup_for_test;          # suite-defined
@@ -602,7 +614,7 @@ sub compare_output
       print "\nCreating Difference File ...\n";
     }
     # Create the difference file
-    local($command) = "diff -u " . &get_basefile . " " . $logfile;
+    local($command) = "diff -c " . &get_basefile . " " . $logfile;
     &run_command_with_output(&get_difffile,$command);
 
     return 0;
@@ -1030,7 +1042,7 @@ sub num_suffix
   local($num) = @_;
 
   if (--$num > 0) {
-    return "$num";
+    return "$extext$num";
   }
 
   return "";
