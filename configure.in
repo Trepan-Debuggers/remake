@@ -3,7 +3,7 @@
 AC_INIT([GNU make],[3.81rc1],[bug-make@gnu.org])
 
 AC_PREREQ(2.58)
-AC_REVISION([[$Id: configure.in,v 1.121 2004/01/21 06:33:00 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.122 2004/02/23 06:25:54 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -51,6 +51,9 @@ AC_HEADER_STAT
 AC_HEADER_TIME
 AC_CHECK_HEADERS(stdlib.h locale.h unistd.h limits.h fcntl.h string.h \
 		 memory.h sys/param.h sys/time.h sys/timeb.h)
+
+# Determine what kind of variadic function calls we support
+AC_CHECK_HEADERS(stdarg.h varargs.h, break)
 
 AM_PROG_CC_C_O
 AM_PROG_CC_STDC
@@ -244,6 +247,12 @@ AC_CACHE_CHECK(for SA_RESTART, make_cv_sa_restart, [
       [[return SA_RESTART;]])],
     [make_cv_sa_restart=yes],
     [make_cv_sa_restart=no])])
+
+# enable make_cv_sa_restart for OS/2
+case "$host_os" in
+  os2*) make_cv_sa_restart=yes ;;
+esac
+
 if test "$make_cv_sa_restart" != no; then
   AC_DEFINE(HAVE_SA_RESTART, 1,
      [Define if <signal.h> defines the SA_RESTART constant.])

@@ -1,3 +1,8 @@
+2004-02-21  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/functions/origin: Set our own environment variable
+	rather than relying on $HOME.
+
 2004-01-21  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/features/conditionals: Test arguments to ifn?def which

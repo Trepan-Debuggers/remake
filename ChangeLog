@@ -1,3 +1,40 @@
+2004-02-22  Paul D. Smith  <psmith@gnu.org>
+
+	* main.c (decode_switches): Require non-empty strings for all our
+	string command-line options.  Fixes Debian bug # 164165.
+
+	* configure.in: Check for stdarg.h and varargs.h.
+	* make.h (USE_VARIADIC): Set this if we can use variadic functions
+	for printing messages.
+	* misc.c: Check USE_VARIADIC instead of (obsolete) HAVE_STDVARARGS.
+	(message): Ditto.
+	(error): Ditto.
+	(fatal): Ditto.
+
+	A number of patches for OS/2 support from Andreas Buening
+	<andreas.buening@nexgo.de>:
+
+	* job.c (child_handler) [OS/2]: Allow this on OS/2 but we have to
+	disable the SIGCHLD handler.
+	(reap_children) [OS/2]: Remove special handling of job_rfd.
+	(set_child_handler_action_flags) [OS/2]: Use this function in OS/2.
+	(new_job) [OS/2]: Disable the SIGCHLD handler on OS/2.
+	* main.c (main) [OS/2]: Special handling for paths in OS/2.
+	* configure.in [OS/2]: Force SA_RESTART for OS/2.
+	* Makefile.am (check-regression): Use $(EXEEXT) for Windows-type
+	systems.
+
+2004-02-21  Paul D. Smith  <psmith@gnu.org>
+
+	* w32/subproc/sub_proc.c (process_easy) [W32]: Christoph Schulz
+	<mail@kristov.de> reports that if process_begin() fails we don't
+	handle the error condition correctly in all cases.
+	* w32/subproc/w32err.c (map_windows32_error_to_string): Make sure
+	to have a newline on the message.
+
+	* job.c (construct_command_argv_internal): Add "test" to UNIX
+	sh_cmds[].  Fixes Savannah bug # 7606.
+
 2004-02-04  Paul D. Smith  <psmith@gnu.org>
 
 	* job.c (vms_handle_apos) [VMS]: Fix various string handling

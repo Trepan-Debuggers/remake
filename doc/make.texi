@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.17 2004/01/08 03:17:08 psmith Exp $
+@set RCSID $Id: make.texi,v 1.18 2004/02/23 06:25:54 psmith Exp $
 @set EDITION 0.61
 @set VERSION 3.81
 @set UPDATED 02 May 2003
@@ -1949,9 +1949,8 @@ just the search paths.
 The value of the @code{make} variable @code{VPATH} specifies a list of
 directories that @code{make} should search.  Most often, the
 directories are expected to contain prerequisite files that are not in the
-current directory; however, @code{VPATH} specifies a search list that
-@code{make} applies for all files, including files which are targets of
-rules.
+current directory; however, @code{make} uses @code{VPATH} as a search
+list for both prerequisites and targets of rules.
 
 Thus, if a file that is listed as a target or prerequisite does not exist
 in the current directory, @code{make} searches the directories listed in
@@ -6470,7 +6469,7 @@ client_LIBS = protocol
 all: $(PROGRAMS)
 
 define PROGRAM_template
- $(1): $$($(1)_OBJ) $$($(1)_LIBS:%=-l%)
+ $(1): $$($(1)_OBJS) $$($(1)_LIBS:%=-l%)
  ALL_OBJS   += $$($(1)_OBJS)
 endef
 
@@ -6600,19 +6599,18 @@ Here the redefinition takes place if @samp{$(origin bletch)} returns either
 @cindex backquotes
 @cindex shell command, function for
 
-The @code{shell} function is unlike any other function except the
+The @code{shell} function is unlike any other function other than the
 @code{wildcard} function
 (@pxref{Wildcard Function, ,The Function @code{wildcard}}) in that it
 communicates with the world outside of @code{make}.
 
 The @code{shell} function performs the same function that backquotes
-(@samp{`}) perform in most shells: it does @dfn{command expansion}.  This
-means that it takes an argument that is a shell command and returns the
-output of the command.  The only processing @code{make} does on the result,
-before substituting it into the surrounding text, is to convert each
-newline or carriage-return / newline pair to a single space.  It also
-removes the trailing (carriage-return and) newline, if it's the last
-thing in the result.@refill
+(@samp{`}) perform in most shells: it does @dfn{command expansion}.
+This means that it takes as an argument a shell command and evaluates
+to the output of the command.  The only processing @code{make} does on
+the result is to convert each newline (or carriage-return / newline
+pair) to a single space.  If there is a trailing (carriage-return
+and) newline it will simply be removed.@refill
 
 The commands run by calls to the @code{shell} function are run when the
 function calls are expanded (@pxref{Reading Makefiles, , How
