@@ -491,6 +491,21 @@ dep_name (dep)
 
 #ifdef	GETLOADAVG_PRIVILEGED
 
+#ifdef POSIX
+/* Hopefully if a system says it's POSIX.1 and has the setuid and setgid
+   functions, they work as POSIX.1 says.  Some systems (Alpha OSF/1 1.2,
+   for example) which claim to be POSIX.1 also have the BSD setreuid and
+   setregid functions, but they don't work as in BSD and only the POSIX.1
+   way works.  */
+
+#if defined (HAVE_SETREUID) && defined (HAVE_SETUID)
+#undef HAVE_SETREUID
+#endif
+#if defined (HAVE_SETREGID) && defined (HAVE_SETGID)
+#undef HAVE_SETREGID
+#endif
+#endif
+
 #ifndef	HAVE_UNISTD_H
 extern int getuid (), getgid (), geteuid (), getegid ();
 extern int setuid (), setgid ();
