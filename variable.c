@@ -362,7 +362,7 @@ define_automatic_variables ()
     {
       free (v->value);
       v->origin = o_file;
-      v->value = savestring (default_shell, 7);
+      v->value = savestring (default_shell, strlen (default_shell));
     }
 
   /* Make sure MAKEFILES gets exported if it is set.  */
