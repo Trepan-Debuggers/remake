@@ -94,6 +94,8 @@ count_implicit_rule_limits ()
 
 	  if (p != 0 && p2 > p)
 	    {
+	      /* There is a slash before the % in the dep name.
+		 Extract the directory name.  */
 	      if (p == dep->name)
 		++p;
 	      if (p - dep->name > namelen)
@@ -108,12 +110,16 @@ count_implicit_rule_limits ()
 
 	      if (!dir_file_exists_p (name, "."))
 		{
+		  /* The name is absolute and the directory does not exist.  */
 		  if (*name == '/')
 		    {
 		      freerule (rule, lastrule);
+		      --num_pattern_rules;
 		      goto end_main_loop;
 		    }
 		  else
+		    /* The directory does not exist, but
+		       it might be found in a VPATH directory.  */
 		    rule->subdir = 1;
 		}
 	    }
@@ -524,4 +530,8 @@ print_rule_data_base ()
 #endif
       puts (" reference nonexistent subdirectories.");
     }
+
+  if (num_pattern_rules != rules)
+    fatal ("BUG: num_pattern_rules wrong!  %u != %u",
+	   num_pattern_rules, rules);
 }
