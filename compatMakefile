@@ -260,10 +260,11 @@ stamp-config: config.status $(srcdir)/config.h.in
 	$(SHELL) config.status
 	touch stamp-config
 
-configure: configure.in
-	autoconf $(ACFLAGS)
-config.h.in: configure.in
-	autoheader $(ACFLAGS)
+# These rules cause too much trouble.
+#configure: configure.in
+#	autoconf $(ACFLAGS)
+#config.h.in: configure.in
+#	autoheader $(ACFLAGS)
 
 # This tells versions [3.59,3.63) of GNU make not to export all variables.
 .NOEXPORT:
