@@ -1,5 +1,5 @@
 ;;; makedb.el --- GNU Make debugger mode via GUD and makedb
-;;; $Id: makedb.el,v 1.1 2004/06/11 00:03:43 rockyb Exp $
+;;; $Id: makedb.el,v 1.2 2004/06/17 02:37:27 rockyb Exp $
 
 ;; Copyright (C) 2004 Rocky Bernstein (rocky@panix.com) 
 
@@ -96,7 +96,7 @@
 ;; "--debugger" in inserted as the first switch.
 
 (defun gud-makedb-massage-args (file args)
-  (let* ((new-args (list "--debugger"))
+  (let* ((new-args (list "--debugger -f Makefile"))
 	 (seen-e nil)
 	 (shift (lambda ()
 		  (setq new-args (cons (car args) new-args))

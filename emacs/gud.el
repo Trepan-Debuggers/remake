@@ -2242,7 +2242,7 @@ and source-file directory for your debugger."
 
     output))
 
-(defcustom gud-makedb-command-name "make --debugger"
+(defcustom gud-makedb-command-name "make --debugger -f Makefile"
   "File name for executing bash debugger."
   :type 'string
   :group 'gud)
