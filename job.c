@@ -204,6 +204,7 @@ reap_children (block, err)
       int exit_code, exit_sig, coredump;
       register struct child *lastc, *c;
       int child_failed;
+      int any_remote;
 
       if (err && dead_children == 0)
 	{
@@ -227,15 +228,31 @@ reap_children (block, err)
       if (dead_children != 0)
 	--dead_children;
 
-      if (debug_flag)
-	for (c = children; c != 0; c = c->next)
-	  printf ("Live child 0x%08lx PID %d%s\n",
-		  (unsigned long int) c,
-		  c->pid, c->remote ? " (remote)" : "");
+      any_remote = 0;
+      for (c = children; c != 0; c = c->next)
+	{
+	  any_remote |= c->remote;
+	  if (debug_flag)
+	    printf ("Live child 0x%08lx PID %d%s\n",
+		    (unsigned long int) c,
+		    c->pid, c->remote ? " (remote)" : "");
+	}
 
       /* First, check for remote children.  */
-      pid = remote_status (&exit_code, &exit_sig, &coredump, 0);
-      if (pid <= 0)
+      if (any_remote)
+	pid = remote_status (&exit_code, &exit_sig, &coredump, 0);
+      else
+	pid = 0;
+      if (pid < 0)
+	{
+	remote_status_lose:
+#ifdef	EINTR
+	  if (errno == EINTR)
+	    continue;
+#endif
+	  pfatal_with_name ("remote_status");
+	}
+      else if (pid == 0)
 	{
 	  /* No remote children.  Check for local children.  */
 
@@ -255,8 +272,24 @@ reap_children (block, err)
 	      pfatal_with_name ("wait");
 	    }
 	  else if (pid == 0)
-	    /* No local children.  */
-	    break;
+	    {
+	      /* No local children.  */
+	      if (block && any_remote)
+		{
+		  /* Now try a blocking wait for a remote child.  */
+		  pid = remote_status (&exit_code, &exit_sig, &coredump, 1);
+		  if (pid < 0)
+		    goto remote_status_lose;
+		  else if (pid == 0)
+		    /* No remote children either.  Finally give up.  */
+		    break;
+		  else
+		    /* We got a remote child.  */
+		    remote = 1;
+		}
+	      else
+		break;
+	    }
 	  else
 	    {
 	      /* Chop the status word up.  */
