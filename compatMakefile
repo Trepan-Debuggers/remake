@@ -265,12 +265,10 @@ stamp-config: config.status $(srcdir)/config.h.in
 	$(SHELL) config.status
 	touch stamp-config
 
-configure: configure.in aclocal.m4
-	cd $(srcdir) && autoconf $(ACFLAGS)
-	test -d CVS && cvs commit -m'autoconf $(ACFLAGS)' $@
-config.h.in: configure.in aclocal.m4
-	cd $(srcdir) && autoheader $(ACFLAGS)
-	test -d CVS && cvs commit -m'autoheader $(ACFLAGS)' $@
+#configure: configure.in aclocal.m4
+#	cd $(srcdir) && autoconf $(ACFLAGS)
+#config.h.in: configure.in aclocal.m4
+#	cd $(srcdir) && autoheader $(ACFLAGS)
 
 # This tells versions [3.59,3.63) of GNU make not to export all variables.
 .NOEXPORT:
