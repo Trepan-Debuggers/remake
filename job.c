@@ -1079,6 +1079,14 @@ construct_command_argv_internal (line, restp, shell, ifs)
     ++i;
   new_argv[i] = 0;
 
+  if (i == 1)
+    {
+      register int j;
+      for (j = 0; sh_cmds[j] != 0; ++j)
+	if (streq (sh_cmds[j], new_argv[0]))
+	  goto slow;
+    }
+
   if (new_argv[0] == 0)
     /* Line was empty.  */
     return 0;
