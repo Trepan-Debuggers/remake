@@ -1555,7 +1555,7 @@ quote_as_word (out, in, double_dollars)
     {
       if (index ("^;'\"*?[]$<>(){}|&~`\\ \t\r\n\f\v", *in) != 0)
 	*out++ = '\\';
-      if (*in == '$')
+      if (double_dollars && *in == '$')
 	*out++ = '$';
       *out++ = *in++;
     }
