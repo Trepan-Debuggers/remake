@@ -642,6 +642,43 @@ start_job (child)
 }
 
 
+static void
+start_waiting_job (c)
+     struct child *c;
+{
+  start_job (c);
+  switch (c->file->command_state)
+    {
+    case cs_not_running:
+      /* The child is waiting to run.
+	 It has already been put on the `waiting_jobs' chain.  */
+      break;
+
+    case cs_running:
+      c->next = children;
+      if (debug_flag)
+	printf ("Putting child 0x%08lx PID %05d%s on the chain.\n",
+		(unsigned long int) c,
+		c->pid, c->remote ? " (remote)" : "");
+      children = c;
+      /* One more job slot is in use.  */
+      ++job_slots_used;
+      unblock_sigs ();
+      break;
+
+    case cs_finished:
+      free_child (c);
+      notice_finished_file (file);
+      break;
+
+    default:
+      error ("internal error: `%s' command_state == %d in new_job",
+	     file->name, (int) file->command_state);
+      abort ();
+      break;
+    }
+}
+
 /* Create a `struct child' for FILE and start its commands running.  */
 
 void
@@ -679,37 +716,8 @@ new_job (file)
   c->command_line = 0;
   c->command_ptr = 0;
   c->environment = 0;
-  start_job (c);
-  switch (file->command_state)
-    {
-    case cs_not_running:
-      /* The child is waiting to run.
-	 It has already been put on the `waiting_jobs' chain.  */
-      break;
 
-    case cs_running:
-      c->next = children;
-      if (debug_flag)
-	printf ("Putting child 0x%08lx PID %05d%s on the chain.\n",
-		(unsigned long int) c,
-		c->pid, c->remote ? " (remote)" : "");
-      children = c;
-      /* One more job slot is in use.  */
-      ++job_slots_used;
-      unblock_sigs ();
-      break;
-
-    case cs_finished:
-      free_child (c);
-      notice_finished_file (file);
-      break;
-
-    default:
-      error ("internal error: `%s' command_state == %d in new_job",
-	     file->name, (int) file->command_state);
-      abort ();
-      break;
-    }
+  start_waiting_job (c);
 
   if (job_slots == 1)
     /* Since there is only one job slot, make things run linearly.
@@ -717,21 +725,21 @@ new_job (file)
     while (file->command_state == cs_running)
       reap_children (1, 0);
 }
-
+
 static int
 load_too_high ()
 {
   extern int getloadavg ();
+  double load;
 
   if (max_load_average < 0)
     return 0;
-
-  double load;
 
   make_access ();
   if (getloadavg (&load, 1) != 1)
     {
       static int lossage = 0;
+      /* Complain only once for the same error.  */
       if (lossage == 0 || errno != lossage)
 	perror_with_name ("getloadavg", "");
       lossage = errno;
@@ -741,17 +749,26 @@ load_too_high ()
 
   return load >= max_load_average;
 }
-
+
+/* Start jobs that are waiting for the load to be lower.  */
+
 void
 start_waiting_jobs ()
 {
   while (waiting_jobs != 0)
     {
-      if (load_too_high ())
+      struct child *c;
+
+      /* Check for recently deceased descendants.  */
+      reap_children (0, 0);
+
+      if (job_slots_used > 0 && load_too_high ())
 	/* We have started all the jobs we can at the moment.  */
 	return;
 
-      /* XXX */;
+      c = waiting_jobs;
+      waiting_jobs = c->next;
+      start_waiting_job (c);
     }
 }
 
