@@ -774,7 +774,7 @@ file_exists_p (char *name)
 	dirend++;
 #endif
       dirname = (char *) alloca (dirend - name + 1);
-      bcopy (name, dirname, dirend - name);
+      memmove (dirname, name, dirend - name);
       dirname[dirend - name] = '\0';
     }
   return dir_file_exists_p (dirname, slash + 1);
@@ -834,7 +834,7 @@ file_impossible (char *filename)
 	    dirend++;
 #endif
 	  dirname = (char *) alloca (dirend - p + 1);
-	  bcopy (p, dirname, dirend - p);
+	  memmove (dirname, p, dirend - p);
 	  dirname[dirend - p] = '\0';
 	}
       dir = find_directory (dirname);
@@ -847,7 +847,7 @@ file_impossible (char *filename)
 	 structure for it, but leave it out of the contents hash table.  */
       dir->contents = (struct directory_contents *)
 	xmalloc (sizeof (struct directory_contents));
-      bzero ((char *) dir->contents, sizeof (struct directory_contents));
+      memset ((char *) dir->contents, 0, sizeof (struct directory_contents));
     }
 
   if (dir->contents->dirfiles.ht_vec == 0)
@@ -915,7 +915,7 @@ file_impossible_p (char *filename)
 	    dirend++;
 #endif
 	  dirname = (char *) alloca (dirend - filename + 1);
-	  bcopy (p, dirname, dirend - p);
+	  memmove (dirname, p, dirend - p);
 	  dirname[dirend - p] = '\0';
 	}
       dir = find_directory (dirname)->contents;

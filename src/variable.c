@@ -311,7 +311,7 @@ handle_special_var (variable_t *var)
                 p = &var->value[off];
               }
 
-            bcopy (v->name, p, l);
+            memmove (p, v->name, l);
             p += l;
             *(p++) = ' ';
           }
@@ -999,9 +999,9 @@ do_variable_definition (const struct floc *flocp, const char *varname,
             oldlen = strlen (v->value);
             vallen = strlen (val);
             p = (char *) alloca (oldlen + 1 + vallen + 1);
-            bcopy (v->value, p, oldlen);
+            memmove (p, v->value, oldlen);
             p[oldlen] = ' ';
-            bcopy (val, &p[oldlen + 1], vallen + 1);
+            memmove (&p[oldlen + 1], val, vallen + 1);
           }
       }
     }
@@ -1223,7 +1223,7 @@ parse_variable_definition (variable_t *v, char *line)
 
   /* Expand the name, so "$(foo)bar = baz" works.  */
   name = (char *) alloca (end - beg + 1);
-  bcopy (beg, name, end - beg);
+  memmove (name, beg, end - beg);
   name[end - beg] = '\0';
   v->name = allocated_variable_expand (name);
 

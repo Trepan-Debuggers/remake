@@ -427,7 +427,7 @@ selective_vpath_search (struct vpath *path, char **file,
 
       /* Put the next VPATH entry into NAME at N and increment N past it.  */
       vlen = strlen (vpath[i]);
-      bcopy (vpath[i], n, vlen);
+      memmove (n, vpath[i], vlen);
       n += vlen;
 
       /* Add the directory prefix already in *FILE.  */
@@ -436,7 +436,7 @@ selective_vpath_search (struct vpath *path, char **file,
 #ifndef VMS
 	  *n++ = '/';
 #endif
-	  bcopy (*file, n, name_dplen);
+	  memmove (n, *file, name_dplen);
 	  n += name_dplen;
 	}
 
@@ -450,11 +450,11 @@ selective_vpath_search (struct vpath *path, char **file,
       if (n != name && n[-1] != '/')
 	{
 	  *n = '/';
-	  bcopy (filename, n + 1, flen + 1);
+	  memmove (n + 1, filename, flen + 1);
 	}
       else
 #endif
-	bcopy (filename, n, flen + 1);
+	memmove (n, filename, flen + 1);
 
       /* Check if the file is mentioned in a makefile.  If *FILE is not
 	 a target, that is enough for us to decide this file exists.

@@ -24,7 +24,7 @@ Boston, MA 02111-1307, USA.  */
 #include "debug.h"
 #include "expand.h"
 
-#ifdef ENABLE_READLINE
+#ifdef HAVE_READLINE
 #include <stdio.h>
 #include <stdlib.h>
 #include <readline/readline.h>
@@ -774,7 +774,7 @@ static debug_return_t com_frame_up (char *psz_amount)
   return debug_read;
 }
 
-#endif /* ENABLE_READLINE */
+#endif /* HAVE_READLINE */
 
 #define PROMPT_LENGTH 200
 #define NEST_DEPTH    ((PROMPT_LENGTH / 2) - 40)
@@ -782,7 +782,7 @@ static debug_return_t com_frame_up (char *psz_amount)
 debug_return_t
 enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
 {
-#ifdef ENABLE_READLINE
+#ifdef HAVE_READLINE
   char *line, *s;
   static int i_init = 0;
   char open_depth[NEST_DEPTH];
@@ -877,5 +877,5 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
   return debug_return;
 #else 
   ;
-#endif /* ENABLE_READLINE */
+#endif /* HAVE_READLINE */
 }

@@ -53,11 +53,11 @@ set_file_variables (file_t *file)
 
       p = strchr (file->name, '(');
       at = (char *) alloca (p - file->name + 1);
-      bcopy (file->name, at, p - file->name);
+      memmove (at, file->name, p - file->name);
       at[p - file->name] = '\0';
       len = strlen (p + 1);
       percent = (char *) alloca (len);
-      bcopy (p + 1, percent, len - 1);
+      memmove (percent, p + 1, len - 1);
       percent[len - 1] = '\0';
     }
   else
@@ -163,7 +163,7 @@ set_file_variables (file_t *file)
 #endif
             len = strlen (c);
 
-          bcopy (c, cp, len);
+          memmove (cp, c, len);
           cp += len;
           *cp++ = FILE_LIST_SEPARATOR;
           if (! d->changed)
@@ -210,18 +210,18 @@ set_file_variables (file_t *file)
 
         if (d->ignore_mtime)
           {
-	    bcopy (c, bp, len);
+	    memmove (bp, c, len);
 	    bp += len;
 	    *bp++ = FILE_LIST_SEPARATOR;
 	  }
 	else
 	  {
-            bcopy (c, cp, len);
+            memmove (cp, c, len);
             cp += len;
             *cp++ = FILE_LIST_SEPARATOR;
             if (d->changed)
               {
-                bcopy (c, qp, len);
+                memmove (qp, c, len);
                 qp += len;
                 *qp++ = FILE_LIST_SEPARATOR;
               }

@@ -37,7 +37,7 @@ copy_dep_chain (dep_t *d)
   while (d != 0)
     {
       c = (dep_t *) xmalloc (sizeof (dep_t));
-      bcopy ((char *) d, (char *) c, sizeof (dep_t));
+      memmove ((char *) c, (char *) d, sizeof (dep_t));
       if (c->name != 0)
 	c->name = xstrdup (c->name);
       c->next = 0;

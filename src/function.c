@@ -280,7 +280,7 @@ pattern_matches (char *pattern, char *percent, char *str)
     {
       unsigned int len = strlen (pattern) + 1;
       char *new_chars = (char *) alloca (len);
-      bcopy (pattern, new_chars, len);
+      memmove (new_chars, pattern, len);
       pattern = new_chars;
       percent = find_percent (pattern);
       if (percent == 0)
@@ -374,7 +374,7 @@ string_glob (char *line)
 	      length += (len + 1) * 2;
 	      result = (char *) xrealloc (result, length);
 	    }
-	  bcopy (name, &result[idx], len);
+	  memmove (&result[idx], name, len);
 	  idx += len;
 	  result[idx++] = ' ';
 	}

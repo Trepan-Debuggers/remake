@@ -1125,9 +1125,9 @@ f_mtime (file_t *file, int search)
 	  /* free (file->name); */
 
 	  name = (char *) xmalloc (arlen + 1 + memlen + 2);
-	  bcopy (arname, name, arlen);
+	  memmove (name, arname, arlen);
 	  name[arlen] = '(';
-	  bcopy (memname, name + arlen + 1, memlen);
+	  memmove (name + arlen + 1, memname, memlen);
 	  name[arlen + 1 + memlen] = ')';
 	  name[arlen + 1 + memlen + 1] = '\0';
 

@@ -354,13 +354,13 @@ pattern_search (file_t *file, int archive,
 		    {
 		      /* Copy directory name from the original FILENAME.  */
 		      i = lastslash - filename + 1;
-		      bcopy (filename, depname, i);
+		      memmove (depname, filename, i);
 		    }
 		  else
 		    i = 0;
-		  bcopy (dep_name (dep), depname + i, p - dep_name (dep));
+		  memmove (depname + i, dep_name (dep), p - dep_name (dep));
 		  i += p - dep_name (dep);
-		  bcopy (stem, depname + i, stemlen);
+		  memmove (depname + i, stem, stemlen);
 		  i += stemlen;
 		  strcpy (depname + i, p + 1);
 		  p = depname;
@@ -433,7 +433,7 @@ pattern_search (file_t *file, int archive,
                        (_("Looking for a rule with intermediate file `%s'.\n"),
                         p));
 
-		  bzero ((char *) intermediate_file, sizeof (file_t));
+		  memset ((char *) intermediate_file, 0, sizeof (file_t));
 		  intermediate_file->name = p;
 		  if (pattern_search (intermediate_file, 0, depth + 1,
 				      recursions + 1))
@@ -599,8 +599,8 @@ pattern_search (file_t *file, int archive,
 	 the original FILENAME onto the stem.  */
       fullstemlen = dirlen + stemlen;
       file->stem = (char *) xmalloc (fullstemlen + 1);
-      bcopy (filename, file->stem, dirlen);
-      bcopy (stem, file->stem + dirlen, stemlen);
+      memmove (file->stem, filename, dirlen);
+      memmove (file->stem + dirlen, stem, stemlen);
       file->stem[fullstemlen] = '\0';
     }
 
@@ -617,12 +617,12 @@ pattern_search (file_t *file, int archive,
 	  /* GKM FIMXE: handle '|' here too */
 	  new->ignore_mtime = 0;
 	  new->name = p = (char *) xmalloc (rule->lens[i] + fullstemlen + 1);
-	  bcopy (rule->targets[i], p,
+	  memmove (p, rule->targets[i],
 		 rule->suffixes[i] - rule->targets[i] - 1);
 	  p += rule->suffixes[i] - rule->targets[i] - 1;
-	  bcopy (file->stem, p, fullstemlen);
+	  memmove (p, file->stem, fullstemlen);
 	  p += fullstemlen;
-	  bcopy (rule->suffixes[i], p,
+	  memmove (p, rule->suffixes[i], 
 		 rule->lens[i] - (rule->suffixes[i] - rule->targets[i]) + 1);
 	  new->file = enter_file (new->name, NILF);
 	  new->next = file->also_make;

@@ -279,7 +279,7 @@ install_conditionals (struct conditionals *new)
 {
   struct conditionals *save = conditionals;
 
-  bzero ((char *) new, sizeof (*new));
+  memset ((char *) new, 0, sizeof (*new));
   conditionals = new;
 
   return save;
@@ -560,7 +560,7 @@ eval (struct ebuffer *ebuf, int set_default)
 		  commands_len = (linelen + 1 + commands_idx) * 2;
 		  commands = xrealloc (commands, commands_len);
 		}
-	      bcopy (line, &commands[commands_idx], linelen);
+	      memmove (&commands[commands_idx], line, linelen);
 	      commands_idx += linelen;
 	      commands[commands_idx++] = '\n';
 
@@ -1228,7 +1228,7 @@ eval (struct ebuffer *ebuf, int set_default)
                 commands_len = (len + 2) * 2;
                 commands = (char *) xrealloc (commands, commands_len);
               }
-            bcopy (cmdleft, commands, len);
+            memmove (commands, cmdleft, len);
             commands_idx += len;
             commands[commands_idx++] = '\n';
           }
@@ -1277,7 +1277,7 @@ do_define (char *name, unsigned int namelen,
 
   /* Expand the variable name.  */
   char *var = (char *) alloca (namelen + 1);
-  bcopy (name, var, namelen);
+  memmove (var, name, namelen);
   var[namelen] = '\0';
   var = variable_expand (var);
 
@@ -1349,7 +1349,7 @@ do_define (char *name, unsigned int namelen,
           definition = (char *) xrealloc (definition, length + 1);
         }
 
-      bcopy (line, &definition[idx], len);
+      memmove (&definition[idx], line, len);
       idx += len;
       /* Separate lines with a newline.  */
       definition[idx++] = '\n';
@@ -1534,7 +1534,7 @@ conditional_line (char *line, const struct floc *flocp)
 	 variable_expand re-uses the same buffer.  */
       len = strlen (s2);
       s1 = (char *) alloca (len + 1);
-      bcopy (s2, s1, len + 1);
+      memmove (s1, s2, len + 1);
 
       if (termin != ',')
 	/* Find the start of the second string.  */
@@ -1866,7 +1866,7 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
                     && (p[1] == '@'
                         || ((p[1] == '(' || p[1] == '{') && p[2] == '@')))
                   {
-                    bcopy (p, s, strlen (p)+1);
+                    memmove (s, p, strlen (p)+1);
                     continue;
                   }
 
@@ -1914,8 +1914,8 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
                 }
 
                 /* Copy the string over.  */
-                bcopy(p, s+atlen, strlen (p)+1);
-                bcopy(at, s, atlen);
+                memmove(s+atlen, p, strlen (p)+1);
+                memmove(s, at, atlen);
                 p = s + atlen - 1;
               }
         }
@@ -2146,7 +2146,7 @@ find_char_unquote (char *string, int stop1, int stop2, int blank)
 	    string_len = strlen (string);
 	  /* The number of backslashes is now -I.
 	     Copy P over itself to swallow half of them.  */
-	  bcopy (&p[i / 2], &p[i], (string_len - (p - string)) - (i / 2) + 1);
+	  memmove (&p[i], &p[i / 2], (string_len - (p - string)) - (i / 2) + 1);
 	  p += i / 2;
 	  if (i % 2 == 0)
 	    /* All the backslashes quoted each other; the STOPCHAR was
@@ -2341,7 +2341,7 @@ parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip,
 	    /* Copy "lib(" into LIBNAME.  */
 	    ++paren;
 	    libname = (char *) alloca (paren - n->name + 1);
-	    bcopy (n->name, libname, paren - n->name);
+	    memmove (libname, n->name, paren - n->name);
 	    libname[paren - n->name] = '\0';
 
 	    if (*paren == '\0')
@@ -3003,12 +3003,12 @@ multi_glob (struct nameseq *chain, unsigned int size)
 			struct nameseq *elt
 			  = (struct nameseq *) xmalloc (size);
                         if (size > sizeof (struct nameseq))
-                          bzero (((char *) elt) + sizeof (struct nameseq),
-                                 size - sizeof (struct nameseq));
+                          memset (((char *) elt) + sizeof (struct nameseq),
+				  0, size - sizeof (struct nameseq));
 			elt->name = (char *) xmalloc (alen + 1 + mlen + 2);
-			bcopy (gl.gl_pathv[i], elt->name, alen);
+			memmove (elt->name, gl.gl_pathv[i], alen);
 			elt->name[alen] = '(';
-			bcopy (memname, &elt->name[alen + 1], mlen);
+			memmove (&elt->name[alen + 1], memname, mlen);
 			elt->name[alen + 1 + mlen] = ')';
 			elt->name[alen + 1 + mlen + 1] = '\0';
 			elt->next = new;
@@ -3034,8 +3034,8 @@ multi_glob (struct nameseq *chain, unsigned int size)
 		  {
 		    struct nameseq *elt = (struct nameseq *) xmalloc (size);
                     if (size > sizeof (struct nameseq))
-                      bzero (((char *) elt) + sizeof (struct nameseq),
-                             size - sizeof (struct nameseq));
+                      memset (((char *) elt) + sizeof (struct nameseq),
+			      0, size - sizeof (struct nameseq));
 		    elt->name = xstrdup (gl.gl_pathv[i]);
 		    elt->next = new;
 		    new = elt;

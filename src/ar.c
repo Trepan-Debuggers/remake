@@ -273,7 +273,7 @@ ar_glob (char *arname, char *member_pattern, unsigned int size)
      ar_glob_match will accumulate them in STATE.chain.  */
   i = strlen (arname);
   state.arname = (char *) alloca (i + 2);
-  bcopy (arname, state.arname, i);
+  memmove (state.arname, arname, i);
   state.arname[i] = '(';
   state.arname[i + 1] = '\0';
   state.pattern = member_pattern;

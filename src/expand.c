@@ -67,7 +67,7 @@ variable_buffer_output (char *ptr, char *string, unsigned int length)
       ptr = variable_buffer + offset;
     }
 
-  bcopy (string, ptr, length);
+  memmove (ptr, string, length);
   return ptr + length;
 }
 
@@ -318,7 +318,7 @@ variable_expand_string (char *line, char *string, long length)
 			  {
 			    pattern = (char *) alloca (subst_end - subst_beg
 						       + 1);
-			    bcopy (subst_beg, pattern, subst_end - subst_beg);
+			    memmove (pattern, subst_beg, subst_end - subst_beg);
 			    pattern[subst_end - subst_beg] = '\0';
 			  }
 			percent = find_percent (pattern);
@@ -335,7 +335,7 @@ variable_expand_string (char *line, char *string, long length)
 				replace = (char *) alloca (replace_end
 							   - replace_beg
 							   + 1);
-				bcopy (replace_beg, replace,
+				memmove (replace, replace_beg, 
 				       replace_end - replace_beg);
 				replace[replace_end - replace_beg] = '\0';
 			      }
@@ -433,7 +433,7 @@ expand_argument (const char *str, const char *end)
     return allocated_variable_expand ((char *)str);
 
   tmp = (char *) alloca (end - str + 1);
-  bcopy (str, tmp, end - str);
+  memmove (tmp, str, end - str);
   tmp[end - str] = '\0';
 
   return allocated_variable_expand (tmp);

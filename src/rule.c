@@ -125,7 +125,7 @@ count_implicit_rule_limits (void)
 		  namelen = p - dep->name;
 		  name = (char *) xmalloc (namelen + 1);
 		}
-	      bcopy (dep->name, name, p - dep->name);
+	      memmove (name, dep->name, p - dep->name);
 	      name[p - dep->name] = '\0';
 
 	      /* In the deps of an implicit rule the `changed' flag
@@ -181,7 +181,7 @@ convert_suffix_rule (char *target, char *source, struct commands *cmds)
       len = strlen (target);
       targname = xmalloc (1 + len + 1);
       targname[0] = '%';
-      bcopy (target, targname + 1, len + 1);
+      memmove (targname + 1, target, len + 1);
       targpercent = targname;
     }
 
@@ -199,7 +199,7 @@ convert_suffix_rule (char *target, char *source, struct commands *cmds)
       len = strlen (source);
       depname = xmalloc (1 + len + 1);
       depname[0] = '%';
-      bcopy (source, depname + 1, len + 1);
+      memmove (depname + 1, source, len + 1);
       deps = (dep_t *) xmalloc (sizeof (dep_t));
       deps->next = 0;
       deps->name = depname;
@@ -246,7 +246,7 @@ convert_to_pattern (void)
 
       /* Record a pattern for each of this suffix's two-suffix rules.  */
       slen = strlen (dep_name (d));
-      bcopy (dep_name (d), rulename, slen);
+      memmove (rulename, dep_name (d), slen);
       for (d2 = suffix_file->deps; d2 != 0; d2 = d2->next)
 	{
 	  s2len = strlen (dep_name (d2));
@@ -254,7 +254,7 @@ convert_to_pattern (void)
 	  if (slen == s2len && streq (dep_name (d), dep_name (d2)))
 	    continue;
 
-	  bcopy (dep_name (d2), rulename + slen, s2len + 1);
+	  memmove (rulename + slen, dep_name (d2), s2len + 1);
 	  f = lookup_file (rulename);
 	  if (f == 0 || f->cmds == 0)
 	    continue;

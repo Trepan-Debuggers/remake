@@ -160,7 +160,7 @@ enter_file (char *name, const floc_t *floc)
     }
 
   new = (file_t *) xmalloc (sizeof (file_t));
-  bzero ((char *) new, sizeof (file_t));
+  memset ((char *) new, 0, sizeof (file_t));
   new->name = new->hname = name;
   new->update_status = -1;
   new->tracing = 0;
@@ -677,7 +677,7 @@ build_target_list (char *value)
                 p = &value[off];
               }
 
-            bcopy (f->name, p, l);
+            memmove (p, f->name, l);
             p += l;
             *(p++) = ' ';
           }

@@ -322,7 +322,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
   {
     char buf[SARMAG];
     int nread = read (desc, buf, SARMAG);
-    if (nread != SARMAG || bcmp (buf, ARMAG, SARMAG))
+    if (nread != SARMAG || memcmp (ARMAG, buf, SARMAG))
       {
 	(void) close (desc);
 	return -2;
@@ -341,7 +341,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 #ifdef AIAMAGBIG
     /* If this is a "big" archive, then set the flag and
        re-read the header into the "big" structure. */
-    if (!bcmp (fl_header.fl_magic, AIAMAGBIG, SAIAMAG))
+    if (!memcmp (AIAMAGBIG, fl_header.fl_magic, SAIAMAG))
       {
 	big_archive = 1;
 
@@ -363,7 +363,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
     else
 #endif
        /* Check to make sure this is a "normal" archive. */
-      if (bcmp (fl_header.fl_magic, AIAMAG, SAIAMAG))
+      if (memcmp (AIAMAG, fl_header.fl_magic, SAIAMAG))
 	{
           (void) close (desc);
           return -2;
@@ -536,13 +536,13 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 #if defined(ARFMAG) || defined(ARFZMAG)
 	    || (
 # ifdef ARFMAG
-                bcmp (member_header.ar_fmag, ARFMAG, 2)
+                memcmp (ARFMAG, member_header.ar_fmag, 2)
 # else
                 1
 # endif
                 &&
 # ifdef ARFZMAG
-                bcmp (member_header.ar_fmag, ARFZMAG, 2)
+                memcmp (ARFZMAG, member_header.ar_fmag, 2)
 # else
                 1
 # endif
@@ -555,7 +555,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 	  }
 
 	name = namebuf;
-	bcopy (member_header.ar_name, name, sizeof member_header.ar_name);
+	memmove (name, member_header.ar_name, sizeof member_header.ar_name);
 	{
 	  char *p = name + sizeof member_header.ar_name;
 	  do

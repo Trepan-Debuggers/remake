@@ -1207,7 +1207,7 @@ main (int argc, char **argv, char **envp)
 	  debugger_on_error  |=  DEBUGGER_ON_FATAL;
 	}
       }
-#ifndef ENABLE_READLINE
+#ifndef HAVE_READLINE
     error (NILF, 
 	   "warning: you specified a debugger option, but you don't have");
     error (NILF, 
@@ -1953,7 +1953,7 @@ main (int argc, char **argv, char **envp)
           if (stdin_nm)
             {
               nargv = (char **) xmalloc ((nargc + 2) * sizeof (char *));
-              bcopy ((char *) argv, (char *) nargv, argc * sizeof (char *));
+              memmove ((char *) nargv, (char *) argv, argc * sizeof (char *));
               nargv[nargc++] = concat ("-o", stdin_nm, "");
               nargv[nargc] = 0;
             }
@@ -2257,9 +2257,9 @@ handle_non_switch_argument (arg, env)
             oldlen = strlen (v->value);
             newlen = strlen (f->name);
             value = (char *) alloca (oldlen + 1 + newlen + 1);
-            bcopy (v->value, value, oldlen);
+            memmove (value, v->value, oldlen);
             value[oldlen] = ' ';
-            bcopy (f->name, &value[oldlen + 1], newlen + 1);
+            memmove (&value[oldlen + 1], f->name, newlen + 1);
           }
         define_variable ("MAKECMDGOALS", 12, value, o_default, 0);
       }
@@ -2477,7 +2477,7 @@ decode_env_switches (char *envar, unsigned int len)
   /* Get the variable's value.  */
   varref[0] = '$';
   varref[1] = '(';
-  bcopy (envar, &varref[2], len);
+  memmove (&varref[2], envar, len);
   varref[2 + len] = ')';
   varref[2 + len + 1] = '\0';
   value = variable_expand (varref);
@@ -2683,7 +2683,7 @@ define_makeflags (int all, int makefile)
   /* Construct the value in FLAGSTRING.
      We allocate enough space for a preceding dash and trailing null.  */
   flagstring = (char *) alloca (1 + flagslen + 1);
-  bzero (flagstring, 1 + flagslen + 1);
+  memset (flagstring, 0, 1 + flagslen + 1);
   p = flagstring;
   words = 1;
   *p++ = '-';
@@ -2775,12 +2775,12 @@ define_makeflags (int all, int makefile)
       /* Copy in the string.  */
       if (posix_pedantic)
 	{
-	  bcopy (posixref, p, sizeof posixref - 1);
+	  memmove (p, posixref, sizeof posixref - 1);
 	  p += sizeof posixref - 1;
 	}
       else
 	{
-	  bcopy (ref, p, sizeof ref - 1);
+	  memmove (p, ref, sizeof ref - 1);
 	  p += sizeof ref - 1;
 	}
     }

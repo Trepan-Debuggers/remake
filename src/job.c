@@ -908,7 +908,7 @@ set_child_handler_action_flags (flags)
      int flags;
 {
   struct sigaction sa;
-  bzero ((char *) &sa, sizeof sa);
+  memset ((char *) &sa, 0, sizeof sa);
   sa.sa_handler = child_handler;
   sa.sa_flags = flags;
 #if defined SIGCHLD
@@ -1514,7 +1514,7 @@ new_job (file_t *file, target_stack_node_t *p_call_stack)
 	    /* Copy the text between the end of the last chunk
 	       we processed (where IN points) and the new chunk
 	       we are about to process (where REF points).  */
-	    bcopy (in, out, ref - in);
+	    memmove (out, in, ref - in);
 
 	  /* Move both pointers past the boring stuff.  */
 	  out += ref - in;
@@ -1593,7 +1593,7 @@ new_job (file_t *file, target_stack_node_t *p_call_stack)
      `struct child', and add that to the chain.  */
 
   c = (child_t *) xmalloc (sizeof (struct child));
-  bzero ((char *)c, sizeof (struct child));
+  memset ((char *)c, 0, sizeof (struct child));
   c->fileinfo      = cmds->fileinfo;
   c->file          = file;   /* FIXME?: Could remove as it is in fileinfo */
   c->command_lines = lines;
@@ -3018,7 +3018,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
                   /* Note these overlap and strcpy() is undefined for
                      overlapping objects in ANSI C.  The strlen() _IS_ right,
                      since we need to copy the nul byte too.  */
-		  bcopy (p + 1, p, strlen (p));
+		  memmove (p, p + 1, strlen (p));
 
 		if (instring)
 		  goto string_char;
@@ -3241,9 +3241,9 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 # endif
 
     ap = new_line;
-    bcopy (shell, ap, shell_len);
+    memmove (ap, shell, shell_len);
     ap += shell_len;
-    bcopy (minus_c, ap, sizeof (minus_c) - 1);
+    memmove (ap, minus_c, sizeof (minus_c) - 1);
     ap += sizeof (minus_c) - 1;
     command_ptr = ap;
     for (p = line; *p != '\0'; ++p)
@@ -3265,7 +3265,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 	       since it was most likely used to line
 	       up the continued line with the previous one.  */
 	    if (*p == '\t')
-	      bcopy (p + 1, p, strlen (p));
+	      memmove (p, p + 1, strlen (p));
 
 	    p = next_token (p);
 	    --p;

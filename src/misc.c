@@ -195,11 +195,11 @@ concat (const char *s1, const char *s2, const char *s3)
   result = (char *) xmalloc (len1 + len2 + len3 + 1);
 
   if (*s1 != '\0')
-    bcopy (s1, result, len1);
+    memmove (result, s1, len1);
   if (*s2 != '\0')
-    bcopy (s2, result + len1, len2);
+    memmove (result + len1, s2, len2);
   if (*s3 != '\0')
-    bcopy (s3, result + len1 + len2, len3);
+    memmove (result + len1 + len2, s3, len3);
   *(result + len1 + len2 + len3) = '\0';
 
   return result;
@@ -268,7 +268,7 @@ savestring (const char *str, unsigned int length)
 {
   char *out = (char *) xmalloc (length + 1);
   if (length > 0)
-    bcopy (str, out, length);
+    memmove (out, str, length);
   out[length] = '\0';
   return out;
 }
