@@ -1,5 +1,5 @@
 /* Library function for scanning an archive file.
-   Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -90,6 +90,11 @@ extern void free ();
 #endif
 #else	/* AIX.  */
 #define	AR_NAMELEN	255
+#endif
+
+/* Cray's <ar.h> apparently defines this.  */
+#ifndef	AR_HDR_SIZE
+#define	AR_HDR_SIZE	(sizeof (struct ar_hdr))
 #endif
 
 #if	defined(__GNU_LIBRARY__) || defined(POSIX) || defined(_IBMR2)
@@ -220,7 +225,7 @@ ar_scan (archive, function, arg)
 
 #ifdef AIAMAG
 #define	AR_MEMHDR	\
-	(sizeof (member_header) - sizeof (member_header._ar_name))
+	(AR_HDR_SIZE - sizeof (member_header._ar_name))
 	nread = read (desc, (char *) &member_header, AR_MEMHDR);
 
 	if (nread != AR_MEMHDR)
@@ -255,12 +260,12 @@ ar_scan (archive, function, arg)
 		       eltmode, arg);
 
 #else
-	nread = read (desc, (char *) &member_header, sizeof (struct ar_hdr));
+	nread = read (desc, (char *) &member_header, AR_HDR_SIZE);
 	if (nread == 0)
 	  /* No data left means end of file; that is OK.  */
 	  break;
 
-	if (nread != sizeof (member_header)
+	if (nread != AR_HDR_SIZE
 #ifdef ARFMAG
 	    || bcmp (member_header.ar_fmag, ARFMAG, 2)
 #endif
@@ -291,7 +296,7 @@ ar_scan (archive, function, arg)
 
 	fnval =
 	  (*function) (desc, name, member_offset,
-		       member_offset + sizeof (member_header), eltsize,
+		       member_offset + AR_HDR_SIZE, eltsize,
 #ifndef	M_XENIX
 		       atol (member_header.ar_date),
 		       atoi (member_header.ar_uid),
@@ -323,7 +328,7 @@ ar_scan (archive, function, arg)
 	    return -2;
 	  }
 #else
-	member_offset += sizeof (member_header) + eltsize;
+	member_offset += AR_HDR_SIZE + eltsize;
 	if (member_offset & 1) member_offset++;
 #endif
       }
@@ -413,12 +418,12 @@ ar_member_touch (arname, memname)
   /* Read in this member's header */
   if (lseek (fd, pos, 0) < 0)
     goto lose;
-  if (sizeof ar_hdr != read (fd, (char *) &ar_hdr, sizeof ar_hdr))
+  if (AR_HDR_SIZE != read (fd, (char *) &ar_hdr, AR_HDR_SIZE))
     goto lose;
   /* Write back the header, thus touching the archive file.  */
   if (lseek (fd, pos, 0) < 0)
     goto lose;
-  if (sizeof ar_hdr != write (fd, (char *) &ar_hdr, sizeof ar_hdr))
+  if (AR_HDR_SIZE != write (fd, (char *) &ar_hdr, AR_HDR_SIZE))
     goto lose;
   /* The file's mtime is the time we we want.  */
   fstat (fd, &statbuf);
@@ -436,7 +441,7 @@ ar_member_touch (arname, memname)
   /* Write back this member's header */
   if (lseek (fd, pos, 0) < 0)
     goto lose;
-  if (sizeof ar_hdr != write (fd, (char *) &ar_hdr, sizeof ar_hdr))
+  if (AR_HDR_SIZE != write (fd, (char *) &ar_hdr, AR_HDR_SIZE))
     goto lose;
   close (fd);
   return 0;
