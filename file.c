@@ -455,8 +455,9 @@ snap_deps (void)
     for (d = f->deps; d != 0; d = d->next)
       for (f2 = d->file; f2 != 0; f2 = f2->prev)
 	{
-	  /* Mark this file as phony and nonexistent.  */
+	  /* Mark this file as phony nonexistent target.  */
 	  f2->phony = 1;
+          f2->is_target = 1;
 	  f2->last_mtime = NONEXISTENT_MTIME;
 	  f2->mtime_before_update = NONEXISTENT_MTIME;
 	}

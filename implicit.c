@@ -342,6 +342,8 @@ pattern_search (struct file *file, int archive,
 	  deps_found = 0;
 	  for (dep = rule->deps; dep != 0; dep = dep->next)
 	    {
+              struct file *f;
+
 	      /* If the dependency name has a %, substitute the stem.  */
 	      p = strchr (dep_name (dep), '%');
 	      if (p != 0)
@@ -396,7 +398,7 @@ pattern_search (struct file *file, int archive,
 		 directory (the one gotten by prepending FILENAME's directory),
 		 so it might actually exist.  */
 
-	      if (lookup_file (p) != 0
+	      if (((f = lookup_file (p)) != 0 && f->is_target)
 		  || ((!dep->changed || check_lastslash) && file_exists_p (p)))
 		{
 		  found_files_im[deps_found] = dep->ignore_mtime;

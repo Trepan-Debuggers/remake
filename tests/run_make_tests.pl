@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/env perl
 # -*-perl-*-
 
 # Test driver for the Make test suite
