@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.15 2003/10/22 04:35:27 psmith Exp $
+@set RCSID $Id: make.texi,v 1.16 2003/11/03 22:04:12 psmith Exp $
 @set EDITION 0.61
 @set VERSION 3.81
 @set UPDATED 02 May 2003
@@ -30,7 +30,7 @@
 * Make: (make).            Remake files automatically.
 @end direntry
 
-@ifinfo
+@ifnottex
 This file documents the GNU Make utility, which determines
 automatically which pieces of a large program need to be recompiled,
 and issues the commands to recompile them.
@@ -47,7 +47,7 @@ any later version published by the Free Software Foundation; with no
 Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
 Texts.  A copy of the license is included in the section entitled
 ``GNU Free Documentation License''.
-@end ifinfo
+@end ifnottex
 
 @iftex
 @shorttitlepage GNU Make
@@ -88,7 +88,7 @@ Cover art by Etienne Suvasa.
 @end titlepage
 @page
 
-@ifinfo
+@ifnottex
 @node Top, Overview, (dir), (dir)
 @top Make
 
@@ -101,7 +101,7 @@ last updated @value{UPDATED},
 documents GNU @code{make} Version @value{VERSION}.@refill
 
 This manual describes @code{make} and contains the following chapters:@refill
-@end ifinfo
+@end ifnottex
 
 @menu
 * Overview::                    Overview of @code{make}.
@@ -371,9 +371,9 @@ from others whenever the others change.
 @end menu
 
 @node Preparing, Reading, Overview, Overview
-@ifinfo
+@ifnottex
 @heading Preparing and Running Make
-@end ifinfo
+@end ifnottex
 
 To prepare to use @code{make}, you must write a file called
 the @dfn{makefile} that describes the relationships among files
@@ -406,10 +406,10 @@ introduction, read the first few sections of each chapter, skipping the
 later sections.  In each chapter, the first few sections contain
 introductory or general information and the later sections contain
 specialized or technical information.
-@ifinfo
+@ifnottex
 The exception is the second chapter, @ref{Introduction, ,An
 Introduction to Makefiles}, all of which is introductory.
-@end ifinfo
+@end ifnottex
 @iftex
 The exception is @ref{Introduction, ,An Introduction to Makefiles},
 all of which is introductory.
@@ -1558,7 +1558,7 @@ the makefile (often with a target called @samp{all}).
                                   prerequisites from source files themselves.
 @end menu
 
-@ifinfo
+@ifnottex
 @node Rule Example, Rule Syntax, Rules, Rules
 @section Rule Example
 
@@ -1587,7 +1587,7 @@ The command does not explicitly mention @file{defs.h}, but we presume
 that @file{foo.c} includes it, and that that is why @file{defs.h} was
 added to the prerequisites.
 @end itemize
-@end ifinfo
+@end ifnottex
 
 @node Rule Syntax, Prerequisite Types, Rule Example, Rules
 @section Rule Syntax
@@ -1833,9 +1833,9 @@ make @file{*.o}.  This is not what you want!
 Actually it is possible to obtain the desired result with wildcard
 expansion, but you need more sophisticated techniques, including the
 @code{wildcard} function and string substitution.
-@ifinfo
+@ifnottex
 @xref{Wildcard Function, ,The Function @code{wildcard}}.
-@end ifinfo
+@end ifnottex
 @iftex
 These are described in the following section.
 @end iftex
@@ -3737,9 +3737,9 @@ on the command line, by putting them in the @code{MAKEFLAGS} variable.
 @iftex
 See the next section.
 @end iftex
-@ifinfo
+@ifnottex
 @xref{Options/Recursion}.
-@end ifinfo
+@end ifnottex
 
 Variables are @emph{not} normally passed down if they were created by
 default by @code{make} (@pxref{Implicit Variables, ,Variables Used by
@@ -5051,9 +5051,9 @@ endef
 @iftex
 See the next section for information about @code{define}.
 @end iftex
-@ifinfo
+@ifnottex
 @xref{Defining, ,Defining Variables Verbatim}.
-@end ifinfo
+@end ifnottex
 
 @node Defining, Environment, Override Directive, Using Variables
 @section Defining Variables Verbatim

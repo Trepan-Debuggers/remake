@@ -13,6 +13,27 @@
 	* dir.c (directory_contents_hash_1, directory_contents_hash_1)
 	[WINDOWS32]: Initialize hash.
 
+2003-06-19  Earnie Boyd  <earnie@uses.sf.net>
+
+	* dir.c (read_dirstream): Provide a workaround for broken versions of
+	the MinGW dirent structure.
+
+2003-05-30  Earnie Boyd  <earnie@users.sf.net>
+
+	* w32/include/dirent.h: Add __MINGW32__ filter.
+
+2003-05-30  Earnie Boyd  <earnie@users.sf.net>
+
+	* make.h: Add global declaration of *make_host.
+	* main.c (print_usage): Remove local declaration of *make_host.
+	(print_version): Display "This program built for ..." after Copyright
+	notice.
+
+2003-05-30  Earnie Boyd  <earnie@users.sf.net>
+
+	* doc/make.texi: Change "ifinfo" to "ifnottex" as suggested by the
+	execution of "makeinfo --html make.texi".
+
 2003-04-30  Paul D. Smith  <psmith@gnu.org>
 
 	* build.template: Make some changes to maybe allow this script to

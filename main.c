@@ -2141,7 +2141,6 @@ handle_non_switch_argument (char *arg, int env)
 static void
 print_usage (int bad)
 {
-  extern char *make_host;
   const char *const *cpp;
   FILE *usageto;
 
@@ -2700,13 +2699,19 @@ print_version (void)
      word "Copyright", so it hardly seems worth it.  */
 
   printf ("%sGNU Make %s\n\
-%sCopyright (C) 2002  Free Software Foundation, Inc.\n",
+%sCopyright (C) 2003  Free Software Foundation, Inc.\n",
           precede, version_string, precede);
 
   printf (_("%sThis is free software; see the source for copying conditions.\n\
 %sThere is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A\n\
 %sPARTICULAR PURPOSE.\n"),
             precede, precede, precede);
+
+  if (!remote_description || *remote_description == '\0')
+    printf (_("\n%sThis program built for %s\n"), precede, make_host);
+  else
+    printf (_("\n%sThis program built for %s (%s)\n"),
+            precede, make_host, remote_description);
 
   printed_version = 1;
 
