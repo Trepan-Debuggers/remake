@@ -55,9 +55,7 @@ $(archpfx)remote.o: remote.c
 $(archpfx)remote.dep: remote.c
 	$(mkdep) $(REMOTE) $< | sed 's,$*\.o,& $@,' > $@
 
-ifneq "$(defines)" "@DEFS@"
-CPPFLAGS = $(defines)
-endif
+CPPFLAGS := $(filter-out @%@,$(defines))
 
 ifneq "$(wildcard $(ARCH)/makefile)" ""
 include $(ARCH)/makefile
@@ -79,9 +77,10 @@ CC := $(CC) -b glibc
 
 # getopt is in libc.
 GETOPT =
-GETOPT_SRC =
+#GETOPT_SRC = Don't clear this or dist will break.
 
-CPPFLAGS := -DSTDC_HEADERS -DHAVE_UNISTD_H -DHAVE_GLOB_H \
+CPPFLAGS := $(CPPFLAGS) \
+	    -DSTDC_HEADERS -DHAVE_UNISTD_H -DHAVE_GLOB_H \
 	    -DHAVE_GETDTABLESIZE -DHAVE_SYS_SIGLIST -DHAVE_DUP2 \
 	    -DHAVE_GETCWD -DHAVE_SIGSETMASK -DHAVE_GETGROUPS -DHAVE_SETLINEBUF
 
