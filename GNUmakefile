@@ -1,6 +1,6 @@
 # GNU Make-specific makefile for GNU Make.
 
-# Copyright (C) 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+# Copyright (C) 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 # 
 # GNU Make is free software; you can redistribute it and/or modify
@@ -52,6 +52,8 @@ ACFLAGS := -m /home/gd/gnu/autoconf
 configure config.h.in: $(patsubst %,/home/gd/gnu/autoconf/%.m4,\
 				  acspecific acgeneral)
 config.h.in: /home/gd/gnu/autoconf/acconfig.h
+configure: configure.in; autoconf $(ACFLAGS)
+config.h.in: configure.in; autoheader $(ACFLAGS)
 
 ifdef customs
 defines := $(defines) -Ipmake/customs -Ipmake/lib/include
