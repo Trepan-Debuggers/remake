@@ -1,3 +1,8 @@
+2002-09-30  Martin P.J. Zinser  <zinser@decus.de>
+
+	* makefile.com: Updates for GNU make 3.80.
+	* makefile.vms: Ditto.
+
 2002-09-23  Paul D. Smith  <psmith@gnu.org>
 
 	* read.c (enum make_word_type): Remove w_comment.
