@@ -306,7 +306,7 @@ ar_name_equal (name, mem)
       && mem[memlen - 2] == '.' && mem[memlen - 1] == 'o')
     return 1;
 
-  return !strncmp (name + max - 3, mem + max - 3);
+  return !strcmp (name + max - 3, mem + max - 3);
 
 #else	/* AIX or APOLLO.  */
 
