@@ -47,10 +47,6 @@ char default_shell[] = "/bin/sh";
 
 #ifdef	HAVE_WAITPID
 #define	WAIT_NOHANG(status)	waitpid (-1, (status), WNOHANG)
-/* The second arg to `waitpid' is always an `int *'.
-   The system might support `union wait' for compatibility in calls to
-   `wait3' or `wait', but most such systems don't support it for `waitpid'.  */
-#undef	HAVE_UNION_WAIT
 #else	/* Don't have waitpid.  */
 #ifdef	HAVE_WAIT3
 #ifndef	wait3
