@@ -385,6 +385,19 @@ snap_deps ()
     export_all_variables = 1;
 }
 
+/* Set the `command_state' member of FILE and all its `also_make's.  */
+
+void
+set_command_state (file, state)
+     struct file *file;
+     int state;
+{
+  file->command_state = state;
+
+  for (d = file->also_make; d != 0; d = d->next)
+    d->command_state = state;
+}
+
 /* Print the data base of files.  */
 
 static void
