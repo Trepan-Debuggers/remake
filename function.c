@@ -79,13 +79,12 @@ subst_expand (char *o, char *text, char *subst, char *replace,
               unsigned int slen, unsigned int rlen, int by_word)
 {
   char *t = text;
-  unsigned int tlen = strlen (text);
   char *p;
 
   if (slen == 0 && !by_word)
     {
       /* The first occurrence of "" in any string is its end.  */
-      o = variable_buffer_output (o, t, tlen);
+      o = variable_buffer_output (o, t, strlen (t));
       if (rlen > 0)
 	o = variable_buffer_output (o, replace, rlen);
       return o;
@@ -99,11 +98,11 @@ subst_expand (char *o, char *text, char *subst, char *replace,
 	p = end_of_token (next_token (t));
       else
 	{
-	  p = sindex (t, tlen, subst, slen);
+	  p = strstr (t, subst);
 	  if (p == 0)
 	    {
 	      /* No more matches.  Output everything left on the end.  */
-	      o = variable_buffer_output (o, t, tlen);
+	      o = variable_buffer_output (o, t, strlen (t));
 	      return o;
 	    }
 	}
@@ -124,10 +123,9 @@ subst_expand (char *o, char *text, char *subst, char *replace,
 	/* Output the replacement string.  */
 	o = variable_buffer_output (o, replace, rlen);
 
-      /* Advance T past the string to be replaced; adjust tlen.  */
+      /* Advance T past the string to be replaced.  */
       {
         char *nt = p + slen;
-        tlen -= nt - t;
         t = nt;
       }
     } while (*t != '\0');
@@ -786,9 +784,8 @@ static char*
 func_findstring (char *o, char **argv, const char *funcname UNUSED)
 {
   /* Find the first occurrence of the first string in the second.  */
-  int i = strlen (argv[0]);
-  if (sindex (argv[1], 0, argv[0], i) != 0)
-    o = variable_buffer_output (o, argv[0], i);
+  if (strstr (argv[1], argv[0]) != 0)
+    o = variable_buffer_output (o, argv[0], strlen (argv[0]));
 
   return o;
 }

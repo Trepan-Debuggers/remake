@@ -423,8 +423,6 @@ extern char *next_token PARAMS ((const char *));
 extern char *end_of_token PARAMS ((char *));
 extern void collapse_continuations PARAMS ((char *));
 extern void remove_comments PARAMS((char *));
-extern char *sindex PARAMS ((const char *, unsigned int, \
-                             const char *, unsigned int));
 extern char *lindex PARAMS ((const char *, const char *, int));
 extern int alpha_compare PARAMS ((const void *, const void *));
 extern void print_spaces PARAMS ((unsigned int));

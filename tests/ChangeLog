@@ -1,3 +1,12 @@
+2004-09-21  Paul D. Smith  <psmith@gnu.org>
+
+	* run_make_tests.pl (run_make_test): Enhance to allow the make
+	string to be undef: in that case it reuses the previous make
+	string.  Allows multiple tests on the same makefile.
+
+	* scripts/variables/flavors: Add some tests for prefix characters
+	interacting with define/endef variables.
+
 2004-09-20  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/functions/substitution: Rewrite to use run_make_test()

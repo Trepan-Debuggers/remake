@@ -1,3 +1,23 @@
+2004-09-21  Paul D. Smith  <psmith@gnu.org>
+
+	* misc.c: Removed the sindex() function.  All instances of this
+	function were trivially replaceable by the standard strstr()
+	function, and that function will always have better (or certainly
+	no worse) performance than the very simple-minded algorithm
+	sindex() used.  This can matter with complex makefiles.
+	* make.h: Remove the prototype for sindex().
+	* function.c (subst_expand): Convert sindex() call to strstr().
+	This means we no longer need to track the TLEN value so remove that.
+	(func_findstring): Convert sindex() to strstr().
+	* commands.c (chop_commands): Convert sindex() calls to strstr().
+	Suggested by: Markus Mauhart <qwe123@chello.at>.
+
+	* main.c (find_and_set_default_shell) [WINDOWS32]: Implement the
+	idea behind Savannah Patch #3144 from david.baird@homemail.com.
+	If SHELL is set to CMD.EXE then assume it's batch-mode and
+	non-unixy.  I wrote the code differently from the patch, though,
+	to make it safer.
+
 2004-09-20  Paul D. Smith  <psmith@gnu.org>
 
 	* expand.c (variable_expand_string): Modify to invoke
