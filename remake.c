@@ -133,7 +133,7 @@ update_goal_chain (goals, makefiles)
 		 by calling update_file above.  We check this flag below to
 		 decide when to give an "up to date" diagnostic.  */
 	      g->changed += commands_started - ocommands_started;
-	    
+
 	      stop = 0;
 	      if (x != 0 || file->updated)
 		{
@@ -769,10 +769,7 @@ touch_file (file)
      register struct file *file;
 {
   if (!silent_flag)
-    {
-      printf ("touch %s\n", file->name);
-      fflush (stdout);
-    }
+    message ("touch %s\n", file->name);
 
 #ifndef	NO_ARCHIVES
   if (ar_name (file->name))
