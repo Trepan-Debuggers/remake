@@ -1,5 +1,10 @@
 Thu Jul 25 19:53:31 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 
+	* Version 3.74.7.
+
+	* main.c (define_makeflags): Back up P to point at null terminator
+	when killing final space and dash before setting MFLAGS.
+
 	From Robert Hoehne <robert.hoehne@Mathematik.TU-Chemnitz.DE>:
 	* dir.c [__MSDOS__] [DJGPP > 1]: Include <libc/dosio.h> and defin
 	`__opendir_flags' initialized to 0.
