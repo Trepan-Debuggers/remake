@@ -383,8 +383,9 @@ read_makefile (filename, type)
 	}
 
       if (ignoring)
-	/* Ignore the line.  */
-	;
+	/* Ignore the line.  We continue here so conditionals
+	   can appear in the middle of a rule.  */
+	continue;
       else if (lb.buffer[0] == '\t')
 	{
 	  /* This line is a shell command.  */
