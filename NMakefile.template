@@ -88,6 +88,7 @@ OBJS = \
 	$(OUTDIR)/getloadavg.obj \
 	$(OUTDIR)/getopt.obj \
 	$(OUTDIR)/getopt1.obj \
+	$(OUTDIR)/hash.obj \
 	$(OUTDIR)/implicit.obj \
 	$(OUTDIR)/job.obj \
 	$(OUTDIR)/main.obj \
