@@ -262,7 +262,7 @@ pattern_search (file, archive, depth, recursions)
     }
 
   /* If we have found a matching rule that won't match all filenames,
-     retroactively reject any "terminal" rules that do always match.  */
+     retroactively reject any non-"terminal" rules that do always match.  */
   if (specific_rule_matched)
     for (i = 0; i < nrules; ++i)
       if (!tryrules[i]->terminal)
