@@ -146,7 +146,7 @@ load.dep: load.c
 remote.dep: remote.c
 	$(mkdep-nolib) $(REMOTE) $< | sed 's,$*\.o,& $@,' > $@
 endif
-nolib-deps = $(notdir $(depfiles)) glob/glob.dep glob/fnmatch.dep
+nolib-deps = $(patsubst $(archpfx)%,%,$(depfiles))
 endif
 Makefile: compatMakefile $(nolib-deps)
 	(cat $<; \
