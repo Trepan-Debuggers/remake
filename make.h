@@ -255,9 +255,19 @@ extern char *alloca ();
 #define streq(a, b) \
   ((a) == (b) || \
    (*(a) == *(b) && (*(a) == '\0' || !strcmp ((a) + 1, (b) + 1))))
+#ifdef _AMIGA
+#define strieq(a, b) \
+  ((a) == (b) || \
+   (tolower(*(a)) == tolower(*(b)) && (*(a) == '\0' || !strcmpi ((a) + 1, (b) + 1))))
+#else
+#define strieq(a, b) \
+  ((a) == (b) || \
+   (*(a) == *(b) && (*(a) == '\0' || !strcmp ((a) + 1, (b) + 1))))
+#endif
 #else
 /* Buggy compiler can't handle this.  */
 #define streq(a, b) (strcmp ((a), (b)) == 0)
+#define strieq(a, b) (strcmp ((a), (b)) == 0)
 #endif
 
 /* Add to VAR the hashing value of C, one character in a name.  */
@@ -376,7 +386,11 @@ extern int print_directory_flag, warn_undefined_variables_flag;
 extern int posix_pedantic;
 
 extern unsigned int job_slots;
+#ifndef NO_FLOAT
 extern double max_load_average;
+#else
+extern int max_load_average;
+#endif
 
 extern char *program;
 extern char *starting_directory;

@@ -1100,8 +1100,10 @@ library_search (lib, mtime_ptr)
 {
   static char *dirs[] =
     {
+#ifndef _AMIGA
       "/lib",
       "/usr/lib",
+#endif
       LIBDIR,			/* Defined by configuration.  */
       0
     };
@@ -1115,7 +1117,11 @@ library_search (lib, mtime_ptr)
 
   /* Look first for `libNAME.a' in the current directory.  */
 
+#ifndef _AMIGA
   sprintf (buf, "lib%s.a", libname);
+#else
+  sprintf (buf, "%s.lib", libname);
+#endif
   mtime = name_mtime (buf);
   if (mtime != (time_t) -1)
     {
@@ -1139,7 +1145,11 @@ library_search (lib, mtime_ptr)
 
   for (dp = dirs; *dp != 0; ++dp)
     {
+#ifndef _AMIGA
       sprintf (buf, "%s/lib%s.a", *dp, libname);
+#else
+      sprintf (buf, "%s/%s.lib", *dp, libname);
+#endif
       mtime = name_mtime (buf);
       if (mtime != (time_t) -1)
 	{

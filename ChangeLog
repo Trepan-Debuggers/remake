@@ -1,3 +1,44 @@
+Thu May  9 13:54:49 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
+
+	* GNUmakefile (globfiles): Add AmigaDOS support files.
+	(distfiles): Add $(amigafiles).
+	(amigafiles): New variable.
+
+Thu Nov  7 10:18:16 1995  Aaron Digulla   <digulla@fh-konstanz.de>
+
+	* Added Amiga support in commands.c, dir.c, function.c,
+	job.c, main.c, make.h, read.c, remake.c
+	* commands.c: Amiga has neither SIGHUP nor SIGQUIT
+	* dir.c: Amiga has filenames with Upper- and Lowercase,
+	but "FileName" is the same as "filename". Added strieq()
+	which is use to compare filenames. This is like streq()
+	on all other systems. Also there is no such thing as
+	"." under AmigaDOS.
+	* function.c: On Amiga, the environment is not passed as envp,
+	there are no pipes and Amiga can't fork. Use my own function
+	to create a new child.
+	* job.c: default_shell is "" (The system automatically chooses
+	a shell for me). Have to use the same workaround as MSDOS for
+	running batch commands. Added HAVE_SYS_PARAM_H. NOFILE isn't
+	known on Amiga. Cloned code to run children from MSDOS. Own
+	version of sh_chars[] and sh_cmds[]. No dup2() or dup() on Amiga.
+	* main.c: Force stack to 20000 bytes. Read environment from ENV:
+	device. On Amiga, exec_command() does return, so I exit()
+	afterwards.
+	* make.h: Added strieq() to compare filenames.
+	* read.c: Amiga needs special extension to have passwd. Only
+	one include-dir. "Makefile" and "makefile" are the same.
+	Added "SMakefile".  Added special code to handle device names (xxx:)
+	and "./" in rules.
+	* remake.c: Only one lib-dir. Amiga link-libs are named "%s.lib"
+	instead of "lib%s.a".
+	* main.c, rule.c, variable.c: Avoid floats at all costs.
+	* vpath.c: Get rid of as many alloca()s as possible.
+
+Thu May  9 13:20:43 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
+
+	* read.c (read_makefile): Grok `sinclude' as alias for `-include'.
+
 Wed Mar 20 09:52:27 1996  Roland McGrath  <roland@charlie-brown.gnu.ai.mit.edu>
 
 	* GNUmakefile (vmsfiles): New variable.

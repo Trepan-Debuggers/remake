@@ -1,5 +1,5 @@
 /* Implementation of pattern-matching file search paths for GNU Make.
-Copyright (C) 1988, 89, 91, 92, 93, 94, 95 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 91, 92, 93, 94, 95, 96 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -340,7 +340,7 @@ selective_vpath_search (path, file, mtime_ptr)
      a slash, the directory prefix that came with *FILE,
      another slash (although this one may not always be
      necessary), the filename, and a null terminator.  */
-  name = (char *) alloca (maxvpath + 1 + name_dplen + 1 + flen + 1);
+  name = (char *) xmalloc (maxvpath + 1 + name_dplen + 1 + flen + 1);
 
   /* Try each VPATH entry.  */
   for (i = 0; vpath[i] != 0; ++i)
@@ -432,6 +432,7 @@ selective_vpath_search (path, file, mtime_ptr)
 		   we record a zero modtime to indicate this.  */
 		*mtime_ptr = exists_in_cache ? st.st_mtime : (time_t) 0;
 
+	      free (name);
 	      return 1;
 	    }
 	  else
@@ -439,6 +440,7 @@ selective_vpath_search (path, file, mtime_ptr)
 	}
     }
 
+  free (name);
   return 0;
 }
 

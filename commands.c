@@ -369,9 +369,16 @@ RETSIGTYPE
 fatal_error_signal (sig)
      int sig;
 {
-#ifdef	__MSDOS__
+#if defined(__MSDOS__) || defined(_AMIGA)
   remove_intermediates (1);
+#ifdef _AMIGA
+  if (sig == SIGINT)
+     fputs ("*** Break.\n", stderr);
+
+  exit (10);
+#else
   exit (1);
+#endif
 #else	/* Not MSDOS.  */
   handling_fatal_signal = 1;
 
@@ -393,7 +400,14 @@ fatal_error_signal (sig)
   /* If we got a signal that means the user
      wanted to kill make, remove pending targets.  */
 
-  if (sig == SIGTERM || sig == SIGINT || sig == SIGHUP || sig == SIGQUIT)
+  if (sig == SIGTERM || sig == SIGINT
+#ifdef SIGHUP
+    || sig == SIGHUP
+#endif
+#ifdef SIGQUIT
+    || sig == SIGQUIT
+#endif
+    )
     {
       register struct child *c;
 

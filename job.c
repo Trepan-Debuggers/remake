@@ -25,7 +25,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <assert.h>
 
 /* Default shell to use.  */
+#ifndef _AMIGA
 char default_shell[] = "/bin/sh";
+#else
+char default_shell[] = "";
+extern int MyExecute (char **);
+#endif
 
 #ifdef __MSDOS__
 #include <process.h>
@@ -35,6 +40,13 @@ static char *dos_bname;
 static char *dos_bename;
 static int dos_batch_file;
 #endif /* MSDOS.  */
+#ifdef _AMIGA
+#include <proto/dos.h>
+static int amiga_pid = 123;
+static int amiga_status;
+static char amiga_bname[32];
+static int amiga_batch_file;
+#endif /* Amiga.  */
 
 #ifdef VMS
 #include <time.h>
@@ -300,7 +312,7 @@ reap_children (block, err)
 	}
       else if (pid == 0)
 	{
-#ifndef	__MSDOS__
+#if !defined(__MSDOS__) && !defined(_AMIGA)
 	  /* No remote children.  Check for local children.  */
 
 	  if (any_local)
@@ -355,12 +367,21 @@ reap_children (block, err)
 	      coredump = WCOREDUMP (status);
 	    }
 #else	/* MSDOS.  */
+#ifdef __MSDOS__
 	  /* Life is very different on MSDOS.  */
 	  pid = dos_pid - 1;
 	  status = dos_status;
 	  exit_code = dos_status;
 	  exit_sig = 0;
 	  coredump = 0;
+#else
+	  /* Same on Amiga */
+	  pid = amiga_pid - 1;
+	  status = amiga_status;
+	  exit_code = amiga_status;
+	  exit_sig = 0;
+	  coredump = 0;
+#endif
 #endif	/* Not MSDOS.  */
 	}
       else
@@ -572,7 +593,9 @@ static void
 start_job_command (child)
      register struct child *child;
 {
+#ifndef _AMIGA
   static int bad_stdin = -1;
+#endif
   register char *p;
   int flags;
 #ifdef VMS
@@ -732,11 +755,13 @@ start_job_command (child)
 
   child->deleted = 0;
 
+#ifndef _AMIGA
   /* Set up the environment for the child.  */
   if (child->environment == 0)
     child->environment = target_environment (child->file);
+#endif
 
-#ifndef	__MSDOS__
+#if !defined(__MSDOS__) && !defined(_AMIGA)
 
 #ifndef VMS
   /* start_waiting_job has set CHILD->remote if we can start a remote job.  */
@@ -805,8 +830,8 @@ start_job_command (child)
 #endif /* !VMS */
     }
 
-#else	/* MSDOS.  */
-
+#else	/* MSDOS or Amiga.  */
+#ifdef __MSDOS__
   dos_status = spawnvpe (P_WAIT, argv[0], argv, child->environment);
   ++dead_children;
   child->pid = dos_pid++;
@@ -820,6 +845,17 @@ start_job_command (child)
        dos_status = 0;
      remove (dos_bename);
    }
+#else
+  amiga_status = MyExecute (argv);
+
+  ++dead_children;
+  child->pid = amiga_pid++;
+  if (amiga_batch_file)
+  {
+     amiga_batch_file = 0;
+     DeleteFile (amiga_bname);        /* Ignore errors.  */
+  }
+#endif	/* Not Amiga */
 #endif	/* Not MSDOS.  */
 
   /* We are the parent side.  Set the state to
@@ -1468,6 +1504,14 @@ construct_command_argv_internal (line, restp, shell, ifs)
 			     "mkdir", "path", "pause", "prompt", "rem", "ren",
 			     "rename", "set", "shift", "time", "type",
 			     "ver", "verify", "vol", ":", 0 };
+#endif
+#ifdef _AMIGA
+  static char sh_chars[] = "#;\"|<>()?*$`";
+  static char *sh_cmds[] = { "cd", "eval", "if", "delete", "echo", "copy",
+			     "rename", "set", "setenv", "date", "makedir",
+			     "skip", "else", "endif", "path", "prompt",
+			     "unset", "unsetenv", "version",
+			     0 };
 #else
   static char sh_chars[] = "#;\"*?[]&|<>(){}$`^";
   static char *sh_cmds[] = { "cd", "eval", "exec", "exit", "login",
@@ -1715,7 +1759,35 @@ construct_command_argv_internal (line, restp, shell, ifs)
      new_argv[0] = strdup (dos_bname);
      new_argv[1] = 0;
    }
-#else	/* Not MSDOS.  */
+#endif /* MSDOS. */
+#ifdef _AMIGA
+   {
+     char *ptr;
+     char *buffer;
+     char *dptr;
+
+     buffer = (char *)xmalloc (strlen (line)+1);
+
+     ptr = line;
+     for (dptr=buffer; *ptr; )
+     {
+	if (*ptr == '\\' && ptr[1] == '\n')
+	    ptr += 2;
+	else if (*ptr == '@') /* Kludge: multiline commands */
+	{
+	    ptr += 2;
+	    *dptr++ = '\n';
+	}
+	else
+	    *dptr++ = *ptr++;
+     }
+     *dptr = 0;
+
+     new_argv = (char **) xmalloc(2 * sizeof(char *));
+     new_argv[0] = buffer;
+     new_argv[1] = 0;
+   }
+#else	/* Not MSDOS or Amiga  */
   {
     /* SHELL may be a multi-word command.  Construct a command line
        "SHELL -c LINE", with all special chars in LINE escaped.
@@ -1773,7 +1845,7 @@ construct_command_argv_internal (line, restp, shell, ifs)
     new_argv = construct_command_argv_internal (new_line, (char **) NULL,
 						(char *) 0, (char *) 0);
   }
-#endif	/* MSDOS.  */
+#endif	/* Not MSDOS nor Amiga.  */
 
   return new_argv;
 }
@@ -1819,7 +1891,7 @@ construct_command_argv (line, restp, file)
 }
 #endif /* !VMS */
 
-#ifndef	HAVE_DUP2
+#if !defined(HAVE_DUP2) && !defined(_AMIGA)
 int
 dup2 (old, new)
      int old, new;
@@ -1837,4 +1909,4 @@ dup2 (old, new)
 
   return fd;
 }
-#endif
+#endif /* !HAPE_DUP2 && !_AMIGA */

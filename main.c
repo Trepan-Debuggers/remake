@@ -174,9 +174,13 @@ static unsigned int inf_jobs = 0;
    Negative values mean unlimited, while zero means limit to
    zero load (which could be useful to start infinite jobs remotely
    but one at a time locally).  */
-
+#ifndef NO_FLOAT
 double max_load_average = -1.0;
 double default_load_average = -1.0;
+#else
+int max_load_average = -1;
+int default_load_average = -1;
+#endif
 
 /* List of directories given with -C switches.  */
 
@@ -239,10 +243,17 @@ static const struct command_switch switches[] =
 	0, (char *) &default_keep_going_flag,
 	"keep-going", 0,
 	"Keep going when some targets can't be made" },
+#ifndef NO_FLOAT
     { 'l', floating, (char *) &max_load_average, 1, 1, 0,
 	(char *) &default_load_average, (char *) &default_load_average,
 	"load-average", "N",
 	"Don't start multiple jobs unless load is below N" },
+#else
+    { 'l', positive_int, (char *) &max_load_average, 1, 1, 0,
+	(char *) &default_load_average, (char *) &default_load_average,
+	"load-average", "N",
+	"Don't start multiple jobs unless load is below N" },
+#endif
     { 'm', ignore, 0, 0, 0, 0, 0, 0,
 	0, 0,
 	"-b" },
@@ -414,11 +425,15 @@ debug_signal_handler (sig)
   debug_flag = ! debug_flag;
 }
 
+#ifndef _AMIGA
 int
 main (argc, argv, envp)
      int argc;
      char **argv;
      char **envp;
+#else
+int main (int argc, char ** argv)
+#endif
 {
   register struct file *f;
   register unsigned int i;
@@ -452,8 +467,12 @@ main (argc, argv, envp)
   else									      \
     ADD_SIG (sig);
 
+#ifdef SIGHUP
   FATAL_SIG (SIGHUP);
+#endif
+#ifdef SIGQUIT
   FATAL_SIG (SIGQUIT);
+#endif
   FATAL_SIG (SIGINT);
   FATAL_SIG (SIGTERM);
 
@@ -530,6 +549,7 @@ main (argc, argv, envp)
      done before $(MAKE) is are figured out so its definitions will not be
      one from the environment.  */
 
+#ifndef _AMIGA
   for (i = 0; envp[i] != 0; ++i)
     {
       register char *ep = envp[i];
@@ -547,6 +567,41 @@ main (argc, argv, envp)
 	   be exported, because it was originally in the environment.  */
 	->export = v_export;
     }
+#else /* For Amiga, read the ENV: device, ignoring all dirs */
+    {
+	BPTR env, file, old;
+	char buffer[1024];
+	int len;
+	__aligned struct FileInfoBlock fib;
+
+	env = Lock ("ENV:", ACCESS_READ);
+	if (env)
+	{
+	    old = CurrentDir (DupLock(env));
+	    Examine (env, &fib);
+
+	    while (ExNext (env, &fib))
+	    {
+		if (fib.fib_DirEntryType < 0) /* File */
+		{
+		    file = Open (fib.fib_FileName, MODE_OLDFILE);
+
+		    if (file)
+		    {
+			len = Read (file, buffer, sizeof (buffer)-1);
+			buffer[len] = 0;
+
+			define_variable (fib.fib_FileName,
+			    strlen (fib.fib_FileName),
+			    buffer, o_env, 1)->export = v_export;
+		    }
+		}
+	    }
+	    UnLock (env);
+	    UnLock(CurrentDir(old));
+	}
+    }
+#endif
 
   /* Decode the switches.  */
 
@@ -1051,6 +1106,7 @@ main (argc, argv, envp)
 		fatal ("Couldn't change back to original directory.");
 	    }
 
+#ifndef _AMIGA
 	  for (p = environ; *p != 0; ++p)
 	    if (!strncmp (*p, "MAKELEVEL=", 10))
 	      {
@@ -1063,6 +1119,17 @@ main (argc, argv, envp)
 		sprintf (*p, "MAKELEVEL=%u", makelevel);
 		break;
 	      }
+#else /* AMIGA */
+#   include <dos/dos.h>
+#   include <proto/dos.h>
+	  {
+	    char buffer[256];
+	    int len;
+
+	    sprintf (buffer, "%u", makelevel);
+	    SetVar ("MAKELEVEL", buffer, -1, GVF_LOCAL_ONLY);
+	  }
+#endif
 
 	  if (debug_flag)
 	    {
@@ -1076,7 +1143,12 @@ main (argc, argv, envp)
 	  fflush (stdout);
 	  fflush (stderr);
 
+#ifndef _AMIGA
 	  exec_command (argv, environ);
+#else
+	  exec_command (argv);
+	  exit (0);
+#endif
 	  /* NOTREACHED */
 	}
     }
@@ -1372,6 +1444,7 @@ positive integral argument",
 		      = *(unsigned int *) cs->noarg_value;
 		  break;
 
+#ifndef NO_FLOAT
 		case floating:
 		  if (optarg == 0 && optind < argc
 		      && (isdigit (argv[optind][0]) || argv[optind][0] == '.'))
@@ -1383,6 +1456,7 @@ positive integral argument",
 			 : *(double *) cs->noarg_value);
 
 		  break;
+#endif
 		}
 
 	      /* We've found the switch.  Stop looking.  */
@@ -1702,6 +1776,7 @@ define_makeflags (all, makefile)
 	    }
 	  break;
 
+#ifndef NO_FLOAT
 	case floating:
 	  if (all)
 	    {
@@ -1721,6 +1796,7 @@ define_makeflags (all, makefile)
 		}
 	    }
 	  break;
+#endif
 
 	case string:
 	  if (all)

@@ -153,6 +153,7 @@ $(prog): $(objs) $(globdep) #$(addprefix $(ARCH)/,gmalloc.o mcheck.o)
 
 libc-srcdir = /home/gd/gnu/libc
 globfiles = $(addprefix glob/,COPYING.LIB configure.in configure Makefile.in \
+			Makefile.ami SCOPTIONS SMakefile \
 			configure.bat glob.c fnmatch.c glob.h fnmatch.h)
 $(globfiles): stamp-glob ;
 stamp-glob: $(libc-srcdir)/posix/glob.tar
@@ -224,10 +225,13 @@ tarfiles: $(tarfiles)
 
 vmsfiles = config.h-vms makefile.com makefile.vms readme.vms \
 	   vmsdir.h vmsfunctionc.c vmsify.c
+amigafiles = README.Amiga config.ami Makefile.ami SCOPTIONS SMakefile \
+	     amiga.c make.lnk
 distfiles=README INSTALL COPYING ChangeLog NEWS \
           configure Makefile.in configure.in build.sh.in mkinstalldirs \
 	  configh.dos configure.bat \
-	  aclocal.m4 acconfig.h $(srcs) remote-*.c $(globfiles) $(vmsfiles) \
+	  $(amigafiles) $(vmsfiles) \
+	  aclocal.m4 acconfig.h $(srcs) remote-*.c $(globfiles) \
 	  make.texinfo make-stds.texi \
 	  make.?? make.??s make.toc make.aux make.man texinfo.tex TAGS tags \
 	  install-sh \

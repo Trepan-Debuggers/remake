@@ -78,9 +78,11 @@ static struct conditionals *conditionals = &toplevel_conditionals;
 static char *default_include_directories[] =
   {
     INCLUDEDIR,
+#ifndef _AMIGA
     "/usr/gnu/include",
     "/usr/local/include",
     "/usr/include",
+#endif
     0
   };
 
@@ -747,6 +749,22 @@ read_makefile (filename, flags)
 #ifdef __MSDOS__
 	  /* For MS-DOS, skip a "C:\...".  */
 	  if (p != 0 && p[1] == '\\' && isalpha (p[-1]))
+	    p = 0;
+#endif
+#ifdef _AMIGA
+	  /* Here, the situation is quite complicated. Let's have a look
+	    at a couple of targets:
+
+		install: dev:make
+
+		dev:make: make
+
+		dev:make:: xyz
+
+	    The rule is that it's only a target, if there are TWO :'s
+	    OR a space around the :.
+	  */
+	  if (p && !(isspace(p[1]) || !p[1] || isspace(p[-1])))
 	    p = 0;
 #endif
 	  if (p != 0)
@@ -1569,6 +1587,13 @@ parse_file_seq (stringp, stopchar, size, strip)
       if (stopchar == ':' && p != 0 && p[1] == '\\' && isalpha (p[-1]))
 	p = 0;
 #endif
+#ifdef _AMIGA
+      if (stopchar == ':' && p && *p == ':' &&
+	!(isspace(p[1]) || !p[1] || isspace(p[-1])))
+      {
+	p = find_char_unquote (p+1, stopchars, 1);
+      }
+#endif
       if (p == 0)
 	p = q + strlen (q);
 
@@ -1950,6 +1975,7 @@ tilde_expand (name)
 	  free (home_dir);
 	  home_dir = getenv ("HOME");
 	}
+#ifndef _AMIGA
       if (home_dir == 0 || home_dir[0] == '\0')
 	{
 	  extern char *getlogin ();
@@ -1962,6 +1988,7 @@ tilde_expand (name)
 		home_dir = p->pw_dir;
 	    }
 	}
+#endif
       if (home_dir != 0)
 	{
 	  char *new = concat (home_dir, "", name + 1);
@@ -1970,6 +1997,7 @@ tilde_expand (name)
 	  return new;
 	}
     }
+#ifndef _AMIGA
   else
     {
       struct passwd *pwent;
@@ -2119,6 +2147,7 @@ multi_glob (chain, size)
 	  break;
 	}
     }
+#endif
 
   return new;
 }
