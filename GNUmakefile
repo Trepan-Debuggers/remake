@@ -176,10 +176,6 @@ testdir := $(shell ls -d1 make-test-?.? | sort -n +0.10 -0.11 +0.12 | tail -1l)
 tests:# $(testdir)/run_make_tests.pl $(prog)
 #	cd $(<D); perl $(<F)
 
-configure: /home/gd/gnu/autoconf/make.conf
-	-cp $< $@
-/home/gd/gnu/autoconf/%: force;$(MAKE) -C $(@D) $(@F)
-
 # Make the distribution tar files.
 
 .PHONY: dist
