@@ -3,10 +3,13 @@
 @synindex vr fn
 
 @ignore
-$Header: /sources/make/make/Attic/make.texinfo,v 1.24 1988/05/22 13:39:08 mcgrath Beta $
+$Header: /sources/make/make/Attic/make.texinfo,v 1.50 1988/05/22 14:49:44 mcgrath Beta $
 
 $Log: make.texinfo,v $
-Revision 1.24  1988/05/22 13:39:08  mcgrath
+Revision 1.50  1988/05/22 14:49:44  mcgrath
+Major Beta release before release 2.0.
+
+Revision 1.24  88/05/22  13:39:08  mcgrath
 Misc cleanup
 
 Revision 1.23  88/05/22  12:29:23  mcgrath
