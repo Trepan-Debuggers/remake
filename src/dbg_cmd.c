@@ -138,6 +138,34 @@ var_to_on_off(int var)
   return var ? "on " : "off";
 }
 
+/* Find the next "word" - skip leading blanks and the "word" is the
+   largest non-blank characters after that. ppsz_str is modified to
+   point after the portion returned and also the region initially
+   pointed to by ppsz_str is modified so that word is zero-byte
+   termintated.
+ */
+static char *
+get_word(char **ppsz_str) 
+{
+  char *psz_word;
+  
+  /* Skip leading blanks. */
+  while (**ppsz_str && whitespace (**ppsz_str))
+    **ppsz_str++;
+
+  /* Word starts here at first non blank character. */
+  psz_word = *ppsz_str;
+
+  /* Find end of word - next whitespace. */
+  while (**ppsz_str && !whitespace (**ppsz_str))
+    (*ppsz_str)++;
+
+  if (**ppsz_str) *((*ppsz_str)++) = '\0';
+
+  return psz_word;
+}
+
+
 static int
 get_int(const char *psz_arg, int *result) 
 {
@@ -317,46 +345,34 @@ find_command (const char *name)
 
 /* Execute a command line. */
 static debug_return_t
-execute_line (char *line)
+execute_line (char *psz_line)
 {
-  int i;
+  unsigned int i = 0;
   short_cmd_t *command;
-  char *word;
+  char *psz_word = get_word(&psz_line);
 
-  /* Isolate the command word. */
-  i = 0;
-  while (line[i] && whitespace (line[i]))
-    i++;
-  word = line + i;
-
-  while (line[i] && !whitespace (line[i]))
-    i++;
-
-  if (line[i])
-    line[i++] = '\0';
-
-  if (1 == strlen(word)) {
-    if ( NULL != short_command[(uint8_t) word[0]].func ) 
-      command = &short_command[(uint8_t) word[0]];
+  if (1 == strlen(psz_word)) {
+    if ( NULL != short_command[(uint8_t) psz_word[0]].func ) 
+      command = &short_command[(uint8_t) psz_word[0]];
     else
       command = NULL;
   } else {
-    command = find_command (word);
+    command = find_command (psz_word);
   }
   if (!command)
     {
-      fprintf (stderr, "No such debugger command: %s.\n", word);
+      fprintf (stderr, "No such debugger command: %s.\n", psz_word);
       return debug_read;
     }
 
   /* Get argument to command, if any. */
-  while (whitespace (line[i]))
+  while (whitespace (psz_line[i]))
     i++;
 
-  word = line + i;
+  psz_word = psz_line + i;
 
   /* Call the function. */
-  return ((*(command->func)) (word));
+  return ((*(command->func)) (psz_word));
 }
 
 /* Strip whitespace from the start and end of STRING.  Return a pointer
@@ -620,20 +636,7 @@ static debug_return_t dbg_cmd_write_cmds (char *psz_args)
       return debug_read;
     }
   } else {
-    /* Isolate the variable. */
-    unsigned int u_len=0;
-
-    while (*psz_args && whitespace (*psz_args))
-      *psz_args++;
-
-    psz_target = psz_args;
-    
-    while (*psz_args && !whitespace (*psz_args)) {
-      *psz_args++;
-      u_len++;
-    }
-
-    if (*psz_args) *psz_args++ = '\0';
+    psz_target = get_word(&psz_args);
   }
 
   /* As a special case, we'll allow $@ for the current target. */
@@ -714,7 +717,16 @@ static debug_return_t dbg_cmd_write_cmds (char *psz_args)
       fprintf(outfd, "#%s/%s:%lu\n", starting_directory,
 	      p_target->floc.filenm, p_target->floc.lineno);
       
-      fprintf (outfd, "%s\n", variable_expand(s));
+
+      initialize_file_variables (p_target, 0);
+      set_file_variables (p_target);
+
+      {
+	char *line = allocated_variable_expand_for_file (s, p_target);
+	fprintf (outfd, "%s\n", line);
+	free(line);
+      }
+      
       if (!b_stdout) {
 	fclose(outfd);
 	printf(_("File \"%s\" written.\n"), filename);
@@ -733,21 +745,7 @@ static debug_return_t dbg_cmd_set (char *psz_args)
     printf(_("You need to supply a variable name\n"));
   } else {
     variable_t *p_v;
-    char *psz_varname;
-    unsigned int u_len=0;
-
-    /* Isolate the variable. */
-    while (*psz_args && whitespace (*psz_args))
-      *psz_args++;
-
-    psz_varname = psz_args;
-    
-    while (*psz_args && !whitespace (*psz_args)) {
-      *psz_args++;
-      u_len++;
-    }
-
-    if (*psz_args) *psz_args++ = '\0';
+    char *psz_varname = get_word(&psz_args);
 
     while (*psz_args && whitespace (*psz_args))
       *psz_args++;
@@ -799,21 +797,8 @@ static debug_return_t dbg_cmd_set_var (char *psz_args, int expand)
     printf(_("You need to supply a variable name.\n"));
   } else {
     variable_t *p_v;
-    char *psz_varname;
-    unsigned int u_len=0;
-
-    /* Isolate the variable. */
-    while (*psz_args && whitespace (*psz_args))
-      *psz_args++;
-
-    psz_varname = psz_args;
-    
-    while (*psz_args && !whitespace (*psz_args)) {
-      *psz_args++;
-      u_len++;
-    }
-
-    if (*psz_args) *psz_args++ = '\0';
+    char *psz_varname = get_word(&psz_args);
+    unsigned int u_len = strlen(psz_varname);
 
     while (*psz_args && whitespace (*psz_args))
       *psz_args++;
