@@ -1,5 +1,5 @@
 /* Library function for scanning an archive file.
-   Copyright (C) 1987, 89, 91, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright (C) 1987, 89, 91, 92, 93, 94, 95 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -144,6 +144,13 @@ ar_scan (archive, function, arg)
 
     sscanf (fl_header.fl_fstmoff, "%12ld", &member_offset);
     sscanf (fl_header.fl_lstmoff, "%12ld", &last_member_offset);
+
+    if (member_offset == 0)
+      {
+	/* Empty archive.  */
+	close (desc);
+	return 0;
+      }
 #else
 #ifndef	M_XENIX
     register long int member_offset = sizeof (int);
