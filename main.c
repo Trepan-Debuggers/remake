@@ -568,7 +568,7 @@ find_and_set_default_shell(char *token)
   } else if (file_exists_p(search_token)) {
     /* search token path was found */
     sprintf(sh_path, "%s", search_token);
-    default_shell = strdup(w32ify(sh_path,0));
+    default_shell = xstrdup(w32ify(sh_path,0));
     if (debug_flag)
       printf("find_and_set_shell setting default_shell = %s\n", default_shell);
     sh_found = 1;
@@ -590,7 +590,7 @@ find_and_set_default_shell(char *token)
 
         if (dir_file_exists_p(p, search_token)) {
           sprintf(sh_path, "%s/%s", p, search_token);
-          default_shell = strdup(w32ify(sh_path,0));
+          default_shell = xstrdup(w32ify(sh_path,0));
           sh_found = 1;
           *ep = PATH_SEPARATOR_CHAR;
 
@@ -607,7 +607,7 @@ find_and_set_default_shell(char *token)
       /* be sure to check last element of Path */
       if (p && *p && dir_file_exists_p(p, search_token)) {
           sprintf(sh_path, "%s/%s", p, search_token);
-          default_shell = strdup(w32ify(sh_path,0));
+          default_shell = xstrdup(w32ify(sh_path,0));
           sh_found = 1;
       }
 
@@ -941,7 +941,7 @@ int main (int argc, char ** argv)
   if (strpbrk(argv[0], "/:\\") ||
       strstr(argv[0], "..") ||
       !strncmp(argv[0], "//", 2))
-    argv[0] = strdup(w32ify(argv[0],1));
+    argv[0] = xstrdup(w32ify(argv[0],1));
 #else /* WINDOWS32 */
   if (current_directory[0] != '\0'
       && argv[0] != 0 && argv[0][0] != '/' && index (argv[0], '/') != 0)

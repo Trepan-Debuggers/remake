@@ -2291,10 +2291,10 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
       /* create argv */
       new_argv = (char **) xmalloc(3 * sizeof(char *));
       if (unixy_shell) {
-        new_argv[0] = strdup (shell);
+        new_argv[0] = xstrdup (shell);
         new_argv[1] = *batch_filename_ptr; /* only argv[0] gets freed later */
       } else {
-        new_argv[0] = strdup (*batch_filename_ptr);
+        new_argv[0] = xstrdup (*batch_filename_ptr);
         new_argv[1] = NULL;
       }
       new_argv[2] = NULL;

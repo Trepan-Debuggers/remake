@@ -385,7 +385,7 @@ find_directory (name)
 	      /* Enter it in the contents hash table.  */
 	      dc->dev = st.st_dev;
 #ifdef WINDOWS32
-              dc->path_key = strdup(w32_path);
+              dc->path_key = xstrdup(w32_path);
               dc->mtime = st.st_mtime;
 
               /*
