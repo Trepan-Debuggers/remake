@@ -352,7 +352,7 @@ should normally be @file{/usr/local/var}, but write it as
 
 @item libdir
 The directory for object files and libraries of object code.  Do not
-install executables here, they probably belong in @file{$(libexecdir)}
+install executables here, they probably ought to go in @file{$(libexecdir)}
 instead.  The value of @code{libdir} should normally be
 @file{/usr/local/lib}, but write it as @file{$(exec_prefix)/lib}.
 (If you are using Autoconf, write it as @samp{@@libdir@@}.)
@@ -535,7 +535,8 @@ $(infodir)/foo.info: foo.info
 # fail gracefully when there is an unknown command.
         if $(SHELL) -c 'install-info --version' \
            >/dev/null 2>&1; then \
-          install-info --dir-file=$(infodir)/dir $(infodir)/foo.info; \
+          install-info --dir-file=$(infodir)/dir \
+                       $(infodir)/foo.info; \
         else true; fi
 @end smallexample
 
@@ -553,7 +554,8 @@ them.  The definition of this target can be very simple:
 
 @smallexample
 install-strip:
-        $(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' install
+        $(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' \
+                install
 @end smallexample
 
 Normally we do not recommend stripping an executable unless you are sure
@@ -609,8 +611,8 @@ To help make users aware of this, the commands for the special
 @code{maintainer-clean} target should start with these two:
 
 @smallexample
-@@echo "This command is intended for maintainers to use; it"
-@@echo "deletes files that may require special tools to rebuild."
+@@echo 'This command is intended for maintainers to use; it'
+@@echo 'deletes files that may need special tools to rebuild.'
 @end smallexample
 
 @item TAGS
@@ -649,7 +651,7 @@ You must define the variable @code{TEXI2DVI} in the Makefile.  It should
 run the program @code{texi2dvi}, which is part of the Texinfo
 distribution.@footnote{@code{texi2dvi} uses @TeX{} to do the real work
 of formatting. @TeX{} is not distributed with Texinfo.}  Alternatively,
-write just the dependencies, and allow GNU Make to provide the command.
+write just the dependencies, and allow GNU @code{make} to provide the command.
 
 @item dist
 Create a distribution tar file for this program.  The tar file should be
