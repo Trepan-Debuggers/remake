@@ -102,22 +102,25 @@ This manual describes @code{make} and contains the following chapters:@refill
 
 @c !!!!! Edit descriptions.
 @menu
-* Overview::                    Overview of @code{make}
+* Overview::                    Overview of @code{make}.
 * Copying::                     Your rights and freedoms.
-* Introduction::                An introduction to makefiles.
-* Makefiles::                   Writing Makefiles
-* Rules::                       Writing Rules
-* Commands::                    Writing the Commands in Rules
-* Using Variables::             How to Use Variables
-* Conditionals::                Conditional Parts of Makefiles
-* Functions::                   Functions for Transforming Text
-* make Invocation: Running.     How to Run @code{make}
-* Implicit Rules::              Using Implicit Rules
-* Archives::                    Using @code{make} to Update Archive Files
-* Features::                    Features of GNU @code{make}
-* Missing::                     Missing Features of GNU @code{make}
-* Quick Reference::             Quick Reference
-* Complex Makefile::            Complex Makefile
+* Introduction::                An introduction to @code{make}.
+* Makefiles::                   Makefiles tell @code{make} what to do.
+* Rules::                       Rules describe when a file must be remade.
+* Commands::                    Commands say how to remake a file.
+* Using Variables::             You can use variables to avoid repetition.
+* Conditionals::                Use or ignore parts of the makefile based
+                                 on the values of variables.
+* Functions::                   Many powerful ways to manipulate text.
+* make Invocation: Running.     How to invoke @code{make} on the command line.
+* Implicit Rules::              Use implicit rules to treat many files alike,
+                                 based on their file names.
+* Archives::                    How @code{make} can update library archives.
+* Features::                    Features GNU @code{make} has over other @code{make}s.
+* Missing::                     What GNU @code{make} lacks from other @code{make}s.
+* Quick Reference::             A quick reference for experienced users.
+* Complex Makefile::            A real example of a straightforward,
+                                 but nontrivial, makefile.
 * Concept Index::               Index of Concepts
 * Name Index::                  Index of Functions, Variables, & Directives
 
