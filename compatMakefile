@@ -188,9 +188,9 @@ $(bindir)/$(instname): make
 
 $(infodir)/$(instname).info: make.info
 	for file in $(srcdir)/make.info*; do \
-	  name="`basename $$file`"
+	  name="`basename $$file`"; \
 	  $(INSTALL_DATA) $$file \
-	    `echo $@ | sed "s/$(instname).info\$$/$$name/"`
+	    `echo $@ | sed "s/$(instname).info\$$/$$name/"`; \
 	done
 
 $(mandir)/$(instname).$(manext): make.man
