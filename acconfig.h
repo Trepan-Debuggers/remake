@@ -12,6 +12,3 @@
 
 /* Define this if you have the `union wait' type in <sys/wait.h>.  */
 #undef HAVE_UNION_WAIT
-
-/* Define this if the POSIX.1 call `sysconf (_SC_OPEN_MAX)' works properly.  */
-#undef HAVE_SYSCONF_OPEN_MAX
