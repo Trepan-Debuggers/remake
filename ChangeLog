@@ -1,3 +1,28 @@
+2002-08-01  Paul D. Smith  <psmith@gnu.org>
+
+	Add new introspection variables .VARIABLES and .TARGETS.
+
+	* variable.c (handle_special_var): New function.  If the variable
+	reference passed in is "special" (.VARIABLES or .TARGETS),
+	calculate the new value if necessary.  .VARIABLES is handled here:
+	walk through the hash of defined variables and construct a value
+	which is a list of the names.  .TARGETS is handled by
+	build_target_list().
+	(lookup_variable): Invoke handle_special_var().
+	* file.c (build_target_list): Walk through the hask of known files
+	and construct a list of the names of all the ones marked as
+	targets.
+	* main.c (main): Initialize them to empty (and as simple variables).
+	* doc/make.texi (Special Variables): Document them.
+	* NEWS: Mention them.
+
+	* variable.h (struct variable): Add a new flag "exportable" which
+	is true if the variable name is valid for export.
+	* variable.c (define_variable_in_set): Set "exportable" when a new
+	variable is defined.
+	(target_environment): Use the "exportable" flag	instead of
+	re-checking the name here... an efficiency improvement.
+
 2002-07-10  Paul D. Smith  <psmith@gnu.org>
 
 	* variable.c (pop_variable_scope): Remove variable made unused by

@@ -988,6 +988,10 @@ int main (int argc, char ** argv)
   atexit (msdos_return_to_initial_directory);
 #endif
 
+  /* Initialize the special variables.  */
+  define_variable (".VARIABLES", 10, "", o_default, 0);
+  define_variable (".TARGETS", 8, "", o_default, 0);
+
   /* Read in variables from the environment.  It is important that this be
      done before $(MAKE) is figured out so its definitions will not be
      from the environment.  */

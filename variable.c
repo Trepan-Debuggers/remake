@@ -157,8 +157,86 @@ define_variable_in_set (name, length, value, origin, recursive, set, flocp)
   v->append = 0;
   v->export = v_default;
 
+  v->exportable = 1;
+  if (*name != '_' && (*name < 'A' || *name > 'Z')
+      && (*name < 'a' || *name > 'z'))
+    v->exportable = 0;
+  else
+    {
+      for (++name; *name != '\0'; ++name)
+        if (*name != '_' && (*name < 'a' || *name > 'z')
+            && (*name < 'A' || *name > 'Z') && !ISDIGIT(*name))
+          break;
+
+      if (*name != '\0')
+        v->exportable = 0;
+    }
+
   return v;
 }
+
+/* If the variable passed in is "special", handle its special nature.
+   Currently there are two such variables, both used for introspection:
+   .MAKE_VARS expands to a list of all the variables defined in this instance
+   of make.
+   .MAKE_TARGETS expands to a list of all the targets defined in this
+   instance of make.
+   Returns the variable reference passed in.  */
+
+#define EXPANSION_INCREMENT(_l)  ((((_l) / 500) + 1) * 500)
+
+static struct variable *
+handle_special_var (var)
+     struct variable *var;
+{
+  static unsigned long last_var_count = 0;
+
+
+  if (streq (var->name, ".MAKE_TARGETS"))
+    var->value = build_target_list (var->value);
+
+  else if (streq (var->name, ".MAKE_VARS")
+      && global_variable_set.table.ht_fill != last_var_count)
+    {
+      unsigned long max = EXPANSION_INCREMENT (strlen (var->value));
+      unsigned long len;
+      char *p;
+      struct variable **vp = (struct variable **) global_variable_set.table.ht_vec;
+      struct variable **end = &vp[global_variable_set.table.ht_size];
+
+      /* Make sure we have at least MAX bytes in the allocated buffer.  */
+      var->value = xrealloc (var->value, max);
+
+      p = var->value;
+      len = 0;
+      for (; vp < end; ++vp)
+        if (!HASH_VACANT (*vp))
+          {
+            struct variable *v = *vp;
+            int l = v->length;
+
+            len += l + 1;
+            if (len > max)
+              {
+                unsigned long off = p - var->value;
+
+                max += EXPANSION_INCREMENT (l + 1);
+                var->value = xrealloc (var->value, max);
+                p = &var->value[off];
+              }
+
+            bcopy (v->name, p, l);
+            p += l;
+            *(p++) = ' ';
+          }
+      *(p-1) = '\0';
+
+      last_var_count = global_variable_set.table.ht_fill;
+    }
+
+  return var;
+}
+
 
 /* Lookup a variable whose name is a string starting at NAME
    and with LENGTH chars.  NAME need not be null-terminated.
@@ -184,7 +262,7 @@ lookup_variable (name, length)
 
       v = (struct variable *) hash_find_item ((struct hash_table *) &set->table, &var_key);
       if (v)
-	return v;
+	return handle_special_var (v);
     }
 
 #ifdef VMS
@@ -570,7 +648,6 @@ target_environment (file)
 	  {
 	    struct variable **new_slot;
 	    struct variable *v = *v_slot;
-	    char *p = v->name;
 
 	    /* If this is a per-target variable and it hasn't been touched
 	       already then look up the global version and take its export
@@ -592,19 +669,13 @@ target_environment (file)
 		  /* Only export default variables by explicit request.  */
 		  continue;
 
+                /* The variable doesn't have a name that can be exported.  */
+                if (! v->exportable)
+                  continue;
+
 		if (! export_all_variables
 		    && v->origin != o_command
 		    && v->origin != o_env && v->origin != o_env_override)
-		  continue;
-
-		if (*p != '_' && (*p < 'A' || *p > 'Z')
-                    && (*p < 'a' || *p > 'z'))
- 		  continue;
-		for (++p; *p != '\0'; ++p)
-		  if (*p != '_' && (*p < 'a' || *p > 'z')
-		      && (*p < 'A' || *p > 'Z') && (*p < '0' || *p > '9'))
-		    continue;
-		if (*p != '\0')
 		  continue;
 		break;
 
