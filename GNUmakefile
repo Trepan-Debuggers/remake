@@ -97,10 +97,9 @@ prog := make
 endif
 
 ifneq	"$(findstring gcc,$(CC))" ""
-CFLAGS = $(defines) -g -W -Wunused -Wpointer-arith -Wreturn-type -Wswitch
-ifneq	"$(findstring -O,$(CC))" ""
-CC := $(CC) -fstrength-reduce
-endif
+CFLAGS = -g -W -Wunused -Wpointer-arith -Wreturn-type -Wswitch
+else
+CFLAGS = -g
 endif
 
 ifdef yescustoms
