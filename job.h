@@ -20,6 +20,23 @@ Boston, MA 02111-1307, USA.  */
 #ifndef SEEN_JOB_H
 #define SEEN_JOB_H
 
+#ifdef HAVE_FCNTL_H
+# include <fcntl.h>
+#else
+# include <sys/file.h>
+#endif
+
+/* How to set close-on-exec for a file descriptor.  */
+
+#if !defined F_SETFD
+# define CLOSE_ON_EXEC(_d)
+#else
+# ifndef FD_CLOEXEC
+#  define FD_CLOEXEC 1
+# endif
+# define CLOSE_ON_EXEC(_d) (void) fcntl ((_d), F_SETFD, FD_CLOEXEC)
+#endif
+
 /* Structure describing a running or dead child process.  */
 
 struct child
@@ -57,11 +74,15 @@ extern void start_waiting_jobs PARAMS ((void));
 extern char **construct_command_argv PARAMS ((char *line, char **restp, struct file *file, char** batch_file));
 #ifdef VMS
 extern int child_execute_job PARAMS ((char *argv, struct child *child));
+#elif defined(__EMX__)
+extern int child_execute_job PARAMS ((int stdin_fd, int stdout_fd, char **argv, char **envp));
 #else
 extern void child_execute_job PARAMS ((int stdin_fd, int stdout_fd, char **argv, char **envp));
 #endif
 #ifdef _AMIGA
 extern void exec_command PARAMS ((char **argv));
+#elif defined(__EMX__)
+extern int exec_command PARAMS ((char **argv, char **envp));
 #else
 extern void exec_command PARAMS ((char **argv, char **envp));
 #endif

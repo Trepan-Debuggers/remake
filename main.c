@@ -37,6 +37,10 @@ MA 02111-1307, USA.  */
 #include <windows.h>
 #include "pathstuff.h"
 #endif
+#ifdef __EMX__
+# include <sys/types.h>
+# include <sys/wait.h>
+#endif
 #if defined(MAKE_JOBSERVER) && defined(HAVE_FCNTL_H)
 # include <fcntl.h>
 #endif
@@ -846,6 +850,9 @@ main (int argc, char **argv, char **envp)
   no_default_sh_exe = 1;
 #endif
 
+  /* Needed for OS/2 */
+  initialize_main(&argc, &argv);
+
   default_goal_file = 0;
   reading_file = 0;
 
@@ -952,7 +959,7 @@ main (int argc, char **argv, char **envp)
 #else
       program = strrchr (argv[0], '/');
 #endif
-#ifdef __MSDOS__
+#if defined(__MSDOS__) || defined(__EMX__)
       if (program == 0)
 	program = strrchr (argv[0], '\\');
       else
@@ -1136,7 +1143,7 @@ main (int argc, char **argv, char **envp)
       strneq(argv[0], "//", 2))
     argv[0] = xstrdup(w32ify(argv[0],1));
 #else /* WINDOWS32 */
-#ifdef __MSDOS__
+#if defined (__MSDOS__) || defined (__EMX__)
   if (strchr (argv[0], '\\'))
     {
       char *p;
@@ -1325,7 +1332,7 @@ main (int argc, char **argv, char **envp)
 #define DEFAULT_TMPFILE     "GmXXXXXX"
 
 	    if (((tmpdir = getenv ("TMPDIR")) == NULL || *tmpdir == '\0')
-#if defined __MSDOS__ || defined(WINDOWS32)
+#if defined (__MSDOS__) || defined (WINDOWS32) || defined (__EMX__)
                 /* These are also used commonly on these platforms.  */
                 && ((tmpdir = getenv ("TEMP")) == NULL || *tmpdir == '\0')
                 && ((tmpdir = getenv ("TMP")) == NULL || *tmpdir == '\0')
@@ -1376,6 +1383,7 @@ main (int argc, char **argv, char **envp)
 	  }
     }
 
+#ifndef __EMX__ /* Don't use a SIGCHLD handler for OS/2 */
 #if defined(MAKE_JOBSERVER) || !defined(HAVE_WAIT_NOHANG)
   /* Set up to handle children dying.  This must be done before
      reading in the makefiles so that `shell' function calls will work.
@@ -1398,6 +1406,7 @@ main (int argc, char **argv, char **envp)
     bsd_signal (SIGCLD, child_handler);
 # endif
   }
+#endif
 #endif
 
   /* Let the user send us SIGUSR1 to toggle the -d flag during the run.  */
@@ -1448,7 +1457,7 @@ main (int argc, char **argv, char **envp)
   }
 #endif /* WINDOWS32 */
 
-#ifdef __MSDOS__
+#if defined (__MSDOS__) || defined (__EMX__)
   /* We need to know what kind of shell we will be using.  */
   {
     extern int _is_unixy_shell (const char *_path);
@@ -1468,7 +1477,7 @@ main (int argc, char **argv, char **envp)
 	  default_shell = shell_path;
       }
   }
-#endif /* __MSDOS__ */
+#endif /* __MSDOS__ || __EMX__ */
 
   /* Decode switches again, in case the variables were set by the makefile.  */
   decode_env_switches ("MAKEFLAGS", 9);
@@ -1476,8 +1485,12 @@ main (int argc, char **argv, char **envp)
   decode_env_switches ("MFLAGS", 6);
 #endif
 
-#ifdef __MSDOS__
-  if (job_slots != 1)
+#if defined (__MSDOS__) || defined (__EMX__)
+  if (job_slots != 1
+# ifdef __EMX__
+      && _osmode != OS2_MODE /* turn off -j if we are in DOS mode */
+# endif
+      )
     {
       error (NILF,
              _("Parallel jobs (-j) are not supported on this platform."));
@@ -1557,8 +1570,13 @@ main (int argc, char **argv, char **envp)
          want job_slots to be 0 to indicate we're using the jobserver.  */
 
       while (--job_slots)
-        if (write (job_fds[1], &c, 1) != 1)
-	  pfatal_with_name (_("init jobserver pipe"));
+        {
+          int r;
+
+          EINTRLOOP (r, write (job_fds[1], &c, 1));
+          if (r != 1)
+            pfatal_with_name (_("init jobserver pipe"));
+        }
 
       /* Fill in the jobserver_fds struct for our children.  */
 
@@ -1880,11 +1898,30 @@ main (int argc, char **argv, char **envp)
           if (job_rfd >= 0)
             close (job_rfd);
 
-#ifndef _AMIGA
-	  exec_command (nargv, environ);
-#else
+#ifdef _AMIGA
 	  exec_command (nargv);
 	  exit (0);
+#elif defined (__EMX__)
+	  {
+	    /* It is not possible to use execve() here because this
+	       would cause the parent process to be terminated with
+	       exit code 0 before the child process has been terminated.
+	       Therefore it may be the best solution simply to spawn the
+	       child process including all file handles and to wait for its
+	       termination. */
+	    int pid;
+	    int status;
+	    pid = child_execute_job(0, 1, nargv, environ);
+
+	    /* is this loop really necessary? */
+	    do {
+	      pid = wait(&status);
+	    } while(pid <= 0);
+	    /* use the exit code of the child process */
+	    exit(WIFEXITED(status) ? WEXITSTATUS(status) : EXIT_FAILURE);
+	  }
+#else
+	  exec_command (nargv, environ);
 #endif
 	  /* NOTREACHED */
 

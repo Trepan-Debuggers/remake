@@ -1,3 +1,52 @@
+2003-02-25  Paul D. Smith  <psmith@gnu.org>
+
+	Port to OS/2 (__EMX__) by Andreas Buening <andreas.buening@nexgo.de>.
+
+	* job.c (_is_unixy_shell) [OS/2]: New function.
+	Set default shell to /bin/sh.
+	(reap_children): Close the job_rfd pipe here since we don't use a
+	SIGCHLD handler.
+	(set_child_handler_action_flags): define this to empty on OS/2.
+	(start_job_command): Close the jobserver pipe and use
+	child_execute_job() instead of fork/exec.
+	(child_execute_job): Rewrite to handle stdin/stdout FDs and spawn
+	rather than exec'ing, then reconfigure stdin/stdout.
+	(exec_command): Rewrite to use spawn instead of exec.  Return the
+	PID of the child.
+
+	* main.c (main) [OS/2]: Call initialize_main().  Handle argv[0] as
+	in DOS.  Handle the TEMP environment variable as in DOS.  Don't
+	use a SIGCHLD handler on OS/2.  Choose a shell as in DOS.  Don't
+	use -j in DOS mode.  Use child_execute_job() instead of
+	exec_command().
+
+	* function.c (func_shell) [OS/2]: Can't use fork/exec on OS/2: use
+	spawn() instead.
+
+	* job.h [OS/2]: Move CLOSE_ON_EXEC here from job.c.  Add
+	prototypes that return values.
+
+	* remake.c (f_mtime) [OS/2]: Handle FAT timestamp offsets for OS/2.
+
+	* read.c (readline) [OS/2]: Don't handle CRLF specially on OS/2.
+	* default.c (default_suffixes) [OS/2]: Set proper default suffixes
+	for OS/2.
+	* vpath.c (construct_vpath_list) [OS/2]: Handle OS/2 paths like
+	DOS paths.
+
+2003-02-24  Paul D. Smith  <psmith@gnu.org>
+
+	* default.c [VMS]: New default rules for .cxx -> .obj compiles.
+	* job.c (child_execute_job) [VMS]: New code for handling spawn().
+	(child_execute_job) [VMS]: Handle error status properly.
+	Patches provided by Hartmut Becker <Hartmut.Becker@compaq.com>.
+
+	* function.c (func_shell): Use EINTRLOOP() while reading from the
+	subshell pipe (Fixes bug #2502).
+	* job.c (free_child): Use EINTRLOOP() while writing tokens to the
+	jobserver pipe.
+	* main.c (main): Ditto.
+
 2003-01-30  Paul D. Smith  <psmith@gnu.org>
 
 	* read.c (eval): eval() was not fully reentrant, because the

@@ -544,7 +544,7 @@ merge_variable_set_lists (struct variable_set_list **setlist0,
 void
 define_automatic_variables (void)
 {
-#ifdef WINDOWS32
+#if defined(WINDOWS32) || defined(__EMX__)
   extern char* default_shell;
 #else
   extern char default_shell[];
@@ -585,6 +585,54 @@ define_automatic_variables (void)
 	  (void) define_variable (shell_str, shlen, comp->value, o_env, 0);
       }
   }
+#elif defined(__EMX__)
+  {
+    static char shell_str[] = "SHELL";
+    const int shlen = sizeof (shell_str) - 1;
+    struct variable *shell = lookup_variable (shell_str, shlen);
+    struct variable *replace = lookup_variable ("MAKESHELL", 9);
+
+    /* if $MAKESHELL is defined in the environment assume o_env_override */
+    if (replace && *replace->value && replace->origin == o_env)
+      replace->origin = o_env_override;
+
+    /* if $MAKESHELL is not defined use $SHELL but only if the variable
+       did not come from the environment */
+    if (!replace || !*replace->value)
+      if (shell && *shell->value && (shell->origin == o_env
+	  || shell->origin == o_env_override))
+	{
+	  /* overwrite whatever we got from the environment */
+	  free(shell->value);
+	  shell->value = xstrdup (default_shell);
+	  shell->origin = o_default;
+	}
+
+    /* Some people do not like cmd to be used as the default
+       if $SHELL is not defined in the Makefile.
+       With -DNO_CMD_DEFAULT you can turn off this behaviour */
+# ifndef NO_CMD_DEFAULT
+    /* otherwise use $COMSPEC */
+    if (!replace || !*replace->value)
+      replace = lookup_variable ("COMSPEC", 7);
+
+    /* otherwise use $OS2_SHELL */
+    if (!replace || !*replace->value)
+      replace = lookup_variable ("OS2_SHELL", 9);
+# else
+#   warning NO_CMD_DEFAULT: GNU make will not use CMD.EXE as default shell
+# endif
+
+    if (replace && *replace->value)
+      /* overwrite $SHELL */
+      (void) define_variable (shell_str, shlen, replace->value,
+			      replace->origin, 0);
+    else
+      /* provide a definition if there is none */
+      (void) define_variable (shell_str, shlen, default_shell,
+			      o_default, 0);
+  }
+
 #endif
 
   /* This won't override any definition, but it
@@ -594,8 +642,10 @@ define_automatic_variables (void)
 
   /* On MSDOS we do use SHELL from environment, since
      it isn't a standard environment variable on MSDOS,
-     so whoever sets it, does that on purpose.  */
-#ifndef __MSDOS__
+     so whoever sets it, does that on purpose.
+     On OS/2 we do not use SHELL from environment but
+     we have already handled that problem above. */
+#if !defined(__MSDOS__) && !defined(__EMX__)
   /* Don't let SHELL come from the environment.  */
   if (*v->value == '\0' || v->origin == o_env || v->origin == o_env_override)
     {

@@ -561,12 +561,16 @@ eval (struct ebuffer *ebuf, int set_default)
 	    }
 	}
 
-      /* This line is not a shell command line.  Don't worry about tabs.  */
+      /* This line is not a shell command line.  Don't worry about tabs.
+         Get more space if we need it; we don't need to preserve the current
+         contents of the buffer.  */
 
       if (collapsed_length < linelen+1)
 	{
 	  collapsed_length = linelen+1;
-	  collapsed = (char *) xrealloc (collapsed, collapsed_length);
+          if (collapsed)
+            free ((char *)collapsed);
+	  collapsed = (char *) xmalloc (collapsed_length);
 	}
       strcpy (collapsed, line);
       /* Collapse continuation lines.  */
@@ -1150,7 +1154,7 @@ eval (struct ebuffer *ebuf, int set_default)
 
           do {
             check_again = 0;
-            /* For DOS paths, skip a "C:\..." or a "C:/..." */
+            /* For DOS-style paths, skip a "C:\..." or a "C:/..." */
             if (p != 0 && (p[1] == '\\' || p[1] == '/') &&
                 isalpha ((unsigned char)p[-1]) &&
                 (p == p2 + 1 || strchr (" \t:(", p[-2]) != 0)) {
@@ -2559,7 +2563,7 @@ readline (struct ebuffer *ebuf)
       /* We got a newline, so add one to the count of lines.  */
       ++nlines;
 
-#if !defined(WINDOWS32) && !defined(__MSDOS__)
+#if !defined(WINDOWS32) && !defined(__MSDOS__) && !defined(__EMX__)
       /* Check to see if the line was really ended with CRLF; if so ignore
          the CR.  */
       if ((p - start) > 1 && p[-2] == '\r')
