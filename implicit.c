@@ -399,8 +399,8 @@ pattern_search (file, archive, depth, recursions)
 		 directory (the one gotten by prepending FILENAME's directory),
 		 so it might actually exist.  */
 
-	      if ((!dep->changed || check_lastslash)
-		  && (lookup_file (p) != 0 || file_exists_p (p)))
+	      if (lookup_file (p) != 0
+		  || ((!dep->changed || check_lastslash) && file_exists_p (p)))
 		{
 		  found_files[deps_found++] = xstrdup (p);
 		  continue;

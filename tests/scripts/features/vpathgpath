@@ -38,12 +38,14 @@ close(MAKEFILE);
 
 @touchedfiles = ();
 
+$off = -500;
+
 sub touchfiles {
   foreach (@_) {
     ($f = $_) =~ s,VP/,$VP,g;
-    &touch($f);
+    &utouch($off, $f);
+    $off += 10;
     push(@touchedfiles, $f);
-    sleep(1);
   }
 }
 

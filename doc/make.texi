@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.5 2002/08/08 00:11:19 psmith Exp $
+@set RCSID $Id: make.texi,v 1.6 2002/09/04 07:26:19 psmith Exp $
 @set EDITION 0.60
 @set VERSION 3.80
 @set UPDATED 08 July 2002
@@ -999,13 +999,25 @@ Defining a variable from a verbatim string containing multiple lines
 @cindex comments, in makefile
 @cindex @code{#} (comments), in makefile
 @item
-@samp{#} in a line of a makefile starts a @dfn{comment}.  It and the rest of
-the line are ignored, except that a trailing backslash not escaped by
-another backslash will continue the comment across multiple lines.
-Comments may appear on any of the lines in the makefile, except within a
-@code{define} directive, and perhaps within commands (where the shell
-decides what is a comment).  A line containing just a comment (with
-perhaps spaces before it) is effectively blank, and is ignored.@refill
+@samp{#} in a line of a makefile starts a @dfn{comment}.  It and the
+rest of the line are ignored, except that a trailing backslash not
+escaped by another backslash will continue the comment across multiple
+lines.  A line containing just a comment (with perhaps spaces before
+it) is effectively blank, and is ignored.  If you want a literal
+@code{#}, escape it with a backslash (e.g., @code{\#}).  Comments may
+appear on any line in the makefile, although they are treated
+specially in certain situations.
+
+Within a command script (if the line begins with a TAB character) the
+entire line is passed to the shell, just as with any other line that
+begins with a TAB.  The shell decides how to interpret the text:
+whether or not this is a comment is up to the shell.
+
+Within a @code{define} directive, comments are not ignored during the
+definition of the variable, but rather kept intact in the value of the
+variable.  When the variable is expanded they will either be treated
+as @code{make} comments or as command script text, depending on the
+context in which the variable is evaluated.
 @end itemize
 
 @node Makefile Names, Include, Makefile Contents, Makefiles
@@ -2322,10 +2334,11 @@ clean:
 @end example
 
 Another example of the usefulness of phony targets is in conjunction
-with recursive invocations of @code{make}.  In this case the makefile
-will often contain a variable which lists a number of subdirectories to
-be built.  One way to handle this is with one rule whose command is a
-shell loop over the subdirectories, like this:
+with recursive invocations of @code{make} (for more information, see
+@ref{Recursion, ,Recursive Use of @code{make}}).  In this case the
+makefile will often contain a variable which lists a number of
+subdirectories to be built.  One way to handle this is with one rule
+whose command is a shell loop over the subdirectories, like this:
 
 @example
 @group
@@ -3597,7 +3610,10 @@ subsystem:
 
 You can write recursive @code{make} commands just by copying this example,
 but there are many things to know about how they work and why, and about
-how the sub-@code{make} relates to the top-level @code{make}.
+how the sub-@code{make} relates to the top-level @code{make}.  You may
+also find it useful to declare targets that invoke recursive
+@code{make} commands as @samp{.PHONY} (for more discussion on when
+this is useful, see @ref{Phony Targets}).
 
 For your convenience, GNU @code{make} sets the variable @code{CURDIR} to
 the pathname of the current working directory for you.  If @code{-C} is
