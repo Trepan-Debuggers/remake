@@ -21,6 +21,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "dep.h"
 #include "file.h"
 #include "variable.h"
+#include <assert.h>
 
 
 /* Hash table of files the makefile knows how to make.  */
@@ -497,6 +498,10 @@ print_file (f)
 	  puts ("#  Successfully updated.");
 	  break;
 	case 1:
+	  assert (question_flag);
+	  puts ("#  Needs to be updated (-q is set).");
+	  break;
+	case 2:
 	  puts ("#  Failed to be updated.");
 	  break;
 	default:
