@@ -744,9 +744,11 @@ notice_finished_file (file)
          would have been updated. */
 
       if (question_flag || just_print_flag)
-        for (i = file->cmds->ncommand_lines; i > 0; --i)
-          if (! (file->cmds->lines_flags[i-1] & COMMANDS_RECURSE))
-            break;
+        {
+          for (i = file->cmds->ncommand_lines; i > 0; --i)
+            if (! (file->cmds->lines_flags[i-1] & COMMANDS_RECURSE))
+              break;
+        }
 
       /* If there were no commands at all, it's always new. */
 
@@ -1232,7 +1234,7 @@ library_search (lib, mtime_ptr)
 
   /* Loop variables for the libpatterns value.  */
   char *p, *p2;
-  int len;
+  unsigned int len;
 
   char *file, **dp;
 

@@ -37,8 +37,6 @@ USA.  */
 #include <lbr$routines.h>
 #endif
 
-#define uppercasify(str) {char *str1; for (str1 = str; *str1; str1++) *str1 = _toupper(*str1);}
-
 static void *VMS_lib_idx;
 
 static char *VMS_saved_memname;
@@ -83,7 +81,7 @@ VMS_get_member_info (module, rfa)
   val = decc$fix_time (&mhd->mhd$l_datim);
 
   for (i = 0; i < module->dsc$w_length; i++)
-    filename[i] = _tolower (module->dsc$a_pointer[i]);
+    filename[i] = _tolower ((unsigned char)module->dsc$a_pointer[i]);
 
   filename[i] = '\0';
 
@@ -172,7 +170,7 @@ ar_scan (archive, function, arg)
 
   /* For comparison, delete .obj from arg name.  */
 
-  p = rindex (VMS_saved_memname, '.');
+  p = strrchr (VMS_saved_memname, '.');
   if (p)
     *p = '\0';
 
@@ -698,7 +696,7 @@ ar_name_equal (name, mem, truncated)
 {
   char *p;
 
-  p = rindex (name, '/');
+  p = strrchr (name, '/');
   if (p != 0)
     name = p + 1;
 

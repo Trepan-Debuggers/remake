@@ -402,11 +402,11 @@ selective_vpath_search (path, file, mtime_ptr)
      NAME_DPLEN gets the length of the prefix; FILENAME gets the
      pointer to the name-within-directory and FLEN is its length.  */
 
-  n = rindex (*file, '/');
+  n = strrchr (*file, '/');
 #if defined (WINDOWS32) || defined (__MSDOS__)
   /* We need the rightmost slash or backslash.  */
   {
-    char *bslash = rindex(*file, '\\');
+    char *bslash = strrchr(*file, '\\');
     if (!n || bslash > n)
       n = bslash;
   }

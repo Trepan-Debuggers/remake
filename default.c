@@ -328,8 +328,7 @@ static char *default_variables[] =
     /* This expands to $(CO) $(COFLAGS) $< $@ if $@ does not exist,
        and to the empty string if $@ does exist.  */
     "CHECKOUT,v",
-    "+$(patsubst $@-noexist,$(CO) $(COFLAGS) $< $@,\
-		 $(filter-out $@,$(firstword $(wildcard $@) $@-noexist)))",
+    "+$(if $(wildcard $@),,$(CO) $(COFLAGS) $< $@)",
 
     "CO", "co",
     "CPP", "$(CC) -E",

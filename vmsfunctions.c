@@ -76,8 +76,8 @@ opendir (dspec)
     { \
       char *tmp; \
       for (tmp = (str); *tmp != '\0'; tmp++) \
-        if (islower (*tmp)) \
-          *tmp = toupper (*tmp); \
+        if (islower ((unsigned char)*tmp)) \
+          *tmp = toupper ((unsigned char)*tmp); \
     } \
   while (0)
 

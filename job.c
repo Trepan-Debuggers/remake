@@ -1257,7 +1257,7 @@ new_job (file)
 	 IN gets ahead of OUT.  */
 
       in = out = cmds->command_lines[i];
-      while ((ref = index (in, '$')) != 0)
+      while ((ref = strchr (in, '$')) != 0)
 	{
 	  ++ref;		/* Move past the $.  */
 
@@ -2099,12 +2099,12 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
 	     If we see any of those, punt.
 	     But on MSDOS, if we use COMMAND.COM, double and single
 	     quotes have the same effect.  */
-	  else if (instring == '"' && index ("\\$`", *p) != 0 && unixy_shell)
+	  else if (instring == '"' && strchr ("\\$`", *p) != 0 && unixy_shell)
 	    goto slow;
 	  else
 	    *ap++ = *p;
 	}
-      else if (index (sh_chars, *p) != 0)
+      else if (strchr (sh_chars, *p) != 0)
 	/* Not inside a string, but it's a special char.  */
 	goto slow;
 #ifdef  __MSDOS__
@@ -2181,8 +2181,9 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
                   }
                 else
 #endif
-                  if (p[1] != '\\' && p[1] != '\'' && !isspace (p[1])
-                      && (index (sh_chars_sh, p[1]) == 0))
+                  if (p[1] != '\\' && p[1] != '\''
+                      && !isspace ((unsigned char)p[1])
+                      && (strchr (sh_chars_sh, p[1]) == 0))
                     /* back up one notch, to copy the backslash */
                     --p;
 
@@ -2330,7 +2331,7 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
    */
 
   /* Make sure not to bother processing an empty line.  */
-  while (isspace (*line))
+  while (isspace ((unsigned char)*line))
     ++line;
   if (*line == '\0')
     return 0;
@@ -2347,14 +2348,14 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
 
     char *new_line = (char *) alloca (shell_len + (sizeof (minus_c) - 1)
 				      + (line_len * 2) + 1);
-    char* command_ptr = NULL; /* used for batch_mode_shell mode */
+    char *command_ptr = NULL; /* used for batch_mode_shell mode */
 
     ap = new_line;
     bcopy (shell, ap, shell_len);
     ap += shell_len;
     bcopy (minus_c, ap, sizeof (minus_c) - 1);
     ap += sizeof (minus_c) - 1;
-	command_ptr = ap;
+    command_ptr = ap;
     for (p = line; *p != '\0'; ++p)
       {
 	if (restp != NULL && *p == '\n')
@@ -2387,8 +2388,8 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
         /* DOS shells don't know about backslash-escaping.  */
 	if (unixy_shell && !batch_mode_shell &&
             (*p == '\\' || *p == '\'' || *p == '"'
-             || isspace (*p)
-             || index (sh_chars, *p) != 0))
+             || isspace ((unsigned char)*p)
+             || strchr (sh_chars, *p) != 0))
 	  *ap++ = '\\';
 #ifdef __MSDOS__
         else if (unixy_shell && strneq (p, "...", 3))
@@ -2447,7 +2448,7 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
       fclose (batch);
 
       /* create argv */
-      new_argv = (char **) xmalloc(3 * sizeof(char *));
+      new_argv = (char **) xmalloc(3 * sizeof (char *));
       if (unixy_shell) {
         new_argv[0] = xstrdup (shell);
         new_argv[1] = *batch_filename_ptr; /* only argv[0] gets freed later */
@@ -2461,7 +2462,7 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
     if (unixy_shell)
       new_argv = construct_command_argv_internal (new_line, (char **) NULL,
                                                   (char *) 0, (char *) 0,
-                                                  (char *) 0);
+                                                  (char **) 0);
 #ifdef  __MSDOS__
     else
       {

@@ -78,8 +78,8 @@ copyto (char **to, char **from, char upto, int as_dir)
 	}
       else
 	{
-	  if (islower (**from))
-	    **to = toupper (**from);
+	  if (islower ((unsigned char)**from))
+	    **to = toupper ((unsigned char)**from);
 	  else
 	    **to = **from;
 	}

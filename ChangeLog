@@ -1,3 +1,24 @@
+1999-10-15  Paul D. Smith  <psmith@gnu.org>
+
+	* main.c (quote_for_env): Rename from quote_as_word().
+
+	* make.h, *.c: Prefer strchr() and strrchr() in the code
+	rather than index() and rindex().  Define strchr/strrchr in terms
+	of index/rindex if the former aren't supported.
+
+	* default.c (CHECKOUT,v): Replace the fancy, complicated
+	patsubst/filter expression with a simple $(if ...) expression.
+
+	* main.c (print_usage): Add the bug reporting mailing address to
+	the --help output, as per the GNU coding standards.
+	Reported by Paul Eggert <eggert@twinsun.com>.
+
+	* README.customs: Installed information on running Customs-ized
+	GNU make and setuid root, collected by Ted Stern <stern@tera.com>.
+
+	* read.c (read_all_makefiles): PR/1394: Mark the end of the next
+	token in the MAKEFILES value string _before_ we dup it.
+
 1999-10-13  Paul D. Smith  <psmith@gnu.org>
 
 	* configure.in (make_cv_sys_gnu_glob): We used to add the -Iglob
@@ -28,6 +49,25 @@
 	any rules to run so it might not have been initialized before
 	this--we need this to set up the chain properly for
 	target-specific variables.
+
+1999-09-29  Paul Eggert  <eggert@twinsun.com>
+
+	* main.c (quote_as_word): Always quote for decode_env_switches
+        instead of for the shell, so that arguments with strange
+        characters are are passed to submakes correctly.  Remove
+        double_dollars arg; we always double dollars now.  All callers
+        changed.
+        (decode_env_switches): Don't run off the end of an environment
+        variable whose contents ends in a unescaped backslash.
+
+1999-09-23  Paul D. Smith  <psmith@gnu.org>
+
+	* commands.c, function.c, job.c, read.c: Cast arguments to
+	ctype.h functions/macros to _unsigned_ char for portability.
+
+	* remake.c, function.c: Compiler warning fixes: the second
+	argument to find_next_token() should be an _unsigned_ int*.
+	Reported by Han-Wen Nienhuys <hanwen@cs.uu.nl>.
 
 1999-09-23  Paul D. Smith  <psmith@gnu.org>
 

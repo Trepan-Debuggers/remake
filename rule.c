@@ -108,11 +108,11 @@ count_implicit_rule_limits ()
 	  unsigned int len = strlen (dep->name);
 
 #ifdef VMS
-	  char *p = rindex (dep->name, ']');
+	  char *p = strrchr (dep->name, ']');
 #else
-	  char *p = rindex (dep->name, '/');
+	  char *p = strrchr (dep->name, '/');
 #endif
-	  char *p2 = p != 0 ? index (dep->name, '%') : 0;
+	  char *p2 = p != 0 ? strchr (dep->name, '%') : 0;
 	  ndeps++;
 
 	  if (len > max_pattern_dep_length)

@@ -240,23 +240,7 @@ extern void exit PARAMS ((int)) __attribute__ ((noreturn));
 
 #endif /* Standard headers.  */
 
-#if ST_MTIM_NSEC
-# if HAVE_INTTYPES_H
-#  include <inttypes.h>
-# endif
-# define FILE_TIMESTAMP uintmax_t
-#else
-# define FILE_TIMESTAMP time_t
-#endif
-
 #ifdef  ANSI_STRING
-
-# ifndef index
-#  define index(s, c)       strchr((s), (c))
-# endif
-# ifndef rindex
-#  define rindex(s, c)      strrchr((s), (c))
-# endif
 
 # ifndef bcmp
 #  define bcmp(s1, s2, n)   memcmp ((s1), (s2), (n))
@@ -269,6 +253,11 @@ extern void exit PARAMS ((int)) __attribute__ ((noreturn));
 # endif
 
 #else   /* Not ANSI_STRING.  */
+
+# ifndef HAVE_STRCHR
+#  define strchr(s, c)      index((s), (c))
+#  define strrchr(s, c)     rindex((s), (c))
+# endif
 
 # ifndef bcmp
 extern int bcmp PARAMS ((const char *, const char *, int));
@@ -303,6 +292,15 @@ extern char *alloca ();
 # endif /* HAVE_ALLOCA_H.  */
 #endif /* GCC.  */
 
+#if ST_MTIM_NSEC
+# if HAVE_INTTYPES_H
+#  include <inttypes.h>
+# endif
+# define FILE_TIMESTAMP uintmax_t
+#else
+# define FILE_TIMESTAMP time_t
+#endif
+
 /* ISDIGIT offers the following features:
    - Its arg may be any int or unsigned int; it need not be an unsigned char.
    - It's guaranteed to evaluate its argument exactly once.
@@ -321,8 +319,9 @@ extern char *alloca ();
 # ifdef HAVE_CASE_INSENSITIVE_FS
 /* This is only used on Windows/DOS platforms, so we assume strcmpi().  */
 #  define strieq(a, b) \
-    ((a) == (b) || \
-     (tolower(*(a)) == tolower(*(b)) && (*(a) == '\0' || !strcmpi ((a) + 1, (b) + 1))))
+    ((a) == (b) \
+     || (tolower((unsigned char)*(a)) == tolower((unsigned char)*(b)) \
+         && (*(a) == '\0' || !strcmpi ((a) + 1, (b) + 1))))
 # else
 #  define strieq(a, b) streq(a, b)
 # endif
@@ -338,7 +337,7 @@ extern char *alloca ();
   ((var += (c)), (var = ((var) << 7) + ((var) >> 20)))
 #ifdef HAVE_CASE_INSENSITIVE_FS /* Fold filenames */
 # define HASHI(var, c) \
-   ((var += tolower((c))), (var = ((var) << 7) + ((var) >> 20)))
+   ((var += tolower((unsigned char)(c))), (var = ((var) << 7) + ((var) >> 20)))
 #else
 # define HASHI(var, c) HASH(var,c)
 #endif

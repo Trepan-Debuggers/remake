@@ -189,7 +189,7 @@ variable_expand_string (line, string, length)
          variable output buffer, and skip them.  Uninteresting chars end
 	 at the next $ or the end of the input.  */
 
-      p1 = index (p, '$');
+      p1 = strchr (p, '$');
 
       o = variable_buffer_output (o, p, p1 != 0 ? p1 - p : strlen (p) + 1);
 
@@ -229,7 +229,7 @@ variable_expand_string (line, string, length)
 	    /* Is there a variable reference inside the parens or braces?
 	       If so, expand it before expanding the entire reference.  */
 
-	    end = index (beg, closeparen);
+	    end = strchr (beg, closeparen);
 	    if (end == 0)
               /* Unterminated variable reference.  */
               fatal (reading_file, _("unterminated variable reference"));
@@ -253,7 +253,7 @@ variable_expand_string (line, string, length)
 		  {
 		    beg = expand_argument (beg, p); /* Expand the name.  */
 		    free_beg = 1; /* Remember to free BEG when finished.  */
-		    end = index (beg, '\0');
+		    end = strchr (beg, '\0');
 		  }
 	      }
 	    else
@@ -273,7 +273,7 @@ variable_expand_string (line, string, length)
 		char *subst_beg, *subst_end, *replace_beg, *replace_end;
 
 		subst_beg = colon + 1;
-		subst_end = index (subst_beg, '=');
+		subst_end = strchr (subst_beg, '=');
 		if (subst_end == 0)
 		  /* There is no = in sight.  Punt on the substitution
 		     reference and treat this as a variable name containing

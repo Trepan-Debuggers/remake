@@ -81,7 +81,7 @@ collapse_continuations (line)
   register int backslash;
   register unsigned int bs_write;
 
-  in = index (line, '\n');
+  in = strchr (line, '\n');
   if (in == 0)
     return;
 
