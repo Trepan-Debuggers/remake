@@ -1,5 +1,5 @@
 # -*-Perl-*-
-# $Id: general,v 1.1 2004/06/12 03:17:40 rockyb Exp $
+# $Id: general,v 1.2 2004/06/12 03:18:07 rockyb Exp $
 $description = "The following checks general debugger operation.\n";
 
 $details = "check debugger operations: print, examine, break\n";
@@ -118,6 +118,3 @@ makedb<7> ';
 # COMPARE RESULTS
 
 &compare_output($answer,&get_logfile(1));
-
-
-
