@@ -27,13 +27,13 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #if defined (POSIX) || defined (DIRENT) || defined (__GNU_LIBRARY__)
 #include <dirent.h>
-#define direct dirent
 #ifndef	__GNU_LIBRARY__
 #define D_NAMLEN(d) strlen((d)->d_name)
 #else
 #define D_NAMLEN(d) ((d)->d_namlen)
 #endif
 #else /* not POSIX or DIRENT */
+#define direct dirent
 #define D_NAMLEN(d) ((d)->d_namlen)
 #if defined (USG) && !defined (sgi)
 #if defined (SYSNDIR)
@@ -154,7 +154,7 @@ dir_file_exists_p (dirname, filename)
   register char *p;
   register struct directory *dir;
   register struct dirfile *df;
-  register struct direct *d;
+  register struct dirent *d;
   dir = find_directory (dirname);
 
   if (dir->files == 0)
