@@ -1,3 +1,28 @@
+Mon Dec 11 22:26:15 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* read.c (find_semicolon): Function removed.
+	(read_makefile): Don't use find_semicolon or remove_comments for
+	rule lines.  Use find_char_unquote directly and handle quoted comments
+	properly.
+
+	* default.c: Remove all [M_XENIX] code.
+
+	* dir.c [HAVE_D_NAMLEN]: Define this for __GNU_LIBRARY__ > 1.
+	(D_NAMLEN): Macro removed.
+	(FAKE_DIR_ENTRY): New macro.
+	(dir_contents_file_exists_p): Test HAVE_D_NAMLEN instead of using
+	D_NAMLEN.
+	(read_dirstream): Return a struct dirent * for new glob interface.
+	(init_dir): Function removed.
+	(dir_setup_glob): New function.
+	* main.c (main): Don't call init_dir.
+	* read.c (multi_glob): Call dir_setup_glob on our glob_t and use
+	GLOB_ALTDIRFUNC flag.
+
+	* misc.c (safe_stat): Function removed.
+	* read.c, commands.c, remake.c, vpath.c: Use plain stat instead of
+	safe_stat.
+
 Sat Nov 25 20:35:18 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
 	* job.c [HAVE_UNION_WAIT]: Include sys/wait.h.
