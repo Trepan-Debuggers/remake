@@ -67,9 +67,10 @@ part of the make or @file{$(srcdir)/} if the file is an unchanging part
 of the source code.  Without one of these prefixes, the current search
 path is used.
 
-The distinction between @file{./} and @file{$(srcdir)/} is important
-when using the @samp{--srcdir} option to @file{configure}.  A rule of
-the form:
+The distinction between @file{./} (the @dfn{build directory}) and
+@file{$(srcdir)/} (the @dfn{source directory}) is important because
+users can build in a separate directory using the @samp{--srcdir} option
+to @file{configure}.  A rule of the form:
 
 @smallexample
 foo.1 : foo.man sedscript
@@ -77,9 +78,8 @@ foo.1 : foo.man sedscript
 @end smallexample
 
 @noindent
-will fail when the current directory is not the source directory,
-because @file{foo.man} and @file{sedscript} are not in the current
-directory.
+will fail when the build directory is not the source directory, because
+@file{foo.man} and @file{sedscript} are in the the source directory.
 
 When using GNU @code{make}, relying on @samp{VPATH} to find the source
 file will work in the case where there is a single dependency file,
@@ -111,6 +111,18 @@ foo.1 : foo.man sedscript
         sed -e $(srcdir)/sedscript $(srcdir)/foo.man > $@@
 @end smallexample
 
+GNU distributions usually contain some files which are not source
+files---for example, Info files, and the output from Autoconf, Automake,
+Bison or Flex.  Since these files normally appear in the source
+directory, they should always appear in the source directory, not in the
+build directory.  So Makefile rules to update them should put the
+updated files in the source directory.
+
+However, if a file does not appear in the distribution, then the
+Makefile should not put it in the source directory, because building a
+program in ordinary circumstances should not modify the source directory
+in any way.
+
 Try to make the build and installation targets, at least (and all their
 subtargets) work correctly with a parallel @code{make}.
 
@@ -124,10 +136,16 @@ special features of @code{ksh} or @code{bash}.
 The @code{configure} script and the Makefile rules for building and
 installation should not use any utilities directly except these:
 
+@c dd find
+@c gunzip gzip md5sum
+@c mkfifo mknod tee uname 
+
 @example
-cat cmp cp echo egrep expr false grep
-ln mkdir mv pwd rm rmdir sed test touch true
+cat cmp cp diff echo egrep expr false grep install-info
+ln ls mkdir mv pwd rm rmdir sed sleep sort tar test touch true
 @end example
+
+The compression program @code{gzip} can be used in the @code{dist} rule.
 
 Stick to the generally supported options for these programs.  For
 example, don't use @samp{mkdir -p}, convenient as it may be, because
@@ -142,25 +160,32 @@ user can substitute alternatives.  Here are some of the programs we
 mean:
 
 @example
-ar bison cc flex install ld lex
+ar bison cc flex install ld ldconfig lex
 make makeinfo ranlib texi2dvi yacc
 @end example
 
-Use the following @code{make} variables:
+Use the following @code{make} variables to run those programs:
 
 @example
-$(AR) $(BISON) $(CC) $(FLEX) $(INSTALL) $(LD) $(LEX)
+$(AR) $(BISON) $(CC) $(FLEX) $(INSTALL) $(LD) $(LDCONFIG) $(LEX)
 $(MAKE) $(MAKEINFO) $(RANLIB) $(TEXI2DVI) $(YACC)
 @end example
 
-When you use @code{ranlib}, you should make sure nothing bad happens if
-the system does not have @code{ranlib}.  Arrange to ignore an error
-from that command, and print a message before the command to tell the
-user that failure of the @code{ranlib} command does not mean a problem.
-(The Autoconf @samp{AC_PROG_RANLIB} macro can help with this.)
+When you use @code{ranlib} or @code{ldconfig}, you should make sure
+nothing bad happens if the system does not have the program in question.
+Arrange to ignore an error from that command, and print a message before
+the command to tell the user that failure of this command does not mean
+a problem.  (The Autoconf @samp{AC_PROG_RANLIB} macro can help with
+this.)
 
 If you use symbolic links, you should implement a fallback for systems
 that don't have symbolic links.
+
+Additional utilities that can be used via Make variables are:
+
+@example
+chgrp chmod chown mknod
+@end example
 
 It is ok to use other utilities in Makefile portions (or scripts)
 intended only for particular systems where you know those utilities
@@ -661,6 +686,12 @@ foo.info: foo.texi chap1.texi chap2.texi
 You must define the variable @code{MAKEINFO} in the Makefile.  It should
 run the @code{makeinfo} program, which is part of the Texinfo
 distribution.
+
+Normally a GNU distribution comes with Info files, and that means the
+Info files are present in the source directory.  Therefore, the Make
+rule for an info file should update it in the source directory.  When
+users build the package, ordinarily Make will not update the Info files
+because they will already be up to date.
 
 @item dvi
 Generate DVI files for all Texinfo documentation.
