@@ -71,12 +71,14 @@ count_implicit_rule_limits ()
   
   name = 0;
   namelen = 0;
-  rule = lastrule = pattern_rules;
+  rule = pattern_rules;
+  lastrule = 0;
   while (rule != 0)
     {
       unsigned int ndeps = 0;
       register struct dep *dep;
-      
+      struct rule *next = rule->next;
+    
       ++num_pattern_rules;
       
       for (dep = rule->deps; dep != 0; dep = dep->next)
@@ -109,7 +111,6 @@ count_implicit_rule_limits ()
 		  if (*name == '/')
 		    {
 		      freerule (rule, lastrule);
-		      rule = lastrule;
 		      goto end_main_loop;
 		    }
 		  else
@@ -121,9 +122,9 @@ count_implicit_rule_limits ()
       if (ndeps > max_pattern_deps)
 	max_pattern_deps = ndeps;
 
-    end_main_loop:;
       lastrule = rule;
-      rule = rule->next;
+    end_main_loop:
+      rule = next;
     }
   
   if (name != 0)
@@ -391,11 +392,8 @@ freerule (rule, lastrule)
 
   free ((char *) rule);
 
-  if (lastrule == 0)
-    return;
-
   if (pattern_rules == rule)
-    if (lastrule != pattern_rules)
+    if (lastrule != 0)
       abort ();
     else
       pattern_rules = next;
