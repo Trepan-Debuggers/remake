@@ -117,9 +117,9 @@ extern void set_command_state PARAMS ((struct file *file, int state));
 extern void notice_finished_file PARAMS ((struct file *file));
 
 
-#if ST_MTIM_NSEC
+#ifdef ST_MTIM_NSEC
 # define FILE_TIMESTAMP_STAT_MODTIME(st) \
-    FILE_TIMESTAMP_FROM_S_AND_NS ((st).st_mtim.tv_sec, \
+    FILE_TIMESTAMP_FROM_S_AND_NS ((st).st_mtime, \
                                   (st).st_mtim.ST_MTIM_NSEC)
 # define FILE_TIMESTAMPS_PER_S \
     MIN ((FILE_TIMESTAMP) 1000000000, \

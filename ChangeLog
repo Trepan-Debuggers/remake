@@ -1,3 +1,28 @@
+2000-03-26  Paul D. Smith  <psmith@gnu.org>
+
+	* file.c (remove_intermediates): Never remove targets explicitly
+	requested on the command-line by checking the cmd_target flag.
+	Fixed PR/1669.
+
+2000-03-23  Paul Eggert  <eggert@twinsun.com>
+
+	* filedef.h (FILE_TIMESTAMP_STAT_MODTIME): Don't use
+	st_mtim.tv_sec; this doesn't work on Unixware.
+
+2000-03-18  Paul D. Smith  <psmith@gnu.org>
+
+	* file.c (file_hash_enter): If we're trying to change a file into
+	itself, just return.  We used to assert this wasn't true, but
+	someone came up with a weird case involving archives.  After
+	playing with it for a while I decided it was OK to ignore it.
+
+	* default.c: Define COFLAGS to empty to avoid spurious warnings.
+
+	* filedef.h: Change #if ST_MTIM_NSEC to #ifdef; this is a macro
+	containing the name of the nsec field, not true/false.
+	* make.h: Ditto.
+	Reported by Marco Franzen <Marco.Franzen@Thyron.com>.
+
 2000-02-09  Paul D. Smith  <psmith@gnu.org>
 
 	* Version 3.78.91 released.

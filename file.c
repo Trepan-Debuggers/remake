@@ -128,8 +128,7 @@ enter_file (name)
   char *lname, *ln;
 #endif
 
-  if (*name == '\0')
-    abort ();
+  assert (*name != '\0');
 
 #if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
   lname = (char *)malloc (strlen (name) + 1);
@@ -252,8 +251,9 @@ file_hash_enter (file, name, oldhash, oldname)
     if (strieq (oldfile->hname, name))
       break;
 
-  /* If the old file is the same as the new file, something's wrong.  */
-  assert (oldfile != file);
+  /* If the old file is the same as the new file, never mind.  */
+  if (oldfile == file)
+    return;
 
   if (oldhash != 0 && (newbucket != oldbucket || oldfile != 0))
     {
@@ -394,7 +394,7 @@ remove_intermediates (sig)
   for (i = 0; i < FILE_BUCKETS; ++i)
     for (f = files[i]; f != 0; f = f->next)
       if (f->intermediate && (f->dontcare || !f->precious)
-	  && !f->secondary)
+	  && !f->secondary && !f->cmd_target)
 	{
 	  int status;
 	  if (f->update_status == -1)
