@@ -198,7 +198,7 @@ static char *default_variables[] =
        However, there is no way to make implicit rules use them and FC.  */
     "F77", "$(FC)",
     "F77FLAGS", "$(FFLAGS)",
-#ifdef	USG
+#if	defined (USG) || defined (ultrix)
     "GET", "get",
 #else
     "GET", "/usr/sccs/get",
