@@ -23,6 +23,11 @@ Boston, MA 02111-1307, USA.  */
 #include "commands.h"
 #include "rule.h"
 
+/* alloca is in stdlib.h */
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 static void freerule PARAMS ((struct rule *rule, struct rule *lastrule));
 
 /* Chain of all pattern rules.  */

@@ -26,6 +26,11 @@ Boston, MA 02111-1307, USA.  */
 #include "commands.h"
 #include "debug.h"
 
+/* alloca is in stdlib.h */
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 #ifdef _AMIGA
 #include "amiga.h"
 #endif

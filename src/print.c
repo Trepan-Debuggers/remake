@@ -349,9 +349,16 @@ log_working_directory (int entering)
 void 
 print_variable (variable_t *p_v)
 {
-  printf("%s:%lu %s = %s\n", 
-	 p_v->fileinfo.filenm, p_v->fileinfo.lineno,
-	 p_v->name, p_v->value);
+  if (p_v) {
+    if (NULL != p_v->fileinfo.filenm) {
+      printf("%s:%lu %s = %s\n", 
+	     p_v->fileinfo.filenm, p_v->fileinfo.lineno,
+	     p_v->name, p_v->value);
+    } else {
+      printf("(null):0 %s = %s\n", 
+	     p_v->name, p_v->value);
+    }
+  }
 }
 
 /*! Display a variable and its value with all substitutions included. */

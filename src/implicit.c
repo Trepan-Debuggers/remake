@@ -25,6 +25,11 @@ Boston, MA 02111-1307, USA.  */
 #include "debug.h"
 #include "vpath.h"
 
+/* alloca is in stdlib.h */
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 static int pattern_search PARAMS ((file_t *file, int archive, 
 				   unsigned int depth, 
 				   unsigned int recursions));

@@ -28,7 +28,14 @@ Boston, MA 02111-1307, USA.  */
 #include "remake.h"
 #include "commands.h"
 
+/* alloca is in stdlib.h */
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_STRING_H
 #include <string.h>
+#endif
 
 /* Default shell to use.  */
 #ifdef WINDOWS32

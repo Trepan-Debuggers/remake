@@ -25,6 +25,11 @@ USA.  */
 #include <sys/file.h>
 #endif
 
+/* alloca is in stdlib.h */
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 #ifndef	NO_ARCHIVES
 #include "arscan.h"
 

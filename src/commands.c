@@ -23,6 +23,11 @@ Boston, MA 02111-1307, USA.  */
 #include "trace.h"
 #include "commands.h"
 
+/* alloca is in stdlib.h */
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 #if VMS
 # define FILE_LIST_SEPARATOR ','
 #else
