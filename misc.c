@@ -485,11 +485,13 @@ dep_name (dep)
 
 #ifndef	HAVE_UNISTD_H
 extern int getuid (), getgid (), geteuid (), getegid ();
-#ifdef	USG
 extern int setuid (), setgid ();
-#else
-extern int setreuid (), setregid ();
-#endif	/* USG.  */
+#ifdef	HAVE_SETREUID
+extern int setreuid ();
+#endif	/* Have setreuid.  */
+#ifdef	HAVE_SETREGID
+extern int setregid ();
+#endif	/* Have setregid.  */
 #endif	/* No <unistd.h>.  */
 
 /* Keep track of the user and group IDs for user- and make- access.  */
