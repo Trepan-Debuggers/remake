@@ -12,6 +12,11 @@ Please send GNU make bug reports to <bug-make@gnu.org>.
 See the README file and the GNU make manual for details on sending bug
 reports.
 
+Version 3.79.1
+
+* .SECONDARY with no prerequisites now causes all targets to be treated
+  as .SECONDARY, not just those listed in the makefile.
+
 Version 3.79
 
 * GNU make optionally supports internationalization and locales via the

@@ -58,6 +58,9 @@ extern int try_implicit_rule PARAMS ((struct file *file, unsigned int depth));
 /* Incremented when a command is started (under -n, when one would be).  */
 unsigned int commands_started = 0;
 
+/* Current value for pruning the scan of the goal chain (toggle 0/1).  */
+static unsigned int considered;
+
 static int update_file PARAMS ((struct file *file, unsigned int depth));
 static int update_file_1 PARAMS ((struct file *file, unsigned int depth));
 static int check_dep PARAMS ((struct file *file, unsigned int depth, FILE_TIMESTAMP this_mtime, int *must_make_ptr));

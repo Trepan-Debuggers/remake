@@ -1,5 +1,28 @@
 2000-06-19  Paul D. Smith  <psmith@gnu.org>
 
+	* config.h-vms.template: #define uintmax_t for this system.
+	* config.ami.template: Ditto.
+	* config.h.W32.template: Ditto.
+
+	* configure.in: We don't use select(2) anymore, so don't bother
+	checking for it.
+	* acconfig.h: Ditto.
+	* acinclude.m4: Ditto.
+
+	* file.c (all_secondary): New static global; if 1 it means
+	.SECONDARY with no prerequisites was seen in the makefile.
+	(snap_deps): Set it appropriately.
+	(remove_intermediates): Check it.
+	(num_intermediates): Remove this global, it's not used anywhere.
+	(considered): Move this to remake.c and make it static.
+
+	* NEWS: Document the change to .SECONDARY.
+	* make.texinfo (Special Targets): Document the change to .SECONDARY.
+
+	* implicit.c (pattern_search): Remove the increment of
+	num_intermediates; it's not used.
+	* filedef.h: Remove num_intermediates and considered.
+
 	* function.c (handle_function): If the last argument was empty, we
 	were pretending it didn't exist rather than providing an empty
 	value.  Keep looking until we're past the end, not just at the end.

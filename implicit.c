@@ -543,7 +543,6 @@ pattern_search (file, archive, depth, recursions)
 	      dep->name = 0;
 	      dep->file->tried_implicit |= dep->changed;
 	    }
-	  num_intermediates++;
 	}
 
       dep = (struct dep *) xmalloc (sizeof (struct dep));

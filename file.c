@@ -35,13 +35,8 @@ Boston, MA 02111-1307, USA.  */
 #endif
 static struct file *files[FILE_BUCKETS];
 
-/* Number of files with the `intermediate' flag set.  */
-
-unsigned int num_intermediates = 0;
-
-/* Current value for pruning the scan of the goal chain (toggle 0/1).  */
-
-unsigned int considered = 0;
+/* Whether or not .SECONDARY with no prerequisites was given.  */
+static int all_secondary = 0;
 
 /* Access the hash table of all file records.
    lookup_file  given a name, return the struct file * for that name,
@@ -385,8 +380,10 @@ remove_intermediates (sig)
   register struct file *f;
   char doneany;
 
-  if (question_flag || touch_flag)
+  /* If there's no way we will ever remove anything anyway, punt early.  */
+  if (question_flag || touch_flag || all_secondary)
     return;
+
   if (sig && just_print_flag)
     return;
 
@@ -500,19 +497,12 @@ snap_deps ()
 	 but unlike real intermediate files,
 	 these are not deleted after make finishes.  */
       if (f->deps)
-	{
-	  for (d = f->deps; d != 0; d = d->next)
-	    for (f2 = d->file; f2 != 0; f2 = f2->prev)
-	      f2->intermediate = f2->secondary = 1;
-	}
+        for (d = f->deps; d != 0; d = d->next)
+          for (f2 = d->file; f2 != 0; f2 = f2->prev)
+            f2->intermediate = f2->secondary = 1;
       /* .SECONDARY with no deps listed marks *all* files that way.  */
       else
-	{
-	  int i;
-	  for (i = 0; i < FILE_BUCKETS; i++)
-	    for (f2 = files[i]; f2; f2= f2->next)
-	      f2->intermediate = f2->secondary = 1;
-	}
+        all_secondary = 1;
     }
 
   f = lookup_file (".EXPORT_ALL_VARIABLES");
@@ -586,7 +576,7 @@ file_timestamp_cons (fname, s, ns)
       error (NILF, _("%s: Timestamp out of range; substituting %s"),
 	     fname ? fname : _("Current time"), buf);
     }
-    
+
   return ts;
 }
 

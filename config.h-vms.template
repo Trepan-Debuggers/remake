@@ -50,6 +50,10 @@
 /* Define if the `getloadavg' function needs to be run setuid or setgid.  */
 /* #undef GETLOADAVG_PRIVILEGED */
 
+/* Define to `unsigned long' or `unsigned long long'
+   if <inttypes.h> doesn't define.  */
+#define uintmax_t unsigned long
+
 /* Define to `int' if <sys/types.h> doesn't define.  */
 /* #undef gid_t */
 
