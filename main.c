@@ -1493,6 +1493,7 @@ define_makeflags (all, makefile)
 {
   register const struct command_switch *cs;
   char *flagstring;
+  struct variable *v;
 
   /* We will construct a linked list of `struct flag's describing
      all the flags which need to go in MAKEFLAGS.  Then, once we
@@ -1662,22 +1663,25 @@ define_makeflags (all, makefile)
       *p = '\0';
     }
 
-  define_variable ("MAKEFLAGS", 9,
-		   /* On Sun, the value of MFLAGS starts with a `-' but
-		      the value of MAKEFLAGS lacks the `-'.
-		      Be compatible with this unless FLAGSTRING starts
-		      with a long option `--foo', since removing the
-		      first dash would result in the bogus `-foo'.  */
-		   flagstring[1] == '-' ? flagstring : &flagstring[1],
-		   /* This used to use o_env, but that lost when a
-		      makefile defined MAKEFLAGS.  Makefiles set
-		      MAKEFLAGS to add switches, but we still want
-		      to redefine its value with the full set of
-		      switches.  Of course, an override or command
-		      definition will still take precedence.  */
-		   o_file, 0)
-    /* Always export MAKEFLAGS.  */
-    ->export = v_export;
+  v = define_variable ("MAKEFLAGS", 9,
+		       /* On Sun, the value of MFLAGS starts with a `-' but
+			  the value of MAKEFLAGS lacks the `-'.
+			  Be compatible with this unless FLAGSTRING starts
+			  with a long option `--foo', since removing the
+			  first dash would result in the bogus `-foo'.  */
+		       flagstring[1] == '-' ? flagstring : &flagstring[1],
+		       /* This used to use o_env, but that lost when a
+			  makefile defined MAKEFLAGS.  Makefiles set
+			  MAKEFLAGS to add switches, but we still want
+			  to redefine its value with the full set of
+			  switches.  Of course, an override or command
+			  definition will still take precedence.  */
+		       o_file, 0);
+  if (! all)
+    /* The first time we are called, set MAKEFLAGS to always be exported.
+       We should not do this again on the second call, because that is
+       after reading makefiles which might have done `unexport MAKEFLAGS'. */
+    v->export = v_export;
   /* Since MFLAGS is not parsed for flags, there is no reason to
      override any makefile redefinition.  */
   (void) define_variable ("MFLAGS", 6, flagstring, o_env, 0);
