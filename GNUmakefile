@@ -89,7 +89,7 @@ $(archpfx)remote.o: remote.c
 $(archpfx)remote.dep: remote.c
 	$(mkdep) $(REMOTE) $< | sed 's,$*\.o,& $@,' > $@
 
-CPPFLAGS := -I$(ARCH) $(CPPFLAGS) $(filter-out @%@,$(defines))
+CPPFLAGS := -I$(ARCH) $(CPPFLAGS) -DHAVE_CONFIG_H $(filter-out @%@,$(defines))
 
 ifneq "$(wildcard $(ARCH)/makefile)" ""
 include $(ARCH)/makefile
@@ -178,8 +178,16 @@ ETAGS = etags -T # for v19 etags
 .PHONY: tests
 testdir := $(shell ls -d1 make-test-?.? | sort -n +0.10 -0.11 +0.12 | tail -1l)
 tests:# $(testdir)/run_make_tests.pl $(prog)
-#	cd $(<D); perl $(<F)
+#	cd $(<D); MAKELEVEL=0 perl $(<F)
 
+build.sh.in: build.template
+	sed -e 's@%objs%@$(filter-out $(GLOB) $(ALLOCA) $(extras),\
+	       $(patsubst $(archpfx)%,%,$(objs)))@'  \
+	    -e 's@%globobjs%@$(patsubst %.c,%.o,\
+	       $(filter %.c,$(notdir $(globfiles))))@' \
+	    $< > $@.new
+	mv -f $@.new $@
+
 # Make the distribution tar files.
 
 .PHONY: dist
@@ -225,7 +233,7 @@ endef
 make-doc-$(version).tar.Z: README-doc COPYING make.dvi make.info make.info*
 	$(make-tar)
 make-$(version).tar.Z: README INSTALL COPYING ChangeLog NEWS \
-          configure Makefile.in configure.in \
+          configure Makefile.in configure.in build.sh.in \
 	  $(srcs) remote-*.c $(globfiles) \
 	  make.texinfo gpl.texinfo make-stds.texi \
 	  make.?? make.??s make.toc make.aux make.man texinfo.tex TAGS tags
