@@ -1,5 +1,5 @@
 /* Directory hashing for GNU Make.
-Copyright (C) 1988, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -136,7 +136,7 @@ find_directory (name)
       /* The directory is not in the name hash table.
 	 Find its device and inode numbers, and look it up by them.  */
 
-      if (stat (name, &st) < 0)
+      if (safe_stat (name, &st) < 0)
 	/* Couldn't stat the directory.  Mark this by
 	   setting the `contents' member to a nil pointer.  */
 	dir->contents = 0;
