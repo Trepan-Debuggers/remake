@@ -1,3 +1,11 @@
+2002-09-12  Paul D. Smith  <psmith@gnu.org>
+
+	* Makefile.am (loadavg_SOURCES, loadavg.c): Tiptoe around automake
+	so it doesn't complain about getloadavg.c.
+
+	* commands.c (set_file_variables): Make sure we always alloca() at
+	least 1 character for the value of $? (for '\0').
+
 2002-09-11  Paul D. Smith  <psmith@gnu.org>
 
 	* hash.h (STRING_COMPARE, ISTRING_COMPARE, STRING_N_COMPARE): Fix
