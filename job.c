@@ -21,15 +21,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "job.h"
 #include "file.h"
 #include "variable.h"
-#include <errno.h>
 
 /* Default path to search for executables.  */
 static char default_path[] = ":/bin:/usr/bin";
 
 /* Default shell to use.  */
 char default_shell[] = "/bin/sh";
-
-extern int errno;
 
 #ifndef	NGROUPS_MAX
 #ifdef	POSIX
