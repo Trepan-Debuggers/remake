@@ -1,3 +1,7 @@
+2005-03-04  Boris Kolpackov  <boris@kolpackov.net>
+
+	* features/patternrules: Add a test fo Savannah bug #12202.
+
 2005-03-03  Boris Kolpackov  <boris@kolpackov.net>
 
 	* scripts/features/se_implicit: Add a test for stem

@@ -803,6 +803,7 @@ pattern_search (struct file *file, int archive,
 	  f->cmds = imf->cmds;
 	  f->stem = imf->stem;
           f->also_make = imf->also_make;
+          f->is_target = 1;
 	  imf = lookup_file (d->intermediate_pattern);
 	  if (imf != 0 && imf->precious)
 	    f->precious = 1;
@@ -881,6 +882,7 @@ pattern_search (struct file *file, int archive,
     }
 
   file->cmds = rule->cmds;
+  file->is_target = 1;
 
   /* If this rule builds other targets, too, put the others into FILE's
      `also_make' member.  */
