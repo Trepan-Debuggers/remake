@@ -114,7 +114,7 @@
 /* #undef NO_MINUS_C_MINUS_O */
 
 /* Define to `int' if <sys/types.h> doesn't define.  */
-#define pid_t int
+/* #undef pid_t */
 
 /* Define if the system does not provide POSIX.1 features except
    with this defined.  */
@@ -153,7 +153,7 @@
 /* #undef SYS_SIGLIST_DECLARED */
 
 /* Define to `int' if <sys/types.h> doesn't define.  */
-#define uid_t int
+/* #undef uid_t */
 
 /* Define for Encore UMAX.  */
 /* #undef UMAX */
@@ -161,6 +161,12 @@
 /* Define for Encore UMAX 4.3 that has <inq_status/cpustats.h>
    instead of <sys/cpustats.h>.  */
 /* #undef UMAX4_3 */
+
+/* Name of this package (needed by automake) */
+#define PACKAGE "%PACKAGE%"
+
+/* Version of this package (needed by automake) */
+#define VERSION "%VERSION%"
 
 /* Define vfork as fork if vfork does not work.  */
 /* #undef vfork */

@@ -176,6 +176,12 @@
 /* Define vfork as fork if vfork does not work.  */
 #undef vfork
 
+/* Name of this package (needed by automake) */
+#define PACKAGE "%PACKAGE%"
+
+/* Version of this package (needed by automake) */
+#define VERSION "%VERSION%"
+
 /* Define to the name of the SCCS `get' command.  */
 #undef SCCS_GET
 #define SCCS_GET "echo no sccs get"
