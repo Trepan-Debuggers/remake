@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.180 1999/08/24 04:49:42 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.181 1999/09/01 08:04:34 psmith Exp $
 @set EDITION 0.53
 @set VERSION 3.78
 @set UPDATED 14 April 1999
@@ -2182,6 +2182,56 @@ clean:
         rm *.o temp
 @end group
 @end example
+
+Another example of the usefulness of phony targets is in conjunction
+with recursive invocations of @code{make}.  In this case the makefile
+will often contain a variable which lists a number of subdirectories to
+be built.  One way to handle this is with one rule whose command is a
+shell loop over the subdirectories, like this:
+
+@example
+@group
+SUBDIRS = foo bar baz
+
+subdirs:
+        for dir in $(SUBDIRS); do \
+          $(MAKE) -C $$dir; \
+        done
+@end group
+@end example
+
+There are a few of problems with this method, however.  First, any error
+detected in a submake is not noted by this rule, so it will continue to
+build the rest of the directories even when one fails.  This can be
+overcome by adding shell commands to note the error and exit, but then
+it will do so even if @code{make} is invoked with the @code{-k} option,
+which is unfortunate.  Second, and perhaps more importantly, you cannot
+take advantage of the parallel build capabilities of make using this
+method, since there is only one rule.
+
+By declaring the subdirectories as phony targets (you must do this as
+the subdirectory obviously always exists; otherwise it won't be built)
+you can remove these problems:
+
+@example
+@group
+SUBDIRS = foo bar baz
+
+.PHONY: subdirs $(SUBDIRS)
+
+subdirs: $(SUBDIRS)
+
+$(SUBDIRS):
+        $(MAKE) -C $@
+
+foo: baz
+@end group
+@end example
+
+Here we've also declared that the @file{foo} subdirectory cannot be
+built until after the @file{baz} subdirectory is complete; this kind of
+relationship declaration is particularly important when attempting
+parallel builds.
 
 A phony target should not be a prerequisite of a real target file; if it
 is, its commands are run every time @code{make} goes to update that

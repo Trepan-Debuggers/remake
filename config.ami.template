@@ -308,3 +308,6 @@
 
 /* Define for Case Insensitve behavior */
 #define HAVE_CASE_INSENSITIVE_FS
+
+/* Build host information. */
+#define MAKE_HOST "Amiga"

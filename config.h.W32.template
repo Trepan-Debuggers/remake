@@ -332,6 +332,9 @@
 /* Define if you have the sun library (-lsun).  */
 /* #undef HAVE_LIBSUN */
 
+/* Build host information. */
+#define MAKE_HOST "Windows32"
+
 /*
  * Refer to README.W32 for info on the following settings
  */

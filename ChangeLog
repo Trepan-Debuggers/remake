@@ -1,3 +1,31 @@
+1999-09-01  Paul D. Smith  <psmith@gnu.org>
+
+	* configure.in (MAKE_HOST): Define it to be the canonical build
+	host info, now that we need AC_CANONICAL_HOST anyway (for large
+	file support).
+	* version.c (make_host): Define a variable to MAKE_HOST so we're
+	sure to get it from the local config.h.
+	* main.c (print_version): Use it in the version information.
+	* config.ami.template: Add MAKE_HOST.
+	* configh.dos.template: Ditto.
+	* config.h.W32.template: Ditto.
+	* config.h-vms.template: Ditto.
+
+	* main.c (main): Close the jobserver file descriptors if we need
+	to re-exec ourselves.
+	Also print more reasonable error if users force -jN for submakes.
+	This may be common for a while until people use the jobserver
+	feature.  If it happens, we ignore the existing jobserver stuff
+	and use whatever they specified on the commandline.
+	(define_makeflags): Fixed a long-standing bug: if a long name
+	only option comes immediately after a single letter option with no
+	argument, then the option string is constructed incorrectly.  For
+	example, with -w and --jobserver-fds you get "-w-jobserver-fds..."
+	instead of "-w --jobserver-fds..."; add in an extra " -".
+
+	* make.texinfo (Phony Targets): Add another example of using
+	.PHONY with subdirectories/recursive make.
+
 1999-08-30  Paul D. Smith  <psmith@gnu.org>
 
 	* README.W32.template: Renamed from README.W32 so it's
