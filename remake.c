@@ -491,7 +491,16 @@ update_file_1 (file, depth)
       return dep_status;
     }
 
-  set_command_state (file, cs_not_started);
+  if (file->command_state == cs_deps_running)
+    /* The commands for some deps were running on the last iteration, but
+       they have finished now.  Reset the command_state to not_started to
+       simplify later bookkeeping.  It is important that we do this only
+       when the prior state was cs_deps_running, because that prior state
+       was definitely propagated to FILE's also_make's by set_command_state
+       (called above), but in another state an also_make may have
+       independently changed to finished state, and we would confuse that
+       file's bookkeeping (updated, but not_started is bogus state).  */
+    set_command_state (file, cs_not_started);
 
   /* Now record which dependencies are more
      recent than this file, so we can define $?.  */
