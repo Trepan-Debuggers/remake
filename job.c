@@ -1643,7 +1643,7 @@ construct_command_argv_internal (line, restp, shell, ifs)
 			     "mkdir", "path", "pause", "prompt", "rem", "ren",
 			     "rename", "set", "shift", "time", "type",
 			     "ver", "verify", "vol", ":", 0 };
-#endif
+#else
 #ifdef _AMIGA
   static char sh_chars[] = "#;\"|<>()?*$`";
   static char *sh_cmds[] = { "cd", "eval", "if", "delete", "echo", "copy",
@@ -1676,7 +1676,8 @@ construct_command_argv_internal (line, restp, shell, ifs)
 			     "export", "read", "readonly", "shift", "times",
 			     "trap", "switch", 0 };
 #endif /* WIN32 */
-#endif
+#endif /* Amiga */
+#endif /* MSDOS */
   register int i;
   register char *p;
   register char *ap;
