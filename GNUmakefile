@@ -200,7 +200,7 @@ version := \
   $(strip $(shell sed -e '/=/!d' -e 's/^.*"\(.*\)";$$/\1/' < version.c))
 tarfiles := make make-doc
 tarfiles := $(addsuffix -$(version).tar,$(tarfiles))
-tarfiles := $(tarfiles:%=%.z) # no more compress $(tarfiles:%=%.Z)
+tarfiles := $(tarfiles:%=%.gz) # no more compress $(tarfiles:%=%.Z)
 # Depend on default and doc so we don't ship anything that won't compile.
 dist: default info dvi tests tarfiles
 .PHONY: tarfiles
@@ -237,7 +237,7 @@ rm -f make-$(version)
 endef
 
 %.Z: %; compress -c $< > $@
-%.z: %; gzip -9 -c $< > $@
+%.gz: %; gzip -9 -c -v $< > $@
 
 make-doc-$(version).tar: README-doc COPYING make.dvi make.info make.info*
 	$(make-tar)
