@@ -227,7 +227,7 @@ vmsfiles = config.h-vms makefile.com makefile.vms readme.vms \
 	   vmsdir.h vmsfunctions.c vmsify.c
 amigafiles = README.Amiga config.ami Makefile.ami SCOPTIONS SMakefile \
 	     amiga.c amiga.h make.lnk
-win32files = README.WIN32 build_w32.bat config.h.WIN32 subproc.bat \
+win32files = README.WIN32 build_w32.bat config.h.WIN32 subproc.bat NMakefile \
 	     $(addprefix w32/,pathstuff.c compat/dirent.c include/dirent.h \
 			      include/pathstuff.h include/sub_proc.h \
 			      include/w32err.h subproc/NMakefile \
