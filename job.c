@@ -975,15 +975,15 @@ search_path (file, path, program)
 #endif
       static int ngroups = -1;
 #ifdef	NGROUPS_MAX
-      static gid_t groups[NGROUPS_MAX];
+      static GETGROUPS_T groups[NGROUPS_MAX];
 #define	ngroups_max	NGROUPS_MAX
 #else
-      static gid_t *groups = 0;
+      static GETGROUPS_T *groups = 0;
       static int ngroups_max;
       if (groups == 0)
 	{
 	  ngroups_max = GET_NGROUPS_MAX;
-	  groups = (gid_t *) malloc (ngroups_max * sizeof (gid_t));
+	  groups = (GETGROUPS_T *) malloc (ngroups_max * sizeof (GETGROUPS_T));
 	}
 #endif
       if (groups != 0 && ngroups == -1)
