@@ -1244,6 +1244,12 @@ construct_command_argv_internal (line, restp, shell, ifs)
 	  /* Inside a string, just copy any char except a closing quote.  */
 	  if (*p == '\'')
 	    instring = 0;
+	  else if (*p == '\n' && restp != NULL)
+	    {
+	      /* End of the command line.  */
+	      *restp = p;
+	      goto end_of_line;
+	    }
 	  else
 	    *ap++ = *p;
 	}
