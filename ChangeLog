@@ -1,5 +1,8 @@
 Tue Mar  7 17:31:06 1995  Roland McGrath  <roland@geech.gnu.ai.mit.edu>
 
+	* compatMakefile (configure, config.h.in): Uncomment these rules.
+  	Commit the files to CVS if there is a CVS directory.
+
 	* main.c (decode_switches): If non-option arg is "-", ignore it.
 
 Mon Mar  6 23:57:38 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
