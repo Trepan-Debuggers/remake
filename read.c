@@ -483,7 +483,7 @@ read_makefile (filename, type)
 	  /* Parse the list of file names.  */
 	  p2 = p;
 	  files = multi_glob (parse_file_seq (&p2, '\0',
-					      sizeof (struct nameseq), 1),
+					      sizeof (struct nameseq)),
 			      sizeof (struct nameseq));
 	  free (p);
 
@@ -1163,10 +1163,31 @@ record_files (filenames, pattern, pattern_percent, deps, commands_started,
 	    }
 	  else if (f->deps != 0)
 	    {
-	      d = f->deps;
+	      /* Add the file's old deps and the new ones in THIS together.  */
+
+	      struct dep *firstdeps, *moredeps;
+	      if (cmds != 0)
+		{
+		  /* This is the rule with commands, so put its deps first.
+		     The rationale behind this is that $< expands to the
+		     first dep in the chain, and commands use $< expecting
+		     to get the dep that rule specifies.  */
+		  firstdeps = this;
+		  moredeps = f->deps;
+		}
+	      else
+		{
+		  /* Append the new deps to the old ones.  */
+		  firstdeps = f->deps;
+		  moredeps = this;
+		}
+
+	      d = firstdeps;
 	      while (d->next != 0)
 		d = d->next;
-	      d->next = this;
+	      d->next = moredeps;
+
+	      f->deps = firstdeps;
 	    }
 	  else
 	    f->deps = this;
@@ -1352,11 +1373,10 @@ find_percent (pattern)
    that have room for additional info.  */
 
 struct nameseq *
-parse_file_seq (stringp, stopchar, size, strip)
+parse_file_seq (stringp, stopchar, size)
      char **stringp;
      char stopchar;
      unsigned int size;
-     int strip;
 {
   register struct nameseq *new = 0;
   register struct nameseq *new1;
@@ -1388,16 +1408,13 @@ parse_file_seq (stringp, stopchar, size, strip)
 	}
       p--;
 
-      if (strip)
+      /* Skip leading `./'s.  */
+      while (p - q > 2 && q[0] == '.' && q[1] == '/')
 	{
-	  /* Skip leading `./'s.  */
-	  while (p - q > 2 && q[0] == '.' && q[1] == '/')
-	    {
-	      q += 2;		/* Skip "./".  */
-	      while (q < p && *q == '/')
-		/* Skip following slashes: ".//foo" is "foo", not "/foo".  */
-		++q;
-	    }
+	  q += 2;		/* Skip "./".  */
+	  while (q < p && *q == '/')
+	    /* Skip following slashes: ".//foo" is "foo", not "/foo".  */
+	    ++q;
 	}
 
       /* Extract the filename just found, and skip it.  */
