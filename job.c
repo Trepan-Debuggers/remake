@@ -621,6 +621,7 @@ start_waiting_job (c)
     {
       /* Put this child on the chain of children waiting
 	 for the load average to go down.  */
+      c->file->command_state = cs_running;
       c->next = waiting_jobs;
       waiting_jobs = c;
       return;
