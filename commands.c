@@ -227,7 +227,7 @@ set_file_variables (file)
 }
 
 /* Chop CMDS up into individual command lines if necessary.
-   Also set the `lines_flag' and `any_recurse' members.  */
+   Also set the `lines_flags' and `any_recurse' members.  */
 
 void
 chop_commands (cmds)

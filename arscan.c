@@ -66,7 +66,7 @@ VMS_get_member_info (module, rfa)
 
   status = lbr$set_module (&VMS_lib_idx, rfa, &bufdesc,
 			   &bufdesc.dsc$w_length, 0);
-  if (! status)
+  if (! (status & 1))
     {
       error (NILF, _("lbr$set_module failed to extract module info, status = %d"),
 	     status);
@@ -79,7 +79,11 @@ VMS_get_member_info (module, rfa)
   mhd = (struct mhddef *) filename;
 
 #ifdef __DECC
-  val = decc$fix_time (&mhd->mhd$l_datim);
+  /* John Fowler <jfowler@nyx.net> writes this is needed in his environment,
+   * but that decc$fix_time() isn't documented to work this way.  Let me
+   * know if this causes problems in other VMS environments.
+   */
+  val = decc$fix_time (&mhd->mhd$l_datim) + timezone - daylight*3600;
 #endif
 
   for (i = 0; i < module->dsc$w_length; i++)
@@ -150,7 +154,7 @@ ar_scan (archive, function, arg)
 
   status = lbr$ini_control (&VMS_lib_idx, &func, &type, 0);
 
-  if (! status)
+  if (! (status & 1))
     {
       error (NILF, _("lbr$ini_control failed with status = %d"),status);
       return -2;
@@ -161,7 +165,7 @@ ar_scan (archive, function, arg)
 
   status = lbr$open (&VMS_lib_idx, &libdesc, 0, 0, 0, 0, 0);
 
-  if (! status)
+  if (! (status & 1))
     {
       error (NILF, _("unable to open library `%s' to lookup member `%s'"),
 	     archive, (char *)arg);

@@ -128,7 +128,7 @@ patsubst_expand (o, text, pattern, replace, pattern_percent, replace_percent)
   unsigned int pattern_prepercent_len, pattern_postpercent_len;
   unsigned int replace_prepercent_len, replace_postpercent_len = 0;
   char *t;
-  int len;
+  unsigned int len;
   int doneany = 0;
 
   /* We call find_percent on REPLACE before checking PATTERN so that REPLACE
