@@ -1,3 +1,9 @@
+1999-04-01  Paul D. Smith  <psmith@gnu.org>
+
+	* job.c (construct_command_argv_internal): Use bcopy() to copy
+	overlapping strings, rather than strcpy().  ISO C says the latter
+	is undefined.  Found this in a bug report from 1996!  Ouch!
+
 1999-03-31  Paul D. Smith  <psmith@gnu.org>
 
 	* read.c (readline): Ignore carriage returns at the end of the

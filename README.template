@@ -3,16 +3,39 @@ All bugs reported for previous releases have been fixed.
 Some bugs surely remain.
 
 For general building and installation instructions, see the file INSTALL.
+
 If you need to build GNU Make and have no other `make' program to use,
 you can use the shell script `build.sh' instead.  To do this, first run
 `configure' as described in INSTALL.  Then, instead of typing `make' to
 build the program, type `sh build.sh'.  This should compile the program
 in the current directory.  Then you will have a Make program that you can
-use for `make install', or whatever else.
+use for `./make install', or whatever else.
 
 Some systems' Make programs are broken and cannot process the Makefile for
 GNU Make.  If you get errors from your system's Make when building GNU
 Make, try using `build.sh' instead.
+
+GNU make is fully documented in the GNU Make manual, which is contained
+in this distribution as the file make.texinfo.  You can also find
+on-line and preformatted (PostScript and DVI) versions at the FSF's web
+site.  There is information there about ordering hardcopy documentation.
+
+  http://www.gnu.org/
+  http://www.gnu.org/doc/doc.html
+  http://www.gnu.org/manual/manual.html
+
+Please send GNU make bug reports to bug-make@gnu.org.  Please see the
+section of the manual entitles `Problems and Bugs' for information on
+submitting bug reports.
+
+If you need help using GNU make, try these forums:
+
+  help-make@gnu.org
+  help-utils@gnu.org
+  news:gnu.utils.help
+  news:gnu.utils.bug
+
+Also:
 
   - See README.customs for details on integrating GNU make with the
     Customs distributed build environment from the Pmake distribution.

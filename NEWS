@@ -19,11 +19,10 @@ Version 3.78
   proceeds normally.
 
 * Make defines a new variable, .LIBPATTERNS.  This variable controls how
-  the link library dependency expansion (dependencies like ``-lfoo'') is
-  performed.
+  library dependency expansion (dependencies like ``-lfoo'') is performed.
 
-* Make allows CRLF sequences as well as traditional LF, in makefiles for
-  UNIX.
+* Make allows CRLF sequences as well as traditional LF, for
+  compatibility with makefiles created on other operating systems.
 
 Version 3.77
 
