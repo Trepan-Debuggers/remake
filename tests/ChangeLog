@@ -1,3 +1,8 @@
+2002-10-13  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/targetvars: Add a test for exporting
+	target-specific vars (Bug #1391).
+
 2002-10-05  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/variables/automatic: Add tests for $$(@), $${@}, $${@D},

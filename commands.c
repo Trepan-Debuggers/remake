@@ -127,11 +127,12 @@ set_file_variables (file)
   /* Compute the values for $^, $+, $?, and $|.  */
 
   {
+    static char *plus_value=0, *bar_value=0, *qmark_value=0;
+    static int qmark_max=0, plus_max=0, bar_max=0;
+
     unsigned int qmark_len, plus_len, bar_len;
-    char *caret_value, *plus_value;
     char *cp;
-    char *qmark_value;
-    char *bar_value;
+    char *caret_value;
     char *qp;
     char *bp;
     struct dep *d;
@@ -147,7 +148,9 @@ set_file_variables (file)
     if (plus_len == 0)
       plus_len++;
 
-    cp = plus_value = (char *) alloca (plus_len);
+    if (plus_len > plus_max)
+      plus_value = (char *) xmalloc (plus_max = plus_len);
+    cp = plus_value;
 
     qmark_len = plus_len + 1;	/* Will be this or less.  */
     for (d = file->deps; d != 0; d = d->next)
@@ -193,8 +196,14 @@ set_file_variables (file)
     /* Compute the values for $^, $?, and $|.  */
 
     cp = caret_value = plus_value; /* Reuse the buffer; it's big enough.  */
-    qp = qmark_value = (char *) alloca (qmark_len);
-    bp = bar_value = (char *) alloca (bar_len);
+
+    if (qmark_len > qmark_max)
+      qmark_value = (char *) xmalloc (qmark_max = qmark_len);
+    qp = qmark_value;
+
+    if (bar_len > bar_max)
+      bar_value = (char *) xmalloc (bar_max = bar_len);
+    bp = bar_value;
 
     for (d = file->deps; d != 0; d = d->next)
       {

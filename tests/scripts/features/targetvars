@@ -37,6 +37,8 @@ eight: BAR = eight
 # Test the export keyword with per-target variables
 nine: ; @echo $(FOO) $(BAR) $$FOO $$BAR
 nine: FOO = wallace
+nine-a: export BAZ = baz
+nine-a: ; @echo $$BAZ
 # Test = escaping
 EQ = =
 ten: one\=two
@@ -84,6 +86,12 @@ $answer = "eight: seven eight\nseven: seven seven\n";
 
 &run_make_with_options($makefile, "nine", &get_logfile);
 $answer = "wallace bar wallace bar\n";
+&compare_output($answer,&get_logfile(1));
+
+# TEST #5-a
+
+&run_make_with_options($makefile, "nine-a", &get_logfile);
+$answer = "baz\n";
 &compare_output($answer,&get_logfile(1));
 
 # TEST #6

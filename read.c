@@ -139,6 +139,7 @@ static void record_files PARAMS ((struct nameseq *filenames, char *pattern, char
 static void record_target_var PARAMS ((struct nameseq *filenames, char *defn,
                                        int two_colon,
                                        enum variable_origin origin,
+                                       int enabled,
                                        const struct floc *flocp));
 static enum make_word_type get_next_mword PARAMS ((char *buffer, char *delim,
                         char **startp, unsigned int *length));
@@ -860,6 +861,7 @@ eval (ebuf, set_default)
       {
         enum make_word_type wtype;
         enum variable_origin v_origin;
+        int exported;
         char *cmdleft, *semip, *lb_next;
         unsigned int len, plen = 0;
         char *colonp;
@@ -1024,17 +1026,24 @@ eval (ebuf, set_default)
             p2 = variable_buffer + l;
           }
 
-        /* See if it's an "override" keyword; if so see if what comes after
-           it looks like a variable definition.  */
+        /* See if it's an "override" or "export" keyword; if so see if what
+           comes after it looks like a variable definition.  */
 
         wtype = get_next_mword (p2, NULL, &p, &len);
 
         v_origin = o_file;
-        if (wtype == w_static && word1eq ("override"))
-          {
-            v_origin = o_override;
-            wtype = get_next_mword (p+len, NULL, &p, &len);
-          }
+        exported = 0;
+        if (wtype == w_static)
+          if (word1eq ("override"))
+            {
+              v_origin = o_override;
+              wtype = get_next_mword (p+len, NULL, &p, &len);
+            }
+          else if (word1eq ("export"))
+            {
+              exported = 1;
+              wtype = get_next_mword (p+len, NULL, &p, &len);
+            }
 
         if (wtype != w_eol)
           wtype = get_next_mword (p+len, NULL, NULL, NULL);
@@ -1049,7 +1058,8 @@ eval (ebuf, set_default)
                 variable_buffer_output (p2 + strlen (p2),
                                         semip, strlen (semip)+1);
               }
-            record_target_var (filenames, p, two_colon, v_origin, fstart);
+            record_target_var (filenames, p, two_colon, v_origin, exported,
+                               fstart);
             filenames = 0;
             continue;
           }
@@ -1628,11 +1638,12 @@ uniquize_deps (chain)
    variable value list.  */
 
 static void
-record_target_var (filenames, defn, two_colon, origin, flocp)
+record_target_var (filenames, defn, two_colon, origin, exported, flocp)
      struct nameseq *filenames;
      char *defn;
      int two_colon;
      enum variable_origin origin;
+     int exported;
      const struct floc *flocp;
 {
   struct nameseq *nextf;
@@ -1691,6 +1702,8 @@ record_target_var (filenames, defn, two_colon, origin, flocp)
       if (!v)
         error (flocp, _("Malformed per-target variable definition"));
       v->per_target = 1;
+      if (exported)
+        v->export = v_export;
 
       /* If it's not an override, check to see if there was a command-line
          setting.  If so, reset the value.  */

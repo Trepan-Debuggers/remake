@@ -1,3 +1,22 @@
+2002-10-13  Paul D. Smith  <psmith@gnu.org>
+
+	* commands.c (set_file_variables): Bug #1379: Don't use alloca()
+	for automatic variable values like $^, etc.  In the case of very
+	large lists of prerequisites this causes problems.  Instead reuse
+	a static buffer (resizeable) for each variable.
+
+	* read.c (eval): Fix Bug #1391: allow "export" keyword in
+	target-specific variable definitions.  Check for it and set an
+	"exported" flag.
+	(record_target_var): Set the export field to v_export if the
+	"exported" flag is set.
+	* doc/make.texi (Target-specific): Document the ability to use
+	"export".
+
+	* doc/make.texi: Change the name of the section on automatic
+	variables from "Automatic" to "Automatic Variables".  Added text
+	clarifying the scope of automatic variables.
+
 2002-10-04  Paul D. Smith  <psmith@gnu.org>
 
 	* read.c (eval): Allow SysV $$@ variables to use {} braces as well
