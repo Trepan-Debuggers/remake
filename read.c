@@ -1675,7 +1675,12 @@ record_target_var (struct nameseq *filenames, char *defn,
              variable definition.  */
           v = parse_variable_definition (&p->variable, defn);
           assert (v != 0);
-          v->value = xstrdup (v->value);
+
+          if (v->flavor == f_simple)
+            v->value = allocated_variable_expand (v->value);
+          else
+            v->value = xstrdup (v->value);
+
           fname = p->target;
         }
       else
