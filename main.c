@@ -373,6 +373,7 @@ main (argc, argv, envp)
   register struct dep *lastgoal;
   struct dep *read_makefiles;
   PATH_VAR (current_directory);
+  char *directory_before_chdir;
 
   default_goal_file = 0;
   reading_filename = 0;
@@ -461,7 +462,11 @@ main (argc, argv, envp)
       error ("getwd: %s", current_directory);
 #endif
       current_directory[0] = '\0';
+      directory_before_chdir = 0;
     }
+  else
+    directory_before_chdir = savestring (current_directory,
+					 strlen (current_directory));
 
   /* Read in variables from the environment.  It is important that this be
      done before `MAKE' and `MAKEOVERRIDES' are figured out so their
@@ -939,9 +944,9 @@ main (argc, argv, envp)
 	  if (directories != 0 && directories->idx > 0)
 	    {
 	      char bad;
-	      if (current_directory[0] != '\0')
+	      if (directory_before_chdir != 0)
 		{
-		  if (chdir (current_directory) < 0)
+		  if (chdir (directory_before_chdir) < 0)
 		    {
 		      perror_with_name ("chdir", "");
 		      bad = 1;
