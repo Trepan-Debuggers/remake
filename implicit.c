@@ -100,7 +100,7 @@ pattern_search (file, archive, depth, recursions)
 
   /* List of dependencies found recursively.  */
   struct file **intermediate_files
-    = (struct file **) alloca (max_pattern_deps * sizeof (struct file *));
+    = (struct file **) xmalloc (max_pattern_deps * sizeof (struct file *));
 
   /* List of the patterns used to find intermediate files.  */
   char **intermediate_patterns
@@ -121,8 +121,8 @@ pattern_search (file, archive, depth, recursions)
 
   /* Buffer in which we store all the rules that are possibly applicable.  */
   struct rule **tryrules
-    = (struct rule **) alloca (num_pattern_rules * max_pattern_targets
-			       * sizeof (struct rule *));
+    = (struct rule **) xmalloc (num_pattern_rules * max_pattern_targets
+                                * sizeof (struct rule *));
 
   /* Number of valid elements in TRYRULES.  */
   unsigned int nrules;
@@ -495,7 +495,7 @@ pattern_search (file, archive, depth, recursions)
   /* RULE is nil if the loop went all the way
      through the list and everything failed.  */
   if (rule == 0)
-    return 0;
+    goto done;
 
   foundrule = i;
 
@@ -624,6 +624,9 @@ pattern_search (file, archive, depth, recursions)
 	  file->also_make = new;
 	}
 
+ done:
+  free (intermediate_files);
+  free (tryrules);
 
-  return 1;
+  return rule != 0;
 }

@@ -393,6 +393,8 @@ struct floc
   };
 #define NILF ((struct floc *)0)
 
+#define STRING_SIZE_TUPLE(_s) (_s), (sizeof (_s)-1)
+
 
 /* Fancy processing for variadic functions in both ANSI and pre-ANSI
    compilers.  */
@@ -419,7 +421,7 @@ extern char *xmalloc PARAMS ((unsigned int));
 extern char *xrealloc PARAMS ((char *, unsigned int));
 extern char *xstrdup PARAMS ((const char *));
 extern char *find_next_token PARAMS ((char **, unsigned int *));
-extern char *next_token PARAMS ((char *));
+extern char *next_token PARAMS ((const char *));
 extern char *end_of_token PARAMS ((char *));
 extern void collapse_continuations PARAMS ((char *));
 extern void remove_comments PARAMS((char *));

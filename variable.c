@@ -57,7 +57,7 @@ struct variable_set_list *current_variable_set_list = &global_setlist;
 
 struct variable *
 define_variable_in_set (name, length, value, origin, recursive, set, flocp)
-     char *name;
+     const char *name;
      unsigned int length;
      char *value;
      enum variable_origin origin;
@@ -68,6 +68,9 @@ define_variable_in_set (name, length, value, origin, recursive, set, flocp)
   register unsigned int i;
   register unsigned int hashval;
   register struct variable *v;
+
+  if (set == NULL)
+    set = &global_variable_set;
 
   hashval = 0;
   for (i = 0; i < length; ++i)
@@ -741,6 +744,227 @@ target_environment (file)
   return result;
 }
 
+/* Given a variable, a value, and a flavor, define the variable.
+   See the try_variable_definition() function for details on the parameters. */
+
+struct variable *
+do_variable_definition (flocp, varname, value, origin, flavor, target_var)
+     const struct floc *flocp;
+     const char *varname;
+     char *value;
+     enum variable_origin origin;
+     enum variable_flavor flavor;
+     int target_var;
+{
+  char *p, *alloc_value = NULL;
+  struct variable *v;
+  int append = 0;
+
+  /* Calculate the variable's new value in VALUE.  */
+
+  switch (flavor)
+    {
+    default:
+    case f_bogus:
+      /* Should not be possible.  */
+      abort ();
+    case f_simple:
+      /* A simple variable definition "var := value".  Expand the value.
+         We have to allocate memory since otherwise it'll clobber the
+	 variable buffer, and we may still need that if we're looking at a
+         target-specific variable.  */
+      p = alloc_value = allocated_variable_expand (value);
+      break;
+    case f_conditional:
+      /* A conditional variable definition "var ?= value".
+         The value is set IFF the variable is not defined yet. */
+      v = lookup_variable (varname, strlen (varname));
+      if (v)
+        return v;
+
+      flavor = f_recursive;
+      /* FALLTHROUGH */
+    case f_recursive:
+      /* A recursive variable definition "var = value".
+	 The value is used verbatim.  */
+      p = value;
+      break;
+    case f_append:
+      {
+        /* If we have += but we're in a target variable context, we want to
+           append only with other variables in the context of this target.  */
+        if (target_var)
+          {
+            append = 1;
+            v = lookup_variable_in_set (varname, strlen (varname),
+                                        current_variable_set_list->set);
+          }
+        else
+          v = lookup_variable (varname, strlen (varname));
+
+        if (v == 0)
+          {
+            /* There was no old value.
+               This becomes a normal recursive definition.  */
+            p = value;
+            flavor = f_recursive;
+          }
+        else
+          {
+            /* Paste the old and new values together in VALUE.  */
+
+            unsigned int oldlen, newlen;
+
+            p = value;
+            if (v->recursive)
+              /* The previous definition of the variable was recursive.
+                 The new value is the unexpanded old and new values. */
+              flavor = f_recursive;
+            else
+              /* The previous definition of the variable was simple.
+                 The new value comes from the old value, which was expanded
+                 when it was set; and from the expanded new value.  Allocate
+                 memory for the expansion as we may still need the rest of the
+                 buffer if we're looking at a target-specific variable.  */
+              p = alloc_value = allocated_variable_expand (p);
+
+            oldlen = strlen (v->value);
+            newlen = strlen (p);
+            p = (char *) alloca (oldlen + 1 + newlen + 1);
+            bcopy (v->value, p, oldlen);
+            p[oldlen] = ' ';
+            bcopy (value, &p[oldlen + 1], newlen + 1);
+          }
+      }
+    }
+
+#ifdef __MSDOS__
+  /* Many Unix Makefiles include a line saying "SHELL=/bin/sh", but
+     non-Unix systems don't conform to this default configuration (in
+     fact, most of them don't even have `/bin').  On the other hand,
+     $SHELL in the environment, if set, points to the real pathname of
+     the shell.
+     Therefore, we generally won't let lines like "SHELL=/bin/sh" from
+     the Makefile override $SHELL from the environment.  But first, we
+     look for the basename of the shell in the directory where SHELL=
+     points, and along the $PATH; if it is found in any of these places,
+     we define $SHELL to be the actual pathname of the shell.  Thus, if
+     you have bash.exe installed as d:/unix/bash.exe, and d:/unix is on
+     your $PATH, then SHELL=/usr/local/bin/bash will have the effect of
+     defining SHELL to be "d:/unix/bash.exe".  */
+  if ((origin == o_file || origin == o_override)
+      && strcmp (varname, "SHELL") == 0)
+    {
+      char shellpath[PATH_MAX];
+      extern char * __dosexec_find_on_path (const char *, char *[], char *);
+
+      /* See if we can find "/bin/sh.exe", "/bin/sh.com", etc.  */
+      if (__dosexec_find_on_path (p, (char **)0, shellpath))
+	{
+	  char *p;
+
+	  for (p = shellpath; *p; p++)
+	    {
+	      if (*p == '\\')
+		*p = '/';
+	    }
+	  v = define_variable_loc (varname, strlen (varname),
+                                   shellpath, origin, flavor == f_recursive,
+                                   flocp);
+	}
+      else
+	{
+	  char *shellbase, *bslash;
+	  struct variable *pathv = lookup_variable ("PATH", 4);
+	  char *path_string;
+	  char *fake_env[2];
+	  size_t pathlen = 0;
+
+	  shellbase = strrchr (p, '/');
+	  bslash = strrchr (p, '\\');
+	  if (!shellbase || bslash > shellbase)
+	    shellbase = bslash;
+	  if (!shellbase && p[1] == ':')
+	    shellbase = p + 1;
+	  if (shellbase)
+	    shellbase++;
+	  else
+	    shellbase = p;
+
+	  /* Search for the basename of the shell (with standard
+	     executable extensions) along the $PATH.  */
+	  if (pathv)
+	    pathlen = strlen (pathv->value);
+	  path_string = (char *)xmalloc (5 + pathlen + 2 + 1);
+	  /* On MSDOS, current directory is considered as part of $PATH.  */
+	  sprintf (path_string, "PATH=.;%s", pathv ? pathv->value : "");
+	  fake_env[0] = path_string;
+	  fake_env[1] = (char *)0;
+	  if (__dosexec_find_on_path (shellbase, fake_env, shellpath))
+	    {
+	      char *p;
+
+	      for (p = shellpath; *p; p++)
+		{
+		  if (*p == '\\')
+		    *p = '/';
+		}
+	      v = define_variable_loc (varname, strlen (varname),
+                                       shellpath, origin,
+                                       flavor == f_recursive, flocp);
+	    }
+	  else
+	    v = lookup_variable (varname, strlen (varname));
+
+	  free (path_string);
+	}
+    }
+  else
+#endif /* __MSDOS__ */
+#ifdef WINDOWS32
+  if ((origin == o_file || origin == o_override) && streq (varname, "SHELL"))
+    {
+      extern char *default_shell;
+
+      /* Call shell locator function. If it returns TRUE, then
+	 set no_default_sh_exe to indicate sh was found and
+         set new value for SHELL variable.  */
+
+      if (find_and_set_default_shell (p))
+        {
+          v = define_variable_in_set (varname, strlen (varname), default_shell,
+                                      origin, flavor == f_recursive,
+                                      (target_var
+                                       ? current_variable_set_list->set
+                                       : NULL),
+                                      flocp);
+          no_default_sh_exe = 0;
+        }
+      else
+        v = lookup_variable (varname, strlen (varname));
+    }
+  else
+#endif
+
+  /* If we are defining variables inside an $(eval ...), we might have a
+     different variable context pushed, not the global context (maybe we're
+     inside a $(call ...) or something.  Since this function is only ever
+     invoked in places where we want to define globally visible variables,
+     make sure we define this variable in the global set.  */
+
+  v = define_variable_in_set (varname, strlen (varname), p,
+                              origin, flavor == f_recursive,
+                              (target_var
+                               ? current_variable_set_list->set : NULL),
+                              flocp);
+  v->append = append;
+
+  if (alloc_value)
+    free (alloc_value);
+
+  return v;
+}
+
 /* Try to interpret LINE (a null-terminated string) as a variable definition.
 
    ORIGIN may be o_file, o_override, o_env, o_env_override,
@@ -765,11 +989,9 @@ try_variable_definition (flocp, line, origin, target_var)
   register char *p = line;
   register char *beg;
   register char *end;
-  enum { f_bogus,
-         f_simple, f_recursive, f_append, f_conditional } flavor = f_bogus;
-  char *name, *expanded_name, *value=0, *alloc_value=NULL;
+  enum variable_flavor flavor = f_bogus;
+  char *name, *expanded_name;
   struct variable *v;
-  int append = 0;
 
   while (1)
     {
@@ -848,195 +1070,9 @@ try_variable_definition (flocp, line, origin, target_var)
   if (expanded_name[0] == '\0')
     fatal (flocp, _("empty variable name"));
 
-  /* Calculate the variable's new value in VALUE.  */
+  v = do_variable_definition (flocp, expanded_name, p,
+                              origin, flavor, target_var);
 
-  switch (flavor)
-    {
-    case f_bogus:
-      /* Should not be possible.  */
-      abort ();
-    case f_simple:
-      /* A simple variable definition "var := value".  Expand the value.
-         We have to allocate memory since otherwise it'll clobber the
-	 variable buffer, and we may still need that if we're looking at a
-         target-specific variable.  */
-      value = alloc_value = allocated_variable_expand (p);
-      break;
-    case f_conditional:
-      /* A conditional variable definition "var ?= value".
-         The value is set IFF the variable is not defined yet. */
-      v = lookup_variable(expanded_name, strlen(expanded_name));
-      if (v)
-        {
-          free(expanded_name);
-          return v;
-        }
-      flavor = f_recursive;
-      /* FALLTHROUGH */
-    case f_recursive:
-      /* A recursive variable definition "var = value".
-	 The value is used verbatim.  */
-      value = p;
-      break;
-    case f_append:
-      {
-        /* If we have += but we're in a target variable context, we want to
-           append only with other variables in the context of this target.  */
-        if (target_var)
-          {
-            append = 1;
-            v = lookup_variable_in_set (expanded_name, strlen (expanded_name),
-                                        current_variable_set_list->set);
-          }
-        else
-          v = lookup_variable (expanded_name, strlen (expanded_name));
-
-        if (v == 0)
-          {
-            /* There was no old value.
-               This becomes a normal recursive definition.  */
-            value = p;
-            flavor = f_recursive;
-          }
-        else
-          {
-            /* Paste the old and new values together in VALUE.  */
-
-            unsigned int oldlen, newlen;
-
-            if (v->recursive)
-              /* The previous definition of the variable was recursive.
-                 The new value is the unexpanded old and new values. */
-              flavor = f_recursive;
-            else
-              /* The previous definition of the variable was simple.
-                 The new value comes from the old value, which was expanded
-                 when it was set; and from the expanded new value.  Allocate
-                 memory for the expansion as we may still need the rest of the
-                 buffer if we're looking at a target-specific variable.  */
-              p = alloc_value = allocated_variable_expand (p);
-
-            oldlen = strlen (v->value);
-            newlen = strlen (p);
-            value = (char *) alloca (oldlen + 1 + newlen + 1);
-            bcopy (v->value, value, oldlen);
-            value[oldlen] = ' ';
-            bcopy (p, &value[oldlen + 1], newlen + 1);
-          }
-      }
-    }
-
-#ifdef __MSDOS__
-  /* Many Unix Makefiles include a line saying "SHELL=/bin/sh", but
-     non-Unix systems don't conform to this default configuration (in
-     fact, most of them don't even have `/bin').  On the other hand,
-     $SHELL in the environment, if set, points to the real pathname of
-     the shell.
-     Therefore, we generally won't let lines like "SHELL=/bin/sh" from
-     the Makefile override $SHELL from the environment.  But first, we
-     look for the basename of the shell in the directory where SHELL=
-     points, and along the $PATH; if it is found in any of these places,
-     we define $SHELL to be the actual pathname of the shell.  Thus, if
-     you have bash.exe installed as d:/unix/bash.exe, and d:/unix is on
-     your $PATH, then SHELL=/usr/local/bin/bash will have the effect of
-     defining SHELL to be "d:/unix/bash.exe".  */
-  if ((origin == o_file || origin == o_override)
-      && strcmp (expanded_name, "SHELL") == 0)
-    {
-      char shellpath[PATH_MAX];
-      extern char * __dosexec_find_on_path (const char *, char *[], char *);
-
-      /* See if we can find "/bin/sh.exe", "/bin/sh.com", etc.  */
-      if (__dosexec_find_on_path (value, (char **)0, shellpath))
-	{
-	  char *p;
-
-	  for (p = shellpath; *p; p++)
-	    {
-	      if (*p == '\\')
-		*p = '/';
-	    }
-	  v = define_variable_loc (expanded_name, strlen (expanded_name),
-                                   shellpath, origin, flavor == f_recursive,
-                                   flocp);
-	}
-      else
-	{
-	  char *shellbase, *bslash;
-	  struct variable *pathv = lookup_variable ("PATH", 4);
-	  char *path_string;
-	  char *fake_env[2];
-	  size_t pathlen = 0;
-
-	  shellbase = strrchr (value, '/');
-	  bslash = strrchr (value, '\\');
-	  if (!shellbase || bslash > shellbase)
-	    shellbase = bslash;
-	  if (!shellbase && value[1] == ':')
-	    shellbase = value + 1;
-	  if (shellbase)
-	    shellbase++;
-	  else
-	    shellbase = value;
-
-	  /* Search for the basename of the shell (with standard
-	     executable extensions) along the $PATH.  */
-	  if (pathv)
-	    pathlen = strlen (pathv->value);
-	  path_string = (char *)xmalloc (5 + pathlen + 2 + 1);
-	  /* On MSDOS, current directory is considered as part of $PATH.  */
-	  sprintf (path_string, "PATH=.;%s", pathv ? pathv->value : "");
-	  fake_env[0] = path_string;
-	  fake_env[1] = (char *)0;
-	  if (__dosexec_find_on_path (shellbase, fake_env, shellpath))
-	    {
-	      char *p;
-
-	      for (p = shellpath; *p; p++)
-		{
-		  if (*p == '\\')
-		    *p = '/';
-		}
-	      v = define_variable_loc (expanded_name, strlen (expanded_name),
-                                       shellpath, origin,
-                                       flavor == f_recursive, flocp);
-	    }
-	  else
-	    v = lookup_variable (expanded_name, strlen (expanded_name));
-
-	  free (path_string);
-	}
-    }
-  else
-#endif /* __MSDOS__ */
-#ifdef WINDOWS32
-  if ((origin == o_file || origin == o_override)
-      && strcmp (expanded_name, "SHELL") == 0)
-    {
-      extern char* default_shell;
-
-    /*
-     * Call shell locator function. If it returns TRUE, then
-	 * set no_default_sh_exe to indicate sh was found and
-     * set new value for SHELL variable.
-	 */
-      if (find_and_set_default_shell(value)) {
-        v = define_variable_loc (expanded_name, strlen (expanded_name),
-                                 default_shell, origin, flavor == f_recursive,
-                                 flocp);
-        no_default_sh_exe = 0;
-      }
-    }
-  else
-#endif
-
-  v = define_variable_loc (expanded_name, strlen (expanded_name), value,
-                           origin, flavor == f_recursive, flocp);
-
-  v->append = append;
-
-  if (alloc_value)
-    free (alloc_value);
   free (expanded_name);
 
   return v;

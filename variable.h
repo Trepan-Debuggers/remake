@@ -31,6 +31,15 @@ enum variable_origin
     o_invalid		/* Core dump time.  */
   };
 
+enum variable_flavor
+  {
+    f_bogus,            /* Bogus (error) */
+    f_simple,           /* Simple definition (:=) */
+    f_recursive,        /* Recursive definition (=) */
+    f_append,           /* Appending definition (+=) */
+    f_conditional       /* Conditional definition (?=) */
+  };
+
 /* Structure that represents one variable definition.
    Each bucket of the hash table is a chain of these,
    chained through `next'.  */
@@ -117,6 +126,7 @@ extern void initialize_file_variables PARAMS ((struct file *file, int read));
 extern void print_file_variables PARAMS ((struct file *file));
 extern void print_variable_set PARAMS ((struct variable_set *set, char *prefix));
 extern void merge_variable_set_lists PARAMS ((struct variable_set_list **setlist0, struct variable_set_list *setlist1));
+extern struct variable *do_variable_definition PARAMS ((const struct floc *flocp, const char *name, char *value, enum variable_origin origin, enum variable_flavor flavor, int target_var));
 extern struct variable *try_variable_definition PARAMS ((const struct floc *flocp, char *line, enum variable_origin origin, int target_var));
 
 extern struct variable *lookup_variable PARAMS ((const char *name, unsigned int length));
@@ -125,7 +135,7 @@ extern struct variable *lookup_variable_in_set PARAMS ((const char *name,
                                                         const struct variable_set *set));
 
 extern struct variable *define_variable_in_set
-    PARAMS ((char *name, unsigned int length, char *value,
+    PARAMS ((const char *name, unsigned int length, char *value,
              enum variable_origin origin, int recursive,
              struct variable_set *set, const struct floc *flocp));
 
@@ -140,6 +150,11 @@ extern struct variable *define_variable_in_set
 #define define_variable_loc(n,l,v,o,r,f) \
           define_variable_in_set((n),(l),(v),(o),(r),\
                                  current_variable_set_list->set,(f))
+
+/* Define a variable with a location in the global variable set.  */
+
+#define define_variable_global(n,l,v,o,r,f) \
+          define_variable_in_set((n),(l),(v),(o),(r),NULL,(f))
 
 /* Define a variable in FILE's variable set.  */
 

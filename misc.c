@@ -520,13 +520,11 @@ end_of_token_w32 (s, stopchar)
 
 char *
 next_token (s)
-     char *s;
+     const char *s;
 {
-  register char *p = s;
-
-  while (isblank ((unsigned char)*p))
-    ++p;
-  return p;
+  while (isblank ((unsigned char)*s))
+    ++s;
+  return (char *)s;
 }
 
 /* Find the next token in PTR; return the address of it, and store the
