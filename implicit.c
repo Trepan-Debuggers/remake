@@ -354,7 +354,7 @@ pattern_search (file, archive, depth, recursions)
 		     "impossible", then the rule fails and don't
 		     bother trying it on the second pass either
 		     since we know that will fail too.  */
-		  DEBUGP2 ("Rejecting impossible %s dependent `%s'.\n",
+		  DEBUGP2 ("Rejecting impossible %s dependency `%s'.\n",
 			   p == depname ? "implicit" : "rule", p);
 		  tryrules[i] = 0;
 		  break;
