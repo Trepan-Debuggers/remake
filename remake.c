@@ -349,6 +349,7 @@ update_file_1 (file, depth)
   int dep_status = 0;
   register struct dep *d, *lastd;
   int running = 0;
+  int maybe_make;
 
   DBF (DB_VERBOSE, _("Considering target file `%s'.\n"));
 
@@ -457,7 +458,11 @@ update_file_1 (file, depth)
 	}
 
       d->file->parent = file;
-      dep_status |= check_dep (d->file, depth, this_mtime, &must_make);
+      maybe_make = must_make;
+      dep_status |= check_dep (d->file, depth, this_mtime, &maybe_make);
+      if (! d->ignore_mtime)
+        must_make = maybe_make;
+
       check_renamed (d->file);
 
       {
@@ -570,17 +575,21 @@ update_file_1 (file, depth)
       FILE_TIMESTAMP d_mtime = file_mtime (d->file);
       check_renamed (d->file);
 
-#if 1	/* %%% In version 4, remove this code completely to
+      if (! d->ignore_mtime)
+        {
+#if 1
+          /* %%% In version 4, remove this code completely to
 	   implement not remaking deps if their deps are newer
 	   than their parents.  */
-      if (d_mtime == NONEXISTENT_MTIME && !d->file->intermediate)
-	/* We must remake if this dep does not
-	   exist and is not intermediate.  */
-	must_make = 1;
+          if (d_mtime == NONEXISTENT_MTIME && !d->file->intermediate)
+            /* We must remake if this dep does not
+               exist and is not intermediate.  */
+            must_make = 1;
 #endif
 
-      /* Set DEPS_CHANGED if this dep actually changed.  */
-      deps_changed |= d->changed;
+          /* Set DEPS_CHANGED if this dep actually changed.  */
+          deps_changed |= d->changed;
+        }
 
       /* Set D->changed if either this dep actually changed,
 	 or its dependent, FILE, is older or does not exist.  */
@@ -590,7 +599,12 @@ update_file_1 (file, depth)
 	{
           const char *fmt = 0;
 
-	  if (d_mtime == NONEXISTENT_MTIME)
+          if (d->ignore_mtime)
+            {
+              if (ISDB (DB_VERBOSE))
+                fmt = _("Prerequisite `%s' is order-only for target `%s'.\n");
+            }
+          else if (d_mtime == NONEXISTENT_MTIME)
             {
               if (ISDB (DB_BASIC))
                 fmt = _("Prerequisite `%s' of target `%s' does not exist.\n");
@@ -822,8 +836,9 @@ check_dep (file, depth, this_mtime, must_make_ptr)
      FILE_TIMESTAMP this_mtime;
      int *must_make_ptr;
 {
-  register struct dep *d;
+  struct dep *d;
   int dep_status = 0;
+  int maybe_make;
 
   ++depth;
   start_updating (file);
@@ -898,8 +913,11 @@ check_dep (file, depth, this_mtime, must_make_ptr)
 		}
 
 	      d->file->parent = file;
+              maybe_make = *must_make_ptr;
 	      dep_status |= check_dep (d->file, depth, this_mtime,
-                                       must_make_ptr);
+                                       &maybe_make);
+              if (! d->ignore_mtime)
+                *must_make_ptr = maybe_make;
 	      check_renamed (d->file);
 	      if (dep_status != 0 && !keep_going_flag)
 		break;

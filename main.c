@@ -905,20 +905,6 @@ int main (int argc, char ** argv)
   /* Make sure stdout is line-buffered.  */
 
 #ifdef HAVE_SETVBUF
-# ifndef SETVBUF_REVERSED
-  setvbuf (stdout, _IOLBF, xmalloc (BUFSIZ), BUFSIZ);
-_WAIT_NOHANG
-# if defined SIGCHLD
-  (void) bsd_signal (SIGCHLD, SIG_DFL);
-# endif
-# if defined SIGCLD && SIGCLD != SIGCHLD
-  (void) bsd_signal (SIGCLD, SIG_DFL);
-# endif
-#endif
-
-  /* Make sure stdout is line-buffered.  */
-
-#ifdef HAVE_SETVBUF
 # ifdef SETVBUF_REVERSED
   setvbuf (stdout, _IOLBF, xmalloc (BUFSIZ), BUFSIZ);
 # else	/* setvbuf not reversed.  */
@@ -1899,6 +1885,7 @@ _WAIT_NOHANG
 	    goals = (struct dep *) xmalloc (sizeof (struct dep));
 	    goals->next = 0;
 	    goals->name = 0;
+            goals->ignore_mtime = 0;
 	    goals->file = default_goal_file;
 	  }
       }
@@ -2056,6 +2043,7 @@ handle_non_switch_argument (arg, env)
 	}
       lastgoal->name = 0;
       lastgoal->file = f;
+      lastgoal->ignore_mtime = 0;
 
       {
         /* Add this target name to the MAKECMDGOALS variable. */
@@ -2180,9 +2168,11 @@ print_usage (bad)
 	       buf, gettext (cs->description));
     }
 
-  fprintf (usageto, _("\nBuilt for %s"), make_host);
-  if (remote_description != 0 && *remote_description != '\0')
-    fprintf (usageto, " (%s)", remote_description);
+  if (!remote_description || *remote_description == '\0')
+    fprintf (usageto, _("\nBuilt for %s"), make_host);
+  else
+    fprintf (usageto, "\nBuilt for %s (%s)", make_host, remote_description);
+
   fprintf (usageto, _("\nReport bugs to <bug-make@gnu.org>\n"));
 }
 
@@ -2828,21 +2818,34 @@ log_working_directory (entering)
   if (print_data_base_flag)
     fputs ("# ", stdout);
 
-  if (makelevel == 0)
-    printf ("%s: ", program);
-  else
-    printf ("%s[%u]: ", program, makelevel);
-
   /* Use entire sentences to give the translators a fighting chance.  */
 
-  if (starting_directory == 0)
-    if (entering)
-      puts (_("Entering an unknown directory"));
+  if (makelevel == 0)
+    if (starting_directory == 0)
+      if (entering)
+        printf (_("%s: Entering an unknown directory"), program);
+      else
+        printf (_("%s: Leaving an unknown directory"), program);
     else
-      puts (_("Leaving an unknown directory"));
+      if (entering)
+        printf (_("%s: Entering directory `%s'\n"),
+                program, starting_directory);
+      else
+        printf (_("%s: Leaving directory `%s'\n"),
+                program, starting_directory);
   else
-    if (entering)
-      printf (_("Entering directory `%s'\n"), starting_directory);
+    if (starting_directory == 0)
+      if (entering)
+        printf (_("%s[%u]: Entering an unknown directory"),
+                program, makelevel);
+      else
+        printf (_("%s[%u]: Leaving an unknown directory"),
+                program, makelevel);
     else
-      printf (_("Leaving directory `%s'\n"), starting_directory);
+      if (entering)
+        printf (_("%s[%u]: Entering directory `%s'\n"),
+                program, makelevel, starting_directory);
+      else
+        printf (_("%s[%u]: Leaving directory `%s'\n"),
+                program, makelevel, starting_directory);
 }

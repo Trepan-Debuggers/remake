@@ -189,4 +189,34 @@ cvs-update: $(cvs-targets)
 # --------------------- #
 
 .PHONY: update
-update: wget-update cvs-update po-update
+update: wget-update po-update
+
+# cvs-update
+
+
+## --------------- ##
+## Sanity checks.  ##
+## --------------- ##
+
+# Checks that don't require cvs.  Run `changelog-check' last as
+# previous test may reveal problems requiring new ChangeLog entries.
+local-check: po-check changelog-check
+
+# copyright-check writable-files
+
+changelog-check:
+	if head ChangeLog | grep 'Version $(VERSION)' >/dev/null; then \
+	  :; \
+	else \
+	  echo "$(VERSION) not in ChangeLog" 1>&2; \
+	  exit 1; \
+	fi
+
+# Verify that all source files using _() are listed in po/POTFILES.in.
+po-check:
+	if test -f po/POTFILES.in; then \
+	  grep -E -v '^(#|$$)' po/POTFILES.in | sort > $@-1; \
+	  grep -E -l '\b_\(' lib/*.c src/*.c | sort > $@-2; \
+	  diff -u $@-1 $@-2 || exit 1; \
+	  rm -f $@-1 $@-2; \
+	fi

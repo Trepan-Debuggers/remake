@@ -1,4 +1,16 @@
+2002-07-08  Paul D. Smith  <psmith@gnu.org>
+
+	* maintMakefile: Add "update" targets for wget'ing the latest
+	versions of various external files.  Taken from Makefile.maint in
+	autoconf, etc.
+
+	* dosbuild.bat: Somehow we got _extra_ ^M's.  Remove them.
+	Reported by Eli Zaretskii  <eliz@is.elta.co.il>.
+
 2002-07-07  Paul D. Smith  <psmith@gnu.org>
+
+	* po/*.po: Remove.  We'll use wget to retrieve them at release
+	time.
 
 	* variable.c (do_variable_definition) [W32]: On W32 using cmd
 	rather than a shell you get an exception.  Make sure we look up
@@ -53,6 +65,23 @@
 	want to define our variables from evaluated makefile code in the
 	global scope.
 
+2002-07-03  Greg McGary  <greg@mcgary.org>
+
+	* dep.h (struct dep) [ignore_mtime]: New member.
+	[changed]: convert to a bitfield.
+	* implicit.c (pattern_search): Zero ignore_mtime.
+	* main.c (main, handle_non_switch_argument): Likewise.
+	* rule.c (convert_suffix_rule): Likewise.
+	* read.c (read_all_makefiles, read_makefile, multi_glob): Likewise.
+	(read_makefile): Parse '|' in prerequisite list.
+        (uniquize_deps): Consider ignore_mtime when comparing deps.
+	* remake.c (update_file_1, check_dep): Don't force remake for
+	dependencies that have d->ignore_mtime.
+	* commands.c (FILE_LIST_SEPARATOR): New constant.
+        (set_file_variables): Don't include a
+	prerequisite in $+, $^ or $? if d->ignore_mtime.
+        Define $|.
+
 2002-06-18  Paul D. Smith  <psmith@gnu.org>
 
 	* make.texinfo: Updates for next revision.  New date/rev/etc.
@@ -82,6 +111,13 @@
 	* read.c (read_all_makefiles): Create a new built-in variable,
 	MAKEFILE_LIST.
 	(read_makefile): Add each makefile read in to this variable value.
+
+2002-05-18  Eli Zaretskii  <eliz@is.elta.co.il>
+
+        * Makefile.DOS.template: Tweak according to changes in the
+        distribution.  Add back the dependencies of *.o files.
+
+        * configh.dos.template: Synchronize with config.h.in.
 
 2002-05-09  Paul D. Smith  <psmith@gnu.org>
 

@@ -38,7 +38,8 @@ struct dep
     struct dep *next;
     char *name;
     struct file *file;
-    int changed;
+    unsigned int changed : 8;
+    unsigned int ignore_mtime : 1;
   };
 
 

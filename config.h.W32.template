@@ -351,6 +351,9 @@
 /* Define if you have the sun library (-lsun).  */
 /* #undef HAVE_LIBSUN */
 
+/* Use high resolution file timestamps if nonzero. */
+#define FILE_TIMESTAMP_HI_RES 0
+
 /* Build host information. */
 #define MAKE_HOST "Windows32"
 
