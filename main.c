@@ -424,7 +424,7 @@ main (argc, argv, envp)
   reading_filename = 0;
   reading_lineno_ptr = 0;
   
-#ifndef	HAVE_SYS_SIGLIST
+#if !defined (HAVE_STRSIGNAL) && !defined (HAVE_SYS_SIGLIST)
   signame_init ();
 #endif
 
