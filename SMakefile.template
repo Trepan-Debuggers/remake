@@ -219,50 +219,58 @@ $(objs): config.h
 # Automatically generated dependencies will be put at the end of the file.
 
 # Automatically generated dependencies.
-commands.o : commands.c make.h dep.h commands.h file.h variable.h job.h
+commands.o: commands.c make.h dep.h filedef.h variable.h job.h \
+ commands.h
 
-job.o: job.c make.h commands.h job.h file.h variable.h
+job.o: job.c make.h job.h filedef.h commands.h variable.h
 
 dir.o: dir.c make.h
 
-file.o: file.c make.h commands.h dep.h file.h variable.h
+file.o: file.c make.h dep.h filedef.h job.h commands.h variable.h
 
 misc.o: misc.c make.h dep.h
 
-main.o: main.c make.h commands.h dep.h file.h variable.h job.h getopt.h
+main.o: main.c make.h dep.h filedef.h variable.h job.h commands.h \
+ getopt.h
 
-read.o: read.c make.h commands.h dep.h file.h variable.h glob/glob.h
+read.o: read.c make.h dep.h filedef.h job.h commands.h variable.h \
+ glob/glob.h
 
-remake.o: remake.c make.h commands.h job.h dep.h file.h
+remake.o: remake.c make.h filedef.h job.h commands.h dep.h
 
-rule.o : rule.c make.h config.h commands.h dep.h file.h variable.h rule.h
+rule.o: rule.c make.h dep.h filedef.h job.h commands.h variable.h \
+ rule.h
 
-implicit.o : implicit.c make.h rule.h dep.h file.h
+implicit.o: implicit.c make.h rule.h dep.h filedef.h
 
-default.o: default.c make.h rule.h dep.h file.h commands.h variable.h
+default.o: default.c make.h rule.h dep.h filedef.h job.h commands.h \
+ variable.h
 
-variable.o : variable.c make.h commands.h variable.h dep.h file.h
+variable.o: variable.c make.h dep.h filedef.h job.h commands.h \
+ variable.h
 
-expand.o: expand.c make.h commands.h file.h variable.h
+expand.o: expand.c make.h filedef.h job.h commands.h variable.h
 
-function.o: function.c make.h variable.h dep.h commands.h job.h
+function.o: function.c make.h filedef.h variable.h dep.h job.h \
+ commands.h amiga.h
 
-vpath.o : vpath.c make.h file.h variable.h
+vpath.o: vpath.c make.h filedef.h variable.h
 
 version.o: version.c
 
-ar.o : ar.c make.h file.h dep.h
+ar.o: ar.c make.h filedef.h dep.h
 
 arscan.o: arscan.c make.h
 
 signame.o: signame.c signame.h
 
-remote-stub.o : remote-stub.c make.h commands.h
+remote-stub.o: remote-stub.c make.h filedef.h job.h commands.h
 
-getopt.o: getopt.c getopt.h
+getopt.o: getopt.c
 
 getopt1.o : getopt1.c getopt.h
 
 getloadavg.o: getloadavg.c
 
-amiga.o: amiga.c make.h
+amiga.o: amiga.c make.h variable.h amiga.h
+
