@@ -49,7 +49,9 @@ $(archpfx)remote.o: remote.c
 $(archpfx)remote.dep: remote.c
 	$(mkdep) $(REMOTE) $< | sed 's,$*\.o,& $@,' > $@
 
+ifneq "$(defines)" "@DEFS@"
 CPPFLAGS = $(defines)
+endif
 
 ifneq "$(wildcard $(ARCH)/makefile)" ""
 include $(ARCH)/makefile
@@ -69,12 +71,10 @@ ifneq ($(wildcard $(libc_dir)/works-for-make),)
 #	     $(libc_dir)/lib/libc.a
 CC := $(CC) -b glibc
 
-# glob is in the C library.
-globdep = $(libc_dir)/lib/libc.a
-globlib =
-
-# So is getopt.
+# getopt is in libc.
 GETOPT =
+
+CPPFLAGS := -DSTDC_HEADERS -DHAVE_UNISTD_H -DHAVE_GLOB_H
 
 else
 
@@ -148,7 +148,7 @@ remote.dep: remote.c
 endif
 nolib-deps = $(patsubst $(archpfx)%,%,$(depfiles))
 endif
-Makefile: compatMakefile $(nolib-deps)
+Makefile.in: compatMakefile $(nolib-deps)
 	(cat $<; \
 	 echo '# Automatically generated dependencies.'; \
 	 sed -e 's/ [^ ]*\.dep//' -e 's=$(archpfx)==' $(filter-out $<,$^) \
@@ -172,6 +172,10 @@ ETAGS = etags -T # for v19 etags
 testdir := $(shell ls -d1 make-test-?.? | sort -n +0.10 -0.11 +0.12 | tail -1l)
 tests: $(testdir)/run_make_tests.pl $(prog)
 	cd $(<D); perl $(<F)
+
+configure: /home/gd/gnu/autoconf/make.conf
+	cp $< $@
+/home/gd/gnu/autoconf/%: force;$(MAKE) -C $(@D) $(@F)
 
 # Make the distribution tar files.
 
@@ -214,10 +218,10 @@ endef
 
 make-doc-$(version).tar.Z: README-doc COPYING make.dvi make.info make.info*
 	$(make-tar)
-make-$(version).tar.Z: README COPYING ChangeLog CHANGES TAGS tags Makefile \
+make-$(version).tar.Z: README COPYING ChangeLog CHANGES configure Makefile.in \
 	  $(srcs) remote-*.c $(globfiles) make.texinfo gpl.texinfo \
   	  make.cp* make.fn* make.ky* make.pg* make.toc make.tp* make.vr* \
-	  make.aux make.man texinfo.tex
+	  make.aux make.man texinfo.tex TAGS tags
 	$(make-tar)
 
 ifneq (,)
