@@ -580,11 +580,12 @@ file_timestamp_cons (fname, s, ns)
   return ts;
 }
 
-/* Get and print file timestamps.  */
-
+/* Return the current time as a file timestamp, setting *RESOLUTION to
+   its resolution.  */
 FILE_TIMESTAMP
-file_timestamp_now ()
+file_timestamp_now (int *resolution)
 {
+  int r;
   time_t s;
   int ns;
 
@@ -598,6 +599,7 @@ file_timestamp_now ()
 	struct timespec timespec;
 	if (clock_gettime (CLOCK_REALTIME, &timespec) == 0)
 	  {
+	    r = 1;
 	    s = timespec.tv_sec;
 	    ns = timespec.tv_nsec;
 	    goto got_time;
@@ -609,6 +611,7 @@ file_timestamp_now ()
 	struct timeval timeval;
 	if (gettimeofday (&timeval, 0) == 0)
 	  {
+	    r = 1000;
 	    s = timeval.tv_sec;
 	    ns = timeval.tv_usec * 1000;
 	    goto got_time;
@@ -617,13 +620,17 @@ file_timestamp_now ()
 #endif
     }
 
+  r = 1000000000;
   s = time ((time_t *) 0);
   ns = 0;
 
  got_time:
+  *resolution = r;
   return file_timestamp_cons (0, s, ns);
 }
 
+/* Place into the buffer P a printable representation of the file
+   timestamp TS.  */
 void
 file_timestamp_sprintf (p, ts)
      char *p;
@@ -647,7 +654,7 @@ file_timestamp_sprintf (p, ts)
      applies only to local times, whereas this timestamp might come
      from a remote filesystem.  So removing trailing zeros is the
      best guess that we can do.  */
-  sprintf (p, ".%09ld", (long) FILE_TIMESTAMP_NS (ts));
+  sprintf (p, ".%09d", FILE_TIMESTAMP_NS (ts));
   p += strlen (p) - 1;
   while (*p == '0')
     p--;
