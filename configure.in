@@ -63,6 +63,10 @@ AC_COMPILE_CHECK(sys_siglist declaration in signal.h,
 AC_DYNIX_SEQ
 AC_XENIX_DIR
 
+AC_SUBST(REMOTE) REMOTE=stub
+AC_WITH(customs, [REMOTE=cstms
+LIBS="$LIBS libcustoms.a"])
+
 AC_OUTPUT(Makefile build.sh glob/Makefile)
 
 dnl Local Variables:
