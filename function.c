@@ -702,13 +702,10 @@ is_numeric (p)
   char *end = p + strlen (p) - 1;
   char *beg = p;
   strip_whitespace (&p, &end);
-  while (p <= end)
-    {
-      if (!isdigit (*p))
-	return 0;
 
-      p++;
-    }
+  while (p <= end)
+    if (!ISDIGIT (*(p++)))  /* ISDIGIT only evals its arg once: see make.h.  */
+      return 0;
 
   return (end - beg >= 0);
 }

@@ -79,7 +79,7 @@ static char *quote_as_word PARAMS ((char *out, char *in, int double_dollars));
 
 struct command_switch
   {
-    char c;			/* The switch character.  */
+    unsigned char c;		/* The switch character.  */
 
     enum			/* Type of the value.  */
       {
@@ -1270,7 +1270,7 @@ int main (int argc, char ** argv)
   /* We need to know what kind of shell we will be using.  */
   {
     extern int _is_unixy_shell (const char *_path);
-    struct variable *shv = lookup_variable("SHELL", 5);
+    struct variable *shv = lookup_variable ("SHELL", 5);
     extern int unixy_shell;
     extern char *default_shell;
 
@@ -1292,6 +1292,15 @@ int main (int argc, char ** argv)
   decode_env_switches ("MAKEFLAGS", 9);
 #if 0
   decode_env_switches ("MFLAGS", 6);
+#endif
+
+#ifdef __MSDOS__
+  if (job_slots != 1)
+    {
+      error (NILF, _("Parallel jobs (-j) are not supported on MS-DOS."));
+      error (NILF, _("Resetting to single job mode."));
+      job_slots = 1;
+    }
 #endif
 
 #ifdef MAKE_JOBSERVER
@@ -1851,8 +1860,7 @@ handle_non_switch_argument (arg, env)
 	}
       else
 	{
-	  lastgoal->next
-	    = (struct dep *) xmalloc (sizeof (struct dep));
+	  lastgoal->next = (struct dep *) xmalloc (sizeof (struct dep));
 	  lastgoal = lastgoal->next;
 	}
       lastgoal->name = 0;
@@ -2075,7 +2083,7 @@ decode_switches (argc, argv, env)
 
 		case positive_int:
 		  if (optarg == 0 && argc > optind
-		      && isdigit (argv[optind][0]))
+		      && ISDIGIT (argv[optind][0]))
 		    optarg = argv[optind++];
 
 		  if (!doit)
@@ -2087,8 +2095,7 @@ decode_switches (argc, argv, env)
 		      if (i < 1)
 			{
 			  if (doit)
-			    error (NILF, _("the `-%c' option requires a \
-positive integral argument"),
+			    error (NILF, _("the `-%c' option requires a positive integral argument"),
 				   cs->c);
 			  bad = 1;
 			}
@@ -2103,7 +2110,7 @@ positive integral argument"),
 #ifndef NO_FLOAT
 		case floating:
 		  if (optarg == 0 && optind < argc
-		      && (isdigit (argv[optind][0]) || argv[optind][0] == '.'))
+		      && (ISDIGIT (argv[optind][0]) || argv[optind][0] == '.'))
 		    optarg = argv[optind++];
 
 		  if (doit)

@@ -1,3 +1,18 @@
+1999-08-25  Paul D. Smith  <psmith@gnu.org>
+
+	* Version 3.77.94 released.
+
+	* main.c (main) [__MSDOS__]: If the user uses -j, warn that it's
+	not supported and reset it.
+
+	* make.h (ISDIGIT): Obtained this from the textutils distribution.
+	* main.c (decode_switches): Use it.
+	* function.c (is_numeric): Use it.
+
+	* main.c (struct command_switch): Store the switch char in an
+	unsigned char to shut up GCC about using it with ctype.h macros.
+	Besides, it _is_ always unsigned.
+
 1999-08-24  Paul D. Smith  <psmith@gnu.org>
 
 	* make.texinfo: Change "dependency" to "prerequisite" and
@@ -13,8 +28,8 @@
 
 	* remake.c (update_file): Move the considered check into the
 	double-colon rule loop, so we consider double-colon rules
-	individually (otherwise after the first is pruned, the rest might
-	not get run).
+	individually (otherwise after the first is pruned, the rest won't
+	get run).
 
 	* README.template: Minor changes.
 
