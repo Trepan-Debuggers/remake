@@ -1273,16 +1273,27 @@ main (int argc, char **argv, char **envp)
     for (i = 0; directories->list[i] != 0; ++i)
       {
 	char *dir = directories->list[i];
+        char *expanded = 0;
 	if (dir[0] == '~')
 	  {
-	    char *expanded = tilde_expand (dir);
+            expanded = tilde_expand (dir);
 	    if (expanded != 0)
 	      dir = expanded;
 	  }
+#ifdef WINDOWS32
+        /* WINDOWS32 chdir() doesn't work if the directory has a trailing '/'
+           But allow -C/ just in case someone wants that.  */
+        {
+          char *p = dir + strlen (dir) - 1;
+          while (p > dir && (p[0] == '/' || p[0] == '\\'))
+            --p;
+          p[1] = '\0';
+        }
+#endif
 	if (chdir (dir) < 0)
 	  pfatal_with_name (dir);
-	if (dir != directories->list[i])
-	  free (dir);
+	if (expanded)
+	  free (expanded);
       }
 
 #ifdef WINDOWS32

@@ -155,4 +155,29 @@ world');
 run_make_test(undef, 'V1=@ V2=@', 'hello
 world');
 
+# TEST #10
+# -------
+# Test the basics; a "@" internally to the variable applies to only one line.
+# A "@" before the variable applies to the entire variable.
+
+run_make_test('
+define FOO
+@echo hello
+echo world
+endef
+define BAR
+echo hello
+echo world
+endef
+
+all: foo bar
+foo: ; $(FOO)
+bar: ; @$(BAR)
+', '', 'hello
+echo world
+world
+hello
+world
+');
+
 1;
