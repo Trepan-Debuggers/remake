@@ -61,6 +61,11 @@ LOAD_AVG =
 ARCHIVES = arscan.o ar.o
 ARCHIVES_SRC = arscan.c ar.c
 
+# If you are using the GNU C library, or have the GNU getopt functions in
+# your C library, you can comment these out.
+GETOPT = getopt.o getopt1.o
+GETOPT_SRC = getopt.c getopt1.c getopt.h
+
 # If your system needs extra libraries loaded in, define them here.
 # System V probably need -lPW for alloca.  HP-UX 7.0's alloca in
 # libPW.a is broken on HP9000s300 and HP9000s400 machines.  Use
@@ -105,10 +110,10 @@ group = kmem
 
 objs = commands.o job.o dir.o file.o load.o misc.o main.o read.o \
        remake.o remote.o rule.o implicit.o default.o variable.o expand.o \
-       function.o vpath.o version.o $(ARCHIVES) $(ALLOCA) $(extras)
+       function.o vpath.o version.o $(ARCHIVES) $(GETOPT) $(ALLOCA) $(extras)
 srcs = commands.c job.c dir.c file.c load.c misc.c main.c read.c \
        remake.c remote.c rule.c implicit.c default.c variable.c expand.c \
-       function.c vpath.c version.c $(ALLOCASRC) $(ARCHIVES_SRC) \
+       function.c vpath.c version.c $(GETOPT_SRC) $(ALLOCASRC) $(ARCHIVES_SRC)\
        commands.h dep.h file.h job.h make.h rule.h variable.h
 
 
