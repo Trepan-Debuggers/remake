@@ -388,7 +388,7 @@ read_makefile (filename, type)
 	  p2 = next_token (p + 8);
 	  if (p2 == 0)
 	    makefile_error (filename, lineno, "empty `override' directive");
-	  if (!strncmp (p2, "define", 6))
+	  if (!strncmp (p2, "define", 6) && (isblank (p2[6]) || p2[6] == '\0'))
 	    {
 	      if (ignoring)
 		in_ignored_define = 1;
@@ -403,6 +403,8 @@ read_makefile (filename, type)
 	    }
 	  else if (!ignoring && !try_variable_definition (p2, o_override))
 	    makefile_error (filename, lineno, "empty `override' directive");
+
+	  continue;
 	}
 
 
