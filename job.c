@@ -787,6 +787,7 @@ start_job_command (child)
   /* Optimize an empty command.  People use this for timestamp rules,
      and forking a useless shell all the time leads to inefficiency. */
 
+#if !defined(VMS) && !defined(_AMIGA)
   if (
 #ifdef __MSDOS__
       unixy_shell	/* the test is complicated and we already did it */
@@ -800,6 +801,7 @@ start_job_command (child)
       set_command_state (child->file, cs_running);
       goto next_command;
     }
+#endif  /* !VMS && !_AMIGA */
 
   /* Tell update_goal_chain that a command has been started on behalf of
      this target.  It is important that this happens here and not in
@@ -827,9 +829,7 @@ start_job_command (child)
   fflush (stderr);
 
 #ifndef VMS
-#ifndef WINDOWS32
-#ifndef _AMIGA
-#ifndef __MSDOS__
+#if !defined(WINDOWS32) && !defined(_AMIGA) && !defined(__MSDOS__)
 
   /* Set up a bad standard input that reads from a broken pipe.  */
 
@@ -857,9 +857,7 @@ start_job_command (child)
 	}
     }
 
-#endif /* !AMIGA */
-#endif /* !WINDOWS32 */
-#endif /* !__MSDOS__ */
+#endif /* !WINDOWS32 && !_AMIGA && !__MSDOS__ */
 
   /* Decide whether to give this child the `good' standard input
      (one that points to the terminal or whatever), or the `bad' one
@@ -869,7 +867,7 @@ start_job_command (child)
   if (child->good_stdin)
     good_stdin_used = 1;
 
-#endif /* Not VMS */
+#endif /* !VMS */
 
   child->deleted = 0;
 
@@ -1602,11 +1600,66 @@ exec_command (argv, envp)
      char **argv, **envp;
 {
 #ifdef VMS
-    /* Run the program.  */
-    execve (argv[0], argv, envp);
-    perror_with_name ("execve: ", argv[0]);
-    _exit (EXIT_FAILURE);
+  /* Run the program.  */
+  execve (argv[0], argv, envp);
+  perror_with_name ("execve: ", argv[0]);
+  _exit (EXIT_FAILURE);
 #else
+#ifdef WINDOWS32
+  HANDLE hPID;
+  HANDLE hWaitPID;
+  int err = 0;
+  int exit_code = EXIT_FAILURE;
+
+  /* make sure CreateProcess() has Path it needs */
+  sync_Path_environment();
+
+  /* launch command */
+  hPID = process_easy(argv, envp);
+
+  /* make sure launch ok */
+  if (hPID == INVALID_HANDLE_VALUE)
+    {
+      int i;
+      fprintf(stderr,
+              "process_easy() failed failed to launch process (e=%d)\n",
+              process_last_err(hPID));
+      for (i = 0; argv[i]; i++)
+          fprintf(stderr, "%s ", argv[i]);
+      fprintf(stderr, "\nCounted %d args in failed launch\n", i);
+      exit(EXIT_FAILURE);
+    }
+
+  /* wait and reap last child */
+  while (hWaitPID = process_wait_for_any())
+    {
+      /* was an error found on this process? */
+      err = process_last_err(hWaitPID);
+
+      /* get exit data */
+      exit_code = process_exit_code(hWaitPID);
+
+      if (err)
+          fprintf(stderr, "make (e=%d, rc=%d): %s",
+                  err, exit_code, map_windows32_error_to_string(err));
+
+      /* cleanup process */
+      process_cleanup(hWaitPID);
+
+      /* expect to find only last pid, warn about other pids reaped */
+      if (hWaitPID == hPID)
+          break;
+      else
+          fprintf(stderr,
+                  "make reaped child pid %d, still waiting for pid %d\n",
+                  hWaitPID, hPID);
+    }
+
+  /* return child's exit code as our exit code */
+  exit(exit_code);
+
+#else  /* !WINDOWS32 */
+
   /* Be the user, permanently.  */
   child_access ();
 
@@ -1658,18 +1711,19 @@ exec_command (argv, envp)
     }
 
   _exit (127);
+#endif /* !WINDOWS32 */
 #endif /* !VMS */
 }
 #else /* On Amiga */
 void exec_command (argv)
      char **argv;
 {
-    MyExecute (argv);
+  MyExecute (argv);
 }
 
 void clean_tmp (void)
 {
-    DeleteFile (amiga_bname);
+  DeleteFile (amiga_bname);
 }
 
 #endif /* On Amiga */

@@ -296,9 +296,7 @@ distdir: $(DISTFILES)
 	rm -rf $(distdir)
 	mkdir $(distdir)
 	-chmod 777 $(distdir)
-	@for file in $(DISTFILES); do    d=$(srcdir);    test -f $(distdir)/$$file    || ln $$d/$$file $(distdir)/$$file 2> /dev/null    || cp -p $$d/$$file $(distdir)/$$file;  done
-	for subdir in $(SUBDIRS); do   test -d $(distdir)/$$subdir   || mkdir $(distdir)/$$subdir   || exit 1;   chmod 777 $(distdir)/$$subdir;   (cd $$subdir && $(MAKE) top_distdir=../$(top_distdir)/$$subdir distdir=../$(distdir)/$$subdir distdir)      || exit
-1;  done
+	@for file in $(DISTFILES); do d=$(srcdir); test -f $(distdir)/$$file || ln $$d/$$file $(distdir)/$$file 2> /dev/null || cp -p $$d/$$file $(distdir)/$$file; done; for subdir in $(SUBDIRS); do test -d $(distdir)/$$subdir || mkdir $(distdir)/$$subdir || exit 1; chmod 777 $(distdir)/$$subdir; (cd $$subdir && $(MAKE) top_distdir=../$(top_distdir)/$$subdir distdir=../$(distdir)/$$subdir distdir) || exit 1; done
 	$(MAKE) top_distdir="$(top_distdir)" distdir="$(distdir)" dist-info
 	$(MAKE) top_distdir="$(top_distdir)" distdir="$(distdir)" dist-hook
 alloca.o alloca.lo: alloca.c config.h

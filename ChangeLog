@@ -1,9 +1,39 @@
+Fri Aug 29 02:01:27 1997  Paul D. Smith  <psmith@baynetworks.com>
+
+	* Version 3.75.93.
+
+Thu Aug 28 19:39:06 1997  Rob Tulloh  <rob_tulloh@tivoli.com>
+
+	* job.c (exec_command): [WINDOWS32] If exec_command() is invoked
+ 	from main() to re-exec make, the call to execvp() would
+ 	incorrectly return control to parent shell before the exec'ed
+ 	command could run to completion. I believe this is a feature of
+ 	the way that execvp() is implemented on top of WIN32 APIs. To
+ 	alleviate the problem, use the supplied process launch function in
+ 	the sub_proc library and suspend the parent process until the
+ 	child process has run.  When the child exits, exit the parent make
+ 	with the exit code of the child make.
+
+Thu Aug 28 17:04:47 1997  Paul D. Smith  <psmith@baynetworks.com>
+
+	* Makefile.DOS.template (distdir): Fix a line that got wrapped in
+	email.
+
+	* Makefile.am (loadavg): Give the necessary cmdline options when
+	linking loadavg.
+
+	* configure.in: Check for pstat_getdynamic for getloadvg on HP.
+
+	* job.c (start_job_command): [VMS,_AMIGA] Don't perform empty
+	command optimization on these systems; it doesn't make sense.
+
 Wed Aug 27 17:09:32 1997  Paul D. Smith  <psmith@baynetworks.com>
 
         * Version 3.75.92
 
 Tue Aug 26 11:59:15 1997  Paul D. Smith  <psmith@baynetworks.com>
-	* main.c (print_version): Add 97 to copyright years.
+
+	* main.c (print_version): Add '97 to copyright years.
 
 	* read.c (do_define): Check the length of the array before looking
 	at a particular offset.
