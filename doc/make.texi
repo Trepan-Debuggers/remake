@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.2 2002/07/09 06:35:56 psmith Exp $
+@set RCSID $Id: make.texi,v 1.3 2002/07/10 12:59:07 psmith Exp $
 @set EDITION 0.60
 @set VERSION 3.80
 @set UPDATED 08 July 2002
@@ -8410,6 +8410,16 @@ part of the first prerequisite.
 Lists of the directory parts and the file-within-directory
 parts of all prerequisites.
 
+@vindex $(+D)
+@vindex +D @r{(automatic variable)}
+@item $(+D)
+@vindex $(+F)
+@vindex +F @r{(automatic variable)}
+@itemx $(+F)
+Lists of the directory parts and the file-within-directory
+parts of all prerequisites, including multiple instances of duplicated
+prerequisites.
+
 @vindex $(?D)
 @vindex ?D @r{(automatic variable)}
 @item $(?D)
@@ -8428,6 +8438,32 @@ looks more natural in this special case.  Please do not assume it has a
 deep significance; @samp{$<} refers to the variable named @code{<} just
 as @samp{$(CFLAGS)} refers to the variable named @code{CFLAGS}.
 You could just as well use @samp{$(<)} in place of @samp{$<}.
+
+@vindex $$@@
+@vindex $$(@@D)
+@vindex $$(@@F)
+@cindex $$@@, support for
+GNU @code{make} provides support for the SysV @code{make} feature that
+allows special variable references @code{$$@@}, @code{$$(@@D)}, and
+@code{$$(@@F)} (note the required double-''$''!) to appear with the
+@emph{prerequisites list} (normal automatic variables are available
+only within a command script).  When appearing in a prerequisites
+list, these variables are expanded to the name of the target, the
+directory component of the target, and the file component of the
+target, respectively.
+
+Note that these variables are available only within explicit and
+static pattern (@pxref{Static Pattern, ,Static Pattern Rules}) rules;
+they have no special significance within implicit (suffix or pattern)
+rules.  Also note that while SysV @code{make} actually expands its
+entire prerequisite list @emph{twice}, GNU @code{make} does not behave
+this way: instead it simply expands these special variables without
+re-expanding any other part of the prerequisites list.
+
+This somewhat bizarre feature is included only to provide some
+compatibility with SysV makefiles.  In a native GNU @code{make} file
+there are other ways to accomplish the same results.  This feature is
+disabled if the special pseudo target @code{.POSIX} is defined.
 
 @node Pattern Match, Match-Anything Rules, Automatic, Pattern Rules
 @subsection How Patterns Match
@@ -9321,29 +9357,6 @@ In GNU @code{make}, this entire series of cases is handled by two
 pattern rules for extraction from SCCS, in combination with the
 general feature of rule chaining.
 @xref{Chained Rules, ,Chains of Implicit Rules}.
-
-@item
-In System V @code{make}, the string @samp{$$@@} has the strange meaning
-that, in the prerequisites of a rule with multiple targets, it stands
-for the particular target that is being processed.
-
-This is not defined in GNU @code{make} because @samp{$$} should always
-stand for an ordinary @samp{$}.
-
-It is possible to get portions of this functionality through the use of
-static pattern rules (@pxref{Static Pattern, ,Static Pattern Rules}).
-The System V @code{make} rule:
-
-@example
-$(targets): $$@@.o lib.a
-@end example
-
-@noindent
-can be replaced with the GNU @code{make} static pattern rule:
-
-@example
-$(targets): %: %.o lib.a
-@end example
 
 @item
 In System V and 4.3 BSD @code{make}, files found by @code{VPATH} search

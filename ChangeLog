@@ -1,3 +1,18 @@
+2002-07-10  Paul D. Smith  <psmith@gnu.org>
+
+	Implement the SysV make syntax $$@, $$(@D), and $$(@F) in the
+	prerequisite list.  A real SysV make will expand the entire
+	prerequisites list _twice_: we don't do that as it's a big
+	backward-compatibility problem.  We only replace those specific
+	variables.
+
+	* read.c (record_files): Replace any $@, $(@D), and $(@F) variable
+	references left in the list of prerequisites.  Check for .POSIX as
+	we record targets, so we can disable non-POSIX behavior while
+	reading makefiles as well as running them.
+	(eval): Check the prerequisite list to see if we have anything
+	that looks like a SysV prerequisite variable reference.
+
 2002-07-09  Paul D. Smith  <psmith@gnu.org>
 
 	* doc/make.texi (Prerequisite Types): Add a new section describing
