@@ -585,7 +585,8 @@ start_job (child)
     {
       /* Wait for the load to be low enough if this
 	 is the first command in the sequence.  */
-      if (child->command_line - 1 == 0 && load_too_high ())
+      if (child->command_line - 1 == 0
+	  && job_slots_used > 0 && load_too_high ())
 	{
 	  /* Put this child on the chain of children waiting
 	     for the load average to go down.  */
