@@ -683,7 +683,8 @@ start_job (child)
   if (start_remote_job_p ())
     {
       int is_remote, id, used_stdin;
-      if (start_remote_job (argv, child->good_stdin ? 0 : bad_stdin,
+      if (start_remote_job (argv, child->environment,
+			    child->good_stdin ? 0 : bad_stdin,
 			    &is_remote, &id, &used_stdin))
 	goto error;
       else
