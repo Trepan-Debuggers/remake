@@ -223,11 +223,7 @@ static char *default_variables[] =
     "F77", "$(FC)",
     "F77FLAGS", "$(FFLAGS)",
 #endif	/* Cray.  */
-#if	defined (USG) || defined (ultrix) || defined (_IBMR2)
-    "GET", "get",
-#else
-    "GET", "/usr/sccs/get",
-#endif
+    "GET", SCCS_GET,
     "LD", "ld",
     "LEX", "lex",
     "LINT", "lint",
@@ -310,7 +306,7 @@ set_default_suffixes ()
       char *p = default_suffixes;
       suffix_file->deps = (struct dep *)
 	multi_glob (parse_file_seq (&p, '\0', sizeof (struct dep)),
-		    sizeof (struct dep));
+		    sizeof (struct dep), 1);
       (void) define_variable ("SUFFIXES", 8, default_suffixes, o_default, 0);
     }
 }
