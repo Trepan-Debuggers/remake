@@ -13,9 +13,9 @@ makebook*
 
 README aclocal.m4 config.h.in config.h configure Makefile.in
 build.sh.in build.sh SMakefile config.ami README.DOS Makefile.DOS configh.dos
-NMakefile config.h.W32 config.h-vms glob/Makefile.in
+NMakefile config.h.W32 config.h-vms
 
-.deps .dep_segment glob/.deps
+.deps .dep_segment
 
 _*
 sun4 i386 i386-netbsd hp300-netbsd hp300 rs6000 sun3 news800 amiga

@@ -14,7 +14,8 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+MA 02111-1307, USA.  */
 
 #include "make.h"
 #include "dep.h"
@@ -2363,7 +2364,7 @@ print_version ()
     printf ("-%s", remote_description);
 
   printf (", by Richard Stallman and Roland McGrath.\n\
-%sCopyright (C) 1988, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98\n\
+%sCopyright (C) 1988, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99\n\
 %s\tFree Software Foundation, Inc.\n\
 %sThis is free software; see the source for copying conditions.\n\
 %sThere is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A\n\

@@ -16,16 +16,17 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with GNU Make; see the file COPYING.  If not, write to
-# the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+# the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+# Boston, MA 02111-1307, USA.
 
 #
 #	Makefile for GNU Make
 #
 
 # Ultrix 2.2 make doesn't expand the value of VPATH.
-VPATH = /make-3.74/
+VPATH = /make-%VERSION%/
 # This must repeat the value, because configure will remove `VPATH = .'.
-srcdir = /make-3.74/
+srcdir = /make-%VERSION%/
 
 CC = sc
 RM = delete
