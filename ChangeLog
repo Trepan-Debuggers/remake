@@ -1,5 +1,17 @@
 2004-11-28  Paul D. Smith  <psmith@gnu.org>
 
+	Fix for bug #1276: Handle SHELL according to POSIX requirements.
+
+	* main.c (main): Set SHELL to v_noexport by default.  Remember the
+	original environment setting of SHELL in the env_shell variable.
+	* main.h: Export new env_shell variable.
+	* variable.c (target_environment): If we find a v_noexport
+	variable for SHELL, add a SHELL variable with the env_shell value.
+	* doc/make.texi (Quick Reference): Document the POSIX behavior.
+	* doc/make.texi (Variables/Recursion): Ditto.
+
+2004-11-28  Paul D. Smith  <psmith@gnu.org>
+
 	* main.c (find_and_set_default_shell) [WINDOWS32]: check for
 	equality of "cmd"/"cmd.exe", not inequality.  Fixes bug #11155.
 	Patch by Alessandro Vesely.

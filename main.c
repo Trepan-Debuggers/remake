@@ -264,6 +264,10 @@ int always_make_flag = 0;
 
 int rebuilding_makefiles = 0;
 
+/* Remember the original value of the SHELL variable, from the environment.  */
+
+const char *env_shell = 0;
+
 
 /* The usage output.  We write it this way to make life easier for the
    translators, especially those trying to translate to right-to-left
@@ -1045,11 +1049,8 @@ main (int argc, char **argv, char **envp)
 #ifndef _AMIGA
   for (i = 0; envp[i] != 0; ++i)
     {
-      int do_not_define;
-      register char *ep = envp[i];
-
-      /* by default, everything gets defined and exported */
-      do_not_define = 0;
+      int do_not_define = 0;
+      char *ep = envp[i];
 
       while (*ep != '=')
         ++ep;
@@ -1065,17 +1066,27 @@ main (int argc, char **argv, char **envp)
 	 machines where ptrdiff_t is a different size that doesn't widen
 	 the same.  */
       if (!do_not_define)
-        define_variable (envp[i], (unsigned int) (ep - envp[i]),
-                         ep + 1, o_env, 1)
-	/* Force exportation of every variable culled from the environment.
-	   We used to rely on target_environment's v_default code to do this.
-	   But that does not work for the case where an environment variable
-	   is redefined in a makefile with `override'; it should then still
-	   be exported, because it was originally in the environment.
-           Another wrinkle is that POSIX says the value of SHELL set in the
-           makefile should not change the value of SHELL given to
-           subprocesses, which seems silly to me but...  */
-	->export = strncmp(envp[i], "SHELL=", 6) ? v_noexport : v_export;
+        {
+          struct variable *v;
+
+          v = define_variable (envp[i], (unsigned int) (ep - envp[i]),
+                               ep + 1, o_env, 1);
+          /* Force exportation of every variable culled from the environment.
+             We used to rely on target_environment's v_default code to do this.
+             But that does not work for the case where an environment variable
+             is redefined in a makefile with `override'; it should then still
+             be exported, because it was originally in the environment.  */
+          v->export = v_export;
+
+          /* Another wrinkle is that POSIX says the value of SHELL set in the
+             makefile should not change the value of SHELL given to
+             subprocesses, which seems silly to me but...  */
+          if (strncmp (envp[i], "SHELL=", 6) == 0)
+            {
+              v->export = v_noexport;
+              env_shell = xstrdup (ep + 1);
+            }
+        }
     }
 #ifdef WINDOWS32
     /*
