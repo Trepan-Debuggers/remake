@@ -668,9 +668,8 @@ read_makefile (filename, type)
 
 	  /* Parse the dependencies.  */
 	  deps = (struct dep *)
-	    multi_glob (parse_file_seq (&p2, '\0', sizeof (struct dep)),
-			sizeof (struct dep),
-			1);
+	    multi_glob (parse_file_seq (&p2, '\0', sizeof (struct dep), 1),
+			sizeof (struct dep));
 
 	  commands_idx = 0;
 	  if (cmdleft != 0)
@@ -1498,6 +1497,95 @@ parse_file_seq (stringp, stopchar, size, strip)
       new = new1;
     }
 
+#ifndef NO_ARCHIVES
+
+  /* Look for multi-word archive references.
+     They are indicated by a elt ending with an unmatched `)' and
+     an elt further down the chain (i.e., previous in the file list)
+     with an unmatched `(' (e.g., "lib(mem").  */
+
+  for (new1 = new; new1 != 0; new1 = new1->next)
+    if (new1->name[0] != '('	/* Don't catch "(%)" and suchlike.  */
+	&& new1->name[strlen (new1->name) - 1] == ')'
+	&& index (new1->name, '(') == 0)
+      {
+	/* NEW1 ends with a `)' but does not contain a `('.
+	   Look back for an elt with an opening `(' but no closing `)'.  */
+
+	struct nameseq *n = new1->next, *lastn = new1;
+	char *paren;
+	while (n != 0 && (paren = index (n->name, '(')) == 0)
+	  {
+	    lastn = n;
+	    n = n->next;
+	  }
+	if (n != 0)
+	  {
+	    /* N is the first element in the archive group.
+	       Its name looks like "lib(mem" (with no closing `)').  */
+
+	    char *libname;
+
+	    /* Copy "lib(" into LIBNAME.  */
+	    ++paren;
+	    libname = (char *) alloca (paren - n->name + 1);
+	    bcopy (n->name, libname, paren - n->name);
+	    libname[paren - n->name] = '\0';
+
+	    if (*paren == '\0')
+	      {
+		/* N was just "lib(", part of something like "lib( a b)".
+		   Edit it out of the chain and free its storage.  */
+		lastn->next = n->next;
+		free (n->name);
+		free ((char *) n);
+		/* LASTN->next is the new stopping elt for the loop below.  */
+		n = lastn->next;
+	      }
+	    else
+	      {
+		/* Replace N's name with the full archive reference.  */
+		name = concat (libname, paren, ")");
+		free (n->name);
+		n->name = name;
+	      }
+
+	    if (new1->name[1] == '\0')
+	      {
+		/* NEW1 is just ")", part of something like "lib(a b )".
+		   Omit it from the chain and free its storage.  */
+		lastn = new1;
+		new1 = new1->next;
+		if (new == lastn)
+		  new = new1;
+		free (lastn->name);
+		free ((char *) lastn);
+	      }
+	    else
+	      {
+		/* Replace also NEW1->name, which already has closing `)'.  */
+		name = concat (libname, new1->name, "");
+		free (new1->name);
+		new1->name = name;
+		new1 = new1->next;
+	      }
+
+	    /* Trace back from NEW1 (the end of the list) until N
+	       (the beginning of the list), rewriting each name
+	       with the full archive reference.  */
+	    
+	    while (new1 != n)
+	      {
+		name = concat (libname, new1->name, ")");
+		free (new1->name);
+		new1->name = name;
+		new1 = new1->next;
+	      }
+	  }
+      }
+
+#endif
+
   *stringp = p;
   return new;
 }
@@ -1748,6 +1836,9 @@ multi_glob (chain, size)
   for (old = chain; old != 0; old = nexto)
     {
       glob_t gl;
+#ifndef NO_ARCHIVES
+      char *memname;
+#endif
 
       nexto = old->next;
 
@@ -1761,6 +1852,23 @@ multi_glob (chain, size)
 	    }
 	}
 
+#ifndef NO_ARCHIVES
+      if (ar_name (old->name))
+	{
+	  /* OLD->name is an archive member reference.
+	     Replace it with the archive file name,
+	     and save the member name in MEMNAME.
+	     We will glob on the archive name and then
+	     reattach MEMNAME later.  */
+	  char *arname;
+	  ar_parse_name (old->name, &arname, &memname);
+	  free (old->name);
+	  old->name = arname;
+	}
+      else
+	memname = 0;
+#endif
+
       switch (glob (old->name, GLOB_NOCHECK, NULL, &gl))
 	{
 	case 0:			/* Success.  */
@@ -1768,11 +1876,55 @@ multi_glob (chain, size)
 	    register int i = gl.gl_pathc;
 	    while (i-- > 0)
 	      {
-		struct nameseq *elt = (struct nameseq *) xmalloc (size);
-		elt->name = savestring (gl.gl_pathv[i],
-					strlen (gl.gl_pathv[i]));
-		elt->next = new;
-		new = elt;
+#ifndef NO_ARCHIVES
+		if (memname != 0)
+		  {
+		    /* Try to glob on MEMNAME within the archive.  */
+		    struct nameseq *found
+		      = ar_glob (gl.gl_pathv[i], memname, size);
+		    if (found == 0)
+		      {
+			/* No matches.  Use MEMNAME as-is.  */
+			struct nameseq *elt
+			  = (struct nameseq *) xmalloc (size);
+			unsigned int alen = strlen (gl.gl_pathv[i]);
+			unsigned int mlen = strlen (memname);
+			elt->name = (char *) xmalloc (alen + 1 + mlen + 2);
+			bcopy (gl.gl_pathv[i], elt->name, alen);
+			elt->name[alen] = '(';
+			bcopy (memname, &elt->name[alen + 1], mlen);
+			elt->name[alen + 1 + mlen] = ')';
+			elt->name[alen + 1 + mlen + 1] = '\0';
+			elt->next = new;
+			new = elt;
+		      }
+		    else
+		      {
+			free (old->name);
+			free (old);
+
+			/* Find the end of the FOUND chain.  */
+			old = found;
+			while (old->next != 0)
+			  old = old->next;
+
+			/* Attach the chain being built to the end of the FOUND
+			   chain, and make FOUND the new NEW chain.  */
+			old->next = new;
+			new = found;
+		      }
+
+		    free (memname);
+		  }
+		else
+#endif
+		  {
+		    struct nameseq *elt = (struct nameseq *) xmalloc (size);
+		    elt->name = savestring (gl.gl_pathv[i],
+					    strlen (gl.gl_pathv[i]));
+		    elt->next = new;
+		    new = elt;
+		  }
 	      }
 	    globfree (&gl);
 	    free (old->name);
