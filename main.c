@@ -1,5 +1,6 @@
 /* Argument parsing and main program of GNU Make.
-Copyright (C) 1988,89,90,91,94,95,96,97,98,99 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
+2002 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -75,6 +76,8 @@ static void decode_switches PARAMS ((int argc, char **argv, int env));
 static void decode_env_switches PARAMS ((char *envar, unsigned int len));
 static void define_makeflags PARAMS ((int all, int makefile));
 static char *quote_for_env PARAMS ((char *out, char *in));
+static void initialize_global_hash_tables PARAMS ((void));
+
 
 /* The structure that describes an accepted command switch.  */
 
@@ -470,6 +473,15 @@ bsd_signal (sig, func)
 }
 # endif
 #endif
+
+static void
+initialize_global_hash_tables ()
+{
+  init_hash_global_variable_set ();
+  init_hash_files ();
+  hash_init_directories ();
+  hash_init_function_table ();
+}
 
 static struct file *
 enter_command_line_file (name)
@@ -951,6 +963,8 @@ int main (int argc, char ** argv)
   /* Set up to access user data (files).  */
   user_access ();
 
+  initialize_global_hash_tables ();
+
   /* Figure out where we are.  */
 
 #ifdef WINDOWS32
@@ -1217,7 +1231,7 @@ int main (int argc, char ** argv)
 #endif /* WINDOWS32 */
   /* Figure out the level of recursion.  */
   {
-    struct variable *v = lookup_variable ("MAKELEVEL", 9);
+    struct variable *v = lookup_variable (MAKELEVEL_NAME, MAKELEVEL_LENGTH);
     if (v != 0 && v->value[0] != '\0' && v->value[0] != '-')
       makelevel = (unsigned int) atoi (v->value);
     else
@@ -1807,7 +1821,8 @@ int main (int argc, char ** argv)
 
 #ifndef _AMIGA
 	  for (p = environ; *p != 0; ++p)
-	    if (strneq (*p, "MAKELEVEL=", 10))
+	    if ((*p)[MAKELEVEL_LENGTH] == '='
+		&& strneq (*p, MAKELEVEL_NAME, MAKELEVEL_LENGTH))
 	      {
 		/* The SGI compiler apparently can't understand
 		   the concept of storing the result of a function
@@ -1815,7 +1830,7 @@ int main (int argc, char ** argv)
 		char *sgi_loses;
 		sgi_loses = (char *) alloca (40);
 		*p = sgi_loses;
-		sprintf (*p, "MAKELEVEL=%u", makelevel);
+		sprintf (*p, "%s=%u", MAKELEVEL_NAME, makelevel);
 		break;
 	      }
 #else /* AMIGA */
@@ -1823,12 +1838,12 @@ int main (int argc, char ** argv)
 	    char buffer[256];
 	    int len;
 
-	    len = GetVar ("MAKELEVEL", buffer, sizeof (buffer), GVF_GLOBAL_ONLY);
+	    len = GetVar (MAKELEVEL_NAME, buffer, sizeof (buffer), GVF_GLOBAL_ONLY);
 
 	    if (len != -1)
 	    {
 	    sprintf (buffer, "%u", makelevel);
-	      SetVar ("MAKELEVEL", buffer, -1, GVF_GLOBAL_ONLY);
+	      SetVar (MAKELEVEL_NAME, buffer, -1, GVF_GLOBAL_ONLY);
 	    }
 	  }
 #endif

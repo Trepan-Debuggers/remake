@@ -1,5 +1,6 @@
 /* Miscellaneous global declarations and portability cruft for GNU Make.
-Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
+2002 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -325,16 +326,6 @@ extern char *strsignal PARAMS ((int signum));
 extern int strcmpi (const char *,const char *);
 #endif
 
-/* Add to VAR the hashing value of C, one character in a name.  */
-#define HASH(var, c) \
-  ((var += (c)), (var = ((var) << 7) + ((var) >> 20)))
-#ifdef HAVE_CASE_INSENSITIVE_FS /* Fold filenames */
-# define HASHI(var, c) \
-   ((var += tolower((unsigned char)(c))), (var = ((var) << 7) + ((var) >> 20)))
-#else
-# define HASHI(var, c) HASH(var,c)
-#endif
-
 #if defined(__GNUC__) || defined(ENUM_BITFIELDS)
 # define ENUM_BITFIELD(bits)    :bits
 #else
@@ -430,7 +421,7 @@ extern char *sindex PARAMS ((const char *, unsigned int, \
 extern char *lindex PARAMS ((const char *, const char *, int));
 extern int alpha_compare PARAMS ((const void *, const void *));
 extern void print_spaces PARAMS ((unsigned int));
-extern char *find_char_unquote PARAMS ((char *, char *, int));
+extern char *find_char_unquote PARAMS ((char *, int, int, int));
 extern char *find_percent PARAMS ((char *));
 extern FILE *open_tmpfile PARAMS ((char **, const char *));
 
@@ -446,6 +437,7 @@ extern int file_exists_p PARAMS ((char *));
 extern int file_impossible_p PARAMS ((char *));
 extern void file_impossible PARAMS ((char *));
 extern char *dir_name PARAMS ((char *));
+extern void hash_init_directories PARAMS ((void));
 
 extern void define_default_variables PARAMS ((void));
 extern void set_default_suffixes PARAMS ((void));

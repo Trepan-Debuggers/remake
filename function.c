@@ -1,5 +1,5 @@
 /* Builtin function expansion for GNU Make.
-Copyright (C) 1988,1989,1991-1997,1999 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1991-1997, 1999, 2002 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -39,6 +39,33 @@ struct function_table_entry
     char expand_args;
     char *(*func_ptr) PARAMS ((char *output, char **argv, const char *fname));
   };
+
+static unsigned long
+function_table_entry_hash_1 (void const *keyv)
+{
+  struct function_table_entry const *key = (struct function_table_entry const *) keyv;
+  return_STRING_N_HASH_1 (key->name, key->len);
+}
+
+static unsigned long
+function_table_entry_hash_2 (void const *keyv)
+{
+  struct function_table_entry const *key = (struct function_table_entry const *) keyv;
+  return_STRING_N_HASH_2 (key->name, key->len);
+}
+
+static int
+function_table_entry_hash_cmp (void const *xv, void const *yv)
+{
+  struct function_table_entry const *x = (struct function_table_entry const *) xv;
+  struct function_table_entry const *y = (struct function_table_entry const *) yv;
+  int result = x->len - y->len;
+  if (result)
+    return result;
+  return_STRING_N_COMPARE (x->name, y->name, x->len);
+}
+
+static struct hash_table function_table;
 
 
 /* Store into VARIABLE_BUFFER at O the result of scanning TEXT and replacing
@@ -221,25 +248,25 @@ patsubst_expand (o, text, pattern, replace, pattern_percent, replace_percent)
 }
 
 
-/* Look up a function by name.
-   The table is currently small enough that it's not really worthwhile to use
-   a fancier lookup algorithm.  If it gets larger, maybe...
-*/
+/* Look up a function by name.  */
 
 static const struct function_table_entry *
-lookup_function (table, s)
-     const struct function_table_entry *table;
+lookup_function (s)
      const char *s;
 {
-  int len = strlen (s);
+  const char *e = s;
 
-  for (; table->name != NULL; ++table)
-    if (table->len <= len
-        && (isblank ((unsigned char)s[table->len]) || s[table->len] == '\0')
-        && strneq (s, table->name, table->len))
-      return table;
+  while (*e && ( (*e >= 'a' && *e <= 'z') || *e == '-'))
+    e++;
+  if (*e == '\0' || isblank ((unsigned char) *e))
+    {
+      struct function_table_entry function_table_entry_key;
+      function_table_entry_key.name = s;
+      function_table_entry_key.len = e - s;
 
-  return NULL;
+      return hash_find_item (&function_table, &function_table_entry_key);
+    }
+  return 0;
 }
 
 
@@ -862,8 +889,41 @@ func_foreach (o, argv, funcname)
 struct a_word
 {
   struct a_word *next;
+  struct a_word *chain;
   char *str;
+  int length;
   int matched;
+};
+
+static unsigned long
+a_word_hash_1 (void const *key)
+{
+  return_STRING_HASH_1 (((struct a_word const *) key)->str);
+}
+
+static unsigned long
+a_word_hash_2 (void const *key)
+{
+  return_STRING_HASH_2 (((struct a_word const *) key)->str);
+}
+
+static int
+a_word_hash_cmp (void const *x, void const *y)
+{
+  int result = ((struct a_word const *) x)->length - ((struct a_word const *) y)->length;
+  if (result)
+    return result;
+  return_STRING_COMPARE (((struct a_word const *) x)->str,
+			 ((struct a_word const *) y)->str);
+}
+
+struct a_pattern
+{
+  struct a_pattern *next;
+  char *str;
+  char *percent;
+  int length;
+  int save_c;
 };
 
 static char *
@@ -872,54 +932,107 @@ func_filter_filterout (o, argv, funcname)
      char **argv;
      const char *funcname;
 {
-  struct a_word *wordhead = 0;
-  struct a_word *wordtail = 0;
-
+  struct a_word *wordhead;
+  struct a_word **wordtail;
+  struct a_word *wp;
+  struct a_pattern *pathead;
+  struct a_pattern **pattail;
+  struct a_pattern *pp;
+  
+  struct hash_table a_word_table;
   int is_filter = streq (funcname, "filter");
-  char *patterns = argv[0];
+  char *pat_iterator = argv[0];
   char *word_iterator = argv[1];
-
+  int literals = 0;
+  int words = 0;
+  int hashing = 0;
   char *p;
   unsigned int len;
 
-  /* Chop ARGV[1] up into words and then run each pattern through.  */
+  /* Chop ARGV[0] up into patterns to match against the words.  */
+
+  pattail = &pathead;
+  while ((p = find_next_token (&pat_iterator, &len)) != 0)
+    {
+      struct a_pattern *pat = (struct a_pattern *) alloca (sizeof (struct a_pattern));
+
+      *pattail = pat;
+      pattail = &pat->next;
+
+      if (*pat_iterator != '\0')
+	++pat_iterator;
+
+      pat->str = p;
+      pat->length = len;
+      pat->save_c = p[len];
+      p[len] = '\0';
+      pat->percent = find_percent (p);
+      if (pat->percent == 0)
+	literals++;
+    }
+  *pattail = 0;
+
+  /* Chop ARGV[1] up into words to match against the patterns.  */
+
+  wordtail = &wordhead;
   while ((p = find_next_token (&word_iterator, &len)) != 0)
     {
-      struct a_word *w = (struct a_word *)alloca (sizeof (struct a_word));
-      if (wordhead == 0)
-	wordhead = w;
-      else
-	wordtail->next = w;
-      wordtail = w;
+      struct a_word *word = (struct a_word *) alloca (sizeof (struct a_word));
+
+      *wordtail = word;
+      wordtail = &word->next;
 
       if (*word_iterator != '\0')
 	++word_iterator;
+
       p[len] = '\0';
-      w->str = p;
-      w->matched = 0;
+      word->str = p;
+      word->length = len;
+      word->matched = 0;
+      word->chain = 0;
+      words++;
+    }
+  *wordtail = 0;
+
+  /* Only use a hash table if arg list lengths justifies the cost.  */
+  hashing = (literals >= 2 && (literals * words) >= 10);
+  if (hashing)
+    {
+      hash_init (&a_word_table, words, a_word_hash_1, a_word_hash_2, a_word_hash_cmp);
+      for (wp = wordhead; wp != 0; wp = wp->next)
+	{
+	  struct a_word *owp = hash_insert (&a_word_table, wp);
+	  if (owp)
+	    wp->chain = owp;
+	}
     }
 
-  if (wordhead != 0)
+  if (words)
     {
-      char *pat_iterator = patterns;
       int doneany = 0;
-      struct a_word *wp;
-
-      wordtail->next = 0;
 
       /* Run each pattern through the words, killing words.  */
-      while ((p = find_next_token (&pat_iterator, &len)) != 0)
+      for (pp = pathead; pp != 0; pp = pp->next)
 	{
-	  char *percent;
-	  char save = p[len];
-	  p[len] = '\0';
-
-	  percent = find_percent (p);
-	  for (wp = wordhead; wp != 0; wp = wp->next)
-	    wp->matched |= (percent == 0 ? streq (p, wp->str)
-			    : pattern_matches (p, percent, wp->str));
-
-	  p[len] = save;
+	  if (pp->percent)
+	    for (wp = wordhead; wp != 0; wp = wp->next)
+	      wp->matched |= pattern_matches (pp->str, pp->percent, wp->str);
+	  else if (hashing)
+	    {
+	      struct a_word a_word_key;
+	      a_word_key.str = pp->str;
+	      a_word_key.length = pp->length;
+	      wp = (struct a_word *) hash_find_item (&a_word_table, &a_word_key);
+	      while (wp)
+		{
+		  wp->matched |= 1;
+		  wp = wp->chain;
+		}
+	    }
+	  else
+	    for (wp = wordhead; wp != 0; wp = wp->next)
+	      wp->matched |= (wp->length == pp->length
+			      && strneq (pp->str, wp->str, wp->length));
 	}
 
       /* Output the words that matched (or didn't, for filter-out).  */
@@ -935,6 +1048,12 @@ func_filter_filterout (o, argv, funcname)
 	/* Kill the last space.  */
 	--o;
     }
+
+  for (pp = pathead; pp != 0; pp = pp->next)
+    pp->str[pp->length] = pp->save_c;
+
+  if (hashing)
+    hash_free (&a_word_table, 0);
 
   return o;
 }
@@ -1669,7 +1788,7 @@ func_not (char* o, char **argv, char *funcname)
 static char *func_call PARAMS ((char *o, char **argv, const char *funcname));
 
 
-static struct function_table_entry function_table[] =
+static struct function_table_entry function_table_init[] =
 {
  /* Name/size */                    /* MIN MAX EXP? Function */
   { STRING_SIZE_TUPLE("addprefix"),     2,  2,  1,  func_addsuffix_addprefix},
@@ -1704,11 +1823,12 @@ static struct function_table_entry function_table[] =
   { STRING_SIZE_TUPLE("eq"),            2,  2,  1,  func_eq},
   { STRING_SIZE_TUPLE("not"),           0,  1,  1,  func_not},
 #endif
-  { 0 }
 };
+
+#define FUNCTION_TABLE_ENTRIES (sizeof (function_table_init) / sizeof (struct function_table_entry))
 
 
-/* These must come after the definition of function_table[].  */
+/* These must come after the definition of function_table.  */
 
 static char *
 expand_builtin_function (o, argc, argv, entry_p)
@@ -1758,7 +1878,7 @@ handle_function (op, stringp)
 
   beg = *stringp + 1;
 
-  entry_p = lookup_function (function_table, beg);
+  entry_p = lookup_function (beg);
 
   if (!entry_p)
     return 0;
@@ -1881,7 +2001,7 @@ func_call (o, argv, funcname)
 
   /* Are we invoking a builtin function?  */
 
-  entry_p = lookup_function (function_table, fname);
+  entry_p = lookup_function (fname);
 
   if (entry_p)
     {
@@ -1935,4 +2055,14 @@ func_call (o, argv, funcname)
   pop_variable_scope ();
 
   return o + strlen (o);
+}
+
+void
+hash_init_function_table ()
+{
+  hash_init (&function_table, FUNCTION_TABLE_ENTRIES * 2,
+	     function_table_entry_hash_1, function_table_entry_hash_2,
+	     function_table_entry_hash_cmp);
+  hash_load (&function_table, function_table_init,
+	     FUNCTION_TABLE_ENTRIES, sizeof (struct function_table_entry));
 }

@@ -1,3 +1,13 @@
+2002-07-11  Paul D. Smith  <psmith@gnu.org>
+
+	* run_make_tests.pl (valid_option): Add support for Valgrind
+	<http://developer.kde.org/~sewardj/>.  Use -valgrind option to the
+	test suite.
+	(set_more_defaults): Set up the file descriptor to capture
+	Valgrind output.  We have to unset its close-on-exec flag; we
+	hardcode the value for F_SETFD (2) rather than load it; hopefully
+	this will help us avoid breaking the Windows/DOS test suite.
+
 2002-07-10  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/variables/automatic: Add some tests for $$@, $$(@D), and

@@ -1,5 +1,6 @@
 /* Reading and parsing of makefiles for GNU Make.
-Copyright (C) 1988,89,90,91,92,93,94,95,96,97 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
+2002 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -30,6 +31,7 @@ Boston, MA 02111-1307, USA.  */
 #include "variable.h"
 #include "rule.h"
 #include "debug.h"
+#include "hash.h"
 
 
 #ifndef WINDOWS32
@@ -378,6 +380,7 @@ eval_makefile (filename, flags)
 
   reading_file = curfile;
 
+  free(ebuf.bufstart);
   return r;
 }
 
@@ -853,7 +856,7 @@ eval (ebuf, set_default)
 
         /* Search the line for an unquoted ; that is not after an
            unquoted #.  */
-        cmdleft = find_char_unquote (line, ";#", 0);
+        cmdleft = find_char_unquote (line, ';', '#', 0);
         if (cmdleft != 0 && *cmdleft == '#')
           {
             /* We found a comment before a semicolon.  */
@@ -899,7 +902,7 @@ eval (ebuf, set_default)
             if (cmdleft == 0)
               {
                 /* Look for a semicolon in the expanded line.  */
-                cmdleft = find_char_unquote (p2, ";", 0);
+                cmdleft = find_char_unquote (p2, ';', 0, 0);
 
                 if (cmdleft != 0)
                   {
@@ -926,7 +929,7 @@ eval (ebuf, set_default)
                   }
               }
 
-            colonp = find_char_unquote(p2, ":", 0);
+            colonp = find_char_unquote(p2, ':', 0, 0);
 #if defined(__MSDOS__) || defined(WINDOWS32)
             /* The drive spec brain-damage strikes again...  */
             /* Note that the only separators of targets in this context
@@ -935,7 +938,7 @@ eval (ebuf, set_default)
             while (colonp && (colonp[1] == '/' || colonp[1] == '\\') &&
                    colonp > p2 && isalpha ((unsigned char)colonp[-1]) &&
                    (colonp == p2 + 1 || strchr (" \t(", colonp[-2]) != 0))
-              colonp = find_char_unquote(colonp + 1, ":", 0);
+              colonp = find_char_unquote(colonp + 1, ':', 0, 0);
 #endif
             if (colonp != 0)
               break;
@@ -1038,7 +1041,7 @@ eval (ebuf, set_default)
 
         /* This is a normal target, _not_ a target-specific variable.
            Unquote any = in the dependency list.  */
-        find_char_unquote (lb_next, "=", 0);
+        find_char_unquote (lb_next, '=', 0, 0);
 
         /* We have some targets, so don't ignore the following commands.  */
         no_targets = 0;
@@ -1053,7 +1056,7 @@ eval (ebuf, set_default)
             /* Look for a semicolon in the expanded line.  */
             if (cmdleft == 0)
               {
-                cmdleft = find_char_unquote (p2, ";", 0);
+                cmdleft = find_char_unquote (p2, ';', 0, 0);
                 if (cmdleft != 0)
                   *(cmdleft++) = '\0';
               }
@@ -1519,47 +1522,68 @@ conditional_line (line, flocp)
 
 /* Remove duplicate dependencies in CHAIN.  */
 
+static unsigned long
+dep_hash_1 (void const *key)
+{
+  return_STRING_HASH_1 (dep_name ((struct dep const *) key));
+}
+
+static unsigned long
+dep_hash_2 (void const *key)
+{
+  return_STRING_HASH_2 (dep_name ((struct dep const *) key));
+}
+
+static int
+dep_hash_cmp (void const *x, void const *y)
+{
+  struct dep *dx = (struct dep *) x;
+  struct dep *dy = (struct dep *) y;
+  int cmp = strcmp (dep_name (dx), dep_name (dy));
+
+  /* If the names are the same but ignore_mtimes are not equal, one of these
+     is an order-only prerequisite and one isn't.  That means that we should
+     remove the one that isn't and keep the one that is.  */
+
+  if (!cmp && dx->ignore_mtime != dy->ignore_mtime)
+    dx->ignore_mtime = dy->ignore_mtime = 0;
+
+  return cmp;
+}
+
+
 void
 uniquize_deps (chain)
      struct dep *chain;
 {
-  register struct dep *d;
+  struct hash_table deps;
+  register struct dep **depp;
+
+  hash_init (&deps, 500, dep_hash_1, dep_hash_2, dep_hash_cmp);
 
   /* Make sure that no dependencies are repeated.  This does not
      really matter for the purpose of updating targets, but it
      might make some names be listed twice for $^ and $?.  */
 
-  for (d = chain; d != 0; d = d->next)
+  depp = &chain;
+  while (*depp)
     {
-      struct dep *last, *next;
-
-      last = d;
-      next = d->next;
-      while (next != 0)
-	if (streq (dep_name (d), dep_name (next)))
-	  {
-	    struct dep *n = next->next;
-            /* If ignore_mtimes are not equal, one of these is an order-only
-               prerequisite and one isn't.  That means that we should remove
-               the one that isn't and keep the one that is.  Ideally we'd
-               like to keep the normal one always but that's hard, and
-               probably not very important, so just remove the second one and
-               force the first one to be normal.  */
-            if (d->ignore_mtime != next->ignore_mtime)
-              d->ignore_mtime = 0;
-	    last->next = n;
-	    if (next->name != 0 && next->name != d->name)
-	      free (next->name);
-	    if (next != d)
-	      free ((char *) next);
-	    next = n;
-	  }
-	else
-	  {
-	    last = next;
-	    next = next->next;
-	  }
+      struct dep *dep = *depp;
+      struct dep **dep_slot = (struct dep **) hash_find_slot (&deps, dep);
+      if (HASH_VACANT (*dep_slot))
+	{
+	  hash_insert_at (&deps, dep, dep_slot);
+	  depp = &dep->next;
+	}
+      else
+	{
+	  /* Don't bother freeing duplicates.
+	     It's dangerous and little benefit accrues.  */
+	  *depp = dep->next;
+	}
     }
+
+  hash_free (&deps, 0);
 }
 
 /* Record target-specific variable values for files FILENAMES.
@@ -2076,9 +2100,10 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
    one, or nil if there are none.  */
 
 char *
-find_char_unquote (string, stopchars, blank)
+find_char_unquote (string, stop1, stop2, blank)
      char *string;
-     char *stopchars;
+     int stop1;
+     int stop2;
      int blank;
 {
   unsigned int string_len = 0;
@@ -2086,9 +2111,21 @@ find_char_unquote (string, stopchars, blank)
 
   while (1)
     {
-      while (*p != '\0' && strchr (stopchars, *p) == 0
-	     && (!blank || !isblank ((unsigned char)*p)))
-	++p;
+      if (stop2 && blank)
+	while (*p != '\0' && *p != stop1 && *p != stop2
+	       && ! isblank ((unsigned char) *p))
+	  ++p;
+      else if (stop2)
+	while (*p != '\0' && *p != stop1 && *p != stop2)
+	  ++p;
+      else if (blank)
+	while (*p != '\0' && *p != stop1
+	       && ! isblank ((unsigned char) *p))
+	  ++p;
+      else
+	while (*p != '\0' && *p != stop1)
+	  ++p;
+
       if (*p == '\0')
 	break;
 
@@ -2128,7 +2165,7 @@ char *
 find_percent (pattern)
      char *pattern;
 {
-  return find_char_unquote (pattern, "%", 0);
+  return find_char_unquote (pattern, '%', 0, 0);
 }
 
 /* Parse a string into a sequence of filenames represented as a
@@ -2156,15 +2193,11 @@ parse_file_seq (stringp, stopchar, size, strip)
   register char *p = *stringp;
   char *q;
   char *name;
-  char stopchars[3];
 
 #ifdef VMS
-  stopchars[0] = ',';
-  stopchars[1] = stopchar;
-  stopchars[2] = '\0';
+# define VMS_COMMA ','
 #else
-  stopchars[0] = stopchar;
-  stopchars[1] = '\0';
+# define VMS_COMMA 0
 #endif
 
   while (1)
@@ -2178,7 +2211,7 @@ parse_file_seq (stringp, stopchar, size, strip)
 
       /* Yes, find end of next name.  */
       q = p;
-      p = find_char_unquote (q, stopchars, 1);
+      p = find_char_unquote (q, stopchar, VMS_COMMA, 1);
 #ifdef VMS
 	/* convert comma separated list to space separated */
       if (p && *p == ',')
@@ -2189,7 +2222,7 @@ parse_file_seq (stringp, stopchar, size, strip)
           && !(isspace ((unsigned char)p[1]) || !p[1]
                || isspace ((unsigned char)p[-1])))
       {
-	p = find_char_unquote (p+1, stopchars, 1);
+	p = find_char_unquote (p+1, stopchar, VMS_COMMA, 1);
       }
 #endif
 #if defined(WINDOWS32) || defined(__MSDOS__)
@@ -2200,7 +2233,7 @@ parse_file_seq (stringp, stopchar, size, strip)
     if (stopchar == ':')
       while (p != 0 && !isspace ((unsigned char)*p) &&
              (p[1] == '\\' || p[1] == '/') && isalpha ((unsigned char)p[-1]))
-        p = find_char_unquote (p + 1, stopchars, 1);
+        p = find_char_unquote (p + 1, stopchar, VMS_COMMA, 1);
 #endif
       if (p == 0)
 	p = q + strlen (q);
@@ -2436,9 +2469,9 @@ static long
 readline (ebuf)
      struct ebuffer *ebuf;
 {
-  char *buffer = ebuf->buffer;
-  char *p = ebuf->buffer;
-  char *end = p + ebuf->size;
+  char *p;
+  char *end;
+  char *start;
   long nlines = 0;
 
   /* The behaviors between string and stream buffers are different enough to
@@ -2447,6 +2480,11 @@ readline (ebuf)
   if (!ebuf->fp)
     return readstring (ebuf);
 
+  /* When reading from a file, we always start over at the beginning of the
+     buffer for each new line.  */
+
+  p = start = ebuf->bufstart;
+  end = p + ebuf->size;
   *p = '\0';
 
   while (fgets (p, end - p, ebuf->fp) != 0)
@@ -2475,16 +2513,7 @@ readline (ebuf)
       /* If the last char isn't a newline, the whole line didn't fit into the
          buffer.  Get some more buffer and try again.  */
       if (p[-1] != '\n')
-	{
-	  unsigned long p_off = p - buffer;
-	  ebuf->size *= 2;
-	  buffer = (char *) xrealloc (buffer, ebuf->size);
-	  p = buffer + p_off;
-	  end = buffer + ebuf->size;
-	  ebuf->buffer = buffer;
-	  *p = '\0';
-	  continue;
-	}
+        goto more_buffer;
 
       /* We got a newline, so add one to the count of lines.  */
       ++nlines;
@@ -2492,7 +2521,7 @@ readline (ebuf)
 #if !defined(WINDOWS32) && !defined(__MSDOS__)
       /* Check to see if the line was really ended with CRLF; if so ignore
          the CR.  */
-      if ((p - buffer) > 1 && p[-2] == '\r')
+      if ((p - start) > 1 && p[-2] == '\r')
         {
           --p;
           p[-1] = '\n';
@@ -2500,7 +2529,7 @@ readline (ebuf)
 #endif
 
       backslash = 0;
-      for (p2 = p - 2; p2 >= buffer; --p2)
+      for (p2 = p - 2; p2 >= start; --p2)
 	{
 	  if (*p2 != '\\')
 	    break;
@@ -2513,16 +2542,23 @@ readline (ebuf)
 	  break;
 	}
 
-      if (end - p <= 1)
-	{
-	  /* Enlarge the buffer.  */
-	  unsigned int p_off = p - buffer;
-	  ebuf->size *= 2;
-	  buffer = (char *) xrealloc (buffer, ebuf->size);
-	  p = buffer + p_off;
-	  end = buffer + ebuf->size;
-	  ebuf->buffer = buffer;
-	}
+      /* It was a backslash/newline combo.  If we have more space, read
+         another line.  */
+      if (end - p >= 80)
+        continue;
+
+      /* We need more space at the end of our buffer, so realloc it.
+         Make sure to preserve the current offset of p.  */
+    more_buffer:
+      {
+        unsigned long off = p - start;
+        ebuf->size *= 2;
+        start = ebuf->buffer = ebuf->bufstart = (char *) xrealloc (start,
+                                                                   ebuf->size);
+        p = start + off;
+        end = start + ebuf->size;
+        *p = '\0';
+      }
     }
 
   if (ferror (ebuf->fp))

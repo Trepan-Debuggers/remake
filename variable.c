@@ -1,5 +1,6 @@
 /* Internals of variables for GNU Make.
-Copyright (C) 1988,89,90,91,92,93,94,96,97 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996, 1997,
+2002 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -27,8 +28,34 @@ Boston, MA 02111-1307, USA.  */
 #ifdef WINDOWS32
 #include "pathstuff.h"
 #endif
+#include "hash.h"
 
 /* Hash table of all global variable definitions.  */
+
+static unsigned long
+variable_hash_1 (void const *keyv)
+{
+  struct variable const *key = (struct variable const *) keyv;
+  return_STRING_N_HASH_1 (key->name, key->length);
+}
+
+static unsigned long
+variable_hash_2 (void const *keyv)
+{
+  struct variable const *key = (struct variable const *) keyv;
+  return_STRING_N_HASH_2 (key->name, key->length);
+}
+
+static int
+variable_hash_cmp (void const *xv, void const *yv)
+{
+  struct variable const *x = (struct variable const *) xv;
+  struct variable const *y = (struct variable const *) yv;
+  int result = x->length - y->length;
+  if (result)
+    return result;
+  return_STRING_N_COMPARE (x->name, y->name, x->length);
+}
 
 #ifndef	VARIABLE_BUCKETS
 #define VARIABLE_BUCKETS		523
@@ -39,14 +66,20 @@ Boston, MA 02111-1307, USA.  */
 #ifndef	SMALL_SCOPE_VARIABLE_BUCKETS
 #define	SMALL_SCOPE_VARIABLE_BUCKETS	13
 #endif
-static struct variable *variable_table[VARIABLE_BUCKETS];
-static struct variable_set global_variable_set
-  = { variable_table, VARIABLE_BUCKETS };
+
+static struct variable_set global_variable_set;
 static struct variable_set_list global_setlist
   = { 0, &global_variable_set };
 struct variable_set_list *current_variable_set_list = &global_setlist;
 
 /* Implement variables.  */
+
+void
+init_hash_global_variable_set ()
+{
+  hash_init (&global_variable_set.table, VARIABLE_BUCKETS,
+	     variable_hash_1, variable_hash_2, variable_hash_cmp);
+}
 
 /* Define variable named NAME with value VALUE in SET.  VALUE is copied.
    LENGTH is the length of NAME, which does not need to be null-terminated.
@@ -65,28 +98,22 @@ define_variable_in_set (name, length, value, origin, recursive, set, flocp)
      struct variable_set *set;
      const struct floc *flocp;
 {
-  register unsigned int i;
-  register unsigned int hashval;
-  register struct variable *v;
+  struct variable *v;
+  struct variable **var_slot;
+  struct variable var_key;
 
   if (set == NULL)
     set = &global_variable_set;
 
-  hashval = 0;
-  for (i = 0; i < length; ++i)
-    HASH (hashval, name[i]);
-  hashval %= set->buckets;
-
-  for (v = set->table[hashval]; v != 0; v = v->next)
-    if (*v->name == *name
-	&& strneq (v->name + 1, name + 1, length - 1)
-	&& v->name[length] == '\0')
-      break;
+  var_key.name = (char *) name;
+  var_key.length = length;
+  var_slot = (struct variable **) hash_find_slot (&set->table, &var_key);
 
   if (env_overrides && origin == o_env)
     origin = o_env_override;
 
-  if (v != 0)
+  v = *var_slot;
+  if (! HASH_VACANT (v))
     {
       if (env_overrides && v->origin == o_env)
 	/* V came from in the environment.  Since it was defined
@@ -115,6 +142,8 @@ define_variable_in_set (name, length, value, origin, recursive, set, flocp)
 
   v = (struct variable *) xmalloc (sizeof (struct variable));
   v->name = savestring (name, length);
+  v->length = length;
+  hash_insert_at (&set->table, v, var_slot);
   v->value = xstrdup (value);
   if (flocp != 0)
     v->fileinfo = *flocp;
@@ -127,8 +156,7 @@ define_variable_in_set (name, length, value, origin, recursive, set, flocp)
   v->per_target = 0;
   v->append = 0;
   v->export = v_default;
-  v->next = set->table[hashval];
-  set->table[hashval] = v;
+
   return v;
 }
 
@@ -143,26 +171,20 @@ lookup_variable (name, length)
      unsigned int length;
 {
   const struct variable_set_list *setlist;
+  struct variable var_key;
 
-  unsigned int i;
-  unsigned int rawhash = 0;
-
-  for (i = 0; i < length; ++i)
-    HASH (rawhash, name[i]);
+  var_key.name = (char *) name;
+  var_key.length = length;
 
   for (setlist = current_variable_set_list;
        setlist != 0; setlist = setlist->next)
     {
       const struct variable_set *set = setlist->set;
-      unsigned int hashval = rawhash % set->buckets;
       struct variable *v;
 
-      /* Look through this set list; return it if found.  */
-      for (v = set->table[hashval]; v != 0; v = v->next)
-	if (*v->name == *name
-	    && strneq (v->name + 1, name + 1, length - 1)
-	    && v->name[length] == '\0')
-          return v;
+      v = (struct variable *) hash_find_item ((struct hash_table *) &set->table, &var_key);
+      if (v)
+	return v;
     }
 
 #ifdef VMS
@@ -235,21 +257,12 @@ lookup_variable_in_set (name, length, set)
      unsigned int length;
      const struct variable_set *set;
 {
-  unsigned int i;
-  unsigned int hash = 0;
-  struct variable *v;
+  struct variable var_key;
 
-  for (i = 0; i < length; ++i)
-    HASH (hash, name[i]);
-  hash %= set->buckets;
+  var_key.name = (char *) name;
+  var_key.length = length;
 
-  for (v = set->table[hash]; v != 0; v = v->next)
-    if (*v->name == *name
-        && strneq (v->name + 1, name + 1, length - 1)
-        && v->name[length] == 0)
-      return v;
-
-  return 0;
+  return (struct variable *) hash_find_item ((struct hash_table *) &set->table, &var_key);
 }
 
 /* Initialize FILE's variable set list.  If FILE already has a variable set
@@ -270,11 +283,8 @@ initialize_file_variables (file, reading)
       l = (struct variable_set_list *)
 	xmalloc (sizeof (struct variable_set_list));
       l->set = (struct variable_set *) xmalloc (sizeof (struct variable_set));
-      l->set->buckets = PERFILE_VARIABLE_BUCKETS;
-      l->set->table = (struct variable **)
-	xmalloc (l->set->buckets * sizeof (struct variable *));
-      bzero ((char *) l->set->table,
-	     l->set->buckets * sizeof (struct variable *));
+      hash_init (&l->set->table, PERFILE_VARIABLE_BUCKETS,
+			     variable_hash_1, variable_hash_2, variable_hash_cmp);
       file->variables = l;
     }
 
@@ -316,31 +326,27 @@ initialize_file_variables (file, reading)
 /* Pop the top set off the current variable set list,
    and free all its storage.  */
 
+static void
+free_variable_name_and_value (item)
+     void *item;
+{
+  struct variable *v = (struct variable *) item;
+  free (v->name);
+  free (v->value);
+}
+
 void
 pop_variable_scope ()
 {
-  register struct variable_set_list *setlist = current_variable_set_list;
-  register struct variable_set *set = setlist->set;
-  register unsigned int i;
+  struct variable_set_list *setlist = current_variable_set_list;
+  struct variable_set *set = setlist->set;
 
   current_variable_set_list = setlist->next;
   free ((char *) setlist);
 
-  for (i = 0; i < set->buckets; ++i)
-    {
-      register struct variable *next = set->table[i];
-      while (next != 0)
-	{
-	  register struct variable *v = next;
-	  next = v->next;
+  hash_map (&set->table, free_variable_name_and_value);
+  hash_free (&set->table, 1);
 
-	  free (v->name);
-	  if (v->value)
-	    free (v->value);
-	  free ((char *) v);
-	}
-    }
-  free ((char *) set->table);
   free ((char *) set);
 }
 
@@ -351,10 +357,8 @@ create_new_variable_set ()
   register struct variable_set *set;
 
   set = (struct variable_set *) xmalloc (sizeof (struct variable_set));
-  set->buckets = SMALL_SCOPE_VARIABLE_BUCKETS;
-  set->table = (struct variable **)
-    xmalloc (set->buckets * sizeof (struct variable *));
-  bzero ((char *) set->table, set->buckets * sizeof (struct variable *));
+  hash_init (&set->table, SMALL_SCOPE_VARIABLE_BUCKETS,
+	     variable_hash_1, variable_hash_2, variable_hash_cmp);
 
   setlist = (struct variable_set_list *)
     xmalloc (sizeof (struct variable_set_list));
@@ -375,52 +379,27 @@ push_new_variable_scope ()
 /* Merge SET1 into SET0, freeing unused storage in SET1.  */
 
 static void
-merge_variable_sets (set0, set1)
-     struct variable_set *set0, *set1;
+merge_variable_sets (to_set, from_set)
+     struct variable_set *to_set, *from_set;
 {
-  register unsigned int bucket1;
+  struct variable **from_var_slot = (struct variable **) from_set->table.ht_vec;
+  struct variable **from_var_end = from_var_slot + from_set->table.ht_size;
 
-  for (bucket1 = 0; bucket1 < set1->buckets; ++bucket1)
-    {
-      register struct variable *v1 = set1->table[bucket1];
-      while (v1 != 0)
-	{
-	  struct variable *next = v1->next;
-	  unsigned int bucket0;
-	  register struct variable *v0;
-
-	  if (set1->buckets >= set0->buckets)
-	    bucket0 = bucket1;
-	  else
-	    {
-	      register char *n;
-	      bucket0 = 0;
-	      for (n = v1->name; *n != '\0'; ++n)
-		HASH (bucket0, *n);
-	    }
-	  bucket0 %= set0->buckets;
-
-	  for (v0 = set0->table[bucket0]; v0 != 0; v0 = v0->next)
-	    if (streq (v0->name, v1->name))
-	      break;
-
-	  if (v0 == 0)
-	    {
-	      /* There is no variable in SET0 with the same name.  */
-	      v1->next = set0->table[bucket0];
-	      set0->table[bucket0] = v1;
-	    }
-	  else
-	    {
-	      /* The same variable exists in both sets.
-		 SET0 takes precedence.  */
-	      free (v1->value);
-	      free ((char *) v1);
-	    }
-
-	  v1 = next;
-	}
-    }
+  for ( ; from_var_slot < from_var_end; from_var_slot++)
+    if (! HASH_VACANT (*from_var_slot))
+      {
+	struct variable *from_var = *from_var_slot;
+	struct variable **to_var_slot
+	  = (struct variable **) hash_find_slot (&to_set->table, *from_var_slot);
+	if (HASH_VACANT (*to_var_slot))
+	  hash_insert_at (&to_set->table, from_var, to_var_slot);
+	else
+	  {
+	    /* GKM FIXME: delete in from_set->table */
+	    free (from_var->value);
+	    free (from_var);
+	  }
+      }
 }
 
 /* Merge SETLIST1 into SETLIST0, freeing unused storage in SETLIST1.  */
@@ -467,7 +446,7 @@ define_automatic_variables ()
   char buf[200];
 
   sprintf (buf, "%u", makelevel);
-  (void) define_variable ("MAKELEVEL", 9, buf, o_env, 0);
+  (void) define_variable (MAKELEVEL_NAME, MAKELEVEL_LENGTH, buf, o_env, 0);
 
   sprintf (buf, "%s%s%s",
 	   version_string,
@@ -564,184 +543,135 @@ target_environment (file)
 {
   struct variable_set_list *set_list;
   register struct variable_set_list *s;
-  struct variable_bucket
-    {
-      struct variable_bucket *next;
-      struct variable *variable;
-    };
-  struct variable_bucket **table;
-  unsigned int buckets;
-  register unsigned int i;
-  register unsigned nvariables;
+  struct hash_table table;
+  struct variable **v_slot;
+  struct variable **v_end;
+  struct variable makelevel_key;
+  char **result_0;
   char **result;
-  unsigned int mklev_hash;
 
   if (file == 0)
     set_list = current_variable_set_list;
   else
     set_list = file->variables;
 
-  /* Find the lowest number of buckets in any set in the list.  */
-  s = set_list;
-  buckets = s->set->buckets;
-  for (s = s->next; s != 0; s = s->next)
-    if (s->set->buckets < buckets)
-      buckets = s->set->buckets;
-
-  /* Find the hash value of the bucket `MAKELEVEL' will fall into.  */
-  {
-    char *p = "MAKELEVEL";
-    mklev_hash = 0;
-    while (*p != '\0')
-      HASH (mklev_hash, *p++);
-  }
-
-  /* Temporarily allocate a table with that many buckets.  */
-  table = (struct variable_bucket **)
-    alloca (buckets * sizeof (struct variable_bucket *));
-  bzero ((char *) table, buckets * sizeof (struct variable_bucket *));
+  hash_init (&table, VARIABLE_BUCKETS,
+	     variable_hash_1, variable_hash_2, variable_hash_cmp);
 
   /* Run through all the variable sets in the list,
      accumulating variables in TABLE.  */
-  nvariables = 0;
   for (s = set_list; s != 0; s = s->next)
     {
-      register struct variable_set *set = s->set;
-      for (i = 0; i < set->buckets; ++i)
-	{
-	  register struct variable *v;
-	  for (v = set->table[i]; v != 0; v = v->next)
-	    {
-	      unsigned int j = i % buckets;
-	      register struct variable_bucket *ov;
-	      register char *p = v->name;
+      struct variable_set *set = s->set;
+      v_slot = (struct variable **) set->table.ht_vec;
+      v_end = v_slot + set->table.ht_size;
+      for ( ; v_slot < v_end; v_slot++)
+	if (! HASH_VACANT (*v_slot))
+	  {
+	    struct variable **new_slot;
+	    struct variable *v = *v_slot;
+	    char *p = v->name;
 
-	      if (i == mklev_hash % set->buckets
-		  && streq (v->name, "MAKELEVEL"))
-		/* Don't include MAKELEVEL because it will be
-		   added specially at the end.  */
+	    /* If this is a per-target variable and it hasn't been touched
+	       already then look up the global version and take its export
+	       value.  */
+	    if (v->per_target && v->export == v_default)
+	      {
+		struct variable *gv;
+
+		gv = lookup_variable_in_set (v->name, strlen(v->name),
+                                             &global_variable_set);
+		if (gv)
+		  v->export = gv->export;
+	      }
+
+	    switch (v->export)
+	      {
+	      case v_default:
+		if (v->origin == o_default || v->origin == o_automatic)
+		  /* Only export default variables by explicit request.  */
+		  continue;
+
+		if (! export_all_variables
+		    && v->origin != o_command
+		    && v->origin != o_env && v->origin != o_env_override)
+		  continue;
+
+		if (*p != '_' && (*p < 'A' || *p > 'Z')
+                    && (*p < 'a' || *p > 'z'))
+ 		  continue;
+		for (++p; *p != '\0'; ++p)
+		  if (*p != '_' && (*p < 'a' || *p > 'z')
+		      && (*p < 'A' || *p > 'Z') && (*p < '0' || *p > '9'))
+		    continue;
+		if (*p != '\0')
+		  continue;
+		break;
+
+	      case v_export:
+		break;
+
+	      case v_noexport:
 		continue;
 
-              /* If this is a per-target variable and it hasn't been touched
-                 already then look up the global version and take its export
-                 value.  */
-              if (v->per_target && v->export == v_default)
-                {
-                  struct variable *gv;
+	      case v_ifset:
+		if (v->origin == o_default)
+		  continue;
+		break;
+	      }
 
-                  gv = lookup_variable_in_set(v->name, strlen(v->name),
-                                              &global_variable_set);
-                  if (gv)
-                    v->export = gv->export;
-                }
-
-	      switch (v->export)
-		{
-		case v_default:
-		  if (v->origin == o_default || v->origin == o_automatic)
-		    /* Only export default variables by explicit request.  */
-		    continue;
-
-		  if (! export_all_variables
-		      && v->origin != o_command
-		      && v->origin != o_env && v->origin != o_env_override)
-		    continue;
-
-		  if (*p != '_' && (*p < 'A' || *p > 'Z')
-		      && (*p < 'a' || *p > 'z'))
-		    continue;
-		  for (++p; *p != '\0'; ++p)
-		    if (*p != '_' && (*p < 'a' || *p > 'z')
-			&& (*p < 'A' || *p > 'Z') && (*p < '0' || *p > '9'))
-		      continue;
-		  if (*p != '\0')
-		    continue;
-		  break;
-
-                case v_export:
-                  break;
-
-                case v_noexport:
-                  continue;
-
-		case v_ifset:
-		  if (v->origin == o_default)
-		    continue;
-		  break;
-		}
-
-              /* If this was from a different-sized hash table, then
-                 recalculate the bucket it goes in.  */
-              if (set->buckets != buckets)
-                {
-                  register char *np;
-
-                  j = 0;
-                  for (np = v->name; *np != '\0'; ++np)
-                    HASH (j, *np);
-                  j %= buckets;
-                }
-
-	      for (ov = table[j]; ov != 0; ov = ov->next)
-		if (streq (v->name, ov->variable->name))
-		  break;
-
-	      if (ov == 0)
-		{
-		  register struct variable_bucket *entry;
-		  entry = (struct variable_bucket *)
-		    alloca (sizeof (struct variable_bucket));
-		  entry->next = table[j];
-		  entry->variable = v;
-		  table[j] = entry;
-		  ++nvariables;
-		}
-	    }
-	}
+	    new_slot = (struct variable **) hash_find_slot (&table, v);
+	    if (HASH_VACANT (*new_slot))
+	      hash_insert_at (&table, v, new_slot);
+	  }
     }
 
-  result = (char **) xmalloc ((nvariables + 2) * sizeof (char *));
-  nvariables = 0;
-  for (i = 0; i < buckets; ++i)
-    {
-      register struct variable_bucket *b;
-      for (b = table[i]; b != 0; b = b->next)
-	{
-	  register struct variable *v = b->variable;
+  makelevel_key.name = MAKELEVEL_NAME;
+  makelevel_key.length = MAKELEVEL_LENGTH;
+  hash_delete (&table, &makelevel_key);
 
-	  /* If V is recursively expanded and didn't come from the environment,
-	     expand its value.  If it came from the environment, it should
-	     go back into the environment unchanged.  */
-	  if (v->recursive
-	      && v->origin != o_env && v->origin != o_env_override)
-	    {
-	      char *value = recursively_expand_for_file (v, file);
+  result = result_0 = (char **) xmalloc ((table.ht_fill + 2) * sizeof (char *));
+
+  v_slot = (struct variable **) table.ht_vec;
+  v_end = v_slot + table.ht_size;
+  for ( ; v_slot < v_end; v_slot++)
+    if (! HASH_VACANT (*v_slot))
+      {
+	struct variable *v = *v_slot;
+
+	/* If V is recursively expanded and didn't come from the environment,
+	   expand its value.  If it came from the environment, it should
+	   go back into the environment unchanged.  */
+	if (v->recursive
+	    && v->origin != o_env && v->origin != o_env_override)
+	  {
+	    char *value = recursively_expand_for_file (v, file);
 #ifdef WINDOWS32
-              if (strcmp(v->name, "Path") == 0 ||
-                  strcmp(v->name, "PATH") == 0)
-                convert_Path_to_windows32(value, ';');
+	    if (strcmp(v->name, "Path") == 0 ||
+		strcmp(v->name, "PATH") == 0)
+	      convert_Path_to_windows32(value, ';');
 #endif
-	      result[nvariables++] = concat (v->name, "=", value);
-	      free (value);
-	    }
-	  else
+	    *result++ = concat (v->name, "=", value);
+	    free (value);
+	  }
+	else
+	  {
 #ifdef WINDOWS32
-          {
             if (strcmp(v->name, "Path") == 0 ||
                 strcmp(v->name, "PATH") == 0)
               convert_Path_to_windows32(v->value, ';');
-            result[nvariables++] = concat (v->name, "=", v->value);
-          }
-#else
-	    result[nvariables++] = concat (v->name, "=", v->value);
 #endif
-	}
-    }
-  result[nvariables] = (char *) xmalloc (100);
-  (void) sprintf (result[nvariables], "MAKELEVEL=%u", makelevel + 1);
-  result[++nvariables] = 0;
+	    *result++ = concat (v->name, "=", v->value);
+	  }
+      }
 
-  return result;
+  *result = (char *) xmalloc (100);
+  (void) sprintf (*result, "%s=%u", MAKELEVEL_NAME, makelevel + 1);
+  *++result = 0;
+
+  hash_free (&table, 0);
+
+  return result_0;
 }
 
 /* Given a variable, a value, and a flavor, define the variable.
@@ -1159,48 +1089,13 @@ print_variable_set (set, prefix)
      register struct variable_set *set;
      char *prefix;
 {
-  register unsigned int i, nvariables, per_bucket;
-  register struct variable *v;
+  hash_map_arg (&set->table, print_variable, prefix);
 
-  per_bucket = nvariables = 0;
-  for (i = 0; i < set->buckets; ++i)
-    {
-      register unsigned int this_bucket = 0;
-
-      for (v = set->table[i]; v != 0; v = v->next)
-	{
-	  ++this_bucket;
-	  print_variable (v, prefix);
-	}
-
-      nvariables += this_bucket;
-      if (this_bucket > per_bucket)
-	per_bucket = this_bucket;
-    }
-
-  if (nvariables == 0)
-    puts (_("# No variables."));
-  else
-    {
-      printf (_("# %u variables in %u hash buckets.\n"),
-	      nvariables, set->buckets);
-#ifndef	NO_FLOAT
-      printf (_("# average of %.1f variables per bucket, \
-max %u in one bucket.\n"),
-	      (double) nvariables / (double) set->buckets,
-	      per_bucket);
-#else
-      {
-	int f = (nvariables * 1000 + 5) / set->buckets;
-	printf (_("# average of %d.%d variables per bucket, \
-max %u in one bucket.\n"),
-	      f/10, f%10,
-	      per_bucket);
-      }
-#endif
-    }
+  fputs (_("# variable set hash-table stats:\n"), stdout);
+  fputs ("# ", stdout);
+  hash_print_stats (&set->table, stdout);
+  putc ('\n', stdout);
 }
-
 
 /* Print the data base of variables.  */
 

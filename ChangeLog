@@ -1,5 +1,122 @@
 2002-07-10  Paul D. Smith  <psmith@gnu.org>
 
+	* variable.c (pop_variable_scope): Remove variable made unused by
+	new hash infrastructure.
+	* read.c (dep_hash_cmp): Rewrite this to handle ignore_mtime
+	comparisons as well as name comparisons.
+	* variable.h: Add a prototype for new hash_init_function_table().
+	* file.c (lookup_file): Remove variables made unused by new hash
+	infrastructure.
+	* dir.c (directory_contents_hash_2): Missing return of hash value.
+	(dir_contents_file_exists_p): Remove variables made unused by new
+	hash infrastructure.
+
+
+	Installed Greg McGary's integration of the hash functions from the
+	GNU id-utils package:
+
+2002-07-10  Greg McGary  <greg@mcgary.org>
+
+	* scripts/functions/filter-out: Add literals to to the
+	pattern space in order to add complexity, and trigger
+	use of an internal hash table.  Fix documentation strings.
+	* scripts/targets/INTERMEDIATE: Reverse order of files
+	passed to expected `rm' command.
+
+2002-07-10  Greg McGary  <greg@mcgary.org>
+
+	* Makefile.am (SRCS): Add hash.c (noinst_HEADERS): Add hash.h
+	* hash.c: New file, taken from id-utils.
+	* hash.h: New file, taken from id-utils.
+
+	* make.h (HASH, HASHI): Remove macros.
+	(find_char_unquote): Change arglist in decl.
+	(hash_init_directories): New function decl.
+	* variable.h (hash.h): New #include.
+	(MAKELEVEL_NAME, MAKELEVEL_LENGTH): New constants.
+	* filedef.h (hash.h): New #include.
+	(struct file) [next]: Remove member.
+	(file_hash_enter): Remove function decl.
+	(init_hash_files): New function decl.
+
+	* ar.c (ar_name): Delay call to strlen until needed.
+	* main.c (initialize_global_hash_tables): New function.
+	(main): Call it.  Use MAKELEVEL_NAME & MAKELEVEL_LENGTH.
+	* misc.c (remove_comments): Pass char constants to find_char_unquote.
+	* remake.c (notice_finished_file): Update last_mtime on `prev' chain.
+
+	* dir.c (hash.h): New #include.
+	(struct directory_contents) [next, files]: Remove members.
+	[ctime]: Add member for VMS.  [dirfiles]: Add hash-table member.
+	(directory_contents_hash_1, directory_contents_hash_2,
+	directory_contents_hash_cmp): New functions.
+	(directories_contents): Change type to `struct hash_table'.
+	(struct directory) [next]: Remove member.
+	(directory_hash_1, directory_hash_2, directory_hash_cmp): New funcs.
+	(directory): Change type to `struct hash_table'.
+	(struct dirfile) [next]: Remove member.
+	[length]: Add member.  [impossible]: widen type to fill alignment gap.
+	(dirfile_hash_1, dirfile_hash_2, dirfile_hash_cmp): New functions.
+	(find_directory): Use new hash table package.
+	(dir_contents_file_exists_p): Likewise.
+	(file_impossible): Likewise.
+	(file_impossible_p): Likewise.
+	(print_dir_data_base): Likewise.
+	(open_dirstream): Likewise.
+	(read_dirstream): Likewise.
+	(hash_init_directories): New function.
+
+	* file.c (hash.h): New #include.
+	(file_hash_1, file_hash_2, file_hash_cmp): New functions.
+	(files): Change type to `struct hash_table'.
+	(lookup_file): Use new hash table package.
+	(enter_file): Likewise.
+	(remove_intermediates): Likewise.
+	(snap_deps): Likewise.
+	(print_file_data_base): Likewise.
+
+	* function.c
+	(function_table_entry_hash_1, function_table_entry_hash_2,
+	function_table_entry_hash_cmp): New functions.
+	(lookup_function): Remove `table' argument.
+	Use new hash table package.
+	(struct a_word) [chain, length]: New members.
+	(a_word_hash_1, a_word_hash_2, a_word_hash_cmp): New functions.
+	(struct a_pattern): New struct.
+	(func_filter_filterout): Pass through patterns noting boundaries
+	and '%', if present.  Note a_word length.  Use a hash table if
+	arglists are large enough to justify cost.
+	(function_table_init): Renamed from function_table.
+	(function_table): Declare as `struct hash_table'.
+	(FUNCTION_TABLE_ENTRIES): New constant.
+	(hash_init_function_table): New function.
+
+	* read.c (hash.h): New #include.
+	(read_makefile): Pass char constants to find_char_unquote.
+	(dep_hash_1, dep_hash_2, dep_hash_cmp): New functions.
+	(uniquize_deps): Use hash table to efficiently identify duplicates.
+	(find_char_unquote): Accept two char-constant stop chars, rather
+	than a string constant, avoiding zillions of calls to strchr.
+	Tighten inner search loops to test only for desired delimiters.
+
+	* variable.c (variable_hash_1, variable_hash_2,
+	variable_hash_cmp): New functions.
+	(variable_table): Declare as `struct hash_table'.
+	(global_variable_set): Remove initialization.
+	(init_hash_global_variable_set): New function.
+	(define_variable_in_set): Use new hash table package.
+	(lookup_variable): Likewise.
+	(lookup_variable_in_set): Likewise.
+	(initialize_file_variables): Likewise.
+	(pop_variable_scope): Likewise.
+	(create_new_variable_set): Likewise.
+	(merge_variable_sets): Likewise.
+	(define_automatic_variables): Likewise.
+	(target_environment): Likewise.
+	(print_variable_set): Likewise.
+
+2002-07-10  Paul D. Smith  <psmith@gnu.org>
+
 	Implement the SysV make syntax $$@, $$(@D), and $$(@F) in the
 	prerequisite list.  A real SysV make will expand the entire
 	prerequisites list _twice_: we don't do that as it's a big

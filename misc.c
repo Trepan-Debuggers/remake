@@ -1,5 +1,6 @@
 /* Miscellaneous generic support functions for GNU Make.
-Copyright (C) 1988,89,90,91,92,93,94,95,97 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1997,
+2002 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -162,7 +163,7 @@ remove_comments (line)
 {
   char *comment;
 
-  comment = find_char_unquote (line, "#", 0);
+  comment = find_char_unquote (line, '#', 0, 0);
 
   if (comment != 0)
     /* Cut off the line at the #.  */
