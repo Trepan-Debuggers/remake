@@ -3,7 +3,7 @@
 % Load plain if necessary, i.e., if running under initex.
 \expandafter\ifx\csname fmtname\endcsname\relax\input plain\fi
 %
-\def\texinfoversion{1999-03-15.16}%
+\def\texinfoversion{1999-03-15.17}%
 %
 % Copyright (C) 1985, 86, 88, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99
 % Free Software Foundation, Inc.
@@ -5288,16 +5288,19 @@ width0pt\relax} \fi
   % \epsfbox itself resets \epsf?size at each figure.
   \setbox0 = \hbox{\ignorespaces #2}\ifdim\wd0 > 0pt \epsfxsize=#2\relax \fi
   \setbox0 = \hbox{\ignorespaces #3}\ifdim\wd0 > 0pt \epsfysize=#3\relax \fi
-  % If the image is by itself, center it.
-  \ifvmode
-    \nobreak\medskip
-    \nobreak
-    \centerline{\epsfbox{#1.eps}}%
-    \bigbreak
-  \else
-    % In the middle of a paragraph, no extra space.
-    \epsfbox{#1.eps}%
-  \fi
+  \begingroup
+    \catcode`\^^M = 5 % in case we're inside an example
+    % If the image is by itself, center it.
+    \ifvmode
+      \nobreak\medskip
+      \nobreak
+      \centerline{\epsfbox{#1.eps}}%
+      \bigbreak
+    \else
+      % In the middle of a paragraph, no extra space.
+      \epsfbox{#1.eps}%
+    \fi
+  \endgroup
 }
 
 
