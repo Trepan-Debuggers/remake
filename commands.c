@@ -357,6 +357,9 @@ execute_file_commands (file)
       break;
   if (*p == '\0')
     {
+      /* We are all out of commands.
+	 If we have gotten this far, all the previous commands
+	 have run successfully, so we have winning update status.  */
       file->update_status = 0;
       notice_finished_file (file);
       return;
