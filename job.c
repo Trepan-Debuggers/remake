@@ -127,7 +127,7 @@ void init_siglist ();
 extern char *sys_siglist[];
 #endif
 
-int child_handler ();
+RETSIGTYPE child_handler ();
 static void free_child (), start_job ();
 static int load_too_high ();
 
@@ -184,8 +184,6 @@ child_handler (sig)
 
   if (debug_flag)
     printf ("Got a SIGCHLD; %d unreaped children.\n", dead_children);
-
-  return 0;
 }
 
 extern int shell_function_pid, shell_function_completed;
@@ -649,7 +647,7 @@ start_waiting_job (c)
   start_job (c);
   switch (c->file->command_state)
     {
-    case cs_not_running:
+    case cs_not_started:
       /* The child is waiting to run.
 	 It has already been put on the `waiting_jobs' chain.  */
       break;
@@ -668,12 +666,12 @@ start_waiting_job (c)
 
     case cs_finished:
       free_child (c);
-      notice_finished_file (file);
+      notice_finished_file (c->file);
       break;
 
     default:
       error ("internal error: `%s' command_state == %d in new_job",
-	     file->name, (int) file->command_state);
+	     c->file->name, (int) c->file->command_state);
       abort ();
       break;
     }
