@@ -1,3 +1,38 @@
+2000-01-11  Paul D. Smith  <psmith@gnu.org>
+
+	Resolve PR/xxxx: don't automatically evaluate the $(call ...)
+	function's arguments.  While we're here, clean up argument passing
+	protocol to always use simple nul-terminated strings, instead of
+	sometimes using offset pointers to mark the end of arguments.
+	This change also fixes PR/1517.
+	Both PR's by Damien GIBOU <damien.gibou@st.com>.
+
+	* function.c (struct function_table_entry): Remove the negative
+	required_args hack; put in explicit min and max # of arguments.
+	(function_table): Add in the max value.  Turn off the expand bit
+	for func_call.
+	(expand_builtin_function): Test against minimum_args instead of
+	the obsolete required_args.
+	(handle_function): Rewrite this.  We don't try to be fancy and
+	pass one style of arguments to expanded functions and another
+	style to non-expanded functions: pass pointers to nul-terminated
+	strings to all functions.
+	(func_call): Rewrite this.  If we are invoking a builtin function
+	and it's supposed to have its arguments expanded, do that (since
+	it's not done by handle_function for $(call ...) anymore).  For
+	non-builtins, just add the variables as before but mark them as
+	recursive so they'll be expanded later, as needed.
+	(func_if): All arguments are vanilla nul-terminated strings:
+	remove trickery with "argv[1]-1".
+	(func_foreach): Ditto.
+
+	* expand.c (expand_argument): If the second arg is NULL, expand
+	the entire first argument.
+
+	* job.c (new_job): Zero the child struct.  This change was just
+	made to keep some heap checking software happy, not because there
+	was an actual bug (the important memory was being cleared properly).
+
 1999-12-15  Paul D. Smith  <psmith@gnu.org>
 
 	* variable.c (print_variable): Print the variable with += if the
@@ -12,7 +47,7 @@
 
 	* dir.c (dir_setup_glob): On 64 bit ReliantUNIX (5.44 and above)
 	in LFS mode, stat() is actually a macro for stat64().  Assignment
-	doesn't work in that case.  So, if stat() is a macro, make a local
+	doesn't work in that case.  So, stat is a macro, make a local
 	wrapper function to invoke it.
 	(local_stat): Wrapper function, if needed.
 	Reported by Andrej Borsenkow <Andrej.Borsenkow@mow.siemens.ru>.

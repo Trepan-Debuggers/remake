@@ -9,7 +9,7 @@ open(MAKEFILE, "> $makefile");
 # The Contents of the MAKEFILE ...
 
 print MAKEFILE <<'EOMAKE';
-# Simple, just reverse something
+# Simple, just reverse two things
 #
 reverse = $2 $1
 
@@ -21,9 +21,19 @@ map = $(foreach a,$2,$(call $1,$a))
 #
 my-notdir = $(call notdir,$(1))
 
+# Test using non-expanded builtins
+#
+my-foreach = $(foreach $(1),$(2),$(3))
+my-if      = $(if $(1),$(2),$(3))
+
 all: ; @echo '$(call reverse,bar,foo)'; \
         echo '$(call map,origin,MAKE reverse map)'; \
-        echo '$(call my-notdir,a/b   c/d      e/f)'
+        echo '$(call my-notdir,a/b   c/d      e/f)'; \
+        echo '$(call my-foreach)'; \
+        echo '$(call my-foreach,a,,,)'; \
+        echo '$(call my-foreach,a,x y z,$(a)$(a))'; \
+        echo '$(call my-if,a,b,c)'; \
+        echo '$(call my-if,,$(warning don't print this),ok)'
 
 EOMAKE
 
@@ -32,7 +42,7 @@ EOMAKE
 close(MAKEFILE);
 
 &run_make_with_options($makefile, "", &get_logfile);
-$answer = "foo bar\ndefault file file\nb d f\n";
+$answer = "foo bar\ndefault file file\nb d f\n\n\nxx yy zz\nb\nok\n";
 &compare_output($answer, &get_logfile(1));
 
 1;

@@ -424,7 +424,7 @@ expand_argument (str, end)
 {
   char *tmp;
 
-  if (*end == '\0')
+  if (!end || *end == '\0')
     tmp = str;
   else
     {

@@ -1341,11 +1341,9 @@ new_job (file)
      `struct child', and add that to the chain.  */
 
   c = (struct child *) xmalloc (sizeof (struct child));
+  bzero ((char *)c, sizeof (struct child));
   c->file = file;
   c->command_lines = lines;
-  c->command_line = 0;
-  c->command_ptr = 0;
-  c->environment = 0;
   c->sh_batch_file = NULL;
 
   /* Fetch the first command line to be run.  */
