@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 # -*-perl-*-
 
 # Modification history:
@@ -12,7 +12,7 @@
 # this routine controls the whole mess; each test suite sets up a few
 # variables and then calls &toplevel, which does all the real work.
 
-# $Id: test_driver.pl,v 1.3 2004/06/12 08:53:19 rockyb Exp $
+# $Id: test_driver.pl,v 1.4 2004/10/17 16:08:24 rockyb Exp $
 
 
 # The number of test categories we've run
@@ -385,6 +385,7 @@ sub run_each_test
     $num_of_tmpfiles = 0;
     $description = "";
     $details = "";
+    $old_makefile = undef;
     $testname =~ s/^$scriptpath$pathsep//;
     $perl_testname = "$scriptpath$pathsep$testname";
     $testname =~ s/(\.pl|\.perl)$//;

@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/env perl
 # -*-perl-*-
 
 # Test driver for the Make test suite
@@ -51,35 +51,54 @@ sub valid_option
 
 # This is an "all-in-one" function.  Arguments are as follows:
 #
-#  [0] (string):  The makefile to be tested.
+#  [0] (string):  The makefile to be tested.  undef means use the last one.
 #  [1] (string):  Arguments to pass to make.
 #  [2] (string):  Answer we should get back.
 #  [3] (integer): Exit code we expect.  A missing code means 0 (success)
+
+$old_makefile = undef;
 
 sub run_make_test
 {
   local ($makestring, $options, $answer, $err_code) = @_;
 
-  if (! defined($makefile)) {
-    $makefile = &get_tmpfile();
+  # If the user specified a makefile string, create a new makefile to contain
+  # it.  If the first value is not defined, use the last one (if there is
+  # one).
+
+  if (! defined $makestring) {
+    defined $old_makefile
+      || die "run_make_test(undef) invoked before run_make_test('...')\n";
+    $makefile = $old_makefile;
+  } else {
+    if (! defined($makefile)) {
+      $makefile = &get_tmpfile();
+    }
+
+    # Make sure it ends in a newline.
+    $makestring && $makestring !~ /\n$/s and $makestring .= "\n";
+
+    # Replace @MAKEFILE@ with the makefile name and @MAKE@ with the path to
+    # make
+    $makestring =~ s/#MAKEFILE#/$makefile/g;
+    $makestring =~ s/#MAKE#/$make_name/g;
+
+    # Populate the makefile!
+    open(MAKEFILE, "> $makefile") || die "Failed to open $makefile: $!\n";
+    print MAKEFILE $makestring;
+    close(MAKEFILE) || die "Failed to write $makefile: $!\n";
   }
 
-  # Replace @MAKEFILE@ with the makefile name and @MAKE@ with the path to
-  # make in both $makestring and $answer.
+  # Do the same processing on $answer as we did on $makestring.
 
-  $makestring =~ s/#MAKEFILE#/$makefile/g;
-  $makestring =~ s/#MAKE#/$make_name/g;
-
+  $answer && $answer !~ /\n$/s and $answer .= "\n";
   $answer =~ s/#MAKEFILE#/$makefile/g;
   $answer =~ s/#MAKE#/$make_name/g;
-
-  open(MAKEFILE, "> $makefile") || die "Failed to open $makefile: $!\n";
-  print MAKEFILE $makestring, "\n";
-  close(MAKEFILE) || die "Failed to write $makefile: $!\n";
 
   &run_make_with_options($makefile, $options, &get_logfile(0), $err_code);
   &compare_output($answer, &get_logfile(1));
 
+  $old_makefile = $makefile;
   $makefile = undef;
 }
 
