@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.132 1994/04/21 01:35:11 roland Exp $
+@set RCSID $Id: make.texinfo,v 2.133 1994/04/21 02:33:10 roland Exp $
 @set EDITION 0.45
 @set VERSION 3.71 Beta
 @set UPDATED 20 April 1994
@@ -5514,6 +5514,19 @@ find out which files are out of date without changing them.
 By giving arguments when you run @code{make}, you can do any of these
 things and many others.
 
+The exit status of @code{make} is always one of three values:
+@table @code
+@item 0
+The exit status is zero if @code{make} is successful.
+@item 2
+The exit status is two if @code{make} encounters any errors.
+It will print messages describing the particular errors.
+@item 1
+The exit status is one if you use the @samp{-q} flag and @code{make}
+determines that some target is not already up to date.
+@xref{Instead of Execution, ,Instead of Executing the Commands}.
+@end table
+
 @menu
 * Makefile Arguments::          How to specify which makefile to use.
 * Goals::                       How to use goal arguments to specify which 
@@ -5734,7 +5747,10 @@ the program @code{touch}.  It does the work directly.
 
 With the @samp{-q} flag, @code{make} prints nothing and executes no
 commands, but the exit status code it returns is zero if and only if the
-targets to be considered are already up to date.
+targets to be considered are already up to date.  If the exit status is
+one, then some updating needs to be done.  If @code{make} encounters an
+error, the exit status is two, so you can distinguish an error from a
+target that is not up to date.
 
 It is an error to use more than one of these three flags in the same
 invocation of @code{make}.
@@ -6064,8 +6080,9 @@ trying to remake any files, use @w{@samp{make -p -f /dev/null}}.
 @cindex @code{--question}
 ``Question mode''.  Do not run any commands, or print anything; just
 return an exit status that is zero if the specified targets are already
-up to date, nonzero otherwise.  @xref{Instead of Execution, ,Instead of
-Executing the Commands}.@refill
+up to date, one if any remaking is required, or two if an error is
+encountered.  @xref{Instead of Execution, ,Instead of Executing the
+Commands}.@refill
 
 @item -r
 @cindex @code{-r}
