@@ -3,10 +3,16 @@
 @synindex vr fn
 
 @ignore
-$Header: /sources/make/make/Attic/make.texinfo,v 1.4 1988/04/23 18:28:02 roland Beta $
+$Header: /sources/make/make/Attic/make.texinfo,v 1.5 1988/04/23 22:01:48 roland Beta $
 
 $Log: make.texinfo,v $
-Revision 1.4  1988/04/23 18:28:02  roland
+Revision 1.5  1988/04/23 22:01:48  roland
+* Added paragraph about reporting bugs.
+* Documented -v (print version info) flag.
+* Corrected a couple typos (probably made a couple more :-).
+* Given to RMS for beta-testing.
+
+Revision 1.4  88/04/23  18:28:02  roland
 * Changed RCS stuff slightly (added a keyword).
 * Changed date from February to April, 1988.
 * Given to RMS for beta-testing.
@@ -101,6 +107,13 @@ recompile them.  This manual describes the GNU implementation of
 @code{make}.
 
 GNU @code{make} was implemented by Richard Stallman and Roland McGrath.
+If you have problems with @code{make} or think you've found a bug,
+please report it to Roland McGrath; he will probably do something about
+it.  Please include the version of @code{make} you are using (the command
+@code{make -v -f /dev/null} will tell you this) and a small makefile that
+reproduces the bug.  Send electronic mail to Internet address
+@samp{roland@rtsg.lbl.gov} or @samp{roland@wheaties.ai.mit.edu}.
+Questions and suggestions are also welcome.@refill
 
 Our examples show C programs, since they are most common, but you can use
 @code{make} with any programming language whose compiler can be run with a
@@ -1536,11 +1549,11 @@ directory as it is entered and exited.  For example, if @code{make -w} is
 run in the directory @file{/u/gnu/make}, @code{make} will print a line of
 the form
 @example
-#### Entering /u/gnu/make ####
+make: Entering directory `/u/gnu/make'.
 @end example
 before doing anything else, and a line of the form
 @example
-#### Exiting /u/gnu/make ####
+make: Leaving directory `/u/gnu/make'.
 @end example
 after finishing with the makefile.
 
@@ -2776,10 +2789,17 @@ targets to be considered are already up to date.
 It is an error to use more than one of these three flags in the same
 invocation of @code{make}.
 
+If you are not at all interested in what @code{make} @emph{would} do,
+but rather in some other information about @code{make}, there are two
+are options: the command line @code{make -p -f /dev/null} will print the
+information in @code{make}'s database of variables, rules, directories
+and files and @code{make -v -f /dev/null} will print information about
+what version of GNU @code{make} you are using.  @xref{Options}.@refill
+
 @node Overriding, Testing, Instead of Execution, Running
 @section Overriding Variables
 
-You can override the value of a variable using an arguments to @code{make}
+You can override the value of a variable using an argument to @code{make}
 that contains a @samp{=}.  The argument @samp{@var{v}=@var{x}} (or
 @samp{@var{v}:=@var{x}}; @pxref{Flavors}) sets the value of the variable
 @var{v} to @var{x}.
@@ -2925,7 +2945,9 @@ are ignored.  @xref{Avoid Compilation}.
 @item -p
 Print the data base (rules and variable values) that results from
 reading the makefiles; then execute as usual or as otherwise
-specified.
+specified.  This also prints the version information given by
+the @samp{-v} switch (see below).  To print the data base without
+trying to remake any files, use @code{make -p -f /dev/null}.
 
 @item -q
 ``Question mode''.  Do not run any commands, or print anything; just
@@ -2944,7 +2966,8 @@ Silent operation; do not print the commands as they are executed.
 @item -S
 Cancel the effect of the @samp{-k} option.  This is never necessary
 except in a recursive @code{make} where @samp{-k} might be inherited
-from the top-level @code{make} via @code{MAKEFLAGS}.  @xref{Recursion}.
+from the top-level @code{make} via @code{MAKEFLAGS} (@pxref{Recursion})
+or if you set @samp{-k} in @code{MAKEFLAGS} in your environment.@refill
 
 @item -t
 Touch files (mark them up to date without really changing them)
@@ -2952,11 +2975,16 @@ instead of running their commands.  This is used to pretend (to fool
 future invocations of @code{make}) that the commands were done.
 @xref{Instead of Execution}.
 
+@item -v
+Print the version of the @code{make} program plus a copyright,
+list of authors and notice of (non)warranty (short).
+After this information is printed, processing continues normally.
+To get just the version information, use @code{make -v -f /dev/null}.
+
 @item -w
 Print a message containing the working directory both before and after
 executing the makefile; this is useful for tracking down errors from builds
-of large directory trees.
-@xref{Recursion}.
+of large directory trees.  @xref{Recursion}.
 @end table
 
 @node Implicit, Archives, Running, Top
