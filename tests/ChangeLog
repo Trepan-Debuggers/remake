@@ -1,3 +1,8 @@
+2004-09-28  Boris Kolpackov  <boris@kolpackov.net>
+
+	* scripts/features/include: Test dontcare flag inheritance
+	when rebuilding makefiles.
+
 2004-09-27  Boris Kolpackov  <boris@kolpackov.net>
 
 	* scripts/features/patspecific_vars: Test exported variables.

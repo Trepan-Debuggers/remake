@@ -16,7 +16,7 @@ open(MAKEFILE,"> $makefile");
 
 print MAKEFILE <<EOF;
 \#Extra space at the end of the following file name
-include $makefile2                  
+include $makefile2
 all: ; \@echo There should be no errors for this makefile.
 
 -include nonexistent.mk
@@ -78,5 +78,15 @@ hello: ; @echo hello
    "hello\n"
   );
 
+# Test inheritance of dontcare flag when rebuilding makefiles.
+#
+run_make_test('
+.PHONY: all
+all: ; @:
+
+-include foo
+
+foo: bar; @:
+', '', '');
 
 1;

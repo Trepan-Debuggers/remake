@@ -468,6 +468,7 @@ update_file_1 (struct file *file, unsigned int depth)
     {
       FILE_TIMESTAMP mtime;
       int maybe_make;
+      int dontcare = 0;
 
       check_renamed (d->file);
 
@@ -491,7 +492,21 @@ update_file_1 (struct file *file, unsigned int depth)
 
       d->file->parent = file;
       maybe_make = must_make;
+
+      /* Inherit dontcare flag from our parent. */
+      if (rebuilding_makefiles)
+        {
+          dontcare = d->file->dontcare;
+          d->file->dontcare = file->dontcare;
+        }
+
+
       dep_status |= check_dep (d->file, depth, this_mtime, &maybe_make);
+
+      /* Restore original dontcare flag. */
+      if (rebuilding_makefiles)
+        d->file->dontcare = dontcare;
+
       if (! d->ignore_mtime)
         must_make = maybe_make;
 
@@ -528,10 +543,26 @@ update_file_1 (struct file *file, unsigned int depth)
       for (d = file->deps; d != 0; d = d->next)
 	if (d->file->intermediate)
 	  {
+            int dontcare = 0;
+
 	    FILE_TIMESTAMP mtime = file_mtime (d->file);
 	    check_renamed (d->file);
 	    d->file->parent = file;
+
+            /* Inherit dontcare flag from our parent. */
+            if (rebuilding_makefiles)
+              {
+                dontcare = d->file->dontcare;
+                d->file->dontcare = file->dontcare;
+              }
+
+
 	    dep_status |= update_file (d->file, depth);
+
+            /* Restore original dontcare flag. */
+            if (rebuilding_makefiles)
+              d->file->dontcare = dontcare;
+
 	    check_renamed (d->file);
 
 	    {
