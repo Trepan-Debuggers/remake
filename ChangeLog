@@ -1,3 +1,9 @@
+Thu Dec 14 06:21:29 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* Version 3.74.2.
+
+	* job.c (reap_children): Call unblock_sigs after start_job_command.
+
 Thu Dec 14 07:22:03 1995  Roland McGrath  <roland@duality.gnu.ai.mit.edu>
 
 	* dir.c (dir_setup_glob): Don't use lstat; glob never calls it anyway.
