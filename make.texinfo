@@ -20,7 +20,7 @@
 
 @tex
 % trying for a two-level index
-\def\doindex#1{\message{FNORD!!!}\edef\indexname{#1}\parsearg\singleindexer}
+\def\doindex#1{\message{FNORD!}\edef\indexname{#1}\parsearg\singleindexer}
 \def\singleindexer #1{\message{frobozzing :{#1}:}\message{}\frobozz{#1}}
 \def\frobozz[#1,#2]{\message{frobozzed :{#1}:{#2}:}\message{}\dosubind{\indexname}{#1}{#2}}
 
@@ -7199,15 +7199,7 @@ named @file{foo.o}.  In connection with such usage, the automatic variables
 * Archive Symbols::             How to update archive symbol directories.
 @end menu
 
-@node Archive Suffix Rules
-@subsection Suffix Rules for Archive Files
-@cindex suffix rule, for archive
-@cindex archive, suffix rule
-@cindex @code{.a} (archives)
-
-!!!
-
-@node Archive Symbols,  ,  , Archive Update
+@node Archive Symbols, Archive Suffix Rules,  , Archive Update
 @subsection Updating Archive Symbol Directories
 @cindex @code{__.SYMDEF}
 @cindex updating archive symbol directories
@@ -7243,6 +7235,51 @@ files into the archive, as described in the preceding section.
 
 This is not necessary when using the GNU @code{ar} program, which
 updates the @file{__.SYMDEF} member automatically.
+
+@node Archive Suffix Rules, , Archive Update, Archives
+@subsection Suffix Rules for Archive Files
+@cindex suffix rule, for archive
+@cindex archive, suffix rule for
+@cindex library archive, suffix rule for
+@cindex @code{.a} (archives)
+
+You can write a special kind of suffix rule for dealing with archive
+files.  @xref{Suffix Rules}, for a full explanation of suffix rules.
+Archive suffix rules are obsolete in GNU @code{make}, because pattern
+rules for archives are a more general mechanism (@pxref{Archive
+Update}).  But they are retained for compatibility with other
+@code{make}s.
+
+To write a suffix rule for archives, you simply write a suffix rule
+using the target suffix @samp{.a} (the usual suffix for archive files).
+For example, here is the old-fashioned suffix rule to update a library
+archive from C source files:
+
+@example
+@group
+.c.a:
+        $(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $*.o
+        $(AR) r $@@ $*.o
+        $(RM) $*.o
+@end group
+@end example
+
+@noindent
+This works just as if you had written the pattern rule:
+
+@example
+@group
+(%.o): %.c
+        $(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $*.o
+        $(AR) r $@@ $*.o
+        $(RM) $*.o
+@end group
+@end example
+
+In fact, this is just what @code{make} does when it sees a suffix rule
+with @samp{.a} as the target suffix.  Any double-suffix rule
+@w{@samp{.@var{x}.a}} is converted to a pattern rule with the target
+pattern @samp{(%.o)} and a dependency pattern of @samp{%.@var{x}}.
 
 @node Features, Missing, Archives, Top
 @chapter Features of GNU @code{make}
@@ -7303,12 +7340,12 @@ Execution of recursive commands to run @code{make} via the variable
 @code{MAKE} even if @samp{-n}, @samp{-q} or @samp{-t} is specified.
 @xref{Recursion, ,Recursive Use of @code{make}}.
 
-@c !!! what about the kludge for this???
 @item
-Support for suffix @samp{.a} in suffix rules.  In GNU @code{make},
-this is actually implemented by chaining with one pattern rule for
-installing members in an archive.
-@xref{Chained Rules, ,Chains of Implicit Rules}.@refill
+Support for suffix @samp{.a} in suffix rules.  @xref{Archive Suffix
+Rules}.  This feature is obsolete in GNU @code{make}, because the
+general feature of rule chaining (@pxref{Chained Rules, ,Chains of
+Implicit Rules}) allows one pattern rule for installing members in an
+archive (@pxref{Archive Update}) to be sufficient.
 
 @item
 The arrangement of lines and backslash-newline combinations in
