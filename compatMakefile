@@ -144,7 +144,7 @@ srcs = $(srcdir)/commands.c $(srcdir)/job.c $(srcdir)/dir.c		\
 all: make
 info: make.info
 dvi: make.dvi
-# Some makes apparently use .PHONY as the default goal is it is before `all'.
+# Some makes apparently use .PHONY as the default goal if it is before `all'.
 .PHONY: all check info dvi
 
 make.info: make.texinfo
