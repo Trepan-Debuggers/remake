@@ -3,57 +3,18 @@
 @setfilename make.info
 @settitle GNU @code{make}
 @setchapternewpage odd
-@smallbook
 @c %**end of header
+
+@c For publication, format makebook.texi instead of using this file directly.
 
 @set EDITION 0.41
 @set VERSION 3.64 Beta
-@set UPDATED 11 April 1993
+@set UPDATED 12 April 1993
 @set UPDATE-MONTH April 1993
 
 @c finalout
 
 @c ISPELL CHECK: done, 14 Jan 1993 --bob
-
-@comment @ifset seems to be completely broken.
-@ignore
-@tex
-\message{If you do not have the two-level texindex program, you will lose.}
-% trying for a two-level index
-% You need the rewritten texindex program for this to work.
-
-\gdef\singleindexerfoo#1, #2\par{%
-% Use a box register to test if #2 is empty.
-\setbox0=\hbox{#2}%
-\ifvoid0{%                      % A one-level entry.
-\doind{\indexname}{#1}}\else{%  % A two-level entry.
-\dosubind{\indexname}{#1}{#2}%
-}\fi}
-\gdef\singleindexer#1{\singleindexerfoo#1, \par}
-
-% This version writes two sort strings.
-\gdef\dosubind #1#2#3{%
-{\count10=\lastpenalty%
-{\indexdummies% Must do this here, since \bf, etc expand at this stage
-\escapechar=`\\%
-{\let\folio=0%
-\def\rawbackslashxx{\indexbackslash}%
-%
-% Now process the index-string once, with all font commands turned off,
-% to get the string to sort the index by.
-{\indexnofonts%
-\xdef\tempa{#2}%
-\xdef\tempb{#3}%
-}%
-% Now produce the complete index entry.  We process the index-string again,
-% this time with font commands expanded, to get what to print in the index.
-\edef\temp{%
-\write \csname#1indfile\endcsname{%
-\realbackslash entry {\tempa}{\folio}{#2}{#3}{\tempb}}}%
-\temp}%
-}\penalty\count10}}
-@end tex
-@end ignore
 
 @c Combine the variable and function indices:
 @syncodeindex vr fn
@@ -95,11 +56,9 @@ entitled ``GNU General Public License'' must be approved for accuracy
 by the Foundation.
 @end ifinfo
 
-@ignore
-@ifset shorttitlepage
+@iftex
 @shorttitlepage GNU Make
-@end ifset
-@end ignore
+@end iftex
 @titlepage
 @title GNU Make
 @subtitle A Program for Directing Recompilation
@@ -3069,9 +3028,9 @@ the above example, its value is @samp{CFLAGS=-O}.  If you @emph{do not}
 want these variable definitions done in all recursive @code{make}
 invocations, you can redefine the @code{MAKEOVERRIDES} variable to
 remove them.  You do this in any of the normal ways for defining
-variables: in a makefile (@pxref{Setting Variables}); on the command
+variables: in a makefile (@pxref{Setting, ,Setting Variables}); on the command
 line with an argument like @samp{MAKEOVERRIDES=} 
-(@pxref{Overriding Variables}); or with an environment variable
+(@pxref{Overriding, ,Overriding Variables}); or with an environment variable
 (@pxref{Environment, ,Variables from the Environment}).
 
 As a special feature, using the variable @code{MAKE} in the commands of
@@ -3525,6 +3484,8 @@ command options (@pxref{Overriding, ,Overriding Variables}).
 * Advanced::                    Advanced features for referencing a variable.
 * Values::                      All the ways variables get their values.
 * Setting::                     How to set a variable in the makefile.
+* Appending::                   How to append more text to the old value
+                                  of a variable.
 * Override Directive::          How to set a variable in the makefile even if
                                   the user has set it with a command argument.
 * Defining::                    An alternate way to set a variable 
@@ -3869,8 +3830,10 @@ defines @code{a} as @samp{Hello}: @samp{$($(x))} becomes @samp{$($(y))}
 which becomes @samp{$(z)} which becomes @samp{Hello}.
 
 Nested variable references can also contain modified references and
-function invocations (@pxref{Functions, ,Functions for Transforming Text}), just like any other reference.
-For example, using the @code{subst} function (@pxref{Text Functions, ,Functions for String Substitution and Analysis}):
+function invocations (@pxref{Functions, ,Functions for Transforming Text}),
+just like any other reference.
+For example, using the @code{subst} function 
+(@pxref{Text Functions, ,Functions for String Substitution and Analysis}):
 
 @example
 @group
@@ -4026,9 +3989,10 @@ Several variables have constant initial values.
 @xref{Implicit Variables, ,Variables Used by Implicit Rules}.
 @end itemize
 
-@node Setting, Override Directive, Values, Using Variables
+@node Setting, Appending, Values, Using Variables
 @section Setting Variables
 @cindex setting variables
+@cindex variables, setting
 @cindex =
 @cindex :=
 
@@ -4067,13 +4031,140 @@ Several special variables are set
 automatically to a new value for each rule; these are called the
 @dfn{automatic} variables (@pxref{Automatic, ,Automatic Variables}).
 
-@node Override Directive, Defining, Setting, Using Variables
+@node Appending, Override Directive, Setting, Using Variables
+@section Appending More Text to Variables
+@cindex +=
+@cindex appending to variables
+@cindex variables, appending to
+
+Often it is useful to add more text to the value of a variable already defined.
+You do this with a line containing @samp{+=}, like this:
+
+@example
+objects += another.o
+@end example
+
+@noindent
+This takes the value of the variable @code{objects}, and adds the text
+@samp{another.o} to it (preceded by a single space).  Thus:
+
+@example
+objects = main.o foo.o bar.o utils.o
+objects += another.o
+@end example
+
+@noindent
+sets @code{objects} to @samp{main.o foo.o bar.o utils.o another.o}.
+
+Using @samp{+=} is similar to:
+
+@example
+objects = main.o foo.o bar.o utils.o
+objects := $(objects) another.o
+@end example
+
+@noindent
+but differs in ways that become important when you use more complex values.
+
+When the variable in question has not been defined before, @samp{+=}
+acts just like normal @samp{=}: it defines a recursively-expanded
+variable.  However, when there @emph{is} a previous definition, exactly
+what @samp{+=} does depends on what flavor of variable you defined
+originally.  @xref{Flavors, ,The Two Flavors of Variables}, for an
+explanation of the two flavors of variables.
+
+When you add to a variable's value with @samp{+=}, @code{make} acts
+essentially as if you had included the extra text in the initial
+definition of the variable.  If you defined it first with @samp{:=},
+making it a simply-expanded variable, @samp{+=} adds to that
+simply-expanded definition, and expands the new text before appending it
+to the old value just as @samp{:=} does
+(@pxref{Setting, ,Setting Variables}, for a full explanation of @samp{:=}).
+In fact,
+
+@example
+variable := value
+variable += more
+@end example
+
+@noindent
+is exactly equivalent to:
+
+@noindent
+@example
+variable := value
+variable := $(variable) more
+@end example
+
+On the other hand, when you use @samp{+=} with a variable that you defined
+first to be recursively-expanded using plain @samp{=}, @code{make} does
+something a bit different.  Recall that when you define a
+recursively-expanded variable, @code{make} does not expand the value you set
+for variable and function references immediately.  Instead it stores the text
+verbatim, and saves these variable and function references to be expanded
+later, when you refer to the new variable (@pxref{Flavors, ,The Two Flavors
+of Variables}).  When you use @samp{+=} on a recursively-expanded variable,
+it is this unexpanded text to which @code{make} appends the new text you
+specify.
+
+@example
+variable = value
+variable += more
+@end example
+
+@noindent
+is roughly equivalent to:
+
+@example
+temp = value
+variable = $(temp) more
+@end example
+
+@noindent
+except that of course it never defines a variable called @code{temp}.
+The importance of this comes when the variable's old value contains
+variable references.  Take this common example:
+
+@example
+CFLAGS = $(includes) -O
+@dots{}
+CFLAGS += -pg # enable profiling
+@end example
+
+@noindent
+The first line defines the @code{CFLAGS} variable with a reference to another
+variable, @code{includes}.  (@code{CFLAGS} is used by the rules for C
+compilation; @pxref{Catalogue of Rules, ,Catalogue of Implicit Rules}.)
+Using @samp{=} for the definition makes @code{CFLAGS} a recursively-expanded
+variable, meaning @w{@samp{$(includes) -O}} is @emph{not} expanded when
+@code{make} processes the definition of @code{CFLAGS}.  Thus, @code{includes}
+need not be defined yet for its value to take effect.  It only has to be
+defined before any reference to @code{CFLAGS}.  If we tried to append to the
+value of @code{CFLAGS} without using @samp{+=}, we might do it like this:
+
+@example
+CFLAGS := $(CFLAGS) -pg # enable profiling
+@end example
+
+@noindent
+This is close, but not quite what we want.  Using @samp{:=} redefines
+@code{CFLAGS} as a simply-expanded variable; this means @code{make} expands
+the text @w{@samp{$(CFLAGS) -pg}} before setting the variable.  If
+@code{includes} is not yet defined, we get @w{@samp{ -O -pg}}, and a later
+definition of @code{includes} will have no effect.  Conversely, by using
+@samp{+=} we set @code{CFLAGS} to the @emph{unexpanded} value
+@w{@samp{$(includes) -O -pg}}.  Thus we preserve the reference to
+@code{includes}, so if that variable gets defined at any later point, a
+reference like @samp{$(CFLAGS)} still uses its value.
+
+@node Override Directive, Defining, Appending, Using Variables
 @section The @code{override} Directive
 @findex override
 @cindex overriding with @code{override}
-@cindex variable, overriding
+@cindex variables, overriding
 
-If a variable has been set with a command argument (@pxref{Overriding, ,Overriding Variables}),
+If a variable has been set with a command argument 
+(@pxref{Overriding, ,Overriding Variables}),
 then ordinary assignments in the makefile are ignored.  If you want to set
 the variable in the makefile even though it was set with a command
 argument, you can use an @code{override} directive, which is a line that
@@ -4083,6 +4174,7 @@ looks like this:@refill
 override @var{variable} = @var{value}
 @end example
 
+@noindent
 or
 
 @example
@@ -4125,7 +4217,7 @@ See the next section for information about @code{define}.
 @findex endef
 @cindex verbatim variable definition
 @cindex defining variables verbatim
-@cindex variable, defining verbatim
+@cindex variables, defining verbatim
 
 Another way to set the value of a variable is to use the @code{define}
 directive.  This directive has an unusual syntax which allows newline
@@ -4182,7 +4274,7 @@ endef
 @node Environment,  , Defining, Using Variables
 @section Variables from the Environment
 
-@cindex variable, environment
+@cindex variables, environment
 @cindex environment
 Variables in @code{make} can come from the environment in which
 @code{make} is run.  Every environment variable that @code{make} sees when
@@ -5136,7 +5228,7 @@ no?), but it is more likely to be a mistake.
 @node Origin Function, Shell Function, Foreach Function, Functions
 @section The @code{origin} Function
 @findex origin
-@cindex variable, origin of
+@cindex variables, origin of
 @cindex origin of variable
 
 The @code{origin} function is unlike most other functions in that it does
@@ -5609,9 +5701,9 @@ Touch all the object files with @samp{make -t}.
 @node Overriding, Testing, Avoiding Compilation, Running
 @section Overriding Variables
 @cindex overriding variables with arguments
-@cindex variable, overriding with arguments
+@cindex variables, overriding with arguments
 @cindex command line variables
-@cindex variable, command line
+@cindex variables, command line
 
 An argument that contains @samp{=} specifies the value of a variable:
 @samp{@var{v}=@var{x}} sets the value of the variable @var{v} to @var{x}.
@@ -6092,35 +6184,38 @@ available unless the makefile explicitly overrides or cancels them.
 canceling or overriding an implicit rule.  The @samp{-r} or
 @samp{--no-builtin-rules} option cancels all predefined rules.
 
-Not all of these rules will always be defined, even when the @samp{-r}
-option is not given.  Many of the predefined implicit rules are
-implemented in @code{make} as suffix rules, so which ones will be
-defined depends on the @dfn{suffix list} (the list of dependencies of
-the special target @code{.SUFFIXES}).  The default suffix list is:
-@code{.out}, @code{.a}, @code{.ln}, @code{.o}, @code{.c}, @code{.cc},
-@code{.C}, @code{.p}, @code{.f}, @code{.F}, @code{.r}, @code{.y},
-@code{.l}, @code{.s}, @code{.S}, @code{.mod}, @code{.sym},
-@code{.def}, @code{.h}, @code{.info}, @code{.dvi}, @code{.tex},
-@code{.texinfo}, @code{.texi}, @code{.cweb}, @code{.web}, @code{.sh},
-@code{.elc}, @code{.el}.  All of the implicit rules described below
-whose dependencies have one of these suffixes are actually suffix
-rules.  If you modify the suffix list, the only predefined suffix
-rules in effect will be those named by one or two of the suffixes that
-are on the list you specify; rules whose suffixes fail to be on the
-list are disabled.  @xref{Suffix Rules, ,Old-Fashioned Suffix Rules},
-for full details on suffix rules.
+Not all of these rules will always be defined, even when the @samp{-r} option
+is not given.  Many of the predefined implicit rules are implemented in
+@code{make} as suffix rules, so which ones will be defined depends on the
+@dfn{suffix list} (the list of dependencies of the special target
+@code{.SUFFIXES}).  The default suffix list is: @code{.out}, @code{.a},
+@code{.ln}, @code{.o}, @code{.c}, @code{.cc}, @code{.C}, @code{.p},
+@code{.f}, @code{.F}, @code{.r}, @code{.y}, @code{.l}, @code{.s}, @code{.S},
+@code{.mod}, @code{.sym}, @code{.def}, @code{.h}, @code{.info}, @code{.dvi},
+@code{.tex}, @code{.texinfo}, @code{.texi}, @code{.txinfo}, @code{.cweb},
+@code{.web}, @code{.sh}, @code{.elc}, @code{.el}.  All of the implicit rules
+described below whose dependencies have one of these suffixes are actually
+suffix rules.  If you modify the suffix list, the only predefined suffix
+rules in effect will be those named by one or two of the suffixes that are on
+the list you specify; rules whose suffixes fail to be on the list are
+disabled.  @xref{Suffix Rules, ,Old-Fashioned Suffix Rules}, for full details
+on suffix rules.
 
 @table @asis
 @item Compiling C programs
 @cindex C, rule to compile
 @pindex cc
 @pindex gcc
+@pindex .o
+@pindex .c
 @file{@var{n}.o} is made automatically from @file{@var{n}.c} with
 a command of the form @samp{$(CC) -c $(CPPFLAGS) $(CFLAGS)}.@refill
 
 @item Compiling C++ programs
 @cindex C++, rule to compile
 @pindex g++
+@pindex .C
+@pindex .cc
 @file{@var{n}.o} is made automatically from @file{@var{n}.cc} or
 @file{@var{n}.C} with a command of the form @samp{$(CXX) -c $(CPPFLAGS)
 $(CXXFLAGS)}.  We encourage you to use the suffix @samp{.cc} for C++
@@ -6129,6 +6224,7 @@ source files instead of @samp{.C}.@refill
 @item Compiling Pascal programs
 @cindex Pascal, rule to compile
 @pindex pc
+@pindex .p
 @file{@var{n}.o} is made automatically from @file{@var{n}.p}
 with the command @samp{$(PC) -c $(PFLAGS)}.@refill
 
@@ -6136,6 +6232,9 @@ with the command @samp{$(PC) -c $(PFLAGS)}.@refill
 @cindex Fortran, rule to compile
 @cindex Ratfor, rule to compile
 @pindex f77
+@pindex .f
+@pindex .r
+@pindex .F
 @file{@var{n}.o} is made automatically from @file{@var{n}.r},
 @file{@var{n}.F} or @file{@var{n}.f} by running the
 Fortran compiler.  The precise command used is as follows:@refill
@@ -6165,6 +6264,9 @@ program.  The precise command used is as follows:@refill
 @item Compiling Modula-2 programs
 @cindex Modula-2, rule to compile
 @pindex m2c
+@pindex .sym
+@pindex .def
+@pindex .mod
 @file{@var{n}.sym} is made from @file{@var{n}.def} with a command
 of the form @samp{$(M2C) $(M2FLAGS) $(DEFFLAGS)}.  @file{@var{n}.o}
 is made from @file{@var{n}.mod}; the form is:
@@ -6174,10 +6276,12 @@ is made from @file{@var{n}.mod}; the form is:
 @item Assembling and preprocessing assembler programs
 @cindex assembly, rule to compile
 @pindex as
+@pindex .s
 @file{@var{n}.o} is made automatically from @file{@var{n}.s} by
 running the assembler, @code{as}.  The precise command is
 @samp{$(AS) $(ASFLAGS)}.@refill
 
+@pindex .S
 @file{@var{n}.s} is made automatically from @file{@var{n}.S} by
 running the C preprocessor, @code{cpp}.  The precise command is
 @w{@samp{$(CPP) $(CPPFLAGS)}}.
@@ -6228,12 +6332,14 @@ done.@refill
 @item Yacc for C programs
 @pindex yacc
 @cindex Yacc, rule to run
+@pindex .y
 @file{@var{n}.c} is made automatically from @file{@var{n}.y} by
 running Yacc with the command @samp{$(YACC) $(YFLAGS)}.
 
 @item Lex for C programs
 @pindex lex
 @cindex Lex, rule to run
+@pindex .l
 @file{@var{n}.c} is made automatically from @file{@var{n}.l} by
 by running Lex.  The actual command is @samp{$(LEX) $(LFLAGS)}.
 
@@ -6262,6 +6368,7 @@ the list of implicit rule suffixes with:@refill
 @item Making Lint Libraries from C, Yacc, or Lex programs
 @pindex lint
 @cindex @code{lint}, rule to run
+@pindex .ln
 @file{@var{n}.ln} is made from @file{@var{n}.c} with a command of
 the form @w{@samp{$(LINT) $(LINTFLAGS) $(CPPFLAGS) -i}}.  
 The same command is used on the C code produced from 
@@ -6275,6 +6382,10 @@ The same command is used on the C code produced from
 @pindex weave
 @pindex tangle
 @pindex ctangle
+@pindex .dvi
+@pindex .tex
+@pindex .web
+@pindex .cweb
 @file{@var{n}.dvi} is made from @file{@var{n}.tex} with the
 command @samp{$(TEX)}.  @file{@var{n}.tex} is made from
 @file{@var{n}.web} with @samp{$(WEAVE)}, or from @file{@var{n}.cweb}
@@ -6287,14 +6398,19 @@ made from @file{@var{n}.cweb} with @samp{$(CTANGLE)}.@refill
 @cindex Info, rule to format
 @pindex texi2dvi
 @pindex makeinfo
-@file{@var{n}.dvi} is made from @file{@var{n}.texinfo} or
-@file{@var{n}.texi} with the @samp{$(TEXI2DVI)} command.
-@file{@var{n}.info} is made from @file{@var{n}.texinfo} or
-@file{@var{n}.texi} with the @samp{$(MAKEINFO)} command .@refill
+@pindex .texinfo
+@pindex .info
+@pindex .texi
+@pindex .txinfo
+@file{@var{n}.dvi} is made from @file{@var{n}.texinfo}, @file{@var{n}.texi},
+or @file{@var{n}.txinfo}, with the @samp{$(TEXI2DVI)} command.
+@file{@var{n}.info} is made from @file{@var{n}.texinfo}, @file{@var{n}.texi},
+or @file{@var{n}.txinfo}, with the @samp{$(MAKEINFO)} command.@refill
 
 @item RCS
 @cindex RCS, rule to extract from
 @pindex co
+@pindex ,v @r{(RCS file extension)}
 Any file @file{@var{n}} is extracted if necessary from an RCS file
 named either @file{@var{n},v} or @file{RCS/@var{n},v}.  The precise
 command used is @w{@samp{$(CO) $(COFLAGS)}}.  @file{@var{n}} will not be
@@ -6307,6 +6423,7 @@ actually exist.@refill
 @item SCCS
 @cindex SCCS, rule to extract from
 @pindex get
+@pindex s. @r{(SCCS file prefix)}
 Any file @file{@var{n}} is extracted if necessary from an SCCS file
 named either @file{s.@var{n}} or @file{SCCS/s.@var{n}}.  The precise
 command used is @w{@samp{$(GET) $(GFLAGS)}}.  The rules for SCCS are
@@ -6314,6 +6431,7 @@ terminal (@pxref{Match-Anything Rules, ,Match-Anything Pattern Rules}),
 so SCCS files cannot be generated from another source; they must
 actually exist.@refill
 
+@pindex .sh
 For the benefit of SCCS, a file @file{@var{n}} is copied from
 @file{@var{n}.sh} and made executable (by everyone).  This is for
 shell scripts that are checked into SCCS.  Since RCS preserves the
@@ -6770,8 +6888,8 @@ dependencies, and it will execute happily ever after.)@refill
 @node Automatic, Pattern Match, Pattern Examples, Pattern Rules
 @subsection Automatic Variables
 @cindex automatic variables
-@cindex variable, automatic
-@cindex variable, and implicit rule
+@cindex variables, automatic
+@cindex variables, and implicit rule
 
 Suppose you are writing a pattern rule to compile a @samp{.c} file into a
 @samp{.o} file: how do you write the @samp{cc} command so that it operates
@@ -7631,6 +7749,10 @@ inspired whom, since GNU @code{make} had @code{patsubst} before SunOS
 The special significance of @samp{+} characters preceding command lines
 (@pxref{Instead of Execution, ,Instead of Executing the Commands}) is
 mandated by draft 11.2 of IEEE Std 1003.2 (POSIX).@refill
+
+@item
+The @samp{+=} syntax to append to the value of a variable comes from SunOS
+4.0 @code{make}.  @xref{Appending, , Appending More Text to Variables}.
 @end itemize
 
 The remaining features are inventions new in GNU @code{make}:
