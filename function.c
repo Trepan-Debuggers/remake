@@ -1893,11 +1893,13 @@ handle_function (char **op, char **stringp)
 static char *
 func_call (char *o, char **argv, const char *funcname)
 {
+  static int max_args = 0;
   char *fname;
   char *cp;
   char *body;
   int flen;
   int i;
+  int saved_args;
   const struct function_table_entry *entry_p;
   struct variable *v;
 
@@ -1960,12 +1962,28 @@ func_call (char *o, char **argv, const char *funcname)
       define_variable (num, strlen (num), *argv, o_automatic, 0);
     }
 
+  /* If the number of arguments we have is < max_args, it means we're inside
+     a recursive invocation of $(call ...).  Fill in the remaining arguments
+     in the new scope with the empty value, to hide them from this
+     invocation.  */
+
+  for (; i < max_args; ++i)
+    {
+      char num[11];
+
+      sprintf (num, "%d", i);
+      define_variable (num, strlen (num), "", o_automatic, 0);
+    }
+
   /* Expand the body in the context of the arguments, adding the result to
      the variable buffer.  */
 
   v->exp_count = EXP_COUNT_MAX;
 
+  saved_args = max_args;
+  max_args = i;
   o = variable_expand_string (o, body, flen+3);
+  max_args = saved_args;
 
   v->exp_count = 0;
 
