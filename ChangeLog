@@ -1,3 +1,11 @@
+Wed Feb 28 03:56:20 1996  Roland McGrath  <roland@charlie-brown.gnu.ai.mit.edu>
+
+	* default.c (default_terminal_rules): Remove + prefix from RCS cmds.
+	(default_variables): Put + prefix in $(CHECKOUT,v) value instead.
+
+	* remake.c (f_mtime): Check for future timestamps; give error and mark
+	file as "failed to update".
+
 Fri Jan 12 18:09:36 1996  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
 	* job.c: Don't declare unblock_sigs; job.h already does.
