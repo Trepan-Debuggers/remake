@@ -9,8 +9,8 @@
 
 @set EDITION 0.45
 @set VERSION 3.71 Beta
-@set UPDATED 25 January 1994
-@set UPDATE-MONTH January 1994
+@set UPDATED 11 February 1994
+@set UPDATE-MONTH February 1994
 
 @c finalout
 
@@ -7072,7 +7072,10 @@ the member named is used (@pxref{Archives}).
 @item $^
 The names of all the dependencies, with spaces between them.  For
 dependencies which are archive members, only the member named is used
-(@pxref{Archives}).
+(@pxref{Archives}).  A target has only one dependency on each other file
+it depends on, no matter how many times each file is listed as a
+dependency.  So if you list a dependency more than once for a target,
+the value of @code{$^} contains just one copy of the name.
 @cindex dependencies, list of all
 @cindex list of all dependencies
 
