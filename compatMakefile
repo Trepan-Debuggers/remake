@@ -180,7 +180,7 @@ install: $(bindir)/$(instname) $(infodir)/$(instname).info \
 $(bindir)/$(instname): make
 	$(INSTALL_PROGRAM) make $@.new
 # These are necessary for load-average checking to work on most Unix machines.
-	-if $(install_setgid); then \
+	if $(install_setgid); then \
 	  chgrp $(group) $@.new && chmod g+s $@.new; \
 	else true; fi
 # Some systems can't deal with renaming onto a running binary.
