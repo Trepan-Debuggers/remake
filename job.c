@@ -1114,7 +1114,7 @@ construct_command_argv_internal (line, restp, shell, ifs)
 		     just get eaten, rather than becoming an empty arg. */
 		  goto end_of_arg;
 		else
-		  --p;
+		  p = next_token (p) - 1;
 	      }
 	    else if (p[1] != '\0')
 	      /* Copy and skip the following char.  */
