@@ -1,5 +1,13 @@
 2003-03-24  Paul D. Smith  <psmith@gnu.org>
 
+	* configure.in, Makefile.am, glob/Makefile.am, doc/Makefile.am:
+	Upgrade to autoconf 2.57 and automake 1.7.3.
+
+	* job.c: More OS/2 changes from Andreas Buening.
+
+	* file.c (print_file): Fix variable initialization.
+	Fixes bug #2892.
+
 	* remake.c (notice_finished_file):
 
 	* make.h (ENULLLOOP): Set errno = 0 before invoking the command;

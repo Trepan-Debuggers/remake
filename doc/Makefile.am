@@ -1,7 +1,6 @@
-## Process this file with automake to create Makefile.in.
+# -*-Makefile-*-, or close enough
 
-## Makefile for GNU make documentation.
-## Copyright 2002 Free Software Foundation, Inc.
+AUTOMAKE_OPTIONS = 1.7.3
 
 TEXI2HTML = texi2html
 TEXI2HTML_FLAGS = -split_chapter

@@ -633,7 +633,7 @@ file_timestamp_sprintf (char *p, FILE_TIMESTAMP ts)
 static void
 print_file (const void *item)
 {
-  struct file *f = (struct file *)f;
+  struct file *f = (struct file *) item;
   struct dep *d;
   struct dep *ood = 0;
 
