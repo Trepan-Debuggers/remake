@@ -78,18 +78,21 @@ build.sh.in: build.template Makefile
 #
 maintFILES = configure aclocal.m4 config.h.in Makefile.in stamp-h.in
 
-MAINTAINERCLEANFILES +=	$(maintFILES) $(TEMPLATES) $(MTEMPLATES) NMakefile \
+CVS-CLEAN-FILES +=	$(maintFILES) $(TEMPLATES) $(MTEMPLATES) NMakefile \
 			missing build.sh.in .dep_segment
 
-# Put the alpha distribution files up for anonymous FTP.
-#
-ALPHA	:= ~ftp/gnu
-TARFILE	:= $(distdir).tar.gz
+# This rule tries to clean the tree right down to how it looks when you do a
+# virgin CVS checkout.
 
-.PHONY: alpha
-alpha: $(ALPHA) $(TARFILE)
-	@rm -f $(ALPHA)/$(TARFILE)
-	cp -p $(TARFILE) $(ALPHA)
+.PHONY: cvs-clean
+cvs-clean: maintainer-clean
+	-rm -f *~
+	-rm -f config/*~ config/Makefile.in config/[a-z]*
+	-rm -f po/*~ po/Makefile.in.in po/Rules-quot po/[a-z]*
+	-rm -f doc/*~ doc/Makefile.in doc/fdl.texi doc/make-stds.texi \
+		doc/texinfo.tex
+	-rm -f glob/*~ glob/Makefile.in
+	-rm -f ABOUT-NLS $(CVS-CLEAN-FILES)
 
 
 # ----------------------------------------------------------------------

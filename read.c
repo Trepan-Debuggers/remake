@@ -445,10 +445,6 @@ eval (ebuf, set_default)
   struct floc *fstart;
   struct floc fi;
 
-#if defined (WINDOWS32) || defined (__MSDOS__)
-  int check_again;
-#endif
-
 #define record_waiting_files()						      \
   do									      \
     { 									      \
@@ -932,7 +928,7 @@ eval (ebuf, set_default)
               }
 
             colonp = find_char_unquote(p2, ':', 0, 0);
-#if defined(__MSDOS__) || defined(WINDOWS32)
+#ifdef HAVE_DOS_PATHS
             /* The drive spec brain-damage strikes again...  */
             /* Note that the only separators of targets in this context
                are whitespace and a left paren.  If others are possible,
@@ -1104,17 +1100,21 @@ eval (ebuf, set_default)
                    || isspace ((unsigned char)p[-1])))
           p = 0;
 #endif
-#if defined (WINDOWS32) || defined (__MSDOS__)
-        do {
-          check_again = 0;
-          /* For MSDOS and WINDOWS32, skip a "C:\..." or a "C:/..." */
-          if (p != 0 && (p[1] == '\\' || p[1] == '/') &&
-              isalpha ((unsigned char)p[-1]) &&
-              (p == p2 + 1 || strchr (" \t:(", p[-2]) != 0)) {
-            p = strchr (p + 1, ':');
-            check_again = 1;
-          }
-        } while (check_again);
+#ifdef HAVE_DOS_PATHS
+        {
+          int check_again;
+
+          do {
+            check_again = 0;
+            /* For DOS paths, skip a "C:\..." or a "C:/..." */
+            if (p != 0 && (p[1] == '\\' || p[1] == '/') &&
+                isalpha ((unsigned char)p[-1]) &&
+                (p == p2 + 1 || strchr (" \t:(", p[-2]) != 0)) {
+              p = strchr (p + 1, ':');
+              check_again = 1;
+            }
+          } while (check_again);
+        }
 #endif
         if (p != 0)
           {
@@ -2048,7 +2048,7 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
 	 not start with a `.', unless it contains a slash.  */
       if (default_goal_file == 0 && set_default
 	  && (*name != '.' || strchr (name, '/') != 0
-#if defined(__MSDOS__) || defined(WINDOWS32)
+#ifdef HAVE_DOS_PATHS
 			   || strchr (name, '\\') != 0
 #endif
 	      ))
@@ -2227,8 +2227,8 @@ parse_file_seq (stringp, stopchar, size, strip)
 	p = find_char_unquote (p+1, stopchar, VMS_COMMA, 1);
       }
 #endif
-#if defined(WINDOWS32) || defined(__MSDOS__)
-    /* For WINDOWS32, skip a "C:\..." or a "C:/..." until we find the
+#ifdef HAVE_DOS_PATHS
+    /* For DOS paths, skip a "C:\..." or a "C:/..." until we find the
        first colon which isn't followed by a slash or a backslash.
        Note that tokens separated by spaces should be treated as separate
        tokens since make doesn't allow path names with spaces */
@@ -2687,7 +2687,7 @@ get_next_mword (buffer, delim, startp, length)
           goto done_word;
 
         case ':':
-#if defined(__MSDOS__) || defined(WINDOWS32)
+#ifdef HAVE_DOS_PATHS
 	  /* A word CAN include a colon in its drive spec.  The drive
 	     spec is allowed either at the beginning of a word, or as part
 	     of the archive member name, like in "libfoo.a(d:/foo/bar.o)".  */

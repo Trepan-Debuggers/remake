@@ -499,13 +499,13 @@ func_origin (o, argv, funcname)
 }
 
 #ifdef VMS
-#define IS_PATHSEP(c) ((c) == ']')
+# define IS_PATHSEP(c) ((c) == ']')
 #else
-#if defined(__MSDOS__) || defined(WINDOWS32)
-#define IS_PATHSEP(c) ((c) == '/' || (c) == '\\')
-#else
-#define IS_PATHSEP(c) ((c) == '/')
-#endif
+# ifdef HAVE_DOS_PATHS
+#  define IS_PATHSEP(c) ((c) == '/' || (c) == '\\')
+# else
+#  define IS_PATHSEP(c) ((c) == '/')
+# endif
 #endif
 
 
@@ -543,7 +543,7 @@ func_notdir_suffix (o, argv, funcname)
 	    continue;
 	  o = variable_buffer_output (o, p, len - (p - p2));
 	}
-#if defined(WINDOWS32) || defined(__MSDOS__)
+#ifdef HAVE_DOS_PATHS
       /* Handle the case of "d:foo/bar".  */
       else if (streq (funcname, "notdir") && p2[0] && p2[1] == ':')
 	{
@@ -599,7 +599,7 @@ func_basename_dir (o, argv, funcname)
 	    o = variable_buffer_output (o, p2, ++p - p2);
 	  else if (p >= p2 && (*p == '.'))
 	    o = variable_buffer_output (o, p2, p - p2);
-#if defined(WINDOWS32) || defined(__MSDOS__)
+#ifdef HAVE_DOS_PATHS
 	/* Handle the "d:foobar" case */
 	  else if (p2[0] && p2[1] == ':' && is_dir)
 	    o = variable_buffer_output (o, p2, 2);
@@ -938,7 +938,7 @@ func_filter_filterout (o, argv, funcname)
   struct a_pattern *pathead;
   struct a_pattern **pattail;
   struct a_pattern *pp;
-  
+
   struct hash_table a_word_table;
   int is_filter = streq (funcname, "filter");
   char *pat_iterator = argv[0];

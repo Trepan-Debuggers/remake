@@ -357,6 +357,9 @@
 /* Build host information. */
 #define MAKE_HOST "Windows32"
 
+/* Grok DOS paths (drive specs and backslash path element separators) */
+#define HAVE_DOS_PATHS
+
 /*
  * Refer to README.W32 for info on the following settings
  */

@@ -24,7 +24,7 @@ Building From CVS
 -----------------
 
 To build GNU make from CVS, you will need Autoconf 2.53 (or better),
-Automake 1.6.1 (or better), and Gettext 0.11.3-pre2 (or better), and any
+Automake 1.6.3 (or better), and Gettext 0.11.5 (or better), and any
 tools that those utilities require (GNU m4, Perl, etc.).  You will also
 need a copy of wget.
 
@@ -125,9 +125,8 @@ foolhardy), here is a canned sequence of commands to build a GNU make
 distribution package from a virgin CVS source checkout (assuming all the
 prerequisites are available of course).
 
-This list is eminently suitable for a quick swipe o' the old mouse and a
-swift click o' mouse-2 into an xterm.  I even grudgingly removed my use
-of "advanced shell features" like {}.  Go for it!
+This list is eminently suitable for a quick swipe o' the mouse and a
+swift click o' mouse-2 into an xterm.  Go for it!
 
 
 autopoint

@@ -348,7 +348,7 @@ vpath_search (file, mtime_ptr)
      there is nothing we can do.  */
 
   if (**file == '/'
-#if defined (WINDOWS32) || defined (__MSDOS__)
+#ifdef HAVE_DOS_PATHS
       || **file == '\\'
       || (*file)[1] == ':'
 #endif
@@ -404,7 +404,7 @@ selective_vpath_search (path, file, mtime_ptr)
      pointer to the name-within-directory and FLEN is its length.  */
 
   n = strrchr (*file, '/');
-#if defined (WINDOWS32) || defined (__MSDOS__)
+#ifdef HAVE_DOS_PATHS
   /* We need the rightmost slash or backslash.  */
   {
     char *bslash = strrchr(*file, '\\');
@@ -445,7 +445,7 @@ selective_vpath_search (path, file, mtime_ptr)
 	  n += name_dplen;
 	}
 
-#if defined (WINDOWS32) || defined (__MSDOS__)
+#ifdef HAVE_DOS_PATHS
       /* Cause the next if to treat backslash and slash alike.  */
       if (n != name && n[-1] == '\\' )
 	n[-1] = '/';

@@ -1345,15 +1345,15 @@ int main (int argc, char ** argv)
                                         + sizeof (DEFAULT_TMPFILE) + 1);
 	    strcpy (template, tmpdir);
 
-#if defined __MSDOS__ || defined(WINDOWS32)
+#ifdef HAVE_DOS_PATHS
 	    if (strchr ("/\\", template[strlen (template) - 1]) == NULL)
 	      strcat (template, "/");
 #else
-#ifndef VMS
+# ifndef VMS
 	    if (template[strlen (template) - 1] != '/')
 	      strcat (template, "/");
-#endif /* !VMS */
-#endif /* __MSDOS__ || WINDOWS32 */
+# endif /* !VMS */
+#endif /* !HAVE_DOS_PATHS */
 
 	    strcat (template, DEFAULT_TMPFILE);
 	    outfile = open_tmpfile (&stdin_nm, template);
