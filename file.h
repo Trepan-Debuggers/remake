@@ -25,7 +25,8 @@ struct file
     struct file *next;
     char *name;
     struct dep *deps;
-    struct commands *cmds;	/* Commands to execute for this target */
+    struct commands *cmds;	/* Commands to execute for this target.  */
+    int command_flags;		/* Flags OR'd in for cmds; see commands.h.  */
     char *stem;			/* Implicit stem, if an implicit
     				   rule has been used */
     struct dep *also_make;	/* Targets that are made by making this.  */
