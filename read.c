@@ -326,7 +326,7 @@ read_makefile (filename, type)
   while (!feof (infile))
     {
       lineno += nlines;
-      nlines = readline (&lb, infile, filename);
+      nlines = readline (&lb, infile, filename, lineno);
 
       if (collapsed_length < lb.size)
 	{
@@ -723,7 +723,7 @@ do_define (name, namelen, origin, lineno, infile, filename)
   while (!feof (infile))
     {
       lineno += nlines;
-      nlines = readline (&lb, infile, filename);
+      nlines = readline (&lb, infile, filename, lineno);
       p = next_token (lb.buffer);
 
       if ((p[5] == '\0' || isblank (p[5])) && !strncmp (p, "endef", 5))
@@ -1480,10 +1480,11 @@ parse_file_seq (stringp, stopchar, size)
  */
 
 static unsigned int
-readline (linebuffer, stream, filename)
+readline (linebuffer, stream, filename, lineno)
      struct linebuffer *linebuffer;
      FILE *stream;
      char *filename;
+     unsigned int lineno;
 {
   char *buffer = linebuffer->buffer;
   register char *p = linebuffer->buffer;
@@ -1499,11 +1500,15 @@ readline (linebuffer, stream, filename)
     {
       if (fgets (p, end - p, stream) == 0)
 	if (feof (stream))
-	  return nlines;
+	  break;
 	else
 	  pfatal_with_name (filename);
 
       len = strlen (p);
+      if (len == 0)
+	/* This only happens when the first thing on the line is a '\0'.  */
+	makefile_fatal (filename, lineno, "NUL not allowed in makefile");
+
       p += len;
       if (p[-1] != '\n')
 	{
@@ -1543,7 +1548,7 @@ readline (linebuffer, stream, filename)
       if (!backslash)
 	{
 	  p[-1] = '\0';
-	  return nlines;
+	  break;
 	}
 
       if (end - p <= 1)
@@ -1557,6 +1562,8 @@ readline (linebuffer, stream, filename)
 	  linebuffer->buffer = buffer;
 	}
     }
+
+  return nlines;
 }
 
 /* Construct the list of include directories
