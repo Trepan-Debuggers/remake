@@ -1,3 +1,59 @@
+2000-06-13  Paul D. Smith  <psmith@gnu.org>
+
+	* gettext.h: If we have libintl.h, use that instead of any of the
+	contents of gettext.h.  We won't check for libintl.h unless we're
+	using the system gettext.
+
+	* function.c (func_word): Clarify error message.
+
+2000-06-10  Paul Eggert  <eggert@twinsun.com>
+
+	Support nanosecond resolution on hosts with 64-bit time_t and
+	uintmax_t (e.g. 64-bit Sparc Solaris), by splitting
+	FILE_TIMESTAMP into a 30-bit part for nanoseconds, with the
+	rest for seconds, if FILE_TIMESTAMP is at least 64 bits wide.
+
+	* make.h: Always define FILE_TIMESTAMP to be uintmax_t, for
+	simplicity.
+
+	* filedef.h (FILE_TIMESTAMP_HI_RES, FILE_TIMESTAMP_LO_BITS)
+	(UNKNOWN_MTIME, NONEXISTENT_MTIME, OLD_MTIME)
+	(ORDINARY_MTIME_MIN, ORDINARY_MTIME_MAX): New macros.
+	(FILE_TIMESTAMP_STAT_MODTIME): Now takes fname arg.  All uses changed.
+	(FILE_TIMESTAMP_DIV, FILE_TIMESTAMP_MOD)
+	(FILE_TIMESTAMP_FROM_S_AND_NS): Remove.
+	(FILE_TIMESTAMP_S, FILE_TIMESTAMP_NS): Use shifts instead of
+	multiplication and division.  Offset the timestamps by
+	ORDINARY_MTIME_MIN.
+	(file_timestamp_cons): New decl.
+	(NEW_MTIME): Now just the maximal timestamp value, as we no longer use
+	-1 to refer to nonexistent files.
+
+	* file.c (snap_deps, print_file): Use NONEXISTENT_MTIME,
+	UNKNOWN_MTIME, and OLD_MTIME instead of magic constants.
+	* filedef.h (file_mtime_1): Likewise.
+	* main.c (main): Likewise.
+	* remake.c (update_file_1, notice_finished_file, check_dep)
+	(f_mtime, name_mtime, library_search): Likewise.
+	* vpath.c (selective_vpath_search): Likewise.
+
+	* remake.c (f_mtime): Do not assume that (time_t) -1 equals
+	NONEXISTENT_MTIME.  When futzing with time stamps, adjust by
+	multiples of 2**30, not 10**9.  Do not calculate timestamp
+	adjustments on DOS unless they are needed.
+
+	* commands.c (delete_target): Do not assume that
+	FILE_TIMESTAMP_S yields -1 for a nonexistent file, as that is
+	no longer true with the new representation.
+
+	* file.c (file_timestamp_cons): New function, replacing
+	FILE_TIMESTAMP_FROM_S_AND_NS.  All uses changed.
+	(file_timestamp_now): Use FILE_TIMESTAMP_HI_RES instead of 1 <
+	FILE_TIMESTAMPS_PER_S to determine whether we're using hi-res
+	timestamps.
+	(print_file): Print OLD_MTIME values as "very old" instead of
+	as a timestamp.
+
 2000-05-31  Paul Eggert  <eggert@twinsun.com>
 
 	* remake.c (name_mtime): Check for stat failures.  Retry if EINTR.

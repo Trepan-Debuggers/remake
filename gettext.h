@@ -17,16 +17,14 @@
    along with this program; if not, write to the Free Software Foundation,
    Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* Because on some systems (e.g. Solaris) we sometimes have to include
-   the systems libintl.h as well as this file we have more complex
-   include protection above.  But the systems header might perhaps also
-   define _LIBINTL_H and therefore we have to protect the definition here.  */
+/* Include libintl.h, if it was found: we don't even look for it unless we
+   want to use the system's gettext().  If not, the rest of the file contains
+   the headers necessary for our own gettext.c.  */
 
-#if !defined _LIBINTL_H || !defined _LIBGETTEXT_H
-#ifndef _LIBINTL_H
-# define _LIBINTL_H	1
-#endif
-#define _LIBGETTEXT_H	1
+#ifdef HAVE_LIBINTL_H
+# include <libintl.h>
+
+#else
 
 /* We define an additional symbol to signal that we use the GNU
    implementation of gettext.  */
@@ -79,10 +77,6 @@ struct _msg_ent
 extern const struct _msg_ent _msg_tbl[];
 extern int _msg_tbl_length;
 #endif
-
-/* For automatical extraction of messages sometimes no real
-   translation is needed.  Instead the string itself is the result.  */
-#define gettext_noop(Str) (Str)
 
 /* Look up MSGID in the current default message catalog for the current
    LC_MESSAGES locale.  If not found, returns MSGID itself (the default
@@ -172,6 +166,12 @@ extern int _nl_msg_cat_cntr;
 }
 #endif
 
+#endif  /* !HAVE_LIBINTL_H */
+
+#ifndef gettext_noop
+/* For automatical extraction of messages sometimes no real
+   translation is needed.  Instead the string itself is the result.  */
+# define gettext_noop(Str) (Str)
 #endif
 
 /* End of libgettext.h */

@@ -1575,7 +1575,7 @@ int main (int argc, char ** argv)
 
   build_vpath_lists ();
 
-  /* Mark files given with -o flags as very old (00:00:01.00 Jan 1, 1970)
+  /* Mark files given with -o flags as very old
      and as having been updated already, and files given with -W flags as
      brand new (time-stamp as far as possible into the future).  */
 
@@ -1583,7 +1583,7 @@ int main (int argc, char ** argv)
     for (p = old_files->list; *p != 0; ++p)
       {
 	f = enter_command_line_file (*p);
-	f->last_mtime = f->mtime_before_update = (FILE_TIMESTAMP) 1;
+	f->last_mtime = f->mtime_before_update = OLD_MTIME;
 	f->updated = 1;
 	f->update_status = 0;
 	f->command_state = cs_finished;
@@ -1716,7 +1716,7 @@ int main (int argc, char ** argv)
                         error (NILF, _("Failed to remake makefile `%s'."),
                                d->file->name);
                         mtime = file_mtime_no_search (d->file);
-                        any_remade |= (mtime != (FILE_TIMESTAMP) -1
+                        any_remade |= (mtime != NONEXISTENT_MTIME
                                        && mtime != makefile_mtimes[i]);
                       }
                   }

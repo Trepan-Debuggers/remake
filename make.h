@@ -286,14 +286,10 @@ extern char *alloca ();
 # endif /* HAVE_ALLOCA_H.  */
 #endif /* GCC.  */
 
-#ifdef ST_MTIM_NSEC
-# if HAVE_INTTYPES_H
-#  include <inttypes.h>
-# endif
-# define FILE_TIMESTAMP uintmax_t
-#else
-# define FILE_TIMESTAMP time_t
+#if HAVE_INTTYPES_H
+# include <inttypes.h>
 #endif
+#define FILE_TIMESTAMP uintmax_t
 
 /* ISDIGIT offers the following features:
    - Its arg may be any int or unsigned int; it need not be an unsigned char.

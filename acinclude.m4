@@ -486,6 +486,8 @@ esac
 dnl ---------------------------------------------------------------------------
 dnl Enable internationalization support for GNU make.
 dnl Obtained from the libit 0.7 distribution
+dnl Modified to check for a system version of GNU gettext by
+dnl   Paul D. Smith <psmith@gnu.org>
 dnl
 AC_DEFUN(fp_WITH_GETTEXT, [
 
@@ -509,7 +511,7 @@ AC_DEFUN(fp_WITH_GETTEXT, [
 
     # Look around for gettext() on the system
     AC_SEARCH_LIBS(gettext, intl)
-    if test $ac_cv_search_gettext = no; then
+    if test "$ac_cv_search_gettext" = no; then
       with_included_gettext=yes
     else
       # We only want to deal with GNU's gettext; if we don't have that
@@ -523,10 +525,10 @@ AC_DEFUN(fp_WITH_GETTEXT, [
       esac
     fi
 
-    if test $with_included_gettext = yes; then
+    if test "$with_included_gettext" = yes; then
       LIBOBJS="$LIBOBJS gettext.o"
-      AC_DEFINE(HAVE_GETTEXT)
-      AC_DEFINE(HAVE_DCGETTEXT)
+      AC_DEFINE(HAVE_GETTEXT, 1, [Define if you have the gettext function.])
+      AC_DEFINE(HAVE_DCGETTEXT, 1, [Define if you have the dcgettext function.])
     else
       AC_CHECK_HEADERS(libintl.h)
       AC_CHECK_FUNCS(dcgettext gettext)
