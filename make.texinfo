@@ -7,10 +7,10 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.145 1994/10/17 00:02:27 roland Exp $
+@set RCSID $Id: make.texinfo,v 2.146 1994/10/24 05:05:43 roland Exp $
 @set EDITION 0.47 DRAFT
 @set VERSION 3.72 Beta
-@set UPDATED 16 October 1994
+@set UPDATED 24 October 1994
 @set UPDATE-MONTH October 1994
 @set ISBN 1-882114-50-7
 
@@ -2583,7 +2583,7 @@ called @file{@var{name}.d} from a C source file called @file{@var{name}.c}:
 @group
 %.d: %.c
         $(SHELL) -ec '$(CC) -M $(CPPFLAGS) $< \
-                      | sed '\''s/$*.o/& $@@/g'\'' > $@@'
+                      | sed '\''s/$*\\.o[ :]*/& $@@/g'\'' > $@@'
 @end group
 @end example
 
@@ -2595,6 +2595,12 @@ shell exits with the status of the last command in the pipeline
 (@code{sed} in this case), so @code{make} would not notice a nonzero
 status from the compiler.
 @cindex @code{-e} (shell flag)
+
+@cindex @code{-MM} (to GNU compiler)
+With the GNU C compiler, you may wish to use the @samp{-MM} flag instead
+of @samp{-M}.  This omits dependencies on system header files.
+@xref{Preprocessor Options, , Options Controlling the Preprocessor, 
+gcc.info, Using GNU CC}, for details.
 
 @cindex @code{sed} (shell command)
 The purpose of the @code{sed} command is to translate (for example):
