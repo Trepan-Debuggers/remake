@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.189 2000/06/20 05:48:40 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.190 2000/07/30 18:26:43 psmith Exp $
 @set EDITION 0.55
 @set VERSION 3.79
 @set UPDATED 04 April 2000
@@ -18,6 +18,7 @@
 @c finalout
 
 @c ISPELL CHECK: done, 10 June 1993 --roland
+@c ISPELL CHECK: done, 2000-06-25 --Martin Buchholz
 
 @c Combine the variable and function indices:
 @syncodeindex vr fn
@@ -1105,8 +1106,8 @@ makefile as has been traditionally done with other versions of
 
 @cindex @code{-I}
 @cindex @code{--include-dir}
-@cindex included makefiles, default directries
-@cindex default directries for included makefiles
+@cindex included makefiles, default directories
+@cindex default directories for included makefiles
 @findex /usr/gnu/include
 @findex /usr/local/include
 @findex /usr/include
@@ -2200,7 +2201,7 @@ subdirs:
 @end group
 @end example
 
-There are a few of problems with this method, however.  First, any error
+There are a few problems with this method, however.  First, any error
 detected in a submake is not noted by this rule, so it will continue to
 build the rest of the directories even when one fails.  This can be
 overcome by adding shell commands to note the error and exit, but then
@@ -2450,6 +2451,42 @@ ignore errors in execution of commands for all files.  This usage of
 this affects every command in the makefile, it is not very useful; we
 recommend you use the more selective ways to ignore errors in specific
 commands.  @xref{Errors, ,Errors in Commands}.
+
+@findex .LOW_RESOLUTION_TIME
+@item .LOW_RESOLUTION_TIME
+
+If you specify prerequisites for @code{.LOW_RESOLUTION_TIME},
+@command{make} assumes that these files are created by commands that
+generate low resolution time stamps.  The commands for
+@code{.LOW_RESOLUTION_TIME} are not meaningful.
+
+The high resolution file time stamps of many modern hosts lessen the
+chance of @command{make} incorrectly concluding that a file is up to
+date.  Unfortunately, these hosts provide no way to set a high
+resolution file time stamp, so commands like @samp{cp -p} that
+explicitly set a file's time stamp must discard its subsecond part.  If
+a file is created by such a command, you should list it as a dependency
+of @code{.LOW_RESOLUTION_TIME} so that @command{make} does not
+mistakenly conclude that the file is out of date.  For example:
+
+@example
+@group
+.LOW_RESOLUTION_TIME: dst
+dst: src
+        cp -p src dst
+@end group
+@end example
+
+Since @samp{cp -p} discards the subsecond part of @file{src}'s time
+stamp, @file{dst} is typically slightly older than @file{src} even when
+it is up to date.  The @code{.LOW_RESOLUTION_TIME} line causes
+@command{make} to consider @file{dst} to be up to date if its time stamp
+is at the start of the same second that @file{src}'s time stamp is in.
+
+Due to a limitation of the archive format, archive member time stamps
+are always low resolution.  You need not list archive members as
+dependencies of @code{.LOW_RESOLUTION_TIME}, as @command{make} does this
+automatically.
 
 @findex .SILENT
 @item .SILENT
@@ -3341,7 +3378,7 @@ default.
 @cindex target, deleting on error
 Usually when a command fails, if it has changed the target file at all,
 the file is corrupted and cannot be used---or at least it is not
-completely updated.  Yet the file's timestamp says that it is now up to
+completely updated.  Yet the file's time stamp says that it is now up to
 date, so the next time @code{make} runs, it will not try to update that
 file.  The situation is just the same as when the command is killed by a
 signal; @pxref{Interrupts}.  So generally the right thing to do is to
@@ -6084,7 +6121,7 @@ This one is slightly more interesting: it defines a macro to search for
 the first instance of a program in @code{PATH}:
 
 @smallexample
-pathsearch = $(firstword $(wildcard $(addsufix /$(1),$(subst :, ,$(PATH)))))
+pathsearch = $(firstword $(wildcard $(addsuffix /$(1),$(subst :, ,$(PATH)))))
 
 LS := $(call pathsearch,ls)
 @end smallexample

@@ -72,6 +72,8 @@ struct file
       } command_state ENUM_BITFIELD (2);
 
     unsigned int precious:1;	/* Non-0 means don't delete file on quit */
+    unsigned int low_resolution_time:1;	/* Nonzero if this file's time stamp
+					   has only one-second resolution.  */
     unsigned int tried_implicit:1; /* Nonzero if have searched
 				      for implicit rule for making
 				      this file; don't search again.  */
@@ -110,13 +112,10 @@ extern void set_command_state PARAMS ((struct file *file, int state));
 extern void notice_finished_file PARAMS ((struct file *file));
 
 
-#ifdef ST_MTIM_NSEC
-# define FILE_TIMESTAMP_HI_RES \
-    (2147483647 < INTEGER_TYPE_MAXIMUM (FILE_TIMESTAMP) >> 31)
+#if FILE_TIMESTAMP_HI_RES
 # define FILE_TIMESTAMP_STAT_MODTIME(fname, st) \
     file_timestamp_cons (fname, (st).st_mtime, (st).st_mtim.ST_MTIM_NSEC)
 #else
-# define FILE_TIMESTAMP_HI_RES 0
 # define FILE_TIMESTAMP_STAT_MODTIME(fname, st) \
     file_timestamp_cons (fname, (st).st_mtime, 0)
 #endif
