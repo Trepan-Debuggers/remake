@@ -1,4 +1,19 @@
+Fri Mar 10 13:56:49 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* Version 3.72.10.
+
+	* GNUmakefile (globfiles): Add glob/configure.bat.
+	(distfiles): Add configh.dos, configure.bat.
+
 Wed Mar  8 13:10:57 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	Fixes for MS-DOS from DJ Delorie.
+	* read.c (read_makefile, parse_file_seq) [__MS_DOS__]: Don't see :
+ 	as separator in "C:\...".
+	* configh.dos (STDC_HEADERS): Define only if undefined.
+	(HAVE_SYS_PARAM_H): Don't define this.
+	(HAVE_STRERROR): Define this.
+	* job.c (construct_command_argv_internal) [__MSDOS__]: Fix typos.
 
 	* Version 3.72.9.
 
