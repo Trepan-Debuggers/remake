@@ -3,7 +3,8 @@
 
   Module for vms <-> unix file name conversion
 
-  Written by Klaus Kämpf (kkaempf@didymus.rmi.de)
+  Written by Klaus Kämpf (kkaempf@progis.de)
+  of proGIS Software, Aachen, Germany
 
 */
 

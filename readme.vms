@@ -1,8 +1,9 @@
-This is the VMS port of GNU Make version 3.74.
+This is the VMS port of GNU Make version 3.75.
 
 It is based on the VMS port of GNU Make 3.60 by Mike Moretti.
 
-This port was done by Klaus Kämpf (kkaempf@didymus.rmi.de)
+This port was done by Klaus Kämpf (kkaempf@progis.de) of
+proGIS Software, Aachen, Germany
 
 To build Make, simply type @makefile.  This should compile all the
 necessary files and link Make.
