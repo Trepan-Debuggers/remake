@@ -126,6 +126,7 @@ $answer = "foo bar\n";
 
 # TEST #9
 # For PR/1380: Using += assignment in target-specific variables sometimes fails
+# Also PR/1831
 
 $makefile3 = &get_tmpfile;
 
@@ -138,18 +139,19 @@ all: one; @echo $(FOO)
 FOO = bar
 
 one: FOO += biz
+one: FOO += boz
 one: ; @echo $(FOO)
 EOF
 close(MAKEFILE);
 
 &run_make_with_options("$makefile3", "", &get_logfile);
-$answer = "bar baz biz\nbar baz\n";
+$answer = "bar baz biz boz\nbar baz\n";
 &compare_output($answer, &get_logfile(1));
 
 # Test #10
 
 &run_make_with_options("$makefile3", "one", &get_logfile);
-$answer = "bar biz\n";
+$answer = "bar biz boz\n";
 &compare_output($answer, &get_logfile(1));
 
 # Test #11
