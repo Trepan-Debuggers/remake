@@ -1,3 +1,19 @@
+Sat Aug 19 23:11:00 1995  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* remake.c (check_dep): For a secondary file, try implicit and
+	default rules if appropriate.
+
+Wed Aug  2 04:29:42 1995  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* remake.c (check_dep): If an intermediate file exists,
+	do consider its actual date.
+
+Sun Jul 30 00:49:53 1995  Richard Stallman  <rms@mole.gnu.ai.mit.edu>
+
+	* file.h (struct file): New field `secondary'.
+	* file.c (snap_deps): Check for .INTERMEDIATE and .SECONDARY.
+	(remove_intermediates): Don't delete .SECONDARY files.
+
 Sat Mar  2 16:26:52 1996  Roland McGrath  <roland@charlie-brown.gnu.ai.mit.edu>
 
 	* compatMakefile (srcs): Add getopt.h; prepend $(srcdir)/ to getopt*.
