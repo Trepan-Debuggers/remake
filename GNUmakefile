@@ -249,7 +249,8 @@ make-$(version).tar: README INSTALL COPYING ChangeLog NEWS \
           configure Makefile.in configure.in build.sh.in mkinstalldirs \
 	  acconfig.h $(srcs) remote-*.c $(globfiles) \
 	  make.texinfo make-stds.texi \
-	  make.?? make.??s make.toc make.aux make.man texinfo.tex TAGS tags
+	  make.?? make.??s make.toc make.aux make.man texinfo.tex TAGS tags \
+	  install.sh
 	$(make-tar)
 
 ifneq (,)
