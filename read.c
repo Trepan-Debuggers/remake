@@ -794,11 +794,17 @@ conditional_line (line, filename, lineno)
 	xrealloc (conditionals->ignoring, conditionals->max_ignoring);
     }
 
-  if (conditionals->if_cmds > 1 &&
-      conditionals->ignoring[conditionals->if_cmds - 2])
-    /* We are already ignoring, so just push a level
-       to match the next "else" or "endif", and keep ignoring.  */
-    conditionals->ignoring[conditionals->if_cmds - 1] = 1;
+  /* Search through the stack to see if we're already ignoring.  */
+  for (i = 0; i < conditionals->if_cmds; ++i)
+    if (conditionals->ignoring[i])
+      {
+	/* We are already ignoring, so just push a level
+	   to match the next "else" or "endif", and keep ignoring.
+	   We don't want to expand variables in the condition.  */
+	conditionals->ignoring[conditionals->if_cmds - 1] = 1;
+	return 1;
+      }
+
   else if (cmdname[notdef ? 3 : 2] == 'd')
     {
       /* "Ifdef" or "ifndef".  */
