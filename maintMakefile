@@ -63,15 +63,11 @@ build.sh.in: build.template Makefile
 .dep_segment: Makefile.am maintMakefile $(DEP_FILES)
 	$(AUTOMAKE) --generate-deps --build-dir=. --srcdir-name=.
 
-# We clean everything here.  The GNU standards for makefile conventions say
-# you shouldn't remove configure, etc., but this makefile is only available
-# in a full development distribution, so they'll only be removed then.
-#
-# And _I_ want them to be removed ;)
+# Get rid of everything "else".
 #
 maintFILES = configure aclocal.m4 config.h.in Makefile.in stamp-h.in
 
-MAINTAINERCLEANFILES =  $(maintFILES) $(TEMPLATES) $(MTEMPLATES) NMakefile \
+MAINTAINERCLEANFILES +=	$(maintFILES) $(TEMPLATES) $(MTEMPLATES) NMakefile \
 			missing build.sh.in .dep_segment
 
 # Put the alpha distribution files up for anonymous FTP.
@@ -83,9 +79,3 @@ TARFILE	:= $(distdir).tar.gz
 alpha: $(ALPHA) $(TARFILE)
 	@rm -f $(ALPHA)/$(TARFILE)
 	cp -p $(TARFILE) $(ALPHA)
-
-# This is needed because normal builds with GCC don't compile alloca.c, so
-# alloca.P doesn't get built :-/.
-#
-.deps/alloca.P: alloca.c
-	$(COMPILE) -M -o $@ $<

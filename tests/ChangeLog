@@ -1,3 +1,8 @@
+2002-04-21  Paul D. Smith  <psmith@gnu.org>
+
+	* test_driver.pl (compare_dir_tree): Ignore CVS and RCS
+	directories in the script directories.
+
 2001-05-02  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/variables/flavors: Test define/endef scripts where only

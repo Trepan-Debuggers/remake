@@ -1,43 +1,46 @@
 # This is a -*-Makefile-*-, or close enough
 
-AUTOMAKE_OPTIONS = 1.4
+AUTOMAKE_OPTIONS = 1.6 dist-bzip2
+ACLOCAL_AMFLAGS	=  -I config
 
-SUBDIRS =	$(GLOBDIR) i18n
+SUBDIRS =	$(GLOBDIR) po
 
 bin_PROGRAMS =	make
 
-# These source files also have gettext references
-SRCS	     =  ar.c arscan.c commands.c dir.c expand.c file.c function.c \
-		getopt.c implicit.c job.c main.c misc.c read.c remake.c \
-		rule.c signame.c variable.c vpath.c
+if USE_CUSTOMS
+  remote =	remote-cstms.c
+else
+  remote =	remote-stub.c
+endif
 
-make_SOURCES =	$(SRCS) default.c remote-$(REMOTE).c version.c \
-		getopt1.c
+make_SOURCES =	ar.c arscan.c commands.c default.c dir.c expand.c file.c \
+		function.c getopt.c getopt1.c implicit.c job.c main.c \
+		misc.c read.c remake.c $(remote) rule.c signame.c \
+		variable.c version.c vpath.c
+
+EXTRA_make_SOURCES = remote-stub.c remote-cstms.c
 
 noinst_HEADERS = commands.h dep.h filedef.h job.h make.h rule.h variable.h \
-		debug.h signame.h getopt.h gettext.h
+		debug.h getopt.h gettext.h
 
-make_LDADD =	$(LIBOBJS) @ALLOCA@ $(GLOBLIB)
+make_LDADD =	@LIBOBJS@ @ALLOCA@ $(GLOBLIB)
 
 man_MANS =	make.1
 info_TEXINFOS =	make.texinfo
 
-DEFS =		-DALIASPATH=\"$(aliaspath)\" -DLOCALEDIR=\"$(localedir)\" -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\" @DEFS@
+DEFS =		-DLOCALEDIR=\"$(localedir)\" -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\" @DEFS@
 
-INCLUDES =	-I. -I$(srcdir) $(GLOBINC)
+AM_CPPFLAGS =	$(GLOBINC)
 
-EXTRA_DIST = 	README build.sh.in $(man_MANS) README.customs remote-cstms.c\
+EXTRA_DIST =	build.sh.in $(man_MANS)\
+		README.customs\
 		make-stds.texi SCOPTIONS SMakefile\
 		README.Amiga Makefile.ami config.ami make.lnk amiga.c amiga.h\
 		README.DOS Makefile.DOS configure.bat dosbuild.bat configh.dos\
 		README.W32 NMakefile config.h.W32 build_w32.bat subproc.bat\
-		readme.vms makefile.vms makefile.com config.h-vms vmsdir.h\
-		vmsfunctions.c vmsify.c\
-		gettext.c\
-		glob/COPYING.LIB glob/ChangeLog glob/Makefile.am\
-		glob/Makefile.ami glob/Makefile.in glob/SCOPTIONS\
-		glob/SMakefile glob/configure.bat glob/fnmatch.c\
-		glob/fnmatch.h glob/glob.c glob/glob.h
+		readme.vms makefile.vms makefile.com config.h-vms \
+		vmsdir.h vmsfunctions.c vmsify.c
+
 
 MOSTLYCLEANFILES = loadavg.c
 CLEANFILES =	loadavg
@@ -47,18 +50,7 @@ MAKE_HOST =	@MAKE_HOST@
 
 # --------------- Internationalization Section
 
-POTFILES     =	$(SRCS) remote-cstms.c vmsfunctions.c
-
-localedir    =	$(prefix)/share/locale
-aliaspath    =	$(localedir):.
-
-all-local: $(srcdir)/stamp-pot
-
-$(srcdir)/stamp-pot: $(POTFILES)
-	@echo "$(POTFILES)" > $@
-
-MAINTAINERCLEANFILES = $(srcdir)/stamp-pot
-
+localedir =	$(datadir)/locale
 
 # --------------- Local INSTALL Section
 
@@ -159,12 +151,6 @@ check-regression:
 	 else \
 	  echo "Can't find the GNU Make test suite ($(srcdir)/tests)."; \
 	 fi
-
-
-# --------------- Local CLEAN section
-
-maintainer-clean-local:
-	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
 
 
 # --------------- Maintainer's Section

@@ -44,31 +44,13 @@ Boston, MA 02111-1307, USA.  */
 
 #define _GNU_SOURCE 1
 
-/* Include libintl.h, if it was found: we don't even look for it unless we
-   want to use the system's gettext().  If not, use the included gettext.h.  */
+/* Always use gettext.h  */
 
-#ifdef HAVE_LIBINTL_H
-# include <libintl.h>
-# ifdef HAVE_LOCALE_H
-#  include <locale.h>
-# endif
-#else
-# include "gettext.h"
-#endif
+#include "gettext.h"
 
-#ifndef gettext_noop
-/* For automatic extraction of messages sometimes no real translation is
-   needed.  Instead the string itself is the result.  */
-# define gettext_noop(Str) (Str)
-#endif
-
-#define _(Text)     gettext (Text)
-#define N_(Text)    gettext_noop (Text)
-
-
-#if !HAVE_SETLOCALE
-# define setlocale(Category, Locale) /* empty */
-#endif
+#define _(_s)           gettext (_s)
+#define S_(_1,_2,_n)    ngettext (_1,_2,_n)
+#define N_(_s)          gettext_noop (_s)
 
 
 #ifdef  CRAY
@@ -307,6 +289,10 @@ extern char *alloca ();
 # include <inttypes.h>
 #endif
 #define FILE_TIMESTAMP uintmax_t
+
+#if !defined(HAVE_STRSIGNAL)
+extern char *strsignal PARAMS ((int signum));
+#endif
 
 /* ISDIGIT offers the following features:
    - Its arg may be any int or unsigned int; it need not be an unsigned char.

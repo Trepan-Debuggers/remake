@@ -1,51 +1,71 @@
-dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.105 2001/07/05 00:35:03 psmith Exp $])
-AC_PREREQ(2.13)dnl		dnl Minimum Autoconf version required.
-AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
+# Process this file with autoconf to produce a configure script.
 
-AM_INIT_AUTOMAKE(make, 3.79.1.90)
+AC_INIT(GNU make,3.79.2rc1,bug-make@gnu.org)
+
+AC_PREREQ(2.53)
+
+AC_REVISION([[$Id: configure.in,v 1.106 2002/04/21 23:57:24 psmith Exp $]])
+
+# Autoconf setup
+AC_CONFIG_AUX_DIR(config)
+AC_CONFIG_SRCDIR(vpath.c)
 AM_CONFIG_HEADER(config.h)
 
-dnl Regular configure stuff
-
-AC_CANONICAL_HOST
+# Automake setup
+AM_INIT_AUTOMAKE
 AC_PROG_MAKE_SET
+
+# Checks for programs.
 AC_PROG_CC
 AC_PROG_INSTALL
-AC_CHECK_PROG(AR, ar, ar, ar)
 AC_PROG_RANLIB
-AC_PROG_CPP			dnl Later checks need this.
+AC_PROG_CPP
+AC_CHECK_PROG(AR, ar, ar, ar)
+# Perl is needed for the test suite (only)
+AC_CHECK_PROG(PERL, perl, perl, perl)
+
+# Specialized system macros
+AC_CANONICAL_HOST
 AC_AIX
 AC_ISC_POSIX
 AC_MINIX
 
-AC_CHECK_PROG(PERL, perl, perl, perl)	dnl Needed for the test suite (only)
+# Enable gettext, in "external" mode.
+# Maintainers: this requires gettext 0.11 or better!
+AM_GNU_GETTEXT([external])
 
-dnl This test must come as early as possible after the compiler configuration
-dnl tests, because the choice of the file model can (in principle) affect
-dnl whether functions and headers are available, whether they work, etc.
+# This test must come as early as possible after the compiler configuration
+# tests, because the choice of the file model can (in principle) affect
+# whether functions and headers are available, whether they work, etc.
 AC_SYS_LARGEFILE
 
+# Checks for libraries.
+AC_SEARCH_LIBS(getpwnam, [sun])
+
+# Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_DIRENT
-AC_TYPE_UID_T			dnl Also does gid_t.
-AC_TYPE_PID_T
-AC_TYPE_SIGNAL
-AC_CHECK_HEADERS(stdlib.h unistd.h limits.h sys/param.h fcntl.h string.h \
-		 memory.h sys/time.h sys/timeb.h)
-AC_PROG_CC_C_O
-AM_PROG_CC_STDC
-AC_C_CONST			dnl getopt needs this.
-AC_C_INLINE			dnl gettext needs this.
 AC_HEADER_STAT
 AC_HEADER_TIME
+AC_CHECK_HEADERS(stdlib.h unistd.h limits.h sys/param.h fcntl.h string.h \
+		 memory.h sys/time.h sys/timeb.h)
 
-dnl Handle internationalization
+AM_PROG_CC_C_O
+AM_PROG_CC_STDC
+AC_C_CONST
+AC_TYPE_SIGNAL
+AC_TYPE_UID_T
+AC_TYPE_PID_T
 
-ALL_LINGUAS="da de es fr gl ja ko nl pl pt_BR ru tr"
-pds_WITH_GETTEXT
+# Find some definition for uintmax_t
 
-jm_AC_TYPE_UINTMAX_T
+AC_CHECK_TYPE(uintmax_t,,[
+  uintmax_t="unsigned long"
+  AC_CHECK_TYPE(unsigned long long,[uintmax_t="unsigned long long"])
+  AC_DEFINE_UNQUOTED(uintmax_t,$uintmax_t,[Define uintmax_t if not defined in <stdint.h> or <inttypes.h>.])])
+
+# Find out whether our struct stat returns nanosecond resolution timestamps.
+
 AC_STRUCT_ST_MTIM_NSEC
 AC_MSG_CHECKING([whether to use high resolution file timestamps])
 AC_CACHE_VAL(make_cv_file_timestamp_hi_res, [
@@ -77,20 +97,6 @@ if test $make_cv_file_timestamp_hi_res = yes; then
   fi
 fi
 
-AC_SUBST(LIBOBJS)
-
-AC_DEFUN(AC_CHECK_SYMBOL, [dnl
-AC_MSG_CHECKING(for $1)
-AC_CACHE_VAL(ac_cv_check_symbol_$1, [dnl
-AC_TRY_LINK(, [extern char *sys_siglist[]; puts(*sys_siglist);],
-	    ac_cv_check_symbol_$1=yes, ac_cv_check_symbol_$1=no)])
-if test "$ac_cv_check_symbol_$1" = yes; then
-changequote(,)dnl
-  ac_tr_symbol=`echo $1 | tr '[a-z]' '[A-Z]'`
-changequote([,])dnl
-  AC_DEFINE_UNQUOTED(HAVE_${ac_tr_symbol})
-fi
-AC_MSG_RESULT($ac_cv_check_symbol_$1)])dnl
 
 # See if we have a standard version of gettimeofday().  Since actual
 # implementations can differ, just make sure we have the most common
@@ -112,22 +118,20 @@ if test $ac_cv_func_gettimeofday = yes; then
 	    [Define if you have a standard gettimeofday function])
 fi
 
-AC_CHECK_FUNCS(	memmove memcpy strchr strdup psignal mkstemp mktemp fdopen \
+AC_CHECK_FUNCS(	memcpy strchr strdup mkstemp mktemp fdopen \
 	        bsd_signal dup2 getcwd sigsetmask sigaction getgroups \
 		setlinebuf seteuid setegid setreuid setregid pipe \
 		strerror strsignal)
 
-AC_CHECK_SYMBOL(sys_siglist)
 AC_FUNC_ALLOCA
 AC_FUNC_VFORK
 AC_FUNC_VPRINTF
 AC_FUNC_STRCOLL
 AC_FUNC_CLOSEDIR_VOID
 AC_FUNC_SETVBUF_REVERSED
-
-AC_CHECK_LIB(kstat, kstat_open) dnl _Must_ come before AC_FUNC_GETLOADAVG.
-AC_CHECK_FUNCS(pstat_getdynamic) dnl Supposedly in AC_FUNC_GETLOADAVG, but...?
 AC_FUNC_GETLOADAVG
+
+AC_DECL_SYS_SIGLIST
 
 # Check out the wait reality.
 AC_CHECK_HEADERS(sys/wait.h)
@@ -158,37 +162,37 @@ if test "$make_cv_union_wait" = yes; then
 fi
 AC_MSG_RESULT($make_cv_union_wait)
 
-AC_DECL_SYS_SIGLIST
 
-# The presence of the following is not meant to imply
-# that make necessarily works on those systems.
-AC_SEARCH_LIBS(getpwnam, sun)
+# See if the user wants to use pmake's "customs" distributed build capability
 
-AC_SUBST(REMOTE) REMOTE=stub
-make_try_customs=no
+use_customs=false
 AC_ARG_WITH(customs,
-[  --with-customs=DIR      Enable remote jobs via Customs--see README.customs],
-[case "$withval" in
-  n|no) ;;
-  *) make_cppflags="$CPPFLAGS"
-     case "$withval" in
-       y|ye|yes) ;;
-       *) CPPFLAGS="$CPPFLAGS -I$with_customs/include/customs"
-	  make_ldflags="$LDFLAGS -L$with_customs/lib" ;;
-     esac
-     CF_NETLIBS
-     AC_CHECK_HEADER(customs.h,
-	             REMOTE=cstms
-                       LIBS="$LIBS -lcustoms" LDFLAGS="$make_ldflags",
-		     with_customs=no
-                       CPPFLAGS="$make_cppflags" make_badcust=yes)
-     ;;
-esac])
+  AC_HELP_STRING([--with-customs=DIR],
+		 [Enable remote jobs via Customs--see README.customs]),
+  [case $withval in
+    n|no) : ;;
+    *) make_cppflags="$CPPFLAGS"
+       case $withval in
+	 y|ye|yes) : ;;
+	 *) CPPFLAGS="$CPPFLAGS -I$with_customs/include/customs"
+	    make_ldflags="$LDFLAGS -L$with_customs/lib" ;;
+       esac
+       CF_NETLIBS
+       AC_CHECK_HEADER(customs.h,
+		       [use_customs=true
+			 LIBS="$LIBS -lcustoms" LDFLAGS="$make_ldflags"],
+		       [with_customs=no
+			 CPPFLAGS="$make_cppflags" make_badcust=yes])
+       ;;
+  esac])
+# Tell automake about this, so it can include the right .c files.
+AM_CONDITIONAL(USE_CUSTOMS, test $use_customs = true)
 
-dnl See if we can handle the job server feature, and if the user wants it.
+# See if we can handle the job server feature, and if the user wants it.
 
 AC_ARG_ENABLE(job-server,
-  [  --disable-job-server    Disallow recursive make communication during -jN],
+  AC_HELP_STRING([--disable-job-server],
+                 [Disallow recursive make communication during -jN]),
   [make_cv_job_server="$enableval" user_job_server="$enableval"],
   [make_cv_job_server="yes"])
 
@@ -213,26 +217,13 @@ case "$ac_cv_func_pipe/$ac_cv_func_sigaction/$make_cv_sa_restart/$has_wait_nohan
               [Define this to enable job server support in GNU make.]);;
 esac
 
-dnl Allow building with dmalloc
-
-AC_ARG_ENABLE(dmalloc,
-  [  --enable-dmalloc        Enable support for the dmalloc debugging library],
-  [make_cv_dmalloc="$enableval"],
-  [make_cv_dmalloc="no"])
-
-case "$make_cv_dmalloc" in
-  yes) AC_CHECK_HEADERS(dmalloc.h)
-       AC_CHECK_LIB(dmalloc, dmalloc_shutdown)
-       CPPFLAGS="$CPPFLAGS -DDMALLOC_FUNC_CHECK" ;;
-esac
-
 AC_CACHE_CHECK(for location of SCCS get command, make_cv_path_sccs_get, [
 if test -f /usr/sccs/get; then
   make_cv_path_sccs_get=/usr/sccs/get
 else
   make_cv_path_sccs_get=get
 fi])
-AC_DEFINE_UNQUOTED(SCCS_GET,["$make_cv_path_sccs_get"])
+AC_DEFINE_UNQUOTED(SCCS_GET, ["$make_cv_path_sccs_get"], [Define to the name of the SCCS 'get' command.])
 
 ac_clean_files="$ac_clean_files s.conftest conftoast" # Remove these later.
 if ( /usr/sccs/admin -n s.conftest || admin -n s.conftest ) >/dev/null 2>&1 &&
@@ -247,7 +238,7 @@ if ( /usr/sccs/admin -n s.conftest || admin -n s.conftest ) >/dev/null 2>&1 &&
     fi])
   case "$make_cv_sys_get_minus_G" in
     yes) AC_DEFINE(SCCS_GET_MINUS_G, 1,
-           [Define this if the SCCS \`get' command understands the \`-G<file>' option.]);;
+           [Define this if the SCCS 'get' command understands the '-G<file>' option.]);;
   esac
 fi
 rm -f s.conftest conftoast
@@ -269,7 +260,7 @@ AC_CACHE_VAL(make_cv_sys_gnu_glob, [
 # endif
 #endif
  ], make_cv_sys_gnu_glob=yes, make_cv_sys_gnu_glob=no)])
-case "$make_cv_sys_gnu_glob" in
+case $make_cv_sys_gnu_glob in
   yes) AC_MSG_RESULT(yes) ;;
   no)  AC_MSG_RESULT([no; using local copy])
        AC_SUBST(GLOBDIR) GLOBDIR=glob
@@ -288,13 +279,11 @@ if test -r "$srcdir/maintMakefile"; then
 fi
 AC_SUBST_FILE(MAINT_MAKEFILE)
 
-AC_OUTPUT(build.sh Makefile glob/Makefile i18n/Makefile)
+# Allow building with dmalloc
+AM_WITH_DMALLOC
 
-dnl If we don't yet have build.sh.in, build.sh is a bogus 0-length file
-dnl so remove it.
-dnl Can't do this because then remote builds with build.sh don't work.
-dnl test -f build.sh.in || rm -f build.sh
 
+# Sanity check and inform the user of what we found
 
 case "$make_badcust" in
   yes) echo
@@ -309,7 +298,7 @@ case "$with_customs" in
        :
      else
        echo
-       echo "WARNING: \`$with_customs/lib' does not appear to contain the"
+       echo "WARNING: '$with_customs/lib' does not appear to contain the"
        echo "         Customs library.  You must build and install Customs"
        echo "         before compiling GNU make."
        echo
@@ -334,6 +323,23 @@ case "$make_cv_job_server/$user_job_server" in
 	  echo "         Disabling job server support."
           echo ;;
 esac
+
+
+# Specify what files are to be created.
+# We only generate the build.sh if we have a build.sh.in; we won't have
+# one before we've created a distribution.
+
+AC_CONFIG_FILES(Makefile glob/Makefile po/Makefile.in config/Makefile)
+
+if test -f $srcdir/build.sh.in; then
+  AC_CONFIG_FILES(build.sh)
+fi
+
+
+# OK, do it!
+
+AC_OUTPUT
+
 
 dnl Local Variables:
 dnl comment-start: "dnl "
