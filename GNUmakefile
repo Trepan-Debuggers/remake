@@ -193,7 +193,7 @@ version := \
   $(strip $(shell sed -e '/=/!d' -e 's/^.*"\(.*\)";$$/\1/' < version.c))
 tarfiles := make make-doc
 tarfiles := $(addsuffix -$(version).tar,$(tarfiles))
-tarfiles := $(tarfiles:%=%.Z) $(tarfiles:%=%.z)
+tarfiles := $(tarfiles:%=%.z) # no more compress $(tarfiles:%=%.Z)
 # Depend on default and doc so we don't ship anything that won't compile.
 dist: default info dvi tests tarfiles
 .PHONY: tarfiles
