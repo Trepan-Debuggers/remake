@@ -79,20 +79,21 @@ extern int errno;
 #endif
 
 #ifndef	PATH_MAX
-#ifdef	POSIX
-#define	GET_PATH_MAX	pathconf ("/", _PC_PATH_MAX)
-#else	/* Not POSIX.  */
+#ifndef	POSIX
+#define	PATH_MAX	MAXPATHLEN
+#endif	/* Not POSIX.  */
+#endif	/* No PATH_MAX.  */
 #ifndef MAXPATHLEN
 #define MAXPATHLEN 1024
 #endif	/* No MAXPATHLEN.  */
-#define	PATH_MAX	MAXPATHLEN
-#endif	/* POSIX.  */
-#endif	/* No PATH_MAX.  */
 
 #ifdef	PATH_MAX
-#define	PATH_VAR(var)	char var[PATH_MAX]
 #define	GET_PATH_MAX	PATH_MAX
+#define	PATH_VAR(var)	char var[PATH_MAX]
 #else
+#define	NEED_GET_PATH_MAX
+extern unsigned int get_path_max ();
+#define	GET_PATH_MAX	(get_path_max ())
 #define	PATH_VAR(var)	char *var = (char *) alloca (GET_PATH_MAX)
 #endif
 
