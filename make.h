@@ -331,6 +331,7 @@ extern int just_print_flag, silent_flag, ignore_errors_flag, keep_going_flag;
 extern int debug_flag, print_data_base_flag, question_flag, touch_flag;
 extern int env_overrides, no_builtin_rules_flag, print_version_flag;
 extern int print_directory_flag, warn_undefined_variables_flag;
+extern int posix_pedantic;
 
 extern unsigned int job_slots;
 extern double max_load_average;
