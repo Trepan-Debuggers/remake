@@ -481,14 +481,14 @@ dep_name (dep)
 }
 #endif
 
-#if	!defined(POSIX) && !defined(__GNU_LIBRARY__)
+#ifndef	HAVE_UNISTD_H
 extern int getuid (), getgid (), geteuid (), getegid ();
 #ifdef	USG
 extern int setuid (), setgid ();
 #else
 extern int setreuid (), setregid ();
 #endif	/* USG.  */
-#endif	/* Not POSIX and not GNU C library.  */
+#endif	/* No <unistd.h>.  */
 
 /* Keep track of the user and group IDs for user- and make- access.  */
 static int user_uid = -1, user_gid = -1, make_uid = -1, make_gid = -1;
