@@ -850,7 +850,7 @@ try_variable_definition (flocp, line, origin)
      you have bash.exe installed as d:/unix/bash.exe, and d:/unix is on
      your $PATH, then SHELL=/usr/local/bin/bash will have the effect of
      defining SHELL to be "d:/unix/bash.exe".  */
-  if (origin == o_file
+  if ((origin == o_file || origin == o_override)
       && strcmp (expanded_name, "SHELL") == 0)
     {
       char shellpath[PATH_MAX];
@@ -918,7 +918,7 @@ try_variable_definition (flocp, line, origin)
   else
 #endif /* __MSDOS__ */
 #ifdef WINDOWS32
-  if (origin == o_file
+  if ((origin == o_file || origin == o_override)
       && strcmp (expanded_name, "SHELL") == 0) {
     extern char* default_shell;
 
