@@ -4,6 +4,14 @@
 	gettext (0.11.1).  We're using gettext's new "external" support,
 	to avoid including libintl source with GNU make.
 
+	* README.cvs: New file.  Explain how to build GNU make from CVS.
+
+	* getloadavg.c (main): Include make.h in the "TEST" program to
+	avoid warnings.
+
+	* Makefile.am: Remove special rules for loadavg.  Replace them
+	with Automake capabilities for building extra programs.
+
 	* signame.c: This file does nothing if the system provide
 	strsignal().  If not, it implements strsignal().  If the system
 	doesn't define sys_siglist, then we make our own; otherwise we use
