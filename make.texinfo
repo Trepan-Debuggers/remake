@@ -2,7 +2,7 @@
 @setfilename make.info
 @synindex vr fn
 
-@c $Header: /sources/make/make/Attic/make.texinfo,v 1.64 1988/06/19 16:15:50 mcgrath Beta $
+@c $Header: /sources/make/make/Attic/make.texinfo,v 2.0 1988/06/28 21:58:42 mcgrath Rel $
 
 @ifinfo
 This file documents the GNU Make utility.
@@ -634,7 +634,7 @@ The criterion for being out of date is specified in terms of the
 date if it does not exist or if it is older than any of the dependencies
 (by comparison of last-modification times).  The idea is that the contents
 of the target file are computed based on information in the dependencies,
-so if any of the dependencies changes the contents of the existing target
+so if any of the dependencies changes, the contents of the existing target
 file are no longer necessarily valid.
 
 How to update is specified by @var{commands}.  These are lines to be
