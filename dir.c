@@ -1,5 +1,5 @@
 /* Directory hashing for GNU Make.
-Copyright (C) 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -557,5 +557,5 @@ init_dir ()
 {
   __glob_opendir_hook = open_dirstream;
   __glob_readdir_hook = read_dirstream;
-  __glob_closedir_hook = free;
+  __glob_closedir_hook = (void (*) __P ((__ptr_t stream))) free;
 }
