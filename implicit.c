@@ -546,41 +546,24 @@ pattern_search (file, archive, depth, recursions)
 
   /* If there was only one target, there is nothing to do.  */
   if (rule->targets[1] != 0)
-    {
-      unsigned int max_targets = 2;
-      register unsigned int idx;
+    for (i = 0; rule->targets[i] != 0; ++i)
+      if (i != matches[foundrule])
+	{
+	  struct dep *new = (struct dep *) xmalloc (sizeof (struct dep));
+	  new->name = p = (char *) xmalloc (rule->lens[i] + stemlen + 1);
+	  bcopy (rule->targets[i], p,
+		 rule->suffixes[i] - rule->targets[i] - 1);
+	  p += rule->suffixes[i] - rule->targets[i] - 1;
+	  bcopy (stem, p, stemlen);
+	  p += stemlen;
+	  bcopy (rule->suffixes[i], p,
+		 rule->lens[i]
+		 - (rule->suffixes[i] - rule->targets[i] - 1) + 1);
+	  new->file = enter_file (new->name);
+	  new->next = file->also_make;
+	  file->also_make = new;
+	}
 
-      file->also_make = (char **) xmalloc (2 * sizeof (char *));
-
-      idx = 0;
-      for (i = 0; rule->targets[i] != 0; ++i)
-	if (i != matches[foundrule])
-	  {
-	    if (idx == max_targets - 1)
-	      {
-		max_targets += 5;
-		file->also_make
-		  = (char **) xrealloc ((char *) file->also_make,
-					max_targets * sizeof (char *));
-	      }
-
-	    p = file->also_make[idx++] = (char *) xmalloc (rule->lens[i] +
-							   stemlen + 1);
-	    bcopy (rule->targets[i], p,
-		   rule->suffixes[i] - rule->targets[i] - 1);
-	    p += rule->suffixes[i] - rule->targets[i] - 1;
-	    bcopy (stem, p, stemlen);
-	    p += stemlen;
-	    bcopy (rule->suffixes[i], p,
-		   rule->lens[i]
-		   - (rule->suffixes[i] - rule->targets[i] - 1) + 1);
-	  }
-
-      file->also_make[idx] = 0;
-      if (idx < max_targets - 1)
-	file->also_make = (char **) xrealloc ((char *) file->also_make,
-					      (idx + 1) * sizeof (char *));
-    }
 
   return 1;
 }
