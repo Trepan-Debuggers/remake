@@ -8,8 +8,8 @@
 
 @set EDITION 0.41
 @set VERSION 3.64 Beta
-@set UPDATED 8 March 1993
-@set UPDATE-MONTH March 1993
+@set UPDATED 11 April 1993
+@set UPDATE-MONTH April 1993
 
 @c finalout
 
@@ -3056,6 +3056,23 @@ Also, any arguments that define variable values are added to @code{MAKE},
 so the sub-@code{make} gets them too.  Thus, if you do @samp{make
 CFLAGS=-O}, so that all C compilations will be optimized, the
 sub-@code{make} is run with @samp{cd subdir; /bin/make CFLAGS=-O}.@refill
+
+@vindex MAKE_COMMAND
+@vindex MAKEOVERRIDES
+The @code{MAKE} variable actually just refers to two other variables
+which contain these special values.  In fact, @code{MAKE} is always
+defined as @samp{$(MAKE_COMMAND) $(MAKEOVERRIDES)}.  The variable
+@code{MAKE_COMMAND} is the file name with which @code{make} was invoked
+(such as @file{/bin/make}, above).  The variable @code{MAKEOVERRIDES}
+contains definitions for the variables defined on the command line; in
+the above example, its value is @samp{CFLAGS=-O}.  If you @emph{do not}
+want these variable definitions done in all recursive @code{make}
+invocations, you can redefine the @code{MAKEOVERRIDES} variable to
+remove them.  You do this in any of the normal ways for defining
+variables: in a makefile (@pxref{Setting Variables}); on the command
+line with an argument like @samp{MAKEOVERRIDES=} 
+(@pxref{Overriding Variables}); or with an environment variable
+(@pxref{Environment, ,Variables from the Environment}).
 
 As a special feature, using the variable @code{MAKE} in the commands of
 a rule alters the effects of the @samp{-t} (@samp{--touch}), @samp{-n}
