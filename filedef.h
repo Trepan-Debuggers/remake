@@ -35,6 +35,8 @@ struct file
     				   rule has been used */
     struct dep *also_make;	/* Targets that are made by making this.  */
     FILE_TIMESTAMP last_mtime;	/* File's modtime, if already known.  */
+    FILE_TIMESTAMP mtime_before_update;	/* File's modtime before any updating
+                                           has been performed.  */
     struct file *prev;		/* Previous entry for same file name;
 				   used when there are multiple double-colon
 				   entries for the same file.  */

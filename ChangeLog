@@ -1,3 +1,12 @@
+1999-07-15  Paul D. Smith  <psmith@gnu.org>
+
+	* function.c (func_apply): Various code cleanup and tightening.
+	(function_table): Add "apply" as a valid builtin function.
+
+	* make.texinfo (Apply Function): Document it.
+
+	* NEWS: Announce it.
+
 1999-07-09  Paul D. Smith  <psmith@gnu.org>
 
 	* job.c (start_waiting_job): Don't get a second job token if we
@@ -227,7 +236,12 @@
 
 	* function.c: Rewrite to use one C function per make function,
 	instead of a huge switch statement.  Also allows some cleanup of
-	multi-architecture issues.
+	multi-architecture issues, and a cleaner API which makes things
+	like func_apply() simple.
+
+	* function.c (func_apply): Initial implementation.  Expand either
+	a builtin function or a make variable in the context of some
+	arguments, provided as $1, $2, ... $N.
 
 1999-03-19  Eli Zaretskii  <eliz@is.elta.co.il>
 1999-03-19  Rob Tulloh  <rob_tulloh@dev.tivoli.com>

@@ -94,7 +94,7 @@ update_goal_chain (goals, makefiles)
 
     struct dep *g;
     for (g = goals; g != 0; g = g->next)
-      g->changed = g->deferred = 0;
+      g->changed = 0;
   }
 
 #if 0
@@ -134,7 +134,6 @@ update_goal_chain (goals, makefiles)
 	    {
 	      unsigned int ocommands_started;
 	      int x;
-	      FILE_TIMESTAMP mtime = MTIME (file);
 	      check_renamed (file);
 	      if (makefiles)
 		{
@@ -161,16 +160,6 @@ update_goal_chain (goals, makefiles)
 		 decide when to give an "up to date" diagnostic.  */
 	      g->changed += commands_started - ocommands_started;
 
-              /* Set the goal's `deferred' flag if we started a command but
-                 it didn't finish (parallel builds).  We need to remember
-                 this, because the next time through the goal chain the call
-                 to reap_children() will set the mtime, not the call to
-                 update_file() above.  So, the saved mtime from before
-                 update_file() will be the same as the mtime after it, and
-                 we'll think nothing changed when it did (see below).  */
-              if (file->command_state == cs_running)
-                g->deferred = 1;
-
 	      stop = 0;
 	      if (x != 0 || file->updated)
 		{
@@ -191,7 +180,8 @@ update_goal_chain (goals, makefiles)
 			  stop = (!keep_going_flag && !question_flag
 				  && !makefiles);
 			}
-		      else if (MTIME (file) != mtime || g->deferred)
+		      else if (file->updated && g->changed &&
+                               file->last_mtime != file->mtime_before_update)
 			{
 			  /* Updating was done.  If this is a makefile and
 			     just_print_flag or question_flag is set
@@ -199,7 +189,6 @@ update_goal_chain (goals, makefiles)
 			     specified as a command-line target), don't
 			     change STATUS.  If STATUS is changed, we will
 			     get re-exec'd, and fall into an infinite loop.  */
-                          g->deferred = 0;
 			  if (!makefiles
 			      || (!just_print_flag && !question_flag))
 			    status = 0;
@@ -735,6 +724,9 @@ notice_finished_file (file)
   if (ran && !file->phony)
     {
       struct file *f;
+
+      assert(file->mtime_before_update == 0);
+      file->mtime_before_update = file->last_mtime;
 
       if (just_print_flag || question_flag
 	  || (file->is_target && file->cmds == 0))

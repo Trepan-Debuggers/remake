@@ -1358,7 +1358,7 @@ int main (int argc, char ** argv)
     for (p = old_files->list; *p != 0; ++p)
       {
 	f = enter_command_line_file (*p);
-	f->last_mtime = (FILE_TIMESTAMP) 1;
+	f->last_mtime = f->mtime_before_update = (FILE_TIMESTAMP) 1;
 	f->updated = 1;
 	f->update_status = 0;
 	f->command_state = cs_finished;
@@ -1369,7 +1369,7 @@ int main (int argc, char ** argv)
       for (p = new_files->list; *p != 0; ++p)
 	{
 	  f = enter_command_line_file (*p);
-	  f->last_mtime = NEW_MTIME;
+	  f->last_mtime = f->mtime_before_update = NEW_MTIME;
 	}
     }
 
