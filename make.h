@@ -44,6 +44,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 extern int errno;
 #endif
 
+#ifndef	isblank
+#define	isblank(c)	((c) == ' ' || (c) == '\t')
+#endif
+
 #ifdef	HAVE_UNISTD_H
 #include <unistd.h>
 #ifdef	_POSIX_VERSION
@@ -68,12 +72,13 @@ extern char *sys_siglist[];
 #include "signame.h"
 #endif
 
-#ifndef	isblank
-#define	isblank(c)	((c) == ' ' || (c) == '\t')
-#endif
-
-#if	!defined(NSIG) && defined(_NSIG)
+/* Some systems do not define NSIG in <signal.h>.  */
+#ifndef	NSIG
+#ifdef	_NSIG
 #define	NSIG	_NSIG
+#else
+#define	NSIG	32
+#endif
 #endif
 
 #ifndef	RETSIGTYPE
