@@ -337,16 +337,35 @@
  */
 
 /*
-   Define if you have the Cygnus GNU WIN32 tool set or a shell
-   that does not grok 'sh -c quoted-command-line' correctly.
+ * If you have a shell that does not grok 'sh -c quoted-command-line'
+ * correctly, you need this setting. Please see below for specific
+ * shell support.
  */
 #undef BATCH_MODE_ONLY_SHELL
+#define BATCH_MODE_ONLY_SHELL 1
 
 /*
-   Define if you have the MKS tool set or shell. Do NOT define
-   BATCH_MODE_ONLY_SHELL if you define HAVE_MKS_SHELL
+ * Define if you have the Cygnus "Cygwin" GNU Windows32 tool set.
+ * Do NOT define BATCH_MODE_ONLY_SHELL if you define HAVE_CYGWIN_SHELL
+ */
+#undef HAVE_CYGWIN_SHELL
+
+/*
+ * Define if you have the MKS tool set or shell. Do NOT define
+ * BATCH_MODE_ONLY_SHELL if you define HAVE_MKS_SHELL
  */
 #undef HAVE_MKS_SHELL
 
-/* Define if you prefer Case Insensitve behavior */
+/*
+ * Enforce the mutual exclusivity restriction.
+ */
+#ifdef HAVE_MKS_SHELL
+#undef BATCH_MODE_ONLY_SHELL
+#endif
+
+#ifdef HAVE_CYGWIN_SHELL
+#undef BATCH_MODE_ONLY_SHELL
+#endif
+
+/* Define if you prefer Case Insensitive behavior */
 #undef HAVE_CASE_INSENSITIVE_FS

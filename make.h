@@ -77,8 +77,8 @@ Boston, MA 02111-1307, USA.  */
 extern int errno;
 #endif
 
-/* A shortcut for EINTR checking.  Note you should never negate this!  That
-   very likely doesn't mean what you want if EINTR is not available.  */
+/* A shortcut for EINTR checking.  Note you should be careful when negating
+   this!  That might not mean what you want if EINTR is not available.  */
 #ifdef EINTR
 # define EINTR_SET (errno == EINTR)
 #else
@@ -170,6 +170,10 @@ extern unsigned int get_path_max PARAMS ((void));
 #define INTEGER_TYPE_MINIMUM(t) \
   (! INTEGER_TYPE_SIGNED (t) ? (t) 0 : ~ (t) 0 << (sizeof (t) * CHAR_BIT - 1))
 #define INTEGER_TYPE_MAXIMUM(t) (~ (t) 0 - INTEGER_TYPE_MINIMUM (t))
+
+#ifndef CHAR_MAX
+# define CHAR_MAX INTEGER_TYPE_MAXIMUM (char)
+#endif
 
 #ifdef STAT_MACROS_BROKEN
 # ifdef S_ISREG

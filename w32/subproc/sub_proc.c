@@ -8,7 +8,9 @@
 #include "w32err.h"
 #include "config.h"
 
-static char *make_command_line( char *shell_name, char *exec_path, char **argv);
+static char *make_command_line(char *shell_name, char *exec_path, char **argv);
+
+extern int debug_flag; /* from make */
 
 typedef struct sub_process_t {
 	int sv_stdin[2];
@@ -504,6 +506,10 @@ process_begin(
 		if (envblk) free(envblk);
 		return -1;
 	} else {
+		if (debug_flag)
+			printf("CreateProcess(%s,%s,...)\n",
+				exec_path ? exec_path : "NULL",
+				command_line ? command_line : "NULL");
 		if (CreateProcess(
 			exec_path,
 			command_line,
@@ -912,6 +918,13 @@ make_command_line( char *shell_name, char *full_exec_path, char **argv)
 	unsigned int	bytes_required = 0;
 	char*		command_line;
 	char*		command_line_i;
+	int  cygwin_mode = 0; /* HAVE_CYGWIN_SHELL */
+	int have_sh = 0; /* HAVE_CYGWIN_SHELL */
+
+#ifdef HAVE_CYGWIN_SHELL
+	have_sh = (shell_name != NULL || strstr(full_exec_path, "sh.exe"));
+	cygwin_mode = 1;
+#endif
 
 	if (shell_name && full_exec_path) {
 		bytes_required
@@ -964,7 +977,7 @@ make_command_line( char *shell_name, char *full_exec_path, char **argv)
 				backslash_count = 0;
 				break;
 
-#ifndef HAVE_MKS_SHELL
+#if !defined(HAVE_MKS_SHELL) && !defined(HAVE_CYGWIN_SHELL)
 			case '\\':
 				backslash_count++;
 				break;
@@ -1058,6 +1071,11 @@ make_command_line( char *shell_name, char *full_exec_path, char **argv)
 
 		while(*p) {
 			if (*p == '\"') {
+				if (cygwin_mode && have_sh) { /* HAVE_CYGWIN_SHELL */
+					/* instead of a \", cygwin likes "" */
+					*(command_line_i++) = '\"';
+				} else {
+
 				/*
 				 * We have to insert a backslash for the "
 				 * and each \ that precedes the ".
@@ -1068,7 +1086,8 @@ make_command_line( char *shell_name, char *full_exec_path, char **argv)
 					*(command_line_i++) = '\\';
 					backslash_count--;
 				};
-#ifndef HAVE_MKS_SHELL
+				}
+#if !defined(HAVE_MKS_SHELL) && !defined(HAVE_CYGWIN_SHELL)
 			} else if (*p == '\\') {
 				backslash_count++;
 			} else {
@@ -1083,7 +1102,7 @@ make_command_line( char *shell_name, char *full_exec_path, char **argv)
 		}
 
 		if (*enclose_in_quotes_i) {
-#ifndef HAVE_MKS_SHELL
+#if !defined(HAVE_MKS_SHELL) && !defined(HAVE_CYGWIN_SHELL)
 			/*
 			 * Add one \ for each \ that precedes the
 			 * closing ".

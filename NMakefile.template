@@ -50,8 +50,10 @@ all: config.h subproc Release Debug
 #
 subproc: w32/subproc/WinDebug/subproc.lib w32/subproc/WinRel/subproc.lib
 
-w32/subproc/WinDebug/subproc.lib w32/subproc/WinRel/subproc.lib:
+w32/subproc/WinDebug/subproc.lib w32/subproc/WinRel/subproc.lib: w32/subproc/misc.c w32/subproc/sub_proc.c w32/subproc/w32err.c
 	subproc.bat $(SUBPROC_MAKEFILE) $(MAKE)
+	if exist WinDebug\make.exe erase WinDebug\make.exe
+	if exist WinRel\make.exe erase WinRel\make.exe
 
 config.h: config.h.W32
 	copy $? $@
@@ -62,9 +64,11 @@ Debug:
 	$(MAKE) /f $(MAKEFILE) LDFLAGS="$(LDFLAGS_debug)" CFLAGS="$(CFLAGS_debug)" OUTDIR=WinDebug WinDebug/make.exe
 
 clean:
-	rmdir /s /q WinDebug WinRel
-	rmdir /s /q w32\subproc\WinDebug w32\subproc\WinRel
-	erase config.h
+	if exist WinDebug\nul rmdir /s /q WinDebug
+	if exist WinRel\nul rmdir /s /q WinRel
+	if exist w32\subproc\WinDebug\nul rmdir /s /q w32\subproc\WinDebug
+	if exist w32\subproc\WinRel\nul rmdir /s /q w32\subproc\WinRel
+	if exist config.h erase config.h
 	erase *.pdb
 
 $(OUTDIR):

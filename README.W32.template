@@ -1,7 +1,11 @@
 Port of GNU make to Windows NT and Windows 95
 Builds natively with MSVC 2.x or MSVC 4.x compilers.
+Should also build fine with MSVC 5.x and 6.x (though not confirmed).
 
-To build with nmake on Windows NT or Windows 95:
+This Windows 32-bit port of GNU make is maintained primarily by Rob
+Tulloh, who is also the author of this README.
+
+To build with nmake on Windows NT, Windows 95, or Windows 98:
 
 	1. Make sure cl.exe is in your %Path%. Example:
 
@@ -18,6 +22,15 @@ To build with nmake on Windows NT or Windows 95:
 	4. nmake /f NMakefile
 
 
+    A short cut to steps 1, 2, and 3 is to run VCVARS32.bat before
+    invoking namke. For example:
+
+        c:
+        cd \msdev\bin
+        VCVARS32.bat
+	cd \path\to\make-%VERSION%
+	nmake /f NMakefile
+
 There is a bat file (build_w32.bat) for folks who have fear of nmake.
 
 Outputs:
@@ -28,47 +41,58 @@ Outputs:
 
 -- Notes/Caveats --
 
+GNU make on Windows 32-bit platforms:
+
+	This version of make is ported natively to Windows32 platforms
+	(Windows NT 3.51, Windows NT 4.0, Windows 95, and Windows 98). It
+	does not rely on any 3rd party software or add-on packages for
+	building. The only thing needed is a version of Visual C++,
+	which is the predominant compiler used on Windows32 platforms.
+
+	Do not confuse this port of GNU make with other Windows32 projects
+	which provide a GNU make binary. These are separate projects
+	and are not connected to this port effort.
+
 GNU make and sh.exe:
 
 	This port prefers you have a working sh.exe somewhere on your
-	system. If you don't have sh.exe, port falls back to
+	system. If you don't have sh.exe, the port falls back to
 	MSDOS mode for launching programs (via a batch file).
-	The MSDOS mode style execution has not been tested too
-	carefully though (I use GNU bash as sh.exe).
+	The MSDOS mode style execution has not been tested that
+	carefully though (The author uses GNU bash as sh.exe).
 
 	There are very few true ports of Bourne shell for NT right now.
-	There is a version of GNU bash available from Cygnus gnu-win32
-	porting effort.	 Other possibilities are to get the MKS version
-	of sh.exe or to build your own with a package like
-	NutCracker (DataFocus) or Portage (Consensys).
+	There is a version of GNU bash available from Cygnus "Cygwin"
+	porting effort (http://sourceware.cygnus.com/cygwin).
+	Other possibilities are the MKS version of sh.exe, or building
+        your own with a package like NutCracker (DataFocus) or Portage
+        (Consensys).
 
-	Tivoli uses a homegrown port of GNU bash which is not (yet)
-	freely available. It may be available someday, but I am not in control
-	of this decision nor do I influence it. Sorry!
+GNU make and brain-dead shells (BATCH_MODE_ONLY_SHELL):
 
-GNU make and Cygnus GNU WIN32 tools (BATCH_MODE_ONLY_SHELL)
-
-	GNU make now has support for the Cygnus GNU WIN32 toolset. The
-	GNU WIN32 version of Bourne shell does not behave well when
-	invoked as 'sh -c' from CreateProcess().  The main problem is it
-	seems to have a hard time handling quoted strings correctly. This
-	problem goes away when invoking the Cygnus shell on a shell script.
+	Some versions of Bourne shell does not behave well when invoked
+	as 'sh -c' from CreateProcess().  The main problem is they seem
+	to have a hard time handling quoted strings correctly. This can
+	be circumvented by writing commands to be executed to a batch
+	file and then executing the command by calling 'sh file'.
 
 	To work around this difficulty, this version of make supports
-	a new batch mode.  When BATCH_MODE_ONLY_SHELL is defined at compile
+	a batch mode.  When BATCH_MODE_ONLY_SHELL is defined at compile
 	time, make forces all command lines to be executed via script
 	files instead of by command line.
 
-	A native WIN32 system with no Bourne shell will also run
+	A native Windows32 system with no Bourne shell will also run
 	in batch mode.  All command lines will be put into batch files
 	and executed via $(COMSPEC) (%COMSPEC%).
 
-	If you wish to use Cygnus' GNUWIN32 shell, be sure you define
-	BATCH_MODE_ONLY_SHELL in the config.h.W32 prior to building make.
-	The new feataure was tested with the b18 version of the Cygnus
-	user tools.
+GNU make and Cygnus GNU Windows32 tools:
 
-GNU make and MKS shell
+	Good news! Make now has native support for Cygwin sh. To enable,
+	define the HAVE_CYGWIN_SHELL in config.h and rebuild make
+	from scratch. This version of make tested with B20.1 of Cygwin.
+	Do not define BATCH_MODE_ONLY_SHELL if you use HAVE_CYGWIN_SHELL.
+
+GNU make and the MKS shell:
 
 	There is now semi-official support for the MKS shell. To turn this
 	support on, define HAVE_MKS_SHELL in the config.h.W32 before you
@@ -101,9 +125,6 @@ GNU make handling of drive letters in pathnames (PATH, vpath, VPATH):
 	      /some/path/x:/some/path/y
 	      x:/some/path/x:x:/some/path/y
 
-	These caveats affect Windows systems only (Windows NT and
-	Windows 95) and can be ignored for other platforms.
-
 	Please note that you are free to mix colon and semi-colon in the
 	specification of paths.	 Make is able to figure out the intended
 	result and convert the paths internally to the format needed
@@ -118,25 +139,27 @@ GNU make handling of drive letters in pathnames (PATH, vpath, VPATH):
 GNU make test suite:
 
 	I verified all functionality with a slightly modified version
-	of make-test-0.4.5 (modifications to get test suite to run
+	of make-test-%VERSION% (modifications to get test suite to run
 	on Windows NT). All tests pass in an environment that includes
-	sh.exe. Tested on both Windows NT and Windows 95.
+	sh.exe.  Tests were performed on both Windows NT and Windows 95.
 
-Building GNU make on Windows NT and Windows 95 with Microsoft Visual C
+Building GNU make on Windows NT and Windows 95/98 with Microsoft Visual C:
 
 	I did not provide a Visual C project file with this port as
 	the project file would not be considered freely distributable
-	(or so I think). It is easy enough to create one though if
+	(or so I think). It is easy enough to create one, though, if
 	you know how to use Visual C.
 
 	I build the program statically to avoid problems locating DLL's
 	on machines that may not have MSVC runtime installed. If you
 	prefer, you can change make to build with shared libraries by
-	changing /MT to /MD in the NMakefile (or build_w32.bat).
+	changing /MT to /MD in the NMakefile (or in build_w32.bat).
 
-	Program has not been built under non-Intel architectures (yet).
+	The program has not been built for non-Intel architectures (yet).
 
-	I have not tried to build with any other compilers than MSVC.
+	I have not tried to build with any other compilers than MSVC. I
+	have heard that this is possible though so don't be afraid to
+	notify me of your successes!
 
 Pathnames and white space:
 
@@ -206,17 +229,13 @@ SAMBA/NTFS/VFAT:
 	under VFAT. VFAT users may wish to be aware that this port
 	of make does respect case sensitivity.
 
-	Version 3.76 contains some preliminary support for FAT.	 Make
-	now tries to work around some difficulties with stat'ing of
+FAT:
+
+	Version 3.76 added support for FAT filesystems. Make
+	works around some difficulties with stat'ing of
 	files and caching of filenames and directories internally.
-	There is still a known problem with filenames sometimes being
-	found to have modification dates in the future which cause make
-	to complain about the file and exit (remake.c).
 
 Bug reports:
 
-	Please submit bugs via the normal bug reporting mechanism
-	which is described in one of the Texinfo files. If you don't
-	have Texinfo for Windows NT or Windows 95, these files are simple
-	text files and can be read with a text editor.
-
+	Please submit bugs via the normal bug reporting mechanism which
+	is described in the GNU make manual and the base README.
