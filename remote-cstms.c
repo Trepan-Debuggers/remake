@@ -48,22 +48,21 @@ static char *normalized_cwd;
 /* Call once at startup even if no commands are run.  */
 
 void
-remote_setup ()
+remote_setup (void)
 {
 }
 
 /* Called before exit.  */
 
 void
-remote_cleanup ()
+remote_cleanup (void)
 {
 }
 
 /* Return nonzero if the next job should be done remotely.  */
 
 int
-start_remote_job_p (first_p)
-     int first_p;
+start_remote_job_p (int first_p)
 {
   static int inited = 0;
   int status;
@@ -140,12 +139,8 @@ start_remote_job_p (first_p)
    if it is local (meaning *ID_PTR is a process ID).  */
 
 int
-start_remote_job (argv, envp, stdin_fd, is_remote, id_ptr, used_stdin)
-     char **argv, **envp;
-     int stdin_fd;
-     int *is_remote;
-     int *id_ptr;
-     int *used_stdin;
+start_remote_job (char **argv, char **envp, int stdin_fd,
+                  int *is_remote, int *id_ptr, int *used_stdin)
 {
   char waybill[MAX_DATA_SIZE], msg[128];
   struct hostent *host;
@@ -275,9 +270,8 @@ start_remote_job (argv, envp, stdin_fd, is_remote, id_ptr, used_stdin)
    0 if we would have to block and !BLOCK, or < 0 if there were none.  */
 
 int
-remote_status (exit_code_ptr, signal_ptr, coredump_ptr, block)
-     int *exit_code_ptr, *signal_ptr, *coredump_ptr;
-     int block;
+remote_status (int *exit_code_ptr, int *signal_ptr, int *coredump_ptr,
+               int block)
 {
   return -1;
 }
@@ -286,7 +280,7 @@ remote_status (exit_code_ptr, signal_ptr, coredump_ptr, block)
    If this notification is done by raising the child termination
    signal, do not block that signal.  */
 void
-block_remote_children ()
+block_remote_children (void)
 {
   return;
 }
@@ -295,16 +289,14 @@ block_remote_children ()
    If this is done by raising the child termination signal,
    do not unblock that signal.  */
 void
-unblock_remote_children ()
+unblock_remote_children (void)
 {
   return;
 }
 
 /* Send signal SIG to child ID.  Return 0 if successful, -1 if not.  */
 int
-remote_kill (id, sig)
-     int id;
-     int sig;
+remote_kill (int id, int sig)
 {
   return -1;
 }

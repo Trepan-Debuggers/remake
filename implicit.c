@@ -33,9 +33,7 @@ static int pattern_search PARAMS ((struct file *file, int archive, unsigned int 
    or returns 0 if no implicit rule was found.  */
 
 int
-try_implicit_rule (file, depth)
-     struct file *file;
-     unsigned int depth;
+try_implicit_rule (struct file *file, unsigned int depth)
 {
   DBF (DB_IMPLICIT, _("Looking for an implicit rule for `%s'.\n"));
 
@@ -78,11 +76,8 @@ try_implicit_rule (file, depth)
    DEPTH is used for debugging messages.  */
 
 static int
-pattern_search (file, archive, depth, recursions)
-     struct file *file;
-     int archive;
-     unsigned int depth;
-     unsigned int recursions;
+pattern_search (struct file *file, int archive,
+                unsigned int depth, unsigned int recursions)
 {
   /* Filename we are searching for a rule for.  */
   char *filename = archive ? strchr (file->name, '(') : file->name;

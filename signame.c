@@ -63,10 +63,7 @@ static int sig_table_nelts = 0;
 /* Enter signal number NUMBER into the tables with ABBREV and NAME.  */
 
 static void
-init_sig (number, abbrev, name)
-     int number;
-     const char *abbrev;
-     const char *name;
+init_sig (int number, const char *abbrev, const char *name)
 {
   /* If this value is ever greater than NSIG it seems like it'd be a bug in
      the system headers, but... better safe than sorry.  We know, for
@@ -83,7 +80,7 @@ init_sig (number, abbrev, name)
 }
 
 static int
-signame_init ()
+signame_init (void)
 {
   int i;
 
@@ -233,8 +230,7 @@ signame_init ()
 
 
 char *
-strsignal (signal)
-     int signal;
+strsignal (int signal)
 {
   static char buf[] = "Signal 12345678901234567890";
 

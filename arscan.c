@@ -46,9 +46,7 @@ static time_t VMS_member_date;
 static long int (*VMS_function) ();
 
 static int
-VMS_get_member_info (module, rfa)
-     struct dsc$descriptor_s *module;
-     unsigned long *rfa;
+VMS_get_member_info (struct dsc$descriptor_s *module, unsigned long *rfa)
 {
   int status, i;
   long int fnval;
@@ -136,10 +134,7 @@ VMS_get_member_info (module, rfa)
    Returns 0 if have scanned successfully.  */
 
 long int
-ar_scan (archive, function, arg)
-     char *archive;
-     long int (*function) ();
-     long int arg;
+ar_scan (char *archive, long int (*function) PARAMS ((void)), long int arg)
 {
   char *p;
 
@@ -306,10 +301,7 @@ struct ar_hdr
    Returns 0 if have scanned successfully.  */
 
 long int
-ar_scan (archive, function, arg)
-     char *archive;
-     long int (*function) ();
-     long int arg;
+ar_scan (char *archive, long int (*function)(), long int arg)
 {
 #ifdef AIAMAG
   FL_HDR fl_header;
@@ -714,9 +706,7 @@ ar_scan (archive, function, arg)
    sizeof (struct ar_hdr.ar_name) - 1.  */
 
 int
-ar_name_equal (name, mem, truncated)
-     char *name, *mem;
-     int truncated;
+ar_name_equal (char *name, char *mem, int truncated)
 {
   char *p;
 
@@ -747,14 +737,9 @@ ar_name_equal (name, mem, truncated)
 #ifndef VMS
 /* ARGSUSED */
 static long int
-ar_member_pos (desc, mem, truncated,
-	       hdrpos, datapos, size, date, uid, gid, mode, name)
-     int desc;
-     char *mem;
-     int truncated;
-     long int hdrpos, datapos, size, date;
-     int uid, gid, mode;
-     char *name;
+ar_member_pos (int desc, char *mem, int truncated,
+	       long int hdrpos, long int datapos, long int size,
+               long int date, int uid, int gid, int mode, char *name)
 {
   if (!ar_name_equal (name, mem, truncated))
     return 0;
@@ -769,8 +754,7 @@ ar_member_pos (desc, mem, truncated,
    1 if valid but member MEMNAME does not exist.  */
 
 int
-ar_member_touch (arname, memname)
-     char *arname, *memname;
+ar_member_touch (char *arname, char *memname)
 {
   register long int pos = ar_scan (arname, ar_member_pos, (long int) memname);
   register int fd;
@@ -829,13 +813,9 @@ ar_member_touch (arname, memname)
 #ifdef TEST
 
 long int
-describe_member (desc, name, truncated,
-		 hdrpos, datapos, size, date, uid, gid, mode)
-     int desc;
-     char *name;
-     int truncated;
-     long int hdrpos, datapos, size, date;
-     int uid, gid, mode;
+describe_member (int desc, char *name, int truncated,
+		 long int hdrpos, long int datapos, long int size,
+                 long int date, int uid, int gid, int mode)
 {
   extern char *ctime ();
 
@@ -848,14 +828,12 @@ describe_member (desc, name, truncated,
   return 0;
 }
 
-main (argc, argv)
-     int argc;
-     char **argv;
+int
+main (int argc, char **argv)
 {
   ar_scan (argv[1], describe_member);
   return 0;
 }
 
 #endif	/* TEST.  */
-
 #endif	/* NO_ARCHIVES.  */

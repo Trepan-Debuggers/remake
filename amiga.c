@@ -30,8 +30,7 @@ static const char Amiga_version[] = "$VER: Make 3.74.3 (12.05.96) \n"
 		    "Amiga Port by A. Digulla (digulla@home.lake.de)";
 
 int
-MyExecute (argv)
-char ** argv;
+MyExecute (char **argv)
 {
     char * buffer, * ptr;
     char ** aptr;
@@ -92,8 +91,7 @@ char ** argv;
 }
 
 char *
-wildcard_expansion (wc, o)
-char * wc, * o;
+wildcard_expansion (char *wc, char *o)
 {
 #   define PATH_SIZE	1024
     struct AnchorPath * apath;

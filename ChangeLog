@@ -1,3 +1,9 @@
+2002-10-14  Paul D. Smith  <psmith@gnu.org>
+
+	* *.c: Convert to using ANSI C-style function definitions.
+	* Makefile.am: Enable the ansi2knr feature of automake.
+	* configure.in: ditto.
+
 2002-10-13  Paul D. Smith  <psmith@gnu.org>
 
 	* commands.c (set_file_variables): Bug #1379: Don't use alloca()

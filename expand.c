@@ -52,9 +52,7 @@ char *variable_buffer;
    the following call.  */
 
 char *
-variable_buffer_output (ptr, string, length)
-     char *ptr, *string;
-     unsigned int length;
+variable_buffer_output (char *ptr, char *string, unsigned int length)
 {
   register unsigned int newlen = length + (ptr - variable_buffer);
 
@@ -76,7 +74,7 @@ variable_buffer_output (ptr, string, length)
 /* Return a pointer to the beginning of the variable buffer.  */
 
 static char *
-initialize_variable_output ()
+initialize_variable_output (void)
 {
   /* If we don't have a variable output buffer yet, get one.  */
 
@@ -95,9 +93,7 @@ initialize_variable_output ()
 static char *allocated_variable_append PARAMS ((const struct variable *v));
 
 char *
-recursively_expand_for_file (v, file)
-     struct variable *v;
-     struct file *file;
+recursively_expand_for_file (struct variable *v, struct file *file)
 {
   char *value;
   struct variable_set_list *save = 0;
@@ -137,10 +133,7 @@ recursively_expand_for_file (v, file)
 __inline
 #endif
 static char *
-reference_variable (o, name, length)
-     char *o;
-     char *name;
-     unsigned int length;
+reference_variable (char *o, char *name, unsigned int length)
 {
   register struct variable *v;
   char *value;
@@ -173,10 +166,7 @@ reference_variable (o, name, length)
    NULL.  */
 
 char *
-variable_expand_string (line, string, length)
-     register char *line;
-     char *string;
-     long length;
+variable_expand_string (char *line, char *string, long length)
 {
   register struct variable *v;
   register char *p, *o, *p1;
@@ -409,8 +399,7 @@ variable_expand_string (line, string, length)
    and is valid only until the next time this function is called.  */
 
 char *
-variable_expand (line)
-     char *line;
+variable_expand (char *line)
 {
   return variable_expand_string(NULL, line, (long)-1);
 }
@@ -422,8 +411,7 @@ variable_expand (line)
    variable-expansion that is in progress.  */
 
 char *
-expand_argument (str, end)
-     char *str, *end;
+expand_argument (char *str, char *end)
 {
   char *tmp;
 
@@ -446,9 +434,7 @@ expand_argument (str, end)
    FILE's commands were found.  Expansion uses FILE's variable set list.  */
 
 static char *
-variable_expand_for_file (line, file)
-     char *line;
-     register struct file *file;
+variable_expand_for_file (char *line, struct file *file)
 {
   char *result;
   struct variable_set_list *save;
@@ -474,10 +460,8 @@ variable_expand_for_file (line, file)
    any upper variable sets.  Then expand the resulting value.  */
 
 static char *
-variable_append (name, length, set)
-     const char *name;
-     unsigned int length;
-     const struct variable_set_list *set;
+variable_append (const char *name, unsigned int length,
+                 const struct variable_set_list *set)
 {
   const struct variable *v;
   char *buf = 0;
@@ -510,8 +494,7 @@ variable_append (name, length, set)
 
 
 static char *
-allocated_variable_append (v)
-     const struct variable *v;
+allocated_variable_append (const struct variable *v)
 {
   char *val, *retval;
 
@@ -541,9 +524,7 @@ allocated_variable_append (v)
    This function is called a lot.  It wants to be efficient.  */
 
 char *
-allocated_variable_expand_for_file (line, file)
-     char *line;
-     struct file *file;
+allocated_variable_expand_for_file (char *line, struct file *file)
 {
   char *value;
 

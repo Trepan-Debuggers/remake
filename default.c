@@ -511,7 +511,7 @@ static char *default_variables[] =
 /* Set up the default .SUFFIXES list.  */
 
 void
-set_default_suffixes ()
+set_default_suffixes (void)
 {
   suffix_file = enter_file (".SUFFIXES");
 
@@ -533,7 +533,7 @@ set_default_suffixes ()
    installed after.  */
 
 void
-install_default_suffix_rules ()
+install_default_suffix_rules (void)
 {
   register char **s;
 
@@ -558,7 +558,7 @@ install_default_suffix_rules ()
 /* Install the default pattern rules.  */
 
 void
-install_default_implicit_rules ()
+install_default_implicit_rules (void)
 {
   register struct pspec *p;
 
@@ -573,7 +573,7 @@ install_default_implicit_rules ()
 }
 
 void
-define_default_variables ()
+define_default_variables (void)
 {
   register char **s;
 

@@ -41,25 +41,21 @@ struct function_table_entry
   };
 
 static unsigned long
-function_table_entry_hash_1 (keyv)
-    const void *keyv;
+function_table_entry_hash_1 (const void *keyv)
 {
   struct function_table_entry const *key = (struct function_table_entry const *) keyv;
   return_STRING_N_HASH_1 (key->name, key->len);
 }
 
 static unsigned long
-function_table_entry_hash_2 (keyv)
-    const void *keyv;
+function_table_entry_hash_2 (const void *keyv)
 {
   struct function_table_entry const *key = (struct function_table_entry const *) keyv;
   return_STRING_N_HASH_2 (key->name, key->len);
 }
 
 static int
-function_table_entry_hash_cmp (xv, yv)
-    const void *xv;
-    const void *yv;
+function_table_entry_hash_cmp (const void *xv, const void *yv)
 {
   struct function_table_entry const *x = (struct function_table_entry const *) xv;
   struct function_table_entry const *y = (struct function_table_entry const *) yv;
@@ -80,12 +76,9 @@ static struct hash_table function_table;
    done only at the ends of whitespace-delimited words.  */
 
 char *
-subst_expand (o, text, subst, replace, slen, rlen, by_word, suffix_only)
-     char *o;
-     char *text;
-     char *subst, *replace;
-     unsigned int slen, rlen;
-     int by_word, suffix_only;
+subst_expand (char *o, char *text, char *subst, char *replace,
+              unsigned int slen, unsigned int rlen,
+              int by_word, int suffix_only)
 {
   register char *t = text;
   register char *p;
@@ -150,11 +143,8 @@ subst_expand (o, text, subst, replace, slen, rlen, by_word, suffix_only)
    run through find_percent, and REPLACE_PERCENT is the result.  */
 
 char *
-patsubst_expand (o, text, pattern, replace, pattern_percent, replace_percent)
-     char *o;
-     char *text;
-     register char *pattern, *replace;
-     register char *pattern_percent, *replace_percent;
+patsubst_expand (char *o, char *text, char *pattern, char *replace,
+                 char *pattern_percent, char *replace_percent)
 {
   unsigned int pattern_prepercent_len, pattern_postpercent_len;
   unsigned int replace_prepercent_len, replace_postpercent_len = 0;
@@ -255,8 +245,7 @@ patsubst_expand (o, text, pattern, replace, pattern_percent, replace_percent)
 /* Look up a function by name.  */
 
 static const struct function_table_entry *
-lookup_function (s)
-     const char *s;
+lookup_function (const char *s)
 {
   const char *e = s;
 
@@ -277,8 +266,7 @@ lookup_function (s)
 /* Return 1 if PATTERN matches STR, 0 if not.  */
 
 int
-pattern_matches (pattern, percent, str)
-     register char *pattern, *percent, *str;
+pattern_matches (char *pattern, char *percent, char *str)
 {
   unsigned int sfxlen, strlength;
 
@@ -312,11 +300,8 @@ pattern_matches (pattern, percent, str)
 */
 
 static char *
-find_next_argument (startparen, endparen, ptr, end)
-     char startparen;
-     char endparen;
-     const char *ptr;
-     const char *end;
+find_next_argument (char startparen, char endparen,
+                    const char *ptr, const char *end)
 {
   int count = 0;
 
@@ -343,8 +328,7 @@ find_next_argument (startparen, endparen, ptr, end)
    only good until the next call to string_glob.  */
 
 static char *
-string_glob (line)
-     char *line;
+string_glob (char *line)
 {
   static char *result = 0;
   static unsigned int length;
@@ -406,10 +390,7 @@ string_glob (line)
  */
 
 static char *
-func_patsubst (o, argv, funcname)
-     char *o;
-     char **argv;
-     const char *funcname;
+func_patsubst (char *o, char **argv, const char *funcname)
 {
   o = patsubst_expand (o, argv[2], argv[0], argv[1], (char *) 0, (char *) 0);
   return o;
@@ -417,10 +398,7 @@ func_patsubst (o, argv, funcname)
 
 
 static char *
-func_join (o, argv, funcname)
-     char *o;
-     char **argv;
-     const char *funcname;
+func_join (char *o, char **argv, const char *funcname)
 {
   int doneany = 0;
 
@@ -460,10 +438,7 @@ func_join (o, argv, funcname)
 
 
 static char *
-func_origin (o, argv, funcname)
-     char *o;
-     char **argv;
-     const char *funcname;
+func_origin (char *o, char **argv, const char *funcname)
 {
   /* Expand the argument.  */
   register struct variable *v = lookup_variable (argv[0], strlen (argv[0]));
@@ -514,10 +489,7 @@ func_origin (o, argv, funcname)
 
 
 static char *
-func_notdir_suffix (o, argv, funcname)
-     char *o;
-     char **argv;
-     const char *funcname;
+func_notdir_suffix (char *o, char **argv, const char *funcname)
 {
   /* Expand the argument.  */
   char *list_iterator = argv[0];
@@ -575,10 +547,7 @@ func_notdir_suffix (o, argv, funcname)
 
 
 static char *
-func_basename_dir (o, argv, funcname)
-     char *o;
-     char **argv;
-     const char *funcname;
+func_basename_dir (char *o, char **argv, const char *funcname)
 {
   /* Expand the argument.  */
   char *p3 = argv[0];
@@ -634,10 +603,7 @@ func_basename_dir (o, argv, funcname)
 }
 
 static char *
-func_addsuffix_addprefix (o, argv, funcname)
-     char *o;
-     char **argv;
-     const char *funcname;
+func_addsuffix_addprefix (char *o, char **argv, const char *funcname)
 {
   int fixlen = strlen (argv[0]);
   char *list_iterator = argv[1];
@@ -667,10 +633,7 @@ func_addsuffix_addprefix (o, argv, funcname)
 }
 
 static char *
-func_subst (o, argv, funcname)
-     char *o;
-     char **argv;
-     const char *funcname;
+func_subst (char *o, char **argv, const char *funcname)
 {
   o = subst_expand (o, argv[2], argv[0], argv[1], strlen (argv[0]),
 		    strlen (argv[1]), 0, 0);
@@ -680,10 +643,7 @@ func_subst (o, argv, funcname)
 
 
 static char *
-func_firstword (o, argv, funcname)
-     char *o;
-     char **argv;
-     const char *funcname;
+func_firstword (char *o, char **argv, const char *funcname)
 {
   unsigned int i;
   char *words = argv[0];    /* Use a temp variable for find_next_token */
@@ -697,10 +657,7 @@ func_firstword (o, argv, funcname)
 
 
 static char *
-func_words (o, argv, funcname)
-     char *o;
-     char **argv;
-     const char *funcname;
+func_words (char *o, char **argv, const char *funcname)
 {
   int i = 0;
   char *word_iterator = argv[0];
@@ -717,9 +674,7 @@ func_words (o, argv, funcname)
 }
 
 char *
-strip_whitespace (begpp, endpp)
-     char **begpp;
-     char **endpp;
+strip_whitespace (char **begpp, char **endpp)
 {
   while (isspace ((unsigned char)**begpp) && *begpp <= *endpp)
     (*begpp) ++;
@@ -729,8 +684,7 @@ strip_whitespace (begpp, endpp)
 }
 
 int
-is_numeric (p)
-     char *p;
+is_numeric (char *p)
 {
   char *end = p + strlen (p) - 1;
   char *beg = p;
@@ -744,9 +698,7 @@ is_numeric (p)
 }
 
 void
-check_numeric (s, message)
-     char *s;
-     char *message;
+check_numeric (char *s, char *message)
 {
   if (!is_numeric (s))
     fatal (reading_file, message);
@@ -755,10 +707,7 @@ check_numeric (s, message)
 
 
 static char *
-func_word (o, argv, funcname)
-     char *o;
-     char **argv;
-     const char *funcname;
+func_word (char *o, char **argv, const char *funcname)
 {
   char *end_p=0;
   int i=0;
@@ -784,10 +733,7 @@ func_word (o, argv, funcname)
 }
 
 static char *
-func_wordlist (o, argv, funcname)
-     char *o;
-     char **argv;
-     const char *funcname;
+func_wordlist (char *o, char **argv, const char *funcname)
 {
   int start, count;
 
@@ -824,10 +770,7 @@ func_wordlist (o, argv, funcname)
 }
 
 static char*
-func_findstring (o, argv, funcname)
-     char *o;
-     char **argv;
-     const char *funcname;
+func_findstring (char *o, char **argv, const char *funcname)
 {
   /* Find the first occurrence of the first string in the second.  */
   int i = strlen (argv[0]);
@@ -838,10 +781,7 @@ func_findstring (o, argv, funcname)
 }
 
 static char *
-func_foreach (o, argv, funcname)
-     char *o;
-     char **argv;
-     const char *funcname;
+func_foreach (char *o, char **argv, const char *funcname)
 {
   /* expand only the first two.  */
   char *varname = expand_argument (argv[0], NULL);
@@ -900,23 +840,19 @@ struct a_word
 };
 
 static unsigned long
-a_word_hash_1 (key)
-    const void *key;
+a_word_hash_1 (const void *key)
 {
   return_STRING_HASH_1 (((struct a_word const *) key)->str);
 }
 
 static unsigned long
-a_word_hash_2 (key)
-    const void *key;
+a_word_hash_2 (const void *key)
 {
   return_STRING_HASH_2 (((struct a_word const *) key)->str);
 }
 
 static int
-a_word_hash_cmp (x, y)
-    const void *x;
-    const void *y;
+a_word_hash_cmp (const void *x, const void *y)
 {
   int result = ((struct a_word const *) x)->length - ((struct a_word const *) y)->length;
   if (result)
@@ -935,10 +871,7 @@ struct a_pattern
 };
 
 static char *
-func_filter_filterout (o, argv, funcname)
-     char *o;
-     char **argv;
-     const char *funcname;
+func_filter_filterout (char *o, char **argv, const char *funcname)
 {
   struct a_word *wordhead;
   struct a_word **wordtail;
@@ -1068,10 +1001,7 @@ func_filter_filterout (o, argv, funcname)
 
 
 static char *
-func_strip (o, argv, funcname)
-     char *o;
-     char **argv;
-     const char *funcname;
+func_strip (char *o, char **argv, const char *funcname)
 {
   char *p = argv[0];
   int doneany =0;
@@ -1103,10 +1033,7 @@ func_strip (o, argv, funcname)
   Print a warning or fatal message.
 */
 static char *
-func_error (o, argv, funcname)
-     char *o;
-     char **argv;
-     const char *funcname;
+func_error (char *o, char **argv, const char *funcname)
 {
   char **argvp;
   char *msg, *p;
@@ -1143,10 +1070,7 @@ func_error (o, argv, funcname)
   chop argv[0] into words, and sort them.
  */
 static char *
-func_sort (o, argv, funcname)
-     char *o;
-     char **argv;
-     const char *funcname;
+func_sort (char *o, char **argv, const char *funcname)
 {
   char **words = 0;
   int nwords = 0;
@@ -1208,10 +1132,7 @@ func_sort (o, argv, funcname)
 */
 
 static char *
-func_if (o, argv, funcname)
-     char *o;
-     char **argv;
-     const char *funcname;
+func_if (char *o, char **argv, const char *funcname)
 {
   char *begp = argv[0];
   char *endp = begp + strlen (argv[0]);
@@ -1252,10 +1173,7 @@ func_if (o, argv, funcname)
 }
 
 static char *
-func_wildcard (o, argv, funcname)
-     char *o;
-     char **argv;
-     const char *funcname;
+func_wildcard (char *o, char **argv, const char *funcname)
 {
 
 #ifdef _AMIGA
@@ -1276,10 +1194,7 @@ func_wildcard (o, argv, funcname)
 */
 
 static char *
-func_eval (o, argv, funcname)
-     char *o;
-     char **argv;
-     const char *funcname;
+func_eval (char *o, char **argv, const char *funcname)
 {
   eval_buffer (argv[0]);
 
@@ -1288,10 +1203,7 @@ func_eval (o, argv, funcname)
 
 
 static char *
-func_value (o, argv, funcname)
-     char *o;
-     char **argv;
-     const char *funcname;
+func_value (char *o, char **argv, const char *funcname)
 {
   /* Look up the variable.  */
   struct variable *v = lookup_variable (argv[0], strlen (argv[0]));
@@ -1307,9 +1219,7 @@ func_value (o, argv, funcname)
   \r  is replaced on UNIX as well. Is this desirable?
  */
 void
-fold_newlines (buffer, length)
-     char *buffer;
-     int *length;
+fold_newlines (char *buffer, int *length)
 {
   char *dst = buffer;
   char *src = buffer;
@@ -1493,10 +1403,7 @@ msdos_openpipe (int* pipedes, int *pidp, char *text)
 #else
 #ifndef _AMIGA
 static char *
-func_shell (o, argv, funcname)
-     char *o;
-     char **argv;
-     const char *funcname;
+func_shell (char *o, char **argv, const char *funcname)
 {
   char* batch_filename = NULL;
   int i;
@@ -1839,11 +1746,8 @@ static struct function_table_entry function_table_init[] =
 /* These must come after the definition of function_table.  */
 
 static char *
-expand_builtin_function (o, argc, argv, entry_p)
-     char *o;
-     int argc;
-     char **argv;
-     struct function_table_entry *entry_p;
+expand_builtin_function (char *o, int argc, char **argv,
+                         const struct function_table_entry *entry_p)
 {
   if (argc < (int)entry_p->minimum_args)
     fatal (reading_file,
@@ -1870,9 +1774,7 @@ expand_builtin_function (o, argc, argv, entry_p)
    *STRINGP past the reference and returning nonzero.  If not, return zero.  */
 
 int
-handle_function (op, stringp)
-     char **op;
-     char **stringp;
+handle_function (char **op, char **stringp)
 {
   const struct function_table_entry *entry_p;
   char openparen = (*stringp)[0];
@@ -1979,10 +1881,7 @@ handle_function (op, stringp)
    assigned to $1, $2, ... $N.  $0 is the name of the function.  */
 
 static char *
-func_call (o, argv, funcname)
-     char *o;
-     char **argv;
-     const char *funcname;
+func_call (char *o, char **argv, const char *funcname)
 {
   char *fname;
   char *cp;
@@ -2066,7 +1965,7 @@ func_call (o, argv, funcname)
 }
 
 void
-hash_init_function_table ()
+hash_init_function_table (void)
 {
   hash_init (&function_table, FUNCTION_TABLE_ENTRIES * 2,
 	     function_table_entry_hash_1, function_table_entry_hash_2,

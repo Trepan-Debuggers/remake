@@ -147,8 +147,7 @@ static enum make_word_type get_next_mword PARAMS ((char *buffer, char *delim,
 /* Read in all the makefiles and return the chain of their names.  */
 
 struct dep *
-read_all_makefiles (makefiles)
-     char **makefiles;
+read_all_makefiles (char **makefiles)
 {
   unsigned int num_makefiles = 0;
 
@@ -274,9 +273,7 @@ read_all_makefiles (makefiles)
 }
 
 static int
-eval_makefile (filename, flags)
-     char *filename;
-     int flags;
+eval_makefile (char *filename, int flags)
 {
   struct dep *deps;
   struct ebuffer ebuf;
@@ -388,8 +385,7 @@ eval_makefile (filename, flags)
 }
 
 int
-eval_buffer (buffer)
-     char *buffer;
+eval_buffer (char *buffer)
 {
   struct ebuffer ebuf;
   const struct floc *curfile;
@@ -425,9 +421,7 @@ eval_buffer (buffer)
    Returns 2 if FILENAME was read, and we kept a reference (don't free it).  */
 
 static int
-eval (ebuf, set_default)
-     struct ebuffer *ebuf;
-     int set_default;
+eval (struct ebuffer *ebuf, int set_default)
 {
   static char *collapsed = 0;
   static unsigned int collapsed_length = 0;
@@ -1230,11 +1224,8 @@ eval (ebuf, set_default)
    the variable to be defined.  The following lines remain to be read.  */
 
 static void
-do_define (name, namelen, origin, ebuf)
-     char *name;
-     unsigned int namelen;
-     enum variable_origin origin;
-     struct ebuffer *ebuf;
+do_define (char *name, unsigned int namelen,
+           enum variable_origin origin, struct ebuffer *ebuf)
 {
   struct floc defstart;
   long nlines = 0;
@@ -1343,9 +1334,7 @@ do_define (name, namelen, origin, ebuf)
    1 if following text should be ignored.  */
 
 static int
-conditional_line (line, flocp)
-     char *line;
-     const struct floc *flocp;
+conditional_line (char *line, const struct floc *flocp)
 {
   int notdef;
   char *cmdname;
@@ -1561,23 +1550,19 @@ conditional_line (line, flocp)
 /* Remove duplicate dependencies in CHAIN.  */
 
 static unsigned long
-dep_hash_1 (key)
-    const void *key;
+dep_hash_1 (const void *key)
 {
   return_STRING_HASH_1 (dep_name ((struct dep const *) key));
 }
 
 static unsigned long
-dep_hash_2 (key)
-    const void *key;
+dep_hash_2 (const void *key)
 {
   return_STRING_HASH_2 (dep_name ((struct dep const *) key));
 }
 
 static int
-dep_hash_cmp (x, y)
-    const void *x;
-    const void *y;
+dep_hash_cmp (const void *x, const void *y)
 {
   struct dep *dx = (struct dep *) x;
   struct dep *dy = (struct dep *) y;
@@ -1595,8 +1580,7 @@ dep_hash_cmp (x, y)
 
 
 void
-uniquize_deps (chain)
-     struct dep *chain;
+uniquize_deps (struct dep *chain)
 {
   struct hash_table deps;
   register struct dep **depp;
@@ -1638,13 +1622,9 @@ uniquize_deps (chain)
    variable value list.  */
 
 static void
-record_target_var (filenames, defn, two_colon, origin, exported, flocp)
-     struct nameseq *filenames;
-     char *defn;
-     int two_colon;
-     enum variable_origin origin;
-     int exported;
-     const struct floc *flocp;
+record_target_var (struct nameseq *filenames, char *defn, int two_colon,
+                   enum variable_origin origin, int exported,
+                   const struct floc *flocp)
 {
   struct nameseq *nextf;
   struct variable_set_list *global;
@@ -1742,19 +1722,10 @@ record_target_var (filenames, defn, two_colon, origin, exported, flocp)
    that are not incorporated into other data structures.  */
 
 static void
-record_files (filenames, pattern, pattern_percent, deps, cmds_started,
-	      commands, commands_idx, two_colon, have_sysv_atvar,
-              flocp, set_default)
-     struct nameseq *filenames;
-     char *pattern, *pattern_percent;
-     struct dep *deps;
-     unsigned int cmds_started;
-     char *commands;
-     unsigned int commands_idx;
-     int two_colon;
-     int have_sysv_atvar;
-     const struct floc *flocp;
-     int set_default;
+record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
+              struct dep *deps, unsigned int cmds_started, char *commands,
+              unsigned int commands_idx, int two_colon,
+              int have_sysv_atvar, const struct floc *flocp, int set_default)
 {
   struct nameseq *nextf;
   int implicit = 0;
@@ -2156,11 +2127,7 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
    one, or nil if there are none.  */
 
 char *
-find_char_unquote (string, stop1, stop2, blank)
-     char *string;
-     int stop1;
-     int stop2;
-     int blank;
+find_char_unquote (char *string, int stop1, int stop2, int blank)
 {
   unsigned int string_len = 0;
   register char *p = string;
@@ -2218,8 +2185,7 @@ find_char_unquote (string, stop1, stop2, blank)
 /* Search PATTERN for an unquoted %.  */
 
 char *
-find_percent (pattern)
-     char *pattern;
+find_percent (char *pattern)
 {
   return find_char_unquote (pattern, '%', 0, 0);
 }
@@ -2238,11 +2204,7 @@ find_percent (pattern)
    If STRIP is nonzero, strip `./'s off the beginning.  */
 
 struct nameseq *
-parse_file_seq (stringp, stopchar, size, strip)
-     char **stringp;
-     int stopchar;
-     unsigned int size;
-     int strip;
+parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip)
 {
   register struct nameseq *new = 0;
   register struct nameseq *new1, *lastnew1;
@@ -2485,8 +2447,7 @@ parse_file_seq (stringp, stopchar, size, strip)
  */
 
 static unsigned long
-readstring (ebuf)
-     struct ebuffer *ebuf;
+readstring (struct ebuffer *ebuf)
 {
   char *p;
 
@@ -2522,8 +2483,7 @@ readstring (ebuf)
 }
 
 static long
-readline (ebuf)
-     struct ebuffer *ebuf;
+readline (struct ebuffer *ebuf)
 {
   char *p;
   char *end;
@@ -2647,11 +2607,7 @@ readline (ebuf)
    in a command list, etc.)  */
 
 static enum make_word_type
-get_next_mword (buffer, delim, startp, length)
-     char *buffer;
-     char *delim;
-     char **startp;
-     unsigned int *length;
+get_next_mword (char *buffer, char *delim, char **startp, unsigned int *length)
 {
   enum make_word_type wtype = w_bogus;
   char *p = buffer, *beg;
@@ -2815,8 +2771,7 @@ get_next_mword (buffer, delim, startp, length)
    from the arguments and the default list.  */
 
 void
-construct_include_path (arg_dirs)
-     char **arg_dirs;
+construct_include_path (char **arg_dirs)
 {
   register unsigned int i;
 #ifdef VAXC		/* just don't ask ... */
@@ -2912,8 +2867,7 @@ construct_include_path (arg_dirs)
    Return a newly malloc'd string or 0.  */
 
 char *
-tilde_expand (name)
-     char *name;
+tilde_expand (char *name)
 {
 #ifndef VMS
   if (name[1] == '/' || name[1] == '\0')
@@ -2994,9 +2948,7 @@ tilde_expand (name)
    that have room for additional info.  */
 
 struct nameseq *
-multi_glob (chain, size)
-     struct nameseq *chain;
-     unsigned int size;
+multi_glob (struct nameseq *chain, unsigned int size)
 {
   extern void dir_setup_glob ();
   register struct nameseq *new = 0;

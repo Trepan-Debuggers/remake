@@ -196,9 +196,7 @@ enum namestate { N_START, N_DEVICE, N_OPEN, N_DOT, N_CLOSED, N_DONE };
 */
 
 char *
-vmsify (name, type)
-    char *name;
-    int type;
+vmsify (char *name, int type)
 {
 /* max 255 device
    max 39 directory

@@ -1,10 +1,10 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(GNU make,3.80,bug-make@gnu.org)
+AC_INIT(GNU make,3.81a1,bug-make@gnu.org)
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.in,v 1.114 2002/10/03 05:46:12 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.115 2002/10/14 21:54:04 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -29,6 +29,9 @@ AC_CANONICAL_HOST
 AC_AIX
 AC_ISC_POSIX
 AC_MINIX
+
+# Needed for ansi2knr
+AM_C_PROTOTYPES
 
 # Enable gettext, in "external" mode.
 
