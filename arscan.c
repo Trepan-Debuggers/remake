@@ -29,24 +29,12 @@
    (System V Release 1).  There is no default, one or the other must be defined
    to have a nonzero value.  */
 
-#if (defined(sun386) || defined(USGr3) || defined(HPUX) \
-     && !defined(PORTAR) && !defined(PORT5AR))
+#if (!defined (PORTAR) || PORTAR == 0) && (!defined (PORT5AR) || PORT5AR == 0)
+#undef	PORTAR
 #define PORTAR 1
 #endif
 
 #include <ar.h>
-
-#ifndef	AIAMAG
-#if	(defined(APOLLO) || defined(HPUX) || defined(hpux) || \
-	 (PORTAR == 1 && (defined(USGr3) || defined(u3b2) || defined(sun386))))
-#define	AR_NAMELEN	14
-#define	AR_TRAILING_SLASH	/* Member names have a trailing slash.  */
-#else
-#define	AR_NAMELEN	15
-#endif
-#else	/* AIX.  */
-#define	AR_NAMELEN	255
-#endif
 
 /* Cray's <ar.h> apparently defines this.  */
 #ifndef	AR_HDR_SIZE
@@ -153,7 +141,7 @@ ar_scan (archive, function, arg)
 	register int nread;
 	struct ar_hdr member_header;
 #ifdef AIAMAG
-	char name[AR_NAMELEN + 1];
+	char name[256];
 	int name_len;
 	long int dateval;
 	int uidval, gidval;
@@ -172,8 +160,7 @@ ar_scan (archive, function, arg)
 	  }
 
 #ifdef AIAMAG
-#define	AR_MEMHDR	\
-	(AR_HDR_SIZE - sizeof (member_header._ar_name))
+#define	AR_MEMHDR	(AR_HDR_SIZE - sizeof (member_header._ar_name))
 	nread = read (desc, (char *) &member_header, AR_MEMHDR);
 
 	if (nread != AR_MEMHDR)
@@ -207,7 +194,7 @@ ar_scan (archive, function, arg)
 		       dateval, uidval, gidval,
 		       eltmode, arg);
 
-#else
+#else	/* Not AIAMAG.  */
 	nread = read (desc, (char *) &member_header, AR_HDR_SIZE);
 	if (nread == 0)
 	  /* No data left means end of file; that is OK.  */
@@ -228,10 +215,10 @@ ar_scan (archive, function, arg)
 	  register char *p = name + sizeof member_header.ar_name;
 	  while (p > name && *--p == ' ')
 	    *p = '\0';
-#ifdef	AR_TRAILING_SLASH
+
+	  /* On some systems, there is a slash after each member name.  */
 	  if (*p == '/')
 	    *p = '\0';
-#endif
 	}
 
 #ifndef	M_XENIX
@@ -256,7 +243,7 @@ ar_scan (archive, function, arg)
 #endif	/* Not Xenix.  */
 		       eltmode, arg);
 
-#endif  /* Not AIAMAG */
+#endif  /* AIAMAG.  */
 
 	if (fnval)
 	  {
@@ -265,8 +252,9 @@ ar_scan (archive, function, arg)
 	  }
 
 #ifdef AIAMAG
-	if (member_offset == last_member_offset) /* end of chain? */
-	    break;
+	if (member_offset == last_member_offset)
+	  /* End of the chain.  */
+	  break;
 
 	sscanf (member_header.ar_nxtmem, "%12ld", &member_offset);
 
@@ -277,7 +265,8 @@ ar_scan (archive, function, arg)
 	  }
 #else
 	member_offset += AR_HDR_SIZE + eltsize;
-	if (member_offset & 1) member_offset++;
+	if (member_offset % 2 != 0)
+	  member_offset++;
 #endif
       }
   }
@@ -294,32 +283,35 @@ ar_name_equal (name, mem)
      char *name, *mem;
 {
   char *p;
+  unsigned int namelen, memlen;
+  struct ar_hdr h;
+  unsigned int max = sizeof (h.ar_name);
 
   p = rindex (name, '/');
   if (p != 0)
     name = p + 1;
 
-#ifndef	APOLLO
+#if !defined (AIAMAG) && !defined (APOLLO)
 
-  if (!strncmp (name, mem, AR_NAMELEN))
+  /* `reallylongname.o' matches `reallylongnam.o'.
+     If member names have a trailing slash, that's `reallylongna.o'.  */
+
+  if (strncmp (name, mem, max - 3))
+    return 0;
+
+  namelen = strlen (name);
+  memlen = strlen (mem);
+  if (namelen > memlen && memlen >= max - 1
+      && name[namelen - 2] == '.' && name[namelen - 1] == 'o'
+      && mem[memlen - 2] == '.' && mem[memlen - 1] == 'o')
     return 1;
 
-  if (!strncmp (name, mem, AR_NAMELEN - 2))
-    {
-      unsigned int namelen, memlen;
+  return !strncmp (name + max - 3, mem + max - 3);
 
-      namelen = strlen (name);
-      memlen = strlen (mem);
+#else	/* AIX or APOLLO.  */
 
-      if (memlen == AR_NAMELEN
-	  && mem[AR_NAMELEN - 2] == '.' && mem[AR_NAMELEN - 1] == 'o'
-	  && name[namelen - 2] == '.' && name[namelen -1] == 'o')
-	return 1;
-    }
-  return 0;
-
-#else	/* APOLLO.  */
   return !strcmp (name, mem);
+
 #endif
 }
 
