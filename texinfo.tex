@@ -3,7 +3,7 @@
 % Load plain if necessary, i.e., if running under initex.
 \expandafter\ifx\csname fmtname\endcsname\relax\input plain\fi
 %
-\def\texinfoversion{1998-12-20}%
+\def\texinfoversion{1999-01-05}%
 %
 % Copyright (C) 1985, 86, 88, 90, 91, 92, 93, 94, 95, 96, 97, 98
 % Free Software Foundation, Inc.
@@ -2836,7 +2836,7 @@ width0pt\relax} \fi
     \unvbox255
     \kern-\topskip \kern\baselineskip
   }}%
-  \eject
+  \eject % run that output routine to set \partialpage
   %
   % Use the double-column output routine for subsequent pages.
   \output = {\doublecolumnout}%
@@ -2897,7 +2897,7 @@ width0pt\relax} \fi
 }
 \def\enddoublecolumns{%
   \output = {%
-    % Split the last of the double-column material.  Leave on the
+    % Split the last of the double-column material.  Leave it on the
     % current page, no automatic page break.
     \balancecolumns
     %
@@ -2909,14 +2909,15 @@ width0pt\relax} \fi
     % called on to balance too much material, but if it is, this makes
     % the output somewhat more palatable.)
     \global\output = {\onepageout{\pagecontents\PAGE}}%
-    %
-    % \pagegoal was set to the doubled \vsize above, since we restarted
-    % the current page.  We're now back to normal single-column
-    % typesetting, so reset \pagegoal to the normal \vsize.
-    \pagegoal = \vsize
   }%
   \eject
   \endgroup % started in \begindoublecolumns
+  %
+  % \pagegoal was set to the doubled \vsize above, since we restarted
+  % the current page.  We're now back to normal single-column
+  % typesetting, so reset \pagegoal to the normal \vsize (after the
+  % \endgroup where \vsize got restored).
+  \pagegoal = \vsize
 }
 \def\balancecolumns{%
   % Called at the end of the double column material.
