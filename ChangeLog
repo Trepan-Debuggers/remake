@@ -1,13 +1,28 @@
+1999-07-20  Paul D. Smith  <psmith@gnu.org>
+
+	* job.c (start_job_command): Ensure that the state of the target
+	is cs_running.  It might not be if we skipped all the lines due to
+	-n (for example).
+
+	* commands.c (execute_file_commands): If we discover that the
+	command script is empty and succeed early, set cs_running so the
+	modtime of the target is still rechecked.
+
+	* rule.c (freerule): Free the dependency list for the rule.
+
+	* implicit.c (pattern_search): When turning an intermediate file
+	into a real target, keep the also_make list.
+	Free the dep->name if we didn't use it during enter_file().
+
 1999-07-16  Paul D. Smith  <psmith@gnu.org>
 
-	* .purify: New file: suppress some known-OK Purify messages.
-
-	* read.c (read_makefile): Remember to free the commands buffer if
-	we can't find a makefile.
+	* read.c (read_makefile): Don't allocate the commands buffer until
+	we're sure we found a makefile and won't return early (mem leak).
 
 	* job.c (start_job_command): Broken #ifdef test: look for F_SETFD,
 	not FD_SETFD.  Close-on-exec isn't getting set on the bad_stdin
 	file descriptor and it's leaking :-/.
+	* getloadavg.c (getloadavg): Ditto.
 
 1999-07-15  Paul D. Smith  <psmith@gnu.org>
 
@@ -371,9 +386,9 @@
 
 1998-10-13  Paul D. Smith  <psmith@gnu.org>
 
-	* job.c (new_job): If the command list resolves to empty (through
-	variable expansion, for example), stop early rather than running
-	start_waiting_job().
+	* job.c (start_job_command): If the command list resolves to no
+	chars at all (e.g.: "foo:;$(empty)") then command_ptr is NULL;
+	quit early.
 
 1998-10-12  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
