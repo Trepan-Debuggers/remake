@@ -8,14 +8,26 @@
 @cindex conventions for makefiles
 @cindex standards for makefiles
 
-This chapter describes conventions for writing the Makefiles for GNU programs.
+This
+@ifinfo
+node
+@end ifinfo
+@iftex
+@ifset CODESTD
+section
+@end ifset
+@ifclear CODESTD
+chapter
+@end ifclear
+@end iftex
+describes conventions for writing the Makefiles for GNU programs.
 
 @menu
-* Makefile Basics::
-* Utilities in Makefiles::
-* Standard Targets::
-* Command Variables::
-* Directory Variables::
+* Makefile Basics::		General Conventions for Makefiles
+* Utilities in Makefiles::	Utilities in Makefiles
+* Command Variables::		Variables for Specifying Commands
+* Directory Variables::		Variables for Installation Directories
+* Standard Targets::		Standard Targets for Users
 @end menu
 
 @node Makefile Basics
@@ -71,7 +83,7 @@ When using GNU @code{make}, relying on @samp{VPATH} to find the source
 file will work in the case where there is a single dependency file,
 since the @code{make} automatic variable @samp{$<} will represent the
 source file wherever it is.  (Many versions of @code{make} set @samp{$<}
-only in implicit rules.)  A makefile target like
+only in implicit rules.)  A Makefile target like
 
 @smallexample
 foo.o : bar.c
@@ -140,13 +152,325 @@ When you use @code{ranlib}, you should make sure nothing bad happens if
 the system does not have @code{ranlib}.  Arrange to ignore an error
 from that command, and print a message before the command to tell the
 user that failure of the @code{ranlib} command does not mean a problem.
+(The Autoconf @samp{AC_PROG_RANLIB} macro can help with this.)
 
 If you use symbolic links, you should implement a fallback for systems
 that don't have symbolic links.
 
 It is ok to use other utilities in Makefile portions (or scripts)
-intended only for particular systems where you know those utilities to
+intended only for particular systems where you know those utilities
 exist.
+
+@node Command Variables
+@section Variables for Specifying Commands
+
+Makefiles should provide variables for overriding certain commands, options,
+and so on.
+
+In particular, you should run most utility programs via variables.
+Thus, if you use Bison, have a variable named @code{BISON} whose default
+value is set with @samp{BISON = bison}, and refer to it with
+@code{$(BISON)} whenever you need to use Bison.
+
+File management utilities such as @code{ln}, @code{rm}, @code{mv}, and
+so on, need not be referred to through variables in this way, since users
+don't need to replace them with other programs.
+
+Each program-name variable should come with an options variable that is
+used to supply options to the program.  Append @samp{FLAGS} to the
+program-name variable name to get the options variable name---for
+example, @code{BISONFLAGS}.  (The name @code{CFLAGS} is an exception to
+this rule, but we keep it because it is standard.)  Use @code{CPPFLAGS}
+in any compilation command that runs the preprocessor, and use
+@code{LDFLAGS} in any compilation command that does linking as well as
+in any direct use of @code{ld}.
+
+If there are C compiler options that @emph{must} be used for proper
+compilation of certain files, do not include them in @code{CFLAGS}.
+Users expect to be able to specify @code{CFLAGS} freely themselves.
+Instead, arrange to pass the necessary options to the C compiler
+independently of @code{CFLAGS}, by writing them explicitly in the
+compilation commands or by defining an implicit rule, like this:
+
+@smallexample
+CFLAGS = -g
+ALL_CFLAGS = -I. $(CFLAGS)
+.c.o:
+        $(CC) -c $(CPPFLAGS) $(ALL_CFLAGS) $<
+@end smallexample
+
+Do include the @samp{-g} option in @code{CFLAGS}, because that is not
+@emph{required} for proper compilation.  You can consider it a default
+that is only recommended.  If the package is set up so that it is
+compiled with GCC by default, then you might as well include @samp{-O}
+in the default value of @code{CFLAGS} as well.
+
+Put @code{CFLAGS} last in the compilation command, after other variables
+containing compiler options, so the user can use @code{CFLAGS} to
+override the others.
+
+Every Makefile should define the variable @code{INSTALL}, which is the
+basic command for installing a file into the system.
+
+Every Makefile should also define the variables @code{INSTALL_PROGRAM}
+and @code{INSTALL_DATA}.  (The default for each of these should be
+@code{$(INSTALL)}.)  Then it should use those variables as the commands
+for actual installation, for executables and nonexecutables
+respectively.  Use these variables as follows:
+
+@example
+$(INSTALL_PROGRAM) foo $(bindir)/foo
+$(INSTALL_DATA) libfoo.a $(libdir)/libfoo.a
+@end example
+
+@noindent
+Always use a file name, not a directory name, as the second argument of
+the installation commands.  Use a separate command for each file to be
+installed.
+
+@node Directory Variables
+@section Variables for Installation Directories
+
+Installation directories should always be named by variables, so it is
+easy to install in a nonstandard place.  The standard names for these
+variables are described below.  They are based on a standard filesystem
+layout; variants of it are used in SVR4, 4.4BSD, Linux, Ultrix v4, and
+other modern operating systems.
+
+These two variables set the root for the installation.  All the other
+installation directories should be subdirectories of one of these two,
+and nothing should be directly installed into these two directories.
+
+@table @samp
+@item prefix
+A prefix used in constructing the default values of the variables listed
+below.  The default value of @code{prefix} should be @file{/usr/local}.
+When building the complete GNU system, the prefix will be empty and
+@file{/usr} will be a symbolic link to @file{/}.
+(If you are using Autoconf, write it as @samp{@@prefix@@}.)
+
+@item exec_prefix
+A prefix used in constructing the default values of some of the
+variables listed below.  The default value of @code{exec_prefix} should
+be @code{$(prefix)}.
+(If you are using Autoconf, write it as @samp{@@exec_prefix@@}.)
+
+Generally, @code{$(exec_prefix)} is used for directories that contain
+machine-specific files (such as executables and subroutine libraries),
+while @code{$(prefix)} is used directly for other directories.
+@end table
+
+Executable programs are installed in one of the following directories.
+
+@table @samp
+@item bindir
+The directory for installing executable programs that users can run.
+This should normally be @file{/usr/local/bin}, but write it as
+@file{$(exec_prefix)/bin}.
+(If you are using Autoconf, write it as @samp{@@bindir@@}.)
+
+@item sbindir
+The directory for installing executable programs that can be run from
+the shell, but are only generally useful to system administrators.  This
+should normally be @file{/usr/local/sbin}, but write it as
+@file{$(exec_prefix)/sbin}.
+(If you are using Autoconf, write it as @samp{@@sbindir@@}.)
+
+@item libexecdir
+@comment This paragraph adjusted to avoid overfull hbox --roland 5jul94
+The directory for installing executable programs to be run by other
+programs rather than by users.  This directory should normally be
+@file{/usr/local/libexec}, but write it as @file{$(exec_prefix)/libexec}.
+(If you are using Autoconf, write it as @samp{@@libexecdir@@}.)
+@end table
+
+Data files used by the program during its execution are divided into
+categories in two ways.
+
+@itemize @bullet
+@item
+Some files are normally modified by programs; others are never normally
+modified (though users may edit some of these).
+
+@item
+Some files are architecture-independent and can be shared by all
+machines at a site; some are architecture-dependent and can be shared
+only by machines of the same kind and operating system; others may never
+be shared between two machines.
+@end itemize
+
+This makes for six different possibilities.  However, we want to
+discourage the use of architecture-dependent files, aside from object
+files and libraries.  It is much cleaner to make other data files
+architecture-independent, and it is generally not hard.
+
+Therefore, here are the variables Makefiles should use to specify
+directories:
+
+@table @samp
+@item datadir
+The directory for installing read-only architecture independent data
+files.  This should normally be @file{/usr/local/share}, but write it as
+@file{$(prefix)/share}.
+(If you are using Autoconf, write it as @samp{@@datadir@@}.)
+As a special exception, see @file{$(infodir)}
+and @file{$(includedir)} below.
+
+@item sysconfdir
+The directory for installing read-only data files that pertain to a
+single machine--that is to say, files for configuring a host.  Mailer
+and network configuration files, @file{/etc/passwd}, and so forth belong
+here.  All the files in this directory should be ordinary ASCII text
+files.  This directory should normally be @file{/usr/local/etc}, but
+write it as @file{$(prefix)/etc}.
+(If you are using Autoconf, write it as @samp{@@sysconfdir@@}.)
+
+@c rewritten to avoid overfull hbox --tower
+Do not install executables
+@c here
+in this directory (they probably
+belong in @file{$(libexecdir)} or @file{$(sbindir)}).  Also do not
+install files that are modified in the normal course of their use
+(programs whose purpose is to change the configuration of the system
+excluded).  Those probably belong in @file{$(localstatedir)}.
+
+@item sharedstatedir
+The directory for installing architecture-independent data files which
+the programs modify while they run.  This should normally be
+@file{/usr/local/com}, but write it as @file{$(prefix)/com}.
+(If you are using Autoconf, write it as @samp{@@sharedstatedir@@}.)
+
+@item localstatedir
+The directory for installing data files which the programs modify while
+they run, and that pertain to one specific machine.  Users should never
+need to modify files in this directory to configure the package's
+operation; put such configuration information in separate files that go
+in @file{$(datadir)} or @file{$(sysconfdir)}.  @file{$(localstatedir)}
+should normally be @file{/usr/local/var}, but write it as
+@file{$(prefix)/var}.
+(If you are using Autoconf, write it as @samp{@@localstatedir@@}.)
+
+@item libdir
+The directory for object files and libraries of object code.  Do not
+install executables here, they probably belong in @file{$(libexecdir)}
+instead.  The value of @code{libdir} should normally be
+@file{/usr/local/lib}, but write it as @file{$(exec_prefix)/lib}.
+(If you are using Autoconf, write it as @samp{@@libdir@@}.)
+
+@item infodir
+The directory for installing the Info files for this package.  By
+default, it should be @file{/usr/local/info}, but it should be written
+as @file{$(prefix)/info}.
+(If you are using Autoconf, write it as @samp{@@infodir@@}.)
+
+@item includedir
+@c rewritten to avoid overfull hbox --roland
+The directory for installing header files to be included by user
+programs with the C @samp{#include} preprocessor directive.  This
+should normally be @file{/usr/local/include}, but write it as
+@file{$(prefix)/include}.
+(If you are using Autoconf, write it as @samp{@@includedir@@}.)
+
+Most compilers other than GCC do not look for header files in
+@file{/usr/local/include}.  So installing the header files this way is
+only useful with GCC.  Sometimes this is not a problem because some
+libraries are only really intended to work with GCC.  But some libraries
+are intended to work with other compilers.  They should install their
+header files in two places, one specified by @code{includedir} and one
+specified by @code{oldincludedir}.
+
+@item oldincludedir
+The directory for installing @samp{#include} header files for use with
+compilers other than GCC.  This should normally be @file{/usr/include}.
+(If you are using Autoconf, you can write it as @samp{@@oldincludedir@@}.)
+
+The Makefile commands should check whether the value of
+@code{oldincludedir} is empty.  If it is, they should not try to use
+it; they should cancel the second installation of the header files.
+
+A package should not replace an existing header in this directory unless
+the header came from the same package.  Thus, if your Foo package
+provides a header file @file{foo.h}, then it should install the header
+file in the @code{oldincludedir} directory if either (1) there is no
+@file{foo.h} there or (2) the @file{foo.h} that exists came from the Foo
+package.
+
+To tell whether @file{foo.h} came from the Foo package, put a magic
+string in the file---part of a comment---and @code{grep} for that string.
+@end table
+
+Unix-style man pages are installed in one of the following:
+
+@table @samp
+@item mandir
+The top-level directory for installing the man pages (if any) for this
+package.  It will normally be @file{/usr/local/man}, but you should
+write it as @file{$(prefix)/man}. 
+(If you are using Autoconf, write it as @samp{@@mandir@@}.)
+
+@item man1dir
+The directory for installing section 1 man pages.  Write it as
+@file{$(mandir)/man1}.
+@item man2dir
+The directory for installing section 2 man pages.  Write it as
+@file{$(mandir)/man2}
+@item @dots{}
+
+@strong{Don't make the primary documentation for any GNU software be a
+man page.  Write a manual in Texinfo instead.  Man pages are just for
+the sake of people running GNU software on Unix, which is a secondary
+application only.}
+
+@item manext
+The file name extension for the installed man page.  This should contain
+a period followed by the appropriate digit; it should normally be @samp{.1}.
+
+@item man1ext
+The file name extension for installed section 1 man pages.
+@item man2ext
+The file name extension for installed section 2 man pages.
+@item @dots{}
+Use these names instead of @samp{manext} if the package needs to install man
+pages in more than one section of the manual.
+@end table
+
+And finally, you should set the following variable:
+
+@table @samp
+@item srcdir
+The directory for the sources being compiled.  The value of this
+variable is normally inserted by the @code{configure} shell script.
+(If you are using Autconf, use @samp{srcdir = @@srcdir@@}.)
+@end table
+
+For example:
+
+@smallexample
+@c I have changed some of the comments here slightly to fix an overfull
+@c hbox, so the make manual can format correctly. --roland
+# Common prefix for installation directories.
+# NOTE: This directory must exist when you start the install.
+prefix = /usr/local
+exec_prefix = $(prefix)
+# Where to put the executable for the command `gcc'.
+bindir = $(exec_prefix)/bin
+# Where to put the directories used by the compiler.
+libexecdir = $(exec_prefix)/libexec
+# Where to put the Info files.
+infodir = $(prefix)/info
+@end smallexample
+
+If your program installs a large number of files into one of the
+standard user-specified directories, it might be useful to group them
+into a subdirectory particular to that program.  If you do this, you
+should write the @code{install} rule to create these subdirectories.
+
+Do not expect the user to include the subdirectory name in the value of
+any of the variables listed above.  The idea of having a uniform set of
+variable names for installation directories is to enable the user to
+specify the exact same values for several different GNU packages.  In
+order for this to be useful, all the packages must be designed so that
+they will work sensibly when the user does so.
 
 @node Standard Targets
 @section Standard Targets for Users
@@ -247,20 +571,20 @@ Bison, tags tables, Info files, and so on.
 
 The reason we say ``almost everything'' is that running the command
 @samp{make maintainer-clean} should not delete @file{configure} even if
-it can be remade using a rule in the Makefile.  More generally,
+@file{configure} can be remade using a rule in the Makefile.  More generally,
 @samp{make maintainer-clean} should not delete anything that needs to
 exist in order to run @file{configure} and then begin to build the
 program.  This is the only exception; @code{maintainer-clean} should
 delete everything else that can be rebuilt.
 
-The @samp{maintainer-clean} is intended to be used by a maintainer of
+The @samp{maintainer-clean} target is intended to be used by a maintainer of
 the package, not by ordinary users.  You may need special tools to
 reconstruct some of the files that @samp{make maintainer-clean} deletes.
 Since these files are normally included in the distribution, we don't
 take care to make them easy to reconstruct.  If you find you need to
 unpack the full distribution again, don't blame us.
 
-To help make users aware of this, the commands for the special 
+To help make users aware of this, the commands for the special
 @code{maintainer-clean} target should start with these two:
 
 @smallexample
@@ -270,6 +594,7 @@ To help make users aware of this, the commands for the special
 
 @item TAGS
 Update a tags table for this program.
+@c ADR: how?
 
 @item info
 Generate any Info files needed.  The best way to write the rules is as
@@ -288,7 +613,7 @@ run the @code{makeinfo} program, which is part of the Texinfo
 distribution.
 
 @item dvi
-Generate DVI files for all TeXinfo documentation.  
+Generate DVI files for all Texinfo documentation.  
 For example:
 
 @smallexample
@@ -301,8 +626,9 @@ foo.dvi: foo.texi chap1.texi chap2.texi
 @noindent
 You must define the variable @code{TEXI2DVI} in the Makefile.  It should
 run the program @code{texi2dvi}, which is part of the Texinfo
-distribution.  Alternatively, write just the dependencies, and allow GNU
-Make to provide the command.
+distribution.@footnote{@code{texi2dvi} uses @TeX{} to do the real work
+of formatting. @TeX{} is not distributed with Texinfo.}  Alternatively,
+write just the dependencies, and allow GNU Make to provide the command.
 
 @item dist
 Create a distribution tar file for this program.  The tar file should be
@@ -317,10 +643,18 @@ The easiest way to do this is to create a subdirectory appropriately
 named, use @code{ln} or @code{cp} to install the proper files in it, and
 then @code{tar} that subdirectory.
 
+Compress the tar file file with @code{gzip}.  For example, the actual
+distribution file for GCC version 1.40 is called @file{gcc-1.40.tar.gz}.
+
 The @code{dist} target should explicitly depend on all non-source files
 that are in the distribution, to make sure they are up to date in the
 distribution.  
+@ifset CODESTD
+@xref{Releases, , Making Releases}.
+@end ifset
+@ifclear CODESTD
 @xref{Releases, , Making Releases, standards, GNU Coding Standards}.
+@end ifclear
 
 @item check
 Perform self-tests (if any).  The user must build the program before
@@ -342,7 +676,8 @@ the program before running the tests.  You should not assume that
 It's useful to add a target named @samp{installdirs} to create the
 directories where files are installed, and their parent directories.
 There is a script called @file{mkinstalldirs} which is convenient for
-this; find it in the Texinfo package.@c It's in /gd/gnu/lib/mkinstalldirs.
+this; you can find it in the Texinfo package.
+@c It's in /gd/gnu/lib/mkinstalldirs.
 You can use a rule like this:
 
 @comment This has been carefully formatted to look decent in the Make manual.
@@ -359,299 +694,3 @@ installdirs: mkinstalldirs
 This rule should not modify the directories where compilation is done.
 It should do nothing but create installation directories.
 @end table
-
-@node Command Variables
-@section Variables for Specifying Commands
-
-Makefiles should provide variables for overriding certain commands, options,
-and so on.
-
-In particular, you should run most utility programs via variables.
-Thus, if you use Bison, have a variable named @code{BISON} whose default
-value is set with @samp{BISON = bison}, and refer to it with
-@code{$(BISON)} whenever you need to use Bison.
-
-File management utilities such as @code{ln}, @code{rm}, @code{mv}, and
-so on, need not be referred to through variables in this way, since users
-don't need to replace them with other programs.
-
-Each program-name variable should come with an options variable that is
-used to supply options to the program.  Append @samp{FLAGS} to the
-program-name variable name to get the options variable name---for
-example, @code{BISONFLAGS}.  (The name @code{CFLAGS} is an exception to
-this rule, but we keep it because it is standard.)  Use @code{CPPFLAGS}
-in any compilation command that runs the preprocessor, and use
-@code{LDFLAGS} in any compilation command that does linking as well as
-in any direct use of @code{ld}.
-
-If there are C compiler options that @emph{must} be used for proper
-compilation of certain files, do not include them in @code{CFLAGS}.
-Users expect to be able to specify @code{CFLAGS} freely themselves.
-Instead, arrange to pass the necessary options to the C compiler
-independently of @code{CFLAGS}, by writing them explicitly in the
-compilation commands or by defining an implicit rule, like this:
-
-@smallexample
-CFLAGS = -g
-ALL_CFLAGS = -I. $(CFLAGS)
-.c.o:
-        $(CC) -c $(CPPFLAGS) $(ALL_CFLAGS) $<
-@end smallexample
-
-Do include the @samp{-g} option in @code{CFLAGS}, because that is not
-@emph{required} for proper compilation.  You can consider it a default
-that is only recommended.  If the package is set up so that it is
-compiled with GCC by default, then you might as well include @samp{-O}
-in the default value of @code{CFLAGS} as well.
-
-Put @code{CFLAGS} last in the compilation command, after other variables
-containing compiler options, so the user can use @code{CFLAGS} to
-override the others.
-
-Every Makefile should define the variable @code{INSTALL}, which is the
-basic command for installing a file into the system.
-
-Every Makefile should also define the variables @code{INSTALL_PROGRAM}
-and @code{INSTALL_DATA}.  (The default for each of these should be
-@code{$(INSTALL)}.)  Then it should use those variables as the commands
-for actual installation, for executables and nonexecutables
-respectively.  Use these variables as follows:
-
-@example
-$(INSTALL_PROGRAM) foo $(bindir)/foo
-$(INSTALL_DATA) libfoo.a $(libdir)/libfoo.a
-@end example
-
-@noindent
-Always use a file name, not a directory name, as the second argument of
-the installation commands.  Use a separate command for each file to be
-installed.
-
-@node Directory Variables
-@section Variables for Installation Directories
-
-Installation directories should always be named by variables, so it is
-easy to install in a nonstandard place.  The standard names for these
-variables are described below.  They are based on a standard filesystem
-layout; variants of it are used in SVR4, 4.4BSD, Linux, Ultrix v4, and
-other modern operating systems.
-
-These two variables set the root for the installation.  All the other
-installation directories should be subdirectories of one of these two,
-and nothing should be directly installed into these two directories.
-
-@table @samp
-@item prefix
-A prefix used in constructing the default values of the variables listed
-below.  The default value of @code{prefix} should be @file{/usr/local}.
-When building the complete GNU system, the prefix will be empty and
-@file{/usr} will be a symbolic link to @file{/}.
-
-@item exec_prefix
-A prefix used in constructing the default values of some of the
-variables listed below.  The default value of @code{exec_prefix} should
-be @code{$(prefix)}.
-
-Generally, @code{$(exec_prefix)} is used for directories that contain
-machine-specific files (such as executables and subroutine libraries),
-while @code{$(prefix)} is used directly for other directories.
-@end table
-
-Executable programs are installed in one of the following directories.
-
-@table @samp
-@item bindir
-The directory for installing executable programs that users can run.
-This should normally be @file{/usr/local/bin}, but write it as
-@file{$(exec_prefix)/bin}.
-
-@item sbindir
-The directory for installing executable programs that can be run from
-the shell, but are only generally useful to system administrators.  This
-should normally be @file{/usr/local/sbin}, but write it as
-@file{$(exec_prefix)/sbin}.
-
-@item libexecdir
-@comment This paragraph adjusted to avoid overfull hbox --roland 5jul94
-The directory for installing executable programs to be run by other
-programs rather than by users.  This directory should normally be
-@file{/usr/local/libexec}, but write it as @file{$(exec_prefix)/libexec}.
-@end table
-
-Data files used by the program during its execution are divided into
-categories in two ways.
-
-@itemize @bullet
-@item
-Some files are normally modified by programs; others are never normally
-modified (though users may edit some of these).
-
-@item
-Some files are architecture-independent and can be shared by all
-machines at a site; some are architecture-dependent and can be shared
-only by machines of the same kind and operating system; others may never
-be shared between two machines.
-@end itemize
-
-This makes for six different possibilities.  However, we want to
-discourage the use of architecture-dependent files, aside from of object
-files and libraries.  It is much cleaner to make other data files
-architecture-independent, and it is generally not hard.
-
-Therefore, here are the variables makefiles should use to specify
-directories:
-
-@table @samp
-@item datadir
-The directory for installing read-only architecture independent data
-files.  This should normally be @file{/usr/local/share}, but write it as
-@file{$(prefix)/share}.  As a special exception, see @file{$(infodir)}
-and @file{$(includedir)} below.
-
-@item sysconfdir
-The directory for installing read-only data files that pertain to a
-single machine--that is to say, files for configuring a host.  Mailer
-and network configuration files, @file{/etc/passwd}, and so forth belong
-here.  All the files in this directory should be ordinary ASCII text
-files.  This directory should normally be @file{/usr/local/etc}, but
-write it as @file{$(prefix)/etc}.
-
-@c rewritten to avoid overfull hbox --tower
-Do not install executables
-@c here
-in this directory (they probably
-belong in @file{$(libexecdir)} or @file{$(sbindir))}.  Also do not
-install files that are modified in the normal course of their use
-(programs whose purpose is to change the configuration of the system
-excluded).  Those probably belong in @file{$(localstatedir)}.
-
-@item sharedstatedir
-The directory for installing architecture-independent data files which
-the programs modify while they run.  This should normally be
-@file{/usr/local/com}, but write it as @file{$(prefix)/com}.
-
-@item localstatedir
-The directory for installing data files which the programs modify while
-they run, and that pertain to one specific machine.  Users should never
-need to modify files in this directory to configure the package's
-operation; put such configuration information in separate files that go
-in @file{datadir} or @file{$(sysconfdir)}.  @file{$(localstatedir)}
-should normally be @file{/usr/local/var}, but write it as
-@file{$(prefix)/var}.
-
-@item libdir
-The directory for object files and libraries of object code.  Do not
-install executables here, they probably belong in @file{$(libexecdir)}
-instead.  The value of @code{libdir} should normally be
-@file{/usr/local/lib}, but write it as @file{$(exec_prefix)/lib}.
-
-@item infodir
-The directory for installing the Info files for this package.  By
-default, it should be @file{/usr/local/info}, but it should be written
-as @file{$(prefix)/info}.
-
-@item includedir
-@c rewritten to avoid overfull hbox --roland
-The directory for installing header files to be included by user
-programs with the C @samp{#include} preprocessor directive.  This
-should normally be @file{/usr/local/include}, but write it as
-@file{$(prefix)/include}.
-
-Most compilers other than GCC do not look for header files in
-@file{/usr/local/include}.  So installing the header files this way is
-only useful with GCC.  Sometimes this is not a problem because some
-libraries are only really intended to work with GCC.  But some libraries
-are intended to work with other compilers.  They should install their
-header files in two places, one specified by @code{includedir} and one
-specified by @code{oldincludedir}.
-
-@item oldincludedir
-The directory for installing @samp{#include} header files for use with
-compilers other than GCC.  This should normally be @file{/usr/include}.
-
-The Makefile commands should check whether the value of
-@code{oldincludedir} is empty.  If it is, they should not try to use
-it; they should cancel the second installation of the header files.
-
-A package should not replace an existing header in this directory unless
-the header came from the same package.  Thus, if your Foo package
-provides a header file @file{foo.h}, then it should install the header
-file in the @code{oldincludedir} directory if either (1) there is no
-@file{foo.h} there or (2) the @file{foo.h} that exists came from the Foo
-package.
-
-To tell whether @file{foo.h} came from the Foo package, put a magic
-string in the file---part of a comment---and grep for that string.
-@end table
-
-Unix-style man pages are installed in one of the following:
-
-@table @samp
-@item mandir
-The top-level directory for installing the man pages (if any) for this
-package.  It will normally be @file{/usr/local/man}, but you should
-write it as @file{$(prefix)/man}.
-
-@item man1dir
-The directory for installing section 1 man pages.  Write it as
-@file{$(mandir)/man1}.
-@item man2dir
-The directory for installing section 2 man pages.  Write it as
-@file{$(mandir)/man2}.
-@item @dots{}
-
-@strong{Don't make the primary documentation for any GNU software be a
-man page.  Write a manual in Texinfo instead.  Man pages are just for
-the sake of people running GNU software on Unix, which is a secondary
-application only.}
-
-@item manext
-The file name extension for the installed man page.  This should contain
-a period followed by the appropriate digit; it should normally be @samp{.1}.
-
-@item man1ext
-The file name extension for installed section 1 man pages.
-@item man2ext
-The file name extension for installed section 2 man pages.
-@item @dots{}
-Use these names instead of @samp{manext} if the package needs to install man
-pages in more than one section of the manual.
-@end table
-
-And finally, you should set the following variable:
-
-@table @samp
-@item srcdir
-The directory for the sources being compiled.  The value of this
-variable is normally inserted by the @code{configure} shell script.
-@end table
-
-For example:
-
-@smallexample
-@c I have changed some of the comments here slightly to fix an overfull
-@c hbox, so the make manual can format correctly. --roland
-# Common prefix for installation directories.
-# NOTE: This directory must exist when you start the install.
-prefix = /usr/local
-exec_prefix = $(prefix)
-# Where to put the executable for the command `gcc'.
-bindir = $(exec_prefix)/bin
-# Where to put the directories used by the compiler.
-libexecdir = $(exec_prefix)/libexec
-# Where to put the Info files.
-infodir = $(prefix)/info
-@end smallexample
-
-If your program installs a large number of files into one of the
-standard user-specified directories, it might be useful to group them
-into a subdirectory particular to that program.  If you do this, you
-should write the @code{install} rule to create these subdirectories.
-
-Do not expect the user to include the subdirectory name in the value of
-any of the variables listed above.  The idea of having a uniform set of
-variable names for installation directories is to enable the user to
-specify the exact same values for several different GNU packages.  In
-order for this to be useful, all the packages must be designed so that
-they will work sensibly when the user does so.
-
