@@ -1,9 +1,9 @@
 \input texinfo  @c -*- Texinfo -*-
-@comment %**start of header (This is for running Texinfo on a region.)
+@c %**start of header 
 @setfilename make.info
 @settitle Make
 @setchapternewpage odd
-@comment %**end of header (This is for running Texinfo on a region.)
+@c %**end of header
 
 @iftex
 @finalout
@@ -15,7 +15,7 @@
 @ifinfo
 This file documents the GNU Make utility.
 
-Copyright (C) 1988-1991 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -52,16 +52,16 @@ Foundation.
 @sp 3
 @center Edition 0.28 Beta,
 @sp 1
-@center last updated 18 September 1991,
+@center last updated 23 September 1991,
 @sp 1
 @center for @code{make}, Version 3.61 Beta.
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1988-1991 Free Software Foundation, Inc.
+Copyright @copyright{} 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
 @sp 2
 
 This is Edition 0.28 Beta of the @cite{GNU Make Manual}, @*
-last updated 18 September 1991, @*
+last updated 23 September 1991, @*
 for @code{make} Version 3.61 Beta.
 
 @sp 2
@@ -4337,7 +4337,7 @@ implemented in @code{make} as suffix rules, so which ones will be
 defined depends on the @dfn{suffix list} (the list of dependencies of
 the special target @code{.SUFFIXES}).  @xref{Suffix Rules}.
 The default suffix list is: @samp{.out}, @samp{.a}, @samp{.o},
-@samp{.c}, @samp{.cc}, @samp{.p}, @samp{.f}, @samp{.F}, @samp{.r},
+@samp{.c}, @samp{.cc}, @samp{.C}, @samp{.p}, @samp{.f}, @samp{.F}, @samp{.r},
 @samp{.e}, @samp{.y}, @samp{.ye}, @samp{.yr}, @samp{.l}, @samp{.s},
 @samp{.S}, @samp{.h}, @samp{.info}, @samp{.dvi}, @samp{.tex},
 @samp{.texinfo}, @samp{.cweb}, @samp{.web}, @samp{.sh}, @samp{.elc},
@@ -4353,12 +4353,10 @@ rules whose suffixes fail to be on the list are disabled.@refill
 a command of the form @samp{$(CC) -c $(CPPFLAGS) $(CFLAGS)}.@refill
 
 @item Compiling C++ programs
-@file{@var{n}.o} will be made automatically from @file{@var{n}.cc}
-with a command of the form @samp{$(C++) -c $(CPPFLAGS) $(C++FLAGS)}.
-Although supported by the GNU C++ compiler, the suffix used by the
-AT&T C++ preprocessor, @samp{.C}, is not supported in @code{make}
-because we encourage the use of the preferred suffix for C++ files,
-@samp{.cc}.@refill
+@file{@var{n}.o} will be made automatically from @file{@var{n}.cc} or
+@file{@var{n}.C} with a command of the form @samp{$(C++) -c $(CPPFLAGS)
+$(C++FLAGS)}.  We encourage you to use the suffix @samp{.cc} for C++
+source files instead of @samp{.C}.@refill
 
 @item Compiling Pascal programs
 @file{@var{n}.o} will be made automatically from @file{@var{n}.p}
