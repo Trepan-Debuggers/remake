@@ -152,7 +152,7 @@ $(prog): $(objs) $(globdep) #$(addprefix $(ARCH)/,gmalloc.o mcheck.o)
 	mv -f $@.new $@
 
 globfiles = $(addprefix glob/,COPYING.LIB configure.in configure Makefile.in \
-			glob.c fnmatch.c glob.h fnmatch.h)
+			configure.bat glob.c fnmatch.c glob.h fnmatch.h)
 $(globfiles): stamp-glob ;
 stamp-glob: /home/gd/gnu/libc/posix/glob.tar
 	-rm -rf glob
@@ -223,6 +223,7 @@ tarfiles: $(tarfiles)
 
 distfiles=README INSTALL COPYING ChangeLog NEWS \
           configure Makefile.in configure.in build.sh.in mkinstalldirs \
+	  configh.dos configure.bat \
 	  acconfig.h $(srcs) remote-*.c $(globfiles) \
 	  make.texinfo make-stds.texi \
 	  make.?? make.??s make.toc make.aux make.man texinfo.tex TAGS tags \
