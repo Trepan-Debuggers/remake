@@ -23,6 +23,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "variable.h"
 #include "job.h"
 #include "getopt.h"
+#include <assert.h>
 
 
 extern void print_variable_data_base ();
