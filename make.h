@@ -21,6 +21,14 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <signal.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <time.h>
+
+#ifdef	HAVE_UNISTD_H
+#include <unistd.h>
+#ifdef	_POSIX_VERSION
+#define	POSIX
+#endif
+#endif
 
 #ifndef	isblank
 #define	isblank(c)	((c) == ' ' || (c) == '\t')
@@ -30,13 +38,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	NSIG	_NSIG
 #endif
 
-#ifdef	__STDC__
-#define	SIGHANDLER	void *
-#else
-#define	SIGHANDLER	int (*)()
+#ifndef	RETSIGTYPE
+#define	RETSIGTYPE	void
 #endif
-#define	SIGNAL(sig, handler) \
-  ((SIGHANDLER) signal((sig), (SIGHANDLER) (handler)))
 
 #ifdef	CRAY
 #define	signal	bsdsignal
@@ -46,22 +50,27 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	sigmask(sig)	(1 << ((sig) - 1))
 #endif
 
-#if	defined(POSIX) || defined(__GNU_LIBRARY__)
+#ifdef	HAVE_LIMITS_H
 #include <limits.h>
-#ifndef	PATH_MAX
-#define	GET_PATH_MAX	pathconf ("/", _PC_PATH_MAX)
 #endif
-#else	/* Not POSIX.  */
+#ifdef	HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif
+
 #ifndef	PATH_MAX
+#ifdef	POSIX
+#define	GET_PATH_MAX	pathconf ("/", _PC_PATH_MAX)
+#else	/* Not POSIX.  */
 #ifndef MAXPATHLEN
 #define MAXPATHLEN 1024
 #endif	/* No MAXPATHLEN.  */
 #define	PATH_MAX	MAXPATHLEN
-#endif	/* No PATH_MAX.  */
 #endif	/* POSIX.  */
+#endif	/* No PATH_MAX.  */
+
 #ifdef	PATH_MAX
 #define	PATH_VAR(var)	char var[PATH_MAX]
+#define	GET_PATH_MAX	PATH_MAX
 #else
 #define	PATH_VAR(var)	char *var = (char *) alloca (GET_PATH_MAX)
 #endif
@@ -93,7 +102,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifdef	USG
 
 #include <string.h>
+#ifdef	NEED_MEMORY_H
 #include <memory.h>
+#endif
 #define	ANSI_STRING
 
 #else	/* Not USG.  */
@@ -209,12 +220,9 @@ extern void notice_finished_file ();
 extern void user_access (), make_access (), child_access ();
 
 
-#if	defined (VFORK_MISSING) || (defined(USG) && !defined(HAVE_VFORK))
-#define	vfork	fork
-#define	VFORK_NAME	"fork"
-#else	/* Have vfork or not USG.  */
-#define	VFORK_NAME	"vfork"
-#endif	/* USG and don't have vfork.  */
+#ifdef	HAVE_VFORK_H
+#include <vfork.h>
+#endif
 
 #if	defined(__GNU_LIBRARY__) || defined(POSIX)
 
@@ -228,24 +236,20 @@ extern int sigblock ();
 #endif
 extern int kill ();
 extern void abort (), exit ();
-extern int unlink (), stat ();
+extern int unlink (), stat (), fstat ();
 extern void qsort ();
 extern int atoi ();
+extern long int atol ();
 extern int pipe (), close (), read (), write (), open ();
 extern long int lseek ();
-extern char *ctime ();
 #endif	/* GNU C library or POSIX.  */
 
-#if	defined(USG) || defined(POSIX) && !defined(__GNU_LIBRARY__)
+#ifndef	GETCWD_MISSING
 extern char *getcwd ();
-#ifdef	PATH_MAX
-#define	getwd(buf)	getcwd (buf, PATH_MAX - 2)
 #else
-#define	getwd(buf)	getcwd (buf, GET_PATH_MAX - 2)
-#endif
-#else	/* USG or POSIX and not GNU C library.  */
 extern char *getwd ();
-#endif	/* Not USG or POSIX, or maybe GNU C library.  */
+#define	getcwd (buf, len)	getwd (buf)
+#endif
 
 #if !defined(__GNU_LIBRARY__) && (!defined(vfork) || !defined(POSIX))
 #ifdef	POSIX
