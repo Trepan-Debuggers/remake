@@ -1,4 +1,14 @@
+1999-09-07  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* job.c (construct_command_argv_internal) [__MSDOS__]: Add "echo"
+	and "unset" to the list of builtin shell commands.
+
+	* configh.DOS.template (MAKE_HOST): Define to "i386-pc-msdosdjgpp"
+	which is the canonical name of the DJGPP host.
+
 1999-09-05  Paul D. Smith  <psmith@gnu.org>
+
+	* Version 3.77.95 released.
 
 	* make.texinfo (Make Errors): Document some new jobserver error
 	messages.

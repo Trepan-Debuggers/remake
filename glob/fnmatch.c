@@ -132,18 +132,21 @@ extern int errno;
 # if !defined HAVE___STRCHRNUL && !defined _LIBC
 static char *
 __strchrnul (s, c)
-     register const char *s;
+     const char *s;
      int c;
 {
-  c = (unsigned char)c;
-  while (*s && *s != c)
-    ++s;
-  return (char *)s;
+  char *result = strchr (s, c);
+  if (result == NULL)
+    result = strchr (s, '\0');
+  return result;
 }
 # endif
 
 /* Match STRING against the filename pattern PATTERN, returning zero if
    it matches, nonzero if not.  */
+static int internal_fnmatch __P ((const char *pattern, const char *string,
+				  int no_leading_period, int flags))
+     internal_function;
 static int
 #ifdef _LIBC
 internal_function
