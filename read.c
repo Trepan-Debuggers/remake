@@ -1582,7 +1582,9 @@ parse_file_seq (stringp, stopchar, size, strip)
      an elt further down the chain (i.e., previous in the file list)
      with an unmatched `(' (e.g., "lib(mem").  */
 
-  for (new1 = new, lastnew1 = 0; new1 != 0; lastnew1 = new1, new1 = new1->next)
+  new1 = new;
+  lastnew1 = 0;
+  while (new1 != 0)
     if (new1->name[0] != '('	/* Don't catch "(%)" and suchlike.  */
 	&& new1->name[strlen (new1->name) - 1] == ')'
 	&& index (new1->name, '(') == 0)
@@ -1663,14 +1665,21 @@ parse_file_seq (stringp, stopchar, size, strip)
 		name = concat (libname, new1->name, ")");
 		free (new1->name);
 		new1->name = name;
+		lastnew1 = new1;
 		new1 = new1->next;
 	      }
-
-	    if (new1 == 0)
-	      /* We might have slurped up the whole list,
-		 and continuing the loop would dereference NEW1.  */
-	      break;
 	  }
+	else
+	  {
+	    /* No frobnication happening.  Just step down the list.  */
+	    lastnew1 = new1;
+	    new1 = new1->next;
+	  }
+      }
+    else
+      {
+	lastnew1 = new1;
+	new1 = new1->next;
       }
 
 #endif
