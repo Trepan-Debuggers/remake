@@ -5625,10 +5625,10 @@ The file name of the target of the rule.  If the target is an archive
 member, then @samp{$@@} is the name of the archive file.
 
 @item $%
-The target member name, when the target is an archive member.  For
-example, if the target is @file{foo.a(bar.o)} then @samp{$%} is
-@file{bar.o} and @samp{$@@} is @file{foo.a}.  @samp{$%} is empty
-when the target is not an archive member.
+The target member name, when the target is an archive member.
+@xref{Archives}.  For example, if the target is @file{foo.a(bar.o)} then
+@samp{$%} is @file{bar.o} and @samp{$@@} is @file{foo.a}.  @samp{$%} is
+empty when the target is not an archive member.
 
 @item $<
 The name of the first dependency.  if the target got its commands from
@@ -5636,11 +5636,14 @@ an implicit rule, this will be the first dependency added by the
 implicit rule (@pxref{Implicit}).
 
 @item $?
-The names of all the dependencies that are
-newer than the target, with spaces between them.
+The names of all the dependencies that are newer than the target, with
+spaces between them.  For dependencies which are archive members, only
+the member named is used (@pxref{Archives}).
 
 @item $^
-The names of all the dependencies, with spaces between them.
+The names of all the dependencies, with spaces between them.  For
+dependencies which are archive members, only the member named is used
+(@pxref{Archives}).
 
 @item $*
 The stem with which an implicit rule matches (@pxref{Pattern Match, ,How
@@ -6435,15 +6438,6 @@ that are not implemented in GNU @code{make}.  Draft 11.1 of the POSIX.2
 standard which specifies @code{make} does not require any of these
 features.@refill
 
-GNU @code{make} has one known incompatibility with the POSIX.2
-specification: In GNU @code{make} the @samp{$?} automatic variable
-(@pxref{Automatic, ,Automatic Variables}) always contains the list of
-changed dependencies.  In POSIX.2, elements of @samp{$?} which are
-archive members (@pxref{Archive Members}) are just the member name, not
-the complete name.  For example, @file{foo.o} rather than
-@file{lib.a(foo.o)}.  Version 4 of GNU @code{make} will behave as
-POSIX.2 specifies.@refill
-
 @itemize @bullet
 @item
 A target of the form @samp{@var{file}((@var{entry}))} stands for a member
@@ -6701,9 +6695,13 @@ The name of the first dependency.
 @item $?
 The names of all the dependencies that are
 newer than the target, with spaces between them.
+For dependencies which are archive members, only
+the member named is used (@pxref{Archives}).
 
 @item $^
-The names of all the dependencies, with spaces between them.
+The names of all the dependencies, with spaces between them.  For
+dependencies which are archive members, only the member named is used
+(@pxref{Archives}).
 
 @item $*
 The stem with which an implicit rule matches (@pxref{Pattern Match, ,How Patterns Match}).
