@@ -1700,12 +1700,7 @@ int main (int argc, char ** argv)
 	  fflush (stdout);
 	  fflush (stderr);
 
-          /* Close the jobserver pipes if we opened any.  */
-          if (job_fds[0] >= 0)
-            {
-              close (job_fds[0]);
-              close (job_fds[1]);
-            }
+          /* Close the dup'd jobserver pipe if we opened one.  */
           if (job_rfd >= 0)
             close (job_rfd);
 

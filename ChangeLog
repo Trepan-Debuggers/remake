@@ -1,3 +1,14 @@
+1999-09-23  Paul D. Smith  <psmith@gnu.org>
+
+	* Version 3.78.1 released.
+
+	* make.texinfo: Update version/date stamp.
+
+	* main.c (main): Argh.  For some reason we were closing _all_ the
+	jobserver pipes before we re-exec'd due to changed makefiles.
+	This means that any re-exec got a "jobserver unavailable" error :-/.
+	I can't believe we didn't notice this before.
+
 1999-09-22  Paul D. Smith  <psmith@gnu.org>
 
 	* Version 3.78 released.
@@ -764,9 +775,9 @@
 	a bit saying whether we've seen this target in this pass or not.
 	(update_goal_chain): Initially set the global considered toggle to
 	1, since all targets initialize their boolean to 0.  At the end of
-	each pass, toggle the global considered variable.  * filedef.h
-	(struct file): Per-file considered toggle bit.  * file.c: New
-	global toggle variable considered.
+	each pass, toggle the global considered variable.
+	* filedef.h (struct file): Per-file considered toggle bit.
+	* file.c: New global toggle variable considered.
 
 1999-04-05  Paul D. Smith  <psmith@gnu.org>
 
