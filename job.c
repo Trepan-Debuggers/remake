@@ -21,6 +21,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "job.h"
 #include "file.h"
 #include "variable.h"
+#include <assert.h>
 
 /* Default path to search for executables.  */
 static char default_path[] = ":/bin:/usr/bin";
@@ -402,7 +403,6 @@ reap_children (block, err)
 			 Since there are more commands that wanted to be run,
 			 the target was not completely remade.  So we treat
 			 this as if a command had failed.  */
-		      c->file->command_state = cs_finished;
 		      c->file->update_status = 1;
 		    }
 		  else
@@ -413,29 +413,28 @@ reap_children (block, err)
 			 by start_remote_job_p.  */
 		      c->remote = start_remote_job_p ();
 		      start_job_command (c);
+		      if (c->file->command_state == cs_running)
+			/* We successfully started the new command.
+			   Loop to reap more children.  */
+			continue;
 		    }
-		}
 
-	      switch (c->file->command_state)
-		{
-		case cs_running:
-		  /* Successfully started.  Loop to reap more children.  */
-		  continue;
-
-		case cs_finished:
 		  if (c->file->update_status != 0)
 		    /* We failed to start the commands.  */
 		    delete_child_targets (c);
-		  break;
-
-		default:
-		  error ("internal error: `%s' has bogus command_state \
-%d in reap_children",
-			 c->file->name, (int) c->file->command_state);
-		  abort ();
-		  break;
 		}
+	      else
+		/* There are no more commands.  We got through them all
+		   without an unignored error.  Now the target has been
+		   successfully updated.  */
+		c->file->update_status = 0;
 	    }
+
+	  /* When we get here, all the commands for C->file are finished
+	     (or aborted) and C->file->update_status contains 0 or 1.  But
+	     C->file->command_state is still cs_running if all the commands
+	     ran; notice_finish_file looks for cs_running to tell it that
+	     it's interesting to check the file's modtime again now.  */
 
 	  if (! handling_fatal_signal)
 	    /* Notice if the target of the commands has been changed.
@@ -584,6 +583,7 @@ start_job_command (child)
       /* This line has no commands.  Go to the next.  */
       if (job_next_command (child))
 	start_job_command (child);
+      child->file->update_status = 0;
       return;
     }
 
@@ -609,6 +609,7 @@ start_job_command (child)
       free ((char *) argv);
       if (job_next_command (child))
 	start_job_command (child);
+      child->file->update_status = 0;
       return;
     }
 
@@ -774,15 +775,18 @@ start_waiting_job (c)
       unblock_sigs ();
       break;
 
+    case cs_not_started:
+      /* All the command lines turned out to be empty.  */
+      c->file->update_status = 0;
+      /* FALLTHROUGH */
+
     case cs_finished:
       notice_finished_file (c->file);
       free_child (c);
       break;
 
     default:
-      error ("internal error: `%s' command_state == %d in new_job",
-	     c->file->name, (int) c->file->command_state);
-      abort ();
+      assert (c->file->command_state == cs_finished);
       break;
     }
 
@@ -928,8 +932,11 @@ new_job (file)
 
   /* Fetch the first command line to be run.  */
   if (! job_next_command (c))
-    /* There were no commands!  */
-    free_child (c);
+    {
+      /* There were no commands!  */
+      free_child (c);
+      c->file->update_status = 0;
+    }
   else
     {
       /* The job is now primed.  Start it running.  */
@@ -957,8 +964,6 @@ job_next_command (child)
 	{
 	  /* There are no more lines to be expanded.  */
 	  child->command_ptr = 0;
-	  child->file->command_state = cs_finished;
-	  child->file->update_status = 0;
 	  return 0;
 	}
       else
