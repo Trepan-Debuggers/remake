@@ -6747,7 +6747,7 @@ how to make @file{@var{n}.c}, the rule for running Yacc is
 used.  Ultimately both @file{@var{n}.c} and @file{@var{n}.o} are
 updated.@refill
 
-@cindex intermediate file
+@cindex intermediate files
 @cindex files, intermediate
 However, even if @file{@var{n}.c} does not exist and is not mentioned,
 @code{make} knows how to envision it as the missing link between
