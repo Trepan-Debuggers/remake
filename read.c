@@ -412,7 +412,13 @@ read_makefile (filename, flags)
 	  else
 	    {
 	      p2 = next_token (p + 6);
-	      p = end_of_token (p2);
+	      /* Let the variable name be the whole rest of the line,
+		 with trailing blanks stripped (comments have already been
+		 removed), so it could be a complex variable/function
+		 reference that might contain blanks.  */
+	      p = index (p2, '\0');
+	      while (isblank (p[-1]))
+		--p;
 	      lineno = do_define (p2, p - p2, o_file,
 				  lineno, infile, filename);
 	    }
@@ -431,8 +437,14 @@ read_makefile (filename, flags)
 		{
 		  unsigned int len;
 		  p2 = end_of_token (p2);
-		  p = find_next_token (&p2, &len);
-		  lineno = do_define (p, len, o_override,
+		  /* Let the variable name be the whole rest of the line,
+		     with trailing blanks stripped (comments have already been
+		     removed), so it could be a complex variable/function
+		     reference that might contain blanks.  */
+		  p = index (p2, '\0');
+		  while (isblank (p[-1]))
+		    --p;
+		  lineno = do_define (p2, p - p2, o_override,
 				      lineno, infile, filename);
 		}
 	    }
