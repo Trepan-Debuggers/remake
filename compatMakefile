@@ -166,11 +166,11 @@ make: $(objs)
 SHELL = /bin/sh
 MAKE = make
 
-glob/libglob.a: force
+glob/libglob.a: FORCE config.h
 	cd glob; $(MAKE) CC='$(CC)' CFLAGS='$(CFLAGS) -I..' \
 			 CPPFLAGS='$(CPPFLAGS) -DHAVE_CONFIG_H' \
 			 libglob.a
-force:
+FORCE:
 
 tagsrcs = $(srcs) $(srcdir)/remote-*.c
 TAGS: $(tagsrcs)
@@ -220,6 +220,18 @@ $(infodir)/make.info: make.info
 
 $(mandir)/$(instname).$(manext): make.man
 	$(INSTALL_DATA) $(srcdir)/make.man $@
+
+
+loadavg: getloadavg.c config.h
+	$(CC) $(defines) -DTEST -I. -I$(srcdir) $(CFLAGS) $(LDFLAGS) \
+	      $(srcdir)/getloadavg.c -o $@
+check-loadavg: loadavg
+	@echo The system uptime program believes the load average to be:
+	-uptime
+	@echo The GNU load average checking code believes:
+	./loadavg
+check: check-loadavg
+
 
 .PHONY: clean realclean distclean mostlyclean
 clean: glob-clean
