@@ -1062,7 +1062,7 @@ search_path (file, path, program)
 	      bcopy (file, program + (p - path) + 1, len);
 	    }
 
-	  if (stat (program, &st) == 0
+	  if (safe_stat (program, &st) == 0
 	      && S_ISREG (st.st_mode))
 	    {
 	      if (st.st_uid == geteuid ())
