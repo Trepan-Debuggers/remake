@@ -17,11 +17,12 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#include "make.h"
+
 #include <assert.h>
 
 #include <glob.h>
 
-#include "make.h"
 #include "dep.h"
 #include "filedef.h"
 #include "job.h"
@@ -149,7 +150,7 @@ read_all_makefiles (makefiles)
   unsigned int num_makefiles = 0;
 
   if (debug_flag)
-    puts ("Reading makefiles...");
+    puts (_("Reading makefiles..."));
 
   /* If there's a non-null variable MAKEFILES, its value is a list of
      files to read first thing.  But don't let it prevent reading the
@@ -323,15 +324,15 @@ read_makefile (filename, flags)
 
   if (debug_flag)
     {
-      printf ("Reading makefile `%s'", fileinfo.filenm);
+      printf (_("Reading makefile `%s'"), fileinfo.filenm);
       if (flags & RM_NO_DEFAULT_GOAL)
-	printf (" (no default goal)");
+	printf (_(" (no default goal)"));
       if (flags & RM_INCLUDED)
-	printf (" (search path)");
+	printf (_(" (search path)"));
       if (flags & RM_DONTCARE)
-	printf (" (don't care)");
+	printf (_(" (don't care)"));
       if (flags & RM_NO_TILDE)
-	printf (" (no ~ expansion)");
+	printf (_(" (no ~ expansion)"));
       puts ("...");
     }
 
@@ -511,7 +512,7 @@ read_makefile (filename, flags)
 	  if (i >= 0)
 	    ignoring = i;
 	  else
-	    fatal (&fileinfo, "invalid syntax in conditional");
+	    fatal (&fileinfo, _("invalid syntax in conditional"));
 	  continue;
 	}
 
@@ -520,7 +521,7 @@ read_makefile (filename, flags)
 	  if (in_ignored_define)
 	    in_ignored_define = 0;
 	  else
-	    fatal (&fileinfo, "extraneous `endef'");
+	    fatal (&fileinfo, _("extraneous `endef'"));
 	  continue;
 	}
 
@@ -532,7 +533,7 @@ read_makefile (filename, flags)
 	    {
 	      p2 = next_token (p + 6);
               if (*p2 == '\0')
-                fatal (&fileinfo, "empty variable name");
+                fatal (&fileinfo, _("empty variable name"));
 
 	      /* Let the variable name be the whole rest of the line,
 		 with trailing blanks stripped (comments have already been
@@ -550,7 +551,7 @@ read_makefile (filename, flags)
         {
 	  p2 = next_token (p + 8);
 	  if (*p2 == '\0')
-	    error (&fileinfo, "empty `override' directive");
+	    error (&fileinfo, _("empty `override' directive"));
 	  if (strneq (p2, "define", 6) && (isblank (p2[6]) || p2[6] == '\0'))
 	    {
 	      if (ignoring)
@@ -559,7 +560,7 @@ read_makefile (filename, flags)
 		{
 		  p2 = next_token (p2 + 6);
                   if (*p2 == '\0')
-                    fatal (&fileinfo, "empty variable name");
+                    fatal (&fileinfo, _("empty variable name"));
 
 		  /* Let the variable name be the whole rest of the line,
 		     with trailing blanks stripped (comments have already been
@@ -573,7 +574,7 @@ read_makefile (filename, flags)
 	    }
 	  else if (!ignoring
 		   && !try_variable_definition (&fileinfo, p2, o_override))
-	    error (&fileinfo, "invalid `override' directive");
+	    error (&fileinfo, _("invalid `override' directive"));
 
 	  continue;
 	}
@@ -657,7 +658,7 @@ read_makefile (filename, flags)
 	  if (*p == '\0')
 	    {
 	      error (&fileinfo,
-			      "no file name for `%sinclude'",
+			      _("no file name for `%sinclude'"),
 			      noerror ? "-" : "");
 	      continue;
 	    }
@@ -722,7 +723,7 @@ read_makefile (filename, flags)
 	     because there was no preceding target, and the line
 	     might have been usable as a variable definition.
 	     But now it is definitely lossage.  */
-	  fatal(&fileinfo, "commands commence before first target");
+	  fatal(&fileinfo, _("commands commence before first target"));
 	}
       else
 	{
@@ -770,7 +771,7 @@ read_makefile (filename, flags)
             {
             case w_eol:
               if (cmdleft != 0)
-                fatal(&fileinfo, "missing rule before commands");
+                fatal(&fileinfo, _("missing rule before commands"));
               /* This line contained something but turned out to be nothing
                  but whitespace (a comment?).  */
               continue;
@@ -856,9 +857,9 @@ read_makefile (filename, flags)
               if (*p2 != '\0')
                 /* There's no need to be ivory-tower about this: check for
                    one of the most common bugs found in makefiles...  */
-                fatal (&fileinfo, "missing separator%s",
+                fatal (&fileinfo, _("missing separator%s"),
                        !strneq(lb.buffer, "        ", 8) ? ""
-                       : " (did you mean TAB instead of 8 spaces?)");
+                       : _(" (did you mean TAB instead of 8 spaces?)"));
               continue;
             }
 
@@ -987,14 +988,13 @@ read_makefile (filename, flags)
 	      target = parse_file_seq (&p2, ':', sizeof (struct nameseq), 1);
 	      ++p2;
 	      if (target == 0)
-		fatal (&fileinfo, "missing target pattern");
+		fatal (&fileinfo, _("missing target pattern"));
 	      else if (target->next != 0)
-		fatal (&fileinfo, "multiple target patterns");
+		fatal (&fileinfo, _("multiple target patterns"));
 	      pattern = target->name;
 	      pattern_percent = find_percent (pattern);
 	      if (pattern_percent == 0)
-		fatal (&fileinfo,
-				"target pattern contains no `%%'");
+		fatal (&fileinfo, _("target pattern contains no `%%'"));
               free((char *)target);
 	    }
 	  else
@@ -1035,7 +1035,7 @@ read_makefile (filename, flags)
     }
 
   if (conditionals->if_cmds)
-    fatal (&fileinfo, "missing `endif'");
+    fatal (&fileinfo, _("missing `endif'"));
 
   /* At eof, record the last rule.  */
   record_waiting_files ();
@@ -1094,7 +1094,7 @@ do_define (name, namelen, origin, infile, flocp)
 	  p += 5;
 	  remove_comments (p);
 	  if (*next_token (p) != '\0')
-	    error (flocp, "Extraneous text after `endef' directive");
+	    error (flocp, _("Extraneous text after `endef' directive"));
 	  /* Define the variable.  */
 	  if (idx == 0)
 	    definition[0] = '\0';
@@ -1123,7 +1123,7 @@ do_define (name, namelen, origin, infile, flocp)
     }
 
   /* No `endef'!!  */
-  fatal (flocp, "missing `endef', unterminated `define'");
+  fatal (flocp, _("missing `endef', unterminated `define'"));
 
   /* NOTREACHED */
   return;
@@ -1177,16 +1177,15 @@ conditional_line (line, flocp)
   if (*cmdname == 'e')
     {
       if (*line != '\0')
-	error (flocp,
-                        "Extraneous text after `%s' directive", cmdname);
+	error (flocp, _("Extraneous text after `%s' directive"), cmdname);
       /* "Else" or "endif".  */
       if (conditionals->if_cmds == 0)
-	fatal (flocp, "extraneous `%s'", cmdname);
+	fatal (flocp, _("extraneous `%s'"), cmdname);
       /* NOTDEF indicates an `endif' command.  */
       if (notdef)
 	--conditionals->if_cmds;
       else if (conditionals->seen_else[conditionals->if_cmds - 1])
-	fatal (flocp, "only one `else' per conditional");
+	fatal (flocp, _("only one `else' per conditional"));
       else
 	{
 	  /* Toggle the state of ignorance.  */
@@ -1334,8 +1333,7 @@ conditional_line (line, flocp)
       *line = '\0';
       line = next_token (++line);
       if (*line != '\0')
-	error (flocp,
-                        "Extraneous text after `%s' directive", cmdname);
+	error (flocp, _("Extraneous text after `%s' directive"), cmdname);
 
       s2 = variable_expand (s2);
       conditionals->ignoring[conditionals->if_cmds - 1]
@@ -1446,7 +1444,7 @@ record_target_var (filenames, defn, two_colon, origin, flocp)
       current_variable_set_list = vlist;
       v = try_variable_definition(flocp, defn, origin);
       if (!v)
-        error (flocp, "Malformed per-target variable definition");
+        error (flocp, _("Malformed per-target variable definition"));
       v->per_target = 1;
 
       /* If it's not an override, check to see if there was a command-line
@@ -1528,10 +1526,10 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
       implicit |= implicit_percent != 0;
 
       if (implicit && pattern != 0)
-	fatal (flocp, "mixed implicit and static pattern rules");
+	fatal (flocp, _("mixed implicit and static pattern rules"));
 
       if (implicit && implicit_percent == 0)
-	fatal (flocp, "mixed implicit and normal rules");
+	fatal (flocp, _("mixed implicit and normal rules"));
 
       if (implicit)
 	{
@@ -1572,7 +1570,7 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
 	    {
 	      /* Give a warning if the rule is meaningless.  */
 	      error (flocp,
-		     "target `%s' doesn't match the target pattern", name);
+		     _("target `%s' doesn't match the target pattern"), name);
 	      this = 0;
 	    }
 	  else
@@ -1604,12 +1602,12 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
 
 	  if (f->double_colon)
 	    fatal (flocp,
-                   "target file `%s' has both : and :: entries", f->name);
+                   _("target file `%s' has both : and :: entries"), f->name);
 
 	  /* If CMDS == F->CMDS, this target was listed in this rule
 	     more than once.  Just give a warning since this is harmless.  */
 	  if (cmds != 0 && cmds == f->cmds)
-	    error (flocp, "target `%s' given more than once in the same rule.",
+	    error (flocp, _("target `%s' given more than once in the same rule."),
                    f->name);
 
 	  /* Check for two single-colon entries both with commands.
@@ -1618,9 +1616,9 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
 	  else if (cmds != 0 && f->cmds != 0 && f->is_target)
 	    {
 	      error (&cmds->fileinfo,
-                     "warning: overriding commands for target `%s'", f->name);
+                     _("warning: overriding commands for target `%s'"), f->name);
 	      error (&f->cmds->fileinfo,
-                     "warning: ignoring old commands for target `%s'",
+                     _("warning: ignoring old commands for target `%s'"),
                      f->name);
 	    }
 
@@ -1702,7 +1700,7 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
 	     we don't lose on default suffix rules or makefiles.  */
 	  if (f != 0 && f->is_target && !f->double_colon)
 	    fatal (flocp,
-                   "target file `%s' has both : and :: entries", f->name);
+                   _("target file `%s' has both : and :: entries"), f->name);
 	  f = enter_file (name);
 	  /* If there was an existing entry and it was a double-colon
 	     entry, enter_file will have returned a new one, making it the
@@ -2119,7 +2117,7 @@ readline (linebuffer, stream, flocp)
 	     lossage strikes again!  (xmkmf puts NULs in its makefiles.)
 	     There is nothing really to be done; we synthesize a newline so
 	     the following line doesn't appear to be part of this line.  */
-	  error (flocp, "warning: NUL character seen; rest of line ignored");
+	  error (flocp, _("warning: NUL character seen; rest of line ignored"));
 	  p[0] = '\n';
 	  len = 1;
 	}
@@ -2674,7 +2672,7 @@ multi_glob (chain, size)
 	  }
 
 	case GLOB_NOSPACE:
-	  fatal (NILF, "virtual memory exhausted");
+	  fatal (NILF, _("virtual memory exhausted"));
 	  break;
 
 	default:

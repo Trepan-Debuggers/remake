@@ -98,7 +98,8 @@ recursively_expand (v)
   if (v->expanding)
     /* Expanding V causes infinite recursion.  Lose.  */
     fatal (reading_file,
-           "Recursive variable `%s' references itself (eventually)", v->name);
+           _("Recursive variable `%s' references itself (eventually)"),
+           v->name);
 
   v->expanding = 1;
   value = allocated_variable_expand (v->value);
@@ -119,7 +120,7 @@ warn_undefined (name, length)
 {
   if (warn_undefined_variables_flag)
     error (reading_file,
-           "warning: undefined variable `%.*s'", (int)length, name);
+           _("warning: undefined variable `%.*s'"), (int)length, name);
 }
 
 /* Expand a simple reference to variable NAME, which is LENGTH chars long.  */
@@ -231,7 +232,7 @@ variable_expand_string (line, string, length)
 	    end = index (beg, closeparen);
 	    if (end == 0)
               /* Unterminated variable reference.  */
-              fatal (reading_file, "unterminated variable reference");
+              fatal (reading_file, _("unterminated variable reference"));
 	    p1 = lindex (beg, end, '$');
 	    if (p1 != 0)
 	      {

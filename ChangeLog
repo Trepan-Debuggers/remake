@@ -1,3 +1,13 @@
+1999-07-28  Paul D. Smith  <psmith@gnu.org>
+
+	* make.h: Define _() and N_() macros as a passthrough to initiate
+	NLS support.
+	* <all>: Add _()/N_() around translatable strings.
+
+1999-07-27  Paul D. Smith  <psmith@gnu.org>
+
+	* read.c: Make sure make.h comes before other headers.
+
 1999-07-26  Paul D. Smith  <psmith@gnu.org>
 
 	* make.texinfo (Quick Reference): Update with the new features.

@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.176 1999/07/26 05:07:01 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.177 1999/07/28 06:23:54 psmith Exp $
 @set EDITION 0.53
 @set VERSION 3.78
 @set UPDATED 14 April 1999
@@ -9107,7 +9107,6 @@ defined.@*
 Evaluate @var{text} with @var{var} bound to each word in @var{words},
 and concatenate the results.@*
 @xref{Foreach Function, ,The @code{foreach} Function}.
-@end table
 
 @item $(call @var{var},@var{param},@dots{})
 

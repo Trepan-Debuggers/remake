@@ -243,7 +243,7 @@ free_job_token (child)
   }
 
   if (debug_flag)
-    printf ("Released token `%c' for child 0x%08lx (%s).\n",
+    printf (_("Released token `%c' for child 0x%08lx (%s).\n"),
             child->job_token, (unsigned long int) child, child->file->name);
 
   child->job_token = '-';
@@ -266,16 +266,16 @@ child_error (target_name, exit_code, exit_sig, coredump, ignored)
 
 #ifdef VMS
   if (!(exit_code & 1))
-      error (NILF, "*** [%s] Error 0x%x%s", target_name, exit_code, ((ignored)? " (ignored)" : ""));
+      error (NILF, _("*** [%s] Error 0x%x%s"), target_name, exit_code, ((ignored)? _(" (ignored)") : ""));
 #else
   if (exit_sig == 0)
-    error (NILF, ignored ? "[%s] Error %d (ignored)" :
-	   "*** [%s] Error %d",
+    error (NILF, ignored ? _("[%s] Error %d (ignored)") :
+	   _("*** [%s] Error %d"),
 	   target_name, exit_code);
   else
     error (NILF, "*** [%s] %s%s",
 	   target_name, strsignal (exit_sig),
-	   coredump ? " (core dumped)" : "");
+	   coredump ? _(" (core dumped)") : "");
 #endif /* VMS */
 }
 
@@ -315,7 +315,7 @@ child_handler (sig)
   ++dead_children;
 
   if (debug_flag)
-    printf ("Got a SIGCHLD; %u unreaped children.\n", dead_children);
+    printf (_("Got a SIGCHLD; %u unreaped children.\n"), dead_children);
 }
 
 
@@ -354,7 +354,7 @@ reap_children (block, err)
 	{
 	  /* We might block for a while, so let the user know why.  */
 	  fflush (stdout);
-	  error (NILF, "*** Waiting for unfinished jobs....");
+	  error (NILF, _("*** Waiting for unfinished jobs...."));
 	}
 
       /* We have one less dead child to reap.  As noted in
@@ -384,10 +384,10 @@ reap_children (block, err)
 	  any_remote |= c->remote;
 	  any_local |= ! c->remote;
 	  if (debug_flag)
-	    printf ("Live child 0x%08lx (%s) PID %ld token %c%s\n",
+	    printf (_("Live child 0x%08lx (%s) PID %ld token %c%s\n"),
 		    (unsigned long int) c, c->file->name,
                     (long) c->pid, c->job_token,
-                    c->remote ? " (remote)" : "");
+                    c->remote ? _(" (remote)") : "");
 #ifdef VMS
 	  break;
 #endif
@@ -547,14 +547,14 @@ reap_children (block, err)
         continue;
 
       if (debug_flag)
-        printf ("Reaping %s child 0x%08lx PID %ld token %c%s\n",
-                child_failed ? "losing" : "winning",
+        printf (_("Reaping %s child 0x%08lx PID %ld token %c%s\n"),
+                child_failed ? _("losing") : _("winning"),
                 (unsigned long int) c, (long) c->pid, c->job_token,
-                c->remote ? " (remote)" : "");
+                c->remote ? _(" (remote)") : "");
 
       if (c->sh_batch_file) {
         if (debug_flag)
-          printf ("Cleaning up temp batch file %s\n", c->sh_batch_file);
+          printf (_("Cleaning up temp batch file %s\n"), c->sh_batch_file);
 
         /* just try and remove, don't care if this fails */
         remove (c->sh_batch_file);
@@ -647,9 +647,9 @@ reap_children (block, err)
         notice_finished_file (c->file);
 
       if (debug_flag)
-        printf ("Removing child 0x%08lx PID %ld token %c%s from chain.\n",
+        printf (_("Removing child 0x%08lx PID %ld token %c%s from chain.\n"),
                 (unsigned long int) c, (long) c->pid, c->job_token,
-                c->remote ? " (remote)" : "");
+                c->remote ? _(" (remote)") : "");
 
       /* Block fatal signals while frobnicating the list, so that
          children and job_slots_used are always consistent.  Otherwise
@@ -1122,11 +1122,11 @@ start_job_command (child)
         int i;
         unblock_sigs();
         fprintf(stderr,
-          "process_easy() failed failed to launch process (e=%d)\n",
+          _("process_easy() failed failed to launch process (e=%d)\n"),
           process_last_err(hPID));
                for (i = 0; argv[i]; i++)
                  fprintf(stderr, "%s ", argv[i]);
-               fprintf(stderr, "\nCounted %d args in failed launch\n", i);
+               fprintf(stderr, _("\nCounted %d args in failed launch\n"), i);
       }
   }
 #endif /* WINDOWS32 */
@@ -1208,7 +1208,7 @@ start_waiting_job (c)
                       /* We should definitely handle this more gracefully!
                          What kinds of things can happen here?  ^C closes the
                          pipe?  Something else closes it?  */
-                      pfatal_with_name ("read jobs pipe");
+                      pfatal_with_name (_("read jobs pipe"));
 #endif
                     /* We were interrupted; handle any dead children.  */
                     reap_children (1, 0);
@@ -1217,7 +1217,7 @@ start_waiting_job (c)
 
           assert(c->job_token != '-');
 	  if (debug_flag)
-	    printf ("Obtained token `%c' for child 0x%08lx (%s).\n",
+	    printf (_("Obtained token `%c' for child 0x%08lx (%s).\n"),
 		    c->job_token, (unsigned long int) c, c->file->name);
 	}
 #endif
@@ -1242,10 +1242,10 @@ start_waiting_job (c)
     case cs_running:
       c->next = children;
       if (debug_flag)
-	printf ("Putting child 0x%08lx (%s) PID %ld token %c%s on the chain.\n",
+	printf (_("Putting child 0x%08lx (%s) PID %ld token %c%s on the chain.\n"),
 		(unsigned long int) c, c->file->name,
                 (long) c->pid, c->job_token,
-                c->remote ? " (remote)" : "");
+                c->remote ? _(" (remote)") : "");
       children = c;
       /* One more job slot is in use.  */
       ++job_slots_used;
@@ -1469,9 +1469,9 @@ load_too_high ()
 	{
 	  if (errno == 0)
 	    /* An errno value of zero means getloadavg is just unsupported.  */
-	    error (NILF, "cannot enforce load limits on this operating system");
+	    error (NILF, _("cannot enforce load limits on this operating system"));
 	  else
-	    perror_with_name ("cannot enforce load limit: ", "getloadavg");
+	    perror_with_name (_("cannot enforce load limit: "), "getloadavg");
 	}
       lossage = errno;
       load = 0;
@@ -1574,7 +1574,7 @@ int vmsHandleChildTerm(struct child *child)
 	    break;
 
 	  default:
-	    error (NILF, "internal error: `%s' command_state", c->file->name);
+	    error (NILF, _("internal error: `%s' command_state"), c->file->name);
 	    abort ();
 	    break;
 	  }
@@ -1680,7 +1680,7 @@ child_execute_job (argv, child)
       sprintf (cmd, "$ @%s", comname);
 
       if (debug_flag)
-	printf ("Executing %s instead\n", cmd);
+	printf (_("Executing %s instead\n"), cmd);
     }
 
   cmddsc.dsc$w_length = strlen(cmd);
@@ -1711,7 +1711,7 @@ child_execute_job (argv, child)
 
   if (!(status & 1))
     {
-      printf("Error spawning, %d\n",status);
+      printf(_("Error spawning, %d\n"),status);
       fflush(stdout);
     }
 
@@ -1780,11 +1780,11 @@ exec_command (argv, envp)
     {
       int i;
       fprintf(stderr,
-              "process_easy() failed failed to launch process (e=%d)\n",
+              _("process_easy() failed failed to launch process (e=%d)\n"),
               process_last_err(hPID));
       for (i = 0; argv[i]; i++)
           fprintf(stderr, "%s ", argv[i]);
-      fprintf(stderr, "\nCounted %d args in failed launch\n", i);
+      fprintf(stderr, _("\nCounted %d args in failed launch\n"), i);
       exit(EXIT_FAILURE);
     }
 
@@ -1809,7 +1809,7 @@ exec_command (argv, envp)
           break;
       else
           fprintf(stderr,
-                  "make reaped child pid %d, still waiting for pid %d\n",
+                  _("make reaped child pid %d, still waiting for pid %d\n"),
                   hWaitPID, hPID);
     }
 
@@ -1828,7 +1828,7 @@ exec_command (argv, envp)
   switch (errno)
     {
     case ENOENT:
-      error (NILF, "%s: Command not found", argv[0]);
+      error (NILF, _("%s: Command not found"), argv[0]);
       break;
     case ENOEXEC:
       {
@@ -1857,7 +1857,7 @@ exec_command (argv, envp)
 
 	execvp (shell, new_argv);
 	if (errno == ENOENT)
-	  error (NILF, "%s: Shell program not found", shell);
+	  error (NILF, _("%s: Shell program not found"), shell);
 	else
 	  perror_with_name ("execvp: ", shell);
 	break;
@@ -2037,7 +2037,7 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
     {
       extern int _is_unixy_shell (const char *_path);
 
-      message (1, "$SHELL changed (was `%s', now `%s')", default_shell, shell);
+      message (1, _("$SHELL changed (was `%s', now `%s')"), default_shell, shell);
       unixy_shell = _is_unixy_shell (shell);
       default_shell = shell;
     }
@@ -2439,7 +2439,7 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
       }
 
       if (debug_flag)
-        printf("Creating temporary batch file %s\n", *batch_filename_ptr);
+        printf(_("Creating temporary batch file %s\n"), *batch_filename_ptr);
 
       /* create batch file to execute command */
       batch = fopen (*batch_filename_ptr, "w");
@@ -2480,7 +2480,7 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
       }
 #else
     else
-      fatal (NILF, "%s (line %d) Bad shell context (!unixy && !batch_mode_shell)\n",
+      fatal (NILF, _("%s (line %d) Bad shell context (!unixy && !batch_mode_shell)\n"),
             __FILE__, __LINE__);
 #endif
   }

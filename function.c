@@ -735,11 +735,11 @@ func_word(o, argv, funcname)
   char *p=0;
 
   /* Check the first argument.  */
-  check_numeric (argv[0], "non-numeric first argument to `word' function");
+  check_numeric (argv[0], _("non-numeric first argument to `word' function"));
   i =  atoi (argv[0]);
 
   if (i == 0)
-    fatal (reading_file, "the `word' function takes a positive index argument");
+    fatal (reading_file, _("the `word' function takes a positive index argument"));
 
 
   end_p = argv[1];
@@ -764,10 +764,10 @@ func_wordlist (o, argv, funcname)
 
   /* Check the first argument.  */
   check_numeric (argv[0],
-		 "non-numeric first argument to `wordlist' function");
+		 _("non-numeric first argument to `wordlist' function"));
   i =atoi(argv[0]);
   check_numeric (argv[1],
-		 "non-numeric second argument to `wordlist' function");
+		 _("non-numeric second argument to `wordlist' function"));
 
   j = atoi(argv[1]);
 
@@ -1156,7 +1156,7 @@ windows32_openpipe (int *pipedes, int *pid_p, char **command_argv, char **envp)
 		      0,
 		      TRUE,
 		      DUPLICATE_SAME_ACCESS) == FALSE) {
-    fatal (NILF, "create_child_process: DuplicateHandle(In) failed (e=%d)\n",
+    fatal (NILF, _("create_child_process: DuplicateHandle(In) failed (e=%d)\n"),
 	   GetLastError());
 
   }
@@ -1167,19 +1167,19 @@ windows32_openpipe (int *pipedes, int *pid_p, char **command_argv, char **envp)
 		      0,
 		      TRUE,
 		      DUPLICATE_SAME_ACCESS) == FALSE) {
-    fatal (NILF, "create_child_process: DuplicateHandle(Err) failed (e=%d)\n",
+    fatal (NILF, _("create_child_process: DuplicateHandle(Err) failed (e=%d)\n"),
 	   GetLastError());
   }
 
   if (!CreatePipe(&hChildOutRd, &hChildOutWr, &saAttr, 0))
-    fatal (NILF, "CreatePipe() failed (e=%d)\n", GetLastError());
+    fatal (NILF, _("CreatePipe() failed (e=%d)\n"), GetLastError());
 
 
 
   hProcess = process_init_fd(hIn, hChildOutWr, hErr);
 
   if (!hProcess)
-    fatal (NILF, "windows32_openpipe (): process_init_fd() failed\n");
+    fatal (NILF, _("windows32_openpipe (): process_init_fd() failed\n"));
 
   else
     process_register(hProcess);
@@ -1190,7 +1190,7 @@ windows32_openpipe (int *pipedes, int *pid_p, char **command_argv, char **envp)
   if (!process_begin(hProcess, command_argv, envp, command_argv[0], NULL))
     *pid_p = (int) hProcess;
   else
-    fatal (NILF, "windows32_openpipe (): unable to launch process (e=%d)\n",
+    fatal (NILF, _("windows32_openpipe (): unable to launch process (e=%d)\n"),
 	   process_last_err(hProcess));
 
   /* set up to read data from child */
@@ -1405,7 +1405,7 @@ func_shell (o, argv, funcname)
 
       if (batch_filename) {
 	if (debug_flag)
-	  printf("Cleaning up temporary batch file %s\n", batch_filename);
+	  printf(_("Cleaning up temporary batch file %s\n"), batch_filename);
 	remove(batch_filename);
 	free(batch_filename);
       }
@@ -1676,11 +1676,11 @@ expand_builtin_function (o, argc, argv, entry_p)
 
   if (argc < min)
     fatal (reading_file,
-           "Insufficient number of arguments (%d) to function `%s'",
+           _("Insufficient number of arguments (%d) to function `%s'"),
            argc, entry_p->name);
 
   if (!entry_p->func_ptr)
-    fatal (reading_file, "Unimplemented on this platform: function `%s'",
+    fatal (reading_file, _("Unimplemented on this platform: function `%s'"),
            entry_p->name);
 
   return entry_p->func_ptr (o, argv, entry_p->name);
@@ -1736,7 +1736,7 @@ handle_function (op, stringp)
 
   if (count >= 0)
     fatal (reading_file,
-	   "unterminated call to function `%s': missing `%c'",
+	   _("unterminated call to function `%s': missing `%c'"),
 	   entry_p->name, closeparen);
 
   /* Get some memory to store the arg pointers.  */
