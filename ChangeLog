@@ -1,4 +1,13 @@
+2000-03-28  Paul D. Smith  <psmith@gnu.org>
+
+	* Version 3.78.92 released.
+
+	* build.template: Updates for gettext support; some bugs fixed.
+
 2000-03-27  Paul D. Smith  <psmith@gnu.org>
+
+	* config.guess, config.sub: Updated from config CVS archive at
+	:pserver:anoncvs@subversions.gnu.org:/home/cvs as of today.
 
 	* read.c (record_files): Check if expanding a static pattern
 	rule's prerequisite pattern leaves an empty string as the
