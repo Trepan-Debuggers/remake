@@ -262,7 +262,7 @@ make-$(version).tar: README INSTALL COPYING ChangeLog NEWS \
 	  acconfig.h $(srcs) remote-*.c $(globfiles) \
 	  make.texinfo make-stds.texi \
 	  make.?? make.??s make.toc make.aux make.man texinfo.tex TAGS tags \
-	  install.sh \
+	  install-sh \
 	  make.info make.info*
 	$(make-tar)
 
