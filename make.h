@@ -280,10 +280,3 @@ extern unsigned int makelevel;
 #define DEBUGPR(msg) \
   do if (debug_flag) { print_spaces (depth); printf (msg, file->name); \
 		       fflush (stdout); } while (0)
-
-#ifdef	__GNUC__
-#define	max(a, b) \
-  ({ register int __a = (a), __b = (b); __a > __b ? __a : __b; })
-#else
-#define max(a, b) ((a) > (b) ? (a) : (b))
-#endif
