@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.102 2000/07/30 18:26:43 psmith Exp $])
+AC_REVISION([$Id: configure.in,v 1.103 2000/10/05 16:27:07 psmith Exp $])
 AC_PREREQ(2.13)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 
@@ -42,7 +42,7 @@ AC_HEADER_TIME
 
 dnl Handle internationalization
 
-ALL_LINGUAS="de es fr ja ko nl pl pt_BR ru"
+ALL_LINGUAS="de es fr gl ja ko nl pl pt_BR ru"
 pds_WITH_GETTEXT
 
 jm_AC_TYPE_UINTMAX_T

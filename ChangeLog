@@ -1,9 +1,28 @@
-2000-09-21  Paul D. Smith  <paul@paulandlesley.org>
+2000-10-05  Paul D. Smith  <psmith@gnu.org>
+
+	* acinclude.m4 (AM_LC_MESSAGES): Remove undefined macro
+	AM_LC_MESSAGES; it doesn't seem to do anything anyway??
+
+	* i18n/gl.po, configure.in (ALL_LINGUAS): New Galician translation.
+
+2000-09-22  Paul D. Smith  <psmith@gnu.org>
+
+	* gettext.c: Don't #define _GETTEXT_H here; we only include some
+	parts of the real gettext.h here, and we expect to really include
+	the real gettext.h later.  If we keep this #define, it's ignored.
+
+2000-09-21  Paul D. Smith  <psmith@gnu.org>
 
 	* main.c (log_working_directory): Rework the text to use complete
 	sentences, to make life simpler for the translators.
 
-2000-08-21  Paul D. Smith  <paul@paulandlesley.org>
+2000-08-29  Paul D. Smith  <psmith@gnu.org>
+
+	* file.c (remove_intermediates): Print a debug message before we
+	remove intermediate files, so the user (if she uses -d) knows
+	what's going on.
+
+2000-08-21  Paul D. Smith  <psmith@gnu.org>
 
 	* variable.c (try_variable_definition): Change how we handle
 	target-specific append variable defns: instead of just setting the
@@ -11,6 +30,12 @@
 	target's context.  Otherwise we lose all but the last value if the
 	variable is appended more than once within the current target
 	context.  Fixes PR/1831.
+
+2000-08-16  Paul D. Smith  <psmith@gnu.org>
+
+	* function.c (func_shell): Nul-terminate the buffer before
+	printing an exec error message (just in case it's not!).
+	Fixes PR/1860, reported by Joey Hess <joey@valinux.com>.
 
 2000-07-25  Paul D. Smith  <psmith@gnu.org>
 
