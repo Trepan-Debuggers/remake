@@ -33,7 +33,7 @@ extern int try_implicit_rule ();
 
 
 /* Incremented when a file has been remade.  */
-static unsigned int files_remade = 0;
+unsigned int files_remade = 0;
 
 static int update_file (), update_file_1 (), check_dep (), touch_file ();
 static void remake_file ();
@@ -549,8 +549,6 @@ notice_finished_file (file)
 
   file->command_state = cs_finished;
   file->updated = 1;
-
-  ++files_remade;
 
   if (touch_flag
       /* The update status will be:
