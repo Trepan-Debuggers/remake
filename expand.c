@@ -398,7 +398,7 @@ char *
 variable_expand (line)
      char *line;
 {
-  return variable_expand_string(NULL, line, -1);
+  return variable_expand_string(NULL, line, (long)-1);
 }
 
 /* Expand an argument for an expansion function.

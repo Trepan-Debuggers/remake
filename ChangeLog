@@ -1,7 +1,21 @@
+1999-04-26  Paul D. Smith  <psmith@gnu.org>
+
+	* main.c (main): Reset read_makefiles to empty after processing so
+	we get the right error message.
+
 1999-04-25  Paul D. Smith  <psmith@gnu.org>
 
 	* make.texinfo: Updates to @dircategory and @direntry suggested by
 	Karl Berry <karl@cs.umb.edu>.
+
+1999-04-23  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* job.c (start_job_command) [__MSDOS__]: Call unblock_sigs before
+	turning off dos_command_running, so child's signals produce the
+	right effect.
+
+	* commands.c (fatal_error_signal) [__MSDOS__]: Use EXIT_FAILURE
+	instead of 1.
 
 1999-04-18  Eli Zaretskii  <eliz@is.elta.co.il>
 

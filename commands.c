@@ -380,7 +380,7 @@ fatal_error_signal (sig)
       return;
     }
   remove_intermediates (1);
-  exit (1);
+  exit (EXIT_FAILURE);
 #else /* not __MSDOS__ */
 #ifdef _AMIGA
   remove_intermediates (1);
