@@ -341,16 +341,14 @@ update_file_1 (file, depth)
       if (try_implicit_rule (file, depth))
 	DEBUGPR ("Found an implicit rule for `%s'.\n");
       else
-	{
-	  DEBUGPR ("No implicit rule found for `%s'.\n");
-	  if (!file->is_target
-	      && default_file != 0 && default_file->cmds != 0)
-	    {
-	      DEBUGPR ("Using default commands for `%s'.\n");
-	      file->cmds = default_file->cmds;
-	    }
-	}
+	DEBUGPR ("No implicit rule found for `%s'.\n");
       file->tried_implicit = 1;
+    }
+  if (file->cmds == 0 && !file->is_target
+      && default_file != 0 && default_file->cmds != 0)
+    {
+      DEBUGPR ("Using default commands for `%s'.\n");
+      file->cmds = default_file->cmds;
     }
 
   /* Update all non-intermediate files we depend on, if necessary,
