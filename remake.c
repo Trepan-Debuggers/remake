@@ -250,7 +250,7 @@ update_file_1 (file, depth)
   int noexist, must_make, deps_changed;
   int dep_status = 0;
   register struct dep *d, *lastd;
-  char running = 0;
+  int running = 0;
 
   DEBUGPR ("Considering target file `%s'.\n");
 
@@ -675,6 +675,13 @@ check_dep (file, depth, this_mtime, must_make_ptr)
 	  check_renamed (d->file);
 	  if (dep_status != 0 && !keep_going_flag)
 	    break;
+
+	  if (d->file->command_state == cs_running
+	      || d->file->command_state == cs_deps_running)
+	    /* Record that some of FILE's dependencies are still being made.
+	       This tells the upper levels to wait on processing it until
+	       the commands are finished.  */
+	    file->command_state = cs_deps_running;
 
 	  lastd = d;
 	  d = d->next;
