@@ -712,8 +712,11 @@ main (argc, argv, envp)
 	    /* Replace the name that read_all_makefiles will
 	       see with the name of the temporary file.  */
 	    {
-	      makefiles->list[i] = (char *) alloca (sizeof (name));
-	      bcopy (name, makefiles->list[i], sizeof (name));
+	      char *temp;
+	      /* SGI compiler requires alloca's result be assigned simply.  */
+	      temp = (char *) alloca (sizeof (name));
+	      bcopy (name, temp, sizeof (name));
+	      makefiles->list[i] = temp;
 	    }
 
 	    /* Make sure the temporary file will not be remade.  */
@@ -1436,8 +1439,10 @@ decode_env_switches (envar, len)
     return;
 
   /* Make a copy of the value in ARGS, where we will munge it.
-     If it does not begin with a dash, prepend one.  */
-  args = (char *) alloca (1 + len + 2);
+     If it does not begin with a dash, prepend one.
+     We must allocate lasting storage for this (and we never free it) because
+     decode_switches may save pointers into it for string-valued switches.  */
+  args = (char *) xmalloc (1 + len + 2);
   if (value[0] != '-')
     args[0] = '-';
   bcopy (value, value[0] == '-' ? args : &args[1], len + 1);
