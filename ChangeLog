@@ -1,5 +1,7 @@
 Thu Jul 25 19:53:31 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 
+	* GNUmakefile (mkdep-nolib): Use -MM option unconditionally.
+
 	* Version 3.74.7.
 
 	* main.c (define_makeflags): Back up P to point at null terminator
