@@ -203,7 +203,7 @@ static unsigned int inf_jobs = 0;
 double max_load_average = -1.0;
 double default_load_average = -1.0;
 
-/* List of directories given with -c switches.  */
+/* List of directories given with -C switches.  */
 
 static struct stringlist *directories = 0;
 
@@ -369,6 +369,13 @@ static struct file *
 enter_command_line_file (name)
      char *name;
 {
+  if (name[0] == '~')
+    {
+      char *expanded = tilde_expand (name);
+      if (expanded != 0)
+	name = expanded;	/* Memory leak; I don't care.  */
+    }
+
   /* This is also done in parse_file_seq, so this is redundant
      for names read from makefiles.  It is here for names passed
      on the command line.  */
@@ -627,8 +634,16 @@ main (argc, argv, envp)
     for (i = 0; directories->list[i] != 0; ++i)
       {
 	char *dir = directories->list[i];
+	if (dir[0] == '~')
+	  {
+	    char *expanded = tilde_expand (dir);
+	    if (expanded != 0)
+	      dir = expanded;
+	  }
 	if (chdir (dir) < 0)
 	  pfatal_with_name (dir);
+	if (dir != directories->list[i])
+	  free (dir);
       }
 
   /* Figure out the level of recursion.  */
@@ -986,7 +1001,7 @@ main (argc, argv, envp)
 	      /* These names might have changed.  */
 	      register unsigned int i, j = 0;
 	      for (i = 1; i < argc; ++i)
-		if (!strcmp (argv[i], "-f"))
+		if (!strcmp (argv[i], "-f")) /* XXX */
 		  {
 		    char *p = &argv[i][2];
 		    if (*p == '\0')
