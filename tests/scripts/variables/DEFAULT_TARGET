@@ -3,6 +3,7 @@ $description = "Test the .DEFAULT_TARGET special variable.";
 
 $details = "";
 
+
 # Test #1: basic logic.
 #
 run_make_test('
@@ -45,7 +46,7 @@ run_make_test('
 512);
 
 
-# Test #2: more than one target.
+# Test #3: more than one target.
 #
 run_make_test('
 .DEFAULT_TARGET := foo bar
@@ -53,6 +54,24 @@ run_make_test('
 '',
 'make: *** .DEFAULT_TARGET contains more than one target.  Stop.',
 512);
+
+
+# Test #4: Savannah bug #12226.
+#
+run_make_test('
+define rule
+foo: ; @echo $$@
+endef
+
+define make-rule
+$(eval $(rule))
+endef
+
+$(call make-rule)
+
+',
+'',
+'foo');
 
 
 # This tells the test driver that the perl test script executed properly.
