@@ -268,7 +268,14 @@ struct file *default_goal_file;
 struct file *default_file;
 
 /* Mask of signals that are being caught with fatal_error_signal.  */
+
+#ifdef	POSIX
+sigset_t fatal_signal_set;
+#else
+#ifndef	USG
 int fatal_signal_mask;
+#endif
+#endif
 
 int
 main (argc, argv, envp)
@@ -299,14 +306,24 @@ main (argc, argv, envp)
   init_siglist ();
 #endif
 
+#ifdef	POSIX
+  sigemptyset (&fatal_signal_set);
+#define	ADD_SIG(sig)	sigaddset (sig, &fatal_signal_set)
+#else
+#ifndef	USG
   fatal_signal_mask = 0;
+#define	ADD_SIG(sig)	fatal_signal_mask |= sigmask (sig)
+#else
+#define	ADD_SIG(sig)
+#endif
+#endif
 
 #define	FATAL_SIG(sig)							      \
   if (SIGNAL ((sig), (SIGHANDLER) fatal_error_signal)			      \
       == (SIGHANDLER) SIG_IGN)						      \
     (void) SIGNAL ((sig), SIG_IGN);					      \
   else									      \
-    fatal_signal_mask |= sigmask (sig);
+    ADD_SIG (sig);
 
   FATAL_SIG (SIGHUP);
   FATAL_SIG (SIGQUIT);
