@@ -37,6 +37,10 @@ struct rule *last_pattern_rule;
 
 unsigned int num_pattern_rules;
 
+/* Maximum number of target patterns of any pattern rule.  */
+
+unsigned int max_pattern_targets;
+
 /* Maximum number of dependencies of any pattern rule.  */
 
 unsigned int max_pattern_deps;
@@ -66,8 +70,9 @@ count_implicit_rule_limits ()
   unsigned int namelen;
   register struct rule *rule, *lastrule;
 
-  num_pattern_rules = 0;
-  
+  num_pattern_rules = max_pattern_targets = max_pattern_deps = 0;
+  max_pattern_dep_length = 0;
+
   name = 0;
   namelen = 0;
   rule = pattern_rules;
@@ -77,9 +82,17 @@ count_implicit_rule_limits ()
       unsigned int ndeps = 0;
       register struct dep *dep;
       struct rule *next = rule->next;
-    
+      unsigned int ntargets;
+
       ++num_pattern_rules;
       
+      ntargets = 0;
+      while (rule->targets[ntargets] != 0)
+	++ntargets;
+
+      if (ntargets > max_pattern_targets)
+	max_pattern_targets = ntargets;
+
       for (dep = rule->deps; dep != 0; dep = dep->next)
 	{
 	  unsigned int len = strlen (dep->name);
