@@ -91,8 +91,7 @@ struct command_switch
 	string,			/* One string per switch.  */
 	positive_int,		/* A positive integer.  */
 	floating,		/* A floating-point number (double).  */
-	ignore,			/* Ignored.  */
-	usage_and_exit		/* Ignored; exit after processing switches.  */
+	ignore			/* Ignored.  */
       } type;
 
     char *value_ptr;	/* Pointer to the value-holding variable.  */
@@ -219,6 +218,10 @@ static struct stringlist *old_files = 0;
 /* List of files given with -W switches.  */
 
 static struct stringlist *new_files = 0;
+
+/* If nonzero, we should just print usage and exit.  */
+
+static int print_usage_flag = 0;
 
 /* The table of command switches.  */
 
@@ -239,7 +242,7 @@ static const struct command_switch switches[] =
     { 'f', string, (char *) &makefiles, 0, 0, 0, 0, 0,
 	"file", "FILE",
 	"Read FILE as a makefile" },
-    { 'h', usage_and_exit, 0, 0, 0, 0, 0, 0,
+    { 'h', flag, (char *) &print_usage_flag, 0, 0, 0, 0, 0,
 	"help", 0,
 	"Print this message and exit" },
     { 'i', flag, (char *) &ignore_errors_flag, 1, 1, 0, 0, 0,
@@ -500,7 +503,7 @@ main (argc, argv, envp)
 
   /* `make --version' is supposed to just print the version and exit.  */
   if (print_version_flag)
-    die (1);
+    die (0);
 
   /* Search for command line arguments that define variables,
      and do the definitions.  Also save up the text of these
@@ -1085,7 +1088,6 @@ init_switches ()
 	case flag:
 	case flag_off:
 	case ignore:
-	case usage_and_exit:
 	  long_options[i].has_arg = no_argument;
 	  break;
 
@@ -1171,10 +1173,6 @@ decode_switches (argc, argv, env)
 		  abort ();
 
 		case ignore:
-		  break;
-
-		case usage_and_exit:
-		  bad = 1;
 		  break;
 
 		case flag:
@@ -1269,7 +1267,7 @@ positive integral argument",
       other_args->list[other_args->idx] = 0;
     }
 
-  if (bad && !env)
+  if (!env && (bad || print_usage_flag))
     {
       /* Print a nice usage message.  */
 
@@ -1355,7 +1353,7 @@ positive integral argument",
 		   buf, cs->description);
 	}
 
-      die (1);
+      die (bad);
     }
 }
 
