@@ -1,5 +1,7 @@
 1999-09-15  Paul D. Smith  <psmith@gnu.org>
 
+	* Version 3.77.97 released.
+
 	* configure.in (MAKE_HOST): AC_SUBST this so it will go into the
 	makefile.
 	* Makefile.am (check-local): Print a success banner if the check

@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.81 1999/09/15 22:23:41 psmith Exp $])
+AC_REVISION([$Id: configure.in,v 1.82 1999/09/16 05:58:52 psmith Exp $])
 AC_PREREQ(2.13)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 
@@ -225,8 +225,8 @@ AC_OUTPUT(build.sh Makefile glob/Makefile)
 
 dnl If we don't yet have build.sh.in, build.sh is a bogus 0-length file
 dnl so remove it.
-
-test -f build.sh.in || rm -f build.sh
+dnl Can't do this because then remote builds with build.sh don't work.
+dnl test -f build.sh.in || rm -f build.sh
 
 
 case "$make_badcust" in
