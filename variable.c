@@ -682,7 +682,7 @@ print_variable_set (set, prefix)
 #ifndef	NO_FLOAT
       printf ("# average of %.1f variables per bucket, \
 max %u in one bucket.\n",
-	      ((double) nvariables) * 100.0 / (double) set->buckets,
+	      (double) nvariables / (double) set->buckets,
 	      per_bucket);
 #endif
     }
