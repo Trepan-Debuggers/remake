@@ -220,7 +220,7 @@ read_makefile (filename, type)
   unsigned int commands_started;
   register char *p;
   char *p2;
-  int ignoring = 0;
+  int ignoring = 0, in_ignored_define = 0;
 
   struct nameseq *filenames = 0;
   struct dep *deps;
@@ -331,7 +331,8 @@ read_makefile (filename, type)
 
 #define	word1eq(s, l) 	((p[l] == '\0' || isblank (p[l])) && \
 			 !strncmp (s, p, l))
-      if (word1eq ("ifdef", 5) || word1eq ("ifndef", 6)
+      if (!in_ignored_define
+	  && word1eq ("ifdef", 5) || word1eq ("ifndef", 6)
 	  || word1eq ("ifeq", 4) || word1eq ("ifneq", 5)
 	  || word1eq ("else", 4) || word1eq ("endif", 5))
 	{
@@ -346,7 +347,25 @@ read_makefile (filename, type)
 			    "invalid syntax in conditional");
 	}
       else if (word1eq ("endef", 5))
-	makefile_fatal (filename, lineno, "extraneous `endef'");
+	{
+	  if (in_ignored_define)
+	    in_ignored_define = 0;
+	  else
+	    makefile_fatal (filename, lineno, "extraneous `endef'");
+	}
+      else if (word1eq ("define", 6))
+	{
+	  if (ignoring)
+	    in_ignored_define = 1;
+	  else
+	    {
+	      p2 = next_token (p + 6);
+	      p = end_of_token (p2);
+	      lineno = do_define (p2, p - p2, o_file,
+				  lineno, infile, filename);
+	      continue;
+	    }
+	}
       if (ignoring)
 	continue;
       else if (lb.buffer[0] == '\t')
@@ -371,13 +390,6 @@ read_makefile (filename, type)
 	  bcopy (p, &commands[commands_idx], len);
 	  commands_idx += len;
 	  commands[commands_idx++] = '\n';
-	}
-      else if (word1eq ("define", 6))
-	{
-	  p2 = next_token (p + 6);
-	  p = end_of_token (p2);
-	  lineno = do_define (p2, p - p2, o_file, lineno, infile, filename);
-	  continue;
 	}
       else if (word1eq ("override", 8))
 	{
