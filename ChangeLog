@@ -1,5 +1,15 @@
 Fri Mar 10 13:56:49 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
+	* Version 3.72.11.
+
+	* read.c (find_char_unquote): Make second arg a string of stop
+ 	chars instead of a single stop char.  Stop when any char in the
+ 	string is hit.  All callers changed.
+	(find_semicolon): Pass stop chars "#;" to one find_char_unquote call,
+	instead of using two calls.  If the match is not a ; but a #,
+ 	return zero.
+	* misc.c: Changed find_char_unquote callers here too.
+
 	* Version 3.72.10.
 
 	* read.c (read_makefile, parse_file_seq): Fix typo __MS_DOS__ ->
