@@ -44,11 +44,15 @@ set_file_variables (file)
 
   if (ar_name (file->name))
     {
+      unsigned int len;
       p = index (file->name, '(');
       at = (char *) alloca (p - file->name + 1);
       bcopy (file->name, at, p - file->name);
       at[p - file->name] = '\0';
-      percent = p + 1;
+      len = strlen (p + 1);
+      percent = (char *) alloca (len);
+      bcopy (p + 1, percent, len - 1);
+      percent[len - 1] = '\0';
     }
   else
 #endif	/* NO_ARCHIVES.  */
