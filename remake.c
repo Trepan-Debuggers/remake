@@ -264,9 +264,9 @@ static void
 no_rule_error(file)
   struct file *file;
 {
-  static const char msg_noparent[]
+  const char *msg_noparent
     = _("%sNo rule to make target `%s'%s");
-  static const char msg_parent[]
+  const char *msg_parent
     = _("%sNo rule to make target `%s', needed by `%s'%s");
 
   if (keep_going_flag || file->dontcare)
