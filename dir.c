@@ -638,14 +638,13 @@ void
 dir_setup_glob (gl)
      glob_t *gl;
 {
-  extern int lstat (), stat ();
+  extern int stat ();
 
-#ifdef HAVE_LSTAT
-#define lstat stat
-#endif
-  gl->gl_opendir = &open_dirstream;
-  gl->gl_readdir = &read_dirstream;
-  gl->gl_closedir = &free;
-  gl->gl_lstat = &lstat;
-  gl->gl_stat = &stat;
+  /* Bogus sunos4 compiler complains (!) about & before functions.  */
+  gl->gl_opendir = open_dirstream;
+  gl->gl_readdir = read_dirstream;
+  gl->gl_closedir = free;
+  gl->gl_stat = stat;
+  /* We don't bother setting gl_lstat, since glob never calls it.
+     The slot is only there for compatibility with 4.4 BSD.  */
 }
