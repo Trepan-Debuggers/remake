@@ -23,7 +23,7 @@ EXTRA_make_SOURCES = remote-stub.c remote-cstms.c
 noinst_HEADERS = commands.h dep.h filedef.h job.h make.h rule.h variable.h \
 		debug.h getopt.h gettext.h
 
-make_LDADD =	@LIBOBJS@ @ALLOCA@ $(GLOBLIB)
+make_LDADD =	@LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@
 
 man_MANS =	make.1
 info_TEXINFOS =	make.texinfo
@@ -117,6 +117,7 @@ check-loadavg: loadavg
 noinst_PROGRAMS = loadavg
 loadavg_SOURCES = getloadavg.c
 loadavg_CFLAGS = -DTEST
+loadavg_LDADD = @GETLOADAVG_LIBS@
 
 # > check-regression
 #

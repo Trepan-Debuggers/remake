@@ -173,7 +173,7 @@ remove_comments (line)
 
 void
 print_spaces (n)
-     register unsigned int n;
+     unsigned int n;
 {
   while (n-- > 0)
     putchar (' ');
@@ -185,10 +185,10 @@ print_spaces (n)
 
 char *
 concat (s1, s2, s3)
-     register char *s1, *s2, *s3;
+     const char *s1, *s2, *s3;
 {
-  register unsigned int len1, len2, len3;
-  register char *result;
+  unsigned int len1, len2, len3;
+  char *result;
 
   len1 = *s1 != '\0' ? strlen (s1) : 0;
   len2 = *s2 != '\0' ? strlen (s2) : 0;
@@ -314,7 +314,7 @@ fatal (flocp, fmt, va_alist)
 
 #undef	strerror
 
-char *
+const char *
 strerror (errnum)
      int errnum;
 {
@@ -336,7 +336,7 @@ strerror (errnum)
 
 void
 perror_with_name (str, name)
-     char *str, *name;
+     const char *str, *name;
 {
   error (NILF, "%s%s: %s", str, name, strerror (errno));
 }
@@ -345,7 +345,7 @@ perror_with_name (str, name)
 
 void
 pfatal_with_name (name)
-     char *name;
+     const char *name;
 {
   fatal (NILF, "%s: %s", name, strerror (errno));
 

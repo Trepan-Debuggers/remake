@@ -594,7 +594,8 @@ file_timestamp_cons (fname, s, ns)
 /* Return the current time as a file timestamp, setting *RESOLUTION to
    its resolution.  */
 FILE_TIMESTAMP
-file_timestamp_now (int *resolution)
+file_timestamp_now (resolution)
+     int *resolution;
 {
   int r;
   time_t s;

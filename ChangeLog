@@ -1,3 +1,58 @@
+2002-05-09  Paul D. Smith  <psmith@gnu.org>
+
+	* file.c (file_timestamp_now): Use K&R function declaration.
+
+	* getloadavg.c (getloadavg): Merge setlocale() fix from sh-utils
+	getloadavg.c.  Autoconf thinks QNX is SVR4-like, but it isn't, so
+	#undef it.  Remove predefined setup of NLIST_STRUCT.  Decide
+	whether to include nlist.h based on HAVE_NLIST_H.  Change obsolete
+	NLIST_NAME_UNION to new HAVE_STRUCT_NLIST_N_UN_N_NAME.
+	* configure.in (NLIST_STRUCT): Define this if we have nlist.h and
+	nlist.n_name is a pointer rather than an array.
+
+	* acinclude.m4 (make_FUNC_SETVBUF_REVERSED): Grab the latest
+	version of AC_FUNC_SETVBUF_REVERSED from autoconf CVS.
+	* configure.in: Use it instead of the old version.
+
+	* main.c (main): Prefer setvbuf() to setlinebuf().
+
+2002-05-08  Paul D. Smith  <psmith@gnu.org>
+
+	* Makefile.am (make_LDADD): Add GETLOADAVG_LIBS.
+	(loadavg_LDADD): Ditto.
+
+2002-04-29  Paul D. Smith  <psmith@gnu.org>
+
+	* expand.c (recursively_expand_for_file): Rename
+	recursively_expand() to recursively_expand_for_file() and provide
+	an extra argument, struct file.  If the argument is provided, set
+	the variable scope to that of the file before expanding.
+	* variable.h (recursively_expand): Make this a macro that invokes
+	recursively_expand_for_file() with a NULL file pointer.
+	* variable.c (target_environment): Call the renamed function and
+	provide the current file context.
+	Fixes Debian bug #144306.
+
+2002-04-28  Paul D. Smith  <psmith@gnu.org>
+
+	Allow $(call ...) user-defined variables to be self-referencing
+	without throwing an error.  Allows implementation of transitive
+	closures, among other possibly useful things.
+	Requested by: Philip Guenther <guenther@sendmail.com>
+
+	* variable.h (struct variable): Add a new field: exp_count, and
+	new macros to hold its size and maximum value.
+	(warn_undefined): Make this a macro.
+	* variable.c (define_variable_in_set): Initialize it.
+	* expand.c (recursively_expand): If we detect recursive expansion
+	of a variable, check the exp_count field.  If it's greater than 0
+	allow the recursion and decrement the count.
+	(warn_undefined): Remove this (now a macro in variable.h).
+	* function.c (func_call): Before we expand the user-defined
+	function, modify its exp_count field to contain the maximum
+	number of recursive calls we'll allow.  After the call, reset it
+	to 0.
+
 2002-04-21  Paul D. Smith  <psmith@gnu.org>
 
 	Modified to use latest autoconf (2.53), automake (1.6.1), and

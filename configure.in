@@ -1,10 +1,10 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(GNU make,3.79.2rc1,bug-make@gnu.org)
+AC_INIT(GNU make,3.79.2a1,bug-make@gnu.org)
 
 AC_PREREQ(2.53)
 
-AC_REVISION([[$Id: configure.in,v 1.107 2002/04/22 04:35:20 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.108 2002/05/10 03:15:08 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -47,8 +47,8 @@ AC_HEADER_STDC
 AC_HEADER_DIRENT
 AC_HEADER_STAT
 AC_HEADER_TIME
-AC_CHECK_HEADERS(stdlib.h unistd.h limits.h sys/param.h fcntl.h string.h \
-		 memory.h sys/time.h sys/timeb.h)
+AC_CHECK_HEADERS(stdlib.h locale.h unistd.h limits.h fcntl.h string.h \
+		 memory.h sys/param.h sys/time.h sys/timeb.h)
 
 AM_PROG_CC_C_O
 AM_PROG_CC_STDC
@@ -70,7 +70,7 @@ AC_STRUCT_ST_MTIM_NSEC
 AC_MSG_CHECKING([whether to use high resolution file timestamps])
 AC_CACHE_VAL(make_cv_file_timestamp_hi_res, [
   make_cv_file_timestamp_hi_res=no
-  if test $ac_cv_struct_st_mtim_nsec != no; then
+  if test "$ac_cv_struct_st_mtim_nsec" != no; then
     AC_TRY_COMPILE([
 #	if HAVE_INTTYPES_H
 #	 include <inttypes.h>
@@ -79,7 +79,7 @@ AC_CACHE_VAL(make_cv_file_timestamp_hi_res, [
       make_cv_file_timestamp_hi_res=yes)
   fi])
 AC_MSG_RESULT($make_cv_file_timestamp_hi_res)
-if test $make_cv_file_timestamp_hi_res = yes; then
+if test "$make_cv_file_timestamp_hi_res" = yes; then
   val=1
 else
   val=0
@@ -87,7 +87,7 @@ fi
 AC_DEFINE_UNQUOTED(FILE_TIMESTAMP_HI_RES, $val,
 		   [Use high resolution file timestamps if nonzero.])
 
-if test $make_cv_file_timestamp_hi_res = yes; then
+if test "$make_cv_file_timestamp_hi_res" = yes; then
   # Solaris 2.5.1 needs -lposix4 to get the clock_gettime function.
   # Solaris 7 prefers the library name -lrt to the obsolescent name -lposix4.
   AC_SEARCH_LIBS(clock_gettime, [rt posix4])
@@ -113,23 +113,43 @@ AC_CACHE_CHECK([for standard gettimeofday], ac_cv_func_gettimeofday,
 	      ac_cv_func_gettimeofday=yes,
 	      ac_cv_func_gettimeofday=no,
 	      ac_cv_func_gettimeofday="no (cross-compiling)")])
-if test $ac_cv_func_gettimeofday = yes; then
+if test "$ac_cv_func_gettimeofday" = yes; then
   AC_DEFINE(HAVE_GETTIMEOFDAY, 1,
 	    [Define if you have a standard gettimeofday function])
 fi
 
 AC_CHECK_FUNCS(	memcpy strchr strdup mkstemp mktemp fdopen \
 	        bsd_signal dup2 getcwd sigsetmask sigaction getgroups \
-		setlinebuf seteuid setegid setreuid setregid pipe \
+		seteuid setegid setlinebuf setreuid setregid setvbuf pipe \
 		strerror strsignal)
+
+make_FUNC_SETVBUF_REVERSED
+
+# strcoll() is used by the GNU glob library
+AC_FUNC_STRCOLL
 
 AC_FUNC_ALLOCA
 AC_FUNC_VFORK
 AC_FUNC_VPRINTF
-AC_FUNC_STRCOLL
 AC_FUNC_CLOSEDIR_VOID
-AC_FUNC_SETVBUF_REVERSED
+
 AC_FUNC_GETLOADAVG
+
+# AC_FUNC_GETLOADAVG is documented to set the NLIST_STRUCT value, but it
+# doesn't.  So, we will.
+
+if test "$ac_cv_header_nlist_h" = yes; then
+  AC_TRY_COMPILE([#include <nlist.h>],
+      [struct nlist nl;
+       nl.n_name = "string";
+       return 0;],
+      make_cv_nlist_struct=yes,
+      make_cv_nlist_struct=no)
+  if test "$make_cv_nlist_struct" = yes; then
+    AC_DEFINE(NLIST_STRUCT, 1,
+       [Define if struct nlist.n_name is a pointer rather than an array.])
+  fi
+fi
 
 AC_DECL_SYS_SIGLIST
 
@@ -168,7 +188,7 @@ AC_MSG_RESULT($make_cv_union_wait)
 use_customs=false
 AC_ARG_WITH(customs,
   AC_HELP_STRING([--with-customs=DIR],
-		 [Enable remote jobs via Customs--see README.customs]),
+		 [enable remote jobs via Customs--see README.customs]),
   [case $withval in
     n|no) : ;;
     *) make_cppflags="$CPPFLAGS"
@@ -186,13 +206,13 @@ AC_ARG_WITH(customs,
        ;;
   esac])
 # Tell automake about this, so it can include the right .c files.
-AM_CONDITIONAL(USE_CUSTOMS, test $use_customs = true)
+AM_CONDITIONAL(USE_CUSTOMS, test "$use_customs" = true)
 
 # See if we can handle the job server feature, and if the user wants it.
 
 AC_ARG_ENABLE(job-server,
   AC_HELP_STRING([--disable-job-server],
-                 [Disallow recursive make communication during -jN]),
+                 [disallow recursive make communication during -jN]),
   [make_cv_job_server="$enableval" user_job_server="$enableval"],
   [make_cv_job_server="yes"])
 
@@ -268,7 +288,7 @@ AC_SUBST(GLOBINC) GLOBINC='-I$(srcdir)/glob'
 AC_SUBST(GLOBLIB) GLOBLIB=glob/libglob.a
 make_cv_sys_gnu_glob=no])])
 # Tell automake about this, so it can build the right .c files.
-AM_CONDITIONAL(USE_LOCAL_GLOB, test $make_cv_sys_gnu_glob = no)
+AM_CONDITIONAL(USE_LOCAL_GLOB, test "$make_cv_sys_gnu_glob" = no)
 
 # Let the makefile know what our build host is
 

@@ -991,7 +991,7 @@ func_error (o, argv, funcname)
   for (len=0, argvp=argv; *argvp != 0; ++argvp)
     len += strlen (*argvp) + 2;
 
-  p = msg = alloca (len + 1);
+  p = msg = (char *) alloca (len + 1);
 
   for (argvp=argv; argvp[1] != 0; ++argvp)
     {
@@ -1822,10 +1822,11 @@ func_call (o, argv, funcname)
 {
   char *fname;
   char *cp;
-  int flen;
   char *body;
+  int flen;
   int i;
   const struct function_table_entry *entry_p;
+  struct variable *v;
 
   /* There is no way to define a variable with a space in the name, so strip
      leading and trailing whitespace as a favor to the user.  */
@@ -1856,11 +1857,18 @@ func_call (o, argv, funcname)
     }
 
   /* Not a builtin, so the first argument is the name of a variable to be
-     expanded and interpreted as a function.  Create the variable
-     reference.  */
+     expanded and interpreted as a function.  Find it.  */
   flen = strlen (fname);
 
-  body = alloca (flen + 4);
+  v = lookup_variable (fname, flen);
+
+  if (v == 0)
+    warn_undefined (fname, flen);
+
+  if (v == 0 || *v->value == '\0')
+    return o;
+
+  body = (char *) alloca (flen + 4);
   body[0] = '$';
   body[1] = '(';
   memcpy (body + 2, fname, flen);
@@ -1882,7 +1890,11 @@ func_call (o, argv, funcname)
   /* Expand the body in the context of the arguments, adding the result to
      the variable buffer.  */
 
+  v->exp_count = EXP_COUNT_MAX;
+
   o = variable_expand_string (o, body, flen+3);
+
+  v->exp_count = 0;
 
   pop_variable_scope ();
 

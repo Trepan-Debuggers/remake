@@ -443,19 +443,21 @@ int clock_skew_detected;
 #ifdef	POSIX
 sigset_t fatal_signal_set;
 #else
-#ifdef	HAVE_SIGSETMASK
+# ifdef	HAVE_SIGSETMASK
 int fatal_signal_mask;
-#endif
+# endif
 #endif
 
 #if !defined HAVE_BSD_SIGNAL && !defined bsd_signal
 # if !defined HAVE_SIGACTION
 #  define bsd_signal signal
 # else
-static RETSIGTYPE
-(*bsd_signal) PARAMS ((int)) (sig, func)
+typedef RETSIGTYPE (*bsd_signal_ret_t) ();
+
+static bsd_signal_ret_t
+bsd_signal (sig, func)
      int sig;
-     RETSIGTYPE (*func) PARAMS ((int));
+     bsd_signal_ret_t func;
 {
   struct sigaction act, oact;
   act.sa_handler = func;
@@ -902,15 +904,15 @@ int main (int argc, char ** argv)
 
   /* Make sure stdout is line-buffered.  */
 
-#ifdef	HAVE_SETLINEBUF
-  setlinebuf (stdout);
-#else
-#ifndef	SETVBUF_REVERSED
+#ifdef HAVE_SETVBUF
+# ifdef SETVBUF_REVERSED
   setvbuf (stdout, (char *) 0, _IOLBF, BUFSIZ);
-#else	/* setvbuf not reversed.  */
+# else	/* setvbuf not reversed.  */
   /* Some buggy systems lose if we pass 0 instead of allocating ourselves.  */
   setvbuf (stdout, _IOLBF, xmalloc (BUFSIZ), BUFSIZ);
-#endif	/* setvbuf reversed.  */
+# endif	/* setvbuf reversed.  */
+#elif HAVE_SETLINEBUF
+  setlinebuf (stdout);
 #endif	/* setlinebuf missing.  */
 
   /* Figure out where this program lives.  */
