@@ -3115,6 +3115,9 @@ line, and if its name consists only of letters, numbers, and underscores.
 Some shells cannot cope with environment variable names consisting of
 characters other than letters, numbers, and underscores.
 
+The special variables @code{SHELL} and @code{MAKEFLAGS} are always exported.
+@code{MAKEFILES} is exported if you set it to anything.
+
 Variables are @emph{not} normally passed down if they were created by
 default by @code{make} (@pxref{Implicit Variables, ,Variables Used by
 Implicit Rules}).  The sub-@code{make} will define these for
