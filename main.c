@@ -1,5 +1,5 @@
 /* Argument parsing and main program of GNU Make.
-Copyright (C) 1988, 89, 90, 91, 94, 1995, 1996 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 90, 91, 94, 95, 96 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -38,6 +38,8 @@ int __stack = 20000; /* Make sure we have 20K of stack space */
 #endif
 
 extern void init_dir PARAMS ((void));
+extern void remote_setup PARAMS ((void));
+extern void remote_cleanup PARAMS ((void));
 extern RETSIGTYPE fatal_error_signal PARAMS ((int sig));
 extern RETSIGTYPE child_handler PARAMS ((int sig));
 
@@ -1100,6 +1102,9 @@ int main (int argc, char ** argv)
 	}
     }
 
+  /* Initialize the remote job module.  */
+  remote_setup ();
+
   if (read_makefiles != 0)
     {
       /* Update any makefiles if necessary.  */
@@ -1815,34 +1820,12 @@ decode_env_switches (envar, len)
   *p = '\0';
   argv[++argc] = 0;
 
-  if (argc == 2 && argv[1][0] != '-')
-    {
-      /* There is just one word in the value, and it is not a switch.
-	 Either this is the single-word form and we should prepend a dash
-	 before calling decode_switches, or this is the multi-word form and
-	 there is no dash because it is a variable definition.  */
-      struct variable *v;
-      v = try_variable_definition ((char *) 0, 0, argv[1], o_command);
-      if (v != 0)
-	{
-	  /* It was indeed a variable definition, and now it has been
-	     processed.  There is nothing for decode_switches to do.
-	     Record a pointer to the variable for later use in
-	     define_makeflags.  */
-	  struct command_variable *cv
-	    = (struct command_variable *) xmalloc (sizeof (*cv));
-	  cv->variable = v;
-	  cv->next = command_variables;
-	  command_variables = cv;
-	  return;
-	}
-
-      /* It wasn't a variable definition, so it's some switches without a
-	 leading dash.  Add one and pass it along to decode_switches.  We
-	 need permanent storage for this in case decode_switches saves
-	 pointers into the value.  */
-      argv[1] = concat ("-", argv[1], "");
-    }
+  if (argv[1][0] != '-' && index (argv[1], '=') == 0)
+    /* The first word doesn't start with a dash and isn't a variable
+       definition.  Add a dash and pass it along to decode_switches.  We
+       need permanent storage for this in case decode_switches saves
+       pointers into the value.  */
+    argv[1] = concat ("-", argv[1], "");
 
   /* Parse those words.  */
   decode_switches (argc, argv, 1);
@@ -2112,10 +2095,10 @@ define_makeflags (all, makefile)
   *p = '\0';
 
   v = define_variable ("MAKEFLAGS", 9,
-		       /* If there is just a single word of switches,
-			  omit the leading dash unless it is a single
-			  long option with two leading dashes.  */
-		       &flagstring[(words == 1 && command_variables == 0
+		       /* If there are switches, omit the leading dash
+			  unless it is a single long option with two
+			  leading dashes.  */
+		       &flagstring[(flagstring[0] == '-'
 				    && flagstring[1] != '-')
 				   ? 1 : 0],
 		       /* This used to use o_env, but that lost when a
@@ -2150,7 +2133,8 @@ print_version ()
     printf ("-%s", remote_description);
 
   printf (", by Richard Stallman and Roland McGrath.\n\
-%sCopyright (C) 1988, 89, 90, 91, 92, 93, 94, 95 Free Software Foundation, Inc.\n\
+%sCopyright (C) 1988, 89, 90, 91, 92, 93, 94, 95, 96\n\
+%s\tFree Software Foundation, Inc.\n\
 %sThis is free software; see the source for copying conditions.\n\
 %sThere is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A\n\
 %sPARTICULAR PURPOSE.\n\n", precede, precede, precede, precede);
@@ -2210,6 +2194,9 @@ die (status)
       /* Wait for children to die.  */
       for (err = status != 0; job_slots_used > 0; err = 0)
 	reap_children (1, err);
+
+      /* Let the remote job module clean up its state.  */
+      remote_cleanup ();
 
       /* Remove the intermediate files.  */
       remove_intermediates (0);
