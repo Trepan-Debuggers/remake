@@ -108,6 +108,10 @@ manext = l
 # Install make setgid to this group so it can read /dev/kmem.
 group = kmem
 
+# Programs to make tags files.
+ETAGS = etags -tw
+CTAGS = ctags -tw
+
 objs = commands.o job.o dir.o file.o load.o misc.o main.o read.o \
        remake.o remote.o rule.o implicit.o default.o variable.o expand.o \
        function.o vpath.o version.o $(ARCHIVES) $(GETOPT) $(ALLOCA) $(extras)
@@ -159,9 +163,9 @@ force:
 
 tagsrcs = $(srcs) remote-*.c *.h
 TAGS: $(tagsrcs)
-	etags -tw $(tagsrcs)
+	$(ETAGS) $(tagsrcs)
 tags: $(tagsrcs)
-	ctags -tw $(tagsrcs)
+	$(CTAGS) $(tagsrcs)
 
 .PHONY: install
 install: $(bindir)/$(instname) $(mandir)/$(instname).$(manext)
