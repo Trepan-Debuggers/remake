@@ -74,8 +74,10 @@ LIBS="$LIBS libcustoms.a"])
 
 echo checking for location of SCCS get command
 if test -f /usr/sccs/get; then
+  SCCS_GET=/usr/sccs/get
   AC_DEFINE(SCCS_GET, "/usr/sccs/get")
 else
+  SCCS_GET=get
   AC_DEFINE(SCCS_GET, "get")
 fi
 ac_clean_files="$ac_clean_files s.conftest conftoast" # Remove these later.
