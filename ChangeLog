@@ -1,3 +1,10 @@
+2000-06-21  Paul D. Smith  <psmith@gnu.org>
+
+	* read.c (read_makefile): If we find a semicolon in the target
+	definition, remember where it was.  If the line turns out to be a
+	target-specific variable, add back the semicolon and everything
+	after it.  Fixes PR/1709.
+
 2000-06-19  Paul D. Smith  <psmith@gnu.org>
 
 	* config.h-vms.template: #define uintmax_t for this system.

@@ -1,3 +1,8 @@
+2000-06-21  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/targetvars: Added a test for PR/1709: allowing
+	semicolons in target-specific variable values.
+
 2000-06-19  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/functions/addsuffix: Test for an empty final argument.

@@ -751,7 +751,7 @@ read_makefile (filename, flags)
 
           enum make_word_type wtype;
           enum variable_origin v_origin;
-          char *cmdleft, *lb_next;
+          char *cmdleft, *semip, *lb_next;
           unsigned int len, plen = 0;
           char *colonp;
 
@@ -772,6 +772,7 @@ read_makefile (filename, flags)
 	  else if (cmdleft != 0)
 	    /* Found one.  Cut the line short there before expanding it.  */
 	    *(cmdleft++) = '\0';
+          semip = cmdleft;
 
 	  collapse_continuations (lb.buffer);
 
@@ -932,6 +933,14 @@ read_makefile (filename, flags)
 
           if (wtype == w_varassign)
             {
+              /* If there was a semicolon found, add it back, plus anything
+                 after it.  */
+              if (semip)
+                {
+                  *(--semip) = ';';
+                  variable_buffer_output (p2 + strlen (p2),
+                                          semip, strlen (semip)+1);
+                }
               record_target_var (filenames, p, two_colon, v_origin, &fileinfo);
               filenames = 0;
               continue;
