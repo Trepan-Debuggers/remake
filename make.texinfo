@@ -9,8 +9,8 @@
 
 @set EDITION 0.44
 @set VERSION 3.69 Beta
-@set UPDATED 19 August 1993
-@set UPDATE-MONTH August 1993
+@set UPDATED 6 September 1993
+@set UPDATE-MONTH September 1993
 
 @c finalout
 
@@ -2571,12 +2571,19 @@ called @file{@var{name}.d} from a C source file called @file{@var{name}.c}:
 @example
 @group
 %.d: %.c
-	$(CC) -M $(CPPFLAGS) $< | sed 's/$*.o/& $@@/g' > $@@
+        $(SHELL) -ec '$(CC) -M $(CPPFLAGS) $< | sed '\''s/$*.o/& $@@/g'\'' > $@@'
 @end group
 @end example
 
 @noindent
-@xref{Pattern Rules}, for information on defining pattern rules.
+@xref{Pattern Rules}, for information on defining pattern rules.  The
+@samp{-e} flag to the shell makes it exit immediately if the
+@code{$(CC)} command fails (exits with a nonzero status).  Normally the
+shell exits with the status of the last command in the pipeline
+(@code{sed} in this case), so @code{make} would not notice a nonzero
+status from the compiler.
+@cindex @code{-e} (shell flag)
+
 @cindex @code{sed} (shell command)
 The purpose of the @code{sed} command is to translate (for example):
 
