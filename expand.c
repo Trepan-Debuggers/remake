@@ -78,7 +78,7 @@ initialize_variable_output ()
 
 /* Recursively expand V.  The returned string is malloc'd.  */
 
-static char *
+char *
 recursively_expand (v)
      register struct variable *v;
 {
