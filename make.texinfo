@@ -9,7 +9,7 @@
 
 @set EDITION 0.43
 @set VERSION 3.68 Beta
-@set UPDATED 14 July 1993
+@set UPDATED 22 July 1993
 @set UPDATE-MONTH July 1993
 
 @c finalout
@@ -1858,11 +1858,11 @@ The search through the directories specified in @code{VPATH} or with
 (@pxref{Implicit Rules, ,Using Implicit Rules}).
 
 For example, when a file @file{foo.o} has no explicit rule, @code{make}
-considers implicit rules such as to compile @file{foo.c} if that file
-exists.  If such a file is lacking in the current directory, the
-appropriate directories are searched for it.  If @file{foo.c} exists (or is
-mentioned in the makefile) in any of the directories, the implicit rule for
-C compilation is applied.
+considers implicit rules, such as the built-in rule to compile
+@file{foo.c} if that file exists.  If such a file is lacking in the
+current directory, the appropriate directories are searched for it.  If
+@file{foo.c} exists (or is mentioned in the makefile) in any of the
+directories, the implicit rule for C compilation is applied.
 
 The commands of implicit rules normally use automatic variables as a
 matter of necessity; consequently they will use the file names found by
@@ -4877,9 +4877,9 @@ each internal sequence of one or more whitespace characters with a
 single space.  Thus, @samp{$(strip a b  c )} results in @w{@samp{a b c}}.
 
 The function @code{strip} can be very useful when used in conjunction
-with conditionals.  When comparing something with the null string
-@samp{""} using @code{ifeq} or @code{ifneq}, you usually want a string
-of just whitespace to match the null string (@pxref{Conditionals}).
+with conditionals.  When comparing something with the empty string
+@samp{} using @code{ifeq} or @code{ifneq}, you usually want a string of
+just whitespace to match the empty string (@pxref{Conditionals}).
 
 Thus, the following may fail to have the desired results:
 
@@ -5980,7 +5980,7 @@ dependencies of these targets can be processed all the same.
 @itemx --max-load[=@var{load}]
 @cindex @code{--max-load}
 Specifies that no new jobs (commands) should be started if there are
-others jobs running and the load average is at least @var{load} (a
+other jobs running and the load average is at least @var{load} (a
 floating-point number).  With no argument, removes a previous load
 limit.  @xref{Parallel, ,Parallel Execution}.
 
@@ -6811,7 +6811,7 @@ constraint has the added benefit of preventing any infinite loop in the
 search for an implicit rule chain.
 
 There are some special implicit rules to optimize certain cases that would
-otherwise by handled by rule chains.  For example, making @file{foo} from
+otherwise be handled by rule chains.  For example, making @file{foo} from
 @file{foo.c} could be handled by compiling and linking with separate
 chained rules, using @file{foo.o} as an intermediate file.  But what
 actually happens is that a special rule for this case does the compilation
