@@ -1,5 +1,5 @@
 /* Argument parsing and main program of GNU Make.
-Copyright (C) 1988,89,90,91,94,95,96,97 Free Software Foundation, Inc.
+Copyright (C) 1988,89,90,91,94,95,96,97,98 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -179,7 +179,6 @@ int print_version_flag = 0;
 /* List of makefiles given with -f switches.  */
 
 static struct stringlist *makefiles = 0;
-
 
 /* Number of job slots (commands that can be run at once).  */
 
@@ -532,7 +531,98 @@ handle_runtime_exceptions( struct _EXCEPTION_POINTERS *exinfo )
   return EXCEPTION_CONTINUE_SEARCH;
 #else
   exit(255);
+  return (255); /* not reached */
 #endif
+}
+
+/*
+ * On WIN32 systems we don't have the luxury of a /bin directory that
+ * is mapped globally to every drive mounted to the system. Since make could
+ * be invoked from any drive, and we don't want to propogate /bin/sh
+ * to every single drive. Allow ourselves a chance to search for
+ * a value for default shell here (if the default path does not exist).
+ */
+
+int
+find_and_set_default_shell(char *token)
+{
+  int sh_found = 0;
+  char* search_token;
+  PATH_VAR(sh_path);
+  extern char *default_shell;
+
+  if (!token)
+    search_token = default_shell;
+  else
+    search_token = token;
+
+  if (!no_default_sh_exe &&
+      (token == NULL || !strcmp(search_token, default_shell))) {
+    /* no new information, path already set or known */
+    sh_found = 1;
+  } else if (file_exists_p(search_token)) {
+    /* search token path was found */
+    sprintf(sh_path, "%s", search_token);
+    default_shell = strdup(w32ify(sh_path,0));
+    if (debug_flag)
+      printf("find_and_set_shell setting default_shell = %s\n", default_shell);
+    sh_found = 1;
+  } else {
+    char *p;
+    struct variable *v = lookup_variable ("Path", 4);
+
+    /*
+     * Search Path for shell
+     */
+    if (v && v->value) {
+      char *ep;
+
+      p  = v->value;
+      ep = strchr(p, PATH_SEPARATOR_CHAR);
+
+      while (ep && *ep) {
+        *ep = '\0';
+
+        if (dir_file_exists_p(p, search_token)) {
+          sprintf(sh_path, "%s/%s", p, search_token);
+          default_shell = strdup(w32ify(sh_path,0));
+          sh_found = 1;
+          *ep = PATH_SEPARATOR_CHAR;
+
+          /* terminate loop */
+          p += strlen(p);
+        } else {
+          *ep = PATH_SEPARATOR_CHAR;
+           p = ++ep;
+        }
+
+        ep = strchr(p, PATH_SEPARATOR_CHAR);
+      }
+
+      /* be sure to check last element of Path */
+      if (p && *p && dir_file_exists_p(p, search_token)) {
+          sprintf(sh_path, "%s/%s", p, search_token);
+          default_shell = strdup(w32ify(sh_path,0));
+          sh_found = 1;
+      }
+
+      if (debug_flag && sh_found)
+        printf("find_and_set_shell path search set default_shell = %s\n", default_shell);
+    }
+  }
+
+  /* naive test */
+  if (!unixy_shell && sh_found &&
+      (strstr(default_shell, "sh") || strstr(default_shell, "SH"))) {
+    unixy_shell = 1;
+    batch_mode_shell = 0;
+  }
+
+#ifdef BATCH_MODE_ONLY_SHELL
+  batch_mode_shell = 1;
+#endif
+
+  return (sh_found);
 }
 #endif  /* WINDOWS32 */
 
@@ -556,17 +646,21 @@ main (argc, argv, envp)
 int main (int argc, char ** argv)
 #endif
 {
+  static char *stdin_nm = 0;
   register struct file *f;
   register unsigned int i;
   char **p;
   struct dep *read_makefiles;
   PATH_VAR (current_directory);
 #ifdef WINDOWS32
-  extern int no_default_sh_exe;
   char *unix_path = NULL;
   char *windows32_path = NULL;
 
   SetUnhandledExceptionFilter(handle_runtime_exceptions);
+
+  /* start off assuming we have no shell */
+  unixy_shell = 0;
+  no_default_sh_exe = 1;
 #endif
 
   default_goal_file = 0;
@@ -708,20 +802,28 @@ int main (int argc, char ** argv)
 #ifndef _AMIGA
   for (i = 0; envp[i] != 0; ++i)
     {
+      int do_not_define;
       register char *ep = envp[i];
+
+      /* by default, everything gets defined and exported */
+      do_not_define = 0;
+
       while (*ep != '=')
-	++ep;
+        ++ep;
 #ifdef WINDOWS32
       if (!unix_path && !strncmp(envp[i], "PATH=", 5))
         unix_path = ep+1;
-      if (!windows32_path && !strncmp(envp[i], "Path=", 5))
+      else if (!windows32_path && !strnicmp(envp[i], "Path=", 5)) {
+        do_not_define = 1; /* it gets defined after loop exits */
         windows32_path = ep+1;
+      }
 #endif
       /* The result of pointer arithmetic is cast to unsigned int for
 	 machines where ptrdiff_t is a different size that doesn't widen
 	 the same.  */
-      define_variable (envp[i], (unsigned int) (ep - envp[i]),
-		       ep + 1, o_env, 1)
+      if (!do_not_define)
+        define_variable (envp[i], (unsigned int) (ep - envp[i]),
+                         ep + 1, o_env, 1)
 	/* Force exportation of every variable culled from the environment.
 	   We used to rely on target_environment's v_default code to do this.
 	   But that does not work for the case where an environment variable
@@ -730,6 +832,16 @@ int main (int argc, char ** argv)
 	->export = v_export;
     }
 #ifdef WINDOWS32
+    /*
+     * Make sure that this particular spelling of 'Path' is available
+     */
+    if (windows32_path)
+      define_variable("Path", 4, windows32_path, o_env, 1)->export = v_export;
+    else if (unix_path)
+      define_variable("Path", 4, unix_path, o_env, 1)->export = v_export;
+    else
+      define_variable("Path", 4, "", o_env, 1)->export = v_export;
+
     /*
      * PATH defaults to Path iff PATH not found and Path is found.
      */
@@ -840,7 +952,7 @@ int main (int argc, char ** argv)
 	  if (! v->recursive)
 	    ++len;
 	  ++len;
-	  len += 2 * strlen (v->value);
+	  len += 3 * strlen (v->value);
 	}
 
       /* Now allocate a buffer big enough and fill it.  */
@@ -899,68 +1011,8 @@ int main (int argc, char ** argv)
    * lookups to fail because the current directory (.) was pointing
    * at the wrong place when it was first evaluated.
    */
+   no_default_sh_exe = !find_and_set_default_shell(NULL);
 
-  /*
-   * On Windows/NT, we don't have the luxury of a /bin directory that
-   * is mapped globally to every drive mounted to the system. Since make could
-   * be invoked from any drive, and we don't want to propogate /bin/sh
-   * to every single drive. Allow ourselves a chance to search for
-   * a value for default shell here (if the default path does not exist).
-   *
-   * The value of default_shell is set here, but it could get reset after
-   * the Makefiles are read in. See logic below where SHELL is checked
-   * after the call to read_all_makefiles() completes.
-   *
-   * The reason SHELL is set here is so that macros can be safely evaluated
-   * as makefiles are read in (some macros require $SHELL).
-   */
-
-  {
-    extern char *default_shell;
-
-    if (!file_exists_p(default_shell)) {
-      char *p;
-      struct variable *v = lookup_variable ("Path", 4);
-
-      /*
-       * Try and make sure we have a full path to default_shell before
-       * we parse makefiles.
-       */
-      if (v && v->value) {
-        PATH_VAR(sh_path);
-        char *ep;
-
-        p  = v->value;
-        ep = strchr(p, PATH_SEPARATOR_CHAR);
-
-        while (ep && *ep) {
-          *ep = '\0';
-
-          if (dir_file_exists_p(p, default_shell)) {
-            sprintf(sh_path, "%s/%s", p, default_shell);
-            default_shell = strdup(w32ify(sh_path,0));
-            no_default_sh_exe = 0;
-            *ep = PATH_SEPARATOR_CHAR;
-
-            /* terminate loop */
-            p += strlen(p);
-          } else {
-            *ep = PATH_SEPARATOR_CHAR;
-             p = ++ep;
-          }
-
-          ep = strchr(p, PATH_SEPARATOR_CHAR);
-        }
-
-        /* be sure to check last element of Path */
-        if (p && *p && dir_file_exists_p(p, default_shell)) {
-            sprintf(sh_path, "%s/%s", p, default_shell);
-            default_shell = strdup(w32ify(sh_path,0));
-            no_default_sh_exe = 0;
-        }
-      }
-    }
-  }
 #endif /* WINDOWS32 */
   /* Figure out the level of recursion.  */
   {
@@ -1007,6 +1059,8 @@ int main (int argc, char ** argv)
 	starting_directory = current_directory;
     }
 
+  (void) define_variable ("CURDIR", 6, current_directory, o_default, 0);
+
   /* Read any stdin makefiles into temporary files.  */
 
   if (makefiles != 0)
@@ -1034,6 +1088,9 @@ int main (int argc, char ** argv)
 	    (void) tmpnam (name);
 #endif
 
+            if (stdin_nm)
+              fatal("Makefile from standard input specified twice.");
+
 	    outfile = fopen (name, "w");
 	    if (outfile == 0)
 	      pfatal_with_name ("fopen (temporary file)");
@@ -1044,9 +1101,6 @@ int main (int argc, char ** argv)
 		if (n > 0 && fwrite (buf, 1, n, outfile) != n)
 		  pfatal_with_name ("fwrite (temporary file)");
 	      }
-	    /* Try to make sure we won't remake the temporary
-	       file when we are re-exec'd.  Kludge-o-matic!  */
-	    fprintf (outfile, "%s:;\n", name);
 	    (void) fclose (outfile);
 
 	    /* Replace the name that read_all_makefiles will
@@ -1060,14 +1114,15 @@ int main (int argc, char ** argv)
 	    }
 
 	    /* Make sure the temporary file will not be remade.  */
-	    f = enter_file (savestring (name, sizeof name - 1));
+            stdin_nm = savestring (name, sizeof(name) -1);
+	    f = enter_file (stdin_nm);
 	    f->updated = 1;
 	    f->update_status = 0;
 	    f->command_state = cs_finished;
-	    /* Let it be removed when we're done.  */
-	    f->intermediate = 1;
-	    /* But don't mention it.  */
-	    f->dontcare = 1;
+ 	    /* Can't be intermediate, or it'll be removed too early for
+               make re-exec.  */
+ 	    f->intermediate = 0;
+	    f->dontcare = 0;
 	  }
     }
 
@@ -1107,53 +1162,6 @@ int main (int argc, char ** argv)
 
   define_makeflags (0, 0);
 
-#ifdef WINDOWS32
-  /*
-   * Now that makefiles are parsed, see if a Makefile gave a
-   * value for SHELL and use that for default_shell instead if
-   * that filename exists. This should speed up the
-   * construct_argv_internal() function by avoiding unnecessary
-   * recursion.
-   */
-  {
-    struct variable *v = lookup_variable("SHELL", 5);
-    extern char* default_shell;
-
-    /*
-     * to change value:
-     *
-     * SHELL must be found, SHELL must be set, value of SHELL
-     * must be different from current value, and the
-     * specified file must exist. Whew!
-     */
-    if (v != 0 && *v->value != '\0') {
-      char *fn = recursively_expand(v);
-
-      if (fn && strcmp(fn, default_shell) && file_exists_p(fn)) {
-        char *p;
-
-        default_shell = fn;
-
-        /* if Makefile says SHELL is sh.exe, believe it */
-        if (strstr(default_shell, "sh.exe"))
-               no_default_sh_exe = 0;
-
-        /*
-         * Convert from backslashes to forward slashes so
-         * create_command_line_argv_internal() is not confused.
-         */
-        for (p = strchr(default_shell, '\\'); p; p = strchr(default_shell, '\\'))
-          *p = '/';
-      }
-    }
-  }
-  if (no_default_sh_exe && job_slots != 1) {
-    error("Do not specify -j or --jobs if sh.exe is not available.");
-    error("Resetting make for single job mode.");
-    job_slots = 1;
-  }
-#endif /* WINDOWS32 */
-
   /* Define the default variables.  */
   define_default_variables ();
 
@@ -1163,6 +1171,18 @@ int main (int argc, char ** argv)
 
   read_makefiles
     = read_all_makefiles (makefiles == 0 ? (char **) 0 : makefiles->list);
+
+#ifdef WINDOWS32
+  /* look one last time after reading all Makefiles */
+  if (no_default_sh_exe)
+    no_default_sh_exe = !find_and_set_default_shell(NULL);
+
+  if (no_default_sh_exe && job_slots != 1) {
+    error("Do not specify -j or --jobs if sh.exe is not available.");
+    error("Resetting make for single job mode.");
+    job_slots = 1;
+  }
+#endif /* WINDOWS32 */
 
 #ifdef __MSDOS__
   /* We need to know what kind of shell we will be using.  */
@@ -1295,7 +1315,7 @@ int main (int argc, char ** argv)
 		      /* Free the storage.  */
 		      free ((char *) d);
 
-		      d = last == 0 ? 0 : last->next;
+		      d = last == 0 ? read_makefiles : last->next;
 
 		      break;
 		    }
@@ -1416,24 +1436,14 @@ int main (int argc, char ** argv)
 		  }
 	    }
 
-          /* Add -o options for all makefiles that were remade */
-          {
-            register unsigned int i;
-            struct dep *d;
-
-            for (i = argc+1, d = read_makefiles; d != 0; d = d->next)
-              i += d->file->updated != 0;
-
-            nargv = (char **)xmalloc(i * sizeof(char *));
-            bcopy(argv, nargv, argc * sizeof(char *));
-
-            for (i = 0, d = read_makefiles; d != 0; ++i, d = d->next)
-              {
-                if (d->file->updated)
-                  nargv[nargc++] = concat("-o", dep_name(d), "");
-              }
-            nargv[nargc] = 0;
-          }
+          /* Add -o option for the stdin temporary file, if necessary.  */
+          if (stdin_nm)
+            {
+              nargv = (char **)xmalloc((nargc + 2) * sizeof(char *));
+              bcopy(argv, nargv, argc * sizeof(char *));
+              nargv[nargc++] = concat("-o", stdin_nm, "");
+              nargv[nargc] = 0;
+            }
 
 	  if (directories != 0 && directories->idx > 0)
 	    {
@@ -1506,6 +1516,11 @@ int main (int argc, char ** argv)
 
   /* Set up `MAKEFLAGS' again for the normal targets.  */
   define_makeflags (1, 0);
+
+  /* If there is a temp file from reading a makefile from stdin, get rid of
+     it now.  */
+  if (stdin_nm && unlink(stdin_nm) < 0 && errno != ENOENT)
+    perror_with_name("unlink (temporary file): ", stdin_nm);
 
   {
     int status;
@@ -2324,12 +2339,12 @@ print_version ()
     printf ("-%s", remote_description);
 
   printf (", by Richard Stallman and Roland McGrath.\n\
-%sCopyright (C) 1988, 89, 90, 91, 92, 93, 94, 95, 96, 97\n\
+%sCopyright (C) 1988, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98\n\
 %s\tFree Software Foundation, Inc.\n\
 %sThis is free software; see the source for copying conditions.\n\
 %sThere is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A\n\
 %sPARTICULAR PURPOSE.\n\n\
-%sReport bugs to <bug-gnu-utils@prep.ai.mit.edu>.\n\n",
+%sReport bugs to <bug-make@gnu.org>.\n\n",
 	  precede, precede, precede, precede, precede, precede);
 
   printed_version = 1;
@@ -2373,13 +2388,6 @@ die (status)
 
       dying = 1;
 
-      /* Try to move back to the original directory.  This is essential on
-	 MS-DOS (where there is really only one process), and on Unix it
-	 puts core files in the original directory instead of the -C
-	 directory.  */
-      if (directory_before_chdir != 0)
-	chdir (directory_before_chdir);
-
       if (print_version_flag)
 	print_version ();
 
@@ -2396,6 +2404,14 @@ die (status)
       if (print_data_base_flag)
 	print_data_base ();
 
+      /* Try to move back to the original directory.  This is essential on
+	 MS-DOS (where there is really only one process), and on Unix it
+	 puts core files in the original directory instead of the -C
+	 directory.  Must wait until after remove_intermediates(), or unlinks
+         of relative pathnames fail.  */
+      if (directory_before_chdir != 0)
+	chdir (directory_before_chdir);
+
       log_working_directory (0);
     }
 
@@ -2410,7 +2426,7 @@ log_working_directory (entering)
      int entering;
 {
   static int entered = 0;
-  char *message = entering ? "Entering" : "Leaving";
+  char *msg = entering ? "Entering" : "Leaving";
 
   /* Print nothing without the flag.  Don't print the entering message
      again if we already have.  Don't print the leaving message if we
@@ -2424,9 +2440,9 @@ log_working_directory (entering)
     fputs ("# ", stdout);
 
   if (makelevel == 0)
-    printf ("%s: %s ", program, message);
+    printf ("%s: %s ", program, msg);
   else
-    printf ("%s[%u]: %s ", program, makelevel, message);
+    printf ("%s[%u]: %s ", program, makelevel, msg);
 
   if (starting_directory == 0)
     puts ("an unknown directory");

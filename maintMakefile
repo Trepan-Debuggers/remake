@@ -7,7 +7,8 @@
 globsrc := $(wildcard glob/*.c)
 globhdr := $(wildcard glob/*.h)
 
-TEMPLATES = README config.ami configh.dos config.h.W32 config.h-vms
+TEMPLATES = README README.DOS config.ami configh.dos config.h.W32 config.h-vms
+MTEMPLATES = Makefile.DOS SMakefile
 
 # General rule for turning a .template into a regular file.
 #
@@ -18,9 +19,9 @@ $(TEMPLATES) : % : %.template configure.in
 	  $< > $@
 	chmod a-w $@
 
-# Construct Makefile.DOS
+# Construct Makefiles by adding on dependencies, etc.
 #
-Makefile.DOS: Makefile.DOS.template Makefile.am configure.in
+$(MTEMPLATES) : % : %.template .dep_segment Makefile.am maintMakefile
 	rm -f $@
 	sed -e 's@%VERSION%@$(VERSION)@' \
 	    -e 's@%PROGRAMS%@$(bin_PROGRAMS)@' \
@@ -29,16 +30,31 @@ Makefile.DOS: Makefile.DOS.template Makefile.am configure.in
 	    -e 's@%GLOB_SOURCES%@$(globsrc) $(globhdr)@' \
 	    -e 's@%GLOB_OBJECTS%@$(globsrc:glob/%.c=%.o)@' \
 	  $< > $@
+	echo >>$@; echo '# --------------- DEPENDENCIES' >>$@; echo '#' >>$@; \
+	  cat $(word 2,$^) >>$@
+	chmod a-w $@
+
+NMakefile: NMakefile.template .dep_segment Makefile.am maintMakefile
+	rm -f $@
+	cp $< $@
+	echo >>$@; echo '# --------------- DEPENDENCIES' >>$@; echo '#' >>$@; \
+	  sed 's/^\([^ ]*\)\.o:/$$(OUTDIR)\/\1.obj:/' $(word 2,$^) >>$@
 	chmod a-w $@
 
 # Construct build.sh.in
 #
-build.sh.in: build.template Makefile.am
+build.sh.in: build.template Makefile.am maintMakefile
 	rm -f $@
 	sed -e 's@%objs%@$(filter-out remote-%, $(make_OBJECTS)\
 	       $(patsubst %.c,%.o,$(globsrc)))@' \
 	    $< > $@
 	chmod a-w+x $@
+
+# Use automake to build a dependency list file, for "foreign" makefiles like
+# Makefile.DOS.
+#
+.dep_segment: Makefile.am maintMakefile $(DEP_FILES)
+	$(AUTOMAKE) --generate-deps --build-dir=. --srcdir-name=.
 
 # We clean everything here.  The GNU standards for makefile conventions say
 # you shouldn't remove configure, etc., but this makefile is only available
@@ -46,11 +62,12 @@ build.sh.in: build.template Makefile.am
 #
 # And _I_ want them to be removed ;)
 #
-maintFILES = configure aclocal.m4 config.h.in Makefile.in \
-	     stamp-h.in glob/stamp-h.in
+maintFILES = configure aclocal.m4 config.h.in Makefile.in stamp-h.in \
+	     glob/configure glob/aclocal.m4 glob/config.h.in glob/Makefile.in \
+	     glob/stamp-h.in
 
-MAINTAINERCLEANFILES =  $(TEMPLATES) missing Makefile.DOS build.sh.in \
-			$(maintFILES)
+MAINTAINERCLEANFILES =  $(maintFILES) $(TEMPLATES) $(MTEMPLATES) NMakefile \
+			missing build.sh.in .dep_segment
 
 # Put the alpha distribution files up for anonymous FTP.
 #
@@ -61,3 +78,9 @@ TARFILE	:= $(distdir).tar.gz
 alpha: $(ALPHA) $(TARFILE)
 	@rm -f $(ALPHA)/$(TARFILE)
 	cp -p $(TARFILE) $(ALPHA)
+
+# This is needed because normal builds with GCC don't compile alloca.c, so
+# alloca.P doesn't get built :-/.
+#
+.deps/alloca.P: alloca.c
+	$(COMPILE) -M -o $@ $<

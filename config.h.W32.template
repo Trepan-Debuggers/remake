@@ -29,7 +29,7 @@
 
 /* Define if you have alloca, as a function or macro.  */
 #undef HAVE_ALLOCA
-#define HAVE_ALLOCA
+#define HAVE_ALLOCA 1
 
 /* Define if you have <alloca.h> and it should be used (not on Ultrix).  */
 #undef HAVE_ALLOCA_H
@@ -52,7 +52,7 @@
 
 /* Define if you support file names longer than 14 characters.  */
 #undef HAVE_LONG_FILE_NAMES
-#define HAVE_LONG_FILE_NAMES
+#define HAVE_LONG_FILE_NAMES 1
 
 /* Define if you have a working `mmap' system call.  */
 #undef HAVE_MMAP
@@ -69,15 +69,15 @@
 
 /* Define if you have the strcoll function and it is properly defined.  */
 #undef HAVE_STRCOLL
-#define HAVE_STRCOLL
+#define HAVE_STRCOLL 1
 
 /* Define if your struct stat has st_rdev.  */
 #undef HAVE_ST_RDEV
-#define HAVE_ST_RDEV
+#define HAVE_ST_RDEV 1
 
 /* Define if you have the strftime function.  */
 #undef HAVE_STRFTIME
-#define HAVE_STRFTIME
+#define HAVE_STRFTIME 1
 
 /* Define if you have <sys/wait.h> that is POSIX.1 compatible.  */
 #undef HAVE_SYS_WAIT_H
@@ -88,21 +88,21 @@
 /* Define if you don't have tm_zone but do have the external array
    tzname.  */
 #undef HAVE_TZNAME
-#define HAVE_TZNAME
+#define HAVE_TZNAME 1
 
 /* Define if you have <unistd.h>.  */
 #undef HAVE_UNISTD_H
 
 /* Define if utime(file, NULL) sets file's timestamp to the present.  */
 #undef HAVE_UTIME_NULL
-#define HAVE_UTIME_NULL
+#define HAVE_UTIME_NULL 1
 
 /* Define if you have <vfork.h>.  */
 #undef HAVE_VFORK_H
 
 /* Define if you have the vprintf function.  */
 #undef HAVE_VPRINTF
-#define HAVE_VPRINTF
+#define HAVE_VPRINTF 1
 
 /* Define if you have the wait3 system call.  */
 #undef HAVE_WAIT3
@@ -129,7 +129,7 @@
 
 /* Define if you need to in order for stat and other things to work.  */
 #undef _POSIX_SOURCE
-#define _POSIX_SOURCE
+#define _POSIX_SOURCE 1
 
 /* Define as the return type of signal handlers (int or void).  */
 #undef RETSIGTYPE
@@ -154,7 +154,7 @@
 
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
-#define STDC_HEADERS
+#define STDC_HEADERS 1
 
 /* Define on System V Release 4.  */
 #undef SVR4
@@ -200,18 +200,18 @@
 
 /* Define if you have the dup2 function.  */
 #undef HAVE_DUP2
-#define HAVE_DUP2
+#define HAVE_DUP2 1
 
 /* Define if you have the getcwd function.  */
 #undef HAVE_GETCWD
-#define HAVE_GETCWD
+#define HAVE_GETCWD 1
 
 /* Define if you have the getgroups function.  */
 #undef HAVE_GETGROUPS
 
 /* Define if you have the mktemp function.  */
 #undef HAVE_MKTEMP
-#define HAVE_MKTEMP
+#define HAVE_MKTEMP 1
 
 /* Define if you have the psignal function.  */
 #undef HAVE_PSIGNAL
@@ -236,7 +236,7 @@
 
 /* Define if you have the strerror function.  */
 #undef HAVE_STRERROR
-#define HAVE_STRERROR
+#define HAVE_STRERROR 1
 
 /* Define if you have the strsignal function.  */
 #undef HAVE_STRSIGNAL
@@ -249,29 +249,29 @@
 
 /* Define if you have the <dirent.h> header file.  */
 #undef HAVE_DIRENT_H
-#define HAVE_DIRENT_H
+#define HAVE_DIRENT_H 1
 
 /* Define if you have the <fcntl.h> header file.  */
 #undef HAVE_FCNTL_H
-#define HAVE_FCNTL_H
+#define HAVE_FCNTL_H 1
 
 /* Define if you have the <limits.h> header file.  */
 #undef HAVE_LIMITS_H
-#define HAVE_LIMITS_H
+#define HAVE_LIMITS_H 1
 
 /* Define if you have the <mach/mach.h> header file.  */
 #undef HAVE_MACH_MACH_H
 
 /* Define if you have the <memory.h> header file.  */
 #undef HAVE_MEMORY_H
-#define HAVE_MEMORY_H
+#define HAVE_MEMORY_H 1
 
 /* Define if you have the <ndir.h> header file.  */
 #undef HAVE_NDIR_H
 
 /* Define if you have the <string.h> header file.  */
 #undef HAVE_STRING_H
-#define HAVE_STRING_H
+#define HAVE_STRING_H 1
 
 /* Define if you have the <sys/dir.h> header file.  */
 #undef HAVE_SYS_DIR_H
@@ -284,7 +284,7 @@
 
 /* Define if you have the <sys/timeb.h> header file.  */
 #undef HAVE_SYS_TIMEB_H
-#define HAVE_SYS_TIMEB_H
+#define HAVE_SYS_TIMEB_H 1
 
 /* Define if you have the <sys/wait.h> header file.  */
 #undef HAVE_SYS_WAIT_H
@@ -297,3 +297,22 @@
 
 /* Define if you have the sun library (-lsun).  */
 #undef HAVE_LIBSUN
+
+/*
+ * Refer to README.W32 for info on the following settings
+ */
+
+/*
+   Define if you have the Cygnus GNU WIN32 tool set or a shell
+   that does not grok 'sh -c quoted-command-line' correctly.
+ */
+#undef BATCH_MODE_ONLY_SHELL
+
+/*
+   Define if you have the MKS tool set or shell. Do NOT define
+   BATCH_MODE_ONLY_SHELL if you define HAVE_MKS_SHELL
+ */
+#undef HAVE_MKS_SHELL
+
+/* Define if you prefer Case Insensitve behavior */
+#undef HAVE_CASE_INSENSITIVE_FS

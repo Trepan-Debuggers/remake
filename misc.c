@@ -253,6 +253,9 @@ makefile_fatal (file, lineno, s1, s2, s3, s4, s5, s6)
      unsigned int lineno;
      char *s1, *s2, *s3, *s4, *s5, *s6;
 {
+  if (!file)
+    fatal(s1, s2, s3, s4, s5, s6);
+
   log_working_directory (1);
 
   fprintf (stderr, "%s:%u: *** ", file, lineno);
@@ -470,7 +473,7 @@ copy_dep_chain (d)
 {
   register struct dep *c;
   struct dep *firstnew = 0;
-  struct dep *lastnew;
+  struct dep *lastnew = 0;
 
   while (d != 0)
     {
@@ -564,8 +567,9 @@ log_access (flavor)
      but we write this one to stderr because it might be
      run in a child fork whose stdout is piped.  */
 
-  fprintf (stderr, "%s access: user %d (real %d), group %d (real %d)\n",
-	   flavor, geteuid (), getuid (), getegid (), getgid ());
+  fprintf (stderr, "%s access: user %lu (real %lu), group %lu (real %lu)\n",
+	   flavor, (unsigned long) geteuid (), (unsigned long) getuid (),
+           (unsigned long) getegid (), (unsigned long) getgid ());
   fflush (stderr);
 }
 

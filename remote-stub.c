@@ -41,7 +41,8 @@ remote_cleanup ()
 /* Return nonzero if the next job should be done remotely.  */
 
 int
-start_remote_job_p ()
+start_remote_job_p (first_p)
+     int first_p;
 {
   return 0;
 }

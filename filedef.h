@@ -52,6 +52,10 @@ struct file
        the same file.  Otherwise this is null.  */
     struct file *double_colon;
 
+    /* Pattern-specific variable reference for this target, or null if there
+       isn't one.  Also see the pat_searched flag, below.  */
+    struct pattern_var *patvar;
+
     short int update_status;	/* Status of the last attempt to update,
 				   or -1 if none has been made.  */
 
@@ -79,7 +83,10 @@ struct file
     unsigned int secondary:1;
     unsigned int dontcare:1;	/* Nonzero if no complaint is to be made if
 				   this target cannot be remade.  */
+    unsigned int shownerror:1;  /* Nonzero if we printed an error */
     unsigned int ignore_vpath:1;/* Nonzero if we threw out VPATH name */
+    unsigned int pat_searched:1;/* Nonzero if we already searched for
+                                   pattern-specific variables */
   };
 
 /* Number of intermediate files entered.  */

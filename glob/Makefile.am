@@ -1,6 +1,6 @@
 # -*-Makefile-*-, or close enough
 
-AUTOMAKE_OPTIONS =	1.2 foreign
+AUTOMAKE_OPTIONS =	1.3 foreign
 
 noinst_LIBRARIES =	libglob.a
 

@@ -44,10 +44,8 @@ static struct variable_set_list global_setlist
   = { 0, &global_variable_set };
 struct variable_set_list *current_variable_set_list = &global_setlist;
 
-static struct variable *define_variable_in_set PARAMS ((char *name, unsigned int length,
-							char *value, enum variable_origin origin,
-							int recursive, struct variable_set *set));
-
+static struct variable *lookup_variable_in_set PARAMS ((char *name,
+                          unsigned int length, struct variable_set *set));
 
 /* Implement variables.  */
 
@@ -58,7 +56,7 @@ static struct variable *define_variable_in_set PARAMS ((char *name, unsigned int
    If RECURSIVE is nonzero a flag is set in the variable saying
    that it should be recursively re-expanded.  */
 
-static struct variable *
+struct variable *
 define_variable_in_set (name, length, value, origin, recursive, set)
      char *name;
      unsigned int length;
@@ -114,6 +112,7 @@ define_variable_in_set (name, length, value, origin, recursive, set)
   v->origin = origin;
   v->recursive = recursive;
   v->expanding = 0;
+  v->per_target = 0;
   v->export = v_default;
   v->next = set->table[hashval];
   set->table[hashval] = v;
@@ -184,6 +183,34 @@ lookup_variable (name, length)
   return 0;
 }
 
+/* Lookup a variable whose name is a string starting at NAME
+   and with LENGTH chars in set SET.  NAME need not be null-terminated.
+   Returns address of the `struct variable' containing all info
+   on the variable, or nil if no such variable is defined.  */
+
+static struct variable *
+lookup_variable_in_set (name, length, set)
+     char *name;
+     unsigned int length;
+     struct variable_set *set;
+{
+  register unsigned int i;
+  register unsigned int hash = 0;
+  register struct variable *v;
+
+  for (i = 0; i < length; ++i)
+    HASH (hash, name[i]);
+  hash %= set->buckets;
+
+  for (v = set->table[hash]; v != 0; v = v->next)
+    if (*v->name == *name
+        && !strncmp (v->name + 1, name + 1, length - 1)
+        && v->name[length] == 0)
+      return v;
+
+  return 0;
+}
+
 /* Initialize FILE's variable set list.  If FILE already has a variable set
    list, the topmost variable set is left intact, but the the rest of the
    chain is replaced with FILE->parent's setlist.  */
@@ -245,10 +272,8 @@ pop_variable_scope ()
   free ((char *) set);
 }
 
-/* Create a new variable set and push it on the current setlist.  */
-
-void
-push_new_variable_scope ()
+struct variable_set_list *
+create_new_variable_set ()
 {
   register struct variable_set_list *setlist;
   register struct variable_set *set;
@@ -263,7 +288,16 @@ push_new_variable_scope ()
     xmalloc (sizeof (struct variable_set_list));
   setlist->set = set;
   setlist->next = current_variable_set_list;
-  current_variable_set_list = setlist;
+
+  return setlist;
+}
+
+/* Create a new variable set and push it on the current setlist.  */
+
+struct variable_set_list *
+push_new_variable_scope ()
+{
+  return (current_variable_set_list = create_new_variable_set());
 }
 
 /* Merge SET1 into SET0, freeing unused storage in SET1.  */
@@ -506,6 +540,19 @@ target_environment (file)
 		   added specially at the end.  */
 		continue;
 
+              /* If this is a per-target variable and it hasn't been touched
+                 already then look up the global version and take its export
+                 value.  */
+              if (v->per_target && v->export == v_default)
+                {
+                  struct variable *gv;
+
+                  gv = lookup_variable_in_set(v->name, strlen(v->name),
+                                              &global_variable_set);
+                  if (gv)
+                    v->export = gv->export;
+                }
+
 	      switch (v->export)
 		{
 		case v_default:
@@ -524,15 +571,16 @@ target_environment (file)
 		  for (++p; *p != '\0'; ++p)
 		    if (*p != '_' && (*p < 'a' || *p > 'z')
 			&& (*p < 'A' || *p > 'Z') && (*p < '0' || *p > '9'))
-		      break;
+		      continue;
 		  if (*p != '\0')
 		    continue;
-
-		case v_export:
 		  break;
 
-		case v_noexport:
-		  continue;
+                case v_export:
+                  break;
+
+                case v_noexport:
+                  continue;
 
 		case v_ifset:
 		  if (v->origin == o_default)
@@ -540,9 +588,22 @@ target_environment (file)
 		  break;
 		}
 
+              /* If this was from a different-sized hash table, then
+                 recalculate the bucket it goes in.  */
+              if (set->buckets != buckets)
+                {
+                  register char *np;
+
+                  j = 0;
+                  for (np = v->name; *np != '\0'; ++np)
+                    HASH (j, *np);
+                  j %= buckets;
+                }
+
 	      for (ov = table[j]; ov != 0; ov = ov->next)
 		if (streq (v->name, ov->variable->name))
 		  break;
+
 	      if (ov == 0)
 		{
 		  register struct variable_bucket *entry;
@@ -565,6 +626,7 @@ target_environment (file)
       for (b = table[i]; b != 0; b = b->next)
 	{
 	  register struct variable *v = b->variable;
+
 	  /* If V is recursively expanded and didn't come from the environment,
 	     expand its value.  If it came from the environment, it should
 	     go back into the environment unchanged.  */
@@ -607,14 +669,11 @@ target_environment (file)
    from a makefile, an override directive, the environment with
    or without the -e switch, or the command line.
 
-   A variable definition has the form "name = value" or "name := value".
-   Any whitespace around the "=" or ":=" is removed.  The first form
-   defines a variable that is recursively re-evaluated.  The second form
-   defines a variable whose value is variable-expanded at the time of
-   definition and then is evaluated only once at the time of expansion.
+   See the comments for parse_variable_definition().
 
-   If a variable was defined, a pointer to its `struct variable' is returned.
-   If not, NULL is returned.  */
+   If LINE was recognized as a variable definition, a pointer to its `struct
+   variable' is returned.  If LINE is not a variable definition, NULL is
+   returned.  */
 
 struct variable *
 try_variable_definition (filename, lineno, line, origin)
@@ -627,7 +686,8 @@ try_variable_definition (filename, lineno, line, origin)
   register char *p = line;
   register char *beg;
   register char *end;
-  enum { bogus, simple, recursive, append } flavor = bogus;
+  enum { f_bogus,
+         f_simple, f_recursive, f_append, f_conditional } flavor = f_bogus;
   char *name, *expanded_name, *value;
   struct variable *v;
 
@@ -639,14 +699,14 @@ try_variable_definition (filename, lineno, line, origin)
       if (c == '=')
 	{
 	  end = p - 1;
-	  flavor = recursive;
+	  flavor = f_recursive;
 	  break;
 	}
       else if (c == ':')
 	if (*p == '=')
 	  {
 	    end = p++ - 1;
-	    flavor = simple;
+	    flavor = f_simple;
 	    break;
 	  }
 	else
@@ -655,9 +715,15 @@ try_variable_definition (filename, lineno, line, origin)
       else if (c == '+' && *p == '=')
 	{
 	  end = p++ - 1;
-	  flavor = append;
+	  flavor = f_append;
 	  break;
 	}
+      else if (c == '?' && *p == '=')
+        {
+          end = p++ - 1;
+          flavor = f_conditional;
+          break;
+        }
       else if (c == '$')
 	{
 	  /* This might begin a variable expansion reference.  Make sure we
@@ -700,31 +766,35 @@ try_variable_definition (filename, lineno, line, origin)
   expanded_name = allocated_variable_expand (name);
 
   if (expanded_name[0] == '\0')
-    {
-      if (filename == 0)
-	fatal ("empty variable name");
-      else
-	makefile_fatal (filename, lineno, "empty variable name");
-    }
+    makefile_fatal (filename, lineno, "empty variable name");
 
   /* Calculate the variable's new value in VALUE.  */
 
   switch (flavor)
     {
-    case bogus:
+    case f_bogus:
       /* Should not be possible.  */
       abort ();
-      return 0;
-    case simple:
+    case f_simple:
       /* A simple variable definition "var := value".  Expand the value.  */
       value = variable_expand (p);
       break;
-    case recursive:
+    case f_conditional:
+      /* A conditional variable definition "var ?= value".
+         The value is set IFF the variable is not defined yet. */
+      v = lookup_variable(expanded_name, strlen(expanded_name));
+      if (v)
+        {
+          free(expanded_name);
+          return v;
+        }
+      /* FALLTHROUGH */
+    case f_recursive:
       /* A recursive variable definition "var = value".
 	 The value is used verbatim.  */
       value = p;
       break;
-    case append:
+    case f_append:
       /* An appending variable definition "var += value".
 	 Extract the old value and append the new one.  */
       v = lookup_variable (expanded_name, strlen (expanded_name));
@@ -733,7 +803,7 @@ try_variable_definition (filename, lineno, line, origin)
 	  /* There was no old value.
 	     This becomes a normal recursive definition.  */
 	  value = p;
-	  flavor = recursive;
+	  flavor = f_recursive;
 	}
       else
 	{
@@ -744,7 +814,7 @@ try_variable_definition (filename, lineno, line, origin)
 	  if (v->recursive)
 	    /* The previous definition of the variable was recursive.
 	       The new value comes from the unexpanded old and new values.  */
-	    flavor = recursive;
+	    flavor = f_recursive;
 	  else
 	    /* The previous definition of the variable was simple.
 	       The new value comes from the old value, which was expanded
@@ -791,7 +861,7 @@ try_variable_definition (filename, lineno, line, origin)
 		*p = '/';
 	    }
 	  v = define_variable (expanded_name, strlen (expanded_name),
-			       shellpath, origin, flavor == recursive);
+			       shellpath, origin, flavor == f_recursive);
 	}
       else
 	{
@@ -831,7 +901,7 @@ try_variable_definition (filename, lineno, line, origin)
 		    *p = '/';
 		}
 	      v = define_variable (expanded_name, strlen (expanded_name),
-				   shellpath, origin, flavor == recursive);
+				   shellpath, origin, flavor == f_recursive);
 	    }
 	  else
 	    v = lookup_variable (expanded_name, strlen (expanded_name));
@@ -841,9 +911,26 @@ try_variable_definition (filename, lineno, line, origin)
     }
   else
 #endif /* __MSDOS__ */
+#ifdef WINDOWS32
+  if (origin == o_file
+      && strcmp (expanded_name, "SHELL") == 0) {
+    extern char* default_shell;
+
+    /*
+     * Call shell locator function. If it returns TRUE, then
+	 * set no_default_sh_exe to indicate sh was found and
+     * set new value for SHELL variable.
+	 */
+    if (find_and_set_default_shell(value)) {
+       v = define_variable (expanded_name, strlen (expanded_name),
+                            default_shell, origin, flavor == f_recursive);
+       no_default_sh_exe = 0;
+    }
+  } else
+#endif
 
   v = define_variable (expanded_name, strlen (expanded_name),
-		       value, origin, flavor == recursive);
+		       value, origin, flavor == f_recursive);
 
   free (expanded_name);
 
@@ -923,7 +1010,7 @@ print_variable (v, prefix)
 /* Print all the variables in SET.  PREFIX is printed before
    the actual variable definitions (everything else is comments).  */
 
-static void
+void
 print_variable_set (set, prefix)
      register struct variable_set *set;
      char *prefix;

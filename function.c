@@ -119,7 +119,7 @@ patsubst_expand (o, text, pattern, replace, pattern_percent, replace_percent)
      register char *pattern_percent, *replace_percent;
 {
   unsigned int pattern_prepercent_len, pattern_postpercent_len;
-  unsigned int replace_prepercent_len, replace_postpercent_len;
+  unsigned int replace_prepercent_len, replace_postpercent_len = 0;
   char *t;
   unsigned int len;
   int doneany = 0;
@@ -282,13 +282,13 @@ static struct
     { 0, 0, function_invalid }
   };
 
-/* Return 1 if PATTERN matches WORD, 0 if not.  */
+/* Return 1 if PATTERN matches STR, 0 if not.  */
 
 int
-pattern_matches (pattern, percent, word)
-     register char *pattern, *percent, *word;
+pattern_matches (pattern, percent, str)
+     register char *pattern, *percent, *str;
 {
-  unsigned int sfxlen, wordlen;
+  unsigned int sfxlen, strlength;
 
   if (percent == 0)
     {
@@ -298,17 +298,17 @@ pattern_matches (pattern, percent, word)
       pattern = new;
       percent = find_percent (pattern);
       if (percent == 0)
-	return streq (pattern, word);
+	return streq (pattern, str);
     }
 
   sfxlen = strlen (percent + 1);
-  wordlen = strlen (word);
+  strlength = strlen (str);
 
-  if (wordlen < (percent - pattern) + sfxlen
-      || strncmp (pattern, word, percent - pattern))
+  if (strlength < (percent - pattern) + sfxlen
+      || strncmp (pattern, str, percent - pattern))
     return 0;
 
-  return !strcmp (percent + 1, word + (wordlen - sfxlen));
+  return !strcmp (percent + 1, str + (strlength - sfxlen));
 }
 
 int shell_function_pid = 0, shell_function_completed;
@@ -318,13 +318,13 @@ int shell_function_pid = 0, shell_function_completed;
    The output is written into VARIABLE_BUFFER starting at O.  */
 
 /* Note this absorbs a semicolon and is safe to use in conditionals.  */
-#define BADARGS(func)                                                         \
+#define BADARGS(func)  do {                                                   \
   if (reading_filename != 0)                                                  \
     makefile_fatal (reading_filename, *reading_lineno_ptr,                    \
 		    "insufficient arguments to function `%s'",                \
 		    func);                                                    \
   else                                                                        \
-    fatal ("insufficient arguments to function `%s'", func)
+    fatal ("insufficient arguments to function `%s'", func); } while (0)
 
 static char *
 expand_function (o, function, text, end)
@@ -348,6 +348,7 @@ expand_function (o, function, text, end)
 #ifndef VMS /* not supported for vms yet */
     case function_shell:
       {
+	char* batch_filename = NULL;
 #ifdef WINDOWS32
 	SECURITY_ATTRIBUTES saAttr;
 	HANDLE hIn;
@@ -373,7 +374,7 @@ expand_function (o, function, text, end)
 #ifndef __MSDOS__
 	/* Construct the argument list.  */
 	argv = construct_command_argv (text,
-				       (char **) NULL, (struct file *) 0);
+				       (char **) NULL, (struct file *) 0, &batch_filename);
 	if (argv == 0)
 	  break;
 #endif
@@ -584,6 +585,12 @@ expand_function (o, function, text, end)
 	    while (shell_function_completed == 0)
 	      reap_children (1, 0);
 
+            if (batch_filename) {
+              if (debug_flag)
+                printf("Cleaning up temporary batch file %s\n", batch_filename);
+              remove(batch_filename);
+              free(batch_filename);
+            }
 	    shell_function_pid = 0;
 
 	    /* The child_handler function will set shell_function_completed
@@ -852,6 +859,8 @@ expand_function (o, function, text, end)
 
 	push_new_variable_scope ();
 	v = define_variable (var, strlen (var), "", o_automatic, 0);
+        free (v->value);
+        v->value = 0;
 	p3 = list;
 	while ((p = find_next_token (&p3, &len)) != 0)
 	  {
@@ -882,10 +891,10 @@ expand_function (o, function, text, end)
     case function_filter:
     case function_filter_out:
       {
-	struct word
+	struct a_word
 	  {
-	    struct word *next;
-	    char *word;
+	    struct a_word *next;
+	    char *str;
 	    int matched;
 	  } *words, *wordtail, *wp;
 
@@ -911,7 +920,7 @@ expand_function (o, function, text, end)
 	p3 = text;
 	while ((p = find_next_token (&p3, &len)) != 0)
 	  {
-	    struct word *w = (struct word *) alloca (sizeof (struct word));
+	    struct a_word *w = (struct a_word *)alloca(sizeof(struct a_word));
 	    if (words == 0)
 	      words = w;
 	    else
@@ -921,7 +930,7 @@ expand_function (o, function, text, end)
 	    if (*p3 != '\0')
 	      ++p3;
 	    p[len] = '\0';
-	    w->word = p;
+	    w->str = p;
 	    w->matched = 0;
 	  }
 
@@ -939,8 +948,8 @@ expand_function (o, function, text, end)
 
 		percent = find_percent (p);
 		for (wp = words; wp != 0; wp = wp->next)
-		  wp->matched |= (percent == 0 ? streq (p, wp->word)
-				  : pattern_matches (p, percent, wp->word));
+		  wp->matched |= (percent == 0 ? streq (p, wp->str)
+				  : pattern_matches (p, percent, wp->str));
 
 		p[len] = save;
 	      }
@@ -949,7 +958,7 @@ expand_function (o, function, text, end)
 	    for (wp = words; wp != 0; wp = wp->next)
 	      if (function == function_filter ? wp->matched : !wp->matched)
 		{
-		  o = variable_buffer_output (o, wp->word, strlen (wp->word));
+		  o = variable_buffer_output (o, wp->str, strlen (wp->str));
 		  o = variable_buffer_output (o, " ", 1);
 		  doneany = 1;
 		}

@@ -91,9 +91,14 @@ update_goal_chain (goals, makefiles)
       g->changed = 0;
   }
 
+#if 0
+  /* Only run one job at a time when building makefiles.
+     No one seems to know why this was done, and no one can think of a good
+     reason to do it.  Hopefully an obvious one won't appear as soon as we
+     release the next version :-/.  */
   if (makefiles)
-    /* Only run one job at a time.  */
     job_slots = 1;
+#endif
 
   /* Update all the goals until they are all finished.  */
 
@@ -115,7 +120,7 @@ update_goal_chain (goals, makefiles)
 	{
 	  /* Iterate over all double-colon entries for this file.  */
 	  struct file *file = g->file;
-	  int stop, any_not_updated = 0;
+	  int stop = 0, any_not_updated = 0;
 
 	  for (file = g->file->double_colon ? g->file->double_colon : g->file;
 	       file != NULL;
@@ -248,6 +253,38 @@ update_goal_chain (goals, makefiles)
   return status;
 }
 
+/* Generate an error/fatal message if no rules are available for the target.
+ */
+static void
+no_rule_error(file)
+  struct file *file;
+{
+  static const char msg_noparent[]
+    = "%sNo rule to make target `%s'%s";
+  static const char msg_parent[]
+    = "%sNo rule to make target `%s', needed by `%s'%s";
+  if (keep_going_flag || file->dontcare)
+    {
+      if (!file->dontcare)
+        {
+          if (file->parent == 0)
+            error (msg_noparent, "*** ", file->name, ".");
+          else
+            error (msg_parent, "*** ",
+                   file->name, file->parent->name, ".");
+          file->shownerror = 1;
+        }
+      file->update_status = 2;
+    }
+  else
+    {
+      if (file->parent == 0)
+        fatal (msg_noparent, "", file->name, "");
+      else
+        fatal (msg_parent, "", file->name, file->parent->name, "");
+    }
+}
+
 /* If FILE is not up to date, execute the commands for it.
    Return 0 if successful, 1 if unsuccessful;
    but with some flag settings, just call `exit' if unsuccessful.
@@ -317,6 +354,13 @@ update_file_1 (file, depth)
       if (file->update_status > 0)
 	{
 	  DEBUGPR ("Recently tried and failed to update file `%s'.\n");
+          if (!file->shownerror)
+            {
+              int dontcare = file->dontcare;
+              file->dontcare = 0;
+              no_rule_error(file);
+              file->dontcare = dontcare;
+            }
 	  return file->update_status;
 	}
 
@@ -394,18 +438,14 @@ update_file_1 (file, depth)
 	{
 	  error ("Circular %s <- %s dependency dropped.",
 		 file->name, d->file->name);
+	  /* We cannot free D here because our the caller will still have
+	     a reference to it when we were called recursively via
+	     check_dep below.  */
 	  if (lastd == 0)
-	    {
-	      file->deps = d->next;
-	      free ((char *) d);
-	      d = file->deps;
-	    }
+	    file->deps = d->next;
 	  else
-	    {
-	      lastd->next = d->next;
-	      free ((char *) d);
-	      d = lastd->next;
-	    }
+	    lastd->next = d->next;
+	  d = d->next;
 	  continue;
 	}
 
@@ -594,7 +634,7 @@ update_file_1 (file, depth)
   DEBUGPR ("Must remake target `%s'.\n");
 
   /* It needs to be remade.  If it's VPATH and not reset via GPATH, toss the
-     VPATH */
+     VPATH.  */
   if (!streq(file->name, file->hname))
     {
       if (debug_flag)
@@ -910,32 +950,7 @@ remake_file (file)
 	   Pretend it was successfully remade.  */
 	file->update_status = 0;
       else
-	{
-	  /* This is a dependency file we cannot remake.  Fail.  */
-	  static const char msg_noparent[]
-	    = "%sNo rule to make target `%s'%s";
-	  static const char msg_parent[]
-	    = "%sNo rule to make target `%s', needed by `%s'%s";
-	  if (keep_going_flag || file->dontcare)
-	    {
-	      if (!file->dontcare)
-		{
-		  if (file->parent == 0)
-		    error (msg_noparent, "*** ", file->name, ".");
-		  else
-		    error (msg_parent, "*** ",
-			   file->name, file->parent->name, ".");
-		}
- 	      file->update_status = 2;
-	    }
-	  else
-	    {
-	      if (file->parent == 0)
-		fatal (msg_noparent, "", file->name, "");
-	      else
-		fatal (msg_parent, "", file->name, file->parent->name, "");
-	    }
-	}
+        no_rule_error(file);
     }
   else
     {
@@ -994,11 +1009,12 @@ f_mtime (file, search)
 	}
       mtime = f_mtime (arfile, search);
       check_renamed (arfile);
-      if (search && strcmp (arfile->name, arname))
+      if (search && strcmp (arfile->hname, arname))
 	{
 	  /* The archive's name has changed.
 	     Change the archive-member reference accordingly.  */
 
+          char *name;
 	  unsigned int arlen, memlen;
 
 	  if (!arname_used)
@@ -1007,18 +1023,26 @@ f_mtime (file, search)
 	      arname_used = 1;
 	    }
 
-	  arname = arfile->name;
+	  arname = arfile->hname;
 	  arlen = strlen (arname);
 	  memlen = strlen (memname);
 
-	  free (file->name);
+	  /* free (file->name); */
 
-	  file->name = (char *) xmalloc (arlen + 1 + memlen + 2);
-	  bcopy (arname, file->name, arlen);
-	  file->name[arlen] = '(';
-	  bcopy (memname, file->name + arlen + 1, memlen);
-	  file->name[arlen + 1 + memlen] = ')';
-	  file->name[arlen + 1 + memlen + 1] = '\0';
+	  name = (char *) xmalloc (arlen + 1 + memlen + 2);
+	  bcopy (arname, name, arlen);
+	  name[arlen] = '(';
+	  bcopy (memname, name + arlen + 1, memlen);
+	  name[arlen + 1 + memlen] = ')';
+	  name[arlen + 1 + memlen + 1] = '\0';
+
+          /* If the archive was found with GPATH, make the change permanent;
+             otherwise defer it until later.  */
+          if (arfile->name == arfile->hname)
+            rename_file (file, name);
+          else
+            rehash_file (file, name);
+          check_renamed (file);
 	}
 
       if (!arname_used)
@@ -1029,7 +1053,7 @@ f_mtime (file, search)
 	/* The archive doesn't exist, so it's members don't exist either.  */
 	return (time_t) -1;
 
-      mtime = ar_member_date (file->name);
+      mtime = ar_member_date (file->hname);
     }
   else
 #endif
@@ -1090,17 +1114,20 @@ f_mtime (file, search)
 	 * FAT filesystems round time to nearest even second(!). Just
 	 * allow for any file (NTFS or FAT) to perhaps suffer from this
 	 * braindamage.
-	 *
-	 * Apparently, this doesn't happen with the MS-DOS/DJGPP port,
-	 * although MS-DOS and MS-Windows 3.X/9X also use FAT filesystems.
 	 */
 	if (mtime > now && (((mtime % 2) == 0) && ((mtime-1) > now)))
 #else
+#ifdef __MSDOS__
+	/* Scrupulous testing indicates that some Windows
+	   filesystems can set file times up to 3 sec into the future!  */
+	if (mtime > now + 3)
+#else
         if (mtime > now)
 #endif
+#endif
           {
-            error("*** Warning: File `%s' has modification time in the future",
-                  file->name);
+            error("*** Warning: File `%s' has modification time in the future (%ld > %ld)",
+                  file->name, mtime, now);
             clock_skew_detected = 1;
           }
       }

@@ -30,7 +30,7 @@ MAKEFILE=NMakefile
 SUBPROC_MAKEFILE=NMakefile
 
 CFLAGS_any = /nologo /MT /W3 /GX /Zi /YX /I . /I glob /I w32/include /D WIN32 /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H /D NO_ARCHIVES
-CFLAGS_debug = $(CFLAGS_any) /Od /D _DEBUG /FR.\WinDebug/ /Fp.\WinDebug/make.pch /Fo.\WinDebug/ /Fd.\WinDebug/make.pdb
+CFLAGS_debug = $(CFLAGS_any) /Od /D DEBUG /D _DEBUG /FR.\WinDebug/ /Fp.\WinDebug/make.pch /Fo.\WinDebug/ /Fd.\WinDebug/make.pdb
 CFLAGS_release = $(CFLAGS_any) /O2 /D NDEBUG /FR.\WinRel/ /Fp.\WinRel/make.pch /Fo.\WinRel/
 
 LDFLAGS_debug = w32\subproc\WinDebug\subproc.lib /NOLOGO /SUBSYSTEM:console\
@@ -50,20 +50,21 @@ all: config.h subproc Release Debug
 subproc: w32/subproc/WinDebug/subproc.lib w32/subproc/WinRel/subproc.lib
 
 w32/subproc/WinDebug/subproc.lib w32/subproc/WinRel/subproc.lib:
-	subproc.bat $(SUBPROC_MAKEFILE)
+	subproc.bat $(SUBPROC_MAKEFILE) $(MAKE)
 
 config.h: config.h.W32
 	copy $? $@
 
 Release:
-	nmake /f $(MAKEFILE) LDFLAGS="$(LDFLAGS_release)" CFLAGS="$(CFLAGS_release)" OUTDIR=WinRel WinRel/make.exe
+	$(MAKE) /f $(MAKEFILE) LDFLAGS="$(LDFLAGS_release)" CFLAGS="$(CFLAGS_release)" OUTDIR=WinRel WinRel/make.exe
 Debug:
-	nmake /f $(MAKEFILE) LDFLAGS="$(LDFLAGS_debug)" CFLAGS="$(CFLAGS_debug)" OUTDIR=WinDebug WinDebug/make.exe
+	$(MAKE) /f $(MAKEFILE) LDFLAGS="$(LDFLAGS_debug)" CFLAGS="$(CFLAGS_debug)" OUTDIR=WinDebug WinDebug/make.exe
 
 clean:
 	rmdir /s /q WinDebug WinRel
 	rmdir /s /q w32\subproc\WinDebug w32\subproc\WinRel
 	erase config.h
+	erase *.pdb
 
 $(OUTDIR):
 	if not exist .\$@\nul mkdir .\$@
@@ -106,30 +107,7 @@ $(OUTDIR)/make.exe: $(OUTDIR) $(OBJS)
 
 .c{$(OUTDIR)}.obj:
 	$(CC) $(CFLAGS) /c $<
-	
-$(OUTDIR)/ar.obj : ar.c make.h filedef.h dep.h
-$(OUTDIR)/arscan.obj : arscan.c make.h
-$(OUTDIR)/commands.obj : commands.c
-$(OUTDIR)/default.obj : default.c make.h rule.h dep.h filedef.h job.h commands.h variable.h
-$(OUTDIR)/dir.obj :  dir.c make.h
-$(OUTDIR)/expand.obj : expand.c make.h filedef.h job.h commands.h variable.h
-$(OUTDIR)/file.obj : file.c make.h dep.h filedef.h job.h commands.h variable.h
-$(OUTDIR)/function.obj : function.c make.h filedef.h variable.h dep.h job.h commands.h
-$(OUTDIR)/getloadavg.obj : getloadavg.c
-$(OUTDIR)/getopt.obj : getopt.c
-$(OUTDIR)/getopt1.obj : getopt1.c getopt.h
-$(OUTDIR)/implicit.obj : implicit.c make.h rule.h dep.h filedef.h
-$(OUTDIR)/job.obj : job.c make.h job.h filedef.h commands.h variable.h
-$(OUTDIR)/main.obj : main.c make.h dep.h filedef.h variable.h job.h commands.h getopt.h
-$(OUTDIR)/misc.obj : misc.c make.h dep.h
-$(OUTDIR)/read.obj : read.c make.h dep.h filedef.h job.h commands.h variable.h glob/glob.h
-$(OUTDIR)/remake.obj : remake.c make.h filedef.h job.h commands.h dep.h
-$(OUTDIR)/remote-stub.obj : remote-stub.c make.h filedef.h job.h commands.h
-$(OUTDIR)/rule.obj : rule.c make.h dep.h filedef.h job.h commands.h variable.h rule.h
-$(OUTDIR)/signame.obj : signame.c signame.h
-$(OUTDIR)/variable.obj : variable.c make.h dep.h filedef.h job.h commands.h variable.h
-$(OUTDIR)/version.obj : version.c
-$(OUTDIR)/vpath.obj : vpath.c make.h filedef.h variable.h
+
 $(OUTDIR)/glob.obj : glob/glob.c
 	$(CC) $(CFLAGS) /c $?
 $(OUTDIR)/fnmatch.obj : glob/fnmatch.c
@@ -138,4 +116,3 @@ $(OUTDIR)/dirent.obj : w32/compat/dirent.c
 	$(CC) $(CFLAGS) /c $?
 $(OUTDIR)/pathstuff.obj : w32/pathstuff.c
 	$(CC) $(CFLAGS) /c $?
-

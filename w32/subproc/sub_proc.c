@@ -6,6 +6,7 @@
 #include "sub_proc.h"
 #include "proc.h"
 #include "w32err.h"
+#include "config.h"
 
 static char *make_command_line( char *shell_name, char *exec_path, char **argv);
 
@@ -889,108 +890,6 @@ process_cleanup(
 
 
 /*
- * Try to protect against WINDOWS32 argument munging. This function takes
- * an argv vector and outputs a 'protected' string as a return
- * value. The return code can be safely passed to CreateProcess().
- *
- * The caller should free the return value.
- */
-
-#define TRACE(x)
-static char *fix_command_line(char *args[])
-{
-	int i;
-	char *narg;
-	char *nargp;
-	char *p;
-	char *q;
-	int alloc_len = 0;
-
-	for (i = 0; args[i]; i++)
-		alloc_len += ((strlen(args[i]) * 2) + 1);
-	/* account for possible enclosing quotes and null termination */
-	alloc_len += 3;
-
-	nargp = narg = malloc(alloc_len);
-
-	for (i = 0; args[i]; i++) {
-		p = args[i];
-		TRACE(("original arg: %s\n", p));
-
-		if (*p == '\0') {
-			*nargp++ = '"';
-			*nargp++ = '"';
-			*nargp = '\0';
-			TRACE(("empty string arg: %s\n", nargp-2));
-		} else if (strpbrk(p, "\" \t")) {
-			/* point to end of copy buffer */
-			q = narg;
-			q += (alloc_len-1);
-			*q-- = '\0'; /* ensure null terminated string */
-			*q-- = '"';  /* terminating quote of argument */
-
-			/* point to end of the input string */
-			p = args[i];
-			p += strlen(args[i]);
-			p--;
-
-			/* 
-			 * Because arg is quoted, escape any backslashes 
-			 * that might occur at the end of the string which
-			 * proceed the closing quote.
-			 * Example:
-			 * 	foo c:\
-			 * Becomes:
-			 *	"foo c:\\"
-			 */
-			while (*p == '\\')
-				*q-- = *p--, *q-- = '\\';
-
-			/* copy the string in reverse */
-			while (p >= args[i]) {
-				/* copy the character */
-				*q-- = *p--;
-
-				/* 
-				 * Escape any double quote found. Also escape
-				 * each backslash preceding the double quote.
-				 */
-				if (*(p+1) == '"') {
-					*q-- = '\\';
-					if (p >= args[i] && *p == '\\')
-						while (p >= args[i] && *p == '\\')
-							*q-- = *p--, *q-- = '\\';
-				}
-			}
-
-			/* finish quoting arg, q now points to complete arg */
-			*q = '"';
-
-			/* rejustify */
-			memmove(nargp, q, strlen(q) + 1);
-			TRACE(("arg with white space or doublequotes: %s\n", nargp));
-			nargp += strlen(nargp);
-		} else {
-			/* just copy the argument, no protection needed */
-			strcpy(nargp, args[i]);
-			TRACE(("plain arg: %s\n", nargp));
-			nargp += strlen(nargp);
-		}
-
-		/* separate arguments with spaces (if more args to gather) */
-		if (args[i+1])
-			*nargp++ = ' ';
-		*nargp   = '\0';
-	} /* end for */
-
-	/* NULL terminate the arg list */
-	*nargp = '\0';
-
-	return (narg);
-}
-#undef TRACE
-
-/*
  * Description: 
  *	 Create a command line buffer to pass to CreateProcess
  *
@@ -1004,55 +903,211 @@ static char *fix_command_line(char *args[])
  */
 
 static char *
-make_command_line( char *shell_name, char *exec_path, char **argv)
+make_command_line( char *shell_name, char *full_exec_path, char **argv)
 {
-	char** nargv;
-	char*  buf;
-	int    i;
-	char** shargv = NULL;
-	char*  p = NULL;
-	char*  q = NULL;
-	int    j = 0;
- 
-	if (shell_name) {
-		/* handle things like: #!/bin/sh -x */
+	int		argc = 0;
+	char**		argvi;
+	int*		enclose_in_quotes = NULL;
+	int*		enclose_in_quotes_i;
+	unsigned int	bytes_required = 0;
+	char*		command_line;
+	char*		command_line_i;
 
-		/* count tokens */
-		q = strdup(shell_name);
-		for (j = 0, p = q; (p = strtok(p, " \t")) != NULL; p = NULL, j++);
-		free(q);
-
-		/* copy tokens */
-		q = strdup(shell_name);
-		shargv = (char **) malloc((j+1) * sizeof (char *));
-		for (j = 0, p = q; (p = strtok(p, " \t")) != NULL; p = NULL, j++)
-			shargv[j] = strdup(p);
-		shargv[j] = NULL;
-		free(q);
-
-		/* create argv */
-		for (i = 0; argv[i]; i++);
-		i += (j+1);
-		nargv = (char **) malloc(i * sizeof (char *));
-		for (i = 0; shargv[i] != NULL; i++)
-			nargv[i] = shargv[i];
-		for (j = 0; argv[j]; j++, i++)
-			nargv[i] = argv[j];
-		nargv[i] = NULL;
-	} else
-		nargv = argv;
-
-	/* create string suitable for CreateProcess() */
-	buf = fix_command_line(nargv);
-
-	if (shell_name) {
-		for (j = 0; shargv[j]; j++)
-			free(shargv[j]);
-		free(shargv);
-		free(nargv);
+	if (shell_name && full_exec_path) {
+		bytes_required
+		  = strlen(shell_name) + 1 + strlen(full_exec_path);
+		/*
+		 * Skip argv[0] if any, when shell_name is given.
+		 */
+		if (*argv) argv++;
+		/*
+		 * Add one for the intervening space.
+		 */
+		if (*argv) bytes_required++;
 	}
-	
-	return buf;
+
+	argvi = argv;
+	while (*(argvi++)) argc++;
+
+	if (argc) {
+		enclose_in_quotes = (int*) calloc(1, argc * sizeof(int));
+
+		if (!enclose_in_quotes) {
+			return NULL;
+		}
+	}
+
+	/* We have to make one pass through each argv[i] to see if we need
+	 * to enclose it in ", so we might as well figure out how much
+	 * memory we'll need on the same pass.
+	 */
+
+	argvi = argv;
+	enclose_in_quotes_i = enclose_in_quotes;
+	while(*argvi) {
+		char* p = *argvi;
+		unsigned int backslash_count = 0;
+
+		/*
+		 * We have to enclose empty arguments in ".
+		 */
+		if (!(*p)) *enclose_in_quotes_i = 1;
+
+		while(*p) {
+			switch (*p) {
+			case '\"':
+				/*
+				 * We have to insert a backslash for each "
+				 * and each \ that precedes the ".
+				 */
+				bytes_required += (backslash_count + 1);
+				backslash_count = 0;
+				break;
+
+			case '\\':
+				backslash_count++;
+				break;
+	/*
+	 * At one time we set *enclose_in_quotes_i for '*' or '?' to suppress
+	 * wildcard expansion in programs linked with MSVC's SETARGV.OBJ so
+	 * that argv in always equals argv out. This was removed.  Say you have
+	 * such a program named glob.exe.  You enter
+	 * glob '*'
+	 * at the sh command prompt.  Obviously the intent is to make glob do the
+	 * wildcarding instead of sh.  If we set *enclose_in_quotes_i for '*' or '?',
+	 * then the command line that glob would see would be
+	 * glob "*"
+	 * and the _setargv in SETARGV.OBJ would _not_ expand the *.
+	 */
+			case ' ':
+			case '\t':
+				*enclose_in_quotes_i = 1;
+				/* fall through */
+
+			default:
+				backslash_count = 0;
+				break;
+			}
+			
+			/*
+			 * Add one for each character in argv[i].
+			 */
+			bytes_required++;
+
+			p++;
+		}
+
+		if (*enclose_in_quotes_i) {
+			/*
+			 * Add one for each enclosing ",
+			 * and one for each \ that precedes the
+			 * closing ".
+			 */
+			bytes_required += (backslash_count + 2);
+		}
+		
+		/*
+		 * Add one for the intervening space.
+		 */
+		if (*(++argvi)) bytes_required++;
+		enclose_in_quotes_i++;
+	}
+
+	/*
+	 * Add one for the terminating NULL.
+	 */
+	bytes_required++;
+
+	command_line = (char*) malloc(bytes_required);
+
+	if (!command_line) {
+		if (enclose_in_quotes) free(enclose_in_quotes);
+		return NULL;
+	}
+
+	command_line_i = command_line;
+
+	if (shell_name && full_exec_path) {
+		while(*shell_name) {
+			*(command_line_i++) = *(shell_name++);
+		}
+
+		*(command_line_i++) = ' ';
+
+		while(*full_exec_path) {
+			*(command_line_i++) = *(full_exec_path++);
+		}
+
+		if (*argv) {
+			*(command_line_i++) = ' ';
+		}
+	}
+
+	argvi = argv;
+	enclose_in_quotes_i = enclose_in_quotes;
+
+	while(*argvi) {
+		char* p = *argvi;
+		unsigned int backslash_count = 0;
+
+		if (*enclose_in_quotes_i) {
+			*(command_line_i++) = '\"';
+		}
+
+		while(*p) {
+			if (*p == '\"') {
+				/*
+				 * We have to insert a backslash for the "
+				 * and each \ that precedes the ".
+				 */
+				backslash_count++;
+
+				while(backslash_count) {
+					*(command_line_i++) = '\\';
+					backslash_count--;
+				};
+
+			} else if (*p == '\\') {
+				backslash_count++;
+			} else {
+				backslash_count = 0;
+			}
+
+			/*
+			 * Copy the character.
+			 */
+			*(command_line_i++) = *(p++);
+		}
+
+		if (*enclose_in_quotes_i) {
+			/*
+			 * Add one \ for each \ that precedes the
+			 * closing ".
+			 */
+			while(backslash_count--) {
+				*(command_line_i++) = '\\';
+			};
+				
+			*(command_line_i++) = '\"';
+		}
+		
+		/*
+		 * Append an intervening space.
+		 */
+		if (*(++argvi)) {
+			*(command_line_i++) = ' ';
+		}
+		
+		enclose_in_quotes_i++;
+	}
+
+	/*
+	 * Append the terminating NULL.
+	 */
+	*command_line_i = '\0';
+
+	if (enclose_in_quotes) free(enclose_in_quotes);
+	return command_line;
 }
 
 /*

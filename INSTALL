@@ -1,8 +1,6 @@
 Basic Installation
 ==================
 
-   These are generic installation instructions.
-
    The `configure' shell script attempts to guess correct values for
 various system-dependent variables used during compilation.  It uses
 those values to create a `Makefile' in each directory of the package.
@@ -36,7 +34,13 @@ The simplest way to compile this package is:
 
   2. Type `make' to compile the package.
 
-  3. Optionally, type `make check' to run any self-tests that come with
+     If you're building GNU make on a system which does not already have
+     a `make', you can use the build.sh shell script to compile.  Run
+     `sh ./build.sh'.  This should compile the program in the current
+     directory.  Then you will have a Make program that you can use for
+     `make install', or whatever else.
+
+  3. Optionally, type `./make check' to run any self-tests that come with
      the package.
 
   4. Type `make install' to install the programs and any data files and

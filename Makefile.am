@@ -1,6 +1,6 @@
 # -*-Makefile-*-, or close enough
 
-AUTOMAKE_OPTIONS = 1.2
+AUTOMAKE_OPTIONS = 1.3
 
 bin_PROGRAMS =	make
 
@@ -13,12 +13,13 @@ make_SOURCES =	main.c commands.c job.c dir.c file.c misc.c read.c remake.c \
 make_LDADD =	@LIBOBJS@ @ALLOCA@ glob/libglob.a
 
 info_TEXINFOS =	make.texinfo
+man_MANS =	make.1
 
 INCLUDES =	-I$(srcdir)/glob -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\"
 
 BUILT_SOURCES =	README build.sh.in
 
-EXTRA_DIST = 	make.man $(BUILT_SOURCES) remote-cstms.c\
+EXTRA_DIST = 	$(BUILT_SOURCES) $(man_MANS) README.customs remote-cstms.c\
 		make-stds.texi texinfo.tex SCOPTIONS SMakefile\
 		README.Amiga Makefile.ami config.ami make.lnk amiga.c amiga.h\
 		README.DOS Makefile.DOS configure.bat dosbuild.bat configh.dos\
@@ -31,13 +32,43 @@ SUBDIRS =	glob
 MOSTLYCLEANFILES = loadavg.c
 CLEANFILES =	loadavg
 
+
+# --------------- Local INSTALL Section
+
+# If necessary, change the gid of the app and turn on the setgid flag.
+#
+
+# Whether or not make needs to be installed setgid.
+# The value should be either `true' or `false'.
+# On many systems, the getloadavg function (used to implement the `-l'
+# switch) will not work unless make is installed setgid kmem.
+#
+inst_setgid = @NEED_SETGID@
+
+# Install make setgid to this group so it can get the load average.
+#
+inst_group = @KMEM_GROUP@
+
+install-exec-local:
+	@if $(inst_setgid); then \
+	   app=$(DESTDIR)$(bindir)/`echo $(bin_PROGRAMS)|sed '$(transform)'`; \
+	   if chgrp $(inst_group) $$app && chmod g+s $$app; then \
+	     echo "chgrp $(inst_group) $$app && chmod g+s $$app"; \
+	   else \
+	     echo "$$app needs to be owned by group $(inst_group) and setgid;"; \
+	     echo "otherwise the \`-l' option will probably not work."; \
+	     echo "You may need special privileges to complete the installation"; \
+	     echo "of $$app."; \
+	   fi; \
+	 else true; fi
+
 # --------------- Local DIST Section
 
 # Install the w32 subdirectory
 #
 dist-hook:
 	(cd $(srcdir); \
-	 w32=`find w32 -follow \( -name CVS -prune \) -o -type f -print`; \
+	 w32=`find w32 -follow \( -name CVS -prune \) -o \( -name \*.orig -o -name \*.rej -o -name \*~ -prune \) -o -type f -print`; \
 	 tar chf - $$w32) \
 	| (cd $(distdir); tar xfBp -)
 
@@ -52,11 +83,14 @@ check-local: check-loadavg check-regression
 loadavg: loadavg.c config.h
 	@rm -f loadavg
 	$(LINK) -I. -I$(srcdir) -DHAVE_CONFIG_H -DTEST $(make_LDFLAGS) loadavg.c $(LIBS)
+
 # We copy getloadavg.c into a different file rather than compiling it
 # directly because some compilers clobber getloadavg.o in the process.
+#
 loadavg.c: getloadavg.c
 	ln $(srcdir)/getloadavg.c loadavg.c || \
-	cp $(srcdir)/getloadavg.c loadavg.c
+	  cp $(srcdir)/getloadavg.c loadavg.c
+
 check-loadavg: loadavg
 	@echo The system uptime program believes the load average to be:
 	-uptime
@@ -69,8 +103,10 @@ check-loadavg: loadavg
 # specified, or else in the srcdir or the distdir, their parents, and _their_
 # parents.
 #
+MAKETESTFLAGS =
+
 check-regression: all
-	here=`pwd`; testdir=""; \
+	@here=`pwd`; testdir=""; \
 	  case "$(MAKE_TEST)" in "") \
 	    for d1 in $$here $(srcdir); do \
 	      for d2 in ../.. .. .; do \
@@ -83,10 +119,10 @@ check-regression: all
 	    *) testdir="$(MAKE_TEST)" ;; \
 	  esac; \
 	  case "$$testdir" in \
-	    "") echo "Couldn't find make-test-* test suite."; exit 0;; \
+	    "") echo "Couldn't find make-test-* regression test suite."; exit 0;; \
 	  esac; \
-	  echo "cd $$testdir && ./run_make_tests -make_path $$here/make"; \
-	  cd $$testdir && ./run_make_tests -make_path $$here/make
+	  echo "cd $$testdir && ./run_make_tests -make $$here/make $(MAKETESTFLAGS)"; \
+	  cd $$testdir && ./run_make_tests -make $$here/make $(MAKETESTFLAGS)
 
 
 # --------------- Maintainer's Section
