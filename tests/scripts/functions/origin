@@ -22,7 +22,7 @@ open(MAKEFILE,"> $makefile");
 
 print MAKEFILE <<EOF;
 foo := bletch garf
-auto_var = udef CC $homevar MAKE foo CFLAGS WHITE \@
+auto_var = udef CC MAKETEST MAKE foo CFLAGS WHITE \@
 av = \$(foreach var, \$(auto_var), \$(origin \$(var)) )
 override WHITE := BLACK
 all: auto
