@@ -1,3 +1,11 @@
+2000-04-03  Paul D. Smith  <psmith@gnu.org>
+
+	* remake.c (f_mtime): Archive member timestamps are stored as
+	time_t, without nanoseconds.  But, f_mtime() wants to return
+	nanosecond info on those systems that support it.  So, convert the
+	return value of ar_member_date() into a FILE_TIMESTAMP, using 0 as
+	the nanoseconds.
+
 2000-03-28  Paul D. Smith  <psmith@gnu.org>
 
 	* Version 3.78.92 released.

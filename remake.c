@@ -1097,7 +1097,7 @@ f_mtime (file, search)
 	/* The archive doesn't exist, so it's members don't exist either.  */
 	return (FILE_TIMESTAMP) -1;
 
-      mtime = ar_member_date (file->hname);
+      mtime = FILE_TIMESTAMP_FROM_S_AND_NS (ar_member_date (file->hname), 0);
     }
   else
 #endif
