@@ -1,4 +1,4 @@
-/* Copyright (C) 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
+/* Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -127,7 +127,11 @@ read_all_makefiles (makefiles)
        MAKEFILES is updated for finding remaining tokens.  */
     p = value;
     while ((name = find_next_token (&p, &length)) != 0)
-      read_makefile (name, 1);
+      {
+	if (*p != '\0')
+	  *p++ = '\0';
+	read_makefile (name, 1);
+      }
 
     free (value);
   }
