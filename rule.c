@@ -140,6 +140,57 @@ count_implicit_rule_limits ()
     free (name);
 }
 
+/* Create a pattern rule from a suffix rule.
+   TARGET is the target suffix; SOURCE is the source suffix.
+   CMDS are the commands.
+   If TARGET is nil, it means the target pattern should be `(%.o)'.
+   If SOURCE is nil, it means there should be no deps.  */
+
+static void
+convert_suffix_rule (target, source, cmds)
+     char *target, *source;
+     struct commands *cmds;
+{
+  char *targname, *depname;
+  char **names, **percents;
+  struct dep *deps;
+  unsigned int len;
+
+  if (target == 0)
+    /* Special case: TARGET being nil means we are defining a
+       `.X.a' suffix rule; the target pattern is always `(%.o)'.  */
+    targname = savestring ("(%.o)", 5);
+  else
+    {
+      /* Construct the target name.  */
+      len = strlen (target);
+      targname = xmalloc (1 + len + 1);
+      targname[0] = '%';
+      bcopy (target, targname + 1, len + 1);
+    }
+
+  names = (char **) xmalloc (2 * sizeof (char *));
+  percents = (char **) xmalloc (2 * sizeof (char *));
+  names[0] = percents[0] = targname;
+  names[1] = percents[1] = 0;
+
+  if (source == 0)
+    deps = 0;
+  else
+    {
+      /* Construct the dependency name.  */
+      len = strlen (source);
+      depname = xmalloc (1 + len + 1);
+      depname[0] = '%';
+      bcopy (source, depname + 1, len + 1);
+      deps = (struct dep *) xmalloc (sizeof (struct dep));
+      deps->next = 0;
+      deps->name = depname;
+    }
+
+  create_pattern_rule (names, percents, 0, deps, cmds, 0);
+}
+
 /* Convert old-style suffix rules to pattern rules.
    All rules for the suffixes on the .SUFFIXES list
    are converted and added to the chain of pattern rules.  */
@@ -147,11 +198,10 @@ count_implicit_rule_limits ()
 void
 convert_to_pattern ()
 {
-  register struct dep *d, *d2, *newd;
+  register struct dep *d, *d2;
   register struct file *f;
   register char *rulename;
   register unsigned int slen, s2len;
-  register char *name, **names;
 
   /* Compute maximum length of all the suffixes.  */
 
@@ -169,35 +219,15 @@ convert_to_pattern ()
     {
       /* Make a rule that is just the suffix, with no deps or commands.
 	 This rule exists solely to disqualify match-anything rules.  */
-      slen = strlen (dep_name (d));
-      name = (char *) xmalloc (1 + slen + 1);
-      name[0] = '%';
-      bcopy (dep_name (d), name + 1, slen + 1);
-      names = (char **) xmalloc (2 * sizeof (char *));
-      names[0] = name;
-      names[1] = 0;
-      create_pattern_rule (names, (char **) 0, 0, (struct dep *) 0,
-			   (struct commands *) 0, 0);
+      convert_suffix_rule (dep_name (d), (char *) 0, (struct commands *) 0);
 
       f = d->file;
       if (f->cmds != 0)
-	{
-	  /* Record a pattern for this suffix's null-suffix rule.  */
-	  newd = (struct dep *) xmalloc (sizeof (struct dep));
-	  /* Construct this again rather than using the contents
-	     of NAME (above), since that may have been freed by
-	     create_pattern_rule.  */
-	  newd->name = (char *) xmalloc (1 + slen + 1);
-	  newd->name[0] = '%';
-	  bcopy (dep_name (d), newd->name + 1, slen + 1);
-	  newd->next = 0;
-	  names = (char **) xmalloc (2 * sizeof (char *));
-	  names[0] = savestring ("%", 1);
-	  names[1] = 0;
-	  create_pattern_rule (names, (char **) 0, 0, newd, f->cmds, 0);
-	}
+	/* Record a pattern for this suffix's null-suffix rule.  */
+	convert_suffix_rule ("", dep_name (d), f->cmds);
 
       /* Record a pattern for each of this suffix's two-suffix rules.  */
+      slen = strlen (dep_name (d));
       bcopy (dep_name (d), rulename, slen);
       for (d2 = suffix_file->deps; d2 != 0; d2 = d2->next)
 	{
@@ -212,27 +242,15 @@ convert_to_pattern ()
 	    continue;
 
 	  if (s2len == 2 && rulename[slen] == '.' && rulename[slen + 1] == 'a')
-	    /* The suffix rule `.X.a:' is converted
-	       to the pattern rule `(%.o): %.X'.  */
-	    name = savestring ("(%.o)", 5);
-	  else
-	    {
-	      /* The suffix rule `.X.Y:' is converted
-		 to the pattern rule `%.Y: %.X'.  */
-	      name = (char *) xmalloc (1 + s2len + 1);
-	      name[0] = '%';
-	      bcopy (dep_name (d2), name + 1, s2len + 1);
-	    }
-	  names = (char **) xmalloc (2 * sizeof (char *));
-	  names[0] = name;
-	  names[1] = 0;
-	  newd = (struct dep *) xmalloc (sizeof (struct dep));
-	  newd->next = 0;
-	  /* Construct this again (see comment above).  */
-	  newd->name = (char *) xmalloc (1 + slen + 1);
-	  newd->name[0] = '%';
-	  bcopy (dep_name (d), newd->name + 1, slen + 1);
-	  create_pattern_rule (names, (char **) 0, 0, newd, f->cmds, 0);
+	    /* A suffix rule `.X.a:' generates the pattern rule `(%.o): %.X'.
+	       It also generates a normal `%.a: %.X' rule below.  */
+	    convert_suffix_rule ((char *) 0, /* Indicates `(%.o)'.  */
+				 dep_name (d),
+				 f->cmds);
+
+	  /* The suffix rule `.X.Y:' is converted
+	     to the pattern rule `%.Y: %.X'.  */
+	  convert_suffix_rule (dep_name (d2), dep_name (d), f->cmds);
 	}
     }
 }
