@@ -322,12 +322,17 @@ chop_commands (cmds)
       cmds->lines_recurse = (char *) xmalloc (nlines);
       for (idx = 0; idx < nlines; ++idx)
 	{
-	  unsigned int len;
 	  int recursive;
 	  p = lines[idx];
-	  len = strlen (p);
-	  recursive = (sindex (p, len, "$(MAKE)", 7) != 0
-		       || sindex (p, len, "${MAKE}", 7) != 0);
+	  while (isblank (*p) || *p == '-' || *p == '@')
+	    ++p;
+	  recursive = *p == '+';
+	  if (!recursive)
+	    {
+	      unsigned int len = strlen (p);
+	      recursive = (sindex (p, len, "$(MAKE)", 7) != 0
+			   || sindex (p, len, "${MAKE}", 7) != 0);
+	    }
 	  cmds->lines_recurse[idx] = recursive;
 	  cmds->any_recurse |= recursive;
 	}
