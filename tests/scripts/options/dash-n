@@ -18,9 +18,13 @@ close(MAKEFILE);
 
 &touch('orig');
 
+# TEST 0
+
 &run_make_with_options($makefile, "", &get_logfile);
 $answer = "echo >> intermediate\necho >> final\n";
 &compare_output($answer, &get_logfile(1));
+
+# TEST 1
 
 &run_make_with_options($makefile, "-Worig -n", &get_logfile);
 $answer = "echo >> intermediate\necho >> final\n";
@@ -28,7 +32,6 @@ $answer = "echo >> intermediate\necho >> final\n";
 
 unlink('orig', 'intermediate', 'final');
 
-# TEST2
 # We consider the actual updated timestamp of targets with all
 # recursive commands, even with -n.
 
@@ -46,13 +49,18 @@ EOF
 
 close(MAKEFILE);
 
-&touch('a', 'b');
+&touch('b');
+&touch('a');
 sleep(1);
 &touch('c');
+
+# TEST 2
 
 &run_make_with_options($makefile2, "", &get_logfile);
 $answer = "$make_name: `a' is up to date.\n";
 &compare_output($answer, &get_logfile(1));
+
+# TEST 3
 
 &run_make_with_options($makefile2, "-n", &get_logfile);
 $answer = "$make_name: `a' is up to date.\n";

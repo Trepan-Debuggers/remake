@@ -27,7 +27,6 @@ CC='@CC@'
 CFLAGS='@CFLAGS@'
 CPPFLAGS='@CPPFLAGS@'
 LDFLAGS='@LDFLAGS@'
-defines='@DEFS@ -DLIBDIR="${libdir}" -DINCLUDEDIR="${includedir}"'
 ALLOCA='@ALLOCA@'
 LOADLIBES='@LIBS@'
 extras='@LIBOBJS@'
@@ -37,11 +36,16 @@ GLOBLIB='@GLOBLIB@'
 # Common prefix for machine-independent installed files.
 prefix='@prefix@'
 # Common prefix for machine-dependent installed files.
-exec_prefix='@exec_prefix@'
+exec_prefix=`eval echo @exec_prefix@`
 # Directory to find libraries in for `-lXXX'.
 libdir=${exec_prefix}/lib
 # Directory to search by default for included makefiles.
 includedir=${prefix}/include
+
+localedir=${prefix}/share/locale
+aliaspath=${localedir}:.
+
+defines="-DALIASPATH=\"${aliaspath}\" -DLOCALEDIR=\"${localedir}\" -DLIBDIR=\"${libdir}\" -DINCLUDEDIR=\"${includedir}\""' @DEFS@'
 
 # Exit as soon as any command fails.
 set -e
@@ -51,13 +55,14 @@ objs="%objs% remote-${REMOTE}.o ${extras} ${ALLOCA}"
 
 if [ x"$GLOBLIB" != x ]; then
   objs="$objs %globobjs%"
+  globinc=-I${srcdir}/glob
 fi
 
 # Compile the source files into those objects.
 for file in `echo ${objs} | sed 's/\.o/.c/g'`; do
   echo compiling ${file}...
   $CC $defines $CPPFLAGS $CFLAGS \
-      -c -I. -I${srcdir} ${srcdir}/$file
+      -c -I. -I${srcdir} ${globinc} ${srcdir}/$file
 done
 
 # The object files were actually all put in the current directory.
