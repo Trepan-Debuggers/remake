@@ -66,9 +66,10 @@ struct linebuffer
 
 struct conditionals
   {
-    unsigned int if_cmds;
-    unsigned int max_ignoring;
-    char *ignoring;
+    unsigned int if_cmds;	/* Depth of conditional nesting.  */
+    unsigned int allocated;	/* Elts allocated in following arrays.  */
+    char *ignoring;		/* Are we ignoring or interepreting?  */
+    char *seen_else;		/* Have we already seen an `else'?  */
   };
 
 static struct conditionals toplevel_conditionals;
@@ -226,6 +227,7 @@ read_makefile (filename, type)
   register char *p;
   char *p2;
   int ignoring = 0, in_ignored_define = 0;
+  int no_targets = 0;		/* Set when reading a rule without targets.  */
 
   struct nameseq *filenames = 0;
   struct dep *deps;
@@ -269,13 +271,13 @@ read_makefile (filename, type)
 	{
 	  char *name = concat (include_directories[i], "/", filename);
 	  infile = fopen (name, "r");
-	  if (infile != 0)
+	  if (infile == 0)
+	    free (name);
+	  else
 	    {
 	      filename = name;
 	      break;
 	    }
-	  else
-	    free (name);
 	}
     }
 
@@ -390,6 +392,13 @@ read_makefile (filename, type)
 	{
 	  /* This line is a shell command.  */
 	  unsigned int len;
+
+	  if (no_targets)
+	    {
+	      /* Ignore the commands in a rule with no targets.  */
+	      no_targets = 0;
+	      continue;
+	    }
 
 	  if (filenames == 0)
 	    makefile_fatal (filename, lineno,
@@ -586,7 +595,12 @@ read_makefile (filename, type)
 		continue;
 	    }
 	  else if (*p2 == ':')
-	    makefile_fatal (filename, lineno, "missing target name");
+	    {
+	      /* We accept and ignore rules without targets for
+		 compatibility with SunOS 4 make.  */
+	      no_targets = 1;
+	      continue;
+	    }
 
 	  filenames = multi_glob (parse_file_seq (&p2, ':',
 						  sizeof (struct nameseq), 1),
@@ -660,9 +674,10 @@ read_makefile (filename, type)
 	 Record now the last rule we read, so following spurious
 	 commands are properly diagnosed.  */
       record_waiting_files ();
+      no_targets = 0;
     }
 
-  if (ignoring)
+  if (conditionals->if_cmds)
     makefile_fatal (filename, lineno, "missing `endif'");
 
   /* At eof, record the last rule.  */
@@ -812,28 +827,42 @@ conditional_line (line, filename, lineno)
       /* NOTDEF indicates an `endif' command.  */
       if (notdef)
 	--conditionals->if_cmds;
+      else if (conditionals->seen_else[conditionals->if_cmds - 1])
+	makefile_fatal (filename, lineno, "only one `else' per conditional");
       else
-	conditionals->ignoring[conditionals->if_cmds - 1]
-	  = !conditionals->ignoring[conditionals->if_cmds - 1];
+	{
+	  /* Toggle the state of ignorance.  */
+	  conditionals->ignoring[conditionals->if_cmds - 1]
+	    = !conditionals->ignoring[conditionals->if_cmds - 1];
+	  /* Record that we have seen an `else' in this conditional.
+	     A second `else' will be erroneous.  */
+	  conditionals->seen_else[conditionals->if_cmds - 1] = 1;
+	}
       for (i = 0; i < conditionals->if_cmds; ++i)
 	if (conditionals->ignoring[i])
 	  return 1;
       return 0;
     }
 
-  if (conditionals->max_ignoring == 0)
+  if (conditionals->allocated == 0)
     {
-      conditionals->max_ignoring = 5;
-      conditionals->ignoring = (char *) xmalloc (conditionals->max_ignoring);
+      conditionals->allocated = 5;
+      conditionals->ignoring = (char *) xmalloc (conditionals->allocated);
+      conditionals->seen_else = (char *) xmalloc (conditionals->allocated);
     }
 
   ++conditionals->if_cmds;
-  if (conditionals->if_cmds > conditionals->max_ignoring)
+  if (conditionals->if_cmds > conditionals->allocated)
     {
-      conditionals->max_ignoring += 5;
+      conditionals->allocated += 5;
       conditionals->ignoring = (char *)
-	xrealloc (conditionals->ignoring, conditionals->max_ignoring);
+	xrealloc (conditionals->ignoring, conditionals->allocated);
+      conditionals->seen_else = (char *)
+	xrealloc (conditionals->seen_else, conditionals->allocated);
     }
+
+  /* Record that we have seen an `if...' but no `else' so far.  */
+  conditionals->seen_else[conditionals->if_cmds - 1] = 0;
 
   /* Search through the stack to see if we're already ignoring.  */
   for (i = 0; i < conditionals->if_cmds - 1; ++i)
@@ -1475,7 +1504,8 @@ readline (linebuffer, stream, filename)
 	  pfatal_with_name (filename);
 
       len = strlen (p);
-      if (len == 0 || (p += len)[-1] != '\n')
+      p += len;
+      if (p[-1] != '\n')
 	{
 	  /* Probably ran out of buffer space.  */
 	  register unsigned int p_off = p - buffer;
