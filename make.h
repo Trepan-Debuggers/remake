@@ -273,6 +273,12 @@ extern char *alloca ();
 /* Add to VAR the hashing value of C, one character in a name.  */
 #define	HASH(var, c) \
   ((var += (c)), (var = ((var) << 7) + ((var) >> 20)))
+#ifdef _AMIGA /* Fold filenames on #amiga */
+#define HASHI(var, c) \
+  ((var += tolower((c))), (var = ((var) << 7) + ((var) >> 20)))
+#else
+#define HASHI(var, c) HASH(var,c)
+#endif
 
 #if defined(__GNUC__) || defined(ENUM_BITFIELDS)
 #define	ENUM_BITFIELD(bits)	:bits
