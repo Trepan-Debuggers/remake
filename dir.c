@@ -242,19 +242,24 @@ dir_contents_file_exists_p (dir, filename)
     {
       /* Enter the file in the hash table.  */
       register unsigned int newhash = 0;
+      unsigned int len;
       register unsigned int i;
 
       if (!REAL_DIR_ENTRY (d))
 	continue;
 
-      for (i = 0; i < D_NAMLEN(d); ++i)
+      len = D_NAMLEN (d);
+      while (d->d_name[len - 1] == '\0')
+	--len;
+
+      for (i = 0; i < len; ++i)
 	HASH (newhash, d->d_name[i]);
       newhash %= DIRFILE_BUCKETS;
 
       df = (struct dirfile *) xmalloc (sizeof (struct dirfile));
       df->next = dir->files[newhash];
       dir->files[newhash] = df;
-      df->name = savestring (d->d_name, D_NAMLEN(d));
+      df->name = savestring (d->d_name, len);
       df->impossible = 0;
 
       /* Check if the name matches the one we're searching for.  */
