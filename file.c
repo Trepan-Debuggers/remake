@@ -392,7 +392,7 @@ set_command_state (file, state)
      struct file *file;
      int state;
 {
-  file->command_state = state;
+  struct dep *d;
 
   for (d = file->also_make; d != 0; d = d->next)
     d->command_state = state;
