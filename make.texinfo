@@ -2459,24 +2459,24 @@ As a special feature, using the variable @code{MAKE} in the commands of a
 rule alters the effects of the @samp{-t}, @samp{-n} or @samp{-q} option.
 (@xref{Instead of Execution, ,Instead of Executing the Commands}.)@refill
 
-@c !!! Check with Roland  --rjc 9mar92
-@c     Is the following correct?
 Consider the command @samp{make -t} in the above example.  (The
-@samp{make -t} option marks targets as up to date without actually
-doing anything.)  Following the usual
+@samp{-t} option marks targets as up to date without actually running
+any commands; @pxref{Instead of Execution}.)  Following the usual
 definition of @samp{-t}, a @samp{make -t} command in the example would
 create a file named @file{subsystem} and do nothing else.  What you
 really want it to do is run @samp{cd subdir; make -t}; but that would
 require executing the command, and @samp{-t} says not to execute
 commands.@refill
 
-The special feature makes this do what you want: whenever a rule's commands
-use the variable @code{MAKE}, the flags @samp{-t}, @samp{-n} or @samp{-q}
-do not apply to that rule.  The commands of that rule are executed normally
-despite the presence of a flag that causes most commands not to be run.
-The usual @code{MAKEFLAGS} mechanism passes the flags to the
-sub-@code{make} (@pxref{Options/Recursion, ,Communicating Options to a Sub-@code{make}}), so your request to touch the
-files, or print the commands, is propagated to the subsystem.@refill
+@strong{ !! This is wrong.  It is per-command line, not per-rule. --roland }
+The special feature makes this do what you want: whenever a rule's
+commands use the variable @code{MAKE}, the flags @samp{-t}, @samp{-n} and
+@samp{-q} do not apply to that rule.  The commands of that rule are
+executed normally despite the presence of a flag that causes most
+commands not to be run.  The usual @code{MAKEFLAGS} mechanism passes the
+flags to the sub-@code{make} (@pxref{Options/Recursion, ,Communicating
+Options to a Sub-@code{make}}), so your request to touch the files, or
+print the commands, is propagated to the subsystem.@refill
 
 @node Variables/Recursion, Options/Recursion, MAKE Variable, Recursion
 @subsection Communicating Variables to a Sub-@code{make}
@@ -2565,6 +2565,15 @@ be exported.  If you use @code{export} by itself to export variables by
 default, variables whose names contain characters other than
 alphanumerics and underscores will not be exported unless specifically
 mentioned in an @code{export} directive.@refill
+
+@findex .EXPORT_ALL_VARIABLES
+The behavior elicited by an @code{export} directive by itself was the
+default in older versions of GNU @code{make}.  If your makefiles depend
+on this behavior and you want to be compatible with old versions of
+@code{make}, you can write a rule for the special target
+@code{.EXPORT_ALL_VARIABLES} instead of the @code{export} directive.
+This will be ignored by old @code{make}s, while the @code{export}
+directive will cause a syntax error.@refill
 
 Likewise, you can use @code{unexport} by itself to tell @code{make}
 @emph{not} to export variables by default.  Since this is the default
