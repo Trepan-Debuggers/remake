@@ -346,6 +346,11 @@ struct file *default_goal_file;
    This is zero if the makefiles do not define .DEFAULT.  */
 
 struct file *default_file;
+
+/* Nonzero if we have seen the magic `.POSIX' target.
+   This turns on pedantic compliance with POSIX.2.  */
+
+int posix_pedantic;
 
 /* Mask of signals that are being caught with fatal_error_signal.  */
 
@@ -769,9 +774,14 @@ main (argc, argv, envp)
 
   define_makeflags (1, 0);
 
-  ignore_errors_flag |= lookup_file (".IGNORE") != 0;
+  f = lookup_file (".IGNORE");
+  ignore_errors_flag
 
-  silent_flag |= lookup_file (".SILENT") != 0;
+  f = lookup_file (".SILENT");
+  silent_flag |= f != 0 && f->is_target;
+
+  f = lookup_file (".POSIX");
+  posix_pedantic = f != 0 && f->is_target;
 
   /* Make each `struct dep' point at the
      `struct file' for the file depended on.  */
