@@ -977,6 +977,8 @@ specify @samp{-f} or @samp{--file}.@refill
 @node Include, MAKEFILES Variable, Makefile Names, Makefiles
 @section Including Other Makefiles
 
+@c !!!!! need to document multiple files in directive: include foo bar ...
+
 @findex include
 The @code{include} directive tells @code{make} to suspend reading the
 current makefile and read another makefile before continuing.  The
@@ -1715,17 +1717,9 @@ foo : foo.c -lcurses
 @end example
 
 @noindent
-would cause the command @samp{cc foo.c -lcurses -o foo} to be executed when
-@file{foo} is older than @file{foo.c} or than @file{libcurses.a} (which has
-probably been found by directory search in the file
-@file{/usr/lib/libcurses.a}).@refill
-
-As shown by the example above, the file name found by directory search is
-used only for comparing the file time with the target file's time.  It
-does not replace the file's name in later usage (such as in automatic
-variables like @code{$^}); the name remains unchanged, still starting
-with @samp{-l}.  This leads to the correct results because the linker
-will repeat the appropriate search when it processes this argument.@refill
+would cause the command @samp{cc foo.c /usr/lib/libcurses.a -o foo} to
+be executed when @file{foo} is older than @file{foo.c} or than
+@file{/usr/lib/libcurses.a}.@refill
 
 @node Phony Targets, Force Targets, Directory Search, Rules
 @section Phony Targets
