@@ -1,11 +1,15 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  18 Aug 1997
+  19 Sep 1997
 
 Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
 See the end for copying conditions.
 
 Please send GNU make bug reports to bug-gnu-utils@prep.ai.mit.edu.
+
+Version 3.76.1
+
+* Small (but serious) bug fix.  Quick rollout to get into the GNU source CD.
 
 Version 3.76
 

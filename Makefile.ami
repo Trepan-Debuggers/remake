@@ -245,7 +245,7 @@ clean: glob-clean
 	-$(RM) make loadavg "#?.o" core make.dvi
 
 distclean: clean glob-realclean
-	-$(RM) Makefile config.h config.status build.sh stamp-config
+	-$(RM) Makefile config.h config.status build.sh
 	-$(RM) config.log config.cache
 	-$(RM) TAGS tags
 	-$(RM) make.?? make.??s make.log make.toc make.*aux

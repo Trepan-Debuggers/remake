@@ -1,3 +1,13 @@
+Fri Sep 19 09:20:49 1997  Paul D. Smith  <psmith@baynetworks.com>
+
+	* Makefile.am: Add loadavg files to clean rules.
+
+	* configure.in (AC_OUTPUT): Remove stamp-config; no longer needed.
+	* Makefile.ami (distclean): Ditto.
+	* SMakefile (distclean): Ditto.
+
+	* main.c (main): Arg count should be int, not char!  Major braino.
+
 Tue Sep 16 10:18:22 1997  Paul D. Smith  <psmith@baynetworks.com>
 
 	* Version 3.76 released.
