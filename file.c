@@ -506,7 +506,7 @@ print_file_data_base ()
       printf ("\n# %u files in %u hash buckets.\n", nfiles, FILE_BUCKETS);
 #ifndef	NO_FLOAT
       printf ("# average %.1f files per bucket, max %u files in one bucket.\n",
-	      ((double) FILE_BUCKETS) / ((double) nfiles) * 100.0, per_bucket);
+	      ((double) nfiles) / ((double) FILE_BUCKETS) * 100.0, per_bucket);
 #endif
     }
 }
