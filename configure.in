@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.35 1994/04/21 02:41:56 roland Alpha $])
+AC_REVISION([$Id: configure.in,v 1.36 1994/05/17 02:59:57 roland Beta $])
 AC_INIT(vpath.c)		dnl A distinctive file to look for in srcdir.
 AC_CONFIG_HEADER(config.h)
 
@@ -81,7 +81,7 @@ if ( /usr/sccs/admin -n s.conftest || admin -n s.conftest ) >/dev/null 2>&1 &&
    test -f s.conftest; then
   # We successfully created an SCCS file.
   echo checking if SCCS get command understands -G
-  if $SCCS_GET s.conftest -Gconftoast >/dev/null 2>&1 &&
+  if $SCCS_GET -Gconftoast s.conftest >/dev/null 2>&1 &&
      test -f conftoast; then
     AC_DEFINE(SCCS_GET_MINUS_G)
   fi
