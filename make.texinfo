@@ -3435,7 +3435,9 @@ dependencies may not be remade properly if the target file actually does exist.
 A @dfn{variable} is a name defined in a makefile to represent a string
 of text, called the variable's @dfn{value}.  These values are
 substituted by explicit request into targets, dependencies, commands,
-and other parts of the makefile.
+and other parts of the makefile.  (In some other versions of @code{make},
+variables are called @dfn{macros}.)
+@cindex macro
 
 Variables and functions in all parts of a makefile are expanded when
 read, except for the shell commands in rules, the right-hand sides of
