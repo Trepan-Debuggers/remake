@@ -21,6 +21,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "print.h"
 #include "dbg_cmd.h"
+#include "commands.h"
 #include "debug.h"
 #include "expand.h"
 
@@ -76,6 +77,7 @@ static debug_return_t com_frame_up         (char *psz_arg);
 static debug_return_t com_frame_down       (char *psz_arg);
 static debug_return_t com_step             (char *psz_arg);
 static debug_return_t com_info             (char *psz_arg);
+static debug_return_t com_write_cmds       (char *psz_arg);
 
 long_cmd_t commands[] = {
   { "break",    'b' },
@@ -98,6 +100,7 @@ long_cmd_t commands[] = {
   { "skip"    , 'k' },
   { "step"    , 's' },
   { "where"   , 'T' },
+  { "write"   , 'w' },
   { "up"      , 'u' },
   { (char *)NULL, ' '}
 };
@@ -216,11 +219,12 @@ cmd_initialize(void)
   short_command['p'].func = &com_print;
   short_command['p'].use = _("print {*variable*|*target*}");
   short_command['p'].doc = 
-    _("Show a variable definition or information about a target.\n" \
-      "\tIf a variable name is given, the value is shown with the\n" \
-      "\tvariable-reference names. Don't include $ before a variable \n" \
-      "\tname. See also \"examine\".\n" \
-      "\tIf a target name is given, information about target is printed." \
+    _("Show a variable definition or target information.\n" \
+      "\tIf a variable name is given, the value is shown with embedded\n" \
+      "\tvariable-references unexpanded. Don't include $ before a variable\n" \
+      "\tname. See also \"examine\".\n\n" \
+      "\tIf a target name is given, information about target is printed.\n" \
+      "\tIf no argument is supplied, we try to use the current target name." \
       );
 
   short_command['q'].func = &com_quit;
@@ -255,6 +259,16 @@ cmd_initialize(void)
     _("Select and print target that caused this one to be examined.\n" \
       "\tAn argument says how many targets up to go.");
 
+  short_command['w'].func = &com_write_cmds;
+  short_command['w'].use =  _("write [*target* [*filename*]]");
+  short_command['w'].doc  = 
+    _("writes the commands associated of a target to a file with MAKE\n" \
+      "\tvariables expanded. If no target given use the current one.\n"
+      "\tIf a filename is supplied it is used. If it is the string \"here\"\n"
+      "\twe write the output to stdout. If no filename is given then we\n"
+      "\tcreate the filename by prepending a directory name to the target\n"
+      "\tname and then append \".sh\".");
+
   short_command['x'].func = &com_show_var_expand;
   short_command['x'].use =  _("examine *string*");
   short_command['x'].doc  = 
@@ -267,15 +281,16 @@ cmd_initialize(void)
     _("Execute the rest of the line as a shell.");
 
   short_command['='].func = &com_set;
-  short_command['='].use =  _("set {variable|basename|trace} *value*");
+  short_command['='].use =  _("set {basename|trace|variable} *value*");
   short_command['='].doc  = 
-    _("\nset variable *var* *value*\n"
+    _("set basename {on|off|toggle}\n"
+      "\tset filename to show full name or basename.\n\n"
+      "\tset trace {on|off|toggle}\n"
+      "\tset tracing status.\n\n"
+      "\tset variable *var* *value*\n"
       "\tSet MAKE variable to value. Variable definitions\n"
-      "\tinside VALUE are expanded before assignment occurs.\n\n"
-      "set basename {on|off|toggle}\n"
-      "\tset filename to show full name or basename\n\n"
-      "set trace {on|off|toggle}\n"
-      "\tset tracing status\n");
+      "\tinside VALUE are expanded before assignment occurs.\n"
+      );
 
   short_command['"'].func = &com_set_var_noexpand;
   short_command['"'].use =  _("setq *variable* *value*");
@@ -555,17 +570,109 @@ static debug_return_t com_trace (char *psz_arg)
   return debug_read;
 }
 
-/* Show a variable definition. */
+/* Show a variable or target definition. */
 static debug_return_t com_print (char *psz_object) 
 {
+  file_t *p_target;
+
   if (!psz_object || 0==strlen(psz_object))
-    return 0;
-  else {
-    file_t *p_target = lookup_file (psz_object);
-    if (p_target) {
-      print_target ((const void *) p_target);
+    /* Use current target */
+    if (p_stack && p_stack->p_target && p_stack->p_target->name)
+      psz_object = p_stack->p_target->name;
+    else {
+      printf("No current target - must supply something to print\n");
+      return debug_read;
+    }
+
+  p_target = lookup_file (psz_object);
+  if (p_target) {
+    print_target ((const void *) p_target);
+  } else {
+    com_show_var(psz_object, 0);
+  }
+  return debug_read;
+}
+
+#define MAX_FILE_LENGTH 1000
+/* Write commands associated with a given target. */
+static debug_return_t com_write_cmds (char *psz_args) 
+{
+  file_t *p_target;
+  char *psz_target;
+  int b_stdout = 0;
+
+  if (!psz_target || 0==strlen(psz_target)) {
+    /* Use current target */
+    if (p_stack && p_stack->p_target && p_stack->p_target->name)
+      psz_target = p_stack->p_target->name;
+    else {
+      printf("No current target - supply a target name\n");
+      return debug_read;
+    }
+  } else {
+    /* Isolate the variable. */
+    unsigned int u_len=0;
+
+    while (*psz_args && whitespace (*psz_args))
+      *psz_args++;
+
+    psz_target = psz_args;
+    
+    while (*psz_args && !whitespace (*psz_args)) {
+      *psz_args++;
+      u_len++;
+    }
+
+    if (*psz_args) *psz_args++ = '\0';
+  }
+  
+  p_target = lookup_file (psz_target);
+  if (!p_target) {
+    printf("Target \"%s\" doesn't appear to be a target name.\n", psz_target);
+  } else {
+    variable_t *p_v = 
+      lookup_variable ("SHELL", strlen ("SHELL"));
+    char filename[MAX_FILE_LENGTH];
+    FILE *outfd;
+    char *s;
+    
+    
+    if (! p_target->cmds || ! p_target->cmds->commands) {
+      printf("Target \"%s\" doesn't have any commands associated with it.\n", 
+	     psz_target);
+      return debug_read;
+    }
+    
+    s = p_target->cmds->commands;
+    
+    /* FIXME: should get directory from a variable, e.g. TMPDIR */
+
+    if (psz_args) {
+      if (strcmp (psz_args, "here") == 0)
+	b_stdout = 1;
+      else 
+	strncpy(filename, psz_args, MAX_FILE_LENGTH);
     } else {
-      com_show_var(psz_object, 0);
+      snprintf(filename, MAX_FILE_LENGTH, "/tmp/%s.sh", psz_target);
+    }
+    
+
+    if (b_stdout) 
+      outfd = stdout;
+    else if (!(outfd = fopen (filename, "w"))) {
+      perror ("write target");
+      return debug_read;
+    }
+    
+    if (p_v) {
+      fprintf(outfd, "#!%s\n", variable_expand(p_v->value));
+    }
+    fprintf(outfd, "#%s/%s:%lu\n", starting_directory,
+	    p_target->floc.filenm, p_target->floc.lineno);
+    fprintf (outfd, "%s\n", variable_expand(s));
+    if (!b_stdout) {
+      fclose(outfd);
+      printf("File \"%s\" written.\n", filename);
     }
   }
   return debug_read;

@@ -89,8 +89,13 @@ use the "print" command:
 
   /remake/src/Makefile:260: make
 
-If however one really did want to stop at "all" or "all-am" one can
-set a *breakpoint* on those targets. Like this: 
+I could have gotten the same output using just "print" since we are 
+currently stopped at the "make" target. 
+
+Above, I mentioned that we don't find "all" or "all-am" all that
+interesting to stop at.  If however one really did want to stop at one
+of these places one can set a *breakpoint* on those targets. Like
+this:
 
    makedb<4> restart
   Changing directory to /remake/src and restarting...
@@ -101,9 +106,9 @@ set a *breakpoint* on those targets. Like this:
 
   /remake/src/Makefile:225: Makefile.in
 
-  The restart command was used to restart execution since we've already
-  passed considering the "all-am" target. So let's "continue" execution
-  and see what happens
+  The "restart" command was used to restart execution since we've
+  already passed considering the "all-am" target. So let's "continue"
+  execution and see what happens
 
   makedb<0> continue
 
@@ -164,7 +169,7 @@ isn't a variable).
 But I can also *change* values too using either "set" or
 "setq". Let's see the difference between the two. 
 
-  makedb<5> set MAKE $(MAKE_COMMAND)
+  makedb<5> set variable MAKE $(MAKE_COMMAND)
   Variable MAKE now has value '/remake/src/./make'
 
  /remake/src/Makefile:383: all-am
@@ -176,20 +181,21 @@ So with "set", the value in the expression $(MAKE_COMMAND) is expanded
 before the variable definition is assigned. With "setq" the internal
 variables are kept unexpanded. Which you use or want is up to you.
 
-Note the syntax of "set" and "setq". Don't put an "=" between the
-variable and the expression. That is, "set MAKE = $(MAKE_COMMAND)" gives
+Note the irregular syntax of "set" and "setq". Don't put an "=" between the
+variable and the expression. That is, "set variable MAKE = $(MAKE_COMMAND)" 
+gives:
 
   Variable MAKE now has value '= /remake/src/./make'
 
-which is probably not what you want. Down the line, I'll probably have
-a better command parser.
-
-To close the tour of the debugger I'll finish with a list of debugger
-commands. 
+which is probably not what you want.  Also note that although you need
+to use the word "variable" when using "set", you must not supply it
+with "setq."  Down the line, someone (maybe YOU!) will probably put in
+a command parser.  To close the tour of the debugger I'll finish with
+a list of debugger commands.
 
 
   makedb<7> help
-  Available commands are: 
+Available commands are: 
   break *target*            (b):
 	Set a breakpoint at a target.
 
@@ -228,11 +234,13 @@ commands.
 	alias for step.
 
   print {*variable*|*target*} (p):
-	Show a variable definition or information about a target.
-	If a variable name is given, the value is shown with the
-	variable-reference names. Don't include $ before a variable 
+	Show a variable definition or target information.
+	If a variable name is given, the value is shown with embedded
+	variable-references unexpanded. Don't include $ before a variable
 	name. See also "examine".
+
 	If a target name is given, information about target is printed.
+	If no argument is supplied, we try to use the current target name.
 
   quit [exit-status]        (q):
 	Exit make. If a numeric argument is given, it will be the exit
@@ -241,17 +249,16 @@ commands.
   restart                   (R):
 	Restart program.
 
-  set {variable|basename|trace} *value* (=):
-	
-  set variable *var* *value*
+  set {basename|trace|variable} *value* (=):
+	set basename {on|off|toggle}
+	set filename to show full name or basename.
+
+	set trace {on|off|toggle}
+	set tracing status.
+
+	set variable *var* *value*
 	Set MAKE variable to value. Variable definitions
 	inside VALUE are expanded before assignment occurs.
-
-  set basename {on|off|toggle}
-	set filename to show full name or basename
-
-  set trace {on|off|toggle}
-	set tracing status
 
 
   setq *variable* *value*   ("):
@@ -278,9 +285,13 @@ commands.
   where                     (T):
 	Show target stack.
 
-  write [*target*]          (w):
+  write [*target* [*filename*]] (w):
 	writes the commands associated of a target to a file with MAKE
 	variables expanded. If no target given use the current one.
+	If a filename is supplied it is used. If it is the string "here"
+	we write the output to stdout. If no filename is given then we
+	create the filename by prepending a directory name to the target
+	name and then append ".sh".
 
   up [amount]               (u):
 	Select and print target that caused this one to be examined.
@@ -366,10 +377,10 @@ http://bashdb.sourceforge.net. I've often found the shell stuff in
 Makefiles really hard to understand with the Make's variables combined
 in with the shell variables. With this, I can set a breakpoint on a
 target with some code in it, dump out the script part to a file, and
-then run that in the bash debugger. And should I chose to fix or patch
-faulty code on the fly, I can just continue with make! It might be
-cool to have some debugger command automate this: write the script
-commands of the current target to a temp file, and then invoke the
-bash debugger on that.
+then run that in the bash debugger. And should I choose to fix or
+patch faulty code on the fly, I can just continue with make! Some of
+this is already partially automated: the "write" command will save the
+script commands of the current target or a specified target to a
+file.
 
 
