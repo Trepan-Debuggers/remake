@@ -78,11 +78,23 @@ if test -f /usr/sccs/get; then
 else
   AC_DEFINE(SCCS_GET, "get")
 fi
+ac_clean_files="$ac_clean_files s.conftest conftoast" # Remove these later.
+if { /usr/sccs/admin -n s.conftest >/dev/null 2>&1 ||
+     admin -n s.conftest >/dev/null 2>&1 } && test -f s.conftest; then
+  # We successfully created an SCCS file.
+  echo checking if SCCS get command understands -G
+  if $SCCS_GET -Gconftoast s.conftest && test -f conftoast; then
+    : # All is well.
+  else
+    AC_DEFINE(SCCS_GET_MINUS_G)
+  fi
+fi
+rm -f s.conftest conftoast
 
-AC_OUTPUT(Makefile build.sh glob/Makefile)
+AC_OUTPUT(Makefile build.sh glob/Makefile, [
 # Makefile uses this timestamp file to know when to remake Makefile,
 # build.sh, and glob/Makefile.
-touch stamp-config
+touch stamp-config])
 
 dnl Local Variables:
 dnl comment-start: "dnl "
