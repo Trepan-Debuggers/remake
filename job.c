@@ -412,20 +412,13 @@ free_child (child)
 #ifdef	POSIX
 extern sigset_t fatal_signal_set;
 
-static void
+void
 unblock_sigs ()
 {
   sigset_t empty;
   sigemptyset (&empty);
   sigprocmask (SIG_SETMASK, &empty, (sigset_t *) 0);
 }
-#else
-#ifdef	HAVE_SIGSETMASK
-extern int fatal_signal_mask;
-#define	unblock_sigs()	sigsetmask (0)
-#else
-#define	unblock_sigs()
-#endif
 #endif
 
 /* Start a job to run the commands specified in CHILD.
