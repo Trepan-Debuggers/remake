@@ -71,7 +71,9 @@ endif	 # !no_libc
 $(ARCH)/%.o: %.c
 	$(COMPILE.c) -Iglob $< $(OUTPUT_OPTION)
 $(ARCH)/glob/libglob.a:
-	$(MAKE) -C $(@D) $(@F)
+	$(MAKE) -C $(@D) $(@F) \
+		CC='$(CC)' CFLAGS='$(CFLAGS) -I..' \
+		CPPFLAGS='$(CPPFLAGS) -DHAVE_CONFIG_H'
 .PHONY: $(ARCH)/glob/libglob.a
 objs := $(addprefix $(ARCH)/,$(objs))
 prog := $(ARCH)/make
