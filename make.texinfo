@@ -3,8 +3,15 @@
 @synindex vr fn
 
 @ignore
+$Header: /sources/make/make/Attic/make.texinfo,v 1.4 1988/04/23 18:28:02 roland Beta $
+
 $Log: make.texinfo,v $
-Revision 1.3  1988/04/23 17:40:09  roland
+Revision 1.4  1988/04/23 18:28:02  roland
+* Changed RCS stuff slightly (added a keyword).
+* Changed date from February to April, 1988.
+* Given to RMS for beta-testing.
+
+Revision 1.3  88/04/23  17:40:09  roland
 * Bumped revision number to be the same as the source.
 * Note that the `patsubst' expansion function and expansions
   of the form `$(a:-b)', etc. (from Sun sh) were in revision
@@ -64,7 +71,7 @@ into another language, under the above conditions for modified versions.
 @sp 1
 @center A Program for Directing Recompilation
 @sp 2
-@center February 1988
+@center April 1988
 @sp 5
 @center Richard M. Stallman, Roland McGrath
 @page
