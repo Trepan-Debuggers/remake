@@ -695,9 +695,10 @@ main (argc, argv, envp)
   /* Set up to handle children dying.  This must be done before
      reading in the makefiles so that `shell' function calls will work.  */
 
-#if	defined (SIGCHLD) && !defined (USG)
+#ifdef SIGCHLD
   (void) signal (SIGCHLD, child_handler);
-#else
+#endif
+#ifdef SIGCLD
   (void) signal (SIGCLD, child_handler);
 #endif
 
