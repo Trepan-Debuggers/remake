@@ -9,7 +9,7 @@
 
 @set EDITION 0.43
 @set VERSION 3.68 Beta
-@set UPDATED 21 June 1993
+@set UPDATED 25 June 1993
 @set UPDATE-MONTH June 1993
 
 @c finalout
@@ -96,7 +96,7 @@ Cover art by Etienne Suvasa.
 @page
 
 @ifinfo
-@node Top, Copying, (dir), (dir)
+@node Top, Overview, (dir), (dir)
 @top Make
 
 The GNU @code{make} utility automatically determines which pieces of a
@@ -111,7 +111,6 @@ This manual describes @code{make} and contains the following chapters:@refill
 @end ifinfo
 
 @menu
-* Copying::                     
 * Overview::                    Overview of @code{make}.
 * Introduction::                An introduction to @code{make}.
 * Makefiles::                   Makefiles tell @code{make} what to do.
@@ -317,10 +316,7 @@ Implicit Rule for Archive Member Targets
 * Archive Symbols::             How to update archive symbol directories.
 @end menu
 
-@node Copying, Overview, Top, Top
-@include gpl.texinfo
-
-@node Overview, Introduction, Copying, Top
+@node Overview, Introduction, Top, Top
 @comment  node-name,  next,  previous,  up
 @chapter Overview of @code{make}
 
@@ -6102,6 +6098,14 @@ running a @code{touch} command on the given file before running
 @code{make}, except that the modification time is changed only in the
 imagination of @code{make}.
 @xref{Instead of Execution, ,Instead of Executing the Commands}.
+
+@item --warn-undefined-variables
+@cindex @code{--warn-undefined-variables}
+@cindex variables, warning for undefined
+@cindex undefined variables, warning message
+Issue a warning message whenever @code{make} sees a reference to an
+undefined variable.  This can be helpful when you are trying to debug
+makefiles which use variables in complex ways.
 @end table
 
 @node Implicit Rules, Archives, Running, Top
@@ -6250,22 +6254,23 @@ available unless the makefile explicitly overrides or cancels them.
 canceling or overriding an implicit rule.  The @samp{-r} or
 @samp{--no-builtin-rules} option cancels all predefined rules.
 
-Not all of these rules will always be defined, even when the @samp{-r} option
-is not given.  Many of the predefined implicit rules are implemented in
-@code{make} as suffix rules, so which ones will be defined depends on the
-@dfn{suffix list} (the list of dependencies of the special target
-@code{.SUFFIXES}).  The default suffix list is: @code{.out}, @code{.a},
-@code{.ln}, @code{.o}, @code{.c}, @code{.cc}, @code{.C}, @code{.p},
-@code{.f}, @code{.F}, @code{.r}, @code{.y}, @code{.l}, @code{.s}, @code{.S},
-@code{.mod}, @code{.sym}, @code{.def}, @code{.h}, @code{.info}, @code{.dvi},
-@code{.tex}, @code{.texinfo}, @code{.texi}, @code{.txinfo}, @code{.w},
-@code{.web}, @code{.sh}, @code{.elc}, @code{.el}.  All of the implicit rules
-described below whose dependencies have one of these suffixes are actually
-suffix rules.  If you modify the suffix list, the only predefined suffix
-rules in effect will be those named by one or two of the suffixes that are on
-the list you specify; rules whose suffixes fail to be on the list are
-disabled.  @xref{Suffix Rules, ,Old-Fashioned Suffix Rules}, for full details
-on suffix rules.
+Not all of these rules will always be defined, even when the @samp{-r}
+option is not given.  Many of the predefined implicit rules are
+implemented in @code{make} as suffix rules, so which ones will be
+defined depends on the @dfn{suffix list} (the list of dependencies of
+the special target @code{.SUFFIXES}).  The default suffix list is:
+@code{.out}, @code{.a}, @code{.ln}, @code{.o}, @code{.c}, @code{.cc},
+@code{.C}, @code{.p}, @code{.f}, @code{.F}, @code{.r}, @code{.y},
+@code{.l}, @code{.s}, @code{.S}, @code{.mod}, @code{.sym}, @code{.def},
+@code{.h}, @code{.info}, @code{.dvi}, @code{.tex}, @code{.texinfo},
+@code{.texi}, @code{.txinfo}, @code{.w}, @code{.ch} @code{.web},
+@code{.sh}, @code{.elc}, @code{.el}.  All of the implicit rules
+described below whose dependencies have one of these suffixes are
+actually suffix rules.  If you modify the suffix list, the only
+predefined suffix rules in effect will be those named by one or two of
+the suffixes that are on the list you specify; rules whose suffixes fail
+to be on the list are disabled.  @xref{Suffix Rules, ,Old-Fashioned
+Suffix Rules}, for full details on suffix rules.
 
 @table @asis
 @item Compiling C programs
@@ -6454,12 +6459,14 @@ The same command is used on the C code produced from
 @pindex .tex
 @pindex .web
 @pindex .w
-@file{@var{n}.dvi} is made from @file{@var{n}.tex} with the
-command @samp{$(TEX)}.  @file{@var{n}.tex} is made from
-@file{@var{n}.web} with @samp{$(WEAVE)}, or from @file{@var{n}.w}
-with @samp{$(CWEAVE)}.  @file{@var{n}.p} is made from
-@file{@var{n}.web} with @samp{$(TANGLE)} and @file{@var{n}.c} is
-made from @file{@var{n}.w} with @samp{$(CTANGLE)}.@refill
+@pindex .ch
+@file{@var{n}.dvi} is made from @file{@var{n}.tex} with the command
+@samp{$(TEX)}.  @file{@var{n}.tex} is made from @file{@var{n}.web} with
+@samp{$(WEAVE)}, or from @file{@var{n}.w} (and from @file{@var{n}.ch} if
+it exists or can be made) with @samp{$(CWEAVE)}.  @file{@var{n}.p} is
+made from @file{@var{n}.web} with @samp{$(TANGLE)} and @file{@var{n}.c}
+is made from @file{@var{n}.w} (and from @file{@var{n}.ch} if it exists
+or can be made) with @samp{$(CTANGLE)}.@refill
 
 @item Texinfo and Info
 @cindex Texinfo, rule to format
