@@ -38,6 +38,9 @@
 /* Define if your system has a working fnmatch function.  */
 #undef HAVE_FNMATCH
 
+/* Define if your system has its own `getloadavg' function.  */
+#undef HAVE_GETLOADAVG
+
 /* Define if you have the getmntent function.  */
 #undef HAVE_GETMNTENT
 
