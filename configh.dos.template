@@ -1,4 +1,3 @@
-/* Generated automatically from configure.in by autoheader.  DO NOT EDIT!  */
 
 /* Many things are defined already by a system header.  */
 #include <sys/config.h>
@@ -9,8 +8,20 @@
 /* Version of this package (needed by automake) */
 #define VERSION "%VERSION%"
 
+#if __DJGPP__ > 2 || __DJGPP_MINOR__ > 1
+
+/* Define if `sys_siglist' is declared by <signal.h>.  */
+# define SYS_SIGLIST_DECLARED 1
+
+/* Define this if the C library defines the variable `_sys_siglist'.  */
+# define HAVE_SYS_SIGLIST 1
+
+#else
+
 /* Define NSIG.  */
-#define NSIG SIGMAX
+# define NSIG SIGMAX
+
+#endif
 
 /* Define if you have sigsetmask.  */
 #define HAVE_SIGSETMASK 1

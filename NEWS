@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  31 Mar 1999
+  13 Apr 1999
 
 Copyright (C) 1992,93,94,95,96,97,98,1999 Free Software Foundation, Inc.
 See the end for copying conditions.
@@ -23,6 +23,15 @@ Version 3.78
 
 * Make allows CRLF sequences as well as traditional LF, for
   compatibility with makefiles created on other operating systems.
+
+* A "job server" feature, proposed by Howard Chu <hyc@highlandsun.com>.
+
+  On systems that support POSIX pipe(2) semantics, GNU make can now pass
+  -jN options to submakes rather than forcing them all to use -j1.  The
+  top make and all its sub-make processes use a pipe to communicate with
+  each other to ensure that no more than N jobs are started across all
+  makes.  To get the old behavior of -j back, you can configure make
+  with the --disable-job-server option.
 
 Version 3.77
 

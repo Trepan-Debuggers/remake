@@ -1,5 +1,5 @@
 /* Definitions for managing subprocesses in GNU Make.
-Copyright (C) 1992, 1993, 1996 Free Software Foundation, Inc.
+Copyright (C) 1992, 1993, 1996, 1999 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -39,13 +39,14 @@ struct child
     int efn;			/* Completion event flag number */
     int cstatus;		/* Completion status */
 #endif
+    char *sh_batch_file;        /* Script file for shell commands */
     unsigned int remote:1;	/* Nonzero if executing remotely.  */
 
     unsigned int noerror:1;	/* Nonzero if commands contained a `-'.  */
 
     unsigned int good_stdin:1;	/* Nonzero if this child has a good stdin.  */
     unsigned int deleted:1;	/* Nonzero if targets have been deleted.  */
-    char *sh_batch_file;        /* Script file for shell commands */
+    char job_token;		/* The token read from the job pipe.  */
   };
 
 extern struct child *children;
