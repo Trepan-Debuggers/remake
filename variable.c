@@ -370,13 +370,13 @@ define_automatic_variables ()
   /* This won't override any definition, but it
      will provide one if there isn't one there.  */
   v = define_variable ("SHELL", 5, default_shell, o_default, 0);
+  v->export = 1;
 
-  /* Don't let SHELL come from the environment
-     if MAKELEVEL is 0.  Also, SHELL must not be empty.  */
-  if (*v->value == '\0' || (v->origin == o_env && makelevel == 0))
+  /* Don't let SHELL come from the environment.  */
+  if (*v->value == '\0' || (v->origin == o_env))
     {
       v->origin = o_file;
-      v->value = savestring ("/bin/sh", 7);
+      v->value = savestring (default_shell, 7);
     }
 }
 
