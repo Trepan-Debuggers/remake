@@ -2137,7 +2137,7 @@ print_version ()
 %s\tFree Software Foundation, Inc.\n\
 %sThis is free software; see the source for copying conditions.\n\
 %sThere is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A\n\
-%sPARTICULAR PURPOSE.\n\n", precede, precede, precede, precede);
+%sPARTICULAR PURPOSE.\n\n", precede, precede, precede, precede, precede);
 
   printed_version = 1;
 
