@@ -3,7 +3,7 @@
 % Load plain if necessary, i.e., if running under initex.
 \expandafter\ifx\csname fmtname\endcsname\relax\input plain\fi
 %
-\def\texinfoversion{1999-01-21}%
+\def\texinfoversion{1999-01-24}%
 %
 % Copyright (C) 1985, 86, 88, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99
 % Free Software Foundation, Inc.
@@ -870,7 +870,7 @@ where each line of input produces a line of output.}
   % We need to warn folks that they may have trouble with TeX 3.0.
   % This uses \immediate\write16 rather than \message to get newlines.
     \immediate\write16{}
-    \immediate\write16{***WARNING*** for users of Unix TeX 3.0!}
+    \immediate\write16{WARNING: for users of Unix TeX 3.0!}
     \immediate\write16{This manual trips a bug in TeX version 3.0 (tex hangs).}
     \immediate\write16{If you are running another version of TeX, relax.}
     \immediate\write16{If you are running Unix TeX 3.0, kill this TeX process.}
