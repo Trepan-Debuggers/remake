@@ -1861,7 +1861,7 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
 		  if (percent == 0)
 		    continue;
 		  o = patsubst_expand (buffer, name, pattern, d->name,
-				       pattern_percent, percent);
+				       pattern_percent+1, percent+1);
                   /* If the name expanded to the empty string, that's
                      illegal.  */
                   if (o == buffer)
@@ -2067,7 +2067,7 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
 	      static char *percent = "%";
 	      char *buffer = variable_expand ("");
 	      char *o = patsubst_expand (buffer, name, pattern, percent,
-					 pattern_percent, percent);
+					 pattern_percent+1, percent+1);
 	      f->stem = savestring (buffer, o - buffer);
 	    }
 	}

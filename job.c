@@ -3099,8 +3099,8 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
   if (new_argv[0] == 0)
     /* Line was empty.  */
     return 0;
-  else
-    return new_argv;
+
+  return new_argv;
 
  slow:;
   /* We must use the shell.  */

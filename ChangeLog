@@ -1,3 +1,25 @@
+2004-09-20  Paul D. Smith  <psmith@gnu.org>
+
+	* expand.c (variable_expand_string): Modify to invoke
+	patsubst_expand() instead of subst_expand(); the latter didn't
+	handle suffix patterns correctly.
+	* function.c (subst_expand): Remove the SUFFIX_ONLY parameter; it
+	was used only from variable_expand_string() and is no longer used
+	there.
+	(func_subst): Ditto, on call to subst_expand().
+	(patsubst_expand): Require the percent pointers to point to the
+	character after the %, not to the % itself.
+	* read.c (record_files): New call criteria for patsubst_expand().
+	* variable.h: Remove SUFFIX_ONLY from subst_expand() prototype.
+	This is to fix a bug reported by Markus Mauhart <qwe123@chello.at>.
+
+2004-09-19  Paul D. Smith  <psmith@gnu.org>
+
+	* function.c (subst_expand): Fix a check in by_word: look for a
+	previous blank if we're beyond the beginning of the string, not
+	the beginning of the word.
+	Bugs reported by Markus Mauhart <qwe123@chello.at>.
+
 2004-05-16  Paul D. Smith  <psmith@gnu.org>
 
 	* remake.c (update_goal_chain): Change the argument specifying
