@@ -423,6 +423,8 @@ initialize_variable_output ()
   return variable_buffer;
 }
 
+int export_all_variables;
+
 /* Create a new environment for FILE's commands.
    The child's MAKELEVEL variable is incremented.  */
 
@@ -441,6 +443,7 @@ target_environment (file)
   register unsigned int i;
   register unsigned nvariables;
   char **result;
+  unsigned int mklev_hash;
 
   /* Find the lowest number of buckets in any set in the list.  */
   s = file->variables;
@@ -448,6 +451,14 @@ target_environment (file)
   for (s = s->next; s != 0; s = s->next)
     if (s->set->buckets < buckets)
       buckets = s->set->buckets;
+
+  /* Find the hash value of `MAKELEVEL' will fall into.  */
+  {
+    char *p = "MAKELEVEL";
+    mklev_hash = 0;
+    while (*p != '\0')
+      HASH (mklev_hash, *p++);
+  }
 
   /* Temporarily allocate a table with that many buckets.  */
   table = (struct variable_bucket **)
@@ -470,10 +481,17 @@ target_environment (file)
 	      register struct variable_bucket *ov;
 	      register char *p = v->name;
 
+	      if (i == mklev_hash % set->buckets
+		  && streq (v->name, "MAKELEVEL"))
+		/* Don't include MAKELEVEL because it will be
+		   added specially at the end.  */
+		continue;
+
 	      switch (v->export)
 		{
 		case v_default:
-		  if (v->origin != o_command
+		  if (!export_all_variables
+		      && v->origin != o_command
 		      && v->origin != o_env && v->origin != o_env_override
 		      && !(v->origin == o_file && getenv (p) != 0))
 		    continue;
