@@ -1,3 +1,60 @@
+2003-04-30  Paul D. Smith  <psmith@gnu.org>
+
+	* build.template: Make some changes to maybe allow this script to
+	work on DOS/Windows/OS2 systems.  Suggested by Andreas Buening.
+
+	* README.OS2.template: New file for OS/2 support.  Original
+	contributed by Andreas Buening.
+	* configure.in: Invoke new pds_AC_DOS_PATHS macro to test for
+	DOS-style paths.
+
+2003-04-19  Paul D. Smith  <psmith@gnu.org>
+
+	Fix bug #1405: allow a target to match multiple pattern-specific
+	variables.
+
+	* rule.c (create_pattern_var, lookup_pattern_var): Move these to
+	variable.c, where they've always belonged.
+	* rule.h: Move the prototypes and struct pattern_var as well.
+	* variable.c (initialize_file_variables): Invoke
+	lookup_pattern_var() in a loop, until no more matches are found.
+	If a match is found, create a new variable set for the target's
+	pattern variables.  Then merge the contents of each matching
+	pattern variable set into the target's pattern variable set.
+	(lookup_pattern_var): Change this function to be usable
+	in a loop.  It takes a starting position: if NULL, start at the
+	beginning; if non-NULL, start with the pattern variable after that
+	position, and return the next matching pattern.
+	(create_pattern_var): Create a unique instance of
+	pattern-specific variables for every definition in the makefile.
+	Don't combine the same pattern together.  This allows us to
+	process the variable handling properly even when the same pattern
+	is used multiple times.
+	(parse_variable_definition): New function: break out the parsing
+	of a variable definition line from try_variable_definition.
+	(try_variable_definition): Call parse_variable_definition to
+	parse.
+	(print_variable_data_base): Print out pattern-specific variables.
+	* variable.h (struct variable): Remember when a variable is
+	conditional.  Also remember its flavor.
+	(struct pattern_var): Instead of keeping a variable set, we just
+	keep a single variable for each pattern.
+	* read.c (record_target_var): Each pattern variable contains only a
+	single variable, not a set, so create it properly.
+	* doc/make.texi (Pattern-specific): Document the new behavior.
+
+2003-04-17  Paul D. Smith  <psmith@gnu.org>
+
+	* dir.c (file_exists_p) [VMS]: Patch provided with Bug #3018 by
+	Jean-Pierre Portier <portierjp2@free.fr>.  I don't understand the
+	file/directory naming rules for VMS so I can't tell whether this
+	is correct or not.
+
+2003-04-09  Paul D. Smith  <psmith@gnu.org>
+
+	* configure.in (HAVE_DOS_PATHS): Define this on systems that need
+	DOS-style pathnames: backslash separators and drive specifiers.
+
 2003-03-28  Paul D. Smith  <psmith@gnu.org>
 
 	* file.c (snap_deps): If .SECONDARY with no targets is given, set

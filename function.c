@@ -681,9 +681,9 @@ func_words (char *o, char **argv, const char *funcname)
 static char *
 strip_whitespace (const char **begpp, const char **endpp)
 {
-  while (isspace ((unsigned char)**begpp) && *begpp <= *endpp)
+  while (*begpp <= *endpp && isspace ((unsigned char)**begpp))
     (*begpp) ++;
-  while (isspace ((unsigned char)**endpp) && *endpp >= *begpp)
+  while (*endpp >= *begpp && isspace ((unsigned char)**endpp))
     (*endpp) --;
   return (char *)*begpp;
 }

@@ -47,7 +47,6 @@ enum variable_flavor
    chained through `next'.  */
 
 #define EXP_COUNT_BITS  15      /* This gets all the bitfields into 32 bits */
-
 #define EXP_COUNT_MAX   ((1<<EXP_COUNT_BITS)-1)
 
 struct variable
@@ -57,20 +56,21 @@ struct variable
     char *value;		/* Variable value.  */
     struct floc fileinfo;       /* Where the variable was defined.  */
     unsigned int recursive:1;	/* Gets recursively re-evaluated.  */
-    unsigned int per_target:1;	/* Nonzero if a target-specific variable.  */
     unsigned int append:1;	/* Nonzero if an appending target-specific
                                    variable.  */
+    unsigned int conditional:1; /* Nonzero if set with a ?=. */
+    unsigned int per_target:1;	/* Nonzero if a target-specific variable.  */
     unsigned int special:1;     /* Nonzero if this is a special variable. */
+    unsigned int exportable:1;  /* Nonzero if the variable _could_ be
+                                   exported.  */
     unsigned int expanding:1;	/* Nonzero if currently being expanded.  */
     unsigned int exp_count:EXP_COUNT_BITS;
                                 /* If >1, allow this many self-referential
                                    expansions.  */
-
+    enum variable_flavor
+      flavor ENUM_BITFIELD (3);	/* Variable flavor.  */
     enum variable_origin
       origin ENUM_BITFIELD (3);	/* Variable origin.  */
-
-    unsigned int exportable:1;  /* Nonzero if the variable _could_ be
-                                   exported.  */
     enum variable_export
       {
 	v_export,		/* Export this variable.  */
@@ -93,6 +93,17 @@ struct variable_set_list
   {
     struct variable_set_list *next;	/* Link in the chain.  */
     struct variable_set *set;		/* Variable set.  */
+  };
+
+/* Structure used for pattern-specific variables.  */
+
+struct pattern_var
+  {
+    struct pattern_var *next;
+    char *target;
+    unsigned int len;
+    char *suffix;
+    struct variable variable;
   };
 
 extern char *variable_buffer;
@@ -131,8 +142,9 @@ extern void define_automatic_variables PARAMS ((void));
 extern void initialize_file_variables PARAMS ((struct file *file, int read));
 extern void print_file_variables PARAMS ((struct file *file));
 extern void print_variable_set PARAMS ((struct variable_set *set, char *prefix));
-extern void merge_variable_set_lists PARAMS ((struct variable_set_list **setlist0, struct variable_set_list *setlist1));
+extern void merge_variable_set_lists PARAMS ((struct variable_set_list **to_list, struct variable_set_list *from_list));
 extern struct variable *do_variable_definition PARAMS ((const struct floc *flocp, const char *name, char *value, enum variable_origin origin, enum variable_flavor flavor, int target_var));
+extern struct variable *parse_variable_definition PARAMS ((struct variable *v, char *line));
 extern struct variable *try_variable_definition PARAMS ((const struct floc *flocp, char *line, enum variable_origin origin, int target_var));
 extern void init_hash_global_variable_set PARAMS ((void));
 extern void hash_init_function_table PARAMS ((void));
@@ -178,6 +190,8 @@ extern struct variable *define_variable_in_set
                               }while(0)
 
 extern char **target_environment PARAMS ((struct file *file));
+
+extern struct pattern_var *create_pattern_var PARAMS ((char *target, char *suffix));
 
 extern int export_all_variables;
 

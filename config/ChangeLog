@@ -1,3 +1,8 @@
+2003-04-30  Paul D. Smith  <psmith@gnu.org>
+
+	* dospaths.m4: New macro to test for DOS-style pathnames, based on
+	coreutils 5.0 "dos.m4" by Jim Meyering.
+
 2002-04-21  gettextize  <bug-gnu-gettext@gnu.org>
 
 	* codeset.m4: New file, from gettext-0.11.1.

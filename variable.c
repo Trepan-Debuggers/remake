@@ -30,6 +30,75 @@ Boston, MA 02111-1307, USA.  */
 #endif
 #include "hash.h"
 
+/* Chain of all pattern-specific variables.  */
+
+static struct pattern_var *pattern_vars;
+
+/* Pointer to last struct in the chain, so we can add onto the end.  */
+
+static struct pattern_var *last_pattern_var;
+
+/* Create a new pattern-specific variable struct.  */
+
+struct pattern_var *
+create_pattern_var (char *target, char *suffix)
+{
+  register struct pattern_var *p
+    = (struct pattern_var *) xmalloc (sizeof (struct pattern_var));
+
+  if (last_pattern_var != 0)
+    last_pattern_var->next = p;
+  else
+    pattern_vars = p;
+  last_pattern_var = p;
+  p->next = 0;
+
+  p->target = target;
+  p->len = strlen (target);
+  p->suffix = suffix + 1;
+
+  return p;
+}
+
+/* Look up a target in the pattern-specific variable list.  */
+
+static struct pattern_var *
+lookup_pattern_var (struct pattern_var *start, char *target)
+{
+  struct pattern_var *p;
+  unsigned int targlen = strlen(target);
+
+  for (p = start ? start->next : pattern_vars; p != 0; p = p->next)
+    {
+      char *stem;
+      unsigned int stemlen;
+
+      if (p->len > targlen)
+        /* It can't possibly match.  */
+        continue;
+
+      /* From the lengths of the filename and the pattern parts,
+         find the stem: the part of the filename that matches the %.  */
+      stem = target + (p->suffix - p->target - 1);
+      stemlen = targlen - p->len + 1;
+
+      /* Compare the text in the pattern before the stem, if any.  */
+      if (stem > target && !strneq (p->target, target, stem - target))
+        continue;
+
+      /* Compare the text in the pattern after the stem, if any.
+         We could test simply using streq, but this way we compare the
+         first two characters immediately.  This saves time in the very
+         common case where the first character matches because it is a
+         period.  */
+      if (*p->suffix == stem[stemlen]
+          && (*p->suffix == '\0' || streq (&p->suffix[1], &stem[stemlen+1])))
+        break;
+    }
+
+  return p;
+}
+
 /* Hash table of all global variable definitions.  */
 
 static unsigned long
@@ -147,6 +216,7 @@ define_variable_in_set (const char *name, unsigned int length,
     v->fileinfo.filenm = 0;
   v->origin = origin;
   v->recursive = recursive;
+  v->special = 0;
   v->expanding = 0;
   v->exp_count = 0;
   v->per_target = 0;
@@ -405,21 +475,33 @@ initialize_file_variables (struct file *file, int reading)
     }
 
   /* If we're not reading makefiles and we haven't looked yet, see if
-     we can find a pattern variable.  */
+     we can find pattern variables for this target.  */
 
   if (!reading && !file->pat_searched)
     {
-      struct pattern_var *p = lookup_pattern_var (file->name);
+      struct pattern_var *p;
 
-      file->pat_searched = 1;
+      p = lookup_pattern_var (0, file->name);
       if (p != 0)
         {
-          /* If we found one, insert it between the current target's
-             variables and the next set, whatever it is.  */
-          file->pat_variables = (struct variable_set_list *)
-            xmalloc (sizeof (struct variable_set_list));
-          file->pat_variables->set = p->vars->set;
+          struct variable_set_list *global = current_variable_set_list;
+
+          /* We found at least one.  Set up a new variable set to accumulate
+             all the pattern variables that match this target.  */
+
+          file->pat_variables = create_new_variable_set ();
+          current_variable_set_list = file->pat_variables;
+
+          do
+            /* We found one, so insert it into the set.  */
+            do_variable_definition (&p->variable.fileinfo, p->variable.name,
+                                    p->variable.value, p->variable.origin,
+                                    p->variable.flavor, 1);
+          while ((p = lookup_pattern_var (p, file->name)) != 0);
+
+          current_variable_set_list = global;
         }
+      file->pat_searched = 1;
     }
 
   /* If we have a pattern variable match, set it up.  */
@@ -483,7 +565,7 @@ push_new_variable_scope (void)
   return (current_variable_set_list = create_new_variable_set());
 }
 
-/* Merge SET1 into SET0, freeing unused storage in SET1.  */
+/* Merge FROM_SET into TO_SET, freeing unused storage in FROM_SET.  */
 
 static void
 merge_variable_sets (struct variable_set *to_set,
@@ -834,6 +916,7 @@ do_variable_definition (const struct floc *flocp, const char *varname,
   char *p, *alloc_value = NULL;
   struct variable *v;
   int append = 0;
+  int conditional = 0;
 
   /* Calculate the variable's new value in VALUE.  */
 
@@ -857,6 +940,7 @@ do_variable_definition (const struct floc *flocp, const char *varname,
       if (v)
         return v;
 
+      conditional = 1;
       flavor = f_recursive;
       /* FALLTHROUGH */
     case f_recursive:
@@ -1034,6 +1118,7 @@ do_variable_definition (const struct floc *flocp, const char *varname,
                                ? current_variable_set_list->set : NULL),
                               flocp);
   v->append = append;
+  v->conditional = conditional;
 
   if (alloc_value)
     free (alloc_value);
@@ -1055,16 +1140,14 @@ do_variable_definition (const struct floc *flocp, const char *varname,
    returned.  */
 
 struct variable *
-try_variable_definition (const struct floc *flocp, char *line,
-                         enum variable_origin origin, int target_var)
+parse_variable_definition (struct variable *v, char *line)
 {
   register int c;
   register char *p = line;
   register char *beg;
   register char *end;
   enum variable_flavor flavor = f_bogus;
-  char *name, *expanded_name;
-  struct variable *v;
+  char *name;
 
   while (1)
     {
@@ -1128,27 +1211,60 @@ try_variable_definition (const struct floc *flocp, char *line,
 	    }
 	}
     }
+  v->flavor = flavor;
 
   beg = next_token (line);
   while (end > beg && isblank ((unsigned char)end[-1]))
     --end;
   p = next_token (p);
+  v->value = p;
 
   /* Expand the name, so "$(foo)bar = baz" works.  */
   name = (char *) alloca (end - beg + 1);
   bcopy (beg, name, end - beg);
   name[end - beg] = '\0';
-  expanded_name = allocated_variable_expand (name);
+  v->name = allocated_variable_expand (name);
 
-  if (expanded_name[0] == '\0')
-    fatal (flocp, _("empty variable name"));
-
-  v = do_variable_definition (flocp, expanded_name, p,
-                              origin, flavor, target_var);
-
-  free (expanded_name);
+  if (v->name[0] == '\0')
+    fatal (&v->fileinfo, _("empty variable name"));
 
   return v;
+}
+
+/* Try to interpret LINE (a null-terminated string) as a variable definition.
+
+   ORIGIN may be o_file, o_override, o_env, o_env_override,
+   or o_command specifying that the variable definition comes
+   from a makefile, an override directive, the environment with
+   or without the -e switch, or the command line.
+
+   See the comments for parse_variable_definition().
+
+   If LINE was recognized as a variable definition, a pointer to its `struct
+   variable' is returned.  If LINE is not a variable definition, NULL is
+   returned.  */
+
+struct variable *
+try_variable_definition (const struct floc *flocp, char *line,
+                         enum variable_origin origin, int target_var)
+{
+  struct variable v;
+  struct variable *vp;
+
+  if (flocp != 0)
+    v.fileinfo = *flocp;
+  else
+    v.fileinfo.filenm = 0;
+
+  if (!parse_variable_definition (&v, line))
+    return 0;
+
+  vp = do_variable_definition (flocp, v.name, v.value,
+                               origin, v.flavor, target_var);
+
+  free (v.name);
+
+  return vp;
 }
 
 /* Print information for variable V, prefixing it with PREFIX.  */
@@ -1246,6 +1362,25 @@ print_variable_data_base (void)
   puts (_("\n# Variables\n"));
 
   print_variable_set (&global_variable_set, "");
+
+  puts (_("\n# Pattern-specific Variable Values"));
+
+  {
+    struct pattern_var *p;
+    int rules = 0;
+
+    for (p = pattern_vars; p != 0; p = p->next)
+      {
+        ++rules;
+        printf ("\n%s :\n", p->target);
+        print_variable (&p->variable, "# ");
+      }
+
+    if (rules == 0)
+      puts (_("\n# No pattern-specific variable values."));
+    else
+      printf (_("\n# %u pattern-specific variable values"), rules);
+  }
 }
 
 

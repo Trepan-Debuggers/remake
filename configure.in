@@ -4,7 +4,7 @@ AC_INIT([GNU make],[3.81a2],[bug-make@gnu.org])
 
 AC_PREREQ(2.57)
 
-AC_REVISION([[$Id: configure.in,v 1.118 2003/03/25 03:21:42 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.119 2003/05/02 01:44:59 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -103,6 +103,8 @@ if test "$make_cv_file_timestamp_hi_res" = yes; then
   fi
 fi
 
+# Check for DOS-style pathnames.
+pds_AC_DOS_PATHS
 
 # See if we have a standard version of gettimeofday().  Since actual
 # implementations can differ, just make sure we have the most common
@@ -190,6 +192,13 @@ if test "$make_cv_union_wait" = yes; then
             [Define this if you have the \`union wait' type in <sys/wait.h>.])
 fi
 AC_MSG_RESULT($make_cv_union_wait)
+
+
+# If we're building on Windows/DOS/OS/2, add some support for DOS drive specs.
+if test "$PATH_SEPARATOR" = ';'; then
+  AC_DEFINE(HAVE_DOS_PATHS, 1,
+            [Define this if your system requires backslashes or drive specs in pathnames.])
+fi
 
 
 # See if the user wants to use pmake's "customs" distributed build capability

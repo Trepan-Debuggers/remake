@@ -48,6 +48,9 @@ to the point where you can run "make".
     Use wget to retrieve various other files that GNU make relies on,
     but does not keep in its own source tree.
 
+    NB: You may need GNU make to correctly perform this step; if you use
+    a platform-local make you may get problems with missing files in doc/.
+
 
 At this point you have successfully brought your CVS copy of the GNU
 make source directory up to the point where it can be treated

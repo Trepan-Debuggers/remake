@@ -1667,9 +1667,9 @@ record_target_var (struct nameseq *filenames, char *defn, int two_colon,
     {
       struct variable *v;
       register char *name = filenames->name;
-      struct variable_set_list *vlist;
       char *fname;
       char *percent;
+      struct pattern_var *p;
 
       nextf = filenames->next;
       free ((char *) filenames);
@@ -1679,11 +1679,13 @@ record_target_var (struct nameseq *filenames, char *defn, int two_colon,
       percent = find_percent (name);
       if (percent)
         {
-          struct pattern_var *p;
-
           /* Get a reference for this pattern-specific variable struct.  */
-          p = create_pattern_var(name, percent);
-          vlist = p->vars;
+          p = create_pattern_var (name, percent);
+          p->variable.fileinfo = *flocp;
+          v = parse_variable_definition (&p->variable, defn);
+          v->value = xstrdup (v->value);
+          if (!v)
+            error (flocp, _("Malformed pattern-specific variable definition"));
           fname = p->target;
         }
       else
@@ -1701,15 +1703,17 @@ record_target_var (struct nameseq *filenames, char *defn, int two_colon,
             f = f->double_colon;
 
           initialize_file_variables (f, 1);
-          vlist = f->variables;
           fname = f->name;
+
+          current_variable_set_list = f->variables;
+          v = try_variable_definition (flocp, defn, origin, 1);
+          if (!v)
+            error (flocp, _("Malformed target-specific variable definition"));
+          current_variable_set_list = global;
         }
 
-      /* Make the new variable context current and define the variable.  */
-      current_variable_set_list = vlist;
-      v = try_variable_definition (flocp, defn, origin, 1);
-      if (!v)
-        error (flocp, _("Malformed per-target variable definition"));
+      /* Set up the variable to be *-specific.  */
+      v->origin = origin;
       v->per_target = 1;
       if (exported)
         v->export = v_export;
@@ -1721,12 +1725,14 @@ record_target_var (struct nameseq *filenames, char *defn, int two_colon,
           struct variable *gv;
           int len = strlen(v->name);
 
-          current_variable_set_list = global;
           gv = lookup_variable (v->name, len);
           if (gv && (gv->origin == o_env_override || gv->origin == o_command))
             {
-              v = define_variable_in_set (v->name, len, gv->value, gv->origin,
-                                          gv->recursive, vlist->set, flocp);
+              if (v->value != 0)
+                free (v->value);
+              v->value = xstrdup (gv->value);
+              v->origin = gv->origin;
+              v->recursive = gv->recursive;
               v->append = 0;
             }
         }
@@ -1735,8 +1741,6 @@ record_target_var (struct nameseq *filenames, char *defn, int two_colon,
       if (name != fname && (name < fname || name > fname + strlen (fname)))
         free (name);
     }
-
-  current_variable_set_list = global;
 }
 
 /* Record a description line for files FILENAMES,

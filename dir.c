@@ -590,7 +590,8 @@ dir_contents_file_exists_p (struct directory_contents *dir, char *filename)
 #endif
 
 #ifdef __EMX__
-  _fnlwr(filename); /* lower case for FAT drives */
+  if (filename != 0)
+    _fnlwr (filename); /* lower case for FAT drives */
 #endif
 
 #ifdef VMS
@@ -736,8 +737,7 @@ file_exists_p (char *name)
   dirend = strrchr (name, ']');
   if (dirend == 0)
     dirend = strrchr (name, ':');
-  dirend++;
-  if (dirend == (char *)1)
+  if (dirend == (char *)0)
     return dir_file_exists_p ("[]", name);
 #else /* !VMS */
   dirend = strrchr (name, '/');

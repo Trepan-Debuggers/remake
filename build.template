@@ -2,7 +2,7 @@
 # Shell script to build GNU Make in the absence of any `make' program.
 # @configure_input@
 
-# Copyright (C) 1993, 1994, 1997 Free Software Foundation, Inc.
+# Copyright (C) 1993, 1994, 1997, 2003 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify
@@ -29,9 +29,12 @@ CPPFLAGS='@CPPFLAGS@'
 LDFLAGS='@LDFLAGS@'
 ALLOCA='@ALLOCA@'
 LOADLIBES='@LIBS@'
-extras='@LIBOBJS@'
+eval extras=\'@LIBOBJS@\'
 REMOTE='@REMOTE@'
 GLOBLIB='@GLOBLIB@'
+PATH_SEPARATOR='@PATH_SEPARATOR@'
+OBJEXT='@OBJEXT@'
+EXEEXT='@EXEEXT@'
 
 # Common prefix for machine-independent installed files.
 prefix='@prefix@'
@@ -43,7 +46,7 @@ libdir=${exec_prefix}/lib
 includedir=${prefix}/include
 
 localedir=${prefix}/share/locale
-aliaspath=${localedir}:.
+aliaspath=${localedir}${PATH_SEPARATOR}.
 
 defines="-DALIASPATH=\"${aliaspath}\" -DLOCALEDIR=\"${localedir}\" -DLIBDIR=\"${libdir}\" -DINCLUDEDIR=\"${includedir}\""' @DEFS@'
 
@@ -51,7 +54,7 @@ defines="-DALIASPATH=\"${aliaspath}\" -DLOCALEDIR=\"${localedir}\" -DLIBDIR=\"${
 set -e
 
 # These are all the objects we need to link together.
-objs="%objs% remote-${REMOTE}.o ${extras} ${ALLOCA}"
+objs="%objs% remote-${REMOTE}.${OBJEXT} ${extras} ${ALLOCA}"
 
 if [ x"$GLOBLIB" != x ]; then
   objs="$objs %globobjs%"
@@ -59,7 +62,7 @@ if [ x"$GLOBLIB" != x ]; then
 fi
 
 # Compile the source files into those objects.
-for file in `echo ${objs} | sed 's/\.o/.c/g'`; do
+for file in `echo ${objs} | sed 's/\.'${OBJEXT}'/.c/g'`; do
   echo compiling ${file}...
   $CC $defines $CPPFLAGS $CFLAGS \
       -c -I. -I${srcdir} ${globinc} ${srcdir}/$file
@@ -75,6 +78,6 @@ done
 
 # Link all the objects together.
 echo linking make...
-$CC $LDFLAGS $objs $LOADLIBES -o make.new
+$CC $LDFLAGS $objs $LOADLIBES -o makenew${EXEEXT}
 echo done
-mv -f make.new make
+mv -f makenew${EXEEXT} make${EXEEXT}
