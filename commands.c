@@ -1,5 +1,5 @@
 /* Command processing for GNU Make.
-Copyright (C) 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -520,7 +520,7 @@ print_commands (cmds)
       if (end == 0)
 	end = s + strlen (s);
 
-      printf ("\t%.*s\n", end - s, s);
+      printf ("\t%.*s\n", (int) (end - s), s);
 
       s = end;
     }
