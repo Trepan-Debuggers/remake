@@ -144,6 +144,9 @@ update_goal_chain (dep_t *goals, int makefiles)
 	    {
 	      unsigned int ocommands_started;
 	      int x;
+	      target_stack_node_t *p_call_stack = 
+		trace_push_target(NULL, file, 1);
+
 	      check_renamed (file);
 	      if (makefiles)
 		{
@@ -162,7 +165,7 @@ update_goal_chain (dep_t *goals, int makefiles)
 		 actually run.  */
 	      ocommands_started = commands_started;
 
-	      x = update_file (file, makefiles ? 1 : 0, NULL);
+	      x = update_file (file, makefiles ? 1 : 0, p_call_stack);
 	      check_renamed (file);
 
 	      /* Set the goal's `changed' flag if any commands were started
@@ -215,6 +218,8 @@ update_goal_chain (dep_t *goals, int makefiles)
 	      /* Keep track if any double-colon entry is not finished.
                  When they are all finished, the goal is finished.  */
 	      any_not_updated |= !file->updated;
+
+	      trace_pop_target(p_call_stack);
 
 	      if (stop)
 		break;
@@ -308,8 +313,6 @@ update_file (file_t *file, unsigned int depth,
       return f->command_state == cs_finished ? f->update_status : 0;
     }
 
-  p_call_stack = trace_push_target(p_call_stack, file, 1);
-
   /* This loop runs until we start commands for a double colon rule, or until
      the chain is exhausted. */
   for (; f != 0; f = f->prev)
@@ -344,7 +347,6 @@ update_file (file_t *file, unsigned int depth,
         status |= update_file (d->file, depth + 1, p_call_stack);
     }
 
-  trace_pop_target(p_call_stack);
   return status;
 }
 
@@ -359,6 +361,7 @@ update_file_1 (file_t *file, unsigned int depth,
   int dep_status = 0;
   dep_t *d, *lastd;
   int running = 0;
+  target_stack_node_t *p_call_stack2;
 
   DBF (DB_VERBOSE, _("Considering target file `%s'.\n"));
 
@@ -394,6 +397,22 @@ update_file_1 (file_t *file, unsigned int depth,
 
   /* Notice recursive update of the same file.  */
   start_updating (file);
+
+  /* In some contexts, we get called twice and in other cases once.
+     Ideally I'd like to figure out where to put the push's and
+     pops to do the right thing. Until then there's the below
+     hackery to test.  */
+  if (p_call_stack && p_call_stack->p_target) {
+    file_t *p_stack_target = p_call_stack->p_target;
+    if ((file->floc.filenm && p_stack_target->floc.filenm
+	 && 0 == strcmp(file->floc.filenm, p_stack_target->floc.filenm)) ||
+	(NULL == file->floc.filenm && NULL == p_stack_target->floc.filenm)) 
+      p_call_stack2 = p_call_stack;
+    else 
+      p_call_stack2 = trace_push_target(p_call_stack, file, 1);
+  } else {
+    p_call_stack2 = trace_push_target(p_call_stack, file, 1);
+  }
 
   /* Looking at the file's modtime beforehand allows the possibility
      that its name may be changed by a VPATH search, and thus it may
@@ -470,7 +489,7 @@ update_file_1 (file_t *file, unsigned int depth,
       d->file->parent = file;
       maybe_make = must_make;
       dep_status |= check_dep (d->file, depth, this_mtime, &maybe_make,
-			       p_call_stack);
+			       p_call_stack2);
       if (! d->ignore_mtime)
         must_make = maybe_make;
 
@@ -535,6 +554,8 @@ update_file_1 (file_t *file, unsigned int depth,
 	  }
     }
 
+  if (p_call_stack != p_call_stack2) 
+    trace_pop_target(p_call_stack2);
   finish_updating (file);
 
   DBF (DB_VERBOSE, _("Finished prerequisites of target file `%s'.\n"));
@@ -696,8 +717,27 @@ update_file_1 (file_t *file, unsigned int depth,
       file->ignore_vpath = 1;
     }
 
+  /* In some contexts, we get called twice and in other cases once.
+     Ideally I'd like to figure out where to put the push's and
+     pops to do the right thing. Until then there's the below
+     hackery to test.  */
+  if (p_call_stack && p_call_stack->p_target) {
+    file_t *p_stack_target = p_call_stack->p_target;
+    if ((file->floc.filenm && p_stack_target->floc.filenm
+	 && 0 == strcmp(file->floc.filenm, p_stack_target->floc.filenm)) ||
+	(NULL == file->floc.filenm && NULL == p_stack_target->floc.filenm)) 
+      p_call_stack2 = p_call_stack;
+    else 
+      p_call_stack2 = trace_push_target(p_call_stack, file, 1);
+  } else {
+    p_call_stack2 = trace_push_target(p_call_stack, file, 1);
+  }
+
   /* Now, take appropriate actions to remake the file.  */
   remake_file (file, p_call_stack);
+
+  if (p_call_stack != p_call_stack2) 
+    trace_pop_target(p_call_stack2);
 
   if (file->command_state != cs_finished)
     {
@@ -854,6 +894,7 @@ check_dep (file_t *file, unsigned int depth, FILE_TIMESTAMP this_mtime,
 
   ++depth;
   start_updating (file);
+  p_call_stack = trace_push_target(p_call_stack, file, 1);
 
   if (!file->intermediate)
     /* If this is a non-intermediate file, update it and record
@@ -949,6 +990,7 @@ check_dep (file_t *file, unsigned int depth, FILE_TIMESTAMP this_mtime,
 	}
     }
 
+  trace_pop_target(p_call_stack);
   finish_updating (file);
   return dep_status;
 }
