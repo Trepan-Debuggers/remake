@@ -811,12 +811,13 @@ do_define (name, namelen, origin, lineno, infile, filename)
     {
       lineno += nlines;
       nlines = readline (&lb, infile, filename, lineno);
-      p = next_token (lb.buffer);
 
+      collapse_continuations (lb.buffer);
+
+      p = next_token (lb.buffer);
       if ((p[5] == '\0' || isblank (p[5])) && !strncmp (p, "endef", 5))
 	{
 	  p += 5;
-	  collapse_continuations (p);
 	  remove_comments (p);
 	  if (*next_token (p) != '\0')
 	    makefile_error (filename, lineno,
@@ -833,7 +834,7 @@ do_define (name, namelen, origin, lineno, infile, filename)
 	}
       else
 	{
-	  unsigned int len = strlen (p);
+	  unsigned int len = strlen (lb.buffer);
 
 	  /* Increase the buffer size if necessary.  */
 	  if (idx + len + 1 > length)
@@ -842,7 +843,7 @@ do_define (name, namelen, origin, lineno, infile, filename)
 	      definition = (char *) xrealloc (definition, length + 1);
 	    }
 
-	  bcopy (p, &definition[idx], len);
+	  bcopy (lb.buffer, &definition[idx], len);
 	  idx += len;
 	  /* Separate lines with a newline.  */
 	  definition[idx++] = '\n';
