@@ -9,8 +9,8 @@
 
 @set EDITION 0.43
 @set VERSION 3.68 Beta
-@set UPDATED 26 May 1993
-@set UPDATE-MONTH May 1993
+@set UPDATED 9 June 1993
+@set UPDATE-MONTH June 1993
 
 @c finalout
 
@@ -5443,8 +5443,8 @@ files := $(shell echo *.c)
 
 @noindent
 sets @code{files} to the expansion of @samp{*.c}.  Unless @code{make} is
-using a very strange shell, this has the same result as @samp{$(wildcard
-*.c)}.@refill
+using a very strange shell, this has the same result as
+@w{@samp{$(wildcard *.c)}}.@refill
 
 @node Running, Implicit Rules, Functions, Top
 @chapter How to Run @code{make}
@@ -7555,6 +7555,27 @@ foolib(hack.o) : hack.o
 
 In fact, nearly all archive member targets are updated in just this way
 and there is an implicit rule to do it for you.
+
+To specify several members in the same archive, you can write all the
+member names together between the parentheses.  For example:
+
+@example
+foolib(hack.o kludge.o)
+@end example
+
+@noindent
+is equivalent to:
+
+@example
+foolib(hack.o) foolib(kludge.o)
+@end example
+
+@cindex wildcard, in archive member
+You can also use shell-style wildcards in an archive member reference.
+@xref{Wildcards, ,Using Wildcard Characters in File Names}.  For
+example, @w{@samp{foolib(*.o)}} expands to all existing members of the
+@file{foolib} archive whose names end in @samp{.o}; perhaps
+@samp{@w{foolib(hack.o)} @w{foolib(kludge.o)}}.
 
 @node Archive Update, Archive Suffix Rules, Archive Members, Archives
 @section Implicit Rule for Archive Member Targets
