@@ -337,8 +337,18 @@ expand_function (o, function, text, end)
 	if (argv == 0)
 	  break;
 
+	/* Using a target environment for `shell' loses in cases like:
+	   	export var = $(shell echo foobie) 
+	   because target_environment hits a loop trying to expand $(var)
+	   to put it in the environment.  This is even more confusing when
+	   var was not explicitly exported, but just appeared in the
+	   calling environment.  */
+#if 1
+	envp = environ;
+#else
 	/* Construct the environment.  */
 	envp = target_environment ((struct file *) 0);
+#endif
 
 	/* For error messages.  */
 	if (reading_filename != 0)
