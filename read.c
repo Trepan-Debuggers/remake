@@ -1617,6 +1617,11 @@ parse_file_seq (stringp, stopchar, size, strip)
 		new1->name = name;
 		new1 = new1->next;
 	      }
+
+	    if (new1 == 0)
+	      /* We might have slurped up the whole list,
+		 and continuing the loop would dereference NEW1.  */
+	      break;
 	  }
       }
 
