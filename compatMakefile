@@ -141,8 +141,8 @@ make: $(objs)
 	$(CC) $(LDFLAGS) $(objs) $(LOADLIBES) -o make.new
 	mv -f make.new make
 
-.c.o:
-	$(CC) $(CFLAGS) $(defines) -c -I$(srcdir) $< $(OUTPUT_OPTION)
+.c.o:;\
+$(CC) $(CFLAGS) $(defines) -c -I$(srcdir) -I$(srcdir)/glob $< $(OUTPUT_OPTION)
 remote.o: remote.c
 	$(CC) $(CFLAGS) $(defines) $(REMOTE) -c -I$(srcdir) $(srcdir)/remote.c
 
