@@ -360,6 +360,7 @@ define_automatic_variables ()
   /* Don't let SHELL come from the environment.  */
   if (*v->value == '\0' || (v->origin == o_env))
     {
+      free (v->value);
       v->origin = o_file;
       v->value = savestring (default_shell, 7);
     }
