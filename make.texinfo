@@ -1,4 +1,4 @@
-input texinfo                @c -*- Texinfo -*-
+\input texinfo                @c -*- Texinfo -*-
 @c %**start of header
 @setfilename make.info
 @settitle GNU @code{make}
@@ -7,7 +7,7 @@ input texinfo                @c -*- Texinfo -*-
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.193 2001/07/05 00:35:03 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.194 2002/04/24 21:36:38 psmith Exp $
 @set EDITION 0.55
 @set VERSION 3.79
 @set UPDATED 04 April 2000
