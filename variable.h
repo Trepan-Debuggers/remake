@@ -125,7 +125,7 @@ extern void restore_variable_buffer PARAMS ((char *buf, unsigned int len));
 extern int handle_function PARAMS ((char **op, char **stringp));
 extern int pattern_matches PARAMS ((char *pattern, char *percent, char *str));
 extern char *subst_expand PARAMS ((char *o, char *text, char *subst, char *replace,
-		unsigned int slen, unsigned int rlen, int by_word, int suffix_only));
+		unsigned int slen, unsigned int rlen, int by_word));
 extern char *patsubst_expand PARAMS ((char *o, char *text, char *pattern, char *replace,
 		char *pattern_percent, char *replace_percent));
 

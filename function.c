@@ -72,19 +72,17 @@ static struct hash_table function_table;
    each occurrence of SUBST with REPLACE. TEXT is null-terminated.  SLEN is
    the length of SUBST and RLEN is the length of REPLACE.  If BY_WORD is
    nonzero, substitutions are done only on matches which are complete
-   whitespace-delimited words.  If SUFFIX_ONLY is nonzero, substitutions are
-   done only at the ends of whitespace-delimited words.  */
+   whitespace-delimited words.  */
 
 char *
 subst_expand (char *o, char *text, char *subst, char *replace,
-              unsigned int slen, unsigned int rlen,
-              int by_word, int suffix_only)
+              unsigned int slen, unsigned int rlen, int by_word)
 {
   char *t = text;
   unsigned int tlen = strlen (text);
   char *p;
 
-  if (slen == 0 && !by_word && !suffix_only)
+  if (slen == 0 && !by_word)
     {
       /* The first occurrence of "" in any string is its end.  */
       o = variable_buffer_output (o, t, tlen);
@@ -95,7 +93,7 @@ subst_expand (char *o, char *text, char *subst, char *replace,
 
   do
     {
-      if ((by_word | suffix_only) && slen == 0)
+      if (by_word && slen == 0)
 	/* When matching by words, the empty string should match
 	   the end of each word, rather than the end of the whole text.  */
 	p = end_of_token (next_token (t));
@@ -116,11 +114,9 @@ subst_expand (char *o, char *text, char *subst, char *replace,
 
       /* If we're substituting only by fully matched words,
 	 or only at the ends of words, check that this case qualifies.  */
-      if ((by_word
-	   && ((p > t && !isblank ((unsigned char)p[-1]))
-	       || (p[slen] != '\0' && !isblank ((unsigned char)p[slen]))))
-	  || (suffix_only
-	      && (p[slen] != '\0' && !isblank ((unsigned char)p[slen]))))
+      if (by_word
+          && ((p > text && !isblank ((unsigned char)p[-1]))
+              || (p[slen] != '\0' && !isblank ((unsigned char)p[slen]))))
 	/* Struck out.  Output the rest of the string that is
 	   no longer to be replaced.  */
 	o = variable_buffer_output (o, subst, slen);
@@ -138,52 +134,65 @@ subst_expand (char *o, char *text, char *subst, char *replace,
 
   return o;
 }
-
+
 
 /* Store into VARIABLE_BUFFER at O the result of scanning TEXT
    and replacing strings matching PATTERN with REPLACE.
    If PATTERN_PERCENT is not nil, PATTERN has already been
    run through find_percent, and PATTERN_PERCENT is the result.
    If REPLACE_PERCENT is not nil, REPLACE has already been
-   run through find_percent, and REPLACE_PERCENT is the result.  */
+   run through find_percent, and REPLACE_PERCENT is the result.
+   Note that we expect PATTERN_PERCENT and REPLACE_PERCENT to point to the
+   character _AFTER_ the %, not to the % itself.
+*/
 
 char *
 patsubst_expand (char *o, char *text, char *pattern, char *replace,
                  char *pattern_percent, char *replace_percent)
 {
   unsigned int pattern_prepercent_len, pattern_postpercent_len;
-  unsigned int replace_prepercent_len, replace_postpercent_len = 0;
+  unsigned int replace_prepercent_len, replace_postpercent_len;
   char *t;
   unsigned int len;
   int doneany = 0;
 
   /* We call find_percent on REPLACE before checking PATTERN so that REPLACE
      will be collapsed before we call subst_expand if PATTERN has no %.  */
-  if (replace_percent == 0)
-    replace_percent = find_percent (replace);
-  if (replace_percent != 0)
+  if (!replace_percent)
     {
-      /* Record the length of REPLACE before and after the % so
-	 we don't have to compute these lengths more than once.  */
-      replace_prepercent_len = replace_percent - replace;
-      replace_postpercent_len = strlen (replace_percent + 1);
+      replace_percent = find_percent (replace);
+      if (replace_percent)
+        ++replace_percent;
+    }
+
+  /* Record the length of REPLACE before and after the % so we don't have to
+     compute these lengths more than once.  */
+  if (replace_percent)
+    {
+      replace_prepercent_len = replace_percent - replace - 1;
+      replace_postpercent_len = strlen (replace_percent);
     }
   else
-    /* We store the length of the replacement
-       so we only need to compute it once.  */
-    replace_prepercent_len = strlen (replace);
+    {
+      replace_prepercent_len = strlen (replace);
+      replace_postpercent_len = 0;
+    }
 
-  if (pattern_percent == 0)
-    pattern_percent = find_percent (pattern);
-  if (pattern_percent == 0)
+  if (!pattern_percent)
+    {
+      pattern_percent = find_percent (pattern);
+      if (pattern_percent)
+        ++pattern_percent;
+    }
+  if (!pattern_percent)
     /* With no % in the pattern, this is just a simple substitution.  */
     return subst_expand (o, text, pattern, replace,
-			 strlen (pattern), strlen (replace), 1, 0);
+			 strlen (pattern), strlen (replace), 1);
 
   /* Record the length of PATTERN before and after the %
      so we don't have to compute it more than once.  */
-  pattern_prepercent_len = pattern_percent - pattern;
-  pattern_postpercent_len = strlen (pattern_percent + 1);
+  pattern_prepercent_len = pattern_percent - pattern - 1;
+  pattern_postpercent_len = strlen (pattern_percent);
 
   while ((t = find_next_token (&text, &len)) != 0)
     {
@@ -196,16 +205,16 @@ patsubst_expand (char *o, char *text, char *pattern, char *replace,
       /* Does the prefix match? */
       if (!fail && pattern_prepercent_len > 0
 	  && (*t != *pattern
-	      || t[pattern_prepercent_len - 1] != pattern_percent[-1]
+	      || t[pattern_prepercent_len - 1] != pattern_percent[-2]
 	      || !strneq (t + 1, pattern + 1, pattern_prepercent_len - 1)))
 	fail = 1;
 
       /* Does the suffix match? */
       if (!fail && pattern_postpercent_len > 0
-	  && (t[len - 1] != pattern_percent[pattern_postpercent_len]
-	      || t[len - pattern_postpercent_len] != pattern_percent[1]
+	  && (t[len - 1] != pattern_percent[pattern_postpercent_len - 1]
+	      || t[len - pattern_postpercent_len] != *pattern_percent
 	      || !strneq (&t[len - pattern_postpercent_len],
-			  &pattern_percent[1], pattern_postpercent_len - 1)))
+			  pattern_percent, pattern_postpercent_len - 1)))
 	fail = 1;
 
       if (fail)
@@ -226,7 +235,7 @@ patsubst_expand (char *o, char *text, char *pattern, char *replace,
 					  len - (pattern_prepercent_len
 						 + pattern_postpercent_len));
 	      /* Output the part of the replacement after the %.  */
-	      o = variable_buffer_output (o, replace_percent + 1,
+	      o = variable_buffer_output (o, replace_percent,
 					  replace_postpercent_len);
 	    }
 	}
@@ -641,7 +650,7 @@ static char *
 func_subst (char *o, char **argv, const char *funcname UNUSED)
 {
   o = subst_expand (o, argv[2], argv[0], argv[1], strlen (argv[0]),
-		    strlen (argv[1]), 0, 0);
+		    strlen (argv[1]), 0);
 
   return o;
 }

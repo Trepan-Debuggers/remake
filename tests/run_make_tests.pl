@@ -64,6 +64,14 @@ sub run_make_test
     $makefile = &get_tmpfile();
   }
 
+  # If either the makestring or the answer don't end in newlines, add one In
+  # the future should we allow an option to disable this?  For now if you
+  # want to test handling with no newline you have to call the underlying
+  # functions directly.
+
+  $makestring =~ /\n$/s or $makestring .= "\n";
+  $answer =~ /\n$/s     or $answer .= "\n";
+
   # Replace @MAKEFILE@ with the makefile name and @MAKE@ with the path to
   # make in both $makestring and $answer.
 
