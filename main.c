@@ -1046,6 +1046,7 @@ decode_switches (argc, argv)
 	case flag:
 	case flag_off:
 	case ignore:
+	case usage_and_exit:
 	  long_options[i].has_arg = no_argument;
 	  break;
 
