@@ -468,7 +468,7 @@ update_file_1 (file, depth)
 
   if (running)
     {
-      file->command_state = cs_deps_running;
+      set_command_state (file, cs_deps_running);
       --depth;
       DEBUGPR ("The dependencies of `%s' are being made.\n");
       return 0;
@@ -478,7 +478,7 @@ update_file_1 (file, depth)
 
   if (dep_status != 0)
     {
-      file->command_state = cs_finished;
+      set_command_state (file, cs_finished);
       file->update_status = dep_status;
       file->updated = 1;
 
@@ -493,7 +493,7 @@ update_file_1 (file, depth)
       return dep_status;
     }
 
-  file->command_state = cs_not_started;
+  set_command_state (file, cs_not_started);
 
   /* Now record which dependencies are more
      recent than this file, so we can define $?.  */
@@ -549,7 +549,7 @@ update_file_1 (file, depth)
   if (!must_make)
     {
       DEBUGPR ("No need to remake target `%s'.\n");
-      file->command_state = cs_finished;
+      set_command_state (file, cs_finished);
       file->update_status = 0;
       file->updated = 1;
       return 0;
@@ -738,7 +738,7 @@ check_dep (file, depth, this_mtime, must_make_ptr)
 	    /* Record that some of FILE's dependencies are still being made.
 	       This tells the upper levels to wait on processing it until
 	       the commands are finished.  */
-	    file->command_state = cs_deps_running;
+	    set_command_state (file, cs_deps_running);
 
 	  lastd = d;
 	  d = d->next;

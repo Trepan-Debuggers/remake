@@ -546,7 +546,7 @@ start_job_command (child)
   if (question_flag && !(flags & COMMANDS_RECURSE))
     {  
       child->file->update_status = 1;
-      child->file->command_state = cs_finished;
+      set_command_state (child->file, cs_finished);
       return;
     }
 
@@ -715,7 +715,7 @@ start_job_command (child)
   /* We are the parent side.  Set the state to
      say the commands are running and return.  */
 
-  child->file->command_state = cs_running;
+  set_command_state (child->file, cs_running);
 
   /* Free the storage used by the child's argument list.  */
 
@@ -726,7 +726,7 @@ start_job_command (child)
 
  error:
   child->file->update_status = 2;
-  child->file->command_state = cs_finished;
+  set_command_state (child->file, cs_finished);
 }
 
 /* Try to start a child running.
@@ -955,7 +955,7 @@ job_next_command (child)
 	{
 	  /* There are no more lines to be expanded.  */
 	  child->command_ptr = 0;
-	  child->file->command_state = cs_finished;
+	  set_command_state (child->file, cs_finished);
 	  child->file->update_status = 0;
 	  return 0;
 	}
