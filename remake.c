@@ -154,13 +154,6 @@ update_goal_chain (goals, makefiles)
 	      x = update_file (file, makefiles ? 1 : 0);
 	      check_renamed (file);
 
-              /* If we don't know what the file's last mtime was, find it.  */
-              if (! file->last_mtime)
-                {
-                  (void) f_mtime (file, 0);
-                  check_renamed (file);
-                }
-
 	      /* Set the goal's `changed' flag if any commands were started
 		 by calling update_file above.  We check this flag below to
 		 decide when to give an "up to date" diagnostic.  */
@@ -186,22 +179,27 @@ update_goal_chain (goals, makefiles)
 			  stop = (!keep_going_flag && !question_flag
 				  && !makefiles);
 			}
-		      else if (file->updated && g->changed &&
-                               file->last_mtime != file->mtime_before_update)
-			{
-			  /* Updating was done.  If this is a makefile and
-			     just_print_flag or question_flag is set
-			     (meaning -n or -q was given and this file was
-			     specified as a command-line target), don't
-			     change STATUS.  If STATUS is changed, we will
-			     get re-exec'd, and fall into an infinite loop.  */
-			  if (!makefiles
-			      || (!just_print_flag && !question_flag))
-			    status = 0;
-			  if (makefiles && file->dontcare)
-			    /* This is a default makefile.  Stop remaking.  */
-			    stop = 1;
-			}
+		      else
+                        {
+                          FILE_TIMESTAMP mtime = MTIME (file);
+                          check_renamed (file);
+                          if (file->updated && g->changed &&
+                               mtime != file->mtime_before_update)
+                          {
+                            /* Updating was done.  If this is a makefile and
+                               just_print_flag or question_flag is set
+                               (meaning -n or -q was given and this file was
+                               specified as a command-line target), don't
+                               change STATUS.  If STATUS is changed, we will
+                               get re-exec'd, and enter an infinite loop.  */
+                            if (!makefiles
+                                || (!just_print_flag && !question_flag))
+                              status = 0;
+                            if (makefiles && file->dontcare)
+                              /* This is a default makefile; stop remaking.  */
+                              stop = 1;
+                          }
+                        }
 		    }
 		}
 
