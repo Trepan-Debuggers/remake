@@ -65,7 +65,7 @@ Cambridge, MA 02139, USA.  */
 #endif
 #endif
 
-#ifndef _AMIGA
+#if !defined (_AMIGA) && !defined (VMS)
 #include <pwd.h>
 #endif
 
@@ -93,6 +93,9 @@ extern int errno;
 # ifdef HAVE_NDIR_H
 #  include <ndir.h>
 # endif
+# ifdef HAVE_VMSDIR_H
+#  include "vmsdir.h"
+# endif /* HAVE_VMSDIR_H */
 #endif
 
 
@@ -185,9 +188,9 @@ my_realloc (p, n)
 #undef	alloca
 #define	alloca(n)	__builtin_alloca (n)
 #else	/* Not GCC.  */
-#if	defined (sparc) || defined (HAVE_ALLOCA_H)
+#ifdef HAVE_ALLOCA_H
 #include <alloca.h>
-#else	/* Not sparc or HAVE_ALLOCA_H.  */
+#else	/* Not HAVE_ALLOCA_H.  */
 #ifndef	_AIX
 extern char *alloca ();
 #endif	/* Not _AIX.  */
@@ -435,6 +438,7 @@ glob (pattern, flags, errfunc, pglob)
 
   oldcount = pglob->gl_pathc;
 
+#ifndef VMS
   if ((flags & GLOB_TILDE) && dirname[0] == '~')
     {
       if (dirname[1] == '\0')
@@ -473,6 +477,7 @@ glob (pattern, flags, errfunc, pglob)
 #endif
 	}
     }
+#endif	/* Not VMS.  */
 
   if (glob_pattern_p (dirname, !(flags & GLOB_NOESCAPE)))
     {
