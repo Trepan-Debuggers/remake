@@ -1,5 +1,15 @@
 1999-09-15  Paul D. Smith  <psmith@gnu.org>
 
+	* test_driver.pl (touch): Rewrite this function.  Previously it
+	used to use utime() to hard-set the time based on the current
+	local clock.  This fails badly on networked filesystems where the
+	FS server clock is skewed from the local clock: normally modifying
+	a file causes it to get a mod time based on the _server's_ clock.
+	Hard-setting it based on the _local_ clock causes gratuitous
+	errors and makes the tests unreliable except on local filesystems.
+	The new function will simply modify the file, allowing the
+	filesystem to set the mod time as it sees fit.
+
 	* scripts/features/parallelism: The second test output could
 	change depending on how fast some scripts completed; use "sleep"
 	to force the order we want.
