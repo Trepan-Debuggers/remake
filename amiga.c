@@ -1,5 +1,5 @@
 /* Running commands on Amiga
-Copyright (C) 1988, 89, 90, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
+Copyright (C) 1995, 1996 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -17,11 +17,16 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "make.h"
+#include "variable.h"
+#include "amiga.h"
 #include <assert.h>
 #include <exec/memory.h>
 #include <dos/dostags.h>
 #include <proto/exec.h>
 #include <proto/dos.h>
+
+static const char Amiga_version[] = "$VER: Make 3.74.3 (12.05.96) \n"
+		    "Amiga Port by A. Digulla (digulla@home.lake.de)";
 
 int
 MyExecute (argv)
@@ -84,3 +89,34 @@ char ** argv;
 
     return status;
 }
+
+char *
+wildcard_expansion (wc, o)
+char * wc, * o;
+{
+#   define PATH_SIZE	1024
+    struct AnchorPath * apath;
+
+    if ( (apath = AllocMem (sizeof (struct AnchorPath) + PATH_SIZE,
+	    MEMF_CLEAR))
+	)
+    {
+	apath->ap_Strlen = PATH_SIZE;
+
+	if (MatchFirst (wc, apath) == 0)
+	{
+	    do
+	    {
+		o = variable_buffer_output (o, apath->ap_Buf,
+			strlen (apath->ap_Buf));
+		o = variable_buffer_output (o, " ",1);
+	    } while (MatchNext (apath) == 0);
+	}
+
+	MatchEnd (apath);
+	FreeMem (apath, sizeof (struct AnchorPath) + PATH_SIZE);
+    }
+
+    return o;
+}
+
