@@ -1,6 +1,11 @@
-Mon Dec 11 22:26:15 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+Tue Dec 12 00:48:42 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
 	* Version 3.74.1.
+
+	* dir.c (read_dirstream): Fix braino: fill in the buffer when not
+	reallocating it!
+
+Mon Dec 11 22:26:15 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
 	* misc.c (collapse_continuations): Fix skipping of trailing \s so
 	it can never dereference before the beginning of the array.
