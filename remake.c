@@ -558,10 +558,13 @@ notice_finished_file (file)
       d->file->command_state = cs_finished;
       d->file->updated = 1;
       d->file->update_status = file->update_status;
-      if (just_print_flag || question_flag)
-	d->file->last_mtime = file->last_mtime;
-      else
-	d->file->last_mtime = 0;
+
+      if (!d->file->phony)
+	/* Fetch the new modification time.
+	   We do this instead of just invalidating the cached time
+	   so that a vpath_search can happen.  Otherwise, it would
+	   never be done because the target is already updated.  */
+	(void) file_mtime (d->file);
     }
 }
 
