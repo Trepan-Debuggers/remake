@@ -90,7 +90,7 @@ static int amiga_batch_file;
 #endif
 
 #ifdef HAVE_WAITPID
-# define WAIT_NOHANG(status)	waitpid (-1, (status), WNOHANG)
+# define WAIT_NOHANG (status)	waitpid (-1, (status), WNOHANG)
 #else	/* Don't have waitpid.  */
 # ifdef HAVE_WAIT3
 #  ifndef wait3
@@ -248,7 +248,7 @@ free_job_token (child)
       /* Write any other job tokens back to the pipe.  */
       while (write (job_fds[1], &child->job_token, 1) != 1)
         if (!EINTR_SET)
-          pfatal_with_name(_("write jobserver"));
+          pfatal_with_name (_("write jobserver"));
       break;
   }
 
@@ -678,7 +678,7 @@ reap_children (block, err)
       block_sigs ();
 
       /* If this job has a token out, return it.  */
-      free_job_token(c);
+      free_job_token (c);
 
       /* There is now another slot open.  */
       if (job_slots_used > 0)
@@ -733,7 +733,7 @@ free_child (child)
   /* If this child has a token it hasn't relinquished, give it up now.
      This can happen if the job completes immediately, mainly because
      all the command lines evaluated to empty strings.  */
-  free_job_token(child);
+  free_job_token (child);
 
   free ((char *) child);
 }
@@ -889,10 +889,11 @@ start_job_command (child)
 #ifdef __MSDOS__
       unixy_shell	/* the test is complicated and we already did it */
 #else
-      (argv[0] && !strcmp(argv[0], "/bin/sh"))
+      (argv[0] && !strcmp (argv[0], "/bin/sh"))
 #endif
-      && (argv[1] && !strcmp(argv[1], "-c"))
-      && (argv[2] && !strcmp(argv[2], ":"))
+      && (argv[1]
+          && argv[1][0] == '-' && argv[1][1] == 'c' && argv[1][2] == '\0')
+      && (argv[2] && argv[2][0] == ':' && argv[2][1] == '\0')
       && argv[3] == NULL)
     {
       free (argv[0]);
@@ -1404,7 +1405,7 @@ new_job (file)
             reap_children (0, 0);
           }
 
-      assert(c->job_token != '-');
+      assert (c->job_token != '-');
       if (debug_flag)
         printf (_("Obtained token `%c' for child 0x%08lx (%s).\n"),
                 c->job_token, (unsigned long int) c, c->file->name);
@@ -2146,7 +2147,7 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
                   /* Note these overlap and strcpy() is undefined for
                      overlapping objects in ANSI C.  The strlen() _IS_ right,
                      since we need to copy the nul byte too.  */
-		  bcopy (p + 1, p, strlen(p));
+		  bcopy (p + 1, p, strlen (p));
 
 		if (instring)
 		  goto string_char;
@@ -2314,7 +2315,7 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
     }
     *dptr = 0;
 
-    new_argv = (char **) xmalloc(2 * sizeof(char *));
+    new_argv = (char **) xmalloc (2 * sizeof (char *));
     new_argv[0] = buffer;
     new_argv[1] = 0;
   }
