@@ -182,9 +182,8 @@ tests:# $(testdir)/run_make_tests.pl $(prog)
 
 build.sh.in: build.template
 	sed -e 's@%objs%@$(filter-out $(GLOB) $(ALLOCA) $(extras),\
-	       $(patsubst $(archpfx)%,%,$(objs)))@'  \
-	    -e 's@%globobjs%@$(patsubst %.c,%.o,\
-	       $(filter %.c,$(notdir $(globfiles))))@' \
+	       $(patsubst $(archpfx)%,%,$(objs)))\
+	       $(patsubst %.c,%.o,$(filter %.c,$(globfiles)))@' \
 	    $< > $@.new
 	mv -f $@.new $@
 
