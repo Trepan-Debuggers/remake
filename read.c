@@ -1509,7 +1509,7 @@ find_char_unquote (string, stopchars, blank)
      char *stopchars;
      int blank;
 {
-  unsigned int string_len = strlen (string);
+  unsigned int string_len = 0;
   register char *p = string;
 
   while (1)
@@ -1527,6 +1527,9 @@ find_char_unquote (string, stopchars, blank)
 	  while (&p[i] >= string && p[i] == '\\')
 	    --i;
 	  ++i;
+	  /* Only compute the length if really needed.  */
+	  if (string_len == 0)
+	    string_len = strlen (string);
 	  /* The number of backslashes is now -I.
 	     Copy P over itself to swallow half of them.  */
 	  bcopy (&p[i / 2], &p[i], (string_len - (p - string)) - (i / 2) + 1);
