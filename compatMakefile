@@ -1,3 +1,6 @@
+# NOTE: If you have no `make' program at all to process this makefile, run
+# `build.sh' instead.
+#
 # Copyright (C) 1988, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 # 
@@ -179,7 +182,7 @@ install: installdirs \
 	 $(mandir)/$(instname).$(manext)
 
 installdirs:
-	${srcdir}/mkinstalldirs
+	$(SHELL) ${srcdir}/mkinstalldirs
 
 $(bindir)/$(instname): make
 	$(INSTALL_PROGRAM) make $@.new
