@@ -218,8 +218,8 @@ dist-flavor = alpha
 endif
 .PHONY: rcs-mark rcs-mark-alpha rcs-mark-beta
 rcs-mark: rcs-mark-$(dist-flavor)
-rcs-mark-alpha:;rcs -sAlpha -Nmake-$(version-): RCS/[!=]*,v
-rcs-mark-beta:;rcs -sBeta -Nmake-$(version-): RCS/[!=]*,v
+rcs-mark-alpha: RCS/[!=]*,v;rcs -sAlpha -Nmake-$(version-): $^
+rcs-mark-beta: RCS/[!=]*,v;rcs -sBeta -Nmake-$(version-): $^
 version- = $(subst .,-,$(version))
 
 dist: local-inst
