@@ -195,7 +195,13 @@ static char *default_suffix_rules[] =
 static char *default_variables[] =
   {
     "AR", "ar",
+#ifndef __hpux
     "ARFLAGS", "rv",
+#else
+    /* HPUX ar's f flag says to truncate the file names to archive member
+       name length in comparisons, so replacement notices the equality.  */
+    "ARFLAGS", "rfv",
+#endif
     "AS", "as",
     "CC", "cc",
     "CXX", "g++",

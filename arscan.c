@@ -1,5 +1,5 @@
 /* Library function for scanning an archive file.
-   Copyright (C) 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright (C) 1987, 89, 91, 92, 93, 94 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -428,7 +428,13 @@ ar_name_equal (name, mem, truncated)
 #else
       struct ar_hdr hdr;
       return !strncmp (name, mem,
-		       sizeof (hdr.ar_name) - 1);
+		       sizeof (hdr.ar_name) - 
+#ifndef __hpux
+		       1
+#else
+		       2
+#endif /* __hpux */
+		       );
 #endif
     }
 
