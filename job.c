@@ -1179,7 +1179,7 @@ construct_command_argv_internal (line, restp, shell, ifs)
      char *line, **restp;
      char *shell, *ifs;
 {
-  static char sh_chars[] = "#;\"*?[]&|<>(){}=$`";
+  static char sh_chars[] = "#;\"*?[]&|<>(){}$`";
   static char *sh_cmds[] = { "cd", "eval", "exec", "exit", "login",
 			     "logout", "set", "umask", "wait", "while", "for",
 			     "case", "if", ":", ".", "break", "continue",
@@ -1189,7 +1189,7 @@ construct_command_argv_internal (line, restp, shell, ifs)
   register char *p;
   register char *ap;
   char *end;
-  int instring;
+  int instring, word_has_equals, seen_nonequals;
   char **new_argv = 0;
 
   if (restp != NULL)
@@ -1223,7 +1223,7 @@ construct_command_argv_internal (line, restp, shell, ifs)
 
   /* I is how many complete arguments have been found.  */
   i = 0;
-  instring = 0;
+  instring = word_has_equals = seen_nonequals = 0;
   for (p = line; *p != '\0'; ++p)
     {
       if (ap > end)
@@ -1244,6 +1244,17 @@ construct_command_argv_internal (line, restp, shell, ifs)
 	/* Not a special char.  */
 	switch (*p)
 	  {
+	  case '=':
+	    /* Equals is a special character in leading words before the
+	       first word with no equals sign in it.  This is not the case
+	       with sh -k, but we never get here when using nonstandard
+	       shell flags.  */
+	    if (! seen_nonequals)
+	      goto slow;
+	    word_has_equals = 1;
+	    *ap++ = '=';
+	    break;
+
 	  case '\\':
 	    /* Backslash-newline combinations are eaten.  */
 	    if (p[1] == '\n')
@@ -1295,6 +1306,16 @@ construct_command_argv_internal (line, restp, shell, ifs)
 	       Terminate the text of the argument.  */
 	    *ap++ = '\0';
 	    new_argv[++i] = ap;
+
+	    /* Update SEEN_NONEQUALS, which tells us if every word
+	       heretofore has contained an `='.  */
+	    seen_nonequals |= ! word_has_equals;
+	    if (word_has_equals && ! seen_nonequals)
+	      /* An `=' in a word before the first
+		 word without one is magical.  */
+	      goto slow;
+	    word_has_equals = 0; /* Prepare for the next word.  */
+
 	    /* If this argument is the command name,
 	       see if it is a built-in shell command.
 	       If so, have the shell handle it.  */
