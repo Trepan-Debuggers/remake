@@ -487,7 +487,7 @@ target.  A target often depends on several files.
 
 A @dfn{command} is an action that @code{make} carries out.
 A rule may have more than one command, each on its own line.
-@strong{Please note:} you need to put a @key{TAB} at the beginning of
+@strong{Please note:} you need to put a tab character at the beginning of
 every command line!  This is an obscurity that catches the unwary.
 
 Usually a command is in a rule with dependencies and serves to create a
@@ -542,8 +542,8 @@ files.o : files.c defs.h buffer.h command.h
 utils.o : utils.c defs.h
         cc -c utils.c
 clean :
-        rm edit  main.o kbd.o command.o display.o \
-        insert.o search.o files.o utils.o
+        rm edit main.o kbd.o command.o display.o \
+           insert.o search.o files.o utils.o
 @end group
 @end example
 
@@ -579,19 +579,24 @@ on the header file @file{defs.h}.
 
 A shell command follows each line that contains a target and
 dependencies.  These shell commands say how to update the target file.
-A @key{TAB} must come at the beginning of every command line to
+A tab character must come at the beginning of every command line to
 distinguish commands lines from other lines in the makefile.  (Bear in
 mind that @code{make} does not know anything about how the commands
 work.  It is up to you to supply commands that will update the target
 file properly.  All @code{make} does is execute the commands you have
 specified when the target file needs to be updated.)
 
-The target @samp{clean} is not a file, but merely the name of an action;
-so @code{make} never does anything with it unless you tell it
-specifically.  (Note that this rule does not have any dependencies.
-@xref{Phony Targets}, to see how to prevent a real file called
-@file{clean} from causing confusion.  @xref{Errors, , Errors in
-Commands}, to see how to force @code{rm} to work in spite of errors.)
+The target @samp{clean} is not a file, but merely the name of an
+action.  Since you do not want to carry out the actions in this rule
+normally, @samp{clean} is not a dependency of any other rule.
+Consequently, @code{make} never does anything with it unless you tell
+it specifically.  Note that this rule not only is not a dependency, it
+also does not have any dependencies, so the only purpose of the rule
+is to run the specified commands.  Targets that do not refer to files
+but are just actions are called @dfn{phony targets}.  @xref{Phony
+Targets}, for information about this kind of target.  @xref{Errors, ,
+Errors in Commands}, to see how to cause @code{make} ignore errors
+from @code{rm}.
 
 @node How Make Works, Variables Simplify, Simple Makefile, Introduction
 @comment  node-name,  next,  previous,  up
@@ -832,10 +837,10 @@ clean :
 @end example
 
 @noindent
-@c !!!! wrong -rm
 This prevents @code{make} from getting confused by an actual file
-called @file{clean} and empowers @code{rm} to continue in spite of errors.
-(See @ref{Phony Targets}, and @ref{Errors, ,Errors in Commands}.)
+called @file{clean} and causes it to continue in spite of errors from
+@code{rm}.  (See @ref{Phony Targets}, and @ref{Errors, ,Errors in
+Commands}.)
 
 @noindent
 A rule such as this should not be placed at the beginning of the
@@ -870,17 +875,27 @@ reading a data base called the @dfn{makefile}.
 
 @c !!!! want to mention implicit rules here somehow --roland
 
-Makefiles contain four kinds of things: @dfn{rules}, @dfn{variable
-definitions}, @dfn{directives}, and @dfn{comments}.  Rules, variables,
-and directives are described at length in later chapters.@refill
+Makefiles contain five kinds of things: @dfn{explicit rules},
+@dfn{implicit rules}, @dfn{variable definitions}, @dfn{directives},
+and @dfn{comments}.  Rules, variables, and directives are described at
+length in later chapters.@refill
 
 @itemize @bullet
-@cindex rule (definition of)
+@cindex rule, explicit (definition of)
+@cindex explicit rule (definition of)
 @item
-An @dfn{rule} says when and how to remake one or more files,
+An @dfn{explicit rule} says when and how to remake one or more files,
 called the rule's targets.  It lists the other files that the targets
 @dfn{depend on}, and may also give commands to use to create or update
 the targets.  @xref{Rules, ,Writing Rules}.
+
+@cindex rule, implicit (definition of)
+@cindex implicit rule (definition of)
+@item
+An @dfn{implicit rule} says when and how to remake a class of files
+based on their names.  It describes how a target may depend on a file
+with a name similar to the target and gives commands to create or
+update such a target.  @xref{Implicit Rules, ,Using Implicit Rules}.
 
 @cindex variable definition
 @item
@@ -927,7 +942,7 @@ perhaps spaces before it) is effectively blank, and is ignored.@refill
 @cindex names of makefiles
 @cindex default makefile names
 
-@c !!! following paragraph rewritten to avoid overfull hbox
+@c following paragraph rewritten to avoid overfull hbox
 By default, when @code{make} looks for the makefile, it tries the
 following names, in order: @file{GNUmakefile}, @file{makefile}
 and @file{Makefile}.@refill
@@ -1052,7 +1067,6 @@ and reads all the makefiles over again.  (It will also attempt to update
 each of them over again, but normally this will not change them again,
 since they are already up to date.)@refill
 
-@c !!!! only :: ? -rm
 If the makefiles specify commands to remake a file but no dependencies,
 the file will always be remade.  In the case of makefiles, a makefile
 that has commands but no dependencies will be remade every time
@@ -1248,8 +1262,8 @@ Usually there is only one
 target per rule, but occasionally there is a reason to have more
 (@pxref{Multiple Targets, , Multiple Targets in a Rule}).@refill
 
-The @var{command} lines start with a @key{TAB}.  The first command may
-appear on the line after the dependencies, with a @key{TAB}, or may
+The @var{command} lines start with a tab character.  The first command may
+appear on the line after the dependencies, with a tab character, or may
 appear on the same line, with a semicolon.  Either way, the effect is the
 same.  @xref{Commands, ,Writing the Commands in Rules}.
 
@@ -1540,13 +1554,41 @@ There are three forms of the @code{vpath} directive:
 @table @code
 @item vpath @var{pattern} @var{directories}
 Specify the search path @var{directories} for file names that match
-@var{pattern}.  If another path was previously specified for the same
-pattern, the new path is effectively appended to the old path.@refill
-@c !!!! above is not quite right --roland
+@var{pattern}.  
 
 The search path, @var{directories}, is a colon-separated list of
 directories to be searched, just like the search path used in the
 @code{VPATH} variable.
+
+@code{make} handles multiple @code{vpath} directives in the order in
+which they appear in the makefile; multiple directives with the same
+pattern are independent of each other.
+
+@need 750
+Thus, 
+
+@example
+@group
+vpath %.c foo
+vpath %   blish
+vpath %.c bar
+@end group
+@end example
+
+@noindent
+will look for a file ending in @samp{.c} in @file{foo}, then
+@file{blish}, then @file{bar}, while
+
+@example
+@group
+vpath %.c foo:bar
+vpath %   blish
+@end group
+@end example
+
+@noindent
+will look for a file ending in @samp{.c} in @file{foo}, then
+@file{bar}, then @file{blish}.
 
 @item vpath @var{pattern}
 Clear out the search path associated with @var{pattern}.
@@ -1814,10 +1856,8 @@ commonly used this way.
 As you can see, using @samp{FORCE} this way has the same results as using
 @samp{.PHONY: clean}.  
 
-@c !!! wrong. FORCE is secure too --roland
-Using @samp{.PHONY} is more explicit, more efficient, and more secure,
-since it protects against the file actually existing.  However, other
-versions of @code{make} do not support @samp{.PHONY}; thus
+Using @samp{.PHONY} is more explicit and more efficient.  However,
+other versions of @code{make} do not support @samp{.PHONY}; thus
 @samp{FORCE} appears in many makefiles.  @xref{Phony Targets}.
 
 @node Empty Targets, Special Targets, Force Targets, Rules
@@ -1991,6 +2031,60 @@ You cannot do this with multiple targets in an ordinary rule, but you can
 do it with a @dfn{static pattern rule}.  @xref{Static Pattern, ,Static Pattern Rules}.
 @end ifinfo
 
+@node Multiple Rules, Double-Colon, Static Pattern, Rules
+@section Multiple Rules for One Target
+
+One file can be the target of several rules.  All the dependencies
+mentioned in all the rules are merged into one list of dependencies for
+the target.  If the target is older than any dependency from any rule,
+the commands are executed.
+
+There can only be one set of commands to be executed for a file.
+If more than one rule gives commands for the same file, 
+@code{make} uses the last set given and prints an error message.
+(As a special case, if the file's name begins with a dot, no
+error message is printed.  This odd behavior is only for
+compatibility with other @code{make}s.)  There is no reason to
+write your makefiles this way; that is why @code{make} gives you
+an error message.@refill
+
+An extra rule with just dependencies can be used to give a few extra
+dependencies to many files at once.  For example, one usually has a
+variable named @code{objects} containing a list of all the compiler output
+files in the system being made.  An easy way to say that all of them must
+be recompiled if @file{config.h} changes is to write the following:
+
+@example
+objects = foo.o bar.o
+foo.o : defs.h
+bar.o : defs.h test.h
+$(objects) : config.h
+@end example
+
+This could be inserted or taken out without changing the rules that really
+say how to make the object files, making it a convenient form to use if
+you wish to add the additional dependency intermittently.
+
+Another wrinkle is that the additional dependencies could be specified with
+a variable that you set with a command argument to @code{make}
+(@pxref{Overriding, ,Overriding Variables}).  For example,
+
+@example
+@group
+extradeps=
+$(objects) : $(extradeps)
+@end group
+@end example
+
+@noindent
+means that the command @samp{make extradeps=foo.h} will consider
+@file{foo.h} as a dependency of each object file, but plain @samp{make}
+will not.
+
+If none of the explicit rules for a target has commands, then @code{make}
+searches for an applicable implicit rule to find some commands
+@pxref{Implicit Rules, ,Using Implicit Rules}).
+
 @node Static Pattern, Multiple Rules, Multiple Targets, Rules
 @section Static Pattern Rules
 @cindex static pattern rules
@@ -2013,15 +2107,16 @@ be @emph{analogous}, but not necessarily @emph{identical}.
 Here is the syntax of a static pattern rule:
 
 @example
-@var{targets}: @var{target-pattern}: @var{dep-patterns} @dots{}
+@var{targets} @dots{}: @var{target-pattern}: @var{dep-patterns} @dots{}
         @var{commands}
         @dots{}
 @end example
 
 @noindent
-The @var{targets} gives the list of targets that the rule applies to.  The
-targets can contain wildcard characters, just like the targets of ordinary
-rules (@pxref{Wildcards, ,Using Wildcard Characters in File Names}).
+The @var{targets} list specifies the targets that the rule applies to.
+The targets can contain wildcard characters, just like the targets of
+ordinary rules (@pxref{Wildcards, ,Using Wildcard Characters in File
+Names}).
 
 The @var{target-pattern} and @var{dep-patterns} say how to compute the
 dependencies of each target.  Each target is matched against the
@@ -2067,9 +2162,9 @@ $(objects): %.o: %.c
 @end example
 
 @noindent
-(Here @samp{$<} is the automatic variable that holds the name of the
+Here @samp{$<} is the automatic variable that holds the name of the
 dependency and @samp{$@@} is the automatic variable that holds the name
-of the target; see @ref{Automatic, , Automatic Variables}.)
+of the target; see @ref{Automatic, , Automatic Variables}.
 
 Each target specified must match the target pattern; a warning is issued
 for each target that does not.  If you have a list of files, only some of
@@ -2129,60 +2224,6 @@ With static pattern rules, there is no uncertainty: each rule applies
 to precisely the targets specified.
 @end itemize
 
-@node Multiple Rules, Double-Colon, Static Pattern, Rules
-@section Multiple Rules for One Target
-
-One file can be the target of several rules.  All the dependencies
-mentioned in all the rules are merged into one list of dependencies for
-the target.  If the target is older than any dependency from any rule,
-the commands are executed.
-
-There can only be one set of commands to be executed for a file.
-If more than one rule gives commands for the same file, the last
-@code{make} uses the last set given and prints an error message.
-(As a special case, if the file's name begins with a dot, no
-error message is printed.  This odd behavior is only for
-compatibility with other @code{make}s.)  There is no reason to
-write your makefiles this way; that is why @code{make} gives you
-an error message.@refill
-
-An extra rule with just dependencies can be used to give a few extra
-dependencies to many files at once.  For example, one usually has a
-variable named @code{objects} containing a list of all the compiler output
-files in the system being made.  An easy way to say that all of them must
-be recompiled if @file{config.h} changes is to write the following:
-
-@example
-objects = foo.o bar.o
-foo.o : defs.h
-bar.o : defs.h test.h
-$(objects) : config.h
-@end example
-
-This could be inserted or taken out without changing the rules that really
-say how to make the object files, making it a convenient form to use if
-you wish to add the additional dependency intermittently.
-
-Another wrinkle is that the additional dependencies could be specified with
-a variable that you set with a command argument to @code{make}
-(@pxref{Overriding, ,Overriding Variables}).  For example,
-
-@example
-@group
-extradeps=
-$(objects) : $(extradeps)
-@end group
-@end example
-
-@noindent
-means that the command @samp{make extradeps=foo.h} will consider
-@file{foo.h} as a dependency of each object file, but plain @samp{make}
-will not.
-
-If none of the explicit rules for a target has commands, then @code{make}
-searches for an applicable implicit rule to find some commands
-9@pxref{Implicit Rules, ,Using Implicit Rules}).
-
 @node Double-Colon,  , Multiple Rules, Rules
 @section Double-Colon Rules
 @cindex double-colon rule
@@ -2211,7 +2252,8 @@ differs depending on which dependency files caused the update, and such
 cases are rare.
 
 Each double-colon rule should specify commands; if it does not, an
-implicit rule will be used if one applies.  @xref{Implicit Rules, ,Using Implicit Rules}.
+implicit rule will be used if one applies.  
+@xref{Implicit Rules, ,Using Implicit Rules}.
 
 @node Commands, Using Variables, Rules, Top
 @chapter Writing the Commands in Rules
@@ -2265,17 +2307,23 @@ the makefile:
 @@echo About to make distribution files
 @end example
 
-When @code{make} is given the flag @samp{-n}, echoing is all that happens,
-no execution.  @xref{Options Summary, ,Summary of Options}.  In this case and only this case, even the
+@cindex @code{-n}
+@cindex @code{--just-print}
+When @code{make} is given the flag @samp{-n} or @samp{--just-print},
+echoing is all that happens, no execution.  @xref{Options Summary,
+,Summary of Options}.  In this case and only this case, even the
 commands starting with @samp{@@} are printed.  This flag is useful for
 finding out which commands @code{make} thinks are necessary without
 actually doing them.
 
 @cindex @code{-s}
+@cindex @code{--silent}
 @findex .SILENT
-The @samp{-s} flag to @code{make} prevents all echoing, as if all commands
+The @samp{-s} or @samp{--silent}
+flag to @code{make} prevents all echoing, as if all commands
 started with @samp{@@}.  A rule in the makefile for the special target
-@code{.SILENT} has the same effect (@pxref{Special Targets, ,Special Built-in Target Names}).
+@code{.SILENT} has the same effect 
+(@pxref{Special Targets, ,Special Built-in Target Names}).
 @code{.SILENT} is essentially obsolete since @samp{@@} is more flexible.@refill
 
 @node Execution, Parallel, Echoing, Commands
@@ -2332,10 +2380,13 @@ Environment}.
 @cindex parallel execution
 @cindex execution in parallel
 @cindex job slots
+@cindex @code{-j}
+@cindex @code{--jobs}
 GNU @code{make} knows how to execute several commands at once.
 Normally, @code{make} will execute only one command at a time, waiting
-for it to finish before executing the next.  However, the @samp{-j}
-option tells @code{make} to execute many commands simultaneously.@refill
+for it to finish before executing the next.  However, the @samp{-j} or
+@samp{--jobs} option tells @code{make} to execute many commands
+simultaneously.@refill
 
 If the @samp{-j} option is followed by an integer, this is the number of
 commands to execute at once; this is called the number of @dfn{job slots}.
@@ -2368,17 +2419,21 @@ if you are not using this feature, then standard input works normally in
 all commands.
 
 If a command fails (is killed by a signal or exits with a nonzero
-status), and errors are not ignored for that command (@pxref{Errors, ,Errors in Commands}),
+status), and errors are not ignored for that command
+(@pxref{Errors, ,Errors in Commands}),
 the remaining command lines to remake the same target will not be run.
-If a command fails and the @samp{-k} option was not given
-(@pxref{Options Summary, ,Summary of Options}), @code{make} aborts execution.  If make
+If a command fails and the @samp{-k} or @samp{--keep-going}
+option was not given
+(@pxref{Options Summary, ,Summary of Options}), 
+@code{make} aborts execution.  If make
 terminates for any reason (including a signal) with child processes
 running, it waits for them to finish before actually exiting.@refill
 
 When the system is heavily loaded, you will probably want to run fewer jobs
 than when it is lightly loaded.  You can use the @samp{-l} option to tell
 @code{make} to limit the number of jobs to run at once, based on the load
-average.  The @samp{-l} option is followed by a floating-point number.  For
+average.  The @samp{-l} or @samp{--max-load}
+option is followed by a floating-point number.  For
 example,
 
 @example
@@ -2431,7 +2486,8 @@ This causes @code{rm} to continue even if it is unable to remove a file.
 
 @cindex @code{-i}
 @findex .IGNORE
-When you run @code{make} with the @samp{-i} flag, errors are ignored in
+When you run @code{make} with the @samp{-i} or @samp{--ignore-errors}
+flag, errors are ignored in
 all commands of all rules.  A rule in the makefile for the special target
 @code{.IGNORE} has the same effect.  These ways of ignoring errors are
 obsolete because @samp{-} is more flexible.
@@ -2448,7 +2504,8 @@ commands will be executed for these targets, since their preconditions
 have not been achieved.
 
 Normally @code{make} gives up immediately in this circumstance, returning a
-nonzero status.  However, if the @samp{-k} flag is specified, @code{make}
+nonzero status.  However, if the @samp{-k} or @samp{--keep-going}
+flag is specified, @code{make}
 continues to consider the other dependencies of the pending targets,
 remaking them if necessary, before it gives up and returns nonzero status.
 For example, after an error in compiling one object file, @samp{make -k}
@@ -2558,7 +2615,8 @@ CFLAGS=-O}, so that all C compilations will be optimized, the
 sub-@code{make} is run with @samp{cd subdir; /bin/make CFLAGS=-O}.@refill
 
 As a special feature, using the variable @code{MAKE} in the commands
-of a rule alters the effects of the @samp{-t}, @samp{-n} or @samp{-q}
+of a rule alters the effects of the @samp{-t} (@samp{--touch}), @samp{-n}
+(@samp{--just-print}), or @samp{-q} (@samp{--question})
 option.  Using the @code{MAKE} variable has the same effect as using a
 @samp{+} character at the beginning of the command line.
 @xref{Instead of Execution, ,Instead of Executing the
@@ -2569,7 +2627,7 @@ Consider the command @samp{make -t} in the above example.  (The
 any commands; see @ref{Instead of Execution}.)  Following the usual
 definition of @samp{-t}, a @samp{make -t} command in the example would
 create a file named @file{subsystem} and do nothing else.  What you
-really want it to do is run @samp{cd subdir; make -t}; but that would
+really want it to do is run @samp{@w{cd subdir;} @w{make -t}}; but that would
 require executing the command, and @samp{-t} says not to execute
 commands.@refill
 
@@ -2594,18 +2652,21 @@ commands, is propagated to the subsystem.@refill
 Variable values of the top-level @code{make} can be passed to the
 sub-@code{make} through the environment by explicit request.  These
 variables are defined in the sub-@code{make} as defaults, but do not
-override what is specified in the sub-@code{make}'s makefile unless the
-@samp{-e} switch is used (@pxref{Options Summary, ,Summary of Options}).@refill
+override what is specified in the sub-@code{make}'s makefile unless
+you use the @samp{-e} switch
+(@pxref{Options Summary, ,Summary of Options}).@refill
 
-The way this works is that @code{make} adds each variable and its value
-to the environment for running each command.  The sub-@code{make}, in
-turn, uses the environment to initialize its table of variable values.
-@xref{Environment, ,Variables from the Environment}.
+To pass down, or @dfn{export}, a variable, @code{make} adds the variable
+and its value to the environment for running each command.  The
+sub-@code{make}, in turn, uses the environment to initialize its table
+of variable values.  @xref{Environment, ,Variables from the
+Environment}.
 
-By default, a variable is only passed down if its name consists only of
-letters, numbers and underscores.  Some shells cannot cope with
-environment variable names consisting of characters other than letters,
-numbers, and underscores.
+Except by explicit request, @code{make} exports a variable only if it
+is either defined in the environment initially or set on the command
+line, and if its name consists only of letters, numbers and underscores.
+Some shells cannot cope with environment variable names consisting of
+characters other than letters, numbers, and underscores.
 
 Variables are @emph{not} normally passed down if they were created by
 default by @code{make} (@pxref{Implicit Variables, ,Variables Used by
@@ -2613,11 +2674,11 @@ Implicit Rules}).  The sub-@code{make} will define these for
 itself.@refill
 
 @findex export
-If you want to send or @dfn{export} specific variables to a
-sub-@code{make}, use the @code{export} directive, like this:
+If you want to export specific variables to a sub-@code{make}, use the
+@code{export} directive, like this:
 
 @example
-export @var{variable} @var{variable-2} @dots{}
+export @var{variable} @dots{}
 @end example
 
 @noindent
@@ -2626,7 +2687,7 @@ If you want to @emph{prevent} a variable from being exported, use the
 @code{unexport} directive, like this:
 
 @example
-unexport @var{variable} @var{variable-2} @dots{}
+unexport @var{variable} @dots{}
 @end example
 
 @noindent
@@ -2638,17 +2699,25 @@ export @var{variable} = value
 @end example
 
 @noindent
-or:
+has the same result as:
+
+@example
+@var{variable} = value
+export @var{variable}
+@end example
+
+@noindent
+and
 
 @example
 export @var{variable} := value
 @end example
 
 @noindent
-This has the same result as:
+has the same result as:
 
 @example
-@var{variable} = value
+@var{variable} := value
 export @var{variable}
 @end example
 
@@ -2676,7 +2745,7 @@ The behavior elicited by an @code{export} directive by itself was the
 default in older versions of GNU @code{make}.  If your makefiles depend
 on this behavior and you want to be compatible with old versions of
 @code{make}, you can write a rule for the special target
-@code{.EXPORT_ALL_VARIABLES} instead of the @code{export} directive.
+@code{.EXPORT_ALL_VARIABLES} instead of using the @code{export} directive.
 This will be ignored by old @code{make}s, while the @code{export}
 directive will cause a syntax error.@refill
 
@@ -2729,10 +2798,11 @@ processes them as if they had been given as arguments.  @xref{Options Summary, ,
 The options @samp{-C}, @samp{-f}, @samp{-I}, @samp{-o}, and @samp{-W}
 are not put into @code{MAKEFLAGS}; these options are not passed down.@refill
 
-The @samp{-j} option is a special case (@pxref{Parallel, ,Parallel Execution}).  If you set
+The @samp{-j} option is a special case 
+(@pxref{Parallel, ,Parallel Execution}).  If you set
 it to some numeric value, @samp{-j 1} is always put into
 @code{MAKEFLAGS} instead of the value you specified.  This is because if
-the @samp{-j} option were passed down to sub-@code{make}s, you would get
+the @w{@samp{-j}} option were passed down to sub-@code{make}s, you would get
 many more jobs running in parallel than you asked for.  If you give
 @samp{-j} with no numeric argument, meaning to run as many jobs as
 possible in parallel, this is passed down, since multiple infinities are
@@ -2812,6 +2882,10 @@ make: Leaving directory `/u/gnu/make'.
 @noindent
 when processing is completed.
 
+Normally, you do not need to specify this option because @samp{make}
+does it for you: @samp{-w} is turned on automatically when you use the
+@samp{-C} option, and in sub-@code{make}s.
+
 @node Sequences, Empty Commands, Recursion, Commands
 @section Defining Canned Command Sequences
 @cindex sequences of commands
@@ -2879,7 +2953,7 @@ target:;
 
 @noindent
 defines an empty command string for @file{target}.  You could also use a
-line beginning with a @key{TAB} to define an empty command string,
+line beginning with a tab character to define an empty command string,
 but this would be confusing because such a line looks empty.
 
 You may be wondering why you would want to define a command string that
@@ -2888,10 +2962,10 @@ from getting implicit commands (from implicit rules or the
 @code{.DEFAULT} special target; @pxref{Implicit Rules} and 
 @pxref{Last Resort, ,Defining Last-Resort Default Rules}).@refill
 
-You may be inclined to define empty command strings for targets that are
-not actual files, but only exist so that their dependencies can be
-remade.  However, this is not the best way to do that, because if the
-target file actually does exist, its dependencies may not be remade.
+You may be inclined to define empty command strings for targets that
+are not actual files, but only exist so that their dependencies can be
+remade.  However, this is not the best way to do that, because its
+commands may not be run if the target file actually does exist.
 @xref{Phony Targets, ,Phony Targets}, for a better way to do this.
 
 @node Using Variables, Conditionals, Commands, Top
@@ -2915,12 +2989,13 @@ Variables can represent lists of file names, options to pass to compilers,
 programs to run, directories to look in for source files, directories to
 write output in, or anything else you can imagine.
 
-A variable name may be any sequence characters not containing @samp{:},
+A variable name may be any sequence of characters not containing @samp{:},
 @samp{#}, @samp{=}, or leading or trailing whitespace.  However,
 variable names containing characters other than letters, numbers and
 underscores should be avoided, as they may be given special meanings in the
-future, and they are not passed through the environment to a
-sub-@code{make} (@pxref{Variables/Recursion, ,Communicating Variables to a Sub-@code{make}}).
+future, and with some shells they cannot be passed through the environment to a
+sub-@code{make} 
+(@pxref{Variables/Recursion, ,Communicating Variables to a Sub-@code{make}}).
 
 It is traditional to use upper case letters in variable names, but we
 recommend using lower case letters for variable names that serve internal
@@ -2968,7 +3043,7 @@ Variable references work by strict textual substitution.  Thus, the rule
 @example
 foo = c
 prog.o : prog.c
-        $(foo)$(foo) prog.c
+        $(foo)$(foo) -$(foo) prog.c
 @end example
 
 @noindent
@@ -3316,7 +3391,7 @@ Computed variable names can also be used in substitution references:
 a_objects := a.o b.o c.o
 1_objects := 1.o 2.o 3.o
 
-sources := $($(a1)_object:.o=.c)
+sources := $($(a1)_objects:.o=.c)
 @end group
 @end example
 
@@ -3418,8 +3493,9 @@ to read.
 
 Most variable names are considered to have the empty string as a value if
 you have never set them.  Several variables have built-in initial values
-that are not empty, but can be set by you in the usual ways
-(@pxref{Implicit Variables, ,Variables Used by Implicit Rules}).  Several special variables are set
+that are not empty, but you can set them in the usual ways
+(@pxref{Implicit Variables, ,Variables Used by Implicit Rules}).  
+Several special variables are set
 automatically to a new value for each rule; these are called the
 @dfn{automatic} variables (@pxref{Automatic, ,Automatic Variables}).
 
@@ -3468,7 +3544,7 @@ endef
 
 @noindent
 @iftex
-See the next section.
+See the next section for information about @code{define}.
 @end iftex
 @ifinfo
 @xref{Defining, ,Defining Variables Verbatim}.
@@ -4892,10 +4968,9 @@ over variables from makefiles.  @xref{Environment, ,Variables from the Environme
 Read the file named @var{file} as a makefile.
 @xref{Makefiles, ,Writing Makefiles}.
 
-@c !!! Does --help exit immediately or run make?
 @item -h
 @itemx --help
-Remind you of the options that @code{make} understands.
+Remind you of the options that @code{make} understands and then exits.  
 
 @item -i
 @itemx --ignore-errors
@@ -4993,7 +5068,6 @@ instead of running their commands.  This is used to pretend that the
 commands were done, in order to fool future invocations of
 @code{make}.  @xref{Instead of Execution, ,Instead of Executing the Commands}.
 
-@c !!! Does --version exit immediately or run make?  (compare --help)
 @item -v
 @itemx --version
 Print the version of the @code{make} program plus a copyright, a list
