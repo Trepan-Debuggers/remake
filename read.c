@@ -879,7 +879,7 @@ read_makefile (filename, flags)
 						  sizeof (struct nameseq),
 						  1),
 				  sizeof (struct nameseq));
-          *colonp = ':';
+          *p2 = ':';
 
           if (!filenames)
             {

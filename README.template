@@ -30,9 +30,17 @@ site.  There is information there about ordering hardcopy documentation.
 
 You can also find the latest versions of GNU Make from there.
 
-You can send GNU make bug reports to bug-make@gnu.org.  Please see the
+You can send GNU make bug reports to <bug-make@gnu.org>.  Please see the
 section of the GNU make manual entitled `Problems and Bugs' for
 information on submitting useful and complete bug reports.
+
+You can also use the FSF's online bug tracking system to submit new
+problem reports or search for existing ones.  A web interface is
+available here:
+
+  http://www-gnats.gnu.org:8080/cgi-bin/wwwgnats.pl
+
+Use the Category "make".
 
 If you need help using GNU make, try these forums:
 
@@ -45,6 +53,8 @@ Also:
 
   - See README.customs for details on integrating GNU make with the
     Customs distributed build environment from the Pmake distribution.
+
+  - See readme.vms for details about GNU Make on OpenVMS.
 
   - See README.W32 for details about GNU Make on Windows NT, 95, or 98.
 
