@@ -1,5 +1,5 @@
 /* Definition of target file data structures for GNU Make.
-Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -45,6 +45,10 @@ struct file
        or nil if there isn't one.  */
     struct file *parent;
 
+    /* For a double-colon entry, this is the first double-colon entry for
+       the same file.  Otherwise this is null.  */
+    struct file *double_colon;
+
     short int update_status;	/* Status of the last attempt to update,
 				   or -1 if none has been made.  */
 
@@ -56,7 +60,6 @@ struct file
 	cs_finished		/* Commands finished.  */
       } command_state ENUM_BITFIELD (2);
 
-    unsigned int double_colon:1;/* Nonzero for double-colon entry */
     unsigned int precious:1;	/* Non-0 means don't delete file on quit */
     unsigned int tried_implicit:1; /* Nonzero if have searched
 				      for implicit rule for making
