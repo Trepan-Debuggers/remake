@@ -7,7 +7,7 @@
 
 @c For publication, format makebook.texi instead of using this file directly.
 
-@set EDITION 0.41
+@set EDITION 0.42
 @set VERSION 3.66 Beta
 @set UPDATED 14 May 1993
 @set UPDATE-MONTH May 1993
