@@ -1,5 +1,9 @@
 2000-06-23  Paul D. Smith  <psmith@gnu.org>
 
+	* main.c (main): Replace EXIT_SUCCESS, EXIT_FAILURE, and
+	EXIT_TROUBLE with MAKE_SUCCESS, MAKE_FAILURE, and MAKE_TROUBLE.
+	* make.h: Define these macros.
+
 	* Version 3.79.1 released.
 
 	* configure.in: Add a new option, --disable-nsec-timestamps, to
