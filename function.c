@@ -1,5 +1,5 @@
 /* Variable function expansion for GNU Make.
-Copyright (C) 1988, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -51,8 +51,23 @@ subst_expand (o, text, subst, replace, slen, rlen, by_word, suffix_only)
       return o;
     }
 
-  while ((p = sindex (t, 0, subst, slen)) != 0)
+  do
     {
+      if ((by_word | suffix_only) && slen == 0)
+	/* When matching by words, the empty string should match
+	   the end of each word, rather than the end of the whole text.  */
+	p = end_of_token (next_token (t));
+      else
+	{
+	  p = sindex (t, 0, subst, slen);
+	  if (p == 0)
+	    {
+	      /* No more matches.  Output everything left on the end.  */
+	      o = variable_buffer_output (o, t, strlen (t));
+	      return o;
+	    }
+	}
+
       /* Output everything before this occurrence of the string to replace.  */
       if (p > t)
 	o = variable_buffer_output (o, t, p - t);
@@ -73,11 +88,7 @@ subst_expand (o, text, subst, replace, slen, rlen, by_word, suffix_only)
 
       /* Advance T past the string to be replaced.  */
       t = p + slen;
-    }
-
-  /* Output everything left on the end.  */
-  if (*t != '\0')
-    o = variable_buffer_output (o, t, strlen (t));
+    } while (*t != '\0');
 
   return o;
 }
