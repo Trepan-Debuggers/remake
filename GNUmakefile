@@ -160,13 +160,10 @@ nolib-deps = $(depfiles)
 else
 %.dep: %.c
 	$(mkdep-nolib) $< | sed 's,$*\.o,$(@:.dep=.o) $@,' > $@
-ifdef	archpfx
-load.dep: load.c
-	$(mkdep-nolib) $(LOAD_AVG) $< | sed 's,$*\.o,& $@,' > $@
-endif
 nolib-deps = $(patsubst $(archpfx)%,%,$(depfiles))
 endif
-Makefile.in: compatMakefile $(nolib-deps)
+# The distributed Makefile.in should contain deps for remote-stub only.
+Makefile.in: compatMakefile $(nolib-deps:remote-%.dep=remote-stub.dep)
 	(cat $<; \
 	 echo '# Automatically generated dependencies.'; \
 	 sed -e 's/ [^ ]*\.dep//' -e 's=$(archpfx)==' $(filter-out $<,$^) \
