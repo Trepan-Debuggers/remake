@@ -1,3 +1,10 @@
+1999-09-23  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/parallelism: Add a check to ensure that the
+	jobserver works when we re-invoke.  Also cleaned up the tests a
+	little, reducing the number of rules we use so the test won't need
+	as many "sleep" commands.
+
 1999-09-16  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/features/reinvoke: Remove invocations of "touch" in
