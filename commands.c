@@ -116,34 +116,64 @@ set_file_variables (file)
   DEFINE_VARIABLE ("@", 1, at);
   DEFINE_VARIABLE ("%", 1, percent);
 
-  /* Make sure that no dependencies are repeated.  This does not
-     really matter for the purpose of updating targets, but it
-     might make some names be listed twice for $^ and $?.  */
-
-  uniquize_deps (file->deps);
-
-  /* Compute the values for $^ and $?.  */
+  /* Compute the values for $^, $+, and $?.  */
 
   {
-    register unsigned int caret_len, qmark_len;
-    char *caret_value;
+    register unsigned int qmark_len, plus_len;
+    char *caret_value, *plus_value;
     register char *cp;
     char *qmark_value;
     register char *qp;
     register struct dep *d;
     unsigned int len;
 
-    caret_len = qmark_len = 0;
+    /* Compute first the value for $+, which is supposed to contain
+       duplicate dependencies as they were listed in the makefile.  */
+
+    plus_len = 0;
+    for (d = file->deps; d != 0; d = d->next)
+      plus_len += strlen (dep_name (d)) + 1;
+
+    len = plus_len == 0 ? 1 : plus_len;
+    cp = plus_value = (char *) alloca (len);
+
+    qmark_len = plus_len;	/* Will be this or less.  */
     for (d = file->deps; d != 0; d = d->next)
       {
-	register unsigned int i = strlen (dep_name (d)) + 1;
-	caret_len += i;
-	if (d->changed)
-	  qmark_len += i;
+	char *c = dep_name (d);
+
+#ifndef	NO_ARCHIVES
+	if (ar_name (c))
+	  {
+	    c = index (c, '(') + 1;
+	    len = strlen (c) - 1;
+	  }
+	else
+#endif
+	  len = strlen (c);
+
+	bcopy (c, cp, len);
+	cp += len;
+	*cp++ = ' ';
+
+	if (! d->changed)
+	  qmark_len -= len + 1;	/* Don't space in $? for this one.  */
       }
 
-    len = caret_len == 0 ? 1 : caret_len;
-    cp = caret_value = (char *) alloca (len);
+    /* Kill the last space and define the variable.  */
+
+    cp[cp > plus_value ? -1 : 0] = '\0';
+    DEFINE_VARIABLE ("+", 1, plus_value);
+
+    /* Make sure that no dependencies are repeated.  This does not
+       really matter for the purpose of updating targets, but it
+       might make some names be listed twice for $^ and $?.  */
+
+    uniquize_deps (file->deps);
+
+    /* Compute the values for $^ and $?.  */
+
+    cp = caret_value = plus_value; /* Reuse the buffer; it's big enough.  */
     len = qmark_len == 0 ? 1 : qmark_len;
     qp = qmark_value = (char *) alloca (len);
 
