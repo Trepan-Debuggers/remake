@@ -1133,8 +1133,9 @@ start_waiting_job (c)
     {
 #ifdef MAKE_JOBSERVER
       /* If this is not a recurse command and we are controlling
-	 multiple jobs, obtain a token before starting child. */
-      if (job_fds[0] >= 0 && !f->cmds->any_recurse)
+	 multiple jobs, and we don't yet have one, obtain a token before
+         starting child. */
+      if (job_fds[0] >= 0 && !f->cmds->any_recurse && !c->job_token)
 	{
 	  fd_set rfds;
 

@@ -94,7 +94,7 @@ update_goal_chain (goals, makefiles)
 
     struct dep *g;
     for (g = goals; g != 0; g = g->next)
-      g->changed = 0;
+      g->changed = g->deferred = 0;
   }
 
 #if 0
@@ -161,6 +161,16 @@ update_goal_chain (goals, makefiles)
 		 decide when to give an "up to date" diagnostic.  */
 	      g->changed += commands_started - ocommands_started;
 
+              /* Set the goal's `deferred' flag if we started a command but
+                 it didn't finish (parallel builds).  We need to remember
+                 this, because the next time through the goal chain the call
+                 to reap_children() will set the mtime, not the call to
+                 update_file() above.  So, the saved mtime from before
+                 update_file() will be the same as the mtime after it, and
+                 we'll think nothing changed when it did (see below).  */
+              if (file->command_state == cs_running)
+                g->deferred = 1;
+
 	      stop = 0;
 	      if (x != 0 || file->updated)
 		{
@@ -181,7 +191,7 @@ update_goal_chain (goals, makefiles)
 			  stop = (!keep_going_flag && !question_flag
 				  && !makefiles);
 			}
-		      else if (MTIME (file) != mtime)
+		      else if (MTIME (file) != mtime || g->deferred)
 			{
 			  /* Updating was done.  If this is a makefile and
 			     just_print_flag or question_flag is set
@@ -189,6 +199,7 @@ update_goal_chain (goals, makefiles)
 			     specified as a command-line target), don't
 			     change STATUS.  If STATUS is changed, we will
 			     get re-exec'd, and fall into an infinite loop.  */
+                          g->deferred = 0;
 			  if (!makefiles
 			      || (!just_print_flag && !question_flag))
 			    status = 0;
