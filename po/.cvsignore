@@ -1,1 +1,5 @@
 *.gmo
+POTFILES
+Makefile.in
+Makefile
+
