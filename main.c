@@ -390,22 +390,8 @@ main (argc, argv, envp)
   FATAL_SIG (SIGINT);
   FATAL_SIG (SIGTERM);
 
-  FATAL_SIG (SIGILL);
-  FATAL_SIG (SIGTRAP);
-  FATAL_SIG (SIGIOT);
-#ifdef	SIGEMT
-  FATAL_SIG (SIGEMT);
-#endif
 #ifdef	SIGDANGER
   FATAL_SIG (SIGDANGER);
-#endif
-  FATAL_SIG (SIGFPE);
-#ifdef	SIGBUS
-  FATAL_SIG (SIGBUS);
-#endif
-  FATAL_SIG (SIGSEGV);
-#ifdef	SIGSYS
-  FATAL_SIG (SIGSYS);
 #endif
 #ifdef SIGXCPU
   FATAL_SIG (SIGXCPU);
