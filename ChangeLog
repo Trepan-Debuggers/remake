@@ -1,5 +1,8 @@
-Tue Aug 26 11:59:15 1997  Paul D. Smith  <psmith@baynetworks.com>
+Wed Aug 27 17:09:32 1997  Paul D. Smith  <psmith@baynetworks.com>
 
+        * Version 3.75.92
+
+Tue Aug 26 11:59:15 1997  Paul D. Smith  <psmith@baynetworks.com>
 	* main.c (print_version): Add 97 to copyright years.
 
 	* read.c (do_define): Check the length of the array before looking
