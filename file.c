@@ -128,8 +128,9 @@ lookup_file (name)
 }
 
 struct file *
-enter_file (name)
+enter_file (name, floc)
      char *name;
+     const floc_t *floc;
 {
   register struct file *f;
   register struct file *new;
@@ -175,6 +176,13 @@ enter_file (name)
   bzero ((char *) new, sizeof (struct file));
   new->name = new->hname = name;
   new->update_status = -1;
+  new->tracing = tracing;
+  if (floc) {
+    new->floc = *floc;
+  } else {
+    new->floc.lineno = 0;
+    new->floc.filenm = NULL;
+  }
 
   if (HASH_VACANT (f))
     hash_insert_at (&files, new, file_slot);
@@ -432,7 +440,7 @@ snap_deps ()
 	  {
 	    d->file = lookup_file (d->name);
 	    if (d->file == 0)
-	      d->file = enter_file (d->name);
+	      d->file = enter_file (d->name, NILF);
 	    else
 	      free (d->name);
 	    d->name = 0;

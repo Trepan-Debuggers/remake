@@ -1,0 +1,94 @@
+                                                                     -*-text-*-
+
+Obtaining CVS Code
+------------------
+
+You can obtain the GNU make source code via anonymous CVS from
+Sourceforge 
+
+  $ cvs -d:pserver:anoncvs@bashdb.sourceforge.net:/cvsroot/bashdb co remake
+
+You might want to use the "-z3" option to get compression, and you most
+certainly will want the -P option to avoid unneeded directories
+cluttering up your source.  Personally I add these (as well as -dP for
+update) to my ~/.cvsrc file.
+
+
+If you have an older version of CVS, you might have to login first.
+There is no password; just hit the ENTER key if you are asked for one.
+
+
+Building From CVS
+-----------------
+
+To build GNU make from CVS, you will need Autoconf, Automake, and
+Gettext, and any tools that those utilities require (GNU m4, Perl,
+etc.).  See the configure.in file to find the minimum versions of each
+of these tools.  You will also need a copy of wget.
+
+After checking out the code, you will need to perform these steps to get
+to the point where you can run "make".
+
+
+ 1) $ autoreconf -i -s
+
+    This rebuilds all the things that need rebuilding, installing
+    missing files as symbolic links.
+
+    You may get warnings here about missing files like README, etc.
+    Ignore them, they are harmless.
+
+
+ 2) $ ./configure
+
+    Generate a Makefile
+
+At this point you have successfully brought your CVS copy of the GNU
+make source directory up to the point where it can be treated
+more-or-less like the official package you would get from ftp.gnu.org.
+That is, you can just run:
+
+  $ make && make check && make install
+
+to build and install GNU make.
+
+
+Creating a Package
+------------------
+
+Once you have performed the above steps (including the configuration and
+build) you can create a GNU make package.  This is very simple, just
+run:
+
+  $ make dist-gzip
+
+and, if you like:
+
+  $ make dist-bzip2
+
+Even better, you should run this:
+
+  $ make distcheck
+
+Which will build both .gz and .bz2 package files, then unpack them into
+a temporary location, try to build them, and repack them, verifying that
+everything works, you get the same results, _and_ no extraneous files
+are left over after the "distclean" rule--whew!!  Now, _that_ is why
+converting to Automake is worth the trouble!  A big "huzzah!" to Tom
+T. and the AutoToolers!
+
+
+That's it, you're done!
+
+
+Appendix A - For The Brave
+--------------------------
+
+For the brave (or foolhardy), here is a command to build a GNU make
+distribution package from a virgin CVS source checkout (assuming all
+the prerequisites are available of course).
+
+autoreconf -i -s && ./configure && make && make check && make distcheck
+
+
+$Id: README.cvs,v 1.1 2004/04/04 02:03:56 rockyb Exp $

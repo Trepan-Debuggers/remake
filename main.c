@@ -1,6 +1,6 @@
 /* Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
-2002 Free Software Foundation, Inc.
+2002, 2004 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -145,6 +145,15 @@ static int debug_flag = 0;
 
 int db_level = 0;
 
+/* If 1, we give additional error reporting information. */
+int extended_errors = 0;
+
+/* If 1, we print variable definitions. */
+int show_variable_definitions = 0;
+
+/* If 1, we are tracing execution */
+int tracing = 0;
+
 #ifdef WINDOWS32
 /* Suspend make in main for a short time to allow debugger to attach */
 
@@ -277,6 +286,9 @@ static const char *const usage[] =
   -e, --environment-overrides\n\
                               Environment variables override makefiles.\n"),
     N_("\
+  -E, --extended-errors\n\
+                              Additional error reporting.\n"),
+    N_("\
   -f FILE, --file=FILE, --makefile=FILE\n\
                               Read FILE as a makefile.\n"),
     N_("\
@@ -306,6 +318,8 @@ static const char *const usage[] =
     N_("\
   -r, --no-builtin-rules      Disable the built-in implicit rules.\n"),
     N_("\
+  -x, --trace                 Trace command execution\n"),
+    N_("\
   -R, --no-builtin-variables  Disable the built-in variable settings.\n"),
     N_("\
   -s, --silent, --quiet       Don't echo commands.\n"),
@@ -325,6 +339,8 @@ static const char *const usage[] =
                               Consider FILE to be infinitely new.\n"),
     N_("\
   --warn-undefined-variables  Warn when an undefined variable is referenced.\n"),
+    N_("\
+  --show--variables  Show variable expansions.\n"),
     NULL
   };
 
@@ -342,6 +358,8 @@ static const struct command_switch switches[] =
 #endif
     { 'e', flag, (char *) &env_overrides, 1, 1, 0, 0, 0,
         "environment-overrides", },
+    { 'E', flag, (char *) &extended_errors, 1, 1, 0, 0, 0,
+        "extended-errors", },
     { 'f', string, (char *) &makefiles, 0, 0, 0, 0, 0, "file" },
     { 'h', flag, (char *) &print_usage_flag, 0, 0, 0, 0, 0, "help" },
     { 'i', flag, (char *) &ignore_errors_flag, 1, 1, 0, 0, 0,
@@ -380,11 +398,14 @@ static const struct command_switch switches[] =
     { 'v', flag, (char *) &print_version_flag, 1, 1, 0, 0, 0, "version" },
     { 'w', flag, (char *) &print_directory_flag, 1, 1, 0, 0, 0,
         "print-directory" },
+    { 'x', flag, (char *) &tracing, 1, 1, 0, 0, 0, "trace" },
     { CHAR_MAX+3, flag, (char *) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
 	"no-print-directory" },
     { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0, "what-if" },
     { CHAR_MAX+4, flag, (char *) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
 	"warn-undefined-variables" },
+    { CHAR_MAX+5, flag, (char *) &show_variable_definitions, 1, 1, 0, 0, 0,
+	"show-variables" },
     { '\0', }
   };
 
@@ -538,7 +559,7 @@ enter_command_line_file (name)
       name[2] = '\0';
     }
 
-  return enter_file (xstrdup (name));
+  return enter_file (xstrdup (name), NILF);
 }
 
 /* Toggle -d on receipt of SIGUSR1.  */
@@ -1373,7 +1394,7 @@ int main (int argc, char ** argv)
             makefiles->list[i] = xstrdup (stdin_nm);
 
 	    /* Make sure the temporary file will not be remade.  */
-	    f = enter_file (stdin_nm);
+	    f = enter_file (stdin_nm, NILF);
 	    f->updated = 1;
 	    f->update_status = 0;
 	    f->command_state = cs_finished;
@@ -1439,7 +1460,7 @@ int main (int argc, char ** argv)
 
   /* Read all the makefiles.  */
 
-  default_file = enter_file (".DEFAULT");
+  default_file = enter_file (".DEFAULT", NILF);
 
   read_makefiles
     = read_all_makefiles (makefiles == 0 ? (char **) 0 : makefiles->list);
@@ -2735,7 +2756,7 @@ die (status)
 
       /* Wait for children to die.  */
       for (err = (status != 0); job_slots_used > 0; err = 0)
-	reap_children (1, err);
+	reap_children (1, err, NULL);
 
       /* Let the remote job module clean up its state.  */
       remote_cleanup ();

@@ -252,7 +252,7 @@ read_all_makefiles (makefiles)
 	    {
 	      struct dep *d = (struct dep *) xmalloc (sizeof (struct dep));
 	      d->name = 0;
-	      d->file = enter_file (*p);
+	      d->file = enter_file (*p, NILF);
 	      d->file->dontcare = 1;
               d->ignore_mtime = 0;
 	      /* Tell update_goal_chain to bail out as soon as this file is
@@ -343,7 +343,7 @@ eval_makefile (filename, flags)
   deps->file = lookup_file (filename);
   if (deps->file == 0)
     {
-      deps->file = enter_file (xstrdup (filename));
+      deps->file = enter_file (xstrdup (filename), NILF);
       if (flags & RM_DONTCARE)
 	deps->file->dontcare = 1;
     }
@@ -442,8 +442,8 @@ eval (ebuf, set_default)
   long nlines = 0;
   int two_colon = 0;
   char *pattern = 0, *pattern_percent;
-  struct floc *fstart;
-  struct floc fi;
+  floc_t *fstart;
+  floc_t fi;
 
 #define record_waiting_files()						      \
   do									      \
@@ -630,7 +630,19 @@ eval (ebuf, set_default)
 	  continue;
 	}
 
-      if (word1eq ("override"))
+      if (word1eq ("traceon")) {
+	tracing = 1;
+	continue;
+      } else if (word1eq ("traceoff")) {
+	tracing = 0;
+	continue;
+      } else if (word1eq ("showon")) {
+	show_variable_definitions = 1;
+	continue;
+      } else if (word1eq ("showoff")) {
+	show_variable_definitions = 0;
+	continue;
+      } else if (word1eq ("override"))
         {
 	  if (*p2 == '\0')
 	    error (fstart, _("empty `override' directive"));
@@ -781,7 +793,7 @@ eval (ebuf, set_default)
 	  p2 = p;
 	  files = multi_glob (parse_file_seq (&p2, '\0',
 					      sizeof (struct nameseq),
-					      1),
+					      1, fstart),
 			      sizeof (struct nameseq));
 	  free (p);
 
@@ -991,7 +1003,7 @@ eval (ebuf, set_default)
         *colonp = '\0';
         filenames = multi_glob (parse_file_seq (&p2, '\0',
                                                 sizeof (struct nameseq),
-                                                1),
+                                                1, fstart),
                                 sizeof (struct nameseq));
         *p2 = ':';
 
@@ -1136,7 +1148,8 @@ eval (ebuf, set_default)
         if (p != 0)
           {
             struct nameseq *target;
-            target = parse_file_seq (&p2, ':', sizeof (struct nameseq), 1);
+            target = parse_file_seq (&p2, ':', 
+				     sizeof (struct nameseq), 1, fstart);
             ++p2;
             if (target == 0)
               fatal (fstart, _("missing target pattern"));
@@ -1153,7 +1166,8 @@ eval (ebuf, set_default)
 
         /* Parse the dependencies.  */
         deps = (struct dep *)
-          multi_glob (parse_file_seq (&p2, '|', sizeof (struct dep), 1),
+          multi_glob (parse_file_seq (&p2, '|', 
+				      sizeof (struct dep), 1, fstart),
                       sizeof (struct dep));
         if (*p2)
           {
@@ -1166,7 +1180,8 @@ eval (ebuf, set_default)
               ;
             ++p2;
             *deps_ptr = (struct dep *)
-              multi_glob (parse_file_seq (&p2, '\0', sizeof (struct dep), 1),
+              multi_glob (parse_file_seq (&p2, '\0', sizeof (struct dep), 1, 
+					  fstart),
                           sizeof (struct dep));
             for (d = *deps_ptr; d != 0; d = d->next)
               d->ignore_mtime = 1;
@@ -1676,7 +1691,7 @@ record_target_var (filenames, defn, two_colon, origin, flocp)
              this situation.  */
           f = lookup_file (name);
           if (!f)
-            f = enter_file (name);
+            f = enter_file (name, NILF);
           else if (f->double_colon)
             f = f->double_colon;
 
@@ -1955,7 +1970,7 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
 	{
 	  /* Single-colon.  Combine these dependencies
 	     with others in file's existing record, if any.  */
-	  f = enter_file (name);
+	  f = enter_file (name, flocp);
 
 	  if (f->double_colon)
 	    fatal (flocp,
@@ -2060,7 +2075,7 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
 	  if (f != 0 && f->is_target && !f->double_colon)
 	    fatal (flocp,
                    _("target file `%s' has both : and :: entries"), f->name);
-	  f = enter_file (name);
+	  f = enter_file (name, flocp);
 	  /* If there was an existing entry and it was a double-colon
 	     entry, enter_file will have returned a new one, making it the
 	     prev pointer of the old one, and setting its double_colon
@@ -2222,11 +2237,12 @@ find_percent (pattern)
    If STRIP is nonzero, strip `./'s off the beginning.  */
 
 struct nameseq *
-parse_file_seq (stringp, stopchar, size, strip)
+parse_file_seq (stringp, stopchar, size, strip, floc)
      char **stringp;
      int stopchar;
      unsigned int size;
      int strip;
+     floc_t *floc;
 {
   register struct nameseq *new = 0;
   register struct nameseq *new1, *lastnew1;
@@ -2339,6 +2355,13 @@ parse_file_seq (stringp, stopchar, size, strip)
       new1 = (struct nameseq *) xmalloc (size);
       new1->name = name;
       new1->next = new;
+      if (floc) {
+	new1->floc = *floc;
+      } else {
+	new1->floc.lineno = 0;
+	new1->floc.filenm = NULL;
+      }
+      
       new = new1;
     }
 

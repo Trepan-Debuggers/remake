@@ -1,0 +1,5 @@
+*.m4
+config.*
+mkinstalldirs
+
+Makefile Makefile.in

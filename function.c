@@ -356,7 +356,7 @@ string_glob (line)
 		       /* We do not want parse_file_seq to strip `./'s.
 			  That would break examples like:
 			  $(patsubst ./%.c,obj/%.o,$(wildcard ./?*.c)).  */
-		       0),
+		       0, NILF),
 		      sizeof (struct nameseq));
 
   if (result == 0)
@@ -1623,7 +1623,7 @@ func_shell (o, argv, funcname)
       /* Loop until child_handler sets shell_function_completed
 	 to the status of our child shell.  */
       while (shell_function_completed == 0)
-	reap_children (1, 0);
+	reap_children (1, 0, NULL);
 
       if (batch_filename) {
 	DB (DB_VERBOSE, (_("Cleaning up temporary batch file %s\n"),

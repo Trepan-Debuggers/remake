@@ -104,7 +104,7 @@ ar_member_date (name)
     arfile = lookup_file (arname);
     if (arfile == 0 && file_exists_p (arname))
       {
-	arfile = enter_file (arname);
+	arfile = enter_file (arname, NILF);
 	arname_used = 1;
       }
 
@@ -165,7 +165,7 @@ ar_touch (name)
     arfile = lookup_file (arname);
     if (arfile == 0)
       {
-	arfile = enter_file (arname);
+	arfile = enter_file (arname, NILF);
 	arname_used = 1;
       }
 

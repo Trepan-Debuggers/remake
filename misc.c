@@ -21,6 +21,7 @@ Boston, MA 02111-1307, USA.  */
 #include "make.h"
 #include "dep.h"
 #include "debug.h"
+#include "trace.h"
 
 /* Variadic functions.  We go through contortions to allow proper function
    prototypes for both ANSI and pre-ANSI C compilers, and also for those
@@ -277,6 +278,41 @@ error (flocp, fmt, va_alist)
   fflush (stderr);
 }
 
+void
+#if __STDC__ && HAVE_STDVARARGS
+err (target_stack_node_t *p_call, const char *fmt, ...)
+#else
+err (p_call, fmt, va_alist)
+     target_stack_node_t *p_call;
+     const char *fmt;
+     va_dcl
+#endif
+{
+#if HAVE_STDVARARGS
+  va_list args;
+#endif
+  floc_t *p_floc;
+
+  log_working_directory (1);
+
+  if (p_call && p_call->p_target) p_floc = &(p_call->p_target->floc);
+
+  if (p_floc && p_floc->filenm)
+    fprintf (stderr, "%s:%lu: ", p_floc->filenm, p_floc->lineno);
+  else if (makelevel == 0)
+    fprintf (stderr, "%s: ", program);
+  else
+    fprintf (stderr, "%s[%u]: ", program, makelevel);
+
+  VA_START(args, fmt);
+  VA_PRINTF (stderr, fmt, args);
+  VA_END (args);
+
+  putc ('\n', stderr);
+  if (extended_errors) show_call_stack(p_call);
+  fflush (stderr);
+}
+
 /* Print an error message and exit.  */
 
 void
@@ -308,6 +344,43 @@ fatal (flocp, fmt, va_alist)
 
   fputs (_(".  Stop.\n"), stderr);
 
+  die (2);
+}
+
+/* Print an error message and exit.  */
+
+void
+#if __STDC__ && HAVE_STDVARARGS
+fatal_err(target_stack_node_t *p_call, const char *fmt, ...)
+#else
+fatal_err (flocp, fmt, va_alist)
+     target_stack_node_t *p_call;
+     const char *fmt;
+     va_dcl
+#endif
+{
+#if HAVE_STDVARARGS
+  va_list args;
+#endif
+  floc_t *p_floc;
+
+  log_working_directory (1);
+
+  if (p_call && p_call->p_target) p_floc = &(p_call->p_target->floc);
+
+  if (p_floc && p_floc->filenm)
+    fprintf (stderr, "%s:%lu: *** ", p_floc->filenm, p_floc->lineno);
+  else if (makelevel == 0)
+    fprintf (stderr, "%s: *** ", program);
+  else
+    fprintf (stderr, "%s[%u]: *** ", program, makelevel);
+
+  VA_START(args, fmt);
+  VA_PRINTF (stderr, fmt, args);
+  VA_END (args);
+
+  fputs (_(".  Stop.\n"), stderr);
+  if (extended_errors) show_call_stack(p_call);
   die (2);
 }
 

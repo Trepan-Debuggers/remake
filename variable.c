@@ -19,11 +19,13 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 #include "make.h"
+#include "debug.h"
 #include "dep.h"
 #include "filedef.h"
 #include "job.h"
 #include "commands.h"
 #include "variable.h"
+#include "show.h"
 #include "rule.h"
 #ifdef WINDOWS32
 #include "pathstuff.h"
@@ -1004,6 +1006,11 @@ do_variable_definition (flocp, varname, value, origin, flavor, target_var)
                               (target_var
                                ? current_variable_set_list->set : NULL),
                               flocp);
+
+  if (show_variable_definitions) {
+    show_variable(v);
+  }
+  
   v->append = append;
 
   if (alloc_value)

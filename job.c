@@ -239,29 +239,28 @@ int w32_kill(int pid, int sig)
    Append "(ignored)" if IGNORED is nonzero.  */
 
 static void
-child_error (target_name, exit_code, exit_sig, coredump, ignored)
-     char *target_name;
-     int exit_code, exit_sig, coredump;
-     int ignored;
+child_error (child_t *p_child, target_stack_node_t *p_call_stack,
+	     int exit_code, int exit_sig, int coredump, int ignored)
 {
+  char *target_name = p_child->file->name;
   if (ignored && silent_flag)
     return;
 
 #ifdef VMS
   if (!(exit_code & 1))
-      error (NILF,
-             (ignored ? _("*** [%s] Error 0x%x (ignored)")
-              : _("*** [%s] Error 0x%x")),
-             target_name, exit_code);
+    err (p_call_stack,
+	 (ignored ? _("*** [%s] Error 0x%x (ignored)")
+	  : _("*** [%s] Error 0x%x")),
+	 target_name, exit_code);
 #else
   if (exit_sig == 0)
-    error (NILF, ignored ? _("[%s] Error %d (ignored)") :
-	   _("*** [%s] Error %d"),
-	   target_name, exit_code);
+    err (p_call_stack, ignored ? _("[%s] Error %d (ignored)") :
+	 _("*** [%s] Error %d"),
+	 target_name, exit_code);
   else
-    error (NILF, "*** [%s] %s%s",
-	   target_name, strsignal (exit_sig),
-	   coredump ? _(" (core dumped)") : "");
+    err (p_call_stack, "*** [%s] %s%s",
+	 target_name, strsignal (exit_sig),
+	 coredump ? _(" (core dumped)") : "");
 #endif /* VMS */
 }
 
@@ -415,8 +414,7 @@ extern int shell_function_pid, shell_function_completed;
    print an error message first.  */
 
 void
-reap_children (block, err)
-     int block, err;
+reap_children (int block, int err, target_stack_node_t *p_call_stack)
 {
   WAIT_T status;
   /* Initially, assume we have some.  */
@@ -656,7 +654,7 @@ reap_children (block, err)
           /* The commands failed.  Write an error message,
              delete non-precious targets, and abort.  */
           static int delete_on_error = -1;
-          child_error (c->file->name, exit_code, exit_sig, coredump, 0);
+          child_error (c, p_call_stack, exit_code, exit_sig, coredump, 0);
           c->file->update_status = 2;
           if (delete_on_error == -1)
             {
@@ -671,8 +669,7 @@ reap_children (block, err)
           if (child_failed)
             {
               /* The commands failed, but we don't care.  */
-              child_error (c->file->name,
-                           exit_code, exit_sig, coredump, 1);
+              child_error (c, p_call_stack, exit_code, exit_sig, coredump, 1);
               child_failed = 0;
             }
 
@@ -986,7 +983,10 @@ start_job_command (child)
      can log the working directory before the command's own error messages
      appear.  */
 
-  message (0, (just_print_flag || (!(flags & COMMANDS_SILENT) && !silent_flag))
+  show_child_cmd(child);
+  message (0, 
+	   ( just_print_flag || tracing || child->tracing
+	     || (!(flags & COMMANDS_SILENT) && !silent_flag) )
 	   ? "%s" : (char *) 0, p);
 
   /* Tell update_goal_chain that a command has been started on behalf of
@@ -1344,8 +1344,7 @@ start_waiting_job (c)
 /* Create a `struct child' for FILE and start its commands running.  */
 
 void
-new_job (file)
-     register struct file *file;
+new_job (file_t *file, target_stack_node_t *p_call_stack)
 {
   register struct commands *cmds = file->cmds;
   register struct child *c;
@@ -1357,7 +1356,7 @@ new_job (file)
   start_waiting_jobs ();
 
   /* Reap any children that might have finished recently.  */
-  reap_children (0, 0);
+  reap_children (0, 0, p_call_stack);
 
   /* Chop the commands up into lines if they aren't already.  */
   chop_commands (cmds);
@@ -1469,9 +1468,11 @@ new_job (file)
 
   c = (struct child *) xmalloc (sizeof (struct child));
   bzero ((char *)c, sizeof (struct child));
-  c->file = file;
+  c->fileinfo      = cmds->fileinfo;
+  c->file          = file;   /* FIXME?: Could remove as it is in fileinfo */
   c->command_lines = lines;
   c->sh_batch_file = NULL;
+  c->tracing       = file->tracing;
 
   /* Fetch the first command line to be run.  */
   job_next_command (c);
@@ -1481,7 +1482,7 @@ new_job (file)
 
   if (job_slots != 0)
     while (job_slots_used == job_slots)
-      reap_children (1, 0);
+      reap_children (1, 0, p_call_stack);
 
 #ifdef MAKE_JOBSERVER
   /* If we are controlling multiple jobs make sure we have a token before
@@ -1540,7 +1541,7 @@ new_job (file)
           }
 
         /* Reap anything that's currently waiting.  */
-        reap_children (0, 0);
+        reap_children (0, 0, p_call_stack);
 
         /* If our "free" token has become available, use it.  */
         if (!children)
@@ -1578,7 +1579,7 @@ new_job (file)
     /* Since there is only one job slot, make things run linearly.
        Wait for the child to die, setting the state to `cs_finished'.  */
     while (file->command_state == cs_running)
-      reap_children (1, 0);
+      reap_children (1, 0, p_call_stack);
 
   return;
 }
@@ -1655,7 +1656,7 @@ start_waiting_jobs ()
   do
     {
       /* Check for recently deceased descendants.  */
-      reap_children (0, 0);
+      reap_children (0, 0, NULL);
 
       /* Take a job off the waiting list.  */
       job = waiting_jobs;
@@ -1677,7 +1678,7 @@ start_waiting_jobs ()
 /* This is called as an AST when a child process dies (it won't get
    interrupted by anything except a higher level AST).
 */
-int vmsHandleChildTerm(struct child *child)
+int vmsHandleChildTerm(struct child *child,  target_stack_node_t *p_call_stack)
 {
     int status;
     register struct child *lastc, *c;
@@ -1703,7 +1704,7 @@ int vmsHandleChildTerm(struct child *child)
       {
 	/* The commands failed.  Write an error message,
 	   delete non-precious targets, and abort.  */
-	child_error (c->file->name, c->cstatus, 0, 0, 0);
+	child_error (c, p_call_stack, c->cstatus, 0, 0, 0);
 	c->file->update_status = 1;
 	delete_child_targets (c);
       }
@@ -1712,7 +1713,7 @@ int vmsHandleChildTerm(struct child *child)
 	if (child_failed)
 	  {
 	    /* The commands failed, but we don't care.  */
-	    child_error (c->file->name, c->cstatus, 0, 0, 1);
+	    child_error (c, p_call_stack, c->cstatus, 0, 0, 1);
 	    child_failed = 0;
 	  }
 
@@ -1844,9 +1845,8 @@ static void tryToSetupYAst(void) {
 	}
 }
 int
-child_execute_job (argv, child)
-     char *argv;
-     struct child *child;
+child_execute_job (char *argv, struct child *child, 
+		   target_stack_node_t *p_call_stack)
 {
   int i;
   static struct dsc$descriptor_s cmddsc;
@@ -2193,7 +2193,7 @@ child_execute_job (argv, child)
   pidToAbort= child->pid;
   status= sys$waitfr (child->efn);
   pidToAbort= 0;
-  vmsHandleChildTerm(child);
+  vmsHandleChildTerm(child, p_call_stack);
 #else
   status = lib$spawn (&cmddsc,
 		      (ifiledsc.dsc$w_length == 0)?0:&ifiledsc,

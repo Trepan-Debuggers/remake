@@ -47,7 +47,7 @@ $delete_error_code = $? >> 8;
 
 $answer = "$delete_command cleanit\n"
          . $cleanit_error
-         ."$make_name: [clean] Error $delete_error_code (ignored)\n"
+         ."work/features/errors.mk:1: [clean] Error $delete_error_code (ignored)\n"
          ."$delete_command foo\n";
 
 &run_make_with_options($makefile,"",&get_logfile);

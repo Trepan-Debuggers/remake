@@ -17,7 +17,12 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#ifndef VARIABLE_H
+#define VARIABLE_H
+
+#include "make.h"
 #include "hash.h"
+#include "filedef.h"
 
 /* Codes in a variable definition saying where the definition came from.
    Increasing numeric values signify less-overridable definitions.  */
@@ -79,6 +84,8 @@ struct variable
 	v_default		/* Decide in target_environment.  */
       } export ENUM_BITFIELD (2);
   };
+
+typedef struct variable variable_t;
 
 /* Structure that represents a variable set.  */
 
@@ -181,3 +188,5 @@ extern int export_all_variables;
 
 #define MAKELEVEL_NAME "MAKELEVEL"
 #define MAKELEVEL_LENGTH (sizeof (MAKELEVEL_NAME) - 1)
+
+#endif /*VARIABLE_H*/

@@ -23,6 +23,9 @@ Boston, MA 02111-1307, USA.  */
    that the makefile says how to make.
    All of these are chained together through `next'.  */
 
+#ifndef FILEDEF_H
+#define FILEDEF_H
+
 #include "hash.h"
 
 struct file
@@ -30,6 +33,7 @@ struct file
     char *name;
     char *hname;                /* Hashed filename */
     char *vpath;                /* VPATH/vpath pathname */
+    floc_t floc;                /* location in Makefile - for tracing */
     struct dep *deps;		/* all dependencies, including duplicates */
     struct commands *cmds;	/* Commands to execute for this target.  */
     int command_flags;		/* Flags OR'd in for cmds; see commands.h.  */
@@ -96,14 +100,16 @@ struct file
                                    pattern-specific variables.  */
     unsigned int considered:1;  /* equal to `considered' if file has been
                                    considered on current scan of goal chain */
+    unsigned int tracing:1;     /* Nonzero if we should trace this target. */
   };
 
+typedef struct file file_t;
 
 extern struct file *default_goal_file, *suffix_file, *default_file;
 
 
 extern struct file *lookup_file PARAMS ((char *name));
-extern struct file *enter_file PARAMS ((char *name));
+extern struct file *enter_file PARAMS ((char *name, const floc_t *floc));
 extern void remove_intermediates PARAMS ((int sig));
 extern void snap_deps PARAMS ((void));
 extern void rename_file PARAMS ((struct file *file, char *name));
@@ -197,3 +203,5 @@ extern FILE_TIMESTAMP f_mtime PARAMS ((struct file *file, int search));
 
 #define check_renamed(file) \
   while ((file)->renamed != 0) (file) = (file)->renamed /* No ; here.  */
+
+#endif /*FILEDEF_H*/

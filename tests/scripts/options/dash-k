@@ -92,7 +92,7 @@ close(MAKEFILE);
 &run_make_with_options($makefile2, "-k", &get_logfile, $error_code);
 
 $answer = "exit 1
-$make_name: *** [foo.o] Error 1
+work/options/dash-k.mk.1:9: *** [foo.o] Error 1
 $make_name: Target `all' not remade because of errors.\n";
 
 &compare_output($answer, &get_logfile(1));

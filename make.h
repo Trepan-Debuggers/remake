@@ -21,6 +21,10 @@ Boston, MA 02111-1307, USA.  */
 /* We use <config.h> instead of "config.h" so that a compilation
    using -I. -I$srcdir will use ./config.h rather than $srcdir/config.h
    (which it would do because make.h was found in $srcdir).  */
+
+#ifndef MAKE_H
+#define MAKE_H
+
 #include <config.h>
 #undef  HAVE_CONFIG_H
 #define HAVE_CONFIG_H 1
@@ -384,6 +388,9 @@ struct floc
     char *filenm;
     unsigned long lineno;
   };
+
+typedef struct floc floc_t;
+
 #define NILF ((struct floc *)0)
 
 #define STRING_SIZE_TUPLE(_s) (_s), (sizeof (_s)-1)
@@ -560,3 +567,4 @@ extern int atomic_stat PARAMS ((const char *file, struct stat *buf));
 extern struct dirent *atomic_readdir PARAMS ((DIR *dir));
 
 #endif
+#endif /*MAKE_H*/

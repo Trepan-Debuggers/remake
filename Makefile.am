@@ -1,6 +1,6 @@
 # This is a -*-Makefile-*-, or close enough
 
-AUTOMAKE_OPTIONS = 1.7 dist-bzip2 check-news
+AUTOMAKE_OPTIONS = dist-bzip2 check-news
 ACLOCAL_AMFLAGS	=  -I config
 
 SUBDIRS =	glob config po doc
@@ -13,15 +13,16 @@ else
   remote =	remote-stub.c
 endif
 
-make_SOURCES =	ar.c arscan.c commands.c default.c dir.c expand.c file.c \
-		function.c getopt.c getopt1.c implicit.c job.c main.c \
-		misc.c read.c remake.c $(remote) rule.c signame.c \
-		variable.c version.c vpath.c hash.c
+make_SOURCES =	ar.c arscan.c commands.c default.c dir.c \
+	        expand.c file.c \
+		function.c getopt.c getopt1.c  hash.c implicit.c job.c \
+	        main.c misc.c read.c remake.c $(remote) rule.c show.c \
+	        signame.c trace.c variable.c version.c vpath.c
 
 EXTRA_make_SOURCES = remote-stub.c remote-cstms.c
 
-noinst_HEADERS = commands.h dep.h filedef.h job.h make.h rule.h variable.h \
-		debug.h getopt.h gettext.h hash.h
+noinst_HEADERS = commands.h dep.h filedef.h debug.h getopt.h gettext.h \
+	         hash.h job.h make.h rule.h show.h trace.h variable.h 
 
 make_LDADD =	@LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@ @LIBINTL@
 

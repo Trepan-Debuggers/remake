@@ -1,5 +1,5 @@
 /* Debugging macros and interface.
-Copyright (C) 1999 Free Software Foundation, Inc.
+Copyright (C) 1999, 2004 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -17,6 +17,8 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#ifndef DEBUG_H
+#define DEBUG_H
 
 #define DB_NONE         (0x000)
 #define DB_BASIC        (0x001)
@@ -29,13 +31,30 @@ Boston, MA 02111-1307, USA.  */
 
 extern int db_level;
 
+/*! If 1, we give additional error reporting information. */
+extern int extended_errors;
+
+/*! If 1, we show variable definitions */
+extern int show_variable_definitions;
+
+/*! If 1, we are tracing execution */
+extern int tracing;
+
 #define ISDB(_l)    ((_l)&db_level)
 
 #define DBS(_l,_x)  do{ if(ISDB(_l)) {print_spaces (depth); \
                                       printf _x; fflush (stdout);} }while(0)
 
-#define DBF(_l,_x)  do{ if(ISDB(_l)) {print_spaces (depth); \
-                                      printf (_x, file->name); \
-                                      fflush (stdout);} }while(0)
+#define DBF(_l,_x)  do{ if(ISDB(_l))					\
+      {									\
+	print_spaces (depth);						\
+	if (file->floc.filenm) {					\
+	  show_floc_prefix(&file->floc);				\
+	  printf("\t");							\
+	}								\
+	printf (_x, file->name);					\
+	fflush (stdout);} }while(0)
 
 #define DB(_l,_x)   do{ if(ISDB(_l)) {printf _x; fflush (stdout);} }while(0)
+
+#endif /*DEBUG_H*/

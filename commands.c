@@ -22,6 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #include "filedef.h"
 #include "variable.h"
 #include "job.h"
+#include "trace.h"
 #include "commands.h"
 
 #if VMS
@@ -92,7 +93,7 @@ set_file_variables (file)
 	  len = strlen (name);
 	}
 
-      for (d = enter_file (".SUFFIXES")->deps; d != 0; d = d->next)
+      for (d = enter_file (".SUFFIXES", NILF)->deps; d != 0; d = d->next)
 	{
 	  unsigned int slen = strlen (dep_name (d));
 	  if (len > slen && strneq (dep_name (d), name + (len - slen), slen))
@@ -351,8 +352,7 @@ chop_commands (cmds)
    fork off a child process to run the first command line in the sequence.  */
 
 void
-execute_file_commands (file)
-     struct file *file;
+execute_file_commands (file_t *file, target_stack_node_t *p_call_stack)
 {
   register char *p;
 
@@ -378,7 +378,7 @@ execute_file_commands (file)
   set_file_variables (file);
 
   /* Start the commands running.  */
-  new_job (file);
+  new_job (file, p_call_stack);
 }
 
 /* This is set while we are inside fatal_error_signal,
@@ -454,12 +454,12 @@ fatal_error_signal (sig)
       /* Clean up the children.  We don't just use the call below because
 	 we don't want to print the "Waiting for children" message.  */
       while (job_slots_used > 0)
-	reap_children (1, 0);
+	reap_children (1, 0, NULL);
     }
   else
     /* Wait for our children to die.  */
     while (job_slots_used > 0)
-      reap_children (1, 1);
+      reap_children (1, 1, NULL);
 
   /* Delete any non-precious intermediate files that were made.  */
 

@@ -20,6 +20,8 @@ Boston, MA 02111-1307, USA.  */
 /* Structure that gives the commands to make a file
    and information about where these commands came from.  */
 
+#include "trace.h"
+
 struct commands
   {
     struct floc fileinfo;	/* Where commands were defined.  */
@@ -36,7 +38,8 @@ struct commands
 #define	COMMANDS_SILENT		2 /* Silent: @.  */
 #define	COMMANDS_NOERROR	4 /* No errors: -.  */
 
-extern void execute_file_commands PARAMS ((struct file *file));
+extern void execute_file_commands PARAMS ((struct file *file, 
+					   target_stack_node_t *p_call_stack));
 extern void print_commands PARAMS ((struct commands *cmds));
 extern void delete_child_targets PARAMS ((struct child *child));
 extern void chop_commands PARAMS ((struct commands *cmds));

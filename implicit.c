@@ -524,7 +524,7 @@ pattern_search (file, archive, depth, recursions)
 	     of F below are null before we change them.  */
 
 	  struct file *imf = intermediate_files[deps_found];
-	  register struct file *f = enter_file (imf->name);
+	  register struct file *f = enter_file (imf->name, NILF);
 	  f->deps = imf->deps;
 	  f->cmds = imf->cmds;
 	  f->stem = imf->stem;
@@ -536,7 +536,7 @@ pattern_search (file, archive, depth, recursions)
 	  f->tried_implicit = 1;
 	  for (dep = f->deps; dep != 0; dep = dep->next)
 	    {
-	      dep->file = enter_file (dep->name);
+	      dep->file = enter_file (dep->name, NILF);
               /* enter_file uses dep->name _if_ we created a new file.  */
               if (dep->name != dep->file->name)
                 free (dep->name);
@@ -554,7 +554,7 @@ pattern_search (file, archive, depth, recursions)
 	  dep->file = lookup_file (s);
 	  if (dep->file == 0)
 	    /* enter_file consumes S's storage.  */
-	    dep->file = enter_file (s);
+	    dep->file = enter_file (s, NILF);
 	  else
 	    /* A copy of S is already allocated in DEP->file->name.
 	       So we can free S.  */
@@ -622,7 +622,7 @@ pattern_search (file, archive, depth, recursions)
 	  p += fullstemlen;
 	  bcopy (rule->suffixes[i], p,
 		 rule->lens[i] - (rule->suffixes[i] - rule->targets[i]) + 1);
-	  new->file = enter_file (new->name);
+	  new->file = enter_file (new->name, NILF);
 	  new->next = file->also_make;
 	  file->also_make = new;
 	}

@@ -42,6 +42,7 @@ struct dep
     unsigned int ignore_mtime : 1;
   };
 
+typedef struct dep dep_t;
 
 /* Structure used in chains of names, for parsing and globbing.  */
 
@@ -49,6 +50,7 @@ struct nameseq
   {
     struct nameseq *next;
     char *name;
+    floc_t floc;
   };
 
 
@@ -56,7 +58,9 @@ extern struct nameseq *multi_glob PARAMS ((struct nameseq *chain, unsigned int s
 #ifdef VMS
 extern struct nameseq *parse_file_seq ();
 #else
-extern struct nameseq *parse_file_seq PARAMS ((char **stringp, int stopchar, unsigned int size, int strip));
+extern struct nameseq *parse_file_seq PARAMS ((char **stringp, int stopchar, 
+					       unsigned int size, int strip,
+					       floc_t *));
 #endif
 extern char *tilde_expand PARAMS ((char *name));
 

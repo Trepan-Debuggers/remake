@@ -2,15 +2,31 @@ GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
   03 October 2002
 
-Copyright (C) 2002  Free Software Foundation, Inc.
+Copyright (C) 2002, 2004  Free Software Foundation, Inc.
 See the end for copying conditions.
 
 All changes mentioned here are more fully described in the GNU make
 manual, which is contained in this distribution as the file make.texinfo.
 
-Please send GNU make bug reports to <bug-make@gnu.org>.
-See the README file and the GNU make manual for details on sending bug
+Please send remake bug reports to <rocky@panix.com>.
+See the README file and the GNU remake manual for details on sending bug
 reports.
+
+Version 3.80+dbg
+
+Fork from version 3.80
+
+We now save line number information at run-time and have a call stack.
+On error we can give a stack trace if option --extended-errors (-E)
+was set.
+
+Error messages which give a location now appear more often. 
+
+We also have POSIX shell "set -x" like call tracking with the option
+--trace (-x).
+
+
+
 
 Version 3.80
 

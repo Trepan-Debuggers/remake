@@ -513,7 +513,7 @@ static char *default_variables[] =
 void
 set_default_suffixes ()
 {
-  suffix_file = enter_file (".SUFFIXES");
+  suffix_file = enter_file (".SUFFIXES", NILF);
 
   if (no_builtin_rules_flag)
     (void) define_variable ("SUFFIXES", 8, "", o_default, 0);
@@ -521,7 +521,8 @@ set_default_suffixes ()
     {
       char *p = default_suffixes;
       suffix_file->deps = (struct dep *)
-	multi_glob (parse_file_seq (&p, '\0', sizeof (struct dep), 1),
+	multi_glob (parse_file_seq (&p, '\0', sizeof (struct dep), 1,
+				    NILF),
 		    sizeof (struct dep));
       (void) define_variable ("SUFFIXES", 8, default_suffixes, o_default, 0);
     }
@@ -542,7 +543,7 @@ install_default_suffix_rules ()
 
  for (s = default_suffix_rules; *s != 0; s += 2)
     {
-      register struct file *f = enter_file (s[0]);
+      register struct file *f = enter_file (s[0], NILF);
       /* Don't clobber cmds given in a makefile if there were any.  */
       if (f->cmds == 0)
 	{

@@ -8,8 +8,8 @@
 # Please note that the actual code of GNU gettext is covered by the GNU
 # General Public License and is *not* in the public domain.
 
-PACKAGE = make
-VERSION = 3.80
+PACKAGE = remake
+VERSION = 3.80+dbg
 
 SHELL = /bin/sh
 

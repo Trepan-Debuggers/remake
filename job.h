@@ -20,13 +20,18 @@ Boston, MA 02111-1307, USA.  */
 #ifndef SEEN_JOB_H
 #define SEEN_JOB_H
 
+#include "trace.h"
+
 /* Structure describing a running or dead child process.  */
 
 struct child
   {
     struct child *next;		/* Link in the chain.  */
 
+    floc_t fileinfo;	        /* Where commands were defined.  */
+
     struct file *file;		/* File being remade.  */
+                                /* FIXME? Could remove as it is in fileinfo */
 
     char **environment;		/* Environment for commands.  */
 
@@ -46,12 +51,16 @@ struct child
 
     unsigned int good_stdin:1;	/* Nonzero if this child has a good stdin.  */
     unsigned int deleted:1;	/* Nonzero if targets have been deleted.  */
+    unsigned int tracing:1;	/* Nonzero child should be traced.  */
   };
+
+typedef struct child child_t;
 
 extern struct child *children;
 
-extern void new_job PARAMS ((struct file *file));
-extern void reap_children PARAMS ((int block, int err));
+extern void new_job PARAMS ((file_t *file, target_stack_node_t *p_call_stack));
+extern void reap_children PARAMS ((int block, int err, 
+				   target_stack_node_t *p_call_stack));
 extern void start_waiting_jobs PARAMS ((void));
 
 extern char **construct_command_argv PARAMS ((char *line, char **restp, struct file *file, char** batch_file));

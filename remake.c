@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 #include "dep.h"
 #include "variable.h"
 #include "debug.h"
+#include "trace.h"
 
 #include <assert.h>
 
@@ -62,11 +63,16 @@ unsigned int commands_started = 0;
 /* Current value for pruning the scan of the goal chain (toggle 0/1).  */
 static unsigned int considered;
 
-static int update_file PARAMS ((struct file *file, unsigned int depth));
-static int update_file_1 PARAMS ((struct file *file, unsigned int depth));
-static int check_dep PARAMS ((struct file *file, unsigned int depth, FILE_TIMESTAMP this_mtime, int *must_make_ptr));
+static int update_file PARAMS ((struct file *file, unsigned int depth,
+				target_stack_node_t *p_call_stack));
+static int update_file_1 PARAMS ((struct file *file, unsigned int depth,
+				  target_stack_node_t *p_call_stack));
+static int check_dep PARAMS ((struct file *file, unsigned int depth, 
+			      FILE_TIMESTAMP this_mtime, int *must_make_ptr,
+			      target_stack_node_t *p_call_stack));
 static int touch_file PARAMS ((struct file *file));
-static void remake_file PARAMS ((struct file *file));
+static void remake_file PARAMS ((struct file *file, 
+				 target_stack_node_t *p_call_stack));
 static FILE_TIMESTAMP name_mtime PARAMS ((char *name));
 static int library_search PARAMS ((char **lib, FILE_TIMESTAMP *mtime_ptr));
 
@@ -120,7 +126,7 @@ update_goal_chain (goals, makefiles)
 
       /* Wait for a child to die.  */
 
-      reap_children (1, 0);
+      reap_children (1, 0, NULL);
 
       lastgoal = 0;
       g = goals;
@@ -154,7 +160,7 @@ update_goal_chain (goals, makefiles)
 		 actually run.  */
 	      ocommands_started = commands_started;
 
-	      x = update_file (file, makefiles ? 1 : 0);
+	      x = update_file (file, makefiles ? 1 : 0, NULL);
 	      check_renamed (file);
 
 	      /* Set the goal's `changed' flag if any commands were started
@@ -282,9 +288,10 @@ update_goal_chain (goals, makefiles)
    each is considered in turn.  */
 
 static int
-update_file (file, depth)
+update_file (file, depth, p_call_stack)
      struct file *file;
      unsigned int depth;
+     target_stack_node_t *p_call_stack;
 {
   register int status = 0;
   register struct file *f;
@@ -301,13 +308,15 @@ update_file (file, depth)
       return f->command_state == cs_finished ? f->update_status : 0;
     }
 
+  p_call_stack = trace_push_target(p_call_stack, file);
+
   /* This loop runs until we start commands for a double colon rule, or until
      the chain is exhausted. */
   for (; f != 0; f = f->prev)
     {
       f->considered = considered;
 
-      status |= update_file_1 (f, depth);
+      status |= update_file_1 (f, depth, p_call_stack);
       check_renamed (f);
 
       if (status != 0 && !keep_going_flag)
@@ -332,18 +341,20 @@ update_file (file, depth)
       f->considered = considered;
 
       for (d = f->deps; d != 0; d = d->next)
-        status |= update_file (d->file, depth + 1);
+        status |= update_file (d->file, depth + 1, p_call_stack);
     }
 
+  trace_pop_target(p_call_stack);
   return status;
 }
 
 /* Consider a single `struct file' and update it as appropriate.  */
 
 static int
-update_file_1 (file, depth)
+update_file_1 (file, depth, p_call_stack)
      struct file *file;
      unsigned int depth;
+     target_stack_node_t *p_call_stack;
 {
   register FILE_TIMESTAMP this_mtime;
   int noexist, must_make, deps_changed;
@@ -460,7 +471,8 @@ update_file_1 (file, depth)
 
       d->file->parent = file;
       maybe_make = must_make;
-      dep_status |= check_dep (d->file, depth, this_mtime, &maybe_make);
+      dep_status |= check_dep (d->file, depth, this_mtime, &maybe_make,
+			       p_call_stack);
       if (! d->ignore_mtime)
         must_make = maybe_make;
 
@@ -500,7 +512,7 @@ update_file_1 (file, depth)
 	    FILE_TIMESTAMP mtime = file_mtime (d->file);
 	    check_renamed (d->file);
 	    d->file->parent = file;
-	    dep_status |= update_file (d->file, depth);
+	    dep_status |= update_file (d->file, depth, p_call_stack);
 	    check_renamed (d->file);
 
 	    {
@@ -687,7 +699,7 @@ update_file_1 (file, depth)
     }
 
   /* Now, take appropriate actions to remake the file.  */
-  remake_file (file);
+  remake_file (file, p_call_stack);
 
   if (file->command_state != cs_finished)
     {
@@ -837,11 +849,12 @@ notice_finished_file (file)
    Return nonzero if any updating failed.  */
 
 static int
-check_dep (file, depth, this_mtime, must_make_ptr)
+check_dep (file, depth, this_mtime, must_make_ptr, p_call_stack)
      struct file *file;
      unsigned int depth;
      FILE_TIMESTAMP this_mtime;
      int *must_make_ptr;
+     target_stack_node_t *p_call_stack;
 {
   struct dep *d;
   int dep_status = 0;
@@ -854,7 +867,7 @@ check_dep (file, depth, this_mtime, must_make_ptr)
        whether it is newer than THIS_MTIME.  */
     {
       FILE_TIMESTAMP mtime;
-      dep_status = update_file (file, depth);
+      dep_status = update_file (file, depth, p_call_stack);
       check_renamed (file);
       mtime = file_mtime (file);
       check_renamed (file);
@@ -923,7 +936,7 @@ check_dep (file, depth, this_mtime, must_make_ptr)
 	      d->file->parent = file;
               maybe_make = *must_make_ptr;
 	      dep_status |= check_dep (d->file, depth, this_mtime,
-                                       &maybe_make);
+                                       &maybe_make, p_call_stack);
               if (! d->ignore_mtime)
                 *must_make_ptr = maybe_make;
 	      check_renamed (d->file);
@@ -1003,8 +1016,9 @@ touch_file (file)
    Return the status from executing FILE's commands.  */
 
 static void
-remake_file (file)
+remake_file (file, p_call_stack)
      struct file *file;
+     target_stack_node_t *p_call_stack;
 {
   if (file->cmds == 0)
     {
@@ -1026,18 +1040,19 @@ remake_file (file)
           if (!keep_going_flag && !file->dontcare)
             {
               if (file->parent == 0)
-                fatal (NILF, msg_noparent, "", file->name, "");
+                fatal (&(file->floc), msg_noparent, "", file->name, "");
 
-              fatal (NILF, msg_parent, "", file->name, file->parent->name, "");
+              fatal (&(file->floc), msg_parent, "", file->name, 
+		     file->parent->name, "");
             }
 
           if (!file->dontcare)
             {
               if (file->parent == 0)
-                error (NILF, msg_noparent, "*** ", file->name, ".");
+                err (p_call_stack, msg_noparent, "*** ", file->name, ".");
               else
-                error (NILF, msg_parent, "*** ",
-                       file->name, file->parent->name, ".");
+                err (p_call_stack, msg_parent, "*** ",
+		     file->name, file->parent->name, ".");
             }
           file->update_status = 2;
         }
@@ -1049,7 +1064,7 @@ remake_file (file)
       /* The normal case: start some commands.  */
       if (!touch_flag || file->cmds->any_recurse)
 	{
-	  execute_file_commands (file);
+	  execute_file_commands (file, p_call_stack);
 	  return;
 	}
 
@@ -1096,7 +1111,7 @@ f_mtime (file, search)
       arfile = lookup_file (arname);
       if (arfile == 0)
 	{
-	  arfile = enter_file (arname);
+	  arfile = enter_file (arname, NILF);
 	  arname_used = 1;
 	}
       mtime = f_mtime (arfile, search);

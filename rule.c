@@ -417,7 +417,8 @@ install_pattern_rule (p, terminal)
 
   ptr = p->dep;
   r->deps = (struct dep *) multi_glob (parse_file_seq (&ptr, '\0',
-                                                       sizeof (struct dep), 1),
+                                                       sizeof (struct dep), 1,
+						       NILF),
 				       sizeof (struct dep));
 
   if (new_pattern_rule (r, 0))

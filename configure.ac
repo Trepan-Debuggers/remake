@@ -1,15 +1,15 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(GNU make,3.80,bug-make@gnu.org)
+AC_INIT(remake,3.80+dbg,rocky@panix.com)
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.1 2004/04/04 01:38:41 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.2 2004/04/04 02:03:56 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_SRCDIR(vpath.c)
-AC_CONFIG_HEADERS(config.h)
+AM_CONFIG_HEADER(config.h)
 
 # Automake setup
 AM_INIT_AUTOMAKE

@@ -1,6 +1,6 @@
 # -*-Makefile-*-, or close enough
 
-AUTOMAKE_OPTIONS =	1.7 foreign
+AUTOMAKE_OPTIONS =	foreign
 
 # Only build the library when the system doesn't already have GNU glob.
 if USE_LOCAL_GLOB
