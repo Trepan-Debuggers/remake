@@ -525,10 +525,10 @@ selective_vpath_search (path, file, mtime_ptr)
 	      if (mtime_ptr != 0)
 		/* Store the modtime into *MTIME_PTR for the caller.
 		   If we have had no need to stat the file here,
-		   we record a zero modtime to indicate this.  */
+		   we record UNKNOWN_MTIME to indicate this.  */
 		*mtime_ptr = (exists_in_cache
-			      ? FILE_TIMESTAMP_STAT_MODTIME (st)
-			      : (FILE_TIMESTAMP) 0);
+			      ? FILE_TIMESTAMP_STAT_MODTIME (name, st)
+			      : UNKNOWN_MTIME);
 
 	      free (name);
 	      return 1;

@@ -46,7 +46,7 @@ Version 3.79
   all debugging information is generated.
 
 * The `-p' (print database) output now includes filename and linenumber
-  information for variable definitions, to help debugging.
+  information for variable definitions, to aid debugging.
 
 * The wordlist function no longer reverses its arguments if the "start"
   value is greater than the "end" value.  If that's true, nothing is
