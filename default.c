@@ -41,7 +41,7 @@ static char default_suffixes[]
 .mod .sym .def .h .info .dvi .tex .texinfo .texi .txinfo \
 .w .ch .cweb .web .com .sh .elc .el";
 #else
-  = ".out .a .ln .o .c .cc .C .p .f .F .r .y .l .s .S \
+  = ".out .a .ln .o .c .cc .C .cpp .p .f .F .r .y .l .s .S \
 .mod .sym .def .h .info .dvi .tex .texinfo .texi .txinfo \
 .w .ch .web .sh .elc .el";
 #endif
@@ -90,6 +90,8 @@ static struct pspec default_terminal_rules[] =
     { "%", "%,v",
 	"$(CHECKOUT,v)" },
     { "%", "RCS/%,v",
+	"$(CHECKOUT,v)" },
+    { "%", "RCS/%",
 	"$(CHECKOUT,v)" },
 
     /* SCCS.  */
@@ -156,6 +158,8 @@ static char *default_suffix_rules[] =
     "$(LINK.cc) $^ $(LOADLIBES) $(LDLIBS) -o $@",
     ".C",
     "$(LINK.C) $^ $(LOADLIBES) $(LDLIBS) -o $@",
+    ".cpp",
+    "$(LINK.cpp) $^ $(LOADLIBES) $(LDLIBS) -o $@",
     ".f",
     "$(LINK.f) $^ $(LOADLIBES) $(LDLIBS) -o $@",
     ".p",
@@ -183,6 +187,8 @@ static char *default_suffix_rules[] =
     "$(COMPILE.cc) $< $(OUTPUT_OPTION)",
     ".C.o",
     "$(COMPILE.C) $< $(OUTPUT_OPTION)",
+    ".cpp.o",
+    "$(COMPILE.cpp) $< $(OUTPUT_OPTION)",
     ".f.o",
     "$(COMPILE.f) $< $(OUTPUT_OPTION)",
     ".p.o",
@@ -386,8 +392,10 @@ static char *default_variables[] =
     "LINK.c", "$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TARGET_ARCH)",
     "COMPILE.cc", "$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c",
     "COMPILE.C", "$(COMPILE.cc)",
+    "COMPILE.cpp", "$(COMPILE.cc)",
     "LINK.cc", "$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TARGET_ARCH)",
     "LINK.C", "$(LINK.cc)",
+    "LINK.cpp", "$(LINK.cc)",
     "YACC.y", "$(YACC) $(YFLAGS)",
     "LEX.l", "$(LEX) $(LFLAGS) -t",
     "COMPILE.f", "$(FC) $(FFLAGS) $(TARGET_ARCH) -c",

@@ -5,17 +5,16 @@ make \- GNU make utility to maintain groups of programs
 .B "make "
 [
 .B \-f
-makefile ] [ option ] ...
+.I makefile
+] [ option ] ...
 target ...
 .SH WARNING
 This man page is an extract of the documentation of
 .I GNU make .
 It is updated only occasionally, because the GNU project does not use nroff.
 For complete, current documentation, refer to the Info file
-.B make
-or the DVI file
-.B make.dvi
-which are made from the Texinfo source file
+.B make.info
+which is made from the Texinfo source file
 .BR make.texinfo .
 .SH DESCRIPTION
 .LP
@@ -24,7 +23,7 @@ The purpose of the
 utility is to determine automatically which
 pieces of a large program need to be recompiled, and issue the commands to
 recompile them.
-This manual describes the GNU implementation of
+The manual describes the GNU implementation of
 .IR make ,
 which was written by Richard Stallman and Roland McGrath.
 Our examples show C programs, since they are most common, but you can use
@@ -288,12 +287,7 @@ command on the given file before running
 except that the modification time is changed only in the imagination of
 .IR make .
 .SH "SEE ALSO"
-.PD 0
-.TP 2.0i
-/usr/local/doc/gnumake.dvi
-.I
-The GNU Make Manual
-.PD
+.I "The GNU Make Manual"
 .SH BUGS
 See the chapter `Problems and Bugs' in
 .I "The GNU Make Manual" .

@@ -7,7 +7,7 @@
 
 NORECURSE = true
 
-# If the user asked for a specific target, invoke the Mkaefile instead.
+# If the user asked for a specific target, invoke the Makefile instead.
 #
 .DEFAULT:
 	@[ -f Makefile.in -a -f configure -a -f aclocal.m4 -a -f config.h.in ] \
@@ -16,7 +16,7 @@ NORECURSE = true
 	  || ./configure
 	$(MAKE) -f Makefile $@
 
-.PHONY: __cfg __cfg_basic TAGS
+.PHONY: __cfg __cfg_basic
 
 # This is variable since the glob subdirectory doesn't use it.
 #
@@ -36,7 +36,7 @@ endif
 
 __cfg_basic: aclocal.m4 stamp-h.in configure Makefile.in
 
-aclocal.m4: configure.in
+aclocal.m4: configure.in $(wildcard acinclude.m4)
 	aclocal
 
 config.h.in: stamp-h.in

@@ -37,6 +37,10 @@ To build:
       if you use PKUNZIP).  If you build Make on Windows 95, use an
       unzip program that supports long filenames in zip files.
 
+      If you are unpacking an official GNU source distribution, use
+      either DJTAR (which is part of the DJGPP development
+      environment), or the DJGPP port of GNU Tar.
+
    2. Invoke the `configure.bat' batch file.
 
       If you are building Make in-place, i.e. in the same directory
@@ -44,7 +48,7 @@ To build:
       [Enter].  Otherwise, you need to supply the path to the source
       directory as an argument to the batch file, like this:
 
-		configure.bat c:/djgpp/gnu/make-3.76
+		configure.bat c:/djgpp/gnu/make-%VERSION%
 
       Note the forward slashes: you MUST use them here.
 
@@ -65,7 +69,7 @@ To build:
       If you are building from outside of the source directory, you
       need to tell Make where the sources are, like this:
 
-	        make srcdir=c:/djgpp/gnu/make-3.76
+	        make srcdir=c:/djgpp/gnu/make-%VERSION%
 
       (configure.bat will tell you this when it finishes).  You MUST
       use a full, not relative, name of the source directory here, or
@@ -73,8 +77,8 @@ To build:
 
    6. After Make finishes, if you have a Unix-style shell installed,
       you can use the `install' target to install the package.  You
-      will also need GNU Fileutils and GNU Sh-utils for this (they
-      should be available from the DJGPP sites).
+      will also need GNU Fileutils and GNU Sed for this (they should
+      be available from the DJGPP sites).
 
       Without a Unix-style shell, you will have to install programs
       and the docs manually.  Copy make.exe to a directory on your
@@ -82,7 +86,7 @@ To build:
       file `dir' in your Info directory by adding the following item
       to the main menu:
 
-	* GNU make: (make.info).           The GNU make utility.
+	* Make: (make.info).           The GNU make utility.
 
       If you have the `install-info' program (from the GNU Texinfo
       package), it will do that for you if you invoke it like this:
@@ -92,8 +96,8 @@ To build:
       (If your Info directory is other than C:\DJGPP\INFO, change this
       command accordingly.)
 
-   7. The `clean' targets also require Unix-style shell and `test' and
-      `rm' programs (from Fileutils and Sh-utils, accordingly). 
+   7. The `clean' targets also require Unix-style shell, and GNU Sed
+      and `rm' programs (the latter from Fileutils).
 
 
 
@@ -240,8 +244,7 @@ Notes:
       doesn't include characters illegal on MSDOS FAT filesystems,
       will be automatically down-cased.)  User reports that I have
       indicate that this default behavior is generally what you'd
-      expect; however, since support for long filenames in the DJGPP
-      port of GNU Make is relatively new, your input is most welcome.
+      expect; however, your input is most welcome.
 
       In any case, if you hit a situation where you must force Make to
       get the 8+3 DOS filenames in upper case, set FNCASE=y in the
@@ -283,8 +286,8 @@ Bug reports:
    reported first on the comp.os.msdos.djgpp news group (if you cannot
    post to Usenet groups, write to the DJGPP mailing list,
    <djgpp@delorie.com>, which is an email gateway into the above news
-   group).  For other bugs, please follow the the procedure explained
-   in the "Bugs" chapter of the Info docs.  If you don't have an Info
+   group).  For other bugs, please follow the procedure explained in
+   the "Bugs" chapter of the Info docs.  If you don't have an Info
    reader, look up that chapter in the `make.i1' file with any text
    browser/editor.
 

@@ -44,6 +44,7 @@ struct child
 
     unsigned int good_stdin:1;	/* Nonzero if this child has a good stdin.  */
     unsigned int deleted:1;	/* Nonzero if targets have been deleted.  */
+	char* sh_batch_file; /* used to execute shell commands via scripts */
   };
 
 extern struct child *children;
@@ -52,7 +53,7 @@ extern void new_job PARAMS ((struct file *file));
 extern void reap_children PARAMS ((int block, int err));
 extern void start_waiting_jobs PARAMS ((void));
 
-extern char **construct_command_argv PARAMS ((char *line, char **restp, struct file *file));
+extern char **construct_command_argv PARAMS ((char *line, char **restp, struct file *file, char** batch_file));
 #ifdef VMS
 extern int child_execute_job PARAMS ((char *argv, struct child *child));
 #else

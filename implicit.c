@@ -111,14 +111,14 @@ pattern_search (file, archive, depth, recursions)
   /* This buffer records all the dependencies actually found for a rule.  */
   char **found_files = (char **) alloca (max_pattern_deps * sizeof (char *));
   /* Number of dep names now in FOUND_FILES.  */
-  unsigned int deps_found;
+  unsigned int deps_found = 0;
 
   /* Names of possible dependencies are constructed in this buffer.  */
   register char *depname = (char *) alloca (namelen + max_pattern_dep_length);
 
   /* The start and length of the stem of FILENAME for the current rule.  */
-  register char *stem;
-  register unsigned int stemlen;
+  register char *stem = 0;
+  register unsigned int stemlen = 0;
 
   /* Buffer in which we store all the rules that are possibly applicable.  */
   struct rule **tryrules

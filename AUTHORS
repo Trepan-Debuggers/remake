@@ -1,28 +1,29 @@
 -----------------------------------
 
 GNU make development up to version 3.75 by:
-    Roland McGrath <roland@gnu.ai.mit.edu>
+    Roland McGrath <roland@gnu.org>
+
+
+Development starting with GNU make 3.76 by:
+    Paul D. Smith <psmith@gnu.org>
 
 
 GNU Make User's Manual written by:
-    Richard M. Stallman <rms@gnu.ai.mit.edu>
+    Richard M. Stallman <rms@gnu.org>
 
   User's Manual edited by:
-    Roland McGrath <roland@gnu.ai.mit.edu>
-    Bob Chassell <bob@gnu.ai.mit.edu>
-    Melissa Weisshaus <melissa@gnu.ai.mit.edu>
-
-
-Development and maintenance starting with GNU make 3.76 by:
-    Paul D. Smith <psmith@gnu.ai.mit.edu>
-
+    Roland McGrath <roland@gnu.org>
+    Bob Chassell <bob@gnu.org>
+    Melissa Weisshaus <melissa@gnu.org>
+    Paul D. Smith <psmith@gnu.org>
 
 -----------------------------------
-GNU Make porting efforts:
+GNU make porting efforts:
 
   Port to VMS by:
       Klaus Kaempf <kkaempf@progis.de>
       Archive support/Bug fixes by John W. Eaton <jwe@bevo.che.wisc.edu>
+
 
   Port to Amiga by:
       Aaron Digulla <digulla@fh-konstanz.de>

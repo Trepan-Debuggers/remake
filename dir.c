@@ -111,19 +111,25 @@ dosify (filename)
 
 #ifdef _AMIGA
 #include <ctype.h>
+#endif
 
+#ifdef HAVE_CASE_INSENSITIVE_FS
 static char *
-amigafy (filename)
+downcase (filename)
      char *filename;
 {
-  static char amiga_filename[136];
+#ifdef _AMIGA
+  static char new_filename[136];
+#else
+  static char new_filename[PATH_MAX];
+#endif
   char *df;
   int i;
 
   if (filename == 0)
     return 0;
 
-  df = amiga_filename;
+  df = new_filename;
 
   /* First, transform the name part.  */
   for (i = 0; *filename != '\0'; ++i)
@@ -134,9 +140,9 @@ amigafy (filename)
 
   *df = 0;
 
-  return amiga_filename;
+  return new_filename;
 }
-#endif /* _AMIGA */
+#endif /* HAVE_CASE_INSENSITIVE_FS */
 
 #ifdef VMS
 
@@ -355,7 +361,7 @@ find_directory (name)
 
 	  for (dc = directories_contents[hash]; dc != 0; dc = dc->next)
 #ifdef WINDOWS32
-            if (!strcmp(dc->path_key, w32_path))
+            if (strieq(dc->path_key, w32_path))
 #else
 	    if (dc->dev == st.st_dev
 #ifdef VMS
@@ -468,8 +474,8 @@ dir_contents_file_exists_p (dir, filename)
   filename = dosify (filename);
 #endif
 
-#ifdef _AMIGA
-  filename = amigafy (filename);
+#ifdef HAVE_CASE_INSENSITIVE_FS
+  filename = downcase (filename);
 #endif
 
 #ifdef VMS
@@ -613,6 +619,7 @@ file_exists_p (name)
 {
   char *dirend;
   char *dirname;
+  char *slash;
 
 #ifndef	NO_ARCHIVES
   if (ar_name (name))
@@ -632,8 +639,9 @@ file_exists_p (name)
     char *bslash = rindex(name, '\\');
     if (!dirend || bslash > dirend)
       dirend = bslash;
-    /* The case of "d:file" is unhandled.  But I don't think
-       such names can happen here.  */
+    /* The case of "d:file".  */
+    if (!dirend && name[0] && name[1] == ':')
+      dirend = name + 1;
   }
 #endif /* WINDOWS32 || __MSDOS__ */
   if (dirend == 0)
@@ -644,15 +652,22 @@ file_exists_p (name)
 #endif /* AMIGA */
 #endif /* VMS */
 
+  slash = dirend;
   if (dirend == name)
     dirname = "/";
   else
     {
+#if defined (WINDOWS32) || defined (__MSDOS__)
+  /* d:/ and d: are *very* different...  */
+      if (dirend < name + 3 && name[1] == ':' &&
+	  (*dirend == '/' || *dirend == '\\' || *dirend == ':'))
+	dirend++;
+#endif
       dirname = (char *) alloca (dirend - name + 1);
       bcopy (name, dirname, dirend - name);
       dirname[dirend - name] = '\0';
     }
-  return dir_file_exists_p (dirname, dirend + 1);
+  return dir_file_exists_p (dirname, slash + 1);
 }
 
 /* Mark FILENAME as `impossible' for `file_impossible_p'.
@@ -682,8 +697,9 @@ file_impossible (filename)
     char *bslash = rindex(p, '\\');
     if (!dirend || bslash > dirend)
       dirend = bslash;
-    /* The case of "d:file" is unhandled.  But I don't think
-       such names can happen here.  */
+    /* The case of "d:file".  */
+    if (!dirend && p[0] && p[1] == ':')
+      dirend = p + 1;
   }
 #endif /* WINDOWS32 or __MSDOS__ */
   if (dirend == 0)
@@ -696,16 +712,23 @@ file_impossible (filename)
   else
     {
       char *dirname;
+      char *slash = dirend;
       if (dirend == p)
 	dirname = "/";
       else
 	{
+#if defined (WINDOWS32) || defined (__MSDOS__)
+	  /* d:/ and d: are *very* different...  */
+	  if (dirend < p + 3 && p[1] == ':' &&
+	      (*dirend == '/' || *dirend == '\\' || *dirend == ':'))
+	    dirend++;
+#endif
 	  dirname = (char *) alloca (dirend - p + 1);
 	  bcopy (p, dirname, dirend - p);
 	  dirname[dirend - p] = '\0';
 	}
       dir = find_directory (dirname);
-      filename = p = dirend + 1;
+      filename = p = slash + 1;
     }
 
   for (hash = 0; *p != '\0'; ++p)
@@ -776,8 +799,9 @@ file_impossible_p (filename)
     char *bslash = rindex(filename, '\\');
     if (!dirend || bslash > dirend)
       dirend = bslash;
-    /* The case of "d:file" is unhandled.  But I don't think
-       such names can happen here.  */
+    /* The case of "d:file".  */
+    if (!dirend && filename[0] && filename[1] == ':')
+      dirend = filename + 1;
   }
 #endif /* WINDOWS32 || __MSDOS__ */
   if (dirend == 0)
@@ -790,16 +814,23 @@ file_impossible_p (filename)
   else
     {
       char *dirname;
+      char *slash = dirend;
       if (dirend == filename)
 	dirname = "/";
       else
 	{
+#if defined (WINDOWS32) || defined (__MSDOS__)
+	  /* d:/ and d: are *very* different...  */
+	  if (dirend < filename + 3 && filename[1] == ':' &&
+	      (*dirend == '/' || *dirend == '\\' || *dirend == ':'))
+	    dirend++;
+#endif
 	  dirname = (char *) alloca (dirend - filename + 1);
 	  bcopy (p, dirname, dirend - p);
 	  dirname[dirend - p] = '\0';
 	}
       dir = find_directory (dirname)->contents;
-      p = filename = dirend + 1;
+      p = filename = slash + 1;
     }
 
   if (dir == 0 || dir->files == 0)
@@ -809,8 +840,8 @@ file_impossible_p (filename)
 #ifdef __MSDOS__
   p = filename = dosify (p);
 #endif
-#ifdef _AMIGA
-  p = filename = amigafy (p);
+#ifdef HAVE_CASE_INSENSITIVE_FS
+  p = filename = downcase (p);
 #endif
 #ifdef VMS
   p = filename = vmsify (p, 1);
@@ -891,8 +922,9 @@ print_dir_data_base ()
 			dir->contents->ino[0], dir->contents->ino[1],
 			dir->contents->ino[2]);
 #else
-	    printf ("# %s (device %d, inode %d): ",
-		    dir->name, dir->contents->dev, dir->contents->ino);
+	    printf ("# %s (device %ld, inode %ld): ",
+		    dir->name,
+                    (long)dir->contents->dev, (long)dir->contents->ino);
 #endif
 #endif /* WINDOWS32 */
 	    if (f == 0)
@@ -1016,6 +1048,14 @@ read_dirstream (stream)
   return 0;
 }
 
+static void
+ansi_free(p)
+  void *p;
+{
+    if (p)
+      free(p);
+}
+
 void
 dir_setup_glob (gl)
      glob_t *gl;
@@ -1025,7 +1065,7 @@ dir_setup_glob (gl)
   /* Bogus sunos4 compiler complains (!) about & before functions.  */
   gl->gl_opendir = open_dirstream;
   gl->gl_readdir = read_dirstream;
-  gl->gl_closedir = free;
+  gl->gl_closedir = ansi_free;
   gl->gl_stat = stat;
   /* We don't bother setting gl_lstat, since glob never calls it.
      The slot is only there for compatibility with 4.4 BSD.  */

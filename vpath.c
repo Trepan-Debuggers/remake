@@ -164,7 +164,7 @@ construct_vpath_list (pattern, dirpath)
   register char **vpath;
   register unsigned int maxvpath;
   unsigned int maxelem;
-  char *percent;
+  char *percent = NULL;
 
   if (pattern != 0)
     {

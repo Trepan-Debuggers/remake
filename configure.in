@@ -1,9 +1,9 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.59 1997/09/19 19:48:46 psmith Exp $])
+AC_REVISION([$Id: configure.in,v 1.60 1998/07/30 20:55:27 psmith Exp $])
 AC_PREREQ(2.12)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 
-AM_INIT_AUTOMAKE(make, 3.76.1)
+AM_INIT_AUTOMAKE(make, 3.77)
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_SUBDIRS(glob)
 
@@ -15,10 +15,16 @@ AC_PROG_MAKE_SET
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_CPP			dnl Later checks need this.
-AC_ARG_PROGRAM
+dnl AC_ARG_PROGRAM -- implied by AM_INIT_AUTOMAKE; gives errors if run twice.
 AC_AIX
 AC_ISC_POSIX
 AC_MINIX
+
+dnl This test must come as early as possible after the compiler configuration
+dnl tests, because the choice of the file model can (in principle) affect
+dnl whether functions and headers are available, whether they work, etc.
+AC_LFS
+
 AC_HEADER_STDC
 AC_HEADER_DIRENT
 AC_TYPE_UID_T			dnl Also does gid_t.
@@ -91,8 +97,25 @@ AC_DECL_SYS_SIGLIST
 AC_CHECK_LIB(sun, getpwnam)
 
 AC_SUBST(REMOTE) REMOTE=stub
-AC_ARG_WITH(customs, [export jobs with the Customs daemon (NOT SUPPORTED)],
-[REMOTE=cstms LIBS="$LIBS libcustoms.a"])
+make_try_customs=no
+AC_ARG_WITH(customs,
+[  --with-customs=DIR      Enable remote jobs via Customs--see README.customs],
+[case "$withval" in
+  n|no) ;;
+  *) make_cppflags="$CPPFLAGS"
+     case "$withval" in
+       y|ye|yes) ;;
+       *) CPPFLAGS="$CPPFLAGS -I$with_customs/include/customs"
+	  make_ldflags="$LDFLAGS -L$with_customs/lib" ;;
+     esac
+     CF_NETLIBS
+     AC_CHECK_HEADER(customs.h,
+	             REMOTE=cstms
+                       LIBS="$LIBS -lcustoms" LDFLAGS="$make_ldflags",
+		     with_customs=no
+                       CPPFLAGS="$make_cppflags" make_badcust=yes)
+     ;;
+esac])
 
 echo checking for location of SCCS get command
 if test -f /usr/sccs/get; then
@@ -115,6 +138,26 @@ fi
 rm -f s.conftest conftoast
 
 AC_OUTPUT(Makefile build.sh)
+
+case "$make_badcust" in
+  yes) echo
+       echo "WARNING: --with-customs specified but no customs.h could be found;"
+       echo "         disabling Customs support."
+       echo ;;
+esac
+
+case "$with_customs" in
+  ""|n|no|y|ye|yes) ;;
+  *) if test -f "$with_customs/lib/libcustoms.a"; then
+       :
+     else
+       echo
+       echo "WARNING: \`$with_customs/lib' does not appear to contain the"
+       echo "         Customs library.  You must build and install Customs"
+       echo "         before compiling GNU make."
+       echo
+     fi ;;
+esac
 
 dnl Local Variables:
 dnl comment-start: "dnl "

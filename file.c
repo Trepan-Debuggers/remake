@@ -49,6 +49,9 @@ lookup_file (name)
   register struct file *f;
   register char *n;
   register unsigned int hashval;
+#ifdef VMS
+  register char *lname, *ln;
+#endif
 
   if (*name == '\0')
     abort ();
@@ -57,6 +60,12 @@ lookup_file (name)
      for names read from makefiles.  It is here for names passed
      on the command line.  */
 #ifdef VMS
+  lname = (char *)malloc(strlen(name) + 1);
+  for (n=name, ln=lname; *n != '\0'; ++n, ++ln)
+    *ln = isupper(*n) ? tolower(*n) : *n;
+  *ln = '\0';
+  name = lname;
+
   while (name[0] == '[' && name[1] == ']' && name[2] != '\0')
       name += 2;
 #endif
@@ -89,9 +98,15 @@ lookup_file (name)
     {
       if (strieq (f->hname, name))
 	{
+#ifdef VMS
+	  free (lname);
+#endif
 	  return f;
 	}
     }
+#ifdef VMS
+  free (lname);
+#endif
   return 0;
 }
 
@@ -374,9 +389,9 @@ remove_intermediates (sig)
 	  if (f->update_status == -1)
 	    /* If nothing would have created this file yet,
 	       don't print an "rm" command for it.  */
-	    continue;
-	  else if (just_print_flag)
-	    status = 0;
+            continue;
+ 	  else if (just_print_flag)
+  	    status = 0;
 	  else
 	    {
 	      status = unlink (f->name);
@@ -660,8 +675,8 @@ print_file_data_base ()
     {
       printf ("\n# %u files in %u hash buckets.\n", nfiles, FILE_BUCKETS);
 #ifndef	NO_FLOAT
-      printf ("# average %.1f files per bucket, max %u files in one bucket.\n",
-	      ((double) nfiles) / ((double) FILE_BUCKETS) * 100.0, per_bucket);
+      printf ("# average %.3f files per bucket, max %u files in one bucket.\n",
+	      ((double) nfiles) / ((double) FILE_BUCKETS), per_bucket);
 #endif
     }
 }

@@ -278,3 +278,6 @@
 
 /* Define if you have the sun library (-lsun).  */
 #undef HAVE_LIBSUN
+
+/* Define for Case Insensitve behavior */
+#define HAVE_CASE_INSENSITIVE_FS

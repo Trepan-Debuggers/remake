@@ -50,6 +50,14 @@ unsigned int max_pattern_deps;
 
 unsigned int max_pattern_dep_length;
 
+/* Chain of all pattern-specific variables.  */
+
+static struct pattern_var *pattern_vars;
+
+/* Pointer to last struct in the chain, so we can add onto the end.  */
+
+static struct pattern_var *last_pattern_var;
+
 /* Pointer to structure for the file .SUFFIXES
    whose dependencies are the suffixes to be searched.  */
 
@@ -86,7 +94,7 @@ count_implicit_rule_limits ()
       unsigned int ntargets;
 
       ++num_pattern_rules;
-      
+
       ntargets = 0;
       while (rule->targets[ntargets] != 0)
 	++ntargets;
@@ -157,7 +165,7 @@ count_implicit_rule_limits ()
     end_main_loop:
       rule = next;
     }
-  
+
   if (name != 0)
     free (name);
 }
@@ -336,7 +344,7 @@ new_pattern_rule (rule, override)
 		  else
 		    last_pattern_rule->next = rule;
 		  last_pattern_rule = rule;
-		  
+
 		  /* We got one.  Stop looking.  */
 		  goto matched;
 		}
@@ -519,6 +527,78 @@ create_pattern_rule (targets, target_percents,
     r->terminal = terminal;
 }
 
+/* Create a new pattern-specific variable struct.  */
+
+struct pattern_var *
+create_pattern_var (target, suffix)
+     char *target, *suffix;
+{
+  register struct pattern_var *p = 0;
+  unsigned int len = strlen(target);
+
+  /* Look to see if this pattern already exists in the list.  */
+  for (p = pattern_vars; p != NULL; p = p->next)
+    if (p->len == len && !strcmp(p->target, target))
+      break;
+
+  if (p == 0)
+    {
+      p = (struct pattern_var *) xmalloc (sizeof (struct pattern_var));
+      if (last_pattern_var != 0)
+        last_pattern_var->next = p;
+      else
+        pattern_vars = p;
+      last_pattern_var = p;
+      p->next = 0;
+      p->target = target;
+      p->len = len;
+      p->suffix = suffix + 1;
+      p->vars = create_new_variable_set();
+    }
+
+  return p;
+}
+
+/* Look up a target in the pattern-specific variable list.  */
+
+struct pattern_var *
+lookup_pattern_var (target)
+     char *target;
+{
+  struct pattern_var *p;
+  unsigned int targlen = strlen(target);
+
+  for (p = pattern_vars; p != 0; p = p->next)
+    {
+      char *stem;
+      unsigned int stemlen;
+
+      if (p->len > targlen)
+        /* It can't possibly match.  */
+        continue;
+
+      /* From the lengths of the filename and the pattern parts,
+         find the stem: the part of the filename that matches the %.  */
+      stem = target + (p->suffix - p->target - 1);
+      stemlen = targlen - p->len + 1;
+
+      /* Compare the text in the pattern before the stem, if any.  */
+      if (stem > target && strncmp (p->target, target, stem - target))
+        continue;
+
+      /* Compare the text in the pattern after the stem, if any.
+         We could test simply use streq, but this way we compare the
+         first two characters immediately.  This saves time in the very
+         common case where the first character matches because it is a
+         period.  */
+      if (*p->suffix == stem[stemlen]
+          && (*p->suffix == '\0'|| streq (&p->suffix[1], &stem[stemlen+1])))
+        break;
+    }
+
+  return p;
+}
+
 /* Print the data base of rules.  */
 
 static void			/* Useful to call from gdb.  */
@@ -586,4 +666,26 @@ print_rule_data_base ()
   if (num_pattern_rules != rules)
     fatal ("BUG: num_pattern_rules wrong!  %u != %u",
 	   num_pattern_rules, rules);
+
+  puts ("\n# Pattern-specific variable values");
+
+  {
+    struct pattern_var *p;
+
+    rules = 0;
+    for (p = pattern_vars; p != 0; p = p->next)
+      {
+        ++rules;
+
+        printf ("\n%s :\n", p->target);
+        print_variable_set (p->vars->set, "# ");
+      }
+
+    if (rules == 0)
+      puts ("\n# No pattern-specific variable values.");
+    else
+      {
+        printf ("\n# %u pattern-specific variable values", rules);
+      }
+  }
 }

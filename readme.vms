@@ -47,8 +47,15 @@ Multiple line DCL commands, such as "if" statements, must be put inside
 command files.  You can run a command file by using \@.
 
 
-VMS changes made for 3.74.3
+Change history:
 
+3.76.x
+======
+Added VMS help version (make.hlp) of the Unix man page. To integrate
+that with an existing Help library use a command like the following
+ $lib/ins/help sys$help:helplib.hlb make.hlp
+3.74.3
+======
 Lots of default settings are adapted for VMS. See default.c.
 
 Long command lines are now converted to command files.

@@ -86,11 +86,11 @@ extern int errno;
 #define POSIX
 #endif
 
-#ifdef HAVE_SYS_SIGLIST
-#ifndef SYS_SIGLIST_DECLARED
+#if defined (HAVE_SYS_SIGLIST) && !defined (SYS_SIGLIST_DECLARED)
 extern char *sys_siglist[];
 #endif
-#else
+
+#if !defined (HAVE_SYS_SIGLIST) || !defined (HAVE_STRSIGNAL)
 #include "signame.h"
 #endif
 
@@ -241,6 +241,11 @@ extern void bcopy ();
 extern char *strerror PARAMS ((int errnum));
 #endif
 
+#ifndef __attribute__
+# if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 5)
+#  define __attribute__(x)
+# endif
+#endif
 
 #ifdef	__GNUC__
 #undef	alloca
@@ -259,7 +264,7 @@ extern char *alloca ();
 #define streq(a, b) \
   ((a) == (b) || \
    (*(a) == *(b) && (*(a) == '\0' || !strcmp ((a) + 1, (b) + 1))))
-#ifdef _AMIGA
+#ifdef HAVE_CASE_INSENSITIVE_FS
 #define strieq(a, b) \
   ((a) == (b) || \
    (tolower(*(a)) == tolower(*(b)) && (*(a) == '\0' || !strcmpi ((a) + 1, (b) + 1))))
@@ -277,7 +282,7 @@ extern char *alloca ();
 /* Add to VAR the hashing value of C, one character in a name.  */
 #define	HASH(var, c) \
   ((var += (c)), (var = ((var) << 7) + ((var) >> 20)))
-#ifdef _AMIGA /* Fold filenames on #amiga */
+#ifdef HAVE_CASE_INSENSITIVE_FS /* Fold filenames */
 #define HASHI(var, c) \
   ((var += tolower((c))), (var = ((var) << 7) + ((var) >> 20)))
 #else
@@ -310,16 +315,23 @@ extern void sync_Path_environment(void);
 extern int kill(int pid, int sig);
 extern int safe_stat(char *file, struct stat *sb);
 extern char *end_of_token_w32();
-#endif
+extern int find_and_set_default_shell(char *token);
+
+/* indicates whether or not we have Bourne shell */
+extern int no_default_sh_exe;
+
+/* is default_shell unixy? */
+extern int unixy_shell;
+#endif  /* WINDOWS32 */
 
-extern void die ();
+extern void die () __attribute__ ((noreturn));
 extern void message ();
-extern void fatal ();
+extern void fatal () __attribute__ ((noreturn));
 extern void error ();
 extern void log_working_directory ();
 extern void makefile_error ();
-extern void makefile_fatal ();
-extern void pfatal_with_name ();
+extern void makefile_fatal () __attribute__ ((noreturn));
+extern void pfatal_with_name () __attribute__ ((noreturn));
 extern void perror_with_name ();
 extern char *savestring ();
 extern char *concat ();
@@ -412,6 +424,9 @@ extern int env_overrides, no_builtin_rules_flag, print_version_flag;
 extern int print_directory_flag, warn_undefined_variables_flag;
 extern int posix_pedantic;
 extern int clock_skew_detected;
+
+/* can we run commands via 'sh -c xxx' or must we use batch files? */
+extern int batch_mode_shell;
 
 extern unsigned int job_slots;
 #ifndef NO_FLOAT

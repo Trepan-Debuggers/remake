@@ -3,6 +3,7 @@ AC_INIT(fnmatch.c)		dnl A distinctive file to look for in srcdir.
 AC_PREREQ(2.12)			dnl Minimum Autoconf version required.
 
 AM_INIT_AUTOMAKE(glob, 0.0, nodefs)
+AM_CONFIG_HEADER(config.h)
 
 AC_PROG_CC
 AC_CHECK_PROG(AR, ar, ar, ar)

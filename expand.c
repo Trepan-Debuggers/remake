@@ -21,15 +21,24 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "job.h"
 #include "commands.h"
 #include "variable.h"
+#include "rule.h"
 
 /* The next two describe the variable output buffer.
    This buffer is used to hold the variable-expansion of a line of the
    makefile.  It is made bigger with realloc whenever it is too small.
    variable_buffer_length is the size currently allocated.
-   variable_buffer is the address of the buffer.  */
+   variable_buffer is the address of the buffer.
+
+   For efficiency, it's guaranteed that the buffer will always have
+   VARIABLE_BUFFER_ZONE extra bytes allocated.  This allows you to add a few
+   extra chars without having to call a function.  Note you should never use
+   these bytes unless you're _sure_ you have room (you know when the buffer
+   length was last checked.  */
+
+#define VARIABLE_BUFFER_ZONE    5
 
 static unsigned int variable_buffer_length;
-static char *variable_buffer;
+char *variable_buffer;
 
 /* Subroutine of variable_expand and friends:
    The text to add is LENGTH chars starting at STRING to the variable_buffer.
@@ -45,7 +54,7 @@ variable_buffer_output (ptr, string, length)
 {
   register unsigned int newlen = length + (ptr - variable_buffer);
 
-  if (newlen > variable_buffer_length)
+  if ((newlen + VARIABLE_BUFFER_ZONE) > variable_buffer_length)
     {
       unsigned int offset = ptr - variable_buffer;
       variable_buffer_length = (newlen + 100 > 2 * variable_buffer_length
@@ -93,7 +102,7 @@ recursively_expand (v)
 	       v->name);
       else
 	makefile_fatal
-	  (reading_filename, *reading_lineno_ptr, 
+	  (reading_filename, *reading_lineno_ptr,
 	   "Recursive variable `%s' references itself (eventually)",
 	   v->name);
     }
@@ -153,20 +162,38 @@ reference_variable (o, name, length)
   return o;
 }
 
-/* Scan LINE for variable references and expansion-function calls.
-   Build in `variable_buffer' the result of expanding the references and calls.
-   Return the address of the resulting string, which is null-terminated
-   and is valid only until the next time this function is called.  */
+/* Scan STRING for variable references and expansion-function calls.  Only
+   LENGTH bytes of STRING are actually scanned.  If LENGTH is -1, scan until
+   a null byte is found.
+
+   Write the results to LINE, which must point into `variable_buffer'.  If
+   LINE is NULL, start at the beginning of the buffer.
+   Return a pointer to LINE, or to the beginning of the buffer if LINE is
+   NULL.  */
 
 char *
-variable_expand (line)
+variable_expand_string (line, string, length)
      register char *line;
+     char *string;
+     long length;
 {
   register struct variable *v;
   register char *p, *o, *p1;
+  char save_char = '\0';
+  unsigned int line_offset;
 
-  p = line;
-  o = initialize_variable_output ();
+  if (!line)
+    line = initialize_variable_output();
+
+  p = string;
+  o = line;
+  line_offset = line - variable_buffer;
+
+  if (length >= 0)
+    {
+      save_char = string[length];
+      string[length] = '\0';
+    }
 
   while (1)
     {
@@ -316,7 +343,7 @@ variable_expand (line)
 				       replace_end - replace_beg);
 				replace[replace_end - replace_beg] = '\0';
 			      }
-			    
+
 			    o = patsubst_expand (o, value, pattern, replace,
 						 percent, (char *) 0);
 			  }
@@ -366,7 +393,7 @@ variable_expand (line)
 	  }
 
 	  break;
-	}      
+	}
 
       if (*p == '\0')
 	break;
@@ -374,8 +401,23 @@ variable_expand (line)
 	++p;
     }
 
-  (void) variable_buffer_output (o, "", 1);
-  return initialize_variable_output ();
+  if (save_char)
+    string[length] = save_char;
+
+  (void)variable_buffer_output (o, "", 1);
+  return (variable_buffer + line_offset);
+}
+
+/* Scan LINE for variable references and expansion-function calls.
+   Build in `variable_buffer' the result of expanding the references and calls.
+   Return the address of the resulting string, which is null-terminated
+   and is valid only until the next time this function is called.  */
+
+char *
+variable_expand (line)
+     char *line;
+{
+  return variable_expand_string(NULL, line, -1);
 }
 
 /* Expand an argument for an expansion function.
@@ -405,13 +447,13 @@ expand_argument (str, end)
 /* Expand LINE for FILE.  Error messages refer to the file and line where
    FILE's commands were found.  Expansion uses FILE's variable set list.  */
 
-char *
+static char *
 variable_expand_for_file (line, file)
      char *line;
      register struct file *file;
 {
   char *result;
-  struct variable_set_list *save;
+  struct variable_set_list *save, *fnext;
 
   if (file == 0)
     return variable_expand (line);
@@ -420,10 +462,23 @@ variable_expand_for_file (line, file)
   current_variable_set_list = file->variables;
   reading_filename = file->cmds->filename;
   reading_lineno_ptr = &file->cmds->lineno;
+  fnext = file->variables->next;
+  /* See if there's a pattern-specific variable struct for this target.  */
+  if (!file->pat_searched)
+    {
+      file->patvar = lookup_pattern_var(file->name);
+      file->pat_searched = 1;
+    }
+  if (file->patvar != 0)
+    {
+      file->patvar->vars->next = fnext;
+      file->variables->next = file->patvar->vars;
+    }
   result = variable_expand (line);
   current_variable_set_list = save;
   reading_filename = 0;
   reading_lineno_ptr = 0;
+  file->variables->next = fnext;
 
   return result;
 }

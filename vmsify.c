@@ -727,48 +727,21 @@ vmsify (name, type)
 		while (*fptr == '/');
 	      }
 	    {					/* got '..' or '../' */
-	      char cwdbuf[MAXPATHLEN+1];
+	      nstate = N_OPEN;
+	      *vptr++ = '[';
+	      while (count--)
+		*vptr++ = '-';
 
-	      s1 = getcwd(cwdbuf, MAXPATHLEN);
-	      if (s1 == 0)
+	      if (*fptr == 0)	/* had '..' or '../' */
 		{
-		  return "";	    /* FIXME, err getcwd */
+		  *vptr++ = ']';
+		  state = -1;
 		}
-	      strcpy (vptr, s1);
-	      s = strchr (vptr, ']');
-	      if (s != 0)
+	      else			/* had '../xxx' */
 		{
-		  nstate = N_OPEN;
-		  while (s > vptr)
-		    {
-		      s--;
-		      if (*s == '[')
-			{
-			  s++;
-			  strcpy (s, "000000]");
-			  state = -1;
-			  break;
-			}
-		      else if (*s == '.')
-			{
-			  if (--count == 0)
-			    {
-			      if (*fptr == 0)	/* had '..' or '../' */
-				{
-				  *s++ = ']';
-				  state = -1;
-				}
-			      else			/* had '../xxx' */
-				{
-				  state = 9;
-				}
-			      *s = 0;
-			      break;
-			    }
-			}
-		    }
+		  state = 9;
 		}
-	      vptr += strlen (vptr);
+	      *vptr = 0;
 	    }
 	    break;
 
@@ -782,34 +755,86 @@ vmsify (name, type)
 		fptr++;
 	      }
 
-	    {
-	      char cwdbuf[MAXPATHLEN+1];
+	    if (*fptr)
+	      {
+		state = 9;
 
-	      s1 = getcwd(cwdbuf, MAXPATHLEN);
-	      if (s1 == 0)
-		{
-		  return "";	    /*FIXME, err getcwd */
-		}
-	      strcpy (vptr, s1);
-	      if (*fptr == 0)
-		{
-		  state = -1;
-		  break;
-		}
-	      else
-		{
-		  s = strchr (vptr, ']');
-		  if (s == 0)
-		    {
-		      state = -1;
-		      break;
-		    }
-		  *s = 0;
-		  nstate = N_OPEN;
-		  vptr += strlen (vptr);
-		  state = 9;
-		}
-	    }
+		switch (type)
+		  {
+		  case 0:
+		    nstate = N_CLOSED;
+		    *vptr++ = '[';
+		    *vptr++ = ']';
+		    break;
+
+		  case 1:
+		    nstate = N_OPEN;
+		    *vptr++ = '[';
+		    break;
+
+		  case 2:
+		    nstate = N_CLOSED;
+		    break;
+		  }
+	      }
+	    else
+	      {
+		if (type == 1)
+		  {
+		    *vptr++ = '[';
+		    *vptr++ = ']';
+		    state = -1;
+		  }
+		else
+		  {
+		    char cwdbuf[MAXPATHLEN+1];
+
+		    s1 = getcwd(cwdbuf, MAXPATHLEN);
+		    if (s1 == 0)
+		      {
+			return "foo";	    /*FIXME, err getcwd */
+		      }
+		    strcpy (vptr, s1);
+		    vptr += strlen (vptr);
+
+		    if (type == 2)
+		      {
+			s = vptr;
+			while (s > vmsname)
+			  {
+			    if (*s == '.')
+			      {
+				*s = ']';
+				vptr--;
+				break;
+			      }
+
+			    if (*s == '[')
+			      {
+				int i;
+				char *t = vptr - 2;
+				while (t > s)
+				  {
+				    *(t+7) = *t;
+				    t--;
+				  }
+				s++;
+				for (i = 0; i < 6; i++)
+				  *s++ = '0';
+				*s = ']';
+				vptr += 6;
+				break;
+			      }
+			    s--;
+			  }
+
+			strcpy (vptr, ".dir");
+			vptr += 4;
+		      }
+
+		    state = -1;
+		  }
+	      }
 	    break;
 	}
 

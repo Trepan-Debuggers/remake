@@ -41,12 +41,12 @@ transform = s,x,x,
 # get "Error -1" instead of "Error 1".
 EXIT_FAIL = false
 
-NORMAL_INSTALL = true
-PRE_INSTALL = true
-POST_INSTALL = true
-NORMAL_UNINSTALL = true
-PRE_UNINSTALL = true
-POST_UNINSTALL = true
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
 AR = ar
 CC = gcc
 CPP = gcc -E
@@ -67,12 +67,13 @@ libglob_a_SOURCES =	%GLOB_SOURCES%
 make_LDADD =	  glob/libglob.a
 
 info_TEXINFOS =	make.texinfo
+man_MANS =	make.1
 
 INCLUDES =	-I$(srcdir)/glob -DLIBDIR=\"c:/djgpp/lib\" -DINCLUDEDIR=\"c:/djgpp/include\"
 
 BUILT_SOURCES =	README build.sh.in
 
-EXTRA_DIST = 	make.man $(BUILT_SOURCES) remote-cstms.c  make-stds.texi texinfo.tex SCOPTIONS SMakefile  Makefile.ami README.Amiga config.ami amiga.c amiga.h  NMakefile README.DOS configh.dos configure.bat makefile.com  README.W32 build_w32.bat config.h.W32 subproc.bat make.lnk  config.h-vms makefile.vms readme.vms vmsdir.h vmsfunctions.c  vmsify.c
+EXTRA_DIST = 	$(BUILT_SOURCES) $(man_MANS) README.customs remote-cstms.c  make-stds.texi texinfo.tex SCOPTIONS SMakefile  Makefile.ami README.Amiga config.ami amiga.c amiga.h  NMakefile README.DOS configh.dos configure.bat makefile.com  README.W32 build_w32.bat config.h.W32 subproc.bat make.lnk  config.h-vms makefile.vms readme.vms vmsdir.h vmsfunctions.c  vmsify.c
 
 SUBDIRS =	glob
 mkinstalldirs = ${bindir}/gmkdir -p
@@ -99,6 +100,10 @@ TEXINFO_TEX = $(srcdir)/texinfo.tex
 INFO_DEPS = make.info
 DVIS = make.dvi
 TEXINFOS = make.texinfo
+man1dir = $(mandir)/man1
+MANS = $(man_MANS)
+
+NROFF = nroff
 DIST_COMMON =  README AUTHORS COPYING ChangeLog INSTALL Makefile.am  Makefile.in NEWS acconfig.h aclocal.m4 alloca.c build.sh.in config.h.in  configure configure.in getloadavg.c install-sh missing mkinstalldirs  stamp-h.in texinfo.tex
 
 
@@ -116,14 +121,14 @@ default: all
 .SUFFIXES: .c .dvi .info .o .ps .texi .texinfo
 
 distclean-hdr:
-	rm -f config.h
+	-rm -f config.h
 
 maintainer-clean-hdr:
 
 mostlyclean-binPROGRAMS:
 
 clean-binPROGRAMS:
-	test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 
 distclean-binPROGRAMS:
 
@@ -131,7 +136,7 @@ maintainer-clean-binPROGRAMS:
 
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(bindir)
+	$(mkinstalldirs) $(DESTDIR)$(bindir)
 	@list='$(bin_PROGRAMS)'; for p in $$list; do    if test -f $$p; then      echo "  $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p | sed '$(transform)'`";       $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p | sed '$(transform)'`;    else :; fi;  done
 
 uninstall-binPROGRAMS:
@@ -142,15 +147,15 @@ uninstall-binPROGRAMS:
 	$(COMPILE) -c $<
 
 clean-noinstLIBRARIES:
-	test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
 
 mostlyclean-compile:
-	rm -f *.o *.exe make.new core
+	-rm -f *.o *.exe make.new core
 
 clean-compile:
 
 distclean-compile:
-	rm -f *.tab.c
+	-rm -f *.tab.c
 
 maintainer-clean-compile:
 
@@ -188,22 +193,22 @@ DVIPS = dvips
 
 install-info-am: $(INFO_DEPS)
 	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(infodir)
-	@for file in $(INFO_DEPS) make.i; do    d=$(srcdir);    for ifile in `cd $$d && echo $$file $$file-[0-9] $$file-[0-9][0-9] $$file[0-9] $$file[0-9][0-9]`; do      if test -f $$d/$$ifile; then        echo " $(INSTALL_DATA) $$d/$$ifile $(infodir)/$$ifile"; $(INSTALL_DATA) $$d/$$ifile $(infodir)/$$ifile; else : ; fi;    done;  done
+	$(mkinstalldirs) $(DESTDIR)$(infodir)
+	@for file in $(INFO_DEPS) make.i; do    d=$(srcdir);    for ifile in `cd $$d && echo $$file $$file-[0-9] $$file-[0-9][0-9] $$file[0-9] $$file[0-9][0-9]`; do      if test -f $$d/$$ifile; then        echo " $(INSTALL_DATA) $$d/$$ifile $(DESTDIR)$(infodir)/$$ifile"; $(INSTALL_DATA) $$d/$$ifile $(DESTDIR)$(infodir)/$$ifile; else : ; fi;    done;  done
 	@$(POST_INSTALL)
-	@if $(SHELL) -c 'install-info --version | sed 1q | fgrep -s -v -i debian' >/dev/null 2>&1; then    for file in $(INFO_DEPS); do      echo " install-info --info-dir=$(infodir) $(infodir)/$$file";     install-info --info-dir=$(infodir) $(infodir)/$$file || :;   done;  else : ; fi
+	@if $(SHELL) -c 'install-info --version | sed 1q | fgrep -s -v -i debian' >/dev/null 2>&1; then    for file in $(INFO_DEPS); do      echo " install-info --info-dir=$(DESTDIR)$(infodir) $(DESTDIR)$(infodir)/$$file";     install-info --info-dir=$(DESTDIR)$(infodir) $(DESTDIR)$(infodir)/$$file || :;   done;  else : ; fi
 
 uninstall-info:
 	$(PRE_UNINSTALL)
-	@if $(SHELL) -c 'install-info --version | sed 1q | fgrep -s -v -i debian' >/dev/null 2>&1; then    ii=yes;  else ii=; fi;  for file in $(INFO_DEPS); do    test -z $ii || install-info --info-dir=$(infodir) --remove $$file;  done
+	@if $(SHELL) -c 'install-info --version | sed 1q | fgrep -s -v -i debian' >/dev/null 2>&1; then    ii=yes;  else ii=; fi;  for file in $(INFO_DEPS); do    test -z $ii || install-info --info-dir=$(DESTDIR)$(infodir) --remove $$file;  done
 	$(NORMAL_UNINSTALL)
-	for file in $(INFO_DEPS) make.i; do    (cd $(infodir) && rm -f $$file $$file-[0-9] $$file-[0-9][0-9] $$file[0-9] $$file[0-9][0-9]);  done
+	for file in $(INFO_DEPS) make.i; do    (cd $(DESTDIR)$(infodir) && rm -f $$file $$file-[0-9] $$file-[0-9][0-9] $$file[0-9] $$file[0-9][0-9]);  done
 
 dist-info: $(INFO_DEPS)
 	for base in $(INFO_DEPS); do    d=$(srcdir);    for file in `cd $$d && eval echo $$base*`; do      test -f $(distdir)/$$file      || ln $$d/$$file $(distdir)/$$file 2> /dev/null      || cp -p $$d/$$file $(distdir)/$$file;    done;  done
 
 mostlyclean-aminfo:
-	rm -f make.aux make.cp make.cps make.dvi make.fn make.fns make.ky    make.log make.pg make.toc make.tp make.tps make.vr make.vrs    make.op make.tr make.cv
+	rm -f make.aux make.cp make.cps make.dvi make.fn make.fns make.ky    make.kys make.ps make.log make.pg make.toc make.tp make.tps make.vr make.vrs    make.op make.tr make.cv make.cn
 
 clean-aminfo:
 
@@ -211,6 +216,45 @@ distclean-aminfo:
 
 maintainer-clean-aminfo:
 	for i in $(INFO_DEPS) make.i; do rm -f `eval echo $$i*`; done
+
+install-man1:
+	$(mkinstalldirs) $(DESTDIR)$(man1dir)
+	@list='$(man1_MANS)'; \
+	l2='$(man_MANS)'; for i in $$l2; do \
+	  case "$$i" in \
+	    *.1*) list="$$list $$i" ;; \
+	  esac; \
+	done; \
+	for i in $$list; do \
+	  if test -f $(srcdir)/$$i; then file=$(srcdir)/$$i; \
+	  else file=$$i; fi; \
+	  ext=`echo $$i | sed -e 's/^.*\\.//'`; \
+	  inst=`echo $$i | sed -e 's/\\.[0-9a-z]*$$//'`; \
+	  inst=`echo $$inst | sed '$(transform)'`.$$ext; \
+	  echo " $(INSTALL_DATA) $$file $(DESTDIR)$(man1dir)/$$inst"; \
+	  $(INSTALL_DATA) $$file $(DESTDIR)$(man1dir)/$$inst; \
+	done
+
+uninstall-man1:
+	@list='$(man1_MANS)'; \
+	l2='$(man_MANS)'; for i in $$l2; do \
+	  case "$$i" in \
+	    *.1*) list="$$list $$i" ;; \
+	  esac; \
+	done; \
+	for i in $$list; do \
+	  ext=`echo $$i | sed -e 's/^.*\\.//'`; \
+	  inst=`echo $$i | sed -e 's/\\.[0-9a-z]*$$//'`; \
+	  inst=`echo $$inst | sed '$(transform)'`.$$ext; \
+	  echo " rm -f $(DESTDIR)$(man1dir)/$$inst"; \
+	  rm -f $(DESTDIR)$(man1dir)/$$inst; \
+	done
+install-man: $(MANS)
+	@$(NORMAL_INSTALL)
+	$(MAKE) install-man1
+uninstall-man:
+	@$(NORMAL_UNINSTALL)
+	$(MAKE) uninstall-man1
 
 # Assume that the only thing to do in glob is to build libglob.a,
 # but do a sanity check: if $SUBDIRS will ever have more than
@@ -266,7 +310,7 @@ mostlyclean-tags:
 clean-tags:
 
 distclean-tags:
-	rm -f TAGS ID
+	-rm -f TAGS ID
 
 maintainer-clean-tags:
 
@@ -299,32 +343,6 @@ distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do d=$(srcdir); test -f $(distdir)/$$file || ln $$d/$$file $(distdir)/$$file 2> /dev/null || cp -p $$d/$$file $(distdir)/$$file; done; for subdir in $(SUBDIRS); do test -d $(distdir)/$$subdir || mkdir $(distdir)/$$subdir || exit 1; chmod 777 $(distdir)/$$subdir; (cd $$subdir && $(MAKE) top_distdir=../$(top_distdir)/$$subdir distdir=../$(distdir)/$$subdir distdir) || exit 1; done
 	$(MAKE) top_distdir="$(top_distdir)" distdir="$(distdir)" dist-info
 	$(MAKE) top_distdir="$(top_distdir)" distdir="$(distdir)" dist-hook
-alloca.o alloca.lo: alloca.c config.h
-ar.o ar.lo: ar.c make.h config.h filedef.h dep.h glob/fnmatch.h
-arscan.o arscan.lo: arscan.c make.h config.h
-commands.o commands.lo: commands.c make.h config.h dep.h filedef.h  variable.h job.h commands.h
-default.o default.lo: default.c make.h config.h rule.h dep.h filedef.h  job.h commands.h variable.h
-dir.o dir.lo: dir.c make.h config.h glob/glob.h
-expand.o expand.lo: expand.c make.h config.h filedef.h job.h commands.h  variable.h
-file.o file.lo: file.c make.h config.h dep.h filedef.h job.h commands.h  variable.h
-function.o function.lo: function.c make.h config.h filedef.h variable.h  dep.h job.h commands.h
-getloadavg.o getloadavg.lo: getloadavg.c config.h
-getopt.o getopt.lo: getopt.c config.h getopt.h
-getopt1.o getopt1.lo: getopt1.c config.h getopt.h
-implicit.o implicit.lo: implicit.c make.h config.h rule.h dep.h  filedef.h
-job.o job.lo: job.c make.h config.h job.h filedef.h commands.h  variable.h
-main.o main.lo: main.c make.h config.h dep.h filedef.h variable.h job.h  commands.h getopt.h
-misc.o misc.lo: misc.c make.h config.h dep.h
-read.o read.lo: read.c make.h config.h dep.h filedef.h job.h commands.h  variable.h glob/glob.h
-remake.o remake.lo: remake.c make.h config.h filedef.h job.h commands.h  dep.h
-remote-stub.o remote-stub.lo: remote-stub.c make.h config.h filedef.h  job.h commands.h
-rule.o rule.lo: rule.c make.h config.h dep.h filedef.h job.h commands.h  variable.h rule.h
-signame.o signame.lo: signame.c config.h signame.h
-variable.o variable.lo: variable.c make.h config.h dep.h filedef.h job.h  commands.h variable.h
-version.o version.lo: version.c config.h
-vpath.o vpath.lo: vpath.c make.h config.h filedef.h variable.h
-fnmatch.o fnmatch.lo: fnmatch.c fnmatch.h ../config.h
-glob.o glob.lo: glob.c fnmatch.h glob.h ../config.h
 
 info: $(INFO_DEPS) info-recursive
 dvi: $(DVIS) dvi-recursive
@@ -362,19 +380,19 @@ installdirs: installdirs-recursive
 
 
 mostlyclean-generic:
-	test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
+	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
 
 clean-generic:
-	test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
-	rm -f Makefile $(DISTCLEANFILES)
-	rm -f config.cache config.log stamp-h stamp-h[0-9]*
-	test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
+	-rm -f Makefile $(DISTCLEANFILES)
+	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
+	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 
 maintainer-clean-generic:
-	test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
-	test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
+	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 mostlyclean-am:  mostlyclean-hdr mostlyclean-binPROGRAMS  mostlyclean-compile mostlyclean-aminfo mostlyclean-tags  mostlyclean-generic
 
 clean-am:  clean-hdr clean-binPROGRAMS clean-compile clean-aminfo  clean-tags clean-generic mostlyclean-am

@@ -27,11 +27,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifdef WINDOWS32
 char *default_shell = "sh.exe";
 int no_default_sh_exe = 1;
+int batch_mode_shell = 1;
 #else  /* WINDOWS32 */
 #ifdef _AMIGA
 char default_shell[] = "";
 extern int MyExecute (char **);
-#else
+#else /* _AMIGA */
 #ifdef __MSDOS__
 /* The default shell is a pointer so we can change it if Makefile
    says so.  It is without an explicit path so we get a chance
@@ -41,6 +42,7 @@ char *default_shell = "command.com";
 #else  /* __MSDOS__ */
 char default_shell[] = "/bin/sh";
 #endif /* __MSDOS__ */
+int batch_mode_shell = 0;
 #endif /* _AMIGA */
 #endif /* WINDOWS32 */
 
@@ -74,11 +76,6 @@ static int amiga_batch_file;
 #include "sub_proc.h"
 #include "w32err.h"
 #include "pathstuff.h"
-
-/* this stuff used if no sh.exe is around */
-static char *dos_bname;
-static char *dos_bename;
-static int dos_batch_file;
 #endif /* WINDOWS32 */
 
 #ifdef HAVE_FCNTL_H
@@ -168,7 +165,7 @@ extern char *allocated_variable_expand_for_file PARAMS ((char *line, struct file
 extern int getloadavg PARAMS ((double loadavg[], int nelem));
 extern int start_remote_job PARAMS ((char **argv, char **envp, int stdin_fd,
 		int *is_remote, int *id_ptr, int *used_stdin));
-extern int start_remote_job_p PARAMS ((void));
+extern int start_remote_job_p PARAMS ((int));
 extern int remote_status PARAMS ((int *exit_code_ptr, int *signal_ptr,
 		int *coredump_ptr, int block));
 
@@ -327,9 +324,9 @@ reap_children (block, err)
 	  any_remote |= c->remote;
 	  any_local |= ! c->remote;
 	  if (debug_flag)
-	    printf ("Live child 0x%08lx PID %d%s\n",
+	    printf ("Live child 0x%08lx PID %ld%s\n",
 		    (unsigned long int) c,
-		    c->pid, c->remote ? " (remote)" : "");
+		    (long) c->pid, c->remote ? " (remote)" : "");
 #ifdef VMS
 	  break;
 #endif
@@ -426,38 +423,33 @@ reap_children (block, err)
 	  coredump = 0;
 #endif /* _AMIGA */
 #ifdef WINDOWS32
-         {
-           HANDLE hPID;
-           int err;
+      {
+        HANDLE hPID;
+        int err;
 
-           /* wait for anything to finish */
-           if (hPID = process_wait_for_any()) {
+        /* wait for anything to finish */
+        if (hPID = process_wait_for_any()) {
 
-             /* was an error found on this process? */
-             err = process_last_err(hPID);
+          /* was an error found on this process? */
+          err = process_last_err(hPID);
 
-             /* get exit data */
-             exit_code = process_exit_code(hPID);
+          /* get exit data */
+          exit_code = process_exit_code(hPID);
 
-             if (err)
-               fprintf(stderr, "make (e=%d): %s",
-                       exit_code, map_windows32_error_to_string(exit_code));
+          if (err)
+            fprintf(stderr, "make (e=%d): %s",
+              exit_code, map_windows32_error_to_string(exit_code));
 
-             exit_sig = process_signal(hPID);
+          /* signal */
+          exit_sig = process_signal(hPID);
 
-             /* cleanup process */
-             process_cleanup(hPID);
+          /* cleanup process */
+          process_cleanup(hPID);
 
-             if (dos_batch_file) {
-               remove (dos_bname);
-               remove (dos_bename);
-               dos_batch_file = 0;
-             }
-
-             coredump = 0;
-           }
-           pid = (int) hPID;
-         }
+          coredump = 0;
+        }
+        pid = (int) hPID;
+      }
 #endif /* WINDOWS32 */
 #endif	/* Not __MSDOS__ */
 	}
@@ -498,10 +490,22 @@ reap_children (block, err)
       else
 	{
 	  if (debug_flag)
-	    printf ("Reaping %s child 0x%08lx PID %d%s\n",
+	    printf ("Reaping %s child 0x%08lx PID %ld%s\n",
 		    child_failed ? "losing" : "winning",
 		    (unsigned long int) c,
-		    c->pid, c->remote ? " (remote)" : "");
+		    (long) c->pid, c->remote ? " (remote)" : "");
+
+      if (c->sh_batch_file) {
+         if (debug_flag)
+           printf("Cleaning up temporary batch file %s\n", c->sh_batch_file);
+
+         /* just try and remove, don't care if this fails */
+         remove(c->sh_batch_file);
+
+         /* all done with memory */
+         free(c->sh_batch_file);
+         c->sh_batch_file = NULL;
+      }
 
 	  /* If this child had the good stdin, say it is now free.  */
 	  if (c->good_stdin)
@@ -549,7 +553,7 @@ reap_children (block, err)
 			 Whether or not we want to changes over time.
 			 Also, start_remote_job may need state set up
 			 by start_remote_job_p.  */
-		      c->remote = start_remote_job_p ();
+		      c->remote = start_remote_job_p (0);
 		      start_job_command (c);
 		      /* Fatal signals are left blocked in case we were
 			 about to put that child on the chain.  But it is
@@ -586,9 +590,9 @@ reap_children (block, err)
 	    notice_finished_file (c->file);
 
 	  if (debug_flag)
-	    printf ("Removing child 0x%08lx PID %d%s from chain.\n",
+	    printf ("Removing child 0x%08lx PID %ld%s from chain.\n",
 		    (unsigned long int) c,
-		    c->pid, c->remote ? " (remote)" : "");
+		    (long) c->pid, c->remote ? " (remote)" : "");
 
 	  /* Block fatal signals while frobnicating the list, so that
 	     children and job_slots_used are always consistent.  Otherwise
@@ -740,7 +744,7 @@ start_job_command (child)
 #ifdef VMS
     argv = p;
 #else
-    argv = construct_command_argv (p, &end, child->file);
+    argv = construct_command_argv (p, &end, child->file, &child->sh_batch_file);
 #endif
     if (end == NULL)
       child->command_ptr = NULL;
@@ -765,6 +769,9 @@ start_job_command (child)
   if (argv == 0)
     {
     next_command:
+#ifdef __MSDOS__
+	  execute_by_shell = 0;   /* in case construct_command_argv sets it */
+#endif
       /* This line has no commands.  Go to the next.  */
       if (job_next_command (child))
 	start_job_command (child);
@@ -887,7 +894,9 @@ start_job_command (child)
       if (start_remote_job (argv, child->environment,
 			    child->good_stdin ? 0 : bad_stdin,
 			    &is_remote, &id, &used_stdin))
-	goto error;
+        /* Don't give up; remote execution may fail for various reasons.  If
+           so, simply run the job locally.  */
+	goto run_local;
       else
 	{
 	  if (child->good_stdin && !used_stdin)
@@ -906,6 +915,7 @@ start_job_command (child)
 
       char **parent_environ;
 
+    run_local:
       block_sigs ();
 
       child->remote = 0;
@@ -1066,7 +1076,7 @@ start_waiting_job (c)
      the local load average.  We record that the job should be started
      remotely in C->remote for start_job_command to test.  */
 
-  c->remote = start_remote_job_p ();
+  c->remote = start_remote_job_p (1);
 
   /* If this job is to be started locally, and we are already running
      some jobs, make this one wait if the load average is too high.  */
@@ -1251,6 +1261,7 @@ new_job (file)
   c->command_line = 0;
   c->command_ptr = 0;
   c->environment = 0;
+  c->sh_batch_file = NULL;
 
   /* Fetch the first command line to be run.  */
   job_next_command (c);
@@ -1479,11 +1490,12 @@ child_execute_job (argv, child)
     }
   *c = *p;
 
-  /* check for maximum dcl length and create *.com file if neccesary */
+  /* Check for maximum DCL length and create *.com file if neccesary.
+     Also create a .com file if the command is more than one line long.  */
 
   comname[0] = '\0';
 
-  if (strlen (cmd) > MAXCMDLEN)
+  if (strlen (cmd) > MAXCMDLEN || strchr (cmd, '\n'))
     {
       FILE *outfile;
       char tmp;
@@ -1743,9 +1755,10 @@ void clean_tmp (void)
    IFS is the value of $IFS, or nil (meaning the default).  */
 
 static char **
-construct_command_argv_internal (line, restp, shell, ifs)
+construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
      char *line, **restp;
      char *shell, *ifs;
+     char **batch_filename_ptr;
 {
 #ifdef __MSDOS__
   /* MSDOS supports both the stock DOS shell and ports of Unixy shells.
@@ -1810,7 +1823,11 @@ construct_command_argv_internal (line, restp, shell, ifs)
 			     "logout", "set", "umask", "wait", "while", "for",
 			     "case", "if", ":", ".", "break", "continue",
 			     "export", "read", "readonly", "shift", "times",
-			     "trap", "switch", "test", 0 };
+			     "trap", "switch", "test",
+#ifdef BATCH_MODE_ONLY_SHELL
+                 "echo",
+#endif
+                 0 };
   char*  sh_chars;
   char** sh_cmds;
 #else  /* WINDOWS32 */
@@ -2144,38 +2161,6 @@ construct_command_argv_internal (line, restp, shell, ifs)
     ++line;
   if (*line == '\0')
     return 0;
-
-  /*
-   * only come here if no sh.exe command
-   */
-  if (no_default_sh_exe)
-  {
-    FILE *batch;
-    dos_batch_file = 1;
-    if (dos_bname == 0)
-    {
-      dos_bname = tempnam (".", "mk");
-      for (i = 0; dos_bname[i] != '\0'; ++i)
-	if (dos_bname[i] == '/')
-	  dos_bname[i] = '\\';
-      dos_bename = (char *) xmalloc (strlen (dos_bname) + 5);
-      strcpy (dos_bename, dos_bname);
-      strcat (dos_bname, ".bat");
-      strcat (dos_bename, ".err");
-    }
-    batch = fopen (dos_bename, "w"); /* Create a file.  */
-    if (batch != NULL)
-      fclose (batch);
-    batch = fopen (dos_bname, "w");
-    fputs ("@echo off\n", batch);
-    fputs (line, batch);
-    fprintf (batch, "\nif errorlevel 1 del %s\n", dos_bename);
-    fclose (batch);
-    new_argv = (char **) xmalloc(2 * sizeof(char *));
-    new_argv[0] = strdup (dos_bname);
-    new_argv[1] = 0;
-  }
-  else
 #endif /* WINDOWS32 */
   {
     /* SHELL may be a multi-word command.  Construct a command line
@@ -2189,12 +2174,14 @@ construct_command_argv_internal (line, restp, shell, ifs)
 
     char *new_line = (char *) alloca (shell_len + (sizeof (minus_c) - 1)
 				      + (line_len * 2) + 1);
+    char* command_ptr = NULL; /* used for batch_mode_shell mode */
 
     ap = new_line;
     bcopy (shell, ap, shell_len);
     ap += shell_len;
     bcopy (minus_c, ap, sizeof (minus_c) - 1);
     ap += sizeof (minus_c) - 1;
+	command_ptr = ap;
     for (p = line; *p != '\0'; ++p)
       {
 	if (restp != NULL && *p == '\n')
@@ -2218,14 +2205,14 @@ construct_command_argv_internal (line, restp, shell, ifs)
 
 	    p = next_token (p);
 	    --p;
-            if (unixy_shell)
-              *ap++ = '\\';
+        if (unixy_shell && !batch_mode_shell)
+          *ap++ = '\\';
 	    *ap++ = ' ';
 	    continue;
 	  }
 
         /* DOS shells don't know about backslash-escaping.  */
-	if (unixy_shell &&
+	if (unixy_shell && !batch_mode_shell &&
             (*p == '\\' || *p == '\'' || *p == '"'
              || isspace (*p)
              || index (sh_chars, *p) != 0))
@@ -2246,9 +2233,63 @@ construct_command_argv_internal (line, restp, shell, ifs)
       return 0;
     *ap = '\0';
 
+#ifdef WINDOWS32
+    /*
+	 * Some shells do not work well when invoked as 'sh -c  xxx' to run
+	 * a command line (e.g. Cygnus GNUWIN32 sh.exe on WIN32 systems).
+	 * In these cases, run commands via a script file.
+     */
+    if ((no_default_sh_exe || batch_mode_shell) && batch_filename_ptr) {
+      FILE* batch = NULL;
+      int id = GetCurrentProcessId();
+      PATH_VAR(fbuf);
+      char* fname = NULL;
+
+      /* create a file name */
+      sprintf(fbuf, "make%d", id);
+      fname = tempnam(".", fbuf);
+
+	  /* create batch file name */
+      *batch_filename_ptr = xmalloc(strlen(fname) + 5);
+      strcpy(*batch_filename_ptr, fname);
+
+      /* make sure path name is in DOS backslash format */
+      if (!unixy_shell) {
+        fname = *batch_filename_ptr;
+        for (i = 0; fname[i] != '\0'; ++i)
+          if (fname[i] == '/')
+            fname[i] = '\\';
+        strcat(*batch_filename_ptr, ".bat");
+      } else {
+        strcat(*batch_filename_ptr, ".sh");
+      }
+
+      if (debug_flag)
+        printf("Creating temporary batch file %s\n", *batch_filename_ptr);
+
+      /* create batch file to execute command */
+      batch = fopen (*batch_filename_ptr, "w");
+      fputs ("@echo off\n", batch);
+      fputs (command_ptr, batch);
+      fputc ('\n', batch);
+      fclose (batch);
+
+      /* create argv */
+      new_argv = (char **) xmalloc(3 * sizeof(char *));
+      if (unixy_shell) {
+        new_argv[0] = strdup (shell);
+        new_argv[1] = *batch_filename_ptr; /* only argv[0] gets freed later */
+      } else {
+        new_argv[0] = strdup (*batch_filename_ptr);
+        new_argv[1] = NULL;
+      }
+      new_argv[2] = NULL;
+    } else
+#endif /* WINDOWS32 */
     if (unixy_shell)
       new_argv = construct_command_argv_internal (new_line, (char **) NULL,
-                                                  (char *) 0, (char *) 0);
+                                                  (char *) 0, (char *) 0,
+                                                  (char *) 0);
 #ifdef  __MSDOS__
     else
       {
@@ -2262,6 +2303,10 @@ construct_command_argv_internal (line, restp, shell, ifs)
                new_line + shell_len + sizeof (minus_c) - 1, line_len);
       new_argv[0][line_len] = '\0';
       }
+#else
+    else
+      fatal("%s (line %d) Invalid shell context (!unixy && !batch_mode_shell)\n",
+            __FILE__, __LINE__);
 #endif
   }
 #endif	/* ! AMIGA */
@@ -2283,9 +2328,10 @@ construct_command_argv_internal (line, restp, shell, ifs)
    variable expansion for $(SHELL) and $(IFS).  */
 
 char **
-construct_command_argv (line, restp, file)
+construct_command_argv (line, restp, file, batch_filename_ptr)
      char *line, **restp;
      struct file *file;
+     char** batch_filename_ptr;
 {
   char *shell, *ifs;
   char **argv;
@@ -2311,7 +2357,7 @@ construct_command_argv (line, restp, file)
     warn_undefined_variables_flag = save;
   }
 
-  argv = construct_command_argv_internal (line, restp, shell, ifs);
+  argv = construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr);
 
   free (shell);
   free (ifs);

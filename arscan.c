@@ -600,15 +600,12 @@ ar_name_equal (name, mem, truncated)
       abort ();
 #else
       struct ar_hdr hdr;
-      return !strncmp (name, mem,
-		       sizeof (hdr.ar_name) -
 #if !defined (__hpux) && !defined (cray)
-		       1
+      return !strncmp (name, mem, sizeof(hdr.ar_name) - 1);
 #else
-		       2
+      return !strncmp (name, mem, sizeof(hdr.ar_name) - 2);
 #endif /* !__hpux && !cray */
-		       );
-#endif
+#endif /* !AIAMAG */
     }
 #endif /* !VMS */
 

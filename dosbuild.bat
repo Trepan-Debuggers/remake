@@ -7,8 +7,8 @@ gcc  -c -I. -I./glob -DHAVE_CONFIG_H -O2 -g dir.c -o dir.o
 gcc  -c -I. -I./glob -DHAVE_CONFIG_H -O2 -g file.c -o file.o
 gcc  -c -I. -I./glob -DHAVE_CONFIG_H -O2 -g misc.c -o misc.o
 gcc  -c -I. -I./glob -DHAVE_CONFIG_H -O2 -g main.c -o main.o
-gcc  -c -I. -I./glob -DHAVE_CONFIG_H -O2 -g read.c -o read.o
-gcc  -c -I. -I./glob -DHAVE_CONFIG_H -O2 -g remake.c -o remake.o
+gcc  -c -I. -I./glob -DHAVE_CONFIG_H -DINCLUDEDIR=\"c:/djgpp/include\" -O2 -g read.c -o read.o
+gcc  -c -I. -I./glob -DHAVE_CONFIG_H -DLIBDIR=\"c:/djgpp/lib\" -O2 -g remake.c -o remake.o
 gcc  -c -I. -I./glob -DHAVE_CONFIG_H -O2 -g rule.c -o rule.o
 gcc  -c -I. -I./glob -DHAVE_CONFIG_H -O2 -g implicit.c -o implicit.o
 gcc  -c -I. -I./glob -DHAVE_CONFIG_H -O2 -g default.c -o default.o
