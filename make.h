@@ -20,6 +20,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  #pragma alloca
 #endif
 
+#include "config.h"
+#define HAVE_CONFIG_H
+
 #ifdef	CRAY
 /* This must happen before #include <signal.h> so
    that the declaration therein is changed.  */
