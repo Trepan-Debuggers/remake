@@ -47,9 +47,12 @@ extern "C" {
 
 /* We need `size_t' for the following definitions.  */
 #ifndef __size_t
-# if defined __GNUC__ && __GNUC__ >= 2
-typedef __SIZE_TYPE__ __size_t;
+# if defined __FreeBSD__
+#  define __size_t size_t
 # else
+#  if defined __GNUC__ && __GNUC__ >= 2
+typedef __SIZE_TYPE__ __size_t;
+#  else
 /* This is a guess.  */
 /*hb
  *	Conflicts with DECCs aready defined type __size_t.
@@ -57,9 +60,10 @@ typedef __SIZE_TYPE__ __size_t;
  *	Anyway if DECC is used and __SIZE_T is defined then __size_t is
  *	already defined (and I hope it's exactly the one we need here).
  */
-#if !(defined __DECC && defined __SIZE_T)
+#   if !(defined __DECC && defined __SIZE_T)
 typedef unsigned long int __size_t;
-#endif
+#   endif
+#  endif
 # endif
 #else
 /* The GNU CC stddef.h version defines __size_t as empty.  We need a real

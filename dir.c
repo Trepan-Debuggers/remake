@@ -455,7 +455,7 @@ find_directory (char *name)
 #ifdef VMS
       r = vmsstat_dir (name, &st);
 #else
-      r = stat (name, &st);
+      EINTRLOOP (r, stat (name, &st));
 #endif
 
 #ifdef WINDOWS32
@@ -536,7 +536,7 @@ find_directory (char *name)
 # endif
 #endif /* WINDOWS32 */
 	      hash_insert_at (&directory_contents, dc, dc_slot);
-	      dc->dirstream = opendir (name);
+	      ENULLLOOP (dc->dirstream, opendir (name));
 	      if (dc->dirstream == 0)
                 /* Couldn't open the directory.  Mark this by
                    setting the `files' member to a nil pointer.  */
@@ -645,12 +645,16 @@ dir_contents_file_exists_p (struct directory_contents *dir, char *filename)
 	return 0;
     }
 
-  while ((d = readdir (dir->dirstream)) != 0)
+  while (1)
     {
       /* Enter the file in the hash table.  */
       unsigned int len;
       struct dirfile dirfile_key;
       struct dirfile **dirfile_slot;
+
+      ENULLLOOP (d, readdir (dir->dirstream));
+      if (d == 0)
+        break;
 
 #if defined(VMS) && defined(HAVE_DIRENT_H)
       /* In VMS we get file versions too, which have to be stripped off */
@@ -1155,7 +1159,10 @@ extern int stat PARAMS ((const char *path, struct stat *sbuf));
 static int
 local_stat (const char *path, struct stat *buf)
 {
-  return stat (path, buf);
+  int e;
+
+  EINTRLOOP (e, stat (path, buf));
+  return e;
 }
 #endif
 

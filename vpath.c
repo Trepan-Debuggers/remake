@@ -507,27 +507,33 @@ selective_vpath_search (struct vpath *path, char **file,
 	  *n = '/';
 #endif
 
-	  if (!exists_in_cache	/* Makefile-mentioned file need not exist.  */
-	      || stat (name, &st) == 0) /* Does it really exist?  */
+	  if (exists_in_cache)	/* Makefile-mentioned file need not exist.  */
 	    {
-	      /* We have found a file.
-		 Store the name we found into *FILE for the caller.  */
+              int e;
 
-	      *file = savestring (name, (n + 1 - name) + flen);
+              EINTRLOOP (e, stat (name, &st)); /* Does it really exist?  */
+              if (e != 0)
+                {
+                  exists = 0;
+                  continue;
+                }
+            }
 
-	      if (mtime_ptr != 0)
-		/* Store the modtime into *MTIME_PTR for the caller.
-		   If we have had no need to stat the file here,
-		   we record UNKNOWN_MTIME to indicate this.  */
-		*mtime_ptr = (exists_in_cache
-			      ? FILE_TIMESTAMP_STAT_MODTIME (name, st)
-			      : UNKNOWN_MTIME);
+          /* We have found a file.
+             Store the name we found into *FILE for the caller.  */
 
-	      free (name);
-	      return 1;
-	    }
-	  else
-	    exists = 0;
+          *file = savestring (name, (n + 1 - name) + flen);
+
+          if (mtime_ptr != 0)
+            /* Store the modtime into *MTIME_PTR for the caller.
+               If we have had no need to stat the file here,
+               we record UNKNOWN_MTIME to indicate this.  */
+            *mtime_ptr = (exists_in_cache
+                          ? FILE_TIMESTAMP_STAT_MODTIME (name, st)
+                          : UNKNOWN_MTIME);
+
+          free (name);
+          return 1;
 	}
     }
 

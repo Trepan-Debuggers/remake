@@ -1,3 +1,34 @@
+2003-01-29  Paul D. Smith  <psmith@gnu.org>
+
+	Fix bug # 2169, also reported by other people on various systems.
+
+	* make.h: Some systems, such as Solaris and PTX, do not fully
+	implement POSIX-compliant SA_RESTART functionality; important
+	system calls like stat() and readdir() can still fail with EINTR
+	even if SA_RESTART has been set on the signal handler.  So,
+	introduce macros EINTRLOOP() and ENULLLOOP() which can loop on
+	EINTR for system calls which return -1 or 0 (NULL), respectively,
+	on error.
+	Also, remove the old atomic_stat()/atomic_readdir() and
+	HAVE_BROKEN_RESTART handling.
+
+	* configure.in: Remove setting of HAVE_BROKEN_RESTART.
+
+	* arscan.c (ar_member_touch): Use EINTRLOOP() to wrap fstat().
+	* remake.c (touch_file): Ditto.
+
+	* commands.c (delete_target): Use EINTRLOOP() to wrap stat().
+	* read.c (construct_include_path): Ditto.
+	* remake.c (name_mtime): Ditto.
+	* vpath.c (selective_vpath_search): Ditto.
+	* dir.c (find_directory): Ditto.
+	(local_stat): Ditto.
+	(find_directory): Use ENULLLOOP() to wrap opendir().
+	(dir_contents_file_exists_p): Use ENULLLOOP() to wrap readdir().
+
+	* misc.c: Remove HAVE_BROKEN_RESTART, atomic_stat(), and
+	atomic_readdir() handling.
+
 2003-01-22  Paul D. Smith  <psmith@gnu.org>
 
 	* function.c (func_call): Fix Bug #1744.  If we're inside a

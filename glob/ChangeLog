@@ -1,3 +1,9 @@
+2003-01-30  Paul D. Smith  <psmith@gnu.org>
+
+	* glob.h: Patch for FreeBSD by Mike Barcroft <mike@freebsd.org>
+	Reported by Gerald Pfeifer <pfeifer@dbai.tuwien.ac.at>.  On
+	FreeBSD, declare __size_t to simply size_t.
+
 2002-04-22  Paul D. Smith  <psmith@gnu.org>
 
 	* Makefile.am: Use automake 1.6.
