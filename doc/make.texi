@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.9 2002/09/18 20:51:58 psmith Exp $
+@set RCSID $Id: make.texi,v 1.10 2002/10/13 18:50:10 psmith Exp $
 @set EDITION 0.60
 @set VERSION 3.80
 @set UPDATED 08 July 2002
@@ -308,7 +308,7 @@ Defining and Redefining Pattern Rules
 
 * Pattern Intro::               An introduction to pattern rules.
 * Pattern Examples::            Examples of pattern rules.
-* Automatic::                   How to use automatic variables in the
+* Automatic Variables::         How to use automatic variables in the
                                   commands of implicit rules.
 * Pattern Match::               How patterns match.
 * Match-Anything Rules::        Precautions you should take prior to
@@ -1776,7 +1776,7 @@ print: *.c
 This rule uses @file{print} as an empty target file; see @ref{Empty
 Targets, ,Empty Target Files to Record Events}.  (The automatic variable
 @samp{$?} is used to print only those files that have changed; see
-@ref{Automatic, ,Automatic Variables}.)@refill
+@ref{Automatic Variables}.)@refill
 
 Wildcard expansion does not happen when you define a variable.  Thus, if
 you write this:
@@ -2171,7 +2171,7 @@ Therefore, you must write the commands with care so that they will look for
 the prerequisite in the directory where @code{make} finds it.
 
 This is done with the @dfn{automatic variables} such as @samp{$^}
-(@pxref{Automatic, ,Automatic Variables}).
+(@pxref{Automatic Variables}).
 For instance, the value of @samp{$^} is a
 list of all the prerequisites of the rule, including the names of
 the directories in which they were found, and the value of
@@ -2514,7 +2514,7 @@ print: foo.c bar.c
 With this rule, @samp{make print} will execute the @code{lpr} command if
 either source file has changed since the last @samp{make print}.  The
 automatic variable @samp{$?} is used to print only those files that have
-changed (@pxref{Automatic, ,Automatic Variables}).
+changed (@pxref{Automatic Variables}).
 
 @node Special Targets, Multiple Targets, Empty Targets, Rules
 @section Special Built-in Target Names
@@ -2724,7 +2724,7 @@ mentioned.
 Similar commands work for all the targets.  The commands do not need
 to be absolutely identical, since the automatic variable @samp{$@@}
 can be used to substitute the particular target to be remade into the
-commands (@pxref{Automatic, ,Automatic Variables}).  For example:
+commands (@pxref{Automatic Variables}).  For example:
 
 @example
 @group
@@ -2912,7 +2912,7 @@ $(objects): %.o: %.c
 @noindent
 Here @samp{$<} is the automatic variable that holds the name of the
 prerequisite and @samp{$@@} is the automatic variable that holds the name
-of the target; see @ref{Automatic, , Automatic Variables}.
+of the target; see @ref{Automatic Variables}.
 
 Each target specified must match the target pattern; a warning is issued
 for each target that does not.  If you have a list of files, only some of
@@ -4234,7 +4234,7 @@ command options (@pxref{Overriding, ,Overriding Variables}).
 
 A few variables have names that are a single punctuation character or
 just a few characters.  These are the @dfn{automatic variables}, and
-they have particular specialized uses.  @xref{Automatic, ,Automatic Variables}.
+they have particular specialized uses.  @xref{Automatic Variables}.
 
 @menu
 * Reference::                   How to use the value of a variable.
@@ -4303,7 +4303,7 @@ A dollar sign followed by a character other than a dollar sign,
 open-parenthesis or open-brace treats that single character as the
 variable name.  Thus, you could reference the variable @code{x} with
 @samp{$x}.  However, this practice is strongly discouraged, except in
-the case of the automatic variables (@pxref{Automatic, ,Automatic Variables}).
+the case of the automatic variables (@pxref{Automatic Variables}).
 
 @node Flavors, Advanced, Reference, Using Variables
 @section The Two Flavors of Variables
@@ -4787,7 +4787,7 @@ Variables in the environment become @code{make} variables.
 @item
 Several @dfn{automatic} variables are given new values for each rule.
 Each of these has a single conventional use.
-@xref{Automatic, ,Automatic Variables}.
+@xref{Automatic Variables}.
 
 @item
 Several variables have constant initial values.
@@ -4835,7 +4835,7 @@ that are not empty, but you can set them in the usual ways
 (@pxref{Implicit Variables, ,Variables Used by Implicit Rules}).
 Several special variables are set
 automatically to a new value for each rule; these are called the
-@dfn{automatic} variables (@pxref{Automatic, ,Automatic Variables}).
+@dfn{automatic} variables (@pxref{Automatic Variables}).
 
 If you'd like a variable to be set to a value only if it's not already
 set, then you can use the shorthand operator @samp{?=} instead of
@@ -5173,7 +5173,7 @@ MS-DOS}.)@refill
 Variable values in @code{make} are usually global; that is, they are the
 same regardless of where they are evaluated (unless they're reset, of
 course).  One exception to that is automatic variables
-(@pxref{Automatic, ,Automatic Variables}).
+(@pxref{Automatic Variables}).
 
 The other exception is @dfn{target-specific variable values}.  This
 feature allows you to define different values for the same variable,
@@ -5192,6 +5192,13 @@ or like this:
 
 @example
 @var{target} @dots{} : override @var{variable-assignment}
+@end example
+
+@noindent
+or like this:
+
+@example
+@var{target} @dots{} : export @var{variable-assignment}
 @end example
 
 Multiple @var{target} values create a target-specific variable value for
@@ -5515,7 +5522,7 @@ beginning or the end of the conditional.@refill
 @code{make} evaluates conditionals when it reads a makefile.
 Consequently, you cannot use automatic variables in the tests of
 conditionals because they are not defined until commands are run
-(@pxref{Automatic, , Automatic Variables}).
+(@pxref{Automatic Variables}).
 
 To prevent intolerable confusion, it is not permitted to start a
 conditional in one makefile and end it in another.  However, you may
@@ -6517,7 +6524,7 @@ makefile (@pxref{Override Directive, ,The @code{override} Directive}).
 
 if @var{variable} is an automatic variable defined for the
 execution of the commands for each rule
-(@pxref{Automatic, , Automatic Variables}).
+(@pxref{Automatic Variables}).
 @end table
 
 This information is primarily useful (other than for your curiosity) to
@@ -8185,7 +8192,7 @@ Variables}, and @ref{Functions, ,Functions for Transforming Text}.
 @menu
 * Pattern Intro::               An introduction to pattern rules.
 * Pattern Examples::            Examples of pattern rules.
-* Automatic::                   How to use automatic variables in the
+* Automatic Variables::         How to use automatic variables in the
                                   commands of implicit rules.
 * Pattern Match::               How patterns match.
 * Match-Anything Rules::        Precautions you should take prior to
@@ -8263,7 +8270,7 @@ rule with prerequisites that must be made by chaining other implicit rules.
 @cindex pattern rules, order of
 @cindex order of pattern rules
 
-@node Pattern Examples, Automatic, Pattern Intro, Pattern Rules
+@node Pattern Examples, Automatic Variables, Pattern Intro, Pattern Rules
 @subsection Pattern Rule Examples
 
 Here are some examples of pattern rules actually predefined in
@@ -8279,7 +8286,7 @@ files:@refill
 defines a rule that can make any file @file{@var{x}.o} from
 @file{@var{x}.c}.  The command uses the automatic variables @samp{$@@} and
 @samp{$<} to substitute the names of the target file and the source file
-in each case where the rule applies (@pxref{Automatic, ,Automatic Variables}).@refill
+in each case where the rule applies (@pxref{Automatic Variables}).@refill
 
 Here is a second built-in rule:
 
@@ -8320,7 +8327,7 @@ and the file @file{scan.o} from @file{scan.c}, while @file{foo} is
 linked from @file{parse.tab.o}, @file{scan.o}, and its other
 prerequisites, and it will execute happily ever after.)@refill
 
-@node Automatic, Pattern Match, Pattern Examples, Pattern Rules
+@node Automatic Variables, Pattern Match, Pattern Examples, Pattern Rules
 @subsection Automatic Variables
 @cindex automatic variables
 @cindex variables, automatic
@@ -8336,6 +8343,17 @@ variables}.  These variables have values computed afresh for each rule that
 is executed, based on the target and prerequisites of the rule.  In this
 example, you would use @samp{$@@} for the object file name and @samp{$<}
 for the source file name.
+
+@cindex automatic variables in prerequisites
+@cindex prerequisites, and automatic variables
+It's very important that you recognize the limited scope in which
+automatic variable values are available: they only have values within
+the command script.  In particular, you cannot use them anywhere
+within the target or prerequisite lists of a rule; they have no value
+there and will expand to the empty string.  A common mistake is
+attempting to use @code{$@@} within the prerequisites list in a rule;
+this will not work.  However, see below for information on the
+SysV-style @code{$$@@} variables.
 
 Here is a table of automatic variables:
 
@@ -8551,7 +8569,7 @@ compatibility with SysV makefiles.  In a native GNU @code{make} file
 there are other ways to accomplish the same results.  This feature is
 disabled if the special pseudo target @code{.POSIX} is defined.
 
-@node Pattern Match, Match-Anything Rules, Automatic, Pattern Rules
+@node Pattern Match, Match-Anything Rules, Automatic Variables, Pattern Rules
 @subsection How Patterns Match
 
 @cindex stem
@@ -8930,7 +8948,7 @@ update status as the file @var{t}.
 
 When the commands of a pattern rule are executed for @var{t}, the automatic
 variables are set corresponding to the target and prerequisites.
-@xref{Automatic, ,Automatic Variables}.
+@xref{Automatic Variables}.
 
 @node Archives, Features, Implicit Rules, Top
 @chapter Using @code{make} to Update Archive Files
@@ -9033,7 +9051,7 @@ Here @code{make} has envisioned the file @file{bar.o} as an intermediate
 file.  @xref{Chained Rules, ,Chains of Implicit Rules}.
 
 Implicit rules such as this one are written using the automatic variable
-@samp{$%}.  @xref{Automatic, ,Automatic Variables}.
+@samp{$%}.  @xref{Automatic Variables}.
 
 An archive member name in an archive cannot contain a directory name, but
 it may be useful in a makefile to pretend that it does.  If you write an
@@ -9196,13 +9214,13 @@ invocations of @code{make}.
 
 @item
 The automatic variable @code{$%} is set to the member name
-in an archive reference.  @xref{Automatic, ,Automatic Variables}.
+in an archive reference.  @xref{Automatic Variables}.
 
 @item
 The automatic variables @code{$@@}, @code{$*}, @code{$<}, @code{$%},
 and @code{$?} have corresponding forms like @code{$(@@F)} and
 @code{$(@@D)}.  We have generalized this to @code{$^} as an obvious
-extension.  @xref{Automatic, ,Automatic Variables}.@refill
+extension.  @xref{Automatic Variables}.@refill
 
 @item
 Substitution variable references.
@@ -9254,7 +9272,7 @@ same time.  @xref{Chained Rules, ,Chains of Implicit Rules}.
 @item
 The automatic variable @code{$^} containing a list of all prerequisites
 of the current target.  We did not invent this, but we have no idea who
-did.  @xref{Automatic, ,Automatic Variables}.  The automatic variable
+did.  @xref{Automatic Variables}.  The automatic variable
 @code{$+} is a simple extension of @code{$^}.
 
 @item
@@ -9711,7 +9729,7 @@ Evaluate the variable @var{var} replacing any references to @code{$(1)},
 @end table
 
 Here is a summary of the automatic variables.
-@xref{Automatic, ,Automatic Variables},
+@xref{Automatic Variables},
 for full information.
 
 @table @code
