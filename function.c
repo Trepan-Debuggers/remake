@@ -382,9 +382,11 @@ expand_function (o, function, text, end)
 	    /* Free the storage only the child needed.  */
 	    free (argv[0]);
 	    free ((char *) argv);
+#if 0
 	    for (i = 0; envp[i] != 0; ++i)
 	      free (envp[i]);
 	    free ((char *) envp);
+#endif
 
 	    /* Record the PID for reap_children.  */
 	    shell_function_pid = pid;
