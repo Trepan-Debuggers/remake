@@ -492,6 +492,7 @@ static void
 delete_target (struct file *file, char *on_behalf_of)
 {
   struct stat st;
+  int e;
 
   if (file->precious || file->phony)
     return;
@@ -515,7 +516,8 @@ delete_target (struct file *file, char *on_behalf_of)
     }
 #endif
 
-  if (stat (file->name, &st) == 0
+  EINTRLOOP (e, stat (file->name, &st));
+  if (e == 0
       && S_ISREG (st.st_mode)
       && FILE_TIMESTAMP_STAT_MODTIME (file->name, st) != file->last_mtime)
     {

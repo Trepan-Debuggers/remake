@@ -961,8 +961,10 @@ touch_file (struct file *file)
 	{
 	  struct stat statbuf;
 	  char buf;
+          int e;
 
-	  if (fstat (fd, &statbuf) < 0)
+          EINTRLOOP (e, fstat (fd, &statbuf));
+	  if (e < 0)
 	    TOUCH_ERROR ("touch: fstat: ");
 	  /* Rewrite character 0 same as it already is.  */
 	  if (read (fd, &buf, 1) < 0)
@@ -1257,8 +1259,10 @@ static FILE_TIMESTAMP
 name_mtime (char *name)
 {
   struct stat st;
+  int e;
 
-  if (stat (name, &st) != 0)
+  EINTRLOOP (e, stat (name, &st));
+  if (e != 0)
     {
       if (errno != ENOENT && errno != ENOTDIR)
         perror_with_name ("stat:", name);

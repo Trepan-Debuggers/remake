@@ -2819,6 +2819,7 @@ construct_include_path (char **arg_dirs)
     while (*arg_dirs != 0)
       {
 	char *dir = *arg_dirs++;
+        int e;
 
 	if (dir[0] == '~')
 	  {
@@ -2827,7 +2828,8 @@ construct_include_path (char **arg_dirs)
 	      dir = expanded;
 	  }
 
-	if (stat (dir, &stbuf) == 0 && S_ISDIR (stbuf.st_mode))
+        EINTRLOOP (e, stat (dir, &stbuf));
+	if (e == 0 && S_ISDIR (stbuf.st_mode))
 	  {
 	    if (idx == max - 1)
 	      {
@@ -2860,9 +2862,13 @@ construct_include_path (char **arg_dirs)
 #endif
 
   for (i = 0; default_include_directories[i] != 0; ++i)
-    if (stat (default_include_directories[i], &stbuf) == 0
-	&& S_ISDIR (stbuf.st_mode))
-      dirs[idx++] = default_include_directories[i];
+    {
+      int e;
+
+      EINTRLOOP (e, stat (default_include_directories[i], &stbuf));
+      if (e == 0 && S_ISDIR (stbuf.st_mode))
+        dirs[idx++] = default_include_directories[i];
+    }
 
   dirs[idx] = 0;
 

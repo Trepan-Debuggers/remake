@@ -539,24 +539,13 @@ extern int handling_fatal_signal;
 #endif
 
 
-/* If we have broken SA_RESTART support, then wrap stat() and readdir() with
-   versions that handle EINTR.  Note that there are still plenty of system
-   calls that can fail with EINTR but this, reportedly, gets the vast
-   majority of failure cases.  If you still experience failures you'll need
-   to either get a system where SA_RESTART works, or you need to avoid -j.  */
+/* Some systems (like Solaris, PTX, etc.) do not support the SA_RESTART flag
+   properly according to POSIX.  So, we try to wrap common system calls with
+   checks for EINTR.  Note that there are still plenty of system calls that
+   can fail with EINTR but this, reportedly, gets the vast majority of
+   failure cases.  If you still experience failures you'll need to either get
+   a system where SA_RESTART works, or you need to avoid -j.  */
 
-#ifdef HAVE_BROKEN_RESTART
+#define EINTRLOOP(_v,_c)   while (((_v)=_c)==-1 && errno==EINTR)
 
-/* Here we make an assumption that a system with a broken SA_RESTART has
-   dirent.h.  Right now the only system I know of in this category is PTX, and
-   it does have dirent.h.
-*/
-#include <dirent.h>
-
-#define stat(_f,_b)     atomic_stat ((_f), (_b))
-#define readdir(_d)     atomic_readdir (_d)
-
-extern int atomic_stat PARAMS ((const char *file, struct stat *buf));
-extern struct dirent *atomic_readdir PARAMS ((DIR *dir));
-
-#endif
+#define ENULLLOOP(_v,_c)   while (((_v)=_c)==0 && errno==EINTR)

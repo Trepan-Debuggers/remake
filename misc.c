@@ -828,35 +828,3 @@ get_path_max (void)
   return value;
 }
 #endif
-
-
-#ifdef HAVE_BROKEN_RESTART
-
-#undef stat
-#undef readdir
-
-int
-atomic_stat (const char *file, struct stat *buf)
-{
-  int r;
-
-  while ((r = stat (file, buf)) < 0)
-    if (errno != EINTR)
-      break;
-
-  return r;
-}
-
-struct dirent *
-atomic_readdir (DIR *dir)
-{
-  struct dirent *r;
-
-  while ((r = readdir (dir)) == NULL)
-    if (errno != EINTR)
-      break;
-
-  return r;
-}
-
-#endif  /* HAVE_BROKEN_RESTART */
