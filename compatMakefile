@@ -93,7 +93,7 @@ manext = 1
 # switch) will not work unless make is installed setgid kmem.
 install_setgid = @NEED_SETGID@
 # Install make setgid to this group so it can read /dev/kmem.
-group = kmem
+group = @KMEM_GROUP@
 
 # Program to install `make'.
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -184,6 +184,9 @@ $(bindir)/$(instname): make
 	-if $(install_setgid); then \
 	  chgrp $(group) $@.new && chmod g+s $@.new; \
 	else true; fi
+# Some systems can't deal with renaming onto a running binary.
+	-rm -f $@.old
+	-mv $@ $@.old
 	mv $@.new $@
 
 $(infodir)/$(instname).info: make.info
