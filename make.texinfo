@@ -9,12 +9,12 @@
 
 @set EDITION 0.43
 @set VERSION 3.68 Beta
-@set UPDATED 9 June 1993
+@set UPDATED 10 June 1993
 @set UPDATE-MONTH June 1993
 
 @c finalout
 
-@c ISPELL CHECK: done, 14 Jan 1993 --bob
+@c ISPELL CHECK: done, 10 June 1993 --roland
 
 @c Combine the variable and function indices:
 @syncodeindex vr fn
@@ -8455,7 +8455,7 @@ INSTALLDATA = /usr/local/bin/install -c -m 644
 # -DMKDIR_MISSING       If you lack mkdir and 
 #                       rmdir system calls.
 # -DRENAME_MISSING      If you lack rename system call.
-# -DFTRUNCATE_MISSING   If you lack frtruncate 
+# -DFTRUNCATE_MISSING   If you lack ftruncate 
 #                       system call.
 # -DV7                  On Version 7 Unix (not 
 #                       tested in a long time).
