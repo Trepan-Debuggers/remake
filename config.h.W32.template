@@ -158,6 +158,9 @@
 /* Define if the `S_IS*' macros in <sys/stat.h> do not work properly.  */
 /* #undef STAT_MACROS_BROKEN */
 
+/* Define to 1 if you have the <stdarg.h> header file. */
+#define HAVE_STDARG_H 1
+
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
 #define STDC_HEADERS 1

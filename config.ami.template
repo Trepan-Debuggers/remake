@@ -277,6 +277,9 @@
 /* Define if you have the <ndir.h> header file.  */
 /* #undef HAVE_NDIR_H */
 
+/* Define to 1 if you have the <stdarg.h> header file. */
+#define HAVE_STDARG_H 1
+
 /* Define if you have the <stdlib.h> header file.  */
 /* #undef HAVE_STDLIB_H */
 
