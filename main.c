@@ -1423,7 +1423,7 @@ print_version ()
     printf ("-%s", remote_description);
 
   printf (", by Richard Stallman and Roland McGrath.\n\
-%sCopyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.\n\
+%sCopyright (C) 1988, 89, 90, 91, 92, 93 Free Software Foundation, Inc.\n\
 %sThis is free software; see the source for copying conditions.\n\
 %sThere is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A\n\
 %sPARTICULAR PURPOSE.\n\n", precede, precede, precede, precede);
