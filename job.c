@@ -500,6 +500,8 @@ start_job_command (child)
     {
       if (*p == '@')
 	flags |= COMMANDS_SILENT;
+      else if (*p == '+')
+	flags |= COMMANDS_RECURSE;
       else if (*p == '-')
 	child->noerror = 1;
       else if (!isblank (*p) && *p != '+')
