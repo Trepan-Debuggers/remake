@@ -54,7 +54,7 @@ lookup_file (name)
   register struct file *f;
   register char *n;
   register unsigned int hashval;
-#ifdef VMS
+#if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
   register char *lname, *ln;
 #endif
 
@@ -65,11 +65,13 @@ lookup_file (name)
      for names read from makefiles.  It is here for names passed
      on the command line.  */
 #ifdef VMS
+# ifndef WANT_CASE_SENSITIVE_TARGETS
   lname = (char *)malloc(strlen(name) + 1);
   for (n=name, ln=lname; *n != '\0'; ++n, ++ln)
     *ln = isupper((unsigned char)*n) ? tolower((unsigned char)*n) : *n;
   *ln = '\0';
   name = lname;
+# endif
 
   while (name[0] == '[' && name[1] == ']' && name[2] != '\0')
       name += 2;
@@ -103,13 +105,13 @@ lookup_file (name)
     {
       if (strieq (f->hname, name))
 	{
-#ifdef VMS
+#if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
 	  free (lname);
 #endif
 	  return f;
 	}
     }
-#ifdef VMS
+#if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
   free (lname);
 #endif
   return 0;
@@ -122,14 +124,14 @@ enter_file (name)
   register struct file *f, *new;
   register char *n;
   register unsigned int hashval;
-#ifdef VMS
+#if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
   char *lname, *ln;
 #endif
 
   if (*name == '\0')
     abort ();
 
-#ifdef VMS
+#if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
   lname = (char *)malloc (strlen (name) + 1);
   for (n = name, ln = lname; *n != '\0'; ++n, ++ln)
     {
@@ -139,6 +141,8 @@ enter_file (name)
 	*ln = *n;
     }
   *ln = 0;
+  /* Creates a possible leak, old value of name is unreachable, but I
+     currently don't know how to fix it. */
   name = lname;
 #endif
 
@@ -153,7 +157,7 @@ enter_file (name)
 
   if (f != 0 && !f->double_colon)
     {
-#ifdef VMS
+#if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
       free(lname);
 #endif
       return f;

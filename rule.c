@@ -109,10 +109,14 @@ count_implicit_rule_limits ()
 
 #ifdef VMS
 	  char *p = strrchr (dep->name, ']');
+          char *p2;
+          if (p == 0)
+            p = strrchr (dep->name, ':');
+          p2 = p != 0 ? strchr (dep->name, '%') : 0;
 #else
 	  char *p = strrchr (dep->name, '/');
-#endif
 	  char *p2 = p != 0 ? strchr (dep->name, '%') : 0;
+#endif
 	  ndeps++;
 
 	  if (len > max_pattern_dep_length)
@@ -140,7 +144,7 @@ count_implicit_rule_limits ()
 
 	      dep->changed = !dir_file_exists_p (name, "");
 #ifdef VMS
-	      if (dep->changed && *name == ']')
+              if (dep->changed && strchr (name, ':') != 0)
 #else
 	      if (dep->changed && *name == '/')
 #endif

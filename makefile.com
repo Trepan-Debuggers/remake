@@ -7,6 +7,13 @@ $! P2 = DEBUG will build an image with debug information
 $!
 $! In case of problems with the install you might contact me at
 $! zinser@decus.decus.de (preferred) or martin_zinser@exchange.de
+$
+$! hb
+$! But don't ask Martin Zinser about the lines, I added/changed.
+$! In case of an error do some cleanup 
+$ on error then $ goto cleanup
+$! in case somebody set up her/his own symbol for cc
+$ set symbol/scope=(nolocal,noglobal)
 $!
 $! Look for the compiler used
 $!
@@ -57,9 +64,16 @@ $ linkit:
 $ close optf
 $ if p1 .nes. "" then goto link_using_library
 $ link/exe=make make.opt/opt'lopt
-$ exit
+$ goto cleanup
+$
 $ link_using_library:
 $ link/exe=make make.opt/opt,sys$library:vaxcrtl/lib'lopt
+$
+$ cleanup:
+$ if f$trnlnm("SYS").nes."" then $ deassign sys
+$ if f$trnlnm("OPTF").nes."" then $ close optf
+$ if f$search("make.opt").nes."" then $ del make.opt;*
+$ exit
 $!
 $ compileit : subroutine
 $ ploc = f$locate("]",p1)

@@ -299,6 +299,12 @@ static int glob_in_dir __P ((const char *pattern, const char *directory,
 static int prefix_array __P ((const char *prefix, char **array, size_t n));
 static int collated_compare __P ((const __ptr_t, const __ptr_t));
 
+#ifdef VMS
+/* these compilers like prototypes */
+#if !defined _LIBC || !defined NO_GLOB_PATTERN_P
+int __glob_pattern_p (const char *pattern, int quote);
+#endif
+#endif
 
 /* Find the end of the sub-pattern in a brace expression.  We define
    this as an inline function if the compiler permits.  */
@@ -609,7 +615,12 @@ glob (pattern, flags, errfunc, pglob)
       if (dirname[1] == '\0' || dirname[1] == '/')
 	{
 	  /* Look up home directory.  */
-	  const char *home_dir = getenv ("HOME");
+#ifdef VMS
+/* This isn't obvious, RTLs of DECC and VAXC know about "HOME" */
+          const char *home_dir = getenv ("SYS$LOGIN");
+#else
+          const char *home_dir = getenv ("HOME");
+#endif
 # ifdef _AMIGA
 	  if (home_dir == NULL || home_dir[0] == '\0')
 	    home_dir = "SYS:";
@@ -618,6 +629,11 @@ glob (pattern, flags, errfunc, pglob)
 	  if (home_dir == NULL || home_dir[0] == '\0')
             home_dir = "c:/users/default"; /* poor default */
 #  else
+#   ifdef VMS
+/* Again, this isn't obvious, if "HOME" isn't known "SYS$LOGIN" should be set */
+	  if (home_dir == NULL || home_dir[0] == '\0')
+	    home_dir = "SYS$DISK:[]";
+#   else
 	  if (home_dir == NULL || home_dir[0] == '\0')
 	    {
 	      int success;
@@ -676,6 +692,7 @@ glob (pattern, flags, errfunc, pglob)
 	      else
 		home_dir = "~"; /* No luck.  */
 	    }
+#   endif /* VMS */
 #  endif /* WINDOWS32 */
 # endif
 	  /* Now construct the full directory.  */
@@ -696,7 +713,7 @@ glob (pattern, flags, errfunc, pglob)
 	      dirname = newp;
 	    }
 	}
-# if !defined _AMIGA && !defined WINDOWS32
+# if !defined _AMIGA && !defined WINDOWS32 && !defined VMS
       else
 	{
 	  char *end_name = strchr (dirname, '/');
@@ -776,7 +793,7 @@ glob (pattern, flags, errfunc, pglob)
 		 home directory.  */
 	      return GLOB_NOMATCH;
 	}
-# endif	/* Not Amiga && not WINDOWS32.  */
+# endif	/* Not Amiga && not WINDOWS32 && not VMS.  */
     }
 #endif	/* Not VMS.  */
 
@@ -1213,6 +1230,10 @@ glob_in_dir (pattern, directory, flags, errfunc, pglob)
   int meta;
   int save;
 
+#ifdef VMS
+  if (*directory == 0)
+    directory = "[]";
+#endif
   meta = __glob_pattern_p (pattern, !(flags & GLOB_NOESCAPE));
   if (meta == 0)
     {

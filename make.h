@@ -312,6 +312,9 @@ extern char *alloca ();
 # define strieq(a, b) (strcmp ((a), (b)) == 0)
 #endif
 #define strneq(a, b, l) (strncmp ((a), (b), (l)) == 0)
+#ifdef  VMS
+extern int strcmpi (const char *,const char *);
+#endif
 
 /* Add to VAR the hashing value of C, one character in a name.  */
 #define HASH(var, c) \
@@ -449,10 +452,9 @@ extern long int lseek ();
 #endif  /* Not GNU C library or POSIX.  */
 
 #ifdef  HAVE_GETCWD
+# if !defined(VMS) && !defined(__DECC)
 extern char *getcwd ();
-# ifdef VMS
-extern char *getwd PARAMS ((char *));
-# endif
+#endif
 #else
 extern char *getwd ();
 # define getcwd(buf, len)       getwd (buf)

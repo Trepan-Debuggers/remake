@@ -51,7 +51,15 @@ extern "C" {
 typedef __SIZE_TYPE__ __size_t;
 # else
 /* This is a guess.  */
+/*hb
+ *	Conflicts with DECCs aready defined type __size_t.
+ *	Defining an own type with a name beginning with '__' is no good.
+ *	Anyway if DECC is used and __SIZE_T is defined then __size_t is
+ *	already defined (and I hope it's exactly the one we need here).
+ */
+#if !(defined __DECC && defined __SIZE_T)
 typedef unsigned long int __size_t;
+#endif
 # endif
 #else
 /* The GNU CC stddef.h version defines __size_t as empty.  We need a real
@@ -118,7 +126,11 @@ typedef struct
     struct dirent *(*gl_readdir) __PMT ((void *));
     __ptr_t (*gl_opendir) __PMT ((__const char *));
     int (*gl_lstat) __PMT ((__const char *, struct stat *));
+#if defined(VMS) && defined(__DECC) && !defined(_POSIX_C_SOURCE)
+    int (*gl_stat) __PMT ((__const char *, struct stat *, ...));
+#else
     int (*gl_stat) __PMT ((__const char *, struct stat *));
+#endif
   } glob_t;
 
 #ifdef _LARGEFILE64_SOURCE

@@ -38,8 +38,8 @@ Boston, MA 02111-1307, USA.  */
 
 static char default_suffixes[]
 #ifdef VMS
-  = ".exe .olb .ln .obj .c .cc .pas .p .for .f .r .y .l .mar \
-.mod .sym .def .h .info .dvi .tex .texinfo .texi .txinfo \
+  = ".exe .olb .ln .obj .c .cxx .cc .pas .p .for .f .r .y .l .mar \
+.s .ss .i .ii .mod .sym .def .h .info .dvi .tex .texinfo .texi .txinfo \
 .w .ch .cweb .web .com .sh .elc .el";
 #else
   = ".out .a .ln .o .c .cc .C .cpp .p .f .F .r .y .l .s .S \
@@ -108,13 +108,21 @@ static char *default_suffix_rules[] =
   {
 #ifdef VMS
     ".obj.exe",
-    "$(LINK.obj) $^ $(LOADLIBES) $(LDLIBS) /exe=$@",
+    "$(LINK.obj) $^ $(LOADLIBES) $(LDLIBS) $(CRT0) /exe=$@",
     ".mar.exe",
-    "$(LINK.mar) $^ $(LOADLIBES) $(LDLIBS) /exe=$@",
+    "$(COMPILE.mar) $^ \n $(LINK.obj) $(subst .mar,.obj,$^) $(LOADLIBES) $(LDLIBS) $(CRT0) /exe=$@",
+    ".s.exe",
+    "$(COMPILE.s) $^ \n $(LINK.obj) $(subst .s,.obj,$^) $(LOADLIBES) $(LDLIBS) $(CRT0) /exe=$@",
     ".c.exe",
-    "$(COMPILE.c) $^ \n $(LINK.obj) $(subst .c,.obj,$^) $(LOADLIBES) $(LDLIBS) /exe=$@",
+    "$(COMPILE.c) $^ \n $(LINK.obj) $(subst .c,.obj,$^) $(LOADLIBES) $(LDLIBS) $(CRT0) /exe=$@",
     ".cc.exe",
-    "$(COMPILE.cc) $^ \n $(LINK.obj) $(subst .cc,.obj,$^) $(LOADLIBES) $(LDLIBS) /exe=$@",
+#ifdef GCC_IS_NATIVE
+    "$(COMPILE.cc) $^ \n $(LINK.obj) $(CXXSTARTUP),sys$$disk:[]$(subst .cc,.obj,$^) $(LOADLIBES) $(LXLIBS) $(LDLIBS) $(CXXRT0) /exe=$@",
+#else
+    "$(COMPILE.cc) $^ \n $(CXXLINK.obj) $(subst .cc,.obj,$^) $(LOADLIBES) $(LXLIBS) $(LDLIBS) $(CXXRT0) /exe=$@",
+    ".cxx.exe",
+    "$(COMPILE.cxx) $^ \n $(CXXLINK.obj) $(subst .cxx,.obj,$^) $(LOADLIBES) $(LXLIBS) $(LDLIBS) $(CXXRT0) /exe=$@",
+#endif
     ".for.exe",
     "$(COMPILE.for) $^ \n $(LINK.obj) $(subst .for,.obj,$^) $(LOADLIBES) $(LDLIBS) /exe=$@",
     ".pas.exe",
@@ -125,8 +133,24 @@ static char *default_suffix_rules[] =
 
     ".mar.obj",
     "$(COMPILE.mar) /obj=$@ $<",
+    ".s.obj",
+    "$(COMPILE.s) /obj=$@ $<",
+    ".ss.obj",
+    "$(COMPILE.s) /obj=$@ $<",
+    ".c.i",
+    "$(COMPILE.c)/prep /list=$@ $<",
+    ".c.s",
+    "$(COMPILE.c)/noobj/machine /list=$@ $<",
+    ".i.s",
+    "$(COMPILE.c)/noprep/noobj/machine /list=$@ $<",
     ".c.obj",
     "$(COMPILE.c) /obj=$@ $<",
+    ".cc.ii",
+    "$(COMPILE.cc)/prep /list=$@ $<",
+    ".cc.ss",
+    "$(COMPILE.cc)/noobj/machine /list=$@ $<",
+    ".ii.ss",
+    "$(COMPILE.cc)/noprep/noobj/machine /list=$@ $<",
     ".cc.obj",
     "$(COMPILE.cc) /obj=$@ $<",
     ".for.obj",
@@ -276,12 +300,31 @@ static char *default_suffix_rules[] =
 static char *default_variables[] =
   {
 #ifdef VMS
+#ifdef __ALPHA
+    "ARCH", "ALPHA",
+#else
+    "ARCH", "VAX",
+#endif
     "AR", "library/obj",
     "ARFLAGS", "/replace",
     "AS", "macro",
+    "MACRO", "macro",
+#ifdef GCC_IS_NATIVE
+    "CC", "gcc",
+#else
     "CC", "cc",
+#endif
+    "CD", "builtin_cd",
+    "MAKE", "make",
+    "ECHO", "write sys$$output \"",
+#ifdef GCC_IS_NATIVE
     "C++", "gcc/plus",
     "CXX", "gcc/plus",
+#else
+    "C++", "cxx",
+    "CXX", "cxx",
+    "CXXLD", "cxxlink",
+#endif
     "CO", "co",
     "CPP", "$(CC) /preprocess_only",
     "FC", "fortran",
@@ -292,21 +335,43 @@ static char *default_variables[] =
     "LD", "link",
     "LEX", "lex",
     "PC", "pascal",
-    "YACC", "yacc",	/* Or "bison -y"  */
+    "YACC", "bison/yacc",
+    "YFLAGS", "/Define/Verbose",
+    "BISON", "bison",
     "MAKEINFO", "makeinfo",
     "TEX", "tex",
     "TEXINDEX", "texindex",
 
     "RM", "delete/nolog",
 
+    "CSTARTUP", "",
+#ifdef GCC_IS_NATIVE
+    "CRT0", ",sys$$library:vaxcrtl.olb/lib,gnu_cc_library:crt0.obj",
+    "CXXSTARTUP", "gnu_cc_library:crtbegin.obj",
+    "CXXRT0", ",sys$$library:vaxcrtl.olb/lib,gnu_cc_library:crtend.obj,gnu_cc_library:gxx_main.obj",
+    "LXLIBS", ",gnu_cc_library:libstdcxx.olb/lib,gnu_cc_library:libgccplus.olb/lib",
+    "LDLIBS", ",gnu_cc_library:libgcc.olb/lib",
+#else
+    "CRT0", "",
+    "CXXSTARTUP", "",
+    "CXXRT0", "",
+    "LXLIBS", "",
+    "LDLIBS", "",
+#endif
+
     "LINK.obj", "$(LD) $(LDFLAGS)",
+#ifndef GCC_IS_NATIVE
+    "CXXLINK.obj", "$(CXXLD) $(LDFLAGS)",
+    "COMPILE.cxx", "$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH)",
+#endif
     "COMPILE.c", "$(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH)",
-    "COMPILE.cc", "$(C++) $(C++FLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c",
+    "COMPILE.cc", "$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH)",
     "YACC.y", "$(YACC) $(YFLAGS)",
     "LEX.l", "$(LEX) $(LFLAGS)",
     "COMPILE.for", "$(FC) $(FFLAGS) $(TARGET_ARCH)",
     "COMPILE.pas", "$(PC) $(PFLAGS) $(CPPFLAGS) $(TARGET_ARCH)",
-    "COMPILE.mar", "$(AS) $(ASFLAGS) $(TARGET_MACH)",
+    "COMPILE.mar", "$(MACRO) $(MACROFLAGS)",
+    "COMPILE.s", "$(AS) $(ASFLAGS) $(TARGET_MACH)",
     "LINT.c", "$(LINT) $(LINTFLAGS) $(CPPFLAGS) $(TARGET_ARCH)",
 
     "MV", "rename/new_version",
