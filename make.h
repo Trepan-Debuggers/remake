@@ -136,11 +136,11 @@ extern void free ();
 #undef	alloca
 #define	alloca(n)	__builtin_alloca (n)
 #else	/* Not GCC.  */
-#ifdef	sparc
+#if	defined (sparc) || defined (HAVE_ALLOCA_H)
 #include <alloca.h>
-#else	/* Not sparc.  */
+#else	/* Not sparc or HAVE_ALLOCA_H.  */
 extern char *alloca ();
-#endif	/* sparc.  */
+#endif	/* sparc or HAVE_ALLOCA_H.  */
 #endif	/* GCC.  */
 
 #ifndef	iAPX286
