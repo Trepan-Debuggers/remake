@@ -81,7 +81,7 @@ update_goal_chain (goals, makefiles)
 
       /* Wait for a child to die.  */
 
-      wait_for_children (1, 0);
+      reap_children (1, 0);
 
       lastgoal = 0;
       g = goals;
