@@ -19,6 +19,7 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 #include "make.h"
+#include "commands.h"
 #include "expand.h"
 #include "print.h"
 #include "debug.h"
@@ -392,9 +393,17 @@ print_file_target_prefix (const file_t *p_target)
 extern void 
 print_floc_prefix (const floc_t *p_floc) 
 {
-  if (!basename_filenames) 
-    printf("%s/", starting_directory);
-  printf("%s:%lu", p_floc->filenm, p_floc->lineno);
+  if (!p_floc) return;
+  if (p_floc->filenm) {
+    if (!basename_filenames && strlen(p_floc->filenm) 
+	&& p_floc->filenm[0] != '/') 
+      printf("%s/", starting_directory);
+    printf("%s:%lu", p_floc->filenm, p_floc->lineno);
+  } else {
+    if (!basename_filenames)
+      printf("%s/", starting_directory);
+    printf("??:%lu", p_floc->lineno);
+  }
 }
 
 /*! Show a command before executing it. */
@@ -425,15 +434,37 @@ print_target_stack (target_stack_node_t *p, int pos)
   unsigned int i=0;
   printf("\n");
   for ( ; p ; p = p->p_parent ) {
-    const floc_t *p_floc = &(p->p_target->floc);
-    if (p_floc->filenm) {
+    floc_t floc;
+
+
+    /* If we don't have a line recorded for the target,
+       but we do have one for the commands it runs,
+       use that.
+    */
+    if (p->p_target->floc.filenm) {
+      memcpy(&floc, &(p->p_target->floc), sizeof(floc_t));
+    } else if (p->p_target->cmds) {
+      memcpy(&floc, &(p->p_target->cmds->fileinfo.filenm), sizeof(floc_t));
+      /* HACK: is it okay to assume that the target is on the line
+	 before the first command? Or should we list the line
+	 that the command starts on - so we know we've faked the location?
+       */
+      floc.lineno--;
+    }
+    
+    if (floc.filenm) {
       if (pos != -1) {
 	printf("%s", (i == pos) ? "=>" : "  ");
       }
       printf ("#%u  %s at ", i, p->p_target->name);
-      print_floc_prefix(p_floc);
-      printf ("\n");
+      print_floc_prefix(&floc);
+    } else {
+      if (pos != -1) {
+	printf("%s", (i == pos) ? "=>" : "  ");
+      }
+      printf ("#%u  %s at ??", i, p->p_target->name);
     }
+    printf ("\n");
     i++;
   }
 }
