@@ -1,17 +1,16 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  21 September 2004
+  16 February 2005
 
-Copyright (C) 2002,2003,2004  Free Software Foundation, Inc.
+Copyright (C) 2002,2003,2004,2005  Free Software Foundation, Inc.
 See the end for copying conditions.
 
 All changes mentioned here are more fully described in the GNU make
 manual, which is contained in this distribution as the file doc/make.texi.
-
-Please send GNU make bug reports to <bug-make@gnu.org>.
-See the README file and the GNU make manual for details on reporting bugs.
+See the README file and the GNU make manual for instructions for
+reporting bugs.
 
-Version 3.81beta1
+Version 3.81beta2
 
 * GNU make is ported to OS/2.
   Port provided by Andreas Buening <andreas.buening@nexgo.de>.
@@ -31,16 +30,33 @@ Version 3.81beta1
   last second and adjust GNU make's view of the system's load average
   accordingly.
 
+* New functions available in this release:
+   - $(lastword ...) returns the last word in the list.  This gives
+     identical results as $(word $(words ...) ...), but is much faster.
+   - $(abspath ...) returns the absolute path (all "." and ".."
+     directories resolved, and any duplicate "/" characters removed) for
+     each path provided.
+   - $(realpath ...) returns the canonical pathname for each path
+     provided.  The canonical pathname is the absolute pathname, with
+     all symbolic links resolved as well.
+
+* Changes made for POSIX compatibility:
+   - Only touch targets (under -t) if they have at least one command.
+   - Setting the SHELL make variable does NOT change the value of the
+     SHELL environment variable given to programs invoked by make.  As
+     an enhancement to POSIX, if you export the make variable SHELL then
+     it will be set in the environment, just as before.
+
 * On DOS and MS Windows systems, explicitly setting SHELL to a pathname
   ending in "cmd" or "cmd.exe" (case-insensitive) will force GNU make to
   use the DOS command interpreter in batch mode even if a UNIX-like
   shell could be found on the system.
 
-* Enhancements for POSIX compatibility:
-   - Only touch targets (under -t) if they have at least one command.
-
 * Updated to autoconf 2.59, automake 1.8.2, and gettext 0.14.1.  Users
   should not be impacted.
+
+* New translations for Swedish, Chinese (simplified), Ukrainian,
+  Belarusian, Finnish, and Irish.  Many updated translations.
 
 
 Version 3.80
