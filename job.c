@@ -370,44 +370,26 @@ static char *
 vms_handle_apos (char *p)
 {
   int alast;
-  int inside;
 
 #define SEPCHARS ",/()= "
 
-  inside = 0;
+  alast = 0;
 
   while (*p != 0)
     {
       if (*p == '"')
 	{
-	  if (inside)
-	    {
-	      while ((alast > 0)
-		    && (*p == '"'))
-		{
-		  p++;
-		  alast--;
-		}
-	      if (alast == 0)
-		inside = 0;
-	      else
-		{
-		  fprintf (stderr, _("Syntax error, still inside '\"'\n"));
-		  exit (3);
-		}
+          if (alast)
+            {
+              alast = 0;
+              p++;
 	    }
 	  else
 	    {
 	      p++;
 	      if (strchr (SEPCHARS, *p))
 		break;
-	      inside = 1;
 	      alast = 1;
-	      while (*p == '"')
-		{
-		  alast++;
-		  p++;
-		}
 	    }
 	}
       else
@@ -2232,7 +2214,7 @@ child_execute_job (char *argv, struct child *child)
 	      /* Nice places for line breaks are after strings, after
 		 comma or space and before slash. */
             case '"':
-              q = vms_handle_apos (q + 1);
+              q = vms_handle_apos (q);
               sep = q;
               break;
             case ',':
