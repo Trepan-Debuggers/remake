@@ -50,7 +50,7 @@ exec_prefix = $(prefix)
 extras := $(filter-out getloadavg.o @%@,$(extras)) getloadavg.o
 LOADLIBES := $(filter-out @%@,$(LOADLIBES))
 ALLOCA := $(filter-out @%@,$(ALLOCA))
-CPPFLAGS := $(filter-out @%@,$(CPPFLAGS)) -DHAVE_CONFIG_H
+CPPFLAGS := $(filter-out @%@,$(defines) $(CPPFLAGS)) -DHAVE_CONFIG_H
 
 ifdef AC_MACRODIR
 configure config.h.in: $(patsubst %,$(AC_MACRODIR)/%.m4,acspecific acgeneral)
