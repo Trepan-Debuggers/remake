@@ -1437,9 +1437,9 @@ record_files (filenames, pattern, pattern_percent, deps, commands_started,
    one, or nil if there are none.  */
 
 char *
-find_char_unquote (string, stopchar, blank)
+find_char_unquote (string, stopchars, blank)
      char *string;
-     int stopchar;
+     char *stopchars;
      int blank;
 {
   unsigned int string_len = strlen (string);
@@ -1447,19 +1447,12 @@ find_char_unquote (string, stopchar, blank)
 
   while (1)
     {
-      if (blank)
-	{
-	  while (*p != '\0' && *p != stopchar && !isblank (*p))
-	    ++p;
-	  if (*p == '\0')
-	    break;
-	}
-      else
-	{
-	  p = index (p, stopchar);
-	  if (p == 0)
-	    break;
-	}
+      while (*p != '\0' && index (stopchars, *p) == 0
+	     && (!blank || !isblank (*p)))
+	++p;
+      if (*p == '\0')
+	break;
+
       if (p > string && p[-1] == '\\')
 	{
 	  /* Search for more backslashes.  */
@@ -1493,7 +1486,7 @@ char *
 find_percent (pattern)
      char *pattern;
 {
-  return find_char_unquote (pattern, '%', 0);
+  return find_char_unquote (pattern, "%", 0);
 }
 
 /* Search STRING for an unquoted ; that is not after an unquoted #.  */
@@ -1502,8 +1495,11 @@ static char *
 find_semicolon (string)
      char *string;
 {
-  return (find_char_unquote (string, '#', 0) == 0
-	  ? find_char_unquote (string, ';', 0) : 0);
+  char *match = find_char_unquote (string, ";#", 0);
+  if (match != 0 && *match == '#')
+    /* We found a comment before a semicolon.  No match.  */
+    match = 0;
+  return match;
 }
 
 /* Parse a string into a sequence of filenames represented as a
@@ -1531,6 +1527,9 @@ parse_file_seq (stringp, stopchar, size, strip)
   register char *p = *stringp;
   char *q;
   char *name;
+  char stopchars[2];
+  stopchars[0] = stopchar;
+  stopchars[1] = '\0';
 
   while (1)
     {
@@ -1542,7 +1541,7 @@ parse_file_seq (stringp, stopchar, size, strip)
 	break;
       /* Yes, find end of next name.  */
       q = p;
-      p = find_char_unquote (q, stopchar, 1);
+      p = find_char_unquote (q, stopchars, 1);
 #ifdef __MSDOS__
       /* For MS-DOS, skip a "C:\...".  */
       if (stopchar == ':' && p != 0 && p[1] == '\\' && isalpha (p[-1]))
