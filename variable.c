@@ -88,6 +88,8 @@ define_variable_in_set (name, length, value, origin, recursive, set)
 	 than this one, don't redefine it.  */
       if ((int) origin >= (int) v->origin)
 	{
+	  if (v->value != 0)
+	    free (v->value);
 	  v->value = savestring (value, strlen (value));
 	  v->origin = origin;
 	  v->recursive = recursive;
