@@ -16,13 +16,14 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <assert.h>
+
 #include "make.h"
 #include "dep.h"
 #include "filedef.h"
 #include "job.h"
 #include "commands.h"
 #include "variable.h"
-#include <assert.h>
 
 
 /* Hash table of files the makefile knows how to make.  */
@@ -294,22 +295,22 @@ file_hash_enter (file, name, oldhash, oldname)
 	      /* We have two sets of commands.  We will go with the
 		 one given in the rule explicitly mentioning this name,
 		 but give a message to let the user know what's going on.  */
-	      if (oldfile->cmds->filename != 0)
-		makefile_error (file->cmds->filename, file->cmds->lineno,
-				"Commands were specified for \
-file `%s' at %s:%u,",
-				oldname, oldfile->cmds->filename,
-				oldfile->cmds->lineno);
+	      if (oldfile->cmds->fileinfo.filenm != 0)
+                error (&file->cmds->fileinfo,
+                                "Commands were specified for \
+file `%s' at %s:%lu,",
+                                oldname, oldfile->cmds->fileinfo.filenm,
+                                oldfile->cmds->fileinfo.lineno);
 	      else
-		makefile_error (file->cmds->filename, file->cmds->lineno,
+		error (&file->cmds->fileinfo,
 				"Commands for file `%s' were found by \
 implicit rule search,",
 				oldname);
-	      makefile_error (file->cmds->filename, file->cmds->lineno,
+	      error (&file->cmds->fileinfo,
 			      "but `%s' is now considered the same file \
 as `%s'.",
 			      oldname, name);
-	      makefile_error (file->cmds->filename, file->cmds->lineno,
+	      error (&file->cmds->fileinfo,
 			      "Commands for `%s' will be ignored \
 in favor of those for `%s'.",
 			      name, oldname);
@@ -331,12 +332,12 @@ in favor of those for `%s'.",
       merge_variable_set_lists (&oldfile->variables, file->variables);
 
       if (oldfile->double_colon && file->is_target && !file->double_colon)
-	fatal ("can't rename single-colon `%s' to double-colon `%s'",
+	fatal (NILF, "can't rename single-colon `%s' to double-colon `%s'",
 	       oldname, name);
       if (!oldfile->double_colon  && file->double_colon)
 	{
 	  if (oldfile->is_target)
-	    fatal ("can't rename double-colon `%s' to single-colon `%s'",
+	    fatal (NILF, "can't rename double-colon `%s' to single-colon `%s'",
 		   oldname, name);
 	  else
 	    oldfile->double_colon = file->double_colon;
@@ -401,7 +402,7 @@ remove_intermediates (sig)
 	  if (!f->dontcare)
 	    {
 	      if (sig)
-		error ("*** Deleting intermediate file `%s'", f->name);
+		error (NILF, "*** Deleting intermediate file `%s'", f->name);
 	      else if (!silent_flag)
 		{
 		  if (! doneany)
@@ -465,7 +466,7 @@ snap_deps ()
 	{
 	  /* Mark this file as phony and nonexistent.  */
 	  f2->phony = 1;
-	  f2->last_mtime = (time_t) -1;
+	  f2->last_mtime = (FILE_TIMESTAMP) -1;
 	}
 
   for (f = lookup_file (".INTERMEDIATE"); f != 0; f = f->prev)
@@ -549,6 +550,51 @@ set_command_state (file, state)
     d->file->command_state = state;
 }
 
+/* Get and print file timestamps.  */
+
+FILE_TIMESTAMP
+file_timestamp_now ()
+{
+#if HAVE_CLOCK_GETTIME && defined CLOCK_REALTIME
+  struct timespec timespec;
+  if (clock_gettime (CLOCK_REALTIME, &timespec) == 0)
+    return FILE_TIMESTAMP_FROM_S_AND_NS (timespec.tv_sec, timespec.tv_nsec);
+#endif
+  return FILE_TIMESTAMP_FROM_S_AND_NS (time ((time_t *) 0), 0);
+}
+
+void
+file_timestamp_sprintf (p, ts)
+     char *p;
+     FILE_TIMESTAMP ts;
+{
+  time_t t = FILE_TIMESTAMP_S (ts);
+  struct tm *tm = localtime (&t);
+
+  if (tm)
+    sprintf (p, "%04d-%02d-%02d %02d:%02d:%02d",
+	     tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+	     tm->tm_hour, tm->tm_min, tm->tm_sec);
+  else if (t < 0)
+    sprintf (p, "%ld", (long) t);
+  else
+    sprintf (p, "%lu", (unsigned long) t);
+  p += strlen (p);
+
+  /* Append nanoseconds as a fraction, but remove trailing zeros.
+     We don't know the actual timestamp resolution, since clock_getres
+     applies only to local times, whereas this timestamp might come
+     from a remote filesystem.  So removing trailing zeros is the
+     best guess that we can do.  */
+  sprintf (p, ".%09ld", (long) FILE_TIMESTAMP_NS (ts));
+  p += strlen (p) - 1;
+  while (*p == '0')
+    p--;
+  p += *p != '.';
+
+  *p = '\0';
+}
+
 /* Print the data base of files.  */
 
 static void
@@ -587,13 +633,16 @@ print_file (f)
 	printf (" %s", dep_name (d));
       putchar ('\n');
     }
-  if (f->last_mtime == (time_t) 0)
+  if (f->last_mtime == 0)
     puts ("#  Modification time never checked.");
-  else if (f->last_mtime == (time_t) -1)
+  else if (f->last_mtime == (FILE_TIMESTAMP) -1)
     puts ("#  File does not exist.");
   else
-    printf ("#  Last modified %.24s (%ld)\n",
-	    ctime (&f->last_mtime), (long int) f->last_mtime);
+    {
+      char buf[FILE_TIMESTAMP_PRINT_LEN_BOUND + 1];
+      file_timestamp_sprintf (buf, f->last_mtime);
+      printf ("#  Last modified %s\n", buf);
+    }
   printf ("#  File has%s been updated.\n",
 	  f->updated ? "" : " not");
   switch (f->command_state)

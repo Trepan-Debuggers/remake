@@ -319,12 +319,8 @@ int shell_function_pid = 0, shell_function_completed;
 
 /* Note this absorbs a semicolon and is safe to use in conditionals.  */
 #define BADARGS(func)  do {                                                   \
-  if (reading_filename != 0)                                                  \
-    makefile_fatal (reading_filename, *reading_lineno_ptr,                    \
-		    "insufficient arguments to function `%s'",                \
-		    func);                                                    \
-  else                                                                        \
-    fatal ("insufficient arguments to function `%s'", func); } while (0)
+    fatal (reading_file, "insufficient arguments to function `%s'", func);    \
+  } while (0)
 
 static char *
 expand_function (o, function, text, end)
@@ -395,11 +391,11 @@ expand_function (o, function, text, end)
 #endif  /* Not Amiga.  */
 
 	/* For error messages.  */
-	if (reading_filename != 0)
+	if (reading_file != 0)
 	  {
-	    error_prefix = (char *) alloca (strlen (reading_filename) + 100);
+	    error_prefix = (char *) alloca (strlen(reading_file->filenm)+100);
 	    sprintf (error_prefix,
-		     "%s:%u: ", reading_filename, *reading_lineno_ptr);
+		     "%s:%lu: ", reading_file->filenm, reading_file->lineno);
 	  }
 	else
 	  error_prefix = "";
@@ -417,7 +413,7 @@ expand_function (o, function, text, end)
 			    0,
 			    TRUE,
 			    DUPLICATE_SAME_ACCESS) == FALSE) {
-	  fatal("create_child_process: DuplicateHandle(In) failed (e=%d)\n",
+	  fatal (NILF, "create_child_process: DuplicateHandle(In) failed (e=%d)\n",
 		GetLastError());
 	}
 	if (DuplicateHandle(GetCurrentProcess(),
@@ -427,17 +423,17 @@ expand_function (o, function, text, end)
 			    0,
 			    TRUE,
 			    DUPLICATE_SAME_ACCESS) == FALSE) {
-	  fatal("create_child_process: DuplicateHandle(Err) failed (e=%d)\n",
+	  fatal (NILF, "create_child_process: DuplicateHandle(Err) failed (e=%d)\n",
 		GetLastError());
 	}
 
 	if (!CreatePipe(&hChildOutRd, &hChildOutWr, &saAttr, 0))
-	  fatal("CreatePipe() failed (e=%d)\n", GetLastError());
+	  fatal (NILF, "CreatePipe() failed (e=%d)\n", GetLastError());
 
 	hProcess = process_init_fd(hIn, hChildOutWr, hErr);
 
 	if (!hProcess)
-	  fatal("expand_function: process_init_fd() failed\n");
+	  fatal (NILF, "expand_function: process_init_fd() failed\n");
 	else
 	  process_register(hProcess);
 
@@ -447,7 +443,7 @@ expand_function (o, function, text, end)
 	if (!process_begin(hProcess, argv, envp, argv[0], NULL))
 		pid = (int) hProcess;
 	else
-		fatal("expand_function: unable to launch process (e=%d)\n",
+		fatal (NILF, "expand_function: unable to launch process (e=%d)\n",
 		      process_last_err(hProcess));
 
 	/* set up to read data from child */
@@ -1178,24 +1174,13 @@ expand_function (o, function, text, end)
       /* Check the first argument.  */
       for (p2 = text; *p2 != '\0'; ++p2)
 	if (*p2 < '0' || *p2 > '9')
-	  {
-	    if (reading_filename != 0)
-	      makefile_fatal (reading_filename, *reading_lineno_ptr,
-			      "non-numeric first argument to `word' function");
-	    else
-	      fatal ("non-numeric first argument to `word' function");
-	  }
+          fatal (reading_file,
+                 "non-numeric first argument to `word' function");
 
       i = (unsigned int) atoi (text);
       if (i == 0)
-	{
-	  if (reading_filename != 0)
-	    makefile_fatal (reading_filename, *reading_lineno_ptr,
-			    "the `word' function takes a one-origin \
-index argument");
-	  else
-	    fatal ("the `word' function takes a one-origin index argument");
-	}
+        fatal (reading_file,
+               "the `word' function takes a one-origin index argument");
 
       p2 = p3;
       while ((p = find_next_token (&p2, &len)) != 0)
@@ -1245,13 +1230,8 @@ index argument");
       /* Check the first argument.  */
       for (p2 = text; *p2 != '\0'; ++p2)
 	if (*p2 < '0' || *p2 > '9')
-	  {
-	    if (reading_filename != 0)
-	      makefile_fatal (reading_filename, *reading_lineno_ptr,
-			      "non-numeric first argument to `wordlist' function");
-	    else
-	      fatal ("non-numeric first argument to `wordlist' function");
-	  }
+          fatal (reading_file,
+                 "non-numeric first argument to `wordlist' function");
       i = (unsigned int)atoi(text);
       free (text);
 
@@ -1274,13 +1254,8 @@ index argument");
 
       for (p2 = text; *p2 != '\0'; ++p2)
 	if (*p2 < '0' || *p2 > '9')
-	  {
-	    if (reading_filename != 0)
-	      makefile_fatal (reading_filename, *reading_lineno_ptr,
-			      "non-numeric second argument to `wordlist' function");
-	    else
-	      fatal ("non-numeric second argument to `wordlist' function");
-	  }
+          fatal (reading_file,
+                 "non-numeric second argument to `wordlist' function");
       j = (unsigned int)atoi(text);
       free (text);
 
@@ -1545,15 +1520,9 @@ handle_function (op, stringp)
 	}
 
       if (count >= 0)
-	{
-	  static const char errmsg[]
-	    = "unterminated call to function `%s': missing `%c'";
-	  if (reading_filename == 0)
-	    fatal (errmsg, function_table[code].name, closeparen);
-	  else
-	    makefile_fatal (reading_filename, *reading_lineno_ptr, errmsg,
-			    function_table[code].name, closeparen);
-	}
+        fatal (reading_file,
+               "unterminated call to function `%s': missing `%c'",
+               function_table[code].name, closeparen);
 
       /* We found the end; expand the function call.  */
 

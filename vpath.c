@@ -48,7 +48,7 @@ static struct vpath *general_vpath;
 
 static struct vpath *gpaths;
 
-static int selective_vpath_search PARAMS ((struct vpath *path, char **file, time_t *mtime_ptr));
+static int selective_vpath_search PARAMS ((struct vpath *path, char **file, FILE_TIMESTAMP *mtime_ptr));
 
 /* Reverse the chain of selective VPATH lists so they
    will be searched in the order given in the makefiles
@@ -338,7 +338,7 @@ gpath_search (file, len)
 int
 vpath_search (file, mtime_ptr)
      char **file;
-     time_t *mtime_ptr;
+     FILE_TIMESTAMP *mtime_ptr;
 {
   register struct vpath *v;
 
@@ -376,7 +376,7 @@ static int
 selective_vpath_search (path, file, mtime_ptr)
      struct vpath *path;
      char **file;
-     time_t *mtime_ptr;
+     FILE_TIMESTAMP *mtime_ptr;
 {
   int not_target;
   char *name, *n;
@@ -524,7 +524,9 @@ selective_vpath_search (path, file, mtime_ptr)
 		/* Store the modtime into *MTIME_PTR for the caller.
 		   If we have had no need to stat the file here,
 		   we record a zero modtime to indicate this.  */
-		*mtime_ptr = exists_in_cache ? st.st_mtime : (time_t) 0;
+		*mtime_ptr = (exists_in_cache
+			      ? FILE_TIMESTAMP_STAT_MODTIME (st)
+			      : (FILE_TIMESTAMP) 0);
 
 	      free (name);
 	      return 1;

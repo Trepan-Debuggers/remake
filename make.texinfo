@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.166 1998/07/30 20:56:39 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.167 1998/10/03 05:40:23 psmith Exp $
 @set EDITION 0.52
 @set VERSION 3.77
 @set UPDATED 20 May 1998
@@ -68,17 +68,17 @@ by the Free Software Foundation.
 @titlepage
 @title GNU Make
 @subtitle A Program for Directing Recompilation
-@subtitle GNU @code{make} Version @value{VERSION}.
+@subtitle GNU @code{make} Version @value{VERSION}
 @subtitle @value{UPDATE-MONTH}
 @author Richard M. Stallman and Roland McGrath
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1988, '89, '90, '91, '92, '93, '94, '95, '96, '97 Free Software Foundation, Inc.
+Copyright @copyright{} 1988, '89, '90, '91, '92, '93, '94, '95, '96, '97, '98
+Free Software Foundation, Inc.
 @sp 2
 Published by the Free Software Foundation @*
 59 Temple Place -- Suite 330, @*
 Boston, MA 02111-1307 USA @*
-Printed copies are available for $20 each. @*
 ISBN @value{ISBN} @*
 
 Permission is granted to make and distribute verbatim copies of
@@ -124,7 +124,7 @@ This manual describes @code{make} and contains the following chapters:@refill
 * Conditionals::                Use or ignore parts of the makefile based
                                  on the values of variables.
 * Functions::                   Many powerful ways to manipulate text.
-* make Invocation: Running.     How to invoke @code{make} on the command line.
+* Invoking make: Running.       How to invoke @code{make} on the command line.
 * Implicit Rules::              Use implicit rules to treat many files alike,
                                  based on their file names.
 * Archives::                    How @code{make} can update library archives.
@@ -2241,8 +2241,7 @@ match that file's name.
 
 The targets which @code{.INTERMEDIATE} depends on are treated as
 intermediate files.  @xref{Chained Rules, ,Chains of Implicit Rules}.
-@code{.INTERMEDIATE} with no dependencies marks all file targets
-mentioned in the makefile as intermediate.
+@code{.INTERMEDIATE} with no dependencies has no effect.
 
 @findex .SECONDARY
 @item .SECONDARY

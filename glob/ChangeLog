@@ -1,3 +1,8 @@
+1998-08-05  Paul D. Smith  <psmith@gnu.org>
+
+	* configure.in: Remove; configuration for glob is handled by the
+	make configure.in.
+
 1998-07-29  Paul D. Smith  <psmith@gnu.org>
 
 	* glob.c, fnmatch.c: New versions from the GLIBC folks (Ulrich

@@ -69,7 +69,7 @@ VMS_get_member_info (module, rfa)
 			   &bufdesc.dsc$w_length, 0);
   if (! status)
     {
-      error ("lbr$set_module failed to extract module info, status = %d",
+      error (NILF, "lbr$set_module failed to extract module info, status = %d",
 	     status);
 
       lbr$close (&VMS_lib_idx);
@@ -151,7 +151,7 @@ ar_scan (archive, function, arg)
 
   if (! status)
     {
-      error ("lbr$ini_control failed with status = %d",status);
+      error (NILF, "lbr$ini_control failed with status = %d",status);
       return -2;
     }
 
@@ -162,7 +162,7 @@ ar_scan (archive, function, arg)
 
   if (! status)
     {
-      error ("unable to open library `%s' to lookup member `%s'",
+      error (NILF, "unable to open library `%s' to lookup member `%s'",
 	     archive, (char *)arg);
       return -1;
     }

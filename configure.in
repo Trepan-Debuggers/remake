@@ -1,11 +1,10 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.60 1998/07/30 20:55:27 psmith Exp $])
+AC_REVISION([$Id: configure.in,v 1.61 1998/10/03 05:40:09 psmith Exp $])
 AC_PREREQ(2.12)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 
-AM_INIT_AUTOMAKE(make, 3.77)
+AM_INIT_AUTOMAKE(make, 3.77.90)
 AM_CONFIG_HEADER(config.h)
-AC_CONFIG_SUBDIRS(glob)
 
 AM_CONDITIONAL(MAINT_MAKEFILE, test -r $srcdir/maintMakefile)
 
@@ -14,6 +13,8 @@ dnl Regular configure stuff
 AC_PROG_MAKE_SET
 AC_PROG_CC
 AC_PROG_INSTALL
+AC_CHECK_PROG(AR, ar, ar, ar)
+AC_PROG_RANLIB
 AC_PROG_CPP			dnl Later checks need this.
 dnl AC_ARG_PROGRAM -- implied by AM_INIT_AUTOMAKE; gives errors if run twice.
 AC_AIX
@@ -30,11 +31,14 @@ AC_HEADER_DIRENT
 AC_TYPE_UID_T			dnl Also does gid_t.
 AC_TYPE_PID_T
 AC_TYPE_SIGNAL
-AC_CHECK_HEADERS(unistd.h limits.h sys/param.h fcntl.h string.h memory.h \
-	         sys/timeb.h)
+AC_CHECK_HEADERS(stdlib.h unistd.h limits.h sys/param.h fcntl.h string.h \
+		 memory.h sys/timeb.h)
 AC_PROG_CC_C_O
 AC_C_CONST			dnl getopt needs this.
 AC_HEADER_STAT
+
+AC_STRUCT_ST_MTIM_NSEC
+jm_AC_TYPE_UINTMAX_T
 
 AC_SUBST(LIBOBJS)
 
@@ -51,19 +55,25 @@ changequote([,])dnl
 fi
 AC_MSG_RESULT($ac_cv_check_symbol_$1)])dnl
 
+# clock_gettime is in -lposix4 in Solaris 2.6.
+AC_CHECK_LIB(posix4, clock_gettime)
+
 AC_CHECK_FUNCS(memmove psignal mktemp pstat_getdynamic \
-	       dup2 getcwd sigsetmask getgroups setlinebuf \
+	       clock_gettime dup2 getcwd sigsetmask getgroups setlinebuf \
 	       seteuid setegid setreuid setregid strerror strsignal)
 AC_CHECK_SYMBOL(sys_siglist)
 AC_FUNC_ALLOCA
 AC_FUNC_VFORK
+AC_FUNC_VPRINTF
+AC_FUNC_STRCOLL
+AC_FUNC_CLOSEDIR_VOID
 AC_FUNC_SETVBUF_REVERSED
 AC_FUNC_GETLOADAVG
 AC_CHECK_LIB(kstat, kstat_open)
-AC_FUNC_STRCOLL
 
 # Check out the wait reality.
-AC_CHECK_HEADERS(sys/wait.h) AC_CHECK_FUNCS(waitpid wait3)
+AC_CHECK_HEADERS(sys/wait.h)
+AC_CHECK_FUNCS(waitpid wait3)
 AC_MSG_CHECKING(for union wait)
 AC_CACHE_VAL(make_cv_union_wait, [dnl
 AC_TRY_LINK([#include <sys/types.h>
@@ -137,7 +147,7 @@ if ( /usr/sccs/admin -n s.conftest || admin -n s.conftest ) >/dev/null 2>&1 &&
 fi
 rm -f s.conftest conftoast
 
-AC_OUTPUT(Makefile build.sh)
+AC_OUTPUT(Makefile glob/Makefile build.sh)
 
 case "$make_badcust" in
   yes) echo
@@ -157,6 +167,15 @@ case "$with_customs" in
        echo "         before compiling GNU make."
        echo
      fi ;;
+esac
+
+case "$ac_cv_func_waitpid/$ac_cv_func_wait3" in
+  no/no) echo
+         echo "WARNING: Your system has neither waitpid() nor wait3()."
+         echo "         Without one of these, signal handling is unreliable."
+         echo "         You should be aware that run GNU make with -j could"
+         echo "         result in erratic behavior."
+         echo ;;
 esac
 
 dnl Local Variables:

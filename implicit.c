@@ -148,7 +148,7 @@ pattern_search (file, archive, depth, recursions)
      that is not just `%'.  */
   int specific_rule_matched = 0;
 
-  register unsigned int i;
+  register unsigned int i = 0;  /* uninit checks OK */
   register struct rule *rule;
   register struct dep *dep;
 
@@ -342,6 +342,8 @@ pattern_search (file, archive, depth, recursions)
 	  deps_found = 0;
 	  for (dep = rule->deps; dep != 0; dep = dep->next)
 	    {
+              struct file *fp;
+
 	      /* If the dependency name has a %, substitute the stem.  */
 	      p = index (dep_name (dep), '%');
 	      if (p != 0)
@@ -390,9 +392,12 @@ pattern_search (file, archive, depth, recursions)
 		 dependency file we are actually looking for is in a different
 		 directory (the one gotten by prepending FILENAME's directory),
 		 so it might actually exist.  */
+              /* If we find a file but the intermediate flag is set, then it
+                 was put here by a .INTERMEDIATE: rule so ignore it.  */
 
 	      if ((!dep->changed || check_lastslash)
-		  && (lookup_file (p) != 0 || file_exists_p (p)))
+		  && (((fp = lookup_file (p)) != 0 && !fp->intermediate)
+                      || file_exists_p (p)))
 		{
 		  found_files[deps_found++] = savestring (p, strlen (p));
 		  continue;
@@ -400,7 +405,7 @@ pattern_search (file, archive, depth, recursions)
 	      /* This code, given FILENAME = "lib/foo.o", dependency name
 		 "lib/foo.c", and VPATH=src, searches for "src/lib/foo.c".  */
 	      vp = p;
-	      if (vpath_search (&vp, (time_t *) 0))
+	      if (vpath_search (&vp, (FILE_TIMESTAMP *) 0))
 		{
 		  DEBUGP2 ("Found dependency `%s' as VPATH `%s'\n", p, vp);
 		  strcpy(vp, p);

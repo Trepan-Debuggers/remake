@@ -473,13 +473,13 @@ delete_target (file, on_behalf_of)
 #ifndef NO_ARCHIVES
   if (ar_name (file->name))
     {
-      if (ar_member_date (file->name) != file->last_mtime)
+      if (ar_member_date (file->name) != FILE_TIMESTAMP_S (file->last_mtime))
 	{
 	  if (on_behalf_of)
-	    error ("*** [%s] Archive member `%s' may be bogus; not deleted",
+	    error (NILF, "*** [%s] Archive member `%s' may be bogus; not deleted",
 		   on_behalf_of, file->name);
 	  else
-	    error ("*** Archive member `%s' may be bogus; not deleted",
+	    error (NILF, "*** Archive member `%s' may be bogus; not deleted",
 		   file->name);
 	}
       return;
@@ -488,12 +488,12 @@ delete_target (file, on_behalf_of)
 
   if (stat (file->name, &st) == 0
       && S_ISREG (st.st_mode)
-      && (time_t) st.st_mtime != file->last_mtime)
+      && FILE_TIMESTAMP_STAT_MODTIME (st) != file->last_mtime)
     {
       if (on_behalf_of)
-	error ("*** [%s] Deleting file `%s'", on_behalf_of, file->name);
+	error (NILF, "*** [%s] Deleting file `%s'", on_behalf_of, file->name);
       else
-	error ("*** Deleting file `%s'", file->name);
+	error (NILF, "*** Deleting file `%s'", file->name);
       if (unlink (file->name) < 0
 	  && errno != ENOENT)	/* It disappeared; so what.  */
 	perror_with_name ("unlink: ", file->name);
@@ -533,10 +533,11 @@ print_commands (cmds)
 
   fputs ("#  commands to execute", stdout);
 
-  if (cmds->filename == 0)
+  if (cmds->fileinfo.filenm == 0)
     puts (" (built-in):");
   else
-    printf (" (from `%s', line %u):\n", cmds->filename, cmds->lineno);
+    printf (" (from `%s', line %lu):\n",
+            cmds->fileinfo.filenm, cmds->fileinfo.lineno);
 
   s = cmds->commands;
   while (*s != '\0')

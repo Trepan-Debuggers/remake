@@ -29,25 +29,25 @@ char *default_shell = "sh.exe";
 int no_default_sh_exe = 1;
 int batch_mode_shell = 1;
 #else  /* WINDOWS32 */
-#ifdef _AMIGA
+# ifdef _AMIGA
 char default_shell[] = "";
 extern int MyExecute (char **);
-#else /* _AMIGA */
-#ifdef __MSDOS__
+# else /* _AMIGA */
+#  ifdef __MSDOS__
 /* The default shell is a pointer so we can change it if Makefile
    says so.  It is without an explicit path so we get a chance
    to search the $PATH for it (since MSDOS doesn't have standard
    directories we could trust).  */
 char *default_shell = "command.com";
-#else  /* __MSDOS__ */
+#  else  /* __MSDOS__ */
 char default_shell[] = "/bin/sh";
-#endif /* __MSDOS__ */
+#  endif /* __MSDOS__ */
 int batch_mode_shell = 0;
-#endif /* _AMIGA */
+# endif /* _AMIGA */
 #endif /* WINDOWS32 */
 
 #ifdef __MSDOS__
-#include <process.h>
+# include <process.h>
 static int execute_by_shell;
 static int dos_pid = 123;
 int dos_status;
@@ -55,7 +55,7 @@ int dos_command_running;
 #endif /* __MSDOS__ */
 
 #ifdef _AMIGA
-#include <proto/dos.h>
+# include <proto/dos.h>
 static int amiga_pid = 123;
 static int amiga_status;
 static char amiga_bname[32];
@@ -63,101 +63,101 @@ static int amiga_batch_file;
 #endif /* Amiga.  */
 
 #ifdef VMS
-#include <time.h>
-#include <processes.h>
-#include <starlet.h>
-#include <lib$routines.h>
+# include <time.h>
+# include <processes.h>
+# include <starlet.h>
+# include <lib$routines.h>
 #endif
 
 #ifdef WINDOWS32
-#include <windows.h>
-#include <io.h>
-#include <process.h>
-#include "sub_proc.h"
-#include "w32err.h"
-#include "pathstuff.h"
+# include <windows.h>
+# include <io.h>
+# include <process.h>
+# include "sub_proc.h"
+# include "w32err.h"
+# include "pathstuff.h"
 #endif /* WINDOWS32 */
 
 #ifdef HAVE_FCNTL_H
-#include <fcntl.h>
+# include <fcntl.h>
 #else
-#include <sys/file.h>
+# include <sys/file.h>
 #endif
 
 #if defined (HAVE_SYS_WAIT_H) || defined (HAVE_UNION_WAIT)
-#include <sys/wait.h>
+# include <sys/wait.h>
 #endif
 
-#ifdef	HAVE_WAITPID
-#define	WAIT_NOHANG(status)	waitpid (-1, (status), WNOHANG)
+#ifdef HAVE_WAITPID
+# define WAIT_NOHANG(status)	waitpid (-1, (status), WNOHANG)
 #else	/* Don't have waitpid.  */
-#ifdef	HAVE_WAIT3
-#ifndef	wait3
+# ifdef HAVE_WAIT3
+#  ifndef wait3
 extern int wait3 ();
-#endif
-#define	WAIT_NOHANG(status)	wait3 ((status), WNOHANG, (struct rusage *) 0)
-#endif	/* Have wait3.  */
-#endif	/* Have waitpid.  */
+#  endif
+#  define WAIT_NOHANG(status)	wait3 ((status), WNOHANG, (struct rusage *) 0)
+# endif /* Have wait3.  */
+#endif /* Have waitpid.  */
 
-#if	!defined (wait) && !defined (POSIX)
+#if !defined (wait) && !defined (POSIX)
 extern int wait ();
 #endif
 
 #ifndef	HAVE_UNION_WAIT
 
-#define	WAIT_T int
+# define WAIT_T int
 
-#ifndef	WTERMSIG
-#define WTERMSIG(x) ((x) & 0x7f)
-#endif
-#ifndef	WCOREDUMP
-#define WCOREDUMP(x) ((x) & 0x80)
-#endif
-#ifndef	WEXITSTATUS
-#define WEXITSTATUS(x) (((x) >> 8) & 0xff)
-#endif
-#ifndef	WIFSIGNALED
-#define WIFSIGNALED(x) (WTERMSIG (x) != 0)
-#endif
-#ifndef	WIFEXITED
-#define WIFEXITED(x) (WTERMSIG (x) == 0)
-#endif
+# ifndef WTERMSIG
+#  define WTERMSIG(x) ((x) & 0x7f)
+# endif
+# ifndef WCOREDUMP
+#  define WCOREDUMP(x) ((x) & 0x80)
+# endif
+# ifndef WEXITSTATUS
+#  define WEXITSTATUS(x) (((x) >> 8) & 0xff)
+# endif
+# ifndef WIFSIGNALED
+#  define WIFSIGNALED(x) (WTERMSIG (x) != 0)
+# endif
+# ifndef WIFEXITED
+#  define WIFEXITED(x) (WTERMSIG (x) == 0)
+# endif
 
 #else	/* Have `union wait'.  */
 
-#define WAIT_T union wait
-#ifndef	WTERMSIG
-#define WTERMSIG(x)	((x).w_termsig)
-#endif
-#ifndef	WCOREDUMP
-#define WCOREDUMP(x)	((x).w_coredump)
-#endif
-#ifndef WEXITSTATUS
-#define WEXITSTATUS(x)	((x).w_retcode)
-#endif
-#ifndef	WIFSIGNALED
-#define	WIFSIGNALED(x)	(WTERMSIG(x) != 0)
-#endif
-#ifndef	WIFEXITED
-#define	WIFEXITED(x)	(WTERMSIG(x) == 0)
-#endif
+# define WAIT_T union wait
+# ifndef WTERMSIG
+#  define WTERMSIG(x) ((x).w_termsig)
+# endif
+# ifndef WCOREDUMP
+#  define WCOREDUMP(x) ((x).w_coredump)
+# endif
+# ifndef WEXITSTATUS
+#  define WEXITSTATUS(x) ((x).w_retcode)
+# endif
+# ifndef WIFSIGNALED
+#  define WIFSIGNALED(x) (WTERMSIG(x) != 0)
+# endif
+# ifndef WIFEXITED
+#  define WIFEXITED(x) (WTERMSIG(x) == 0)
+# endif
 
 #endif	/* Don't have `union wait'.  */
 
 #ifdef VMS
-static int vms_jobsefnmask=0;
+static int vms_jobsefnmask = 0;
 #endif /* !VMS */
 
 #ifndef	HAVE_UNISTD_H
 extern int dup2 ();
 extern int execve ();
 extern void _exit ();
-#ifndef VMS
+# ifndef VMS
 extern int geteuid ();
 extern int getegid ();
 extern int setgid ();
 extern int getgid ();
-#endif
+# endif
 #endif
 
 extern char *allocated_variable_expand_for_file PARAMS ((char *line, struct file *file));
@@ -169,7 +169,6 @@ extern int start_remote_job_p PARAMS ((int));
 extern int remote_status PARAMS ((int *exit_code_ptr, int *signal_ptr,
 		int *coredump_ptr, int block));
 
-RETSIGTYPE child_handler PARAMS ((int));
 static void free_child PARAMS ((struct child *));
 static void start_job_command PARAMS ((struct child *child));
 static int load_too_high PARAMS ((void));
@@ -224,21 +223,19 @@ child_error (target_name, exit_code, exit_sig, coredump, ignored)
 
 #ifdef VMS
   if (!(exit_code & 1))
-      error("*** [%s] Error 0x%x%s", target_name, exit_code, ((ignored)? " (ignored)" : ""));
+      error (NILF, "*** [%s] Error 0x%x%s", target_name, exit_code, ((ignored)? " (ignored)" : ""));
 #else
   if (exit_sig == 0)
-    error (ignored ? "[%s] Error %d (ignored)" :
+    error (NILF, ignored ? "[%s] Error %d (ignored)" :
 	   "*** [%s] Error %d",
 	   target_name, exit_code);
   else
-    error ("*** [%s] %s%s",
+    error (NILF, "*** [%s] %s%s",
 	   target_name, strsignal (exit_sig),
 	   coredump ? " (core dumped)" : "");
 #endif /* VMS */
 }
 
-static unsigned int dead_children = 0;
-
 #ifdef VMS
 /* Wait for nchildren children to terminate */
 static void
@@ -259,6 +256,13 @@ vmsWaitForChildren(int *status)
 #endif
 
 
+/* If we can't use waitpid() or wait3(), then we use a signal handler
+   to track the number of SIGCHLD's we got.  This is less robust.  */
+
+#ifndef WAIT_NOHANG
+
+static unsigned int dead_children = 0;
+
 /* Notice that a child died.
    reap_children should be called when convenient.  */
 RETSIGTYPE
@@ -270,6 +274,8 @@ child_handler (sig)
   if (debug_flag)
     printf ("Got a SIGCHLD; %d unreaped children.\n", dead_children);
 }
+
+#endif /* WAIT_NOHANG */
 
 extern int shell_function_pid, shell_function_completed;
 
@@ -284,9 +290,12 @@ reap_children (block, err)
      int block, err;
 {
   WAIT_T status;
+#ifdef WAIT_NOHANG
+  int dead_children = 1;  /* Initially, assume we have some.  */
+#endif
 
   while ((children != 0 || shell_function_pid != 0) &&
-	 (block || dead_children > 0))
+	 (block || dead_children))
     {
       int remote = 0;
       register int pid;
@@ -295,13 +304,14 @@ reap_children (block, err)
       int child_failed;
       int any_remote, any_local;
 
-      if (err && dead_children == 0)
+      if (err && block)
 	{
 	  /* We might block for a while, so let the user know why.  */
 	  fflush (stdout);
-	  error ("*** Waiting for unfinished jobs....");
+	  error (NILF, "*** Waiting for unfinished jobs....");
 	}
 
+#ifndef WAIT_NOHANG
       /* We have one less dead child to reap.
 	 The test and decrement are not atomic; if it is compiled into:
 	 	register = dead_children - 1;
@@ -316,6 +326,7 @@ reap_children (block, err)
 
       if (dead_children > 0)
 	--dead_children;
+#endif
 
       any_remote = 0;
       any_local = shell_function_pid != 0;
@@ -338,8 +349,12 @@ reap_children (block, err)
       else
 	pid = 0;
 
-      if (pid < 0)
+      if (pid > 0)
+	/* We got a remote child.  */
+	remote = 1;
+      else if (pid < 0)
 	{
+          /* A remote status command failed miserably.  Punt.  */
 	remote_status_lose:
 #ifdef	EINTR
 	  if (errno == EINTR)
@@ -347,11 +362,11 @@ reap_children (block, err)
 #endif
 	  pfatal_with_name ("remote_status");
 	}
-      else if (pid == 0)
+      else
 	{
-#if !defined(__MSDOS__) && !defined(_AMIGA) && !defined(WINDOWS32)
 	  /* No remote children.  Check for local children.  */
 
+#if !defined(__MSDOS__) && !defined(_AMIGA) && !defined(WINDOWS32)
 	  if (any_local)
 	    {
 #ifdef VMS
@@ -371,15 +386,26 @@ reap_children (block, err)
 
 	  if (pid < 0)
 	    {
+              /* The wait*() failed miserably.  Punt.  */
 #ifdef EINTR
 	      if (errno == EINTR)
 		continue;
 #endif
 	      pfatal_with_name ("wait");
 	    }
-	  else if (pid == 0)
+	  else if (pid > 0)
 	    {
-	      /* No local children.  */
+	      /* We got one; chop the status word up.  */
+	      exit_code = WEXITSTATUS (status);
+	      exit_sig = WIFSIGNALED (status) ? WTERMSIG (status) : 0;
+	      coredump = WCOREDUMP (status);
+	    }
+	  else
+	    {
+	      /* No local children are dead.  */
+#ifdef WAIT_NOHANG
+              dead_children = 0;
+#endif
 	      if (block && any_remote)
 		{
 		  /* Now try a blocking wait for a remote child.  */
@@ -396,14 +422,7 @@ reap_children (block, err)
 	      else
 		break;
 	    }
-	  else
-	    {
-	      /* Chop the status word up.  */
-	      exit_code = WEXITSTATUS (status);
-	      exit_sig = WIFSIGNALED (status) ? WTERMSIG (status) : 0;
-	      coredump = WCOREDUMP (status);
-	    }
-#else	/* __MSDOS__, Amiga, WINDOWS32.  */
+#endif /* !__MSDOS__, !Amiga, !WINDOWS32.  */
 #ifdef __MSDOS__
 	  /* Life is very different on MSDOS.  */
 	  pid = dos_pid - 1;
@@ -423,39 +442,35 @@ reap_children (block, err)
 	  coredump = 0;
 #endif /* _AMIGA */
 #ifdef WINDOWS32
-      {
-        HANDLE hPID;
-        int err;
+          {
+            HANDLE hPID;
+            int err;
 
-        /* wait for anything to finish */
-        if (hPID = process_wait_for_any()) {
+            /* wait for anything to finish */
+            if (hPID = process_wait_for_any()) {
 
-          /* was an error found on this process? */
-          err = process_last_err(hPID);
+              /* was an error found on this process? */
+              err = process_last_err(hPID);
 
-          /* get exit data */
-          exit_code = process_exit_code(hPID);
+              /* get exit data */
+              exit_code = process_exit_code(hPID);
 
-          if (err)
-            fprintf(stderr, "make (e=%d): %s",
-              exit_code, map_windows32_error_to_string(exit_code));
+              if (err)
+                fprintf(stderr, "make (e=%d): %s",
+                  exit_code, map_windows32_error_to_string(exit_code));
 
-          /* signal */
-          exit_sig = process_signal(hPID);
+              /* signal */
+              exit_sig = process_signal(hPID);
 
-          /* cleanup process */
-          process_cleanup(hPID);
+              /* cleanup process */
+              process_cleanup(hPID);
 
-          coredump = 0;
-        }
-        pid = (int) hPID;
-      }
+              coredump = 0;
+            }
+            pid = (int) hPID;
+          }
 #endif /* WINDOWS32 */
-#endif	/* Not __MSDOS__ */
 	}
-      else
-	/* We got a remote child.  */
-	remote = 1;
 
       /* Check if this is the child of the `shell' function.  */
       if (!remote && pid == shell_function_pid)
@@ -478,14 +493,9 @@ reap_children (block, err)
 
       if (c == 0)
 	{
-	  /* An unknown child died.  */
-	  char buf[100];
-	  sprintf (buf, "Unknown%s job %d", remote ? " remote" : "", pid);
-	  if (child_failed)
-	    child_error (buf, exit_code, exit_sig, coredump,
-			 ignore_errors_flag);
-	  else
-	    error ("%s finished.", buf);
+	  /* An unknown child died.
+             Ignore it; it was inherited from our invoker.  */
+          continue;
 	}
       else
 	{
@@ -495,17 +505,17 @@ reap_children (block, err)
 		    (unsigned long int) c,
 		    (long) c->pid, c->remote ? " (remote)" : "");
 
-      if (c->sh_batch_file) {
-         if (debug_flag)
-           printf("Cleaning up temporary batch file %s\n", c->sh_batch_file);
+          if (c->sh_batch_file) {
+            if (debug_flag)
+              printf("Cleaning up temp batch file %s\n", c->sh_batch_file);
 
-         /* just try and remove, don't care if this fails */
-         remove(c->sh_batch_file);
+            /* just try and remove, don't care if this fails */
+            remove(c->sh_batch_file);
 
-         /* all done with memory */
-         free(c->sh_batch_file);
-         c->sh_batch_file = NULL;
-      }
+            /* all done with memory */
+            free(c->sh_batch_file);
+            c->sh_batch_file = NULL;
+          }
 
 	  /* If this child had the good stdin, say it is now free.  */
 	  if (c->good_stdin)
@@ -661,12 +671,12 @@ extern sigset_t fatal_signal_set;
 void
 block_sigs ()
 {
-#ifdef	 POSIX
+#ifdef POSIX
   (void) sigprocmask (SIG_BLOCK, &fatal_signal_set, (sigset_t *) 0);
 #else
-#ifdef	HAVE_SIGSETMASK
+# ifdef HAVE_SIGSETMASK
   (void) sigblock (fatal_signal_mask);
-#endif
+# endif
 #endif
 }
 
@@ -1098,9 +1108,9 @@ start_waiting_job (c)
     case cs_running:
       c->next = children;
       if (debug_flag)
-	printf ("Putting child 0x%08lx PID %05d%s on the chain.\n",
+	printf ("Putting child 0x%08lx PID %ld%s on the chain.\n",
 		(unsigned long int) c,
-		c->pid, c->remote ? " (remote)" : "");
+		(long) c->pid, c->remote ? " (remote)" : "");
       children = c;
       /* One more job slot is in use.  */
       ++job_slots_used;
@@ -1322,7 +1332,7 @@ load_too_high ()
 	{
 	  if (errno == 0)
 	    /* An errno value of zero means getloadavg is just unsupported.  */
-	    error ("cannot enforce load limits on this operating system");
+	    error (NILF, "cannot enforce load limits on this operating system");
 	  else
 	    perror_with_name ("cannot enforce load limit: ", "getloadavg");
 	}
@@ -1427,8 +1437,7 @@ int vmsHandleChildTerm(struct child *child)
 	    break;
 
 	  default:
-	    error ("internal error: `%s' command_state \
-%d in child_handler", c->file->name);
+	    error (NILF, "internal error: `%s' command_state", c->file->name);
 	    abort ();
 	    break;
 	  }
@@ -1682,7 +1691,7 @@ exec_command (argv, envp)
   switch (errno)
     {
     case ENOENT:
-      error ("%s: Command not found", argv[0]);
+      error (NILF, "%s: Command not found", argv[0]);
       break;
     case ENOEXEC:
       {
@@ -1711,7 +1720,7 @@ exec_command (argv, envp)
 
 	execvp (shell, new_argv);
 	if (errno == ENOENT)
-	  error ("%s: Shell program not found", shell);
+	  error (NILF, "%s: Shell program not found", shell);
 	else
 	  perror_with_name ("execvp: ", shell);
 	break;
@@ -2205,8 +2214,8 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
 
 	    p = next_token (p);
 	    --p;
-        if (unixy_shell && !batch_mode_shell)
-          *ap++ = '\\';
+            if (unixy_shell && !batch_mode_shell)
+              *ap++ = '\\';
 	    *ap++ = ' ';
 	    continue;
 	  }
@@ -2234,11 +2243,9 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
     *ap = '\0';
 
 #ifdef WINDOWS32
-    /*
-	 * Some shells do not work well when invoked as 'sh -c  xxx' to run
-	 * a command line (e.g. Cygnus GNUWIN32 sh.exe on WIN32 systems).
-	 * In these cases, run commands via a script file.
-     */
+    /* Some shells do not work well when invoked as 'sh -c xxx' to run a
+       command line (e.g. Cygnus GNUWIN32 sh.exe on WIN32 systems).  In these
+       cases, run commands via a script file.  */
     if ((no_default_sh_exe || batch_mode_shell) && batch_filename_ptr) {
       FILE* batch = NULL;
       int id = GetCurrentProcessId();
@@ -2269,7 +2276,8 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
 
       /* create batch file to execute command */
       batch = fopen (*batch_filename_ptr, "w");
-      fputs ("@echo off\n", batch);
+      if (!unixy_shell)
+        fputs ("@echo off\n", batch);
       fputs (command_ptr, batch);
       fputc ('\n', batch);
       fclose (batch);
@@ -2305,7 +2313,7 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
       }
 #else
     else
-      fatal("%s (line %d) Invalid shell context (!unixy && !batch_mode_shell)\n",
+      fatal (NILF, "%s (line %d) Bad shell context (!unixy && !batch_mode_shell)\n",
             __FILE__, __LINE__);
 #endif
   }
