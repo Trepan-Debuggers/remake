@@ -1,4 +1,5 @@
-/* Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+/* Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993
+	Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -57,15 +58,15 @@ struct file
 
     unsigned int double_colon:1;/* Nonzero for double-colon entry */
     unsigned int precious:1;	/* Non-0 means don't delete file on quit */
-    unsigned int tried_implicit:1;/* Nonzero if have searched
-				     for implicit rule for making
-				     this file; don't search again.  */
+    unsigned int tried_implicit:1; /* Nonzero if have searched
+				      for implicit rule for making
+				      this file; don't search again.  */
     unsigned int updating:1;	/* Nonzero while updating deps of this file */
     unsigned int updated:1;	/* Nonzero if this file has been remade.  */
     unsigned int is_target:1;	/* Nonzero if file is described as target.  */
     unsigned int cmd_target:1;	/* Nonzero if file was given on cmd line.  */
     unsigned int phony:1;	/* Nonzero if this is a phony file
-				   ie, a dependent of .PHONY.  */
+				   i.e., a dependency of .PHONY.  */
     unsigned int intermediate:1;/* Nonzero if this is an intermediate file.  */
     unsigned int dontcare:1;	/* Nonzero if no complaint is to be made if
 				   this target cannot be remade.  */
