@@ -159,49 +159,47 @@ update_goal_chain (goals, makefiles)
 		 decide when to give an "up to date" diagnostic.  */
 	      g->changed += commands_started - ocommands_started;
 
-	      stop = 0;
-	      if (x != 0 || file->updated)
-		{
-		  /* If STATUS was not already 1, set it to 1 if
-		     updating failed, or to 0 if updating succeeded.
-		     Leave STATUS as it is if no updating was done.  */
+              /* If we updated a file and STATUS was not already 1, set it to
+                 1 if updating failed, or to 0 if updating succeeded.  Leave
+                 STATUS as it is if no updating was done.  */
 
-		  if (status < 1)
-		    {
-		      if (file->update_status != 0)
-			{
-			  /* Updating failed, or -q triggered.
-			     The STATUS value tells our caller which.  */
-			  status = file->update_status;
-			  /* If -q just triggered, stop immediately.
-			     It doesn't matter how much more we run,
-			     since we already know the answer to return.  */
-			  stop = (!keep_going_flag && !question_flag
-				  && !makefiles);
-			}
-		      else
+	      stop = 0;
+	      if ((x != 0 || file->updated) && status < 1)
+                {
+                  if (file->update_status != 0)
+                    {
+                      /* Updating failed, or -q triggered.  The STATUS value
+                         tells our caller which.  */
+                      status = file->update_status;
+                      /* If -q just triggered, stop immediately.  It doesn't
+                         matter how much more we run, since we already know
+                         the answer to return.  */
+                      stop = (!keep_going_flag && !question_flag
+                              && !makefiles);
+                    }
+                  else
+                    {
+                      FILE_TIMESTAMP mtime = MTIME (file);
+                      check_renamed (file);
+
+                      if (file->updated && g->changed &&
+                           mtime != file->mtime_before_update)
                         {
-                          FILE_TIMESTAMP mtime = MTIME (file);
-                          check_renamed (file);
-                          if (file->updated && g->changed &&
-                               mtime != file->mtime_before_update)
-                          {
-                            /* Updating was done.  If this is a makefile and
-                               just_print_flag or question_flag is set
-                               (meaning -n or -q was given and this file was
-                               specified as a command-line target), don't
-                               change STATUS.  If STATUS is changed, we will
-                               get re-exec'd, and enter an infinite loop.  */
-                            if (!makefiles
-                                || (!just_print_flag && !question_flag))
-                              status = 0;
-                            if (makefiles && file->dontcare)
-                              /* This is a default makefile; stop remaking.  */
-                              stop = 1;
-                          }
+                          /* Updating was done.  If this is a makefile and
+                             just_print_flag or question_flag is set (meaning
+                             -n or -q was given and this file was specified
+                             as a command-line target), don't change STATUS.
+                             If STATUS is changed, we will get re-exec'd, and
+                             enter an infinite loop.  */
+                          if (!makefiles
+                              || (!just_print_flag && !question_flag))
+                            status = 0;
+                          if (makefiles && file->dontcare)
+                            /* This is a default makefile; stop remaking.  */
+                            stop = 1;
                         }
-		    }
-		}
+                    }
+                }
 
 	      /* Keep track if any double-colon entry is not finished.
                  When they are all finished, the goal is finished.  */
@@ -457,7 +455,7 @@ update_file_1 (file, depth)
 
       if (d->file->updating)
 	{
-	  error (NILF, _("Circular %s <- %s prerequisite dropped."),
+	  error (NILF, _("Circular %s <- %s dependency dropped."),
 		 file->name, d->file->name);
 	  /* We cannot free D here because our the caller will still have
 	     a reference to it when we were called recursively via
@@ -857,7 +855,7 @@ check_dep (file, depth, this_mtime, must_make_ptr)
 	    {
 	      if (d->file->updating)
 		{
-		  error (NILF, _("Circular %s <- %s prerequisite dropped."),
+		  error (NILF, _("Circular %s <- %s dependency dropped."),
 			 file->name, d->file->name);
 		  if (lastd == 0)
 		    {
@@ -875,7 +873,8 @@ check_dep (file, depth, this_mtime, must_make_ptr)
 		}
 
 	      d->file->parent = file;
-	      dep_status |= check_dep (d->file, depth, this_mtime, must_make_ptr);
+	      dep_status |= check_dep (d->file, depth, this_mtime,
+                                       must_make_ptr);
 	      check_renamed (d->file);
 	      if (dep_status != 0 && !keep_going_flag)
 		break;
