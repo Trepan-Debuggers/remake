@@ -905,11 +905,25 @@ int main (int argc, char ** argv)
   /* Make sure stdout is line-buffered.  */
 
 #ifdef HAVE_SETVBUF
+# ifndef SETVBUF_REVERSED
+  setvbuf (stdout, _IOLBF, xmalloc (BUFSIZ), BUFSIZ);
+_WAIT_NOHANG
+# if defined SIGCHLD
+  (void) bsd_signal (SIGCHLD, SIG_DFL);
+# endif
+# if defined SIGCLD && SIGCLD != SIGCHLD
+  (void) bsd_signal (SIGCLD, SIG_DFL);
+# endif
+#endif
+
+  /* Make sure stdout is line-buffered.  */
+
+#ifdef HAVE_SETVBUF
 # ifdef SETVBUF_REVERSED
-  setvbuf (stdout, (char *) 0, _IOLBF, BUFSIZ);
+  setvbuf (stdout, _IOLBF, xmalloc (BUFSIZ), BUFSIZ);
 # else	/* setvbuf not reversed.  */
   /* Some buggy systems lose if we pass 0 instead of allocating ourselves.  */
-  setvbuf (stdout, _IOLBF, xmalloc (BUFSIZ), BUFSIZ);
+  setvbuf (stdout, (char *) 0, _IOLBF, BUFSIZ);
 # endif	/* setvbuf reversed.  */
 #elif HAVE_SETLINEBUF
   setlinebuf (stdout);
@@ -2074,6 +2088,7 @@ static void
 print_usage (bad)
      int bad;
 {
+  extern char *make_host;
   register const struct command_switch *cs;
   FILE *usageto;
 
@@ -2165,7 +2180,10 @@ print_usage (bad)
 	       buf, gettext (cs->description));
     }
 
-  fprintf (usageto, _("\nReport bugs to <bug-make@gnu.org>.\n"));
+  fprintf (usageto, _("\nBuilt for %s"), make_host);
+  if (remote_description != 0 && *remote_description != '\0')
+    fprintf (usageto, " (%s)", remote_description);
+  fprintf (usageto, _("\nReport bugs to <bug-make@gnu.org>\n"));
 }
 
 /* Decode switches from ARGC and ARGV.
@@ -2697,7 +2715,6 @@ define_makeflags (all, makefile)
 static void
 print_version ()
 {
-  extern char *make_host;
   static int printed_version = 0;
 
   char *precede = print_data_base_flag ? "# " : "";
@@ -2706,19 +2723,19 @@ print_version ()
     /* Do it only once.  */
     return;
 
-  printf ("%sGNU Make version %s", precede, version_string);
-  if (remote_description != 0 && *remote_description != '\0')
-    printf ("-%s", remote_description);
+  /* Print this untranslated.  The coding standards recommend translating the
+     (C) to the copyright symbol, but this string is going to change every
+     year, and none of the rest of it should be translated (including the
+     word "Copyright", so it hardly seems worth it.  */
 
-  printf (_(", by Richard Stallman and Roland McGrath.\n\
-%sBuilt for %s\n\
-%sCopyright (C) 2002  Free Software Foundation, Inc.\n\
-%sThis is free software; see the source for copying conditions.\n\
+  printf ("%sGNU Make %s\n\
+%sCopyright (C) 2002  Free Software Foundation, Inc.\n",
+          precede, version_string, precede);
+
+  printf (_("%sThis is free software; see the source for copying conditions.\n\
 %sThere is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A\n\
-%sPARTICULAR PURPOSE.\n\n\
-%sReport bugs to <bug-make@gnu.org>.\n\n"),
-          precede, make_host,
-	  precede, precede, precede, precede, precede);
+%sPARTICULAR PURPOSE.\n"),
+            precede, precede, precede);
 
   printed_version = 1;
 

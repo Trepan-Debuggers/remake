@@ -706,6 +706,7 @@ notice_finished_file (file)
 {
   struct dep *d;
   int ran = file->command_state == cs_running;
+  int touched = 0;
 
   file->command_state = cs_finished;
   file->updated = 1;
@@ -734,24 +735,36 @@ notice_finished_file (file)
 	  if (file->phony)
 	    file->update_status = 0;
 	  else
-	    /* Should set file's modification date and do nothing else.  */
-	    file->update_status = touch_file (file);
+            {
+              /* Should set file's modification date and do nothing else.  */
+              file->update_status = touch_file (file);
+
+              /* Pretend we ran a real touch command, to suppress the
+                 "`foo' is up to date" message.  */
+              commands_started++;
+
+              /* Request for the timestamp to be updated (and distributed
+                 to the double-colon entries). Simply setting ran=1 would
+                 almost have done the trick, but messes up with the also_make
+                 updating logic below.  */
+              touched = 1;
+            }
 	}
     }
 
   if (file->mtime_before_update == UNKNOWN_MTIME)
     file->mtime_before_update = file->last_mtime;
 
-  if (ran && !file->phony)
+  if ((ran && !file->phony) || touched)
     {
       struct file *f;
       int i = 0;
 
-      /* If -n or -q and all the commands are recursive, we ran them so
+      /* If -n, -t, or -q and all the commands are recursive, we ran them so
          really check the target's mtime again.  Otherwise, assume the target
          would have been updated. */
 
-      if (question_flag || just_print_flag)
+      if (question_flag || just_print_flag || touch_flag)
         {
           for (i = file->cmds->ncommand_lines; i > 0; --i)
             if (! (file->cmds->lines_flags[i-1] & COMMANDS_RECURSE))

@@ -24,7 +24,7 @@ Building From CVS
 -----------------
 
 To build GNU make from CVS, you will need Autoconf 2.53 (or better),
-Automake 1.6.1 (or better), and Gettext 0.11.1 (or better), and any
+Automake 1.6.1 (or better), and Gettext 0.11.3-pre2 (or better), and any
 tools that those utilities require (GNU m4, Perl, etc.).
 
 After checking out the code, you will need to perform these steps to get
@@ -34,18 +34,10 @@ Hopefully at some point in the (near) future this will all be obsolete
 and you can just run "autoreconf" and have it DTRT.
 
 
- 1) $ gettextize --no-changelog
-    $ mv config/Makefile.am{~,}
-    $ mv Makefile.am{~,}
-    $ mv configure.in{~,}
+ 1) $ autopoint
 
     This will instantiate various m4 macros files, etc. in the config
     and po directories.
-
-    The mv commands are necessary because gettextize doesn't realize
-    that the things it's adding to those files already exist in it.
-    Hopefully there will be a better solution for this in upcoming
-    versions of Gettext.
 
 
  2) $ aclocal -I config
@@ -129,10 +121,7 @@ swift click o' mouse-2 into an xterm.  I even grudgingly removed my use
 of "advanced shell features" like {}.  Go for it!
 
 
-gettextize --no-changelog
-mv config/Makefile.am~ config/Makefile.am
-mv Makefile.am~ Makefile.am
-mv configure.in~ configure.in
+autopoint
 aclocal -I config
 autoheader
 automake --add-missing

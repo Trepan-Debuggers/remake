@@ -1141,6 +1141,42 @@ func_wildcard (o, argv, funcname)
 }
 
 /*
+  $(eval <makefile string>)
+
+  Always resolves to the empty string.
+
+  Treat the arguments as a segment of makefile, and parse them.
+*/
+
+static char *
+func_eval (o, argv, funcname)
+     char *o;
+     char **argv;
+     const char *funcname;
+{
+  eval_buffer (argv[0]);
+
+  return o;
+}
+
+
+static char *
+func_value (o, argv, funcname)
+     char *o;
+     char **argv;
+     const char *funcname;
+{
+  /* Look up the variable.  */
+  struct variable *v = lookup_variable (argv[0], strlen (argv[0]));
+
+  /* Copy its value into the output buffer without expanding it.  */
+  if (v)
+    o = variable_buffer_output (o, v->value, strlen(v->value));
+
+  return o;
+}
+
+/*
   \r  is replaced on UNIX as well. Is this desirable?
  */
 void
@@ -1618,8 +1654,6 @@ func_not (char* o, char **argv, char *funcname)
 #endif
 
 
-#define STRING_SIZE_TUPLE(_s) (_s), (sizeof (_s)-1)
-
 /* Lookup table for builtin functions.
 
    This doesn't have to be sorted; we use a straight lookup.  We might gain
@@ -1664,6 +1698,8 @@ static struct function_table_entry function_table[] =
   { STRING_SIZE_TUPLE("error"),         0,  1,  1,  func_error},
   { STRING_SIZE_TUPLE("warning"),       0,  1,  1,  func_error},
   { STRING_SIZE_TUPLE("if"),            2,  3,  0,  func_if},
+  { STRING_SIZE_TUPLE("value"),         0,  1,  1,  func_value},
+  { STRING_SIZE_TUPLE("eval"),          0,  1,  1,  func_eval},
 #ifdef EXPERIMENTAL
   { STRING_SIZE_TUPLE("eq"),            2,  2,  1,  func_eq},
   { STRING_SIZE_TUPLE("not"),           0,  1,  1,  func_not},

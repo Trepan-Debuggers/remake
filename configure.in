@@ -1,10 +1,10 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(GNU make,3.79.2a1,bug-make@gnu.org)
+AC_INIT(GNU make,3.80rc1,bug-make@gnu.org)
 
 AC_PREREQ(2.53)
 
-AC_REVISION([[$Id: configure.in,v 1.108 2002/05/10 03:15:08 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.109 2002/07/08 02:26:47 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -31,7 +31,8 @@ AC_ISC_POSIX
 AC_MINIX
 
 # Enable gettext, in "external" mode.
-# Maintainers: this requires gettext 0.11 or better!
+
+GETTEXT_VERSION=0.11.3-pre2
 AM_GNU_GETTEXT([external])
 
 # This test must come as early as possible after the compiler configuration
@@ -279,7 +280,7 @@ AC_CACHE_VAL(make_cv_sys_gnu_glob, [
 #if !defined _LIBC && defined __GNU_LIBRARY__ && __GNU_LIBRARY__ > 1
 # include <gnu-versions.h>
 # if _GNU_GLOB_INTERFACE_VERSION == GLOB_INTERFACE_VERSION
-#  gnu glob
+   gnu glob
 # endif
 #endif
  ], [AC_MSG_RESULT(yes)
@@ -354,7 +355,7 @@ esac
 # We only generate the build.sh if we have a build.sh.in; we won't have
 # one before we've created a distribution.
 
-AC_CONFIG_FILES(Makefile glob/Makefile po/Makefile.in config/Makefile)
+AC_CONFIG_FILES(Makefile glob/Makefile po/Makefile.in config/Makefile doc/Makefile)
 
 if test -f $srcdir/build.sh.in; then
   AC_CONFIG_FILES(build.sh)

@@ -88,3 +88,105 @@ TARFILE	:= $(distdir).tar.gz
 alpha: $(ALPHA) $(TARFILE)
 	@rm -f $(ALPHA)/$(TARFILE)
 	cp -p $(TARFILE) $(ALPHA)
+
+
+# ----------------------------------------------------------------------
+#
+# The sections below were stolen from the Makefile.maint used by fileutils,
+# sh-utils, textutils, CPPI, Bison, and Autoconf.
+
+
+## ---------------- ##
+## Updating files.  ##
+## ---------------- ##
+
+WGET = wget --passive-ftp --non-verbose
+ftp-gnu = ftp://ftp.gnu.org/gnu
+
+move_if_change =  if test -r $(target) && cmp -s $(target).t $(target); then \
+		    echo $(target) is unchanged; rm -f $(target).t; \
+		  else \
+		    mv $(target).t $(target); \
+		  fi
+
+# ------------------- #
+# Updating PO files.  #
+# ------------------- #
+
+po_repo = http://www.iro.umontreal.ca/contrib/po/maint/$(PACKAGE)
+.PHONY: do-po-update po-update
+do-po-update:
+	tmppo=/tmp/$(PACKAGE)-$(VERSION)-po &&\
+	rm -rf $$tmppo && \
+	mkdir $$tmppo && \
+	(cd $$tmppo && $(WGET) -r -l1 -nd --no-parent -A '*.po' $(po_repo)) &&\
+	cp $$tmppo/*.po po
+	cd po && $(MAKE) update-po
+	$(MAKE) po-check
+
+po-update:
+	if test -d "po"; then \
+	  $(MAKE) do-po-update; \
+	fi
+
+# -------------------------- #
+# Updating GNU build tools.  #
+# -------------------------- #
+
+# The following pseudo table associates a local directory and a URL
+# with each of the files that belongs to some other package and is
+# regularly updated from the specified URL.
+#              $(srcdir)/src/ansi2knr.c
+
+
+wget_files ?= $(srcdir)/config/config.guess $(srcdir)/config/config.sub \
+	      $(srcdir)/doc/texinfo.tex $(srcdir)/doc/make-stds.texi \
+	      $(srcdir)/doc/fdl.texi
+
+wget-targets = $(patsubst %, get-%, $(wget_files))
+
+config.guess-url_prefix = $(ftp-gnu)/config/
+config.sub-url_prefix = $(ftp-gnu)/config/
+
+ansi2knr.c-url_prefix = ftp://ftp.cs.wisc.edu/ghost/
+
+texinfo.tex-url_prefix = $(ftp-gnu)/texinfo/
+
+standards.texi-url_prefix = $(ftp-gnu)/GNUinfo/
+make-stds.texi-url_prefix = $(ftp-gnu)/GNUinfo/
+fdl.texi-url_prefix = $(ftp-gnu)/GNUinfo/
+
+target = $(patsubst get-%,%,$@)
+url = $($(notdir $(target))-url_prefix)$(notdir $(target))
+
+.PHONY: $(wget-targets)
+$(wget-targets):
+	@echo $(WGET) $(url) -O $(target) \
+	  && $(WGET) $(url) -O $(target).t \
+	  && $(move_if_change)
+
+.PHONY: wget-update
+wget-update: $(wget-targets)
+
+
+# Updating tools via CVS.
+cvs_files ?= depcomp missing
+cvs-targets = $(patsubst %, get-%, $(cvs_files))
+
+automake_repo = :pserver:anoncvs@anoncvs.cygnus.com:/cvs/automake
+.PHONY: $(cvs-targets)
+$(cvs-targets):
+	$(CVS) -d $(automake_repo) co -p automake/lib/$(notdir $(target)) \
+	  >$(target).t \
+	    && $(move_if_change)
+
+.PHONY: cvs-update
+cvs-update: $(cvs-targets)
+
+
+# --------------------- #
+# Updating everything.  #
+# --------------------- #
+
+.PHONY: update
+update: wget-update cvs-update po-update

@@ -3,7 +3,7 @@
 AUTOMAKE_OPTIONS = 1.6 dist-bzip2
 ACLOCAL_AMFLAGS	=  -I config
 
-SUBDIRS =	glob config po
+SUBDIRS =	glob config po doc
 
 bin_PROGRAMS =	make
 
@@ -23,10 +23,9 @@ EXTRA_make_SOURCES = remote-stub.c remote-cstms.c
 noinst_HEADERS = commands.h dep.h filedef.h job.h make.h rule.h variable.h \
 		debug.h getopt.h gettext.h
 
-make_LDADD =	@LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@
+make_LDADD =	@LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@ @LIBINTL@
 
 man_MANS =	make.1
-info_TEXINFOS =	make.texinfo
 
 DEFS =		-DLOCALEDIR=\"$(localedir)\" -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\" @DEFS@
 
@@ -40,7 +39,7 @@ AM_CPPFLAGS =	$(GLOBINC)
 
 EXTRA_DIST =	README build.sh.in $(man_MANS)\
 		README.customs\
-		make-stds.texi SCOPTIONS SMakefile\
+		SCOPTIONS SMakefile\
 		README.Amiga Makefile.ami config.ami make.lnk amiga.c amiga.h\
 		README.DOS Makefile.DOS configure.bat dosbuild.bat configh.dos\
 		README.W32 NMakefile config.h.W32 build_w32.bat subproc.bat\
@@ -49,6 +48,13 @@ EXTRA_DIST =	README build.sh.in $(man_MANS)\
 
 MAKE_HOST =	@MAKE_HOST@
 
+
+# Forward targets
+
+html pdf:
+	cd doc && $(MAKE) $(AM_MAKEFLAGS) $@
+
+.PHONY: html pdf
 
 # --------------- Internationalization Section
 

@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  21 April 2002
+  06 July 2002
 
 Copyright (C) 2002  Free Software Foundation, Inc.
 See the end for copying conditions.
@@ -13,6 +13,22 @@ See the README file and the GNU make manual for details on sending bug
 reports.
 
 Version <next>
+
+* A new function is defined: $(quote ...).  The argument to this
+  function is the _name_ of a variable.  The result of the function is
+  the value of the variable, without having been expanded.
+
+* A new function is defined: $(eval ...).  The arguments to this
+  function should expand to makefile commands, which will then be
+  evaluated as if they had appeared in the makefile.  In combination
+  with define/endef multiline variable definitions this is an extremely
+  powerful capability.  The $(quote ...) function is also useful here.
+
+* A new built-in variable is defined, $(MAKEFILE_LIST).  It contains a
+  list of each makefile GNU make has read, or started to read, in the
+  order in which they were encountered.  So, the last filename in the
+  list when a makefile is just being read (before any includes) is the
+  name of the current makefile.
 
 * The arguments to $(call ...) functions were being stored in $1, $2,
   etc. as recursive variables, even though they are fully expanded

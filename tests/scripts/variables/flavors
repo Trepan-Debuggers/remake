@@ -37,6 +37,16 @@ define
 endef
 endif
 
+define outer
+ define inner
+  A = B
+ endef
+endef
+
+$(eval $(outer))
+
+outer: ; @echo $(inner)
+
 EOF
 
 # END of Contents of MAKEFILE
@@ -62,6 +72,13 @@ $answer = "later foo bar\n";
 
 &run_make_with_options($makefile, "BOGUS=true", &get_logfile, 512);
 $answer = "$makefile:23: *** empty variable name.  Stop.\n";
+&compare_output($answer, &get_logfile(1));
+
+# TEST #4
+# -------
+
+&run_make_with_options($makefile, "outer", &get_logfile);
+$answer = "A = B\n";
 &compare_output($answer, &get_logfile(1));
 
 

@@ -1,3 +1,9 @@
+2002-07-07  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/functions/eval: Test new function.
+	* scripts/functions/value: Test new function.
+	* scripts/variables/MAKEFILE_LIST: Test new variable.
+
 2002-04-28  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/functions/call: New test: transitive closure
