@@ -20,6 +20,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  #pragma alloca
 #endif
 
+#ifdef	CRAY
+/* This must happen before #include <signal.h> so
+   that the declaration therein is changed.  */
+#define	signal	bsdsignal
+#endif
+
 #define _GNU_SOURCE
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -54,10 +60,6 @@ extern int errno;
 
 #ifndef	RETSIGTYPE
 #define	RETSIGTYPE	void
-#endif
-
-#ifdef	CRAY
-#define	signal	bsdsignal
 #endif
 
 #ifndef	sigmask
