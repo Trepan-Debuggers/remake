@@ -63,6 +63,11 @@ int batch_mode_shell = 0;
 char default_shell[] = "";
 int batch_mode_shell = 0;
 
+#elif defined (__riscos__)
+
+char default_shell[] = "";
+int batch_mode_shell = 0;
+
 #else
 
 char default_shell[] = "/bin/sh";
@@ -1725,7 +1730,7 @@ job_next_command (struct child *child)
 static int
 load_too_high (void)
 {
-#if defined(__MSDOS__) || defined(VMS) || defined(_AMIGA)
+#if defined(__MSDOS__) || defined(VMS) || defined(_AMIGA) || defined(__riscos__)
   return 1;
 #else
   static double last_sec;
@@ -1953,7 +1958,9 @@ static void tryToSetupYAst(void) {
 	}
 	status= sys$qiow (0, chan, IO$_SETMODE|IO$M_CTRLYAST,&iosb,0,0,
 		astHandler,0,0,0,0,0);
-	if (status==SS$_ILLIOFUNC) {
+	if (status==SS$_NORMAL)
+		status= iosb.status;
+        if (status==SS$_ILLIOFUNC || status==SS$_NOPRIV) {
 		sys$dassgn(chan);
 #ifdef	CTRLY_ENABLED_ANYWAY
 		fprintf (stderr,
@@ -1962,9 +1969,8 @@ static void tryToSetupYAst(void) {
 		return;
 #endif
 	}
-	if (status==SS$_NORMAL)
-		status= iosb.status;
-	if (!(status&SS$_NORMAL)) {
+	else if (!(status&SS$_NORMAL)) {
+		sys$dassgn(chan);
 		lib$signal(status);
 		return;
 	}
@@ -2773,6 +2779,9 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
                  0 };
   char*  sh_chars;
   char** sh_cmds;
+#elif defined(__riscos__)
+  static char sh_chars[] = "";
+  static char *sh_cmds[] = { 0 };
 #else  /* must be UNIX-ish */
   static char sh_chars[] = "#;\"*?[]&|<>(){}$`^~!";
   static char *sh_cmds[] = { ".", ":", "break", "case", "cd", "continue",
@@ -3295,7 +3304,22 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
            We use line here instead of new_line because we run the shell
            manually.  */
         size_t line_len = strlen (line);
+        char *p = new_line;
+        char *q = new_line;
         memcpy (new_line, line, line_len + 1);
+        /* replace all backslash-newline combination and also following tabs */
+        while (*q != '\0')
+          {
+            if (q[0] == '\\' && q[1] == '\n')
+              {
+                q += 2; /* remove '\\' and '\n' */
+                if (q[0] == '\t')
+                  q++; /* remove 1st tab in the next line */
+              }
+            else
+              *p++ = *q++;
+          }
+        *p = '\0';
 
 # ifndef NO_CMD_DEFAULT
         if (strnicmp (new_line, "echo", 4) == 0
@@ -3338,7 +3362,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
           new_argv[1] = new_argv[0] + sh_len + 1;
           memcpy (new_argv[1], "/c", 3);
           new_argv[2] = new_argv[1] + 3;
-          memcpy (new_argv[2], new_line, line_len);
+          memcpy (new_argv[2], new_line, line_len + 1);
           new_argv[3] = NULL;
         }
       }

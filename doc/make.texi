@@ -7,13 +7,13 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.18 2004/02/23 06:25:54 psmith Exp $
+@set RCSID $Id: make.texi,v 1.19 2004/05/16 19:16:55 psmith Exp $
 @set EDITION 0.61
-@set VERSION 3.81
-@set UPDATED 02 May 2003
-@set UPDATE-MONTH May 2003
-@comment The ISBN number might need to change on next publication.
-@set ISBN 1-882114-81-7 @c From Brian Youmans <3diff@gnu.org>, 25 Apr 2000
+@set VERSION 3.80
+@set UPDATED 23 Feb 2003
+@set UPDATE-MONTH Feb 2003
+@c ISBN provided by Lisa M. Opus Goldstein <opus@gnu.org>, 5 May 2004
+@set ISBN 1-882114-83-5
 
 @c finalout
 
@@ -6637,7 +6637,8 @@ files := $(shell echo *.c)
 @noindent
 sets @code{files} to the expansion of @samp{*.c}.  Unless @code{make} is
 using a very strange shell, this has the same result as
-@w{@samp{$(wildcard *.c)}}.@refill
+@w{@samp{$(wildcard *.c)}} (as long as at least one @samp{.c} file
+exists).@refill
 
 @node Make Control Functions,  , Shell Function, Functions
 @section Functions That Control Make
@@ -7519,8 +7520,8 @@ retained for compatibility.
 * Implicit Variables::          How to change what predefined rules do.
 * Chained Rules::               How to use a chain of implicit rules.
 * Pattern Rules::               How to define new implicit rules.
-* Last Resort::                 How to defining commands for rules
-                                  which cannot find any.
+* Last Resort::                 How to define commands for rules which
+                                cannot find any.
 * Suffix Rules::                The old-fashioned style of implicit rule.
 * Implicit Rule Search::        The precise algorithm for applying
                                   implicit rules.
@@ -9445,6 +9446,7 @@ Various new built-in implicit rules.
 @item
 The built-in variable @samp{MAKE_VERSION} gives the version number of
 @code{make}.
+@vindex MAKE_VERSION
 @end itemize
 
 @node Missing, Makefile Conventions, Features, Top
@@ -10220,9 +10222,11 @@ AUX =   README COPYING ChangeLog Makefile.in  \
         level-0 level-1 backup-specs testpad.c
 @end group
 
+.PHONY: all
 all:    tar rmt tar.info
 
 @group
+.PHONY: tar
 tar:    $(OBJS)
         $(CC) $(LDFLAGS) -o $@@ $(OBJS) $(LIBS)
 @end group
@@ -10238,6 +10242,7 @@ tar.info: tar.texinfo
 @end group
 
 @group
+.PHONY: install
 install: all
         $(INSTALL) tar $(bindir)/$(binprefix)tar
         -test ! -f rmt || $(INSTALL) rmt /etc/rmt
@@ -10266,21 +10271,25 @@ TAGS:   $(SRCS)
 @end group
 
 @group
+.PHONY: clean
 clean:
         rm -f *.o tar rmt testpad testpad.h core
 @end group
 
 @group
+.PHONY: distclean
 distclean: clean
         rm -f TAGS Makefile config.status
 @end group
 
 @group
+.PHONY: realclean
 realclean: distclean
         rm -f tar.info*
 @end group
 
 @group
+.PHONY: shar
 shar: $(SRCS) $(AUX)
         shar $(SRCS) $(AUX) | compress \
           > tar-`sed -e '/version_string/!d' \
@@ -10290,6 +10299,7 @@ shar: $(SRCS) $(AUX)
 @end group
 
 @group
+.PHONY: dist
 dist: $(SRCS) $(AUX)
         echo tar-`sed \
              -e '/version_string/!d' \

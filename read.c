@@ -367,16 +367,14 @@ eval_makefile (char *filename, int flags)
   deps->name = 0;
   deps->file = lookup_file (filename);
   if (deps->file == 0)
-    {
-      deps->file = enter_file (xstrdup (filename));
-      if (flags & RM_DONTCARE)
-	deps->file->dontcare = 1;
-    }
+    deps->file = enter_file (xstrdup (filename));
   if (filename != ebuf.floc.filenm)
     free (filename);
   filename = deps->file->name;
   deps->changed = flags;
   deps->ignore_mtime = 0;
+  if (flags & RM_DONTCARE)
+    deps->file->dontcare = 1;
 
   /* If the makefile can't be found at all, give up entirely.  */
 

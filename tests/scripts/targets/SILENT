@@ -22,7 +22,7 @@ open(MAKEFILE,"> $makefile");
 
 print MAKEFILE ".SILENT : clean\n";
 print MAKEFILE "clean: \n";
-print MAKEFILE "\t$delete_command EXAMPLE_FILE\n"; 
+print MAKEFILE "\t$delete_command EXAMPLE_FILE\n";
 
 # END of Contents of MAKEFILE
 
@@ -32,13 +32,11 @@ close(MAKEFILE);
 
 $answer = "";
 &run_make_with_options($makefile,"clean",&get_logfile,0);
-
-&compare_output($answer,&get_logfile(1)); 
-if (-f $example)
-{
-   $test_passed = 0;
+if (-f $example) {
+  $test_passed = 0;
 }
- 
+&compare_output($answer,&get_logfile(1));
+
 1;
 
 

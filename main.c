@@ -259,6 +259,11 @@ int warn_undefined_variables_flag;
    they appear out of date or not.  */
 
 int always_make_flag = 0;
+
+/* If nonzero, we're in the "try to rebuild makefiles" phase.  */
+
+int rebuilding_makefiles = 0;
+
 
 /* The usage output.  We write it this way to make life easier for the
    translators, especially those trying to translate to right-to-left
@@ -839,6 +844,7 @@ main (int argc, char **argv, char **envp)
   static char *stdin_nm = 0;
   struct file *f;
   int i;
+  int makefile_status = MAKE_SUCCESS;
   char **p;
   struct dep *read_makefiles;
   PATH_VAR (current_directory);
@@ -1666,6 +1672,7 @@ main (int argc, char **argv, char **envp)
       char **nargv = argv;
       int nargc = argc;
       int orig_db_level = db_level;
+      int status;
 
       if (! ISDB (DB_MAKEFILES))
         db_level = DB_NONE;
@@ -1726,7 +1733,11 @@ main (int argc, char **argv, char **envp)
       /* Set up `MAKEFLAGS' specially while remaking makefiles.  */
       define_makeflags (1, 1);
 
-      switch (update_goal_chain (read_makefiles, 1))
+      rebuilding_makefiles = 1;
+      status = update_goal_chain (read_makefiles);
+      rebuilding_makefiles = 0;
+
+      switch (status)
 	{
 	case 1:
           /* The only way this can happen is if the user specified -q and asked
@@ -1775,6 +1786,7 @@ main (int argc, char **argv, char **envp)
                         mtime = file_mtime_no_search (d->file);
                         any_remade |= (mtime != NONEXISTENT_MTIME
                                        && mtime != makefile_mtimes[i]);
+                        makefile_status = MAKE_FAILURE;
                       }
                   }
                 else
@@ -1985,13 +1997,13 @@ main (int argc, char **argv, char **envp)
 
     DB (DB_BASIC, (_("Updating goal targets....\n")));
 
-    switch (update_goal_chain (goals, 0))
+    switch (update_goal_chain (goals))
     {
       case -1:
         /* Nothing happened.  */
       case 0:
         /* Updated successfully.  */
-        status = MAKE_SUCCESS;
+        status = makefile_status;
         break;
       case 1:
         /* We are under -q and would run some commands.  */

@@ -97,4 +97,18 @@ $make_name: Target `all' not remade because of errors.\n";
 
 &compare_output($answer, &get_logfile(1));
 
+# TEST -- make sure we keep the error code if we can't create an included
+# makefile.
+
+run_make_test('all: ; @echo hi
+include ifile
+ifile: no-such-file; @false
+',
+              '-k',
+              "#MAKEFILE#:2: ifile: No such file or directory
+#MAKE#: *** No rule to make target `no-such-file', needed by `ifile'.
+#MAKE#: Failed to remake makefile `ifile'.
+hi\n",
+              512);
+
 1;

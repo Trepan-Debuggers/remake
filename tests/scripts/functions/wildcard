@@ -85,12 +85,11 @@ else
 
 &run_make_with_options($makefile,"clean",&get_logfile);
 
-&compare_output($answer,&get_logfile(1));
-
-if ((-f "example.1")||(-f "example.two")||(-f "example.3")||(-f "example.for"))
-{
+if ((-f "example.1")||(-f "example.two")||(-f "example.3")||(-f "example.for")) {
    $test_passed = 0;
 }
+
+&compare_output($answer,&get_logfile(1));
 
 
 1;

@@ -308,7 +308,11 @@ static char *default_variables[] =
 #ifdef VMS
 #ifdef __ALPHA
     "ARCH", "ALPHA",
-#else
+#endif
+#ifdef __ia64
+    "ARCH", "IA64",
+#endif
+#ifdef __VAX
     "ARCH", "VAX",
 #endif
     "AR", "library/obj",

@@ -12,7 +12,7 @@
 # this routine controls the whole mess; each test suite sets up a few
 # variables and then calls &toplevel, which does all the real work.
 
-# $Id: test_driver.pl,v 1.11 2004/03/22 15:11:49 psmith Exp $
+# $Id: test_driver.pl,v 1.12 2004/05/16 19:16:55 psmith Exp $
 
 
 # The number of test categories we've run
@@ -27,6 +27,10 @@ $total_tests_passed = 0;
 $tests_run = 0;
 # The number of tests in this category that have passed
 $tests_passed = 0;
+
+
+# Yeesh.  This whole test environment is such a hack!
+$test_passed = 1;
 
 sub toplevel
 {
@@ -376,7 +380,7 @@ sub run_each_test
   foreach $testname (sort @TESTS)
   {
     ++$categories_run;
-    $passed = 1;       # reset by test on failure
+    $suite_passed = 1;       # reset by test on failure
     $num_of_logfiles = 0;
     $num_of_tmpfiles = 0;
     $description = "";
@@ -423,7 +427,7 @@ sub run_each_test
     # How did it go?
     if (!defined($code))
     {
-      $passed = 0;
+      $suite_passed = 0;
       if (length ($@))
       {
         warn "\n*** Test died ($testname): $@\n";
@@ -434,14 +438,14 @@ sub run_each_test
       }
     }
     elsif ($code == -1) {
-      $passed = 0;
+      $suite_passed = 0;
     }
     elsif ($code != 1 && $code != -1) {
-      $passed = 0;
+      $suite_passed = 0;
       warn "\n*** Test returned $code\n";
     }
 
-    if ($passed) {
+    if ($suite_passed) {
       ++$categories_passed;
       $status = "ok     ($tests_passed passed)";
       for ($i = $num_of_tmpfiles; $i; $i--)
@@ -608,10 +612,7 @@ sub compare_output
   local($answer,$logfile) = @_;
   local($slurp);
 
-  if ($debug)
-  {
-    print "Comparing Output ........ ";
-  }
+  print "Comparing Output ........ " if $debug;
 
   $slurp = &read_file_into_string ($logfile);
 
@@ -622,34 +623,28 @@ sub compare_output
 
   ++$tests_run;
 
-  if ($slurp eq $answer)
+  if ($slurp eq $answer && $test_passed)
   {
-    if ($debug)
-    {
-      print "ok\n";
-    }
+    print "ok\n" if $debug;
     ++$tests_passed;
     return 1;
   }
-  else
-  {
-    if ($debug)
-    {
-      print "DIFFERENT OUTPUT\n";
-    }
-    $passed = 0;
+
+  if ($slurp ne $answer) {
+    print "DIFFERENT OUTPUT\n" if $debug;
+
     &create_file (&get_basefile, $answer);
 
-    if ($debug)
-    {
-      print "\nCreating Difference File ...\n";
-    }
+    print "\nCreating Difference File ...\n" if $debug;
+
     # Create the difference file
     local($command) = "diff -c " . &get_basefile . " " . $logfile;
     &run_command_with_output(&get_difffile,$command);
 
-    return 0;
   }
+
+  $suite_passed = 0;
+  return 0;
 }
 
 sub read_file_into_string
