@@ -164,7 +164,7 @@ convert_suffix_rule (target, source, cmds)
      char *target, *source;
      struct commands *cmds;
 {
-  char *targname, *depname;
+  char *targname, *targpercent, *depname;
   char **names, **percents;
   struct dep *deps;
   unsigned int len;
@@ -172,7 +172,10 @@ convert_suffix_rule (target, source, cmds)
   if (target == 0)
     /* Special case: TARGET being nil means we are defining a
        `.X.a' suffix rule; the target pattern is always `(%.o)'.  */
-    targname = savestring ("(%.o)", 5);
+    {
+      targname = savestring ("(%.o)", 5);
+      targpercent = targname + 1;
+    }
   else
     {
       /* Construct the target name.  */
@@ -180,11 +183,13 @@ convert_suffix_rule (target, source, cmds)
       targname = xmalloc (1 + len + 1);
       targname[0] = '%';
       bcopy (target, targname + 1, len + 1);
+      targpercent = targname;
     }
 
   names = (char **) xmalloc (2 * sizeof (char *));
   percents = (char **) alloca (2 * sizeof (char *));
-  names[0] = percents[0] = targname;
+  names[0] = targname;
+  percents[0] = targpercent;
   names[1] = percents[1] = 0;
 
   if (source == 0)
