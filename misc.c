@@ -525,6 +525,27 @@ copy_dep_chain (struct dep *d)
   return firstnew;
 }
 
+/* Free a chain of `struct dep'. Each dep->name is freed
+   as well.  */
+
+void
+free_dep_chain (struct dep *d)
+{
+  register struct dep *tmp;
+
+  while (d != 0)
+  {
+    if (d->name != 0)
+      free (d->name);
+
+    tmp = d;
+
+    d = d->next;
+
+    free (tmp);
+  }
+
+}
 #ifdef	iAPX286
 /* The losing compiler on this machine can't handle this macro.  */
 

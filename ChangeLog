@@ -1,3 +1,49 @@
+Sun Feb 27 22:03:36 2005  Boris Kolpackov  <boris@kolpackov.net>
+
+	Implementation of the second expansion in explicit rules,
+	static pattern rules and implicit rules.
+
+	* read.c (eval): Refrain from chopping up rule's dependencies.
+	Store them in a struct dep as a single dependency line. Remove
+	the code that implements SySV-style automatic variables.
+
+	* read.c (record_files): Adjust the code that handles static
+	pattern rules to expand all percents instead of only the first
+	one. Reverse the order in which dependencies are stored so that
+	when the second expansion reverses them again they appear in
+	the makefile order (with some exceptions, see comments in
+	the code). Remove the code that implements SySV-style automatic
+	variables.
+
+	* file.c (snap_deps): Implement the second expansion and chopping
+	of dependency lines for explicit rules.
+
+	* implicit.c (struct idep): Define an auxiliary data type to hold
+	implicit rule's dependencies after stem substitution and
+	expansion.
+
+	* implicit.c (free_idep_chain): Implement.
+
+	* implicit.c (get_next_word): Implement helper function for
+	parsing implicit rule's dependency lines into words taking
+	into account variable expansion requests. Used in the stem
+	splitting code.
+
+	* implicit.c (pattern_search): Implement the second expansion
+	for implicit rules. Also fixes bug #12091.
+
+	* commands.h (set_file_variables): Declare.
+	* commands.c (set_file_variables): Remove static specifier.
+
+	* dep.h (free_dep_chain): Declare.
+	* misc.c (free_dep_chain): Implement.
+
+	* variable.h (variable_expand_for_file): Declare.
+	* expand.c (variable_expand_for_file): Remove static specifier.
+
+	* make.h (strip_whitespace): Declare.
+	* function.c (strip_whitespace): Remove static specifier.
+
 2005-02-24  Jonathan Grant  <jg@jguk.org>
 
 	* configure.in: Add MinGW configuration options, and extra w32 code

@@ -440,7 +440,7 @@ expand_argument (const char *str, const char *end)
 /* Expand LINE for FILE.  Error messages refer to the file and line where
    FILE's commands were found.  Expansion uses FILE's variable set list.  */
 
-static char *
+char *
 variable_expand_for_file (char *line, struct file *file)
 {
   char *result;

@@ -112,6 +112,7 @@ extern struct variable_set_list *current_variable_set_list;
 /* expand.c */
 extern char *variable_buffer_output PARAMS ((char *ptr, char *string, unsigned int length));
 extern char *variable_expand PARAMS ((char *line));
+extern char *variable_expand_for_file PARAMS ((char *line, struct file *file));
 extern char *allocated_variable_expand_for_file PARAMS ((char *line, struct file *file));
 #define	allocated_variable_expand(line) \
   allocated_variable_expand_for_file (line, (struct file *) 0)

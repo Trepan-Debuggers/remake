@@ -706,7 +706,7 @@ func_words (char *o, char **argv, const char *funcname UNUSED)
  * If the string is empty or contains nothing but whitespace, endpp will be
  * begpp-1.
  */
-static char *
+char *
 strip_whitespace (const char **begpp, const char **endpp)
 {
   while (*begpp <= *endpp && isspace ((unsigned char)**begpp))
