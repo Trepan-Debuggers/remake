@@ -104,7 +104,7 @@ extern void *hash_deleted_item;
 } while (0)
 
 #define STRING_COMPARE(X, Y, RESULT) do { \
-  _RESULT_ = strcmp ((X), (Y)); \
+  RESULT = strcmp ((X), (Y)); \
 } while (0)
 #define return_STRING_COMPARE(X, Y) do { \
   return strcmp ((X), (Y)); \
@@ -140,7 +140,7 @@ extern void *hash_deleted_item;
 } while (0)
 
 #define STRING_N_COMPARE(X, Y, N, RESULT) do { \
-  _RESULT_ = strncmp ((X), (Y), (N)); \
+  RESULT = strncmp ((X), (Y), (N)); \
 } while (0)
 #define return_STRING_N_COMPARE(X, Y, N) do { \
   return strncmp ((X), (Y), (N)); \
@@ -173,7 +173,7 @@ extern void *hash_deleted_item;
 } while (0)
 
 #define ISTRING_COMPARE(X, Y, RESULT) do { \
-  _RESULT_ = strcmpi ((X), (Y)); \
+  RESULT = strcmpi ((X), (Y)); \
 } while (0)
 #define return_ISTRING_COMPARE(X, Y) do { \
   return strcmpi ((X), (Y)); \

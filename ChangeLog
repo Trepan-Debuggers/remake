@@ -1,3 +1,13 @@
+2002-09-11  Paul D. Smith  <psmith@gnu.org>
+
+	* hash.h (STRING_COMPARE, ISTRING_COMPARE, STRING_N_COMPARE): Fix
+	macro to use RESULT instead of the incorrect _RESULT_.
+
+	* make.h (HAVE_BROKEN_RESTART): Add prototypes for atomic_stat()
+	and atomic_readdir().  We need to #include dirent.h to get this to
+	work.
+	* misc.c (atomic_readdir): Fix typos.
+
 2002-09-10  Paul D. Smith  <psmith@gnu.org>
 
 	* read.c (eval): Expand variable lists given to export and

@@ -1,2 +1,4 @@
+*.m4
+config.*
+
 Makefile Makefile.in
-.deps
