@@ -3,10 +3,14 @@
 @synindex vr fn
 
 @ignore
-$Header: /sources/make/make/Attic/make.texinfo,v 1.6 1988/04/24 00:57:23 roland Beta $
+$Header: /sources/make/make/Attic/make.texinfo,v 1.7 1988/04/30 15:24:24 mcgrath Beta $
 
 $Log: make.texinfo,v $
-Revision 1.6  1988/04/24 00:57:23  roland
+Revision 1.7  1988/04/30 15:24:24  mcgrath
+* Removed `roland@rtsg.lbl.gov' address.
+* Doubled up @'s in addresses to fix Makeinfo errors.
+
+Revision 1.6  88/04/24  00:57:23  roland
 Removed $($@) automatic macro.
 
 Revision 1.5  88/04/23  22:01:48  roland
@@ -115,7 +119,7 @@ please report it to Roland McGrath; he will probably do something about
 it.  Please include the version of @code{make} you are using (the command
 @code{make -v -f /dev/null} will tell you this) and a small makefile that
 reproduces the bug.  Send electronic mail to Internet address
-@samp{roland@rtsg.lbl.gov} or @samp{roland@wheaties.ai.mit.edu}.
+@samp{roland@@wheaties.ai.mit.edu}@.
 Questions and suggestions are also welcome.@refill
 
 Our examples show C programs, since they are most common, but you can use
