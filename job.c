@@ -128,8 +128,8 @@ extern char *sys_siglist[];
 #endif
 
 RETSIGTYPE child_handler ();
-static void free_child (), start_job ();
-static int load_too_high ();
+static void free_child (), start_job_command ();
+static int load_too_high (), job_next_command ();
 
 /* Chain of all live (or recently deceased) children.  */
 
@@ -335,7 +335,8 @@ reap_children (block, err)
 		}
 
 	      /* If there are more commands to run, try to start them.  */
-	      start_job (c);
+	      if (job_next_command (c))
+		start_job_command (c);
 
 	      switch (c->file->command_state)
 		{
@@ -345,16 +346,14 @@ reap_children (block, err)
 
 		case cs_finished:
 		  if (c->file->update_status != 0)
-		    {
-		      /* We failed to start the commands.  */
-		      delete_child_targets (c);
-		    }
+		    /* We failed to start the commands.  */
+		    delete_child_targets (c);
 		  break;
 
 		default:
 		  error ("internal error: `%s' has bogus command_state \
 %d in reap_children",
-			 c->file->name, c->file->command_state);
+			 c->file->name, (int) c->file->command_state);
 		  abort ();
 		  break;
 		}
@@ -437,7 +436,7 @@ extern int fatal_signal_mask;
    CHILD is updated to reflect the commands and ID of the child process.  */
 
 static void
-start_job (child)
+start_job_command (child)
      register struct child *child;
 {
   static int bad_stdin = -1;
@@ -445,29 +444,7 @@ start_job (child)
   char noprint = 0, recursive;
   char **argv;
 
-  if (child->command_ptr == 0 || *child->command_ptr == '\0')
-    {
-      /* There are no more lines in the expansion of this line.  */
-      if (child->command_line == child->file->cmds->ncommand_lines)
-	{
-	  /* There are no more lines to be expanded.  */
-	  child->command_ptr = 0;
-	  child->file->command_state = cs_finished;
-	  child->file->update_status = 0;
-	  return;
-	}
-      else
-	{
-	  /* Get the next line to run, and set RECURSIVE
-	     if the unexpanded line contains $(MAKE).  */
-	  child->command_ptr = child->command_lines[child->command_line];
-	  recursive = child->file->cmds->lines_recurse[child->command_line];
-	  ++child->command_line;
-	}
-    }
-  else
-    /* Still executing the last line we started.  */
-    recursive = child->file->cmds->lines_recurse[child->command_line - 1];
+  recursive = child->file->cmds->lines_recurse[child->command_line - 1];
 
   p = child->command_ptr;
   child->noerror = 0;
@@ -509,7 +486,8 @@ start_job (child)
   if (argv == 0)
     {
       /* This line has no commands.  Go to the next.  */
-      start_job (child);
+      if (job_next_command (child))
+	start_job_command (child);
       return;
     }
 
@@ -524,7 +502,8 @@ start_job (child)
     {
       free (argv[0]);
       free ((char *) argv);
-      start_job (child);
+      if (job_next_command (child))
+	start_job_command (child);
       return;
     }
 
@@ -563,7 +542,8 @@ start_job (child)
   if (child->environment == 0)
     child->environment = target_environment (child->file);
 
-  if (start_remote_job_p ())
+  /* start_waiting_job has set CHILD->remote if we can start a remote job.  */
+  if (child->remote)
     {
       int is_remote, id, used_stdin;
       if (start_remote_job (argv, child->environment,
@@ -583,18 +563,6 @@ start_job (child)
     }
   else
     {
-      /* Wait for the load to be low enough if this
-	 is the first command in the sequence.  */
-      if (child->command_line - 1 == 0
-	  && job_slots_used > 0 && load_too_high ())
-	{
-	  /* Put this child on the chain of children waiting
-	     for the load average to go down.  */
-	  child->next = waiting_jobs;
-	  waiting_jobs = child;
-	  return;
-	}
-
       /* Fork the child process.  */
 
 #ifdef	 POSIX
@@ -640,19 +608,32 @@ start_job (child)
   child->file->command_state = cs_finished;
 }
 
-
 static void
 start_waiting_job (c)
      struct child *c;
 {
-  start_job (c);
+  /* If we can start a job remotely, we always want to, and don't care about
+     the local load average.  We record that the job should be started
+     remotely in C->remote for start_job_command to test.  */
+
+  c->remote = start_remote_job_p ();
+
+  /* If this job is to be started locally, and we are already running
+     some jobs, make this one wait if the load average is too high.  */
+  if (!c->remote && job_slots_used > 0 && load_too_high ())
+    {
+      /* Put this child on the chain of children waiting
+	 for the load average to go down.  */
+      c->next = waiting_jobs;
+      waiting_jobs = c;
+      return;
+    }
+
+  /* Start the first command; reap_children will run later command lines.  */
+  start_job_command (c);
+
   switch (c->file->command_state)
     {
-    case cs_not_started:
-      /* The child is waiting to run.
-	 It has already been put on the `waiting_jobs' chain.  */
-      break;
-
     case cs_running:
       c->next = children;
       if (debug_flag)
@@ -716,15 +697,48 @@ new_job (file)
   c->command_ptr = 0;
   c->environment = 0;
 
-  start_waiting_job (c);
+  /* Fetch the first command line to be run.  */
+  if (! job_next_command (c))
+    /* There were no commands!  */
+    free_child (c);
+  else
+    {
+      /* The job is now primed.  Start it running.  */
+      start_waiting_job (c);
 
-  if (job_slots == 1)
-    /* Since there is only one job slot, make things run linearly.
-       Wait for the child to finish, setting the state to `cs_finished'.  */
-    while (file->command_state == cs_running)
-      reap_children (1, 0);
+      if (job_slots == 1)
+	/* Since there is only one job slot, make things run linearly.
+	   Wait for the child to die, setting the state to `cs_finished'.  */
+	while (file->command_state == cs_running)
+	  reap_children (1, 0);
+    }
 }
 
+/* Move CHILD's pointers to the next command for it to execute.
+   Returns nonzero if there is another command.  */
+
+static int
+job_next_command (child)
+     struct child *child;
+{
+  if (child->command_ptr == 0 || *child->command_ptr == '\0')
+    {
+      /* There are no more lines in the expansion of this line.  */
+      if (child->command_line == child->file->cmds->ncommand_lines)
+	{
+	  /* There are no more lines to be expanded.  */
+	  child->command_ptr = 0;
+	  child->file->command_state = cs_finished;
+	  child->file->update_status = 0;
+	  return 0;
+	}
+      else
+	/* Get the next line to run.  */
+	child->command_ptr = child->command_lines[child->command_line++];
+    }
+  return 1;
+}
+
 static int
 load_too_high ()
 {
