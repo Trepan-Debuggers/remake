@@ -22,7 +22,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "variable.h"
 
 /* This is POSIX.2, but most systems using -DPOSIX probably don't have it.  */
-#ifdef	__GNU_LIBRARY__
+#ifdef	HAVE_GLOB_H
 #include <glob.h>
 #else
 #include "glob/glob.h"
@@ -795,7 +795,7 @@ conditional_line (line, filename, lineno)
     }
 
   /* Search through the stack to see if we're already ignoring.  */
-  for (i = 0; i < conditionals->if_cmds; ++i)
+  for (i = 0; i < conditionals->if_cmds - 1; ++i)
     if (conditionals->ignoring[i])
       {
 	/* We are already ignoring, so just push a level
@@ -805,7 +805,7 @@ conditional_line (line, filename, lineno)
 	return 1;
       }
 
-  else if (cmdname[notdef ? 3 : 2] == 'd')
+  if (cmdname[notdef ? 3 : 2] == 'd')
     {
       /* "Ifdef" or "ifndef".  */
       struct variable *v;
