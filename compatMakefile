@@ -85,6 +85,11 @@ mandir = $(prefix)/man/man$(manext)
 # Number to put on the man page filename.
 manext = 1
 
+# Whether or not make needs to be installed setgid.
+# The value should be either `true' or `false'.
+# On many systems, the getloadavg function (used to implement the `-l'
+# switch) will not work unless make is installed setgid kmem.
+install_setgid = @NEED_SETGID@
 # Install make setgid to this group so it can read /dev/kmem.
 group = kmem
 
@@ -172,8 +177,9 @@ install: $(bindir)/$(instname) $(mandir)/$(instname).$(manext)
 $(bindir)/$(instname): make
 	$(INSTALL_PROGRAM) make $@.new
 # These are necessary for load-average checking to work on most Unix machines.
-	-chgrp $(group) $@.new
-	-chmod g+s $@.new
+	if $(install_setgid); then \
+	  chgrp $(group) $@.new && chmod g+s $@.new; \
+	else true; fi
 	mv $@.new $@
 
 $(mandir)/$(instname).$(manext): make.man
