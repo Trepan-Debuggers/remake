@@ -932,15 +932,16 @@ library_search (lib)
       0
     };
 
-  char *libname = &(*lib)[2];
-  char *buf = xmalloc (sizeof (LIBDIR) + 8 + strlen (libname) + 4 + 2 + 1);
-  char **dp;
+  char *libname = &(*lib)[2];	/* Name without the `-l'.  */
 
-  sprintf (buf, "lib%s.a", libname);
+  /* Buffer to construct possible names in.  */
+  char *buf = xmalloc (sizeof (LIBDIR) + 8 + strlen (libname) + 4 + 2 + 1);
+  char *file, **dp;
 
   /* Look first for `libNAME.a' in the current directory.  */
 
-  if (name_mtime (libname) != (time_t) -1)
+  sprintf (buf, "lib%s.a", libname);
+  if (name_mtime (buf) != (time_t) -1)
     {
       *lib = buf;
       return 1;
@@ -948,11 +949,11 @@ library_search (lib)
 
   /* Now try VPATH search on that.  */
 
-  libname = buf;
-  if (vpath_search (&libname))
+  file = buf;
+  if (vpath_search (&file))
     {
       free (buf);
-      *lib = libname;
+      *lib = file;
       return 1;
     }
 
@@ -960,7 +961,7 @@ library_search (lib)
 
   for (dp = dirs; *dp != 0; ++dp)
     {
-      sprintf (buf, "%s/lib%s.a", *dp, &(*lib)[2]);
+      sprintf (buf, "%s/lib%s.a", *dp, libname);
       if (name_mtime (buf) != (time_t) -1)
 	{
 	  *lib = buf;
