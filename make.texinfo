@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.181 1999/09/01 08:04:34 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.182 1999/09/06 05:21:56 psmith Exp $
 @set EDITION 0.53
 @set VERSION 3.78
 @set UPDATED 14 April 1999
@@ -6025,13 +6025,13 @@ $(call @var{variable},@var{param},@var{param},@dots{})
 @end example
 
 When @code{make} expands this function, it assigns each @var{param} to
-temporary variables @var{$(1)}, @var{$(2)}, etc.  The variable
-@var{$(0)} will contain @var{variable}.  There is no maximum number of
+temporary variables @code{$(1)}, @code{$(2)}, etc.  The variable
+@code{$(0)} will contain @var{variable}.  There is no maximum number of
 parameter arguments.  There is no minimum, either, but it doesn't make
 sense to use @code{call} with no parameters.
 
 Then @var{variable} is expanded as a @code{make} variable in the context
-of these temporary assignments.  Thus, any reference to @var{$(1)} in
+of these temporary assignments.  Thus, any reference to @code{$(1)} in
 the value of @var{variable} will resolve to the first @var{param} in the
 invocation of @code{call}.
 
@@ -6050,7 +6050,7 @@ Some examples may make this clearer.
 This macro simply reverses its arguments:
 
 @smallexample
-reverse = $2 $1
+reverse = $(2) $(1)
 
 foo = a b
 bar = $(call reverse,$(foo))
@@ -6063,7 +6063,7 @@ This one is slightly more interesting: it defines a macro to search for
 the first instance of a program in @code{PATH}:
 
 @smallexample
-pathsearch = $(firstword $(wildcard $(addsufix /$1,$(subst :, ,$(PATH)))))
+pathsearch = $(firstword $(wildcard $(addsufix /$(1),$(subst :, ,$(PATH)))))
 
 LS := $(call pathsearch,ls)
 @end smallexample
@@ -6072,12 +6072,12 @@ LS := $(call pathsearch,ls)
 Now the variable LS contains @code{/bin/ls} or similar.
 
 The @code{call} function can be nested.  Each recursive invocation gets
-its own local values for @var{$(1)}, etc. that mask the values of
+its own local values for @code{$(1)}, etc. that mask the values of
 higher-level @code{call}.  For example, here is an implementation of a
 @dfn{map} function:
 
 @smallexample
-map = $(foreach a,$2,$(call $1,$a))
+map = $(foreach a,$(2),$(call $(1),$(a)))
 @end smallexample
 
 Now you can @var{map} a function that normally takes only one argument,
@@ -9280,8 +9280,8 @@ and concatenate the results.@*
 
 @item $(call @var{var},@var{param},@dots{})
 
-Evaluate the variable @var{var} replacing any references to @var{$(1)},
-@var{$(2)} with the first, second, etc. @var{param} values.@*
+Evaluate the variable @var{var} replacing any references to @code{$(1)},
+@code{$(2)} with the first, second, etc. @var{param} values.@*
 @xref{Call Function, ,The @code{call} Function}.
 @end table
 
@@ -9444,6 +9444,7 @@ but the rule in the makefile was prefixed with the @code{-} special
 character, so @code{make} ignored the error.
 
 @item missing separator.  Stop.
+@itemx missing separator (did you mean TAB instead of 8 spaces?).  Stop.
 This means that @code{make} could not understand much of anything about
 the command line it just read.  GNU @code{make} looks for various kinds
 of separators (@code{:}, @code{=}, TAB characters, etc.) to help it
@@ -9453,8 +9454,10 @@ find a valid one.
 One of the most common reasons for this message is that you (or perhaps
 your oh-so-helpful editor, as is the case with many MS-Windows editors)
 have attempted to indent your command scripts with spaces instead of a
-TAB character.  Remember that every line in the command script must
-begin with a TAB character.  Eight spaces do not count.  @xref{Rule Syntax}.
+TAB character.  In this case, @code{make} will use the second form of
+the error above. Remember that every line in the command script must
+begin with a TAB character.  Eight spaces do not count.  @xref{Rule
+Syntax}.
 
 @item commands commence before first target.  Stop.
 @itemx missing rule before commands.  Stop.
@@ -9501,7 +9504,7 @@ which already has been defined to have commands, this warning is issued
 and the second set of commands will overwrite the first set.
 @xref{Multiple Rules, ,Multiple Rules for One Target}.
 
-@item Circular @var{xxx} <- @var{yyy} prerequisite dropped.
+@item Circular @var{xxx} <- @var{yyy} dependency dropped.
 This means that @code{make} detected a loop in the dependency graph:
 after tracing the prerequisite @var{yyy} of target @var{xxx}, and its
 prerequisites, etc., one of them depended on @var{xxx} again.
@@ -9530,6 +9533,30 @@ there's no pattern in the target section of the rule, the second means
 there are multiple patterns in the target section, and the third means
 the target doesn't contain a pattern character (@code{%}).  @xref{Static
 Usage, ,Syntax of Static Pattern Rules}.
+
+@item warning: -jN forced in submake: disabling jobserver mode.
+This warning and the next are generated if @code{make} detects error
+conditions related to parallel processing on systems where
+sub-@code{make}s can communicate (@pxref{Options/Recursion,
+,Communicating Options to a Sub-@code{make}}).  This warning is
+generated if a recursive invocation of a @code{make} process is forced
+to have @samp{-j@var{N}} in its argument list (where @var{N} is greater
+than one).  This could happen, for example, if you set the @code{MAKE}
+environment variable to @samp{make -j2}.  In this case, the
+sub-@code{make} doesn't communicate with other @code{make} processes and
+will simply pretend it has two jobs of its own.
+
+@item warning: jobserver unavailable: using -j1.  Add `+' to parent make rule.
+In order for @code{make} processes to communicate, the parent will pass
+information to the child.  Since this could result in problems if the
+child process isn't actually a @code{make}, the parent will only do this
+if it thinks the child is a @code{make}.  The parent uses the normal
+algorithms to determine this (@pxref{MAKE Variable, ,How the @code{MAKE}
+Variable Works}).  If the makefile is constructed such that the parent
+doesn't know the child is a @code{make} process, then the child will
+receive only part of the information necessary.  In this case, the child
+will generate this warning message and proceed with its build in a
+sequential manner.
 
 @end table
 
