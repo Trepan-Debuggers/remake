@@ -2802,9 +2802,9 @@ log_working_directory (int entering)
   if (makelevel == 0)
     if (starting_directory == 0)
       if (entering)
-        printf (_("%s: Entering an unknown directory"), program);
+        printf (_("%s: Entering an unknown directory\n"), program);
       else
-        printf (_("%s: Leaving an unknown directory"), program);
+        printf (_("%s: Leaving an unknown directory\n"), program);
     else
       if (entering)
         printf (_("%s: Entering directory `%s'\n"),
@@ -2815,10 +2815,10 @@ log_working_directory (int entering)
   else
     if (starting_directory == 0)
       if (entering)
-        printf (_("%s[%u]: Entering an unknown directory"),
+        printf (_("%s[%u]: Entering an unknown directory\n"),
                 program, makelevel);
       else
-        printf (_("%s[%u]: Leaving an unknown directory"),
+        printf (_("%s[%u]: Leaving an unknown directory\n"),
                 program, makelevel);
     else
       if (entering)

@@ -1,18 +1,3 @@
-2000-06-23  Paul D. Smith  <psmith@gnu.org>
-
-	* main.c (main): Replace EXIT_SUCCESS, EXIT_FAILURE, and
-	EXIT_TROUBLE with MAKE_SUCCESS, MAKE_FAILURE, and MAKE_TROUBLE.
-	* make.h: Define these macros.
-
-	* Version 3.79.1 released.
-
-	* configure.in: Add a new option, --disable-nsec-timestamps, to
-	avoid using sub-second timestamps on systems that support it.  It
-	can lead to problems, e.g. if your makefile relies on "cp -p".
-	* README.template: Document the issue with "cp -p".
-
-	* config.guess, config.sub: Updated.
-
 2000-06-22  Paul D. Smith  <psmith@gnu.org>
 
 	* job.c (start_job_command): Increment commands_started before the

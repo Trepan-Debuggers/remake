@@ -37,6 +37,9 @@ to the point where you can run "make".
     This rebuilds all the things that need rebuilding, installing
     missing files as symbolic links.
 
+    You may get warnings here about missing files like README, etc.
+    Ignore them, they are harmless.
+
 
  2) $ ./configure
 
