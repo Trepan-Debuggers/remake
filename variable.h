@@ -35,19 +35,28 @@ enum variable_origin
    Each bucket of the hash table is a chain of these,
    chained through `next'.  */
 
+#define EXP_COUNT_BITS  15      /* This gets all the bitfields into 32 bits */
+
+#define EXP_COUNT_MAX   ((1<<EXP_COUNT_BITS)-1)
+
 struct variable
   {
     struct variable *next;	/* Link in the chain.  */
     char *name;			/* Variable name.  */
     char *value;		/* Variable value.  */
     struct floc fileinfo;       /* Where the variable was defined.  */
-    enum variable_origin
-      origin ENUM_BITFIELD (3);	/* Variable origin.  */
     unsigned int recursive:1;	/* Gets recursively re-evaluated.  */
     unsigned int expanding:1;	/* Nonzero if currently being expanded.  */
+    unsigned int exp_count:EXP_COUNT_BITS;
+                                /* If >1, allow this many self-referential
+                                   expansions */
     unsigned int per_target:1;	/* Nonzero if a target-specific variable.  */
     unsigned int append:1;	/* Nonzero if an appending target-specific
                                    variable.  */
+
+    enum variable_origin
+      origin ENUM_BITFIELD (3);	/* Variable origin.  */
+
     enum variable_export
       {
 	v_export,		/* Export this variable.  */
@@ -95,7 +104,9 @@ extern char *patsubst_expand PARAMS ((char *o, char *text, char *pattern, char *
 		char *pattern_percent, char *replace_percent));
 
 /* expand.c */
-extern char *recursively_expand PARAMS ((struct variable *v));
+extern char *recursively_expand_for_file PARAMS ((struct variable *v,
+                                                  struct file *file));
+#define recursively_expand(v)   recursively_expand_for_file (v, NULL)
 
 /* variable.c */
 extern struct variable_set_list *create_new_variable_set PARAMS ((void));
@@ -134,6 +145,15 @@ extern struct variable *define_variable_in_set
 
 #define define_variable_for_file(n,l,v,o,r,f) \
           define_variable_in_set((n),(l),(v),(o),(r),(f)->variables->set,NILF)
+
+/* Warn that NAME is an undefined variable.  */
+
+#define warn_undefined(n,l) do{\
+                              if (warn_undefined_variables_flag) \
+                                error (reading_file, \
+                                       _("warning: undefined variable `%.*s'"), \
+                                (int)(l), (n)); \
+                              }while(0)
 
 extern char **target_environment PARAMS ((struct file *file));
 

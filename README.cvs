@@ -53,7 +53,13 @@ and you can just run "autoreconf" and have it DTRT.
     Generate the proper aclocal.m4 file.
 
 
- 3) $ automake --add-missing
+ 3) $ autoheader
+
+    Generate a "config.h.in" file from the contents of configure.in,
+    etc.
+
+
+ 4) $ automake --add-missing
 
     Add (symlink) missing files into the distribution, and generate
     Makefile.in's from Makefile.am's.
@@ -67,15 +73,9 @@ and you can just run "autoreconf" and have it DTRT.
       Makefile.am:xxx: automatically discovered file `getloadavg.c' should not be explicitly mentioned
 
 
- 4) $ autoconf
+ 5) $ autoconf
 
     Generate a "configure" script from configure.in and acinclude.m4.
-
-
- 5) $ autoheader
-
-    Generate a "config.h.in" file from the contents of configure.in,
-    etc.
 
 
 At this point you have successfully brought your CVS copy of the GNU
@@ -134,9 +134,9 @@ mv config/Makefile.am~ config/Makefile.am
 mv Makefile.am~ Makefile.am
 mv configure.in~ configure.in
 aclocal -I config
+autoheader
 automake --add-missing
 autoconf
-autoheader
 ./configure
 make
 make check

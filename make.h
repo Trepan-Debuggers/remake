@@ -17,17 +17,27 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/* AIX requires this to be the first thing in the file.  */
-#if defined (_AIX) && !defined (__GNUC__)
- #pragma alloca
-#endif
-
 /* We use <config.h> instead of "config.h" so that a compilation
    using -I. -I$srcdir will use ./config.h rather than $srcdir/config.h
    (which it would do because make.h was found in $srcdir).  */
 #include <config.h>
 #undef  HAVE_CONFIG_H
 #define HAVE_CONFIG_H 1
+
+/* AIX requires this to be the first thing in the file.  */
+#ifndef __GNUC__
+# if HAVE_ALLOCA_H
+#  include <alloca.h>
+# else
+#  ifdef _AIX
+ #pragma alloca
+#  else
+#   ifndef alloca /* predefined by HP cc +Olibcalls */
+char *alloca ();
+#   endif
+#  endif
+# endif
+#endif
 
 
 /* Use prototypes if available.  */
@@ -43,14 +53,6 @@ Boston, MA 02111-1307, USA.  */
    system headers are included.  */
 
 #define _GNU_SOURCE 1
-
-/* Always use gettext.h  */
-
-#include "gettext.h"
-
-#define _(_s)           gettext (_s)
-#define S_(_1,_2,_n)    ngettext (_1,_2,_n)
-#define N_(_s)          gettext_noop (_s)
 
 
 #ifdef  CRAY
@@ -233,6 +235,14 @@ extern void exit PARAMS ((int)) __attribute__ ((noreturn));
 
 #endif /* Standard headers.  */
 
+/* These should be in stdlib.h.  Make sure we have them.  */
+#ifndef EXIT_SUCCESS
+# define EXIT_SUCCESS 0
+#endif
+#ifndef EXIT_FAILURE
+# define EXIT_FAILURE 0
+#endif
+
 #ifdef  ANSI_STRING
 
 # ifndef bcmp
@@ -271,19 +281,6 @@ extern void bcopy PARAMS ((const char *b1, char *b2, int));
 #if !defined(ANSI_STRING) && !defined(__DECC)
 extern char *strerror PARAMS ((int errnum));
 #endif
-
-#ifdef __GNUC__
-# undef alloca
-# define alloca(n)      __builtin_alloca (n)
-#else   /* Not GCC.  */
-# ifdef HAVE_ALLOCA_H
-#  include <alloca.h>
-# else /* Not HAVE_ALLOCA_H.  */
-#  ifndef _AIX
-extern char *alloca ();
-#  endif /* Not AIX.  */
-# endif /* HAVE_ALLOCA_H.  */
-#endif /* GCC.  */
 
 #if HAVE_INTTYPES_H
 # include <inttypes.h>
@@ -344,6 +341,22 @@ extern int strcmpi (const char *,const char *);
 # define ENUM_BITFIELD(bits)
 #endif
 
+/* Handle gettext and locales.  */
+
+#if HAVE_LOCALE_H
+# include <locale.h>
+#else
+# define setlocale(category, locale)
+#endif
+
+#include <gettext.h>
+
+#define _(msgid)            gettext (msgid)
+#define N_(msgid)           gettext_noop (msgid)
+#define S_(msg1,msg2,num)   ngettext (msg1,msg2,num)
+
+/* Handle other OSs.  */
+
 #if defined(__MSDOS__) || defined(WINDOWS32)
 # define PATH_SEPARATOR_CHAR ';'
 #else
@@ -398,10 +411,10 @@ extern void fatal ();
 
 extern void die PARAMS ((int)) __attribute__ ((noreturn));
 extern void log_working_directory PARAMS ((int));
-extern void pfatal_with_name PARAMS ((char *)) __attribute__ ((noreturn));
-extern void perror_with_name PARAMS ((char *, char *));
+extern void pfatal_with_name PARAMS ((const char *)) __attribute__ ((noreturn));
+extern void perror_with_name PARAMS ((const char *, const char *));
 extern char *savestring PARAMS ((const char *, unsigned int));
-extern char *concat PARAMS ((char *, char *, char *));
+extern char *concat PARAMS ((const char *, const char *, const char *));
 extern char *xmalloc PARAMS ((unsigned int));
 extern char *xrealloc PARAMS ((char *, unsigned int));
 extern char *xstrdup PARAMS ((const char *));

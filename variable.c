@@ -120,6 +120,7 @@ define_variable_in_set (name, length, value, origin, recursive, set, flocp)
   v->origin = origin;
   v->recursive = recursive;
   v->expanding = 0;
+  v->exp_count = 0;
   v->per_target = 0;
   v->append = 0;
   v->export = v_default;
@@ -711,7 +712,7 @@ target_environment (file)
 	  if (v->recursive
 	      && v->origin != o_env && v->origin != o_env_override)
 	    {
-	      char *value = recursively_expand (v);
+	      char *value = recursively_expand_for_file (v, file);
 #ifdef WINDOWS32
               if (strcmp(v->name, "Path") == 0 ||
                   strcmp(v->name, "PATH") == 0)

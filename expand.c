@@ -95,16 +95,28 @@ initialize_variable_output ()
 static char *allocated_variable_append PARAMS ((const struct variable *v));
 
 char *
-recursively_expand (v)
-     register struct variable *v;
+recursively_expand_for_file (v, file)
+     struct variable *v;
+     struct file *file;
 {
   char *value;
+  struct variable_set_list *save;
 
   if (v->expanding)
-    /* Expanding V causes infinite recursion.  Lose.  */
-    fatal (reading_file,
-           _("Recursive variable `%s' references itself (eventually)"),
-           v->name);
+    {
+      if (!v->exp_count)
+        /* Expanding V causes infinite recursion.  Lose.  */
+        fatal (reading_file,
+               _("Recursive variable `%s' references itself (eventually)"),
+               v->name);
+      --v->exp_count;
+    }
+
+  if (file)
+    {
+      save = current_variable_set_list;
+      current_variable_set_list = file->variables;
+    }
 
   v->expanding = 1;
   if (v->append)
@@ -113,22 +125,10 @@ recursively_expand (v)
     value = allocated_variable_expand (v->value);
   v->expanding = 0;
 
+  if (file)
+    current_variable_set_list = save;
+
   return value;
-}
-
-/* Warn that NAME is an undefined variable.  */
-
-#ifdef __GNUC__
-__inline
-#endif
-static void
-warn_undefined (name, length)
-     char *name;
-     unsigned int length;
-{
-  if (warn_undefined_variables_flag)
-    error (reading_file,
-           _("warning: undefined variable `%.*s'"), (int)length, name);
 }
 
 /* Expand a simple reference to variable NAME, which is LENGTH chars long.  */
@@ -280,7 +280,7 @@ variable_expand_string (line, string, length)
 	       Is the resultant text a substitution reference?  */
 
 	    colon = lindex (beg, end, ':');
-	    if (colon != 0)
+	    if (colon)
 	      {
 		/* This looks like a substitution reference: $(FOO:A=B).  */
 		char *subst_beg, *subst_end, *replace_beg, *replace_end;

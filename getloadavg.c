@@ -40,7 +40,7 @@
    NLIST_STRUCT			Include nlist.h, not a.out.h, and
 				the nlist n_name element is a pointer,
 				not an array.
-   NLIST_NAME_UNION		struct nlist has an n_un member, not n_name.
+   HAVE_STRUCT_NLIST_N_UN_N_NAME struct nlist has an n_un member, not n_name.
    LINUX_LDAV_FILE		[__linux__]: File containing load averages.
 
    Specific system predefines this file uses, aside from setting
@@ -97,6 +97,13 @@
 
 #ifndef errno
 extern int errno;
+#endif
+
+#if HAVE_LOCALE_H
+# include <locale.h>
+#endif
+#if !HAVE_SETLOCALE
+# define setlocale(Category, Locale) /* empty */
 #endif
 
 #ifndef HAVE_GETLOADAVG
@@ -192,6 +199,10 @@ extern int errno;
 #  define tek4300			/* Define by emacs, but not by other users.  */
 # endif
 
+/* AC_FUNC_GETLOADAVG thinks QNX is SVR4, but it isn't. */
+# if defined(__QNX__)
+#  undef SVR4
+# endif
 
 /* VAX C can't handle multi-line #ifs, or lines longer than 256 chars.  */
 # ifndef LOAD_AVE_TYPE
@@ -309,67 +320,6 @@ extern int errno;
 #  define	LDAV_CVT(n) (((double) (n)) / FSCALE)
 # endif
 
-/* VAX C can't handle multi-line #ifs, or lines longer that 256 characters.  */
-# ifndef NLIST_STRUCT
-
-#  ifdef MORE_BSD
-#   define NLIST_STRUCT
-#  endif
-
-#  ifdef sun
-#   define NLIST_STRUCT
-#  endif
-
-#  ifdef decstation
-#   define NLIST_STRUCT
-#  endif
-
-#  ifdef hpux
-#   define NLIST_STRUCT
-#  endif
-
-#  if defined (_SEQUENT_) || defined (sequent)
-#   define NLIST_STRUCT
-#  endif
-
-#  ifdef sgi
-#   define NLIST_STRUCT
-#  endif
-
-#  ifdef SVR4
-#   define NLIST_STRUCT
-#  endif
-
-#  ifdef sony_news
-#   define NLIST_STRUCT
-#  endif
-
-#  ifdef OSF_ALPHA
-#   define NLIST_STRUCT
-#  endif
-
-#  if defined (ardent) && defined (titan)
-#   define NLIST_STRUCT
-#  endif
-
-#  ifdef tek4300
-#   define NLIST_STRUCT
-#  endif
-
-#  ifdef butterfly
-#   define NLIST_STRUCT
-#  endif
-
-#  if defined(alliant) && defined(i860) /* Alliant FX/2800 */
-#   define NLIST_STRUCT
-#  endif
-
-#  ifdef _AIX
-#   define NLIST_STRUCT
-#  endif
-
-# endif /* defined (NLIST_STRUCT) */
-
 
 # if defined(sgi) || (defined(mips) && !defined(BSD))
 #  define FIXUP_KERNEL_SYMBOL_ADDR(nl) ((nl)[0].n_value &= ~(1 << 31))
@@ -413,11 +363,11 @@ extern int errno;
 
 #  ifndef VMS
 #   ifndef __linux__
-#    ifndef NLIST_STRUCT
-#     include <a.out.h>
-#    else /* NLIST_STRUCT */
+#    ifdef HAVE_NLIST_H
 #     include <nlist.h>
-#    endif /* NLIST_STRUCT */
+#    else
+#     include <a.out.h>
+#    endif
 
 #    ifdef SUNOS_5
 #     include <fcntl.h>
@@ -646,8 +596,11 @@ getloadavg (loadavg, nelem)
   if (count <= 0)
     return -1;
 
+  /* The following sscanf must use the C locale.  */
+  setlocale (LC_NUMERIC, "C");
   count = sscanf (ldavgbuf, "%lf %lf %lf",
 		  &load_ave[0], &load_ave[1], &load_ave[2]);
+  setlocale (LC_NUMERIC, "");
   if (count < 1)
     return -1;
 
@@ -923,13 +876,13 @@ getloadavg (loadavg, nelem)
       strcpy (nl[0].n_name, LDAV_SYMBOL);
       strcpy (nl[1].n_name, "");
 #   else /* NLIST_STRUCT */
-#    ifdef NLIST_NAME_UNION
+#    ifdef HAVE_STRUCT_NLIST_N_UN_N_NAME
       nl[0].n_un.n_name = LDAV_SYMBOL;
       nl[1].n_un.n_name = 0;
-#    else /* not NLIST_NAME_UNION */
+#    else /* not HAVE_STRUCT_NLIST_N_UN_N_NAME */
       nl[0].n_name = LDAV_SYMBOL;
       nl[1].n_name = 0;
-#    endif /* not NLIST_NAME_UNION */
+#    endif /* not HAVE_STRUCT_NLIST_N_UN_N_NAME */
 #   endif /* NLIST_STRUCT */
 
 #   ifndef SUNOS_5
