@@ -631,7 +631,7 @@ try_variable_definition (filename, lineno, line, origin)
     case bogus:
       /* Should not be possible.  */
       abort ();
-      break;
+      return 0;
     case simple:
       /* A simple variable definition "var := value".  Expand the value.  */
       value = variable_expand (p);
