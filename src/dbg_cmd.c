@@ -222,7 +222,7 @@ cmd_initialize(void)
       "\tIf a variable name is given, the value is shown with the\n" \
       "\tvariable-reference names. Don't include $ before a variable \n" \
       "\tname. See also \"examine\".\n" \
-      "\tIf a target name is given, information tabout target is printed." \
+      "\tIf a target name is given, information about target is printed." \
       );
 
   short_command['q'].func = &com_quit;
