@@ -1,3 +1,7 @@
+2005-02-01  Paul D. Smith  <psmith@gnu.org>
+
+	* LINGUAS: Added a new translation for Finnish (fi).
+
 2003-10-18  Paul D. Smith  <psmith@gnu.org>
 
 	* LINGUAS: Added a new translation for Belarusian (be).
