@@ -1,5 +1,5 @@
 /* Data base of default implicit rules for GNU Make.
-Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -30,7 +30,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 static char default_suffixes[]
   = ".out .a .ln .o .c .cc .C .p .f .F .r .y .l .s .S \
-.mod .sym .def .h .info .dvi .tex .texinfo .texi .cweb .web .sh .elc .el";
+.mod .sym .def .h .info .dvi .tex .texinfo .texi .txinfo \
+.cweb .web .sh .elc .el";
 
 static struct pspec default_pattern_rules[] =
   {
@@ -155,6 +156,9 @@ static char *default_suffix_rules[] =
     ".texi.info",
     "$(MAKEINFO) $<",
 
+    ".txinfo.info",
+    "$(MAKEINFO) $<",
+
     ".tex.dvi",
     "$(TEX) $<",
 
@@ -162,6 +166,9 @@ static char *default_suffix_rules[] =
     "$(TEXI2DVI) $<",
 
     ".texi.dvi",
+    "$(TEXI2DVI) $<",
+
+    ".txinfo.dvi",
     "$(TEXI2DVI) $<",
 
     ".cweb.c",
