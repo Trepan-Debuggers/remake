@@ -3832,8 +3832,8 @@ Also, the function iterates over all whitespace separated tokens in
 @item $(filter-out @var{pattern},@var{text})
 @findex filter-out
 Removes all whitespace-separated words in @var{text} that @emph{do}
-match @var{pattern}, returning only the words that match.  This is the
-exact opposite of the @code{filter} function.@refill
+match @var{pattern}, returning only the words that @emph{do not} match.
+This is the exact opposite of the @code{filter} function.@refill
 
 @c !!! Roland says the following needs improvement --rjc 9mar92
 Also, since @code{filter-out} iterates over all whitespace separated
