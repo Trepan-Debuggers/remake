@@ -315,7 +315,7 @@ fatal (flocp, fmt, va_alist)
 
 #undef	strerror
 
-const char *
+char *
 strerror (errnum)
      int errnum;
 {

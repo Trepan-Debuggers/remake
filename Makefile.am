@@ -121,9 +121,12 @@ check-loadavg: loadavg
 
 # The loadavg function is invoked during "make check" to test getloadavg.
 noinst_PROGRAMS = loadavg
-loadavg_SOURCES = getloadavg.c
+loadavg_SOURCES = loadavg.c
 loadavg_CFLAGS = -DTEST
 loadavg_LDADD = @GETLOADAVG_LIBS@
+
+loadavg.c: $(srcdir)/getloadavg.c
+	cp $(srcdir)/getloadavg.c loadavg.c
 
 # > check-regression
 #

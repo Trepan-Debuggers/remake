@@ -149,7 +149,7 @@ set_file_variables (file)
 
     cp = plus_value = (char *) alloca (plus_len);
 
-    qmark_len = plus_len;	/* Will be this or less.  */
+    qmark_len = plus_len + 1;	/* Will be this or less.  */
     for (d = file->deps; d != 0; d = d->next)
       if (! d->ignore_mtime)
         {
