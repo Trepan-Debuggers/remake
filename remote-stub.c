@@ -1,4 +1,4 @@
-/* Copyright (C) 1988, 1989 Free Software Foundation, Inc.
+/* Copyright (C) 1988, 1989, 1992 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -30,17 +30,16 @@ start_remote_job_p ()
   return 0;
 }
 
-/* Start a remote job running the command in ARGV.
-   It gets standard input from STDIN_FD.  On failure,
-   return nonzero.  On success, return zero, and set
-   *USED_STDIN to nonzero if it will actually use STDIN_FD,
-   zero if not, set *ID_PTR to a unique identification, and
-   set *IS_REMOTE to zero if the job is local, nonzero if it
-   is remote (meaning *ID_PTR is a process ID).  */
+/* Start a remote job running the command in ARGV,
+   with environment from ENVP.  It gets standard input from STDIN_FD.  On
+   failure, return nonzero.  On success, return zero, and set *USED_STDIN
+   to nonzero if it will actually use STDIN_FD, zero if not, set *ID_PTR to
+   a unique identification, and set *IS_REMOTE to zero if the job is local,
+   nonzero if it is remote (meaning *ID_PTR is a process ID).  */
 
 int
-start_remote_job (argv, stdin_fd, is_remote, id_ptr, used_stdin)
-     char **argv;
+start_remote_job (argv, envp, stdin_fd, is_remote, id_ptr, used_stdin)
+     char **argv, **envp;
      int stdin_fd;
      int *is_remote;
      int *id_ptr;
