@@ -35,6 +35,12 @@ static char *dos_bename;
 static int dos_batch_file;
 #endif /* MSDOS.  */
 
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#else
+#include <sys/file.h>
+#endif
+
 
 /* If NGROUPS_MAX == 0 then try other methods for finding a real value.  */
 #if defined (NGROUPS_MAX) && NGROUPS_MAX == 0
@@ -641,6 +647,16 @@ start_job_command (child)
 	  (void) close (pd[1]);
 	  /* Save the read side.  */
 	  bad_stdin = pd[0];
+
+	  /* Set the descriptor to close on exec, so it does not litter any
+	     child's descriptor table.  When it is dup2'd onto descriptor 0,
+	     that descriptor will not close on exec.  */
+#ifdef FD_SETFD
+#ifndef FD_CLOEXEC
+#define FD_CLOEXEC 1
+#endif
+	  (void) fcntl (bad_stdin, F_SETFD, FD_CLOEXEC);
+#endif
 	}
     }
 
