@@ -620,9 +620,9 @@ print_file (f)
   putchar ('\n');
 
   if (f->precious)
-    puts (_("#  Precious file (dependency of .PRECIOUS)."));
+    puts (_("#  Precious file (prerequisite of .PRECIOUS)."));
   if (f->phony)
-    puts (_("#  Phony target (dependency of .PHONY)."));
+    puts (_("#  Phony target (prerequisite of .PHONY)."));
   if (f->cmd_target)
     puts (_("#  Command-line target."));
   if (f->dontcare)
@@ -632,7 +632,7 @@ print_file (f)
   if (f->stem != 0)
     printf (_("#  Implicit/static pattern stem: `%s'\n"), f->stem);
   if (f->intermediate)
-    puts (_("#  File is an intermediate dependency."));
+    puts (_("#  File is an intermediate prerequisite."));
   if (f->also_make != 0)
     {
       fputs (_("#  Also makes:"), stdout);

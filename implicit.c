@@ -376,7 +376,7 @@ pattern_search (file, archive, depth, recursions)
 		     "impossible", then the rule fails and don't
 		     bother trying it on the second pass either
 		     since we know that will fail too.  */
-		  DEBUGP2 (_("Rejecting impossible %s dependency `%s'.\n"),
+		  DEBUGP2 (_("Rejecting impossible %s prerequisite `%s'.\n"),
 			   p == depname ? _("implicit") : _("rule"), p);
 		  tryrules[i] = 0;
 		  break;
@@ -384,7 +384,7 @@ pattern_search (file, archive, depth, recursions)
 
 	      intermediate_files[deps_found] = 0;
 
-	      DEBUGP2 (_("Trying %s dependency `%s'.\n"),
+	      DEBUGP2 (_("Trying %s prerequisite `%s'.\n"),
 		       p == depname ? _("implicit") : _("rule"), p);
 
 	      /* The DEP->changed flag says that this dependency resides in a
@@ -408,8 +408,9 @@ pattern_search (file, archive, depth, recursions)
 	      vp = p;
 	      if (vpath_search (&vp, (FILE_TIMESTAMP *) 0))
 		{
-		  DEBUGP2 (_("Found dependency `%s' as VPATH `%s'\n"), p, vp);
-		  strcpy(vp, p);
+		  DEBUGP2 (_("Found prerequisite `%s' as VPATH `%s'\n"),
+                           p, vp);
+		  strcpy (vp, p);
 		  found_files[deps_found++] = vp;
 		  continue;
 		}

@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.179 1999/08/22 17:51:01 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.180 1999/08/24 04:49:42 psmith Exp $
 @set EDITION 0.53
 @set VERSION 3.78
 @set UPDATED 14 April 1999
@@ -155,7 +155,7 @@ An Introduction to Makefiles
 * How Make Works::              How @code{make} Processes This Makefile
 * Variables Simplify::          Variables Make Makefiles Simpler
 * make Deduces::                Letting @code{make} Deduce the Commands
-* Combine By Dependency::       Another Style of Makefile
+* Combine By Prerequisite::     Another Style of Makefile
 * Cleanup::                     Rules for Cleaning the Directory
 
 Writing Makefiles
@@ -167,6 +167,7 @@ Writing Makefiles
 * Remaking Makefiles::          How makefiles get remade.
 * Overriding Makefiles::        How to override part of one makefile
                                  with another makefile.
+* Reading Makefiles::           How makefiles are parsed.
 
 Writing Rules
 
@@ -176,7 +177,7 @@ Writing Rules
 * Directory Search::            Searching other directories for source files.
 * Phony Targets::               Using a target that is not a real file's name.
 * Force Targets::               You can use a target without commands
-                                  or dependencies to mark other
+                                  or prerequisites to mark other
                                   targets as phony.
 * Empty Targets::               When only the date matters and the
                                   files are empty.
@@ -184,12 +185,12 @@ Writing Rules
 * Multiple Targets::            When to make use of several targets in a rule.
 * Multiple Rules::              How to use several rules with the same target.
 * Static Pattern::              Static pattern rules apply to multiple targets
-                                  and can vary the dependencies according to
+                                  and can vary the prerequisites according to
                                   the target name.
 * Double-Colon::                How to use a special kind of rule to allow
                                   several independent rules for one target.
-* Automatic Dependencies::      How to automatically generate rules giving
-                                 dependencies from the source files themselves.
+* Automatic Prerequisites::     How to automatically generate rules giving
+                                 prerequisites from source files themselves.
 
 Using Wildcard Characters in File Names
 
@@ -198,10 +199,10 @@ Using Wildcard Characters in File Names
 * Wildcard Function::           How to cause wildcard expansion where
                                   it does not normally take place.
 
-Searching Directories for Dependencies
+Searching Directories for Prerequisites
 
 * General Search::              Specifying a search path that applies
-                                  to every dependency.
+                                  to every prerequisite.
 * Selective Search::            Specifying a search path
                                   for a specified class of names.
 * Search Algorithm::            When and how search paths are applied.
@@ -477,7 +478,7 @@ together to produce the new executable editor.
 * How Make Works::              How @code{make} Processes This Makefile
 * Variables Simplify::          Variables Make Makefiles Simpler
 * make Deduces::                Letting @code{make} Deduce the Commands
-* Combine By Dependency::       Another Style of Makefile
+* Combine By Prerequisite::     Another Style of Makefile
 * Cleanup::                     Rules for Cleaning the Directory
 @end menu
 
@@ -491,11 +492,11 @@ together to produce the new executable editor.
 A simple makefile consists of ``rules'' with the following shape:
 
 @cindex targets, introduction to
-@cindex dependencies, introduction to
+@cindex prerequisites, introduction to
 @cindex commands, introduction to
 @example
 @group
-@var{target} @dots{} : @var{dependencies} @dots{}
+@var{target} @dots{} : @var{prerequisites} @dots{}
         @var{command}
         @dots{}
         @dots{}
@@ -507,7 +508,7 @@ program; examples of targets are executable or object files.  A target
 can also be the name of an action to carry out, such as @samp{clean}
 (@pxref{Phony Targets}).
 
-A @dfn{dependency} is a file that is used as input to create the
+A @dfn{prerequisite} is a file that is used as input to create the
 target.  A target often depends on several files.
 
 @cindex tabs in rules
@@ -516,15 +517,15 @@ A rule may have more than one command, each on its own line.
 @strong{Please note:} you need to put a tab character at the beginning of
 every command line!  This is an obscurity that catches the unwary.
 
-Usually a command is in a rule with dependencies and serves to create a
-target file if any of the dependencies change.  However, the rule that
-specifies commands for the target need not have dependencies.  For
+Usually a command is in a rule with prerequisites and serves to create a
+target file if any of the prerequisites change.  However, the rule that
+specifies commands for the target need not have prerequisites.  For
 example, the rule containing the delete command associated with the
-target @samp{clean} does not have dependencies.
+target @samp{clean} does not have prerequisites.
 
 A @dfn{rule}, then, explains how and when to remake certain files
 which are the targets of the particular rule.  @code{make} carries out
-the commands on the dependencies to create or update the target.  A
+the commands on the prerequisites to create or update the target.  A
 rule can also explain how and when to carry out an action.
 @xref{Rules, , Writing Rules}.
 
@@ -599,19 +600,19 @@ make clean
 
 In the example makefile, the targets include the executable file
 @samp{edit}, and the object files @samp{main.o} and @samp{kbd.o}.  The
-dependencies are files such as @samp{main.c} and @samp{defs.h}.
-In fact, each @samp{.o} file is both a target and a dependency.
+prerequisites are files such as @samp{main.c} and @samp{defs.h}.
+In fact, each @samp{.o} file is both a target and a prerequisite.
 Commands include @w{@samp{cc -c main.c}} and @w{@samp{cc -c kbd.c}}.
 
 When a target is a file, it needs to be recompiled or relinked if any
-of its dependencies change.  In addition, any dependencies that are
+of its prerequisites change.  In addition, any prerequisites that are
 themselves automatically generated should be updated first.  In this
 example, @file{edit} depends on each of the eight object files; the
 object file @file{main.o} depends on the source file @file{main.c} and
 on the header file @file{defs.h}.
 
 A shell command follows each line that contains a target and
-dependencies.  These shell commands say how to update the target file.
+prerequisites.  These shell commands say how to update the target file.
 A tab character must come at the beginning of every command line to
 distinguish commands lines from other lines in the makefile.  (Bear in
 mind that @code{make} does not know anything about how the commands
@@ -623,10 +624,10 @@ you have specified when the target file needs to be updated.)
 The target @samp{clean} is not a file, but merely the name of an
 action.  Since you
 normally
-do not want to carry out the actions in this rule, @samp{clean} is not a dependency of any other rule.
+do not want to carry out the actions in this rule, @samp{clean} is not a prerequisite of any other rule.
 Consequently, @code{make} never does anything with it unless you tell
-it specifically.  Note that this rule not only is not a dependency, it
-also does not have any dependencies, so the only purpose of the rule
+it specifically.  Note that this rule not only is not a prerequisite, it
+also does not have any prerequisites, so the only purpose of the rule
 is to run the specified commands.  Targets that do not refer to files
 but are just actions are called @dfn{phony targets}.  @xref{Phony
 Targets}, for information about this kind of target.  @xref{Errors, ,
@@ -668,17 +669,17 @@ which in this case are the object files.  Each of these files is
 processed according to its own rule.  These rules say to update each
 @samp{.o} file by compiling its source file.  The recompilation must
 be done if the source file, or any of the header files named as
-dependencies, is more recent than the object file, or if the object
+prerequisites, is more recent than the object file, or if the object
 file does not exist.
 
 The other rules are processed because their targets appear as
-dependencies of the goal.  If some other rule is not depended on by the
+prerequisites of the goal.  If some other rule is not depended on by the
 goal (or anything it depends on, etc.), that rule is not processed,
 unless you tell @code{make} to do so (with a command such as
 @w{@code{make clean}}).
 
 Before recompiling an object file, @code{make} considers updating its
-dependencies, the source file and header files.  This makefile does not
+prerequisites, the source file and header files.  This makefile does not
 specify anything to be done for them---the @samp{.c} and @samp{.h} files
 are not the targets of any rules---so @code{make} does nothing for these
 files.  But @code{make} would update automatically generated C programs,
@@ -775,7 +776,7 @@ clean :
 @end group
 @end example
 
-@node make Deduces, Combine By Dependency, Variables Simplify, Introduction
+@node make Deduces, Combine By Prerequisite, Variables Simplify, Introduction
 @section Letting @code{make} Deduce the Commands
 @cindex deducing commands (implicit rules)
 @cindex implicit rule, introduction to
@@ -790,8 +791,8 @@ use the command @samp{cc -c main.c -o main.o} to compile @file{main.c} into
 object files.  @xref{Implicit Rules, ,Using Implicit Rules}.@refill
 
 When a @samp{.c} file is used automatically in this way, it is also
-automatically added to the list of dependencies.  We can therefore omit
-the @samp{.c} files from the dependencies, provided we omit the commands.
+automatically added to the list of prerequisites.  We can therefore omit
+the @samp{.c} files from the prerequisites, provided we omit the commands.
 
 Here is the entire example, with both of these changes, and a variable
 @code{objects} as suggested above:
@@ -827,13 +828,13 @@ See @ref{Phony Targets}, and @ref{Errors, ,Errors in Commands}.)
 Because implicit rules are so convenient, they are important.  You
 will see them used frequently.@refill
 
-@node Combine By Dependency, Cleanup, make Deduces, Introduction
+@node Combine By Prerequisite, Cleanup, make Deduces, Introduction
 @section Another Style of Makefile
-@cindex combining rules by dependency
+@cindex combining rules by prerequisite
 
 When the objects of a makefile are created only by implicit rules, an
 alternative style of makefile is possible.  In this style of makefile,
-you group entries by their dependencies instead of by their targets.
+you group entries by their prerequisites instead of by their targets.
 Here is what one looks like:
 
 @example
@@ -851,15 +852,15 @@ display.o insert.o search.o files.o : buffer.h
 @end example
 
 @noindent
-Here @file{defs.h} is given as a dependency of all the object files;
-@file{command.h} and @file{buffer.h} are dependencies of the specific
+Here @file{defs.h} is given as a prerequisite of all the object files;
+@file{command.h} and @file{buffer.h} are prerequisites of the specific
 object files listed for them.
 
 Whether this is better is a matter of taste: it is more compact, but some
 people dislike it because they find it clearer to put all the information
 about each target in one place.
 
-@node Cleanup,  , Combine By Dependency, Introduction
+@node Cleanup,  , Combine By Prerequisite, Introduction
 @section Rules for Cleaning the Directory
 @cindex cleaning up
 @cindex removing, to clean up
@@ -903,7 +904,7 @@ makefile, because we do not want it to run by default!  Thus, in the
 example makefile, we want the rule for @code{edit}, which recompiles
 the editor, to remain the default goal.
 
-Since @code{clean} is not a dependency of @code{edit}, this rule will not
+Since @code{clean} is not a prerequisite of @code{edit}, this rule will not
 run at all if we give the command @samp{make} with no arguments.  In
 order to make the rule run, we have to type @samp{make clean}.
 @xref{Running, ,How to Run @code{make}}.
@@ -923,6 +924,7 @@ reading a data base called the @dfn{makefile}.
 * Remaking Makefiles::          How makefiles get remade.
 * Overriding Makefiles::        How to override part of one makefile
                                  with another makefile.
+* Reading Makefiles::           How makefiles are parsed.
 @end menu
 
 @node Makefile Contents, Makefile Names,  , Makefiles
@@ -939,8 +941,9 @@ length in later chapters.@refill
 @item
 An @dfn{explicit rule} says when and how to remake one or more files,
 called the rule's targets.  It lists the other files that the targets
-@dfn{depend on}, and may also give commands to use to create or update
-the targets.  @xref{Rules, ,Writing Rules}.
+depend on, call the @dfn{prerequisites} of the target, and may also give
+commands to use to create or update the targets.  @xref{Rules, ,Writing
+Rules}.
 
 @cindex rule, implicit, definition of
 @cindex implicit rule, definition of
@@ -1090,15 +1093,15 @@ common set of variable definitions
 (@pxref{Setting, ,Setting Variables}) or pattern rules
 (@pxref{Pattern Rules, ,Defining and Redefining Pattern Rules}).
 
-Another such occasion is when you want to generate dependencies from
-source files automatically; the dependencies can be put in a file that
+Another such occasion is when you want to generate prerequisites from
+source files automatically; the prerequisites can be put in a file that
 is included by the main makefile.  This practice is generally cleaner
-than that of somehow appending the dependencies to the end of the main
+than that of somehow appending the prerequisites to the end of the main
 makefile as has been traditionally done with other versions of
-@code{make}.  @xref{Automatic Dependencies}.
-@cindex dependencies, automatic generation
-@cindex automatic generation of dependencies
-@cindex generating dependencies automatically
+@code{make}.  @xref{Automatic Prerequisites}.
+@cindex prerequisites, automatic generation
+@cindex automatic generation of prerequisites
+@cindex generating prerequisites automatically
 
 @cindex @code{-I}
 @cindex @code{--include-dir}
@@ -1202,15 +1205,15 @@ explicit rule with the makefile as the target, and an empty command
 string (@pxref{Empty Commands, ,Using Empty Commands}).
 
 If the makefiles specify a double-colon rule to remake a file with
-commands but no dependencies, that file will always be remade
+commands but no prerequisites, that file will always be remade
 (@pxref{Double-Colon}).  In the case of makefiles, a makefile that has a
-double-colon rule with commands but no dependencies will be remade every
+double-colon rule with commands but no prerequisites will be remade every
 time @code{make} is run, and then again after @code{make} starts over
 and reads the makefiles in again.  This would cause an infinite loop:
 @code{make} would constantly remake the makefile, and never do anything
 else.  So, to avoid this, @code{make} will @strong{not} attempt to
 remake makefiles which are specified as targets of a double-colon rule
-with commands but no dependencies.@refill
+with commands but no prerequisites.@refill
 
 If you do not specify any makefiles to be read with @samp{-f} or
 @samp{--file} options, @code{make} will try the default makefile names;
@@ -1237,7 +1240,7 @@ Likewise, @samp{-q} (or @samp{--question}) and @samp{-n} (or
 @samp{--just-print}) do not prevent updating of makefiles, because an
 out-of-date makefile would result in the wrong output for other targets.
 Thus, @samp{make -f mfile -n foo} will update @file{mfile}, read it in,
-and then print the commands to update @file{foo} and its dependencies
+and then print the commands to update @file{foo} and its prerequisites
 without running them.  The commands printed for @file{foo} will be those
 specified in the updated contents of @file{mfile}.
 
@@ -1253,7 +1256,7 @@ running them, and then print the commands needed to update @file{foo}
 without running them.  The commands for @file{foo} will be those
 specified by the existing contents of @file{mfile}.
 
-@node Overriding Makefiles,  , Remaking Makefiles, Makefiles
+@node Overriding Makefiles, Reading Makefiles, Remaking Makefiles, Makefiles
 @section Overriding Part of Another Makefile
 
 @cindex overriding makefiles
@@ -1295,22 +1298,104 @@ will apply the rule.  And likewise for any other target that
 
 The way this works is that the pattern rule has a pattern of just
 @samp{%}, so it matches any target whatever.  The rule specifies a
-dependency @file{force}, to guarantee that the commands will be run even
+prerequisite @file{force}, to guarantee that the commands will be run even
 if the target file already exists.  We give @file{force} target empty
 commands to prevent @code{make} from searching for an implicit rule to
 build it---otherwise it would apply the same match-anything rule to
-@file{force} itself and create a dependency loop!
+@file{force} itself and create a prerequisite loop!
+
+@node Reading Makefiles,  , Overriding Makefiles, Makefiles
+@section How @code{make} Reads a Makefile
+@cindex reading makefiles
+@cindex makefile, parsing
+
+GNU @code{make} does its work in two distinct phases.  During the first
+phase it reads all the makefiles, included makefiles, etc. and
+internalizes all the variables and their values, implicit and explicit
+rules, and constructs a dependency graph of all the targets and their
+prerequisites.  During the second phase, @code{make} uses these internal
+structures to determine what targets will need to be rebuilt and to
+invoke the rules necessary to do so.
+
+It's important to understand this two-phase approach because it has a
+direct impact on how variable and function expansion happens; this is
+often a source of some confusion when writing makefiles.  Here we will
+present a summary of the phases in which expansion happens for different
+constructs within the makefile.  We say that expansion is
+@dfn{immediate} if it happens during the first phase: in this case
+@code{make} will expand any variables or functions in that section of a
+construct as the makefile is parsed.  We say that expansion is
+@dfn{deferred} if expansion is not performed immediately.  Expansion of
+deferred construct is not performed until either the construct appears
+later in an immediate context, or until the second phase.
+
+You may not be familiar with some of these constructs yet.  You can
+reference this section as you become familiar with them, in later
+chapters.
+
+@subheading Variable Assignment
+@cindex +=, expansion
+@cindex =, expansion
+@cindex ?=, expansion
+@cindex +=, expansion
+@cindex define, expansion
+
+Variable definitions are parsed as follows:
+
+@example
+@var{immediate} = @var{deferred}
+@var{immediate} ?= @var{deferred}
+@var{immediate} := @var{immediate}
+@var{immediate} += @var{deferred} or @var{immediate}
+
+define @var{immediate}
+  @var{deferred}
+endef
+@end example
+
+For the append operator, @samp{+=}, the right-hand side is considered
+immediate if the variable was previously set as a simple variable
+(@samp{:=}), and deferred otherwise.
+
+@subheading Conditional Syntax
+@cindex ifdef, expansion
+@cindex ifeq, expansion
+@cindex ifndef, expansion
+@cindex ifneq, expansion
+
+All instances of conditional syntax are parsed immediately, in their
+entirety; this includes the @code{ifdef}, @code{ifeq}, @code{ifndef},
+and @code{ifneq} forms.
+
+@subheading Rule Definition
+@cindex target, expansion
+@cindex prerequisite, expansion
+@cindex implicit rule, expansion
+@cindex pattern rule, expansion
+@cindex explicit rule, expansion
+
+A rule is always expanded the same way, regardless of the form:
+
+@example
+@var{immediate} : @var{immediate} ; @var{deferred}
+	@var{deferred}
+@end example
+
+That is, the target and prerequisite sections are expanded immediately,
+and the commands used to construct the target are always deferred.  This
+general rule is true for explicit rules, pattern rules, suffix rules,
+static pattern rules, and simple prerequisite definitions.
 
 @node Rules, Commands, Makefiles, Top
 @chapter Writing Rules
 @cindex writing rules
 @cindex rule, how to write
 @cindex target
-@cindex dependency
+@cindex prerequisite
 
 A @dfn{rule} appears in the makefile and says when and how to remake
 certain files, called the rule's @dfn{targets} (most often only one per rule).
-It lists the other files that are the @dfn{dependencies} of the target, and
+It lists the other files that are the @dfn{prerequisites} of the target, and
 @dfn{commands} to use to create or update the target.
 
 @cindex default goal
@@ -1337,7 +1422,7 @@ the makefile (often with a target called @samp{all}).
 * Directory Search::            Searching other directories for source files.
 * Phony Targets::               Using a target that is not a real file's name.
 * Force Targets::               You can use a target without commands
-                                  or dependencies to mark other
+                                  or prerequisites to mark other
                                   targets as phony.
 * Empty Targets::               When only the date matters and the
                                   files are empty.
@@ -1345,12 +1430,12 @@ the makefile (often with a target called @samp{all}).
 * Multiple Targets::            When to make use of several targets in a rule.
 * Multiple Rules::              How to use several rules with the same target.
 * Static Pattern::              Static pattern rules apply to multiple targets
-                                  and can vary the dependencies according to
+                                  and can vary the prerequisites according to
                                   the target name.
 * Double-Colon::                How to use a special kind of rule to allow
                                   several independent rules for one target.
-* Automatic Dependencies::      How to automatically generate rules giving
-                                 dependencies from the source files themselves.
+* Automatic Prerequisites::     How to automatically generate rules giving
+                                  prerequisites from source files themselves.
 @end menu
 
 @ifinfo
@@ -1364,7 +1449,7 @@ foo.o : foo.c defs.h       # module for twiddling the frobs
         cc -c -g foo.c
 @end example
 
-Its target is @file{foo.o} and its dependencies are @file{foo.c} and
+Its target is @file{foo.o} and its prerequisites are @file{foo.c} and
 @file{defs.h}.  It has one command, which is @samp{cc -c -g foo.c}.
 The command line starts with a tab to identify it as a command.
 
@@ -1380,7 +1465,7 @@ more recent than it.
 How to update the file @file{foo.o}: by running @code{cc} as stated.
 The command does not explicitly mention @file{defs.h}, but we presume
 that @file{foo.c} includes it, and that that is why @file{defs.h} was
-added to the dependencies.
+added to the prerequisites.
 @end itemize
 @end ifinfo
 
@@ -1392,7 +1477,7 @@ added to the dependencies.
 In general, a rule looks like this:
 
 @example
-@var{targets} : @var{dependencies}
+@var{targets} : @var{prerequisites}
         @var{command}
         @dots{}
 @end example
@@ -1401,7 +1486,7 @@ In general, a rule looks like this:
 or like this:
 
 @example
-@var{targets} : @var{dependencies} ; @var{command}
+@var{targets} : @var{prerequisites} ; @var{command}
         @var{command}
         @dots{}
 @end example
@@ -1420,7 +1505,7 @@ target per rule, but occasionally there is a reason to have more
 @cindex commands
 @cindex tab character (in commands)
 The @var{command} lines start with a tab character.  The first command may
-appear on the line after the dependencies, with a tab character, or may
+appear on the line after the prerequisites, with a tab character, or may
 appear on the same line, with a semicolon.  Either way, the effect is the
 same.  @xref{Commands, ,Writing the Commands in Rules}.
 
@@ -1437,15 +1522,15 @@ limit on the length of a line in a makefile.
 A rule tells @code{make} two things: when the targets are out of date,
 and how to update them when necessary.
 
-@cindex dependencies
-@cindex rule dependencies
+@cindex prerequisites
+@cindex rule prerequisites
 The criterion for being out of date is specified in terms of the
-@var{dependencies}, which consist of file names separated by spaces.
+@var{prerequisites}, which consist of file names separated by spaces.
 (Wildcards and archive members (@pxref{Archives}) are allowed here too.)
 A target is out of date if it does not exist or if it is older than any
-of the dependencies (by comparison of last-modification times).  The
+of the prerequisites (by comparison of last-modification times).  The
 idea is that the contents of the target file are computed based on
-information in the dependencies, so if any of the dependencies changes,
+information in the prerequisites, so if any of the prerequisites changes,
 the contents of the existing target file are no longer necessarily
 valid.
 
@@ -1481,7 +1566,7 @@ directory for each user (such as MS-DOS or MS-Windows), this
 functionality can be simulated by setting the environment variable
 @var{HOME}.@refill
 
-Wildcard expansion happens automatically in targets, in dependencies,
+Wildcard expansion happens automatically in targets, in prerequisites,
 and in commands (where the shell does the expansion).  In other
 contexts, wildcard expansion happens only if you request it explicitly
 with the @code{wildcard} function.
@@ -1512,7 +1597,7 @@ clean:
 @end example
 @cindex @code{rm} (shell command)
 
-Wildcards are also useful in the dependencies of a rule.  With the
+Wildcards are also useful in the prerequisites of a rule.  With the
 following rule in the makefile, @samp{make print} will print all the
 @samp{.c} files that have changed since the last time you printed them:
 
@@ -1541,7 +1626,7 @@ objects = *.o
 @noindent
 then the value of the variable @code{objects} is the actual string
 @samp{*.o}.  However, if you use the value of @code{objects} in a target,
-dependency or command, wildcard expansion will take place at that time.
+prerequisite or command, wildcard expansion will take place at that time.
 To set @code{objects} to the expansion, instead use:
 
 @example
@@ -1574,7 +1659,7 @@ foo : $(objects)
 @noindent
 The value of @code{objects} is the actual string @samp{*.o}.  Wildcard
 expansion happens in the rule for @file{foo}, so that each @emph{existing}
-@samp{.o} file becomes a dependency of @file{foo} and will be recompiled if
+@samp{.o} file becomes a prerequisite of @file{foo} and will be recompiled if
 necessary.
 
 But what if you delete all the @samp{.o} files?  When a wildcard matches
@@ -1668,23 +1753,23 @@ there is no need to write explicit rules for compiling the files.
 @samp{:=}, which is a variant of @samp{=}.)
 
 @node Directory Search, Phony Targets, Wildcards, Rules
-@section Searching Directories for Dependencies
+@section Searching Directories for Prerequisites
 @vindex VPATH
 @findex vpath
 @cindex vpath
-@cindex search path for dependencies (@code{VPATH})
+@cindex search path for prerequisites (@code{VPATH})
 @cindex directory search (@code{VPATH})
 
 For large systems, it is often desirable to put sources in a separate
 directory from the binaries.  The @dfn{directory search} features of
 @code{make} facilitate this by searching several directories
-automatically to find a dependency.  When you redistribute the files
+automatically to find a prerequisite.  When you redistribute the files
 among directories, you do not need to change the individual rules,
 just the search paths.
 
 @menu
 * General Search::              Specifying a search path that applies
-                                  to every dependency.
+                                  to every prerequisite.
 * Selective Search::            Specifying a search path
                                   for a specified class of names.
 * Search Algorithm::            When and how search paths are applied.
@@ -1695,21 +1780,21 @@ just the search paths.
 @end menu
 
 @node General Search, Selective Search,  , Directory Search
-@subsection @code{VPATH}: Search Path for All Dependencies
+@subsection @code{VPATH}: Search Path for All Prerequisites
 @vindex VPATH
 
 The value of the @code{make} variable @code{VPATH} specifies a list of
 directories that @code{make} should search.  Most often, the
-directories are expected to contain dependency files that are not in the
+directories are expected to contain prerequisite files that are not in the
 current directory; however, @code{VPATH} specifies a search list that
 @code{make} applies for all files, including files which are targets of
 rules.
 
-Thus, if a file that is listed as a target or dependency does not exist
+Thus, if a file that is listed as a target or prerequisite does not exist
 in the current directory, @code{make} searches the directories listed in
 @code{VPATH} for a file with that name.  If a file is found in one of
-them, that file may become the dependency (see below).  Rules may then
-specify the names of files in the dependency list as if they all
+them, that file may become the prerequisite (see below).  Rules may then
+specify the names of files in the prerequisite list as if they all
 existed in the current directory.  @xref{Commands/Search, ,Writing Shell
 Commands with Directory Search}.
 
@@ -1778,12 +1863,12 @@ Clear all search paths previously specified with @code{vpath} directives.
 @end table
 
 A @code{vpath} pattern is a string containing a @samp{%} character.  The
-string must match the file name of a dependency that is being searched
+string must match the file name of a prerequisite that is being searched
 for, the @samp{%} character matching any sequence of zero or more
 characters (as in pattern rules; @pxref{Pattern Rules, ,Defining and
 Redefining Pattern Rules}).  For example, @code{%.h} matches files that
 end in @code{.h}.  (If there is no @samp{%}, the pattern must match the
-dependency exactly, which is not useful very often.)
+prerequisite exactly, which is not useful very often.)
 
 @cindex @code{%}, quoting in @code{vpath}
 @cindex @code{%}, quoting with @code{\} (backslash)
@@ -1797,9 +1882,9 @@ Backslashes that quote @samp{%} characters or other backslashes are
 removed from the pattern before it is compared to file names.  Backslashes
 that are not in danger of quoting @samp{%} characters go unmolested.@refill
 
-When a dependency fails to exist in the current directory, if the
+When a prerequisite fails to exist in the current directory, if the
 @var{pattern} in a @code{vpath} directive matches the name of the
-dependency file, then the @var{directories} in that directive are searched
+prerequisite file, then the @var{directories} in that directive are searched
 just like (and before) the directories in the @code{VPATH} variable.
 
 For example,
@@ -1809,11 +1894,11 @@ vpath %.h ../headers
 @end example
 
 @noindent
-tells @code{make} to look for any dependency whose name ends in @file{.h}
+tells @code{make} to look for any prerequisite whose name ends in @file{.h}
 in the directory @file{../headers} if the file is not found in the current
 directory.
 
-If several @code{vpath} patterns match the dependency file's name, then
+If several @code{vpath} patterns match the prerequisite file's name, then
 @code{make} processes each matching @code{vpath} directive one by one,
 searching all the directories mentioned in each directive.  @code{make}
 handles multiple @code{vpath} directives in the order in which they
@@ -1851,9 +1936,9 @@ will look for a file ending in @samp{.c} in @file{foo}, then
 @cindex algorithm for directory search
 @cindex directory search algorithm
 
-When a dependency is found through directory search, regardless of type
+When a prerequisite is found through directory search, regardless of type
 (general or selective), the pathname located may not be the one that
-@code{make} actually provides you in the dependency list.  Sometimes
+@code{make} actually provides you in the prerequisite list.  Sometimes
 the path discovered through directory search is thrown away.
 
 The algorithm @code{make} uses to decide whether to keep or abandon a
@@ -1869,16 +1954,16 @@ If the directory search is successful, that path is kept and this file
 is tentatively stored as the target.
 
 @item
-All dependencies of this target are examined using this same method.
+All prerequisites of this target are examined using this same method.
 
 @item
-After processing the dependencies, the target may or may not need to be
+After processing the prerequisites, the target may or may not need to be
 rebuilt:
 
 @enumerate a
 @item
 If the target does @emph{not} need to be rebuilt, the path to the file
-found during directory search is used for any dependency lists which
+found during directory search is used for any prerequisite lists which
 contain this target.  In short, if @code{make} doesn't need to rebuild
 the target then you use the path found via directory search.
 
@@ -1918,15 +2003,15 @@ rebuilt using the expanded path.
 @cindex shell command, and directory search
 @cindex directory search (@code{VPATH}), and shell commands
 
-When a dependency is found in another directory through directory search,
+When a prerequisite is found in another directory through directory search,
 this cannot change the commands of the rule; they will execute as written.
 Therefore, you must write the commands with care so that they will look for
-the dependency in the directory where @code{make} finds it.
+the prerequisite in the directory where @code{make} finds it.
 
 This is done with the @dfn{automatic variables} such as @samp{$^}
 (@pxref{Automatic, ,Automatic Variables}).
 For instance, the value of @samp{$^} is a
-list of all the dependencies of the rule, including the names of
+list of all the prerequisites of the rule, including the names of
 the directories in which they were found, and the value of
 @samp{$@@} is the target.  Thus:@refill
 
@@ -1941,9 +2026,9 @@ compilation by implicit rules; we use it here for consistency so it will
 affect all C compilations uniformly;
 @pxref{Implicit Variables, ,Variables Used by Implicit Rules}.)
 
-Often the dependencies include header files as well, which you do not
+Often the prerequisites include header files as well, which you do not
 want to mention in the commands.  The automatic variable @samp{$<} is
-just the first dependency:
+just the first prerequisite:
 
 @example
 VPATH = src:../headers
@@ -1955,7 +2040,7 @@ foo.o : foo.c defs.h hack.h
 @subsection Directory Search and Implicit Rules
 @cindex @code{VPATH}, and implicit rules
 @cindex directory search (@code{VPATH}), and implicit rules
-@cindex search path for dependencies (@code{VPATH}), and implicit rules
+@cindex search path for prerequisites (@code{VPATH}), and implicit rules
 @cindex implicit rule, and directory search
 @cindex implicit rule, and @code{VPATH}
 @cindex rule, implicit, and directory search
@@ -1982,20 +2067,20 @@ directory search with no extra effort.
 @cindex libraries for linking, directory search
 @cindex directory search (@code{VPATH}), and link libraries
 @cindex @code{VPATH}, and link libraries
-@cindex search path for dependencies (@code{VPATH}), and link libraries
+@cindex search path for prerequisites (@code{VPATH}), and link libraries
 @cindex @code{-l} (library search)
 @cindex link libraries, patterns matching
 @cindex @code{.LIBPATTERNS}, and link libraries
 @vindex .LIBPATTERNS
 
 Directory search applies in a special way to libraries used with the
-linker.  This special feature comes into play when you write a dependency
+linker.  This special feature comes into play when you write a prerequisite
 whose name is of the form @samp{-l@var{name}}.  (You can tell something
-strange is going on here because the dependency is normally the name of a
+strange is going on here because the prerequisite is normally the name of a
 file, and the @emph{file name} of a library generally looks like
 @file{lib@var{name}.a}, not like @samp{-l@var{name}}.)@refill
 
-When a dependency's name has the form @samp{-l@var{name}}, @code{make}
+When a prerequisite's name has the form @samp{-l@var{name}}, @code{make}
 handles it specially by searching for the file @file{lib@var{name}.so} in
 the current directory, in directories specified by matching @code{vpath}
 search paths and the @code{VPATH} search path, and then in the
@@ -2025,7 +2110,7 @@ be executed when @file{foo} is older than @file{foo.c} or than
 Although the default set of files to be searched for is
 @file{lib@var{name}.so} and @file{lib@var{name}.a}, this is customizable
 via the @code{.LIBPATTERNS} variable.  Each word in the value of this
-variable is a pattern string.  When a dependency like
+variable is a pattern string.  When a prerequisite like
 @samp{-l@var{name}} is seen, @code{make} will replace the percent in
 each pattern in the list with @var{name} and perform the above directory
 searches using that library filename.  If no library is found, the next
@@ -2067,7 +2152,7 @@ will be executed every time you say @samp{make clean}.
 
 @findex .PHONY
 The phony target will cease to work if anything ever does create a file
-named @file{clean} in this directory.  Since it has no dependencies, the
+named @file{clean} in this directory.  Since it has no prerequisites, the
 file @file{clean} would inevitably be considered up to date, and its
 commands would not be executed.  To avoid this problem, you can explicitly
 declare the target to be phony, using the special target @code{.PHONY}
@@ -2098,18 +2183,18 @@ clean:
 @end group
 @end example
 
-A phony target should not be a dependency of a real target file; if it
+A phony target should not be a prerequisite of a real target file; if it
 is, its commands are run every time @code{make} goes to update that
-file.  As long as a phony target is never a dependency of a real
+file.  As long as a phony target is never a prerequisite of a real
 target, the phony target commands will be executed only when the phony
 target is a specified goal (@pxref{Goals, ,Arguments to Specify the
 Goals}).
 
-Phony targets can have dependencies.  When one directory contains multiple
+Phony targets can have prerequisites.  When one directory contains multiple
 programs, it is most convenient to describe all of the programs in one
 makefile @file{./Makefile}.  Since the target remade by default will be the
 first one in the makefile, it is common to make this a phony target named
-@samp{all} and give it, as dependencies, all the individual programs.  For
+@samp{all} and give it, as prerequisites, all the individual programs.  For
 example:
 
 @example
@@ -2130,7 +2215,7 @@ prog3 : prog3.o sort.o utils.o
 Now you can say just @samp{make} to remake all three programs, or specify
 as arguments the ones to remake (as in @samp{make prog1 prog3}).
 
-When one phony target is a dependency of another, it serves as a subroutine
+When one phony target is a prerequisite of another, it serves as a subroutine
 of the other.  For example, here @samp{make cleanall} will delete the
 object files, the difference files, and the file @file{program}:
 
@@ -2148,13 +2233,13 @@ cleandiff :
 @end example
 
 @node Force Targets, Empty Targets, Phony Targets, Rules
-@section Rules without Commands or Dependencies
+@section Rules without Commands or Prerequisites
 @cindex force targets
 @cindex targets, force
 @cindex @code{FORCE}
-@cindex rule, no commands or dependencies
+@cindex rule, no commands or prerequisites
 
-If a rule has no dependencies or commands, and the target of the rule
+If a rule has no prerequisites or commands, and the target of the rule
 is a nonexistent file, then @code{make} imagines this target to have
 been updated whenever its rule is run.  This implies that all targets
 depending on this one will always have their commands run.
@@ -2197,10 +2282,10 @@ last-modification time, when the rule's commands were last executed.  It
 does so because one of the commands is a @code{touch} command to update the
 target file.
 
-The empty target file should have some dependencies (otherwise it
+The empty target file should have some prerequisites (otherwise it
 doesn't make sense).  When you ask to remake the empty target, the
-commands are executed if any dependency is more recent than the target;
-in other words, if a dependency has changed since the last time you
+commands are executed if any prerequisite is more recent than the target;
+in other words, if a prerequisite has changed since the last time you
 remade the target.  Here is an example:
 
 @example
@@ -2230,7 +2315,7 @@ Certain names have special meanings if they appear as targets.
 @findex .PHONY
 @item .PHONY
 
-The dependencies of the special target @code{.PHONY} are considered to
+The prerequisites of the special target @code{.PHONY} are considered to
 be phony targets.  When it is time to consider such a target,
 @code{make} will run its commands unconditionally, regardless of
 whether a file with that name exists or what its last-modification
@@ -2239,7 +2324,7 @@ time is.  @xref{Phony Targets, ,Phony Targets}.
 @findex .SUFFIXES
 @item .SUFFIXES
 
-The dependencies of the special target @code{.SUFFIXES} are the list
+The prerequisites of the special target @code{.SUFFIXES} are the list
 of suffixes to be used in checking for suffix rules.
 @xref{Suffix Rules, , Old-Fashioned Suffix Rules}.
 
@@ -2249,7 +2334,7 @@ of suffixes to be used in checking for suffix rules.
 The commands specified for @code{.DEFAULT} are used for any target for
 which no rules are found (either explicit rules or implicit rules).
 @xref{Last Resort}.  If @code{.DEFAULT} commands are specified, every
-file mentioned as a dependency, but not as a target in a rule, will have
+file mentioned as a prerequisite, but not as a target in a rule, will have
 these commands executed on its behalf.  @xref{Implicit Rule Search,
 ,Implicit Rule Search Algorithm}.
 
@@ -2267,7 +2352,7 @@ after it is no longer needed, as is normally done.
 @xref{Chained Rules, ,Chains of Implicit Rules}.
 
 You can also list the target pattern of an implicit rule (such as
-@samp{%.o}) as a dependency file of the special target @code{.PRECIOUS}
+@samp{%.o}) as a prerequisite file of the special target @code{.PRECIOUS}
 to preserve intermediate files created by rules whose target patterns
 match that file's name.
 
@@ -2277,7 +2362,7 @@ match that file's name.
 
 The targets which @code{.INTERMEDIATE} depends on are treated as
 intermediate files.  @xref{Chained Rules, ,Chains of Implicit Rules}.
-@code{.INTERMEDIATE} with no dependencies has no effect.
+@code{.INTERMEDIATE} with no prerequisites has no effect.
 
 @findex .SECONDARY
 @item .SECONDARY
@@ -2288,7 +2373,7 @@ The targets which @code{.SECONDARY} depends on are treated as
 intermediate files, except that they are never automatically deleted.
 @xref{Chained Rules, ,Chains of Implicit Rules}.
 
-@code{.SECONDARY} with no dependencies marks all file targets mentioned
+@code{.SECONDARY} with no prerequisites marks all file targets mentioned
 in the makefile as secondary.
 
 @findex .DELETE_ON_ERROR
@@ -2303,11 +2388,11 @@ does when it receives a signal.  @xref{Errors, ,Errors in Commands}.
 @findex .IGNORE
 @item .IGNORE
 
-If you specify dependencies for @code{.IGNORE}, then @code{make} will
+If you specify prerequisites for @code{.IGNORE}, then @code{make} will
 ignore errors in execution of the commands run for those particular
 files.  The commands for @code{.IGNORE} are not meaningful.
 
-If mentioned as a target with no dependencies, @code{.IGNORE} says to
+If mentioned as a target with no prerequisites, @code{.IGNORE} says to
 ignore errors in execution of commands for all files.  This usage of
 @samp{.IGNORE} is supported only for historical compatibility.  Since
 this affects every command in the makefile, it is not very useful; we
@@ -2317,11 +2402,11 @@ commands.  @xref{Errors, ,Errors in Commands}.
 @findex .SILENT
 @item .SILENT
 
-If you specify dependencies for @code{.SILENT}, then @code{make} will
+If you specify prerequisites for @code{.SILENT}, then @code{make} will
 not print the commands to remake those particular files before executing
 them.  The commands for @code{.SILENT} are not meaningful.
 
-If mentioned as a target with no dependencies, @code{.SILENT} says not
+If mentioned as a target with no prerequisites, @code{.SILENT} says not
 to print any commands before executing them.  This usage of
 @samp{.SILENT} is supported only for historical compatibility.  We
 recommend you use the more selective ways to silence specific commands.
@@ -2358,20 +2443,20 @@ A rule with multiple targets is equivalent to writing many rules, each with
 one target, and all identical aside from that.  The same commands apply to
 all the targets, but their effects may vary because you can substitute the
 actual target name into the command using @samp{$@@}.  The rule contributes
-the same dependencies to all the targets also.
+the same prerequisites to all the targets also.
 
 This is useful in two cases.
 
 @itemize @bullet
 @item
-You want just dependencies, no commands.  For example:
+You want just prerequisites, no commands.  For example:
 
 @example
 kbd.o command.o files.o: command.h
 @end example
 
 @noindent
-gives an additional dependency to each of the three object files
+gives an additional prerequisite to each of the three object files
 mentioned.
 
 @item
@@ -2406,7 +2491,7 @@ types of output, one if given @samp{-big} and one if given
 for an explanation of the @code{subst} function.
 @end itemize
 
-Suppose you would like to vary the dependencies according to the target,
+Suppose you would like to vary the prerequisites according to the target,
 much as the variable @samp{$@@} allows you to vary the commands.
 You cannot do this with multiple targets in an ordinary rule, but you can
 do it with a @dfn{static pattern rule}.
@@ -2419,9 +2504,9 @@ do it with a @dfn{static pattern rule}.
 @cindex rule, multiple for one target
 @cindex target, multiple rules for one
 
-One file can be the target of several rules.  All the dependencies
-mentioned in all the rules are merged into one list of dependencies for
-the target.  If the target is older than any dependency from any rule,
+One file can be the target of several rules.  All the prerequisites
+mentioned in all the rules are merged into one list of prerequisites for
+the target.  If the target is older than any prerequisite from any rule,
 the commands are executed.
 
 There can only be one set of commands to be executed for a file.
@@ -2434,8 +2519,8 @@ There is no reason to
 write your makefiles this way; that is why @code{make} gives you
 an error message.@refill
 
-An extra rule with just dependencies can be used to give a few extra
-dependencies to many files at once.  For example, one usually has a
+An extra rule with just prerequisites can be used to give a few extra
+prerequisites to many files at once.  For example, one usually has a
 variable named @code{objects} containing a list of all the compiler output
 files in the system being made.  An easy way to say that all of them must
 be recompiled if @file{config.h} changes is to write the following:
@@ -2449,9 +2534,9 @@ $(objects) : config.h
 
 This could be inserted or taken out without changing the rules that really
 specify how to make the object files, making it a convenient form to use if
-you wish to add the additional dependency intermittently.
+you wish to add the additional prerequisite intermittently.
 
-Another wrinkle is that the additional dependencies could be specified with
+Another wrinkle is that the additional prerequisites could be specified with
 a variable that you set with a command argument to @code{make}
 (@pxref{Overriding, ,Overriding Variables}).  For example,
 
@@ -2464,7 +2549,7 @@ $(objects) : $(extradeps)
 
 @noindent
 means that the command @samp{make extradeps=foo.h} will consider
-@file{foo.h} as a dependency of each object file, but plain @samp{make}
+@file{foo.h} as a prerequisite of each object file, but plain @samp{make}
 will not.
 
 If none of the explicit rules for a target has commands, then @code{make}
@@ -2476,13 +2561,13 @@ searches for an applicable implicit rule to find some commands
 @cindex static pattern rule
 @cindex rule, static pattern
 @cindex pattern rules, static (not implicit)
-@cindex varying dependencies
-@cindex dependencies, varying (static pattern)
+@cindex varying prerequisites
+@cindex prerequisites, varying (static pattern)
 
 @dfn{Static pattern rules} are rules which specify multiple targets and
-construct the dependency names for each target based on the target name.
+construct the prerequisite names for each target based on the target name.
 They are more general than ordinary rules with multiple targets because the
-targets do not have to have identical dependencies.  Their dependencies must
+targets do not have to have identical prerequisites.  Their prerequisites must
 be @emph{analogous}, but not necessarily @emph{identical}.
 
 @menu
@@ -2512,10 +2597,10 @@ Names}).
 @cindex target pattern, static (not implicit)
 @cindex stem
 The @var{target-pattern} and @var{dep-patterns} say how to compute the
-dependencies of each target.  Each target is matched against the
+prerequisites of each target.  Each target is matched against the
 @var{target-pattern} to extract a part of the target name, called the
 @dfn{stem}.  This stem is substituted into each of the @var{dep-patterns}
-to make the dependency names (one from each @var{dep-pattern}).
+to make the prerequisite names (one from each @var{dep-pattern}).
 
 Each pattern normally contains the character @samp{%} just once.  When the
 @var{target-pattern} matches a target, the @samp{%} can match any part of
@@ -2524,13 +2609,13 @@ pattern must match exactly.  For example, the target @file{foo.o} matches
 the pattern @samp{%.o}, with @samp{foo} as the stem.  The targets
 @file{foo.c} and @file{foo.out} do not match that pattern.@refill
 
-@cindex dependency pattern, static (not implicit)
-The dependency names for each target are made by substituting the stem
-for the @samp{%} in each dependency pattern.  For example, if one
-dependency pattern is @file{%.c}, then substitution of the stem
-@samp{foo} gives the dependency name @file{foo.c}.  It is legitimate
-to write a dependency pattern that does not contain @samp{%}; then this
-dependency is the same for all targets.
+@cindex prerequisite pattern, static (not implicit)
+The prerequisite names for each target are made by substituting the stem
+for the @samp{%} in each prerequisite pattern.  For example, if one
+prerequisite pattern is @file{%.c}, then substitution of the stem
+@samp{foo} gives the prerequisite name @file{foo.c}.  It is legitimate
+to write a prerequisite pattern that does not contain @samp{%}; then this
+prerequisite is the same for all targets.
 
 @cindex @code{%}, quoting in static pattern
 @cindex @code{%}, quoting with @code{\} (backslash)
@@ -2564,7 +2649,7 @@ $(objects): %.o: %.c
 
 @noindent
 Here @samp{$<} is the automatic variable that holds the name of the
-dependency and @samp{$@@} is the automatic variable that holds the name
+prerequisite and @samp{$@@} is the automatic variable that holds the name
 of the target; see @ref{Automatic, , Automatic Variables}.
 
 Each target specified must match the target pattern; a warning is issued
@@ -2610,12 +2695,12 @@ stem, either @samp{big} or @samp{little}.
 A static pattern rule has much in common with an implicit rule defined as a
 pattern rule (@pxref{Pattern Rules, ,Defining and Redefining Pattern Rules}).
 Both have a pattern for the target and patterns for constructing the
-names of dependencies.  The difference is in how @code{make} decides
+names of prerequisites.  The difference is in how @code{make} decides
 @emph{when} the rule applies.
 
 An implicit rule @emph{can} apply to any target that matches its pattern,
 but it @emph{does} apply only when the target has no commands otherwise
-specified, and only when the dependencies can be found.  If more than one
+specified, and only when the prerequisites can be found.  If more than one
 implicit rule appears applicable, only one applies; the choice depends on
 the order of rules.
 
@@ -2642,7 +2727,7 @@ With static pattern rules, there is no uncertainty: each rule applies
 to precisely the targets specified.
 @end itemize
 
-@node Double-Colon, Automatic Dependencies, Static Pattern, Rules
+@node Double-Colon, Automatic Prerequisites, Static Pattern, Rules
 @section Double-Colon Rules
 @cindex double-colon rules
 @cindex rule, double-colon (@code{::})
@@ -2656,7 +2741,7 @@ ordinary rules when the same target appears in more than one rule.
 When a target appears in multiple rules, all the rules must be the same
 type: all ordinary, or all double-colon.  If they are double-colon, each of
 them is independent of the others.  Each double-colon rule's commands are
-executed if the target is older than any dependencies of that rule.  This
+executed if the target is older than any prerequisites of that rule.  This
 can result in executing none, any, or all of the double-colon rules.
 
 Double-colon rules with the same target are in fact completely separate
@@ -2669,18 +2754,18 @@ sense are those where the order of executing the commands would not matter.
 
 Double-colon rules are somewhat obscure and not often very useful; they
 provide a mechanism for cases in which the method used to update a target
-differs depending on which dependency files caused the update, and such
+differs depending on which prerequisite files caused the update, and such
 cases are rare.
 
 Each double-colon rule should specify commands; if it does not, an
 implicit rule will be used if one applies.
 @xref{Implicit Rules, ,Using Implicit Rules}.
 
-@node Automatic Dependencies,  , Double-Colon, Rules
-@section Generating Dependencies Automatically
-@cindex dependencies, automatic generation
-@cindex automatic generation of dependencies
-@cindex generating dependencies automatically
+@node Automatic Prerequisites,  , Double-Colon, Rules
+@section Generating Prerequisites Automatically
+@cindex prerequisites, automatic generation
+@cindex automatic generation of prerequisites
+@cindex generating prerequisites automatically
 
 In the makefile for a program, many of the rules you need to write often
 say only that some object file depends on some header
@@ -2720,31 +2805,31 @@ main.o : main.c defs.h
 Thus you no longer have to write all those rules yourself.
 The compiler will do it for you.
 
-Note that such a dependency constitutes mentioning @file{main.o} in a
+Note that such a prerequisite constitutes mentioning @file{main.o} in a
 makefile, so it can never be considered an intermediate file by implicit
 rule search.  This means that @code{make} won't ever remove the file
 after using it; @pxref{Chained Rules, ,Chains of Implicit Rules}.
 
 @cindex @code{make depend}
 With old @code{make} programs, it was traditional practice to use this
-compiler feature to generate dependencies on demand with a command like
+compiler feature to generate prerequisites on demand with a command like
 @samp{make depend}.  That command would create a file @file{depend}
-containing all the automatically-generated dependencies; then the
+containing all the automatically-generated prerequisites; then the
 makefile could use @code{include} to read them in (@pxref{Include}).
 
 In GNU @code{make}, the feature of remaking makefiles makes this
 practice obsolete---you need never tell @code{make} explicitly to
-regenerate the dependencies, because it always regenerates any makefile
+regenerate the prerequisites, because it always regenerates any makefile
 that is out of date.  @xref{Remaking Makefiles}.
 
-The practice we recommend for automatic dependency generation is to have
+The practice we recommend for automatic prerequisite generation is to have
 one makefile corresponding to each source file.  For each source file
 @file{@var{name}.c} there is a makefile @file{@var{name}.d} which lists
 what files the object file @file{@var{name}.o} depends on.  That way
 only the source files that have changed need to be rescanned to produce
-the new dependencies.
+the new prerequisites.
 
-Here is the pattern rule to generate a file of dependencies (i.e., a makefile)
+Here is the pattern rule to generate a file of prerequisites (i.e., a makefile)
 called @file{@var{name}.d} from a C source file called @file{@var{name}.c}:
 
 @smallexample
@@ -2767,7 +2852,7 @@ status from the compiler.
 
 @cindex @code{-MM} (to GNU compiler)
 With the GNU C compiler, you may wish to use the @samp{-MM} flag instead
-of @samp{-M}.  This omits dependencies on system header files.
+of @samp{-M}.  This omits prerequisites on system header files.
 @xref{Preprocessor Options, , Options Controlling the Preprocessor,
 gcc.info, Using GNU CC}, for details.
 
@@ -2789,7 +2874,7 @@ main.o main.d : main.c defs.h
 @cindex @code{.d}
 This makes each @samp{.d} file depend on all the source and header files
 that the corresponding @samp{.o} file depends on.  @code{make} then
-knows it must regenerate the dependencies whenever any of the source or
+knows it must regenerate the prerequisites whenever any of the source or
 header files changes.
 
 Once you've defined the rule to remake the @samp{.d} files,
@@ -2806,7 +2891,7 @@ include $(sources:.c=.d)
 
 @noindent
 (This example uses a substitution variable reference to translate the
-list of source files @samp{foo.c bar.c} into a list of dependency
+list of source files @samp{foo.c bar.c} into a list of prerequisite
 makefiles, @samp{foo.d bar.d}.  @xref{Substitution Refs}, for full
 information on substitution references.)  Since the @samp{.d} files are
 makefiles like any others, @code{make} will remake them as necessary
@@ -2820,7 +2905,7 @@ with no further work from you.  @xref{Remaking Makefiles}.
 
 The commands of a rule consist of shell command lines to be executed one
 by one.  Each command line must start with a tab, except that the first
-command line may be attached to the target-and-dependencies line with a
+command line may be attached to the target-and-prerequisites line with a
 semicolon in between.  Blank lines and lines of just comments may appear
 among the command lines; they are ignored.  (But beware, an apparently
 ``blank'' line that begins with a tab is @emph{not} blank!  It is an
@@ -2890,7 +2975,7 @@ actually doing them.
 The @samp{-s} or @samp{--silent}
 flag to @code{make} prevents all echoing, as if all commands
 started with @samp{@@}.  A rule in the makefile for the special target
-@code{.SILENT} without dependencies has the same effect
+@code{.SILENT} without prerequisites has the same effect
 (@pxref{Special Targets, ,Special Built-in Target Names}).
 @code{.SILENT} is essentially obsolete since @samp{@@} is more flexible.@refill
 
@@ -3152,7 +3237,7 @@ This causes @code{rm} to continue even if it is unable to remove a file.
 When you run @code{make} with the @samp{-i} or @samp{--ignore-errors}
 flag, errors are ignored in all commands of all rules.  A rule in the
 makefile for the special target @code{.IGNORE} has the same effect, if
-there are no dependencies.  These ways of ignoring errors are obsolete
+there are no prerequisites.  These ways of ignoring errors are obsolete
 because @samp{-} is more flexible.
 
 When errors are to be ignored, because of either a @samp{-} or the
@@ -3172,7 +3257,7 @@ have not been achieved.
 Normally @code{make} gives up immediately in this circumstance, returning a
 nonzero status.  However, if the @samp{-k} or @samp{--keep-going}
 flag is specified, @code{make}
-continues to consider the other dependencies of the pending targets,
+continues to consider the other prerequisites of the pending targets,
 remaking them if necessary, before it gives up and returns nonzero status.
 For example, after an error in compiling one object file, @samp{make -k}
 will continue compiling other object files even though it already knows
@@ -3232,7 +3317,7 @@ tries to link an object file half of which is missing.
 @findex .PRECIOUS
 You can prevent the deletion of a target file in this way by making the
 special target @code{.PRECIOUS} depend on it.  Before remaking a target,
-@code{make} checks to see whether it appears on the dependencies of
+@code{make} checks to see whether it appears on the prerequisites of
 @code{.PRECIOUS}, and thereby decides whether the target should be deleted
 if a signal happens.  Some reasons why you might do this are that the
 target is updated in some atomic fashion, or exists only to record a
@@ -3730,7 +3815,7 @@ variable you are defining.
 @xref{Defining, ,Defining Variables Verbatim},
 for a complete explanation of @code{define}.
 
-The first command in this example runs Yacc on the first dependency of
+The first command in this example runs Yacc on the first prerequisite of
 whichever rule uses the canned sequence.  The output file from Yacc is
 always named @file{y.tab.c}.  The second command moves the output to the
 rule's target file name.
@@ -3825,9 +3910,9 @@ stamp-foo: foo.in
 @end ignore
 
 You may be inclined to define empty command strings for targets that are
-not actual files, but only exist so that their dependencies can be
+not actual files, but only exist so that their prerequisites can be
 remade.  However, this is not the best way to do that, because the
-dependencies may not be remade properly if the target file actually does exist.
+prerequisites may not be remade properly if the target file actually does exist.
 @xref{Phony Targets, ,Phony Targets}, for a better way to do this.
 
 @node Using Variables, Conditionals, Commands, Top
@@ -3839,7 +3924,7 @@ dependencies may not be remade properly if the target file actually does exist.
 
 A @dfn{variable} is a name defined in a makefile to represent a string
 of text, called the variable's @dfn{value}.  These values are
-substituted by explicit request into targets, dependencies, commands,
+substituted by explicit request into targets, prerequisites, commands,
 and other parts of the makefile.  (In some other versions of @code{make},
 variables are called @dfn{macros}.)
 @cindex macro
@@ -3908,7 +3993,7 @@ of the variable in parentheses or braces: either @samp{$(foo)} or
 special significance of @samp{$} is why you must write @samp{$$} to have
 the effect of a single dollar sign in a file name or command.
 
-Variable references can be used in any context: targets, dependencies,
+Variable references can be used in any context: targets, prerequisites,
 commands, most directives, and new variable values.  Here is an
 example of a common case, where a variable holds the names of all the
 object files in a program:
@@ -4845,7 +4930,7 @@ variable value to be preferred.
 
 There is one more special feature of target-specific variables: when you
 define a target-specific variable, that variable value is also in effect
-for all dependencies of this target (unless those dependencies override
+for all prerequisites of this target (unless those prerequisites override
 it with their own target-specific variable value).  So, for example, a
 statement like this:
 
@@ -4858,7 +4943,7 @@ prog : prog.o foo.o bar.o
 will set @code{CFLAGS} to @samp{-g} in the command script for
 @file{prog}, but it will also set @code{CFLAGS} to @samp{-g} in the
 command scripts that create @file{prog.o}, @file{foo.o}, and
-@file{bar.o}, and any command scripts which create their dependencies.
+@file{bar.o}, and any command scripts which create their prerequisites.
 
 @node Pattern-specific,  , Target-specific, Using Variables
 @section Pattern-specific Variable Values
@@ -5504,8 +5589,8 @@ it for this purpose even if you don't care about the sort order.
 Here is a realistic example of the use of @code{subst} and
 @code{patsubst}.  Suppose that a makefile uses the @code{VPATH} variable
 to specify a list of directories that @code{make} should search for
-dependency files
-(@pxref{General Search, , @code{VPATH} Search Path for All Dependencies}).
+prerequisite files
+(@pxref{General Search, , @code{VPATH} Search Path for All Prerequisites}).
 This example shows how to
 tell the C compiler to search for header files in the same list of
 directories.@refill
@@ -6240,7 +6325,7 @@ that order, and use the first of these three which exists or can be made
 
 The @dfn{goals} are the targets that @code{make} should strive ultimately
 to update.  Other targets are updated as well if they appear as
-dependencies of goals, or dependencies of dependencies of goals, etc.
+prerequisites of goals, or prerequisites of prerequisites of goals, etc.
 
 By default, the goal is the first target in the makefile (not counting
 targets that start with a period).  Therefore, makefiles are usually
@@ -6267,7 +6352,7 @@ on the command line, this variable is empty.  Note that this variable
 should be used only in special circumstances.
 
 An example of appropriate use is to avoid including @file{.d} files
-during @code{clean} rules (@pxref{Automatic Dependencies}), so
+during @code{clean} rules (@pxref{Automatic Prerequisites}), so
 @code{make} won't create them only to immediately remove them
 again:@refill
 
@@ -6297,7 +6382,7 @@ If you are working on the program @code{size}, you might want to say
 Another use of specifying a goal is to make files that are not normally
 made.  For example, there may be a file of debugging output, or a
 version of the program that is compiled specially for testing, which has
-a rule in the makefile but is not a dependency of the default goal.
+a rule in the makefile but is not a prerequisite of the default goal.
 
 Another use of specifying a goal is to run the commands associated with
 a phony target (@pxref{Phony Targets}) or empty target (@pxref{Empty
@@ -6487,12 +6572,12 @@ information about @code{make} or about the makefiles in use
 @cindex recompilation, avoiding
 
 Sometimes you may have changed a source file but you do not want to
-recompile all the files that depend on it.  For example, suppose you add a
-macro or a declaration to a header file that many other files depend on.
-Being conservative, @code{make} assumes that any change in the header file
-requires recompilation of all dependent files, but you know that they do not
-need to be recompiled and you would rather not waste the time waiting for
-them to compile.
+recompile all the files that depend on it.  For example, suppose you add
+a macro or a declaration to a header file that many other files depend
+on.  Being conservative, @code{make} assumes that any change in the
+header file requires recompilation of all dependent files, but you know
+that they do not need to be recompiled and you would rather not waste
+the time waiting for them to compile.
 
 If you anticipate the problem before changing the header file, you can
 use the @samp{-t} flag.  This flag tells @code{make} not to run the
@@ -6607,14 +6692,14 @@ as possible.
 @cindex @code{--keep-going}
 On these occasions, you should use the @samp{-k} or
 @samp{--keep-going} flag.  This tells @code{make} to continue to
-consider the other dependencies of the pending targets, remaking them
+consider the other prerequisites of the pending targets, remaking them
 if necessary, before it gives up and returns nonzero status.  For
 example, after an error in compiling one object file, @samp{make -k}
 will continue compiling other object files even though it already
 knows that linking them will be impossible.  In addition to continuing
 after failed shell commands, @samp{make -k} will continue as much as
 possible after discovering that it does not know how to make a target
-or dependency file.  This will always cause an error message, but
+or prerequisite file.  This will always cause an error message, but
 without @samp{-k}, it is a fatal error (@pxref{Options Summary,
 ,Summary of Options}).@refill
 
@@ -6722,7 +6807,7 @@ Note that this option is ignored on MS-DOS.
 @cindex @code{--keep-going}
 Continue as much as possible after an error.  While the target that
 failed, and those that depend on it, cannot be remade, the other
-dependencies of these targets can be processed all the same.
+prerequisites of these targets can be processed all the same.
 @xref{Testing, ,Testing the Compilation of a Program}.
 
 @item -l [@var{load}]
@@ -6756,7 +6841,7 @@ Print the commands that would be executed, but do not execute them.
 @itemx --assume-old=@var{file}
 @cindex @code{--assume-old}
 Do not remake the file @var{file} even if it is older than its
-dependencies, and do not remake anything on account of changes in
+prerequisites, and do not remake anything on account of changes in
 @var{file}.  Essentially the file is treated as very old and its rules
 are ignored.  @xref{Avoiding Compilation, ,Avoiding Recompilation of
 Some Files}.@refill
@@ -6974,40 +7059,40 @@ will automatically look for an implicit rule that tells how to update it.
 This happens whether or not the file @file{foo.o} currently exists.
 
 If an implicit rule is found, it can supply both commands and one or
-more dependencies (the source files).  You would want to write a rule
+more prerequisites (the source files).  You would want to write a rule
 for @file{foo.o} with no command lines if you need to specify additional
-dependencies, such as header files, that the implicit rule cannot
+prerequisites, such as header files, that the implicit rule cannot
 supply.
 
-Each implicit rule has a target pattern and dependency patterns.  There may
+Each implicit rule has a target pattern and prerequisite patterns.  There may
 be many implicit rules with the same target pattern.  For example, numerous
 rules make @samp{.o} files: one, from a @samp{.c} file with the C compiler;
 another, from a @samp{.p} file with the Pascal compiler; and so on.  The rule
-that actually applies is the one whose dependencies exist or can be made.
+that actually applies is the one whose prerequisites exist or can be made.
 So, if you have a file @file{foo.c}, @code{make} will run the C compiler;
 otherwise, if you have a file @file{foo.p}, @code{make} will run the Pascal
 compiler; and so on.
 
 Of course, when you write the makefile, you know which implicit rule you
 want @code{make} to use, and you know it will choose that one because you
-know which possible dependency files are supposed to exist.
+know which possible prerequisite files are supposed to exist.
 @xref{Catalogue of Rules, ,Catalogue of Implicit Rules},
 for a catalogue of all the predefined implicit rules.
 
-Above, we said an implicit rule applies if the required dependencies ``exist
+Above, we said an implicit rule applies if the required prerequisites ``exist
 or can be made''.  A file ``can be made'' if it is mentioned explicitly in
-the makefile as a target or a dependency, or if an implicit rule can be
-recursively found for how to make it.  When an implicit dependency is the
+the makefile as a target or a prerequisite, or if an implicit rule can be
+recursively found for how to make it.  When an implicit prerequisite is the
 result of another implicit rule, we say that @dfn{chaining} is occurring.
 @xref{Chained Rules, ,Chains of Implicit Rules}.
 
 In general, @code{make} searches for an implicit rule for each target, and
 for each double-colon rule, that has no commands.  A file that is mentioned
-only as a dependency is considered a target whose rule specifies nothing,
+only as a prerequisite is considered a target whose rule specifies nothing,
 so implicit rule search happens for it.  @xref{Implicit Rule Search, ,Implicit Rule Search Algorithm}, for the
 details of how the search is done.
 
-Note that explicit dependencies do not influence implicit rule search.
+Note that explicit prerequisites do not influence implicit rule search.
 For example, consider this explicit rule:
 
 @example
@@ -7015,7 +7100,7 @@ foo.o: foo.p
 @end example
 
 @noindent
-The dependency on @file{foo.p} does not necessarily mean that
+The prerequisite on @file{foo.p} does not necessarily mean that
 @code{make} will remake @file{foo.o} according to the implicit rule to
 make an object file, a @file{.o} file, from a Pascal source file, a
 @file{.p} file.  For example, if @file{foo.c} also exists, the implicit
@@ -7042,7 +7127,7 @@ canceling or overriding an implicit rule.  The @samp{-r} or
 Not all of these rules will always be defined, even when the @samp{-r}
 option is not given.  Many of the predefined implicit rules are
 implemented in @code{make} as suffix rules, so which ones will be
-defined depends on the @dfn{suffix list} (the list of dependencies of
+defined depends on the @dfn{suffix list} (the list of prerequisites of
 the special target @code{.SUFFIXES}).  The default suffix list is:
 @code{.out}, @code{.a}, @code{.ln}, @code{.o}, @code{.c}, @code{.cc},
 @code{.C}, @code{.p}, @code{.f}, @code{.F}, @code{.r}, @code{.y},
@@ -7050,7 +7135,7 @@ the special target @code{.SUFFIXES}).  The default suffix list is:
 @code{.h}, @code{.info}, @code{.dvi}, @code{.tex}, @code{.texinfo},
 @code{.texi}, @code{.txinfo}, @code{.w}, @code{.ch} @code{.web},
 @code{.sh}, @code{.elc}, @code{.el}.  All of the implicit rules
-described below whose dependencies have one of these suffixes are
+described below whose prerequisites have one of these suffixes are
 actually suffix rules.  If you modify the suffix list, the only
 predefined suffix rules in effect will be those named by one or two of
 the suffixes that are on the list you specify; rules whose suffixes fail
@@ -7564,7 +7649,7 @@ considers a target that depends on @var{b}, it invariably creates
 @var{b} and then updates the target from @var{b}.  But if @var{b} is an
 intermediate file, then @code{make} can leave well enough alone.  It
 won't bother updating @var{b}, or the ultimate target, unless some
-dependency of @var{b} is newer than that target or there is some other
+prerequisite of @var{b} is newer than that target or there is some other
 reason to update that target.
 
 The second difference is that if @code{make} @emph{does} create @var{b}
@@ -7575,8 +7660,8 @@ exist before @code{make} also does not exist after @code{make}.
 command showing which file it is deleting.
 
 Ordinarily, a file cannot be intermediate if it is mentioned in the
-makefile as a target or dependency.  However, you can explicitly mark a
-file as intermediate by listing it as a dependency of the special target
+makefile as a target or prerequisite.  However, you can explicitly mark a
+file as intermediate by listing it as a prerequisite of the special target
 @code{.INTERMEDIATE}.  This takes effect even if the file is mentioned
 explicitly in some other way.
 
@@ -7584,14 +7669,14 @@ explicitly in some other way.
 @cindex preserving intermediate files
 @cindex secondary files
 You can prevent automatic deletion of an intermediate file by marking it
-as a @dfn{secondary} file.  To do this, list it as a dependency of the
+as a @dfn{secondary} file.  To do this, list it as a prerequisite of the
 special target @code{.SECONDARY}.  When a file is secondary, @code{make}
 will not create the file merely because it does not already exist, but
 @code{make} does not automatically delete the file.  Marking a file as
 secondary also marks it as intermediate.
 
 You can list the target pattern of an implicit rule (such as @samp{%.o})
-as a dependency of the special target @code{.PRECIOUS} to preserve
+as a prerequisite of the special target @code{.PRECIOUS} to preserve
 intermediate files made by implicit rules whose target patterns match
 that file's name; see @ref{Interrupts}.@refill
 @cindex preserving with @code{.PRECIOUS}
@@ -7624,7 +7709,7 @@ You define an implicit rule by writing a @dfn{pattern rule}.  A pattern
 rule looks like an ordinary rule, except that its target contains the
 character @samp{%} (exactly one of them).  The target is considered a
 pattern for matching file names; the @samp{%} can match any nonempty
-substring, while other characters match only themselves.  The dependencies
+substring, while other characters match only themselves.  The prerequisites
 likewise use @samp{%} to show how their names relate to the target name.
 
 Thus, a pattern rule @samp{%.o : %.c} says how to make any file
@@ -7665,12 +7750,12 @@ with @samp{s.}, ends in @samp{.c} and is at least five characters long.
 (There must be at least one character to match the @samp{%}.)  The substring
 that the @samp{%} matches is called the @dfn{stem}.@refill
 
-@samp{%} in a dependency of a pattern rule stands for the same stem
+@samp{%} in a prerequisite of a pattern rule stands for the same stem
 that was matched by the @samp{%} in the target.  In order for
 the pattern rule to apply, its target pattern must match the file name
-under consideration, and its dependency patterns must name files that
-exist or can be made.  These files become dependencies of the target.
-@cindex dependency pattern, implicit
+under consideration, and its prerequisite patterns must name files that
+exist or can be made.  These files become prerequisites of the target.
+@cindex prerequisite pattern, implicit
 
 Thus, a rule of the form
 
@@ -7680,27 +7765,27 @@ Thus, a rule of the form
 
 @noindent
 specifies how to make a file @file{@var{n}.o}, with another file
-@file{@var{n}.c} as its dependency, provided that @file{@var{n}.c}
+@file{@var{n}.c} as its prerequisite, provided that @file{@var{n}.c}
 exists or can be made.
 
-There may also be dependencies that do not use @samp{%}; such a dependency
+There may also be prerequisites that do not use @samp{%}; such a prerequisite
 attaches to every file made by this pattern rule.  These unvarying
-dependencies are useful occasionally.
+prerequisites are useful occasionally.
 
-A pattern rule need not have any dependencies that contain @samp{%}, or
-in fact any dependencies at all.  Such a rule is effectively a general
+A pattern rule need not have any prerequisites that contain @samp{%}, or
+in fact any prerequisites at all.  Such a rule is effectively a general
 wildcard.  It provides a way to make any file that matches the target
 pattern.  @xref{Last Resort}.
 
 @c !!! The end of of this paragraph should be rewritten.  --bob
 Pattern rules may have more than one target.  Unlike normal rules, this
-does not act as many different rules with the same dependencies and
+does not act as many different rules with the same prerequisites and
 commands.  If a pattern rule has multiple targets, @code{make} knows that
 the rule's commands are responsible for making all of the targets.  The
 commands are executed only once to make all the targets.  When searching
 for a pattern rule to match a target, the target patterns of a rule other
 than the one that matches the target in need of a rule are incidental:
-@code{make} worries only about giving commands and dependencies to the file
+@code{make} worries only about giving commands and prerequisites to the file
 presently in question.  However, when this file's commands are run, the
 other targets are marked as having been updated themselves.
 @cindex multiple targets, in pattern rule
@@ -7711,8 +7796,8 @@ since this is the order in which they are considered.
 Of equally applicable
 rules, only the first one found is used.  The rules you write take precedence
 over those that are built in.  Note however, that a rule whose
-dependencies actually exist or are mentioned always takes priority over a
-rule with dependencies that must be made by chaining other implicit rules.
+prerequisites actually exist or are mentioned always takes priority over a
+rule with prerequisites that must be made by chaining other implicit rules.
 @cindex pattern rules, order of
 @cindex order of pattern rules
 
@@ -7745,8 +7830,8 @@ Here is a second built-in rule:
 defines a rule that can make any file @file{@var{x}} whatsoever from a
 corresponding file @file{@var{x},v} in the subdirectory @file{RCS}.  Since
 the target is @samp{%}, this rule will apply to any file whatever, provided
-the appropriate dependency file exists.  The double colon makes the rule
-@dfn{terminal}, which means that its dependency may not be an intermediate
+the appropriate prerequisite file exists.  The double colon makes the rule
+@dfn{terminal}, which means that its prerequisite may not be an intermediate
 file (@pxref{Match-Anything Rules, ,Match-Anything Pattern Rules}).@refill
 
 @need 500
@@ -7766,12 +7851,12 @@ make both @file{@var{x}.tab.c} and @file{@var{x}.tab.h}.  If the file
 @file{foo} depends on the files @file{parse.tab.o} and @file{scan.o}
 and the file @file{scan.o} depends on the file @file{parse.tab.h},
 when @file{parse.y} is changed, the command @samp{bison -d parse.y}
-will be executed only once, and the dependencies of both
+will be executed only once, and the prerequisites of both
 @file{parse.tab.o} and @file{scan.o} will be satisfied.  (Presumably
 the file @file{parse.tab.o} will be recompiled from @file{parse.tab.c}
 and the file @file{scan.o} from @file{scan.c}, while @file{foo} is
 linked from @file{parse.tab.o}, @file{scan.o}, and its other
-dependencies, and it will execute happily ever after.)@refill
+prerequisites, and it will execute happily ever after.)@refill
 
 @node Automatic, Pattern Match, Pattern Examples, Pattern Rules
 @subsection Automatic Variables
@@ -7786,7 +7871,7 @@ because the name is different each time the implicit rule is applied.
 
 What you do is use a special feature of @code{make}, the @dfn{automatic
 variables}.  These variables have values computed afresh for each rule that
-is executed, based on the target and dependencies of the rule.  In this
+is executed, based on the target and prerequisites of the rule.  In this
 example, you would use @samp{$@@} for the object file name and @samp{$<}
 for the source file name.
 
@@ -7813,35 +7898,35 @@ empty when the target is not an archive member.
 @vindex $<
 @vindex < @r{(automatic variable)}
 @item $<
-The name of the first dependency.  If the target got its commands from
-an implicit rule, this will be the first dependency added by the
+The name of the first prerequisite.  If the target got its commands from
+an implicit rule, this will be the first prerequisite added by the
 implicit rule (@pxref{Implicit Rules}).
 
 @vindex $?
 @vindex ? @r{(automatic variable)}
 @item $?
-The names of all the dependencies that are newer than the target, with
-spaces between them.  For dependencies which are archive members, only
+The names of all the prerequisites that are newer than the target, with
+spaces between them.  For prerequisites which are archive members, only
 the member named is used (@pxref{Archives}).
-@cindex dependencies, list of changed
-@cindex list of changed dependencies
+@cindex prerequisites, list of changed
+@cindex list of changed prerequisites
 
 @vindex $^
 @vindex ^ @r{(automatic variable)}
 @item $^
-The names of all the dependencies, with spaces between them.  For
-dependencies which are archive members, only the member named is used
-(@pxref{Archives}).  A target has only one dependency on each other file
+The names of all the prerequisites, with spaces between them.  For
+prerequisites which are archive members, only the member named is used
+(@pxref{Archives}).  A target has only one prerequisite on each other file
 it depends on, no matter how many times each file is listed as a
-dependency.  So if you list a dependency more than once for a target,
+prerequisite.  So if you list a prerequisite more than once for a target,
 the value of @code{$^} contains just one copy of the name.
-@cindex dependencies, list of all
-@cindex list of all dependencies
+@cindex prerequisites, list of all
+@cindex list of all prerequisites
 
 @vindex $+
 @vindex + @r{(automatic variable)}
 @item $+
-This is like @samp{$^}, but dependencies listed more than once are
+This is like @samp{$^}, but prerequisites listed more than once are
 duplicated in the order they were listed in the makefile.  This is
 primarily useful for use in linking commands where it is meaningful to
 repeat library file names in a particular order.
@@ -7872,7 +7957,7 @@ suffix, @samp{$*} is set to the empty string for that rule.
 @end table
 
 @samp{$?} is useful even in explicit rules when you wish to operate on only
-the dependencies that have changed.  For example, suppose that an archive
+the prerequisites that have changed.  For example, suppose that an archive
 named @file{lib} is supposed to contain copies of several object files.
 This rule copies just the changed object files into the archive:
 
@@ -7938,7 +8023,7 @@ of the form @file{@var{archive}(@var{member})} and is useful only when
 @vindex <F @r{(automatic variable)}
 @itemx $(<F)
 The directory part and the file-within-directory
-part of the first dependency.
+part of the first prerequisite.
 
 @vindex $(^D)
 @vindex ^D @r{(automatic variable)}
@@ -7947,7 +8032,7 @@ part of the first dependency.
 @vindex ^F @r{(automatic variable)}
 @itemx $(^F)
 Lists of the directory parts and the file-within-directory
-parts of all dependencies.
+parts of all prerequisites.
 
 @vindex $(?D)
 @vindex ?D @r{(automatic variable)}
@@ -7956,7 +8041,7 @@ parts of all dependencies.
 @vindex ?F @r{(automatic variable)}
 @itemx $(?F)
 Lists of the directory parts and the file-within-directory parts of
-all dependencies that are newer than the target.
+all prerequisites that are newer than the target.
 @end table
 
 Note that we use a special stylistic convention when we talk about these
@@ -7977,9 +8062,9 @@ either or both of which may be empty.  The pattern matches a file name only
 if the file name starts with the prefix and ends with the suffix, without
 overlap.  The text between the prefix and the suffix is called the
 @dfn{stem}.  Thus, when the pattern @samp{%.o} matches the file name
-@file{test.o}, the stem is @samp{test}.  The pattern rule dependencies are
+@file{test.o}, the stem is @samp{test}.  The pattern rule prerequisites are
 turned into actual file names by substituting the stem for the character
-@samp{%}.  Thus, if in the same example one of the dependencies is written
+@samp{%}.  Thus, if in the same example one of the prerequisites is written
 as @samp{%.c}, it expands to @samp{test.c}.@refill
 
 When the target pattern does not contain a slash (and it usually does
@@ -7987,14 +8072,14 @@ not), directory names in the file names are removed from the file name
 before it is compared with the target prefix and suffix.  After the
 comparison of the file name to the target pattern, the directory
 names, along with the slash that ends them, are added on to the
-dependency file names generated from the pattern rule's dependency
+prerequisite file names generated from the pattern rule's prerequisite
 patterns and the file name. The directories are ignored only for the
 purpose of finding an implicit rule to use, not in the application of
 that rule.  Thus, @samp{e%t} matches the file name @file{src/eat},
-with @samp{src/a} as the stem.  When dependencies are turned into file
+with @samp{src/a} as the stem.  When prerequisites are turned into file
 names, the directories from the stem are added at the front, while the
 rest of the stem is substituted for the @samp{%}.  The stem
-@samp{src/a} with a dependency pattern @samp{c%r} gives the file name
+@samp{src/a} with a prerequisite pattern @samp{c%r} gives the file name
 @file{src/car}.@refill
 
 @node Match-Anything Rules, Canceling Rules, Pattern Match, Pattern Rules
@@ -8006,7 +8091,7 @@ When a pattern rule's target is just @samp{%}, it matches any file name
 whatever.  We call these rules @dfn{match-anything} rules.  They are very
 useful, but it can take a lot of time for @code{make} to think about them,
 because it must consider every such rule for each file name listed either
-as a target or as a dependency.
+as a target or as a prerequisite.
 
 Suppose the makefile mentions @file{foo.c}.  For this target, @code{make}
 would have to consider making it by linking an object file @file{foo.c.o},
@@ -8028,7 +8113,7 @@ choose one or the other for that rule.
 
 One choice is to mark the match-anything rule as @dfn{terminal} by defining
 it with a double colon.  When a rule is terminal, it does not apply unless
-its dependencies actually exist.  Dependencies that could be made with
+its prerequisites actually exist.  Prerequisites that could be made with
 other implicit rules are not good enough.  In other words, no further
 chaining is allowed beyond a terminal rule.
 
@@ -8061,7 +8146,7 @@ other specific type of data (such as a C source file).
 
 Special built-in dummy pattern rules are provided solely to recognize
 certain file names so that nonterminal match-anything rules will not be
-considered.  These dummy rules have no dependencies and no commands, and
+considered.  These dummy rules have no prerequisites and no commands, and
 they are ignored for all other purposes.  For example, the built-in
 implicit rule
 
@@ -8082,12 +8167,12 @@ suffix listed as valid for use in suffix rules (@pxref{Suffix Rules, ,Old-Fashio
 
 You can override a built-in implicit rule (or one you have defined
 yourself) by defining a new pattern rule with the same target and
-dependencies, but different commands.  When the new rule is defined, the
+prerequisites, but different commands.  When the new rule is defined, the
 built-in one is replaced.  The new rule's position in the sequence of
 implicit rules is determined by where you write the new rule.
 
 You can cancel a built-in implicit rule by defining a pattern rule with the
-same target and dependencies, but no commands.  For example, the following
+same target and prerequisites, but no commands.  For example, the following
 would cancel the rule that runs the assembler:
 
 @example
@@ -8100,10 +8185,10 @@ would cancel the rule that runs the assembler:
 @cindex default rules, last-resort
 
 You can define a last-resort implicit rule by writing a terminal
-match-anything pattern rule with no dependencies (@pxref{Match-Anything
+match-anything pattern rule with no prerequisites (@pxref{Match-Anything
 Rules}).  This is just like any other pattern rule; the only thing
 special about it is that it will match any target.  So such a rule's
-commands are used for all targets and dependencies that have no commands
+commands are used for all targets and prerequisites that have no commands
 of their own and for which no other implicit rule applies.
 
 For example, when testing a makefile, you might not care if the source
@@ -8115,18 +8200,18 @@ files contain real data, only that they exist.  Then you might do this:
 @end example
 
 @noindent
-to cause all the source files needed (as dependencies) to be created
+to cause all the source files needed (as prerequisites) to be created
 automatically.
 
 @findex .DEFAULT
 You can instead define commands to be used for targets for which there
 are no rules at all, even ones which don't specify commands.  You do
 this by writing a rule for the target @code{.DEFAULT}.  Such a rule's
-commands are used for all dependencies which do not appear as targets in
+commands are used for all prerequisites which do not appear as targets in
 any explicit rule, and for which no implicit rule applies.  Naturally,
 there is no @code{.DEFAULT} rule unless you write one.
 
-If you use @code{.DEFAULT} with no commands or dependencies:
+If you use @code{.DEFAULT} with no commands or prerequisites:
 
 @example
 .DEFAULT:
@@ -8157,14 +8242,14 @@ compatibility with old makefiles.  They come in two kinds:
 
 A double-suffix rule is defined by a pair of suffixes: the target suffix
 and the source suffix.  It matches any file whose name ends with the
-target suffix.  The corresponding implicit dependency is made by
+target suffix.  The corresponding implicit prerequisite is made by
 replacing the target suffix with the source suffix in the file name.  A
 two-suffix rule whose target and source suffixes are @samp{.o} and
 @samp{.c} is equivalent to the pattern rule @samp{%.o : %.c}.
 
 A single-suffix rule is defined by a single suffix, which is the source
 suffix.  It matches any file name, and the corresponding implicit
-dependency name is made by appending the source suffix.  A single-suffix
+prerequisite name is made by appending the source suffix.  A single-suffix
 rule whose source suffix is @samp{.c} is equivalent to the pattern rule
 @samp{% : %.c}.
 
@@ -8185,7 +8270,7 @@ way to define the rule for compiling a C source file:@refill
         $(CC) -c $(CFLAGS) $(CPPFLAGS) -o $@@ $<
 @end example
 
-Suffix rules cannot have any dependencies of their own.  If they have any,
+Suffix rules cannot have any prerequisites of their own.  If they have any,
 they are treated as normal files with funny names, not as suffix rules.
 Thus, the rule:
 
@@ -8195,7 +8280,7 @@ Thus, the rule:
 @end example
 
 @noindent
-tells how to make the file @file{.c.o} from the dependency file
+tells how to make the file @file{.c.o} from the prerequisite file
 @file{foo.h}, and is not at all like the pattern rule:
 
 @example
@@ -8213,9 +8298,9 @@ Rules, , Canceling Implicit Rules}).  They simply enter the suffix or pair of su
 a target in the data base.@refill
 
 @findex .SUFFIXES
-The known suffixes are simply the names of the dependencies of the special
+The known suffixes are simply the names of the prerequisites of the special
 target @code{.SUFFIXES}.  You can add your own suffixes by writing a rule
-for @code{.SUFFIXES} that adds more dependencies, as in:
+for @code{.SUFFIXES} that adds more prerequisites, as in:
 
 @example
 .SUFFIXES: .hack .win
@@ -8225,8 +8310,8 @@ for @code{.SUFFIXES} that adds more dependencies, as in:
 which adds @samp{.hack} and @samp{.win} to the end of the list of suffixes.
 
 If you wish to eliminate the default known suffixes instead of just adding
-to them, write a rule for @code{.SUFFIXES} with no dependencies.  By
-special dispensation, this eliminates all existing dependencies of
+to them, write a rule for @code{.SUFFIXES} with no prerequisites.  By
+special dispensation, this eliminates all existing prerequisites of
 @code{.SUFFIXES}.  You can then write another rule to add the suffixes you
 want.  For example,
 
@@ -8254,8 +8339,8 @@ this variable.
 Here is the procedure @code{make} uses for searching for an implicit rule
 for a target @var{t}.  This procedure is followed for each double-colon
 rule with no commands, for each target of ordinary rules none of which have
-commands, and for each dependency that is not the target of any rule.  It
-is also followed recursively for dependencies that come from implicit
+commands, and for each prerequisite that is not the target of any rule.  It
+is also followed recursively for prerequisites that come from implicit
 rules, in the search for a chain of rules.
 
 Suffix rules are not mentioned in this algorithm because suffix rules are
@@ -8294,16 +8379,16 @@ Find the stem @var{s}, which is the nonempty part of @var{t} or @var{n}
 matched by the @samp{%} in the target pattern.@refill
 
 @item
-Compute the dependency names by substituting @var{s} for @samp{%}; if
+Compute the prerequisite names by substituting @var{s} for @samp{%}; if
 the target pattern does not contain a slash, append @var{d} to
-the front of each dependency name.@refill
+the front of each prerequisite name.@refill
 
 @item
-Test whether all the dependencies exist or ought to exist.  (If a
+Test whether all the prerequisites exist or ought to exist.  (If a
 file name is mentioned in the makefile as a target or as an explicit
-dependency, then we say it ought to exist.)
+prerequisite, then we say it ought to exist.)
 
-If all dependencies exist or ought to exist, or there are no dependencies,
+If all prerequisites exist or ought to exist, or there are no prerequisites,
 then this rule applies.
 @end enumerate
 
@@ -8316,18 +8401,18 @@ For each pattern rule in the list:
 If the rule is terminal, ignore it and go on to the next rule.
 
 @item
-Compute the dependency names as before.
+Compute the prerequisite names as before.
 
 @item
-Test whether all the dependencies exist or ought to exist.
+Test whether all the prerequisites exist or ought to exist.
 
 @item
-For each dependency that does not exist, follow this algorithm
-recursively to see if the dependency can be made by an implicit
+For each prerequisite that does not exist, follow this algorithm
+recursively to see if the prerequisite can be made by an implicit
 rule.
 
 @item
-If all dependencies exist, ought to exist, or can be
+If all prerequisites exist, ought to exist, or can be
 made by implicit rules, then this rule applies.
 @end enumerate
 
@@ -8346,7 +8431,7 @@ into the data base and marked as having been updated and having the same
 update status as the file @var{t}.
 
 When the commands of a pattern rule are executed for @var{t}, the automatic
-variables are set corresponding to the target and dependencies.
+variables are set corresponding to the target and prerequisites.
 @xref{Automatic, ,Automatic Variables}.
 
 @node Archives, Features, Implicit Rules, Top
@@ -8370,7 +8455,7 @@ main use is as subroutine libraries for linking.
 @cindex archive member targets
 
 An individual member of an archive file can be used as a target or
-dependency in @code{make}.  You specify the member named @var{member} in
+prerequisite in @code{make}.  You specify the member named @var{member} in
 archive file @var{archive} as follows:
 
 @example
@@ -8378,7 +8463,7 @@ archive file @var{archive} as follows:
 @end example
 
 @noindent
-This construct is available only in targets and dependencies, not in
+This construct is available only in targets and prerequisites, not in
 commands!  Most programs that you might use in commands do not support this
 syntax and cannot act directly on archive members.  Only @code{ar} and
 other programs specifically designed to operate on archives can do so.
@@ -8489,7 +8574,7 @@ ranlib @var{archivefile}
 @end example
 
 Normally you would put this command in the rule for the archive file,
-and make all the members of the archive file dependencies of that rule.
+and make all the members of the archive file prerequisites of that rule.
 For example,
 
 @example
@@ -8567,7 +8652,7 @@ This works just as if you had written the pattern rule:
 In fact, this is just what @code{make} does when it sees a suffix rule
 with @samp{.a} as the target suffix.  Any double-suffix rule
 @w{@samp{.@var{x}.a}} is converted to a pattern rule with the target
-pattern @samp{(%.o)} and a dependency pattern of @samp{%.@var{x}}.
+pattern @samp{(%.o)} and a prerequisite pattern of @samp{%.@var{x}}.
 
 Since you might want to use @samp{.a} as the suffix for some other kind
 of file, @code{make} also converts archive suffix rules to pattern rules
@@ -8592,7 +8677,7 @@ Many features come from the version of @code{make} in System V.
 @itemize @bullet
 @item
 The @code{VPATH} variable and its special meaning.
-@xref{Directory Search, , Searching Directories for Dependencies}.
+@xref{Directory Search, , Searching Directories for Prerequisites}.
 This feature exists in System V @code{make}, but is undocumented.
 It is documented in 4.3 BSD @code{make} (which says it mimics System V's
 @code{VPATH} feature).@refill
@@ -8669,7 +8754,7 @@ we got this from either of them or thought it up ourselves at the
 same time.  @xref{Chained Rules, ,Chains of Implicit Rules}.
 
 @item
-The automatic variable @code{$^} containing a list of all dependencies
+The automatic variable @code{$^} containing a list of all prerequisites
 of the current target.  We did not invent this, but we have no idea who
 did.  @xref{Automatic, ,Automatic Variables}.  The automatic variable
 @code{$+} is a simple extension of @code{$^}.
@@ -8781,7 +8866,7 @@ Strip leading sequences of @samp{./} from file names, so that
 same file.@refill
 
 @item
-Use a special search method for library dependencies written in the
+Use a special search method for library prerequisites written in the
 form @samp{-l@var{name}}.
 @xref{Libraries/Search, ,Directory Search for Link Libraries}.
 
@@ -8804,7 +8889,7 @@ Specify static pattern rules.  @xref{Static Pattern, ,Static Pattern Rules}.
 
 @item
 Provide selective @code{vpath} search.
-@xref{Directory Search, ,Searching Directories for Dependencies}.
+@xref{Directory Search, ,Searching Directories for Prerequisites}.
 
 @item
 Provide computed variable references.
@@ -8863,7 +8948,7 @@ general feature of rule chaining.
 
 @item
 In System V @code{make}, the string @samp{$$@@} has the strange meaning
-that, in the dependencies of a rule with multiple targets, it stands
+that, in the prerequisites of a rule with multiple targets, it stands
 for the particular target that is being processed.
 
 This is not defined in GNU @code{make} because @samp{$$} should always
@@ -8886,13 +8971,13 @@ $(targets): %: %.o lib.a
 
 @item
 In System V and 4.3 BSD @code{make}, files found by @code{VPATH} search
-(@pxref{Directory Search, ,Searching Directories for Dependencies}) have their names changed inside command
+(@pxref{Directory Search, ,Searching Directories for Prerequisites}) have their names changed inside command
 strings.  We feel it is much cleaner to always use automatic variables
 and thus make this feature obsolete.@refill
 
 @item
 In some Unix @code{make}s, the automatic variable @code{$*} appearing in
-the dependencies of a rule has the amazingly strange ``feature'' of
+the prerequisites of a rule has the amazingly strange ``feature'' of
 expanding to the full name of the @emph{target of that rule}.  We cannot
 imagine what went on in the minds of Unix @code{make} developers to do
 this; it is utterly inconsistent with the normal definition of @code{$*}.
@@ -8915,7 +9000,7 @@ foo.o:
 and Unix @code{make} will intuit that @file{foo.o} depends on
 @file{foo.c}.@refill
 
-We feel that such usage is broken.  The dependency properties of
+We feel that such usage is broken.  The prerequisite properties of
 @code{make} are well-defined (for GNU @code{make}, at least),
 and doing such a thing simply does not fit the model.@refill
 
@@ -8937,7 +9022,7 @@ no commands, and it is treated as if it had empty commands
 will override the built-in @file{.c.a} suffix rule.
 
 We feel that it is cleaner for a rule without commands to always simply
-add to the dependency list for the target.  The above example can be
+add to the prerequisite list for the target.  The above example can be
 easily rewritten to get the desired behavior in GNU @code{make}:
 
 @example
@@ -9162,20 +9247,20 @@ The file name of the target.
 The target member name, when the target is an archive member.
 
 @item $<
-The name of the first dependency.
+The name of the first prerequisite.
 
 @item $?
-The names of all the dependencies that are
+The names of all the prerequisites that are
 newer than the target, with spaces between them.
-For dependencies which are archive members, only
+For prerequisites which are archive members, only
 the member named is used (@pxref{Archives}).
 
 @item $^
 @itemx $+
-The names of all the dependencies, with spaces between them.  For
-dependencies which are archive members, only the member named is used
+The names of all the prerequisites, with spaces between them.  For
+prerequisites which are archive members, only the member named is used
 (@pxref{Archives}).  The value of @code{$^} omits duplicate
-dependencies, while @code{$+} retains them and preserves their order.
+prerequisites, while @code{$+} retains them and preserves their order.
 
 @item $*
 The stem with which an implicit rule matches
@@ -9221,7 +9306,7 @@ Makefiles to be read on every invocation of @code{make}.@*
 @item VPATH
 
 Directory search path for files not found in the current directory.@*
-@xref{General Search, , @code{VPATH} Search Path for All Dependencies}.
+@xref{General Search, , @code{VPATH} Search Path for All Prerequisites}.
 
 @item SHELL
 
@@ -9330,7 +9415,7 @@ must always be associated with a target.
 
 The second form is generated if the line has a semicolon as the first
 non-whitespace character; @code{make} interprets this to mean you left
-out the "target: dependency" section of a rule.  @xref{Rule Syntax}.
+out the "target: prerequisite" section of a rule.  @xref{Rule Syntax}.
 
 @item No rule to make target `@var{xxx}'.
 @itemx No rule to make target `@var{xxx}', needed by `@var{yyy}'.
@@ -9342,7 +9427,7 @@ If you want that file to be built, you will need to add a rule to your
 makefile describing how that target can be built.  Other possible
 sources of this problem are typos in the makefile (if that filename is
 wrong) or a corrupted source tree (if that file is not supposed to be
-built, but rather only a dependency).
+built, but rather only a prerequisite).
 
 @item No targets specified and no makefile found.  Stop.
 @itemx No targets.  Stop.
@@ -9366,14 +9451,14 @@ which already has been defined to have commands, this warning is issued
 and the second set of commands will overwrite the first set.
 @xref{Multiple Rules, ,Multiple Rules for One Target}.
 
-@item Circular @var{xxx} <- @var{yyy} dependency dropped.
+@item Circular @var{xxx} <- @var{yyy} prerequisite dropped.
 This means that @code{make} detected a loop in the dependency graph:
-after tracing the dependency @var{yyy} of target @var{xxx}, and its
-dependencies, etc., one of them depended on @var{xxx} again.
+after tracing the prerequisite @var{yyy} of target @var{xxx}, and its
+prerequisites, etc., one of them depended on @var{xxx} again.
 
 @item Recursive variable `@var{xxx}' references itself (eventually).  Stop.
 This means you've defined a normal (recursive) @code{make} variable
-@var{xxx} that, when its expanded, will refer to itself (@var{xxx}).
+@var{xxx} that, when it's expanded, will refer to itself (@var{xxx}).
 This is not allowed; either use simply-expanded variables (@code{:=}) or
 use the append operator (@code{+=}).  @xref{Using Variables, ,How to Use
 Variables}.
