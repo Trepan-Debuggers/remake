@@ -134,6 +134,9 @@ rename_file (file, name)
   register struct file *f;
   struct file *oldfile;
 
+  while (file->renamed != 0)
+    file = file->renamed;
+
   /* Find the hash values of the old and new names.  */
 
   oldhash = 0;
