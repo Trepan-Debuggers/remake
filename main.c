@@ -1301,11 +1301,15 @@ int main (int argc, char ** argv)
   {
     char *cp;
 
-    if (jobserver_fds->max > 1)
-      fatal (NILF, _("internal error: multiple --jobserver-fds options."));
+    if (jobserver_fds->idx > 1)
+      fatal (NILF, _("internal error: multiple --jobserver-fds options"));
 
-    if (job_slots > 0)
-      fatal (NILF, _("internal error: --jobserver-fds unexpected."));
+    /* The combination of a pipe + !job_slots means we're using the
+       jobserver.  If !job_slots and we don't have a pipe, we can start
+       infinite jobs.  */
+
+    if (job_slots != 0)
+      fatal (NILF, _("internal error: --jobserver-fds unexpected"));
 
     /* Now parse the fds string and make sure it has the proper format.  */
 
@@ -1313,13 +1317,7 @@ int main (int argc, char ** argv)
 
     if (sscanf (cp, "%d,%d", &job_fds[0], &job_fds[1]) != 2)
       fatal (NILF,
-             _("internal error: invalid --jobserver-fds string `%s'."), cp);
-
-    /* Set job_slots to 0.  The combination of a pipe + !job_slots means
-       we're using the jobserver.  If !job_slots and we don't have a pipe, we
-       can start infinite jobs.  */
-
-    job_slots = 0;
+             _("internal error: invalid --jobserver-fds string `%s'"), cp);
 
     /* Create a duplicate pipe, that will be closed in the SIGCHLD
        handler.  If this fails with EBADF, the parent has closed the pipe
@@ -1353,7 +1351,8 @@ int main (int argc, char ** argv)
 
       /* Every make assumes that it always has one job it can run.  For the
          submakes it's the token they were given by their parent.  For the
-         top make, we just subtract one from the number the user wants.  */
+         top make, we just subtract one from the number the user wants.  We
+         want job_slots to be 0 to indicate we're using the jobserver.  */
 
       while (--job_slots)
         while (write (job_fds[1], &c, 1) != 1)

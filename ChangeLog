@@ -1,3 +1,55 @@
+1999-08-23  Paul D. Smith  <psmith@gnu.org>
+
+	* remake.c (update_file): Move the considered check into the
+	double-colon rule loop, so we consider double-colon rules
+	individually (otherwise after the first is pruned, the rest might
+	not get run).
+
+	* README.template: Minor changes.
+
+	Remove the debugging features of the jobserver, so it no longer
+	writes distinct tokens to the pipe.  Thus, we don't need to store
+	the token we get.  A side effect of this is to remove a potential
+	"unavailable token" situation: make-1 invokes make-2 with its
+	special token and make-3 with a normal token; make-2 completes.
+	Now we're waiting for make-3 but using 2 tokens; our special token
+	is idle.  In the new version we don't have special tokens per se,
+	we merely decide if we already have a child or not.  If we don't,
+	we don't need a token.  If we do, we have to get one to run the
+	next child.  Similar for putting tokens back: if we're cleaning up
+	the last child, we don't put a token back.  Otherwise, we do.
+
+	* main.c: Add a new, internal flag --jobserver-fds instead of
+	overloading the meaning of -j.  Remove job_slots_str and add the
+	stringlist jobserver_fds.
+	(struct command_switch): We don't need the int_string type.
+	(switches[]): Add a new option for --jobserver-fds and remove
+	conditions around -j.  Make the description for the former 0 so it
+	doesn't print during "make --help".
+	(main): Rework jobserver parsing.  If we got --jobserver-fds
+	make sure it's valid.  We only get one and job_slots must be 0.
+	If we're the toplevel make (-jN without --jobserver-fds) create
+	the pipe and write generic tokens.
+	Create the stringlist struct for the submakes.
+	Clean up the stringlist where necessary.
+	(init_switches): Remove int_string handling.
+	(print_usage): Don't print internal flags (description ptr is 0).
+	(decode_switches): Remove int_string handling.
+	(define_makeflags): Remove int_string handling.
+
+	* job.c: Remove my_job_token flag and all references to the
+	child->job_token field.
+	(free_job_token): Remove this and merge it into free_child().
+	(reap_children): Rework the "reaped a child" logic slightly.
+	Don't call defunct free_job_token anymore.  Always call
+	free_child, even if we're dying.
+	(free_child): If we're not freeing the only child, put a token
+	back in the pipe.  Then, if we're dying, don't bother to free.
+	(new_job): If we are using the jobserver, loop checking to see if
+	a) there are no children or b) we get a token from the pipe.
+
+	* job.h (struct child): Remove the job_token field.
+
 1999-08-20  Paul D. Smith  <psmith@gnu.org>
 
 	* variable.c (try_variable_definition): Allocate for variable
