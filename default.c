@@ -23,6 +23,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "commands.h"
 #include "variable.h"
 
+/* Define GCC_IS_NATIVE if gcc is the native development environment on
+   your system (gcc/bison/flex vs cc/yacc/lex).  */
+#ifdef __MSDOS__
+#define GCC_IS_NATIVE
+#endif
+
 
 /* This is the default list of suffixes for suffix rules.
    `.s' must come last, so that a `.o' file will be made from
@@ -133,12 +139,20 @@ static char *default_suffix_rules[] =
     ".c.ln",
     "$(LINT.c) -C$* $<",
     ".y.ln",
+#ifndef __MSDOS__
     "$(YACC.y) $< \n $(LINT.c) -C$* y.tab.c \n $(RM) y.tab.c",
+#else
+    "$(YACC.y) $< \n $(LINT.c) -C$* y_tab.c \n $(RM) y_tab.c",
+#endif
     ".l.ln",
     "@$(RM) $*.c\n $(LEX.l) $< > $*.c\n$(LINT.c) -i $*.c -o $@\n $(RM) $*.c",
 
     ".y.c",
+#ifndef __MSDOS__
     "$(YACC.y) $< \n mv -f y.tab.c $@",
+#else
+    "$(YACC.y) $< \n mv -f y_tab.c $@",
+#endif
     ".l.c",
     "@$(RM) $@ \n $(LEX.l) $< > $@",
 
@@ -203,8 +217,13 @@ static char *default_variables[] =
     "ARFLAGS", "rfv",
 #endif
     "AS", "as",
+#ifdef GCC_IS_NATIVE
+    "CC", "gcc",
+    "CXX, "gcc",
+#else
     "CC", "cc",
     "CXX", "g++",
+#endif
 
     /* This expands to $(CO) $(COFLAGS) $< $@ if $@ does not exist,
        and to the empty string if $@ does exist.  */
@@ -237,7 +256,11 @@ static char *default_variables[] =
 #endif	/* Cray.  */
     "GET", SCCS_GET,
     "LD", "ld",
+#ifdef GCC_IS_NATIVE
+    "LEX", "flex",
+#else
     "LEX", "lex",
+#endif
     "LINT", "lint",
     "M2C", "m2c",
 #ifdef	pyr
@@ -250,7 +273,11 @@ static char *default_variables[] =
     "PC", "pc",
 #endif	/* CRAY.  */
 #endif	/* pyr.  */
+#ifdef GCC_IS_NATIVE
+    "YACC", "bison -y",
+#else
     "YACC", "yacc",	/* Or "bison -y"  */
+#endif
     "MAKEINFO", "makeinfo",
     "TEX", "tex",
     "TEXI2DVI", "texi2dvi",
