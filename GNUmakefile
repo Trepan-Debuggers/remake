@@ -140,7 +140,7 @@ depfiles = $(patsubst %.o,%.dep,$(filter %.o,$(objs)))
 .PHONY: default
 default: $(prog)
 
-$(prog): $(objs) $(globdep) $(addprefix $(ARCH)/,gmalloc.o mcheck.o)
+$(prog): $(objs) $(globdep) #$(addprefix $(ARCH)/,gmalloc.o mcheck.o)
 	$(CC) $(LDFLAGS) $^ $(globlib) $(LOADLIBES) -o $@.new
 	mv -f $@.new $@
 
