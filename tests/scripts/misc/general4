@@ -24,13 +24,10 @@ close(MAKEFILE);
 $answer = "mkdir -p dir/subdir\ntouch dir/subdir/file.b\ncp dir/subdir/file.b dir/subdir/file.a\n";
 &compare_output($answer,&get_logfile(1));
 
-
 # Test implicit rules
 
 &touch('foo.c');
-run_make_test('
-foo: foo.o
-',
+run_make_test('foo: foo.o',
               'CC="@echo cc" OUTPUT_OPTION=',
               'cc -c foo.c
 cc foo.o -o foo');

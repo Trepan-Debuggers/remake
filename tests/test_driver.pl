@@ -12,7 +12,7 @@
 # this routine controls the whole mess; each test suite sets up a few
 # variables and then calls &toplevel, which does all the real work.
 
-# $Id: test_driver.pl,v 1.13 2004/09/21 05:39:04 psmith Exp $
+# $Id: test_driver.pl,v 1.14 2005/02/28 07:48:23 psmith Exp $
 
 
 # The number of test categories we've run
@@ -451,13 +451,13 @@ sub run_each_test
       $status = "ok     ($tests_passed passed)";
       for ($i = $num_of_tmpfiles; $i; $i--)
       {
-        &delete ($tmp_filename . &num_suffix ($i) );
+        &rmfiles ($tmp_filename . &num_suffix ($i) );
       }
 
       for ($i = $num_of_logfiles ? $num_of_logfiles : 1; $i; $i--)
       {
-        &delete ($log_filename . &num_suffix ($i) );
-        &delete ($base_filename . &num_suffix ($i) );
+        &rmfiles ($log_filename . &num_suffix ($i) );
+        &rmfiles ($base_filename . &num_suffix ($i) );
       }
     }
     elsif ($code > 0) {
@@ -500,7 +500,7 @@ sub run_each_test
 # If the keep flag is not set, this subroutine deletes all filenames that
 # are sent to it.
 
-sub delete
+sub rmfiles
 {
   local(@files) = @_;
 
@@ -611,7 +611,7 @@ sub error
 sub compare_output
 {
   local($answer,$logfile) = @_;
-  local($slurp);
+  local($slurp, $answer_matched) = ('', 0);
 
   print "Comparing Output ........ " if $debug;
 
@@ -624,14 +624,29 @@ sub compare_output
 
   ++$tests_run;
 
-  if ($slurp eq $answer && $test_passed)
+  if ($slurp eq $answer) {
+    $answer_matched = 1;
+  } else {
+    # See if it is a slash or CRLF problem
+    local ($answer_mod) = $answer;
+
+    $answer_mod =~ tr,\\,/,;
+    $answer_mod =~ s,\r\n,\n,gs;
+
+    $slurp =~ tr,\\,/,;
+    $slurp =~ s,\r\n,\n,gs;
+
+    $answer_matched = ($slurp eq $answer_mod);
+  }
+
+  if ($answer_matched && $test_passed)
   {
     print "ok\n" if $debug;
     ++$tests_passed;
     return 1;
   }
 
-  if ($slurp ne $answer) {
+  if (! $answer_matched) {
     print "DIFFERENT OUTPUT\n" if $debug;
 
     &create_file (&get_basefile, $answer);
@@ -639,9 +654,9 @@ sub compare_output
     print "\nCreating Difference File ...\n" if $debug;
 
     # Create the difference file
+
     local($command) = "diff -c " . &get_basefile . " " . $logfile;
     &run_command_with_output(&get_difffile,$command);
-
   }
 
   $suite_passed = 0;
@@ -729,15 +744,11 @@ sub run_command
 {
   local ($code);
 
-  if ($debug)
-  {
-    print "\nrun_command: @_\n";
-    $code = system @_;
-    print "run_command: \"@_\" returned $code.\n";
-    return $code;
-  }
+  print "\nrun_command: @_\n" if $debug;
+  $code = system @_;
+  print "run_command: \"@_\" returned $code.\n" if $debug;
 
-  return system @_;
+  return $code;
 }
 
 # run one command (passed as a list of arg 0 - n, with arg 0 being the
@@ -753,10 +764,8 @@ sub run_command_with_output
   &attach_default_output ($filename);
   $code = system @_;
   &detach_default_output;
-  if ($debug)
-  {
-    print "run_command_with_output: \"@_\" returned $code.\n";
-  }
+
+  print "run_command_with_output: '@_' returned $code.\n" if $debug;
 
   return $code;
 }

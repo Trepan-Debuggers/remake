@@ -1,29 +1,68 @@
-Mon Feb 28 00:18:20 2005  Boris Kolpackov  <boris@kolpackov.net>
+2005-02-27  Paul D. Smith  <psmith@gnu.org>
+
+	* misc.c (end_of_token): Make argument const.
+	* make.h: Update prototype.
+
+	* function.c (abspath, func_realpath, func_abspath): Use
+	PATH_VAR() and GET_PATH_MAX instead of PATH_MAX.
+	* dir.c (downcase): Use PATH_VAR() instead of PATH_MAX.
+	* read.c (record_files): Ditto.
+	* variable.c (do_variable_definition): Ditto.
+
+	* function.c (func_error): Create a new function $(info ...) that
+	simply prints the message to stdout with no extras.
+	(function_table_init): Add new function to the table.
+	* NEWS: Add $(info ...) reference.
+	* doc/make.texi (Make Control Functions): Document it.
+
+	New feature: if the system supports symbolic links, and the user
+	provides the -L/--check-symlink-time flag, then use the latest
+	mtime between the symlink(s) and the target file.
+
+	* configure.in (MAKE_SYMLINKS): Check for lstat() and
+	readlink().  If both are available, define MAKE_SYMLINKS.
+	* main.c: New variable: check_symlink_flag.
+	(usage): Add a line for -L/--check-symlink-times to the help string.
+	(switches): Add -L/--check-symlink-times command line argument.
+	(main): If MAKE_SYMLINKS is not defined but the user specified -L,
+	print a warning and disable it again.
+	* make.h: Declare check_symlink_flag.
+	* remake.c (name_mtime): If MAKE_SYMLINKS and check_symlink_flag,
+	if the file is a symlink then check each link in the chain and
+	choose the NEWEST mtime we find as the mtime for the file.  The
+	newest mtime might be the file itself!
+	* NEWS: Add information about this new feature.
+	* doc/make.texi (Options Summary): Add -L/--check-symlink-times docs.
+
+	Avoid core dumps described in Savannah bug # 12124:
+
+	* file.c: New variable snapped_deps remember whether we've run
+	snap_deps().
+	(snap_deps): Set it.
+	* filedef.h: Extern it.
+	* read.c (record_files): Check snapped_deps; if it's set then
+	we're trying to eval a new target/prerequisite relationship from
+	within a command script, which we don't support.  Fatal.
+
+2005-02-28  Boris Kolpackov  <boris@kolpackov.net>
 
 	Implementation of the .DEFAULT_TARGET special variable.
 
-	* read.c (eval): If necessary, update default_target_name
-	when reading rules.
-
+	* read.c (eval): If necessary, update default_target_name when
+	reading rules.
 	* read.c (record_files): Update default_target_file if
 	default_target_name has changed.
-
 	* main.c (default_target_name): Define.
-
 	* main.c (main): Enter .DEFAULT_TARGET as make variable. If
 	default_target_name is set use default_target_file as a root
 	target to make.
-
 	* filedef.h (default_target_name): Declare.
-
 	* dep.h (free_dep_chain):
 	* misc.c (free_dep_chain): Change to operate on struct nameseq
 	and change name to free_ns_chain.
-
 	* file.c (snap_deps): Update to use free_ns_chain.
 
-
-Sun Feb 27 22:03:36 2005  Boris Kolpackov  <boris@kolpackov.net>
+2005-02-27  Boris Kolpackov  <boris@kolpackov.net>
 
 	Implementation of the second expansion in explicit rules,
 	static pattern rules and implicit rules.
@@ -69,6 +108,12 @@ Sun Feb 27 22:03:36 2005  Boris Kolpackov  <boris@kolpackov.net>
 	* make.h (strip_whitespace): Declare.
 	* function.c (strip_whitespace): Remove static specifier.
 
+2005-02-26  Paul D. Smith  <psmith@gnu.org>
+
+	* main.c (main): Check for ferror() when reading makefiles from stdin.
+	Apparently some shells in Windows don't close pipes properly and
+	require this check.
+
 2005-02-24  Jonathan Grant  <jg@jguk.org>
 
 	* configure.in: Add MinGW configuration options, and extra w32 code
@@ -82,6 +127,12 @@ Sun Feb 27 22:03:36 2005  Boris Kolpackov  <boris@kolpackov.net>
 	* subproc/w32err.c: MSVC thread directive not applied to MinGW builds.
 	* tests/run_make_tests.pl, tests/test_driver.pl: MSYS testing
         environment support.
+
+2004-04-16  Dmitry V. Levin  <ldv@altlinux.org>
+
+        * function.c (func_shell): When initializing error_prefix, check
+        that reading file name is not null.  This fixes long-standing
+        segfault in cases like "make 'a1=$(shell :)' 'a2:=$(a1)'".
 
 2005-02-09  Paul D. Smith  <psmith@gnu.org>
 

@@ -67,7 +67,7 @@ run_make_test('
 /%: export foo := foo
 
 /bar:
-	@test "$(foo)" == "$$foo"
+	@test "$(foo)" = "$$foo"
 ', '', '');
 
 

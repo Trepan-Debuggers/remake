@@ -432,11 +432,11 @@ lindex (const char *s, const char *limit, int c)
 /* Return the address of the first whitespace or null in the string S.  */
 
 char *
-end_of_token (char *s)
+end_of_token (const char *s)
 {
   while (*s != '\0' && !isblank ((unsigned char)*s))
     ++s;
-  return s;
+  return (char *)s;
 }
 
 #ifdef WINDOWS32

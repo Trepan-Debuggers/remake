@@ -193,6 +193,10 @@ int no_builtin_variables_flag = 0;
 int keep_going_flag;
 int default_keep_going_flag = 0;
 
+/* Nonzero means check symlink mtimes.  */
+
+int check_symlink_flag = 0;
+
 /* Nonzero means print directory before starting and when done (-w).  */
 
 int print_directory_flag = 0;
@@ -316,6 +320,8 @@ static const char *const usage[] =
   -l [N], --load-average[=N], --max-load[=N]\n\
                               Don't start multiple jobs unless load is below N.\n"),
     N_("\
+  -L, --check-symlink-times   Use the latest mtime between symlinks and target.\n"),
+    N_("\
   -n, --just-print, --dry-run, --recon\n\
                               Don't actually run any commands; just print them.\n"),
     N_("\
@@ -363,50 +369,52 @@ static const struct command_switch switches[] =
     { 'D', flag, (char *) &suspend_flag, 1, 1, 0, 0, 0, "suspend-for-debug" },
 #endif
     { 'e', flag, (char *) &env_overrides, 1, 1, 0, 0, 0,
-        "environment-overrides", },
+      "environment-overrides", },
     { 'f', string, (char *) &makefiles, 0, 0, 0, 0, 0, "file" },
     { 'h', flag, (char *) &print_usage_flag, 0, 0, 0, 0, 0, "help" },
     { 'i', flag, (char *) &ignore_errors_flag, 1, 1, 0, 0, 0,
-        "ignore-errors" },
+      "ignore-errors" },
     { 'I', string, (char *) &include_directories, 1, 1, 0, 0, 0,
-        "include-dir" },
+      "include-dir" },
     { 'j', positive_int, (char *) &job_slots, 1, 1, 0, (char *) &inf_jobs,
-        (char *) &default_job_slots, "jobs" },
+      (char *) &default_job_slots, "jobs" },
     { CHAR_MAX+2, string, (char *) &jobserver_fds, 1, 1, 0, 0, 0,
-        "jobserver-fds" },
+      "jobserver-fds" },
     { 'k', flag, (char *) &keep_going_flag, 1, 1, 0, 0,
-        (char *) &default_keep_going_flag, "keep-going" },
+      (char *) &default_keep_going_flag, "keep-going" },
 #ifndef NO_FLOAT
     { 'l', floating, (char *) &max_load_average, 1, 1, 0,
-	(char *) &default_load_average, (char *) &default_load_average,
-	"load-average" },
+      (char *) &default_load_average, (char *) &default_load_average,
+      "load-average" },
 #else
     { 'l', positive_int, (char *) &max_load_average, 1, 1, 0,
-	(char *) &default_load_average, (char *) &default_load_average,
-	"load-average" },
+      (char *) &default_load_average, (char *) &default_load_average,
+      "load-average" },
 #endif
+    { 'L', flag, (char *) &check_symlink_flag, 1, 1, 0, 0, 0,
+      "check-symlink-times" },
     { 'm', ignore, 0, 0, 0, 0, 0, 0, 0 },
     { 'n', flag, (char *) &just_print_flag, 1, 1, 1, 0, 0, "just-print" },
     { 'o', string, (char *) &old_files, 0, 0, 0, 0, 0, "old-file" },
     { 'p', flag, (char *) &print_data_base_flag, 1, 1, 0, 0, 0,
-        "print-data-base" },
+      "print-data-base" },
     { 'q', flag, (char *) &question_flag, 1, 1, 1, 0, 0, "question" },
     { 'r', flag, (char *) &no_builtin_rules_flag, 1, 1, 0, 0, 0,
       "no-builtin-rules" },
     { 'R', flag, (char *) &no_builtin_variables_flag, 1, 1, 0, 0, 0,
-	"no-builtin-variables" },
+      "no-builtin-variables" },
     { 's', flag, (char *) &silent_flag, 1, 1, 0, 0, 0, "silent" },
     { 'S', flag_off, (char *) &keep_going_flag, 1, 1, 0, 0,
       (char *) &default_keep_going_flag, "no-keep-going" },
     { 't', flag, (char *) &touch_flag, 1, 1, 1, 0, 0, "touch" },
     { 'v', flag, (char *) &print_version_flag, 1, 1, 0, 0, 0, "version" },
     { 'w', flag, (char *) &print_directory_flag, 1, 1, 0, 0, 0,
-        "print-directory" },
+      "print-directory" },
     { CHAR_MAX+3, flag, (char *) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
-	"no-print-directory" },
+      "no-print-directory" },
     { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0, "what-if" },
     { CHAR_MAX+4, flag, (char *) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
-	"warn-undefined-variables" },
+      "warn-undefined-variables" },
     { 0 }
   };
 
@@ -1461,7 +1469,7 @@ main (int argc, char **argv, char **envp)
 	    outfile = open_tmpfile (&stdin_nm, template);
 	    if (outfile == 0)
 	      pfatal_with_name (_("fopen (temporary file)"));
-	    while (!feof (stdin))
+	    while (!feof (stdin) && ! ferror (stdin))
 	      {
 		char buf[2048];
 		unsigned int n = fread (buf, 1, sizeof (buf), stdin);
@@ -1699,6 +1707,14 @@ main (int argc, char **argv, char **envp)
       sprintf (jobserver_fds->list[0], "%d,%d", job_fds[0], job_fds[1]);
       jobserver_fds->idx = 1;
       jobserver_fds->max = 1;
+    }
+#endif
+
+#ifndef MAKE_SYMLINKS
+  if (check_symlink_flag)
+    {
+      error (NILF, _("Symbolic links not supported: disabling -L."));
+      check_symlink_flag = 0;
     }
 #endif
 

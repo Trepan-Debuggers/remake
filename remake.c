@@ -1313,9 +1313,16 @@ f_mtime (struct file *file, int search)
 
 /* Return the mtime of the file or archive-member reference NAME.  */
 
+/* First, we check with stat().  If the file does not exist, then we return
+   NONEXISTENT_MTIME.  If it does, and the symlink check flag is set, then
+   examine each indirection of the symlink and find the newest mtime.
+   This causes one duplicate stat() when -L is being used, but the code is
+   much cleaner.  */
+
 static FILE_TIMESTAMP
 name_mtime (char *name)
 {
+  FILE_TIMESTAMP mtime;
   struct stat st;
   int e;
 
@@ -1326,8 +1333,74 @@ name_mtime (char *name)
         perror_with_name ("stat:", name);
       return NONEXISTENT_MTIME;
     }
+  mtime = FILE_TIMESTAMP_STAT_MODTIME (name, st);
 
-  return FILE_TIMESTAMP_STAT_MODTIME (name, st);
+#ifdef MAKE_SYMLINKS
+#ifndef S_ISLNK
+# define S_ISLNK(_m)     (((_m)&S_IFMT)==S_IFLNK)
+#endif
+  if (check_symlink_flag)
+    {
+      PATH_VAR (lpath);
+
+      /* Check each symbolic link segment (if any).  Find the latest mtime
+         amongst all of them (and the target file of course).
+         Note that we have already successfully dereferenced all the links
+         above.  So, if we run into any error trying to lstat(), or
+         readlink(), or whatever, something bizarre-o happened.  Just give up
+         and use whatever mtime we've already computed at that point.  */
+      strcpy (lpath, name);
+      while (1)
+        {
+          FILE_TIMESTAMP ltime;
+          PATH_VAR (lbuf);
+          long llen;
+          char *p;
+
+          EINTRLOOP (e, lstat (lpath, &st));
+          if (e)
+            {
+              /* Eh?  Just take what we have.  */
+              perror_with_name ("lstat: ", lpath);
+              break;
+            }
+
+          /* If this is not a symlink, we're done (we started with the real
+             file's mtime so we don't need to test it again).  */
+          if (!S_ISLNK (st.st_mode))
+            break;
+
+          /* If this mtime is newer than what we had, keep the new one.  */
+          ltime = FILE_TIMESTAMP_STAT_MODTIME (lpath, st);
+          if (ltime > mtime)
+            mtime = ltime;
+
+          /* Set up to check the file pointed to by this link.  */
+          EINTRLOOP (llen, readlink (lpath, lbuf, GET_PATH_MAX));
+          if (llen < 0)
+            {
+              /* Eh?  Just take what we have.  */
+              perror_with_name ("readlink: ", lpath);
+              break;
+            }
+          lbuf[llen] = '\0';
+
+          /* If the target is fully-qualified or the source is just a
+             filename, then the new path is the target.  Otherwise it's the
+             source directory plus the target.  */
+          if (lbuf[0] == '/' || (p = strrchr (lpath, '/')) == NULL)
+            strcpy (lpath, lbuf);
+          else if ((p - lpath) + llen + 2 > GET_PATH_MAX)
+            /* Eh?  Path too long!  Again, just go with what we have.  */
+            break;
+          else
+            /* Create the next step in the symlink chain.  */
+            strcpy (p+1, lbuf);
+        }
+    }
+#endif
+
+  return mtime;
 }
 
 

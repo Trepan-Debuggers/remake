@@ -1082,12 +1082,23 @@ func_error (char *o, char **argv, const char *funcname)
     }
   strcpy (p, *argvp);
 
-  if (*funcname == 'e')
-    fatal (reading_file, "%s", msg);
+  switch (*funcname) {
+    case 'e':
+      fatal (reading_file, "%s", msg);
+
+    case 'w':
+      error (reading_file, "%s", msg);
+      break;
+
+    case 'i':
+      printf ("%s\n", msg);
+      break;
+
+    default:
+      fatal (reading_file, "Internal error: func_error: '%s'", funcname);
+  }
 
   /* The warning function expands to the empty string.  */
-  error (reading_file, "%s", msg);
-
   return o;
 }
 
@@ -1472,7 +1483,7 @@ func_shell (char *o, char **argv, const char *funcname UNUSED)
   envp = environ;
 
   /* For error messages.  */
-  if (reading_file != 0)
+  if (reading_file && reading_file->filenm)
     {
       error_prefix = (char *) alloca (strlen (reading_file->filenm)+11+4);
       sprintf (error_prefix,
@@ -1752,7 +1763,7 @@ abspath (const char *name, char *apath)
   if (name[0] == '\0' || apath == NULL)
     return NULL;
 
-  apath_limit = apath + PATH_MAX;
+  apath_limit = apath + GET_PATH_MAX;
 
   if (name[0] != '/')
     {
@@ -1826,13 +1837,12 @@ func_realpath (char *o, char **argv, const char *funcname UNUSED)
   char *path = 0;
   int doneany = 0;
   unsigned int len = 0;
-
-  char in[PATH_MAX];
-  char out[PATH_MAX];
+  PATH_VAR (in);
+  PATH_VAR (out);
 
   while ((path = find_next_token (&p, &len)) != 0)
     {
-      if (len < PATH_MAX)
+      if (len < GET_PATH_MAX)
         {
           strncpy (in, path, len);
           in[len] = '\0';
@@ -1868,13 +1878,12 @@ func_abspath (char *o, char **argv, const char *funcname UNUSED)
   char *path = 0;
   int doneany = 0;
   unsigned int len = 0;
-
-  char in[PATH_MAX];
-  char out[PATH_MAX];
+  PATH_VAR (in);
+  PATH_VAR (out);
 
   while ((path = find_next_token (&p, &len)) != 0)
     {
-      if (len < PATH_MAX)
+      if (len < GET_PATH_MAX)
         {
           strncpy (in, path, len);
           in[len] = '\0';
@@ -1939,6 +1948,7 @@ static struct function_table_entry function_table_init[] =
   { STRING_SIZE_TUPLE("origin"),        0,  1,  1,  func_origin},
   { STRING_SIZE_TUPLE("foreach"),       3,  3,  0,  func_foreach},
   { STRING_SIZE_TUPLE("call"),          1,  0,  1,  func_call},
+  { STRING_SIZE_TUPLE("info"),          0,  1,  1,  func_error},
   { STRING_SIZE_TUPLE("error"),         0,  1,  1,  func_error},
   { STRING_SIZE_TUPLE("warning"),       0,  1,  1,  func_error},
   { STRING_SIZE_TUPLE("if"),            2,  3,  0,  func_if},

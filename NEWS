@@ -13,7 +13,14 @@ reporting bugs.
 Version 3.81beta2
 
 * GNU make is ported to OS/2.
-  Port provided by Andreas Buening <andreas.buening@nexgo.de>.
+
+* GNU make is ported to MinGW.
+
+* New command-line option: -L (--check-symlink-times).  On systems that
+  support symbolic links, if this option is given then GNU make will
+  use the most recent modification time of any symbolic links that are
+  used to resolve target files.  The default behavior remains as it
+  always has: use the modification time of the actual target file only.
 
 * All pattern-specific variables that match a given target are now used
   (previously only the first match was used).
@@ -27,8 +34,13 @@ Version 3.81beta2
 * Implemented a solution for the "thundering herd" problem with "-j -l".
   This version of GNU make uses an algorithm suggested by Thomas Riedl
   <thomas.riedl@siemens.com> to track the number of jobs started in the
-  last second and adjust GNU make's view of the system's load average
-  accordingly.
+  last second and artificially adjust GNU make's view of the system's
+  load average accordingly.
+
+* New special variables available in this release:
+   - .DEFAULT_TARGET: Contains the name of the default target make will
+     use if no targets are provided on the command line.  It can be set
+     to change the default target.
 
 * New functions available in this release:
    - $(lastword ...) returns the last word in the list.  This gives
@@ -39,6 +51,8 @@ Version 3.81beta2
    - $(realpath ...) returns the canonical pathname for each path
      provided.  The canonical pathname is the absolute pathname, with
      all symbolic links resolved as well.
+   - $(info ...) prints informative messages to stdout.  No makefile
+     name or line number info, etc. is printed, just the message.
 
 * Changes made for POSIX compatibility:
    - Only touch targets (under -t) if they have at least one command.
