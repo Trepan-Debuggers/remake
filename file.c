@@ -58,8 +58,7 @@ lookup_file (name)
   register char *lname, *ln;
 #endif
 
-  if (*name == '\0')
-    abort ();
+  assert (*name != '\0');
 
   /* This is also done in parse_file_seq, so this is redundant
      for names read from makefiles.  It is here for names passed

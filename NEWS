@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  25 Jan 2000
+  27 Mar 2000
 
 Copyright (C) 1992,93,94,95,96,97,98,99,2000 Free Software Foundation, Inc.
 See the end for copying conditions.
@@ -35,12 +35,6 @@ Version 3.79
 * A new psuedo-target .NOTPARALLEL is available.  If defined, the
   current makefile is run serially regardless of the value of -j.
   However, submakes are still eligible for parallel execution.
-
-* The $(call ...) function doesn't expand its arguments automatically
-  anymore.  This allows you to put builtin functions like "if" and
-  "foreach", which also have special expansion rules, in a $(call ...)
-  function and have it work properly.  This was suggested by Damien
-  GIBOU <damien.gibou@st.com>.
 
 * The --debug option has changed: it now allows optional flags
   controlling the amount and type of debugging output.  By default only
