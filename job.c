@@ -37,6 +37,7 @@ extern int errno;
 #else	/* Not POSIX.  */
 #define	NGROUPS_MAX	NGROUPS
 #endif	/* POSIX.  */
+#endif
 
 #ifdef	HAVE_WAITPID
 #include <sys/wait.h>
