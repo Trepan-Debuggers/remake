@@ -1,5 +1,4 @@
-/* This file implements an interface to the Customs daemon to do
-   remote execution of commands under GNU make.
+/* GNU Make remote job exportation interface to the Customs daemon.
    THIS CODE IS NOT SUPPORTED BY THE GNU PROJECT.
    Please do not send bug reports or questions about it to
    the Make maintainers.

@@ -1,5 +1,5 @@
-/* Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993
-	Free Software Foundation, Inc.
+/* Target file hash table management for GNU Make.
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify

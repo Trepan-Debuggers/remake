@@ -1,4 +1,5 @@
-/* Copyright (C) 1992, 1993 Free Software Foundation, Inc.
+/* Definitions for managing subprocesses in GNU Make.
+Copyright (C) 1992, 1993 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
