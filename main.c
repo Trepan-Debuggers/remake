@@ -764,7 +764,9 @@ main (argc, argv, envp)
 
   /* Decode switches again, in case the variables were set by the makefile.  */
   decode_env_switches ("MAKEFLAGS", 9);
+#if 0
   decode_env_switches ("MFLAGS", 6);
+#endif
 
   /* Set up MAKEFLAGS and MFLAGS again, so they will be right.  */
 
