@@ -30,6 +30,16 @@ extras := $(filter-out getloadavg.o @%@,$(extras)) getloadavg.o
 LOADLIBES := $(filter-out @%@,$(LOADLIBES))
 ALLOCA := $(filter-out @%@,$(ALLOCA))
 
+customs=yes
+ifdef customs
+REMOTE := cstms
+defines := $(defines) -Ipmake/customs -Ipmake/lib/include
+LOADLIBES := $(addprefix pmake/customs/,customslib.o rpc.o xlog.o) \
+	     pmake/lib/sprite/libsprite.a
+else
+REMOTE := stub
+endif
+
 # Set `ARCH' to a string for the type of machine.
 ifndef ARCH
 ifdef machine
@@ -98,12 +108,6 @@ objs := $(objs) $(addprefix $(ARCH)/,$(ALLOCA) $(extras))
 
 else # Not ARCH
 prog := make
-endif
-
-ifdef customs
-REMOTE := -DCUSTOMS -Ipmake/customs -Ipmake/lib/include
-LOADLIBES := $(addprefix pmake/customs/,customslib.o rpc.o xlog.o) \
-	     pmake/lib/sprite/libsprite.a
 endif
 
 ifneq	"$(findstring gcc,$(CC))" ""
