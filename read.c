@@ -2129,6 +2129,17 @@ readline (linebuffer, stream, flocp)
 
       ++nlines;
 
+#if !defined(WINDOWS32) && !defined(__MSDOS__)
+      /* Check to see if the line was really ended with CRLF; if so ignore
+         the CR.  */
+      if (len > 1 && p[-2] == '\r')
+        {
+          --len;
+          --p;
+          p[-1] = '\n';
+        }
+#endif
+
       if (len == 1 && p > buffer)
 	/* P is pointing at a newline and it's the beginning of
 	   the buffer returned by the last fgets call.  However,

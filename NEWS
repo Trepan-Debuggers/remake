@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  22 Mar 1999
+  31 Mar 1999
 
 Copyright (C) 1992,93,94,95,96,97,98,1999 Free Software Foundation, Inc.
 See the end for copying conditions.
@@ -21,6 +21,9 @@ Version 3.78
 * Make defines a new variable, .LIBPATTERNS.  This variable controls how
   the link library dependency expansion (dependencies like ``-lfoo'') is
   performed.
+
+* Make allows CRLF sequences as well as traditional LF, in makefiles for
+  UNIX.
 
 Version 3.77
 
@@ -682,7 +685,3 @@ Copyright information:
    Permission is granted to distribute modified versions of this
    document, or of portions of it, under the above conditions, provided
    also that they carry prominent notices stating who last changed them.
-
-Local variables:
-version-control: never
-end:
