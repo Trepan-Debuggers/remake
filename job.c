@@ -28,6 +28,11 @@ static char default_path[] = ":/bin:/usr/bin";
 /* Default shell to use.  */
 char default_shell[] = "/bin/sh";
 
+/* If NGROUPS_MAX == 0 then try other methods for finding a real value.  */
+#if defined (NGROUPS_MAX) && NGROUPS_MAX == 0
+#undef NGROUPS_MAX
+#endif /* NGROUPS_MAX == 0 */
+
 #ifndef	NGROUPS_MAX
 #ifdef	POSIX
 #define	GET_NGROUPS_MAX	sysconf (_SC_NGROUPS_MAX)
