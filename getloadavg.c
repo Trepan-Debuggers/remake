@@ -1038,6 +1038,8 @@ getloadavg (loadavg, nelem)
 #endif /* ! HAVE_GETLOADAVG */
 
 #ifdef TEST
+#include "make.h"
+
 int
 main (argc, argv)
      int argc;

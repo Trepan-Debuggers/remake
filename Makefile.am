@@ -32,6 +32,7 @@ DEFS =		-DLOCALEDIR=\"$(localedir)\" -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(inc
 
 AM_CPPFLAGS =	$(GLOBINC)
 
+
 EXTRA_DIST =	build.sh.in $(man_MANS)\
 		README.customs\
 		make-stds.texi SCOPTIONS SMakefile\
@@ -40,10 +41,6 @@ EXTRA_DIST =	build.sh.in $(man_MANS)\
 		README.W32 NMakefile config.h.W32 build_w32.bat subproc.bat\
 		readme.vms makefile.vms makefile.com config.h-vms \
 		vmsdir.h vmsfunctions.c vmsify.c
-
-
-MOSTLYCLEANFILES = loadavg.c
-CLEANFILES =	loadavg
 
 MAKE_HOST =	@MAKE_HOST@
 
@@ -105,24 +102,16 @@ check-local: check-regression check-loadavg
 
 .PHONY: check-loadavg check-regression
 
-# > check-loadavg
-#
-loadavg: loadavg.c config.h
-	@rm -f loadavg
-	$(LINK) -DTEST $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(make_LDFLAGS) loadavg.c $(LIBS)
-
-# We copy getloadavg.c into a different file rather than compiling it
-# directly because some compilers clobber getloadavg.o in the process.
-#
-loadavg.c: getloadavg.c
-	ln $(srcdir)/getloadavg.c loadavg.c || \
-	  cp $(srcdir)/getloadavg.c loadavg.c
-
 check-loadavg: loadavg
 	@echo The system uptime program believes the load average to be:
 	-uptime
-	@echo The GNU load average checking code believes:
+	@echo The GNU load average checking code thinks:
 	-./loadavg
+
+# The loadavg function is invoked during "make check" to test getloadavg.
+noinst_PROGRAMS = loadavg
+loadavg_SOURCES = getloadavg.c
+loadavg_CFLAGS = -DTEST
 
 # > check-regression
 #
