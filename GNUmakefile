@@ -42,6 +42,8 @@ endif
 # Get most of the information from the Unix-compatible makefile.
 include compatMakefile
 
+MAKE = $(MAKE_COMMAND) $(MAKEOVERRIDES)
+
 # Remove autoconf magic.
 extras := $(filter-out getloadavg.o @%@,$(extras)) getloadavg.o
 LOADLIBES := $(filter-out @%@,$(LOADLIBES))
