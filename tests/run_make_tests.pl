@@ -76,7 +76,7 @@ sub run_make_test
     }
 
     # Make sure it ends in a newline.
-    $makestring =~ /\n$/s or $makestring .= "\n";
+    $makestring && $makestring !~ /\n$/s and $makestring .= "\n";
 
     # Replace @MAKEFILE@ with the makefile name and @MAKE@ with the path to
     # make
@@ -91,7 +91,7 @@ sub run_make_test
 
   # Do the same processing on $answer as we did on $makestring.
 
-  $answer =~ /\n$/s     or $answer .= "\n";
+  $answer && $answer !~ /\n$/s and $answer .= "\n";
   $answer =~ s/#MAKEFILE#/$makefile/g;
   $answer =~ s/#MAKE#/$make_name/g;
 
