@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.164 1997/08/27 20:31:18 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.165 1997/09/16 14:17:33 psmith Exp $
 @set EDITION 0.51
 @set VERSION 3.76 Beta
 @set UPDATED 26 Aug 1997
@@ -5746,8 +5746,10 @@ The @code{shell} function performs the same function that backquotes
 (@samp{`}) perform in most shells: it does @dfn{command expansion}.  This
 means that it takes an argument that is a shell command and returns the
 output of the command.  The only processing @code{make} does on the result,
-before substituting it into the surrounding text, is to convert newlines to
-spaces.@refill
+before substituting it into the surrounding text, is to convert each
+newline or carriage-return / newline pair to a single space.  It also
+removes the trailing (carriage-return and) newline, if it's the last
+thing in the result.@refill
 
 The commands run by calls to the @code{shell} function are run when the
 function calls are expanded.  In most cases, this is when the makefile is
@@ -5856,17 +5858,33 @@ You can specify a different goal or goals with arguments to @code{make}.
 Use the name of the goal as an argument.  If you specify several goals,
 @code{make} processes each of them in turn, in the order you name them.
 
-@cindex @code{MAKECMDGOALS}
-@vindex MAKECMDGOALS
-@code{Make} will set the special variable @code{MAKECMDGOALS} to the
-list of goals you specified on the command line.  If no goals were given
-on the command line, this variable is empty.
-
 Any target in the makefile may be specified as a goal (unless it
 starts with @samp{-} or contains an @samp{=}, in which case it will be
 parsed as a switch or variable definition, respectively).  Even
 targets not in the makefile may be specified, if @code{make} can find
 implicit rules that say how to make them.
+
+@cindex @code{MAKECMDGOALS}
+@vindex MAKECMDGOALS
+@code{Make} will set the special variable @code{MAKECMDGOALS} to the
+list of goals you specified on the command line.  If no goals were given
+on the command line, this variable is empty.  Note that this variable
+should be used only in special circumstances.
+
+An example of appropriate use is to avoid including @file{.d} files
+during @code{clean} rules (@pxref{Automatic Dependencies}), so
+@code{make} won't create them only to immediately remove them
+again:@refill
+
+@example
+@group
+sources = foo.c bar.c
+
+ifneq ($(MAKECMDGOALS),clean)
+include $(sources:.c=.d)
+endif
+@end group
+@end example
 
 One use of specifying a goal is if you want to compile only a part of
 the program, or only one of several programs.  Specify as a goal each
@@ -8796,6 +8814,12 @@ The number of levels of recursion (sub-@code{make}s).@*
 The flags given to @code{make}.  You can set this in the environment or
 a makefile to set flags.@*
 @xref{Options/Recursion, ,Communicating Options to a Sub-@code{make}}.
+
+@item MAKECMDGOALS
+
+The targets given to @code{make} on the command line.  Setting this
+variable has no effect on the operation of @code{make}.@*
+@xref{Goals, ,Arguments to Specify the Goals}.
 
 @item SUFFIXES
 

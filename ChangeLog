@@ -1,3 +1,18 @@
+Tue Sep  2 10:07:39 1997  Paul D. Smith  <psmith@baynetworks.com>
+
+	* function.c (expand_function): When processing $(shell...)
+  	translate a CRLF (\r\n) sequence as well as a newline (\n) to a
+ 	space.  Also remove an ending \r\n sequence.
+	* make.texinfo (Shell Function): Document it.
+
+Fri Aug 29 12:59:06 1997  Rob Tulloh  <rob_tulloh@tivoli.com>
+
+	* w32/pathstuff.c (convert_Path_to_windows32): Fix problem where
+ 	paths which contain single character entries like `.' are not
+ 	handled correctly.
+
+	* README.W32: Document path handling issues on Windows systems.
+
 Fri Aug 29 02:01:27 1997  Paul D. Smith  <psmith@baynetworks.com>
 
 	* Version 3.75.93.

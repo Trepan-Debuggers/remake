@@ -39,6 +39,9 @@ Version 3.76
 
 * The $(strip) function now removes newlines as well as TABs and spaces.
 
+* The $(shell) function now changes CRLF (\r\n) pairs to a space as well
+  as newlines (\n).
+
 * Updates to the Windows 95/NT port from Rob Tulloh (see README.W32).
 
 * Eli Zaretskii has updated the port to 32-bit protected mode on MSDOS
@@ -46,6 +49,8 @@ Version 3.76
   and utilities.  See README.DOS for details, and direct all questions
   concerning this port to Eli Zaretskii <eliz@is.elta.co.il> or DJ
   Delorie <dj@delorie.com>.
+
+* John W. Eaton has updated the VMS port to support libraries and VPATH.
 
 Version 3.75
 

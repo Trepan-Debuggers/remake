@@ -160,14 +160,14 @@ patsubst_expand (o, text, pattern, replace, pattern_percent, replace_percent)
       if (len < pattern_prepercent_len + pattern_postpercent_len)
 	fail = 1;
 
-      /* Does the prefix match?  */
+      /* Does the prefix match? */
       if (!fail && pattern_prepercent_len > 0
 	  && (*t != *pattern
 	      || t[pattern_prepercent_len - 1] != pattern_percent[-1]
 	      || strncmp (t + 1, pattern + 1, pattern_prepercent_len - 1)))
 	fail = 1;
 
-      /* Does the suffix match?  */
+      /* Does the suffix match? */
       if (!fail && pattern_postpercent_len > 0
 	  && (t[len - 1] != pattern_percent[pattern_postpercent_len]
 	      || t[len - pattern_postpercent_len] != pattern_percent[1]
@@ -318,12 +318,12 @@ int shell_function_pid = 0, shell_function_completed;
    The output is written into VARIABLE_BUFFER starting at O.  */
 
 /* Note this absorbs a semicolon and is safe to use in conditionals.  */
-#define BADARGS(func)							      \
-  if (reading_filename != 0)						      \
-    makefile_fatal (reading_filename, *reading_lineno_ptr,		      \
-		    "insufficient arguments to function `%s'", 		      \
-		    func);						      \
-  else									      \
+#define BADARGS(func)                                                         \
+  if (reading_filename != 0)                                                  \
+    makefile_fatal (reading_filename, *reading_lineno_ptr,                    \
+		    "insufficient arguments to function `%s'",                \
+		    func);                                                    \
+  else                                                                        \
     fatal ("insufficient arguments to function `%s'", func)
 
 static char *
@@ -349,12 +349,12 @@ expand_function (o, function, text, end)
     case function_shell:
       {
 #ifdef WINDOWS32
-        SECURITY_ATTRIBUTES saAttr;
-        HANDLE hIn;
-        HANDLE hErr;
-        HANDLE hChildOutRd;
-        HANDLE hChildOutWr;
-        HANDLE hProcess;
+	SECURITY_ATTRIBUTES saAttr;
+	HANDLE hIn;
+	HANDLE hErr;
+	HANDLE hChildOutRd;
+	HANDLE hChildOutWr;
+	HANDLE hProcess;
 #endif
 #ifdef __MSDOS__
 	FILE *fpipe;
@@ -380,7 +380,7 @@ expand_function (o, function, text, end)
 
 #ifndef _AMIGA
 	/* Using a target environment for `shell' loses in cases like:
-	   	export var = $(shell echo foobie)
+		export var = $(shell echo foobie)
 	   because target_environment hits a loop trying to expand $(var)
 	   to put it in the environment.  This is even more confusing when
 	   var was not explicitly exported, but just appeared in the
@@ -391,7 +391,7 @@ expand_function (o, function, text, end)
 	/* Construct the environment.  */
 	envp = target_environment ((struct file *) 0);
 #endif
-#endif	/* Not Amiga.  */
+#endif  /* Not Amiga.  */
 
 	/* For error messages.  */
 	if (reading_filename != 0)
@@ -405,111 +405,111 @@ expand_function (o, function, text, end)
 
 #ifndef _AMIGA
 # ifdef WINDOWS32
-        saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
-        saAttr.bInheritHandle = TRUE;
-        saAttr.lpSecurityDescriptor = NULL;
+	saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+	saAttr.bInheritHandle = TRUE;
+	saAttr.lpSecurityDescriptor = NULL;
 
-        if (DuplicateHandle(GetCurrentProcess(),
-                            GetStdHandle(STD_INPUT_HANDLE),
-                            GetCurrentProcess(),
-                            &hIn,
-                            0,
-                            TRUE,
-                            DUPLICATE_SAME_ACCESS) == FALSE) {
-          fatal("create_child_process: DuplicateHandle(In) failed (e=%d)\n",
-                GetLastError());
-        }
-        if (DuplicateHandle(GetCurrentProcess(),
-                            GetStdHandle(STD_ERROR_HANDLE),
-                            GetCurrentProcess(),
-                            &hErr,
-                            0,
-                            TRUE,
-                            DUPLICATE_SAME_ACCESS) == FALSE) {
-          fatal("create_child_process: DuplicateHandle(Err) failed (e=%d)\n",
-                GetLastError());
-        }
+	if (DuplicateHandle(GetCurrentProcess(),
+			    GetStdHandle(STD_INPUT_HANDLE),
+			    GetCurrentProcess(),
+			    &hIn,
+			    0,
+			    TRUE,
+			    DUPLICATE_SAME_ACCESS) == FALSE) {
+	  fatal("create_child_process: DuplicateHandle(In) failed (e=%d)\n",
+		GetLastError());
+	}
+	if (DuplicateHandle(GetCurrentProcess(),
+			    GetStdHandle(STD_ERROR_HANDLE),
+			    GetCurrentProcess(),
+			    &hErr,
+			    0,
+			    TRUE,
+			    DUPLICATE_SAME_ACCESS) == FALSE) {
+	  fatal("create_child_process: DuplicateHandle(Err) failed (e=%d)\n",
+		GetLastError());
+	}
 
-        if (!CreatePipe(&hChildOutRd, &hChildOutWr, &saAttr, 0))
-          fatal("CreatePipe() failed (e=%d)\n", GetLastError());
+	if (!CreatePipe(&hChildOutRd, &hChildOutWr, &saAttr, 0))
+	  fatal("CreatePipe() failed (e=%d)\n", GetLastError());
 
-        hProcess = process_init_fd(hIn, hChildOutWr, hErr);
+	hProcess = process_init_fd(hIn, hChildOutWr, hErr);
 
-        if (!hProcess)
-          fatal("expand_function: process_init_fd() failed\n");
-        else
-          process_register(hProcess);
+	if (!hProcess)
+	  fatal("expand_function: process_init_fd() failed\n");
+	else
+	  process_register(hProcess);
 
-        /* make sure that CreateProcess() has Path it needs */
-        sync_Path_environment();
+	/* make sure that CreateProcess() has Path it needs */
+	sync_Path_environment();
 
-        if (!process_begin(hProcess, argv, envp, argv[0], NULL))
-                pid = (int) hProcess;
-        else
-                fatal("expand_function: unable to launch process (e=%d)\n",
-                      process_last_err(hProcess));
+	if (!process_begin(hProcess, argv, envp, argv[0], NULL))
+		pid = (int) hProcess;
+	else
+		fatal("expand_function: unable to launch process (e=%d)\n",
+		      process_last_err(hProcess));
 
-        /* set up to read data from child */
-        pipedes[0] = _open_osfhandle((long) hChildOutRd, O_RDONLY);
+	/* set up to read data from child */
+	pipedes[0] = _open_osfhandle((long) hChildOutRd, O_RDONLY);
 
-        /* this will be closed almost right away */
-        pipedes[1] = _open_osfhandle((long) hChildOutWr, O_APPEND);
+	/* this will be closed almost right away */
+	pipedes[1] = _open_osfhandle((long) hChildOutWr, O_APPEND);
 # else /* WINDOWS32 */
 #  ifdef __MSDOS__
-        {
-          /* MSDOS can't fork, but it has `popen'.
-             (Bwt, why isn't `popen' used in all the versions?)  */
-          struct variable *sh = lookup_variable ("SHELL", 5);
-          int e;
-          extern int dos_command_running, dos_status;
+	{
+	  /* MSDOS can't fork, but it has `popen'.
+	     (Bwt, why isn't `popen' used in all the versions?) */
+	  struct variable *sh = lookup_variable ("SHELL", 5);
+	  int e;
+	  extern int dos_command_running, dos_status;
 
-          /* Make sure not to bother processing an empty line.  */
-          while (isblank (*text))
-            ++text;
-          if (*text == '\0')
-            break;
+	  /* Make sure not to bother processing an empty line.  */
+	  while (isblank (*text))
+	    ++text;
+	  if (*text == '\0')
+	    break;
 
-          if (sh)
-            {
-              char buf[PATH_MAX + 7];
-              /* This makes sure $SHELL value is used by $(shell), even
-                 though the target environment is not passed to it.  */
-              sprintf (buf, "SHELL=%s", sh->value);
-              putenv (buf);
-            }
+	  if (sh)
+	    {
+	      char buf[PATH_MAX + 7];
+	      /* This makes sure $SHELL value is used by $(shell), even
+		 though the target environment is not passed to it.  */
+	      sprintf (buf, "SHELL=%s", sh->value);
+	      putenv (buf);
+	    }
 
-          e = errno;
-          errno = 0;
-          dos_command_running = 1;
-          dos_status = 0;
-          fpipe = popen (text, "rt");
-          dos_command_running = 0;
-          if (!fpipe || dos_status)
-            {
-              pipedes[0] = -1;
-              pid = -1;
-              if (dos_status)
-                errno = EINTR;
-              else if (errno == 0)
-                errno = ENOMEM;
-              shell_function_completed = -1;
-            }
-          else
-            {
-              pipedes[0] = fileno (fpipe);
-              pid = 42;
-              errno = e;
-              shell_function_completed = 1;
-            }
-        }
-        if (pipedes[0] < 0)
+	  e = errno;
+	  errno = 0;
+	  dos_command_running = 1;
+	  dos_status = 0;
+	  fpipe = popen (text, "rt");
+	  dos_command_running = 0;
+	  if (!fpipe || dos_status)
+	    {
+	      pipedes[0] = -1;
+	      pid = -1;
+	      if (dos_status)
+		errno = EINTR;
+	      else if (errno == 0)
+		errno = ENOMEM;
+	      shell_function_completed = -1;
+	    }
+	  else
+	    {
+	      pipedes[0] = fileno (fpipe);
+	      pid = 42;
+	      errno = e;
+	      shell_function_completed = 1;
+	    }
+	}
+	if (pipedes[0] < 0)
 #  else /* ! __MSDOS__ */
-        if (pipe (pipedes) < 0)
+	if (pipe (pipedes) < 0)
 #  endif /* __MSDOS__ */
-          {
-            perror_with_name (error_prefix, "pipe");
-            break;
-          }
+	  {
+	    perror_with_name (error_prefix, "pipe");
+	    break;
+	  }
 
 #  ifndef  __MSDOS__
 	pid = vfork ();
@@ -606,28 +606,41 @@ expand_function (o, function, text, end)
 		if (i > 0)
 		  {
 		    if (buffer[i - 1] == '\n')
-		      buffer[--i] = '\0';
+		      {
+			if (i > 1 && buffer[i - 2] == '\r')
+			  --i;
+			buffer[--i] = '\0';
+		      }
 		    else
 		      buffer[i] = '\0';
+
 		    p = buffer;
-		    while ((p = index (p, '\n')) != 0)
-		      *p++ = ' ';
+		    for (p2=p; *p != '\0'; ++p)
+		      {
+			if (p[0] == '\r' && p[1] == '\n')
+			  continue;
+			if (*p == '\n')
+			  *p2++ = ' ';
+			else
+			  *p2++ = *p;
+		      }
+		    *p2 = '\0';
 		    o = variable_buffer_output (o, buffer, i);
 		  }
 	      }
 
 	    free (buffer);
 	  }
-#else	/* Amiga */
+#else   /* Amiga */
 	 {
 	   /* Amiga can't fork nor spawn, but I can start a program with
-	      redirection of my choice.   However, this means that we
+	      redirection of my choice.  However, this means that we
 	      don't have an opportunity to reopen stdout to trap it.  Thus,
 	      we save our own stdout onto a new descriptor and dup a temp
 	      file's descriptor onto our stdout temporarily.  After we
 	      spawn the shell program, we dup our own stdout back to the
 	      stdout descriptor.  The buffer reading is the same as above,
-	      except that we're now reading from a file. */
+	      except that we're now reading from a file.  */
 #include <dos/dos.h>
 #include <proto/dos.h>
 
@@ -699,7 +712,7 @@ expand_function (o, function, text, end)
 	     }
 	   free (buffer);
 	 }
-#endif	/* Not Amiga.  */
+#endif  /* Not Amiga.  */
 
 	free (text);
 	break;
@@ -1051,13 +1064,13 @@ expand_function (o, function, text, end)
       p2 = text;
       while (*p2 != '\0')
 	{
-          while (isspace(*p2))
-            ++p2;
-          p = p2;
-          for (i=0; *p2 != '\0' && !isspace(*p2); ++p2, ++i)
-            {}
-          if (!i)
-            break;
+	  while (isspace(*p2))
+	    ++p2;
+	  p = p2;
+	  for (i=0; *p2 != '\0' && !isspace(*p2); ++p2, ++i)
+	    {}
+	  if (!i)
+	    break;
 	  o = variable_buffer_output (o, p, i);
 	  o = variable_buffer_output (o, " ", 1);
 	  doneany = 1;
@@ -1235,42 +1248,42 @@ index argument");
 
       /* Check the next argument */
       for (p2 = p + 1; isblank(*p2); ++p2)
-        {}
+	{}
       count = 0;
       for (p = p2; p < end; ++p)
-        {
-          if (*p == startparen)
-            ++count;
-          else if (*p == endparen)
-            --count;
-          else if (*p == ',' && count <= 0)
-            break;
-        }
+	{
+	  if (*p == startparen)
+	    ++count;
+	  else if (*p == endparen)
+	    --count;
+	  else if (*p == ',' && count <= 0)
+	    break;
+	}
       if (p == end)
-        BADARGS ("wordlist");
+	BADARGS ("wordlist");
       text = expand_argument (p2, p);
 
       for (p2 = text; *p2 != '\0'; ++p2)
-        if (*p2 < '0' || *p2 > '9')
-          {
-            if (reading_filename != 0)
-              makefile_fatal (reading_filename, *reading_lineno_ptr,
-                              "non-numeric second argument to `wordlist' function");
-            else
-              fatal ("non-numeric second argument to `wordlist' function");
-          }
+	if (*p2 < '0' || *p2 > '9')
+	  {
+	    if (reading_filename != 0)
+	      makefile_fatal (reading_filename, *reading_lineno_ptr,
+			      "non-numeric second argument to `wordlist' function");
+	    else
+	      fatal ("non-numeric second argument to `wordlist' function");
+	  }
       j = (unsigned int)atoi(text);
       free (text);
 
       if (j > i)
-        j -= i;
+	j -= i;
       else
-        {
-          unsigned int k;
-          k = j;
-          j = i - j;
-          i = k;
-        }
+	{
+	  unsigned int k;
+	  k = j;
+	  j = i - j;
+	  i = k;
+	}
       ++j;
 
       /* Extract the requested words */
@@ -1278,13 +1291,13 @@ index argument");
       p2 = text;
 
       while (((p = find_next_token (&p2, &len)) != 0) && --i)
-        {}
+	{}
       if (p)
-        {
-          while (--j && (find_next_token (&p2, &len) != 0))
-            {}
-          o = variable_buffer_output (o, p, p2 - p);
-        }
+	{
+	  while (--j && (find_next_token (&p2, &len) != 0))
+	    {}
+	  o = variable_buffer_output (o, p, p2 - p);
+	}
 
       free (text);
       break;
@@ -1366,34 +1379,34 @@ index argument");
 	  p = p2 + len;
 #ifdef VMS
 	  while (p >= p2 && *p != ']'
-                 && (function != function_basename || *p != '.'))
+		 && (function != function_basename || *p != '.'))
 #else
 # ifdef __MSDOS__
 	  while (p >= p2 && *p != '/' && *p != '\\'
-                 && (function != function_basename || *p != '.'))
+		 && (function != function_basename || *p != '.'))
 # else
 	  while (p >= p2 && *p != '/'
-                 && (function != function_basename || *p != '.'))
+		 && (function != function_basename || *p != '.'))
 # endif
 #endif
 	    --p;
 	  if (p >= p2 && (function == function_dir))
 	    o = variable_buffer_output (o, p2, ++p - p2);
-          else if (p >= p2 && (*p == '.'))
-            o = variable_buffer_output (o, p2, p - p2);
+	  else if (p >= p2 && (*p == '.'))
+	    o = variable_buffer_output (o, p2, p - p2);
 #if defined(WINDOWS32) || defined(__MSDOS__)
-        /* Handle the "d:foobar" case */
-          else if (p2[0] && p2[1] == ':' && function == function_dir)
-            o = variable_buffer_output (o, p2, 2);
+	/* Handle the "d:foobar" case */
+	  else if (p2[0] && p2[1] == ':' && function == function_dir)
+	    o = variable_buffer_output (o, p2, 2);
 #endif
 	  else if (function == function_dir)
 #ifdef VMS
-            o = variable_buffer_output (o, "[]", 2);
+	    o = variable_buffer_output (o, "[]", 2);
 #else
 #ifndef _AMIGA
-            o = variable_buffer_output (o, "./", 2);
+	    o = variable_buffer_output (o, "./", 2);
 #else
-	    /* o = o */; /* Just a nop... */
+	    /* o = o */; /* Just a nop...  */
 #endif /* AMIGA */
 #endif /* !VMS */
 	  else
@@ -1421,32 +1434,32 @@ index argument");
 	  p = p2 + len;
 #ifdef VMS
 	  while (p >= p2 && *p != ']'
-                 && (function != function_suffix || *p != '.'))
+		 && (function != function_suffix || *p != '.'))
 #else
 # ifdef __MSDOS__
 	  while (p >= p2 && *p != '/' && *p != '\\'
-                 && (function != function_suffix || *p != '.'))
+		 && (function != function_suffix || *p != '.'))
 # else
 	  while (p >= p2 && *p != '/'
-                 && (function != function_suffix || *p != '.'))
+		 && (function != function_suffix || *p != '.'))
 # endif
 #endif
 	    --p;
 	  if (p >= p2)
 	    {
 	      if (function == function_notdir)
-                ++p;
-              else if (*p != '.')
-                continue;
+		++p;
+	      else if (*p != '.')
+		continue;
 	      o = variable_buffer_output (o, p, len - (p - p2));
 	    }
 #if defined(WINDOWS32) || defined(__MSDOS__)
-          /* Handle the case of "d:foo/bar". */
-          else if (function == function_notdir && p2[0] && p2[1] == ':')
-            {
-              p = p2 + 2;
-              o = variable_buffer_output (o, p, len - (p - p2));
-            }
+	  /* Handle the case of "d:foo/bar".  */
+	  else if (function == function_notdir && p2[0] && p2[1] == ':')
+	    {
+	      p = p2 + 2;
+	      o = variable_buffer_output (o, p, len - (p - p2));
+	    }
 #endif
 	  else if (function == function_notdir)
 	    o = variable_buffer_output (o, p2, len);

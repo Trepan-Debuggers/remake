@@ -38,11 +38,15 @@ convert_Path_to_windows32(char *Path, char to_delim)
         if ((etok - p) == 1) {
             if (*(etok - 1) == ';' ||
                 *(etok - 1) == ':') {
-		etok[-1] = to_delim;
-		etok[0] = to_delim;
+                etok[-1] = to_delim;
+                etok[0] = to_delim;
                 p = ++etok;
                 continue;    /* ignore empty bucket */
-            } else if (etok = strpbrk(etok+1, ":;")) {
+            } else if (!isalpha(*p)) {
+                /* found one to count, handle things like '.' */
+                *etok = to_delim;
+                p = ++etok;
+            } else if ((*etok == ':') && (etok = strpbrk(etok+1, ":;"))) {
                 /* found one to count, handle drive letter */
                 *etok = to_delim;
                 p = ++etok;
@@ -55,11 +59,6 @@ convert_Path_to_windows32(char *Path, char to_delim)
             p = ++etok;
 	}
 
-#if 0
-    /* convert to backward slashes */
-    for (p = Path, p = strchr(p, '/'); p; p = strchr(p, '/'))
-	*p = '\\';
-#endif
     return Path;
 }
 
