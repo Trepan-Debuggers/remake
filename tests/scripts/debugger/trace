@@ -1,5 +1,5 @@
 # -*-Perl-*-
-# $Id: trace,v 1.2 2004/06/12 03:18:34 rockyb Exp $
+# $Id: trace,v 1.3 2004/07/18 22:38:08 rockyb Exp $
 $description = "The following checks tracing.\n";
 
 $details = "We test line tracing, showing a target stack, line numbers\n"
@@ -30,6 +30,7 @@ close(MAKEFILE);
 
 $answer = "work/debugger/trace.mk:4 foo
 work/debugger/trace.mk:5 foo
+	echo FOO here
 FOO here
 ";
 
@@ -64,7 +65,9 @@ close(MAKEFILE);
 
 $answer = "work/debugger/trace.mk:3 foo
 work/debugger/trace.mk:4 foo
+	echo hi > /dev/null
 work/debugger/trace.mk:5 foo
+	exit 5
 work/debugger/trace.mk:5: [foo] Error 5 (ignored)
 
 #0  foo at work/debugger/trace.mk:5
@@ -75,4 +78,41 @@ work/debugger/trace.mk:5: [foo] Error 5 (ignored)
 
 &compare_output($answer,&get_logfile(1));
 
+# TEST #3 Test #3 "tracing" vs "silent"
+# dump
+# -------
 
+open(MAKEFILE,"> $makefile");
+
+# The Contents of the MAKEFILE ...
+
+print MAKEFILE <<\EOF;
+# Test #3 "tracing" versus "silent"
+.SILENT: foo
+
+all: foo
+
+foo:
+	if [ -n FOO ] ; \
+	then echo "test okay"; fi
+EOF
+# END of Contents of MAKEFILE
+
+close(MAKEFILE);
+
+# We used option --trace in test 1, use short option name -x this time.
+&run_make_with_options($makefile, "-E -x -i --basename-filenames",
+		       &get_logfile);
+
+# Create the answer to what should be produced by this Makefile
+
+$answer = "work/debugger/trace.mk:6 foo
+work/debugger/trace.mk:7 foo
+	if [ -n FOO ] ; \\
+then echo \"test okay\"; fi
+test okay
+";
+
+# COMPARE RESULTS
+
+&compare_output($answer,&get_logfile(1));
