@@ -784,7 +784,8 @@ start_waiting_jobs ()
       /* Check for recently deceased descendants.  */
       reap_children (0, 0);
 
-      if (job_slots_used > 0 && load_too_high ())
+      if (job_slots_used > 0
+	  && (job_slots_used == job_slots || load_too_high ()))
 	/* We have started all the jobs we can at the moment.  */
 	return;
 
