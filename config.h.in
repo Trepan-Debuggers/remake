@@ -38,9 +38,6 @@
 /* Define if your system has a working fnmatch function.  */
 #undef HAVE_FNMATCH
 
-/* Define if your system has its own `getloadavg' function.  */
-#undef HAVE_GETLOADAVG
-
 /* Define if you have the getmntent function.  */
 #undef HAVE_GETMNTENT
 
@@ -185,6 +182,9 @@
 /* Define if you have the getgroups function.  */
 #undef HAVE_GETGROUPS
 
+/* Define if you have the getloadavg function.  */
+#undef HAVE_GETLOADAVG
+
 /* Define if you have the memmove function.  */
 #undef HAVE_MEMMOVE
 
@@ -265,6 +265,9 @@
 
 /* Define if you have the dgc library (-ldgc).  */
 #undef HAVE_LIBDGC
+
+/* Define if you have the kstat library (-lkstat).  */
+#undef HAVE_LIBKSTAT
 
 /* Define if you have the sun library (-lsun).  */
 #undef HAVE_LIBSUN

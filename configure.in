@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.53 1997/04/07 07:22:42 psmith Exp $])
+AC_REVISION([$Id: configure.in,v 1.54 1997/04/07 18:02:17 psmith Exp $])
 AC_PREREQ(2.10)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 AC_CONFIG_HEADER(config.h)
@@ -46,6 +46,7 @@ AC_FUNC_ALLOCA
 AC_FUNC_VFORK
 AC_FUNC_SETVBUF_REVERSED
 AC_FUNC_GETLOADAVG
+AC_CHECK_LIB(kstat, kstat_open)
 AC_FUNC_STRCOLL
 
 # Check out the wait reality.

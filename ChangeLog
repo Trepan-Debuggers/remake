@@ -2,8 +2,15 @@ Mon Apr  7 02:06:22 1997  Paul D. Smith  <psmith@baynetworks.com>
 
 	* Version 3.75.1
 
-	* compatMakefile (objs): Define & use theo $(GLOB) variable so
+	* compatMakefile (objs): Define & use the $(GLOB) variable so
 	that it's removed correctly from build.sh.in when it's built.
+
+	* configure.in: On Solaris we can use the kstat_*() functions to
+	get load averages without needing special permissions.  Add a
+	check for -lkstat to see if we have it.
+
+	* getloadavg.c (getloadavg): Use HAVE_LIBKSTAT instead of SUN5 as
+	the test to enable kstat_open(), etc. processing.
 
 Fri Apr  4 20:21:18 1997  Eli Zaretskii  <eliz@is.elta.co.il>
 
