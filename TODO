@@ -1,7 +1,7 @@
 Most of what's here are things I know need to be done. Volunteers are
 welcome. I'll probably do only the things that either most interest me
 or I most want to have. So even though something below may be a major
-gap, Things marked :-( are important but things that I'll probably live
+gap, Things marked :-( are important but something I'll probably live
 with.
 
 
@@ -20,9 +20,14 @@ are in effect, or reset them on a restart.
 :-( Add a debugger profile mechanism. (Should be a stack of file
 descriptors so profiles can nest).
 
-Add debugger regression tests.
+Redo command parsing. Make more like gdb. 
+  trace -> set trace
+  set foo bar -> set variable foo = bar
+  add set annotate
 
-Add debugger documentation.
+More debugger regression tests.
+
+Expand/rewrite debugger documentation as texinfo. 
 
 :-( Allow breakpoint on file:line. 
 
@@ -44,4 +49,4 @@ There are probably many make-specific commands (e.g like the ones
 listed above). Using the debugger will probably uncover many areas.
 such as specialized things to trace.
 
-$Id: TODO,v 1.1 2004/06/11 00:40:41 rockyb Exp $
+$Id: TODO,v 1.2 2004/06/12 21:55:53 rockyb Exp $
