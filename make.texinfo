@@ -2,7 +2,7 @@
 @setfilename make.info
 @synindex vr fn
 
-@c $Header: /sources/make/make/Attic/make.texinfo,v 2.3 1988/07/03 13:07:42 mcgrath Exp $
+@c $Header: /sources/make/make/Attic/make.texinfo,v 2.6 1988/07/03 20:59:14 mcgrath Rel $
 
 @ifinfo
 This file documents the GNU Make utility.
@@ -2786,7 +2786,7 @@ the value of @code{foo}, and substitutes the result.
 @node Text Functions, Foreach Function, Function Syntax, Functions
 @section Functions for String Substitution and Analysis
 
-Here are some functions that operate on substrings of a string:
+Here are some functions that operate strings:
 
 @table @code
 @item $(subst @var{from},@var{to},@var{text})
@@ -2808,7 +2808,7 @@ Finds whitespace-separated words in @var{text} that match
 @var{pattern} may contain a @samp{%} which acts as a wildcard,
 matching any number of any characters within a word.  If
 @var{replacement} also contains a @samp{%}, the @samp{%} is replaced
-by the text that matched the @samp{%} in @var{pattern}.
+by the text that matched the @samp{%} in @var{pattern}.@refill
 
 Whitespace between words is folded into single space characters;
 leading and trailing whitespace is discarded.
@@ -2856,6 +2856,18 @@ opposite of the @code{filter} function.@refill
 @findex sort
 Sorts the words of @var{list} in lexical order, removing duplicate
 words.  The output is a list of words separated by single spaces.
+
+@item $(word @var{n},@var{text})
+@findex word
+Returns the @var{n}th word of @var{text}.  If @var{n} is bigger than
+the number of words in @var{text}, nothing is returned.  If you give
+0 as @var{n}, you will get a fatal error to remind you to quit
+thinking like a C programmer.
+
+@item $(words @var{text})
+@findex words
+Returns the number of words in @var{text}.  Thus, @code{$(word
+$(words @var{text}),@var{text})} is the last word of @var{text}.@refill
 @end table
 
 Here is a realistic example of the use of @code{subst}.  Suppose that a
@@ -3136,7 +3148,9 @@ $(firstword foo bar)
 @end example
 
 @noindent
-produces the result @samp{foo}.
+produces the result @samp{foo}.  Although @code{$(firstword
+@var{text})} is the same as @code{$(word 1,@var{text})}, the
+@code{firstword} function is retained for its ease of use.@refill
 
 @item $(wildcard @var{pattern})
 @findex wildcard
@@ -4568,162 +4582,136 @@ files into the archive, as described in the preceding section.
 @node Features, Missing, Archives, Top
 @chapter Features of GNU @code{make}
 
-GNU @code{make} contains many features not in any other @code{make}
-program.  Some of them are taken from other versions of @code{make}, while
-most are new inventions of the implementors of GNU @code{make}.
-
-The standard for comparison among versions of @code{make} in this chapter
-will be the version found in standard 4.2 BSD Unix systems.  Many additions
-come from the versions of @code{make} found in other Unix systems.  This
-chapter lists the features of GNU @code{make} beyond the 4.2 BSD version.
-They are presented as a simple list of small items with terse descriptions.
-All of these features (as well as those found in 4.2 BSD @code{make}) are
-documented in this manual, so it would be redundant to repeat that
-documentation here.
+Here is a summary of the features of GNU @code{make}, for comparison
+with and credit to other versions of @code{make}.  We consider the features
+of @code{make} in BSD 4.2 systems as a baseline.
 
 The @code{VPATH} variable and its special meaning come from the @code{make}
-in 4.3 BSD Unix.  @xref{Directory Search}.
+in BSD 4.3.  @xref{Directory Search}.
 
-Many features come from the version of @code{make} in Sun Unix systems.  I
-believe that these in turn are adopted from the @code{make} in Unix System V.
+Many features come from the version of @code{make} in System V:
 
 @itemize @bullet
 @item
 Included makefiles.  @xref{Include}.
 
 @item
-Variables are read in from the environment.
-All variables are placed into the environment of child processes (running
-commands).  @xref{Environment}.  Note also the @samp{-e} option.
+Variables are read from and communicated via the environment.
+@xref{Environment}.
 
 @item
-The environment variable @samp{MAKEFLAGS} is scanned for command-line
-options to @code{make}.  The options @samp{-f}, @samp{-p}, @samp{-d} and
-@samp{-c} are not accepted.  The @code{make} variable @samp{MAKEFLAGS} is
-set to a list of the options @code{make} was invoked with, except those
-noted above.  @xref{Options/Recursion}.@refill
+Options passed through the variable @code{MAKEFLAGS} to recursive
+invocations of @code{make}.  @xref{Options/Recursion}.
 
 @item
 The automatic variable @code{$%} is set to the member name
 in an archive reference.  @xref{Automatic}.
 
 @item
-The automatic variables @code{$@@}, @code{$*}, @code{$<} and @code{$%} have
-corresponding forms such as @code{$(@@F)} and @code{$(@@D)} which are the
-simple form (such as @code{$@@}) with only the filename and only the
-directory, respectively.  @xref{Automatic}.@refill
+The automatic variables @code{$@@}, @code{$*}, @code{$<} and @code{$%}
+have corresponding forms like @code{$(@@F)} and @code{$(@@D)}.
+@xref{Automatic}.@refill
 
 @item
 Substitution variable references.  @xref{Reference}.
 
 @item
-The command-line options @samp{-b} and @samp{-m} are accepted and ignored.
+The command-line options @samp{-b} and @samp{-m}, accepted and ignored.
 
 @item
-Targets whose commands contain a reference to the variable @code{MAKE} have
-their commands executed even if the @samp{-n}, @samp{-q} or @samp{-t}
-options are specified.  @xref{Recursion}.  I'm told that Unix System V
-@code{make} does this only in the case of @samp{-n}.@refill
+Execution of recursive commands to run @code{make} via the variable
+@code{MAKE} even if @samp{-n}, @samp{-q} or @samp{-t} is specified.
+@xref{Recursion}.
 
 @item
-An implicit suffix rule @samp{@var{x}.a:} makes
-@file{@var{lib}(@var{name}.o)} from @file{@var{name}.@var{x}}.  In GNU
-@code{make}, this is actually implemented by using one pattern rule for
-making library-archive files and rule chaining.  @xref{Chained Rules}.@refill
+Support for suffix @samp{.a} in suffix rules.  In GNU @code{make},
+this is actually implemented by chaining with one pattern rule for
+installing members in an archive.  @xref{Chained Rules}.@refill
+
+@item
+The arrangement of lines and backslash-newline combinations in
+commands is retained when the commands are printed, so they appear as
+they do in the makefile, except for the stripping of initial
+whitespace.
 @end itemize
 
-The Sun Unix (and probably System V) version of @code{make} fails to
-support variable references using braces (@samp{@{} and @samp{@}}) rather
-than parantheses (@pxref{Reference}), and to set the @code{MFLAGS} variable
-to the list of options (the same list as in @code{MAKEFLAGS}).@refill
-
-The remaining features are inventions new to GNU @code{make}.
+Some features were inspired by a version of @code{make} whose identity we
+don't recall:
 
 @itemize @bullet
 @item
-The arrangement of lines and backslash-newline combinations in
-commands is retained when the commands are printed, so they
-appear as they do in the makefile, except for the stripping of
-initial whitespace.
+Pattern rules using @samp{%}.
 This has been implemented in several versions of @code{make}.
 We're not sure who invented it first, but it's been spread around a bit.
-The @samp{-v} option prints version and copyright information.
+@xref{Pattern Rules}.@refill
+
+@item
 Rule chaining and implicit intermediate files.
+This was implemented by Stu Feldman in his version of @code{make}
+for AT&T Eighth Edition Research Unix, and later by Andrew Hume of
+AT&T Bell Labs in his @code{mk} program.  We don't really know if
 we got this from either of them or thought it up ourselves at the
+same time.  @xref{Chained Rules}.
+
+@item
 The automatic variable @code{$^} containing a list of all dependencies
 of the current target.  @xref{Automatic}.
 @end itemize
-The variable @code{MAKEOVERRIDES} is defined to contain all
-the variable definitions given on the command line, and is
-appended to the @code{MAKE} variable which contains the name
-by which @code{make} was invoked.  Thus, sub-makes will always
-get variable definitions from the command line that cannot
-come from the environment since environment variable
-definitions do not override those in makefiles.
+
+The remaining features are inventions new in GNU @code{make}:
+
 @itemize @bullet
 @item
-The @samp{-c} command option to change directories.  @xref{Options}.
+The @samp{-v} option to print version and copyright information.
 
 @item
 Simply-expanded variables.  @xref{Flavors}.
 
 @item
-Phony targets with the special target @code{.PHONY}.  @xref{Phony Targets}.
+Passing command-line variable assignments automatically through the
+variable @code{MAKE} to recursive @code{make} invocations.
 @xref{Recursion}.
 
-Variable expansion functions.  @xref{Functions}.
+@item
 The @samp{-c} command option to change directory.  @xref{Options}.
 
-The @samp{-o} option makes files seem artificially old.
+@item
 Verbatim variable definitions made with @code{define}.  @xref{Defining}.
 
 @item
-Conditional lines.  @xref{Conditionals}.
+Phony targets declared with the special target @code{.PHONY}.
 A similar feature with a different syntax was implemented by
 Andrew Hume of AT&T Bell Labs in his @code{mk} program.  This
-Included makefiles never determine the default target.
+seems to be a case of parallel discovery.  @xref{Phony Targets}.
 
 @item
-There is an include file search path.  @xref{Include}.
+Text manipulation by calling functions.  @xref{Functions}.
 
 @item
-@xref{MAKEFILES Variable}.
+The @samp{-o} option to pretend a file's modification-time is old.
 @xref{Avoid Compilation}.
 
-@xref{Pattern Rules}.
+@item
+Conditional execution.
+This has been implemented numerous times in various versions of
 @code{make}; it seems a natural extension derived from the features
 of the C preprocessor and similar macro languages and is not a
-The automatic variable @code{$^} contains a list of all
-dependencies of the current target.  @xref{Automatic}.
+revolutionary concept.  @xref{Conditionals}.
+
 @item
 Included makefiles never determine the default goal.
-There is a complete default set of implicit rules to operate on libraries,
-assembler, C, Fortran, Pascal, EFL, Ratfor, Yacc, and Lex sources and RCS
-and SCCS files.  @xref{Catalogue of Rules}.
 
 @item
-Leading sequences of @samp{./} are stripped from file names, so that
-@file{./@var{file}} and @file{@var{file}} are considered to be the same file.
+The included makefile search path.  @xref{Include}.
+
+@item
+Specifying extra makefiles to read.  @xref{MAKEFILES Variable}.
+
 @item
 Stripping leading sequences of @samp{./} from file names, so that
-Dependencies of the form @samp{-l@var{name}} are searched for
-as library archives.  @xref{Libraries/Search}.
+@file{./@var{file}} and @file{@var{file}} are considered to be the
 same file.
 
-Suffixes for suffix rules (@pxref{Suffix Rules}) may contain
-any characters.  In other version of @code{make}, they must
-begin with @samp{.} and not contain any @samp{/} characters.
-
-@item
-The variable @code{MAKELEVEL} keeps track of the current level
-of @code{make} recursion.  At the top level (@code{MAKELEVEL}
-is zero), the @code{SHELL} environment variable is not used to
-execute commands.  It is reset to @samp{/bin/sh}.@refill
-
-@item
-Intermediate implicit files.  @xref{Chained Rules}.
-
-@item
 @item
 Special search method for library dependencies written in the form
 @samp{-l@var{name}}.  @xref{Libraries/Search}.
@@ -4770,7 +4758,7 @@ to the file one would get without the @samp{~}.  For example, the
 suffix rule @samp{.c~.o} would make the file @file{@var{n}.o} file from
 the SCCS file @file{s.@var{n}.c}.  For complete coverage, a whole
 series of such suffix rules is required.  @xref{Suffix Rules}.@refill
-rules.  The System V @code{make} rule:
+
 In GNU @code{make}, this entire series of cases is handled by two
 pattern rules for extraction from SCCS, in combination with the
 general feature of rule chaining.  @xref{Chained Rules}.
