@@ -179,6 +179,9 @@ update_goal_chain (goals, makefiles)
 		break;
 	    }
 
+	  /* Reset FILE since it is null at the end of the loop.  */
+	  file = g->file;
+
 	  if (stop || !any_not_updated)
 	    {
 	      /* If we have found nothing whatever to do for the goal,
