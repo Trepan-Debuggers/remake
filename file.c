@@ -336,12 +336,13 @@ remove_intermediates (sig)
 		error ("*** Deleting file `%s'", f->name);
 	      else if (!silent_flag)
 		{
-		  if (!doneany)
+		  if (! doneany)
 		    {
 		      fputs ("rm ", stdout);
 		      doneany = 1;
 		    }
-		  putchar (' ');
+		  else
+		    putchar (' ');
 		  fputs (f->name, stdout);
 		  fflush (stdout);
 		}
