@@ -147,7 +147,7 @@ $(prog): $(objs) $(globdep) #$(addprefix $(ARCH)/,gmalloc.o mcheck.o)
 	$(CC) $(LDFLAGS) $^ $(globlib) $(LOADLIBES) -o $@.new
 	mv -f $@.new $@
 
-globfiles = $(addprefix glob/,COPYING.LIB Makefile.in \
+globfiles = $(addprefix glob/,COPYING.LIB configure.in configure Makefile.in \
 			glob.c fnmatch.c glob.h fnmatch.h)
 $(globfiles): stamp-glob ;
 stamp-glob: /home/gd/gnu/libc/posix/glob.tar
