@@ -88,7 +88,7 @@ pattern_search (file, archive, depth, recursions)
      unsigned int recursions;
 {
   /* Filename we are searching for a rule for.  */
-  char *filename = archive ? index (file->name, '(') : file->name;
+  char *filename = archive ? strchr (file->name, '(') : file->name;
 
   /* Length of FILENAME.  */
   unsigned int namelen = strlen (filename);
@@ -165,14 +165,14 @@ pattern_search (file, archive, depth, recursions)
 	 but not counting any slash at the end.  (foo/bar/ counts as
 	 bar/ in directory foo/, not empty in directory foo/bar/.)  */
 #ifdef VMS
-      lastslash = rindex (filename, ']');
+      lastslash = strrchr (filename, ']');
 #else
-      lastslash = rindex (filename, '/');
+      lastslash = strrchr (filename, '/');
 #if defined(__MSDOS__) || defined(WINDOWS32)
       /* Handle backslashes (possibly mixed with forward slashes)
 	 and the case of "d:file".  */
       {
-	char *bslash = rindex (filename, '\\');
+	char *bslash = strrchr (filename, '\\');
 	if (lastslash == 0 || bslash > lastslash)
 	  lastslash = bslash;
 	if (lastslash == 0 && filename[0] && filename[1] == ':')
@@ -228,9 +228,9 @@ pattern_search (file, archive, depth, recursions)
 	     prefix and the target pattern does not contain a slash.  */
 
 #ifdef VMS
-	  check_lastslash = lastslash != 0 && index (target, ']') == 0;
+	  check_lastslash = lastslash != 0 && strchr (target, ']') == 0;
 #else
-	  check_lastslash = lastslash != 0 && index (target, '/') == 0;
+	  check_lastslash = lastslash != 0 && strchr (target, '/') == 0;
 #endif
 	  if (check_lastslash)
 	    {
@@ -346,7 +346,7 @@ pattern_search (file, archive, depth, recursions)
               struct file *fp;
 
 	      /* If the dependency name has a %, substitute the stem.  */
-	      p = index (dep_name (dep), '%');
+	      p = strchr (dep_name (dep), '%');
 	      if (p != 0)
 		{
 		  register unsigned int i;

@@ -1,3 +1,5 @@
+#                                                                    -*-perl-*-
+
 $description = "This tests the CURDIR varaible.";
 
 $details = "Echo CURDIR both with and without -C.  Also ensure overrides work.";

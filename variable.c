@@ -878,8 +878,8 @@ try_variable_definition (flocp, line, origin)
 	  char *fake_env[2];
 	  size_t pathlen = 0;
 
-	  shellbase = rindex (value, '/');
-	  bslash = rindex (value, '\\');
+	  shellbase = strrchr (value, '/');
+	  bslash = strrchr (value, '\\');
 	  if (!shellbase || bslash > shellbase)
 	    shellbase = bslash;
 	  if (!shellbase && value[1] == ':')
@@ -987,7 +987,7 @@ print_variable (v, prefix)
   fputs (prefix, stdout);
 
   /* Is this a `define'?  */
-  if (v->recursive && index (v->value, '\n') != 0)
+  if (v->recursive && strchr (v->value, '\n') != 0)
     printf ("define %s\n%s\nendef\n", v->name, v->value);
   else
     {

@@ -84,7 +84,7 @@ dosify (filename)
 
   /* First, transform the name part.  */
   for (i = 0; *filename != '\0' && i < 8 && *filename != '.'; ++i)
-    *df++ = tolower (*filename++);
+    *df++ = tolower ((unsigned char)*filename++);
 
   /* Now skip to the next dot.  */
   while (*filename != '\0' && *filename != '.')
@@ -93,7 +93,7 @@ dosify (filename)
     {
       *df++ = *filename++;
       for (i = 0; *filename != '\0' && i < 3 && *filename != '.'; ++i)
-	*df++ = tolower (*filename++);
+	*df++ = tolower ((unsigned char)*filename++);
     }
 
   /* Look for more dots.  */
@@ -135,7 +135,7 @@ downcase (filename)
   /* First, transform the name part.  */
   for (i = 0; *filename != '\0'; ++i)
   {
-    *df++ = tolower (*filename);
+    *df++ = tolower ((unsigned char)*filename);
     ++filename;
   }
 
@@ -635,16 +635,16 @@ file_exists_p (name)
 #endif
 
 #ifdef VMS
-  dirend = rindex (name, ']');
+  dirend = strrchr (name, ']');
   dirend++;
   if (dirend == (char *)1)
     return dir_file_exists_p ("[]", name);
 #else /* !VMS */
-  dirend = rindex (name, '/');
+  dirend = strrchr (name, '/');
 #if defined (WINDOWS32) || defined (__MSDOS__)
   /* Forward and backslashes might be mixed.  We need the rightmost one.  */
   {
-    char *bslash = rindex(name, '\\');
+    char *bslash = strrchr(name, '\\');
     if (!dirend || bslash > dirend)
       dirend = bslash;
     /* The case of "d:file".  */
@@ -693,16 +693,16 @@ file_impossible (filename)
   register struct dirfile *new;
 
 #ifdef VMS
-  dirend = rindex (p, ']');
+  dirend = strrchr (p, ']');
   dirend++;
   if (dirend == (char *)1)
     dir = find_directory ("[]");
 #else
-  dirend = rindex (p, '/');
+  dirend = strrchr (p, '/');
 #if defined (WINDOWS32) || defined (__MSDOS__)
   /* Forward and backslashes might be mixed.  We need the rightmost one.  */
   {
-    char *bslash = rindex(p, '\\');
+    char *bslash = strrchr(p, '\\');
     if (!dirend || bslash > dirend)
       dirend = bslash;
     /* The case of "d:file".  */
@@ -796,15 +796,15 @@ file_impossible_p (filename)
   register struct dirfile *next;
 
 #ifdef VMS
-  dirend = rindex (filename, ']');
+  dirend = strrchr (filename, ']');
   if (dirend == 0)
     dir = find_directory ("[]")->contents;
 #else
-  dirend = rindex (filename, '/');
+  dirend = strrchr (filename, '/');
 #if defined (WINDOWS32) || defined (__MSDOS__)
   /* Forward and backslashes might be mixed.  We need the rightmost one.  */
   {
-    char *bslash = rindex(filename, '\\');
+    char *bslash = strrchr(filename, '\\');
     if (!dirend || bslash > dirend)
       dirend = bslash;
     /* The case of "d:file".  */

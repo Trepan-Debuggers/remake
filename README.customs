@@ -56,6 +56,28 @@ See the documentation for Customs for information on starting and
 configuring Customs.
 
 
+INVOKING CUSTOMS-IZED GNU MAKE
+-----------------------------
+
+One thing you should be aware of is that the default build environment
+for Customs requires root permissions.  Practically, this means that GNU
+make must be installed setuid root to use Customs.
+
+If you don't want to do this, you can build Customs such that root
+permissions are not necessary.  Andreas Stolcke <stolcke@speech.sri.com>
+writes:
+
+ > pmake, gnumake or any other customs client program is not required to
+ > be suid root if customs was compiled WITHOUT the USE_RESERVED_PORTS
+ > option in customs/config.h.  Make sure the "customs" service in
+ > /etc/services is defined accordingly (port 8231 instead of 1001).
+
+ > Not using USE_RESERVED_PORTS means that a user with programming
+ > skills could impersonate another user by writing a fake customs
+ > client that pretends to be someone other than himself.  See the
+ > discussion in etc/SECURITY.
+
+
 PROBLEMS
 --------
 

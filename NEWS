@@ -8,10 +8,26 @@ See the end for copying conditions.
 All changes mentioned here are more fully described in the GNU make
 manual, which is contained in this distribution as the file make.texinfo.
 
-Please send GNU make bug reports to bug-make@gnu.org.
+Please send GNU make bug reports to <bug-make@gnu.org>.
 See the README file and the GNU make manual for details on sending bug
 reports.
 
+Version 3.78.2
+
+* Previously, GNU make quoted variables such as MAKEFLAGS and
+  MAKEOVERRIDES for proper parsing by the shell.  This allowed them to
+  be used within make build scripts.  However, using them there is not
+  proper behavior: they are meant to be passed to subshells via the
+  environment.  Unfortunately the values were not quoted properly to be
+  passed through the environment.  This meant that some invocations of
+  make didn't properly pass values to submakes.
+
+  With this version we change that behavior: now these variables are
+  quoted properly for passing through the environment, which is the
+  correct way to do it.  If you previously used these variables
+  explicitly within a make rule you may need to re-examine your use for
+  correctness given this change.
+
 Version 3.78
 
 * Two new functions, $(error ...) and $(warning ...) are available.  The

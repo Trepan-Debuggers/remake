@@ -551,7 +551,7 @@ func_basename_dir(o, argv, funcname)
   char *p3 = argv[0];
   char *p2=0;
   int doneany=0;
-  int len=0;
+  unsigned int len=0;
   char *p=0;
   int is_basename= streq(funcname, "basename");
   int is_dir= !is_basename;
@@ -611,9 +611,9 @@ func_addsuffix_addprefix(o, argv, funcname)
   int is_addprefix = streq (funcname, "addprefix");
   int is_addsuffix = !is_addprefix;
 
-  int doneany =0;
-  char *p=0;
-  int len =0;
+  int doneany = 0;
+  char *p;
+  unsigned int len;
 
   while ((p = find_next_token (&list_iterator, &len)) != 0)
     {
@@ -652,8 +652,8 @@ func_firstword(o, argv, funcname)
      char **argv;
      const char *funcname;
 {
-  int i=0;
-  char *words = argv[0];
+  unsigned int i;
+  char *words = argv[0];    /* Use a temp variable for find_next_token */
   char *p = find_next_token (&words, &i);
 
   if (p != 0)
@@ -688,9 +688,9 @@ strip_whitespace (begpp, endpp)
      char **begpp;
      char **endpp;
 {
-  while (isspace (**begpp) && *begpp <= *endpp)
+  while (isspace ((unsigned char)**begpp) && *begpp <= *endpp)
     (*begpp) ++;
-  while (isspace (**endpp) && *endpp >= *begpp)
+  while (isspace ((unsigned char)**endpp) && *endpp >= *begpp)
     (*endpp) --;
   return *begpp;
 }
@@ -818,11 +818,11 @@ func_foreach (o, argv, funcname)
   char *list = expand_argument (argv[1], argv[2] -1);
   char *body = savestring (argv[2], argv[3] - argv[2] - 1);
 
-  int len =0;
+  int doneany = 0;
   char *list_iterator = list;
   char *p;
-  register struct variable *var=0;
-  int doneany =0;
+  unsigned int len;
+  register struct variable *var;
 
   push_new_variable_scope ();
   var = define_variable (varname, strlen (varname), "", o_automatic, 0);
@@ -874,16 +874,15 @@ func_filter_filterout (o, argv, funcname)
      char **argv;
      const char *funcname;
 {
-  struct  a_word   *wordhead =0;
-  struct  a_word *wordtail =0;
+  struct a_word *wordhead = 0;
+  struct a_word *wordtail = 0;
 
   int is_filter = streq (funcname, "filter");
   char *patterns = argv[0];
-
+  char *word_iterator = argv[1];
 
   char *p;
-  int len;
-  char *word_iterator = argv[1];
+  unsigned int len;
 
   /* Chop ARGV[1] up into words and then run each pattern through.  */
   while ((p = find_next_token (&word_iterator, &len)) != 0)
@@ -904,12 +903,11 @@ func_filter_filterout (o, argv, funcname)
 
   if (wordhead != 0)
     {
-      struct  a_word *wp =0;
       char *pat_iterator = patterns;
       int doneany = 0;
+      struct a_word *wp;
 
       wordtail->next = 0;
-
 
       /* Run each pattern through the words, killing words.  */
       while ((p = find_next_token (&pat_iterator, &len)) != 0)
@@ -958,10 +956,10 @@ func_strip(o, argv, funcname)
       int i=0;
       char *word_start=0;
 
-      while (isspace(*p))
+      while (isspace ((unsigned char)*p))
 	++p;
       word_start = p;
-      for (i=0; *p != '\0' && !isspace(*p); ++p, ++i)
+      for (i=0; *p != '\0' && !isspace ((unsigned char)*p); ++p, ++i)
 	{}
       if (!i)
 	break;
@@ -1031,15 +1029,15 @@ func_sort (o, argv, funcname)
 
   /* Chop ARGV[0] into words and put them in WORDS.  */
   char *t = argv[0];
-  char *p=0;
-  int len;
+  char *p;
+  unsigned int len;
   int i;
 
   while ((p = find_next_token (&t, &len)) != 0)
     {
       if (wordi >= nwords - 1)
 	{
-	  nwords = 2* nwords + 5;
+	  nwords = (2 * nwords) + 5;
 	  words = (char **) xrealloc ((char *) words,
 				      nwords * sizeof (char *));
 	}
@@ -1599,7 +1597,7 @@ func_not (char* o, char **argv, char *funcname)
 {
   char * s = argv[0];
   int result = 0;
-  while (isspace (*s))
+  while (isspace ((unsigned char)*s))
     s++;
   result = ! (*s);
   o = variable_buffer_output (o,  result ? "1" : "", result);
@@ -1814,7 +1812,7 @@ func_call (o, argv, funcname)
 
   flen = strlen (argv[0]);
   fname = argv[0] + flen - 1;
-  while (isspace (*fname))
+  while (isspace ((unsigned char)*fname))
     --fname;
   fname[1] = '\0';
 

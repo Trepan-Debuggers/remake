@@ -73,7 +73,7 @@ static void print_version PARAMS ((void));
 static void decode_switches PARAMS ((int argc, char **argv, int env));
 static void decode_env_switches PARAMS ((char *envar, unsigned int len));
 static void define_makeflags PARAMS ((int all, int makefile));
-static char *quote_as_word PARAMS ((char *out, char *in, int double_dollars));
+static char *quote_for_env PARAMS ((char *out, char *in));
 
 /* The structure that describes an accepted command switch.  */
 
@@ -784,18 +784,18 @@ int main (int argc, char ** argv)
   else
     {
 #ifdef VMS
-      program = rindex (argv[0], ']');
+      program = strrchr (argv[0], ']');
 #else
-      program = rindex (argv[0], '/');
+      program = strrchr (argv[0], '/');
 #endif
 #ifdef __MSDOS__
       if (program == 0)
-	program = rindex (argv[0], '\\');
+	program = strrchr (argv[0], '\\');
       else
 	{
 	  /* Some weird environments might pass us argv[0] with
 	     both kinds of slashes; we must find the rightmost.  */
-	  char *p = rindex (argv[0], '\\');
+	  char *p = strrchr (argv[0], '\\');
 	  if (p && p > program)
 	    program = p;
 	}
@@ -983,7 +983,7 @@ int main (int argc, char ** argv)
     argv[0] = concat (current_directory, "/", argv[0]);
 #else  /* !__MSDOS__ */
   if (current_directory[0] != '\0'
-      && argv[0] != 0 && argv[0][0] != '/' && index (argv[0], '/') != 0)
+      && argv[0] != 0 && argv[0][0] != '/' && strchr (argv[0], '/') != 0)
     argv[0] = concat (current_directory, "/", argv[0]);
 #endif /* !__MSDOS__ */
 #endif /* WINDOWS32 */
@@ -1010,7 +1010,8 @@ int main (int argc, char ** argv)
 	  if (! v->recursive)
 	    ++len;
 	  ++len;
-	  len += 3 * strlen (v->value);
+	  len += 2 * strlen (v->value);
+	  ++len;
 	}
 
       /* Now allocate a buffer big enough and fill it.  */
@@ -1018,11 +1019,11 @@ int main (int argc, char ** argv)
       for (cv = command_variables; cv != 0; cv = cv->next)
 	{
 	  v = cv->variable;
-	  p = quote_as_word (p, v->name, 0);
+	  p = quote_for_env (p, v->name);
 	  if (! v->recursive)
 	    *p++ = ':';
 	  *p++ = '=';
-	  p = quote_as_word (p, v->value, 0);
+	  p = quote_for_env (p, v->value);
 	  *p++ = ' ';
 	}
       p[-1] = '\0';		/* Kill the final space and terminate.  */
@@ -2012,6 +2013,8 @@ print_usage (bad)
 	       - DESCRIPTION_COLUMN,
 	       buf, cs->description);
     }
+
+  fprintf (usageto, _("\nReport bugs to <bug-make@gnu.org>.\n"));
 }
 
 /* Decode switches from ARGC and ARGV.
@@ -2211,7 +2214,7 @@ decode_env_switches (envar, len)
   argv[argc] = p;
   while (*value != '\0')
     {
-      if (*value == '\\')
+      if (*value == '\\' && value[1] != '\0')
 	++value;		/* Skip the backslash.  */
       else if (isblank (*value))
 	{
@@ -2228,7 +2231,7 @@ decode_env_switches (envar, len)
   *p = '\0';
   argv[++argc] = 0;
 
-  if (argv[1][0] != '-' && index (argv[1], '=') == 0)
+  if (argv[1][0] != '-' && strchr (argv[1], '=') == 0)
     /* The first word doesn't start with a dash and isn't a variable
        definition.  Add a dash and pass it along to decode_switches.  We
        need permanent storage for this in case decode_switches saves
@@ -2240,27 +2243,21 @@ decode_env_switches (envar, len)
 }
 
 /* Quote the string IN so that it will be interpreted as a single word with
-   no magic by the shell; if DOUBLE_DOLLARS is nonzero, also double dollar
-   signs to avoid variable expansion in make itself.  Write the result into
-   OUT, returning the address of the next character to be written.
-   Allocating space for OUT twice the length of IN (thrice if
-   DOUBLE_DOLLARS is nonzero) is always sufficient.  */
+   no magic by decode_env_switches; also double dollar signs to avoid
+   variable expansion in make itself.  Write the result into OUT, returning
+   the address of the next character to be written.
+   Allocating space for OUT twice the length of IN is always sufficient.  */
 
 static char *
-quote_as_word (out, in, double_dollars)
+quote_for_env (out, in)
      char *out, *in;
-     int double_dollars;
 {
   while (*in != '\0')
     {
-#ifdef VMS
-      if (index ("^;'\"*?$<>(){}|&~`\\ \t\r\n\f\v", *in) != 0)
-#else
-      if (index ("^;'\"*?[]$<>(){}|&~`\\ \t\r\n\f\v", *in) != 0)
-#endif
-	*out++ = '\\';
-      if (double_dollars && *in == '$')
+      if (*in == '$')
 	*out++ = '$';
+      else if (isblank (*in) || *in == '\\')
+        *out++ = '\\';
       *out++ = *in++;
     }
 
@@ -2429,7 +2426,7 @@ define_makeflags (all, makefile)
 	    {
 	      /* Add its argument too.  */
 	      *p++ = !short_option (flags->cs->c) ? '=' : ' ';
-	      p = quote_as_word (p, flags->arg, 1);
+	      p = quote_for_env (p, flags->arg);
 	    }
 	  ++words;
 	  /* Write a following space and dash, for the next flag.  */

@@ -46,7 +46,7 @@ set_file_variables (file)
   if (ar_name (file->name))
     {
       unsigned int len;
-      p = index (file->name, '(');
+      p = strchr (file->name, '(');
       at = (char *) alloca (p - file->name + 1);
       bcopy (file->name, at, p - file->name);
       at[p - file->name] = '\0';
@@ -75,7 +75,7 @@ set_file_variables (file)
 #ifndef	NO_ARCHIVES
       if (ar_name (file->name))
 	{
-	  name = index (file->name, '(') + 1;
+	  name = strchr (file->name, '(') + 1;
 	  len = strlen (name) - 1;
 	}
       else
@@ -146,7 +146,7 @@ set_file_variables (file)
 #ifndef	NO_ARCHIVES
 	if (ar_name (c))
 	  {
-	    c = index (c, '(') + 1;
+	    c = strchr (c, '(') + 1;
 	    len = strlen (c) - 1;
 	  }
 	else
@@ -188,7 +188,7 @@ set_file_variables (file)
 #ifndef	NO_ARCHIVES
 	if (ar_name (c))
 	  {
-	    c = index (c, '(') + 1;
+	    c = strchr (c, '(') + 1;
 	    len = strlen (c) - 1;
 	  }
 	else
@@ -255,7 +255,7 @@ chop_commands (cmds)
     {
       char *end = p;
     find_end:;
-      end = index (end, '\n');
+      end = strchr (end, '\n');
       if (end == 0)
         end = p + strlen (p);
       else if (end > p && end[-1] == '\\')
@@ -341,7 +341,7 @@ execute_file_commands (file)
      the commands are nothing but whitespace.  */
 
   for (p = file->cmds->commands; *p != '\0'; ++p)
-    if (!isspace (*p) && *p != '-' && *p != '@')
+    if (!isspace ((unsigned char)*p) && *p != '-' && *p != '@')
       break;
   if (*p == '\0')
     {
@@ -548,10 +548,10 @@ print_commands (cmds)
     {
       char *end;
 
-      while (isspace (*s))
+      while (isspace ((unsigned char)*s))
 	++s;
 
-      end = index (s, '\n');
+      end = strchr (s, '\n');
       if (end == 0)
 	end = s + strlen (s);
 

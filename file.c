@@ -67,7 +67,7 @@ lookup_file (name)
 #ifdef VMS
   lname = (char *)malloc(strlen(name) + 1);
   for (n=name, ln=lname; *n != '\0'; ++n, ++ln)
-    *ln = isupper(*n) ? tolower(*n) : *n;
+    *ln = isupper((unsigned char)*n) ? tolower((unsigned char)*n) : *n;
   *ln = '\0';
   name = lname;
 
@@ -133,8 +133,8 @@ enter_file (name)
   lname = (char *)malloc (strlen (name) + 1);
   for (n = name, ln = lname; *n != '\0'; ++n, ++ln)
     {
-      if (isupper(*n))
-	*ln = tolower(*n);
+      if (isupper((unsigned char)*n))
+	*ln = tolower((unsigned char)*n);
       else
 	*ln = *n;
     }

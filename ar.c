@@ -41,7 +41,7 @@ int
 ar_name (name)
      char *name;
 {
-  char *p = index (name, '('), *end = name + strlen (name) - 1;
+  char *p = strchr (name, '('), *end = name + strlen (name) - 1;
 
   if (p == 0 || p == name || *end != ')')
     return 0;
@@ -61,7 +61,7 @@ void
 ar_parse_name (name, arname_p, memname_p)
      char *name, **arname_p, **memname_p;
 {
-  char *p = index (name, '('), *end = name + strlen (name) - 1;
+  char *p = strchr (name, '('), *end = name + strlen (name) - 1;
 
   if (arname_p != 0)
     *arname_p = savestring (name, p - name);
