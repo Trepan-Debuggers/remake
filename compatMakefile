@@ -235,10 +235,10 @@ check: check-loadavg
 
 .PHONY: clean realclean distclean mostlyclean
 clean: glob-clean
-	-rm -f make *.o core
+	-rm -f make *.o core make.info* make.dvi
 distclean: clean glob-realclean
 	-rm -f Makefile config.h config.status build.sh stamp-config
-	-rm -f TAGS tags make.info* make.dvi
+	-rm -f TAGS tags
 	-rm -f make.?? make.??s make.log make.toc make.*aux
 realclean: distclean
 mostlyclean: clean
