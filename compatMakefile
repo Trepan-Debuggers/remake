@@ -152,10 +152,11 @@ glob/libglob.a: force
 	cd glob; $(MAKE) CC='$(CC)' CFLAGS='$(CFLAGS) -I..' libglob.a
 force:
 
-TAGS: $(srcs)
-	etags -tw $(srcs)
-tags: $(srcs)
-	ctags -tw $(srcs)
+tagsrcs = $(srcs) remote-*.c *.h
+TAGS: $(tagsrcs)
+	etags -tw $(tagsrcs)
+tags: $(tagsrcs)
+	ctags -tw $(tagsrcs)
 
 .PHONY: install
 install: $(bindir)/$(instname) $(mandir)/$(instname).$(manext)
