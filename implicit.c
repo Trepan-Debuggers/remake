@@ -1,5 +1,5 @@
 /* Implicit rule searching for GNU Make.
-Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -547,7 +547,9 @@ pattern_search (file, archive, depth, recursions)
     }
  
   if (!checked_lastslash[foundrule])
-    file->stem = stem[stemlen] == '\0' ? stem : savestring (stem, stemlen);
+    /* Always allocate new storage, since STEM might be
+       on the stack for an intermediate file.  */
+    file->stem = savestring (stem, stemlen);
   else
     {
       /* We want to prepend the directory from
