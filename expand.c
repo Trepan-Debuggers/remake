@@ -37,7 +37,7 @@ static char *variable_buffer;
    each call to variable_buffer_output should be the first argument to
    the following call.  */
 
-static char *
+char *
 variable_buffer_output (ptr, string, length)
      char *ptr, *string;
      unsigned int length;
