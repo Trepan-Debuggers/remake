@@ -7,11 +7,11 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.146 1994/10/24 05:05:43 roland Exp $
+@set RCSID $Id: make.texinfo,v 2.147 1994/11/01 08:29:31 roland Exp $
 @set EDITION 0.47 DRAFT
 @set VERSION 3.72 Beta
-@set UPDATED 24 October 1994
-@set UPDATE-MONTH October 1994
+@set UPDATED 1 November 1994
+@set UPDATE-MONTH November 1994
 @set ISBN 1-882114-50-7
 
 @c finalout
@@ -2141,24 +2141,28 @@ match that file's name.
 @findex .IGNORE
 @item .IGNORE
 
-Simply by being mentioned as a target, @code{.IGNORE} says to ignore
-errors in execution of commands.  The dependencies and commands for
-@code{.IGNORE} are not meaningful.
+If you specify dependencies for @code{.IGNORE}, then @code{make} will
+ignore errors in execution of the commands run for those particular
+files.  The commands for @code{.IGNORE} are not meaningful.
 
-@samp{.IGNORE} exists for historical compatibility.  Since
-@code{.IGNORE} affects every command in the makefile, it is not very
-useful; we recommend you use the more selective ways to ignore errors
-in specific commands.  @xref{Errors, ,Errors in Commands}.
+If mentioned as a target with no dependencies, @code{.IGNORE} says to
+ignore errors in execution of commands for all files.  This usage of
+@samp{.IGNORE} is supported only for historical compatibility.  Since
+this affects every command in the makefile, it is not very useful; we
+recommend you use the more selective ways to ignore errors in specific
+commands.  @xref{Errors, ,Errors in Commands}.
 
 @findex .SILENT
 @item .SILENT
 
-Simply by being mentioned as a target, @code{.SILENT} says not to
-print commands before executing them.  The dependencies and commands
-for @code{.SILENT} are not meaningful.
+If you specify dependencies for @code{.SILENT}, then @code{make} will
+not the print commands to remake those particular files before executing
+them.  The commands for @code{.SILENT} are not meaningful.
 
-@samp{.SILENT} exists for historical compatibility.  We recommend you
-use the more selective ways to silence specific commands.
+If mentioned as a target with no dependencies, @code{.SILENT} says not
+to print any commands before executing them.  This usage of
+@samp{.SILENT} is supported only for historical compatibility.  We
+recommend you use the more selective ways to silence specific commands.
 @xref{Echoing, ,Command Echoing}.  If you want to silence all commands
 for a particular run of @code{make}, use the @samp{-s} or
 @w{@samp{--silent}} option (@pxref{Options Summary}).
@@ -2721,7 +2725,7 @@ actually doing them.
 The @samp{-s} or @samp{--silent}
 flag to @code{make} prevents all echoing, as if all commands
 started with @samp{@@}.  A rule in the makefile for the special target
-@code{.SILENT} has the same effect 
+@code{.SILENT} without dependencies has the same effect 
 (@pxref{Special Targets, ,Special Built-in Target Names}).
 @code{.SILENT} is essentially obsolete since @samp{@@} is more flexible.@refill
 
@@ -2910,10 +2914,10 @@ This causes @code{rm} to continue even if it is unable to remove a file.
 @cindex @code{--ignore-errors}
 @findex .IGNORE
 When you run @code{make} with the @samp{-i} or @samp{--ignore-errors}
-flag, errors are ignored in
-all commands of all rules.  A rule in the makefile for the special target
-@code{.IGNORE} has the same effect.  These ways of ignoring errors are
-obsolete because @samp{-} is more flexible.
+flag, errors are ignored in all commands of all rules.  A rule in the
+makefile for the special target @code{.IGNORE} has the same effect, if
+there are no dependencies.  These ways of ignoring errors are obsolete
+because @samp{-} is more flexible.
 
 When errors are to be ignored, because of either a @samp{-} or the
 @samp{-i} flag, @code{make} treats an error return just like success,
@@ -2925,6 +2929,7 @@ it implies that the current target cannot be correctly remade, and neither
 can any other that depends on it either directly or indirectly.  No further
 commands will be executed for these targets, since their preconditions
 have not been achieved.
+
 
 @cindex @code{-k}
 @cindex @code{--keep-going}
@@ -2947,11 +2952,28 @@ is why Emacs' @code{compile} command passes the @samp{-k} flag by
 default.
 @cindex Emacs (@code{M-x compile})
 
+@findex .DELETE_ON_ERROR
+@cindex deletion of target files
+@cindex removal of target files
+@cindex target, deleting on error
+Usually when a command fails, if it has changed the target file at all,
+the file is corrupted and cannot be used---or at least it is not
+completely updated.  Yet the file's timestamp says that it is now up to
+date, so the next time @code{make} runs, it will not try to update that
+file.  The situation is just the same as when the command is killed by a
+signal; @pxref{Interrupts}.  So generally the right thing to do is to
+delete the target file if the command fails after beginning to change
+the file.  @code{make} will do this if @code{.DELETE_ON_ERROR} appears
+as a target.  This is almost always what you want @code{make} to do, but
+it is not historical practice; so for compatibility, you must explicitly
+request it.
+
 @node Interrupts, Recursion, Errors, Commands
 @section Interrupting or Killing @code{make}
 @cindex interrupt
 @cindex signal
 @cindex deletion of target files
+@cindex removal of target files
 @cindex target, deleting on interrupt
 @cindex killing (interruption)
 
@@ -3042,28 +3064,6 @@ is @samp{cd subdir; /bin/make}.  If you use a special version of
 executed for recursive invocations.
 @cindex @code{cd} (shell command)
 
-Also, any arguments that define variable values are added to @code{MAKE},
-so the sub-@code{make} gets them too.  Thus, if you do @samp{make
-CFLAGS=-O}, so that all C compilations will be optimized, the
-sub-@code{make} is run with @samp{cd subdir; /bin/make CFLAGS=-O}.@refill
-
-@vindex MAKE_COMMAND
-@vindex MAKEOVERRIDES
-The @code{MAKE} variable actually just refers to two other variables
-which contain these special values.  In fact, @code{MAKE} is always
-defined as @samp{$(MAKE_COMMAND) $(MAKEOVERRIDES)}.  The variable
-@code{MAKE_COMMAND} is the file name with which @code{make} was invoked
-(such as @file{/bin/make}, above).  The variable @code{MAKEOVERRIDES}
-contains definitions for the variables defined on the command line; in
-the above example, its value is @samp{CFLAGS=-O}.  If you @emph{do not}
-want these variable definitions done in all recursive @code{make}
-invocations, you can redefine the @code{MAKEOVERRIDES} variable to
-remove them.  You do this in any of the normal ways for defining
-variables: in a makefile (@pxref{Setting, ,Setting Variables}); on the command
-line with an argument like @samp{MAKEOVERRIDES=} 
-(@pxref{Overriding, ,Overriding Variables}); or with an environment variable
-(@pxref{Environment, ,Variables from the Environment}).
-
 As a special feature, using the variable @code{MAKE} in the commands of
 a rule alters the effects of the @samp{-t} (@samp{--touch}), @samp{-n}
 (@samp{--just-print}), or @samp{-q} (@w{@samp{--question}}) option.
@@ -3106,9 +3106,9 @@ commands, is propagated to the subsystem.@refill
 Variable values of the top-level @code{make} can be passed to the
 sub-@code{make} through the environment by explicit request.  These
 variables are defined in the sub-@code{make} as defaults, but do not
-override what is specified in the sub-@code{make}'s makefile unless
-you use the @samp{-e} switch
-(@pxref{Options Summary, ,Summary of Options}).@refill
+override what is specified in the makefile used by the sub-@code{make}
+makefile unless you use the @samp{-e} switch (@pxref{Options Summary,
+,Summary of Options}).@refill
 
 To pass down, or @dfn{export}, a variable, @code{make} adds the variable
 and its value to the environment for running each command.  The
@@ -3125,6 +3125,15 @@ characters other than letters, numbers, and underscores.
 The special variables @code{SHELL} and @code{MAKEFLAGS} are always
 exported (unless you unexport them).
 @code{MAKEFILES} is exported if you set it to anything.
+
+@code{make} automatically passes down variable values that were defined
+on the command line, by putting them in the @code{MAKEFLAGS} variable.
+@iftex
+See the next section.
+@end iftext
+@ifinfo
+@xref{Options/Recursion}.
+@end ifinfo
 
 Variables are @emph{not} normally passed down if they were created by
 default by @code{make} (@pxref{Implicit Variables, ,Variables Used by
@@ -3274,6 +3283,15 @@ in its environment.  In response, it takes the flags from that value and
 processes them as if they had been given as arguments.
 @xref{Options Summary, ,Summary of Options}.
 
+@cindex command line variable definitions, and recursion
+@cindex variables, command line, and recursion
+@cindex recursion, and command line variable definitions
+Likewise variables defined on the command line are passed to the
+sub-@code{make} through @code{MAKEFLAGS}.  Words in the value of
+@code{MAKEFLAGS} that contain @samp{=}, @code{make} treats as variable
+definitions just as if they appeared on the command line.
+@xref{Overriding, ,Overriding Variables}.
+
 @cindex @code{-C}, and recursion
 @cindex @code{-f}, and recursion
 @cindex @code{-I}, and recursion
@@ -3323,13 +3341,39 @@ subsystem:
         cd subdir; $(MAKE) MAKEFLAGS=
 @end example
 
+@vindex MAKEOVERRIDES
+The command line variable definitions really appear in the variable
+@code{MAKEOVERRIDES}, and @code{MAKEFLAGS} contains a reference to this
+variable.  If you do want to pass flags down normally, but don't want to
+pass down the command line variable definitions, you can reset
+@code{MAKEOVERRIDES} to empty, like this:
+
+@example
+MAKEOVERRIDES =
+@end example
+
+@noindent
+@cindex Arg list too long
+@cindex E2BIG
+This is not usually useful to do.  However, some systems have a small
+fixed limit on the size of the environment, and putting so much
+information in into the value of @code{MAKEFLAGS} can exceed it.
+If you see the error message @samp{Arg list too long}, this may be the problem.
+@findex .POSIX
+@cindex POSIX.2
+(For strict compliance with POSIX.2, changing @code{MAKEOVERRIDES} does
+not affect @code{MAKEFLAGS} if the special target @samp{.POSIX} appears
+in the makefile.  You probably do not care about this.)
+
 @vindex MFLAGS
-A similar variable @code{MFLAGS} exists also, for historical compatibility.
-It has the same value as @code{MAKEFLAGS} except that it always begins with
-a hyphen unless it is empty (@code{MAKEFLAGS} begins with a hyphen only when
-it begins with an option that has no single-letter version, such as
-@samp{--warn-undefined-variables}).  @code{MFLAGS} was traditionally used
-explicitly in the recursive @code{make} command, like this:
+A similar variable @code{MFLAGS} exists also, for historical
+compatibility.  It has the same value as @code{MAKEFLAGS} except that it
+does not contain the command line variable definitions, and it always
+begins with a hyphen unless it is empty (@code{MAKEFLAGS} begins with a
+hyphen only when it begins with an option that has no single-letter
+version, such as @samp{--warn-undefined-variables}).  @code{MFLAGS} was
+traditionally used explicitly in the recursive @code{make} command, like
+this:
 
 @example
 subsystem:
