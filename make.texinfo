@@ -5590,8 +5590,9 @@ a phony target (@pxref{Phony Targets}) or empty target (@pxref{Empty
 Targets, ,Empty Target Files to Record Events}).  Many makefiles contain
 a phony target named @file{clean} which deletes everything except source
 files.  Naturally, this is done only if you request it explicitly with
-@w{@samp{make clean}}.  Here is a list of typical phony and empty target
-names:@refill
+@w{@samp{make clean}}.  Following is a list of typical phony and empty
+target names.  @xref{Standard Targets}, for a detailed list of all the
+standard target names which GNU software packages use.
 
 @table @file
 @item all
@@ -5615,11 +5616,10 @@ is rarely necessary and takes a lot of time.
 @cindex @code{realclean} @r{(standard target)}
 @itemx clobber
 @cindex @code{clobber} @r{(standard target)}
-Any of these three might be defined to delete everything that would
-not be part of a standard distribution.  For example, this would
-delete configuration files or links that you would normally create as
-preparation for compilation, even if the makefile itself cannot create
-these files.
+Any of these targets might be defined to delete @emph{more} files than
+@samp{clean} does.  For example, this would delete configuration files
+or links that you would normally create as preparation for compilation,
+even if the makefile itself cannot create these files.
 
 @item install
 @cindex @code{install} @r{(standard target)}
