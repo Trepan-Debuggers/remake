@@ -392,6 +392,15 @@ remove_intermediates (int sig)
     }
 }
 
+/* Set the intermediate flag.  */
+
+static void
+set_intermediate (const void *item)
+{
+  struct file *f = (struct file *) item;
+  f->intermediate = 1;
+}
+
 /* For each dependency of each file, make the `struct dep' point
    at the appropriate `struct file' (which may have to be created).
 
@@ -473,7 +482,10 @@ snap_deps (void)
             f2->intermediate = f2->secondary = 1;
       /* .SECONDARY with no deps listed marks *all* files that way.  */
       else
-        all_secondary = 1;
+        {
+          all_secondary = 1;
+          hash_map (&files, set_intermediate);
+        }
     }
 
   f = lookup_file (".EXPORT_ALL_VARIABLES");

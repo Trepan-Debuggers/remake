@@ -1,3 +1,8 @@
+2003-03-28  Paul D. Smith  <psmith@gnu.org>
+
+	* file.c (snap_deps): If .SECONDARY with no targets is given, set
+	the intermediate flag on all targets.  Fixes bug #2515.
+
 2003-03-24  Paul D. Smith  <psmith@gnu.org>
 
 	* configure.in, Makefile.am, glob/Makefile.am, doc/Makefile.am:
