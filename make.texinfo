@@ -5699,7 +5699,7 @@ considered and which are applied---everything interesting about how
 
 @item -e
 @cindex @code{-e}
-@item --environment-overrides
+@itemx --environment-overrides
 @cindex @code{--environment-overrides}
 Give variables taken from the environment precedence
 over variables from makefiles.
@@ -5707,9 +5707,9 @@ over variables from makefiles.
 
 @item -f @var{file}
 @cindex @code{-f}
-@item --file @var{file}
+@itemx --file @var{file}
 @cindex @code{--file}
-@item --makefile @var{file}
+@itemx --makefile @var{file}
 @cindex @code{--makefile}
 Read the file named @var{file} as a makefile.
 @xref{Makefiles, ,Writing Makefiles}.
@@ -5731,7 +5731,7 @@ Ignore all errors in commands executed to remake files.
 
 @item -I @var{dir}
 @cindex @code{-I}
-@item --include-dir @var{dir}
+@itemx --include-dir @var{dir}
 @cindex @code{--include-dir}
 Specifies a directory @var{dir} to search for included makefiles.
 @xref{Include, ,Including Other Makefiles}.  If several @samp{-I}
