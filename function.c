@@ -114,9 +114,9 @@ patsubst_expand (o, text, pattern, replace, pattern_percent, replace_percent)
      register char *pattern, *replace;
      register char *pattern_percent, *replace_percent;
 {
-  register int pattern_prepercent_len, pattern_postpercent_len;
-  register int replace_prepercent_len, replace_postpercent_len;
-  register char *t;
+  unsigned int pattern_prepercent_len, pattern_postpercent_len;
+  unsigned int replace_prepercent_len, replace_postpercent_len;
+  char *t;
   unsigned int len;
   int doneany = 0;
 
@@ -579,7 +579,7 @@ expand_function (o, function, text, end)
 	   for (aptr=argv; *aptr; aptr++)
 	     {
 	       strcpy (ptr, *aptr);
-	       len += strlen (ptr) + 1;
+	       ptr += strlen (ptr) + 1;
 	       *ptr ++ = ' ';
 	       *ptr = 0;
 	     }
@@ -603,7 +603,7 @@ expand_function (o, function, text, end)
 		   buffer = (char *) xrealloc (buffer, maxlen + 1);
 		 }
 
-	       cc = read (child_stdout, &buffer[i], maxlen - i);
+	       cc = Read (child_stdout, &buffer[i], maxlen - i);
 	       if (cc > 0)
 		 i += cc;
 	     } while (cc > 0);
