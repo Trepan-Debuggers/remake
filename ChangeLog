@@ -1,3 +1,11 @@
+2003-03-24  Paul D. Smith  <psmith@gnu.org>
+
+	* remake.c (notice_finished_file):
+
+	* make.h (ENULLLOOP): Set errno = 0 before invoking the command;
+	some calls (like readdir()) return NULL in valid situations
+	without resetting errno.  Fixes bug #2846.
+
 2003-02-25  Paul D. Smith  <psmith@gnu.org>
 
 	Port to OS/2 (__EMX__) by Andreas Buening <andreas.buening@nexgo.de>.
