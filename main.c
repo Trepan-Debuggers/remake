@@ -977,7 +977,7 @@ main (argc, argv, envp)
 	    if (any_remade)
 	      goto re_exec;
 	    else if (any_failed)
-	      die (1);
+	      die (2);
 	    else
 	      break;
 	  }
@@ -1094,8 +1094,12 @@ main (argc, argv, envp)
 	    /* Updated successfully.  */
 	    status = 0;
 	    break;
-	  case 1:
+	  case 2:
 	    /* Updating failed.  */
+	    status = 2;
+	    break;
+	  case 1:
+	    /* We are under -q and would run some commands.  */
 	    status = 1;
 	    break;
 	  default:
@@ -1418,7 +1422,7 @@ positive integral argument",
 		   buf, cs->description);
 	}
 
-      die (bad);
+      die (bad ? 2 : 0);
     }
 }
 
