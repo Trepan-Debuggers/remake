@@ -332,7 +332,14 @@ reap_children (block, err)
 
 	      /* If there are more commands to run, try to start them.  */
 	      if (job_next_command (c))
-		start_job_command (c);
+		{
+		  /* Check again whether to start remotely.
+		     Whether or not we want to changes over time.
+		     Also, start_remote_job may need state set up
+		     by start_remote_job_p.  */
+		  c->remote = start_remote_job_p ();
+		  start_job_command (c);
+		}
 
 	      switch (c->file->command_state)
 		{
