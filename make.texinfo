@@ -9,7 +9,7 @@
 
 @set EDITION 0.43
 @set VERSION 3.68 Beta
-@set UPDATED 24 May 1993
+@set UPDATED 26 May 1993
 @set UPDATE-MONTH May 1993
 
 @c finalout
@@ -1039,7 +1039,7 @@ implicit rules.  @xref{Implicit Rules, ,Using Implicit Rules}.
 @cindex @code{--makefile}
 If you want to use a nonstandard name for your makefile, you can specify
 the makefile name with the @samp{-f} or @samp{--file} option.  The
-arguments @w{@samp{-f @var{name}}} or @w{@samp{--file @var{name}}} tell
+arguments @w{@samp{-f @var{name}}} or @w{@samp{--file=@var{name}}} tell
 @code{make} to read the file @var{name} as the makefile.  If you use
 more than one @samp{-f} or @samp{--file} option, you can specify several
 makefiles.  All the makefiles are effectively concatenated in the order
@@ -3526,6 +3526,9 @@ future, and with some shells they cannot be passed through the environment to a
 sub-@code{make} 
 (@pxref{Variables/Recursion, ,Communicating Variables to a Sub-@code{make}}).
 
+Variable names are case-sensitive.  The names @samp{foo}, @samp{FOO},
+and @samp{Foo} all refer to different variables.
+
 It is traditional to use upper case letters in variable names, but we
 recommend using lower case letters for variable names that serve internal
 purposes in the makefile, and reserving upper case for parameters that
@@ -5649,10 +5652,10 @@ the targets but does not really change their contents.
 are up to date already; but execute no commands in either case.  In other
 words, neither compilation nor output will occur.
 
-@item -W
-@itemx --what-if
-@itemx --assume-new
-@itemx --new-file
+@item -W @var{file}
+@itemx --what-if=@var{file}
+@itemx --assume-new=@var{file}
+@itemx --new-file=@var{file}
 @cindex @code{--what-if}
 @cindex @code{-W}
 @cindex @code{--assume-new}
@@ -5875,7 +5878,7 @@ These options are ignored for compatibility with other versions of @code{make}.
 
 @item -C @var{dir}
 @cindex @code{-C}
-@itemx --directory @var{dir}
+@itemx --directory=@var{dir}
 @cindex @code{--directory}
 Change to directory @var{dir} before reading the makefiles.  If multiple
 @samp{-C} options are specified, each is interpreted relative to the
@@ -5906,9 +5909,9 @@ over variables from makefiles.
 
 @item -f @var{file}
 @cindex @code{-f}
-@itemx --file @var{file}
+@itemx --file=@var{file}
 @cindex @code{--file}
-@itemx --makefile @var{file}
+@itemx --makefile=@var{file}
 @cindex @code{--makefile}
 Read the file named @var{file} as a makefile.
 @xref{Makefiles, ,Writing Makefiles}.
@@ -5930,7 +5933,7 @@ Ignore all errors in commands executed to remake files.
 
 @item -I @var{dir}
 @cindex @code{-I}
-@itemx --include-dir @var{dir}
+@itemx --include-dir=@var{dir}
 @cindex @code{--include-dir}
 Specifies a directory @var{dir} to search for included makefiles.
 @xref{Include, ,Including Other Makefiles}.  If several @samp{-I}
@@ -5939,7 +5942,7 @@ searched in the order specified.
 
 @item -j [@var{jobs}]
 @cindex @code{-j}
-@itemx --jobs [@var{jobs}]
+@itemx --jobs=[@var{jobs}]
 @cindex @code{--jobs}
 Specifies the number of jobs (commands) to run simultaneously.  With no
 argument, @code{make} runs as many jobs simultaneously as possible.  If
@@ -5958,9 +5961,9 @@ dependencies of these targets can be processed all the same.
 
 @item -l [@var{load}]
 @cindex @code{-l}
-@itemx --load-average [@var{load}]
+@itemx --load-average[=@var{load}]
 @cindex @code{--load-average}
-@itemx --max-load [@var{load}]
+@itemx --max-load[=@var{load}]
 @cindex @code{--max-load}
 Specifies that no new jobs (commands) should be started if there are
 others jobs running and the load average is at least @var{load} (a
@@ -5982,9 +5985,9 @@ Print the commands that would be executed, but do not execute them.
 
 @item -o @var{file}
 @cindex @code{-o}
-@itemx --old-file @var{file}
+@itemx --old-file=@var{file}
 @cindex @code{--old-file}
-@itemx --assume-old @var{file}
+@itemx --assume-old=@var{file}
 @cindex @code{--assume-old}
 Do not remake the file @var{file} even if it is older than its
 dependencies, and do not remake anything on account of changes in
@@ -6085,11 +6088,11 @@ but you do not want to see the extra messages.
 
 @item -W @var{file}
 @cindex @code{-W}
-@itemx --what-if @var{file}
+@itemx --what-if=@var{file}
 @cindex @code{--what-if}
-@itemx --new-file @var{file}
+@itemx --new-file=@var{file}
 @cindex @code{--new-file}
-@itemx --assume-new @var{file}
+@itemx --assume-new=@var{file}
 @cindex @code{--assume-new}
 Pretend that the target @var{file} has just been modified.  When used
 with the @samp{-n} flag, this shows you what would happen if you were
@@ -6859,8 +6862,6 @@ There may also be dependencies that do not use @samp{%}; such a dependency
 attaches to every file made by this pattern rule.  These unvarying
 dependencies are useful occasionally.
 
-@c !!! The following sentence should be rewritten.  --bob
-@c rewritten by roland; does it win now?
 A pattern rule need not have any dependencies that contain @samp{%}, or
 in fact any dependencies at all.  Such a rule is effectively a general
 wildcard.  It provides a way to make any file that matches the target
