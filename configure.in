@@ -1,5 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(vpath.c)		dnl A distinctive file to look for in srcdir.
+AC_CONFIG_HEADER(config.h)
 
 AC_PROG_INSTALL
 AC_PROG_RANLIB
@@ -50,5 +51,5 @@ dnl Local Variables:
 dnl comment-start: " dnl "
 dnl comment-end: ""
 dnl comment-start-skip: "\\bdnl\\b\\s *"
-dnl compile-command: "make configure"
+dnl compile-command: "make configure config.h.in"
 dnl End:
