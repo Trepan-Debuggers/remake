@@ -6,10 +6,6 @@
 @smallbook
 @c %**end of header
 
-@comment These are necessary only because of texinfo.tex bugs.
-@clear two-level-index
-@clear shorttitlepage
-
 @set EDITION 0.40
 @set VERSION 3.63 Beta
 @set UPDATED 14 January 1993
@@ -19,7 +15,8 @@
 
 @c ISPELL CHECK: done, 14 Jan 1993 --bob
 
-@ifset two-level-index
+@comment @ifset seems to be completely broken.
+@ignore
 @tex
 \message{If you do not have the two-level texindex program, you will lose.}
 % trying for a two-level index
@@ -56,7 +53,7 @@
 \temp}%
 }\penalty\count10}}
 @end tex
-@end ifset
+@end ignore
 
 @c Combine the variable and function indices:
 @syncodeindex vr fn
@@ -98,9 +95,11 @@ entitled ``GNU General Public License'' must be approved for accuracy
 by the Foundation.
 @end ifinfo
 
+@ignore
 @ifset shorttitlepage
 @shorttitlepage GNU Make
 @end ifset
+@end ignore
 @titlepage
 @title GNU Make
 @subtitle A Program for Directing Recompilation
