@@ -494,12 +494,20 @@ dep_name (dep)
 #ifndef	HAVE_UNISTD_H
 extern int getuid (), getgid (), geteuid (), getegid ();
 extern int setuid (), setgid ();
+#ifdef HAVE_SETEUID
+extern int seteuid ();
+#else
 #ifdef	HAVE_SETREUID
 extern int setreuid ();
 #endif	/* Have setreuid.  */
+#endif	/* Have seteuid.  */
+#ifdef HAVE_SETEGID
+extern int setegid ();
+#else
 #ifdef	HAVE_SETREGID
 extern int setregid ();
 #endif	/* Have setregid.  */
+#endif	/* Have setegid.  */
 #endif	/* No <unistd.h>.  */
 
 /* Keep track of the user and group IDs for user- and make- access.  */
@@ -565,6 +573,16 @@ user_access ()
      We now want to set the effective user and group IDs to the real IDs,
      which are the IDs of the process that exec'd make.  */
 
+#ifdef	HAVE_SETEUID
+
+  /* Modern systems have the seteuid/setegid calls which set only the
+     effective IDs, which is ideal.  */
+
+  if (seteuid (user_uid) < 0)
+    pfatal_with_name ("user_access: seteuid");
+
+#else	/* Not HAVE_SETEUID.  */
+
 #ifndef	HAVE_SETREUID
 
   /* System V has only the setuid/setgid calls to set user/group IDs.
@@ -578,7 +596,7 @@ user_access ()
   if (setuid (user_uid) < 0)
     pfatal_with_name ("user_access: setuid");
 
-#else
+#else	/* HAVE_SETREUID.  */
 
   /* In 4BSD, the setreuid/setregid calls set both the real and effective IDs.
      They may be set to themselves or each other.  So you have two alternatives
@@ -590,14 +608,20 @@ user_access ()
   if (setreuid (make_uid, user_uid) < 0)
     pfatal_with_name ("user_access: setreuid");
 
-#endif
+#endif	/* Not HAVE_SETREUID.  */
+#endif	/* HAVE_SETEUID.  */
 
+#ifdef	HAVE_SETEGID
+  if (setegid (user_gid) < 0)
+    pfatal_with_name ("user_access: setegid");
+#else
 #ifndef	HAVE_SETREGID
   if (setgid (user_gid) < 0)
     pfatal_with_name ("user_access: setgid");
 #else
   if (setregid (make_gid, user_gid) < 0)
     pfatal_with_name ("user_access: setregid");
+#endif
 #endif
 
   current_access = user;
@@ -622,6 +646,10 @@ make_access ()
 
   /* See comments in user_access, above.  */
 
+#ifdef	HAVE_SETEUID
+  if (seteuid (make_uid) < 0)
+    pfatal_with_name ("make_access: seteuid");
+#else
 #ifndef	HAVE_SETREUID
   if (setuid (make_uid) < 0)
     pfatal_with_name ("make_access: setuid");
@@ -629,13 +657,19 @@ make_access ()
   if (setreuid (user_uid, make_uid) < 0)
     pfatal_with_name ("make_access: setreuid");
 #endif
+#endif
 
+#ifdef	HAVE_SETEGID
+  if (setegid (make_gid) < 0)
+    pfatal_with_name ("make_access: setegid");
+#else
 #ifndef	HAVE_SETREGID
   if (setgid (make_gid) < 0)
     pfatal_with_name ("make_access: setgid");
 #else
   if (setregid (user_gid, make_gid) < 0)
     pfatal_with_name ("make_access: setregid");
+#endif
 #endif
 
   current_access = make;
