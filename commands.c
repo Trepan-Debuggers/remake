@@ -124,7 +124,7 @@ set_file_variables (file)
   DEFINE_VARIABLE ("@", 1, at);
   DEFINE_VARIABLE ("%", 1, percent);
 
-  /* Compute the values for $^, $+, and $?.  */
+  /* Compute the values for $^, $+, $?, and $|.  */
 
   {
     unsigned int qmark_len, plus_len, bar_len;

@@ -14,6 +14,13 @@ reports.
 
 Version <next>
 
+* A new feature exists: order-only prerequisites.  These prerequisites
+  affect the order in which targets are built, but they do not impact
+  the rebuild/no-rebuild decision of their dependents.  That is to say,
+  they allow you to require target B be built before target A, without
+  requiring that target A will always be rebuilt if target B is updated.
+  Patch for this feature provided by Greg McGary <greg@mcgary.org>.
+
 * A new function is defined: $(quote ...).  The argument to this
   function is the _name_ of a variable.  The result of the function is
   the value of the variable, without having been expanded.

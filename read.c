@@ -1524,10 +1524,17 @@ uniquize_deps (chain)
       last = d;
       next = d->next;
       while (next != 0)
-	if (streq (dep_name (d), dep_name (next))
-            && d->ignore_mtime == next->ignore_mtime)
+	if (streq (dep_name (d), dep_name (next)))
 	  {
 	    struct dep *n = next->next;
+            /* If ignore_mtimes are not equal, one of these is an order-only
+               prerequisite and one isn't.  That means that we should remove
+               the one that isn't and keep the one that is.  Ideally we'd
+               like to keep the normal one always but that's hard, and
+               probably not very important, so just remove the second one and
+               force the first one to be normal.  */
+            if (d->ignore_mtime != next->ignore_mtime)
+              d->ignore_mtime = 0;
 	    last->next = n;
 	    if (next->name != 0 && next->name != d->name)
 	      free (next->name);
