@@ -122,11 +122,15 @@ extern int setgid (), getgid ();
 #ifdef HAVE_GETDTABLESIZE
 extern int getdtablesize ();
 #else
+#ifdef HAVE_SYSCONF_OPEN_MAX
+#define getdtablesize()		((int) sysconf (_SC_OPEN_MAX))
+#else
 #include <sys/param.h>
 #define getdtablesize() NOFILE
 #if !defined (NOFILE) && defined (NOFILES_MAX)
 /* SCO 3.2 "devsys 4.2" defines NOFILES_{MIN,MAX} in lieu of NOFILE.  */
 #define NOFILE	NOFILES_MAX
+#endif
 #endif
 #endif
 #endif
