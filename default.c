@@ -509,6 +509,9 @@ define_default_variables ()
 {
   register char **s;
 
+  if (no_builtin_variables_flag)
+    return;
+
   for (s = default_variables; *s != 0; s += 2)
     (void) define_variable (s[0], strlen (s[0]), s[1], o_default, 1);
 }

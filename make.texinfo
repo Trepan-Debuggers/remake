@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.172 1999/07/06 21:09:34 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.173 1999/07/08 06:49:58 psmith Exp $
 @set EDITION 0.53
 @set VERSION 3.78
 @set UPDATED 14 April 1999
@@ -6668,7 +6668,17 @@ Rules}).  But you can still define your own suffixes with a rule for
 @code{.SUFFIXES}, and then define your own suffix rules.  Note that only
 @emph{rules} are affected by the @code{-r} option; default variables
 remain in effect (@pxref{Implicit Variables, ,Variables Used by Implicit
-Rules}).
+Rules}); see the @samp{-R} option below.
+
+@item -R
+@cindex @code{-R}
+@itemx --no-builtin-variables
+@cindex @code{--no-builtin-variables}
+Eliminate use of the built-in rule-specific variables (@pxref{Implicit
+Variables, ,Variables Used by Implicit Rules}).  You can still define
+your own, of course.  The @samp{-R} option also automatically enables
+the @samp{-r} option (see above), since it doesn't make sense to have
+implicit rules without any definitions for the variables that they use.
 
 @item -s
 @cindex @code{-s}
@@ -7201,7 +7211,9 @@ the value @w{@samp{; mv $*.o $@@}}.
 The commands in built-in implicit rules make liberal use of certain
 predefined variables.  You can alter these variables in the makefile,
 with arguments to @code{make}, or in the environment to alter how the
-implicit rules work without redefining the rules themselves.
+implicit rules work without redefining the rules themselves.  You can
+cancel all variables used by implicit rules with the @samp{-R} or
+@samp{--no-builtin-variables} option.
 
 For example, the command used to compile a C source file actually says
 @samp{$(CC) -c $(CFLAGS) $(CPPFLAGS)}.  The default values of the variables
