@@ -1,5 +1,5 @@
 /* Job execution and handling for GNU Make.
-Copyright (C) 1988, 89, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 90, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -1250,11 +1250,12 @@ exec_command (argv, envp)
   _exit (127);
 }
 
-/* Figure out the argument list necessary to run LINE as a command.
-   Try to avoid using a shell.  This routine handles only ' quoting.
-   Starting quotes may be escaped with a backslash.  If any of the
-   characters in sh_chars[] is seen, or any of the builtin commands
-   listed in sh_cmds[] is the first word of a line, the shell is used.
+/* Figure out the argument list necessary to run LINE as a command.  Try to
+   avoid using a shell.  This routine handles only ' quoting, and " quoting
+   when no backslash, $ or ` characters are seen in the quotes.  Starting
+   quotes may be escaped with a backslash.  If any of the characters in
+   sh_chars[] is seen, or any of the builtin commands listed in sh_cmds[]
+   is the first word of a line, the shell is used.
 
    If RESTP is not NULL, *RESTP is set to point to the first newline in LINE.
    If *RESTP is NULL, newlines will be ignored.
@@ -1332,7 +1333,7 @@ construct_command_argv_internal (line, restp, shell, ifs)
 	string_char:
 	  /* Inside a string, just copy any char except a closing quote
 	     or a backslash-newline combination.  */
-	  if (*p == '\'')
+	  if (*p == instring)
 	    instring = 0;
 	  else if (*p == '\\' && p[1] == '\n')
 	    goto swallow_escaped_newline;
@@ -1342,6 +1343,10 @@ construct_command_argv_internal (line, restp, shell, ifs)
 	      *restp = p;
 	      goto end_of_line;
 	    }
+	  /* Backslash, $, and ` are special inside double quotes.
+	     If we see any of those, punt.  */
+	  else if (instring == '"' && index ("\\$`", *p) != 0)
+	    goto slow;
 	  else
 	    *ap++ = *p;
 	}
@@ -1399,7 +1404,8 @@ construct_command_argv_internal (line, restp, shell, ifs)
 	    break;
 
 	  case '\'':
-	    instring = 1;
+	  case '"':
+	    instring = *p;
 	    break;
 
 	  case '\n':
@@ -1564,7 +1570,7 @@ construct_command_argv_internal (line, restp, shell, ifs)
 	    continue;
 	  }
 
-	if (*p == '\\' || *p == '\''
+	if (*p == '\\' || *p == '\'' || *p == '"'
 	    || isspace (*p)
 	    || index (sh_chars, *p) != 0)
 	  *ap++ = '\\';
@@ -1580,11 +1586,12 @@ construct_command_argv_internal (line, restp, shell, ifs)
   return new_argv;
 }
 
-/* Figure out the argument list necessary to run LINE as a command.
-   Try to avoid using a shell.  This routine handles only ' quoting.
-   Starting quotes may be escaped with a backslash.  If any of the
-   characters in sh_chars[] is seen, or any of the builtin commands
-   listed in sh_cmds[] is the first word of a line, the shell is used.
+/* Figure out the argument list necessary to run LINE as a command.  Try to
+   avoid using a shell.  This routine handles only ' quoting, and " quoting
+   when no backslash, $ or ` characters are seen in the quotes.  Starting
+   quotes may be escaped with a backslash.  If any of the characters in
+   sh_chars[] is seen, or any of the builtin commands listed in sh_cmds[]
+   is the first word of a line, the shell is used.
 
    If RESTP is not NULL, *RESTP is set to point to the first newline in LINE.
    If *RESTP is NULL, newlines will be ignored.
