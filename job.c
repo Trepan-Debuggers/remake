@@ -513,6 +513,11 @@ start_job_command (child)
       free ((char *) argv);
       if (job_next_command (child))
 	start_job_command (child);
+      else
+	/* Normally, this is set by reap_children to indicate that
+	   some commands were actually run.  Under -n, reap_children
+	   never gets called, so we increment it here.  */
+	++files_remade;
       return;
     }
 
