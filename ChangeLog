@@ -1,3 +1,26 @@
+2000-06-19  Paul D. Smith  <psmith@gnu.org>
+
+	* function.c (handle_function): If the last argument was empty, we
+	were pretending it didn't exist rather than providing an empty
+	value.  Keep looking until we're past the end, not just at the end.
+
+	* implicit.c (pattern_search): Multi-target implicit rules weren't
+	expanding the "also made" targets correctly if the pattern didn't
+	contain a slash but the target did; in that case the directory
+	part wasn't being added back to the stem on the "also made"
+	targets.  Reported by Seth M LaForge <sethml@newtonlabs.com>, with
+	a patch.
+
+2000-06-17  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* Makefile.DOS.template (DESTDIR, bindir, datadir, libdir)
+	(infodir, mandir, includedir): Support installation under a
+	non-default DESTDIR.
+
+	* remake.c (f_mtime): Fix the spelling of __MSDOS__.
+
+	* configh.DOS.template (HAVE_FDOPEN, HAVE_MKSTEMP): Define.
+
 2000-06-14  Paul D. Smith  <psmith@gnu.org>
 
 	* acinclude.m4 (pds_WITH_GETTEXT): rewrite fp_WITH_GETTEXT and

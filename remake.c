@@ -1155,7 +1155,7 @@ f_mtime (file, search)
 
 	FILE_TIMESTAMP adjusted_mtime = mtime;
 
-#if defined WINDOWS32 || defined _MSDOS__
+#if defined(WINDOWS32) || defined(__MSDOS__)
 	FILE_TIMESTAMP adjustment;
 #ifdef WINDOWS32
 	/* FAT filesystems round time to the nearest even second!

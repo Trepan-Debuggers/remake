@@ -1778,7 +1778,7 @@ handle_function (op, stringp)
 
   p = beg;
   nargs = 0;
-  for (p=beg, nargs=0; p < end; ++argvp)
+  for (p=beg, nargs=0; p <= end; ++argvp)
     {
       char *next;
 
