@@ -417,6 +417,8 @@ read_makefile (filename, type)
 	{
 	  struct variable *v;
 	  p2 = next_token (p + 6);
+	  if (*p2 == '\0')
+	    export_all_variables = 1;
 	  v = try_variable_definition (p2, o_file);
 	  if (v != 0)
 	    v->export = 1;
@@ -438,6 +440,8 @@ read_makefile (filename, type)
 	  unsigned int len;
 	  struct variable *v;
 	  p2 = next_token (p + 8);
+	  if (*p2 == '\0')
+	    export_all_variables = 0;
 	  for (p = find_next_token (&p2, &len); p != 0;
 	       p = find_next_token (&p2, &len))
 	    {
