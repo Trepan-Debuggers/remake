@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.154 1995/08/22 18:45:01 hag Exp $
+@set RCSID $Id: make.texinfo,v 2.155 1995/10/10 20:18:24 roland Exp $
 @set EDITION 0.49
 @set VERSION 3.74 Beta
 @set UPDATED 14 August 1995
@@ -632,11 +632,10 @@ from @code{rm} or any other command.
 @cindex processing a makefile
 @cindex makefile, how @code{make} processes
 
-By default, @code{make} starts with the first rule (not counting rules
-whose target names start with @samp{.}).  This is called the
-@dfn{default goal}.  (@dfn{Goals} are the targets that @code{make}
-strives ultimately to update.  @xref{Goals, , Arguments to Specify the
-Goals}.)
+By default, @code{make} starts with the first target (not targets whose
+names start with @samp{.}).  This is called the @dfn{default goal}.
+(@dfn{Goals} are the targets that @code{make} strives ultimately to
+update.  @xref{Goals, , Arguments to Specify the Goals}.)
 @cindex default goal
 @cindex goal, default
 @cindex goal
@@ -3564,6 +3563,14 @@ does nothing.  The only reason this is useful is to prevent a target
 from getting implicit commands (from implicit rules or the
 @code{.DEFAULT} special target; @pxref{Implicit Rules} and 
 @pxref{Last Resort, ,Defining Last-Resort Default Rules}).@refill
+
+@c !!! another reason is for canonical stamp files:
+@ignore
+foo: stamp-foo ;
+stamp-foo: foo.in
+	create foo frm foo.in
+	touch $@
+@end ignore
 
 You may be inclined to define empty command strings for targets that are
 not actual files, but only exist so that their dependencies can be
