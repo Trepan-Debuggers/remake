@@ -1114,7 +1114,7 @@ exec_command (argv, envp)
 
 	new_argv = (char **) alloca ((1 + argc + 1) * sizeof (char *));
 	new_argv[0] = shell;
-	new_argv[1] = program;
+	new_argv[1] = argv[0];
 	while (argc > 0)
 	  {
 	    new_argv[1 + argc] = argv[argc];
