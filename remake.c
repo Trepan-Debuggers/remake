@@ -1208,7 +1208,7 @@ library_search (lib, mtime_ptr)
       int save = warn_undefined_variables_flag;
       warn_undefined_variables_flag = 0;
 
-      libpatterns = strdup (variable_expand ("$(strip $(.LIBPATTERNS))"));
+      libpatterns = xstrdup (variable_expand ("$(strip $(.LIBPATTERNS))"));
 
       warn_undefined_variables_flag = save;
     }
@@ -1249,7 +1249,7 @@ library_search (lib, mtime_ptr)
       mtime = name_mtime (libbuf);
       if (mtime != (FILE_TIMESTAMP) -1)
 	{
-	  *lib = strdup (libbuf);
+	  *lib = xstrdup (libbuf);
 	  if (mtime_ptr != 0)
 	    *mtime_ptr = mtime;
 	  return 1;
@@ -1289,7 +1289,7 @@ library_search (lib, mtime_ptr)
 	  mtime = name_mtime (buf);
 	  if (mtime != (FILE_TIMESTAMP) -1)
 	    {
-	      *lib = strdup (buf);
+	      *lib = xstrdup (buf);
 	      if (mtime_ptr != 0)
 		*mtime_ptr = mtime;
 	      return 1;

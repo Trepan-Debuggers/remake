@@ -1,5 +1,15 @@
 1999-03-05  Paul D. Smith  <psmith@gnu.org>
 
+	* configure.in: Check for a system strdup().
+	* misc.c (xstrdup): Created.  Suggestion by Han-Wen Nienhuys
+	<hanwen@cs.uu.nl>.
+	* make.h: Prototype xstrdup().
+	* remake.c (library_search): Use it.
+	* main.c (main): Use it.
+	(find_and_set_default_shell): Use it.
+	* job.c (construct_command_argv_internal): Use it.
+	* dir.c (find_directory): Use it.
+
 	* Makefile.am, configure.in: Use AC_SUBST_FILE to insert the
 	maintMakefile instead of "include", to avoid automake 1.4
 	incompatibility.
@@ -82,6 +92,10 @@
 1998-11-17  Paul D. Smith  <psmith@gnu.org>
 
 	* read.c (record_files): Clean up some indentation.
+
+1998-11-08  Han-Wen Nienhuys  <hanwen@cs.uu.nl>
+
+	* rule.c (print_rule_data_base): Fix arguments to fatal() call.
 
 1998-10-13  Paul D. Smith  <psmith@gnu.org>
 

@@ -374,6 +374,7 @@ extern char *savestring PARAMS ((char *, unsigned int));
 extern char *concat PARAMS ((char *, char *, char *));
 extern char *xmalloc PARAMS ((unsigned int));
 extern char *xrealloc PARAMS ((char *, unsigned int));
+extern char *xstrdup PARAMS ((const char *));
 extern char *find_next_token PARAMS ((char **, unsigned int *));
 extern char *next_token PARAMS ((char *));
 extern char *end_of_token PARAMS ((char *));
