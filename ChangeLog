@@ -1,5 +1,8 @@
 Fri Mar  1 12:04:47 1996  Roland McGrath  <roland@charlie-brown.gnu.ai.mit.edu>
 
+	* remake.c (f_mtime): Move future modtime check before FILE is
+	clobbered by :: loop.
+
 	* Version 3.74.3.
 
 	* dir.c: Use canonical code from autoconf manual for dirent include.
