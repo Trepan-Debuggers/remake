@@ -439,9 +439,22 @@ freerule (rule, lastrule)
 {
   struct rule *next = rule->next;
   register unsigned int i;
+  register struct dep *dep;
 
   for (i = 0; rule->targets[i] != 0; ++i)
     free (rule->targets[i]);
+
+  dep = rule->deps;
+  while (dep)
+    {
+      struct dep *t;
+
+      t = dep->next;
+      /* We might leak dep->name here, but I'm not sure how to fix this: I
+         think that pointer might be shared (e.g., in the file hash?)  */
+      free ((char *) dep);
+      dep = t;
+    }
 
   free ((char *) rule->targets);
   free ((char *) rule->suffixes);

@@ -280,7 +280,7 @@ read_makefile (filename, flags)
   register FILE *infile;
   struct linebuffer lb;
   unsigned int commands_len = 200;
-  char *commands = (char *) xmalloc (200);
+  char *commands;
   unsigned int commands_idx = 0;
   unsigned int cmds_started;
   char *p;
@@ -396,7 +396,6 @@ read_makefile (filename, flags)
 	 attempt, rather from FILENAME itself.  Restore it in case the
 	 caller wants to use it in a message.  */
       errno = makefile_errno;
-      free (commands);
       return 0;
     }
 
@@ -408,6 +407,7 @@ read_makefile (filename, flags)
      when the start of the next rule (or eof) is encountered.  */
 
   initbuffer (&lb);
+  commands = xmalloc (200);
 
   while (!feof (infile))
     {

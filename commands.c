@@ -344,6 +344,7 @@ execute_file_commands (file)
       /* We are all out of commands.
 	 If we have gotten this far, all the previous commands
 	 have run successfully, so we have winning update status.  */
+      set_command_state (file, cs_running);
       file->update_status = 0;
       notice_finished_file (file);
       return;

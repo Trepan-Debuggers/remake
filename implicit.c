@@ -524,6 +524,7 @@ pattern_search (file, archive, depth, recursions)
 	  f->deps = imf->deps;
 	  f->cmds = imf->cmds;
 	  f->stem = imf->stem;
+          f->also_make = imf->also_make;
 	  imf = lookup_file (intermediate_patterns[deps_found]);
 	  if (imf != 0 && imf->precious)
 	    f->precious = 1;
@@ -532,6 +533,9 @@ pattern_search (file, archive, depth, recursions)
 	  for (dep = f->deps; dep != 0; dep = dep->next)
 	    {
 	      dep->file = enter_file (dep->name);
+              /* enter_file uses dep->name _if_ we created a new file.  */
+              if (dep->name != dep->file->name)
+                free (dep->name);
 	      dep->name = 0;
 	      dep->file->tried_implicit |= dep->changed;
 	    }
@@ -591,10 +595,9 @@ pattern_search (file, archive, depth, recursions)
 
   file->cmds = rule->cmds;
 
-  /* Put the targets other than the one that
-     matched into FILE's `also_make' member.  */
+  /* If this rule builds other targets, too, put the others into FILE's
+     `also_make' member.  */
 
-  /* If there was only one target, there is nothing to do.  */
   if (rule->targets[1] != 0)
     for (i = 0; rule->targets[i] != 0; ++i)
       if (i != matches[foundrule])

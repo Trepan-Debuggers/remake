@@ -744,6 +744,10 @@ start_job_command (child)
   char **argv;
 #endif
 
+  /* If we have a completely empty commandset, stop now.  */
+  if (!child->command_ptr)
+    goto next_command;
+
   /* Combine the flags parsed for the line itself with
      the flags specified globally for this target.  */
   flags = (child->file->command_flags
@@ -812,14 +816,16 @@ start_job_command (child)
     {
     next_command:
 #ifdef __MSDOS__
-	  execute_by_shell = 0;   /* in case construct_command_argv sets it */
+      execute_by_shell = 0;   /* in case construct_command_argv sets it */
 #endif
       /* This line has no commands.  Go to the next.  */
       if (job_next_command (child))
 	start_job_command (child);
       else
 	{
-	  /* No more commands.  All done.  */
+	  /* No more commands.  Make sure we're "running"; we might not be if
+             (e.g.) all commands were skipped due to -n.  */
+          set_command_state (child->file, cs_running);
 	  child->file->update_status = 0;
 	  notice_finished_file (child->file);
 	}
@@ -843,11 +849,12 @@ start_job_command (child)
 #else
       (argv[0] && !strcmp(argv[0], "/bin/sh"))
 #endif
-      && (argv[1]   && !strcmp(argv[1], "-c"))
-      && (argv[2]   && !strcmp(argv[2], ":"))
+      && (argv[1] && !strcmp(argv[1], "-c"))
+      && (argv[2] && !strcmp(argv[2], ":"))
       && argv[3] == NULL)
     {
-      set_command_state (child->file, cs_running);
+      free (argv[0]);
+      free ((char *) argv);
       goto next_command;
     }
 #endif  /* !VMS && !_AMIGA */
@@ -1144,7 +1151,7 @@ start_waiting_job (c)
 
 	  /* Read a token.  We set the non-blocking bit on this earlier,
 	     so if there's no token to be read we'll fall through to the
-	     select.  The select block until (a) there's data to read,
+	     select.  The select blocks until (a) there's data to read,
 	     in which case we come back around and try to grab the token
 	     before someone else does, or (b) a signal, such as SIGCHLD,
 	     is caught (because we installed a handler for it).  If the
@@ -1364,16 +1371,11 @@ new_job (file)
   c->job_token = 0;
 
   /* Fetch the first command line to be run.  */
-  if (job_next_command (c))
-    /* The job is now primed.  Start it running.  */
-    (void)start_waiting_job (c);
-  else
-    {
-      /* There were no commands (variable expands to empty?).  All done.  */
-      c->file->update_status = 0;
-      notice_finished_file(c->file);
-      free_child (c);
-    }
+  job_next_command (c);
+
+  /* The job is now primed.  Start it running.
+     (This will notice if there are in fact no commands.)  */
+  (void)start_waiting_job (c);
 
   if (job_slots == 1)
     /* Since there is only one job slot, make things run linearly.
