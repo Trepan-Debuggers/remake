@@ -1,3 +1,7 @@
+2004-09-27  Boris Kolpackov  <boris@kolpackov.net>
+
+	* scripts/features/patspecific_vars: Test exported variables.
+
 2004-09-22  Paul D. Smith  <psmith@gnu.org>
 
 	* run_make_tests.pl (run_make_test): Don't add newlines to the

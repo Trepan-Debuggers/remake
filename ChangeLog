@@ -1,3 +1,8 @@
+2004-09-27  Boris Kolpackov  <boris@kolpackov.net>
+
+	* variable.c (initialize_file_variables): Mark pattern-specific
+	variable as a per-target and copy export status.
+
 2004-09-21  Boris Kolpackov  <boris@kolpackov.net>
 
 	* file.c (snap_deps): Mark .PHONY prerequisites as targets.

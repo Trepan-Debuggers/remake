@@ -61,4 +61,13 @@ $answer = "baz: foo two baz\nfour.x: foo two baz\n";
 $answer = "aaa bbb\nccc ddd\n";
 &compare_output($answer,&get_logfile(1));
 
+# TEST #5 -- test pattern-specific exported variables
+#
+run_make_test('
+/%: export foo := foo
+
+/bar:
+	@test "$(foo)" == "$$foo"
+', '', '');
+
 1;
