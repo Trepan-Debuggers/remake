@@ -147,11 +147,6 @@ construct_vpath_list (pattern, dirpath)
       return;
     }
 
-  /* Skip over any initial colons and blanks.  */
-  p = dirpath;
-  while (*p == ':' || isblank (*p))
-    ++p;
-
   /* Figure out the maximum number of VPATH entries and
      put it in MAXELEM.  We start with 2, one before the
      first colon and one nil, the list terminator and
@@ -164,18 +159,16 @@ construct_vpath_list (pattern, dirpath)
   vpath = (char **) xmalloc (maxelem * sizeof (char *));
   maxvpath = 0;
 
-  elem = 0;
+  /* Skip over any initial colons and blanks.  */
   p = dirpath;
+  while (*p == ':' || isblank (*p))
+    ++p;
+
+  elem = 0;
   while (*p != '\0')
     {
       char *v;
       unsigned int len;
-
-      /* Find the next entry.  */
-      while (*p != ':' && !isblank (*p))
-	++p;
-      if (*p == '\0')
-	break;
 
       /* Find the end of this entry.  */
       v = p;
@@ -206,6 +199,10 @@ construct_vpath_list (pattern, dirpath)
       else
 	/* The directory does not exist.  Omit from the list.  */
 	free (v);
+
+      /* Skip over colons and blanks between entries.  */
+      while (*p == ':' || isblank (*p))
+	++p;
     }
 
   if (elem > 0)
