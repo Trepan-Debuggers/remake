@@ -434,6 +434,8 @@ selective_vpath_search (path, file, mtime_ptr)
 
 	      return 1;
 	    }
+	  else
+	    exists = 0;
 	}
     }
 
