@@ -20,32 +20,40 @@
 .PHONY: default
 default:
 
-override srcdir := .
-override CC := $(CC)
-
-# Get most of the information from the Unix-compatible makefile.
-include compatMakefile
-
-extras := $(filter-out getloadavg.o @%@,$(extras)) getloadavg.o
-LOADLIBES := $(filter-out @%@,$(LOADLIBES))
-ALLOCA := $(filter-out @%@,$(ALLOCA))
-
-customs=yes
-ifdef customs
-REMOTE := cstms
-defines := $(defines) -Ipmake/customs -Ipmake/lib/include
-LOADLIBES := $(addprefix pmake/customs/,customslib.o rpc.o xlog.o) \
-	     pmake/lib/sprite/libsprite.a
-else
-REMOTE := stub
-endif
-
 # Set `ARCH' to a string for the type of machine.
 ifndef ARCH
 ifdef machine
 ARCH = $(machine)
 endif # machine
 endif # not ARCH
+
+override srcdir := .
+override CC := $(CC)
+
+ifeq ($(ARCH),hp300)
+customs=yes
+endif
+ifdef customs
+override REMOTE := cstms
+else
+override REMOTE := stub
+endif
+
+# Get most of the information from the Unix-compatible makefile.
+include compatMakefile
+
+# Tell autoconf/autoheader to use m4 files from the master source.
+ACFLAGS := -m /home/gd/gnu/autoconf
+configure config.h.in: $(patsubst %,/home/gd/gnu/autoconf/%.m4,\
+				  acspecific acgeneral)
+config.h.in: /home/gd/gnu/autoconf/acconfig.h
+
+ifdef customs
+extras := $(filter-out getloadavg.o @%@,$(extras)) getloadavg.o
+LOADLIBES := $(filter-out @%@,$(LOADLIBES))
+ALLOCA := $(filter-out @%@,$(ALLOCA))
+endif
+
 
 ifdef ARCH
 
@@ -94,10 +102,6 @@ $(archpfx)load.o: load.c
 	$(COMPILE.c) $(LOAD_AVG) $< -o $@
 $(archpfx)load.dep: load.c
 	$(mkdep) $(LOAD_AVG) $< | sed 's,$*\.o,& $@,' > $@
-$(archpfx)remote.o: remote.c remote-*.c
-	$(COMPILE.c) $(REMOTE) $< -o $@
-$(archpfx)remote.dep: remote.c remote-*.c
-	$(mkdep) $(REMOTE) $< | sed 's,$*\.o,& $@,' > $@
 
 CPPFLAGS := -I$(ARCH) $(CPPFLAGS) -DHAVE_CONFIG_H $(filter-out @%@,$(defines))
 
@@ -155,8 +159,6 @@ else
 ifdef	archpfx
 load.dep: load.c
 	$(mkdep-nolib) $(LOAD_AVG) $< | sed 's,$*\.o,& $@,' > $@
-remote.dep: remote.c
-	$(mkdep-nolib) $(REMOTE) $< | sed 's,$*\.o,& $@,' > $@
 endif
 nolib-deps = $(patsubst $(archpfx)%,%,$(depfiles))
 endif
