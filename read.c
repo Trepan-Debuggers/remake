@@ -404,7 +404,9 @@ read_makefile (filename, type)
 				      lineno, infile, filename);
 		}
 	    }
-	  else if (!ignoring && !try_variable_definition (p2, o_override))
+	  else if (!ignoring
+		   && !try_variable_definition (filename, lineno,
+						p2, o_override))
 	    makefile_error (filename, lineno, "empty `override' directive");
 
 	  continue;
@@ -454,7 +456,7 @@ read_makefile (filename, type)
 	  p2 = next_token (p + 6);
 	  if (*p2 == '\0')
 	    export_all_variables = 1;
-	  v = try_variable_definition (p2, o_file);
+	  v = try_variable_definition (filename, lineno, p2, o_file);
 	  if (v != 0)
 	    v->export = v_export;
 	  else
@@ -554,7 +556,7 @@ read_makefile (filename, type)
 	    free (pattern);
 	}
 #undef	word1eq
-      else if (try_variable_definition (p, o_file))
+      else if (try_variable_definition (filename, lineno, p, o_file))
 	/* This line has been dealt with.  */
 	;
       else
