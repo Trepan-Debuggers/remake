@@ -22,9 +22,13 @@ Boston, MA 02111-1307, USA.  */
 #include "rule.h"
 #include "dep.h"
 #include "debug.h"
+#include "variable.h"
+#include "job.h"      /* struct child, used inside commands.h */
+#include "commands.h" /* set_file_variables */
 
-static int pattern_search PARAMS ((struct file *file, int archive, unsigned int depth,
-		unsigned int recursions));
+static int
+pattern_search PARAMS ((struct file *file, int archive,
+                        unsigned int depth, unsigned int recursions));
 
 /* For a FILE which has no commands specified, try to figure out some
    from the implicit pattern rules.
@@ -61,6 +65,126 @@ try_implicit_rule (struct file *file, unsigned int depth)
 }
 
 
+/* Struct idep captures information about implicit prerequisites
+   that come from implicit rules. */
+struct idep
+{
+  struct idep *next;              /* struct dep -compatible interface */
+  char *name;                     /* name of the prerequisite */
+  struct file *intermediate_file; /* intermediate file, 0 otherwise */
+  char *intermediate_pattern;     /* pattern for intermediate file */
+  unsigned char had_stem;         /* had % substituted with stem */
+  unsigned char ignore_mtime;     /* ignore_mtime flag */
+};
+
+static void
+free_idep_chain (struct idep* p)
+{
+  register struct idep* n;
+  register struct file *f;
+
+  for (; p != 0; p = n)
+    {
+      n = p->next;
+
+      if (p->name)
+        {
+          free (p->name);
+
+          f = p->intermediate_file;
+
+          if (f != 0
+              && (f->stem < f->name
+                  || f->stem > f->name + strlen (f->name)))
+            free (f->stem);
+        }
+
+      free (p);
+    }
+}
+
+
+/* Scans the BUFFER for the next word with whitespace as a separator.
+   Returns the pointer to the beginning of the word. LENGTH hold the
+   length of the word.  */
+
+static char *
+get_next_word (char *buffer, unsigned int *length)
+{
+  char *p = buffer, *beg;
+  char c;
+
+  /* Skip any leading whitespace.  */
+  while (isblank ((unsigned char)*p))
+    ++p;
+
+  beg = p;
+  c = *(p++);
+
+  if (c == '\0')
+    return 0;
+
+
+  /* We already found the first value of "c", above.  */
+  while (1)
+    {
+      char closeparen;
+      int count;
+
+      switch (c)
+        {
+        case '\0':
+        case ' ':
+        case '\t':
+          goto done_word;
+
+        case '$':
+          c = *(p++);
+          if (c == '$')
+            break;
+
+          /* This is a variable reference, so read it to the matching
+             close paren.  */
+
+          if (c == '(')
+            closeparen = ')';
+          else if (c == '{')
+            closeparen = '}';
+          else
+            /* This is a single-letter variable reference.  */
+            break;
+
+          for (count = 0; *p != '\0'; ++p)
+            {
+              if (*p == c)
+                ++count;
+              else if (*p == closeparen && --count < 0)
+                {
+                  ++p;
+                  break;
+                }
+            }
+          break;
+
+        case '|':
+          goto done;
+
+        default:
+          break;
+        }
+
+      c = *(p++);
+    }
+ done_word:
+  --p;
+
+ done:
+  if (length)
+    *length = p - beg;
+
+  return beg;
+}
+
 /* Search the pattern rules for a rule with an existing dependency to make
    FILE.  If a rule is found, the appropriate commands and deps are put in FILE
    and 1 is returned.  If not, 0 is returned.
@@ -93,20 +217,13 @@ pattern_search (struct file *file, int archive,
      except during a recursive call.  */
   struct file *intermediate_file = 0;
 
-  /* List of dependencies found recursively.  */
-  struct file **intermediate_files
-    = (struct file **) xmalloc (max_pattern_deps * sizeof (struct file *));
+  /* This linked list records all the prerequisites actually
+     found for a rule along with some other useful information
+     (see struct idep for details). */
+  struct idep* deps = 0;
 
-  /* List of the patterns used to find intermediate files.  */
-  char **intermediate_patterns
-    = (char **) alloca (max_pattern_deps * sizeof (char *));
-
-  /* This buffer records all the dependencies actually found for a rule.  */
-  char **found_files = (char **) alloca (max_pattern_deps * sizeof (char *));
-  /* Remember whether the associated dep has an "ignore_mtime" flag set.  */
-  unsigned char *found_files_im = (unsigned char *) alloca (max_pattern_deps * sizeof (unsigned char));
-  /* Number of dep names now in FOUND_FILES.  */
-  unsigned int deps_found = 0;
+  /* 1 if we need to remove explicit prerequisites, 0 otherwise. */
+  unsigned int remove_explicit_deps = 0;
 
   /* Names of possible dependencies are constructed in this buffer.  */
   register char *depname = (char *) alloca (namelen + max_pattern_dep_length);
@@ -146,9 +263,13 @@ pattern_search (struct file *file, int archive,
 
   register unsigned int i = 0;  /* uninit checks OK */
   register struct rule *rule;
-  register struct dep *dep;
+  register struct dep *dep, *expl_d;
 
-  char *p, *vp;
+  char *p, *vname;
+
+  struct idep *d;
+  struct idep **id_ptr;
+  struct dep **d_ptr;
 
 #ifndef	NO_ARCHIVES
   if (archive || ar_name (filename))
@@ -295,18 +416,26 @@ pattern_search (struct file *file, int archive,
 	    tryrules[i] = 0;
 	}
 
+  /* We are going to do second expansion so initialize file variables
+     for the rule. */
+  initialize_file_variables (file, 0);
+
   /* Try each rule once without intermediate files, then once with them.  */
   for (intermed_ok = 0; intermed_ok == !!intermed_ok; ++intermed_ok)
     {
       /* Try each pattern rule till we find one that applies.
-	 If it does, copy the names of its dependencies (as substituted)
-	 and store them in FOUND_FILES.  DEPS_FOUND is the number of them.  */
+	 If it does, expand its dependencies (as substituted)
+	 and chain them in DEPS.  */
 
       for (i = 0; i < nrules; i++)
 	{
+          struct file *f;
+          unsigned int failed = 0;
 	  int check_lastslash;
 
 	  rule = tryrules[i];
+
+          remove_explicit_deps = 0;
 
 	  /* RULE is nil when we discover that a rule,
 	     already placed in TRYRULES, should not be applied.  */
@@ -337,149 +466,258 @@ pattern_search (struct file *file, int archive,
 	  DBS (DB_IMPLICIT, (_("Trying pattern rule with stem `%.*s'.\n"),
                              (int) stemlen, stem));
 
+          /* Temporary assign STEM to file->stem and set file variables. */
+          file->stem = stem;
+          set_file_variables (file);
+
 	  /* Try each dependency; see if it "exists".  */
 
-	  deps_found = 0;
+          /* @@ There is always only one dep line for any given implicit
+                rule. So the loop is not necessary. Can rule->deps be 0?
+
+                Watch out for conversion of suffix rules to implicit rules.
+          */
+
 	  for (dep = rule->deps; dep != 0; dep = dep->next)
 	    {
-              struct file *f;
+              unsigned int len;
+              char *p2;
+              unsigned int order_only = 0; /* Set if '|' was seen. */
 
-	      /* If the dependency name has a %, substitute the stem.  */
-	      p = strchr (dep_name (dep), '%');
-	      if (p != 0)
-		{
-		  register unsigned int i;
-		  if (check_lastslash)
-		    {
-		      /* Copy directory name from the original FILENAME.  */
-		      i = lastslash - filename + 1;
-		      bcopy (filename, depname, i);
-		    }
-		  else
-		    i = 0;
-		  bcopy (dep_name (dep), depname + i, p - dep_name (dep));
-		  i += p - dep_name (dep);
-		  bcopy (stem, depname + i, stemlen);
-		  i += stemlen;
-		  strcpy (depname + i, p + 1);
-		  p = depname;
-		}
-	      else
-		p = dep_name (dep);
+              /* In an ideal world we would take the dependency line,
+                 substitute the stem, re-expand the whole line and
+                 chop it into individual prerequisites. Unfortunately
+                 this won't work because of the "check_lastslash" twist.
+                 Instead, we will have to go word by word, taking $()'s
+                 into account, for each word we will substitute the stem,
+                 re-expand, chop it up, and, if check_lastslash != 0,
+                 add the directory part to each resulting prerequisite.  */
 
-	      /* P is now the actual dependency name as substituted.  */
+              p = get_next_word (dep->name, &len);
 
-	      if (file_impossible_p (p))
-		{
-		  /* If this dependency has already been ruled
-		     "impossible", then the rule fails and don't
-		     bother trying it on the second pass either
-		     since we know that will fail too.  */
-		  DBS (DB_IMPLICIT,
-                       (p == depname
+              while (1)
+                {
+                  int add_dir = 0;
+                  int had_stem = 0;
+
+                  if (p == 0)
+                    break; /* No more words */
+
+                  /* If the dependency name has %, substitute the stem.  */
+
+                  for (p2 = p; p2 < p + len && *p2 != '%'; ++p2);
+
+                  if (p2 < p + len)
+                    {
+                      register unsigned int i = p2 - p;
+                      bcopy (p, depname, i);
+                      bcopy (stem, depname + i, stemlen);
+                      bcopy (p2 + 1, depname + i + stemlen, len - i - 1);
+                      depname[len + stemlen - 1] = '\0';
+
+                      if (check_lastslash)
+                        add_dir = 1;
+
+                      had_stem = 1;
+                    }
+                  else
+                    {
+                      bcopy (p, depname, len);
+                      depname[len] = '\0';
+                    }
+
+                  p2 = variable_expand_for_file (depname, file);
+
+                  /* Parse the dependencies. */
+
+                  while (1)
+                    {
+                      id_ptr = &deps;
+
+                      for (; *id_ptr; id_ptr = &(*id_ptr)->next)
+                        ;
+
+                      *id_ptr = (struct idep *)
+                        multi_glob (
+                          parse_file_seq (&p2,
+                                          order_only ? '\0' : '|',
+                                          sizeof (struct idep),
+                                          1), sizeof (struct idep));
+
+                      /* @@ It would be nice to teach parse_file_seq or
+                         multi_glob to add prefix. This would save us
+                         some reallocations. */
+
+                      if (order_only || add_dir || had_stem)
+                        {
+                          unsigned long l = lastslash - filename + 1;
+
+                          for (d = *id_ptr; d != 0; d = d->next)
+                            {
+                              if (order_only)
+                                d->ignore_mtime = 1;
+
+                              if (add_dir)
+                                {
+                                  char *p = d->name;
+
+                                  d->name = xmalloc (strlen (p) + l + 1);
+
+                                  bcopy (filename, d->name, l);
+                                  bcopy (p, d->name + l, strlen (p) + 1);
+
+                                  free (p);
+                                }
+
+                              if (had_stem)
+                                d->had_stem = 1;
+                            }
+                        }
+
+                      if (!order_only && *p2)
+                      {
+                        ++p2;
+                        order_only = 1;
+                        continue;
+                      }
+
+                      break;
+                    }
+
+                  p += len;
+                  p = get_next_word (p, &len);
+                }
+	    }
+
+          /* Reset the stem in FILE. */
+
+          file->stem = 0;
+
+          /* @@ This loop can be combined with the previous one. I do
+             it separately for now for transparency.*/
+
+          for (d = deps; d != 0; d = d->next)
+            {
+              char *name = d->name;
+
+              if (file_impossible_p (name))
+                {
+                  /* If this dependency has already been ruled
+                     "impossible", then the rule fails and don't
+                     bother trying it on the second pass either
+                     since we know that will fail too.  */
+                  DBS (DB_IMPLICIT,
+                       (d->had_stem
                         ? _("Rejecting impossible implicit prerequisite `%s'.\n")
                         : _("Rejecting impossible rule prerequisite `%s'.\n"),
-                        p));
-		  tryrules[i] = 0;
-		  break;
-		}
+                        name));
+                  tryrules[i] = 0;
 
-	      intermediate_files[deps_found] = 0;
+                  failed = 1;
+                  break;
+                }
 
-	      DBS (DB_IMPLICIT,
-                   (p == depname
+              DBS (DB_IMPLICIT,
+                   (d->had_stem
                     ? _("Trying implicit prerequisite `%s'.\n")
-                    : _("Trying rule prerequisite `%s'.\n"), p));
+                    : _("Trying rule prerequisite `%s'.\n"), name));
 
-	      /* The DEP->changed flag says that this dependency resides in a
-		 nonexistent directory.  So we normally can skip looking for
-		 the file.  However, if CHECK_LASTSLASH is set, then the
-		 dependency file we are actually looking for is in a different
-		 directory (the one gotten by prepending FILENAME's directory),
-		 so it might actually exist.  */
+              /* If this prerequisite also happened to be explicitly
+                 mentioned for FILE skip all the test below since it
+                 it has to be built anyway, no matter which implicit
+                 rule we choose. */
 
-	      if (((f = lookup_file (p)) != 0 && f->is_target)
-		  || ((!dep->changed || check_lastslash) && file_exists_p (p)))
-		{
-		  found_files_im[deps_found] = dep->ignore_mtime;
-		  found_files[deps_found++] = xstrdup (p);
-		  continue;
-		}
-	      /* This code, given FILENAME = "lib/foo.o", dependency name
-		 "lib/foo.c", and VPATH=src, searches for "src/lib/foo.c".  */
-	      vp = p;
-	      if (vpath_search (&vp, (FILE_TIMESTAMP *) 0))
-		{
-		  DBS (DB_IMPLICIT,
-                       (_("Found prerequisite `%s' as VPATH `%s'\n"), p, vp));
-		  strcpy (vp, p);
-		  found_files_im[deps_found] = dep->ignore_mtime;
-		  found_files[deps_found++] = vp;
-		  continue;
-		}
+              for (expl_d = file->deps; expl_d != 0; expl_d = expl_d->next)
+                if (strcmp (dep_name (expl_d), name) == 0) break;
 
-	      /* We could not find the file in any place we should look.
-		 Try to make this dependency as an intermediate file,
-		 but only on the second pass.  */
+              if (expl_d != 0)
+                continue;
 
-	      if (intermed_ok)
-		{
-		  if (intermediate_file == 0)
-		    intermediate_file
-		      = (struct file *) alloca (sizeof (struct file));
 
-		  DBS (DB_IMPLICIT,
+
+              /* The DEP->changed flag says that this dependency resides in a
+                 nonexistent directory.  So we normally can skip looking for
+                 the file.  However, if CHECK_LASTSLASH is set, then the
+                 dependency file we are actually looking for is in a different
+                 directory (the one gotten by prepending FILENAME's directory),
+                 so it might actually exist.  */
+
+              /* @@ dep->changed check is disabled. */
+              if (((f = lookup_file (name)) != 0 && f->is_target)
+                  /*|| ((!dep->changed || check_lastslash) && */
+                  || file_exists_p (name))
+                {
+                  continue;
+                }
+
+              /* This code, given FILENAME = "lib/foo.o", dependency name
+                 "lib/foo.c", and VPATH=src, searches for "src/lib/foo.c".  */
+              vname = name;
+              if (vpath_search (&vname, (FILE_TIMESTAMP *) 0))
+                {
+                  DBS (DB_IMPLICIT,
+                       (_("Found prerequisite `%s' as VPATH `%s'\n"),
+                        name,
+                        vname));
+
+                  free (vname);
+                  continue;
+                }
+
+
+              /* We could not find the file in any place we should look.
+                 Try to make this dependency as an intermediate file,
+                 but only on the second pass.  */
+
+              if (intermed_ok)
+                {
+                  if (intermediate_file == 0)
+                    intermediate_file
+                      = (struct file *) alloca (sizeof (struct file));
+
+                  DBS (DB_IMPLICIT,
                        (_("Looking for a rule with intermediate file `%s'.\n"),
-                        p));
+                        name));
 
-		  bzero ((char *) intermediate_file, sizeof (struct file));
-		  intermediate_file->name = p;
-		  if (pattern_search (intermediate_file, 0, depth + 1,
-				      recursions + 1))
-		    {
-		      p = xstrdup (p);
-		      intermediate_patterns[deps_found]
-			= intermediate_file->name;
-		      intermediate_file->name = p;
-		      intermediate_files[deps_found] = intermediate_file;
-		      intermediate_file = 0;
-		      found_files_im[deps_found] = dep->ignore_mtime;
-		      /* Allocate an extra copy to go in FOUND_FILES,
-			 because every elt of FOUND_FILES is consumed
-			 or freed later.  */
-		      found_files[deps_found++] = xstrdup (p);
-		      continue;
-		    }
+                  bzero ((char *) intermediate_file, sizeof (struct file));
+                  intermediate_file->name = name;
+                  if (pattern_search (intermediate_file,
+                                      0,
+                                      depth + 1,
+                                      recursions + 1))
+                    {
+                      d->intermediate_file = intermediate_file;
+                      d->intermediate_pattern = intermediate_file->name;
 
-		  /* If we have tried to find P as an intermediate
-		     file and failed, mark that name as impossible
-		     so we won't go through the search again later.  */
-		  file_impossible (p);
-		}
+                      intermediate_file->name = xstrdup (name);
+                      intermediate_file = 0;
 
-	      /* A dependency of this rule does not exist.
-		 Therefore, this rule fails.  */
-	      break;
-	    }
+                      continue;
+                    }
 
-	  /* This rule is no longer `in use' for recursive searches.  */
+                  /* If we have tried to find P as an intermediate
+                     file and failed, mark that name as impossible
+                     so we won't go through the search again later.  */
+                  file_impossible (name);
+                }
+
+              /* A dependency of this rule does not exist. Therefore,
+                 this rule fails.  */
+              failed = 1;
+              break;
+            }
+
+          /* This rule is no longer `in use' for recursive searches.  */
 	  rule->in_use = 0;
 
-	  if (dep != 0)
-	    {
-	      /* This pattern rule does not apply.
-		 If some of its dependencies succeeded,
-		 free the data structure describing them.  */
-	      while (deps_found-- > 0)
-		{
-		  register struct file *f = intermediate_files[deps_found];
-		  free (found_files[deps_found]);
-		  if (f != 0
-		      && (f->stem < f->name
-			  || f->stem > f->name + strlen (f->name)))
-		    free (f->stem);
-		}
-	    }
+          if (failed)
+            {
+              /* This pattern rule does not apply. If some of its
+                 dependencies succeeded, free the data structure
+                 describing them.  */
+              free_idep_chain (deps);
+              deps = 0;
+            }
 	  else
 	    /* This pattern rule does apply.  Stop looking for one.  */
 	    break;
@@ -511,11 +749,30 @@ pattern_search (struct file *file, int archive,
      This includes the intermediate files, if any.
      Convert them into entries on the deps-chain of FILE.  */
 
-  while (deps_found-- > 0)
+  if (remove_explicit_deps)
+    {
+      /* Remove all the dependencies that didn't come from
+         this implicit rule. */
+
+      dep = file->deps;
+      while (dep != 0)
+        {
+          struct dep *next = dep->next;
+          free (dep->name);
+          free ((char *)dep);
+          dep = next;
+        }
+      file->deps = 0;
+  }
+
+  expl_d = file->deps; /* We will add them at the end. */
+  d_ptr = &file->deps;
+
+  for (d = deps; d != 0; d = d->next)
     {
       register char *s;
 
-      if (intermediate_files[deps_found] != 0)
+      if (d->intermediate_file != 0)
 	{
 	  /* If we need to use an intermediate file,
 	     make sure it is entered as a target, with the info that was
@@ -524,13 +781,13 @@ pattern_search (struct file *file, int archive,
 	     a target; therefore we can assume that the deps and cmds
 	     of F below are null before we change them.  */
 
-	  struct file *imf = intermediate_files[deps_found];
+	  struct file *imf = d->intermediate_file;
 	  register struct file *f = enter_file (imf->name);
 	  f->deps = imf->deps;
 	  f->cmds = imf->cmds;
 	  f->stem = imf->stem;
           f->also_make = imf->also_make;
-	  imf = lookup_file (intermediate_patterns[deps_found]);
+	  imf = lookup_file (d->intermediate_pattern);
 	  if (imf != 0 && imf->precious)
 	    f->precious = 1;
 	  f->intermediate = 1;
@@ -547,8 +804,9 @@ pattern_search (struct file *file, int archive,
 	}
 
       dep = (struct dep *) xmalloc (sizeof (struct dep));
-      dep->ignore_mtime = found_files_im[deps_found];
-      s = found_files[deps_found];
+      dep->ignore_mtime = d->ignore_mtime;
+      s = d->name; /* Hijacking the name. */
+      d->name = 0;
       if (recursions == 0)
 	{
 	  dep->name = 0;
@@ -567,7 +825,7 @@ pattern_search (struct file *file, int archive,
 	  dep->file = 0;
 	  dep->changed = 0;
 	}
-      if (intermediate_files[deps_found] == 0 && tryrules[foundrule]->terminal)
+      if (d->intermediate_file == 0 && tryrules[foundrule]->terminal)
 	{
 	  /* If the file actually existed (was not an intermediate file),
 	     and the rule that found it was a terminal one, then we want
@@ -579,9 +837,12 @@ pattern_search (struct file *file, int archive,
 	  else
 	    dep->file->tried_implicit = 1;
 	}
-      dep->next = file->deps;
-      file->deps = dep;
+
+      *d_ptr = dep;
+      d_ptr = &dep->next;
     }
+
+  *d_ptr = expl_d;
 
   if (!checked_lastslash[foundrule])
     {
@@ -629,7 +890,7 @@ pattern_search (struct file *file, int archive,
 	}
 
  done:
-  free (intermediate_files);
+  free_idep_chain (deps);
   free (tryrules);
 
   return rule != 0;

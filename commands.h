@@ -40,3 +40,4 @@ extern void execute_file_commands PARAMS ((struct file *file));
 extern void print_commands PARAMS ((struct commands *cmds));
 extern void delete_child_targets PARAMS ((struct child *child));
 extern void chop_commands PARAMS ((struct commands *cmds));
+extern void set_file_variables PARAMS ((struct file *file));

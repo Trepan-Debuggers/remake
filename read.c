@@ -134,7 +134,6 @@ static int conditional_line PARAMS ((char *line, const struct floc *flocp));
 static void record_files PARAMS ((struct nameseq *filenames, char *pattern, char *pattern_percent,
 			struct dep *deps, unsigned int cmds_started, char *commands,
 			unsigned int commands_idx, int two_colon,
-			int have_sysv_atvar,
                         const struct floc *flocp, int set_default));
 static void record_target_var PARAMS ((struct nameseq *filenames, char *defn,
                                        enum variable_origin origin,
@@ -457,7 +456,6 @@ eval (struct ebuffer *ebuf, int set_default)
   unsigned int cmds_started, tgts_started;
   int ignoring = 0, in_ignored_define = 0;
   int no_targets = 0;		/* Set when reading a rule without targets.  */
-  int have_sysv_atvar = 0;
   struct nameseq *filenames = 0;
   struct dep *deps = 0;
   long nlines = 0;
@@ -474,7 +472,7 @@ eval (struct ebuffer *ebuf, int set_default)
 	  fi.lineno = tgts_started;                                           \
 	  record_files (filenames, pattern, pattern_percent, deps,            \
                         cmds_started, commands, commands_idx, two_colon,      \
-                        have_sysv_atvar, &fi, set_default);                   \
+                        &fi, set_default);                                    \
         }                                                                     \
       filenames = 0;							      \
       commands_idx = 0;							      \
@@ -869,6 +867,7 @@ eval (struct ebuffer *ebuf, int set_default)
         char *cmdleft, *semip, *lb_next;
         unsigned int len, plen = 0;
         char *colonp;
+        const char *end, *beg; /* Helpers for whitespace stripping. */
 
         /* Record the previous rule.  */
 
@@ -917,6 +916,7 @@ eval (struct ebuffer *ebuf, int set_default)
           }
 
         p2 = variable_expand_string(NULL, lb_next, len);
+
         while (1)
           {
             lb_next += len;
@@ -1094,16 +1094,6 @@ eval (struct ebuffer *ebuf, int set_default)
               }
           }
 
-        /* Do any of the prerequisites appear to have $@ etc.?  */
-        have_sysv_atvar = 0;
-        if (!posix_pedantic)
-          for (p = strchr (p2, '$'); p != 0; p = strchr (p+1, '$'))
-            if (p[1] == '@' || ((p[1] == '(' || p[1] == '{') && p[2] == '@'))
-              {
-                have_sysv_atvar = 1;
-                break;
-              }
-
         /* Is this a static pattern rule: `target: %targ: %dep; ...'?  */
         p = strchr (p2, ':');
         while (p != 0 && p[-1] == '\\')
@@ -1168,26 +1158,20 @@ eval (struct ebuffer *ebuf, int set_default)
         else
           pattern = 0;
 
-        /* Parse the dependencies.  */
-        deps = (struct dep *)
-          multi_glob (parse_file_seq (&p2, '|', sizeof (struct dep), 1),
-                      sizeof (struct dep));
-        if (*p2)
+        /* Strip leading and trailing whitespaces. */
+        beg = p2;
+        end = beg + strlen (beg) - 1;
+        strip_whitespace (&beg, &end);
+
+        if (beg <= end && *beg != '\0')
           {
-            /* Files that follow '|' are special prerequisites that
-               need only exist in order to satisfy the dependency.
-               Their modification times are irrelevant.  */
-            struct dep **deps_ptr = &deps;
-            struct dep *d;
-            for (deps_ptr = &deps; *deps_ptr; deps_ptr = &(*deps_ptr)->next)
-              ;
-            ++p2;
-            *deps_ptr = (struct dep *)
-              multi_glob (parse_file_seq (&p2, '\0', sizeof (struct dep), 1),
-                          sizeof (struct dep));
-            for (d = *deps_ptr; d != 0; d = d->next)
-              d->ignore_mtime = 1;
+            deps = (struct dep*) xmalloc (sizeof (struct dep));
+            deps->next = 0;
+            deps->name = savestring (beg, end - beg + 1);
+            deps->file = 0;
           }
+        else
+          deps = 0;
 
         commands_idx = 0;
         if (cmdleft != 0)
@@ -1753,7 +1737,7 @@ static void
 record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
               struct dep *deps, unsigned int cmds_started, char *commands,
               unsigned int commands_idx, int two_colon,
-              int have_sysv_atvar, const struct floc *flocp, int set_default)
+              const struct floc *flocp, int set_default)
 {
   struct nameseq *nextf;
   int implicit = 0;
@@ -1846,125 +1830,34 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
 	      /* We use patsubst_expand to do the work of translating
 		 the target pattern, the target's name and the dependencies'
 		 patterns into plain dependency names.  */
-	      char *buffer = variable_expand ("");
 
-	      for (d = this; d != 0; d = d->next)
-		{
-		  char *o;
-		  char *percent = find_percent (d->name);
-		  if (percent == 0)
-		    continue;
-		  o = patsubst_expand (buffer, name, pattern, d->name,
-				       pattern_percent+1, percent+1);
+              if (find_percent (this->name) != 0)
+                {
+                  char stem[PATH_MAX];
+                  char *o;
+                  char *buffer = variable_expand ("");
+
+                  o = patsubst_expand (buffer, name, pattern, "%",
+                                       pattern_percent + 1, 0);
+
+
+                  strncpy (stem, buffer, o - buffer);
+                  stem[o - buffer] = '\0';
+
+                  o = subst_expand (buffer, this->name, "%", stem,
+                                    1, strlen (stem), 0);
+
                   /* If the name expanded to the empty string, that's
                      illegal.  */
                   if (o == buffer)
                     fatal (flocp,
                            _("target `%s' leaves prerequisite pattern empty"),
                            name);
-		  free (d->name);
-		  d->name = savestring (buffer, o - buffer);
+		  free (this->name);
+		  this->name = savestring (buffer, o - buffer);
 		}
 	    }
 	}
-
-      /* If at least one of the dependencies uses $$@ etc. deal with that.
-         It would be very nice and very simple to just expand everything, but
-         it would break a lot of backward compatibility.  Maybe that's OK
-         since we're just emulating a SysV function, and if we do that then
-         why not emulate it completely (that's what SysV make does: it
-         re-expands the entire prerequisite list, all the time, with $@
-         etc. in scope).  But, it would be a pain indeed to document this
-         ("iff you use $$@, your prerequisite lists is expanded twice...")
-         Ouch.  Maybe better to make the code more complex.  */
-
-      if (have_sysv_atvar)
-        {
-          char *p;
-          int tlen = strlen (name);
-          char *fnp = strrchr (name, '/');
-          int dlen;
-          int flen;
-
-          if (fnp)
-            {
-              dlen = fnp - name;
-              ++fnp;
-              flen = strlen (fnp);
-            }
-          else
-            {
-              dlen = 0;
-              fnp = name;
-              flen = tlen;
-            }
-
-
-          for (d = this; d != 0; d = d->next)
-            for (p = strchr (d->name, '$'); p != 0; p = strchr (p+1, '$'))
-              {
-                char *s = p;
-                char *at;
-                int atlen;
-
-                /* If it's '$@', '$(@', or '${@', it's escaped */
-                if ((++p)[0] == '$'
-                    && (p[1] == '@'
-                        || ((p[1] == '(' || p[1] == '{') && p[2] == '@')))
-                  {
-                    bcopy (p, s, strlen (p)+1);
-                    continue;
-                  }
-
-                /* Maybe found one.  We like anything of any form matching @,
-                   [({]@[}):], or [({]@[DF][}):].  */
-
-                if (! (p[0] == '@'
-                       || ((p[0] == '(' || p[0] == '{') && (++p)[0] == '@'
-                           && (((++p)[0] == ')' || p[0] == '}' || p[0] == ':')
-                               || ((p[1] == ')' || p[1] == '}' || p[1] == ':')
-                                   && (p[0] == 'D' || p[0] == 'F'))))))
-                  continue;
-
-                /* Found one.  Compute the length and string ptr.  Move p
-                   past the variable reference.  */
-                switch (p[0])
-                  {
-                  case 'D':
-                    atlen = dlen;
-                    at = name;
-                    p += 2;
-                    break;
-
-                  case 'F':
-                    atlen = flen;
-                    at = fnp;
-                    p += 2;
-                    break;
-
-                  default:
-                    atlen = tlen;
-                    at = name;
-                    ++p;
-                    break;
-                  }
-
-                /* Get more space.  */
-                {
-                  int soff = s - d->name;
-                  int poff = p - d->name;
-                  d->name = (char *) xrealloc (d->name,
-                                               strlen (d->name) + atlen + 1);
-                  s = d->name + soff;
-                  p = d->name + poff;
-                }
-
-                /* Copy the string over.  */
-                bcopy(p, s+atlen, strlen (p)+1);
-                bcopy(at, s, atlen);
-                p = s + atlen - 1;
-              }
-        }
 
       if (!two_colon)
 	{
@@ -2003,6 +1896,7 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
 	    f->cmds = 0;
 	  if (cmds != 0)
 	    f->cmds = cmds;
+
 	  /* Defining .SUFFIXES with no dependencies
 	     clears out the list of suffixes.  */
 	  if (f == suffix_file && this == 0)
@@ -2017,41 +1911,63 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
 		}
 	      f->deps = 0;
 	    }
-	  else if (f->deps != 0)
+          else if (this != 0)
 	    {
 	      /* Add the file's old deps and the new ones in THIS together.  */
 
-	      struct dep *firstdeps, *moredeps;
-	      if (cmds != 0)
-		{
-		  /* This is the rule with commands, so put its deps first.
-		     The rationale behind this is that $< expands to the
-		     first dep in the chain, and commands use $< expecting
-		     to get the dep that rule specifies.  */
-		  firstdeps = this;
-		  moredeps = f->deps;
-		}
-	      else
-		{
-		  /* Append the new deps to the old ones.  */
-		  firstdeps = f->deps;
-		  moredeps = this;
-		}
+              if (f->deps != 0)
+                {
+                  struct dep **d_ptr = &f->deps;
 
-	      if (firstdeps == 0)
-		firstdeps = moredeps;
-	      else
-		{
-		  d = firstdeps;
-		  while (d->next != 0)
-		    d = d->next;
-		  d->next = moredeps;
-		}
+                  while ((*d_ptr)->next != 0)
+                    d_ptr = &(*d_ptr)->next;
 
-	      f->deps = firstdeps;
+                  if (cmds != 0)
+                    {
+                      /* This is the rule with commands, so put its deps
+                         last. The rationale behind this is that $< expands
+                         to the first dep in the chain, and commands use $<
+                         expecting to get the dep that rule specifies.
+                         However the second expansion algorithm reverses
+                         the order thus we need to make it last here.  */
+
+                      (*d_ptr)->next = this;
+                    }
+                  else
+                    {
+                      /* This is the rule without commands. Put its
+                         dependencies at the end but before dependencies
+                         from the rule with commands (if any). This way
+                         everyhting appears in makefile order.  */
+
+                      if (f->cmds != 0)
+                        {
+                          this->next = *d_ptr;
+                          *d_ptr = this;
+                        }
+                      else
+                        (*d_ptr)->next = this;
+                    }
+                }
+              else
+                f->deps = this;
+
+              /* This is a hack. I need a way to communicate to snap_deps()
+                 that the last dependency line in this file came with commands
+                 (so that logic in snap_deps() can put it in front and all
+                 this $< -logic works). I cannot's simply rely oon file->cmds
+                 being not 0 because of the cases like the following:
+
+                 foo: bar
+                 foo:
+                     ...
+
+                 I am going to temporarily "borrow" UPDATING member in
+                 `struct file' for this.   */
+
+              if (cmds != 0)
+                f->updating = 1;
 	    }
-	  else
-	    f->deps = this;
 
 	  /* If this is a static pattern rule, set the file's stem to
 	     the part of its name that matched the `%' in the pattern,
@@ -2135,7 +2051,7 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
 	    }
 
 	  if (!reject)
-	    default_goal_file = f;
+            default_goal_file = f;
 	}
     }
 

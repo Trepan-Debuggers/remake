@@ -1,3 +1,19 @@
+Sun Feb 27 23:33:32 2005  Boris Kolpackov  <boris@kolpackov.net>
+
+	* scripts/features/se_explicit: Test the second expansion in
+	explicit rules.
+
+	* scripts/features/se_implicit: Test the second expansion in
+	implicit rules.
+
+	* scripts/features/se_statpat: Test the second expansion in
+	static pattern rules.
+
+	* tests/scripts/variables/automatic: Fix to work with the second
+	expansion.
+
+	* scripts/misc/general4: Add a test for bug #12091.
+
 2005-02-09  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/features/recursion: Test command line variable settings:

@@ -460,6 +460,10 @@ extern void user_access PARAMS ((void));
 extern void make_access PARAMS ((void));
 extern void child_access PARAMS ((void));
 
+extern char *
+strip_whitespace PARAMS ((const char **begpp, const char **endpp));
+
+
 #ifdef  HAVE_VFORK_H
 # include <vfork.h>
 #endif

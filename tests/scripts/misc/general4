@@ -6,9 +6,6 @@ which have either broken at some point in the past or seem likely to
 break.";
 
 open(MAKEFILE,"> $makefile");
-
-# The contents of the Makefile ...
-
 print MAKEFILE <<'EOF';
 # Make sure that subdirectories built as prerequisites are actually handled
 # properly.
@@ -21,11 +18,36 @@ dir/subdir/file.b: dir/subdir ; @echo touch dir/subdir/file.b
 
 dir/subdir/%.a: dir/subdir/%.b ; @echo cp $< $@
 EOF
-
 close(MAKEFILE);
 
 &run_make_with_options($makefile,"",&get_logfile);
 $answer = "mkdir -p dir/subdir\ntouch dir/subdir/file.b\ncp dir/subdir/file.b dir/subdir/file.a\n";
 &compare_output($answer,&get_logfile(1));
+
+
+# Test implicit rules
+
+&touch('foo.c');
+run_make_test('
+foo: foo.o
+',
+              'CC="@echo cc" OUTPUT_OPTION=',
+              'cc -c foo.c
+cc foo.o -o foo');
+unlink('foo.c');
+
+
+# Test other implicit rule searching
+
+&touch('bar');
+run_make_test('
+test.foo:
+%.foo : baz ; @echo done $<
+%.foo : bar ; @echo done $<
+fox: baz
+',
+              '',
+              'done bar');
+unlink('bar');
 
 1;
