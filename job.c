@@ -197,7 +197,7 @@ child_error (target_name, exit_code, exit_sig, coredump, ignored)
     error ("*** [%s] %s%s",
 	   target_name, strsignal (exit_sig),
 	   coredump ? " (core dumped)" : "");
-#endif
+#endif /* VMS */
 }
 
 static unsigned int dead_children = 0;
@@ -715,6 +715,7 @@ start_job_command (child)
   fflush (stdout);
   fflush (stderr);
 
+#ifndef _AMIGA
 #ifndef VMS
 
   /* Set up a bad standard input that reads from a broken pipe.  */
@@ -743,6 +744,8 @@ start_job_command (child)
 	}
     }
 
+#endif /* !AMIGA */
+
   /* Decide whether to give this child the `good' standard input
      (one that points to the terminal or whatever), or the `bad' one
      that points to the read side of a broken pipe.  */
@@ -751,7 +754,7 @@ start_job_command (child)
   if (child->good_stdin)
     good_stdin_used = 1;
 
-#endif /* !VMS */
+#endif /* Not VMS */
 
   child->deleted = 0;
 
@@ -1117,7 +1120,7 @@ job_next_command (child)
 static int
 load_too_high ()
 {
-#if defined(__MSDOS__) || defined(VMS)
+#if defined(__MSDOS__) || defined(VMS) || defined(_AMIGA)
   return 1;
 #else
   double load;
@@ -1386,6 +1389,7 @@ child_execute_job (argv, child)
 
 #else /* !VMS */
 
+#ifndef _AMIGA
 /* UNIX:
    Replace the current process with one executing the command in ARGV.
    STDIN_FD and STDOUT_FD are used as the process's stdin and stdout; ENVP is
@@ -1408,8 +1412,10 @@ child_execute_job (stdin_fd, stdout_fd, argv, envp)
   /* Run the command.  */
   exec_command (argv, envp);
 }
+#endif /* !AMIGA */
 #endif /* !VMS */
 
+#ifndef _AMIGA
 /* Replace the current process with one running the command in ARGV,
    with environment ENVP.  This function does not return.  */
 
@@ -1476,6 +1482,19 @@ exec_command (argv, envp)
   _exit (127);
 #endif /* !VMS */
 }
+#else /* On Amiga */
+void exec_command (argv)
+     char **argv;
+{
+    MyExecute (argv);
+}
+
+void clean_tmp (void)
+{
+    DeleteFile (amiga_bname);
+}
+
+#endif /* An Amiga */
 
 #ifndef VMS
 /* Figure out the argument list necessary to run LINE as a command.  Try to
