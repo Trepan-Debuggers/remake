@@ -862,7 +862,7 @@ main (argc, argv, envp)
 	  {
 	    register struct file *f = d->file;
 	    if (f->double_colon)
-	      do
+	      for (f = f->double_colon; f != NULL; f = f->prev)
 		{
 		  if (f->deps == 0 && f->cmds != 0)
 		    {
@@ -890,9 +890,7 @@ main (argc, argv, envp)
 
 		      break;
 		    }
-		  f = f->prev;
 		}
-	      while (f != NULL);
 	    if (f == NULL || !f->double_colon)
 	      {
 		if (makefile_mtimes == 0)
