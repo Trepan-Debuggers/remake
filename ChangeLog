@@ -2,6 +2,8 @@ Mon May 13 14:37:42 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 
 	* Version 3.74.4.
 
+	* GNUmakefile (vmsfiles): Fix typo.
+
 	* GNUmakefile (amigafiles): Add amiga.h.
 
 Sun May 12 19:19:43 1996  Aaron Digulla   <digulla@fh-konstanz.de>
