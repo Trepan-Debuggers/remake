@@ -25,7 +25,7 @@ $ exit
 $ link_using_library:
 $ link/exe=make alloca,commands,default,dir,expand,file,function,-
 		implicit,job,main,misc,read,remake,remote-stub,rule,-
-		signame,variable,version,vmsfunctions,vmsfiy,vpath,-
+		signame,variable,version,vmsfunctions,vmsify,vpath,-
 		glob,fnmatch,getopt,getopt1,sys$library:vaxcrtl/lib
 $!
 $ compileit : subroutine

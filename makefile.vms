@@ -43,7 +43,7 @@ LOAD_AVG = /define="NO_LDAV"
 # System V probably need -lPW for alloca.
 # if on vax, uncomment the following line
 #LOADLIBES = ,c.opt/opt
-LOADLIBES =
+LOADLIBES =,sys$$library:vaxcrtl.obl/lib
 
 # If your system doesn't have alloca, or the one provided is bad,
 # get it from the Emacs distribution and define these.
