@@ -20,8 +20,8 @@ Version 3.79.2
   "cp -p" (right now) doesn't preserve the subsecond portion of a time
   stamp.
 
-* Updated translations for Galician, Japanese, and Russian, and a new
-  Turkish translation.
+* Updated translations for Galician, Japanese, Korean, and Russian.
+  New translations for Danish and Turkish.
 
 Version 3.79.1
 

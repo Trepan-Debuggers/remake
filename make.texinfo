@@ -7,7 +7,7 @@ input texinfo                @c -*- Texinfo -*-
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.192 2001/06/01 03:56:50 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.193 2001/07/05 00:35:03 psmith Exp $
 @set EDITION 0.55
 @set VERSION 3.79
 @set UPDATED 04 April 2000
@@ -1980,8 +1980,8 @@ not in the directory found via directory search.
 This algorithm may seem complex, but in practice it is quite often
 exactly what you want.
 
-@cindex traditional directory search
-@cindex directory search, traditional
+@cindex traditional directory search (GPATH)
+@cindex directory search, traditional (GPATH)
 Other versions of @code{make} use a simpler algorithm: if the file does
 not exist, and it is found via directory search, then that pathname is
 always used whether or not the target needs to be built.  Thus, if the
