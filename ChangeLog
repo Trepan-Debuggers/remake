@@ -1,5 +1,8 @@
 Fri Mar 24 00:32:32 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
+	* main.c (main): Handle 1 and 2 returns from update_goal_chain
+ 	makefile run properly.
+
 	* Version 3.72.12.
 
 	* main.c (handle_non_switch_argument): New function, broken out of
