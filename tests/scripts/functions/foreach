@@ -20,7 +20,7 @@ open(MAKEFILE,"> $makefile");
 
 # On WIN32 systems, the user's path is found in %Path% ($Path)
 #
-$pathvar = (($osname =~ /Windows/i) ? "Path" : "PATH");
+$pathvar = (($port_type eq 'Windows') ? "Path" : "PATH");
 
 print MAKEFILE <<EOF;
 foo = bletch null \@ garf

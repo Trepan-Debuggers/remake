@@ -9,8 +9,8 @@ open(MAKEFILE, "> $makefile");
 
 print MAKEFILE <<'EOMAKE';
 
-final: intermediate ; touch $@
-intermediate: orig ; touch $@
+final: intermediate ; echo >> $@
+intermediate: orig ; echo >> $@
 
 EOMAKE
 
@@ -19,11 +19,11 @@ close(MAKEFILE);
 &touch('orig');
 
 &run_make_with_options($makefile, "", &get_logfile);
-$answer = "touch intermediate\ntouch final\n";
+$answer = "echo >> intermediate\necho >> final\n";
 &compare_output($answer, &get_logfile(1));
 
 &run_make_with_options($makefile, "-Worig -n", &get_logfile);
-$answer = "touch intermediate\ntouch final\n";
+$answer = "echo >> intermediate\necho >> final\n";
 &compare_output($answer, &get_logfile(1));
 
 unlink('orig', 'intermediate', 'final');

@@ -36,9 +36,6 @@ feel free to make whatever changes you like to the current tests, given
 some high-level goals, and that you'll port the current tests to
 whatever you do :).
 
-If someone does this work I'll be able to start including the test suite
-with make itself, which would be very cool.
-
 
 The Rest of the List
 --------------------
@@ -59,6 +56,8 @@ The Rest of the List
      workable, but doesn't really fit into my ideas for #2.  Maybe
      that's OK.  I have paperwork for their work so if you want to do
      this one talk to me to get what they've already done.
+
+     [K R Praveen <praveen@cair.res.in>]
 
  3) Currently you can use "%.foo %.bar : %.baz" to mean that one
     invocation of the rule builds both targets.  GNU make needs a way to

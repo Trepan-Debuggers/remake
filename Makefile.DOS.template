@@ -471,10 +471,14 @@ dist-hook:
 # Note: check-loadavg is NOT a prerequisite of check-local, since
 # there's no uptime utility, and the test it does doesn't make sense
 # on MSDOS anyway.
-check-local: check-loadavg check-regression
-	@echo "=========================" \
-	echo "Regression passed: GNU Make $(VERSION) ($(MAKE_HOST)) built with $(CC)"; \
-	echo "========================="
+check-local: check-shell check-regression
+	@banner=" Regression PASSED: GNU Make $(VERSION) ($(MAKE_HOST)) built with $(CC) "; \
+	dashes=`echo "$$banner" | sed s/./=/g`; \
+	echo; \
+	echo "$$dashes"; \
+	echo "$$banner"; \
+	echo "$$dashes"; \
+	echo
 
 .PHONY: check-loadavg check-shell check-regression
 

@@ -1,3 +1,12 @@
+1999-09-17  Paul D. Smith  <psmith@gnu.org>
+
+	* Version 3.78 released.
+
+1999-09-16  Paul D. Smith  <psmith@gnu.org>
+
+	* main.c (define_makeflags): Zero out FLAGSTRING to avoid
+	uninitialized memory reads when checking *p != '-' in the loop.
+
 1999-09-15  Paul D. Smith  <psmith@gnu.org>
 
 	* Version 3.77.97 released.
