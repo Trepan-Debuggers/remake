@@ -1,3 +1,30 @@
+Sat Sep  9 06:33:20 1995  Roland McGrath  <roland@whiz-bang.gnu.ai.mit.edu>
+
+	* commands.c (delete_target): Ignore unlink failure if it is ENOENT.
+
+Thu Aug 17 15:08:57 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* configure.in: Don't check for getdtablesize.
+	* job.c (getdtablesize): Remove decls and macros.
+
+Thu Aug 10 19:10:03 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* main.c (define_makeflags): Omit command line variable
+ 	definitions from MFLAGS value.
+
+	* arscan.c (ar_scan) [AIAMAG]: Check for zero MEMBER_OFFSET,
+ 	indicating a valid, but empty, archive.
+
+Mon Aug  7 15:40:03 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* dir.c (file_impossible_p): Correctly reset FILENAME to name
+ 	within directory before hash search.
+
+	* job.c (child_error): Do nothing if IGNORED under -s.
+
+	* job.c (exec_command): Correctly use ARGV[0] for script name when
+ 	running shell directly.
+
 Tue Aug  1 14:39:14 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
 	* job.c (child_execute_job): Close STDIN_FD and STDOUT_FD after
