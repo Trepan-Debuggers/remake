@@ -393,7 +393,7 @@ read_makefile (filename, type)
 
 	  if (filenames == 0)
 	    makefile_fatal (filename, lineno,
-			    "commands commence before first target");
+			    "commands with no associated target");
 
 	  /* Add this command line to end of the line being accumulated.  */
 	  p = lb.buffer;
@@ -1202,8 +1202,6 @@ record_files (filenames, pattern, pattern_percent, deps, commands_started,
 	    }
 	  else
 	    f->deps = this;
-
-	  uniquize_deps (f->deps);
 
 	  /* If this is a static pattern rule, set the file's stem to
 	     the part of its name that matched the `%' in the pattern,
