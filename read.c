@@ -134,7 +134,7 @@ static int conditional_line PARAMS ((char *line, const struct floc *flocp));
 static void record_files PARAMS ((struct nameseq *filenames, char *pattern, char *pattern_percent,
 			struct dep *deps, unsigned int cmds_started, char *commands,
 			unsigned int commands_idx, int two_colon,
-                        const struct floc *flocp, int set_default));
+                        const struct floc *flocp));
 static void record_target_var PARAMS ((struct nameseq *filenames, char *defn,
                                        enum variable_origin origin,
                                        int enabled,
@@ -472,7 +472,7 @@ eval (struct ebuffer *ebuf, int set_default)
 	  fi.lineno = tgts_started;                                           \
 	  record_files (filenames, pattern, pattern_percent, deps,            \
                         cmds_started, commands, commands_idx, two_colon,      \
-                        &fi, set_default);                                    \
+                        &fi);                                                 \
         }                                                                     \
       filenames = 0;							      \
       commands_idx = 0;							      \
@@ -1192,6 +1192,83 @@ eval (struct ebuffer *ebuf, int set_default)
             commands[commands_idx++] = '\n';
           }
 
+        /* Determine if this target should be made default. We used
+           to do this in record_files() but because of the delayed
+           target recording and because preprocessor directives are
+           legal in target's commands it is too late. Consider this
+           fragment for example:
+
+           foo:
+
+           ifeq ($(.DEFAULT_TARGET),foo)
+              ...
+           endif
+
+           Because the target is not recorded until after ifeq
+           directive is evaluated the .DEFAULT_TARGET does not
+           contain foo yet as one would expect. Because of this
+           we have to move some of the logic here. */
+
+        if (**default_target_name == '\0' && set_default)
+          {
+            char* name;
+            struct dep *d;
+            struct nameseq *t = filenames;
+
+            for (; t != 0; t = t->next)
+              {
+                int reject = 0;
+                name = t->name;
+
+                /* We have nothing to do if this is an implicit rule. */
+                if (strchr (name, '%') != 0)
+                  break;
+
+                /* See if this target's name does not start with a `.',
+                   unless it contains a slash.  */
+                if (*name == '.' && strchr (name, '/') == 0
+#ifdef HAVE_DOS_PATHS
+                    && strchr (name, '\\') == 0
+#endif
+                )
+                  continue;
+
+
+                /* If this file is a suffix, don't let it be
+                   the default goal file.  */
+                for (d = suffix_file->deps; d != 0; d = d->next)
+                  {
+                    register struct dep *d2;
+                    if (*dep_name (d) != '.' && streq (name, dep_name (d)))
+                      {
+                        reject = 1;
+                        break;
+                      }
+                    for (d2 = suffix_file->deps; d2 != 0; d2 = d2->next)
+                      {
+                        register unsigned int len = strlen (dep_name (d2));
+                        if (!strneq (name, dep_name (d2), len))
+                          continue;
+                        if (streq (name + len, dep_name (d)))
+                          {
+                            reject = 1;
+                            break;
+                          }
+                      }
+
+                    if (reject)
+                      break;
+                  }
+
+                if (!reject)
+                  {
+                    (void) define_variable (
+                      ".DEFAULT_TARGET", 15, t->name, o_file, 0);
+                    break;
+                  }
+              }
+          }
+
         continue;
       }
 
@@ -1737,7 +1814,7 @@ static void
 record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
               struct dep *deps, unsigned int cmds_started, char *commands,
               unsigned int commands_idx, int two_colon,
-              const struct floc *flocp, int set_default)
+              const struct floc *flocp)
 {
   struct nameseq *nextf;
   int implicit = 0;
@@ -2013,45 +2090,13 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
 	  name = f->name;
 	}
 
-      /* See if this is first target seen whose name does
-	 not start with a `.', unless it contains a slash.  */
-      if (default_goal_file == 0 && set_default
-	  && (*name != '.' || strchr (name, '/') != 0
-#ifdef HAVE_DOS_PATHS
-			   || strchr (name, '\\') != 0
-#endif
-	      ))
+      /* See if this target is a default target and update
+         DEFAULT_GOAL_FILE if necessary.  */
+      if (strcmp (*default_target_name, name) == 0 &&
+          (default_goal_file == 0 ||
+           strcmp (default_goal_file->name, name) != 0))
 	{
-	  int reject = 0;
-
-	  /* If this file is a suffix, don't
-	     let it be the default goal file.  */
-
-	  for (d = suffix_file->deps; d != 0; d = d->next)
-	    {
-	      register struct dep *d2;
-	      if (*dep_name (d) != '.' && streq (name, dep_name (d)))
-		{
-		  reject = 1;
-		  break;
-		}
-	      for (d2 = suffix_file->deps; d2 != 0; d2 = d2->next)
-		{
-		  register unsigned int len = strlen (dep_name (d2));
-		  if (!strneq (name, dep_name (d2), len))
-		    continue;
-		  if (streq (name + len, dep_name (d)))
-		    {
-		      reject = 1;
-		      break;
-		    }
-		}
-	      if (reject)
-		break;
-	    }
-
-	  if (!reject)
-            default_goal_file = f;
+          default_goal_file = f;
 	}
     }
 

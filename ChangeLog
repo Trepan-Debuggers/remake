@@ -1,3 +1,28 @@
+Mon Feb 28 00:18:20 2005  Boris Kolpackov  <boris@kolpackov.net>
+
+	Implementation of the .DEFAULT_TARGET special variable.
+
+	* read.c (eval): If necessary, update default_target_name
+	when reading rules.
+
+	* read.c (record_files): Update default_target_file if
+	default_target_name has changed.
+
+	* main.c (default_target_name): Define.
+
+	* main.c (main): Enter .DEFAULT_TARGET as make variable. If
+	default_target_name is set use default_target_file as a root
+	target to make.
+
+	* filedef.h (default_target_name): Declare.
+
+	* dep.h (free_dep_chain):
+	* misc.c (free_dep_chain): Change to operate on struct nameseq
+	and change name to free_ns_chain.
+
+	* file.c (snap_deps): Update to use free_ns_chain.
+
+
 Sun Feb 27 22:03:36 2005  Boris Kolpackov  <boris@kolpackov.net>
 
 	Implementation of the second expansion in explicit rules,

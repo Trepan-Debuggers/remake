@@ -525,22 +525,22 @@ copy_dep_chain (struct dep *d)
   return firstnew;
 }
 
-/* Free a chain of `struct dep'. Each dep->name is freed
-   as well.  */
+/* Free a chain of `struct nameseq'. Each nameseq->name is freed
+   as well.  Can be used on `struct dep' chains.*/
 
 void
-free_dep_chain (struct dep *d)
+free_ns_chain (struct nameseq *n)
 {
-  register struct dep *tmp;
+  register struct nameseq *tmp;
 
-  while (d != 0)
+  while (n != 0)
   {
-    if (d->name != 0)
-      free (d->name);
+    if (n->name != 0)
+      free (n->name);
 
-    tmp = d;
+    tmp = n;
 
-    d = d->next;
+    n = n->next;
 
     free (tmp);
   }

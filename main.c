@@ -461,6 +461,10 @@ unsigned int makelevel;
 
 struct file *default_goal_file;
 
+/* Pointer to the value of the .DEFAULT_TARGET special
+   variable.  */
+char ** default_target_name;
+
 /* Pointer to structure for the file .DEFAULT
    whose commands are used for any file that has none of its own.
    This is zero if the makefiles do not define .DEFAULT.  */
@@ -1537,9 +1541,16 @@ main (int argc, char **argv, char **envp)
   /* Define the default variables.  */
   define_default_variables ();
 
-  /* Read all the makefiles.  */
-
   default_file = enter_file (".DEFAULT");
+
+  {
+    struct variable *v = define_variable (
+      ".DEFAULT_TARGET", 15, "", o_default, 0);
+
+    default_target_name = &v->value;
+  }
+
+  /* Read all the makefiles.  */
 
   read_makefiles
     = read_all_makefiles (makefiles == 0 ? (char **) 0 : makefiles->list);
@@ -2058,17 +2069,46 @@ main (int argc, char **argv, char **envp)
     /* If there were no command-line goals, use the default.  */
     if (goals == 0)
       {
-	if (default_goal_file != 0)
-	  {
-	    goals = (struct dep *) xmalloc (sizeof (struct dep));
-	    goals->next = 0;
-	    goals->name = 0;
+        if (**default_target_name != '\0')
+          {
+            if (default_goal_file == 0 ||
+                strcmp (*default_target_name, default_goal_file->name) != 0)
+              {
+                default_goal_file = lookup_file (*default_target_name);
+
+                /* In case user set .DEFAULT_TARGET to a non-existent target
+                   name let's just enter this name into the table and let
+                   the standard logic sort it out. */
+                if (default_goal_file == 0)
+                  {
+                    struct nameseq *ns;
+                    char *p = *default_target_name;
+
+                    ns = multi_glob (
+                      parse_file_seq (&p, '\0', sizeof (struct nameseq), 1),
+                      sizeof (struct nameseq));
+
+                    /* .DEFAULT_TARGET should contain one target. */
+                    if (ns->next != 0)
+                      fatal (NILF, _(".DEFAULT_TARGET contains more than one target"));
+
+                    default_goal_file = enter_file (ns->name);
+
+                    ns->name = 0; /* It was reused by enter_file(). */
+                    free_ns_chain (ns);
+                  }
+              }
+
+            goals = (struct dep *) xmalloc (sizeof (struct dep));
+            goals->next = 0;
+            goals->name = 0;
             goals->ignore_mtime = 0;
-	    goals->file = default_goal_file;
-	  }
+            goals->file = default_goal_file;
+          }
       }
     else
       lastgoal->next = 0;
+
 
     if (!goals)
       {
