@@ -1,3 +1,9 @@
+1999-03-04  Paul D. Smith  <psmith@gnu.org>
+
+	* variable.c (try_variable_definition): If we see a conditional
+	variable and we decide to set it, re-type it as recursive so it
+	will be expanded properly later.
+
 1999-02-22  Paul D. Smith  <psmith@gnu.org>
 
 	* NEWS: Mention new .LIBPATTERNS feature.

@@ -792,6 +792,7 @@ try_variable_definition (flocp, line, origin)
           free(expanded_name);
           return v;
         }
+      flavor = f_recursive;
       /* FALLTHROUGH */
     case f_recursive:
       /* A recursive variable definition "var = value".
