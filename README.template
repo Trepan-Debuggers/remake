@@ -14,6 +14,11 @@ Some systems' Make programs are broken and cannot process the Makefile for
 GNU Make.  If you get errors from your system's Make when building GNU
 Make, try using `build.sh' instead.
 
+See README.WIN32 for details about GNU Make on Windows NT or 95.
+See README.Amiga for details about GNU Make on AmigaDOS.
+The MSDOS port of GNU Make is available as part of DJGPP; see the
+WWW page http://www.delorie.com/djgpp/ for more information.
+
 It has been reported that the XLC 1.2 compiler on AIX 3.2 is buggy such
 that if you compile make with `cc -O' on AIX 3.2, it will not work correctly.
 It is said that using `cc' without `-O' does work.
