@@ -1,5 +1,5 @@
 /* Target file hash table management for GNU Make.
-Copyright (C) 1988, 89, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 90, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -294,7 +294,9 @@ remove_intermediates (sig)
   register struct file *f;
   char doneany;
   
-  if (!sig && just_print_flag)
+  if (question_flag || touch_flag)
+    return;
+  if (sig && just_print_flag)
     return;
 
   doneany = 0;
@@ -303,7 +305,11 @@ remove_intermediates (sig)
       if (f->intermediate && (f->dontcare || !f->precious))
 	{
 	  int status;
-	  if (just_print_flag)
+	  if (f->update_status == -1)
+	    /* If nothing would have created this file yet,
+	       don't print an "rm" command for it.  */
+	    continue;
+	  else if (just_print_flag)
 	    status = 0;
 	  else
 	    {
