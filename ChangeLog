@@ -1,3 +1,7 @@
+Tue Sep 16 10:18:22 1997  Paul D. Smith  <psmith@baynetworks.com>
+
+	* Version 3.76 released.
+
 Tue Sep  2 10:07:39 1997  Paul D. Smith  <psmith@baynetworks.com>
 
 	* function.c (expand_function): When processing $(shell...)

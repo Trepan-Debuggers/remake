@@ -38,13 +38,53 @@ GNU make and sh.exe:
 
 	There are very few true ports of Bourne shell for NT right now.
 	There is a version of GNU bash available from Cygnus gnu-win32
-	porting effort.  Other possibilites are to get the MKS version
+	porting effort.	 Other possibilities are to get the MKS version
 	of sh.exe or to build your own with a package like
 	NutCracker (DataFocus) or Portage (Consensys).
 
 	Tivoli uses a homegrown port of GNU bash which is not (yet)
 	freely available. It may be available someday, but I am not in control
 	of this decision nor do I influence it. Sorry!
+
+GNU make handling of drive letters in pathnames (PATH, vpath, VPATH):
+
+	There is a caveat that should be noted with respect to handling
+	single character pathnames on Windows systems.	When colon is
+	used in PATH variables, make tries to be smart about knowing when
+	you are using colon as a separator versus colon as a drive
+	letter.	 Unfortunately, something as simple as the string 'x:/'
+	could be interpreted 2 ways: (x and /) or (x:/).
+
+	Make chooses to interpret a letter plus colon (e.g. x:/) as a
+	drive letter pathname.	If it is necessary to use single
+	character directories in paths (VPATH, vpath, Path, PATH), the
+	user must do one of two things:
+
+	 a. Use semicolon as the separator to disambiguate colon. For
+	    example use 'x;/' if you want to say 'x' and '/' are
+	    separate components.
+
+	 b. Qualify the directory name so that there is more than
+	    one character in the path(s) used. For example, none
+	    of these settings are ambiguous:
+
+	      ./x:./y
+	      /some/path/x:/some/path/y
+	      x:/some/path/x:x:/some/path/y
+
+	These caveats affect Windows systems only (Windows NT and
+	Windows 95) and can be ignored for other platforms.
+
+	Please note that you are free to mix colon and semi-colon in the
+	specification of paths.	 Make is able to figure out the intended
+	result and convert the paths internally to the format needed
+	when interacting with the operating system.
+
+	You are encouraged to use colon as the separator character.
+	This should ease the pain of deciding how to handle various path
+	problems which exist between platforms.	 If colon is used on
+	both Unix and Windows systems, then no ifdef'ing will be
+	necessary in the makefile source.
 
 GNU make test suite:
 
@@ -105,17 +145,17 @@ SAMBA/NTFS/VFAT:
 	under VFAT. VFAT users may wish to be aware that this port
 	of make does respect case sensitivity.
 
-    Version 3.76 contains some preliminary support for FAT.
-    Make now tries to work around some difficulties with stat'ing of
-    files and caching of filenames and directories internally.
-    There is still a known problem with filenames sometimes being found
-    to have modification dates in the future which cause make to
-    complain about the file and exit (remake.c).
+	Version 3.76 contains some preliminary support for FAT.	 Make
+	now tries to work around some difficulties with stat'ing of
+	files and caching of filenames and directories internally.
+	There is still a known problem with filenames sometimes being
+	found to have modification dates in the future which cause make
+	to complain about the file and exit (remake.c).
 
 Bug reports:
 
 	Please submit bugs via the normal bug reporting mechanism
-	which is described in one of the texinfo files. If you don't
-	have texinfo for Windows NT or Windows 95, these files are simple
+	which is described in one of the Texinfo files. If you don't
+	have Texinfo for Windows NT or Windows 95, these files are simple
 	text files and can be read with a text editor.
 

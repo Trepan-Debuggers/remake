@@ -40,6 +40,13 @@ build.sh.in: build.template Makefile.am
 	    $< > $@
 	chmod a-w+x $@
 
+# We clean everything here.  The GNU standards for makefile conventions say
+# you shouldn't remove configure, etc., but this makefile is only available
+# in a full development distribution, so they'll only be removed then.
+#
+MAINTAINERCLEANFILES =  $(TEMPLATES) Makefile.DOS build.sh.in \
+			configure Makefile.in stamp-h.in
+
 # Put the alpha distribution files up for anonymous FTP.
 #
 ALPHA	:= ~ftp/gnu

@@ -12,10 +12,6 @@ Make with this makefile to rebuild.
 
 Here are some notes about GNU Make for VMS:
 
-Libraries are not supported. They were in GNU Make 3.60 but somehow I didn't
-care porting the code. If there is enough interest, I'll do it at some
-later time.
-
 The variable $^ separates files with commas instead of spaces (It's the
 natural thing to do for VMS).
 
@@ -40,8 +36,6 @@ less than what vms provides. This might be a problem on the faster Alphas.
 
 You can use a : in a filename only if you preceed it with a backslash ('\').
 E.g.- hobbes\:[bogas.files]
-
-None of the stuff in vpath.c has been implemented yet.
 
 Make ignores success, informational, or warning errors (-S-, -I-, or -W-).
 But it will stop on -E- and -F- errors. (unless you do something to override
