@@ -24,6 +24,7 @@ AC_HAVE_HEADERS(limits.h sys/param.h fcntl.h string.h memory.h)
 AC_MINUS_C_MINUS_O
 AC_CONST			dnl getopt needs this.
 AC_USG
+AC_STAT_MACROS_BROKEN
 
 AC_SUBST(LIBOBJS)
 
