@@ -153,7 +153,7 @@ Writing Rules
 * Rule Syntax::                 General syntax explained.
 * Wildcards::                   Using wildcard characters such as `*'.
 * Directory Search::            Searching other directories for source files.
-* Phony Targets::               Using a target that isn't a real file's name.
+* Phony Targets::               Using a target that is not a real file's name.
 * Force Targets::               You can use a target without commands
                                   or dependencies to mark other 
                                   targets as phony.
@@ -269,7 +269,7 @@ Using Implicit Rules
 * Chained Rules::               How to use a chain of implicit rules.
 * Pattern Rules::               How to define new implicit rules.
 * Last Resort::                 How to defining commands for rules 
-                                  which can't find any.
+                                  which cannot find any.
 * Suffix Rules::                The old-fashioned style of implicit rule.
 * Search Algorithm::            The precise algorithm for applying 
                                   implicit rules.
@@ -771,7 +771,7 @@ about each target in one place.
 @node Cleanup,  , Combine By Dependency, Introduction
 @section Rules for Cleaning the Directory
 
-Compiling a program isn't the only thing you might want to write rules
+Compiling a program is not the only thing you might want to write rules
 for.  Makefiles commonly tell how to do a few other things besides
 compiling a program: for example, how to delete all the object files
 and executables so that the directory is ``clean''.  
@@ -804,11 +804,11 @@ called @file{clean} and empowers @code{rm} to continue in spite of errors.
 
 @noindent
 A rule such as this should not be placed at the beginning of the
-makefile, because we don't want it to run by default!  Thus, in the
+makefile, because we do not want it to run by default!  Thus, in the
 example makefile, we want the rule for @code{edit}, which recompiles
 the editor, to remain the default goal.
 
-Since @code{clean} is not a dependency of @code{edit}, this rule won't
+Since @code{clean} is not a dependency of @code{edit}, this rule will not
 run at all if we give the command @samp{make} with no arguments.  In
 order to make the rule run, we have to type @samp{make clean}.
 
@@ -973,7 +973,7 @@ from one of these makefiles and it is not an error if the files listed
 in @code{MAKEFILES} are not found.@refill
 
 The main use of @code{MAKEFILES} is in communication between recursive
-invocations of @code{make} (@pxref{Recursion, ,Recursive Use of @code{make}}).  It usually isn't
+invocations of @code{make} (@pxref{Recursion, ,Recursive Use of @code{make}}).  It usually is not
 desirable to set the environment variable before a top-level invocation
 of @code{make}, because it is usually better not to mess with a makefile
 from outside.  However, if you are running @code{make} without a specific
@@ -1120,7 +1120,7 @@ the makefile.  @xref{Goals, ,Arguments to Specify the Goals}.
 * Rule Syntax::                 General syntax explained.
 * Wildcards::                   Using wildcard characters such as `*'.
 * Directory Search::            Searching other directories for source files.
-* Phony Targets::               Using a target that isn't a real file's name.
+* Phony Targets::               Using a target that is not a real file's name.
 * Force Targets::               You can use a target without commands
                                   or dependencies to mark other 
                                   targets as phony.
@@ -1531,7 +1531,7 @@ foo.o : foo.c
 compilation by implicit rule; we use it here for consistency so it will
 affect all C compilations uniformly; @pxref{Implicit Variables, ,Variables Used by Implicit Rules}.)
 
-Often the dependencies include header files as well, which you don't want
+Often the dependencies include header files as well, which you do not want
 to mention in the commands.  The function @code{firstword} can be used to
 extract just the first dependency from the entire list, as shown here
 (@pxref{Filename Functions, ,Functions for File Names}):
@@ -1648,7 +1648,7 @@ clean:
 @end example
 
 A phony target should not be a dependency of a real target file; strange
-things can result from that.  As long as you don't do that, the phony
+things can result from that.  As long as you do not do that, the phony
 target commands will be executed only when the phony target is a specified
 goal (@pxref{Goals, ,Arguments to Specify the Goals}).
 
@@ -1877,7 +1877,7 @@ do it with a @dfn{static pattern rule}.  @xref{Static Pattern, ,Static Pattern R
 @dfn{Static pattern rules} are rules which specify multiple targets and
 construct the dependency names for each target based on the target name.
 They are more general than ordinary rules with multiple targets because the
-targets don't have to have identical dependencies.  Their dependencies must
+targets do not have to have identical dependencies.  Their dependencies must
 be @emph{analogous}, but not necessarily @emph{identical}.
 
 @menu
@@ -1912,13 +1912,13 @@ Each pattern normally contains the character @samp{%} just once.  When the
 the target name; this part is called the @dfn{stem}.  The rest of the
 pattern must match exactly.  For example, the target @file{foo.o} matches
 the pattern @samp{%.o}, with @samp{foo} as the stem.  The targets
-@file{foo.c} and @file{foo.out} don't match that pattern.@refill
+@file{foo.c} and @file{foo.out} do not match that pattern.@refill
 
 The dependency names for each target are made by substituting the stem
 for the @samp{%} in each dependency pattern.  For example, if one
 dependency pattern is @file{%.c}, then substitution of the stem
 @samp{foo} gives the dependency name @file{foo.c}.  It is legitimate
-to write a dependency pattern that doesn't contain @samp{%}; then this
+to write a dependency pattern that does notcontain @samp{%}; then this
 dependency is the same for all targets.
 
 @samp{%} characters in pattern rules can be quoted with preceding
@@ -1930,7 +1930,7 @@ Backslashes that are not in danger of quoting @samp{%} characters go
 unmolested.  For example, the pattern @file{the\%weird\\%pattern\\} has
 @samp{the%weird\} preceding the operative @samp{%} character, and
 @samp{pattern\\} following it.  The final two backslashes are left alone
-because they can't affect any @samp{%} character.@refill
+because they cannot affect any @samp{%} character.@refill
 
 Here is an example, which compiles each of @file{foo.o} and @file{bar.o}
 from the corresponding @file{.c} file:
@@ -2515,7 +2515,7 @@ many more jobs running in parallel than you asked for.  If you give
 possible in parallel, this is passed down, since multiple infinities are
 no more than one.@refill
 
-If you don't want to pass the other flags down, you must change the
+If you do not want to pass the other flags down, you must change the
 value of @code{MAKEFLAGS}, like this:
 
 @example
@@ -2796,7 +2796,7 @@ include_dirs = -Ifoo -Ibar
 @noindent
 will do what was intended: when @samp{CFLAGS} is expanded in a command,
 it will expand to @samp{-Ifoo -Ibar -O}.  A major disadvantage is that you
-can't append something on the end of a variable, as in
+cannot append something on the end of a variable, as in
 
 @example
 CFLAGS = $(CFLAGS) -O
@@ -3554,7 +3554,7 @@ all the references; in other words, write @w{@samp{$(subst a,b,$(x))}}, not
 @w{@samp{$(subst a,b,$@{x@})}}.  This is both because it is clearer, and
 because only one type of delimiters is matched to find the end of the
 reference.  Thus in @w{@samp{$(subst a,b,$@{subst c,d,$@{x@}@})}}
-doesn't work because the second @code{subst} function invocation ends at
+does notwork because the second @code{subst} function invocation ends at
 the first @samp{@}}, not the second.
 
 The text written for each argument is processed by substitution of
@@ -3617,7 +3617,7 @@ substituted into it.  Backslashes that are not in danger of quoting
 @samp{%} characters go unmolested.  For example, the pattern
 @file{the\%weird\\%pattern\\} has @samp{the%weird\} preceding the
 operative @samp{%} character, and @samp{pattern\\} following it.  The
-final two backslashes are left alone because they can't affect any
+final two backslashes are left alone because they cannot affect any
 @samp{%} character.@refill
 
 
@@ -4070,7 +4070,7 @@ suppose you have a makefile @file{foo} that includes another makefile
 @file{bar}.  You want a variable @code{bletch} to be defined in @file{bar}
 if you run the command @samp{make -f bar}, even if the environment contains
 a definition of @code{bletch}.  However, if @file{foo} defined
-@code{bletch} before including @file{bar}, you don't want to override that
+@code{bletch} before including @file{bar}, you do not want to override that
 definition.  This could be done by using an @code{override} directive in
 @file{foo}, giving that definition precedence over the later definition in
 @file{bar}; unfortunately, the @code{override} directive would also
@@ -4222,10 +4222,10 @@ all: size nm ld ar as
 If you are working on the program @code{size}, you might want to say
 @samp{make size} so that only the files of that program are recompiled.
 
-Another use of specifying a goal is to make files that aren't normally
+Another use of specifying a goal is to make files that are notnormally
 made.  For example, there may be a file of debugging output, or a version
 of the program that is compiled specially for testing, which has a rule
-in the makefile but isn't a dependency of the default goal.
+in the makefile but is not a dependency of the default goal.
 
 Another use of specifying a goal is to run the commands associated with a
 phony target (@pxref{Phony Targets}) or empty target (@pxref{Empty Targets, ,Empty Target Files to Record Events}).
@@ -4353,11 +4353,11 @@ information about @code{make} or about the makefiles in use.
 @section Avoiding Recompilation of Some Files
 @cindex @code{-o}
 
-Sometimes you may have changed a source file but you don't want to
+Sometimes you may have changed a source file but you do not want to
 recompile all the files that depend on it.  For example, suppose you add a
 macro or a declaration to a header file that many other files depend on.
 Being conservative, @code{make} assumes that any change in the header file
-requires recompilation of all dependent files, but you know that they don't
+requires recompilation of all dependent files, but you know that they do not
 need to be recompiled and you would rather not waste the time waiting for
 them to compile.
 
@@ -4383,7 +4383,7 @@ header files will not cause any recompilation.
 If you have already changed the header file at a time when some files do
 need recompilation, it is too late to do this.  Instead, you can use the
 @samp{-o @var{file}} flag, which marks a specified file as ``old''
-(@pxref{Options Summary, ,Summary of Options}).  This means that the file itself won't be remade,
+(@pxref{Options Summary, ,Summary of Options}).  This means that the file itself will not be remade,
 and nothing else will be remade on its account.  Follow this procedure:
 
 @enumerate
@@ -4473,7 +4473,7 @@ status.  For example, after an error in compiling one object file,
 @samp{make -k} will continue compiling other object files even though it
 already knows that linking them will be impossible.  In addition to
 continuing after failed shell commands, @samp{make -k} will continue as much
-as possible after discovering that it doesn't know how to make a target or
+as possible after discovering that it does notknow how to make a target or
 dependency file.  This will always cause an error message, but without
 @samp{-k}, it is a fatal error.  @xref{Options Summary, ,Summary of Options}.
 
@@ -4624,7 +4624,7 @@ example, one customary way to make an object file is from a C source file
 using the C compiler, @code{cc}.
 
 @dfn{Implicit rules} tell @code{make} how to use customary techniques so
-that you don't have to specify them in detail when you want to use them.
+that you do not have to specify them in detail when you want to use them.
 For example, there is an implicit rule for C compilation.  
 File names determine which implicit rules are run.
 For example, C compilation typically takes a
@@ -4659,7 +4659,7 @@ You can define your own implicit rules by writing @dfn{pattern rules}.
 * Chained Rules::               How to use a chain of implicit rules.
 * Pattern Rules::               How to define new implicit rules.
 * Last Resort::                 How to defining commands for rules 
-                                  which can't find any.
+                                  which cannot find any.
 * Suffix Rules::                The old-fashioned style of implicit rule.
 * Search Algorithm::            The precise algorithm for applying 
                                   implicit rules.
@@ -4719,7 +4719,7 @@ only as a dependency is considered a target whose rule specifies nothing,
 so implicit rule search happens for it.  @xref{Search Algorithm, ,Implicit Rule Search Algorithm}, for the
 details of how the search is done.
 
-If you don't want an implicit rule to be used for a target that has no
+If you do not want an implicit rule to be used for a target that has no
 commands, you can give that target empty commands by writing a semicolon.
 @xref{Empty Commands, ,Defining Empty Commands}.
 
@@ -4909,7 +4909,7 @@ precise command used is @samp{$(GET) $(GFLAGS)}.@refill
 For the benefit of SCCS, a file @file{@var{n}} will be copied from
 @file{@var{n}.sh} and made executable (by everyone).  This is for
 shell scripts that are checked into SCCS.  Since RCS preserves the
-execution permission of a file, you don't need to use this feature
+execution permission of a file, you do not need to use this feature
 with RCS.@refill
 
 We recommend that you avoid using of SCCS.  RCS is widely held to be
@@ -5315,7 +5315,7 @@ dependencies, and it will execute happily ever after.)@refill
 
 Suppose you are writing a pattern rule to compile a @samp{.c} file into a
 @samp{.o} file: how do you write the @samp{cc} command so that it operates
-on the right source file name?  You can't write the name in the command,
+on the right source file name?  You cannot write the name in the command,
 because the name is different each time the implicit rule is applied.
 
 What you do is use a special feature of @code{make}, the @dfn{automatic
@@ -5430,7 +5430,7 @@ Note that we use a special stylistic convention when we talk about these
 automatic variables; we write ``the value of @samp{$<}'', rather than ``the
 variable @code{<}'' as we would write for ordinary variables such as
 @code{objects} and @code{CFLAGS}.  We think this convention looks more
-natural in this special case.  Please don't assume it has a deep
+natural in this special case.  Please do not assume it has a deep
 significance; @samp{$<} refers to the variable named @code{<} just as
 @samp{$(CFLAGS)} refers to the variable named @code{CFLAGS}.@refill
 
@@ -5521,7 +5521,7 @@ executable files) and a file name with a recognized suffix indicates some
 other specific type of data (such as a C source file).
 
 Special built-in dummy pattern rules are provided solely to recognize
-certain file names so that nonterminal match-anything rules won't be
+certain file names so that nonterminal match-anything rules will not be
 considered.  These dummy rules have no dependencies and no commands, and
 they are ignored for all other purposes.  For example, the built-in
 implicit rule
@@ -5587,7 +5587,7 @@ If you give @code{.DEFAULT} with no commands or dependencies:
 the commands previously stored for @code{.DEFAULT} are cleared.
 Then @code{make} acts as if you had never defined @code{.DEFAULT} at all.
 
-If you don't want a target to get the commands from @code{.DEFAULT}, but
+If you do not want a target to get the commands from @code{.DEFAULT}, but
 you also
 do not want any commands to be run for the target, you can give it empty
 commands.  @xref{Empty Commands, ,Defining Empty Commands}.
@@ -5991,13 +5991,13 @@ We're not sure who invented it first, but it's been spread around a bit.
 Rule chaining and implicit intermediate files.
 This was implemented by Stu Feldman in his version of @code{make}
 for AT&T Eighth Edition Research Unix, and later by Andrew Hume of
-AT&T Bell Labs in his @code{mk} program.  We don't really know if
+AT&T Bell Labs in his @code{mk} program.  We do not really know if
 we got this from either of them or thought it up ourselves at the
 same time.  @xref{Chained Rules, ,Chains of Implicit Rules}.
 
 @item
 The automatic variable @code{$^} containing a list of all dependencies
-of the current target.  We didn't invent this, but we have no idea who did.
+of the current target.  We did not invent this, but we have no idea who did.
 @xref{Automatic, ,Automatic Variables}.
 
 @item
@@ -6283,7 +6283,7 @@ INSTALLDATA = /usr/local/bin/install -c -m 644
 #                       fcntl.h, getcwd, no valloc, 
 #                       and ndir.h (unless 
 #                       you use -DDIRENT).
-# -DNO_MEMORY_H         If USG or STDC_HEADERS but don't 
+# -DNO_MEMORY_H         If USG or STDC_HEADERS but do not 
 #                       include memory.h.
 # -DDIRENT              If USG and you have dirent.h 
 #                       instead of ndir.h.
