@@ -1,4 +1,5 @@
-/* Copyright (C) 1991,92,93,94,95,96,97,98,99 Free Software Foundation, Inc.
+/* Copyright (C) 1991,92,93,94,95,96,97,98,99, 2004
+   Free Software Foundation, Inc.
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Library General Public License as
@@ -191,9 +192,7 @@ static void *
 #  else
 static char *
 # endif
-my_realloc (p, n)
-     char *p;
-     unsigned int n;
+my_realloc (char *p, unsigned int n)
 {
   /* These casts are the for sake of the broken Ultrix compiler,
      which warns of illegal pointer combinations otherwise.  */
