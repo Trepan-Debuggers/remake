@@ -13,7 +13,7 @@
 #include <fibdef.h>
 #include "vmsdir.h"
 
-#if __VMS_VER < 70000000
+#ifdef HAVE_VMSDIR_H
 
 DIR *
 opendir (dspec)
