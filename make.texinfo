@@ -3,10 +3,15 @@
 @synindex vr fn
 
 @ignore
-$Header: /sources/make/make/Attic/make.texinfo,v 1.52 1988/05/30 21:39:16 mcgrath Beta $
+$Header: /sources/make/make/Attic/make.texinfo,v 1.53 1988/06/03 00:07:30 mcgrath Beta $
 
 $Log: make.texinfo,v $
-Revision 1.52  1988/05/30 21:39:16  mcgrath
+Revision 1.53  1988/06/03 00:07:30  mcgrath
+* Fixed a typo in the `Missing' section.
+* Added an example of how to replace the System V $$@ feature
+  using static pattern rules.
+
+Revision 1.52  88/05/30  21:39:16  mcgrath
 Added `foreach' and `sort' functions.
 
 Revision 1.51  88/05/26  17:55:55  mcgrath
@@ -4301,7 +4306,7 @@ Recursive variable references.  @xref{Reference}.
 The @code{make} programs in various other systems support a few features
 that are not implemented in GNU @code{make}.
 
-suffix rule @samp{.c~.o} would make files @file{@var{n}.o} file from
+@itemize @bullet
 @item
 A target of the form @samp{@var{file}((@var{entry}))} stands for a member
 of archive file @var{file}.  The member is chosen, not by name, but by
@@ -4316,6 +4321,20 @@ Suffixes (used in suffix rules) that end with the character @samp{~}
 have a special meaning; they refer to the SCCS file that corresponds
 to the file one would get without the @samp{~}.  For example, the
 suffix rule @samp{.c~.o} would make the file @file{@var{n}.o} file from
+the SCCS file @file{s.@var{n}.c}.  For complete coverage, a whole
+series of such suffix rules is required.  @xref{Suffix Rules}.@refill
+rules.  The System V @code{make} rule:
+In GNU @code{make}, this entire series of cases is handled by two
+pattern rules for extraction from SCCS, in combination with the
+$(targets): $$@.o lib.a
+
+@item
+In System V @code{make}, the string @samp{$$@@} has the strange meaning
+that, in the dependencies of a rule with multiple targets, it stands
+for the particular target that is being processed.
+
+This is not defined in GNU @code{make} because @samp{$$} should always
+stand for an ordinary @samp{$}.
 @noindent
 can be replaced with the GNU @code{make} static pattern rule:
 
