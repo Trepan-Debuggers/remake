@@ -19,7 +19,7 @@ automatically which pieces of a large program need to be recompiled,
 and issues the commands to recompile them.
 
 @c !!set edition, date, version
-This is Edition 0.33 Beta, last updated 16 July 1992,
+This is Edition 0.34 Beta, last updated 23 July 1992,
 of @cite{The GNU Make Manual}, for @code{make}, Version 3.63 Beta.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
@@ -53,7 +53,7 @@ by the Foundation.
 @titlepage
 @title GNU Make
 @subtitle A Program for Directing Recompilation
-@subtitle Edition 0.33 Beta, for @code{make} Version 3.63 Beta.
+@subtitle Edition 0.34 Beta, for @code{make} Version 3.63 Beta.
 @subtitle July 1992
 @author by Richard M. Stallman and Roland McGrath
 @page
@@ -93,8 +93,8 @@ The GNU @code{make} utility automatically determines which pieces of a
 large program need to be recompiled, and issues the commands to
 recompile them.@refill
 
-This is Edition 0.33 Beta of the @cite{GNU Make Manual},
-last updated 16 July 1992
+This is Edition 0.34 Beta of the @cite{GNU Make Manual},
+last updated 23 July 1992
 for @code{make} Version 3.63 Beta.@refill
 
 This manual describes @code{make} and contains the following chapters:@refill
@@ -359,13 +359,13 @@ specialized or technical information.  The exception is the second
 chapter, @ref{Introduction, ,An Introduction to Makefiles}, all of which
 is introductory.
 
-@c Must have commas after references so the Info readers will work.
 If you are familiar with other @code{make} programs, see
 @ref{Features}, which lists the enhancements GNU @code{make} has, and
 @ref{Missing}, which explains the few things GNU @code{make} lacks
 that others have.
 
-For a quick summary, see @ref{Options Summary}, and @ref{Special Targets}.
+For a quick summary, see @ref{Options Summary}, @ref{Quick Reference},
+and @ref{Special Targets}.
 
 @node Bugs,  , Reading, Overview
 @section Problems and Bugs
@@ -1323,11 +1323,10 @@ print: *.c
 @end example
 
 @noindent
-This rule uses @file{print} as an empty target file; see 
-@ref{Empty Targets, ,Empty Target Files to Record Events}.  
-(The automatic
-variable @samp{$?} is used to print only those files that have
-changed; see @ref{Automatic, ,Automatic Variables}.)
+This rule uses @file{print} as an empty target file; see @ref{Empty
+Targets, ,Empty Target Files to Record Events}.  (The automatic variable
+@samp{$?} is used to print only those files that have changed; see
+@ref{Automatic, ,Automatic Variables}.)@refill
 
 Wildcard expansion does not happen when you define a variable.  Thus, if
 you write this:
