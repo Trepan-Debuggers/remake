@@ -1,4 +1,4 @@
-GNU make NEWS -- history of user-visible changes.  28 February 1996
+GNU make NEWS -- history of user-visible changes.  9 May 1996
 
 Copyright (C) 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
 See the end for copying conditions.
@@ -15,6 +15,9 @@ Version 3.75
   can result from unsynchronized clocks, or archived distributions
   containing bogus timestamps; they confuse Make's dependency engine
   thoroughly.
+
+* The new directive `sinclude' is now recognized as another name for
+  `-include', for compatibility with some other Makes.
 
 Version 3.73
 
