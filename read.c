@@ -1,4 +1,4 @@
-/* Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+/* Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -350,9 +350,9 @@ read_makefile (filename, type)
 #define	word1eq(s, l) 	(!strncmp (s, p, l) \
 			 && (p[l] == '\0' || isblank (p[l])))
       if (!in_ignored_define
-	  && word1eq ("ifdef", 5) || word1eq ("ifndef", 6)
-	  || word1eq ("ifeq", 4) || word1eq ("ifneq", 5)
-	  || word1eq ("else", 4) || word1eq ("endif", 5))
+	  && (word1eq ("ifdef", 5) || word1eq ("ifndef", 6)
+	      || word1eq ("ifeq", 4) || word1eq ("ifneq", 5)
+	      || word1eq ("else", 4) || word1eq ("endif", 5)))
 	{
 	  int i = conditional_line (p, filename, lineno);
 	  if (i >= 0)
@@ -714,7 +714,7 @@ do_define (name, namelen, origin, lineno, infile, filename)
   register char *p;
 
   /* Expand the variable name.  */
-  char *var = alloca (namelen + 1);
+  char *var = (char *) alloca (namelen + 1);
   bcopy (name, var, namelen);
   var[namelen] = '\0';
   var = variable_expand (var);
