@@ -440,6 +440,11 @@ extern char *getwd ();
 
 extern const struct floc *reading_file;
 
+
+/*! Print version information.
+*/
+extern void print_version (void);
+
 extern char **environ;
 
 extern int just_print_flag, silent_flag, ignore_errors_flag, keep_going_flag;
