@@ -43,7 +43,6 @@ extern double atof ();
 #endif
 extern char *mktemp ();
 
-static void log_working_directory ();
 static void print_data_base (), print_version ();
 static void decode_switches (), decode_env_switches ();
 static void define_makeflags ();
@@ -387,7 +386,7 @@ enter_command_line_file (name)
 	/* Skip following slashes: ".//foo" is "foo", not "/foo".  */
 	++name;
     }
-  
+
   if (*name == '\0')
     {
       /* It was all slashes!  Move back to the dot and truncate
@@ -427,7 +426,7 @@ main (argc, argv, envp)
   default_goal_file = 0;
   reading_filename = 0;
   reading_lineno_ptr = 0;
-  
+
 #if !defined (HAVE_STRSIGNAL) && !defined (HAVE_SYS_SIGLIST)
   signame_init ();
 #endif
@@ -489,7 +488,7 @@ main (argc, argv, envp)
     argv[0] = "";
   if (argv[0][0] == '\0')
     program = "make";
-  else 
+  else
     {
       program = rindex (argv[0], '/');
 #ifdef __MSDOS__
@@ -688,10 +687,6 @@ main (argc, argv, envp)
 	starting_directory = current_directory;
     }
 
-  /* Tell the user where he is.  */
-
-  if (print_directory_flag)
-    log_working_directory (1);
 
   /* Read any stdin makefiles into temporary files.  */
 
@@ -920,7 +915,7 @@ main (argc, argv, envp)
 		d = d->next;
 	      }
 	  }
-      }	
+      }
 
       /* Set up `MAKEFLAGS' specially while remaking makefiles.  */
       define_makeflags (1, 1);
@@ -932,11 +927,11 @@ main (argc, argv, envp)
 #define BOGUS_UPDATE_STATUS 0
 	  assert (BOGUS_UPDATE_STATUS);
 	  break;
-	  
+
 	case -1:
 	  /* Did nothing.  */
 	  break;
-	  
+
 	case 2:
 	  /* Failed to update.  Figure out if we care.  */
 	  {
@@ -1010,8 +1005,7 @@ main (argc, argv, envp)
 	  if (print_data_base_flag)
 	    print_data_base ();
 
-	  if (print_directory_flag)
-	    log_working_directory (0);
+	  log_working_directory (0);
 
 	  if (makefiles != 0)
 	    {
@@ -1233,7 +1227,7 @@ handle_non_switch_argument (arg, env)
 	 goals.  */
       struct file *f = enter_command_line_file (arg);
       f->cmd_target = 1;
-	  
+
       if (goals == 0)
 	{
 	  goals = (struct dep *) xmalloc (sizeof (struct dep));
@@ -1375,13 +1369,13 @@ positive integral argument",
 		    optarg = argv[optind++];
 
 		  if (doit)
-		    *(double *) cs->value_ptr		    
+		    *(double *) cs->value_ptr
 		      = (optarg != 0 ? atof (optarg)
 			 : *(double *) cs->noarg_value);
 
 		  break;
 		}
-	    
+
 	      /* We've found the switch.  Stop looking.  */
 	      break;
 	    }
@@ -1950,8 +1944,7 @@ die (status)
       if (print_data_base_flag)
 	print_data_base ();
 
-      if (print_directory_flag)
-	log_working_directory (0);
+      log_working_directory (0);
     }
 
   exit (status);
@@ -1960,19 +1953,20 @@ die (status)
 /* Write a message indicating that we've just entered or
    left (according to ENTERING) the current directory.  */
 
-static void
+void
 log_working_directory (entering)
      int entering;
 {
   static int entered = 0;
   char *message = entering ? "Entering" : "Leaving";
 
-  if (entering)
-    entered = 1;
-  else if (!entered)
-    /* Don't print the leaving message if we
-       haven't printed the entering message.  */
+  /* Print nothing without the flag.  Don't print the entering message
+     again if we already have.  Don't print the leaving message if we
+     haven't printed the entering message.  */
+  if (! print_directory_flag || entering == entered)
     return;
+
+  entered = entering;
 
   if (print_data_base_flag)
     fputs ("# ", stdout);
