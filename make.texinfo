@@ -9,7 +9,7 @@
 
 @set EDITION 0.43
 @set VERSION 3.68 Beta
-@set UPDATED 23 July 1993
+@set UPDATED 25 July 1993
 @set UPDATE-MONTH July 1993
 
 @c finalout
@@ -64,7 +64,7 @@ by the Foundation.
 @subtitle A Program for Directing Recompilation
 @subtitle Edition @value{EDITION}, for @code{make} Version @value{VERSION}.
 @subtitle @value{UPDATE-MONTH}
-@author by Richard M. Stallman and Roland McGrath
+@author Richard M. Stallman and Roland McGrath
 @page
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1988, '89, '90, '91, '92, '93 Free Software Foundation, Inc.
@@ -7865,7 +7865,8 @@ inspired whom, since GNU @code{make} had @code{patsubst} before SunOS
 @item
 The special significance of @samp{+} characters preceding command lines
 (@pxref{Instead of Execution, ,Instead of Executing the Commands}) is
-mandated by draft 11.2 of IEEE Std 1003.2 (POSIX).@refill
+mandated by
+@cite{IEEE Standard 1003.2-1992} (POSIX.2).
 
 @item
 The @samp{+=} syntax to append to the value of a variable comes from SunOS
@@ -7990,9 +7991,9 @@ Various new built-in implicit rules.
 @cindex features, missing
 
 The @code{make} programs in various other systems support a few features
-that are not implemented in GNU @code{make}.  Draft 11.2 of the POSIX.2
-standard which specifies @code{make} does not require any of these
-features.@refill
+that are not implemented in GNU @code{make}.  The POSIX.2 standard
+(@cite{IEEE Standard 1003.2-1992}) which specifies @code{make} does not
+require any of these features.@refill
 
 @itemize @bullet
 @item
