@@ -1,9 +1,14 @@
-GNU make NEWS -- history of user-visible changes.  26 January 1995
+GNU make NEWS -- history of user-visible changes.  11 December 1995
 
 Copyright (C) 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
 See the end for copying conditions.
 
 Please send GNU make bug reports to bug-gnu-utils@prep.ai.mit.edu.
+
+Version 3.75
+
+* The directory messages printed by `-w' and implicitly in sub-makes,
+  are now omitted if Make runs no commands and has no other messages to print.
 
 Version 3.73
 
@@ -222,7 +227,7 @@ Version 3.63
   include, like this:
 	include file1 file2
   You can also use shell file name patterns in an `include' directive:
-	include *.mk 
+	include *.mk
 
 * The default directories to search for included makefiles, and for
   libraries specified with `-lNAME', are now set by configuration.
