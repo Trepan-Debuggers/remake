@@ -698,6 +698,12 @@ do_define (name, namelen, origin, lineno, infile, filename)
   register unsigned int idx = 0;
   register char *p;
 
+  /* Expand the variable name.  */
+  char *var = alloca (namelen + 1);
+  bcopy (name, var, namelen);
+  var[namelen] = '\0';
+  var = variable_expand (var);
+
   initbuffer (&lb);
   while (!feof (infile))
     {
@@ -718,7 +724,7 @@ do_define (name, namelen, origin, lineno, infile, filename)
 	    definition[0] = '\0';
 	  else
 	    definition[idx - 1] = '\0';
-	  (void) define_variable (name, namelen, definition, origin, 1);
+	  (void) define_variable (var, strlen (var), definition, origin, 1);
 	  free (definition);
 	  freebuffer (&lb);
 	  return lineno;
