@@ -1170,21 +1170,12 @@ f_mtime (file, search)
 	FILE_TIMESTAMP adjusted_mtime = mtime;
 
 #if defined(WINDOWS32) || defined(__MSDOS__)
-	FILE_TIMESTAMP adjustment;
-#ifdef WINDOWS32
-	/* FAT filesystems round time to the nearest even second!
-	   Allow for any file (NTFS or FAT) to perhaps suffer from this
-	   brain damage.  */
-	adjustment = (((FILE_TIMESTAMP_S (adjusted_mtime) & 1) == 0
-		       && FILE_TIMESTAMP_NS (adjusted_mtime) == 0)
-		      ? (FILE_TIMESTAMP) 1 << FILE_TIMESTAMP_LO_BITS
-		      : 0);
-#else
-	/* On DJGPP under Windows 98 and Windows NT, FAT filesystems can
-	   set file times up to 3 seconds into the future!  The bug doesn't
-	   occur in plain DOS or in Windows 95, but we play it safe.  */
-	adjustment = (FILE_TIMESTAMP) 3 << FILE_TIMESTAMP_LO_BITS;
-#endif
+	/* Experimentation has shown that FAT filesystems can set file times
+	   up to 3 seconds into the future!  Play it safe.  */
+
+#define FAT_ADJ_OFFSET  (FILE_TIMESTAMP) 3
+
+	FILE_TIMESTAMP adjustment = FAT_ADJ_OFFSET << FILE_TIMESTAMP_LO_BITS;
 	if (ORDINARY_MTIME_MIN + adjustment <= adjusted_mtime)
 	  adjusted_mtime -= adjustment;
 #endif
