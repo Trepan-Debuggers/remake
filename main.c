@@ -903,14 +903,14 @@ main (argc, argv, envp)
 	      register unsigned int i, j = 0;
 	      for (i = 1; i < argc; ++i)
 		if (!strcmp (argv[i], "-f"))
-		    {
-		      char *p = &argv[i][2];
-		      if (*p == '\0')
-			argv[++i] = makefiles->list[j];
-		      else
-			argv[i] = concat ("-f", makefiles->list[j], "");
-		      ++j;
-		    }
+		  {
+		    char *p = &argv[i][2];
+		    if (*p == '\0')
+		      argv[++i] = makefiles->list[j];
+		    else
+		      argv[i] = concat ("-f", makefiles->list[j], "");
+		    ++j;
+		  }
 	    }
 	  if (directories != 0 && directories->idx > 0)
 	    {
@@ -992,8 +992,7 @@ main (argc, argv, envp)
 	    abort ();
 	  }
       }
-
-    if (goals == 0)
+    else
       {
 	if (read_makefiles == 0)
 	  fatal ("No targets specified and no makefile found");
@@ -1430,7 +1429,7 @@ define_makeflags (all, makefile)
 	      else if (cs->noarg_value != 0
 		       && (*(unsigned int *) cs->value_ptr ==
 			   *(unsigned int *) cs->noarg_value))
-		ADD_FLAG (0, 0);
+		ADD_FLAG ("", 0); /* Optional value omitted; see below.  */
 	      else if (cs->c == 'j')
 		/* Special case for `-j'.  */
 		ADD_FLAG ("1", 1);
@@ -1453,7 +1452,7 @@ define_makeflags (all, makefile)
 	      else if (cs->noarg_value != 0
 		       && (*(double *) cs->value_ptr
 			   == *(double *) cs->noarg_value))
-		ADD_FLAG (0, 0);
+		ADD_FLAG ("", 0); /* Optional value omitted; see below.  */
 	      else
 		{
 		  char *buf = (char *) alloca (100);
@@ -1494,10 +1493,17 @@ define_makeflags (all, makefile)
 	  *p++ = flags->c;
 	  if (flags->arg != 0)
 	    {
-	      /* Add its argument too.  */
-	      *p++ = ' ';
-	      bcopy (flags->arg, p, flags->arglen);
-	      p += flags->arglen;
+	      /* A flag that takes an optional argument which in this case
+		 is omitted is specified by ARG being "" and ARGLEN being 0.
+		 We must distinguish because a following flag appended without
+		 an intervening " -" is considered the arg for the first.  */
+	      if (flags->arglen > 0)
+		{
+		  /* Add its argument too.  */
+		  *p++ = ' ';
+		  bcopy (flags->arg, p, flags->arglen);
+		  p += flags->arglen;
+		}
 	      /* Write a following space and dash, for the next flag.  */
 	      *p++ = ' ';
 	      *p++ = '-';
