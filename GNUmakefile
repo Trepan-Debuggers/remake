@@ -155,7 +155,7 @@ globfiles = $(addprefix glob/,COPYING.LIB configure.in configure Makefile.in \
 			configure.bat glob.c fnmatch.c glob.h fnmatch.h)
 $(globfiles): stamp-glob ;
 stamp-glob: /home/gd/gnu/libc/posix/glob.tar
-	-rm -rf glob
+	-rm -f $(globfiles)
 	tar xvf $< glob
 	cvs commit -m'Updated from libc' glob
 	touch $@
