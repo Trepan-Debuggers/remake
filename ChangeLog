@@ -1,3 +1,18 @@
+Sat Nov 25 20:35:18 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* main.c (log_working_directory): Made global.
+	Print entering msg only once.
+	* make.h (log_working_directory): Declare it.
+	* misc.c (message): Take new arg PREFIX.  Print "make: " only if
+	nonzero.  Call log_working_directory.
+	* remake.c: Pass new arg in `message' calls.
+
+Tue Nov 21 19:01:12 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* job.c (start_job_command): Use `message' to print the command,
+	and call it with null if the command is silent.
+	* remake.c (touch_file): Use message instead of printf.
+
 Tue Oct 10 14:59:30 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
 	* main.c (enter_command_line_file): Barf if NAME is "".
@@ -66,7 +81,7 @@ Thu Apr 27 12:39:35 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 Wed Apr 26 17:15:57 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
 	* file.c (remove_intermediates): Fix inverted test to bail under
- 	-n for signal case.  Bail under -q or -t.  
+ 	-n for signal case.  Bail under -q or -t.
 	Skip files with update_status==-1.
 
 	* job.c (job_next_command): Skip empty lines.
@@ -1952,7 +1967,7 @@ Mon Jan 18 14:53:54 1993  Roland McGrath  (roland@churchy.gnu.ai.mit.edu)
 	* Version 3.62.30.
 
 	* job.c (start_waiting_jobs): Return when job_slots_used is equal to
-	job_slots. 
+	job_slots.
 
 	* configure.in: Add AC_CONST for the sake of getopt.
 
@@ -2251,7 +2266,7 @@ Mon Nov  9 17:50:16 1992  Roland McGrath  (roland@churchy.gnu.ai.mit.edu)
 	(notice_finished_file): Don't increment files_remade here; this
 	function gets called in many situations where no remaking was in
 	fact done.
-	* job.c (reap_children): Do it here instead, when we know that 
+	* job.c (reap_children): Do it here instead, when we know that
 	actual commands have been run for the file.
 	* make.h (files_remade): Declare it.
 
@@ -2949,7 +2964,7 @@ Sat May  9 00:21:05 1992  Roland McGrath  (roland@geech.gnu.ai.mit.edu)
 
 Fri May  8 21:55:35 1992  Roland McGrath  (roland@geech.gnu.ai.mit.edu)
 
-	* main.c (struct command_switch): Added elts `long_name', 
+	* main.c (struct command_switch): Added elts `long_name',
 	`description', and `argdesc'.
 	(switches): Added initializers for new members.
 	(decode_switches): Rewritten to use getopt_long.
@@ -2967,7 +2982,7 @@ Fri May  8 21:55:35 1992  Roland McGrath  (roland@geech.gnu.ai.mit.edu)
 	on the child being reaped, instead set its command_state to
 	cs_finished.
 	(reap_children, child_handler, new_job): I added several
-	debugging printf's while fixing this.  I left them in if (debug_flag) 
+	debugging printf's while fixing this.  I left them in if (debug_flag)
 	because they may be useful for debugging this stuff again.
 
 Wed May  6 22:02:37 1992  Roland McGrath  (roland@albert.gnu.ai.mit.edu)
