@@ -31,7 +31,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 static char default_suffixes[]
   = ".out .a .ln .o .c .cc .C .p .f .F .r .y .l .s .S \
 .mod .sym .def .h .info .dvi .tex .texinfo .texi .txinfo \
-.cweb .web .sh .elc .el";
+.w .web .sh .elc .el";
 
 static struct pspec default_pattern_rules[] =
   {
@@ -171,13 +171,13 @@ static char *default_suffix_rules[] =
     ".txinfo.dvi",
     "$(TEXI2DVI) $<",
 
-    ".cweb.c",
+    ".w.c",
     "$(CTANGLE) $<",
 
     ".web.p",
     "$(TANGLE) $<",
 
-    ".cweb.tex",
+    ".w.tex",
     "$(CWEAVE) $<",
 
     ".web.tex",
