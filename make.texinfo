@@ -3,10 +3,13 @@
 @synindex vr fn
 
 @ignore
-$Header: /sources/make/make/Attic/make.texinfo,v 1.51 1988/05/26 17:55:55 mcgrath Exp $
+$Header: /sources/make/make/Attic/make.texinfo,v 1.52 1988/05/30 21:39:16 mcgrath Beta $
 
 $Log: make.texinfo,v $
-Revision 1.51  1988/05/26 17:55:55  mcgrath
+Revision 1.52  1988/05/30 21:39:16  mcgrath
+Added `foreach' and `sort' functions.
+
+Revision 1.51  88/05/26  17:55:55  mcgrath
 * Removed built-in .? -> .s suffix rules.
 * Misc cleanup, etc.
 
@@ -2491,6 +2494,7 @@ compute the files to operate on or the commands to use.
 @menu
 * Syntax: Function Syntax.  Syntax of function calls in general.
 * Text Functions::          Text manipulation functions.
+* Foreach Function::        The @code{foreach} function.
 * Filename Functions::      Functions for manipulating file names.
 @end menu
 
@@ -2515,7 +2519,7 @@ Here @var{function} is a function name; one of a short list of names that
 are part of @code{make}.  There is no provision for defining new functions.
 
 The @var{arguments} are the arguments of the function.  They are separated
-from the function name by one or more spaces and/or tabs, and if there are
+from the function name by one or more spaces and/or tabs, and if there is
 more than one argument they are separated by commas.  Such whitespace and
 commas are not part of any argument's value.  Parentheses or braces,
 whichever you use to surround the function call, can appear in an argument
@@ -2547,12 +2551,10 @@ bar:= $(subst $(space),$(comma),$(foo))
 Here the @code{subst} function replaces each space with a comma, through
 the value of @code{foo}, and substitutes the result.
 
-@node Text Functions, Filename Functions, Function Syntax, Functions
+@node Text Functions, Foreach Function, Function Syntax, Functions
 @section Functions for String Substitution and Analysis
 
 Here are some functions that operate on substrings of a string:
-@code{subst}, @code{patsubst}, @code{strip}, @code{findstring},
-@code{filter} and @code{filter-out}.
 
 @table @code
 @item $(subst @var{from},@var{to},@var{text})
@@ -2617,9 +2619,14 @@ in the command to the compiler.@refill
 Removes all whitespace-separated words in @var{text} that @emph{do}
 match @var{pattern}, returning only matching words.  This is the exact
 opposite of the @code{filter} function.@refill
+
+@item $(sort @var{list})
+@findex sort
+Sorts the words of @var{list} in lexical order, removing duplicate
+words.  The output is a list of words separated by single spaces.
 @end table
 
-Here is a realistic example of use of @code{subst}.  Suppose that a
+Here is a realistic example of the use of @code{subst}.  Suppose that a
 makefile uses the @code{VPATH} variable to specify a list of directories
 that @code{make} should search for dependency files.  This example shows
 how to tell the C compiler to search for header files in the same list of
@@ -2666,7 +2673,42 @@ might fail to have the desired results.  Replacing
 @samp{"$(needs_made)"} with @samp{"$(strip $(needs_made))"} in the
 @code{ifneq} directive would make it more reliable.@refill
 
-@node Filename Functions,, Text Functions, Functions
+@node Foreach Function, Filename Functions, Text Functions, Functions
+@section The @code{foreach} Function
+
+The @code{foreach} function is very different from other functions.
+It performs a specialized operation of a different nature.
+
+The syntax of the @code{foreach} function is:
+
+@example
+$(foreach @var{var},@var{list},@var{text})
+@end example
+
+@noindent
+This function operates similarly to the @code{for} command in the shell
+@samp{sh} and the @code{foreach} command in the C-shell @samp{csh}.
+The first two arguments, @var{var} and @var{list}, are expanded before
+anything else is done; note that the last argument, @var{text}, is
+@emph{not} expanded at the same time.  Then for each word of the expanded
+value of @var{list}, the variable named by the expanded value of @var{var}
+is set to that word, and @var{text} is expanded.  Presumably @var{text}
+contains references to that variable, so the expansions will be different
+each time.  The expansions of @var{text} for each word in the expanded
+value of @var{list} are separated by a single space in the output.  The
+control variable (the one named by the expanded value of @var{var}) is
+restored to the value it had before the @code{foreach} function was
+executed when the function is finished.  If it was not previously defined,
+the control variable is defined as a recursively expanded variable (as if
+defined with @samp{=} rather than @samp{:=}; @pxref{Flavors}).@refill
+
+To increase readability and lessen complexity, it is a good idea to put the
+@var{text} part of a @code{foreach} function invokation into a variable.
+For this to work properly, you must use a recursively expanded variable, so
+it will be expanded when the @code{foreach} function is invoked, not when
+the variable is defined.@refill
+
+@node Filename Functions,, Foreach Function, Functions
 @section Functions for File Names
 
 Several of the built-in expansion functions relate specifically to
