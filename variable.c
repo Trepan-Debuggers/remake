@@ -493,10 +493,17 @@ initialize_file_variables (struct file *file, int reading)
           current_variable_set_list = file->pat_variables;
 
           do
-            /* We found one, so insert it into the set.  */
-            do_variable_definition (&p->variable.fileinfo, p->variable.name,
-                                    p->variable.value, p->variable.origin,
-                                    p->variable.flavor, 1);
+            {
+              /* We found one, so insert it into the set.  */
+              struct variable *v = do_variable_definition (
+                &p->variable.fileinfo, p->variable.name,
+                p->variable.value, p->variable.origin,
+                p->variable.flavor, 1);
+
+              /* Also mark it as a per-target and copy export status. */
+              v->per_target = p->variable.per_target;
+              v->export = p->variable.export;
+            }
           while ((p = lookup_pattern_var (p, file->name)) != 0);
 
           current_variable_set_list = global;
