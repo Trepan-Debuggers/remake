@@ -177,7 +177,7 @@ construct_vpath_list (pattern, dirpath)
   maxelem = 2;
   p = dirpath;
   while (*p != '\0')
-    if (*p++ == ':' || isblank (*p))
+    if (*p++ == PATH_SEPARATOR_CHAR || isblank (*p))
       ++maxelem;
 
   vpath = (char **) xmalloc (maxelem * sizeof (char *));
@@ -185,7 +185,7 @@ construct_vpath_list (pattern, dirpath)
 
   /* Skip over any initial colons and blanks.  */
   p = dirpath;
-  while (*p == ':' || isblank (*p))
+  while (*p == PATH_SEPARATOR_CHAR || isblank (*p))
     ++p;
 
   elem = 0;
@@ -196,7 +196,7 @@ construct_vpath_list (pattern, dirpath)
 
       /* Find the end of this entry.  */
       v = p;
-      while (*p != '\0' && *p != ':' && !isblank (*p))
+      while (*p != '\0' && *p != PATH_SEPARATOR_CHAR && !isblank (*p))
 	++p;
 
       len = p - v;
@@ -225,7 +225,7 @@ construct_vpath_list (pattern, dirpath)
 	}
 
       /* Skip over colons and blanks between entries.  */
-      while (*p == ':' || isblank (*p))
+      while (*p == PATH_SEPARATOR_CHAR || isblank (*p))
 	++p;
     }
 
@@ -461,7 +461,7 @@ print_vpath_data_base ()
 
       for (i = 0; v->searchpath[i] != 0; ++i)
 	printf ("%s%c", v->searchpath[i],
-		v->searchpath[i + 1] == 0 ? '\n' : ':');
+		v->searchpath[i + 1] == 0 ? '\n' : PATH_SEPARATOR_CHAR);
     }
 
   if (vpaths == 0)
@@ -479,6 +479,7 @@ print_vpath_data_base ()
       fputs ("\n# General (`VPATH' variable) search path:\n# ", stdout);
 
       for (i = 0; path[i] != 0; ++i)
-	printf ("%s%c", path[i], path[i + 1] == 0 ? '\n' : ':');
+	printf ("%s%c", path[i],
+		path[i + 1] == 0 ? '\n' : PATH_SEPARATOR_CHAR);
     }
 }
