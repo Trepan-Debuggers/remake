@@ -739,16 +739,14 @@ define_automatic_variables (void)
 
 #endif
 
-  /* This won't override any definition, but it
-     will provide one if there isn't one there.  */
+  /* This won't override any definition, but it will provide one if there
+     isn't one there.  */
   v = define_variable ("SHELL", 5, default_shell, o_default, 0);
-  v->export = v_export;		/* Always export SHELL.  */
 
-  /* On MSDOS we do use SHELL from environment, since
-     it isn't a standard environment variable on MSDOS,
-     so whoever sets it, does that on purpose.
-     On OS/2 we do not use SHELL from environment but
-     we have already handled that problem above. */
+  /* On MSDOS we do use SHELL from environment, since it isn't a standard
+     environment variable on MSDOS, so whoever sets it, does that on purpose.
+     On OS/2 we do not use SHELL from environment but we have already handled
+     that problem above. */
 #if !defined(__MSDOS__) && !defined(__EMX__)
   /* Don't let SHELL come from the environment.  */
   if (*v->value == '\0' || v->origin == o_env || v->origin == o_env_override)
@@ -809,6 +807,11 @@ target_environment (struct file *file)
   struct variable makelevel_key;
   char **result_0;
   char **result;
+  struct variable ev;
+
+  /* Set up a fake variable struct for the original SHELL value.  */
+  ev.name = "SHELL";
+  ev.value = env_shell;
 
   if (file == 0)
     set_list = current_variable_set_list;
@@ -865,7 +868,12 @@ target_environment (struct file *file)
 		break;
 
 	      case v_noexport:
-		continue;
+                if (!streq (v->name, "SHELL"))
+                  continue;
+                /* If this is the SHELL variable and it's not exported, then
+                   add the value from our original environment.  */
+                v = &ev;
+                break;
 
 	      case v_ifset:
 		if (v->origin == o_default)

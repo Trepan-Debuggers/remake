@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.20 2004/10/21 17:42:25 bosk Exp $
+@set RCSID $Id: make.texi,v 1.21 2004/11/28 23:11:23 psmith Exp $
 @set EDITION 0.61
 @set VERSION 3.80
 @set UPDATED 23 Feb 2003
@@ -3732,9 +3732,15 @@ line, and if its name consists only of letters, numbers, and underscores.
 Some shells cannot cope with environment variable names consisting of
 characters other than letters, numbers, and underscores.
 
-The special variables @code{SHELL} and @code{MAKEFLAGS} are always
-exported (unless you unexport them).
-@code{MAKEFILES} is exported if you set it to anything.
+@cindex SHELL, exported value
+The value of the @code{make} variable @code{SHELL} is not exported.
+Instead, the value of the @code{SHELL} variable from the invoking
+environment is passed to the sub-@code{make}.  You can force
+@code{make} to export its value for @code{SHELL} by using the
+@code{export} directive, described below.
+
+The special variable @code{MAKEFLAGS} is always exported (unless you
+unexport it).  @code{MAKEFILES} is exported if you set it to anything.
 
 @code{make} automatically passes down variable values that were defined
 on the command line, by putting them in the @code{MAKEFLAGS} variable.
@@ -5137,28 +5143,28 @@ endef
 @cindex variables, environment
 @cindex environment
 Variables in @code{make} can come from the environment in which
-@code{make} is run.  Every environment variable that @code{make} sees when
-it starts up is transformed into a @code{make} variable with the same name
-and value.  But an explicit assignment in the makefile, or with a command
-argument, overrides the environment.  (If the @samp{-e} flag is specified,
-then values from the environment override assignments in the makefile.
-@xref{Options Summary, ,Summary of Options}.
-But this is not recommended practice.)
+@code{make} is run.  Every environment variable that @code{make} sees
+when it starts up is transformed into a @code{make} variable with the
+same name and value.  However, an explicit assignment in the makefile,
+or with a command argument, overrides the environment.  (If the
+@samp{-e} flag is specified, then values from the environment override
+assignments in the makefile.  @xref{Options Summary, ,Summary of
+Options}.  But this is not recommended practice.)
 
 Thus, by setting the variable @code{CFLAGS} in your environment, you can
 cause all C compilations in most makefiles to use the compiler switches you
 prefer.  This is safe for variables with standard or conventional meanings
-because you know that no makefile will use them for other things.  (But
+because you know that no makefile will use them for other things.  (Note
 this is not totally reliable; some makefiles set @code{CFLAGS} explicitly
 and therefore are not affected by the value in the environment.)
 
-When @code{make} is invoked recursively, variables defined in the
-outer invocation can be passed to inner invocations through the
-environment (@pxref{Recursion, ,Recursive Use of @code{make}}).  By
-default, only variables that came from the environment or the command
-line are passed to recursive invocations.  You can use the
-@code{export} directive to pass other variables.
-@xref{Variables/Recursion, , Communicating Variables to a
+When @code{make} runs a command script, variables defined in the
+makefile are placed into the environment of that command.  This allows
+you to pass values to sub-@code{make} invocations. (@pxref{Recursion,
+,Recursive Use of @code{make}}).  By default, only variables that came
+from the environment or the command line are passed to recursive
+invocations.  You can use the @code{export} directive to pass other
+variables.  @xref{Variables/Recursion, , Communicating Variables to a
 Sub-@code{make}}, for full details.
 
 Other use of variables from the environment is not recommended.  It is not
@@ -5167,6 +5173,7 @@ set up outside their control, since this would cause different users to get
 different results from the same makefile.  This is against the whole
 purpose of most makefiles.
 
+@cindex SHELL, import from environment
 Such problems would be especially likely with the variable @code{SHELL},
 which is normally present in the environment to specify the user's choice
 of interactive shell.  It would be very undesirable for this choice to
@@ -5174,6 +5181,15 @@ affect @code{make}.  So @code{make} ignores the environment value of
 @code{SHELL} (except on MS-DOS and MS-Windows, where @code{SHELL} is
 usually not set.  @xref{Execution, ,Special handling of SHELL on
 MS-DOS}.)@refill
+
+@cindex SHELL, export to environment
+The @code{SHELL} variable is special in another way: just as the value
+of the @code{make} variable @code{SHELL} is not taken from the
+environment, so also it is not placed into the environment of commands
+that @code{make} invokes.  Instead, the value of @code{SHELL} from the
+invoking environment is provided to the command.  You can use
+@code{export SHELL} to force the value of the @code{make} variable
+@code{SHELL} to be placed in the environment of commands.
 
 @node Target-specific, Pattern-specific, Environment, Using Variables
 @section Target-specific Variable Values
@@ -9865,7 +9881,9 @@ Directory search path for files not found in the current directory.@*
 
 The name of the system default command interpreter, usually @file{/bin/sh}.
 You can set @code{SHELL} in the makefile to change the shell used to run
-commands.  @xref{Execution, ,Command Execution}.
+commands.  @xref{Execution, ,Command Execution}.  The @code{SHELL}
+variable is handled specially when importing from and exporting to the
+environment.  @xref{Environment, ,Using Variable from the Environment}.
 
 @item MAKESHELL
 

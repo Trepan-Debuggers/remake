@@ -1,3 +1,8 @@
+2004-11-28  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/variables/SHELL: New file: test proper handling of SHELL
+	according to POSIX rules.  Fixes bug #1276.
+
 2004-10-21  Boris Kolpackov  <boris@kolpackov.net>
 
 	* scripts/functions/word: Test $(firstword ) and $(lastword ).

@@ -496,6 +496,8 @@ extern int print_version_flag, print_directory_flag;
 extern int warn_undefined_variables_flag, posix_pedantic, not_parallel;
 extern int clock_skew_detected, rebuilding_makefiles;
 
+extern const char *env_shell;
+
 /* can we run commands via 'sh -c xxx' or must we use batch files? */
 extern int batch_mode_shell;
 
