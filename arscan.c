@@ -352,7 +352,6 @@ ar_member_touch (arname, memname)
   register int fd;
   struct ar_hdr ar_hdr;
   register int i;
-  extern int errno;
   struct stat statbuf;
 
   if (pos < 0)
