@@ -2633,7 +2633,7 @@ foo.c : foo.y
 @end example
 
 @noindent
-@samp{foo.y} will substituted for the variable @samp{$^} when it occurs in
+@samp{foo.y} will be substituted for the variable @samp{$^} when it occurs in
 @code{run-yacc}'s value, and @samp{foo.c} for @samp{$@@}.@refill
 
 This is a realistic example, but this particular one is not needed in
