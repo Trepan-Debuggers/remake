@@ -8,7 +8,7 @@ make.dvi make.ps make.pdf
 makedb*.html
 makedb.aux makedb.cp makedb.cps makedb.fn makedb.fns makedb.ky
 makedb.pg makedb.toc makedb.tp makedb.vr makedb.log
-makedb.dvi makedb.ps makedb.pdf
+makedb.dvi makedb.ps makedb.pdf makedb.kys makedb.tmp
 makedb.info*
 stamp-vti
 version-makedb.texi
