@@ -497,7 +497,11 @@ main (argc, argv, envp)
       register char *ep = envp[i];
       while (*ep != '=')
 	++ep;
-      define_variable (envp[i], ep - envp[i], ep + 1, o_env, 1)
+      /* The result of pointer arithmetic is cast to unsigned int for
+	 machines where ptrdiff_t is a different size that doesn't widen
+	 the same.  */
+      define_variable (envp[i], (unsigned int) (ep - envp[i]),
+		       ep + 1, o_env, 1)
 	/* Force exportation of every variable culled from the environment.
 	   We used to rely on target_environment's v_default code to do this.
 	   But that does not work for the case where an environment variable
