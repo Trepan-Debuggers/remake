@@ -9,7 +9,7 @@
 
 @set EDITION 0.45
 @set VERSION 3.71 Beta
-@set UPDATED 19 January 1994
+@set UPDATED 25 January 1994
 @set UPDATE-MONTH January 1994
 
 @c finalout
@@ -7114,23 +7114,24 @@ lib: foo.o bar.o lose.o win.o
 @end example
 
 Of the variables listed above, four have values that are single file
-names, and two have values that are lists of file names.  These six
-have variants that get just the file's directory name or just the file
-name within the directory.  The variant variables' names are formed by
+names, and two have values that are lists of file names.  These six have
+variants that get just the file's directory name or just the file name
+within the directory.  The variant variables' names are formed by
 appending @samp{D} or @samp{F}, respectively.  These variants are
 semi-obsolete in GNU @code{make} since the functions @code{dir} and
-@code{notdir} can be used to get an equivalent effect (@pxref{Filename
-Functions, , Functions for File Names}).  Here is a table of the
-variants:@refill
+@code{notdir} can be used to get a similar effect (@pxref{Filename
+Functions, , Functions for File Names}).  Note, however, that the
+@samp{F} variants all omit the trailing slash which always appears in
+the output of the @code{dir} function.  Here is a table of the variants:
 
 @table @samp
 @vindex $(@@D)
 @vindex @@D @r{(automatic variable)}
 @item $(@@D)
-The directory part of the file name of the target.  If the value of
-@samp{$@@} is @file{dir/foo.o} then @samp{$(@@D)} is @file{dir/}.
-This value is @file{./} if @samp{$@@} does not contain a slash.
-@samp{$(@@D)} is equivalent to @w{@samp{$(dir $@@)}}.@refill
+The directory part of the file name of the target, with the trailing
+slash removed.  If the value of @samp{$@@} is @file{dir/foo.o} then
+@samp{$(@@D)} is @file{dir}.  This value is @file{.} if @samp{$@@} does
+not contain a slash.
 
 @vindex $(@@F)
 @vindex @@F @r{(automatic variable)}
@@ -7146,7 +7147,7 @@ value of @samp{$@@} is @file{dir/foo.o} then @samp{$(@@F)} is
 @vindex *F @r{(automatic variable)}
 @itemx $(*F)
 The directory part and the file-within-directory
-part of the stem; @file{dir/} and @file{foo} in this example.
+part of the stem; @file{dir} and @file{foo} in this example.
 
 @vindex $(%D)
 @vindex %D @r{(automatic variable)}
