@@ -29,6 +29,7 @@ defines='@DEFS@ -DLIBDIR="${libdir}" -DINCLUDEDIR="${includedir}"'
 ALLOCA='@ALLOCA@'
 LOADLIBES='@LIBS@'
 extras='@LIBOBJS@'
+REMOTE='@REMOTE@'
 
 # Common prefix for machine-independent installed files.
 prefix=/usr/local
@@ -43,7 +44,7 @@ includedir=${prefix}/include
 set -e
 
 # These are all the objects we need to link together.
-objs="%objs% ${extras} ${ALLOCA}"
+objs="%objs% remote-${REMOTE}.o ${extras} ${ALLOCA}"
 
 # Compile the source files into those objects.
 for file in `echo ${objs} | sed 's/\.o/.c/g'`; do
