@@ -1,3 +1,10 @@
+2004-01-07  Paul D. Smith  <psmith@gnu.org>
+
+	* implicit.c (pattern_search): When matching an implicit rule,
+	remember which dependencies have the ignore_mtime flag set.
+	Original fix provided in Savannah patch #2349, by Benoit
+	Poulot-Cazajous <Benoit.Poulot-Cazajous@jaluna.com>.
+
 2003-11-02  Paul D. Smith  <psmith@gnu.org>
 
 	* function.c (func_if): Strip all the trailing whitespace from the
@@ -16,6 +23,11 @@
 	* maintMakefile (po_repo): Set a new URL for PO file updates.
 	(get-config/config.guess get-config/config.sub): Get these files
 	from the Savannah config project instead of ftp.gnu.org.
+
+2003-08-22  Paul D. Smith  <psmith@gnu.org>
+
+	* misc.c (xmalloc, xrealloc): Add one to 0 sizes, to cater to
+	systems which don't yet implement the C89 standard :-/.
 
 2003-07-18  Paul D. Smith  <psmith@gnu.org>
 
