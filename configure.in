@@ -55,6 +55,5 @@ dnl Local Variables:
 dnl comment-start: " dnl "
 dnl comment-end: ""
 dnl comment-start-skip: "\\bdnl\\b\\s *"
-dnl compile-command: "make make.conf"
-dnl eval: (if (fboundp 'resolve-symlink) (resolve-symlink))
+dnl compile-command: "make configure"
 dnl End:
