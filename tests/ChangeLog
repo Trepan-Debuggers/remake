@@ -1,3 +1,7 @@
+2005-03-10  Boris Kolpackov  <boris@kolpackov.net>
+
+	* scripts/features/patternrules: Add a test for Savannah bug #12267.
+
 2005-03-09  Boris Kolpackov  <boris@kolpackov.net>
 
 	* scripts/variables/DEFAULT_TARGET: Add a test for Savannah

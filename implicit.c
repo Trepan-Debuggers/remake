@@ -798,15 +798,29 @@ pattern_search (struct file *file, int archive,
 	     of F below are null before we change them.  */
 
 	  struct file *imf = d->intermediate_file;
-	  register struct file *f = enter_file (imf->name);
+	  register struct file *f = lookup_file (imf->name);
+
+          /* We don't want to delete an intermediate file that happened
+             to be a prerequisite of some (other) target. Mark it as
+             precious.  */
+          if (f != 0)
+            f->precious = 1;
+          else
+            f = enter_file (imf->name);
+
 	  f->deps = imf->deps;
 	  f->cmds = imf->cmds;
 	  f->stem = imf->stem;
           f->also_make = imf->also_make;
           f->is_target = 1;
-	  imf = lookup_file (d->intermediate_pattern);
-	  if (imf != 0 && imf->precious)
-	    f->precious = 1;
+
+          if (!f->precious)
+            {
+              imf = lookup_file (d->intermediate_pattern);
+              if (imf != 0 && imf->precious)
+                f->precious = 1;
+            }
+
 	  f->intermediate = 1;
 	  f->tried_implicit = 1;
 	  for (dep = f->deps; dep != 0; dep = dep->next)
