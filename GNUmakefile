@@ -63,10 +63,15 @@ ifneq ($(wildcard $(libc_dir)/works-for-make),)
 dash_m := -M
 CPPFLAGS := -I$(libc_dir)/ansi
 LDFLAGS := -nostdlib $(libc_dir)/start.o
+ifeq ($(ARCH),hp300)
+gcc-arch = hp300bsd
+else
+gcc-arch = $(ARCH)
+endif
 LOADLIBES := $(LOADLIBES) \
 	     $(libc_dir)/mcheck-init.o \
 	     $(libc_dir)/libc.a \
-	     /usr/local/lib/gcc-gnulib \
+	     /usr/local/lib/gcc-lib/$(gcc-arch)/2.1/libgcc.a \
 	     $(libc_dir)/libc.a
 $(prog): $(libc_dir)/libc.a
 
