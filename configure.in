@@ -18,6 +18,7 @@ AC_PID_T
 AC_RETSIGTYPE
 AC_HAVE_HEADERS(limits.h sys/param.h fcntl.h)
 AC_MINUS_C_MINUS_O
+AC_CONST			dnl getopt needs this.
 
 AC_SUBST(LIBOBJS)
 
@@ -50,7 +51,7 @@ AC_XENIX_DIR
 AC_OUTPUT(Makefile build.sh glob/Makefile)
 
 dnl Local Variables:
-dnl comment-start: " dnl "
+dnl comment-start: "dnl "
 dnl comment-end: ""
 dnl comment-start-skip: "\\bdnl\\b\\s *"
 dnl compile-command: "make configure config.h.in"
