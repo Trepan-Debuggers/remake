@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.149 1994/11/04 20:23:23 roland Alpha $
+@set RCSID $Id: make.texinfo,v 2.150 1995/01/13 06:30:39 roland Alpha $
 @set EDITION 0.47
 @set VERSION 3.72 Beta
 @set UPDATED 1 November 1994
@@ -5400,12 +5400,12 @@ variable names because many strange things are valid variable names, but
 are probably not what you intended.  For example,
 
 @smallexample
-files := $(foreach Es escrito en espanol!,b c ch,$(find_files))
+files := $(foreach Esta escrito en espanol!,b c ch,$(find_files))
 @end smallexample
 
 @noindent
 might be useful if the value of @code{find_files} references the variable
-whose name is @samp{Es escrito en espanol!} (es un nombre bastante largo,
+whose name is @samp{Esta escrito en espanol!} (es un nombre bastante largo,
 no?), but it is more likely to be a mistake.
 
 @node Origin Function, Shell Function, Foreach Function, Functions
