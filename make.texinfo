@@ -8,7 +8,7 @@
 
 @set EDITION 0.38-1/2
 @set VERSION 3.63 Beta
-@set UPDATED 9 December 1992
+@set UPDATED 10 December 1992
 @set UPDATE-MONTH December 1992
 
 @c finalout
@@ -20,10 +20,18 @@
 
 @tex
 % trying for a two-level index
-\def\doindex#1{\message{FNORD!}\edef\indexname{#1}\parsearg\singleindexer}
-\def\singleindexer #1{\message{frobozzing :{#1}:}\message{}\frobozz{#1}}
-\def\frobozz[#1,#2]{\message{frobozzed :{#1}:{#2}:}\message{}\dosubind{\indexname}{#1}{#2}}
 
+\gdef\singleindexerfoo#1, #2\par{%
+% Use a box register to test if #2 is empty.
+\setbox0=\hbox{#2}%
+\ifvoid0{                       % A one-level entry.
+\doind{\indexname}{#1}}\else{   % A two-level entry.
+\dosubind{\indexname}{#1}{#2}
+}\fi}%
+\gdef\singleindexer#1{\singleindexerfoo#1, \par}%
+
+
+%\def\singleindexer #1{\doind{\indexname}{#1}}
 @end tex
 
 @ifinfo
@@ -143,7 +151,7 @@ Overview of @code{make}
 
 An Introduction to Makefiles
 
-* Rule Introduction::           This is a bogus description Bob must fix.
+* Rule Introduction::           What a rule looks like.
 * Simple Makefile::             A Simple Makefile
 * How Make Works::              How @code{make} Processes This Makefile
 * Variables Simplify::          Variables Make Makefiles Simpler
@@ -175,10 +183,10 @@ Writing Rules
                                   files are empty.
 * Special Targets::             Targets with special built-in meanings.
 * Multiple Targets::            When to make use of several targets in a rule.
+* Multiple Rules::              How to use several rules with the same target.
 * Static Pattern::              Static pattern rules apply to multiple targets
                                   and can vary the dependencies according to 
                                   the target name.
-* Multiple Rules::              How to use several rules with the same target.
 * Double-Colon::                How to use a special kind of rule to allow
                                   several independent rules for one target.
 
@@ -221,8 +229,8 @@ Recursive Use of @code{make}
 * MAKE Variable::               The special effects of using @samp{$(MAKE)}.
 * Variables/Recursion::         How to communicate variables to a sub-@code{make}.
 * Options/Recursion::           How to communicate options to a sub-@code{make}.
-* -w Option::                   How to use the @samp{-w} option to debug
-                                  makefiles with recursive @code{make} commands.
+* -w Option::                   How the @samp{-w} or @samp{--print-directory} option
+                                 helps debug use of recursive @code{make} commands.
 
 How to Use Variables
 
@@ -292,7 +300,8 @@ Defining and Redefining Pattern Rules
 
 * Pattern Intro::               An introduction to pattern rules.
 * Pattern Examples::            Examples of pattern rules.
-* Automatic::                   Automatic variables.
+* Automatic::                   How to use automatic variables in the
+                                  commands of implicit rules.
 * Pattern Match::               How patterns match.
 * Match-Anything Rules::        Precautions you should take prior to
                                   defining rules that can match any
@@ -303,6 +312,8 @@ Using @code{make} to Update Archive Files
 
 * Archive Members::             Archive members as targets.
 * Archive Update::              The implicit rule for archive member targets.
+* Archive Suffix Rules::        You can write a special kind of suffix rule
+                                  for updating archives.
 
 Implicit Rule for Archive Member Targets
 
@@ -483,8 +494,7 @@ together to produce the new executable editor.
 * Cleanup::                     Rules for Cleaning the Directory
 @end menu
 
-
-@node Rule Introduction
+@node Rule Introduction, Simple Makefile,  , Introduction
 @comment  node-name,  next,  previous,  up
 @section What a Rule Looks Like
 @cindex rule, introduction to
@@ -535,7 +545,7 @@ A makefile may contain other text besides rules, but a simple makefile
 need only contain rules.  Rules may look somewhat more complicated
 than shown in this template, but all fit the pattern more or less.
 
-@node Simple Makefile
+@node Simple Makefile, How Make Works, Rule Introduction, Introduction
 @section A Simple Makefile
 @cindex simple makefile
 @cindex makefile, simple
@@ -1305,10 +1315,10 @@ the makefile (often with a target called @samp{all}).
                                   files are empty.
 * Special Targets::             Targets with special built-in meanings.
 * Multiple Targets::            When to make use of several targets in a rule.
+* Multiple Rules::              How to use several rules with the same target.
 * Static Pattern::              Static pattern rules apply to multiple targets
                                   and can vary the dependencies according to 
                                   the target name.
-* Multiple Rules::              How to use several rules with the same target.
 * Double-Colon::                How to use a special kind of rule to allow
                                   several independent rules for one target.
 @end menu
@@ -2145,7 +2155,7 @@ both pieces to the suffix list.  In practice, suffixes normally begin with
 @samp{.}, so these special target names also begin with @samp{.}.
 @xref{Suffix Rules, ,Old-Fashioned Suffix Rules}.
 
-@node Multiple Targets, Static Pattern, Special Targets, Rules
+@node Multiple Targets, Multiple Rules, Special Targets, Rules
 @section Multiple Targets in a Rule
 @cindex multiple targets
 @cindex several targets in a rule
@@ -2210,7 +2220,7 @@ You cannot do this with multiple targets in an ordinary rule, but you can
 do it with a @dfn{static pattern rule}.
 @xref{Static Pattern, ,Static Pattern Rules}.
 
-@node Multiple Rules, Double-Colon, Static Pattern, Rules
+@node Multiple Rules, Static Pattern, Multiple Targets, Rules
 @section Multiple Rules for One Target
 @cindex multiple rules for one target
 @cindex several rules for one target
@@ -2268,7 +2278,7 @@ If none of the explicit rules for a target has commands, then @code{make}
 searches for an applicable implicit rule to find some commands
 @pxref{Implicit Rules, ,Using Implicit Rules}).
 
-@node Static Pattern, Multiple Rules, Multiple Targets, Rules
+@node Static Pattern, Double-Colon, Multiple Rules, Rules
 @section Static Pattern Rules
 @cindex static pattern rule
 @cindex rule, static pattern
@@ -2437,7 +2447,7 @@ With static pattern rules, there is no uncertainty: each rule applies
 to precisely the targets specified.
 @end itemize
 
-@node Double-Colon,  , Multiple Rules, Rules
+@node Double-Colon,  , Static Pattern, Rules
 @section Double-Colon Rules
 @cindex double-colon rules
 @cindex rule, double-colon (@code{::})
@@ -7146,7 +7156,7 @@ foolib(hack.o) : hack.o
 In fact, nearly all archive member targets are updated in just this way
 and there is an implicit rule to do it for you.
 
-@node Archive Update,  , Archive Members, Archives
+@node Archive Update, Archive Suffix Rules, Archive Members, Archives
 @section Implicit Rule for Archive Member Targets
 
 Recall that a target that looks like @file{@var{a}(@var{m})} stands for the
@@ -7199,7 +7209,7 @@ named @file{foo.o}.  In connection with such usage, the automatic variables
 * Archive Symbols::             How to update archive symbol directories.
 @end menu
 
-@node Archive Symbols, Archive Suffix Rules,  , Archive Update
+@node Archive Symbols,  ,  , Archive Update
 @subsection Updating Archive Symbol Directories
 @cindex @code{__.SYMDEF}
 @cindex updating archive symbol directories
@@ -7236,8 +7246,8 @@ files into the archive, as described in the preceding section.
 This is not necessary when using the GNU @code{ar} program, which
 updates the @file{__.SYMDEF} member automatically.
 
-@node Archive Suffix Rules, , Archive Update, Archives
-@subsection Suffix Rules for Archive Files
+@node Archive Suffix Rules,  , Archive Update, Archives
+@section Suffix Rules for Archive Files
 @cindex suffix rule, for archive
 @cindex archive, suffix rule for
 @cindex library archive, suffix rule for
