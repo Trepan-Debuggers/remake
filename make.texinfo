@@ -3,10 +3,13 @@
 @synindex vr fn
 
 @ignore
-$Header: /sources/make/make/Attic/make.texinfo,v 1.22 1988/05/20 17:00:49 mcgrath Beta $
+$Header: /sources/make/make/Attic/make.texinfo,v 1.23 1988/05/22 12:29:23 mcgrath Beta $
 
 $Log: make.texinfo,v $
-Revision 1.22  1988/05/20 17:00:49  mcgrath
+Revision 1.23  1988/05/22 12:29:23  mcgrath
+Static pattern rules section rewritten by RMS.
+
+Revision 1.22  88/05/20  17:00:49  mcgrath
 Documented extended static rules.
 
 Revision 1.17  88/05/18  16:26:55  mcgrath
@@ -184,8 +187,6 @@ be recompiled, or how.  @xref{Running}.
 
 * Implicit::	Implicit rules take over if the makefile doesn't say
 		 how a file is to be remade.
-* Static::	Extended static rules provide a compromise between explicit
-		 rules and implicit rule assumptions.
 * Archives::	How to use @code{make} to update archive files.
 * Missing::	Features of other @code{make}s not supported by GNU @code{make}.
 
@@ -604,6 +605,9 @@ or all the programs described by the makefile.  @xref{Goals}.
 * Special Targets::     Targets with special built-in meanings.
 * Empty Targets::       Real files that are empty--only the date matters.
 * Multiple Targets::    When it is useful to have several targets in a rule.
+* Static Pattern::	Static pattern rules apply to multiple targets
+			 and can vary the dependencies according to the
+			 target name.
 * Multiple Rules::      Using several rules with the same target.
 * Double-Colon::        Special kind of rule allowing
                           several independent rules for one target.
@@ -1220,7 +1224,12 @@ both pieces to the suffix list.  In practice, suffixes normally begin with
 @section Multiple Targets in a Rule
 
 A rule with multiple targets is equivalent to writing many rules, each with
-one target, and all identical aside from that.  This is useful in two cases.
+one target, and all identical aside from that.  The same commands apply to
+all the targets, but their effects may vary because you can substitute the
+actual target name into the command using @samp{$@@}.  The rule contributes
+the same dependencies to all the targets also.
+
+This is useful in two cases.
 
 @itemize @bullet
 @item
@@ -1235,8 +1244,9 @@ gives an additional dependency to each of the three object files
 mentioned.
 
 @item
-Identical commands work for all the targets.  The automatic variable
-@samp{$@@} can be used to substitute the target to be remade into the
+Similar commands work for all the targets.  The commands do not need
+to be absolutely identical, since the automatic variable @samp{$@@}
+can be used to substitute the particular target to be remade into the
 commands (@pxref{Automatic}).  For example:
 
 @example
@@ -1260,7 +1270,117 @@ types of output, one if given @samp{-big} and one if given
 @samp{-little}.@refill
 @end itemize
 
-@node Multiple Rules, Double-Colon, Multiple Targets, Rules
+@ifinfo
+Suppose you would like to vary the dependencies according to the target,
+much as the variable @samp{$@@} allows you to vary the commands.
+You cannot do this with multiple targets in an ordinary rule, but you can
+do it with a @dfn{static pattern rule}.  @xref{Static Pattern}.
+@end ifinfo
+
+@node Static Pattern, Multiple Rules, Multiple Targets, Rules
+@section Static Pattern Rules
+@cindex static pattern rules
+@cindex varying dependencies
+
+@dfn{Static pattern rules} are rules which specify multiple targets and
+construct the dependency names for each target based on the target name.
+They are more general than ordinary rules with multiple targets because the
+targets don't have to have identical dependencies.  Their dependencies must
+be @emph{analogous}, but not necessarily @emph{identical}.
+
+Here is the syntax of a static pattern rule:
+
+@example
+@var{targets}: @var{target-pattern}: @var{dep-patterns} @dots{}
+        @var{commands}
+	@dots{}
+@end example
+
+@noindent
+Here @var{targets} gives the list of targets that the rule applies to.  The
+targets can contain wildcard characters, just like the targets of ordinary
+rules (@pxref{Wildcards}).
+
+The @var{target-pattern} and @var{dep-patterns} say how to compute the
+dependencies of each target.  Each target is matched against the
+@var{target-pattern} to extract a part of the target name, called the
+@dfn{stem}.  This stem is substituted into each of the @var{dep-patterns}
+to make the dependency names (one from each @var{dep-pattern}).
+
+Each pattern normally contains the character @samp{%} just once.  When the
+@var{target-pattern} matches a target, the @samp{%} can match any part of
+the target name; this part is called the @dfn{stem}.  The rest of the
+pattern must match exactly.  For example, the target @file{foo.o} matches
+the pattern @samp{%.o}, with @samp{foo} as the stem.  The targets
+@file{foo.c} and @file{foo.out} don't match that pattern.@refill
+
+The dependency names for each target are made by substituting the stem for
+the @samp{%} in each dependency pattern.  For example, if one dependency
+pattern is @file{%.c}, then substitution of the stem @samp{foo} gives the
+dependency name @file{foo.c}.  It is fine to write a dependency pattern that
+doesn't contain @samp{%}; then this dependency is the same for all targets.
+
+Here is an example, which compiles each of @file{foo.o} and @file{bar.o}
+from the corresponding @file{.c} file:
+
+@example
+objects := foo.o bar.o
+
+$(objects): %.o: %.c
+	$(CC) -c $(CFLAGS) $< -o $@@
+@end example
+
+Each target specified must match the target pattern; a warning is issued
+for each that does not.  If you have a list of files, only some of which
+will match the pattern, you can use the @code{filter} function to remove
+nonmatching filenames (@pxref{Functions}):
+
+@example
+files := foo.elc bar.o
+
+$(filter %.o,$(files)): %.o: %.c
+        $(CC) -c $(CFLAGS) $< -o $@@
+$(filter %.elc,$(files)): %.elc: %.el
+        emacs -f batch-byte-compile $<
+@end example
+
+@subsection Static Pattern Rules versus Implicit Rules
+
+A static pattern rule has much in common with an implicit rule defined as a
+pattern rule (@pxref{Pattern Rules}).  Both have a pattern for the target
+and patterns for constructing the names of dependencies.  The difference is
+in how @code{make} decides @emph{when} the rule applies.
+
+An implicit rule @emph{can} apply to any target that matches its pattern,
+but it @emph{does} apply only when the target has no commands otherwise
+specified, and only when the dependencies can be found.  If more than one
+implicit rule appears applicable, only one applies; the choice depends on
+the order of rules.
+
+By contrast, a static pattern rule applies to the precise list of targets
+that you specify in the rule.  It cannot apply to any other target and it
+invariably does apply to each of the targets specified.  If two conflicting
+rules apply, and both have commands, that's an error.
+
+The static pattern rule can be better than an implicit rule for these
+reasons:
+
+@itemize @bullet
+@item
+You may wish to override the usual implicit rule for a few files whose
+names cannot be categorized syntactically but can be given in an
+explicit list.
+
+@item
+If you cannot be sure of the precise contents of the directories you
+are using, you may not be sure which other irrelevant files might lead
+@code{make} to use the wrong implicit rule.  The choice might depend
+on the order in which the implicit rule search is done.  With static
+pattern rules, there is no uncertainty: each rule applies to precisely
+the targets specified.
+@end itemize
+
+@node Multiple Rules, Double-Colon, Static Pattern, Rules
 @section Multiple Rules for One Target
 
 One file can be the target of several rules if at most one rule has commands.
@@ -3999,76 +4119,7 @@ The name of the first dependency that came via the implicit rule.
 For @code{.DEFAULT} commands, as for non-implicit commands, @samp{$*}
 and @samp{$<} are empty.  @samp{$@@} is @var{t}, as always.
 
-@node Static, Archives, Implicit, Top
-@chapter Extended Static Rules
-@cindex extended static rules
-@cindex static rules
-@cindex explicit rules
-
-@dfn{Static rules}, or @dfn{explicit rules} are simple rules where you give
-the dependencies and commands for the targets.  @dfn{Implicit rules}
-(@pxref{Implicit}) are rules generated by @code{make} for which you specify
-only the target (and perhaps some implicit rules in addition to the
-standard set), and the dependencies and commands are figured out for you.
-@dfn{Extended static rules} provide a compromise between these two types of
-rules.  They have the flexibility of implicit rules, but do not depend on
-the contents of any directory to determine what is made from what.
-
-Extended static rules are basically implicit rules that are applied to a
-limited set of targets, rather than just any target that has no commands of
-its own.  The syntax of this type of rule follows directly from this
-explanation:
-
-@example
-@var{targets}: @var{target-pattern}: @var{dep} @dots{}; @var{command}
-	@var{command}
-	@dots{}
-@end example
-
-The first part of this rule, ``@var{targets}:'' gives the list of targets
-that the rule applies to.  These targets are filenames, possibly containing
-wildcard characters, just like the targets of ordinary explicit rules.
-The rest of the rule resembles an implicit pattern rule.  It has a target
-pattern containing a @samp{%} character and dependency filenames, each of
-which may contain a @samp{%} which is replaced by what matched the @samp{%}
-in the target pattern.
-
-In extended static rules, each target must match the target pattern; a
-warning is issued for each that does not.  If you have a list of files,
-only some of which will match the pattern, you can use the @samp{filter}
-function to remove nonmatching filenames:
-
-@example
-files := foo.elc bar.o
-
-$(filter %.o,$(files)): %.o: %.c; cc $< -o $@@
-$(filter %.elc,$(files)): %.elc: %.el; el-compile $< -o $@@
-@end example
-
-This type of rule is better than implicit rules in some situations
-for a few reasons:
-
-@itemize @bullet
-@item
-You may wish to have a different pattern rule apply to one set of files
-than applies to all others.
-
-@item
-If you cannot be sure of the contents of the directories in which your
-targets reside (or those listed in @code{vpath} search paths or the
-@code{VPATH} variable; @pxref{Directory Search}), you may want to
-circumvent possible unintended actions by @code{make} resulting from the
-wrong implicit rule matching.
-
-@item
-You may simply be of the opinion that implicit rules are inherently not
-particularly wonderful and would rather tell @code{make} exactly what to do
-with what, but without all the trouble of ordinary explicit rules.
-(This is included because that appears to be the opinion of the person who
-originally suggested the concept of extended static rules.)
-@end itemize
-
-@node Archives, Missing, Static, Top
+@node Archives, Missing, Implicit, Top
 @chapter Using @code{make} to Update Archive Files
 @cindex archive
 
