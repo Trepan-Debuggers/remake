@@ -9,8 +9,8 @@
 
 @set EDITION 0.43
 @set VERSION 3.68 Beta
-@set UPDATED 25 June 1993
-@set UPDATE-MONTH June 1993
+@set UPDATED 9 July 1993
+@set UPDATE-MONTH July 1993
 
 @c finalout
 
@@ -8072,6 +8072,14 @@ easily rewritten to get the desired behavior in GNU @code{make}:
 @example
 .c.a: ;
 @end example
+
+@item
+Some versions of @code{make} invoke the shell with the @samp{-e} flag,
+except under @samp{-k} (@pxref{Testing, ,Testing the Compilation of a
+Program}).  The @samp{-e} flag tells the shell to exit as soon as any
+program it runs returns a nonzero status.  We feel it is cleaner to
+write each shell command line to stand on its own and not require this
+special treatment.
 @end itemize
 
 @comment The makefile standards are in a separate file that is also
