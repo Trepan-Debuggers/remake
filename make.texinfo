@@ -19,7 +19,7 @@ automatically which pieces of a large program need to be recompiled,
 and issues the commands to recompile them.
 
 @c !!set edition, date, version
-This is Edition 0.33 Beta, last updated 4 May 1992,
+This is Edition 0.33 Beta, last updated 11 May 1992,
 of @cite{The GNU Make Manual}, for @code{make}, Version 3.63 Beta.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
@@ -94,7 +94,7 @@ large program need to be recompiled, and issues the commands to
 recompile them.@refill
 
 This is Edition 0.33 Beta of the @cite{GNU Make Manual},
-last updated 4 May 1992,
+last updated 11 May 1992,
 for @code{make} Version 3.63 Beta.@refill
 
 This manual describes @code{make} and contains the following chapters:@refill
@@ -4685,6 +4685,7 @@ Here is a table of all the options @code{make} understands:
 These options are ignored for compatibility with other versions of @code{make}.
 
 @item -C @var{dir}
+@itemx --directory @var{dir}
 Change to directory @var{dir} before reading the makefiles.  If multiple
 @samp{-C} options are specified, each is interpreted relative to the
 previous one: @samp{-C / -C etc} is equivalent to @samp{-C /etc}.
@@ -4692,6 +4693,7 @@ This is typically used with recursive invocations of @code{make}
 (@pxref{Recursion, ,Recursive Use of @code{make}}).
 
 @item -d
+@itemx --debug
 Print debugging information in addition to normal processing.  The
 debugging information says which files are being considered for
 remaking, which file-times are being compared and with what results,
@@ -4700,54 +4702,71 @@ considered and which are applied---everything interesting about how
 @code{make} decides what to do.
 
 @item -e
+@item --environment-ovverides
 Give variables taken from the environment precedence
 over variables from makefiles.  @xref{Environment, ,Variables from the Environment}.
 
 @item -f @var{file}
+@item --file @var{file}
+@item --makefile @var{file}
 Use file @var{file} as a makefile.  @xref{Makefiles, ,Writing Makefiles}.
 
 @item -i
+@itemx --ignore-errors
 Ignore all errors in commands executed to remake files.
 @xref{Errors, ,Errors in Commands}.
 
 @item -I @var{dir}
+@item --include-dir @var{dir}
 Specifies a directory @var{dir} to search for included makefiles.
-@xref{Include, ,Including Other Makefiles}.  If several @samp{-I} options are used to specify several
-directories, the directories are searched in the order specified.  Unlike
-the arguments to other flags of @code{make}, directories given with
-@samp{-I} flags may come directly after the flag: @samp{-I@var{dir}} is
-allowed, as well as @samp{-I @var{dir}}.  This syntax is allowed for
-compatibility with the C preprocessor's @samp{-I} flag.@refill
+@xref{Include, ,Including Other Makefiles}.  If several @samp{-I}
+options are used to specify several directories, the directories are
+searched in the order specified.  Unlike the arguments to other flags of
+@code{make}, directories given with @samp{-I} flags may come directly
+after the flag: @samp{-I@var{dir}} is allowed, as well as @samp{-I
+@var{dir}}.  This syntax is allowed for compatibility with the C
+preprocessor's @samp{-I} flag.@refill
 
 @item -j @var{jobs}
-Specifies the number of jobs (commands) to run simultaneously.  If
-there is more than one @samp{-j} option, the last one is effective.
-@xref{Execution, ,Command Execution}, for more information on how commands are run.
+@itemx --jobs @var{jobs}
+Specifies the number of jobs (commands) to run simultaneously.  If there
+is more than one @samp{-j} option, the last one is effective.
+@xref{Execution, ,Command Execution}, for more information on how
+commands are run.@refill
 
 @item -k
+@itemx --keep-going
 Continue as much as possible after an error.  While the target that
 failed, and those that depend on it, cannot be remade, the other
 dependencies of these targets can be processed all the same.
 @xref{Testing, ,Testing the Compilation of a Program}.
 
-@item -l @var{load}
-@item -l
+@item -l [@var{load}]
+@itemx --load-average [@var{load}]
+@itemx --max-load [@var{load}]
 Specifies that no new jobs (commands) should be started if there are
 others jobs running and the load average is at least @var{load} (a
 floating-point number).  With no argument, removes a previous load
 limit.  @xref{Parallel, ,Parallel Execution}.
 
 @item -n
+@itemx --just-print
+@itemx --dry-run
+@itemx --recon
 Print the commands that would be executed, but do not execute them.
 @xref{Instead of Execution, ,Instead of Executing the Commands}.
 
 @item -o @var{file}
+@itemx --old-file @var{file}
+@itemx --assume-old @var{file}
 Do not remake the file @var{file} even if it is older than its
 dependencies, and do not remake anything on account of changes in
 @var{file}.  Essentially the file is treated as very old and its rules
-are ignored.  @xref{Avoiding Compilation, ,Avoiding Recompilation of Some Files}.
+are ignored.  @xref{Avoiding Compilation, ,Avoiding Recompilation of
+Some Files}.@refill
 
 @item -p
+@itemx --print-data-base
 Print the data base (rules and variable values) that results from
 reading the makefiles; then execute as usual or as otherwise
 specified.  This also prints the version information given by
@@ -4755,32 +4774,40 @@ the @samp{-v} switch (see below).  To print the data base without
 trying to remake any files, use @samp{make -p -f /dev/null}.
 
 @item -q
+@itemx --question
 ``Question mode''.  Do not run any commands, or print anything; just
-return an exit status that is zero if the specified targets are
-already up to date, nonzero otherwise.  @xref{Instead of Execution, ,Instead of Executing the Commands}.
+return an exit status that is zero if the specified targets are already
+up to date, nonzero otherwise.  @xref{Instead of Execution, ,Instead of
+Executing the Commands}.@refill
 
 @item -r
-Eliminate use of the built-in implicit rules (@pxref{Implicit Rules, ,Using Implicit Rules}).
-Also clear out the default list of suffixes for suffix rules
-(@pxref{Suffix Rules, ,Old-Fashioned Suffix Rules}).
+@itemx --no-builtin-rules
+Eliminate use of the built-in implicit rules (@pxref{Implicit Rules,
+,Using Implicit Rules}).  Also clear out the default list of suffixes
+for suffix rules (@pxref{Suffix Rules, ,Old-Fashioned Suffix Rules}).@refill
 
 @item -s
+@itemx --silent
+@itemx --quiet
 Silent operation; do not print the commands as they are executed.
 @xref{Echoing, ,Command Echoing}.
 
 @item -S
+@itemx --no-keep-going
 Cancel the effect of the @samp{-k} option.  This is never necessary
 except in a recursive @code{make} where @samp{-k} might be inherited
 from the top-level @code{make} via @code{MAKEFLAGS} (@pxref{Recursion, ,Recursive Use of @code{make}})
 or if you set @samp{-k} in @code{MAKEFLAGS} in your environment.@refill
 
 @item -t
+@itemx --touch
 Touch files (mark them up to date without really changing them)
 instead of running their commands.  This is used to pretend that the
 commands were done, in order to fool future invocations of
 @code{make}.  @xref{Instead of Execution, ,Instead of Executing the Commands}.
 
 @item -v
+@itemx --version
 Print the version of the @code{make} program plus a copyright, a list
 of authors and a notice that there is no warranty.  After this
 information is printed, processing continues normally.  To get this
@@ -4788,12 +4815,16 @@ information without doing anything else, use @samp{make -v -f
 /dev/null}.
 
 @item -w
+@itemx --print-directory
 Print a message containing the working directory both before and after
 executing the makefile.  This may be useful for tracking down errors
 from complicated nests of recursive @code{make} commands.
 @xref{Recursion, ,Recursive Use of @code{make}}.
 
 @item -W @var{file}
+@itemx --what-if @var{file}
+@itemx --new @var{file}
+@itemx --assume-new @var{file}
 Pretend that the target @var{file} has just been modified.  When used
 with the @samp{-n} flag, this shows you what would happen if you were
 to modify that file.  Without @samp{-n}, it is almost the same as
