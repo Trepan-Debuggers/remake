@@ -1,4 +1,4 @@
-/* Copyright (C) 1992 Free Software Foundation, Inc.
+/* Copyright (C) 1992, 1993 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -42,6 +42,7 @@ extern struct child *children;
 
 extern void new_job ();
 extern void reap_children ();
+extern void start_waiting_jobs ();
 
 extern char **construct_command_argv ();
 extern void child_execute_job ();
