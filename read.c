@@ -435,7 +435,6 @@ read_makefile (filename, flags)
 		in_ignored_define = 1;
 	      else
 		{
-		  unsigned int len;
 		  p2 = end_of_token (p2);
 		  /* Let the variable name be the whole rest of the line,
 		     with trailing blanks stripped (comments have already been
@@ -1508,7 +1507,7 @@ parse_file_seq (stringp, stopchar, size, strip)
      int strip;
 {
   register struct nameseq *new = 0;
-  register struct nameseq *new1;
+  register struct nameseq *new1, *lastnew1;
   register char *p = *stringp;
   char *q;
   char *name;
@@ -1569,7 +1568,7 @@ parse_file_seq (stringp, stopchar, size, strip)
      an elt further down the chain (i.e., previous in the file list)
      with an unmatched `(' (e.g., "lib(mem").  */
 
-  for (new1 = new; new1 != 0; new1 = new1->next)
+  for (new1 = new, lastnew1 = 0; new1 != 0; lastnew1 = new1, new1 = new1->next)
     if (new1->name[0] != '('	/* Don't catch "(%)" and suchlike.  */
 	&& new1->name[strlen (new1->name) - 1] == ')'
 	&& index (new1->name, '(') == 0)
@@ -1623,10 +1622,12 @@ parse_file_seq (stringp, stopchar, size, strip)
 	      {
 		/* NEW1 is just ")", part of something like "lib(a b )".
 		   Omit it from the chain and free its storage.  */
+		if (lastnew1 == 0)
+		  new = new1->next;
+		else
+		  lastnew1->next = new1->next;
 		lastn = new1;
 		new1 = new1->next;
-		if (new == lastn)
-		  new = new1;
 		free (lastn->name);
 		free ((char *) lastn);
 	      }
