@@ -6,7 +6,7 @@ AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.6 2004/06/12 17:41:14 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.7 2004/06/12 22:05:14 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -213,7 +213,7 @@ AC_CHECK_HEADER(readline/readline.h, [], [have_readline=no])
 if test "$enable_readline" = yes ; then 
   AC_CHECK_LIB(readline, readline, 
               [LIBS="$LIBS -lreadline -ltermcap"], 
-	      [have_readline=no], -ltermcap)
+	      [enable_readline=no], -ltermcap)
 fi
 
 if test "$enable_readline" = yes ; then 
