@@ -1,6 +1,6 @@
 # This is a -*-Makefile-*-, or close enough
 
-AUTOMAKE_OPTIONS = 1.6 dist-bzip2
+AUTOMAKE_OPTIONS = 1.7 dist-bzip2 check-news
 ACLOCAL_AMFLAGS	=  -I config
 
 SUBDIRS =	glob config po doc
@@ -51,10 +51,10 @@ MAKE_HOST =	@MAKE_HOST@
 
 # Forward targets
 
-html pdf:
+html:
 	cd doc && $(MAKE) $(AM_MAKEFLAGS) $@
 
-.PHONY: html pdf
+.PHONY: html
 
 # --------------- Internationalization Section
 
