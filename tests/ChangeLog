@@ -1,3 +1,9 @@
+2000-01-11  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/functions/call: Add a test for PR/1517 and PR/1527: make
+	sure $(call ...) doesn't eval its arguments and that you can
+	invoke foreach from it without infinitely looping.
+
 1999-12-15  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/targets/INTERMEDIATE: Add a test for PR/1423: make sure

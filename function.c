@@ -33,9 +33,10 @@ Boston, MA 02111-1307, USA.  */
 struct function_table_entry
   {
     const char *name;
-    int len;
-    int required_args;
-    int expand_args;
+    unsigned char len;
+    unsigned char minimum_args;
+    unsigned char maximum_args;
+    char expand_args;
     char *(*func_ptr) PARAMS((char *output, char **argv, const char*funcname));
   };
 
@@ -815,9 +816,9 @@ func_foreach (o, argv, funcname)
      const char *funcname;
 {
   /* expand only the first two.  */
-  char *varname = expand_argument (argv[0], argv[1] - 1);
-  char *list = expand_argument (argv[1], argv[2] -1);
-  char *body = savestring (argv[2], argv[3] - argv[2] - 1);
+  char *varname = expand_argument (argv[0], NULL);
+  char *list = expand_argument (argv[1], NULL);
+  char *body = argv[2];
 
   int doneany = 0;
   char *list_iterator = list;
@@ -857,7 +858,6 @@ func_foreach (o, argv, funcname)
   pop_variable_scope ();
   free (varname);
   free (list);
-  free (body);
 
   return o;
 }
@@ -1090,7 +1090,7 @@ func_if (o, argv, funcname)
      const char *funcname;
 {
   char *begp = argv[0];
-  char *endp = argv[1]-1;
+  char *endp = begp + strlen (argv[0]);
   int result = 0;
 
   /* Find the result of the condition: if we have a value, and it's not
@@ -1101,7 +1101,7 @@ func_if (o, argv, funcname)
 
   if (begp < endp)
     {
-      char *expansion = expand_argument (begp, endp);
+      char *expansion = expand_argument (begp, NULL);
 
       result = strlen (expansion);
       free (expansion);
@@ -1113,20 +1113,14 @@ func_if (o, argv, funcname)
 
   argv += 1 + !result;
 
-  if (argv[0] != NULL && argv[1] != NULL)
+  if (argv[0])
     {
       char *expansion;
-      char **argend = argv+1;
 
-      /* If we're doing the else-clause, make sure we concatenate any
-         potential extra arguments into the last argument.  */
-      if (!result)
-        while (argend[1])
-          ++argend;
-
-      expansion = expand_argument (*argv, *argend-1);
+      expansion = expand_argument (argv[0], NULL);
 
       o = variable_buffer_output (o, expansion, strlen (expansion));
+
       free (expansion);
     }
 
@@ -1634,11 +1628,8 @@ func_not (char* o, char **argv, char *funcname)
    some efficiency by moving most often used functions to the start of the
    table.
 
-   If REQUIRED_ARGS is positive, the function takes exactly that many
-   arguments.  All subsequent text is included with the last argument.  So,
-   since $(sort a,b,c) takes only one argument, it will be the full string
-   "a,b,c".  If the value is negative, it's the minimum number of arguments.
-   A function can have more, but if it has less an error is generated.
+   If MAXIMUM_ARGS is 0, that means there is no maximum and all
+   comma-separated values are treated as arguments.
 
    EXPAND_ARGS means that all arguments should be expanded before invocation.
    Functions that do namespace tricks (foreach) don't automatically expand.  */
@@ -1648,36 +1639,36 @@ static char *func_call PARAMS((char *o, char **argv, const char *funcname));
 
 static struct function_table_entry function_table[] =
 {
- /* Name/size */                    /* ARG EXP? Function */
-  { STRING_SIZE_TUPLE("addprefix"),     2,  1,  func_addsuffix_addprefix},
-  { STRING_SIZE_TUPLE("addsuffix"),     2,  1,  func_addsuffix_addprefix},
-  { STRING_SIZE_TUPLE("basename"),      1,  1,  func_basename_dir},
-  { STRING_SIZE_TUPLE("dir"),           1,  1,  func_basename_dir},
-  { STRING_SIZE_TUPLE("notdir"),        1,  1,  func_notdir_suffix},
-  { STRING_SIZE_TUPLE("subst"),         3,  1,  func_subst},
-  { STRING_SIZE_TUPLE("suffix"),        1,  1,  func_notdir_suffix},
-  { STRING_SIZE_TUPLE("filter"),        2,  1,  func_filter_filterout},
-  { STRING_SIZE_TUPLE("filter-out"),    2,  1,  func_filter_filterout},
-  { STRING_SIZE_TUPLE("findstring"),    2,  1,  func_findstring},
-  { STRING_SIZE_TUPLE("firstword"),     1,  1,  func_firstword},
-  { STRING_SIZE_TUPLE("join"),          2,  1,  func_join},
-  { STRING_SIZE_TUPLE("patsubst"),      3,  1,  func_patsubst},
-  { STRING_SIZE_TUPLE("shell"),         1,  1,  func_shell},
-  { STRING_SIZE_TUPLE("sort"),          1,  1,  func_sort},
-  { STRING_SIZE_TUPLE("strip"),         1,  1,  func_strip},
-  { STRING_SIZE_TUPLE("wildcard"),      1,  1,  func_wildcard},
-  { STRING_SIZE_TUPLE("word"),          2,  1,  func_word},
-  { STRING_SIZE_TUPLE("wordlist"),      3,  1,  func_wordlist},
-  { STRING_SIZE_TUPLE("words"),         1,  1,  func_words},
-  { STRING_SIZE_TUPLE("origin"),        1,  1,  func_origin},
-  { STRING_SIZE_TUPLE("foreach"),       3,  0,  func_foreach},
-  { STRING_SIZE_TUPLE("call"),         -1,  1,  func_call},
-  { STRING_SIZE_TUPLE("error"),         1,  1,  func_error},
-  { STRING_SIZE_TUPLE("warning"),       1,  1,  func_error},
-  { STRING_SIZE_TUPLE("if"),           -2,  0,  func_if},
+ /* Name/size */                    /* MIN MAX EXP? Function */
+  { STRING_SIZE_TUPLE("addprefix"),     2,  2,  1,  func_addsuffix_addprefix},
+  { STRING_SIZE_TUPLE("addsuffix"),     2,  2,  1,  func_addsuffix_addprefix},
+  { STRING_SIZE_TUPLE("basename"),      1,  1,  1,  func_basename_dir},
+  { STRING_SIZE_TUPLE("dir"),           1,  1,  1,  func_basename_dir},
+  { STRING_SIZE_TUPLE("notdir"),        1,  1,  1,  func_notdir_suffix},
+  { STRING_SIZE_TUPLE("subst"),         3,  3,  1,  func_subst},
+  { STRING_SIZE_TUPLE("suffix"),        1,  1,  1,  func_notdir_suffix},
+  { STRING_SIZE_TUPLE("filter"),        2,  2,  1,  func_filter_filterout},
+  { STRING_SIZE_TUPLE("filter-out"),    2,  2,  1,  func_filter_filterout},
+  { STRING_SIZE_TUPLE("findstring"),    2,  2,  1,  func_findstring},
+  { STRING_SIZE_TUPLE("firstword"),     1,  1,  1,  func_firstword},
+  { STRING_SIZE_TUPLE("join"),          2,  2,  1,  func_join},
+  { STRING_SIZE_TUPLE("patsubst"),      3,  3,  1,  func_patsubst},
+  { STRING_SIZE_TUPLE("shell"),         1,  1,  1,  func_shell},
+  { STRING_SIZE_TUPLE("sort"),          1,  1,  1,  func_sort},
+  { STRING_SIZE_TUPLE("strip"),         1,  1,  1,  func_strip},
+  { STRING_SIZE_TUPLE("wildcard"),      1,  1,  1,  func_wildcard},
+  { STRING_SIZE_TUPLE("word"),          2,  2,  1,  func_word},
+  { STRING_SIZE_TUPLE("wordlist"),      3,  3,  1,  func_wordlist},
+  { STRING_SIZE_TUPLE("words"),         1,  1,  1,  func_words},
+  { STRING_SIZE_TUPLE("origin"),        1,  1,  1,  func_origin},
+  { STRING_SIZE_TUPLE("foreach"),       3,  3,  0,  func_foreach},
+  { STRING_SIZE_TUPLE("call"),          1,  0,  0,  func_call},
+  { STRING_SIZE_TUPLE("error"),         1,  1,  1,  func_error},
+  { STRING_SIZE_TUPLE("warning"),       1,  1,  1,  func_error},
+  { STRING_SIZE_TUPLE("if"),            2,  3,  0,  func_if},
 #ifdef EXPERIMENTAL
-  { STRING_SIZE_TUPLE("eq"),            2,  1,  func_eq},
-  { STRING_SIZE_TUPLE("not"),           1,  1,  func_not},
+  { STRING_SIZE_TUPLE("eq"),            2,  2,  1,  func_eq},
+  { STRING_SIZE_TUPLE("not"),           1,  1,  1,  func_not},
 #endif
   { 0 }
 };
@@ -1692,11 +1683,7 @@ expand_builtin_function (o, argc, argv, entry_p)
      char **argv;
      struct function_table_entry *entry_p;
 {
-  int min = (entry_p->required_args > 0
-             ? entry_p->required_args
-             : -entry_p->required_args);
-
-  if (argc < min)
+  if (argc < entry_p->minimum_args)
     fatal (reading_file,
            _("Insufficient number of arguments (%d) to function `%s'"),
            argc, entry_p->name);
@@ -1721,39 +1708,36 @@ handle_function (op, stringp)
   const struct function_table_entry *entry_p;
   char openparen = (*stringp)[0];
   char closeparen = openparen == '(' ? ')' : '}';
-  char *beg = *stringp + 1;
-  char *endref;
+  char *beg;
+  char *end;
   int count = 0;
-  char *argbeg;
   register char *p;
   char **argv, **argvp;
   int nargs;
+
+  beg = *stringp + 1;
 
   entry_p = lookup_function (function_table, beg);
 
   if (!entry_p)
     return 0;
 
-  /* We have found a call to a builtin function.  Find the end of the
-     arguments, and do the function.  */
+  /* We found a builtin function.  Find the beginning of its arguments (skip
+     whitespace after the name).  */
 
-  endref = beg + entry_p->len;
-
-  /* Space after function name isn't part of the args.  */
-  p = next_token (endref);
-  argbeg = p;
+  beg = next_token (beg + entry_p->len);
 
   /* Find the end of the function invocation, counting nested use of
      whichever kind of parens we use.  Since we're looking, count commas
      to get a rough estimate of how many arguments we might have.  The
      count might be high, but it'll never be low.  */
 
-  for (nargs=1; *p != '\0'; ++p)
-    if (*p == ',')
+  for (nargs=1, end=beg; *end != '\0'; ++end)
+    if (*end == ',')
       ++nargs;
-    else if (*p == openparen)
+    else if (*end == openparen)
       ++count;
-    else if (*p == closeparen && --count < 0)
+    else if (*end == closeparen && --count < 0)
       break;
 
   if (count >= 0)
@@ -1761,47 +1745,63 @@ handle_function (op, stringp)
 	   _("unterminated call to function `%s': missing `%c'"),
 	   entry_p->name, closeparen);
 
+  *stringp = end;
+
   /* Get some memory to store the arg pointers.  */
   argvp = argv = (char **) alloca (sizeof(char *) * (nargs + 2));
 
-  /* Chop the string into arguments, then store the end pointer and a nul.
-     If REQUIRED_ARGS is positive, as soon as we hit that many assume the
-     rest of the string is part of the last argument.  */
-  *argvp = argbeg;
-  nargs = 1;
-  while (entry_p->required_args < 0 || nargs < entry_p->required_args)
+  /* Chop the string into arguments, then a nul.  As soon as we hit
+     MAXIMUM_ARGS (if it's >0) assume the rest of the string is part of the
+     last argument.
+
+     If we're expanding, store pointers to the expansion of each one.  If
+     not, make a duplicate of the string and point into that, nul-terminating
+     each argument.  */
+
+  if (!entry_p->expand_args)
     {
-      char *next = find_next_argument (openparen, closeparen, *argvp, p);
+      int len = end - beg;
 
-      if (!next)
-	break;
+      p = xmalloc (len+1);
+      memcpy (p, beg, len);
+      p[len] = '\0';
+      beg = p;
+      end = beg + len;
+    }
 
-      *(++argvp) = next+1;
+  p = beg;
+  nargs = 0;
+  for (p=beg, nargs=0; p < end; ++argvp)
+    {
+      char *next;
+
       ++nargs;
+
+      if (nargs == entry_p->maximum_args
+          || (! (next = find_next_argument (openparen, closeparen, p, end))))
+        next = end;
+
+      if (entry_p->expand_args)
+        *argvp = expand_argument (p, next);
+      else
+        {
+          *argvp = p;
+          *next = '\0';
+        }
+
+      p = next + 1;
     }
-
-  *(++argvp) = p+1;
-  *(++argvp) = 0;
-
-  /* If we should expand, do it.  */
-  if (entry_p->expand_args)
-    {
-      for (argvp=argv; argvp[1] != 0; ++argvp)
-	*argvp = expand_argument (*argvp, argvp[1]-1);
-
-      /* end pointer doesn't make sense for expanded stuff.  */
-      *argvp = 0;
-    }
+  *argvp = NULL;
 
   /* Finally!  Run the function...  */
   *op = expand_builtin_function (*op, nargs, argv, entry_p);
 
-  /* If we allocated memory for the expanded args, free it again.  */
+  /* Free memory.  */
   if (entry_p->expand_args)
     for (argvp=argv; *argvp != 0; ++argvp)
       free (*argvp);
-
-  *stringp = p;
+  else
+    free (beg);
 
   return 1;
 }
@@ -1818,47 +1818,73 @@ func_call (o, argv, funcname)
      const char *funcname;
 {
   char *fname;
+  char *cp;
   int flen;
   char *body;
   int i;
   const struct function_table_entry *entry_p;
 
-  /* Calling nothing is a no-op.  */
-  if (*argv[0] == '\0')
-    return o;
+  fname = expand_argument (argv[0], NULL);
 
   /* There is no way to define a variable with a space in the name, so strip
-     trailing whitespace as a favor to the user.  */
+     leading and trailing whitespace as a favor to the user.  */
+  cp = fname;
+  while (*cp != '\0' && isspace ((unsigned char)*cp))
+    ++cp;
+  argv[0] = cp;
 
-  flen = strlen (argv[0]);
-  fname = argv[0] + flen - 1;
-  while (isspace ((unsigned char)*fname))
-    --fname;
-  fname[1] = '\0';
+  cp += strlen(cp) - 1;
+  while (cp > argv[0] && isspace ((unsigned char)*cp))
+    --cp;
+  cp[1] = '\0';
 
-  flen = fname - argv[0] + 1;
-  fname = argv[0];
+  /* Calling nothing is a no-op */
+  if (*argv[0] == '\0')
+    {
+      free (fname);
+      return o;
+    }
 
   /* Are we invoking a builtin function?  */
 
-  entry_p = lookup_function (function_table, fname);
+  entry_p = lookup_function (function_table, argv[0]);
 
   if (entry_p)
     {
-      for (i=0; argv[i+1]; ++i)
-	;
+      char **av;
 
-      return expand_builtin_function (o, i, argv + 1, entry_p);
+      free (fname);
+
+      /* How many arguments do we have?  */
+      for (i=0; argv[i+1]; ++i)
+  	;
+
+      /* If we need to expand arguments, do it now.  */
+      if (entry_p->expand_args)
+        for (av=argv+1; *av; ++av)
+          *av = expand_argument (*av, NULL);
+
+      o = expand_builtin_function (o, i, argv+1, entry_p);
+
+      /* What we expanded we must free...  */
+      if (entry_p->expand_args)
+        for (av=argv+1; *av; ++av)
+          free (*av);
+
+      return o;
     }
 
-  /* No, so the first argument is the name of a variable to be expanded and
-     interpreted as a function.  Create the variable reference.  */
+  /* Not a builtin, so the first argument is the name of a variable to be
+     expanded and interpreted as a function.  Create the variable
+     reference.  */
+  flen = strlen (argv[0]);
+
   body = alloca (flen + 4);
-  body[0]='$';
-  body[1]='(';
-  strcpy (body + 2, fname);
-  body[flen+2]=')';
-  body[flen+3]= '\0';
+  body[0] = '$';
+  body[1] = '(';
+  memcpy (body + 2, fname, flen);
+  body[flen+2] = ')';
+  body[flen+3] = '\0';
 
   /* Set up arguments $(1) .. $(N).  $(0) is the function name.  */
 
@@ -1869,7 +1895,7 @@ func_call (o, argv, funcname)
       char num[11];
 
       sprintf (num, "%d", i);
-      define_variable (num, strlen (num), *argv, o_automatic, 0);
+      define_variable (num, strlen (num), *argv, o_automatic, 1);
     }
 
   /* Expand the body in the context of the arguments, adding the result to
@@ -1879,5 +1905,6 @@ func_call (o, argv, funcname)
 
   pop_variable_scope ();
 
+  free (fname);
   return o + strlen(o);
 }

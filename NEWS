@@ -32,6 +32,12 @@ Version 3.79
   makefile is always run serially regardless of the value of -j.  Any
   submakes will still be run in parallel if -j was specified.
 
+* The $(call ...) function doesn't expand its arguments automatically
+  anymore.  This allows you to put builtin functions like "if" and
+  "foreach", which also have special expansion rules, in a $(call ...)
+  function and have it work properly.  This was suggested by Damien
+  GIBOU <damien.gibou@st.com>.
+
 * The -d (--debug) option has changed: it now allows optional flags
   controlling the amount and type of debugging output.  By default only
   a minimal amount information is generated, displaying the names of
