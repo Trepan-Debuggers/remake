@@ -42,11 +42,14 @@ Version 3.79
   function and have it work properly.  This was suggested by Damien
   GIBOU <damien.gibou@st.com>.
 
-* The -d (--debug) option has changed: it now allows optional flags
+* The --debug option has changed: it now allows optional flags
   controlling the amount and type of debugging output.  By default only
   a minimal amount information is generated, displaying the names of
   "normal" targets (not makefiles) were deemed out of date and in need
   of being rebuilt.
+
+  Note that the -d option behaves as before: all debugging information
+  is generated.
 
 * Hartmut Becker provided many updates for the VMS port of GNU make.
   See the readme.vms file for more details.

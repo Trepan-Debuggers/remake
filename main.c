@@ -142,6 +142,7 @@ int just_print_flag;
 /* Print debugging info (--debug).  */
 
 static struct stringlist *db_flags;
+static int debug_flag = 0;
 
 int db_level = 0;
 
@@ -260,10 +261,13 @@ static const struct command_switch switches[] =
     { 'C', string, (char *) &directories, 0, 0, 0, 0, 0,
 	"directory", N_("DIRECTORY"),
 	N_("Change to DIRECTORY before doing anything") },
-    { 'd', string, (char *) &db_flags, 1, 1, 0,
+    { 'd', flag, (char *) &debug_flag, 1, 1, 0, 0, 0,
+	0, 0,
+	N_("Print lots of debugging information") },
+    { CHAR_MAX+1, string, (char *) &db_flags, 1, 1, 0,
         "basic", 0,
 	"debug", N_("FLAGS"),
-	N_("Print different types of debugging information") },
+	N_("Print various types of debugging information") },
 #ifdef WINDOWS32
     { 'D', flag, (char *) &suspend_flag, 1, 1, 0, 0, 0,
         "suspend-for-debug", 0,
@@ -289,7 +293,7 @@ static const struct command_switch switches[] =
 	(char *) &inf_jobs, (char *) &default_job_slots,
 	"jobs", "N",
 	N_("Allow N jobs at once; infinite jobs with no arg") },
-    { CHAR_MAX+1, string, (char *) &jobserver_fds, 1, 1, 0, 0, 0,
+    { CHAR_MAX+2, string, (char *) &jobserver_fds, 1, 1, 0, 0, 0,
         "jobserver-fds", 0,
         0 },
     { 'k', flag, (char *) &keep_going_flag, 1, 1, 0,
@@ -344,13 +348,13 @@ static const struct command_switch switches[] =
     { 'w', flag, (char *) &print_directory_flag, 1, 1, 0, 0, 0,
 	"print-directory", 0,
 	N_("Print the current directory") },
-    { CHAR_MAX+2, flag, (char *) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
+    { CHAR_MAX+3, flag, (char *) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
 	"no-print-directory", 0,
 	N_("Turn off -w, even if it was turned on implicitly") },
     { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0,
 	"what-if", N_("FILE"),
 	N_("Consider FILE to be infinitely new") },
-    { CHAR_MAX+3, flag, (char *) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
+    { CHAR_MAX+4, flag, (char *) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
 	"warn-undefined-variables", 0,
 	N_("Warn when an undefined variable is referenced") },
     { '\0', }
@@ -497,6 +501,9 @@ decode_debug_flags ()
 {
   char **pp;
 
+  if (debug_flag)
+    db_level = DB_ALL;
+
   if (!db_flags)
     return;
 
@@ -515,13 +522,13 @@ decode_debug_flags ()
               db_level |= DB_BASIC;
               break;
             case 'i':
-              db_level |= DB_IMPLICIT;
+              db_level |= DB_BASIC | DB_IMPLICIT;
               break;
             case 'j':
               db_level |= DB_JOBS;
               break;
             case 'm':
-              db_level |= DB_MAKEFILES;
+              db_level |= DB_BASIC | DB_MAKEFILES;
               break;
             case 'v':
               db_level |= DB_BASIC | DB_VERBOSE;
