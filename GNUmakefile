@@ -30,12 +30,6 @@ extras := $(filter-out getloadavg.o @%@,$(extras)) getloadavg.o
 LOADLIBES := $(filter-out @%@,$(LOADLIBES))
 ALLOCA := $(filter-out @%@,$(ALLOCA))
 
-ifdef customs
-REMOTE := -DCUSTOMS -Ipmake/customs -Ipmake/lib/include
-LOADLIBES := $(addprefix pmake/customs/,customslib.o rpc.o xlog.o) \
-	     pmake/lib/sprite/libsprite.a
-endif
-
 # Set `ARCH' to a string for the type of machine.
 ifndef ARCH
 ifdef machine
@@ -106,6 +100,12 @@ else # Not ARCH
 prog := make
 endif
 
+ifdef customs
+REMOTE := -DCUSTOMS -Ipmake/customs -Ipmake/lib/include
+LOADLIBES := $(addprefix pmake/customs/,customslib.o rpc.o xlog.o) \
+	     pmake/lib/sprite/libsprite.a
+endif
+
 ifneq	"$(findstring gcc,$(CC))" ""
 CFLAGS = -g -W -Wunused -Wpointer-arith -Wreturn-type -Wswitch
 else
@@ -124,10 +124,6 @@ mkdep = $(CC) -M $(CPPFLAGS)
 
 depfiles = $(patsubst %.o,%.dep,$(filter %.o,$(objs)))
 
-
-ifdef yescustoms
-prog := $(prog)-customs
-endif
 
 .PHONY: default
 default: $(prog)
