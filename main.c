@@ -1326,7 +1326,7 @@ die (status)
 
       /* Wait for children to die.  */
       for (err = status != 0; job_slots_used > 0; err = 0)
-	reap_children (0, err);
+	reap_children (1, err);
 
       /* Remove the intermediate files.  */
       remove_intermediates (0);
