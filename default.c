@@ -101,24 +101,16 @@ static char *default_suffix_rules[] =
     ".mod",
     "$(COMPILE.mod) -o $@ -e $@ $^",
 
-    ".def.sym", 
+    ".def.sym",
     "$(COMPILE.def) -o $@ $<",
 
     ".sh",
     "cat $< >$@ \n chmod a+x $@",
 
     ".s.o",
-#if !defined(M_XENIX) || defined(__GNUC__)
     "$(COMPILE.s) -o $@ $<",
-#else	/* Xenix.  */
-    "$(COMPILE.s) -o$@ $<",
-#endif	/* Not Xenix.  */
     ".S.o",
-#if !defined(M_XENIX) || defined(__GNUC__)
     "$(COMPILE.S) -o $@ $<",
-#else	/* Xenix.  */
-    "$(COMPILE.S) -o$@ $<",
-#endif	/* Not Xenix.  */
     ".c.o",
     "$(COMPILE.c) $< $(OUTPUT_OPTION)",
     ".cc.o",
@@ -305,21 +297,13 @@ static char *default_variables[] =
     "COMPILE.s", "$(AS) $(ASFLAGS) $(TARGET_MACH)",
     "LINK.S", "$(CC) $(ASFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TARGET_MACH)",
     "COMPILE.S", "$(CC) $(ASFLAGS) $(CPPFLAGS) $(TARGET_MACH) -c",
-#if !defined(M_XENIX) || defined(__GNUC__)
     "PREPROCESS.S", "$(CC) -E $(CPPFLAGS)",
-#else	/* Xenix.  */
-    "PREPROCESS.S", "$(CC) -EP $(CPPFLAGS)",
-#endif	/* Not Xenix.  */
     "PREPROCESS.F", "$(FC) $(FFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -F",
     "PREPROCESS.r", "$(FC) $(FFLAGS) $(RFLAGS) $(TARGET_ARCH) -F",
     "LINT.c", "$(LINT) $(LINTFLAGS) $(CPPFLAGS) $(TARGET_ARCH)",
 
 #ifndef	NO_MINUS_C_MINUS_O
-#if !defined(M_XENIX) || defined(__GNUC__)
     "OUTPUT_OPTION", "-o $@",
-#else	/* Xenix.  */
-    "OUTPUT_OPTION", "-Fo$@",
-#endif	/* Not Xenix.  */
 #endif
 
 #ifdef	SCCS_GET_MINUS_G
@@ -357,7 +341,7 @@ void
 install_default_suffix_rules ()
 {
   register char **s;
-  
+
   if (no_builtin_rules_flag)
     return;
 
@@ -382,7 +366,7 @@ void
 install_default_implicit_rules ()
 {
   register struct pspec *p;
-  
+
   if (no_builtin_rules_flag)
     return;
 
