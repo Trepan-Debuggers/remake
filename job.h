@@ -29,7 +29,7 @@ struct child
     unsigned int command_line;	/* Index into above.  */
     char *command_ptr;		/* Ptr into command_lines[command_line].  */
 
-    int pid;			/* Child process's ID number.  */
+    pid_t pid;			/* Child process's ID number.  */
     unsigned int remote:1;	/* Nonzero if executing remotely.  */
 
     unsigned int noerror:1;	/* Nonzero if commands contained a `-'.  */
