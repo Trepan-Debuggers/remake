@@ -786,10 +786,12 @@ remake_file (file)
 }
 
 /* Return the mtime of a file, given a `struct file'.
-   Caches the time in the struct file to avoid excess stat calls.  If the file
-   is not found, and SEARCH is nonzero, VPATH searching and replacement is
-   done.  If that fails, a library (-lLIBNAME) is tried but the library's
-   actual name (/lib/libLIBNAME.a, etc.) is not substituted into FILE.  */
+   Caches the time in the struct file to avoid excess stat calls.
+
+   If the file is not found, and SEARCH is nonzero, VPATH searching and
+   replacement is done.  If that fails, a library (-lLIBNAME) is tried and
+   the library's actual name (/lib/libLIBNAME.a, etc.) is substituted into
+   FILE.  */
 
 time_t
 f_mtime (file, search)
@@ -916,8 +918,8 @@ library_search (lib)
 {
   static char *dirs[] =
     {
-      "/usr/lib",
       "/lib",
+      "/usr/lib",
       LIBDIR,			/* Defined by configuration.  */
       0
     };
@@ -925,6 +927,28 @@ library_search (lib)
   char *libname = &(*lib)[2];
   char *buf = xmalloc (sizeof (LIBDIR) + 8 + strlen (libname) + 4 + 2 + 1);
   char **dp;
+
+  sprintf (buf, "lib%s.a", libname);
+
+  /* Look first for `libNAME.a' in the current directory.  */
+
+  if (name_mtime (libname) != (time_t) -1)
+    {
+      *lib = buf;
+      return 1;
+    }
+
+  /* Now try VPATH search on that.  */
+
+  libname = buf;
+  if (vpath_search (&libname))
+    {
+      free (buf);
+      *lib = libname;
+      return 1;
+    }
+
+  /* Now try the standard set of directories.  */
 
   for (dp = dirs; *dp != 0; ++dp)
     {
@@ -934,15 +958,6 @@ library_search (lib)
 	  *lib = buf;
 	  return 1;
 	}
-    }
-
-  sprintf (buf, "lib%s.a", libname);
-  libname = buf;
-  if (vpath_search (&libname))
-    {
-      free (buf);
-      *lib = libname;
-      return 1;
     }
 
   free (buf);
