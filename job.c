@@ -2088,6 +2088,7 @@ child_execute_job (char *argv, struct child *child)
   char ifile[256], ofile[256], efile[256];
   char *comname = 0;
   char procname[100];
+  int in_string;
 
   /* Parse IO redirection.  */
 
@@ -2109,9 +2110,17 @@ child_execute_job (char *argv, struct child *child)
   pnamedsc.dsc$b_dtype = DSC$K_DTYPE_T;
   pnamedsc.dsc$b_class = DSC$K_CLASS_S;
 
+  in_string = 0;
   /* Handle comments and redirection. */
   for (p = argv, q = cmd; *p; p++, q++)
     {
+      if (*p == '"')
+        in_string = !in_string;
+      if (in_string)
+        {
+          *q = *p;
+          continue;
+        }
       switch (*p)
 	{
 	  case '#':
@@ -2167,6 +2176,8 @@ child_execute_job (char *argv, struct child *child)
 	}
     }
   *q = *p;
+  while (isspace ((unsigned char)*--q))
+    *q = '\0';
 
   if (strncmp (cmd, "builtin_", 8) == 0)
     {

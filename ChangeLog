@@ -1,3 +1,9 @@
+2004-11-12  Paul D. Smith  <psmith@gnu.org>
+
+	* job.c (child_execute_job) [VMS]: Don't treat "#" as a comment on
+	the command line if it's inside a string.
+	Patch by: Hartmut Becker <Hartmut.Becker@hp.com>
+
 2004-10-21  Boris Kolpackov  <boris@kolpackov.net>
 
 	* function.c (func_lastword): New function: return last word
@@ -64,7 +70,7 @@
 	idea behind Savannah Patch #3144 from david.baird@homemail.com.
 	If SHELL is set to CMD.EXE then assume it's batch-mode and
 	non-unixy.  I wrote the code differently from the patch, though,
-	to make it safer.
+	to make it safer.  This also resolves bug #9174.
 
 2004-09-20  Paul D. Smith  <psmith@gnu.org>
 
