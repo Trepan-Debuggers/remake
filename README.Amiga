@@ -29,9 +29,7 @@ GNU make):
     Also be carefull that there is a space after the "\" (ie, at the
     beginning of the next line).
 - Can be made resident to save space and time
-- To use "#?" as a wildcard, you must enclose it in "":
-
-    delete "#?.o"
+- Amiga specific wildcards can be used in $(wildcard ...)
 
 BUGS:
 - The line
@@ -42,6 +40,7 @@ tries to make dummy.h from "src/*.c" (ie. no wildcard-expansion takes
 place). You have to use "$(wildcard src/*.c)" instead.
 
 COMPILING FROM SCRATCH
+----------------------
 
 To recompile, you need SAS/C 6.51. make itself is not neccessary, there
 is an smakefile.
