@@ -307,6 +307,16 @@ static struct option long_option_aliases[] =
 /* List of goal targets.  */
 
 static struct dep *goals, *lastgoal;
+
+/* List of variables which were defined on the command line
+   (or, equivalently, in MAKEFLAGS).  */
+
+struct command_variable
+  {
+    struct command_variable *next;
+    struct variable *variable;
+  };
+static struct command_variable *command_variables;
 
 /* The name we were invoked with.  */
 
@@ -1077,7 +1087,7 @@ init_switches ()
   p = options;
 
   /* Return switch and non-switch args in order, regardless of
-     POSIXLY_CORRECT.  Non-switch args are returned as option '\0'.  */
+     POSIXLY_CORRECT.  Non-switch args are returned as option 1.  */
   *p++ = '-';
 
   for (i = 0; switches[i].c != '\0'; ++i)
@@ -1148,11 +1158,22 @@ decode_switches (argc, argv, env)
   while ((c = getopt_long (argc, argv,
 			   options, long_options, (int *) 0)) != EOF)
     {
-      if (c == '\0')
+      if (c == 1)
 	{
 	  /* Non-option argument.  It might be a variable definition.  */
-	  if (! try_variable_definition ((char *) 0, 0, optarg, o_command)
-	      && ! env)
+	  struct variable *v;
+	  v = try_variable_definition ((char *) 0, 0, optarg, o_command);
+	  if (v != 0)
+	    {
+	      /* It is indeed a variable definition.  Record a pointer to
+		 the variable for later use in define_makeflags.  */
+	      struct command_variable *cv
+		= (struct command_variable *) xmalloc (sizeof (*cv));
+	      cv->variable = v;
+	      cv->next = command_variables;
+	      command_variables = cv;
+	    }
+	  else if (! env)
 	    {
 	      /* Not an option or variable definition; it must be a goal
 		 target!  Enter it as a file and add it to the dep chain of
@@ -1415,10 +1436,21 @@ decode_env_switches (envar, len)
 	 Either this is the single-word form and we should prepend a dash
 	 before calling decode_switches, or this is the multi-word form and
 	 there is no dash because it is a variable definition.  */
-      if (try_variable_definition ((char *) 0, 0, argv[1], o_command))
-	/* It was indeed a variable definition, and now it has been
-	   processed.  There is nothing for decode_switches to do.  */
-	return;
+      struct variable *v;
+      v = try_variable_definition ((char *) 0, 0, argv[1], o_command);
+      if (v != 0)
+	{
+	  /* It was indeed a variable definition, and now it has been
+	     processed.  There is nothing for decode_switches to do.
+	     Record a pointer to the variable for later use in
+	     define_makeflags.  */
+	  struct command_variable *cv
+	    = (struct command_variable *) xmalloc (sizeof (*cv));
+	  cv->variable = v;
+	  cv->next = command_variables;
+	  command_variables = cv;
+	  return;
+	}
 
       /* It wasn't a variable definition, so it's some switches without a
 	 leading dash.  Add one and pass it along to decode_switches.  We
@@ -1441,7 +1473,10 @@ define_makeflags (all, makefile)
 {
   register const struct command_switch *cs;
   char *flagstring;
+  register char *p;
+  unsigned int words;
   struct variable *v;
+  struct command_variable *cv;
 
   /* We will construct a linked list of `struct flag's describing
      all the flags which need to go in MAKEFLAGS.  Then, once we
@@ -1554,70 +1589,119 @@ define_makeflags (all, makefile)
 
 #undef	ADD_FLAG
 
-  if (flags == 0)
-    /* No flags.  Use a string of two nulls so [1] works below.  */
-    flagstring = "\0";
-  else
+  if (all && command_variables != 0)
     {
-      /* Construct the value in FLAGSTRING.
-	 We allocate enough space for a preceding dash and trailing null.  */
-      register char *p;
-      flagstring = (char *) alloca (1 + flagslen + 1);
-      p = flagstring;
-      *p++ = '-';
-      do
+      /* Now figure out how much space will be taken up
+	 by the command-line variable definitions.  */
+      flagslen += 4;		/* For the possible " -- ".  */
+      for (cv = command_variables; cv != 0; cv = cv->next)
 	{
-	  /* Add the flag letter or name to the string.  */
-	  if (!isalnum (flags->cs->c))
-	    {
-	      *p++ = '-';
-	      strcpy (p, flags->cs->long_name);
-	      p += strlen (p);
-	    }
-	  else
-	    *p++ = flags->cs->c;
-	  if (flags->arg != 0)
-	    {
-	      /* A flag that takes an optional argument which in this case
-		 is omitted is specified by ARG being "" and ARGLEN being 0.
-		 We must distinguish because a following flag appended without
-		 an intervening " -" is considered the arg for the first.  */
-	      if (flags->arglen > 0)
-		{
-		  /* Add its argument too.  */
-		  *p++ = !isalnum (flags->cs->c) ? '=' : ' ';
-		  bcopy (flags->arg, p, flags->arglen);
-		  p += flags->arglen;
-		}
-	      /* Write a following space and dash, for the next flag.  */
-	      *p++ = ' ';
-	      *p++ = '-';
-	    }
-	  else if (!isalnum (flags->cs->c))
-	    {
-	      /* Long options must each go in their own word,
-		 so we write the following space and dash.  */
-	      *p++ = ' ';
-	      *p++ = '-';
-	    }
-	  flags = flags->next;
-	} while (flags != 0);
-
-      if (p[-1] == '-')
-	/* Kill the final space and dash.  */
-	p -= 2;
-
-      /* Terminate the string.  */
-      *p = '\0';
+	  v = cv->variable;
+	  flagslen += strlen (v->name);
+	  if (! v->recursive)
+	    ++flagslen;
+	  ++flagslen;
+	  flagslen += strlen (v->value);
+	}
     }
 
+  /* Construct the value in FLAGSTRING.
+     We allocate enough space for a preceding dash and trailing null.  */
+  flagstring = (char *) alloca (1 + flagslen + 1);
+  p = flagstring;
+  words = 1;
+  *p++ = '-';
+  while (flags != 0)
+    {
+      /* Add the flag letter or name to the string.  */
+      if (!isalnum (flags->cs->c))
+	{
+	  *p++ = '-';
+	  strcpy (p, flags->cs->long_name);
+	  p += strlen (p);
+	}
+      else
+	*p++ = flags->cs->c;
+      if (flags->arg != 0)
+	{
+	  /* A flag that takes an optional argument which in this case
+	     is omitted is specified by ARG being "" and ARGLEN being 0.
+	     We must distinguish because a following flag appended without
+	     an intervening " -" is considered the arg for the first.  */
+	  if (flags->arglen > 0)
+	    {
+	      /* Add its argument too.  */
+	      *p++ = !isalnum (flags->cs->c) ? '=' : ' ';
+	      bcopy (flags->arg, p, flags->arglen);
+	      p += flags->arglen;
+	    }
+	  ++words;
+	  /* Write a following space and dash, for the next flag.  */
+	  *p++ = ' ';
+	  *p++ = '-';
+	}
+      else if (!isalnum (flags->cs->c))
+	{
+	  ++words;
+	  /* Long options must each go in their own word,
+	     so we write the following space and dash.  */
+	  *p++ = ' ';
+	  *p++ = '-';
+	}
+      flags = flags->next;
+    }
+
+  if (all && command_variables != 0)
+    {
+      /* Now write all the command-line variable definitions.  */
+      if (p == &flagstring[1])
+	/* No flags written, so elide the leading dash already written.  */
+	p = flagstring;
+      else
+	{
+	  /* Separate the variables from the switches with a "--" arg.  */
+	  if (p[-1] != '-')
+	    {
+	      /* We did not already write a trailing " -".  */
+	      *p++ = ' ';
+	      *p++ = '-';
+	    }
+	  /* There is a trailing " -"; fill it out to " -- ".  */
+	  *p++ = '-';
+	  *p++ = ' ';
+	}
+      for (cv = command_variables; cv != 0; cv = cv->next)
+	{
+	  /* XXX Quoting? */
+	  unsigned int len;
+	  v = cv->variable;
+	  len = strlen (v->name);
+	  bcopy (v->name, p, len);
+	  p += len;
+	  if (! v->recursive)
+	    *p++ = ':';
+	  len = strlen (v->value);
+	  bcopy (v->value, p, len);
+	  p += len;
+	  *p++ = ' ';
+	  ++words;
+	}
+      --p;			/* Kill the final space.  */
+    }
+  else if (p[-1] == '-')
+    /* Kill the final space and dash.  */
+    p -= 2;
+
+  /* Terminate the string.  */
+  *p = '\0';
+
   v = define_variable ("MAKEFLAGS", 9,
-		       /* On Sun, the value of MFLAGS starts with a `-' but
-			  the value of MAKEFLAGS lacks the `-'.
-			  Be compatible with this unless FLAGSTRING starts
-			  with a long option `--foo', since removing the
-			  first dash would result in the bogus `-foo'.  */
-		       flagstring[1] == '-' ? flagstring : &flagstring[1],
+		       /* If there is just a single word of switches,
+			  omit the leading dash unless it is a single
+			  long option with two leading dashes.  */
+		       &flagstring[(words == 1 && command_variables == 0
+				    && flagstring[1] != '-')
+				   ? 1 : 0],
 		       /* This used to use o_env, but that lost when a
 			  makefile defined MAKEFLAGS.  Makefiles set
 			  MAKEFLAGS to add switches, but we still want
