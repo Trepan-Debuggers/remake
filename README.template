@@ -1,5 +1,5 @@
-This directory contains the %VERSION% test release of GNU Make.
-All bugs reported for previous test releases have been fixed.
+This directory contains the %VERSION% release of GNU Make.
+All bugs reported for previous releases have been fixed.
 Some bugs surely remain.
 
 For general building and installation instructions, see the file INSTALL.
