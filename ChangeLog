@@ -1,11 +1,19 @@
 1999-07-15  Paul D. Smith  <psmith@gnu.org>
 
+	* read.c (read_makefile): Fix some potential memory stomps parsing
+	`define' directives where no variable name is given.
+
 	* function.c (func_apply): Various code cleanup and tightening.
 	(function_table): Add "apply" as a valid builtin function.
 
 	* make.texinfo (Apply Function): Document it.
 
 	* NEWS: Announce it.
+
+1999-07-09  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* variable.c (try_variable_definition) [__MSDOS__, WINDOWS32]:
+	Treat "override SHELL=" the same as just "SHELL=".
 
 1999-07-09  Paul D. Smith  <psmith@gnu.org>
 

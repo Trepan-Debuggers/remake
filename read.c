@@ -530,6 +530,9 @@ read_makefile (filename, flags)
 	  else
 	    {
 	      p2 = next_token (p + 6);
+              if (*p2 == '\0')
+                fatal (&fileinfo, "empty variable name");
+
 	      /* Let the variable name be the whole rest of the line,
 		 with trailing blanks stripped (comments have already been
 		 removed), so it could be a complex variable/function
@@ -545,7 +548,7 @@ read_makefile (filename, flags)
       if (word1eq ("override", 8))
         {
 	  p2 = next_token (p + 8);
-	  if (p2 == 0)
+	  if (*p2 == '\0')
 	    error (&fileinfo, "empty `override' directive");
 	  if (!strncmp (p2, "define", 6) && (isblank (p2[6]) || p2[6] == '\0'))
 	    {
@@ -554,6 +557,9 @@ read_makefile (filename, flags)
 	      else
 		{
 		  p2 = next_token (p2 + 6);
+                  if (*p2 == '\0')
+                    fatal (&fileinfo, "empty variable name");
+
 		  /* Let the variable name be the whole rest of the line,
 		     with trailing blanks stripped (comments have already been
 		     removed), so it could be a complex variable/function
@@ -566,7 +572,7 @@ read_makefile (filename, flags)
 	    }
 	  else if (!ignoring
 		   && !try_variable_definition (&fileinfo, p2, o_override))
-	    error (&fileinfo, "empty `override' directive");
+	    error (&fileinfo, "invalid `override' directive");
 
 	  continue;
 	}
