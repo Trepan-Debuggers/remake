@@ -344,9 +344,6 @@ reap_children (block, err)
 		  if (c->file->update_status != 0)
 		    /* We failed to start the commands.  */
 		    delete_child_targets (c);
-
-		  /* Tell update_file that some actual work has been done.  */
-		  ++files_remade;
 		  break;
 
 		default:
@@ -502,6 +499,15 @@ start_job_command (child)
   if (just_print_flag || (!noprint && !silent_flag))
     puts (p);
 
+  /* Tell update_goal_chain that a command has been started on behalf of
+     this target.  It is important that this happens here and not in
+     reap_children (where we used to do it), because reap_children might be
+     reaping children from a different target.  We want this increment to
+     guaranteedly indicate that a command was started for the dependency
+     chain (i.e., update_file recursion chain) we are processing.  */
+
+  ++commands_started;
+
   /* If -n was given, recurse to get the next line in the sequence.  */
 
   if (just_print_flag && !recursive)
@@ -510,11 +516,6 @@ start_job_command (child)
       free ((char *) argv);
       if (job_next_command (child))
 	start_job_command (child);
-      else
-	/* Normally, this is set by reap_children to indicate that
-	   some commands were actually run.  Under -n, reap_children
-	   never gets called, so we increment it here.  */
-	++files_remade;
       return;
     }
 
