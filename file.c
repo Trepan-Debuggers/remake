@@ -73,17 +73,21 @@ lookup_file (name)
 #ifdef VMS
     name = "[]";
 #else
+#ifdef _AMIGA
+    name = "";
+#else
     name = "./";
-#endif
+#endif /* AMIGA */
+#endif /* VMS */
 
   hashval = 0;
   for (n = name; *n != '\0'; ++n)
-    HASH (hashval, *n);
+    HASHI (hashval, *n);
   hashval %= FILE_BUCKETS;
 
   for (f = files[hashval]; f != 0; f = f->next)
     {
-      if (streq (f->name, name))
+      if (strieq (f->name, name))
 	{
 	  return f;
 	}
@@ -120,11 +124,11 @@ enter_file (name)
 
   hashval = 0;
   for (n = name; *n != '\0'; ++n)
-    HASH (hashval, *n);
+    HASHI (hashval, *n);
   hashval %= FILE_BUCKETS;
 
   for (f = files[hashval]; f != 0; f = f->next)
-    if (streq (f->name, name))
+    if (strieq (f->name, name))
       break;
 
   if (f != 0 && !f->double_colon)
@@ -178,7 +182,7 @@ rename_file (file, name)
 
   oldhash = 0;
   for (n = oldname; *n != '\0'; ++n)
-    HASH (oldhash, *n);
+    HASHI (oldhash, *n);
 
   file_hash_enter (file, name, oldhash, file->name);
 }
@@ -198,13 +202,13 @@ file_hash_enter (file, name, oldhash, oldname)
 
   newhash = 0;
   for (n = name; *n != '\0'; ++n)
-    HASH (newhash, *n);
+    HASHI (newhash, *n);
   newbucket = newhash % FILE_BUCKETS;
 
   /* Look for an existing file under the new name.  */
 
   for (oldfile = files[newbucket]; oldfile != 0; oldfile = oldfile->next)
-    if (streq (oldfile->name, name))
+    if (strieq (oldfile->name, name))
       break;
 
   if (oldhash != 0 && (newbucket != oldbucket || oldfile != 0))
