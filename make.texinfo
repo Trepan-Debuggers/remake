@@ -6,11 +6,10 @@
 @smallbook
 @c %**end of header
 
-@set EDITION 0.34 Beta
+@set EDITION 0.35 Beta
 @set VERSION 3.63 Beta
-@set UPDATED 23 July 1992
-@c !!!!! is there a reason not to use the full date in the title page? -rm
-@set UPDATE-MONTH July 1992
+@set UPDATED 14 August 1992
+@set UPDATE-MONTH August 1992
 
 @c finalout
 
@@ -1723,10 +1722,12 @@ clean:
 @end group
 @end example
 
-A phony target should not be a dependency of a real target file; strange
-things can result from that.  As long as you do not do that, the phony
-target commands will be executed only when the phony target is a specified
-goal (@pxref{Goals, ,Arguments to Specify the Goals}).
+A phony target should not be a dependency of a real target file; if it
+is, its commands are run every time @code{make} goes to update that
+file.  As long as a phony target is never a dependency of a real
+target, the phony target commands will be executed only when the phony
+target is a specified goal (@pxref{Goals, ,Arguments to Specify the
+Goals}).
 
 Phony targets can have dependencies.  When one directory contains multiple
 programs, it is most convenient to describe all of the programs in one
@@ -1792,8 +1793,12 @@ There is nothing special about the name @samp{FORCE}, but that is one name
 commonly used this way.
 
 As you can see, using @samp{FORCE} this way has the same results as using
-@samp{.PHONY: clean}.  The latter is more explicit, but other versions of
-@code{make} do not support it; thus @samp{FORCE} appears in many makefiles.
+@samp{.PHONY: clean}.  
+
+Using @samp{.PHONY} is more explicit, more efficient, and more secure,
+since it protects against the file actually existing.  However, other
+versions of @code{make} do not support @samp{.PHONY}; thus
+@samp{FORCE} appears in many makefiles.  @xref{Phony Targets}.
 
 @node Empty Targets, Special Targets, Force Targets, Rules
 @section Empty Target Files to Record Events
