@@ -1497,7 +1497,7 @@ construct_command_argv_internal (line, restp, shell, ifs)
 	 strcat (dos_bname, ".bat");
 	 strcat (dos_bename, ".err");
        }
-     batch = fopen(bename, "w"); /* Create a file.  */
+     batch = fopen (dos_bename, "w"); /* Create a file.  */
      if (batch != NULL)
        fclose (batch);
      batch = fopen (dos_bname, "w");
@@ -1506,7 +1506,7 @@ construct_command_argv_internal (line, restp, shell, ifs)
      fprintf (batch, "\nif errorlevel 1 del %s\n", dos_bename);
      fclose (batch);
      new_argv = (char **) xmalloc(2 * sizeof(char *));
-     new_argv[0] = strdup (bname);
+     new_argv[0] = strdup (dos_bname);
      new_argv[1] = 0;
    }
 #else	/* Not MSDOS.  */
