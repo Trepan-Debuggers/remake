@@ -40,6 +40,9 @@ char *remote_description = "Customs";
 /* ExportPermit gotten by start_remote_job_p, and used by start_remote_job.  */
 static ExportPermit permit;
 
+/* Normalized path name of the current directory.  */
+static char *normalized_cwd;
+
 /* Return nonzero if the next job should be done remotely.  */
 
 int
@@ -64,6 +67,22 @@ start_remote_job_p ()
 
       /* Return to normal user access.  */
       user_access ();
+
+      if (starting_directory == 0)
+	/* main couldn't figure it out.  */
+	inited = -1;
+      else
+	{
+	  /* Normalize the current directory path name to something
+	     that should work on all machines exported to.  */
+
+	  normalized_cwd = (char *) xmalloc (GET_PATH_MAX);
+	  strcpy (normalized_cwd, starting_directory);
+	  if (Customs_NormPath (normalized_cwd, GET_PATH_MAX) < 0)
+	    /* Path normalization failure means using Customs
+	       won't work, but it's not really an error.  */
+	    inited = -1;
+	}
     }
 
   if (inited < 0)
@@ -96,7 +115,6 @@ start_remote_job (argv, envp, stdin_fd, is_remote, id_ptr, used_stdin)
      int *used_stdin;
 {
   extern int vfork (), execve ();
-  PATH_VAR (cwd);
   char waybill[MAX_DATA_SIZE], msg[128];
   struct timeval timeout;
   struct sockaddr_in sin;
@@ -104,25 +122,6 @@ start_remote_job (argv, envp, stdin_fd, is_remote, id_ptr, used_stdin)
   int retsock, retport, sock;
   Rpc_Stat status;
   int pid;
-
-  /* Find the current directory.  */
-  if (getcwd (cwd, GET_PATH_MAX) == 0)
-    {
-#ifdef	HAVE_GETCWD
-      perror_with_name ("exporting: getcwd: ", "");
-#else
-      error ("exporting: getwd: %s", cwd);
-#endif
-      return 1;
-    }
-
-  /* Normalize the current directory path name to something
-     that should work on all machines exported to.  */
-  if (Customs_NormPath (cwd, GET_PATH_MAX) < 0)
-    {
-      error ("exporting: path normalization failed: %s", cwd);
-      return 1;
-    }
 
   /* Create the return socket.  */
   retsock = Rpc_UdpCreate (True, 0);
@@ -146,14 +145,14 @@ start_remote_job (argv, envp, stdin_fd, is_remote, id_ptr, used_stdin)
   sock = Rpc_TcpCreate (False, 0);
 
   /* Create a WayBill to give to the server.  */
-  len = Customs_MakeWayBill (&permit, cwd, argv[0], argv,
+  len = Customs_MakeWayBill (&permit, normalized_cwd, argv[0], argv,
 			     envp, retport, waybill);
 
   /* Modify the waybill as if the remote child had done `child_access ()'.  */
   {
     WayBill *wb = (WayBill *) waybill;
-    wb->ruid = wb->euid;
-    wb->rgid = wb->egid;
+    wb->euid = wb->ruid;
+    wb->rgid = wb->rgid;
   }
 
   /* Send the request to the server, timing out in 20 seconds.  */
