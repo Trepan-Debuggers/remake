@@ -9,7 +9,7 @@
 
 @set EDITION 0.43
 @set VERSION 3.68 Beta
-@set UPDATED 10 June 1993
+@set UPDATED 21 June 1993
 @set UPDATE-MONTH June 1993
 
 @c finalout
@@ -2406,11 +2406,11 @@ $(filter %.elc,$(files)): %.elc: %.el
 @end example
 
 @noindent
-Here the result of @samp{$(filter %.o,$(files))} is @file{bar.o lose.o},
-and the first static pattern rule causes each of these object files to
-be updated by compiling the corresponding C source file.  The result of
-@w{@samp{$(filter %.elc,$(files))}} is @file{foo.elc}, so that file is
-made from @file{foo.el}.@refill
+In this example the result of @samp{$(filter %.o,$(files))} is
+@file{bar.o lose.o}, and the first static pattern rule causes each of
+these object files to be updated by compiling the corresponding C source
+file.  The result of @w{@samp{$(filter %.elc,$(files))}} is
+@file{foo.elc}, so that file is made from @file{foo.el}.@refill
 
 Another example shows how to use @code{$*} in static pattern rules:
 @vindex $*@r{, and static pattern}
@@ -3093,7 +3093,8 @@ line, and if its name consists only of letters, numbers, and underscores.
 Some shells cannot cope with environment variable names consisting of
 characters other than letters, numbers, and underscores.
 
-The special variables @code{SHELL} and @code{MAKEFLAGS} are always exported.
+The special variables @code{SHELL} and @code{MAKEFLAGS} are always
+exported (unless you unexport them).
 @code{MAKEFILES} is exported if you set it to anything.
 
 Variables are @emph{not} normally passed down if they were created by
@@ -4665,7 +4666,7 @@ that they will be executed despite use of the @samp{-t} flag.
 
 @node Functions, Running, Conditionals, Top
 @chapter Functions for Transforming Text
-@cindex function
+@cindex functions
 
 @dfn{Functions} allow you to do text processing in the makefile to compute
 the files to operate on or the commands to use.  You use a function in a
@@ -6257,7 +6258,7 @@ is not given.  Many of the predefined implicit rules are implemented in
 @code{.ln}, @code{.o}, @code{.c}, @code{.cc}, @code{.C}, @code{.p},
 @code{.f}, @code{.F}, @code{.r}, @code{.y}, @code{.l}, @code{.s}, @code{.S},
 @code{.mod}, @code{.sym}, @code{.def}, @code{.h}, @code{.info}, @code{.dvi},
-@code{.tex}, @code{.texinfo}, @code{.texi}, @code{.txinfo}, @code{.cweb},
+@code{.tex}, @code{.texinfo}, @code{.texi}, @code{.txinfo}, @code{.w},
 @code{.web}, @code{.sh}, @code{.elc}, @code{.el}.  All of the implicit rules
 described below whose dependencies have one of these suffixes are actually
 suffix rules.  If you modify the suffix list, the only predefined suffix
@@ -6353,9 +6354,11 @@ running the C preprocessor, @code{cpp}.  The precise command is
 
 @item Linking a single object file
 @cindex linking, predefined rule for
-@file{@var{n}} is made automatically from @file{@var{n}.o} by
-running the linker @code{ld} via the C compiler.  The precise command
-used is @w{@samp{$(CC) $(LDFLAGS) @var{n}.o $(LOADLIBES)}}.@refill
+@pindex ld
+@pindex .o
+@file{@var{n}} is made automatically from @file{@var{n}.o} by running
+the linker (usually called @code{ld}) via the C compiler.  The precise
+command used is @w{@samp{$(CC) $(LDFLAGS) @var{n}.o $(LOADLIBES)}}.
 
 This rule does the right thing for a simple program with only one
 source file.  It will also do the right thing if there are multiple
@@ -6434,8 +6437,8 @@ the list of implicit rule suffixes with:@refill
 @pindex lint
 @cindex @code{lint}, rule to run
 @pindex .ln
-@file{@var{n}.ln} is made from @file{@var{n}.c} with a command of
-the form @w{@samp{$(LINT) $(LINTFLAGS) $(CPPFLAGS) -i}}.  
+@file{@var{n}.ln} is made from @file{@var{n}.c} by running @code{lint}.
+The precise command is @w{@samp{$(LINT) $(LINTFLAGS) $(CPPFLAGS) -i}}.  
 The same command is used on the C code produced from 
 @file{@var{n}.y} or @file{@var{n}.l}.@refill
 
@@ -6450,13 +6453,13 @@ The same command is used on the C code produced from
 @pindex .dvi
 @pindex .tex
 @pindex .web
-@pindex .cweb
+@pindex .w
 @file{@var{n}.dvi} is made from @file{@var{n}.tex} with the
 command @samp{$(TEX)}.  @file{@var{n}.tex} is made from
-@file{@var{n}.web} with @samp{$(WEAVE)}, or from @file{@var{n}.cweb}
+@file{@var{n}.web} with @samp{$(WEAVE)}, or from @file{@var{n}.w}
 with @samp{$(CWEAVE)}.  @file{@var{n}.p} is made from
 @file{@var{n}.web} with @samp{$(TANGLE)} and @file{@var{n}.c} is
-made from @file{@var{n}.cweb} with @samp{$(CTANGLE)}.@refill
+made from @file{@var{n}.w} with @samp{$(CTANGLE)}.@refill
 
 @item Texinfo and Info
 @cindex Texinfo, rule to format
@@ -7828,12 +7831,12 @@ System V or BSD implementations.  @xref{Execution, ,Command Execution}.
 
 @item
 Modified variable references using pattern substitution come from
-SunOS 4.0.  @xref{Reference, ,Basics of Variable References}.
+SunOS 4.  @xref{Reference, ,Basics of Variable References}.
 This functionality was provided in GNU @code{make} by the
 @code{patsubst} function before the alternate syntax was implemented
-for compatibility with SunOS 4.0.  It is not altogether clear who
+for compatibility with SunOS 4.  It is not altogether clear who
 inspired whom, since GNU @code{make} had @code{patsubst} before SunOS
-4.0 was released.@refill
+4 was released.@refill
 
 @item
 The special significance of @samp{+} characters preceding command lines
@@ -7842,7 +7845,12 @@ mandated by draft 11.2 of IEEE Std 1003.2 (POSIX).@refill
 
 @item
 The @samp{+=} syntax to append to the value of a variable comes from SunOS
-4.0 @code{make}.  @xref{Appending, , Appending More Text to Variables}.
+4 @code{make}.  @xref{Appending, , Appending More Text to Variables}.
+
+@item
+The syntax @w{@samp{@var{archive}(@var{mem1} @var{mem2}@dots{})}} to list
+multiple members in a single archive file comes from SunOS 4 @code{make}.
+@xref{Archive Members}.
 @end itemize
 
 The remaining features are inventions new in GNU @code{make}:
@@ -7897,12 +7905,12 @@ of the C preprocessor and similar macro languages and is not a
 revolutionary concept.  @xref{Conditionals, ,Conditional Parts of Makefiles}.
 
 @item
-Specify the included makefile search path.  @xref{Include, ,Including
-Other Makefiles}.
+Specify a search path for included makefiles.
+@xref{Include, ,Including Other Makefiles}.
 
 @item
-Specify extra makefiles to read.  @xref{MAKEFILES Variable, ,The
-Variable @code{MAKEFILES}}.
+Specify extra makefiles to read with an environment variable.
+@xref{MAKEFILES Variable, ,The Variable @code{MAKEFILES}}.
 
 @item
 Strip leading sequences of @samp{./} from file names, so that
