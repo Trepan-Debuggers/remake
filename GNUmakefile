@@ -38,30 +38,6 @@ endif # not ARCH
 
 ifdef ARCH
 
-# We know the type of machine, so put the binaries in subdirectories.
-$(ARCH)/%.o: %.c
-	$(COMPILE.c) $< $(OUTPUT_OPTION)
-objs := $(addprefix $(ARCH)/,$(objs))
-prog := $(ARCH)/make
-
-archpfx = $(ARCH)/
-
-$(archpfx)load.o: load.c
-	$(COMPILE.c) $(LOAD_AVG) $< -o $@
-$(archpfx)load.dep: load.c
-	$(mkdep) $(LOAD_AVG) $< | sed 's,$*\.o,& $@,' > $@
-$(archpfx)remote.o: remote.c
-	$(COMPILE.c) $(REMOTE) $< -o $@
-$(archpfx)remote.dep: remote.c
-	$(mkdep) $(REMOTE) $< | sed 's,$*\.o,& $@,' > $@
-
-CPPFLAGS := $(filter-out @%@,$(defines))
-
-ifneq "$(wildcard $(ARCH)/makefile)" ""
-include $(ARCH)/makefile
-endif
-objs := $(sort $(objs) $(addprefix $(ARCH)/,$(ALLOCA) $(extras)))
-
 ifndef no_libc
 libc_dir = /home/gd2/gnu/libc/$(ARCH)
 ifneq ($(wildcard $(libc_dir)),)
@@ -79,6 +55,9 @@ CC := $(CC) -b glibc
 GETOPT =
 #GETOPT_SRC = Don't clear this or dist will break.
 
+# glob is in libc too.
+GLOB = 
+
 CPPFLAGS := $(CPPFLAGS) \
 	    -DSTDC_HEADERS -DHAVE_UNISTD_H -DHAVE_GLOB_H \
 	    -DHAVE_GETDTABLESIZE -DHAVE_SYS_SIGLIST -DHAVE_DUP2 \
@@ -90,9 +69,33 @@ globdep = glob/libglob.a
 globlib = $(globdep)
 CPPFLAGS := $(CPPFLAGS) -Iglob
 
+endif	 # works-for-make
+endif	 # $(libc_dir)
+endif	 # !no_libc
+
+# We know the type of machine, so put the binaries in subdirectories.
+$(ARCH)/%.o: %.c
+	$(COMPILE.c) $< $(OUTPUT_OPTION)
+objs := $(addprefix $(ARCH)/,$(objs))
+prog := $(ARCH)/make
+
+archpfx = $(ARCH)/
+
+$(archpfx)load.o: load.c
+	$(COMPILE.c) $(LOAD_AVG) $< -o $@
+$(archpfx)load.dep: load.c
+	$(mkdep) $(LOAD_AVG) $< | sed 's,$*\.o,& $@,' > $@
+$(archpfx)remote.o: remote.c
+	$(COMPILE.c) $(REMOTE) $< -o $@
+$(archpfx)remote.dep: remote.c
+	$(mkdep) $(REMOTE) $< | sed 's,$*\.o,& $@,' > $@
+
+CPPFLAGS := $(CPPFLAGS) $(filter-out @%@,$(defines))
+
+ifneq "$(wildcard $(ARCH)/makefile)" ""
+include $(ARCH)/makefile
 endif
-endif
-endif
+objs := $(sort $(objs) $(addprefix $(ARCH)/,$(ALLOCA) $(extras)))
 
 else # Not ARCH
 prog := make
