@@ -1,4 +1,4 @@
-/* Copyright (C) 1988, 1989, 1991 Free Software Foundation, Inc.
+/* Copyright (C) 1988, 1989, 1991, 1993 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -25,10 +25,15 @@ struct commands
     char *commands;		/* Commands text.  */
     unsigned int ncommand_lines;/* Number of command lines.  */
     char **command_lines;	/* Commands chopped up into lines.  */
-    char *lines_recurse;	/* One flag for each line.  */
-    char any_recurse;		/* Nonzero if any `lines_recurse' elt is.  */
+    char *lines_flags;		/* One set of flag bits for each line.  */
+    int any_recurse;		/* Nonzero if any `lines_recurse' elt has */
+				/* the COMMANDS_RECURSE bit set.  */
   };
 
+/* Bits in `lines_flags'.  */
+#define	COMMANDS_RECURSE	1 /* Recurses: + or $(MAKE).  */
+#define	COMMANDS_SILENT		2 /* Silent: @.  */
+#define	COMMANDS_NOERROR	4 /* No errors: -.  */
 
 extern void execute_file_commands ();
 extern void print_commands ();
