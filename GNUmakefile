@@ -71,7 +71,7 @@ endif
 LOADLIBES := $(LOADLIBES) \
 	     $(libc_dir)/mcheck-init.o \
 	     $(libc_dir)/libc.a \
-	     /usr/local/lib/gcc-lib/$(gcc-arch)/2.1/libgcc.a \
+	     -lgcc \
 	     $(libc_dir)/libc.a
 $(prog): $(libc_dir)/libc.a
 
