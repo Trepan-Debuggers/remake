@@ -1,9 +1,13 @@
+Sat Mar  2 16:26:52 1996  Roland McGrath  <roland@charlie-brown.gnu.ai.mit.edu>
+
+	* compatMakefile (srcs): Add getopt.h; prepend $(srcdir)/ to getopt*.
+
 Fri Mar  1 12:04:47 1996  Roland McGrath  <roland@charlie-brown.gnu.ai.mit.edu>
+
+	* Version 3.74.3.
 
 	* remake.c (f_mtime): Move future modtime check before FILE is
 	clobbered by :: loop.
-
-	* Version 3.74.3.
 
 	* dir.c: Use canonical code from autoconf manual for dirent include.
 	[_D_NAMLEN]: Redefine NAMLEN using this.
