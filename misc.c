@@ -461,10 +461,10 @@ dep_name (dep)
    setregid functions, but they don't work as in BSD and only the POSIX.1
    way works.  */
 
-#if defined (HAVE_SETREUID) && defined (HAVE_SETUID)
+#ifndef HAVE_SETREUID
 #undef HAVE_SETREUID
 #endif
-#if defined (HAVE_SETREGID) && defined (HAVE_SETGID)
+#ifndef HAVE_SETREGID
 #undef HAVE_SETREGID
 #endif
 
