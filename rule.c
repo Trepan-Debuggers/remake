@@ -237,7 +237,7 @@ convert_to_pattern ()
 /* Install the pattern rule RULE (whose fields have been filled in)
    at the end of the list (so that any rules previously defined
    will take precedence).  If this rule duplicates a previous one
-   (identical target and dependents), the old one is replaced
+   (identical target and dependencies), the old one is replaced
    if OVERRIDE is nonzero, otherwise this new one is thrown out.
    When an old rule is replaced, the new one is put at the end of the
    list.  Return nonzero if RULE is used; zero if not.  */
