@@ -153,7 +153,8 @@ reference_variable (char *o, char *name, unsigned int length)
   if (v == 0)
     warn_undefined (name, length);
 
-  if (v == 0 || *v->value == '\0')
+  /* If there's no variable by that name or it has no value, stop now.  */
+  if (v == 0 || (*v->value == '\0' && !v->append))
     return o;
 
   value = (v->recursive ? recursively_expand (v) : v->value);

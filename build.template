@@ -2,7 +2,7 @@
 # Shell script to build GNU Make in the absence of any `make' program.
 # @configure_input@
 
-# Copyright (C) 1993, 1994, 1997, 2003 Free Software Foundation, Inc.
+# Copyright (C) 1993, 1994, 1997, 2003, 2004 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify
@@ -28,7 +28,7 @@ CFLAGS='@CFLAGS@'
 CPPFLAGS='@CPPFLAGS@'
 LDFLAGS='@LDFLAGS@'
 ALLOCA='@ALLOCA@'
-LOADLIBES='@LIBS@'
+LOADLIBES='@LIBS@ @LIBINTL@'
 eval extras=\'@LIBOBJS@\'
 REMOTE='@REMOTE@'
 GLOBLIB='@GLOBLIB@'
@@ -78,6 +78,6 @@ done
 
 # Link all the objects together.
 echo linking make...
-$CC $LDFLAGS $objs $LOADLIBES -o makenew${EXEEXT}
+$CC $CFLAGS $LDFLAGS $objs $LOADLIBES -o makenew${EXEEXT}
 echo done
 mv -f makenew${EXEEXT} make${EXEEXT}

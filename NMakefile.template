@@ -25,6 +25,7 @@
 
 LINK = link
 CC = cl
+MAKE = nmake
 
 OUTDIR=.
 MAKEFILE=NMakefile

@@ -957,6 +957,11 @@ do_variable_definition (const struct floc *flocp, const char *varname,
             append = 1;
             v = lookup_variable_in_set (varname, strlen (varname),
                                         current_variable_set_list->set);
+
+            /* Don't append from the global set if a previous non-appending
+               target-specific variable definition exists. */
+            if (v && !v->append)
+              append = 0;
           }
         else
           v = lookup_variable (varname, strlen (varname));

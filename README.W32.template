@@ -5,7 +5,7 @@ Should also build fine with MSVC 5.x and 6.x (though not confirmed).
 This Windows 32-bit port of GNU make is maintained primarily by Rob
 Tulloh, who is also the author of this README.
 
-To build with nmake on Windows NT, Windows 95, or Windows 98:
+To build with nmake on MS-Windows:
 
 	1. Make sure cl.exe is in your %Path%. Example:
 
@@ -63,10 +63,10 @@ GNU make and sh.exe:
 
 	There are very few true ports of Bourne shell for NT right now.
 	There is a version of GNU bash available from Cygnus "Cygwin"
-	porting effort (http://sourceware.cygnus.com/cygwin).
+	porting effort (http://www.cygwin.com/).
 	Other possibilities are the MKS version of sh.exe, or building
         your own with a package like NutCracker (DataFocus) or Portage
-        (Consensys).
+        (Consensys).  Also MinGW includes sh (http://mingw.org/).
 
 GNU make and brain-dead shells (BATCH_MODE_ONLY_SHELL):
 
@@ -131,7 +131,8 @@ GNU make handling of drive letters in pathnames (PATH, vpath, VPATH):
 	Please note that you are free to mix colon and semi-colon in the
 	specification of paths.	 Make is able to figure out the intended
 	result and convert the paths internally to the format needed
-	when interacting with the operating system.
+	when interacting with the operating system, providing the path
+	is not within quotes, e.g. "x:/test/test.c".
 
 	You are encouraged to use colon as the separator character.
 	This should ease the pain of deciding how to handle various path
@@ -167,15 +168,17 @@ Building GNU make on Windows NT and Windows 95/98 with Microsoft Visual C:
 Pathnames and white space:
 
 	Unlike Unix, Windows 95/NT systems encourage pathnames which
-	contain white space (e.g. C:\Program Files\). These sorts of pathnames
-	are legal under Unix too, but are never encouraged. There is
-	at least one place in make (VPATH/vpath handling) where paths
-	containing white space will simply not work. There may be others
-	too. I chose to not try and port make in such a way so that
-	these sorts of paths could be handled. I offer these suggestions
-	as workarounds:
+	contain white space (e.g. C:\Program Files\). These sorts of
+	pathnames are legal under Unix too, but are never encouraged.
+	There is at least one place in make (VPATH/vpath handling) where
+	paths containing white space will simply not work. There may be
+	others too. I chose to not try and port make in such a way so
+	that these sorts of paths could be handled. I offer these
+	suggestions as workarounds:
 
-		1. Use 8.3 notation
+		1. Use 8.3 notation. i.e. "x:/long~1/", which is actually
+		   "x:\longpathtest".  Type "dir /x" to view these filenames
+		   within the cmd.exe shell.
 		2. Rename the directory so it does not contain white space.
 
 	If you are unhappy with this choice, this is free software

@@ -35,6 +35,7 @@ MA 02111-1307, USA.  */
 #endif
 #ifdef WINDOWS32
 #include <windows.h>
+#include <io.h>
 #include "pathstuff.h"
 #endif
 #ifdef __EMX__
@@ -544,11 +545,13 @@ enter_command_line_file (char *name)
 
 /* Toggle -d on receipt of SIGUSR1.  */
 
+#ifdef SIGUSR1
 static RETSIGTYPE
 debug_signal_handler (int sig UNUSED)
 {
   db_level = db_level ? DB_NONE : DB_BASIC;
 }
+#endif
 
 static void
 decode_debug_flags (void)
@@ -1917,14 +1920,14 @@ main (int argc, char **argv, char **envp)
 	       termination. */
 	    int pid;
 	    int status;
-	    pid = child_execute_job(0, 1, nargv, environ);
+	    pid = child_execute_job (0, 1, nargv, environ);
 
 	    /* is this loop really necessary? */
 	    do {
-	      pid = wait(&status);
-	    } while(pid <= 0);
+	      pid = wait (&status);
+	    } while (pid <= 0);
 	    /* use the exit code of the child process */
-	    exit(WIFEXITED(status) ? WEXITSTATUS(status) : EXIT_FAILURE);
+	    exit (WIFEXITED(status) ? WEXITSTATUS(status) : EXIT_FAILURE);
 	  }
 #else
 	  exec_command (nargv, environ);
@@ -1938,6 +1941,10 @@ main (int argc, char **argv, char **envp)
 	}
 
       db_level = orig_db_level;
+
+      /* Free the makefile mtimes (if we allocated any).  */
+      if (makefile_mtimes)
+        free ((char *) makefile_mtimes);
     }
 
   /* Set up `MAKEFLAGS' again for the normal targets.  */
