@@ -1,5 +1,5 @@
 /* Directory hashing for GNU Make.
-Copyright (C) 1988, 1989, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 91, 92, 93, 94, 95 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -444,7 +444,7 @@ file_impossible_p (filename)
       bcopy (p, dirname, dirend - p);
       dirname[dirend - p] = '\0';
       dir = find_directory (dirname)->contents;
-      p = dirend + 1;
+      p = filename = dirend + 1;
     }
 
   if (dir == 0 || dir->files == 0)
