@@ -1241,9 +1241,12 @@ construct_command_argv_internal (line, restp, shell, ifs)
 
       if (instring)
 	{
-	  /* Inside a string, just copy any char except a closing quote.  */
+	  /* Inside a string, just copy any char except a closing quote
+	     or a backslash-newline combination.  */
 	  if (*p == '\'')
 	    instring = 0;
+	  else if (*p == '\\' && p[1] == '\n')
+	    goto swallow_escaped_newline;
 	  else if (*p == '\n' && restp != NULL)
 	    {
 	      /* End of the command line.  */
@@ -1275,6 +1278,8 @@ construct_command_argv_internal (line, restp, shell, ifs)
 	    /* Backslash-newline combinations are eaten.  */
 	    if (p[1] == '\n')
 	      {
+	      swallow_escaped_newline:
+
 		/* Eat the backslash, the newline, and following whitespace,
 		   replacing it all with a single space.  */
 		p += 2;
@@ -1286,13 +1291,18 @@ construct_command_argv_internal (line, restp, shell, ifs)
 		if (*p == '\t')
 		  strcpy (p, p + 1);
 
-		if (ap != new_argv[i])
-		  /* Treat this as a space, ending the arg.
-		     But if it's at the beginning of the arg, it should
-		     just get eaten, rather than becoming an empty arg. */
-		  goto end_of_arg;
+		if (instring)
+		  *ap++ = *p;
 		else
-		  p = next_token (p) - 1;
+		  {
+		    if (ap != new_argv[i])
+		      /* Treat this as a space, ending the arg.
+			 But if it's at the beginning of the arg, it should
+			 just get eaten, rather than becoming an empty arg. */
+		      goto end_of_arg;
+		    else
+		      p = next_token (p) - 1;
+		  }
 	      }
 	    else if (p[1] != '\0')
 	      /* Copy and skip the following char.  */
