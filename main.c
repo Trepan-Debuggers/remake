@@ -1037,7 +1037,8 @@ decode_switches (argc, argv)
   *p++ = '-';			/* Non-option args are returned in order.  */
   for (i = 0; switches[i].c != '\0'; ++i)
     {
-      long_options[i].name = switches[i].long_name;
+      long_options[i].name = (switches[i].long_name == 0 ? "" :
+			      switches[i].long_name);
       *p++ = switches[i].c;
       switch (switches[i].type)
 	{
@@ -1091,8 +1092,8 @@ decode_switches (argc, argv)
 	}
       else
 	for (cs = switches; cs->c != '\0'; ++cs)
-	  {
-	    if (cs->c == c)
+	  if (cs->c == c)
+	    {
 	      switch (cs->type)
 		{
 		default:
@@ -1158,9 +1159,9 @@ positive integral argument",
 		  break;
 		}
 	    
-	    /* We've found the switch.  Stop looking.  */
-	    break;
-	  }
+	      /* We've found the switch.  Stop looking.  */
+	      break;
+	    }
     }
 
   if (other_args != 0)
