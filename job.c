@@ -334,11 +334,8 @@ reap_children (block, err)
 		  child_failed = 0;
 		}
 
-	      if (!err)
-		/* If there are more commands to run, try to start them.  */
-		start_job (c);
-	      else
-		c->file->command_state = cs_finished;
+	      /* If there are more commands to run, try to start them.  */
+	      start_job (c);
 
 	      switch (c->file->command_state)
 		{
