@@ -1,3 +1,7 @@
+Wed Apr 19 03:25:54 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* Version 3.73.1.
+
 Sat Apr  8 14:53:24 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
 	* remake.c (notice_finished_file): Set FILE->update_status to zero
