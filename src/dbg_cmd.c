@@ -65,7 +65,7 @@ static debug_return_t com_history          (char *psz_arg);
 static debug_return_t com_print            (char *psz_arg);
 static debug_return_t com_quit             (char *psz_arg);
 static debug_return_t com_restart          (char *psz_arg);
-static debug_return_t com_set_var_expand   (char *psz_arg);
+static debug_return_t com_set              (char *psz_arg);
 static debug_return_t com_set_var_noexpand (char *psz_arg);
 static debug_return_t com_shell            (char *psz_arg);
 static debug_return_t com_show_stack       (char *psz_arg);
@@ -76,7 +76,6 @@ static debug_return_t com_frame_up         (char *psz_arg);
 static debug_return_t com_frame_down       (char *psz_arg);
 static debug_return_t com_step             (char *psz_arg);
 static debug_return_t com_info             (char *psz_arg);
-static debug_return_t com_trace            (char *psz_arg);
 
 long_cmd_t commands[] = {
   { "break",    'b' },
@@ -98,7 +97,6 @@ long_cmd_t commands[] = {
   { "show"    , 'i' },
   { "skip"    , 'k' },
   { "step"    , 's' },
-  { "trace"   , 't' },
   { "where"   , 'T' },
   { "up"      , 'u' },
   { (char *)NULL, ' '}
@@ -127,7 +125,7 @@ on_off_toggle(const char *psz_arg, int *var)
   else if (strcmp (psz_arg, "toggle") == 0)
     *var = !*var;
   else 
-    printf("expecting \"on\", \"off\", or \"toggle\"; got %s \n",
+    printf("expecting \"on\", \"off\", or \"toggle\"; got \"%s\" \n",
 	   psz_arg);
 }
 
@@ -247,12 +245,6 @@ cmd_initialize(void)
       "\tArgument N means do this N times (or until there's another\n " \
       "\treason to stop.");
 
-  short_command['t'].func = &com_trace;
-  short_command['t'].use  = _("trace [on|off|toggle]");
-  short_command['t'].doc  = 
-    _("toggle or set tracing on or off. With no argument "	\
-      "the value is toggled.\n");
-  
   short_command['T'].func = &com_show_stack;
   short_command['T'].doc  = _("Show target stack.");
   short_command['T'].use  = _("where");
@@ -274,11 +266,16 @@ cmd_initialize(void)
   short_command['!'].doc  = 
     _("Execute the rest of the line as a shell.");
 
-  short_command['='].func = &com_set_var_expand;
-  short_command['='].use =  _("set *variable* *value*");
+  short_command['='].func = &com_set;
+  short_command['='].use =  _("set {variable|basename|trace} *value*");
   short_command['='].doc  = 
-    _("Set MAKE variable to value. Variable definitions\n"
-      "\tinside VALUE are expanded before assignment occurs.");
+    _("\nset variable *var* *value*\n"
+      "\tSet MAKE variable to value. Variable definitions\n"
+      "\tinside VALUE are expanded before assignment occurs.\n\n"
+      "set basename {on|off|toggle}\n"
+      "\tset filename to show full name or basename\n\n"
+      "set trace {on|off|toggle}\n"
+      "\tset tracing status\n");
 
   short_command['"'].func = &com_set_var_noexpand;
   short_command['"'].use =  _("setq *variable* *value*");
@@ -399,7 +396,7 @@ static debug_return_t com_help (char *psz_arg)
     }
   }
   
-  return 0;
+  return debug_read;
 }
 
 #if HISTORY_STUFF
@@ -506,6 +503,7 @@ static debug_return_t com_continue (char *psz_arg)
 static debug_return_t com_info (char *psz_arg)
 {
   if (!psz_arg || 0==strlen(psz_arg)) {
+    com_info("basename");
     com_info("target");
     com_info("trace");
   } else {
@@ -516,6 +514,8 @@ static debug_return_t com_info (char *psz_arg)
 	printf("target unknown\n");
     } else if (0 == strcmp (psz_arg, "trace")) {
       printf("trace: %s\n", var_to_on_off(tracing));
+    } else if (0 == strcmp (psz_arg, "basename")) {
+      printf("basename: %s\n", var_to_on_off(basename_filenames));
     } else {
       printf("Don't know how to show %s\n", psz_arg);
     }
@@ -571,6 +571,53 @@ static debug_return_t com_print (char *psz_object)
   return debug_read;
 }
 
+/* Set a variable definition with all variable references in the value
+   part of psz_string expanded. */
+static debug_return_t com_set (char *psz_args) 
+{
+  if (!psz_args || 0==strlen(psz_args)) {
+    printf("need to supply a variable name\n");
+  } else {
+    variable_t *p_v;
+    char *psz_varname;
+    unsigned int u_len=0;
+
+    /* Isolate the variable. */
+    while (*psz_args && whitespace (*psz_args))
+      *psz_args++;
+
+    psz_varname = psz_args;
+    
+    while (*psz_args && !whitespace (*psz_args)) {
+      *psz_args++;
+      u_len++;
+    }
+
+    if (*psz_args) *psz_args++ = '\0';
+
+    while (*psz_args && whitespace (*psz_args))
+      *psz_args++;
+
+    if (0 == strcmp (psz_varname, "variable")) {
+      return com_set_var(psz_args, 1);
+    } else if (0 == strcmp (psz_varname, "trace")) {
+      if (!psz_args || 0==strlen(psz_args))
+	on_off_toggle("toggle", &tracing);
+      else
+	on_off_toggle(psz_args, &tracing);
+      com_info("trace");
+    } else if (0 == strcmp (psz_varname, "basename")) {
+      if (!psz_args || 0==strlen(psz_args))
+	on_off_toggle("toggle", &basename_filenames);
+      else
+	on_off_toggle(psz_args, &basename_filenames);
+      com_info("basename");
+    }
+  }
+  return debug_read;
+}
+
+
 /* Set a variable. Set "expand' to 1 if you want variable 
    definitions inside the value getting passed in to be expanded
    before assigment. */
@@ -616,14 +663,6 @@ static debug_return_t com_set_var (char *psz_args, int expand)
       printf("Can't find variable %s\n", psz_varname);
     }
   }
-  return debug_read;
-}
-
-/* Set a variable definition with all variable references in the value
-   part of psz_string expanded. */
-static debug_return_t com_set_var_expand (char *psz_string) 
-{
-  com_set_var(psz_string, 1);
   return debug_read;
 }
 
