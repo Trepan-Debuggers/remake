@@ -1,3 +1,62 @@
+Mon May 13 14:37:42 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
+
+	* GNUmakefile (amigafiles): Add amiga.h.
+
+Sun May 12 19:19:43 1996  Aaron Digulla   <digulla@fh-konstanz.de>
+
+	* dir.c: New function: amigafy() to fold filenames
+	Changes HASH() to HASHI() to fold filenames on Amiga.
+	Stringcompares use strieq() instead of streq()
+	The current directory on Amiga is "" instead of "."
+	* file.c: Likewise.
+
+	* amiga.c: New function wildcard_expansion(). Allows to use
+	Amiga wildcards with $(wildcard )
+
+	* amiga.h: New file. Prototypes for amiga.c
+
+	* function.c: Use special function wildcard_expansion() for
+	$(wildcard ) to allow Amiga wildcards
+	The current directory on Amiga is "" instead of "."
+
+	* job.c: No Pipes on Amiga, too
+	(load_too_high) Neither on Amiga
+	ENV variable on Amiga are in a special directory and are not
+	passed as third argument to main().
+
+	* job.h: No envp on Amiga
+
+	* make.h: Added HASHI(). This is the same as HASH() but converts
+	it's second parameter to lowercase on Amiga to fold filenames.
+
+	* main.c: (main), variable.c Changed handling of ENV-vars. Make
+	stores now the names of the variables only and reads their contents
+	when they are accessed to reflect that these variables are really
+	global (ie. they CAN change WHILE make runs !) This handling is
+	made in lookup_variable()
+
+	* Makefile.ami: renamed file.h to filedep.h
+	Updated dependencies
+
+	* read.c: "find_semicolon" is declared as static but never defined.
+	No difference between Makefile and makefile on Amiga; added
+	SMakefile to *default_makefiles[].
+	(read_makefile) SAS/C want's two_colon and pattern_percent be set
+	before use.
+	The current directory on Amiga is "" instead of "."
+	Strange #endif moved.
+
+	* README.Amiga: updated feature list
+
+	* SMakefile: Updated dependencies
+
+	* variable.c: Handling of ENV variable happens inside lookup_variable()
+
+Sat May 11 17:58:32 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
+
+	* variable.c (try_variable_definition): Count parens in lhs variable
+	refs to avoid seeing =/:=/+= inside a ref.
+
 Thu May  9 13:54:49 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 
 	* commands.c (fatal_error_signal) [SIGQUIT]: Make SIGQUIT check
