@@ -1,3 +1,9 @@
+2004-11-28  Paul D. Smith  <psmith@gnu.org>
+
+	* main.c (find_and_set_default_shell) [WINDOWS32]: check for
+	equality of "cmd"/"cmd.exe", not inequality.  Fixes bug #11155.
+	Patch by Alessandro Vesely.
+
 2004-11-12  Paul D. Smith  <psmith@gnu.org>
 
 	* job.c (child_execute_job) [VMS]: Don't treat "#" as a comment on
