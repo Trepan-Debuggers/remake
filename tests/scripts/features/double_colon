@@ -1,0 +1,48 @@
+$description = "The following test creates a makefile to test Double-Colon\n"
+              ."Rules.  They are rules which are written with '::' instead\n"
+              ."of ':' after the target names.  This tells make that each \n"
+              ."of these rules are independent of the others and each rule's\n"
+              ."commands are executed if the target is older than any \n"
+              ."dependencies of that rule.";
+
+$details = "The makefile created by this test contains two double-colon \n"
+          ."rules for foo; each with their own commands.  When make is run,\n"
+          ."each command should be executed in the sequence that they are \n"
+          ."found.  The command is a simple echo statement.";
+
+open(MAKEFILE,"> $makefile");
+
+# The Contents of the MAKEFILE ...
+
+print MAKEFILE "foo:: bar.h \n"
+              ."\t\@echo Executing rule foo FIRST\n"
+              ."foo2: bar.h \n"
+              ."foo:: bar2.h \n"
+              ."\t\@echo Executing rule foo SECOND\n";
+
+# END of Contents of MAKEFILE
+
+close(MAKEFILE);
+
+&touch("bar.h","bar2.h");
+
+&run_make_with_options($makefile,
+                       "",
+                       &get_logfile,
+                       0);
+
+
+$answer = "Executing rule foo FIRST\n"
+         ."Executing rule foo SECOND\n";
+
+&compare_output($answer,&get_logfile(1));
+
+unlink("bar.h","bar2.h");
+
+1;
+
+
+
+
+
+

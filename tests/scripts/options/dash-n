@@ -1,0 +1,31 @@
+#                                                                    -*-perl-*-
+$description = "Test the -n option.\n";
+
+$details = "Try various uses of -n and ensure they all give the correct results.\n";
+
+open(MAKEFILE, "> $makefile");
+
+# The Contents of the MAKEFILE ...
+
+print MAKEFILE <<'EOMAKE';
+
+final: intermediate ; touch $@
+intermediate: orig ; touch $@
+
+EOMAKE
+
+close(MAKEFILE);
+
+&touch('orig');
+
+&run_make_with_options($makefile, "", &get_logfile);
+$answer = "touch intermediate\ntouch final\n";
+&compare_output($answer, &get_logfile(1));
+
+&run_make_with_options($makefile, "-Worig -n", &get_logfile);
+$answer = "touch intermediate\ntouch final\n";
+&compare_output($answer, &get_logfile(1));
+
+unlink('orig', 'intermediate', 'final');
+
+1;

@@ -62,18 +62,18 @@ install-exec-local:
 
 # --------------- Local DIST Section
 
-# Install the w32 subdirectory
+# Install the w32 and tests subdirectories
 #
 dist-hook:
 	(cd $(srcdir); \
-	 w32=`find w32 -follow \( -name CVS -prune \) -o \( -name \*.orig -o -name \*.rej -o -name \*~ -prune \) -o -type f -print`; \
-	 tar chf - $$w32) \
+	 sub=`find w32 tests -follow \( -name CVS -prune \) -o \( -name \*.orig -o -name \*.rej -o -name \*~ -prune \) -o -type f -print`; \
+	 tar chf - $$sub) \
 	| (cd $(distdir); tar xfBp -)
 
 
 # --------------- Local CHECK Section
 
-check-local: check-loadavg check-regression
+check-local: check-regression check-loadavg
 .PHONY: check-loadavg check-regression
 
 # > check-loadavg
@@ -97,30 +97,30 @@ check-loadavg: loadavg
 
 # > check-regression
 #
-# Look for the make test suite, and run it if found.  Look in MAKE_TEST if
-# specified, or else in the srcdir or the distdir, their parents, and _their_
-# parents.
+# Look for the make test suite, and run it if found and we can find perl.
+# If we're building outside the tree, we use symlinks to make a local copy of
+# the test suite.  Unfortunately the test suite itself isn't localizable yet.
 #
 MAKETESTFLAGS =
 
-check-regression: all
-	@here=`pwd`; testdir=""; \
-	  case "$(MAKE_TEST)" in "") \
-	    for d1 in $$here $(srcdir); do \
-	      for d2 in ../.. .. .; do \
-		all=`echo $$d1/$$d2/make-test-[0-9]*/run_make_tests`; \
-		case "$$all" in \
-		  "$$d1/$$d2/make-test-[0-9]*/run_make_tests") : ;; \
-		  *) try=`for x in $$all; do echo $$x; done | sort | tail -1`;\
-		     testdir=`dirname $$try` ;; esac; \
-            done; done ;; \
-	    *) testdir="$(MAKE_TEST)" ;; \
-	  esac; \
-	  case "$$testdir" in \
-	    "") echo "Couldn't find make-test-* regression test suite."; exit 0;; \
-	  esac; \
-	  echo "cd $$testdir && ./run_make_tests -make $$here/make $(MAKETESTFLAGS)"; \
-	  cd $$testdir && ./run_make_tests -make $$here/make $(MAKETESTFLAGS)
+check-regression:
+	@if test -f "$(srcdir)/tests/run_make_tests"; then \
+	  if $(PERL) -v >/dev/null 2>&1; then \
+	    case `cd $(srcdir); pwd` in `pwd`) : ;; \
+	      *) mkdir tests; \
+		 if ln -s "$(srcdir)/tests" srctests; then \
+		   for f in run_make_tests run_make_tests.pl test_driver.pl scripts; do \
+		     rm -f tests/$$f; ln -s ../srctests/$$f tests; \
+		   done; fi ;; \
+	    esac; \
+	    echo "cd tests && ./run_make_tests -make ../make $(MAKETESTFLAGS)"; \
+	    cd tests && ./run_make_tests -make ../make $(MAKETESTFLAGS); \
+	  else \
+	    echo "Can't find a working Perl ($(PERL)); the test suite requires Perl."; \
+	  fi; \
+	 else \
+	  echo "Can't find the GNU Make test suite ($(srcdir)/tests)."; \
+	 fi
 
 
 # --------------- Local CLEAN section
