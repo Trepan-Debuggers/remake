@@ -239,6 +239,9 @@ Put @code{CFLAGS} last in the compilation command, after other variables
 containing compiler options, so the user can use @code{CFLAGS} to
 override the others.
 
+@code{CFLAGS} should be used in every invocation of the C compiler,
+both those which do compilation and those which do linking.
+
 Every Makefile should define the variable @code{INSTALL}, which is the
 basic command for installing a file into the system.
 
