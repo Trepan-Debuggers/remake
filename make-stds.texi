@@ -69,7 +69,7 @@ directory.
 
 When using GNU @code{make}, relying on @samp{VPATH} to find the source
 file will work in the case where there is a single dependency file,
-since the @file{make} automatic variable @samp{$<} will represent the
+since the @code{make} automatic variable @samp{$<} will represent the
 source file wherever it is.  (Many versions of @code{make} set @samp{$<}
 only in implicit rules.)  A makefile target like
 
@@ -96,6 +96,9 @@ way to make the rule work well.  For example, the target above for
 foo.1 : foo.man sedscript
         sed -e $(srcdir)/sedscript $(srcdir)/foo.man > $@@
 @end smallexample
+
+Try to make the build and installation targets, at least (and all their
+subtargets) work correctly with a parallel @code{make}.
 
 @node Utilities in Makefiles
 @section Utilities in Makefiles
