@@ -1537,7 +1537,11 @@ parse_file_seq (stringp, stopchar, size, strip)
 	    lastn = n;
 	    n = n->next;
 	  }
-	if (n != 0)
+	if (n != 0
+	    /* Ignore something starting with `(', as that cannot actually
+	       be an archive-member reference (and treating it as such
+	       results in an empty file name, which causes much lossage).  */
+	    && n->name[0] != '(')
 	  {
 	    /* N is the first element in the archive group.
 	       Its name looks like "lib(mem" (with no closing `)').  */
