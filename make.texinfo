@@ -3,10 +3,13 @@
 @synindex vr fn
 
 @ignore
-$Header: /sources/make/make/Attic/make.texinfo,v 1.23 1988/05/22 12:29:23 mcgrath Beta $
+$Header: /sources/make/make/Attic/make.texinfo,v 1.24 1988/05/22 13:39:08 mcgrath Beta $
 
 $Log: make.texinfo,v $
-Revision 1.23  1988/05/22 12:29:23  mcgrath
+Revision 1.24  1988/05/22 13:39:08  mcgrath
+Misc cleanup
+
+Revision 1.23  88/05/22  12:29:23  mcgrath
 Static pattern rules section rewritten by RMS.
 
 Revision 1.22  88/05/20  17:00:49  mcgrath
@@ -136,8 +139,7 @@ into another language, under the above conditions for modified versions.
 
 The purpose of the @code{make} utility is to determine automatically which
 pieces of a large program need to be recompiled, and issue the commands to
-recompile them.  This manual describes the GNU implementation of
-@code{make}.
+recompile them.  This manual describes the GNU implementation of @code{make}.
 
 GNU @code{make} was implemented by Richard Stallman and Roland McGrath.
 
@@ -147,14 +149,14 @@ shell command.  In fact, @code{make} is not limited to programs.  You can
 use it to describe any task where some files must be updated automatically
 from others whenever the others change.
 
-To prepare to use @code{make}, you must write a file called the
-@dfn{makefile} that describes the relationships among files in your
-program, and the states the commands for updating each file.  In a program,
-typically the executable file is updated from object files, which are in
-turn made by compiling source files.
+To prepare to use @code{make}, you must write a file called
+the @dfn{makefile} that describes the relationships among files
+in your program, and the states the commands for updating each file.
+In a program, typically the executable file is updated from object
+files, which are in turn made by compiling source files.@refill
 
-Once a suitable makefile exists, each time you change some source files, this
-simple shell command:
+Once a suitable makefile exists, each time you change some source files,
+this simple shell command:
 
 @example
 make
@@ -209,17 +211,22 @@ to do something or not, report that too; it's a bug in the documentation!
 
 Before reporting a bug or trying to fix it yourself, try to isolate it to
 the smallest possible makefile that reproduces the problem.  Then send
-the makefile, the exact results @code{make} gave you.  Also say what
+us the makefile and the exact results @code{make} gave you.  Also say what
 you expected to occur; this will help us decide whether the problem
-was in the documentation.
+was really in the documentation.
 
-Once you've got a precise problem, send electronic mail to Internet
-address @samp{bug-gnu-utils@@prep.ai.mit.edu} or UUCP path
+Once you've got a precise problem, send electronic mail to
+Internet address @samp{bug-gnu-utils@@prep.ai.mit.edu} or UUCP path
 @samp{mit-eddie!prep.ai.mit.edu!bug-gnu-utils}.  Please include the version
 number of @code{make} you are using.  You can get this information with the
 command @samp{make -v -f /dev/null}.@refill
 
 Non-bug suggestions are always welcome as well.
+If you have questions about things that are unclear in the documentation
+or are just obscure features, ask Roland McGrath; he'll be happy to help
+you out (but no promises).  You can send him electronic mail at Internet
+address @samp{roland@@wheaties.ai.mit.edu} or UUCP path
+@samp{mit-eddie!wheaties.ai.mit.edu!roland}.
 
 @node Simple, Makefiles, Bugs, Top
 @section Simple Example of @code{make}
@@ -231,7 +238,7 @@ only those defining editing commands include @file{commands.h} and only low
 level files that change the editor buffer include @file{buffer.h}.
 
 To recompile the editor, each changed C source file must be recompiled.  If
-a header file has changed, in order to be safe each C source file that
+a header file has changed, to be safe each C source file that
 includes the header file must be recompiled.  Each compilation produces an
 object file corresponding to the source file.  Finally, if any source file
 has been recompiled, all the object files, whether newly made or saved from
@@ -243,26 +250,26 @@ how to compile and link when the time comes:
 
 @example
 edit : main.o kbd.o commands.o display.o \
-              insert.o search.o files.o utils.o
-        cc -o edit main.o kbd.o commands.o display.o \
-              insert.o search.o files.o utils.o
+       insert.o search.o files.o utils.o
+	cc -o edit main.o kbd.o commands.o display.o \
+                   insert.o search.o files.o utils.o
 
 main.o : main.c defs.h
-        cc -c main.c
+	cc -c main.c
 kbd.o : kbd.c defs.h command.h
-        cc -c kbd.c
+	cc -c kbd.c
 commands.o : command.c defs.h command.h
-        cc -c commands.c
+	cc -c commands.c
 display.o : display.c defs.h buffer.h
-        cc -c display.c
+	cc -c display.c
 insert.o : insert.c defs.h buffer.h
-        cc -c insert.c
+	cc -c insert.c
 search.o : search.c defs.h buffer.h
-        cc -c search.c
+	cc -c search.c
 files.o : files.c defs.h buffer.h command.h
-        cc -c files.c
+	cc -c files.c
 utils.o : utils.c defs.h
-        cc -c utils.c
+	cc -c utils.c
 @end example
 
 We split each long line into two lines using a backslash-newline; this is
@@ -278,23 +285,23 @@ After the colon come the target's @dfn{dependencies}: all the files that
 are used as input when the target file is updated.  A target file needs to
 be recompiled or relinked if any of its dependencies changes.  In addition,
 any dependencies that are themselves automatically generated should be
-updated first.  In this example, @file{edit} depends on each of the
-eight object files; the object file @file{main.o} depends on the source
-file @file{main.c} and on the header file @file{defs.h}.
+updated first.  In this example, @file{edit} depends on each of the eight
+object files; the object file @file{main.o} depends on the source file
+@file{main.c} and on the header file @file{defs.h}.
 
 By default, @code{make} starts with the first rule (not counting rules
 whose target names start with @samp{.}).  This is called the @dfn{default
 goal}.  Therefore, we put the rule for the executable program @file{edit}
 first.  The other rules are processed because their targets appear as
-dependencies in the goal.
+dependencies of the goal.
 
 After each line containing a target and dependencies come one or more lines
 of shell commands that say how to update the target file.  These lines
-start with a tab to tell @code{make} that they are command lines.
-But @code{make} does not know anything about how the commands work.  It is up
-to you to supply commands that will update the target file properly.  All
-@code{make} does is execute the commands you have specified when the target
-file needs to be updated.
+start with a tab to tell @code{make} that they are command lines.  But
+@code{make} does not know anything about how the commands work.  It is up
+to you to supply commands that will update the target file properly.
+All @code{make} does is execute the commands you have specified when the
+target file needs to be updated.
 
 @subsection How @code{make} Processes This Makefile
 
@@ -311,8 +318,8 @@ Before recompiling an object file, @code{make} considers updating its
 dependencies, the source file and header files.  This makefile does not
 specify anything to be done for them---the @samp{.c} and @samp{.h} files
 are not the targets of any rules---so nothing needs to be done.  But
-automatically generated C programs, such as made by Yacc, would be updated
-by their own rules at this time.
+automatically generated C programs, such as made by Yacc (or Bison), would
+be updated by their own rules at this time.
 
 After recompiling whichever object files need it, @code{make} can now
 decide whether to relink @file{edit}.  This must be done if the file
@@ -327,9 +334,9 @@ In our example, we had to list all the object files twice in the rule for
 
 @example
 edit : main.o kbd.o commands.o display.o \
-              insert.o search.o files.o utils.o
-        cc -o edit main.o kbd.o commands.o display.o \
-              insert.o search.o files.o utils.o
+       insert.o search.o files.o utils.o
+	cc -o edit main.o kbd.o commands.o display.o \
+                   insert.o search.o files.o utils.o
 @end example
 
 @vindex objects
@@ -340,9 +347,9 @@ allow a text string to be defined once and substituted in multiple places
 later (@pxref{Variables}).
 
 It's standard practice for every makefile to have a variable named
-@code{objects}, @code{OBJECTS} or @code{OBJ} which is a list of all object
-file names.  We would define such a variable @code{objects} with a line
-like this in the makefile:
+@code{objects}, @code{OBJECTS}, @code{objs}, @code{OBJS}, @code{obj} or
+@code{OBJ} which is a list of all object file names.  We would define
+such a variable @code{objects} with a line like this in the makefile:@refill
 
 @example
 objects = main.o kbd.o commands.o display.o \
@@ -357,7 +364,7 @@ result:
 
 @example
 edit : $(objects)
-        cc -o edit $(objects)
+	cc -o edit $(objects)
 @end example
 
 @subsection Letting @code{make} Deduce the Commands
@@ -371,8 +378,8 @@ use the command @samp{cc -c main.c -o main.o} to compile @file{main.c} into
 object files.  @xref{Implicit}.@refill
 
 When a @samp{.c} file is used automatically in this way, it is also
-automatically added to the list of dependencies.  We can therefore omit the
-@samp{.c} files from the dependencies, provided we omit the commands.
+automatically added to the list of dependencies.  We can therefore omit
+the @samp{.c} files from the dependencies, provided we omit the commands.
 
 Here is the entire example, with both of these changes, and a variable
 @code{objects} as suggested above:
@@ -382,7 +389,7 @@ objects =  main.o kbd.o commands.o display.o \
  insert.o search.o files.o utils.o
 
 edit : $(objects)
-        cc -o edit $(objects)
+	cc -o edit $(objects)
 
 main.o : defs.h
 kbd.o : defs.h command.h
@@ -408,7 +415,7 @@ objects =  main.o kbd.o commands.o display.o \
  insert.o search.o files.o utils.o
 
 edit : $(objects)
-        cc -o edit $(objects)
+	cc -o edit $(objects)
 
 $(objects) : defs.h
 kbd.o commands.o files.o : command.h
@@ -433,7 +440,7 @@ reading a data base called the @dfn{makefile}.
 
 @menu
 * Contents: Makefile Contents.   Overview of what you put in a makefile.
-* Names: Makefile Names.         Where @code{make} finds the makefile.
+* Names: Makefile Names.	 Where @code{make} finds the makefile.
 * Include::                      How one makefile can use another makefile.
 @end menu
 
@@ -467,8 +474,8 @@ reading the makefile.  These include:
 Reading another makefile (@pxref{Include}).
 
 @item
-Deciding (based on the values of variables) whether to use or ignore a
-part of the makefile (@pxref{Conditionals}).
+Deciding (based on the values of variables) whether to use or
+ignore a part of the makefile (@pxref{Conditionals}).
 
 @item
 Defining a variable from a verbatim string containing multiple lines
@@ -492,7 +499,8 @@ By default, when @code{make} looks for the makefile, it tries the names
 @file{./makefile} and @file{./Makefile} in that order.  So normally you call
 your makefile by one of these two names, and @code{make} finds it
 automatically.  We recommend @file{Makefile} because it appears prominently
-near the beginning of a directory listing.
+near the beginning of a directory listing (right near other important
+files such as @file{README}).@refill
 
 If @code{make} finds neither of these two names, it does not use any
 makefile.  Then you must specify a goal with a command argument, and
@@ -514,7 +522,7 @@ additional makefiles to be read before the others.  This works much like
 the @code{include} directive: various directories are searched for those
 files and the default goal is never taken from them.  @xref{Include}.  In
 addition, it is not an error if the files listed in @code{MAKEFILES} are
-not found.
+not found.@refill
 
 The main use of @code{MAKEFILES} is in communication between recursive
 invocations of @code{make} (@pxref{Recursion}).  It usually isn't
