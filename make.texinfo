@@ -1435,7 +1435,8 @@ Thus, if a files that is listed as a dependency does not exist in the
 current directory, @code{make} searches the directories listed in
 @code{VPATH} for a file with that name.  If a file is found in one of
 them, that file becomes the dependency.  Rules may then specify the
-names of source files as if they all existed in the current directory.
+names of source files in the dependencies as if they all existed in the
+current directory.
 
 In the @code{VPATH} variable, directory names are separated by colons.
 The order in which directories are listed is the order followed by
@@ -1482,7 +1483,7 @@ There are three forms of the @code{vpath} directive:
 @table @code
 @item vpath @var{pattern} @var{directories}
 Specify the search path @var{directories} for file names that match
-@code{pattern}.  If another path was previously specified for the same
+@var{pattern}.  If another path was previously specified for the same
 pattern, the new path is effectively appended to the old path.@refill
 
 The search path, @var{directories}, is a colon-separated list of
@@ -1570,8 +1571,10 @@ foo.o : foo.c defs.h hack.h
 @noindent
 @c !!! following paragraph rewritten to avoid overfull hbox
 In this example, the value of @samp{$^} would be a value such as
-@samp{src/foo.c ../headers/defs.h hack.h}; you would use 
-@samp{$(firstword $^)} to extract just @samp{src/foo.c}.@refill
+@samp{src/foo.c ../headers/defs.h hack.h}; you would use
+@samp{$(firstword $^)} to extract just @samp{src/foo.c}.  Since you want
+to do this so often, the automatic variable @code{$<} is always the
+first dependency, the same as @samp{$(firstword $^)}.@refill
 
 @node Implicit/Search, Libraries/Search, Commands/Search, Directory Search
 @subsection Directory Search and Implicit Rules
