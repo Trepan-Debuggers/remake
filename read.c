@@ -383,6 +383,28 @@ read_makefile (filename, type)
 	    }
 	  continue;
 	}
+      else if (word1eq ("override", 8))
+	{
+	  p2 = next_token (p + 8);
+	  if (p2 == 0)
+	    makefile_error (filename, lineno, "empty `override' directive");
+	  if (!strncmp (p2, "define", 6))
+	    {
+	      if (ignoring)
+		in_ignored_define = 1;
+	      else
+		{
+		  unsigned int len;
+		  p2 = end_of_token (p2);
+		  p = find_next_token (&p2, &len);
+		  lineno = do_define (p, len, o_override,
+				      lineno, infile, filename);
+		}
+	    }
+	  else if (!ignoring && !try_variable_definition (p2, o_override))
+	    makefile_error (filename, lineno, "empty `override' directive");
+	}
+
 
       if (ignoring)
 	/* Ignore the line.  We continue here so conditionals
@@ -419,23 +441,6 @@ read_makefile (filename, type)
 	  commands[commands_idx++] = '\n';
 
 	  continue;
-	}
-      else if (word1eq ("override", 8))
-	{
-	  p2 = next_token (p + 8);
-	  if (p2 == 0)
-	    makefile_error (filename, lineno, "empty `override' directive");
-	  if (!strncmp (p2, "define", 6))
-	    {
-	      unsigned int len;
-	      p2 = end_of_token (p2);
-	      p = find_next_token (&p2, &len);
-	      lineno = do_define (p, len, o_override,
-				  lineno, infile, filename);
-	    }
-	  else if (!try_variable_definition (p2, o_override))
-	    makefile_error (filename, lineno,
-			    "Empty `override' directive");
 	}
       else if (word1eq ("export", 6))
 	{
