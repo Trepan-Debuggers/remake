@@ -897,7 +897,7 @@ start_job_command (child)
 	  /* Set the descriptor to close on exec, so it does not litter any
 	     child's descriptor table.  When it is dup2'd onto descriptor 0,
 	     that descriptor will not close on exec.  */
-#ifdef FD_SETFD
+#ifdef F_SETFD
 #ifndef FD_CLOEXEC
 #define FD_CLOEXEC 1
 #endif
@@ -980,7 +980,7 @@ start_job_command (child)
 	  /* We are the child side.  */
 	  unblock_sigs ();
 	  child_execute_job (child->good_stdin ? 0 : bad_stdin, 1,
-			     argv, child->environment);
+                             argv, child->environment);
 	}
       else if (child->pid < 0)
 	{

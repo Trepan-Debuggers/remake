@@ -1,3 +1,14 @@
+1999-07-16  Paul D. Smith  <psmith@gnu.org>
+
+	* .purify: New file: suppress some known-OK Purify messages.
+
+	* read.c (read_makefile): Remember to free the commands buffer if
+	we can't find a makefile.
+
+	* job.c (start_job_command): Broken #ifdef test: look for F_SETFD,
+	not FD_SETFD.  Close-on-exec isn't getting set on the bad_stdin
+	file descriptor and it's leaking :-/.
+
 1999-07-15  Paul D. Smith  <psmith@gnu.org>
 
 	* read.c (read_makefile): Fix some potential memory stomps parsing
