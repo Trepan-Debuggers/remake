@@ -152,7 +152,7 @@ make: $(objs)
 .c.o:
 	$(CC) $(defines) -c -I. -I$(srcdir) -I$(srcdir)/glob \
 	      $(CFLAGS) $< $(OUTPUT_OPTION)
-remote.o: remote.c
+remote.o: remote.c remote-*.c
 	$(CC) $(defines) $(REMOTE) -c -I. -I$(srcdir) \
 	      $(CFLAGS) $(srcdir)/remote.c
 
