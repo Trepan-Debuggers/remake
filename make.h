@@ -15,6 +15,11 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+/* AIX requires this to be the first thing in the file.  */
+#if defined (_AIX) && !defined (__GNUC__)
+ #pragma alloca
+#endif
+
 #define _GNU_SOURCE
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -139,16 +144,29 @@ extern void bcopy ();
 extern char *malloc (), *realloc ();
 extern void free ();
 
+extern void qsort ();
+extern void abort (), exit ();
+
 #endif	/* Standard headers.  */
 
 #ifdef	ANSI_STRING
+#ifndef	index
 #define	index(s, c)	strchr((s), (c))
+#endif
+#ifndef	rindex
 #define	rindex(s, c)	strrchr((s), (c))
+#endif
 
+#ifndef	bcmp
 #define bcmp(s1, s2, n)	memcmp ((s1), (s2), (n))
+#endif
+#ifndef	bzero
 #define bzero(s, n)	memset ((s), 0, (n))
+#endif
+#ifndef	bcopy
 #define bcopy(s, d, n)	memcpy ((d), (s), (n))
 #endif
+#endif	/* ANSI_STRING.  */
 #undef	ANSI_STRING
 
 
@@ -240,11 +258,9 @@ extern int sigsetmask ();
 extern int sigblock ();
 #endif
 extern int kill ();
-extern void abort (), exit ();
-extern int unlink (), stat (), fstat ();
-extern void qsort ();
 extern int atoi ();
 extern long int atol ();
+extern int unlink (), stat (), fstat ();
 extern int pipe (), close (), read (), write (), open ();
 extern long int lseek ();
 #endif	/* GNU C library or POSIX.  */
