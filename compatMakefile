@@ -24,7 +24,8 @@
 
 # Ultrix 2.2 make doesn't expand the value of VPATH.
 VPATH = @srcdir@
-srcdir = $(VPATH)
+# This must repeat the value, because configure will remove `VPATH = .'.
+srcdir = @srcdir@
 
 CC = @CC@
 
@@ -254,6 +255,8 @@ glob-clean glob-realclean:
 	cd glob; $(MAKE) $@
 
 Makefile: config.status $(srcdir)/Makefile.in
+	$(SHELL) config.status
+glob/Makefile: config.status $(srcdir)/glob/Makefile.in
 	$(SHELL) config.status
 config.h: stamp-config ;
 stamp-config: config.status $(srcdir)/config.h.in
