@@ -19,7 +19,7 @@ automatically which pieces of a large program need to be recompiled,
 and issues the commands to recompile them.
 
 @c !!set edition, date, version
-This is Edition 0.32 Beta, last updated 11 March 1991,
+This is Edition 0.33 Beta, last updated 3 May 1992,
 of @cite{The GNU Make Manual}, for @code{make}, Version 3.63 Beta.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
@@ -53,8 +53,8 @@ by the Foundation.
 @titlepage
 @title GNU Make
 @subtitle A Program for Directing Recompilation
-@subtitle Edition 0.32 Beta, for @code{make} Version 3.63 Beta.
-@subtitle March 1992
+@subtitle Edition 0.33 Beta, for @code{make} Version 3.63 Beta.
+@subtitle May 1992
 @author by Richard M. Stallman and Roland McGrath
 @page
 @vskip 0pt plus 1filll
@@ -93,8 +93,8 @@ The GNU @code{make} utility automatically determines which pieces of a
 large program need to be recompiled, and issues the commands to
 recompile them.@refill
 
-This is Edition 0.32 Beta of the @cite{GNU Make Manual},
-last updated 11 March 1992,
+This is Edition 0.33 Beta of the @cite{GNU Make Manual},
+last updated 3 May 1992,
 for @code{make} Version 3.63 Beta.@refill
 
 This manual describes @code{make} and contains the following chapters:@refill
@@ -985,12 +985,13 @@ from one of these makefiles and it is not an error if the files listed
 in @code{MAKEFILES} are not found.@refill
 
 The main use of @code{MAKEFILES} is in communication between recursive
-invocations of @code{make} (@pxref{Recursion, ,Recursive Use of @code{make}}).  It usually is not
-desirable to set the environment variable before a top-level invocation
-of @code{make}, because it is usually better not to mess with a makefile
-from outside.  However, if you are running @code{make} without a specific
-makefile, a makefile in @code{MAKEFILES} can do useful things to help the
-built-in implicit rules work better, such as defining search paths.
+invocations of @code{make} (@pxref{Recursion, ,Recursive Use of
+@code{make}}).  It usually is not desirable to set the environment
+variable before a top-level invocation of @code{make}, because it is
+usually better not to mess with a makefile from outside.  However, if
+you are running @code{make} without a specific makefile, a makefile in
+@code{MAKEFILES} can do useful things to help the built-in implicit
+rules work better, such as defining search paths.@refill
 
 Some users are tempted to set @code{MAKEFILES} in the environment
 automatically on login, and program makefiles to expect this to be done.
@@ -2480,45 +2481,96 @@ files, or print the commands, is propagated to the subsystem.@refill
 @node Variables/Recursion, Options/Recursion, MAKE Variable, Recursion
 @subsection Communicating Variables to a Sub-@code{make}
 @cindex environment and recursion
+@cindex exporting variables
+@cindex variables, environment
+@cindex variables, exporting
 
-Most variable values of the top-level @code{make} are passed to the
+Variable values of the top-level @code{make} can be passed to the
 sub-@code{make} through the environment.  These variables are defined in
 the sub-@code{make} as defaults, but do not override what is specified
-in the sub-@code{make}'s makefile.
+in the sub-@code{make}'s makefile unless the @samp{-e} switch is used
+(@pxref{Options Summary, ,Summary of Options}).@refill
 
-Variables are passed down if their names consist only of letters,
+By default, a variable is passed down if its name consists only of letters,
 numbers and underscores.  Some shells cannot cope with environment
 variable names consisting of characters other than letters, numbers,
 and underscores.
 
-Variable are @emph{not} passed down if they were created by default by
-@code{make} (@pxref{Implicit Variables, ,Variables Used by Implicit Rules}).  The sub-@code{make} will
-define these for itself.@refill
+Variable are @emph{not} normally passed down if they were created by
+default by @code{make} (@pxref{Implicit Variables, ,Variables Used by
+Implicit Rules}).  The sub-@code{make} will define these for
+itself.@refill
 
 The way this works is that @code{make} adds each variable and its value
 to the environment for running each command.  The sub-@code{make}, in
 turn, uses the environment to initialize its table of variable values.
 @xref{Environment, ,Variables from the Environment}.
 
-@vindex MAKELEVEL
-As a special feature, the variable @code{MAKELEVEL} is changed when it is
-passed down from level to level.  This variable's value is a string which
-is the depth of the level as a decimal number.  The value is @samp{0} for
-the top-level @code{make}; @samp{1} for a sub-@code{make}, @samp{2} for a
-sub-sub-@code{make}, and so on.  The incrementation happens when
-@code{make} sets up the environment for a command.@refill
+@findex export
+If you want specific variables to be passed down, or @dfn{exported} to
+sub-@code{make}s, you can use the @code{export} directive to tell
+@code{make} this:
 
-The main use of @code{MAKELEVEL} is to test it in a conditional directive
-(@pxref{Conditionals, ,Conditional Parts of Makefiles}); this way you can write a makefile that behaves one
-way if run recursively and another way if run directly by you.
+@example
+export @var{variable} @var{variable-2} @dots{}
+@end example
+
+@noindent
+@findex unexport
+If you want a variable @emph{not} to be exported, you can tell
+@code{make} so with the @code{unexport} directive:
+
+@example
+unexport @var{variable} @var{variable-2} @dots{}
+@end example
+
+@noindent
+As a convenience, you can define a variable and export it at the same
+time by doing:
+
+@example
+export @var{variable} = value
+@end example
+
+or:
+@noindent
+
+@example
+export @var{variable} := value
+@end example
+
+@noindent
+This works just like:
+
+@example
+@var{variable} = value
+export @var{variable}
+@end example
+
+You may notice that the @code{export} and @code{unexport} directives
+work in @code{make} just like they work in the shell, @code{sh}.
+
+@vindex MAKELEVEL
+As a special feature, the variable @code{MAKELEVEL} is changed when it
+is passed down from level to level.  This variable's value is a string
+which is the depth of the level as a decimal number.  The value is
+@samp{0} for the top-level @code{make}; @samp{1} for a sub-@code{make},
+@samp{2} for a sub-sub-@code{make}, and so on.  The incrementation
+happens when @code{make} sets up the environment for a command.@refill
+
+The main use of @code{MAKELEVEL} is to test it in a conditional
+directive (@pxref{Conditionals, ,Conditional Parts of Makefiles}); this
+way you can write a makefile that behaves one way if run recursively and
+another way if run directly by you.@refill
 
 @vindex MAKEFILES
 You can use the variable @code{MAKEFILES} to cause all sub-@code{make}
-commands to use additional makefiles.  The value of @code{MAKEFILES} is a
-whitespace-separated list of filenames.  This variable, if defined in the
-outer-level makefile, is passed down through the environment as usual; then
-it serves as a list of extra makefiles for the sub-@code{make} to read
-before the usual or specified ones.  @xref{MAKEFILES Variable, ,The Variable @code{MAKEFILES}}.
+commands to use additional makefiles.  The value of @code{MAKEFILES} is
+a whitespace-separated list of filenames.  This variable, if defined in
+the outer-level makefile, is passed down through the environment as
+usual; then it serves as a list of extra makefiles for the
+sub-@code{make} to read before the usual or specified ones.
+@xref{MAKEFILES Variable, ,The Variable @code{MAKEFILES}}.@refill
 
 @node Options/Recursion, -w Option, Variables/Recursion, Recursion
 @subsection Communicating Options to a Sub-@code{make}
