@@ -151,7 +151,7 @@ $(prog): $(objs) $(globdep) #$(addprefix $(ARCH)/,gmalloc.o mcheck.o)
 	$(CC) $(LDFLAGS) $^ $(globlib) $(LOADLIBES) -o $@.new
 	mv -f $@.new $@
 
-libc-srcdir = /home/gd/gnu/libc
+libc-srcdir = ../libc
 globfiles = $(addprefix glob/,COPYING.LIB configure.in configure Makefile.in \
 			Makefile.ami SCOPTIONS SMakefile \
 			configure.bat glob.c fnmatch.c glob.h fnmatch.h)
