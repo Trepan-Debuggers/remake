@@ -319,7 +319,7 @@ update_file (file, depth)
          change is possible below here until then.  */
       if (f->considered == considered)
         {
-          DBF (DB_EXTRA, _("Pruning file `%s'.\n"));
+          DBF (DB_VERBOSE, _("Pruning file `%s'.\n"));
           continue;
         }
       f->considered = considered;
@@ -364,19 +364,19 @@ update_file_1 (file, depth)
   register struct dep *d, *lastd;
   int running = 0;
 
-  DBF (DB_EXTRA, _("Considering target file `%s'.\n"));
+  DBF (DB_VERBOSE, _("Considering target file `%s'.\n"));
 
   if (file->updated)
     {
       if (file->update_status > 0)
 	{
-	  DBF (DB_EXTRA,
+	  DBF (DB_VERBOSE,
                _("Recently tried and failed to update file `%s'.\n"));
           no_rule_error(file);
 	  return file->update_status;
 	}
 
-      DBF (DB_EXTRA, _("File `%s' was considered already.\n"));
+      DBF (DB_VERBOSE, _("File `%s' was considered already.\n"));
       return 0;
     }
 
@@ -386,10 +386,10 @@ update_file_1 (file, depth)
     case cs_deps_running:
       break;
     case cs_running:
-      DBF (DB_EXTRA, _("Still updating file `%s'.\n"));
+      DBF (DB_VERBOSE, _("Still updating file `%s'.\n"));
       return 0;
     case cs_finished:
-      DBF (DB_EXTRA, _("Finished updating file `%s'.\n"));
+      DBF (DB_VERBOSE, _("Finished updating file `%s'.\n"));
       return file->update_status;
     default:
       abort ();
@@ -526,13 +526,13 @@ update_file_1 (file, depth)
 
   file->updating = 0;
 
-  DBF (DB_EXTRA, _("Finished prerequisites of target file `%s'.\n"));
+  DBF (DB_VERBOSE, _("Finished prerequisites of target file `%s'.\n"));
 
   if (running)
     {
       set_command_state (file, cs_deps_running);
       --depth;
-      DBF (DB_EXTRA, _("The prerequisites of `%s' are being made.\n"));
+      DBF (DB_VERBOSE, _("The prerequisites of `%s' are being made.\n"));
       return 0;
     }
 
@@ -545,7 +545,7 @@ update_file_1 (file, depth)
 
       depth--;
 
-      DBF (DB_EXTRA, _("Giving up on target file `%s'.\n"));
+      DBF (DB_VERBOSE, _("Giving up on target file `%s'.\n"));
 
       if (depth == 0 && keep_going_flag
 	  && !just_print_flag && !question_flag)
@@ -591,7 +591,7 @@ update_file_1 (file, depth)
 	 or its dependent, FILE, is older or does not exist.  */
       d->changed |= noexist || d_mtime > this_mtime;
 
-      if (!noexist && ISDB (DB_BASIC|DB_EXTRA))
+      if (!noexist && ISDB (DB_BASIC|DB_VERBOSE))
 	{
           const char *fmt = 0;
 
@@ -605,7 +605,7 @@ update_file_1 (file, depth)
               if (ISDB (DB_BASIC))
                 fmt = _("Prerequisite `%s' is newer than target `%s'.\n");
             }
-          else if (ISDB (DB_EXTRA))
+          else if (ISDB (DB_VERBOSE))
             fmt = _("Prerequisite `%s' is older than target `%s'.\n");
 
           if (fmt)
@@ -629,13 +629,13 @@ update_file_1 (file, depth)
   else if (!noexist && file->is_target && !deps_changed && file->cmds == 0)
     {
       must_make = 0;
-      DBF (DB_EXTRA,
+      DBF (DB_VERBOSE,
            _("No commands for `%s' and no prerequisites actually changed.\n"));
     }
 
   if (!must_make)
     {
-      if (ISDB (DB_EXTRA))
+      if (ISDB (DB_VERBOSE))
         {
           print_spaces (depth);
           printf (_("No need to remake target `%s'"), file->name);
@@ -675,7 +675,7 @@ update_file_1 (file, depth)
 
   if (file->command_state != cs_finished)
     {
-      DBF (DB_EXTRA, _("Commands of `%s' are being run.\n"));
+      DBF (DB_VERBOSE, _("Commands of `%s' are being run.\n"));
       return 0;
     }
 

@@ -20,10 +20,12 @@ Boston, MA 02111-1307, USA.  */
 
 #define DB_NONE         (0x000)
 #define DB_BASIC        (0x001)
-#define DB_EXTRA        (0x002)
+#define DB_VERBOSE      (0x002)
 #define DB_JOBS         (0x004)
 #define DB_IMPLICIT     (0x008)
 #define DB_MAKEFILES    (0x100)
+
+#define DB_ALL          (0xfff)
 
 extern int db_level;
 

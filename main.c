@@ -141,9 +141,9 @@ int just_print_flag;
 
 /* Print debugging info (--debug).  */
 
+static struct stringlist *db_flags;
+
 int db_level = 0;
-int noarg_db_level = 1;
-int default_db_level = 0;
 
 #ifdef WINDOWS32
 /* Suspend make in main for a short time to allow debugger to attach */
@@ -260,9 +260,9 @@ static const struct command_switch switches[] =
     { 'C', string, (char *) &directories, 0, 0, 0, 0, 0,
 	"directory", _("DIRECTORY"),
 	_("Change to DIRECTORY before doing anything") },
-    { 'd', positive_int, (char *) &db_level, 1, 1, 0,
-        (char *) &noarg_db_level, (char *) &default_db_level,
-	"debug", "L",
+    { 'd', string, (char *) &db_flags, 1, 1, 0,
+        "basic", 0,
+	"debug", _("FLAGS"),
 	_("Print different types of debugging information") },
 #ifdef WINDOWS32
     { 'D', flag, (char *) &suspend_flag, 1, 1, 0, 0, 0,
@@ -489,7 +489,57 @@ static RETSIGTYPE
 debug_signal_handler (sig)
      int sig;
 {
-  db_level = DB_NONE;
+  db_level = db_level ? DB_NONE : DB_BASIC;
+}
+
+static void
+decode_debug_flags ()
+{
+  char **pp;
+
+  if (!db_flags)
+    return;
+
+  for (pp=db_flags->list; *pp; ++pp)
+    {
+      const char *p = *pp;
+
+      while (1)
+        {
+          switch (tolower (p[0]))
+            {
+            case 'a':
+              db_level |= DB_ALL;
+              break;
+            case 'b':
+              db_level |= DB_BASIC;
+              break;
+            case 'i':
+              db_level |= DB_IMPLICIT;
+              break;
+            case 'j':
+              db_level |= DB_JOBS;
+              break;
+            case 'm':
+              db_level |= DB_MAKEFILES;
+              break;
+            case 'v':
+              db_level |= DB_BASIC | DB_VERBOSE;
+              break;
+            default:
+              fatal (NILF, _("unknown debug level specification `%s'"), p);
+            }
+
+          while (*(++p) != '\0')
+            if (*p == ',' || *p == ' ')
+              break;
+
+          if (*p == '\0')
+            break;
+
+          ++p;
+        }
+    }
 }
 
 #ifdef WINDOWS32
@@ -497,8 +547,8 @@ debug_signal_handler (sig)
  * HANDLE runtime exceptions by avoiding a requestor on the GUI. Capture
  * exception and print it to stderr instead.
  *
- * If ! DB_EXTRA, just print a simple message and exit.
- * If DB_EXTRA, print a more verbose message.
+ * If ! DB_VERBOSE, just print a simple message and exit.
+ * If DB_VERBOSE, print a more verbose message.
  * If compiled for DEBUG, let exception pass through to GUI so that
  *   debuggers can attach.
  */
@@ -514,7 +564,7 @@ handle_runtime_exceptions( struct _EXCEPTION_POINTERS *exinfo )
   LPTSTR lpszStrings[1];
 #endif
 
-  if (! ISDB (DB_EXTRA))
+  if (! ISDB (DB_VERBOSE))
     {
       sprintf(errmsg, _("%s: Interrupt/Exception caught "), prg);
       sprintf(&errmsg[strlen(errmsg)],
@@ -601,7 +651,7 @@ find_and_set_default_shell(char *token)
     /* search token path was found */
     sprintf(sh_path, "%s", search_token);
     default_shell = xstrdup(w32ify(sh_path,0));
-    DB (DB_EXTRA,
+    DB (DB_VERBOSE,
         (_("find_and_set_shell setting default_shell = %s\n"), default_shell));
     sh_found = 1;
   } else {
@@ -644,7 +694,7 @@ find_and_set_default_shell(char *token)
       }
 
       if (sh_found)
-        DB (DB_EXTRA,
+        DB (DB_VERBOSE,
             (_("find_and_set_shell path search set default_shell = %s\n"),
              default_shell));
     }
@@ -949,10 +999,7 @@ int main (int argc, char ** argv)
   }
 #endif
 
-  /* If we have the "extra" level, force the basic level too.  */
-
-  if (ISDB (DB_EXTRA))
-    db_level |= DB_BASIC;
+  decode_debug_flags ();
 
   /* Print version information.  */
 
@@ -1514,7 +1561,7 @@ int main (int argc, char ** argv)
 			 stupidly; but if you work for Athena, that's how
 			 you write your makefiles.)  */
 
-		      DB (DB_EXTRA,
+		      DB (DB_VERBOSE,
                           (_("Makefile `%s' might loop; not remaking it.\n"),
                            f->name));
 
@@ -2133,7 +2180,7 @@ decode_switches (argc, argv, env)
 
 		case positive_int:
 		  if (optarg == 0 && argc > optind
-		      && ISDIGIT (argv[optind][0]))
+                      && ISDIGIT (argv[optind][0]))
 		    optarg = argv[optind++];
 
 		  if (!doit)
