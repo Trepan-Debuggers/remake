@@ -204,6 +204,7 @@ update_file (file, depth)
 
       for (d = f->also_make; d != 0; d = d->next)
 	{
+	  check_renamed (d->file);
 	  d->file->command_state = f->command_state;
 	  d->file->update_status = f->update_status;
 	  d->file->updated = f->updated;
@@ -320,6 +321,8 @@ update_file_1 (file, depth)
   while (d != 0)
     {
       time_t mtime;
+
+      check_renamed (d->file);
 
       mtime = file_mtime (d->file);
       check_renamed (d->file);
