@@ -2478,7 +2478,7 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
                  0 };
   char*  sh_chars;
   char** sh_cmds;
-#else  /* WINDOWS32 */
+#else  /* must be UNIX-ish */
   static char sh_chars[] = "#;\"*?[]&|<>(){}$`^~";
   static char *sh_cmds[] = { "cd", "eval", "exec", "exit", "login",
 			     "logout", "set", "umask", "wait", "while", "for",
