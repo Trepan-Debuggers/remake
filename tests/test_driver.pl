@@ -113,7 +113,7 @@ sub toplevel
     print "Finding tests...\n";
     opendir (SCRIPTDIR, $scriptpath)
 	|| &error ("Couldn't opendir $scriptpath: $!\n");
-    @dirs = readdir (SCRIPTDIR);
+    @dirs = grep (!/^(\.\.?|CVS|RCS)$/, readdir (SCRIPTDIR) );
     closedir (SCRIPTDIR);
     foreach $dir (@dirs)
     {
@@ -124,7 +124,7 @@ sub toplevel
            || &error ("Couldn't mkdir $workpath/$dir: $!\n");
       opendir (SCRIPTDIR, "$scriptpath/$dir")
 	  || &error ("Couldn't opendir $scriptpath/$dir: $!\n");
-      @files = readdir (SCRIPTDIR);
+      @files = grep (!/^(\.\.?|CVS|RCS)$/, readdir (SCRIPTDIR) );
       closedir (SCRIPTDIR);
       foreach $test (@files)
       {
@@ -777,7 +777,7 @@ sub remove_directory_tree_inner
   $subdirhandle++;
   while ($object = readdir ($dirhandle))
   {
-    if ($object eq "." || $object eq "..")
+    if ($object =~ /^(\.\.?|CVS|RCS)$/)
     {
       next;
     }
@@ -912,7 +912,7 @@ sub compare_dir_tree
   local (@allfiles);
 
   opendir (DIR, $basedir) || &error ("Couldn't open $basedir: $!\n", 1);
-  @allfiles = grep (!/^\.\.?$/, readdir (DIR) );
+  @allfiles = grep (!/^(\.\.?|CVS|RCS)$/, readdir (DIR) );
   closedir (DIR);
   if ($debug)
   {
@@ -955,7 +955,7 @@ sub compare_dir_tree
       {
         @files = readdir (DIR);
         closedir (DIR);
-        @files = grep (!/^\.\.?$/ && ($_ = "$path/$_"), @files);
+        @files = grep (!/^(\.\.?|CVS|RCS)$/ && ($_ = "$path/$_"), @files);
         push (@allfiles, @files);
         if ($debug)
         {

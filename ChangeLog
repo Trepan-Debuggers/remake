@@ -1,3 +1,39 @@
+2002-04-21  Paul D. Smith  <psmith@gnu.org>
+
+	Modified to use latest autoconf (2.53), automake (1.6.1), and
+	gettext (0.11.1).  We're using gettext's new "external" support,
+	to avoid including libintl source with GNU make.
+
+	* signame.c: This file does nothing if the system provide
+	strsignal().  If not, it implements strsignal().  If the system
+	doesn't define sys_siglist, then we make our own; otherwise we use
+	the system version.
+	* signame.h: Removed.
+
+	* main.c (main): No need to invoke signame_init().  Update copyright.
+
+	* ABOUT-NLS: Removed.
+	* gettext.c: Removed.
+	* gettext.h: Get a simplified copy from the gettext package.
+	* po/*: Created.
+	* i18n/*.po: Moved to po/.
+	* i18n/: Removed.
+
+	* config/*: Created.  Contains package configuration helper files.
+	* config.guess, config.sub: Moved to config directory.
+
+	* configure.in (AC_CONFIG_FILES): Add po/Makefile.in, config/Makefile.
+	Rework to use new-style autoconf features.  Use the "external"
+	mode for gettext.  Make the build.sh config file conditional on
+	whether build.sh.in exists, to avoid autoconf errors.
+	* acinclude.m4: Removed almost all macros as being obsolete.
+	Rewrote remaining macros to use AC_DEFINE.
+	* acconfig.h: Removed.
+
+	* Makefile.am (EXTRA_DIST): Add config/config.rpath.  Use a
+	conditional to handle customs support.  Remove special handling
+	for i18n features.
+
 2002-04-20  Paul D. Smith  <psmith@gnu.org>
 
 	* function.c (func_call): Don't mark the argument variables $1,

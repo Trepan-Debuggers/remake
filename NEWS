@@ -1,8 +1,8 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  30 May 2001
+  21 April 2002
 
-Copyright (C) 1992,93,94,95,96,97,98,99,2000,2001 Free Software Foundation, Inc.
+Copyright (C) 2002  Free Software Foundation, Inc.
 See the end for copying conditions.
 
 All changes mentioned here are more fully described in the GNU make
@@ -29,6 +29,16 @@ Version <next>
 
 * Updated translations for French, Galician, German, Japanese, Korean,
   and Russian.  New translations for Danish, Hebrew, and Turkish.
+
+* Updated internationalization support to Gettext 0.11.1.
+  GNU make now uses Gettext's "external" feature, and does not include
+  any internationalization code itself.  Configure will search your
+  system for an existing implementation of GNU Gettext (only GNU Gettext
+  is acceptable) and use it if it exists.  If not, NLS will be disabled.
+  See ABOUT-NLS for more information.
+
+* Updated to autoconf 2.53 and automake 1.6.1.  Users should not be
+  impacted.
 
 Version 3.79.1
 

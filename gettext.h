@@ -1,165 +1,59 @@
-/* Begin of libgettext.h */
+/* Convenience header for conditional use of GNU <libintl.h>.
+   Copyright (C) 1995-1998, 2000-2002 Free Software Foundation, Inc.
 
-/* Message catalogs for internationalization.
-   Copyright (C) 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
+   This program is free software; you can redistribute it and/or modify it
+   under the terms of the GNU Library General Public License as published
+   by the Free Software Foundation; either version 2, or (at your option)
    any later version.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Library General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU Library General Public
+   License along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+   USA.  */
 
-#ifndef _GETTEXT_H
-#define _GETTEXT_H 1
+#ifndef _LIBGETTEXT_H
+#define _LIBGETTEXT_H 1
 
-/* We define an additional symbol to signal that we use the GNU
-   implementation of gettext.  */
-#define __USE_GNU_GETTEXT 1
-
-#include <sys/types.h>
-
-#if HAVE_LOCALE_H
-# include <locale.h>
-#endif
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifndef PARAMS
-# if __STDC__ || defined __cplusplus
-#  define PARAMS(args) args
-# else
-#  define PARAMS(args) ()
-# endif
-#endif
-
-#ifndef NULL
-# if !defined __cplusplus || defined __GNUC__
-#  define NULL ((void *) 0)
-# else
-#  define NULL (0)
-# endif
-#endif
-
-#if !HAVE_LC_MESSAGES
-/* This value determines the behaviour of the gettext() and dgettext()
-   function.  But some system does not have this defined.  Define it
-   to a default value.  */
-# define LC_MESSAGES (-1)
-#endif
-
-/* Declarations for gettext-using-catgets interface.  Derived from
-   Jim Meyering's libintl.h.  */
-struct _msg_ent
-{
-  const char *_msg;
-  int _msg_number;
-};
-
-#if HAVE_CATGETS
-/* These two variables are defined in the automatically by po-to-tbl.sed
-   generated file `cat-id-tbl.c'.  */
-extern const struct _msg_ent _msg_tbl[];
-extern int _msg_tbl_length;
-#endif
-
-/* Look up MSGID in the current default message catalog for the current
-   LC_MESSAGES locale.  If not found, returns MSGID itself (the default
-   text).  */
-extern char *gettext PARAMS ((const char *__msgid));
-/* static char *gettext__ PARAMS ((const char *__msgid)); */
-
-/* Look up MSGID in the DOMAINNAME message catalog for the current
-   LC_MESSAGES locale.  */
-extern char *dgettext PARAMS ((const char *__domainname, const char *__msgid));
-/* static char *dgettext__ PARAMS ((const char *__domainname,
-                                  const char *__msgid)); */
-
-/* Look up MSGID in the DOMAINNAME message catalog for the current CATEGORY
-   locale.  */
-extern char *dcgettext PARAMS ((const char *__domainname, const char *__msgid,
-				int __category));
-extern char *dcgettext__ PARAMS ((const char *__domainname,
-				  const char *__msgid, int __category));
-
-/* Set the current default message catalog to DOMAINNAME.
-   If DOMAINNAME is null, return the current default.
-   If DOMAINNAME is "", reset to the default of "messages".  */
-extern char *textdomain PARAMS ((const char *__domainname));
-/* static char *textdomain__ PARAMS ((const char *__domainname)); */
-
-/* Specify that the DOMAINNAME message catalog will be found
-   in DIRNAME rather than in the system locale data base.  */
-extern char *bindtextdomain PARAMS ((const char *__domainname,
-				  const char *__dirname));
-/* static char *bindtextdomain__ PARAMS ((const char *__domainname,
-                                        const char *__dirname)); */
-
+/* NLS can be disabled through the configure --disable-nls option.  */
 #if ENABLE_NLS
 
-/* Solaris 2.3 has the gettext function but dcgettext is missing.
-   So we omit this optimization for Solaris 2.3.  BTW, Solaris 2.4
-   has dcgettext.  */
-# if !HAVE_CATGETS && (!HAVE_GETTEXT || HAVE_DCGETTEXT)
-
-#  define gettext(Msgid)						      \
-     dgettext (NULL, Msgid)
-
-#  define dgettext(Domainname, Msgid)					      \
-     dcgettext (Domainname, Msgid, LC_MESSAGES)
-
-#  if defined __GNUC__ && __GNUC__ == 2 && __GNUC_MINOR__ >= 7
-/* This global variable is defined in loadmsgcat.c.  We need a sign,
-   whether a new catalog was loaded, which can be associated with all
-   translations.  */
-extern int _nl_msg_cat_cntr;
-
-#   define dcgettext(Domainname, Msgid, Category)			      \
-  (__extension__							      \
-   ({									      \
-     char *__result;							      \
-     if (__builtin_constant_p (Msgid))					      \
-       {								      \
-	 static char *__translation__;					      \
-	 static int __catalog_counter__;				      \
-	 if (! __translation__ || __catalog_counter__ != _nl_msg_cat_cntr)    \
-	   {								      \
-	     __translation__ =						      \
-	       dcgettext__ (Domainname, Msgid, Category);		      \
-	     __catalog_counter__ = _nl_msg_cat_cntr;			      \
-	   }								      \
-	 __result = __translation__;					      \
-       }								      \
-     else								      \
-       __result = dcgettext__ (Domainname, Msgid, Category);		      \
-     __result;								      \
-    }))
-#  endif
-# endif
+/* Get declarations of GNU message catalog functions.  */
+# include <libintl.h>
 
 #else
 
-# define gettext(Msgid) (Msgid)
-# define dgettext(Domainname, Msgid) (Msgid)
-# define dcgettext(Domainname, Msgid, Category) (Msgid)
-# define textdomain(Domainname) ((char *) Domainname)
-# define bindtextdomain(Domainname, Dirname) ((char *) Dirname)
+/* Disabled NLS.
+   The casts to 'const char *' serve the purpose of producing warnings
+   for invalid uses of the value returned from these functions.
+   On pre-ANSI systems without 'const', the config.h file is supposed to
+   contain "#define const".  */
+# define gettext(Msgid) ((const char *) (Msgid))
+# define dgettext(Domainname, Msgid) ((const char *) (Msgid))
+# define dcgettext(Domainname, Msgid, Category) ((const char *) (Msgid))
+# define ngettext(Msgid1, Msgid2, N) \
+    ((N) == 1 ? (const char *) (Msgid1) : (const char *) (Msgid2))
+# define dngettext(Domainname, Msgid1, Msgid2, N) \
+    ((N) == 1 ? (const char *) (Msgid1) : (const char *) (Msgid2))
+# define dcngettext(Domainname, Msgid1, Msgid2, N, Category) \
+    ((N) == 1 ? (const char *) (Msgid1) : (const char *) (Msgid2))
+# define textdomain(Domainname) ((const char *) (Domainname))
+# define bindtextdomain(Domainname, Dirname) ((const char *) (Dirname))
+# define bind_textdomain_codeset(Domainname, Codeset) ((const char *) (Codeset))
 
 #endif
 
-#ifdef __cplusplus
-}
-#endif
+/* A pseudo function call that serves as a marker for the automated
+   extraction of messages, but does not call gettext().  The run-time
+   translation is done at a different place in the code.
+   The argument, String, should be a literal string.  Concatenated strings
+   and other string expressions won't work.
+   The macro's expansion is not parenthesized, so that it is suitable as
+   initializer for static 'char[]' or 'const char[]' variables.  */
+#define gettext_noop(String) String
 
-#endif  /* _GETTEXT_H */
-
-/* End of libgettext.h */
+#endif /* _LIBGETTEXT_H */
