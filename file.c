@@ -1,5 +1,5 @@
 /* Target file hash table management for GNU Make.
-Copyright (C) 1988, 89, 90, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
+Copyright (C) 1988,89,90,91,92,93,94,95,96 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -295,12 +295,17 @@ in favor of those for `%s'.",
 
       merge_variable_set_lists (&oldfile->variables, file->variables);
 
-      if (oldfile->double_colon && !file->double_colon)
+      if (oldfile->double_colon && file->is_target && !file->double_colon)
 	fatal ("can't rename single-colon `%s' to double-colon `%s'",
 	       oldname, name);
-      if (!oldfile->double_colon && file->double_colon)
-	fatal ("can't rename double-colon `%s' to single-colon `%s'",
-	       oldname, name);
+      if (!oldfile->double_colon  && file->double_colon)
+	{
+	  if (oldfile->is_target)
+	    fatal ("can't rename double-colon `%s' to single-colon `%s'",
+		   oldname, name);
+	  else
+	    oldfile->double_colon = file->double_colon;
+	}
 
       if (file->last_mtime > oldfile->last_mtime)
 	/* %%% Kludge so -W wins on a file that gets vpathized.  */
@@ -332,7 +337,7 @@ remove_intermediates (sig)
   register int i;
   register struct file *f;
   char doneany;
-  
+
   if (question_flag || touch_flag)
     return;
   if (sig && just_print_flag)
@@ -412,7 +417,7 @@ snap_deps ()
 		free (d->name);
 	      d->name = 0;
 	    }
-  
+
   for (f = lookup_file (".PRECIOUS"); f != 0; f = f->prev)
     for (d = f->deps; d != 0; d = d->next)
       for (f2 = d->file; f2 != 0; f2 = f2->prev)
@@ -522,11 +527,11 @@ print_file (f)
   if (!f->is_target)
     puts ("# Not a target:");
   printf ("%s:%s", f->name, f->double_colon ? ":" : "");
-	      
+
   for (d = f->deps; d != 0; d = d->next)
     printf (" %s", dep_name (d));
   putchar ('\n');
-	      
+
   if (f->precious)
     puts ("#  Precious file (dependency of .PRECIOUS).");
   if (f->phony)
