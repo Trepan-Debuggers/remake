@@ -209,11 +209,12 @@ don't need to replace them with other programs.
 Each program-name variable should come with an options variable that is
 used to supply options to the program.  Append @samp{FLAGS} to the
 program-name variable name to get the options variable name---for
-example, @code{BISONFLAGS}.  (The name @code{CFLAGS} is an exception to
-this rule, but we keep it because it is standard.)  Use @code{CPPFLAGS}
-in any compilation command that runs the preprocessor, and use
-@code{LDFLAGS} in any compilation command that does linking as well as
-in any direct use of @code{ld}.
+example, @code{BISONFLAGS}.  (The names @code{CFLAGS} for the C
+compiler, @code{YFLAGS} for yacc, and @code{LFLAGS} for lex, are
+exceptions to this rule, but we keep them because they are standard.)
+Use @code{CPPFLAGS} in any compilation command that runs the
+preprocessor, and use @code{LDFLAGS} in any compilation command that
+does linking as well as in any direct use of @code{ld}.
 
 If there are C compiler options that @emph{must} be used for proper
 compilation of certain files, do not include them in @code{CFLAGS}.
