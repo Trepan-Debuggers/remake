@@ -219,7 +219,7 @@ static char *default_variables[] =
     "AS", "as",
 #ifdef GCC_IS_NATIVE
     "CC", "gcc",
-    "CXX, "gcc",
+    "CXX", "gcc",
 #else
     "CC", "cc",
     "CXX", "g++",
