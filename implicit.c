@@ -559,8 +559,7 @@ pattern_search (file, archive, depth, recursions)
 	  bcopy (stem, p, stemlen);
 	  p += stemlen;
 	  bcopy (rule->suffixes[i], p,
-		 rule->lens[i]
-		 - (rule->suffixes[i] - rule->targets[i] - 1) + 1);
+		 rule->lens[i] - (rule->suffixes[i] - rule->targets[i]) + 1);
 	  new->file = enter_file (new->name);
 	  new->next = file->also_make;
 	  file->also_make = new;
