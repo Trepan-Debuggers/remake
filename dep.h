@@ -1,5 +1,5 @@
 /* Definitions of dependency data structures for GNU Make.
-Copyright (C) 1988, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1991, 1992, 1993, 1996 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -44,7 +44,7 @@ extern struct nameseq *multi_glob PARAMS ((struct nameseq *chain, unsigned int s
 #ifdef VMS
 extern struct nameseq *parse_file_seq ();
 #else
-extern struct nameseq *parse_file_seq PARAMS ((char **stringp, char stopchar, unsigned int size, int strip));
+extern struct nameseq *parse_file_seq PARAMS ((char **stringp, int stopchar, unsigned int size, int strip));
 #endif
 extern char *tilde_expand PARAMS ((char *name));
 

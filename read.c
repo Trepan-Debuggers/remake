@@ -1544,7 +1544,7 @@ find_percent (pattern)
 struct nameseq *
 parse_file_seq (stringp, stopchar, size, strip)
      char **stringp;
-     char stopchar;
+     int stopchar;
      unsigned int size;
      int strip;
 {
