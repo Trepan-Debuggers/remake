@@ -539,8 +539,6 @@ read_makefile (filename, type)
 	    {
 	      pattern = savestring (p, len);
 	      p = find_next_token (&p2, &len);
-	      if (p != 0)
-		p = savestring (p, len);
 	      /* No searchpath means remove all previous
 		 selective VPATH's with the same pattern.  */
 	    }
@@ -550,8 +548,6 @@ read_makefile (filename, type)
 	  construct_vpath_list (pattern, p);
 	  if (pattern != 0)
 	    free (pattern);
-	  if (p != 0)
-	    free (p);
 	}
 #undef	word1eq
       else if (try_variable_definition (p, o_file))
