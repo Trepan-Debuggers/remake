@@ -1,11 +1,15 @@
 Sat Nov 25 20:35:18 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
+	* job.c [HAVE_UNION_WAIT]: Include sys/wait.h.
+
 	* main.c (log_working_directory): Made global.
 	Print entering msg only once.
 	* make.h (log_working_directory): Declare it.
 	* misc.c (message): Take new arg PREFIX.  Print "make: " only if
 	nonzero.  Call log_working_directory.
 	* remake.c: Pass new arg in `message' calls.
+	* job.c (start_job_command): Pass new arg to `message'; fix
+	inverted test in that call.
 
 Tue Nov 21 19:01:12 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
