@@ -4,6 +4,12 @@ $description = "Test pattern rules.";
 
 $details = "";
 
+use Cwd;
+
+$dir = cwd;
+$dir =~ s,.*/([^/]+)$,../$1,;
+
+
 #  TEST #1: Make sure that multiple patterns where the same target
 #           can be built are searched even if the first one fails
 #           to match properly.
@@ -62,6 +68,32 @@ foo.in: ; @:
 'foo
 foo.out');
 
+
+# TEST #3: make sure intermidite files that also happened to be
+#          prerequisites are not removed (Savannah bug #12267).
+#
+run_make_test('
+$(dir)/foo.o:
+
+$(dir)/foo.y:
+	@echo $@
+
+%.c: %.y
+	touch $@
+
+%.o: %.c
+	@echo $@
+
+.PHONY: install
+install: $(dir)/foo.c
+
+',
+"dir=$dir",
+"$dir/foo.y
+touch $dir/foo.c
+$dir/foo.o");
+
+unlink("$dir/foo.c");
 
 # This tells the test driver that the perl test script executed properly.
 1;
