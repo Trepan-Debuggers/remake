@@ -1,3 +1,11 @@
+1999-10-08  Paul D. Smith  <psmith@gnu.org>
+
+	* variable.c (initialize_file_variables): Always recurse to
+	initialize the parent's file variables: the parent might not have
+	any rules to run so it might not have been initialized before
+	this--we need this to set up the chain properly for
+	target-specific variables.
+
 1999-09-23  Paul D. Smith  <psmith@gnu.org>
 
 	* Version 3.78.1 released.

@@ -105,4 +105,24 @@ $answer = "qvar = qvar\nqvar =\n";
 &compare_output($answer,&get_logfile(1));
 
 
+# TEST #8
+# For PR/1378: Target-specific vars don't inherit correctly
+
+$makefile2 = &get_tmpfile;
+
+open(MAKEFILE,"> $makefile2");
+print MAKEFILE <<'EOF';
+foo: FOO = foo
+bar: BAR = bar
+foo: bar
+bar: baz
+baz: ; @echo $(FOO) $(BAR)
+EOF
+close(MAKEFILE);
+
+&run_make_with_options("$makefile2", "", &get_logfile);
+$answer = "foo bar\n";
+&compare_output($answer, &get_logfile(1));
+
+
 1;
