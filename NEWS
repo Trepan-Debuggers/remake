@@ -32,11 +32,11 @@ Version 3.79
   makefile is always run serially regardless of the value of -j.  Any
   submakes will still be run in parallel if -j was specified.
 
-* The -d (--debug) option has changed: it now takes an optional numeric
-  argument.  By default only a minimal set of debugging output is
-  generated, displaying information about what "normal" files (not
-  makefiles) were deemed out of date and in need of being rebuilt.
-  Various values control the amount of detail in the debugging output.
+* The -d (--debug) option has changed: it now allows optional flags
+  controlling the amount and type of debugging output.  By default only
+  a minimal amount information is generated, displaying the names of
+  "normal" targets (not makefiles) were deemed out of date and in need
+  of being rebuilt.
 
 Version 3.78
 

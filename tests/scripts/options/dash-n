@@ -58,4 +58,6 @@ $answer = "$make_name: `a' is up to date.\n";
 $answer = "$make_name: `a' is up to date.\n";
 &compare_output($answer, &get_logfile(1));
 
+unlink('a', 'b', 'c');
+
 1;

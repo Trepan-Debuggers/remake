@@ -59,5 +59,7 @@ arr2envblk(char **arr, char **envblk_out)
 		ptr += strlen(tmp[arrcnt]) + 1;
 		arrcnt++;
 	}
+
+        free(tmp);
 	return TRUE;
 }
