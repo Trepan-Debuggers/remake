@@ -1,3 +1,10 @@
+2003-01-22  Paul D. Smith  <psmith@gnu.org>
+
+	* function.c (func_call): Fix Bug #1744.  If we're inside a
+	recursive invocation of $(call ...), mask any of the outer
+	invocation's arguments that aren't used by this one, so that this
+	invocation doesn't "inherit" them accidentally.
+
 2002-11-16  Paul D. Smith  <psmith@gnu.org>
 
 	* NMakefile.template (OBJS): Add hash.c object file.
