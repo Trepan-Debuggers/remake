@@ -1,7 +1,7 @@
 # NOTE: If you have no `make' program at all to process this makefile, run
 # `build.sh' instead.
 #
-# Copyright (C) 1988, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
+# Copyright (C) 1988, 1989, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 # 
 # GNU Make is free software; you can redistribute it and/or modify
@@ -80,8 +80,6 @@ prefix = /usr/local
 # Common prefix for machine-dependent installed files.
 exec_prefix = $(prefix)
 
-# Name under which to install GNU make.
-instname = make
 # Directory to install `make' in.
 bindir = $(exec_prefix)/bin
 # Directory to find libraries in for `-lXXX'.
@@ -94,6 +92,10 @@ infodir = $(prefix)/info
 mandir = $(prefix)/man/man$(manext)
 # Number to put on the man page filename.
 manext = 1
+# Prefix to put on installed `make' binary file name.
+binprefix =
+# Prefix to put on installed `make' man page file name.
+manprefix = $(binprefix)
 
 # Whether or not make needs to be installed setgid.
 # The value should be either `true' or `false'.
@@ -184,13 +186,13 @@ tags: $(tagsrcs)
 
 .PHONY: install installdirs
 install: installdirs \
-	 $(bindir)/$(instname) $(infodir)/make.info \
-	 $(mandir)/$(instname).$(manext)
+	 $(bindir)/$(binprefix)make $(infodir)/make.info \
+	 $(mandir)/$(manprefix)make.$(manext)
 
 installdirs:
 	$(SHELL) ${srcdir}/mkinstalldirs $(bindir) $(infodir) $(mandir)
 
-$(bindir)/$(instname): make
+$(bindir)/$(binprefix)make: make
 	$(INSTALL_PROGRAM) make $@.new
 	@if $(install_setgid); then \
 	   if chgrp $(group) $@.new && chmod g+s $@.new; then \
@@ -219,10 +221,10 @@ $(infodir)/make.info: make.info
 # We use `$(SHELL) -c' because some shells do not
 # fail gracefully when there is an unknown command.
 	if $(SHELL) -c 'install-info --version' >/dev/null 2>&1; then \
-	  install-info --infodir=$(infodir) $$d/foo.info; \
+	  install-info --infodir=$(infodir) $$dir/make.info; \
 	else true; fi
 
-$(mandir)/$(instname).$(manext): make.man
+$(mandir)/$(manprefix)make.$(manext): make.man
 	$(INSTALL_DATA) $(srcdir)/make.man $@
 
 
