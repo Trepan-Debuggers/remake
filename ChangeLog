@@ -1,3 +1,8 @@
+2000-09-21  Paul D. Smith  <paul@paulandlesley.org>
+
+	* main.c (log_working_directory): Rework the text to use complete
+	sentences, to make life simpler for the translators.
+
 2000-08-21  Paul D. Smith  <paul@paulandlesley.org>
 
 	* variable.c (try_variable_definition): Change how we handle
