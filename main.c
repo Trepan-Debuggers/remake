@@ -926,7 +926,7 @@ main (argc, argv, envp)
 	{
 	case 1:
 	default:
-#define BOGUS_UPDATE_STATUS 1
+#define BOGUS_UPDATE_STATUS 0
 	  assert (BOGUS_UPDATE_STATUS);
 	  break;
 	  
