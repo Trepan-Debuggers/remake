@@ -1,3 +1,14 @@
+2004-11-30  Paul D. Smith  <psmith@gnu.org>
+
+	* configure.in: The old way we avoided creating build.sh from
+	build.sh.in before build.sh.in exists doesn't work anymore; we
+	have to use raw M4 (thanks to Andreas Schwab <schwab@suse.de> for
+	the help!).  This also keeps automake from complaining.
+	* Makefile.am (README): Add a dummy target so automake won't
+	complain that this file doesn't exist when we checkout from CVS.
+	* maintMakefile (.dep_segment): Rewrite this rule since newer
+	versions of automake don't provide DEP_FILES.
+
 2004-11-30  Boris Kolpackov  <boris@kolpackov.net>
 
 	Implementation of `realpath' and `abspath' built-in functions.
@@ -395,6 +406,11 @@
 	* maintMakefile (po_repo): Set a new URL for PO file updates.
 	(get-config/config.guess get-config/config.sub): Get these files
 	from the Savannah config project instead of ftp.gnu.org.
+
+2003-10-05  Paul Eggert  <eggert@twinsun.com>
+
+	* main.c (main): Avoid potential subscript error if environ has
+	short strings.
 
 2003-08-22  Paul D. Smith  <psmith@gnu.org>
 

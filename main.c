@@ -1919,8 +1919,8 @@ main (int argc, char **argv, char **envp)
 
 #ifndef _AMIGA
 	  for (p = environ; *p != 0; ++p)
-	    if ((*p)[MAKELEVEL_LENGTH] == '='
-		&& strneq (*p, MAKELEVEL_NAME, MAKELEVEL_LENGTH))
+	    if (strneq (*p, MAKELEVEL_NAME, MAKELEVEL_LENGTH)
+		&& (*p)[MAKELEVEL_LENGTH] == '=')
 	      {
 		/* The SGI compiler apparently can't understand
 		   the concept of storing the result of a function

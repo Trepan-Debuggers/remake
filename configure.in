@@ -3,7 +3,7 @@
 AC_INIT([GNU make],[3.81beta1],[bug-make@gnu.org])
 
 AC_PREREQ(2.59)
-AC_REVISION([[$Id: configure.in,v 1.128 2004/11/30 19:51:24 bosk Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.129 2004/11/30 20:58:55 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -389,14 +389,12 @@ esac
 
 
 # Specify what files are to be created.
-# We only generate the build.sh if we have a build.sh.in; we won't have
-# one before we've created a distribution.
-
 AC_CONFIG_FILES(Makefile glob/Makefile po/Makefile.in config/Makefile doc/Makefile)
 
-if test -f $srcdir/build.sh.in; then
-  AC_CONFIG_FILES(build.sh)
-fi
+# We only generate the build.sh if we have a build.sh.in; we won't have
+# one before we've created a distribution.
+m4_syscmd([test -f build.sh.in])dnl
+m4_if(m4_sysval, 0, [AC_CONFIG_FILES(build.sh)])
 
 
 # OK, do it!

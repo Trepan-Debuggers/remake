@@ -15,11 +15,6 @@ MTEMPLATES = Makefile.DOS SMakefile
 
 all-am: $(TEMPLATES) $(MTEMPLATES) build.sh.in
 
-# We need this to ensure that README and build.sh.in are created on time to
-# avoid errors by automake.
-#
-#Makefile.in: README build.sh.in
-
 # General rule for turning a .template into a regular file.
 #
 $(TEMPLATES) : % : %.template Makefile
@@ -67,13 +62,18 @@ build.sh.in: build.template Makefile
 # Automake used to have a --generate-deps flag, but it's gone now, so we have
 # to do it ourselves.
 #
+DEP_FILES := $(wildcard $(DEPDIR)/*.Po)
 .dep_segment: Makefile.am maintMakefile $(DEP_FILES)
-	cat $(DEP_FILES) \
-	  | sed -e '/^[^:]*\.[ch] *:/d' \
-		-e 's, /usr/[^ ]*,,g' \
-		-e 's, $(srcdir)/, ,g' \
-		-e '/^ \\$$/d' \
-	  > $@
+	(for f in $(DEPDIR)/*.Po; do \
+	   echo ""; \
+	   echo "# $$f"; \
+	   cat $$f \
+	     | sed -e '/^[^:]*\.[ch] *:/d' \
+		   -e 's, /usr/[^ ]*,,g' \
+		   -e 's, $(srcdir)/, ,g' \
+		   -e '/^ *\\$$/d' \
+		   -e '/^ *$$/d'; \
+	 done) > $@
 
 # Get rid of everything "else".
 #

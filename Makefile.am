@@ -157,4 +157,10 @@ check-regression:
 
 # --------------- Maintainer's Section
 
+# Tell automake that I haven't forgotten about this file and it will be
+# created before we build a distribution (see maintMakefile in the CVS
+# distribution).
+
+README:
+
 @MAINT_MAKEFILE@
