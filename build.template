@@ -1,0 +1,48 @@
+#!/bin/sh
+
+# Shell script to build GNU Make in the absence of any `make' program.
+
+# Copyright (C) 1993 Free Software Foundation, Inc.
+# This file is part of GNU Make.
+# 
+# GNU Make is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# GNU Make is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with GNU Make; see the file COPYING.  If not, write to
+# the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+# See Makefile.in for comments describing these variables.
+
+srcdir='@srcdir@'
+CC='@CC@'
+CFLAGS="${CFLAGS--g}"
+defines='@DEFS@ -DLIBDIR=\"${libdir}\" -DINCLUDEDIR=\"${includedir}\"'
+ALLOCA='@ALLOCA@'
+LOADLIBES='@LIBS@'
+extras='@LIBOBJS@'
+
+objs="%objs% ${extras} ${ALLOCA}"
+
+# Common prefix for machine-independent installed files.
+prefix=/usr/local
+# Common prefix for machine-dependent installed files.
+exec_prefix=/usr/local
+# Directory to find libraries in for `-lXXX'.
+libdir=${exec_prefix}/lib
+# Directory to search by default for included makefiles.
+includedir=${prefix}/include
+
+for file in `echo ${objs} | sed 's/\.o/.c/g'`; do
+  $CC $CFLAGS $defines -c -I. -I${srcdir} -I${srcdir}/glob ${srcdir}/$file
+done
+
+$CC $LDFLAGS $objs $LOADLIBES -o make.new
+mv -f make.new make
