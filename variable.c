@@ -446,7 +446,6 @@ target_environment (file)
 	  register struct variable *v;
 	  for (v = set->table[i]; v != 0; v = v->next)
 	    {
-	      extern char *getenv ();
 	      unsigned int j = i % buckets;
 	      register struct variable_bucket *ov;
 	      register char *p = v->name;
@@ -464,10 +463,9 @@ target_environment (file)
 		    /* Only export default variables by explicit request.  */
 		    continue;
 
-		  if (!export_all_variables
+		  if (! export_all_variables
 		      && v->origin != o_command
-		      && v->origin != o_env && v->origin != o_env_override
-		      && !(v->origin == o_file && getenv (p) != 0))
+		      && v->origin != o_env && v->origin != o_env_override)
 		    continue;
 
 		  if (*p != '_' && (*p < 'A' || *p > 'Z')
