@@ -136,17 +136,18 @@ define_variable_in_set (name, length, value, origin, recursive, set, flocp)
    Returns address of the `struct variable' containing all info
    on the variable, or nil if no such variable is defined.
 
-   If LISTP is not nil, return a pointer to the setlist where
-   the variable was found.  If the variable wasn't found, the
-   value of LISTP is unchanged.  */
+   If we find a variable which is in the process of being expanded,
+   try to find one further up the set_list chain.  If we don't find
+   one that isn't being expanded, return a pointer to whatever we
+   _did_ find.  */
 
 struct variable *
-lookup_variable_setlist (name, length, listp)
+lookup_variable (name, length)
      char *name;
      unsigned int length;
-     struct variable_set_list **listp;
 {
   register struct variable_set_list *setlist;
+  struct variable *firstv = 0;
 
   register unsigned int i;
   register unsigned int rawhash = 0;
@@ -161,21 +162,31 @@ lookup_variable_setlist (name, length, listp)
       register unsigned int hashval = rawhash % set->buckets;
       register struct variable *v;
 
+      /* Look through this set list.  */
       for (v = set->table[hashval]; v != 0; v = v->next)
 	if (*v->name == *name
 	    && strneq (v->name + 1, name + 1, length - 1)
-	    && v->name[length] == 0)
-          {
-            if (listp)
-              *listp = setlist;
-            return v;
-          }
+	    && v->name[length] == '\0')
+          break;
+
+      /* If we didn't find anything, go to the next set list.  */
+      if (!v)
+        continue;
+
+      /* If it's not being expanded already, we're done.  */
+      if (!v->expanding)
+        return v;
+
+      /* It is, so try to find another one.  If this is the first one we've
+         seen, keep a pointer in case we don't find anything else.  */
+      if (!firstv)
+        firstv = v;
     }
 
 #ifdef VMS
   /* since we don't read envp[] on startup, try to get the
      variable via getenv() here.  */
-
+  if (!firstv)
     {
       char *vname = alloca (length + 1);
       char *value;
@@ -229,10 +240,9 @@ lookup_variable_setlist (name, length, listp)
 	  return define_variable (vname, length, value, o_env, 1);
 	}
     }
-
 #endif /* VMS */
 
-  return 0;
+  return firstv;
 }
 
 /* Lookup a variable whose name is a string starting at NAME

@@ -68,7 +68,6 @@ extern void exit PARAMS ((int)) __attribute__ ((noreturn));
 # endif
 extern double atof ();
 #endif
-extern char *mktemp ();
 
 static void print_data_base PARAMS ((void));
 static void print_version PARAMS ((void));
@@ -728,6 +727,51 @@ msdos_return_to_initial_directory ()
 }
 #endif
 
+extern char *mktemp ();
+extern int mkstemp ();
+
+FILE *
+open_tmpfile(name, template)
+     char **name;
+     const char *template;
+{
+  int fd;
+
+#if defined HAVE_MKSTEMP || defined HAVE_MKTEMP
+# define TEMPLATE_LEN   strlen (template)
+#else
+# define TEMPLATE_LEN   L_tmpnam
+#endif
+  *name = xmalloc (TEMPLATE_LEN + 1);
+  strcpy (*name, template);
+
+#if defined HAVE_MKSTEMP && defined HAVE_FDOPEN
+  /* It's safest to use mkstemp(), if we can.  */
+  fd = mkstemp (*name);
+  if (fd == -1)
+    return 0;
+  return fdopen (fd, "w");
+#else
+# ifdef HAVE_MKTEMP
+  (void) mktemp (*name);
+# else
+  (void) tmpnam (*name);
+# endif
+
+# ifdef HAVE_FDOPEN
+  /* Can't use mkstemp(), but guard against a race condition.  */
+  fd = open (*name, O_CREAT|O_EXCL|O_WRONLY, 0600);
+  if (fd == -1)
+    return 0;
+  return fdopen (fd, "w");
+# else
+  /* Not secure, but what can we do?  */
+  return fopen (*name, "w");
+# endif
+#endif
+}
+
+
 #ifndef _AMIGA
 int
 main (argc, argv, envp)
@@ -1212,24 +1256,16 @@ int main (int argc, char ** argv)
 	       into a temporary file and read from that.  */
 	    FILE *outfile;
 
-	    /* Make a unique filename.  */
-#ifdef HAVE_MKTEMP
-
-#ifdef VMS
-	    static char name[] = "sys$scratch:GmXXXXXX";
-#else
-	    static char name[] = "/tmp/GmXXXXXX";
-#endif
-	    (void) mktemp (name);
-#else
-	    static char name[L_tmpnam];
-	    (void) tmpnam (name);
-#endif
-
             if (stdin_nm)
               fatal (NILF, _("Makefile from standard input specified twice."));
 
-	    outfile = fopen (name, "w");
+#ifdef VMS
+# define TMP_TEMPLATE   "sys$scratch:GmXXXXXX"
+#else
+# define TMP_TEMPLATE   "/tmp/GmXXXXXX"
+#endif
+
+	    outfile = open_tmpfile (&stdin_nm, TMP_TEMPLATE);
 	    if (outfile == 0)
 	      pfatal_with_name (_("fopen (temporary file)"));
 	    while (!feof (stdin))
@@ -1243,16 +1279,9 @@ int main (int argc, char ** argv)
 
 	    /* Replace the name that read_all_makefiles will
 	       see with the name of the temporary file.  */
-	    {
-	      char *temp;
-	      /* SGI compiler requires alloca's result be assigned simply.  */
-	      temp = (char *) alloca (sizeof (name));
-	      bcopy (name, temp, sizeof (name));
-	      makefiles->list[i] = temp;
-	    }
+            makefiles->list[i] = xstrdup (stdin_nm);
 
 	    /* Make sure the temporary file will not be remade.  */
-            stdin_nm = savestring (name, sizeof (name) -1);
 	    f = enter_file (stdin_nm);
 	    f->updated = 1;
 	    f->update_status = 0;
@@ -2683,7 +2712,7 @@ die (status)
 	print_version ();
 
       /* Wait for children to die.  */
-      for (err = status != 0; job_slots_used > 0; err = 0)
+      for (err = (status != 0); job_slots_used > 0; err = 0)
 	reap_children (1, err);
 
       /* Let the remote job module clean up its state.  */

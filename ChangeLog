@@ -1,3 +1,25 @@
+2000-03-27  Paul D. Smith  <psmith@gnu.org>
+
+	* remake.c (start_updating, finish_updating, is_updating): Fix
+	PR/1671; circular dependencies in double-colon rules are not
+	diagnosed.  These macros set the updating flag in the root
+	double-colon file instead of the current one, if it's part of a
+	double-colon list.  This solution provided by Tim Magill
+	<magill@gate.net>; I just changed the macro names :).
+	(update_file_1): Call them.
+	(check_dep): Call them.
+
+	The change to not automatically evaluate the $(call ...)
+	function's arguments breaks recursive use of call.  Although using
+	$(if ...) and $(foreach ...) in $(call ...) macros is important,
+	the error conditions generated are simply to obscure for me to
+	feel comfortable with.  If a method is devised to get both
+	working, we'll revisit.  For now, remove this change.
+
+	* function.c (function_table): Turn on the expand bit for func_call.
+	(func_call): Don't expand arguments for builtin functions; that
+	will have already been done.
+
 2000-03-26  Paul D. Smith  <psmith@gnu.org>
 
 	* file.c (remove_intermediates): Never remove targets explicitly
@@ -23,6 +45,48 @@
 	* make.h: Ditto.
 	Reported by Marco Franzen <Marco.Franzen@Thyron.com>.
 
+2000-03-08  Tim Magill  <magill@gate.net>
+
+	* remake.c (update_file): Return the exit status of the pruned
+	file when pruning, not just 0.  Fixes PR/1634.
+
+2000-02-24  Paul D. Smith  <psmith@gnu.org>
+
+	* configure.in: Close a minor potential security hole; if you're
+	reading makefiles from stdin (who does that?) you could run into a
+	race condition with the temp file using mktemp() or tmpnam().  Add
+	a check for mkstemp() and fdopen().
+	* main.c (open_tmpfile): New function to open a temporary file.
+	If we have mkstemp() (and fdopen()), use that.  If not use
+	mktemp() or tmpnam().  If we have fdopen(), use open() to open the
+	file O_CREAT|O_EXCL.  If not, fall back to normal fopen() (insecure).
+	(main): Call it.
+	* job.c (child_execute_job) [VMS]: Call it.
+
+	* variable.c (lookup_variable): If we find a variable which is
+	being expanded, then note it but keep looking through the rest of
+	the set list to see if we can find one that isn't.  If we do,
+	return that.  If we don't, return the original.  Fix for PR/1610.
+
+	While implementing this I realized that it also solves PR/1380 in
+	a much more elegant way.  I don't know what I was smoking before.
+	So, remove the hackage surrounding the original fix for that (see
+	below).  Change this function back to lookup_variable and remove
+	the extra setlist argument.
+	* variable.h (recursively_expand_setlist): Remove the macro,
+	rename the prototype, and remove the extra setlist argument.
+	(lookup_variable): Ditto.
+	* expand.c (recursively_expand): Rename and remove the extra
+	setlist argument.
+	(reference_variable): Use lookup_variable() again.
+	(allocated_variable_append): Remove the extra setlist argument.
+
+2000-02-21  Paul D. Smith  <psmith@gnu.org>
+
+	* README.template: A few updates.
+
+	* i18n/de.po: New version from the German translation team.
+
 2000-02-09  Paul D. Smith  <psmith@gnu.org>
 
 	* Version 3.78.91 released.
@@ -42,6 +106,7 @@
 	implementing expansion of these references separately from the
 	"normal" expansion, say, instead of using the same codepath.
 	Actually, it's already "worse enough" :-/.
+	Fix for PR/1380.
 
 	* variable.h (recursively_expand_setlist): Rename
 	recursively_expand to add a struct variable_set_list argument, and

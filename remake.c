@@ -43,6 +43,18 @@ Boston, MA 02111-1307, USA.  */
 extern int try_implicit_rule PARAMS ((struct file *file, unsigned int depth));
 
 
+/* The test for circular dependencies is based on the 'updating' bit in
+   `struct file'.  However, double colon targets have seperate `struct
+   file's; make sure we always use the base of the double colon chain. */
+
+#define start_updating(_f)  (((_f)->double_colon ? (_f)->double_colon : (_f))\
+                             ->updating = 1)
+#define finish_updating(_f) (((_f)->double_colon ? (_f)->double_colon : (_f))\
+                             ->updating = 0)
+#define is_updating(_f)     (((_f)->double_colon ? (_f)->double_colon : (_f))\
+                             ->updating)
+
+
 /* Incremented when a command is started (under -n, when one would be).  */
 unsigned int commands_started = 0;
 
@@ -282,7 +294,7 @@ update_file (file, depth)
   if (f->considered == considered)
     {
       DBF (DB_VERBOSE, _("Pruning file `%s'.\n"));
-      return 0;
+      return f->command_state == cs_finished ? f->update_status : 0;
     }
 
   /* This loop runs until we start commands for a double colon rule, or until
@@ -368,7 +380,7 @@ update_file_1 (file, depth)
   ++depth;
 
   /* Notice recursive update of the same file.  */
-  file->updating = 1;
+  start_updating (file);
 
   /* Looking at the file's modtime beforehand allows the possibility
      that its name may be changed by a VPATH search, and thus it may
@@ -416,7 +428,7 @@ update_file_1 (file, depth)
       mtime = file_mtime (d->file);
       check_renamed (d->file);
 
-      if (d->file->updating)
+      if (is_updating (d->file))
 	{
 	  error (NILF, _("Circular %s <- %s dependency dropped."),
 		 file->name, d->file->name);
@@ -494,7 +506,7 @@ update_file_1 (file, depth)
 	  }
     }
 
-  file->updating = 0;
+  finish_updating (file);
 
   DBF (DB_VERBOSE, _("Finished prerequisites of target file `%s'.\n"));
 
@@ -788,7 +800,7 @@ check_dep (file, depth, this_mtime, must_make_ptr)
   int dep_status = 0;
 
   ++depth;
-  file->updating = 1;
+  start_updating (file);
 
   if (!file->intermediate)
     /* If this is a non-intermediate file, update it and record
@@ -840,7 +852,7 @@ check_dep (file, depth, this_mtime, must_make_ptr)
 	  d = file->deps;
 	  while (d != 0)
 	    {
-	      if (d->file->updating)
+	      if (is_updating (d->file))
 		{
 		  error (NILF, _("Circular %s <- %s dependency dropped."),
 			 file->name, d->file->name);
@@ -879,7 +891,7 @@ check_dep (file, depth, this_mtime, must_make_ptr)
 	}
     }
 
-  file->updating = 0;
+  finish_updating (file);
   return dep_status;
 }
 

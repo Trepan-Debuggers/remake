@@ -1,7 +1,27 @@
+2000-03-27  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/reinvoke: Make more robust by touching "b"
+	first, to ensure it's not newer than "a".
+	Reported by Marco Franzen <Marco.Franzen@Thyron.com>.
+
+	* scripts/functions/call: Whoops.  The fix to PR/1527 caused
+	recursive invocations of $(call ...) to break.  I can't come up
+	with any way to get both working at the same time, so I backed out
+	the fix to 1527 and added a test case for recursive calls.
+
+	* scripts/features/double_colon: Test that circular dependencies
+	in double-colon rule sets are detected correctly (PR/1671).
+
 2000-03-26  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/targets/INTERMEDIATE: Test that make doesn't remove
 	.INTERMEDIATE files when given on the command line (PR/1669).
+
+2000-03-08  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/options/dash-k: Add a test for error detection by
+	multiple targets depending on the same prerequisite with -k.
+	For PR/1634.
 
 2000-02-07  Paul D. Smith  <psmith@gnu.org>
 

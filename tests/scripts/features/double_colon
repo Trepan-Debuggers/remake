@@ -36,6 +36,9 @@ two: ; @echo two
 
 f1.h f2.h: ; @echo $@
 
+d :: ; @echo ok
+d :: d ; @echo oops
+
 EOF
 
 close(MAKEFILE);
@@ -93,6 +96,12 @@ $answer = "f2.h\nfoo SECOND\n";
 
 &run_make_with_options($makefile, "-j10 foo", &get_logfile, 0);
 $answer = "f2.h\nfoo SECOND\n";
+&compare_output($answer, &get_logfile(1));
+
+# TEST 8: Test circular dependency check; PR/1671
+
+&run_make_with_options($makefile, "d", &get_logfile, 0);
+$answer = "ok\n$make_name: Circular d <- d dependency dropped.\noops\n";
 &compare_output($answer, &get_logfile(1));
 
 # TEST 8: I don't grok why this is different than the above, but it is...

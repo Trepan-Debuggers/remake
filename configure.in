@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.92 2000/02/05 07:50:47 psmith Exp $])
+AC_REVISION([$Id: configure.in,v 1.93 2000/03/27 06:54:37 psmith Exp $])
 AC_PREREQ(2.13)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 
@@ -60,7 +60,7 @@ AC_MSG_RESULT($ac_cv_check_symbol_$1)])dnl
 # clock_gettime is in -lposix4 in Solaris 2.6.
 AC_CHECK_LIB(posix4, clock_gettime)
 
-AC_CHECK_FUNCS(memmove strchr memcpy strdup psignal mktemp pstat_getdynamic \
+AC_CHECK_FUNCS(memmove strchr memcpy strdup psignal mkstemp mktemp fdopen \
 	       clock_gettime dup2 getcwd sigsetmask sigaction getgroups \
 	       setlinebuf seteuid setegid setreuid setregid pipe \
 	       strerror strsignal)
@@ -74,6 +74,7 @@ AC_FUNC_SETVBUF_REVERSED
 AC_FUNC_SELECT
 
 AC_CHECK_LIB(kstat, kstat_open) dnl _Must_ come before AC_FUNC_GETLOADAVG.
+AC_CHECK_FUNCS(pstat_getdynamic) dnl Supposedly in AC_FUNC_GETLOADAVG, but...?
 AC_FUNC_GETLOADAVG
 
 # Check out the wait reality.
