@@ -86,7 +86,6 @@ struct command_switch
 	flag,			/* Turn int flag on.  */
 	flag_off,		/* Turn int flag off.  */
 	string,			/* One string per switch.  */
-	int_string,		/* One string.  */
 	positive_int,		/* A positive integer.  */
 	floating,		/* A floating-point number (double).  */
 	ignore			/* Ignored.  */
@@ -104,6 +103,7 @@ struct command_switch
     char *long_name;		/* Long option name.  */
     char *argdesc;		/* Descriptive word for argument.  */
     char *description;		/* Description for usage message.  */
+                                /* 0 means internal; don't display help.  */
   };
 
 
@@ -195,14 +195,13 @@ static struct stringlist *makefiles = 0;
 unsigned int job_slots = 1;
 unsigned int default_job_slots = 1;
 
-static char *job_slots_str = "1";
-
-#ifndef MAKE_JOBSERVER
 /* Value of job_slots that means no limit.  */
+
 static unsigned int inf_jobs = 0;
-#endif
 
 /* File descriptors for the jobs pipe.  */
+
+static struct stringlist *jobserver_fds = 0;
 
 int job_fds[2] = { -1, -1 };
 int job_rfd = -1;
@@ -278,14 +277,13 @@ static const struct command_switch switches[] =
 	"include-dir", _("DIRECTORY"),
 	_("Search DIRECTORY for included makefiles") },
     { 'j',
-#ifndef MAKE_JOBSERVER
         positive_int, (char *) &job_slots, 1, 1, 0,
 	(char *) &inf_jobs, (char *) &default_job_slots,
-#else
-        int_string, (char *)&job_slots_str, 1, 1, 0, "0", "1",
-#endif
 	"jobs", "N",
 	_("Allow N jobs at once; infinite jobs with no arg") },
+    { 2, string, (char *) &jobserver_fds, 1, 1, 0, 0, 0,
+        "jobserver-fds", 0,
+        0 },
     { 'k', flag, (char *) &keep_going_flag, 1, 1, 0,
 	0, (char *) &default_keep_going_flag,
 	"keep-going", 0,
@@ -338,13 +336,13 @@ static const struct command_switch switches[] =
     { 'w', flag, (char *) &print_directory_flag, 1, 1, 0, 0, 0,
 	"print-directory", 0,
 	_("Print the current directory") },
-    { 2, flag, (char *) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
+    { 3, flag, (char *) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
 	"no-print-directory", 0,
 	_("Turn off -w, even if it was turned on implicitly") },
     { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0,
 	"what-if", _("FILE"),
 	_("Consider FILE to be infinitely new") },
-    { 3, flag, (char *) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
+    { 4, flag, (char *) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
 	"warn-undefined-variables", 0,
 	_("Warn when an undefined variable is referenced") },
     { '\0', }
@@ -1297,52 +1295,58 @@ int main (int argc, char ** argv)
 #endif
 
 #ifdef MAKE_JOBSERVER
-  /* If extended jobs are available then the -j option can have one of 4
-     formats: (1) not specified: default is "1"; (2) specified with no value:
-     default is "0" (infinite); (3) specified with a single value: this means
-     the user wants N job slots; or (4) specified with 2 values separated by
-     a comma.  The latter means we're a submake; the two values are the read
-     and write FDs, respectively, for the pipe.  Note this last form is
-     undocumented for the user!  */
+  /* If the jobserver-fds option is seen, make sure that -j is reasonable.  */
 
-  sscanf (job_slots_str, "%d", &job_slots);
+  if (jobserver_fds)
   {
-    char *cp = index (job_slots_str, ',');
+    char *cp;
 
-    /* In case #4, get the FDs.  */
-    if (cp && sscanf (cp+1, "%d", &job_fds[1]) == 1)
+    if (jobserver_fds->max > 1)
+      fatal (NILF, _("internal error: multiple --jobserver-fds options."));
+
+    if (job_slots > 0)
+      fatal (NILF, _("internal error: --jobserver-fds unexpected."));
+
+    /* Now parse the fds string and make sure it has the proper format.  */
+
+    cp = jobserver_fds->list[0];
+
+    if (sscanf (cp, "%d,%d", &job_fds[0], &job_fds[1]) != 2)
+      fatal (NILF,
+             _("internal error: invalid --jobserver-fds string `%s'."), cp);
+
+    /* Set job_slots to 0.  The combination of a pipe + !job_slots means
+       we're using the jobserver.  If !job_slots and we don't have a pipe, we
+       can start infinite jobs.  */
+
+    job_slots = 0;
+
+    /* Create a duplicate pipe, that will be closed in the SIGCHLD
+       handler.  If this fails with EBADF, the parent has closed the pipe
+       on us because it didn't think we were a submake.  If so, print a
+       warning then default to -j1.  */
+
+    if ((job_rfd = dup (job_fds[0])) < 0)
       {
-        /* Set up the first FD and set job_slots to 0.  The combination of a
-           pipe + !job_slots means we're using the jobserver.  If !job_slots
-           and we don't have a pipe, we can start infinite jobs.  */
-        job_fds[0] = job_slots;
-        job_slots = 0;
+        if (errno != EBADF)
+          pfatal_with_name (_("dup jobserver"));
 
-        /* Create a duplicate pipe, that will be closed in the SIGCHLD
-           handler.  If this fails with EBADF, the parent has closed the pipe
-           on us because it didn't think we were a submake.  If so, print a
-           warning then default to -j1.  */
-        if ((job_rfd = dup (job_fds[0])) < 0)
-          {
-            if (errno != EBADF)
-              pfatal_with_name (_("dup jobserver"));
-
-            error (NILF,
-                   _("warning: jobserver unavailable (using -j1).  Add `+' to parent make rule."));
-            job_slots = 1;
-            job_fds[0] = job_fds[1] = -1;
-            job_slots_str = "1";
-          }
+        error (NILF,
+               _("warning: jobserver unavailable (using -j1).  Add `+' to parent make rule."));
+        job_slots = 1;
+        job_fds[0] = job_fds[1] = -1;
+        free (jobserver_fds->list);
+        free (jobserver_fds);
+        jobserver_fds = 0;
       }
   }
 
-  /* In case #3 above, set up the pipe and set up the submake options
-     properly.  */
+  /* If we have >1 slot but no jobserver-fds, then we're a top-level make.
+     Set up the pipe and install the fds option for our children.  */
 
-  if (job_slots > 1)
+  else if (job_slots > 1)
     {
-      char buf[(sizeof ("1024")*2)+1];
-      char c = '0';
+      char c = '+';
 
       if (pipe (job_fds) < 0 || (job_rfd = dup (job_fds[0])) < 0)
 	pfatal_with_name (_("creating jobs pipe"));
@@ -1351,23 +1355,21 @@ int main (int argc, char ** argv)
          submakes it's the token they were given by their parent.  For the
          top make, we just subtract one from the number the user wants.  */
 
-      job_slots = 1; /* !!!!!DEBUG!!!!! */
-
       while (--job_slots)
-	{
-	  write (job_fds[1], &c, 1);
-	  if (c == '9')
-	    c = 'a';
-	  else if (c == 'z')
-	    c = 'A';
-	  else if (c == 'Z')
-	    c = '0'; /* Start over again!!  */
-	  else
-	    ++c;
-	}
+        while (write (job_fds[1], &c, 1) != 1)
+          if (!EINTR_SET)
+            pfatal_with_name (_("init jobserver pipe"));
 
-      sprintf (buf, "%d,%d", job_fds[0], job_fds[1]);
-      job_slots_str = xstrdup (buf);
+      /* Fill in the jobserver_fds struct for our children.  */
+
+      jobserver_fds = (struct stringlist *)
+                        xmalloc (sizeof (struct stringlist));
+      jobserver_fds->list = (char **) xmalloc (sizeof (char *));
+      jobserver_fds->list[0] = xmalloc ((sizeof ("1024")*2)+1);
+
+      sprintf (jobserver_fds->list[0], "%d,%d", job_fds[0], job_fds[1]);
+      jobserver_fds->idx = 1;
+      jobserver_fds->max = 1;
     }
 #endif
 
@@ -1790,7 +1792,6 @@ init_switches ()
 	  long_options[i].has_arg = no_argument;
 	  break;
 
-	case int_string:
 	case string:
 	case positive_int:
 	case floating:
@@ -1904,7 +1905,7 @@ print_usage (bad)
     {
       char buf[1024], shortarg[50], longarg[50], *p;
 
-      if (cs->description[0] == '-')
+      if (!cs->description || cs->description[0] == '-')
 	continue;
 
       switch (long_options[cs - switches].has_arg)
@@ -1949,8 +1950,9 @@ print_usage (bad)
       {
 	const struct command_switch *ncs = cs;
 	while ((++ncs)->c != '\0')
-	  if (ncs->description[0] == '-' &&
-	      ncs->description[1] == cs->c)
+	  if (ncs->description
+              && ncs->description[0] == '-'
+              && ncs->description[1] == cs->c)
 	    {
 	      /* This is another switch that does the same
 		 one as the one we are processing.  We want
@@ -2042,20 +2044,6 @@ decode_switches (argc, argv, env)
 		case flag_off:
 		  if (doit)
 		    *(int *) cs->value_ptr = cs->type == flag;
-		  break;
-
-		case int_string:
-		  if (optarg == 0 && argc > optind
-		      && isdigit (argv[optind][0]))
-		    optarg = argv[optind++];
-
-		  if (!doit)
-		    break;
-
-		  if (optarg == 0)
-		    optarg = cs->noarg_value;
-
-		  *(char **) cs->value_ptr = optarg;
 		  break;
 
 		case string:
@@ -2355,22 +2343,6 @@ define_makeflags (all, makefile)
 	    }
 	  break;
 #endif
-
-	case int_string:
-	  if (all)
-	    {
-	      char *vp = *(char **) cs->value_ptr;
-
-	      if (cs->default_value != 0
-		  && streq (vp, cs->default_value))
-		break;
-	      if (cs->noarg_value != 0
-		  && streq (vp, cs->noarg_value))
-		ADD_FLAG ("", 0); /* Optional value omitted; see below.  */
-	      else
-		ADD_FLAG (vp, strlen (vp));
-	    }
-	  break;
 
 	case string:
 	  if (all)
