@@ -1,4 +1,4 @@
-/* Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993
+/* Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994
 	Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -360,7 +360,7 @@ read_makefile (filename, flags)
       remove_comments (collapsed);
 
       p = collapsed;
-      while (isspace (*p))
+      while (*p == ' ')
 	++p;
       /* We cannot consider a line containing just a tab to be empty
 	 because it might constitute an empty command for a target.  */
@@ -429,7 +429,6 @@ read_makefile (filename, flags)
 
 	  continue;
 	}
-
 
       if (ignoring)
 	/* Ignore the line.  We continue here so conditionals
