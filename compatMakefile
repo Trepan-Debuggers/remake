@@ -35,20 +35,6 @@ LDFLAGS = -g
 # NeXT 1.0a uses an old version of GCC, which required -D__inline=inline.
 defines = @DEFS@
 
-# Define these for your system as follows:
-#	-DUMAX		Encore UMAX
-#	-DUMAX_43	Encore UMAX 4.3 (also define UMAX)
-#	-DNO_LDAV	Disable load-average checking.
-# To read /dev/kmem (most Unix systems), define these if different from the
-# given defaults:
-#	-DKERNEL_FILE_NAME=\"/vmunix\"
-#	-DLDAV_SYMBOL=\"_avenrun\"
-#	-DLDAV_CVT="(double) load"
-# Define:
-#	-DNLIST_NAME_UNION	If `struct nlist' has a n_un member.
-#	-DNLIST_NAME_ARRAY	If `n_name' is an array.
-LOAD_AVG =
-
 # If you are using the GNU C library, or have the GNU getopt functions in
 # your C library, you can comment these out.
 GETOPT = getopt.o getopt1.o
