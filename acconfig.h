@@ -9,3 +9,6 @@
 
 /* Define this if the C library defines the variable `_sys_siglist'.  */
 #undef HAVE__SYS_SIGLIST
+
+/* Define this if you have the `union wait' type in <sys/wait.h>.  */
+#undef HAVE_UNION_WAIT
