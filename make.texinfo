@@ -31,8 +31,27 @@
 }\fi}%
 \gdef\singleindexer#1{\singleindexerfoo#1, \par}%
 
-
-%\def\singleindexer #1{\doind{\indexname}{#1}}
+% This version writes two sort strings.
+\gdef\dosubind #1#2#3{%
+{\count10=\lastpenalty %
+{\indexdummies % Must do this here, since \bf, etc expand at this stage
+\escapechar=`\\%
+{\let\folio=0%
+\def\rawbackslashxx{\indexbackslash}%
+%
+% Now process the index-string once, with all font commands turned off,
+% to get the string to sort the index by.
+{\indexnofonts
+\xdef\tempa{#2}%
+\xdef\tempb{#3}%
+}%
+% Now produce the complete index entry.  We process the index-string again,
+% this time with font commands expanded, to get what to print in the index.
+\edef\temp{%
+\write \csname#1indfile\endcsname{%
+\realbackslash entry {\tempa}{\folio}{#2}{#3}{\tempb}}}%
+\temp}%
+}\penalty\count10}}
 @end tex
 
 @ifinfo
