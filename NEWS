@@ -46,6 +46,10 @@ Version 3.78
   each other to ensure that no more than N jobs are started across all
   makes.  To get the old behavior of -j back, you can configure make
   with the --disable-job-server option.
+
+* The confusing term "dependency" has been replaced by the more accurate
+  and standard term "prerequisite", both in the manual and in all GNU make
+  output.
 
 Version 3.77
 

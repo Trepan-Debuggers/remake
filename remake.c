@@ -452,7 +452,7 @@ update_file_1 (file, depth)
 
       if (d->file->updating)
 	{
-	  error (NILF, _("Circular %s <- %s dependency dropped."),
+	  error (NILF, _("Circular %s <- %s prerequisite dropped."),
 		 file->name, d->file->name);
 	  /* We cannot free D here because our the caller will still have
 	     a reference to it when we were called recursively via
@@ -530,13 +530,13 @@ update_file_1 (file, depth)
 
   file->updating = 0;
 
-  DEBUGPR (_("Finished dependencies of target file `%s'.\n"));
+  DEBUGPR (_("Finished prerequisites of target file `%s'.\n"));
 
   if (running)
     {
       set_command_state (file, cs_deps_running);
       --depth;
-      DEBUGPR (_("The dependencies of `%s' are being made.\n"));
+      DEBUGPR (_("The prerequisites of `%s' are being made.\n"));
       return 0;
     }
 
@@ -598,9 +598,9 @@ update_file_1 (file, depth)
 	{
 	  print_spaces (depth);
 	  if (d_mtime == (FILE_TIMESTAMP) -1)
-	    printf (_("Dependency `%s' does not exist.\n"), dep_name (d));
+	    printf (_("Prerequisite `%s' does not exist.\n"), dep_name (d));
 	  else
-	    printf (_("Dependency `%s' is %s than dependent `%s'.\n"),
+	    printf (_("Prerequisite `%s' is %s than target `%s'.\n"),
 		    dep_name (d), d->changed ? _("newer") : _("older"), file->name);
 	  fflush (stdout);
 	}
@@ -612,12 +612,12 @@ update_file_1 (file, depth)
   if (file->double_colon && file->deps == 0)
     {
       must_make = 1;
-      DEBUGPR (_("Target `%s' is double-colon and has no dependencies.\n"));
+      DEBUGPR (_("Target `%s' is double-colon and has no prerequisites.\n"));
     }
   else if (!noexist && file->is_target && !deps_changed && file->cmds == 0)
     {
       must_make = 0;
-      DEBUGPR (_("No commands for `%s' and no dependencies actually changed.\n"));
+      DEBUGPR (_("No commands for `%s' and no prerequisites actually changed.\n"));
     }
 
   if (!must_make)
@@ -851,7 +851,7 @@ check_dep (file, depth, this_mtime, must_make_ptr)
 	    {
 	      if (d->file->updating)
 		{
-		  error (NILF, _("Circular %s <- %s dependency dropped."),
+		  error (NILF, _("Circular %s <- %s prerequisite dropped."),
 			 file->name, d->file->name);
 		  if (lastd == 0)
 		    {
