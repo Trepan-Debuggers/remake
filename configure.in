@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.40 1994/11/28 20:20:43 roland Exp $])
+AC_REVISION([$Id: configure.in,v 1.41 1994/11/28 20:28:26 roland Exp $])
 AC_PREREQ(2.1)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 AC_CONFIG_HEADER(config.h)
@@ -39,7 +39,7 @@ if test "$ac_cv_check_symbol_$1" = yes; then
 changequote(,)dnl
   ac_tr_symbol=`echo $1 | tr '[a-z]' '[A-Z]'`
 changequote([,])dnl
-  AC_DEFINE(HAVE_${ac_tr_symbol})
+  AC_DEFINE_UNQUOTED(HAVE_${ac_tr_symbol})
 fi
 AC_MSG_RESULT($ac_cv_check_symbol_$1)])dnl
 
