@@ -26,7 +26,7 @@ override srcdir := .
 include compatMakefile
 
 extras := $(filter-out @%@,$(extras))
-LOADLIBES := $(filter-out @%@,$(LOADLIBES)) cygnus-is-scum.o
+LOADLIBES := $(filter-out @%@,$(LOADLIBES))
 
 # Set `ARCH' to a string for the type of machine.
 ifndef ARCH
