@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.157 1996/03/04 17:59:44 roland Published $
+@set RCSID $Id: make.texinfo,v 2.158 1996/03/20 00:58:43 roland Exp $
 @set EDITION 0.50
 @set VERSION 3.75 Beta
 @set UPDATED 28 February 1996
@@ -2130,6 +2130,27 @@ You can also list the target pattern of an implicit rule (such as
 @samp{%.o}) as a dependency file of the special target @code{.PRECIOUS}
 to preserve intermediate files created by rules whose target patterns
 match that file's name.
+
+@findex .INTERMEDIATE
+@item .INTERMEDIATE
+@cindex intermediate targets, explicit
+
+The targets which @code{.INTERMEDIATE} depends on are treated as
+intermediate files.  @xref{Chained Rules, ,Chains of Implicit Rules}.
+@code{.INTERMEDIATE} with no dependencies marks all file targets
+mentioned in the makefile as intermediate.
+
+@findex .SECONDARY
+@item .SECONDARY
+@cindex secondary targets
+@cindex preserving with @code{.SECONDARY}
+
+The targets which @code{.SECONDARY} depends on are treated as
+intermediate files, except that they are never automatically deleted.
+@xref{Chained Rules, ,Chains of Implicit Rules}.
+
+@code{.SECONDARY} with no dependencies marks all file targets mentioned
+in the makefile as secondary.
 
 @findex .IGNORE
 @item .IGNORE
@@ -6897,17 +6918,44 @@ mentioned in the makefile, along with the implicit rule that says how to
 create it.@refill
 
 Intermediate files are remade using their rules just like all other
-files.  The difference is that the intermediate file is deleted when
-@code{make} is finished.  Therefore, the intermediate file which did not
-exist before @code{make} also does not exist after @code{make}.  The
-deletion is reported to you by printing a @samp{rm -f} command that
-shows what @code{make} is doing.  (You can list the target pattern of an
-implicit rule (such as @samp{%.o}) as a dependency of the special
-target @code{.PRECIOUS} to preserve intermediate files made by implicit
-rules whose target patterns match that file's name;
-see @ref{Interrupts}.)@refill
+files.  But intermediate files are treated differently in two ways.
+
+The first difference is what happens if the intermediate file does not
+exist.  If an ordinary file @var{b} does not exist, and @code{make}
+considers a target that depends on @var{b}, it invariably creates
+@var{b} and then updates the target from @var{b}.  But if @var{b} is an
+intermediate file, then @code{make} can leave well enough alone.  It
+won't bother updating @var{b}, or the ultimate target, unless some
+dependency of @var{b} is newer than that target or there is some other
+reason to update that target.
+
+The second difference is that if @code{make} @emph{does} create @var{b}
+in order to update something else, it deletes @var{b} later on after it
+is no longer needed.  Therefore, an intermediate file which did not
+exist before @code{make} also does not exist after @code{make}.
+@code{make} reports the deletion to you by printing a @samp{rm -f}
+command showing which file it is deleting.
+
+Ordinarily, a file cannot be intermediate if it is mentioned in the
+makefile as a target or dependency.  However, you can explicitly mark a
+file as intermediate by listing it as a dependency of the special target
+@code{.INTERMEDIATE}.  This takes effect even if the file is mentioned
+explicitly in some other way.
+
 @cindex intermediate files, preserving
 @cindex preserving intermediate files
+@cindex secondary files
+You can prevent automatic deletion of an intermediate file by marking it
+as a @dfn{secondary} file.  To do this, list it as a dependency of the
+special target @code{.SECONDARY}.  When a file is secondary, @code{make}
+will not create the file merely because it does not already exist, but
+@code{make} does not automatically delete the file.  Marking a file as
+secondary also marks it as intermediate.
+
+You can list the target pattern of an implicit rule (such as @samp{%.o})
+as a dependency of the special target @code{.PRECIOUS} to preserve
+intermediate files made by implicit rules whose target patterns match
+that file's name; see @ref{Interrupts}.@refill
 @cindex preserving with @code{.PRECIOUS}
 @cindex @code{.PRECIOUS} intermediate files
 
