@@ -1,3 +1,10 @@
+1999-09-29  Paul D. Smith  <psmith@gnu.org>
+
+	* test_driver.pl (get_osname): Change $fancy_file_names to
+	$short_filenames and reverse the logic.
+	(run_each_test): Change test of non-existent $port_host to use
+	$short_filenames--problem reported by Eli Zaretskii.
+
 1999-09-23  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/features/parallelism: Add a check to ensure that the
