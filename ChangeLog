@@ -1,3 +1,34 @@
+1999-02-22  Paul D. Smith  <psmith@gnu.org>
+
+	* NEWS: Mention new .LIBPATTERNS feature.
+
+	* make.texinfo (Libraries/Search): Describe the use and
+	ramifications of the new .LIBPATTERNS variable.
+
+	* remake.c (library_search): Instead of searching only for the
+	hardcoded expansion "libX.a" for a library reference "-lX", we
+	obtain a list of patterns from the .LIBPATTERNS variable and
+	search those in order.
+
+	* default.c: Added a new default variable .LIBPATTERNS.  The
+	default for UNIX is "lib%.so lib%.a".  Amiga and DOS values are
+	also provided.
+
+	* read.c: Remove bogus HAVE_GLOB_H references; always include
+	vanilla glob.h.
+
+1999-02-21  Paul D. Smith  <psmith@gnu.org>
+
+	* function.c (expand_function): Set value to 0 to avoid freeing it.
+	* variable.c (pop_variable_scope): Free the value of the variable.
+	(try_variable_definition): For simple variables, use
+	allocated_variable_expand() to avoid stomping on the variable
+	buffer when we still need it for other things.
+
+	* arscan.c: Modified to support AIX 4.3 big archives.  The changes
+	are based on information provided by Phil Adams
+	<padams@austin.ibm.com>; thanks!
+
 1999-02-19  Paul D. Smith  <psmith@gnu.org>
 
 	* configure.in: Check to see if the GNU glob library is already

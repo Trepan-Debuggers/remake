@@ -876,6 +876,7 @@ expand_function (o, function, text, end)
 	  /* Kill the last space.  */
 	  --o;
 
+	v->value = 0;
 	pop_variable_scope ();
 
 	free (var);

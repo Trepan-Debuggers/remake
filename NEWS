@@ -1,11 +1,20 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  19 May 1998
+  22 Feb 1999
 
-Copyright (C) 1992,1993,1994,1995,1996,1997,1998 Free Software Foundation, Inc.
+Copyright (C) 1992,93,94,95,96,97,98,1999 Free Software Foundation, Inc.
 See the end for copying conditions.
 
+All changes mentioned here are more fully described in the GNU make
+manual, which is contained in this distribution as the file make.texinfo.
+
 Please send GNU make bug reports to bug-make@gnu.org.
+
+Version 3.78
+
+* Make defines a new variable, .LIBPATTERNS.  This variable controls how
+  the link library dependency expansion (dependencies like ``-lfoo'') is
+  performed.
 
 Version 3.77
 
@@ -659,17 +668,14 @@ Version 3.05
 ----------------------------------------------------------------------
 Copyright information:
 
-Copyright (C) 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
-
    Permission is granted to anyone to make or distribute verbatim copies
    of this document as received, in any medium, provided that the
-   copyright notice and this permission notice are preserved,
-   thus giving the recipient permission to redistribute in turn.
+   copyright notice and this permission notice are preserved, thus
+   giving the recipient permission to redistribute in turn.
 
-   Permission is granted to distribute modified versions
-   of this document, or of portions of it,
-   under the above conditions, provided also that they
-   carry prominent notices stating who last changed them.
+   Permission is granted to distribute modified versions of this
+   document, or of portions of it, under the above conditions, provided
+   also that they carry prominent notices stating who last changed them.
 
 Local variables:
 version-control: never

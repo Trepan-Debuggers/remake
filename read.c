@@ -18,6 +18,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <assert.h>
 
+#include <glob.h>
+
 #include "make.h"
 #include "dep.h"
 #include "filedef.h"
@@ -26,12 +28,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "variable.h"
 #include "rule.h"
 
-/* This is POSIX.2, but most systems using -DPOSIX probably don't have it.  */
-#ifdef	HAVE_GLOB_H
-#include <glob.h>
-#else
-#include "glob/glob.h"
-#endif
 
 #ifndef WINDOWS32
 #ifndef _AMIGA
@@ -1564,9 +1560,7 @@ record_files (filenames, pattern, pattern_percent, deps, cmds_started,
 	if (!pattern_matches (pattern, pattern_percent, name))
 	  {
 	    /* Give a warning if the rule is meaningless.  */
-	    error (flocp,
-			    "target `%s' doesn't match the target pattern",
-			    name);
+	    error (flocp,"target `%s' doesn't match the target pattern", name);
 	    this = 0;
 	  }
 	else
