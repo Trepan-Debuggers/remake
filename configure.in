@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.62 1999/02/19 18:07:51 psmith Exp $])
+AC_REVISION([$Id: configure.in,v 1.63 1999/02/22 07:23:34 psmith Exp $])
 AC_PREREQ(2.13)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 
@@ -154,17 +154,20 @@ rm -f s.conftest conftoast
 AC_MSG_CHECKING(if system libc has GNU glob)
 AC_CACHE_VAL(make_cv_sys_gnu_glob, [
  AC_TRY_CPP([
+#include <features.h>
 #include <glob.h>
 #include <fnmatch.h>
 
 #define GLOB_INTERFACE_VERSION 1
-#if !defined _LIBC && defined __GNU_LIBRARY__ && __GNU_LIBRARY__ > 1
+#if defined _LIBC || !defined __GNU_LIBRARY__ || __GNU_LIBRARY__ <= 1
+# error no gnu glob
+#else
 # include <gnu-versions.h>
-# if _GNU_GLOB_INTERFACE_VERSION == GLOB_INTERFACE_VERSION
-#  error have gnu glob
+# if _GNU_GLOB_INTERFACE_VERSION != GLOB_INTERFACE_VERSION
+#  error no gnu glob
 # endif
 #endif
- ], make_cv_sys_gnu_glob=no, make_cv_sys_gnu_glob=yes)])
+ ], make_cv_sys_gnu_glob=yes, make_cv_sys_gnu_glob=no)])
 case "$make_cv_sys_gnu_glob" in
   yes) AC_MSG_RESULT(yes) ;;
   no)  AC_MSG_RESULT([no; using local copy])

@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.167 1998/10/03 05:40:23 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.168 1999/02/22 07:23:35 psmith Exp $
 @set EDITION 0.52
 @set VERSION 3.77
 @set UPDATED 20 May 1998
@@ -1971,16 +1971,19 @@ directory search with no extra effort.
 @cindex @code{VPATH}, and link libraries
 @cindex search path for dependencies (@code{VPATH}), and link libraries
 @cindex @code{-l} (library search)
+@cindex link libraries, patterns matching
+@cindex @code{.LIBPATTERNS}, and link libraries
+@vindex .LIBPATTERNS
 
 Directory search applies in a special way to libraries used with the
 linker.  This special feature comes into play when you write a dependency
 whose name is of the form @samp{-l@var{name}}.  (You can tell something
 strange is going on here because the dependency is normally the name of a
-file, and the @emph{file name} of the library looks like
+file, and the @emph{file name} of a library generally looks like
 @file{lib@var{name}.a}, not like @samp{-l@var{name}}.)@refill
 
 When a dependency's name has the form @samp{-l@var{name}}, @code{make}
-handles it specially by searching for the file @file{lib@var{name}.a} in
+handles it specially by searching for the file @file{lib@var{name}.so} in
 the current directory, in directories specified by matching @code{vpath}
 search paths and the @code{VPATH} search path, and then in the
 directories @file{/lib}, @file{/usr/lib}, and @file{@var{prefix}/lib}
@@ -1988,7 +1991,11 @@ directories @file{/lib}, @file{/usr/lib}, and @file{@var{prefix}/lib}
 @code{make} behave as if @var{prefix} is defined to be the root of the
 DJGPP installation tree).
 
-For example,
+If that file is not found, then the file @file{lib@var{name}.a} is
+searched for, in the same directories as above.
+
+For example, if there is a @file{/usr/lib/libcurses.a} library on your
+system (and no @file{/usr/lib/libcurses.so} file), then
 
 @example
 @group
@@ -2001,6 +2008,21 @@ foo : foo.c -lcurses
 would cause the command @samp{cc foo.c /usr/lib/libcurses.a -o foo} to
 be executed when @file{foo} is older than @file{foo.c} or than
 @file{/usr/lib/libcurses.a}.@refill
+
+Although the default set of files to be searched for is
+@file{lib@var{name}.so} and @file{lib@var{name}.a}, this is customizable
+via the @code{.LIBPATTERNS} variable.  Each word in the value of this
+variable is a pattern string.  When a dependency like
+@samp{-l@var{name}} is seen, @code{make} will replace the percent in
+each pattern in the list with @var{name} and perform the above directory
+searches using that library filename.  If no library is found, the next
+word in the list will be used.
+
+The default value for @code{.LIBPATTERNS} is ``@samp{lib%.so lib%.a}'',
+which provides the default behavior described above.
+
+You can turn off link library expansion completely by setting this
+variable to an empty value.
 
 @node Phony Targets, Force Targets, Directory Search, Rules
 @section Phony Targets

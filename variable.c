@@ -265,6 +265,8 @@ pop_variable_scope ()
 	  next = v->next;
 
 	  free (v->name);
+	  if (v->value)
+	    free (v->value);
 	  free ((char *) v);
 	}
     }
@@ -687,7 +689,7 @@ try_variable_definition (flocp, line, origin)
   register char *end;
   enum { f_bogus,
          f_simple, f_recursive, f_append, f_conditional } flavor = f_bogus;
-  char *name, *expanded_name, *value;
+  char *name, *expanded_name, *value, *alloc_value=NULL;
   struct variable *v;
 
   while (1)
@@ -775,8 +777,11 @@ try_variable_definition (flocp, line, origin)
       /* Should not be possible.  */
       abort ();
     case f_simple:
-      /* A simple variable definition "var := value".  Expand the value.  */
-      value = variable_expand (p);
+      /* A simple variable definition "var := value".  Expand the value.
+         We have to allocate memory since otherwise it'll clobber the
+	 variable buffer, and we still need that.  */
+      alloc_value = allocated_variable_expand (p);
+      value = alloc_value;
       break;
     case f_conditional:
       /* A conditional variable definition "var ?= value".
@@ -931,6 +936,8 @@ try_variable_definition (flocp, line, origin)
   v = define_variable (expanded_name, strlen (expanded_name),
 		       value, origin, flavor == f_recursive);
 
+  if (alloc_value)
+    free (alloc_value);
   free (expanded_name);
 
   return v;

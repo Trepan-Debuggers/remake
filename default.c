@@ -425,6 +425,16 @@ static char *default_variables[] =
     "SCCS_OUTPUT_OPTION", "-G$@",
 #endif
 
+#ifdef _AMIGA
+    ".LIBPATTERNS", "%.lib",
+#else
+#ifdef __MSDOS__
+    ".LIBPATTERNS", "lib%.a $(DJDIR)/lib/lib%.a",
+#else
+    ".LIBPATTERNS", "lib%.so lib%.a",
+#endif
+#endif
+
 #endif /* !VMS */
     0, 0
   };
