@@ -652,7 +652,7 @@ log_access (flavor)
      but we write this one to stderr because it might be
      run in a child fork whose stdout is piped.  */
 
-  fprintf (stderr, _("%s access: user %lu (real %lu), group %lu (real %lu)\n"),
+  fprintf (stderr, _("%s: user %lu (real %lu), group %lu (real %lu)\n"),
 	   flavor, (unsigned long) geteuid (), (unsigned long) getuid (),
            (unsigned long) getegid (), (unsigned long) getgid ());
   fflush (stderr);
@@ -673,7 +673,7 @@ init_access ()
   if (user_uid == -1 || user_gid == -1 || make_uid == -1 || make_gid == -1)
     pfatal_with_name ("get{e}[gu]id");
 
-  log_access (_("Initialized"));
+  log_access (_("Initialized access"));
 
   current_access = make;
 #endif
@@ -752,7 +752,7 @@ user_access ()
 
   current_access = user;
 
-  log_access ("User");
+  log_access (_("User access"));
 
 #endif	/* GETLOADAVG_PRIVILEGED */
 }
@@ -800,7 +800,7 @@ make_access ()
 
   current_access = make;
 
-  log_access ("Make");
+  log_access (_("Make access"));
 
 #endif	/* GETLOADAVG_PRIVILEGED */
 }
@@ -834,7 +834,7 @@ child_access ()
     pfatal_with_name ("child_access: setregid");
 #endif
 
-  log_access ("Child");
+  log_access (_("Child access"));
 
 #endif	/* GETLOADAVG_PRIVILEGED */
 }
