@@ -396,6 +396,7 @@ char **
 target_environment (file)
      struct file *file;
 {
+  struct variable_set_list *set_list;
   register struct variable_set_list *s;
   struct variable_bucket
     {
@@ -410,11 +411,12 @@ target_environment (file)
   unsigned int mklev_hash;
 
   if (file == 0)
-    s = current_variable_set_list;
+    set_list = current_variable_set_list;
   else
-    s = file->variables;
+    set_list = file->variables;
 
   /* Find the lowest number of buckets in any set in the list.  */
+  s = set_list;
   buckets = s->set->buckets;
   for (s = s->next; s != 0; s = s->next)
     if (s->set->buckets < buckets)
@@ -436,7 +438,7 @@ target_environment (file)
   /* Run through all the variable sets in the list,
      accumulating variables in TABLE.  */
   nvariables = 0;
-  for (s = file->variables; s != 0; s = s->next)
+  for (s = set_list; s != 0; s = s->next)
     {
       register struct variable_set *set = s->set;
       for (i = 0; i < set->buckets; ++i)
