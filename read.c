@@ -612,7 +612,7 @@ read_makefile (filename, type)
 	    }
 
 	  filenames = multi_glob (parse_file_seq (&p2, ':',
-						  sizeof (struct nameseq), 1),
+						  sizeof (struct nameseq)),
 				  sizeof (struct nameseq));
 	  if (*p2++ == '\0')
 	    makefile_fatal (filename, lineno, "missing separator");
@@ -637,7 +637,7 @@ read_makefile (filename, type)
 	  if (p != 0)
 	    {
 	      struct nameseq *target;
-	      target = parse_file_seq (&p2, ':', sizeof (struct nameseq), 1);
+	      target = parse_file_seq (&p2, ':', sizeof (struct nameseq));
 	      ++p2;
 	      if (target == 0)
 		makefile_fatal (filename, lineno, "missing target pattern");
@@ -654,7 +654,7 @@ read_makefile (filename, type)
 
 	  /* Parse the dependencies.  */
 	  deps = (struct dep *)
-	    multi_glob (parse_file_seq (&p2, '\0', sizeof (struct dep), 1),
+	    multi_glob (parse_file_seq (&p2, '\0', sizeof (struct dep)),
 			sizeof (struct dep));
 
 	  commands_idx = 0;
