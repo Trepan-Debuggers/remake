@@ -116,6 +116,7 @@ check-regression:
 	  if $(PERL) -v >/dev/null 2>&1; then \
 	    case `cd $(srcdir); pwd` in `pwd`) : ;; \
 	      *) test -d tests || mkdir tests; \
+		 rm -f srctests; \
 		 if ln -s "$(srcdir)/tests" srctests; then \
 		   for f in run_make_tests run_make_tests.pl test_driver.pl scripts; do \
 		     rm -f tests/$$f; ln -s ../srctests/$$f tests; \
