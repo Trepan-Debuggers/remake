@@ -1,3 +1,8 @@
+1999-03-31  Paul D. Smith  <psmith@gnu.org>
+
+	* read.c (readline): Ignore carriage returns at the end of the
+	line, to allow Windows-y CRLF line terminators.
+
 1999-03-30  Paul D. Smith  <psmith@gnu.org>
 
 	* configure.in: Don't put build.sh here, since build.sh.in doesn't
