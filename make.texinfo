@@ -131,7 +131,7 @@ Overview of @code{make}
 
 An Introduction to Makefiles
 
-* Parts of Makefiles::          The Parts of a Makefile 
+* Rule Introduction::           This is a bogus description Bob must fix.
 * Simple Makefile::             A Simple Makefile
 * How Make Works::              How @code{make} Processes This Makefile
 * Variables Simplify::          Variables Make Makefiles Simpler
@@ -517,8 +517,7 @@ A makefile may contain other text besides rules, but a simple makefile
 need only contain rules.  Rules may look somewhat more complicated
 than shown in this template, but all fit the pattern more or less.
 
-@node Simple Makefile, How Make Works, Parts of Makefiles, Introduction
-@comment  node-name,  next,  previous,  up
+@node Simple Makefile
 @section A Simple Makefile
 @cindex simple makefile
 @cindex makefile, simple
@@ -1802,7 +1801,7 @@ The phony target will cease to work if anything ever does create a file
 named @file{clean} in this directory.  Since it has no dependencies, the
 file @file{clean} would inevitably be considered up to date, and its
 commands would not be executed.  To avoid this problem, you can explicitly
-declare the target to be phony, using the special target @code{.PHONY
+declare the target to be phony, using the special target @code{.PHONY}
 (@pxref{Special Targets, ,Special Built-in Target Names}) as follows:
 
 @example
