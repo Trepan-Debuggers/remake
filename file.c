@@ -290,7 +290,7 @@ remove_intermediates (sig)
 	    {
 	      if (sig)
 		error ("*** Deleting file `%s'", f->name);
-	      else if (!silent_flag && !just_print_flag)
+	      else if (!silent_flag)
 		{
 		  if (!doneany)
 		    {
