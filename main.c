@@ -252,6 +252,11 @@ static int print_usage_flag = 0;
    for each reference to an undefined variable.  */
 
 int warn_undefined_variables_flag;
+
+/* If nonzero, always build all targets, regardless of whether
+   they appear out of date or not.  */
+
+int always_make_flag = 0;
 
 /* The table of command switches.  */
 
@@ -260,6 +265,9 @@ static const struct command_switch switches[] =
     { 'b', ignore, 0, 0, 0, 0, 0, 0,
 	0, 0,
 	N_("Ignored for compatibility") },
+    { 'B', flag, (char *) &always_make_flag, 1, 1, 0, 0, 0,
+	"always-make", 0,
+	N_("Unconditionally make all targets") },
     { 'C', string, (char *) &directories, 0, 0, 0, 0, 0,
 	"directory", N_("DIRECTORY"),
 	N_("Change to DIRECTORY before doing anything") },
@@ -989,8 +997,8 @@ int main (int argc, char ** argv)
 #endif
 
   /* Initialize the special variables.  */
-  define_variable (".VARIABLES", 10, "", o_default, 0);
-  define_variable (".TARGETS", 8, "", o_default, 0);
+  define_variable (".VARIABLES", 10, "", o_default, 0)->special = 1;
+  /* define_variable (".TARGETS", 8, "", o_default, 0); */
 
   /* Read in variables from the environment.  It is important that this be
      done before $(MAKE) is figured out so its definitions will not be

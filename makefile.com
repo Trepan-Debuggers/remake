@@ -49,7 +49,7 @@ $   lopt = "/debug"
 $ else
 $   lopt = ""
 $ endif
-$ filelist = "alloca ar arscan commands default dir expand file function implicit job main misc read remake remote-stub rule signame variable version vmsfunctions vmsify vpath [.glob]glob [.glob]fnmatch getopt1 getopt"
+$ filelist = "alloca ar arscan commands default dir expand file function hash implicit job main misc read remake remote-stub rule signame variable version vmsfunctions vmsify vpath [.glob]glob [.glob]fnmatch getopt1 getopt"
 $ copy config.h-vms config.h
 $ n=0
 $ open/write optf make.opt
