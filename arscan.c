@@ -14,6 +14,15 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+#include "make.h"
+#if	defined (USG) || defined (POSIX)
+#include <fcntl.h>
+#else
+#include <sys/file.h>
+#endif
+
+#ifndef	NO_ARCHIVES
 
 /* On the sun386i and in System V rel 3, ar.h defines two different archive
    formats depending upon whether you have defined PORTAR (normal) or PORT5AR
@@ -26,59 +35,6 @@
 #endif
 
 #include <ar.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-
-#if	defined (USG) || defined (POSIX)
-#include <fcntl.h>
-#else
-#include <sys/file.h>
-#endif
-
-#if	(defined (STDC_HEADERS) || defined (__GNU_LIBRARY__) \
-	 || defined (POSIX))
-#include <stdlib.h>
-#include <string.h>
-#define	ANSI_STRING
-#else	/* No standard headers.  */
-
-#ifdef	USG
-
-#include <string.h>
-#include <memory.h>
-#define	ANSI_STRING
-
-#else	/* Not USG.  */
-#include <strings.h>
-
-#ifndef	bcmp
-extern int bcmp ();
-#endif
-#ifndef	bzero
-extern void bzero ();
-#endif
-#ifndef	bcopy
-extern void bcopy ();
-#endif
-
-#endif	/* USG.  */
-
-extern char *malloc (), *realloc ();
-extern void free ();
-
-#endif	/* Standard headers.  */
-
-#ifdef	ANSI_STRING
-#define	index(s, c)	strchr((s), (c))
-#define	rindex(s, c)	strrchr((s), (c))
-
-#define bcmp(s1, s2, n)	memcmp ((s1), (s2), (n))
-#define bzero(s, n)	memset ((s), 0, (n))
-#define bcopy(s, d, n)	memcpy ((d), (s), (n))
-#endif	ANSI_STRING
-#undef	ANSI_STRING
-
 
 #ifndef	AIAMAG
 #if	(defined(APOLLO) || defined(HPUX) || defined(hpux) || \
@@ -95,14 +51,6 @@ extern void free ();
 /* Cray's <ar.h> apparently defines this.  */
 #ifndef	AR_HDR_SIZE
 #define	AR_HDR_SIZE	(sizeof (struct ar_hdr))
-#endif
-
-#if	defined(__GNU_LIBRARY__) || defined(POSIX) || defined(_IBMR2)
-#include <unistd.h>
-#else
-extern int read (), open (), close (), write (), fstat ();
-extern long int lseek (), atol ();
-extern int atoi ();
 #endif
 
 /* Takes three arguments ARCHIVE, FUNCTION and ARG.
@@ -480,3 +428,5 @@ main (argc, argv)
 }
 
 #endif	/* TEST.  */
+
+#endif	/* NO_ARCHIVES.  */
