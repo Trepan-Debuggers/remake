@@ -353,7 +353,7 @@ define_automatic_variables ()
   /* This won't override any definition, but it
      will provide one if there isn't one there.  */
   v = define_variable ("SHELL", 5, default_shell, o_default, 0);
-  v->export = 1;
+  v->export = v_export;
 
   /* Don't let SHELL come from the environment.  */
   if (*v->value == '\0' || (v->origin == o_env))
@@ -361,6 +361,10 @@ define_automatic_variables ()
       v->origin = o_file;
       v->value = savestring (default_shell, 7);
     }
+
+  /* Make sure MAKEFILES gets exported if it is set.  */
+  v = define_variable ("MAKEFILES", 9, (char *) 0, o_default, 0);
+  v->export = v_ifset;
 }
 
 int export_all_variables;
@@ -451,6 +455,11 @@ target_environment (file)
 
 		case v_noexport:
 		  continue;
+
+		case v_ifset:
+		  if (v->origin == o_default)
+		    continue;
+		  break;
 		}
 
 	      for (ov = table[j]; ov != 0; ov = ov->next)
