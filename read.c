@@ -506,7 +506,8 @@ read_makefile (filename, type)
 	  p2 = p;
 	  files = multi_glob (parse_file_seq (&p2, '\0',
 					      sizeof (struct nameseq)),
-			      sizeof (struct nameseq));
+			      sizeof (struct nameseq),
+			      1);
 	  free (p);
 
 	  /* Save the state of conditionals and start
@@ -613,7 +614,8 @@ read_makefile (filename, type)
 
 	  filenames = multi_glob (parse_file_seq (&p2, ':',
 						  sizeof (struct nameseq)),
-				  sizeof (struct nameseq));
+				  sizeof (struct nameseq),
+				  1);
 	  if (*p2++ == '\0')
 	    makefile_fatal (filename, lineno, "missing separator");
 	  /* Is this a one-colon or two-colon entry?  */
@@ -637,7 +639,7 @@ read_makefile (filename, type)
 	  if (p != 0)
 	    {
 	      struct nameseq *target;
-	      target = parse_file_seq (&p2, ':', sizeof (struct nameseq));
+	      target = parse_file_seq (&p2, ':', sizeof (struct nameseq), 1);
 	      ++p2;
 	      if (target == 0)
 		makefile_fatal (filename, lineno, "missing target pattern");
@@ -655,7 +657,8 @@ read_makefile (filename, type)
 	  /* Parse the dependencies.  */
 	  deps = (struct dep *)
 	    multi_glob (parse_file_seq (&p2, '\0', sizeof (struct dep)),
-			sizeof (struct dep));
+			sizeof (struct dep),
+			1);
 
 	  commands_idx = 0;
 	  if (cmdleft != 0)
@@ -1417,13 +1420,16 @@ find_percent (pattern)
 
    SIZE is how big to construct chain elements.
    This is useful if we want them actually to be other structures
-   that have room for additional info.  */
+   that have room for additional info.
+
+   If STRIP is nonzero, strip `./'s off the beginning.  */
 
 struct nameseq *
-parse_file_seq (stringp, stopchar, size)
+parse_file_seq (stringp, stopchar, size, strip)
      char **stringp;
      char stopchar;
      unsigned int size;
+     int strip;
 {
   register struct nameseq *new = 0;
   register struct nameseq *new1;
@@ -1455,14 +1461,15 @@ parse_file_seq (stringp, stopchar, size)
 	}
       p--;
 
-      /* Skip leading `./'s.  */
-      while (p - q > 2 && q[0] == '.' && q[1] == '/')
-	{
-	  q += 2;		/* Skip "./".  */
-	  while (q < p && *q == '/')
-	    /* Skip following slashes: ".//foo" is "foo", not "/foo".  */
-	    ++q;
-	}
+      if (strip)
+	/* Skip leading `./'s.  */
+	while (p - q > 2 && q[0] == '.' && q[1] == '/')
+	  {
+	    q += 2;		/* Skip "./".  */
+	    while (q < p && *q == '/')
+	      /* Skip following slashes: ".//foo" is "foo", not "/foo".  */
+	      ++q;
+	  }
 
       /* Extract the filename just found, and skip it.  */
 
