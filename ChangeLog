@@ -1,3 +1,9 @@
+2004-02-24  Paul D. Smith  <psmith@gnu.org>
+
+	* config.h.W32.template: Add HAVE_STDARG_H
+	* config.h-vms.template: Ditto.
+	* config.ami.template: Ditto.
+
 2004-02-23  Jonathan Grant  <jg-make@jguk.org>
 
 	* README.W32.template: Add a notation about -j with BATCH_MODE_ONLY.
