@@ -41,6 +41,7 @@ extern struct rule *last_pattern_rule;
 extern unsigned int num_pattern_rules;
 
 extern unsigned int max_pattern_deps;
+extern unsigned int max_pattern_targets;
 extern unsigned int max_pattern_dep_length;
 
 extern struct file *suffix_file;
