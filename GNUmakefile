@@ -214,10 +214,13 @@ dist: default info dvi tests tarfiles
 .PHONY: tarfiles
 tarfiles: $(tarfiles)
 
-.PHONY: rcs-mark-alpha
-dist: rcs-mark-alpha
-rcs-mark-alpha:
-	rcs -sAlpha -Nmake-$(version) RCS/[!=]*,v
+ifndef dist-flavor
+dist-flavor = alpha
+endif
+.PHONY: rcs-mark-alpha rcs-mark-beta
+dist: rcs-mark-$(dist-flavor)
+rcs-mark-alpha:;rcs -sAlpha -Nmake-$(version) RCS/[!=]*,v
+rcs-mark-beta:;rcs -sBeta -Nmake-$(version) RCS/[!=]*,v
 
 dist: local-inst
 .PHONY: local-inst
