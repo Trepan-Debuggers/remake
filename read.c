@@ -1799,7 +1799,7 @@ construct_include_path (arg_dirs)
 	      dir = expanded;
 	  }
 
-	if (stat (dir, &stbuf) == 0 && S_ISDIR (stbuf.st_mode))
+	if (safe_stat (dir, &stbuf) == 0 && S_ISDIR (stbuf.st_mode))
 	  {
 	    if (idx == max - 1)
 	      {
@@ -1816,7 +1816,7 @@ construct_include_path (arg_dirs)
   /* Now add at the end the standard default dirs.  */
 
   for (i = 0; default_include_directories[i] != 0; ++i)
-    if (stat (default_include_directories[i], &stbuf) == 0
+    if (safe_stat (default_include_directories[i], &stbuf) == 0
 	&& S_ISDIR (stbuf.st_mode))
       dirs[idx++] = default_include_directories[i];
 
