@@ -451,9 +451,7 @@ start_job_command (child)
 	noprint = 1;
       else if (*p == '-')
 	child->noerror = 1;
-      else if (*p == '+')
-	recursive = 1;
-      else if (!isblank (*p))
+      else if (!isblank (*p) && *p != '+')
 	break;
       ++p;
     }
