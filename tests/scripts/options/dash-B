@@ -18,7 +18,7 @@ all: foo
 
 foo: bar.x
 	@echo cp $< $@
-	@touch $@
+	@echo "" > $@
 EOF
 
 close(MAKEFILE);
