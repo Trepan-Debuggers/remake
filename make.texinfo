@@ -1615,7 +1615,6 @@ there is no need to write explicit rules for compiling the files.
 @vindex VPATH
 @findex vpath
 @cindex vpath 
-@c !!! s/search path/search path for dependencies (@code{VPATH})/
 @cindex search path for dependencies (@code{VPATH})
 @cindex directory search (@code{VPATH})
 
@@ -1789,8 +1788,7 @@ will look for a file ending in @samp{.c} in @file{foo}, then
 @node Commands/Search, Implicit/Search, Selective Search, Directory Search
 @subsection Writing Shell Commands with Directory Search
 @cindex shell command, and directory search
-@c !!! s/directory search/& (VPATH)/
-@cindex directory search, and shell commands
+@cindex directory search (@code{VPATH}), and shell commands
 
 When a dependency is found in another directory through directory search,
 this cannot change the commands of the rule; they will execute as written.
@@ -1828,8 +1826,8 @@ foo.o : foo.c defs.h hack.h
 @node Implicit/Search, Libraries/Search, Commands/Search, Directory Search
 @subsection Directory Search and Implicit Rules
 @cindex @code{VPATH}, and implicit rules
-@cindex directory search, and implicit rules
-@cindex search path, and implicit rules
+@cindex directory search (@code{VPATH}), and implicit rules
+@cindex search path for dependencies (@code{VPATH}), and implicit rules
 @cindex implicit rule, and directory search
 @cindex implicit rule, and @code{VPATH}
 @cindex rule, implicit, and directory search
@@ -1854,9 +1852,9 @@ directory search with no extra effort.
 @subsection Directory Search for Link Libraries
 @cindex link libraries, and directory search
 @cindex libraries for linking, directory search
-@cindex directory search, and link libraries 
+@cindex directory search (@code{VPATH}), and link libraries 
 @cindex @code{VPATH}, and link libraries 
-@cindex search path, and link libraries 
+@cindex search path for dependencies (@code{VPATH}), and link libraries 
 @cindex @code{-l} (library search)
 
 Directory search applies in a special way to libraries used with the
