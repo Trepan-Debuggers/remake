@@ -179,7 +179,7 @@ tags: $(tagsrcs)
 
 .PHONY: install installdirs
 install: installdirs \
-	 $(bindir)/$(instname) $(infodir)/$(instname).info \
+	 $(bindir)/$(instname) $(infodir)/make.info \
 	 $(mandir)/$(instname).$(manext)
 
 installdirs:
@@ -201,13 +201,19 @@ $(bindir)/$(instname): make
 	-mv $@ $@.old
 	mv $@.new $@
 
-$(infodir)/$(instname).info: make.info
+$(infodir)/make.info: make.info
 	if [ -r ./make.info ]; then dir=.; else dir=$(srcdir); fi; \
 	for file in $${dir}/make.info*; do \
 	  name="`basename $$file`"; \
 	  $(INSTALL_DATA) $$file \
-	    `echo $@ | sed "s,$(instname).info\$$,$$name,"`; \
+	    `echo $@ | sed "s,make.info\$$,$$name,"`; \
 	done
+# Run install-info only if it exists.
+# Use `if' instead of just prepending `-' to the
+# line so we notice real errors from install-info.
+	if install-info --version >/dev/null 2>&1; then \
+	  install-info --infodir=$(infodir) $$d/foo.info; \
+	else true; fi
 
 $(mandir)/$(instname).$(manext): make.man
 	$(INSTALL_DATA) $(srcdir)/make.man $@
