@@ -224,7 +224,7 @@ $(mandir)/$(instname).$(manext): make.man
 
 loadavg: getloadavg.c config.h
 	$(CC) $(defines) -DTEST -I. -I$(srcdir) $(CFLAGS) $(LDFLAGS) \
-	      $(srcdir)/getloadavg.c -o $@
+	      $(srcdir)/getloadavg.c $(LOADLIBES) -o $@
 check-loadavg: loadavg
 	@echo The system uptime program believes the load average to be:
 	-uptime
