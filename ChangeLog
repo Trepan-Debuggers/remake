@@ -4,6 +4,17 @@
 
 	* Makefile.am (AUTOMAKE_OPTIONS): Require automake 1.4.
 
+	* function.c: Rearrange so we don't need to predeclare the
+	function_table array; K&R C compilers don't like that.
+
+	* acinclude.m4 (AC_FUNC_SELECT): Ouch; this requires an ANSI C
+	compiler!  Change to work with K&R compilers as well.
+
+	* configure.in (AC_OUTPUT): Put build.sh back.  I don't know how I
+	thought it would work this way :-/.  We'll have to think of
+	something else.
+	* Makefile.am: Remove rule to create build.sh.
+
 	* default.c (default_suffix_rules): Rearrange the default command
 	lines to conform to POSIX rules (put the filename argument $<
 	_after_ the OUTPUT_OPTION, not before it).
