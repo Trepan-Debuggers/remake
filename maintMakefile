@@ -240,3 +240,29 @@ po-check:
 	  diff -u $@-1 $@-2 || exit 1; \
 	  rm -f $@-1 $@-2; \
 	fi
+
+## ------------------------- ##
+## GNU FTP upload artifacts. ##
+## ------------------------- ##
+
+# This target creates the upload artifacts.
+
+GPG = gpg
+
+DIST_ARCHIVES_SIG = $(addsuffix .sig,$(DIST_ARCHIVES))
+DIST_ARCHIVES_DIRECTIVE = $(addsuffix .directive.asc,$(DIST_ARCHIVES))
+
+sign-dist: $(DIST_ARCHIVES_SIG) $(DIST_ARCHIVES_DIRECTIVE)
+
+$(DIST_ARCHIVES_DIRECTIVE): directive.asc
+	cp $< $@
+
+%.sig : %
+	@echo "Signing file '$<':"
+	$(GPG) -o $@ -b $<
+
+directive.asc:
+	@echo "Creating directive file '$@':"
+	@echo 'directory: make' > .directive
+	$(GPG) -o $@ --clearsign .directive
+	@rm -f .directive

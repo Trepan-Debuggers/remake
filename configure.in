@@ -1,9 +1,9 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT([GNU make],[3.81rc1],[bug-make@gnu.org])
+AC_INIT([GNU make],[3.81beta1],[bug-make@gnu.org])
 
-AC_PREREQ(2.58)
-AC_REVISION([[$Id: configure.in,v 1.123 2004/02/24 13:50:21 psmith Exp $]])
+AC_PREREQ(2.59)
+AC_REVISION([[$Id: configure.in,v 1.124 2004/03/04 13:42:52 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -11,7 +11,7 @@ AC_CONFIG_SRCDIR(vpath.c)
 AC_CONFIG_HEADERS(config.h)
 
 # Automake setup
-AM_INIT_AUTOMAKE([1.7.6])
+AM_INIT_AUTOMAKE([1.8.2])
 
 # Checks for programs.
 AC_PROG_CC
@@ -33,7 +33,7 @@ AM_C_PROTOTYPES
 
 # Enable gettext, in "external" mode.
 
-AM_GNU_GETTEXT_VERSION(0.12.1)
+AM_GNU_GETTEXT_VERSION(0.14.1)
 AM_GNU_GETTEXT([external])
 
 # This test must come as early as possible after the compiler configuration

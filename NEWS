@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  21 January 2004
+  04 March 2004
 
 Copyright (C) 2002,2003,2004  Free Software Foundation, Inc.
 See the end for copying conditions.
@@ -11,7 +11,7 @@ manual, which is contained in this distribution as the file doc/make.texi.
 Please send GNU make bug reports to <bug-make@gnu.org>.
 See the README file and the GNU make manual for details on reporting bugs.
 
-Version 3.81rc1
+Version 3.81beta1
 
 * GNU make is ported to OS/2.
   Port provided by Andreas Buening <andreas.buening@nexgo.de>.
@@ -34,7 +34,7 @@ Version 3.81rc1
 * Enhancements for POSIX compatibility:
    - Only touch targets (under -t) if they have at least one command.
 
-* Updated to autoconf 2.58, automake 1.8, and gettext 0.13.1.  Users
+* Updated to autoconf 2.59, automake 1.8.2, and gettext 0.14.1.  Users
   should not be impacted.
 
 
