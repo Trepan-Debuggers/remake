@@ -562,7 +562,7 @@ main (argc, argv, envp)
 	  
 	  while (*p != '\0')
 	    {
-	      if (index (";'\"*?[]$<>(){}|&~`\\ \t\r\n\f\v", *p) != 0)
+	      if (index ("^;'\"*?[]$<>(){}|&~`\\ \t\r\n\f\v", *p) != 0)
 		cmd_defs[cmd_defs_idx++] = '\\';
 	      cmd_defs[cmd_defs_idx++] = *p++;
 	    }
