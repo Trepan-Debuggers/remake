@@ -490,11 +490,18 @@ target_environment (file)
       for (b = table[i]; b != 0; b = b->next)
 	{
 	  register struct variable *v = b->variable;
-	  /* If V is recursively expanded, expand its value.  */
-	  char *value = v->recursive ? recursively_expand (v) : v->value;
-	  result[nvariables++] = concat (v->name, "=", value);
-	  if (v->recursive)
-	    free (value);
+	  /* If V is recursively expanded and didn't come from the environment,
+	     expand its value.  If it came from the environment, it should
+	     go back into the environment unchanged.  */
+	  if (v->recursive
+	      && v->origin != o_env && v->origin != o_env_override)
+	      {
+		char *value = recursively_expand (v);
+		result[nvariables++] = concat (v->name, "=", value);
+		free (value);
+	      }
+	  else
+	    result[nvariables++] = concat (v->name, "=", v->value);
 	}
     }
   result[nvariables] = (char *) xmalloc (100);
