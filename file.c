@@ -1,4 +1,4 @@
-/* Copyright (C) 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
+/* Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -78,6 +78,12 @@ enter_file (name)
 
   if (*name == '\0')
     abort ();
+
+  /* This is also done in parse_file_seq, so this is redundant
+     for names read from makefiles.  It is here for names passed
+     on the command line.  */
+  while (name[0] == '.' && name[1] == '/' && name[2] != '\0')
+    name += 2;
 
   hashval = 0;
   for (n = name; *n != '\0'; ++n)
