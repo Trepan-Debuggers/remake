@@ -31,7 +31,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 static char default_suffixes[]
   = ".out .a .ln .o .c .cc .C .p .f .F .r .y .l .s .S \
 .mod .sym .def .h .info .dvi .tex .texinfo .texi .txinfo \
-.w .web .sh .elc .el";
+.w .ch .web .sh .elc .el";
 
 static struct pspec default_pattern_rules[] =
   {
@@ -43,6 +43,12 @@ static struct pspec default_pattern_rules[] =
        `foo' are the same thing.  */
     { "%.out", "%",
 	"@rm -f $@ \n cp $< $@" },
+
+    /* Syntax is "ctangle foo.w foo.ch foo.c".  */
+    { "%.c", "%.w %.ch",
+	"$(CTANGLE) $^ $@" },
+    { "%.tex", "%.w %.ch",
+	"$(CWEAVE) $^ $@" },
 
     { 0, 0, 0 }
   };
@@ -172,13 +178,13 @@ static char *default_suffix_rules[] =
     "$(TEXI2DVI) $<",
 
     ".w.c",
-    "$(CTANGLE) $<",
+    "$(CTANGLE) $< - $@",	/* The `-' says there is no `.ch' file.  */
 
     ".web.p",
     "$(TANGLE) $<",
 
     ".w.tex",
-    "$(CWEAVE) $<",
+    "$(CWEAVE) $< - $@",	/* The `-' says there is no `.ch' file.  */
 
     ".web.tex",
     "$(WEAVE) $<",
