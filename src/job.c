@@ -1078,9 +1078,13 @@ static void start_job_command (child_t *p_child,
     goto next_command;
 
   /* Print out the command.  If silent, we log the working directory
-     before the command's own error messages appear.  */
+     before the command's own error messages appear.  But note
+     that tracing which is more dynamic (e.g. it can be set in the
+     debugger) overrides the silent flag. 
+  */
 
-  if (just_print_flag || (!(flags & COMMANDS_SILENT) && !silent_flag)) {
+  if (just_print_flag || tracing 
+      || (!(flags & COMMANDS_SILENT) && !silent_flag)) {
     if (tracing) printf("\t");
     message (0, "%s", p);
   } else {
