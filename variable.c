@@ -355,7 +355,7 @@ define_automatic_variables ()
   /* This won't override any definition, but it
      will provide one if there isn't one there.  */
   v = define_variable ("SHELL", 5, default_shell, o_default, 0);
-  v->export = v_export;
+  v->export = v_export;		/* Always export SHELL.  */
 
   /* Don't let SHELL come from the environment.  */
   if (*v->value == '\0' || v->origin == o_env || v->origin == o_env_override)
@@ -368,6 +368,22 @@ define_automatic_variables ()
   /* Make sure MAKEFILES gets exported if it is set.  */
   v = define_variable ("MAKEFILES", 9, "", o_default, 0);
   v->export = v_ifset;
+
+  /* Define the magic D and F variables in terms of
+     the automatic variables they are variations of.  */
+
+  define_variable ("@D", 2, "$(dir $@)", o_automatic, 1);
+  define_variable ("%D", 2, "$(dir $%)", o_automatic, 1);
+  define_variable ("*D", 2, "$(dir $*)", o_automatic, 1);
+  define_variable ("<D", 2, "$(dir $<)", o_automatic, 1);
+  define_variable ("?D", 2, "$(dir $?)", o_automatic, 1);
+  define_variable ("^D", 2, "$(dir $^)", o_automatic, 1);
+  define_variable ("@F", 2, "$(notdir $@)", o_automatic, 1);
+  define_variable ("%F", 2, "$(notdir $%)", o_automatic, 1);
+  define_variable ("*F", 2, "$(notdir $*)", o_automatic, 1);
+  define_variable ("<F", 2, "$(notdir $<)", o_automatic, 1);
+  define_variable ("?F", 2, "$(notdir $?)", o_automatic, 1);
+  define_variable ("^F", 2, "$(notdir $^)", o_automatic, 1);
 }
 
 int export_all_variables;
@@ -437,6 +453,10 @@ target_environment (file)
 	      switch (v->export)
 		{
 		case v_default:
+		  if (v->origin == o_default || v->origin == o_automatic)
+		    /* Only export default variables by explicit request.  */
+		    continue;
+
 		  if (!export_all_variables
 		      && v->origin != o_command
 		      && v->origin != o_env && v->origin != o_env_override
@@ -495,11 +515,11 @@ target_environment (file)
 	     go back into the environment unchanged.  */
 	  if (v->recursive
 	      && v->origin != o_env && v->origin != o_env_override)
-	      {
-		char *value = recursively_expand (v);
-		result[nvariables++] = concat (v->name, "=", value);
-		free (value);
-	      }
+	    {
+	      char *value = recursively_expand (v);
+	      result[nvariables++] = concat (v->name, "=", value);
+	      free (value);
+	    }
 	  else
 	    result[nvariables++] = concat (v->name, "=", v->value);
 	}
