@@ -605,10 +605,21 @@ child_access ()
   /* Set both the real and effective UID and GID to the user's.
      They cannot be changed back to make's.  */
 
+#ifndef	HAVE_SETREUID
   if (setuid (user_uid) < 0)
     pfatal_with_name ("child_access: setuid");
+#else
+  if (setreuid (user_uid, user_uid) < 0)
+    pfatal_with_name ("child_access: setreuid");
+#endif
+
+#ifndef	HAVE_SETREGID
   if (setgid (user_gid) < 0)
     pfatal_with_name ("child_access: setgid");
+#else
+  if (setregid (user_gid, user_gid) < 0)
+    pfatal_with_name ("child_access: setregid");
+#endif
 }
 
 #ifdef NEED_GET_PATH_MAX
