@@ -1,3 +1,16 @@
+Tue Aug  1 14:39:14 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* job.c (child_execute_job): Close STDIN_FD and STDOUT_FD after
+ 	dup'ing from them.  Don't try to close all excess descriptors;
+ 	getdtablesize might return a huge value.  Any open descriptors in
+ 	the parent should have FD_CLOEXEC set.
+	(start_job_command): Set FD_CLOEXEC flag on BAD_STDIN descriptor.
+
+Tue Jun 20 03:47:15 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
+
+	* read.c (read_all_makefiles): Properly append default makefiles
+ 	to the end of the `read_makefiles' chain.
+
 Fri May 19 16:36:32 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
 	* Version 3.74 released.
