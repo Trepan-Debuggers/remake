@@ -290,7 +290,7 @@ static const struct command_switch switches[] =
 	"Touch targets instead of remaking them" },
     { 'v', flag, (char *) &print_version_flag, 1, 1, 0, 0, 0,
 	"version", 0,
-	"Print the version number of make" },
+	"Print the version number of make and exit" },
     { 'w', flag, (char *) &print_directory_flag, 1, 1, 0, 0, 0,
 	"print-directory", 0,
 	"Print the current directory" },
@@ -497,6 +497,10 @@ main (argc, argv, envp)
 
   if (print_version_flag || print_data_base_flag || debug_flag)
     print_version ();
+
+  /* `make --version' is supposed to just print the version and exit.  */
+  if (print_version_flag)
+    die (1);
 
   /* Search for command line arguments that define variables,
      and do the definitions.  Also save up the text of these
