@@ -19,6 +19,8 @@ t%.x: BAR = four
 %.x: override BAZ = three
 one.x: override FOO = one
 one.x two.x three.x: ; @echo $(FOO) $(BAR) $(BAZ)
+four.x: baz ; @echo $(FOO) $(BAR) $(BAZ)
+baz: ; @echo $(FOO) $(BAR) $(BAZ)
 EOF
 
 close(MAKEFILE);
@@ -35,6 +37,13 @@ $answer = "one two three\nfoo four baz\nfoo bar three\n";
 
 &run_make_with_options($makefile, "BAZ=five", &get_logfile);
 $answer = "one two three\nfoo four five\nfoo bar three\n";
+&compare_output($answer,&get_logfile(1));
+
+
+# TEST #3 -- make sure patterns are inherited properly
+
+&run_make_with_options($makefile, "four.x", &get_logfile);
+$answer = "foo two three\nfoo two three\n";
 &compare_output($answer,&get_logfile(1));
 
 1;

@@ -607,12 +607,12 @@ lookup_pattern_var (target)
         continue;
 
       /* Compare the text in the pattern after the stem, if any.
-         We could test simply use streq, but this way we compare the
+         We could test simply using streq, but this way we compare the
          first two characters immediately.  This saves time in the very
          common case where the first character matches because it is a
          period.  */
       if (*p->suffix == stem[stemlen]
-          && (*p->suffix == '\0'|| streq (&p->suffix[1], &stem[stemlen+1])))
+          && (*p->suffix == '\0' || streq (&p->suffix[1], &stem[stemlen+1])))
         break;
     }
 

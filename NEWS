@@ -23,8 +23,8 @@ Version 3.79
   be used within make build scripts.  However, using them there is not
   proper behavior: they are meant to be passed to subshells via the
   environment.  Unfortunately the values were not quoted properly to be
-  passed through the environment.  This meant that some invocations of
-  make didn't properly pass values to submakes.
+  passed through the environment.  This meant that make didn't properly
+  pass some types of command line values to submakes.
 
   With this version we change that behavior: now these variables are
   quoted properly for passing through the environment, which is the
@@ -32,9 +32,9 @@ Version 3.79
   explicitly within a make rule you may need to re-examine your use for
   correctness given this change.
 
-* A new psuedo-target, .NOTPARALLEL, is defined.  If set the current
-  makefile is always run serially regardless of the value of -j.  Any
-  submakes will still be run in parallel if -j was specified.
+* A new psuedo-target .NOTPARALLEL is available.  If defined, the
+  current makefile is run serially regardless of the value of -j.
+  However, submakes are still eligible for parallel execution.
 
 * The $(call ...) function doesn't expand its arguments automatically
   anymore.  This allows you to put builtin functions like "if" and
@@ -48,8 +48,11 @@ Version 3.79
   "normal" targets (not makefiles) were deemed out of date and in need
   of being rebuilt.
 
-  Note that the -d option behaves as before: all debugging information
-  is generated.
+  Note that the -d option behaves as before: it takes no arguments and
+  all debugging information is generated.
+
+* The `-p' (print database) output now includes filename and linenumber
+  information for variable definitions, to help debugging.
 
 * Hartmut Becker provided many updates for the VMS port of GNU make.
   See the readme.vms file for more details.

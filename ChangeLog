@@ -1,3 +1,32 @@
+2000-02-04  Paul D. Smith  <psmith@gnu.org>
+
+	* variable.c (print_variable): Write out filename/linenumber
+	information for the variable definition if present.
+	(define_variable_in_set): Store filename information if provided.
+	(define_variable, define_variable_for_file): Removed.
+	(try_variable_definition): Use define_variable_loc() to keep
+	variable definition location information.
+	* read.c (read_makefile): Keep variable definition location info.
+	(do_define): Ditto.
+	(record_target_var): Ditto.
+	* variable.h (define_variable_in_set): New fileinfo argument.
+	(define_variable, define_variable_loc, define_variable_for_file):
+	Declare new macros.
+
+	Fix PR/1407:
+
+	* filedef.h (struct file): Rename patvar to pat_variables and make
+	it just a variable_set_list; we need our own copy of the pattern
+	variable's variable set list here to avoid overwriting the global
+	one.
+	* variable.c (initialize_file_variables): Move the instantiation
+	of the pat_variables pointer here.  Only do the search after we're
+	done reading the makefiles so we don't search too early.  If
+	there's a pat_variables value, set up the variables next ptr.
+	* expand.c (variable_expand_for_file): Remove the setup of the
+	pat_variables info; it's done earlier now to ensure the parent's
+	pattern variables are set up correctly as well.
+
 2000-01-25  Paul D. Smith  <psmith@gnu.org>
 
 	Change gettext support to use the simplified version in libit 0.7.
