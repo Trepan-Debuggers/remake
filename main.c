@@ -168,10 +168,14 @@ int no_builtin_rules_flag = 0;
 int keep_going_flag;
 int default_keep_going_flag = 0;
 
-/* Nonzero means print working directory
-   before starting and after finishing make. */
+/* Nonzero means print directory before starting and when done (-w).  */
 
 int print_directory_flag = 0;
+
+/* Nonzero means ignore print_directory_flag and never print the directory.
+   This is necessary because print_directory_flag is set implicitly.  */
+
+int inhibit_print_directory_flag = 0;
 
 /* Nonzero means print version information.  */
 
@@ -289,6 +293,9 @@ static struct command_switch switches[] =
     { 'w', flag, (char *) &print_directory_flag, 1, 1, 0, 0, 0,
 	"print-directory", 0,
 	"Print the current directory" },
+    { -1, flag, (char *) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
+	"no-print-directory", 0,
+	"Turn off -w, even if it was turned on implicitly" },
     { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0,
 	"what-if", "FILE",
 	"Consider FILE to be infinitely new" },
@@ -600,6 +607,10 @@ main (argc, argv, envp)
   /* Except under -s, always do -w in sub-makes and under -C.  */
   if (!silent_flag && (directories != 0 || makelevel > 0))
     print_directory_flag = 1;
+
+  /* Let the user disable that with --no-print-directory.  */
+  if (inhibit_print_directory_flag)
+    print_directory_flag = 0;
 
   /* Construct the list of include directories to search.  */
 
@@ -1279,12 +1290,18 @@ positive integral argument",
 	    }
 
 	  p = buf;
-	  sprintf (buf, "  -%c%s", cs->c, arg);
-	  p += strlen (p);
+
+	  if (cs->c != -1)
+	    {
+	      sprintf (buf, "  -%c%s", cs->c, arg);
+	      p += strlen (p);
+	    }
 	  if (cs->long_name != 0)
 	    {
 	      unsigned int i;
-	      sprintf (p, ", --%s%s", cs->long_name, arg);
+	      sprintf (p, "%s--%s%s",
+		       cs->c == -1 ? "" : ", ",
+		       cs->long_name, arg);
 	      p += strlen (p);
 	      for (i = 0; i < (sizeof (long_option_aliases) /
 			       sizeof (long_option_aliases[0]));
@@ -1409,7 +1426,7 @@ define_makeflags (all, makefile)
   struct flag
     {
       struct flag *next;
-      int c;
+      struct command_switch *switch;
       char *arg;
       unsigned int arglen;
     };
@@ -1418,7 +1435,7 @@ define_makeflags (all, makefile)
 #define	ADD_FLAG(ARG, LEN) \
   do {									      \
     struct flag *new = (struct flag *) alloca (sizeof (struct flag));	      \
-    new->c = cs->c;							      \
+    new->switch = cs;							      \
     new->arg = (ARG);							      \
     new->arglen = (LEN);						      \
     new->next = flags;							      \
@@ -1427,6 +1444,9 @@ define_makeflags (all, makefile)
       ++flagslen;		/* Just a single flag letter.  */	      \
     else								      \
       flagslen += 1 + 1 + 1 + 1 + new->arglen; /* " -x foo" */		      \
+    if (cs->c == -1)							      \
+      /* This switch has no single-letter version, so we use the long.  */    \
+      flagslen += 2 + strlen (cs->long_name);				      \
   } while (0)
 
   for (cs = switches; cs->c != '\0'; ++cs)
@@ -1522,8 +1542,15 @@ define_makeflags (all, makefile)
       *p++ = '-';
       do
 	{
-	  /* Add the flag letter to the string.  */
-	  *p++ = flags->c;
+	  /* Add the flag letter or name to the string.  */
+	  if (flags->switch->c == -1)
+	    {
+	      *p++ = '-';
+	      strcpy (p, flags->switch->long_name);
+	      p += strlen (p);
+	    }
+	  else
+	    *p++ = flags->c;
 	  if (flags->arg != 0)
 	    {
 	      /* A flag that takes an optional argument which in this case
@@ -1533,11 +1560,18 @@ define_makeflags (all, makefile)
 	      if (flags->arglen > 0)
 		{
 		  /* Add its argument too.  */
-		  *p++ = ' ';
+		  *p++ = flags->switch->c == -1 ? '=' : ' ';
 		  bcopy (flags->arg, p, flags->arglen);
 		  p += flags->arglen;
 		}
 	      /* Write a following space and dash, for the next flag.  */
+	      *p++ = ' ';
+	      *p++ = '-';
+	    }
+	  else if (flags->switch->c == -1)
+	    {
+	      /* Long options must each go in their own word,
+		 so we write the following space and dash.  */
 	      *p++ = ' ';
 	      *p++ = '-';
 	    }
