@@ -1059,6 +1059,9 @@ read_dirstream (stream)
 #ifdef _DIRENT_HAVE_D_NAMLEN
 	      d->d_namlen = len - 1;
 #endif
+#ifdef _DIRENT_HAVE_D_TYPE
+	      d->d_type = DT_UNKNOWN;
+#endif
 	      memcpy (d->d_name, df->name, len);
 	      return d;
 	    }
@@ -1079,19 +1082,33 @@ ansi_free(p)
       free(p);
 }
 
+/* On 64 bit ReliantUNIX (5.44 and above) in LFS mode, stat() is actually a
+ * macro for stat64().  If stat is a macro, make a local wrapper function to
+ * invoke it.
+ */
+#ifndef stat
+# ifndef VMS
+extern int stat ();
+# endif
+# define local_stat stat
+#else
+static int local_stat (path, buf)
+    char *path;
+    struct stat *buf;
+{
+  return stat (path, buf);
+}
+#endif
+
 void
 dir_setup_glob (gl)
      glob_t *gl;
 {
-#ifndef VMS
-  extern int stat ();
-#endif
-
   /* Bogus sunos4 compiler complains (!) about & before functions.  */
   gl->gl_opendir = open_dirstream;
   gl->gl_readdir = read_dirstream;
   gl->gl_closedir = ansi_free;
-  gl->gl_stat = stat;
+  gl->gl_stat = local_stat;
   /* We don't bother setting gl_lstat, since glob never calls it.
      The slot is only there for compatibility with 4.4 BSD.  */
 }

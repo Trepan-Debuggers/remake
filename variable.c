@@ -134,12 +134,17 @@ define_variable_in_set (name, length, value, origin, recursive, set, flocp)
 /* Lookup a variable whose name is a string starting at NAME
    and with LENGTH chars.  NAME need not be null-terminated.
    Returns address of the `struct variable' containing all info
-   on the variable, or nil if no such variable is defined.  */
+   on the variable, or nil if no such variable is defined.
+
+   If LISTP is not nil, return a pointer to the setlist where
+   the variable was found.  If the variable wasn't found, the
+   value of LISTP is unchanged.  */
 
 struct variable *
-lookup_variable (name, length)
+lookup_variable_setlist (name, length, listp)
      char *name;
      unsigned int length;
+     struct variable_set_list **listp;
 {
   register struct variable_set_list *setlist;
 
@@ -160,7 +165,11 @@ lookup_variable (name, length)
 	if (*v->name == *name
 	    && strneq (v->name + 1, name + 1, length - 1)
 	    && v->name[length] == 0)
-	  return v;
+          {
+            if (listp)
+              *listp = setlist;
+            return v;
+          }
     }
 
 #ifdef VMS
@@ -180,6 +189,9 @@ lookup_variable (name, length)
 
 	  sptr = value;
 	  scnt = 0;
+
+          if (listp)
+            *listp = current_variable_set_list;
 
 	  while ((sptr = strchr (sptr, '$')))
 	    {

@@ -1,3 +1,31 @@
+2000-02-07  Paul D. Smith  <psmith@gnu.org>
+
+	For += target-specific variables we need to remember which
+	variable set we found the variable in, so we can start looking
+	there in the next iteration (otherwise we'll see it again in
+	recursively_expand and fail!).  This is getting to be a hack; if
+	it gets any worse we'll have to rethink this entire algorithm;
+	probably implementing expansion of these separately from the
+	"normal" expansion, instead of alongside.
+
+	* variable.h (recursively_expand_setlist): Rename
+	recursively_expand to add a struct variable_set_list argument, and
+	make a macro for recursively_expand.
+	(lookup_variable_setlist): Rename lookup_variable to add a struct
+	variable_set_list argument, and make a macro for lookup_variable.
+
+	* expand.c (recursively_expand_setlist): Take an extra struct
+	variable_set_list argument and pass it to
+	allocated_variable_append().
+	(reference_variable): Use lookup_variable_setlist() and pass the
+	returned variable_set_list to recursively_expand_setlist.
+	(allocated_variable_append): Take an extra setlist argument and
+	use this as the starting place when searching for the appended
+	expansion.  If it's null, use current_variable_set_list as before.
+
+	* variable.c (lookup_variable_setlist): If the LISTP argument is
+	not nil, return the list where we found the variable in it.
+
 2000-02-04  Paul D. Smith  <psmith@gnu.org>
 
 	* variable.c (print_variable): Write out filename/linenumber
@@ -130,6 +158,10 @@
 	* variable.c, vmsdir.h, vmsfunctions.c, vmsify.c, glob/glob.c:
 	* glob/glob.h: Installed patches.  See readme.vms for details.
 
+2000-01-14  Andreas Schwab  <schwab@suse.de>
+
+	* dir.c (read_dirstream): Initialize d_type if it exists.
+
 2000-01-11  Paul D. Smith  <psmith@gnu.org>
 
 	Resolve PR/xxxx: don't automatically evaluate the $(call ...)
@@ -137,7 +169,7 @@
 	protocol to always use simple nul-terminated strings, instead of
 	sometimes using offset pointers to mark the end of arguments.
 	This change also fixes PR/1517.
-	Both PR's by Damien GIBOU <damien.gibou@st.com>.
+	Reported by Damien GIBOU <damien.gibou@st.com>.
 
 	* function.c (struct function_table_entry): Remove the negative
 	required_args hack; put in explicit min and max # of arguments.
@@ -173,7 +205,7 @@
 	* implicit.c (pattern_search): Remove the extra check of the
 	implicit flag added on 8/24/1998.  This causes problems and the
 	reason for the change was better resolved by the change made to
-	check_deps() on 8/26/1998.  This fixes PR/1423.
+	check_deps() on 1998-08-26.  This fixes PR/1423.
 
 1999-12-08  Paul D. Smith  <psmith@gnu.org>
 
