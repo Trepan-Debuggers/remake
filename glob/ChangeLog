@@ -1,3 +1,14 @@
+1999-07-21  Paul D. Smith  <psmith@gnu.org>
+
+	* glob.c, glob.h, fnmatch.c, fnmatch.h: Update to latest version
+	from GLIBC.
+
+	* fnmatch.c (internal_fnmatch): Use K&R definition syntax, not ANSI.
+	(__strchrnul): This won't exist outside GLIBC, so create one.
+
+	* glob.c: Move getlogin{,_r} prototypes below glob.h to get __P()
+	macro.
+
 1998-08-05  Paul D. Smith  <psmith@gnu.org>
 
 	* configure.in: Remove; configuration for glob is handled by the

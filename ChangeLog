@@ -1,5 +1,13 @@
 1999-07-21  Paul D. Smith  <psmith@gnu.org>
 
+	* Version 3.77.90 released.
+
+	* Makefile.am (AUTOMAKE_OPTIONS): Require automake 1.4.
+
+	* default.c (default_suffix_rules): Rearrange the default command
+	lines to conform to POSIX rules (put the filename argument $<
+	_after_ the OUTPUT_OPTION, not before it).
+
 	* various: Changed !strncmp() calls to strneq() macros.
 
 	* misc.c (sindex): Make slightly more efficient.
@@ -18,9 +26,8 @@
 	(define_automatic_variables): Ditto.
 	* vpath.c (construct_vpath_list): Ditto.
 
-	* misc.c (xrealloc): If PTR is NULL, call malloc to conform to
-	the standard--some older versions of realloc are non-standard so
-	make xrealloc DTRT.
+	* misc.c (xrealloc): Some reallocs are non-standard: work around
+	them in xrealloc by calling malloc if PTR is NULL.
 	* main.c (main): Call xrealloc() directly instead of testing for
 	NULL.
 
@@ -28,8 +35,8 @@
 	non-standard versions of free() don't like it.
 
 	* configure.in (--enable-dmalloc): Install some support for using
-	dmalloc (http://www.dmalloc.com) with make.  Use --enable-dmalloc
-	with configure.
+	dmalloc (http://www.dmalloc.com/) with make.  Use --enable-dmalloc
+	with configure to enable it.
 
 1999-07-20  Paul D. Smith  <psmith@gnu.org>
 
@@ -189,7 +196,8 @@
 	suggested by Howard Chu <hyc@highlandsun.com>.
 
 	* configure.in (job-server): New disable option for job server
-	support--it's enabled by default.
+	support--it's enabled by default.  If it works well this will go
+	away.
 
 	* NEWS: Summarize the new feature.
 
@@ -232,6 +240,29 @@
 	(child_handler): Re-enable the signal handler.  The count is still
 	kept although it's not needed or used unless you don't have
 	waitpid() or wait3().
+
+1999-04-10  Paul D. Smith  <psmith@gnu.org>
+
+	* main.c (main): Reset the considered bit on all the makefiles if
+	something failed to update; we need to examine them again if they
+	appear as normal targets in order to get the proper error message.
+
+1999-04-09  Paul D. Smith  <psmith@gnu.org>
+
+	Performance enhancement from Tim Magill <tim.magill@telops.gte.com>.
+
+	* remake.c (update_file): If you have large numbers of
+	dependencies and you run in parallel, make can spend considerable
+	time each pass through the graph looking at branches it has
+	already seen.  Since we only reap_children() when starting a pass,
+	not in the middle, if a branch has been seen already in that pass
+	nothing interesting can happen until the next pass.  So, we toggle
+	a bit saying whether we've seen this target in this pass or not.
+	(update_goal_chain): Initially set the global considered toggle to
+	1, since all targets initialize their boolean to 0.  At the end of
+	each pass, toggle the global considered variable.  * filedef.h
+	(struct file): Per-file considered toggle bit.  * file.c: New
+	global toggle variable considered.
 
 1999-04-03  Paul D. Smith  <psmith@gnu.org>
 
@@ -540,6 +571,9 @@
 	* config.h-vms: Ditto.
 	* config.h.W32: Ditto.
 	* configh.dos: Ditto.
+
+	* dir.c (find_directory) [WINDOWS32]: Windows stat() fails if
+	directory names end with `\' so strip it.
 
 1998-08-17  Paul D. Smith  <psmith@gnu.org>
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 1991, 1992, 1995, 1996, 1997 Free Software Foundation, Inc.
+/* Copyright (C) 1991, 92, 95, 96, 97, 98 Free Software Foundation, Inc.
 
    The GNU C Library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Library General Public License as
@@ -24,20 +24,41 @@ extern "C" {
 
 #undef	__ptr_t
 #if defined __cplusplus || (defined __STDC__ && __STDC__) || defined WINDOWS32
-# undef	__P
-# define __P(protos)	protos
-# define __ptr_t	void *
-# if !defined __GNUC__ || __GNUC__ < 2
-#  undef __const
-#  define __const const
+# if !defined __GLIBC__ || !defined __P
+#  undef __P
+#  undef __PMT
+#  define __P(protos)	protos
+#  define __PMT(protos)	protos
+#  if !defined __GNUC__ || __GNUC__ < 2
+#   undef __const
+#   define __const const
+#  endif
 # endif
+# define __ptr_t	void *
 #else /* Not C++ or ANSI C.  */
 # undef	__P
+# undef __PMT
 # define __P(protos)	()
+# define __PMT(protos)	()
 # undef	__const
 # define __const
 # define __ptr_t	char *
 #endif /* C++ or ANSI C.  */
+
+/* We need `size_t' for the following definitions.  */
+#ifndef __size_t
+# if defined __GNUC__ && __GNUC__ >= 2
+typedef __SIZE_TYPE__ __size_t;
+# else
+/* This is a guess.  */
+typedef unsigned long int __size_t;
+# endif
+#else
+/* The GNU CC stddef.h version defines __size_t as empty.  We need a real
+   definition.  */
+# undef __size_t
+# define __size_t size_t
+#endif
 
 /* Bits set in the FLAGS argument to `glob'.  */
 #define	GLOB_ERR	(1 << 0)/* Return on read errors.  */
@@ -57,10 +78,12 @@ extern "C" {
 # define GLOB_NOMAGIC	 (1 << 11)/* If no magic chars, return the pattern.  */
 # define GLOB_TILDE	 (1 << 12)/* Expand ~user and ~ to home directories. */
 # define GLOB_ONLYDIR	 (1 << 13)/* Match only directories.  */
+# define GLOB_TILDE_CHECK (1 << 14)/* Like GLOB_TILDE but return an error
+				      if the user name is not available.  */
 # define __GLOB_FLAGS	(GLOB_ERR|GLOB_MARK|GLOB_NOSORT|GLOB_DOOFFS| \
 			 GLOB_NOESCAPE|GLOB_NOCHECK|GLOB_APPEND|     \
 			 GLOB_PERIOD|GLOB_ALTDIRFUNC|GLOB_BRACE|     \
-			 GLOB_NOMAGIC|GLOB_TILDE|GLOB_ONLYDIR)
+			 GLOB_NOMAGIC|GLOB_TILDE|GLOB_ONLYDIR|GLOB_TILDE_CHECK)
 #else
 # define __GLOB_FLAGS	(GLOB_ERR|GLOB_MARK|GLOB_NOSORT|GLOB_DOOFFS| \
 			 GLOB_NOESCAPE|GLOB_NOCHECK|GLOB_APPEND|     \
@@ -71,19 +94,11 @@ extern "C" {
 #define	GLOB_NOSPACE	1	/* Ran out of memory.  */
 #define	GLOB_ABORTED	2	/* Read error.  */
 #define	GLOB_NOMATCH	3	/* No matches found.  */
-
+#define GLOB_NOSYS	4	/* Not implemented.  */
 #ifdef _GNU_SOURCE
 /* Previous versions of this file defined GLOB_ABEND instead of
    GLOB_ABORTED.  Provide a compatibility definition here.  */
 # define GLOB_ABEND GLOB_ABORTED
-#endif
-
-/* This value is returned if the implementation does not support
-   `glob'.  Since this is not the case here it will never be
-   returned but the conformance test suites still require the symbol
-   to be defined.  */
-#if (_XOPEN_SOURCE - 0) == 500
-# define GLOB_NOSYS	(-1)
 #endif
 
 /* Structure describing a globbing run.  */
@@ -92,19 +107,38 @@ struct stat;
 #endif
 typedef struct
   {
-    int gl_pathc;		/* Count of paths matched by the pattern.  */
+    __size_t gl_pathc;		/* Count of paths matched by the pattern.  */
     char **gl_pathv;		/* List of matched pathnames.  */
-    int gl_offs;		/* Slots to reserve in `gl_pathv'.  */
+    __size_t gl_offs;		/* Slots to reserve in `gl_pathv'.  */
     int gl_flags;		/* Set to FLAGS, maybe | GLOB_MAGCHAR.  */
 
     /* If the GLOB_ALTDIRFUNC flag is set, the following functions
        are used instead of the normal file access functions.  */
-    void (*gl_closedir) __P ((void *));
-    struct dirent *(*gl_readdir) __P ((void *));
-    __ptr_t (*gl_opendir) __P ((__const char *));
-    int (*gl_lstat) __P ((__const char *, struct stat *));
-    int (*gl_stat) __P ((__const char *, struct stat *));
+    void (*gl_closedir) __PMT ((void *));
+    struct dirent *(*gl_readdir) __PMT ((void *));
+    __ptr_t (*gl_opendir) __PMT ((__const char *));
+    int (*gl_lstat) __PMT ((__const char *, struct stat *));
+    int (*gl_stat) __PMT ((__const char *, struct stat *));
   } glob_t;
+
+#ifdef _LARGEFILE64_SOURCE
+struct stat64;
+typedef struct
+  {
+    __size_t gl_pathc;
+    char **gl_pathv;
+    __size_t gl_offs;
+    int gl_flags;
+
+    /* If the GLOB_ALTDIRFUNC flag is set, the following functions
+       are used instead of the normal file access functions.  */
+    void (*gl_closedir) __PMT ((void *));
+    struct dirent64 *(*gl_readdir) __PMT ((void *));
+    __ptr_t (*gl_opendir) __PMT ((__const char *));
+    int (*gl_lstat) __PMT ((__const char *, struct stat64 *));
+    int (*gl_stat) __PMT ((__const char *, struct stat64 *));
+  } glob64_t;
+#endif
 
 /* Do glob searching for PATTERN, placing results in PGLOB.
    The bits defined above may be set in FLAGS.
@@ -114,12 +148,33 @@ typedef struct
    `glob' returns GLOB_ABEND; if it returns zero, the error is ignored.
    If memory cannot be allocated for PGLOB, GLOB_NOSPACE is returned.
    Otherwise, `glob' returns zero.  */
+#if _FILE_OFFSET_BITS != 64
 extern int glob __P ((__const char *__pattern, int __flags,
-		      int (*__errfunc) __P ((__const char *, int)),
+		      int (*__errfunc) (__const char *, int),
 		      glob_t *__pglob));
 
 /* Free storage allocated in PGLOB by a previous `glob' call.  */
 extern void globfree __P ((glob_t *__pglob));
+#else
+# if __GNUC__ >= 2
+extern int glob __P ((__const char *__pattern, int __flags,
+		      int (*__errfunc) (__const char *, int),
+		      glob_t *__pglob)) __asm__ ("glob64");
+
+extern void globfree __P ((glob_t *__pglob)) __asm__ ("globfree64");
+# else
+#  define glob glob64
+#  define globfree globfree64
+# endif
+#endif
+
+#ifdef _LARGEFILE64_SOURCE
+extern int glob64 __P ((__const char *__pattern, int __flags,
+			int (*__errfunc) (__const char *, int),
+			glob64_t *__pglob));
+
+extern void globfree64 __P ((glob64_t *__pglob));
+#endif
 
 
 #ifdef _GNU_SOURCE
@@ -128,7 +183,6 @@ extern void globfree __P ((glob_t *__pglob));
 
    This function is not part of the interface specified by POSIX.2
    but several programs want to use it.  */
-extern int __glob_pattern_p __P ((__const char *__pattern, int __quote));
 extern int glob_pattern_p __P ((__const char *__pattern, int __quote));
 #endif
 

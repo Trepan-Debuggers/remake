@@ -106,6 +106,9 @@ update_goal_chain (goals, makefiles)
     job_slots = 1;
 #endif
 
+  /* All files start with the considered bit 0, so the global value is 1.  */
+  considered = 1;
+
   /* Update all the goals until they are all finished.  */
 
   while (goals != 0)
@@ -247,6 +250,11 @@ update_goal_chain (goals, makefiles)
 	      g = g->next;
 	    }
 	}
+
+      /* If we reached the end of the dependency graph toggle the considered
+         flag for the next pass.  */
+      if (g == 0)
+        considered = !considered;
     }
 
   if (makefiles)
@@ -311,6 +319,17 @@ update_file (file, depth)
 {
   register int status = 0;
   register struct file *f;
+
+  /* Prune the dependency graph: if we've already been here on _this_ pass
+     through the dependency graph, we don't have to go any further.  We won't
+     reap_children until we start the next pass, so no state change is
+     possible below here until then.  */
+  if (file->considered == considered)
+    {
+      DEBUGPR ("Pruning file `%s'.\n");
+      return 0;
+    }
+  file->considered = considered;
 
   for (f = file->double_colon ? file->double_colon : file; f != 0; f = f->prev)
     {

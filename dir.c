@@ -332,6 +332,13 @@ find_directory (name)
 #ifdef VMS
       if (vmsstat_dir (name, &st) < 0)
 #else
+
+#ifdef WINDOWS32
+      /* Remove any trailing '\'.  Windows32 stat fails even on valid
+         directories if they end in '\'. */
+      if (p[-1] == '\\')
+        p[-1] = '\0';
+#endif
       if (stat (name, &st) < 0)
 #endif
 	{
