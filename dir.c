@@ -20,14 +20,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #if	defined (POSIX) || defined (HAVE_DIRENT_H) || defined (__GNU_LIBRARY__)
 #include <dirent.h>
-#ifndef	__GNU_LIBRARY__
-#define D_NAMLEN(d) strlen((d)->d_name)
-#else	/* GNU C library.  */
-#define D_NAMLEN(d) ((d)->d_namlen)
-#endif	/* Not GNU C library.  */
+#if	defined (__GNU_LIBRARY__) && __GNU_LIBRARY__ > 1
+#define HAVE_D_NAMLEN
+#endif	/* GNU C library.  */
 #else	/* Not POSIX or HAVE_DIRENT_H.  */
 #define direct dirent
-#define D_NAMLEN(d) ((d)->d_namlen)
+#define HAVE_D_NAMLEN
 #ifdef	HAVE_SYS_NDIR_H
 #include <sys/ndir.h>
 #endif	/* HAVE_SYS_NDIR_H */
@@ -43,8 +41,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Posix does not require that the d_ino field be present, and some
    systems do not provide it. */
 #define REAL_DIR_ENTRY(dp) 1
+#define FAKE_DIR_ENTRY(dp)
 #else
 #define REAL_DIR_ENTRY(dp) (dp->d_ino != 0)
+#define FAKE_DIR_ENTRY(dp) (dp->d_ino = 1)
 #endif /* POSIX */
 
 #ifdef __MSDOS__
@@ -179,7 +179,7 @@ find_directory (name)
       /* The directory is not in the name hash table.
 	 Find its device and inode numbers, and look it up by them.  */
 
-      if (safe_stat (name, &st) < 0)
+      if (stat (name, &st) < 0)
 	/* Couldn't stat the directory.  Mark this by
 	   setting the `contents' member to a nil pointer.  */
 	dir->contents = 0;
@@ -295,9 +295,13 @@ dir_contents_file_exists_p (dir, filename)
       if (!REAL_DIR_ENTRY (d))
 	continue;
 
-      len = D_NAMLEN (d);
+#ifdef HAVE_D_NAMLEN
+      len = d->d_namlen;
       while (d->d_name[len - 1] == '\0')
 	--len;
+#else
+      len = strlen (d->d_name);
+#endif
 
       for (i = 0; i < len; ++i)
 	HASH (newhash, d->d_name[i]);
@@ -557,7 +561,7 @@ struct dirstream
 
 /* Forward declarations.  */
 static __ptr_t open_dirstream __P ((const char *));
-static const char *read_dirstream __P ((__ptr_t));
+static struct dirent *read_dirstream __P ((__ptr_t));
 
 static __ptr_t
 open_dirstream (directory)
@@ -584,12 +588,14 @@ open_dirstream (directory)
   return (__ptr_t) new;
 }
 
-static const char *
+static struct dirent *
 read_dirstream (stream)
      __ptr_t stream;
 {
   struct dirstream *const ds = (struct dirstream *) stream;
   register struct dirfile *df;
+  static char *buf;
+  static unsigned int bufsz;
 
   while (ds->bucket < DIRFILE_BUCKETS)
     {
@@ -597,7 +603,28 @@ read_dirstream (stream)
 	{
 	  ds->elt = df->next;
 	  if (!df->impossible)
-	    return df->name;
+	    {
+	      /* The glob interface wants a `struct dirent',
+		 so mock one up.  */
+	      struct dirent *d;
+	      unsigned int len = strlen (df->name) + 1;
+	      if (sizeof *d - sizeof d->d_name + len > bufsz)
+		{
+		  if (buf != 0)
+		    free (buf);
+		  bufsz *= 2;
+		  if (sizeof *d - sizeof d->d_name + len > bufsz)
+		    bufsz = sizeof *d - sizeof d->d_name + len;
+		  buf = xmalloc (bufsz);
+		  d = (struct dirent *) buf;
+		  d->d_ino = 1;
+#ifdef HAVE_D_NAMLEN
+		  d->d_namlen = len - 1;
+#endif
+		  memcpy (d->d_name, df->name, len);
+		  return d;
+		}
+	    }
 	}
       if (++ds->bucket == DIRFILE_BUCKETS)
 	break;
@@ -608,9 +635,17 @@ read_dirstream (stream)
 }
 
 void
-init_dir ()
+dir_setup_glob (gl)
+     glob_t *gl;
 {
-  __glob_opendir_hook = open_dirstream;
-  __glob_readdir_hook = read_dirstream;
-  __glob_closedir_hook = (void (*) __P ((__ptr_t stream))) free;
+  extern int lstat (), stat ();
+
+#ifdef HAVE_LSTAT
+#define lstat stat
+#endif
+  gl->gl_opendir = &open_dirstream;
+  gl->gl_readdir = &read_dirstream;
+  gl->gl_closedir = &free;
+  gl->gl_lstat = &lstat;
+  gl->gl_stat = &stat;
 }
