@@ -298,6 +298,8 @@ extern char *alloca ();
 # define strieq(a, b) (strcmp ((a), (b)) == 0)
 #endif
 
+#define strneq(a, b, n) (strncmp((a), (b), (n)) == 0)
+
 /* Add to VAR the hashing value of C, one character in a name.  */
 #define HASH(var, c) \
   ((var += (c)), (var = ((var) << 7) + ((var) >> 20)))

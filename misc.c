@@ -379,7 +379,7 @@ xrealloc (ptr, size)
 }
 
 
-const char *
+char *
 xstrdup (ptr)
      const char *ptr;
 {
