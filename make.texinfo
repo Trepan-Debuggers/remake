@@ -2127,8 +2127,8 @@ after it is no longer needed, as is normally done.
 
 You can also list the target pattern of an implicit rule (such as
 @samp{%.o}) as a dependency file of the special target @code{.PRECIOUS}
-to preserve intermediate files whose target patterns match that file's
-name.
+to preserve intermediate files created by rules whose target patterns
+match that file's name.
 
 @findex .IGNORE
 @item .IGNORE
