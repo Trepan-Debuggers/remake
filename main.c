@@ -602,8 +602,19 @@ main (argc, argv, envp)
 	}
       p[-1] = '\0';		/* Kill the final space and terminate.  */
 
-      /* Define the variable; this will not override any user definition.  */
-      (void) define_variable ("MAKEOVERRIDES", 13, value, o_env, 0);
+      /* Define an unchangeable variable with a name that no POSIX.2
+	 makefile could validly use for its own variable.  */
+      (void) define_variable ("-*-command-variables-*-", 23,
+			      value, o_automatic, 0);
+
+      /* Define the variable; this will not override any user definition.
+         Normally a reference to this variable is written into the value of
+         MAKEFLAGS, allowing the user to override this value to affect the
+         exported value of MAKEFLAGS.  In POSIX-pedantic mode, we cannot
+         allow the user's setting of MAKEOVERRIDES to affect MAKEFLAGS, so
+         a reference to this hidden variable is written instead. */
+      (void) define_variable ("MAKEOVERRIDES", 13,
+			      "${-*-command-variables-*-}", o_env, 1);
     }
 
   /* If there were -C flags, move ourselves about.  */
@@ -1582,6 +1593,7 @@ define_makeflags (all, makefile)
      int all, makefile;
 {
   static const char ref[] = "$(MAKEOVERRIDES)";
+  static const char posixref[] = "$(-*-command-variables-*-)";
   register const struct command_switch *cs;
   char *flagstring;
   register char *p;
@@ -1695,7 +1707,7 @@ define_makeflags (all, makefile)
 	  break;
 	}
 
-  flagslen += 4 + sizeof ref;	/* Four more for the possible " -- ".  */
+  flagslen += 4 + sizeof posixref; /* Four more for the possible " -- ".  */
 
 #undef	ADD_FLAG
 
@@ -1767,8 +1779,16 @@ define_makeflags (all, makefile)
 	}
 
       /* Copy in the string.  */
-      bcopy (ref, p, sizeof ref - 1);
-      p += sizeof ref - 1;
+      if (posix_pedantic)
+	{
+	  bcopy (posixref, p, sizeof posixref - 1);
+	  p += sizeof posixref - 1;
+	}
+      else
+	{
+	  bcopy (ref, p, sizeof ref - 1);
+	  p += sizeof ref - 1;
+	}
     }
   else if (p[-1] == '-')
     /* Kill the final space and dash.  */
