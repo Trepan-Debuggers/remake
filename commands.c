@@ -159,15 +159,15 @@ set_file_variables (file)
     len = caret_len == 0 ? 1 : caret_len;
     if (caretD_len == 0)
       caretD_len = 1;
-    cp = caret_value = (char *) xmalloc (len);
-    cDp = caretD_value = (char *) xmalloc (caretD_len);
-    cFp = caretF_value = (char *) xmalloc (len);
+    cp = caret_value = (char *) alloca (len);
+    cDp = caretD_value = (char *) alloca (caretD_len);
+    cFp = caretF_value = (char *) alloca (len);
     len = qmark_len == 0 ? 1 : qmark_len;
     if (qmarkD_len == 0)
       qmarkD_len = 1;
-    qp = qmark_value = (char *) xmalloc (len);
-    qDp = qmarkD_value = (char *) xmalloc (qmarkD_len);
-    qFp = qmarkF_value = (char *) xmalloc (len);
+    qp = qmark_value = (char *) alloca (len);
+    qDp = qmarkD_value = (char *) alloca (qmarkD_len);
+    qFp = qmarkF_value = (char *) alloca (len);
 
     for (d = file->deps; d != 0; d = d->next)
       {
