@@ -580,7 +580,7 @@ read_makefile (filename, flags)
 		}
 	    }
 	  else if (!ignoring
-		   && !try_variable_definition (&fileinfo, p2, o_override))
+		   && !try_variable_definition (&fileinfo, p2, o_override, 0))
 	    error (&fileinfo, _("invalid `override' directive"));
 
 	  continue;
@@ -598,7 +598,7 @@ read_makefile (filename, flags)
 	  p2 = next_token (p + 6);
 	  if (*p2 == '\0')
 	    export_all_variables = 1;
-	  v = try_variable_definition (&fileinfo, p2, o_file);
+	  v = try_variable_definition (&fileinfo, p2, o_file, 0);
 	  if (v != 0)
 	    v->export = v_export;
 	  else
@@ -717,7 +717,7 @@ read_makefile (filename, flags)
 	  reading_file = &fileinfo;
 	}
 #undef	word1eq
-      else if (try_variable_definition (&fileinfo, p, o_file))
+      else if (try_variable_definition (&fileinfo, p, o_file, 0))
 	/* This line has been dealt with.  */
 	;
       else if (lb.buffer[0] == '\t')
@@ -1422,6 +1422,9 @@ record_target_var (filenames, defn, two_colon, origin, flocp)
 
   global = current_variable_set_list;
 
+  /* If the variable is an append version, store that but treat it as a
+     normal recursive variable.  */
+
   for (; filenames != 0; filenames = nextf)
     {
       struct variable *v;
@@ -1458,7 +1461,7 @@ record_target_var (filenames, defn, two_colon, origin, flocp)
 
       /* Make the new variable context current and define the variable.  */
       current_variable_set_list = vlist;
-      v = try_variable_definition (flocp, defn, origin);
+      v = try_variable_definition (flocp, defn, origin, 1);
       if (!v)
         error (flocp, _("Malformed per-target variable definition"));
       v->per_target = 1;

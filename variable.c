@@ -678,10 +678,11 @@ target_environment (file)
    returned.  */
 
 struct variable *
-try_variable_definition (flocp, line, origin)
+try_variable_definition (flocp, line, origin, target_var)
      const struct floc *flocp;
      char *line;
      enum variable_origin origin;
+     int target_var;
 {
   register int c;
   register char *p = line;
@@ -691,6 +692,7 @@ try_variable_definition (flocp, line, origin)
          f_simple, f_recursive, f_append, f_conditional } flavor = f_bogus;
   char *name, *expanded_name, *value, *alloc_value=NULL;
   struct variable *v;
+  int append = 0;
 
   while (1)
     {
@@ -800,6 +802,16 @@ try_variable_definition (flocp, line, origin)
       value = p;
       break;
     case f_append:
+      /* If we have += but we're in a target variable context, defer the
+         append until the context expansion.  */
+      if (target_var)
+        {
+          append = 1;
+          flavor = f_recursive;
+          value = p;
+          break;
+        }
+
       /* An appending variable definition "var += value".
 	 Extract the old value and append the new one.  */
       v = lookup_variable (expanded_name, strlen (expanded_name));
@@ -938,6 +950,8 @@ try_variable_definition (flocp, line, origin)
 
   v = define_variable (expanded_name, strlen (expanded_name),
 		       value, origin, flavor == f_recursive);
+
+  v->append = append;
 
   if (alloc_value)
     free (alloc_value);

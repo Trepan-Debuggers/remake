@@ -1,3 +1,54 @@
+1999-11-17  Paul D. Smith  <psmith@gnu.org>
+
+	* function.c (func_if): Find the end of the arg list by testing
+	the next item for NULL; any other test is not correct.
+	Reported by Graham Reed <grahamr@algorithmics.com> (PR/1429).
+
+	Fix += when used in a target-specific variable context.
+
+	* variable.h: New bitfield APPEND set if we have a +=
+	target-specific variable.
+
+	* variable.c (try_variable_definition): Add an argument to specify
+	if we're trying a target-specific variable.  If we are and it's an
+	append style, don't append it, record it as normal recursive, but
+	set the APPEND flag so it'll be expanded later.
+	* main.c (handle_non_switch_argument): Use new
+	try_variable_definition() signature.
+	* read.c (read_makefile,record_target_var): Ditto.
+
+	* expand.c (allocated_variable_append): New function: like
+	allocated_variable_expand(), but we expand the same variable name
+	in the context of the ``next'' variable set, then we append this
+	expanded value.
+	(recursively_expand): Invoke it, if the APPEND bit is set.
+
+1999-11-10  Paul D. Smith  <psmith@gnu.org>
+
+	* file.c (snap_deps): If the .NOTPARALLEL target is defined, turn
+	off parallel builds for this make only (still allow submakes to be
+	run in parallel).
+	* main.c: New variable, ``not_parallel''.
+	* make.h: Add an extern for it.
+	* job.c (new_job): Test NOT_PARALLEL as well as JOB_SLOTS.
+	* NEWS: Add info on .NOTPARALLEL.
+	* make.texinfo (Special Targets): Document it.
+
+	* configure.in (GLOBDIR): Set to "glob" if we need to build the
+	glob library.
+	* Makefile.am (SUBDIRS): Use the GLOBDIR variable instead of
+	"glob" so we don't try to build glob if we don't need to (if we
+	have GLIBC glob).  Reported by Lars Hecking <lhecking@nmrc.ucc.ie>.
+
+	* main.c (main): Don't put "***" in the clock skew warning
+	message.  Reported by karl@gnu.org.
+
+	* make.h: Remove unneeded signal setup.
+
+	* signame.c: Remove extraneous #includes; some versions of Ultrix
+	don't protect against multiple inclusions and it causes compile
+	errors.  Reported by Simon Burge <simonb@thistledown.com.au>.
+
 1999-10-15  Paul D. Smith  <psmith@gnu.org>
 
 	* main.c (quote_for_env): Rename from quote_as_word().
