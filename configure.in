@@ -40,8 +40,19 @@ dnl Check out the wait reality.
 AC_HAVE_HEADERS(sys/wait.h) AC_HAVE_FUNCS(waitpid wait3)
 AC_COMPILE_CHECK(union wait, [#include <sys/types.h>
 #include <sys/wait.h>],
-	 	 [union wait status; return wait (&status);],
+	 	 [union wait status; int pid; pid = wait (&status);
+#ifdef WEXITSTATUS
+/* Some POSIXoid systems have both the new-style macros and the old
+   `union wait' type, and they don't work together.  If `union wait'
+   conflicts with WEXITSTATUS et al, we don't want to use it at all.  */
+if (WEXITSTATUS (status) != 0) pid = -1;
+#endif
+],
 		 AC_DEFINE(HAVE_UNION_WAIT))
+
+AC_COMPILE_CHECK(sys_siglist declaration in signal.h,
+		 [#include <signal.h>], [char *msg = *(sys_siglist + 1);],
+		 AC_DEFINE(SYS_SIGLIST_DECLARED))
 
 # The presence of the following is not meant to imply
 # that make necessarily works on those systems.
