@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.100 2000/06/23 15:55:46 psmith Exp $])
+AC_REVISION([$Id: configure.in,v 1.101 2000/06/23 18:55:43 psmith Exp $])
 AC_PREREQ(2.13)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 
@@ -150,7 +150,7 @@ AC_DECL_SYS_SIGLIST
 
 # The presence of the following is not meant to imply
 # that make necessarily works on those systems.
-AC_CHECK_LIB(sun, getpwnam)
+AC_SEARCH_LIBS(getpwnam, sun)
 
 AC_SUBST(REMOTE) REMOTE=stub
 make_try_customs=no
