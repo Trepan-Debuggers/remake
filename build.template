@@ -41,20 +41,25 @@ includedir=${prefix}/include
 # Exit as soon as any command fails.
 set -e
 
-globobjs="%globobjs%"
+# These are all the objects we need to link together.
+objs="%objs% ${extras} ${ALLOCA}"
 
-# To make life simpler, just copy the glob sources into this directory.
-for file in `echo ${globobjs} | sed 's/\.o/.c/g'`; do
-  ln ${srcdir}/glob/$file $file || cp ${srcdir}/glob/$file $file
-done
-
-objs="%objs% ${globobjs} ${extras} ${ALLOCA}"
-
+# Compile the source files into those objects.
 for file in `echo ${objs} | sed 's/\.o/.c/g'`; do
   echo compiling ${file}...
   $CC $CFLAGS $defines -c -I. -I${srcdir} -I${srcdir}/glob ${srcdir}/$file
 done
 
-echo linking make
+# The object files were actually all put in the current directory.
+# Remove the source directory names from the list.
+srcobjs="$objs"
+objs=
+for obj in $srcobjs; do
+  objs="$objs `basename $obj`"
+done
+
+# Link all the objects together.
+echo linking make...
 $CC $LDFLAGS $objs $LOADLIBES -o make.new
+echo done
 mv -f make.new make
