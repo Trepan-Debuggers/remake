@@ -20,8 +20,8 @@ MTEMPLATES = Makefile.DOS SMakefile
 #
 $(TEMPLATES) : % : %.template configure.in
 	rm -f $@
-	sed -e 's@%VERSION%@$(VERSION)@' \
-	    -e 's@%PACKAGE%@$(PACKAGE)@' \
+	sed -e 's@%VERSION%@$(VERSION)@g' \
+	    -e 's@%PACKAGE%@$(PACKAGE)@g' \
 	  $< > $@
 	chmod a-w $@
 
@@ -29,12 +29,12 @@ $(TEMPLATES) : % : %.template configure.in
 #
 $(MTEMPLATES) : % : %.template .dep_segment Makefile.am maintMakefile
 	rm -f $@
-	sed -e 's@%VERSION%@$(VERSION)@' \
-	    -e 's@%PROGRAMS%@$(bin_PROGRAMS)@' \
-	    -e 's@%SOURCES%@$(filter-out remote-%,$(make_SOURCES)) remote-$$(REMOTE).c@' \
-	    -e 's@%OBJECTS%@$(filter-out remote-%,$(make_OBJECTS)) remote-$$(REMOTE).o@' \
-	    -e 's@%GLOB_SOURCES%@$(globsrc) $(globhdr)@' \
-	    -e 's@%GLOB_OBJECTS%@$(globsrc:glob/%.c=%.o)@' \
+	sed -e 's@%VERSION%@$(VERSION)@g' \
+	    -e 's@%PROGRAMS%@$(bin_PROGRAMS)@g' \
+	    -e 's@%SOURCES%@$(filter-out remote-%,$(make_SOURCES)) remote-$$(REMOTE).c@g' \
+	    -e 's@%OBJECTS%@$(filter-out remote-%,$(make_OBJECTS)) remote-$$(REMOTE).o@g' \
+	    -e 's@%GLOB_SOURCES%@$(globsrc) $(globhdr)@g' \
+	    -e 's@%GLOB_OBJECTS%@$(globsrc:glob/%.c=%.o)@g' \
 	  $< > $@
 	echo >>$@; echo '# --------------- DEPENDENCIES' >>$@; echo '#' >>$@; \
 	  cat $(word 2,$^) >>$@
@@ -51,8 +51,8 @@ NMakefile: NMakefile.template .dep_segment Makefile.am maintMakefile
 #
 build.sh.in: build.template Makefile.am maintMakefile
 	rm -f $@
-	sed -e 's@%objs%@$(filter-out remote-%, $(make_OBJECTS)@' \
-	    -e 's@%globobjs%@$(patsubst %.c,%.o,$(globsrc)))@' \
+	sed -e 's@%objs%@$(filter-out remote-%, $(make_OBJECTS)@g' \
+	    -e 's@%globobjs%@$(patsubst %.c,%.o,$(globsrc)))@g' \
 	  $< > $@
 	chmod a-w+x $@
 

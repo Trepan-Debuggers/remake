@@ -224,7 +224,9 @@ dist-info: $(INFO_DEPS)
 	for base in $(INFO_DEPS); do    d=$(srcdir);    for file in `cd $$d && eval echo $$base*`; do      test -f $(distdir)/$$file      || ln $$d/$$file $(distdir)/$$file 2> /dev/null      || cp -p $$d/$$file $(distdir)/$$file;    done;  done
 
 mostlyclean-aminfo:
-	cd $(srcdir) && for i in $(INFO_DEPS) make.i; do rm -f `eval echo $$i*`; done
+	-rm -f make.aux make.cp make.cps make.dvi make.fn make.fns make.ky \
+	  make.kys make.ps make.log make.pg make.toc make.tp make.tps \
+	  make.vr make.vrs make.op make.tr make.cv make.cn
 
 clean-aminfo:
 

@@ -1,3 +1,15 @@
+1999-08-09  Paul D. Smith  <psmith@gnu.org>
+
+	* maintMakefile: Use g in sed (s///g) to replace >1 variable per
+	line.
+
+	* Makefile.DOS.template: Fix mostlyclean-aminfo to remove the
+	right stuff.
+
+1999-08-01  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* function.c (msdos_openpipe): *Really* return a FILE ptr.
+
 1999-08-01  Paul D. Smith  <psmith@gnu.org>
 
 	New jobserver algorithm to avoid a possible hole where we could
