@@ -11,6 +11,21 @@ seem worth to get it working. There are still some PTRMISMATCH warnings
 during the compile. Although perl is working on VMS the test scripts
 don't work. The function $shell is still missing.
 
+There is a known bug in some of the VMS CRTLs. It is in the shipped
+versions of VMS V7.2 and V7.2-1 and in the currently (October 1999)
+available ECOs for VMS V7.1 and newer versions. It is fixed in versions
+shipped with newer VMS versions and all ECO kits after October 1999. It
+only shows up during the daylight saving time period (DST): stat()
+returns a modification time 1 hour ahead. This results in GNU make
+warning messages. For a just created source you will see:
+
+ $ gmake x.exe
+ gmake.exe;1: *** Warning: File `x.c' has modification time in the future (940582863 > 940579269)
+ cc    /obj=x.obj x.c
+ link  x.obj    /exe=x.exe
+ gmake.exe;1: *** Warning:  Clock skew detected.  Your build may be incomplete.
+
+
 New in 3.78.1:
 
 Fix a problem with automatically remaking makefiles. GNU make uses an

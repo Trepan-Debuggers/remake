@@ -330,14 +330,23 @@
 /* #undef WANT_CASE_SENSITIVE_TARGETS */
 
 /* VMS specific, V7.0 has opendir() and friends, so it's undefined */
-/* Define first or both if you want to use non-VMS code for opendir() etc. */
+/* If you want to use non-VMS code for opendir() etc. on V7.0 and greater
+   define the first or both macros AND change the compile command to get the
+   non-VMS versions linked: (prefix=(all,except=(opendir,...  */
 /* #undef HAVE_VMSDIR_H */
 /* #undef _DIRENT_HAVE_D_NAMLEN */
 
-/* On older systems with older CRTLs force non-VMS-code */
-#if __CRTL_VER < 70000000 && !defined(HAVE_VMSDIR_H)
-#define HAVE_VMSDIR_H 1
+/* On older systems without 7.0 backport of CRTL the first one is defined */
+#ifdef __CRTL_VER
+# if __CRTL_VER < 70000000
+#  define HAVE_VMSDIR_H 1
+# endif
+#else
+# if __VMS_VER < 70000000
+#  define HAVE_VMSDIR_H 1
+# endif
 #endif
+
 #if defined(HAVE_VMSDIR_H) && defined(HAVE_DIRENT_H)
 #undef HAVE_DIRENT_H
 #endif
