@@ -192,6 +192,9 @@ read_all_makefiles (makefiles)
 	  /* No default makefile was found.  Add the default makefiles to the
 	     `read_makefiles' chain so they will be updated if possible.  */
 	  struct dep *tail = read_makefiles;
+	  /* Add them to the tail, after any MAKEFILES variable makefiles.  */
+	  while (tail != 0 && tail->next != 0)
+	    tail = tail->next;
 	  for (p = default_makefiles; *p != 0; ++p)
 	    {
 	      struct dep *d = (struct dep *) xmalloc (sizeof (struct dep));
