@@ -1,6 +1,6 @@
 # GNU Make-specific makefile for GNU Make.
 
-# Copyright (C) 1990, 91, 92, 93, 94, 95 Free Software Foundation, Inc.
+# Copyright (C) 1990, 91, 92, 93, 94, 95, 96 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify
@@ -186,7 +186,7 @@ Makefile.in: compatMakefile $(nolib-deps:remote-%.dep=remote-stub.dep)
 .SUFFIXES: .dep
 # Maintain the automatically-generated dependencies.
 ifndef	   no_deps
-include $(depfiles)
+-include $(depfiles)
 endif
 $(archpfx)%.dep: %.c
 	$(mkdep) $< | sed 's,$*\.o,$(@:.dep=.o) $@,' > $@
@@ -222,10 +222,12 @@ dist: cvs-mark default info dvi tests tarfiles
 .PHONY: tarfiles
 tarfiles: $(tarfiles)
 
+vmsfiles = config.h-vms makefile.com makefile.vms readme.vms \
+	   vmsdir.h vmsfunctionc.c vmsify.c
 distfiles=README INSTALL COPYING ChangeLog NEWS \
           configure Makefile.in configure.in build.sh.in mkinstalldirs \
 	  configh.dos configure.bat \
-	  aclocal.m4 acconfig.h $(srcs) remote-*.c $(globfiles) \
+	  aclocal.m4 acconfig.h $(srcs) remote-*.c $(globfiles) $(vmsfiles) \
 	  make.texinfo make-stds.texi \
 	  make.?? make.??s make.toc make.aux make.man texinfo.tex TAGS tags \
 	  install-sh \
