@@ -38,6 +38,10 @@ LDFLAGS = @LDFLAGS@
 # NeXT 1.0a uses an old version of GCC, which required -D__inline=inline.
 defines = @DEFS@ -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\"
 
+# Which flavor of remote job execution support to use.
+# The code is found in `remote-$(REMOTE).c'.
+REMOTE = @REMOTE@
+
 # If you are using the GNU C library, or have the GNU getopt functions in
 # your C library, you can comment these out.
 GETOPT = getopt.o getopt1.o
@@ -60,10 +64,6 @@ ALLOCA_SRC = $(srcdir)/alloca.c
 # libPW.a is broken on HP9000s300 and HP9000s400 machines.  Use
 # alloca.c instead on those machines.
 LOADLIBES = @LIBS@
-
-# If there are remote execution facilities defined,
-# enable them with switches here (see remote-*.c).
-REMOTE =
 
 # Any extra object files your system needs.
 extras = @LIBOBJS@
@@ -113,15 +113,16 @@ ETAGS = etags -tw
 CTAGS = ctags -tw
 
 objs = commands.o job.o dir.o file.o misc.o main.o read.o remake.o	\
-       remote.o rule.o implicit.o default.o variable.o expand.o		\
-       function.o vpath.o version.o ar.o arscan.o signame.o		\
+       rule.o implicit.o default.o variable.o expand.o function.o	\
+       vpath.o version.o ar.o arscan.o signame.o remote-$(REMOTE).o	\
        $(GLOB) $(GETOPT) $(ALLOCA) $(extras)
 srcs = $(srcdir)/commands.c $(srcdir)/job.c $(srcdir)/dir.c		\
        $(srcdir)/file.c $(srcdir)/getloadavg.c $(srcdir)/misc.c		\
        $(srcdir)/main.c $(srcdir)/read.c $(srcdir)/remake.c		\
-       $(srcdir)/remote.c $(srcdir)/rule.c $(srcdir)/implicit.c		\
-       $(srcdir)/default.c $(srcdir)/variable.c $(srcdir)/expand.c	\
-       $(srcdir)/function.c $(srcdir)/vpath.c $(srcdir)/version.c	\
+       $(srcdir)/rule.c $(srcdir)/implicit.c $(srcdir)/default.c	\
+       $(srcdir)/variable.c $(srcdir)/expand.c $(srcdir)/function.c	\
+       $(srcdir)/vpath.c $(srcdir)/version.c				\
+       $(srcdir)/remote-$(REMOTE).c					\
        $(srcdir)/ar.c $(srcdir)/arscan.c				\
        $(srcdir)/signame.c $(srcdir)/signame.h $(GETOPT_SRC)		\
        $(srcdir)/commands.h $(srcdir)/dep.h $(srcdir)/file.h		\
@@ -155,9 +156,6 @@ make: $(objs)
 .c.o:
 	$(CC) $(defines) -c -I. -I$(srcdir) -I$(srcdir)/glob \
 	      $(CFLAGS) $< $(OUTPUT_OPTION)
-remote.o: remote.c $(srcdir)/remote-*.c
-	$(CC) $(defines) $(REMOTE) -c -I. -I$(srcdir) \
-	      $(CFLAGS) $(srcdir)/remote.c
 
 # For some losing Unix makes.
 SHELL = /bin/sh
