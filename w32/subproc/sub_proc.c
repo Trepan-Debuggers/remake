@@ -1193,6 +1193,9 @@ process_easy(
 
   if (process_begin(hProcess, argv, envp, argv[0], NULL)) {
     fake_exits_pending++;
+    /* process_begin() failed: make a note of that.  */
+    if (!((sub_process*) hProcess)->last_err)
+      ((sub_process*) hProcess)->last_err = -1;
     ((sub_process*) hProcess)->exit_code = process_last_err(hProcess);
 
     /* close up unused handles */

@@ -15,13 +15,8 @@ defined per the following list:
 'override'             defined by override in makefile
 'automatic'            Automatic variable\n";
 
-# On WIN32 systems, HOME is meaningless. SystemRoot should be defined
-# though.  With DJGPP, HOME is not guaranteed to be defined.  Use DJDIR
-# instead.
-#
-$homevar = (($port_type eq 'Windows') ? "SystemRoot"
-	    : (($port_type eq 'DOS') ? "DJDIR"
-	       : "HOME"));
+# Set an environment variable
+$ENV{MAKETEST} = 1;
 
 open(MAKEFILE,"> $makefile");
 
@@ -33,7 +28,7 @@ override WHITE := BLACK
 all: auto
 \t\@echo \$(origin undefined)
 \t\@echo \$(origin CC)
-\t\@echo \$(origin $homevar)
+\t\@echo \$(origin MAKETEST)
 \t\@echo \$(origin MAKE)
 \t\@echo \$(origin foo)
 \t\@echo \$(origin CFLAGS)

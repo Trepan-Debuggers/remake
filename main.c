@@ -1158,7 +1158,12 @@ main (int argc, char **argv, char **envp)
      program that uses a non-absolute name.  */
   if (current_directory[0] != '\0'
       && argv[0] != 0
-      && (argv[0][0] != '/' && (argv[0][0] == '\0' || argv[0][1] != ':')))
+      && (argv[0][0] != '/' && (argv[0][0] == '\0' || argv[0][1] != ':'))
+#ifdef __EMX__
+      /* do not prepend cwd if argv[0] contains no '/', e.g. "make" */
+      && (strchr (argv[0], '/') != 0 || strchr (argv[0], '\\') != 0)
+# endif
+      )
     argv[0] = concat (current_directory, "/", argv[0]);
 #else  /* !__MSDOS__ */
   if (current_directory[0] != '\0'
@@ -2230,6 +2235,12 @@ decode_switches (int argc, char **argv, int env)
 
 		  if (optarg == 0)
 		    optarg = cs->noarg_value;
+                  else if (*optarg == '\0')
+                    {
+                      error (NILF, _("the `-%c' option requires a non-empty string argument"),
+                             cs->c);
+                      bad = 1;
+                    }
 
 		  sl = *(struct stringlist **) cs->value_ptr;
 		  if (sl == 0)

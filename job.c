@@ -54,7 +54,7 @@ int batch_mode_shell = 0;
 
 #elif defined (__EMX__)
 
-const char *default_shell = "/bin/sh";
+char *default_shell = "/bin/sh";
 int batch_mode_shell = 0;
 
 #elif defined (VMS)
@@ -414,7 +414,6 @@ vms_handle_apos (char *p)
 
 static unsigned int dead_children = 0;
 
-#ifndef __EMX__ /* Don't use SIGCHLD handler on OS/2. */
 RETSIGTYPE
 child_handler (int sig)
 {
@@ -426,9 +425,15 @@ child_handler (int sig)
       job_rfd = -1;
     }
 
+#ifdef __EMX__
+  /* The signal handler must called only once! */
+  signal (SIGCHLD, SIG_DFL);
+#endif
+
+  /* This causes problems if the SIGCHLD interrupts a printf().
   DB (DB_JOBS, (_("Got a SIGCHLD; %u unreaped children.\n"), dead_children));
+  */
 }
-#endif  /* !__EMX__ */
 
 extern int shell_function_pid, shell_function_completed;
 
@@ -562,18 +567,6 @@ reap_children (int block, int err)
               /* If we have started jobs in this second, remove one.  */
               if (job_counter)
                 --job_counter;
-
-#ifdef __EMX__
-	      /* the SIGCHLD handler must not be used on OS/2 because, unlike
-		 on UNIX systems, it had to call wait() itself.  Therefore
-		 job_rfd has to be closed here.  */
-	      if (job_rfd >= 0)
-		{
-		  close (job_rfd);
-		  job_rfd = -1;
-		}
-#endif
-
 	    }
 	  else
 	    {
@@ -881,10 +874,6 @@ unblock_sigs (void)
 #endif
 
 #ifdef MAKE_JOBSERVER
-# ifdef __EMX__
-/* Never install the SIGCHLD handler for EMX!!! */
-#  define set_child_handler_action_flags(x)
-# else
 /* Set the child handler action flags to FLAGS.  */
 static void
 set_child_handler_action_flags (int flags)
@@ -900,7 +889,6 @@ set_child_handler_action_flags (int flags)
   sigaction (SIGCLD, &sa, NULL);
 #endif
 }
-#endif  /* !__EMX__ */
 #endif
 
 
@@ -1630,6 +1618,10 @@ new_job (struct file *file)
 	set_child_handler_action_flags (0);
 	got_token = read (job_rfd, &token, 1);
 	saved_errno = errno;
+#ifdef __EMX__
+        /* The child handler must be turned off here.  */
+        signal (SIGCHLD, SIG_DFL);
+#endif
 	set_child_handler_action_flags (SA_RESTART);
 
         /* If we got one, we're done here.  */
@@ -2750,12 +2742,12 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
   char** sh_cmds;
 #else  /* must be UNIX-ish */
   static char sh_chars[] = "#;\"*?[]&|<>(){}$`^~!";
-  static char *sh_cmds[] = { "cd", "eval", "exec", "exit", "login",
-			     "logout", "set", "umask", "wait", "while", "for",
-			     "case", "if", ":", ".", "break", "continue",
-			     "export", "read", "readonly", "shift", "times",
-			     "trap", "switch", 0 };
-#endif /* __MSDOS__ */
+  static char *sh_cmds[] = { ".", ":", "break", "case", "cd", "continue",
+                             "eval", "exec", "exit", "export", "for", "if",
+                             "login", "logout", "read", "readonly", "set",
+                             "shift", "switch", "test", "times", "trap",
+                             "umask", "wait", "while", 0 };
+#endif
   register int i;
   register char *p;
   register char *ap;
