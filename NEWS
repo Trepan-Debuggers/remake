@@ -39,14 +39,18 @@ Version 3.79
 * The --debug option has changed: it now allows optional flags
   controlling the amount and type of debugging output.  By default only
   a minimal amount information is generated, displaying the names of
-  "normal" targets (not makefiles) were deemed out of date and in need
-  of being rebuilt.
+  "normal" targets (not makefiles) that were deemed out of date and in
+  need of being rebuilt.
 
   Note that the -d option behaves as before: it takes no arguments and
   all debugging information is generated.
 
 * The `-p' (print database) output now includes filename and linenumber
   information for variable definitions, to help debugging.
+
+* The wordlist function no longer reverses its arguments if the "start"
+  value is greater than the "end" value.  If that's true, nothing is
+  returned.
 
 * Hartmut Becker provided many updates for the VMS port of GNU make.
   See the readme.vms file for more details.
