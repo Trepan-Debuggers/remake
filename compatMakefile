@@ -48,9 +48,9 @@ GETOPT_SRC = $(srcdir)/getopt.c $(srcdir)/getopt1.c $(srcdir)/getopt.h
 # functions in the AIX and HPUX C libraries are said to be buggy.
 GLOB = glob/libglob.a
 
-# If your system doesn't have alloca, or the one provided is bad,
-# get it from the Emacs distribution and define this.
+# If your system doesn't have alloca, or the one provided is bad, define this.
 ALLOCA = @ALLOCA@
+ALLOCA_SRC = $(srcdir)/alloca.c
 
 # If your system needs extra libraries loaded in, define them here.
 # System V probably need -lPW for alloca.  HP-UX 7.0's alloca in
@@ -115,7 +115,7 @@ srcs = $(srcdir)/commands.c $(srcdir)/job.c $(srcdir)/dir.c		\
        $(srcdir)/ar.c $(srcdir)/arscan.c $(GETOPT_SRC)			\
        $(srcdir)/commands.h $(srcdir)/dep.h $(srcdir)/file.h		\
        $(srcdir)/job.h $(srcdir)/make.h $(srcdir)/rule.h		\
-       $(srcdir)/variable.h
+       $(srcdir)/variable.h $(ALLOCA_SRC)
 
 
 .SUFFIXES:
