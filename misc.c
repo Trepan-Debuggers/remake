@@ -1,4 +1,4 @@
-/* Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+/* Copyright (C) 1988, 89, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -268,6 +268,9 @@ makefile_fatal (file, lineno, s1, s2, s3, s4, s5, s6)
 }
 
 #ifndef HAVE_STRERROR
+
+#undef	strerror
+
 char *
 strerror (errnum)
      int errnum;
