@@ -331,7 +331,6 @@ read_makefile (filename, flags)
 	deps->file->dontcare = 1;
     }
   filename = deps->file->name;
-  deps->file->precious = 1;
   deps->changed = flags;
   deps = 0;
 
