@@ -133,12 +133,7 @@ endif
 LDFLAGS = -g
 
 # Define the command to make dependencies.
-ifneq	"$(findstring gcc,$(CC))" ""
-# Don't include system directories.
 mkdep-nolib = $(CC) -MM $(CPPFLAGS)
-else
-mkdep-nolib = $(mkdep)
-endif
 mkdep = $(CC) -M $(CPPFLAGS)
 
 depfiles = $(patsubst %.o,%.dep,$(filter %.o,$(objs)))
