@@ -1,5 +1,12 @@
 2003-01-30  Paul D. Smith  <psmith@gnu.org>
 
+	* scripts/features/targetvars: Test very long target-specific
+	variable definition lines (longer than the default make buffer
+	length).  Tests patch # 1022.
+
+	* scripts/functions/eval: Test very recursive $(eval ...) calls
+	with simple variable expansion (bug #2238).
+
 	* scripts/functions/word: Test error handling for word and
 	wordlist functions (bug #2407).
 

@@ -248,4 +248,23 @@ $answer = "ok ok foo pat\nok ok foo pat\n";
 &compare_output($answer, &get_logfile(1));
 
 
+# Test #16
+# Test target-specific variables with very long command line
+# (> make default buffer length)
+
+$makefile7 = &get_tmpfile;
+
+open(MAKEFILE, "> $makefile7");
+print MAKEFILE <<'EOF';
+base_metals_fmd_reports.sun5 base_metals_fmd_reports CreateRealPositions        CreateMarginFunds deals_changed_since : BUILD_OBJ=$(shell if [ -f               "build_information.generate" ]; then echo "$(OBJ_DIR)/build_information.o"; else echo "no build information"; fi  )
+
+deals_changed_since: ; @echo $(BUILD_OBJ)
+
+EOF
+close(MAKEFILE);
+
+&run_make_with_options("$makefile7", '', &get_logfile);
+$answer = "no build information\n";
+&compare_output($answer, &get_logfile(1));
+
 1;
