@@ -372,9 +372,12 @@ lookup_variable_in_set (name, length, set)
 
 /* Initialize FILE's variable set list.  If FILE already has a variable set
    list, the topmost variable set is left intact, but the the rest of the
-   chain is replaced with FILE->parent's setlist.  If we're READing a
-   makefile, don't do the pattern variable search now, since the pattern
-   variable might not have been defined yet.  */
+   chain is replaced with FILE->parent's setlist.  If FILE is a double-colon
+   rule, then we will use the "root" double-colon target's variable set as the
+   parent of FILE's variable set.
+
+   If we're READing a makefile, don't do the pattern variable search now,
+   since the pattern variable might not have been defined yet.  */
 
 void
 initialize_file_variables (file, reading)
@@ -389,8 +392,19 @@ initialize_file_variables (file, reading)
 	xmalloc (sizeof (struct variable_set_list));
       l->set = (struct variable_set *) xmalloc (sizeof (struct variable_set));
       hash_init (&l->set->table, PERFILE_VARIABLE_BUCKETS,
-			     variable_hash_1, variable_hash_2, variable_hash_cmp);
+                 variable_hash_1, variable_hash_2, variable_hash_cmp);
       file->variables = l;
+    }
+
+  /* If this is a double-colon, then our "parent" is the "root" target for
+     this double-colon rule.  Since that rule has the same name, parent,
+     etc. we can just use its variables as the "next" for ours.  */
+
+  if (file->double_colon && file->double_colon != file)
+    {
+      initialize_file_variables (file->double_colon, reading);
+      l->next = file->double_colon->variables;
+      return;
     }
 
   if (file->parent == 0)
