@@ -17,7 +17,8 @@ echo "}							">> config.sed
 
 echo "s/@srcdir@/./					">> config.sed
 echo "s/@CC@/gcc/					">> config.sed
-echo "s/@CFLAGS@/-O2 -g -DHAVE_CONFIG_H/		">> config.sed
+echo "s/@CFLAGS@/-O2 -g/				">> config.sed
+echo "s/@CPPFLAGS@/-DHAVE_CONFIG_H/			">> config.sed
 echo "s/@LDFLAGS@//					">> config.sed
 echo "s/@RANLIB@/ranlib/				">> config.sed
 echo "s/@DEFS@//					">> config.sed
