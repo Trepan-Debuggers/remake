@@ -581,4 +581,13 @@ extern int handling_fatal_signal;
 
 #define EINTRLOOP(_v,_c)   while (((_v)=_c)==-1 && errno==EINTR)
 
-#define ENULLLOOP(_v,_c)   while (((_v)=_c)==0 && errno==EINTR)
+/* While system calls that return integers are pretty consistent about
+   returning -1 on failure and setting errno in that case, functions that
+   return pointers are not always so well behaved.  Sometimes they return
+   NULL for expected behavior: one good example is readdir() which returns
+   NULL at the end of the directory--and _doesn't_ reset errno.  So, we have
+   to do it ourselves here.  */
+
+#define ENULLLOOP(_v,_c)   do{ errno = 0; \
+                               while (((_v)=_c)==0 && errno==EINTR); }while(0)
+
