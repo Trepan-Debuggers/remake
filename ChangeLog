@@ -2,6 +2,9 @@ Fri Mar 10 13:56:49 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
 	* Version 3.72.10.
 
+	* read.c (read_makefile, parse_file_seq): Fix typo __MS_DOS__ ->
+ 	__MSDOS__.
+
 	* GNUmakefile (globfiles): Add glob/configure.bat.
 	(distfiles): Add configh.dos, configure.bat.
 
