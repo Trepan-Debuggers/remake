@@ -27,22 +27,21 @@ char *remote_description = 0;
 /* Call once at startup even if no commands are run.  */
 
 void
-remote_setup ()
+remote_setup (void)
 {
 }
 
 /* Called before exit.  */
 
 void
-remote_cleanup ()
+remote_cleanup (void)
 {
 }
 
-/* Return nonzero if the next job should be done remotely.  */
-
+/*! Return nonzero if the next job should be done remotely.  
+*/
 int
-start_remote_job_p (first_p)
-     int first_p;
+start_remote_job_p (int first_p UNUSED)
 {
   return 0;
 }
@@ -55,26 +54,22 @@ start_remote_job_p (first_p)
    nonzero if it is remote (meaning *ID_PTR is a process ID).  */
 
 int
-start_remote_job (argv, envp, stdin_fd, is_remote, id_ptr, used_stdin)
-     char **argv, **envp;
-     int stdin_fd;
-     int *is_remote;
-     int *id_ptr;
-     int *used_stdin;
+start_remote_job (char **argv UNUSED, char **envp UNUSED, int stdin_fd UNUSED,
+                  int *is_remote UNUSED, int *id_ptr UNUSED,
+                  int *used_stdin UNUSED)
 {
   return -1;
 }
 
-/* Get the status of a dead remote child.  Block waiting for one to die
+/*! Get the status of a dead remote child.  Block waiting for one to die
    if BLOCK is nonzero.  Set *EXIT_CODE_PTR to the exit status, *SIGNAL_PTR
    to the termination signal or zero if it exited normally, and *COREDUMP_PTR
    nonzero if it dumped core.  Return the ID of the child that died,
-   0 if we would have to block and !BLOCK, or < 0 if there were none.  */
-
+   0 if we would have to block and !BLOCK, or < 0 if there were none.
+*/
 int
-remote_status (exit_code_ptr, signal_ptr, coredump_ptr, block)
-     int *exit_code_ptr, *signal_ptr, *coredump_ptr;
-     int block;
+remote_status (int *exit_code_ptr UNUSED, int *signal_ptr UNUSED,
+               int *coredump_ptr UNUSED, int block UNUSED)
 {
   errno = ECHILD;
   return -1;
@@ -84,7 +79,7 @@ remote_status (exit_code_ptr, signal_ptr, coredump_ptr, block)
    If this notification is done by raising the child termination
    signal, do not block that signal.  */
 void
-block_remote_children ()
+block_remote_children (void)
 {
   return;
 }
@@ -93,16 +88,14 @@ block_remote_children ()
    If this is done by raising the child termination signal,
    do not unblock that signal.  */
 void
-unblock_remote_children ()
+unblock_remote_children (void)
 {
   return;
 }
 
 /* Send signal SIG to child ID.  Return 0 if successful, -1 if not.  */
 int
-remote_kill (id, sig)
-     int id;
-     int sig;
+remote_kill (int id UNUSED, int sig UNUSED)
 {
   return -1;
 }
