@@ -638,10 +638,10 @@ make_access ()
 void
 child_access ()
 {
+#ifdef	GETLOADAVG_PRIVILEGED
+
   if (!access_inited)
     abort ();
-
-#ifdef	GETLOADAVG_PRIVILEGED
 
   /* Set both the real and effective UID and GID to the user's.
      They cannot be changed back to make's.  */
