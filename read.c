@@ -360,6 +360,47 @@ read_makefile (filename, flags)
       lineno += nlines;
       nlines = readline (&lb, infile, filename, lineno);
 
+      /* Check for a shell command line first.
+	 If it is not one, we can stop treating tab specially.  */
+      if (lb.buffer[0] == '\t')
+	{
+	  /* This line is a probably shell command.  */
+	  unsigned int len;
+
+	  if (no_targets)
+	    /* Ignore the commands in a rule with no targets.  */
+	    continue;
+
+	  /* If there is no preceding rule line, don't treat this line
+	     as a command, even though it begins with a tab character.
+	     SunOS 4 make appears to behave this way.  */
+
+	  if (filenames != 0)
+	    {
+	      if (ignoring)
+		/* Yep, this is a shell command, and we don't care.  */
+		continue;
+
+	      /* Append this command line to the line being accumulated.  */
+	      p = lb.buffer;
+	      if (commands_idx == 0)
+		commands_started = lineno;
+	      len = strlen (p);
+	      if (len + 1 + commands_idx > commands_len)
+		{
+		  commands_len = (len + 1 + commands_idx) * 2;
+		  commands = (char *) xrealloc (commands, commands_len);
+		}
+	      bcopy (p, &commands[commands_idx], len);
+	      commands_idx += len;
+	      commands[commands_idx++] = '\n';
+
+	      continue;
+	    }
+	}
+
+      /* This line is not a shell command line.  Don't worry about tabs.  */
+
       if (collapsed_length < lb.size)
 	{
 	  collapsed_length = lb.size;
@@ -372,17 +413,20 @@ read_makefile (filename, flags)
       collapse_continuations (collapsed);
       remove_comments (collapsed);
 
-      p = collapsed;
-      while (isspace (*p) && *p != '\t')
-	++p;
-      /* We cannot consider a line containing just a tab to be empty
-	 because it might constitute an empty command for a target.  */
-      if (*p == '\0' && lb.buffer[0] != '\t')
-	continue;
-
       /* strncmp is first to avoid dereferencing out into space.  */
 #define	word1eq(s, l) 	(!strncmp (s, p, l) \
 			 && (p[l] == '\0' || isblank (p[l])))
+      p = collapsed;
+      while (isspace (*p))
+	++p;
+      if (*p == '\0')
+	/* This line is completely empty.  */
+	continue;
+
+      /* We must first check for conditional and `define' directives before
+	 ignoring anything, since they control what we will do with
+	 following lines.  */
+
       if (!in_ignored_define
 	  && (word1eq ("ifdef", 5) || word1eq ("ifndef", 6)
 	      || word1eq ("ifeq", 4) || word1eq ("ifneq", 5)
@@ -458,40 +502,7 @@ read_makefile (filename, flags)
 	/* Ignore the line.  We continue here so conditionals
 	   can appear in the middle of a rule.  */
 	continue;
-      else if (lb.buffer[0] == '\t')
-	{
-	  /* This line is a shell command.  */
-	  unsigned int len;
-
-	  if (no_targets)
-	    /* Ignore the commands in a rule with no targets.  */
-	    continue;
-
-	  /* If there is no preceding rule line, don't treat this line
-	     as a command, even though it begins with a tab character.
-	     SunOS 4 make appears to behave this way.  */
-
-	  if (filenames != 0)
-	    {
-	      /* Append this command line to the line being accumulated.  */
-	      p = lb.buffer;
-	      if (commands_idx == 0)
-		commands_started = lineno;
-	      len = strlen (p);
-	      if (len + 1 + commands_idx > commands_len)
-		{
-		  commands_len = (len + 1 + commands_idx) * 2;
-		  commands = (char *) xrealloc (commands, commands_len);
-		}
-	      bcopy (p, &commands[commands_idx], len);
-	      commands_idx += len;
-	      commands[commands_idx++] = '\n';
-
-	      continue;
-	    }
-	}
-
-      if (word1eq ("export", 6))
+      else if (word1eq ("export", 6))
 	{
 	  struct variable *v;
 	  p2 = next_token (p + 6);
