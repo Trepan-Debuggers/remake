@@ -1207,6 +1207,13 @@ main (int argc, char **argv, char **envp)
 	  debugger_on_error  |=  DEBUGGER_ON_FATAL;
 	}
       }
+#ifndef ENABLE_READLINE
+    error (NILF, 
+	   "warning: you specified a debugger option, but you don't have");
+    error (NILF, 
+	   "debugger support compiled in. Debugger options will be ignored.");
+    
+#endif
   }
   
   
