@@ -423,6 +423,8 @@ expand_function (o, function, text, end)
 		  {
 		    if (buffer[i - 1] == '\n')
 		      buffer[--i] = '\0';
+		    else
+		      buffer[i] = '\0';
 		    p = buffer;
 		    while ((p = index (p, '\n')) != 0)
 		      *p++ = ' ';
