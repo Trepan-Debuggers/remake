@@ -144,9 +144,14 @@ update_goal_chain (goals, makefiles)
 		    {
 		      if (file->update_status != 0)
 			{
-			  /* Updating failed.  */
-			  status = 1;
-			  stop = !keep_going_flag && !makefiles;
+			  /* Updating failed, or -q triggered.
+			     The STATUS value tells our caller which.  */
+			  status = file->update_status;
+			  /* If -q just triggered, stop immediately.
+			     It doesn't matter how much more we run,
+			     since we already know the answer to return.  */
+			  stop = (!keep_going_flag && !question_flag
+				  && !makefiles);
 			}
 		      else if (MTIME (file) != mtime)
 			{
