@@ -1,3 +1,8 @@
+Mon Feb 28 00:31:14 2005  Boris Kolpackov  <boris@kolpackov.net>
+
+	* scripts/variables/DEFAULT_TARGET: Test the .DEFAULT_TARGET
+	special variable.
+
 Sun Feb 27 23:33:32 2005  Boris Kolpackov  <boris@kolpackov.net>
 
 	* scripts/features/se_explicit: Test the second expansion in

@@ -522,7 +522,7 @@ snap_deps (void)
               }
           }
 
-        free_dep_chain (old);
+        free_ns_chain ((struct nameseq*)old);
       }
   free (file_slot_0);
 
