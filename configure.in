@@ -3,7 +3,7 @@
 AC_INIT([GNU make],[3.81beta2],[bug-make@gnu.org])
 
 AC_PREREQ(2.59)
-AC_REVISION([[$Id: configure.in,v 1.131 2005/02/16 05:03:42 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.132 2005/02/26 01:41:48 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -235,6 +235,15 @@ AC_ARG_WITH(customs,
 # Tell automake about this, so it can include the right .c files.
 AM_CONDITIONAL(USE_CUSTOMS, test "$use_customs" = true)
 
+# See if the user asked to handle case insensitive file systems.
+
+AH_TEMPLATE(HAVE_CASE_INSENSITIVE_FS, [Use case insensitive file names])
+AC_ARG_ENABLE(case-insensitive-file-system,
+  AC_HELP_STRING([--enable-case-insensitive-file-system],
+		 [enable case insensitive file system support]),
+  case_insensitive_fs="yes" AC_DEFINE(HAVE_CASE_INSENSITIVE_FS),
+  case_insensitive_fs="no")
+
 # See if we can handle the job server feature, and if the user wants it.
 
 AC_ARG_ENABLE(job-server,
@@ -331,6 +340,18 @@ AC_DEFINE_UNQUOTED(MAKE_HOST,"$host",[Build host information.])
 MAKE_HOST="$host"
 AC_SUBST(MAKE_HOST)
 
+w32_target_env=no
+AM_CONDITIONAL(WINDOWSENV, false)
+
+case "$host" in
+  *-*-mingw32)
+    AM_CONDITIONAL(WINDOWSENV, true)
+    w32_target_env=yes
+    AC_DEFINE([WINDOWS32], [1], [Use platform specific coding])
+    AC_DEFINE([HAVE_DOS_PATHS], [1], [Use platform specific coding])
+    ;;
+esac
+
 # Include the Maintainer's Makefile section, if it's here.
 
 MAINT_MAKEFILE=/dev/null
@@ -390,6 +411,11 @@ esac
 
 # Specify what files are to be created.
 AC_CONFIG_FILES(Makefile glob/Makefile po/Makefile.in config/Makefile doc/Makefile)
+
+# Only process if target is MS-Windows
+if test "$w32_target_env" == yes; then
+    AC_CONFIG_FILES(w32/Makefile)
+fi
 
 # OK, do it!
 

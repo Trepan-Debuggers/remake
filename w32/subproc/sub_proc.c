@@ -664,13 +664,13 @@ process_pipe_io(
 	DWORD wait_return;
 	HANDLE ready_hand;
 	bool_t child_dead = FALSE;
-
+	BOOL GetExitCodeResult;
 
 	/*
 	 *  Create stdin thread, if needed
 	 */
-    pproc->inp = stdin_data;
-    pproc->incnt = stdin_data_len;
+	pproc->inp = stdin_data;
+	pproc->incnt = stdin_data_len;
 	if (!pproc->inp) {
 		stdin_eof = TRUE;
 		CloseHandle((HANDLE)pproc->sv_stdin[0]);
@@ -762,7 +762,8 @@ process_pipe_io(
 
 		} else if (ready_hand == childhand) {
 
-			if (GetExitCodeProcess(childhand, &pproc->exit_code) == FALSE) {
+			GetExitCodeResult = GetExitCodeProcess(childhand, (DWORD*)&pproc->exit_code);
+			if (GetExitCodeResult == FALSE) {
 				pproc->last_err = GetLastError();
 				pproc->lerrno = E_SCALL;
 				goto done;
@@ -809,6 +810,7 @@ process_file_io(
 	sub_process *pproc;
 	HANDLE childhand;
 	DWORD wait_return;
+	BOOL GetExitCodeResult;
 
 	if (proc == NULL)
 		pproc = process_wait_for_any_private();
@@ -852,7 +854,8 @@ process_file_io(
 		goto done2;
 	}
 
-	if (GetExitCodeProcess(childhand, &pproc->exit_code) == FALSE) {
+	GetExitCodeResult = GetExitCodeProcess(childhand, (DWORD*)&pproc->exit_code);
+	if (GetExitCodeResult == FALSE) {
 		pproc->last_err = GetLastError();
 		pproc->lerrno = E_SCALL;
 	}
