@@ -42,6 +42,11 @@ endif
 # Get most of the information from the Unix-compatible makefile.
 include compatMakefile
 
+# Remove autoconf magic.
+extras := $(filter-out getloadavg.o @%@,$(extras)) getloadavg.o
+LOADLIBES := $(filter-out @%@,$(LOADLIBES))
+ALLOCA := $(filter-out @%@,$(ALLOCA))
+
 # Tell autoconf/autoheader to use m4 files from the master source.
 ACFLAGS := -m /home/gd/gnu/autoconf
 configure config.h.in: $(patsubst %,/home/gd/gnu/autoconf/%.m4,\
@@ -49,11 +54,10 @@ configure config.h.in: $(patsubst %,/home/gd/gnu/autoconf/%.m4,\
 config.h.in: /home/gd/gnu/autoconf/acconfig.h
 
 ifdef customs
-extras := $(filter-out getloadavg.o @%@,$(extras)) getloadavg.o
-LOADLIBES := $(filter-out @%@,$(LOADLIBES))
-ALLOCA := $(filter-out @%@,$(ALLOCA))
+defines := $(defines) -Ipmake/customs -Ipmake/lib/include
+LOADLIBES := $(addprefix pmake/customs/,customslib.o rpc.o xlog.o) \
+	     pmake/lib/sprite/libsprite.a
 endif
-
 
 ifdef ARCH
 
