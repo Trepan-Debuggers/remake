@@ -299,7 +299,10 @@ extern void user_access (), make_access (), child_access ();
 #include <vfork.h>
 #endif
 
-#if !defined (__GNU_LIBRARY__) && !defined (POSIX)
+/* We omit these declarations on non-POSIX systems which define _POSIX_VERSION,
+   because such systems often declare the in header files anyway.  */
+
+#if !defined (__GNU_LIBRARY__) && !defined (POSIX) && !defined (_POSIX_VERSION)
 
 #ifdef	HAVE_SIGSETMASK
 extern int sigsetmask ();
