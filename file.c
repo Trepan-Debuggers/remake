@@ -303,7 +303,8 @@ remove_intermediates (sig)
   doneany = 0;
   for (i = 0; i < FILE_BUCKETS; ++i)
     for (f = files[i]; f != 0; f = f->next)
-      if (f->intermediate && (f->dontcare || !f->precious))
+      if (f->intermediate && (f->dontcare || !f->precious)
+	  && !f->secondary)
 	{
 	  int status;
 	  if (f->update_status == -1)
@@ -349,7 +350,8 @@ remove_intermediates (sig)
 /* For each dependency of each file, make the `struct dep' point
    at the appropriate `struct file' (which may have to be created).
 
-   Also mark the files depended on by .PRECIOUS and .PHONY.  */
+   Also mark the files depended on by .PRECIOUS, .PHONY, .SILENT,
+   and various other special targets.  */
 
 void
 snap_deps ()
@@ -386,6 +388,41 @@ snap_deps ()
 	  f2->phony = 1;
 	  f2->last_mtime = (time_t) -1;
 	}
+
+  for (f = lookup_file (".INTERMEDIATE"); f != 0; f = f->prev)
+    {
+      /* .INTERMEDIATE with deps listed
+	 marks those deps as intermediate files.  */
+      for (d = f->deps; d != 0; d = d->next)
+	for (f2 = d->file; f2 != 0; f2 = f2->prev)
+	  f2->intermediate = 1;
+      /* .INTERMEDIATE with no deps does nothing.
+	 Marking all files as intermediates is useless
+	 since the goal targets would be deleted after they are built.  */
+    }
+
+  for (f = lookup_file (".SECONDARY"); f != 0; f = f->prev)
+    {
+      /* .SECONDARY with deps listed
+	 marks those deps as intermediate files
+	 in that they don't get rebuilt if not actually needed;
+	 but unlike real intermediate files,
+	 these are not deleted after make finishes.  */
+      if (f->deps)
+	{
+	  for (d = f->deps; d != 0; d = d->next)
+	    for (f2 = d->file; f2 != 0; f2 = f2->prev)
+	      f2->intermediate = f2->secondary = 1;
+	}
+      /* .SECONDARY with no deps listed marks *all* files that way.  */
+      else
+	{
+	  int i;
+	  for (i = 0; i < FILE_BUCKETS; i++)
+	    for (f2 = files[i]; f2; f2= f2->next)
+	      f2->intermediate = f2->secondary = 1;
+	}
+    }
 
   f = lookup_file (".EXPORT_ALL_VARIABLES");
   if (f != 0 && f->is_target)

@@ -72,6 +72,9 @@ struct file
     unsigned int phony:1;	/* Nonzero if this is a phony file
 				   i.e., a dependency of .PHONY.  */
     unsigned int intermediate:1;/* Nonzero if this is an intermediate file.  */
+    /* Nonzero, for an intermediate file,
+       means remove_intermediates should not delete it.  */
+    unsigned int secondary:1;
     unsigned int dontcare:1;	/* Nonzero if no complaint is to be made if
 				   this target cannot be remade.  */
   };
@@ -89,11 +92,17 @@ extern void rename_file (), file_hash_enter ();
 extern void set_command_state ();
 
 
+/* Return the mtime of file F (a struct file *), caching it.
+   The value is -1 if the file does not exist.  */
+#define file_mtime(f) file_mtime_1 ((f), 1)
+/* Return the mtime of file F (a struct file *), caching it.
+   Don't search using vpath for the file--if it doesn't actually exist,
+   we don't find it.
+   The value is -1 if the file does not exist.  */
+#define file_mtime_no_search(f) file_mtime_1 ((f), 0)
 extern time_t f_mtime ();
 #define file_mtime_1(f, v) \
   ((f)->last_mtime != (time_t) 0 ? (f)->last_mtime : f_mtime ((f), v))
-#define file_mtime(f) file_mtime_1 ((f), 1)
-#define file_mtime_no_search(f) file_mtime_1 ((f), 0)
 
 /* Modtime value to use for `infinitely new'.  We used to get the current time
    from the system and use that whenever we wanted `new'.  But that causes
