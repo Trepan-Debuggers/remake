@@ -18,6 +18,7 @@
 @c Combine the program and concept indices:
 @syncodeindex pg cp
 
+@ifset two-level-index
 @tex
 % trying for a two-level index
 % You need the rewritten texindex program for this to work.
@@ -53,6 +54,7 @@
 \temp}%
 }\penalty\count10}}
 @end tex
+@end ifset
 
 @ifinfo
 This file documents the GNU Make utility, which determines
