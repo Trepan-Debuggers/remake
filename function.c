@@ -326,8 +326,6 @@ expand_function (o, function, text, end)
       
     case function_shell:
       {
-	extern int fork ();
-	extern int pipe ();
 	char **argv;
 	char *error_prefix;
 	int pipedes[2];
@@ -359,7 +357,7 @@ expand_function (o, function, text, end)
 
 	push_signals_blocked_p (1);
 
-	pid = fork ();
+	pid = vfork ();
 	if (pid < 0)
 	  perror_with_name (error_prefix, "fork");
 	else if (pid == 0)
