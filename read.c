@@ -267,6 +267,20 @@ read_makefile (filename, flags)
   two_colon = 0;
 #endif
 
+  if (debug_flag)
+    {
+      printf ("Reading makefile `%s'", filename);
+      if (flags & RM_NO_DEFAULT_GOAL)
+	printf (" (no default goal)");
+      if (flags & RM_INCLUDED)
+	printf (" (search path)");
+      if (flags & RM_DONTCARE)
+	printf (" (don't care)");
+      if (flags & RM_NO_TILDE)
+	printf (" (no ~ expansion)");
+      puts ("...");
+    }
+
   /* First, get a stream to read.  */
 
   /* Expand ~ in FILENAME unless it came from `include',
@@ -360,7 +374,7 @@ read_makefile (filename, flags)
       remove_comments (collapsed);
 
       p = collapsed;
-      while (*p == ' ')
+      while (isspace (*p) && *p != '\t')
 	++p;
       /* We cannot consider a line containing just a tab to be empty
 	 because it might constitute an empty command for a target.  */
@@ -592,12 +606,20 @@ read_makefile (filename, flags)
 	/* This line has been dealt with.  */
 	;
       else if (lb.buffer[0] == '\t')
-	/* This line starts with a tab but was not caught above
-	   because there was no preceding target, and the line
-	   might have been usable as a variable definition.
-	   But now it is definitely lossage.  */
-	makefile_fatal (filename, lineno,
-			"commands commence before first target");
+	{
+	  p = lb.buffer;
+	  while (isblank (*p))
+	    ++p;
+	  if (*p == '\0')
+	    /* The line is completely blank; that is harmless.  */
+	    continue;
+	  /* This line starts with a tab but was not caught above
+	     because there was no preceding target, and the line
+	     might have been usable as a variable definition.
+	     But now it is definitely lossage.  */
+	  makefile_fatal (filename, lineno,
+			  "commands commence before first target");
+	}
       else
 	{
 	  /* This line describes some target files.  */
