@@ -45,9 +45,6 @@ static struct variable_set global_variable_set
 static struct variable_set_list global_setlist
   = { 0, &global_variable_set };
 struct variable_set_list *current_variable_set_list = &global_setlist;
-
-static struct variable *lookup_variable_in_set PARAMS ((char *name,
-                          unsigned int length, struct variable_set *set));
 
 /* Implement variables.  */
 
@@ -134,23 +131,17 @@ define_variable_in_set (name, length, value, origin, recursive, set, flocp)
 /* Lookup a variable whose name is a string starting at NAME
    and with LENGTH chars.  NAME need not be null-terminated.
    Returns address of the `struct variable' containing all info
-   on the variable, or nil if no such variable is defined.
-
-   If we find a variable which is in the process of being expanded,
-   try to find one further up the set_list chain.  If we don't find
-   one that isn't being expanded, return a pointer to whatever we
-   _did_ find.  */
+   on the variable, or nil if no such variable is defined.  */
 
 struct variable *
 lookup_variable (name, length)
-     char *name;
+     const char *name;
      unsigned int length;
 {
-  register struct variable_set_list *setlist;
-  struct variable *firstv = 0;
+  const struct variable_set_list *setlist;
 
-  register unsigned int i;
-  register unsigned int rawhash = 0;
+  unsigned int i;
+  unsigned int rawhash = 0;
 
   for (i = 0; i < length; ++i)
     HASH (rawhash, name[i]);
@@ -158,88 +149,74 @@ lookup_variable (name, length)
   for (setlist = current_variable_set_list;
        setlist != 0; setlist = setlist->next)
     {
-      register struct variable_set *set = setlist->set;
-      register unsigned int hashval = rawhash % set->buckets;
-      register struct variable *v;
+      const struct variable_set *set = setlist->set;
+      unsigned int hashval = rawhash % set->buckets;
+      struct variable *v;
 
-      /* Look through this set list.  */
+      /* Look through this set list; return it if found.  */
       for (v = set->table[hashval]; v != 0; v = v->next)
 	if (*v->name == *name
 	    && strneq (v->name + 1, name + 1, length - 1)
 	    && v->name[length] == '\0')
-          break;
-
-      /* If we didn't find anything, go to the next set list.  */
-      if (!v)
-        continue;
-
-      /* If it's not being expanded already, we're done.  */
-      if (!v->expanding)
-        return v;
-
-      /* It is, so try to find another one.  If this is the first one we've
-         seen, keep a pointer in case we don't find anything else.  */
-      if (!firstv)
-        firstv = v;
+          return v;
     }
 
 #ifdef VMS
   /* since we don't read envp[] on startup, try to get the
      variable via getenv() here.  */
-  if (!firstv)
-    {
-      char *vname = alloca (length + 1);
-      char *value;
-      strncpy (vname, name, length);
-      vname[length] = 0;
-      value = getenv (vname);
-      if (value != 0)
-	{
-	  char *sptr;
-	  int scnt;
+  {
+    char *vname = alloca (length + 1);
+    char *value;
+    strncpy (vname, name, length);
+    vname[length] = 0;
+    value = getenv (vname);
+    if (value != 0)
+      {
+        char *sptr;
+        int scnt;
 
-	  sptr = value;
-	  scnt = 0;
+        sptr = value;
+        scnt = 0;
 
-	  while ((sptr = strchr (sptr, '$')))
-	    {
-	      scnt++;
-	      sptr++;
-	    }
+        while ((sptr = strchr (sptr, '$')))
+          {
+            scnt++;
+            sptr++;
+          }
 
-	  if (scnt > 0)
-	    {
-	      char *nvalue;
-	      char *nptr;
+        if (scnt > 0)
+          {
+            char *nvalue;
+            char *nptr;
 
-	      nvalue = alloca (length + scnt + 1);
-	      sptr = value;
-	      nptr = nvalue;
+            nvalue = alloca (strlen (value) + scnt + 1);
+            sptr = value;
+            nptr = nvalue;
 
-	      while (*sptr)
-		{
-		  if (*sptr == '$')
-		    {
-		      *nptr++ = '$';
-		      *nptr++ = '$';
-		    }
-		  else
-		    {
-		      *nptr++ = *sptr;
-		    }
-		  sptr++;
-		}
+            while (*sptr)
+              {
+                if (*sptr == '$')
+                  {
+                    *nptr++ = '$';
+                    *nptr++ = '$';
+                  }
+                else
+                  {
+                    *nptr++ = *sptr;
+                  }
+                sptr++;
+              }
 
-	      return define_variable (vname, length, nvalue, o_env, 1);
+            return define_variable (vname, length, nvalue, o_env, 1);
 
-	    }
+          }
 
-	  return define_variable (vname, length, value, o_env, 1);
-	}
-    }
+        return define_variable (vname, length, value, o_env, 1);
+      }
+  }
 #endif /* VMS */
 
-  return firstv;
+  return 0;
 }
 
 /* Lookup a variable whose name is a string starting at NAME
@@ -247,15 +224,15 @@ lookup_variable (name, length)
    Returns address of the `struct variable' containing all info
    on the variable, or nil if no such variable is defined.  */
 
-static struct variable *
+struct variable *
 lookup_variable_in_set (name, length, set)
-     char *name;
+     const char *name;
      unsigned int length;
-     struct variable_set *set;
+     const struct variable_set *set;
 {
-  register unsigned int i;
-  register unsigned int hash = 0;
-  register struct variable *v;
+  unsigned int i;
+  unsigned int hash = 0;
+  struct variable *v;
 
   for (i = 0; i < length; ++i)
     HASH (hash, name[i]);
@@ -788,7 +765,7 @@ try_variable_definition (flocp, line, origin, target_var)
   register char *end;
   enum { f_bogus,
          f_simple, f_recursive, f_append, f_conditional } flavor = f_bogus;
-  char *name, *expanded_name, *value, *alloc_value=NULL;
+  char *name, *expanded_name, *value=0, *alloc_value=NULL;
   struct variable *v;
   int append = 0;
 
@@ -901,21 +878,16 @@ try_variable_definition (flocp, line, origin, target_var)
       break;
     case f_append:
       {
-        struct variable_set_list *saved_next = current_variable_set_list->next;
-
         /* If we have += but we're in a target variable context, we want to
            append only with other variables in the context of this target.  */
         if (target_var)
           {
             append = 1;
-            current_variable_set_list->next = 0;
+            v = lookup_variable_in_set (expanded_name, strlen (expanded_name),
+                                        current_variable_set_list->set);
           }
-
-        /* An appending variable definition "var += value".
-           Extract the old value and append the new one.  */
-        v = lookup_variable (expanded_name, strlen (expanded_name));
-
-        current_variable_set_list->next = saved_next;
+        else
+          v = lookup_variable (expanded_name, strlen (expanded_name));
 
         if (v == 0)
           {

@@ -1,4 +1,4 @@
-\input texinfo                @c -*- Texinfo -*-
+input texinfo                @c -*- Texinfo -*-
 @c %**start of header
 @setfilename make.info
 @settitle GNU @code{make}
@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.190 2000/07/30 18:26:43 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.191 2001/01/21 06:49:12 psmith Exp $
 @set EDITION 0.55
 @set VERSION 3.79
 @set UPDATED 04 April 2000
@@ -2465,9 +2465,9 @@ chance of @command{make} incorrectly concluding that a file is up to
 date.  Unfortunately, these hosts provide no way to set a high
 resolution file time stamp, so commands like @samp{cp -p} that
 explicitly set a file's time stamp must discard its subsecond part.  If
-a file is created by such a command, you should list it as a dependency
-of @code{.LOW_RESOLUTION_TIME} so that @command{make} does not
-mistakenly conclude that the file is out of date.  For example:
+a file is created by such a command, you should list it as a
+prerequisite of @code{.LOW_RESOLUTION_TIME} so that @command{make} does
+not mistakenly conclude that the file is out of date.  For example:
 
 @example
 @group
@@ -2485,7 +2485,7 @@ is at the start of the same second that @file{src}'s time stamp is in.
 
 Due to a limitation of the archive format, archive member time stamps
 are always low resolution.  You need not list archive members as
-dependencies of @code{.LOW_RESOLUTION_TIME}, as @command{make} does this
+prerequisites of @code{.LOW_RESOLUTION_TIME}, as @command{make} does this
 automatically.
 
 @findex .SILENT
@@ -2682,7 +2682,7 @@ be @emph{analogous}, but not necessarily @emph{identical}.
 Here is the syntax of a static pattern rule:
 
 @example
-@var{targets} @dots{}: @var{target-pattern}: @var{dep-patterns} @dots{}
+@var{targets} @dots{}: @var{target-pattern}: @var{prereq-patterns} @dots{}
         @var{commands}
         @dots{}
 @end example
@@ -2695,11 +2695,11 @@ Names}).
 
 @cindex target pattern, static (not implicit)
 @cindex stem
-The @var{target-pattern} and @var{dep-patterns} say how to compute the
+The @var{target-pattern} and @var{prereq-patterns} say how to compute the
 prerequisites of each target.  Each target is matched against the
 @var{target-pattern} to extract a part of the target name, called the
-@dfn{stem}.  This stem is substituted into each of the @var{dep-patterns}
-to make the prerequisite names (one from each @var{dep-pattern}).
+@dfn{stem}.  This stem is substituted into each of the @var{prereq-patterns}
+to make the prerequisite names (one from each @var{prereq-pattern}).
 
 Each pattern normally contains the character @samp{%} just once.  When the
 @var{target-pattern} matches a target, the @samp{%} can match any part of
@@ -2838,10 +2838,12 @@ to precisely the targets specified.
 ordinary rules when the same target appears in more than one rule.
 
 When a target appears in multiple rules, all the rules must be the same
-type: all ordinary, or all double-colon.  If they are double-colon, each of
-them is independent of the others.  Each double-colon rule's commands are
-executed if the target is older than any prerequisites of that rule.  This
-can result in executing none, any, or all of the double-colon rules.
+type: all ordinary, or all double-colon.  If they are double-colon, each
+of them is independent of the others.  Each double-colon rule's commands
+are executed if the target is older than any prerequisites of that rule.
+If there are no prerequisites for that rule, its commands are always
+executed (even if the target already exists).  This can result in
+executing none, any, or all of the double-colon rules.
 
 Double-colon rules with the same target are in fact completely separate
 from one another.  Each double-colon rule is processed individually, just
@@ -5481,7 +5483,9 @@ Finds whitespace-separated words in @var{text} that match
 @var{pattern} may contain a @samp{%} which acts as a wildcard,
 matching any number of any characters within a word.  If
 @var{replacement} also contains a @samp{%}, the @samp{%} is replaced
-by the text that matched the @samp{%} in @var{pattern}.@refill
+by the text that matched the @samp{%} in @var{pattern}.  Only the first
+@samp{%} in the @var{pattern} and @var{replacement} is treated this
+way; any subsequent @samp{%} is unchanged.@refill
 
 @cindex @code{%}, quoting in @code{patsubst}
 @cindex @code{%}, quoting with @code{\} (backslash)
@@ -8125,7 +8129,7 @@ appending @samp{D} or @samp{F}, respectively.  These variants are
 semi-obsolete in GNU @code{make} since the functions @code{dir} and
 @code{notdir} can be used to get a similar effect (@pxref{File Name
 Functions, , Functions for File Names}).  Note, however, that the
-@samp{F} variants all omit the trailing slash which always appears in
+@samp{D} variants all omit the trailing slash which always appears in
 the output of the @code{dir} function.  Here is a table of the variants:
 
 @table @samp

@@ -108,7 +108,10 @@ extern void print_variable_set PARAMS ((struct variable_set *set, char *prefix))
 extern void merge_variable_set_lists PARAMS ((struct variable_set_list **setlist0, struct variable_set_list *setlist1));
 extern struct variable *try_variable_definition PARAMS ((const struct floc *flocp, char *line, enum variable_origin origin, int target_var));
 
-extern struct variable *lookup_variable PARAMS ((char *name, unsigned int length));
+extern struct variable *lookup_variable PARAMS ((const char *name, unsigned int length));
+extern struct variable *lookup_variable_in_set PARAMS ((const char *name,
+                                                        unsigned int length,
+                                                        const struct variable_set *set));
 
 extern struct variable *define_variable_in_set
     PARAMS ((char *name, unsigned int length, char *value,

@@ -170,5 +170,29 @@ close(MAKEFILE);
 $answer = "; ok\n";
 &compare_output($answer, &get_logfile(1));
 
+# Test #12
+# PR/2020: More hassles with += target-specific vars.  I _really_ think
+# I nailed it this time :-/.
+
+$makefile5 = &get_tmpfile;
+
+open(MAKEFILE, "> $makefile5");
+print MAKEFILE <<'EOF';
+.PHONY: a
+
+BLAH := foo
+COMMAND = echo $(BLAH)
+
+a: ; @$(COMMAND)
+
+a: BLAH := bar
+a: COMMAND += snafu $(BLAH)
+EOF
+close(MAKEFILE);
+
+&run_make_with_options("$makefile5", "", &get_logfile);
+$answer = "bar snafu bar\n";
+&compare_output($answer, &get_logfile(1));
+
 
 1;
