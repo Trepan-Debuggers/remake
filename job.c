@@ -615,7 +615,11 @@ start_job_command (child)
   child->file->command_state = cs_finished;
 }
 
-static void
+/* Try to start a child running.
+   Returns nonzero if the child was started (and maybe finished), or zero if
+   the load was too high and the child was put on the `waiting_jobs' chain.  */
+
+static int
 start_waiting_job (c)
      struct child *c;
 {
@@ -634,7 +638,7 @@ start_waiting_job (c)
       c->file->command_state = cs_running;
       c->next = waiting_jobs;
       waiting_jobs = c;
-      return;
+      return 0;
     }
 
   /* Start the first command; reap_children will run later command lines.  */
@@ -665,6 +669,8 @@ start_waiting_job (c)
       abort ();
       break;
     }
+
+  return 1;
 }
 
 /* Create a `struct child' for FILE and start its commands running.  */
@@ -677,6 +683,10 @@ new_job (file)
   register struct child *c;
   char **lines;
   register unsigned int i;
+
+  /* Let any previously decided-upon jobs that are waiting
+     for the load to go down start before this new one.  */
+  start_waiting_jobs ();
 
   /* Reap any children that might have finished recently.  */
   reap_children (0, 0);
@@ -877,22 +887,23 @@ load_too_high ()
 void
 start_waiting_jobs ()
 {
-  while (waiting_jobs != 0)
+  if (waiting_jobs == 0)
+    return;
+
+  do
     {
-      struct child *c;
+      struct child *job;
 
       /* Check for recently deceased descendants.  */
       reap_children (0, 0);
 
-      if (job_slots_used > 0
-	  && (job_slots_used == job_slots || load_too_high ()))
-	/* We have started all the jobs we can at the moment.  */
-	return;
+      /* Take a job off the waiting list.  */
+      job = waiting_jobs;
+      waiting_jobs = job->next;
 
-      c = waiting_jobs;
-      waiting_jobs = c->next;
-      start_waiting_job (c);
-    }
+      /* Try to start that job.  We break out of the loop as soon
+	 as start_waiting_job puts one back on the waiting list.  */
+    } while (start_waiting_job (job) && waiting_jobs != 0);
 }
 
 /* Replace the current process with one executing the command in ARGV.
