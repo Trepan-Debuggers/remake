@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.11 2002/10/25 18:42:52 psmith Exp $
+@set RCSID $Id: make.texi,v 1.12 2003/05/02 01:45:00 psmith Exp $
 @set EDITION 0.60
 @set VERSION 3.80
 @set UPDATED 08 July 2002
@@ -5245,13 +5245,16 @@ command scripts that create @file{prog.o}, @file{foo.o}, and
 @cindex pattern-specific variables
 @cindex variables, pattern-specific
 
-In addition to target-specific variable values (@pxref{Target-specific,
-,Target-specific Variable Values}), GNU @code{make} supports
-pattern-specific variable values.  In this form, a variable is defined
-for any target that matches the pattern specified.  Variables defined in
-this way are searched after any target-specific variables defined
-explicitly for that target, and before target-specific variables defined
-for the parent target.
+In addition to target-specific variable values
+(@pxref{Target-specific, ,Target-specific Variable Values}), GNU
+@code{make} supports pattern-specific variable values.  In this form,
+the variable is defined for any target that matches the pattern
+specified.  If a target matches more than one pattern, all the
+matching pattern-specific variables are interpreted in the order in
+which they were defined in the makefile, and collected together into
+one set.  Variables defined in this way are searched after any
+target-specific variables defined explicitly for that target, and
+before target-specific variables defined for the parent target.
 
 Set a pattern-specific variable value like this:
 

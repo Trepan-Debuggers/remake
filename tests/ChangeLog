@@ -1,3 +1,14 @@
+2003-04-19  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/patspecific_vars: Test multiple patterns
+	matching the same target--Bug #1405.
+
+2003-04-09  Paul D. Smith  <psmith@gnu.org>
+
+	* run_make_tests.pl (set_more_defaults): A new $port_type of
+	'OS/2' for (surprise!) OS/2.  Also choose a wait time of 2 seconds
+	for OS/2.
+
 2003-03-28  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/targets/SECONDARY: Test the "global" .SECONDARY (with

@@ -38,12 +38,12 @@ AM_CPPFLAGS =	$(GLOBINC)
 # because often that directory isn't built on the systems used by the
 # maintainers.
 
-EXTRA_DIST =	README build.sh.in $(man_MANS)\
-		README.customs\
-		SCOPTIONS SMakefile\
-		README.Amiga Makefile.ami config.ami make.lnk amiga.c amiga.h\
+EXTRA_DIST =	README build.sh.in $(man_MANS) \
+		README.customs README.OS2 \
+		SCOPTIONS SMakefile \
+		README.Amiga Makefile.ami config.ami make.lnk amiga.c amiga.h \
 		README.DOS Makefile.DOS configure.bat dosbuild.bat configh.dos\
-		README.W32 NMakefile config.h.W32 build_w32.bat subproc.bat\
+		README.W32 NMakefile config.h.W32 build_w32.bat subproc.bat \
 		readme.vms makefile.vms makefile.com config.h-vms \
 		vmsdir.h vmsfunctions.c vmsify.c
 

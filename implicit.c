@@ -18,9 +18,9 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 #include "make.h"
+#include "filedef.h"
 #include "rule.h"
 #include "dep.h"
-#include "filedef.h"
 #include "debug.h"
 
 static int pattern_search PARAMS ((struct file *file, int archive, unsigned int depth,

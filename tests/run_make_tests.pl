@@ -169,6 +169,10 @@ sub set_more_defaults
    elsif ($osname =~ /^([^ ]*|[^ ]* [^ ]*)D(OS|os|ev) /) {
      $port_type = 'DOS';
    }
+   # Check for OS/2
+   elsif ($osname =~ m%OS/2%) {
+     $port_type = 'OS/2';
+   }
    # Everything else, right now, is UNIX.  Note that we should integrate
    # the VOS support into this as well and get rid of $vos; we'll do
    # that next time.
@@ -180,7 +184,7 @@ sub set_more_defaults
    # timestamps with second granularity (!!).  Change the sleep time
    # needed to force a file to be considered "old".
    #
-   $wtime = $port_type eq 'UNIX' ? 1 : 4;
+   $wtime = $port_type eq 'UNIX' ? 1 : $port_type eq 'OS/2' ? 2 : 4;
 
    # Find the full pathname of Make.  For DOS systems this is more
    # complicated, so we ask make itself.

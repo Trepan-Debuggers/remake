@@ -104,7 +104,7 @@ static int amiga_batch_file;
 #endif /* WINDOWS32 */
 
 #ifdef __EMX__
-# include <sys/file.h>
+# include <process.h>
 #endif
 
 #if defined (HAVE_SYS_WAIT_H) || defined (HAVE_UNION_WAIT)
@@ -2507,9 +2507,9 @@ exec_command (char **argv, char **envp)
 
 # ifdef __EMX__
         /* Do not use $SHELL from the environment */
-	shell = lookup_variable ("SHELL", 5);
-	if (shell)
-	  shell = shell->value;
+	struct variable *p = lookup_variable ("SHELL", 5);
+	if (p)
+	  shell = p->value;
         else
           shell = 0;
 # else
@@ -2756,11 +2756,9 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
       DB (DB_BASIC, (_("$SHELL changed (was `%s', now `%s')\n"),
                      default_shell, shell));
       unixy_shell = _is_unixy_shell (shell);
-      default_shell = shell;
       /* we must allocate a copy of shell: construct_command_argv() will free
        * shell after this function returns.  */
-      default_shell = xmalloc (strlen (shell) + 1);
-      strcpy (default_shell, shell);
+      default_shell = xstrdup (shell);
     }
   if (unixy_shell)
     {
@@ -2778,6 +2776,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
           sh_cmds = sh_cmds_os2;
         }
 # endif
+    }
 #else  /* !__MSDOS__ */
   else if (strcmp (shell, default_shell))
     goto slow;

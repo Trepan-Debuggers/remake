@@ -8,7 +8,7 @@
 globsrc := $(wildcard glob/*.c)
 globhdr := $(wildcard glob/*.h)
 
-TEMPLATES = README README.DOS README.W32 \
+TEMPLATES = README README.DOS README.W32 README.OS2 \
 	    config.ami configh.dos config.h.W32 config.h-vms
 MTEMPLATES = Makefile.DOS SMakefile
 
@@ -54,8 +54,8 @@ NMakefile: NMakefile.template .dep_segment Makefile
 #
 build.sh.in: build.template Makefile
 	rm -f $@
-	sed -e 's@%objs%@$(filter-out remote-%,$(make_OBJECTS)@g' \
-	    -e 's@%globobjs%@$(patsubst %.c,%.o,$(globsrc)))@g' \
+	sed -e 's@%objs%@$(patsubst %.o,%.$${OBJEXT},$(filter-out remote-%,$(make_OBJECTS)))@g' \
+	    -e 's@%globobjs%@$(patsubst %.c,%.$${OBJEXT},$(globsrc)))@g' \
 	  $< > $@
 	chmod a-w+x $@
 
