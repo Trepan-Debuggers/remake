@@ -895,8 +895,14 @@ start_job_command (child)
       ++p;
     }
 
-  /* Update the file's command flags with any new ones we found.  */
-  child->file->cmds->lines_flags[child->command_line - 1] |= flags;
+  /* Update the file's command flags with any new ones we found.  We only
+     keep the COMMANDS_RECURSE setting.  Even this isn't 100% correct; we are
+     now marking more commands recursive than should be in the case of
+     multiline define/endef scripts where only one line is marked "+".  In
+     order to really fix this, we'll have to keep a lines_flags for every
+     actual line, after expansion.  */
+  child->file->cmds->lines_flags[child->command_line - 1]
+    |= flags & COMMANDS_RECURSE;
 
   /* Figure out an argument list from this command line.  */
 
@@ -1580,6 +1586,8 @@ load_too_high ()
     }
   user_access ();
 
+  DB (DB_JOBS, ("Current system load = %f (max requested = %f)\n",
+                load, max_load_average));
   return load >= max_load_average;
 #endif
 }

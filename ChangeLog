@@ -1,3 +1,16 @@
+2001-05-02  Paul D. Smith  <psmith@gnu.org>
+
+	* job.c (start_job_command): Don't add define/endef per-line flags
+	to the top-level flags setting.
+
+2001-04-03  Paul D. Smith  <psmith@gnu.org>
+
+	* arscan.c (VMS_get_member_info,ar_scan) [VMS]: VMS sets the low
+	bit on error, so check for odd return values, not non-0 return
+	values.
+	(VMS_get_member_info): Calculate the timezone differences correctly.
+	Reported by John Fowler <jfowler@nyx.net>.
+
 2001-01-17  Paul D. Smith  <psmith@gnu.org>
 
 	* variable.c (lookup_variable) [VMS]: When getting values from the
