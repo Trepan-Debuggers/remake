@@ -569,11 +569,24 @@ notice_finished_file (file)
 	 it had some recursive commands, and they lost.  */
       && file->update_status != 1)
     {
-      if (file->phony)
-	file->update_status = 0;
+      if (file->cmds != 0 && file->cmds->any_recurse)
+	{
+	  /* If all the command lines were recursive,
+	     we don't want to do the touching.  */
+	  unsigned int i;
+	  for (i = 0; i < file->cmds->ncommand_lines; ++i)
+	    if (!file->cmds->lines_recurse[i])
+	      goto have_nonrecursing;
+	}
       else
-	/* Should set file's modification date and do nothing else.  */
-	file->update_status = touch_file (file);
+	{
+	have_nonrecursing:
+	  if (file->phony)
+	    file->update_status = 0;
+	  else
+	    /* Should set file's modification date and do nothing else.  */
+	    file->update_status = touch_file (file);
+	}
     }
 
   if (!file->phony)
