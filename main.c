@@ -91,7 +91,8 @@ struct command_switch
 	string,			/* One string per switch.  */
 	positive_int,		/* A positive integer.  */
 	floating,		/* A floating-point number (double).  */
-	ignore			/* Ignored.  */
+	ignore,			/* Ignored.  */
+	usage_and_exit		/* Ignored; exit after processing switches.  */
       } type;
 
     char *value_ptr;	/* Pointer to the value-holding variable.  */
@@ -234,6 +235,10 @@ static struct command_switch switches[] =
     { 'f', string, (char *) &makefiles, 0, 0, 0, 0, 0,
 	"file", "FILE",
 	"Read FILE as a makefile" },
+    { 'h', usage_and_exit, 
+	0, 0, 0, 0, 0, 0,
+	"help", 0,
+	"Print this message and exit." },
     { 'i', flag, (char *) &ignore_errors_flag, 1, 1, 0, 0, 0,
 	"ignore-errors", 0,
 	"Ignore errors from commands" },
@@ -1093,6 +1098,10 @@ decode_switches (argc, argv)
 		  abort ();
 
 		case ignore:
+		  break;
+
+		case usage_and_exit:
+		  bad = 1;
 		  break;
 
 		case flag:
