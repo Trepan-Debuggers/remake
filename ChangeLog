@@ -1,6 +1,11 @@
-1999-09-17  Paul D. Smith  <psmith@gnu.org>
+1999-09-22  Paul D. Smith  <psmith@gnu.org>
 
 	* Version 3.78 released.
+
+	* main.c (main): Only fail on multiple --jobserver-fds options if
+	they aren't all the same.  Some makefiles use things like
+	$(MAKE) $(MFLAGS) which will cause multiple, identical copies of
+	--jobserver-fds to show up.
 
 1999-09-16  Paul D. Smith  <psmith@gnu.org>
 
