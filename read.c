@@ -623,6 +623,9 @@ read_makefile (filename, type)
 	  if (two_colon)
 	    p2++;
 
+	  /* We have some targets, so don't ignore the following commands.  */
+	  no_targets = 0;
+
 	  /* Is this a static pattern rule: `target: %targ: %dep; ...'?  */
 	  p = index (p2, ':');
 	  while (p != 0 && p[-1] == '\\')
