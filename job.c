@@ -1,5 +1,5 @@
 /* Job execution and handling for GNU Make.
-Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -441,7 +441,7 @@ reap_children (block, err)
 	  /* If the job failed, and the -k flag was not given, die,
 	     unless we are already in the process of dying.  */
 	  if (!err && child_failed && !keep_going_flag)
-	    die (1);
+	    die (2);
 	}
 
       /* Only block for one child.  */
@@ -513,9 +513,15 @@ start_job_command (child)
       ++p;
     }
 
-  /* If -q was given, just say that updating `failed'.  */
+  /* If -q was given, just say that updating `failed'.  The exit status of
+     1 tells the user that -q is saying `something to do'; the exit status
+     for a random error is 2.  */
   if (question_flag && !(flags & COMMANDS_RECURSE))
-    goto error;
+    {  
+      child->file->update_status = 1;
+      child->file->command_state = cs_finished;
+      return;
+    }
 
   /* There may be some preceding whitespace left if there
      was nothing but a backslash on the first line.  */
@@ -673,8 +679,8 @@ start_job_command (child)
 
   return;
 
- error:;
-  child->file->update_status = 1;
+ error:
+  child->file->update_status = 2;
   child->file->command_state = cs_finished;
 }
 
