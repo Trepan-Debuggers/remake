@@ -421,22 +421,12 @@ main (argc, argv, envp)
 #ifndef	SETLINEBUF_MISSING
   setlinebuf (stdout);
 #else
-
-  /* XXX This should be decided by an autoconf test program.  */
-#if	(defined (USGr3) || defined (HPUX) || defined (hpux) \
-	 || defined (M_XENIX) || defined (APOLLO) || defined (DGUX) \
-	 || defined (__IBMR2) || defined (POSIX))
+#ifndef	SETVBUF_REVERSED
   setvbuf (stdout, (char *) 0, _IOLBF, BUFSIZ);
-#else	/* Not USGr3 and not HPUX et al.  */
-#ifdef	USG
-#ifdef	sgi
+#else	/* setvbuf not reversed.  */
+  /* Some buggy systems lose if we pass 0 instead of allocating ourselves.  */
   setvbuf (stdout, _IOLBF, xmalloc (BUFSIZ), BUFSIZ);
-#else
-  setvbuf (stdout, _IOLBF, (char *) 0, BUFSIZ);
-#endif
-#endif	/* USG.  */
-#endif	/* USGr3.  */
-
+#endif	/* setvbuf reversed.  */
 #endif	/* setlinebuf missing.  */
 
   /* Set up to access user data (files).  */
