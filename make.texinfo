@@ -115,6 +115,8 @@ This manual describes @code{make} and contains the following chapters:@refill
 * Archives::                    Using @code{make} to Update Archive Files
 * Features::                    Features of GNU @code{make}
 * Missing::                     Missing Features of GNU @code{make}
+* Summary::                     Summary of Directives, Special Targets,
+                                  and Special Variables
 * Complex Makefile::            Complex Makefile
 * Concept Index::               Index of Concepts
 * Name Index::                  Index of Functions, Variables, & Directives
@@ -1824,6 +1826,11 @@ for @code{.SILENT} are not meaningful.
 @samp{.SILENT} exists for historical compatibility.  We recommend you
 use the more selective ways to silence specific commands.
 @xref{Echoing, ,Command Echoing}.
+
+@item .EXPORT_ALL_VARIABLES
+Simply by being mentioned as a target, @code{.EXPORT_ALL_VARIABLES}
+tells @code{make} to export all variables to child processes by default.
+@xref{Variables/Recursion, ,Exporting Variables}.
 @end table
 
 Any defined implicit rule suffix also counts as a special target if it
@@ -2610,7 +2617,7 @@ sub-@code{make} to read before the usual or specified ones.
 Flags such as @samp{-s} and @samp{-k} are passed automatically to the
 sub-@code{make} through the variable @code{MAKEFLAGS}.  This variable is
 set up automatically by @code{make} to contain the flag letters that
-@code{make} received.  Thus, if you do @samp{make -ks} then
+@code{make} received.  Thus, if you do @w{@samp{make -ks}} then
 @code{MAKEFLAGS} gets the value @samp{ks}.@refill
 
 As a consequence, every sub-@code{make} gets a value for @code{MAKEFLAGS}
@@ -6371,7 +6378,7 @@ functionality in that it will check out SCCS files for makefiles.
 Various new built-in implicit rules.  @xref{Catalogue of Rules, ,Catalogue of Implicit Rules}.
 @end itemize
 
-@node Missing, Complex Makefile, Features, Top
+@node Missing, Summary, Features, Top
 @chapter Incompatibilities and Missing Features of GNU @code{make}
 
 The @code{make} programs in various other systems support a few features
@@ -6457,8 +6464,231 @@ We feel that such usage is broken.  The dependency properties of
 and doing such a thing simply does not fit the model.@refill
 @end itemize
 
-@node Complex Makefile, Concept Index, Missing, Top
-@appendix Complex Makefile
+@node Summary, Complex Makefile, Missing, Top
+@appendix Summary of Directives, Functions, and Special Variables
+
+This appendix summarizes the directives, text manipulation functions,
+and special variables which GNU @code{make} understands.
+@xref{Special Targets}, and @ref{Catalogue of Rules, ,Catalogue of
+Implicit Rules}.@refill
+
+Here is a summary of the directives GNU @code{make} recognizes:
+
+@table @code
+@item define @var{variable}
+@itemx endef
+Define a multi-line, recursively-expanded variable.
+@xref{Sequences}.
+
+@item ifdef @var{variable}
+@itemx ifndef @var{variable}
+@itemx ifeq (@var{a},@var{b})
+@itemx ifeq "@var{a}" "@var{b}"
+@itemx ifneq (@var{a},@var{b})
+@itemx ifneq "@var{a}" "@var{b}"
+@itemx else
+@itemx endif
+Conditionally evaluate part of the makefile.
+@xref{Conditionals}.
+
+@item include @var{file}
+Include another makefile.
+@xref{Include}.
+
+@item override @var{variable} = @var{value}
+@itemx override @var{variable} := @var{value}
+Define a variable, overriding any previous definition.
+@xref{Override Directive}.
+
+@item export
+Tell @code{make} to export all variables to child processes by default.
+@xref{Variables/Recursion}.
+
+@item export @var{variable}
+@itemx export @var{variable} = @var{value}
+@itemx export @var{variable} := @var{value}
+@itemx unexport @var{variable}
+Tell @code{make} whether or not to export a particular variable to child
+processes.  @xref{Variables/Recursion}.
+
+@item vpath
+Specify a search path for files matching a @samp{%} pattern.
+@xref{Selective Search}.
+@end table
+
+Here is a summary of the text manipulation functions (@pxref{Functions}):
+
+@table @code
+@item $(subst @var{from},@var{to},@var{text})
+Replace @var{from} with @var{to} in @var{text}.
+@xref{Text Functions}.
+
+@item $(patsubst @var{pattern},@var{replacement},@var{text})
+Replace words matching @var{pattern} with @var{replacement} in @var{text}.
+@xref{Text Functions}.
+
+@item $(strip @var{string})
+Remove excess whitespace characters from @var{string}.
+@xref{Text Functions}.
+
+@item $(findstring @var{find},@var{text})
+Locate @var{find} in @var{text}.
+@xref{Text Functions}.
+
+@item $(filter @var{pattern}@dots{},@var{text})
+Select words in @var{text} that match one of the @var{pattern} words.
+@xref{Text Functions}.
+
+@item $(filter-out @var{pattern}@dots{},@var{text})
+Select words in @var{text} that @emph{do not} match any of the @var{pattern} words.
+@xref{Text Functions}.
+
+@item $(sort @var{list})
+Sort the words in @var{list} lexicographically, removing duplicates.
+@xref{Text Functions}.
+
+@item $(dir @var{names})
+Extract the directory part of each file name.
+@xref{Filename Functions}.
+
+@item $(notdir @var{names})
+Extract the non-directory part of each file name.
+@xref{Filename Functions}.
+
+@item $(suffix @var{names})
+Extract the suffix (the last @samp{.} and following characters) of each file name.
+@xref{Filename Functions}.
+
+@item $(basename @var{names})
+Extract the base name (name without suffix) of each file name.
+@xref{Filename Functions}.
+
+@item $(addsuffix @var{suffix},@var{names})
+Append @var{suffix} to each word in @var{names}.
+@xref{Filename Functions}.
+
+@item $(addprefix @var{prefix},@var{names})
+Prepend @var{prefix} to each word in @var{names}.
+@xref{Filename Functions}.
+
+@item $(join @var{list1},@var{list2})
+Join two parallel lists of words.
+@xref{Filename Functions}.
+
+@item $(word @var{n},@var{text})
+Extract the @var{n}th word (one-origin) of @var{text}.
+@xref{Filename Functions}.
+
+@item $(words @var{text})
+Count the number of words in @var{text}.
+@xref{Filename Functions}.
+
+@item $(firstword @var{names})
+Extract the first word of @var{names}.
+@xref{Filename Functions}.
+
+@item $(wildcard @var{pattern}@dots{})
+Find file names matching a shell file name pattern.
+@xref{Wildcard Function}.
+
+@item $(shell @var{command})
+Execute a shell command and return its output.
+@xref{Shell Function}.
+
+@item $(origin @var{var})
+Return a string describing how the @code{make} variable @var{var} was defined.
+@xref{Origin Function}.
+
+@item $(foreach @var{var},@var{words},@var{text})
+Evaluate @var{text} with @var{var} bound to each word in @var{words},
+and concatenate the results.
+@xref{Foreach Function}.
+@end table
+
+Here is a summary of the automatic variables.
+@xref{Automatic}, for full information.
+
+@table @code
+@item $@@
+The file name of the target.
+
+@item $%
+The target member name, when the target is an archive member.
+
+@item $<
+The name of the first dependency.
+
+@item $?
+The names of all the dependencies that are
+newer than the target, with spaces between them.
+
+@item $^
+The names of all the dependencies, with spaces between them.
+
+@item $*
+The stem with which an implicit rule matches (@pxref{Pattern Match, ,How Patterns Match}).
+
+@item $(@@D)
+@itemx $(@@F)
+The directory part and the file-within-directory part of @code{$@@}.
+
+@item $(*D)
+@itemx $(*F)
+The directory part and the file-within-directory part of @code{$*}.
+
+@item $(%D)
+@itemx $(%F)
+The directory part and the file-within-directory part of @code{$%}.
+
+@item $(<D)
+@itemx $(<F)
+The directory part and the file-within-directory part of @code{$<}.
+
+@item $(^D)
+@itemx $(^F)
+The directory part and the file-within-directory part of @code{$^}.
+
+@item $(?D)
+@itemx $(?F)
+The directory part and the file-within-directory part of @code{$?}.
+@end table
+
+These variables are used specially by GNU @code{make}:
+
+@table @code
+@item MAKEFILES
+Makefiles to be read on every invocation of @code{make}.
+@xref{MAKEFILES Variable}.
+
+@item VPATH
+Directory search path for files not found in the current directory.
+@xref{General Search}.
+
+@item SHELL
+The name of the system default command interpreter, usually @file{/bin/sh}.
+
+@item MAKE
+The name with which @code{make} was invoked.
+Using this variable in commands has special meaning.
+@xref{MAKE Variable}.
+
+@item MAKELEVEL
+The number of levels of recursion (sub-@code{make}s).
+@xref{Variables/Recursion}.
+
+@item MAKEFLAGS
+@itemx MFLAGS
+The flags given to @code{make}.  You can set this in the environment or
+a makefile to set flags.
+@xref{Options/Recursion}.
+
+@item SUFFIXES
+The default list of suffixes before @code{make} reads any makefiles.
+@end table
+
+@c !!! this is a pretty lame example --roland
+@node Complex Makefile, Concept Index, Summary, Top
+@appendix A Complex Makefile Example
 
 Here is the makefile for the GNU @code{tar} program.  This is a
 moderately complex makefile.
