@@ -235,7 +235,7 @@ $(alpha-dir)/%: %
 define make-tar
 @rm -fr make-$(version)
 ln -s . make-$(version)
-tar cvhf $@ $(addprefix make-$(version)/,$^)
+tar cvhof $@ $(addprefix make-$(version)/,$^)
 rm -f make-$(version)
 endef
 
