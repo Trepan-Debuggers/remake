@@ -379,9 +379,15 @@ reap_children (block, err)
 	    {
 	      /* The commands failed.  Write an error message,
 		 delete non-precious targets, and abort.  */
+	      static int delete_on_error = -1;
 	      child_error (c->file->name, exit_code, exit_sig, coredump, 0);
 	      c->file->update_status = 1;
-	      if (exit_sig != 0)
+	      if (delete_on_error == -1)
+		{
+		  struct file *f = lookup_file (".DELETE_ON_ERROR");
+		  delete_on_error = f != 0 && f->is_target;
+		}
+	      if (exit_sig != 0 || delete_on_error)
 		delete_child_targets (c);
 	    }
 	  else
