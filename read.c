@@ -1301,7 +1301,7 @@ parse_file_seq (stringp, stopchar, size, strip)
       p--;
 
       if (strip)
-	while (q[0] == '.' && q[1] == '/' && q[2] != '\0')
+	while (q[0] == '.' && q[1] == '/' && q[2] != '\0' && !isblank (q[2]))
 	  q += 2;
 
       /* Extract the filename just found, and skip it.  */
