@@ -23,7 +23,7 @@ There is no password; just hit the ENTER key if you are asked for one.
 Building From CVS
 -----------------
 
-To build GNU make from CVS, you will need Autoconf 2.54 (or better),
+To build GNU make from CVS, you will need Autoconf 2.56 (or better),
 Automake 1.7.1 (or better), and Gettext 0.11.5 (or better), and any
 tools that those utilities require (GNU m4, Perl, etc.).  You will also
 need a copy of wget.
@@ -32,48 +32,18 @@ After checking out the code, you will need to perform these steps to get
 to the point where you can run "make".
 
 
- 1) $ autopoint
+ 1) $ autoreconf -i -s
 
-    This will instantiate various m4 macros files, etc. in the config
-    and po directories.
-
-
- 2) $ aclocal -I config
-
-    Generate the proper aclocal.m4 file.
+    This rebuilds all the things that need rebuilding, installing
+    missing files as symbolic links.
 
 
- 3) $ autoheader
-
-    Generate a "config.h.in" file from the contents of configure.in,
-    etc.
-
-
- 4) $ automake --add-missing
-
-    Add (symlink) missing files into the distribution, and generate
-    Makefile.in's from Makefile.am's.
-
-    You will see these perhaps unexpected messages (among others which
-    you should be expecting :)); just ignore them--I know what I'm doing
-    :).
-
-      Makefile.am: required file `./README' not found
-      configure.in:xxx: required file `./build.sh.in' not found
-      Makefile.am:xxx: automatically discovered file `getloadavg.c' should not be explicitly mentioned
-
-
- 5) $ autoconf
-
-    Generate a "configure" script from configure.in and acinclude.m4.
-
-
- 6) $ ./configure
+ 2) $ ./configure
 
     Generate a Makefile
 
 
- 7) $ make update
+ 3) $ make update
 
     Use wget to retrieve various other files that GNU make relies on,
     but does not keep in its own source tree.
@@ -129,11 +99,7 @@ This list is eminently suitable for a quick swipe o' the mouse and a
 swift click o' mouse-2 into an xterm.  Go for it!
 
 
-autopoint
-aclocal -I config
-autoheader
-automake --add-missing
-autoconf
+autoreconf -i -s
 ./configure
 make update
 make

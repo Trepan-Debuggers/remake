@@ -35,4 +35,24 @@ $answer = "touch interm-a\ntouch final-a\ntouch interm-b\ntouch final-b\n";
 unlink('orig1-a', 'orig2-a', 'interm-a', 'final-a');
 unlink('orig1-b', 'orig2-b', 'interm-b', 'final-b');
 
+# TEST 1
+# -t should not touch files with no commands.
+
+$makefile2 = &get_tmpfile;
+
+open(MAKEFILE, "> $makefile2");
+print MAKEFILE <<'EOMAKE';
+
+PHOOEY: xxx
+xxx: ; @:
+
+EOMAKE
+close(MAKEFILE);
+
+&run_make_with_options($makefile2, "-t", &get_logfile);
+$answer = "touch xxx\n";
+&compare_output($answer, &get_logfile(1));
+
+unlink('xxx');
+
 1;

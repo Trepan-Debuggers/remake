@@ -1,10 +1,10 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(GNU make,3.81a1,bug-make@gnu.org)
+AC_INIT([GNU make],[3.81a1],[bug-make@gnu.org])
 
-AC_PREREQ(2.54)
+AC_PREREQ(2.56)
 
-AC_REVISION([[$Id: configure.in,v 1.116 2003/01/30 05:22:52 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.117 2003/03/25 00:15:25 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -66,7 +66,8 @@ AC_TYPE_PID_T
 AC_CHECK_TYPE(uintmax_t,,[
   uintmax_t="unsigned long"
   AC_CHECK_TYPE(unsigned long long,[uintmax_t="unsigned long long"])
-  AC_DEFINE_UNQUOTED(uintmax_t,$uintmax_t,[Define uintmax_t if not defined in <stdint.h> or <inttypes.h>.])])
+  AC_DEFINE_UNQUOTED(uintmax_t,$uintmax_t,
+    [Define uintmax_t if not defined in <stdint.h> or <inttypes.h>.])])
 
 # Find out whether our struct stat returns nanosecond resolution timestamps.
 
@@ -75,12 +76,13 @@ AC_MSG_CHECKING([whether to use high resolution file timestamps])
 AC_CACHE_VAL(make_cv_file_timestamp_hi_res, [
   make_cv_file_timestamp_hi_res=no
   if test "$ac_cv_struct_st_mtim_nsec" != no; then
-    AC_TRY_COMPILE([
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #	if HAVE_INTTYPES_H
 #	 include <inttypes.h>
-#	endif],
-      [char a[0x7fffffff < (uintmax_t) -1 >> 30 ? 1 : -1];],
-      make_cv_file_timestamp_hi_res=yes)
+#	endif]],
+	              [[char a[0x7fffffff < (uintmax_t)-1 >> 30 ? 1 : -1];]])],
+      [make_cv_file_timestamp_hi_res=yes],
+      [])
   fi])
 AC_MSG_RESULT($make_cv_file_timestamp_hi_res)
 if test "$make_cv_file_timestamp_hi_res" = yes; then
@@ -107,16 +109,16 @@ fi
 # one.
 AC_CACHE_CHECK([for standard gettimeofday], ac_cv_func_gettimeofday,
   [ac_cv_func_gettimeofday=no
-   AC_TRY_RUN([#include <sys/time.h>
-	       int main ()
-	       {
-		 struct timeval t; t.tv_sec = -1; t.tv_usec = -1;
-		 exit (gettimeofday (&t, 0) != 0
-		       || t.tv_sec < 0 || t.tv_usec < 0);
-	       }],
-	      ac_cv_func_gettimeofday=yes,
-	      ac_cv_func_gettimeofday=no,
-	      ac_cv_func_gettimeofday="no (cross-compiling)")])
+   AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <sys/time.h>
+                  int main ()
+	          {
+		    struct timeval t; t.tv_sec = -1; t.tv_usec = -1;
+		    exit (gettimeofday (&t, 0) != 0
+		          || t.tv_sec < 0 || t.tv_usec < 0);
+	          }]])],
+		  [ac_cv_func_gettimeofday=yes],
+		  [ac_cv_func_gettimeofday=no],
+		  [ac_cv_func_gettimeofday="no (cross-compiling)"])])
 if test "$ac_cv_func_gettimeofday" = yes; then
   AC_DEFINE(HAVE_GETTIMEOFDAY, 1,
 	    [Define if you have a standard gettimeofday function])
@@ -133,7 +135,7 @@ make_FUNC_SETVBUF_REVERSED
 AC_FUNC_STRCOLL
 
 AC_FUNC_ALLOCA
-AC_FUNC_VFORK
+AC_FUNC_FORK([])
 AC_FUNC_VPRINTF
 AC_FUNC_CLOSEDIR_VOID
 
@@ -143,52 +145,56 @@ AC_FUNC_GETLOADAVG
 # doesn't.  So, we will.
 
 if test "$ac_cv_header_nlist_h" = yes; then
-  AC_TRY_COMPILE([#include <nlist.h>],
-      [struct nlist nl;
-       nl.n_name = "string";
-       return 0;],
-      make_cv_nlist_struct=yes,
-      make_cv_nlist_struct=no)
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <nlist.h>]],
+	[[struct nlist nl;
+          nl.n_name = "string";
+          return 0;]])],
+	[make_cv_nlist_struct=yes],
+	[make_cv_nlist_struct=no])
   if test "$make_cv_nlist_struct" = yes; then
     AC_DEFINE(NLIST_STRUCT, 1,
        [Define if struct nlist.n_name is a pointer rather than an array.])
   fi
 fi
 
-AC_DECL_SYS_SIGLIST
+AC_CHECK_DECLS([sys_siglist])
+
 
 # Check out the wait reality.
 AC_CHECK_HEADERS(sys/wait.h)
 AC_CHECK_FUNCS(waitpid wait3)
 AC_MSG_CHECKING(for union wait)
 AC_CACHE_VAL(make_cv_union_wait, [dnl
-AC_TRY_LINK([#include <sys/types.h>
-#include <sys/wait.h>],
-	    [union wait status; int pid; pid = wait (&status);
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
+#include <sys/wait.h>]],
+     [[union wait status; int pid; pid = wait (&status);
 #ifdef WEXITSTATUS
 /* Some POSIXoid systems have both the new-style macros and the old
    union wait type, and they do not work together.  If union wait
    conflicts with WEXITSTATUS et al, we don't want to use it at all.  */
-if (WEXITSTATUS (status) != 0) pid = -1;
+        if (WEXITSTATUS (status) != 0) pid = -1;
 #ifdef WTERMSIG
-/* If we have WEXITSTATUS and WTERMSIG, just use them on ints.  */
--- blow chunks here --
+        /* If we have WEXITSTATUS and WTERMSIG, just use them on ints.  */
+        -- blow chunks here --
 #endif
 #endif
 #ifdef HAVE_WAITPID
-/* Make sure union wait works with waitpid.  */
-pid = waitpid (-1, &status, 0);
+        /* Make sure union wait works with waitpid.  */
+        pid = waitpid (-1, &status, 0);
 #endif
-],
-	    [make_cv_union_wait=yes], [make_cv_union_wait=no])])
+      ]])],
+    [make_cv_union_wait=yes],
+    [make_cv_union_wait=no])])
 if test "$make_cv_union_wait" = yes; then
-  AC_DEFINE(HAVE_UNION_WAIT, 1, [Define this if you have the \`union wait' type in <sys/wait.h>.])
+  AC_DEFINE(HAVE_UNION_WAIT, 1,
+            [Define this if you have the \`union wait' type in <sys/wait.h>.])
 fi
 AC_MSG_RESULT($make_cv_union_wait)
 
 
 # See if the user wants to use pmake's "customs" distributed build capability
 
+AC_SUBST(REMOTE) REMOTE=stub
 use_customs=false
 AC_ARG_WITH(customs,
   AC_HELP_STRING([--with-customs=DIR],
@@ -204,6 +210,7 @@ AC_ARG_WITH(customs,
        CF_NETLIBS
        AC_CHECK_HEADER(customs.h,
 		       [use_customs=true
+		         REMOTE=cstms
 			 LIBS="$LIBS -lcustoms" LDFLAGS="$make_ldflags"],
 		       [with_customs=no
 			 CPPFLAGS="$make_cppflags" make_badcust=yes])
@@ -226,10 +233,10 @@ case "$ac_cv_func_waitpid/$ac_cv_func_wait3" in
 esac
 
 AC_CACHE_CHECK(for SA_RESTART, make_cv_sa_restart, [
-  AC_TRY_COMPILE([#include <signal.h>],
-      [return SA_RESTART;],
-      make_cv_sa_restart=yes,
-      make_cv_sa_restart=no)])
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <signal.h>]],
+      [[return SA_RESTART;]])],
+    [make_cv_sa_restart=yes],
+    [make_cv_sa_restart=no])])
 if test "$make_cv_sa_restart" != no; then
   AC_DEFINE(HAVE_SA_RESTART, 1,
      [Define if <signal.h> defines the SA_RESTART constant.])
@@ -249,7 +256,8 @@ if test -f /usr/sccs/get; then
 else
   make_cv_path_sccs_get=get
 fi])
-AC_DEFINE_UNQUOTED(SCCS_GET, ["$make_cv_path_sccs_get"], [Define to the name of the SCCS 'get' command.])
+AC_DEFINE_UNQUOTED(SCCS_GET, ["$make_cv_path_sccs_get"],
+	           [Define to the name of the SCCS 'get' command.])
 
 ac_clean_files="$ac_clean_files s.conftest conftoast" # Remove these later.
 if ( /usr/sccs/admin -n s.conftest || admin -n s.conftest ) >/dev/null 2>&1 &&
