@@ -46,6 +46,7 @@ struct variable
       {
 	v_export,		/* Export this variable.  */
 	v_noexport,		/* Don't export this variable.  */
+	v_ifset,		/* Export it if it has a non-default value.  */
 	v_default		/* Decide in target_environment.  */
       } export ENUM_BITFIELD (2);
   };
