@@ -50,9 +50,8 @@ collapse_continuations (line)
     return;
 
   out = in;
-  if (out > line)
-    while (out[-1] == '\\')
-      --out;
+  while (out > line && out[-1] == '\\')
+    --out;
 
   while (*in != '\0')
     {
