@@ -346,8 +346,12 @@ selective_vpath_search (path, file, mtime_ptr)
 
       /* Now add the name-within-directory at the end of NAME.  */
       if (n != name && n[-1] != '/')
-	*n = '/';
-      bcopy (filename, n + 1, flen + 1);
+	{
+	  *n = '/';
+	  bcopy (filename, n + 1, flen + 1);
+	}
+      else
+	bcopy (filename, n, flen + 1);
 
       if (not_target)
 	/* Since *FILE is not a target, if the file is
