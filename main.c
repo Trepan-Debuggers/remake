@@ -234,14 +234,13 @@ static struct command_switch switches[] =
     { 'f', string, (char *) &makefiles, 0, 0, 0, 0, 0,
 	"file", "FILE",
 	"Read FILE as a makefile" },
-    { 'h', usage_and_exit, 
-	0, 0, 0, 0, 0, 0,
+    { 'h', usage_and_exit, 0, 0, 0, 0, 0, 0,
 	"help", 0,
 	"Print this message and exit" },
     { 'i', flag, (char *) &ignore_errors_flag, 1, 1, 0, 0, 0,
 	"ignore-errors", 0,
 	"Ignore errors from commands" },
-    { 'I', string, (char *) &include_directories, 0, 0, 0, 0, 0,
+    { 'I', string, (char *) &include_directories, 1, 0, 0, 0, 0,
 	"include-dir", "DIRECTORY",
 	"Search DIRECTORY for included makefiles" },
     { 'j', positive_int, (char *) &job_slots, 1, 1, 0,
@@ -284,7 +283,7 @@ static struct command_switch switches[] =
     { 't', flag, (char *) &touch_flag, 1, 1, 1, 0, 0,
 	"touch", 0,
 	"Touch targets instead of remaking them" },
-    { 'v', flag, (char *) &print_version_flag, 0, 0, 0, 0, 0,
+    { 'v', flag, (char *) &print_version_flag, 1, 0, 0, 0, 0,
 	"version", 0,
 	"Print the version number of make" },
     { 'w', flag, (char *) &print_directory_flag, 1, 1, 0, 0, 0,
@@ -358,6 +357,7 @@ main (argc, argv, envp)
      char **argv;
      char **envp;
 {
+  extern void init_dir ();
   extern RETSIGTYPE fatal_error_signal (), child_handler ();
   register struct file *f;
   register unsigned int i;
@@ -473,7 +473,9 @@ main (argc, argv, envp)
 
   /* Decode the switches.  */
 
-  decode_switches (argc, argv);
+  decode_env_switches ("MAKEFLAGS", 9);
+  decode_env_switches ("MFLAGS", 6);
+  decode_switches (argc, argv, 0);
 
   /* Print version information.  */
 
@@ -545,7 +547,7 @@ main (argc, argv, envp)
   if (cmd_defs_idx > 0)
     {
       cmd_defs[cmd_defs_idx - 1] = '\0';
-      (void) define_variable ("MAKEOVERRIDES", 13, cmd_defs, o_override, 0);
+      (void) define_variable ("MAKEOVERRIDES", 13, cmd_defs, o_default, 0);
     }
   free (cmd_defs);
 
@@ -559,15 +561,15 @@ main (argc, argv, envp)
       && argv[0] != 0 && argv[0][0] != '/' && index (argv[0], '/') != 0)
     argv[0] = concat (current_directory, "/", argv[0]);
 
-  (void) define_variable ("MAKE_COMMAND", 12, argv[0], o_env, 0);
+  (void) define_variable ("MAKE_COMMAND", 12, argv[0], o_default, 0);
 
   /* Append the command-line variable definitions gathered above
      so sub-makes will get them as command-line definitions.  */
 
   (void) define_variable ("MAKE", 4,
-			  "$(MAKE_COMMAND) $(MAKEOVERRIDES)", o_env, 1);
+			  "$(MAKE_COMMAND) $(MAKEOVERRIDES)", o_default, 1);
 
-  /* If there were -c flags, move ourselves about.  */
+  /* If there were -C flags, move ourselves about.  */
 
   if (directories != 0)
     for (i = 0; directories->list[i] != 0; ++i)
@@ -683,6 +685,7 @@ main (argc, argv, envp)
   read_makefiles
     = read_all_makefiles (makefiles == 0 ? (char **) 0 : makefiles->list);
 
+  /* Decode switches again, in case the variables were set by the makefile.  */
   decode_env_switches ("MAKEFLAGS", 9);
   decode_env_switches ("MFLAGS", 6);
 
@@ -1009,32 +1012,25 @@ main (argc, argv, envp)
   return 0;
 }
 
+/* Parsing of arguments, decoding of switches.  */
+
+static char options[sizeof (switches) / sizeof (switches[0]) * 3];
+static struct option long_options[(sizeof (switches) / sizeof (switches[0])) +
+				  (sizeof (long_option_aliases) /
+				   sizeof (long_option_aliases[0]))];
+
+/* Fill in the string and vector for getopt.  */
 static void
-decode_switches (argc, argv)
-     int argc;
-     char **argv;
+init_switches ()
 {
-  char bad = 0;
-  register unsigned int i;
-  register struct command_switch *cs;
-  register struct stringlist *sl;
-  char *p;
-  char options[sizeof (switches) / sizeof (switches[0]) * 3];
-  struct option long_options[(sizeof (switches) / sizeof (switches[0])) +
-			     (sizeof (long_option_aliases) /
-			      sizeof (long_option_aliases[0]))];
+  register char *p;
   register int c;
+  register unsigned int i;
 
-  decode_env_switches ("MAKEFLAGS", 9);
-  decode_env_switches ("MFLAGS", 6);
+  if (options[0] != '\0')
+    /* Already done.  */
+    return;
 
-  other_args = (struct stringlist *) xmalloc (sizeof (struct stringlist));
-  other_args->max = argc + 1;
-  other_args->list = (char **) xmalloc ((argc + 1) * sizeof (char *));
-  other_args->idx = 1;
-  other_args->list[0] = savestring (argv[0], strlen (argv[0]));
-
-  /* Fill in the string and vector for getopt.  */
   p = options;
   for (i = 0; switches[i].c != '\0'; ++i)
     {
@@ -1071,8 +1067,42 @@ decode_switches (argc, argv)
        ++c)
     long_options[i++] = long_option_aliases[c];
   long_options[i].name = 0;
+}
 
-  /* getopt does most of the parsing for us.  */
+/* Decode switches from ARGC and ARGV.
+   They came from the environment if ENV is nonzero.  */
+
+static void
+decode_switches (argc, argv, env)
+     int argc;
+     char **argv;
+     int env;
+{
+  int bad = 0;
+  register struct command_switch *cs;
+  register struct stringlist *sl;
+  register int c;
+
+  if (!env)
+    {
+      other_args = (struct stringlist *) xmalloc (sizeof (struct stringlist));
+      other_args->max = argc + 1;
+      other_args->list = (char **) xmalloc ((argc + 1) * sizeof (char *));
+      other_args->idx = 1;
+      other_args->list[0] = savestring (argv[0], strlen (argv[0]));
+    }
+
+  /* getopt does most of the parsing for us.
+     First, get its vectors set up.  */
+
+  init_switches ();
+
+  /* Let getopt produce error messages for the command line,
+     but not for options from the environment.  */
+  opterr = !env;
+  /* Reset getopt's state.  */
+  optind = 0;
+
   while ((c = getopt_long (argc, argv,
 			   options, long_options, (int *) 0)) != EOF)
     {
@@ -1085,6 +1115,12 @@ decode_switches (argc, argv)
 	for (cs = switches; cs->c != '\0'; ++cs)
 	  if (cs->c == c)
 	    {
+	      /* Whether or not we will actually do anything with
+		 this switch.  We test this individually inside the
+		 switch below rather than just once outside it, so that
+		 options which are to be ignored still consume args.  */
+	      int doit = !env || cs->env;
+
 	      switch (cs->type)
 		{
 		default:
@@ -1099,10 +1135,14 @@ decode_switches (argc, argv)
 
 		case flag:
 		case flag_off:
-		  *(int *) cs->value_ptr = cs->type == flag;
+		  if (doit)
+		    *(int *) cs->value_ptr = cs->type == flag;
 		  break;
 
 		case string:
+		  if (!doit)
+		    break;
+
 		  if (optarg == 0)
 		    optarg = cs->noarg_value;
 
@@ -1131,14 +1171,19 @@ decode_switches (argc, argv)
 		  if (optarg == 0 && argc > optind
 		      && isdigit (argv[optind][0]))
 		    optarg = argv[optind++];
+
+		  if (!doit)
+		    break;
+
 		  if (optarg != 0)
 		    {
 		      int i = atoi (optarg);
 		      if (i < 1)
 			{
-			  error ("the `-%c' option requires a \
+			  if (doit)
+			    error ("the `-%c' option requires a \
 positive integral argument",
-				 cs->c);
+				   cs->c);
 			  bad = 1;
 			}
 		      else
@@ -1150,12 +1195,15 @@ positive integral argument",
 		  break;
 
 		case floating:
-		  *(double *) cs->value_ptr
-		    = (optarg != 0 ? atof (optarg)
-		       : (optind < argc && (isdigit (argv[optind][0])
-					    || argv[optind][0] == '.'))
-		       ? atof (argv[optind++])
-		       : *(double *) cs->noarg_value);
+		  if (optarg == 0 && optind < argc
+		      && (isdigit (argv[optind][0]) || argv[optind][0] == '.'))
+		    optarg = argv[optind++];
+
+		  if (doit)
+		    *(double *) cs->value_ptr		    
+		      = (optarg != 0 ? atof (optarg)
+			 : *(double *) cs->noarg_value);
+
 		  break;
 		}
 	    
@@ -1164,15 +1212,20 @@ positive integral argument",
 	    }
     }
 
-  while (optind < argc)
+  if (!env)
     {
-      char *arg = argv[optind++];
-      if (arg[0] != '-' || arg[1] != '\0')
-	other_args->list[other_args->idx++] = arg;
-    }
-  other_args->list[other_args->idx] = 0;
+      /* Collect the remaining args in the `other_args' string list.  */
 
-  if (bad)
+      while (optind < argc)
+	{
+	  char *arg = argv[optind++];
+	  if (arg[0] != '-' || arg[1] != '\0')
+	    other_args->list[other_args->idx++] = arg;
+	}
+      other_args->list[other_args->idx] = 0;
+    }
+
+  if (bad && !env)
     {
       /* Print a nice usage message.  */
 
@@ -1184,7 +1237,7 @@ positive integral argument",
       fputs ("Options:\n", stderr);
       for (cs = switches; cs->c != '\0'; ++cs)
 	{
-	  char buf[1024], arg[50];
+	  char buf[1024], arg[50], *p;
 
 	  if (cs->description[0] == '-')
 	    continue;
@@ -1207,6 +1260,7 @@ positive integral argument",
 	  p += strlen (p);
 	  if (cs->long_name != 0)
 	    {
+	      unsigned int i;
 	      sprintf (p, ", --%s%s", cs->long_name, arg);
 	      p += strlen (p);
 	      for (i = 0; i < (sizeof (long_option_aliases) /
@@ -1255,66 +1309,63 @@ positive integral argument",
     }
 }
 
+/* Decode switches from environment variable ENVAR (which is LEN chars long).
+   We do this by chopping the value into a vector of words, prepending a
+   dash to the first word if it lacks one, and passing the vector to
+   decode_switches.  */
+
 static void
 decode_env_switches (envar, len)
      char *envar;
      unsigned int len;
 {
-  struct variable *v;
-  register char *args;
-  register struct command_switch *cs;
+  char *varref = alloca (2 + len + 2);
+  char *value, *args;
+  int argc;
+  char **argv;
 
-  v = lookup_variable (envar, len);
-  if (v == 0 || *v->value == '\0')
+  /* Get the variable's value.  */
+  varref[0] = '$';
+  varref[1] = '(';
+  bcopy (envar, &varref[2], len);
+  varref[2 + len] = ')';
+  varref[2 + len + 1] = '\0';
+  value = variable_expand (varref);
+
+  /* Skip whitespace, and check for an empty value.  */
+  value = next_token (value);
+  len = strlen (value);
+  if (len == 0)
     return;
 
-  for (args = v->value; *args != '\0'; ++args)
-    for (cs = switches; cs->c != '\0'; ++cs)
-      if (cs->c == *args)
-	if (cs->env)
-	  switch (cs->type)
-	    {
-	    case string:
-	      /* None of these allow environment changes.  */
-	    default:
-	      abort ();
-	    case flag:
-	    case flag_off:
-	      *(int *) cs->value_ptr = cs->type == flag;
-	      break;
-	    case positive_int:
-	      while (isspace (args[1]))
-		++args;
-	      if (isdigit(args[1]))
-		{
-		  int i = atoi (&args[1]);
-		  while (isdigit (args[1]))
-		    ++args;
-		  if (i >= 1)
-		    *(unsigned int *) cs->value_ptr = i;
-		}
-	      else
-		*(unsigned int *) cs->value_ptr
-		  = *(unsigned int *) cs->noarg_value;
-	      break;
-	    case floating:
-	      while (isspace (args[1]))
-		++args;
-	      if (args[1] == '.' || isdigit (args[1]))
-		{
-		  *(double *) cs->value_ptr = atof (&args[1]);
-		  while (args[1] == '.' || isdigit (args[1]))
-		    ++args;
-		}
-	      else
-		*(double *) cs->value_ptr = *(double *) cs->noarg_value;
-	      break;
-	    }
+  /* Make a copy of the value in ARGS, where we will munge it.
+     If it does not begin with a dash, prepend one.  */
+  args = (char *) alloca (1 + len + 2);
+  if (value[0] != '-')
+    args[0] = '-';
+  bcopy (value, value[0] == '-' ? args : &args[1], len + 1);
+  /* Write an extra null terminator so our loop below will
+     never be in danger of looking past the end of the string.  */
+  args[(value[0] == '-' ? 0 : 1) + len + 1] = '\0';
+
+  /* Allocate a vector that is definitely big enough.  */
+  argv = (char **) alloca (len * sizeof (char *));
+  argc = 0;
+  do
+    {
+      argv[argc++] = args;
+      args = end_of_token (args);
+      *args++ = '\0';
+    } while (*args != '\0');
+  argv[argc] = 0;
+
+  /* Parse those words.  */
+  decode_switches (argc, argv, 1);
 }
 
 /* Define the MAKEFLAGS and MFLAGS variables to reflect the settings of the
    command switches.  Include positive_int and floating options if PF.
-   Don't include options with the `no_makefile' flag is if MAKEFILE.  */
+   Don't include options with the `no_makefile' flag set if MAKEFILE.  */
 
 static void
 define_makeflags (pf, makefile)
