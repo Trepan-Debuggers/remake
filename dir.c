@@ -1,5 +1,5 @@
 /* Directory hashing for GNU Make.
-Copyright (C) 1988, 89, 91, 92, 93, 94, 95 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 91, 92, 93, 94, 95, 96 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -18,24 +18,28 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "make.h"
 
-#if	defined (POSIX) || defined (HAVE_DIRENT_H) || defined (__GNU_LIBRARY__)
-#include <dirent.h>
-#if	defined (__GNU_LIBRARY__) && __GNU_LIBRARY__ > 1
-#define HAVE_D_NAMLEN
-#endif	/* GNU C library.  */
-#else	/* Not POSIX or HAVE_DIRENT_H.  */
-#define direct dirent
-#define HAVE_D_NAMLEN
-#ifdef	HAVE_SYS_NDIR_H
-#include <sys/ndir.h>
-#endif	/* HAVE_SYS_NDIR_H */
-#ifdef	HAVE_SYS_DIR_H
-#include <sys/dir.h>
-#endif	/* HAVE_SYS_DIR_H */
-#ifdef HAVE_NDIR_H
-#include <ndir.h>
-#endif	/* HAVE_NDIR_H */
-#endif	/* POSIX or HAVE_DIRENT_H or __GNU_LIBRARY__.  */
+#ifdef	HAVE_DIRENT_H
+# include <dirent.h>
+# define NAMLEN(dirent) strlen((dirent)->d_name)
+#else
+# define dirent direct
+# define NAMLEN(dirent) (dirent)->d_namlen
+# ifdef HAVE_SYS_NDIR_H
+#  include <sys/ndir.h>
+# endif
+# ifdef HAVE_SYS_DIR_H
+#  include <sys/dir.h>
+# endif
+# ifdef HAVE_NDIR_H
+#  include <ndir.h>
+# endif
+#endif
+
+/* In GNU systems, <dirent.h> defines this macro for us.  */
+#ifdef _D_NAMLEN
+#undef NAMLEN
+#define NAMLEN(d) _D_NAMLEN(d)
+#endif
 
 #if defined (POSIX) && !defined (__GNU_LIBRARY__)
 /* Posix does not require that the d_ino field be present, and some
@@ -295,14 +299,7 @@ dir_contents_file_exists_p (dir, filename)
       if (!REAL_DIR_ENTRY (d))
 	continue;
 
-#ifdef HAVE_D_NAMLEN
-      len = d->d_namlen;
-      while (d->d_name[len - 1] == '\0')
-	--len;
-#else
-      len = strlen (d->d_name);
-#endif
-
+      len = NAMLEN (d);
       for (i = 0; i < len; ++i)
 	HASH (newhash, d->d_name[i]);
       newhash %= DIRFILE_BUCKETS;
@@ -619,7 +616,7 @@ read_dirstream (stream)
 		}
 	      d = (struct dirent *) buf;
 	      FAKE_DIR_ENTRY (d);
-#ifdef HAVE_D_NAMLEN
+#ifdef _DIRENT_HAVE_D_NAMLEN
 	      d->d_namlen = len - 1;
 #endif
 	      memcpy (d->d_name, df->name, len);
