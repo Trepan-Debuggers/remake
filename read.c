@@ -177,10 +177,12 @@ read_all_makefiles (makefiles)
 
     while ((name = find_next_token (&p, &length)) != 0)
       {
+        name = xstrdup (name);
 	if (*p != '\0')
 	  *p++ = '\0';
-	(void) read_makefile (name,
-			      RM_NO_DEFAULT_GOAL | RM_INCLUDED | RM_DONTCARE);
+	if (read_makefile (name,
+                           RM_NO_DEFAULT_GOAL|RM_INCLUDED|RM_DONTCARE) < 2)
+          free (name);
       }
 
     free (value);
@@ -269,7 +271,9 @@ read_all_makefiles (makefiles)
 
    FILENAME is added to the `read_makefiles' chain.
 
-   Returns 1 if a file was found and read, 0 if not.  */
+   Returns 0 if a file was not found or not read.
+   Returns 1 if FILENAME was found and read.
+   Returns 2 if FILENAME was read, and we kept a reference (don't free it).  */
 
 static int
 read_makefile (filename, flags)
@@ -289,6 +293,7 @@ read_makefile (filename, flags)
   int len, reading_target;
   int ignoring = 0, in_ignored_define = 0;
   int no_targets = 0;		/* Set when reading a rule without targets.  */
+  int using_filename = 0;
   struct floc fileinfo;
   char *passed_filename = filename;
 
@@ -307,10 +312,12 @@ read_makefile (filename, flags)
   do									      \
     { 									      \
       if (filenames != 0)						      \
-	record_files (filenames, pattern, pattern_percent, deps,	      \
-		      cmds_started, commands, commands_idx,		      \
-		      two_colon, &fileinfo,				      \
-		      !(flags & RM_NO_DEFAULT_GOAL));		     	      \
+        {                                                                     \
+	  record_files (filenames, pattern, pattern_percent, deps,            \
+                        cmds_started, commands, commands_idx, two_colon,      \
+                        &fileinfo, !(flags & RM_NO_DEFAULT_GOAL)); 	      \
+          using_filename |= commands_idx > 0;                                 \
+        }                                                                     \
       filenames = 0;							      \
       commands_idx = 0;							      \
       if (pattern) { free(pattern); pattern = 0; }                            \
@@ -685,16 +692,18 @@ read_makefile (filename, flags)
 	    {
 	      struct nameseq *next = files->next;
 	      char *name = files->name;
+              int r;
+
 	      free ((char *)files);
 	      files = next;
 
-	      if (! read_makefile (name, (RM_INCLUDED | RM_NO_TILDE
-					  | (noerror ? RM_DONTCARE : 0)))
-		  && ! noerror)
+              r = read_makefile (name, (RM_INCLUDED | RM_NO_TILDE
+                                        | (noerror ? RM_DONTCARE : 0)));
+	      if (!r && !noerror)
 		error (&fileinfo, "%s: %s", name, strerror (errno));
 
-              /* We can't free NAME here, in case some of the commands,
-                 etc. still contain references to the filename.  */
+              if (r < 2)
+                free (name);
 	    }
 
 	  /* Free any space allocated by conditional_line.  */
@@ -880,7 +889,7 @@ read_makefile (filename, flags)
               continue;
             }
           /* This should never be possible; we handled it above.  */
-	  assert(*p2 != '\0');
+	  assert (*p2 != '\0');
           ++p2;
 
 	  /* Is this a one-colon or two-colon entry?  */
@@ -895,25 +904,31 @@ read_makefile (filename, flags)
           if (*lb_next != '\0')
             {
               unsigned int l = p2 - variable_buffer;
-              plen = strlen(p2);
-              (void)variable_buffer_output(p2+plen,
-                                           lb_next, strlen(lb_next)+1);
+              plen = strlen (p2);
+              (void) variable_buffer_output (p2+plen,
+                                             lb_next, strlen (lb_next)+1);
               p2 = variable_buffer + l;
             }
-          wtype = get_next_mword(p2, NULL, &p, &len);
+
+          /* See if it's an "override" keyword; if so see if what comes after
+             it looks like a variable definition.  */
+
+          wtype = get_next_mword (p2, NULL, &p, &len);
+
           v_origin = o_file;
-          if (wtype == w_static && (len == (sizeof("override")-1)
-                                    && strneq(p, "override", len)))
+          if (wtype == w_static && (len == (sizeof ("override")-1)
+                                    && strneq (p, "override", len)))
             {
               v_origin = o_override;
-              (void)get_next_mword(p+len, NULL, &p, &len);
+              wtype = get_next_mword (p+len, NULL, &p, &len);
             }
-          else if (wtype != w_eol)
-            wtype = get_next_mword(p+len, NULL, NULL, NULL);
 
-          if (wtype == w_varassign || v_origin == o_override)
+          if (wtype != w_eol)
+            wtype = get_next_mword (p+len, NULL, NULL, NULL);
+
+          if (wtype == w_varassign)
             {
-              record_target_var(filenames, p, two_colon, v_origin, &fileinfo);
+              record_target_var (filenames, p, two_colon, v_origin, &fileinfo);
               filenames = 0;
               continue;
             }
@@ -929,7 +944,7 @@ read_makefile (filename, flags)
           if (*lb_next != '\0')
             {
               unsigned int l = p2 - variable_buffer;
-              (void)variable_expand_string(p2 + plen, lb_next, (long)-1);
+              (void) variable_expand_string (p2 + plen, lb_next, (long)-1);
               p2 = variable_buffer + l;
 
               /* Look for a semicolon in the expanded line.  */
@@ -1046,7 +1061,7 @@ read_makefile (filename, flags)
 
   reading_file = 0;
 
-  return 1;
+  return 1+using_filename;
 }
 
 /* Execute a `define' directive.
