@@ -104,7 +104,7 @@ extern int setgid (), getgid ();
 #endif
 
 #ifndef	getdtablesize
-#ifndef GETDTABLESIZE_MISSING
+#ifdef HAVE_GETDTABLESIZE
 extern int getdtablesize ();
 #else
 #include <sys/param.h>
@@ -117,7 +117,7 @@ extern int start_remote_job_p ();
 extern int start_remote_job (), remote_status ();
 
 
-#ifdef	SYS_SIGLIST_MISSING
+#ifndef	HAVE_SYS_SIGLIST
 static char *sys_siglist[NSIG];
 void init_siglist ();
 #else
@@ -421,7 +421,7 @@ unblock_sigs ()
   sigprocmask (SIG_SETMASK, &empty, (sigset_t *) 0);
 }
 #else
-#ifndef	SIGSETMASK_MISSING
+#ifdef	HAVE_SIGSETMASK
 extern int fatal_signal_mask;
 #define	unblock_sigs()	sigsetmask (0)
 #else
@@ -565,7 +565,7 @@ start_job_command (child)
 #ifdef	 POSIX
       (void) sigprocmask (SIG_BLOCK, &fatal_signal_set, (sigset_t *) 0);
 #else
-#ifndef	SIGSETMASK_MISSING
+#ifdef	HAVE_SIGSETMASK
       (void) sigblock (fatal_signal_mask);
 #endif
 #endif
@@ -828,7 +828,7 @@ search_path (file, path, program)
     {
       unsigned int len;
 
-#ifndef	GETGROUPS_MISSING
+#ifdef	HAVE_GETGROUPS
 #ifndef	HAVE_UNISTD_H
       extern int getgroups ();
 #endif
@@ -847,7 +847,7 @@ search_path (file, path, program)
 #endif
       if (groups != 0 && ngroups == -1)
 	ngroups = getgroups (ngroups_max, groups);
-#endif	/* getgroups missing.  */
+#endif	/* Have getgroups.  */
 
       len = strlen (file) + 1;
       do
@@ -878,7 +878,7 @@ search_path (file, path, program)
 		perm = (st.st_mode & 0010);
 	      else
 		{
-#ifndef	GETGROUPS_MISSING
+#ifdef	HAVE_GETGROUPS
 		  register int i;
 		  for (i = 0; i < ngroups; ++i)
 		    if (groups[i] == st.st_gid)
@@ -886,7 +886,7 @@ search_path (file, path, program)
 		  if (i < ngroups)
 		    perm = (st.st_mode & 0010);
 		  else
-#endif	/* getgroups missing.  */
+#endif	/* Have getgroups.  */
 		    perm = (st.st_mode & 0001);
 		}
 
@@ -1261,7 +1261,7 @@ construct_command_argv (line, restp, file)
   return argv;
 }
 
-#ifdef	SYS_SIGLIST_MISSING
+#ifndef	HAVE_SYS_SIGLIST
 /* Initialize sys_siglist.  */
 
 void
@@ -1416,7 +1416,7 @@ init_siglist ()
 }
 #endif
 
-#ifdef	DUP2_MISSING
+#ifndef	HAVE_DUP2
 int
 dup2 (old, new)
      int old, new;
