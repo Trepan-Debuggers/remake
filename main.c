@@ -945,7 +945,7 @@ int main (int argc, char ** argv)
   if (print_version_flag)
     die (0);
 
-#if !defined(__MSDOS__) && !defined(VMS)
+#ifndef VMS
   /* Set the "MAKE_COMMAND" variable to the name we were invoked with.
      (If it is a relative pathname with a slash, prepend our directory name
      so the result will run the same program regardless of the current dir.
@@ -963,9 +963,21 @@ int main (int argc, char ** argv)
       strneq(argv[0], "//", 2))
     argv[0] = xstrdup(w32ify(argv[0],1));
 #else /* WINDOWS32 */
+#ifdef __MSDOS__
+  if (strchr (argv[0], '\\'))
+    {
+      char *p;
+
+      argv[0] = xstrdup (argv[0]);
+      for (p = argv[0]; *p; p++)
+	if (*p == '\\')
+	  *p = '/';
+    }
+#else  /* !__MSDOS__ */
   if (current_directory[0] != '\0'
       && argv[0] != 0 && argv[0][0] != '/' && index (argv[0], '/') != 0)
     argv[0] = concat (current_directory, "/", argv[0]);
+#endif /* !__MSDOS__ */
 #endif /* WINDOWS32 */
 #endif
 
@@ -1338,6 +1350,8 @@ int main (int argc, char ** argv)
       /* Every make assumes that it always has one job it can run.  For the
          submakes it's the token they were given by their parent.  For the
          top make, we just subtract one from the number the user wants.  */
+
+      job_slots = 1; /* !!!!!DEBUG!!!!! */
 
       while (--job_slots)
 	{

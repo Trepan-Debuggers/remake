@@ -780,9 +780,9 @@ try_variable_definition (flocp, line, origin)
     case f_simple:
       /* A simple variable definition "var := value".  Expand the value.
          We have to allocate memory since otherwise it'll clobber the
-	 variable buffer, and we still need that.  */
-      alloc_value = allocated_variable_expand (p);
-      value = alloc_value;
+	 variable buffer, and we may still need that if we're looking at a
+         target-specific variable.  */
+      value = alloc_value = allocated_variable_expand (p);
       break;
     case f_conditional:
       /* A conditional variable definition "var ?= value".
@@ -824,8 +824,10 @@ try_variable_definition (flocp, line, origin)
 	  else
 	    /* The previous definition of the variable was simple.
 	       The new value comes from the old value, which was expanded
-	       when it was set; and from the expanded new value.  */
-	    p = variable_expand (p);
+	       when it was set; and from the expanded new value.  Allocate
+               memory for the expansion as we may still need the rest of the
+               buffer if we're looking at a target-specific variable.  */
+	    p = alloc_value = allocated_variable_expand (p);
 
 	  oldlen = strlen (v->value);
 	  newlen = strlen (p);
