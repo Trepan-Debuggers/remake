@@ -87,7 +87,7 @@ set_file_variables (file)
       for (d = enter_file (".SUFFIXES")->deps; d != 0; d = d->next)
 	{
 	  unsigned int slen = strlen (dep_name (d));
-	  if (len > slen && !strncmp (dep_name (d), name + len - slen, slen))
+	  if (len > slen && !strncmp (dep_name (d), name + (len - slen), slen))
 	    {
 	      file->stem = savestring (name, len - slen);
 	      break;
