@@ -1,5 +1,5 @@
 /* Argument parsing and main program of GNU Make.
-Copyright (C) 1988, 89, 90, 91, 94, 1995 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 90, 91, 94, 1995, 1996 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -780,7 +780,7 @@ int main (int argc, char ** argv)
 	    while (!feof (stdin))
 	      {
 		char buf[2048];
-		int n = fread (buf, 1, sizeof(buf), stdin);
+		unsigned int n = fread (buf, 1, sizeof(buf), stdin);
 		if (n > 0 && fwrite (buf, 1, n, outfile) != n)
 		  pfatal_with_name ("fwrite (temporary file)");
 	      }
