@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.187 2000/04/05 16:02:55 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.188 2000/04/22 02:11:18 psmith Exp $
 @set EDITION 0.55
 @set VERSION 3.79
 @set UPDATED 04 April 2000
@@ -6828,27 +6828,27 @@ first character is considered, and values must be comma- or
 space-separated.
 
 @table @code
-@item a@var{ll}
+@item a (@i{all})
 All types of debugging output is enabled.  This is equivalent to using
 @samp{-d}.
 
-@item b@var{asic}
+@item b (@i{basic})
 Basic debugging prints each target that was found to be out-of-date, and
 whether the build was successful or not.
 
-@item v@var{erbose}
+@item v (@i{verbose})
 A level above @samp{basic}; includes messages about which makefiles were
 parsed, prerequisites that did not need to be rebuilt, etc.  This option
 also enables @samp{basic} messages.
 
-@item i@var{mplicit}
+@item i (@i{implicit})
 Prints messages describing the implicit rule searches for each target.
 This option also enables @samp{basic} messages.
 
-@item j@var{obs}
+@item j (@i{jobs})
 Prints messages giving details on the invocation of specific subcommands.
 
-@item m@var{akefile}
+@item m (@i{makefile})
 By default, the above messages are not enabled while trying to remake
 the makefiles.  This option enables messages while rebuilding makefiles,
 too.  Note that the @samp{all} option does enable this option.  This
@@ -6956,6 +6956,8 @@ Some Files}.@refill
 @cindex @code{-p}
 @itemx --print-data-base
 @cindex @code{--print-data-base}
+@cindex data base of @code{make} rules
+@cindex predefined rules and variables, printing
 Print the data base (rules and variable values) that results from
 reading the makefiles; then execute as usual or as otherwise specified.
 This also prints the version information given by the @samp{-v} switch

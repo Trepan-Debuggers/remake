@@ -188,6 +188,21 @@
 #undef SCCS_GET
 #define SCCS_GET "echo no sccs get"
 
+/* Define to 1 if NLS is requested.  */
+/* #undef ENABLE_NLS */
+
+/* Define as 1 if you have dcgettext.  */
+/* #undef HAVE_DCGETTEXT */
+
+/* Define as 1 if you have gettext and don't want to use GNU gettext.  */
+/* #undef HAVE_GETTEXT */
+
+/* Define if your locale.h file contains LC_MESSAGES.  */
+/* #undef HAVE_LC_MESSAGES */
+
+/* Define to the installation directory for locales.  */
+#define LOCALEDIR ""
+
 /* Define this if the SCCS `get' command understands the `-G<file>' option.  */
 /* #undef SCCS_GET_MINUS_G */
 

@@ -1038,6 +1038,7 @@ f_mtime (file, search)
 
       char *arname, *memname;
       struct file *arfile;
+      time_t memtime;
       int arname_used = 0;
 
       /* Find the archive's name.  */
@@ -1097,7 +1098,12 @@ f_mtime (file, search)
 	/* The archive doesn't exist, so it's members don't exist either.  */
 	return (FILE_TIMESTAMP) -1;
 
-      mtime = FILE_TIMESTAMP_FROM_S_AND_NS (ar_member_date (file->hname), 0);
+      memtime = ar_member_date (file->hname);
+      if (memtime == (time_t) -1)
+	/* The archive member doesn't exist.  */
+        return (FILE_TIMESTAMP) -1;
+
+      mtime = FILE_TIMESTAMP_FROM_S_AND_NS (memtime, 0);
     }
   else
 #endif
