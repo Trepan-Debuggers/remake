@@ -715,6 +715,7 @@ do_define (name, namelen, origin, lineno, infile, filename)
 	    definition[idx - 1] = '\0';
 	  (void) define_variable (name, namelen, definition, origin, 1);
 	  free (definition);
+	  freebuffer (&lb);
 	  return lineno;
 	}
       else
@@ -737,6 +738,8 @@ do_define (name, namelen, origin, lineno, infile, filename)
 
   /* No `endef'!!  */
   makefile_fatal (filename, lineno, "missing `endef', unterminated `define'");
+
+  /* NOTREACHED */
   return 0;
 }
 
@@ -1142,7 +1145,17 @@ record_files (filenames, pattern, pattern_percent, deps, commands_started,
 	  /* Defining .SUFFIXES with no dependencies
 	     clears out the list of suffixes.  */
 	  if (f == suffix_file && this == 0)
-	    f->deps = 0;
+	    {
+	      d = f->deps;
+	      while (d != 0)
+		{
+		  struct dep *nextd = d->next;
+ 		  free (d->name);
+ 		  free (d);
+		  d = nextd;
+		}
+	      f->deps = 0;
+	    }
 	  else if (f->deps != 0)
 	    {
 	      d = f->deps;
@@ -1190,7 +1203,7 @@ record_files (filenames, pattern, pattern_percent, deps, commands_started,
 
       /* Free name if not needed further.  */
       if (f != 0 && name != f->name
-	  && !(f->name == name + 2 && name[0] == '.' && name[1] == '/'))
+	  && (name < f->name || name > f->name + strlen (f->name)))
 	{
 	  free (name);
 	  name = f->name;
@@ -1636,6 +1649,8 @@ multi_glob (chain, size)
 		new = elt;
 	      }
 	    globfree (&gl);
+	    free (old->name);
+	    free (old);
 	    break;
 	  }
 
@@ -1646,6 +1661,7 @@ multi_glob (chain, size)
 	default:
 	  old->next = new;
 	  new = old;
+	  break;
 	}
     }
 
