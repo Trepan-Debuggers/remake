@@ -133,37 +133,15 @@ extern unsigned int get_path_max ();
 #define	ANSI_STRING
 #else	/* No standard headers.  */
 
-#ifdef	USG
-
+#ifdef HAVE_STRING_H
 #include <string.h>
-#ifdef	NEED_MEMORY_H
+#define	ANSI_STRING
+#else
+#include <strings.h>
+#endif
+#ifdef	HAVE_MEMORY_H
 #include <memory.h>
 #endif
-#define	ANSI_STRING
-
-#else	/* Not USG.  */
-
-#ifdef	NeXT
-
-#include <string.h>
-
-#else	/* Not NeXT.  */
-
-#include <strings.h>
-
-#ifndef	bcmp
-extern int bcmp ();
-#endif
-#ifndef	bzero
-extern void bzero ();
-#endif
-#ifndef	bcopy
-extern void bcopy ();
-#endif
-
-#endif	/* NeXT. */
-
-#endif	/* USG.  */
 
 extern char *malloc (), *realloc ();
 extern void free ();
@@ -174,6 +152,7 @@ extern void abort (), exit ();
 #endif	/* Standard headers.  */
 
 #ifdef	ANSI_STRING
+
 #ifndef	index
 #define	index(s, c)	strchr((s), (c))
 #endif
@@ -190,6 +169,19 @@ extern void abort (), exit ();
 #ifndef	bcopy
 #define bcopy(s, d, n)	memcpy ((d), (s), (n))
 #endif
+
+#else	/* Not ANSI_STRING.  */
+
+#ifndef	bcmp
+extern int bcmp ();
+#endif
+#ifndef	bzero
+extern void bzero ();
+#endif
+#ifndef	bcopy
+extern void bcopy ();
+#endif
+
 #endif	/* ANSI_STRING.  */
 #undef	ANSI_STRING
 
@@ -198,13 +190,13 @@ extern void abort (), exit ();
 #undef	alloca
 #define	alloca(n)	__builtin_alloca (n)
 #else	/* Not GCC.  */
-#if	defined (sparc) || defined (HAVE_ALLOCA_H)
+#ifdef	HAVE_ALLOCA_H
 #include <alloca.h>
-#else	/* Not sparc or HAVE_ALLOCA_H.  */
+#else	/* Not HAVE_ALLOCA_H.  */
 #ifndef	_AIX
 extern char *alloca ();
 #endif	/* Not AIX.  */
-#endif	/* sparc or HAVE_ALLOCA_H.  */
+#endif	/* HAVE_ALLOCA_H.  */
 #endif	/* GCC.  */
 
 #ifndef	iAPX286
@@ -273,13 +265,9 @@ extern void user_access (), make_access (), child_access ();
 #include <vfork.h>
 #endif
 
-#if	defined(__GNU_LIBRARY__) || defined(POSIX)
+#if !defined (__GNU_LIBRARY__) && !defined (POSIX)
 
-#include <unistd.h>
-
-#else
-
-#ifndef	USG
+#ifdef	HAVE_SIGSETMASK
 extern int sigsetmask ();
 extern int sigblock ();
 #endif
@@ -289,7 +277,8 @@ extern long int atol ();
 extern int unlink (), stat (), fstat ();
 extern int pipe (), close (), read (), write (), open ();
 extern long int lseek ();
-#endif	/* GNU C library or POSIX.  */
+
+#endif	/* Not GNU C library or POSIX.  */
 
 #ifdef	HAVE_GETCWD
 extern char *getcwd ();
