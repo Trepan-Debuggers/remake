@@ -115,7 +115,7 @@ extern int getdtablesize ();
 #endif
 #endif
 
-extern void wait_to_start_job ();
+extern int getloadavg ();
 extern int start_remote_job_p ();
 extern int start_remote_job (), remote_status ();
 
@@ -129,8 +129,9 @@ extern char *sys_siglist[];
 
 int child_handler ();
 static void free_child (), start_job ();
+static int load_too_high ();
 
-/* Chain of all children.  */
+/* Chain of all live (or recently deceased) children.  */
 
 struct child *children = 0;
 
@@ -141,6 +142,10 @@ unsigned int job_slots_used = 0;
 /* Nonzero if the `good' standard input is in use.  */
 
 static int good_stdin_used = 0;
+
+/* Chain of children waiting to run until the load average goes down.  */
+
+static struct child *waiting_jobs = 0;
 
 /* Write an error message describing the exit status given in
    EXIT_CODE, EXIT_SIG, and COREDUMP, for the target TARGET_NAME.
@@ -580,13 +585,15 @@ start_job (child)
     }
   else
     {
-      if (child->command_line - 1 == 0)
+      /* Wait for the load to be low enough if this
+	 is the first command in the sequence.  */
+      if (child->command_line - 1 == 0 && load_too_high ())
 	{
-	  /* Wait for the load to be low enough if this
-	     is the first command in the sequence.  */
-	  make_access ();
-	  wait_to_start_job ();
-	  user_access ();
+	  /* Put this child on the chain of children waiting
+	     for the load average to go down.  */
+	  child->next = waiting_jobs;
+	  waiting_jobs = child;
+	  return;
 	}
 
       /* Fork the child process.  */
@@ -675,10 +682,15 @@ new_job (file)
   start_job (c);
   switch (file->command_state)
     {
+    case cs_not_running:
+      /* The child is waiting to run.
+	 It has already been put on the `waiting_jobs' chain.  */
+      break;
+
     case cs_running:
       c->next = children;
       if (debug_flag)
-	printf ("Putting child 0x%08lx PID %d%s on the chain.\n",
+	printf ("Putting child 0x%08lx PID %05d%s on the chain.\n",
 		(unsigned long int) c,
 		c->pid, c->remote ? " (remote)" : "");
       children = c;
@@ -699,12 +711,47 @@ new_job (file)
       break;
     }
 
-  if (job_slots == 1 && file->command_state == cs_running)
+  if (job_slots == 1)
+    /* Since there is only one job slot, make things run linearly.
+       Wait for the child to finish, setting the state to `cs_finished'.  */
+    while (file->command_state == cs_running)
+      reap_children (1, 0);
+}
+
+static int
+load_too_high ()
+{
+  extern int getloadavg ();
+
+  if (max_load_average < 0)
+    return 0;
+
+  double load;
+
+  make_access ();
+  if (getloadavg (&load, 1) != 1)
     {
-      /* Since there is only one job slot, make things run linearly.
-	 Wait for the child to finish, setting the state to `cs_finished'.  */
-      while (file->command_state != cs_finished)
-	reap_children (1, 0);
+      static int lossage = 0;
+      if (lossage == 0 || errno != lossage)
+	perror_with_name ("getloadavg", "");
+      lossage = errno;
+      load = 0;
+    }
+  user_access ();
+
+  return load >= max_load_average;
+}
+
+void
+start_waiting_jobs ()
+{
+  while (waiting_jobs != 0)
+    {
+      if (load_too_high ())
+	/* We have started all the jobs we can at the moment.  */
+	return;
+
+      /* XXX */;
     }
 }
 
