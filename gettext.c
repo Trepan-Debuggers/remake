@@ -563,7 +563,8 @@ _nl_explode_name (name, language, modifier, territory, codeset,
 
 	  if (*codeset != cp && (*codeset)[0] != '\0')
 	    {
-	      *normalized_codeset = _nl_normalize_codeset (*codeset,
+	      *normalized_codeset = _nl_normalize_codeset ((const unsigned
+                                                            char *)*codeset,
 							   cp - *codeset);
 	      if (strcmp (*codeset, *normalized_codeset) == 0)
 		free ((char *) *normalized_codeset);
@@ -1220,13 +1221,13 @@ read_alias_file (fname, fname_len)
       unsigned char *value;
       unsigned char *cp;
 
-      if (fgets (buf, sizeof buf, fp) == NULL)
+      if (fgets ((char *)buf, sizeof buf, fp) == NULL)
 	/* EOF reached.  */
 	break;
 
       /* Possibly not the whole line fits into the buffer.  Ignore
 	 the rest of the line.  */
-      if (strchr (buf, '\n') == NULL)
+      if (strchr ((char *)buf, '\n') == NULL)
 	{
 	  char altbuf[BUFSIZ];
 	  do
@@ -1279,8 +1280,8 @@ read_alias_file (fname, fname_len)
 	      if (nmap >= maxmap)
 		extend_alias_table ();
 
-	      alias_len = strlen (alias) + 1;
-	      value_len = strlen (value) + 1;
+	      alias_len = strlen ((char *)alias) + 1;
+	      value_len = strlen ((char *)value) + 1;
 
 	      if (string_space_act + alias_len + value_len > string_space_max)
 		{
@@ -1749,41 +1750,6 @@ static const char *category_to_name PARAMS ((int category)) internal_function;
 static const char *guess_category_value PARAMS ((int category,
 						 const char *categoryname))
      internal_function;
-
-/* For those loosing systems which don't have `alloca' we have to add
-   some additional code emulating it.  */
-#ifdef HAVE_ALLOCA
-/* Nothing has to be done.  */
-# define ADD_BLOCK(list, address) /* nothing */
-# define FREE_BLOCKS(list) /* nothing */
-#else
-struct block_list
-{
-  void *address;
-  struct block_list *next;
-};
-# define ADD_BLOCK(list, addr)						      \
-  do {									      \
-    struct block_list *newp = (struct block_list *) malloc (sizeof (*newp));  \
-    /* If we cannot get a free block we cannot add the new element to	      \
-       the list.  */							      \
-    if (newp != NULL) {							      \
-      newp->address = (addr);						      \
-      newp->next = (list);						      \
-      (list) = newp;							      \
-    }									      \
-  } while (0)
-# define FREE_BLOCKS(list)						      \
-  do {									      \
-    while (list != NULL) {						      \
-      struct block_list *old = list;					      \
-      list = list->next;						      \
-      free (old);							      \
-    }									      \
-  } while (0)
-# undef alloca
-# define alloca(size) (malloc (size))
-#endif	/* have alloca */
 
 /* Names for the libintl functions are a problem.  They must not clash
    with existing names and they should follow ANSI C.  But this source
