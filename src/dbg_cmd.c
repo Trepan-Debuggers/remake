@@ -38,6 +38,12 @@ static floc_t *p_target_loc = NULL;
 static char   *psz_target_name = NULL;
 static int i_stack_pos = 0;
 
+/* We use the if when we fake a line number because
+   a real one hasn't been recorded on the stack.
+*/
+static floc_t  fake_floc;
+
+
 /* A structure which contains information on the commands this program
    can understand. */
 
@@ -996,8 +1002,22 @@ static debug_return_t dbg_cmd_frame_up (char *psz_amount)
   if (p) {
     i_stack_pos    += i_amount;
     p_stack         = p;
-    p_target_loc    = &(p->p_target->floc);
     psz_target_name = p->p_target->name;
+
+    p_target_loc    = &(p->p_target->floc);
+    if (!p->p_target->floc.filenm && p->p_target->cmds->fileinfo.filenm) {
+      /* Fake the location based on the commands - it's better than
+	 nothing...
+       */
+      memcpy(&fake_floc, &(p->p_target->cmds->fileinfo),
+	     sizeof(floc_t));
+      /* HACK: is it okay to assume that the target is on the line
+	 before the first command? Or should we list the line
+	 that the command starts on - so we know we've faked the location?
+       */
+      fake_floc.lineno--;
+      p_target_loc = &fake_floc;
+    }
   } else {
     printf("Can't move up %d - would be beyond top-most frame position.\n",
 	   i_amount);
