@@ -1,5 +1,5 @@
 /* Template for the remote job exportation interface to GNU Make.
-Copyright (C) 1988, 1989, 1992, 1993 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1992, 1993, 1996 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -24,7 +24,20 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 char *remote_description = 0;
 
+/* Call once at startup even if no commands are run.  */
 
+void
+remote_setup ()
+{
+}
+
+/* Called before exit.  */
+
+void
+remote_cleanup ()
+{
+}
+
 /* Return nonzero if the next job should be done remotely.  */
 
 int
