@@ -2,7 +2,7 @@
 @setfilename make.info
 @synindex vr fn
 
-@c $Header: /sources/make/make/Attic/make.texinfo,v 2.7 1988/07/04 13:41:43 mcgrath Exp $
+@c $Header: /sources/make/make/Attic/make.texinfo,v 2.8 1988/07/10 00:51:51 mcgrath Rel $
 
 @ifinfo
 This file documents the GNU Make utility.
@@ -4628,7 +4628,7 @@ Execution of recursive commands to run @code{make} via the variable
 
 @item
 Support for suffix @samp{.a} in suffix rules.  In GNU @code{make},
-this is actually implemented by chaining with one pattern rule for
+this is actually implemented by changing with one pattern rule for
 installing members in an archive.  @xref{Chained Rules}.@refill
 
 @item
@@ -4643,18 +4643,7 @@ don't recall:
 
 @itemize @bullet
 @item
-Pattern rules using @samp{%}.
-This has been implemented in several versions of @code{make}.
-We're not sure who invented it first, but it's been spread around a bit.
-@xref{Pattern Rules}.@refill
-
-@item
-Rule chaining and implicit intermediate files.
-This was implemented by Stu Feldman in his version of @code{make}
-for AT&T Eighth Edition Research Unix, and later by Andrew Hume of
-AT&T Bell Labs in his @code{mk} program.  We don't really know if
-we got this from either of them or thought it up ourselves at the
-same time.  @xref{Chained Rules}.
+Pattern rules using @samp{%}.  @xref{Pattern Rules}.
 
 @item
 The automatic variable @code{$^} containing a list of all dependencies
@@ -4683,9 +4672,7 @@ Verbatim variable definitions made with @code{define}.  @xref{Defining}.
 
 @item
 Phony targets declared with the special target @code{.PHONY}.
-A similar feature with a different syntax was implemented by
-Andrew Hume of AT&T Bell Labs in his @code{mk} program.  This
-seems to be a case of parallel discovery.  @xref{Phony Targets}.
+@xref{Phony Targets}.
 
 @item
 Text manipulation by calling functions.  @xref{Functions}.
@@ -4695,11 +4682,7 @@ The @samp{-o} option to pretend a file's modification-time is old.
 @xref{Avoid Compilation}.
 
 @item
-Conditional execution.
-This has been implemented numerous times in various versions of
-@code{make}; it seems a natural extension derived from the features
-of the C preprocessor and similar macro languages and is not a
-revolutionary concept.  @xref{Conditionals}.
+Conditional execution.  @xref{Conditionals}.
 
 @item
 Included makefiles never determine the default goal.
@@ -4727,6 +4710,9 @@ any characters.  In other version of @code{make}, they must begin with
 @item
 The variable @code{MAKELEVEL} which keeps track of the current level
 of @code{make} recursion.  @xref{Recursion}.
+
+@item
+Rule chaining and implicit intermediate files.  @xref{Chained Rules}.
 
 @item
 Static pattern rules.  @xref{Static Pattern}.
@@ -4792,8 +4778,9 @@ $(targets): %: %.o lib.a
 In System V and 4.3 BSD @code{make}, files found by @code{VPATH} search
 (@pxref{Directory Search}) have their names changed inside command strings.
 We feel it is much cleaner to always use automatic variables and thus
-obviate the need for this feature.  We are still debating whether to
-implement this to be compatible or to leave it out to avoid such ugliness.
+obviate the need for this feature.  However, this feature may be
+implemented in the near future for the sake of compatibility.  (In fact, it
+may be implemented before anyone but the author reads this paragraph.)
 @end itemize
 
 @node Concept Index, Name Index, Missing, Top
