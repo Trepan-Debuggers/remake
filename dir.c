@@ -772,7 +772,7 @@ file_impossible (filename)
   new = (struct dirfile *) xmalloc (sizeof (struct dirfile));
   new->next = dir->contents->files[hash];
   dir->contents->files[hash] = new;
-  new->name = savestring (filename, strlen (filename));
+  new->name = xstrdup (filename);
   new->impossible = 1;
 }
 

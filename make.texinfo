@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.174 1999/07/15 07:36:48 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.175 1999/07/21 05:53:33 psmith Exp $
 @set EDITION 0.53
 @set VERSION 3.78
 @set UPDATED 14 April 1999
@@ -269,7 +269,7 @@ Functions for Transforming Text
 * Text Functions::              General-purpose text manipulation functions.
 * File Name Functions::         Functions for manipulating file names.
 * Foreach Function::            Repeat some text with controlled variation.
-* Apply Function::              Expand a user-defined function.
+* Call Function::               Expand a user-defined function.
 * Origin Function::             Find where a variable got its value.
 * Shell Function::              Substitute the output of a shell command.
 
@@ -5200,7 +5200,7 @@ call, just as a variable might be substituted.
 * Text Functions::              General-purpose text manipulation functions.
 * File Name Functions::         Functions for manipulating file names.
 * Foreach Function::            Repeat some text with controlled variation.
-* Apply Function::              Expand a user-defined function.
+* Call Function::               Expand a user-defined function.
 * Origin Function::             Find where a variable got its value.
 * Shell Function::              Substitute the output of a shell command.
 * Make Control Functions::      Functions that control how make runs.
@@ -5228,7 +5228,7 @@ $@{@var{function} @var{arguments}@}
 
 Here @var{function} is a function name; one of a short list of names
 that are part of @code{make}.  You can also essentially create your own
-functions by using the @code{apply} builtin function.
+functions by using the @code{call} builtin function.
 
 The @var{arguments} are the arguments of the function.  They are
 separated from the function name by one or more spaces or tabs, and if
@@ -5749,7 +5749,7 @@ that match the pattern.
 @xref{Wildcards, ,Using Wildcard Characters in File Names}.
 @end table
 
-@node Foreach Function, Apply Function, File Name Functions, Functions
+@node Foreach Function, Call Function, File Name Functions, Functions
 @section The @code{foreach} Function
 @findex foreach
 @cindex words, iterating over
@@ -5837,33 +5837,33 @@ might be useful if the value of @code{find_files} references the variable
 whose name is @samp{Esta escrito en espanol!} (es un nombre bastante largo,
 no?), but it is more likely to be a mistake.
 
-@node Apply Function, Origin Function, Foreach Function, Functions
-@section The @code{apply} Function
-@findex apply
+@node Call Function, Origin Function, Foreach Function, Functions
+@section The @code{call} Function
+@findex call
 @cindex functions, user defined
 @cindex user defined functions
 
-The @code{apply} function is unique in that it can be used to create new
+The @code{call} function is unique in that it can be used to create new
 parameterized functions.  You can write a complex expression as the
-value of a variable, then use @code{apply} to expand it with different
+value of a variable, then use @code{call} to expand it with different
 values.
 
-The syntax of the @code{apply} function is:
+The syntax of the @code{call} function is:
 
 @example
-$(apply @var{variable}, @var{param}, @var{param}, @dots{})
+$(call @var{variable}, @var{param}, @var{param}, @dots{})
 @end example
 
 When @code{make} expands this function, it assigns each @var{param} to
 temporary variables @var{$(1)}, @var{$(2)}, etc.  The variable
 @var{$(0)} will contain @var{variable}.  There is no maximum number of
 parameter arguments.  There is no minimum, either, but it doesn't make
-sense to use @code{apply} with no parameters.
+sense to use @code{call} with no parameters.
 
 Then @var{variable} is expanded as a @code{make} variable in the context
 of these temporary assignments.  Thus, any reference to @var{$(1)} in
 the value of @var{variable} will resolve to the first @var{param} in the
-invocation of @code{apply}.
+invocation of @code{call}.
 
 Note that @var{variable} is the @emph{name} of a variable, not a
 @emph{reference} to that variable.  Therefore you would not normally use
@@ -5883,7 +5883,7 @@ This macro simply reverses its arguments:
 reverse = $2 $1
 
 foo = a b
-bar = $(apply reverse,$(foo))
+bar = $(call reverse,$(foo))
 @end smallexample
 
 @noindent
@@ -5895,38 +5895,38 @@ the first instance of a program in @code{PATH}:
 @smallexample
 pathsearch = $(firstword $(wildcard $(addsufix /$1,$(subst :, ,$(PATH)))))
 
-LS := $(apply pathsearch,ls)
+LS := $(call pathsearch,ls)
 @end smallexample
 
 @noindent
 Now the variable LS contains @code{/bin/ls} or similar.
 
-The @code{apply} function can be nested.  Each recursive invocation gets
+The @code{call} function can be nested.  Each recursive invocation gets
 its own local values for @var{$(1)}, etc. that mask the values of
-higher-level @code{apply}.  For example, here is an implementation of a
+higher-level @code{call}.  For example, here is an implementation of a
 @dfn{map} function:
 
 @smallexample
-map = $(foreach a,$2,$(apply $1,$a))
+map = $(foreach a,$2,$(call $1,$a))
 @end smallexample
 
 Now you can @var{map} a function that normally takes only one argument,
 such as @code{origin}, to multiple values in one step:
 
 @smallexample
-o = $(apply map,origin,o map MAKE)
+o = $(call map,origin,o map MAKE)
 @end smallexample
 
 and end up with @var{o} containing something like @samp{file file default}.
 
 A final caution: be careful when adding whitespace to the arguments to
-@code{apply}.  As with other functions, any whitespace contained in the
+@code{call}.  As with other functions, any whitespace contained in the
 second and subsequent arguments is kept; this can cause strange
 effects.  It's generally safest to remove all extraneous whitespace when
-defining variables for use with @code{apply}.
+providing parameters to @code{call}.
 
 
-@node Origin Function, Shell Function, Apply Function, Functions
+@node Origin Function, Shell Function, Call Function, Functions
 @section The @code{origin} Function
 @findex origin
 @cindex variables, origin of

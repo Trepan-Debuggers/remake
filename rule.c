@@ -423,7 +423,7 @@ install_pattern_rule (p, terminal)
       r->cmds->fileinfo.lineno = 0;
       /* These will all be string literals, but we malloc space for them
 	 anyway because somebody might want to free them later.  */
-      r->cmds->commands = savestring (p->commands, strlen (p->commands));
+      r->cmds->commands = xstrdup (p->commands);
       r->cmds->command_lines = 0;
     }
 }
@@ -599,7 +599,7 @@ lookup_pattern_var (target)
       stemlen = targlen - p->len + 1;
 
       /* Compare the text in the pattern before the stem, if any.  */
-      if (stem > target && strncmp (p->target, target, stem - target))
+      if (stem > target && !strneq (p->target, target, stem - target))
         continue;
 
       /* Compare the text in the pattern after the stem, if any.

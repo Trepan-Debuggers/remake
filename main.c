@@ -468,7 +468,7 @@ enter_command_line_file (name)
       name[2] = '\0';
     }
 
-  return enter_file (savestring (name, strlen (name)));
+  return enter_file (xstrdup (name));
 }
 
 /* Toggle -d on receipt of SIGUSR1.  */
@@ -826,8 +826,7 @@ int main (int argc, char ** argv)
       directory_before_chdir = 0;
     }
   else
-    directory_before_chdir = savestring (current_directory,
-					 strlen (current_directory));
+    directory_before_chdir = xstrdup (current_directory);
 #ifdef  __MSDOS__
   /* Make sure we will return to the initial directory, come what may.  */
   atexit (msdos_return_to_initial_directory);
@@ -849,7 +848,7 @@ int main (int argc, char ** argv)
       while (*ep != '=')
         ++ep;
 #ifdef WINDOWS32
-      if (!unix_path && !strncmp(envp[i], "PATH=", 5))
+      if (!unix_path && strneq(envp[i], "PATH=", 5))
         unix_path = ep+1;
       else if (!windows32_path && !strnicmp(envp[i], "Path=", 5)) {
         do_not_define = 1; /* it gets defined after loop exits */
@@ -960,7 +959,7 @@ int main (int argc, char ** argv)
    */
   if (strpbrk(argv[0], "/:\\") ||
       strstr(argv[0], "..") ||
-      !strncmp(argv[0], "//", 2))
+      strneq(argv[0], "//", 2))
     argv[0] = xstrdup(w32ify(argv[0],1));
 #else /* WINDOWS32 */
   if (current_directory[0] != '\0'
@@ -1429,13 +1428,9 @@ int main (int argc, char ** argv)
 		}
 	    if (f == NULL || !f->double_colon)
 	      {
-		if (makefile_mtimes == 0)
-		  makefile_mtimes = (FILE_TIMESTAMP *)
-		    xmalloc (sizeof (FILE_TIMESTAMP));
-		else
-		  makefile_mtimes = (FILE_TIMESTAMP *)
-		    xrealloc ((char *) makefile_mtimes,
-			      (mm_idx + 1) * sizeof (FILE_TIMESTAMP));
+                makefile_mtimes = (FILE_TIMESTAMP *)
+                  xrealloc ((char *) makefile_mtimes,
+                            (mm_idx + 1) * sizeof (FILE_TIMESTAMP));
 		makefile_mtimes[mm_idx++] = file_mtime_no_search (d->file);
 		last = d;
 		d = d->next;
@@ -1535,7 +1530,7 @@ int main (int argc, char ** argv)
 	      /* These names might have changed.  */
 	      register unsigned int i, j = 0;
 	      for (i = 1; i < argc; ++i)
-		if (!strncmp (argv[i], "-f", 2)) /* XXX */
+		if (strneq (argv[i], "-f", 2)) /* XXX */
 		  {
 		    char *p = &argv[i][2];
 		    if (*p == '\0')
@@ -1550,7 +1545,7 @@ int main (int argc, char ** argv)
           if (stdin_nm)
             {
               nargv = (char **)xmalloc((nargc + 2) * sizeof(char *));
-              bcopy(argv, nargv, argc * sizeof(char *));
+              bcopy((char *)argv, (char *)nargv, argc * sizeof(char *));
               nargv[nargc++] = concat("-o", stdin_nm, "");
               nargv[nargc] = 0;
             }
@@ -1576,7 +1571,7 @@ int main (int argc, char ** argv)
 
 #ifndef _AMIGA
 	  for (p = environ; *p != 0; ++p)
-	    if (!strncmp (*p, "MAKELEVEL=", 10))
+	    if (strneq (*p, "MAKELEVEL=", 10))
 	      {
 		/* The SGI compiler apparently can't understand
 		   the concept of storing the result of a function

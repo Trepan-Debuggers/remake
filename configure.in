@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.68 1999/04/25 04:30:58 psmith Exp $])
+AC_REVISION([$Id: configure.in,v 1.69 1999/07/21 05:53:27 psmith Exp $])
 AC_PREREQ(2.13)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 
@@ -136,6 +136,18 @@ case "$ac_cv_func_pipe $make_cv_job_server" in
   "yes yes") AC_DEFINE(MAKE_JOBSERVER) ;;
 esac
 
+dnl Allow building with dmalloc
+
+AC_ARG_ENABLE(dmalloc,
+  [  --enable-dmalloc        Enable support for the dmalloc debugging library],
+  [make_cv_dmalloc="$enableval"],
+  [make_cv_dmalloc="no"])
+
+case "$make_cv_dmalloc" in
+  yes) AC_CHECK_HEADERS(dmalloc.h)
+       AC_CHECK_LIB(dmalloc, dmalloc_shutdown)
+       CPPFLAGS="$CPPFLAGS -DDMALLOC_FUNC_CHECK" ;;
+esac
 
 AC_CACHE_CHECK(for location of SCCS get command, make_cv_path_sccs_get, [
 if test -f /usr/sccs/get; then

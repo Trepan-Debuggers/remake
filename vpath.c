@@ -169,7 +169,7 @@ construct_vpath_list (pattern, dirpath)
 
   if (pattern != 0)
     {
-      pattern = savestring (pattern, strlen (pattern));
+      pattern = xstrdup (pattern);
       percent = find_percent (pattern);
     }
 
@@ -324,7 +324,7 @@ gpath_search (file, len)
 
   if (gpaths && (len <= gpaths->maxlen))
     for (gp = gpaths->searchpath; *gp != NULL; ++gp)
-      if (!strncmp(*gp, file, len) && (*gp)[len] == '\0')
+      if (strneq (*gp, file, len) && (*gp)[len] == '\0')
         return 1;
 
   return 0;
