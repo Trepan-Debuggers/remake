@@ -50,9 +50,9 @@ static struct pspec default_terminal_rules[] =
   {
     /* RCS.  */
     "%", "%,v",
-    "$(CHECKOUT,v)",
+    "+$(CHECKOUT,v)",
     "%", "RCS/%,v",
-    "$(CHECKOUT,v)",
+    "+$(CHECKOUT,v)",
 
     /* SCCS.  */
     "%", "s.%",
