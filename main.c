@@ -1198,6 +1198,51 @@ init_switches ()
   long_options[i].name = 0;
 }
 
+static void
+handle_non_switch_argument (arg, env)
+     char *arg;
+     int env;
+{
+  /* Non-option argument.  It might be a variable definition.  */
+  struct variable *v;
+  if (arg[0] == '-' && arg[1] == '\0')
+    /* Ignore plain `-' for compatibility.  */
+    return;
+  v = try_variable_definition ((char *) 0, 0, arg, o_command);
+  if (v != 0)
+    {
+      /* It is indeed a variable definition.  Record a pointer to
+	 the variable for later use in define_makeflags.  */
+      struct command_variable *cv
+	= (struct command_variable *) xmalloc (sizeof (*cv));
+      cv->variable = v;
+      cv->next = command_variables;
+      command_variables = cv;
+    }
+  else if (! env)
+    {
+      /* Not an option or variable definition; it must be a goal
+	 target!  Enter it as a file and add it to the dep chain of
+	 goals.  */
+      struct file *f = enter_command_line_file (arg);
+      f->cmd_target = 1;
+	  
+      if (goals == 0)
+	{
+	  goals = (struct dep *) xmalloc (sizeof (struct dep));
+	  lastgoal = goals;
+	}
+      else
+	{
+	  lastgoal->next
+	    = (struct dep *) xmalloc (sizeof (struct dep));
+	  lastgoal = lastgoal->next;
+	}
+      lastgoal->name = 0;
+      lastgoal->file = f;
+    }
+}
+
 /* Decode switches from ARGC and ARGV.
    They came from the environment if ENV is nonzero.  */
 
@@ -1221,67 +1266,18 @@ decode_switches (argc, argv, env)
      but not for options from the environment.  */
   opterr = !env;
   /* Reset getopt's state.  */
-  optind = 1;
+  optind = 0;
 
   while (optind < argc)
     {
       /* Parse the next argument.  */
       c = getopt_long (argc, argv, options, long_options, (int *) 0);
       if (c == EOF)
-	{
-	  /* There are no more options according to getting getopt, but
-	     there are some arguments left.  Since we have asked for
-	     non-option arguments to be returned in order, I think this
-	     only happens when there is a "--" argument to prevent later
-	     arguments from being options.  Since getopt has finished its
-	     job, just update its state variables for the next argument and
-	     set C as if it had returned 1, indicating a non-option
-	     argument.  */
-	  optarg = argv[optind++];
-	  c = 1;
-	}
-
-      if (c == 1)
-	{
-	  /* Non-option argument.  It might be a variable definition.  */
-	  struct variable *v;
-	  if (optarg[0] == '-' && optarg[1] == '\0')
-	    /* Ignore plain `-' for compatibility.  */
-	    continue;
-	  v = try_variable_definition ((char *) 0, 0, optarg, o_command);
-	  if (v != 0)
-	    {
-	      /* It is indeed a variable definition.  Record a pointer to
-		 the variable for later use in define_makeflags.  */
-	      struct command_variable *cv
-		= (struct command_variable *) xmalloc (sizeof (*cv));
-	      cv->variable = v;
-	      cv->next = command_variables;
-	      command_variables = cv;
-	    }
-	  else if (! env)
-	    {
-	      /* Not an option or variable definition; it must be a goal
-		 target!  Enter it as a file and add it to the dep chain of
-		 goals.  */
-	      struct file *f = enter_command_line_file (optarg);
-	      f->cmd_target = 1;
-	  
-	      if (goals == 0)
-		{
-		  goals = (struct dep *) xmalloc (sizeof (struct dep));
-		  lastgoal = goals;
-		}
-	      else
-		{
-		  lastgoal->next
-		    = (struct dep *) xmalloc (sizeof (struct dep));
-		  lastgoal = lastgoal->next;
-		}
-	      lastgoal->name = 0;
-	      lastgoal->file = f;
-	    }
-	}
+	/* End of arguments, or "--" marker seen.  */
+	break;
+      else if (c == 1)
+	/* An argument not starting with a dash.  */
+	handle_non_switch_argument (optarg, env);
       else if (c == '?')
 	/* Bad option.  We will print a usage message and die later.
 	   But continue to parse the other options so the user can
@@ -1383,6 +1379,14 @@ positive integral argument",
 	      break;
 	    }
     }
+
+  /* There are no more options according to getting getopt, but there may
+     be some arguments left.  Since we have asked for non-option arguments
+     to be returned in order, this only happens when there is a "--"
+     argument to prevent later arguments from being options.  */
+  while (optind < argc)
+    handle_non_switch_argument (argv[optind++], env);
+
 
   if (!env && (bad || print_usage_flag))
     {
