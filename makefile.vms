@@ -4,6 +4,7 @@
 # VMS extensions from GNU Make 3.60 imported by
 #  Klaus Kämpf (kkaempf@rmi.de)
 # Modified for version 3.78.1 by Hartmut.Becker@compaq.com.
+# Modified for version 3.80 by zinser@decus.de
 #
 # GNU Make is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -86,11 +87,11 @@ mandir = []
 # Number to put on the man page filename.
 manext = 1
 
-objs = commands.obj,job.obj,dir.obj,file.obj,misc.obj,\
+objs = commands.obj,job.obj,dir.obj,file.obj,misc.obj,hash.obj,\
        main.obj,read.obj,remake.obj,rule.obj,implicit.obj,\
        default.obj,variable.obj,expand.obj,function.obj,\
        vpath.obj,version.obj$(ARCHIVES)$(ALLOCA)$(extras)$(getopt)$(glob)
-srcs = commands.c job.c dir.c file.c misc.c \
+srcs = commands.c job.c dir.c file.c misc.c  hash.c\
 	main.c read.c remake.c rule.c implicit.c \
 	default.c variable.c expand.c function.c \
 	vpath.c version.c vmsfunctions.c vmsify.c $(ARCHIVES_SRC) $(ALLOCASRC) \
@@ -119,6 +120,7 @@ job.obj: job.c make.h commands.h job.h filedef.h variable.h
 dir.obj: dir.c make.h
 file.obj: file.c make.h commands.h dep.h filedef.h variable.h
 misc.obj: misc.c make.h dep.h
+hash.obj: hash.c make.h hash.h
 main.obj: main.c make.h commands.h dep.h filedef.h variable.h job.h
 read.obj: read.c make.h commands.h dep.h filedef.h variable.h
 remake.obj: remake.c make.h commands.h job.h dep.h filedef.h
