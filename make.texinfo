@@ -139,8 +139,8 @@ This manual describes @code{make} and contains the following chapters:@refill
 @end ifinfo
 
 @menu
+* Copying::                     
 * Overview::                    Overview of @code{make}.
-* Copying::                     Your rights and freedoms.
 * Introduction::                An introduction to @code{make}.
 * Makefiles::                   Makefiles tell @code{make} what to do.
 * Rules::                       Rules describe when a file must be remade.
@@ -209,6 +209,8 @@ Writing Rules
                                   the target name.
 * Double-Colon::                How to use a special kind of rule to allow
                                   several independent rules for one target.
+* Automatic Dependencies::      How to automatically generate rules giving
+                                 dependencies from the source files themselves.
 
 Using Wildcard Characters in File Names
 
@@ -2469,7 +2471,7 @@ With static pattern rules, there is no uncertainty: each rule applies
 to precisely the targets specified.
 @end itemize
 
-@node Double-Colon,  , Static Pattern, Rules
+@node Double-Colon, Automatic Dependencies, Static Pattern, Rules
 @section Double-Colon Rules
 @cindex double-colon rules
 @cindex rule, double-colon (@code{::})
@@ -2509,8 +2511,8 @@ implicit rule will be used if one applies.
 @cindex automatic generation of dependencies
 @cindex generating dependencies automatically
 
-In the makefile for a program, often many of the rules you need to write
-are ones that simply say that some object file depends on some header
+In the makefile for a program, many of the rules you need to write often
+say only that some object file depends on some header
 file.  For example, if @file{main.c} uses @file{defs.h} via an
 @code{#include}, you would write:
 
@@ -2615,7 +2617,7 @@ include $(sources:.c=.d)
 (This example uses a substitution variable reference to translate the
 list of source files @samp{foo.c bar.c} into a list of dependency
 makefiles, @samp{foo.d bar.d}.  @xref{Substitution Refs}, for full
-information on subtitution references.)  Since the @samp{.d} files are
+information on substitution references.)  Since the @samp{.d} files are
 makefiles like any others, @code{make} will remake them as necessary
 with no further work from you.  @xref{Remaking Makefiles}.
 
