@@ -159,7 +159,7 @@ update_goal_chain (goals, makefiles)
 		    }
 		}
 
-	      if (stop || g->file->updated)
+	      if (stop || g->file->prev == 0)
 		{
 		  /* If we have found nothing whatever to do for the goal,
 		     print a message saying nothing needs doing.  */
@@ -191,6 +191,15 @@ update_goal_chain (goals, makefiles)
 
 		  g = lastgoal == 0 ? goals : lastgoal->next;
 		}
+	      else if (g->file->updated)
+		/* This instance of the target is done being updated.
+		   Go to the next instance (:: rule).
+		   update_file cycles through all instances, but under -j,
+		   update_file can return while the file is running,
+		   then reap_children can change its command state and
+		   updated flag, leaving G->file done, but some of its
+		   other instances needing work.  */
+		g->file = g->file->prev;
 
 	      if (stop)
 		break;
@@ -591,7 +600,7 @@ notice_finished_file (file)
 	     we don't want to do the touching.  */
 	  unsigned int i;
 	  for (i = 0; i < file->cmds->ncommand_lines; ++i)
-	    if (!file->cmds->lines_recurse[i])
+	    if (!(file->cmds->lines_flags[i] & COMMANDS_RECURSE))
 	      goto have_nonrecursing;
 	}
       else
