@@ -49,35 +49,7 @@ static void log_working_directory ();
 static void print_data_base (), print_version ();
 static void decode_switches (), decode_env_switches ();
 static void define_makeflags ();
-
-
-#if 0 /* dummy tag */
-flags () {}
-#endif
-/* Flags:
- *	-b ignored for compatibility with System V Make
- *	-C change directory
- *	-d debug
- *	-e env_overrides
- *	-f makefile
- *	-i ignore_errors
- *	-j job_slots
- *	-k keep_going
- *	-l max_load_average
- *	-m ignored for compatibility with something or other
- *	-n just_print
- *	-o consider file old
- *	-p print_data_base
- *	-q question
- *	-r no_builtin_rules
- *	-s silent
- *	-S turn off -k
- *	-t touch
- *	-v print version information
- *	-w log working directory
- *	-W consider file new (with -n, `what' if effect)
- */
-
+
 /* The structure that describes an accepted command switch.  */
 
 struct command_switch
@@ -222,6 +194,11 @@ static struct stringlist *new_files = 0;
 /* If nonzero, we should just print usage and exit.  */
 
 static int print_usage_flag = 0;
+
+/* If nonzero, we should print a warning message
+   for each reference to an undefined variable.  */
+
+int warn_undefined_variables_flag;
 
 /* The table of command switches.  */
 
@@ -303,6 +280,9 @@ static const struct command_switch switches[] =
     { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0,
 	"what-if", "FILE",
 	"Consider FILE to be infinitely new" },
+    { 2, flag, (char *) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
+	"warn-undefined-variables", 0,
+	"Warn when an undefined variable is referenced" },
     { '\0', }
   };
 
