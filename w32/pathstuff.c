@@ -1,6 +1,26 @@
 #include <string.h>
 #include <stdlib.h>
 #include "make.h"
+#include "pathstuff.h"
+
+/*
+ * Convert delimiter separated vpath to Canonical format. 
+ */
+char *
+convert_vpath_to_win32(char *Path, char to_delim)
+{
+    char *etok;            /* token separator for old Path */
+
+	/*
+	 * Convert all spaces to delimiters. Note that pathnames which
+	 * contain blanks get trounced here. Use 8.3 format as a workaround.
+	 */
+	for (etok = Path; etok && *etok; etok++)
+		if (isblank(*etok))
+			*etok = to_delim;
+
+	return (convert_Path_to_win32(Path, to_delim));
+}
 
 /*
  * Convert delimiter separated path to Canonical format. 
