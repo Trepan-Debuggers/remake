@@ -19,7 +19,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "make.h"
 #include "dep.h"
-
+#include "debug.h"
 
 /* Variadic functions.  We go through contortions to allow proper function
    prototypes for both ANSI and pre-ANSI C compilers, and also for those
@@ -168,7 +168,7 @@ remove_comments (line)
     *comment = '\0';
 }
 
-/* Print N spaces (used by DEBUGPR for target-depth).  */
+/* Print N spaces (used in debug for target-depth).  */
 
 void
 print_spaces (n)
@@ -643,7 +643,7 @@ static void
 log_access (flavor)
      char *flavor;
 {
-  if (! debug_flag)
+  if (! ISDB (DB_JOBS))
     return;
 
   /* All the other debugging messages go to stdout,

@@ -17,12 +17,17 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#include <assert.h>
+
 #include "make.h"
 #include "job.h"
+#include "debug.h"
 #include "filedef.h"
 #include "commands.h"
 #include "variable.h"
-#include <assert.h>
+#include "debug.h"
+
+#include <string.h>
 
 /* Default shell to use.  */
 #ifdef WINDOWS32
@@ -210,8 +215,6 @@ static struct child *waiting_jobs = 0;
 
 int unixy_shell = 1;
 
-/* #define debug_flag 1 */
-
 
 #ifdef WINDOWS32
 /*
@@ -296,8 +299,7 @@ child_handler (sig)
       job_rfd = -1;
     }
 
-  if (debug_flag)
-    printf (_("Got a SIGCHLD; %u unreaped children.\n"), dead_children);
+  DB (DB_JOBS, (_("Got a SIGCHLD; %u unreaped children.\n"), dead_children));
 }
 
 
@@ -375,10 +377,9 @@ reap_children (block, err)
 	{
 	  any_remote |= c->remote;
 	  any_local |= ! c->remote;
-	  if (debug_flag)
-	    printf (_("Live child 0x%08lx (%s) PID %ld %s\n"),
-		    (unsigned long int) c, c->file->name,
-                    (long) c->pid, c->remote ? _(" (remote)") : "");
+	  DB (DB_JOBS, (_("Live child 0x%08lx (%s) PID %ld %s\n"),
+                        (unsigned long int) c, c->file->name,
+                        (long) c->pid, c->remote ? _(" (remote)") : ""));
 #ifdef VMS
 	  break;
 #endif
@@ -534,15 +535,15 @@ reap_children (block, err)
            Ignore it; it was inherited from our invoker.  */
         continue;
 
-      if (debug_flag)
-        printf (_("Reaping %s child 0x%08lx PID %ld %s\n"),
-                child_failed ? _("losing") : _("winning"),
-                (unsigned long int) c, (long) c->pid,
-                c->remote ? _(" (remote)") : "");
+      DB (DB_JOBS, (child_failed
+                    ? _("Reaping losing child 0x%08lx PID %ld %s\n")
+                    : _("Reaping winning child 0x%08lx PID %ld %s\n"),
+                    (unsigned long int) c, (long) c->pid,
+                    c->remote ? _(" (remote)") : ""));
 
       if (c->sh_batch_file) {
-        if (debug_flag)
-          printf (_("Cleaning up temp batch file %s\n"), c->sh_batch_file);
+        DB (DB_JOBS, (_("Cleaning up temp batch file %s\n"),
+                      c->sh_batch_file));
 
         /* just try and remove, don't care if this fails */
         remove (c->sh_batch_file);
@@ -634,10 +635,9 @@ reap_children (block, err)
            update_status to its also_make files.  */
         notice_finished_file (c->file);
 
-      if (debug_flag)
-        printf (_("Removing child 0x%08lx PID %ld %s from chain.\n"),
-                (unsigned long int) c, (long) c->pid,
-                c->remote ? _(" (remote)") : "");
+      DB (DB_JOBS, (_("Removing child 0x%08lx PID %ld %s from chain.\n"),
+                    (unsigned long int) c, (long) c->pid,
+                    c->remote ? _(" (remote)") : ""));
 
       /* Block fatal signals while frobnicating the list, so that
          children and job_slots_used are always consistent.  Otherwise
@@ -694,9 +694,8 @@ free_child (child)
         if (!EINTR_SET)
           pfatal_with_name (_("write jobserver"));
 
-      if (debug_flag)
-        printf (_("Released token for child 0x%08lx (%s).\n"),
-                (unsigned long int) child, child->file->name);
+      DB (DB_JOBS, (_("Released token for child 0x%08lx (%s).\n"),
+                    (unsigned long int) child, child->file->name));
     }
 
   if (handling_fatal_signal) /* Don't bother free'ing if about to die.  */
@@ -1189,10 +1188,9 @@ start_waiting_job (c)
     {
     case cs_running:
       c->next = children;
-      if (debug_flag)
-	printf (_("Putting child 0x%08lx (%s) PID %ld%s on the chain.\n"),
-		(unsigned long int) c, c->file->name,
-                (long) c->pid, c->remote ? _(" (remote)") : "");
+      DB (DB_JOBS, (_("Putting child 0x%08lx (%s) PID %ld%s on the chain.\n"),
+                    (unsigned long int) c, c->file->name,
+                    (long) c->pid, c->remote ? _(" (remote)") : ""));
       children = c;
       /* One more job slot is in use.  */
       ++job_slots_used;
@@ -1389,9 +1387,8 @@ new_job (file)
 
         if (read (job_rfd, &token, 1) == 1)
           {
-            if (debug_flag)
-              printf (_("Obtained token for child 0x%08lx (%s).\n"),
-                      (unsigned long int) c, c->file->name);
+            DB (DB_JOBS, (_("Obtained token for child 0x%08lx (%s).\n"),
+                          (unsigned long int) c, c->file->name));
             break;
           }
 
@@ -1675,8 +1672,7 @@ child_execute_job (argv, child)
 
       sprintf (cmd, "$ @%s", comname);
 
-      if (debug_flag)
-	printf (_("Executing %s instead\n"), cmd);
+      DB (DB_JOBS, (_("Executing %s instead\n"), cmd));
     }
 
   cmddsc.dsc$w_length = strlen(cmd);
@@ -2436,8 +2432,8 @@ construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr)
         strcat(*batch_filename_ptr, ".sh");
       }
 
-      if (debug_flag)
-        printf(_("Creating temporary batch file %s\n"), *batch_filename_ptr);
+      DB (DB_JOBS, (_("Creating temporary batch file %s\n"),
+                    *batch_filename_ptr));
 
       /* create batch file to execute command */
       batch = fopen (*batch_filename_ptr, "w");

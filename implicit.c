@@ -21,6 +21,7 @@ Boston, MA 02111-1307, USA.  */
 #include "rule.h"
 #include "dep.h"
 #include "filedef.h"
+#include "debug.h"
 
 static int pattern_search PARAMS ((struct file *file, int archive, unsigned int depth,
 		unsigned int recursions));
@@ -36,7 +37,7 @@ try_implicit_rule (file, depth)
      struct file *file;
      unsigned int depth;
 {
-  DEBUGPR (_("Looking for an implicit rule for `%s'.\n"));
+  DBF (DB_IMPLICIT, _("Looking for an implicit rule for `%s'.\n"));
 
   /* The order of these searches was previously reversed.  My logic now is
      that since the non-archive search uses more information in the target
@@ -51,7 +52,8 @@ try_implicit_rule (file, depth)
      archive member name to search for implicit rules.  */
   if (ar_name (file->name))
     {
-      DEBUGPR (_("Looking for archive-member implicit rule for `%s'.\n"));
+      DBF (DB_IMPLICIT,
+           _("Looking for archive-member implicit rule for `%s'.\n"));
       if (pattern_search (file, 1, depth, 0))
 	return 1;
     }
@@ -60,11 +62,6 @@ try_implicit_rule (file, depth)
   return 0;
 }
 
-#define DEBUGP2(msg, a1, a2)						      \
-  do {									      \
-    if (debug_flag)							      \
-      { print_spaces (depth); printf (msg, a1, a2); fflush (stdout); }	      \
-  } while (0)
 
 /* Search the pattern rules for a rule with an existing dependency to make
    FILE.  If a rule is found, the appropriate commands and deps are put in FILE
@@ -199,7 +196,7 @@ pattern_search (file, archive, depth, recursions)
 	 don't use it here.  */
       if (rule->in_use)
 	{
-	  DEBUGP2 (_("Avoiding implicit rule recursion.%s%s\n"), "", "");
+	  DBS (DB_IMPLICIT, (_("Avoiding implicit rule recursion.\n")));
 	  continue;
 	}
 
@@ -335,8 +332,8 @@ pattern_search (file, archive, depth, recursions)
 	      stemlen -= (lastslash - filename) + 1;
 	    }
 
-	  DEBUGP2 (_("Trying pattern rule with stem `%.*s'.\n"),
-		   (int) stemlen, stem);
+	  DBS (DB_IMPLICIT, (_("Trying pattern rule with stem `%.*s'.\n"),
+                             (int) stemlen, stem));
 
 	  /* Try each dependency; see if it "exists".  */
 
@@ -376,16 +373,21 @@ pattern_search (file, archive, depth, recursions)
 		     "impossible", then the rule fails and don't
 		     bother trying it on the second pass either
 		     since we know that will fail too.  */
-		  DEBUGP2 (_("Rejecting impossible %s prerequisite `%s'.\n"),
-			   p == depname ? _("implicit") : _("rule"), p);
+		  DBS (DB_IMPLICIT,
+                       (p == depname
+                        ? _("Rejecting impossible implicit prerequisite `%s'.\n")
+                        : _("Rejecting impossible rule prerequisite `%s'.\n"),
+                        p));
 		  tryrules[i] = 0;
 		  break;
 		}
 
 	      intermediate_files[deps_found] = 0;
 
-	      DEBUGP2 (_("Trying %s prerequisite `%s'.\n"),
-		       p == depname ? _("implicit") : _("rule"), p);
+	      DBS (DB_IMPLICIT,
+                   (p == depname
+                    ? _("Trying implicit prerequisite `%s'.\n")
+                    : _("Trying rule prerequisite `%s'.\n"), p));
 
 	      /* The DEP->changed flag says that this dependency resides in a
 		 nonexistent directory.  So we normally can skip looking for
@@ -408,8 +410,8 @@ pattern_search (file, archive, depth, recursions)
 	      vp = p;
 	      if (vpath_search (&vp, (FILE_TIMESTAMP *) 0))
 		{
-		  DEBUGP2 (_("Found prerequisite `%s' as VPATH `%s'\n"),
-                           p, vp);
+		  DBS (DB_IMPLICIT,
+                       (_("Found prerequisite `%s' as VPATH `%s'\n"), p, vp));
 		  strcpy (vp, p);
 		  found_files[deps_found++] = vp;
 		  continue;
@@ -425,8 +427,9 @@ pattern_search (file, archive, depth, recursions)
 		    intermediate_file
 		      = (struct file *) alloca (sizeof (struct file));
 
-		  DEBUGP2 (_("Looking for a rule with %s file `%s'.\n"),
-			   _("intermediate"), p);
+		  DBS (DB_IMPLICIT,
+                       (_("Looking for a rule with intermediate file `%s'.\n"),
+                        p));
 
 		  bzero ((char *) intermediate_file, sizeof (struct file));
 		  intermediate_file->name = p;

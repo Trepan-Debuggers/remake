@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  10 Nov 1999
+  21 Nov 1999
 
 Copyright (C) 1992,93,94,95,96,97,98,1999 Free Software Foundation, Inc.
 See the end for copying conditions.
@@ -31,6 +31,12 @@ Version 3.79
 * A new psuedo-target, .NOTPARALLEL, is defined.  If set the current
   makefile is always run serially regardless of the value of -j.  Any
   submakes will still be run in parallel if -j was specified.
+
+* The -d (--debug) option has changed: it now takes an optional numeric
+  argument.  By default only a minimal set of debugging output is
+  generated, displaying information about what "normal" files (not
+  makefiles) were deemed out of date and in need of being rebuilt.
+  Various values control the amount of detail in the debugging output.
 
 Version 3.78
 

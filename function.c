@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 #include "dep.h"
 #include "job.h"
 #include "commands.h"
+#include "debug.h"
 
 #ifdef _AMIGA
 #include "amiga.h"
@@ -1454,8 +1455,8 @@ func_shell (o, argv, funcname)
 	reap_children (1, 0);
 
       if (batch_filename) {
-	if (debug_flag)
-	  printf(_("Cleaning up temporary batch file %s\n"), batch_filename);
+	DB (DB_EXTRA, (_("Cleaning up temporary batch file %s\n"),
+                       batch_filename));
 	remove(batch_filename);
 	free(batch_filename);
       }

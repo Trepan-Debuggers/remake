@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 #include "commands.h"
 #include "dep.h"
 #include "variable.h"
+#include "debug.h"
 
 #include <assert.h>
 
@@ -318,7 +319,7 @@ update_file (file, depth)
          change is possible below here until then.  */
       if (f->considered == considered)
         {
-          DEBUGPR (_("Pruning file `%s'.\n"));
+          DBF (DB_EXTRA, _("Pruning file `%s'.\n"));
           continue;
         }
       f->considered = considered;
@@ -363,18 +364,19 @@ update_file_1 (file, depth)
   register struct dep *d, *lastd;
   int running = 0;
 
-  DEBUGPR (_("Considering target file `%s'.\n"));
+  DBF (DB_EXTRA, _("Considering target file `%s'.\n"));
 
   if (file->updated)
     {
       if (file->update_status > 0)
 	{
-	  DEBUGPR (_("Recently tried and failed to update file `%s'.\n"));
+	  DBF (DB_EXTRA,
+               _("Recently tried and failed to update file `%s'.\n"));
           no_rule_error(file);
 	  return file->update_status;
 	}
 
-      DEBUGPR (_("File `%s' was considered already.\n"));
+      DBF (DB_EXTRA, _("File `%s' was considered already.\n"));
       return 0;
     }
 
@@ -384,10 +386,10 @@ update_file_1 (file, depth)
     case cs_deps_running:
       break;
     case cs_running:
-      DEBUGPR (_("Still updating file `%s'.\n"));
+      DBF (DB_EXTRA, _("Still updating file `%s'.\n"));
       return 0;
     case cs_finished:
-      DEBUGPR (_("Finished updating file `%s'.\n"));
+      DBF (DB_EXTRA, _("Finished updating file `%s'.\n"));
       return file->update_status;
     default:
       abort ();
@@ -408,7 +410,7 @@ update_file_1 (file, depth)
   check_renamed (file);
   noexist = this_mtime == (FILE_TIMESTAMP) -1;
   if (noexist)
-    DEBUGPR (_("File `%s' does not exist.\n"));
+    DBF (DB_BASIC, _("File `%s' does not exist.\n"));
 
   must_make = noexist;
 
@@ -418,15 +420,15 @@ update_file_1 (file, depth)
   if (!file->phony && file->cmds == 0 && !file->tried_implicit)
     {
       if (try_implicit_rule (file, depth))
-	DEBUGPR (_("Found an implicit rule for `%s'.\n"));
+	DBF (DB_IMPLICIT, _("Found an implicit rule for `%s'.\n"));
       else
-	DEBUGPR (_("No implicit rule found for `%s'.\n"));
+	DBF (DB_IMPLICIT, _("No implicit rule found for `%s'.\n"));
       file->tried_implicit = 1;
     }
   if (file->cmds == 0 && !file->is_target
       && default_file != 0 && default_file->cmds != 0)
     {
-      DEBUGPR (_("Using default commands for `%s'.\n"));
+      DBF (DB_IMPLICIT, _("Using default commands for `%s'.\n"));
       file->cmds = default_file->cmds;
     }
 
@@ -524,13 +526,13 @@ update_file_1 (file, depth)
 
   file->updating = 0;
 
-  DEBUGPR (_("Finished prerequisites of target file `%s'.\n"));
+  DBF (DB_EXTRA, _("Finished prerequisites of target file `%s'.\n"));
 
   if (running)
     {
       set_command_state (file, cs_deps_running);
       --depth;
-      DEBUGPR (_("The prerequisites of `%s' are being made.\n"));
+      DBF (DB_EXTRA, _("The prerequisites of `%s' are being made.\n"));
       return 0;
     }
 
@@ -543,7 +545,7 @@ update_file_1 (file, depth)
 
       depth--;
 
-      DEBUGPR (_("Giving up on target file `%s'.\n"));
+      DBF (DB_EXTRA, _("Giving up on target file `%s'.\n"));
 
       if (depth == 0 && keep_going_flag
 	  && !just_print_flag && !question_flag)
@@ -589,15 +591,29 @@ update_file_1 (file, depth)
 	 or its dependent, FILE, is older or does not exist.  */
       d->changed |= noexist || d_mtime > this_mtime;
 
-      if (debug_flag && !noexist)
+      if (!noexist && ISDB (DB_BASIC|DB_EXTRA))
 	{
-	  print_spaces (depth);
+          const char *fmt = 0;
+
 	  if (d_mtime == (FILE_TIMESTAMP) -1)
-	    printf (_("Prerequisite `%s' does not exist.\n"), dep_name (d));
-	  else
-	    printf (_("Prerequisite `%s' is %s than target `%s'.\n"),
-		    dep_name (d), d->changed ? _("newer") : _("older"), file->name);
-	  fflush (stdout);
+            {
+              if (ISDB (DB_BASIC))
+                fmt = _("Prerequisite `%s' of target `%s' does not exist.\n");
+            }
+	  else if (d->changed)
+            {
+              if (ISDB (DB_BASIC))
+                fmt = _("Prerequisite `%s' is newer than target `%s'.\n");
+            }
+          else if (ISDB (DB_EXTRA))
+            fmt = _("Prerequisite `%s' is older than target `%s'.\n");
+
+          if (fmt)
+            {
+              print_spaces (depth);
+              printf (fmt, dep_name (d), file->name);
+              fflush (stdout);
+            }
 	}
     }
 
@@ -607,24 +623,26 @@ update_file_1 (file, depth)
   if (file->double_colon && file->deps == 0)
     {
       must_make = 1;
-      DEBUGPR (_("Target `%s' is double-colon and has no prerequisites.\n"));
+      DBF (DB_BASIC,
+           _("Target `%s' is double-colon and has no prerequisites.\n"));
     }
   else if (!noexist && file->is_target && !deps_changed && file->cmds == 0)
     {
       must_make = 0;
-      DEBUGPR (_("No commands for `%s' and no prerequisites actually changed.\n"));
+      DBF (DB_EXTRA,
+           _("No commands for `%s' and no prerequisites actually changed.\n"));
     }
 
   if (!must_make)
     {
-      if (debug_flag)
+      if (ISDB (DB_EXTRA))
         {
-          print_spaces(depth);
-          printf(_("No need to remake target `%s'"), file->name);
-          if (!streq(file->name, file->hname))
-              printf(_("; using VPATH name `%s'"), file->hname);
-          printf(".\n");
-          fflush(stdout);
+          print_spaces (depth);
+          printf (_("No need to remake target `%s'"), file->name);
+          if (!streq (file->name, file->hname))
+              printf (_("; using VPATH name `%s'"), file->hname);
+          puts (".");
+          fflush (stdout);
         }
 
       notice_finished_file (file);
@@ -642,18 +660,13 @@ update_file_1 (file, depth)
       return 0;
     }
 
-  DEBUGPR (_("Must remake target `%s'.\n"));
+  DBF (DB_BASIC, _("Must remake target `%s'.\n"));
 
   /* It needs to be remade.  If it's VPATH and not reset via GPATH, toss the
      VPATH.  */
   if (!streq(file->name, file->hname))
     {
-      if (debug_flag)
-        {
-          print_spaces (depth);
-          printf(_("  Ignoring VPATH name `%s'.\n"), file->hname);
-          fflush(stdout);
-        }
+      DB (DB_BASIC, (_("  Ignoring VPATH name `%s'.\n"), file->hname));
       file->ignore_vpath = 1;
     }
 
@@ -662,20 +675,20 @@ update_file_1 (file, depth)
 
   if (file->command_state != cs_finished)
     {
-      DEBUGPR (_("Commands of `%s' are being run.\n"));
+      DBF (DB_EXTRA, _("Commands of `%s' are being run.\n"));
       return 0;
     }
 
   switch (file->update_status)
     {
     case 2:
-      DEBUGPR (_("Failed to remake target file `%s'.\n"));
+      DBF (DB_BASIC, _("Failed to remake target file `%s'.\n"));
       break;
     case 0:
-      DEBUGPR (_("Successfully remade target file `%s'.\n"));
+      DBF (DB_BASIC, _("Successfully remade target file `%s'.\n"));
       break;
     case 1:
-      DEBUGPR (_("Target file `%s' needs remade under -q.\n"));
+      DBF (DB_BASIC, _("Target file `%s' needs remade under -q.\n"));
       break;
     default:
       assert (file->update_status >= 0 && file->update_status <= 2);
@@ -827,15 +840,15 @@ check_dep (file, depth, this_mtime, must_make_ptr)
       if (!file->phony && file->cmds == 0 && !file->tried_implicit)
 	{
 	  if (try_implicit_rule (file, depth))
-	    DEBUGPR (_("Found an implicit rule for `%s'.\n"));
+	    DBF (DB_IMPLICIT, _("Found an implicit rule for `%s'.\n"));
 	  else
-	    DEBUGPR (_("No implicit rule found for `%s'.\n"));
+	    DBF (DB_IMPLICIT, _("No implicit rule found for `%s'.\n"));
 	  file->tried_implicit = 1;
 	}
       if (file->cmds == 0 && !file->is_target
 	  && default_file != 0 && default_file->cmds != 0)
 	{
-	  DEBUGPR (_("Using default commands for `%s'.\n"));
+	  DBF (DB_IMPLICIT, _("Using default commands for `%s'.\n"));
 	  file->cmds = default_file->cmds;
 	}
 

@@ -24,7 +24,9 @@ MA 02111-1307, USA.  */
 #include "job.h"
 #include "commands.h"
 #include "rule.h"
+#include "debug.h"
 #include "getopt.h"
+
 #include <assert.h>
 #ifdef _AMIGA
 # include <dos/dos.h>
@@ -137,9 +139,11 @@ int touch_flag;
 
 int just_print_flag;
 
-/* Print debugging trace info (-d).  */
+/* Print debugging info (--debug).  */
 
-int debug_flag = 0;
+int db_level = 0;
+int noarg_db_level = 1;
+int default_db_level = 0;
 
 #ifdef WINDOWS32
 /* Suspend make in main for a short time to allow debugger to attach */
@@ -256,9 +260,10 @@ static const struct command_switch switches[] =
     { 'C', string, (char *) &directories, 0, 0, 0, 0, 0,
 	"directory", _("DIRECTORY"),
 	_("Change to DIRECTORY before doing anything") },
-    { 'd', flag, (char *) &debug_flag, 1, 1, 0, 0, 0,
-	"debug", 0,
-	_("Print lots of debugging information") },
+    { 'd', positive_int, (char *) &db_level, 1, 1, 0,
+        (char *) &noarg_db_level, (char *) &default_db_level,
+	"debug", "L",
+	_("Print different types of debugging information") },
 #ifdef WINDOWS32
     { 'D', flag, (char *) &suspend_flag, 1, 1, 0, 0, 0,
         "suspend-for-debug", 0,
@@ -484,7 +489,7 @@ static RETSIGTYPE
 debug_signal_handler (sig)
      int sig;
 {
-  debug_flag = ! debug_flag;
+  db_level = DB_NONE;
 }
 
 #ifdef WINDOWS32
@@ -492,8 +497,8 @@ debug_signal_handler (sig)
  * HANDLE runtime exceptions by avoiding a requestor on the GUI. Capture
  * exception and print it to stderr instead.
  *
- * If debug_flag not set, just print a simple message and exit.
- * If debug_flag set, print a more verbose message.
+ * If ! DB_EXTRA, just print a simple message and exit.
+ * If DB_EXTRA, print a more verbose message.
  * If compiled for DEBUG, let exception pass through to GUI so that
  *   debuggers can attach.
  */
@@ -509,7 +514,7 @@ handle_runtime_exceptions( struct _EXCEPTION_POINTERS *exinfo )
   LPTSTR lpszStrings[1];
 #endif
 
-  if (!debug_flag)
+  if (! ISDB (DB_EXTRA))
     {
       sprintf(errmsg, _("%s: Interrupt/Exception caught "), prg);
       sprintf(&errmsg[strlen(errmsg)],
@@ -596,8 +601,8 @@ find_and_set_default_shell(char *token)
     /* search token path was found */
     sprintf(sh_path, "%s", search_token);
     default_shell = xstrdup(w32ify(sh_path,0));
-    if (debug_flag)
-      printf(_("find_and_set_shell setting default_shell = %s\n"), default_shell);
+    DB (DB_EXTRA,
+        (_("find_and_set_shell setting default_shell = %s\n"), default_shell));
     sh_found = 1;
   } else {
     char *p;
@@ -638,8 +643,10 @@ find_and_set_default_shell(char *token)
           sh_found = 1;
       }
 
-      if (debug_flag && sh_found)
-        printf(_("find_and_set_shell path search set default_shell = %s\n"), default_shell);
+      if (sh_found)
+        DB (DB_EXTRA,
+            (_("find_and_set_shell path search set default_shell = %s\n"),
+             default_shell));
     }
   }
 
@@ -942,9 +949,14 @@ int main (int argc, char ** argv)
   }
 #endif
 
+  /* If we have the "extra" level, force the basic level too.  */
+
+  if (ISDB (DB_EXTRA))
+    db_level |= DB_BASIC;
+
   /* Print version information.  */
 
-  if (print_version_flag || print_data_base_flag || debug_flag)
+  if (print_version_flag || print_data_base_flag || db_level)
     print_version ();
 
   /* `make --version' is supposed to just print the version and exit.  */
@@ -1473,9 +1485,12 @@ int main (int argc, char ** argv)
       unsigned int mm_idx = 0;
       char **nargv = argv;
       int nargc = argc;
+      int orig_db_level = db_level;
 
-      if (debug_flag)
-	puts (_("Updating makefiles...."));
+      if (! ISDB (DB_MAKEFILES))
+        db_level = DB_NONE;
+
+      DB (DB_BASIC, (_("Updating makefiles....\n")));
 
       /* Remove any makefiles we don't want to try to update.
 	 Also record the current modtimes so we can compare them later.  */
@@ -1499,9 +1514,9 @@ int main (int argc, char ** argv)
 			 stupidly; but if you work for Athena, that's how
 			 you write your makefiles.)  */
 
-		      if (debug_flag)
-			printf (_("Makefile `%s' might loop; not remaking it.\n"),
-				f->name);
+		      DB (DB_EXTRA,
+                          (_("Makefile `%s' might loop; not remaking it.\n"),
+                           f->name));
 
 		      if (last == 0)
 			read_makefiles = d->next;
@@ -1694,13 +1709,13 @@ int main (int argc, char ** argv)
 	  }
 #endif
 
-	  if (debug_flag)
+	  if (ISDB (DB_BASIC))
 	    {
 	      char **p;
 	      fputs (_("Re-executing:"), stdout);
 	      for (p = nargv; *p != 0; ++p)
 		printf (" %s", *p);
-	      puts ("");
+	      putchar ('\n');
 	    }
 
 	  fflush (stdout);
@@ -1718,6 +1733,8 @@ int main (int argc, char ** argv)
 #endif
 	  /* NOTREACHED */
 	}
+
+      db_level = orig_db_level;
     }
 
   /* Set up `MAKEFLAGS' again for the normal targets.  */
@@ -1755,8 +1772,7 @@ int main (int argc, char ** argv)
 
     /* Update the goals.  */
 
-    if (debug_flag)
-      puts (_("Updating goal targets...."));
+    DB (DB_BASIC, (_("Updating goal targets....\n")));
 
     switch (update_goal_chain (goals, 0))
     {
