@@ -1,3 +1,21 @@
+1999-06-14  Paul D. Smith  <psmith@gnu.org>
+
+	* read.c (read_makefile): Cast -1 arguments to
+	variable_expand_string() to long.  Alexandre Sauve
+	<Alexandre.SAUVE@ifp.fr> reports that without casts, this breaks
+	on a NEC SUPER-UX SX-4 system (and it's wrong without a cast
+	anyway).  Of course, (a) I'd really love to start using function
+	prototypes, and (b) there's a whole slew of issues related to int
+	vs. long and signed vs. unsigned in the length handling of
+	variable buffers, etc.  Gross.  Needs a complete mucking-out.
+	* expand.c (variable_expand): Ditto.
+
+	* acinclude.m4 (AC_FUNC_SELECT): Slight enhancement for AIX 3.2 by
+	Lars Hecking <lhecking@nmrc.ucc.ie>.
+
+	* read.c (get_next_mword): Allow colons to be escaped in target
+	names: fix for regression failure.
+
 1999-04-26  Paul D. Smith  <psmith@gnu.org>
 
 	* main.c (main): Reset read_makefiles to empty after processing so

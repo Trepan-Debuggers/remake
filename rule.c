@@ -334,27 +334,29 @@ new_pattern_rule (rule, override)
 	      if (!streq (dep_name (d), dep_name (d2)))
 		break;
 	    if (d == 0 && d2 == 0)
-	      /* All the dependencies matched.  */
-	      if (override)
-		{
-		  /* Remove the old rule.  */
-		  freerule (r, lastrule);
-		  /* Install the new one.  */
-		  if (pattern_rules == 0)
-		    pattern_rules = rule;
-		  else
-		    last_pattern_rule->next = rule;
-		  last_pattern_rule = rule;
+	      {
+		/* All the dependencies matched.  */
+		if (override)
+		  {
+		    /* Remove the old rule.  */
+		    freerule (r, lastrule);
+		    /* Install the new one.  */
+		    if (pattern_rules == 0)
+		      pattern_rules = rule;
+		    else
+		      last_pattern_rule->next = rule;
+		    last_pattern_rule = rule;
 
-		  /* We got one.  Stop looking.  */
-		  goto matched;
-		}
-	      else
-		{
-		  /* The old rule stays intact.  Destroy the new one.  */
-		  freerule (rule, (struct rule *) 0);
-		  return 0;
-		}
+		    /* We got one.  Stop looking.  */
+		    goto matched;
+		  }
+		else
+		  {
+		    /* The old rule stays intact.  Destroy the new one.  */
+		    freerule (rule, (struct rule *) 0);
+		    return 0;
+		  }
+	      }
 	  }
       }
 
