@@ -9,8 +9,8 @@
 
 @set EDITION 0.44
 @set VERSION 3.69 Beta
-@set UPDATED 17 September 1993
-@set UPDATE-MONTH September 1993
+@set UPDATED 21 October 1993
+@set UPDATE-MONTH October 1993
 
 @c finalout
 
@@ -8068,6 +8068,14 @@ In System V and 4.3 BSD @code{make}, files found by @code{VPATH} search
 (@pxref{Directory Search, ,Searching Directories for Dependencies}) have their names changed inside command
 strings.  We feel it is much cleaner to always use automatic variables
 and thus make this feature obsolete.@refill
+
+@item
+In some Unix @code{make}s, the automatic variable @code{$*} appearing in
+the dependencies of a rule has the amazingly strange ``feature'' of
+expanding to the full name of the @emph{target of that rule}.  We cannot
+imagine what went on in the minds of Unix @code{make} developers to do
+this; it is utterly inconsistent with the normal definition of @code{$*}.
+@vindex * @r{(automatic variable), unsupported bizarre usage}
 
 @item
 In some Unix @code{make}s, implicit rule search
