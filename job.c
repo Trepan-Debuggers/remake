@@ -1241,6 +1241,7 @@ construct_command_argv_internal (line, restp, shell, ifs)
 
       if (instring)
 	{
+	string_char:
 	  /* Inside a string, just copy any char except a closing quote
 	     or a backslash-newline combination.  */
 	  if (*p == '\'')
@@ -1292,7 +1293,7 @@ construct_command_argv_internal (line, restp, shell, ifs)
 		  strcpy (p, p + 1);
 
 		if (instring)
-		  *ap++ = *p;
+		  goto string_char;
 		else
 		  {
 		    if (ap != new_argv[i])
