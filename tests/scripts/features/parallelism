@@ -60,15 +60,15 @@ all: 1 2 3; @echo success
 
 -include 1.inc 2.inc 3.inc
 
-    1.inc: ; @sleep 1; echo 1; echo "1: ; @echo $@ has been included" > $@
+1.inc: ; @sleep 1; echo 1; echo "1: ; @sleep 2; echo $@ has been included" > $@
 2.inc: ; @sleep 2; echo 2; echo "2: ; @echo $@ has been included" > $@
-3.inc: ; @echo 3; echo "3: ; @echo $@ has been included" > $@
+3.inc: ; @echo 3; echo "3: ; @sleep 1; echo $@ has been included" > $@
 EOF
 
 close(MAKEFILE);
 
 &run_make_with_options("$makefile2", "-j 4", &get_logfile);
-$answer = "3\n1\n2\n1.inc has been included\n2.inc has been included\n3.inc has been included\nsuccess\n";
+$answer = "3\n1\n2\n2.inc has been included\n3.inc has been included\n1.inc has been included\nsuccess\n";
 &compare_output($answer, &get_logfile(1));
 
 unlink('1.inc', '2.inc', '3.inc');

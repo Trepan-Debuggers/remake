@@ -36,7 +36,15 @@ sub toplevel
   # Replace the environment with the new one
   #
   %origENV = %ENV;
-  %ENV = ();
+
+  # We used to say "%ENV = ();" but this doesn't work in Perl 5.000
+  # through Perl 5.004.  It was fixed in Perl 5.004_01, but we don't
+  # want to require that here, so just delete each one individually.
+
+  foreach $v (keys %ENV) {
+    delete $ENV{$v};
+  }
+
   %ENV = %makeENV;
 
   $| = 1;                     # unbuffered output

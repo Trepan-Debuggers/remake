@@ -13,7 +13,6 @@ $makefile_orig = &get_tmpfile;
 open(MAKEFILE,"> $makefile");
 
 print MAKEFILE <<EOM;
-SHELL = /bin/sh
 
 all: ; \@echo 'running rules.'
 
@@ -51,6 +50,8 @@ $makefile3 = &get_tmpfile;
 
 open(MAKEFILE, "> $makefile3");
 print MAKEFILE <<'EOM';
+SHELL = /bin/sh
+
 all: ; @echo hello
 
 a : b ; touch $@

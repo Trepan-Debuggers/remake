@@ -974,6 +974,13 @@ int main (int argc, char ** argv)
 	if (*p == '\\')
 	  *p = '/';
     }
+  /* If argv[0] is not in absolute form, prepend the current
+     directory.  This can happen when Make is invoked by another DJGPP
+     program that uses a non-absolute name.  */
+  if (current_directory[0] != '\0'
+      && argv[0] != 0
+      && (argv[0][0] != '/' && (argv[0][0] == '\0' || argv[0][1] != ':')))
+    argv[0] = concat (current_directory, "/", argv[0]);
 #else  /* !__MSDOS__ */
   if (current_directory[0] != '\0'
       && argv[0] != 0 && argv[0][0] != '/' && index (argv[0], '/') != 0)

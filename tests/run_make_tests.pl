@@ -101,18 +101,16 @@ sub print_help
 }
 
 sub get_this_pwd {
-   if ($vos)
-   {
-      $delete_command = "delete_file";
-      $__pwd = `++(current_dir)`;
-   }
-   else
-   {
-      $delete_command = "rm";
-      chop ($__pwd = `pwd`);
-   }
+  if ($vos) {
+    $delete_command = "delete_file";
+    $__pwd = `++(current_dir)`;
+  }
+  else {
+    $delete_command = "rm";
+    chop ($__pwd = `pwd`);
+  }
 
-   return $__pwd;
+  return $__pwd;
 }
 
 sub set_defaults
@@ -141,8 +139,8 @@ sub set_more_defaults
 
    $string = `$make_path -v -f /dev/null 2> /dev/null`;
 
-   $string =~ s/[,\n].*/\n/s;
-   $testee_version = $string;
+   $string =~ /^(GNU Make [^,\n]*)/;
+   $testee_version = "$1\n";
 
    $string = `sh -c "$make_path -f /dev/null 2>&1"`;
    if ($string =~ /(.*): \*\*\* No targets\.  Stop\./) {
@@ -172,7 +170,8 @@ sub set_more_defaults
 
    # Get Purify log info--if any.
 
-   ($pure_log = $ENV{PURIFYOPTIONS}) =~ s,.*-logfile=([^ ]+) .*,\1,;
+   $ENV{PURIFYOPTIONS} =~ /.*-logfile=([^ ]+)/;
+   $pure_log = $1 || '';
    $pure_log =~ s/%v/$make_name/;
    $purify_errors = 0;
 
@@ -187,17 +186,18 @@ sub set_more_defaults
 
 sub setup_for_test
 {
-   $makefile = &get_tmpfile;
-   if (-f $makefile)
-   {
-      unlink $makefile;
-   }
+  $makefile = &get_tmpfile;
+  if (-f $makefile) {
+    unlink $makefile;
+  }
 
-   # Get rid of any Purify logs.
-   ($pure_testname = $testname) =~ tr,/,_,;
-   $pure_testname = "$pure_log.$pure_testname";
-   system("rm -f $pure_testname*");
-   print("Purify testfiles are: $pure_testname*\n") if $debug;
+  # Get rid of any Purify logs.
+  if ($pure_log) {
+    ($pure_testname = $testname) =~ tr,/,_,;
+    $pure_testname = "$pure_log.$pure_testname";
+    system("rm -f $pure_testname*");
+    print("Purify testfiles are: $pure_testname*\n") if $debug;
+  }
 }
 
 exit !&toplevel;

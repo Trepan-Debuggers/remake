@@ -1,0 +1,25 @@
+1999-09-15  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/parallelism: The second test output could
+	change depending on how fast some scripts completed; use "sleep"
+	to force the order we want.
+
+	* test_driver.pl (toplevel): A bug in Perl 5.000 to Perl 5.004
+	means that "%ENV = ();" doesn't do the right thing.  This worked
+	in Perl 4 and was fixed in Perl 5.004_01, but use a loop to delete
+	the environment rather than require specific versions.
+
+	* run_make_tests.pl (set_more_defaults): Don't use Perl 5 s///
+	modifier "s", so the tests will run with Perl 4.
+	(set_more_defaults): Set $pure_log to empty if there's no -logfile
+	option in PURIFYOPTIONS.
+	(setup_for_test): Don't remove any logs unless $pure_log is set.
+
+1999-09-15  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* scripts/features/reinvoke: Put the SHELL definition in the right
+	test makefile.
+
+1999-09-15  Paul D. Smith  <psmith@gnu.org>
+
+	ChangeLog file for the test suite created.

@@ -8,8 +8,8 @@ infrastructure changes I've added a number of new tests.
 
 Rob Tulloh has contributed changes to get the suite running on NT.
 
-Eli Zaretski and Esa A E Peuha <peuha@cc.helsinki.fi> have contributed
-changes to the get the suite running on DJGPP/DOS.
+Eli Zaretskii and Esa A E Peuha <peuha@cc.helsinki.fi> have contributed
+changes to get the suite running on DJGPP/DOS.
 
 This package has a number of problems which preclude me from
 distributing it with make as a default "make check" test suite.  The
