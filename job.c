@@ -377,7 +377,7 @@ reap_children (block, err)
 		 delete non-precious targets, and abort.  */
 	      static int delete_on_error = -1;
 	      child_error (c->file->name, exit_code, exit_sig, coredump, 0);
-	      c->file->update_status = 1;
+	      c->file->update_status = 2;
 	      if (delete_on_error == -1)
 		{
 		  struct file *f = lookup_file (".DELETE_ON_ERROR");
@@ -405,7 +405,7 @@ reap_children (block, err)
 			 Since there are more commands that wanted to be run,
 			 the target was not completely remade.  So we treat
 			 this as if a command had failed.  */
-		      c->file->update_status = 1;
+		      c->file->update_status = 2;
 		    }
 		  else
 		    {
@@ -433,7 +433,7 @@ reap_children (block, err)
 	    }
 
 	  /* When we get here, all the commands for C->file are finished
-	     (or aborted) and C->file->update_status contains 0 or 1.  But
+	     (or aborted) and C->file->update_status contains 0 or 2.  But
 	     C->file->command_state is still cs_running if all the commands
 	     ran; notice_finish_file looks for cs_running to tell it that
 	     it's interesting to check the file's modtime again now.  */
