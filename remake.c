@@ -21,6 +21,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "job.h"
 #include "dep.h"
 #include "file.h"
+#include <assert.h>
 
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
@@ -277,9 +278,7 @@ update_file (file, depth)
 	  return 0;
 
 	default:
-	  error ("internal error: `%s' command_state == %d in update_file",
-		 f->name, (int) f->command_state);
-	  abort ();
+	  assert (f->command_state == cs_running);
 	  break;
 	}
     }
@@ -572,13 +571,9 @@ update_file_1 (file, depth)
     case 0:
       DEBUGPR ("Successfully remade target file `%s'.\n");
       break;
-    case -1:
-      error ("internal error: `%s' update_status is -1 at cs_finished!",
-	     file->name);
-      abort ();
     default:
-      error ("internal error: `%s' update_status invalid!", file->name);
-      abort ();
+      assert (file->update_status == 0 || file->update_status == 1);
+      break;
     }
 
   file->updated = 1;
