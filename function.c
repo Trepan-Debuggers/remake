@@ -27,6 +27,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <process.h>
 #include <fcntl.h>
 #endif
+#ifdef _AMIGA
+#include "amiga.h"
+#endif
 
 static char *string_glob PARAMS ((char *line));
 
@@ -342,10 +345,13 @@ expand_function (o, function, text, end)
 #ifndef VMS /* not supported for vms yet */
     case function_shell:
       {
-	char **argv, **envp;
+	char **argv;
 	char *error_prefix;
+#ifndef _AMIGA
+	char **envp;
 	int pipedes[2];
 	int pid;
+#endif
 
 	/* Expand the command line.  */
 	text = expand_argument (text, end);
@@ -991,8 +997,12 @@ expand_function (o, function, text, end)
     case function_wildcard:
       text = expand_argument (text, end);
 
+#ifdef _AMIGA
+      o = wildcard_expansion (text, o);
+#else
       p = string_glob (text);
       o = variable_buffer_output (o, p, strlen (p));
+#endif
 
       free (text);
       break;
@@ -1210,8 +1220,12 @@ index argument");
 #ifdef VMS
             o = variable_buffer_output (o, "[]", 2);
 #else
+#ifndef _AMIGA
             o = variable_buffer_output (o, "./", 2);
-#endif
+#else
+	    /* o = o */; /* Just a nop... */
+#endif /* AMIGA */
+#endif /* !VMS */
 	  else
 	    /* The entire name is the basename.  */
 	    o = variable_buffer_output (o, p2, len);
