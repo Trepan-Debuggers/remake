@@ -708,7 +708,7 @@ main (argc, argv, envp)
 	    (void) mktemp (name);
 #else
 	    static char name[L_tmpnam];
-	    (void) tmpnam ();
+	    (void) tmpnam (name);
 #endif
 
 	    outfile = fopen (name, "w");
