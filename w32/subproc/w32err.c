@@ -11,9 +11,12 @@
  */
 char *
 map_windows32_error_to_string (DWORD ercode) {
-/* __declspec (thread) necessary if you will use multiple threads */
+/* __declspec (thread) necessary if you will use multiple threads on MSVC */
+#ifdef _MSC_VER
 __declspec (thread) static char szMessageBuffer[128];
-
+#else
+static char szMessageBuffer[128];
+#endif
 	/* Fill message buffer with a default message in
 	 * case FormatMessage fails
 	 */

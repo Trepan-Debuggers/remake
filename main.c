@@ -1026,6 +1026,25 @@ main (int argc, char **argv, char **envp)
       if (program == 0 && argv[0][1] == ':')
 	program = argv[0] + 1;
 #endif
+#ifdef WINDOWS32
+      if (program == 0)
+        {
+          /* Extract program from full path */
+          int argv0_len;
+          char *p = strrchr (argv[0], '\\');
+          if (!p)
+            p = argv[0];
+          argv0_len = strlen(p);
+          if (argv0_len > 4
+              && streq (&p[argv0_len - 4], ".exe"))
+            {
+              /* Remove .exe extension */
+              p[argv0_len - 4] = '\0';
+              /* Increment past the initial '\' */
+              program = p + 1;
+            }
+        }
+#endif
       if (program == 0)
 	program = argv[0];
       else

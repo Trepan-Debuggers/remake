@@ -1,3 +1,17 @@
+2005-02-24  Jonathan Grant  <jg@jguk.org>
+
+	* configure.in: Add MinGW configuration options, and extra w32 code
+        directory.
+	* Makefile.am: Add MinGW configuration options, and extra w32 code
+        directory.
+	* main.c: Determine correct program string (after last \ without .exe).
+	* subproc/sub_proc.c: `GetExitCodeProcess' from incompatible pointer
+        type fix x2
+	* w32/Makefile.am: Import to build win32 lib of sub_proc etc.
+	* subproc/w32err.c: MSVC thread directive not applied to MinGW builds.
+	* tests/run_make_tests.pl, tests/test_driver.pl: MSYS testing
+        environment support.
+
 2005-02-09  Paul D. Smith  <psmith@gnu.org>
 
 	* maintMakefile: Update the CVS download URL to simplify them.

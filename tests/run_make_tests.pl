@@ -12,6 +12,7 @@
 #                        (and others)
 
 $valgrind = 0;              # invoke make with valgrind
+$pure_log = undef;
 
 require "test_driver.pl";
 
@@ -215,7 +216,7 @@ sub set_more_defaults
    #
    # This is probably not specific enough.
    #
-   if ($osname =~ /Windows/i) {
+   if ($osname =~ /Windows/i || $osname =~ /MINGW32/i) {
      $port_type = 'W32';
    }
    # Bleah, the osname is so variable on DOS.  This kind of bites.
@@ -243,11 +244,17 @@ sub set_more_defaults
    #
    $wtime = $port_type eq 'UNIX' ? 1 : $port_type eq 'OS/2' ? 2 : 4;
 
-   # Find the full pathname of Make.  For DOS systems this is more
-   # complicated, so we ask make itself.
+   print "Port type: $port_type\n" if $debug;
+   print "Make path: $make_path\n" if $debug;
 
-   $make_path = `sh -c 'echo "all:;\@echo \\\$(MAKE)" | $make_path -f-'`;
-   chop $make_path;
+   # Find the full pathname of Make.  For DOS systems this is more
+   # complicated, so we ask make itself.  The following shell code does not
+   # work on W32 (MinGW/MSYS)
+
+   if ($port_type ne 'W32') {
+     $make_path = `sh -c 'echo "all:;\@echo \\\$(MAKE)" | $make_path -f-'`;
+     chop $make_path;
+   }
    print "Make\t= `$make_path'\n" if $debug;
 
    $string = `$make_path -v -f /dev/null 2> /dev/null`;
@@ -283,10 +290,12 @@ sub set_more_defaults
 
    # Get Purify log info--if any.
 
-   $ENV{PURIFYOPTIONS} =~ /.*-logfile=([^ ]+)/;
-   $pure_log = $1 || '';
-   $pure_log =~ s/%v/$make_name/;
-   $purify_errors = 0;
+   if (exists $ENV{PURIFYOPTIONS}
+       && $ENV{PURIFYOPTIONS} =~ /.*-logfile=([^ ]+)/) {
+     $pure_log = $1 || '';
+     $pure_log =~ s/%v/$make_name/;
+     $purify_errors = 0;
+   }
 
    $string = `sh -c "$make_path -j 2 -f /dev/null 2>&1"`;
    if ($string =~ /not supported/) {
