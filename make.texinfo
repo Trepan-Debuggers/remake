@@ -7,11 +7,11 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.127 1994/03/23 14:43:56 roland Exp $
+@set RCSID $Id: make.texinfo,v 2.128 1994/04/20 22:21:51 roland Exp $
 @set EDITION 0.45
 @set VERSION 3.71 Beta
-@set UPDATED 11 February 1994
-@set UPDATE-MONTH February 1994
+@set UPDATED 20 April 1994
+@set UPDATE-MONTH April 1994
 
 @c finalout
 
@@ -3563,6 +3563,10 @@ purposes in the makefile, and reserving upper case for parameters that
 control implicit rules or for parameters that the user should override with
 command options (@pxref{Overriding, ,Overriding Variables}).
 
+A few variables have names that are a single punctuation character or
+just a few characters.  These are the @dfn{automatic variables}, and
+they have particular specialized uses.  @xref{Automatic Variables}.
+
 @menu
 * Reference::                   How to use the value of a variable.
 * Flavors::                     Variables come in two flavors.
@@ -3576,6 +3580,8 @@ command options (@pxref{Overriding, ,Overriding Variables}).
 * Defining::                    An alternate way to set a variable 
                                   to a verbatim string.
 * Environment::                 Variable values can come from the environment.
+* Automatic Variables::         Some special variables have predefined
+                                  meanings for use with implicit rules.
 @end menu
 
 @node Reference, Flavors,  , Using Variables
