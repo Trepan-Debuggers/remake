@@ -401,7 +401,9 @@ installed.
 
 Installation directories should always be named by variables, so it is
 easy to install in a nonstandard place.  The standard names for these
-variables are as follows.
+variables are described below.  They are based on a standard filesystem
+layout; variants of it are used in SVR4, 4.4BSD, Linux, Ultrix v4, and
+other modern operating systems.
 
 These two variables set the root for the installation.  All the other
 installation directories should be subdirectories of one of these two,
@@ -411,7 +413,8 @@ and nothing should be directly installed into these two directories.
 @item prefix
 A prefix used in constructing the default values of the variables listed
 below.  The default value of @code{prefix} should be @file{/usr/local}
-(at least for now).
+When building the complete GNU system, the prefix will be empty and
+@file{/usr} will be a symbolic link to @file{/}.
 
 @item exec_prefix
 A prefix used in constructing the default values of some of the
