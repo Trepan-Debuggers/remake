@@ -49,13 +49,10 @@ extras := $(filter-out getloadavg.o @%@,$(extras)) getloadavg.o
 LOADLIBES := $(filter-out @%@,$(LOADLIBES))
 ALLOCA := $(filter-out @%@,$(ALLOCA))
 
-# Tell autoconf/autoheader to use m4 files from the master source.
-ifndef AC_MACRODIR
-AC_MACRODIR = /home/gd/gnu/autoconf
-endif
-ACFLAGS := -m $(AC_MACRODIR)
+ifdef AC_MACRODIR
 configure config.h.in: $(patsubst %,$(AC_MACRODIR)/%.m4,acspecific acgeneral)
 config.h.in: $(AC_MACRODIR)/acconfig.h
+endif
 configure: configure.in; autoconf $(ACFLAGS)
 config.h.in: configure.in; autoheader $(ACFLAGS)
 
