@@ -134,4 +134,28 @@ $answer = "OK\n";
 
 delete $ENV{EVAR};
 
+
+# Clean out previous information to allow new run_make_test() interface.
+# If we ever convert all the above to run_make_test() we can remove this line.
+$makefile = undef;
+
+# Test handling of backslashes in strings to be evaled.
+
+run_make_test('
+define FOO
+all: ; @echo hello \
+world
+endef
+$(eval $(FOO))
+', '', 'hello world');
+
+run_make_test('
+define FOO
+all: ; @echo he\llo
+	@echo world
+endef
+$(eval $(FOO))
+', '', 'hello
+world');
+
 1;
