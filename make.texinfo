@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.135 1994/04/21 22:39:51 roland Alpha $
+@set RCSID $Id: make.texinfo,v 2.136 1994/05/02 23:00:39 roland Exp $
 @set EDITION 0.45
 @set VERSION 3.71 Beta
 @set UPDATED 20 April 1994
@@ -1666,9 +1666,9 @@ names of source files in the dependencies as if they all existed in the
 current directory.  @xref{Commands/Search, ,Writing Shell Commands with
 Directory Search}.
 
-In the @code{VPATH} variable, directory names are separated by colons.
-The order in which directories are listed is the order followed by
-@code{make} in its search.
+In the @code{VPATH} variable, directory names are separated by colons or
+blanks.  The order in which directories are listed is the order followed
+by @code{make} in its search.
 
 For example,
 
@@ -1714,9 +1714,9 @@ There are three forms of the @code{vpath} directive:
 Specify the search path @var{directories} for file names that match
 @var{pattern}.  
 
-The search path, @var{directories}, is a colon-separated list of
-directories to be searched, just like the search path used in the
-@code{VPATH} variable.
+The search path, @var{directories}, is a list of directories to be
+searched, separated by colons or blanks, just like the search path used
+in the @code{VPATH} variable.
 
 @item vpath @var{pattern}
 Clear out the search path associated with @var{pattern}.
