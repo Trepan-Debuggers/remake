@@ -183,7 +183,7 @@ convert_suffix_rule (target, source, cmds)
     }
 
   names = (char **) xmalloc (2 * sizeof (char *));
-  percents = (char **) xmalloc (2 * sizeof (char *));
+  percents = (char **) alloca (2 * sizeof (char *));
   names[0] = percents[0] = targname;
   names[1] = percents[1] = 0;
 
