@@ -73,7 +73,7 @@ if ($parallel_jobs) {
 
 # TEST 4: Each double-colon rule is supposed to be run individually
 
-&touch('f2.h');
+&utouch(-5, 'f2.h');
 &touch('foo');
 
 &run_make_with_options($makefile, "foo", &get_logfile, 0);
@@ -90,7 +90,7 @@ if ($parallel_jobs) {
 
 # TEST 6: Each double-colon rule is supposed to be run individually
 
-&touch('f1.h');
+&utouch(-5, 'f1.h');
 unlink('f2.h');
 &touch('foo');
 

@@ -1,3 +1,11 @@
+2002-09-23  Paul D. Smith  <psmith@gnu.org>
+
+	* read.c (enum make_word_type): Remove w_comment.
+	(get_next_mword): Don't treat comment characters as special; where
+	this function is used we will never see a comment (it's stripped
+	before we get here) and treating comments specially means that
+	targets like "foo\#bar" aren't handled properly.
+
 2002-09-18  Paul D. Smith  <psmith@gnu.org>
 
 	* doc/make.texi (Bugs): Update with some info on Savannah, etc.

@@ -62,7 +62,7 @@ struct ebuffer
 enum make_word_type
   {
      w_bogus, w_eol, w_static, w_variable, w_colon, w_dcolon, w_semicolon,
-     w_comment, w_varassign
+     w_varassign
   };
 
 
@@ -2620,7 +2620,6 @@ readline (ebuf)
      w_colon        A colon
      w_dcolon       A double-colon
      w_semicolon    A semicolon
-     w_comment      A comment character
      w_varassign    A variable assignment operator (=, :=, +=, or ?=)
 
    Note that this function is only used when reading certain parts of the
@@ -2648,10 +2647,6 @@ get_next_mword (buffer, delim, startp, length)
     {
     case '\0':
       wtype = w_eol;
-      break;
-
-    case '#':
-      wtype = w_comment;
       break;
 
     case ';':
@@ -2717,7 +2712,6 @@ get_next_mword (buffer, delim, startp, length)
         case ' ':
         case '\t':
         case '=':
-        case '#':
           goto done_word;
 
         case ':':
