@@ -28,6 +28,8 @@ describes conventions for writing the Makefiles for GNU programs.
 * Command Variables::		Variables for Specifying Commands
 * Directory Variables::		Variables for Installation Directories
 * Standard Targets::		Standard Targets for Users
+* Install Command Categories::  Three categories of commands in the `install'
+                                  rule: normal, pre-install and post-install.
 @end menu
 
 @node Makefile Basics
@@ -541,6 +543,7 @@ Here is a sample rule to install an Info file:
 @comment Please do not reformat it without talking to roland@gnu.ai.mit.edu.
 @smallexample
 $(infodir)/foo.info: foo.info
+        $(POST_INSTALL)
 # There may be a newer info file in . than in srcdir.
         -if test -f foo.info; then d=.; \
          else d=$(srcdir); fi; \
@@ -557,17 +560,24 @@ $(infodir)/foo.info: foo.info
         else true; fi
 @end smallexample
 
+When writing the @code{install} target, you must classify all the
+commands into three categories: normal ones, @dfn{pre-installation}
+commands and @dfn{post-installation} commands.  @xref{Install Command
+Categories}.
+
 @item uninstall
-Delete all the installed files that the @samp{install} target would
-create (but not the noninstalled files such as @samp{make all} would
-create).
+Delete all the installed files---the copies that the @samp{install}
+target creates.
 
 This rule should not modify the directories where compilation is done,
 only the directories where files are installed.
 
+The uninstallation commands are divided into three categories, just like
+the installation commands.  @xref{Install Command Categories}.
+
 @item install-strip
 Like @code{install}, but strip the executable files while installing
-them.  The definition of this target can be very simple:
+them.  In many cases, the definition of this target can be very simple:
 
 @smallexample
 install-strip:
@@ -734,3 +744,119 @@ installdirs: mkinstalldirs
 This rule should not modify the directories where compilation is done.
 It should do nothing but create installation directories.
 @end table
+
+@node Install Command Categories
+@section Install Command Categories
+
+@cindex pre-installation commands
+@cindex post-installation commands
+When writing the @code{install} target, you must classify all the
+commands into three categories: normal ones, @dfn{pre-installation}
+commands and @dfn{post-installation} commands.
+
+Normal commands move files into their proper places, and set their
+modes.  They may not alter any files except the ones that come entirely
+from the package they belong to.
+
+Pre-installation and post-installation commands may alter other files;
+in particular, they can edit global configuration files or data bases.
+
+Pre-installation commands are typically executed before the normal
+commands, and post-installation commands are typically run after the
+normal commands.
+
+The most common use for a post-installation command is to run
+@code{install-info}.  This cannot be done with a normal command, since
+it alters a file (the Info directory) which does not come entirely and
+solely from the package being installed.  It is a post-installation
+command because it needs to be done after the normal command which
+installs the package's Info files.
+
+Most programs don't need any pre-installation commands, but we have the
+feature just in case it is needed.
+
+To classify the commands in the @code{install} rule into these three
+categories, insert @dfn{category lines} among them.  A category line
+specifies the category for the commands that follow.
+
+A category line consists of a tab and a reference to a special Make
+variable, plus an optional comment at the end.  There are three
+variables you can use, one for each category; the variable name
+specifies the category.  Category lines are no-ops in ordinary execution
+because these three Make variables are normally undefined (and you
+@emph{should not} define them in the makefile).
+
+Here are the three possible category lines, each with a comment that
+explains what it means:
+
+@smallexample
+        $(PRE_INSTALL)     # @r{Pre-install commands follow.}
+        $(POST_INSTALL)    # @r{Post-install commands follow.}
+        $(NORMAL_INSTALL)  # @r{Normal commands follow.}
+@end smallexample
+
+If you don't use a category line at the beginning of the @code{install}
+rule, all the commands are classified as normal until the first category
+line.  If you don't use any category lines, all the commands are
+classified as normal.
+
+These are the category lines for @code{uninstall}:
+
+@smallexample
+        $(PRE_UNINSTALL)     # @r{Pre-uninstall commands follow.}
+        $(POST_UNINSTALL)    # @r{Post-uninstall commands follow.}
+        $(NORMAL_UNINSTALL)  # @r{Normal commands follow.}
+@end smallexample
+
+Typically, a pre-uninstall command would be used for deleting entries
+from the Info directory.
+
+If the @code{install} or @code{uninstall} target has any dependencies
+which act as subroutines of installation, then you should start
+@emph{each} dependency's commands with a category line, and start the
+main target's commands with a category line also.  This way, you can
+ensure that each command is placed in the right category regardless of
+which of the dependencies actually run.
+
+Pre-installation and post-installation commands should not run any
+programs except for these:
+
+@example
+[ basename bash cat chgrp chmod chown cmp cp dd diff echo
+egrep expand expr false fgrep find getopt grep gunzip gzip
+hostname install install-info kill ldconfig ln ls md5sum
+mkdir mkfifo mknod mv printenv pwd rm rmdir sed sort tee
+test touch true uname xargs yes
+@end example
+
+@cindex binary packages
+The reason for distinguishing the commands in this way is for the sake
+of making binary packages.  Typically a binary package contains all the
+executables and other files that need to be installed, and has its own
+method of installing them---so it does not need to run the normal
+installation commands.  But installing the binary package does need to
+execute the pre-installation and post-installation commands.
+
+Programs to build binary packages work by extracting the
+pre-installation and post-installation commands.  Here is one way of
+extracting the pre-installation commands:
+
+@smallexample
+make -n install -o all \
+      PRE_INSTALL=pre-install \
+      POST_INSTALL=post-install \
+      NORMAL_INSTALL=normal-install \
+  | gawk -f pre-install.awk
+@end smallexample
+
+@noindent
+where the file @file{pre-install.awk} could contain this:
+
+@smallexample
+$0 ~ /^\t[ \t]*(normal_install|post_install)[ \t]*$/ @{on = 0@}
+on @{print $0@}
+$0 ~ /^\t[ \t]*pre_install[ \t]*$/ @{on = 1@}
+@end smallexample
+
+The resulting file of pre-installation commands is executed as a shell
+script as part of installing the binary package.
