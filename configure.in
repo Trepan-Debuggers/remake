@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_REVISION([$Id: configure.in,v 1.49 1995/08/17 19:09:57 roland Exp $])
+AC_REVISION([$Id: configure.in,v 1.50 1995/12/14 07:18:09 roland Exp $])
 AC_PREREQ(2.1)dnl		dnl Minimum Autoconf version required.
 AC_INIT(vpath.c)dnl		dnl A distinctive file to look for in srcdir.
 AC_CONFIG_HEADER(config.h)
@@ -48,17 +48,6 @@ AC_FUNC_VFORK
 AC_FUNC_SETVBUF_REVERSED
 AC_FUNC_GETLOADAVG
 AC_FUNC_STRCOLL
-
-if test $ac_cv_func_getdtablesize = no; then
-  AC_MSG_CHECKING(for sysconf (_SC_OPEN_MAX))
-  AC_CACHE_VAL(make_cv_sysconf_open_max, [dnl
-  AC_TRY_LINK([#include <unistd.h>], [int max = sysconf (_SC_OPEN_MAX);],
-	      [make_cv_sysconf_open_max=yes], [make_cv_sysconf_open_max=no])])
-  if test $make_cv_sysconf_open_max = yes; then
-    AC_DEFINE(HAVE_SYSCONF_OPEN_MAX)
-  fi
-  AC_MSG_RESULT($make_cv_sysconf_open_max)
-fi
 
 # Check out the wait reality.
 AC_CHECK_HEADERS(sys/wait.h) AC_CHECK_FUNCS(waitpid wait3)
