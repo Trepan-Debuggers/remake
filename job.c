@@ -311,7 +311,7 @@ reap_children (block, err)
 	--dead_children;
 
       any_remote = 0;
-      any_local = shell_function_pid != -1;
+      any_local = shell_function_pid != 0;
       for (c = children; c != 0; c = c->next)
 	{
 	  any_remote |= c->remote;
@@ -578,17 +578,26 @@ reap_children (block, err)
 		    (unsigned long int) c,
 		    c->pid, c->remote ? " (remote)" : "");
 
+	  /* Block fatal signals while frobnicating the list, so that
+	     children and job_slots_used are always consistent.  Otherwise
+	     a fatal signal arriving after the child is off the chain and
+	     before job_slots_used is decremented would believe a child was
+	     live and call reap_children again.  */
+	  block_sigs ();
+
 	  /* Remove the child from the chain and free it.  */
 	  if (lastc == 0)
 	    children = c->next;
 	  else
 	    lastc->next = c->next;
-	  if (! handling_fatal_signal) /* Avoid nonreentrancy.  */
+	  if (! handling_fatal_signal) /* Don't bother if about to die.  */
 	    free_child (c);
 
 	  /* There is now another slot open.  */
 	  if (job_slots_used > 0)
 	    --job_slots_used;
+
+	  unblock_sigs ();
 
 	  /* If the job failed, and the -k flag was not given, die,
 	     unless we are already in the process of dying.  */
@@ -627,6 +636,18 @@ free_child (child)
   free ((char *) child);
 }
 
+void
+block_sigs ()
+{
+#ifdef	 POSIX
+  (void) sigprocmask (SIG_BLOCK, &fatal_signal_set, (sigset_t *) 0);
+#else
+#ifdef	HAVE_SIGSETMASK
+  (void) sigblock (fatal_signal_mask);
+#endif
+#endif
+}
+
 #ifdef	POSIX
 #ifdef	__MSDOS__
 void
@@ -860,13 +881,7 @@ start_job_command (child)
 
       char **parent_environ;
 
-#ifdef	 POSIX
-      (void) sigprocmask (SIG_BLOCK, &fatal_signal_set, (sigset_t *) 0);
-#else
-#ifdef	HAVE_SIGSETMASK
-      (void) sigblock (fatal_signal_mask);
-#endif
-#endif
+      block_sigs ();
 
       child->remote = 0;
 
