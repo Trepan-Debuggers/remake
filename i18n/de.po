@@ -1,0 +1,1772 @@
+# This is the german message translation file for GNU-make 3.76.1
+# Copyright (C) 1996, 1997 Free Software Foundation, Inc.
+# Jochen Hein <jochen.hein@informatik.tu-clausthal.de>, 1996.
+# Alexander Mader  <mader@wias-berlin.de>, 1997.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: make 3.76.1\n"
+"POT-Creation-Date: 1997-09-27 11:44+0200\n"
+"PO-Revision-Date: 1997-09-27 17:33 MET DST\n"
+"Last-Translator: Alexander Mader <mader@wias-berlin.de>\n"
+"Language-Team: German <de@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Transfer-Encoding: 8-bit\n"
+
+#: make-3.76.1/vpath.c:568
+#, c-format
+msgid ""
+"\n"
+"# %u `vpath' search paths.\n"
+msgstr "\n# %u «vpath» Suchpfade.\n"
+
+#: make-3.76.1/file.c:661
+#, c-format
+msgid ""
+"\n"
+"# %u files in %u hash buckets.\n"
+msgstr "\n# %u Dateien zu %u hash-Werten.\n"
+
+#: make-3.76.1/rule.c:574
+#, c-format
+msgid ""
+"\n"
+"# %u implicit rules, %u"
+msgstr "\n# %u implizite Regeln, %u"
+
+#: make-3.76.1/dir.c:848
+msgid ""
+"\n"
+"# Directories\n"
+msgstr "\n# Verzeichnisse\n"
+
+#: make-3.76.1/file.c:635
+msgid ""
+"\n"
+"# Files"
+msgstr "\n# Dateien"
+
+#: make-3.76.1/main.c:2359
+#, c-format
+msgid ""
+"\n"
+"# Finished Make data base on %s\n"
+msgstr "\n# «Make» Datenbank beendet zur Zeit %s.\n"
+
+#: make-3.76.1/vpath.c:577
+msgid ""
+"\n"
+"# General (`VPATH' variable) search path:\n"
+"# "
+msgstr ""
+"\n"
+"# Allgemeiner (Variable «VPATH») Suchpfad:\n"
+"# "
+
+#: make-3.76.1/rule.c:556
+msgid ""
+"\n"
+"# Implicit Rules"
+msgstr "\n# Implizite Regeln"
+
+#: make-3.76.1/main.c:2350
+#, c-format
+msgid ""
+"\n"
+"# Make data base, printed on %s"
+msgstr "\n# «Make» Datenbank, ausgegeben zur Zeit %s."
+
+#: make-3.76.1/file.c:658
+msgid ""
+"\n"
+"# No files."
+msgstr "\n# Keine Dateien."
+
+#: make-3.76.1/vpath.c:571
+msgid ""
+"\n"
+"# No general (`VPATH' variable) search path."
+msgstr "\n# Kein allgemeiner (Variable «VPATH») Suchpfad."
+
+#: make-3.76.1/rule.c:571
+msgid ""
+"\n"
+"# No implicit rules."
+msgstr "\n# Keine impliziten Regeln vorhanden."
+
+#: make-3.76.1/vpath.c:549
+msgid ""
+"\n"
+"# VPATH Search Paths\n"
+msgstr "\n# VPATH Suchpfade\n"
+
+#: make-3.76.1/variable.c:979
+msgid ""
+"\n"
+"# Variables\n"
+msgstr "\n# Variablen\n"
+
+#: make-3.76.1/job.c:1032 make-3.76.1/job.c:1629
+#, c-format
+msgid ""
+"\n"
+"Counted %d args in failed launch\n"
+msgstr "\n%d Argumente gehörten zum fehlgeschlagenen Prozessstart.\n"
+
+#: make-3.76.1/main.c:492
+#, c-format
+msgid ""
+"\r\n"
+"Unhandled exception filter called from program %s\r\n"
+msgstr ""
+"\\r\n"
+"Das Programm %s rief einen Ausnahmefilter auf, \n"
+"der nicht bearbeitet wird.\\r\n"
+
+#: make-3.76.1/arscan.c:721
+#, c-format
+msgid "  Date %s"
+msgstr "  Datum %s"
+
+#: make-3.76.1/remake.c:603
+#, c-format
+msgid "  Ignoring VPATH name `%s'.\n"
+msgstr "  Ignoriere VPATH-Name «%s».\n"
+
+#: make-3.76.1/arscan.c:722
+#, c-format
+msgid "  uid = %d, gid = %d, mode = 0%o.\n"
+msgstr "  Nutzer-ID = %d, Gruppen-ID = %d, Modus = 0%o.\n"
+
+#: make-3.76.1/commands.c:537
+msgid " (built-in):"
+msgstr " (eingebaut):"
+
+#: make-3.76.1/job.c:239
+msgid " (core dumped)"
+msgstr " (Speicherauszug erstellt)"
+
+#: make-3.76.1/read.c:318
+msgid " (don't care)"
+msgstr " (macht nichts)"
+
+#: make-3.76.1/commands.c:539
+#, c-format
+msgid " (from `%s', line %u):\n"
+msgstr " (aus «%s», Zeile %u):\n"
+
+#: make-3.76.1/job.c:230
+msgid " (ignored)"
+msgstr " (ignoriert)"
+
+#: make-3.76.1/arscan.c:719
+msgid " (name might be truncated)"
+msgstr " (der Name ist möglicherweise gekürzt)"
+
+#: make-3.76.1/read.c:314
+msgid " (no default goal)"
+msgstr " (kein Standard-Ziel)"
+
+#: make-3.76.1/read.c:320
+msgid " (no ~ expansion)"
+msgstr " (keine ~-Erweiterung)"
+
+#: make-3.76.1/job.c:332 make-3.76.1/job.c:504 make-3.76.1/job.c:591
+#: make-3.76.1/job.c:1093
+msgid " (remote)"
+msgstr " (entfernt)"
+
+#: make-3.76.1/read.c:316
+msgid " (search path)"
+msgstr " (Suchpfad)"
+
+#: make-3.76.1/dir.c:902 make-3.76.1/dir.c:922
+msgid " files, "
+msgstr " Dateien, "
+
+#: make-3.76.1/dir.c:907
+msgid " impossibilities"
+msgstr " Unmöglichkeiten"
+
+#: make-3.76.1/dir.c:927
+#, c-format
+msgid " impossibilities in %u directories.\n"
+msgstr " Unmöglichkeiten in %u Verzeichnissen.\n"
+
+#: make-3.76.1/file.c:563 make-3.76.1/file.c:583
+msgid " not"
+msgstr " nicht"
+
+#: make-3.76.1/job.c:491
+msgid " remote"
+msgstr " entfernter"
+
+#: make-3.76.1/dir.c:911
+msgid " so far."
+msgstr " bisher."
+
+#: make-3.76.1/rule.c:583
+msgid " terminal."
+msgstr " Terminal."
+
+#: make-3.76.1/getopt1.c:134
+#, c-format
+msgid " with arg %s"
+msgstr "mit Argument %s"
+
+#: make-3.76.1/file.c:561
+msgid "#  A default or MAKEFILES makefile."
+msgstr "#  Ein Standardwert oder MAKEFILES «make»-Steuerdatei."
+
+#: make-3.76.1/file.c:570
+msgid "#  Also makes:"
+msgstr "#  Erzeugt außerdem:"
+
+#: make-3.76.1/file.c:559
+msgid "#  Command-line target."
+msgstr "#  Kommandozeilen-Ziel (target)."
+
+#: make-3.76.1/file.c:587
+msgid "#  Commands currently running (THIS IS A BUG)."
+msgstr "#  Z.Zt. ausgeführte Kommandos (DAS IST EIN BUG)."
+
+#: make-3.76.1/file.c:590
+msgid "#  Dependencies commands running (THIS IS A BUG)."
+msgstr "#  Z.Zt. ausgeführte Kommandos für Abhängigkeiten (DAS IST EIN BUG)."
+
+#: make-3.76.1/file.c:606
+msgid "#  Failed to be updated."
+msgstr "#  Aktualisierung fehlgeschlagen."
+
+#: make-3.76.1/file.c:578
+msgid "#  File does not exist."
+msgstr "#  Die Datei existiert nicht."
+
+#: make-3.76.1/file.c:582
+#, c-format
+msgid "#  File has%s been updated.\n"
+msgstr "#  Datei wurde%s aktualisiert.\n"
+
+#: make-3.76.1/file.c:567
+msgid "#  File is an intermediate dependency."
+msgstr "#  Datei ist ein Zwischenschritt in den Abhängigkeiten."
+
+#: make-3.76.1/file.c:562
+#, c-format
+msgid "#  Implicit rule search has%s been done.\n"
+msgstr "#  Implizite Regelsuche wurde%s durchgeführt.\n"
+
+#: make-3.76.1/file.c:565
+#, c-format
+msgid "#  Implicit/static pattern stem: `%s'\n"
+msgstr "#  Ersetzung für implizites/statisches Muster: «%s»\n"
+
+#: make-3.76.1/file.c:616
+msgid "#  Invalid value in `command_state' member!"
+msgstr "#  Ungültiger Wert im «command_state»-Eintrag!"
+
+#: make-3.76.1/file.c:609
+msgid "#  Invalid value in `update_status' member!"
+msgstr "#  Ungültiger Wert in «update_status»-Eintrag!"
+
+#: make-3.76.1/file.c:580
+#, c-format
+msgid "#  Last modified %.24s (%ld)\n"
+msgstr "#  Zuletzt geändert %.24s (%ld).\n"
+
+#: make-3.76.1/file.c:576
+msgid "#  Modification time never checked."
+msgstr "#  Zeit der letzten Änderung wurde nicht überprüft."
+
+#: make-3.76.1/file.c:603
+msgid "#  Needs to be updated (-q is set)."
+msgstr "#  Eine Aktualisierung ist notwendig (-q ist angegeben)."
+
+#: make-3.76.1/file.c:557
+msgid "#  Phony target (dependency of .PHONY)."
+msgstr "#  «Phony»-Ziel (abhängig von .PHONY)."
+
+#: make-3.76.1/file.c:555
+msgid "#  Precious file (dependency of .PRECIOUS)."
+msgstr "#  «Precious»-Datei (abhängig von .PRECIOUS)."
+
+#: make-3.76.1/file.c:599
+msgid "#  Successfully updated."
+msgstr "#  Erfolgreich aktualisiert."
+
+#: make-3.76.1/commands.c:534
+msgid "#  commands to execute"
+msgstr "#  Auszuführende Kommandos"
+
+#: make-3.76.1/dir.c:894
+#, c-format
+msgid "# %s (device %d, inode %d): "
+msgstr "# %s (Gerät %d, I-Knoten (inode) %d): "
+
+#: make-3.76.1/dir.c:889
+#, c-format
+msgid "# %s (device %d, inode [%d,%d,%d]): "
+msgstr "# %s (Gerät %d, I-Knoten (inode) [%d,%d,%d]): "
+
+#: make-3.76.1/dir.c:863
+#, c-format
+msgid "# %s (device %d, inode [%d,%d,%d]): could not be opened.\n"
+msgstr ""
+"# %s (Gerät %d, I-Knoten (inode) [%d,%d,%d]): \n"
+"Konnte nicht geöffnet werden.\n"
+
+#: make-3.76.1/dir.c:868
+#, c-format
+msgid "# %s (device %ld, inode %ld): could not be opened.\n"
+msgstr ""
+"# %s (Gerät %ld, I-Knoten (inode) %ld): \n"
+"Konnte nicht geöffnet werden.\n"
+
+#: make-3.76.1/dir.c:885
+#, c-format
+msgid "# %s (key %s, mtime %d): "
+msgstr "# %s (Schlüssel (key) %s,  letzte Änderung (mtime) %d): "
+
+#: make-3.76.1/dir.c:859
+#, c-format
+msgid "# %s (key %s, mtime %d): could not be opened.\n"
+msgstr ""
+"# %s ( Schlüssel (key) %s,  letzte Änderung (mtime) %d): \n"
+"Konnte nicht geöffnet werden.\n"
+
+#: make-3.76.1/dir.c:856
+#, c-format
+msgid "# %s: could not be stat'd.\n"
+msgstr "# %s: Konnte den Status nicht feststellen.\n"
+
+#: make-3.76.1/variable.c:954
+#, c-format
+msgid "# %u variables in %u hash buckets.\n"
+msgstr "# %u Variablen für %u hash-Werte.\n"
+
+#: make-3.76.1/vpath.c:566
+msgid "# No `vpath' search paths."
+msgstr "# Keine «vpath» Suchpfade."
+
+#: make-3.76.1/variable.c:951
+msgid "# No variables."
+msgstr "# Keine Variablen vorhanden."
+
+#: make-3.76.1/file.c:547
+msgid "# Not a target:"
+msgstr "# Dies ist kein Ziel:"
+
+#: make-3.76.1/file.c:663
+#, c-format
+msgid "# average %.1f files per bucket, max %u files in one bucket.\n"
+msgstr ""
+"# durchschnittlich %.1f Dateien je hash-Wert,\n"
+"max. %u Dateien zu einem hash-Wert.\n"
+
+#: make-3.76.1/variable.c:957
+#, c-format
+msgid "# average of %.1f variables per bucket, max %u in one bucket.\n"
+msgstr "# Durchschnittlich %.1f Variablen pro Wert, max %u je Wert.\n"
+
+#: make-3.76.1/variable.c:964
+#, c-format
+msgid "# average of %d.%d variables per bucket, max %u in one bucket.\n"
+msgstr "# Durchschnittlich %d.%d Variablen pro Wert, max %u je Wert.\n"
+
+#: make-3.76.1/job.c:1877
+#, c-format
+msgid "$SHELL changed (was `%s', now `%s')"
+msgstr "$SHELL gewechselt (war «%s», ist «%s»)."
+
+#. All the other debugging messages go to stdout,
+#. but we write this one to stderr because it might be
+#. run in a child fork whose stdout is piped.
+#: make-3.76.1/misc.c:567
+#, c-format
+msgid "%s access: user %d (real %d), group %d (real %d)\n"
+msgstr "%s Zugriff: Nutzer %d (real %d), Gruppe %d (real %d)\n"
+
+#: make-3.76.1/job.c:496
+#, c-format
+msgid "%s finished."
+msgstr "%s beendet."
+
+#: make-3.76.1/main.c:783
+#, c-format
+msgid "%s is suspending for 30 seconds..."
+msgstr "%s setzt für 30 Sekunden aus..."
+
+#: make-3.76.1/job.c:1673
+#, c-format
+msgid "%s: Command not found"
+msgstr "%s: Kommando nicht gefunden."
+
+#: make-3.76.1/main.c:483
+#, c-format
+msgid "%s: Interrupt/Exception caught "
+msgstr "%s: hat Unterbrechung/Ausnahme bemerkt "
+
+#: make-3.76.1/job.c:1702
+#, c-format
+msgid "%s: Shell program not found"
+msgstr "%s: Shell-Programm wurde nicht gefunden."
+
+#. 1003.2 specifies the format of this message.
+#: make-3.76.1/getopt.c:786
+#, c-format
+msgid "%s: illegal option -- %c\n"
+msgstr "%s: unerlaubte Option -- %c\n"
+
+#: make-3.76.1/getopt.c:789
+#, c-format
+msgid "%s: invalid option -- %c\n"
+msgstr "%s: ungültige Option -- %c.\n"
+
+#: make-3.76.1/getopt.c:710
+#, c-format
+msgid "%s: option `%c%s' doesn't allow an argument\n"
+msgstr "%s: Option «%c%s» erlaubt kein Argument.\n"
+
+#: make-3.76.1/getopt.c:681
+#, c-format
+msgid "%s: option `%s' is ambiguous\n"
+msgstr "%s: Option «%s» ist mehrdeutig.\n"
+
+#: make-3.76.1/getopt.c:727 make-3.76.1/getopt.c:900
+#, c-format
+msgid "%s: option `%s' requires an argument\n"
+msgstr "%s: Option «%s» erfordert ein Argument.\n"
+
+#: make-3.76.1/getopt.c:705
+#, c-format
+msgid "%s: option `--%s' doesn't allow an argument\n"
+msgstr "%s: Option «--%s» erlaubt kein Argument.\n"
+
+#: make-3.76.1/getopt.c:884
+#, c-format
+msgid "%s: option `-W %s' doesn't allow an argument\n"
+msgstr "%s: Option «-W %s» erlaubt kein Argument.\n"
+
+#: make-3.76.1/getopt.c:866
+#, c-format
+msgid "%s: option `-W %s' is ambiguous\n"
+msgstr "%s: Option «-W %s» ist mehrdeutig.\n"
+
+#. 1003.2 specifies the format of this message.
+#: make-3.76.1/getopt.c:819 make-3.76.1/getopt.c:949
+#, c-format
+msgid "%s: option requires an argument -- %c\n"
+msgstr "%s: Option erfordert ein Argument -- %c.\n"
+
+#: make-3.76.1/signame.c:291
+#, c-format
+msgid "%s: unknown signal"
+msgstr "%s: unbekanntes Signal"
+
+#. +option or -option
+#: make-3.76.1/getopt.c:760
+#, c-format
+msgid "%s: unrecognized option `%c%s'\n"
+msgstr "%s: unerkannte Option «%c%s»\n"
+
+#. --option
+#: make-3.76.1/getopt.c:756
+#, c-format
+msgid "%s: unrecognized option `--%s'\n"
+msgstr "%s: unerkannte Option «--%s».\n"
+
+#: make-3.76.1/main.c:2322
+#, c-format
+msgid "%sGNU Make version %s"
+msgstr "%sGNU Make Version %s"
+
+#: make-3.76.1/remake.c:916
+#, c-format
+msgid "%sNo rule to make target `%s'%s"
+msgstr "%sKeine Regel, um «%s» zu erstellen%s"
+
+#: make-3.76.1/remake.c:918
+#, c-format
+msgid "%sNo rule to make target `%s', needed by `%s'%s"
+msgstr ""
+"%sKeine Regel vorhanden, um das Target «%s», \n"
+"  benötigt von «%s», zu erstellen%s"
+
+#: make-3.76.1/commands.c:482
+#, c-format
+msgid "*** Archive member `%s' may be bogus; not deleted"
+msgstr "*** Archiveintrag «%s» ist wohl falsch; nicht glöscht."
+
+#: make-3.76.1/commands.c:387
+msgid "*** Break.\n"
+msgstr "*** Abbruch.\n"
+
+#: make-3.76.1/commands.c:496
+#, c-format
+msgid "*** Deleting file `%s'"
+msgstr "*** Datei «%s» wird gelöscht."
+
+#: make-3.76.1/file.c:389
+#, c-format
+msgid "*** Deleting intermediate file `%s'"
+msgstr "*** Löschen der Zwischendatei «%s»."
+
+#: make-3.76.1/job.c:305
+msgid "*** Waiting for unfinished jobs...."
+msgstr "*** Warte auf noch nicht beendete Prozesse...."
+
+#: make-3.76.1/main.c:1565
+msgid "*** Warning:  Clock skew detected.  Your build may be incomplete."
+msgstr ""
+"*** Warnung: Mit der Uhr stimmt etwas nicht. \n"
+"             Die Bearbeitung könnte unvollständig sein."
+
+#: make-3.76.1/remake.c:1102
+#, c-format
+msgid "*** Warning: File `%s' has modification time in the future"
+msgstr "*** Warnung: Datei «%s» hat Änderungszeit aus der Zukunft!"
+
+#: make-3.76.1/commands.c:479
+#, c-format
+msgid "*** [%s] Archive member `%s' may be bogus; not deleted"
+msgstr "*** [%s] Archiveintrag «%s» ist wohl falsch; nicht gelöscht."
+
+#: make-3.76.1/commands.c:494
+#, c-format
+msgid "*** [%s] Deleting file `%s'"
+msgstr "*** [%s] Datei «%s» wird gelöscht."
+
+#: make-3.76.1/job.c:234
+#, c-format
+msgid "*** [%s] Error %d"
+msgstr "*** [%s] Fehler %d"
+
+#: make-3.76.1/job.c:230
+#, c-format
+msgid "*** [%s] Error 0x%x%s"
+msgstr "*** [%s] Fehler 0x%x%s"
+
+#: make-3.76.1/misc.c:212 make-3.76.1/misc.c:260
+msgid ".  Stop.\n"
+msgstr ".  Schluss.\n"
+
+#: make-3.76.1/getloadavg.c:1056
+#, c-format
+msgid "1-minute: %f  "
+msgstr "1-Minuten-Schnitt: %f  "
+
+#: make-3.76.1/getloadavg.c:1060
+#, c-format
+msgid "15-minute: %f  "
+msgstr "15-Minuten-Schnitt: %f  "
+
+#: make-3.76.1/getloadavg.c:1058
+#, c-format
+msgid "5-minute: %f  "
+msgstr "5-Minuten-Schnitt: %f  "
+
+#: make-3.76.1/remake.c:574
+#, c-format
+msgid "; using VPATH name `%s'"
+msgstr "; benutze VPATH-Name «%s»"
+
+#: make-3.76.1/getopt.c:1038 make-3.76.1/getopt1.c:174
+#, c-format
+msgid "?? getopt returned character code 0%o ??\n"
+msgstr "?? «getopt» lieferte Zeichencode 0%o ??\n"
+
+#: make-3.76.1/signame.c:126
+msgid "Aborted"
+msgstr "Abgebrochen (Aborted)"
+
+#: make-3.76.1/main.c:503
+#, c-format
+msgid "Access violation: %s operation at address %x\r\n"
+msgstr "Zugriffsverstoß: %soperation an Adresse %x\\r\n"
+
+#: make-3.76.1/signame.c:153
+msgid "Alarm clock"
+msgstr "Wecksignal"
+
+#: make-3.76.1/main.c:266
+msgid "Allow N jobs at once; infinite jobs with no arg"
+msgstr ""
+"Erlaube N Jobs gleichzeitig; unbegrenzte Anzahl \n"
+"von Jobs ohne Argument."
+
+#: make-3.76.1/implicit.c:201
+#, c-format
+msgid "Avoiding implicit rule recursion.%s%s\n"
+msgstr "Vermeide Rekursion in den impliziten Regeln.%s%s\n"
+
+#: make-3.76.1/rule.c:587
+#, c-format
+msgid "BUG: num_pattern_rules wrong!  %u != %u"
+msgstr "BUG: «num_pattern_rules» falsch!  %u != %u"
+
+#: make-3.76.1/signame.c:147
+msgid "Bad system call"
+msgstr "Falscher Systemaufruf"
+
+#: make-3.76.1/signame.c:150
+msgid "Broken pipe"
+msgstr "Zerstörte Pipe"
+
+#: make-3.76.1/signame.c:141
+msgid "Bus error"
+msgstr "Bus-Fehler"
+
+#: make-3.76.1/signame.c:188
+msgid "CPU time limit exceeded"
+msgstr "CPU-Zeitschranke überschritten"
+
+#: make-3.76.1/main.c:239
+msgid "Change to DIRECTORY before doing anything"
+msgstr "Wechsle in das VERZEICHNIS bevor etwas anderes ausgeführt wird."
+
+#: make-3.76.1/misc.c:748
+msgid "Child"
+msgstr "Kindprozess"
+
+#: make-3.76.1/signame.c:167 make-3.76.1/signame.c:170
+msgid "Child exited"
+msgstr "Kindprozeß beendet"
+
+#: make-3.76.1/remake.c:395 make-3.76.1/remake.c:796
+#, c-format
+msgid "Circular %s <- %s dependency dropped."
+msgstr "Zirkuläre Datei %s <- %s Abhängigkeit wird nicht verwendet."
+
+#: make-3.76.1/file.c:298
+#, c-format
+msgid "Commands for `%s' will be ignored in favor of those for `%s'."
+msgstr ""
+"Die Kommandos für «%s» werden ignoriert, \n"
+"die für «%s» werden bevorzugt."
+
+#: make-3.76.1/file.c:290
+#, c-format
+msgid "Commands for file `%s' were found by implicit rule search,"
+msgstr ""
+"Die Kommandos für die Datei «%s» wurden aufgrund \n"
+"der Suche nach impliziten Regeln gefunden,"
+
+#: make-3.76.1/remake.c:614
+#, c-format
+msgid "Commands of `%s' are being run.\n"
+msgstr "Die Kommandos von «%s» werden gerade ausgeführt.\n"
+
+#: make-3.76.1/file.c:284
+#, c-format
+msgid "Commands were specified for file `%s' at %s:%u,"
+msgstr ""
+"Die Kommandos wurden für die Datei «%s» angegeben \n"
+"an der Stelle %s:%u,"
+
+#: make-3.76.1/main.c:321
+msgid "Consider FILE to be infinitely new"
+msgstr "Betrachte die DATEI stets als neu."
+
+#: make-3.76.1/main.c:290
+msgid "Consider FILE to be very old and don't remake it"
+msgstr "Betrachte DATEI als sehr alt und erzeuge sie nicht neu."
+
+#: make-3.76.1/remake.c:313
+#, c-format
+msgid "Considering target file `%s'.\n"
+msgstr "Betrachte Target-Datei «%s».\n"
+
+#: make-3.76.1/signame.c:206
+msgid "Continued"
+msgstr "Fortgesetzt"
+
+#: make-3.76.1/main.c:1454
+msgid "Couldn't change back to original directory."
+msgstr "Konnte nicht in das ursprüngliche Verzeichnis wechseln."
+
+#: make-3.76.1/function.c:434
+#, c-format
+msgid "CreatePipe() failed (e=%d)\n"
+msgstr "«CreatePipe()» schlug fehl (e=%d).\n"
+
+#: make-3.76.1/remote-cstms.c:94
+#, c-format
+msgid "Customs won't export: %s\n"
+msgstr "Customs wird nicht exportieren: %s\n"
+
+#: make-3.76.1/main.c:238 make-3.76.1/main.c:261
+msgid "DIRECTORY"
+msgstr "VERZEICHNIS"
+
+#: make-3.76.1/signame.c:231
+msgid "Danger signal"
+msgstr "Gefahrensignal"
+
+#: make-3.76.1/remake.c:545
+#, c-format
+msgid "Dependency `%s' does not exist.\n"
+msgstr "Abhängigkeit «%s» existiert nicht.\n"
+
+#: make-3.76.1/remake.c:547
+#, c-format
+msgid "Dependency `%s' is %s than dependent `%s'.\n"
+msgstr "Die Abhängigkeit «%s» ist %s als die abhängige Datei «%s».\n"
+
+#: make-3.76.1/main.c:299
+msgid "Disable the built-in implicit rules"
+msgstr "Deaktivieren der eingebauten impliziten Regeln."
+
+#: make-3.76.1/main.c:1151
+msgid "Do not specify -j or --jobs if sh.exe is not available."
+msgstr ""
+"Wenn «sh.exe» nicht vorhanden ist, \n"
+"sollten Sie nicht «-j» oder «--jobs» angeben."
+
+#: make-3.76.1/main.c:287
+msgid "Don't actually run any commands; just print them"
+msgstr "Kommandos nur anzeigen, nicht ausführen."
+
+#: make-3.76.1/main.c:302
+msgid "Don't echo commands"
+msgstr "Gebe die Kommandos nicht aus."
+
+#: make-3.76.1/main.c:275 make-3.76.1/main.c:280
+msgid "Don't start multiple jobs unless load is below N"
+msgstr "Nur bei Belastung unterhalb N mehrere Prozesse starten."
+
+#: make-3.76.1/signame.c:132
+msgid "EMT trap"
+msgstr "EMT abfangen (EMT trap)"
+
+#: make-3.76.1/main.c:2413
+msgid "Entering"
+msgstr "Wechsel in das Verzeichnis"
+
+#: make-3.76.1/main.c:250
+msgid "Environment variables override makefiles"
+msgstr "Umgebungsvariablen überschreiben «make»-Steuerdateien."
+
+#. Fill message buffer with a default message in 
+#. * case FormatMessage fails 
+#.
+#: make-3.76.1/w32/subproc/w32err.c:20
+#, c-format
+msgid "Error %ld"
+msgstr "Fehler %ld"
+
+#: make-3.76.1/getloadavg.c:1052
+msgid "Error getting load average"
+msgstr "Fehler beim Bestimmen der durchschnittlichen Last."
+
+#: make-3.76.1/vmsfunctions.c:23
+msgid "Error mallocing for FAB\n"
+msgstr "Fehler bei Speicherzuteilung (xmalloc) für «FAB».\n"
+
+#: make-3.76.1/vmsfunctions.c:27
+msgid "Error mallocing for NAM\n"
+msgstr "Fehler bei Speicherzuteilung (xmalloc) für «NAM».\n"
+
+#: make-3.76.1/vmsfunctions.c:69
+msgid "Error mallocing for direct\n"
+msgstr "Fehler bei Speicherzuteilung (xmalloc) für «direct».\n"
+
+#: make-3.76.1/vmsfunctions.c:32
+msgid "Error mallocing for searchspec\n"
+msgstr "Fehler bei Speicherzuteilung (xmalloc) für «searchspec».\n"
+
+#: make-3.76.1/job.c:1556
+#, c-format
+msgid "Error spawning, %d\n"
+msgstr "Fehler beim Starten eines Kindprozesses, %d.\n"
+
+#: make-3.76.1/main.c:497
+#, c-format
+msgid "ExceptionAddress = %x\r\n"
+msgstr "Ausnahmeadresse (ExceptionAddress) = %x\\r\n"
+
+#: make-3.76.1/main.c:493
+#, c-format
+msgid "ExceptionCode = %x\r\n"
+msgstr "Ausnahmekode (ExceptionCode) = %x\\r\n"
+
+#: make-3.76.1/main.c:495
+#, c-format
+msgid "ExceptionFlags = %x\r\n"
+msgstr "Ausnahmemerkmale (ExceptionFlags) = %x\\r\n"
+
+#: make-3.76.1/job.c:1525
+#, c-format
+msgid "Executing %s instead\n"
+msgstr "%s wird stattdessen ausgeführt.\n"
+
+#: make-3.76.1/read.c:1011 make-3.76.1/read.c:1167
+#, c-format
+msgid "Extraneous text after `%s' directive"
+msgstr "Überflüssiger Text nach einer «%s»-Anweisung"
+
+#: make-3.76.1/read.c:926
+msgid "Extraneous text after `endef' directive"
+msgstr "Überflüssiger Text nach einer «endef»-Anweisung"
+
+#: make-3.76.1/main.c:252 make-3.76.1/main.c:289 make-3.76.1/main.c:320
+msgid "FILE"
+msgstr "DATEI"
+
+#. The update failed and this makefile was not
+#. from the MAKEFILES variable, so we care.
+#: make-3.76.1/main.c:1359
+#, c-format
+msgid "Failed to remake makefile `%s'."
+msgstr "Konnte die «make»-Steuerdatei «%s» nicht neu erstellen."
+
+#: make-3.76.1/remake.c:621
+#, c-format
+msgid "Failed to remake target file `%s'.\n"
+msgstr "Fehler beim Aktualisieren der Target-Datei «%s».\n"
+
+#: make-3.76.1/remake.c:357
+#, c-format
+msgid "File `%s' does not exist.\n"
+msgstr "Die Datei «%s» existiert nicht.\n"
+
+#: make-3.76.1/remake.c:323
+#, c-format
+msgid "File `%s' was considered already.\n"
+msgstr "Die Datei «%s» wurde bereits betrachtet.\n"
+
+#: make-3.76.1/signame.c:191
+msgid "File size limit exceeded"
+msgstr "Dateigrößenschranke überschritten"
+
+#: make-3.76.1/remake.c:477
+#, c-format
+msgid "Finished dependencies of target file `%s'.\n"
+msgstr "Fertig mit den Abhängigkeiten für die Target-Datei «%s».\n"
+
+#: make-3.76.1/remake.c:336
+#, c-format
+msgid "Finished updating file `%s'.\n"
+msgstr "Aktualisierung der Datei «%s» beendet.\n"
+
+#: make-3.76.1/signame.c:237
+msgid "Floating point co-processor not available"
+msgstr "Es ist kein Koprozessor für Fließkommaoperationen vorhanden."
+
+#: make-3.76.1/signame.c:135
+msgid "Floating point exception"
+msgstr "Gleitkommafehler"
+
+#: make-3.76.1/remake.c:367 make-3.76.1/remake.c:764
+#, c-format
+msgid "Found an implicit rule for `%s'.\n"
+msgstr "Eine implizite Regel für «%s» gefunden.\n"
+
+#: make-3.76.1/implicit.c:405
+#, c-format
+msgid "Found dependency `%s' as VPATH `%s'\n"
+msgstr "Fand die Abhängigkeit «%s» als VPATH «%s».\n"
+
+#: make-3.76.1/remake.c:496
+#, c-format
+msgid "Giving up on target file `%s'.\n"
+msgstr "Die Arbeit an der Target-Datei «%s» wurde aufgegeben.\n"
+
+#: make-3.76.1/job.c:274
+#, c-format
+msgid "Got a SIGCHLD; %d unreaped children.\n"
+msgstr "Erhielt ein SIGCHLD; %d unbeendete Kindprozesse.\n"
+
+#: make-3.76.1/signame.c:109
+msgid "Hangup"
+msgstr "Aufgelegt"
+
+#: make-3.76.1/signame.c:216 make-3.76.1/signame.c:225
+msgid "I/O possible"
+msgstr "I/O möglich"
+
+#: make-3.76.1/signame.c:129
+msgid "IOT trap"
+msgstr "IOT abfangen (IOT trap)"
+
+#: make-3.76.1/main.c:259
+msgid "Ignore errors from commands"
+msgstr "Ignoriere Fehler in den Kommandos."
+
+#: make-3.76.1/main.c:236
+msgid "Ignored for compatibility"
+msgstr "Aus Kompatibilitätsgründen ignoriert."
+
+#: make-3.76.1/signame.c:118
+msgid "Illegal Instruction"
+msgstr "Illegaler Befehl"
+
+#. An included makefile.  We don't need
+#. to die, but we do want to complain.
+#: make-3.76.1/main.c:1374
+#, c-format
+msgid "Included makefile `%s' was not found."
+msgstr "Die eingebundene «make»-Steuerdatei «%s» wurde nicht gefunden."
+
+#: make-3.76.1/signame.c:234
+msgid "Information request"
+msgstr "Informationsanforderung"
+
+#: make-3.76.1/misc.c:587
+msgid "Initialized"
+msgstr "Initialisiert"
+
+#: make-3.76.1/signame.c:112
+msgid "Interrupt"
+msgstr "Abgebrochen (Interrupt)"
+
+#: make-3.76.1/remote-cstms.c:185
+#, c-format
+msgid "Job exported to %s ID %u\n"
+msgstr "Job nach %s ID %u exportiert\n"
+
+#: make-3.76.1/main.c:270
+msgid "Keep going when some targets can't be made"
+msgstr "Weiterlaufen, auch wenn einige Targets nicht erzeugt werden konnten."
+
+#: make-3.76.1/signame.c:138
+msgid "Killed"
+msgstr "Abgebrochen (Killed)"
+
+#: make-3.76.1/main.c:2413
+msgid "Leaving"
+msgstr "Verlassen des Verzeichnisses"
+
+#: make-3.76.1/job.c:330
+#, c-format
+msgid "Live child 0x%08lx PID %d%s\n"
+msgstr "Aktiver Kind-Prozeß 0x%08lx PID %d%s\n"
+
+#: make-3.76.1/implicit.c:421
+#, c-format
+msgid "Looking for a rule with %s file `%s'.\n"
+msgstr "Suche nach einer Regel, in der als %s die Datei «%s» vorkommt.\n"
+
+#: make-3.76.1/implicit.c:38
+#, c-format
+msgid "Looking for an implicit rule for `%s'.\n"
+msgstr "Suche nach einer impliziten Regel für «%s».\n"
+
+#: make-3.76.1/implicit.c:53
+#, c-format
+msgid "Looking for archive-member implicit rule for `%s'.\n"
+msgstr "Suche nach einer impliziten Regel für Archiveinträge für «%s».\n"
+
+#: make-3.76.1/main.c:1287
+#, c-format
+msgid "Makefile `%s' might loop; not remaking it.\n"
+msgstr ""
+"«make»-Steuerdatei «%s» könnte eine Schleife enthalten; \n"
+"es wird nicht neu erzeugt.\n"
+
+#. A normal makefile.  We must die later.
+#: make-3.76.1/main.c:1379
+#, c-format
+msgid "Makefile `%s' was not found"
+msgstr "Die «make»-Steuerdatei «%s» wurde nicht gefunden"
+
+#: make-3.76.1/arscan.c:718
+#, c-format
+msgid "Member `%s'%s: %ld bytes at %ld (%ld).\n"
+msgstr ""
+"Eintrag «%s» %s: \n"
+"%ld bytes an Position %ld (%ld).\n"
+
+#: make-3.76.1/remake.c:594
+#, c-format
+msgid "Must remake target `%s'.\n"
+msgstr "Das Target «%s» muß neu erzeugt werden.\n"
+
+#: make-3.76.1/amiga.c:48
+msgid "MyExecute: Cannot allocate space for calling a command"
+msgstr "MyExecute: Kann keinen Speicher für Kommandoaufruf belegen."
+
+#: make-3.76.1/dir.c:899 make-3.76.1/dir.c:919
+msgid "No"
+msgstr "Keine"
+
+#: make-3.76.1/remake.c:564
+#, c-format
+msgid "No commands for `%s' and no dependencies actually changed.\n"
+msgstr "Keine Kommandos für «%s» und keine Abhängigkeit wurde verändert.\n"
+
+#: make-3.76.1/remake.c:369 make-3.76.1/remake.c:766
+#, c-format
+msgid "No implicit rule found for `%s'.\n"
+msgstr "Keine implizite Regel für «%s» gefunden.\n"
+
+#: make-3.76.1/remake.c:572
+#, c-format
+msgid "No need to remake target `%s'"
+msgstr "Es ist nicht notwendig, das Target «%s» neu zu erzeugen."
+
+#: make-3.76.1/main.c:1560
+msgid "No targets"
+msgstr "Keine Targets."
+
+#: make-3.76.1/main.c:1558
+msgid "No targets specified and no makefile found"
+msgstr "Keine Targets angegeben und keine «make»-Steuerdatei gefunden."
+
+#: make-3.76.1/remake.c:215
+#, c-format
+msgid "Nothing to be done for `%s'."
+msgstr "Für das Target «%s» gibt es nichts zu tun."
+
+#: make-3.76.1/main.c:1866
+msgid "Options:\n"
+msgstr "Optionen:\n"
+
+#: make-3.76.1/signame.c:173
+msgid "Power failure"
+msgstr "Stromausfall"
+
+#: make-3.76.1/main.c:242
+msgid "Print lots of debugging information"
+msgstr "Gebe viele Informationen zur Fehlersuche aus."
+
+#: make-3.76.1/main.c:293
+msgid "Print make's internal database"
+msgstr "Gib die interne Datenbank von «make» aus."
+
+#: make-3.76.1/main.c:315
+msgid "Print the current directory"
+msgstr "Gib das aktuelle Verzeichnis aus."
+
+#: make-3.76.1/main.c:312
+msgid "Print the version number of make and exit"
+msgstr "Gib die Versionsnummer von «make» aus und beende."
+
+#: make-3.76.1/main.c:256
+msgid "Print this message and exit"
+msgstr "Gib diese Nachricht aus und beende."
+
+#: make-3.76.1/signame.c:197
+msgid "Profiling timer expired"
+msgstr "Profiling Timer erloschen"
+
+#: make-3.76.1/job.c:1091
+#, c-format
+msgid "Putting child 0x%08lx PID %05d%s on the chain.\n"
+msgstr "Nehme Kindprozeß 0x%08lx PID %05d%s in die Kette auf.\n"
+
+#: make-3.76.1/signame.c:115
+msgid "Quit"
+msgstr "Quit"
+
+#: make-3.76.1/main.c:1488
+msgid "Re-executing:"
+msgstr "Erneute Ausführung:"
+
+#: make-3.76.1/main.c:253
+msgid "Read FILE as a makefile"
+msgstr "Lese die Datei DATEI als «make»-Steuerdatei."
+
+#: make-3.76.1/read.c:312
+#, c-format
+msgid "Reading makefile `%s'"
+msgstr "Lese «make»-Steuerdatei «%s»"
+
+#: make-3.76.1/read.c:138
+msgid "Reading makefiles..."
+msgstr "Lese «make»-Steuerdateien ..."
+
+#: make-3.76.1/job.c:501
+#, c-format
+msgid "Reaping %s child 0x%08lx PID %d%s\n"
+msgstr "Sammle %s Kindprozeß 0x%08lx PID %d%s\n"
+
+#: make-3.76.1/remake.c:319
+#, c-format
+msgid "Recently tried and failed to update file `%s'.\n"
+msgstr ""
+"Versuchte gerade die Datei «%s» zu aktualisieren, \n"
+"dies schlug aber fehl.\n"
+
+#: make-3.76.1/expand.c:92 make-3.76.1/expand.c:97
+#, c-format
+msgid "Recursive variable `%s' references itself (eventually)"
+msgstr "Rekursive Variable «%s» referenziert sich (schließlich) selbst."
+
+#. If this dependency has already been ruled
+#. "impossible", then the rule fails and don't
+#. bother trying it on the second pass either
+#. since we know that will fail too.
+#: make-3.76.1/implicit.c:376
+#, c-format
+msgid "Rejecting impossible %s dependency `%s'.\n"
+msgstr "Unmögliche %s Abhängigkeit «%s» abgelehnt.\n"
+
+#: make-3.76.1/job.c:589
+#, c-format
+msgid "Removing child 0x%08lx PID %d%s from chain.\n"
+msgstr "Entferne Kindprozeß 0x%08lx PID %d%s aus der Kette.\n"
+
+#: make-3.76.1/main.c:1152
+msgid "Resetting make for single job mode."
+msgstr "«make» wird so umgestellt, dass nur ein Job laufen kann."
+
+#: make-3.76.1/signame.c:228
+msgid "Resource lost"
+msgstr "Ressource verloren gegangen"
+
+#: make-3.76.1/main.c:296
+msgid "Run no commands; exit status says if up to date"
+msgstr ""
+"Keine Kommandos ausführen; der Exit-Status gibt an, ob die Dateien\n"
+"aktuell sind."
+
+#: make-3.76.1/main.c:262
+msgid "Search DIRECTORY for included makefiles"
+msgstr "Durchsuche das VERZEICHNIS nach eingebundenen «make»-Steuerdateien."
+
+#: make-3.76.1/signame.c:144
+msgid "Segmentation fault"
+msgstr "Adressierungsdefekt"
+
+#: make-3.76.1/remake.c:333
+#, c-format
+msgid "Still updating file `%s'.\n"
+msgstr "Die Datei «%s» wird immer noch aktualisiert.\n"
+
+#: make-3.76.1/signame.c:176
+msgid "Stopped"
+msgstr "Angehalten"
+
+#: make-3.76.1/signame.c:185
+msgid "Stopped (signal)"
+msgstr "Angehalten (signal)"
+
+#: make-3.76.1/signame.c:179
+msgid "Stopped (tty input)"
+msgstr "Angehalten (tty input)"
+
+#: make-3.76.1/signame.c:182
+msgid "Stopped (tty output)"
+msgstr "Angehalten (tty output)"
+
+#: make-3.76.1/remake.c:624
+#, c-format
+msgid "Successfully remade target file `%s'.\n"
+msgstr "Die Target-Datei «%s» wurde erfolgreich aktualisiert.\n"
+
+#: make-3.76.1/main.c:246
+msgid "Suspend process to allow a debugger to attach"
+msgstr "Setze Prozess aus, um das Einklinken eines Debuggers zu ermöglichen."
+
+#: make-3.76.1/remake.c:559
+#, c-format
+msgid "Target `%s' is double-colon and has no dependencies.\n"
+msgstr ""
+"Das Target «%s» hat einen doppelten Doppelpunkt \n"
+"und keine Abhängigkeiten.\n"
+
+#: make-3.76.1/remake.c:500
+#, c-format
+msgid "Target `%s' not remade because of errors."
+msgstr "Das Target «%s» wurde wegen Fehlern nicht aktualisiert."
+
+#: make-3.76.1/remake.c:627
+#, c-format
+msgid "Target file `%s' needs remade under -q.\n"
+msgstr "Target «%s» muss bei -q aktualisiert werden.\n"
+
+#: make-3.76.1/signame.c:156
+msgid "Terminated"
+msgstr "Abgebrochen (Terminated)"
+
+#: make-3.76.1/remake.c:483
+#, c-format
+msgid "The dependencies of `%s' are being made.\n"
+msgstr "Die Abhängigkeiten von «%s» werden festgestellt.\n"
+
+#: make-3.76.1/main.c:309
+msgid "Touch targets instead of remaking them"
+msgstr ""
+"Die Targets werden nur als aktualisiert markiert,\n"
+"nicht tatsächlich erneuert."
+
+#: make-3.76.1/signame.c:121
+msgid "Trace/breakpoint trap"
+msgstr "Verfolgen/anhalten abfangen (Trace/breakpoint trap)"
+
+#: make-3.76.1/implicit.c:384
+#, c-format
+msgid "Trying %s dependency `%s'.\n"
+msgstr "Versuche %s Abhängigkeit «%s».\n"
+
+#: make-3.76.1/implicit.c:337
+#, c-format
+msgid "Trying pattern rule with stem `%.*s'.\n"
+msgstr "Versuche Muster-Regel mit Ersetzung «%.*s».\n"
+
+#: make-3.76.1/main.c:318
+msgid "Turn off -w, even if it was turned on implicitly"
+msgstr "Schalte -w aus, selbst wenn es implizit eingeschaltet wurde."
+
+#: make-3.76.1/main.c:306
+msgid "Turns off -k"
+msgstr "Schaltet -k ab."
+
+#: make-3.76.1/misc.c:282
+#, c-format
+msgid "Unknown error %d"
+msgstr "Unbekannter Fehler %d."
+
+#: make-3.76.1/misc.c:277
+msgid "Unknown error 12345678901234567890"
+msgstr "Unbekannter Fehler 12345678901234567890"
+
+#: make-3.76.1/job.c:491
+#, c-format
+msgid "Unknown%s job %d"
+msgstr "Unbekannter%s Job %d"
+
+#: make-3.76.1/main.c:1532
+msgid "Updating goal targets...."
+msgstr "Aktualisieren der Targets...."
+
+#: make-3.76.1/main.c:1262
+msgid "Updating makefiles...."
+msgstr "Aktualisiere «make»-Steuerdateien...."
+
+#: make-3.76.1/signame.c:209
+msgid "Urgent I/O condition"
+msgstr "Dringende I/O-Bedingung"
+
+#: make-3.76.1/main.c:1864
+#, c-format
+msgid "Usage: %s [options] [target] ...\n"
+msgstr "Syntax: %s [Optionen] [Target] ...\n"
+
+#: make-3.76.1/misc.c:666
+msgid "User"
+msgstr "Nutzer"
+
+#: make-3.76.1/signame.c:159
+msgid "User defined signal 1"
+msgstr "Nutzersignal 1"
+
+#: make-3.76.1/signame.c:162
+msgid "User defined signal 2"
+msgstr "Nutzersignal 2"
+
+#: make-3.76.1/remake.c:375 make-3.76.1/remake.c:772
+#, c-format
+msgid "Using default commands for `%s'.\n"
+msgstr "Verwende die Standard-Kommandos für «%s».\n"
+
+#: make-3.76.1/signame.c:194
+msgid "Virtual timer expired"
+msgstr "Virtueller Timer erloschen"
+
+#: make-3.76.1/main.c:324
+msgid "Warn when an undefined variable is referenced"
+msgstr ""
+"Gib eine Warnung aus, wenn eine undefinierte Variable referenziert wird."
+
+#: make-3.76.1/signame.c:203
+msgid "Window changed"
+msgstr "Fenster hat sich verändert"
+
+#: make-3.76.1/job.c:233
+#, c-format
+msgid "[%s] Error %d (ignored)"
+msgstr "[%s] Fehler %d (ignoriert)"
+
+#: make-3.76.1/remake.c:216
+#, c-format
+msgid "`%s' is up to date."
+msgstr "«%s» ist bereits aktualisiert."
+
+#: make-3.76.1/variable.c:880
+msgid "`override' directive"
+msgstr "«override»-Anweisung"
+
+#: make-3.76.1/main.c:2432
+msgid "an unknown directory"
+msgstr "ein unbekanntes Verzeichnis"
+
+#: make-3.76.1/w32/subproc/sub_proc.c:971
+#, c-format
+msgid "arg with white space or doublequotes: %s\n"
+msgstr "Argument mit Leerzeichen oder Anführungszeichen: %s\n"
+
+#: make-3.76.1/ar.c:49
+#, c-format
+msgid "attempt to use unsupported feature: `%s'"
+msgstr "Versuch, eine nicht unterstützte Funktionalität zu verwenden: «%s»."
+
+#: make-3.76.1/function.c:756 make-3.76.1/variable.c:883
+msgid "automatic"
+msgstr "automatisch"
+
+#: make-3.76.1/file.c:294
+#, c-format
+msgid "but `%s' is now considered the same file as `%s'."
+msgstr ""
+"aber «%s» wird jetzt als dieselbe Datei \n"
+"wie «%s» betrachtet."
+
+#: make-3.76.1/file.c:324
+#, c-format
+msgid "can't rename double-colon `%s' to single-colon `%s'"
+msgstr ""
+"«%s» mit doppeltem Doppelpunkt kann nicht in \n"
+"«%s» mit einfachem Doppelpunkt geändert werden."
+
+#: make-3.76.1/file.c:319
+#, c-format
+msgid "can't rename single-colon `%s' to double-colon `%s'"
+msgstr ""
+"«%s» mit einfachem Doppelpunkt kann nicht in \n"
+"«%s» mit doppeltem Doppelpunkt geändert werden."
+
+#: make-3.76.1/job.c:1316
+msgid "cannot enforce load limit: "
+msgstr "Lasteinschränkung kann nicht erzwungen werden: "
+
+#. An errno value of zero means getloadavg is just unsupported.
+#: make-3.76.1/job.c:1314
+msgid "cannot enforce load limits on this operating system"
+msgstr ""
+"Auf diesem Betriebssystem kann die Einhaltung\n"
+"der Lastbeschränkung nicht erzwungen werden."
+
+#: make-3.76.1/function.c:750 make-3.76.1/variable.c:877
+msgid "command line"
+msgstr "Kommandozeile"
+
+#: make-3.76.1/read.c:700
+msgid "commands commence before first target"
+msgstr "Kommandos beginnen vor dem ersten Target."
+
+#: make-3.76.1/function.c:429
+#, c-format
+msgid "create_child_process: DuplicateHandle(Err) failed (e=%d)\n"
+msgstr "«create_child_process»: «DuplicateHandle(Err)» schlug fehl (e=%d).\n"
+
+#: make-3.76.1/function.c:419
+#, c-format
+msgid "create_child_process: DuplicateHandle(In) failed (e=%d)\n"
+msgstr "«create_child_process»: «DuplicateHandle(In)» schlug fehl (e=%d).\n"
+
+#: make-3.76.1/getopt.c:1017 make-3.76.1/getopt1.c:149
+msgid "digits occur in two different argv-elements.\n"
+msgstr ""
+"Zahlen erscheinen in zwei verschiedenen \n"
+"Einträgen des «argv»-Vektors.\n"
+
+#: make-3.76.1/main.c:2434
+#, c-format
+msgid "directory `%s'\n"
+msgstr "Verzeichnis «%s»\n"
+
+#: make-3.76.1/main.c:785
+msgid "done sleep(30). Continuing.\n"
+msgstr "«sleep(30)» ist abgeschlossen. Es geht weiter.\n"
+
+#: make-3.76.1/read.c:528 make-3.76.1/read.c:550
+msgid "empty `override' directive"
+msgstr "Leere «override» Anweisung."
+
+#: make-3.76.1/w32/subproc/sub_proc.c:924
+#, c-format
+msgid "empty string arg: %s\n"
+msgstr "Argument ist leere Zeichenkette: %s.\n"
+
+#: make-3.76.1/main.c:417
+msgid "empty string invalid as file name"
+msgstr "Eine leere Zeichenkette ist als Dateiname ungültig."
+
+#: make-3.76.1/variable.c:705 make-3.76.1/variable.c:707
+msgid "empty variable name"
+msgstr "Leerer Variablenname"
+
+#: make-3.76.1/function.c:741 make-3.76.1/variable.c:868
+msgid "environment"
+msgstr "Umgebung"
+
+#: make-3.76.1/function.c:747
+msgid "environment override"
+msgstr "Umgebung überschrieben"
+
+#: make-3.76.1/variable.c:874
+msgid "environment under -e"
+msgstr "Umgebung per -e"
+
+#: make-3.76.1/job.c:1605
+msgid "execve: "
+msgstr "«execve»: "
+
+#: make-3.76.1/job.c:1704 make-3.76.1/job.c:1709
+msgid "execvp: "
+msgstr "«execvp»: "
+
+#: make-3.76.1/function.c:439
+msgid "expand_function: process_init_fd() failed\n"
+msgstr "«expand_function»: «process_init_fd()» schlug fehl.\n"
+
+#: make-3.76.1/function.c:449
+#, c-format
+msgid "expand_function: unable to launch process (e=%d)\n"
+msgstr "«expand_function»: Der Prozess kann nicht gestartet werden (e=%d).\n"
+
+#: make-3.76.1/remote-cstms.c:138
+msgid "exporting: "
+msgstr "Export: "
+
+#: make-3.76.1/remote-cstms.c:171
+#, c-format
+msgid "exporting: %s"
+msgstr "Export: %s"
+
+#: make-3.76.1/remote-cstms.c:129
+msgid "exporting: Couldn't create return socket."
+msgstr "Export: Konnte Rückverbindung nicht herstellen."
+
+#: make-3.76.1/read.c:1015
+#, c-format
+msgid "extraneous `%s'"
+msgstr "Überflüssiges «%s»"
+
+#: make-3.76.1/read.c:502
+msgid "extraneous `endef'"
+msgstr "Überflüssiges «endef»."
+
+#: make-3.76.1/main.c:1039
+msgid "fopen (temporary file)"
+msgstr "fopen (temporäre Datei)"
+
+#: make-3.76.1/main.c:1045
+msgid "fwrite (temporary file)"
+msgstr "fwrite (temporäre Datei)"
+
+#: make-3.76.1/main.c:689 make-3.76.1/main.c:1000
+msgid "getcwd: "
+msgstr "«getcwd»: "
+
+#: make-3.76.1/main.c:691 make-3.76.1/main.c:1002
+#, c-format
+msgid "getwd: %s"
+msgstr "«getwd»: %s"
+
+#: make-3.76.1/implicit.c:377 make-3.76.1/implicit.c:385
+msgid "implicit"
+msgstr "implizite"
+
+#: make-3.76.1/implicit.c:422
+msgid "intermediate"
+msgstr "Zwischenstufe"
+
+#: make-3.76.1/job.c:1419
+#, c-format
+msgid "internal error: `%s' command_state %d in child_handler"
+msgstr "Interner Fehler: «%s» command_state %d in child_handler."
+
+#: make-3.76.1/read.c:494
+msgid "invalid syntax in conditional"
+msgstr "Ungültige Syntax in der Bedingung."
+
+#: make-3.76.1/arscan.c:154
+#, c-format
+msgid "lbr$ini_control failed with status = %d"
+msgstr "«lbr$ini_control» schlug mit Status = %d fehl."
+
+#: make-3.76.1/arscan.c:72
+#, c-format
+msgid "lbr$set_module failed to extract module info, status = %d"
+msgstr "«lbr$set_module» konnte keine Modulinformation auslesen; Status = %d."
+
+#: make-3.76.1/job.c:502
+msgid "losing"
+msgstr "erfolglosen"
+
+#: make-3.76.1/job.c:1654
+#, c-format
+msgid "make reaped child pid %d, still waiting for pid %d\n"
+msgstr ""
+"«make» registrierte die Beendigung des Kindprozesses mit ID %d,\n"
+"wartet jedoch noch auf den Prozess mit ID %d.\n"
+
+#. No `endef'!!
+#: make-3.76.1/read.c:955
+msgid "missing `endef', unterminated `define'"
+msgstr "Fehlendes «endef», nicht abgeschlossenes «define»"
+
+#: make-3.76.1/read.c:864
+msgid "missing `endif'"
+msgstr "Fehlendes «endif»"
+
+#: make-3.76.1/read.c:744
+msgid "missing rule before commands"
+msgstr "Es fehlt eine Regel vor den Kommandos."
+
+#: make-3.76.1/read.c:763
+msgid "missing separator"
+msgstr "Fehlendes Trennzeichen."
+
+#: make-3.76.1/read.c:817
+msgid "missing target pattern"
+msgstr "Es fehlt ein Target-Muster"
+
+#: make-3.76.1/read.c:1280
+msgid "mixed implicit and normal rules"
+msgstr "Implizite und normale Regel vermischt."
+
+#: make-3.76.1/read.c:1277
+msgid "mixed implicit and static pattern rules"
+msgstr "Implizite und statische Muster-Regel vermischt."
+
+#: make-3.76.1/read.c:819
+msgid "multiple target patterns"
+msgstr "Mehrfache Target-Muster."
+
+#: make-3.76.1/vmsfunctions.c:227
+msgid "never"
+msgstr "niemals"
+
+#: make-3.76.1/remake.c:548
+msgid "newer"
+msgstr "jünger"
+
+#: make-3.76.1/dir.c:904 make-3.76.1/dir.c:924
+msgid "no"
+msgstr "keine"
+
+#: make-3.76.1/read.c:634
+#, c-format
+msgid "no file name for `%sinclude'"
+msgstr "Kein Dateiname für «%sinclude»."
+
+#: make-3.76.1/function.c:1175 make-3.76.1/function.c:1177
+msgid "non-numeric first argument to `word' function"
+msgstr "Nicht-numerisches erstes Argument zur  «word»-Funktion."
+
+#: make-3.76.1/function.c:1242 make-3.76.1/function.c:1244
+msgid "non-numeric first argument to `wordlist' function"
+msgstr "Nicht-numerisches erstes Argument für die «wordlist»-Funktion."
+
+#: make-3.76.1/function.c:1271 make-3.76.1/function.c:1273
+msgid "non-numeric second argument to `wordlist' function"
+msgstr "Nicht-numerisches zweites Argument zur «wordlist»-Funktion."
+
+#: make-3.76.1/getopt.c:1044 make-3.76.1/getopt1.c:180
+msgid "non-option ARGV-elements: "
+msgstr "Einträge im «argv»-Vektor, die nicht Option sind: "
+
+#: make-3.76.1/remake.c:548
+msgid "older"
+msgstr "älter"
+
+#: make-3.76.1/read.c:1020
+msgid "only one `else' per conditional"
+msgstr "Es ist nur ein «else» je Verzweigung erlaubt."
+
+#: make-3.76.1/getopt.c:1019 make-3.76.1/getopt1.c:151
+#, c-format
+msgid "option %c\n"
+msgstr "Option %c\n"
+
+#: make-3.76.1/getopt1.c:132
+#, c-format
+msgid "option %s"
+msgstr "Option %s"
+
+#: make-3.76.1/getopt.c:1023 make-3.76.1/getopt1.c:155
+msgid "option a\n"
+msgstr "Option a\n"
+
+#: make-3.76.1/getopt.c:1027 make-3.76.1/getopt1.c:159
+msgid "option b\n"
+msgstr "Option b\n"
+
+#: make-3.76.1/getopt.c:1031 make-3.76.1/getopt1.c:163
+#, c-format
+msgid "option c with value `%s'\n"
+msgstr "Option c mit Wert `%s'\n"
+
+#: make-3.76.1/getopt1.c:167
+#, c-format
+msgid "option d with value `%s'\n"
+msgstr "Option d mit Wert «%s»\n"
+
+#: make-3.76.1/w32/subproc/sub_proc.c:918
+#, c-format
+msgid "original arg: %s\n"
+msgstr "Ursprüngliches Argument: %s\n"
+
+#: make-3.76.1/function.c:753 make-3.76.1/read.c:524
+msgid "override"
+msgstr "überschreiben"
+
+#: make-3.76.1/w32/subproc/sub_proc.c:976
+#, c-format
+msgid "plain arg: %s\n"
+msgstr "Pures Argument: %s\n"
+
+#: make-3.76.1/w32/subproc/sub_proc.c:520
+#, c-format
+msgid "process_begin: CreateProcess(%s, %s, ...) failed.\n"
+msgstr "«process_begin»: «CreateProcess(%s, %s, ...)» schlug fehl.\n"
+
+#: make-3.76.1/job.c:1028 make-3.76.1/job.c:1625
+#, c-format
+msgid "process_easy() failed failed to launch process (e=%d)\n"
+msgstr "«process_easy()» konnte den Prozess nicht starten (e=%d).\n"
+
+#: make-3.76.1/w32/subproc/sub_proc.c:1111
+#, c-format
+msgid "process_easy: DuplicateHandle(Err) failed (e=%d)\n"
+msgstr "«process_easy»: «DuplicateHandle(Err)» schlug fehl (e=%d).\n"
+
+#: make-3.76.1/w32/subproc/sub_proc.c:1087
+#, c-format
+msgid "process_easy: DuplicateHandle(In) failed (e=%d)\n"
+msgstr "«process_easy»: «DuplicateHandle(In)» schlug fehl (e=%d).\n"
+
+#: make-3.76.1/w32/subproc/sub_proc.c:1099
+#, c-format
+msgid "process_easy: DuplicateHandle(Out) failed (e=%d)\n"
+msgstr "«process_easy»: «DuplicateHandle(Out)» schlug fehl (e=%d).\n"
+
+#: make-3.76.1/main.c:504
+msgid "read"
+msgstr "Lese"
+
+#: make-3.76.1/implicit.c:377 make-3.76.1/implicit.c:385
+msgid "rule"
+msgstr "explizite"
+
+#: make-3.76.1/vmsfunctions.c:81
+#, c-format
+msgid "sys$search failed with %d\n"
+msgstr "«sys$search» schlug mit %d fehl.\n"
+
+#: make-3.76.1/read.c:1320
+#, c-format
+msgid "target `%s' doesn't match the target pattern"
+msgstr "Target «%s» passt nicht zum Target-Muster"
+
+#: make-3.76.1/read.c:1360
+#, c-format
+msgid "target `%s' given more than once in the same rule."
+msgstr "Target «%s» steht mehrfach in derselben Regel."
+
+#: make-3.76.1/read.c:1352 make-3.76.1/read.c:1454
+#, c-format
+msgid "target file `%s' has both : and :: entries"
+msgstr "Target «%s» enthält sowohl «:» als auch «::» Einträge"
+
+#: make-3.76.1/read.c:824
+msgid "target pattern contains no `%%'"
+msgstr "Target-Muster enthält kein «%%»"
+
+#: make-3.76.1/main.c:1813
+#, c-format
+msgid "the `-%c' option requires a positive integral argument"
+msgstr "Die Option «-%c» verlangt eine positive ganze Zahl als Argument."
+
+#: make-3.76.1/function.c:1185 make-3.76.1/function.c:1188
+msgid "the `word' function takes a one-origin index argument"
+msgstr "Die «word»-Funktion erwartet ein eindeutiges Index-Argument."
+
+#: make-3.76.1/remake.c:845
+#, c-format
+msgid "touch %s"
+msgstr "%s wird als aktualisiert markiert."
+
+#: make-3.76.1/ar.c:140
+msgid "touch archive member is not available on VMS"
+msgstr ""
+"VMS stellt nicht die Möglichkeit einer Änderung \n"
+"der Zeitmarken von Archiveinträgen zur Verfügung."
+
+#: make-3.76.1/ar.c:172
+#, c-format
+msgid "touch: Archive `%s' does not exist"
+msgstr "touch: Archiv «%s» existiert nicht."
+
+#: make-3.76.1/ar.c:187
+#, c-format
+msgid "touch: Bad return code from ar_member_touch on `%s'"
+msgstr ""
+"touch: Ungünstiger Rückgabewert beim Zugriff \n"
+"von ar_member_touch auf «%s»."
+
+#: make-3.76.1/ar.c:181
+#, c-format
+msgid "touch: Member `%s' does not exist in `%s'"
+msgstr "touch: Eintrag «%s» existiert nicht in «%s»."
+
+#: make-3.76.1/ar.c:175
+#, c-format
+msgid "touch: `%s' is not a valid archive"
+msgstr "touch: «%s» ist kein gültiges Archiv."
+
+#: make-3.76.1/arscan.c:165
+#, c-format
+msgid "unable to open library `%s' to lookup member `%s'"
+msgstr ""
+"Konnte die Bibliothek «%s» auf der Suche \n"
+"nach dem Eintrag «%s» nicht öffnen."
+
+#: make-3.76.1/function.c:729
+msgid "undefined"
+msgstr "nicht definiert"
+
+#. There is too much variation in Sys V signal numbers and names, so
+#. we must initialize them at runtime.
+#: make-3.76.1/signame.c:59
+msgid "unknown signal"
+msgstr "Unbekanntes Signal"
+
+#. It disappeared; so what.
+#: make-3.76.1/commands.c:499 make-3.76.1/file.c:403
+msgid "unlink: "
+msgstr "Verbindung verloren (unlink): "
+
+#: make-3.76.1/function.c:1541
+#, c-format
+msgid "unterminated call to function `%s': missing `%c'"
+msgstr "Nicht beendeter Aufruf der Funktion «%s»: «%c» fehlt."
+
+#: make-3.76.1/expand.c:223 make-3.76.1/expand.c:225
+msgid "unterminated variable reference"
+msgstr "Nicht abgeschlossene Variablenreferenz."
+
+#: make-3.76.1/misc.c:318 make-3.76.1/misc.c:330 make-3.76.1/read.c:2238
+msgid "virtual memory exhausted"
+msgstr "Der virtuelle Speicher ist verbraucht."
+
+#: make-3.76.1/read.c:1882
+msgid "warning: NUL character seen; rest of line ignored"
+msgstr "Warnung: NUL-Zeichen gelesen; der Rest der Zeile wird ignoriert."
+
+#: make-3.76.1/read.c:1372
+#, c-format
+msgid "warning: ignoring old commands for target `%s'"
+msgstr "Warnung: Ignoriere alte Kommandos für das Target «%s»."
+
+#: make-3.76.1/read.c:1369
+#, c-format
+msgid "warning: overriding commands for target `%s'"
+msgstr "Warnung: Überschreibe die Kommandos für das Target «%s»."
+
+#: make-3.76.1/expand.c:120
+#, c-format
+msgid "warning: undefined variable `%.*s'"
+msgstr "Warnung: undefinierte Variable «%.*s»"
+
+#: make-3.76.1/job.c:502
+msgid "winning"
+msgstr "erfolgreichen"
+
+#: make-3.76.1/main.c:504
+msgid "write"
+msgstr "Schreib"

@@ -1,3 +1,23 @@
+2000-01-25  Paul D. Smith  <psmith@gnu.org>
+
+	Change gettext support to use the simplified version in libit 0.7.
+
+	* getopt.c, make.h: Use gettext.h instead of libintl.h.
+	* ABOUT-NLS, gettext.h, gettext.c: New files from libit 0.7.
+	Modified to remove some static declarations which aren't defined.
+	* acconfig.h: Use new gettext #defines.
+	* acinclude.m4: Add fp_WITH_GETTEXT; remove AM_GNU_GETTEXT.
+	* configure.in: Call fp_WITH_GETTEXT instead.
+	* Makefile.am: New gettext stuff.  Also force inclusion of glob
+	files for systems which have LIBC glob.
+
+	* i18n/Makefile.am, i18n/.cvsignore: New dir for translation files.
+	* i18n/de.po, i18n/es.po, i18n/fr.po, i18n/ko.po, i18n/nl.po:
+	* i18n/pl.po, i18n/ru.po: Import translations already done for
+	earlier versions of GNU make.  Thanks for that work!!
+
+	* po/Makefile.in.in, po/POTFILES.in: Removed.
+
 2000-01-23  Paul D. Smith  <psmith@gnu.org>
 
 	* main.c (decode_debug_flags): If debug_flag is set, enable all

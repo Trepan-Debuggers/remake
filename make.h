@@ -40,25 +40,13 @@ Boston, MA 02111-1307, USA.  */
 #endif /* C++ or ANSI C.  */
 
 
-#if HAVE_LOCALE_H
-# include <locale.h>
-#endif
+#include "gettext.h"
+#define _(Text)     gettext (Text)
+#define N_(Text)    gettext_noop (Text)
+
 #if !HAVE_SETLOCALE
 # define setlocale(Category, Locale) /* empty */
 #endif
-
-#if ENABLE_NLS
-# include <libintl.h>
-# define _(Text) gettext (Text)
-#else
-# undef bindtextdomain
-# define bindtextdomain(Domain, Directory) /* empty */
-# undef textdomain
-# define textdomain(Domain) /* empty */
-# define _(Text) Text
-# define gettext(Text) Text
-#endif
-#define N_(Text) Text
 
 
 #ifdef  CRAY
