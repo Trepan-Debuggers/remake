@@ -53,6 +53,7 @@
    and for each one call FUNCTION with the following arguments:
      archive file descriptor for reading the data,
      member name,
+     member name might be truncated flag,
      member header position in file,
      member data position in file,
      member data size,
@@ -83,6 +84,7 @@ ar_scan (archive, function, arg)
   FL_HDR fl_header;
 #endif
   char *namemap = 0;
+  int long_name = 0;
   register int desc = open (archive, O_RDONLY, 0);
   if (desc < 0)
     return -1;
@@ -189,6 +191,8 @@ ar_scan (archive, function, arg)
 	
 	name[name_len] = 0;
 
+	long_name = 1;
+
 	sscanf (member_header.ar_date, "%12ld", &dateval);
 	sscanf (member_header.ar_uid, "%12d", &uidval);
 	sscanf (member_header.ar_gid, "%12d", &gidval);
@@ -250,7 +254,10 @@ ar_scan (archive, function, arg)
  	  if (! is_namemap
  	      && (name[0] == ' ' || name[0] == '/')
  	      && namemap != 0)
- 	    name = namemap + atoi (name + 1);
+	    {
+	      name = namemap + atoi (name + 1);
+	      long_name = 1;
+	    }
  	  else if (name[0] == '#'
  		   && name[1] == '1'
  		   && name[2] == '/')
@@ -265,6 +272,8 @@ ar_scan (archive, function, arg)
  		  return -2;
  		}
  	      name[namesize] = '\0';
+
+	      long_name = 1;
  	    }
 #endif /* Not AIAMAG. */
 	}
@@ -278,7 +287,7 @@ ar_scan (archive, function, arg)
 #endif	/* Not Xenix.  */
 
 	fnval =
-	  (*function) (desc, name, member_offset,
+	  (*function) (desc, name, ! long_name, member_offset,
 		       member_offset + AR_HDR_SIZE, eltsize,
 #ifndef	M_XENIX
 		       atol (member_header.ar_date),
@@ -357,12 +366,14 @@ ar_scan (archive, function, arg)
   return 0;
 }
 
-/* Return nonzero iff NAME matches MEM.  If NAME is longer than
-   sizeof (struct ar_hdr.ar_name), MEM may be the truncated version.  */
+/* Return nonzero iff NAME matches MEM.
+   If TRUNCATED is nonzero, MEM may be truncated to
+   sizeof (struct ar_hdr.ar_name) - 1.  */
 
 int
-ar_name_equal (name, mem)
+ar_name_equal (name, mem, truncated)
      char *name, *mem;
+     int truncated;
 {
   char *p;
 
@@ -402,6 +413,12 @@ ar_name_equal (name, mem)
 
 #else	/* AIX or APOLLO.  */
 
+  if (truncated)
+    {
+      struct ar_hdr hdr;
+      return !strncmp (name, mem, sizeof (hdr.ar_name) - 1);
+    }
+
   return !strcmp (name, mem);
 
 #endif
@@ -409,14 +426,16 @@ ar_name_equal (name, mem)
 
 /* ARGSUSED */
 static long int
-ar_member_pos (desc, mem, hdrpos, datapos, size, date, uid, gid, mode, name)
+ar_member_pos (desc, mem, truncated,
+	       hdrpos, datapos, size, date, uid, gid, mode, name)
      int desc;
      char *mem;
+     int truncated;
      long int hdrpos, datapos, size, date;
      int uid, gid, mode;
      char *name;
 {
-  if (!ar_name_equal (name, mem))
+  if (!ar_name_equal (name, mem, truncated))
     return 0;
   return hdrpos;
 }
@@ -487,15 +506,19 @@ ar_member_touch (arname, memname)
 #ifdef TEST
 
 long int
-describe_member (desc, name, hdrpos, datapos, size, date, uid, gid, mode)
+describe_member (desc, name, truncated,
+		 hdrpos, datapos, size, date, uid, gid, mode)
      int desc;
      char *name;
+     int truncated;
      long int hdrpos, datapos, size, date;
      int uid, gid, mode;
 {
   extern char *ctime ();
 
-  printf ("Member %s: %ld bytes at %ld (%ld).\n", name, size, hdrpos, datapos);
+  printf ("Member `%s'%s: %ld bytes at %ld (%ld).\n",
+	  name, truncated ? " (name might be truncated)" : "",
+	  size, hdrpos, datapos);
   printf ("  Date %s", ctime (&date));
   printf ("  uid = %d, gid = %d, mode = 0%o.\n", uid, gid, mode);
 
