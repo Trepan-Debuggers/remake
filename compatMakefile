@@ -217,9 +217,9 @@ config.h: config.status $(srcdir)/config.h.in
 	$(SHELL) config.status
 
 configure: configure.in
-	autoconf
+	autoconf $(ACFLAGS)
 config.h.in: configure.in
-	autoheader
+	autoheader $(ACFLAGS)
 
 # This tells versions [3.59,3.63) of GNU make not to export all variables.
 .NOEXPORT:
