@@ -192,7 +192,7 @@ $(bindir)/$(instname): make
 $(infodir)/$(instname).info: make.info
 	for file in make.info*; do \
 	  $(INSTALL_DATA) $$file \
-	    `echo $@ | sed "s/$(instname).info\$$/$$file/"`; \
+	    `echo $@ | sed "s,$(instname).info\$$,$$file,"`; \
 	done
 
 $(mandir)/$(instname).$(manext): make.man
