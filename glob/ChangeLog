@@ -1,3 +1,8 @@
+2005-03-11  Paul D. Smith  <psmith@gnu.org>
+
+	* glob.c (glob_in_dir): Change FNM_CASEFOLD to be enabled if
+	HAVE_CASE_INSENSITIVE_FS is defined.
+
 2003-01-30  Paul D. Smith  <psmith@gnu.org>
 
 	* glob.h: Patch for FreeBSD by Mike Barcroft <mike@freebsd.org>

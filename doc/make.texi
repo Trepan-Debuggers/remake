@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.26 2005/03/04 12:52:33 psmith Exp $
+@set RCSID $Id: make.texi,v 1.27 2005/04/08 12:51:20 psmith Exp $
 @set EDITION 0.61
 @set VERSION 3.80
 @set UPDATED 23 Feb 2003
@@ -1270,22 +1270,26 @@ variable definitions.
 @cindex makefiles, and special variables
 @cindex special variables
 
-GNU @code{make} also supports a special variable.  Note that any value
-you assign to this variable will be ignored; it will always return its
-special value.
+GNU @code{make} also supports other special variables.  Unless
+otherwise documented here, these values lose their special properties
+if they are set by a makefile or on the command line.
+
+@table @code
 
 @vindex $(.VARIABLES)
 @vindex .VARIABLES @r{(list of variables)}
-The first special variable is @code{.VARIABLES}.  When expanded, the
-value consists of a list of the @emph{names} of all global variables
-defined in all makefiles read up until that point.  This includes
-variables which have empty values, as well as built-in variables
-(@pxref{Implicit Variables, , Variables Used by Implicit Rules}), but
-does not include any variables which are only defined in a
-target-specific context.
+@item .VARIABLES
+Expands to a list of the @emph{names} of all global variables defined
+so far.  This includes variables which have empty values, as well as
+built-in variables (@pxref{Implicit Variables, , Variables Used by
+Implicit Rules}), but does not include any variables which are only
+defined in a target-specific context.  Note that any value you assign
+to this variable will be ignored; it will always return its special
+value.
 
 @c @vindex $(.TARGETS)
 @c @vindex .TARGETS @r{(list of targets)}
+@c @item .TARGETS
 @c The second special variable is @code{.TARGETS}.  When expanded, the
 @c value consists of a list of all targets defined in all makefiles read
 @c up until that point.  Note it's not enough for a file to be simply
@@ -1293,6 +1297,36 @@ target-specific context.
 @c would match an implicit rule and become an ``implicit target''.  The
 @c file must appear as a target, on the left-hand side of a ``:'', to be
 @c considered a target for the purposes of this variable.
+
+@vindex $(.FEATURES)
+@vindex .FEATURES @r{(list of supported features)}
+@item .FEATURES
+Expands to a list of special features supported by this version of
+@code{make}.  Possible values include:
+
+@table @samp
+@item target-specific
+Supports target-specific and pattern-specific variable assignments.
+@xref{Target-specific, ,Target-specific Variable Values}.
+
+@item order-only
+Supports order-only prerequisites.  @xref{Prerequisite Types, ,Types
+of Prerequisites}.
+
+@item second-expansion
+Supports secondary expansion of prerequisite lists.
+
+@item jobserver
+Supports ``job server'' enhanced parallel builds.  @xref{Parallel,
+,Parallel Execution}.
+
+@item check-symlink
+Supports the @code{-L} (@code{--check-symlink-times}) flag.
+@xref{Options Summary, ,Summary of Options}.
+
+@end table
+
+@end table
 
 @node Remaking Makefiles, Overriding Makefiles, Special Variables, Makefiles
 @section How Makefiles Are Remade

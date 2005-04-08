@@ -1,3 +1,7 @@
+2005-04-06  Paul D. Smith  <psmith@gnu.org>
+
+	* LINGUAS: Added a new translation for Kinywarwanda (rw).
+
 2005-02-09  Paul D. Smith  <psmith@gnu.org>
 
 	* LINGUAS: Added a new translation for Irish (ga).

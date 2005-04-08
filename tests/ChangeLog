@@ -1,3 +1,7 @@
+2005-04-07  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/targets/SECONDARY: Add a test for Savannah bug #12331.
+
 2005-03-15  Boris Kolpackov  <boris@kolpackov.net>
 
 	* scripts/variables/automatic: Add a test for Savannah bug #12320.

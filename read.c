@@ -405,6 +405,7 @@ eval_makefile (char *filename, int flags)
   fclose (ebuf.fp);
 
   free (ebuf.bufstart);
+  alloca (0);
   return r;
 }
 
@@ -436,6 +437,7 @@ eval_buffer (char *buffer)
 
   reading_file = curfile;
 
+  alloca (0);
   return r;
 }
 

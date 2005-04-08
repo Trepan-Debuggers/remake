@@ -909,10 +909,10 @@ check_dep (struct file *file, unsigned int depth,
   ++depth;
   start_updating (file);
 
-  if (!file->intermediate)
-    /* If this is a non-intermediate file, update it and record
-       whether it is newer than THIS_MTIME.  */
+  if (file->phony || !file->intermediate)
     {
+      /* If this is a non-intermediate file, update it and record
+         whether it is newer than THIS_MTIME.  */
       FILE_TIMESTAMP mtime;
       dep_status = update_file (file, depth);
       check_renamed (file);
