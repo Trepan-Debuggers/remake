@@ -1,6 +1,6 @@
 /* Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
-2002, 2003 Free Software Foundation, Inc.
+2002, 2003, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -763,11 +763,9 @@ find_and_set_default_shell (char *token)
     sh_found = 1;
   } else {
     char *p;
-    struct variable *v = lookup_variable ("Path", 4);
+    struct variable *v = lookup_variable ("PATH", 4);
 
-    /*
-     * Search Path for shell
-     */
+    /* Search Path for shell */
     if (v && v->value) {
       char *ep;
 
@@ -1093,7 +1091,20 @@ main (int argc, char **argv, char **envp)
 
   /* Initialize the special variables.  */
   define_variable (".VARIABLES", 10, "", o_default, 0)->special = 1;
-  /* define_variable (".TARGETS", 8, "", o_default, 0); */
+  /* define_variable (".TARGETS", 8, "", o_default, 0)->special = 1; */
+
+  /* Set up .FEATURES */
+  define_variable (".FEATURES", 9,
+                   "target-specific order-only second-expansion",
+                   o_default, 0);
+#ifdef MAKE_JOBSERVER
+  do_variable_definition (NILF, ".FEATURES", "jobserver",
+                          o_default, f_append, 0);
+#endif
+#ifdef MAKE_SYMLINKS
+  do_variable_definition (NILF, ".FEATURES", "check-symlink",
+                          o_default, f_append, 0);
+#endif
 
   /* Read in variables from the environment.  It is important that this be
      done before $(MAKE) is figured out so its definitions will not be
@@ -1110,9 +1121,10 @@ main (int argc, char **argv, char **envp)
 #ifdef WINDOWS32
       if (!unix_path && strneq(envp[i], "PATH=", 5))
         unix_path = ep+1;
-      else if (!windows32_path && !strnicmp(envp[i], "Path=", 5)) {
+      else if (!strnicmp(envp[i], "Path=", 5)) {
         do_not_define = 1; /* it gets defined after loop exits */
-        windows32_path = ep+1;
+        if (!windows32_path)
+          windows32_path = ep+1;
       }
 #endif
       /* The result of pointer arithmetic is cast to unsigned int for
@@ -1136,28 +1148,22 @@ main (int argc, char **argv, char **envp)
              subprocesses, which seems silly to me but...  */
           if (strncmp (envp[i], "SHELL=", 6) == 0)
             {
+#ifndef __MSDOS__
               v->export = v_noexport;
+#endif
               shell_var.name = "SHELL";
               shell_var.value = xstrdup (ep + 1);
             }
         }
     }
 #ifdef WINDOWS32
-    /*
-     * Make sure that this particular spelling of 'Path' is available
+    /* If we didn't find a correctly spelled PATH we define PATH as
+     * either the first mispelled value or an empty string
      */
-    if (windows32_path)
-      define_variable("Path", 4, windows32_path, o_env, 1)->export = v_export;
-    else if (unix_path)
-      define_variable("Path", 4, unix_path, o_env, 1)->export = v_export;
-    else
-      define_variable("Path", 4, "", o_env, 1)->export = v_export;
-
-    /*
-     * PATH defaults to Path iff PATH not found and Path is found.
-     */
-    if (!unix_path && windows32_path)
-      define_variable("PATH", 4, windows32_path, o_env, 1)->export = v_export;
+    if (!unix_path)
+      define_variable("PATH", 4,
+                      windows32_path ? windows32_path : "",
+                      o_env, 1)->export = v_export;
 #endif
 #else /* For Amiga, read the ENV: device, ignoring all dirs */
     {

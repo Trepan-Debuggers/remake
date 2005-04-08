@@ -1430,7 +1430,7 @@ print_file_variables (struct file *file)
 void
 sync_Path_environment (void)
 {
-  char *path = allocated_variable_expand ("$(Path)");
+  char *path = allocated_variable_expand ("$(PATH)");
   static char *environ_path = NULL;
 
   if (!path)
@@ -1447,7 +1447,7 @@ sync_Path_environment (void)
    * Create something WINDOWS32 world can grok
    */
   convert_Path_to_windows32 (path, ';');
-  environ_path = concat ("Path", "=", path);
+  environ_path = concat ("PATH", "=", path);
   putenv (environ_path);
   free (path);
 }

@@ -234,7 +234,7 @@ strsignal (int signal)
 {
   static char buf[] = "Signal 12345678901234567890";
 
-#if !defined(HAVE_DECL_SYS_SIGLIST)
+#if ! HAVE_DECL_SYS_SIGLIST
   static char sig_initted = 0;
 
   if (!sig_initted)

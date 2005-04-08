@@ -525,6 +525,8 @@ child_handler (int sig UNUSED)
 
 extern int shell_function_pid, shell_function_completed;
 
+static int reap_lock = 0;
+
 /* Reap all dead children, storing the returned status and the new command
    state (`cs_finished') in the `file' member of the `struct child' for the
    dead child, and removing the child from the chain.  In addition, if BLOCK
@@ -544,6 +546,9 @@ reap_children (int block, int err)
 #else
 # define REAP_MORE dead_children
 #endif
+
+  if (reap_lock)
+    fatal (NILF, _("INTERNAL: reap_children invoked while reap_lock set."));
 
   /* As long as:
 
@@ -1470,6 +1475,7 @@ start_waiting_job (struct child *c)
     }
 
   /* Start the first command; reap_children will run later command lines.  */
+  reap_lock = 1;
   start_job_command (c);
 
   switch (f->command_state)
@@ -1499,6 +1505,8 @@ start_waiting_job (struct child *c)
       assert (f->command_state == cs_finished);
       break;
     }
+
+  reap_lock = 0;
 
   return 1;
 }

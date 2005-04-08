@@ -1,3 +1,16 @@
+2005-04-07  Paul D. Smith  <psmith@gnu.org>
+
+	* main.c (main) [WINDOWS32]: Export PATH to sub-shells, not Path.
+	* variable.c (sync_Path_environment): Ditto.
+	Patch by Alessandro Vesely.  Fixes Savannah bug #12209.
+
+	* main.c (main): Define the .FEATURES variable.
+	* NEWS: Announce .FEATURES.
+	* doc/make.texi (Special Variables): Document .FEATURES.
+
+	* remake.c (check_dep): If a file is .PHONY, update it even if
+	it's marked intermediate.  Fixes Savannah bug #12331.
+
 2005-03-15  Boris Kolpackov  <boris@kolpackov.net>
 
 	* file.c (expand_deps): Factor out the second expansion and
@@ -7,20 +20,34 @@
 	prerequisites of the .SUFFIXES special target first. Fixes
 	Savannah bug #12320.
 
+2005-03-13  Paul D. Smith  <psmith@gnu.org>
+
+	* main.c (main) [MSDOS]: Export SHELL in MSDOS.  Requested by Eli
+	Zaretskii.
+
+2005-03-11  Paul D. Smith  <psmith@gnu.org>
+
+	* signame.c (strsignal): HAVE_DECL_SYS_SIGLIST is 0 when not
+	available, not undefined (from Earnie Boyd).
+
 2005-03-10  Boris Kolpackov  <boris@kolpackov.net>
 
 	* implicit.c (pattern_search): Mark an intermediate target as
 	precious if it happened to be a prerequisite of some (other)
 	target. Fixes Savannah bug #12267.
 
+2005-03-09  Paul D. Smith  <psmith@gnu.org>
+
+	* read.c (eval_makefile): Add alloca(0).
+	(eval_buffer): Ditto.
+
 2005-03-09  Boris Kolpackov  <boris@kolpackov.net>
 
 	* main.c (main): Use o_file instead of o_default when defining
 	the .DEFAULT_TARGET special variable.
-
 	* read.c (eval): Use define_variable_global() instead of
 	define_variable() when setting new value for the .DEFAULT_TARGET
-	special variable. Fixes Savannah bug #12266.
+	special variable.  Fixes Savannah bug #12266.
 
 2005-03-04  Boris Kolpackov  <boris@kolpackov.net>
 

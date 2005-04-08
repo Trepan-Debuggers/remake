@@ -97,4 +97,11 @@ $answer = "ONE.inc\nTHREE.inc\nTWO.inc\nONE\nTHREE\nTWO\nsuccess\n";
 
 unlink('1.inc', '2.inc');
 
+# Test shell functions within commands: make sure they're not reducing our
+# parallelism.
+
+run_make_test('.PHONY: all
+all: ; @echo $(shell echo hi)
+','','hi');
+
 1;
