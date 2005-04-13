@@ -418,28 +418,40 @@ set_intermediate (const void *item)
 static void
 expand_deps (struct file *f)
 {
-  register struct dep *d, *d1;
+  struct dep *d, *d1;
   struct dep *new = 0;
   struct dep *old = f->deps;
   unsigned int last_dep_has_cmds = f->updating;
+  int initialized = 0;
 
   f->updating = 0;
   f->deps = 0;
-
-  /* We are going to do second expansion so initialize file
-     variables for the file. */
-  initialize_file_variables (f, 0);
 
   for (d = old; d != 0; d = d->next)
     {
       if (d->name != 0)
         {
           char *p;
-          struct dep **d_ptr;
 
-          set_file_variables (f);
+          /* If we need a second expansion on these, set up the file
+             variables, etc.  It takes a lot of extra memory and processing
+             to do this, so only do it if it's needed.  */
+          if (! d->need_2nd_expansion)
+            p = d->name;
+          else
+            {
+              /* We are going to do second expansion so initialize file
+                 variables for the file. */
+              if (!initialized)
+                {
+                  initialize_file_variables (f, 0);
+                  initialized = 1;
+                }
 
-          p = variable_expand_for_file (d->name, f);
+              set_file_variables (f);
+
+              p = variable_expand_for_file (d->name, f);
+            }
 
           /* Parse the dependencies.  */
           new = (struct dep *)
@@ -452,8 +464,8 @@ expand_deps (struct file *f)
               /* Files that follow '|' are special prerequisites that
                  need only exist in order to satisfy the dependency.
                  Their modification times are irrelevant.  */
+              struct dep **d_ptr;
 
-              struct dep *d;
               for (d_ptr = &new; *d_ptr; d_ptr = &(*d_ptr)->next)
                 ;
               ++p;
@@ -463,8 +475,8 @@ expand_deps (struct file *f)
                   parse_file_seq (&p, '\0', sizeof (struct dep), 1),
                   sizeof (struct dep));
 
-              for (d = *d_ptr; d != 0; d = d->next)
-                d->ignore_mtime = 1;
+              for (d1 = *d_ptr; d1 != 0; d1 = d1->next)
+                d1->ignore_mtime = 1;
             }
 
           /* Enter them as files. */
@@ -476,6 +488,7 @@ expand_deps (struct file *f)
               else
                 free (d1->name);
               d1->name = 0;
+              d1->need_2nd_expansion = 0;
             }
 
           /* Add newly parsed deps to f->deps. If this is the last
@@ -492,15 +505,17 @@ expand_deps (struct file *f)
             {
               if (d->next == 0 && last_dep_has_cmds)
                 {
+                  struct dep **d_ptr;
                   for (d_ptr = &new; *d_ptr; d_ptr = &(*d_ptr)->next)
-                        ;
+                    ;
 
                   *d_ptr = f->deps;
                   f->deps = new;
                 }
               else
                 {
-                  for (d_ptr = &(f->deps); *d_ptr; d_ptr = &(*d_ptr)->next)
+                  struct dep **d_ptr;
+                  for (d_ptr = &f->deps; *d_ptr; d_ptr = &(*d_ptr)->next)
                     ;
 
                   *d_ptr = new;
@@ -509,7 +524,7 @@ expand_deps (struct file *f)
         }
     }
 
-  free_ns_chain ((struct nameseq*)old);
+  free_ns_chain ((struct nameseq *) old);
 }
 
 /* For each dependency of each file, make the `struct dep' point
@@ -521,12 +536,12 @@ expand_deps (struct file *f)
 void
 snap_deps (void)
 {
-  register struct file *f;
-  register struct file *f2;
-  register struct dep *d;
-  register struct file **file_slot_0;
-  register struct file **file_slot;
-  register struct file **file_end;
+  struct file *f;
+  struct file *f2;
+  struct dep *d;
+  struct file **file_slot_0;
+  struct file **file_slot;
+  struct file **file_end;
 
   /* Perform second expansion and enter each dependency
      name as a file. */

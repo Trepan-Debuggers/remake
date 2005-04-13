@@ -253,6 +253,7 @@ read_all_makefiles (char **makefiles)
 	      d->file = enter_file (*p);
 	      d->file->dontcare = 1;
               d->ignore_mtime = 0;
+              d->need_2nd_expansion = 0;
 	      /* Tell update_goal_chain to bail out as soon as this file is
 		 made, and main not to die if we can't make this file.  */
 	      d->changed = RM_DONTCARE;
@@ -372,6 +373,7 @@ eval_makefile (char *filename, int flags)
   filename = deps->file->name;
   deps->changed = flags;
   deps->ignore_mtime = 0;
+  deps->need_2nd_expansion = 0;
   if (flags & RM_DONTCARE)
     deps->file->dontcare = 1;
 
@@ -1167,9 +1169,21 @@ eval (struct ebuffer *ebuf, int set_default)
 
         if (beg <= end && *beg != '\0')
           {
+            char *top;
+            const char *fromp = beg;
+
+            /* Make a copy of the dependency string.  Note if we find '$'.  */
             deps = (struct dep*) xmalloc (sizeof (struct dep));
             deps->next = 0;
-            deps->name = savestring (beg, end - beg + 1);
+            deps->name = top = (char *) xmalloc (end - beg + 2);
+            deps->need_2nd_expansion = 0;
+            while (fromp <= end)
+              {
+                if (*fromp == '$')
+                  deps->need_2nd_expansion = 1;
+                *(top++) = *(fromp++);
+              }
+            *top = '\0';
             deps->file = 0;
           }
         else
@@ -1194,11 +1208,10 @@ eval (struct ebuffer *ebuf, int set_default)
             commands[commands_idx++] = '\n';
           }
 
-        /* Determine if this target should be made default. We used
-           to do this in record_files() but because of the delayed
-           target recording and because preprocessor directives are
-           legal in target's commands it is too late. Consider this
-           fragment for example:
+        /* Determine if this target should be made default. We used to do
+           this in record_files() but because of the delayed target recording
+           and because preprocessor directives are legal in target's commands
+           it is too late. Consider this fragment for example:
 
            foo:
 
@@ -1206,10 +1219,10 @@ eval (struct ebuffer *ebuf, int set_default)
               ...
            endif
 
-           Because the target is not recorded until after ifeq
-           directive is evaluated the .DEFAULT_TARGET does not
-           contain foo yet as one would expect. Because of this
-           we have to move some of the logic here. */
+           Because the target is not recorded until after ifeq directive is
+           evaluated the .DEFAULT_TARGET does not contain foo yet as one
+           would expect. Because of this we have to move some of the logic
+           here.  */
 
         if (**default_target_name == '\0' && set_default)
           {
@@ -1232,7 +1245,7 @@ eval (struct ebuffer *ebuf, int set_default)
 #ifdef HAVE_DOS_PATHS
                     && strchr (name, '\\') == 0
 #endif
-                )
+                    )
                   continue;
 
 
@@ -1895,7 +1908,7 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
 
       /* If there are multiple filenames, copy the chain DEPS
 	 for all but the last one.  It is not safe for the same deps
-	 to go in more than one place in the data base.  */
+	 to go in more than one place in the database.  */
       this = nextf != 0 ? copy_dep_chain (deps) : deps;
 
       if (pattern != 0)
@@ -1912,22 +1925,20 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
 	      this = 0;
 	    }
 	  else
-	    {
-	      /* We use subst_expand to do the work of translating
-		 % to $* in the dependency line.  */
+            /* We use subst_expand to do the work of translating % to $* in
+               the dependency line.  */
 
-              if (this != 0 && find_percent (this->name) != 0)
-                {
-                  char *o;
-                  char *buffer = variable_expand ("");
+            if (this != 0 && find_percent (this->name) != 0)
+              {
+                char *o;
+                char *buffer = variable_expand ("");
 
-                  o = subst_expand (buffer, this->name, "%", "$*",
-                                    1, 2, 0);
+                o = subst_expand (buffer, this->name, "%", "$*", 1, 2, 0);
 
-		  free (this->name);
-		  this->name = savestring (buffer, o - buffer);
-		}
-	    }
+                free (this->name);
+                this->name = savestring (buffer, o - buffer);
+                this->need_2nd_expansion = 1;
+              }
 	}
 
       if (!two_colon)
@@ -2009,7 +2020,7 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
                       /* This is the rule without commands. Put its
                          dependencies at the end but before dependencies
                          from the rule with commands (if any). This way
-                         everyhting appears in makefile order.  */
+                         everything appears in makefile order.  */
 
                       if (f->cmds != 0)
                         {
@@ -2026,7 +2037,7 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
               /* This is a hack. I need a way to communicate to snap_deps()
                  that the last dependency line in this file came with commands
                  (so that logic in snap_deps() can put it in front and all
-                 this $< -logic works). I cannot's simply rely oon file->cmds
+                 this $< -logic works). I cannot simply rely on file->cmds
                  being not 0 because of the cases like the following:
 
                  foo: bar

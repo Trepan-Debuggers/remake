@@ -1,3 +1,30 @@
+2005-04-12  Paul D. Smith  <psmith@gnu.org>
+
+	The second expansion feature causes significant slowdown.  Timing
+	a complex makefile (GCC 4.1) shows a slowdown from .25s to just
+	read the makefile before the feature, to 11+s to do the same
+	operations after the feature.  Additionally, memory usage
+	increased drastically.  To fix this I added some intelligence that
+	avoids the overhead of the second expansion unless it's required.
+
+	* dep.h: Add a new boolean field, need_2nd_expansion.
+
+	* read.c (eval): When creating the struct dep for the target,
+	check if the name contains a "$"; if so set need_2nd_expansion to 1.
+	(record_files): If there's a "%" in a static pattern rule, it gets
+	converted to "$*" so set need_2nd_expansion to 1.
+
+	* file.c (expand_deps): Rework to be more efficient.  Only perform
+	initialize_file_variables(), set_file_variables(), and
+	variable_expand_for_file() if the need_2nd_expansion is set.
+
+	* implicit.c (pattern_search): Default need_2nd_expansion to 0.
+	(pattern_search): Ditto.
+	* main.c (handle_non_switch_argument): Ditto.
+	(main): Ditto.
+	* read.c (read_all_makefiles): Ditto.
+	(eval_makefile): Ditto.
+
 2005-04-07  Paul D. Smith  <psmith@gnu.org>
 
 	* main.c (main) [WINDOWS32]: Export PATH to sub-shells, not Path.
