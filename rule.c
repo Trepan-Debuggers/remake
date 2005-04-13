@@ -206,6 +206,7 @@ convert_suffix_rule (char *target, char *source, struct commands *cmds)
       deps->next = 0;
       deps->name = depname;
       deps->ignore_mtime = 0;
+      deps->need_2nd_expansion = 0;
     }
 
   create_pattern_rule (names, percents, 0, deps, cmds, 0);

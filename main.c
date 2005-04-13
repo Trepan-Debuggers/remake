@@ -2125,6 +2125,7 @@ main (int argc, char **argv, char **envp)
             goals->next = 0;
             goals->name = 0;
             goals->ignore_mtime = 0;
+            goals->need_2nd_expansion = 0;
             goals->file = default_goal_file;
           }
       }
@@ -2290,6 +2291,7 @@ handle_non_switch_argument (char *arg, int env)
       lastgoal->name = 0;
       lastgoal->file = f;
       lastgoal->ignore_mtime = 0;
+      lastgoal->need_2nd_expansion = 0;
 
       {
         /* Add this target name to the MAKECMDGOALS variable. */

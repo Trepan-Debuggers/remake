@@ -509,19 +509,19 @@ pattern_search (struct file *file, int archive,
                     break; /* No more words */
 
                   /* If the dependency name has %, substitute the stem.
-                     Watch out, we are going to do something very smart
-                     here. If we just replace % with the stem value,
-                     later, when we do the second expansion, we will
-                     re-expand this stem value once again. This is not
-                     good especially if you have certain characters in
-                     your setm (like $).
+                     Watch out, we are going to do something tricky here. If
+                     we just replace % with the stem value, later, when we do
+                     the second expansion, we will re-expand this stem value
+                     once again. This is not good especially if you have
+                     certain characters in your setm (like $).
 
-                     Instead, we will replace % with $* and allow the
-                     second expansion to take care of it for us. This
-                     way (since $* is a simple variable) there won't
-                     be additional re-expansion of the stem.*/
+                     Instead, we will replace % with $* and allow the second
+                     expansion to take care of it for us. This way (since $*
+                     is a simple variable) there won't be additional
+                     re-expansion of the stem.  */
 
-                  for (p2 = p; p2 < p + len && *p2 != '%'; ++p2);
+                  for (p2 = p; p2 < p + len && *p2 != '%'; ++p2)
+                    ;
 
                   if (p2 < p + len)
                     {
@@ -836,6 +836,7 @@ pattern_search (struct file *file, int archive,
 
       dep = (struct dep *) xmalloc (sizeof (struct dep));
       dep->ignore_mtime = d->ignore_mtime;
+      dep->need_2nd_expansion = 0;
       s = d->name; /* Hijacking the name. */
       d->name = 0;
       if (recursions == 0)
@@ -908,6 +909,7 @@ pattern_search (struct file *file, int archive,
 	  struct dep *new = (struct dep *) xmalloc (sizeof (struct dep));
 	  /* GKM FIMXE: handle '|' here too */
 	  new->ignore_mtime = 0;
+	  new->need_2nd_expansion = 0;
 	  new->name = p = (char *) xmalloc (rule->lens[i] + fullstemlen + 1);
 	  bcopy (rule->targets[i], p,
 		 rule->suffixes[i] - rule->targets[i] - 1);

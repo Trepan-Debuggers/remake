@@ -40,6 +40,7 @@ struct dep
     struct file *file;
     unsigned int changed : 8;
     unsigned int ignore_mtime : 1;
+    unsigned int need_2nd_expansion : 1;
   };
 
 
