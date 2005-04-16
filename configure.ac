@@ -6,7 +6,7 @@ AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.10 2004/07/18 23:05:30 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.11 2005/04/16 23:01:19 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -196,10 +196,9 @@ AC_CACHE_VAL(make_cv_union_wait, [dnl
     [make_cv_union_wait=no])])
 if test "$make_cv_union_wait" = yes; then
   AC_DEFINE(HAVE_UNION_WAIT, 1,
-            [Define this if you have the \`union wait' type in <sys/wait.h>.])
+            [Define this if you have the "union wait" type in <sys/wait.h>.])
 fi
 AC_MSG_RESULT($make_cv_union_wait)
-
 
 #
 # Check for readline to see if we can add debugging support.
@@ -210,17 +209,9 @@ AC_ARG_WITH(readline,
 
 AC_CHECK_HEADER(readline/readline.h, [], [have_readline=no])
 
-if test "$enable_readline" = yes ; then 
-  AC_CHECK_LIB(readline, readline, 
-              [LIBS="$LIBS -lreadline -ltermcap"], 
-	      [enable_readline=no], -ltermcap)
-fi
-
-if test "$enable_readline" = yes ; then 
-   AC_DEFINE(HAVE_READLINE, 1, 
-   [Define this if you have libreadline. It is needed for the debugger.])
-   HAVE_READLINE=1
- else 
+if test "$enable_readline" = yes; then
+   VL_LIB_READLINE
+else 
    AC_MSG_WARN([libreadline is needed for the debugger. I'll build "make"])
    AC_MSG_WARN([with trace support, but you won't be able enter the])
    AC_MSG_WARN([debugger.])

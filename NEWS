@@ -1,8 +1,8 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  12 June 2004
+  Apr 12 2005
 
-Copyright (C) 2002, 2004  Free Software Foundation, Inc.
+Copyright (C) 2002, 2004, 2005  Free Software Foundation, Inc.
 See the end for copying conditions.
 
 All changes mentioned here are more fully described in the GNU make
@@ -14,6 +14,14 @@ reports.
 
 Version 3.80+dbg-0.3cvs
 *  trace override silent
+
+RGP:  (remake@rich-paul.net)
+
+*  fixed compilation issue on systems that have readline, but do not
+	have termcap.
+	
+*  fixed failure of enter_debugger to exit on an empty line from readline.
+
 Version 3.80+dbg-0.2
 *  Add ability to print specified attributes of a target, e.g. "time",
   "deps", "vars"... 

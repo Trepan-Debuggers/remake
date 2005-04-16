@@ -1206,7 +1206,7 @@ main (int argc, char **argv, char **envp)
 	  debugger_on_error  |=  DEBUGGER_ON_FATAL;
 	}
       }
-#ifndef HAVE_READLINE
+#ifndef HAVE_LIBREADLINE
     error (NILF, 
 	   "warning: you specified a debugger option, but you don't have");
     error (NILF, 

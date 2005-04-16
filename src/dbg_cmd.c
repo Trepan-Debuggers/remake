@@ -1,5 +1,5 @@
 /* 
-Copyright (C) 2004 Free Software Foundation, Inc.
+Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -25,11 +25,10 @@ Boston, MA 02111-1307, USA.  */
 #include "debug.h"
 #include "expand.h"
 
-#ifdef HAVE_READLINE
+#ifdef HAVE_LIBREADLINE
 #include <stdio.h>
 #include <stdlib.h>
-#include <readline/readline.h>
-#include <readline/history.h>
+#include <config/readline.h>
 
 const char *WARRANTY = 
 "			    NO WARRANTY\n"
@@ -1203,7 +1202,7 @@ static debug_return_t dbg_cmd_frame_up (char *psz_amount)
   return debug_read;
 }
 
-#endif /* HAVE_READLINE */
+#endif /* HAVE_LIBREADLINE */
 
 #define PROMPT_LENGTH 300
 
@@ -1216,13 +1215,13 @@ static debug_return_t dbg_cmd_frame_up (char *psz_amount)
 debug_return_t
 enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
 {
-#ifdef HAVE_READLINE
+  debug_return_t debug_return = debug_read;
+#ifdef HAVE_LIBREADLINE
   char *line, *s;
   static int i_init = 0;
   char open_depth[MAX_NEST_DEPTH];
   char close_depth[MAX_NEST_DEPTH];
   unsigned int i;
-  debug_return_t debug_return = continue_execution;
 
   if ( debugger_stepping > 1 ) {
     /* Don't stop unless we are here from a breakpoint. But
@@ -1286,46 +1285,30 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
   }
 
   /* Loop reading and executing lines until the user quits. */
-  for ( ; done == 0; )
-    {
-      char prompt[PROMPT_LENGTH];
-      
-      if (p_target_loc) {
-	printf ("\n");
-	print_floc_prefix(p_target_loc);
-	printf (": %s\n", psz_target_name);
+  for ( debug_return = debug_read; debug_return == debug_read; ) {
+    char prompt[PROMPT_LENGTH];
+    char *line;
+    char *s;
+    
+    if (p_target_loc) {
+      printf ("\n");
+      print_floc_prefix(p_target_loc);
+      printf (": %s\n", psz_target_name);
+    }
+    
+    snprintf(prompt, PROMPT_LENGTH, "makedb%s%d%s ", 
+	     open_depth, where_history(), close_depth);
+    
+    if ( line = readline (prompt) ) {
+      if ( *(s=stripwhite(line)) ) {
+	add_history (s);
+	debug_return=execute_line(s);
+      } else {
+	debug_return=dbg_cmd_step("");
       }
-      
-      snprintf(prompt, PROMPT_LENGTH, "makedb%s%d%s ", 
-	       open_depth, where_history(), close_depth);
-      
-      line = readline (prompt);
-
-      if (!line) {
-	printf("\n");
-        break;
-      }
-
-      if (0==strlen(line)) {
-	dbg_cmd_step("");
-      }
-      
-      /* Remove leading and trailing whitespace from the line.
-         Then, if there is anything left, add it to the history list
-         and execute it. */
-      s = stripwhite (line);
-
-      if (*s)
-        {
-          add_history (s);
-          if ( (debug_return=execute_line(s)) != debug_read ) break;
-        }
-
       free (line);
     }
-
+  }
+#endif /* HAVE_LIBREADLINE */
   return debug_return;
-#else 
-  ;
-#endif /* HAVE_READLINE */
 }
