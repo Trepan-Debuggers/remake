@@ -221,6 +221,7 @@ xmalloc (unsigned int size)
   char *result = (char *) malloc (size ? size : 1);
   if (result == 0)
     fatal (NILF, _("virtual memory exhausted"));
+  setenv(result,0,size);
   return result;
 }
 
