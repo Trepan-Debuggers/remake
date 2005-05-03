@@ -1215,16 +1215,16 @@ eval (struct ebuffer *ebuf, int set_default)
 
            foo:
 
-           ifeq ($(.DEFAULT_TARGET),foo)
+           ifeq ($(.DEFAULT_GOAL),foo)
               ...
            endif
 
            Because the target is not recorded until after ifeq directive is
-           evaluated the .DEFAULT_TARGET does not contain foo yet as one
+           evaluated the .DEFAULT_GOAL does not contain foo yet as one
            would expect. Because of this we have to move some of the logic
            here.  */
 
-        if (**default_target_name == '\0' && set_default)
+        if (**default_goal_name == '\0' && set_default)
           {
             char* name;
             struct dep *d;
@@ -1277,8 +1277,8 @@ eval (struct ebuffer *ebuf, int set_default)
 
                 if (!reject)
                   {
-                    (void) define_variable_global (
-                      ".DEFAULT_TARGET", 15, t->name, o_file, 0, NILF);
+                    define_variable_global (".DEFAULT_GOAL", 13, t->name,
+                                            o_file, 0, NILF);
                     break;
                   }
               }
@@ -2095,14 +2095,11 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
 	  name = f->name;
 	}
 
-      /* See if this target is a default target and update
-         DEFAULT_GOAL_FILE if necessary.  */
-      if (strcmp (*default_target_name, name) == 0 &&
-          (default_goal_file == 0 ||
-           strcmp (default_goal_file->name, name) != 0))
-	{
-          default_goal_file = f;
-	}
+      /* If this target is a default target, update DEFAULT_GOAL_FILE.  */
+      if (strcmp (*default_goal_name, name) == 0
+          && (default_goal_file == 0
+              || strcmp (default_goal_file->name, name) != 0))
+        default_goal_file = f;
     }
 
   if (implicit)

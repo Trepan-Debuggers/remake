@@ -101,4 +101,6 @@ extern int fatal_signal_mask;
 #endif
 #endif
 
+extern unsigned int jobserver_tokens;
+
 #endif /* SEEN_JOB_H */

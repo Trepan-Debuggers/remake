@@ -100,7 +100,7 @@ struct file
 
 
 extern struct file *default_goal_file, *suffix_file, *default_file;
-extern char **default_target_name;
+extern char **default_goal_name;
 
 
 extern struct file *lookup_file PARAMS ((char *name));

@@ -2,6 +2,7 @@
 
 #include "make.h"
 #include "debug.h"
+#include "job.h"
 
 #ifdef __DECC
 #include <starlet.h>

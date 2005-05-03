@@ -1,5 +1,5 @@
 #                                                                    -*-perl-*-
-$description = "Test the .DEFAULT_TARGET special variable.";
+$description = "Test the .DEFAULT_GOAL special variable.";
 
 $details = "";
 
@@ -11,24 +11,24 @@ run_make_test('
 #
 foo: ; @:
 
-ifneq ($(.DEFAULT_TARGET),foo)
+ifneq ($(.DEFAULT_GOAL),foo)
 $(error )
 endif
 
 # Reset to empty.
 #
-.DEFAULT_TARGET :=
+.DEFAULT_GOAL :=
 
 bar: ; @:
 
-ifneq ($(.DEFAULT_TARGET),bar)
+ifneq ($(.DEFAULT_GOAL),bar)
 $(error )
 endif
 
-# Change to a different target.
+# Change to a different goal.
 #
 
-.DEFAULT_TARGET := baz
+.DEFAULT_GOAL := baz
 
 baz: ; @echo $@
 ',
@@ -36,23 +36,23 @@ baz: ; @echo $@
 'baz');
 
 
-# Test #2: unknown target.
+# Test #2: unknown goal.
 #
 run_make_test('
-.DEFAULT_TARGET := foo
+.DEFAULT_GOAL = foo
 ',
 '',
-'make: *** No rule to make target `foo\'.  Stop.',
+'#MAKE#: *** No rule to make target `foo\'.  Stop.',
 512);
 
 
-# Test #3: more than one target.
+# Test #3: more than one goal.
 #
 run_make_test('
-.DEFAULT_TARGET := foo bar
+.DEFAULT_GOAL := foo bar
 ',
 '',
-'make: *** .DEFAULT_TARGET contains more than one target.  Stop.',
+'#MAKE#: *** .DEFAULT_GOAL contains more than one target.  Stop.',
 512);
 
 

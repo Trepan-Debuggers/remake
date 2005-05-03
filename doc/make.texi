@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.27 2005/04/08 12:51:20 psmith Exp $
+@set RCSID $Id: make.texi,v 1.28 2005/05/03 13:57:21 psmith Exp $
 @set EDITION 0.61
 @set VERSION 3.80
 @set UPDATED 23 Feb 2003
@@ -671,7 +671,10 @@ from @code{rm} or any other command.
 By default, @code{make} starts with the first target (not targets whose
 names start with @samp{.}).  This is called the @dfn{default goal}.
 (@dfn{Goals} are the targets that @code{make} strives ultimately to
-update.  @xref{Goals, , Arguments to Specify the Goals}.)
+update.    You can override this behavior using the command line
+(@pxref{Goals, , Arguments to Specify the Goals}) or with the
+@code{.DEFAULT_GOAL} special variable (@pxref{Special Variables, ,
+Other Special Variables}).
 @cindex default goal
 @cindex goal, default
 @cindex goal
@@ -1275,6 +1278,55 @@ otherwise documented here, these values lose their special properties
 if they are set by a makefile or on the command line.
 
 @table @code
+
+@vindex $(.DEFAULT_GOAL)
+@vindex .DEFAULT_GOAL @r{(define default goal)}
+@item .DEFAULT_GOAL
+Sets the default goal to be used if no targets were specified on the
+command line (@pxref{Goals, , Arguments to Specify the Goals}).  The
+@code{.DEFAULT_GOAL} variable allows you to discover the current
+default goal, restart the default goal selection algorithm by clearing
+its value, or to explicitly set the default goal. The following
+example illustrates these cases:
+
+@example
+@group
+# Query the default goal.
+ifeq ($(.DEFAULT_GOAL),)
+  $(warning no default goal is set)
+endif
+
+.PHONY: foo
+foo: ; @@echo $@@
+
+$(warning default target is $(.DEFAULT_GOAL))
+
+# Reset the default goal.
+.DEFAULT_GOAL :=
+
+.PHONY: bar
+bar: ; @@echo $@@
+
+$(warning default target is $(.DEFAULT_GOAL))
+
+# Set our own.
+.DEFAULT_GOAL := foo
+@end group
+@end example
+
+This makefile prints:
+
+@example
+@group
+no default goal is set
+default goal is foo
+default goal is bar
+foo
+@end group
+@end example
+
+Note that assigning more than one target name to .DEFAULT_GOAL is
+illegal and will result in an error.
 
 @vindex $(.VARIABLES)
 @vindex .VARIABLES @r{(list of variables)}
@@ -6870,11 +6922,14 @@ targets that start with a period).  Therefore, makefiles are usually
 written so that the first target is for compiling the entire program or
 programs they describe.  If the first rule in the makefile has several
 targets, only the first target in the rule becomes the default goal, not
-the whole list.
+the whole list.  You can manage the selection of the default goal from
+within your makefile using the @code{.DEFAULT_GOAL} variable
+(@pxref{Special Variables, , Other Special Variables}).
 
-You can specify a different goal or goals with arguments to @code{make}.
-Use the name of the goal as an argument.  If you specify several goals,
-@code{make} processes each of them in turn, in the order you name them.
+You can also specify a different goal or goals with command-line
+arguments to @code{make}.  Use the name of the goal as an argument.
+If you specify several goals, @code{make} processes each of them in
+turn, in the order you name them.
 
 Any target in the makefile may be specified as a goal (unless it
 starts with @samp{-} or contains an @samp{=}, in which case it will be

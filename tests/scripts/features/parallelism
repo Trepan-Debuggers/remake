@@ -26,58 +26,32 @@ else {
   $sleep_command = "sleep";
 }
 
-open(MAKEFILE,"> $makefile");
 
-print MAKEFILE <<"EOF";
+run_make_test("
 all : def_1 def_2 def_3
 def_1 : ; \@echo ONE; $sleep_command 3 ; echo TWO
 def_2 : ; \@$sleep_command 2 ; echo THREE
-def_3 : ; \@$sleep_command 1 ; echo FOUR
-EOF
-
-close(MAKEFILE);
-
-&run_make_with_options($makefile, "-j 4", &get_logfile);
-$answer = "ONE\nFOUR\nTHREE\nTWO\n";
-&compare_output($answer, &get_logfile(1));
-
+def_3 : ; \@$sleep_command 1 ; echo FOUR",
+              '-j4', "ONE\nFOUR\nTHREE\nTWO");
 
 # Test parallelism with included files.  Here we sleep/echo while
 # building the included files, to test that they are being built in
 # parallel.
-
-$makefile2 = &get_tmpfile;
-
-open(MAKEFILE,"> $makefile2");
-
-print MAKEFILE <<"EOF";
+run_make_test("
 all: 1 2; \@echo success
-
 -include 1.inc 2.inc
-
-1.inc: ; \@echo ONE.inc; $sleep_command 2; echo TWO.inc; echo "1: ; \@echo ONE; $sleep_command 2; echo TWO" > \$\@
-2.inc: ; \@$sleep_command 1; echo THREE.inc; echo "2: ; \@$sleep_command 1; echo THREE" > \$\@
-EOF
-
-close(MAKEFILE);
-
-&run_make_with_options("$makefile2", "-j 4", &get_logfile);
-$answer = "ONE.inc\nTHREE.inc\nTWO.inc\nONE\nTHREE\nTWO\nsuccess\n";
-&compare_output($answer, &get_logfile(1));
+1.inc: ; \@echo ONE.inc; $sleep_command 2; echo TWO.inc; echo '1: ; \@echo ONE; $sleep_command 2; echo TWO' > \$\@
+2.inc: ; \@$sleep_command 1; echo THREE.inc; echo '2: ; \@$sleep_command 1; echo THREE' > \$\@",
+              "-j4",
+              "ONE.inc\nTHREE.inc\nTWO.inc\nONE\nTHREE\nTWO\nsuccess\n");
 
 unlink('1.inc', '2.inc');
 
 
 # Test parallelism with included files--this time recurse first and make
 # sure the jobserver works.
-
-$makefile3 = &get_tmpfile;
-
-open(MAKEFILE,"> $makefile3");
-
-print MAKEFILE <<"EOF";
-recurse: ; \@\$(MAKE) --no-print-directory -f $makefile3 INC=yes all
-
+run_make_test("
+recurse: ; \@\$(MAKE) --no-print-directory -f #MAKEFILE# INC=yes all
 all: 1 2; \@echo success
 
 INC = no
@@ -85,23 +59,28 @@ ifeq (\$(INC),yes)
 -include 1.inc 2.inc
 endif
 
-1.inc: ; \@echo ONE.inc; $sleep_command 2; echo TWO.inc; echo "1: ; \@echo ONE; $sleep_command 2; echo TWO" > \$\@
-2.inc: ; \@$sleep_command 1; echo THREE.inc; echo "2: ; \@$sleep_command 1; echo THREE" > \$\@
-EOF
-
-close(MAKEFILE);
-
-&run_make_with_options("$makefile3", "-j 4", &get_logfile);
-$answer = "ONE.inc\nTHREE.inc\nTWO.inc\nONE\nTHREE\nTWO\nsuccess\n";
-&compare_output($answer, &get_logfile(1));
+1.inc: ; \@echo ONE.inc; $sleep_command 2; echo TWO.inc; echo '1: ; \@echo ONE; $sleep_command 2; echo TWO' > \$\@
+2.inc: ; \@$sleep_command 1; echo THREE.inc; echo '2: ; \@$sleep_command 1; echo THREE' > \$\@",
+              "-j4",
+              "ONE.inc\nTHREE.inc\nTWO.inc\nONE\nTHREE\nTWO\nsuccess\n");
 
 unlink('1.inc', '2.inc');
 
-# Test shell functions within commands: make sure they're not reducing our
-# parallelism.
+# Grant Taylor reports a problem where tokens can be lost (not written back
+# to the pipe when they should be): this happened when there is a $(shell ...)
+# function in an exported recursive variable.  I added some code to check
+# for this situation and print a message if it occurred.  This test used
+# to trigger this code when I added it but no longer does after the fix.
 
-run_make_test('.PHONY: all
-all: ; @echo $(shell echo hi)
-','','hi');
+run_make_test("
+export HI = \$(shell \$(\$\@.CMD))
+first.CMD = echo hi
+second.CMD = $sleep_command 4; echo hi
+
+.PHONY: all first second
+all: first second
+
+first second: ; \@echo \$\@; $sleep_command 1; echo \$\@",
+              '-j2', "first\nfirst\nsecond\nsecond");
 
 1;

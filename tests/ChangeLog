@@ -1,3 +1,14 @@
+2005-05-03  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/variables/DEFAULT_GOAL: Rename DEFAULT_TARGET to
+	DEFAULT_GOAL.
+
+2005-05-02  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/parallelism: Add a test for exporting recursive
+	variables containing $(shell ) calls.  Rewrite this script to use
+	run_make_test() everywhere.
+
 2005-04-07  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/targets/SECONDARY: Add a test for Savannah bug #12331.
