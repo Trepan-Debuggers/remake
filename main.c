@@ -218,6 +218,7 @@ static struct stringlist *makefiles = 0;
 
 unsigned int job_slots = 1;
 unsigned int default_job_slots = 1;
+static unsigned int master_job_slots = 0;
 
 /* Value of job_slots that means no limit.  */
 
@@ -469,9 +470,9 @@ unsigned int makelevel;
 
 struct file *default_goal_file;
 
-/* Pointer to the value of the .DEFAULT_TARGET special
+/* Pointer to the value of the .DEFAULT_GOAL special
    variable.  */
-char ** default_target_name;
+char ** default_goal_name;
 
 /* Pointer to structure for the file .DEFAULT
    whose commands are used for any file that has none of its own.
@@ -1116,7 +1117,7 @@ main (int argc, char **argv, char **envp)
       int do_not_define = 0;
       char *ep = envp[i];
 
-      while (*ep != '=')
+      while (*ep != '\0' && *ep != '=')
         ++ep;
 #ifdef WINDOWS32
       if (!unix_path && strneq(envp[i], "PATH=", 5))
@@ -1558,10 +1559,8 @@ main (int argc, char **argv, char **envp)
   default_file = enter_file (".DEFAULT");
 
   {
-    struct variable *v = define_variable (
-      ".DEFAULT_TARGET", 15, "", o_file, 0);
-
-    default_target_name = &v->value;
+    struct variable *v = define_variable (".DEFAULT_GOAL", 13, "", o_file, 0);
+    default_goal_name = &v->value;
   }
 
   /* Read all the makefiles.  */
@@ -1693,6 +1692,8 @@ main (int argc, char **argv, char **envp)
          submakes it's the token they were given by their parent.  For the
          top make, we just subtract one from the number the user wants.  We
          want job_slots to be 0 to indicate we're using the jobserver.  */
+
+      master_job_slots = job_slots;
 
       while (--job_slots)
         {
@@ -2091,28 +2092,28 @@ main (int argc, char **argv, char **envp)
     /* If there were no command-line goals, use the default.  */
     if (goals == 0)
       {
-        if (**default_target_name != '\0')
+        if (**default_goal_name != '\0')
           {
             if (default_goal_file == 0 ||
-                strcmp (*default_target_name, default_goal_file->name) != 0)
+                strcmp (*default_goal_name, default_goal_file->name) != 0)
               {
-                default_goal_file = lookup_file (*default_target_name);
+                default_goal_file = lookup_file (*default_goal_name);
 
-                /* In case user set .DEFAULT_TARGET to a non-existent target
+                /* In case user set .DEFAULT_GOAL to a non-existent target
                    name let's just enter this name into the table and let
                    the standard logic sort it out. */
                 if (default_goal_file == 0)
                   {
                     struct nameseq *ns;
-                    char *p = *default_target_name;
+                    char *p = *default_goal_name;
 
                     ns = multi_glob (
                       parse_file_seq (&p, '\0', sizeof (struct nameseq), 1),
                       sizeof (struct nameseq));
 
-                    /* .DEFAULT_TARGET should contain one target. */
+                    /* .DEFAULT_GOAL should contain one target. */
                     if (ns->next != 0)
-                      fatal (NILF, _(".DEFAULT_TARGET contains more than one target"));
+                      fatal (NILF, _(".DEFAULT_GOAL contains more than one target"));
 
                     default_goal_file = enter_file (ns->name);
 
@@ -2956,6 +2957,33 @@ die (int status)
 
       if (print_data_base_flag)
 	print_data_base ();
+
+      /* Sanity: have we written all our jobserver tokens back?  */
+
+      if (jobserver_tokens)
+        error (NILF,
+               "INTERNAL: Exiting with %u jobserver tokens (should be 0)!",
+               jobserver_tokens);
+
+      /* Sanity: If we're the master, were all the tokens written back?  */
+
+      if (master_job_slots)
+        {
+          char token;
+          /* We didn't write one for ourself, so start at 1.  */
+          unsigned int tcnt = 1;
+
+          /* Close the write side, so the read() won't hang.  */
+          close (job_fds[1]);
+
+          while ((err = read (job_fds[0], &token, 1)) == 1)
+            ++tcnt;
+
+          if (tcnt != master_job_slots)
+            error (NILF,
+                   "INTERNAL: Exiting with %u jobserver tokens available; should be %u!",
+                   tcnt, master_job_slots);
+        }
 
       /* Try to move back to the original directory.  This is essential on
 	 MS-DOS (where there is really only one process), and on Unix it

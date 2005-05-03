@@ -1,3 +1,59 @@
+2005-05-03  Paul D. Smith  <psmith@gnu.org>
+
+	Rename .DEFAULT_TARGET to .DEFAULT_GOAL: in GNU make terminology
+	the targets which are to ultimately be made are called "goals";
+	see the GNU make manual.  Also, MAKECMDGOALS, etc.
+
+	* filedef.h, read.c, main.c: Change .DEFAULT_TARGET to
+	.DEFAULT_GOAL, and default_target_name to default_goal_name.
+	* doc/make.texi (Special Variables): Document .DEFAULT_GOAL.
+
+2005-05-02  Paul D. Smith  <psmith@gnu.org>
+
+	* job.c, vmsjobs.c (vmsWaitForChildren, vms_redirect,
+	vms_handle_apos, vmsHandleChildTerm, reEnableAst, astHandler,
+	tryToSetupYAst, child_execute_job) [VMS]: Move VMS-specific
+	functions to vmsjobs.c.  #include it into jobs.c.
+
+	Grant Taylor <gtaylor@picante.com> reports that -j# can lose
+	jobserver tokens.  I found that this happens when an exported
+	recursive variable contains a $(shell ...) function reference: in
+	this situation we could "forget" to write back a token.
+
+	* job.c, job.h: Add variable jobserver_tokens: counts the tokens
+	we have.  It's not reliable to depend on the number of children in
+	our linked list so keep a separate count.
+	(new_job): Check jobserver_tokens rather than children &&
+	waiting_jobs.  Increment jobserver_tokens when we get one.
+	(free_child): If jobserver_tokens is 0, internal error.  If it's
+	>1, write a token back to the jobserver pipe (we don't write a
+	token for the "free" job).  Decrement jobserver_tokens.
+
+	* main.c: Add variable master_job_slots.
+	(main): Set it to hold the number of jobs requested if we're the
+	master process, when using the jobserver.
+	(die): Sanity checks: first test jobserver_tokens to make sure
+	this process isn't holding any tokens we didn't write back.
+	Second, if master_job_slots is set count the tokens left in the
+	jobserver pipe and ensure it's the same as master_job_slots (- 1).
+
+2005-04-24  Paul D. Smith  <psmith@gnu.org>
+
+	Grant Taylor <gtaylor@picante.com> reports that -j# in conjunction
+	with -l# can lose jobserver tokens, because waiting jobs are not
+	consulted properly when checking for the "free" token.
+
+	* job.c (free_child): Count waiting_jobs as having tokens.
+	* job.c (new_job): Ditto.  Plus, call start_waiting_jobs() here to
+	handle jobs waiting for the load to drop.
+
+2005-04-23  Paul D. Smith  <psmith@gnu.org>
+
+	* main.c (main): Be careful to not core if a variable setting in
+	the environment doesn't contain an '='.  This is illegal but can
+	happen in broken setups.
+	Reported by Joerg Schilling <schilling@fokus.fraunhofer.de>.
+
 2005-04-12  Paul D. Smith  <psmith@gnu.org>
 
 	The second expansion feature causes significant slowdown.  Timing
