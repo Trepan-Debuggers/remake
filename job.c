@@ -1,5 +1,6 @@
 /* Job execution and handling for GNU Make.
-Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99 Free Software Foundation, Inc.
+Copyright (C) 1988,1989,1990,1991,1992,1993,1994,1995,1996,1997,1999,
+2000,2001,2002,2003,2004,2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -880,19 +881,41 @@ unblock_sigs (void)
 #endif
 
 #ifdef MAKE_JOBSERVER
+RETSIGTYPE
+job_noop (int sig UNUSED)
+{
+}
 /* Set the child handler action flags to FLAGS.  */
 static void
-set_child_handler_action_flags (int flags)
+set_child_handler_action_flags (int set_handler, int set_alarm)
 {
   struct sigaction sa;
+
+#ifdef __EMX__
+  /* The child handler must be turned off here.  */
+  signal (SIGCHLD, SIG_DFL);
+#endif
+
   bzero ((char *) &sa, sizeof sa);
   sa.sa_handler = child_handler;
-  sa.sa_flags = flags;
+  sa.sa_flags = set_handler ? 0 : SA_RESTART;
 #if defined SIGCHLD
   sigaction (SIGCHLD, &sa, NULL);
 #endif
 #if defined SIGCLD && SIGCLD != SIGCHLD
   sigaction (SIGCLD, &sa, NULL);
+#endif
+#if defined SIGALRM
+  if (set_alarm)
+    {
+      /* If we're about to enter the read(), set an alarm to wake up in a
+         second so we can check if the load has dropped and we can start more
+         work.  On the way out, turn off the alarm and set SIG_DFL.  */
+      alarm (set_handler ? 1 : 0);
+      sa.sa_handler = set_handler ? job_noop : SIG_DFL;
+      sa.sa_flags = 0;
+      sigaction (SIGALRM, &sa, NULL);
+    }
 #endif
 }
 #endif
@@ -1630,14 +1653,10 @@ new_job (struct file *file)
           fatal (NILF, "INTERNAL: no children as we go to sleep on read\n");
 
         /* Set interruptible system calls, and read() for a job token.  */
-	set_child_handler_action_flags (0);
+	set_child_handler_action_flags (1, waiting_jobs != NULL);
 	got_token = read (job_rfd, &token, 1);
 	saved_errno = errno;
-#ifdef __EMX__
-        /* The child handler must be turned off here.  */
-        signal (SIGCHLD, SIG_DFL);
-#endif
-	set_child_handler_action_flags (SA_RESTART);
+	set_child_handler_action_flags (0, waiting_jobs != NULL);
 
         /* If we got one, we're done here.  */
 	if (got_token == 1)

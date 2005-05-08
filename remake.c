@@ -1331,7 +1331,7 @@ name_mtime (char *name)
   if (e != 0)
     {
       if (errno != ENOENT && errno != ENOTDIR)
-        perror_with_name ("stat:", name);
+        perror_with_name ("stat: ", name);
       return NONEXISTENT_MTIME;
     }
   mtime = FILE_TIMESTAMP_STAT_MODTIME (name, st);
