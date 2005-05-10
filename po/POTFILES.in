@@ -22,4 +22,5 @@ signame.c
 variable.c
 variable.h
 vmsfunctions.c
+vmsjobs.c
 vpath.c

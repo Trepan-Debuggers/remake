@@ -3,7 +3,7 @@
 AC_INIT([GNU make],[3.81beta3],[bug-make@gnu.org])
 
 AC_PREREQ(2.59)
-AC_REVISION([[$Id: configure.in,v 1.134 2005/03/04 12:52:32 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.135 2005/05/10 01:38:18 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -356,7 +356,7 @@ MAKE_HOST="$host"
 AC_SUBST(MAKE_HOST)
 
 w32_target_env=no
-AM_CONDITIONAL(WINDOWSENV, false)
+AM_CONDITIONAL([WINDOWSENV], false)
 
 case "$host" in
   *-*-mingw32)
@@ -425,12 +425,7 @@ esac
 
 
 # Specify what files are to be created.
-AC_CONFIG_FILES(Makefile glob/Makefile po/Makefile.in config/Makefile doc/Makefile)
-
-# Only process if target is MS-Windows
-if test "$w32_target_env" == yes; then
-    AC_CONFIG_FILES(w32/Makefile)
-fi
+AC_CONFIG_FILES(Makefile glob/Makefile po/Makefile.in config/Makefile doc/Makefile w32/Makefile)
 
 # OK, do it!
 

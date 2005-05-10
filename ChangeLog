@@ -1,3 +1,12 @@
+2005-05-09  Paul D. Smith  <psmith@gnu.org>
+
+	* Makefile.am (EXTRA_make_SOURCES): Add vmsjobs.c
+	(MAYBE_W32): Rework how SUBDIRS are handled so that "make dist"
+	recurses to the w32 directory, even on non-Windows systems.  Use
+	the method suggested in the automake manual.
+	* configure.in: Add w32/Makefile to AC_CONFIG_FILES.
+	* maintMakefile (gnulib-url): They moved the texinfo.tex files.
+
 2005-05-07  Paul D. Smith  <psmith@gnu.org>
 
 	* main.c (die): If we're dying with a fatal error (not that a
