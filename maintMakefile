@@ -157,7 +157,7 @@ get-config/config.guess get-config/config.sub:
 	  && $(WGET) $(config-url) -O $(target).t \
 	  && $(move_if_change)
 
-gnulib-url = $(savannah-url)/gnulib/gnulib/config/$(patsubst get-config/%,%,$@)
+gnulib-url = $(savannah-url)/gnulib/gnulib/build-aux/$(patsubst get-config/%,%,$@)
 get-config/texinfo.tex:
 	@echo $(WGET) $(gnulib-url) -O $(target) \
 	  && $(WGET) $(gnulib-url) -O $(target).t \
