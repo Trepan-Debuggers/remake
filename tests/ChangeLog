@@ -1,3 +1,8 @@
+2005-05-13  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/conditionals: Add tests for the new if... else
+	if... endif syntax.
+
 2005-05-03  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/variables/DEFAULT_GOAL: Rename DEFAULT_TARGET to

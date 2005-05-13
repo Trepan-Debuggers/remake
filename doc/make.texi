@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.29 2005/05/08 16:50:59 psmith Exp $
+@set RCSID $Id: make.texi,v 1.30 2005/05/13 12:45:31 psmith Exp $
 @set EDITION 0.70
 @set VERSION 3.81
 @set UPDATED 07 May 2005
@@ -5723,14 +5723,30 @@ else
 endif
 @end example
 
+or:
+
+@example
+@var{conditional-directive}
+@var{text-if-one-is-true}
+else @var{conditional-directive}
+@var{text-if-true}
+else
+@var{text-if-false}
+endif
+@end example
+
 @noindent
-If the condition is true, @var{text-if-true} is used; otherwise,
-@var{text-if-false} is used instead.  The @var{text-if-false} can be any
-number of lines of text.
+There can be as many ``@code{else} @var{conditional-directive}''
+clauses as necessary.  Once a given condition is true,
+@var{text-if-true} is used and no other clause is used; if no
+condition is true then @var{text-if-false} is used.  The
+@var{text-if-true} and @var{text-if-false} can be any number of lines
+of text.
 
 The syntax of the @var{conditional-directive} is the same whether the
-conditional is simple or complex.  There are four different directives that
-test different conditions.  Here is a table of them:
+conditional is simple or complex; after an @code{else} or not.  There
+are four different directives that test different conditions.  Here is
+a table of them:
 
 @table @code
 @item ifeq (@var{arg1}, @var{arg2})

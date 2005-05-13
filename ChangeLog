@@ -1,3 +1,21 @@
+2005-05-13  Paul D. Smith  <psmith@gnu.org>
+
+	Implement "if... else if... endif" syntax.
+
+	* read.c (eval): Push all checks for conditional words ("ifeq",
+	"else", etc.) down into the conditional_line() function.
+	(conditional_line): Rework to allow "else if..." clause.  New
+	return value -2 for lines which are not conditionals.  The
+	ignoring flag can now also be 2, which means "already parsed a
+	true branch".  If that value is seen no other branch of this
+	conditional can be considered true.  In the else parsing if there
+	is extra text after the else, invoke conditional_line()
+	recursively to see if it's another conditional.  If not, it's an
+	error.  If so, raise the conditional value to this level instead
+	of creating a new conditional nesting level.  Special check for
+	"else" and "endif", which aren't allowed on the "else" line.
+	* doc/make.texi (Conditional Syntax): Document the new syntax.
+
 2005-05-09  Paul D. Smith  <psmith@gnu.org>
 
 	* Makefile.am (EXTRA_make_SOURCES): Add vmsjobs.c
