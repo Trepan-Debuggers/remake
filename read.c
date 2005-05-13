@@ -78,7 +78,9 @@ struct conditionals
   {
     unsigned int if_cmds;	/* Depth of conditional nesting.  */
     unsigned int allocated;	/* Elts allocated in following arrays.  */
-    char *ignoring;		/* Are we ignoring or interepreting?  */
+    char *ignoring;		/* Are we ignoring or interpreting?
+                                   0=interpreting, 1=not yet interpreted,
+                                   2=already interpreted */
     char *seen_else;		/* Have we already seen an `else'?  */
   };
 
@@ -130,7 +132,7 @@ static long readline PARAMS ((struct ebuffer *ebuf));
 static void do_define PARAMS ((char *name, unsigned int namelen,
                                enum variable_origin origin,
                                struct ebuffer *ebuf));
-static int conditional_line PARAMS ((char *line, const struct floc *flocp));
+static int conditional_line PARAMS ((char *line, int len, const struct floc *flocp));
 static void record_files PARAMS ((struct nameseq *filenames, char *pattern, char *pattern_percent,
 			struct dep *deps, unsigned int cmds_started, char *commands,
 			unsigned int commands_idx, int two_colon,
@@ -613,17 +615,17 @@ eval (struct ebuffer *ebuf, int set_default)
 	 ignoring anything, since they control what we will do with
 	 following lines.  */
 
-      if (!in_ignored_define
-	  && (word1eq ("ifdef") || word1eq ("ifndef")
-	      || word1eq ("ifeq") || word1eq ("ifneq")
-	      || word1eq ("else") || word1eq ("endif")))
+      if (!in_ignored_define)
 	{
- 	  int i = conditional_line (p, fstart);
-	  if (i < 0)
-	    fatal (fstart, _("invalid syntax in conditional"));
+ 	  int i = conditional_line (p, len, fstart);
+          if (i != -2)
+            {
+              if (i == -1)
+                fatal (fstart, _("invalid syntax in conditional"));
 
-          ignoring = i;
-	  continue;
+              ignoring = i;
+              continue;
+            }
 	}
 
       if (word1eq ("endef"))
@@ -1420,67 +1422,108 @@ do_define (char *name, unsigned int namelen,
    FILENAME and LINENO are the filename and line number in the
    current makefile.  They are used for error messages.
 
-   Value is -1 if the line is invalid,
+   Value is -2 if the line is not a conditional at all,
+   -1 if the line is an invalid conditional,
    0 if following text should be interpreted,
    1 if following text should be ignored.  */
 
 static int
-conditional_line (char *line, const struct floc *flocp)
+conditional_line (char *line, int len, const struct floc *flocp)
 {
-  int notdef;
   char *cmdname;
-  register unsigned int i;
+  enum { c_ifdef, c_ifndef, c_ifeq, c_ifneq, c_else, c_endif } cmdtype;
+  unsigned int i;
+  unsigned int o;
 
-  if (*line == 'i')
-    {
-      /* It's an "if..." command.  */
-      notdef = line[2] == 'n';
-      if (notdef)
-	{
-	  cmdname = line[3] == 'd' ? "ifndef" : "ifneq";
-	  line += cmdname[3] == 'd' ? 7 : 6;
-	}
-      else
-	{
-	  cmdname = line[2] == 'd' ? "ifdef" : "ifeq";
-	  line += cmdname[2] == 'd' ? 6 : 5;
-	}
-    }
+  /* Compare a word, both length and contents. */
+#define	word1eq(s)      (len == sizeof(s)-1 && strneq (s, line, sizeof(s)-1))
+#define	chkword(s, t)   if (word1eq (s)) { cmdtype = (t); cmdname = (s); }
+
+  /* Make sure this line is a conditional.  */
+  chkword ("ifdef", c_ifdef)
+  else chkword ("ifndef", c_ifndef)
+  else chkword ("ifeq", c_ifeq)
+  else chkword ("ifneq", c_ifneq)
+  else chkword ("else", c_else)
+  else chkword ("endif", c_endif)
   else
-    {
-      /* It's an "else" or "endif" command.  */
-      notdef = line[1] == 'n';
-      cmdname = notdef ? "endif" : "else";
-      line += notdef ? 5 : 4;
-    }
+    return -2;
 
-  line = next_token (line);
+  /* Found one: skip past it and any whitespace after it.  */
+  line = next_token (line + len);
 
-  if (*cmdname == 'e')
+#define EXTRANEOUS() error (flocp, _("Extraneous text after `%s' directive"), cmdname)
+
+  /* An 'endif' cannot contain extra text, and reduces the if-depth by 1  */
+  if (cmdtype == c_endif)
     {
       if (*line != '\0')
-	error (flocp, _("Extraneous text after `%s' directive"), cmdname);
-      /* "Else" or "endif".  */
-      if (conditionals->if_cmds == 0)
+	EXTRANEOUS ();
+
+      if (!conditionals->if_cmds)
 	fatal (flocp, _("extraneous `%s'"), cmdname);
-      /* NOTDEF indicates an `endif' command.  */
-      if (notdef)
-	--conditionals->if_cmds;
-      else if (conditionals->seen_else[conditionals->if_cmds - 1])
-	fatal (flocp, _("only one `else' per conditional"));
+
+      --conditionals->if_cmds;
+
+      goto DONE;
+    }
+
+  /* An 'else' statement can either be simple, or it can have another
+     conditional after it.  */
+  if (cmdtype == c_else)
+    {
+      const char *p;
+
+      if (!conditionals->if_cmds)
+	fatal (flocp, _("extraneous `%s'"), cmdname);
+
+      o = conditionals->if_cmds - 1;
+
+      if (conditionals->seen_else[o])
+        fatal (flocp, _("only one `else' per conditional"));
+
+      /* Change the state of ignorance.  */
+      switch (conditionals->ignoring[o])
+        {
+          case 0:
+            /* We've just been interpreting.  Never do it again.  */
+            conditionals->ignoring[o] = 2;
+            break;
+          case 1:
+            /* We've never interpreted yet.  Maybe this time!  */
+            conditionals->ignoring[o] = 0;
+            break;
+        }
+
+      /* It's a simple 'else'.  */
+      if (*line == '\0')
+        {
+          conditionals->seen_else[o] = 1;
+          goto DONE;
+        }
+
+      /* The 'else' has extra text.  That text must be another conditional
+         and cannot be an 'else' or 'endif'.  */
+
+      /* Find the length of the next word.  */
+      for (p = line+1; *p != '\0' && !isspace ((unsigned char)*p); ++p)
+        ;
+      len = p - line;
+
+      /* If it's 'else' or 'endif' or an illegal conditional, fail.  */
+      if (word1eq("else") || word1eq("endif")
+          || conditional_line (line, len, flocp) < 0)
+	EXTRANEOUS ();
       else
-	{
-	  /* Toggle the state of ignorance.  */
-	  conditionals->ignoring[conditionals->if_cmds - 1]
-	    = !conditionals->ignoring[conditionals->if_cmds - 1];
-	  /* Record that we have seen an `else' in this conditional.
-	     A second `else' will be erroneous.  */
-	  conditionals->seen_else[conditionals->if_cmds - 1] = 1;
-	}
-      for (i = 0; i < conditionals->if_cmds; ++i)
-	if (conditionals->ignoring[i])
-	  return 1;
-      return 0;
+        {
+          /* conditional_line() created a new level of conditional.
+             Raise it back to this level.  */
+          if (conditionals->ignoring[o] < 2)
+            conditionals->ignoring[o] = conditionals->ignoring[o+1];
+          --conditionals->if_cmds;
+        }
+
+      goto DONE;
     }
 
   if (conditionals->allocated == 0)
@@ -1490,7 +1533,7 @@ conditional_line (char *line, const struct floc *flocp)
       conditionals->seen_else = (char *) xmalloc (conditionals->allocated);
     }
 
-  ++conditionals->if_cmds;
+  o = conditionals->if_cmds++;
   if (conditionals->if_cmds > conditionals->allocated)
     {
       conditionals->allocated += 5;
@@ -1501,25 +1544,24 @@ conditional_line (char *line, const struct floc *flocp)
     }
 
   /* Record that we have seen an `if...' but no `else' so far.  */
-  conditionals->seen_else[conditionals->if_cmds - 1] = 0;
+  conditionals->seen_else[o] = 0;
 
   /* Search through the stack to see if we're already ignoring.  */
-  for (i = 0; i < conditionals->if_cmds - 1; ++i)
+  for (i = 0; i < o; ++i)
     if (conditionals->ignoring[i])
       {
-	/* We are already ignoring, so just push a level
-	   to match the next "else" or "endif", and keep ignoring.
-	   We don't want to expand variables in the condition.  */
-	conditionals->ignoring[conditionals->if_cmds - 1] = 1;
+	/* We are already ignoring, so just push a level to match the next
+	   "else" or "endif", and keep ignoring.  We don't want to expand
+	   variables in the condition.  */
+	conditionals->ignoring[o] = 1;
 	return 1;
       }
 
-  if (cmdname[notdef ? 3 : 2] == 'd')
+  if (cmdtype == c_ifdef || cmdtype == c_ifndef)
     {
-      /* "Ifdef" or "ifndef".  */
       char *var;
       struct variable *v;
-      register char *p;
+      char *p;
 
       /* Expand the thing we're looking up, so we can use indirect and
          constructed variable names.  */
@@ -1533,9 +1575,10 @@ conditional_line (char *line, const struct floc *flocp)
 	return -1;
 
       var[i] = '\0';
-      v = lookup_variable (var, strlen (var));
-      conditionals->ignoring[conditionals->if_cmds - 1]
-	= (v != 0 && *v->value != '\0') == notdef;
+      v = lookup_variable (var, i);
+
+      conditionals->ignoring[o] =
+        ((v != 0 && *v->value != '\0') == (cmdtype == c_ifndef));
 
       free (var);
     }
@@ -1553,7 +1596,7 @@ conditional_line (char *line, const struct floc *flocp)
       /* Find the end of the first string.  */
       if (termin == ',')
 	{
-	  register int count = 0;
+	  int count = 0;
 	  for (; *line != '\0'; ++line)
 	    if (*line == '(')
 	      ++count;
@@ -1627,13 +1670,13 @@ conditional_line (char *line, const struct floc *flocp)
       *line = '\0';
       line = next_token (++line);
       if (*line != '\0')
-	error (flocp, _("Extraneous text after `%s' directive"), cmdname);
+	EXTRANEOUS ();
 
       s2 = variable_expand (s2);
-      conditionals->ignoring[conditionals->if_cmds - 1]
-	= streq (s1, s2) == notdef;
+      conditionals->ignoring[o] = (streq (s1, s2) == (cmdtype == c_ifneq));
     }
 
+ DONE:
   /* Search through the stack to see if we're ignoring.  */
   for (i = 0; i < conditionals->if_cmds; ++i)
     if (conditionals->ignoring[i])
