@@ -95,5 +95,25 @@ $dir/foo.o");
 
 unlink("$dir/foo.c");
 
+
+# TEST #4: make sure precious flag is set properly for targets
+#          that are built via implicit rules (Savannah bug #13218).
+#
+run_make_test('
+.DELETE_ON_ERROR:
+
+.PRECIOUS: %.bar
+
+%.bar:; @touch $@ && false
+
+$(dir)/foo.bar:
+
+',
+"dir=$dir",
+"make: *** [$dir/foo.bar] Error 1",
+512);
+
+unlink("$dir/foo.bar");
+
 # This tells the test driver that the perl test script executed properly.
 1;

@@ -1,3 +1,8 @@
+2005-05-31  Boris Kolpackov  <boris@kolpackov.net>
+
+	* scripts/features/include: Add a test for Savannah bug #13216.
+	* scripts/features/patternrules: Add a test for Savannah bug #13218.
+
 2005-05-13  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/features/conditionals: Add tests for the new if... else

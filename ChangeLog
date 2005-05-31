@@ -1,3 +1,12 @@
+2005-05-31  Boris Kolpackov  <boris@kolpackov.net>
+
+	* job.c (reap_children): Don't die of the command failed but
+	the dontcare flag is set. Fixes Savannah bug #13216.
+
+	* implicit.c (pattern_search): When creating a target from
+	an implicit rule match, lookup pattern target and set precious
+	flag in a newly created target. Fixes Savannah bug #13218.
+
 2005-05-13  Paul D. Smith  <psmith@gnu.org>
 
 	Implement "if... else if... endif" syntax.

@@ -470,6 +470,7 @@ reap_children (int block, int err)
       register struct child *lastc, *c;
       int child_failed;
       int any_remote, any_local;
+      int dontcare;
 
       if (err && block)
 	{
@@ -686,12 +687,17 @@ reap_children (int block, int err)
       if (c->good_stdin)
         good_stdin_used = 0;
 
+      dontcare = c->file->dontcare;
+
       if (child_failed && !c->noerror && !ignore_errors_flag)
         {
           /* The commands failed.  Write an error message,
              delete non-precious targets, and abort.  */
           static int delete_on_error = -1;
-          child_error (c->file->name, exit_code, exit_sig, coredump, 0);
+
+          if (!dontcare)
+            child_error (c->file->name, exit_code, exit_sig, coredump, 0);
+
           c->file->update_status = 2;
           if (delete_on_error == -1)
             {
@@ -791,7 +797,7 @@ reap_children (int block, int err)
 
       /* If the job failed, and the -k flag was not given, die,
          unless we are already in the process of dying.  */
-      if (!err && child_failed && !keep_going_flag &&
+      if (!err && child_failed && !dontcare && !keep_going_flag &&
           /* fatal_error_signal will die with the right signal.  */
           !handling_fatal_signal)
         die (2);
