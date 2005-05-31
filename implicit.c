@@ -899,6 +899,13 @@ pattern_search (struct file *file, int archive,
   file->cmds = rule->cmds;
   file->is_target = 1;
 
+  /* Set precious flag. */
+  {
+    struct file *f = lookup_file (rule->targets[matches[foundrule]]);
+    if (f && f->precious)
+      file->precious = 1;
+  }
+
   /* If this rule builds other targets, too, put the others into FILE's
      `also_make' member.  */
 
@@ -906,6 +913,7 @@ pattern_search (struct file *file, int archive,
     for (i = 0; rule->targets[i] != 0; ++i)
       if (i != matches[foundrule])
 	{
+	  struct file *f;
 	  struct dep *new = (struct dep *) xmalloc (sizeof (struct dep));
 	  /* GKM FIMXE: handle '|' here too */
 	  new->ignore_mtime = 0;
@@ -920,6 +928,12 @@ pattern_search (struct file *file, int archive,
 		 rule->lens[i] - (rule->suffixes[i] - rule->targets[i]) + 1);
 	  new->file = enter_file (new->name);
 	  new->next = file->also_make;
+	  
+	  /* Set precious flag. */
+	  f = lookup_file (rule->targets[i]);
+	  if (f && f->precious)
+            new->file->precious = 1;
+	  
 	  file->also_make = new;
 	}
 

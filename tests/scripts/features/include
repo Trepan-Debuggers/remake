@@ -78,6 +78,7 @@ hello: ; @echo hello
    "hello\n"
   );
 
+
 # Test inheritance of dontcare flag when rebuilding makefiles.
 #
 run_make_test('
@@ -87,6 +88,23 @@ all: ; @:
 -include foo
 
 foo: bar; @:
+', '', '');
+
+1;
+
+
+# Make sure that we don't die when the command fails but we dontcare.
+# (Savannah bug #13216).
+#
+run_make_test('
+.PHONY: all
+all:; @:
+
+-include foo
+
+foo: bar; @:
+
+bar:; @false
 ', '', '');
 
 1;
