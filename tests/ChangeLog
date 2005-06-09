@@ -1,3 +1,7 @@
+2005-06-09  Paul D. Smith  <psmith@gnu.org>
+
+        * scripts/functions/foreach: Add a test for Savannah bug #11913.
+
 2005-05-31  Boris Kolpackov  <boris@kolpackov.net>
 
 	* scripts/features/include: Add a test for Savannah bug #13216.

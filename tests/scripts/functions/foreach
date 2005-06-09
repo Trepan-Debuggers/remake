@@ -1,6 +1,6 @@
 #                                                                    -*-perl-*-
 
-# Updated 6.16.93  variable "MAKE" is default was environment override
+# Updated 16 June 1993 variable "MAKE" is default was environment override
 # For make 3.63 and above
 
 $description = "The following test creates a makefile to verify
@@ -14,40 +14,47 @@ form of the command is $(foreach var,$list,$text). Several
 types of foreach loops are tested\n";
 
 
-open(MAKEFILE,"> $makefile");
-
-# The Contents of the MAKEFILE ...
+# TEST 0
 
 # On WIN32 systems, the user's path is found in %Path% ($Path)
 #
 $pathvar = (($port_type eq 'Windows') ? "Path" : "PATH");
 
-print MAKEFILE <<EOF;
-foo = bletch null \@ garf
+run_make_test("
 null :=
 space = ' '
-auto_var = udef space CC null $pathvar MAKE foo CFLAGS WHITE \@ <
-av = \$(foreach var, \$(auto_var), \$(origin \$(var)) )
+auto_var = udef space CC null $pathvar".' MAKE foo CFLAGS WHITE @ <
+foo = bletch null @ garf
+av = $(foreach var, $(auto_var), $(origin $(var)) )
 override WHITE := BLACK
-for_var = \$(addsuffix .c,foo \$(null) \$(foo) \$(space) \$(av) )
-fe = \$(foreach var2, \$(for_var),\$(subst .c,.o, \$(var2) ) )
+for_var = $(addsuffix .c,foo $(null) $(foo) $(space) $(av) )
+fe = $(foreach var2, $(for_var),$(subst .c,.o, $(var2) ) )
 all: auto for2
-auto :
-\t\@echo \$(av)
-for2:
-\t\@echo \$(fe)
-EOF
+auto : ; @echo $(av)
+for2: ; @echo $(fe)',
+              '-e WHITE=WHITE CFLAGS=',
+              "undefined file default file environment default file command line override automatic automatic
+foo.o bletch.o null.o @.o garf.o .o    .o undefined.o file.o default.o file.o environment.o default.o file.o command.o line.o override.o automatic.o automatic.o");
 
-close(MAKEFILE);
 
-&run_make_with_options($makefile,
-                      "-e WHITE=WHITE CFLAGS=",
-                      &get_logfile);
+# TEST 1: Test that foreach variables take precedence over global
+# variables in a global scope (like inside an eval).  Tests bug #11913
 
-# Create the answer to what should be produced by this Makefile
-$answer = "undefined file default file environment default file command line override automatic automatic
-foo.o bletch.o null.o @.o garf.o .o    .o undefined.o file.o default.o file.o environment.o default.o file.o command.o line.o override.o automatic.o automatic.o\n";
+run_make_test('
+.PHONY: all target
+all: target
 
-&compare_output($answer,&get_logfile(1));
+x := BAD
+
+define mktarget
+target: x := $(x)
+target: ; @echo "$(x)"
+endef
+
+x := GLOBAL
+
+$(foreach x,FOREACH,$(eval $(value mktarget)))',
+              '',
+              'FOREACH');
 
 1;
