@@ -1,3 +1,16 @@
+2005-06-09  Paul D. Smith  <psmith@gnu.org>
+
+        * variable.c (push_new_variable_scope): File variables point
+        directly to the global_setlist variable.  So, inserting a new
+        scope in front of that has no effect on those variables: they
+        don't go through current_variable_set_list.  If we're pushing a
+        scope and the current scope is global, push it "the other way" so
+        that the new setlist is in the global_setlist variable, and
+        next points to a new setlist with the global variable set.
+        (pop_variable_scope): Properly undo a push with the new
+        semantics.
+        Fixes Savannah bug #11913.
+
 2005-05-31  Boris Kolpackov  <boris@kolpackov.net>
 
 	* job.c (reap_children): Don't die of the command failed but

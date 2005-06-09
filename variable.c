@@ -19,6 +19,9 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 #include "make.h"
+
+#include <assert.h>
+
 #include "dep.h"
 #include "filedef.h"
 #include "job.h"
@@ -546,21 +549,6 @@ free_variable_name_and_value (const void *item)
   free (v->value);
 }
 
-void
-pop_variable_scope (void)
-{
-  struct variable_set_list *setlist = current_variable_set_list;
-  struct variable_set *set = setlist->set;
-
-  current_variable_set_list = setlist->next;
-  free ((char *) setlist);
-
-  hash_map (&set->table, free_variable_name_and_value);
-  hash_free (&set->table, 1);
-
-  free ((char *) set);
-}
-
 struct variable_set_list *
 create_new_variable_set (void)
 {
@@ -579,12 +567,63 @@ create_new_variable_set (void)
   return setlist;
 }
 
-/* Create a new variable set and push it on the current setlist.  */
+/* Create a new variable set and push it on the current setlist.
+   If we're pushing a global scope (that is, the current scope is the global
+   scope) then we need to "push" it the other way: file variable sets point
+   directly to the global_setlist so we need to replace that with the new one.
+ */
 
 struct variable_set_list *
 push_new_variable_scope (void)
 {
-  return (current_variable_set_list = create_new_variable_set());
+  current_variable_set_list = create_new_variable_set();
+  if (current_variable_set_list->next == &global_setlist)
+    {
+      /* It was the global, so instead of new -> &global we want to replace
+         &global with the new one and have &global -> new, with current still
+         pointing to &global  */
+      struct variable_set *set = current_variable_set_list->set;
+      current_variable_set_list->set = global_setlist.set;
+      global_setlist.set = set;
+      current_variable_set_list->next = global_setlist.next;
+      global_setlist.next = current_variable_set_list;
+      current_variable_set_list = &global_setlist;
+    }
+  return (current_variable_set_list);
+}
+
+void
+pop_variable_scope (void)
+{
+  struct variable_set_list *setlist;
+  struct variable_set *set;
+
+  /* Can't call this if there's no scope to pop!  */
+  assert(current_variable_set_list->next != NULL);
+
+  if (current_variable_set_list != &global_setlist)
+    {
+      /* We're not pointing to the global setlist, so pop this one.  */
+      setlist = current_variable_set_list;
+      set = setlist->set;
+      current_variable_set_list = setlist->next;
+    }
+  else
+    {
+      /* This set is the one in the global_setlist, but there is another global
+         set beyond that.  We want to copy that set to global_setlist, then
+         delete what used to be in global_setlist.  */
+      setlist = global_setlist.next;
+      set = global_setlist.set;
+      global_setlist.set = setlist->set;
+      global_setlist.next = setlist->next;
+    }
+
+  /* Free the one we no longer need.  */
+  free ((char *) setlist);
+  hash_map (&set->table, free_variable_name_and_value);
+  hash_free (&set->table, 1);
+  free ((char *) set);
 }
 
 /* Merge FROM_SET into TO_SET, freeing unused storage in FROM_SET.  */

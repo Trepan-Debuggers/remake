@@ -36,7 +36,8 @@ Version 3.81beta3
 
 * The "else" conditional line can now be followed by any other legal
   conditional on the same line: this does not increase the depth of the
-  conditional nesting.
+  conditional nesting, so only one "endif" is required to close the
+  conditional.
 
 * All pattern-specific variables that match a given target are now used
   (previously only the first match was used).
