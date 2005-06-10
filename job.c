@@ -98,6 +98,7 @@ static int amiga_batch_file;
 # endif
 # include <starlet.h>
 # include <lib$routines.h>
+static void vmsWaitForChildren PARAMS ((int *));
 #endif
 
 #ifdef WINDOWS32
@@ -535,7 +536,6 @@ reap_children (int block, int err)
 	  if (any_local)
 	    {
 #ifdef VMS
-              static void vmsWaitForChildren PARAMS ((int *));
 	      vmsWaitForChildren (&status);
 	      pid = c->pid;
 #else
@@ -1905,7 +1905,7 @@ child_execute_job (int stdin_fd, int stdout_fd, char **argv, char **envp)
   return pid;
 }
 
-#elif !defined (_AMIGA) && !defined (__MSDOS__)
+#elif !defined (_AMIGA) && !defined (__MSDOS__) && !defined (VMS)
 
 /* UNIX:
    Replace the current process with one executing the command in ARGV.
@@ -1926,7 +1926,7 @@ child_execute_job (int stdin_fd, int stdout_fd, char **argv, char **envp)
   /* Run the command.  */
   exec_command (argv, envp);
 }
-#endif /* !AMIGA && !__MSDOS__ */
+#endif /* !AMIGA && !__MSDOS__ && !VMS */
 #endif /* !WINDOWS32 */
 
 #ifndef _AMIGA

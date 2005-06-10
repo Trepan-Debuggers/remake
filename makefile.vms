@@ -116,7 +116,7 @@ clean:
 
 # Automatically generated dependencies.
 commands.obj: commands.c make.h dep.h commands.h filedef.h variable.h job.h
-job.obj: job.c make.h commands.h job.h filedef.h variable.h
+job.obj: job.c vmsjobs.c make.h commands.h job.h filedef.h variable.h
 dir.obj: dir.c make.h
 file.obj: file.c make.h commands.h dep.h filedef.h variable.h
 misc.obj: misc.c make.h dep.h

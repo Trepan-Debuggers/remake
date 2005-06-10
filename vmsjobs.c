@@ -4,10 +4,16 @@
    This file must be #included in job.c, as it accesses static functions.
 */
 
+#include <string.h>
+#include <descrip.h>
+#include <clidef.h>
+
+extern char *vmsify PARAMS ((char *name, int type));
+
 static int vms_jobsefnmask = 0;
 
 /* Wait for nchildren children to terminate */
-void
+static void
 vmsWaitForChildren(int *status)
 {
   while (1)
@@ -90,9 +96,6 @@ vms_handle_apos (char *p)
 
   return p;
 }
-
-#include <descrip.h>
-#include <clidef.h>
 
 /* This is called as an AST when a child process dies (it won't get
    interrupted by anything except a higher level AST).
@@ -196,6 +199,7 @@ vmsHandleChildTerm(struct child *child)
 #define MAXCMDLEN 200
 
 /* local helpers to make ctrl+c and ctrl+y working, see below */
+#include <iodef.h>
 #include <libclidef.h>
 #include <ssdef.h>
 
