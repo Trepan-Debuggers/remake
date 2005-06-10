@@ -1,3 +1,13 @@
+2005-06-10  Paul D. Smith  <psmith@gnu.org>
+        
+        VMS build updates from Hartmut Becker <Hartmut.Becker@hp.com>:
+        
+        * vmsjobs.c [VMS]: Updates to compile on VMS: add some missing
+        headers; make vmsWaitForChildren() static; extern vmsify().
+        * job.c [VMS]: Move vmsWaitForChildren() prototype to be global.
+        Don't create child_execute_job() here (it's in vmsjobs.c).
+        * makefile.vms (job.obj) [VMS]: Add vmsjobs.c as a prerequisite.
+
 2005-06-09  Paul D. Smith  <psmith@gnu.org>
 
         * variable.c (push_new_variable_scope): File variables point
