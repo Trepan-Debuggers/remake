@@ -3,7 +3,7 @@
 AC_INIT([GNU make],[3.81beta3],[bug-make@gnu.org])
 
 AC_PREREQ(2.59)
-AC_REVISION([[$Id: configure.in,v 1.135 2005/05/10 01:38:18 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.136 2005/06/12 22:22:07 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -137,7 +137,7 @@ AC_CHECK_FUNCS(	memcpy memmove strchr strdup mkstemp mktemp fdopen \
 	        bsd_signal dup2 getcwd realpath sigsetmask sigaction \
                 getgroups seteuid setegid setlinebuf setreuid setregid \
                 getrlimit setrlimit setvbuf pipe strerror strsignal \
-		lstat readlink)
+		lstat readlink atexit)
 
 AC_FUNC_SETVBUF_REVERSED
 

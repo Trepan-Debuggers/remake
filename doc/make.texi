@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.30 2005/05/13 12:45:31 psmith Exp $
+@set RCSID $Id: make.texi,v 1.31 2005/06/12 22:22:07 psmith Exp $
 @set EDITION 0.70
 @set VERSION 3.81
 @set UPDATED 07 May 2005
@@ -9385,7 +9385,7 @@ foolib(hack.o) : hack.o
 @end example
 
 In fact, nearly all archive member targets are updated in just this way
-and there is an implicit rule to do it for you.  @strong{Note:} The
+and there is an implicit rule to do it for you.  @strong{Please note:} The
 @samp{c} flag to @code{ar} is required if the archive file does not
 already exist.
 

@@ -1,7 +1,18 @@
+2005-06-12  Paul D. Smith  <psmith@gnu.org>
+
+	Fix Savannah bug # 1328.
+
+	* configure.in: Check for atexit().
+	* misc.c (close_stdout): Test stdout to see if writes to it have
+	failed.  If so, be sure to exit with a non-0 error code.  Based on
+	code found in gnulib.
+	* make.h: Prototype.
+	* main.c (main): Install close_stdout() with atexit().
+
 2005-06-10  Paul D. Smith  <psmith@gnu.org>
-        
+
         VMS build updates from Hartmut Becker <Hartmut.Becker@hp.com>:
-        
+
         * vmsjobs.c [VMS]: Updates to compile on VMS: add some missing
         headers; make vmsWaitForChildren() static; extern vmsify().
         * job.c [VMS]: Move vmsWaitForChildren() prototype to be global.
