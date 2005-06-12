@@ -1,3 +1,8 @@
+2005-06-12  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/misc/close_stdout: Add a test for Savannah bug #1328.
+	This test only works on systems that have /dev/full (e.g., Linux).
+
 2005-06-09  Paul D. Smith  <psmith@gnu.org>
 
         * scripts/functions/foreach: Add a test for Savannah bug #11913.
