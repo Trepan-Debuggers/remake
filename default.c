@@ -1,5 +1,6 @@
 /* Data base of default implicit rules for GNU Make.
-Copyright (C) 1988,89,90,91,92,93,94,95,96 Free Software Foundation, Inc.
+Copyright (C) 1988,1989,1990,1991,1992,1993,1994,1995,
+1996,2003,2004 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify

@@ -26,7 +26,7 @@ Version 3.81beta3
   applies to implicit rules, as well, where the second expansion occurs
   after the rule is matched.  However, this means that you need to
   double-quote any "$" in your filenames; instead of "foo: boo$$bar" you
-  must write "foo: foo$$$$bar"
+  now must write "foo: foo$$$$bar".
 
 * New command-line option: -L (--check-symlink-times).  On systems that
   support symbolic links, if this option is given then GNU make will
@@ -59,6 +59,9 @@ Version 3.81beta3
      version of GNU make.
    - .DEFAULT_GOAL: Set the name of the default goal make will
      use if no goals are provided on the command line.
+   - MAKE_RESTARTS: If set, then this is the number of times this
+     instance of make has been restarted (see "How Makefiles Are Remade"
+     in the manual).
    - New automatic variable: $| (added in 3.80, actually): contains all
      the order-only prerequisites defined for the target.
 
