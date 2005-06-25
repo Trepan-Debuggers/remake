@@ -24,7 +24,7 @@ extern "C" {
 #endif
 
 #if defined __cplusplus || (defined __STDC__ && __STDC__) || defined WINDOWS32
-# if !defined __GLIBC__ || !defined __P
+# if !defined __GLIBC__
 #  undef	__P
 #  define __P(protos)	protos
 # endif
@@ -37,7 +37,7 @@ extern "C" {
 #endif /* C++ or ANSI C.  */
 
 #ifndef const
-# if (defined __STDC__ && __STDC__) || defined __cplusplus
+# if (defined __STDC__ && __STDC__) || defined __cplusplus || defined WINDOWS32
 #  define __const	const
 # else
 #  define __const

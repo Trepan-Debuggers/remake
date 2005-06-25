@@ -1,5 +1,8 @@
 2005-06-25  Paul D. Smith  <psmith@gnu.org>
 
+	* scripts/options/symlinks: Test symlinks to non-existent files.
+	Tests fix for Savannah bug #13280.
+
 	* scripts/misc/general3: Test semicolons in variable references.
 	Tests fix for Savannah bug #1454.
 

@@ -1328,13 +1328,18 @@ name_mtime (char *name)
   int e;
 
   EINTRLOOP (e, stat (name, &st));
-  if (e != 0)
+  if (e == 0)
+    mtime = FILE_TIMESTAMP_STAT_MODTIME (name, st);
+  else if (errno == ENOENT || errno == ENOTDIR)
+    mtime = NONEXISTENT_MTIME;
+  else
     {
-      if (errno != ENOENT && errno != ENOTDIR)
-        perror_with_name ("stat: ", name);
+      perror_with_name ("stat: ", name);
       return NONEXISTENT_MTIME;
     }
-  mtime = FILE_TIMESTAMP_STAT_MODTIME (name, st);
+
+  /* If we get here we either found it, or it doesn't exist.
+     If it doesn't exist see if we can use a symlink mtime instead.  */
 
 #ifdef MAKE_SYMLINKS
 #ifndef S_ISLNK
@@ -1361,8 +1366,9 @@ name_mtime (char *name)
           EINTRLOOP (e, lstat (lpath, &st));
           if (e)
             {
-              /* Eh?  Just take what we have.  */
-              perror_with_name ("lstat: ", lpath);
+              /* Just take what we have so far.  */
+              if (errno != ENOENT && errno != ENOTDIR)
+                perror_with_name ("lstat: ", lpath);
               break;
             }
 
