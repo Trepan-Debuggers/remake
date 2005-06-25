@@ -1,5 +1,18 @@
 2005-06-25  Paul D. Smith  <psmith@gnu.org>
 
+	Fix Savannah bug #1454.
+
+	* read.c (find_char_unquote): Accept a new argument IGNOREVARS.
+	If it's set, then don't	stop on STOPCHARs or BLANKs if they're
+	inside a variable reference.  Make this function static as it's
+	only used here.
+	(eval): Call find_char_unquote() with IGNOREVARS set when we're
+	parsing an unexpanded line looking for semicolons.
+	* misc.c (remove_comments): Move this to read.c and make it static
+	as it's only used there.  Call find_char_unquote() with new arg.
+	* make.h: Remove prototypes for find_char_unquote() and
+	remove_comments() since they're static now.
+
 	Implement the MAKE_RESTARTS variable, and disable -B if it's >0.
 	Fixes Savannah bug #7566.
 

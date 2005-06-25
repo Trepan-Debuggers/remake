@@ -1,5 +1,8 @@
 2005-06-25  Paul D. Smith  <psmith@gnu.org>
 
+	* scripts/misc/general3: Test semicolons in variable references.
+	Tests fix for Savannah bug #1454.
+
 	* scripts/variables/MAKE_RESTARTS: New file: test the
 	MAKE_RESTARTS variable.
 	* scripts/options/dash-B: Test re-exec doesn't loop infinitely.
