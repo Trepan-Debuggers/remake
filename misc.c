@@ -149,22 +149,6 @@ collapse_continuations (char *line)
 
   *out = '\0';
 }
-
-
-/* Remove comments from LINE.
-   This is done by copying the text at LINE onto itself.  */
-
-void
-remove_comments (char *line)
-{
-  char *comment;
-
-  comment = find_char_unquote (line, '#', 0, 0);
-
-  if (comment != 0)
-    /* Cut off the line at the #.  */
-    *comment = '\0';
-}
 
 /* Print N spaces (used in debug for target-depth).  */
 

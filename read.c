@@ -143,6 +143,9 @@ static void record_target_var PARAMS ((struct nameseq *filenames, char *defn,
                                        const struct floc *flocp));
 static enum make_word_type get_next_mword PARAMS ((char *buffer, char *delim,
                         char **startp, unsigned int *length));
+static void remove_comments PARAMS ((char *line));
+static char *find_char_unquote PARAMS ((char *string, int stop1,
+                                        int stop2, int blank, int ignorevars));
 
 /* Read in all the makefiles and return the chain of their names.  */
 
@@ -882,7 +885,7 @@ eval (struct ebuffer *ebuf, int set_default)
 
         /* Search the line for an unquoted ; that is not after an
            unquoted #.  */
-        cmdleft = find_char_unquote (line, ';', '#', 0);
+        cmdleft = find_char_unquote (line, ';', '#', 0, 1);
         if (cmdleft != 0 && *cmdleft == '#')
           {
             /* We found a comment before a semicolon.  */
@@ -929,7 +932,7 @@ eval (struct ebuffer *ebuf, int set_default)
             if (cmdleft == 0)
               {
                 /* Look for a semicolon in the expanded line.  */
-                cmdleft = find_char_unquote (p2, ';', 0, 0);
+                cmdleft = find_char_unquote (p2, ';', 0, 0, 0);
 
                 if (cmdleft != 0)
                   {
@@ -956,7 +959,7 @@ eval (struct ebuffer *ebuf, int set_default)
                   }
               }
 
-            colonp = find_char_unquote(p2, ':', 0, 0);
+            colonp = find_char_unquote(p2, ':', 0, 0, 0);
 #ifdef HAVE_DOS_PATHS
             /* The drive spec brain-damage strikes again...  */
             /* Note that the only separators of targets in this context
@@ -965,7 +968,7 @@ eval (struct ebuffer *ebuf, int set_default)
             while (colonp && (colonp[1] == '/' || colonp[1] == '\\') &&
                    colonp > p2 && isalpha ((unsigned char)colonp[-1]) &&
                    (colonp == p2 + 1 || strchr (" \t(", colonp[-2]) != 0))
-              colonp = find_char_unquote(colonp + 1, ':', 0, 0);
+              colonp = find_char_unquote(colonp + 1, ':', 0, 0, 0);
 #endif
             if (colonp != 0)
               break;
@@ -1079,7 +1082,7 @@ eval (struct ebuffer *ebuf, int set_default)
 
         /* This is a normal target, _not_ a target-specific variable.
            Unquote any = in the dependency list.  */
-        find_char_unquote (lb_next, '=', 0, 0);
+        find_char_unquote (lb_next, '=', 0, 0, 0);
 
         /* We have some targets, so don't ignore the following commands.  */
         no_targets = 0;
@@ -1094,7 +1097,7 @@ eval (struct ebuffer *ebuf, int set_default)
             /* Look for a semicolon in the expanded line.  */
             if (cmdleft == 0)
               {
-                cmdleft = find_char_unquote (p2, ';', 0, 0);
+                cmdleft = find_char_unquote (p2, ';', 0, 0, 0);
                 if (cmdleft != 0)
                   *(cmdleft++) = '\0';
               }
@@ -1310,8 +1313,23 @@ eval (struct ebuffer *ebuf, int set_default)
 
   return 1;
 }
-
 
+
+/* Remove comments from LINE.
+   This is done by copying the text at LINE onto itself.  */
+
+static void
+remove_comments (char *line)
+{
+  char *comment;
+
+  comment = find_char_unquote (line, '#', 0, 0, 0);
+
+  if (comment != 0)
+    /* Cut off the line at the #.  */
+    *comment = '\0';
+}
+
 /* Execute a `define' directive.
    The first line has already been read, and NAME is the name of
    the variable to be defined.  The following lines remain to be read.  */
@@ -2158,33 +2176,74 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
    Backslashes quote STOPCHAR, blanks if BLANK is nonzero, and backslash.
    Quoting backslashes are removed from STRING by compacting it into
    itself.  Returns a pointer to the first unquoted STOPCHAR if there is
-   one, or nil if there are none.  */
+   one, or nil if there are none.  STOPCHARs inside variable references are
+   ignored if IGNOREVARS is true.
 
-char *
-find_char_unquote (char *string, int stop1, int stop2, int blank)
+   STOPCHAR _cannot_ be '$' if IGNOREVARS is true.  */
+
+static char *
+find_char_unquote (char *string, int stop1, int stop2, int blank,
+                   int ignorevars)
 {
   unsigned int string_len = 0;
   register char *p = string;
+  int pcount = 0;
+  char openparen;
+  char closeparen;
+
+  if (ignorevars)
+    ignorevars = '$';
 
   while (1)
     {
       if (stop2 && blank)
-	while (*p != '\0' && *p != stop1 && *p != stop2
+	while (*p != '\0' && *p != ignorevars && *p != stop1 && *p != stop2
 	       && ! isblank ((unsigned char) *p))
 	  ++p;
       else if (stop2)
-	while (*p != '\0' && *p != stop1 && *p != stop2)
+	while (*p != '\0' && *p != ignorevars && *p != stop1 && *p != stop2)
 	  ++p;
       else if (blank)
-	while (*p != '\0' && *p != stop1
+	while (*p != '\0' && *p != ignorevars && *p != stop1
 	       && ! isblank ((unsigned char) *p))
 	  ++p;
       else
-	while (*p != '\0' && *p != stop1)
+	while (*p != '\0' && *p != ignorevars && *p != stop1)
 	  ++p;
 
       if (*p == '\0')
 	break;
+
+      /* If we stopped due to a variable reference, skip over its contents.  */
+      if (*p == ignorevars)
+        {
+          char openparen = p[1];
+
+          p += 2;
+
+          /* Skip the contents of a non-quoted, multi-char variable ref.  */
+          if (openparen == '(' || openparen == '{')
+            {
+              unsigned int pcount = 1;
+              char closeparen = (openparen == '(' ? ')' : '}');
+
+              while (*p)
+                {
+                  if (*p == openparen)
+                    ++pcount;
+                  else if (*p == closeparen)
+                    if (--pcount == 0)
+                      {
+                        ++p;
+                        break;
+                      }
+                  ++p;
+                }
+            }
+
+          /* Skipped the variable reference: look for STOPCHARS again.  */
+          continue;
+        }
 
       if (p > string && p[-1] == '\\')
 	{
@@ -2221,7 +2280,7 @@ find_char_unquote (char *string, int stop1, int stop2, int blank)
 char *
 find_percent (char *pattern)
 {
-  return find_char_unquote (pattern, '%', 0, 0);
+  return find_char_unquote (pattern, '%', 0, 0, 0);
 }
 
 /* Parse a string into a sequence of filenames represented as a
@@ -2263,7 +2322,7 @@ parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip)
 
       /* Yes, find end of next name.  */
       q = p;
-      p = find_char_unquote (q, stopchar, VMS_COMMA, 1);
+      p = find_char_unquote (q, stopchar, VMS_COMMA, 1, 0);
 #ifdef VMS
 	/* convert comma separated list to space separated */
       if (p && *p == ',')
@@ -2274,7 +2333,7 @@ parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip)
           && !(isspace ((unsigned char)p[1]) || !p[1]
                || isspace ((unsigned char)p[-1])))
       {
-	p = find_char_unquote (p+1, stopchar, VMS_COMMA, 1);
+	p = find_char_unquote (p+1, stopchar, VMS_COMMA, 1, 0);
       }
 #endif
 #ifdef HAVE_DOS_PATHS
@@ -2285,7 +2344,7 @@ parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip)
     if (stopchar == ':')
       while (p != 0 && !isspace ((unsigned char)*p) &&
              (p[1] == '\\' || p[1] == '/') && isalpha ((unsigned char)p[-1]))
-        p = find_char_unquote (p + 1, stopchar, VMS_COMMA, 1);
+        p = find_char_unquote (p + 1, stopchar, VMS_COMMA, 1, 0);
 #endif
       if (p == 0)
 	p = q + strlen (q);

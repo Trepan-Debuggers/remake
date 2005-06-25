@@ -421,11 +421,9 @@ extern char *find_next_token PARAMS ((char **, unsigned int *));
 extern char *next_token PARAMS ((const char *));
 extern char *end_of_token PARAMS ((const char *));
 extern void collapse_continuations PARAMS ((char *));
-extern void remove_comments PARAMS((char *));
 extern char *lindex PARAMS ((const char *, const char *, int));
 extern int alpha_compare PARAMS ((const void *, const void *));
 extern void print_spaces PARAMS ((unsigned int));
-extern char *find_char_unquote PARAMS ((char *, int, int, int));
 extern char *find_percent PARAMS ((char *));
 extern FILE *open_tmpfile PARAMS ((char **, const char *));
 
