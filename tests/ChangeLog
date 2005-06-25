@@ -4,6 +4,8 @@
 	MAKE_RESTARTS variable.
 	* scripts/options/dash-B: Test re-exec doesn't loop infinitely.
 	Tests fix for Savannah bug #7566.
+	* scripts/options/dash-W: New file: test the -W flag, including
+	re-exec infinite looping.
 
 2005-06-12  Paul D. Smith  <psmith@gnu.org>
 
