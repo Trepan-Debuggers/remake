@@ -42,6 +42,19 @@ if (eval { symlink("",""); 1 }) {
   run_make_test(undef, '-L', "make targ from sym");
 
   rmfiles('targ', 'dep', 'sym', 'dep1');
+
+  # Check handling when symlinks point to non-existent files.  Without -L we
+  # should get an error: with -L we should use the timestamp of the symlink.
+
+  symlink("../$dirname/dep", 'sym');
+  run_make_test('targ: sym ; @echo make $@ from $<', '',
+                "#MAKE#: *** No rule to make target `sym', needed by `targ'.  Stop.", 512);
+
+  run_make_test('targ: sym ; @echo make $@ from $<', '-L',
+                'make targ from sym');
+
+
+  rmfiles('targ', 'sym');
 }
 
 1;

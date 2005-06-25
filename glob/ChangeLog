@@ -1,3 +1,8 @@
+2005-06-25  Paul D. Smith  <psmith@gnu.org>
+
+	* fnmatch.h, glob.h [WINDOWS32]: Fix ifdefs in headers.
+	Fixes Savannah bug #13477.
+
 2005-03-11  Paul D. Smith  <psmith@gnu.org>
 
 	* glob.c (glob_in_dir): Change FNM_CASEFOLD to be enabled if

@@ -2187,9 +2187,6 @@ find_char_unquote (char *string, int stop1, int stop2, int blank,
 {
   unsigned int string_len = 0;
   register char *p = string;
-  int pcount = 0;
-  char openparen;
-  char closeparen;
 
   if (ignorevars)
     ignorevars = '$';

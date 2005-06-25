@@ -1,5 +1,13 @@
 2005-06-25  Paul D. Smith  <psmith@gnu.org>
 
+	* make.h [WINDOWS32]: #include <direct.h>.
+	Fixes Savannah bug #13478.
+
+	* remake.c (name_mtime): If the stat() of a file fails and the -L
+	option was given and the file is a symlink, take the best mtime of
+	the symlink we can get as the mtime of the file and don't fail.
+	Fixes Savannah bug #13280.
+
 	Fix Savannah bug #1454.
 
 	* read.c (find_char_unquote): Accept a new argument IGNOREVARS.

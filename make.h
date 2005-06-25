@@ -358,6 +358,11 @@ extern int strcmpi (const char *,const char *);
 # define PATH_SEPARATOR_CHAR ':'
 #endif
 
+/* This is needed for getcwd() and chdir().  */
+#if defined(_MSC_VER) || defined(__BORLANDC__)
+# include <direct.h>
+#endif
+
 #ifdef WINDOWS32
 # include <fcntl.h>
 # include <malloc.h>
@@ -481,7 +486,7 @@ extern long int lseek ();
 #ifdef  HAVE_GETCWD
 # if !defined(VMS) && !defined(__DECC)
 extern char *getcwd ();
-#endif
+# endif
 #else
 extern char *getwd ();
 # define getcwd(buf, len)       getwd (buf)
