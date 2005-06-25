@@ -1,0 +1,57 @@
+#                                                                    -*-perl-*-
+
+$description = "Test make -W (what if) option.\n";
+
+# Basic build
+
+run_make_test('
+a.x: b.x
+a.x b.x: ; touch $@
+',
+              '', "touch b.x\ntouch a.x");
+
+# Run it again: nothing should happen
+
+run_make_test(undef, '', "#MAKE#: `a.x' is up to date.");
+
+# Now run it with -W b.x: should rebuild a.x
+
+run_make_test(undef, '-W b.x', 'touch a.x');
+
+# Put the timestamp for a.x into the future; it should still be remade.
+
+utouch(1000, 'a.x');
+run_make_test(undef, '', "#MAKE#: `a.x' is up to date.");
+run_make_test(undef, '-W b.x', 'touch a.x');
+
+# Clean up
+
+rmfiles('a.x', 'b.x');
+
+# Test -W with the re-exec feature: we don't want to re-exec forever
+# Savannah bug # 7566
+
+# First set it up with a normal build
+
+run_make_test('
+all: baz.x ; @:
+include foo.x
+foo.x: bar.x
+	@echo "\$$(info restarts=\$$(MAKE_RESTARTS))" > $@
+	@echo "touch $@"
+bar.x: ; touch $@
+baz.x: bar.x ; @echo "touch $@"
+',
+              '', '#MAKEFILE#:3: foo.x: No such file or directory
+touch bar.x
+touch foo.x
+restarts=1
+touch baz.x');
+
+# Now run with -W bar.x
+
+run_make_test(undef, '-W bar.x', "restarts=\ntouch foo.x\nrestarts=1\ntouch baz.x");
+
+rmfiles('foo.x', 'bar.x');
+
+1;

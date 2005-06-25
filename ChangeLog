@@ -13,6 +13,10 @@
 	(main): When checking makefiles, only set always_make_flag if
 	always_make_set is set AND the restarts flag is 0.  When building
 	normal targets, set it IFF always_make_set is set.
+	(main): Avoid infinite recursion with -W, too: only set what-if
+	files to NEW before we check makefiles if we've never restarted
+	before.  If we have restarted, set what-if files to NEW _after_ we
+	check makefiles.
 
 2005-06-17  Paul D. Smith  <psmith@gnu.org>
 

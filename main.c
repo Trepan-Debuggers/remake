@@ -1772,9 +1772,9 @@ main (int argc, char **argv, char **envp)
 
   build_vpath_lists ();
 
-  /* Mark files given with -o flags as very old
-     and as having been updated already, and files given with -W flags as
-     brand new (time-stamp as far as possible into the future).  */
+  /* Mark files given with -o flags as very old and as having been updated
+     already, and files given with -W flags as brand new (time-stamp as far
+     as possible into the future).  If restarts is set we'll do -W later.  */
 
   if (old_files != 0)
     for (p = old_files->list; *p != 0; ++p)
@@ -1786,7 +1786,7 @@ main (int argc, char **argv, char **envp)
 	f->command_state = cs_finished;
       }
 
-  if (new_files != 0)
+  if (!restarts && new_files != 0)
     {
       for (p = new_files->list; *p != 0; ++p)
 	{
@@ -2116,6 +2116,16 @@ main (int argc, char **argv, char **envp)
 
   /* Set always_make_flag if -B was given.  */
   always_make_flag = always_make_set;
+
+  /* If restarts is set we haven't set up -W files yet, so do that now.  */
+  if (restarts && new_files != 0)
+    {
+      for (p = new_files->list; *p != 0; ++p)
+	{
+	  f = enter_command_line_file (*p);
+	  f->last_mtime = f->mtime_before_update = NEW_MTIME;
+	}
+    }
 
   /* If there is a temp file from reading a makefile from stdin, get rid of
      it now.  */
