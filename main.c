@@ -271,6 +271,7 @@ int warn_undefined_variables_flag;
 /* If nonzero, always build all targets, regardless of whether
    they appear out of date or not.  */
 
+static int always_make_set = 0;
 int always_make_flag = 0;
 
 /* If nonzero, we're in the "try to rebuild makefiles" phase.  */
@@ -362,7 +363,7 @@ static const char *const usage[] =
 static const struct command_switch switches[] =
   {
     { 'b', ignore, 0, 0, 0, 0, 0, 0, 0 },
-    { 'B', flag, (char *) &always_make_flag, 1, 1, 0, 0, 0, "always-make" },
+    { 'B', flag, (char *) &always_make_set, 1, 1, 0, 0, 0, "always-make" },
     { 'C', string, (char *) &directories, 0, 0, 0, 0, 0, "directory" },
     { 'd', flag, (char *) &debug_flag, 1, 1, 0, 0, 0, 0 },
     { CHAR_MAX+1, string, (char *) &db_flags, 1, 1, 0, "basic", 0, "debug" },
@@ -764,7 +765,7 @@ find_and_set_default_shell (char *token)
     sh_found = 1;
   } else {
     char *p;
-    struct variable *v = lookup_variable ("PATH", 4);
+    struct variable *v = lookup_variable (STRING_SIZE_TUPLE ("PATH"));
 
     /* Search Path for shell */
     if (v && v->value) {
@@ -889,6 +890,7 @@ main (int argc, char **argv, char **envp)
   char **p;
   struct dep *read_makefiles;
   PATH_VAR (current_directory);
+  unsigned int restarts = 0;
 #ifdef WINDOWS32
   char *unix_path = NULL;
   char *windows32_path = NULL;
@@ -1149,15 +1151,21 @@ main (int argc, char **argv, char **envp)
           v->export = v_export;
 
           /* Another wrinkle is that POSIX says the value of SHELL set in the
-             makefile should not change the value of SHELL given to
-             subprocesses, which seems silly to me but...  */
-          if (strncmp (envp[i], "SHELL=", 6) == 0)
+             makefile won't change the value of SHELL given to subprocesses  */
+          if (streq (v->name, "SHELL"))
             {
 #ifndef __MSDOS__
               v->export = v_noexport;
 #endif
               shell_var.name = "SHELL";
               shell_var.value = xstrdup (ep + 1);
+            }
+
+          /* If MAKE_RESTARTS is set, remember it but don't export it.  */
+          if (streq (v->name, "MAKE_RESTARTS"))
+            {
+              v->export = v_noexport;
+              restarts = (unsigned int) atoi (ep + 1);
             }
         }
     }
@@ -1203,12 +1211,12 @@ main (int argc, char **argv, char **envp)
 
   /* Decode the switches.  */
 
-  decode_env_switches ("MAKEFLAGS", 9);
+  decode_env_switches (STRING_SIZE_TUPLE ("MAKEFLAGS"));
 #if 0
   /* People write things like:
      	MFLAGS="CC=gcc -pipe" "CFLAGS=-g"
      and we set the -p, -i and -e switches.  Doesn't seem quite right.  */
-  decode_env_switches ("MFLAGS", 6);
+  decode_env_switches (STRING_SIZE_TUPLE ("MFLAGS"));
 #endif
   decode_switches (argc, argv, 0);
 #ifdef WINDOWS32
@@ -1222,14 +1230,18 @@ main (int argc, char **argv, char **envp)
 
   decode_debug_flags ();
 
+  /* Set always_make_flag if -B was given and we've not restarted already.  */
+  always_make_flag = always_make_set && (restarts == 0);
+
   /* Print version information.  */
-
   if (print_version_flag || print_data_base_flag || db_level)
-    print_version ();
+    {
+      print_version ();
 
-  /* `make --version' is supposed to just print the version and exit.  */
-  if (print_version_flag)
-    die (0);
+      /* `make --version' is supposed to just print the version and exit.  */
+      if (print_version_flag)
+        die (0);
+    }
 
 #ifndef VMS
   /* Set the "MAKE_COMMAND" variable to the name we were invoked with.
@@ -1376,7 +1388,7 @@ main (int argc, char **argv, char **envp)
 #endif /* WINDOWS32 */
   /* Figure out the level of recursion.  */
   {
-    struct variable *v = lookup_variable (MAKELEVEL_NAME, MAKELEVEL_LENGTH);
+    struct variable *v = lookup_variable (STRING_SIZE_TUPLE (MAKELEVEL_NAME));
     if (v != 0 && v->value[0] != '\0' && v->value[0] != '-')
       makelevel = (unsigned int) atoi (v->value);
     else
@@ -1588,7 +1600,7 @@ main (int argc, char **argv, char **envp)
   /* We need to know what kind of shell we will be using.  */
   {
     extern int _is_unixy_shell (const char *_path);
-    struct variable *shv = lookup_variable ("SHELL", 5);
+    struct variable *shv = lookup_variable (STRING_SIZE_TUPLE ("SHELL"));
     extern int unixy_shell;
     extern char *default_shell;
 
@@ -1607,9 +1619,9 @@ main (int argc, char **argv, char **envp)
 #endif /* __MSDOS__ || __EMX__ */
 
   /* Decode switches again, in case the variables were set by the makefile.  */
-  decode_env_switches ("MAKEFLAGS", 9);
+  decode_env_switches (STRING_SIZE_TUPLE ("MAKEFLAGS"));
 #if 0
-  decode_env_switches ("MFLAGS", 6);
+  decode_env_switches (STRING_SIZE_TUPLE ("MFLAGS"));
 #endif
 
 #if defined (__MSDOS__) || defined (__EMX__)
@@ -1997,43 +2009,60 @@ main (int argc, char **argv, char **envp)
 		fatal (NILF, _("Couldn't change back to original directory."));
 	    }
 
-#ifndef _AMIGA
-	  for (p = environ; *p != 0; ++p)
-	    if (strneq (*p, MAKELEVEL_NAME, MAKELEVEL_LENGTH)
-		&& (*p)[MAKELEVEL_LENGTH] == '=')
-	      {
-		/* The SGI compiler apparently can't understand
-		   the concept of storing the result of a function
-		   in something other than a local variable.  */
-		char *sgi_loses;
-		sgi_loses = (char *) alloca (40);
-		*p = sgi_loses;
-		sprintf (*p, "%s=%u", MAKELEVEL_NAME, makelevel);
-		break;
-	      }
-#else /* AMIGA */
-	  {
-	    char buffer[256];
-	    int len;
-
-	    len = GetVar (MAKELEVEL_NAME, buffer, sizeof (buffer), GVF_GLOBAL_ONLY);
-
-	    if (len != -1)
-	    {
-	    sprintf (buffer, "%u", makelevel);
-	      SetVar (MAKELEVEL_NAME, buffer, -1, GVF_GLOBAL_ONLY);
-	    }
-	  }
-#endif
+          ++restarts;
 
 	  if (ISDB (DB_BASIC))
 	    {
 	      char **p;
-	      fputs (_("Re-executing:"), stdout);
+	      printf (_("Re-executing[%u]:"), restarts);
 	      for (p = nargv; *p != 0; ++p)
 		printf (" %s", *p);
 	      putchar ('\n');
 	    }
+
+#ifndef _AMIGA
+	  for (p = environ; *p != 0; ++p)
+            {
+              if (strneq (*p, MAKELEVEL_NAME, MAKELEVEL_LENGTH)
+                  && (*p)[MAKELEVEL_LENGTH] == '=')
+                {
+                  /* The SGI compiler apparently can't understand
+                     the concept of storing the result of a function
+                     in something other than a local variable.  */
+                  char *sgi_loses;
+                  sgi_loses = (char *) alloca (40);
+                  *p = sgi_loses;
+                  sprintf (*p, "%s=%u", MAKELEVEL_NAME, makelevel);
+                }
+              if (strneq (*p, "MAKE_RESTARTS=", 14))
+                {
+                  char *sgi_loses;
+                  sgi_loses = (char *) alloca (40);
+                  *p = sgi_loses;
+                  sprintf (*p, "MAKE_RESTARTS=%u", restarts);
+                  restarts = 0;
+                }
+            }
+#else /* AMIGA */
+	  {
+	    char buffer[256];
+
+            sprintf (buffer, "%u", makelevel);
+            SetVar (MAKELEVEL_NAME, buffer, -1, GVF_GLOBAL_ONLY);
+
+            sprintf (buffer, "%u", restarts);
+            SetVar ("MAKE_RESTARTS", buffer, -1, GVF_GLOBAL_ONLY);
+            restarts = 0;
+	  }
+#endif
+
+          /* If we didn't set the restarts variable yet, add it.  */
+          if (restarts)
+            {
+              char *b = alloca (40);
+              sprintf (b, "MAKE_RESTARTS=%u", restarts);
+              putenv (b);
+            }
 
 	  fflush (stdout);
 	  fflush (stderr);
@@ -2084,6 +2113,9 @@ main (int argc, char **argv, char **envp)
 
   /* Set up `MAKEFLAGS' again for the normal targets.  */
   define_makeflags (1, 0);
+
+  /* Set always_make_flag if -B was given.  */
+  always_make_flag = always_make_set;
 
   /* If there is a temp file from reading a makefile from stdin, get rid of
      it now.  */
@@ -2304,7 +2336,7 @@ handle_non_switch_argument (char *arg, int env)
         struct variable *v;
         char *value;
 
-        v = lookup_variable ("MAKECMDGOALS", 12);
+        v = lookup_variable (STRING_SIZE_TUPLE ("MAKECMDGOALS"));
         if (v == 0)
           value = f->name;
         else

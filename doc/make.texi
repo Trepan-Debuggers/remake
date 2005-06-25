@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.31 2005/06/12 22:22:07 psmith Exp $
+@set RCSID $Id: make.texi,v 1.32 2005/06/25 18:57:28 psmith Exp $
 @set EDITION 0.70
 @set VERSION 3.81
 @set UPDATED 07 May 2005
@@ -1329,6 +1329,14 @@ foo
 
 Note that assigning more than one target name to @code{.DEFAULT_GOAL} is
 illegal and will result in an error.
+
+@vindex MAKE_RESTARTS @r{(number of times @code{make} has restarted)}
+@item MAKE_RESTARTS
+This variable is set only if this instance of @code{make} has
+restarted (@pxref{Remaking Makefiles, , How Makefiles Are Remade}): it
+will contain the number of times this instance has restarted.  Note
+this is not the same as recursion (counted by the @code{MAKELEVEL}
+variable).  You should not set, modify, or export this variable.
 
 @vindex .VARIABLES @r{(list of variables)}
 @item .VARIABLES
@@ -7549,8 +7557,12 @@ These options are ignored for compatibility with other versions of @code{make}.
 @cindex @code{--always-make}
 Consider all targets out-of-date.  GNU @code{make} proceeds to
 consider targets and their prerequisites using the normal algorithms;
-however, all these targets are remade, regardless of the status of
-their prerequisites.
+however, all targets so considered are always remade regardless of the
+status of their prerequisites.  To avoid infinite recursion, if
+@code{MAKE_RESTARTS} (@pxref{Special Variables, , Other Special
+Variables}) is set to a number greater than 0 this option is disabled
+when considering whether to remake makefiles (@pxref{Remaking
+Makefiles, , How Makefiles Are Remade}).
 
 @item -C @var{dir}
 @cindex @code{-C}

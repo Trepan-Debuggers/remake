@@ -1,3 +1,10 @@
+2005-06-25  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/variables/MAKE_RESTARTS: New file: test the
+	MAKE_RESTARTS variable.
+	* scripts/options/dash-B: Test re-exec doesn't loop infinitely.
+	Tests fix for Savannah bug #7566.
+
 2005-06-12  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/misc/close_stdout: Add a test for Savannah bug #1328.
