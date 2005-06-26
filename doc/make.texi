@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.32 2005/06/25 18:57:28 psmith Exp $
+@set RCSID $Id: make.texi,v 1.33 2005/06/26 03:31:30 psmith Exp $
 @set EDITION 0.70
 @set VERSION 3.81
 @set UPDATED 07 May 2005
@@ -3565,17 +3565,59 @@ foo : bar/lose
 @cindex @code{\} (backslash), in commands
 @cindex quoting newline, in commands
 @cindex newline, quoting, in commands
-If you would like to split a single shell command into multiple lines of
-text, you must use a backslash at the end of all but the last subline.
-Such a sequence of lines is combined into a single line, by deleting the
-backslash-newline sequences, before passing it to the shell.  Thus, the
-following is equivalent to the preceding example:
+A shell command can be split into multiple lines of text by placing a
+backslash before each newline.  Such a sequence of lines is provided
+to the shell as a single command script.  The backslash and newline
+are preserved in the shell command.  If the first character on the
+line after a backslash-newline is a tab, the tab will @emph{not} be
+included in the shell command.  So, this makefile:
 
 @example
 @group
-foo : bar/lose
-        cd bar;  \
-        gobble lose > ../foo
+all :
+        @@echo no\
+space
+        @@echo no\
+        space
+@end group
+@end example
+
+consists of two separate shell commands where the output is:
+
+@example
+@group
+nospace
+nospace
+@end group
+@end example
+
+As a more complex example, this makefile:
+
+@example
+@group
+all : ; @@echo 'hello \
+        world' ; echo "hello \
+    world"
+@end group
+@end example
+
+will run one shell with a command script of:
+
+@example
+@group
+echo 'hello \
+world' ; echo "hello \
+    world"
+@end group
+@end example
+
+which, according to shell quoting rules, will yield the following output:
+
+@example
+@group
+hello \
+world
+hello     world
 @end group
 @end example
 

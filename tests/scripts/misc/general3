@@ -53,4 +53,261 @@ all: ; @:
 ',
               '', 'true; true');
 
+# TEST 4
+
+# Check that backslashes in command scripts are handled according to POSIX.
+# Checks Savannah bug # 1332.
+
+# Test the fastpath / no quotes
+run_make_test('
+all:
+	@echo foo\
+bar
+	@echo foo\
+	bar
+	@echo foo\
+    bar
+	@echo foo\
+	    bar
+	@echo foo \
+bar
+	@echo foo \
+	bar
+	@echo foo \
+    bar
+	@echo foo \
+	    bar
+',
+              '', 'foobar
+foobar
+foo bar
+foo bar
+foo bar
+foo bar
+foo bar
+foo bar');
+
+# Test the fastpath / single quotes
+run_make_test("
+all:
+	\@echo 'foo\\
+bar'
+	\@echo 'foo\\
+	bar'
+	\@echo 'foo\\
+    bar'
+	\@echo 'foo\\
+	    bar'
+	\@echo 'foo \\
+bar'
+	\@echo 'foo \\
+	bar'
+	\@echo 'foo \\
+    bar'
+	\@echo 'foo \\
+	    bar'
+",
+              '', 'foo\
+bar
+foo\
+bar
+foo\
+    bar
+foo\
+    bar
+foo \
+bar
+foo \
+bar
+foo \
+    bar
+foo \
+    bar');
+
+# Test the fastpath / double quotes
+run_make_test('
+all:
+	@echo "foo\
+bar"
+	@echo "foo\
+	bar"
+	@echo "foo\
+    bar"
+	@echo "foo\
+	    bar"
+	@echo "foo \
+bar"
+	@echo "foo \
+	bar"
+	@echo "foo \
+    bar"
+	@echo "foo \
+	    bar"
+',
+              '', 'foobar
+foobar
+foo    bar
+foo    bar
+foo bar
+foo bar
+foo     bar
+foo     bar');
+
+# Test the slow path / no quotes
+run_make_test('
+all:
+	@echo hi; echo foo\
+bar
+	@echo hi; echo foo\
+	bar
+	@echo hi; echo foo\
+ bar
+	@echo hi; echo foo\
+	 bar
+	@echo hi; echo foo \
+bar
+	@echo hi; echo foo \
+	bar
+	@echo hi; echo foo \
+ bar
+	@echo hi; echo foo \
+	 bar
+',
+              '', 'hi
+foobar
+hi
+foobar
+hi
+foo bar
+hi
+foo bar
+hi
+foo bar
+hi
+foo bar
+hi
+foo bar
+hi
+foo bar');
+
+# Test the slow path / no quotes.  This time we put the slow path
+# determination _after_ the backslash-newline handling.
+run_make_test('
+all:
+	@echo foo\
+bar; echo hi
+	@echo foo\
+	bar; echo hi
+	@echo foo\
+ bar; echo hi
+	@echo foo\
+	 bar; echo hi
+	@echo foo \
+bar; echo hi
+	@echo foo \
+	bar; echo hi
+	@echo foo \
+ bar; echo hi
+	@echo foo \
+	 bar; echo hi
+',
+              '', 'foobar
+hi
+foobar
+hi
+foo bar
+hi
+foo bar
+hi
+foo bar
+hi
+foo bar
+hi
+foo bar
+hi
+foo bar
+hi');
+
+# Test the slow path / single quotes
+run_make_test("
+all:
+	\@echo hi; echo 'foo\\
+bar'
+	\@echo hi; echo 'foo\\
+	bar'
+	\@echo hi; echo 'foo\\
+    bar'
+	\@echo hi; echo 'foo\\
+	    bar'
+	\@echo hi; echo 'foo \\
+bar'
+	\@echo hi; echo 'foo \\
+	bar'
+	\@echo hi; echo 'foo \\
+    bar'
+	\@echo hi; echo 'foo \\
+	    bar'
+",
+              '', 'hi
+foo\
+bar
+hi
+foo\
+bar
+hi
+foo\
+    bar
+hi
+foo\
+    bar
+hi
+foo \
+bar
+hi
+foo \
+bar
+hi
+foo \
+    bar
+hi
+foo \
+    bar');
+
+# Test the slow path / double quotes
+run_make_test('
+all:
+	@echo hi; echo "foo\
+bar"
+	@echo hi; echo "foo\
+	bar"
+	@echo hi; echo "foo\
+    bar"
+	@echo hi; echo "foo\
+	    bar"
+	@echo hi; echo "foo \
+bar"
+	@echo hi; echo "foo \
+	bar"
+	@echo hi; echo "foo \
+    bar"
+	@echo hi; echo "foo \
+	    bar"
+',
+              '', 'hi
+foobar
+hi
+foobar
+hi
+foo    bar
+hi
+foo    bar
+hi
+foo bar
+hi
+foo bar
+hi
+foo     bar
+hi
+foo     bar');
+
 1;

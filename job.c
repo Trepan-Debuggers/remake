@@ -2363,12 +2363,10 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
   instring = word_has_equals = seen_nonequals = last_argument_was_empty = 0;
   for (p = line; *p != '\0'; ++p)
     {
-      if (ap > end)
-	abort ();
+      assert (ap <= end);
 
       if (instring)
 	{
-	string_char:
 	  /* Inside a string, just copy any char except a closing quote
 	     or a backslash-newline combination.  */
 	  if (*p == instring)
@@ -2378,7 +2376,21 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 		last_argument_was_empty = 1;
 	    }
 	  else if (*p == '\\' && p[1] == '\n')
-	    goto swallow_escaped_newline;
+            {
+              /* Backslash-newline is handled differently depending on what
+                 kind of string we're in: inside single-quoted strings you
+                 keep them; in double-quoted strings they disappear.  */
+              if (instring == '"')
+                ++p;
+              else
+                {
+                  *(ap++) = *(p++);
+                  *(ap++) = *p;
+                }
+              /* If there's a TAB here, skip it.  */
+              if (p[1] == '\t')
+                ++p;
+            }
 	  else if (*p == '\n' && restp != NULL)
 	    {
 	      /* End of the command line.  */
@@ -2418,37 +2430,21 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 	    break;
 
 	  case '\\':
-	    /* Backslash-newline combinations are eaten.  */
+	    /* Backslash-newline has special case handling, ref POSIX.
+               We're in the fastpath, so emulate what the shell would do.  */
 	    if (p[1] == '\n')
 	      {
-	      swallow_escaped_newline:
+		/* Throw out the backslash and newline.  */
+                ++p;
 
-		/* Eat the backslash, the newline, and following whitespace,
-		   replacing it all with a single space.  */
-		p += 2;
+		/* If there is a tab after a backslash-newline, remove it.  */
+		if (p[1] == '\t')
+                  ++p;
 
-		/* If there is a tab after a backslash-newline,
-		   remove it from the source line which will be echoed,
-		   since it was most likely used to line
-		   up the continued line with the previous one.  */
-		if (*p == '\t')
-                  /* Note these overlap and strcpy() is undefined for
-                     overlapping objects in ANSI C.  The strlen() _IS_ right,
-                     since we need to copy the nul byte too.  */
-		  bcopy (p + 1, p, strlen (p));
-
-		if (instring)
-		  goto string_char;
-		else
-		  {
-		    if (ap != new_argv[i])
-		      /* Treat this as a space, ending the arg.
-			 But if it's at the beginning of the arg, it should
-			 just get eaten, rather than becoming an empty arg. */
-		      goto end_of_arg;
-		    else
-		      p = next_token (p) - 1;
-		  }
+                /* If there's nothing in this argument yet, skip any
+                   whitespace before the start of the next word.  */
+                if (ap == new_argv[i])
+                  p = next_token (p + 1) - 1;
 	      }
 	    else if (p[1] != '\0')
               {
@@ -2502,7 +2498,6 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 
 	  case ' ':
 	  case '\t':
-	  end_of_arg:
 	    /* We have the end of an argument.
 	       Terminate the text of the argument.  */
 	    *ap++ = '\0';
@@ -2538,9 +2533,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 	      }
 
 	    /* Ignore multiple whitespace chars.  */
-	    p = next_token (p);
-	    /* Next iteration should examine the first nonwhite char.  */
-	    --p;
+	    p = next_token (p) - 1;
 	    break;
 
 	  default:
@@ -2672,23 +2665,15 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 	  }
 	else if (*p == '\\' && p[1] == '\n')
 	  {
-	    /* Eat the backslash, the newline, and following whitespace,
-	       replacing it all with a single space (which is escaped
-	       from the shell).  */
-	    p += 2;
+	    /* POSIX says we keep the backslash-newline, but throw out the
+               next char if it's a TAB.  */
+            *(ap++) = '\\';
+            *(ap++) = *(p++);
+            *(ap++) = *p;
 
-	    /* If there is a tab after a backslash-newline,
-	       remove it from the source line which will be echoed,
-	       since it was most likely used to line
-	       up the continued line with the previous one.  */
-	    if (*p == '\t')
-	      bcopy (p + 1, p, strlen (p));
+	    if (p[1] == '\t')
+	      ++p;
 
-	    p = next_token (p);
-	    --p;
-            if (unixy_shell && !batch_mode_shell)
-              *ap++ = '\\';
-	    *ap++ = ' ';
 	    continue;
 	  }
 
