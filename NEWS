@@ -28,6 +28,11 @@ Version 3.81beta3
   double-quote any "$" in your filenames; instead of "foo: boo$$bar" you
   now must write "foo: foo$$$$bar".
 
+* WARNING: Backward-incompatibility!
+  In order to comply with POSIX, the way in which GNU make processes
+  backslash-newline sequences in command strings has changed.  See the
+  GNU make manual section "Shell Execution" for details.
+
 * New command-line option: -L (--check-symlink-times).  On systems that
   support symbolic links, if this option is given then GNU make will
   use the most recent modification time of any symbolic links that are

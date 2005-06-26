@@ -1,5 +1,10 @@
 2005-06-25  Paul D. Smith  <psmith@gnu.org>
 
+	* scripts/misc/general3: Implement comprehensive testing of
+	backslash-newline behavior in command scripts: various types of
+	quoting, fast path / slow path, etc.
+	Tests fix for Savannah bug #1332.
+
 	* scripts/options/symlinks: Test symlinks to non-existent files.
 	Tests fix for Savannah bug #13280.
 

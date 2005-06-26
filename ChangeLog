@@ -1,5 +1,17 @@
 2005-06-25  Paul D. Smith  <psmith@gnu.org>
 
+	* job.c (construct_command_argv_internal): Sanitize handling of
+	backslash/newline pairs according to POSIX: that is, keep the
+	backslash-newline in the command script, but remove a following
+	TAB character, if present.  In the fast path, make sure that the
+	behavior matches what the shell would do both inside and outside
+	of quotes.  In the slow path, quote the backslash and put a
+	literal newline in the string.
+	Fixes Savannah bug #1332.
+	* doc/make.texi (Execution): Document the new behavior and give
+	some examples.
+	* NEWS: Make a note of the new behavior.
+
 	* make.h [WINDOWS32]: #include <direct.h>.
 	Fixes Savannah bug #13478.
 
@@ -8,29 +20,25 @@
 	the symlink we can get as the mtime of the file and don't fail.
 	Fixes Savannah bug #13280.
 
-	Fix Savannah bug #1454.
-
 	* read.c (find_char_unquote): Accept a new argument IGNOREVARS.
 	If it's set, then don't	stop on STOPCHARs or BLANKs if they're
 	inside a variable reference.  Make this function static as it's
 	only used here.
 	(eval): Call find_char_unquote() with IGNOREVARS set when we're
 	parsing an unexpanded line looking for semicolons.
+	Fixes Savannah bug #1454.
 	* misc.c (remove_comments): Move this to read.c and make it static
 	as it's only used there.  Call find_char_unquote() with new arg.
 	* make.h: Remove prototypes for find_char_unquote() and
 	remove_comments() since they're static now.
 
-	Implement the MAKE_RESTARTS variable, and disable -B if it's >0.
-	Fixes Savannah bug #7566.
-
-	* doc/make.texi (Special Variables): Document MAKE_RESTARTS.
-	* NEWS: Mention MAKE_RESTARTS.
 	* main.c (main): If we see MAKE_RESTARTS in the environment, unset
 	its export flag and obtain its value.  When we need to re-exec,
 	increment the value and add it into the environment.
-	(always_make_set): New variable.  Change the -B option to set this
-	one instead.
+	* doc/make.texi (Special Variables): Document MAKE_RESTARTS.
+	* NEWS: Mention MAKE_RESTARTS.
+	* main.c (always_make_set): New variable.  Change the -B option to
+	set this one instead.
 	(main): When checking makefiles, only set always_make_flag if
 	always_make_set is set AND the restarts flag is 0.  When building
 	normal targets, set it IFF always_make_set is set.
@@ -38,6 +46,7 @@
 	files to NEW before we check makefiles if we've never restarted
 	before.  If we have restarted, set what-if files to NEW _after_ we
 	check makefiles.
+	Fixes Savannah bug #7566:
 
 2005-06-17  Paul D. Smith  <psmith@gnu.org>
 
