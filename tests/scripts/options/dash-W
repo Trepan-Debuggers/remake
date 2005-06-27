@@ -50,6 +50,9 @@ touch baz.x');
 
 # Now run with -W bar.x
 
+# Tweak foo.x's timestamp so the update will change it.
+utouch(1000, 'foo.x');
+
 run_make_test(undef, '-W bar.x', "restarts=\ntouch foo.x\nrestarts=1\ntouch baz.x");
 
 rmfiles('foo.x', 'bar.x');
