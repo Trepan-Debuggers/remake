@@ -111,7 +111,7 @@ cvs-clean: maintainer-clean
 ## Updating files.  ##
 ## ---------------- ##
 
-WGET = wget --passive-ftp --non-verbose
+WGET = wget --passive-ftp -nv
 ftp-gnu = ftp://ftp.gnu.org/gnu
 
 move_if_change =  if test -r $(target) && cmp -s $(target).t $(target); then \

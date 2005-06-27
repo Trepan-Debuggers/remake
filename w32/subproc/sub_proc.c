@@ -536,15 +536,15 @@ process_begin(
 	/* Close the halves of the pipes we don't need */
 	if (pproc->sv_stdin) {
 		CloseHandle((HANDLE)pproc->sv_stdin[1]);
-		(HANDLE)pproc->sv_stdin[1] = 0;
+		pproc->sv_stdin[1] = 0;
 	}
 	if (pproc->sv_stdout) {
 		CloseHandle((HANDLE)pproc->sv_stdout[1]);
-		(HANDLE)pproc->sv_stdout[1] = 0;
+		pproc->sv_stdout[1] = 0;
 	}
 	if (pproc->sv_stderr) {
 		CloseHandle((HANDLE)pproc->sv_stderr[1]);
-		(HANDLE)pproc->sv_stderr[1] = 0;
+		pproc->sv_stderr[1] = 0;
 	}
 
 	free( command_line );
@@ -657,7 +657,7 @@ process_pipe_io(
 	sub_process *pproc = (sub_process *)proc;
 	bool_t stdin_eof = FALSE, stdout_eof = FALSE, stderr_eof = FALSE;
 	HANDLE childhand = (HANDLE) pproc->pid;
-	HANDLE tStdin, tStdout, tStderr;
+	HANDLE tStdin = NULL, tStdout = NULL, tStderr = NULL;
 	DWORD dwStdin, dwStdout, dwStderr;
 	HANDLE wait_list[4];
 	DWORD wait_count;
@@ -674,7 +674,7 @@ process_pipe_io(
 	if (!pproc->inp) {
 		stdin_eof = TRUE;
 		CloseHandle((HANDLE)pproc->sv_stdin[0]);
-		(HANDLE)pproc->sv_stdin[0] = 0;
+		pproc->sv_stdin[0] = 0;
 	} else {
 		tStdin = (HANDLE) _beginthreadex( 0, 1024,
 			(unsigned (__stdcall *) (void *))proc_stdin_thread, pproc, 0,
@@ -739,7 +739,7 @@ process_pipe_io(
 
 		if (ready_hand == tStdin) {
 			CloseHandle((HANDLE)pproc->sv_stdin[0]);
-			(HANDLE)pproc->sv_stdin[0] = 0;
+			pproc->sv_stdin[0] = 0;
 			CloseHandle(tStdin);
 			tStdin = 0;
 			stdin_eof = TRUE;
@@ -747,7 +747,7 @@ process_pipe_io(
 		} else if (ready_hand == tStdout) {
 
 		  	CloseHandle((HANDLE)pproc->sv_stdout[0]);
-			(HANDLE)pproc->sv_stdout[0] = 0;
+			pproc->sv_stdout[0] = 0;
 			CloseHandle(tStdout);
 			tStdout = 0;
 		  	stdout_eof = TRUE;
@@ -755,7 +755,7 @@ process_pipe_io(
 		} else if (ready_hand == tStderr) {
 
 			CloseHandle((HANDLE)pproc->sv_stderr[0]);
-			(HANDLE)pproc->sv_stderr[0] = 0;
+			pproc->sv_stderr[0] = 0;
 			CloseHandle(tStderr);
 			tStderr = 0;
 			stderr_eof = TRUE;
