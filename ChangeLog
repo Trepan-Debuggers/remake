@@ -1,3 +1,12 @@
+2005-06-27  Paul D. Smith  <psmith@gnu.org>
+
+	* dir.c (find_directory): Change type of fs_serno/fs_flags/fs_len
+	to unsigned long.  Fixes Savannah bug #13550.
+
+	* w32/subproc/sub_proc.c: Remove (HANDLE) casts on lvalues.
+	(process_pipe_io): Initialize tStdin/tStdout/tStderr variables.
+	Fixes Savannah bug #13551.
+
 2005-06-26  Paul D. Smith  <psmith@gnu.org>
 
 	* make.h: Fix bug in ANSI_STRING/strerror() handling; only define

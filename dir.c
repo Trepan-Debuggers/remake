@@ -415,9 +415,9 @@ find_directory (char *name)
   char* w32_path;
   char  fs_label[BUFSIZ];
   char  fs_type[BUFSIZ];
-  long  fs_serno;
-  long  fs_flags;
-  long  fs_len;
+  unsigned long  fs_serno;
+  unsigned long  fs_flags;
+  unsigned long  fs_len;
 #endif
 #ifdef VMS
   if ((*name == '.') && (*(name+1) == 0))
