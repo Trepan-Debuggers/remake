@@ -104,7 +104,7 @@ run_make_test('
 
 .PRECIOUS: %.bar
 
-%.bar:; @touch $@ && false
+%.bar:; @touch $@ && exit 1
 
 $(dir)/foo.bar:
 
