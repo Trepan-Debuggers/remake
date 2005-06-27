@@ -1102,7 +1102,7 @@ main (int argc, char **argv, char **envp)
 
   /* Set up .FEATURES */
   define_variable (".FEATURES", 9,
-                   "target-specific order-only second-expansion",
+                   "target-specific order-only second-expansion else-if",
                    o_default, 0);
 #ifdef MAKE_JOBSERVER
   do_variable_definition (NILF, ".FEATURES", "jobserver",

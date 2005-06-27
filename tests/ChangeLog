@@ -1,4 +1,11 @@
+2005-06-26  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/functions/shell: New test suite for the shell function.
+
 2005-06-25  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/include: Test include/-include/sinclude with no
+	arguments.  Tests fix for Savannah bug #1761.
 
 	* scripts/misc/general3: Implement comprehensive testing of
 	backslash-newline behavior in command scripts: various types of

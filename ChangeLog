@@ -1,4 +1,14 @@
+2005-06-26  Paul D. Smith  <psmith@gnu.org>
+
+	* make.h: Fix bug in ANSI_STRING/strerror() handling; only define
+	it if ANSI_STRING is not set.
+
 2005-06-25  Paul D. Smith  <psmith@gnu.org>
+
+	* read.c (eval): If no filenames are passed to any of the
+	"include" variants, don't print an error.
+	* doc/make.texi (Include): Document this.
+	Fixes Savannah bug #1761.
 
 	* job.c (construct_command_argv_internal): Sanitize handling of
 	backslash/newline pairs according to POSIX: that is, keep the
