@@ -1482,7 +1482,10 @@ func_shell (char *o, char **argv, const char *funcname UNUSED)
      because target_environment hits a loop trying to expand $(var)
      to put it in the environment.  This is even more confusing when
      var was not explicitly exported, but just appeared in the
-     calling environment.  */
+     calling environment.
+
+  envp = target_environment (NILF);
+  */
 
   envp = environ;
 

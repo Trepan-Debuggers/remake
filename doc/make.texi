@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.33 2005/06/26 03:31:30 psmith Exp $
+@set RCSID $Id: make.texi,v 1.34 2005/06/27 01:01:07 psmith Exp $
 @set EDITION 0.70
 @set VERSION 3.81
 @set UPDATED 07 May 2005
@@ -1099,7 +1099,8 @@ include @var{filenames}@dots{}
 @end example
 
 @noindent
-@var{filenames} can contain shell file name patterns.
+@var{filenames} can contain shell file name patterns.  If
+@var{filenames} is empty, nothing is included and no error is printed.
 @cindex shell file name pattern (in @code{include})
 @cindex shell wildcards (in @code{include})
 @cindex wildcard, in @code{include}
@@ -1378,6 +1379,10 @@ Supports secondary expansion of prerequisite lists.
 @item jobserver
 Supports ``job server'' enhanced parallel builds.  @xref{Parallel,
 ,Parallel Execution}.
+
+@item else-if
+Supports ``else if'' non-nested conditionals.  @xref{Conditional
+Syntax, ,Syntax of Conditionals}.
 
 @item check-symlink
 Supports the @code{-L} (@code{--check-symlink-times}) flag.

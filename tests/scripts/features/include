@@ -107,4 +107,14 @@ foo: bar; @:
 bar:; @false
 ', '', '');
 
+# Check include, sinclude, -include with no filenames.
+# (Savannah bug #1761).
+
+run_make_test('
+.PHONY: all
+all:; @:
+include
+-include
+sinclude', '', '');
+
 1;
