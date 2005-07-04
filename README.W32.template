@@ -1,9 +1,8 @@
-Port of GNU make to Windows NT and Windows 95
-Builds natively with MSVC 2.x or MSVC 4.x compilers.
-Should also build fine with MSVC 5.x and 6.x (though not confirmed).
+Port of GNU make to Microsoft Windows 95/98/NT/2000/XP
+Builds natively with MSVC 2.x, 4.x, 5.x, 6.x and MSVC.NET 7.x.
 
-This Windows 32-bit port of GNU make is maintained primarily by Rob
-Tulloh, who is also the author of this README.
+The Windows 32-bit port of GNU make is maintained jointly by various
+people.
 
 To build with nmake on MS-Windows:
 
@@ -23,7 +22,7 @@ To build with nmake on MS-Windows:
 
 
     A short cut to steps 1, 2, and 3 is to run VCVARS32.bat before
-    invoking namke. For example:
+    invoking nmake. For example:
 
         c:
         cd \msdev\bin

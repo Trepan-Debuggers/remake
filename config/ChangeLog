@@ -1,3 +1,8 @@
+2005-07-01  Paul D. Smith  <psmith@gnu.org>
+
+	* Makefile.am (EXTRA_DIST): Added more M4 files to EXTRA_DIST, so
+	users can re-run aclocal.
+
 2003-04-30  Paul D. Smith  <psmith@gnu.org>
 
 	* dospaths.m4: New macro to test for DOS-style pathnames, based on

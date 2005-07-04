@@ -6,7 +6,7 @@ $description = "Test proper handling of SHELL.";
 # but on other platforms who knows?
 $oshell = $ENV{SHELL};
 delete $ENV{SHELL};
-$mshell = `echo 'all:;\@echo \$(SHELL)' | $make_name -f-`;
+$mshell = `echo 'all:;\@echo \$(SHELL)' | $make_path -f-`;
 chop $mshell;
 
 # According to POSIX, the value of SHELL in the environment has no impact on
