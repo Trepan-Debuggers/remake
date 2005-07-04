@@ -1048,17 +1048,13 @@ main (int argc, char **argv, char **envp)
         {
           /* Extract program from full path */
           int argv0_len;
-          char *p = strrchr (argv[0], '\\');
-          if (!p)
-            p = argv[0];
-          argv0_len = strlen(p);
-          if (argv0_len > 4
-              && streq (&p[argv0_len - 4], ".exe"))
+          program = strrchr (argv[0], '\\');
+          if (program)
             {
-              /* Remove .exe extension */
-              p[argv0_len - 4] = '\0';
-              /* Increment past the initial '\' */
-              program = p + 1;
+              argv0_len = strlen(program);
+              if (argv0_len > 4 && streq (&program[argv0_len - 4], ".exe"))
+                /* Remove .exe extension */
+                program[argv0_len - 4] = '\0';
             }
         }
 #endif

@@ -124,6 +124,11 @@ move_if_change =  if test -r $(target) && cmp -s $(target).t $(target); then \
 # Updating PO files.  #
 # ------------------- #
 
+# PO archive mirrors --- Be careful; some might not be fully populated!
+#   ftp://ftp.unex.es/pub/gnu-i18n/po/maint/
+#   http://translation.sf.net/maint/
+#   ftp://tiger.informatik.hu-berlin.de/pub/po/maint/
+
 po_repo = http://www.iro.umontreal.ca/translation/maint/$(PACKAGE)
 .PHONY: do-po-update po-update
 do-po-update:

@@ -1,3 +1,18 @@
+2005-07-03  Paul D. Smith  <psmith@gnu.org>
+
+	From J. Grant <jg@jguk.org>:
+
+	* README.W32.template: Update the Windows and tested MSVC versions.
+	* NMakefile.template (CFLAGS_any): Change warning level from W3 to W4.
+	* w32/subproc/NMakefile (CFLAGS_any): Ditto.
+	* build_w32.bat: Ditto.
+	* w32/subproc/build.bat: Ditto.
+
+2005-06-28  Paul D. Smith  <psmith@gnu.org>
+
+	* signame.c: HAVE_DECL_* macros are set to 0, not undef, if the
+	declaration was checked but not present.
+
 2005-06-27  Paul D. Smith  <psmith@gnu.org>
 
 	* dir.c (find_directory): Change type of fs_serno/fs_flags/fs_len
@@ -85,26 +100,26 @@
 
 2005-06-10  Paul D. Smith  <psmith@gnu.org>
 
-        VMS build updates from Hartmut Becker <Hartmut.Becker@hp.com>:
+	VMS build updates from Hartmut Becker <Hartmut.Becker@hp.com>:
 
-        * vmsjobs.c [VMS]: Updates to compile on VMS: add some missing
-        headers; make vmsWaitForChildren() static; extern vmsify().
-        * job.c [VMS]: Move vmsWaitForChildren() prototype to be global.
-        Don't create child_execute_job() here (it's in vmsjobs.c).
-        * makefile.vms (job.obj) [VMS]: Add vmsjobs.c as a prerequisite.
+	* vmsjobs.c [VMS]: Updates to compile on VMS: add some missing
+	headers; make vmsWaitForChildren() static; extern vmsify().
+	* job.c [VMS]: Move vmsWaitForChildren() prototype to be global.
+	Don't create child_execute_job() here (it's in vmsjobs.c).
+	* makefile.vms (job.obj) [VMS]: Add vmsjobs.c as a prerequisite.
 
 2005-06-09  Paul D. Smith  <psmith@gnu.org>
 
-        * variable.c (push_new_variable_scope): File variables point
-        directly to the global_setlist variable.  So, inserting a new
-        scope in front of that has no effect on those variables: they
-        don't go through current_variable_set_list.  If we're pushing a
-        scope and the current scope is global, push it "the other way" so
-        that the new setlist is in the global_setlist variable, and
-        next points to a new setlist with the global variable set.
-        (pop_variable_scope): Properly undo a push with the new
-        semantics.
-        Fixes Savannah bug #11913.
+	* variable.c (push_new_variable_scope): File variables point
+	directly to the global_setlist variable.  So, inserting a new
+	scope in front of that has no effect on those variables: they
+	don't go through current_variable_set_list.  If we're pushing a
+	scope and the current scope is global, push it "the other way" so
+	that the new setlist is in the global_setlist variable, and
+	next points to a new setlist with the global variable set.
+	(pop_variable_scope): Properly undo a push with the new
+	semantics.
+	Fixes Savannah bug #11913.
 
 2005-05-31  Boris Kolpackov  <boris@kolpackov.net>
 
@@ -463,22 +478,22 @@
 2005-02-24  Jonathan Grant  <jg@jguk.org>
 
 	* configure.in: Add MinGW configuration options, and extra w32 code
-        directory.
+	directory.
 	* Makefile.am: Add MinGW configuration options, and extra w32 code
-        directory.
+	directory.
 	* main.c: Determine correct program string (after last \ without .exe).
 	* subproc/sub_proc.c: `GetExitCodeProcess' from incompatible pointer
-        type fix x2
+	type fix x2
 	* w32/Makefile.am: Import to build win32 lib of sub_proc etc.
 	* subproc/w32err.c: MSVC thread directive not applied to MinGW builds.
 	* tests/run_make_tests.pl, tests/test_driver.pl: MSYS testing
-        environment support.
+	environment support.
 
 2004-04-16  Dmitry V. Levin  <ldv@altlinux.org>
 
-        * function.c (func_shell): When initializing error_prefix, check
-        that reading file name is not null.  This fixes long-standing
-        segfault in cases like "make 'a1=$(shell :)' 'a2:=$(a1)'".
+	* function.c (func_shell): When initializing error_prefix, check
+	that reading file name is not null.  This fixes long-standing
+	segfault in cases like "make 'a1=$(shell :)' 'a2:=$(a1)'".
 
 2005-02-09  Paul D. Smith  <psmith@gnu.org>
 
@@ -1639,13 +1654,13 @@
 	* rule.c (convert_suffix_rule): Likewise.
 	* read.c (read_all_makefiles, read_makefile, multi_glob): Likewise.
 	(read_makefile): Parse '|' in prerequisite list.
-        (uniquize_deps): Consider ignore_mtime when comparing deps.
+	(uniquize_deps): Consider ignore_mtime when comparing deps.
 	* remake.c (update_file_1, check_dep): Don't force remake for
 	dependencies that have d->ignore_mtime.
 	* commands.c (FILE_LIST_SEPARATOR): New constant.
-        (set_file_variables): Don't include a
+	(set_file_variables): Don't include a
 	prerequisite in $+, $^ or $? if d->ignore_mtime.
-        Define $|.
+	Define $|.
 
 2002-06-18  Paul D. Smith  <psmith@gnu.org>
 
@@ -1679,10 +1694,10 @@
 
 2002-05-18  Eli Zaretskii  <eliz@is.elta.co.il>
 
-        * Makefile.DOS.template: Tweak according to changes in the
-        distribution.  Add back the dependencies of *.o files.
+	* Makefile.DOS.template: Tweak according to changes in the
+	distribution.  Add back the dependencies of *.o files.
 
-        * configh.dos.template: Synchronize with config.h.in.
+	* configh.dos.template: Synchronize with config.h.in.
 
 2002-05-09  Paul D. Smith  <psmith@gnu.org>
 

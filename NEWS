@@ -79,8 +79,8 @@ Version 3.81beta3
    - $(realpath ...) returns the canonical pathname for each path
      provided.  The canonical pathname is the absolute pathname, with
      all symbolic links resolved as well.
-   - $(info ...) prints informative messages to stdout.  No makefile
-     name or line number info, etc. is printed, just the message.
+   - $(info ...) prints its arguments to stdout.  No makefile name or
+     line number info, etc. is printed.
 
 * Changes made for POSIX compatibility:
    - Only touch targets (under -t) if they have at least one command.
@@ -94,7 +94,7 @@ Version 3.81beta3
   use the DOS command interpreter in batch mode even if a UNIX-like
   shell could be found on the system.
 
-* Updated to autoconf 2.59, automake 1.8.2, and gettext 0.14.1.  Users
+* Updated to autoconf 2.59, automake 1.9.5, and gettext 0.14.1.  Users
   should not be impacted.
 
 * New translations for Swedish, Chinese (simplified), Ukrainian,

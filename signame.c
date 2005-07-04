@@ -21,13 +21,13 @@ Boston, MA 02111-1307, USA.  */
 
 /* If the system provides strsignal, we don't need it. */
 
-#if !defined(HAVE_STRSIGNAL)
+#if !HAVE_STRSIGNAL
 
 /* If the system provides sys_siglist, we'll use that.
    Otherwise create our own.
  */
 
-#if !defined(HAVE_DECL_SYS_SIGLIST)
+#if !HAVE_DECL_SYS_SIGLIST
 
 /* Some systems do not define NSIG in <signal.h>.  */
 #ifndef	NSIG

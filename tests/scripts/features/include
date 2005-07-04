@@ -104,7 +104,7 @@ all:; @:
 
 foo: bar; @:
 
-bar:; @false
+bar:; @exit 1
 ', '', '');
 
 # Check include, sinclude, -include with no filenames.
