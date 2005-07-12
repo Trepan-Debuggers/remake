@@ -12,7 +12,7 @@
 # this routine controls the whole mess; each test suite sets up a few
 # variables and then calls &toplevel, which does all the real work.
 
-# $Id: test_driver.pl,v 1.14 2005/02/28 07:48:23 psmith Exp $
+# $Id: test_driver.pl,v 1.15 2005/07/12 04:35:13 psmith Exp $
 
 
 # The number of test categories we've run
@@ -32,12 +32,35 @@ $tests_passed = 0;
 # Yeesh.  This whole test environment is such a hack!
 $test_passed = 1;
 
+
+# %makeENV is the cleaned-out environment.
+%makeENV = ();
+
+# %extraENV are any extra environment variables the tests might want to set.
+# These are RESET AFTER EVERY TEST!
+%extraENV = ();
+
+# %origENV is the caller's original environment
+%origENV = %ENV;
+
+sub resetENV
+{
+  # We used to say "%ENV = ();" but this doesn't work in Perl 5.000
+  # through Perl 5.004.  It was fixed in Perl 5.004_01, but we don't
+  # want to require that here, so just delete each one individually.
+  foreach $v (keys %ENV) {
+    delete $ENV{$v};
+  }
+
+  %ENV = %makeENV;
+  foreach $v (keys %extraENV) {
+    $ENV{$v} = $extraENV{$v};
+    delete $extraENV{$v};
+  }
+}
+
 sub toplevel
 {
-  # Get a clean environment
-
-  %makeENV = ();
-
   # Pull in benign variables from the user's environment
   #
   foreach (# UNIX-specific things
@@ -57,15 +80,7 @@ sub toplevel
   #
   %origENV = %ENV;
 
-  # We used to say "%ENV = ();" but this doesn't work in Perl 5.000
-  # through Perl 5.004.  It was fixed in Perl 5.004_01, but we don't
-  # want to require that here, so just delete each one individually.
-
-  foreach $v (keys %ENV) {
-    delete $ENV{$v};
-  }
-
-  %ENV = %makeENV;
+  resetENV();
 
   $| = 1;                     # unbuffered output
 
@@ -744,6 +759,11 @@ sub run_command
 {
   local ($code);
 
+  # We reset this before every invocation.  On Windows I think there is only
+  # one environment, not one per process, so I think that variables set in
+  # test scripts might leak into subsequent tests if this isn't reset--???
+  resetENV();
+
   print "\nrun_command: @_\n" if $debug;
   $code = system @_;
   print "run_command: \"@_\" returned $code.\n" if $debug;
@@ -760,6 +780,11 @@ sub run_command_with_output
 {
   local ($filename) = shift;
   local ($code);
+
+  # We reset this before every invocation.  On Windows I think there is only
+  # one environment, not one per process, so I think that variables set in
+  # test scripts might leak into subsequent tests if this isn't reset--???
+  resetENV();
 
   &attach_default_output ($filename);
   $code = system @_;

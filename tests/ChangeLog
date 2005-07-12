@@ -1,3 +1,16 @@
+2005-07-08  Paul D. Smith  <psmith@gnu.org>
+
+	* test_driver.pl: Reset the environment to a clean value every
+	time before we invoke make.  I'm suspicious that the environment
+	isn't handled the same way in Windows as it is in UNIX, and some
+	variables are leaking out beyond the tests they are intended for.
+	Create an %extraENV hash tests can set to add more env. vars.
+	* tests/scripts/features/export: Change to use %extraENV.
+	* tests/scripts/functions/eval: Ditto.
+	* tests/scripts/functions/origin: Ditto.
+	* tests/scripts/options/dash-e: Ditto.
+	* tests/scripts/variables/SHELL: Ditto.
+
 2005-06-27  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/options/dash-W: Use 'echo >>' instead of touch to update

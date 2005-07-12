@@ -56,7 +56,7 @@ FOO= BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=\n";
 
 # TEST 1: make sure vars inherited from the parent are exported
 
-$ENV{FOO} = 1;
+$extraENV{FOO} = 1;
 
 &run_make_with_options($makefile,"",&get_logfile,0);
 
@@ -64,8 +64,6 @@ $answer = "FOO=foo BAR=bar BAZ=baz BOZ=boz BITZ=bitz BOTZ=botz
 FOO=foo BAR= BAZ=baz BOZ=boz BITZ=bitz BOTZ=\n";
 
 &compare_output($answer,&get_logfile(1));
-
-delete $ENV{FOO};
 
 # TEST 2: global export.  Explicit unexport takes precedence.
 
@@ -237,13 +235,11 @@ EOF
 
 close(MAKEFILE);
 
-@ENV{qw(A B C D E F G H I J)} = qw(1 2 3 4 5 6 7 8 9 10);
+@extraENV{qw(A B C D E F G H I J)} = qw(1 2 3 4 5 6 7 8 9 10);
 
 &run_make_with_options($makefile5,"",&get_logfile,0);
 $answer = "A= B= C= D= E= F= G= H= I= J=\n";
 &compare_output($answer,&get_logfile(1));
-
-delete @ENV{qw(A B C D E F G H I J)};
 
 
 # This tells the test driver that the perl test script executed properly.

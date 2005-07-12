@@ -64,15 +64,16 @@ build.sh.in: build.template Makefile
 #
 DEP_FILES := $(wildcard $(DEPDIR)/*.Po)
 .dep_segment: Makefile.am maintMakefile $(DEP_FILES)
+	rm -f $@
 	(for f in $(DEPDIR)/*.Po; do \
 	   echo ""; \
 	   echo "# $$f"; \
-	   cat $$f \
-	     | sed -e '/^[^:]*\.[ch] *:/d' \
-		   -e 's, /usr/[^ ]*,,g' \
-		   -e 's, $(srcdir)/, ,g' \
-		   -e '/^ *\\$$/d' \
-		   -e '/^ *$$/d'; \
+	   sed	-e '/^[^:]*\.[ch] *:/d' \
+		-e 's, /usr/[^ ]*,,g' \
+		-e 's, $(srcdir)/, ,g' \
+		-e '/^ *\\$$/d' \
+		-e '/^ *$$/d' \
+		< $$f; \
 	 done) > $@
 
 # Get rid of everything "else".
