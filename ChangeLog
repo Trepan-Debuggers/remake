@@ -1,3 +1,28 @@
+2005-07-08  Paul D. Smith  <psmith@gnu.org>
+
+	* config.h.W32.template: Reorder to match the standard config.h,
+	for easier comparisons.
+	From J. Grant <jg@jguk.org>
+
+	* maintMakefile: Remove .dep_segment before overwriting it, in
+	case it's not writable or noclobber is set.
+	* expand.c (variable_expand_string): Cast result of pointer
+	arithmetic to avoid a warning.
+	* main.c (switches): Add full-fledged final initializer.
+
+2005-07-06  Paul D. Smith  <psmith@gnu.org>
+
+	* configure.in: IRIX has _sys_siglist.  Tru64 UNIX has __sys_siglist.
+	* signame.c (strsignal): If we found _sys_siglist[] or
+	__sys_siglist[] use those instead of sys_siglist[].
+	From Albert Chin <china@thewrittenword.com>
+
+2005-07-04  Paul D. Smith  <psmith@gnu.org>
+
+	* config.h-vms.template [VMS]: Latest VMS has its own glob() and
+	globfree(); set up to use the GNU versions.
+	From Martin Zinser <zinser@zinser.no-ip.info>
+
 2005-07-03  Paul D. Smith  <psmith@gnu.org>
 
 	From J. Grant <jg@jguk.org>:

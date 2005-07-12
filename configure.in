@@ -3,7 +3,7 @@
 AC_INIT([GNU make],[3.81beta3],[bug-make@gnu.org])
 
 AC_PREREQ(2.59)
-AC_REVISION([[$Id: configure.in,v 1.136 2005/06/12 22:22:07 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.137 2005/07/12 04:35:13 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -167,8 +167,9 @@ if test "$ac_cv_header_nlist_h" = yes; then
   fi
 fi
 
-AC_CHECK_DECLS([sys_siglist],,,
-[#include <signal.h>
+AC_CHECK_DECLS([sys_siglist, _sys_siglist, __sys_siglist], , ,
+  [AC_INCLUDES_DEFAULT
+#include <signal.h>
 /* NetBSD declares sys_siglist in unistd.h.  */
 #if HAVE_UNISTD_H
 # include <unistd.h>

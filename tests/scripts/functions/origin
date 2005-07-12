@@ -16,7 +16,7 @@ defined per the following list:
 'automatic'            Automatic variable\n";
 
 # Set an environment variable
-$ENV{MAKETEST} = 1;
+$extraENV{MAKETEST} = 1;
 
 open(MAKEFILE,"> $makefile");
 

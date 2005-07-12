@@ -127,12 +127,10 @@ EOF
 
 close(MAKEFILE);
 
-$ENV{EVAR} = '1';
+$extraENV{EVAR} = '1';
 &run_make_with_options($makefile4, "", &get_logfile);
 $answer = "OK\n";
 &compare_output($answer,&get_logfile(1));
-
-delete $ENV{EVAR};
 
 
 # Clean out previous information to allow new run_make_test() interface.

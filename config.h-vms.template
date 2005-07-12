@@ -383,11 +383,13 @@
 #ifdef __DECC
 #include <stdio.h>
 #include <unistd.h>
-#define getopt gnu_getopt
-#define optarg gnu_optarg
-#define optopt gnu_optopt
-#define optind gnu_optind
-#define opterr gnu_opterr
+#define getopt   gnu_getopt
+#define optarg   gnu_optarg
+#define optopt   gnu_optopt
+#define optind   gnu_optind
+#define opterr   gnu_opterr
+#define globfree gnu_globfree
+#define glob     gnu_glob
 #endif
 
 #if defined (__cplusplus) || (defined (__STDC__) && __STDC__)

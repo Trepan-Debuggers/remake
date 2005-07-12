@@ -417,7 +417,7 @@ static const struct command_switch switches[] =
     { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0, "what-if" },
     { CHAR_MAX+4, flag, (char *) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
       "warn-undefined-variables" },
-    { 0 }
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
 /* Secondary long names for options.  */
