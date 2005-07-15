@@ -1,3 +1,7 @@
+2005-07-14  Paul D. Smith  <psmith@gnu.org>
+
+	* LINGUAS: Added new translation for Indonesian (id).
+
 2005-05-09  Paul D. Smith  <psmith@gnu.org>
 
 	* POTFILES.in: Add new file vmsjobs.c.
