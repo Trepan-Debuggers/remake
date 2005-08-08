@@ -86,9 +86,9 @@ w32ify(char *filename, int resolve)
 char *
 getcwd_fs(char* buf, int len)
 {
-	char *p;
+	char *p = getcwd(buf, len);
 
-	if (p = getcwd(buf, len)) {
+	if (p) {
 		char *q = w32ify(buf, 0);
 		strncpy(buf, q, len);
 	}

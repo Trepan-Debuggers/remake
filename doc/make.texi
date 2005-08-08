@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.34 2005/06/27 01:01:07 psmith Exp $
+@set RCSID $Id: make.texi,v 1.35 2005/08/08 05:08:00 psmith Exp $
 @set EDITION 0.70
 @set VERSION 3.81
 @set UPDATED 07 May 2005
@@ -5251,7 +5251,7 @@ definition of the variable.  If you defined it first with @samp{:=},
 making it a simply-expanded variable, @samp{+=} adds to that
 simply-expanded definition, and expands the new text before appending it
 to the old value just as @samp{:=} does
-(@pxref{Setting, ,Setting Variables}, for a full explanation of @samp{:=}).
+(@pxref{Setting, ,Setting Variables} for a full explanation of @samp{:=}).
 In fact,
 
 @example

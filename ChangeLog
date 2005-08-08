@@ -1,3 +1,78 @@
+2005-08-07  Paul D. Smith  <psmith@gnu.org>
+
+	* w32/pathstuff.c (getcwd_fs): Fix warning about assignment in a
+	conditional (slightly different version of a fix from Eli).
+
+	Fix a bug reported by Michael Matz <matz@suse.de>: patch included.
+	If make is running in parallel without -k and two jobs die in a
+	row, but not too close to each other, then make will quit without
+	waiting for the rest of the jobs to die.
+
+	* main.c (die): Don't reset err before calling reap_children() the
+	second time: we still want it to be in the error condition.
+	* job.c (reap_children): Use a static variable, rather than err,
+	to control whether or not the error message should be printed.
+
+2005-08-06  Eli Zaretskii  <eliz@gnu.org>
+
+	* w32/subproc/sub_proc.c: Include signal.h.
+	(process_pipe_io, process_file_io): Pass a pointer to a local
+	DWORD variable to GetExitCodeProcess.  If the exit code is
+	CONTROL_C_EXIT, put SIGINT into pproc->signal.
+
+	* job.c [WINDOWS32]: Include windows.h.
+	(main_thread) [WINDOWS32]: New global variable.
+	(reap_children) [WINDOWS32]: Get the handle for the main thread
+	and store it in main_thread.
+
+	* commands.c [WINDOWS32]: Include windows.h and w32err.h.
+	(fatal_error_signal) [WINDOWS32]: Suspend the main thread before
+	doing anything else.  When we are done, close the main thread
+	handle and exit with status 130.
+
+2005-07-30  Eli Zaretskii  <eliz@gnu.org>
+
+	* w32/subproc/sub_proc.c (process_begin): Don't pass a NULL
+	pointer to fprintf.
+
+	* main.c (find_and_set_default_shell): If found a DOSish shell,
+	set sh_found and the value of default_shell, and report the
+	findings in debug mode.
+
+	* job.c (construct_command_argv_internal): Check unixy_shell, not
+	no_default_sh_exe, to decide whether to use Unixy or DOSish
+	builtin commands.
+
+	* README.W32: Update with info about the MinGW build.
+
+	* build_w32.bat: Support MinGW.
+
+	* w32/subproc/build.bat: Likewise.
+
+	* w32/subproc/sub_proc.c (process_easy): Fix format strings for
+	printing DWORD args.
+
+	* function.c (windows32_openpipe): Fix format strings for printing
+	DWORD args.
+
+	* job.c (reap_children) [WINDOWS32]: Don't declare 'status' and
+	'reap_mode'.
+	(start_job_command): Fix format string for printing the result of
+	process_easy.
+	(start_job_command) [WINDOWS32]: Do not define.
+	(exec_command): Fix format string for printing HANDLE args.
+
+	* main.c (handle_runtime_exceptions): Fix sprintf format strings
+	to avoid compiler warnings.
+	(open_tmpfile): Declare fd only if HAVE_FDOPEN is defined.
+	(Note: some of these fixes were submitted independently by J. Grant)
+
+2005-07-30  J. Grant <jg@jguk.org>
+
+	* prepare_w32.bat: Copy config.h.w32 to config.h if not exist.
+	* make_msvc_net2003.vcproj, make_msvc_net2003.sln: MSVC Project files.
+	* Makefile.am (EXTRA_DIST): Add MSVC Project files.
+
 2005-07-08  Paul D. Smith  <psmith@gnu.org>
 
 	* config.h.W32.template: Reorder to match the standard config.h,

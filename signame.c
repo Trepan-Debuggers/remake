@@ -239,11 +239,12 @@ strsignal (int signal)
 #  define sys_siglist _sys_siglist
 # elif HAVE_DECL___SYS_SIGLIST
 #  define sys_siglist __sys_siglist
-# endif
+# else
   static char sig_initted = 0;
 
   if (!sig_initted)
     sig_initted = signame_init ();
+# endif
 #endif
 
   if (signal > 0 || signal < NSIG)

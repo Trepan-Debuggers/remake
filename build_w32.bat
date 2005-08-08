@@ -1,14 +1,14 @@
-set make=gnumake
 if not exist config.h copy config.h.W32 config.h
 cd w32\subproc
-echo "Creating the subproc library"
-%ComSpec% /c build.bat
+@echo "Creating the subproc library"
+%ComSpec% /c build.bat %1
 cd ..\..
-del link.dbg link.rel
-del config.h
-copy config.h.W32 config.h
-echo off
-echo "Creating GNU make for Windows 95/NT"
+@echo off
+if exist link.dbg del link.dbg
+if exist link.rel del link.rel
+echo "Creating GNU Make for Windows 9X/NT/2K/XP"
+if "%1" == "gcc" GoTo GCCBuild
+set make=gnumake
 echo on
 if not exist .\WinDebug\nul mkdir .\WinDebug
 cl.exe /nologo /MT /W4 /GX /Zi /YX /Od /I . /I glob /I w32/include /D TIVOLI /D _DEBUG /D WINDOWS32 /D WIN32 /D _CONSOLE /D HAVE_CONFIG_H /FR.\WinDebug/ /Fp.\WinDebug/%make%.pch /Fo.\WinDebug/ /Fd.\WinDebug/%make%.pdb /c variable.c
@@ -139,4 +139,37 @@ echo kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib sh
 link.exe /NOLOGO /SUBSYSTEM:console /INCREMENTAL:no /PDB:.\WinRel/%make%.pdb /MACHINE:I386 /OUT:.\WinRel/%make%.exe @link.rel
 if not exist .\WinRel/%make%.exe echo "WinRel build failed"
 if exist .\WinRel/%make%.exe echo "WinRel build succeeded!"
+set make=
+GoTo BuildEnd
+:GCCBuild
+echo on
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c variable.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c rule.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c remote-stub.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c commands.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c file.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c getloadavg.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c default.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c signame.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c expand.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c dir.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c main.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c getopt1.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c job.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c read.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c version.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c getopt.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c arscan.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c remake.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c hash.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c misc.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c ar.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c function.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c vpath.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c implicit.c
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c ./glob/glob.c -o glob.o
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c ./glob/fnmatch.c -o fnmatch.o
+gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32 -DHAVE_CONFIG_H -c ./w32/pathstuff.c -o pathstuff.o
+gcc -mthreads -gstabs+ -ggdb3 -o gnumake.exe variable.o rule.o remote-stub.o commands.o file.o getloadavg.o default.o signame.o expand.o dir.o main.o getopt1.o job.o read.o version.o getopt.o arscan.o remake.o misc.o hash.o ar.o function.o vpath.o implicit.o glob.o fnmatch.o pathstuff.o w32_misc.o sub_proc.o w32err.o -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lodbc32 -lodbccp32
+:BuildEnd
 echo on

@@ -83,4 +83,31 @@ all: first second
 first second: ; \@echo \$\@; $sleep_command 1; echo \$\@",
               '-j2', "first\nfirst\nsecond\nsecond");
 
+# Michael Matz <matz@suse.de> reported a bug where if make is running in
+# parallel without -k and two jobs die in a row, but not too close to each
+# other, then make will quit without waiting for the rest of the jobs to die.
+
+run_make_test("
+.PHONY: all fail.1 fail.2 fail.3 ok
+all: fail.1 ok fail.2 fail.3
+
+fail.1 fail.2 fail.3:
+	\@sleep \$(patsubst fail.%,%,\$\@)
+	\@echo Fail
+	\@exit 1
+
+ok:
+	\@sleep 4
+	\@echo Ok done",
+              '-rR -j5', 'Fail
+#MAKE#: *** [fail.1] Error 1
+#MAKE#: *** Waiting for unfinished jobs....
+Fail
+#MAKE#: *** [fail.2] Error 1
+Fail
+#MAKE#: *** [fail.3] Error 1
+Ok done',
+             512);
+
+
 1;

@@ -2064,22 +2064,19 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
                     d_ptr = &(*d_ptr)->next;
 
                   if (cmds != 0)
-                    {
-                      /* This is the rule with commands, so put its deps
-                         last. The rationale behind this is that $< expands
-                         to the first dep in the chain, and commands use $<
-                         expecting to get the dep that rule specifies.
-                         However the second expansion algorithm reverses
-                         the order thus we need to make it last here.  */
-
-                      (*d_ptr)->next = this;
-                    }
+                    /* This is the rule with commands, so put its deps
+                       last. The rationale behind this is that $< expands to
+                       the first dep in the chain, and commands use $<
+                       expecting to get the dep that rule specifies.  However
+                       the second expansion algorithm reverses the order thus
+                       we need to make it last here.  */
+                    (*d_ptr)->next = this;
                   else
                     {
                       /* This is the rule without commands. Put its
-                         dependencies at the end but before dependencies
-                         from the rule with commands (if any). This way
-                         everything appears in makefile order.  */
+                         dependencies at the end but before dependencies from
+                         the rule with commands (if any). This way everything
+                         appears in makefile order.  */
 
                       if (f->cmds != 0)
                         {
