@@ -1,10 +1,22 @@
 Port of GNU make to Microsoft Windows 95/98/NT/2000/XP
 Builds natively with MSVC 2.x, 4.x, 5.x, 6.x and MSVC.NET 7.x.
+Also builds with the MinGW port of GCC 3.x (tested with GCC 3.4.2).
 
 The Windows 32-bit port of GNU make is maintained jointly by various
-people.
+people.  It was originally made by Rob Tulloh.
 
-To build with nmake on MS-Windows:
+To build with MinGW:
+
+	1. Edit config.h.W32 to your liking (especially the few
+           shell-related defines near the end).
+
+	2. Invoke build_w32.bat with the "gcc" argument:
+
+		build_w32 gcc
+
+	   This produces gnumake.exe in the current directory.
+
+To build with nmake:
 
 	1. Make sure cl.exe is in your %Path%. Example:
 

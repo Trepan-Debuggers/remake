@@ -1,3 +1,9 @@
+2005-08-07  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/parallelism: Add a test for a bug reported by
+	Michael Matz (matz@suse.de) in which make exits without waiting
+	for all its children in some situations during parallel builds.
+
 2005-07-08  Paul D. Smith  <psmith@gnu.org>
 
 	* test_driver.pl: Reset the environment to a clean value every

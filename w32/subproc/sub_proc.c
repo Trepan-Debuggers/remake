@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <process.h>  /* for msvc _beginthreadex, _endthreadex */
+#include <signal.h>
 #include <windows.h>
 
 #include "sub_proc.h"
@@ -522,7 +523,8 @@ process_begin(
 
 			pproc->last_err = GetLastError();
 			pproc->lerrno = E_FORK;
-			fprintf(stderr, "process_begin: CreateProcess(%s, %s, ...) failed.\n", exec_path, command_line);
+			fprintf(stderr, "process_begin: CreateProcess(%s, %s, ...) failed.\n",
+                                exec_path ? exec_path : "NULL", command_line);
 			if (envblk) free(envblk);
 			free( command_line );
 			return(-1);
@@ -762,7 +764,13 @@ process_pipe_io(
 
 		} else if (ready_hand == childhand) {
 
-			GetExitCodeResult = GetExitCodeProcess(childhand, (DWORD*)&pproc->exit_code);
+			DWORD ierr;
+			GetExitCodeResult = GetExitCodeProcess(childhand, &ierr);
+			if (ierr == CONTROL_C_EXIT) {
+				pproc->signal = SIGINT;
+			} else {
+				pproc->exit_code = ierr;
+			}
 			if (GetExitCodeResult == FALSE) {
 				pproc->last_err = GetLastError();
 				pproc->lerrno = E_SCALL;
@@ -811,6 +819,7 @@ process_file_io(
 	HANDLE childhand;
 	DWORD wait_return;
 	BOOL GetExitCodeResult;
+        DWORD ierr;
 
 	if (proc == NULL)
 		pproc = process_wait_for_any_private();
@@ -854,7 +863,12 @@ process_file_io(
 		goto done2;
 	}
 
-	GetExitCodeResult = GetExitCodeProcess(childhand, (DWORD*)&pproc->exit_code);
+	GetExitCodeResult = GetExitCodeProcess(childhand, &ierr);
+	if (ierr == CONTROL_C_EXIT) {
+		pproc->signal = SIGINT;
+	} else {
+		pproc->exit_code = ierr;
+	}
 	if (GetExitCodeResult == FALSE) {
 		pproc->last_err = GetLastError();
 		pproc->lerrno = E_SCALL;
@@ -1163,7 +1177,7 @@ process_easy(
                       TRUE,
                       DUPLICATE_SAME_ACCESS) == FALSE) {
     fprintf(stderr,
-            "process_easy: DuplicateHandle(In) failed (e=%d)\n",
+            "process_easy: DuplicateHandle(In) failed (e=%ld)\n",
             GetLastError());
     return INVALID_HANDLE_VALUE;
   }
@@ -1175,7 +1189,7 @@ process_easy(
                       TRUE,
                       DUPLICATE_SAME_ACCESS) == FALSE) {
     fprintf(stderr,
-           "process_easy: DuplicateHandle(Out) failed (e=%d)\n",
+           "process_easy: DuplicateHandle(Out) failed (e=%ld)\n",
            GetLastError());
     return INVALID_HANDLE_VALUE;
   }
@@ -1187,7 +1201,7 @@ process_easy(
                       TRUE,
                       DUPLICATE_SAME_ACCESS) == FALSE) {
     fprintf(stderr,
-            "process_easy: DuplicateHandle(Err) failed (e=%d)\n",
+            "process_easy: DuplicateHandle(Err) failed (e=%ld)\n",
             GetLastError());
     return INVALID_HANDLE_VALUE;
   }

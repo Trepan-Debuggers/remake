@@ -33,10 +33,12 @@ Boston, MA 02111-1307, USA.  */
 
 /* Default shell to use.  */
 #ifdef WINDOWS32
+#include <windows.h>
 
 char *default_shell = "sh.exe";
 int no_default_sh_exe = 1;
 int batch_mode_shell = 1;
+HANDLE main_thread;
 
 #elif defined (_AMIGA)
 
@@ -444,9 +446,11 @@ extern int shell_function_pid, shell_function_completed;
 void
 reap_children (int block, int err)
 {
+#ifndef WINDOWS32
   WAIT_T status;
   /* Initially, assume we have some.  */
   int reap_more = 1;
+#endif
 
 #ifdef WAIT_NOHANG
 # define REAP_MORE reap_more
@@ -475,9 +479,14 @@ reap_children (int block, int err)
 
       if (err && block)
 	{
-	  /* We might block for a while, so let the user know why.  */
+          static int printed = 0;
+
+	  /* We might block for a while, so let the user know why.
+             Only print this message once no matter how many jobs are left.  */
 	  fflush (stdout);
-	  error (NILF, _("*** Waiting for unfinished jobs...."));
+          if (!printed)
+            error (NILF, _("*** Waiting for unfinished jobs...."));
+          printed = 1;
 	}
 
       /* We have one less dead child to reap.  As noted in
@@ -608,10 +617,30 @@ reap_children (int block, int err)
 #ifdef WINDOWS32
           {
             HANDLE hPID;
-            int err;
+            int werr;
+            HANDLE hcTID, hcPID;
             exit_code = 0;
             exit_sig = 0;
             coredump = 0;
+
+            /* Record the thread ID of the main process, so that we
+               could suspend it in the signal handler.  */
+            if (!main_thread)
+              {
+                hcTID = GetCurrentThread ();
+                hcPID = GetCurrentProcess ();
+                if (!DuplicateHandle (hcPID, hcTID, hcPID, &main_thread, 0,
+                                      FALSE, DUPLICATE_SAME_ACCESS))
+                  {
+                    DWORD e = GetLastError ();
+                    fprintf (stderr,
+                             "Determine main thread ID (Error %ld: %s)\n",
+                             e, map_windows32_error_to_string(e));
+                  }
+                else
+                  DB (DB_VERBOSE, ("Main thread handle = 0x%08lx\n",
+                                   (unsigned long)main_thread));
+              }
 
             /* wait for anything to finish */
             hPID = process_wait_for_any();
@@ -619,12 +648,12 @@ reap_children (int block, int err)
               {
 
                 /* was an error found on this process? */
-                err = process_last_err(hPID);
+                werr = process_last_err(hPID);
 
                 /* get exit data */
                 exit_code = process_exit_code(hPID);
 
-                if (err)
+                if (werr)
                   fprintf(stderr, "make (e=%d): %s",
                           exit_code, map_windows32_error_to_string(exit_code));
 
@@ -937,7 +966,7 @@ set_child_handler_action_flags (int set_handler, int set_alarm)
 static void
 start_job_command (struct child *child)
 {
-#ifndef _AMIGA
+#if !defined(_AMIGA) && !defined(WINDOWS32)
   static int bad_stdin = -1;
 #endif
   register char *p;
@@ -1351,7 +1380,7 @@ start_job_command (struct child *child)
         int i;
         unblock_sigs();
         fprintf(stderr,
-          _("process_easy() failed failed to launch process (e=%d)\n"),
+          _("process_easy() failed failed to launch process (e=%ld)\n"),
           process_last_err(hPID));
                for (i = 0; argv[i]; i++)
                  fprintf(stderr, "%s ", argv[i]);
@@ -1968,7 +1997,7 @@ exec_command (char **argv, char **envp)
     {
       int i;
       fprintf(stderr,
-              _("process_easy() failed failed to launch process (e=%d)\n"),
+              _("process_easy() failed failed to launch process (e=%ld)\n"),
               process_last_err(hPID));
       for (i = 0; argv[i]; i++)
           fprintf(stderr, "%s ", argv[i]);
@@ -2272,7 +2301,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 #ifdef WINDOWS32
   int slow_flag = 0;
 
-  if (no_default_sh_exe) {
+  if (!unixy_shell) {
     sh_cmds = sh_cmds_dos;
     sh_chars = sh_chars_dos;
   } else {
@@ -2449,12 +2478,11 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 	    else if (p[1] != '\0')
               {
 #ifdef HAVE_DOS_PATHS
-                /* Only remove backslashes before characters special
-                   to Unixy shells.  All other backslashes are copied
-                   verbatim, since they are probably DOS-style
-                   directory separators.  This still leaves a small
-                   window for problems, but at least it should work
-                   for the vast majority of naive users.  */
+                /* Only remove backslashes before characters special to Unixy
+                   shells.  All other backslashes are copied verbatim, since
+                   they are probably DOS-style directory separators.  This
+                   still leaves a small window for problems, but at least it
+                   should work for the vast majority of naive users.  */
 
 #ifdef __MSDOS__
                 /* A dot is only special as part of the "..."
@@ -2469,7 +2497,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 #endif
                   if (p[1] != '\\' && p[1] != '\''
                       && !isspace ((unsigned char)p[1])
-                      && (strchr (sh_chars_sh, p[1]) == 0))
+                      && strchr (sh_chars_sh, p[1]) == 0)
                     /* back up one notch, to copy the backslash */
                     --p;
 #endif  /* HAVE_DOS_PATHS */

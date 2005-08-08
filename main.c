@@ -662,14 +662,14 @@ handle_runtime_exceptions( struct _EXCEPTION_POINTERS *exinfo )
   if (! ISDB (DB_VERBOSE))
     {
       sprintf(errmsg,
-              _("%s: Interrupt/Exception caught (code = 0x%x, addr = 0x%x)\n"),
+              _("%s: Interrupt/Exception caught (code = 0x%lx, addr = 0x%lx)\n"),
               prg, exrec->ExceptionCode, exrec->ExceptionAddress);
       fprintf(stderr, errmsg);
       exit(255);
     }
 
   sprintf(errmsg,
-          _("\nUnhandled exception filter called from program %s\nExceptionCode = %x\nExceptionFlags = %x\nExceptionAddress = %x\n"),
+          _("\nUnhandled exception filter called from program %s\nExceptionCode = %lx\nExceptionFlags = %lx\nExceptionAddress = %lx\n"),
           prg, exrec->ExceptionCode, exrec->ExceptionFlags,
           exrec->ExceptionAddress);
 
@@ -677,8 +677,8 @@ handle_runtime_exceptions( struct _EXCEPTION_POINTERS *exinfo )
       && exrec->NumberParameters >= 2)
     sprintf(&errmsg[strlen(errmsg)],
             (exrec->ExceptionInformation[0]
-             ? _("Access violation: write operation at address %x\n")
-             : _("Access violation: read operation at address %x\n")),
+             ? _("Access violation: write operation at address %lx\n")
+             : _("Access violation: read operation at address %lx\n")),
             exrec->ExceptionInformation[1]);
 
   /* turn this on if we want to put stuff in the event log too */
@@ -751,7 +751,11 @@ find_and_set_default_shell (char *token)
           && !strcmpi (tokend - 4, "cmd.exe"))) {
     batch_mode_shell = 1;
     unixy_shell = 0;
-    sh_found = 0;
+    sprintf (sh_path, "%s", search_token);
+    default_shell = xstrdup (w32ify (sh_path, 0));
+    DB (DB_VERBOSE,
+        (_("find_and_set_shell setting default_shell = %s\n"), default_shell));
+    sh_found = 1;
   } else if (!no_default_sh_exe &&
              (token == NULL || !strcmp (search_token, default_shell))) {
     /* no new information, path already set or known */
@@ -838,7 +842,9 @@ extern int mkstemp PARAMS ((char *template));
 FILE *
 open_tmpfile(char **name, const char *template)
 {
+#ifdef HAVE_FDOPEN
   int fd;
+#endif
 
 #if defined HAVE_MKSTEMP || defined HAVE_MKTEMP
 # define TEMPLATE_LEN   strlen (template)
@@ -1217,7 +1223,7 @@ main (int argc, char **argv, char **envp)
   decode_switches (argc, argv, 0);
 #ifdef WINDOWS32
   if (suspend_flag) {
-        fprintf(stderr, "%s (pid = %d)\n", argv[0], GetCurrentProcessId());
+        fprintf(stderr, "%s (pid = %ld)\n", argv[0], GetCurrentProcessId());
         fprintf(stderr, _("%s is suspending for 30 seconds..."), argv[0]);
         Sleep(30 * 1000);
         fprintf(stderr, _("done sleep(30). Continuing.\n"));
@@ -2990,7 +2996,8 @@ die (int status)
 	print_version ();
 
       /* Wait for children to die.  */
-      for (err = (status != 0); job_slots_used > 0; err = 0)
+      err = (status != 0);
+      while (job_slots_used > 0)
 	reap_children (1, err);
 
       /* Let the remote job module clean up its state.  */

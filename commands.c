@@ -23,6 +23,10 @@ Boston, MA 02111-1307, USA.  */
 #include "variable.h"
 #include "job.h"
 #include "commands.h"
+#ifdef WINDOWS32
+#include <windows.h>
+#include "w32err.h"
+#endif
 
 #if VMS
 # define FILE_LIST_SEPARATOR ','
@@ -420,6 +424,27 @@ fatal_error_signal (int sig)
 
   exit (10);
 #else /* not Amiga */
+#ifdef WINDOWS32
+  extern HANDLE main_thread;
+
+  /* Windows creates a sperate thread for handling Ctrl+C, so we need
+     to suspend the main thread, or else we will have race conditions
+     when both threads call reap_children.  */
+  if (main_thread)
+    {
+      DWORD susp_count = SuspendThread (main_thread);
+
+      if (susp_count != 0)
+	fprintf (stderr, "SuspendThread: suspend count = %ld\n", susp_count);
+      else if (susp_count == (DWORD)-1)
+	{
+	  DWORD ierr = GetLastError ();
+
+	  fprintf (stderr, "SuspendThread: error %ld: %s\n",
+		   ierr, map_windows32_error_to_string (ierr));
+	}
+    }
+#endif
   handling_fatal_signal = 1;
 
   /* Set the handling for this signal to the default.
@@ -482,8 +507,11 @@ fatal_error_signal (int sig)
 #endif
 
 #ifdef WINDOWS32
-  /* Cannot call W32_kill with a pid (it needs a handle) */
-  exit (EXIT_FAILURE);
+  if (main_thread)
+    CloseHandle (main_thread);
+  /* Cannot call W32_kill with a pid (it needs a handle).  The exit
+     status of 130 emulates what happens in Bash.  */
+  exit (130);
 #else
   /* Signal the same code; this time it will really be fatal.  The signal
      will be unblocked when we return and arrive then to kill us.  */
