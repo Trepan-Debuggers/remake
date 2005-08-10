@@ -1,3 +1,9 @@
+2005-08-10  Boris Kolpackov  <boris@kolpackov.net>
+
+	* read.c (record_files): Move code that sets stem for static
+	pattern rules out of the if (!two_colon) condition so it is
+	also executed for two-colon rules. Fixes Savannah bug #13881.
+
 2005-08-07  Paul D. Smith  <psmith@gnu.org>
 
 	* w32/pathstuff.c (getcwd_fs): Fix warning about assignment in a

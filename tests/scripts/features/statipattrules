@@ -73,4 +73,15 @@ foo.x bar.x: %.x : ; @echo $@
 'foo.x
 ');
 
+
+# TEST #6 -- bug #13881: double colon static pattern rule does not
+#                        substitute %.
+#
+run_make_test('
+foo.bar:: %.bar: %.baz
+foo.baz: ;@:
+',
+'',
+'');
+
 1;
