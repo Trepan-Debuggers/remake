@@ -1,3 +1,7 @@
+2005-08-10  Boris Kolpackov  <boris@kolpackov.net>
+
+	* scripts/features/statipattrules: Add a test for Savannah bug #13881.
+
 2005-08-07  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/features/parallelism: Add a test for a bug reported by

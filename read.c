@@ -2106,18 +2106,6 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
               if (cmds != 0)
                 f->updating = 1;
 	    }
-
-	  /* If this is a static pattern rule, set the file's stem to
-	     the part of its name that matched the `%' in the pattern,
-	     so you can use $* in the commands.  */
-	  if (pattern != 0)
-	    {
-	      static char *percent = "%";
-	      char *buffer = variable_expand ("");
-	      char *o = patsubst_expand (buffer, name, pattern, percent,
-					 pattern_percent+1, percent+1);
-	      f->stem = savestring (buffer, o - buffer);
-	    }
 	}
       else
 	{
@@ -2142,6 +2130,18 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
 	  f->deps = this;
 	  f->cmds = cmds;
 	}
+
+      /* If this is a static pattern rule, set the file's stem to
+         the part of its name that matched the `%' in the pattern,
+         so you can use $* in the commands.  */
+      if (pattern != 0)
+        {
+          static char *percent = "%";
+          char *buffer = variable_expand ("");
+          char *o = patsubst_expand (buffer, name, pattern, percent,
+                                     pattern_percent+1, percent+1);
+          f->stem = savestring (buffer, o - buffer);
+        }
 
       /* Free name if not needed further.  */
       if (f != 0 && name != f->name
