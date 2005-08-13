@@ -1,3 +1,9 @@
+2005-08-13  Boris Kolpackov  <boris@kolpackov.net>
+
+	* scripts/functions/wildcard: Wrap calls to $(wildcard ) with
+	$(sort) so that the resulting order is no longer filesystem-
+	dependant.
+
 2005-08-10  Boris Kolpackov  <boris@kolpackov.net>
 
 	* scripts/features/statipattrules: Add a test for Savannah bug #13881.
