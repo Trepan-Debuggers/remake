@@ -79,6 +79,13 @@
 	* make_msvc_net2003.vcproj, make_msvc_net2003.sln: MSVC Project files.
 	* Makefile.am (EXTRA_DIST): Add MSVC Project files.
 
+2005-07-15  Paul Smith  <psmith@gnu.org>
+
+	* job.c (construct_command_argv_internal) [DOS,WINDOWS32,OS/2]: If
+	we don't have a POSIX shell, then revert to the old
+	backslash-newline behavior (where they are stripped).
+	Fixes bug #13665.
+
 2005-07-08  Paul D. Smith  <psmith@gnu.org>
 
 	* config.h.W32.template: Reorder to match the standard config.h,

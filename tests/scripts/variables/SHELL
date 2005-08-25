@@ -19,23 +19,23 @@ run_make_test('all:;@echo "$(SHELL)"', '', $mshell);
 # According to POSIX, any value of SHELL set in the makefile should _NOT_ be
 # exported to the subshell!  I wanted to set SHELL to be $^X (perl) in the
 # makefile, but make runs $(SHELL) -c 'commandline' and that doesn't work at
-# all when $(SHELL) is perl :-/.  So, we just add an extra initial / and hope
-# for the best on non-UNIX platforms :-/.
+# all when $(SHELL) is perl :-/.  So, we just add an extra initial /./ which
+# works well on UNIX and seems to work OK on at least some non-UNIX systems.
 
 $extraENV{SHELL} = $mshell;
 
-run_make_test("SHELL := /$mshell\n".'
+run_make_test("SHELL := /./$mshell\n".'
 all:;@echo "$(SHELL) $$SHELL"
-', '', "/$mshell $mshell");
+', '', "/./$mshell $mshell");
 
 # As a GNU make extension, if make's SHELL variable is explicitly exported,
 # then we really _DO_ export it.
 
 $extraENV{SHELL} = $mshell;
 
-run_make_test("export SHELL := /$mshell\n".'
+run_make_test("export SHELL := /./$mshell\n".'
 all:;@echo "$(SHELL) $$SHELL"
-', '', "/$mshell /$mshell");
+', '', "/./$mshell /./$mshell");
 
 
 # Test out setting of SHELL, both exported and not, as a target-specific
@@ -43,14 +43,14 @@ all:;@echo "$(SHELL) $$SHELL"
 
 $extraENV{SHELL} = $mshell;
 
-run_make_test("all: SHELL := /$mshell\n".'
+run_make_test("all: SHELL := /./$mshell\n".'
 all:;@echo "$(SHELL) $$SHELL"
-', '', "/$mshell $mshell");
+', '', "/./$mshell $mshell");
 
 $extraENV{SHELL} = $mshell;
 
-run_make_test("all: export SHELL := /$mshell\n".'
+run_make_test("all: export SHELL := /./$mshell\n".'
 all:;@echo "$(SHELL) $$SHELL"
-', '', "/$mshell $mshell");
+', '', "/./$mshell $mshell");
 
 1;
