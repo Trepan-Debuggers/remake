@@ -2408,8 +2408,15 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
             {
               /* Backslash-newline is handled differently depending on what
                  kind of string we're in: inside single-quoted strings you
-                 keep them; in double-quoted strings they disappear.  */
-              if (instring == '"')
+                 keep them; in double-quoted strings they disappear.
+	         For DOS/Windows/OS2, if we don't have a POSIX shell,
+		 we keep the pre-POSIX behavior of removing the
+		 backslash-newline.  */
+              if (instring == '"'
+#if defined (__MSDOS__) || defined (__EMX__) || defined (WINDOWS32)
+		  || !unixy_shell
+#endif
+		  )
                 ++p;
               else
                 {
@@ -2693,12 +2700,23 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 	  }
 	else if (*p == '\\' && p[1] == '\n')
 	  {
-	    /* POSIX says we keep the backslash-newline, but throw out the
-               next char if it's a TAB.  */
-            *(ap++) = '\\';
-            *(ap++) = *(p++);
-            *(ap++) = *p;
+	    /* POSIX says we keep the backslash-newline, but throw out
+               the next char if it's a TAB.  If we don't have a POSIX
+               shell on DOS/Windows/OS2, mimic the pre-POSIX behavior
+               and remove the backslash/newline.  */
+#if defined (__MSDOS__) || defined (__EMX__) || defined (WINDOWS32)
+# define PRESERVE_BSNL  unixy_shell
+#else
+# define PRESERVE_BSNL  1
+#endif
+	    if (PRESERVE_BSNL)
+	      {
+		*(ap++) = '\\';
+		*(ap++) = '\\';
+		*(ap++) = '\n';
+	      }
 
+	    ++p;
 	    if (p[1] == '\t')
 	      ++p;
 

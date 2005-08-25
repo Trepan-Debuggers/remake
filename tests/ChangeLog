@@ -1,3 +1,9 @@
+2005-08-25  Paul Smith  <psmith@gnu.org>
+
+	* scripts/variables/SHELL: Use a /./ prefix instead of //: the
+	former works better with non-UNIX environments.  Fixes Savannah
+	bug #14129.
+
 2005-08-13  Boris Kolpackov  <boris@kolpackov.net>
 
 	* scripts/functions/wildcard: Wrap calls to $(wildcard ) with
