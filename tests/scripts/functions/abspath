@@ -5,68 +5,68 @@ $details = "";
 
 run_make_test('
 ifneq ($(realpath $(abspath .)),$(CURDIR))
-  $(error )
+  $(warning .: abs="$(abspath .)" real="$(realpath $(abspath .))" curdir="$(CURDIR)")
 endif
 
 ifneq ($(realpath $(abspath ./)),$(CURDIR))
-  $(error )
+  $(warning ./: abs="$(abspath ./)" real="$(realpath $(abspath ./))" curdir="$(CURDIR)")
 endif
 
 ifneq ($(realpath $(abspath .///)),$(CURDIR))
-  $(error )
+  $(warning .///: abs="$(abspath .///)" real="$(realpath $(abspath .///))" curdir="$(CURDIR)")
 endif
 
 ifneq ($(abspath /),/)
-  $(error )
+  $(warning /: abspath="$(abspath /)")
 endif
 
 ifneq ($(abspath ///),/)
-  $(error )
+  $(warning ///: abspath="$(abspath ///)")
 endif
 
 ifneq ($(abspath /.),/)
-  $(error )
+  $(warning /.: abspath="$(abspath /.)")
 endif
 
 ifneq ($(abspath ///.),/)
-  $(error )
+  $(warning ///.: abspath="$(abspath ///.)")
 endif
 
 ifneq ($(abspath /./),/)
-  $(error )
+  $(warning /./: abspath="$(abspath /./)")
 endif
 
 ifneq ($(abspath /.///),/)
-  $(error )
+  $(warning /.///: abspath="$(abspath /.///)")
 endif
 
 ifneq ($(abspath /..),/)
-  $(error )
+  $(warning /..: abspath="$(abspath /..)")
 endif
 
 ifneq ($(abspath ///..),/)
-  $(error )
+  $(warning ///..: abspath="$(abspath ///..)")
 endif
 
 ifneq ($(abspath /../),/)
-  $(error )
+  $(warning /../: abspath="$(abspath /../)")
 endif
 
 ifneq ($(abspath /..///),/)
-  $(error )
+  $(warning /..///: abspath="$(abspath /..///)")
 endif
 
 
 ifneq ($(abspath /foo/bar/..),/foo)
-  $(error )
+  $(warning /foo/bar/..: abspath="$(abspath /foo/bar/..)")
 endif
 
 ifneq ($(abspath /foo/bar/../../../baz),/baz)
-  $(error )
+  $(warning /foo/bar/../../../baz: abspath="$(abspath /foo/bar/../../../baz)")
 endif
 
 ifneq ($(abspath /foo/bar/../ /..),/foo /)
-  $(error )
+  $(warning /foo/bar/../ /..: abspath="$(abspath /foo/bar/../ /..)")
 endif
 
 

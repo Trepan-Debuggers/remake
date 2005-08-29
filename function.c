@@ -1096,6 +1096,7 @@ func_error (char *o, char **argv, const char *funcname)
 
     case 'i':
       printf ("%s\n", msg);
+      fflush(stdout);
       break;
 
     default:

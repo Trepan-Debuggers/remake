@@ -1,3 +1,13 @@
+2005-08-29  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/functions/abspath: Add some text to the error messages
+	to get a better idea of what's wrong.  Make warnings instead of
+	errors.
+
+	* scripts/features/patspecific_vars: Don't use "test", which is
+	UNIX specific.  Print the values and let the test script match
+	them.
+
 2005-08-25  Paul Smith  <psmith@gnu.org>
 
 	* scripts/variables/SHELL: Use a /./ prefix instead of //: the

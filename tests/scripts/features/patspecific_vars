@@ -67,8 +67,8 @@ run_make_test('
 /%: export foo := foo
 
 /bar:
-	@test "$(foo)" = "$$foo"
-', '', '');
+	@echo $(foo) $$foo
+', '', 'foo foo');
 
 
 # TEST #6 -- test expansion of pattern-specific simple variables

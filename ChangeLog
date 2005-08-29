@@ -1,8 +1,19 @@
+2005-08-29  Paul D. Smith  <psmith@gnu.org>
+
+	* function.c (func_error): On Windows, output from $(info ...)
+	seems to come in the wrong order.  Try to force it with fflush().
+
 2005-08-10  Boris Kolpackov  <boris@kolpackov.net>
 
 	* read.c (record_files): Move code that sets stem for static
 	pattern rules out of the if (!two_colon) condition so it is
 	also executed for two-colon rules. Fixes Savannah bug #13881.
+
+2005-08-08  Paul D. Smith  <psmith@gnu.org>
+
+	* make.h: Don't test that __STDC__ is non-0.  Some compilers
+	(Windows for example) set it to 0 to denote "ISO C + extensions".
+	Fixes bug # 13594.
 
 2005-08-07  Paul D. Smith  <psmith@gnu.org>
 
