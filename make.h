@@ -42,7 +42,7 @@ char *alloca ();
 
 
 /* Use prototypes if available.  */
-#if defined (__cplusplus) || (defined (__STDC__) && __STDC__)
+#if defined (__cplusplus) || defined (__STDC__)
 # undef  PARAMS
 # define PARAMS(protos)  protos
 #else /* Not C++ or ANSI C.  */
