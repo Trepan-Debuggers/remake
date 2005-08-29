@@ -149,11 +149,11 @@ $(eval $(FOO))
 
 run_make_test('
 define FOO
-all: ; @echo he\llo
+all: ; @echo '."'".'he\llo'."'".'
 	@echo world
 endef
 $(eval $(FOO))
-', '', 'hello
+', '', 'he\llo
 world');
 
 
