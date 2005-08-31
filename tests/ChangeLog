@@ -1,3 +1,11 @@
+2005-08-31  Paul D. Smith  <psmith@gnu.org>
+
+	* run_make_tests.pl (get_this_pwd): Require the POSIX module (in
+	an eval to trap errors) and if it exists, use POSIX::getcwd to
+	find the working directory.  If it doesn't exist, go back to the
+	previous methods.  This tries to be more accurate on Windows
+	systems.
+
 2005-08-29  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/functions/abspath: Add some text to the error messages

@@ -16,6 +16,9 @@ $pure_log = undef;
 
 require "test_driver.pl";
 
+# Some target systems might not have the POSIX module...
+$has_POSIX = eval { require "POSIX.pm" };
+
 #$SIG{INT} = sub { print STDERR "Caught a signal!\n"; die @_; };
 
 sub valid_option
@@ -180,12 +183,14 @@ sub print_help
 }
 
 sub get_this_pwd {
-  if ($vos) {
+  $delete_command = "rm";
+  if ($has_POSIX) {
+    $__pwd = POSIX::getcwd();
+  } elsif ($vos) {
     $delete_command = "delete_file";
     $__pwd = `++(current_dir)`;
-  }
-  else {
-    $delete_command = "rm";
+  } else {
+    # No idea... just try using pwd as a last resort.
     chop ($__pwd = `pwd`);
   }
 
@@ -303,8 +308,6 @@ sub set_more_defaults
    # Set up for valgrind, if requested.
 
    if ($valgrind) {
-#     use POSIX qw(:fcntl_h);
-#     require Fcntl;
      open(VALGRIND, "> valgrind.out")
        || die "Cannot open valgrind.out: $!\n";
      #  -q --leak-check=yes
