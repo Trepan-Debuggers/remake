@@ -446,7 +446,7 @@ lookup_variable_in_set (const char *name, unsigned int length,
 void
 initialize_file_variables (struct file *file, int reading)
 {
-  register struct variable_set_list *l = file->variables;
+  struct variable_set_list *l = file->variables;
 
   if (l == 0)
     {

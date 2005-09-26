@@ -987,7 +987,7 @@ start_job_command (struct child *child)
 	   | child->file->cmds->lines_flags[child->command_line - 1]);
 
   p = child->command_ptr;
-  child->noerror = flags & COMMANDS_NOERROR;
+  child->noerror = ((flags & COMMANDS_NOERROR) != 0);
 
   while (*p != '\0')
     {
@@ -2298,6 +2298,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
   char *end;
   int instring, word_has_equals, seen_nonequals, last_argument_was_empty;
   char **new_argv = 0;
+  char *argstr = 0;
 #ifdef WINDOWS32
   int slow_flag = 0;
 
@@ -2384,7 +2385,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
   new_argv = (char **) xmalloc (i * sizeof (char *));
 
   /* All the args can fit in a buffer as big as LINE is.   */
-  ap = new_argv[0] = (char *) xmalloc (i);
+  ap = new_argv[0] = argstr = (char *) xmalloc (i);
   end = ap + i;
 
   /* I is how many complete arguments have been found.  */
@@ -2598,8 +2599,12 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
     }
 
   if (new_argv[0] == 0)
-    /* Line was empty.  */
-    return 0;
+    {
+      /* Line was empty.  */
+      free (argstr);
+      free ((char *)new_argv);
+      return 0;
+    }
 
   return new_argv;
 
@@ -2609,8 +2614,8 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
   if (new_argv != 0)
     {
       /* Free the old argument list we were working on.  */
-      free (new_argv[0]);
-      free ((void *)new_argv);
+      free (argstr);
+      free ((char *)new_argv);
     }
 
 #ifdef __MSDOS__
