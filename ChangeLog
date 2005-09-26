@@ -1,3 +1,15 @@
+2005-09-26  Paul D. Smith  <psmith@gnu.org>
+
+	* job.c (construct_command_argv_internal): If the line is empty
+	remember to free the temporary argv strings.
+	Fixes bug # 14527.
+
+2005-09-16  Paul D. Smith  <psmith@gnu.org>
+
+	* job.c (start_job_command): The noerror flag is a boolean (single
+	bit); set it appropriately.
+	Reported by Mark Eichin <eichin@metacarta.com>
+
 2005-08-29  Paul D. Smith  <psmith@gnu.org>
 
 	* function.c (func_error): On Windows, output from $(info ...)
