@@ -485,7 +485,7 @@ find_next_token (char **ptr, unsigned int *lengthptr)
    with the same contents as the old one.  */
 
 struct dep *
-copy_dep_chain (struct dep *d)
+copy_dep_chain (const struct dep *d)
 {
   register struct dep *c;
   struct dep *firstnew = 0;
@@ -507,6 +507,21 @@ copy_dep_chain (struct dep *d)
     }
 
   return firstnew;
+}
+
+/* Free a chain of 'struct dep'.  */
+
+void
+free_dep_chain (struct dep *d)
+{
+  while (d != 0)
+    {
+      struct dep *df = d;
+      d = d->next;
+
+      free (df->name);
+      free ((char *)df);
+    }
 }
 
 /* Free a chain of `struct nameseq'. Each nameseq->name is freed

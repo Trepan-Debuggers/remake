@@ -486,6 +486,11 @@ struct file *default_file;
 
 int posix_pedantic;
 
+/* Nonzero if we have seen the '.SECONDEXPANSION' target.
+   This turns on secondary expansion of prerequisites.  */
+
+int second_expansion;
+
 /* Nonzero if we have seen the `.NOTPARALLEL' target.
    This turns off parallel builds for this invocation of make.  */
 
@@ -1437,7 +1442,7 @@ main (int argc, char **argv, char **envp)
 	starting_directory = current_directory;
     }
 
-  (void) define_variable ("CURDIR", 6, current_directory, o_default, 0);
+  (void) define_variable ("CURDIR", 6, current_directory, o_file, 0);
 
   /* Read any stdin makefiles into temporary files.  */
 
@@ -2174,6 +2179,7 @@ main (int argc, char **argv, char **envp)
             goals->next = 0;
             goals->name = 0;
             goals->ignore_mtime = 0;
+            goals->staticpattern = 0;
             goals->need_2nd_expansion = 0;
             goals->file = default_goal_file;
           }
@@ -2341,6 +2347,7 @@ handle_non_switch_argument (char *arg, int env)
       lastgoal->name = 0;
       lastgoal->file = f;
       lastgoal->ignore_mtime = 0;
+      lastgoal->staticpattern = 0;
       lastgoal->need_2nd_expansion = 0;
 
       {

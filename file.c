@@ -405,6 +405,42 @@ remove_intermediates (int sig)
     }
 }
 
+struct dep *
+parse_prereqs (char *p)
+{
+  struct dep *new = (struct dep *)
+    multi_glob (parse_file_seq (&p, '|', sizeof (struct dep), 1),
+                sizeof (struct dep));
+
+  if (*p)
+    {
+      /* Files that follow '|' are "order-only" prerequisites that satisfy the
+         dependency by existing: their modification times are irrelevant.  */
+      struct dep *ood;
+
+      ++p;
+      ood = (struct dep *)
+        multi_glob (parse_file_seq (&p, '\0', sizeof (struct dep), 1),
+                    sizeof (struct dep));
+
+      if (! new)
+        new = ood;
+      else
+        {
+          struct dep *dp;
+          for (dp = new; dp->next != NULL; dp = dp->next)
+            ;
+          dp->next = ood;
+        }
+
+      for (; ood != NULL; ood = ood->next)
+        ood->ignore_mtime = 1;
+    }
+
+  return new;
+}
+
+
 /* Set the intermediate flag.  */
 
 static void
@@ -418,8 +454,7 @@ set_intermediate (const void *item)
 static void
 expand_deps (struct file *f)
 {
-  struct dep *d, *d1;
-  struct dep *new = 0;
+  struct dep *d;
   struct dep *old = f->deps;
   unsigned int last_dep_has_cmds = f->updating;
   int initialized = 0;
@@ -429,97 +464,138 @@ expand_deps (struct file *f)
 
   for (d = old; d != 0; d = d->next)
     {
-      if (d->name != 0)
+      struct dep *new, *d1;
+      char *p;
+
+      if (! d->name)
+        continue;
+
+      /* Create the dependency list.
+         If we're not doing 2nd expansion, then it's just the name.  */
+      if (! d->need_2nd_expansion)
+        p = d->name;
+      else
         {
-          char *p;
-
-          /* If we need a second expansion on these, set up the file
-             variables, etc.  It takes a lot of extra memory and processing
-             to do this, so only do it if it's needed.  */
-          if (! d->need_2nd_expansion)
-            p = d->name;
-          else
+          /* If it's from a static pattern rule, convert the patterns into
+             "$*" so they'll expand properly.  */
+          if (d->staticpattern)
             {
-              /* We are going to do second expansion so initialize file
-                 variables for the file. */
-              if (!initialized)
-                {
-                  initialize_file_variables (f, 0);
-                  initialized = 1;
-                }
+              char *o;
+              char *buffer = variable_expand ("");
 
-              set_file_variables (f);
+              o = subst_expand (buffer, d->name, "%", "$*", 1, 2, 0);
 
-              p = variable_expand_for_file (d->name, f);
+              free (d->name);
+              d->name = savestring (buffer, o - buffer);
+              d->staticpattern = 0;
             }
 
-          /* Parse the dependencies.  */
-          new = (struct dep *)
-            multi_glob (
-              parse_file_seq (&p, '|', sizeof (struct dep), 1),
-              sizeof (struct dep));
-
-          if (*p)
+          /* We are going to do second expansion so initialize file variables
+             for the file. */
+          if (!initialized)
             {
-              /* Files that follow '|' are special prerequisites that
-                 need only exist in order to satisfy the dependency.
-                 Their modification times are irrelevant.  */
-              struct dep **d_ptr;
+              initialize_file_variables (f, 0);
+              initialized = 1;
+            }
 
+          set_file_variables (f);
+
+          p = variable_expand_for_file (d->name, f);
+        }
+
+      /* Parse the prerequisites.  */
+      new = parse_prereqs (p);
+
+      /* If this dep list was from a static pattern rule, expand the %s.  We
+         use patsubst_expand to translate the prerequisites' patterns into
+         plain prerequisite names.  */
+      if (new && d->staticpattern)
+        {
+          char *pattern = "%";
+          char *buffer = variable_expand ("");
+          struct dep *dp = new, *dl = 0;
+
+          while (dp != 0)
+            {
+              char *percent = find_percent (dp->name);
+              if (percent)
+                {
+                  /* We have to handle empty stems specially, because that
+                     would be equivalent to $(patsubst %,dp->name,) which
+                     will always be empty.  */
+                  if (f->stem[0] == '\0')
+                    /* This needs memmove() in ISO C.  */
+                    bcopy (percent+1, percent, strlen (percent));
+                  else
+                    {
+                      char *o = patsubst_expand (buffer, f->stem, pattern,
+                                                 dp->name, pattern+1,
+                                                 percent+1);
+                      if (o == buffer)
+                        dp->name[0] = '\0';
+                      else
+                        {
+                          free (dp->name);
+                          dp->name = savestring (buffer, o - buffer);
+                        }
+                    }
+
+                  /* If the name expanded to the empty string, ignore it.  */
+                  if (dp->name[0] == '\0')
+                    {
+                      struct dep *df = dp;
+                      if (dp == new)
+                        dp = new = new->next;
+                      else
+                        dp = dl->next = dp->next;
+                      free ((char *)df);
+                      continue;
+                    }
+                }
+              dl = dp;
+              dp = dp->next;
+            }
+        }
+
+      /* Enter them as files. */
+      for (d1 = new; d1 != 0; d1 = d1->next)
+        {
+          d1->file = lookup_file (d1->name);
+          if (d1->file == 0)
+            d1->file = enter_file (d1->name);
+          else
+            free (d1->name);
+          d1->name = 0;
+          d1->staticpattern = 0;
+          d1->need_2nd_expansion = 0;
+        }
+
+      /* Add newly parsed deps to f->deps. If this is the last dependency
+         line and this target has commands then put it in front so the
+         last dependency line (the one with commands) ends up being the
+         first. This is important because people expect $< to hold first
+         prerequisite from the rule with commands. If it is not the last
+         dependency line or the rule does not have commands then link it
+         at the end so it appears in makefile order.  */
+
+      if (new != 0)
+        {
+          if (d->next == 0 && last_dep_has_cmds)
+            {
+              struct dep **d_ptr;
               for (d_ptr = &new; *d_ptr; d_ptr = &(*d_ptr)->next)
                 ;
-              ++p;
 
-              *d_ptr = (struct dep *)
-                multi_glob (
-                  parse_file_seq (&p, '\0', sizeof (struct dep), 1),
-                  sizeof (struct dep));
-
-              for (d1 = *d_ptr; d1 != 0; d1 = d1->next)
-                d1->ignore_mtime = 1;
+              *d_ptr = f->deps;
+              f->deps = new;
             }
-
-          /* Enter them as files. */
-          for (d1 = new; d1 != 0; d1 = d1->next)
+          else
             {
-              d1->file = lookup_file (d1->name);
-              if (d1->file == 0)
-                d1->file = enter_file (d1->name);
-              else
-                free (d1->name);
-              d1->name = 0;
-              d1->need_2nd_expansion = 0;
-            }
+              struct dep **d_ptr;
+              for (d_ptr = &f->deps; *d_ptr; d_ptr = &(*d_ptr)->next)
+                ;
 
-          /* Add newly parsed deps to f->deps. If this is the last
-             dependency line and this target has commands then put
-             it in front so the last dependency line (the one with
-             commands) ends up being the first. This is important
-             because people expect $< to hold first prerequisite
-             from the rule with commands. If it is not the last
-             dependency line or the rule does not have commands
-             then link it at the end so it appears in makefile
-             order.  */
-
-          if (new != 0)
-            {
-              if (d->next == 0 && last_dep_has_cmds)
-                {
-                  struct dep **d_ptr;
-                  for (d_ptr = &new; *d_ptr; d_ptr = &(*d_ptr)->next)
-                    ;
-
-                  *d_ptr = f->deps;
-                  f->deps = new;
-                }
-              else
-                {
-                  struct dep **d_ptr;
-                  for (d_ptr = &f->deps; *d_ptr; d_ptr = &(*d_ptr)->next)
-                    ;
-
-                  *d_ptr = new;
-                }
+              *d_ptr = new;
             }
         }
     }

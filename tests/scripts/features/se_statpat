@@ -6,6 +6,7 @@ $details = "";
 # Test #1: automatic variables.
 #
 run_make_test('
+.SECONDEXPANSION:
 .DEFAULT: ; @echo $@
 
 foo.a foo.b: foo.%: bar.% baz.%
@@ -41,6 +42,7 @@ a.6
 # Test #2: target/pattern -specific variables.
 #
 run_make_test('
+.SECONDEXPANSION:
 .DEFAULT: ; @echo $@
 
 foo.x foo.y: foo.%: $$(%_a) $$($$*_b)
@@ -60,6 +62,7 @@ baz
 # Test #3: order of prerequisites.
 #
 run_make_test('
+.SECONDEXPANSION:
 .DEFAULT: ; @echo $@
 
 all: foo.a bar.a baz.a
@@ -106,6 +109,7 @@ baz.a.2
 # Test #4: Make sure stem triple-expansion does not happen.
 #
 run_make_test('
+.SECONDEXPANSION:
 foo$$bar: f%r: % $$*.1
 	@echo \'$*\'
 

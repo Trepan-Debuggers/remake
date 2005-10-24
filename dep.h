@@ -40,6 +40,7 @@ struct dep
     struct file *file;
     unsigned int changed : 8;
     unsigned int ignore_mtime : 1;
+    unsigned int staticpattern : 1;
     unsigned int need_2nd_expansion : 1;
   };
 
@@ -72,7 +73,8 @@ extern struct nameseq *ar_glob PARAMS ((char *arname, char *member_pattern, unsi
 extern char *dep_name ();
 #endif
 
-extern struct dep *copy_dep_chain PARAMS ((struct dep *d));
+extern struct dep *copy_dep_chain PARAMS ((const struct dep *d));
+extern void free_dep_chain PARAMS ((struct dep *d));
 extern void free_ns_chain PARAMS ((struct nameseq *n));
 extern struct dep *read_all_makefiles PARAMS ((char **makefiles));
 extern int eval_buffer PARAMS ((char *buffer));

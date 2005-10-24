@@ -18,15 +18,21 @@ Version 3.81beta3
 
 * WARNING: Backward-incompatibility!
   GNU make now implements a generic "second expansion" feature on the
-  prerequisites of both explicit and implicit (pattern) rules.  After
-  all rules have been parsed the prerequisites are expanded again, this
-  time with all the automatic variables in scope.  This means that in
-  addition to using standard SysV $$@ in prerequisites lists, you can
-  also use complex functions such as $$(notdir $$@) etc.  This behavior
-  applies to implicit rules, as well, where the second expansion occurs
-  after the rule is matched.  However, this means that you need to
-  double-quote any "$" in your filenames; instead of "foo: boo$$bar" you
-  now must write "foo: foo$$$$bar".
+  prerequisites of both explicit and implicit (pattern) rules.  In order
+  to enable this feature, the special target '.SECONDEXPANSION' must be
+  defined before the first target which takes advantage of it.  If this
+  feature is enabled then after all rules have been parsed the
+  prerequisites are expanded again, this time with all the automatic
+  variables in scope.  This means that in addition to using standard
+  SysV $$@ in prerequisites lists, you can also use complex functions
+  such as $$(notdir $$@) etc.  This behavior applies to implicit rules,
+  as well, where the second expansion occurs when the rule is matched.
+  However, this means that you need to double-quote any "$" in your
+  filenames; instead of "foo: boo$$bar" you now must write "foo:
+  foo$$$$bar".  Note that the SysV $$@ etc. feature, which used to be
+  available by default, is now ONLY available when the .SECONDEXPANSION
+  target is defined.  If your makefiles take advantage of this SysV
+  feature you will need to update them.
 
 * WARNING: Backward-incompatibility!
   In order to comply with POSIX, the way in which GNU make processes

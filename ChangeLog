@@ -1,3 +1,39 @@
+2005-10-24  Paul D. Smith  <psmith@gnu.org>
+
+	Make secondary expansion optional: its enabled by declaring the
+	special target .SECONDEXPANSION.
+
+	* NEWS: Update information on second expansion capabilities.
+	* doc/make.texi (Secondary Expansion): Document the
+	.SECONDEXPANSION special target and its behavior.
+	* dep.h (struct dep): Add a flag STATICPATTERN, set to true if the
+	prerequisite list was found in a static pattern rule.
+	(free_dep_chain): Declare a prototype.
+	* file.c (parse_prereqs): New function: break out some complexity
+	from expand_deps().
+	(expand_deps): If we aren't doing second expansion, replace % with
+	the stem for static pattern rules.  Call the new function.
+	* filedef.h (parse_prereqs): Declare a prototype.
+	* implicit.c (pattern_search): Initialize the new staticpattern
+	field.
+	* main.c (second_expansion): Declare a global variable to remember
+	if the special target has been seen.  Initialize the new
+	staticpattern field for prerequisites.
+	* make.h: Extern for second_expansion.
+	* misc.c (free_dep_chain): New function: frees a struct dep list.
+	* read.c (read_all_makefiles): Initialize the staticpattern field.
+	(eval_makefile): Ditto.
+	(record_files): Check for the .SECONDEXPANSION target and set
+	second_expansion global if it's found.
+	Use the new free_dep_chain() instead of doing it by hand.
+	Set the staticpattern field for prereqs of static pattern targets.
+
+2005-10-16  Paul D. Smith  <psmith@gnu.org>
+
+	* main.c (main): Set CURDIR to be a file variable instead of a
+	default, so that values of CURDIR inherited from the environment
+	won't override the make value.
+
 2005-09-26  Paul D. Smith  <psmith@gnu.org>
 
 	* job.c (construct_command_argv_internal): If the line is empty

@@ -3,9 +3,29 @@ $description = "Test second expansion in ordinary rules.";
 
 $details = "";
 
-# Test #1: automatic variables.
+# TEST #0: Test handing of '$' in prerequisites with and without second
+# expansion.
+
+run_make_test(q!
+ifdef SE
+  .SECONDEXPANSION:
+endif
+foo$$bar: bar$$baz bar$$biz ; @echo '$@ : $^'
+PRE = one two
+bar$$baz: $$(PRE)
+baraz: $$(PRE)
+PRE = three four
+.DEFAULT: ; @echo '$@'
+!,
+              '',
+              "\$\nbar\$biz\nfoo\$bar : bar\$baz bar\$biz");
+
+run_make_test(undef, 'SE=1', "three\nfour\nbariz\nfoo\$bar : baraz bariz");
+
+# TEST #1: automatic variables.
 #
 run_make_test('
+.SECONDEXPANSION:
 .DEFAULT: ; @echo $@
 
 foo: bar baz
@@ -41,6 +61,7 @@ buz.5
 # Test #2: target/pattern -specific variables.
 #
 run_make_test('
+.SECONDEXPANSION:
 .DEFAULT: ; @echo $@
 
 foo.x: $$a $$b
@@ -59,6 +80,7 @@ baz
 # Test #3: order of prerequisites.
 #
 run_make_test('
+.SECONDEXPANSION:
 .DEFAULT: ; @echo $@
 
 all: foo bar baz
