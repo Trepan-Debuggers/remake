@@ -1,3 +1,15 @@
+2005-10-24  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/misc/general4: Test '$$' in prerequisites list.
+	* scripts/features/statipattrules: Rewrite to use run_make_test().
+	Add various static pattern info.
+	* scripts/features/se_statpat: Enable .SECONDEXPANSION target.
+	* scripts/features/se_explicit: Add tests for handling '$$' in
+	prerequisite lists with and without setting .SECONDEXPANSION.
+	* scripts/features/order_only: Convert to run_make_test().
+	* run_make_tests.pl (set_more_defaults): If we can't get the value
+	of $(MAKE) from make, then fatal immediately.
+
 2005-08-31  Paul D. Smith  <psmith@gnu.org>
 
 	* run_make_tests.pl (get_this_pwd): Require the POSIX module (in

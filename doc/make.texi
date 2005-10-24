@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.35 2005/08/08 05:08:00 psmith Exp $
+@set RCSID $Id: make.texi,v 1.36 2005/10/24 13:01:40 psmith Exp $
 @set EDITION 0.70
 @set VERSION 3.81
 @set UPDATED 07 May 2005
@@ -1612,22 +1612,31 @@ static pattern rules, and simple prerequisite definitions.
 @cindex secondary expansion
 @cindex expansion, secondary
 
+@findex .SECONDEXPANSION
 In the previous section we learned that GNU @code{make} works in two
 distinct phases: a read-in phase and a target-update phase
-(@pxref{Reading Makefiles, , How @code{make} Reads a Makefile}).
-There is an extra wrinkle that comes in between those two phases,
-right at the end of the read-in phase: at that time, all the
-prerequisites of all of the targets are expanded a @emph{second time}.
-In most circumstances this secondary expansion will have no effect,
-since all variable and function references will have been expanded
-during the initial parsing of the makefiles.  In order to take
-advantage of the secondary expansion phase of the parser, then, it's
-necessary to @emph{escape} the variable or function reference in the
-makefile.  In this case the first expansion merely un-escapes the
-reference but doesn't expand it, and expansion is left to the
-secondary expansion phase.  For example, consider this makefile:
+(@pxref{Reading Makefiles, , How @code{make} Reads a Makefile}).  GNU
+make also has the ability to enable a @emph{second expansion} of the
+prerequisites (only) for some or all targets defined in the makefile.
+In order for this second expansion to occur, the special target
+@code{.SECONDEXPANSION} must be defined before the first prerequisite
+list that makes use of this feature.
+
+If that special target is defined then in between the two phases
+mentioned above, right at the end of the read-in phase, all the
+prerequisites of the targets defined after the special target are
+expanded a @emph{second time}.  In most circumstances this secondary
+expansion will have no effect, since all variable and function
+references will have been expanded during the initial parsing of the
+makefiles.  In order to take advantage of the secondary expansion
+phase of the parser, then, it's necessary to @emph{escape} the
+variable or function reference in the makefile.  In this case the
+first expansion merely un-escapes the reference but doesn't expand it,
+and expansion is left to the secondary expansion phase.  For example,
+consider this makefile:
 
 @example
+.SECONDEXPANSION:
 ONEVAR = onefile
 TWOVAR = twofile
 myfile: $(ONEVAR) $$(TWOVAR)
@@ -1651,6 +1660,7 @@ appear, unescaped, in the prerequisites list.  One difference becomes
 apparent if the variables are reset; consider this example:
 
 @example
+.SECONDEXPANSION:
 AVAR = top
 onefile: $(AVAR)
 twofile: $$(AVAR)
@@ -1670,10 +1680,11 @@ target.  This means that you can use variables such as @code{$@@},
 expected values, just as in the command script.  All you have to do is
 defer the expansion by escaping the @code{$}.  Also, secondary
 expansion occurs for both explicit and implicit (pattern) rules.
-Knowing this, the possible uses for this feature are almost endless.
-For example:
+Knowing this, the possible uses for this feature increase
+dramatically.  For example:
 
 @example
+.SECONDEXPANSION:
 main_OBJS := main.o try.o test.o
 lib_OBJS := lib.o api.o
 
@@ -1694,6 +1705,7 @@ You can also mix functions here, as long as they are properly escaped:
 main_SRCS := main.c try.c test.c
 lib_SRCS := lib.c api.c
 
+.SECONDEXPANSION:
 main lib: $$(patsubst %.c,%.o,$$($$@@_SRCS))
 @end example
 
@@ -1723,6 +1735,8 @@ the same target (@code{$$+} with repetitions and @code{$$^}
 without). The following example will help illustrate these behaviors:
 
 @example
+.SECONDEXPANSION:
+
 foo: foo.1 bar.1 $$< $$^ $$+    # line #1
 
 foo: foo.2 bar.2 $$< $$^ $$+    # line #2
@@ -1763,6 +1777,8 @@ target pattern.  The value of the automatic variables is derived in
 the same fashion as for static pattern rules.  As an example:
 
 @example
+.SECONDEXPANSION:
+
 foo: bar
 
 foo foz: fo%: bo%
@@ -1781,6 +1797,8 @@ expansion) to all the patterns in the prerequisites list.  As an
 example:
 
 @example
+.SECONDEXPANSION:
+
 /tmp/foo.o:
 
 %.o: $$(addsuffix /%.c,foo bar) foo.h
@@ -2879,6 +2897,18 @@ intermediate files, except that they are never automatically deleted.
 @code{.SECONDARY} with no prerequisites causes all targets to be treated
 as secondary (i.e., no target is removed because it is considered
 intermediate).
+
+@findex .SECONDEXPANSION
+@item .SECONDEXPANSION
+
+If @code{.SECONDEXPANSION} is mentioned as a target anwyeren in the
+makefile, then all prerequisite lists defined @emph{after} it appears
+will be expanded a second time after all makefiles have been read in.
+@xref{Secondary Expansion, ,Secondary Expansion}.
+
+The prerequisites of the special target @code{.SUFFIXES} are the list
+of suffixes to be used in checking for suffix rules.
+@xref{Suffix Rules, , Old-Fashioned Suffix Rules}.
 
 @findex .DELETE_ON_ERROR
 @item .DELETE_ON_ERROR

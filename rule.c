@@ -206,6 +206,7 @@ convert_suffix_rule (char *target, char *source, struct commands *cmds)
       deps->next = 0;
       deps->name = depname;
       deps->ignore_mtime = 0;
+      deps->staticpattern = 0;
       deps->need_2nd_expansion = 0;
     }
 
@@ -476,8 +477,8 @@ create_pattern_rule (char **targets, char **target_percents,
 		     int terminal, struct dep *deps,
                      struct commands *commands, int override)
 {
-  register struct rule *r = (struct rule *) xmalloc (sizeof (struct rule));
-  register unsigned int max_targets, i;
+  unsigned int max_targets, i;
+  struct rule *r = (struct rule *) xmalloc (sizeof (struct rule));
 
   r->cmds = commands;
   r->deps = deps;

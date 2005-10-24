@@ -84,17 +84,16 @@ struct file
     unsigned int is_target:1;	/* Nonzero if file is described as target.  */
     unsigned int cmd_target:1;	/* Nonzero if file was given on cmd line.  */
     unsigned int phony:1;	/* Nonzero if this is a phony file
-				   i.e., a dependency of .PHONY.  */
+				   i.e., a prerequisite of .PHONY.  */
     unsigned int intermediate:1;/* Nonzero if this is an intermediate file.  */
-    /* Nonzero, for an intermediate file,
-       means remove_intermediates should not delete it.  */
-    unsigned int secondary:1;
+    unsigned int secondary:1;   /* Nonzero means remove_intermediates should
+                                   not delete it.  */
     unsigned int dontcare:1;	/* Nonzero if no complaint is to be made if
 				   this target cannot be remade.  */
     unsigned int ignore_vpath:1;/* Nonzero if we threw out VPATH name.  */
     unsigned int pat_searched:1;/* Nonzero if we already searched for
                                    pattern-specific variables.  */
-    unsigned int considered:1;  /* equal to `considered' if file has been
+    unsigned int considered:1;  /* equal to 'considered' if file has been
                                    considered on current scan of goal chain */
   };
 
@@ -105,6 +104,7 @@ extern char **default_goal_name;
 
 extern struct file *lookup_file PARAMS ((char *name));
 extern struct file *enter_file PARAMS ((char *name));
+extern struct dep *parse_prereqs PARAMS ((char *prereqs));
 extern void remove_intermediates PARAMS ((int sig));
 extern void snap_deps PARAMS ((void));
 extern void rename_file PARAMS ((struct file *file, char *name));

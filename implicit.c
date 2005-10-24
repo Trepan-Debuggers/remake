@@ -477,12 +477,6 @@ pattern_search (struct file *file, int archive,
 
 	  /* Try each dependency; see if it "exists".  */
 
-          /* @@ There is always only one dep line for any given implicit
-                rule. So the loop is not necessary. Can rule->deps be 0?
-
-                Watch out for conversion of suffix rules to implicit rules.
-          */
-
 	  for (dep = rule->deps; dep != 0; dep = dep->next)
 	    {
               unsigned int len;
@@ -513,7 +507,7 @@ pattern_search (struct file *file, int archive,
                      we just replace % with the stem value, later, when we do
                      the second expansion, we will re-expand this stem value
                      once again. This is not good especially if you have
-                     certain characters in your setm (like $).
+                     certain characters in your stem (like $).
 
                      Instead, we will replace % with $* and allow the second
                      expansion to take care of it for us. This way (since $*
@@ -836,6 +830,7 @@ pattern_search (struct file *file, int archive,
 
       dep = (struct dep *) xmalloc (sizeof (struct dep));
       dep->ignore_mtime = d->ignore_mtime;
+      dep->staticpattern = 0;
       dep->need_2nd_expansion = 0;
       s = d->name; /* Hijacking the name. */
       d->name = 0;
@@ -917,6 +912,7 @@ pattern_search (struct file *file, int archive,
 	  struct dep *new = (struct dep *) xmalloc (sizeof (struct dep));
 	  /* GKM FIMXE: handle '|' here too */
 	  new->ignore_mtime = 0;
+          new->staticpattern = 0;
 	  new->need_2nd_expansion = 0;
 	  new->name = p = (char *) xmalloc (rule->lens[i] + fullstemlen + 1);
 	  bcopy (rule->targets[i], p,
@@ -928,12 +924,12 @@ pattern_search (struct file *file, int archive,
 		 rule->lens[i] - (rule->suffixes[i] - rule->targets[i]) + 1);
 	  new->file = enter_file (new->name);
 	  new->next = file->also_make;
-	  
+
 	  /* Set precious flag. */
 	  f = lookup_file (rule->targets[i]);
 	  if (f && f->precious)
             new->file->precious = 1;
-	  
+
 	  file->also_make = new;
 	}
 
