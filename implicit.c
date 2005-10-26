@@ -484,13 +484,13 @@ pattern_search (struct file *file, int archive,
               unsigned int order_only = 0; /* Set if '|' was seen. */
 
               /* In an ideal world we would take the dependency line,
-                 substitute the stem, re-expand the whole line and
-                 chop it into individual prerequisites. Unfortunately
-                 this won't work because of the "check_lastslash" twist.
-                 Instead, we will have to go word by word, taking $()'s
-                 into account, for each word we will substitute the stem,
-                 re-expand, chop it up, and, if check_lastslash != 0,
-                 add the directory part to each resulting prerequisite.  */
+                 substitute the stem, re-expand the whole line and chop it
+                 into individual prerequisites. Unfortunately this won't work
+                 because of the "check_lastslash" twist.  Instead, we will
+                 have to go word by word, taking $()'s into account, for each
+                 word we will substitute the stem, re-expand, chop it up, and,
+                 if check_lastslash != 0, add the directory part to each
+                 resulting prerequisite.  */
 
               p = get_next_word (dep->name, &len);
 
@@ -555,8 +555,8 @@ pattern_search (struct file *file, int archive,
                                           1), sizeof (struct idep));
 
                       /* @@ It would be nice to teach parse_file_seq or
-                         multi_glob to add prefix. This would save us
-                         some reallocations. */
+                         multi_glob to add prefix. This would save us some
+                         reallocations. */
 
                       if (order_only || add_dir || had_stem)
                         {
@@ -612,10 +612,9 @@ pattern_search (struct file *file, int archive,
 
               if (file_impossible_p (name))
                 {
-                  /* If this dependency has already been ruled
-                     "impossible", then the rule fails and don't
-                     bother trying it on the second pass either
-                     since we know that will fail too.  */
+                  /* If this dependency has already been ruled "impossible",
+                     then the rule fails and don't bother trying it on the
+                     second pass either since we know that will fail too.  */
                   DBS (DB_IMPLICIT,
                        (d->had_stem
                         ? _("Rejecting impossible implicit prerequisite `%s'.\n")
@@ -632,10 +631,9 @@ pattern_search (struct file *file, int archive,
                     ? _("Trying implicit prerequisite `%s'.\n")
                     : _("Trying rule prerequisite `%s'.\n"), name));
 
-              /* If this prerequisite also happened to be explicitly
-                 mentioned for FILE skip all the test below since it
-                 it has to be built anyway, no matter which implicit
-                 rule we choose. */
+              /* If this prerequisite also happened to be explicitly mentioned
+                 for FILE skip all the test below since it it has to be built
+                 anyway, no matter which implicit rule we choose. */
 
               for (expl_d = file->deps; expl_d != 0; expl_d = expl_d->next)
                 if (strcmp (dep_name (expl_d), name) == 0) break;
@@ -675,9 +673,9 @@ pattern_search (struct file *file, int archive,
                 }
 
 
-              /* We could not find the file in any place we should look.
-                 Try to make this dependency as an intermediate file,
-                 but only on the second pass.  */
+              /* We could not find the file in any place we should look.  Try
+                 to make this dependency as an intermediate file, but only on
+                 the second pass.  */
 
               if (intermed_ok)
                 {

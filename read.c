@@ -1969,7 +1969,8 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
              the last one.  It is not safe for the same deps to go in more
              than one place in the database.  */
           this = nextf != 0 ? copy_dep_chain (deps) : deps;
-          this->need_2nd_expansion = second_expansion;
+          this->need_2nd_expansion = (second_expansion
+				      && strchr (this->name, '$'));
         }
 
       if (!two_colon)
@@ -2129,9 +2130,12 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
     {
       targets[target_idx] = 0;
       target_percents[target_idx] = 0;
-      deps->need_2nd_expansion = second_expansion;
-      /* We set this to indicate we've not yet parsed the prereq string.  */
-      deps->staticpattern = 1;
+      if (deps)
+	{
+	  deps->need_2nd_expansion = second_expansion;
+	  /* We set this to indicate the prereq string hasn't been parsed.  */
+	  deps->staticpattern = 1;
+	}
       create_pattern_rule (targets, target_percents, two_colon, deps, cmds, 1);
       free ((char *) target_percents);
     }

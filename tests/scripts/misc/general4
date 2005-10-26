@@ -48,10 +48,9 @@ run_make_test(q!
 %.foo : baz$$bar ; @echo 'done $<'
 %.foo : bar$$baz ; @echo 'done $<'
 test.foo:
-fox: baz
-.DEFAULT baz$$bar bar$$baz: ; @echo '$@'
+baz$$bar bar$$baz: ; @echo '$@'
 !,
               '',
-              'done bar');
+              "baz\$bar\ndone baz\$bar");
 
 1;
