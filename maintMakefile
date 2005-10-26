@@ -13,7 +13,8 @@ TEMPLATES = README README.DOS README.W32 README.OS2 \
 	    config.ami configh.dos config.h.W32 config.h-vms
 MTEMPLATES = Makefile.DOS SMakefile
 
-all-am: $(TEMPLATES) $(MTEMPLATES) build.sh.in
+# These are built as a side-effect of the dist rule
+#all-am: $(TEMPLATES) $(MTEMPLATES) build.sh.in
 
 # General rule for turning a .template into a regular file.
 #

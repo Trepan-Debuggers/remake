@@ -1,3 +1,9 @@
+2005-10-26  Paul Smith  <psmith@gnu.org>
+
+	* read.c (record_files): Don't set deps flags if there are no deps.
+	* maintMakefile: We only need to build the templates when we are
+	creating a distribution, so don't do it for "all".
+
 2005-10-24  Paul D. Smith  <psmith@gnu.org>
 
 	Make secondary expansion optional: its enabled by declaring the
