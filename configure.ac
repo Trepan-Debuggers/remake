@@ -6,7 +6,7 @@ AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.13 2005/11/13 23:02:26 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.14 2005/11/13 23:15:11 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -216,6 +216,7 @@ if test "$enable_readline" = yes; then
    VL_LIB_READLINE
    AC_MSG_CHECKING(for tilde_expand() in <readline/readline.h>)
    AC_TRY_RUN([
+#include <stdio.h>
 #include <readline/readline.h>
 
 int main(int argc, char **argv) {
