@@ -208,7 +208,6 @@ To understand this better here is a simple small Makefile with an invalid
 shell command in it:
 
 @smallexample
-@cartouche
 1: # 
 2: SHELL=/bin/bash
 3: 
@@ -216,13 +215,11 @@ shell command in it:
 5: 
 6: foo:
 7:         fdafds
-@end cartouche
 @end smallexample 
 
 Now let's see what happens when we run ``debug'' from an unpatched @value{MAKE}:
 
 @smallexample
-@cartouche
 $ @b{/usr/bin/make -d -f test1}
 
 
@@ -274,7 +271,6 @@ Live child 0x08072958 (foo) PID 9920
 Reaping losing child 0x08072958 PID 9920 
 make: *** [foo] Error 127
 Removing child 0x08072958 PID 9920  from chain.
-@end cartouche
 @end smallexample 
 
 Clearly this information referring to rule stems, implicit
@@ -298,7 +294,6 @@ But now let's try the new kind of trace we prove in this patched
 short-form option format @code{-x}
 
 @smallexample
-@cartouche
 $ @b{make --trace -f /tmp/test1}
 Reading makefiles...
 Updating goal targets....
@@ -310,7 +305,6 @@ Updating goal targets....
 	fdafds
 /bin/bash: fdafds: command not found
 /tmp/test1:7: *** [foo] Error 127
-@end cartouche
 @end smallexample 
 
 Notice there is some debug output that is the same as the first run.
@@ -331,7 +325,6 @@ to run line 7. there is another option @code{--extended-errors} or
 error. For the above it looks like this:
 
 @smallexample
-@cartouche
 $ @b{make --extended-errors -x -f test1}
 Reading makefiles...
 Updating goal targets....
@@ -346,7 +339,6 @@ Updating goal targets....
 
 #0  foo at /tmp/test1:7
 #1  all at /tmp/test1:4
-@end cartouche
 @end smallexample 
 
 So we were working on target ``foo'' on line 7 of file test1 which was
@@ -356,26 +348,22 @@ Now let's go into the debugger itself.  For this use the --debugger or
 -X option.
 
 @smallexample
-@cartouche
 $  @b{./make --debugger}
 Reading makefiles...
 
 /home/src/external-cvs/remake/src/Makefile:254: Makefile.in
-@end cartouche
 @end smallexample 
 
 Let's see where we are. In particular is this @emph{really} the top-level
 target? The @code{where} command shows you the target call stack:
 
 @smallexample
-@cartouche
 makedb<0> @b{where}
 
 =>#0  Makefile.in at /tmp/remake/src/Makefile:254
   #1  Makefile at /tmp/remake/src/Makefile:267
 
 /tmp/remake/src/Makefile:254: Makefile.in
-@end cartouche
 @end smallexample 
 
 No, we was triggered by checking dependecies from Makefile. And that
@@ -383,7 +371,6 @@ was triggered by checking dependencies of ``all.'' (There's a bug in
 our debugger currently in that it doesn't show ``all.'')
 
 @smallexample
-@cartouche
 makedb<1> @b{step}
 
 /tmp/remake/src/Makefile:281: ../aclocal.m4
@@ -392,7 +379,6 @@ makedb<2> where
 =>#0  ../aclocal.m4 at /tmp/remake/src/Makefile:281
   #1  Makefile.in at /tmp/remake/src/Makefile:254
   #2  Makefile at /tmp/remake/src/Makefile:267
-@end cartouche
 @end smallexample 
 
 To get information about the make "target" we can use the @code{target}
@@ -400,7 +386,6 @@ command:
 
 
 @smallexample
-@cartouche
 makedb<3> @b{target}
 
 ../aclocal.m4: ../config/readline.m4 ../lib-ld.m4 ../lib-link.m4 ../lib-prefix.m4 ../acinclude.m4 ../configure.ac | ../gettext.m4 ../iconv.m4 ../progtest.m4
@@ -412,9 +397,7 @@ makedb<3> @b{target}
 
 
 /tmp/remake/src/Makefile:281: ../aclocal.m4
-@end cartouche
 @end smallexample 
-
 
 I could have gotten the same output explicitly giving a target name
 such as @code{target ../aclocal.m4}.
@@ -424,7 +407,6 @@ to be remade and this is a dependency of target @code{all-am}. We
 don't have to be stopped on a target to get information about it:
 
 @smallexample
-@cartouche
 makedb<3> @b{target all-am}
 
 target all-am
@@ -436,7 +418,6 @@ all-am: Makefile make loadavg commands.h dbg_cmd.h dep.h expand.h filedef.h func
 #  File has not been updated.
 
 /tmp/remake/src/Makefile:250: all
-@end cartouche
 @end smallexample 
 
 However information may change depending on where Make is. In
@@ -447,8 +428,6 @@ If all of this is proceding too slowly, could set a
 this:
 
 @smallexample
-@cartouche
-
 makedb<4> @b{restart}
 Changing directory to /tmp/remake/src and restarting...
 
@@ -458,7 +437,6 @@ makedb<0> @b{break all-am}
 Breakpoint on target all-am set.
 
 /tmp/remake/src/Makefile:254: Makefile.in
-@end cartouche
 @end smallexample 
 
 The @code{restart} command was used to restart execution since we've
@@ -466,7 +444,6 @@ already passed considering the "all-am" target. So let's @code{continue}
 execution and see what happens:
 
 @smallexample
-@cartouche
 
 makedb<1> @b{continue}
 
@@ -478,7 +455,6 @@ makedb<1> where
 
 =>#0  all-am at /tmp/remake/src/Makefile:461
   #1  all at /tmp/remake/src/Makefile:250
-@end cartouche
 @end smallexample 
 
 We've seen we can get information about @value{MAKE}'s targets.  We
@@ -486,12 +462,10 @@ can also get information about @value{MAKE}'s variables. That is done
 also with the @code{print} command.
 
 @smallexample
-@cartouche
   /tmp/remake/src/Makefile:383: all-am
   makedb<4> print MAKE
 
   (null):0 MAKE = $(MAKE_COMMAND)
-@end cartouche
 @end smallexample 
 
 The @code{(null):0} means this is a built-in definition. However there is
@@ -499,9 +473,7 @@ another print which does full expansion of the variables. So if I run
 @code{x} (@code{examine}) instead I get: 
 
 @smallexample
-@cartouche
   (null):0 MAKE = /src/local-cvs/remake/src/./make
-@end cartouche
 @end smallexample 
 
 In fact, @code{examine} doesn't need a variable name, it will work with a
@@ -509,9 +481,7 @@ string. So I could type ``@code{x This is $(MAKE)}'' or
 ``@code{x $(bin_PROGRAMS) $(noinst_PROGRAMS)}''. For the latter, I get:
 
 @smallexample
-@cartouche
   make loadavg
-@end cartouche
 @end smallexample 
 
 Note, no location identification is given here (since what I put in
@@ -521,7 +491,6 @@ But I can also @emph{change} values too using either @code{set} or
 @code{setq}. Let's see the difference between the two. 
 
 @smallexample
-@cartouche
   makedb<5> @b{set variable MAKE $(MAKE_COMMAND)}
   Variable MAKE now has value '/tmp/remake/src/./make'
 
@@ -529,7 +498,6 @@ But I can also @emph{change} values too using either @code{set} or
 
   makedb<6> @b{setq MAKE $(MAKE_COMMAND)}
   Variable MAKE now has value '$(MAKE_COMMAND)'
-@end cartouche
 @end smallexample 
 
 So with @code{set}, the value in the expression @code{$(MAKE_COMMAND)}
@@ -542,9 +510,7 @@ equal sign (@code{=}) between the variable and the expression. That
 is, @code{set variable MAKE = $(MAKE_COMMAND)}" gives:
 
 @smallexample
-@cartouche
   Variable MAKE now has value '= /tmp/remake/src/./make'
-@end cartouche
 @end smallexample 
 
 which is probably not what you want.  Also note that although you need

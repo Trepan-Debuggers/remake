@@ -4,12 +4,14 @@
 ## Copyright 2002, 2004 Free Software Foundation, Inc.
 
 TEXI2HTML = texi2html
-TEXI2HTML_FLAGS = -split_chapter
+TEXI2PDF = texi2dvi --pdf
 
 info_TEXINFOS =	make.texi makedb.texi
 make_TEXINFOS = fdl.texi make-stds.texi
 
-CLEANFILES = make*.html
+MOSTLYCLEANFILES = make.tgs make.pdf make.html makedb.cps makedb.kys makedb.html makedb.fns makedb.ps.gz makedb.pdf 
+
+CLEANFILES = make*.html make*.info
 
 # Extra stuff to include in the distribution.
 
@@ -25,9 +27,12 @@ reference:
 doxygen:
 	-( cd ${top_srcdir}/doc/doxygen && /bin/sh ${srcdir}/run_doxygen )
 
-html: make_1.html
+html: make.html makedb.html
 
-make_1.html: $(info_TEXINFOS) $(make_TEXINFOS)
-	-$(TEXI2HTML) $(TEXI2HTML_FLAGS) $(srcdir)/make.texi
+.texi.html:
+	texi2html $<
 
-.PHONY: html
+.texi.txt:
+	makeinfo --no-headers $< > $@
+
+
