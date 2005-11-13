@@ -10,18 +10,38 @@ See the README file and the GNU remake manual for details on sending bug
 reports.
 
 Version 3.80+dbg-0.3cvs
-*  trace override silent
 
-RGP:  (remake@rich-paul.net)
+* "list" command renamed to "target". A future "list" command will 
+  look more like gdb.
 
-*  fixed compilation issue on systems that have readline, but do not
-	have termcap.
+* Allow abbreviations of debugger command attributes. As a result some
+  attributes were renamed slighly, e.g. vars -> variables, deps ->
+  depends, cmds -> commands. But note that since substrings are
+  allowed, "command" and "com", and even "c" is the same as
+  "commands".
+
+* tracing adds GNU Make "basic" debugging. If debugging, then we also
+  enter the debugger read loop. Hopefully this adds more granularity
+  but not the diarrhea that "make -d" gives. To reduce this "next"
+  could be used to skip over remaking targets that don't have
+  commands.
+
+* Make option --trace (-x) overrules using the --silent option and
+  not echoing @ commands.
+
+* fixed compilation issue(s) on systems that have readline, but do not
+  have termcap.
 	
-*  fixed failure of enter_debugger to exit on an empty line from readline.
+* fixed failure of enter_debugger to exit on an empty line from
+  readline.
+
+* OS/X compilations fixes
+
 
 Version 3.80+dbg-0.2
-*  Add ability to print specified attributes of a target, e.g. "time",
-  "deps", "vars"... 
+
+* Add ability to print specified attributes of a target, e.g. "time",
+  "deps", "vars"...
 
 * Improve reporting target locations.
 
@@ -31,9 +51,9 @@ Version 3.80+dbg-0.2
   with MAKE variables expanded, or show that inside a debugger
   session.
 
-* Separate info from show. Make these act more like they do n gdb
+* Separate info from show. Make these act more like they do in gdb
 
-* Stay in debugger when a makefile exits.
+* Stay in debugger when a Makefile exits.
 
 * First debugger documentation.
 

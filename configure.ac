@@ -6,7 +6,7 @@ AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.11 2005/04/16 23:01:19 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.12 2005/11/13 16:16:35 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -42,6 +42,9 @@ AC_CANONICAL_HOST
 AC_AIX
 AC_ISC_POSIX
 AC_MINIX
+
+AM_MISSING_PROG(CVS2CL, cvs2cl, $missing_dir)
+AM_MAINTAINER_MODE
 
 # Enable gettext, in "external" mode.
 

@@ -1242,7 +1242,8 @@ main (int argc, char **argv, char **envp)
 
   /* Print version information.  */
 
-  if (print_version_flag || print_data_base_flag || db_level)
+  if (print_version_flag || print_data_base_flag || 
+      (db_level && !(debugger_opts || tracing)))
     print_version ();
 
   /* `make --version' is supposed to just print the version and exit.  */

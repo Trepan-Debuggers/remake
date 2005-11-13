@@ -1,7 +1,6 @@
 # This is a -*-Makefile-*-, or close enough
 
 AUTOMAKE_OPTIONS = dist-bzip2 check-news
-ACLOCAL_AMFLAGS	=  -I config
 
 SUBDIRS =	glob config po doc src emacs
 
@@ -15,7 +14,7 @@ man_MANS =	make.1
 EXTRA_DIST =	README build.sh.in $(man_MANS) \
 		README.customs README.makedb getloadavg.c \
 		SCOPTIONS SMakefile\
-		README.W32 TODO
+		README.W32 TODO ChangeLog.GNUMake
 
 MAKE_HOST =	@MAKE_HOST@
 
@@ -24,8 +23,6 @@ MAKE_HOST =	@MAKE_HOST@
 
 html:
 	cd doc && $(MAKE) $(AM_MAKEFLAGS) $@
-
-.PHONY: html
 
 # --------------- Internationalization Section
 
@@ -116,4 +113,23 @@ check-regression:
 
 # --------------- Maintainer's Section
 
+# cvs2cl
+MAINTAINERCLEANFILES = ChangeLog
+
 @MAINT_MAKEFILE@
+
+if MAINTAINER_MODE
+
+.PHONY: html ChangeLog
+ChangeLog:
+	$(CVS2CL) -W 450 --header $(srcdir)/cvs2cl_header --utc -w -I ChangeLog --usermap $(srcdir)/cvs2cl_usermap -P 
+
+ACLOCAL_AMFLAGS= -I . -I config
+
+else 
+.PHONY: html
+
+ACLOCAL_AMFLAGS	=  -I config
+
+endif
+
