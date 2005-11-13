@@ -246,8 +246,13 @@ sub set_more_defaults
    # Find the full pathname of Make.  For DOS systems this is more
    # complicated, so we ask make itself.
 
-   $make_path = `sh -c 'echo "all:;\@echo \\\$(MAKE)" | $make_path -f-'`;
-   chop $make_path;
+   my $mk = `sh -c 'echo "all:;\@echo \\\$(MAKE)" | $make_path -f-'`;
+   chomp $mk;
+   if ($mk) {
+       $make_path = $mk;
+   } else {
+       $make_path = glob($make_path);
+   }
    print "Make\t= `$make_path'\n" if $debug;
 
    $string = `$make_path -v -f /dev/null 2> /dev/null`;
