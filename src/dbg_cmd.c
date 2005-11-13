@@ -244,6 +244,23 @@ get_int(const char *psz_arg, int *result)
   return 1;
 }
 
+static unsigned int
+get_uint(const char *psz_arg, unsigned int *result) 
+{
+  unsigned int i;
+  char *endptr;
+  
+  if (!psz_arg || 0==strlen(psz_arg)) return 0;
+
+  i = strtol(psz_arg, &endptr, 10);
+  if (*endptr != '\0') {
+    printf("expecting %s to be an integer\n", psz_arg);
+    return 0;
+  }
+  *result = i;
+  return 1;
+}
+
 static void 
 cmd_initialize(void) 
 {
@@ -718,7 +735,7 @@ static debug_return_t dbg_cmd_step (char *psz_arg)
     debugger_stepping = 1;
     return continue_execution;
   } 
-  if (get_int(psz_arg, &debugger_stepping)) 
+  if (get_uint(psz_arg, &debugger_stepping)) 
     return continue_execution;
   else 
     return continue_execution;
@@ -1173,7 +1190,7 @@ static debug_return_t dbg_cmd_frame_up (char *psz_amount)
   if (!psz_amount || 0==strlen(psz_amount)) {
     i_amount = 1;
   } else {
-    if (!get_int(psz_amount, &i_amount))
+    if (!get_uint(psz_amount, &i_amount))
       return debug_read;
   }
 

@@ -48,7 +48,7 @@ Boston, MA 02111-1307, USA.  */
 # endif
 # define VA_END(args) va_end(args)
 #else
-/* # undef HAVE_STDVARARGS */
+/* We can't use any variadic interface! */
 # define va_alist a1, a2, a3, a4, a5, a6, a7, a8
 # define va_dcl char *a1, *a2, *a3, *a4, *a5, *a6, *a7, *a8;
 # define VA_START(args, lastarg)
@@ -221,7 +221,6 @@ xmalloc (unsigned int size)
   char *result = (char *) malloc (size ? size : 1);
   if (result == 0)
     fatal (NILF, _("virtual memory exhausted"));
-  setenv(result,0,size);
   return result;
 }
 
@@ -322,11 +321,11 @@ lindex (const char *s, const char *limit, int c)
 /* Return the address of the first whitespace or null in the string S.  */
 
 char *
-end_of_token (char *s)
+end_of_token (const char *s)
 {
   while (*s != '\0' && !isblank ((unsigned char)*s))
     ++s;
-  return s;
+  return (char *)s;
 }
 
 #ifdef WINDOWS32

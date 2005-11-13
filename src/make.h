@@ -385,7 +385,7 @@ extern char *xrealloc PARAMS ((char *, unsigned int));
 extern char *xstrdup PARAMS ((const char *));
 extern char *find_next_token PARAMS ((char **, unsigned int *));
 extern char *next_token PARAMS ((const char *));
-extern char *end_of_token PARAMS ((char *));
+extern char *end_of_token PARAMS ((const char *));
 extern void collapse_continuations PARAMS ((char *));
 extern void remove_comments PARAMS((char *));
 extern char *sindex PARAMS ((const char *, unsigned int, \

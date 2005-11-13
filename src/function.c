@@ -1239,7 +1239,7 @@ func_value (char *o, char **argv, const char *funcname UNUSED)
   \r  is replaced on UNIX as well. Is this desirable?
  */
 void
-fold_newlines (char *buffer, int *length)
+fold_newlines (char *buffer, unsigned int *length)
 {
   char *dst = buffer;
   char *src = buffer;

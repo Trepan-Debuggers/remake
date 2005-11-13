@@ -24,7 +24,7 @@ Boston, MA 02111-1307, USA.  */
 /*!
   \r  is replaced on UNIX as well. Is this desirable?
  */
-extern void fold_newlines (char *buffer, int *length);
+extern void fold_newlines (char *buffer, unsigned int *length);
 
 /*! Check for a function invocation in *STRINGP.  *STRINGP points at
    the opening ( or { and is not null-terminated.  If a function
