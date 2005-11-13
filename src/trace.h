@@ -31,7 +31,7 @@ typedef enum {
 			   as normal.  */
   skip_execution,       /* Get out of debug read loop, but skip execution 
 			   of next command or action. */
-  debug_read            /* Stay in debugger read loop - used only
+  debug_readloop        /* Stay in debugger read loop - used only
 			   inside debugger read loop. */
 } debug_return_t;
 

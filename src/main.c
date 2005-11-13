@@ -1187,6 +1187,7 @@ main (int argc, char **argv, char **envp)
   decode_switches (argc, argv, 0);
 
   /* debugging sets some things */
+  if (tracing) db_level |= DB_BASIC;
   if (debugger_opts) {
     char **p;
     for (p = debugger_opts->list; *p != 0; ++p)
@@ -1196,6 +1197,10 @@ main (int argc, char **argv, char **envp)
 	  job_slots          =  1;
 	  debugger_stepping  =  1;
 	  debugger_enabled   =  1;
+	  /* For now we'll do basic debugging. Later, "stepping'
+ 	     will stop here while next won't - either way no printing.
+	   */
+	  db_level          |=  DB_BASIC;
 	} 
 	if ( 0 == strcmp(*p, "full")
 	     || 0 == strcmp(*p, "error") ) {
