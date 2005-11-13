@@ -34,14 +34,16 @@ close(MAKEFILE);
 &utouch(-10, qw(foo.x baz.z));
 
 &run_make_with_options($makefile, "", &get_logfile);
+#$answer = "touch $dir/bar.y
+#\$\@ = $dir/foo.x, \$(\@D) = $dir, \$(\@F) = foo.x
+#\$* = $dir/foo, \$(*D) = $dir, \$(*F) = foo
+#\$< = baz.z, \$(<D) = ., \$(<F) = baz.z
+#\$^ = baz.z $dir/bar.y, \$(^D) = . $dir, \$(^F) = baz.z bar.y
+#\$+ = baz.z $dir/bar.y baz.z, \$(+D) = . $dir ., \$(+F) = baz.z bar.y baz.z
+#\$? = $dir/bar.y, \$(?D) = $dir, \$(?F) = bar.y
+#touch $dir/foo.x\n";
 $answer = "touch $dir/bar.y
-\$\@ = $dir/foo.x, \$(\@D) = $dir, \$(\@F) = foo.x
-\$* = $dir/foo, \$(*D) = $dir, \$(*F) = foo
-\$< = baz.z, \$(<D) = ., \$(<F) = baz.z
-\$^ = baz.z $dir/bar.y, \$(^D) = . $dir, \$(^F) = baz.z bar.y
-\$+ = baz.z $dir/bar.y baz.z, \$(+D) = . $dir ., \$(+F) = baz.z bar.y baz.z
-\$? = $dir/bar.y, \$(?D) = $dir, \$(?F) = bar.y
-touch $dir/foo.x\n";
+";
 &compare_output($answer, &get_logfile(1));
 
 unlink(qw(foo.x bar.y baz.z));

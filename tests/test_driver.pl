@@ -12,7 +12,7 @@
 # this routine controls the whole mess; each test suite sets up a few
 # variables and then calls &toplevel, which does all the real work.
 
-# $Id: test_driver.pl,v 1.4 2004/10/17 16:08:24 rockyb Exp $
+# $Id: test_driver.pl,v 1.5 2005/11/13 16:14:14 rockyb Exp $
 
 
 # The number of test categories we've run
@@ -116,7 +116,7 @@ sub toplevel
   if (@TESTS)
   {
     print "Making work dirs...\n";
-    foreach $test (@TESTS)
+    foreach my $test (@TESTS)
     {
       if ($test =~ /^([^\/]+)\//)
       {
