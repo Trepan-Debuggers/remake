@@ -30,6 +30,12 @@ Boston, MA 02111-1307, USA.  */
 #include <stdlib.h>
 #include <config/readline.h>
 
+/* From readline. ?? Should this be in configure?  */
+#ifndef whitespace
+#define whitespace(c) (((c) == ' ') || ((c) == '\t'))
+#endif
+
+
 const char *WARRANTY = 
 "			    NO WARRANTY\n"
 "\n"
