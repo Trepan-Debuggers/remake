@@ -27,6 +27,7 @@ Boston, MA 02111-1307, USA.  */
 #include "expand.h"
 #include "function.h"
 #include "debug.h"
+#include "dbg_cmd.h"
 #include "trace.h"
 
 #ifndef	NO_ARCHIVES
