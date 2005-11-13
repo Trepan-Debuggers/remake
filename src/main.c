@@ -58,7 +58,6 @@ extern void remote_setup PARAMS ((void));
 extern void remote_cleanup PARAMS ((void));
 extern RETSIGTYPE fatal_error_signal PARAMS ((int sig));
 
-extern void print_variable_data_base PARAMS ((void));
 extern void print_dir_data_base PARAMS ((void));
 extern void print_rule_data_base PARAMS ((void));
 extern void print_file_data_base PARAMS ((void));

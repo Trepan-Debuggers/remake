@@ -79,7 +79,9 @@ struct conditionals
   {
     unsigned int if_cmds;	/* Depth of conditional nesting.  */
     unsigned int allocated;	/* Elts allocated in following arrays.  */
-    char *ignoring;		/* Are we ignoring or interepreting?  */
+    char *ignoring;		/* Are we ignoring or interpreting?
+                                   0=interpreting, 1=not yet interpreted,
+                                   2=already interpreted */
     char *seen_else;		/* Have we already seen an `else'?  */
   };
 
@@ -803,12 +805,10 @@ eval (struct ebuffer *ebuf, int set_default)
 	  int noerror = (p[0] != 'i');
 
 	  p = allocated_variable_expand (p2);
+
+          /* If no filenames, it's a no-op.  */
 	  if (*p == '\0')
-	    {
-	      error (fstart,
-                     _("no file name for `%sinclude'"), noerror ? "-" : "");
-	      continue;
-	    }
+            continue;
 
 	  /* Parse the list of file names.  */
 	  p2 = p;
@@ -937,6 +937,7 @@ eval (struct ebuffer *ebuf, int set_default)
           }
 
         p2 = variable_expand_string(NULL, lb_next, len);
+
         while (1)
           {
             lb_next += len;
@@ -2852,6 +2853,7 @@ construct_include_path (char **arg_dirs)
   include_directories = dirs;
 }
 
+#if !defined(HAVE_TILDE_EXPAND)
 /* Expand ~ or ~USER at the beginning of NAME.
    Return a newly malloc'd string or 0.  */
 
@@ -2925,6 +2927,7 @@ tilde_expand (char *name)
 #endif /* !VMS */
   return 0;
 }
+#endif /*HAVE_TILDE_EXPAND*/
 
 /* Given a chain of struct nameseq's describing a sequence of filenames,
    in reverse of the intended order, return a new chain describing the

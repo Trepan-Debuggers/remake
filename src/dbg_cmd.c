@@ -118,7 +118,6 @@ static debug_return_t dbg_cmd_step             (char *psz_arg);
 static debug_return_t dbg_cmd_write_cmds       (char *psz_arg);
 
 long_cmd_t commands[] = {
-  { "backtrace",'T' },
   { "break",    'b' },
   { "comment",  '#' },
   { "continue", 'c' },
@@ -166,10 +165,6 @@ char *show_subcommands[] = {
   "warranty",
   NULL
 };
-
-
-/* This is set to 1 when we are done with the read loop */
-static int done=0 ;
 
 /* Pointer to top of current target call stack */
 static target_stack_node_t *p_stack_top;
@@ -748,26 +743,14 @@ static debug_return_t dbg_cmd_step (char *psz_arg)
     return continue_execution;
 }
 
-/* Continue running program. */
-static debug_return_t dbg_cmd_trace (char *psz_arg)
-{
-  if (!psz_arg || 0==strlen(psz_arg))
-    on_off_toggle("toggle", &tracing) ;
-  else
-    on_off_toggle(psz_arg, &tracing) ;
-  dbg_cmd_info("trace");
-  return debug_readloop;
-}
-
-/* Show a variable or target definition. */
+/* Show a variable definition. */
 static debug_return_t dbg_cmd_print (char *psz_args) 
 {
-  file_t *p_target;
   char   *psz_name;
   static char *psz_last_name = NULL;
 
   if (!psz_args || 0==strlen(psz_args)) {
-    /* Use last target value */
+    /* Use last value */
     if (psz_last_name)
       psz_name = psz_last_name;
     else {
@@ -782,7 +765,6 @@ static debug_return_t dbg_cmd_print (char *psz_args)
     if (psz_last_name) free(psz_last_name);
     psz_last_name = strdup(psz_name);
   }
-  
 
   return debug_readloop;
 }
@@ -793,14 +775,15 @@ static debug_return_t dbg_cmd_target (char *psz_args)
   file_t *p_target;
   char   *psz_target;
 
-  if (!psz_args || 0==strlen(psz_args))
+  if (!psz_args || 0==strlen(psz_args)) {
     /* Use current target */
-    if (p_stack && p_stack->p_target && p_stack->p_target->name)
+    if (p_stack && p_stack->p_target && p_stack->p_target->name) {
       psz_args = p_stack->p_target->name;
-    else {
+    } else {
       printf("No current target - must supply something to print\n");
       return debug_readloop;
     }
+  }
 
   psz_target = get_word(&psz_args);
   
@@ -809,7 +792,7 @@ static debug_return_t dbg_cmd_target (char *psz_args)
     print_target_mask_t i_mask = 0;
     char *psz_word;
     
-    while(psz_word = get_word(&psz_args)) {
+    while( (psz_word = get_word(&psz_args))) {
       if (0 == strlen(psz_word)) {
 	break;
       } else if (is_abbrev_of(psz_word, "depends")) {
@@ -975,7 +958,6 @@ static debug_return_t dbg_cmd_set (char *psz_args)
   if (!psz_args || 0==strlen(psz_args)) {
     printf(_("You need to supply a variable name\n"));
   } else {
-    variable_t *p_v;
     char *psz_varname = get_word(&psz_args);
 
     while (*psz_args && whitespace (*psz_args))
@@ -1250,11 +1232,10 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
 {
   debug_return_t debug_return = debug_readloop;
 #ifdef HAVE_LIBREADLINE
-  char *line, *s;
   static int i_init = 0;
   char open_depth[MAX_NEST_DEPTH];
   char close_depth[MAX_NEST_DEPTH];
-  unsigned int i;
+  unsigned int i = 0;
 
   if ( debugger_stepping > 1 ) {
     /* Don't stop unless we are here from a breakpoint. But
@@ -1297,9 +1278,9 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
   }
 
   if ( MAX_NEST_DEPTH - 5 == i ) {
-    close_depth[i++] = open_depth[i]  = '.';
-    close_depth[i++] = open_depth[i]  = '.';
-    close_depth[i++] = open_depth[i]  = '.';
+    close_depth[i] = open_depth[i]  = '.'; i++;
+    close_depth[i] = open_depth[i]  = '.'; i++;
+    close_depth[i] = open_depth[i]  = '.'; i++;
   }
   
   open_depth[i] = close_depth[i] = '\0';
@@ -1332,7 +1313,7 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
     snprintf(prompt, PROMPT_LENGTH, "makedb%s%d%s ", 
 	     open_depth, where_history(), close_depth);
     
-    if ( line = readline (prompt) ) {
+    if ( (line = readline (prompt)) ) {
       if ( *(s=stripwhite(line)) ) {
 	add_history (s);
 	debug_return=execute_line(s);

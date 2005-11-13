@@ -6,7 +6,7 @@ AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.12 2005/11/13 16:16:35 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.13 2005/11/13 23:02:26 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -214,6 +214,18 @@ AC_CHECK_HEADER(readline/readline.h, [], [have_readline=no])
 
 if test "$enable_readline" = yes; then
    VL_LIB_READLINE
+   AC_MSG_CHECKING(for tilde_expand() in <readline/readline.h>)
+   AC_TRY_RUN([
+#include <readline/readline.h>
+
+int main(int argc, char **argv) {
+  char *s = tilde_expand ("~");
+  return 0;
+}], [AC_MSG_RESULT(yes); ac_have_islnk=yes; 
+     AC_DEFINE(HAVE_TILDE_EXPAND, [], 
+     [Define this <readline/readline.h> defines tilde_expand()])],
+     [AC_MSG_RESULT(no); ac_have_tilde_expand=no],
+     [AC_MSG_RESULT(no); ac_have_tilde_expand=no])
 else 
    AC_MSG_WARN([libreadline is needed for the debugger. I'll build "make"])
    AC_MSG_WARN([with trace support, but you won't be able enter the])
@@ -400,6 +412,7 @@ case "$make_cv_job_server/$user_job_server" in
 	  echo "         Disabling job server support."
           echo ;;
 esac
+
 
 
 # Specify what files are to be created.

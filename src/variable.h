@@ -151,6 +151,10 @@ extern void initialize_file_variables PARAMS ((struct file *file, int read));
 /*! Print all the local variables of FILE.  */
 extern void print_file_variables PARAMS ((struct file *file));
 
+/*! Print the data base of variables.  */
+
+extern void print_variable_data_base PARAMS ((void));
+
 /*! Print all the variables in SET.  PREFIX is printed before the
    actual variable definitions (everything else is comments).  */
 extern void print_variable_set PARAMS ((struct variable_set *set, char *prefix));
