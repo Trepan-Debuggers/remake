@@ -1,5 +1,5 @@
 \input texinfo      @c -*-texinfo-*-
-@c Copyright 2004
+@c Copyright 2004, 2005
 @c Rocky Bernstein for the Free Software Foundation
 @c
 @c TODO: 
@@ -299,33 +299,50 @@ short-form option format @code{-x}
 
 @smallexample
 @cartouche
-$ @b{make --trace -f test1}
+$ @b{make --trace -f /tmp/test1}
+Reading makefiles...
+Updating goal targets....
+ /tmp/test1:4	File `all' does not exist.
 /tmp/test1:6 foo
+   /tmp/test1:6	File `foo' does not exist.
+  /tmp/test1:6	Must remake target `foo'.
 /tmp/test1:7 foo
 	fdafds
-/bin/bash: line 1: fdafds: command not found
-test1:7: *** [foo] Error 127
+/bin/bash: fdafds: command not found
+/tmp/test1:7: *** [foo] Error 127
 @end cartouche
 @end smallexample 
 
-What's going on here is that we show the line and target before we
-execute any sort of shell command. So the history before the error is
-that we ran line 6 and then line 7 and then hit an error.  Simple
-trace output for a simple Makefile.
+Notice there is some debug output that is the same as the first run.
+For the first two lines example ``Reading makefiles...'' and
+``Updating goal targets...''. This is the ``basic'' output you would
+get in GNU Make using the option ``--debug=basic''. There are some
+other lines that are the same but they just have line numbers and
+filenames added. For example ``/tmp/test1:4  File `all' does not exist.''
 
-But above when we hit the error it's not readily apparent how we might
-have decided to run line 7. So there is another option
-@code{--extended-errors} or @code{-E} which gives a target stack
-trace when @value{MAKE} hits an error. For the above it looks like this:
+But what is completely new is that we also show the line and targets
+before we execute any sort of shell command. So the history before the
+error is that we ran line 6 and then line 7 and then hit an error.
+The goal is simple trace output for a simple Makefile.
+
+We hit the error, althoguh the trace gives some idea of we decided to
+to run line 7. there is another option @code{--extended-errors} or
+@code{-E} which gives a target stack trace when @value{MAKE} hits an
+error. For the above it looks like this:
 
 @smallexample
 @cartouche
 $ @b{make --extended-errors -x -f test1}
+Reading makefiles...
+Updating goal targets....
+ /tmp/test1:4	File `all' does not exist.
 /tmp/test1:6 foo
-/tmp/src/test1:7 foo
+   /tmp/test1:6	File `foo' does not exist.
+  /tmp/test1:6	Must remake target `foo'.
+/tmp/test1:7 foo
 	fdafds
-/bin/bash: line 1: fdafds: command not found
-test1:7: *** [foo] Error 127
+/bin/bash: fdafds: command not found
+/tmp/test1:7: *** [foo] Error 127
 
 #0  foo at /tmp/test1:7
 #1  all at /tmp/test1:4
@@ -335,19 +352,15 @@ test1:7: *** [foo] Error 127
 So we were working on target ``foo'' on line 7 of file test1 which was
 rebuilt because we were making target ``all'' on line 4 of file test1.
 
-If you want a longer trace example, try doing this the top-level
-directory.  Although you'll get more output, I think you'll find this
-much more comprehensible than what you'd get if you run "make -d".
-
-But alas there is a bit going in the makefile that alas is not really
-reflected by the trace above. So let's go into the debugger itself.
-For this use the --debugger or -X option.
+Now let's go into the debugger itself.  For this use the --debugger or
+-X option.
 
 @smallexample
 @cartouche
-$  @b{make --debugger}
+$  @b{./make --debugger}
+Reading makefiles...
 
-/tmp/remake/src/Makefile:225: Makefile.in
+/home/src/external-cvs/remake/src/Makefile:254: Makefile.in
 @end cartouche
 @end smallexample 
 
@@ -358,10 +371,10 @@ target? The @code{where} command shows you the target call stack:
 @cartouche
 makedb<0> @b{where}
 
-=>#0  Makefile.in at /tmp/remake/src/Makefile:228
-  #1  Makefile at /tmp/remake/src/Makefile:231
+=>#0  Makefile.in at /tmp/remake/src/Makefile:254
+  #1  Makefile at /tmp/remake/src/Makefile:267
 
-/tmp/remake/src/Makefile:225: Makefile.in
+/tmp/remake/src/Makefile:254: Makefile.in
 @end cartouche
 @end smallexample 
 
@@ -373,51 +386,64 @@ our debugger currently in that it doesn't show ``all.'')
 @cartouche
 makedb<1> @b{step}
 
-/tmp/remake/src/Makefile:260: make
+/tmp/remake/src/Makefile:281: ../aclocal.m4
 makedb<2> where
 
-=>#0  make at /tmp/remake/src/Makefile:260
-  #1  all-am at /tmp/remake/src/Makefile:383
-  #2  all at /tmp/remake/src/Makefile:221
+=>#0  ../aclocal.m4 at /tmp/remake/src/Makefile:281
+  #1  Makefile.in at /tmp/remake/src/Makefile:254
+  #2  Makefile at /tmp/remake/src/Makefile:267
 @end cartouche
 @end smallexample 
 
-We are at the ``make'' target which was triggered by the ``all-am'' target
-which was triggered by the ``all'' target. The reason we didn't stop at
-``all'' or ``all-am'' is for convenience. There were no commands
-associated with making those so they weren't deemed interesting to
-stop at. The ``make'' target however does have commands to run
-associated with it. To get information about the make "target" we can
-use the @code{print} command:
+To get information about the make "target" we can use the @code{target}
+command:
 
 
 @smallexample
 @cartouche
-makedb<3> @b{print make}
+makedb<3> @b{target}
 
-make: ar.o arscan.o default.o dep.o dir.o expand.o file.o ...
+../aclocal.m4: ../config/readline.m4 ../lib-ld.m4 ../lib-link.m4 ../lib-prefix.m4 ../acinclude.m4 ../configure.ac | ../gettext.m4 ../iconv.m4 ../progtest.m4
 #  Implicit rule search has not been done.
-#  Last modified 2004-06-09 20:31:56
+#  Last modified 2005-11-13 11:16:53
 #  File has not been updated.
-#  commands to execute (from `Makefile', line 261):
-    @@rm -f make$(EXEEXT)
-    $(LINK) $(make_LDFLAGS) $(make_OBJECTS) $(make_LDADD) $(LIBS)
-	
+#  commands to execute (from `Makefile', line 282):
+	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
-/tmp/remake/src/Makefile:260: make
+
+/tmp/remake/src/Makefile:281: ../aclocal.m4
 @end cartouche
 @end smallexample 
 
 
-I could have gotten the same output using just @code{print} since we
-are currently stopped at the ``make'' target. Also note that
-@code{print make} is different from @code{print MAKE}. The former is a
-target name while the latter is a variable name. Variable and target
-names are case sensitive.
+I could have gotten the same output explicitly giving a target name
+such as @code{target ../aclocal.m4}.
 
-Above, I mentioned that we don't find ``all'' or ``all-am'' all that
-interesting to stop at.  If however one really did want to stop at one
-of these places one can set a @code{breakpoint} on those targets. Like
+What is going on here is we are checking to see if the Makefile needs
+to be remade and this is a dependency of target @code{all-am}. We
+don't have to be stopped on a target to get information about it:
+
+@smallexample
+@cartouche
+makedb<3> @b{target all-am}
+
+target all-am
+
+all-am: Makefile make loadavg commands.h dbg_cmd.h dep.h expand.h filedef.h function.h gettext.h implicit.h make.h print.h remake.h rule.h variable.h vpath.h | arscan.h debug.h default.h getopt.h hash.h job.h read.h remote-stub.h trace.h
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+
+/tmp/remake/src/Makefile:250: all
+@end cartouche
+@end smallexample 
+
+However information may change depending on where Make is. In
+particular note that ``Implicit rule search has not been done.''
+
+If all of this is proceding too slowly, could set a
+@code{breakpoint} on a target of interest, perhaps @code{all-am}. Like
 this:
 
 @smallexample
@@ -427,12 +453,11 @@ makedb<4> @b{restart}
 Changing directory to /tmp/remake/src and restarting...
 
 
-/tmp/remake/src/Makefile:225: Makefile.in
+/tmp/remake/src/Makefile:254: Makefile.in
 makedb<0> @b{break all-am}
 Breakpoint on target all-am set.
 
-/tmp/remake/src/Makefile:225: Makefile.in
-
+/tmp/remake/src/Makefile:254: Makefile.in
 @end cartouche
 @end smallexample 
 
@@ -443,51 +468,22 @@ execution and see what happens:
 @smallexample
 @cartouche
 
-makedb<0> @b{continue}
+makedb<1> @b{continue}
 
-/tmp/remake/src/Makefile:383: all-am
+Updating goal targets....
+ /tmp/remake/src/Makefile:250	File `all' does not exist.
+
+/tmp/remake/src/Makefile:461: all-am
 makedb<1> where
 
-=>#0  all-am at /tmp/remake/src/Makefile:383
-  #1  all at /tmp/remake/src/Makefile:221
+=>#0  all-am at /tmp/remake/src/Makefile:461
+  #1  all at /tmp/remake/src/Makefile:250
 @end cartouche
 @end smallexample 
 
-Note that now we have stopped at this uninteresting target. What is
-it? 
-
-@smallexample
-@cartouche
-  /tmp/remake/src/Makefile:383: all-am
-  makedb<2> list all-am
-
-  all-am: Makefile loadavg commands.h dbg_cmd.h debug.h ...
-  #  Phony target (prerequisite of .PHONY).
-  #  Implicit rule search has not been done.
-  #  File does not exist.
-  #  File has not been updated.
-@end cartouche
-@end smallexample 
-
-Note that we don't have to be stopped on a target to get information
-about it:
-
-@smallexample
-@cartouche
-  /tmp/remake/src/Makefile:383: all-am
-  makedb<3> list all
-
-  all: all-am
-  #  Phony target (prerequisite of .PHONY).
-  #  Implicit rule search has not been done.
-  #  File does not exist.
-  #  File has not been updated.
-
-@end cartouche
-@end smallexample 
-
-We can also get information about @value{MAKE}'s variables. That is done
-also with the @code{print} command. 
+We've seen we can get information about @value{MAKE}'s targets.  We
+can also get information about @value{MAKE}'s variables. That is done
+also with the @code{print} command.
 
 @smallexample
 @cartouche
@@ -788,7 +784,7 @@ just @key{RET}. Some commands which require a parameter, such as
 * Stopping::             Stopping and continuing (break, watch, step, cont...)
 * Information::          Status and Debugger settings (info, show)
 * Stack::                Examining the stack (where, up, down, frame)
-* Data::                 Examining data (print, examine, info variables)
+* Data::                 Examining data (print, target, examine, info variables)
 * Evaluation/Execution:: Arbitrary execution (shell)
 * Controlling Make::     Controlling make (annotate, file, prompt...)
 @end menu
@@ -802,7 +798,10 @@ is followed by arguments whose meaning depends on the command name.
 For example, the command @code{step} accepts an argument which is the
 number of times to step, as in @samp{step 5}.  You can also use the
 @code{step} command with no arguments.  Some commands do not allow any
-arguments.
+arguments. In commands that have attributes, the attribute can be
+abbreviated to the minimum string that makes it unique. For example
+``commands''in @code{target all commands} can be shortened to
+``command'' or ``com'' or just ``c''.
 
 @cindex repeating next/step commands
 @kindex RET @r{(repeat last command)}
@@ -831,8 +830,11 @@ display a short list of named classes of commands:
 
 @flushleft
 @smallexample
-bashdb<0> @b{help}
+makedb<0> @b{help}
 Available commands are: 
+  where                     (T):
+	Show target stack.
+
   break *target*            (b):
 	Set a breakpoint at a target.
 
@@ -879,11 +881,8 @@ Available commands are:
 	variable-references unexpanded. Don't include $ before a variable
 	name. See also "examine".
 
-	If a target name is given, information about target is printed.
-	Attributes 'depend', 'nonorder', 'attrs', 'state', 'time', 'vars'
-	or 'prev' can be given after a target name.
-	If no variable or target name  is supplied, we try to use the
- 	current target name.
+	If no variable is supplied, we try to use the
+	last value given.
 
 
   quit [exit-status]        (q):
@@ -916,6 +915,7 @@ Available commands are:
 	Show the state of thing.
 	If no 'thing' is specified, show everything there is to show.
 
+
   skip                      (k):
 	Skip execution of next command or action.
 
@@ -924,6 +924,16 @@ Available commands are:
 	Step execution until another stopping point is reached.
 	Argument N means do this N times (or until there's another
  	reason to stop.
+
+  target                    (t):
+	Show information about a target.
+	target information is printed.
+	The following attributes names can be given after a target name:
+		'attributes', 'commands', 'depends', 'nonorder',
+		'previous', 'state', 'time', 'variables'
+	If no variable or target name is supplied, we try to use the
+	current target name.
+
 
   where                     (T):
 	Show target stack.
@@ -940,7 +950,8 @@ Available commands are:
 	Select and print target that caused this one to be examined.
 	An argument says how many targets up to go.
 
-Readline command line editing (emacs/vi mode) is available
+
+Readline command line editing (emacs/vi mode) is available.
 For more help, type h <cmd> or consult online-documentation.
 @end smallexample
 @end flushleft
@@ -1390,9 +1401,9 @@ For example:
 
 @smallexample
 @group
-bashdb<8> @b{up}
+makedb<8> @b{up}
 /tmp/remake/src/Makefile:386: all-am
-bashdb<8> @b{T}
+makedb<8> @b{T}
   #0  make at /tmp/remake/src/Makefile:263
 =>#1  all-am at /tmp/remake/src/Makefile:386
   #2  all at /tmp/remake/src/Makefile:224
@@ -1415,7 +1426,7 @@ current stack frame.
 @menu
 * Print::                  Print variable info
 * Examine::                Print a string expanded
-* List::                   Print target Info
+* Target::                 Print target Info
 * Write::                  Write commands of a target
 * Info Variables::         Print all variables
 @end menu
@@ -1502,8 +1513,8 @@ compile starts: gcc -DLOCALEDIR=\"\" -DLIBDIR=\"/usr/local/lib\" -DINCLUDEDIR=\"
 @end smallexample
 @end table
 
-@node List
-@subsection Examining Targets (@samp{list})
+@node Target
+@subsection Examining Targets (@samp{target})
 
 @value{DBG} can print information about targets.  When your script
 stops, @value{DBG} spontaneously prints the line and target name
@@ -1512,14 +1523,45 @@ where it stopped.  Likewise, when you select a stack frame
 target name is changed.
 
 @table @code
-@item list
-@itemx l
+@item target
+@itemx t
 print information about the current target.
 
 
-@item list @var{target}
-@itemx l @var{target}
-Print the information about @var{target}.
+@item target @var{target}
+@itemx t @var{target}
+Print information about @var{target}. A list of attributes can be
+specified after the target name. The list of attributes names are 
+
+@table @kbd
+@item attributes
+Show the list of ``attributes'' associated with the target. Attributes
+include whether Implicit rule search has been done, whether the target
+is phony, etc.
+
+@item commands
+Show the list of commands that need to get run in order to bring the
+target up to date.
+
+@item depends
+Show the targets that this one depends on.
+
+@item nonorder
+@item previous
+@item state
+
+@item time
+This shows the time that the file was last modified and if the file
+has been ``updated''. (I think the word ``updated'' is an odd term to
+use.  It think ``updated'' means ``considered for running the commands
+to bring it ``up to date''.
+
+If a target is ``phony'', i.e. doesn't have file associated with it, the
+message ``File does not exist.'' will appear instead of the time. In
+some cases you may see ``Modification time never checked.''
+
+@item variables
+@end table
 
 @end table
 
@@ -1912,7 +1954,7 @@ version number.
 
 @item
 What compiler (and its version) was used to compile BASH---e.g.
-``@value{GCC}--3.1''.
+``@code{gcc}--3.1''.
 
 @item
 The command arguments you gave the compiler to compile your example and
