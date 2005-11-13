@@ -51,6 +51,13 @@ extern int tracing;
 */
 extern unsigned int debugger_stepping;
 
+/*! If nonzero, we are debugging after each "next" for that many times. 
+  When we have a value 1, then we actually run the debugger read loop.
+  Otherwise we decrement the step count.
+
+*/
+extern unsigned int debugger_nexting;
+
 /*! If nonzero, enter the debugger if we hit a fatal error.
 */
 extern unsigned int debugger_on_error;

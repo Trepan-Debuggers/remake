@@ -170,6 +170,13 @@ int tracing = 0;
 */
 unsigned int debugger_stepping = 0;
 
+/*! If nonzero, we are debugging after each "next" for that many times. 
+  When we have a value 1, then we actually run the debugger read loop.
+  Otherwise we decrement the step count.
+
+*/
+unsigned int debugger_nexting = 0;
+
 /*! If nonzero, enter the debugger if we hit a fatal error.
 */
 unsigned int debugger_on_error = 0;
@@ -1196,6 +1203,7 @@ main (int argc, char **argv, char **envp)
 	     || 0 == strcmp(*p, "enter") ) {
 	  job_slots          =  1;
 	  debugger_stepping  =  1;
+	  debugger_nexting   =  1;
 	  debugger_enabled   =  1;
 	  /* For now we'll do basic debugging. Later, "stepping'
  	     will stop here while next won't - either way no printing.

@@ -450,7 +450,10 @@ print_target_stack (target_stack_node_t *p, int pos)
 	 that the command starts on - so we know we've faked the location?
        */
       floc.lineno--;
+    } else {
+      floc.filenm = NULL;
     }
+    
     
     if (floc.filenm) {
       if (pos != -1) {

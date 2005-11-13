@@ -5,9 +5,6 @@ GNU make NEWS                                               -*-indented-text-*-
 Copyright (C) 2002, 2004, 2005  Free Software Foundation, Inc.
 See the end for copying conditions.
 
-All changes mentioned here are more fully described in the GNU make
-manual, which is contained in this distribution as the file make.texinfo.
-
 Please send remake bug reports to <rocky@panix.com>.
 See the README file and the GNU remake manual for details on sending bug
 reports.

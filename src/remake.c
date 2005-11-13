@@ -796,6 +796,9 @@ update_file_1 (file_t *file, unsigned int depth,
     p_call_stack2 = trace_push_target(p_call_stack, file, 1);
   }
 
+  if ( debugger_enabled && debugger_nexting ) 
+    enter_debugger(p_call_stack2, file, 0);
+
   /* Now, take appropriate actions to remake the file.  */
   remake_file (file, p_call_stack);
 
