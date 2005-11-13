@@ -11,8 +11,11 @@ reports.
 
 Version 3.80+dbg-0.3cvs
 
-* "list" command renamed to "target". A future "list" command will 
-  look more like gdb.
+* tracing adds GNU Make "basic" debugging. If debugging, then we also
+  enter the debugger read loop. Hopefully this adds more granularity
+  but not the diarrhea that "make -d" gives. To reduce this, "next"
+  could be used to skip over remaking targets that don't have
+  commands.
 
 * Allow abbreviations of debugger command attributes. As a result some
   attributes were renamed slighly, e.g. vars -> variables, deps ->
@@ -20,14 +23,11 @@ Version 3.80+dbg-0.3cvs
   allowed, "command" and "com", and even "c" is the same as
   "commands".
 
-* tracing adds GNU Make "basic" debugging. If debugging, then we also
-  enter the debugger read loop. Hopefully this adds more granularity
-  but not the diarrhea that "make -d" gives. To reduce this "next"
-  could be used to skip over remaking targets that don't have
-  commands.
-
 * Make option --trace (-x) overrules using the --silent option and
   not echoing @ commands.
+
+* "list" command renamed to "target". A future "list" command will 
+  look more like gdb.
 
 * fixed compilation issue(s) on systems that have readline, but do not
   have termcap.
