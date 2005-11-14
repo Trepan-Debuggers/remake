@@ -459,7 +459,7 @@ makedb<1> where
 
 We've seen we can get information about @value{MAKE}'s targets.  We
 can also get information about @value{MAKE}'s variables. That is done
-also with the @code{print} command.
+with the @code{print} command.
 
 @smallexample
   /tmp/remake/src/Makefile:383: all-am
@@ -1515,6 +1515,7 @@ Show the targets that this one depends on.
 @item nonorder
 @item previous
 @item state
+Show state of target, ``successfully updated'' or nothing if not known.
 
 @item time
 This shows the time that the file was last modified and if the file
@@ -1527,6 +1528,9 @@ message ``File does not exist.'' will appear instead of the time. In
 some cases you may see ``Modification time never checked.''
 
 @item variables
+Show automatic state variables `@@', `%', `%', `*', `+', `|', `<',
+`>', `^', and `?' if they are defined.
+
 @end table
 
 @end table

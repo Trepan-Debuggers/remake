@@ -318,10 +318,10 @@ cmd_initialize(void)
   short_command['n'].doc = _("alias for step.");
 
   short_command['p'].func = &dbg_cmd_print;
-  short_command['p'].use = _("print {*variable*|*target* [attrs...]}");
+  short_command['p'].use = _("print {*variable* [attrs...]}");
   short_command['p'].doc = 
-    _("Show a variable definition or target information.\n" \
-      "\tIf a variable name is given, the value is shown with embedded\n" \
+    _("Show a variable definition.\n" \
+      "\tThe value is shown with embedded\n" \
       "\tvariable-references unexpanded. Don't include $ before a variable\n" \
       "\tname. See also \"examine\".\n\n" \
       "\tIf no variable is supplied, we try to use the\n" \
@@ -1062,8 +1062,10 @@ static int dbg_cmd_show_var (char *psz_varname, int expand)
     return 0;
   } else {
     variable_t *p_v;
-    initialize_file_variables (p_stack->p_target, 0);
-    set_file_variables (p_stack->p_target);
+    if (p_stack) {
+      initialize_file_variables (p_stack->p_target, 0);
+      set_file_variables (p_stack->p_target);
+    }
     p_v = lookup_variable (psz_varname, strlen (psz_varname));
     if (p_v) {
       if (expand) {
