@@ -66,6 +66,8 @@ Version 3.81beta3
   load average accordingly.
 
 * New special variables available in this release:
+   - .INCLUDE_DIRS: Expands to a list of directories that make searches
+     for included makefiles.
    - .FEATURES: Contains a list of special features available in this
      version of GNU make.
    - .DEFAULT_GOAL: Set the name of the default goal make will
