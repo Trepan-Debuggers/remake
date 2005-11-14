@@ -1502,8 +1502,13 @@ specified after the target name. The list of attributes names are
 @table @kbd
 @item attributes
 Show the list of ``attributes'' associated with the target. Attributes
-include whether Implicit rule search has been done, whether the target
-is phony, etc.
+can be:
+@itemize @bullet
+@item implicit rule search has been done
+@item phony: has no file associated with it
+@item precious: 
+@item a command-line target
+@end itemize
 
 @item commands
 Show the list of commands that need to get run in order to bring the
@@ -1515,21 +1520,36 @@ Show the targets that this one depends on.
 @item nonorder
 @item previous
 @item state
-Show state of target, ``successfully updated'' or nothing if not known.
+Show status of target:
+@itemize @bullet
+@item Successfully updated
+@item Needs to be updated
+@item Failed to be updated
+@item Invalid - error of some sort
+@end itemize
 
 @item time
 This shows the time that the file was last modified and if the file
-has been ``updated''. (I think the word ``updated'' is an odd term to
-use.  It think ``updated'' means ``considered for running the commands
-to bring it ``up to date''.
-
-If a target is ``phony'', i.e. doesn't have file associated with it, the
-message ``File does not exist.'' will appear instead of the time. In
-some cases you may see ``Modification time never checked.''
+has been brought up to date. If it is not up to date you will see the
+message ``File is very old.'' If a target is ``phony'', i.e. doesn't
+have file associated with it, the message ``File does not exist.''
+will appear instead of the time. In some cases you may see
+``Modification time never checked.''
 
 @item variables
-Show automatic state variables `@@', `%', `%', `*', `+', `|', `<',
-`>', `^', and `?' if they are defined.
+Show automatic state variables (if defined):
+@itemize @bullet
+@item @@ 
+@item %
+@item *
+@item + - the duplicate dependencies 
+@item |
+@item <
+@item >
+@item >
+@item ^
+@item ?
+@end itemize
 
 @end table
 
