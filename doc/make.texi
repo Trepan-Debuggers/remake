@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.36 2005/10/24 13:01:40 psmith Exp $
+@set RCSID $Id: make.texi,v 1.37 2005/11/14 15:31:14 bosk Exp $
 @set EDITION 0.70
 @set VERSION 3.81
 @set UPDATED 07 May 2005
@@ -1389,6 +1389,11 @@ Supports the @code{-L} (@code{--check-symlink-times}) flag.
 @xref{Options Summary, ,Summary of Options}.
 
 @end table
+
+@vindex .INCLUDE_DIRS @r{(list of include directories)}
+@item .INCLUDE_DIRS
+Expands to a list of directories that @code{make} searches for
+included makefiles (@pxref{Include, , Including Other Makefiles}).
 
 @end table
 

@@ -2917,7 +2917,8 @@ construct_include_path (char **arg_dirs)
 
   dirs[idx] = 0;
 
-  /* Now compute the maximum length of any name in it.  */
+  /* Now compute the maximum length of any name in it. Also add each
+     dir to the .INCLUDE_DIRS variable.  */
 
   max_incl_len = 0;
   for (i = 0; i < idx; ++i)
@@ -2930,6 +2931,10 @@ construct_include_path (char **arg_dirs)
 	dirs[i] = savestring (dirs[i], len - 1);
       if (len > max_incl_len)
 	max_incl_len = len;
+
+      /* Append to .INCLUDE_DIRS.   */
+      do_variable_definition (NILF, ".INCLUDE_DIRS", dirs[i],
+                              o_default, f_append, 0);
     }
 
   include_directories = dirs;

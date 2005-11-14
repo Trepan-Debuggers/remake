@@ -1,3 +1,8 @@
+2005-11-14  Boris Kolpackov  <boris@kolpackov.net>
+
+	* scripts/variables/INCLUDE_DIRS: Add a test for the .INCLUDE_DIRS
+	special variable.
+
 2005-10-24  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/misc/general4: Test '$$' in prerequisites list.
