@@ -97,12 +97,14 @@ struct variable_set
     struct hash_table table;	/* Hash table of variables.  */
   };
 
+typedef struct variable_set variable_set_t;
+
 /* Structure that represents a list of variable sets.  */
 
 struct variable_set_list
   {
     struct variable_set_list *next;	/* Link in the chain.  */
-    struct variable_set *set;		/* Variable set.  */
+    variable_set_t *set;		/* Variable set.  */
   };
 
 /* Structure used for pattern-specific variables.  */
@@ -157,7 +159,7 @@ extern void print_variable_data_base PARAMS ((void));
 
 /*! Print all the variables in SET.  PREFIX is printed before the
    actual variable definitions (everything else is comments).  */
-extern void print_variable_set PARAMS ((struct variable_set *set, char *prefix));
+extern void print_variable_set PARAMS ((variable_set_t *set, char *prefix));
 
 /*! Merge FROM_SET into TO_SET, freeing unused storage in
     FROM_SET.  */
@@ -196,7 +198,7 @@ extern variable_t *lookup_variable PARAMS ((const char *name,
 
 extern variable_t *lookup_variable_in_set PARAMS ((const char *name,
 						   unsigned int length,
-						   const struct variable_set *set));
+						   const variable_set_t *set));
 
 /*! Define variable named NAME with value VALUE in SET.  VALUE is copied.
   LENGTH is the length of NAME, which does not need to be null-terminated.
@@ -208,7 +210,7 @@ extern variable_t *lookup_variable_in_set PARAMS ((const char *name,
 extern variable_t *define_variable_in_set
     PARAMS ((const char *name, unsigned int length, char *value,
              enum variable_origin origin, int recursive,
-             struct variable_set *set, const struct floc *flocp));
+             variable_set_t *set, const struct floc *flocp));
 
 /* Define a variable in the current variable set.  */
 

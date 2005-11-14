@@ -135,7 +135,7 @@ variable_hash_cmp (const void *xv, const void *yv)
 #define	SMALL_SCOPE_VARIABLE_BUCKETS	13
 #endif
 
-static struct variable_set global_variable_set;
+static variable_set_t global_variable_set;
 static struct variable_set_list global_setlist
   = { 0, &global_variable_set };
 struct variable_set_list *current_variable_set_list = &global_setlist;
@@ -159,7 +159,7 @@ init_hash_global_variable_set (void)
 variable_t *
 define_variable_in_set (const char *name, unsigned int length,
                         char *value, enum variable_origin origin,
-                        int recursive, struct variable_set *set,
+                        int recursive, variable_set_t *set,
                         const struct floc *flocp)
 {
   variable_t *v;
@@ -346,7 +346,7 @@ lookup_variable (const char *name, unsigned int length)
   for (setlist = current_variable_set_list;
        setlist != 0; setlist = setlist->next)
     {
-      const struct variable_set *set = setlist->set;
+      const variable_set_t *set = setlist->set;
       variable_t *v;
 
       v = (variable_t *) hash_find_item ((hash_table_t *) &set->table, &var_key);
@@ -420,7 +420,7 @@ lookup_variable (const char *name, unsigned int length)
 
 variable_t *
 lookup_variable_in_set (const char *name, unsigned int length,
-                        const struct variable_set *set)
+                        const variable_set_t *set)
 {
   variable_t var_key;
 
@@ -449,7 +449,7 @@ initialize_file_variables (struct file *file, int reading)
     {
       l = (struct variable_set_list *)
 	xmalloc (sizeof (struct variable_set_list));
-      l->set = (struct variable_set *) xmalloc (sizeof (struct variable_set));
+      l->set = (struct variable_set *) xmalloc (sizeof (variable_set_t));
       hash_init (&l->set->table, PERFILE_VARIABLE_BUCKETS,
                  variable_hash_1, variable_hash_2, variable_hash_cmp);
       file->variables = l;
@@ -527,7 +527,7 @@ void
 pop_variable_scope (void)
 {
   struct variable_set_list *setlist = current_variable_set_list;
-  struct variable_set *set = setlist->set;
+  variable_set_t *set = setlist->set;
 
   current_variable_set_list = setlist->next;
   free ((char *) setlist);
@@ -543,9 +543,9 @@ struct variable_set_list *
 create_new_variable_set (void)
 {
   struct variable_set_list *setlist;
-  struct variable_set *set;
+  variable_set_t *set;
 
-  set = (struct variable_set *) xmalloc (sizeof (struct variable_set));
+  set = (variable_set_t *) xmalloc (sizeof (variable_set_t));
   hash_init (&set->table, SMALL_SCOPE_VARIABLE_BUCKETS,
 	     variable_hash_1, variable_hash_2, variable_hash_cmp);
 
@@ -571,8 +571,8 @@ push_new_variable_scope (void)
     FROM_SET.  */
 
 static void
-merge_variable_sets (struct variable_set *to_set,
-                     struct variable_set *from_set)
+merge_variable_sets (variable_set_t *to_set,
+                     variable_set_t *from_set)
 {
   variable_t **from_var_slot = (variable_t **) from_set->table.ht_vec;
   variable_t **from_var_end = from_var_slot + from_set->table.ht_size;
@@ -803,7 +803,7 @@ target_environment (struct file *file)
      accumulating variables in TABLE.  */
   for (s = set_list; s != 0; s = s->next)
     {
-      struct variable_set *set = s->set;
+      variable_set_t *set = s->set;
       v_slot = (variable_t **) set->table.ht_vec;
       v_end = v_slot + set->table.ht_size;
       for ( ; v_slot < v_end; v_slot++)
@@ -1347,7 +1347,7 @@ print_variable_info (const void *item, void *arg)
    actual variable definitions (everything else is comments).  */
 
 void
-print_variable_set (struct variable_set *set, char *prefix)
+print_variable_set (variable_set_t *set, char *prefix)
 {
   hash_map_arg (&set->table, print_variable_info, prefix);
 

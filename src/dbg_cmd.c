@@ -1062,11 +1062,17 @@ static int dbg_cmd_show_var (char *psz_varname, int expand)
     return 0;
   } else {
     variable_t *p_v;
+    variable_set_t *p_set = NULL;
     if (p_stack) {
       initialize_file_variables (p_stack->p_target, 0);
       set_file_variables (p_stack->p_target);
+      if (p_stack->p_target->variables) 
+	p_set = p_stack->p_target->variables->set;
     }
     p_v = lookup_variable (psz_varname, strlen (psz_varname));
+    if (!p_v && p_set) {
+      p_v = lookup_variable_in_set(psz_varname, strlen(psz_varname), p_set);
+    }
     if (p_v) {
       if (expand) {
 	print_variable_expand(p_v);
