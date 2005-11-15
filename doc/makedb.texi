@@ -315,14 +315,14 @@ other lines that are the same but they just have line numbers and
 filenames added. For example ``/tmp/test1:4  File `all' does not exist.''
 
 But what is completely new is that we also show the line and targets
-before we execute any sort of shell command. So the history before the
-error is that we ran line 6 and then line 7 and then hit an error.
-The goal is simple trace output for a simple Makefile.
+before we execute any sort of shell command. The goal is simple trace
+output for a simple Makefile. (I think that although above can be
+improved, it is far better than what is in GNU make by default.)
 
-We hit the error, althoguh the trace gives some idea of we decided to
-to run line 7. there is another option @code{--extended-errors} or
+When we hit the error, the trace gives some idea of why we decided to
+to run line 7. There is another option @code{--extended-errors} or
 @code{-E} which gives a target stack trace when @value{MAKE} hits an
-error. For the above it looks like this:
+error. For the above, it looks like this:
 
 @smallexample
 $ @b{make --extended-errors -x -f test1}
