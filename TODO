@@ -20,33 +20,33 @@ are in effect, or reset them on a restart.
 :-( Add a debugger profile mechanism. (Should be a stack of file
 descriptors so profiles can nest).
 
-Redo command parsing. Make more like gdb. 
+:-( Redo command parsing. Make more like gdb. 
   trace -> set trace
   set foo bar -> set variable foo = bar
   add set annotate
 
-More debugger regression tests.
-
-Expand/rewrite debugger documentation as texinfo. 
+:-( More debugger regression tests, existing regression tests should work.
 
 :-( Allow breakpoint on file:line. 
 
-MAKELEVEL seems buggy
+:-( MAKELEVEL seems buggy
 
-better line info stored for commands 
+:-( "expand" doesn't handle automatic variables
+
+:-( better line info stored for commands 
 
 :-( Add ddd support. (Although I have CVS commit ability for ddd in
-case someone submits a patch.)
+   case someone submits a patch.)
 
-Run until recursive call? 
+:-( Run until recursive call? 
 
 :-( breakpoint actions? 
 
-More sophisticated debugger inquiries such as comparing two target
-timestamps, listing targets that need remaking.
+:-( More sophisticated debugger inquiries such as comparing two target
+    timestamps, listing targets that need remaking.
 
 There are probably many make-specific commands (e.g like the ones
 listed above). Using the debugger will probably uncover many areas.
 such as specialized things to trace.
 
-$Id: TODO,v 1.2 2004/06/12 21:55:53 rockyb Exp $
+$Id: TODO,v 1.3 2005/11/15 01:37:45 rockyb Exp $

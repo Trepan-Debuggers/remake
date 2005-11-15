@@ -78,7 +78,7 @@ This file documents the @sc{gnu} MAKE debugger
 This is the @value{EDITION} Edition, @value{UPDATED-MONTH},
 of @cite{Debugging with MAKEDB: the @sc{gnu} Make Debugger}
 
-Copyright (C) 2004 Rocky Bernstein for the Free Software Foundation.
+Copyright (C) 2004, 2005 Rocky Bernstein for the Free Software Foundation.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
@@ -102,7 +102,7 @@ development.''
 @page
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 2004 Rocky Bernstein for the Free Software
+Copyright @copyright{} 2004, 2005 Rocky Bernstein for the Free Software
 Foundation.
 
 Permission is granted to copy, distribute and/or modify this document
@@ -128,7 +128,7 @@ This file describes @value{DBG}
 
 This is the @value{EDITION} Edition, @value{UPDATED-MONTH}
 
-Copyright (C) 2004 Rocky Bernstein
+Copyright (C) 2004, 2005 Rocky Bernstein
 
 @menu
 * Summary::                     Overview of Debugger with a sample session
@@ -465,27 +465,31 @@ with the @code{print} command.
   /tmp/remake/src/Makefile:383: all-am
   makedb<4> print MAKE
 
-  (null):0 MAKE = $(MAKE_COMMAND)
+  (origin default) MAKE := $(MAKE_COMMAND)
 @end smallexample 
 
-The @code{(null):0} means this is a built-in definition. However there is
-another print which does full expansion of the variables. So if I run
-@code{x} (@code{examine}) instead I get: 
+The @code{(origin default)} means this is a built-in
+definition. There is another print which does full expansion
+of the variables. So if I run @code{x} (@code{examine}) instead I get:
 
 @smallexample
-  (null):0 MAKE = /src/local-cvs/remake/src/./make
+ (origin default) MAKE = /tmp/remake/src/./make
 @end smallexample 
 
-In fact, @code{examine} doesn't need a variable name, it will work with a
-string. So I could type ``@code{x This is $(MAKE)}'' or 
-``@code{x $(bin_PROGRAMS) $(noinst_PROGRAMS)}''. For the latter, I get:
+Note that in printing expanded values we use ``='' while non-expanded
+values we use ``:=''. 
+
+In fact, @code{examine} doesn't need a variable name, it will work
+with a string. So I could type ``@code{x This is $(MAKE)}'' or
+``@code{x $(bin_PROGRAMS) $(noinst_PROGRAMS)}''. For the latter, I
+get:
 
 @smallexample
   make loadavg
 @end smallexample 
 
-Note, no location identification is given here (since what I put in
-isn't a variable).
+No location identification is given here since what I put in
+isn't a variable.
 
 But I can also @emph{change} values too using either @code{set} or
 @code{setq}. Let's see the difference between the two. 
@@ -841,8 +845,9 @@ Available commands are:
   next [amount]             (n):
 	alias for step.
 
-  print @{*variable*|*target* [attrs...]@} (p):
-	Show a variable definition or target information.
+  print @{*variable* [attrs...]@} (p):
+
+	Show a variable definition.
 	If a variable name is given, the value is shown with embedded
 	variable-references unexpanded. Don't include $ before a variable
 	name. See also "examine".
@@ -1412,7 +1417,7 @@ includes variable.
 @table @code
 @kindex print
 @kindex p @r{(@code{print})}
-@item print @var{variable-name|target-name}
+@item print @var{variable-name}
 
 Use @code{print} to display @value{MAKE}'s variables. As such,
 variable names should @emph{not} be preceded with a dollar sign.
@@ -1420,7 +1425,7 @@ variable names should @emph{not} be preceded with a dollar sign.
 @smallexample
 @group
 makedb<0> @b{print SHELL}
-Makefile:150 SHELL = /bin/sh
+Makefile:168 (origin: makefile) SHELL := /bin/sh
 
 /tmp/remake/Makefile:243: Makefile.in
 makedb<1> @b{print $MAKE}   # don't use $
@@ -1454,22 +1459,21 @@ were given as a command inside the target.
 @smallexample
 @group
 makedb<0> @b{examine MAKE}
-(null):0 MAKE = /tmp/remake/src/./make
+(origin default) MAKE = /tmp/remake/src/./make
 
 
 /tmp/remake/src/Makefile:264: Makefile.in
 
 makedb<1> @b{print MAKE}  # note the difference with the ``print''
-(null):0 MAKE = $(MAKE_COMMAND)
+(origin default) MAKE := $(MAKE_COMMAND)
 
-makedb<2> @b{examine $MAKE}   # Note using $ doesn't matter here.
-(null):0 MAKE = /tmp/remake/src/./make
+makedb<2> @b{examine $(MAKE)}   # Note using $( ) doesn't matter here...
+/tmp/remake/src/./make          # except in output format - no origin info
 
 /tmp/remake/src/Makefile:264: Makefile.in
 
 makedb<2> @b{p COMPILE}
-Makefile:104 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) 
-
+Makefile:104 (origin: makefile) COMPILE := $(CC) $(DEFS) $(DEFAULT_INCLUDES) 
 
 /tmp/remake/src/Makefile:264: Makefile.in
 makedb<10> @b{x compile starts: $(CC) $(DEFS) $(DEFAULT_INCLUDES)}

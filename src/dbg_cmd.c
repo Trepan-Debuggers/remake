@@ -1078,7 +1078,6 @@ static int dbg_cmd_show_var (char *psz_varname, int expand)
 	print_variable_expand(p_v);
       } else
 	print_variable(p_v);
-      printf("\n");
     } else {
       if (expand)
 	printf("%s\n", variable_expand(psz_varname));

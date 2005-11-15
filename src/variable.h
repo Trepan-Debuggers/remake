@@ -123,6 +123,11 @@ extern struct variable_set_list *current_variable_set_list;
 
 /* variable.c */
 
+/*!
+  Return a string describing origin.
+ */
+const char *origin2str(variable_origin_t origin);
+
 /*! Create a new variable set and push it on the current setlist.  */
 extern struct variable_set_list *create_new_variable_set PARAMS ((void));
 

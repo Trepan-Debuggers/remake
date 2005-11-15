@@ -37,6 +37,42 @@ static struct pattern_var *pattern_vars;
 
 static struct pattern_var *last_pattern_var;
 
+/*!
+  Return a string describing origin.
+ */
+const char *
+origin2str(variable_origin_t origin) 
+{
+  switch (origin)
+    {
+    case o_default:
+      return _("default");
+      break;
+    case o_env:
+      return _("environment");
+      break;
+    case o_file:
+      return _("makefile");
+      break;
+    case o_env_override:
+      return _("environment under -e");
+      break;
+    case o_command:
+      return _("command line");
+      break;
+    case o_override:
+      return _("`override' directive");
+      break;
+    case o_automatic:
+      return _("automatic");
+      break;
+    case o_invalid:
+    default:
+      return _("invalid");
+    }
+}
+
+  
 /* Create a new pattern-specific variable struct.  */
 
 struct pattern_var *
@@ -1279,33 +1315,9 @@ print_variable_info (const void *item, void *arg)
   const char *prefix = (char *) arg;
   const char *origin;
 
-  switch (v->origin)
-    {
-    case o_default:
-      origin = _("default");
-      break;
-    case o_env:
-      origin = _("environment");
-      break;
-    case o_file:
-      origin = _("makefile");
-      break;
-    case o_env_override:
-      origin = _("environment under -e");
-      break;
-    case o_command:
-      origin = _("command line");
-      break;
-    case o_override:
-      origin = _("`override' directive");
-      break;
-    case o_automatic:
-      origin = _("automatic");
-      break;
-    case o_invalid:
-    default:
-      abort ();
-    }
+  if (o_invalid == v->origin) abort ();
+  origin = origin2str(v->origin);
+
   fputs ("# ", stdout);
   fputs (origin, stdout);
   if (v->fileinfo.filenm)

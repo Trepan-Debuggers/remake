@@ -351,13 +351,14 @@ void
 print_variable (variable_t *p_v)
 {
   if (p_v) {
+    const char *psz_origin = origin2str(p_v->origin);
     if (NULL != p_v->fileinfo.filenm) {
-      printf("%s:%lu %s = %s\n", 
+      printf("%s:%lu (origin: %s) %s := %s\n", 
 	     p_v->fileinfo.filenm, p_v->fileinfo.lineno,
+	     psz_origin,
 	     p_v->name, p_v->value);
     } else {
-      printf("(null):0 %s = %s\n", 
-	     p_v->name, p_v->value);
+      printf("(origin %s) %s := %s\n", psz_origin, p_v->name, p_v->value);
     }
   }
 }
@@ -366,9 +367,18 @@ print_variable (variable_t *p_v)
 void 
 print_variable_expand (variable_t *p_v)
 {
-  printf("%s:%lu %s = %s\n", 
-	 p_v->fileinfo.filenm, p_v->fileinfo.lineno,
-	 p_v->name, variable_expand(p_v->value));
+  if (p_v) {
+    const char *psz_origin = origin2str(p_v->origin);
+    if (NULL != p_v->fileinfo.filenm) {
+      printf("%s:%lu (origin: %s) %s = %s\n", 
+	     p_v->fileinfo.filenm, p_v->fileinfo.lineno,
+	     psz_origin,
+	     p_v->name, variable_expand(p_v->value));
+    } else {
+      printf("(origin %s) %s = %s\n", psz_origin, 
+	     p_v->name, variable_expand(p_v->value));
+    }
+  }
 }
 
 /*! Show a command before executing it. */
