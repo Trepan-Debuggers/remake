@@ -1,7 +1,9 @@
 ## Process this file with automake to create Makefile.in.
 
 ## Makefile for GNU make documentation.
-## Copyright 2002, 2004 Free Software Foundation, Inc.
+## Copyright 2002, 2004, 2005 Free Software Foundation, Inc.
+
+transform = s,make,@MAKE_NAME@,
 
 TEXI2HTML = texi2html
 TEXI2PDF = texi2dvi --pdf

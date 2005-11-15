@@ -2,6 +2,8 @@
 
 AUTOMAKE_OPTIONS = dist-bzip2 check-news
 
+transform = s,make,@MAKE_NAME@,
+
 SUBDIRS =	glob config po doc src emacs
 
 man_MANS =	make.1
