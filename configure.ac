@@ -1,12 +1,12 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(remake,3.80+dbg-0.3cvs,rocky@panix.com)
+AC_INIT(remake,3.80+dbg-0.3,rocky@panix.com)
 
 AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.14 2005/11/13 23:15:11 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.15 2005/11/15 02:38:14 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -202,6 +202,12 @@ if test "$make_cv_union_wait" = yes; then
             [Define this if you have the "union wait" type in <sys/wait.h>.])
 fi
 AC_MSG_RESULT($make_cv_union_wait)
+
+AC_ARG_WITH(make_name,
+[  --with-make-name        name to use as the program name (default remake)],
+make_name="${withval}", make_name="remake")
+MAKE_NAME="$make_name"
+AC_SUBST(MAKE_NAME)
 
 #
 # Check for readline to see if we can add debugging support.
@@ -424,6 +430,7 @@ AC_CONFIG_FILES([Makefile        \
                  config/Makefile \
 		 doc/Makefile    \
 		 emacs/Makefile  \
+		 emacs/makedb.el \
 		 glob/Makefile   \
                  po/Makefile.in  \
 		 src/Makefile    \

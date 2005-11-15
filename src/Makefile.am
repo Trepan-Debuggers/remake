@@ -1,5 +1,7 @@
 # This is a -*-Makefile-*-, or close enough
 
+transform = s,make,@MAKE_NAME@,
+
 ACLOCAL_AMFLAGS	=  -I config
 
 bin_PROGRAMS =	make

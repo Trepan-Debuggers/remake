@@ -9,13 +9,18 @@ Please send remake bug reports to <rocky@panix.com>.
 See the README file and the GNU remake manual for details on sending bug
 reports.
 
-Version 3.80+dbg-0.3cvs
+Version 3.80+dbg-0.3
 
 * tracing adds GNU Make "basic" debugging. If debugging, then we also
   enter the debugger read loop. Hopefully this adds more granularity
   but not the diarrhea that "make -d" gives. To reduce this, "next"
   could be used to skip over remaking targets that don't have
   commands.
+
+* print and examine now show origin status
+
+* print/examine work for automatic variables. examine still has 
+  problems with automatic variables in strings though.
 
 * Allow abbreviations of debugger command attributes. As a result some
   attributes were renamed slighly, e.g. vars -> variables, deps ->
@@ -35,7 +40,9 @@ Version 3.80+dbg-0.3cvs
 * fixed failure of enter_debugger to exit on an empty line from
   readline.
 
-* OS/X compilations fixes
+* install program as remake by default (not make).
+
+* misc bug fixes and compilations fixes for various OS's
 
 
 Version 3.80+dbg-0.2

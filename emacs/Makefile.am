@@ -13,9 +13,9 @@
 #   You should have received a copy of the GNU General Public License along
 #   with Bash; see the file COPYING.  If not, write to the Free Software
 #   Foundation, 59 Temple Place, Suite 330, Boston, MA 02111 USA.
-#$Id: Makefile.am,v 1.1 2004/06/11 00:03:41 rockyb Exp $
+#$Id: Makefile.am,v 1.2 2005/11/15 02:38:15 rockyb Exp $
 
-EXTRA_DIST = makedb.el
+EXTRA_DIST = makedb.el makedb.el.in
 ELCFILES  =
 if INSTALL_EMACS_LISP
 lisp_LISP = makedb.el 
