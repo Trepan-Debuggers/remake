@@ -1522,6 +1522,8 @@ target up to date.
 Show the targets that this one depends on.
 
 @item nonorder
+Show the dependencies that are not ordered.
+
 @item previous
 @item state
 Show status of target:
@@ -1541,19 +1543,24 @@ will appear instead of the time. In some cases you may see
 ``Modification time never checked.''
 
 @item variables
-Show automatic state variables (if defined):
+Show single-character automatic state variables (if defined):
 @itemize @bullet
-@item @@ 
-@item %
-@item *
+@item @@ - the target name
+@item % - target member name, when target is an the archive member
+@item * - the stem with which an implicit rule matches
 @item + - the duplicate dependencies 
 @item |
-@item <
-@item >
-@item >
-@item ^
-@item ?
+@item < - the name of the first prerequisite
+@item > - the names of all prerequisites in the order listed in the makefile
+@item ^ - the names of all prerequisites
+@item ? - the names of all prerequisites newer than the target (@@)
 @end itemize
+
+Note that there are other automatic variables defined based on
+these. In particular those that have a `D' or `F' suffix, e.g. $(@@D),
+or $(*F). These however are not listed here but can shown in a
+@code{print} command or figured out from their corresponding
+single-letter variable name.
 
 @end table
 
