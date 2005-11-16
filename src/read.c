@@ -431,10 +431,15 @@ eval_buffer (char *buffer)
   ebuf.buffer = ebuf.bufnext = ebuf.bufstart = buffer;
   ebuf.fp = NULL;
 
-  ebuf.floc = *reading_file;
+  if (reading_file) {
+    ebuf.floc = *reading_file;
 
-  curfile = reading_file;
-  reading_file = &ebuf.floc;
+    curfile = reading_file;
+    reading_file = &ebuf.floc;
+  } else {
+    ebuf.floc.filenm = NULL;
+    ebuf.floc.lineno = 0;
+  }
 
   saved = install_conditionals (&new);
 
@@ -1606,7 +1611,7 @@ record_target_var (struct nameseq *filenames, char *defn,
                    const struct floc *flocp)
 {
   struct nameseq *nextf;
-  struct variable_set_list *global;
+  variable_set_list_t *global;
 
   global = current_variable_set_list;
 

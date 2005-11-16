@@ -9,6 +9,12 @@ Please send remake bug reports to <rocky@panix.com>.
 See the README file and the GNU remake manual for details on sending bug
 reports.
 
+Version 3.80+dbg-0.4cvs
+
+* Add eval!
+
+* The usual doc fixes after a release
+
 Version 3.80+dbg-0.3
 
 * tracing adds GNU Make "basic" debugging. If debugging, then we also

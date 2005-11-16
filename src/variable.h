@@ -107,6 +107,8 @@ struct variable_set_list
     variable_set_t *set;		/* Variable set.  */
   };
 
+typedef struct variable_set_list variable_set_list_t;
+
 /* Structure used for pattern-specific variables.  */
 
 struct pattern_var
@@ -119,7 +121,7 @@ struct pattern_var
   };
 
 extern char *variable_buffer;
-extern struct variable_set_list *current_variable_set_list;
+extern variable_set_list_t *current_variable_set_list;
 
 /* variable.c */
 
@@ -129,12 +131,12 @@ extern struct variable_set_list *current_variable_set_list;
 const char *origin2str(variable_origin_t origin);
 
 /*! Create a new variable set and push it on the current setlist.  */
-extern struct variable_set_list *create_new_variable_set PARAMS ((void));
+extern variable_set_list_t *create_new_variable_set PARAMS ((void));
 
 /*! Create a new variable set, push it on the current setlist,
   and assign current_variable_set_list to it. 
  */
-extern struct variable_set_list *push_new_variable_scope PARAMS ((void));
+extern variable_set_list_t *push_new_variable_scope PARAMS ((void));
 
 /*! Pop the top set off the current_variable_set_list, and free all
    its storage.  */
@@ -168,7 +170,7 @@ extern void print_variable_set PARAMS ((variable_set_t *set, char *prefix));
 
 /*! Merge FROM_SET into TO_SET, freeing unused storage in
     FROM_SET.  */
-extern void merge_variable_set_lists PARAMS ((struct variable_set_list **to_list, struct variable_set_list *from_list));
+extern void merge_variable_set_lists PARAMS ((variable_set_list_t **to_list, variable_set_list_t *from_list));
 
 /*! Given a variable, a value, and a flavor, define the variable.  See
    the try_variable_definition() function for details on the

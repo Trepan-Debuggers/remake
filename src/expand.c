@@ -96,7 +96,7 @@ char *
 recursively_expand_for_file (variable_t *v, file_t *file)
 {
   char *value;
-  struct variable_set_list *save = 0;
+  variable_set_list_t *save = 0;
   int set_reading = 0;
 
   if (v->expanding)
@@ -446,7 +446,7 @@ static char *
 variable_expand_for_file (char *line, file_t *file)
 {
   char *result;
-  struct variable_set_list *save;
+  variable_set_list_t *save;
 
   if (file == 0)
     return variable_expand (line);
@@ -470,7 +470,7 @@ variable_expand_for_file (char *line, file_t *file)
 
 static char *
 variable_append (const char *name, unsigned int length,
-                 const struct variable_set_list *set)
+                 const variable_set_list_t *set)
 {
   const variable_t *v;
   char *buf = 0;

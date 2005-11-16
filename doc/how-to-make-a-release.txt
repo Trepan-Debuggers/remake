@@ -1,0 +1,68 @@
+- Let people know of a pending release,
+  e.g. bashdb-devel@lists.sourceforge.net; no major changes before
+  release, please
+
+- test on lots of platforms; sourceforge compile farm, for example
+
+- "make distcheck" should work - (but it doesn't at present)
+
+- Go over Changelog and add NEWS. Update date of release.
+
+- Remove "cvs" from configure.ac's release name. E.g.
+    AC_INIT(remake,3.80+dbg-0.3cvs,rocky@panix.com)
+                               ^^^
+    ...
+
+- Make sure sources are current and checked in:
+    cvs update -dPA .
+    cvs commit .
+
+- autogen.sh && make && make check
+
+- make doxygen documentation
+  cd doc/doxygen; ./run_doxygen
+
+- Tag release in CVS: 
+   cvs log -h configure.ac
+   cvs tag release_<0_3> . (replace <0_3> with the right value)
+
+- "make distcheck" one more time
+
+- Upload files to upload.sourceforge.net, 
+  ftp upload.sourceforge.net, 
+    user anonymous, 
+    password (your email address)
+  cd incoming 
+  bin
+  hash
+  mput remake-3.80+dbg-0.*.tar.*
+  quit
+
+- Go to sourcefore Release section and make release
+
+- Update/Announce on Freshmeat:
+   http://freshmeat.net/projects/libcdio/ "add release" generally
+
+  The NEWS file is your friend.
+
+- copy doxygen html to web pages:
+  cd libcdio-www/doxygen
+  rm *.html
+  cp ../libcdio/doc/doxygen/html/*.html .
+  cvs update . 
+    for each "U" html *except libcdio.hmtl* put back remove it 
+      with "rm" and "cvs remove"
+    for each new "?" html add it
+  cvs commit .
+
+- copy libcdio manual to web page:
+     (cd ../libcdio/doc && make libcdio.html)
+     cp ../libcdio/doc/libcdio.html .
+     cvs commit .
+
+- Remove old cvs versions 
+
+- Bump version in configure.ac and add "cvs". See place above in 
+  removal. 
+
+

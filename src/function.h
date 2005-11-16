@@ -62,4 +62,14 @@ extern char * subst_expand PARAMS ((char *o, char *text, char *subst,
 				    unsigned int rlen, int by_word, 
 				    int suffix_only));
 
+/*!
+  $(eval <makefile string>)
+
+  Always resolves to the empty string.
+
+  Treat the arguments as a segment of makefile, and parse them.
+*/
+extern char *func_eval (char *o, char **argv, const char *funcname UNUSED);
+
+
 #endif /*FUNCTION_H*/

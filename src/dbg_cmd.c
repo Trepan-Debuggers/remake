@@ -24,6 +24,7 @@ Boston, MA 02111-1307, USA.  */
 #include "commands.h"
 #include "debug.h"
 #include "expand.h"
+#include "function.h"
 
 #ifdef HAVE_LIBREADLINE
 #include <stdio.h>
@@ -94,6 +95,7 @@ static debug_return_t dbg_cmd_break            (char *psz_arg);
 static debug_return_t dbg_cmd_comment          (char *psz_arg);
 static debug_return_t dbg_cmd_continue         (char *psz_arg);
 static debug_return_t dbg_cmd_delete           (char *psz_arg);
+static debug_return_t dbg_cmd_eval             (char *psz_arg);
 static debug_return_t dbg_cmd_expand           (char *psz_arg);
 static debug_return_t dbg_cmd_frame            (char *psz_arg);
 static debug_return_t dbg_cmd_help             (char *psz_arg);
@@ -123,6 +125,7 @@ long_cmd_t commands[] = {
   { "continue", 'c' },
   { "delete",   'd' },
   { "down",     'D' },
+  { "eval" ,    'e' },
   { "examine" , 'x' },
   { "exit"    , 'q' },
   { "frame"   , 'f' },
@@ -277,6 +280,10 @@ cmd_initialize(void)
   short_command['D'].doc  = 
     _("Select and print the target this one caused to be examined.\n" \
       "\tAn argument says how many targets down to go.");
+
+  short_command['e'].func = &dbg_cmd_eval;
+  short_command['e'].use  = _("eval *string*");
+  short_command['e'].doc  = _("parse and evaluate a string.");
 
   short_command['f'].func = &dbg_cmd_frame;
   short_command['f'].use  = _("frame *n*");
@@ -641,6 +648,14 @@ static debug_return_t dbg_cmd_delete (char *psz_target)
     printf("No breakpoint at target %s; nothing cleared.\n", psz_target);
   }
 
+  return debug_readloop;
+}
+
+/* Parse and evaluate buffer and return the results. */
+static debug_return_t dbg_cmd_eval (char *psz_evalstring)
+{
+  func_eval(NULL, &psz_evalstring, NULL);
+  reading_file = 0;
   return debug_readloop;
 }
 

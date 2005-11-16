@@ -172,9 +172,9 @@ variable_hash_cmp (const void *xv, const void *yv)
 #endif
 
 static variable_set_t global_variable_set;
-static struct variable_set_list global_setlist
+static variable_set_list_t global_setlist
   = { 0, &global_variable_set };
-struct variable_set_list *current_variable_set_list = &global_setlist;
+variable_set_list_t *current_variable_set_list = &global_setlist;
 
 /* Implement variables.  */
 
@@ -373,7 +373,7 @@ handle_special_var (variable_t *var)
 variable_t *
 lookup_variable (const char *name, unsigned int length)
 {
-  const struct variable_set_list *setlist;
+  const variable_set_list_t *setlist;
   variable_t var_key;
 
   var_key.name = (char *) name;
@@ -479,12 +479,12 @@ lookup_variable_in_set (const char *name, unsigned int length,
 void
 initialize_file_variables (struct file *file, int reading)
 {
-  struct variable_set_list *l = file->variables;
+  variable_set_list_t *l = file->variables;
 
   if (l == 0)
     {
-      l = (struct variable_set_list *)
-	xmalloc (sizeof (struct variable_set_list));
+      l = (variable_set_list_t *)
+	xmalloc (sizeof (variable_set_list_t));
       l->set = (struct variable_set *) xmalloc (sizeof (variable_set_t));
       hash_init (&l->set->table, PERFILE_VARIABLE_BUCKETS,
                  variable_hash_1, variable_hash_2, variable_hash_cmp);
@@ -520,7 +520,7 @@ initialize_file_variables (struct file *file, int reading)
       p = lookup_pattern_var (0, file->name);
       if (p != 0)
         {
-          struct variable_set_list *global = current_variable_set_list;
+          variable_set_list_t *global = current_variable_set_list;
 
           /* We found at least one.  Set up a new variable set to accumulate
              all the pattern variables that match this target.  */
@@ -562,7 +562,7 @@ free_variable_name_and_value (const void *item)
 void
 pop_variable_scope (void)
 {
-  struct variable_set_list *setlist = current_variable_set_list;
+  variable_set_list_t *setlist = current_variable_set_list;
   variable_set_t *set = setlist->set;
 
   current_variable_set_list = setlist->next;
@@ -575,18 +575,18 @@ pop_variable_scope (void)
 }
 
 /*! Create a new variable set and push it on the current setlist.  */
-struct variable_set_list *
+variable_set_list_t *
 create_new_variable_set (void)
 {
-  struct variable_set_list *setlist;
+  variable_set_list_t *setlist;
   variable_set_t *set;
 
   set = (variable_set_t *) xmalloc (sizeof (variable_set_t));
   hash_init (&set->table, SMALL_SCOPE_VARIABLE_BUCKETS,
 	     variable_hash_1, variable_hash_2, variable_hash_cmp);
 
-  setlist = (struct variable_set_list *)
-    xmalloc (sizeof (struct variable_set_list));
+  setlist = (variable_set_list_t *)
+    xmalloc (sizeof (variable_set_list_t));
   setlist->set = set;
   setlist->next = current_variable_set_list;
 
@@ -597,7 +597,7 @@ create_new_variable_set (void)
   and assign current_variable_set_list to it. 
  */
 
-struct variable_set_list *
+variable_set_list_t *
 push_new_variable_scope (void)
 {
   return (current_variable_set_list = create_new_variable_set());
@@ -633,15 +633,15 @@ merge_variable_sets (variable_set_t *to_set,
 /* Merge SETLIST1 into SETLIST0, freeing unused storage in SETLIST1.  */
 
 void
-merge_variable_set_lists (struct variable_set_list **setlist0,
-                          struct variable_set_list *setlist1)
+merge_variable_set_lists (variable_set_list_t **setlist0,
+                          variable_set_list_t *setlist1)
 {
-  struct variable_set_list *list0 = *setlist0;
-  struct variable_set_list *last0 = 0;
+  variable_set_list_t *list0 = *setlist0;
+  variable_set_list_t *last0 = 0;
 
   while (setlist1 != 0 && list0 != 0)
     {
-      struct variable_set_list *next = setlist1;
+      variable_set_list_t *next = setlist1;
       setlist1 = setlist1->next;
 
       merge_variable_sets (list0->set, next->set);
@@ -818,8 +818,8 @@ int export_all_variables;
 char **
 target_environment (struct file *file)
 {
-  struct variable_set_list *set_list;
-  struct variable_set_list *s;
+  variable_set_list_t *set_list;
+  variable_set_list_t *s;
   hash_table_t table;
   variable_t **v_slot;
   variable_t **v_end;

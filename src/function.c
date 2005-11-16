@@ -1195,7 +1195,7 @@ func_wildcard (char *o, char **argv, const char *funcname UNUSED)
    return o;
 }
 
-/*
+/*!
   $(eval <makefile string>)
 
   Always resolves to the empty string.
@@ -1203,7 +1203,7 @@ func_wildcard (char *o, char **argv, const char *funcname UNUSED)
   Treat the arguments as a segment of makefile, and parse them.
 */
 
-static char *
+char *
 func_eval (char *o, char **argv, const char *funcname UNUSED)
 {
   char *buf;
