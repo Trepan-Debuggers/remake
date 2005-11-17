@@ -132,7 +132,7 @@ static int eval PARAMS ((struct ebuffer *buffer, int flags));
 
 static long readline PARAMS ((struct ebuffer *ebuf));
 static void do_define PARAMS ((char *name, unsigned int namelen,
-                               enum variable_origin origin,
+                               variable_origin_t origin,
                                struct ebuffer *ebuf));
 static int conditional_line PARAMS ((char *line, const struct floc *flocp));
 static void record_files PARAMS ((struct nameseq *filenames, char *pattern, char *pattern_percent,
@@ -141,8 +141,8 @@ static void record_files PARAMS ((struct nameseq *filenames, char *pattern, char
 			int have_sysv_atvar,
                         const floc_t *flocp, int set_default));
 static void record_target_var PARAMS ((struct nameseq *filenames, char *defn,
-                                       enum variable_origin origin,
-                                       int enabled,
+                                       variable_origin_t origin,
+                                       bool b_exported,
                                        const floc_t *flocp));
 static enum make_word_type get_next_mword PARAMS ((char *buffer, char *delim,
                         char **startp, unsigned int *length));
@@ -892,8 +892,8 @@ eval (struct ebuffer *ebuf, int set_default)
 
       {
         enum make_word_type wtype;
-        enum variable_origin v_origin;
-        int exported;
+        variable_origin_t v_origin;
+        bool b_exported;
         char *cmdleft, *semip, *lb_next;
         unsigned int len, plen = 0;
         char *colonp;
@@ -1067,7 +1067,7 @@ eval (struct ebuffer *ebuf, int set_default)
         wtype = get_next_mword (p2, NULL, &p, &len);
 
         v_origin = o_file;
-        exported = 0;
+        b_exported = false;
         if (wtype == w_static)
           {
             if (word1eq ("override"))
@@ -1077,7 +1077,7 @@ eval (struct ebuffer *ebuf, int set_default)
               }
             else if (word1eq ("export"))
               {
-                exported = 1;
+                b_exported = true;
                 wtype = get_next_mword (p+len, NULL, &p, &len);
               }
           }
@@ -1097,7 +1097,7 @@ eval (struct ebuffer *ebuf, int set_default)
                                         semip, strlen (semip)+1);
                 p = variable_buffer + l;
               }
-            record_target_var (filenames, p, v_origin, exported, fstart);
+            record_target_var (filenames, p, v_origin, b_exported, fstart);
             filenames = 0;
             continue;
           }
@@ -1274,7 +1274,7 @@ eval (struct ebuffer *ebuf, int set_default)
 
 static void
 do_define (char *name, unsigned int namelen,
-           enum variable_origin origin, struct ebuffer *ebuf)
+           variable_origin_t origin, struct ebuffer *ebuf)
 {
   struct floc defstart;
   long nlines = 0;
@@ -1610,7 +1610,7 @@ conditional_line (char *line, const struct floc *flocp)
 
 static void
 record_target_var (struct nameseq *filenames, char *defn,
-                   enum variable_origin origin, int exported,
+                   variable_origin_t origin, bool b_exported,
                    const struct floc *flocp)
 {
   struct nameseq *nextf;
@@ -1673,7 +1673,7 @@ record_target_var (struct nameseq *filenames, char *defn,
       /* Set up the variable to be *-specific.  */
       v->origin = origin;
       v->per_target = 1;
-      if (exported)
+      if (b_exported)
         v->export = v_export;
 
       /* If it's not an override, check to see if there was a command-line
