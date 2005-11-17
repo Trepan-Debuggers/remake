@@ -36,6 +36,7 @@ Boston, MA 02111-1307, USA.  */
 #define whitespace(c) (((c) == ' ') || ((c) == '\t'))
 #endif
 
+bool b_in_debugger = false;
 
 const char *WARRANTY = 
 "			    NO WARRANTY\n"
@@ -1318,6 +1319,8 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
     }
   }
 
+  b_in_debugger = true;
+
   /* Loop reading and executing lines until the user quits. */
   for ( debug_return = debug_readloop; debug_return == debug_readloop; ) {
     char prompt[PROMPT_LENGTH];
@@ -1343,6 +1346,7 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
       free (line);
     }
   }
+  b_in_debugger=false;
 #endif /* HAVE_LIBREADLINE */
   return debug_return;
 }

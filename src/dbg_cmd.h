@@ -21,6 +21,8 @@ Boston, MA 02111-1307, USA.  */
 #define SEEN_DBG_CMD_H
 #include "job.h"
 
+extern bool b_in_debugger;
+
 /*!
   debugger command interface. 
 */

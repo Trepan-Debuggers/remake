@@ -28,6 +28,7 @@ MA 02111-1307, USA.  */
 #include "commands.h"
 #include "rule.h"
 #include "debug.h"
+#include "dbg_cmd.h"
 #include "getopt.h"
 #include "vpath.h"
 
@@ -293,9 +294,11 @@ static stringlist_t *new_files = NULL;
 static int print_usage_flag = 0;
 
 /* Do we want to go into a debugger or not?
-   Values are "error"    - enter on errors or fatal errors
-              "fatal"    - enter on fatal errors
-              "enter"    - set to enter debugger initially
+   Values are "error"     - enter on errors or fatal errors
+              "fatal"     - enter on fatal errors
+              "preread"   - set to enter debugger before reading makefile(s)
+              "preaction" - set to enter debugger before performing any 
+	                    actions(s)
               "full"     - "enter" + "error" + "fatal"
 */
 static stringlist_t* debugger_opts = NULL;
@@ -394,7 +397,8 @@ static const char *const usage[] =
   -x, --trace                  Trace command execution\n"),
     N_("\
   -X [type], --debugger=[TYPE] Enter debugger. TYPE may be\n\
-                               \"enter\", \"full\"," " \"error\", or \"fatal\".\n"),
+                               \"preread\", \"preaction\", \"full\",\n\
+                               \"error\", or \"fatal\".\n"),
     N_("\
   -V, --show-variables         Show variable expansions.\n"),
     NULL
@@ -458,7 +462,7 @@ static const struct command_switch switches[] =
         "print-directory" },
     { 'x', flag, (char *) &tracing, 1, 1, 0, 0, 0, "trace" },
     { 'X', string, (char *) &debugger_opts, 1, 1, 0, 
-      "enter", 0, "debugger" },
+      "preaction", 0, "debugger" },
     { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0, "what-if" },
     { 'V', flag, (char *) &show_variable_definitions, 1, 1, 0, 0, 0,
 	"show-variables" },
@@ -917,6 +921,9 @@ int
 main (int argc, char **argv, char **envp)
 #endif
 {
+  /*! If true, enter the debugger before reading any makefiles. */
+  bool debugger_preread = false;
+
   static char *stdin_nm = 0;
   struct file *f;
   int i;
@@ -940,7 +947,9 @@ main (int argc, char **argv, char **envp)
   initialize_main(&argc, &argv);
 
   default_goal_file = 0;
-  reading_file = 0;
+  reading_file      = 0;
+  b_in_debugger     = false;
+  
 
 #if defined (__MSDOS__) && !defined (_POSIX_SOURCE)
   /* Request the most powerful version of `system', to
@@ -1198,8 +1207,9 @@ main (int argc, char **argv, char **envp)
     char **p;
     for (p = debugger_opts->list; *p != 0; ++p)
       {
-	if ( 0 == strcmp(*p, "full") 
-	     || 0 == strcmp(*p, "enter") ) {
+	debugger_preread = (0 == strcmp(*p, "preread"));
+	if ( 0 == strcmp(*p, "full") || debugger_preread
+	     || 0 == strcmp(*p, "preaction") ) {
 	  job_slots          =  1;
 	  debugger_stepping  =  1;
 	  debugger_nexting   =  1;
@@ -1566,6 +1576,8 @@ main (int argc, char **argv, char **envp)
 
   /* Define the default variables.  */
   define_default_variables ();
+
+  if (debugger_preread) enter_debugger (NULL, NULL, 0);
 
   /* Read all the makefiles.  */
 

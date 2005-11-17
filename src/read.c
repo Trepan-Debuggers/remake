@@ -27,6 +27,7 @@ Boston, MA 02111-1307, USA.  */
 #include "commands.h"
 #include "rule.h"
 #include "debug.h"
+#include "dbg_cmd.h"
 
 #ifndef NO_ARCHIVES
 #include "arscan.h"
@@ -395,7 +396,8 @@ eval_makefile (char *filename, int flags)
     }
 
   /* Add this makefile to the list. */
-  do_variable_definition (&ebuf.floc, "MAKEFILE_LIST", filename, o_file,
+  do_variable_definition (&ebuf.floc, "MAKEFILE_LIST", filename, 
+			  b_in_debugger ? o_debugger: o_file,
                           f_append, 0);
 
   /* Evaluate the makefile */
@@ -857,7 +859,8 @@ eval (struct ebuffer *ebuf, int set_default)
           goto rule_complete;
 	}
 
-      if (try_variable_definition (fstart, p, o_file, 0))
+      if (try_variable_definition (fstart, p, 
+				   b_in_debugger ? o_debugger: o_file, 0))
 	/* This line has been dealt with.  */
 	goto rule_complete;
 
