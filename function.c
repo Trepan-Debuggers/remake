@@ -489,6 +489,22 @@ func_origin (char *o, char **argv, const char *funcname UNUSED)
   return o;
 }
 
+static char *
+func_flavor (char *o, char **argv, const char *funcname UNUSED)
+{
+  register struct variable *v = lookup_variable (argv[0], strlen (argv[0]));
+
+  if (v == 0)
+    o = variable_buffer_output (o, "undefined", 9);
+  else
+    if (v->recursive)
+      o = variable_buffer_output (o, "recursive", 9);
+    else
+      o = variable_buffer_output (o, "simple", 6);
+
+  return o;
+}
+
 #ifdef VMS
 # define IS_PATHSEP(c) ((c) == ']')
 #else
@@ -1942,6 +1958,7 @@ static struct function_table_entry function_table_init[] =
   { STRING_SIZE_TUPLE("filter-out"),    2,  2,  1,  func_filter_filterout},
   { STRING_SIZE_TUPLE("findstring"),    2,  2,  1,  func_findstring},
   { STRING_SIZE_TUPLE("firstword"),     0,  1,  1,  func_firstword},
+  { STRING_SIZE_TUPLE("flavor"),        0,  1,  1,  func_flavor},
   { STRING_SIZE_TUPLE("join"),          2,  2,  1,  func_join},
   { STRING_SIZE_TUPLE("lastword"),      0,  1,  1,  func_lastword},
   { STRING_SIZE_TUPLE("patsubst"),      3,  3,  1,  func_patsubst},
