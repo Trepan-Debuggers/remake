@@ -89,6 +89,7 @@ Version 3.81beta3
      all symbolic links resolved as well.
    - $(info ...) prints its arguments to stdout.  No makefile name or
      line number info, etc. is printed.
+   - $(flavor ...) returns the flavor of a variable.
 
 * Changes made for POSIX compatibility:
    - Only touch targets (under -t) if they have at least one command.

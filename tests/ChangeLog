@@ -1,3 +1,7 @@
+2005-11-17  Boris Kolpackov  <boris@kolpackov.net>
+
+	* scripts/functions/flavor: Add a test for the flavor function.
+
 2005-11-14  Boris Kolpackov  <boris@kolpackov.net>
 
 	* scripts/variables/INCLUDE_DIRS: Add a test for the .INCLUDE_DIRS

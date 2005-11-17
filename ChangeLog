@@ -1,3 +1,10 @@
+2005-11-17  Boris Kolpackov  <boris@kolpackov.net>
+
+	* function.c (func_flavor): Implement the flavor function which
+	returns the flavor of a variable.
+	* doc/make.texi (Functions for Transforming Text): Document it.
+	* NEWS: Add it to the list of new functions.
+
 2005-11-14  Boris Kolpackov  <boris@kolpackov.net>
 
 	* read.c (construct_include_path): Set the .INCLUDE_DIRS special
