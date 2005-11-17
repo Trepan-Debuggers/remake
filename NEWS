@@ -13,7 +13,11 @@ Version 3.80+dbg-0.4cvs
 
 * Add eval!
 
-* The usual doc fixes after a release
+* Add ability to break before reading Makefiles - may be useful in 
+  debugging macros and variables --debugger=preread. We can now trace
+  makefile reading activity with -d r or via --trace = {read,full}
+
+* The usual doc fixes after a release.
 
 Version 3.80+dbg-0.3
 
