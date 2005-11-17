@@ -448,13 +448,16 @@ func_join (char *o, char **argv, const char *funcname UNUSED)
 }
 
 
+#define VARIABLE_BUFFER_OUTPUT(o, text)		\
+  o = variable_buffer_output(o, text, sizeof(text)-1)
+  
 static char *
 func_origin (char *o, char **argv, const char *funcname UNUSED)
 {
   /* Expand the argument.  */
   struct variable *v = lookup_variable (argv[0], strlen (argv[0]));
   if (v == 0)
-    o = variable_buffer_output (o, "undefined", 9);
+    VARIABLE_BUFFER_OUTPUT (o, "undefined");
   else
     switch (v->origin)
       {
@@ -463,25 +466,28 @@ func_origin (char *o, char **argv, const char *funcname UNUSED)
 	abort ();
 	break;
       case o_default:
-	o = variable_buffer_output (o, "default", 7);
+	VARIABLE_BUFFER_OUTPUT (o, "default");
 	break;
       case o_env:
-	o = variable_buffer_output (o, "environment", 11);
+	VARIABLE_BUFFER_OUTPUT (o, "environment");
 	break;
       case o_file:
-	o = variable_buffer_output (o, "file", 4);
+	VARIABLE_BUFFER_OUTPUT (o, "file");
+	break;
+      case o_debugger:
+	VARIABLE_BUFFER_OUTPUT (o, "debugger");
 	break;
       case o_env_override:
-	o = variable_buffer_output (o, "environment override", 20);
+	VARIABLE_BUFFER_OUTPUT (o, "environment override");
 	break;
       case o_command:
-	o = variable_buffer_output (o, "command line", 12);
+	VARIABLE_BUFFER_OUTPUT (o, "command line");
 	break;
       case o_override:
-	o = variable_buffer_output (o, "override", 8);
+	VARIABLE_BUFFER_OUTPUT (o, "override" );
 	break;
       case o_automatic:
-	o = variable_buffer_output (o, "automatic", 9);
+	VARIABLE_BUFFER_OUTPUT (o, "automatic" );
 	break;
       }
 

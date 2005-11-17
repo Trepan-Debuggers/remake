@@ -1,6 +1,6 @@
 /* Internals of variables for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996, 1997,
-2002, 2004 Free Software Foundation, Inc.
+2002, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -65,6 +65,9 @@ origin2str(variable_origin_t origin)
       break;
     case o_automatic:
       return _("automatic");
+      break;
+    case o_debugger:
+      return _("debugger");
       break;
     case o_invalid:
     default:
@@ -194,9 +197,9 @@ init_hash_global_variable_set (void)
 
 variable_t *
 define_variable_in_set (const char *name, unsigned int length,
-                        char *value, enum variable_origin origin,
+                        char *value, variable_origin_t origin,
                         int recursive, variable_set_t *set,
-                        const struct floc *flocp)
+                        const floc_t *p_floc)
 {
   variable_t *v;
   variable_t **var_slot;
@@ -228,8 +231,8 @@ define_variable_in_set (const char *name, unsigned int length,
 	  if (v->value != 0)
 	    free (v->value);
 	  v->value = xstrdup (value);
-          if (flocp != 0)
-            v->fileinfo = *flocp;
+          if (p_floc != 0)
+            v->fileinfo = *p_floc;
           else
             v->fileinfo.filenm = 0;
 	  v->origin = origin;
@@ -245,8 +248,8 @@ define_variable_in_set (const char *name, unsigned int length,
   v->length = length;
   hash_insert_at (&set->table, v, var_slot);
   v->value = xstrdup (value);
-  if (flocp != 0)
-    v->fileinfo = *flocp;
+  if (p_floc != 0)
+    v->fileinfo = *p_floc;
   else
     v->fileinfo.filenm = 0;
   v->origin = origin;
@@ -949,8 +952,8 @@ target_environment (struct file *file)
    parameters. */
 
 variable_t *
-do_variable_definition (const struct floc *flocp, const char *varname,
-                        char *value, enum variable_origin origin,
+do_variable_definition (const floc_t *p_floc, const char *varname,
+                        char *value, variable_origin_t origin,
                         enum variable_flavor flavor, int target_var)
 {
   char *p, *alloc_value = NULL;
@@ -1075,7 +1078,7 @@ do_variable_definition (const struct floc *flocp, const char *varname,
 	    }
 	  v = define_variable_loc (varname, strlen (varname),
                                    shellpath, origin, flavor == f_recursive,
-                                   flocp);
+                                   p_floc);
 	}
       else
 	{
@@ -1116,7 +1119,7 @@ do_variable_definition (const struct floc *flocp, const char *varname,
 		}
 	      v = define_variable_loc (varname, strlen (varname),
                                        shellpath, origin,
-                                       flavor == f_recursive, flocp);
+                                       flavor == f_recursive, p_floc);
 	    }
 	  else
 	    v = lookup_variable (varname, strlen (varname));
@@ -1142,7 +1145,7 @@ do_variable_definition (const struct floc *flocp, const char *varname,
                                       (target_var
                                        ? current_variable_set_list->set
                                        : NULL),
-                                      flocp);
+                                      p_floc);
           no_default_sh_exe = 0;
         }
       else
@@ -1161,7 +1164,7 @@ do_variable_definition (const struct floc *flocp, const char *varname,
                               origin, flavor == f_recursive,
                               (target_var
                                ? current_variable_set_list->set : NULL),
-                              flocp);
+                              p_floc);
   v->append = append;
   v->conditional = conditional;
 
@@ -1284,21 +1287,21 @@ parse_variable_definition (variable_t *v, char *line)
    returned.  */
 
 variable_t *
-try_variable_definition (const struct floc *flocp, char *line,
-                         enum variable_origin origin, int target_var)
+try_variable_definition (const floc_t *p_floc, char *line,
+                         variable_origin_t origin, int target_var)
 {
   variable_t v;
   variable_t *vp;
 
-  if (flocp != 0)
-    v.fileinfo = *flocp;
+  if (p_floc != 0)
+    v.fileinfo = *p_floc;
   else
     v.fileinfo.filenm = 0;
 
   if (!parse_variable_definition (&v, line))
     return 0;
 
-  vp = do_variable_definition (flocp, v.name, v.value,
+  vp = do_variable_definition (p_floc, v.name, v.value,
                                origin, v.flavor, target_var);
 
   free (v.name);

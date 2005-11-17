@@ -1,5 +1,5 @@
 /* Definitions for using variables in GNU Make.
-Copyright (C) 1988, 1989, 1990, 1991, 1992, 2002, 2004
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 2002, 2004, 2005
 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -25,18 +25,19 @@ Boston, MA 02111-1307, USA.  */
 #include "hash.h"
 #include "filedef.h"
 
-/* Codes in a variable definition saying where the definition came from.
+/** Codes in a variable definition saying where the definition came from.
    Increasing numeric values signify less-overridable definitions.  */
 enum variable_origin
   {
-    o_default,		/* Variable from the default set.  */
-    o_env,		/* Variable from environment.  */
-    o_file,		/* Variable given in a makefile.  */
-    o_env_override,	/* Variable from environment, if -e.  */
-    o_command,		/* Variable given by user.  */
-    o_override, 	/* Variable from an `override' directive.  */
-    o_automatic,	/* Automatic variable -- cannot be set.  */
-    o_invalid		/* Core dump time.  */
+    o_default,		/**< Variable from the default set.  */
+    o_env,		/**< Variable from environment.  */
+    o_file,		/**< Variable given in a makefile.  */
+    o_env_override,	/**< Variable from environment, if -e.  */
+    o_command,		/**< Variable given by user.  */
+    o_override, 	/**< Variable from an `override' directive.  */
+    o_automatic,	/**< Automatic variable -- cannot be set.  */
+    o_debugger,  	/**< set inside debugger.  */
+    o_invalid		/**< Core dump time.  */
   };
 
 typedef enum variable_origin variable_origin_t;
@@ -50,7 +51,7 @@ enum variable_flavor
     f_conditional       /* Conditional definition (?=) */
   };
 
-/* Structure that represents one variable definition.
+/** Structure that represents one variable definition.
    Each bucket of the hash table is a chain of these,
    chained through `next'.  */
 
@@ -59,38 +60,38 @@ enum variable_flavor
 
 struct variable
   {
-    char *name;			/* Variable name.  */
-    int length;			/* strlen (name) */
-    char *value;		/* Variable value.  */
-    struct floc fileinfo;       /* Where the variable was defined.  */
-    unsigned int recursive:1;	/* Gets recursively re-evaluated.  */
-    unsigned int append:1;	/* Nonzero if an appending target-specific
-                                   variable.  */
-    unsigned int conditional:1; /* Nonzero if set with a ?=. */
-    unsigned int per_target:1;	/* Nonzero if a target-specific variable.  */
-    unsigned int special:1;     /* Nonzero if this is a special variable. */
-    unsigned int exportable:1;  /* Nonzero if the variable _could_ be
-                                   exported.  */
-    unsigned int expanding:1;	/* Nonzero if currently being expanded.  */
+    char *name;			/**< Variable name.  */
+    int length;			/**< strlen (name) */
+    char *value;		/**< Variable value.  */
+    floc_t fileinfo;            /**< Where the variable was defined.  */
+    unsigned int recursive:1;	/**< Gets recursively re-evaluated.  */
+    unsigned int append:1;	/**< Nonzero if an appending target-specific
+                                     variable.  */
+    unsigned int conditional:1; /**< Nonzero if set with a ?=. */
+    unsigned int per_target:1;	/**< Nonzero if a target-specific variable.  */
+    unsigned int special:1;     /**< Nonzero if this is a special variable. */
+    unsigned int exportable:1;  /**< Nonzero if the variable _could_ be
+                                     exported.  */
+    unsigned int expanding:1;	/**< Nonzero if currently being expanded.  */
     unsigned int exp_count:EXP_COUNT_BITS;
-                                /* If >1, allow this many self-referential
+                                /**< If >1, allow this many self-referential
                                    expansions.  */
     enum variable_flavor
-      flavor ENUM_BITFIELD (3);	/* Variable flavor.  */
+      flavor ENUM_BITFIELD (3);	/**< Variable flavor.  */
     enum variable_origin
-      origin ENUM_BITFIELD (3);	/* Variable origin.  */
+      origin ENUM_BITFIELD (4);	/**< Variable origin.  */
     enum variable_export
       {
-	v_export,		/* Export this variable.  */
-	v_noexport,		/* Don't export this variable.  */
-	v_ifset,		/* Export it if it has a non-default value.  */
-	v_default		/* Decide in target_environment.  */
+	v_export,		/**< Export this variable.  */
+	v_noexport,		/**< Don't export this variable.  */
+	v_ifset,		/**< Export it if it has a non-default value.  */
+	v_default		/**< Decide in target_environment.  */
       } export ENUM_BITFIELD (2);
   };
 
 typedef struct variable variable_t;
 
-/* Structure that represents a variable set.  */
+/** Structure that represents a variable set.  */
 
 struct variable_set
   {
@@ -99,7 +100,7 @@ struct variable_set
 
 typedef struct variable_set variable_set_t;
 
-/* Structure that represents a list of variable sets.  */
+/** Structure that represents a list of variable sets.  */
 
 struct variable_set_list
   {
@@ -109,7 +110,7 @@ struct variable_set_list
 
 typedef struct variable_set_list variable_set_list_t;
 
-/* Structure used for pattern-specific variables.  */
+/** Structure used for pattern-specific variables.  */
 
 struct pattern_var
   {
@@ -175,7 +176,7 @@ extern void merge_variable_set_lists PARAMS ((variable_set_list_t **to_list, var
 /*! Given a variable, a value, and a flavor, define the variable.  See
    the try_variable_definition() function for details on the
    parameters. */
-extern variable_t *do_variable_definition PARAMS ((const floc_t *flocp, 
+extern variable_t *do_variable_definition PARAMS ((const floc_t *p_floc, 
 						   const char *name, 
 						   char *value, 
 						   enum variable_origin origin,
@@ -192,7 +193,7 @@ extern variable_t *do_variable_definition PARAMS ((const floc_t *flocp,
 extern variable_t *parse_variable_definition PARAMS ((struct variable *v, 
 						      char *line));
 
-extern struct variable *try_variable_definition PARAMS ((const struct floc *flocp, char *line, enum variable_origin origin, int target_var));
+extern struct variable *try_variable_definition PARAMS ((const floc_t *p_floc, char *line, enum variable_origin origin, int target_var));
 extern void init_hash_global_variable_set PARAMS ((void));
 extern void hash_init_function_table PARAMS ((void));
 

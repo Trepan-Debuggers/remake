@@ -1038,10 +1038,8 @@ static debug_return_t dbg_cmd_set_var (char *psz_args, int expand)
       char *psz_value =  expand ? variable_expand(psz_args) : psz_args;
       
       define_variable_in_set(p_v->name, u_len, psz_value,
-			     o_env_override, 0, NULL,
+			     o_debugger, 0, NULL,
 			     &(p_v->fileinfo));
-      p_v->origin = e_origin;
-      
       printf(_("Variable %s now has value '%s'\n"), psz_varname,
 	     psz_value);
     } else {

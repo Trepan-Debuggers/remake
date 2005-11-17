@@ -29,6 +29,8 @@ Boston, MA 02111-1307, USA.  */
 #undef  HAVE_CONFIG_H
 #define HAVE_CONFIG_H 1
 
+#include "types.h"
+
 /* AIX requires this to be the first thing in the file.  */
 #ifndef __GNUC__
 # if HAVE_ALLOCA_H
@@ -360,16 +362,6 @@ extern int no_default_sh_exe;
 /* is default_shell unixy? */
 extern int unixy_shell;
 #endif  /* WINDOWS32 */
-
-typedef unsigned long int lineno_t;
-
-struct floc
-  {
-    char    *filenm;
-    lineno_t lineno;
-  };
-
-typedef struct floc floc_t;
 
 #define NILF ((struct floc *)0)
 

@@ -1,6 +1,6 @@
 /* Output or logging functions for GNU Make.  
 
-Copyright (C) 2004 Free Software Foundation, Inc.  This file is part
+Copyright (C) 2004, 2005 Free Software Foundation, Inc.  This file is part
 of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -353,12 +353,12 @@ print_variable (variable_t *p_v)
   if (p_v) {
     const char *psz_origin = origin2str(p_v->origin);
     if (NULL != p_v->fileinfo.filenm) {
-      printf("%s:%lu (origin: %s) %s := %s\n", 
+      printf("%s:%lu (origin: %s) %s = %s\n", 
 	     p_v->fileinfo.filenm, p_v->fileinfo.lineno,
 	     psz_origin,
 	     p_v->name, p_v->value);
     } else {
-      printf("(origin %s) %s := %s\n", psz_origin, p_v->name, p_v->value);
+      printf("(origin %s) %s = %s\n", psz_origin, p_v->name, p_v->value);
     }
   }
 }
@@ -370,12 +370,12 @@ print_variable_expand (variable_t *p_v)
   if (p_v) {
     const char *psz_origin = origin2str(p_v->origin);
     if (NULL != p_v->fileinfo.filenm) {
-      printf("%s:%lu (origin: %s) %s = %s\n", 
+      printf("%s:%lu (origin: %s) %s := %s\n", 
 	     p_v->fileinfo.filenm, p_v->fileinfo.lineno,
 	     psz_origin,
 	     p_v->name, variable_expand(p_v->value));
     } else {
-      printf("(origin %s) %s = %s\n", psz_origin, 
+      printf("(origin %s) %s := %s\n", psz_origin, 
 	     p_v->name, variable_expand(p_v->value));
     }
   }

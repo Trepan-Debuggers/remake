@@ -6,7 +6,7 @@ AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.16 2005/11/16 03:53:40 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.17 2005/11/17 03:14:49 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -64,8 +64,8 @@ AC_HEADER_STDC
 AC_HEADER_DIRENT
 AC_HEADER_STAT
 AC_HEADER_TIME
-AC_CHECK_HEADERS(locale.h limits.h fcntl.h sys/param.h sys/time.h sys/timeb.h)
-
+AC_CHECK_HEADERS(locale.h limits.h fcntl.h stdbool.h)
+AC_CHECK_HEADERS(sys/param.h sys/time.h sys/timeb.h)
 AM_PROG_CC_C_O
 AM_PROG_CC_STDC
 AC_C_CONST
