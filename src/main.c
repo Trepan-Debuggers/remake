@@ -377,7 +377,7 @@ static const char *const usage[] =
   --warn-undefined-variables   Warn when an undefined variable is referenced.\n"),
     N_("\
   -x, --trace[=TYPE]           Trace command execution TYPE  may be\n\
-                               \"read\", \"normal\", \"full\""),
+                               \"read\", \"normal\", \"full\".\n"),
     N_("\
   -X [type], --debugger[=TYPE] Enter debugger. TYPE may be\n\
                                \"preread\", \"preaction\", \"full\",\n\
