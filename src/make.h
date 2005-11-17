@@ -1,6 +1,6 @@
 /* Miscellaneous global declarations and portability cruft for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
-2002, 2004 Free Software Foundation, Inc.
+2002, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -360,7 +360,7 @@ extern int find_and_set_default_shell(char *token);
 extern int no_default_sh_exe;
 
 /* is default_shell unixy? */
-extern int unixy_shell;
+extern bool unixy_shell;
 #endif  /* WINDOWS32 */
 
 #define NILF ((struct floc *)0)
@@ -447,7 +447,7 @@ extern int warn_undefined_variables_flag, posix_pedantic, not_parallel;
 extern int clock_skew_detected, rebuilding_makefiles;
 
 /*! can we run commands via 'sh -c xxx' or must we use batch files? */
-extern int batch_mode_shell;
+extern bool batch_mode_shell;
 
 extern unsigned int job_slots;
 extern int job_fds[2];

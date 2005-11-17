@@ -1,5 +1,5 @@
 /* Debugging macros and interface.
-Copyright (C) 1999, 2004 Free Software Foundation, Inc.
+Copyright (C) 1999, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -20,20 +20,53 @@ Boston, MA 02111-1307, USA.  */
 #ifndef DEBUG_H
 #define DEBUG_H
 
-#define DB_NONE         (0x000)
-#define DB_BASIC        (0x001)
-#define DB_VERBOSE      (0x002)
-#define DB_JOBS         (0x004)
-#define DB_IMPLICIT     (0x008)
-#define DB_MAKEFILES    (0x100)
+#include <config.h>
+#include "types.h"
 
-#define DB_ALL          (0xfff)
+/**
+   Imagine the below enums values as #define'd values rather than
+   distinct values of an enum.
+*/
+typedef enum {
+  DB_NONE           = 0x000,
+  DB_BASIC          = 0x001, /** targets which need to be made and status;
+				 also set when tracing or debugging */
+  DB_VERBOSE        = 0x002,
+  DB_JOBS           = 0x004,
+  DB_IMPLICIT       = 0x008,
+  DB_MAKEFILES      = 0x100,
+  DB_READMAKEFILES  = 0x200,
+  DB_ALL            = 0xfff
+} debug_level_mask_t;
 
-#define DEBUGGER_ON_ERROR  0x1   /* Enter debugger on any error */
-#define DEBUGGER_ON_FATAL  0x2   /* Enter debugger on a fatal error */
-#define DEBUGGER_ON_SIG    0x4   /* Enter debugger on getting a signal */
+typedef enum {
+  DEBUGGER_ON_ERROR  = 0x1,   /**< Enter debugger on any error */
+  DEBUGGER_ON_FATAL  = 0x2,   /**< Enter debugger on a fatal error */
+  DEBUGGER_ON_SIG    = 0x4    /**< Enter debugger on getting a signal */
+} debug_enter_debugger_t;
+  
 
+/** These variables are trickery to force the above enum symbol values to
+    be recorded in debug symbol tables. It is used to allow one refer
+    to above enumeration values in a debugger and debugger
+    expressions */
+extern debug_level_mask_t debug_dummy_level_mask;
+extern debug_enter_debugger_t debug_dummy_enter_debugger_mask;
+
+/** bitmask of debug_level_mask values. */
 extern int db_level;
+
+/** The structure used to hold the list of strings given
+    in command switches of a type that takes string arguments.  */
+
+typedef struct stringlist
+{
+  char **list;	/* Nil-terminated list of strings.  */
+  unsigned int idx;	/* Index into above.  */
+  unsigned int max;	/* Number of pointers allocated.  */
+} stringlist_t;
+
+extern int debug_flag;
 
 /*! If 1, we give additional error reporting information. */
 extern int extended_errors;
@@ -41,8 +74,11 @@ extern int extended_errors;
 /*! If 1, we show variable definitions */
 extern int show_variable_definitions;
 
-/*! If 1, we are tracing execution */
+/*! If non-null, we are tracing execution */
 extern int tracing;
+
+/*! If true, enter the debugger before reading any makefiles. */
+extern bool b_debugger_preread;
 
 /*! If nonzero, we are debugging after each "step" for that many times. 
   When we have a value 1, then we actually run the debugger read loop.
@@ -66,6 +102,8 @@ extern unsigned int debugger_on_error;
 */
 extern unsigned int debugger_enabled;
 
+extern stringlist_t *db_flags;
+
 #define ISDB(_l)    ((_l)&db_level)
 
 #define DBS(_l,_x)  do{ if(ISDB(_l)) {print_spaces (depth); \
@@ -82,5 +120,10 @@ extern unsigned int debugger_enabled;
 	fflush (stdout);} }while(0)
 
 #define DB(_l,_x)   do{ if(ISDB(_l)) {printf _x; fflush (stdout);} }while(0)
+
+/** Toggle -d on receipt of SIGUSR1.  */
+#ifdef SIGUSR1
+RETSIGTYPE debug_signal_handler (int sig);
+#endif
 
 #endif /*DEBUG_H*/

@@ -1,6 +1,6 @@
 /* Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
-2002, 2003, 2004 Free Software Foundation, Inc.
+2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -118,19 +118,6 @@ struct command_switch
 
 #define short_option(c) ((c) <= CHAR_MAX)
 
-/* The structure used to hold the list of strings given
-   in command switches of a type that takes string arguments.  */
-
-struct stringlist
-  {
-    char **list;	/* Nil-terminated list of strings.  */
-    unsigned int idx;	/* Index into above.  */
-    unsigned int max;	/* Number of pointers allocated.  */
-  };
-
-typedef struct stringlist stringlist_t;
-
-
 /* The recognized command switches.  */
 
 /* Nonzero means do not print commands to be executed (-s).  */
@@ -149,19 +136,14 @@ int just_print_flag;
 
 /* Print debugging info (--debug).  */
 
-static stringlist_t *db_flags;
-static int debug_flag = 0;
-
-int db_level = 0;
-
 /* If 1, we give additional error reporting information. */
 int extended_errors = 0;
 
 /*! If 1, we print variable definitions. */
 int show_variable_definitions = 0;
 
-/*! If 1, we are tracing execution */
-int tracing = 0;
+/*! If non-null, we are tracing execution */
+stringlist_t *tracing_opts = NULL;
 
 /*! If nonzero, we are debugging after each "step" for that many times. 
   When we have a value 1, then we actually run the debugger read loop.
@@ -394,9 +376,10 @@ static const char *const usage[] =
     N_("\
   --warn-undefined-variables   Warn when an undefined variable is referenced.\n"),
     N_("\
-  -x, --trace                  Trace command execution\n"),
+  -x, --trace[=TYPE]           Trace command execution TYPE  may be\n\
+                               \"read\", \"normal\", \"full\""),
     N_("\
-  -X [type], --debugger=[TYPE] Enter debugger. TYPE may be\n\
+  -X [type], --debugger[=TYPE] Enter debugger. TYPE may be\n\
                                \"preread\", \"preaction\", \"full\",\n\
                                \"error\", or \"fatal\".\n"),
     N_("\
@@ -460,7 +443,7 @@ static const struct command_switch switches[] =
     { 'v', flag, (char *) &print_version_flag, 1, 1, 0, 0, 0, "version" },
     { 'w', flag, (char *) &print_directory_flag, 1, 1, 0, 0, 0,
         "print-directory" },
-    { 'x', flag, (char *) &tracing, 1, 1, 0, 0, 0, "trace" },
+    { 'x', string, (char *) &tracing_opts, 1, 1, 0, "normal", 0, "trace" },
     { 'X', string, (char *) &debugger_opts, 1, 1, 0, 
       "preaction", 0, "debugger" },
     { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0, "what-if" },
@@ -627,70 +610,6 @@ enter_command_line_file (name)
   return enter_file (xstrdup (name), NILF);
 }
 
-/* Toggle -d on receipt of SIGUSR1.  */
-
-#ifdef SIGUSR1
-static RETSIGTYPE
-debug_signal_handler (sig)
-     int sig;
-{
-  db_level = db_level ? DB_NONE : DB_BASIC;
-}
-#endif
-
-static void
-decode_debug_flags (void)
-{
-  char **pp;
-
-  if (debug_flag)
-    db_level = DB_ALL;
-
-  if (!db_flags)
-    return;
-
-  for (pp=db_flags->list; *pp; ++pp)
-    {
-      const char *p = *pp;
-
-      while (1)
-        {
-          switch (tolower (p[0]))
-            {
-            case 'a':
-              db_level |= DB_ALL;
-              break;
-            case 'b':
-              db_level |= DB_BASIC;
-              break;
-            case 'i':
-              db_level |= DB_BASIC | DB_IMPLICIT;
-              break;
-            case 'j':
-              db_level |= DB_JOBS;
-              break;
-            case 'm':
-              db_level |= DB_BASIC | DB_MAKEFILES;
-              break;
-            case 'v':
-              db_level |= DB_BASIC | DB_VERBOSE;
-              break;
-            default:
-              fatal (NILF, _("unknown debug level specification `%s'"), p);
-            }
-
-          while (*(++p) != '\0')
-            if (*p == ',' || *p == ' ')
-              break;
-
-          if (*p == '\0')
-            break;
-
-          ++p;
-        }
-    }
-}
-
 #ifdef WINDOWS32
 /*
  * HANDLE runtime exceptions by avoiding a requestor on the GUI. Capture
@@ -848,12 +767,12 @@ find_and_set_default_shell (char *token)
   /* naive test */
   if (!unixy_shell && sh_found &&
       (strstr(default_shell, "sh") || strstr(default_shell, "SH"))) {
-    unixy_shell = 1;
-    batch_mode_shell = 0;
+    unixy_shell      = true;
+    batch_mode_shell = false;
   }
 
 #ifdef BATCH_MODE_ONLY_SHELL
-  batch_mode_shell = 1;
+  batch_mode_shell   = true;
 #endif
 
   return (sh_found);
@@ -921,8 +840,6 @@ int
 main (int argc, char **argv, char **envp)
 #endif
 {
-  /*! If true, enter the debugger before reading any makefiles. */
-  bool debugger_preread = false;
 
   static char *stdin_nm = 0;
   struct file *f;
@@ -938,7 +855,7 @@ main (int argc, char **argv, char **envp)
   SetUnhandledExceptionFilter(handle_runtime_exceptions);
 
   /* start off assuming we have no shell */
-  unixy_shell = 0;
+  unixy_shell = false;
   no_default_sh_exe = 1;
 #endif
 
@@ -1202,13 +1119,16 @@ main (int argc, char **argv, char **envp)
   decode_switches (argc, argv, 0);
 
   /* debugging sets some things */
-  if (tracing) db_level |= DB_BASIC;
   if (debugger_opts) {
     char **p;
     for (p = debugger_opts->list; *p != 0; ++p)
       {
-	debugger_preread = (0 == strcmp(*p, "preread"));
-	if ( 0 == strcmp(*p, "full") || debugger_preread
+	if (0 == strcmp(*p, "preread")) {
+	  b_debugger_preread  = true;
+	  db_level           |= DB_READMAKEFILES;
+	}
+	
+	if ( 0 == strcmp(*p, "full") || b_debugger_preread
 	     || 0 == strcmp(*p, "preaction") ) {
 	  job_slots          =  1;
 	  debugger_stepping  =  1;
@@ -1230,13 +1150,22 @@ main (int argc, char **argv, char **envp)
       }
 #ifndef HAVE_LIBREADLINE
     error (NILF, 
-	   "warning: you specified a debugger option, but you don't have");
+	   "warning: you specified a debugger option, but you don't have readline support");
     error (NILF, 
 	   "debugger support compiled in. Debugger options will be ignored.");
     
 #endif
   }
   
+  if (tracing_opts) {
+    char **p;
+    for (p = tracing_opts->list; *p != 0; ++p) {
+      if (0 == strcmp(*p, "read") || 0 == strcmp(*p, "full"))
+	db_level |= DB_READMAKEFILES;
+    }
+    tracing = 1;
+    db_level |= DB_BASIC;
+  }
   
 #ifdef WINDOWS32
   if (suspend_flag) {
@@ -1577,8 +1506,6 @@ main (int argc, char **argv, char **envp)
   /* Define the default variables.  */
   define_default_variables ();
 
-  if (debugger_preread) enter_debugger (NULL, NULL, 0);
-
   /* Read all the makefiles.  */
 
   default_file = enter_file (".DEFAULT", NILF);
@@ -1603,7 +1530,7 @@ main (int argc, char **argv, char **envp)
   {
     extern int _is_unixy_shell (const char *_path);
     struct variable *shv = lookup_variable ("SHELL", 5);
-    extern int unixy_shell;
+    extern bool unixy_shell;
     extern char *default_shell;
 
     if (shv && *shv->value)
@@ -1611,9 +1538,9 @@ main (int argc, char **argv, char **envp)
 	char *shell_path = recursively_expand(shv);
 
 	if (shell_path && _is_unixy_shell (shell_path))
-	  unixy_shell = 1;
+	  unixy_shell = true;
 	else
-	  unixy_shell = 0;
+	  unixy_shell = false;
 	if (shell_path)
 	  default_shell = shell_path;
       }

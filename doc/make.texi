@@ -7,13 +7,13 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.1 2004/04/04 01:39:11 rockyb Exp $
-@set EDITION 0.60
+@set RCSID $Id: make.texi,v 1.2 2005/11/17 12:51:19 rockyb Exp $
+@set EDITION 0.61
 @set VERSION 3.80
-@set UPDATED 08 July 2002
-@set UPDATE-MONTH July 2002
-@comment The ISBN number might need to change on next publication.
-@set ISBN 1-882114-81-7 @c From Brian Youmans <3diff@gnu.org>, 25 Apr 2000
+@set UPDATED 23 Feb 2003
+@set UPDATE-MONTH Feb 2003
+@c ISBN provided by Lisa M. Opus Goldstein <opus@gnu.org>, 5 May 2004
+@set ISBN 1-882114-83-5
 
 @c finalout
 
@@ -30,7 +30,7 @@
 * Make: (make).            Remake files automatically.
 @end direntry
 
-@ifinfo
+@ifnottex
 This file documents the GNU Make utility, which determines
 automatically which pieces of a large program need to be recompiled,
 and issues the commands to recompile them.
@@ -38,7 +38,8 @@ and issues the commands to recompile them.
 This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Make Manual}, for @code{make}, Version @value{VERSION}.
 
-Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2002
+Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
+1998, 1999, 2000, 2002, 2003, 2004
 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
@@ -47,7 +48,7 @@ any later version published by the Free Software Foundation; with no
 Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
 Texts.  A copy of the license is included in the section entitled
 ``GNU Free Documentation License''.
-@end ifinfo
+@end ifnottex
 
 @iftex
 @shorttitlepage GNU Make
@@ -57,11 +58,11 @@ Texts.  A copy of the license is included in the section entitled
 @subtitle A Program for Directing Recompilation
 @subtitle GNU @code{make} Version @value{VERSION}
 @subtitle @value{UPDATE-MONTH}
-@author Richard M. Stallman, Roland McGrath, Paul Smith
+@author Richard M. Stallman, Roland McGrath, Paul D. Smith
 @page
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-1996, 1997, 1998, 1999, 2000, 2002 Free Software Foundation, Inc.
+1996, 1997, 1998, 1999, 2000, 2002, 2003, 2004 Free Software Foundation, Inc.
 @sp 2
 Published by the Free Software Foundation @*
 59 Temple Place -- Suite 330, @*
@@ -88,7 +89,7 @@ Cover art by Etienne Suvasa.
 @end titlepage
 @page
 
-@ifinfo
+@ifnottex
 @node Top, Overview, (dir), (dir)
 @top Make
 
@@ -101,7 +102,7 @@ last updated @value{UPDATED},
 documents GNU @code{make} Version @value{VERSION}.@refill
 
 This manual describes @code{make} and contains the following chapters:@refill
-@end ifinfo
+@end ifnottex
 
 @menu
 * Overview::                    Overview of @code{make}.
@@ -308,7 +309,7 @@ Defining and Redefining Pattern Rules
 
 * Pattern Intro::               An introduction to pattern rules.
 * Pattern Examples::            Examples of pattern rules.
-* Automatic::                   How to use automatic variables in the
+* Automatic Variables::         How to use automatic variables in the
                                   commands of implicit rules.
 * Pattern Match::               How patterns match.
 * Match-Anything Rules::        Precautions you should take prior to
@@ -350,7 +351,7 @@ The @code{make} utility automatically determines which pieces of a large
 program need to be recompiled, and issues commands to recompile them.
 This manual describes GNU @code{make}, which was implemented by Richard
 Stallman and Roland McGrath.  Development since Version 3.76 has been
-handled by Paul Smith.
+handled by Paul D. Smith.
 
 GNU @code{make} conforms to section 6.2 of @cite{IEEE Standard
 1003.2-1992} (POSIX.2).
@@ -371,9 +372,9 @@ from others whenever the others change.
 @end menu
 
 @node Preparing, Reading, Overview, Overview
-@ifinfo
+@ifnottex
 @heading Preparing and Running Make
-@end ifinfo
+@end ifnottex
 
 To prepare to use @code{make}, you must write a file called
 the @dfn{makefile} that describes the relationships among files
@@ -406,10 +407,10 @@ introduction, read the first few sections of each chapter, skipping the
 later sections.  In each chapter, the first few sections contain
 introductory or general information and the later sections contain
 specialized or technical information.
-@ifinfo
+@ifnottex
 The exception is the second chapter, @ref{Introduction, ,An
 Introduction to Makefiles}, all of which is introductory.
-@end ifinfo
+@end ifnottex
 @iftex
 The exception is @ref{Introduction, ,An Introduction to Makefiles},
 all of which is introductory.
@@ -969,10 +970,10 @@ length in later chapters.@refill
 @cindex explicit rule, definition of
 @item
 An @dfn{explicit rule} says when and how to remake one or more files,
-called the rule's targets.  It lists the other files that the targets
-depend on, call the @dfn{prerequisites} of the target, and may also give
-commands to use to create or update the targets.  @xref{Rules, ,Writing
-Rules}.
+called the rule's @dfn{targets}.  It lists the other files that the
+targets depend on, called the @dfn{prerequisites} of the target, and
+may also give commands to use to create or update the targets.
+@xref{Rules, ,Writing Rules}.
 
 @cindex rule, implicit, definition of
 @cindex implicit rule, definition of
@@ -1558,7 +1559,7 @@ the makefile (often with a target called @samp{all}).
                                   prerequisites from source files themselves.
 @end menu
 
-@ifinfo
+@ifnottex
 @node Rule Example, Rule Syntax, Rules, Rules
 @section Rule Example
 
@@ -1587,7 +1588,7 @@ The command does not explicitly mention @file{defs.h}, but we presume
 that @file{foo.c} includes it, and that that is why @file{defs.h} was
 added to the prerequisites.
 @end itemize
-@end ifinfo
+@end ifnottex
 
 @node Rule Syntax, Prerequisite Types, Rule Example, Rules
 @section Rule Syntax
@@ -1671,9 +1672,9 @@ executed by the shell (normally @samp{sh}), but with some extra features
 There are actually two different types of prerequisites understood by
 GNU @code{make}: normal prerequisites such as described in the
 previous section, and @dfn{order-only} prerequisites.  A normal
-prerequisite actually makes two statements: first, it imposes an order
-of execution of build commands: any commands necessary to build any of
-a target's prerequisites will be fully executed before any commands
+prerequisite makes two statements: first, it imposes an order of
+execution of build commands: any commands necessary to build any of a
+target's prerequisites will be fully executed before any commands
 necessary to build the target.  Second, it imposes a dependency
 relationship: if any prerequisite is newer than the target, then the
 target is considered out-of-date and must be rebuilt.
@@ -1776,7 +1777,7 @@ print: *.c
 This rule uses @file{print} as an empty target file; see @ref{Empty
 Targets, ,Empty Target Files to Record Events}.  (The automatic variable
 @samp{$?} is used to print only those files that have changed; see
-@ref{Automatic, ,Automatic Variables}.)@refill
+@ref{Automatic Variables}.)@refill
 
 Wildcard expansion does not happen when you define a variable.  Thus, if
 you write this:
@@ -1833,9 +1834,9 @@ make @file{*.o}.  This is not what you want!
 Actually it is possible to obtain the desired result with wildcard
 expansion, but you need more sophisticated techniques, including the
 @code{wildcard} function and string substitution.
-@ifinfo
+@ifnottex
 @xref{Wildcard Function, ,The Function @code{wildcard}}.
-@end ifinfo
+@end ifnottex
 @iftex
 These are described in the following section.
 @end iftex
@@ -1948,9 +1949,8 @@ just the search paths.
 The value of the @code{make} variable @code{VPATH} specifies a list of
 directories that @code{make} should search.  Most often, the
 directories are expected to contain prerequisite files that are not in the
-current directory; however, @code{VPATH} specifies a search list that
-@code{make} applies for all files, including files which are targets of
-rules.
+current directory; however, @code{make} uses @code{VPATH} as a search
+list for both prerequisites and targets of rules.
 
 Thus, if a file that is listed as a target or prerequisite does not exist
 in the current directory, @code{make} searches the directories listed in
@@ -2171,7 +2171,7 @@ Therefore, you must write the commands with care so that they will look for
 the prerequisite in the directory where @code{make} finds it.
 
 This is done with the @dfn{automatic variables} such as @samp{$^}
-(@pxref{Automatic, ,Automatic Variables}).
+(@pxref{Automatic Variables}).
 For instance, the value of @samp{$^} is a
 list of all the prerequisites of the rule, including the names of
 the directories in which they were found, and the value of
@@ -2514,7 +2514,7 @@ print: foo.c bar.c
 With this rule, @samp{make print} will execute the @code{lpr} command if
 either source file has changed since the last @samp{make print}.  The
 automatic variable @samp{$?} is used to print only those files that have
-changed (@pxref{Automatic, ,Automatic Variables}).
+changed (@pxref{Automatic Variables}).
 
 @node Special Targets, Multiple Targets, Empty Targets, Rules
 @section Special Built-in Target Names
@@ -2724,7 +2724,7 @@ mentioned.
 Similar commands work for all the targets.  The commands do not need
 to be absolutely identical, since the automatic variable @samp{$@@}
 can be used to substitute the particular target to be remade into the
-commands (@pxref{Automatic, ,Automatic Variables}).  For example:
+commands (@pxref{Automatic Variables}).  For example:
 
 @example
 @group
@@ -2912,7 +2912,7 @@ $(objects): %.o: %.c
 @noindent
 Here @samp{$<} is the automatic variable that holds the name of the
 prerequisite and @samp{$@@} is the automatic variable that holds the name
-of the target; see @ref{Automatic, , Automatic Variables}.
+of the target; see @ref{Automatic Variables}.
 
 Each target specified must match the target pattern; a warning is issued
 for each target that does not.  If you have a list of files, only some of
@@ -3627,13 +3627,17 @@ also find it useful to declare targets that invoke recursive
 @code{make} commands as @samp{.PHONY} (for more discussion on when
 this is useful, see @ref{Phony Targets}).
 
-For your convenience, GNU @code{make} sets the variable @code{CURDIR} to
-the pathname of the current working directory for you.  If @code{-C} is
-in effect, it will contain the path of the new directory, not the
-original.  The value has the same precedence it would have if it were
+@vindex @code{CURDIR}
+For your convenience, when GNU @code{make} starts (after it has
+processed any @code{-C} options) it sets the variable @code{CURDIR} to
+the pathname of the current working directory.  This value is never
+touched by @code{make} again: in particular note that if you include
+files from other directories the value of @code{CURDIR} does not
+change.  The value has the same precedence it would have if it were
 set in the makefile (by default, an environment variable @code{CURDIR}
 will not override this value).  Note that setting this variable has no
-effect on the operation of @code{make}
+impact on the operation of @code{make} (it does not cause @code{make}
+to change its working directory, for example).
 
 @menu
 * MAKE Variable::               The special effects of using @samp{$(MAKE)}.
@@ -3671,7 +3675,11 @@ a rule alters the effects of the @samp{-t} (@samp{--touch}), @samp{-n}
 (@samp{--just-print}), or @samp{-q} (@w{@samp{--question}}) option.
 Using the @code{MAKE} variable has the same effect as using a @samp{+}
 character at the beginning of the command line.  @xref{Instead of
-Execution, ,Instead of Executing the Commands}.@refill
+Execution, ,Instead of Executing the Commands}.  This special feature
+is only enabled if the @code{MAKE} variable appears directly in the
+command script: it does not apply if the @code{MAKE} variable is
+referenced through expansion of another variable.  In the latter case
+you must use the @samp{+} token to get these special effects.@refill
 
 Consider the command @samp{make -t} in the above example.  (The
 @samp{-t} option marks targets as up to date without actually running
@@ -3733,9 +3741,9 @@ on the command line, by putting them in the @code{MAKEFLAGS} variable.
 @iftex
 See the next section.
 @end iftex
-@ifinfo
+@ifnottex
 @xref{Options/Recursion}.
-@end ifinfo
+@end ifnottex
 
 Variables are @emph{not} normally passed down if they were created by
 default by @code{make} (@pxref{Implicit Variables, ,Variables Used by
@@ -4180,10 +4188,12 @@ from getting implicit commands (from implicit rules or the
 
 @c !!! another reason is for canonical stamp files:
 @ignore
+@example
 foo: stamp-foo ;
 stamp-foo: foo.in
         create foo frm foo.in
         touch $@
+@end example
 @end ignore
 
 You may be inclined to define empty command strings for targets that are
@@ -4234,7 +4244,7 @@ command options (@pxref{Overriding, ,Overriding Variables}).
 
 A few variables have names that are a single punctuation character or
 just a few characters.  These are the @dfn{automatic variables}, and
-they have particular specialized uses.  @xref{Automatic, ,Automatic Variables}.
+they have particular specialized uses.  @xref{Automatic Variables}.
 
 @menu
 * Reference::                   How to use the value of a variable.
@@ -4303,7 +4313,7 @@ A dollar sign followed by a character other than a dollar sign,
 open-parenthesis or open-brace treats that single character as the
 variable name.  Thus, you could reference the variable @code{x} with
 @samp{$x}.  However, this practice is strongly discouraged, except in
-the case of the automatic variables (@pxref{Automatic, ,Automatic Variables}).
+the case of the automatic variables (@pxref{Automatic Variables}).
 
 @node Flavors, Advanced, Reference, Using Variables
 @section The Two Flavors of Variables
@@ -4787,7 +4797,7 @@ Variables in the environment become @code{make} variables.
 @item
 Several @dfn{automatic} variables are given new values for each rule.
 Each of these has a single conventional use.
-@xref{Automatic, ,Automatic Variables}.
+@xref{Automatic Variables}.
 
 @item
 Several variables have constant initial values.
@@ -4835,7 +4845,7 @@ that are not empty, but you can set them in the usual ways
 (@pxref{Implicit Variables, ,Variables Used by Implicit Rules}).
 Several special variables are set
 automatically to a new value for each rule; these are called the
-@dfn{automatic} variables (@pxref{Automatic, ,Automatic Variables}).
+@dfn{automatic} variables (@pxref{Automatic Variables}).
 
 If you'd like a variable to be set to a value only if it's not already
 set, then you can use the shorthand operator @samp{?=} instead of
@@ -5045,9 +5055,9 @@ endef
 @iftex
 See the next section for information about @code{define}.
 @end iftex
-@ifinfo
+@ifnottex
 @xref{Defining, ,Defining Variables Verbatim}.
-@end ifinfo
+@end ifnottex
 
 @node Defining, Environment, Override Directive, Using Variables
 @section Defining Variables Verbatim
@@ -5173,7 +5183,7 @@ MS-DOS}.)@refill
 Variable values in @code{make} are usually global; that is, they are the
 same regardless of where they are evaluated (unless they're reset, of
 course).  One exception to that is automatic variables
-(@pxref{Automatic, ,Automatic Variables}).
+(@pxref{Automatic Variables}).
 
 The other exception is @dfn{target-specific variable values}.  This
 feature allows you to define different values for the same variable,
@@ -5194,6 +5204,13 @@ or like this:
 @var{target} @dots{} : override @var{variable-assignment}
 @end example
 
+@noindent
+or like this:
+
+@example
+@var{target} @dots{} : export @var{variable-assignment}
+@end example
+
 Multiple @var{target} values create a target-specific variable value for
 each member of the target list individually.
 
@@ -5212,10 +5229,11 @@ environment if the @samp{-e} option is in force) will take precedence.
 Specifying the @code{override} directive will allow the target-specific
 variable value to be preferred.
 
-There is one more special feature of target-specific variables: when you
-define a target-specific variable, that variable value is also in effect
-for all prerequisites of this target (unless those prerequisites override
-it with their own target-specific variable value).  So, for example, a
+There is one more special feature of target-specific variables: when
+you define a target-specific variable that variable value is also in
+effect for all prerequisites of this target, and all their
+prerequisites, etc. (unless those prerequisites override that variable
+with their own target-specific variable value).  So, for example, a
 statement like this:
 
 @example
@@ -5227,20 +5245,32 @@ prog : prog.o foo.o bar.o
 will set @code{CFLAGS} to @samp{-g} in the command script for
 @file{prog}, but it will also set @code{CFLAGS} to @samp{-g} in the
 command scripts that create @file{prog.o}, @file{foo.o}, and
-@file{bar.o}, and any command scripts which create their prerequisites.
+@file{bar.o}, and any command scripts which create their
+prerequisites.
+
+Be aware that a given prerequisite will only be built once per
+invocation of make, at most.  If the same file is a prerequisite of
+multiple targets, and each of those targets has a different value for
+the same target-specific variable, then the first target to be built
+will cause that prerequisite to be built and the prerequisite will
+inherit the target-specific value from the first target.  It will
+ignore the target-specific values from any other targets.
 
 @node Pattern-specific,  , Target-specific, Using Variables
 @section Pattern-specific Variable Values
 @cindex pattern-specific variables
 @cindex variables, pattern-specific
 
-In addition to target-specific variable values (@pxref{Target-specific,
-,Target-specific Variable Values}), GNU @code{make} supports
-pattern-specific variable values.  In this form, a variable is defined
-for any target that matches the pattern specified.  Variables defined in
-this way are searched after any target-specific variables defined
-explicitly for that target, and before target-specific variables defined
-for the parent target.
+In addition to target-specific variable values
+(@pxref{Target-specific, ,Target-specific Variable Values}), GNU
+@code{make} supports pattern-specific variable values.  In this form,
+the variable is defined for any target that matches the pattern
+specified.  If a target matches more than one pattern, all the
+matching pattern-specific variables are interpreted in the order in
+which they were defined in the makefile, and collected together into
+one set.  Variables defined in this way are searched after any
+target-specific variables defined explicitly for that target, and
+before target-specific variables defined for the parent target.
 
 Set a pattern-specific variable value like this:
 
@@ -5515,7 +5545,7 @@ beginning or the end of the conditional.@refill
 @code{make} evaluates conditionals when it reads a makefile.
 Consequently, you cannot use automatic variables in the tests of
 conditionals because they are not defined until commands are run
-(@pxref{Automatic, , Automatic Variables}).
+(@pxref{Automatic Variables}).
 
 To prevent intolerable confusion, it is not permitted to start a
 conditional in one makefile and end it in another.  However, you may
@@ -6439,7 +6469,7 @@ client_LIBS = protocol
 all: $(PROGRAMS)
 
 define PROGRAM_template
- $(1): $$($(1)_OBJ) $$($(1)_LIBS:%=-l%)
+ $(1): $$($(1)_OBJS) $$($(1)_LIBS:%=-l%)
  ALL_OBJS   += $$($(1)_OBJS)
 endef
 
@@ -6517,7 +6547,7 @@ makefile (@pxref{Override Directive, ,The @code{override} Directive}).
 
 if @var{variable} is an automatic variable defined for the
 execution of the commands for each rule
-(@pxref{Automatic, , Automatic Variables}).
+(@pxref{Automatic Variables}).
 @end table
 
 This information is primarily useful (other than for your curiosity) to
@@ -6569,19 +6599,18 @@ Here the redefinition takes place if @samp{$(origin bletch)} returns either
 @cindex backquotes
 @cindex shell command, function for
 
-The @code{shell} function is unlike any other function except the
+The @code{shell} function is unlike any other function other than the
 @code{wildcard} function
 (@pxref{Wildcard Function, ,The Function @code{wildcard}}) in that it
 communicates with the world outside of @code{make}.
 
 The @code{shell} function performs the same function that backquotes
-(@samp{`}) perform in most shells: it does @dfn{command expansion}.  This
-means that it takes an argument that is a shell command and returns the
-output of the command.  The only processing @code{make} does on the result,
-before substituting it into the surrounding text, is to convert each
-newline or carriage-return / newline pair to a single space.  It also
-removes the trailing (carriage-return and) newline, if it's the last
-thing in the result.@refill
+(@samp{`}) perform in most shells: it does @dfn{command expansion}.
+This means that it takes as an argument a shell command and evaluates
+to the output of the command.  The only processing @code{make} does on
+the result is to convert each newline (or carriage-return / newline
+pair) to a single space.  If there is a trailing (carriage-return
+and) newline it will simply be removed.@refill
 
 The commands run by calls to the @code{shell} function are run when the
 function calls are expanded (@pxref{Reading Makefiles, , How
@@ -6608,7 +6637,8 @@ files := $(shell echo *.c)
 @noindent
 sets @code{files} to the expansion of @samp{*.c}.  Unless @code{make} is
 using a very strange shell, this has the same result as
-@w{@samp{$(wildcard *.c)}}.@refill
+@w{@samp{$(wildcard *.c)}} (as long as at least one @samp{.c} file
+exists).@refill
 
 @node Make Control Functions,  , Shell Function, Functions
 @section Functions That Control Make
@@ -7205,6 +7235,9 @@ By default, the above messages are not enabled while trying to remake
 the makefiles.  This option enables messages while rebuilding makefiles,
 too.  Note that the @samp{all} option does enable this option.  This
 option also enables @samp{basic} messages.
+
+@item m (@i{read})
+Gives status on each Makefile as it is read in.
 @end table
 
 @item -e
@@ -7490,8 +7523,8 @@ retained for compatibility.
 * Implicit Variables::          How to change what predefined rules do.
 * Chained Rules::               How to use a chain of implicit rules.
 * Pattern Rules::               How to define new implicit rules.
-* Last Resort::                 How to defining commands for rules
-                                  which cannot find any.
+* Last Resort::                 How to define commands for rules which
+                                cannot find any.
 * Suffix Rules::                The old-fashioned style of implicit rule.
 * Implicit Rule Search::        The precise algorithm for applying
                                   implicit rules.
@@ -8185,7 +8218,7 @@ Variables}, and @ref{Functions, ,Functions for Transforming Text}.
 @menu
 * Pattern Intro::               An introduction to pattern rules.
 * Pattern Examples::            Examples of pattern rules.
-* Automatic::                   How to use automatic variables in the
+* Automatic Variables::         How to use automatic variables in the
                                   commands of implicit rules.
 * Pattern Match::               How patterns match.
 * Match-Anything Rules::        Precautions you should take prior to
@@ -8263,7 +8296,7 @@ rule with prerequisites that must be made by chaining other implicit rules.
 @cindex pattern rules, order of
 @cindex order of pattern rules
 
-@node Pattern Examples, Automatic, Pattern Intro, Pattern Rules
+@node Pattern Examples, Automatic Variables, Pattern Intro, Pattern Rules
 @subsection Pattern Rule Examples
 
 Here are some examples of pattern rules actually predefined in
@@ -8279,7 +8312,7 @@ files:@refill
 defines a rule that can make any file @file{@var{x}.o} from
 @file{@var{x}.c}.  The command uses the automatic variables @samp{$@@} and
 @samp{$<} to substitute the names of the target file and the source file
-in each case where the rule applies (@pxref{Automatic, ,Automatic Variables}).@refill
+in each case where the rule applies (@pxref{Automatic Variables}).@refill
 
 Here is a second built-in rule:
 
@@ -8320,7 +8353,7 @@ and the file @file{scan.o} from @file{scan.c}, while @file{foo} is
 linked from @file{parse.tab.o}, @file{scan.o}, and its other
 prerequisites, and it will execute happily ever after.)@refill
 
-@node Automatic, Pattern Match, Pattern Examples, Pattern Rules
+@node Automatic Variables, Pattern Match, Pattern Examples, Pattern Rules
 @subsection Automatic Variables
 @cindex automatic variables
 @cindex variables, automatic
@@ -8336,6 +8369,17 @@ variables}.  These variables have values computed afresh for each rule that
 is executed, based on the target and prerequisites of the rule.  In this
 example, you would use @samp{$@@} for the object file name and @samp{$<}
 for the source file name.
+
+@cindex automatic variables in prerequisites
+@cindex prerequisites, and automatic variables
+It's very important that you recognize the limited scope in which
+automatic variable values are available: they only have values within
+the command script.  In particular, you cannot use them anywhere
+within the target or prerequisite lists of a rule; they have no value
+there and will expand to the empty string.  A common mistake is
+attempting to use @code{$@@} within the prerequisites list in a rule;
+this will not work.  However, see below for information on the
+SysV-style @code{$$@@} variables.
 
 Here is a table of automatic variables:
 
@@ -8551,7 +8595,7 @@ compatibility with SysV makefiles.  In a native GNU @code{make} file
 there are other ways to accomplish the same results.  This feature is
 disabled if the special pseudo target @code{.POSIX} is defined.
 
-@node Pattern Match, Match-Anything Rules, Automatic, Pattern Rules
+@node Pattern Match, Match-Anything Rules, Automatic Variables, Pattern Rules
 @subsection How Patterns Match
 
 @cindex stem
@@ -8930,7 +8974,7 @@ update status as the file @var{t}.
 
 When the commands of a pattern rule are executed for @var{t}, the automatic
 variables are set corresponding to the target and prerequisites.
-@xref{Automatic, ,Automatic Variables}.
+@xref{Automatic Variables}.
 
 @node Archives, Features, Implicit Rules, Top
 @chapter Using @code{make} to Update Archive Files
@@ -8975,9 +9019,9 @@ foolib(hack.o) : hack.o
 @end example
 
 In fact, nearly all archive member targets are updated in just this way
-and there is an implicit rule to do it for you.  @strong{Note:} The
+and there is an implicit rule to do it for you.  @emph{Note: The
 @samp{c} flag to @code{ar} is required if the archive file does not
-already exist.
+already exist.}
 
 To specify several members in the same archive, you can write all the
 member names together between the parentheses.  For example:
@@ -9033,7 +9077,7 @@ Here @code{make} has envisioned the file @file{bar.o} as an intermediate
 file.  @xref{Chained Rules, ,Chains of Implicit Rules}.
 
 Implicit rules such as this one are written using the automatic variable
-@samp{$%}.  @xref{Automatic, ,Automatic Variables}.
+@samp{$%}.  @xref{Automatic Variables}.
 
 An archive member name in an archive cannot contain a directory name, but
 it may be useful in a makefile to pretend that it does.  If you write an
@@ -9196,13 +9240,13 @@ invocations of @code{make}.
 
 @item
 The automatic variable @code{$%} is set to the member name
-in an archive reference.  @xref{Automatic, ,Automatic Variables}.
+in an archive reference.  @xref{Automatic Variables}.
 
 @item
 The automatic variables @code{$@@}, @code{$*}, @code{$<}, @code{$%},
 and @code{$?} have corresponding forms like @code{$(@@F)} and
 @code{$(@@D)}.  We have generalized this to @code{$^} as an obvious
-extension.  @xref{Automatic, ,Automatic Variables}.@refill
+extension.  @xref{Automatic Variables}.@refill
 
 @item
 Substitution variable references.
@@ -9254,7 +9298,7 @@ same time.  @xref{Chained Rules, ,Chains of Implicit Rules}.
 @item
 The automatic variable @code{$^} containing a list of all prerequisites
 of the current target.  We did not invent this, but we have no idea who
-did.  @xref{Automatic, ,Automatic Variables}.  The automatic variable
+did.  @xref{Automatic Variables}.  The automatic variable
 @code{$+} is a simple extension of @code{$^}.
 
 @item
@@ -9405,6 +9449,7 @@ Various new built-in implicit rules.
 @item
 The built-in variable @samp{MAKE_VERSION} gives the version number of
 @code{make}.
+@vindex MAKE_VERSION
 @end itemize
 
 @node Missing, Makefile Conventions, Features, Top
@@ -9708,10 +9753,22 @@ and concatenate the results.@*
 Evaluate the variable @var{var} replacing any references to @code{$(1)},
 @code{$(2)} with the first, second, etc. @var{param} values.@*
 @xref{Call Function, ,The @code{call} Function}.
+
+@item $(eval @var{text})
+
+Evaluate @var{text} then read the results as makefile commands.
+Expands to the empty string.@*
+@xref{Eval Function, ,The @code{eval} Function}.
+
+@item $(value @var{var})
+
+Evaluates to the contents of the variable @var{var}, with no expansion
+performed on it.@*
+@xref{Value Function, ,The @code{value} Function}.
 @end table
 
 Here is a summary of the automatic variables.
-@xref{Automatic, ,Automatic Variables},
+@xref{Automatic Variables},
 for full information.
 
 @table @code
@@ -10168,9 +10225,11 @@ AUX =   README COPYING ChangeLog Makefile.in  \
         level-0 level-1 backup-specs testpad.c
 @end group
 
+.PHONY: all
 all:    tar rmt tar.info
 
 @group
+.PHONY: tar
 tar:    $(OBJS)
         $(CC) $(LDFLAGS) -o $@@ $(OBJS) $(LIBS)
 @end group
@@ -10186,6 +10245,7 @@ tar.info: tar.texinfo
 @end group
 
 @group
+.PHONY: install
 install: all
         $(INSTALL) tar $(bindir)/$(binprefix)tar
         -test ! -f rmt || $(INSTALL) rmt /etc/rmt
@@ -10214,21 +10274,25 @@ TAGS:   $(SRCS)
 @end group
 
 @group
+.PHONY: clean
 clean:
         rm -f *.o tar rmt testpad testpad.h core
 @end group
 
 @group
+.PHONY: distclean
 distclean: clean
         rm -f TAGS Makefile config.status
 @end group
 
 @group
+.PHONY: realclean
 realclean: distclean
         rm -f tar.info*
 @end group
 
 @group
+.PHONY: shar
 shar: $(SRCS) $(AUX)
         shar $(SRCS) $(AUX) | compress \
           > tar-`sed -e '/version_string/!d' \
@@ -10238,6 +10302,7 @@ shar: $(SRCS) $(AUX)
 @end group
 
 @group
+.PHONY: dist
 dist: $(SRCS) $(AUX)
         echo tar-`sed \
              -e '/version_string/!d' \

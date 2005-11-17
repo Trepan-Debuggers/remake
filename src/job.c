@@ -44,13 +44,13 @@ Boston, MA 02111-1307, USA.  */
 
 char *default_shell = "sh.exe";
 int no_default_sh_exe = 1;
-int batch_mode_shell = 1;
+bool batch_mode_shell = true;
 
 #elif defined (_AMIGA)
 
 char default_shell[] = "";
 extern int MyExecute (char **);
-int batch_mode_shell = 0;
+bool batch_mode_shell = false;
 
 #elif defined (__MSDOS__)
 
@@ -64,23 +64,23 @@ int batch_mode_shell = 0;
 #elif defined (__EMX__)
 
 char *default_shell = "/bin/sh";
-int batch_mode_shell = 0;
+bool batch_mode_shell = false;
 
 #elif defined (VMS)
 
 # include <descrip.h>
 char default_shell[] = "";
-int batch_mode_shell = 0;
+bool batch_mode_shell = false;
 
 #elif defined (__riscos__)
 
 char default_shell[] = "";
-int batch_mode_shell = 0;
+bool batch_mode_shell = false;
 
 #else
 
 char default_shell[] = "/bin/sh";
-int batch_mode_shell = 0;
+bool batch_mode_shell = false;
 
 #endif
 

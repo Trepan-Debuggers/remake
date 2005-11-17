@@ -12,8 +12,8 @@ else
   remote =	remote-stub.c
 endif
 
-make_SOURCES =	ar.c arscan.c commands.c dbg_cmd.c default.c dep.c dir.c \
-	        expand.c file.c \
+make_SOURCES =	ar.c arscan.c commands.c dbg_cmd.c debug.c default.c \
+	        dep.c dir.c expand.c file.c \
 		function.c getopt.c getopt1.c  hash.c implicit.c job.c \
 	        main.c misc.c print.c read.c remake.c $(remote) rule.c \
 	        signame.c trace.c variable.c version.c vpath.c

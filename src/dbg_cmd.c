@@ -1285,6 +1285,9 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
 
   p_stack = p_stack_top = p;
 
+  /* Get the target name either from the stack top (preferred) or
+     the passed in target.
+   */
   if (p && p->p_target) {
     p_target_loc    = &(p->p_target->floc);  
     psz_target_name = p->p_target->name;
@@ -1329,8 +1332,17 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
     
     if (p_target_loc) {
       printf ("\n");
-      print_floc_prefix(p_target_loc);
-      printf (": %s\n", psz_target_name);
+      if ( !p_target_loc->filenm && !p_target_loc->lineno 
+	   && p_target->name ) {
+	/* We don't have file location info in the target floc, but we
+	   do have it as part of the name, so use that. This happens for
+	   example with we've stopped before reading a Makefile.
+	 */
+	printf("%s:0\n", p_target->name);
+      } else {
+	print_floc_prefix(p_target_loc);
+	printf (": %s\n", psz_target_name);
+      }
     }
     
     snprintf(prompt, PROMPT_LENGTH, "makedb%s%d%s ", 

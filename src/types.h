@@ -1,5 +1,5 @@
-/* Miscellaneous global declarations and portability cruft for GNU Make.
-Copyright (C) 2005 Free Software Foundation, Inc.
+/* Miscellaneous types
+  Copyright (c) 2005 Rocky Bernstein <rocky@panix.com>
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
