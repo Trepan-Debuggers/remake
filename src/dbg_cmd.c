@@ -161,6 +161,7 @@ char *info_subcommands[] = {
 char *show_subcommands[] = {
   "args",
   "basename",
+  "debug",
   "ignore-errors",
   "keep-going",
   "silent",
@@ -226,7 +227,7 @@ get_word(char **ppsz_str)
 }
 
 
-static int
+static bool
 get_int(const char *psz_arg, int *result) 
 {
   int i;
@@ -237,10 +238,10 @@ get_int(const char *psz_arg, int *result)
   i = strtol(psz_arg, &endptr, 10);
   if (*endptr != '\0') {
     printf("expecting %s to be an integer\n", psz_arg);
-    return 0;
+    return false;
   }
   *result = i;
-  return 1;
+  return true;
 }
 
 static unsigned int
@@ -414,12 +415,14 @@ cmd_initialize(void)
 
   short_command['='].func = &dbg_cmd_set;
   short_command['='].use =  
-    _("set {basename|trace|ignore-errors|variable} *value*");
+    _("set {basename|debug|ignore-errors|keep-going|silent|trace|variable} *value*");
   short_command['='].doc  = 
-    _("set basename {on|off|toggle}\n"
-      "\tset filename to show full name or basename.\n\n"
-      "\tset trace {on|off|toggle}\n"
-      "\tset tracing status.\n\n"
+    _("set basename {on|off|toggle} - show full name or basename?\n"
+      "\tset debug debug-mask - like --debug value.\n\n"
+      "\tset ignore-errors {on|off|toggle} - like --ignore-errors option\n\n"
+      "\tset keep-going {on|off|toggle} - like --keep-going option\n\n"
+      "\tset silent {on|off|toggle} - like --silent option\n\n"
+      "\tset trace {on|off|toggle} - set tracing status\n"
       "\tset variable *var* *value*\n"
       "\tSet MAKE variable to value. Variable definitions\n"
       "\tinside VALUE are expanded before assignment occurs.\n"
@@ -692,6 +695,8 @@ static debug_return_t dbg_cmd_show (char *psz_arg)
       printf("\n");
     } else if (is_abbrev_of (psz_arg, "basename")) {
       printf("basename: %s\n", var_to_on_off(basename_filenames));
+    } else if (is_abbrev_of (psz_arg, "debug")) {
+      printf("debug: %d\n", db_level);
     } else if (is_abbrev_of (psz_arg, "ignore-errors")) {
       printf("ignore-errors: %s\n", var_to_on_off(ignore_errors_flag));
     } else if (is_abbrev_of (psz_arg, "keep-going")) {
@@ -986,31 +991,36 @@ static debug_return_t dbg_cmd_set (char *psz_args)
 	on_off_toggle("toggle", &basename_filenames);
       else
 	on_off_toggle(psz_args, &basename_filenames);
-      dbg_cmd_info("basename");
+      dbg_cmd_show("basename");
+    } else if (is_abbrev_of (psz_varname, "debug")) {
+      int dbg_mask;
+      if (get_int(psz_args, &dbg_mask)) {
+	db_level = dbg_mask;
+      }
     } else if (is_abbrev_of (psz_varname, "ignore-errors")) {
       if (!psz_args || 0==strlen(psz_args))
 	on_off_toggle("toggle", &ignore_errors_flag);
       else
 	on_off_toggle(psz_args, &ignore_errors_flag);
-      dbg_cmd_info("ignore-errors");
+      dbg_cmd_show("ignore-errors");
     } else if (is_abbrev_of (psz_varname, "keep-going")) {
       if (!psz_args || 0==strlen(psz_args))
 	on_off_toggle("toggle", &keep_going_flag);
       else
 	on_off_toggle(psz_args, &keep_going_flag);
-      dbg_cmd_info("keep-going");
+      dbg_cmd_show("keep-going");
     } else if (is_abbrev_of (psz_varname, "silent")) {
       if (!psz_args || 0==strlen(psz_args))
 	on_off_toggle("toggle", &silent_flag);
       else
 	on_off_toggle(psz_args, &silent_flag);
-      dbg_cmd_info("silent");
+      dbg_cmd_show("silent");
     } else if (is_abbrev_of (psz_varname, "trace")) {
       if (!psz_args || 0==strlen(psz_args))
 	on_off_toggle("toggle", &tracing);
       else
 	on_off_toggle(psz_args, &tracing);
-      dbg_cmd_info("trace");
+      dbg_cmd_show("trace");
     }
   }
   return debug_readloop;

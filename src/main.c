@@ -2785,8 +2785,8 @@ print_version (void)
      year, and none of the rest of it should be translated (including the
      word "Copyright", so it hardly seems worth it.  */
 
-  printf ("%sGNU Make %s\n\
-%sCopyright (C) 2002, 2003, 2004  Free Software Foundation, Inc.\n",
+  printf ("%sGNU Make + Debugger %s\n\
+%sCopyright (C) 2002, 2003, 2004, 2005  Free Software Foundation, Inc.\n",
           precede, version_string, precede);
 
   printf (_("%sThis is free software; see the source for copying conditions.\n\
