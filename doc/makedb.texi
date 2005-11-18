@@ -214,25 +214,20 @@ shell command in it:
 4: all: foo
 5: 
 6: foo:
-7:         fdafds
+7: 	@@if [ -n FOO ] ; \
+8: 	then echo "test okay"; fi
+9: 	bogus-command
 @end smallexample 
 
 Now let's see what happens when we run ``debug'' from an unpatched @value{MAKE}:
 
 @smallexample
 $ @b{/usr/bin/make -d -f test1}
-
-
-GNU Make version 3.79.1, by Richard Stallman and Roland McGrath.
-Built for i386-redhat-linux-gnu
-Copyright (C) 1988, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
-	Free Software Foundation, Inc.
+GNU Make 3.80
+Copyright (C) 2002  Free Software Foundation, Inc.
 This is free software; see the source for copying conditions.
 There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE.
-
-Report bugs to <bug-make@@gnu.org>.
-
 Reading makefiles...
 Reading makefile `test1'...
 Updating makefiles....
@@ -242,14 +237,13 @@ Updating makefiles....
   Trying implicit prerequisite `test1.o'.
   Trying pattern rule with stem `test1'.
   Trying implicit prerequisite `test1.c'.
-  Trying pattern rule with stem `test1'.
-  Trying implicit prerequisite `test1.cc'.
-  Trying pattern rule with stem `test1'.
 
 ... over 700 lines later ...
 
  Looking for a rule with intermediate file `all.sh'.
   Avoiding implicit rule recursion.
+  Trying pattern rule with stem `all.sh'.
+  Trying implicit prerequisite `all.sh,v'.
   Trying pattern rule with stem `all.sh'.
   Trying implicit prerequisite `RCS/all.sh,v'.
   Trying pattern rule with stem `all.sh'.
@@ -263,14 +257,18 @@ Updating makefiles....
    File `foo' does not exist.
    Finished prerequisites of target file `foo'.
   Must remake target `foo'.
-fdafds
-/bin/bash: line 1: fdafds: command not found
+test okay
 Got a SIGCHLD; 1 unreaped children.
-Putting child 0x08072958 (foo) PID 9920 on the chain.
-Live child 0x08072958 (foo) PID 9920 
-Reaping losing child 0x08072958 PID 9920 
+Putting child 0x08c69158 (foo) PID 16937 on the chain.
+Live child 0x08c69158 (foo) PID 16937 
+Reaping winning child 0x08c69158 PID 16937 
+bogus-command
+/bin/bash: bogus-command: command not found
+Got a SIGCHLD; 1 unreaped children.
+Live child 0x08c69158 (foo) PID 16938 
+Reaping losing child 0x08c69158 PID 16938 
 make: *** [foo] Error 127
-Removing child 0x08072958 PID 9920  from chain.
+Removing child 0x08c69158 PID 16938 from chain.
 @end smallexample 
 
 Clearly this information referring to rule stems, implicit
@@ -279,22 +277,22 @@ for someone who is well versed with the internals of @value{MAKE}.
 
 But even for someone such as myself who through writing the debugger
 has @emph{become} more knowledgable, it still isn't all that
-helpful. @code{/bin/bash: line 1} you say? Okay that's the first line
-of some code sent to bash, but where in the Makefile source did that
-come from? Sine we added the debug output we see ``foo'' listed
-beforehand, but in a normal make, there would have been no mention of
-``foo.'' In our simple example tracking down the location is easy.
-But when you have a Makefile which is hundreds of lines long as any
-Makefile is when it is generated from @code{automake}, it would be
-nice to list the line in the Makefile and full filename as well as
-the target name.
+helpful. @code{/bin/bash: bogus-command: command not found} you say?
+Okay but where in the Makefile source did that come from? Since we
+added the debug output we see ``foo'' listed beforehand, but in a
+normal make, there would have been no mention of ``foo.'' In our
+simple example tracking down the location is easy.  But when you have
+a Makefile which is hundreds of lines long as any Makefile is when it
+is generated from @code{automake}, it would be nice to list the line
+in the Makefile and full filename as well as the target name.
 
 But now let's try the new kind of trace we prove in this patched
 @value{MAKE}.  We use the new option @code{--trace} which has the
 short-form option format @code{-x}
 
 @smallexample
-$ @b{make --trace -f /tmp/test1}
+$ @b{remake --trace -f /tmp/test1}
+remake --trace -f /tmp/test1
 Reading makefiles...
 Updating goal targets....
  /tmp/test1:4	File `all' does not exist.
@@ -302,56 +300,68 @@ Updating goal targets....
    /tmp/test1:6	File `foo' does not exist.
   /tmp/test1:6	Must remake target `foo'.
 /tmp/test1:7 foo
-	fdafds
-/bin/bash: fdafds: command not found
-/tmp/test1:7: *** [foo] Error 127
+	if [ -n FOO ] ; \
+then echo "test okay"; fi
+test okay
+/tmp/test1:8 foo
+	bogus-command
+/bin/bash: bogus-command: command not found
+test1:8: *** [foo] Error 127
 @end smallexample 
 
 Notice there is some debug output that is the same as the first run.
 For the first two lines example ``Reading makefiles...'' and
 ``Updating goal targets...''. This is the ``basic'' output you would
-get in GNU Make using the option ``--debug=basic''. There are some
-other lines that are the same but they just have line numbers and
-filenames added. For example ``/tmp/test1:4  File `all' does not exist.''
+get in GNU Make using the option @code{--debug=basic}. There are some
+other lines that are the same but they have line numbers and
+filenames added. For example @code{/tmp/test1:4  File `foo' does not exist.}'
 
-But what is completely new is that we also show the line and targets
+What is completely new is that we also show the line and targets
 before we execute any sort of shell command. The goal is simple trace
-output for a simple Makefile. (I think that although above can be
+output for a simple Makefile. (Although I think that the above may be
 improved, it is far better than what is in GNU make by default.)
 
-When we hit the error, the trace gives some idea of why we decided to
-to run line 7. There is another option @code{--extended-errors} or
-@code{-E} which gives a target stack trace when @value{MAKE} hits an
-error. For the above, it looks like this:
+A slight subtley you might not have notices is that we echoed the
+command @code{if [ -n FOO ] ...} even though the original makefile had
+this set to be silent (in particular by preceding the command that
+starts ``if'' with an @@). When tracing turn off the silent execution
+as this information is usually helpful in finding what's going on and
+what got run.
+
+So now when we hit the error, the above trace gives some idea of why
+we decided to to run line 7. 
+
+There is another option @code{--extended-errors} or @code{-E} which
+lists the stack of targets when @value{MAKE} hits an error. For the above,
+it looks like this:
 
 @smallexample
-$ @b{make --extended-errors -x -f test1}
+$ @b{remake --extended-errors -x -f test1}
+remake -E --trace -f /tmp/test1
 Reading makefiles...
 Updating goal targets....
- /tmp/test1:4	File `all' does not exist.
-/tmp/test1:6 foo
-   /tmp/test1:6	File `foo' does not exist.
-  /tmp/test1:6	Must remake target `foo'.
-/tmp/test1:7 foo
-	fdafds
-/bin/bash: fdafds: command not found
-/tmp/test1:7: *** [foo] Error 127
 
-#0  foo at /tmp/test1:7
+... same output as before ...
+
+#0  foo at /tmp/test1:8
 #1  all at /tmp/test1:4
 @end smallexample 
 
-So we were working on target ``foo'' on line 7 of file test1 which was
-rebuilt because we were making target ``all'' on line 4 of file test1.
+So we were working on target @code{foo} on line 7 of file
+@code{/tmp/test1} which was rebuilt because we were making target
+@code{all} on line 4 of file @code{/tmp/test1}.
 
-Now let's go into the debugger itself.  For this use the --debugger or
--X option.
+Now let's use a real example -- the Makefile for the GNU Make +
+Debugger. 
+
+And we'll go into the debugger:  for this use the @code{--debugger} or
+@code{-X} option.
 
 @smallexample
 $  @b{./make --debugger}
 Reading makefiles...
 
-/home/src/external-cvs/remake/src/Makefile:254: Makefile.in
+/tmp/remake/src/Makefile:254: Makefile.in
 @end smallexample 
 
 Let's see where we are. In particular is this @emph{really} the top-level
@@ -363,22 +373,21 @@ makedb<0> @b{where}
 =>#0  Makefile.in at /tmp/remake/src/Makefile:254
   #1  Makefile at /tmp/remake/src/Makefile:267
 
-/tmp/remake/src/Makefile:254: Makefile.in
+/tmp/remake/src/Makefile:255: Makefile.in
 @end smallexample 
 
-No, we was triggered by checking dependecies from Makefile. And that
+No, we were triggered by checking dependecies from Makefile. And that
 was triggered by checking dependencies of ``all.'' (There's a bug in
 our debugger currently in that it doesn't show ``all.'')
 
 @smallexample
 makedb<1> @b{step}
 
-/tmp/remake/src/Makefile:281: ../aclocal.m4
+/tmp/remake/src/Makefile:277: ../config.status
 makedb<2> where
 
-=>#0  ../aclocal.m4 at /tmp/remake/src/Makefile:281
-  #1  Makefile.in at /tmp/remake/src/Makefile:254
-  #2  Makefile at /tmp/remake/src/Makefile:267
+=>#0  ../config.status at /tmp/remake/src/Makefile:277
+  #1  Makefile at /tmp/remake/src/Makefile:268
 @end smallexample 
 
 To get information about the make "target" we can use the @code{target}
@@ -388,19 +397,19 @@ command:
 @smallexample
 makedb<3> @b{target}
 
-../aclocal.m4: ../config/readline.m4 ../lib-ld.m4 ../lib-link.m4 ../lib-prefix.m4 ../acinclude.m4 ../configure.ac | ../gettext.m4 ../iconv.m4 ../progtest.m4
+../config.status: ../configure
 #  Implicit rule search has not been done.
-#  Last modified 2005-11-13 11:16:53
+#  Last modified 2005-11-16 21:46:13
 #  File has not been updated.
-#  commands to execute (from `Makefile', line 282):
+#  commands to execute (from `Makefile', line 278):
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
 
-/tmp/remake/src/Makefile:281: ../aclocal.m4
+/home/src/external-cvs/remake/src/Makefile:277: ../config.status
 @end smallexample 
 
 I could have gotten the same output explicitly giving a target name
-such as @code{target ../aclocal.m4}.
+such as @code{target ../config.status}.
 
 What is going on here is we are checking to see if the Makefile needs
 to be remade and this is a dependency of target @code{all-am}. We
@@ -417,7 +426,7 @@ all-am: Makefile make loadavg commands.h dbg_cmd.h dep.h expand.h filedef.h func
 #  File does not exist.
 #  File has not been updated.
 
-/tmp/remake/src/Makefile:250: all
+/tmp/remake/src/Makefile:277: ../config.status
 @end smallexample 
 
 However information may change depending on where Make is. In
@@ -430,13 +439,14 @@ this:
 @smallexample
 makedb<4> @b{restart}
 Changing directory to /tmp/remake/src and restarting...
+Reading makefiles...
 
 
-/tmp/remake/src/Makefile:254: Makefile.in
+/tmp/remake/src/Makefile:255: Makefile.in
 makedb<0> @b{break all-am}
 Breakpoint on target all-am set.
 
-/tmp/remake/src/Makefile:254: Makefile.in
+/tmp/remake/src/Makefile:255: Makefile.in
 @end smallexample 
 
 The @code{restart} command was used to restart execution since we've
@@ -453,8 +463,8 @@ Updating goal targets....
 /tmp/remake/src/Makefile:461: all-am
 makedb<1> where
 
-=>#0  all-am at /tmp/remake/src/Makefile:461
-  #1  all at /tmp/remake/src/Makefile:250
+=>#0  all-am at /tmp/remake/src/Makefile:462
+  #1  all at /tmp/remake/src/Makefile:251
 @end smallexample 
 
 We've seen we can get information about @value{MAKE}'s targets.  We
@@ -465,7 +475,7 @@ with the @code{print} command.
   /tmp/remake/src/Makefile:383: all-am
   makedb<4> print MAKE
 
-  (origin default) MAKE := $(MAKE_COMMAND)
+  (origin default) MAKE = $(MAKE_COMMAND)
 @end smallexample 
 
 The @code{(origin default)} means this is a built-in
@@ -473,11 +483,12 @@ definition. There is another print which does full expansion
 of the variables. So if I run @code{x} (@code{examine}) instead I get:
 
 @smallexample
- (origin default) MAKE = /tmp/remake/src/./make
+ (origin default) MAKE := /tmp/remake/src/./make
 @end smallexample 
 
-Note that in printing expanded values we use ``='' while non-expanded
-values we use ``:=''. 
+Note that in printing expanded values we use ``:='' while non-expanded
+values we use ``=''. This output matches the semantics of these
+assignment operators.
 
 In fact, @code{examine} doesn't need a variable name, it will work
 with a string. So I could type ``@code{x This is $(MAKE)}'' or
@@ -650,7 +661,6 @@ as well.
 @menu
 * Starting the GNU Make debugger::    How to enter the @value{DBG}
 * Quitting the GNU Make debugger::    How to leave the @value{DBG}
-* Newly-added Options::               Newly-added options to @value{MAKE}
 @end menu
 @menu
 @end menu
@@ -680,30 +690,29 @@ mode and will go into the debugger read loop when before encounter in
 ``interesting'' target. An ``interesting'' target is one that has
 commands associated with it to rebuild the target.
 
-@node Quitting the GNU Make debugger
-@section Quitting the GNU Make debugger
+A suboption to the @code{--debugger} (or @code{-X}) option specifies
+under what conditions to enter the debugger; it is specified by
+putting an equals sign (`=') and then the suboption; for example:
 
-@cindex interrupt
-An interrupt (often @kbd{C-c}) does not exit from @value{DBG}, but
-rather terminates the action of any @value{DBG} command that is in
-progress and returns to @value{DBG} command level.  Inside a debugger
-command interpreter, use @code{quit} command (@pxref{Quit, ,Quitting
-the Make debugger}).
+@example
+make -X=preread @var{other-make-arguments...}
+@end example
 
-@node Newly-added Options
-@section Newly-added options to @value{MAKE}
-
-Above we described how to enter the @value{DBG} initially. However the
-patched @value{MAKE} also has tracing and improved error handling.
-Below we give all the options we've added to @value{MAKE}.
-
+Here is a full list of debugger options and suboptions...
 
 @table @code
-@item --debugger @r{[} @ovar{enter | full | error | fatal}@r{]}
-@itemx -X @r{[} @ovar{enter | full | error | fatal}@r{]}
+@item --debugger @r{[} @ovar{preread | preaction | full | error | fatal}@r{]}
+@itemx -X @r{[} @ovar{preread | preaction | full | error | fatal}@r{]}
 @cindex @code{-X}
-The ``enter suboption puts @value{MAKE} in step tracing mode and sets
-the debugger to enter if it encounters an error.  
+The ``preread'' suboption enters the debugger after command-line
+options are parsed but before any Makefiles have been read. It also
+puts @value{MAKE} in step tracing mode and sets the debugger to enter
+if it encounters an error.
+
+The ``preaction suboption enters the debugger after command-line
+options are parsed and after Makefiles have been read, but before any
+action is performed. It also puts @value{MAKE} in step tracing mode
+and sets the debugger to enter if it encounters an error.
 
 The ``error'' suboption enters the debugger when it encounters an
 error. Depending on other conditions, @value{MAKE} can ignore errors
@@ -712,14 +721,14 @@ and continue processing.
 The ``fatal'' suboption enters the debugger when it encounters a fatal
 error. A fatal error generally cause @value{MAKE} to abort execution.
 
-The ``full suboption is just a convenience for giving the ``enter,''
+The ``full'' suboption is just a convenience for giving the ``enter,''
 ``error,'' and ``fatal'' options described above.
 execution.
 
 If no suboption is provided, ``full'' is assumed.
 
 @item --extended-errors
-@itemx -X
+@itemx -E
 @cindex @code{-E}
 This option causes @value{MAKE} to print a target stack trace if it
 encounters an error.
@@ -738,6 +747,16 @@ command.
 
 @end table
 
+@node Quitting the GNU Make debugger
+@section Quitting the GNU Make debugger
+
+@cindex interrupt
+An interrupt (often @kbd{C-c}) does not exit from @value{DBG}, but
+rather terminates the action of any @value{DBG} command that is in
+progress and returns to @value{DBG} command level.  Inside a debugger
+command interpreter, use @code{quit} command (@pxref{Quit, ,Quitting
+the Make debugger}).
+
 @node Debugger Command Reference
 @chapter @value{MAKE} Debugger Command Reference
 
@@ -755,7 +774,7 @@ just @key{RET}. Some commands which require a parameter, such as
 * Information::          Status and Debugger settings (info, show)
 * Stack::                Examining the stack (where, up, down, frame)
 * Data::                 Examining data (print, target, examine, info variables)
-* Evaluation/Execution:: Arbitrary execution (shell)
+* Evaluation/Execution:: Arbitrary execution (eval, shell)
 * Controlling Make::     Controlling make (annotate, file, prompt...)
 @end menu
 
@@ -1425,7 +1444,7 @@ variable names should @emph{not} be preceded with a dollar sign.
 @smallexample
 @group
 makedb<0> @b{print SHELL}
-Makefile:168 (origin: makefile) SHELL := /bin/sh
+Makefile:168 (origin: makefile) SHELL = /bin/sh
 
 /tmp/remake/Makefile:243: Makefile.in
 makedb<1> @b{print $MAKE}   # don't use $
@@ -1459,13 +1478,13 @@ were given as a command inside the target.
 @smallexample
 @group
 makedb<0> @b{examine MAKE}
-(origin default) MAKE = /tmp/remake/src/./make
+(origin default) MAKE := /tmp/remake/src/./make
 
 
 /tmp/remake/src/Makefile:264: Makefile.in
 
 makedb<1> @b{print MAKE}  # note the difference with the ``print''
-(origin default) MAKE := $(MAKE_COMMAND)
+(origin default) MAKE = $(MAKE_COMMAND)
 
 makedb<2> @b{examine $(MAKE)}   # Note using $( ) doesn't matter here...
 /tmp/remake/src/./make          # except in output format - no origin info
@@ -1594,6 +1613,25 @@ If you want to all list variables, use this command.
 @end table
 
 @node Evaluation/Execution
+@section Evaluating MAKE commands ( @samp{eval})
+
+@table @code
+@kindex eval
+@kindex e @r{(@code{eval})}
+@cindex shell escape
+@item eval @var{command string}
+@itemx e
+
+A powerful command is the ability to enter MAKE fragments and have
+them interpreted on the fly. This can be done using the @code{eval}
+command. For example to ``include'' a makefile, you might enter
+@code{eval include ...}. Some of the other commands given
+elsewhere can be performed by @code{eval}. In particular, instead of
+using the ``setq'' debugger command, one could issue the command as
+@code{eval VAR=value}.
+
+@end table
+
 @section Running Shell commands ( @samp{shell})
 
 @table @code
