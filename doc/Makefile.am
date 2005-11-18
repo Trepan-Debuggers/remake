@@ -5,11 +5,8 @@
 
 transform = s,make,@MAKE_NAME@,
 
-TEXI2HTML = texi2html
-TEXI2PDF = texi2dvi --pdf
-
-info_TEXINFOS =	make.texi makedb.texi
 make_TEXINFOS = fdl.texi make-stds.texi
+TEXI2PDF = texi2dvi --pdf
 
 MOSTLYCLEANFILES = make.tgs make.pdf make.html makedb.cps makedb.kys makedb.html makedb.fns makedb.ps.gz makedb.pdf 
 
@@ -23,6 +20,8 @@ EXTRA_DIST =	doxygen/Doxyfile doxygen/run_doxygen
 ## Other documentation formats.  ##
 ## ----------------------------- ##
 
+all: make.html makedb.html makedb.info make.info
+
 reference:
 	-( cd ${top_srcdir} && $(MAKE) doxygen )
 
@@ -33,6 +32,15 @@ html: make.html makedb.html
 
 .texi.html:
 	texi2html $<
+
+.texi.pdf:
+	texi2pdf $<
+
+.texi.dvi:
+	texi2dvi $<
+
+.texi.info:
+	makeinfo $< 
 
 .texi.txt:
 	makeinfo --no-headers $< > $@
