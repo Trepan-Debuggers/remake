@@ -152,6 +152,7 @@ long_cmd_t commands[] = {
 short_cmd_t short_command[256] = { { NULL, '\0' }, };
 
 char *info_subcommands[] = {
+  "line",
   "target",
   "variables",
   "warranty",
@@ -725,7 +726,22 @@ static debug_return_t dbg_cmd_info (char *psz_arg)
   if (!psz_arg || 0==strlen(psz_arg)) {
     dbg_cmd_help("info");
   } else {
-    if (is_abbrev_of (psz_arg, "stack")) {
+    if (is_abbrev_of (psz_arg, "line")) {
+      /* We want output to be compatible with gdb output.*/
+      if (p_stack_top && p_stack_top->p_target && 
+	  p_stack_top->p_target->floc.filenm) {
+	const floc_t *p_floc = &p_stack_top->p_target->floc;
+	if (!basename_filenames && strlen(p_floc->filenm) 
+	    && p_floc->filenm[0] != '/') 
+	  printf("Line %d of \"%s/%s\"", p_floc->lineno, starting_directory,
+		 p_floc->filenm);
+	else 
+	  printf("Line %d of \"%s\"", p_floc->lineno, p_floc->filenm);
+      } else {
+	printf("No line number info recorded.\n");
+      }
+      
+    } else if (is_abbrev_of (psz_arg, "stack")) {
       print_target_stack(p_stack_top, i_stack_pos);
     } else if (is_abbrev_of (psz_arg, "target")) {
       if (p_stack_top && p_stack_top->p_target && p_stack_top->p_target->name)
