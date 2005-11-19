@@ -1309,9 +1309,8 @@ try_variable_definition (const floc_t *p_floc, char *line,
   return vp;
 }
 
-/* Print information for variable V, prefixing it with PREFIX.  */
-
-static void
+/** Print information for variable V, prefixing it with PREFIX.  */
+void
 print_variable_info (const void *item, void *arg)
 {
   const variable_t *v = (variable_t *) item;
@@ -1321,13 +1320,15 @@ print_variable_info (const void *item, void *arg)
   if (o_invalid == v->origin) abort ();
   origin = origin2str(v->origin);
 
-  fputs ("# ", stdout);
-  fputs (origin, stdout);
-  if (v->fileinfo.filenm)
-    printf (_(" (from `%s', line %lu)"),
-            v->fileinfo.filenm, v->fileinfo.lineno);
-  putchar ('\n');
-  fputs (prefix, stdout);
+  if (prefix) {
+    fputs (prefix, stdout);
+    fputs (origin, stdout);
+    if (v->fileinfo.filenm)
+      printf (_(" (from `%s', line %lu)"),
+	      v->fileinfo.filenm, v->fileinfo.lineno);
+    putchar ('\n');
+    fputs (prefix, stdout);
+  }
 
   /* Is this a `define'?  */
   if (v->recursive && strchr (v->value, '\n') != 0)
@@ -1366,8 +1367,9 @@ print_variable_set (variable_set_t *set, char *prefix)
 {
   hash_map_arg (&set->table, print_variable_info, prefix);
 
-  fputs (_("# variable set hash-table stats:\n"), stdout);
-  fputs ("# ", stdout);
+  if (prefix) fputs (prefix, stdout);
+  fputs (_("variable set hash-table stats:\n"), stdout);
+  if (prefix) fputs (prefix, stdout);
   hash_print_stats (&set->table, stdout);
   putc ('\n', stdout);
 }
@@ -1405,10 +1407,10 @@ print_variable_data_base (void)
 /*! Print all the local variables of FILE.  */
 
 void
-print_file_variables (struct file *file)
+print_file_variables (file_t *p_target)
 {
-  if (file->variables != 0)
-    print_variable_set (file->variables->set, "# ");
+  if (p_target->variables != 0)
+    print_variable_set (p_target->variables->set, "# ");
 }
 
 #ifdef WINDOWS32

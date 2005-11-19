@@ -75,7 +75,8 @@ void hash_delete_items __P((hash_table_t *ht));
 void hash_free_items __P((hash_table_t *ht));
 void hash_free __P((hash_table_t *ht, int free_items));
 void hash_map __P((hash_table_t *ht, hash_map_func_t map));
-void hash_map_arg __P((hash_table_t *ht, hash_map_arg_func_t map, void *arg));
+void hash_map_arg __P((hash_table_t *ht, hash_map_arg_func_t map, 
+		       void *arg));
 void hash_print_stats __P((hash_table_t *ht, FILE *out_FILE));
 void **hash_dump __P((hash_table_t *ht, void **vector_0, qsort_cmp_t compare));
 

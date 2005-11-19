@@ -132,20 +132,20 @@ extern variable_set_list_t *current_variable_set_list;
 const char *origin2str(variable_origin_t origin);
 
 /*! Create a new variable set and push it on the current setlist.  */
-extern variable_set_list_t *create_new_variable_set PARAMS ((void));
+extern variable_set_list_t *create_new_variable_set (void);
 
 /*! Create a new variable set, push it on the current setlist,
   and assign current_variable_set_list to it. 
  */
-extern variable_set_list_t *push_new_variable_scope PARAMS ((void));
+extern variable_set_list_t *push_new_variable_scope (void);
 
 /*! Pop the top set off the current_variable_set_list, and free all
    its storage.  */
-extern void pop_variable_scope PARAMS ((void));
+extern void pop_variable_scope (void);
 
 /*! Define the automatic variables, and record the addresses of their
   structures so we can change their values quickly.  */
-extern void define_automatic_variables PARAMS ((void));
+extern void define_automatic_variables (void);
 
 /*! Initialize FILE's variable set list.  If FILE already has a
    variable set list, the topmost variable set is left intact, but the
@@ -156,22 +156,27 @@ extern void define_automatic_variables PARAMS ((void));
 
    If we're READing a makefile, don't do the pattern variable search now,
    since the pattern variable might not have been defined yet.  */
-extern void initialize_file_variables PARAMS ((struct file *file, int read));
+extern void initialize_file_variables (struct file *p_target, int read);
 
-/*! Print all the local variables of FILE.  */
-extern void print_file_variables PARAMS ((struct file *file));
+/*! Print all the local variables of FILE.  Lines output have psz_prefix
+    prepended.
+*/
+extern void print_file_variables (file_t *p_target);
 
 /*! Print the data base of variables.  */
 
-extern void print_variable_data_base PARAMS ((void));
+extern void print_variable_data_base (void);
+
+/** Print information for variable V, prefixing it with PREFIX.  */
+extern void print_variable_info (const void *item, void *arg);
 
 /*! Print all the variables in SET.  PREFIX is printed before the
    actual variable definitions (everything else is comments).  */
-extern void print_variable_set PARAMS ((variable_set_t *set, char *prefix));
+extern void print_variable_set (variable_set_t *set, char *prefix);
 
 /*! Merge FROM_SET into TO_SET, freeing unused storage in
     FROM_SET.  */
-extern void merge_variable_set_lists PARAMS ((variable_set_list_t **to_list, variable_set_list_t *from_list));
+extern void merge_variable_set_lists (variable_set_list_t **to_list, variable_set_list_t *from_list);
 
 /*! Given a variable, a value, and a flavor, define the variable.  See
    the try_variable_definition() function for details on the
@@ -179,7 +184,7 @@ extern void merge_variable_set_lists PARAMS ((variable_set_list_t **to_list, var
 extern variable_t *do_variable_definition PARAMS ((const floc_t *p_floc, 
 						   const char *name, 
 						   char *value, 
-						   enum variable_origin origin,
+						   variable_origin_t origin,
 						   enum variable_flavor flavor,
 						   int target_var));
 
@@ -190,12 +195,15 @@ extern variable_t *do_variable_definition PARAMS ((const floc_t *p_floc,
    If LINE was recognized as a variable definition, a pointer to its `struct
    variable' is returned.  If LINE is not a variable definition, NULL is
    returned.  */
-extern variable_t *parse_variable_definition PARAMS ((struct variable *v, 
+extern variable_t *parse_variable_definition PARAMS ((variable_t *v, 
 						      char *line));
 
-extern struct variable *try_variable_definition PARAMS ((const floc_t *p_floc, char *line, enum variable_origin origin, int target_var));
-extern void init_hash_global_variable_set PARAMS ((void));
-extern void hash_init_function_table PARAMS ((void));
+extern struct variable *try_variable_definition (const floc_t *p_floc, 
+						 char *line, 
+						 variable_origin_t origin, 
+						 int target_var);
+extern void init_hash_global_variable_set (void);
+extern void hash_init_function_table (void);
 
 /*! Lookup a variable whose name is a string starting at NAME and with
    LENGTH chars.  NAME need not be null-terminated.  Returns address
@@ -218,7 +226,7 @@ extern variable_t *lookup_variable_in_set PARAMS ((const char *name,
 extern variable_t *define_variable_in_set
     PARAMS ((const char *name, unsigned int length, char *value,
              enum variable_origin origin, int recursive,
-             variable_set_t *set, const struct floc *flocp));
+             variable_set_t *set, const floc_t *p_floc));
 
 /* Define a variable in the current variable set.  */
 
@@ -251,9 +259,10 @@ extern variable_t *define_variable_in_set
                                 (int)(l), (n)); \
                               }while(0)
 
-extern char **target_environment PARAMS ((struct file *file));
+extern char **target_environment (file_t *p_target);
 
-extern struct pattern_var *create_pattern_var PARAMS ((char *target, char *suffix));
+extern struct pattern_var *create_pattern_var (char *psz_target, 
+					       char *psz_suffix);
 
 extern int export_all_variables;
 

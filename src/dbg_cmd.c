@@ -135,7 +135,8 @@ long_cmd_t commands[] = {
   { "next"    , 'n' },
   { "print"   , 'p' },
   { "quit"    , 'q' },
-  { "restart" , 'R' },
+  { "restart" , 'r' },
+  { "run"     , 'R' },
   { "set"     , '=' },
   { "setq"    , '"' },
   { "shell"   , '!' },
@@ -153,6 +154,7 @@ short_cmd_t short_command[256] = { { NULL, '\0' }, };
 
 char *info_subcommands[] = {
   "line",
+  "local",
   "target",
   "variables",
   "warranty",
@@ -349,8 +351,12 @@ cmd_initialize(void)
   short_command['Q'].use  = _("exit");
   short_command['Q'].doc  = _("alias for quit.");
   
+  short_command['r'].func = &dbg_cmd_restart;
+  short_command['r'].doc = _("Start program - same as restart.");
+  short_command['r'].use = _("run");
+
   short_command['R'].func = &dbg_cmd_restart;
-  short_command['R'].doc = _("Restart program.");
+  short_command['R'].doc = _("Restart program. Alias: run");
   short_command['R'].use = _("restart");
 
   short_command['s'].func = &dbg_cmd_step;
@@ -741,6 +747,17 @@ static debug_return_t dbg_cmd_info (char *psz_arg)
 	printf("No line number info recorded.\n");
       }
       
+    } else if (is_abbrev_of (psz_arg, "local")) {
+      if (p_stack_top && p_stack_top->p_target) {
+	file_t *p_target = p_stack_top->p_target;
+	if (!p_target->variables) {
+	  char *psz_target = p_target->name;
+	  p_target = lookup_file (psz_target);
+	  if (!p_target->variables) return;
+	}
+	hash_map_arg (&p_target->variables->set->table, 
+		      print_variable_info, NULL);
+      }
     } else if (is_abbrev_of (psz_arg, "stack")) {
       print_target_stack(p_stack_top, i_stack_pos);
     } else if (is_abbrev_of (psz_arg, "target")) {
@@ -1108,6 +1125,11 @@ static int dbg_cmd_show_var (char *psz_varname, int expand)
       set_file_variables (p_stack->p_target);
       if (p_stack->p_target->variables) 
 	p_set = p_stack->p_target->variables->set;
+      else {
+	char *psz_target = p_stack->p_target->name;
+	file_t *p_target = lookup_file (psz_target);
+	p_set = p_target->variables->set;
+      }
     }
     p_v = lookup_variable (psz_varname, strlen (psz_varname));
     if (!p_v && p_set) {
