@@ -154,7 +154,7 @@ short_cmd_t short_command[256] = { { NULL, '\0' }, };
 
 char *info_subcommands[] = {
   "line",
-  "local",
+  "locals",
   "target",
   "variables",
   "warranty",
@@ -747,7 +747,7 @@ static debug_return_t dbg_cmd_info (char *psz_arg)
 	printf("No line number info recorded.\n");
       }
       
-    } else if (is_abbrev_of (psz_arg, "local")) {
+    } else if (is_abbrev_of (psz_arg, "locals")) {
       if (p_stack_top && p_stack_top->p_target) {
 	file_t *p_target = p_stack_top->p_target;
 	if (!p_target->variables) {
