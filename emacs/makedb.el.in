@@ -1,5 +1,5 @@
 ;;; makedb.el --- GNU Make debugger mode via GUD and makedb
-;;; $Id: makedb.el.in,v 1.2 2005/11/17 12:51:19 rockyb Exp $
+;;; $Id: makedb.el.in,v 1.3 2005/11/20 03:14:15 rockyb Exp $
 
 ;; Copyright (C) 2004 Rocky Bernstein (rocky@panix.com) 
 
@@ -75,10 +75,10 @@
 
     ;; Process all the complete markers in this chunk.
     ;; Format of line looks like this:
-    ;;   (/etc/init.d/ntp.init:16):
+    ;;   (/src/remake/Makefile:16):
     ;; but we also allow DOS drive letters
-    ;;   (d:/etc/init.d/ntp.init:16):
-    (while (string-match "\\(^\\|\n\\)\\(\\([a-zA-Z]:\\)?[^:\n]*\\):\\([0-9]*\\).*\n"
+    ;;   (d:/src/remake/Makefile:16):
+    (while (string-match "\\(^\\|\n\\)(\\(\\([a-zA-Z]:\\)?[^:\n]*\\):\\([0-9]*\\)).*\n"
 			 gud-marker-acc)
       (setq
 

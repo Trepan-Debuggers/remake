@@ -1386,10 +1386,11 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
 	   do have it as part of the name, so use that. This happens for
 	   example with we've stopped before reading a Makefile.
 	 */
-	printf("%s:0\n", p_target->name);
+	printf("(%s:0)\n", p_target->name);
       } else {
+	printf("(", p_target->name);
 	print_floc_prefix(p_target_loc);
-	printf (": %s\n", psz_target_name);
+	printf ("): %s\n", psz_target_name);
       }
     }
     
