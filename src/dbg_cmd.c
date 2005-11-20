@@ -772,7 +772,7 @@ static debug_return_t dbg_cmd_info (char *psz_arg)
 	if (!p_target->variables) {
 	  char *psz_target = p_target->name;
 	  p_target = lookup_file (psz_target);
-	  if (!p_target->variables) return;
+	  if (!p_target->variables) return debug_readloop;
 	}
 	hash_map_arg (&p_target->variables->set->table, 
 		      print_variable_info, NULL);
