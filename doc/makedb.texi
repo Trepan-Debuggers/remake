@@ -27,7 +27,7 @@
 
 @settitle @value{MAKE} Debugger
 @setchapternewpage odd
-@setcontentsaftertitlepage
+@c @setcontentsaftertitlepage
 
 @c %**end of header
 
@@ -178,12 +178,12 @@ be used just as a front-end for learning more about Makefiles and
 writing them with @value{MAKE}. 
 
 @menu
-* Sample Session::              A Sample GNU Make Debugger session
+* Sample Sessions::             Sample GNU Make Debugger sessions
 * Free Software::               Freely redistributable software
 @end menu
 
-@node Sample Session
-@section A Sample @value{MAKE} Debugger Session
+@node Sample Sessions
+@section Sample @value{MAKE} Debugger Sessions
 
 You can use this manual at your leisure to read all about @value{DBG}.
 However, a handful of commands are enough to get started using the
@@ -193,6 +193,16 @@ debugger.  This chapter illustrates those commands.
 In this sample session, we emphasize user input like this: @b{input},
 to make it easier to pick out from the surrounding output.
 @end iftex
+
+@menu
+* Tracing::
+* Simple Debugging::            
+* Debugging Variables::
+* Debugging Commands::
+@end menu
+
+@node Tracing
+@subsection Sample @value{MAKE} Trace Sessions
 
 A simplified form of debugging is @emph{tracing}. And so before we
 get into debugging proper, let's show some of the tracing abilites. 
@@ -275,8 +285,8 @@ Clearly this information referring to rule stems, implicit
 prerequisites, @code{SIGCHLD}, pids, and unreaped children is intended
 for someone who is well versed with the internals of @value{MAKE}.
 
-But even for someone such as myself who through writing the debugger
-has @emph{become} more knowledgable, it still isn't all that
+But even for someone such as myself who has become more knowledgable
+(through writing this debugger), it @emph{still} isn't all that
 helpful. @code{/bin/bash: bogus-command: command not found} you say?
 Okay but where in the Makefile source did that come from? Since we
 added the debug output we see ``foo'' listed beforehand, but in a
@@ -291,8 +301,8 @@ But now let's try the new kind of trace we prove in this patched
 short-form option format @code{-x}
 
 @smallexample
+@group
 $ @b{remake --trace -f /tmp/test1}
-remake --trace -f /tmp/test1
 Reading makefiles...
 Updating goal targets....
  /tmp/test1:4	File `all' does not exist.
@@ -307,6 +317,7 @@ test okay
 	bogus-command
 /bin/bash: bogus-command: command not found
 test1:8: *** [foo] Error 127
+@end group
 @end smallexample 
 
 Notice there is some debug output that is the same as the first run.
@@ -324,9 +335,9 @@ improved, it is far better than what is in GNU make by default.)
 A slight subtley you might not have notices is that we echoed the
 command @code{if [ -n FOO ] ...} even though the original makefile had
 this set to be silent (in particular by preceding the command that
-starts ``if'' with an @@). When tracing turn off the silent execution
-as this information is usually helpful in finding what's going on and
-what got run.
+starts ``if'' with an @@). When tracing, we override any silent
+execution (making execution more verbose); information is usually
+helpful in finding what's going on and what got run.
 
 So now when we hit the error, the above trace gives some idea of why
 we decided to to run line 7. 
@@ -351,6 +362,9 @@ So we were working on target @code{foo} on line 7 of file
 @code{/tmp/test1} which was rebuilt because we were making target
 @code{all} on line 4 of file @code{/tmp/test1}.
 
+@node Simple Debugging
+@subsection Simple @value{MAKE} Debug Sessions
+
 Now let's use a real example -- the Makefile for the GNU Make +
 Debugger. 
 
@@ -361,40 +375,45 @@ And we'll go into the debugger:  for this use the @code{--debugger} or
 $  @b{./make --debugger}
 Reading makefiles...
 
-/tmp/remake/src/Makefile:254: Makefile.in
+(/tmp/remake/src/Makefile:254): Makefile.in
 @end smallexample 
 
-Let's see where we are. In particular is this @emph{really} the top-level
-target? The @code{where} command shows you the target call stack:
+Let's see where we are. In particular is this @emph{really} the
+top-level target? The @code{where} command, @xref{Backtrace}, shows
+you the target call stack:
 
 @smallexample
+@group
 makedb<0> @b{where}
 
 =>#0  Makefile.in at /tmp/remake/src/Makefile:254
   #1  Makefile at /tmp/remake/src/Makefile:267
 
-/tmp/remake/src/Makefile:255: Makefile.in
+(/tmp/remake/src/Makefile:255): Makefile.in
+@end group
 @end smallexample 
 
 No, we were triggered by checking dependecies from Makefile. And that
 was triggered by checking dependencies of ``all.'' (There's a bug in
-our debugger currently in that it doesn't show ``all.'')
-
+our debugger currently in that it doesn't show ``all.''). We can use
+the @code{step} command, @xref{Step}, to progress a little in the
+interpretation or execution of the makefile:
 @smallexample
+@group
 makedb<1> @b{step}
 
-/tmp/remake/src/Makefile:277: ../config.status
+(/tmp/remake/src/Makefile:277): ../config.status
 makedb<2> where
 
 =>#0  ../config.status at /tmp/remake/src/Makefile:277
-  #1  Makefile at /tmp/remake/src/Makefile:268
+  #1  Makefile at /tmp/remake/src/Makefile:267
+@end group
 @end smallexample 
 
-To get information about the make "target" we can use the @code{target}
-command:
-
-
+To get information about the make "target" we can use the @code{target},
+@xref{Target}, command:
 @smallexample
+@group
 makedb<3> @b{target}
 
 ../config.status: ../configure
@@ -406,6 +425,7 @@ makedb<3> @b{target}
 
 
 /home/src/external-cvs/remake/src/Makefile:277: ../config.status
+@end group
 @end smallexample 
 
 I could have gotten the same output explicitly giving a target name
@@ -426,7 +446,7 @@ all-am: Makefile make loadavg commands.h dbg_cmd.h dep.h expand.h filedef.h func
 #  File does not exist.
 #  File has not been updated.
 
-/tmp/remake/src/Makefile:277: ../config.status
+(/tmp/remake/src/Makefile:277): ../config.status
 @end smallexample 
 
 However information may change depending on where Make is. In
@@ -446,7 +466,7 @@ Reading makefiles...
 makedb<0> @b{break all-am}
 Breakpoint on target all-am set.
 
-/tmp/remake/src/Makefile:255: Makefile.in
+(/tmp/remake/src/Makefile:255): Makefile.in
 @end smallexample 
 
 The @code{restart} command was used to restart execution since we've
@@ -467,12 +487,15 @@ makedb<1> where
   #1  all at /tmp/remake/src/Makefile:251
 @end smallexample 
 
+@node Debugging Variables
+@subsection Debuging Variables
+
 We've seen we can get information about @value{MAKE}'s targets.  We
 can also get information about @value{MAKE}'s variables. That is done
-with the @code{print} command.
+with the @code{print} command, @xref{Print}.
 
 @smallexample
-  /tmp/remake/src/Makefile:383: all-am
+  (/tmp/remake/src/Makefile:383): all-am
   makedb<4> print MAKE
 
   (origin default) MAKE = $(MAKE_COMMAND)
@@ -509,16 +532,16 @@ But I can also @emph{change} values too using either @code{set} or
   makedb<5> @b{set variable MAKE $(MAKE_COMMAND)}
   Variable MAKE now has value '/tmp/remake/src/./make'
 
- /tmp/remake/src/Makefile:383: all-am
+ (/tmp/remake/src/Makefile:383): all-am
 
   makedb<6> @b{setq MAKE $(MAKE_COMMAND)}
   Variable MAKE now has value '$(MAKE_COMMAND)'
 @end smallexample 
 
 So with @code{set}, the value in the expression @code{$(MAKE_COMMAND)}
-is expanded before the variable definition is assigned. With @code{setq}
-the internal variables are kept unexpanded. Which you use or want is
-up to you.
+is expanded before the variable definition is assigned. With
+@code{setq}, @xref{setq}, the internal variables are kept
+unexpanded. Which you use or want is up to you.
 
 Note the irregular syntax of @code{set} and @code{"setq}. Don't put an
 equal sign (@code{=}) between the variable and the expression. That
@@ -532,6 +555,143 @@ which is probably not what you want.  Also note that although you need
 to use the word "variable" when using @code{set}, you must not supply
 it with "setq."  Down the line, someone (maybe @emph{you!}) will
 probably put in a command parser.  
+
+@node Debugging Commands
+@subsection Debuging Commands
+
+Now consider the following sample Makefile:
+@smallexample
+@group
+$ @b{cat -n test2}
+1 PACKAGE=make
+2 
+3 all: $(PACKAGE).txt
+4 
+5 $(PACKAGE).txt: ../doc/makedb.texi
+6 	makeinfo --no-headers $< > $@
+@end group
+@end smallexample
+
+@smallexample
+@group
+$ @b{remake -X -f test2}
+Reading makefiles...
+Updating goal targets....
+ /home/src/external-cvs/remake/src/test2:3	File `all' does not exist.
+
+(/home/src/external-cvs/remake/src/test2:5): make.txt
+@end group
+@end smallexample
+
+As before we'll use the target command to show information about
+@code{make.txt}:
+@smallexample
+@group
+makedb<0> @b{target}
+
+make.txt: ../doc/makedb.texi
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  commands to execute (from `test2', line 6):
+	makeinfo --no-headers $< > $@
+
+makedb<1> @b{step 2}
+   /home/src/external-cvs/remake/src/test2:5	File `make.txt' does not exist.
+  /home/src/external-cvs/remake/src/test2:5	Must remake target `make.txt'.
+
+(/home/src/external-cvs/remake/src/test2:6): make.txt
+makedb<2> @b{t}
+
+make.txt: ../doc/makedb.texi
+#  Implicit rule search has not been done.
+#  Implicit/static pattern stem: `'
+#  File does not exist.
+#  File has not been updated.
+# automatic
+# @@ := make.txt
+# automatic
+# % := 
+# automatic
+# * := 
+# automatic
+# + := ../doc/makedb.texi
+# automatic
+# | := 
+# automatic
+# < := ../doc/makedb.texi
+# automatic
+# ^ := ../doc/makedb.texi
+# automatic
+# ? := ../doc/makedb.texi
+# variable set hash-table stats:
+# Load=8/32=25%, Rehash=0, Collisions=1/12=8%
+#  commands to execute (from `test2', line 6):
+	makeinfo --no-headers $< > $@
+@end group
+@end smallexample
+
+Notice that the first time we asked for target info we were on line
+5. After @value{MAKE} decided we needed to update the target we went
+to line 6. When asking about target information on line 6, we now see
+that a number of automatic variables have been set. We can also get
+information about just these variables using the command @code{target
+make.txt variables} or @code{info locals}:
+
+@smallexample
+@group
+(/home/src/external-cvs/remake/src/test2:6): make.txt
+makedb<3> @b{info locals}
+@@ := make.txt
+% := 
+* := 
++ := ../doc/makedb.texi
+| := 
+< := ../doc/makedb.texi
+^ := ../doc/makedb.texi
+? := ../doc/makedb.texi
+
+@end group
+@end smallexample
+
+Since these variables are set we can use these variables to see a full
+expansion of the command that is going to get set:
+
+@smallexample
+@group
+(/home/src/external-cvs/remake/src/test2:6): make.txt
+makedb<4> @b{target make.txt commands}
+
+make.txt:
+#  commands to execute (from `test2', line 6):
+	makeinfo --no-headers $< > $@@
+	
+(/home/src/external-cvs/remake/src/test2:6): make.txt
+makedb<5> @b{x makeinfo --no-headers $< > $@@}
+makeinfo --no-headers ../doc/makedb.texi > make.txt
+
+@end group
+@end smallexample
+
+If we want to write out those commands as a shell script which we
+might want to execute, we can use the @code{write} command:
+@smallexample
+@group
+(/home/src/external-cvs/remake/src/test2:6): make.txt
+makedb<6> @b{write}
+File "/tmp/make.txt.sh" written.
+
+(/home/src/external-cvs/remake/src/test2:6): make.txt
+makedb<7> @b{shell cat -n /tmp/make.txt.sh}
+     1	#!/bin/sh
+     2	#/home/src/external-cvs/remake/src/test2:5
+     3	makeinfo --no-headers ../doc/makedb.texi > make.txt
+     4	
+@end group
+@end smallexample
+
+And last we see that we can even issue a shell command (@code{cat -n
+/tmp/make.txt.sh}) via the debugger command @code{shell}.
 
 @node Free Software
 @unnumberedsec Free software
@@ -821,9 +981,6 @@ display a short list of named classes of commands:
 @smallexample
 makedb<0> @b{help}
 Available commands are: 
-  where                     (T):
-	Show target stack.
-
   break *target*            (b):
 	Set a breakpoint at a target.
 
@@ -839,6 +996,9 @@ Available commands are:
   down [amount]             (D):
 	Select and print the target this one caused to be examined.
 	An argument says how many targets down to go.
+
+  eval *string*             (e):
+	parse and evaluate a string.
 
   examine *string*          (x):
 	Show string with internal variables references expanded. See also 
@@ -865,9 +1025,8 @@ Available commands are:
 	alias for step.
 
   print @{*variable* [attrs...]@} (p):
-
 	Show a variable definition.
-	If a variable name is given, the value is shown with embedded
+	The value is shown with embedded
 	variable-references unexpanded. Don't include $ before a variable
 	name. See also "examine".
 
@@ -879,16 +1038,23 @@ Available commands are:
 	Exit make. If a numeric argument is given, it will be the exit
 	status this program reports back. Otherwise exit with status 0.
 
+  run                       (r):
+	Start program - same as restart.
+
   restart                   (R):
-	Restart program.
+	Restart program. Alias: run
 
-  set @{basename|trace|ignore-errors|variable@} *value* (=):
-	set basename @{on|off|toggle@}
-	set filename to show full name or basename.
+  set @{basename|debug|ignore-errors|keep-going|silent|trace|variable@} *value* (=):
+	set basename @{on|off|toggle@} - show full name or basename?
+	set debug debug-mask - like --debug value.
 
-	set trace @{on|off|toggle@}
-	set tracing status.
+	set ignore-errors @{on|off|toggle@} - like --ignore-errors option
 
+	set keep-going @{on|off|toggle@} - like --keep-going option
+
+	set silent @{on|off|toggle@} - like --silent option
+
+	set trace @{on|off|toggle@} - set tracing status
 	set variable *var* *value*
 	Set MAKE variable to value. Variable definitions
 	inside VALUE are expanded before assignment occurs.
@@ -930,16 +1096,15 @@ Available commands are:
 
   write [*target* [*filename*]] (w):
 	writes the commands associated of a target to a file with MAKE
-	variables expanded. If no target given use the current one.
-	If a filename is supplied it is used. If it is the string "here"
-	we write the output to stdout. If no filename is given then we
-	create the filename by prepending a directory name to the target
-	name and then append ".sh".
+	variables expanded. If no target given, the basename of the current
+	is used. If a filename is supplied it is used. If it is the string
+	"here", we write the output to stdout. If no filename is
+	given then create the filename by prepending a directory name to
+	the target name and then append ".sh".
 
   up [amount]               (u):
 	Select and print target that caused this one to be examined.
 	An argument says how many targets up to go.
-
 
 Readline command line editing (emacs/vi mode) is available.
 For more help, type h <cmd> or consult online-documentation.
@@ -980,8 +1145,8 @@ makedb<0> @b{help info}
 	Show the state of thing.
 	If no 'thing' is specified, show everything there is to show.
 
-	Available commands are:
-	 args basename ignore-errors keep-going silent target trace
+	Available info subcommands are:
+	 line locals target variables warranty
 @end example
 @end table
 
