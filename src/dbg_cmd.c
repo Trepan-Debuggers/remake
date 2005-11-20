@@ -406,23 +406,23 @@ cmd_initialize(void)
   short_command['u'].func = &dbg_cmd_frame_up;
   short_command['u'].use  = _("up [amount]");
   short_command['u'].doc  = 
-    _("Select and print target that caused this one to be examined.\n" \
+    _("Select and print target that caused this one to be examined.\n"
       "\tAn argument says how many targets up to go.");
 
   short_command['w'].func = &dbg_cmd_write_cmds;
   short_command['w'].use =  _("write [*target* [*filename*]]");
   short_command['w'].doc  = 
-    _("writes the commands associated of a target to a file with MAKE\n" \
-      "\tvariables expanded. If no target given use the current one.\n"
-      "\tIf a filename is supplied it is used. If it is the string \"here\"\n"
-      "\twe write the output to stdout. If no filename is given then we\n"
-      "\tcreate the filename by prepending a directory name to the target\n"
-      "\tname and then append \".sh\".");
+    _("writes the commands associated of a target to a file with MAKE\n"
+      "\tvariables expanded. If no target given, the basename of the current\n"
+      "\tis used. If a filename is supplied it is used. If it is the string\n"
+      "\t\"here\", we write the output to stdout. If no filename is\n"
+      "\tgiven then create the filename by prepending a directory name to\n"
+      "\tthe target name and then append \".sh\".");
 
   short_command['x'].func = &dbg_cmd_expand;
   short_command['x'].use =  _("examine *string*");
   short_command['x'].doc  = 
-    _("Show string with internal variables references expanded. See also \n" \
+    _("Show string with internal variables references expanded. See also \n"
       "\t\"print\".");
 
   short_command['#'].func = &dbg_cmd_comment;
@@ -909,7 +909,7 @@ static debug_return_t dbg_cmd_write_cmds (char *psz_args)
   char *psz_target;
   int b_stdout = 0;
 
-  if (!psz_args || 0==strlen(psz_args)) {
+  if (!psz_args || !*psz_args) {
     /* Use current target */
     if (p_stack && p_stack->p_target && p_stack->p_target->name)
       psz_target = p_stack->p_target->name;
@@ -938,7 +938,7 @@ static debug_return_t dbg_cmd_write_cmds (char *psz_args)
   } else {
     variable_t *p_v = 
       lookup_variable ("SHELL", strlen ("SHELL"));
-    char filename[MAX_FILE_LENGTH];
+    char *psz_filename = NULL;
     FILE *outfd;
     char *s;
     
@@ -953,13 +953,22 @@ static debug_return_t dbg_cmd_write_cmds (char *psz_args)
     
     /* FIXME: should get directory from a variable, e.g. TMPDIR */
 
-    if (psz_args) {
+    if (psz_args && *psz_args) {
       if (strcmp (psz_args, "here") == 0)
 	b_stdout = 1;
       else 
-	strncpy(filename, psz_args, MAX_FILE_LENGTH);
+	psz_filename = strdup(psz_args);
     } else {
-      snprintf(filename, MAX_FILE_LENGTH, "/tmp/%s.sh", psz_target);
+      /* Create target from the basename of the target name. */
+      char *psz_target_basename = strrchr(psz_target, '/');
+      if (!psz_target_basename) 
+	psz_target_basename = psz_target;
+      else 
+	psz_target_basename++; /* Skip delimiter */
+      psz_filename=(char *) calloc(sizeof(char), 
+				   strlen(psz_target_basename) + 10);
+      snprintf(psz_filename, MAX_FILE_LENGTH, "/tmp/%s.sh", 
+	       psz_target_basename);
     }
     
     /* Skip leading space, MAKE's comamnd prefixes:
@@ -988,8 +997,9 @@ static debug_return_t dbg_cmd_write_cmds (char *psz_args)
     } else {
       if (b_stdout) 
 	outfd = stdout;
-      else if (!(outfd = fopen (filename, "w"))) {
+      else if (!(outfd = fopen (psz_filename, "w"))) {
 	perror ("write target");
+	free(psz_filename);
 	return debug_readloop;
       }
       
@@ -1019,10 +1029,10 @@ static debug_return_t dbg_cmd_write_cmds (char *psz_args)
       
       if (!b_stdout) {
 	fclose(outfd);
-	printf(_("File \"%s\" written.\n"), filename);
+	printf(_("File \"%s\" written.\n"), psz_filename);
+	free(psz_filename);
       }
     }
-    
   }
   return debug_readloop;
 }
@@ -1142,20 +1152,19 @@ static int dbg_cmd_show_var (char *psz_varname, int expand)
   } else {
     variable_t *p_v;
     variable_set_t *p_set = NULL;
-    if (p_stack) {
-      initialize_file_variables (p_stack->p_target, 0);
-      set_file_variables (p_stack->p_target);
-      if (p_stack->p_target->variables) 
-	p_set = p_stack->p_target->variables->set;
-      else {
-	char *psz_target = p_stack->p_target->name;
-	file_t *p_target = lookup_file (psz_target);
-	p_set = p_target->variables->set;
-      }
+    variable_set_list_t *p_file_vars = NULL;
+    if (p_stack && p_stack->p_target && p_stack->p_target->name) {
+      char *psz_target = p_stack->p_target->name;
+      file_t *p_target = lookup_file (psz_target);
+      initialize_file_variables (p_target, 0);
+      set_file_variables (p_target);
+      p_file_vars = p_target->variables;
+      p_set = p_file_vars->set;
     }
-    p_v = lookup_variable (psz_varname, strlen (psz_varname));
-    if (!p_v && p_set) {
+    if (p_set) {
       p_v = lookup_variable_in_set(psz_varname, strlen(psz_varname), p_set);
+    } else {
+      p_v = lookup_variable (psz_varname, strlen (psz_varname));
     }
     if (p_v) {
       if (expand) {
@@ -1164,7 +1173,7 @@ static int dbg_cmd_show_var (char *psz_varname, int expand)
 	print_variable(p_v);
     } else {
       if (expand)
-	printf("%s\n", variable_expand(psz_varname));
+	printf("%s\n", variable_expand_set(psz_varname, p_file_vars));
       else {
 	printf("Can't find variable %s\n", psz_varname);
 	return 0;
@@ -1180,7 +1189,7 @@ static debug_return_t dbg_cmd_expand (char *psz_string)
 {
   static char *psz_last_string = NULL;
 
-  if (!psz_string || 0==strlen(psz_string)) {
+  if (!psz_string || !*psz_string) {
     /* Use last target value */
     if (psz_last_string)
       psz_string = psz_last_string;

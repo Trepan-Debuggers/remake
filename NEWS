@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  Apr 12 2005
+  November 2005
 
 Copyright (C) 2002, 2004, 2005  Free Software Foundation, Inc.
 See the end for copying conditions.
@@ -13,9 +13,19 @@ Version 3.80+dbg-0.4cvs
 
 * Add eval!
 
-* Add ability to break before reading Makefiles - may be useful in 
+* Add ability to stop before reading Makefiles - may be useful in 
   debugging macros and variables --debugger=preread. We can now trace
   makefile reading activity with -d r or via --trace = {read,full}
+
+* Fix bugs in setting automatic variables 
+
+* More ddd (gdb/bashdb) compatible: 
+  - "help set" added 
+  - "help show" works like the others
+  - "info locals" added
+  - file/line reporting more like bash/perl
+
+* write file takes basename (well, at least for POSIX systems)
 
 * The usual doc fixes after a release.
 

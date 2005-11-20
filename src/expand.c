@@ -1,5 +1,6 @@
 /* Variable expansion functions for GNU Make.
-Copyright (C) 1988, 89, 91, 92, 93, 95, 2004 Free Software Foundation, Inc.
+Copyright (C) 1988, 89, 91, 92, 93, 95, 
+2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -90,7 +91,7 @@ initialize_variable_output (void)
 
 /* Recursively expand V.  The returned string is malloc'd.  */
 
-static char *allocated_variable_append PARAMS ((const variable_t *v));
+static char *allocated_variable_append(const variable_t *v);
 
 char *
 recursively_expand_for_file (variable_t *v, file_t *file)
@@ -177,19 +178,19 @@ reference_variable (char *o, char *name, unsigned int length)
    NULL.  */
 
 char *
-variable_expand_string (char *line, char *string, long length)
+variable_expand_string (char *psz_line, char *string, long length)
 {
   variable_t *v;
   char *p, *o, *p1;
   char save_char = '\0';
   unsigned int line_offset;
 
-  if (!line)
-    line = initialize_variable_output();
+  if (!psz_line)
+    psz_line = initialize_variable_output();
 
   p = string;
-  o = line;
-  line_offset = line - variable_buffer;
+  o = psz_line;
+  line_offset = psz_line - variable_buffer;
 
   if (length >= 0)
     {
@@ -410,9 +411,9 @@ variable_expand_string (char *line, char *string, long length)
    and is valid only until the next time this function is called.  */
 
 char *
-variable_expand (char *line)
+variable_expand (char *psz_line)
 {
-  return variable_expand_string(NULL, line, (long)-1);
+  return variable_expand_string(NULL, psz_line, (long)-1);
 }
 
 /* Expand an argument for an expansion function.
@@ -439,17 +440,17 @@ expand_argument (const char *str, const char *end)
   return allocated_variable_expand (tmp);
 }
 
-/* Expand LINE for FILE.  Error messages refer to the file and line where
-   FILE's commands were found.  Expansion uses FILE's variable set list.  */
-
+/** Expand PSZ_LINE for FILE.  Error messages refer to the file and
+   line where FILE's commands were found.  Expansion uses FILE's
+   variable set list.  */
 static char *
-variable_expand_for_file (char *line, file_t *file)
+variable_expand_for_file (char *psz_line, file_t *file)
 {
   char *result;
   variable_set_list_t *save;
 
   if (file == 0)
-    return variable_expand (line);
+    return variable_expand (psz_line);
 
   save = current_variable_set_list;
   current_variable_set_list = file->variables;
@@ -457,11 +458,27 @@ variable_expand_for_file (char *line, file_t *file)
     reading_file = &file->cmds->fileinfo;
   else
     reading_file = 0;
-  result = variable_expand (line);
+  result = variable_expand (psz_line);
   current_variable_set_list = save;
   reading_file = 0;
 
   return result;
+}
+
+/** Expand PSZ_LINE. Expansion uses P_FILE_SET if it is not NULL. */
+char *
+variable_expand_set (char *psz_line, variable_set_list_t *p_file_vars)
+{
+  char *psz_result;
+  variable_set_list_t *p_vars_save;
+
+  p_vars_save = current_variable_set_list;
+  if (p_file_vars)
+    current_variable_set_list = p_file_vars;
+  psz_result = variable_expand (psz_line);
+  current_variable_set_list = p_vars_save;
+
+  return psz_result;
 }
 
 /* Like allocated_variable_expand, but for += target-specific variables.
@@ -533,7 +550,7 @@ allocated_variable_append (const variable_t *v)
   This function is called a lot.  It wants to be efficient.
   */
 char *
-allocated_variable_expand_for_file (char *line, file_t *file)
+allocated_variable_expand_for_file (char *psz_line, file_t *file)
 {
   char *value;
 
@@ -542,7 +559,7 @@ allocated_variable_expand_for_file (char *line, file_t *file)
 
   variable_buffer = 0;
 
-  value = variable_expand_for_file (line, file);
+  value = variable_expand_for_file (psz_line, file);
 
 #if 0
   /* Waste a little memory and save time.  */

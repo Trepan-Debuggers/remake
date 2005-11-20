@@ -1,5 +1,5 @@
 /* Header for variable expansion functions for GNU Make.
-Copyright (C) 2004 Free Software Foundation, Inc.
+Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -29,8 +29,7 @@ Boston, MA 02111-1307, USA.  */
 /*! Like variable_expand_for_file, but the returned string is malloc'd.
    This function is called a lot.  It wants to be efficient.  */
 
-extern char *allocated_variable_expand_for_file PARAMS ((char *line, 
-							 file_t *file));
+extern char *allocated_variable_expand_for_file(char *psz_line, file_t *file);
 
 
 /*! Expand an argument for an expansion function.  The text starting
@@ -39,12 +38,12 @@ extern char *allocated_variable_expand_for_file PARAMS ((char *line,
    without clobbering `variable_buffer' or the current
    variable-expansion that is in progress.  */
 
-extern char *expand_argument PARAMS((const char *str, const char *end));
+extern char *expand_argument(const char *str, const char *end);
 
 /*! Install a new variable_buffer context, returning the current one for
    safe-keeping.  */
 
-extern void install_variable_buffer PARAMS((char **bufp, unsigned int *lenp));
+extern void install_variable_buffer(char **bufp, unsigned int *lenp);
 
 /*! Restore a previously-saved variable_buffer setting (free the current one).
  */
@@ -52,7 +51,7 @@ extern void install_variable_buffer PARAMS((char **bufp, unsigned int *lenp));
 #define recursively_expand(v)   recursively_expand_for_file (v, NULL)
 
 /*! Recursively expand V.  The returned string is malloc'd.  */
-extern char *recursively_expand_for_file PARAMS((variable_t *v, file_t *file));
+extern char *recursively_expand_for_file(variable_t *v, file_t *file);
 
 /*! Subroutine of variable_expand and friends:
    The text to add is LENGTH chars starting at STRING to the variable_buffer.
@@ -61,17 +60,21 @@ extern char *recursively_expand_for_file PARAMS((variable_t *v, file_t *file));
    each call to variable_buffer_output should be the first argument to
    the following call.  */
 
-extern void restore_variable_buffer PARAMS ((char *buf, unsigned int len));
+extern void restore_variable_buffer(char *buf, unsigned int len);
 
-extern char *variable_buffer_output PARAMS ((char *ptr, char *string, 
-					     unsigned int length));
+extern char *variable_buffer_output(char *ptr, char *psz_string, 
+				    unsigned int length);
 
 /*! Scan LINE for variable references and expansion-function calls.
    Build in `variable_buffer' the result of expanding the references and calls.
    Return the address of the resulting string, which is null-terminated
    and is valid only until the next time this function is called.  */
 
-extern char *variable_expand PARAMS((char *line));
+extern char *variable_expand(char *line);
+
+/** Expand PSZ_LINE. Expansion uses P_FILE_SET if it is not NULL. */
+extern char *variable_expand_set (char *psz_line, 
+				  variable_set_list_t *p_file_set);
 
 /*! Scan STRING for variable references and expansion-function calls.  Only
    LENGTH bytes of STRING are actually scanned.  If LENGTH is -1, scan until
@@ -82,7 +85,6 @@ extern char *variable_expand PARAMS((char *line));
    Return a pointer to LINE, or to the beginning of the buffer if LINE is
    NULL.  */
 
-char *variable_expand_string PARAMS((char *line, char *string, 
-				     long int length));
+char *variable_expand_string(char *line, char *string, long int length);
 
 #endif /*EXPAND_H*/
