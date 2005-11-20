@@ -578,7 +578,10 @@ static debug_return_t dbg_cmd_help (char *psz_arg)
 	  printf("set %-15s -- %s\n", 
 		 set_subcommands[i].name, set_subcommands[i].doc );
 	}
+      } else {
+	printf("  %s:\n\t%s\n", p_command->use, p_command->doc);
       }
+      
     } else {
       printf("Invalid command %s. Try help for a list of commands\n", 
 	     psz_arg);
