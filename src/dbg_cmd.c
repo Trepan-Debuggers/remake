@@ -152,6 +152,11 @@ long_cmd_t commands[] = {
 
 short_cmd_t short_command[256] = { { NULL, '\0' }, };
 
+typedef struct {
+  const char *name;	/* name of subcommand command. */
+  const char *doc;	/* short description of subcommand */
+} subcommand_info_t;
+
 char *info_subcommands[] = {
   "line",
   "locals",
@@ -161,16 +166,16 @@ char *info_subcommands[] = {
   NULL
 };
 
-char *show_subcommands[] = {
-  "args",
-  "basename",
-  "debug",
-  "ignore-errors",
-  "keep-going",
-  "silent",
-  "trace",
-  "version",
-  "warranty",
+subcommand_info_t show_subcommands[] = {
+  { "args",     "Show argument list to give program when it is started"},
+  { "basename", "Show if we are to show short or long filenames"},
+  { "debug",    "GNU Make debug mask (set via --debug or -d)" },
+  { "ignore-errors", "Value of GNU Make --ignore-errors (or -i) flag" },
+  { "keep-going",    "Value of GNU Make --keep-going (or -k) flag"},
+  { "silent",        "Value of GNU Make --silent (or -s) flags"},
+  { "trace",         "Show if we are tracing execution"},
+  { "version",       "Show what version of GNU Make + dbg this is"},
+  { "warranty",      "Various kinds of warranty you do not have"},
   NULL
 };
 
@@ -546,19 +551,18 @@ static debug_return_t dbg_cmd_help (char *psz_arg)
       p_command = find_command (psz_arg);
     }
     if (p_command) {
-      printf("  %s:\n\t%s\n", p_command->use, p_command->doc);
       if ( p_command->func == &dbg_cmd_info ) {
+	printf("  %s:\n\t%s\n", p_command->use, p_command->doc);
 	printf ("\tAvailable info subcommands are:\n\t");
 	for (i = 0; info_subcommands[i]; i++) {
 	  printf(" %s", info_subcommands[i]);
 	}
 	printf("\n");
       } else if ( p_command->func == &dbg_cmd_show ) {
-	printf ("\tAvailable show subcommands are:\n\t");
-	for (i = 0; show_subcommands[i]; i++) {
-	  printf(" %s", show_subcommands[i]);
+	for (i = 0; show_subcommands[i].name; i++) {
+	  printf("show %-15s -- %s\n", 
+		 show_subcommands[i].name, show_subcommands[i].doc );
 	}
-	printf("\n");
       }
     } else {
       printf("Invalid command %s. Try help for a list of commands\n", 
@@ -688,9 +692,9 @@ static debug_return_t dbg_cmd_show (char *psz_arg)
 {
   if (!psz_arg || 0==strlen(psz_arg)) {
     unsigned int i;
-    for (i=0; show_subcommands[i]; i++) {
-      if ( 0 != strcmp(show_subcommands[i], "warranty") )
-	dbg_cmd_show(show_subcommands[i]);
+    for (i=0; show_subcommands[i].name; i++) {
+      if ( 0 != strcmp(show_subcommands[i].name, "warranty") )
+	dbg_cmd_show((char *) show_subcommands[i].name);
     }
   } else {
     if (is_abbrev_of (psz_arg, "args")) {
@@ -701,17 +705,17 @@ static debug_return_t dbg_cmd_show (char *psz_arg)
       }
       printf("\n");
     } else if (is_abbrev_of (psz_arg, "basename")) {
-      printf("basename: %s\n", var_to_on_off(basename_filenames));
+      printf("basename is %s.\n", var_to_on_off(basename_filenames));
     } else if (is_abbrev_of (psz_arg, "debug")) {
-      printf("debug: %d\n", db_level);
+      printf("debug is %d.\n", db_level);
     } else if (is_abbrev_of (psz_arg, "ignore-errors")) {
-      printf("ignore-errors: %s\n", var_to_on_off(ignore_errors_flag));
+      printf("ignore-errors is %s.\n", var_to_on_off(ignore_errors_flag));
     } else if (is_abbrev_of (psz_arg, "keep-going")) {
-      printf("keep-going: %s\n", var_to_on_off(keep_going_flag));
+      printf("keep-going is %s.\n", var_to_on_off(keep_going_flag));
     } else if (is_abbrev_of (psz_arg, "silent")) {
-      printf("silent: %s\n", var_to_on_off(silent_flag));
+      printf("silent is %s.\n", var_to_on_off(silent_flag));
     } else if (is_abbrev_of (psz_arg, "trace")) {
-      printf("trace: %s\n", var_to_on_off(tracing));
+      printf("trace is %s.\n", var_to_on_off(tracing));
     } else if (is_abbrev_of (psz_arg, "version")) {
       printf("version: ");
       print_version();
