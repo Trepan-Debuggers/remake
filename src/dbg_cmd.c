@@ -179,6 +179,16 @@ subcommand_info_t show_subcommands[] = {
   NULL
 };
 
+subcommand_info_t set_subcommands[] = {
+  { "basename",      "Set short filenames (the basename) in debug output"},
+  { "debug",         "Set GNU Make debug mask (--debug or -d)" },
+  { "ignore-errors", "Set GNU Make --ignore-errors (or -i) flag" },
+  { "keep-going",    "Set GNU Make --keep-going (or -k) flag"},
+  { "silent",        "Set GNU Make --silent (or -s) flags"},
+  { "trace",         "Set if we are tracing execution"},
+  NULL
+};
+
 /* Pointer to top of current target call stack */
 static target_stack_node_t *p_stack_top;
 
@@ -562,6 +572,11 @@ static debug_return_t dbg_cmd_help (char *psz_arg)
 	for (i = 0; show_subcommands[i].name; i++) {
 	  printf("show %-15s -- %s\n", 
 		 show_subcommands[i].name, show_subcommands[i].doc );
+	}
+      } else if ( p_command->func == &dbg_cmd_set ) {
+	for (i = 0; set_subcommands[i].name; i++) {
+	  printf("set %-15s -- %s\n", 
+		 set_subcommands[i].name, set_subcommands[i].doc );
 	}
       }
     } else {
