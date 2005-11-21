@@ -166,29 +166,68 @@ char *info_subcommands[] = {
   NULL
 };
 
-subcommand_info_t show_subcommands[] = {
-  { "args",     "Show argument list to give program when it is started"},
-  { "basename", "Show if we are to show short or long filenames"},
-  { "debug",    "GNU Make debug mask (set via --debug or -d)" },
-  { "ignore-errors", "Value of GNU Make --ignore-errors (or -i) flag" },
-  { "keep-going",    "Value of GNU Make --keep-going (or -k) flag"},
-  { "silent",        "Value of GNU Make --silent (or -s) flags"},
-  { "trace",         "Show if we are tracing execution"},
-  { "version",       "Show what version of GNU Make + dbg this is"},
-  { "warranty",      "Various kinds of warranty you do not have"},
+
+typedef struct {
+  const char *name;	/* name of subcommand command. */
+  const char *doc;	/* short description of subcommand */
+  void *var;	        /* address of variable setting. NULL if no
+			   setting. */
+  bool b_onoff;         /* True if on/off variable, false if int. 
+			   FIXME: generalize into enumeration.
+			 */
+} show_subcommand_info_t;
+
+show_subcommand_info_t show_subcommands[] = {
+  { "args",     "Show argument list to give program when it is started",
+    NULL, false},
+  { "basename", "Show if we are to show short or long filenames",
+    &basename_filenames, true},
+  { "debug",    "GNU Make debug mask (set via --debug or -d)",
+    &db_level, false},
+  { "ignore-errors", "Value of GNU Make --ignore-errors (or -i) flag",
+    &ignore_errors_flag, true},
+  { "keep-going",    "Value of GNU Make --keep-going (or -k) flag",
+    &keep_going_flag,    true},
+  { "silent",        "Value of GNU Make --silent (or -s) flags",
+    &silent_flag,        true},
+  { "trace",         "Show if we are tracing execution",
+    &tracing,            true},
+  { "version",       "Show the version of GNU Make + dbg",
+    NULL,                false},
+  { "warranty",      "Various kinds of warranty you do not have",
+    NULL,                false},
   NULL
 };
 
 subcommand_info_t set_subcommands[] = {
-  { "basename",      "Set short filenames (the basename) in debug output"},
-  { "debug",         "Set GNU Make debug mask (--debug or -d)" },
-  { "ignore-errors", "Set GNU Make --ignore-errors (or -i) flag" },
-  { "keep-going",    "Set GNU Make --keep-going (or -k) flag"},
-  { "silent",        "Set GNU Make --silent (or -s) flags"},
-  { "trace",         "Set if we are tracing execution"},
+  { "basename",      "short filenames (the basename) in debug output"},
+  { "debug",         "GNU Make debug mask (--debug or -d)" },
+  { "ignore-errors", "GNU Make --ignore-errors (or -i) flag" },
+  { "keep-going",    "GNU Make --keep-going (or -k) flag"},
+  { "silent",        "GNU Make --silent (or -s) flag"},
+  { "trace",         "tracing execution"},
+  { "variable",      "set variable to value"},
   NULL
 };
 
+void print_debugger_location(file_t *p_target) 
+{
+  if (p_target_loc) {
+    if ( !p_target_loc->filenm && !p_target_loc->lineno 
+	 && p_target->name ) {
+      /* We don't have file location info in the target floc, but we
+	 do have it as part of the name, so use that. This happens for
+	 example with we've stopped before reading a Makefile.
+      */
+      printf("(%s:0)\n", p_target->name);
+    } else {
+      printf("(", p_target->name);
+      print_floc_prefix(p_target_loc);
+      printf ("): %s\n", psz_target_name);
+    }
+  }
+}
+    
 /* Pointer to top of current target call stack */
 static target_stack_node_t *p_stack_top;
 
@@ -214,7 +253,7 @@ on_off_toggle(const char *psz_arg, int *var)
 static char *
 var_to_on_off(int var) 
 {
-  return var ? "on " : "off";
+  return var ? "on" : "off";
 }
 
 /* Find the next "word" - skip leading blanks and the "word" is the
@@ -570,8 +609,16 @@ static debug_return_t dbg_cmd_help (char *psz_arg)
 	printf("\n");
       } else if ( p_command->func == &dbg_cmd_show ) {
 	for (i = 0; show_subcommands[i].name; i++) {
-	  printf("show %-15s -- %s\n", 
+	  printf("show %-15s -- %s", 
 		 show_subcommands[i].name, show_subcommands[i].doc );
+	  if (show_subcommands[i].var) {
+	    if (show_subcommands[i].b_onoff)
+	      printf(" is %s.", 
+		     var_to_on_off(* (int *) show_subcommands[i].var));
+	    else 
+	      printf(" is %d.", *(int *)(show_subcommands[i].var));
+	  }
+	  printf("\n");
 	}
       } else if ( p_command->func == &dbg_cmd_set ) {
 	for (i = 0; set_subcommands[i].name; i++) {
@@ -583,7 +630,7 @@ static debug_return_t dbg_cmd_help (char *psz_arg)
       }
       
     } else {
-      printf("Invalid command %s. Try help for a list of commands\n", 
+      printf("Undefined command %s. Try help for a list of commands\n", 
 	     psz_arg);
     }
   }
@@ -723,15 +770,15 @@ static debug_return_t dbg_cmd_show (char *psz_arg)
       }
       printf("\n");
     } else if (is_abbrev_of (psz_arg, "basename")) {
-      printf("basename is %s.\n", var_to_on_off(basename_filenames));
+      printf("basename: is %s.\n", var_to_on_off(basename_filenames));
     } else if (is_abbrev_of (psz_arg, "debug")) {
-      printf("debug is %d.\n", db_level);
+      printf("debug: is %d.\n", db_level);
     } else if (is_abbrev_of (psz_arg, "ignore-errors")) {
-      printf("ignore-errors is %s.\n", var_to_on_off(ignore_errors_flag));
+      printf("ignore-errors: is %s.\n", var_to_on_off(ignore_errors_flag));
     } else if (is_abbrev_of (psz_arg, "keep-going")) {
-      printf("keep-going is %s.\n", var_to_on_off(keep_going_flag));
+      printf("keep-going: is %s.\n", var_to_on_off(keep_going_flag));
     } else if (is_abbrev_of (psz_arg, "silent")) {
-      printf("silent is %s.\n", var_to_on_off(silent_flag));
+      printf("silent: is %s.\n", var_to_on_off(silent_flag));
     } else if (is_abbrev_of (psz_arg, "trace")) {
       printf("trace is %s.\n", var_to_on_off(tracing));
     } else if (is_abbrev_of (psz_arg, "version")) {
@@ -741,7 +788,7 @@ static debug_return_t dbg_cmd_show (char *psz_arg)
       printf("warranty: ");
       printf(WARRANTY);
     } else {
-      printf("Undefined show command \"%s\". Try \"help show\"\n", psz_arg);
+      printf("Undefined command \"%s\". Try \"help show\"\n", psz_arg);
     }
   }
   
@@ -792,7 +839,7 @@ static debug_return_t dbg_cmd_info (char *psz_arg)
     } else if (is_abbrev_of (psz_arg, "warranty")) {
       printf(WARRANTY);
     } else {
-      printf("Undefined info command \"%s\". Try \"help info\"\n", psz_arg);
+      printf("Undefined command \"%s\". Try \"help info\"\n", psz_arg);
     }
   }
   
@@ -1069,19 +1116,19 @@ static debug_return_t dbg_cmd_set (char *psz_args)
 	on_off_toggle(psz_args, &ignore_errors_flag);
       dbg_cmd_show("ignore-errors");
     } else if (is_abbrev_of (psz_varname, "keep-going")) {
-      if (!psz_args || 0==strlen(psz_args))
+      if (!psz_args || !*psz_args)
 	on_off_toggle("toggle", &keep_going_flag);
       else
 	on_off_toggle(psz_args, &keep_going_flag);
       dbg_cmd_show("keep-going");
     } else if (is_abbrev_of (psz_varname, "silent")) {
-      if (!psz_args || 0==strlen(psz_args))
+      if (!psz_args || !*psz_args)
 	on_off_toggle("toggle", &silent_flag);
       else
 	on_off_toggle(psz_args, &silent_flag);
       dbg_cmd_show("silent");
     } else if (is_abbrev_of (psz_varname, "trace")) {
-      if (!psz_args || 0==strlen(psz_args))
+      if (!psz_args || !*psz_args)
 	on_off_toggle("toggle", &tracing);
       else
 	on_off_toggle(psz_args, &tracing);
@@ -1236,6 +1283,7 @@ static debug_return_t dbg_cmd_frame_down (char *psz_amount)
   p_target_loc    = &(p_stack->p_target->floc);
   psz_target_name = p_stack->p_target->name;
   
+  print_debugger_location(p_stack->p_target);
   return debug_readloop;
 }
 
@@ -1269,6 +1317,7 @@ static debug_return_t dbg_cmd_frame (char *psz_frame)
   p_target_loc    = &(p_stack->p_target->floc);
   psz_target_name = p_stack->p_target->name;
   
+  print_debugger_location(p_stack->p_target);
   return debug_readloop;
 }
 
@@ -1314,6 +1363,7 @@ static debug_return_t dbg_cmd_frame_up (char *psz_amount)
 	   i_amount);
   }
   
+  print_debugger_location(p_stack->p_target);
   return debug_readloop;
 }
 
@@ -1401,6 +1451,8 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
     }
   }
 
+  print_debugger_location(p_target);
+  
   b_in_debugger = true;
 
   /* Loop reading and executing lines until the user quits. */
@@ -1408,22 +1460,6 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
     char prompt[PROMPT_LENGTH];
     char *line;
     char *s;
-    
-    if (p_target_loc) {
-      printf ("\n");
-      if ( !p_target_loc->filenm && !p_target_loc->lineno 
-	   && p_target->name ) {
-	/* We don't have file location info in the target floc, but we
-	   do have it as part of the name, so use that. This happens for
-	   example with we've stopped before reading a Makefile.
-	 */
-	printf("(%s:0)\n", p_target->name);
-      } else {
-	printf("(", p_target->name);
-	print_floc_prefix(p_target_loc);
-	printf ("): %s\n", psz_target_name);
-      }
-    }
     
     snprintf(prompt, PROMPT_LENGTH, "makedb%s%d%s ", 
 	     open_depth, where_history(), close_depth);
