@@ -100,9 +100,7 @@ static debug_return_t dbg_cmd_eval             (char *psz_arg);
 static debug_return_t dbg_cmd_expand           (char *psz_arg);
 static debug_return_t dbg_cmd_frame            (char *psz_arg);
 static debug_return_t dbg_cmd_help             (char *psz_arg);
-#ifdef HISTORY_STUFF
 static debug_return_t dbg_cmd_history          (char *psz_arg);
-#endif
 static debug_return_t dbg_cmd_info             (char *psz_arg);
 static debug_return_t dbg_cmd_target           (char *psz_arg);
 static debug_return_t dbg_cmd_print            (char *psz_arg);
@@ -131,6 +129,7 @@ long_cmd_t commands[] = {
   { "exit"    , 'q' },
   { "frame"   , 'f' },
   { "help"    , 'h' },
+  { "history" , 'H' },
   { "info"    , 'i' },
   { "next"    , 'n' },
   { "print"   , 'p' },
@@ -369,13 +368,12 @@ cmd_initialize(void)
     _("Display list of commands (i.e. this help text.)\n"		\
       "\twith an command name, give only the help for that command.");
 
-#ifdef HISTORY_STUFF
   short_command['H'].func = &dbg_cmd_history;
-  short_command['H'].use  = _("history [num]");
+  /*short_command['H'].use  = _("history [num]");*/
+  short_command['H'].use  = _("history");
   short_command['H'].doc = 
     _("Display the history of commands\n"		\
       "\twith an argument number, list that many history entries.");
-#endif
 
   short_command['i'].func = &dbg_cmd_info;
   short_command['i'].use = _("info [thing]");
@@ -524,7 +522,8 @@ find_command (const char *psz_name)
   return ((short_cmd_t *)NULL);
 }
 
-int is_abbrev_of(const char* psz_substr, const char* psz_word) 
+int 
+is_abbrev_of(const char* psz_substr, const char* psz_word) 
 {
   char *psz = strstr(psz_word, psz_substr);
   return (psz && psz == psz_word);
@@ -584,7 +583,8 @@ stripwhite (char *string)
   return s;
 }
 
-void help_cmd_set_show(const char *psz_fmt, subcommand_var_info_t *p_subcmd) 
+void 
+help_cmd_set_show(const char *psz_fmt, subcommand_var_info_t *p_subcmd) 
 {
   printf(psz_fmt, p_subcmd->name, p_subcmd->doc );
   if (p_subcmd->var) {
@@ -599,8 +599,8 @@ void help_cmd_set_show(const char *psz_fmt, subcommand_var_info_t *p_subcmd)
 
 
 /* Give some help info. */
-static 
-debug_return_t dbg_cmd_help (char *psz_args)
+static debug_return_t 
+dbg_cmd_help (char *psz_args)
 {
   unsigned int i;
 
@@ -668,21 +668,27 @@ debug_return_t dbg_cmd_help (char *psz_args)
   return debug_readloop;
 }
 
-#if HISTORY_STUFF
-/* Give some help info. */
-static debug_return_t dbg_cmd_history (char *psz_arg)
+/* Show history. */
+static debug_return_t 
+dbg_cmd_history (char *psz_arg)
 {
   unsigned int i;
 
-  if (!psz_arg || 0==strlen(psz_arg)) {
+  /*
+  if (!psz_arg || *psz_arg) {
     ;
+    } */
+  HIST_ENTRY **hist_list = history_list();
+  unsigned int i_line;
+  for (i_line=0; *hist_list; i_line++, *hist_list++) {
+    printf("%d: %s %s\n", i_line, (*hist_list)->timestamp, 
+	   (*hist_list)->line);
   }
-  
 }
-#endif
 
 /* Show target call stack info. */
-static debug_return_t dbg_cmd_restart (char *psz_arg)
+static debug_return_t 
+dbg_cmd_restart (char *psz_arg)
 {
   printf("Changing directory to %s and restarting...\n", 
 	 directory_before_chdir);
@@ -693,14 +699,16 @@ static debug_return_t dbg_cmd_restart (char *psz_arg)
 }
 
 /* Show target call stack info. */
-static debug_return_t dbg_cmd_show_stack (char *psz_arg)
+static debug_return_t 
+dbg_cmd_show_stack (char *psz_arg)
 {
   print_target_stack (p_stack_top, i_stack_pos);
   return debug_readloop;
 }
 
 /* Terminate execution. */
-static debug_return_t dbg_cmd_quit (char *psz_arg)
+static debug_return_t 
+dbg_cmd_quit (char *psz_arg)
 {
   if (!psz_arg || 0==strlen(psz_arg)) {
     exit(0);
