@@ -175,9 +175,9 @@ typedef struct {
   bool b_onoff;         /* True if on/off variable, false if int. 
 			   FIXME: generalize into enumeration.
 			 */
-} show_subcommand_info_t;
+} subcommand_var_info_t;
 
-show_subcommand_info_t show_subcommands[] = {
+subcommand_var_info_t show_subcommands[] = {
   { "args",     "Show argument list to give program when it is started",
     NULL, false},
   { "basename", "Show if we are to show short or long filenames",
@@ -199,14 +199,27 @@ show_subcommand_info_t show_subcommands[] = {
   NULL
 };
 
-subcommand_info_t set_subcommands[] = {
-  { "basename",      "short filenames (the basename) in debug output"},
-  { "debug",         "GNU Make debug mask (--debug or -d)" },
-  { "ignore-errors", "GNU Make --ignore-errors (or -i) flag" },
-  { "keep-going",    "GNU Make --keep-going (or -k) flag"},
-  { "silent",        "GNU Make --silent (or -s) flag"},
-  { "trace",         "tracing execution"},
-  { "variable",      "set variable to value"},
+/* Documentation for help set, and help set xxx. Note the format has
+   been customized to make ddd work. In particular for "basename" it should
+   be 
+     set basename -- Set if were are to show shor or long filenames is off.
+   (or "is on").
+*/
+subcommand_var_info_t set_subcommands[] = {
+  { "basename", "Set if we are to show short or long filenames",
+    &basename_filenames, true},
+  { "debug",    "Set GNU Make debug mask (set via --debug or -d)",
+    &db_level, false},
+  { "ignore-errors", "Set value of GNU Make --ignore-errors (or -i) flag",
+    &ignore_errors_flag, true},
+  { "keep-going",    "Set value of GNU Make --keep-going (or -k) flag",
+    &keep_going_flag,    true},
+  { "silent",        "Set value of GNU Make --silent (or -s) flags",
+    &silent_flag,        true},
+  { "trace",         "Set if we are tracing execution",
+    &tracing,            true},
+  { "variable",      "Set the version of GNU Make + dbg",
+    NULL,                false},
   NULL
 };
 
@@ -571,12 +584,27 @@ stripwhite (char *string)
   return s;
 }
 
+void help_cmd_set_show(const char *psz_fmt, subcommand_var_info_t *p_subcmd) 
+{
+  printf(psz_fmt, p_subcmd->name, p_subcmd->doc );
+  if (p_subcmd->var) {
+    if (p_subcmd->b_onoff)
+      printf(" is %s.", 
+	     var_to_on_off(* (int *) p_subcmd->var));
+    else 
+      printf(" is %d.", *(int *)(p_subcmd->var));
+  }
+  printf("\n");
+}
+
+
 /* Give some help info. */
-static debug_return_t dbg_cmd_help (char *psz_arg)
+static 
+debug_return_t dbg_cmd_help (char *psz_args)
 {
   unsigned int i;
 
-  if (!psz_arg || 0==strlen(psz_arg)) {
+  if (!psz_args || !*psz_args) {
     printf ("Available commands are: \n");
     for (i = 0; commands[i].long_name; i++) {
       uint8_t s=commands[i].short_name;
@@ -591,13 +619,14 @@ static debug_return_t dbg_cmd_help (char *psz_arg)
   } else {
     short_cmd_t *p_command;
 
-    if (1 == strlen(psz_arg)) {
-      if ( NULL != short_command[(uint8_t)psz_arg[0]].func ) 
-	p_command = &short_command[(uint8_t)psz_arg[0]];
+    if (1 == strlen(psz_args)) {
+      if ( NULL != short_command[(uint8_t)psz_args[0]].func ) 
+	p_command = &short_command[(uint8_t)psz_args[0]];
       else
 	p_command = NULL;
     } else {
-      p_command = find_command (psz_arg);
+      char *psz_command = get_word(&psz_args);
+      p_command = find_command (psz_command);
     }
     if (p_command) {
       if ( p_command->func == &dbg_cmd_info ) {
@@ -609,21 +638,22 @@ static debug_return_t dbg_cmd_help (char *psz_arg)
 	printf("\n");
       } else if ( p_command->func == &dbg_cmd_show ) {
 	for (i = 0; show_subcommands[i].name; i++) {
-	  printf("show %-15s -- %s", 
-		 show_subcommands[i].name, show_subcommands[i].doc );
-	  if (show_subcommands[i].var) {
-	    if (show_subcommands[i].b_onoff)
-	      printf(" is %s.", 
-		     var_to_on_off(* (int *) show_subcommands[i].var));
-	    else 
-	      printf(" is %d.", *(int *)(show_subcommands[i].var));
-	  }
+	  help_cmd_set_show("show %-15s -- %s", &(show_subcommands[i]));
 	  printf("\n");
 	}
       } else if ( p_command->func == &dbg_cmd_set ) {
-	for (i = 0; set_subcommands[i].name; i++) {
-	  printf("set %-15s -- %s\n", 
-		 set_subcommands[i].name, set_subcommands[i].doc );
+	if (!psz_args || !*psz_args) {
+	  for (i = 0; set_subcommands[i].name; i++) {
+	    help_cmd_set_show("set %s -- %s", &(set_subcommands[i]));
+	  }
+	} else {
+	  for (i = 0; set_subcommands[i].name; i++) {
+	    if ( !strcmp(psz_args, set_subcommands[i].name) ) {
+	      help_cmd_set_show("set %s -- %s", &(set_subcommands[i]));
+	      return debug_readloop;
+	    }
+	    printf("There is no \"set %s\" command.\n", psz_args);
+	  }
 	}
       } else {
 	printf("  %s:\n\t%s\n", p_command->use, p_command->doc);
@@ -631,7 +661,7 @@ static debug_return_t dbg_cmd_help (char *psz_arg)
       
     } else {
       printf("Undefined command %s. Try help for a list of commands\n", 
-	     psz_arg);
+	     psz_args);
     }
   }
   
@@ -770,15 +800,15 @@ static debug_return_t dbg_cmd_show (char *psz_arg)
       }
       printf("\n");
     } else if (is_abbrev_of (psz_arg, "basename")) {
-      printf("basename: is %s.\n", var_to_on_off(basename_filenames));
+      printf("basename is %s.\n", var_to_on_off(basename_filenames));
     } else if (is_abbrev_of (psz_arg, "debug")) {
-      printf("debug: is %d.\n", db_level);
+      printf("debug is %d.\n", db_level);
     } else if (is_abbrev_of (psz_arg, "ignore-errors")) {
-      printf("ignore-errors: is %s.\n", var_to_on_off(ignore_errors_flag));
+      printf("ignore-errors is %s.\n", var_to_on_off(ignore_errors_flag));
     } else if (is_abbrev_of (psz_arg, "keep-going")) {
-      printf("keep-going: is %s.\n", var_to_on_off(keep_going_flag));
+      printf("keep-going is %s.\n", var_to_on_off(keep_going_flag));
     } else if (is_abbrev_of (psz_arg, "silent")) {
-      printf("silent: is %s.\n", var_to_on_off(silent_flag));
+      printf("silent is %s.\n", var_to_on_off(silent_flag));
     } else if (is_abbrev_of (psz_arg, "trace")) {
       printf("trace is %s.\n", var_to_on_off(tracing));
     } else if (is_abbrev_of (psz_arg, "version")) {
