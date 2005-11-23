@@ -231,9 +231,9 @@ void print_debugger_location(file_t *p_target)
 	 do have it as part of the name, so use that. This happens for
 	 example with we've stopped before reading a Makefile.
       */
-      printf("(%s:0)\n", p_target->name);
+      printf("\n(%s:0)\n", p_target->name);
     } else {
-      printf("(", p_target->name);
+      printf("\n(", p_target->name);
       print_floc_prefix(p_target_loc);
       printf ("): %s\n", psz_target_name);
     }
@@ -639,7 +639,6 @@ dbg_cmd_help (char *psz_args)
       } else if ( p_command->func == &dbg_cmd_show ) {
 	for (i = 0; show_subcommands[i].name; i++) {
 	  help_cmd_set_show("show %-15s -- %s", &(show_subcommands[i]));
-	  printf("\n");
 	}
       } else if ( p_command->func == &dbg_cmd_set ) {
 	if (!psz_args || !*psz_args) {
@@ -1171,6 +1170,9 @@ static debug_return_t dbg_cmd_set (char *psz_args)
       else
 	on_off_toggle(psz_args, &tracing);
       dbg_cmd_show("trace");
+    } else {
+      /* Treat as set variable */
+      return dbg_cmd_set_var(psz_args, 1);
     }
   }
   return debug_readloop;
@@ -1248,6 +1250,9 @@ static int dbg_cmd_show_var (char *psz_varname, int expand)
     }
     if (p_set) {
       p_v = lookup_variable_in_set(psz_varname, strlen(psz_varname), p_set);
+      if (!p_v) 
+	/* May be a global variable. */
+	p_v = lookup_variable (psz_varname, strlen (psz_varname));
     } else {
       p_v = lookup_variable (psz_varname, strlen (psz_varname));
     }
