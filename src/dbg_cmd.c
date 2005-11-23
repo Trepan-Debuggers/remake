@@ -1,4 +1,4 @@
-/* 
+/* $Id: dbg_cmd.c,v 1.40 2005/11/23 11:48:18 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -21,6 +21,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include "print.h"
 #include "dbg_cmd.h"
+#include "dbg_fns.h"
+#include "dbg_stack.h"
 #include "commands.h"
 #include "debug.h"
 #include "expand.h"
@@ -65,16 +67,6 @@ const char *WARRANTY =
 /* Common debugger command function prototype */
 typedef debug_return_t (*dbg_cmd_t) (char *);
 
-static floc_t *p_target_loc = NULL;
-static char   *psz_target_name = NULL;
-static int i_stack_pos = 0;
-
-/* We use the if when we fake a line number because
-   a real one hasn't been recorded on the stack.
-*/
-static floc_t  fake_floc;
-
-
 /* A structure which contains information on the commands this program
    can understand. */
 
@@ -98,7 +90,6 @@ static debug_return_t dbg_cmd_continue         (char *psz_arg);
 static debug_return_t dbg_cmd_delete           (char *psz_arg);
 static debug_return_t dbg_cmd_eval             (char *psz_arg);
 static debug_return_t dbg_cmd_expand           (char *psz_arg);
-static debug_return_t dbg_cmd_frame            (char *psz_arg);
 static debug_return_t dbg_cmd_help             (char *psz_arg);
 static debug_return_t dbg_cmd_history          (char *psz_arg);
 static debug_return_t dbg_cmd_info             (char *psz_arg);
@@ -111,9 +102,6 @@ static debug_return_t dbg_cmd_set_var_noexpand (char *psz_arg);
 static debug_return_t dbg_cmd_shell            (char *psz_arg);
 static debug_return_t dbg_cmd_show_stack       (char *psz_arg);
 static debug_return_t dbg_cmd_skip             (char *psz_arg);
-static debug_return_t dbg_cmd_frame_down       (char *psz_arg);
-static debug_return_t dbg_cmd_frame_up         (char *psz_arg);
-static debug_return_t dbg_cmd_frame_down       (char *psz_arg);
 static debug_return_t dbg_cmd_show             (char *psz_arg);
 static debug_return_t dbg_cmd_step             (char *psz_arg);
 static debug_return_t dbg_cmd_write_cmds       (char *psz_arg);
@@ -221,114 +209,6 @@ subcommand_var_info_t set_subcommands[] = {
     NULL,                false},
   NULL
 };
-
-void print_debugger_location(file_t *p_target) 
-{
-  if (p_target_loc) {
-    if ( !p_target_loc->filenm && !p_target_loc->lineno 
-	 && p_target->name ) {
-      /* We don't have file location info in the target floc, but we
-	 do have it as part of the name, so use that. This happens for
-	 example with we've stopped before reading a Makefile.
-      */
-      printf("\n(%s:0)\n", p_target->name);
-    } else {
-      printf("\n(", p_target->name);
-      print_floc_prefix(p_target_loc);
-      printf ("): %s\n", psz_target_name);
-    }
-  }
-}
-    
-/* Pointer to top of current target call stack */
-static target_stack_node_t *p_stack_top;
-
-/* Pointer to current target call stack at the place we are currently
-   focused on.
- */
-static target_stack_node_t *p_stack;
-
-static void 
-on_off_toggle(const char *psz_arg, int *var) 
-{
-  if (strcmp (psz_arg, "on") == 0)
-    *var = 1;
-  else if (strcmp (psz_arg, "off") == 0)
-    *var = 0;
-  else if (strcmp (psz_arg, "toggle") == 0)
-    *var = !*var;
-  else 
-    printf(_("expecting \"on\", \"off\", or \"toggle\"; got \"%s\" \n"),
-	   psz_arg);
-}
-
-static char *
-var_to_on_off(int var) 
-{
-  return var ? "on" : "off";
-}
-
-/* Find the next "word" - skip leading blanks and the "word" is the
-   largest non-blank characters after that. ppsz_str is modified to
-   point after the portion returned and also the region initially
-   pointed to by ppsz_str is modified so that word is zero-byte
-   termintated.
- */
-static char *
-get_word(char **ppsz_str) 
-{
-  char *psz_word;
-  
-  /* Skip leading blanks. */
-  while (**ppsz_str && whitespace (**ppsz_str))
-    **ppsz_str++;
-
-  /* Word starts here at first non blank character. */
-  psz_word = *ppsz_str;
-
-  /* Find end of word - next whitespace. */
-  while (**ppsz_str && !whitespace (**ppsz_str))
-    (*ppsz_str)++;
-
-  if (**ppsz_str) *((*ppsz_str)++) = '\0';
-
-  return psz_word;
-}
-
-
-static bool
-get_int(const char *psz_arg, int *result) 
-{
-  int i;
-  char *endptr;
-  
-  if (!psz_arg || 0==strlen(psz_arg)) return 0;
-
-  i = strtol(psz_arg, &endptr, 10);
-  if (*endptr != '\0') {
-    printf("expecting %s to be an integer\n", psz_arg);
-    return false;
-  }
-  *result = i;
-  return true;
-}
-
-static unsigned int
-get_uint(const char *psz_arg, unsigned int *result) 
-{
-  unsigned int i;
-  char *endptr;
-  
-  if (!psz_arg || 0==strlen(psz_arg)) return 0;
-
-  i = strtol(psz_arg, &endptr, 10);
-  if (*endptr != '\0') {
-    printf("expecting %s to be an integer\n", psz_arg);
-    return 0;
-  }
-  *result = i;
-  return 1;
-}
 
 static void 
 cmd_initialize(void) 
@@ -522,14 +402,6 @@ find_command (const char *psz_name)
   return ((short_cmd_t *)NULL);
 }
 
-int 
-is_abbrev_of(const char* psz_substr, const char* psz_word) 
-{
-  char *psz = strstr(psz_word, psz_substr);
-  return (psz && psz == psz_word);
-}
-
-
 /* Execute a command line. */
 static debug_return_t
 execute_line (char *psz_line)
@@ -562,27 +434,6 @@ execute_line (char *psz_line)
   return ((*(command->func)) (psz_word));
 }
 
-/* Strip whitespace from the start and end of STRING.  Return a pointer
-   into STRING. */
-static char *
-stripwhite (char *string)
-{
-  char *s, *t;
-
-  for (s = string; whitespace (*s); s++)
-    ;
-    
-  if (*s == 0)
-    return (s);
-
-  t = s + strlen (s) - 1;
-  while (t > s && whitespace (*t))
-    t--;
-  *++t = '\0';
-
-  return s;
-}
-
 void 
 help_cmd_set_show(const char *psz_fmt, subcommand_var_info_t *p_subcmd) 
 {
@@ -596,7 +447,6 @@ help_cmd_set_show(const char *psz_fmt, subcommand_var_info_t *p_subcmd)
   }
   printf("\n");
 }
-
 
 /* Give some help info. */
 static debug_return_t 
@@ -1293,120 +1143,6 @@ static debug_return_t dbg_cmd_expand (char *psz_string)
     if (psz_last_string) free(psz_last_string);
     psz_last_string = strdup(psz_string);
   }
-  return debug_readloop;
-}
-
-/* Move reported target frame postition up one. */
-static debug_return_t dbg_cmd_frame_down (char *psz_amount) 
-{
-  unsigned int i=0;
-  int i_amount = 1;
-
-  if (!psz_amount || 0==strlen(psz_amount)) {
-    i_amount = 1;
-  } else {
-    if (!get_int(psz_amount, &i_amount))
-      return debug_readloop;
-  }
-
-  if (i_stack_pos - i_amount < 0) {
-    printf(_("Move down by %d would be below bottom-most frame position.\n"),
-	   i_amount);
-    return debug_readloop;
-  }
-  
-  i_stack_pos -= i_amount;
-  
-  for ( p_stack=p_stack_top; p_stack ; p_stack = p_stack->p_parent ) {
-    if (i_stack_pos == i)
-      break;
-    i++;
-  }
-
-  p_target_loc    = &(p_stack->p_target->floc);
-  psz_target_name = p_stack->p_target->name;
-  
-  print_debugger_location(p_stack->p_target);
-  return debug_readloop;
-}
-
-/* Move reported target frame postition up one. */
-static debug_return_t dbg_cmd_frame (char *psz_frame) 
-{
-  int i, i_frame;
-
-  if (!psz_frame || 0==strlen(psz_frame)) {
-    return debug_readloop;
-  } else {
-    if (!get_int(psz_frame, &i_frame))
-      return debug_readloop;
-  }
-
-  i = i_frame + 1;
-  
-  for ( p_stack=p_stack_top; p_stack ; p_stack = p_stack->p_parent ) {
-    i--;
-    if (0 == i)
-      break;
-  }
-
-  if (0 != i) {
-    printf(_("Can't set frame to position %d; %d is the highest position."),
-	   i_frame, i_frame - i);
-    return debug_readloop;
-  }
-
-  i_stack_pos     = i_frame;
-  p_target_loc    = &(p_stack->p_target->floc);
-  psz_target_name = p_stack->p_target->name;
-  
-  print_debugger_location(p_stack->p_target);
-  return debug_readloop;
-}
-
-/* Move reported target frame postition up one. */
-static debug_return_t dbg_cmd_frame_up (char *psz_amount) 
-{
-  unsigned int i_amount=1;
-  unsigned int i = 0;
-  target_stack_node_t *p=p_stack;
-
-  if (!psz_amount || 0==strlen(psz_amount)) {
-    i_amount = 1;
-  } else {
-    if (!get_uint(psz_amount, &i_amount))
-      return debug_readloop;
-  }
-
-  for ( ; p ; p = p->p_parent, i++ ) {
-    if (i_amount == i) break;
-  }
-
-  if (p) {
-    i_stack_pos    += i_amount;
-    p_stack         = p;
-    psz_target_name = p->p_target->name;
-
-    p_target_loc    = &(p->p_target->floc);
-    if (!p->p_target->floc.filenm && p->p_target->cmds->fileinfo.filenm) {
-      /* Fake the location based on the commands - it's better than
-	 nothing...
-       */
-      memcpy(&fake_floc, &(p->p_target->cmds->fileinfo),
-	     sizeof(floc_t));
-      /* HACK: is it okay to assume that the target is on the line
-	 before the first command? Or should we list the line
-	 that the command starts on - so we know we've faked the location?
-       */
-      fake_floc.lineno--;
-      p_target_loc = &fake_floc;
-    }
-  } else {
-    printf("Can't move up %d - would be beyond top-most frame position.\n",
-	   i_amount);
-  }
-  
-  print_debugger_location(p_stack->p_target);
   return debug_readloop;
 }
 

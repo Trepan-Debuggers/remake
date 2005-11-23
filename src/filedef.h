@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef FILEDEF_H
 #define FILEDEF_H
 
+#include "make.h"
 #include "hash.h"
 
 struct file

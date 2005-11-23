@@ -12,16 +12,16 @@ else
   remote =	remote-stub.c
 endif
 
-make_SOURCES =	ar.c arscan.c commands.c dbg_cmd.c debug.c default.c \
-	        dep.c dir.c expand.c file.c \
+make_SOURCES =	ar.c arscan.c commands.c dbg_cmd.c dbg_fns.c dbg_stack.c \
+	        debug.c default.c dep.c dir.c expand.c file.c \
 		function.c getopt.c getopt1.c  hash.c implicit.c job.c \
 	        main.c misc.c print.c read.c remake.c $(remote) rule.c \
 	        signame.c trace.c variable.c version.c vpath.c
 
 EXTRA_make_SOURCES = remote-stub.c remote-cstms.c
 
-noinst_HEADERS = arscan.h commands.h dbg_cmd.h debug.h default.h dep.h \
-		 expand.h filedef.h \
+noinst_HEADERS = arscan.h commands.h dbg_cmd.h dbg_fns.h dbg_stack.h debug.h \
+	         default.h dep.h expand.h filedef.h \
 	         function.h getopt.h gettext.h hash.h implicit.h job.h \
 		 make.h print.h read.h remake.h remote-stub.h rule.h \
 		 trace.h types.h variable.h  vpath.h

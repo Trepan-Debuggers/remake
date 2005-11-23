@@ -17,8 +17,8 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#ifndef SEEN_DBG_CMD_H
-#define SEEN_DBG_CMD_H
+#ifndef DBG_CMD_H
+#define DBG_CMD_H
 #include "job.h"
 
 extern bool b_in_debugger;
@@ -29,4 +29,4 @@ extern bool b_in_debugger;
 extern debug_return_t enter_debugger (target_stack_node_t *p, 
 				      file_t *p_target, int err);
 
-#endif /* SEEN_DBG_CMD_H*/
+#endif /* DBG_CMD_H*/
