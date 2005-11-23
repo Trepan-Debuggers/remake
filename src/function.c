@@ -1,5 +1,5 @@
-/* Builtin function expansion for GNU Make.
-Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004
+/* Builtin expansion for GNU Make.
+Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004, 2005
 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -35,6 +35,7 @@ Boston, MA 02111-1307, USA.  */
 #include "amiga.h"
 #endif
 
+static unsigned int i_trace_level=0;
 
 struct function_table_entry
   {
@@ -1949,9 +1950,7 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
   /* Calling nothing is a no-op */
   if (*fname == '\0')
     return o;
-
-  DB (DB_CALLTRACE, (_("function %s("), funcname));
-
+  
   /* Are we invoking a builtin function?  */
 
   entry_p = lookup_function (fname);
@@ -1964,8 +1963,20 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
       for (i=0; argv[i+1]; ++i)
   	;
 
+      if (ISDB(DB_CALLTRACE)) {
+	DBPRINTS ( (_("calling built-in %s("), fname), i_trace_level);
+	for (i=1; argv[i]; i++)
+	  {
+	    DBPRINT( ("%s%s", (i > 1) ? ", " : "", argv[i]) );
+	  }
+	DBPRINT( (")\n") );
+      }
+      i_trace_level++;
+
       psz_ret = expand_builtin_function (o, i, argv+1, entry_p);
-      DB (DB_CALLTRACE, (_(") = %s\n"), psz_ret));
+      i_trace_level--;
+      DBSD (DB_CALLTRACE, (_("%s() returns \"%s\"\n"), fname, o), 
+	    i_trace_level);
       return  psz_ret;
     }
 
@@ -1981,6 +1992,18 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
   if (v == 0 || *v->value == '\0')
     return o;
 
+  if (ISDB(DB_CALLTRACE)) {
+    DBPRINTS ( (_("calling %s("), fname), i_trace_level);
+    for (i=1; argv[i]; i++)
+    {
+      DBPRINT( ("%s%s", (i > 1) ? ", " : "", argv[i]) );
+    }
+    DBPRINT( (")\n") );
+  }
+
+  i_trace_level++;
+
+
   body = (char *) alloca (flen + 4);
   body[0] = '$';
   body[1] = '(';
@@ -1995,12 +2018,10 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
   for (i=0; *argv; ++i, ++argv)
     {
       char num[11];
-
       sprintf (num, "%d", i);
-      DB (DB_CALLTRACE, (_("%s%s"), 0==i ? "" : ", ", *argv));
       define_variable (num, strlen (num), *argv, o_automatic, 0);
     }
-
+  
   /* If the number of arguments we have is < max_args, it means we're inside
      a recursive invocation of $(call ...).  Fill in the remaining arguments
      in the new scope with the empty value, to hide them from this
@@ -2028,7 +2049,8 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
 
   pop_variable_scope ();
 
-  DB (DB_CALLTRACE, (_(") = %s\n"), o + strlen(o)));
+  i_trace_level--;
+  DBSD (DB_CALLTRACE, (_("%s() returns \"%s\"\n"), fname, o), i_trace_level);
   return o + strlen (o);
 }
 

@@ -107,8 +107,34 @@ extern stringlist_t *db_flags;
 
 #define ISDB(_l)    ((_l)&db_level)
 
-#define DBS(_l,_x)  do{ if(ISDB(_l)) {print_spaces (depth); \
-                                      printf _x; fflush (stdout);} }while(0)
+/*! Debugged print */
+#define DBPRINT(_x)           \
+   printf _x; fflush (stdout)
+
+/*! Debugged print indented a number of spaces given by "_depth" */
+#define DBPRINTS(_x, _depth) \
+   print_spaces (_depth);    \
+   DBPRINT(_x)
+
+/*! Debugged print if debug mask is set indented a number of spaces 
+    implied by global variable "depth"
+*/
+#define DBS(_l,_x)           \
+  do {                       \
+    if(ISDB(_l)) {           \
+       DBPRINTS(_x, depth);  \
+    }                        \
+  } while(0)
+
+/*! Debugged print if debug mask is set indented a number of spaces 
+    given by "_depth"
+*/
+#define DBSD(_l,_x,_depth)   \
+  do {                       \
+    if(ISDB(_l)) {           \
+      DBPRINTS(_x, _depth);   \
+    }                        \
+  } while(0)
 
 #define DBF(_l,_x)  do{ if(ISDB(_l))					\
       {									\
@@ -120,7 +146,7 @@ extern stringlist_t *db_flags;
 	printf (_x, file->name);					\
 	fflush (stdout);} }while(0)
 
-#define DB(_l,_x)   do{ if(ISDB(_l)) {printf _x; fflush (stdout);} }while(0)
+#define DB(_l,_x)   do{ if(ISDB(_l)) {DBPRINT(_x);} }while(0)
 
 /** Toggle -d on receipt of SIGUSR1.  */
 #ifdef SIGUSR1
