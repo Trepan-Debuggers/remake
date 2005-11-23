@@ -35,7 +35,8 @@ typedef enum {
   DB_JOBS           = 0x004,
   DB_IMPLICIT       = 0x008,
   DB_MAKEFILES      = 0x100,
-  DB_READMAKEFILES  = 0x200,
+  DB_READMAKEFILES  = 0x200, /** Reading makefiles */
+  DB_CALLTRACE      = 0x400, /** GNU Make function call and returns */
   DB_ALL            = 0xfff
 } debug_level_mask_t;
 

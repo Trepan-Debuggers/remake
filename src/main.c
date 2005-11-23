@@ -1138,6 +1138,7 @@ main (int argc, char **argv, char **envp)
  	     will stop here while next won't - either way no printing.
 	   */
 	  db_level          |=  DB_BASIC;
+	  db_level          |=  DB_CALLTRACE;
 	} 
 	if ( 0 == strcmp(*p, "full")
 	     || 0 == strcmp(*p, "error") ) {

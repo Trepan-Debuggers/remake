@@ -1950,17 +1950,23 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
   if (*fname == '\0')
     return o;
 
+  DB (DB_CALLTRACE, (_("function %s("), funcname));
+
   /* Are we invoking a builtin function?  */
 
   entry_p = lookup_function (fname);
 
   if (entry_p)
     {
+      char *psz_ret;
+      
       /* How many arguments do we have?  */
       for (i=0; argv[i+1]; ++i)
   	;
 
-      return expand_builtin_function (o, i, argv+1, entry_p);
+      psz_ret = expand_builtin_function (o, i, argv+1, entry_p);
+      DB (DB_CALLTRACE, (_(") = %s\n"), psz_ret));
+      return  psz_ret;
     }
 
   /* Not a builtin, so the first argument is the name of a variable to be
@@ -1991,6 +1997,7 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
       char num[11];
 
       sprintf (num, "%d", i);
+      DB (DB_CALLTRACE, (_("%s%s"), 0==i ? "" : ", ", *argv));
       define_variable (num, strlen (num), *argv, o_automatic, 0);
     }
 
@@ -2021,6 +2028,7 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
 
   pop_variable_scope ();
 
+  DB (DB_CALLTRACE, (_(") = %s\n"), o + strlen(o)));
   return o + strlen (o);
 }
 
