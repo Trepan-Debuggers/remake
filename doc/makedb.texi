@@ -388,8 +388,6 @@ makedb<0> @b{where}
 
 =>#0  Makefile.in at /tmp/remake/src/Makefile:254
   #1  Makefile at /tmp/remake/src/Makefile:267
-
-(/tmp/remake/src/Makefile:255): Makefile.in
 @end group
 @end smallexample 
 
@@ -423,8 +421,6 @@ makedb<3> @b{target}
 #  commands to execute (from `Makefile', line 278):
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
-
-/home/src/external-cvs/remake/src/Makefile:277: ../config.status
 @end group
 @end smallexample 
 
@@ -445,8 +441,6 @@ all-am: Makefile make loadavg commands.h dbg_cmd.h dep.h expand.h filedef.h func
 #  Implicit rule search has not been done.
 #  File does not exist.
 #  File has not been updated.
-
-(/tmp/remake/src/Makefile:277): ../config.status
 @end smallexample 
 
 However information may change depending on where Make is. In
@@ -465,8 +459,6 @@ Reading makefiles...
 /tmp/remake/src/Makefile:255: Makefile.in
 makedb<0> @b{break all-am}
 Breakpoint on target all-am set.
-
-(/tmp/remake/src/Makefile:255): Makefile.in
 @end smallexample 
 
 The @code{restart} command was used to restart execution since we've
@@ -476,12 +468,11 @@ execution and see what happens:
 @smallexample
 
 makedb<1> @b{continue}
-
 Updating goal targets....
  /tmp/remake/src/Makefile:250	File `all' does not exist.
 
 /tmp/remake/src/Makefile:461: all-am
-makedb<1> where
+makedb<2> where
 
 =>#0  all-am at /tmp/remake/src/Makefile:462
   #1  all at /tmp/remake/src/Makefile:251
@@ -495,9 +486,7 @@ can also get information about @value{MAKE}'s variables. That is done
 with the @code{print} command, @xref{Print}.
 
 @smallexample
-  (/tmp/remake/src/Makefile:383): all-am
-  makedb<4> print MAKE
-
+  makedb<4> @b{print MAKE}
   (origin default) MAKE = $(MAKE_COMMAND)
 @end smallexample 
 
@@ -506,6 +495,7 @@ definition. There is another print which does full expansion
 of the variables. So if I run @code{x} (@code{examine}) instead I get:
 
 @smallexample
+  makedb<5> @b{examine MAKE}
  (origin default) MAKE := /tmp/remake/src/./make
 @end smallexample 
 
@@ -519,6 +509,7 @@ with a string. So I could type ``@code{x This is $(MAKE)}'' or
 get:
 
 @smallexample
+  makedb<6> @b{x $(bin_PROGRAMS) $(noinst_PROGRAMS)}
   make loadavg
 @end smallexample 
 
@@ -529,12 +520,9 @@ But I can also @emph{change} values too using either @code{set} or
 @code{setq}. Let's see the difference between the two. 
 
 @smallexample
-  makedb<5> @b{set variable MAKE $(MAKE_COMMAND)}
+  makedb<7> @b{set MAKE $(MAKE_COMMAND)}
   Variable MAKE now has value '/tmp/remake/src/./make'
-
- (/tmp/remake/src/Makefile:383): all-am
-
-  makedb<6> @b{setq MAKE $(MAKE_COMMAND)}
+  makedb<8> @b{setq MAKE $(MAKE_COMMAND)}
   Variable MAKE now has value '$(MAKE_COMMAND)'
 @end smallexample 
 
@@ -545,14 +533,14 @@ unexpanded. Which you use or want is up to you.
 
 Note the irregular syntax of @code{set} and @code{"setq}. Don't put an
 equal sign (@code{=}) between the variable and the expression. That
-is, @code{set variable MAKE = $(MAKE_COMMAND)}" gives:
+is, @code{set MAKE = $(MAKE_COMMAND)}" gives:
 
 @smallexample
   Variable MAKE now has value '= /tmp/remake/src/./make'
 @end smallexample 
 
-which is probably not what you want.  Also note that although you need
-to use the word "variable" when using @code{set}, you must not supply
+which is probably not what you want.  One may optionally put in the 
+the word "variable" when using @code{set}, one must not supply
 it with "setq."  Down the line, someone (maybe @emph{you!}) will
 probably put in a command parser.  
 
@@ -577,9 +565,9 @@ $ @b{cat -n test2}
 $ @b{remake -X -f test2}
 Reading makefiles...
 Updating goal targets....
- /home/src/external-cvs/remake/src/test2:3	File `all' does not exist.
+ /tmp/remake/src/test2:3	File `all' does not exist.
 
-(/home/src/external-cvs/remake/src/test2:5): make.txt
+(/tmp/remake/src/test2:5): make.txt
 @end group
 @end smallexample
 
@@ -640,7 +628,6 @@ make.txt variables} or @code{info locals}:
 
 @smallexample
 @group
-(/home/src/external-cvs/remake/src/test2:6): make.txt
 makedb<3> @b{info locals}
 @@ := make.txt
 % := 
@@ -650,7 +637,6 @@ makedb<3> @b{info locals}
 < := ../doc/makedb.texi
 ^ := ../doc/makedb.texi
 ? := ../doc/makedb.texi
-
 @end group
 @end smallexample
 
@@ -659,14 +645,11 @@ expansion of the command that is going to get set:
 
 @smallexample
 @group
-(/home/src/external-cvs/remake/src/test2:6): make.txt
 makedb<4> @b{target make.txt commands}
 
 make.txt:
 #  commands to execute (from `test2', line 6):
 	makeinfo --no-headers $< > $@@
-	
-(/home/src/external-cvs/remake/src/test2:6): make.txt
 makedb<5> @b{x makeinfo --no-headers $< > $@@}
 makeinfo --no-headers ../doc/makedb.texi > make.txt
 
@@ -680,8 +663,6 @@ might want to execute, we can use the @code{write} command:
 (/home/src/external-cvs/remake/src/test2:6): make.txt
 makedb<6> @b{write}
 File "/tmp/make.txt.sh" written.
-
-(/home/src/external-cvs/remake/src/test2:6): make.txt
 makedb<7> @b{shell cat -n /tmp/make.txt.sh}
      1	#!/bin/sh
      2	#/home/src/external-cvs/remake/src/test2:5
