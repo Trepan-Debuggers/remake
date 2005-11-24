@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.40 2005/11/23 11:48:18 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.41 2005/11/24 03:17:44 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -117,7 +117,6 @@ long_cmd_t commands[] = {
   { "exit"    , 'q' },
   { "frame"   , 'f' },
   { "help"    , 'h' },
-  { "history" , 'H' },
   { "info"    , 'i' },
   { "next"    , 'n' },
   { "print"   , 'p' },
@@ -169,6 +168,8 @@ subcommand_var_info_t show_subcommands[] = {
     NULL, false},
   { "basename", "Show if we are to show short or long filenames",
     &basename_filenames, true},
+  { "commands", "Show the history of commands you typed.",
+    NULL, false},
   { "debug",    "GNU Make debug mask (set via --debug or -d)",
     &db_level, false},
   { "ignore-errors", "Value of GNU Make --ignore-errors (or -i) flag",
@@ -179,9 +180,9 @@ subcommand_var_info_t show_subcommands[] = {
     &silent_flag,        true},
   { "trace",         "Show if we are tracing execution",
     &tracing,            true},
-  { "version",       "Show the version of GNU Make + dbg",
+  { "version",       "Show the version of GNU Make + dbg.",
     NULL,                false},
-  { "warranty",      "Various kinds of warranty you do not have",
+  { "warranty",      "Various kinds of warranty you do not have.",
     NULL,                false},
   NULL
 };
@@ -247,13 +248,6 @@ cmd_initialize(void)
   short_command['h'].doc = 
     _("Display list of commands (i.e. this help text.)\n"		\
       "\twith an command name, give only the help for that command.");
-
-  short_command['H'].func = &dbg_cmd_history;
-  /*short_command['H'].use  = _("history [num]");*/
-  short_command['H'].use  = _("history");
-  short_command['H'].doc = 
-    _("Display the history of commands\n"		\
-      "\twith an argument number, list that many history entries.");
 
   short_command['i'].func = &dbg_cmd_info;
   short_command['i'].use = _("info [thing]");
@@ -519,7 +513,7 @@ dbg_cmd_help (char *psz_args)
 
 /* Show history. */
 static debug_return_t 
-dbg_cmd_history (char *psz_arg)
+dbg_cmd_show_command (char *psz_arg)
 {
   unsigned int i;
 
@@ -530,7 +524,7 @@ dbg_cmd_history (char *psz_arg)
   HIST_ENTRY **hist_list = history_list();
   unsigned int i_line;
   for (i_line=0; *hist_list; i_line++, *hist_list++) {
-    printf("%d: %s %s\n", i_line, (*hist_list)->timestamp, 
+    printf("%5d  %s %s\n", i_line, (*hist_list)->timestamp, 
 	   (*hist_list)->line);
   }
 }
@@ -659,6 +653,8 @@ static debug_return_t dbg_cmd_show (char *psz_arg)
     } else if (is_abbrev_of (psz_arg, "basename")) {
       printf("basename is %s.\n", var_to_on_off(basename_filenames));
     } else if (is_abbrev_of (psz_arg, "debug")) {
+      printf("debug is %d.\n", db_level);
+    } else if (is_abbrev_of (psz_arg, "commands")) {
       printf("debug is %d.\n", db_level);
     } else if (is_abbrev_of (psz_arg, "ignore-errors")) {
       printf("ignore-errors is %s.\n", var_to_on_off(ignore_errors_flag));

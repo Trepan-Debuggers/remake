@@ -51,14 +51,14 @@ extern void fatal_err();
 #endif
 
 /*! Under -d, write a message describing the current IDs.  */
-extern void log_access PARAMS ((char *flavor));
+extern void log_access (char *flavor);
 
 /*! Write a message indicating that we've just entered or
   left (according to ENTERING) the current directory.  */
-extern void log_working_directory PARAMS ((int));
+extern void log_working_directory (int);
 
 /*! Print an error message from errno.  */
-extern void perror_with_name PARAMS ((const char *, const char *));
+extern void perror_with_name (const char *, const char *);
 
 /*! Print an error message from errno and exit.  */
 extern void pfatal_with_name PARAMS ((const char *)) __attribute__ ((noreturn));
@@ -69,13 +69,13 @@ extern void print_variable (variable_t *p_v);
 extern void print_variable_expand (variable_t *p_v);
 
 /*! Display common file target prefix message output file target. */
-extern void print_file_target_prefix PARAMS ((const file_t *p_target));
+extern void print_file_target_prefix (const file_t *p_target);
 
 /*! Display common target prefix message. */
-extern void print_target_prefix PARAMS ((const char *p_name));
+extern void print_target_prefix (const char *p_name);
 
 /*! Display common prefix message output file target. */
-extern void print_floc_prefix PARAMS ((const floc_t *p_floc));
+extern void print_floc_prefix (const floc_t *p_floc);
 
 /*! Display common prefix message output file target. */
 extern debug_return_t print_child_cmd (child_t *p_child, 

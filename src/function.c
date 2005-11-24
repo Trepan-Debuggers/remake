@@ -1967,7 +1967,7 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
 	DBPRINTS ( (_("calling built-in %s("), fname), i_trace_level);
 	for (i=1; argv[i]; i++)
 	  {
-	    DBPRINT( ("%s%s", (i > 1) ? ", " : "", argv[i]) );
+	    DBPRINT( ("%s\"%s\"", (i > 1) ? ", " : "", argv[i]) );
 	  }
 	DBPRINT( (")\n") );
       }
@@ -1975,8 +1975,16 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
 
       psz_ret = expand_builtin_function (o, i, argv+1, entry_p);
       i_trace_level--;
-      DBSD (DB_CALLTRACE, (_("%s() returns \"%s\"\n"), fname, o), 
-	    i_trace_level);
+      if (ISDB(DB_CALLTRACE)) {
+	unsigned int i_len=psz_ret - o;
+	if (i_len) {
+	  char psz_fmt[100] = {'\0'};
+	  snprintf(psz_fmt, sizeof(psz_fmt)-1, 
+		   _("%%s() returns \"%%%d.%ds\"\n"), i_len, i_len);
+	  DBSD (DB_CALLTRACE, (psz_fmt, fname, o), 
+		i_trace_level);
+	}
+      }
       return  psz_ret;
     }
 
@@ -1996,7 +2004,7 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
     DBPRINTS ( (_("calling %s("), fname), i_trace_level);
     for (i=1; argv[i]; i++)
     {
-      DBPRINT( ("%s%s", (i > 1) ? ", " : "", argv[i]) );
+      DBPRINT( ("%s\"%s\"", (i > 1) ? ", " : "", argv[i]) );
     }
     DBPRINT( (")\n") );
   }

@@ -50,7 +50,7 @@ struct passwd *getpwnam PARAMS ((char *name));
    eval'ing.
 */
 
-struct ebuffer
+typedef struct ebuffer
   {
     char *buffer;       /* Start of the current line in the buffer.  */
     char *bufnext;      /* Start of the next line in the buffer.  */
@@ -58,7 +58,7 @@ struct ebuffer
     unsigned int size;  /* Malloc'd size of buffer. */
     FILE *fp;           /* File, or NULL if this is an internal buffer.  */
     floc_t floc;        /* Info on the file in fp (if any).  */
-  };
+  } ebuffer_t;
 
 /* Types of "words" that can be read in a makefile.  */
 enum make_word_type
@@ -127,14 +127,14 @@ const floc_t *reading_file = 0;
 
 static dep_t *read_makefiles = 0;
 
-static int eval_makefile PARAMS ((char *filename, int flags));
-static int eval PARAMS ((struct ebuffer *buffer, int flags));
+static int eval_makefile (char *filename, int flags, floc_t *fstart);
+static int eval (ebuffer_t *buffer, int flags);
 
-static long readline PARAMS ((struct ebuffer *ebuf));
+static long readline PARAMS ((ebuffer_t *ebuf));
 static void do_define PARAMS ((char *name, unsigned int namelen,
                                variable_origin_t origin,
-                               struct ebuffer *ebuf));
-static int conditional_line PARAMS ((char *line, const struct floc *flocp));
+                               ebuffer_t *ebuf));
+static int conditional_line PARAMS ((char *line, const floc_t *flocp));
 static void record_files PARAMS ((struct nameseq *filenames, char *pattern, char *pattern_percent,
 			dep_t *deps, unsigned int cmds_started, char *commands,
 			unsigned int commands_idx, int two_colon,
@@ -189,8 +189,8 @@ read_all_makefiles (char **makefiles)
 	if (*p != '\0')
 	  *p++ = '\0';
         name = xstrdup (name);
-	if (eval_makefile (name,
-                           RM_NO_DEFAULT_GOAL|RM_INCLUDED|RM_DONTCARE) < 2)
+	if ( eval_makefile (name, RM_NO_DEFAULT_GOAL|RM_INCLUDED|RM_DONTCARE,
+			   NULL) < 2 )
           free (name);
       }
 
@@ -205,7 +205,7 @@ read_all_makefiles (char **makefiles)
 	dep_t *tail = read_makefiles;
 	dep_t *d;
 
-	if (! eval_makefile (*makefiles, 0))
+	if (! eval_makefile (*makefiles, 0, NULL))
 	  perror_with_name ("", *makefiles);
 
 	/* Find the right element of read_makefiles.  */
@@ -240,7 +240,7 @@ read_all_makefiles (char **makefiles)
 
       if (*p != 0)
 	{
-	  if (! eval_makefile (*p, 0))
+	  if (! eval_makefile (*p, 0, NULL))
 	    perror_with_name ("", *p);
 	}
       else
@@ -304,10 +304,10 @@ restore_conditionals (struct conditionals *saved)
 }
 
 static int
-eval_makefile (char *filename, int flags)
+eval_makefile (char *filename, int flags, floc_t *p_floc)
 {
   dep_t *deps;
-  struct ebuffer ebuf;
+  ebuffer_t ebuf;
   const floc_t *curfile;
   int makefile_errno;
   int r;
@@ -317,6 +317,10 @@ eval_makefile (char *filename, int flags)
 
   if (ISDB (DB_VERBOSE|DB_READMAKEFILES))
     {
+      if (p_floc) {
+	print_floc_prefix(p_floc);
+	printf ("\n\t");
+      }
       printf (_("Reading makefile `%s'"), filename);
       if (flags & RM_NO_DEFAULT_GOAL)
 	printf (_(" (no default goal)"));
@@ -424,7 +428,7 @@ eval_makefile (char *filename, int flags)
 int
 eval_buffer (char *buffer)
 {
-  struct ebuffer ebuf;
+  ebuffer_t ebuf;
   struct conditionals *saved;
   struct conditionals new;
   const floc_t *curfile;
@@ -469,7 +473,7 @@ eval_buffer (char *buffer)
    Returns 2 if FILENAME was read, and we kept a reference (don't free it).  */
 
 static int
-eval (struct ebuffer *ebuf, int set_default)
+eval (ebuffer_t *ebuf, int set_default)
 {
   char *collapsed = 0;
   unsigned int collapsed_length = 0;
@@ -847,7 +851,9 @@ eval (struct ebuffer *ebuf, int set_default)
 	      files = next;
 
               r = eval_makefile (name, (RM_INCLUDED | RM_NO_TILDE
-                                        | (noerror ? RM_DONTCARE : 0)));
+                                        | (noerror ? RM_DONTCARE : 0)),
+				 fstart
+				 );
 	      if (!r)
                 {
                   if (!noerror)
@@ -1277,9 +1283,9 @@ eval (struct ebuffer *ebuf, int set_default)
 
 static void
 do_define (char *name, unsigned int namelen,
-           variable_origin_t origin, struct ebuffer *ebuf)
+           variable_origin_t origin, ebuffer_t *ebuf)
 {
-  struct floc defstart;
+  floc_t defstart;
   long nlines = 0;
   int nlevels = 1;
   unsigned int length = 100;
@@ -1386,7 +1392,7 @@ do_define (char *name, unsigned int namelen,
    1 if following text should be ignored.  */
 
 static int
-conditional_line (char *line, const struct floc *flocp)
+conditional_line (char *line, const floc_t *flocp)
 {
   int notdef;
   char *cmdname;
@@ -1614,7 +1620,7 @@ conditional_line (char *line, const struct floc *flocp)
 static void
 record_target_var (struct nameseq *filenames, char *defn,
                    variable_origin_t origin, bool b_exported,
-                   const struct floc *flocp)
+                   const floc_t *flocp)
 {
   struct nameseq *nextf;
   variable_set_list_t *global;
@@ -1719,7 +1725,7 @@ static void
 record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
               dep_t *deps, unsigned int cmds_started, char *commands,
               unsigned int commands_idx, int two_colon,
-              int have_sysv_atvar, const struct floc *flocp, int set_default)
+              int have_sysv_atvar, const floc_t *flocp, int set_default)
 {
   struct nameseq *nextf;
   int implicit = 0;
@@ -2442,7 +2448,7 @@ parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip,
  */
 
 static unsigned long
-readstring (struct ebuffer *ebuf)
+readstring (ebuffer_t *ebuf)
 {
   char *p;
 
@@ -2478,7 +2484,7 @@ readstring (struct ebuffer *ebuf)
 }
 
 static long
-readline (struct ebuffer *ebuf)
+readline (ebuffer_t *ebuf)
 {
   char *p;
   char *end;
