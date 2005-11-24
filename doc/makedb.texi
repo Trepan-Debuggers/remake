@@ -177,6 +177,10 @@ Although you can use the @value{DBG} to debug Makefiles, it can also
 be used just as a front-end for learning more about Makefiles and
 writing them with @value{MAKE}. 
 
+A degenerate and less-interactive form of debugging is @emph{tracing}
+in which one passivly watches some of the steps that go on in
+processing a Makefile.
+
 @menu
 * Sample Sessions::             Sample GNU Make Debugger sessions
 * Free Software::               Freely redistributable software
@@ -196,13 +200,14 @@ to make it easier to pick out from the surrounding output.
 
 @menu
 * Tracing::
+* Tracing Makefile Reading::
 * Simple Debugging::            
 * Debugging Variables::
 * Debugging Commands::
 @end menu
 
 @node Tracing
-@subsection Sample @value{MAKE} Trace Sessions
+@subsection Sample @value{MAKE} Trace Session
 
 A simplified form of debugging is @emph{tracing}. And so before we
 get into debugging proper, let's show some of the tracing abilites. 
@@ -332,7 +337,7 @@ before we execute any sort of shell command. The goal is simple trace
 output for a simple Makefile. (Although I think that the above may be
 improved, it is far better than what is in GNU make by default.)
 
-A slight subtley you might not have notices is that we echoed the
+A slight subtlety you might not have noticed is that we echoed the
 command @code{if [ -n FOO ] ...} even though the original makefile had
 this set to be silent (in particular by preceding the command that
 starts ``if'' with an @@). When tracing, we override any silent
@@ -362,17 +367,65 @@ So we were working on target @code{foo} on line 7 of file
 @code{/tmp/test1} which was rebuilt because we were making target
 @code{all} on line 4 of file @code{/tmp/test1}.
 
+@node Tracing Makefile Reading
+@subsection Tracing Makefile Reading
+
+@value{MAKE} works like many other interpreters. First Makefiles are
+read in and parsed and then they are ``executed'' which in
+@value{MAKE} means that dependency checks are done and actions are
+performed based on those checks.  However there is quite a bit work
+that may be done just in portion which reads in the Makefiles and
+performs variable expansion.
+
+To see this, let's use a real example -- the Makefile for the GNU Make
++ Debugger. For comparison, here is a simple trace:
+@smallexample
+@group
+$ @b{remake --trace}
+Reading makefiles...
+/tmp/remake/src/Makefile:254 Makefile.in
+/tmp/remake/src/Makefile:276 ../config.status
+/tmp/remake/src/Makefile:279 ../configure
+Updating goal targets....
+make: `Makefile' is up to date.
+@end group
+@end smallexample 
+
+So far so good -- still pretty simple output even though the Makefile
+in this case is pretty complex, is hundreds of lines long and has
+thousands of dependencies noted.  Digging just a little into this
+complexity, If we want to trace the files that were read in performing
+the above, we can use the suboption @code{read} on the @code{--trace}
+option:
+@smallexample
+@group
+$ @b{remake --trace Makefile}
+Reading makefiles...
+Reading makefile `Makefile'...
+/tmp/remake/src/Makefile:322
+	Reading makefile `.deps/alloca.Po' (search path) (no ~ expansion)...
+/tmp/remake/src/Makefile:323
+	Reading makefile `.deps/getloadavg.Po' (search path) (no ~ expansion)......
+... about 32 more lines like the above ...
+/tmp/remake/src/Makefile:355
+	Reading makefile `.deps/vpath.Po' (search path) (no ~ expansion)...
+/tmp/remake/src/Makefile:254 Makefile.in
+/tmp/remake/src/Makefile:276 ../config.status
+/tmp/remake/src/Makefile:279 ../configure
+Updating goal targets....
+make: `Makefile' is up to date.
+@end group
+@end smallexample 
+
 @node Simple Debugging
 @subsection Simple @value{MAKE} Debug Sessions
 
-Now let's use a real example -- the Makefile for the GNU Make +
-Debugger. 
-
-And we'll go into the debugger:  for this use the @code{--debugger} or
-@code{-X} option.
+Now let's go into the debugger: for this use the @code{--debugger} or
+@code{-X} option. Again we'll use the Makefile from the sourcecode of
+this distribution.
 
 @smallexample
-$  @b{./make --debugger}
+$  @b{remake --debugger}
 Reading makefiles...
 
 (/tmp/remake/src/Makefile:254): Makefile.in
@@ -585,10 +638,10 @@ make.txt: ../doc/makedb.texi
 	makeinfo --no-headers $< > $@
 
 makedb<1> @b{step 2}
-   /home/src/external-cvs/remake/src/test2:5	File `make.txt' does not exist.
-  /home/src/external-cvs/remake/src/test2:5	Must remake target `make.txt'.
+   /tmp/remake/src/test2:5	File `make.txt' does not exist.
+  /tmp/remake/src/test2:5	Must remake target `make.txt'.
 
-(/home/src/external-cvs/remake/src/test2:6): make.txt
+(/tmp/remake/src/test2:6): make.txt
 makedb<2> @b{t}
 
 make.txt: ../doc/makedb.texi
@@ -660,12 +713,12 @@ If we want to write out those commands as a shell script which we
 might want to execute, we can use the @code{write} command:
 @smallexample
 @group
-(/home/src/external-cvs/remake/src/test2:6): make.txt
+(/tmp/remake/src/test2:6): make.txt
 makedb<6> @b{write}
 File "/tmp/make.txt.sh" written.
 makedb<7> @b{shell cat -n /tmp/make.txt.sh}
      1	#!/bin/sh
-     2	#/home/src/external-cvs/remake/src/test2:5
+     2	#/tmp/remake/src/test2:5
      3	makeinfo --no-headers ../doc/makedb.texi > make.txt
      4	
 @end group
@@ -874,17 +927,22 @@ If no suboption is provided, ``full'' is assumed.
 This option causes @value{MAKE} to print a target stack trace if it
 encounters an error.
 
-@item --trace
+@item --trace @ovar{=suboption}
 @itemx -x
 @cindex @code{-x}
 Causes target names which have commands associated with them to get
 printed before they are considered. If a target has multiple commands
 each one is printed before they are run whether or not the command has
 the @value{MAKE} @@ specifier which would otherwise cause them not to
-echo. Note that this command is independent of the @code{--debugger}
-option and can be used in conjunction with it. Inside the debugger one
-can have the same effect by issuing the debugger @code{set trace on}
-command.
+echo. 
+
+This option also allows for suboptions, @code{read}, @code{normal},
+and @code{full}. The default is @code{normal}; @code{read} adds
+tracing as Makefiles are read.
+
+tracing is independent of the @code{--debugger} option and can be used
+in conjunction with it. Inside the debugger one can have the same
+effect by issuing the debugger @code{set trace on} command.
 
 @end table
 
@@ -1361,10 +1419,15 @@ values, you can use @code{show} with no arguments; you may also use
 @end table
 @c @end group
 
-Here are three miscellaneous @code{show} subcommands, all of which are
+Here are fource miscellaneous @code{show} subcommands, all of which are
 exceptional in lacking corresponding @code{set} commands:
 
 @table @code
+@kindex show command
+@cindex history
+@item show command
+Shows the list of commands previously entered
+
 @kindex show version
 @cindex version number
 @item show version
@@ -1875,6 +1938,7 @@ available.
 
 @menu
 * Emacs::      Using @value{DBG} from @sc{gnu} Emacs
+* DDD::        Using @value{DBG} from @value{DDD}
 @end menu
 
 
@@ -2029,17 +2093,31 @@ communicates with Emacs in terms of line numbers.  If you add or
 delete lines from the text, the line numbers that @value{DBG} knows cease
 to correspond properly with the code.
 
+@node DDD
+@section Using @value{MAKE} from @value{DDD}
+@cindex DDD
+
+@value{MAKE} support is rather new in @value{DDD}. As a programming
+language, @value{MAKE} is not feature rich: there are no record
+structures or hash tables (yet), no pointers, package variable scoping
+or methods. So much of the data display and visualization features of
+@value{DDD} are disabled.
+
+As with any scripting or interpreted language (e.g. Perl), one can't
+step by a single machine-language instruction. So the ddd Stepi/Nexti
+commands are disabled.
+
 @node Make Debugger Bugs
 @chapter Reporting Bugs
 @cindex bugs
 @cindex reporting bugs
 
-Your bug reports play an essential role in making the @value{DBG} reliable.
+Your bug reports play an essential role in making the @value{MAKE} reliable.
 
 Reporting a bug may help you by bringing a solution to your problem, or it
 may not.  But in any case the principal function of a bug report is to help
-the entire community by making the next version of @value{DBG} work better.  Bug
-reports are your contribution to the maintenance of @value{DBG}.
+the entire community by making the next version of @value{MAKE} work better.  Bug
+reports are your contribution to the maintenance of @value{MAKE}.
 
 In order for a bug report to serve its purpose, you must include the
 information that enables us to fix the bug.
@@ -2061,24 +2139,24 @@ If you are not sure whether you have found a bug, here are some guidelines:
 @cindex crash of debugger
 @item
 If the debugger gets a fatal signal, for any input whatever, that is a
-@value{DBG} bug.  Reliable debuggers never crash.
+@value{MAKE} bug.  Reliable debuggers never crash.
 
 @cindex error on valid input
 @item
-If @value{DBG} produces an error message for valid input, that is a
+If @value{MAKE} produces an error message for valid input, that is a
 bug.  (Note that if you're cross debugging, the problem may also be
 somewhere in the connection to the target.)
 
 @cindex invalid input
 @item
-If @value{DBG} does not produce an error message for invalid input,
+If @value{MAKE} does not produce an error message for invalid input,
 that is a bug.  However, you should note that your idea of
 ``invalid input'' might be our idea of ``an extension'' or ``support
 for traditional practice''.
 
 @item
 If you are an experienced user of debugging tools, your suggestions
-for improvement of @value{DBG} are welcome in any case.
+for improvement of @value{MAKE} are welcome in any case.
 @end itemize
 
 @node Bug Reporting
@@ -2086,7 +2164,7 @@ for improvement of @value{DBG} are welcome in any case.
 @cindex bug reports
 @cindex debugger bugs, reporting
 
-Submit bug reports for @value{DBG}.  Until better mechanism is set up
+Submit bug reports for @value{MAKE}.  Until better mechanism is set up
 the prefered method is to submit them directly using
 @email{rocky@@panix.com}. There are also a bug tracking system
 and, help, developer and open discussion forums which can be found via
@@ -2126,12 +2204,12 @@ To enable us to fix the bug, you should include all these things:
 
 @itemize @bullet
 @item
-The version of @value{DBG}.  @value{DBG} announces it if you start
+The version of @value{MAKE}.  @value{MAKE} announces it if you start
 with no arguments; you can also print it at any time using @code{version}
 command.
 
 Without this, we will not know whether there is any point in looking for
-the bug in the current version of @value{DBG}.
+the bug in the current version of @value{MAKE}.
 
 @item
 The type of machine you are using, and the operating system name and
@@ -2158,14 +2236,14 @@ reproduce the bug.
 A description of what behavior you observe that you believe is
 incorrect.  For example, ``It gets a fatal signal.''
 
-Of course, if the bug is that @value{DBG} gets a fatal signal, then we
+Of course, if the bug is that @value{MAKE} gets a fatal signal, then we
 will certainly notice it.  But if the bug is incorrect output, we might
 not notice unless it is glaringly wrong.  You might as well not give us
 a chance to make a mistake.
 
 Even if the problem you experience is a fatal signal, you should still
 say so explicitly.  Suppose something strange is going on, such as, your
-copy of @value{DBG} is out of synch, or you have encountered a bug in
+copy of @value{MAKE} is out of synch, or you have encountered a bug in
 the C library on your system.  (This has happened!)  Your copy might
 crash and ours would not.  If you told us to expect a crash, then when
 ours fails to crash, we would know that the bug was not happening for
@@ -2173,8 +2251,8 @@ us.  If you had not told us to expect a crash, then we would not be able
 to draw any conclusion from our observations.
 
 @item
-If you wish to suggest changes to the @value{DBG} source, send us context
-diffs.  If you even discuss something in the @value{DBG} source, refer to
+If you wish to suggest changes to the @value{MAKE} source, send us context
+diffs.  If you even discuss something in the @value{MAKE} source, refer to
 it by context, not by line number.
 
 The line numbers in our development sources will not match those in your
@@ -2213,7 +2291,7 @@ the necessary information, such as the test case, on the assumption that
 a patch is all we need.  We might see problems with your patch and decide
 to fix the problem another way, or we might not understand it at all.
 
-Sometimes with a program as complicated as @value{DBG} it is very hard to
+Sometimes with a program as complicated as @value{MAKE} it is very hard to
 construct an example that will make the program follow a certain path
 through the code.  If you do not send us the example, we will not be able
 to construct one, so we will not be able to verify that the bug is fixed.
