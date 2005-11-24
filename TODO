@@ -5,6 +5,14 @@ gap, Things marked :-( are important but something I'll probably live
 with.
 
 
+:-( Create breakpoint-list data structure so we can report what breakpoints
+are in effect, or reset them on a restart.
+
+:-( Create a file/line datastructure so we can set breakpoints by lines
+    or list by line number 
+
+:-( better line info stored for commands 
+
 :-( Should have remote invocation interface so debugger command loop
 can live outside of the make environment. With this global state like
 breakpoints would survive across forks and subshells returns. Without
@@ -12,31 +20,17 @@ that, something hacky for saving and passing state as is done in the
 bash debugger has to be done. For now, I'll probably live with no
 global state.
 
-:-( Create breakpoint-list data structure so we can report what breakpoints
-are in effect, or reset them on a restart.
-
-:-( Debugger history commands.
+:-( More complete debugger history commands.
 
 :-( Add a debugger profile mechanism. (Should be a stack of file
 descriptors so profiles can nest).
 
 :-( Redo command parsing. Make more like gdb. 
-  trace -> set trace
-  set foo bar -> set variable foo = bar
   add set annotate
 
 :-( More debugger regression tests, existing regression tests should work.
 
-:-( Allow breakpoint on file:line. 
-
 :-( MAKELEVEL seems buggy
-
-:-( "expand" doesn't handle automatic variables
-
-:-( better line info stored for commands 
-
-:-( Add ddd support. (Although I have CVS commit ability for ddd in
-   case someone submits a patch.)
 
 :-( Run until recursive call? 
 
@@ -49,4 +43,4 @@ There are probably many make-specific commands (e.g like the ones
 listed above). Using the debugger will probably uncover many areas.
 such as specialized things to trace.
 
-$Id: TODO,v 1.3 2005/11/15 01:37:45 rockyb Exp $
+$Id: TODO,v 1.4 2005/11/24 03:23:32 rockyb Exp $
