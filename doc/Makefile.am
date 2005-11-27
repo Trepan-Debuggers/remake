@@ -20,7 +20,7 @@ EXTRA_DIST =	doxygen/Doxyfile doxygen/run_doxygen
 ## Other documentation formats.  ##
 ## ----------------------------- ##
 
-all: make.html makedb.html makedb.info make.info
+all: makedb.info make.info
 
 reference:
 	-( cd ${top_srcdir} && $(MAKE) doxygen )
