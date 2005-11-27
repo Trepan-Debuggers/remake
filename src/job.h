@@ -1,5 +1,5 @@
 /* Definitions for managing subprocesses in GNU Make.
-Copyright (C) 1992, 1993, 1996, 1999 Free Software Foundation, Inc.
+Copyright (C) 1992, 1993, 1996, 1999, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -62,6 +62,7 @@ struct child
     char **environment;		/* Environment for commands.  */
 
     char **command_lines;	/* Array of variable-expanded cmd lines.  */
+    unsigned int *line_no;	/* line number offsets of chopped commands.  */
     unsigned int command_line;	/* Index into above.  */
     char *command_ptr;		/* Ptr into command_lines[command_line].  */
 

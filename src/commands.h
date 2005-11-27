@@ -1,5 +1,5 @@
 /* Definition of data structures describing shell commands for GNU Make.
-Copyright (C) 1988, 1989, 1991, 1993, 2004 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1991, 1993, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
