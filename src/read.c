@@ -1,4 +1,4 @@
-/* $Id: read.c,v 1.11 2005/11/27 11:55:59 rockyb Exp $
+/* $Id: read.c,v 1.12 2005/11/27 15:49:14 rockyb Exp $
 Reading and parsing of makefiles for GNU Make.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
@@ -1274,8 +1274,8 @@ eval (ebuffer_t *ebuf, int set_default)
   record_waiting_files ();
 
   if (collapsed)
-    free ((char *) collapsed);
-  free ((char *) commands);
+    free (collapsed);
+  free (commands);
 
   return 1;
 }

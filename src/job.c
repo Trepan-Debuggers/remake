@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.12 2005/11/27 12:38:38 rockyb Exp $
+/* $Id: job.c,v 1.13 2005/11/27 15:49:14 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005
 Free Software Foundation, Inc.
@@ -67,12 +67,6 @@ int batch_mode_shell = 0;
 char *default_shell = "/bin/sh";
 bool batch_mode_shell = false;
 
-#elif defined (VMS)
-
-# include <descrip.h>
-char default_shell[] = "";
-bool batch_mode_shell = false;
-
 #elif defined (__riscos__)
 
 char default_shell[] = "";
@@ -100,14 +94,6 @@ static int amiga_status;
 static char amiga_bname[32];
 static int amiga_batch_file;
 #endif /* Amiga.  */
-
-#ifdef VMS
-# ifndef __GNUC__
-#   include <processes.h>
-# endif
-# include <starlet.h>
-# include <lib$routines.h>
-#endif
 
 #ifdef WINDOWS32
 # include <windows.h>
@@ -182,20 +168,14 @@ extern int wait ();
 
 #endif	/* Don't have `union wait'.  */
 
-#ifdef VMS
-static int vms_jobsefnmask = 0;
-#endif /* !VMS */
-
 #ifndef	HAVE_UNISTD_H
 extern int dup2 ();
 extern int execve ();
 extern void _exit ();
-# ifndef VMS
 extern int geteuid ();
 extern int getegid ();
 extern int setgid ();
 extern int getgid ();
-# endif
 #endif
 
 extern int getloadavg PARAMS ((double loadavg[], int nelem));
@@ -207,9 +187,6 @@ static void start_job_command (child_t *child,
 static int load_too_high PARAMS ((void));
 static int job_next_command PARAMS ((child_t *));
 static int start_waiting_job (child_t *c, target_stack_node_t *p_call_stack);
-#ifdef VMS
-static void vmsWaitForChildren PARAMS ((int *));
-#endif
 
 /* Chain of all live (or recently deceased) children.  */
 
@@ -515,9 +492,6 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
 	  DB (DB_JOBS, (_("Live child 0x%08lx (%s) PID %ld %s\n"),
                         (unsigned long int) c, c->file->name,
                         (long) c->pid, c->remote ? _(" (remote)") : ""));
-#ifdef VMS
-	  break;
-#endif
 	}
 
       /* First, check for remote children.  */
@@ -541,17 +515,12 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
 #if !defined(__MSDOS__) && !defined(_AMIGA) && !defined(WINDOWS32)
 	  if (any_local)
 	    {
-#ifdef VMS
-	      vmsWaitForChildren (&status);
-	      pid = c->pid;
-#else
 #ifdef WAIT_NOHANG
 	      if (!block)
 		pid = WAIT_NOHANG (&status);
 	      else
 #endif
 		pid = wait (&status);
-#endif /* !VMS */
 	    }
 	  else
 	    pid = 0;
@@ -929,11 +898,7 @@ static void start_job_command (child_t *p_child,
 #endif
   char *p;
   int flags;
-#ifdef VMS
-  char *argv;
-#else
   char **argv;
-#endif
 
   /* If we have a completely empty commandset, stop now.  */
   if (!p_child->command_ptr)
@@ -991,12 +956,8 @@ static void start_job_command (child_t *p_child,
 
   {
     char *end = 0;
-#ifdef VMS
-    argv = p;
-#else
     argv = construct_command_argv (p, &end, p_child->file, 
 				   &p_child->sh_batch_file);
-#endif
     if (end == NULL)
       p_child->command_ptr = NULL;
     else
@@ -1012,10 +973,8 @@ static void start_job_command (child_t *p_child,
      error is 2.  */
   if (argv != 0 && question_flag && !(flags & COMMANDS_RECURSE))
     {
-#ifndef VMS
       free (argv[0]);
       free ((char *) argv);
-#endif
       p_child->file->update_status = 1;
       notice_finished_file (p_child->file);
       return;
@@ -1025,13 +984,11 @@ static void start_job_command (child_t *p_child,
     {
       /* Go on to the next command.  It might be the recursive one.
 	 We construct ARGV only to find the end of the command line.  */
-#ifndef VMS
       if (argv)
         {
           free (argv[0]);
           free ((char *) argv);
         }
-#endif
       argv = 0;
     }
 
@@ -1089,7 +1046,7 @@ static void start_job_command (child_t *p_child,
      performed some action (makes a difference as to what messages are
      printed, etc.  */
 
-#if !defined(VMS) && !defined(_AMIGA)
+#if !defined(_AMIGA)
   if (
 #if defined __MSDOS__ || defined (__EMX__)
       unixy_shell	/* the test is complicated and we already did it */
@@ -1105,16 +1062,14 @@ static void start_job_command (child_t *p_child,
       free ((char *) argv);
       goto next_command;
     }
-#endif  /* !VMS && !_AMIGA */
+#endif  /* !_AMIGA */
 
   /* If -n was given, recurse to get the next line in the sequence.  */
 
   if (just_print_flag && !(flags & COMMANDS_RECURSE))
     {
-#ifndef VMS
       free (argv[0]);
       free ((char *) argv);
-#endif
       goto next_command;
     }
 
@@ -1123,7 +1078,6 @@ static void start_job_command (child_t *p_child,
   fflush (stdout);
   fflush (stderr);
 
-#ifndef VMS
 #if !defined(WINDOWS32) && !defined(_AMIGA) && !defined(__MSDOS__)
 
   /* Set up a bad standard input that reads from a broken pipe.  */
@@ -1157,8 +1111,6 @@ static void start_job_command (child_t *p_child,
   if (p_child->good_stdin)
     good_stdin_used = 1;
 
-#endif /* !VMS */
-
   p_child->deleted = 0;
 
 #ifndef _AMIGA
@@ -1169,7 +1121,6 @@ static void start_job_command (child_t *p_child,
 
 #if !defined(__MSDOS__) && !defined(_AMIGA) && !defined(WINDOWS32)
 
-#ifndef VMS
   /* start_waiting_job has set CHILD->remote if we can start a remote job.  */
   if (p_child->remote)
     {
@@ -1192,7 +1143,6 @@ static void start_job_command (child_t *p_child,
 	}
     }
   else
-#endif /* !VMS */
     {
       /* Fork the child process.  */
 
@@ -1202,16 +1152,6 @@ static void start_job_command (child_t *p_child,
       block_sigs ();
 
       p_child->remote = 0;
-
-#ifdef VMS
-
-      if (!child_execute_job (argv, p_child)) {
-        /* Fork failed!  */
-        perror_with_name ("vfork", "");
-        goto error;
-      }
-
-#else
 
       parent_environ = environ;
 
@@ -1276,7 +1216,6 @@ static void start_job_command (child_t *p_child,
 	  goto error;
 	}
 # endif  /* !__EMX__ */
-#endif /* !VMS */
     }
 
 #else	/* __MSDOS__ or Amiga or WINDOWS32 */
@@ -1389,10 +1328,8 @@ static void start_job_command (child_t *p_child,
   set_command_state (p_child->file, cs_running);
 
   /* Free the storage used by the child's argument list.  */
-#ifndef VMS
   free (argv[0]);
   free ((char *) argv);
-#endif
 
   return;
 
@@ -1777,7 +1714,7 @@ job_next_command (child)
 static int
 load_too_high (void)
 {
-#if defined(__MSDOS__) || defined(VMS) || defined(_AMIGA) || defined(__riscos__)
+#if defined(__MSDOS__) || defined(_AMIGA) || defined(__riscos__)
   return 1;
 #else
   static double last_sec;
@@ -1860,567 +1797,6 @@ start_waiting_jobs (target_stack_node_t *p_call_stack)
 }
 
 #ifndef WINDOWS32
-#ifdef VMS
-#include <descrip.h>
-#include <clidef.h>
-
-/* This is called as an AST when a child process dies (it won't get
-   interrupted by anything except a higher level AST).
-*/
-int vmsHandleChildTerm(child_t *child,  target_stack_node_t *p_call_stack)
-{
-    int status;
-    child_t *lastc, *c;
-    int child_failed;
-
-    vms_jobsefnmask &= ~(1 << (child->efn - 32));
-
-    lib$free_ef(&child->efn);
-
-    (void) sigblock (fatal_signal_mask);
-
-    child_failed = !(child->cstatus & 1 || ((child->cstatus & 7) == 0));
-
-    /* Search for a child matching the deceased one.  */
-    lastc = 0;
-#if defined(RECURSIVEJOBS) /* I've had problems with recursive stuff and process handling */
-    for (c = children; c != 0 && c != child; lastc = c, c = c->next);
-#else
-    c = child;
-#endif
-
-    if (child_failed && !c->noerror && !ignore_errors_flag)
-      {
-	/* The commands failed.  Write an error message,
-	   delete non-precious targets, and abort.  */
-	child_error (c, p_call_stack, c->cstatus, 0, 0, 0);
-	c->file->update_status = 1;
-	delete_child_targets (c);
-      }
-    else
-      {
-	if (child_failed)
-	  {
-	    /* The commands failed, but we don't care.  */
-	    child_error (c, p_call_stack, c->cstatus, 0, 0, 1);
-	    child_failed = 0;
-	  }
-
-#if defined(RECURSIVEJOBS) /* I've had problems with recursive stuff and process handling */
-	/* If there are more commands to run, try to start them.  */
-	start_job (c);
-
-	switch (c->file->command_state)
-	  {
-	  case cs_running:
-	    /* Successfully started.  */
-	    break;
-
-	  case cs_finished:
-	    if (c->file->update_status != 0) {
-		/* We failed to start the commands.  */
-		delete_child_targets (c);
-	    }
-	    break;
-
-	  default:
-	    error (NILF, _("internal error: `%s' command_state"),
-                   c->file->name);
-	    abort ();
-	    break;
-	  }
-#endif /* RECURSIVEJOBS */
-      }
-
-    /* Set the state flag to say the commands have finished.  */
-    c->file->command_state = cs_finished;
-    notice_finished_file (c->file);
-
-#if defined(RECURSIVEJOBS) /* I've had problems with recursive stuff and process handling */
-    /* Remove the child from the chain and free it.  */
-    if (lastc == 0)
-      children = c->next;
-    else
-      lastc->next = c->next;
-    free_child (c);
-#endif /* RECURSIVEJOBS */
-
-    /* There is now another slot open.  */
-    if (job_slots_used > 0)
-      --job_slots_used;
-
-    /* If the job failed, and the -k flag was not given, die.  */
-    if (child_failed && !keep_going_flag)
-      die (EXIT_FAILURE);
-
-    (void) sigsetmask (sigblock (0) & ~(fatal_signal_mask));
-
-    return 1;
-}
-
-/* VMS:
-   Spawn a process executing the command in ARGV and return its pid. */
-
-#define MAXCMDLEN 200
-
-/* local helpers to make ctrl+c and ctrl+y working, see below */
-#include <iodef.h>
-#include <libclidef.h>
-#include <ssdef.h>
-
-static int ctrlMask= LIB$M_CLI_CTRLY;
-static int oldCtrlMask;
-static int setupYAstTried= 0;
-static int pidToAbort= 0;
-static int chan= 0;
-
-static void reEnableAst(void) {
-	lib$enable_ctrl (&oldCtrlMask,0);
-}
-
-static astHandler (void) {
-	if (pidToAbort) {
-		sys$forcex (&pidToAbort, 0, SS$_ABORT);
-		pidToAbort= 0;
-	}
-	kill (getpid(),SIGQUIT);
-}
-
-static void tryToSetupYAst(void) {
-	$DESCRIPTOR(inputDsc,"SYS$COMMAND");
-	int	status;
-	struct {
-		short int	status, count;
-		int	dvi;
-	} iosb;
-
-	setupYAstTried++;
-
-	if (!chan) {
-		status= sys$assign(&inputDsc,&chan,0,0);
-		if (!(status&SS$_NORMAL)) {
-			lib$signal(status);
-			return;
-		}
-	}
-	status= sys$qiow (0, chan, IO$_SETMODE|IO$M_CTRLYAST,&iosb,0,0,
-		astHandler,0,0,0,0,0);
-	if (status==SS$_NORMAL)
-		status= iosb.status;
-        if (status==SS$_ILLIOFUNC || status==SS$_NOPRIV) {
-		sys$dassgn(chan);
-#ifdef	CTRLY_ENABLED_ANYWAY
-		fprintf (stderr,
-                         _("-warning, CTRL-Y will leave sub-process(es) around.\n"));
-#else
-		return;
-#endif
-	}
-	else if (!(status&SS$_NORMAL)) {
-		sys$dassgn(chan);
-		lib$signal(status);
-		return;
-	}
-
-	/* called from AST handler ? */
-	if (setupYAstTried>1)
-		return;
-	if (atexit(reEnableAst))
-		fprintf (stderr,
-                         _("-warning, you may have to re-enable CTRL-Y handling from DCL.\n"));
-	status= lib$disable_ctrl (&ctrlMask, &oldCtrlMask);
-	if (!(status&SS$_NORMAL)) {
-		lib$signal(status);
-		return;
-	}
-}
-
-/*! Start a child process. This function returns the new pid.  */
-int
-child_execute_job (char *argv, child_t *child, 
-		   target_stack_node_t *p_call_stack)
-{
-  int i;
-  static struct dsc$descriptor_s cmddsc;
-  static struct dsc$descriptor_s pnamedsc;
-  static struct dsc$descriptor_s ifiledsc;
-  static struct dsc$descriptor_s ofiledsc;
-  static struct dsc$descriptor_s efiledsc;
-  int have_redirection = 0;
-  int have_newline = 0;
-
-  int spflags = CLI$M_NOWAIT;
-  int status;
-  char *cmd = alloca (strlen (argv) + 512), *p, *q;
-  char ifile[256], ofile[256], efile[256];
-  char *comname = 0;
-  char procname[100];
-
-  /* Parse IO redirection.  */
-
-  ifile[0] = 0;
-  ofile[0] = 0;
-  efile[0] = 0;
-
-  DB (DB_JOBS, ("child_execute_job (%s)\n", argv));
-
-  while (isspace ((unsigned char)*argv))
-    argv++;
-
-  if (*argv == 0)
-    return 0;
-
-  sprintf (procname, "GMAKE_%05x", getpid () & 0xfffff);
-  pnamedsc.dsc$w_length = strlen(procname);
-  pnamedsc.dsc$a_pointer = procname;
-  pnamedsc.dsc$b_dtype = DSC$K_DTYPE_T;
-  pnamedsc.dsc$b_class = DSC$K_CLASS_S;
-
-  /* Handle comments and redirection. */
-  for (p = argv, q = cmd; *p; p++, q++)
-    {
-      switch (*p)
-	{
-	  case '#':
-	    *p-- = 0;
-	    *q-- = 0;
-	    break;
-	  case '\\':
-	    p++;
-	    if (*p == '\n')
-	      p++;
-	    if (isspace ((unsigned char)*p))
-	      {
-		do { p++; } while (isspace ((unsigned char)*p));
-		p--;
-	      }
-	    *q = *p;
-	    break;
-	  case '<':
-	    p = vms_redirect (&ifiledsc, ifile, p);
-	    *q = ' ';
-	    have_redirection = 1;
-	    break;
-	  case '>':
-	    have_redirection = 1;
-	    if (*(p-1) == '2')
-	      {
-		q--;
-		if (strncmp (p, ">&1", 3) == 0)
-		  {
-		    p += 3;
-		    strcpy (efile, "sys$output");
-		    efiledsc.dsc$w_length = strlen(efile);
-		    efiledsc.dsc$a_pointer = efile;
-		    efiledsc.dsc$b_dtype = DSC$K_DTYPE_T;
-		    efiledsc.dsc$b_class = DSC$K_CLASS_S;
-		  }
-		else
-		  {
-		    p = vms_redirect (&efiledsc, efile, p);
-		  }
-	      }
-	    else
-	      {
-		p = vms_redirect (&ofiledsc, ofile, p);
-	      }
-	    *q = ' ';
-	    break;
-	  case '\n':
-	    have_newline = 1;
-	  default:
-	    *q = *p;
-	    break;
-	}
-    }
-  *q = *p;
-
-  if (strncmp (cmd, "builtin_", 8) == 0)
-    {
-      child->pid = 270163;
-      child->efn = 0;
-      child->cstatus = 1;
-
-      DB (DB_JOBS, (_("BUILTIN [%s][%s]\n"), cmd, cmd+8));
-
-      p = cmd + 8;
-
-      if ((*(p) == 'c')
-	  && (*(p+1) == 'd')
-	  && ((*(p+2) == ' ') || (*(p+2) == '\t')))
-	{
-	  p += 3;
-	  while ((*p == ' ') || (*p == '\t'))
-	    p++;
-	  DB (DB_JOBS, (_("BUILTIN CD %s\n"), p));
-	  if (chdir (p))
-	    return 0;
-	  else
-	    return 1;
-	}
-      else if ((*(p) == 'r')
-	  && (*(p+1) == 'm')
-	  && ((*(p+2) == ' ') || (*(p+2) == '\t')))
-	{
-	  int in_arg;
-
-	  /* rm  */
-	  p += 3;
-	  while ((*p == ' ') || (*p == '\t'))
-	    p++;
-	  in_arg = 1;
-
-	  DB (DB_JOBS, (_("BUILTIN RM %s\n"), p));
-	  while (*p)
-	    {
-	      switch (*p)
-		{
-		  case ' ':
-		  case '\t':
-		    if (in_arg)
-		      {
-			*p++ = ';';
-			in_arg = 0;
-		      }
-		    break;
-		  default:
-		    break;
-		}
-	      p++;
-	    }
-	}
-      else
-	{
-	  printf(_("Unknown builtin command '%s'\n"), cmd);
-	  fflush(stdout);
-	  return 0;
-	}
-    }
-
-  /* Create a *.com file if either the command is too long for
-     lib$spawn, or the command contains a newline, or if redirection
-     is desired. Forcing commands with newlines into DCLs allows to
-     store search lists on user mode logicals.  */
-
-  if (strlen (cmd) > MAXCMDLEN
-      || (have_redirection != 0)
-      || (have_newline != 0))
-    {
-      FILE *outfile;
-      char c;
-      char *sep;
-      int alevel = 0;	/* apostrophe level */
-
-      if (strlen (cmd) == 0)
-	{
-	  printf (_("Error, empty command\n"));
-	  fflush (stdout);
-	  return 0;
-	}
-
-      outfile = open_tmpfile (&comname, "sys$scratch:CMDXXXXXX.COM");
-      if (outfile == 0)
-	pfatal_with_name (_("fopen (temporary file)"));
-
-      if (ifile[0])
-	{
-	  fprintf (outfile, "$ assign/user %s sys$input\n", ifile);
-          DB (DB_JOBS, (_("Redirected input from %s\n"), ifile));
-	  ifiledsc.dsc$w_length = 0;
-	}
-
-      if (efile[0])
-	{
-	  fprintf (outfile, "$ define sys$error %s\n", efile);
-          DB (DB_JOBS, (_("Redirected error to %s\n"), efile));
-	  efiledsc.dsc$w_length = 0;
-	}
-
-      if (ofile[0])
-	{
-	  fprintf (outfile, "$ define sys$output %s\n", ofile);
-	  DB (DB_JOBS, (_("Redirected output to %s\n"), ofile));
-	  ofiledsc.dsc$w_length = 0;
-	}
-
-      p = sep = q = cmd;
-      for (c = '\n'; c; c = *q++)
-	{
-	  switch (c)
-	    {
-            case '\n':
-              /* At a newline, skip any whitespace around a leading $
-                 from the command and issue exactly one $ into the DCL. */
-              while (isspace ((unsigned char)*p))
-                p++;
-              if (*p == '$')
-                p++;
-              while (isspace ((unsigned char)*p))
-                p++;
-              fwrite (p, 1, q - p, outfile);
-              fputc ('$', outfile);
-              fputc (' ', outfile);
-              /* Reset variables. */
-              p = sep = q;
-              break;
-
-	      /* Nice places for line breaks are after strings, after
-		 comma or space and before slash. */
-            case '"':
-              q = vms_handle_apos (q);
-              sep = q;
-              break;
-            case ',':
-            case ' ':
-              sep = q;
-              break;
-            case '/':
-            case '\0':
-              sep = q - 1;
-              break;
-            default:
-              break;
-	    }
-	  if (sep - p > 78)
-	    {
-	      /* Enough stuff for a line. */
-	      fwrite (p, 1, sep - p, outfile);
-	      p = sep;
-	      if (*sep)
-		{
-		  /* The command continues.  */
-		  fputc ('-', outfile);
-		}
-	      fputc ('\n', outfile);
-	    }
-  	}
-
-      fwrite (p, 1, q - p, outfile);
-      fputc ('\n', outfile);
-
-      fclose (outfile);
-
-      sprintf (cmd, "$ @%s", comname);
-
-      DB (DB_JOBS, (_("Executing %s instead\n"), cmd));
-    }
-
-  cmddsc.dsc$w_length = strlen(cmd);
-  cmddsc.dsc$a_pointer = cmd;
-  cmddsc.dsc$b_dtype = DSC$K_DTYPE_T;
-  cmddsc.dsc$b_class = DSC$K_CLASS_S;
-
-  child->efn = 0;
-  while (child->efn < 32 || child->efn > 63)
-    {
-      status = lib$get_ef ((unsigned long *)&child->efn);
-      if (!(status & 1))
-	return 0;
-    }
-
-  sys$clref (child->efn);
-
-  vms_jobsefnmask |= (1 << (child->efn - 32));
-
-/*
-             LIB$SPAWN  [command-string]
-			[,input-file]
-			[,output-file]
-			[,flags]
-			[,process-name]
-			[,process-id] [,completion-status-address] [,byte-integer-event-flag-num]
-			[,AST-address] [,varying-AST-argument]
-			[,prompt-string] [,cli] [,table]
-*/
-
-#ifndef DONTWAITFORCHILD
-/*
- *	Code to make ctrl+c and ctrl+y working.
- *	The problem starts with the synchronous case where after lib$spawn is
- *	called any input will go to the child. But with input re-directed,
- *	both control characters won't make it to any of the programs, neither
- *	the spawning nor to the spawned one. Hence the caller needs to spawn
- *	with CLI$M_NOWAIT to NOT give up the input focus. A sys$waitfr
- *	has to follow to simulate the wanted synchronous behaviour.
- *	The next problem is ctrl+y which isn't caught by the crtl and
- *	therefore isn't converted to SIGQUIT (for a signal handler which is
- *	already established). The only way to catch ctrl+y, is an AST
- *	assigned to the input channel. But ctrl+y handling of DCL needs to be
- *	disabled, otherwise it will handle it. Not to mention the previous
- *	ctrl+y handling of DCL needs to be re-established before make exits.
- *	One more: At the time of LIB$SPAWN signals are blocked. SIGQUIT will
- *	make it to the signal handler after the child "normally" terminates.
- *	This isn't enough. It seems reasonable for simple command lines like
- *	a 'cc foobar.c' spawned in a subprocess but it is unacceptable for
- *	spawning make. Therefore we need to abort the process in the AST.
- *
- *	Prior to the spawn it is checked if an AST is already set up for
- *	ctrl+y, if not one is set up for a channel to SYS$COMMAND. In general
- *	this will work except if make is run in a batch environment, but there
- *	nobody can press ctrl+y. During the setup the DCL handling of ctrl+y
- *	is disabled and an exit handler is established to re-enable it.
- *	If the user interrupts with ctrl+y, the assigned AST will fire, force
- *	an abort to the subprocess and signal SIGQUIT, which will be caught by
- *	the already established handler and will bring us back to common code.
- *	After the spawn (now /nowait) a sys$waitfr simulates the /wait and
- *	enables the ctrl+y be delivered to this code. And the ctrl+c too,
- *	which the crtl converts to SIGINT and which is caught by the common
- *	signal handler. Because signals were blocked before entering this code
- *	sys$waitfr will always complete and the SIGQUIT will be processed after
- *	it (after termination of the current block, somewhere in common code).
- *	And SIGINT too will be delayed. That is ctrl+c can only abort when the
- *	current command completes. Anyway it's better than nothing :-)
- */
-
-  if (!setupYAstTried)
-    tryToSetupYAst();
-  status = lib$spawn (&cmddsc,					/* cmd-string  */
-		      (ifiledsc.dsc$w_length == 0)?0:&ifiledsc, /* input-file  */
-		      (ofiledsc.dsc$w_length == 0)?0:&ofiledsc, /* output-file */
-		      &spflags,					/* flags  */
-		      &pnamedsc,				/* proc name  */
-		      &child->pid, &child->cstatus, &child->efn,
-		      0, 0,
-		      0, 0, 0);
-  if (status & 1)
-    {
-      pidToAbort= child->pid;
-      status= sys$waitfr (child->efn);
-      pidToAbort= 0;
-      vmsHandleChildTerm(child);
-    }
-#else
-  status = lib$spawn (&cmddsc,
-		      (ifiledsc.dsc$w_length == 0)?0:&ifiledsc,
-		      (ofiledsc.dsc$w_length == 0)?0:&ofiledsc,
-		      &spflags,
-		      &pnamedsc,
-		      &child->pid, &child->cstatus, &child->efn,
-		      vmsHandleChildTerm, child,
-		      0, 0, 0);
-#endif
-
-  if (!(status & 1))
-    {
-      printf (_("Error spawning, %d\n") ,status);
-      fflush (stdout);
-      switch (status)
-        {
-        case 0x1c:
-          errno = EPROCLIM;
-          break;
-        default:
-          errno = EFAIL;
-        }
-    }
-
-  if (comname && !ISDB (DB_JOBS))
-    unlink (comname);
-
-  return (status & 1);
-}
-
-#else /* !VMS */
 
 /*! EMX: Start a child process. This function returns the new pid.  */
 # if defined __MSDOS__ ||  defined __EMX__
@@ -2506,7 +1882,6 @@ child_execute_job (stdin_fd, stdout_fd, argv, envp)
   exec_command (argv, envp);
 }
 #endif /* !AMIGA && !__MSDOS__ */
-#endif /* !VMS */
 #endif /* !WINDOWS32 */
 
 #ifndef _AMIGA
@@ -2521,16 +1896,6 @@ int
 # endif
 exec_command (char **argv, char **envp)
 {
-#ifdef VMS
-  /* to work around a problem with signals and execve: ignore them */
-#ifdef SIGCHLD
-  signal (SIGCHLD,SIG_IGN);
-#endif
-  /* Run the program.  */
-  execve (argv[0], argv, envp);
-  perror_with_name ("execve: ", argv[0]);
-  _exit (EXIT_FAILURE);
-#else
 #ifdef WINDOWS32
   HANDLE hPID;
   HANDLE hWaitPID;
@@ -2701,7 +2066,6 @@ exec_command (char **argv, char **envp)
   _exit (127);
 # endif
 #endif /* !WINDOWS32 */
-#endif /* !VMS */
 }
 #else /* On Amiga */
 void exec_command (char **argv)
@@ -2716,7 +2080,6 @@ void clean_tmp (void)
 
 #endif /* On Amiga */
 
-#ifndef VMS
 /*! Figure out the argument list necessary to run LINE as a command.  Try to
    avoid using a shell.  This routine handles only ' quoting, and " quoting
    when no backslash, $ or ` characters are seen in the quotes.  Starting
@@ -3221,11 +2584,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
        argument list.  */
 
     unsigned int shell_len = strlen (shell);
-#ifndef VMS
     static char minus_c[] = " -c ";
-#else
-    static char minus_c[] = "";
-#endif
     unsigned int line_len = strlen (line);
 
     char *new_line = (char *) alloca (shell_len + (sizeof (minus_c) - 1)
@@ -3426,7 +2785,6 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 
   return new_argv;
 }
-#endif /* !VMS */
 
 /*! Figure out the argument list necessary to run LINE as a command.
    Try to avoid using a shell.  This routine handles only ' quoting,
@@ -3449,47 +2807,6 @@ construct_command_argv (char *line, char **restp, file_t *file,
   char *shell, *ifs;
   char **argv;
 
-#ifdef VMS
-  char *cptr;
-  int argc;
-
-  argc = 0;
-  cptr = line;
-  for (;;)
-    {
-      while ((*cptr != 0)
-	     && (isspace ((unsigned char)*cptr)))
-	cptr++;
-      if (*cptr == 0)
-	break;
-      while ((*cptr != 0)
-	     && (!isspace((unsigned char)*cptr)))
-	cptr++;
-      argc++;
-    }
-
-  argv = (char **)malloc (argc * sizeof (char *));
-  if (argv == 0)
-    abort ();
-
-  cptr = line;
-  argc = 0;
-  for (;;)
-    {
-      while ((*cptr != 0)
-	     && (isspace ((unsigned char)*cptr)))
-	cptr++;
-      if (*cptr == 0)
-	break;
-      DB (DB_JOBS, ("argv[%d] = [%s]\n", argc, cptr));
-      argv[argc++] = cptr;
-      while ((*cptr != 0)
-	     && (!isspace((unsigned char)*cptr)))
-	cptr++;
-      if (*cptr != 0)
-	*cptr++ = 0;
-    }
-#else
   {
     /* Turn off --warn-undefined-variables while we expand SHELL and IFS.  */
     int save = warn_undefined_variables_flag;
@@ -3560,7 +2877,6 @@ construct_command_argv (char *line, char **restp, file_t *file,
 
   free (shell);
   free (ifs);
-#endif /* !VMS */
   return argv;
 }
 
