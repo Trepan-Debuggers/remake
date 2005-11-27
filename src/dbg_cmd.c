@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.43 2005/11/27 17:41:17 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.44 2005/11/27 17:53:35 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -28,6 +28,9 @@ Boston, MA 02111-1307, USA.  */
 #include "expand.h"
 #include "function.h"
 
+/* True if we are inside the debugger, false otherwise. */
+bool b_in_debugger = false;
+
 #ifdef HAVE_LIBREADLINE
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,8 +40,6 @@ Boston, MA 02111-1307, USA.  */
 #ifndef whitespace
 #define whitespace(c) (((c) == ' ') || ((c) == '\t'))
 #endif
-
-bool b_in_debugger = false;
 
 const char *WARRANTY = 
 "			    NO WARRANTY\n"
