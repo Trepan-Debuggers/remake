@@ -32,6 +32,7 @@ struct commands
     char *commands;		/* Commands text.  */
     unsigned int ncommand_lines;/* Number of command lines.  */
     char **command_lines;	/* Commands chopped up into lines.  */
+    unsigned int *line_no;	/* line number offsets of chopped commands.  */
     char *lines_flags;		/* One set of flag bits for each line.  */
     int any_recurse;		/* Nonzero if any `lines_recurse' elt has */
 				/* the COMMANDS_RECURSE bit set.  */
