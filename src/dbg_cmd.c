@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.42 2005/11/27 01:42:00 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.43 2005/11/27 17:41:17 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -91,7 +91,7 @@ static debug_return_t dbg_cmd_delete           (char *psz_arg);
 static debug_return_t dbg_cmd_eval             (char *psz_arg);
 static debug_return_t dbg_cmd_expand           (char *psz_arg);
 static debug_return_t dbg_cmd_help             (char *psz_arg);
-static debug_return_t dbg_cmd_history          (char *psz_arg);
+static debug_return_t dbg_cmd_show_command     (char *psz_arg);
 static debug_return_t dbg_cmd_info             (char *psz_arg);
 static debug_return_t dbg_cmd_target           (char *psz_arg);
 static debug_return_t dbg_cmd_print            (char *psz_arg);
@@ -184,7 +184,7 @@ subcommand_var_info_t show_subcommands[] = {
     NULL,                false},
   { "warranty",      "Various kinds of warranty you do not have.",
     NULL,                false},
-  NULL
+  { NULL, NULL, NULL,    false}
 };
 
 /* Documentation for help set, and help set xxx. Note the format has
@@ -208,7 +208,7 @@ subcommand_var_info_t set_subcommands[] = {
     &tracing,            true},
   { "variable",      "Set the version of GNU Make + dbg",
     NULL,                false},
-  NULL
+  { NULL, NULL, NULL, false }
 };
 
 static void 
@@ -515,8 +515,6 @@ dbg_cmd_help (char *psz_args)
 static debug_return_t 
 dbg_cmd_show_command (char *psz_arg)
 {
-  unsigned int i;
-
   /*
   if (!psz_arg || *psz_arg) {
     ;
@@ -527,6 +525,7 @@ dbg_cmd_show_command (char *psz_arg)
     printf("%5d  %s %s\n", i_line, (*hist_list)->timestamp, 
 	   (*hist_list)->line);
   }
+  return debug_readloop;
 }
 
 /* Show target call stack info. */
@@ -659,7 +658,7 @@ static debug_return_t dbg_cmd_show (char *psz_arg)
     } else if (is_abbrev_of (psz_arg, "debug")) {
       printf("debug is %d.\n", db_level);
     } else if (is_abbrev_of (psz_arg, "commands")) {
-      printf("debug is %d.\n", db_level);
+      dbg_cmd_show_command(psz_arg);
     } else if (is_abbrev_of (psz_arg, "ignore-errors")) {
       printf("ignore-errors is %s.\n", var_to_on_off(ignore_errors_flag));
     } else if (is_abbrev_of (psz_arg, "keep-going")) {
@@ -695,10 +694,10 @@ static debug_return_t dbg_cmd_info (char *psz_arg)
 	const floc_t *p_floc = &p_stack_top->p_target->floc;
 	if (!basename_filenames && strlen(p_floc->filenm) 
 	    && p_floc->filenm[0] != '/') 
-	  printf("Line %d of \"%s/%s\"", p_floc->lineno, starting_directory,
+	  printf("Line %lu of \"%s/%s\"", p_floc->lineno, starting_directory,
 		 p_floc->filenm);
 	else 
-	  printf("Line %d of \"%s\"", p_floc->lineno, p_floc->filenm);
+	  printf("Line %lu of \"%s\"", p_floc->lineno, p_floc->filenm);
       } else {
 	printf("No line number info recorded.\n");
       }
@@ -1047,7 +1046,6 @@ static debug_return_t dbg_cmd_set_var (char *psz_args, int expand)
     p_v = lookup_variable (psz_varname, u_len);
 
     if (p_v) {
-      variable_origin_t e_origin = p_v->origin;
       char *psz_value =  expand ? variable_expand(psz_args) : psz_args;
       
       define_variable_in_set(p_v->name, u_len, psz_value,

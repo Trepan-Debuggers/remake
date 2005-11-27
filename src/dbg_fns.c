@@ -1,4 +1,4 @@
-/* $Id: dbg_fns.c,v 1.2 2005/11/27 01:42:00 rockyb Exp $
+/* $Id: dbg_fns.c,v 1.3 2005/11/27 17:41:17 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -19,9 +19,11 @@ Boston, MA 02111-1307, USA.  */
 
 /* Helper rutines for debugger command interface. */
 
-#include "dbg_fns.h"
-#include "trace.h"
 #include "config.h"
+#include "dbg_fns.h"
+#include "debug.h"
+#include "print.h"
+#include "trace.h"
 
 #ifdef HAVE_STRING_H
 #include <string.h>
@@ -152,11 +154,11 @@ print_debugger_location(const file_t *p_target,
   } else if (p_stack_floc && p_stack_floc->p_floc) {
       printf("\n(");
       print_floc_prefix(p_stack_floc->p_floc);
-      printf (")\n", psz_target_name);
+      printf (")\n");
   } else if (p_stack_floc_top && p_stack_floc_top->p_floc) {
       printf("\n(");
       print_floc_prefix(p_stack_floc_top->p_floc);
-      printf (")\n", psz_target_name);
+      printf (")\n");
   }
 }
 

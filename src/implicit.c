@@ -24,6 +24,7 @@ Boston, MA 02111-1307, USA.  */
 #include "dep.h"
 #include "debug.h"
 #include "vpath.h"
+#include "ar_fns.h"
 
 /* alloca is in stdlib.h */
 #ifdef HAVE_STDLIB_H

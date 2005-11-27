@@ -153,4 +153,6 @@ extern stringlist_t *db_flags;
 RETSIGTYPE debug_signal_handler (int sig);
 #endif
 
+extern void decode_debug_flags (void);
+
 #endif /*DEBUG_H*/
