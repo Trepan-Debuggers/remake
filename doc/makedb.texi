@@ -321,7 +321,7 @@ test okay
 /tmp/test1:9 foo
 	bogus-command
 /bin/bash: bogus-command: command not found
-test1:8: *** [foo] Error 127
+test1:9: *** [foo] Error 127
 @end group
 @end smallexample 
 
