@@ -1,3 +1,5 @@
+$Id: how-to-make-a-release.txt,v 1.2 2005/11/27 23:12:14 rockyb Exp $
+
 - Let people know of a pending release,
   e.g. bashdb-devel@lists.sourceforge.net; no major changes before
   release, please
@@ -19,8 +21,10 @@
 
 - autogen.sh && make && make check
 
-- make doxygen documentation
-  cd doc/doxygen; ./run_doxygen
+- make documentation
+  cd doc
+  make makedb.html make.html makedb.dvi
+  cd doxygen; ./run_doxygen
 
 - Tag release in CVS: 
    cvs log -h configure.ac
@@ -38,27 +42,21 @@
   mput remake-3.80+dbg-0.*.tar.*
   quit
 
-- Go to sourcefore Release section and make release
+- Go to sourceforge Release section and make release
+   http://sourceforge.net/project/admin/newrelease.php?package_id=120837&group_id=61395
 
 - Update/Announce on Freshmeat:
-   http://freshmeat.net/projects/libcdio/ "add release" generally
+   http://freshmeat.net/projects/remake/ "add release" generally
 
   The NEWS file is your friend.
 
-- copy doxygen html to web pages:
-  cd libcdio-www/doxygen
-  rm *.html
-  cp ../libcdio/doc/doxygen/html/*.html .
-  cvs update . 
-    for each "U" html *except libcdio.hmtl* put back remove it 
-      with "rm" and "cvs remove"
-    for each new "?" html add it
-  cvs commit .
+- copy remake and makedb manual to web page:
+     cd ../remake/doc && make make.html makedb.html
+     scp make.html makedb.html id@bashdb.sourceforge.net:/home/groups/b/ba/bashdb/htdocs/remake/
 
-- copy libcdio manual to web page:
-     (cd ../libcdio/doc && make libcdio.html)
-     cp ../libcdio/doc/libcdio.html .
-     cvs commit .
+- copy doxygen HTML to web pages:
+  cd doc/doxygen/html
+  scp *.html id@bashdb.sourceforge.net:/home/groups/b/ba/bashdb/htdocs/remake/doxygen/
 
 - Remove old cvs versions 
 
