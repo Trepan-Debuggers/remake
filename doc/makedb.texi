@@ -318,7 +318,7 @@ Updating goal targets....
 	if [ -n FOO ] ; \
 then echo "test okay"; fi
 test okay
-/tmp/test1:8 foo
+/tmp/test1:9 foo
 	bogus-command
 /bin/bash: bogus-command: command not found
 test1:8: *** [foo] Error 127

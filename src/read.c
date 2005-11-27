@@ -1,4 +1,4 @@
-/* $Id: read.c,v 1.12 2005/11/27 15:49:14 rockyb Exp $
+/* $Id: read.c,v 1.13 2005/11/27 16:49:56 rockyb Exp $
 Reading and parsing of makefiles for GNU Make.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
@@ -32,6 +32,7 @@ Boston, MA 02111-1307, USA.  */
 #include "dbg_cmd.h"
 
 #ifndef NO_ARCHIVES
+#include "ar_fns.h"
 #include "arscan.h"
 #endif
 

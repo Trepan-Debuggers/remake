@@ -1,7 +1,7 @@
 # List of source files containing translatable strings.
 # Copyright (C) 2002, 2005 Free Software Foundation, Inc.
 
-src/ar.c
+src/ar_fns.c
 src/arscan.c
 src/commands.c
 src/dir.c

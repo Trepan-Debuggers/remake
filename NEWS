@@ -23,6 +23,8 @@ Version 3.80+dbg-0.4cvs
 
 * Fix bugs in showing automatic variables 
 
+* Line number in Makefile commands is more accurate
+
 * More ddd (gdb/bashdb) compatible: 
   - "help set" added 
   - "help show" works like the others

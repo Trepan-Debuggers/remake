@@ -31,7 +31,7 @@ Boston, MA 02111-1307, USA.  */
 #include "trace.h"
 
 #ifndef	NO_ARCHIVES
-#include "ar.h"
+#include "ar_fns.h"
 #endif 
 
 #include <assert.h>
@@ -42,9 +42,6 @@ Boston, MA 02111-1307, USA.  */
 #include <sys/file.h>
 #endif
 
-#ifdef VMS
-#include <starlet.h>
-#endif
 #ifdef WINDOWS32
 #include <io.h>
 #endif
@@ -78,7 +75,7 @@ static int touch_file PARAMS ((file_t *file));
 static void remake_file PARAMS ((file_t *file, 
 				 target_stack_node_t *p_call_stack));
 static FILE_TIMESTAMP name_mtime PARAMS ((char *name));
-static int library_search PARAMS ((char **lib, FILE_TIMESTAMP *mtime_ptr));
+static bool library_search (char **lib, FILE_TIMESTAMP *mtime_ptr);
 
 
 /*! Remake all the goals in the `struct dep' chain GOALS.  Return -1
@@ -1392,7 +1389,7 @@ name_mtime (char *name)
    suitable library file in the system library directories and the VPATH
    directories.  */
 
-static int
+static bool
 library_search (char **lib, FILE_TIMESTAMP *mtime_ptr)
 {
   static char *dirs[] =
@@ -1473,7 +1470,7 @@ library_search (char **lib, FILE_TIMESTAMP *mtime_ptr)
 	  *lib = xstrdup (libbuf);
 	  if (mtime_ptr != 0)
 	    *mtime_ptr = mtime;
-	  return 1;
+	  return true;
 	}
 
       /* Now try VPATH search on that.  */
@@ -1482,7 +1479,7 @@ library_search (char **lib, FILE_TIMESTAMP *mtime_ptr)
       if (vpath_search (&file, mtime_ptr))
 	{
 	  *lib = file;
-	  return 1;
+	  return true;
 	}
 
       /* Now try the standard set of directories.  */
@@ -1513,10 +1510,10 @@ library_search (char **lib, FILE_TIMESTAMP *mtime_ptr)
 	      *lib = xstrdup (buf);
 	      if (mtime_ptr != 0)
 		*mtime_ptr = mtime;
-	      return 1;
+	      return true;
 	    }
 	}
     }
 
-  return 0;
+  return false;
 }

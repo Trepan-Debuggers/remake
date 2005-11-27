@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.2 2005/11/17 12:51:19 rockyb Exp $
+@set RCSID $Id: make.texi,v 1.3 2005/11/27 16:49:56 rockyb Exp $
 @set EDITION 0.61
 @set VERSION 3.80
 @set UPDATED 23 Feb 2003
@@ -3099,7 +3099,7 @@ called @file{@var{name}.d} from a C source file called @file{@var{name}.c}:
 @smallexample
 @group
 %.d: %.c
-        @set -e; rm -f $@@; \
+        @@set -e; rm -f $@@; \
          $(CC) -M $(CPPFLAGS) $< > $@@.$$$$; \
          sed 's,\($*\)\.o[ :]*,\1.o $@@ : ,g' < $@@.$$$$ > $@@; \
          rm -f $@@.$$$$
