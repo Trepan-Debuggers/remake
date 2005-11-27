@@ -1,5 +1,6 @@
-/* Miscellaneous types
-  Copyright (c) 2005 Rocky Bernstein <rocky@panix.com>
+/* $Id: types.h,v 1.3 2005/11/27 21:03:27 rockyb Exp $
+Miscellaneous types
+Copyright (c) 2005 Rocky Bernstein <rocky@panix.com>
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -20,15 +21,23 @@ Boston, MA 02111-1307, USA.  */
 #ifndef MAKE_TYPES_H
 #define MAKE_TYPES_H
 
-# if defined(HAVE_STDBOOL_H)
-#  include <stdbool.h>
-# else
+#include "config.h"
+
+#if defined(HAVE_STDINT_H)
+# include <stdint.h>
+#elif defined(HAVE_INTTYPES_H)
+# include <inttypes.h>
+#endif /* HAVE_STDINT_H */
+
+#if defined(HAVE_STDBOOL_H)
+# include <stdbool.h>
+#else
    /* ISO/IEC 9899:1999 <stdbool.h> missing -- enabling workaround */
   
 #   define false   0
 #   define true    1
 #   define bool uint8_t
-# endif /*HAVE_STDBOOL_H*/
+#endif /*HAVE_STDBOOL_H*/
 
 typedef unsigned long int lineno_t;
 

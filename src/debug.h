@@ -1,4 +1,5 @@
-/* Debugging macros and interface.
+/* $Id: debug.h,v 1.7 2005/11/27 21:03:27 rockyb Exp $
+Debugging macros and interface.
 Copyright (C) 1999, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -20,7 +21,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef DEBUG_H
 #define DEBUG_H
 
-#include <config.h>
+#include "config.h"
 #include "types.h"
 
 /**
