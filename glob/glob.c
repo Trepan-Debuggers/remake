@@ -1,4 +1,4 @@
-/* $Id: glob.c,v 1.3 2005/11/27 18:01:00 rockyb Exp $
+/* $Id: glob.c,v 1.4 2005/11/27 18:17:06 rockyb Exp $
    Copyright (C) 1991,92,93,94,95,96,97,98,99, 2004, 2005
    Free Software Foundation, Inc.
 
@@ -73,7 +73,7 @@
 # endif
 #endif
 
-#if !defined _AMIGA && !defined VMS && !defined WINDOWS32
+#if !defined _AMIGA && !defined WINDOWS32
 # include <pwd.h>
 #endif
 
@@ -104,9 +104,6 @@ extern int errno;
 # ifdef HAVE_NDIR_H
 #  include <ndir.h>
 # endif
-# ifdef HAVE_VMSDIR_H
-#  include "vmsdir.h"
-# endif /* HAVE_VMSDIR_H */
 #endif
 
 
@@ -299,11 +296,9 @@ static int glob_in_dir __P ((const char *pattern, const char *directory,
 static int prefix_array __P ((const char *prefix, char **array, size_t n));
 static int collated_compare __P ((const __ptr_t, const __ptr_t));
 
-#ifdef VMS
 /* these compilers like prototypes */
 #if !defined _LIBC || !defined NO_GLOB_PATTERN_P
 int __glob_pattern_p (const char *pattern, int quote);
-#endif
 #endif
 
 /* Find the end of the sub-pattern in a brace expression.  We define
@@ -615,12 +610,7 @@ glob (pattern, flags, errfunc, pglob)
       if (dirname[1] == '\0' || dirname[1] == '/')
 	{
 	  /* Look up home directory.  */
-#ifdef VMS
-/* This isn't obvious, RTLs of DECC and VAXC know about "HOME" */
-          const char *home_dir = getenv ("SYS$LOGIN");
-#else
           const char *home_dir = getenv ("HOME");
-#endif
 # ifdef _AMIGA
 	  if (home_dir == NULL || home_dir[0] == '\0')
 	    home_dir = "SYS:";
@@ -713,7 +703,7 @@ glob (pattern, flags, errfunc, pglob)
 	      dirname = newp;
 	    }
 	}
-# if !defined _AMIGA && !defined WINDOWS32 && !defined VMS
+# if !defined _AMIGA && !defined WINDOWS32 
       else
 	{
 	  char *end_name = strchr (dirname, '/');
@@ -793,7 +783,7 @@ glob (pattern, flags, errfunc, pglob)
 		 home directory.  */
 	      return GLOB_NOMATCH;
 	}
-# endif	/* Not Amiga && not WINDOWS32 && not VMS.  */
+# endif	/* Not Amiga && not WINDOWS32 */
     }
 #endif	/* Not VMS.  */
 
@@ -1230,10 +1220,6 @@ glob_in_dir (pattern, directory, flags, errfunc, pglob)
   int meta;
   int save;
 
-#ifdef VMS
-  if (*directory == 0)
-    directory = "[]";
-#endif
   meta = __glob_pattern_p (pattern, !(flags & GLOB_NOESCAPE));
   if (meta == 0)
     {
@@ -1303,7 +1289,7 @@ glob_in_dir (pattern, directory, flags, errfunc, pglob)
 	    {
 	      int fnm_flags = ((!(flags & GLOB_PERIOD) ? FNM_PERIOD : 0)
 			       | ((flags & GLOB_NOESCAPE) ? FNM_NOESCAPE : 0)
-#if defined _AMIGA || defined VMS
+#if defined _AMIGA 
 				   | FNM_CASEFOLD
 #endif
 				   );
