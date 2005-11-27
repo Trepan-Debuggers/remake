@@ -1,4 +1,5 @@
-/* Header for variable expansion functions for GNU Make.
+/* $Id: expand.h,v 1.3 2005/11/27 11:39:33 rockyb Exp $
+Header for variable expansion functions for GNU Make.
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -29,7 +30,8 @@ Boston, MA 02111-1307, USA.  */
 /*! Like variable_expand_for_file, but the returned string is malloc'd.
    This function is called a lot.  It wants to be efficient.  */
 
-extern char *allocated_variable_expand_for_file(char *psz_line, file_t *file);
+extern char *allocated_variable_expand_for_file(char *psz_line, 
+						file_t *p_file);
 
 
 /*! Expand an argument for an expansion function.  The text starting
@@ -43,7 +45,7 @@ extern char *expand_argument(const char *str, const char *end);
 /*! Install a new variable_buffer context, returning the current one for
    safe-keeping.  */
 
-extern void install_variable_buffer(char **bufp, unsigned int *lenp);
+extern void install_variable_buffer (char **pp_buf, unsigned int *pi_len);
 
 /*! Restore a previously-saved variable_buffer setting (free the current one).
  */

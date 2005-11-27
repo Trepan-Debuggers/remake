@@ -1,4 +1,5 @@
-/* Variable expansion functions for GNU Make.
+/* $Id: expand.c,v 1.6 2005/11/27 11:39:33 rockyb Exp $
+Variable expansion functions for GNU Make.
 Copyright (C) 1988, 89, 91, 92, 93, 95, 
 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -550,36 +551,31 @@ allocated_variable_append (const variable_t *v)
   This function is called a lot.  It wants to be efficient.
   */
 char *
-allocated_variable_expand_for_file (char *psz_line, file_t *file)
+allocated_variable_expand_for_file (char *psz_line, file_t *p_file)
 {
-  char *value;
+  char *psz_value;
 
-  char *obuf = variable_buffer;
+  char *psz_obuf = variable_buffer;
   unsigned int olen = variable_buffer_length;
 
   variable_buffer = 0;
 
-  value = variable_expand_for_file (psz_line, file);
+  psz_value = variable_expand_for_file (psz_line, p_file);
 
-#if 0
-  /* Waste a little memory and save time.  */
-  value = xrealloc (value, strlen (value))
-#endif
-
-  variable_buffer = obuf;
+  variable_buffer = psz_obuf;
   variable_buffer_length = olen;
 
-  return value;
+  return psz_value;
 }
 
 /*! Install a new variable_buffer context, returning the current one for
    safe-keeping.  */
 
 void
-install_variable_buffer (char **bufp, unsigned int *lenp)
+install_variable_buffer (char **pp_buf, unsigned int *pi_len)
 {
-  *bufp = variable_buffer;
-  *lenp = variable_buffer_length;
+  *pp_buf = variable_buffer;
+  *pi_len = variable_buffer_length;
 
   variable_buffer = 0;
   initialize_variable_output ();
