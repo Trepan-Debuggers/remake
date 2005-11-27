@@ -6,7 +6,7 @@ AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.19 2005/11/27 22:14:51 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.20 2005/11/27 22:18:29 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -241,10 +241,11 @@ fi
 
 if test "$enable_readline" = yes; then
    VL_LIB_READLINE
-   AC_MSG_CHECKING(for hisotry_list() in <readline/readline.h>)
+   AC_MSG_CHECKING(for history_list() in <readline/readline.h>)
    AC_TRY_RUN([
 #include <stdio.h>
 #include <readline/readline.h>
+#include <readline/history.h>
 
 int main(int argc, char **argv) {
   HIST_ENTRY **hist_list;
