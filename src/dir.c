@@ -19,9 +19,9 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 #include "config.h"
-#include "make.h"
 #include "ar_fns.h"
 #include "hash.h"
+#include "make.h"
 
 #ifdef	HAVE_STDLIB_H
 #include <stdlib.h>
@@ -1076,8 +1076,8 @@ struct dirstream
   };
 
 /* Forward declarations.  */
-static void * open_dirstream PARAMS ((const char *));
-static struct dirent *read_dirstream PARAMS ((void *));
+static void * open_dirstream (const char *);
+static struct dirent *read_dirstream (void *);
 
 static void *
 open_dirstream (const char *directory)
@@ -1163,9 +1163,6 @@ ansi_free(void *p)
  * invoke it.
  */
 #ifndef stat
-# ifndef VMS
-extern int stat PARAMS ((const char *path, struct stat *sbuf));
-# endif
 # define local_stat stat
 #else
 static int
