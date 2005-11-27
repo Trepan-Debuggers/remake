@@ -81,7 +81,10 @@ extern void print_floc_prefix (const floc_t *p_floc);
 extern debug_return_t print_child_cmd (child_t *p_child, 
 				       target_stack_node_t *p);
 
-/*! Display common prefix message output file target. */
+/*! Display the target stack. */
 extern void print_target_stack (target_stack_node_t *p, int pos);
+
+/*! Display the Makefile read stack. */
+extern void print_floc_stack (int pos);
 
 #endif /*PRINT_H*/

@@ -153,7 +153,12 @@ err (p_call, fmt, va_alist)
   VA_END (args);
 
   putc ('\n', stderr);
-  if (extended_errors) print_target_stack(p_call, -1);
+  if (extended_errors) {
+    if (p_call) 
+      print_target_stack(p_call, -1);
+    else if (p_stack_floc_top)
+      print_floc_stack(-1);
+  }
   fflush (stderr);
   if (debugger_on_error & DEBUGGER_ON_ERROR) 
     enter_debugger(p_call, p_target, -1);
@@ -232,7 +237,12 @@ fatal_err (flocp, fmt, va_alist)
   VA_END (args);
 
   fputs (_(".  Stop.\n"), stderr);
-  if (extended_errors) print_target_stack(p_call, -1);
+  if (extended_errors) {
+    if (p_call) 
+      print_target_stack(p_call, -1);
+    else if (p_stack_floc_top)
+      print_floc_stack(-1);
+  }
   if ( (debugger_on_error & DEBUGGER_ON_FATAL) || debugger_enabled )
     enter_debugger(p_call, p_target, 2);
   die (2);
@@ -437,7 +447,7 @@ print_child_cmd (child_t *p_child, target_stack_node_t *p)
   return rc;
 }
 
-/*! Display common prefix message output file target. */
+/*! Display the target stack. */
 extern void 
 print_target_stack (target_stack_node_t *p, int pos)
 {
@@ -482,7 +492,7 @@ print_target_stack (target_stack_node_t *p, int pos)
   }
 }
 
-/*! Display common prefix message output file target. */
+/*! Display the Makefile read stack. */
 extern void 
 print_floc_stack (int pos)
 {
