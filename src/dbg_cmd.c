@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.45 2005/11/27 20:38:01 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.46 2005/11/27 22:14:53 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -520,11 +520,14 @@ dbg_cmd_show_command (char *psz_arg)
   if (!psz_arg || *psz_arg) {
     ;
     } */
+
+#ifdef HAVE_HISTORY_LIST
   HIST_ENTRY **hist_list = history_list();
   unsigned int i_line;
   for (i_line=0; *hist_list; i_line++, *hist_list++) {
     printf("%5d  %s\n", i_line, (*hist_list)->line);
   }
+#endif
   return debug_readloop;
 }
 

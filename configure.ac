@@ -6,7 +6,7 @@ AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.18 2005/11/27 16:49:56 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.19 2005/11/27 22:14:51 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -228,11 +228,35 @@ if test "$enable_readline" = yes; then
 int main(int argc, char **argv) {
   char *s = tilde_expand ("~");
   return 0;
-}], [AC_MSG_RESULT(yes); ac_have_islnk=yes; 
+}], [AC_MSG_RESULT(yes); ac_have_tilde_expand=yes; 
      AC_DEFINE(HAVE_TILDE_EXPAND, [], 
      [Define this <readline/readline.h> defines tilde_expand()])],
      [AC_MSG_RESULT(no); ac_have_tilde_expand=no],
      [AC_MSG_RESULT(no); ac_have_tilde_expand=no])
+else 
+   AC_MSG_WARN([libreadline is needed for the debugger. I'll build "make"])
+   AC_MSG_WARN([with trace support, but you won't be able enter the])
+   AC_MSG_WARN([debugger.])
+fi
+
+if test "$enable_readline" = yes; then
+   VL_LIB_READLINE
+   AC_MSG_CHECKING(for hisotry_list() in <readline/readline.h>)
+   AC_TRY_RUN([
+#include <stdio.h>
+#include <readline/readline.h>
+
+int main(int argc, char **argv) {
+  HIST_ENTRY **hist_list;
+
+      rl_initialize ();
+   hist_list = history_list();
+  return 0;
+}], [AC_MSG_RESULT(yes); ac_have_history_list=yes; 
+     AC_DEFINE(HAVE_HISTORY_LIST, [], 
+     [Define this <readline/readline.h> defines history_list()])],
+     [AC_MSG_RESULT(no); ac_have_history_list=no],
+     [AC_MSG_RESULT(no); ac_have_history_list=no])
 else 
    AC_MSG_WARN([libreadline is needed for the debugger. I'll build "make"])
    AC_MSG_WARN([with trace support, but you won't be able enter the])
