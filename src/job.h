@@ -1,4 +1,5 @@
-/* Definitions for managing subprocesses in GNU Make.
+/* $Id: job.h,v 1.5 2005/11/27 16:12:58 rockyb Exp $
+Definitions for managing subprocesses in GNU Make.
 Copyright (C) 1992, 1993, 1996, 1999, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -17,8 +18,8 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#ifndef SEEN_JOB_H
-#define SEEN_JOB_H
+#ifndef JOB_H
+#define JOB_H
 
 #include "trace.h"
 
@@ -39,18 +40,17 @@ Boston, MA 02111-1307, USA.  */
 # define CLOSE_ON_EXEC(_d) (void) fcntl ((_d), F_SETFD, FD_CLOEXEC)
 #endif
 
-/* Structure describing a running or dead child process.  */
-
+/** Structure describing a running or dead child process.  */
 struct child
   {
-    struct child *next;		/* Link in the chain.  */
+    struct child *next;		/**< Link in the chain.  */
 
-    floc_t fileinfo;	        /* Where commands were defined. Note:
+    floc_t fileinfo;	        /**< Where commands were defined. Note:
 				   this could be a pattern target.
 				 */
 
-    struct file *file;		/* File being remade.  */
-                                /* Note this can be different from the
+    struct file *file;		/**< File being remade.  */
+                                /**< Note this can be different from the
 				   file of fileinfo. The above might be
 				   a pattern target, while this is a target
 				   which matches the pattern target and thus
@@ -59,22 +59,22 @@ struct child
 				   .c.o . 
 				 */
 
-    char **environment;		/* Environment for commands.  */
+    char **environment;		/**< Environment for commands.  */
 
-    char **command_lines;	/* Array of variable-expanded cmd lines.  */
-    unsigned int *line_no;	/* line number offsets of chopped commands.  */
-    unsigned int command_line;	/* Index into above.  */
-    char *command_ptr;		/* Ptr into command_lines[command_line].  */
+    char **command_lines;	/**< Array of variable-expanded cmd lines.  */
+    unsigned int *line_no;	/**< line # offsets of chopped commands. */
+    unsigned int command_line;	/**< Index into above.  */
+    char *command_ptr;		/**< Ptr into command_lines[command_line].  */
 
-    pid_t pid;			/* Child process's ID number.  */
-    char *sh_batch_file;        /* Script file for shell commands */
-    unsigned int remote:1;	/* Nonzero if executing remotely.  */
+    pid_t pid;			/**< Child process's ID number.  */
+    char *sh_batch_file;        /**< Script file for shell commands */
+    unsigned int remote:1;	/**< Nonzero if executing remotely.  */
 
-    unsigned int noerror:1;	/* Nonzero if commands contained a `-'.  */
+    unsigned int noerror:1;	/**< Nonzero if commands contained a `-'.  */
 
-    unsigned int good_stdin:1;	/* Nonzero if this child has a good stdin.  */
-    unsigned int deleted:1;	/* Nonzero if targets have been deleted.  */
-    unsigned int tracing:1;	/* Nonzero child should be traced.  */
+    unsigned int good_stdin:1;	/**< Nonzero if this child has a good stdin. */
+    unsigned int deleted:1;	/**< Nonzero if targets have been deleted.  */
+    unsigned int tracing:1;	/**< Nonzero child should be traced.  */
   };
 
 typedef struct child child_t;
@@ -143,4 +143,4 @@ extern int fatal_signal_mask;
 #endif
 #endif
 
-#endif /* SEEN_JOB_H */
+#endif /* JOB_H */
