@@ -6,6 +6,7 @@
 transform = s,make,@MAKE_NAME@,
 
 make_TEXINFOS = fdl.texi make-stds.texi
+makedb_TEXINFOS = makedb.texi 
 TEXI2PDF = texi2dvi --pdf
 
 MOSTLYCLEANFILES = make.tgs make.pdf make.html makedb.cps makedb.kys makedb.html makedb.fns makedb.ps.gz makedb.pdf 
@@ -14,7 +15,7 @@ CLEANFILES = make*.html make*.info
 
 # Extra stuff to include in the distribution.
 
-EXTRA_DIST =	doxygen/Doxyfile doxygen/run_doxygen
+EXTRA_DIST =	doxygen/Doxyfile doxygen/run_doxygen makedb.info
 
 ## ----------------------------- ##
 ## Other documentation formats.  ##
