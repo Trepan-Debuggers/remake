@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.79.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-11-27 07:13-0500\n"
+"POT-Creation-Date: 2005-11-27 16:53-0500\n"
 "PO-Revision-Date: 2001-12-03 13:55+0900\n"
 "Last-Translator: Daisuke Yamashita <yamad@mb.infoweb.ne.jp>\n"
 "Language-Team: Japanese <ja@li.org>\n"
@@ -15,88 +15,88 @@ msgstr ""
 "Content-Type: text/plain; charset=EUC-JP\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/ar.c:48
+#: src/ar_fns.c:55
 #, c-format
 msgid "attempt to use unsupported feature: `%s'"
 msgstr "サポートされていない機能を使おうとしています: `%s'"
 
-#: src/ar.c:156
+#: src/ar_fns.c:163
 #, c-format
 msgid "touch: Archive `%s' does not exist"
 msgstr "touch: 書庫 `%s' がありません"
 
-#: src/ar.c:159
+#: src/ar_fns.c:166
 #, c-format
 msgid "touch: `%s' is not a valid archive"
 msgstr "touch: `%s' は正常な書庫ではありません"
 
-#: src/ar.c:166
+#: src/ar_fns.c:173
 #, c-format
 msgid "touch: Member `%s' does not exist in `%s'"
 msgstr "touch: メンバ `%s' は `%s' 内にありません"
 
-#: src/ar.c:173
+#: src/ar_fns.c:180
 #, c-format
 msgid "touch: Bad return code from ar_member_touch on `%s'"
 msgstr "touch: `%s' への ar_member_touch から異常な値が返りました"
 
-#: src/arscan.c:667
+#: src/arscan.c:673
 #, c-format
 msgid "Member `%s'%s: %ld bytes at %ld (%ld).\n"
 msgstr "メンバ `%s'%s: %ld バイト at %ld (%ld)。\n"
 
-#: src/arscan.c:668
+#: src/arscan.c:674
 msgid " (name might be truncated)"
 msgstr " (名前が切り詰められたかも)"
 
-#: src/arscan.c:670
+#: src/arscan.c:676
 #, c-format
 msgid "  Date %s"
 msgstr "  日付 %s"
 
-#: src/arscan.c:671
+#: src/arscan.c:677
 #, c-format
 msgid "  uid = %d, gid = %d, mode = 0%o.\n"
 msgstr "  uid = %d, gid = %d, mode = 0%o.\n"
 
-#: src/commands.c:419
+#: src/commands.c:420
 msgid "*** Break.\n"
 msgstr "*** 中断。\n"
 
-#: src/commands.c:512
+#: src/commands.c:513
 #, c-format
 msgid "*** [%s] Archive member `%s' may be bogus; not deleted"
 msgstr "*** [%s] 書庫メンバ `%s' は多分偽物です ― 削除しませんでした"
 
-#: src/commands.c:515
+#: src/commands.c:516
 #, c-format
 msgid "*** Archive member `%s' may be bogus; not deleted"
 msgstr "*** 書庫メンバ `%s' は多分偽物です ― 削除しませんでした"
 
-#: src/commands.c:527
+#: src/commands.c:528
 #, c-format
 msgid "*** [%s] Deleting file `%s'"
 msgstr "*** [%s] ファイル `%s' を削除します"
 
-#: src/commands.c:529
+#: src/commands.c:530
 #, c-format
 msgid "*** Deleting file `%s'"
 msgstr "*** ファイル `%s' を削除します"
 
-#: src/commands.c:565
+#: src/commands.c:566
 msgid "#  commands to execute"
 msgstr "#  実行するコマンド"
 
-#: src/commands.c:568
+#: src/commands.c:569
 msgid " (built-in):"
 msgstr " (ビルトイン):"
 
-#: src/commands.c:570
+#: src/commands.c:571
 #, c-format
 msgid " (from `%s', line %lu):\n"
 msgstr " (`%s', %lu 行目から):\n"
 
-#: src/dir.c:967
+#: src/dir.c:971
 msgid ""
 "\n"
 "# Directories\n"
@@ -104,72 +104,72 @@ msgstr ""
 "\n"
 "# ディレクトリ\n"
 
-#: src/dir.c:979
+#: src/dir.c:983
 #, c-format
 msgid "# %s: could not be stat'd.\n"
 msgstr "# %s: 状態を調べられませんでした。\n"
 
-#: src/dir.c:983
+#: src/dir.c:987
 #, c-format
 msgid "# %s (key %s, mtime %d): could not be opened.\n"
 msgstr "# %s (key %s, mtime %d): 開けませんでした。\n"
 
-#: src/dir.c:987
+#: src/dir.c:991
 #, c-format
 msgid "# %s (device %d, inode [%d,%d,%d]): could not be opened.\n"
 msgstr "# %s (device %d, inode [%d,%d,%d]): 開けませんでした。\n"
 
-#: src/dir.c:992
+#: src/dir.c:996
 #, c-format
 msgid "# %s (device %ld, inode %ld): could not be opened.\n"
 msgstr "# %s (device %ld, inode %ld): 開けませんでした。\n"
 
-#: src/dir.c:1019
+#: src/dir.c:1023
 #, c-format
 msgid "# %s (key %s, mtime %d): "
 msgstr "# %s (key %s, mtime %d): "
 
-#: src/dir.c:1023
+#: src/dir.c:1027
 #, c-format
 msgid "# %s (device %d, inode [%d,%d,%d]): "
 msgstr "# %s (device %d, inode [%d,%d,%d]): "
 
-#: src/dir.c:1028
+#: src/dir.c:1032
 #, c-format
 msgid "# %s (device %ld, inode %ld): "
 msgstr "# %s (device %ld, inode %ld): "
 
-#: src/dir.c:1034 src/dir.c:1055
+#: src/dir.c:1038 src/dir.c:1059
 msgid "No"
 msgstr "0"
 
-#: src/dir.c:1037 src/dir.c:1058
+#: src/dir.c:1041 src/dir.c:1062
 msgid " files, "
 msgstr " 個のファイル、"
 
-#: src/dir.c:1039 src/dir.c:1060
+#: src/dir.c:1043 src/dir.c:1064
 msgid "no"
 msgstr "0"
 
-#: src/dir.c:1042
+#: src/dir.c:1046
 msgid " impossibilities"
 msgstr " 個の適用不能ファイル名"
 
-#: src/dir.c:1046
+#: src/dir.c:1050
 msgid " so far."
 msgstr " (ここまでに)。"
 
-#: src/dir.c:1063
+#: src/dir.c:1067
 #, fuzzy, c-format
 msgid " impossibilities in %lu directories.\n"
 msgstr " 個の適用不能ファイル名 (%u 個のディレクトリ内)。\n"
 
-#: src/expand.c:109
+#: src/expand.c:113
 #, c-format
 msgid "Recursive variable `%s' references itself (eventually)"
 msgstr "再帰的変数 `%s' が(最終的に)それ自身を参照しています"
 
-#: src/expand.c:251
+#: src/expand.c:255
 msgid "unterminated variable reference"
 msgstr "終端のない変数参照"
 
@@ -332,77 +332,77 @@ msgid ""
 "# "
 msgstr ""
 
-#: src/function.c:734
+#: src/function.c:740
 msgid "non-numeric first argument to `word' function"
 msgstr "非数値の第一引数が `word' 関数に与えられました"
 
-#: src/function.c:738
+#: src/function.c:744
 msgid "first argument to `word' function must be greater than 0"
 msgstr "`word' 関数への第一引数は 0 より大きくなければなりません"
 
-#: src/function.c:759
+#: src/function.c:765
 msgid "non-numeric first argument to `wordlist' function"
 msgstr "非数値の第一引数が `wordlist' 関数に与えられました"
 
-#: src/function.c:761
+#: src/function.c:767
 msgid "non-numeric second argument to `wordlist' function"
 msgstr "非数値の第二引数が `wordlist' 関数に与えられました"
 
-#: src/function.c:1308
+#: src/function.c:1314
 #, c-format
 msgid "create_child_process: DuplicateHandle(In) failed (e=%d)\n"
 msgstr "create_child_process: DuplicateHandle(In) が失敗 (e=%d)\n"
 
-#: src/function.c:1319
+#: src/function.c:1325
 #, c-format
 msgid "create_child_process: DuplicateHandle(Err) failed (e=%d)\n"
 msgstr "create_child_process: DuplicateHandle(Err) が失敗 (e=%d)\n"
 
-#: src/function.c:1324
+#: src/function.c:1330
 #, c-format
 msgid "CreatePipe() failed (e=%d)\n"
 msgstr "CreatePipe() が失敗 (e=%d)\n"
 
-#: src/function.c:1329
+#: src/function.c:1335
 msgid "windows32_openpipe (): process_init_fd() failed\n"
 msgstr "windows32_openpipe (): process_init_fd() が失敗\n"
 
-#: src/function.c:1579
+#: src/function.c:1585
 #, c-format
 msgid "Cleaning up temporary batch file %s\n"
 msgstr "一時的なバッチファイル %s を消去します\n"
 
-#: src/function.c:1797
+#: src/function.c:1803
 #, c-format
 msgid "Insufficient number of arguments (%d) to function `%s'"
 msgstr "引数の数(%d)が関数 `%s' にとって不十分です"
 
-#: src/function.c:1808
+#: src/function.c:1814
 #, c-format
 msgid "Unimplemented on this platform: function `%s'"
 msgstr "このプラットフォームでは実装されていません: 関数 `%s'"
 
-#: src/function.c:1859
+#: src/function.c:1865
 #, c-format
 msgid "unterminated call to function `%s': missing `%c'"
 msgstr "終端がない関数呼び出し `%s': `%c' がありません"
 
-#: src/function.c:1967
+#: src/function.c:1973
 #, c-format
 msgid "calling built-in %s("
 msgstr ""
 
-#: src/function.c:1983
+#: src/function.c:1989
 #, c-format
 msgid "%%s() returns \"%%%d.%ds\"\n"
 msgstr ""
 
-#: src/function.c:2004
+#: src/function.c:2010
 #, c-format
 msgid "calling %s("
 msgstr ""
 
-#: src/function.c:2061
+#: src/function.c:2067
 #, c-format
 msgid "%s() returns \"%s\"\n"
 msgstr ""
@@ -482,122 +482,122 @@ msgstr ""
 msgid "Collisions=%ld/%ld=%.0f%%"
 msgstr ""
 
-#: src/implicit.c:46
+#: src/implicit.c:52
 #, c-format
 msgid "Looking for an implicit rule for `%s'.\n"
 msgstr "`%s' のための暗黙ルールを探します。\n"
 
-#: src/implicit.c:62
+#: src/implicit.c:68
 #, c-format
 msgid "Looking for archive-member implicit rule for `%s'.\n"
 msgstr "`%s' のための書庫メンバ暗黙ルールを探します。\n"
 
-#: src/implicit.c:207
+#: src/implicit.c:213
 msgid "Avoiding implicit rule recursion.\n"
 msgstr "暗黙ルールの再帰を回避します。\n"
 
-#: src/implicit.c:345
+#: src/implicit.c:351
 #, c-format
 msgid "Trying pattern rule with stem `%.*s'.\n"
 msgstr "語幹 `%.*s' とのパターンルールを試します。\n"
 
-#: src/implicit.c:386
+#: src/implicit.c:392
 #, c-format
 msgid "Rejecting impossible implicit prerequisite `%s'.\n"
 msgstr "適用不能な暗黙の必要条件 `%s' を却下します。\n"
 
-#: src/implicit.c:387
+#: src/implicit.c:393
 #, c-format
 msgid "Rejecting impossible rule prerequisite `%s'.\n"
 msgstr "適用不能なルールの必要条件 `%s' を却下します。\n"
 
-#: src/implicit.c:397
+#: src/implicit.c:403
 #, c-format
 msgid "Trying implicit prerequisite `%s'.\n"
 msgstr "暗黙の必要条件 `%s' を試します。\n"
 
-#: src/implicit.c:398
+#: src/implicit.c:404
 #, c-format
 msgid "Trying rule prerequisite `%s'.\n"
 msgstr "ルールの必要条件 `%s' を試します。\n"
 
-#: src/implicit.c:420
+#: src/implicit.c:426
 #, c-format
 msgid "Found prerequisite `%s' as VPATH `%s'\n"
 msgstr "VPATH `%2$s' として必要条件 `%1$s' を見つけました\n"
 
-#: src/implicit.c:438
+#: src/implicit.c:444
 #, c-format
 msgid "Looking for a rule with intermediate file `%s'.\n"
 msgstr "中間ファイル `%s' のルールを探します。\n"
 
-#: src/job.c:325
+#: src/job.c:306
 #, fuzzy
 msgid "Cannot create a temporary file\n"
 msgstr "fwrite (一時ファイル)"
 
-#: src/job.c:391
+#: src/job.c:372
 #, c-format
 msgid "[%s] Error %d (ignored)"
 msgstr "[%s] エラー %d (無視されました)"
 
-#: src/job.c:392
+#: src/job.c:373
 #, c-format
 msgid "*** [%s] Error %d"
 msgstr "*** [%s] エラー %d"
 
-#: src/job.c:397
+#: src/job.c:378
 msgid " (core dumped)"
 msgstr " (コアダンプしました)"
 
-#: src/job.c:486
+#: src/job.c:467
 msgid "*** Waiting for unfinished jobs...."
 msgstr "*** 未完了のジョブを待っています...."
 
-#: src/job.c:515
+#: src/job.c:496
 #, c-format
 msgid "Live child 0x%08lx (%s) PID %ld %s\n"
 msgstr "生存子プロセス 0x%08lx (%s) PID %ld %s\n"
 
-#: src/job.c:517 src/job.c:678 src/job.c:775 src/job.c:1441
+#: src/job.c:498 src/job.c:651 src/job.c:748 src/job.c:1382
 msgid " (remote)"
 msgstr " (リモート)"
 
-#: src/job.c:675
+#: src/job.c:648
 #, c-format
 msgid "Reaping losing child 0x%08lx PID %ld %s\n"
 msgstr "失った子プロセス 0x%08lx PID %ld %s を回収します\n"
 
-#: src/job.c:676
+#: src/job.c:649
 #, c-format
 msgid "Reaping winning child 0x%08lx PID %ld %s\n"
 msgstr "成功した子プロセス 0x%08lx PID %ld %s を回収します\n"
 
-#: src/job.c:681
+#: src/job.c:654
 #, c-format
 msgid "Cleaning up temp batch file %s\n"
 msgstr "一時的なバッチファイル %s を片付けます\n"
 
-#: src/job.c:773
+#: src/job.c:746
 #, fuzzy, c-format
 msgid "Removing child 0x%08lx PID %ld%s from chain.\n"
 msgstr "チェインから子プロセス 0x%08lx PID %ld %s を削除します。\n"
 
-#: src/job.c:841
+#: src/job.c:814
 msgid "write jobserver"
 msgstr "ジョブサーバへの write"
 
-#: src/job.c:843
+#: src/job.c:816
 #, c-format
 msgid "Released token for child 0x%08lx (%s).\n"
 msgstr "子プロセス 0x%08lx (%s) の印を解放しました。\n"
 
-#: src/job.c:1373 src/job.c:2551
+#: src/job.c:1316 src/job.c:1920
 #, c-format
 msgid "process_easy() failed failed to launch process (e=%d)\n"
 msgstr "process_easy() が失敗しプロセス起動ができませんでした (e=%d)\n"
 
-#: src/job.c:1377 src/job.c:2555
+#: src/job.c:1320 src/job.c:1924
 #, c-format
 msgid ""
 "\n"
@@ -606,349 +606,279 @@ msgstr ""
 "\n"
 "起動の失敗で %d 個の引数がカウントされました\n"
 
-#: src/job.c:1439
+#: src/job.c:1380
 #, c-format
 msgid "Putting child 0x%08lx (%s) PID %ld%s on the chain.\n"
 msgstr "チェインに子プロセス 0x%08lx (%s) PID %ld%s を取り込みました。\n"
 
-#: src/job.c:1686
+#: src/job.c:1627
 #, c-format
 msgid "Obtained token for child 0x%08lx (%s).\n"
 msgstr "子プロセス 0x%08lx (%s) に印がつけられました。\n"
 
-#: src/job.c:1695
+#: src/job.c:1636
 msgid "read jobs pipe"
 msgstr "ジョブのパイプの read"
 
-#: src/job.c:1802
+#: src/job.c:1743
 msgid "cannot enforce load limits on this operating system"
 msgstr "このオペレーティングシステムではシステム負荷制限を加えられません"
 
-#: src/job.c:1804
+#: src/job.c:1745
 msgid "cannot enforce load limit: "
 msgstr "システム負荷制限の課すことができませんでした: "
 
-#: src/job.c:1927
-#, c-format
-msgid "internal error: `%s' command_state"
-msgstr "内部エラー: `%s' command_state"
-
-#: src/job.c:2014
-#, c-format
-msgid "-warning, CTRL-Y will leave sub-process(es) around.\n"
-msgstr "-警告、CTRL-Y は子プロセスを散らかしたままにするでしょう。\n"
-
-#: src/job.c:2030
-#, c-format
-msgid "-warning, you may have to re-enable CTRL-Y handling from DCL.\n"
-msgstr ""
-"-警告、DCL からの CTRL-Y 操作を再び有効にする必要があるかも知れません。\n"
-
-#: src/job.c:2144
-#, c-format
-msgid "BUILTIN [%s][%s]\n"
-msgstr "ビルトイン [%s][%s]\n"
-
-#: src/job.c:2155
-#, c-format
-msgid "BUILTIN CD %s\n"
-msgstr "ビルトイン CD %s\n"
-
-#: src/job.c:2173
-#, c-format
-msgid "BUILTIN RM %s\n"
-msgstr "ビルトイン RM %s\n"
-
-#: src/job.c:2194
-#, c-format
-msgid "Unknown builtin command '%s'\n"
-msgstr "不明なビルトインコマンド '%s'\n"
-
-#: src/job.c:2216
-#, c-format
-msgid "Error, empty command\n"
-msgstr "エラー、空のコマンド\n"
-
-#: src/job.c:2223 src/main.c:1429
-msgid "fopen (temporary file)"
-msgstr "fopen (一時ファイル)"
-
-#: src/job.c:2228
-#, c-format
-msgid "Redirected input from %s\n"
-msgstr "%s から入力リダイレクトされました\n"
-
-#: src/job.c:2235
-#, c-format
-msgid "Redirected error to %s\n"
-msgstr "%s へエラーリダイレクトされました\n"
-
-#: src/job.c:2242
-#, c-format
-msgid "Redirected output to %s\n"
-msgstr "%s へ出力リダイレクトされました\n"
-
-#: src/job.c:2305
-#, c-format
-msgid "Executing %s instead\n"
-msgstr "代わりに %s を実行します\n"
-
-#: src/job.c:2405
-#, c-format
-msgid "Error spawning, %d\n"
-msgstr "spawn のエラー、%d\n"
-
-#: src/job.c:2439
+#: src/job.c:1819
 msgid "no more file handles: could not duplicate stdin\n"
 msgstr ""
 
-#: src/job.c:2441
+#: src/job.c:1821
 msgid "no more file handles: could not duplicate stdout\n"
 msgstr ""
 
-#: src/job.c:2469
+#: src/job.c:1849
 msgid "Could not restore stdin\n"
 msgstr ""
 
-#: src/job.c:2477
+#: src/job.c:1857
 msgid "Could not restore stdout\n"
 msgstr ""
 
-#: src/job.c:2581
+#: src/job.c:1950
 #, c-format
 msgid "make reaped child pid %d, still waiting for pid %d\n"
 msgstr "make は pid %d の子プロセスを回収し、pid %d を待ち続けます\n"
 
-#: src/job.c:2620
+#: src/job.c:1989
 #, c-format
 msgid "%s: Command not found"
 msgstr "%s: コマンドが見つかりませんでした"
 
-#: src/job.c:2680
+#: src/job.c:2049
 #, c-format
 msgid "%s: Shell program not found"
 msgstr "%s: シェルプログラムが見つかりませんでした"
 
-#: src/job.c:2689
+#: src/job.c:2058
 msgid "spawnvpe: environment space might be exhausted"
 msgstr ""
 
-#: src/job.c:2897
+#: src/job.c:2264
 #, fuzzy, c-format
 msgid "$SHELL changed (was `%s', now `%s')\n"
 msgstr "$SHELL が変更されました (前は `%s'、今は `%s')"
 
-#: src/job.c:3310
+#: src/job.c:2673
 #, c-format
 msgid "Creating temporary batch file %s\n"
 msgstr "一時的なバッチファイル %s を作成します\n"
 
-#: src/job.c:3421
+#: src/job.c:2784
 #, c-format
 msgid "%s (line %d) Bad shell context (!unixy && !batch_mode_shell)\n"
 msgstr "%s (%d 行目) 不正なシェルコンテキスト (!unixy && !batch_mode_shell)\n"
 
-#: src/main.c:309
+#: src/main.c:320
 msgid "Options:\n"
 msgstr "オプション:\n"
 
-#: src/main.c:310
+#: src/main.c:321
 #, fuzzy
 msgid "  -b, -m                       Ignored for compatibility.\n"
 msgstr "互換性のためのもので、無視される"
 
-#: src/main.c:312
+#: src/main.c:323
 msgid "  -B, --always-make            Unconditionally make all targets.\n"
 msgstr ""
 
-#: src/main.c:314
+#: src/main.c:325
 msgid "  --basename-filenames         Show files as basename only.\n"
 msgstr ""
 
-#: src/main.c:316
+#: src/main.c:327
 msgid ""
 "  -C DIRECTORY, --directory=DIRECTORY\n"
 "                               Change to DIRECTORY before doing anything.\n"
 msgstr ""
 
-#: src/main.c:319
+#: src/main.c:330
 #, fuzzy
 msgid "  -d                           Print lots of debugging information.\n"
 msgstr "デバッグ情報を大量に表示する"
 
-#: src/main.c:321
+#: src/main.c:332
 #, fuzzy
 msgid ""
 "  --debug[=FLAGS]              Print various types of debugging "
 "information.\n"
 msgstr "多様な形式のデバッグ情報を表示する"
 
-#: src/main.c:323
+#: src/main.c:334
 msgid ""
 "  -e, --environment-overrides\n"
 "                               Environment variables override makefiles.\n"
 msgstr ""
 
-#: src/main.c:326
+#: src/main.c:337
 msgid ""
 "  -E, --extended-errors\n"
 "                               Additional error reporting.\n"
 msgstr ""
 
-#: src/main.c:329
+#: src/main.c:340
 msgid ""
 "  -f FILE, --file=FILE, --makefile=FILE\n"
 "                               Read FILE as a makefile.\n"
 msgstr ""
 
-#: src/main.c:332
+#: src/main.c:343
 #, fuzzy
 msgid "  -h, --help                   Print this message and exit.\n"
 msgstr "このメッセージを表示して終了する"
 
-#: src/main.c:334
+#: src/main.c:345
 #, fuzzy
 msgid "  -i, --ignore-errors          Ignore errors from commands.\n"
 msgstr "コマンドからのエラーを無視する"
 
-#: src/main.c:336
+#: src/main.c:347
 msgid ""
 "  -I DIRECTORY, --include-dir=DIRECTORY\n"
 "                               Search DIRECTORY for included makefiles.\n"
 msgstr ""
 
-#: src/main.c:339
+#: src/main.c:350
 #, fuzzy
 msgid ""
 "  -j [N], --jobs[=N]           Allow N jobs at once; infinite jobs with no "
 "arg.\n"
 msgstr "N 個のジョブを許可; 無引数だとジョブ数制限なし"
 
-#: src/main.c:341
+#: src/main.c:352
 #, fuzzy
 msgid ""
 "  -k, --keep-going             Keep going when some targets can't be made.\n"
 msgstr "あるターゲットが make できなくても実行を続ける"
 
-#: src/main.c:343
+#: src/main.c:354
 msgid ""
 "  -l [N], --load-average[=N], --max-load[=N]\n"
 "                               Don't start multiple jobs unless load is "
 "below N.\n"
 msgstr ""
 
-#: src/main.c:346
+#: src/main.c:357
 msgid ""
 "  -n, --just-print, --dry-run, --recon\n"
 "                               Don't actually run any commands; just print "
 "them.\n"
 msgstr ""
 
-#: src/main.c:349
+#: src/main.c:360
 msgid ""
 "  -o FILE, --old-file=FILE, --assume-old=FILE\n"
 "                               Consider FILE to be very old and don't remake "
 "it.\n"
 msgstr ""
 
-#: src/main.c:352
+#: src/main.c:363
 #, fuzzy
 msgid "  -p, --print-data-base        Print make's internal database.\n"
 msgstr "make の内部データベースを表示する"
 
-#: src/main.c:354
+#: src/main.c:365
 #, fuzzy
 msgid ""
 "  -q, --question               Run no commands; exit status says if up to "
 "date.\n"
 msgstr "コマンドを実行しない; 更新状況は終了状態で通知"
 
-#: src/main.c:356
+#: src/main.c:367
 #, fuzzy
 msgid "  -r, --no-builtin-rules       Disable the built-in implicit rules.\n"
 msgstr "ビルトインの暗黙ルールを無効にする"
 
-#: src/main.c:358
+#: src/main.c:369
 #, fuzzy
 msgid ""
 "  -R, --no-builtin-variables   Disable the built-in variable settings.\n"
 msgstr "ビルトインの変数設定を無効にする"
 
-#: src/main.c:360
+#: src/main.c:371
 #, fuzzy
 msgid "  -s, --silent, --quiet        Don't echo commands.\n"
 msgstr "コマンドからのエラーを無視する"
 
-#: src/main.c:362
+#: src/main.c:373
 msgid ""
 "  -S, --no-keep-going, --stop\n"
 "                               Turns off -k.\n"
 msgstr ""
 
-#: src/main.c:365
+#: src/main.c:376
 #, fuzzy
 msgid ""
 "  -t, --touch                  Touch targets instead of remaking them.\n"
 msgstr "ターゲットを再 make する代わりに touch する"
 
-#: src/main.c:367
+#: src/main.c:378
 #, fuzzy
 msgid ""
 "  -v, --version                Print the version number of make and exit.\n"
 msgstr "make のバージョン番号を表示して終了する"
 
-#: src/main.c:369
+#: src/main.c:380
 #, fuzzy
 msgid "  -w, --print-directory        Print the current directory.\n"
 msgstr "カレントディレクトリを表示する"
 
-#: src/main.c:371
+#: src/main.c:382
 #, fuzzy
 msgid ""
 "  --no-print-directory         Turn off -w, even if it was turned on "
 "implicitly.\n"
 msgstr "-w をオフにする。暗黙に有効な場合でもオフにする"
 
-#: src/main.c:373
+#: src/main.c:384
 msgid ""
 "  -W FILE, --what-if=FILE, --new-file=FILE, --assume-new=FILE\n"
 "                               Consider FILE to be infinitely new.\n"
 msgstr ""
 
-#: src/main.c:376
+#: src/main.c:387
 #, fuzzy
 msgid ""
 "  --warn-undefined-variables   Warn when an undefined variable is "
 "referenced.\n"
 msgstr "未定義の変数が参照されたときに警告を発する"
 
-#: src/main.c:378
+#: src/main.c:389
 msgid ""
 "  -x, --trace[=TYPE]           Trace command execution TYPE  may be\n"
 "                               \"read\", \"normal\", \"full\".\n"
 msgstr ""
 
-#: src/main.c:381
+#: src/main.c:392
 msgid ""
 "  -X [type], --debugger[=TYPE] Enter debugger. TYPE may be\n"
 "                               \"preread\", \"preaction\", \"full\",\n"
 "                               \"error\", or \"fatal\".\n"
 msgstr ""
 
-#: src/main.c:385
+#: src/main.c:396
 msgid "  -V, --show-variables         Show variable expansions.\n"
 msgstr ""
 
-#: src/main.c:580
+#: src/main.c:591
 msgid "empty string invalid as file name"
 msgstr "空の文字列はファイル名としては無効です"
 
-#: src/main.c:638
+#: src/main.c:649
 #, c-format
 msgid "%s: Interrupt/Exception caught (code = 0x%x, addr = 0x%x)\n"
 msgstr "%s: 割り込み/例外を捕捉しました (code = 0x%x, addr = 0x%x)\n"
 
-#: src/main.c:645
+#: src/main.c:656
 #, c-format
 msgid ""
 "\n"
@@ -963,181 +893,185 @@ msgstr ""
 "例外フラグ = %x\n"
 "例外アドレス = %x\n"
 
-#: src/main.c:653
+#: src/main.c:664
 #, c-format
 msgid "Access violation: write operation at address %x\n"
 msgstr "アクセス保護違反: アドレス %x での書き込み操作\n"
 
-#: src/main.c:654
+#: src/main.c:665
 #, c-format
 msgid "Access violation: read operation at address %x\n"
 msgstr "アクセス保護違反: アドレス %x での読み込み操作\n"
 
-#: src/main.c:719
+#: src/main.c:730
 #, c-format
 msgid "find_and_set_shell setting default_shell = %s\n"
 msgstr "find_and_set_shell は default_shell = %s に設定します\n"
 
-#: src/main.c:762
+#: src/main.c:773
 #, c-format
 msgid "find_and_set_shell path search set default_shell = %s\n"
 msgstr "find_and_set_shell パス探索で default_shell = %s にセットしました\n"
 
-#: src/main.c:1174
+#: src/main.c:1185
 #, c-format
 msgid "%s is suspending for 30 seconds..."
 msgstr "%s は 30 秒間停止します..."
 
-#: src/main.c:1176
+#: src/main.c:1187
 #, c-format
 msgid "done sleep(30). Continuing.\n"
 msgstr "sleep(30) が終わりました。続けます。\n"
 
-#: src/main.c:1390
+#: src/main.c:1401
 msgid "Makefile from standard input specified twice."
 msgstr "標準入力からの makefile が二回指定されました。"
 
-#: src/main.c:1435
+#: src/main.c:1440
+msgid "fopen (temporary file)"
+msgstr "fopen (一時ファイル)"
+
+#: src/main.c:1446
 msgid "fwrite (temporary file)"
 msgstr "fwrite (一時ファイル)"
 
-#: src/main.c:1523
+#: src/main.c:1534
 msgid "Do not specify -j or --jobs if sh.exe is not available."
 msgstr "sh.exe が使えない状態で -j や --jobs を指定してはいけません。"
 
-#: src/main.c:1524
+#: src/main.c:1535
 msgid "Resetting make for single job mode."
 msgstr "単一ジョブモードの make にリセットします。"
 
-#: src/main.c:1565
+#: src/main.c:1576
 msgid "Parallel jobs (-j) are not supported on this platform."
 msgstr "並列ジョブ (-j) はこのプラットフォームでサポートされません。"
 
-#: src/main.c:1566
+#: src/main.c:1577
 msgid "Resetting to single job (-j1) mode."
 msgstr "単一ジョブ (-j1) モードにリセットします。"
 
-#: src/main.c:1581
+#: src/main.c:1592
 msgid "internal error: multiple --jobserver-fds options"
 msgstr "内部エラー: 複数の --jobserver-fds オプション"
 
-#: src/main.c:1589
+#: src/main.c:1600
 #, c-format
 msgid "internal error: invalid --jobserver-fds string `%s'"
 msgstr "内部エラー: 無効な --jobserver-fds 文字列 `%s'"
 
-#: src/main.c:1599
+#: src/main.c:1610
 msgid "warning: -jN forced in submake: disabling jobserver mode."
 msgstr ""
 "警告: 副次 make で -jN を強制指定しました: jobserver モードを無効にします。"
 
-#: src/main.c:1609
+#: src/main.c:1620
 msgid "dup jobserver"
 msgstr "dup jobserver"
 
-#: src/main.c:1612
+#: src/main.c:1623
 msgid ""
 "warning: jobserver unavailable: using -j1.  Add `+' to parent make rule."
 msgstr ""
 "警告: jobserver が利用不可: -j1 を使い、親 make ルールに `+' を追加しましょう"
 
-#: src/main.c:1635
+#: src/main.c:1646
 msgid "creating jobs pipe"
 msgstr "ジョブパイプ作成中"
 
-#: src/main.c:1648
+#: src/main.c:1659
 msgid "init jobserver pipe"
 msgstr "jobserver パイプの初期化"
 
-#: src/main.c:1735
+#: src/main.c:1746
 msgid "Updating makefiles....\n"
 msgstr "makefile の更新中....\n"
 
-#: src/main.c:1760
+#: src/main.c:1771
 #, c-format
 msgid "Makefile `%s' might loop; not remaking it.\n"
 msgstr "makefile `%s' 自己再帰のおそれ ― 再 make しません。\n"
 
-#: src/main.c:1839
+#: src/main.c:1850
 #, c-format
 msgid "Failed to remake makefile `%s'."
 msgstr "makefile `%s' の再 make に失敗しました。"
 
-#: src/main.c:1856
+#: src/main.c:1867
 #, c-format
 msgid "Included makefile `%s' was not found."
 msgstr "インクルードされる makefile `%s' が見つかりませんでした。"
 
-#: src/main.c:1861
+#: src/main.c:1872
 #, c-format
 msgid "Makefile `%s' was not found"
 msgstr "makefile `%s' が見つかりませんでした"
 
-#: src/main.c:1929
+#: src/main.c:1940
 msgid "Couldn't change back to original directory."
 msgstr "元のディレクトリに戻れませんでした。"
 
-#: src/main.c:1964
+#: src/main.c:1975
 msgid "Re-executing:"
 msgstr "再実行します:"
 
-#: src/main.c:2023
+#: src/main.c:2034
 msgid "unlink (temporary file): "
 msgstr "unlink (一時ファイル): "
 
-#: src/main.c:2046
+#: src/main.c:2057
 msgid "No targets specified and no makefile found"
 msgstr "ターゲットが指定されておらず、makefile も見つかりません"
 
-#: src/main.c:2048
+#: src/main.c:2059
 msgid "No targets"
 msgstr "ターゲットがありません"
 
-#: src/main.c:2053
+#: src/main.c:2064
 msgid "Updating goal targets....\n"
 msgstr "最終ターゲットを更新中....\n"
 
-#: src/main.c:2079
+#: src/main.c:2090
 msgid "warning:  Clock skew detected.  Your build may be incomplete."
 msgstr "警告:  クロックの歪みを検出。不完全なビルド結果になるかもしれません。"
 
-#: src/main.c:2234
+#: src/main.c:2245
 #, c-format
 msgid "Usage: %s [options] [target] ...\n"
 msgstr "使い方: %s [オプション] [ターゲット] ...\n"
 
-#: src/main.c:2240
+#: src/main.c:2251
 #, c-format
 msgid ""
 "\n"
 "This program built for %s\n"
 msgstr ""
 
-#: src/main.c:2242
+#: src/main.c:2253
 #, c-format
 msgid ""
 "\n"
 "This program built for %s (%s)\n"
 msgstr ""
 
-#: src/main.c:2245
+#: src/main.c:2256
 #, fuzzy, c-format
 msgid "Report bugs to <bug-make@gnu.org>\n"
 msgstr ""
 "\n"
 "バグレポートは <bug-make@gnu.org> まで。\n"
 
-#: src/main.c:2317
+#: src/main.c:2328
 #, fuzzy, c-format
 msgid "the `-%c' option requires a non-empty string argument"
 msgstr "`-%c' オプションは正の整数引数を要求します"
 
-#: src/main.c:2369
+#: src/main.c:2380
 #, c-format
 msgid "the `-%c' option requires a positive integral argument"
 msgstr "`-%c' オプションは正の整数引数を要求します"
 
-#: src/main.c:2793
+#: src/main.c:2804
 #, fuzzy, c-format
 msgid ""
 "%sThis is free software; see the source for copying conditions.\n"
@@ -1155,21 +1089,21 @@ msgstr ""
 "%sバグレポートは <bug-make@gnu.org> まで。\n"
 "\n"
 
-#: src/main.c:2799
+#: src/main.c:2810
 #, c-format
 msgid ""
 "\n"
 "%sThis program built for %s\n"
 msgstr ""
 
-#: src/main.c:2801
+#: src/main.c:2812
 #, c-format
 msgid ""
 "\n"
 "%sThis program built for %s (%s)\n"
 msgstr ""
 
-#: src/main.c:2819
+#: src/main.c:2830
 #, c-format
 msgid ""
 "\n"
@@ -1178,7 +1112,7 @@ msgstr ""
 "\n"
 "# Make データベース出力 %s"
 
-#: src/main.c:2828
+#: src/main.c:2839
 #, c-format
 msgid ""
 "\n"
@@ -1187,7 +1121,7 @@ msgstr ""
 "\n"
 "# Make データベース終了 %s\n"
 
-#: src/misc.c:223 src/misc.c:238 src/misc.c:255 src/read.c:3075
+#: src/misc.c:223 src/misc.c:238 src/misc.c:255 src/read.c:3086
 msgid "virtual memory exhausted"
 msgstr "仮想メモリを使い果たしました"
 
@@ -1208,351 +1142,351 @@ msgstr ""
 msgid "Child access"
 msgstr ""
 
-#: src/read.c:164
+#: src/read.c:175
 msgid "Reading makefiles...\n"
 msgstr "makefile を読み込みます...\n"
 
-#: src/read.c:326
+#: src/read.c:337
 #, c-format
 msgid "Reading makefile `%s'"
 msgstr "makefile `%s' の読み込み中"
 
-#: src/read.c:328
+#: src/read.c:339
 #, c-format
 msgid " (no default goal)"
 msgstr " (デフォルトの最終ターゲットがありません)"
 
-#: src/read.c:330
+#: src/read.c:341
 #, c-format
 msgid " (search path)"
 msgstr " (探索パス)"
 
-#: src/read.c:332
+#: src/read.c:343
 #, c-format
 msgid " (don't care)"
 msgstr " (気にしなくてよい)"
 
-#: src/read.c:334
+#: src/read.c:345
 #, c-format
 msgid " (no ~ expansion)"
 msgstr " (~ の展開なし)"
 
-#: src/read.c:653
+#: src/read.c:664
 msgid "invalid syntax in conditional"
 msgstr "条件部の文法が無効です"
 
-#: src/read.c:662
+#: src/read.c:673
 msgid "extraneous `endef'"
 msgstr "関係のない `endef'"
 
-#: src/read.c:674 src/read.c:702 src/variable.c:1205
+#: src/read.c:685 src/read.c:713 src/variable.c:1210
 msgid "empty variable name"
 msgstr "空の変数名"
 
-#: src/read.c:691
+#: src/read.c:702
 msgid "empty `override' directive"
 msgstr "空の `override' 疑似命令"
 
-#: src/read.c:716
+#: src/read.c:727
 msgid "invalid `override' directive"
 msgstr "無効な `override' 疑似命令"
 
-#: src/read.c:893
+#: src/read.c:904
 msgid "commands commence before first target"
 msgstr "最初のターゲットより前にコマンドを起動"
 
-#: src/read.c:944
+#: src/read.c:955
 msgid "missing rule before commands"
 msgstr "コマンドより前でルールが指示されていません"
 
-#: src/read.c:1031
+#: src/read.c:1042
 #, c-format
 msgid "missing separator%s"
 msgstr "分離記号を欠いています%s"
 
-#: src/read.c:1033
+#: src/read.c:1044
 msgid " (did you mean TAB instead of 8 spaces?)"
 msgstr " (8 個の空白でしたが、TAB のつもりでしたか?)"
 
-#: src/read.c:1204
+#: src/read.c:1215
 msgid "missing target pattern"
 msgstr "ターゲットパターンを欠いています"
 
-#: src/read.c:1206
+#: src/read.c:1217
 msgid "multiple target patterns"
 msgstr "複数のターゲットパターンです"
 
-#: src/read.c:1210
+#: src/read.c:1221
 #, c-format
 msgid "target pattern contains no `%%'"
 msgstr "ターゲットパターンが `%%' を含んでいません"
 
-#: src/read.c:1271
+#: src/read.c:1282
 msgid "missing `endif'"
 msgstr "`endif' を欠いています"
 
-#: src/read.c:1347
+#: src/read.c:1358
 msgid "Extraneous text after `endef' directive"
 msgstr "`endef' 疑似命令の後ろに無関係な文字列があります"
 
-#: src/read.c:1381
+#: src/read.c:1392
 msgid "missing `endef', unterminated `define'"
 msgstr "`endef' を欠いており、`define' が終了されません"
 
-#: src/read.c:1433 src/read.c:1601
+#: src/read.c:1444 src/read.c:1612
 #, c-format
 msgid "Extraneous text after `%s' directive"
 msgstr "`%s' 疑似命令の後ろに無関係な文字列があります"
 
-#: src/read.c:1436
+#: src/read.c:1447
 #, c-format
 msgid "extraneous `%s'"
 msgstr "無関係な `%s'"
 
-#: src/read.c:1441
+#: src/read.c:1452
 msgid "only one `else' per conditional"
 msgstr "一つの条件部につき一つしか `else' を使えません"
 
-#: src/read.c:1659
+#: src/read.c:1670
 #, fuzzy
 msgid "Malformed pattern-specific variable definition"
 msgstr "ターゲット毎の変数定義が異常です"
 
-#: src/read.c:1682
+#: src/read.c:1693
 #, fuzzy
 msgid "Malformed target-specific variable definition"
 msgstr "ターゲット毎の変数定義が異常です"
 
-#: src/read.c:1773
+#: src/read.c:1784
 msgid "mixed implicit and static pattern rules"
 msgstr "暗黙ルールと静的パターンルールが混ざりました"
 
-#: src/read.c:1776
+#: src/read.c:1787
 msgid "mixed implicit and normal rules"
 msgstr "暗黙ルールと通常ルールが混ざりました"
 
-#: src/read.c:1817
+#: src/read.c:1828
 #, c-format
 msgid "target `%s' doesn't match the target pattern"
 msgstr "ターゲット `%s' はターゲットパターンと一致しません"
 
-#: src/read.c:1839
+#: src/read.c:1850
 #, c-format
 msgid "target `%s' leaves prerequisite pattern empty"
 msgstr "ターゲット `%s' の必要条件パターンが空のままです"
 
-#: src/read.c:1953 src/read.c:2053
+#: src/read.c:1964 src/read.c:2064
 #, c-format
 msgid "target file `%s' has both : and :: entries"
 msgstr "ターゲットファイル `%s' が : と :: 項目の両方を持っています"
 
-#: src/read.c:1959
+#: src/read.c:1970
 #, c-format
 msgid "target `%s' given more than once in the same rule."
 msgstr "同一ルール内でターゲット `%s' が複数回与えられました。"
 
-#: src/read.c:1968
+#: src/read.c:1979
 #, c-format
 msgid "warning: overriding commands for target `%s'"
 msgstr "警告: ターゲット `%s' へのコマンドを置き換えます"
 
-#: src/read.c:1971
+#: src/read.c:1982
 #, c-format
 msgid "warning: ignoring old commands for target `%s'"
 msgstr "警告: ターゲット `%s' への古いコマンドは無視されます"
 
-#: src/read.c:2526
+#: src/read.c:2537
 msgid "warning: NUL character seen; rest of line ignored"
 msgstr "警告: NUL 文字があります; 行の残りは無視されます"
 
-#: src/remake.c:245
+#: src/remake.c:242
 #, c-format
 msgid "Nothing to be done for `%s'."
 msgstr "`%s' に対して行うべき事はありません。"
 
-#: src/remake.c:246
+#: src/remake.c:243
 #, c-format
 msgid "`%s' is up to date."
 msgstr "`%s' は更新済みです"
 
-#: src/remake.c:320
+#: src/remake.c:317
 #, c-format
 msgid "Pruning file `%s'.\n"
 msgstr "ファイル `%s' を整理します。\n"
 
-#: src/remake.c:368
+#: src/remake.c:365
 #, c-format
 msgid "%sNo rule to make target `%s'%s"
 msgstr "%sターゲット `%s' を make するルールがありません%s"
 
-#: src/remake.c:370
+#: src/remake.c:367
 #, c-format
 msgid "%sNo rule to make target `%s', needed by `%s'%s"
 msgstr ""
 "%1$s`%3$s' に必要なターゲット `%2$s' を make するルールがありません%4$s"
 
-#: src/remake.c:399
+#: src/remake.c:396
 #, c-format
 msgid "Considering target file `%s'.\n"
 msgstr "ターゲットファイル `%s' の検討を行います。\n"
 
-#: src/remake.c:406
+#: src/remake.c:403
 #, c-format
 msgid "Recently tried and failed to update file `%s'.\n"
 msgstr "最近試して更新に失敗したファイル `%s'。\n"
 
-#: src/remake.c:410
+#: src/remake.c:407
 #, c-format
 msgid "File `%s' was considered already.\n"
 msgstr "ファイル `%s' は検討済みです。\n"
 
-#: src/remake.c:420
+#: src/remake.c:417
 #, c-format
 msgid "Still updating file `%s'.\n"
 msgstr "まだファイル `%s' の更新中です。\n"
 
-#: src/remake.c:423
+#: src/remake.c:420
 #, c-format
 msgid "Finished updating file `%s'.\n"
 msgstr "ファイル `%s' の更新が終了しました。\n"
 
-#: src/remake.c:460
+#: src/remake.c:457
 #, c-format
 msgid "File `%s' does not exist.\n"
 msgstr "ファイル `%s' が存在しません。\n"
 
-#: src/remake.c:467
+#: src/remake.c:464
 #, c-format
 msgid ""
 "*** Warning: .LOW_RESOLUTION_TIME file `%s' has a high resolution time stamp"
 msgstr ""
 
-#: src/remake.c:480 src/remake.c:987
+#: src/remake.c:477 src/remake.c:984
 #, c-format
 msgid "Found an implicit rule for `%s'.\n"
 msgstr "`%s' のための暗黙ルールを見つけました。\n"
 
-#: src/remake.c:482 src/remake.c:989
+#: src/remake.c:479 src/remake.c:986
 #, c-format
 msgid "No implicit rule found for `%s'.\n"
 msgstr "`%s' のための暗黙ルールがありません。\n"
 
-#: src/remake.c:488 src/remake.c:995
+#: src/remake.c:485 src/remake.c:992
 #, c-format
 msgid "Using default commands for `%s'.\n"
 msgstr "`%s' 用のデフォルトコマンドを使用します。\n"
 
-#: src/remake.c:510 src/remake.c:1021
+#: src/remake.c:507 src/remake.c:1018
 #, c-format
 msgid "Circular %s <- %s dependency dropped."
 msgstr "循環 %s <- %s 依存関係が破棄されました。"
 
-#: src/remake.c:625
+#: src/remake.c:622
 #, c-format
 msgid "Finished prerequisites of target file `%s'.\n"
 msgstr "ターゲットファイル `%s' の必要条件を満たしました。\n"
 
-#: src/remake.c:631
+#: src/remake.c:628
 #, c-format
 msgid "The prerequisites of `%s' are being made.\n"
 msgstr "`%s' の必要条件を make します。\n"
 
-#: src/remake.c:644
+#: src/remake.c:641
 #, c-format
 msgid "Giving up on target file `%s'.\n"
 msgstr "ターゲットファイル `%s' を諦めます。\n"
 
-#: src/remake.c:649
+#: src/remake.c:646
 #, c-format
 msgid "Target `%s' not remade because of errors."
 msgstr "ターゲット `%s' はエラーにより再 make できませんでした。"
 
-#: src/remake.c:701
+#: src/remake.c:698
 #, fuzzy, c-format
 msgid "Prerequisite `%s' is order-only for target `%s'.\n"
 msgstr "必要条件 `%s' はターゲット `%s' よりも古い。\n"
 
-#: src/remake.c:706
+#: src/remake.c:703
 #, c-format
 msgid "Prerequisite `%s' of target `%s' does not exist.\n"
 msgstr "ターゲット `%2$s' の必要条件 `%1$s' が存在しません。\n"
 
-#: src/remake.c:711
+#: src/remake.c:708
 #, c-format
 msgid "Prerequisite `%s' is newer than target `%s'.\n"
 msgstr "必要条件 `%s' はターゲット `%s' よりも新しい。\n"
 
-#: src/remake.c:714
+#: src/remake.c:711
 #, c-format
 msgid "Prerequisite `%s' is older than target `%s'.\n"
 msgstr "必要条件 `%s' はターゲット `%s' よりも古い。\n"
 
-#: src/remake.c:732
+#: src/remake.c:729
 #, c-format
 msgid "Target `%s' is double-colon and has no prerequisites.\n"
 msgstr "ターゲット `%s' はダブルコロンで、かつ必要条件を持たない。\n"
 
-#: src/remake.c:739
+#: src/remake.c:736
 #, c-format
 msgid "No commands for `%s' and no prerequisites actually changed.\n"
 msgstr "`%s' のためのコマンドが無く、かつ実際に変更された必要条件がない。\n"
 
-#: src/remake.c:744
+#: src/remake.c:741
 #, c-format
 msgid "Making `%s' due to always-make flag.\n"
 msgstr ""
 
-#: src/remake.c:752
+#: src/remake.c:749
 #, c-format
 msgid "No need to remake target `%s'"
 msgstr "ターゲット `%s' を再 make する必要はありません"
 
-#: src/remake.c:754
+#: src/remake.c:751
 #, c-format
 msgid "; using VPATH name `%s'"
 msgstr "; VPATH 名 `%s' を使用します"
 
-#: src/remake.c:774
+#: src/remake.c:771
 #, c-format
 msgid "Must remake target `%s'.\n"
 msgstr "ターゲット `%s' の再 make が必要です。\n"
 
-#: src/remake.c:780
+#: src/remake.c:777
 #, c-format
 msgid "  Ignoring VPATH name `%s'.\n"
 msgstr "  VPATH 名 `%s' を無視します。\n"
 
-#: src/remake.c:811
+#: src/remake.c:808
 #, c-format
 msgid "Commands of `%s' are being run.\n"
 msgstr "`%s' のコマンドを実行します。\n"
 
-#: src/remake.c:818
+#: src/remake.c:815
 #, c-format
 msgid "Failed to remake target file `%s'.\n"
 msgstr "ターゲットファイル `%s' の再 make に失敗しました。\n"
 
-#: src/remake.c:821
+#: src/remake.c:818
 #, c-format
 msgid "Successfully remade target file `%s'.\n"
 msgstr "ターゲットファイル `%s' の再 make に成功しました。\n"
 
-#: src/remake.c:824
+#: src/remake.c:821
 #, c-format
 msgid "Target file `%s' needs remade under -q.\n"
 msgstr "ターゲットファイル `%s' は -q オプション付での再 make が必要です。\n"
 
-#: src/remake.c:1330
+#: src/remake.c:1327
 #, fuzzy, c-format
 msgid "Warning: File `%s' has modification time in the future"
 msgstr "*** 警告: ファイル `%s' の修正時刻が未来の時刻です (%s > %s)"
 
-#: src/remake.c:1337
+#: src/remake.c:1334
 #, fuzzy, c-format
 msgid "Warning: File `%s' has modification time %.2g s in the future"
 msgstr "*** 警告: ファイル `%s' の修正時刻が未来の時刻です (%s > %s)"
 
-#: src/remake.c:1457
+#: src/remake.c:1454
 #, c-format
 msgid ".LIBPATTERNS element `%s' is not a pattern"
 msgstr ".LIBPATTERNS 要素 `%s' がパターンではありません"
@@ -1562,7 +1496,7 @@ msgstr ".LIBPATTERNS 要素 `%s' がパターンではありません"
 msgid "Customs won't export: %s\n"
 msgstr "Customs がエクスポートしてくれません: %s\n"
 
-#: src/rule.c:554
+#: src/rule.c:559
 #, fuzzy
 msgid ""
 "\n"
@@ -1571,7 +1505,7 @@ msgstr ""
 "\n"
 "# 暗黙ルールなし。"
 
-#: src/rule.c:569
+#: src/rule.c:574
 msgid ""
 "\n"
 "# No implicit rules."
@@ -1579,7 +1513,7 @@ msgstr ""
 "\n"
 "# 暗黙ルールなし。"
 
-#: src/rule.c:572
+#: src/rule.c:577
 #, c-format
 msgid ""
 "\n"
@@ -1588,11 +1522,11 @@ msgstr ""
 "\n"
 "# %u 個の暗黙ルール、%u"
 
-#: src/rule.c:581
+#: src/rule.c:586
 msgid " terminal."
 msgstr " 以上。"
 
-#: src/rule.c:589
+#: src/rule.c:594
 #, c-format
 msgid "BUG: num_pattern_rules wrong!  %u != %u"
 msgstr "バグ: num_pattern_rules が間違っている!  %u != %u"
@@ -1753,53 +1687,53 @@ msgstr "情報要求"
 msgid "Floating point co-processor not available"
 msgstr "浮動小数点コプロセッサが利用不能"
 
-#: src/variable.c:49
+#: src/variable.c:54
 msgid "default"
 msgstr "デフォルト"
 
-#: src/variable.c:52
+#: src/variable.c:57
 msgid "environment"
 msgstr "環境変数"
 
-#: src/variable.c:55
+#: src/variable.c:60
 msgid "makefile"
 msgstr "makefile 変数"
 
-#: src/variable.c:58
+#: src/variable.c:63
 msgid "environment under -e"
 msgstr "-e オプションでの環境変数"
 
-#: src/variable.c:61
+#: src/variable.c:66
 msgid "command line"
 msgstr "コマンドライン変数"
 
-#: src/variable.c:64
+#: src/variable.c:69
 msgid "`override' directive"
 msgstr "`override' 疑似命令"
 
-#: src/variable.c:67
+#: src/variable.c:72
 msgid "automatic"
 msgstr "自動変数"
 
-#: src/variable.c:70
+#: src/variable.c:75
 msgid "debugger"
 msgstr ""
 
-#: src/variable.c:74
+#: src/variable.c:79
 msgid "invalid"
 msgstr ""
 
-#: src/variable.c:1261
+#: src/variable.c:1266
 #, fuzzy, c-format
 msgid " (from `%s', line %lu)"
 msgstr " (`%s', %lu 行目から):\n"
 
-#: src/variable.c:1305
+#: src/variable.c:1310
 #, fuzzy
 msgid "variable set hash-table stats:\n"
 msgstr "# %u 個の変数がサイズ %u のハッシュ内にあります。\n"
 
-#: src/variable.c:1316
+#: src/variable.c:1321
 msgid ""
 "\n"
 "# Variables\n"
@@ -1807,7 +1741,7 @@ msgstr ""
 "\n"
 "# 変数\n"
 
-#: src/variable.c:1320
+#: src/variable.c:1325
 #, fuzzy
 msgid ""
 "\n"
@@ -1816,7 +1750,7 @@ msgstr ""
 "\n"
 "# パターン指定変数の値"
 
-#: src/variable.c:1334
+#: src/variable.c:1339
 msgid ""
 "\n"
 "# No pattern-specific variable values."
@@ -1824,7 +1758,7 @@ msgstr ""
 "\n"
 "# パターン指定変数の値なし。"
 
-#: src/variable.c:1336
+#: src/variable.c:1341
 #, c-format
 msgid ""
 "\n"
@@ -1871,6 +1805,46 @@ msgstr ""
 "\n"
 "# 一般の (`VPATH' 変数) 探索パス:\n"
 "# "
+
+#~ msgid "internal error: `%s' command_state"
+#~ msgstr "内部エラー: `%s' command_state"
+
+#~ msgid "-warning, CTRL-Y will leave sub-process(es) around.\n"
+#~ msgstr "-警告、CTRL-Y は子プロセスを散らかしたままにするでしょう。\n"
+
+#~ msgid "-warning, you may have to re-enable CTRL-Y handling from DCL.\n"
+#~ msgstr ""
+#~ "-警告、DCL からの CTRL-Y 操作を再び有効にする必要があるかも知れません。\n"
+
+#~ msgid "BUILTIN [%s][%s]\n"
+#~ msgstr "ビルトイン [%s][%s]\n"
+
+#~ msgid "BUILTIN CD %s\n"
+#~ msgstr "ビルトイン CD %s\n"
+
+#~ msgid "BUILTIN RM %s\n"
+#~ msgstr "ビルトイン RM %s\n"
+
+#~ msgid "Unknown builtin command '%s'\n"
+#~ msgstr "不明なビルトインコマンド '%s'\n"
+
+#~ msgid "Error, empty command\n"
+#~ msgstr "エラー、空のコマンド\n"
+
+#~ msgid "Redirected input from %s\n"
+#~ msgstr "%s から入力リダイレクトされました\n"
+
+#~ msgid "Redirected error to %s\n"
+#~ msgstr "%s へエラーリダイレクトされました\n"
+
+#~ msgid "Redirected output to %s\n"
+#~ msgstr "%s へ出力リダイレクトされました\n"
+
+#~ msgid "Executing %s instead\n"
+#~ msgstr "代わりに %s を実行します\n"
+
+#~ msgid "Error spawning, %d\n"
+#~ msgstr "spawn のエラー、%d\n"
 
 #~ msgid "touch archive member is not available on VMS"
 #~ msgstr "VMS では書庫のメンバを touch する機能がありません"

@@ -47,9 +47,12 @@ extern "C" {
 
 /* We need `size_t' for the following definitions.  */
 #ifndef __size_t
-# if defined __GNUC__ && __GNUC__ >= 2
-typedef __SIZE_TYPE__ __size_t;
+# if defined __FreeBSD__
+#  define __size_t size_t
 # else
+#  if defined __GNUC__ && __GNUC__ >= 2
+typedef __SIZE_TYPE__ __size_t;
+#  else
 /* This is a guess.  */
 /*hb
  *	Conflicts with DECCs aready defined type __size_t.
@@ -57,9 +60,10 @@ typedef __SIZE_TYPE__ __size_t;
  *	Anyway if DECC is used and __SIZE_T is defined then __size_t is
  *	already defined (and I hope it's exactly the one we need here).
  */
-#if !(defined __DECC && defined __SIZE_T)
+#   if !(defined __DECC && defined __SIZE_T)
 typedef unsigned long int __size_t;
-#endif
+#   endif
+#  endif
 # endif
 #else
 /* The GNU CC stddef.h version defines __size_t as empty.  We need a real
@@ -110,9 +114,6 @@ typedef unsigned long int __size_t;
 #endif
 
 /* Structure describing a globbing run.  */
-#if !defined _AMIGA && !defined VMS /* Buggy compiler.   */
-struct stat;
-#endif
 typedef struct
   {
     __size_t gl_pathc;		/* Count of paths matched by the pattern.  */
@@ -123,14 +124,10 @@ typedef struct
     /* If the GLOB_ALTDIRFUNC flag is set, the following functions
        are used instead of the normal file access functions.  */
     void (*gl_closedir) __PMT ((void *));
-    struct dirent *(*gl_readdir) __PMT ((void *));
-    __ptr_t (*gl_opendir) __PMT ((__const char *));
-    int (*gl_lstat) __PMT ((__const char *, struct stat *));
-#if defined(VMS) && defined(__DECC) && !defined(_POSIX_C_SOURCE)
-    int (*gl_stat) __PMT ((__const char *, struct stat *, ...));
-#else
-    int (*gl_stat) __PMT ((__const char *, struct stat *));
-#endif
+    struct dirent *(*gl_readdir) (void *);
+    __ptr_t (*gl_opendir) (__const char *);
+    int (*gl_lstat) (__const char *, struct stat *);
+    int (*gl_stat) (__const char *, struct stat *);
   } glob_t;
 
 #ifdef _LARGEFILE64_SOURCE
