@@ -1,4 +1,4 @@
-/* $Id: read.c,v 1.13 2005/11/27 16:49:56 rockyb Exp $
+/* $Id: read.c,v 1.14 2005/11/27 18:11:46 rockyb Exp $
 Reading and parsing of makefiles for GNU Make.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
@@ -448,13 +448,13 @@ eval_buffer (char *buffer)
   ebuf.fp = NULL;
 
   if (reading_file) {
-    ebuf.floc = *reading_file;
-
-    curfile = reading_file;
+    ebuf.floc    = *reading_file;
+    curfile      = reading_file;
     reading_file = &ebuf.floc;
   } else {
     ebuf.floc.filenm = NULL;
     ebuf.floc.lineno = 0;
+    curfile          = NULL;
   }
 
   saved = install_conditionals (&new);
