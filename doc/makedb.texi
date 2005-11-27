@@ -359,7 +359,7 @@ Updating goal targets....
 
 ... same output as before ...
 
-#0  foo at /tmp/test1:8
+#0  foo at /tmp/test1:9
 #1  all at /tmp/test1:4
 @end smallexample 
 
