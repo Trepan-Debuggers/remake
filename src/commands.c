@@ -1,4 +1,5 @@
-/* Command processing for GNU Make.
+/* $Id: commands.c,v 1.7 2005/11/27 12:38:38 rockyb Exp $
+Command processing for GNU Make.
 Copyright (C) 1988,89,91,92,93,94,95,96,97, 2004, 2005
 Free Software Foundation, Inc.
 This file is part of GNU Make.

@@ -1,4 +1,5 @@
-/* Job execution and handling for GNU Make.
+/* $Id: job.c,v 1.12 2005/11/27 12:38:38 rockyb Exp $
+Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005
 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -852,7 +853,6 @@ free_child (child)
       for (i = 0; i < child->file->cmds->ncommand_lines; ++i)
 	free (child->command_lines[i]);
       free (child->command_lines);
-      // FIXME free (child->line_no);
     }
 
   if (child->environment != 0)
@@ -952,10 +952,8 @@ static void start_job_command (child_t *p_child,
     
     p_call_stack->p_target->floc.filenm = p_child->fileinfo.filenm;
     
-    /* FIXME: there is no guarentee that each comamnd is on a separate
-     line. */
     p_call_stack->p_target->floc.lineno = 
-      p_child->fileinfo.lineno + p_child->command_line - 1;
+      p_child->fileinfo.lineno + p_child->line_no[p_child->command_line - 1];
   }
   
 

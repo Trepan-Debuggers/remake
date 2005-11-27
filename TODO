@@ -11,8 +11,6 @@ are in effect, or reset them on a restart.
 :-( Create a file/line datastructure so we can set breakpoints by lines
     or list by line number 
 
-:-( better line info stored for commands 
-
 :-( Should have remote invocation interface so debugger command loop
 can live outside of the make environment. With this global state like
 breakpoints would survive across forks and subshells returns. Without
@@ -24,6 +22,8 @@ global state.
 
 :-( Add a debugger profile mechanism. (Should be a stack of file
 descriptors so profiles can nest).
+
+:-( Fix memory leaks
 
 :-( Redo command parsing. Make more like gdb. 
   add set annotate
@@ -43,4 +43,4 @@ There are probably many make-specific commands (e.g like the ones
 listed above). Using the debugger will probably uncover many areas.
 such as specialized things to trace.
 
-$Id: TODO,v 1.4 2005/11/24 03:23:32 rockyb Exp $
+$Id: TODO,v 1.5 2005/11/27 12:38:37 rockyb Exp $

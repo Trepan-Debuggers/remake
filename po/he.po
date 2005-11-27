@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.79.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-11-14 21:39-0500\n"
+"POT-Creation-Date: 2005-11-27 07:13-0500\n"
 "PO-Revision-Date: 2002-03-30 21:33+0300\n"
 "Last-Translator: Eli Zaretskii <eliz@gnu.org>\n"
 "Language-Team: Hebrew <eliz@gnu.org>\n"
@@ -19,85 +19,66 @@ msgstr ""
 msgid "attempt to use unsupported feature: `%s'"
 msgstr "תכמתנ הנניאש `%s' הנוכתב שומיש ןויסנ"
 
-#: src/ar.c:133
-msgid "touch archive member is not available on VMS"
-msgstr "VMS תכרעמב ןויכראב רבא לש העש/ךיראת יונישב הכימת ןיא"
-
-#: src/ar.c:164
+#: src/ar.c:156
 #, c-format
 msgid "touch: Archive `%s' does not exist"
 msgstr "םייק וניא `%s' ןויכרא ץבוק :touch"
 
-#: src/ar.c:167
+#: src/ar.c:159
 #, c-format
 msgid "touch: `%s' is not a valid archive"
 msgstr "ןיקת ןויכרא ץבוק וניא `%s' :touch"
 
-#: src/ar.c:174
+#: src/ar.c:166
 #, c-format
 msgid "touch: Member `%s' does not exist in `%s'"
 msgstr "`%s' רבא ליכמ וניא `%s' ןויכרא :touch"
 
-#: src/ar.c:181
+#: src/ar.c:173
 #, c-format
 msgid "touch: Bad return code from ar_member_touch on `%s'"
 msgstr "`%s' רובע ןיקת-אל דוק הריזחה ar_member_touch :touch"
 
-#: src/arscan.c:76
-#, c-format
-msgid "lbr$set_module failed to extract module info, status = %d"
-msgstr "%d סוטטס ,lib$rset_module י\"ע לודומ לע עדימ תפילשב ןולשכ"
-
-#: src/arscan.c:161
-#, c-format
-msgid "lbr$ini_control failed with status = %d"
-msgstr "%d סוטטס םע לשכנ lbr$ini_control"
-
-#: src/arscan.c:172
-#, c-format
-msgid "unable to open library `%s' to lookup member `%s'"
-msgstr "(`%s' הירפס) `%s' רבא רובע הירפס תחיתפב הלקת"
-
 #  These are not translated, since they belong to a test program.
-#: src/arscan.c:832
+#: src/arscan.c:667
 #, c-format
 msgid "Member `%s'%s: %ld bytes at %ld (%ld).\n"
 msgstr "Member `%s'%s: %ld bytes at %ld (%ld).\n"
 
-#: src/arscan.c:833
+#: src/arscan.c:668
 msgid " (name might be truncated)"
 msgstr " (name might be truncated)"
 
-#: src/arscan.c:835
+#: src/arscan.c:670
 #, c-format
 msgid "  Date %s"
 msgstr "  Date %s"
 
-#: src/arscan.c:836
+#: src/arscan.c:671
 #, c-format
 msgid "  uid = %d, gid = %d, mode = 0%o.\n"
 msgstr "  uid = %d, gid = %d, mode = 0%o.\n"
 
-#: src/commands.c:411
+#: src/commands.c:419
 msgid "*** Break.\n"
 msgstr "*** Break. ***\n"
 
-#: src/commands.c:504
+#: src/commands.c:512
 #, c-format
 msgid "*** [%s] Archive member `%s' may be bogus; not deleted"
 msgstr "*** [%s] קחמיי אל ;ןיקת-יתלב תויהל לולע `%s' ןויכרא רבא ***"
 
-#: src/commands.c:507
+#: src/commands.c:515
 #, c-format
 msgid "*** Archive member `%s' may be bogus; not deleted"
 msgstr "*** קחמיי אל ;ןיקת-יתלב תויהל לולע `%s' ןויכרא רבא ***"
 
-#: src/commands.c:519
+#: src/commands.c:527
 #, c-format
 msgid "*** [%s] Deleting file `%s'"
 msgstr "*** [%s] `%s' ץבוק קחומ ***"
 
-#: src/commands.c:521
+#: src/commands.c:529
 #, c-format
 msgid "*** Deleting file `%s'"
 msgstr "*** `%s' ץבוק קחומ ***"
@@ -105,15 +86,15 @@ msgstr "*** `%s' ץבוק קחומ ***"
 #  I decided to retain the English text of what Make prints under -p,
 #  since it is notoriously hard to get right in right-to-left languages,
 #  and because its primary use is for programmers who write Makefiles.
-#: src/commands.c:557
+#: src/commands.c:565
 msgid "#  commands to execute"
 msgstr "#  commands to execute"
 
-#: src/commands.c:560
+#: src/commands.c:568
 msgid " (built-in):"
 msgstr " (built-in):"
 
-#: src/commands.c:562
+#: src/commands.c:570
 #, c-format
 msgid " (from `%s', line %lu):\n"
 msgstr " (from `%s', line %lu):\n"
@@ -186,12 +167,12 @@ msgstr " so far."
 msgid " impossibilities in %lu directories.\n"
 msgstr " impossibilities in %u directories.\n"
 
-#: src/expand.c:107
+#: src/expand.c:109
 #, c-format
 msgid "Recursive variable `%s' references itself (eventually)"
 msgstr "(רבד לש ופוסב) ומצעל היינפהל םרוג `%s' יביסרוקר הנתשמ"
 
-#: src/expand.c:249
+#: src/expand.c:251
 msgid "unterminated variable reference"
 msgstr "הכלהכ תמייתסמ הניא הנתשמל היינפה"
 
@@ -355,60 +336,80 @@ msgid ""
 "# "
 msgstr ""
 
-#: src/function.c:727
+#: src/function.c:734
 msgid "non-numeric first argument to `word' function"
 msgstr "רפסמ וניא `word' תייצקנופל ןושאר טנמוגרא"
 
-#: src/function.c:731
+#: src/function.c:738
 msgid "first argument to `word' function must be greater than 0"
 msgstr "יבויח תויהל בייח `word' תייצקנופל ןושאר טנמוגרא"
 
-#: src/function.c:752
+#: src/function.c:759
 msgid "non-numeric first argument to `wordlist' function"
 msgstr "רפסמ וניא `wordlist' תייצקנופל ןושאר טנמוגרא"
 
-#: src/function.c:754
+#: src/function.c:761
 msgid "non-numeric second argument to `wordlist' function"
 msgstr "רפסמ וניא `wordlist' תייצקנופל ינש טנמוגרא"
 
-#: src/function.c:1301
+#: src/function.c:1308
 #, c-format
 msgid "create_child_process: DuplicateHandle(In) failed (e=%d)\n"
 msgstr "create_child_process: DuplicateHandle(In) failed (e=%d)\n"
 
-#: src/function.c:1312
+#: src/function.c:1319
 #, c-format
 msgid "create_child_process: DuplicateHandle(Err) failed (e=%d)\n"
 msgstr "create_child_process: DuplicateHandle(Err) failed (e=%d)\n"
 
-#: src/function.c:1317
+#: src/function.c:1324
 #, c-format
 msgid "CreatePipe() failed (e=%d)\n"
 msgstr "CreatePipe() failed (e=%d)\n"
 
-#: src/function.c:1322
+#: src/function.c:1329
 msgid "windows32_openpipe (): process_init_fd() failed\n"
 msgstr "windows32_openpipe (): process_init_fd() failed\n"
 
-#: src/function.c:1572
+#: src/function.c:1579
 #, c-format
 msgid "Cleaning up temporary batch file %s\n"
 msgstr "`%s' ינמז batch ץבוק קלסמ\n"
 
-#: src/function.c:1790
+#: src/function.c:1797
 #, c-format
 msgid "Insufficient number of arguments (%d) to function `%s'"
 msgstr "קפסמ וניאש (%d) םיטנמוגרא רפסמ םע הארקנ `%s' היצקנופ"
 
-#: src/function.c:1801
+#: src/function.c:1808
 #, c-format
 msgid "Unimplemented on this platform: function `%s'"
 msgstr "וז תכרעמב תשמוממ הניא `%s' היצקנופ"
 
-#: src/function.c:1852
+#: src/function.c:1859
 #, c-format
 msgid "unterminated call to function `%s': missing `%c'"
 msgstr "`%s' היצקנופל האירקב `%c' רסח"
+
+#: src/function.c:1967
+#, c-format
+msgid "calling built-in %s("
+msgstr ""
+
+#: src/function.c:1983
+#, c-format
+msgid "%%s() returns \"%%%d.%ds\"\n"
+msgstr ""
+
+#: src/function.c:2004
+#, c-format
+msgid "calling %s("
+msgstr ""
+
+#: src/function.c:2061
+#, c-format
+msgid "%s() returns \"%s\"\n"
+msgstr ""
 
 #: src/getopt.c:663
 #, c-format
@@ -534,90 +535,75 @@ msgstr "`%s' םדק תשירדכ VPATH `%s' יתאצמ\n"
 msgid "Looking for a rule with intermediate file `%s'.\n"
 msgstr ".`%s' ינמז ץבוק םע ללכ שפחמ\n"
 
-#: src/job.c:324
+#: src/job.c:325
 #, fuzzy
 msgid "Cannot create a temporary file\n"
 msgstr "fwrite (temporary file)"
 
-#: src/job.c:392
-#, c-format
-msgid "*** [%s] Error 0x%x (ignored)"
-msgstr "*** [%s] 0x%x הלקתמ יתמלעתה ***"
-
-#: src/job.c:393
-#, c-format
-msgid "*** [%s] Error 0x%x"
-msgstr "*** [%s] 0x%x הלקת ***"
-
-#: src/job.c:397
+#: src/job.c:391
 #, c-format
 msgid "[%s] Error %d (ignored)"
 msgstr "[%s] %d הלקתמ יתמלעתה"
 
-#: src/job.c:398
+#: src/job.c:392
 #, c-format
 msgid "*** [%s] Error %d"
 msgstr "*** [%s] %d הלקת"
 
-#: src/job.c:403
+#: src/job.c:397
 msgid " (core dumped)"
 msgstr " (core ץבוקב םשרנ ןורכזה ןכות)"
 
-#: src/job.c:463
-#, c-format
-msgid "Warning: Empty redirection\n"
-msgstr "הקיר היינפה :תוריהז\n"
-
-#: src/job.c:586
+#: src/job.c:486
 msgid "*** Waiting for unfinished jobs...."
 msgstr "*** ...ומייתסנ םרטש תודובעל ןיתממ"
 
-#: src/job.c:615
+#: src/job.c:515
 #, c-format
 msgid "Live child 0x%08lx (%s) PID %ld %s\n"
 msgstr "הצר 0x%08lx (%s) PID=%ld %s תב-תינכת\n"
 
-#: src/job.c:617 src/job.c:778 src/job.c:875 src/job.c:1542
+#: src/job.c:517 src/job.c:678 src/job.c:775 src/job.c:1441
 msgid " (remote)"
 msgstr "(תקחורמ)"
 
-#: src/job.c:775
+#: src/job.c:675
 #, c-format
 msgid "Reaping losing child 0x%08lx PID %ld %s\n"
 msgstr "הלשכנש 0x%08lx PID=%ld %s תב-תינכת ףסוא\n"
 
-#: src/job.c:776
+#: src/job.c:676
 #, c-format
 msgid "Reaping winning child 0x%08lx PID %ld %s\n"
 msgstr "החילצהש 0x%08lx PID=%ld %s תב-תינכת ףסוא\n"
 
-#: src/job.c:781
+#: src/job.c:681
 #, c-format
 msgid "Cleaning up temp batch file %s\n"
 msgstr "`%s' ינמז batch ץבוק קלסמ\n"
 
-#: src/job.c:873
+#: src/job.c:773
 #, fuzzy, c-format
 msgid "Removing child 0x%08lx PID %ld%s from chain.\n"
 msgstr ".תודובע תרשרשמ 0x%08lx PID=%ld %s תב-תינכת קיחרמ\n"
 
 #  Here and elsewhere leading strings passed to perror are not translated,
 #  since they will be followed by an error message in English.
-#: src/job.c:941
+#: src/job.c:841
 msgid "write jobserver"
 msgstr "write jobserver"
 
-#: src/job.c:943
+#: src/job.c:843
 #, c-format
 msgid "Released token for child 0x%08lx (%s).\n"
 msgstr ".ררחוש 0x%08lx (%s) תב-תינכת רובע ןומיסאה\n"
 
-#: src/job.c:1474 src/job.c:2652
+#: src/job.c:1373 src/job.c:2551
 #, c-format
 msgid "process_easy() failed failed to launch process (e=%d)\n"
 msgstr "(e=%d) תינכת-תת רוגישב לשכנ process_easy()\n"
 
-#: src/job.c:1478 src/job.c:2656
+#: src/job.c:1377 src/job.c:2555
 #, c-format
 msgid ""
 "\n"
@@ -626,353 +612,349 @@ msgstr ""
 "\n"
 "לשכנש רוגישב ונמנ םיטנמוגרא %d\n"
 
-#: src/job.c:1540
+#: src/job.c:1439
 #, c-format
 msgid "Putting child 0x%08lx (%s) PID %ld%s on the chain.\n"
 msgstr ".תודובע תרשרשל 0x%08lx (%s) PID=%ld %s תב-תינכת ףרצמ\n"
 
-#: src/job.c:1787
+#: src/job.c:1686
 #, c-format
 msgid "Obtained token for child 0x%08lx (%s).\n"
 msgstr ".0x%08lx (%s) תב-תינכת רובע ןומיסא לבקתה\n"
 
-#: src/job.c:1796
+#: src/job.c:1695
 msgid "read jobs pipe"
 msgstr "read jobs pipe"
 
-#: src/job.c:1903
+#: src/job.c:1802
 msgid "cannot enforce load limits on this operating system"
 msgstr "וז תכרעמב סמוע תולבגמ תופכל ןתינ אל"
 
-#: src/job.c:1905
+#: src/job.c:1804
 msgid "cannot enforce load limit: "
 msgstr "cannot enforce load limit: "
 
-#: src/job.c:2028
+#: src/job.c:1927
 #, c-format
 msgid "internal error: `%s' command_state"
 msgstr "command_state `%s' :תימינפ הנכת תלקת"
 
-#: src/job.c:2115
+#: src/job.c:2014
 #, c-format
 msgid "-warning, CTRL-Y will leave sub-process(es) around.\n"
 msgstr ".תוליעפ תב-תוינכת ריאשהל לולע CTRL-Y :תוריהז\n"
 
-#: src/job.c:2131
+#: src/job.c:2030
 #, c-format
 msgid "-warning, you may have to re-enable CTRL-Y handling from DCL.\n"
 msgstr ".DCL-מ CTRL-Y-ב לופיט רושפיאב ךרוצ תויהל לולע :תוריהז\n"
 
-#: src/job.c:2245
+#: src/job.c:2144
 #, c-format
 msgid "BUILTIN [%s][%s]\n"
 msgstr "BUILTIN [%s][%s]\n"
 
-#: src/job.c:2256
+#: src/job.c:2155
 #, c-format
 msgid "BUILTIN CD %s\n"
 msgstr "BUILTIN CD %s\n"
 
-#: src/job.c:2274
+#: src/job.c:2173
 #, c-format
 msgid "BUILTIN RM %s\n"
 msgstr "BUILTIN RM %s\n"
 
-#: src/job.c:2295
+#: src/job.c:2194
 #, c-format
 msgid "Unknown builtin command '%s'\n"
 msgstr "תרכומ הניא '%s'תינבומ הדוקפ\n"
 
-#: src/job.c:2317
+#: src/job.c:2216
 #, c-format
 msgid "Error, empty command\n"
 msgstr "הקיר הדוקפ :הלקת\n"
 
-#: src/job.c:2324 src/main.c:1489
+#: src/job.c:2223 src/main.c:1429
 msgid "fopen (temporary file)"
 msgstr "fopen (temporary file)"
 
-#: src/job.c:2329
+#: src/job.c:2228
 #, c-format
 msgid "Redirected input from %s\n"
 msgstr "%s-מ טלק תיינפה\n"
 
-#: src/job.c:2336
+#: src/job.c:2235
 #, c-format
 msgid "Redirected error to %s\n"
 msgstr "%s-ל תואיגש תיינפה\n"
 
-#: src/job.c:2343
+#: src/job.c:2242
 #, c-format
 msgid "Redirected output to %s\n"
 msgstr "%s-ל טלפ תיינפה\n"
 
-#: src/job.c:2406
+#: src/job.c:2305
 #, c-format
 msgid "Executing %s instead\n"
 msgstr "%s ץירמ תאז םוקמב\n"
 
-#: src/job.c:2506
+#: src/job.c:2405
 #, c-format
 msgid "Error spawning, %d\n"
 msgstr "%d :תב-תינכת תלעפהב הלקת\n"
 
-#: src/job.c:2540
+#: src/job.c:2439
 msgid "no more file handles: could not duplicate stdin\n"
 msgstr ""
 
-#: src/job.c:2542
+#: src/job.c:2441
 msgid "no more file handles: could not duplicate stdout\n"
 msgstr ""
 
-#: src/job.c:2570
+#: src/job.c:2469
 msgid "Could not restore stdin\n"
 msgstr ""
 
-#: src/job.c:2578
+#: src/job.c:2477
 msgid "Could not restore stdout\n"
 msgstr ""
 
-#: src/job.c:2682
+#: src/job.c:2581
 #, c-format
 msgid "make reaped child pid %d, still waiting for pid %d\n"
 msgstr "הפסאנ pid %d תב-תינכת ,pid %d-ל הכחמ ןיידע\n"
 
-#: src/job.c:2721
+#: src/job.c:2620
 #, c-format
 msgid "%s: Command not found"
 msgstr "האצמנ אל וז הדוקפ :%s"
 
-#: src/job.c:2781
+#: src/job.c:2680
 #, c-format
 msgid "%s: Shell program not found"
 msgstr "האצמנ אל shell תדוקפ :%s"
 
-#: src/job.c:2790
+#: src/job.c:2689
 msgid "spawnvpe: environment space might be exhausted"
 msgstr ""
 
-#: src/job.c:2998
+#: src/job.c:2897
 #, fuzzy, c-format
 msgid "$SHELL changed (was `%s', now `%s')\n"
 msgstr "(`%s' היה םדוק ,`%s' וישכע) הנתשה $SHELL לש וכרע"
 
-#: src/job.c:3411
+#: src/job.c:3310
 #, c-format
 msgid "Creating temporary batch file %s\n"
 msgstr "`%s' ינמז batch ץבוק רצוי\n"
 
-#: src/job.c:3522
+#: src/job.c:3421
 #, c-format
 msgid "%s (line %d) Bad shell context (!unixy && !batch_mode_shell)\n"
 msgstr ""
 "(!unixy && !batch_mode_shell) shell-mode תעיבקב הלקת :%s ץבוק לש %d הרוש\n"
 
-#: src/main.c:324
+#: src/main.c:309
 msgid "Options:\n"
 msgstr "                                             :םינייפאמ\n"
 
-#: src/main.c:325
+#: src/main.c:310
 #, fuzzy
 msgid "  -b, -m                       Ignored for compatibility.\n"
 msgstr "תומיאת ןעמל טמשומ"
 
-#: src/main.c:327
+#: src/main.c:312
 msgid "  -B, --always-make            Unconditionally make all targets.\n"
 msgstr ""
 
-#: src/main.c:329
+#: src/main.c:314
 msgid "  --basename-filenames         Show files as basename only.\n"
 msgstr ""
 
-#: src/main.c:331
+#: src/main.c:316
 msgid ""
 "  -C DIRECTORY, --directory=DIRECTORY\n"
 "                               Change to DIRECTORY before doing anything.\n"
 msgstr ""
 
-#: src/main.c:334
+#: src/main.c:319
 #, fuzzy
 msgid "  -d                           Print lots of debugging information.\n"
 msgstr "תואיגש יופינ תבוטל עדימ לש עפש גצה"
 
-#: src/main.c:336
+#: src/main.c:321
 #, fuzzy
 msgid ""
 "  --debug[=FLAGS]              Print various types of debugging "
 "information.\n"
 msgstr "תואיגש יופינ תבוטל עדימ לש םינוש םיגוס גצה"
 
-#: src/main.c:338
+#: src/main.c:323
 msgid ""
 "  -e, --environment-overrides\n"
 "                               Environment variables override makefiles.\n"
 msgstr ""
 
-#: src/main.c:341
+#: src/main.c:326
 msgid ""
 "  -E, --extended-errors\n"
 "                               Additional error reporting.\n"
 msgstr ""
 
-#: src/main.c:344
+#: src/main.c:329
 msgid ""
 "  -f FILE, --file=FILE, --makefile=FILE\n"
 "                               Read FILE as a makefile.\n"
 msgstr ""
 
-#: src/main.c:347
+#: src/main.c:332
 #, fuzzy
 msgid "  -h, --help                   Print this message and exit.\n"
 msgstr "תינכתהמ אצו הז הרזע ךסמ גצה"
 
-#: src/main.c:349
+#: src/main.c:334
 #, fuzzy
 msgid "  -i, --ignore-errors          Ignore errors from commands.\n"
 msgstr "תוינכת-תתב תואיגשמ םלעתה"
 
-#: src/main.c:351
+#: src/main.c:336
 msgid ""
 "  -I DIRECTORY, --include-dir=DIRECTORY\n"
 "                               Search DIRECTORY for included makefiles.\n"
 msgstr ""
 
-#: src/main.c:354
+#: src/main.c:339
 #, fuzzy
 msgid ""
 "  -j [N], --jobs[=N]           Allow N jobs at once; infinite jobs with no "
 "arg.\n"
 msgstr "הלבגמ ןיא טנמוגרא אלל ;תינמז-וב תודובע N-מ רתוי אל"
 
-#: src/main.c:356
+#: src/main.c:341
 #, fuzzy
 msgid ""
 "  -k, --keep-going             Keep going when some targets can't be made.\n"
 msgstr "הינבל תונתינ ןניא תורטמהמ המכ םא וליפא ךשמה"
 
-#: src/main.c:358
+#: src/main.c:343
 msgid ""
 "  -l [N], --load-average[=N], --max-load[=N]\n"
 "                               Don't start multiple jobs unless load is "
 "below N.\n"
 msgstr ""
 
-#: src/main.c:361
+#: src/main.c:346
 msgid ""
 "  -n, --just-print, --dry-run, --recon\n"
 "                               Don't actually run any commands; just print "
 "them.\n"
 msgstr ""
 
-#: src/main.c:364
+#: src/main.c:349
 msgid ""
 "  -o FILE, --old-file=FILE, --assume-old=FILE\n"
 "                               Consider FILE to be very old and don't remake "
 "it.\n"
 msgstr ""
 
-#: src/main.c:367
+#: src/main.c:352
 #, fuzzy
 msgid "  -p, --print-data-base        Print make's internal database.\n"
 msgstr "Make לש ימינפ םינותנ סיסב גצה"
 
-#: src/main.c:369
+#: src/main.c:354
 #, fuzzy
 msgid ""
 "  -q, --question               Run no commands; exit status says if up to "
 "date.\n"
 msgstr "תנכדועמ הרטמ םאב רמוא האיצי דוק ;תודוקפ ץירת לא"
 
-#: src/main.c:371
+#: src/main.c:356
 #, fuzzy
 msgid "  -r, --no-builtin-rules       Disable the built-in implicit rules.\n"
 msgstr "םישרופמ-יתלב םינבומ םיללכ לרטנ"
 
-#: src/main.c:373
+#: src/main.c:358
 #, fuzzy
 msgid ""
 "  -R, --no-builtin-variables   Disable the built-in variable settings.\n"
 msgstr "םינתשמ לש תונבומ תורדגה לרטנ"
 
-#: src/main.c:375
+#: src/main.c:360
 #, fuzzy
 msgid "  -s, --silent, --quiet        Don't echo commands.\n"
 msgstr "תוינכת-תתב תואיגשמ םלעתה"
 
-#: src/main.c:377
+#: src/main.c:362
 msgid ""
 "  -S, --no-keep-going, --stop\n"
 "                               Turns off -k.\n"
 msgstr ""
 
-#: src/main.c:380
+#: src/main.c:365
 #, fuzzy
 msgid ""
 "  -t, --touch                  Touch targets instead of remaking them.\n"
 msgstr "ןתונבל םוקמב תורטמ לש ןמז תמיתח ןכדע"
 
-#: src/main.c:382
+#: src/main.c:367
 #, fuzzy
 msgid ""
 "  -v, --version                Print the version number of make and exit.\n"
 msgstr "תינכתהמ אצו Make לש אסריג רפסמ גצה"
 
-#: src/main.c:384
+#: src/main.c:369
 #, fuzzy
 msgid "  -w, --print-directory        Print the current directory.\n"
 msgstr "תיחכונ היקית םש גצה"
 
-#: src/main.c:386
+#: src/main.c:371
 #, fuzzy
 msgid ""
 "  --no-print-directory         Turn off -w, even if it was turned on "
 "implicitly.\n"
 msgstr "שרופמב ןיוצ אוה םא וליפא -w לטב"
 
-#: src/main.c:388
+#: src/main.c:373
 msgid ""
 "  -W FILE, --what-if=FILE, --new-file=FILE, --assume-new=FILE\n"
 "                               Consider FILE to be infinitely new.\n"
 msgstr ""
 
-#: src/main.c:391
+#: src/main.c:376
 #, fuzzy
 msgid ""
 "  --warn-undefined-variables   Warn when an undefined variable is "
 "referenced.\n"
 msgstr "רדגוה אלש הנתשמל היינפה הרקמב הרהזא גצה"
 
-#: src/main.c:393
-#, fuzzy
-msgid "  -x, --trace                  Trace command execution\n"
-msgstr "תינכתהמ אצו הז הרזע ךסמ גצה"
-
-#: src/main.c:395
+#: src/main.c:378
 msgid ""
-"  -X [type], --debugger=[TYPE] Enter debugger. TYPE may be\n"
-"                               \"enter\", \"full\", \"error\", or \"fatal"
-"\".\n"
+"  -x, --trace[=TYPE]           Trace command execution TYPE  may be\n"
+"                               \"read\", \"normal\", \"full\".\n"
 msgstr ""
 
-#: src/main.c:398
+#: src/main.c:381
+msgid ""
+"  -X [type], --debugger[=TYPE] Enter debugger. TYPE may be\n"
+"                               \"preread\", \"preaction\", \"full\",\n"
+"                               \"error\", or \"fatal\".\n"
+msgstr ""
+
+#: src/main.c:385
 msgid "  -V, --show-variables         Show variable expansions.\n"
 msgstr ""
 
-#: src/main.c:593
+#: src/main.c:580
 msgid "empty string invalid as file name"
 msgstr "ץבוק םשכ תלבקתמ הניא הקיר תזורחמ"
 
-#: src/main.c:675
-#, c-format
-msgid "unknown debug level specification `%s'"
-msgstr "תואיגש יופינל עדימ לש `%s' רכומ-יתלב ןייפאמ"
-
-#: src/main.c:715
+#: src/main.c:638
 #, c-format
 msgid "%s: Interrupt/Exception caught (code = 0x%x, addr = 0x%x)\n"
 msgstr "%s תינכתב (code = 0x%x, addr = 0x%x) הגירח וא הקיספ\n"
 
-#: src/main.c:722
+#: src/main.c:645
 #, c-format
 msgid ""
 "\n"
@@ -987,182 +969,182 @@ msgstr ""
 "ExceptionFlags = %x\n"
 "ExceptionAddress = %x\n"
 
-#: src/main.c:730
+#: src/main.c:653
 #, c-format
 msgid "Access violation: write operation at address %x\n"
 msgstr "%x תבותכל הביתכ :ןורכזל השיג תלקת\n"
 
-#: src/main.c:731
+#: src/main.c:654
 #, c-format
 msgid "Access violation: read operation at address %x\n"
 msgstr "%x תבותכמ האירק :ןורכזל השיג תלקת\n"
 
-#: src/main.c:796
+#: src/main.c:719
 #, c-format
 msgid "find_and_set_shell setting default_shell = %s\n"
 msgstr "find_and_set_shell setting default_shell = %s\n"
 
-#: src/main.c:839
+#: src/main.c:762
 #, c-format
 msgid "find_and_set_shell path search set default_shell = %s\n"
 msgstr "find_and_set_shell path search set default_shell = %s\n"
 
-#: src/main.c:1234
+#: src/main.c:1174
 #, c-format
 msgid "%s is suspending for 30 seconds..."
 msgstr ".תוינש 30 לש %s תייהשה"
 
 #  Pay attention: this is written to the _right_ of the previous string,
 #  but should look like a single sentence together with it.
-#: src/main.c:1236
+#: src/main.c:1176
 #, c-format
 msgid "done sleep(30). Continuing.\n"
 msgstr " המייתסנ\n"
 
-#: src/main.c:1450
+#: src/main.c:1390
 msgid "Makefile from standard input specified twice."
 msgstr ".תחא םעפמ רתוי ןתינ ינקת טלק ץורעמ Makefile"
 
-#: src/main.c:1495
+#: src/main.c:1435
 msgid "fwrite (temporary file)"
 msgstr "fwrite (temporary file)"
 
-#: src/main.c:1583
+#: src/main.c:1523
 msgid "Do not specify -j or --jobs if sh.exe is not available."
 msgstr ".ןימז וניא sh.exe םא --jobs וא -j-ב ךומתל ןתינ אל"
 
-#: src/main.c:1584
+#: src/main.c:1524
 msgid "Resetting make for single job mode."
 msgstr ".יתרדס ןפואב ועצובי תודוקפ"
 
-#: src/main.c:1625
+#: src/main.c:1565
 msgid "Parallel jobs (-j) are not supported on this platform."
 msgstr ".וז תכרעמב ךמתנ וניא (-j) יליבקמ עוציב"
 
-#: src/main.c:1626
+#: src/main.c:1566
 msgid "Resetting to single job (-j1) mode."
 msgstr ".(-j1) יתרדס ןפואב ועצובי תודוקפ"
 
-#: src/main.c:1641
+#: src/main.c:1581
 msgid "internal error: multiple --jobserver-fds options"
 msgstr "םיבורמ --jobserver-fds ינייפאמ :תימינפ הנכת תלקת"
 
-#: src/main.c:1649
+#: src/main.c:1589
 #, c-format
 msgid "internal error: invalid --jobserver-fds string `%s'"
 msgstr "--jobserver-fds ןייפאמב `%s' היוגש תזורחמ :תימינפ הנכת תלקת"
 
-#: src/main.c:1659
+#: src/main.c:1599
 msgid "warning: -jN forced in submake: disabling jobserver mode."
 msgstr "jobserver ןפוא לטבמ ;-jN בייחמ Make-תת :הרהזא"
 
-#: src/main.c:1669
+#: src/main.c:1609
 msgid "dup jobserver"
 msgstr "dup jobserver"
 
-#: src/main.c:1672
+#: src/main.c:1612
 msgid ""
 "warning: jobserver unavailable: using -j1.  Add `+' to parent make rule."
 msgstr ""
 ".Make לש באה ללכל `+' ףסוה .-j1-ב שומיש השעיי ;ןימז וניא jobserver :הרהזא"
 
-#: src/main.c:1695
+#: src/main.c:1635
 msgid "creating jobs pipe"
 msgstr "creating jobs pipe"
 
-#: src/main.c:1708
+#: src/main.c:1648
 msgid "init jobserver pipe"
 msgstr "init jobserver pipe"
 
-#: src/main.c:1795
+#: src/main.c:1735
 msgid "Updating makefiles....\n"
 msgstr "...makefile יצבק ןכדעמ\n"
 
-#: src/main.c:1820
+#: src/main.c:1760
 #, c-format
 msgid "Makefile `%s' might loop; not remaking it.\n"
 msgstr ".שדחמ ורציילמ ענמנ ;תיפוסניא האלול רוציל לולע `%s' Makefile\n"
 
-#: src/main.c:1899
+#: src/main.c:1839
 #, c-format
 msgid "Failed to remake makefile `%s'."
 msgstr ".`%s' makefile לש שדחמ-הריציב הלקת"
 
-#: src/main.c:1916
+#: src/main.c:1856
 #, c-format
 msgid "Included makefile `%s' was not found."
 msgstr ".אצמנ אל `%s' ללכומ makefile"
 
-#: src/main.c:1921
+#: src/main.c:1861
 #, c-format
 msgid "Makefile `%s' was not found"
 msgstr "אצמנ אל `%s' Makefile"
 
-#: src/main.c:1989
+#: src/main.c:1929
 msgid "Couldn't change back to original directory."
 msgstr ".תירוקמה היקיתל רוזחל ןתינ אל"
 
-#: src/main.c:2024
+#: src/main.c:1964
 msgid "Re-executing:"
 msgstr "Re-executing:"
 
-#: src/main.c:2083
+#: src/main.c:2023
 msgid "unlink (temporary file): "
 msgstr "unlink (temporary file): "
 
-#: src/main.c:2106
+#: src/main.c:2046
 msgid "No targets specified and no makefile found"
 msgstr "makefile יצבק ואצמנ אלו תורטמ ןויצ ןיא"
 
-#: src/main.c:2108
+#: src/main.c:2048
 msgid "No targets"
 msgstr "תורטמ ןיא"
 
-#: src/main.c:2113
+#: src/main.c:2053
 msgid "Updating goal targets....\n"
 msgstr "...דעי תורטמ ןכדעמ\n"
 
-#: src/main.c:2139
+#: src/main.c:2079
 msgid "warning:  Clock skew detected.  Your build may be incomplete."
 msgstr ".המלש אל תויהל הלולע הינבה .ןועש תשילג התלגתנ :תוריהז"
 
-#: src/main.c:2294
+#: src/main.c:2234
 #, c-format
 msgid "Usage: %s [options] [target] ...\n"
 msgstr "%s [םינייפאמ] [הרטמ] ...  :שומיש ןפוא\n"
 
-#: src/main.c:2300
+#: src/main.c:2240
 #, c-format
 msgid ""
 "\n"
 "This program built for %s\n"
 msgstr ""
 
-#: src/main.c:2302
+#: src/main.c:2242
 #, c-format
 msgid ""
 "\n"
 "This program built for %s (%s)\n"
 msgstr ""
 
-#: src/main.c:2305
+#: src/main.c:2245
 #, fuzzy, c-format
 msgid "Report bugs to <bug-make@gnu.org>\n"
 msgstr ""
 "\n"
 ".<bug-make@gnu.org>-ל הלקת יחוויד חולשל אנ\n"
 
-#: src/main.c:2377
+#: src/main.c:2317
 #, fuzzy, c-format
 msgid "the `-%c' option requires a non-empty string argument"
 msgstr "יבויחו םלש טנמוגרא בייחמ `-%c' ןייפאמ"
 
-#: src/main.c:2429
+#: src/main.c:2369
 #, c-format
 msgid "the `-%c' option requires a positive integral argument"
 msgstr "יבויחו םלש טנמוגרא בייחמ `-%c' ןייפאמ"
 
-#: src/main.c:2853
+#: src/main.c:2793
 #, fuzzy, c-format
 msgid ""
 "%sThis is free software; see the source for copying conditions.\n"
@@ -1180,21 +1162,21 @@ msgstr ""
 "%s                           <bug-make@gnu.org>-ל הלקת יחוויד חולשל אנ\n"
 "\n"
 
-#: src/main.c:2859
+#: src/main.c:2799
 #, c-format
 msgid ""
 "\n"
 "%sThis program built for %s\n"
 msgstr ""
 
-#: src/main.c:2861
+#: src/main.c:2801
 #, c-format
 msgid ""
 "\n"
 "%sThis program built for %s (%s)\n"
 msgstr ""
 
-#: src/main.c:2879
+#: src/main.c:2819
 #, c-format
 msgid ""
 "\n"
@@ -1203,7 +1185,7 @@ msgstr ""
 "\n"
 "# Make data base, printed on %s"
 
-#: src/main.c:2888
+#: src/main.c:2828
 #, c-format
 msgid ""
 "\n"
@@ -1212,7 +1194,7 @@ msgstr ""
 "\n"
 "# Finished Make data base on %s\n"
 
-#: src/misc.c:223 src/misc.c:238 src/misc.c:255 src/read.c:3054
+#: src/misc.c:223 src/misc.c:238 src/misc.c:255 src/read.c:3075
 msgid "virtual memory exhausted"
 msgstr "ילאוטריוה ןורכזה רמגנ"
 
@@ -1233,160 +1215,160 @@ msgstr ""
 msgid "Child access"
 msgstr ""
 
-#: src/read.c:161
+#: src/read.c:164
 msgid "Reading makefiles...\n"
 msgstr "...makefile יצבק ארוק\n"
 
-#: src/read.c:319
+#: src/read.c:326
 #, c-format
 msgid "Reading makefile `%s'"
 msgstr "Reading makefile `%s'"
 
-#: src/read.c:321
+#: src/read.c:328
 #, c-format
 msgid " (no default goal)"
 msgstr " (no default goal)"
 
-#: src/read.c:323
+#: src/read.c:330
 #, c-format
 msgid " (search path)"
 msgstr " (search path)"
 
-#: src/read.c:325
+#: src/read.c:332
 #, c-format
 msgid " (don't care)"
 msgstr " (don't care)"
 
-#: src/read.c:327
+#: src/read.c:334
 #, c-format
 msgid " (no ~ expansion)"
 msgstr " (no ~ expansion)"
 
-#: src/read.c:633
+#: src/read.c:653
 msgid "invalid syntax in conditional"
 msgstr "יאנת לש יוגש ריבחת"
 
-#: src/read.c:642
+#: src/read.c:662
 msgid "extraneous `endef'"
 msgstr "רתוימ `endef'"
 
-#: src/read.c:654 src/read.c:682 src/variable.c:1268
+#: src/read.c:674 src/read.c:702 src/variable.c:1205
 msgid "empty variable name"
 msgstr "קיר הנתשמ םש"
 
-#: src/read.c:671
+#: src/read.c:691
 msgid "empty `override' directive"
 msgstr "הקיר `override' תארוה"
 
-#: src/read.c:696
+#: src/read.c:716
 msgid "invalid `override' directive"
 msgstr "היוגש `override' תארוה"
 
-#: src/read.c:872
+#: src/read.c:893
 msgid "commands commence before first target"
 msgstr "הנושאר הרטמ ינפל תוליחתמ תודוקפ"
 
-#: src/read.c:923
+#: src/read.c:944
 msgid "missing rule before commands"
 msgstr "ןהינפל ללכ אלל תודוקפ"
 
-#: src/read.c:1010
+#: src/read.c:1031
 #, c-format
 msgid "missing separator%s"
 msgstr "%sדירפמ רסח"
 
-#: src/read.c:1012
+#: src/read.c:1033
 msgid " (did you mean TAB instead of 8 spaces?)"
 msgstr "(?םיחוור 8 םוקמב TAB-ל תנווכתה םאה) "
 
-#: src/read.c:1183
+#: src/read.c:1204
 msgid "missing target pattern"
 msgstr "הרטמ תינבת ןיא"
 
-#: src/read.c:1185
+#: src/read.c:1206
 msgid "multiple target patterns"
 msgstr "תובורמ הרטמ תוינבת"
 
-#: src/read.c:1189
+#: src/read.c:1210
 #, c-format
 msgid "target pattern contains no `%%'"
 msgstr "`%%' אלל הרטמ תינבת"
 
-#: src/read.c:1250
+#: src/read.c:1271
 msgid "missing `endif'"
 msgstr "רסח `endif'"
 
-#: src/read.c:1326
+#: src/read.c:1347
 msgid "Extraneous text after `endef' directive"
 msgstr "`endef' תארוה ירחא רתוימ טסקט"
 
-#: src/read.c:1360
+#: src/read.c:1381
 msgid "missing `endef', unterminated `define'"
 msgstr "םויס אלל `define' תארוה ,רסח `endef'"
 
-#: src/read.c:1412 src/read.c:1580
+#: src/read.c:1433 src/read.c:1601
 #, c-format
 msgid "Extraneous text after `%s' directive"
 msgstr "`%s' תארוה ירחא רתוימ טסקט"
 
-#: src/read.c:1415
+#: src/read.c:1436
 #, c-format
 msgid "extraneous `%s'"
 msgstr "רתוימ `%s'"
 
-#: src/read.c:1420
+#: src/read.c:1441
 msgid "only one `else' per conditional"
 msgstr "יאנת לכל דיחי `else' קר רתומ"
 
-#: src/read.c:1638
+#: src/read.c:1659
 #, fuzzy
 msgid "Malformed pattern-specific variable definition"
 msgstr "הרטמל יפיצפס הנתשמ לש היוגש הרדגה"
 
-#: src/read.c:1661
+#: src/read.c:1682
 #, fuzzy
 msgid "Malformed target-specific variable definition"
 msgstr "הרטמל יפיצפס הנתשמ לש היוגש הרדגה"
 
-#: src/read.c:1752
+#: src/read.c:1773
 msgid "mixed implicit and static pattern rules"
 msgstr "םישרופמ-יתלבו םייטטס תינבת יללכ לש בוברע"
 
-#: src/read.c:1755
+#: src/read.c:1776
 msgid "mixed implicit and normal rules"
 msgstr "םישרופמ-יתלבו םיליגר םיללכ לש בוברע"
 
-#: src/read.c:1796
+#: src/read.c:1817
 #, c-format
 msgid "target `%s' doesn't match the target pattern"
 msgstr "דעיה תינבת תא תמאות הניא `%s' הרטמ"
 
-#: src/read.c:1818
+#: src/read.c:1839
 #, c-format
 msgid "target `%s' leaves prerequisite pattern empty"
 msgstr "הקיר םדקה תשירד תינבת תא הריאשמ `%s' הרטמ"
 
-#: src/read.c:1932 src/read.c:2032
+#: src/read.c:1953 src/read.c:2053
 #, c-format
 msgid "target file `%s' has both : and :: entries"
 msgstr ":: ןהו : גוסמ ןה םיללכ שי `%s' הרטמ ץבוקל"
 
-#: src/read.c:1938
+#: src/read.c:1959
 #, c-format
 msgid "target `%s' given more than once in the same rule."
 msgstr ".ללכ ותואב תחא םעפמ רתוי העיפומ `%s' הרטמ"
 
-#: src/read.c:1947
+#: src/read.c:1968
 #, c-format
 msgid "warning: overriding commands for target `%s'"
 msgstr "`%s' הרטמ רובע תודוקפ סרוד :תוריהז"
 
-#: src/read.c:1950
+#: src/read.c:1971
 #, c-format
 msgid "warning: ignoring old commands for target `%s'"
 msgstr "`%s' הרטמ רובע תומדוק תודוקפמ םלעתמ :תוריהז"
 
-#: src/read.c:2505
+#: src/read.c:2526
 msgid "warning: NUL character seen; rest of line ignored"
 msgstr "החנזנ הרושה תרתי ;NUL ות יתשגפ :הרהזא"
 
@@ -1807,21 +1789,25 @@ msgstr "`override' directive"
 msgid "automatic"
 msgstr "automatic"
 
-#: src/variable.c:71
+#: src/variable.c:70
+msgid "debugger"
+msgstr ""
+
+#: src/variable.c:74
 msgid "invalid"
 msgstr ""
 
-#: src/variable.c:1324
+#: src/variable.c:1261
 #, fuzzy, c-format
 msgid " (from `%s', line %lu)"
 msgstr " (from `%s', line %lu):\n"
 
-#: src/variable.c:1366
+#: src/variable.c:1305
 #, fuzzy
-msgid "# variable set hash-table stats:\n"
+msgid "variable set hash-table stats:\n"
 msgstr "# %u variables in %u hash buckets.\n"
 
-#: src/variable.c:1377
+#: src/variable.c:1316
 msgid ""
 "\n"
 "# Variables\n"
@@ -1829,7 +1815,7 @@ msgstr ""
 "\n"
 "# Variables\n"
 
-#: src/variable.c:1381
+#: src/variable.c:1320
 #, fuzzy
 msgid ""
 "\n"
@@ -1838,7 +1824,7 @@ msgstr ""
 "\n"
 "# Pattern-specific variable values"
 
-#: src/variable.c:1395
+#: src/variable.c:1334
 msgid ""
 "\n"
 "# No pattern-specific variable values."
@@ -1846,7 +1832,7 @@ msgstr ""
 "\n"
 "# No pattern-specific variable values."
 
-#: src/variable.c:1397
+#: src/variable.c:1336
 #, c-format
 msgid ""
 "\n"
@@ -1854,11 +1840,6 @@ msgid ""
 msgstr ""
 "\n"
 "# %u pattern-specific variable values"
-
-#: src/vmsfunctions.c:80
-#, c-format
-msgid "sys$search failed with %d\n"
-msgstr "%d םע לשכנ sys$search\n"
 
 #: src/vpath.c:554
 msgid ""
@@ -1898,6 +1879,37 @@ msgstr ""
 "\n"
 "# General (`VPATH' variable) search path:\n"
 "# "
+
+#~ msgid "touch archive member is not available on VMS"
+#~ msgstr "VMS תכרעמב ןויכראב רבא לש העש/ךיראת יונישב הכימת ןיא"
+
+#~ msgid "lbr$set_module failed to extract module info, status = %d"
+#~ msgstr "%d סוטטס ,lib$rset_module י\"ע לודומ לע עדימ תפילשב ןולשכ"
+
+#~ msgid "lbr$ini_control failed with status = %d"
+#~ msgstr "%d סוטטס םע לשכנ lbr$ini_control"
+
+#~ msgid "unable to open library `%s' to lookup member `%s'"
+#~ msgstr "(`%s' הירפס) `%s' רבא רובע הירפס תחיתפב הלקת"
+
+#~ msgid "*** [%s] Error 0x%x (ignored)"
+#~ msgstr "*** [%s] 0x%x הלקתמ יתמלעתה ***"
+
+#~ msgid "*** [%s] Error 0x%x"
+#~ msgstr "*** [%s] 0x%x הלקת ***"
+
+#~ msgid "Warning: Empty redirection\n"
+#~ msgstr "הקיר היינפה :תוריהז\n"
+
+#, fuzzy
+#~ msgid "  -x, --trace                  Trace command execution\n"
+#~ msgstr "תינכתהמ אצו הז הרזע ךסמ גצה"
+
+#~ msgid "unknown debug level specification `%s'"
+#~ msgstr "תואיגש יופינל עדימ לש `%s' רכומ-יתלב ןייפאמ"
+
+#~ msgid "sys$search failed with %d\n"
+#~ msgstr "%d םע לשכנ sys$search\n"
 
 #~ msgid "no file name for `%sinclude'"
 #~ msgstr "ץבוק םש אלל `%sinclude' תארוה"
