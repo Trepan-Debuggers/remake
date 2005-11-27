@@ -1,5 +1,6 @@
 /* Command processing for GNU Make.
-Copyright (C) 1988,89,91,92,93,94,95,96,97, 2004 Free Software Foundation, Inc.
+Copyright (C) 1988,89,91,92,93,94,95,96,97, 2004, 2005
+Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -254,72 +255,77 @@ set_file_variables (file_t *file)
 void
 chop_commands (commands_t *cmds)
 {
-  char *p;
-  unsigned int nlines, idx;
-  char **lines;
-
   /* If we don't have any commands,
      or we already parsed them, never mind.  */
 
   if (!cmds || cmds->command_lines != 0)
     return;
 
-  /* Chop CMDS->commands up into lines in CMDS->command_lines.
-	 Also set the corresponding CMDS->lines_flags elements,
-	 and the CMDS->any_recurse flag.  */
+  else {
+    unsigned int  nlines  = 5;
+    unsigned int *line_no = (unsigned int *) calloc (5, sizeof (unsigned int));
+    char        **lines   = (char **) calloc (5, sizeof (char *));
 
-  nlines = 5;
-  lines = (char **) xmalloc (5 * sizeof (char *));
-  idx = 0;
-  p = cmds->commands;
-  while (*p != '\0')
-    {
+    unsigned int i_line   = 0; /* Temporary line number. */
+    unsigned int i_prev   = 0; /* Temporary previous line number. */
+    unsigned int idx      = 0; /* Current index into lines/line_no*/
+    char        *p        = cmds->commands;
+    
+  /* Chop CMDS->commands up into lines in CMDS->command_lines.
+     Also set the corresponding CMDS->lines_flags elements,
+     and the CMDS->any_recurse flag.  */
+
+    while (*p != '\0') {
       char *end = p;
     find_end:;
       end = strchr (end, '\n');
       if (end == 0)
         end = p + strlen (p);
-      else if (end > p && end[-1] == '\\')
-        {
-          int backslash = 1;
-          char *b;
-          for (b = end - 2; b >= p && *b == '\\'; --b)
-            backslash = !backslash;
-          if (backslash)
-            {
-              ++end;
-              goto find_end;
-            }
-        }
+      else if (end > p && end[-1] == '\\') {
+	bool backslash = true;
+	char *b;
+	for (b = end - 2; b >= p && *b == '\\'; --b)
+	  backslash = !backslash;
+	if (backslash)
+	  {
+	    i_line++;
+	    ++end;
+	    goto find_end;
+	  }
+      } else 
+	i_line++;
 
-      if (idx == nlines)
-        {
-          nlines += 2;
-          lines = (char **) xrealloc ((char *) lines,
-                                      nlines * sizeof (char *));
-        }
-      lines[idx++] = savestring (p, end - p);
+      if (idx == nlines) {
+	nlines += 2;
+	lines  = (char **) xrealloc ((char *) lines,
+				     nlines * sizeof (char *));
+	line_no = (unsigned int *) xrealloc ((char *) line_no,
+					     nlines * sizeof (unsigned int *));
+      }
+      lines[idx]     = savestring (p, end - p);
+      line_no[idx++] = i_prev;
+      i_prev         = i_line;
       p = end;
-      if (*p != '\0')
-        ++p;
+      if (*p != '\0') ++p;
     }
 
-  if (idx != nlines)
-    {
+    if (idx != nlines) {
       nlines = idx;
-      lines = (char **) xrealloc ((char *) lines,
-                                  nlines * sizeof (char *));
+      lines  = (char **) xrealloc ((char *) lines,
+				   nlines * sizeof (char *));
+      line_no = (unsigned int *) xrealloc ((char *) line_no,
+					   nlines * sizeof (char *));
     }
-
-  cmds->ncommand_lines = nlines;
-  cmds->command_lines = lines;
-
-  cmds->any_recurse = 0;
-  cmds->lines_flags = (char *) xmalloc (nlines);
-  for (idx = 0; idx < nlines; ++idx)
-    {
+    
+    cmds->ncommand_lines = nlines;
+    cmds->command_lines  = lines;
+    cmds->line_no        = line_no;
+    
+    cmds->any_recurse = 0;
+    cmds->lines_flags = (char *) xmalloc (nlines);
+    for (idx = 0; idx < nlines; ++idx) {
       int flags = 0;
-
+      
       for (p = lines[idx];
            isblank ((unsigned char)*p) || *p == '-' || *p == '@' || *p == '+';
            ++p)
@@ -342,10 +348,11 @@ chop_commands (commands_t *cmds)
               || sindex (p, len, "${MAKE}", 7) != 0)
             flags |= COMMANDS_RECURSE;
         }
-
+      
       cmds->lines_flags[idx] = flags;
       cmds->any_recurse |= flags & COMMANDS_RECURSE;
     }
+  }
 }
 
 /*! Execute the commands to remake FILE.  If they are currently
