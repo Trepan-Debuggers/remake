@@ -18,17 +18,22 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#include "config.h"
+#include "ar_fns.h"
+#include "debug.h"
+#include "dep.h"
 #include "print.h"
 #include "implicit.h"
 #include "rule.h"
-#include "dep.h"
-#include "debug.h"
 #include "vpath.h"
-#include "ar_fns.h"
 
-/* alloca is in stdlib.h */
+/* alloca is in stdlib.h or alloca.h */
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
 #endif
 
 static int pattern_search PARAMS ((file_t *file, int archive, 

@@ -18,16 +18,18 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#include "config.h"
 #include "make.h"
-#include "hash.h"
 #include "ar_fns.h"
+#include "hash.h"
+
+#ifdef	HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 
 #ifdef	HAVE_DIRENT_H
 # include <dirent.h>
 # define NAMLEN(dirent) strlen((dirent)->d_name)
-# ifdef VMS
-extern char *vmsify PARAMS ((char *name, int type));
-# endif
 #else
 # define dirent direct
 # define NAMLEN(dirent) (dirent)->d_namlen
@@ -40,9 +42,6 @@ extern char *vmsify PARAMS ((char *name, int type));
 # ifdef HAVE_NDIR_H
 #  include <ndir.h>
 # endif
-# ifdef HAVE_VMSDIR_H
-#  include "vmsdir.h"
-# endif /* HAVE_VMSDIR_H */
 #endif
 
 /* In GNU systems, <dirent.h> defines this macro for us.  */

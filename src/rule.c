@@ -17,15 +17,20 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#include "print.h"
-#include "read.h"
+#include "config.h"
 #include "dep.h"
 #include "commands.h"
+#include "print.h"
+#include "read.h"
 #include "rule.h"
 
-/* alloca is in stdlib.h */
+/* alloca is in stdlib.h or alloca.h */
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
 #endif
 
 static void freerule PARAMS ((struct rule *rule, struct rule *lastrule));

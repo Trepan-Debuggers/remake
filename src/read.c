@@ -1,4 +1,4 @@
-/* $Id: read.c,v 1.14 2005/11/27 18:11:46 rockyb Exp $
+/* $Id: read.c,v 1.15 2005/11/27 20:38:01 rockyb Exp $
 Reading and parsing of makefiles for GNU Make.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
@@ -20,16 +20,26 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#include "print.h"
-#include "read.h"
-#include "vpath.h"
+#include "config.h"
+
+#include "dbg_cmd.h"
+#include "debug.h"
+#include "commands.h"
 #include "dep.h"
 #include "expand.h"
 #include "function.h"
-#include "commands.h"
 #include "rule.h"
-#include "debug.h"
-#include "dbg_cmd.h"
+#include "print.h"
+#include "read.h"
+#include "vpath.h"
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
 
 #ifndef NO_ARCHIVES
 #include "ar_fns.h"

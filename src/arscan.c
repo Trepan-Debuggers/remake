@@ -1,5 +1,6 @@
-/* Library function for scanning an archive file.
-Copyright (C) 1987, 89, 91, 92, 93, 94, 95, 97, 2004
+/* $Id: arscan.c,v 1.5 2005/11/27 20:38:01 rockyb Exp $
+Library function for scanning an archive file.
+Copyright (C) 1987, 89, 91, 92, 93, 94, 95, 97, 2004, 2005
 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
@@ -17,6 +18,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 USA.  */
 
+#include "config.h"
 #include "make.h"
 
 #ifdef HAVE_FCNTL_H
@@ -25,9 +27,13 @@ USA.  */
 #include <sys/file.h>
 #endif
 
-/* alloca is in stdlib.h */
+/* alloca is in stdlib.h or alloca.h */
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
 #endif
 
 #ifndef	NO_ARCHIVES

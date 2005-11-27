@@ -1,4 +1,4 @@
-/* $Id: commands.c,v 1.8 2005/11/27 17:41:17 rockyb Exp $
+/* $Id: commands.c,v 1.9 2005/11/27 20:38:01 rockyb Exp $
 Command processing for GNU Make.
 Copyright (C) 1988,89,91,92,93,94,95,96,97, 2004, 2005
 Free Software Foundation, Inc.
@@ -26,16 +26,16 @@ Boston, MA 02111-1307, USA.  */
 #include "commands.h"
 #include "ar_fns.h"
 
-/* alloca is in stdlib.h */
+/* alloca is in stdlib.h or alloca.h */
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 
-#if VMS
-# define FILE_LIST_SEPARATOR ','
-#else
-# define FILE_LIST_SEPARATOR ' '
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
 #endif
+
+#define FILE_LIST_SEPARATOR ' '
 
 extern int remote_kill PARAMS ((int id, int sig));
 

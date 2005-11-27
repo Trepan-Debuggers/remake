@@ -1,4 +1,5 @@
-/* Argument parsing and main program of GNU Make.
+/* $Id: main.c,v 1.16 2005/11/27 20:38:01 rockyb Exp $
+Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -18,19 +19,29 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
 MA 02111-1307, USA.  */
 
-#include "print.h"
-#include "read.h"
+#include "config.h"
+#include "dbg_cmd.h"
+#include "debug.h"
 #include "default.h"
-#include "remake.h"
-#include "variable.h"
 #include "expand.h"
 #include "function.h"
+#include "print.h"
+#include "read.h"
+#include "remake.h"
+#include "variable.h"
 #include "commands.h"
 #include "rule.h"
-#include "debug.h"
-#include "dbg_cmd.h"
 #include "getopt.h"
 #include "vpath.h"
+
+/* alloca is in stdlib.h or alloca.h */
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
 
 #include <assert.h>
 #ifdef _AMIGA

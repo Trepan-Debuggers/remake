@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.13 2005/11/27 15:49:14 rockyb Exp $
+/* $Id: job.c,v 1.14 2005/11/27 20:38:01 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005
 Free Software Foundation, Inc.
@@ -31,9 +31,13 @@ Boston, MA 02111-1307, USA.  */
 #include "commands.h"
 #include "remote-stub.h"
 
-/* alloca is in stdlib.h */
+/* alloca is in stdlib.h or alloca.h */
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
 #endif
 
 #ifdef HAVE_STRING_H

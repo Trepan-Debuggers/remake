@@ -1,4 +1,5 @@
-/* Builtin expansion for GNU Make.
+/* $Id: function.c,v 1.11 2005/11/27 20:38:01 rockyb Exp $
+Builtin expansion for GNU Make.
 Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004, 2005
 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -18,17 +19,22 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#include "print.h"
-#include "read.h"
+#include "config.h"
+#include "debug.h"
+#include "dep.h"
 #include "expand.h"
 #include "function.h"
-#include "dep.h"
+#include "print.h"
+#include "read.h"
 #include "commands.h"
-#include "debug.h"
 
-/* alloca is in stdlib.h */
+/* alloca is in stdlib.h or alloca.h */
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
 #endif
 
 #ifdef _AMIGA

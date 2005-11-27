@@ -25,8 +25,13 @@ Boston, MA 02111-1307, USA.  */
 #include "expand.h"
 #include "commands.h"
 #include "rule.h"
+
 #ifdef WINDOWS32
 #include "pathstuff.h"
+#endif
+
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
 #endif
 
 /* Chain of all pattern-specific variables.  */

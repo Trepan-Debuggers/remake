@@ -1,4 +1,4 @@
-/* $Id: ar_fns.h,v 1.1 2005/11/27 16:49:56 rockyb Exp $
+/* $Id: ar_fns.h,v 1.2 2005/11/27 20:38:01 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -16,6 +16,11 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
+
+#ifndef AR_FNS_H
+#define AR_FNS_H
+
+#include <time.h>
 
 /*! Return nonzero if PSZ_NAME is an archive-member reference, zero if not.
    An archive-member reference is a name like `lib(member)'.  If a
@@ -37,3 +42,4 @@ extern int ar_touch (char *psz_name);
 /*! Return the modtime of PSZ_NAME.  */
 extern time_t ar_member_date (char *);
 
+#endif /*AR_FNS_H*/

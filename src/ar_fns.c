@@ -1,4 +1,4 @@
-/* $Id: ar_fns.c,v 1.1 2005/11/27 17:24:55 rockyb Exp $
+/* $Id: ar_fns.c,v 1.2 2005/11/27 20:38:01 rockyb Exp $
 Interface to `ar' archives for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -19,14 +19,19 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#include "print.h"
+#include "config.h"
 
 #ifndef	NO_ARCHIVES
 
 #include "ar_fns.h"
 #include "arscan.h"
+#include "print.h"
 #include "remake.h"
 #include <fnmatch.h>
+
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
 
 /*! Return nonzero if NAME is an archive-member reference, zero if not.
    An archive-member reference is a name like `lib(member)'.  If a

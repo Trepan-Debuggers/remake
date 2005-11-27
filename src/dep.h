@@ -21,6 +21,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef DEP_H
 #define DEP_H
 
+#include "types.h"
 #include "hash.h"
 
 /* Flag bits for the second argument to `read_makefile'.
@@ -62,8 +63,8 @@ struct nameseq
 typedef struct nameseq nameseq_t;
 
 #ifndef NO_ARCHIVES
-extern nameseq_t *ar_glob PARAMS ((char *arname, char *member_pattern, 
-				   unsigned int size));
+extern nameseq_t *ar_glob (char *arname, char *member_pattern, 
+			   unsigned int size);
 #endif
 
 /*! Whether or not .SECONDARY with no prerequisites was given.  */
@@ -80,18 +81,18 @@ extern char *dep_name ();
   as the old one and return that.  The return value is malloc'd. The
   caller must thus free it.
  */
-extern struct dep *copy_dep_chain PARAMS ((dep_t *d));
+extern struct dep *copy_dep_chain (dep_t *d);
 
-extern struct dep *read_all_makefiles PARAMS ((char **makefiles));
+extern struct dep *read_all_makefiles (char **makefiles);
 
 /*! For each dependency of each file, make the `struct dep' point
    at the appropriate `struct file' (which may have to be created).
 
    Also mark the files depended on by .PRECIOUS, .PHONY, .SILENT,
    and various other special targets.  */
-extern void snap_deps PARAMS ((hash_table_t *p_files));
+extern void snap_deps (hash_table_t *p_files);
 
 /*! Remove duplicate dependencies in CHAIN.  */
-extern void uniquize_deps PARAMS ((dep_t * chain));
+extern void uniquize_deps (dep_t * chain);
 
 #endif /*DEP_H*/
