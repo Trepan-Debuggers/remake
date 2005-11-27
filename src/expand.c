@@ -1,4 +1,4 @@
-/* $Id: expand.c,v 1.6 2005/11/27 11:39:33 rockyb Exp $
+/* $Id: expand.c,v 1.7 2005/11/27 21:52:23 rockyb Exp $
 Variable expansion functions for GNU Make.
 Copyright (C) 1988, 89, 91, 92, 93, 95, 
 2004, 2005 Free Software Foundation, Inc.
@@ -25,6 +25,10 @@ Boston, MA 02111-1307, USA.  */
 #include "commands.h"
 #include "function.h"
 #include "rule.h"
+
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
 
 #include <assert.h>
 
