@@ -1,6 +1,8 @@
-/* Reading and parsing of makefiles for GNU Make.
+/* $Id: read.c,v 1.11 2005/11/27 11:55:59 rockyb Exp $
+Reading and parsing of makefiles for GNU Make.
+
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-2002, 2004 Free Software Foundation, Inc.
+2002, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify

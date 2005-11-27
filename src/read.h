@@ -1,5 +1,7 @@
-/* header for Reading and parsing of makefiles for GNU Make.
-Copyright (C) 2004 Free Software Foundation, Inc.
+/* $Id: read.h,v 1.2 2005/11/27 11:55:59 rockyb Exp $ 
+Header for Reading and parsing of makefiles for GNU Make.
+
+Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
