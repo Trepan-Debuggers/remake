@@ -1,4 +1,4 @@
-/* $Id: dbg_fns.c,v 1.1 2005/11/23 11:48:18 rockyb Exp $
+/* $Id: dbg_fns.c,v 1.2 2005/11/27 01:42:00 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -20,6 +20,7 @@ Boston, MA 02111-1307, USA.  */
 /* Helper rutines for debugger command interface. */
 
 #include "dbg_fns.h"
+#include "trace.h"
 #include "config.h"
 
 #ifdef HAVE_STRING_H
@@ -132,7 +133,8 @@ on_off_toggle(const char *psz_onoff, int *var)
 
 /** Print where we are in the Makefile. */
 void 
-print_debugger_location(file_t *p_target) 
+print_debugger_location(const file_t *p_target, 
+			const floc_stack_node_t *p_stack_floc)
 {
   if (p_target_loc) {
     if ( !p_target_loc->filenm && !p_target_loc->lineno 
@@ -143,10 +145,18 @@ print_debugger_location(file_t *p_target)
       */
       printf("\n(%s:0)\n", p_target->name);
     } else {
-      printf("\n(", p_target->name);
+      printf("\n(");
       print_floc_prefix(p_target_loc);
       printf ("): %s\n", psz_target_name);
     }
+  } else if (p_stack_floc && p_stack_floc->p_floc) {
+      printf("\n(");
+      print_floc_prefix(p_stack_floc->p_floc);
+      printf (")\n", psz_target_name);
+  } else if (p_stack_floc_top && p_stack_floc_top->p_floc) {
+      printf("\n(");
+      print_floc_prefix(p_stack_floc_top->p_floc);
+      printf (")\n", psz_target_name);
   }
 }
 

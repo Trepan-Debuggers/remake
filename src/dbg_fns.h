@@ -1,4 +1,4 @@
-/* $Id: dbg_fns.h,v 1.1 2005/11/23 11:48:18 rockyb Exp $
+/* $Id: dbg_fns.h,v 1.2 2005/11/27 01:42:00 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 #define DBG_FNS_H
 
 #include "filedef.h"
+#include "trace.h"
 
 extern floc_t *p_target_loc;
 extern char   *psz_target_name;
@@ -57,7 +58,8 @@ extern bool is_abbrev_of(const char* psz_substr, const char* psz_word);
 extern void on_off_toggle(const char *psz_onoff, int *var) ;
 
 /** Print where we are in the Makefile. */
-extern void print_debugger_location(file_t *p_target);
+extern void print_debugger_location(const file_t *p_target, 
+				    const floc_stack_node_t *p_stack_floc);
     
 /** Strip whitespace from the start and end of STRING.  Return a pointer
    into STRING. */

@@ -127,7 +127,7 @@ const floc_t *reading_file = 0;
 
 static dep_t *read_makefiles = 0;
 
-static int eval_makefile (char *filename, int flags, floc_t *fstart);
+static int eval_makefile (char *filename, int flags);
 static int eval (ebuffer_t *buffer, int flags);
 
 static long readline PARAMS ((ebuffer_t *ebuf));
@@ -189,8 +189,8 @@ read_all_makefiles (char **makefiles)
 	if (*p != '\0')
 	  *p++ = '\0';
         name = xstrdup (name);
-	if ( eval_makefile (name, RM_NO_DEFAULT_GOAL|RM_INCLUDED|RM_DONTCARE,
-			   NULL) < 2 )
+	if ( eval_makefile (name, RM_NO_DEFAULT_GOAL|RM_INCLUDED|RM_DONTCARE) 
+	     < 2 )
           free (name);
       }
 
@@ -205,7 +205,7 @@ read_all_makefiles (char **makefiles)
 	dep_t *tail = read_makefiles;
 	dep_t *d;
 
-	if (! eval_makefile (*makefiles, 0, NULL))
+	if ( !eval_makefile (*makefiles, 0) )
 	  perror_with_name ("", *makefiles);
 
 	/* Find the right element of read_makefiles.  */
@@ -240,7 +240,7 @@ read_all_makefiles (char **makefiles)
 
       if (*p != 0)
 	{
-	  if (! eval_makefile (*p, 0, NULL))
+	  if ( !eval_makefile (*p, 0) )
 	    perror_with_name ("", *p);
 	}
       else
@@ -304,7 +304,7 @@ restore_conditionals (struct conditionals *saved)
 }
 
 static int
-eval_makefile (char *filename, int flags, floc_t *p_floc)
+eval_makefile (char *filename, int flags)
 {
   dep_t *deps;
   ebuffer_t ebuf;
@@ -317,8 +317,8 @@ eval_makefile (char *filename, int flags, floc_t *p_floc)
 
   if (ISDB (DB_VERBOSE|DB_READMAKEFILES))
     {
-      if (p_floc) {
-	print_floc_prefix(p_floc);
+      if (p_stack_floc_top && p_stack_floc_top->p_floc) {
+	print_floc_prefix(p_stack_floc_top->p_floc);
 	printf ("\n\t");
       }
       printf (_("Reading makefile `%s'"), filename);
@@ -332,6 +332,8 @@ eval_makefile (char *filename, int flags, floc_t *p_floc)
 	printf (_(" (no ~ expansion)"));
       puts ("...");
     }
+
+  trace_push_floc(&ebuf.floc);
 
   /* First, get a stream to read.  */
 
@@ -396,6 +398,7 @@ eval_makefile (char *filename, int flags, floc_t *p_floc)
 	 attempt, rather from FILENAME itself.  Restore it in case the
 	 caller wants to use it in a message.  */
       errno = makefile_errno;
+      trace_pop_floc();
       return 0;
     }
 
@@ -405,7 +408,7 @@ eval_makefile (char *filename, int flags, floc_t *p_floc)
                           f_append, 0);
 
   if (b_debugger_preread && !b_in_debugger) 
-    enter_debugger (NULL, deps->file, 0);
+    enter_debugger (NULL, NULL, 0);
 
   /* Evaluate the makefile */
 
@@ -422,6 +425,7 @@ eval_makefile (char *filename, int flags, floc_t *p_floc)
   fclose (ebuf.fp);
 
   free (ebuf.bufstart);
+  trace_pop_floc();
   return r;
 }
 
@@ -851,9 +855,7 @@ eval (ebuffer_t *ebuf, int set_default)
 	      files = next;
 
               r = eval_makefile (name, (RM_INCLUDED | RM_NO_TILDE
-                                        | (noerror ? RM_DONTCARE : 0)),
-				 fstart
-				 );
+                                        | (noerror ? RM_DONTCARE : 0)) );
 	      if (!r)
                 {
                   if (!noerror)

@@ -1,5 +1,5 @@
 /* 
-Copyright (C) 2004 Free Software Foundation, Inc.
+Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -24,19 +24,25 @@ Boston, MA 02111-1307, USA.  */
 #include "debug.h"
 #include "dbg_cmd.h"
 
+/** Pointer to top of current target call stack */
+target_stack_node_t *p_stack_top;
+
+/** Pointer to top of current target floc stack */
+floc_stack_node_t *p_stack_floc_top = NULL;
+
 /*! Push "target" to the call stack. */
 extern target_stack_node_t *
 trace_push_target (target_stack_node_t *p, file_t *p_target,
 		   int b_debugger) {
   target_stack_node_t *new_node = 
-    (target_stack_node_t *) xmalloc (sizeof(target_stack_node_t));
+    (target_stack_node_t *) calloc (1, sizeof(target_stack_node_t));
 
   /* We allocate and make a copy of p_target in case we want to
      modify information, like the file location or target name
      on the fly as we process file commands or handle dependencies from
      target patterns.
    */
-  new_node->p_target = (file_t *) xmalloc (sizeof(file_t));
+  new_node->p_target = (file_t *) calloc (1, sizeof(file_t));
   memcpy(new_node->p_target, p_target, sizeof(file_t));
 
   new_node->p_parent = p;
@@ -65,12 +71,32 @@ trace_push_target (target_stack_node_t *p, file_t *p_target,
 extern void
 trace_pop_target (target_stack_node_t *p) 
 {
-  /*if ( debugger_stepping ) enter_debugger(p, NULL, 0);*/
   if (NULL == p) return;
   free(p->p_target);
   free(p);
 }
 
+/*! Push "p_floc" to the floc stack. Return the new stack top. 
+*/
+extern void
+trace_push_floc (floc_t *p_floc) 
+{
+  floc_stack_node_t *new_node = 
+    (floc_stack_node_t *) calloc (1, sizeof(floc_stack_node_t));
 
+  /* We DO NOT allocate and make a copy of p_floc so that as we
+     read the Makefile, the line number gets updated automatically.
+     Slick, huh? Also it shortens and simplifies code a bit.
+   */
+  new_node->p_floc = p_floc;
+  new_node->p_parent = p_stack_floc_top;
+  p_stack_floc_top = new_node;
+};
 
-
+/*! Pop the next target from the floc stack. */
+extern void
+trace_pop_floc (void) 
+{
+  if (NULL == p_stack_floc_top) return;
+  p_stack_floc_top = p_stack_floc_top->p_parent;
+}

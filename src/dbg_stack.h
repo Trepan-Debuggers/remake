@@ -1,4 +1,4 @@
-/* $Id: dbg_stack.h,v 1.1 2005/11/23 11:48:18 rockyb Exp $
+/* $Id: dbg_stack.h,v 1.2 2005/11/27 01:42:00 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -26,13 +26,11 @@ Boston, MA 02111-1307, USA.  */
 
 extern int i_stack_pos;
 
-/** Pointer to top of current target call stack */
-extern target_stack_node_t *p_stack_top;
-
 /** Pointer to current target call stack at the place we are currently
    focused on.
  */
 extern target_stack_node_t *p_stack;
+extern floc_stack_node_t   *p_floc_stack;
 
 /** Move reported target frame postition down by psz_amount. */
 debug_return_t dbg_cmd_frame_down (char *psz_amount);

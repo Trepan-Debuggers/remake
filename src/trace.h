@@ -39,16 +39,17 @@ typedef enum {
    "jobs" it's not really a stack but a tree. 
 */
 
-/* Node for an item in the call tree */
-struct target_stack_node
+/*! Node for an item in the target call stack */
+typedef struct target_stack_node
   {
     file_t                   *p_target;
     struct target_stack_node *p_parent;
-  };
+  } target_stack_node_t; 
 
-typedef struct target_stack_node target_stack_node_t;
+/** Pointer to top of current target call stack */
+extern target_stack_node_t *p_stack_top;
 
-/*! Push "target" to the call stack. Return the new stack top. 
+/*! Push "p_target" to the call stack. Return the new stack top. 
     if b_debugger is true we might enter the debugger.
 */
 extern target_stack_node_t *trace_push_target (target_stack_node_t *p, 
@@ -57,5 +58,22 @@ extern target_stack_node_t *trace_push_target (target_stack_node_t *p,
 
 /*! Pop the next target from the call stack.. */
 extern void trace_pop_target (target_stack_node_t *p);
+
+/*! Node for an item in the "include Makefile" stack */
+typedef struct floc_stack_node
+  {
+    floc_t                 *p_floc;
+    struct floc_stack_node *p_parent;
+  } floc_stack_node_t;
+
+/** Pointer to top of current target floc stack */
+extern floc_stack_node_t *p_stack_floc_top;
+
+/*! Push "p_floc" to the floc stack. Return the new stack top. 
+*/
+extern void trace_push_floc (floc_t *p_floc);
+
+/*! Pop the next floc from the call stack.. */
+extern void trace_pop_floc (void);
 
 #endif /*TRACE_H*/

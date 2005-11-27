@@ -1,4 +1,4 @@
-/* $Id: dbg_stack.c,v 1.1 2005/11/23 11:48:18 rockyb Exp $
+/* $Id: dbg_stack.c,v 1.2 2005/11/27 01:42:00 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -25,13 +25,11 @@ Boston, MA 02111-1307, USA.  */
 
 int i_stack_pos = 0;
 
-/** Pointer to top of current target call stack */
-target_stack_node_t *p_stack_top;
-
 /** Pointer to current target call stack at the place we are currently
    focused on.
  */
-target_stack_node_t *p_stack;
+target_stack_node_t *p_stack = NULL;
+floc_stack_node_t *p_floc_stack = NULL;
 
 /** Move reported target frame postition down by psz_amount. */
 debug_return_t 
@@ -54,17 +52,33 @@ dbg_cmd_frame_down (char *psz_amount)
   }
   
   i_stack_pos -= i_amount;
-  
-  for ( p_stack=p_stack_top; p_stack ; p_stack = p_stack->p_parent ) {
-    if (i_stack_pos == i)
-      break;
-    i++;
-  }
 
-  p_target_loc    = &(p_stack->p_target->floc);
-  psz_target_name = p_stack->p_target->name;
+  if (p_stack_top) {
+    /* We have a target stack  */
+    for ( p_stack=p_stack_top; p_stack ; p_stack = p_stack->p_parent ) {
+      if (i_stack_pos == i)
+	break;
+      i++;
+    }
+
+    p_target_loc    = &(p_stack->p_target->floc);
+    psz_target_name = p_stack->p_target->name;
+    
+    print_debugger_location(p_stack->p_target, NULL);
+    
+  } else if (p_stack_floc_top) {
+    /* We have a Makefile stack */
+    for ( p_floc_stack=p_stack_floc_top; 
+	  p_floc_stack ; p_floc_stack = p_floc_stack->p_parent ) {
+      if (i_stack_pos == i)
+	break;
+      i++;
+    }
+
+    print_debugger_location(NULL, p_floc_stack);
+    
+  }
   
-  print_debugger_location(p_stack->p_target);
   return debug_readloop;
 }
 
@@ -82,24 +96,46 @@ dbg_cmd_frame (char *psz_frame)
   }
 
   i = i_frame + 1;
-  
-  for ( p_stack=p_stack_top; p_stack ; p_stack = p_stack->p_parent ) {
-    i--;
-    if (0 == i)
-      break;
-  }
 
-  if (0 != i) {
-    printf(_("Can't set frame to position %d; %d is the highest position."),
-	   i_frame, i_frame - i);
-    return debug_readloop;
-  }
+  if (p_stack_top) {
+    for ( p_stack=p_stack_top; p_stack ; p_stack = p_stack->p_parent ) {
+      i--;
+      if (0 == i)
+	break;
+    }
 
-  i_stack_pos     = i_frame;
-  p_target_loc    = &(p_stack->p_target->floc);
-  psz_target_name = p_stack->p_target->name;
+    if (0 != i) {
+      printf(_("Can't set frame to position %d; "
+	       "%d is the highest position.\n"),
+	     i_frame, i_frame - i);
+      return debug_readloop;
+    }
+    
+    i_stack_pos     = i_frame;
+    p_target_loc    = &(p_stack->p_target->floc);
+    psz_target_name = p_stack->p_target->name;
+    
+    print_debugger_location(p_stack->p_target, NULL);
+  } else if (p_stack_floc_top) {
+    /* We have a Makefile stack */
+    for ( p_floc_stack=p_stack_floc_top; 
+	  p_floc_stack ; p_floc_stack = p_floc_stack->p_parent ) {
+      i--;
+      if (0 == i)
+	break;
+    }
+
+    if (0 != i) {
+      printf(_("Can't set frame to position %d; "
+	       "%d is the highest position.\n"),
+	     i_frame, i_frame - i);
+      return debug_readloop;
+    }
+    i_stack_pos     = i_frame;
+
+    print_debugger_location(NULL, p_floc_stack);
+  }
   
-  print_debugger_location(p_stack->p_target);
   return debug_readloop;
 }
 
@@ -109,7 +145,6 @@ dbg_cmd_frame_up (char *psz_amount)
 {
   unsigned int i_amount=1;
   unsigned int i = 0;
-  target_stack_node_t *p=p_stack;
 
   if (!psz_amount || !*psz_amount) {
     i_amount = 1;
@@ -118,34 +153,56 @@ dbg_cmd_frame_up (char *psz_amount)
       return debug_readloop;
   }
 
-  for ( ; p ; p = p->p_parent, i++ ) {
-    if (i_amount == i) break;
-  }
+  if (p_stack_top) {
+    /* We have a target stack  */
+    target_stack_node_t *p=p_stack;
 
-  if (p) {
-    i_stack_pos    += i_amount;
-    p_stack         = p;
-    psz_target_name = p->p_target->name;
-
-    p_target_loc    = &(p->p_target->floc);
-    if (!p->p_target->floc.filenm && p->p_target->cmds->fileinfo.filenm) {
-      /* Fake the location based on the commands - it's better than
-	 nothing...
-       */
-      memcpy(&fake_floc, &(p->p_target->cmds->fileinfo),
-	     sizeof(floc_t));
-      /* HACK: is it okay to assume that the target is on the line
-	 before the first command? Or should we list the line
-	 that the command starts on - so we know we've faked the location?
-       */
-      fake_floc.lineno--;
-      p_target_loc = &fake_floc;
+    for ( ; p ; p = p->p_parent, i++ ) {
+      if (i_amount == i) break;
     }
-  } else {
-    printf("Can't move up %d - would be beyond top-most frame position.\n",
-	   i_amount);
+    
+    if (p) {
+      i_stack_pos    += i_amount;
+      p_stack         = p;
+      psz_target_name = p->p_target->name;
+      
+      p_target_loc    = &(p->p_target->floc);
+      if (!p->p_target->floc.filenm && p->p_target->cmds->fileinfo.filenm) {
+	/* Fake the location based on the commands - it's better than
+	   nothing...
+	*/
+	memcpy(&fake_floc, &(p->p_target->cmds->fileinfo),
+	       sizeof(floc_t));
+	/* HACK: is it okay to assume that the target is on the line
+	   before the first command? Or should we list the line
+	   that the command starts on - so we know we've faked the location?
+	*/
+	fake_floc.lineno--;
+	p_target_loc = &fake_floc;
+      }
+    } else {
+      printf("Can't move up %d - would be beyond top-most frame position.\n",
+	     i_amount);
+    }
+    
+    print_debugger_location(p_stack->p_target, NULL);
+  } else if (p_floc_stack) {
+    /* We don't have a target stack, but we have a Makefile read stack  */
+    floc_stack_node_t *p=p_floc_stack;
+    for ( ; p ; p = p->p_parent, i++ ) {
+      if (i_amount == i) break;
+    }
+    
+    if (p) {
+      i_stack_pos    += i_amount;
+      p_floc_stack   = p;
+      
+    } else {
+      printf("Can't move up %d - would be beyond top-most frame position.\n",
+	     i_amount);
+    }
+    print_debugger_location(NULL, p_floc_stack);
   }
   
-  print_debugger_location(p_stack->p_target);
   return debug_readloop;
 }

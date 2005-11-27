@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.41 2005/11/24 03:17:44 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.42 2005/11/27 01:42:00 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -545,7 +545,11 @@ dbg_cmd_restart (char *psz_arg)
 static debug_return_t 
 dbg_cmd_show_stack (char *psz_arg)
 {
-  print_target_stack (p_stack_top, i_stack_pos);
+  if (p_stack_top)
+    print_target_stack (p_stack_top, i_stack_pos);
+
+  if (p_stack_floc_top) 
+    print_floc_stack (i_stack_pos);
   return debug_readloop;
 }
 
@@ -1188,6 +1192,7 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
   i_stack_pos      = 0;
 
   p_stack = p_stack_top = p;
+  p_floc_stack = p_stack_floc_top;
 
   /* Get the target name either from the stack top (preferred) or
      the passed in target.
@@ -1226,7 +1231,7 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
     }
   }
 
-  print_debugger_location(p_target);
+  print_debugger_location(p_target, NULL);
   
   b_in_debugger = true;
 

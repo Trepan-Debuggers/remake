@@ -481,3 +481,23 @@ print_target_stack (target_stack_node_t *p, int pos)
     i++;
   }
 }
+
+/*! Display common prefix message output file target. */
+extern void 
+print_floc_stack (int pos)
+{
+  unsigned int i=0;
+  floc_stack_node_t *p;
+  printf("\n");
+  for ( p=p_stack_floc_top; p ; p = p->p_parent ) {
+    if (pos != -1) {
+      printf("%s", (i == pos) ? "=>" : "  ");
+    }
+    printf ("#%u  ", i);
+    if (p->p_floc->filenm) {
+      print_floc_prefix(p->p_floc);
+    }
+    printf ("\n");
+    i++;
+  }
+}
