@@ -126,14 +126,6 @@ ar_member_date_1 (int desc UNUSED, char *mem, int truncated,
 
 /* Set the archive-member NAME's modtime to now.  */
 
-#ifdef VMS
-int
-ar_touch (char *name)
-{
-  error (NILF, _("touch archive member is not available on VMS"));
-  return -1;
-}
-#else
 int
 ar_touch (char *name)
 {
@@ -187,7 +179,6 @@ ar_touch (char *name)
 
   return val;
 }
-#endif /* !VMS */
 
 /* State of an `ar_glob' run, passed to `ar_glob_match'.  */
 

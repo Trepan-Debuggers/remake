@@ -16,6 +16,10 @@ Version 3.80+dbg-0.4cvs
 * Add ability to stop before reading Makefiles - may be useful in 
   debugging macros and variables --debugger=preread. We can now trace
   makefile reading activity with -d r or via --trace = {read,full}
+  
+* "where" command expanded to include above new Makefile read stack.
+
+* Add call tracing.
 
 * Fix bugs in showing automatic variables 
 
@@ -23,11 +27,15 @@ Version 3.80+dbg-0.4cvs
   - "help set" added 
   - "help show" works like the others
   - "info locals" added
+  - "show command" (history) added
   - file/line reporting more like bash/perl
 
-* write file takes basename (well, at least for POSIX systems)
+* write file takes basename of target file (well, at least for POSIX
+  systems)
 
-* The usual doc fixes after a release.
+* Update documentation quite a bit
+
+* Start to remove VMS support
 
 Version 3.80+dbg-0.3
 

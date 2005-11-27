@@ -195,15 +195,6 @@ extern unsigned int get_path_max PARAMS ((void));
 # define S_ISDIR(mode)  (((mode) & S_IFMT) == S_IFDIR)
 #endif
 
-#ifdef VMS
-# include <types.h>
-# include <unixlib.h>
-# include <unixio.h>
-# include <perror.h>
-/* Needed to use alloca on VMS.  */
-# include <builtins.h>
-#endif
-
 #ifndef __attribute__
 /* This feature is available in gcc versions 2.5 and later.  */
 # if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 5) || __STRICT_ANSI__
@@ -494,15 +485,9 @@ extern int handling_fatal_signal;
 #define MAX(_a,_b) ((_a)>(_b)?(_a):(_b))
 #endif
 
-#ifdef VMS
-#  define MAKE_SUCCESS 1
-#  define MAKE_TROUBLE 2
-#  define MAKE_FAILURE 3
-#else
-#  define MAKE_SUCCESS 0
-#  define MAKE_TROUBLE 1
-#  define MAKE_FAILURE 2
-#endif
+#define MAKE_SUCCESS 0
+#define MAKE_TROUBLE 1
+#define MAKE_FAILURE 2
 
 /* Set up heap debugging library dmalloc.  */
 

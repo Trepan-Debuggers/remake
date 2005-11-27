@@ -66,10 +66,6 @@ struct child
     char *command_ptr;		/* Ptr into command_lines[command_line].  */
 
     pid_t pid;			/* Child process's ID number.  */
-#ifdef VMS
-    int efn;			/* Completion event flag number */
-    int cstatus;		/* Completion status */
-#endif
     char *sh_batch_file;        /* Script file for shell commands */
     unsigned int remote:1;	/* Nonzero if executing remotely.  */
 

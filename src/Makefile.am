@@ -38,8 +38,6 @@ AM_CPPFLAGS =	$(GLOBINC)
 # because often that directory isn't built on the systems used by the
 # maintainers.
 
-EXTRA_DIST =	vmsdir.h vmsfunctions.c vmsify.c
-
 MAKE_HOST =	@MAKE_HOST@
 
 
