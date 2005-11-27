@@ -1,5 +1,5 @@
 /* Job execution and handling for GNU Make.
-Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004
+Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005
 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -386,13 +386,6 @@ child_error (child_t *p_child, target_stack_node_t *p_call_stack,
   if (ignored && silent_flag)
     return;
 
-#ifdef VMS
-  if (!(exit_code & 1))
-    err (p_call_stack,
-	 (ignored ? _("*** [%s] Error 0x%x (ignored)")
-	  : _("*** [%s] Error 0x%x")),
-	 target_name, exit_code);
-#else
   if (exit_sig == 0)
     err (p_call_stack, ignored ? _("[%s] Error %d (ignored)") :
 	 _("*** [%s] Error %d"),
@@ -401,7 +394,6 @@ child_error (child_t *p_child, target_stack_node_t *p_call_stack,
     err (p_call_stack, "*** [%s] %s%s",
 	 target_name, strsignal (exit_sig),
 	 coredump ? _(" (core dumped)") : "");
-#endif /* VMS */
 
   /* If have enabled debugging but haven't entered the debugger above
      because we haven't set to debug on error, enter the debugger now.
@@ -412,99 +404,6 @@ child_error (child_t *p_child, target_stack_node_t *p_call_stack,
     enter_debugger(p_call_stack, p_child->file, exit_code);
 }
 
-#ifdef VMS
-/* Wait for nchildren children to terminate */
-static void
-vmsWaitForChildren(int *status)
-{
-  while (1)
-    {
-      if (!vms_jobsefnmask)
-	{
-	  *status = 0;
-	  return;
-	}
-
-      *status = sys$wflor (32, vms_jobsefnmask);
-    }
-  return;
-}
-
-/* Set up IO redirection.  */
-
-char *
-vms_redirect (desc, fname, ibuf)
-    struct dsc$descriptor_s *desc;
-    char *fname;
-    char *ibuf;
-{
-  char *fptr;
-  extern char *vmsify ();
-
-  ibuf++;
-  while (isspace ((unsigned char)*ibuf))
-    ibuf++;
-  fptr = ibuf;
-  while (*ibuf && !isspace ((unsigned char)*ibuf))
-    ibuf++;
-  *ibuf = 0;
-  if (strcmp (fptr, "/dev/null") != 0)
-    {
-      strcpy (fname, vmsify (fptr, 0));
-      if (strchr (fname, '.') == 0)
-	strcat (fname, ".");
-    }
-  desc->dsc$w_length = strlen(fname);
-  desc->dsc$a_pointer = fname;
-  desc->dsc$b_dtype = DSC$K_DTYPE_T;
-  desc->dsc$b_class = DSC$K_CLASS_S;
-
-  if (*fname == 0)
-    printf (_("Warning: Empty redirection\n"));
-  return ibuf;
-}
-
-
-/* found apostrophe at (p-1)
-   inc p until after closing apostrophe.
- */
-
-static char *
-vms_handle_apos (char *p)
-{
-  int alast;
-
-#define SEPCHARS ",/()= "
-
-  alast = 0;
-
-  while (*p != 0)
-    {
-      if (*p == '"')
-	{
-          if (alast)
-            {
-              alast = 0;
-              p++;
-	    }
-	  else
-	    {
-	      p++;
-	      if (strchr (SEPCHARS, *p))
-		break;
-	      alast = 1;
-	    }
-	}
-      else
-	p++;
-    }
-
-  return p;
-}
-
-#endif
-
-
 /* Handle a dead child.  This handler may or may not ever be installed.
 
    If we're using the jobserver feature, we need it.  First, installing it
@@ -952,7 +851,8 @@ free_child (child)
       unsigned int i;
       for (i = 0; i < child->file->cmds->ncommand_lines; ++i)
 	free (child->command_lines[i]);
-      free ((char *) child->command_lines);
+      free (child->command_lines);
+      // FIXME free (child->line_no);
     }
 
   if (child->environment != 0)
@@ -1587,7 +1487,7 @@ new_job (file_t *file, target_stack_node_t *p_call_stack)
   chop_commands (cmds);
 
   /* Expand the command lines and store the results in LINES.  */
-  lines = (char **) xmalloc (cmds->ncommand_lines * sizeof (char *));
+  lines = (char **) calloc (cmds->ncommand_lines, sizeof (char *));
   for (i = 0; i < cmds->ncommand_lines; ++i)
     {
       /* Collapse backslash-newline combinations that are inside variable
@@ -1691,9 +1591,9 @@ new_job (file_t *file, target_stack_node_t *p_call_stack)
   /* Start the command sequence, record it in a new
      `struct child', and add that to the chain.  */
 
-  c = (child_t *) xmalloc (sizeof (struct child));
-  memset ((char *)c, 0, sizeof (struct child));
+  c                = (child_t *) calloc (1, sizeof (struct child));
   c->fileinfo      = cmds->fileinfo;
+  c->line_no       = cmds->line_no;
   c->file          = file;   /* FIXME?: Could remove as it is in fileinfo */
   c->command_lines = lines;
   c->sh_batch_file = NULL;
