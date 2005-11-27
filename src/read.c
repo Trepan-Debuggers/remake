@@ -1733,11 +1733,11 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
   int implicit = 0;
   unsigned int max_targets = 0, target_idx = 0;
   char **targets = 0, **target_percents = 0;
-  struct commands *cmds;
+  commands_t *cmds;
 
   if (commands_idx > 0)
     {
-      cmds = (struct commands *) xmalloc (sizeof (struct commands));
+      cmds = (commands_t *) xmalloc (sizeof(commands_t));
       cmds->fileinfo.filenm = flocp->filenm;
       cmds->fileinfo.lineno = cmds_started;
       cmds->commands = savestring (commands, commands_idx);
