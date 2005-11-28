@@ -294,12 +294,13 @@ But even for someone such as myself who has become more knowledgable
 (through writing this debugger), it @emph{still} isn't all that
 helpful. @code{/bin/bash: bogus-command: command not found} you say?
 Okay but where in the Makefile source did that come from? Since we
-added the debug output we see ``foo'' listed beforehand, but in a
-normal make, there would have been no mention of ``foo.'' In our
-simple example tracking down the location is easy.  But when you have
-a Makefile which is hundreds of lines long as any Makefile is when it
-is generated from @code{automake}, it would be nice to list the line
-in the Makefile and full filename as well as the target name.
+added the debug output we see ``foo'' listed beforehand after skipping
+800 lines, but in a normal make, there would have been no mention
+of ``foo.'' In our simple example tracking down the location is easy.
+But when you have a Makefile which is hundreds of lines long as any
+Makefile is when it is generated from @code{automake}, it would be
+nice to list the line in the Makefile and full filename as well as the
+target name.
 
 But now let's try the new kind of trace we prove in this patched
 @value{MAKE}.  We use the new option @code{--trace} which has the
@@ -345,7 +346,7 @@ execution (making execution more verbose); information is usually
 helpful in finding what's going on and what got run.
 
 So now when we hit the error, the above trace gives some idea of why
-we decided to to run line 7. 
+we decided to to run line 9 and what got executed before that. 
 
 There is another option @code{--extended-errors} or @code{-E} which
 lists the stack of targets when @value{MAKE} hits an error. For the above,
@@ -363,7 +364,7 @@ Updating goal targets....
 #1  all at /tmp/test1:4
 @end smallexample 
 
-So we were working on target @code{foo} on line 7 of file
+So we were working on target @code{foo} on line 9 of file
 @code{/tmp/test1} which was rebuilt because we were making target
 @code{all} on line 4 of file @code{/tmp/test1}.
 
@@ -381,7 +382,7 @@ To see this, let's use a real example -- the Makefile for the GNU Make
 + Debugger. For comparison, here is a simple trace:
 @smallexample
 @group
-$ @b{remake --trace}
+$ @b{remake --trace=read}
 Reading makefiles...
 /tmp/remake/src/Makefile:254 Makefile.in
 /tmp/remake/src/Makefile:276 ../config.status
@@ -1521,25 +1522,24 @@ how your script got where it is.  It shows one line per frame, for
 many frames, starting with the place that you sare stopped at (frame
 zero), followed by its caller (frame one), and on up the stack.
 
+If @value{MAKE} is in the reading phase the backtrace shows the
+nesting of include files. If @value{MAKE} is in the interpretation
+phase the backtrace shows the nesting of targets.
+
 @table @code
 @kindex backtrace
-@item backtrace
-@itemx bt
-@itemx where
+@item where
 @itemx T
 Print a backtrace of the entire stack: one line per frame for all
 frames in the stack.
 
-@item backtrace @var{n}
-@itemx where @var{n}
+@item where @var{n}
 @itemx T @var{n}
 Similar, but print only the innermost @var{n} frames.
 
 @end table
 
 @kindex where
-The names @code{where} and @code{T} are additional aliases for
-@code{backtrace}.
 
 Each line in the backtrace shows the frame number and the function
 name, the source file name and line number, as well as the function name.
