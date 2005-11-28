@@ -382,7 +382,7 @@ To see this, let's use a real example -- the Makefile for the GNU Make
 + Debugger. For comparison, here is a simple trace:
 @smallexample
 @group
-$ @b{remake --trace=read}
+$ @b{remake --trace}
 Reading makefiles...
 /tmp/remake/src/Makefile:254 Makefile.in
 /tmp/remake/src/Makefile:276 ../config.status
@@ -400,7 +400,7 @@ the above, we can use the suboption @code{read} on the @code{--trace}
 option:
 @smallexample
 @group
-$ @b{remake --trace Makefile}
+$ @b{remake --trace=read Makefile}
 Reading makefiles...
 Reading makefile `Makefile'...
 /tmp/remake/src/Makefile:322
@@ -533,7 +533,7 @@ makedb<2> where
 @end smallexample 
 
 @node Debugging Variables
-@subsection Debuging Variables
+@subsection Debugging Variables
 
 We've seen we can get information about @value{MAKE}'s targets.  We
 can also get information about @value{MAKE}'s variables. That is done
@@ -599,7 +599,7 @@ it with "setq."  Down the line, someone (maybe @emph{you!}) will
 probably put in a command parser.  
 
 @node Debugging Commands
-@subsection Debuging Commands
+@subsection Debugging Commands
 
 Now consider the following sample Makefile:
 @smallexample
@@ -896,8 +896,8 @@ make -X=preread @var{other-make-arguments...}
 Here is a full list of debugger options and suboptions...
 
 @table @code
-@item --debugger @r{[} @ovar{preread | preaction | full | error | fatal}@r{]}
-@itemx -X @r{[} @ovar{preread | preaction | full | error | fatal}@r{]}
+@item --debugger @ovar{preread | preaction | full | error | fatal}
+@itemx -X @ovar{preread | preaction | full | error | fatal}
 @cindex @code{-X}
 The ``preread'' suboption enters the debugger after command-line
 options are parsed but before any Makefiles have been read. It also
