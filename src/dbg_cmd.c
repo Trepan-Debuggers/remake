@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.49 2005/11/29 14:50:27 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.50 2005/11/29 15:09:43 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -602,14 +602,13 @@ dbg_cmd_show_stack (char *psz_arg)
 static debug_return_t 
 dbg_cmd_quit (char *psz_arg)
 {
-  if (!psz_arg || *psz_arg) {
+  if (!psz_arg || !*psz_arg) {
     exit(0);
   } else {
     int rc;
     if (get_int(psz_arg, &rc)) 
       exit(rc);
   }
-  /* NOT USED: */
   return debug_readloop;
 }
 
