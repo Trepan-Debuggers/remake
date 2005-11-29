@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.47 2005/11/29 08:49:12 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.48 2005/11/29 14:39:49 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -573,7 +573,7 @@ dbg_cmd_show_command (char *psz_arg)
   return debug_readloop;
 }
 
-/* Show target call stack info. */
+/* Restart/run program. */
 static debug_return_t 
 dbg_cmd_run (char *psz_arg)
 {
@@ -691,31 +691,36 @@ static debug_return_t dbg_cmd_show (char *psz_arg)
 	dbg_cmd_show((char *) show_subcommands[i].name);
     }
   } else {
-    if (is_abbrev_of (psz_arg, "args")) {
+    if (is_abbrev_of (psz_arg, "args", 3)) {
       unsigned int i;
-      printf("args:");
-      for (i = 0; global_argv[i]; i++) {
-	printf(" %s", global_argv[i]);
+      printf("Argument list to give Makefile when it is started is");
+      if (global_argv[1]) {
+	printf("\n\t\"%s", global_argv[1]);
+	for (i = 2; global_argv[i]; i++) {
+	  printf(" %s", global_argv[i]);
+	}
+      } else {
+	printf("\"");
       }
-      printf("\n");
-    } else if (is_abbrev_of (psz_arg, "basename")) {
+      printf("\".\n");
+    } else if (is_abbrev_of (psz_arg, "basename", 4)) {
       printf("basename is %s.\n", var_to_on_off(basename_filenames));
-    } else if (is_abbrev_of (psz_arg, "debug")) {
+    } else if (is_abbrev_of (psz_arg, "debug", 3)) {
       printf("debug is %d.\n", db_level);
-    } else if (is_abbrev_of (psz_arg, "commands")) {
+    } else if (is_abbrev_of (psz_arg, "commands", 3)) {
       dbg_cmd_show_command(psz_arg);
-    } else if (is_abbrev_of (psz_arg, "ignore-errors")) {
+    } else if (is_abbrev_of (psz_arg, "ignore-errors", 3)) {
       printf("ignore-errors is %s.\n", var_to_on_off(ignore_errors_flag));
-    } else if (is_abbrev_of (psz_arg, "keep-going")) {
+    } else if (is_abbrev_of (psz_arg, "keep-going", 4)) {
       printf("keep-going is %s.\n", var_to_on_off(keep_going_flag));
-    } else if (is_abbrev_of (psz_arg, "silent")) {
+    } else if (is_abbrev_of (psz_arg, "silent", 3)) {
       printf("silent is %s.\n", var_to_on_off(silent_flag));
-    } else if (is_abbrev_of (psz_arg, "trace")) {
+    } else if (is_abbrev_of (psz_arg, "trace", 3)) {
       printf("trace is %s.\n", var_to_on_off(tracing));
-    } else if (is_abbrev_of (psz_arg, "version")) {
+    } else if (is_abbrev_of (psz_arg, "version", 3)) {
       printf("version: ");
       print_version();
-    } else if (is_abbrev_of (psz_arg, "warranty")) {
+    } else if (is_abbrev_of (psz_arg, "warranty", 3)) {
       printf("warranty: ");
       printf(WARRANTY);
     } else {
@@ -732,7 +737,7 @@ static debug_return_t dbg_cmd_info (char *psz_arg)
   if (!psz_arg || 0==strlen(psz_arg)) {
     dbg_cmd_help("info");
   } else {
-    if (is_abbrev_of (psz_arg, "line")) {
+    if (is_abbrev_of (psz_arg, "line", 1)) {
       /* We want output to be compatible with gdb output.*/
       if (p_stack_top && p_stack_top->p_target && 
 	  p_stack_top->p_target->floc.filenm) {
@@ -747,7 +752,7 @@ static debug_return_t dbg_cmd_info (char *psz_arg)
 	printf("No line number info recorded.\n");
       }
       
-    } else if (is_abbrev_of (psz_arg, "locals")) {
+    } else if (is_abbrev_of (psz_arg, "locals", 1)) {
       if (p_stack_top && p_stack_top->p_target) {
 	file_t *p_target = p_stack_top->p_target;
 	if (!p_target->variables) {
@@ -758,16 +763,16 @@ static debug_return_t dbg_cmd_info (char *psz_arg)
 	hash_map_arg (&p_target->variables->set->table, 
 		      print_variable_info, NULL);
       }
-    } else if (is_abbrev_of (psz_arg, "stack")) {
+    } else if (is_abbrev_of (psz_arg, "stack", 1)) {
       print_target_stack(p_stack_top, i_stack_pos);
-    } else if (is_abbrev_of (psz_arg, "target")) {
+    } else if (is_abbrev_of (psz_arg, "target", 1)) {
       if (p_stack_top && p_stack_top->p_target && p_stack_top->p_target->name)
 	printf("target: %s\n", p_stack_top->p_target->name);
       else 
 	printf("target unknown\n");
-    } else if (is_abbrev_of (psz_arg, "variables")) {
+    } else if (is_abbrev_of (psz_arg, "variables", 1)) {
       print_variable_data_base();
-    } else if (is_abbrev_of (psz_arg, "warranty")) {
+    } else if (is_abbrev_of (psz_arg, "warranty", 1)) {
       printf(WARRANTY);
     } else {
       printf("Undefined command \"%s\". Try \"help info\"\n", psz_arg);
@@ -849,21 +854,21 @@ static debug_return_t dbg_cmd_target (char *psz_args)
     while( (psz_word = get_word(&psz_args))) {
       if (0 == strlen(psz_word)) {
 	break;
-      } else if (is_abbrev_of(psz_word, "depends")) {
+      } else if (is_abbrev_of(psz_word, "depends", 1)) {
 	i_mask |= PRINT_TARGET_DEPEND;
-      } else if (is_abbrev_of(psz_word, "nonorder")) {
+      } else if (is_abbrev_of(psz_word, "nonorder", 1)) {
 	i_mask |= PRINT_TARGET_NONORDER;
-      } else if (is_abbrev_of(psz_word, "attributes")) {
+      } else if (is_abbrev_of(psz_word, "attributes", 1)) {
 	i_mask |= PRINT_TARGET_ATTRS;
-      } else if (is_abbrev_of(psz_word, "state")) {
+      } else if (is_abbrev_of(psz_word, "state", 1)) {
 	i_mask |= PRINT_TARGET_STATE;
-      } else if (is_abbrev_of(psz_word, "time")) {
+      } else if (is_abbrev_of(psz_word, "time", 1)) {
 	i_mask |= PRINT_TARGET_TIME;
-      } else if (is_abbrev_of(psz_word, "variables")) {
+      } else if (is_abbrev_of(psz_word, "variables", 1)) {
 	i_mask |= PRINT_TARGET_VARS;
-      } else if (is_abbrev_of(psz_word, "commands")) {
+      } else if (is_abbrev_of(psz_word, "commands", 1)) {
 	i_mask |= PRINT_TARGET_CMDS;
-      } else if (is_abbrev_of(psz_word, "previous")) {
+      } else if (is_abbrev_of(psz_word, "previous", 1)) {
 	i_mask |= PRINT_TARGET_PREV;
       } else {
 	printf("Don't understand attribute '%s'\n", psz_word);
@@ -1027,38 +1032,43 @@ static debug_return_t dbg_cmd_set (char *psz_args)
     while (*psz_args && whitespace (*psz_args))
       *psz_args++;
 
-    if (is_abbrev_of (psz_varname, "variable")) {
-      return dbg_cmd_set_var(psz_args, 1);
-    } else if (is_abbrev_of (psz_varname, "basename")) {
+    if (is_abbrev_of (psz_varname, "variable", 3)) {
+      return dbg_cmd_set_var(psz_args, 3);
+#if FIXME_SET_ARGS
+    } else if (is_abbrev_of (psz_varname, "args", 3)) {
+      ...
+      }
+#endif
+    } else if (is_abbrev_of (psz_varname, "basename", 4)) {
       if (!psz_args || 0==strlen(psz_args))
 	on_off_toggle("toggle", &basename_filenames);
       else
 	on_off_toggle(psz_args, &basename_filenames);
       dbg_cmd_show("basename");
-    } else if (is_abbrev_of (psz_varname, "debug")) {
+    } else if (is_abbrev_of (psz_varname, "debug", 3)) {
       int dbg_mask;
       if (get_int(psz_args, &dbg_mask)) {
 	db_level = dbg_mask;
       }
-    } else if (is_abbrev_of (psz_varname, "ignore-errors")) {
+    } else if (is_abbrev_of (psz_varname, "ignore-errors", 3)) {
       if (!psz_args || 0==strlen(psz_args))
 	on_off_toggle("toggle", &ignore_errors_flag);
       else
 	on_off_toggle(psz_args, &ignore_errors_flag);
       dbg_cmd_show("ignore-errors");
-    } else if (is_abbrev_of (psz_varname, "keep-going")) {
+    } else if (is_abbrev_of (psz_varname, "keep-going", 3)) {
       if (!psz_args || !*psz_args)
 	on_off_toggle("toggle", &keep_going_flag);
       else
 	on_off_toggle(psz_args, &keep_going_flag);
       dbg_cmd_show("keep-going");
-    } else if (is_abbrev_of (psz_varname, "silent")) {
+    } else if (is_abbrev_of (psz_varname, "silent", 3)) {
       if (!psz_args || !*psz_args)
 	on_off_toggle("toggle", &silent_flag);
       else
 	on_off_toggle(psz_args, &silent_flag);
       dbg_cmd_show("silent");
-    } else if (is_abbrev_of (psz_varname, "trace")) {
+    } else if (is_abbrev_of (psz_varname, "trace", 3)) {
       if (!psz_args || !*psz_args)
 	on_off_toggle("toggle", &tracing);
       else

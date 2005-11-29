@@ -1,4 +1,4 @@
-/* $Id: dbg_fns.c,v 1.3 2005/11/27 17:41:17 rockyb Exp $
+/* $Id: dbg_fns.c,v 1.4 2005/11/29 14:39:49 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -112,10 +112,15 @@ get_word(char **ppsz_str)
 /*! Return true if psz_substr is an initial prefix (abbreviation) of
     psz_word. The empty string is not a valid abbreviation. */
 bool
-is_abbrev_of(const char* psz_substr, const char* psz_word) 
+is_abbrev_of(const char* psz_substr, const char* psz_word, 
+	     unsigned int i_min)
 {
-  char *psz = strstr(psz_word, psz_substr);
-  return (psz && psz == psz_word);
+  if (strlen(psz_substr) < i_min) 
+    return false;
+  else {
+    const char *psz = strstr(psz_word, psz_substr);
+    return (psz && psz == psz_word);
+  }
 }
 
 /*! toggle var on or on or off depending on psz_onoff */    

@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.15 2005/11/29 08:49:12 rockyb Exp $
+/* $Id: job.c,v 1.16 2005/11/29 14:39:49 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005
 Free Software Foundation, Inc.
@@ -20,16 +20,25 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 
+#include "config.h"
+#include "commands.h"
+#include "dbg_cmd.h"
+#include "debug.h"
+#include "expand.h"
+#include "job.h"
 #include "print.h"
+#include "remake.h"
+#include "remote-stub.h"
+
 #include <assert.h>
 
-#include "job.h"
-#include "expand.h"
-#include "debug.h"
-#include "dbg_cmd.h"
-#include "remake.h"
-#include "commands.h"
-#include "remote-stub.h"
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+
+#ifdef HAVE_STRSIGNAL
+extern char *strsignal (int __sig);
+#endif
 
 /* alloca is in stdlib.h or alloca.h */
 #ifdef HAVE_STDLIB_H
@@ -40,9 +49,6 @@ Boston, MA 02111-1307, USA.  */
 #include <alloca.h>
 #endif
 
-#ifdef HAVE_STRING_H
-#include <string.h>
-#endif
 
 /* Default shell to use.  */
 #ifdef WINDOWS32
@@ -358,10 +364,16 @@ child_error (child_t *p_child, target_stack_node_t *p_call_stack,
     err (p_call_stack, ignored ? _("[%s] Error %d (ignored)") :
 	 _("*** [%s] Error %d"),
 	 target_name, exit_code);
-  else
+  else {
+#ifdef HAVE_STRSIGNAL
     err (p_call_stack, "*** [%s] %s%s",
 	 target_name, strsignal (exit_sig),
 	 coredump ? _(" (core dumped)") : "");
+#else 
+    err (p_call_stack, "*** [%s] %s",
+	 target_name, coredump ? _(" (core dumped)") : "");
+#endif
+  }
 
   /* If have enabled debugging but haven't entered the debugger above
      because we haven't set to debug on error, enter the debugger now.
