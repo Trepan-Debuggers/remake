@@ -1532,12 +1532,17 @@ phase the backtrace shows the nesting of targets.
 @itemx backtrace
 @itemx bt
 @itemx T
-Print a backtrace of the entire stack: one line per frame for all
-frames in the stack.
+If we are reading Makefiles, print a backtrace of the included
+Makefile stack. If we are evaluating the Makefile to bring targets up
+to date, print a backtrace of the target stack. In either case, we print
+line per frame.
 
 @item where @var{n}
+@itemx backtrace @var{n}
+@itemx bt @var{n}
 @itemx T @var{n}
-Similar, but print only the innermost @var{n} frames.
+Similar, but print only the innermost @var{n} frames. A negative
+number prints the outermost @var{n} frames.
 
 @end table
 
@@ -1551,7 +1556,7 @@ regression-tests @file{parm.sh}.
 
 @smallexample
 @group
-./make -X
+@b{./make -X}
 
 /tmp/remake/src/Makefile:228: Makefile.in
 makedb<0> @b{step}
@@ -1563,6 +1568,28 @@ makedb<1> @b{where}
   #1  all-am at /tmp/remake/src/Makefile:386
   #2  all at /tmp/remake/src/Makefile:224
 
+@end group
+@end smallexample
+
+However if we hae set debugging to stop before reading makefiles are
+we are in the reading phase, we show included Makefiles:
+
+@smallexample
+@group
+$ @b{./make --debugger=preread}
+Reading makefiles...
+Reading makefile `Makefile'...
+
+(/home/src/external-cvs/remake/src/Makefile:1)
+makedb<0> @b{step}
+/home/src/external-cvs/remake/src/Makefile:324
+	Reading makefile `.deps/alloca.Po' (search path) (no ~ expansion)...
+
+(/home/src/external-cvs/remake/src/.deps/alloca.Po:1)
+makedb<1> @b{where}
+
+=>#0  /home/src/external-cvs/remake/src/.deps/alloca.Po:1
+  #1  /home/src/external-cvs/remake/src/Makefile:324
 @end group
 @end smallexample
 
