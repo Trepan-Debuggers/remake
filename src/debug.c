@@ -18,6 +18,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "make.h"
 #include "debug.h"
+#include "print.h"
 
 debug_level_mask_t debug_dummy_level_mask;
 debug_enter_debugger_t debug_dummy_enter_debugger_mask;
