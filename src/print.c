@@ -168,10 +168,10 @@ err (p_call, fmt, va_alist)
 
 void
 #if __STDC__ && HAVE_STDVARARGS
-fatal (const struct floc *flocp, const char *fmt, ...)
+fatal (const floc_t *flocp, const char *fmt, ...)
 #else
 fatal (flocp, fmt, va_alist)
-     const struct floc *flocp;
+     const floc_t *flocp;
      const char *fmt;
      va_dcl
 #endif

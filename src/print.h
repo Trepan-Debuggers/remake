@@ -1,5 +1,6 @@
-/* Header for output or logging functions for GNU Make.
-Copyright (C) 2004 Free Software Foundation, Inc.
+/* $Id: print.h,v 1.4 2005/11/29 02:17:27 rockyb Exp $
+Header for output or logging functions for GNU Make.
+Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -29,9 +30,9 @@ Boston, MA 02111-1307, USA.  */
 #if defined __STDC__ && __STDC__
 extern void message (int prefix, const char *fmt, ...)
                      __attribute__ ((__format__ (__printf__, 2, 3)));
-extern void error (const struct floc *flocp, const char *fmt, ...)
+extern void error (const floc_t *flocp, const char *fmt, ...)
                    __attribute__ ((__format__ (__printf__, 2, 3)));
-extern void fatal (const struct floc *flocp, const char *fmt, ...)
+extern void fatal (const floc_t *flocp, const char *fmt, ...)
                    __attribute__ ((noreturn, __format__ (__printf__, 2, 3)));
 #else
 extern void message ();
