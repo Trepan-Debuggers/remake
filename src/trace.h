@@ -27,11 +27,14 @@ Boston, MA 02111-1307, USA.  */
 #include "filedef.h"
 
 typedef enum {
-  continue_execution,   /* Get out of debug read loop and continue execution
-			   as normal.  */
-  skip_execution,       /* Get out of debug read loop, but skip execution 
-			   of next command or action. */
-  debug_readloop        /* Stay in debugger read loop - used only
+  continue_execution,   /**< Get out of debug read loop and continue execution
+			     as normal.  */
+  next_execution,       /**< Get out of debug read loop and continue execution
+			     as but don't enter debugger for the any remaining
+			     commands.  */
+  skip_execution,       /**< Get out of debug read loop, but skip execution 
+			     of next command or action. */
+  debug_readloop        /**< Stay in debugger read loop - used only
 			   inside debugger read loop. */
 } debug_return_t;
 

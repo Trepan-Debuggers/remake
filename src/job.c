@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.14 2005/11/27 20:38:01 rockyb Exp $
+/* $Id: job.c,v 1.15 2005/11/29 08:49:12 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005
 Free Software Foundation, Inc.
@@ -51,12 +51,6 @@ char *default_shell = "sh.exe";
 int no_default_sh_exe = 1;
 bool batch_mode_shell = true;
 
-#elif defined (_AMIGA)
-
-char default_shell[] = "";
-extern int MyExecute (char **);
-bool batch_mode_shell = false;
-
 #elif defined (__MSDOS__)
 
 /* The default shell is a pointer so we can change it if Makefile
@@ -90,14 +84,6 @@ static int dos_pid = 123;
 int dos_status;
 int dos_command_running;
 #endif /* __MSDOS__ */
-
-#ifdef _AMIGA
-# include <proto/dos.h>
-static int amiga_pid = 123;
-static int amiga_status;
-static char amiga_bname[32];
-static int amiga_batch_file;
-#endif /* Amiga.  */
 
 #ifdef WINDOWS32
 # include <windows.h>
@@ -516,7 +502,7 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
       else
 	{
 	  /* No remote children.  Check for local children.  */
-#if !defined(__MSDOS__) && !defined(_AMIGA) && !defined(WINDOWS32)
+#if !defined(__MSDOS__) && !defined(WINDOWS32)
 	  if (any_local)
 	    {
 #ifdef WAIT_NOHANG
@@ -564,7 +550,7 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
               /* We got a remote child.  */
               remote = 1;
 	    }
-#endif /* !__MSDOS__, !Amiga, !WINDOWS32.  */
+#endif /* !__MSDOS__, !WINDOWS32.  */
 
 #ifdef __MSDOS__
 	  /* Life is very different on MSDOS.  */
@@ -576,14 +562,6 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
 	  exit_sig = WIFSIGNALED (status) ? WTERMSIG (status) : 0;
 	  coredump = 0;
 #endif /* __MSDOS__ */
-#ifdef _AMIGA
-	  /* Same on Amiga */
-	  pid = amiga_pid - 1;
-	  status = amiga_status;
-	  exit_code = amiga_status;
-	  exit_sig = 0;
-	  coredump = 0;
-#endif /* _AMIGA */
 #ifdef WINDOWS32
           {
             HANDLE hPID;
@@ -795,8 +773,7 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
 /* Free the storage allocated for CHILD.  */
 
 static void
-free_child (child)
-     child_t *child;
+free_child (child_t *child)
 {
   /* If this child is the only one it was our "free" job, so don't put a
      token back for it.  This child has already been removed from the list,
@@ -897,9 +874,7 @@ set_child_handler_action_flags (flags)
 static void start_job_command (child_t *p_child, 
 			       target_stack_node_t *p_call_stack)
 {
-#ifndef _AMIGA
   static int bad_stdin = -1;
-#endif
   char *p;
   int flags;
   char **argv;
@@ -1050,7 +1025,6 @@ static void start_job_command (child_t *p_child,
      performed some action (makes a difference as to what messages are
      printed, etc.  */
 
-#if !defined(_AMIGA)
   if (
 #if defined __MSDOS__ || defined (__EMX__)
       unixy_shell	/* the test is complicated and we already did it */
@@ -1066,7 +1040,6 @@ static void start_job_command (child_t *p_child,
       free ((char *) argv);
       goto next_command;
     }
-#endif  /* !_AMIGA */
 
   /* If -n was given, recurse to get the next line in the sequence.  */
 
@@ -1082,7 +1055,7 @@ static void start_job_command (child_t *p_child,
   fflush (stdout);
   fflush (stderr);
 
-#if !defined(WINDOWS32) && !defined(_AMIGA) && !defined(__MSDOS__)
+#if !defined(WINDOWS32) && !defined(__MSDOS__)
 
   /* Set up a bad standard input that reads from a broken pipe.  */
 
@@ -1105,7 +1078,7 @@ static void start_job_command (child_t *p_child,
 	}
     }
 
-#endif /* !WINDOWS32 && !_AMIGA && !__MSDOS__ */
+#endif /* !WINDOWS32 && !__MSDOS__ */
 
   /* Decide whether to give this child the `good' standard input
      (one that points to the terminal or whatever), or the `bad' one
@@ -1117,13 +1090,11 @@ static void start_job_command (child_t *p_child,
 
   p_child->deleted = 0;
 
-#ifndef _AMIGA
   /* Set up the environment for the child.  */
   if (p_child->environment == 0)
     p_child->environment = target_environment (p_child->file);
-#endif
 
-#if !defined(__MSDOS__) && !defined(_AMIGA) && !defined(WINDOWS32)
+#if !defined(__MSDOS__) && !defined(WINDOWS32)
 
   /* start_waiting_job has set CHILD->remote if we can start a remote job.  */
   if (p_child->remote)
@@ -1279,17 +1250,6 @@ static void start_job_command (child_t *p_child,
     p_child->pid = dos_pid++;
   }
 #endif /* __MSDOS__ */
-#ifdef _AMIGA
-  amiga_status = MyExecute (argv);
-
-  ++dead_children;
-  p_child->pid = amiga_pid++;
-  if (amiga_batch_file)
-  {
-     amiga_batch_file = 0;
-     DeleteFile (amiga_bname);        /* Ignore errors.  */
-  }
-#endif	/* Amiga */
 #ifdef WINDOWS32
   {
       HANDLE hPID;
@@ -1530,7 +1490,7 @@ new_job (file_t *file, target_stack_node_t *p_call_stack)
   /* Start the command sequence, record it in a new
      `struct child', and add that to the chain.  */
 
-  c                = (child_t *) calloc (1, sizeof (struct child));
+  c                = (child_t *) calloc (1, sizeof (child_t));
   c->fileinfo      = cmds->fileinfo;
   c->line_no       = cmds->line_no;
   c->file          = file;   /* FIXME?: Could remove as it is in fileinfo */
@@ -1718,7 +1678,7 @@ job_next_command (child)
 static int
 load_too_high (void)
 {
-#if defined(__MSDOS__) || defined(_AMIGA) || defined(__riscos__)
+#if defined(__MSDOS__) || defined(__riscos__)
   return 1;
 #else
   static double last_sec;
@@ -1862,7 +1822,7 @@ child_execute_job (int stdin_fd, int stdout_fd,
   return pid;
 }
 
-#elif !defined (_AMIGA) && !defined (__MSDOS__)
+#elif !defined (__MSDOS__)
 
 /* UNIX:
    Replace the current process with one executing the command in ARGV.
@@ -1885,10 +1845,9 @@ child_execute_job (stdin_fd, stdout_fd, argv, envp)
   /* Run the command.  */
   exec_command (argv, envp);
 }
-#endif /* !AMIGA && !__MSDOS__ */
+#endif /* !__MSDOS__ */
 #endif /* !WINDOWS32 */
 
-#ifndef _AMIGA
 /*! Replace the current process with one running the command in ARGV,
    with environment ENVP.  This function does not return.  */
 
@@ -2071,18 +2030,7 @@ exec_command (char **argv, char **envp)
 # endif
 #endif /* !WINDOWS32 */
 }
-#else /* On Amiga */
-void exec_command (char **argv)
-{
-  MyExecute (argv);
-}
 
-void clean_tmp (void)
-{
-  DeleteFile (amiga_bname);
-}
-
-#endif /* On Amiga */
 
 /*! Figure out the argument list necessary to run LINE as a command.  Try to
    avoid using a shell.  This routine handles only ' quoting, and " quoting
@@ -2172,13 +2120,6 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
   char *sh_chars;
   char **sh_cmds;
 
-#elif defined (_AMIGA)
-  static char sh_chars[] = "#;\"|<>()?*$`";
-  static char *sh_cmds[] = { "cd", "eval", "if", "delete", "echo", "copy",
-			     "rename", "set", "setenv", "date", "makedir",
-			     "skip", "else", "endif", "path", "prompt",
-			     "unset", "unsetenv", "version",
-			     0 };
 #elif defined (WINDOWS32)
   static char sh_chars_dos[] = "\"|&<>";
   static char *sh_cmds_dos[] = { "break", "call", "cd", "chcp", "chdir", "cls",
@@ -2884,7 +2825,7 @@ construct_command_argv (char *line, char **restp, file_t *file,
   return argv;
 }
 
-#if !defined(HAVE_DUP2) && !defined(_AMIGA)
+#if !defined(HAVE_DUP2) 
 int
 dup2 (int old, int new)
 {
@@ -2901,4 +2842,4 @@ dup2 (int old, int new)
 
   return fd;
 }
-#endif /* !HAPE_DUP2 && !_AMIGA */
+#endif /* !HAPE_DUP2 */

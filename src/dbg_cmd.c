@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.46 2005/11/27 22:14:53 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.47 2005/11/29 08:49:12 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -77,11 +77,6 @@ typedef struct {
   const char *use;		/* short command usage.  */
 } short_cmd_t;
 
-typedef struct {
-  const char *long_name;	/* long name of command. */
-  const char short_name;	/* Index into short_cmd array. */
-} long_cmd_t;
-
 static int            dbg_cmd_show_var(char *psz_arg, int expand);
 static debug_return_t dbg_cmd_set_var (char *psz_arg, int expand);
 
@@ -97,7 +92,7 @@ static debug_return_t dbg_cmd_info             (char *psz_arg);
 static debug_return_t dbg_cmd_target           (char *psz_arg);
 static debug_return_t dbg_cmd_print            (char *psz_arg);
 static debug_return_t dbg_cmd_quit             (char *psz_arg);
-static debug_return_t dbg_cmd_restart          (char *psz_arg);
+static debug_return_t dbg_cmd_run              (char *psz_arg);
 static debug_return_t dbg_cmd_set              (char *psz_arg);
 static debug_return_t dbg_cmd_set_var_noexpand (char *psz_arg);
 static debug_return_t dbg_cmd_shell            (char *psz_arg);
@@ -107,6 +102,12 @@ static debug_return_t dbg_cmd_show             (char *psz_arg);
 static debug_return_t dbg_cmd_step             (char *psz_arg);
 static debug_return_t dbg_cmd_write_cmds       (char *psz_arg);
 
+typedef struct {
+  const char *long_name;	/* long name of command. */
+  const char short_name;	/* Index into short_cmd array. */
+} long_cmd_t;
+
+/* Should be in alphabetic order by command name. */
 long_cmd_t commands[] = {
   { "break",    'b' },
   { "comment",  '#' },
@@ -115,14 +116,12 @@ long_cmd_t commands[] = {
   { "down",     'D' },
   { "eval" ,    'e' },
   { "examine" , 'x' },
-  { "exit"    , 'q' },
   { "frame"   , 'f' },
   { "help"    , 'h' },
   { "info"    , 'i' },
   { "next"    , 'n' },
   { "print"   , 'p' },
   { "quit"    , 'q' },
-  { "restart" , 'r' },
   { "run"     , 'R' },
   { "set"     , '=' },
   { "setq"    , '"' },
@@ -136,6 +135,24 @@ long_cmd_t commands[] = {
   { "up"      , 'u' },
   { (char *)NULL, ' '}
 };
+
+typedef struct {
+  const char *command;	        /* real command name. */
+  const char *alias;	        /* alias for command. */
+} alias_cmd_t;
+
+/* Should be in alphabetic order by ALIAS name. */
+
+alias_cmd_t aliases[] = {
+  { "shell",    "!!" },
+  { "help",     "??" },
+  { "where",    "backtrace" },
+  { "quit",     "exit" },
+  { "quit",     "return" },
+  { "run",      "restart" },
+  { (char *)NULL, (char *) NULL}
+};
+
 
 short_cmd_t short_command[256] = { { NULL, '\0' }, };
 
@@ -267,7 +284,7 @@ cmd_initialize(void)
   
   short_command['n'].func = &dbg_cmd_step;
   short_command['n'].use = _("next [amount]");
-  short_command['n'].doc = _("alias for step.");
+  short_command['n'].doc = _("For now the same as step.");
 
   short_command['p'].func = &dbg_cmd_print;
   short_command['p'].use = _("print {*variable* [attrs...]}");
@@ -287,17 +304,11 @@ cmd_initialize(void)
       "\tstatus this program reports back. Otherwise exit with status 0." \
       );
 
-  short_command['Q'].func = &dbg_cmd_quit;
-  short_command['Q'].use  = _("exit");
-  short_command['Q'].doc  = _("alias for quit.");
-  
-  short_command['r'].func = &dbg_cmd_restart;
-  short_command['r'].doc = _("Start program - same as restart.");
-  short_command['r'].use = _("run");
-
-  short_command['R'].func = &dbg_cmd_restart;
-  short_command['R'].doc = _("Restart program. Alias: run");
-  short_command['R'].use = _("restart");
+  short_command['R'].func = &dbg_cmd_run;
+  short_command['R'].doc = _("Run Makefile from the beginning.\n" \
+   "\tYou may specify arguments to give it.\n" \
+   "\tWith no arguments, uses arguments last specified (with \"run\")");
+  short_command['R'].use = _("run");
 
   short_command['s'].func = &dbg_cmd_step;
   short_command['s'].use = _("step [amount]");
@@ -390,9 +401,26 @@ find_command (const char *psz_name)
 {
   unsigned int i;
 
-  for (i = 0; commands[i].long_name; i++)
-    if (strcmp (psz_name, commands[i].long_name) == 0)
+  for (i = 0; aliases[i].alias; i++) {
+    const int cmp = strcmp (psz_name, aliases[i].alias);
+    if ( 0 == cmp ) {
+      psz_name = aliases[i].command;
+      break;
+    } else 
+      /* Words should be in alphabetic order by alias name.
+	 Have we gone too far? */
+      if (cmp < 0) break;
+  }
+  
+  for (i = 0; commands[i].long_name; i++) {
+    const int cmp = strcmp (psz_name, commands[i].long_name);
+    if ( 0 == cmp ) {
       return (&short_command[(uint8_t) commands[i].short_name]);
+    } else 
+      /* Words should be in alphabetic order by command name.
+	 Have we gone too far? */
+      if (cmp < 0) break;
+  }
 
   return ((short_cmd_t *)NULL);
 }
@@ -452,10 +480,24 @@ dbg_cmd_help (char *psz_args)
   if (!psz_args || !*psz_args) {
     printf ("Available commands are: \n");
     for (i = 0; commands[i].long_name; i++) {
+      unsigned int j;
+      bool b_alias = false;
       uint8_t s=commands[i].short_name;
       printf("  %-25s (%c):\n", 
 	     short_command[s].use, commands[i].short_name);
-      printf("\t%s\n\n", short_command[s].doc);
+      printf("\t%s\n", short_command[s].doc);
+      for (j = 0; aliases[j].alias; j++) {
+	if (strcmp (commands[i].long_name, aliases[j].command) == 0) {
+	  if (!b_alias) {
+	    printf("\tAlias(es): %s", aliases[j].alias);
+	    b_alias = true;
+	  } else {
+	    printf(", %s", aliases[j].alias);
+	  }
+	}
+      }
+      if (b_alias) printf("\n");
+      printf("\n");
     }
 
     printf("Readline command line editing (emacs/vi mode) is available.\n");
@@ -533,7 +575,7 @@ dbg_cmd_show_command (char *psz_arg)
 
 /* Show target call stack info. */
 static debug_return_t 
-dbg_cmd_restart (char *psz_arg)
+dbg_cmd_run (char *psz_arg)
 {
   printf("Changing directory to %s and restarting...\n", 
 	 directory_before_chdir);
