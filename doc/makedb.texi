@@ -1529,6 +1529,8 @@ phase the backtrace shows the nesting of targets.
 @table @code
 @kindex backtrace
 @item where
+@itemx backtrace
+@itemx bt
 @itemx T
 Print a backtrace of the entire stack: one line per frame for all
 frames in the stack.
