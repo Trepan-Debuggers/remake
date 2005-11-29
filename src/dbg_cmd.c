@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.48 2005/11/29 14:39:49 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.49 2005/11/29 14:50:27 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -147,6 +147,7 @@ alias_cmd_t aliases[] = {
   { "shell",    "!!" },
   { "help",     "??" },
   { "where",    "backtrace" },
+  { "where",    "bt" },
   { "quit",     "exit" },
   { "quit",     "return" },
   { "run",      "restart" },
@@ -336,7 +337,7 @@ cmd_initialize(void)
       );
 
   short_command['T'].func = &dbg_cmd_show_stack;
-  short_command['T'].doc  = _("Show target stack.");
+  short_command['T'].doc  = _("Print target stack or Makefile include stack.");
   short_command['T'].use  = _("where");
 
   short_command['u'].func = &dbg_cmd_frame_up;
@@ -601,7 +602,7 @@ dbg_cmd_show_stack (char *psz_arg)
 static debug_return_t 
 dbg_cmd_quit (char *psz_arg)
 {
-  if (!psz_arg || 0==strlen(psz_arg)) {
+  if (!psz_arg || *psz_arg) {
     exit(0);
   } else {
     int rc;
