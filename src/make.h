@@ -29,8 +29,6 @@ Boston, MA 02111-1307, USA.  */
 #undef  HAVE_CONFIG_H
 #define HAVE_CONFIG_H 1
 
-#include "types.h"
-
 /* AIX requires this to be the first thing in the file.  */
 #ifndef __GNUC__
 # if HAVE_ALLOCA_H
@@ -48,7 +46,7 @@ char *alloca ();
 
 
 /* Use prototypes if available.  */
-#if defined (__cplusplus) || (defined (__STDC__) && __STDC__)
+#if defined (__cplusplus) || defined (__STDC__)
 # undef  PARAMS
 # define PARAMS(protos)  protos
 #else /* Not C++ or ANSI C.  */
@@ -61,6 +59,7 @@ char *alloca ();
 
 #define _GNU_SOURCE 1
 
+#include "types.h"
 
 #ifdef  CRAY
 /* This must happen before #include <signal.h> so
@@ -76,6 +75,7 @@ char *alloca ();
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <signal.h>
+
 #include <stdio.h>
 #include <ctype.h>
 #ifdef HAVE_SYS_TIMEB_H
@@ -251,15 +251,14 @@ extern void exit PARAMS ((int)) __attribute__ ((noreturn));
 #  define strrchr(s, c)     rindex((s), (c))
 # endif
 
-#endif  /* ANSI_STRING.  */
-#undef  ANSI_STRING
-
 /* SCO Xenix has a buggy macro definition in <string.h>.  */
 #undef  strerror
-
-#if !defined(ANSI_STRING) && !defined(__DECC)
+#if !defined(__DECC)
 extern char *strerror PARAMS ((int errnum));
 #endif
+
+#endif  /* !ANSI_STRING.  */
+#undef  ANSI_STRING
 
 #if HAVE_INTTYPES_H
 # include <inttypes.h>
