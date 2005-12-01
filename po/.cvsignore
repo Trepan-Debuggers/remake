@@ -4,5 +4,4 @@ POTFILES
 Makefile.in
 Makefile
 remake.pot
-
-
+remove-potcdate.sed
