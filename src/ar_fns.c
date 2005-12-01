@@ -1,4 +1,4 @@
-/* $Id: ar_fns.c,v 1.2 2005/11/27 20:38:01 rockyb Exp $
+/* $Id: ar_fns.c,v 1.3 2005/12/01 08:30:34 rockyb Exp $
 Interface to `ar' archives for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -75,8 +75,10 @@ ar_parse_name (char *name, char **arname_p, char **memname_p)
     *memname_p = savestring (p + 1, end - (p + 1));
 }
 
-static long int ar_member_date_1 PARAMS ((int desc, char *mem, int truncated, long int hdrpos,
-	long int datapos, long int size, long int date, int uid, int gid, int mode, char *name));
+static long int 
+ar_member_date_1 (int desc, char *mem, int truncated, long int hdrpos,
+		  long int datapos, long int size, long int date, int uid, 
+		  int gid, int mode, char *name);
 
 /* Return the modtime of NAME.  */
 

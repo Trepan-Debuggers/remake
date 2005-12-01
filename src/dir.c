@@ -406,8 +406,9 @@ dirfile_hash_cmp (const void *xv, const void *yv)
 #define DIRFILE_BUCKETS 107
 #endif
 
-static int dir_contents_file_exists_p PARAMS ((struct directory_contents *dir, char *filename));
-static struct directory *find_directory PARAMS ((char *name));
+static int dir_contents_file_exists_p (struct directory_contents *p_dir, 
+				       char *p_filename);
+static struct directory *find_directory (char *psz_name);
 
 /* Find the directory named NAME and return its `struct directory'.  */
 

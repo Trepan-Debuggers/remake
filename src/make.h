@@ -110,7 +110,7 @@ extern int errno;
 # include <unistd.h>
 /* Ultrix's unistd.h always defines _POSIX_VERSION, but you only get
    POSIX.1 behavior with `cc -YPOSIX', which predefines POSIX itself!  */
-# if defined (_POSIX_VERSION) && !defined (ultrix) && !defined (VMS)
+# if defined (_POSIX_VERSION) && !defined (ultrix)
 #  define POSIX 1
 # endif
 #endif
@@ -159,7 +159,7 @@ extern int errno;
 # define NEED_GET_PATH_MAX 1
 # define GET_PATH_MAX   (get_path_max ())
 # define PATH_VAR(var)  char *var = (char *) alloca (GET_PATH_MAX)
-extern unsigned int get_path_max PARAMS ((void));
+extern unsigned int get_path_max (void);
 #endif
 
 #ifndef CHAR_BIT
@@ -226,12 +226,12 @@ extern unsigned int get_path_max PARAMS ((void));
 # ifdef HAVE_STDLIB_H
 #  include <stdlib.h>
 # else
-extern char *malloc PARAMS ((int));
-extern char *realloc PARAMS ((char *, int));
-extern void free PARAMS ((char *));
+extern char *malloc (int);
+extern char *realloc (char *, int);
+extern void free (char *);
 
-extern void abort PARAMS ((void)) __attribute__ ((noreturn));
-extern void exit PARAMS ((int)) __attribute__ ((noreturn));
+extern void abort (void) __attribute__ ((noreturn));
+extern void exit (int) __attribute__ ((noreturn));
 # endif /* HAVE_STDLIB_H.  */
 
 #endif /* Standard headers.  */
@@ -254,7 +254,7 @@ extern void exit PARAMS ((int)) __attribute__ ((noreturn));
 /* SCO Xenix has a buggy macro definition in <string.h>.  */
 #undef  strerror
 #if !defined(__DECC)
-extern char *strerror PARAMS ((int errnum));
+extern char *strerror (int errnum);
 #endif
 
 #endif  /* !ANSI_STRING.  */
@@ -266,7 +266,7 @@ extern char *strerror PARAMS ((int errnum));
 #define FILE_TIMESTAMP uintmax_t
 
 #if !defined(HAVE_STRSIGNAL)
-extern char *strsignal PARAMS ((int signum));
+extern char *strsignal (int i_signum);
 #endif
 
 #ifndef ISDIGIT
@@ -328,8 +328,6 @@ extern int strcmpi (const char *,const char *);
 /* Handle other OSs.  */
 #if defined(HAVE_DOS_PATHS)
 # define PATH_SEPARATOR_CHAR ';'
-#elif defined(VMS)
-# define PATH_SEPARATOR_CHAR ','
 #else
 # define PATH_SEPARATOR_CHAR ':'
 #endif
@@ -353,40 +351,40 @@ extern int no_default_sh_exe;
 extern bool unixy_shell;
 #endif  /* WINDOWS32 */
 
-#define NILF ((struct floc *)0)
+#define NILF ((floc_t *)0)
 
 #define STRING_SIZE_TUPLE(_s) (_s), (sizeof (_s)-1)
 
 
 
-extern void die PARAMS ((int)) __attribute__ ((noreturn));
-extern char *savestring PARAMS ((const char *, unsigned int));
-extern char *concat PARAMS ((const char *, const char *, const char *));
-extern char *xmalloc PARAMS ((unsigned int));
-extern char *xrealloc PARAMS ((char *, unsigned int));
-extern char *xstrdup PARAMS ((const char *));
-extern char *find_next_token PARAMS ((char **, unsigned int *));
-extern char *next_token PARAMS ((const char *));
-extern char *end_of_token PARAMS ((const char *));
-extern void collapse_continuations PARAMS ((char *));
-extern void remove_comments PARAMS((char *));
-extern char *sindex PARAMS ((const char *, unsigned int, \
-                             const char *, unsigned int));
-extern char *lindex PARAMS ((const char *, const char *, int));
-extern int alpha_compare PARAMS ((const void *, const void *));
-extern void print_spaces PARAMS ((unsigned int));
-extern FILE *open_tmpfile PARAMS ((char **, const char *));
+extern void die (int) __attribute__ ((noreturn));
+extern char *savestring (const char *, unsigned int);
+extern char *concat (const char *, const char *, const char *);
+extern char *xmalloc (unsigned int);
+extern char *xrealloc (char *, unsigned int);
+extern char *xstrdup (const char *);
+extern char *find_next_token (char **, unsigned int *);
+extern char *next_token (const char *);
+extern char *end_of_token (const char *);
+extern void collapse_continuations (char *);
+extern void remove_comments (char *);
+extern char *sindex (const char *, unsigned int, \
+		     const char *, unsigned int);
+extern char *lindex (const char *, const char *, int);
+extern int alpha_compare (const void *, const void *);
+extern void print_spaces (unsigned int);
+extern FILE *open_tmpfile (char **, const char *);
 
-extern int dir_file_exists_p PARAMS ((char *, char *));
-extern int file_exists_p PARAMS ((char *));
-extern int file_impossible_p PARAMS ((char *));
-extern void file_impossible PARAMS ((char *));
-extern char *dir_name PARAMS ((char *));
-extern void hash_init_directories PARAMS ((void));
+extern int dir_file_exists_p (char *, char *);
+extern int file_exists_p (char *);
+extern int file_impossible_p (char *);
+extern void file_impossible (char *);
+extern char *dir_name (char *);
+extern void hash_init_directories (void);
 
-extern void user_access PARAMS ((void));
-extern void make_access PARAMS ((void));
-extern void child_access PARAMS ((void));
+extern void user_access (void);
+extern void make_access (void);
+extern void child_access (void);
 
 #ifdef  HAVE_VFORK_H
 # include <vfork.h>
@@ -398,22 +396,19 @@ extern void child_access PARAMS ((void));
 #if !defined (__GNU_LIBRARY__) && !defined (POSIX) && !defined (_POSIX_VERSION) && !defined(WINDOWS32)
 
 extern long int atol ();
-# ifndef VMS
-extern long int lseek ();
-# endif
 
 #endif  /* Not GNU C library or POSIX.  */
 
 #ifdef  HAVE_GETCWD
-# if !defined(VMS) && !defined(__DECC)
+# if !defined(__DECC)
 extern char *getcwd ();
-#endif
+# endif
 #else
 extern char *getwd ();
 # define getcwd(buf, len)       getwd (buf)
-#endif
+#endif /*HAVE_GETCWD*/
 
-extern const struct floc *reading_file;
+extern const floc_t *reading_file;
 
 
 /*! Print version information.

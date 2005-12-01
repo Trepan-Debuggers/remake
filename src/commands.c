@@ -1,4 +1,4 @@
-/* $Id: commands.c,v 1.9 2005/11/27 20:38:01 rockyb Exp $
+/* $Id: commands.c,v 1.10 2005/12/01 08:30:34 rockyb Exp $
 Command processing for GNU Make.
 Copyright (C) 1988,89,91,92,93,94,95,96,97, 2004, 2005
 Free Software Foundation, Inc.
@@ -37,7 +37,7 @@ Boston, MA 02111-1307, USA.  */
 
 #define FILE_LIST_SEPARATOR ' '
 
-extern int remote_kill PARAMS ((int id, int sig));
+extern int remote_kill (int id, int sig);
 
 #ifndef	HAVE_UNISTD_H
 extern int getpid ();

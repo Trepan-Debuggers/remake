@@ -1,4 +1,4 @@
-/* $Id: arscan.c,v 1.5 2005/11/27 20:38:01 rockyb Exp $
+/* $Id: arscan.c,v 1.6 2005/12/01 08:30:34 rockyb Exp $
 Library function for scanning an archive file.
 Copyright (C) 1987, 89, 91, 92, 93, 94, 95, 97, 2004, 2005
 Free Software Foundation, Inc.
@@ -40,11 +40,6 @@ USA.  */
 #include "arscan.h"
 
 
-/* SCO Unix's compiler defines both of these.  */
-#ifdef	M_UNIX
-#undef	M_XENIX
-#endif
-
 /* On the sun386i and in System V rel 3, ar.h defines two different archive
    formats depending upon whether you have defined PORTAR (normal) or PORT5AR
    (System V Release 1).  There is no default, one or the other must be defined
@@ -52,14 +47,7 @@ USA.  */
 
 #if (!defined (PORTAR) || PORTAR == 0) && (!defined (PORT5AR) || PORT5AR == 0)
 #undef	PORTAR
-#ifdef M_XENIX
-/* According to Jim Sievert <jas1@rsvl.unisys.com>, for SCO XENIX defining
-   PORTAR to 1 gets the wrong archive format, and defining it to 0 gets the
-   right one.  */
-#define PORTAR 0
-#else
 #define PORTAR 1
-#endif
 #endif
 
 /* On AIX, define these symbols to be sure to get both archive formats.
@@ -218,11 +206,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
   }
 #else
   {
-#ifndef M_XENIX
     int buf;
-#else
-    unsigned short int buf;
-#endif
     int nread = read(desc, &buf, sizeof (buf));
     if (nread != sizeof (buf) || buf != ARMAG)
       {
@@ -262,11 +246,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 	return 0;
       }
 #else
-#ifndef	M_XENIX
     long int member_offset = sizeof (int);
-#else	/* Xenix.  */
-    long int member_offset = sizeof (unsigned short int);
-#endif	/* Not Xenix.  */
 #endif
 #endif
 
@@ -456,26 +436,15 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 #endif /* Not AIAMAG. */
 	}
 
-#ifndef	M_XENIX
 	sscanf (member_header.ar_mode, "%o", &eltmode);
 	eltsize = atol (member_header.ar_size);
-#else	/* Xenix.  */
-	eltmode = (unsigned short int) member_header.ar_mode;
-	eltsize = member_header.ar_size;
-#endif	/* Not Xenix.  */
 
 	fnval =
 	  (*function) (desc, name, ! long_name, member_offset,
 		       member_offset + AR_HDR_SIZE, eltsize,
-#ifndef	M_XENIX
 		       atol (member_header.ar_date),
 		       atoi (member_header.ar_uid),
 		       atoi (member_header.ar_gid),
-#else	/* Xenix.  */
-		       member_header.ar_date,
-		       member_header.ar_uid,
-		       member_header.ar_gid,
-#endif	/* Not Xenix.  */
 		       eltmode, arg);
 
 #endif  /* AIAMAG.  */
@@ -562,7 +531,6 @@ ar_name_equal (char *name, char *mem, int truncated)
   if (p != 0)
     name = p + 1;
 
-#ifndef VMS
   if (truncated)
     {
 #ifdef AIAMAG
@@ -577,12 +545,10 @@ ar_name_equal (char *name, char *mem, int truncated)
 #endif /* !__hpux && !cray */
 #endif /* !AIAMAG */
     }
-#endif /* !VMS */
 
   return !strcmp (name, mem);
 }
 
-#ifndef VMS
 /* ARGSUSED */
 static long int
 ar_member_pos (int desc UNUSED, char *mem, int truncated,
@@ -659,7 +625,6 @@ ar_member_touch (char *arname, char *memname)
   errno = i;
   return -3;
 }
-#endif
 
 #ifdef TEST
 

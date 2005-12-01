@@ -1,4 +1,4 @@
-/* $Id: job.h,v 1.5 2005/11/27 16:12:58 rockyb Exp $
+/* $Id: job.h,v 1.6 2005/12/01 08:30:34 rockyb Exp $
 Definitions for managing subprocesses in GNU Make.
 Copyright (C) 1992, 1993, 1996, 1999, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -108,9 +108,7 @@ extern char **construct_command_argv PARAMS ((char *line, char **restp,
 					      char** batch_file));
 
 /*! Start a child process. This function returns the new pid.  */
-#ifdef VMS
-extern int child_execute_job PARAMS ((char *argv, struct child *child));
-#elif defined(__EMX__)
+#if defined(__EMX__)
 extern int child_execute_job PARAMS ((int stdin_fd, int stdout_fd, char **argv, char **envp));
 #else
 extern void child_execute_job PARAMS ((int stdin_fd, int stdout_fd, char **argv, char **envp));

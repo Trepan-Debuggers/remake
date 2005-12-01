@@ -1,4 +1,4 @@
-/* $Id: function.c,v 1.11 2005/11/27 20:38:01 rockyb Exp $
+/* $Id: function.c,v 1.12 2005/12/01 08:30:34 rockyb Exp $
 Builtin expansion for GNU Make.
 Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004, 2005
 Free Software Foundation, Inc.
@@ -50,7 +50,7 @@ struct function_table_entry
     unsigned char minimum_args;
     unsigned char maximum_args;
     char expand_args;
-    char *(*func_ptr) PARAMS ((char *output, char **argv, const char *fname));
+    char *(*func_ptr) (char *output, char **argv, const char *fname);
   };
 
 static unsigned long
@@ -1749,7 +1749,7 @@ func_not (char* o, char **argv, char *funcname)
    EXPAND_ARGS means that all arguments should be expanded before invocation.
    Functions that do namespace tricks (foreach) don't automatically expand.  */
 
-static char *func_call PARAMS ((char *o, char **argv, const char *funcname));
+static char *func_call (char *p_o, char **argv, const char *p_funcname);
 
 
 static struct function_table_entry function_table_init[] =
