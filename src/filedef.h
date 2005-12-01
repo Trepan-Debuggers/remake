@@ -118,18 +118,29 @@ extern void set_command_state PARAMS ((struct file *file, enum cmd_state state))
 extern void init_hash_files PARAMS ((void));
 extern char *build_target_list PARAMS ((char *old_list));
 
-typedef int print_target_mask_t;
-#define PRINT_TARGET_NONORDER 0x001
-#define PRINT_TARGET_ORDER    0x002
-#define PRINT_TARGET_ATTRS    0x004
-#define PRINT_TARGET_TIME     0x008
-#define PRINT_TARGET_STATE    0x010
-#define PRINT_TARGET_VARS     0x020
-#define PRINT_TARGET_CMDS     0x040
-#define PRINT_TARGET_PREV     0x080
+/*! Thing of the below as a bit mask rather than an enumeration and
+    use print_target_mask;
+    The enumeration is created be helpful in debuggers where wants just to
+    refer to the PRINT_TARGET_ names and get something.
+*/
+typedef enum 
+{
+  PRINT_TARGET_NONORDER  = 0x001,
+  PRINT_TARGET_ORDER     = 0x002,
+  PRINT_TARGET_ATTRS     = 0x004,
+  PRINT_TARGET_TIME      = 0x008,
+  PRINT_TARGET_STATE     = 0x010,
+  PRINT_TARGET_VARS      = 0x020,
+  PRINT_TARGET_VARS_HASH = 0x040  ,
+  PRINT_TARGET_CMDS      = 0x080,
+  PRINT_TARGET_PREV      = 0x100,
+  PRINT_TARGET_DEPEND   = (PRINT_TARGET_ORDER|PRINT_TARGET_NONORDER),
+  PRINT_TARGET_ALL      = 0x0FF,
+} print_target_mask_t;
 
-#define PRINT_TARGET_DEPEND   (PRINT_TARGET_ORDER|PRINT_TARGET_NONORDER)
-#define PRINT_TARGET_ALL      0x0FF
+/* The below variable is to make sure the enumerations are accessible
+   in a debugger. */
+extern print_target_mask_t debugger_enum_mask;
 
 /*! Print the data base of files.  */
 extern void  print_target (const void *item);

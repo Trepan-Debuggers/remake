@@ -1,4 +1,4 @@
-/* $Id: print.h,v 1.4 2005/11/29 02:17:27 rockyb Exp $
+/* $Id: print.h,v 1.5 2005/12/01 07:14:12 rockyb Exp $
 Header for output or logging functions for GNU Make.
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -51,6 +51,12 @@ extern void err();
 extern void fatal_err();
 #endif
 
+/* Think of the below not as an enumeration but as #defines done in a
+   way that we'll be able to use the value in a gdb. */
+extern enum debug_print_enums_e {
+  MAX_STACK_SHOW = 1000,
+} debug_print_enums1;
+
 /*! Under -d, write a message describing the current IDs.  */
 extern void log_access (char *flavor);
 
@@ -82,10 +88,13 @@ extern void print_floc_prefix (const floc_t *p_floc);
 extern debug_return_t print_child_cmd (child_t *p_child, 
 				       target_stack_node_t *p);
 
-/*! Display the target stack. */
-extern void print_target_stack (target_stack_node_t *p, int pos);
+/*! Display the target stack i_pos is the position we are currently.
+  i_max is the maximum number of entries to show.
+ */
+extern void print_target_stack (target_stack_node_t *p, int i_pos, int i_max);
 
-/*! Display the Makefile read stack. */
-extern void print_floc_stack (int pos);
+/*! Display the Makefile read stack. i_pos is the position we are currently.
+  i_max is the maximum number of entries to show. */
+extern void print_floc_stack (int i_pos, int i_max);
 
 #endif /*PRINT_H*/

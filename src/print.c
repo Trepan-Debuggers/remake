@@ -25,6 +25,10 @@ Boston, MA 02111-1307, USA.  */
 #include "debug.h"
 #include "dbg_cmd.h"
 
+/* Think of the below not as an enumeration but as #defines done in a
+   way that we'll be able to use the value in a gdb. */
+enum debug_print_enums_e debug_print_enums1;
+
 #if HAVE_VPRINTF || HAVE_DOPRNT
 # define HAVE_STDVARARGS 1
 # if __STDC__
@@ -155,9 +159,9 @@ err (p_call, fmt, va_alist)
   putc ('\n', stderr);
   if (extended_errors) {
     if (p_call) 
-      print_target_stack(p_call, -1);
+      print_target_stack(p_call, -1, MAX_STACK_SHOW);
     else if (p_stack_floc_top)
-      print_floc_stack(-1);
+      print_floc_stack(-1, MAX_STACK_SHOW);
   }
   fflush (stderr);
   if (debugger_on_error & DEBUGGER_ON_ERROR) 
@@ -239,9 +243,9 @@ fatal_err (flocp, fmt, va_alist)
   fputs (_(".  Stop.\n"), stderr);
   if (extended_errors) {
     if (p_call) 
-      print_target_stack(p_call, -1);
+      print_target_stack(p_call, -1, MAX_STACK_SHOW);
     else if (p_stack_floc_top)
-      print_floc_stack(-1);
+      print_floc_stack(-1, MAX_STACK_SHOW);
   }
   if ( (debugger_on_error & DEBUGGER_ON_FATAL) || debugger_enabled )
     enter_debugger(p_call, p_target, 2);
@@ -447,13 +451,16 @@ print_child_cmd (child_t *p_child, target_stack_node_t *p)
   return rc;
 }
 
-/*! Display the target stack. */
+/*! Display the target stack. i_pos is the position we are currently.
+  i_max is the maximum number of entries to show.
+ */
 extern void 
-print_target_stack (target_stack_node_t *p, int pos)
+print_target_stack (target_stack_node_t *p, int i_pos, int i_max)
 {
   unsigned int i=0;
   printf("\n");
-  for ( ; p ; p = p->p_parent ) {
+  for ( ; p && i < i_max ; 
+	i++, p = p->p_parent  ) {
     floc_t floc;
 
 
@@ -476,38 +483,38 @@ print_target_stack (target_stack_node_t *p, int pos)
     
     
     if (floc.filenm) {
-      if (pos != -1) {
-	printf("%s", (i == pos) ? "=>" : "  ");
+      if (i_pos != -1) {
+	printf("%s", (i == i_pos) ? "=>" : "  ");
       }
       printf ("#%u  %s at ", i, p->p_target->name);
       print_floc_prefix(&floc);
     } else {
-      if (pos != -1) {
-	printf("%s", (i == pos) ? "=>" : "  ");
+      if (i_pos != -1) {
+	printf("%s", (i == i_pos) ? "=>" : "  ");
       }
       printf ("#%u  %s at ??", i, p->p_target->name);
     }
     printf ("\n");
-    i++;
   }
 }
 
-/*! Display the Makefile read stack. */
+/*! Display the Makefile read stack. i_pos is the position we are currently.
+  i_max is the maximum number of entries to show. */
 extern void 
-print_floc_stack (int pos)
+print_floc_stack (int i_pos, int i_max)
 {
   unsigned int i=0;
   floc_stack_node_t *p;
   printf("\n");
-  for ( p=p_stack_floc_top; p ; p = p->p_parent ) {
-    if (pos != -1) {
-      printf("%s", (i == pos) ? "=>" : "  ");
+  for ( p=p_stack_floc_top; p && i < i_max ; 
+	i++, p = p->p_parent ) {
+    if (i_pos != -1) {
+      printf("%s", (i == i_pos) ? "=>" : "  ");
     }
     printf ("#%u  ", i);
     if (p->p_floc->filenm) {
       print_floc_prefix(p->p_floc);
     }
     printf ("\n");
-    i++;
   }
 }

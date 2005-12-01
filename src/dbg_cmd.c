@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.50 2005/11/29 15:09:43 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.51 2005/12/01 07:14:12 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -27,6 +27,14 @@ Boston, MA 02111-1307, USA.  */
 #include "debug.h"
 #include "expand.h"
 #include "function.h"
+
+/* Think of the below not as an enumeration but as #defines done in a
+   way that we'll be able to use the value in a gdb. */
+enum {
+  MAX_FILE_LENGTH   = 1000,
+} debugger_enum1;
+
+  
 
 /* True if we are inside the debugger, false otherwise. */
 bool b_in_debugger = false;
@@ -259,8 +267,8 @@ cmd_initialize(void)
   short_command['f'].func = &dbg_cmd_frame;
   short_command['f'].use  = _("frame *n*");
   short_command['f'].doc  = 
-    _("Move target frame to *n*; In contrast to \"up\" tor \"down\",\n" \
-      "\tthis sets to an absolute postion. O is the top.");
+    _("Move target frame to *n*; In contrast to \"up\" or \"down\",\n" \
+      "\tthis sets to an absolute postion. 0 is the top.");
 
   short_command['h'].func = &dbg_cmd_help;
   short_command['h'].use  = _("help [command]");
@@ -337,8 +345,10 @@ cmd_initialize(void)
       );
 
   short_command['T'].func = &dbg_cmd_show_stack;
-  short_command['T'].doc  = _("Print target stack or Makefile include stack.");
   short_command['T'].use  = _("where");
+  short_command['T'].doc  = 
+    _("Print target stack or Makefile include stack.\n" \
+      "\tAn argument specifies the maximum amount of entries to show.");
 
   short_command['u'].func = &dbg_cmd_frame_up;
   short_command['u'].use  = _("up [amount]");
@@ -588,13 +598,21 @@ dbg_cmd_run (char *psz_arg)
 
 /* Show target call stack info. */
 static debug_return_t 
-dbg_cmd_show_stack (char *psz_arg)
+dbg_cmd_show_stack (char *psz_amount)
 {
+  int i_amount;
+  
+  if (!psz_amount || !*psz_amount) {
+    i_amount = MAX_STACK_SHOW;
+  } else if (!get_int(psz_amount, &i_amount)) {
+      return debug_readloop;
+  }
+
   if (p_stack_top)
-    print_target_stack (p_stack_top, i_stack_pos);
+    print_target_stack (p_stack_top, i_stack_pos, i_amount);
 
   if (p_stack_floc_top) 
-    print_floc_stack (i_stack_pos);
+    print_floc_stack (i_stack_pos, i_amount);
   return debug_readloop;
 }
 
@@ -764,7 +782,7 @@ static debug_return_t dbg_cmd_info (char *psz_arg)
 		      print_variable_info, NULL);
       }
     } else if (is_abbrev_of (psz_arg, "stack", 1)) {
-      print_target_stack(p_stack_top, i_stack_pos);
+      print_target_stack(p_stack_top, i_stack_pos, MAX_STACK_SHOW);
     } else if (is_abbrev_of (psz_arg, "target", 1)) {
       if (p_stack_top && p_stack_top->p_target && p_stack_top->p_target->name)
 	printf("target: %s\n", p_stack_top->p_target->name);
@@ -792,7 +810,7 @@ static debug_return_t dbg_cmd_skip (char *psz_arg)
 static debug_return_t dbg_cmd_step (char *psz_arg)
 {
 
-  if (!psz_arg || 0==strlen(psz_arg)) {
+  if (!psz_arg || !*psz_arg) {
     debugger_stepping = 1;
     return continue_execution;
   } 
@@ -834,7 +852,7 @@ static debug_return_t dbg_cmd_target (char *psz_args)
   file_t *p_target;
   char   *psz_target;
 
-  if (!psz_args || 0==strlen(psz_args)) {
+  if (!psz_args || !*psz_args) {
     /* Use current target */
     if (p_stack && p_stack->p_target && p_stack->p_target->name) {
       psz_args = p_stack->p_target->name;
@@ -852,7 +870,7 @@ static debug_return_t dbg_cmd_target (char *psz_args)
     char *psz_word;
     
     while( (psz_word = get_word(&psz_args))) {
-      if (0 == strlen(psz_word)) {
+      if (!*psz_word) {
 	break;
       } else if (is_abbrev_of(psz_word, "depends", 1)) {
 	i_mask |= PRINT_TARGET_DEPEND;
@@ -876,7 +894,13 @@ static debug_return_t dbg_cmd_target (char *psz_args)
       }
     }
     
-    if (0 == i_mask) i_mask = PRINT_TARGET_ALL;
+    if (0 == i_mask) i_mask = PRINT_TARGET_ALL & (~PRINT_TARGET_VARS_HASH);
+
+    if (i_mask & PRINT_TARGET_VARS) {
+      initialize_file_variables (p_target, 0);
+      set_file_variables (p_target);
+    }
+
     print_target_props(p_target, i_mask);
   } else {
     printf("Couldn't find target '%s'\n", psz_target);
@@ -884,7 +908,6 @@ static debug_return_t dbg_cmd_target (char *psz_args)
   return debug_readloop;
 }
 
-#define MAX_FILE_LENGTH 1000
 /* Write commands associated with a given target. */
 static debug_return_t dbg_cmd_write_cmds (char *psz_args) 
 {

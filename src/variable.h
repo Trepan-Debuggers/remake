@@ -1,4 +1,5 @@
-/* Definitions for using variables in GNU Make.
+/* $Id: variable.h,v 1.8 2005/12/01 07:14:12 rockyb Exp $
+Definitions for using variables in GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 2002, 2004, 2005
 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -158,10 +159,11 @@ extern void define_automatic_variables (void);
    since the pattern variable might not have been defined yet.  */
 extern void initialize_file_variables (struct file *p_target, int read);
 
-/*! Print all the local variables of FILE.  Lines output have psz_prefix
-    prepended.
+/*! Print all the local variables of P_TARGET.  Lines output have "# "
+    prepended. If you want hash table statistics too, set b_hash_stats
+    true.
 */
-extern void print_file_variables (file_t *p_target);
+extern void print_file_variables (file_t *p_target, bool b_hash_stats);
 
 /*! Print the data base of variables.  */
 
@@ -171,8 +173,11 @@ extern void print_variable_data_base (void);
 extern void print_variable_info (const void *item, void *arg);
 
 /*! Print all the variables in SET.  PREFIX is printed before the
-   actual variable definitions (everything else is comments).  */
-extern void print_variable_set (variable_set_t *set, char *prefix);
+   actual variable definitions (everything else is comments).  If you
+   want hash table statistics too, set b_hash_stats true.
+*/
+extern void print_variable_set (variable_set_t *p_set, char *psz_prefix,
+				bool b_hash_stats);
 
 /*! Merge FROM_SET into TO_SET, freeing unused storage in
     FROM_SET.  */

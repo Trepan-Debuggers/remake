@@ -1,4 +1,4 @@
-/* $Id: dbg_stack.c,v 1.2 2005/11/27 01:42:00 rockyb Exp $
+/* $Id: dbg_stack.c,v 1.3 2005/12/01 07:14:12 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -40,8 +40,7 @@ dbg_cmd_frame_down (char *psz_amount)
 
   if (!psz_amount || !*psz_amount) {
     i_amount = 1;
-  } else {
-    if (!get_int(psz_amount, &i_amount))
+  } else if (!get_int(psz_amount, &i_amount)) {
       return debug_readloop;
   }
 

@@ -1,4 +1,5 @@
-/* Internals of variables for GNU Make.
+/* $Id: variable.c,v 1.12 2005/12/01 07:14:12 rockyb Exp $
+Internals of variables for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -1302,15 +1303,17 @@ print_variable_info (const void *item, void *arg)
    actual variable definitions (everything else is comments).  */
 
 void
-print_variable_set (variable_set_t *set, char *prefix)
+print_variable_set (variable_set_t *p_set, char *psz_prefix, bool b_hash_stats)
 {
-  hash_map_arg (&set->table, print_variable_info, prefix);
+  hash_map_arg (&p_set->table, print_variable_info, psz_prefix);
 
-  if (prefix) fputs (prefix, stdout);
-  fputs (_("variable set hash-table stats:\n"), stdout);
-  if (prefix) fputs (prefix, stdout);
-  hash_print_stats (&set->table, stdout);
-  putc ('\n', stdout);
+  if (b_hash_stats) {
+    if (psz_prefix) fputs (psz_prefix, stdout);
+    fputs (_("variable set hash-table stats:\n"), stdout);
+    if (psz_prefix) fputs (psz_prefix, stdout);
+    hash_print_stats (&p_set->table, stdout);
+    putc ('\n', stdout);
+  }
 }
 
 /* Print the data base of variables.  */
@@ -1320,7 +1323,7 @@ print_variable_data_base (void)
 {
   puts (_("\n# Variables\n"));
 
-  print_variable_set (&global_variable_set, "");
+  print_variable_set (&global_variable_set, "", true);
 
   puts (_("\n# Pattern-specific Variable Values"));
 
@@ -1343,13 +1346,15 @@ print_variable_data_base (void)
 }
 
 
-/*! Print all the local variables of FILE.  */
-
+/*! Print all the local variables of P_TARGET.  Lines output have "# "
+    prepended. If you want hash table statistics too, set b_hash_stats
+    true.
+*/
 void
-print_file_variables (file_t *p_target)
+print_file_variables (file_t *p_target, bool b_hash_stats)
 {
   if (p_target->variables != 0)
-    print_variable_set (p_target->variables->set, "# ");
+    print_variable_set (p_target->variables->set, "# ", b_hash_stats);
 }
 
 #ifdef WINDOWS32

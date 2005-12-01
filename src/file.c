@@ -26,6 +26,10 @@ Boston, MA 02111-1307, USA.  */
 #include "commands.h"
 #include "debug.h"
 
+/* The below variable is to make sure the enumerations are accessible
+   in a debugger. */
+print_target_mask_t debugger_enum_mask;
+
 /* Hash table of files the makefile knows how to make.  */
 
 static unsigned long
@@ -649,7 +653,7 @@ print_target_props (file_t *p_target, print_target_mask_t i_mask)
   
 
   if (p_target->variables != 0 && i_mask & PRINT_TARGET_VARS)
-    print_file_variables (p_target);
+    print_file_variables (p_target, i_mask & PRINT_TARGET_VARS_HASH);
 
   if (p_target->cmds != 0 && i_mask & PRINT_TARGET_CMDS)
     print_commands (p_target->cmds);

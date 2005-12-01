@@ -9,7 +9,20 @@ Please send remake bug reports to <rocky@panix.com>.
 See the README file and the GNU remake manual for details on sending bug
 reports.
 
-Version 3.80+dbg-0.4cvs
+Version 3.80+dbg-0.5cvs
+
+* Add a number of aliases (e.g. backtrace, bt, !!) 
+  for commands and via an alias mechanism
+
+* target commands sets file variables if those are shown
+
+* remove hash stats on printing variables -- generally not wanted for
+  users (rather than GNU Make maintainers)a
+
+* More document updates
+
+
+Version 3.80+dbg-0.4
 
 * Add eval!
 
