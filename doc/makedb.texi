@@ -1778,6 +1778,10 @@ target up to date.
 @item depends
 Show the targets that this one depends on.
 
+@item expand
+Show the list of commands that need to get run in order to bring the
+target up to date with @value{MAKE} variables expanded.
+
 @item nonorder
 Show the dependencies that are not ordered.
 

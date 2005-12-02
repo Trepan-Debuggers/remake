@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.52 2005/12/02 04:47:18 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.53 2005/12/02 04:54:47 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -85,7 +85,7 @@ typedef struct {
   const char *use;		/* short command usage.  */
 } short_cmd_t;
 
-static int            dbg_cmd_show_var(char *psz_arg, int expand);
+static int            dbg_cmd_show_exp(char *psz_arg, int expand);
 static debug_return_t dbg_cmd_set_var (char *psz_arg, int expand);
 
 static debug_return_t dbg_cmd_break            (char *psz_arg);
@@ -338,7 +338,7 @@ cmd_initialize(void)
     _("Show information about a target.\n" \
       "\ttarget information is printed.\n" \
       "\tThe following attributes names can be given after a target name:\n" \
-      "\t\t'attributes', 'commands', 'depends', 'nonorder',\n" \
+      "\t\t'attributes', 'commands', 'expand', 'depends', 'nonorder',\n" \
       "\t\t'previous', 'state', 'time', 'variables'\n" \
       "\tIf no variable or target name is supplied, we try to use the\n" \
       "\tcurrent target name.\n"				
@@ -838,7 +838,7 @@ static debug_return_t dbg_cmd_print (char *psz_args)
     psz_name = get_word(&psz_args);
   }
   
-  if (dbg_cmd_show_var(psz_name, 0)) {
+  if (dbg_cmd_show_exp(psz_name, 0)) {
     if (psz_last_name) free(psz_last_name);
     psz_last_name = strdup(psz_name);
   }
@@ -1159,7 +1159,7 @@ static debug_return_t dbg_cmd_shell (char *psz_varname)
 /* Show a variable definition. Set "expand" to 1 if you want variable
    definitions inside the displayed value expanded.
 */
-static int dbg_cmd_show_var (char *psz_varname, int expand) 
+static int dbg_cmd_show_exp (char *psz_varname, int expand) 
 {
   if (!psz_varname || 0==strlen(psz_varname)) {
     printf(_("You need to supply a variable name.\n"));
@@ -1216,7 +1216,7 @@ static debug_return_t dbg_cmd_expand (char *psz_string)
     }
   }
   
-  if (dbg_cmd_show_var(psz_string, 1)) {
+  if (dbg_cmd_show_exp(psz_string, 1)) {
     if (psz_last_string) free(psz_last_string);
     psz_last_string = strdup(psz_string);
   }

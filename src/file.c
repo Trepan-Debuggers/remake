@@ -656,8 +656,10 @@ print_target_props (file_t *p_target, print_target_mask_t i_mask)
     print_file_variables (p_target, i_mask & PRINT_TARGET_VARS_HASH);
 
   if (p_target->cmds != 0 && i_mask & PRINT_TARGET_CMDS)
-    print_commands (p_target, p_target->cmds,
-		    (i_mask & PRINT_TARGET_CMDS_EXP) != 0);
+    print_commands (p_target, p_target->cmds, false);
+
+  if (p_target->cmds != 0 && i_mask & PRINT_TARGET_CMDS_EXP)
+    print_commands (p_target, p_target->cmds, true);
 
   if (p_target->prev && i_mask & PRINT_TARGET_PREV)
     print_target_props (p_target->prev, i_mask);
