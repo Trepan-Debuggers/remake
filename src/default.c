@@ -1,4 +1,5 @@
-/* Data base of default implicit rules for GNU Make.
+/* $Id: default.c,v 1.2 2005/12/02 12:46:54 rockyb Exp $
+Data base of default implicit rules for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96, 2004 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -548,24 +549,32 @@ void
 install_default_suffix_rules (void)
 {
   char **s;
-
-  if (no_builtin_rules_flag)
-    return;
-
- for (s = default_suffix_rules; *s != 0; s += 2)
-    {
-      file_t *f = enter_file (s[0], NILF);
-      /* Don't clobber cmds given in a makefile if there were any.  */
-      if (f->cmds == 0)
-	{
-	  f->cmds = (struct commands *) xmalloc (sizeof (struct commands));
-	  f->cmds->fileinfo.filenm = 0;
-	  f->cmds->commands = s[1];
-	  f->cmds->command_lines = 0;
-	}
+  
+  if (no_builtin_rules_flag) return;
+  
+  for (s = default_suffix_rules; *s != 0; s += 2) {
+    file_t *f = enter_file (s[0], NILF);
+    /* Don't clobber cmds given in a makefile if there were any.  */
+    if (!f->cmds) {
+      f->cmds = (commands_t *) calloc (1, sizeof (commands_t));
+      f->cmds->commands = s[1];
     }
+  }
 }
 
+void
+free_default_suffix_rules (void) 
+{
+  char **s;
+  
+  if (no_builtin_rules_flag) return;
+  
+  for (s = default_suffix_rules; *s != 0; s += 2) {
+    file_t *f = lookup_file (s[0]);
+    /* Don't clobber cmds given in a makefile if there were any.  */
+    if (f && f->cmds) free (f->cmds);
+  }
+}
 
 /*! Install the default pattern rules.  */
 

@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.16 2005/11/27 20:38:01 rockyb Exp $
+/* $Id: main.c,v 1.17 2005/12/02 12:46:54 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -1400,19 +1400,16 @@ main (int argc, char **argv, char **envp)
             if (stdin_nm)
               fatal (NILF, _("Makefile from standard input specified twice."));
 
-#ifdef VMS
-# define DEFAULT_TMPDIR     "sys$scratch:"
+#ifdef P_tmpdir
+# define DEFAULT_TMPDIR    P_tmpdir
 #else
-# ifdef P_tmpdir
-#  define DEFAULT_TMPDIR    P_tmpdir
-# else
-#  define DEFAULT_TMPDIR    "/tmp"
-# endif
+# define DEFAULT_TMPDIR    "/tmp"
 #endif
+
 #define DEFAULT_TMPFILE     "GmXXXXXX"
 
 	    if (((tmpdir = getenv ("TMPDIR")) == NULL || *tmpdir == '\0')
-#if defined (__MSDOS__) || defined (WINDOWS32) || defined (__EMX__)
+#if defined (__MSDOS__) || defined (WINDOWS32)
                 /* These are also used commonly on these platforms.  */
                 && ((tmpdir = getenv ("TEMP")) == NULL || *tmpdir == '\0')
                 && ((tmpdir = getenv ("TMP")) == NULL || *tmpdir == '\0')
@@ -1428,10 +1425,8 @@ main (int argc, char **argv, char **envp)
 	    if (strchr ("/\\", template[strlen (template) - 1]) == NULL)
 	      strcat (template, "/");
 #else
-# ifndef VMS
 	    if (template[strlen (template) - 1] != '/')
 	      strcat (template, "/");
-# endif /* !VMS */
 #endif /* !HAVE_DOS_PATHS */
 
 	    strcat (template, DEFAULT_TMPFILE);
@@ -1940,7 +1935,6 @@ main (int argc, char **argv, char **envp)
 		fatal (NILF, _("Couldn't change back to original directory."));
 	    }
 
-#ifndef _AMIGA
 	  for (p = environ; *p != 0; ++p)
 	    if ((*p)[MAKELEVEL_LENGTH] == '='
 		&& strneq (*p, MAKELEVEL_NAME, MAKELEVEL_LENGTH))
@@ -1954,20 +1948,6 @@ main (int argc, char **argv, char **envp)
 		sprintf (*p, "%s=%u", MAKELEVEL_NAME, makelevel);
 		break;
 	      }
-#else /* AMIGA */
-	  {
-	    char buffer[256];
-	    int len;
-
-	    len = GetVar (MAKELEVEL_NAME, buffer, sizeof (buffer), GVF_GLOBAL_ONLY);
-
-	    if (len != -1)
-	    {
-	    sprintf (buffer, "%u", makelevel);
-	      SetVar (MAKELEVEL_NAME, buffer, -1, GVF_GLOBAL_ONLY);
-	    }
-	  }
-#endif
 
 	  if (ISDB (DB_BASIC))
 	    {
@@ -1985,10 +1965,7 @@ main (int argc, char **argv, char **envp)
           if (job_rfd >= 0)
             close (job_rfd);
 
-#ifdef _AMIGA
-	  exec_command (nargv);
-	  exit (0);
-#elif defined (__EMX__)
+#if defined (__EMX__)
 	  {
 	    /* It is not possible to use execve() here because this
 	       would cause the parent process to be terminated with
@@ -2090,6 +2067,7 @@ main (int argc, char **argv, char **envp)
              _("warning:  Clock skew detected.  Your build may be incomplete."));
 
     /* Exit.  */
+    free_default_suffix_rules();
     die (status);
   }
 
@@ -2879,5 +2857,6 @@ die (int status)
       log_working_directory (0);
     }
 
+  /* FIXME: free_default_suffix_rules (); */
   exit (status);
 }

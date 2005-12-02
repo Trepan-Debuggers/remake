@@ -1,4 +1,4 @@
-/* $Id: read.c,v 1.15 2005/11/27 20:38:01 rockyb Exp $
+/* $Id: read.c,v 1.16 2005/12/02 12:46:54 rockyb Exp $
 Reading and parsing of makefiles for GNU Make.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
@@ -237,16 +237,7 @@ read_all_makefiles (char **makefiles)
   if (num_makefiles == 0)
     {
       static char *default_makefiles[] =
-#ifdef VMS
-	/* all lower case since readdir() (the vms version) 'lowercasifies' */
-	{ "makefile.vms", "gnumakefile.", "makefile.", 0 };
-#else
-#ifdef _AMIGA
-	{ "GNUmakefile", "Makefile", "SMakefile", 0 };
-#else /* !Amiga && !VMS */
 	{ "GNUmakefile", "makefile", "Makefile", 0 };
-#endif /* AMIGA */
-#endif /* VMS */
       char **p = default_makefiles;
       while (*p != 0 && !file_exists_p (*p))
 	++p;
@@ -266,7 +257,7 @@ read_all_makefiles (char **makefiles)
 	    tail = tail->next;
 	  for (p = default_makefiles; *p != 0; ++p)
 	    {
-	      dep_t *d = (dep_t *) xmalloc (sizeof (dep_t));
+	      dep_t *d = (dep_t *) calloc (1, sizeof (dep_t));
 	      d->name = 0;
 	      d->file = enter_file (*p, NILF);
 	      d->file->dontcare = 1;
