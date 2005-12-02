@@ -12,18 +12,19 @@ reports.
 Version 3.80+dbg-0.5cvs
 
 * Add a number of aliases (e.g. backtrace, bt, !!) 
-  for commands and via an alias mechanism
+  and via an internal alias mechanism
 
-* target commands sets file variables if those are shown
-
-* add "target expand" to list target commands with "make" variables
-  expanded.
+* target command improvements:
+   -  sets file variables if when showing file variables
+     requested
+   - add "target expand" to list target commands with "make" variables
+     expanded.
+   - allow @ or $@ as a target name 
 
 * remove hash stats on printing variables -- generally not wanted for
-  users (rather than GNU Make maintainers)a
+  users (rather than GNU Make maintainers)
 
 * More document updates
-
 
 Version 3.80+dbg-0.4
 
