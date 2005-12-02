@@ -1,4 +1,4 @@
-/* $Id: variable.h,v 1.8 2005/12/01 07:14:12 rockyb Exp $
+/* $Id: variable.h,v 1.9 2005/12/02 12:12:09 rockyb Exp $
 Definitions for using variables in GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 2002, 2004, 2005
 Free Software Foundation, Inc.
@@ -28,29 +28,25 @@ Boston, MA 02111-1307, USA.  */
 
 /** Codes in a variable definition saying where the definition came from.
    Increasing numeric values signify less-overridable definitions.  */
-enum variable_origin
-  {
-    o_default,		/**< Variable from the default set.  */
-    o_env,		/**< Variable from environment.  */
-    o_file,		/**< Variable given in a makefile.  */
-    o_env_override,	/**< Variable from environment, if -e.  */
-    o_command,		/**< Variable given by user.  */
-    o_override, 	/**< Variable from an `override' directive.  */
-    o_automatic,	/**< Automatic variable -- cannot be set.  */
-    o_debugger,  	/**< set inside debugger.  */
-    o_invalid		/**< Core dump time.  */
-  };
+typedef enum {
+  o_default,		/**< Variable from the default set.  */
+  o_env,		/**< Variable from environment.  */
+  o_file,		/**< Variable given in a makefile.  */
+  o_env_override,	/**< Variable from environment, if -e.  */
+  o_command,		/**< Variable given by user.  */
+  o_override, 	        /**< Variable from an `override' directive.  */
+  o_automatic,	        /**< Automatic variable -- cannot be set.  */
+  o_debugger,  	        /**< set inside debugger.  */
+  o_invalid		/**< Core dump time.  */
+} variable_origin_t;
 
-typedef enum variable_origin variable_origin_t;
-
-enum variable_flavor
-  {
-    f_bogus,            /* Bogus (error) */
-    f_simple,           /* Simple definition (:=) */
-    f_recursive,        /* Recursive definition (=) */
-    f_append,           /* Appending definition (+=) */
-    f_conditional       /* Conditional definition (?=) */
-  };
+typedef enum {
+  f_bogus,            /* Bogus (error) */
+  f_simple,           /* Simple definition (:=) */
+  f_recursive,        /* Recursive definition (=) */
+  f_append,           /* Appending definition (+=) */
+  f_conditional       /* Conditional definition (?=) */
+} variable_flavor_t;
 
 /** Structure that represents one variable definition.
    Each bucket of the hash table is a chain of these,
@@ -77,9 +73,9 @@ struct variable
     unsigned int exp_count:EXP_COUNT_BITS;
                                 /**< If >1, allow this many self-referential
                                    expansions.  */
-    enum variable_flavor
+    variable_flavor_t
       flavor ENUM_BITFIELD (3);	/**< Variable flavor.  */
-    enum variable_origin
+    variable_origin_t
       origin ENUM_BITFIELD (4);	/**< Variable origin.  */
     enum variable_export
       {
@@ -186,12 +182,11 @@ extern void merge_variable_set_lists (variable_set_list_t **to_list, variable_se
 /*! Given a variable, a value, and a flavor, define the variable.  See
    the try_variable_definition() function for details on the
    parameters. */
-extern variable_t *do_variable_definition PARAMS ((const floc_t *p_floc, 
-						   const char *name, 
-						   char *value, 
-						   variable_origin_t origin,
-						   enum variable_flavor flavor,
-						   int target_var));
+extern variable_t *do_variable_definition (const floc_t *p_floc, 
+					   const char *name,  char *value, 
+					   variable_origin_t origin,
+					   variable_flavor_t flavor,
+					   int target_var);
 
 
 /*! Try to interpret LINE (a null-terminated string) as a variable
@@ -200,8 +195,7 @@ extern variable_t *do_variable_definition PARAMS ((const floc_t *p_floc,
    If LINE was recognized as a variable definition, a pointer to its `struct
    variable' is returned.  If LINE is not a variable definition, NULL is
    returned.  */
-extern variable_t *parse_variable_definition PARAMS ((variable_t *v, 
-						      char *line));
+extern variable_t *parse_variable_definition (variable_t *v, char *line);
 
 extern struct variable *try_variable_definition (const floc_t *p_floc, 
 						 char *line, 
@@ -214,12 +208,11 @@ extern void hash_init_function_table (void);
    LENGTH chars.  NAME need not be null-terminated.  Returns address
    of the `struct variable' containing all info on the variable, or
    nil if no such variable is defined.  */
-extern variable_t *lookup_variable PARAMS ((const char *name, 
-					    unsigned int length));
+extern variable_t *lookup_variable (const char *name, unsigned int length);
 
-extern variable_t *lookup_variable_in_set PARAMS ((const char *name,
-						   unsigned int length,
-						   const variable_set_t *set));
+extern variable_t *lookup_variable_in_set (const char *name, 
+					   unsigned int length,
+					   const variable_set_t *set);
 
 /*! Define variable named NAME with value VALUE in SET.  VALUE is copied.
   LENGTH is the length of NAME, which does not need to be null-terminated.
@@ -228,10 +221,12 @@ extern variable_t *lookup_variable_in_set PARAMS ((const char *name,
   If RECURSIVE is nonzero a flag is set in the variable saying
   that it should be recursively re-expanded.  */
 
-extern variable_t *define_variable_in_set
-    PARAMS ((const char *name, unsigned int length, char *value,
-             enum variable_origin origin, int recursive,
-             variable_set_t *set, const floc_t *p_floc));
+extern variable_t *define_variable_in_set (const char *name, 
+					   unsigned int length, char *value,
+					   variable_origin_t origin, 
+					   int recursive,
+					   variable_set_t *set, 
+					   const floc_t *p_floc);
 
 /* Define a variable in the current variable set.  */
 

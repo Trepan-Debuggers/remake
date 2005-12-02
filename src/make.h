@@ -1,4 +1,5 @@
-/* Miscellaneous global declarations and portability cruft for GNU Make.
+/* $Id: make.h,v 1.12 2005/12/02 12:12:09 rockyb Exp $
+Miscellaneous global declarations and portability cruft for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -483,35 +484,7 @@ extern int handling_fatal_signal;
 #endif
 
 #ifndef initialize_main
-# ifdef __EMX__
-#  define initialize_main(pargc, pargv) \
-                          { _wildcard(pargc, pargv); _response(pargc, pargv); }
-# else
-#  define initialize_main(pargc, pargv)
-# endif
-#endif
-
-
-#ifdef __EMX__
-# if !HAVE_STRCASECMP
-#  define strcasecmp stricmp
-# endif
-
-# if !defined chdir
-#  define chdir _chdir2
-# endif
-# if !defined getcwd
-#  define getcwd _getcwd2
-# endif
-
-/* NO_CHDIR2 causes make not to use _chdir2() and _getcwd2() instead of
-   chdir() and getcwd(). This avoids some error messages for the
-   make testsuite but restricts the drive letter support. */
-# ifdef NO_CHDIR2
-#  warning NO_CHDIR2: usage of drive letters restricted
-#  undef chdir
-#  undef getcwd
-# endif
+#define initialize_main(pargc, pargv)
 #endif
 
 #ifndef initialize_main

@@ -1,4 +1,4 @@
-/* $Id: variable.c,v 1.12 2005/12/01 07:14:12 rockyb Exp $
+/* $Id: variable.c,v 1.13 2005/12/02 12:12:09 rockyb Exp $
 Internals of variables for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -894,7 +894,7 @@ target_environment (struct file *file)
 variable_t *
 do_variable_definition (const floc_t *p_floc, const char *varname,
                         char *value, variable_origin_t origin,
-                        enum variable_flavor flavor, int target_var)
+                        variable_flavor_t flavor, int target_var)
 {
   char *p, *alloc_value = NULL;
   variable_t *v;
@@ -1128,7 +1128,7 @@ parse_variable_definition (variable_t *v, char *line)
   char *p = line;
   char *beg;
   char *end;
-  enum variable_flavor flavor = f_bogus;
+  variable_flavor_t flavor = f_bogus;
   char *name;
 
   while (1)

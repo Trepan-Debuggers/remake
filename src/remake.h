@@ -1,5 +1,6 @@
-/* Header for basic dependency engine for GNU Make.
-Copyright (C) 2004
+/* $Id: remake.h,v 1.3 2005/12/02 12:12:09 rockyb Exp $
+Header for basic dependency engine for GNU Make.
+Copyright (C) 2004, 2005
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -39,7 +40,7 @@ Boston, MA 02111-1307, USA.  */
   and the library's actual name (/lib/libLIBNAME.a, etc.) is
   substituted into FILE.  */
 
-extern FILE_TIMESTAMP f_mtime PARAMS ((file_t *file, int search));
+extern FILE_TIMESTAMP f_mtime (file_t *file, int search);
 
 /*! Set FILE's `updated' flag and re-check its mtime and the mtime's
   of all files listed in its `also_make' member.  Under -t, this
@@ -47,7 +48,7 @@ extern FILE_TIMESTAMP f_mtime PARAMS ((file_t *file, int search));
   
   On return, FILE->update_status will no longer be -1 if it was.
 */
-extern void notice_finished_file PARAMS ((file_t *file));
+extern void notice_finished_file (file_t *file);
 
 /*! Remake all the goals in the `struct dep' chain GOALS.  Return -1
    if nothing was done, 0 if all goals were updated successfully, or 1
@@ -57,6 +58,6 @@ extern void notice_finished_file PARAMS ((file_t *file));
    goal at a time and return as soon as one goal whose `changed'
    member is nonzero is successfully made.
 */
-extern int update_goal_chain PARAMS ((dep_t *goals, int makefiles));
+extern int update_goal_chain (dep_t *goals, int makefiles);
 
 #endif /*REMAKE_H*/

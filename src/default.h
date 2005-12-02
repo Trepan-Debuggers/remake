@@ -24,18 +24,18 @@ Boston, MA 02111-1307, USA.  */
   Create definitions for all of the builtin default variables,
   e.g. CC, LD, MAKE. Nothing is done fault if no_builtin_flag is set.
  */
-extern void define_default_variables PARAMS ((void));
+extern void define_default_variables (void);
 
 /*! Set up the default .SUFFIXES list.  */
-extern void set_default_suffixes PARAMS ((void));
+extern void set_default_suffixes (void);
 
 /*! Enter the default suffix rules as file rules.  This used to be
    done in install_default_implicit_rules, but that loses because we
    want the suffix rules installed before reading makefiles, and thee
    pattern rules installed after.  */
-extern void install_default_suffix_rules PARAMS ((void));
+extern void install_default_suffix_rules (void);
 
 /*! Install the default pattern rules.  */
-extern void install_default_implicit_rules PARAMS ((void));
+extern void install_default_implicit_rules (void);
 
 #endif /*DEFAULT_H*/

@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.53 2005/12/02 04:54:47 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.54 2005/12/02 12:12:09 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -852,19 +852,7 @@ static debug_return_t dbg_cmd_target (char *psz_args)
   file_t *p_target;
   char   *psz_target;
 
-  if (!psz_args || !*psz_args) {
-    /* Use current target */
-    if (p_stack && p_stack->p_target && p_stack->p_target->name) {
-      psz_args = p_stack->p_target->name;
-    } else {
-      printf("No current target - must supply something to print\n");
-      return debug_readloop;
-    }
-  }
-
-  psz_target = get_word(&psz_args);
-  
-  p_target = lookup_file (psz_target);
+  p_target = get_target(&psz_args, &psz_target);
   if (p_target) {
     print_target_mask_t i_mask = 0;
     char *psz_word;
@@ -904,8 +892,6 @@ static debug_return_t dbg_cmd_target (char *psz_args)
     }
 
     print_target_props(p_target, i_mask);
-  } else {
-    printf("Couldn't find target '%s'\n", psz_target);
   }
   return debug_readloop;
 }
@@ -913,43 +899,16 @@ static debug_return_t dbg_cmd_target (char *psz_args)
 /* Write commands associated with a given target. */
 static debug_return_t dbg_cmd_write_cmds (char *psz_args) 
 {
-  file_t *p_target;
-  char *psz_target;
+  file_t *p_target = NULL;;
+  char *psz_target = NULL;
   int b_stdout = 0;
 
-  if (!psz_args || !*psz_args) {
-    /* Use current target */
-    if (p_stack && p_stack->p_target && p_stack->p_target->name)
-      psz_target = p_stack->p_target->name;
-    else {
-      printf("No current target - supply a target name.\n");
-      return debug_readloop;
-    }
-  } else {
-    psz_target = get_word(&psz_args);
-  }
-
-  /* As a special case, we'll allow $@ for the current target. */
-  if ( 0 == strcmp("$@", psz_target) ) {
-    if (p_stack && p_stack->p_target && p_stack->p_target->name)
-      psz_target = p_stack->p_target->name;
-    else {
-      printf(_("No current target found for $@ - supply a target name.\n"));
-      return debug_readloop;
-    }
-  }
-  
-  p_target = lookup_file (psz_target);
-  if (!p_target) {
-    printf(_("Target \"%s\" doesn't appear to be a target name.\n"), 
-	   psz_target);
-  } else {
-    variable_t *p_v = 
-      lookup_variable ("SHELL", strlen ("SHELL"));
+  p_target = get_target(&psz_args, &psz_target);
+  if (p_target) {
+    variable_t *p_v = lookup_variable ("SHELL", strlen ("SHELL"));
     char *psz_filename = NULL;
     FILE *outfd;
     char *s;
-    
     
     if (! p_target->cmds || ! p_target->cmds->commands) {
       printf(_("Target \"%s\" doesn't have commands associated with it.\n"), 
@@ -1156,7 +1115,7 @@ static debug_return_t dbg_cmd_shell (char *psz_varname)
 }
 
 
-/* Show a variable definition. Set "expand" to 1 if you want variable
+/* Show a expression. Set "expand" to 1 if you want variable
    definitions inside the displayed value expanded.
 */
 static int dbg_cmd_show_exp (char *psz_varname, int expand) 

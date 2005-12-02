@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.17 2005/12/02 11:24:42 rockyb Exp $
+/* $Id: job.c,v 1.18 2005/12/02 12:12:09 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005
 Free Software Foundation, Inc.
@@ -62,11 +62,6 @@ bool batch_mode_shell = true;
 char *default_shell = "command.com";
 int batch_mode_shell = 0;
 
-#elif defined (__EMX__)
-
-char *default_shell = "/bin/sh";
-bool batch_mode_shell = false;
-
 #elif defined (__riscos__)
 
 char default_shell[] = "";
@@ -95,10 +90,6 @@ int dos_command_running;
 # include "w32err.h"
 # include "pathstuff.h"
 #endif /* WINDOWS32 */
-
-#ifdef __EMX__
-# include <process.h>
-#endif
 
 #if defined (HAVE_SYS_WAIT_H) || defined (HAVE_UNION_WAIT)
 # include <sys/wait.h>
@@ -170,14 +161,14 @@ extern int setgid ();
 extern int getgid ();
 #endif
 
-extern int getloadavg PARAMS ((double loadavg[], int nelem));
+extern int getloadavg (double loadavg[], int nelem);
 
-RETSIGTYPE child_handler PARAMS ((int));
-static void free_child PARAMS ((child_t *));
+RETSIGTYPE child_handler (int);
+static void free_child (child_t *);
 static void start_job_command (child_t *child, 
 			       target_stack_node_t *p_call_stack);
-static int load_too_high PARAMS ((void));
-static int job_next_command PARAMS ((child_t *));
+static int load_too_high (void);
+static int job_next_command (child_t *);
 static int start_waiting_job (child_t *c, target_stack_node_t *p_call_stack);
 
 /* Chain of all live (or recently deceased) children.  */
@@ -299,50 +290,6 @@ create_batch_filename(char const *base, int unixy)
 }
 #endif /* WINDOWS32 */
 
-#ifdef __EMX__
-/* returns whether path is assumed to be a unix like shell. */
-int
-_is_unixy_shell (const char *path)
-{
-  /* list of non unix shells */
-  const char *known_os2shells[] = {
-    "cmd.exe",
-    "cmd",
-    "4os2.exe",
-    "4os2",
-    "4dos.exe",
-    "4dos",
-    "command.com",
-    "command",
-    NULL
-  };
-
-  /* find the rightmost '/' or '\\' */
-  const char *name = strrchr (path, '/');
-  const char *p = strrchr (path, '\\');
-  unsigned i;
-
-  if (name && p)    /* take the max */
-    name = (name > p) ? name : p;
-  else if (p)       /* name must be 0 */
-    name = p;
-  else if (!name)   /* name and p must be 0 */
-    name = path;
-
-  if (*name == '/' || *name == '\\') name++;
-
-  i = 0;
-  while (known_os2shells[i] != NULL) {
-    if (stricmp (name, known_os2shells[i]) == 0) /* strcasecmp() */
-      return 0; /* not a unix shell */
-    i++;
-  }
-
-  /* in doubt assume a unix like shell */
-  return 1;
-}
-#endif /* __EMX__ */
-
 
 /* Write an error message describing the exit status given in
    EXIT_CODE, EXIT_SIG, and COREDUMP, for the target TARGET_NAME.
@@ -403,11 +350,6 @@ child_handler (sig)
       close (job_rfd);
       job_rfd = -1;
     }
-
-#ifdef __EMX__
-  /* The signal handler must called only once! */
-  signal (SIGCHLD, SIG_DFL);
-#endif
 
   /* This causes problems if the SIGCHLD interrupts a printf().
   DB (DB_JOBS, (_("Got a SIGCHLD; %u unreaped children.\n"), dead_children));
@@ -1034,7 +976,7 @@ static void start_job_command (child_t *p_child,
      printed, etc.  */
 
   if (
-#if defined __MSDOS__ || defined (__EMX__)
+#if defined __MSDOS__
       unixy_shell	/* the test is complicated and we already did it */
 #else
       (argv[0] && !strcmp (argv[0], "/bin/sh"))
@@ -1138,39 +1080,6 @@ static void start_job_command (child_t *p_child,
 
       parent_environ = environ;
 
-# ifdef __EMX__
-      /* If we aren't running a recursive command and we have a jobserver
-         pipe, close it before exec'ing.  */
-      if (!(flags & COMMANDS_RECURSE) && job_fds[0] >= 0)
-	{
-	  CLOSE_ON_EXEC (job_fds[0]);
-	  CLOSE_ON_EXEC (job_fds[1]);
-	}
-      if (job_rfd >= 0)
-	CLOSE_ON_EXEC (job_rfd);
-
-      /* Never use fork()/exec() here! Use spawn() instead in exec_command() */
-      p_child->pid = child_execute_job (p_child->good_stdin ? 0 : bad_stdin, 1,
-                                      argv, p_child->environment);
-      if (p_child->pid < 0)
-	{
-	  /* spawn failed!  */
-	  unblock_sigs ();
-	  perror_with_name ("spawn", "");
-	  goto error;
-	}
-
-      /* undo CLOSE_ON_EXEC() after the child process has been started */
-      if (!(flags & COMMANDS_RECURSE) && job_fds[0] >= 0)
-	{
-	  fcntl (job_fds[0], F_SETFD, 0);
-	  fcntl (job_fds[1], F_SETFD, 0);
-	}
-      if (job_rfd >= 0)
-	fcntl (job_rfd, F_SETFD, 0);
-
-#else  /* !__EMX__ */
-
       p_child->pid = vfork ();
       environ = parent_environ;	/* Restore value child may have clobbered.  */
       if (p_child->pid == 0)
@@ -1198,10 +1107,9 @@ static void start_job_command (child_t *p_child,
 	  perror_with_name ("vfork", "");
 	  goto error;
 	}
-# endif  /* !__EMX__ */
     }
 
-#else	/* __MSDOS__ or Amiga or WINDOWS32 */
+#else	/* __MSDOS__ or WINDOWS32 */
 #ifdef __MSDOS__
   {
     int proc_return;
@@ -1289,7 +1197,7 @@ static void start_job_command (child_t *p_child,
       }
   }
 #endif /* WINDOWS32 */
-#endif	/* __MSDOS__ or Amiga or WINDOWS32 */
+#endif	/* __MSDOS__ or WINDOWS32 */
 
   /* Bump the number of jobs started in this second.  */
   ++job_counter;
@@ -2424,12 +2332,6 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
                   {
                     if (streq (sh_cmds[j], new_argv[0]))
                       goto slow;
-# ifdef __EMX__
-                    /* Non-Unix shells are case insensitive.  */
-                    if (!unixy_shell
-                        && strcasecmp (sh_cmds[j], new_argv[0]) == 0)
-                      goto slow;
-# endif
                   }
 	      }
 
@@ -2485,34 +2387,6 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
   execute_by_shell = 1;	/* actually, call `system' if shell isn't unixy */
 #endif
 
-#ifdef _AMIGA
-  {
-    char *ptr;
-    char *buffer;
-    char *dptr;
-
-    buffer = (char *)xmalloc (strlen (line)+1);
-
-    ptr = line;
-    for (dptr=buffer; *ptr; )
-    {
-      if (*ptr == '\\' && ptr[1] == '\n')
-	ptr += 2;
-      else if (*ptr == '@') /* Kludge: multiline commands */
-      {
-	ptr += 2;
-	*dptr++ = '\n';
-      }
-      else
-	*dptr++ = *ptr++;
-    }
-    *dptr = 0;
-
-    new_argv = (char **) xmalloc (2 * sizeof (char *));
-    new_argv[0] = buffer;
-    new_argv[1] = 0;
-  }
-#else	/* Not Amiga  */
 #ifdef WINDOWS32
   /*
    * Not eating this whitespace caused things like
@@ -2543,11 +2417,6 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
     char *new_line = (char *) alloca (shell_len + (sizeof (minus_c) - 1)
 				      + (line_len * 2) + 1);
     char *command_ptr = NULL; /* used for batch_mode_shell mode */
-
-# ifdef __EMX__ /* is this necessary? */
-    if (!unixy_shell)
-      minus_c[1] = '/'; /* " /c " */
-# endif
 
     ap = new_line;
     memmove (ap, shell, shell_len);
@@ -2646,76 +2515,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
       new_argv = construct_command_argv_internal (new_line, (char **) NULL,
                                                   (char *) 0, (char *) 0,
                                                   (char **) 0);
-#ifdef __EMX__
-    else if (!unixy_shell)
-      {
-	/* new_line is local, must not be freed therefore
-           We use line here instead of new_line because we run the shell
-           manually.  */
-        size_t line_len = strlen (line);
-        char *p = new_line;
-        char *q = new_line;
-        memcpy (new_line, line, line_len + 1);
-        /* replace all backslash-newline combination and also following tabs */
-        while (*q != '\0')
-          {
-            if (q[0] == '\\' && q[1] == '\n')
-              {
-                q += 2; /* remove '\\' and '\n' */
-                if (q[0] == '\t')
-                  q++; /* remove 1st tab in the next line */
-              }
-            else
-              *p++ = *q++;
-          }
-        *p = '\0';
-
-# ifndef NO_CMD_DEFAULT
-        if (strnicmp (new_line, "echo", 4) == 0
-            && (new_line[4] == ' ' || new_line[4] == '\t'))
-          {
-            /* the builtin echo command: handle it separately */
-            size_t echo_len = line_len - 5;
-            char *echo_line = new_line + 5;
-
-            /* special case: echo 'x="y"'
-               cmd works this way: a string is printed as is, i.e., no quotes
-               are removed. But autoconf uses a command like echo 'x="y"' to
-               determine whether make works. autoconf expects the output x="y"
-               so we will do exactly that.
-               Note: if we do not allow cmd to be the default shell
-               we do not need this kind of voodoo */
-            if (echo_line[0] == '\''
-                && echo_line[echo_len - 1] == '\''
-                && strncmp (echo_line + 1, "ac_maketemp=",
-                            strlen ("ac_maketemp=")) == 0)
-              {
-                /* remove the enclosing quotes */
-                memmove (echo_line, echo_line + 1, echo_len - 2);
-                echo_line[echo_len - 2] = '\0';
-              }
-          }
-# endif
-
-        {
-          /* Let the shell decide what to do. Put the command line into the
-             2nd command line argument and hope for the best ;-)  */
-          size_t sh_len = strlen (shell);
-
-          /* exactly 3 arguments + NULL */
-          new_argv = (char **) xmalloc (4 * sizeof (char *));
-          /* Exactly strlen(shell) + strlen("/c") + strlen(line) + 3 times
-             the trailing '\0' */
-          new_argv[0] = (char *) malloc (sh_len + line_len + 5);
-          memcpy (new_argv[0], shell, sh_len + 1);
-          new_argv[1] = new_argv[0] + sh_len + 1;
-          memcpy (new_argv[1], "/c", 3);
-          new_argv[2] = new_argv[1] + 3;
-          memcpy (new_argv[2], new_line, line_len + 1);
-          new_argv[3] = NULL;
-        }
-      }
-#elif defined(__MSDOS__)
+#if defined(__MSDOS__)
     else
       {
         /* With MSDOS shells, we must construct the command line here
@@ -2734,7 +2534,6 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
             __FILE__, __LINE__);
 #endif
   }
-#endif	/* ! AMIGA */
 
   return new_argv;
 }

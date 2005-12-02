@@ -1,4 +1,4 @@
-/* $Id: job.h,v 1.6 2005/12/01 08:30:34 rockyb Exp $
+/* $Id: job.h,v 1.7 2005/12/02 12:12:09 rockyb Exp $
 Definitions for managing subprocesses in GNU Make.
 Copyright (C) 1992, 1993, 1996, 1999, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -29,7 +29,7 @@ Boston, MA 02111-1307, USA.  */
 # include <sys/file.h>
 #endif
 
-/* How to set close-on-exec for a file descriptor.  */
+/** How to set close-on-exec for a file descriptor.  */
 
 #if !defined F_SETFD
 # define CLOSE_ON_EXEC(_d)
@@ -41,7 +41,7 @@ Boston, MA 02111-1307, USA.  */
 #endif
 
 /** Structure describing a running or dead child process.  */
-struct child
+typedef struct child
   {
     struct child *next;		/**< Link in the chain.  */
 
@@ -75,20 +75,18 @@ struct child
     unsigned int good_stdin:1;	/**< Nonzero if this child has a good stdin. */
     unsigned int deleted:1;	/**< Nonzero if targets have been deleted.  */
     unsigned int tracing:1;	/**< Nonzero child should be traced.  */
-  };
-
-typedef struct child child_t;
+  } child_t;
 
 extern struct child *children;
 
 /*!
  Create a `struct child' for FILE and start its commands running.
 */
-extern void new_job PARAMS ((file_t *file, target_stack_node_t *p_call_stack));
+extern void new_job (file_t *file, target_stack_node_t *p_call_stack);
 
-extern void reap_children PARAMS ((int block, int err, 
-				   target_stack_node_t *p_call_stack));
-extern void start_waiting_jobs PARAMS ((target_stack_node_t *p_call_stack));
+extern void reap_children (int block, int err, 
+			   target_stack_node_t *p_call_stack);
+extern void start_waiting_jobs (target_stack_node_t *p_call_stack);
 
 /*! Figure out the argument list necessary to run LINE as a command.
    Try to avoid using a shell.  This routine handles only ' quoting,
@@ -103,35 +101,24 @@ extern void start_waiting_jobs PARAMS ((target_stack_node_t *p_call_stack));
 
    FILE is the target whose commands these are.  It is used for
    variable expansion for $(SHELL) and $(IFS).  */
-extern char **construct_command_argv PARAMS ((char *line, char **restp, 
-					      file_t *file, 
-					      char** batch_file));
+extern char **construct_command_argv (char *line, char **restp, file_t *file, 
+				      char** batch_file);
 
 /*! Start a child process. This function returns the new pid.  */
-#if defined(__EMX__)
-extern int child_execute_job PARAMS ((int stdin_fd, int stdout_fd, char **argv, char **envp));
-#else
-extern void child_execute_job PARAMS ((int stdin_fd, int stdout_fd, char **argv, char **envp));
-#endif
+extern void child_execute_job (int stdin_fd, int stdout_fd, char **argv, char **envp);
 
 /*! Replace the current process with one running the command in ARGV,
    with environment ENVP.  This function does not return.  */
-#ifdef _AMIGA
-extern void exec_command PARAMS ((char **argv));
-#elif defined(__EMX__)
-extern int exec_command PARAMS ((char **argv, char **envp));
-#else
-extern void exec_command PARAMS ((char **argv, char **envp));
-#endif
+extern void exec_command (char **argv, char **envp);
 
 extern unsigned int job_slots_used;
 
 /*! block getting any maskable signals.  */
-extern void block_sigs PARAMS ((void));
+extern void block_sigs (void);
 
 #ifdef POSIX
 /*! Remove blocks on signals.  */
-extern void unblock_sigs PARAMS ((void));
+extern void unblock_sigs (void);
 #else
 #ifdef	HAVE_SIGSETMASK
 extern int fatal_signal_mask;

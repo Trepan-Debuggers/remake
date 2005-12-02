@@ -1,4 +1,4 @@
-/* $Id: dbg_fns.h,v 1.3 2005/11/29 14:39:49 rockyb Exp $
+/* $Id: dbg_fns.h,v 1.4 2005/12/02 12:12:09 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -50,11 +50,18 @@ extern bool get_uint(const char *psz_arg, /*out*/ unsigned int *pi_result);
  */
 extern char *get_word(char **ppsz_str);
 
+/*! Find the target in first word of psz_args or use $@ (the current
+    stack) if none.  We also allow $@ or @ explicitly as a target name
+    to mean the current target on the stack. NULL is returned if a lookup 
+    of the target name was not found. ppsz_target is to the name
+    looked up.
+ */
+file_t *get_target(/*in/out*/ char **ppsz_args, /*out*/ char **ppsz_target);
+
 /*! Return true if psz_substr is an initial prefix (abbreviation) of
     psz_word. The empty string is not a valid abbreviation. */
-extern bool is_abbrev_of(const char* psz_substr, 
-			 const char* psz_word, unsigned int i_min);
-
+extern bool is_abbrev_of(const char *psz_substr, 
+			 const char *psz_word, unsigned int i_min);
 /*! toggle var on or on or off depending on psz_onoff */    
 extern void on_off_toggle(const char *psz_onoff, int *var) ;
 

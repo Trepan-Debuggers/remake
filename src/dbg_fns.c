@@ -1,4 +1,4 @@
-/* $Id: dbg_fns.c,v 1.4 2005/11/29 14:39:49 rockyb Exp $
+/* $Id: dbg_fns.c,v 1.5 2005/12/02 12:12:09 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -21,6 +21,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "config.h"
 #include "dbg_fns.h"
+#include "dbg_stack.h"
 #include "debug.h"
 #include "print.h"
 #include "trace.h"
@@ -107,6 +108,47 @@ get_word(char **ppsz_str)
   if (**ppsz_str) *((*ppsz_str)++) = '\0';
 
   return psz_word;
+}
+
+/*! Find the target in first word of psz_args or use $@ (the current
+    stack) if none.  We also allow $@ or @ explicitly as a target name
+    to mean the current target on the stack. NULL is returned if a lookup 
+    of the target name was not found. ppsz_target is to the name
+    looked up.
+ */
+file_t *
+get_target(char **ppsz_args, /*out*/ char **ppsz_target) 
+{
+  if (!*ppsz_args || !**ppsz_args) {
+    /* Use current target */
+    if (p_stack && p_stack->p_target && p_stack->p_target->name) {
+      *ppsz_args = p_stack->p_target->name;
+    } else {
+      printf(_("Default target not found here. You must supply one\n"));
+      return NULL;
+    }
+  }
+
+  *ppsz_target = get_word(ppsz_args);
+  
+  /* As a special case, we'll allow $@ or @ for the current target. */
+  if ( 0 == strcmp("$@", *ppsz_target) || 0 == strcmp("@", *ppsz_target) ) {
+    if (p_stack && p_stack->p_target && p_stack->p_target->name)
+      *ppsz_target = p_stack->p_target->name;
+    else {
+      printf(_("No current target found for $@ - supply a target name.\n"));
+      return NULL;
+    }
+  }
+  
+  {
+    file_t *p_target = lookup_file (*ppsz_target);
+
+    if (!p_target) 
+      printf(_("Target \"%s\" doesn't appear to be a target name.\n"), 
+	     *ppsz_target);
+    return p_target;
+  }
 }
 
 /*! Return true if psz_substr is an initial prefix (abbreviation) of

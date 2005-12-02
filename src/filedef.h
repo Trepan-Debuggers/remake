@@ -111,12 +111,12 @@ extern struct file *default_goal_file, *suffix_file, *default_file;
 
 extern file_t *lookup_file (char *name);
 extern file_t *enter_file  (char *name, const floc_t *floc);
-extern void remove_intermediates PARAMS ((int sig));
-extern void rename_file PARAMS ((struct file *file, char *name));
-extern void rehash_file PARAMS ((struct file *file, char *name));
-extern void set_command_state PARAMS ((struct file *file, enum cmd_state state));
-extern void init_hash_files PARAMS ((void));
-extern char *build_target_list PARAMS ((char *old_list));
+extern void remove_intermediates (int sig);
+extern void rename_file (file_t *file, char *name);
+extern void rehash_file (file_t *file, char *name);
+extern void set_command_state (file_t *file, enum cmd_state state);
+extern void init_hash_files (void);
+extern char *build_target_list (char *old_list);
 
 /*! Thing of the below as a bit mask rather than an enumeration and
     use print_target_mask;
@@ -136,7 +136,7 @@ typedef enum
   PRINT_TARGET_PREV      = 0x100,
   PRINT_TARGET_CMDS_EXP  = 0x200,
   PRINT_TARGET_DEPEND    = (PRINT_TARGET_ORDER|PRINT_TARGET_NONORDER),
-  PRINT_TARGET_ALL       = (0x0FF & ~ PRINT_TARGET_CMDS_EXP)
+  PRINT_TARGET_ALL       = 0x0FF,
 } print_target_mask_t;
 
 /* The below variable is to make sure the enumerations are accessible
@@ -188,15 +188,16 @@ extern void  print_target_props (file_t *p_target, print_target_mask_t i_mask);
     * 302 / 1000) \
    + 1 + 1 + 4 + 25)
 
-extern FILE_TIMESTAMP file_timestamp_cons PARAMS ((char const *,
-						   time_t, int));
-extern FILE_TIMESTAMP file_timestamp_now PARAMS ((int *));
-extern void file_timestamp_sprintf PARAMS ((char *p, FILE_TIMESTAMP ts));
+extern FILE_TIMESTAMP file_timestamp_cons (char const *,
+						   time_t, int);
+extern FILE_TIMESTAMP file_timestamp_now (int *);
 
-/* Return the mtime of file F (a struct file *), caching it.
+extern void file_timestamp_sprintf (char *p, FILE_TIMESTAMP ts);
+
+/* Return the mtime of file F (a file_t *), caching it.
    The value is NONEXISTENT_MTIME if the file does not exist.  */
 #define file_mtime(f) file_mtime_1 ((f), 1)
-/* Return the mtime of file F (a struct file *), caching it.
+/* Return the mtime of file F (a file_t *), caching it.
    Don't search using vpath for the file--if it doesn't actually exist,
    we don't find it.
    The value is NONEXISTENT_MTIME if the file does not exist.  */
