@@ -547,7 +547,7 @@ print_rule (struct rule *r)
   putchar ('\n');
 
   if (r->cmds != 0)
-    print_commands (r->cmds);
+    print_commands (NULL, r->cmds, false);
 }
 
 void

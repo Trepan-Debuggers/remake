@@ -26,21 +26,21 @@ Boston, MA 02111-1307, USA.  */
 #include "trace.h"
 #include "job.h"
 
-struct commands
+/*! Command structure */
+typedef struct commands
   {
-    struct floc fileinfo;	/* Where commands were defined.  */
-    char *commands;		/* Commands text.  */
-    unsigned int ncommand_lines;/* Number of command lines.  */
-    char **command_lines;	/* Commands chopped up into lines.  */
-    unsigned int *line_no;	/* line number offsets of chopped commands.  */
-    char *lines_flags;		/* One set of flag bits for each line.  */
-    int any_recurse;		/* Nonzero if any `lines_recurse' elt has */
-				/* the COMMANDS_RECURSE bit set.  */
-};
+    floc_t fileinfo;	        /**< Where commands were defined.  */
+    char *commands;		/**< Commands text.  */
+    unsigned int ncommand_lines;/**< Number of command lines.  */
+    char **command_lines;	/**< Commands chopped up into lines.  */
+    unsigned int *line_no;	/**< line number offsets of chopped
+				     commands.  */
+    char *lines_flags;		/**< One set of flag bits for each line.  */
+    int any_recurse;		/**< Nonzero if any `lines_recurse' elt has */
+				/**< the COMMANDS_RECURSE bit set.  */
+} commands_t;
 
-typedef struct commands commands_t;
-
-/* Bits in `lines_flags'.  */
+/** Bits in `lines_flags'.  */
 #define	COMMANDS_RECURSE	1 /* Recurses: + or $(MAKE).  */
 #define	COMMANDS_SILENT		2 /* Silent: @.  */
 #define	COMMANDS_NOERROR	4 /* No errors: -.  */
@@ -50,23 +50,29 @@ typedef struct commands commands_t;
    Otherwise, fork off a child process to run the first command line
    in the sequence.  
 */
-extern void execute_file_commands PARAMS ((file_t *file, 
-					   target_stack_node_t *p_call_stack));
-/*! Print out the commands in CMDS.  */
-extern void print_commands PARAMS ((commands_t *cmds));
+extern void execute_file_commands (file_t *p_file, 
+				   target_stack_node_t *p_call_stack);
+
+/*! 
+  Print out the commands in p_CMDS. If b_expand is true expand the
+  commands to remove MAKE variables. p_target is used to set automatic
+  variables if it is non-null
+*/
+extern void print_commands (file_t *p_target, commands_t *p_cmds, 
+			    bool b_expand);
 
 /*! Delete all non-precious targets of CHILD unless they were already
    deleted.  Set the flag in CHILD to say they've been deleted.  
 */
-extern void delete_child_targets PARAMS ((child_t *child));
+extern void delete_child_targets (child_t *p_child);
 
 /*! Chop CMDS up into individual command lines if necessary.  Also set
    the `lines_flags' and `any_recurse' members.
 */
-extern void chop_commands PARAMS ((commands_t *cmds));
+extern void chop_commands (commands_t *p_cmds);
 
 /*! Set FILE's automatic variables up.  */
-extern void set_file_variables PARAMS((file_t *file));
+extern void set_file_variables(file_t *file);
 
 
 #endif /*COMMANDS_H*/

@@ -1,6 +1,7 @@
-/* Directory hashing for GNU Make.
+/* $Id: dir.c,v 1.9 2005/12/02 04:47:18 rockyb Exp $
+Directory hashing for GNU Make.
 Copyright (C) 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-2002, 2003, 2004 Free Software Foundation, Inc.
+2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -797,14 +798,6 @@ file_impossible (char *filename)
   struct directory *dir;
   struct dirfile *new;
 
-#ifdef VMS
-  dirend = strrchr (p, ']');
-  if (dirend == 0)
-    dirend = strrchr (p, ':');
-  dirend++;
-  if (dirend == (char *)1)
-    dir = find_directory ("[]");
-#else
   dirend = strrchr (p, '/');
 # ifdef HAVE_DOS_PATHS
   /* Forward and backslashes might be mixed.  We need the rightmost one.  */
@@ -820,10 +813,9 @@ file_impossible (char *filename)
   if (dirend == 0)
 # ifdef _AMIGA
     dir = find_directory ("");
-# else /* !VMS && !AMIGA */
+# else /* !AMIGA */
     dir = find_directory (".");
 # endif /* AMIGA */
-#endif /* VMS */
   else
     {
       char *dirname;

@@ -1,4 +1,4 @@
-/* $Id: commands.c,v 1.10 2005/12/01 08:30:34 rockyb Exp $
+/* $Id: commands.c,v 1.11 2005/12/02 04:47:18 rockyb Exp $
 Command processing for GNU Make.
 Copyright (C) 1988,89,91,92,93,94,95,96,97, 2004, 2005
 Free Software Foundation, Inc.
@@ -19,12 +19,14 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#include "config.h"
+#include "ar_fns.h"
+#include "commands.h"
+#include "expand.h"
 #include "print.h"
 #include "remake.h"
 #include "variable.h"
 #include "trace.h"
-#include "commands.h"
-#include "ar_fns.h"
 
 /* alloca is in stdlib.h or alloca.h */
 #ifdef HAVE_STDLIB_H
@@ -46,7 +48,7 @@ extern int getpid ();
 /* Set FILE's automatic variables up.  */
 
 void
-set_file_variables (file_t *file)
+set_file_variables (file_t *p_file)
 {
   char *at, *percent, *star, *less;
 
@@ -54,15 +56,15 @@ set_file_variables (file_t *file)
   /* If the target is an archive member `lib(member)',
      then $@ is `lib' and $% is `member'.  */
 
-  if (ar_name (file->name))
+  if (ar_name (p_file->name))
     {
       unsigned int len;
       char *p;
 
-      p = strchr (file->name, '(');
-      at = (char *) alloca (p - file->name + 1);
-      memmove (at, file->name, p - file->name);
-      at[p - file->name] = '\0';
+      p = strchr (p_file->name, '(');
+      at = (char *) alloca (p - p_file->name + 1);
+      memmove (at, p_file->name, p - p_file->name);
+      at[p - p_file->name] = '\0';
       len = strlen (p + 1);
       percent = (char *) alloca (len);
       memmove (percent, p + 1, len - 1);
@@ -71,12 +73,12 @@ set_file_variables (file_t *file)
   else
 #endif	/* NO_ARCHIVES.  */
     {
-      at = file->name;
+      at = p_file->name;
       percent = "";
     }
 
   /* $* is the stem from an implicit or static pattern rule.  */
-  if (file->stem == 0)
+  if (p_file->stem == 0)
     {
       /* In Unix make, $* is set to the target name with
 	 any suffix in the .SUFFIXES list stripped off for
@@ -86,15 +88,15 @@ set_file_variables (file_t *file)
       unsigned int len;
 
 #ifndef	NO_ARCHIVES
-      if (ar_name (file->name))
+      if (ar_name (p_file->name))
 	{
-	  name = strchr (file->name, '(') + 1;
+	  name = strchr (p_file->name, '(') + 1;
 	  len = strlen (name) - 1;
 	}
       else
 #endif
 	{
-	  name = file->name;
+	  name = p_file->name;
 	  len = strlen (name);
 	}
 
@@ -103,25 +105,25 @@ set_file_variables (file_t *file)
 	  unsigned int slen = strlen (dep_name (d));
 	  if (len > slen && strneq (dep_name (d), name + (len - slen), slen))
 	    {
-	      file->stem = savestring (name, len - slen);
+	      p_file->stem = savestring (name, len - slen);
 	      break;
 	    }
 	}
       if (d == 0)
-	file->stem = "";
+	p_file->stem = "";
     }
-  star = file->stem;
+  star = p_file->stem;
 
   /* $< is the first dependency.  */
-  less = file->deps != 0 ? dep_name (file->deps) : "";
+  less = p_file->deps != 0 ? dep_name (p_file->deps) : "";
 
-  if (file->cmds == default_file->cmds)
+  if (p_file->cmds == default_file->cmds)
     /* This file got its commands from .DEFAULT.
        In this case $< is the same as $@.  */
     less = at;
 
 #define	DEFINE_VARIABLE(name, len, value) \
-  (void) define_variable_for_file (name,len,value,o_automatic,0,file)
+  (void) define_variable_for_file (name,len,value,o_automatic,0,p_file)
 
   /* Define the variables.  */
 
@@ -147,7 +149,7 @@ set_file_variables (file_t *file)
        duplicate dependencies as they were listed in the makefile.  */
 
     plus_len = 0;
-    for (d = file->deps; d != 0; d = d->next)
+    for (d = p_file->deps; d != 0; d = d->next)
       if (! d->ignore_mtime)
 	plus_len += strlen (dep_name (d)) + 1;
     if (plus_len == 0)
@@ -156,7 +158,7 @@ set_file_variables (file_t *file)
     cp = plus_value = (char *) alloca (plus_len);
 
     qmark_len = plus_len + 1;	/* Will be this or less.  */
-    for (d = file->deps; d != 0; d = d->next)
+    for (d = p_file->deps; d != 0; d = d->next)
       if (! d->ignore_mtime)
         {
           char *c = dep_name (d);
@@ -187,10 +189,10 @@ set_file_variables (file_t *file)
        really matter for the purpose of updating targets, but it
        might make some names be listed twice for $^ and $?.  */
 
-    uniquize_deps (file->deps);
+    uniquize_deps (p_file->deps);
 
     bar_len = 0;
-    for (d = file->deps; d != 0; d = d->next)
+    for (d = p_file->deps; d != 0; d = d->next)
       if (d->ignore_mtime)
 	bar_len += strlen (dep_name (d)) + 1;
     if (bar_len == 0)
@@ -202,7 +204,7 @@ set_file_variables (file_t *file)
     qp = qmark_value = (char *) alloca (qmark_len);
     bp = bar_value = (char *) alloca (bar_len);
 
-    for (d = file->deps; d != 0; d = d->next)
+    for (d = p_file->deps; d != 0; d = d->next)
       {
 	char *c = dep_name (d);
 
@@ -539,39 +541,54 @@ delete_target (struct file *file, char *on_behalf_of)
    deleted.  Set the flag in CHILD to say they've been deleted.  
 */
 void
-delete_child_targets (child_t *child)
+delete_child_targets (child_t *p_child)
 {
-  dep_t *d;
+  dep_t *p_dep;
 
-  if (child->deleted)
+  if (p_child->deleted)
     return;
 
   /* Delete the target file if it changed.  */
-  delete_target (child->file, (char *) 0);
+  delete_target (p_child->file, (char *) 0);
 
   /* Also remove any non-precious targets listed in the `also_make' member.  */
-  for (d = child->file->also_make; d != 0; d = d->next)
-    delete_target (d->file, child->file->name);
+  for (p_dep = p_child->file->also_make; p_dep != 0; p_dep = p_dep->next)
+    delete_target (p_dep->file, p_child->file->name);
 
-  child->deleted = 1;
+  p_child->deleted = 1;
 }
 
-/*! Print out the commands in CMDS.
+
+/*! 
+  Print out the commands in p_CMDS. If b_expand is true expand the
+  commands to remove MAKE variables. p_target is used to set automatic
+  variables if it is non-null
 */
 void
-print_commands (commands_t *cmds)
+print_commands (file_t *p_target, commands_t *p_cmds, bool b_expand)
 {
   char *s;
 
   fputs (_("#  commands to execute"), stdout);
 
-  if (cmds->fileinfo.filenm == 0)
+  if (p_cmds->fileinfo.filenm == 0)
     puts (_(" (built-in):"));
   else
     printf (_(" (from `%s', line %lu):\n"),
-            cmds->fileinfo.filenm, cmds->fileinfo.lineno);
+            p_cmds->fileinfo.filenm, p_cmds->fileinfo.lineno);
 
-  s = cmds->commands;
+  if (b_expand && p_target) {
+    variable_set_list_t *p_file_vars = NULL;
+    variable_set_t *p_set = NULL;
+    initialize_file_variables (p_target, 0);
+    set_file_variables (p_target);
+    p_file_vars = p_target->variables;
+    p_set = p_file_vars->set;
+    s = variable_expand_set(p_cmds->commands, p_file_vars);
+  } else {
+    s = p_cmds->commands;
+  }
+
   while (*s != '\0')
     {
       char *end;

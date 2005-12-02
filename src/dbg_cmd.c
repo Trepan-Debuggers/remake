@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.51 2005/12/01 07:14:12 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.52 2005/12/02 04:47:18 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -886,6 +886,8 @@ static debug_return_t dbg_cmd_target (char *psz_args)
 	i_mask |= PRINT_TARGET_VARS;
       } else if (is_abbrev_of(psz_word, "commands", 1)) {
 	i_mask |= PRINT_TARGET_CMDS;
+      } else if (is_abbrev_of(psz_word, "expand", 1)) {
+	i_mask |= (PRINT_TARGET_CMDS|PRINT_TARGET_CMDS_EXP);
       } else if (is_abbrev_of(psz_word, "previous", 1)) {
 	i_mask |= PRINT_TARGET_PREV;
       } else {
@@ -1199,8 +1201,7 @@ static int dbg_cmd_show_var (char *psz_varname, int expand)
   return 1;
 }
 
-/* Show a variable definition;'t expand any variable references
-   in the displayed value. */
+/* Show a string with variable references expanded. */
 static debug_return_t dbg_cmd_expand (char *psz_string) 
 {
   static char *psz_last_string = NULL;
