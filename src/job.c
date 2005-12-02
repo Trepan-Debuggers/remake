@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.16 2005/11/29 14:39:49 rockyb Exp $
+/* $Id: job.c,v 1.17 2005/12/02 11:24:42 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005
 Free Software Foundation, Inc.
@@ -34,10 +34,6 @@ Boston, MA 02111-1307, USA.  */
 
 #ifdef HAVE_STRING_H
 #include <string.h>
-#endif
-
-#ifdef HAVE_STRSIGNAL
-extern char *strsignal (int __sig);
 #endif
 
 /* alloca is in stdlib.h or alloca.h */
