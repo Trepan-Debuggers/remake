@@ -1,3 +1,8 @@
+Change from 3.78 to 3.90 + dbg 
+
+    Revise a little to follow more modern Perl conventions and to 
+    simplify.
+
 Changes from 0.4.9 to 3.78 (Sep 6, 1999):
 
     Lots of new tests.  Renamed to follow the GNU make scheme.  Also

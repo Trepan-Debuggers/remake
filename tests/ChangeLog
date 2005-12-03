@@ -1,3 +1,7 @@
+Changes more recent than the below are now in the ChangeLog in top-level
+directory.
+	
+	
 2002-09-23  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/features/escape: Test handling of escaped comment
