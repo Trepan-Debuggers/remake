@@ -1,4 +1,4 @@
-/* $Id: read.c,v 1.17 2005/12/03 01:27:45 rockyb Exp $
+/* $Id: read.c,v 1.18 2005/12/03 12:49:42 rockyb Exp $
 Reading and parsing of makefiles for GNU Make.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
@@ -141,14 +141,14 @@ static long readline (ebuffer_t *ebuf);
 static void do_define (char *name, unsigned int namelen,
 		       variable_origin_t origin, ebuffer_t *ebuf);
 static int conditional_line (char *line, const floc_t *flocp);
-static void record_files (struct nameseq *filenames, char *pattern, 
+static void record_files (nameseq_t *filenames, char *pattern, 
 			  char *pattern_percent,
 			  dep_t *deps, unsigned int cmds_started, 
 			  char *commands,
 			  unsigned int commands_idx, int two_colon,
 			  int have_sysv_atvar,
 			  const floc_t *flocp, int set_default);
-static void record_target_var (struct nameseq *filenames, char *defn,
+static void record_target_var (nameseq_t *filenames, char *defn,
                                        variable_origin_t origin,
                                        bool b_exported,
                                        const floc_t *flocp);
@@ -252,7 +252,7 @@ read_all_makefiles (char **makefiles)
 	    tail = tail->next;
 	  for (p = default_makefiles; *p != 0; ++p)
 	    {
-	      dep_t *d = (dep_t *) calloc (1, sizeof (dep_t));
+	      dep_t *d = CALLOC(dep_t, 1);
 	      d->name = 0;
 	      d->file = enter_file (*p, NILF);
 	      d->file->dontcare = 1;
@@ -487,7 +487,7 @@ eval (ebuffer_t *ebuf, int set_default)
   int ignoring = 0, in_ignored_define = 0;
   int no_targets = 0;		/* Set when reading a rule without targets.  */
   int have_sysv_atvar = 0;
-  struct nameseq *filenames = 0;
+  nameseq_t *filenames = 0;
   dep_t *deps = 0;
   long nlines = 0;
   int two_colon = 0;
@@ -823,7 +823,7 @@ eval (ebuffer_t *ebuf, int set_default)
 	     makefile to be read at this point.  */
 	  struct conditionals *save;
           struct conditionals new_conditionals;
-	  struct nameseq *files;
+	  nameseq_t *files;
 	  /* "-include" (vs "include") says no error if the file does not
 	     exist.  "sinclude" is an alias for this from SGI.  */
 	  int noerror = (p[0] != 'i');
@@ -837,9 +837,9 @@ eval (ebuffer_t *ebuf, int set_default)
 	  /* Parse the list of file names.  */
 	  p2 = p;
 	  files = multi_glob (parse_file_seq (&p2, '\0',
-					      sizeof (struct nameseq),
+					      sizeof (nameseq_t),
 					      1, fstart),
-			      sizeof (struct nameseq));
+			      sizeof (nameseq_t));
 	  free (p);
 
 	  /* Save the state of conditionals and start
@@ -853,7 +853,7 @@ eval (ebuffer_t *ebuf, int set_default)
 	  /* Read each included makefile.  */
 	  while (files != 0)
 	    {
-	      struct nameseq *next = files->next;
+	      nameseq_t *next = files->next;
 	      char *name = files->name;
               int r;
 
@@ -1047,9 +1047,9 @@ eval (ebuffer_t *ebuf, int set_default)
            looking for targets.  */
         *colonp = '\0';
         filenames = multi_glob (parse_file_seq (&p2, '\0',
-                                                sizeof (struct nameseq),
+                                                sizeof (nameseq_t),
                                                 1, fstart),
-                                sizeof (struct nameseq));
+                                sizeof (nameseq_t));
         *p2 = ':';
 
         if (!filenames)
@@ -1205,9 +1205,9 @@ eval (ebuffer_t *ebuf, int set_default)
 #endif
         if (p != 0)
           {
-            struct nameseq *target;
+            nameseq_t *target;
             target = parse_file_seq (&p2, ':', 
-				     sizeof (struct nameseq), 1, fstart);
+				     sizeof (nameseq_t), 1, fstart);
             ++p2;
             if (target == 0) {
               fatal (fstart, _("missing target pattern"));
@@ -1638,11 +1638,11 @@ conditional_line (char *line, const floc_t *flocp)
    variable value list.  */
 
 static void
-record_target_var (struct nameseq *filenames, char *defn,
+record_target_var (nameseq_t *filenames, char *defn,
                    variable_origin_t origin, bool b_exported,
                    const floc_t *flocp)
 {
-  struct nameseq *nextf;
+  nameseq_t *nextf;
   variable_set_list_t *global;
 
   global = current_variable_set_list;
@@ -1742,12 +1742,12 @@ record_target_var (struct nameseq *filenames, char *defn,
    that are not incorporated into other data structures.  */
 
 static void
-record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
+record_files (nameseq_t *filenames, char *pattern, char *pattern_percent,
               dep_t *deps, unsigned int cmds_started, char *commands,
               unsigned int commands_idx, int two_colon,
               int have_sysv_atvar, const floc_t *flocp, int set_default)
 {
-  struct nameseq *nextf;
+  nameseq_t *nextf;
   int implicit = 0;
   unsigned int max_targets = 0, target_idx = 0;
   char **targets = 0, **target_percents = 0;
@@ -2211,7 +2211,7 @@ find_percent (char *pattern)
 }
 
 /*! Parse a string into a sequence of filenames represented as a chain
-   of struct nameseq's in reverse order and return that chain.
+   of nameseq_t's in reverse order and return that chain.
 
    The string is passed as STRINGP, the address of a string pointer.
    The string pointer is updated to point at the first character
@@ -2223,12 +2223,12 @@ find_percent (char *pattern)
 
    If STRIP is nonzero, strip `./'s off the beginning.  */
 
-struct nameseq *
+nameseq_t *
 parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip,
 		floc_t *floc)
 {
-  struct nameseq *new = 0;
-  struct nameseq *new1, *lastnew1;
+  nameseq_t *new = 0;
+  nameseq_t *new1, *lastnew1;
   char *p = *stringp;
   char *q;
   char *name;
@@ -2261,13 +2261,8 @@ parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip,
 	p = q + strlen (q);
 
       if (strip)
-#ifdef VMS
-	/* Skip leading `[]'s.  */
-	while (p - q > 2 && q[0] == '[' && q[1] == ']')
-#else
 	/* Skip leading `./'s.  */
 	while (p - q > 2 && q[0] == '.' && q[1] == '/')
-#endif
 	  {
 	    q += 2;		/* Skip "./".  */
 	    while (q < p && *q == '/')
@@ -2284,7 +2279,7 @@ parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip,
 	name = savestring (q, p - q);
 
       /* Add it to the front of the chain.  */
-      new1 = (struct nameseq *) xmalloc (size);
+      new1 = (nameseq_t *) xmalloc (size);
       new1->name = name;
       new1->next = new;
       new = new1;
@@ -2307,7 +2302,7 @@ parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip,
 	/* NEW1 ends with a `)' but does not contain a `('.
 	   Look back for an elt with an opening `(' but no closing `)'.  */
 
-	struct nameseq *n = new1->next, *lastn = new1;
+	nameseq_t *n = new1->next, *lastn = new1;
 	char *paren = 0;
 	while (n != 0 && (paren = strchr (n->name, '(')) == 0)
 	  {
@@ -2910,7 +2905,7 @@ tilde_expand (char *name)
 }
 #endif /*HAVE_TILDE_EXPAND*/
 
-/* Given a chain of struct nameseq's describing a sequence of filenames,
+/* Given a chain of nameseq_t's describing a sequence of filenames,
    in reverse of the intended order, return a new chain describing the
    result of globbing the filenames.  The new chain is in forward order.
    The links of the old chain are freed or used in the new chain.
@@ -2920,13 +2915,13 @@ tilde_expand (char *name)
    This is useful if we want them actually to be other structures
    that have room for additional info.  */
 
-struct nameseq *
-multi_glob (struct nameseq *chain, unsigned int size)
+nameseq_t *
+multi_glob (nameseq_t *chain, unsigned int size)
 {
   extern void dir_setup_glob ();
-  struct nameseq *new = 0;
-  struct nameseq *old;
-  struct nameseq *nexto;
+  nameseq_t *new = NULL;
+  nameseq_t *old;
+  nameseq_t *nexto;
   glob_t gl;
 
   dir_setup_glob (&gl);
@@ -2977,18 +2972,18 @@ multi_glob (struct nameseq *chain, unsigned int size)
 		if (memname != 0)
 		  {
 		    /* Try to glob on MEMNAME within the archive.  */
-		    struct nameseq *found
+		    nameseq_t *found
 		      = ar_glob (gl.gl_pathv[i], memname, size);
 		    if (found == 0)
 		      {
 			/* No matches.  Use MEMNAME as-is.  */
 			unsigned int alen = strlen (gl.gl_pathv[i]);
 			unsigned int mlen = strlen (memname);
-			struct nameseq *elt
-			  = (struct nameseq *) xmalloc (size);
-                        if (size > sizeof (struct nameseq))
-                          memset (((char *) elt) + sizeof (struct nameseq),
-				  0, size - sizeof (struct nameseq));
+			nameseq_t *elt
+			  = (nameseq_t *) xmalloc (size);
+                        if (size > sizeof (nameseq_t))
+                          memset (((char *) elt) + sizeof (nameseq_t),
+				  0, size - sizeof (nameseq_t));
 			elt->name = (char *) xmalloc (alen + 1 + mlen + 2);
 			memmove (elt->name, gl.gl_pathv[i], alen);
 			elt->name[alen] = '(';
@@ -3001,7 +2996,7 @@ multi_glob (struct nameseq *chain, unsigned int size)
 		    else
 		      {
 			/* Find the end of the FOUND chain.  */
-			struct nameseq *f = found;
+			nameseq_t *f = found;
 			while (f->next != 0)
 			  f = f->next;
 
@@ -3016,10 +3011,10 @@ multi_glob (struct nameseq *chain, unsigned int size)
 		else
 #endif /* !NO_ARCHIVES */
 		  {
-		    struct nameseq *elt = (struct nameseq *) xmalloc (size);
-                    if (size > sizeof (struct nameseq))
-                      memset (((char *) elt) + sizeof (struct nameseq),
-			      0, size - sizeof (struct nameseq));
+		    nameseq_t *elt = (nameseq_t *) xmalloc (size);
+                    if (size > sizeof (nameseq_t))
+                      memset (((char *) elt) + sizeof (nameseq_t),
+			      0, size - sizeof (nameseq_t));
 		    elt->name = xstrdup (gl.gl_pathv[i]);
 		    elt->next = new;
 		    new = elt;

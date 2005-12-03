@@ -1,4 +1,4 @@
-/* $Id: function.c,v 1.12 2005/12/01 08:30:34 rockyb Exp $
+/* $Id: function.c,v 1.13 2005/12/03 12:49:42 rockyb Exp $
 Builtin expansion for GNU Make.
 Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004, 2005
 Free Software Foundation, Inc.
@@ -462,7 +462,7 @@ static char *
 func_origin (char *o, char **argv, const char *funcname UNUSED)
 {
   /* Expand the argument.  */
-  struct variable *v = lookup_variable (argv[0], strlen (argv[0]));
+  variable_t *v = lookup_variable (argv[0], strlen (argv[0]));
   if (v == 0)
     VARIABLE_BUFFER_OUTPUT (o, "undefined");
   else
@@ -815,7 +815,7 @@ func_foreach (char *o, char **argv, const char *funcname UNUSED)
   char *list_iterator = list;
   char *p;
   unsigned int len;
-  struct variable *var;
+  variable_t *var;
 
   push_new_variable_scope ();
   var = define_variable (varname, strlen (varname), "", o_automatic, 0);
@@ -846,7 +846,7 @@ func_foreach (char *o, char **argv, const char *funcname UNUSED)
     /* Kill the last space.  */
     --o;
 
-  pop_variable_scope ();
+  pop_variable_scope (false);
   free (varname);
   free (list);
 
@@ -1239,7 +1239,7 @@ static char *
 func_value (char *o, char **argv, const char *funcname UNUSED)
 {
   /* Look up the variable.  */
-  struct variable *v = lookup_variable (argv[0], strlen (argv[0]));
+  variable_t *v = lookup_variable (argv[0], strlen (argv[0]));
 
   /* Copy its value into the output buffer without expanding it.  */
   if (v)
@@ -1375,7 +1375,7 @@ msdos_openpipe (int* pipedes, int *pidp, char *text)
 {
   FILE *fpipe=0;
   /* MSDOS can't fork, but it has `popen'.  */
-  struct variable *sh = lookup_variable ("SHELL", 5);
+  variable_t *sh = lookup_variable ("SHELL", 5);
   int e;
   extern int dos_command_running, dos_status;
 
@@ -1940,7 +1940,7 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
   int i;
   int saved_args;
   const struct function_table_entry *entry_p;
-  struct variable *v;
+  variable_t *v;
 
   /* There is no way to define a variable with a space in the name, so strip
      leading and trailing whitespace as a favor to the user.  */
@@ -2061,7 +2061,7 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
 
   v->exp_count = 0;
 
-  pop_variable_scope ();
+  pop_variable_scope (false);
 
   i_trace_level--;
   DBSD (DB_CALLTRACE, (_("%s() returns \"%s\"\n"), fname, o), i_trace_level);

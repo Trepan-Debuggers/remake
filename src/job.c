@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.18 2005/12/02 12:12:09 rockyb Exp $
+/* $Id: job.c,v 1.19 2005/12/03 12:49:42 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005
 Free Software Foundation, Inc.
@@ -1302,7 +1302,7 @@ new_job (file_t *file, target_stack_node_t *p_call_stack)
   chop_commands (cmds);
 
   /* Expand the command lines and store the results in LINES.  */
-  lines = (char **) calloc (cmds->ncommand_lines, sizeof (char *));
+  lines = CALLOC (char *, cmds->ncommand_lines);
   for (i = 0; i < cmds->ncommand_lines; ++i)
     {
       /* Collapse backslash-newline combinations that are inside variable
@@ -1406,7 +1406,7 @@ new_job (file_t *file, target_stack_node_t *p_call_stack)
   /* Start the command sequence, record it in a new
      `struct child', and add that to the chain.  */
 
-  c                = (child_t *) calloc (1, sizeof (child_t));
+  c                = CALLOC (child_t, 1);
   c->fileinfo      = cmds->fileinfo;
   c->line_no       = cmds->line_no;
   c->file          = file;   /* FIXME?: Could remove as it is in fileinfo */
@@ -1491,10 +1491,6 @@ new_job (file_t *file, target_stack_node_t *p_call_stack)
 	set_child_handler_action_flags (0);
 	got_token = read (job_rfd, &token, 1);
 	saved_errno = errno;
-#ifdef __EMX__
-        /* The child handler must be turned off here.  */
-        signal (SIGCHLD, SIG_DFL);
-#endif
 	set_child_handler_action_flags (SA_RESTART);
 
         /* If we got one, we're done here.  */
@@ -1831,32 +1827,12 @@ exec_command (char **argv, char **envp)
 
 #else  /* !WINDOWS32 */
 
-# ifdef __EMX__
-  int pid;
-# endif
-
   /* Be the user, permanently.  */
   child_access ();
-
-# ifdef __EMX__
-
-  /* Run the program.  */
-  pid = spawnvpe (P_NOWAIT, argv[0], argv, envp);
-
-  if (pid >= 0)
-    return pid;
-
-  /* the file might have a strange shell extension */
-  if (errno == ENOENT)
-    errno = ENOEXEC;
-
-# else
 
   /* Run the program.  */
   environ = envp;
   execvp (argv[0], argv);
-
-# endif /* !__EMX__ */
 
   switch (errno)
     {
@@ -1872,16 +1848,7 @@ exec_command (char **argv, char **envp)
 	int argc;
         int i=1;
 
-# ifdef __EMX__
-        /* Do not use $SHELL from the environment */
-	struct variable *p = lookup_variable ("SHELL", 5);
-	if (p)
-	  shell = p->value;
-        else
-          shell = 0;
-# else
 	shell = getenv ("SHELL");
-# endif
 	if (shell == 0)
 	  shell = default_shell;
 
@@ -1889,23 +1856,8 @@ exec_command (char **argv, char **envp)
 	while (argv[argc] != 0)
 	  ++argc;
 
-# ifdef __EMX__
-        if (!unixy_shell)
-          ++argc;
-# endif
-
 	new_argv = (char **) alloca ((1 + argc + 1) * sizeof (char *));
 	new_argv[0] = shell;
-
-# ifdef __EMX__
-        if (!unixy_shell)
-          {
-            new_argv[1] = "/c";
-            ++i;
-            --argc;
-          }
-# endif
-
         new_argv[i] = argv[0];
 	while (argc > 0)
 	  {
@@ -1913,13 +1865,7 @@ exec_command (char **argv, char **envp)
 	    --argc;
 	  }
 
-# ifdef __EMX__
-	pid = spawnvpe (P_NOWAIT, shell, new_argv, envp);
-	if (pid >= 0)
-          break;
-# else
 	execvp (shell, new_argv);
-# endif
 	if (errno == ENOENT)
 	  error (NILF, _("%s: Shell program not found"), shell);
 	else
@@ -1927,23 +1873,12 @@ exec_command (char **argv, char **envp)
 	break;
       }
 
-# ifdef __EMX__
-    case EINVAL:
-      /* this nasty error was driving me nuts :-( */
-      error (NILF, _("spawnvpe: environment space might be exhausted"));
-      /* FALLTHROUGH */
-# endif
-
     default:
       perror_with_name ("execvp: ", argv[0]);
       break;
     }
 
-# ifdef __EMX__
-  return pid;
-# else
   _exit (127);
-# endif
 #endif /* !WINDOWS32 */
 }
 

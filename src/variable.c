@@ -1,4 +1,4 @@
-/* $Id: variable.c,v 1.13 2005/12/02 12:12:09 rockyb Exp $
+/* $Id: variable.c,v 1.14 2005/12/03 12:49:42 rockyb Exp $
 Internals of variables for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -511,20 +511,27 @@ free_variable_name_and_value (const void *item)
 }
 
 /*! Pop the top set off the current_variable_set_list, and free all
-   its storage.  */
-void
-pop_variable_scope (void)
+   its storage.  If b_toplevel set we have the top-most global scope
+   and some things don't get freed because they weren't malloc'd.
+*/
+void 
+pop_variable_scope (bool b_toplevel)
 {
-  variable_set_list_t *setlist = current_variable_set_list;
-  variable_set_t *set = setlist->set;
+  variable_set_list_t *p_setlist = current_variable_set_list;
+  variable_set_t *p_set;
 
-  current_variable_set_list = setlist->next;
-  free ((char *) setlist);
+  if (!p_setlist) return;
+  p_set = p_setlist->set;
+  current_variable_set_list = p_setlist->next;
 
-  hash_map (&set->table, free_variable_name_and_value);
-  hash_free (&set->table, 1);
+  hash_map (&p_set->table, free_variable_name_and_value);
+  hash_free (&p_set->table, 1);
 
-  free ((char *) set);
+  if (!b_toplevel) {
+    free ((char *) p_setlist);
+    free ((char *) p_set);
+  }
+  
 }
 
 /*! Create a new variable set and push it on the current setlist.  */

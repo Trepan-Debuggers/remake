@@ -1,4 +1,4 @@
-/* $Id: dir.c,v 1.9 2005/12/02 04:47:18 rockyb Exp $
+/* $Id: dir.c,v 1.10 2005/12/03 12:49:42 rockyb Exp $
 Directory hashing for GNU Make.
 Copyright (C) 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -55,7 +55,7 @@ Boston, MA 02111-1307, USA.  */
 # define NAMLEN(d) _D_NAMLEN(d)
 #endif
 
-#if (defined (POSIX) || defined (VMS) || defined (WINDOWS32)) && !defined (__GNU_LIBRARY__)
+#if (defined (POSIX) || defined (WINDOWS32)) && !defined (__GNU_LIBRARY__)
 /* Posix does not require that the d_ino field be present, and some
    systems do not provide it. */
 # define REAL_DIR_ENTRY(dp) 1
@@ -119,19 +119,11 @@ dosify (char *filename)
 #include "pathstuff.h"
 #endif
 
-#ifdef _AMIGA
-#include <ctype.h>
-#endif
-
 #ifdef HAVE_CASE_INSENSITIVE_FS
 static char *
 downcase (char *filename)
 {
-#ifdef _AMIGA
-  static char new_filename[136];
-#else
   static char new_filename[PATH_MAX];
-#endif
   char *df;
   int i;
 
@@ -153,63 +145,6 @@ downcase (char *filename)
 }
 #endif /* HAVE_CASE_INSENSITIVE_FS */
 
-#ifdef VMS
-
-static int
-vms_hash (char *name)
-{
-  int h = 0;
-  int g;
-
-  while (*name)
-    {
-      unsigned char uc = *name;
-      h = (h << 4) + (isupper (uc) ? tolower (uc) : uc);
-      name++;
-      g = h & 0xf0000000;
-      if (g)
-	{
-	  h = h ^ (g >> 24);
-	  h = h ^ g;
-	}
-    }
-  return h;
-}
-
-/* fake stat entry for a directory */
-static int
-vmsstat_dir (char *name, struct stat *st)
-{
-  char *s;
-  int h;
-  DIR *dir;
-
-  dir = opendir (name);
-  if (dir == 0)
-    return -1;
-  closedir (dir);
-  s = strchr (name, ':');	/* find device */
-  if (s)
-    {
-      *s++ = 0;
-      st->st_dev = (char *)vms_hash (name);
-      h = vms_hash (s);
-      *(s-1) = ':';
-    }
-  else
-    {
-      st->st_dev = 0;
-      s = name;
-      h = vms_hash (s);
-    }
-
-  st->st_ino[0] = h & 0xff;
-  st->st_ino[1] = h & 0xff00;
-  st->st_ino[2] = h >> 16;
-
-  return 0;
-}
-#endif /* VMS */
 
 /* Hash table of directories.  */
 
@@ -237,11 +172,7 @@ struct directory_contents
 #define FS_NTFS     0x2
 #define FS_UNKNOWN  0x4
 #else
-#ifdef VMS
-    ino_t ino[3];
-#else
     ino_t ino;
-#endif
 #endif /* WINDOWS32 */
     hash_table_t dirfiles;	/* Files in this directory.  */
     DIR *dirstream;		/* Stream reading this directory.  */
@@ -258,14 +189,7 @@ directory_contents_hash_1 (const void *key_0)
   ISTRING_HASH_1 (key->path_key, hash);
   hash ^= ((unsigned int) key->dev << 4) ^ (unsigned int) key->ctime;
 #else
-# ifdef VMS
-  hash = (((unsigned int) key->dev << 4)
-	  ^ ((unsigned int) key->ino[0]
-	     + (unsigned int) key->ino[1]
-	     + (unsigned int) key->ino[2]));
-# else
   hash = ((unsigned int) key->dev << 4) ^ (unsigned int) key->ino;
-# endif
 #endif /* WINDOWS32 */
   return hash;
 }
@@ -281,14 +205,7 @@ directory_contents_hash_2 (const void *key_0)
   ISTRING_HASH_2 (key->path_key, hash);
   hash ^= ((unsigned int) key->dev << 4) ^ (unsigned int) ~key->ctime;
 #else
-# ifdef VMS
-  hash = (((unsigned int) key->dev << 4)
-	  ^ ~((unsigned int) key->ino[0]
-	      + (unsigned int) key->ino[1]
-	      + (unsigned int) key->ino[2]));
-# else
   hash = ((unsigned int) key->dev << 4) ^ (unsigned int) ~key->ino;
-# endif
 #endif /* WINDOWS32 */
 
   return hash;
@@ -309,21 +226,9 @@ directory_contents_hash_cmp (const void *xv, const void *yv)
   if (result)
     return result;
 #else
-# ifdef VMS
-  result = x->ino[0] - y->ino[0];
-  if (result)
-    return result;
-  result = x->ino[1] - y->ino[1];
-  if (result)
-    return result;
-  result = x->ino[2] - y->ino[2];
-  if (result)
-    return result;
-# else
   result = x->ino - y->ino;
   if (result)
     return result;
-# endif
 #endif /* WINDOWS32 */
 
   return x->dev - y->dev;
@@ -429,12 +334,6 @@ find_directory (char *name)
   long  fs_flags;
   long  fs_len;
 #endif
-#ifdef VMS
-  if ((*name == '.') && (*(name+1) == 0))
-    name = "[]";
-  else
-    name = vmsify (name,1);
-#endif
 
   dir_key.name = name;
   dir_slot = (struct directory **) hash_find_slot (&directories, &dir_key);
@@ -460,11 +359,7 @@ find_directory (char *name)
         p[-1] = '\0';
 #endif
 
-#ifdef VMS
-      r = vmsstat_dir (name, &st);
-#else
       EINTRLOOP (r, stat (name, &st));
-#endif
 
 #ifdef WINDOWS32
       /* Put back the trailing '\'.  If we don't, we're permanently
@@ -492,13 +387,7 @@ find_directory (char *name)
 	  dc_key.path_key = w32_path = w32ify (name, 1);
 	  dc_key.ctime = st.st_ctime;
 #else
-# ifdef VMS
-	  dc_key.ino[0] = st.st_ino[0];
-	  dc_key.ino[1] = st.st_ino[1];
-	  dc_key.ino[2] = st.st_ino[2];
-# else
 	  dc_key.ino = st.st_ino;
-# endif
 #endif
 	  dc_slot = (struct directory_contents **) hash_find_slot (&directory_contents, &dc_key);
 	  dc = *dc_slot;
@@ -535,13 +424,7 @@ find_directory (char *name)
               else
                 dc->fs_flags = FS_UNKNOWN;
 #else
-# ifdef VMS
-	      dc->ino[0] = st.st_ino[0];
-	      dc->ino[1] = st.st_ino[1];
-	      dc->ino[2] = st.st_ino[2];
-# else
 	      dc->ino = st.st_ino;
-# endif
 #endif /* WINDOWS32 */
 	      hash_insert_at (&directory_contents, dc, dc_slot);
 	      ENULLLOOP (dc->dirstream, opendir (name));
@@ -595,15 +478,6 @@ dir_contents_file_exists_p (struct directory_contents *dir, char *filename)
 
 #ifdef HAVE_CASE_INSENSITIVE_FS
   filename = downcase (filename);
-#endif
-
-#ifdef __EMX__
-  if (filename != 0)
-    _fnlwr (filename); /* lower case for FAT drives */
-#endif
-
-#ifdef VMS
-  filename = vmsify (filename,0);
 #endif
 
   hash = 0;
@@ -669,14 +543,6 @@ dir_contents_file_exists_p (struct directory_contents *dir, char *filename)
       if (d == 0)
         break;
 
-#if defined(VMS) && defined(HAVE_DIRENT_H)
-      /* In VMS we get file versions too, which have to be stripped off */
-      {
-        char *p = strrchr (d->d_name, ';');
-        if (p)
-          *p = '\0';
-      }
-#endif
       if (!REAL_DIR_ENTRY (d))
 	continue;
 
@@ -741,14 +607,8 @@ file_exists_p (char *name)
     return ar_member_date (name) != (time_t) -1;
 #endif
 
-#ifdef VMS
-  dirend = strrchr (name, ']');
-  if (dirend == 0)
-    dirend = strrchr (name, ':');
-  if (dirend == (char *)0)
-    return dir_file_exists_p ("[]", name);
-#else /* !VMS */
   dirend = strrchr (name, '/');
+
 #ifdef HAVE_DOS_PATHS
   /* Forward and backslashes might be mixed.  We need the rightmost one.  */
   {
@@ -760,13 +620,9 @@ file_exists_p (char *name)
       dirend = name + 1;
   }
 #endif /* HAVE_DOS_PATHS */
+
   if (dirend == 0)
-#ifndef _AMIGA
     return dir_file_exists_p (".", name);
-#else /* !VMS && !AMIGA */
-    return dir_file_exists_p ("", name);
-#endif /* AMIGA */
-#endif /* VMS */
 
   slash = dirend;
   if (dirend == name)
@@ -799,7 +655,8 @@ file_impossible (char *filename)
   struct dirfile *new;
 
   dirend = strrchr (p, '/');
-# ifdef HAVE_DOS_PATHS
+
+#ifdef HAVE_DOS_PATHS
   /* Forward and backslashes might be mixed.  We need the rightmost one.  */
   {
     char *bslash = strrchr(p, '\\');
@@ -809,13 +666,10 @@ file_impossible (char *filename)
     if (!dirend && p[0] && p[1] == ':')
       dirend = p + 1;
   }
-# endif /* HAVE_DOS_PATHS */
+#endif /* HAVE_DOS_PATHS */
+
   if (dirend == 0)
-# ifdef _AMIGA
-    dir = find_directory ("");
-# else /* !AMIGA */
     dir = find_directory (".");
-# endif /* AMIGA */
   else
     {
       char *dirname;
@@ -873,12 +727,8 @@ file_impossible_p (char *filename)
   struct dirfile *dirfile;
   struct dirfile dirfile_key;
 
-#ifdef VMS
-  dirend = strrchr (filename, ']');
-  if (dirend == 0)
-    dir = find_directory ("[]")->contents;
-#else
   dirend = strrchr (filename, '/');
+
 #ifdef HAVE_DOS_PATHS
   /* Forward and backslashes might be mixed.  We need the rightmost one.  */
   {
@@ -890,13 +740,9 @@ file_impossible_p (char *filename)
       dirend = filename + 1;
   }
 #endif /* HAVE_DOS_PATHS */
+
   if (dirend == 0)
-#ifdef _AMIGA
-    dir = find_directory ("")->contents;
-#else /* !VMS && !AMIGA */
     dir = find_directory (".")->contents;
-#endif /* AMIGA */
-#endif /* VMS */
   else
     {
       char *dirname;
@@ -905,12 +751,14 @@ file_impossible_p (char *filename)
 	dirname = "/";
       else
 	{
+
 #ifdef HAVE_DOS_PATHS
 	  /* d:/ and d: are *very* different...  */
 	  if (dirend < filename + 3 && filename[1] == ':' &&
 	      (*dirend == '/' || *dirend == '\\' || *dirend == ':'))
 	    dirend++;
 #endif
+
 	  dirname = (char *) alloca (dirend - filename + 1);
 	  memmove (dirname, p, dirend - p);
 	  dirname[dirend - p] = '\0';
@@ -928,9 +776,6 @@ file_impossible_p (char *filename)
 #endif
 #ifdef HAVE_CASE_INSENSITIVE_FS
   filename = downcase (p);
-#endif
-#ifdef VMS
-  filename = vmsify (p, 1);
 #endif
 
   dirfile_key.name = filename;
@@ -980,16 +825,9 @@ print_dir_data_base (void)
 	      printf (_("# %s (key %s, mtime %d): could not be opened.\n"),
 		      dir->name, dir->contents->path_key,dir->contents->mtime);
 #else  /* WINDOWS32 */
-#ifdef VMS
-	      printf (_("# %s (device %d, inode [%d,%d,%d]): could not be opened.\n"),
-		      dir->name, dir->contents->dev,
-		      dir->contents->ino[0], dir->contents->ino[1],
-		      dir->contents->ino[2]);
-#else
 	      printf (_("# %s (device %ld, inode %ld): could not be opened.\n"),
 		      dir->name, (long int) dir->contents->dev,
 		      (long int) dir->contents->ino);
-#endif
 #endif /* WINDOWS32 */
 	    }
 	  else
@@ -1015,17 +853,10 @@ print_dir_data_base (void)
 #ifdef WINDOWS32
 	      printf (_("# %s (key %s, mtime %d): "),
 		      dir->name, dir->contents->path_key, dir->contents->mtime);
-#else  /* WINDOWS32 */
-#ifdef VMS
-	      printf (_("# %s (device %d, inode [%d,%d,%d]): "),
-		      dir->name, dir->contents->dev,
-		      dir->contents->ino[0], dir->contents->ino[1],
-		      dir->contents->ino[2]);
-#else
+#else  /* !WINDOWS32 */
 	      printf (_("# %s (device %ld, inode %ld): "),
 		      dir->name,
 		      (long)dir->contents->dev, (long)dir->contents->ino);
-#endif
 #endif /* WINDOWS32 */
 	      if (f == 0)
 		fputs (_("No"), stdout);

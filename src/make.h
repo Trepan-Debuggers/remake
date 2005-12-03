@@ -1,4 +1,4 @@
-/* $Id: make.h,v 1.12 2005/12/02 12:12:09 rockyb Exp $
+/* $Id: make.h,v 1.13 2005/12/03 12:49:42 rockyb Exp $
 Miscellaneous global declarations and portability cruft for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -227,6 +227,7 @@ extern unsigned int get_path_max (void);
 # ifdef HAVE_STDLIB_H
 #  include <stdlib.h>
 # else
+
 extern char *malloc (int);
 extern char *realloc (char *, int);
 extern void free (char *);
@@ -357,6 +358,8 @@ extern bool unixy_shell;
 #define STRING_SIZE_TUPLE(_s) (_s), (sizeof (_s)-1)
 
 
+
+#define	CALLOC(t, n) ((t *) calloc (sizeof (t), (n)))
 
 extern void die (int) __attribute__ ((noreturn));
 extern char *savestring (const char *, unsigned int);

@@ -1,4 +1,4 @@
-/* $Id: commands.c,v 1.11 2005/12/02 04:47:18 rockyb Exp $
+/* $Id: commands.c,v 1.12 2005/12/03 12:49:42 rockyb Exp $
 Command processing for GNU Make.
 Copyright (C) 1988,89,91,92,93,94,95,96,97, 2004, 2005
 Free Software Foundation, Inc.
@@ -20,6 +20,7 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 #include "config.h"
+#include "make.h"
 #include "ar_fns.h"
 #include "commands.h"
 #include "expand.h"
@@ -267,8 +268,8 @@ chop_commands (commands_t *cmds)
 
   else {
     unsigned int  nlines  = 5;
-    unsigned int *line_no = (unsigned int *) calloc (5, sizeof (unsigned int));
-    char        **lines   = (char **) calloc (5, sizeof (char *));
+    unsigned int *line_no = CALLOC (unsigned int, 5);
+    char        **lines   = CALLOC (char *, 5);
 
     unsigned int i_line   = 0; /* Temporary line number. */
     unsigned int i_prev   = 0; /* Temporary previous line number. */

@@ -1,5 +1,6 @@
-/* hash.c -- hash table maintenance
-   Copyright (C) 1995, 1999, 2002, 2004 Free Software Foundation, Inc.
+/* $Id: hash.c,v 1.2 2005/12/03 12:49:42 rockyb Exp $
+   hash.c -- hash table maintenance
+   Copyright (C) 1995, 1999, 2002, 2004, 2005 Free Software Foundation, Inc.
    Written by Greg McGary <gkm@gnu.org> <greg@mcgary.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -20,7 +21,6 @@
 #include "make.h"
 #include "hash.h"
 
-#define	CALLOC(t, n) ((t *) calloc (sizeof (t), (n)))
 #define MALLOC(t, n) ((t *) xmalloc (sizeof (t) * (n)))
 #define REALLOC(o, t, n) ((t *) xrealloc ((o), sizeof (t) * (n)))
 #define CLONE(o, t, n) ((t *) memcpy (MALLOC (t, (n)), (o), sizeof (t) * (n)))

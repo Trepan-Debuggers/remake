@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.17 2005/12/02 12:46:54 rockyb Exp $
+/* $Id: main.c,v 1.18 2005/12/03 12:49:42 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -44,36 +44,24 @@ MA 02111-1307, USA.  */
 #endif
 
 #include <assert.h>
-#ifdef _AMIGA
-# include <dos/dos.h>
-# include <proto/dos.h>
-#endif
 #ifdef WINDOWS32
 #include <windows.h>
 #include <io.h>
 #include "pathstuff.h"
 #endif
-#ifdef __EMX__
-# include <sys/types.h>
-# include <sys/wait.h>
-#endif
 #ifdef HAVE_FCNTL_H
 # include <fcntl.h>
 #endif
 
-#ifdef _AMIGA
-int __stack = 20000; /* Make sure we have 20K of stack space */
-#endif
+extern void init_dir (void);
+extern void remote_setup (void);
+extern void remote_cleanup (void);
+extern RETSIGTYPE fatal_error_signal (int sig);
 
-extern void init_dir PARAMS ((void));
-extern void remote_setup PARAMS ((void));
-extern void remote_cleanup PARAMS ((void));
-extern RETSIGTYPE fatal_error_signal PARAMS ((int sig));
-
-extern void print_dir_data_base PARAMS ((void));
-extern void print_rule_data_base PARAMS ((void));
-extern void print_file_data_base PARAMS ((void));
-extern void print_vpath_data_base PARAMS ((void));
+extern void print_dir_data_base (void);
+extern void print_rule_data_base (void);
+extern void print_file_data_base (void);
+extern void print_vpath_data_base (void);
 
 #if defined HAVE_WAITPID || defined HAVE_WAIT3
 # define HAVE_WAIT_NOHANG
@@ -84,17 +72,17 @@ extern int chdir ();
 #endif
 #ifndef	STDC_HEADERS
 # ifndef sun			/* Sun has an incorrect decl in a header.  */
-extern void exit PARAMS ((int)) __attribute__ ((noreturn));
+extern void exit (int) __attribute__ ((noreturn));
 # endif
 extern double atof ();
 #endif
 
-static void print_data_base PARAMS ((void));
-static void decode_switches PARAMS ((int argc, char **argv, int env));
-static void decode_env_switches PARAMS ((char *envar, unsigned int len));
-static void define_makeflags PARAMS ((int all, int makefile));
-static char *quote_for_env PARAMS ((char *out, char *in));
-static void initialize_global_hash_tables PARAMS ((void));
+static void print_data_base (void);
+static void decode_switches (int argc, char **argv, int env);
+static void decode_env_switches (char *envar, unsigned int len);
+static void define_makeflags (int all, int makefile);
+static char *quote_for_env (char *out, char *in);
+static void initialize_global_hash_tables (void);
 
 
 /* The structure that describes an accepted command switch.  */
@@ -507,7 +495,7 @@ char **global_argv;
 char *starting_directory;
 
 /*! Our current directory before processing any -C options.  */
-char *directory_before_chdir;
+char *directory_before_chdir = NULL;
 
 
 /*! Value of the MAKELEVEL variable at startup (or 0).  */
@@ -800,8 +788,8 @@ msdos_return_to_initial_directory (void)
 }
 #endif
 
-extern char *mktemp PARAMS ((char *template));
-extern int mkstemp PARAMS ((char *template));
+extern char *mktemp (char *template);
+extern int mkstemp (char *template);
 
 FILE *
 open_tmpfile(char **name, const char *template)
@@ -977,12 +965,9 @@ main (int argc, char **argv, char **envp)
     program = "make";
   else
     {
-#ifdef VMS
-      program = strrchr (argv[0], ']');
-#else
       program = strrchr (argv[0], '/');
-#endif
-#if defined(__MSDOS__) || defined(__EMX__)
+
+#if defined(__MSDOS__)
       if (program == 0)
 	program = strrchr (argv[0], '\\');
       else
@@ -996,6 +981,7 @@ main (int argc, char **argv, char **envp)
       if (program == 0 && argv[0][1] == ':')
 	program = argv[0] + 1;
 #endif
+
       if (program == 0)
 	program = argv[0];
       else
@@ -1038,7 +1024,6 @@ main (int argc, char **argv, char **envp)
      done before $(MAKE) is figured out so its definitions will not be
      from the environment.  */
 
-#ifndef _AMIGA
   for (i = 0; envp[i] != 0; ++i)
     {
       int do_not_define;
@@ -1087,46 +1072,10 @@ main (int argc, char **argv, char **envp)
     if (!unix_path && windows32_path)
       define_variable("PATH", 4, windows32_path, o_env, 1)->export = v_export;
 #endif
-#else /* For Amiga, read the ENV: device, ignoring all dirs */
-    {
-	BPTR env, file, old;
-	char buffer[1024];
-	int len;
-	__aligned struct FileInfoBlock fib;
-
-	env = Lock ("ENV:", ACCESS_READ);
-	if (env)
-	{
-	    old = CurrentDir (DupLock(env));
-	    Examine (env, &fib);
-
-	    while (ExNext (env, &fib))
-	    {
-		if (fib.fib_DirEntryType < 0) /* File */
-		{
-		    /* Define an empty variable. It will be filled in
-			variable_lookup(). Makes startup quite a bit
-			faster. */
-			define_variable (fib.fib_FileName,
-			    strlen (fib.fib_FileName),
-			"", o_env, 1)->export = v_export;
-		}
-	    }
-	    UnLock (env);
-	    UnLock(CurrentDir(old));
-	}
-    }
-#endif
 
   /* Decode the switches.  */
 
   decode_env_switches ("MAKEFLAGS", 9);
-#if 0
-  /* People write things like:
-     	MFLAGS="CC=gcc -pipe" "CFLAGS=-g"
-     and we set the -p, -i and -e switches.  Doesn't seem quite right.  */
-  decode_env_switches ("MFLAGS", 6);
-#endif
   decode_switches (argc, argv, 0);
 
   /* debugging sets some things */
@@ -1234,10 +1183,6 @@ main (int argc, char **argv, char **envp)
   if (current_directory[0] != '\0'
       && argv[0] != 0
       && (argv[0][0] != '/' && (argv[0][0] == '\0' || argv[0][1] != ':'))
-#ifdef __EMX__
-      /* do not prepend cwd if argv[0] contains no '/', e.g. "make" */
-      && (strchr (argv[0], '/') != 0 || strchr (argv[0], '\\') != 0)
-# endif
       )
     argv[0] = concat (current_directory, "/", argv[0]);
 #else  /* !__MSDOS__ */
@@ -1473,7 +1418,7 @@ main (int argc, char **argv, char **envp)
 
      If none of these are true, we don't need a signal handler at all.  */
   {
-    extern RETSIGTYPE child_handler PARAMS ((int sig));
+    extern RETSIGTYPE child_handler (int sig);
 # if defined SIGCHLD
     bsd_signal (SIGCHLD, child_handler);
 # endif
@@ -2067,7 +2012,6 @@ main (int argc, char **argv, char **envp)
              _("warning:  Clock skew detected.  Your build may be incomplete."));
 
     /* Exit.  */
-    free_default_suffix_rules();
     die (status);
   }
 
@@ -2820,7 +2764,7 @@ print_data_base (void)
 /* Exit with STATUS, cleaning up as necessary.  */
 
 void
-die (int status)
+die (int status) 
 {
   static char dying = 0;
 
@@ -2851,12 +2795,14 @@ die (int status)
 	 puts core files in the original directory instead of the -C
 	 directory.  Must wait until after remove_intermediates(), or unlinks
          of relative pathnames fail.  */
-      if (directory_before_chdir != 0)
-	chdir (directory_before_chdir);
+      if (directory_before_chdir) chdir (directory_before_chdir);
+      free(directory_before_chdir);
 
       log_working_directory (0);
     }
 
-  /* FIXME: free_default_suffix_rules (); */
+  free_default_suffix_rules();
+  pop_variable_scope(true);
+
   exit (status);
 }

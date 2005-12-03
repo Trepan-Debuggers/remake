@@ -1,5 +1,6 @@
-/* hash.h -- decls for hash table
-   Copyright (C) 1995, 1999, 2002, 2004 Free Software Foundation, Inc.
+/* $Id: hash.h,v 1.3 2005/12/03 12:49:42 rockyb Exp $
+   hash.h -- decls for hash table
+   Copyright (C) 1995, 1999, 2002, 2004, 2005 Free Software Foundation, Inc.
    Written by Greg McGary <gkm@gnu.org> <greg@mcgary.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -16,69 +17,54 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
-#ifndef _hash_h_
-#define _hash_h_
+#ifndef _HASH_H__
+#define _HASH_H__
 
 #include <stdio.h>
 #include <ctype.h>
 
-#if defined __cplusplus || (defined __STDC__ && __STDC__) || defined WINDOWS32
-# if !defined __GLIBC__ || !defined __P
-#  undef	__P
-#  define __P(protos)	protos
-# endif
-#else /* Not C++ or ANSI C.  */
-# undef	__P
-# define __P(protos)	()
-/* We can get away without defining `const' here only because in this file
-   it is used only inside the prototype for `fnmatch', which is elided in
-   non-ANSI C where `const' is problematical.  */
-#endif /* C++ or ANSI C.  */
+typedef unsigned long (*hash_func_t) (void const *key);
+typedef int (*hash_cmp_func_t) (void const *x, void const *y);
+typedef void (*hash_map_func_t) (void const *item);
+typedef void (*hash_map_arg_func_t) (void const *item, void *arg);
 
-typedef unsigned long (*hash_func_t) __P((void const *key));
-typedef int (*hash_cmp_func_t) __P((void const *x, void const *y));
-typedef void (*hash_map_func_t) __P((void const *item));
-typedef void (*hash_map_arg_func_t) __P((void const *item, void *arg));
-
-struct hash_table
-{
+typedef struct {
   void **ht_vec;
-  unsigned long ht_size;	/* total number of slots (power of 2) */
-  unsigned long ht_capacity;	/* usable slots, limited by loading-factor */
-  unsigned long ht_fill;	/* items in table */
-  unsigned long ht_empty_slots;	/* empty slots not including deleted slots */
-  unsigned long ht_collisions;	/* # of failed calls to comparison function */
-  unsigned long ht_lookups;	/* # of queries */
-  unsigned int ht_rehashes;	/* # of times we've expanded table */
-  hash_func_t ht_hash_1;	/* primary hash function */
-  hash_func_t ht_hash_2;	/* secondary hash function */
-  hash_cmp_func_t ht_compare;	/* comparison function */
-};
-
-typedef struct hash_table hash_table_t;
+  unsigned long   ht_size;	 /* total number of slots (power of 2) */
+  unsigned long   ht_capacity;	 /* usable slots, limited by loading-factor */
+  unsigned long   ht_fill;	 /* items in table */
+  unsigned long   ht_empty_slots;/* empty slots not including deleted slots */
+  unsigned long   ht_collisions; /* # of failed calls to comparison function */
+  unsigned long   ht_lookups;	 /* # of queries */
+  unsigned int    ht_rehashes;	 /* # of times we've expanded table */
+  hash_func_t     ht_hash_1;	 /* primary hash function */
+  hash_func_t     ht_hash_2;	 /* secondary hash function */
+  hash_cmp_func_t ht_compare;	 /* comparison function */
+} hash_table_t;
 
 hash_table_t files;
 
-typedef int (*qsort_cmp_t) __P((void const *, void const *));
+typedef int (*qsort_cmp_t) (void const *, void const *);
 
-void hash_init __P((hash_table_t *ht, unsigned long size,
-		    hash_func_t hash_1, hash_func_t hash_2, hash_cmp_func_t hash_cmp));
-void hash_load __P((hash_table_t *ht, void *item_table,
-		    unsigned long cardinality, unsigned long size));
-void **hash_find_slot __P((hash_table_t *ht, void const *key));
-void *hash_find_item __P((hash_table_t *ht, void const *key));
-void *hash_insert __P((hash_table_t *ht, void *item));
-void *hash_insert_at __P((hash_table_t *ht, void *item, void const *slot));
-void *hash_delete __P((hash_table_t *ht, void const *item));
-void *hash_delete_at __P((hash_table_t *ht, void const *slot));
-void hash_delete_items __P((hash_table_t *ht));
-void hash_free_items __P((hash_table_t *ht));
-void hash_free __P((hash_table_t *ht, int free_items));
-void hash_map __P((hash_table_t *ht, hash_map_func_t map));
+void hash_init(hash_table_t *ht, unsigned long size,
+	       hash_func_t hash_1, hash_func_t hash_2, 
+	       hash_cmp_func_t hash_cmp);
+void hash_load (hash_table_t *ht, void *item_table, unsigned long cardinality, 
+		unsigned long size);
+void **hash_find_slot (hash_table_t *ht, void const *key);
+void *hash_find_item (hash_table_t *ht, void const *key);
+void *hash_insert (hash_table_t *ht, void *item);
+void *hash_insert_at (hash_table_t *ht, void *item, void const *slot);
+void *hash_delete (hash_table_t *ht, void const *item);
+void *hash_delete_at (hash_table_t *ht, void const *slot);
+void hash_delete_items (hash_table_t *ht);
+void hash_free_items (hash_table_t *ht);
+void hash_free (hash_table_t *ht, int free_items);
+void hash_map (hash_table_t *ht, hash_map_func_t map);
 void hash_map_arg __P((hash_table_t *ht, hash_map_arg_func_t map, 
 		       void *arg));
-void hash_print_stats __P((hash_table_t *ht, FILE *out_FILE));
-void **hash_dump __P((hash_table_t *ht, void **vector_0, qsort_cmp_t compare));
+void hash_print_stats (hash_table_t *ht, FILE *out_FILE);
+void **hash_dump (hash_table_t *ht, void **vector_0, qsort_cmp_t compare);
 
 extern void *hash_deleted_item;
 #define HASH_VACANT(item) ((item) == 0 || (void *) (item) == hash_deleted_item)
@@ -235,4 +221,4 @@ extern void *hash_deleted_item;
 #define return_ADDRESS_HASH_2(KEY) return_INTEGER_HASH_2 (((unsigned long)(KEY)) >> 3)
 #define return_ADDRESS_COMPARE(X, Y) return_INTEGER_COMPARE ((X), (Y))
 
-#endif /* not _hash_h_ */
+#endif /* _HASH_H__ */

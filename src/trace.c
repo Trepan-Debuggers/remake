@@ -1,4 +1,4 @@
-/* 
+/* $Id: trace.c,v 1.3 2005/12/03 12:49:42 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -34,15 +34,14 @@ floc_stack_node_t *p_stack_floc_top = NULL;
 extern target_stack_node_t *
 trace_push_target (target_stack_node_t *p, file_t *p_target,
 		   int b_debugger) {
-  target_stack_node_t *new_node = 
-    (target_stack_node_t *) calloc (1, sizeof(target_stack_node_t));
+  target_stack_node_t *new_node = CALLOC(target_stack_node_t, 1);
 
   /* We allocate and make a copy of p_target in case we want to
      modify information, like the file location or target name
      on the fly as we process file commands or handle dependencies from
      target patterns.
    */
-  new_node->p_target = (file_t *) calloc (1, sizeof(file_t));
+  new_node->p_target = CALLOC (file_t, 1);
   memcpy(new_node->p_target, p_target, sizeof(file_t));
 
   new_node->p_parent = p;
@@ -81,8 +80,7 @@ trace_pop_target (target_stack_node_t *p)
 extern void
 trace_push_floc (floc_t *p_floc) 
 {
-  floc_stack_node_t *new_node = 
-    (floc_stack_node_t *) calloc (1, sizeof(floc_stack_node_t));
+  floc_stack_node_t *new_node = CALLOC (floc_stack_node_t, 1);
 
   /* We DO NOT allocate and make a copy of p_floc so that as we
      read the Makefile, the line number gets updated automatically.
@@ -98,5 +96,9 @@ extern void
 trace_pop_floc (void) 
 {
   if (NULL == p_stack_floc_top) return;
-  p_stack_floc_top = p_stack_floc_top->p_parent;
+  else {
+    floc_stack_node_t *p_new_top = p_stack_floc_top->p_parent;
+    free(p_stack_floc_top);
+    p_stack_floc_top = p_new_top;
+  }
 }

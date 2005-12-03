@@ -1,4 +1,4 @@
-/* $Id: variable.h,v 1.9 2005/12/02 12:12:09 rockyb Exp $
+/* $id: variable.h,v 1.9 2005/12/02 12:12:09 rockyb Exp $
 Definitions for using variables in GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 2002, 2004, 2005
 Free Software Foundation, Inc.
@@ -55,7 +55,7 @@ typedef enum {
 #define EXP_COUNT_BITS  15      /* This gets all the bitfields into 32 bits */
 #define EXP_COUNT_MAX   ((1<<EXP_COUNT_BITS)-1)
 
-struct variable
+typedef struct variable
   {
     char *name;			/**< Variable name.  */
     int length;			/**< strlen (name) */
@@ -79,33 +79,28 @@ struct variable
       origin ENUM_BITFIELD (4);	/**< Variable origin.  */
     enum variable_export
       {
-	v_export,		/**< Export this variable.  */
-	v_noexport,		/**< Don't export this variable.  */
-	v_ifset,		/**< Export it if it has a non-default value.  */
-	v_default		/**< Decide in target_environment.  */
+	v_export,	/**< Export this variable.  */
+	v_noexport,	/**< Don't export this variable.  */
+	v_ifset,	/**< Export it if it has a non-default value.  */
+	v_default	/**< Decide in target_environment.  */
       } export ENUM_BITFIELD (2);
-  };
+  } variable_t;
 
-typedef struct variable variable_t;
 
 /** Structure that represents a variable set.  */
 
-struct variable_set
+typedef struct variable_set
   {
-    struct hash_table table;	/* Hash table of variables.  */
-  };
-
-typedef struct variable_set variable_set_t;
+    hash_table_t table;	/* Hash table of variables.  */
+  } variable_set_t;
 
 /** Structure that represents a list of variable sets.  */
 
-struct variable_set_list
+typedef struct variable_set_list
   {
     struct variable_set_list *next;	/* Link in the chain.  */
     variable_set_t *set;		/* Variable set.  */
-  };
-
-typedef struct variable_set_list variable_set_list_t;
+  } variable_set_list_t;
 
 /** Structure used for pattern-specific variables.  */
 
@@ -134,15 +129,17 @@ extern variable_set_list_t *create_new_variable_set (void);
 /*! Create a new variable set, push it on the current setlist,
   and assign current_variable_set_list to it. 
  */
-extern variable_set_list_t *push_new_variable_scope (void);
+variable_set_list_t *push_new_variable_scope (void);
 
 /*! Pop the top set off the current_variable_set_list, and free all
-   its storage.  */
-extern void pop_variable_scope (void);
+   its storage.  If b_toplevel set we have the top-most global scope
+   and some things don't get freed because they weren't malloc'd.
+*/
+void pop_variable_scope (bool b_toplevel);
 
 /*! Define the automatic variables, and record the addresses of their
   structures so we can change their values quickly.  */
-extern void define_automatic_variables (void);
+void define_automatic_variables (void);
 
 /*! Initialize FILE's variable set list.  If FILE already has a
    variable set list, the topmost variable set is left intact, but the
@@ -197,20 +194,23 @@ extern variable_t *do_variable_definition (const floc_t *p_floc,
    returned.  */
 extern variable_t *parse_variable_definition (variable_t *v, char *line);
 
-extern struct variable *try_variable_definition (const floc_t *p_floc, 
-						 char *line, 
-						 variable_origin_t origin, 
-						 int target_var);
-extern void init_hash_global_variable_set (void);
-extern void hash_init_function_table (void);
+variable_t *try_variable_definition (const floc_t *p_floc, 
+				     char *line,  variable_origin_t origin, 
+				     int target_var);
+
+void init_hash_global_variable_set (void);
+
+void free_hash_global_variable_set (void);
+
+void hash_init_function_table (void);
 
 /*! Lookup a variable whose name is a string starting at NAME and with
    LENGTH chars.  NAME need not be null-terminated.  Returns address
    of the `struct variable' containing all info on the variable, or
    nil if no such variable is defined.  */
-extern variable_t *lookup_variable (const char *name, unsigned int length);
+variable_t *lookup_variable (const char *name, unsigned int length);
 
-extern variable_t *lookup_variable_in_set (const char *name, 
+variable_t *lookup_variable_in_set (const char *name, 
 					   unsigned int length,
 					   const variable_set_t *set);
 
@@ -221,12 +221,12 @@ extern variable_t *lookup_variable_in_set (const char *name,
   If RECURSIVE is nonzero a flag is set in the variable saying
   that it should be recursively re-expanded.  */
 
-extern variable_t *define_variable_in_set (const char *name, 
-					   unsigned int length, char *value,
-					   variable_origin_t origin, 
-					   int recursive,
-					   variable_set_t *set, 
-					   const floc_t *p_floc);
+variable_t *define_variable_in_set (const char *name, 
+				    unsigned int length, char *value,
+				    variable_origin_t origin, 
+				    int recursive,
+				    variable_set_t *set, 
+				    const floc_t *p_floc);
 
 /* Define a variable in the current variable set.  */
 
