@@ -199,9 +199,11 @@ fatal (flocp, fmt, va_alist)
 
   fputs (_(".  Stop.\n"), stderr);
 
-  if ( (debugger_on_error & DEBUGGER_ON_FATAL) || debugger_enabled )
-    enter_debugger(NULL, NULL, 2);
-  die (2);
+  if (!b_in_debugger) {
+    if ( (debugger_on_error & DEBUGGER_ON_FATAL) || debugger_enabled )
+      enter_debugger(NULL, NULL, 2);
+    die (2);
+  }
 }
 
 /* Print an error message and exit.  */
@@ -285,10 +287,9 @@ perror_with_name (const char *str, const char *name)
 /*! Print an error message from errno and exit.  */
 
 void
-pfatal_with_name (const char *name)
+pfatal_with_name (const char *psz_name)
 {
-  fatal (NILF, _("%s: %s"), name, strerror (errno));
-  /* NOTREACHED */
+  fatal (NILF, _("%s: %s"), psz_name, strerror (errno));
 }
 
 /*! Under -d, write a message describing the current IDs.  */

@@ -1,4 +1,4 @@
-/* $Id: print.h,v 1.5 2005/12/01 07:14:12 rockyb Exp $
+/* $Id: print.h,v 1.6 2005/12/03 01:27:45 rockyb Exp $
 Header for output or logging functions for GNU Make.
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -33,7 +33,7 @@ extern void message (int prefix, const char *fmt, ...)
 extern void error (const floc_t *flocp, const char *fmt, ...)
                    __attribute__ ((__format__ (__printf__, 2, 3)));
 extern void fatal (const floc_t *flocp, const char *fmt, ...)
-                   __attribute__ ((noreturn, __format__ (__printf__, 2, 3)));
+                   __attribute__ ((__format__ (__printf__, 2, 3)));
 #else
 extern void message ();
 extern void error ();
@@ -68,7 +68,8 @@ extern void log_working_directory (int);
 extern void perror_with_name (const char *, const char *);
 
 /*! Print an error message from errno and exit.  */
-extern void pfatal_with_name PARAMS ((const char *)) __attribute__ ((noreturn));
+extern void pfatal_with_name (const char *psz_name);
+
 /*! Display a variable and its value. */
 extern void print_variable (variable_t *p_v);
 

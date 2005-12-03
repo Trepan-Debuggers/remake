@@ -1,4 +1,4 @@
-/* $Id: read.c,v 1.16 2005/12/02 12:46:54 rockyb Exp $
+/* $Id: read.c,v 1.17 2005/12/03 01:27:45 rockyb Exp $
 Reading and parsing of makefiles for GNU Make.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
@@ -50,20 +50,16 @@ Boston, MA 02111-1307, USA.  */
 #include <glob.h>
 
 #ifndef WINDOWS32
-#ifndef _AMIGA
-#ifndef VMS
 #include <pwd.h>
 #else
-struct passwd *getpwnam PARAMS ((char *name));
-#endif
-#endif
+struct passwd *getpwnam (char *name);
 #endif /* !WINDOWS32 */
 
 /* A 'struct ebuffer' controls the origin of the makefile we are currently
    eval'ing.
 */
 
-typedef struct ebuffer
+typedef struct 
   {
     char *buffer;       /* Start of the current line in the buffer.  */
     char *bufnext;      /* Start of the next line in the buffer.  */
@@ -115,11 +111,9 @@ static char *default_include_directories[] =
 #define INCLUDEDIR "."
 #endif
     INCLUDEDIR,
-#ifndef _AMIGA
     "/usr/gnu/include",
     "/usr/local/include",
     "/usr/include",
-#endif
     0
   };
 
@@ -143,22 +137,23 @@ static dep_t *read_makefiles = 0;
 static int eval_makefile (char *filename, int flags);
 static int eval (ebuffer_t *buffer, int flags);
 
-static long readline PARAMS ((ebuffer_t *ebuf));
-static void do_define PARAMS ((char *name, unsigned int namelen,
-                               variable_origin_t origin,
-                               ebuffer_t *ebuf));
-static int conditional_line PARAMS ((char *line, const floc_t *flocp));
-static void record_files PARAMS ((struct nameseq *filenames, char *pattern, char *pattern_percent,
-			dep_t *deps, unsigned int cmds_started, char *commands,
-			unsigned int commands_idx, int two_colon,
-			int have_sysv_atvar,
-                        const floc_t *flocp, int set_default));
-static void record_target_var PARAMS ((struct nameseq *filenames, char *defn,
+static long readline (ebuffer_t *ebuf);
+static void do_define (char *name, unsigned int namelen,
+		       variable_origin_t origin, ebuffer_t *ebuf);
+static int conditional_line (char *line, const floc_t *flocp);
+static void record_files (struct nameseq *filenames, char *pattern, 
+			  char *pattern_percent,
+			  dep_t *deps, unsigned int cmds_started, 
+			  char *commands,
+			  unsigned int commands_idx, int two_colon,
+			  int have_sysv_atvar,
+			  const floc_t *flocp, int set_default);
+static void record_target_var (struct nameseq *filenames, char *defn,
                                        variable_origin_t origin,
                                        bool b_exported,
-                                       const floc_t *flocp));
-static enum make_word_type get_next_mword PARAMS ((char *buffer, char *delim,
-                        char **startp, unsigned int *length));
+                                       const floc_t *flocp);
+static enum make_word_type get_next_mword (char *buffer, char *delim,
+                        char **startp, unsigned int *length);
 
 /* Read in all the makefiles and return the chain of their names.  */
 
@@ -651,17 +646,20 @@ eval (ebuffer_t *ebuf, int set_default)
 	      || word1eq ("else") || word1eq ("endif")))
 	{
  	  int i = conditional_line (p, fstart);
-	  if (i < 0)
+	  if (i < 0) {
 	    fatal (fstart, _("invalid syntax in conditional"));
-
+	    return 0;
+	  }
           ignoring = i;
 	  continue;
 	}
 
       if (word1eq ("endef"))
 	{
-	  if (!in_ignored_define)
+	  if (!in_ignored_define) {
 	    fatal (fstart, _("extraneous `endef'"));
+	    return 0;
+	  }
           in_ignored_define = 0;
 	  continue;
 	}
@@ -672,8 +670,10 @@ eval (ebuffer_t *ebuf, int set_default)
 	    in_ignored_define = 1;
 	  else
 	    {
-              if (*p2 == '\0')
+              if (*p2 == '\0') {
                 fatal (fstart, _("empty variable name"));
+		return 0;
+	      }
 
 	      /* Let the variable name be the whole rest of the line,
 		 with trailing blanks stripped (comments have already been
@@ -700,8 +700,10 @@ eval (ebuffer_t *ebuf, int set_default)
 	      else
 		{
 		  p2 = next_token (p2 + 6);
-                  if (*p2 == '\0')
+                  if (*p2 == '\0') {
                     fatal (fstart, _("empty variable name"));
+		    return 0;
+		  }
 
 		  /* Let the variable name be the whole rest of the line,
 		     with trailing blanks stripped (comments have already been
@@ -893,6 +895,7 @@ eval (ebuffer_t *ebuf, int set_default)
 	     might have been usable as a variable definition.
 	     But now we know it is definitely lossage.  */
 	  fatal(fstart, _("commands commence before first target"));
+	  return 0;
 	}
 
       /* This line describes some target files.  This is complicated by
@@ -942,8 +945,10 @@ eval (ebuffer_t *ebuf, int set_default)
         switch (wtype)
           {
           case w_eol:
-            if (cmdleft != 0)
+            if (cmdleft != 0) {
               fatal(fstart, _("missing rule before commands"));
+	      return 0;
+	    }
             /* This line contained something but turned out to be nothing
                but whitespace (a comment?).  */
             continue;
@@ -1027,12 +1032,14 @@ eval (ebuffer_t *ebuf, int set_default)
            it.  If so, we can't parse this line so punt.  */
         if (wtype == w_eol)
           {
-            if (*p2 != '\0')
+            if (*p2 != '\0') {
               /* There's no need to be ivory-tower about this: check for
                  one of the most common bugs found in makefiles...  */
               fatal (fstart, _("missing separator%s"),
                      !strneq(line, "        ", 8) ? ""
                      : _(" (did you mean TAB instead of 8 spaces?)"));
+	      return 0;
+	    }
             continue;
           }
 
@@ -1202,14 +1209,19 @@ eval (ebuffer_t *ebuf, int set_default)
             target = parse_file_seq (&p2, ':', 
 				     sizeof (struct nameseq), 1, fstart);
             ++p2;
-            if (target == 0)
+            if (target == 0) {
               fatal (fstart, _("missing target pattern"));
-            else if (target->next != 0)
+	      return 0;
+            } else if (target->next != 0) {
               fatal (fstart, _("multiple target patterns"));
+	      return 0;
+	    }
             pattern = target->name;
             pattern_percent = find_percent (pattern);
-            if (pattern_percent == 0)
+            if (pattern_percent == 0) {
               fatal (fstart, _("target pattern contains no `%%'"));
+	      return 0;
+	    }
             free((char *)target);
           }
         else
@@ -1269,8 +1281,10 @@ eval (ebuffer_t *ebuf, int set_default)
 
 #undef	word1eq
 
-  if (conditionals->if_cmds)
+  if (conditionals->if_cmds) {
     fatal (fstart, _("missing `endif'"));
+    return 0;
+  }
 
   /* At eof, record the last rule.  */
   record_waiting_files ();
@@ -2219,11 +2233,7 @@ parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip,
   char *q;
   char *name;
 
-#ifdef VMS
-# define VMS_COMMA ','
-#else
-# define VMS_COMMA 0
-#endif
+#define VMS_COMMA 0
 
   while (1)
     {
@@ -2237,19 +2247,6 @@ parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip,
       /* Yes, find end of next name.  */
       q = p;
       p = find_char_unquote (q, stopchar, VMS_COMMA, 1);
-#ifdef VMS
-	/* convert comma separated list to space separated */
-      if (p && *p == ',')
-	*p =' ';
-#endif
-#ifdef _AMIGA
-      if (stopchar == ':' && p && *p == ':'
-          && !(isspace ((unsigned char)p[1]) || !p[1]
-               || isspace ((unsigned char)p[-1])))
-      {
-	p = find_char_unquote (p+1, stopchar, VMS_COMMA, 1);
-      }
-#endif
 #ifdef HAVE_DOS_PATHS
     /* For DOS paths, skip a "C:\..." or a "C:/..." until we find the
        first colon which isn't followed by a slash or a backslash.
@@ -2282,43 +2279,9 @@ parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip,
 
       if (q == p)
 	/* ".///" was stripped to "". */
-#ifdef VMS
-	continue;
-#else
-#ifdef _AMIGA
-	name = savestring ("", 0);
-#else
 	name = savestring ("./", 2);
-#endif
-#endif
       else
-#ifdef VMS
-/* VMS filenames can have a ':' in them but they have to be '\'ed but we need
- *  to remove this '\' before we can use the filename.
- * Savestring called because q may be read-only string constant.
- */
-	{
-	  char *qbase = xstrdup (q);
-	  char *pbase = qbase + (p-q);
-	  char *q1 = qbase;
-	  char *q2 = q1;
-	  char *p1 = pbase;
-
-	  while (q1 != pbase)
-	    {
-	      if (*q1 == '\\' && *(q1+1) == ':')
-		{
-		  q1++;
-		  p1--;
-		}
-	      *q2++ = *q1++;
-	    }
-	  name = savestring (qbase, p1 - qbase);
-	  free (qbase);
-	}
-#else
 	name = savestring (q, p - q);
-#endif
 
       /* Add it to the front of the chain.  */
       new1 = (struct nameseq *) xmalloc (size);
@@ -2781,11 +2744,8 @@ void
 construct_include_path (char **arg_dirs)
 {
   unsigned int i;
-#ifdef VAXC		/* just don't ask ... */
-  stat_t stbuf;
-#else
   struct stat stbuf;
-#endif
+
   /* Table to hold the dirs.  */
 
   unsigned int defsize = (sizeof (default_include_directories)
@@ -2883,7 +2843,6 @@ construct_include_path (char **arg_dirs)
 char *
 tilde_expand (char *name)
 {
-#ifndef VMS
   if (name[1] == '/' || name[1] == '\0')
     {
       extern char *getenv ();
@@ -2906,7 +2865,7 @@ tilde_expand (char *name)
 	  free (home_dir);
 	  home_dir = getenv ("HOME");
 	}
-#if !defined(_AMIGA) && !defined(WINDOWS32)
+#if !defined(WINDOWS32)
       if (home_dir == 0 || home_dir[0] == '\0')
 	{
 	  extern char *getlogin ();
@@ -2919,7 +2878,7 @@ tilde_expand (char *name)
 		home_dir = p->pw_dir;
 	    }
 	}
-#endif /* !AMIGA && !WINDOWS32 */
+#endif /* !WINDOWS32 */
       if (home_dir != 0)
 	{
 	  char *new = concat (home_dir, "", name + 1);
@@ -2928,7 +2887,7 @@ tilde_expand (char *name)
 	  return new;
 	}
     }
-#if !defined(_AMIGA) && !defined(WINDOWS32)
+#if !defined(WINDOWS32)
   else
     {
       struct passwd *pwent;
@@ -2946,8 +2905,7 @@ tilde_expand (char *name)
       else if (userend != 0)
 	*userend = '/';
     }
-#endif /* !AMIGA && !WINDOWS32 */
-#endif /* !VMS */
+#endif /* !WINDOWS32 */
   return 0;
 }
 #endif /*HAVE_TILDE_EXPAND*/
