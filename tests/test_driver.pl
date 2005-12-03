@@ -12,7 +12,7 @@
 # this routine controls the whole mess; each test suite sets up a few
 # variables and then calls &toplevel, which does all the real work.
 
-# $Id: test_driver.pl,v 1.6 2005/12/03 19:53:50 rockyb Exp $
+# $Id: test_driver.pl,v 1.7 2005/12/03 20:13:18 rockyb Exp $
 
 sub print_standard_usage
 {
@@ -36,7 +36,7 @@ options are:
   --help                 -- This help
   --make *make-program*  -- location of GNU Make program to use in test(s).
 
-A test names generally have a category name and a test within the category,
+Test names generally have a category name and a test within the category,
 e.g. \"features/default_names\" and these correspond to the perl programs
 in the scripts directory. However you can also give the script name, e.g.
 \"scripts/features/default_names\". Any trailing .pl extension in a test name

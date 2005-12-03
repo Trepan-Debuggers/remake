@@ -26,7 +26,11 @@ Version 3.80+dbg-0.5cvs
 * Remove hash stats on printing variables -- generally not wanted for
   users (rather than GNU Make maintainers)
 
-* Reduce memory leaks via valgrind.
+* Reduce memory leaks and uninitialized read reduced via valgrind.
+
+* Revise testing mechanism for a more modern use of Perl. Can specify 
+  test program file name (./scripts/variables/special) test name
+  (variables/special). The former is works better with command completion.
 
 * More document updates
 
