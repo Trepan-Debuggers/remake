@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.56 2005/12/04 01:39:30 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.57 2005/12/04 02:21:59 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -139,9 +139,9 @@ long_cmd_t commands[] = {
   { "skip"    , 'k' },
   { "step"    , 's' },
   { "target"  , 't' },
+  { "up"      , 'u' },
   { "where"   , 'T' },
   { "write"   , 'w' },
-  { "up"      , 'u' },
   { (char *)NULL, ' '}
 };
 
