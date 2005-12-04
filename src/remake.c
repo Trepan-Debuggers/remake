@@ -1,4 +1,4 @@
-/* $Id: remake.c,v 1.11 2005/12/04 13:22:48 rockyb Exp $
+/* $Id: remake.c,v 1.12 2005/12/04 15:48:47 rockyb Exp $
 Basic dependency engine for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -1296,7 +1296,7 @@ f_mtime (file_t *file, int search)
 
 	FILE_TIMESTAMP adjusted_mtime = mtime;
 
-#if defined(WINDOWS32) || defined(__MSDOS__)
+#if defined(WINDOWS32) || defined(__MSDOS__) || defined(__CYGWIN__)
 	/* Experimentation has shown that FAT filesystems can set file times
 	   up to 3 seconds into the future!  Play it safe.  */
 

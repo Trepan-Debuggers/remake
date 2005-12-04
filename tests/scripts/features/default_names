@@ -1,65 +1,49 @@
 #                                                                    -*-perl-*-
+# $Id: default_names,v 1.2 2005/12/04 15:48:51 rockyb Exp $
 
-$description = "This script tests to make sure that Make looks for
-default makefiles in the correct order (GNUmakefile,makefile,Makefile)";
+$description = "This script tests to make sure that GNU Make looks for
+default makefiles in the correct order: GNUmakefile, makefile, Makefile.
 
-# Create a makefile called "GNUmakefile"
-$makefile = "GNUmakefile";
+On non UNIX platforms, notably Microsoft OS's filenames may be case
+insensitive (e.g. makefile can match Makefile). So on these systems we
+check only the order GNUmakefile, Makefile.
 
-open(MAKEFILE,"> $makefile");
+Note that this test removes its makefiles on success even if \"--keep\" is
+in effect.
+";
 
-print MAKEFILE "FIRST: ; \@echo It chose GNUmakefile\n";
-
-close(MAKEFILE);
-
-# DOS/WIN32 platforms preserve case, but Makefile is the same file as makefile.
-# Just test what we can here (avoid Makefile versus makefile test).
-#
-if ($port_type eq 'UNIX')
-{
-  # Create another makefile called "makefile"
-  open(MAKEFILE,"> makefile");
-
-  print MAKEFILE "SECOND: ; \@echo It chose makefile\n";
-
-  close(MAKEFILE);
+sub write_makefile($$) {
+    my ($makefile, $position) = @_;
+    open(MAKEFILE,">$makefile");
+    printf MAKEFILE "%s: ; \@echo It chose $makefile\n", $position;
+    close(MAKEFILE);
 }
 
+sub run_compare_test($) {
+    my $makefile = $_[0];
+    &run_make_with_options("","",&get_logfile);
+    my $answer = "It chose $makefile\n";
+    &compare_output($answer, &get_logfile(1)) || &error("abort");
+    unlink $makefile;
+}
+
+# Create a makefile called "GNUmakefile"
+write_makefile("GNUmakefile", "FIRST");
+
+# DOS/WIN32 platforms preserve case, but Makefile is the same file as makefile.
+# So we'll have to skip the test of preferring makefile over Makefile.
+#
+write_makefile("makefile", "SECOND") if ($port_type eq 'UNIX');
 
 # Create another makefile called "Makefile"
-open(MAKEFILE,"> Makefile");
-
-print MAKEFILE "THIRD: ; \@echo It chose Makefile\n";
-
-close(MAKEFILE);
-
-
-&run_make_with_options("","",&get_logfile);
-
-# Create the answer to what should be produced by this Makefile
-$answer = "It chose GNUmakefile\n";
+write_makefile("Makefile", "THIRD");
 
 # COMPARE RESULTS
 
-&compare_output($answer,&get_logfile(1)) || &error("abort");
-unlink $makefile;
+run_compare_test("GNUmakefile");
 
 # DOS/WIN32 platforms preserve case, but Makefile is the same file as makefile.
 # Just test what we can here (avoid Makefile versus makefile test).
 #
-if ($port_type eq 'UNIX')
-{
-  $answer = "It chose makefile\n";
-
-  &run_make_with_options("","",&get_logfile);
-
-  &compare_output($answer,&get_logfile(1)) || &error("abort");
-  unlink "makefile";
-}
-
-$answer = "It chose Makefile\n";
-
-&run_make_with_options("","",&get_logfile);
-
-&compare_output($answer,&get_logfile(1)) || &error("abort");
-unlink "Makefile";
+run_compare_test("makefile") if ($port_type eq 'UNIX');
+run_compare_test("Makefile");

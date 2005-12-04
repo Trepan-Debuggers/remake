@@ -12,7 +12,7 @@
 # this routine controls the whole mess; each test suite sets up a few
 # variables and then calls &toplevel, which does all the real work.
 
-# $Id: test_driver.pl,v 1.7 2005/12/03 20:13:18 rockyb Exp $
+# $Id: test_driver.pl,v 1.8 2005/12/04 15:48:51 rockyb Exp $
 
 sub print_standard_usage
 {
@@ -263,7 +263,7 @@ sub get_osname
     # to not get ugly error messages if uname can't be found.
     # Hmmm, BSD/OS 2.0's uname -a is excessively verbose.  Let's try it
     # with switches first.
-    eval "chop (\$osname = `sh -c 'uname -nmsr 2>&1'`)";
+    eval "chomp (\$osname = `sh -c 'uname -nmsr 2>&1'`)";
     if ($osname =~ /not found/i)
     {
 	$osname = "(something unixy with no uname)";
