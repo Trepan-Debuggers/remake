@@ -1,6 +1,7 @@
-/* Definition of target file data structures for GNU Make.
+/* $Id: file.h,v 1.2 2005/12/04 01:44:16 rockyb Exp $
+Definition of target file data structures for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1997,
-2002, 2004 Free Software Foundation, Inc.
+2002, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -23,8 +24,8 @@ Boston, MA 02111-1307, USA.  */
    that the makefile says how to make.
    All of these are chained together through `next'.  */
 
-#ifndef FILEDEF_H
-#define FILEDEF_H
+#ifndef FILE_H
+#define FILE_H
 
 #include "make.h"
 #include "hash.h"
@@ -236,4 +237,4 @@ extern void file_timestamp_sprintf (char *p, FILE_TIMESTAMP ts);
 #define check_renamed(file) \
   while ((file)->renamed != 0) (file) = (file)->renamed /* No ; here.  */
 
-#endif /*FILEDEF_H*/
+#endif /*FILE_H*/
