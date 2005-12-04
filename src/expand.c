@@ -1,4 +1,4 @@
-/* $Id: expand.c,v 1.7 2005/11/27 21:52:23 rockyb Exp $
+/* $Id: expand.c,v 1.8 2005/12/04 01:39:30 rockyb Exp $
 Variable expansion functions for GNU Make.
 Copyright (C) 1988, 89, 91, 92, 93, 95, 
 2004, 2005 Free Software Foundation, Inc.
@@ -84,7 +84,7 @@ initialize_variable_output (void)
 {
   /* If we don't have a variable output buffer yet, get one.  */
 
-  if (variable_buffer == 0)
+  if (!variable_buffer)
     {
       variable_buffer_length = 200;
       variable_buffer = (char *) xmalloc (variable_buffer_length);
@@ -173,15 +173,14 @@ reference_variable (char *o, char *name, unsigned int length)
   return o;
 }
 
-/* Scan STRING for variable references and expansion-function calls.  Only
+/*! Scan STRING for variable references and expansion-function calls.  Only
    LENGTH bytes of STRING are actually scanned.  If LENGTH is -1, scan until
    a null byte is found.
 
-   Write the results to LINE, which must point into `variable_buffer'.  If
-   LINE is NULL, start at the beginning of the buffer.
-   Return a pointer to LINE, or to the beginning of the buffer if LINE is
+   Write the results to PSZ_LINE, which must point into `variable_buffer'.  If
+   PSZ_LINE is NULL, start at the beginning of the buffer.
+   Return a pointer to PSZ_LINE, or to the beginning of the buffer if LINE is
    NULL.  */
-
 char *
 variable_expand_string (char *psz_line, char *string, long length)
 {
@@ -410,7 +409,7 @@ variable_expand_string (char *psz_line, char *string, long length)
   return (variable_buffer + line_offset);
 }
 
-/* Scan LINE for variable references and expansion-function calls.
+/* Scan PSZ_LINE for variable references and expansion-function calls.
    Build in `variable_buffer' the result of expanding the references and calls.
    Return the address of the resulting string, which is null-terminated
    and is valid only until the next time this function is called.  */

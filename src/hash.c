@@ -1,4 +1,4 @@
-/* $Id: hash.c,v 1.2 2005/12/03 12:49:42 rockyb Exp $
+/* $Id: hash.c,v 1.3 2005/12/04 01:39:30 rockyb Exp $
    hash.c -- hash table maintenance
    Copyright (C) 1995, 1999, 2002, 2004, 2005 Free Software Foundation, Inc.
    Written by Greg McGary <gkm@gnu.org> <greg@mcgary.org>
@@ -207,9 +207,9 @@ hash_delete_items (hash_table_t *ht)
 }
 
 void
-hash_free (hash_table_t *ht, int free_items)
+hash_free (hash_table_t *ht, bool b_free_items)
 {
-  if (free_items)
+  if (b_free_items)
     hash_free_items (ht);
   else
     {

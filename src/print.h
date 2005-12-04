@@ -1,4 +1,4 @@
-/* $Id: print.h,v 1.6 2005/12/03 01:27:45 rockyb Exp $
+/* $Id: print.h,v 1.7 2005/12/04 01:39:30 rockyb Exp $
 Header for output or logging functions for GNU Make.
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -28,74 +28,77 @@ Boston, MA 02111-1307, USA.  */
 /*! Fancy processing for variadic functions in both ANSI and pre-ANSI
    compilers.  */
 #if defined __STDC__ && __STDC__
-extern void message (int prefix, const char *fmt, ...)
+void message (int prefix, const char *fmt, ...)
                      __attribute__ ((__format__ (__printf__, 2, 3)));
-extern void error (const floc_t *flocp, const char *fmt, ...)
+void error (const floc_t *flocp, const char *fmt, ...)
                    __attribute__ ((__format__ (__printf__, 2, 3)));
-extern void fatal (const floc_t *flocp, const char *fmt, ...)
+void fatal (const floc_t *flocp, const char *fmt, ...)
                    __attribute__ ((__format__ (__printf__, 2, 3)));
 #else
-extern void message ();
-extern void error ();
-extern void fatal ();
+void message ();
+void error ();
+void fatal ();
 #endif
 
 /*! Versions of error and fatal with the ability to show call-stack. */
 #if defined __STDC__ && __STDC__
-extern void err (target_stack_node_t *p_call, const char *fmt, ...)
+void err (target_stack_node_t *p_call, const char *fmt, ...)
                    __attribute__ ((__format__ (__printf__, 2, 3)));
-extern void fatal_err (target_stack_node_t *p_call, const char *fmt, ...)
+void fatal_err (target_stack_node_t *p_call, const char *fmt, ...)
                    __attribute__ ((noreturn, __format__ (__printf__, 2, 3)));
 #else
-extern void err();
-extern void fatal_err();
+void err();
+void fatal_err();
 #endif
 
 /* Think of the below not as an enumeration but as #defines done in a
    way that we'll be able to use the value in a gdb. */
-extern enum debug_print_enums_e {
+enum debug_print_enums_e {
   MAX_STACK_SHOW = 1000,
 } debug_print_enums1;
 
 /*! Under -d, write a message describing the current IDs.  */
-extern void log_access (char *flavor);
+void log_access (char *flavor);
 
 /*! Write a message indicating that we've just entered or
   left (according to ENTERING) the current directory.  */
-extern void log_working_directory (int);
+void log_working_directory (int);
 
 /*! Print an error message from errno.  */
-extern void perror_with_name (const char *, const char *);
+void perror_with_name (const char *, const char *);
 
 /*! Print an error message from errno and exit.  */
-extern void pfatal_with_name (const char *psz_name);
+void pfatal_with_name (const char *psz_name);
 
 /*! Display a variable and its value. */
-extern void print_variable (variable_t *p_v);
+void print_variable (variable_t *p_v);
 
 /*! Display a variable and its value with all substitutions included. */
-extern void print_variable_expand (variable_t *p_v);
+void print_variable_expand (variable_t *p_v);
 
 /*! Display common file target prefix message output file target. */
-extern void print_file_target_prefix (const file_t *p_target);
+void print_file_target_prefix (const file_t *p_target);
 
 /*! Display common target prefix message. */
-extern void print_target_prefix (const char *p_name);
+void print_target_prefix (const char *p_name);
 
 /*! Display common prefix message output file target. */
-extern void print_floc_prefix (const floc_t *p_floc);
+void print_floc_prefix (const floc_t *p_floc);
 
 /*! Display common prefix message output file target. */
-extern debug_return_t print_child_cmd (child_t *p_child, 
+debug_return_t print_child_cmd (child_t *p_child, 
 				       target_stack_node_t *p);
 
 /*! Display the target stack i_pos is the position we are currently.
   i_max is the maximum number of entries to show.
  */
-extern void print_target_stack (target_stack_node_t *p, int i_pos, int i_max);
+void print_target_stack (target_stack_node_t *p, int i_pos, int i_max);
 
 /*! Display the Makefile read stack. i_pos is the position we are currently.
   i_max is the maximum number of entries to show. */
-extern void print_floc_stack (int i_pos, int i_max);
+void print_floc_stack (int i_pos, int i_max);
+
+/*! Print the list makefiles read by read_makefiles().  */
+void print_read_makefiles (void);
 
 #endif /*PRINT_H*/

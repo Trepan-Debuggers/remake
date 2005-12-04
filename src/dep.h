@@ -40,27 +40,23 @@ Boston, MA 02111-1307, USA.  */
 
    Note that the first two words of this match a struct nameseq.  */
 
-struct dep
+typedef struct dep
   {
     struct dep *next;
     char *name;
     struct file *file;
     unsigned int changed : 8;
     unsigned int ignore_mtime : 1;
-  };
-
-typedef struct dep dep_t;
+  } dep_t;
 
 /* Structure used in chains of names, for parsing and globbing.  */
 
-struct nameseq
+typedef struct nameseq
   {
     struct nameseq *next;
     char *name;
     floc_t floc;
-  };
-
-typedef struct nameseq nameseq_t;
+  } nameseq_t;
 
 #ifndef NO_ARCHIVES
 extern nameseq_t *ar_glob (char *arname, char *member_pattern, 
@@ -70,20 +66,18 @@ extern nameseq_t *ar_glob (char *arname, char *member_pattern,
 /*! Whether or not .SECONDARY with no prerequisites was given.  */
 extern int all_secondary;
 
-#ifndef	iAPX286
 #define dep_name(d) ((d)->name == 0 ? (d)->file->name : (d)->name)
-#else
-/* Buggy compiler can't hack this.  */
-extern char *dep_name ();
-#endif
 
 /*! Copy dependency chain making a new chain with the same contents
   as the old one and return that.  The return value is malloc'd. The
   caller must thus free it.
  */
-extern struct dep *copy_dep_chain (dep_t *d);
+dep_t *copy_dep_chain (dep_t *p_dep);
 
-extern struct dep *read_all_makefiles (char **makefiles);
+/*! Free memory associated with a dependency chain.  */
+void free_dep_chain (dep_t *p_dep);
+
+dep_t *read_all_makefiles (char **makefiles);
 
 /*! For each dependency of each file, make the `struct dep' point
    at the appropriate `struct file' (which may have to be created).

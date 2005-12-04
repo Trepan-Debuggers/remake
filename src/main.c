@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.18 2005/12/03 12:49:42 rockyb Exp $
+/* $Id: main.c,v 1.19 2005/12/04 01:39:30 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -87,7 +87,7 @@ static void initialize_global_hash_tables (void);
 
 /* The structure that describes an accepted command switch.  */
 
-struct command_switch
+typedef struct
   {
     int c;			/* The switch character.  */
 
@@ -111,7 +111,7 @@ struct command_switch
     char *default_value;/* Pointer to default value.  */
 
     char *long_name;		/* Long option name.  */
-  };
+  }  command_switch_t;
 
 /* True if C is a switch value that corresponds to a short option.  */
 
@@ -224,7 +224,7 @@ int print_version_flag = 0;
 
 /* List of makefiles given with -f switches.  */
 
-static stringlist_t *makefiles = 0;
+static stringlist_t *makefiles = NULL;
 
 /* Number of job slots (commands that can be run at once).  */
 
@@ -237,7 +237,7 @@ static unsigned int inf_jobs = 0;
 
 /* File descriptors for the jobs pipe.  */
 
-static stringlist_t *jobserver_fds = 0;
+static stringlist_t *jobserver_fds = NULL;
 
 int job_fds[2] = { -1, -1 };
 int job_rfd = -1;
@@ -388,7 +388,7 @@ static const char *const usage[] =
 
 /* The table of command switches.  */
 
-static const struct command_switch switches[] =
+static const command_switch_t switches[] =
   {
     { 'b', ignore, 0, 0, 0, 0, 0, 0, 0 },
     { 'B', flag, (char *) &always_make_flag, 1, 1, 0, 0, 0, "always-make" },
@@ -485,8 +485,12 @@ struct command_variable
 static struct command_variable *command_variables;
 
 
+/*! Value of argv[0] which seems to get modified. Can we merge this with
+    program below? */
+static char *argv0 = NULL;
+
 /*! The name we were invoked with.  */
-char *program;
+char *program = NULL;
 
 /*! Our initial arguments -- used for debugger restart execvp.  */
 char **global_argv;
@@ -505,13 +509,13 @@ unsigned int makelevel;
    start with `.'.  This is the default to remake if the
    command line does not specify.  */
 
-struct file *default_goal_file;
+file_t *default_goal_file = NULL;
 
 /* Pointer to structure for the file .DEFAULT
    whose commands are used for any file that has none of its own.
    This is zero if the makefiles do not define .DEFAULT.  */
 
-struct file *default_file;
+file_t *default_file = NULL;
 
 /* Nonzero if we have seen the magic `.POSIX' target.
    This turns on pedantic compliance with POSIX.2.  */
@@ -529,8 +533,22 @@ int not_parallel;
 
 int clock_skew_detected;
 
-/* Mask of signals that are being caught with fatal_error_signal.  */
 
+/* Free resources associated with p_stringlist */
+static void 
+free_stringlist(stringlist_t *p_stringlist) 
+{
+  if (p_stringlist) {
+    unsigned int i;
+    for (i=0; i<p_stringlist->idx; i++)
+      free(p_stringlist->list[i]);
+    free(p_stringlist->list);
+    free(p_stringlist);
+  }
+}
+
+
+/* Mask of signals that are being caught with fatal_error_signal.  */
 #ifdef	POSIX
 sigset_t fatal_signal_set;
 #else
@@ -1149,12 +1167,6 @@ main (int argc, char **argv, char **envp)
   if (print_version_flag)
     die (0);
 
-#ifndef VMS
-  /* Set the "MAKE_COMMAND" variable to the name we were invoked with.
-     (If it is a relative pathname with a slash, prepend our directory name
-     so the result will run the same program regardless of the current dir.
-     If it is a name with no slash, we can only hope that PATH did not
-     find it in the current directory.)  */
 #ifdef WINDOWS32
   /*
    * Convert from backslashes to forward slashes for
@@ -1165,18 +1177,17 @@ main (int argc, char **argv, char **envp)
   if (strpbrk(argv[0], "/:\\") ||
       strstr(argv[0], "..") ||
       strneq(argv[0], "//", 2))
-    argv[0] = xstrdup(w32ify(argv[0],1));
-#else /* WINDOWS32 */
-#if defined (__MSDOS__) || defined (__EMX__)
-  if (strchr (argv[0], '\\'))
-    {
-      char *p;
-
-      argv[0] = xstrdup (argv[0]);
-      for (p = argv[0]; *p; p++)
-	if (*p == '\\')
-	  *p = '/';
-    }
+    argv0 = xstrdup(w32ify(argv[0],1));
+  else 
+    argv0 = strdup(argv[0]);
+#elsif defined (__MSDOS__)
+  if (strchr (argv[0], '\\')) {
+    char *p;
+    
+    for (p = argv[0]; *p; p++)
+      if (*p == '\\')
+	*p = '/';
+  }
   /* If argv[0] is not in absolute form, prepend the current
      directory.  This can happen when Make is invoked by another DJGPP
      program that uses a non-absolute name.  */
@@ -1184,18 +1195,20 @@ main (int argc, char **argv, char **envp)
       && argv[0] != 0
       && (argv[0][0] != '/' && (argv[0][0] == '\0' || argv[0][1] != ':'))
       )
-    argv[0] = concat (current_directory, "/", argv[0]);
+    argv0 = concat (current_directory, "/", argv[0]);
+  else 
+    argv0 = strdup(argv[0]);
 #else  /* !__MSDOS__ */
   if (current_directory[0] != '\0'
       && argv[0] != 0 && argv[0][0] != '/' && strchr (argv[0], '/') != 0)
-    argv[0] = concat (current_directory, "/", argv[0]);
-#endif /* !__MSDOS__ */
+    argv0 = concat (current_directory, "/", argv[0]);
+  else 
+    argv0 = strdup(argv[0]);
 #endif /* WINDOWS32 */
-#endif
 
   /* The extra indirection through $(MAKE_COMMAND) is done
      for hysterical raisins.  */
-  (void) define_variable ("MAKE_COMMAND", 12, argv[0], o_default, 0);
+  (void) define_variable ("MAKE_COMMAND", 12, argv0, o_default, 0);
   (void) define_variable ("MAKE", 4, "$(MAKE_COMMAND)", o_default, 1);
 
   if (command_variables != 0)
@@ -1330,7 +1343,7 @@ main (int argc, char **argv, char **envp)
 
   /* Read any stdin makefiles into temporary files.  */
 
-  if (makefiles != 0)
+  if (makefiles)
     {
       unsigned int i;
       for (i = 0; i < makefiles->idx; ++i)
@@ -1477,7 +1490,7 @@ main (int argc, char **argv, char **envp)
   }
 #endif /* WINDOWS32 */
 
-#if defined (__MSDOS__) || defined (__EMX__)
+#if defined (__MSDOS__)
   /* We need to know what kind of shell we will be using.  */
   {
     extern int _is_unixy_shell (const char *_path);
@@ -1497,27 +1510,10 @@ main (int argc, char **argv, char **envp)
 	  default_shell = shell_path;
       }
   }
-#endif /* __MSDOS__ || __EMX__ */
+#endif /* __MSDOS__ */
 
   /* Decode switches again, in case the variables were set by the makefile.  */
   decode_env_switches ("MAKEFLAGS", 9);
-#if 0
-  decode_env_switches ("MFLAGS", 6);
-#endif
-
-#if defined (__MSDOS__) || defined (__EMX__)
-  if (job_slots != 1
-# ifdef __EMX__
-      && _osmode != OS2_MODE /* turn off -j if we are in DOS mode */
-# endif
-      )
-    {
-      error (NILF,
-             _("Parallel jobs (-j) are not supported on this platform."));
-      error (NILF, _("Resetting to single job (-j1) mode."));
-      job_slots = 1;
-    }
-#endif
 
 #ifdef MAKE_JOBSERVER
   /* If the jobserver-fds option is seen, make sure that -j is reasonable.  */
@@ -1910,28 +1906,8 @@ main (int argc, char **argv, char **envp)
           if (job_rfd >= 0)
             close (job_rfd);
 
-#if defined (__EMX__)
-	  {
-	    /* It is not possible to use execve() here because this
-	       would cause the parent process to be terminated with
-	       exit code 0 before the child process has been terminated.
-	       Therefore it may be the best solution simply to spawn the
-	       child process including all file handles and to wait for its
-	       termination. */
-	    int pid;
-	    int status;
-	    pid = child_execute_job (0, 1, nargv, environ);
-
-	    /* is this loop really necessary? */
-	    do {
-	      pid = wait (&status);
-	    } while (pid <= 0);
-	    /* use the exit code of the child process */
-	    exit (WIFEXITED(status) ? WEXITSTATUS(status) : EXIT_FAILURE);
-	  }
-#else
 	  exec_command (nargv, environ);
-#endif
+
 	  /* NOTREACHED */
 
 	default:
@@ -2185,8 +2161,8 @@ static void
 decode_switches (int argc, char **argv, int env)
 {
   int bad = 0;
-  const struct command_switch *cs;
-  stringlist_t *sl;
+  const command_switch_t *cs;
+  stringlist_t *sl=NULL;
   int c;
 
   /* getopt does most of the parsing for us.
@@ -2253,7 +2229,7 @@ decode_switches (int argc, char **argv, int env)
                     }
 
 		  sl = *(stringlist_t **) cs->value_ptr;
-		  if (sl == 0)
+		  if (!sl)
 		    {
 		      sl = (stringlist_t *)
 			xmalloc (sizeof (stringlist_t));
@@ -2269,14 +2245,14 @@ decode_switches (int argc, char **argv, int env)
 			xrealloc ((char *) sl->list,
 				  sl->max * sizeof (char *));
 		    }
-		  sl->list[sl->idx++] = optarg;
+		  sl->list[sl->idx++] = strdup(optarg);
 		  sl->list[sl->idx] = 0;
 		  break;
 
 		case positive_int:
                   /* See if we have an option argument; if we do require that
                      it's all digits, not something like "10foo".  */
-		  if (optarg == 0 && argc > optind)
+		  if (!optarg && argc > optind)
                     {
                       const char *cp;
                       for (cp=argv[optind]; ISDIGIT (cp[0]); ++cp)
@@ -2356,6 +2332,7 @@ decode_env_switches (char *envar, unsigned int len)
 {
   char *varref = (char *) alloca (2 + len + 2);
   char *value, *p;
+  char *psz_line;  
   int argc;
   char **argv;
 
@@ -2365,13 +2342,16 @@ decode_env_switches (char *envar, unsigned int len)
   memmove (&varref[2], envar, len);
   varref[2 + len] = ')';
   varref[2 + len + 1] = '\0';
-  value = variable_expand (varref);
+  psz_line = value = variable_expand (varref);
 
   /* Skip whitespace, and check for an empty value.  */
   value = next_token (value);
   len = strlen (value);
-  if (len == 0)
+  if (len == 0) {
+    free(variable_buffer);
+    variable_buffer=NULL;
     return;
+  }
 
   /* Allocate a vector that is definitely big enough.  */
   argv = (char **) alloca ((1 + len + 1) * sizeof (char *));
@@ -2383,7 +2363,7 @@ decode_env_switches (char *envar, unsigned int len)
 
   /* getopt will look at the arguments starting at ARGV[1].
      Prepend a spacer word.  */
-  argv[0] = 0;
+  argv[0] = NULL;
   argc = 1;
   argv[argc] = p;
   while (*value != '\0')
@@ -2414,6 +2394,8 @@ decode_env_switches (char *envar, unsigned int len)
 
   /* Parse those words.  */
   decode_switches (argc, argv, 1);
+  free(variable_buffer);
+  variable_buffer=NULL;
 }
 
 /* Quote the string IN so that it will be interpreted as a single word with
@@ -2446,7 +2428,7 @@ define_makeflags (int all, int makefile)
 {
   static const char ref[] = "$(MAKEOVERRIDES)";
   static const char posixref[] = "$(-*-command-variables-*-)";
-  const struct command_switch *cs;
+  const command_switch_t *cs;
   char *flagstring;
   char *p;
   unsigned int words;
@@ -2460,7 +2442,7 @@ define_makeflags (int all, int makefile)
   struct flag
     {
       struct flag *next;
-      const struct command_switch *cs;
+      const command_switch_t *cs;
       char *arg;
     };
   struct flag *flags = 0;
@@ -2801,8 +2783,21 @@ die (int status)
       log_working_directory (0);
     }
 
+  free(argv0);
+  free_stringlist(makefiles);
+  free_stringlist(tracing_opts);
+  free_stringlist(jobserver_fds);
+  free_stringlist(directories);
+  free_stringlist(include_directories);
+  free_stringlist(old_files);
+  free_stringlist(new_files);
+  free_stringlist(debugger_opts);
+
+  free_include_directories();
   free_default_suffix_rules();
   pop_variable_scope(true);
+  free_dep_chain(read_makefiles);
+  hash_free(&files, true);
 
   exit (status);
 }

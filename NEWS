@@ -20,6 +20,8 @@ Version 3.80+dbg-0.5cvs
      expanded.
    - allow @ or $@ as a target name 
 
+* Add "info makefiles" to show what Makefiles have been read in.
+
 * Add a number of aliases (e.g. backtrace, bt, !!) 
   and via an internal alias mechanism
 
@@ -32,7 +34,7 @@ Version 3.80+dbg-0.5cvs
   test program file name (./scripts/variables/special) test name
   (variables/special). The former is works better with command completion.
 
-* More document updates
+* More document updates.
 
 Version 3.80+dbg-0.4
 

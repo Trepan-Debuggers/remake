@@ -20,10 +20,12 @@ Boston, MA 02111-1307, USA.  */
 
 #include "make.h"
 #include "commands.h"
+#include "dbg_cmd.h"
+#include "debug.h"
+#include "dep.h"
 #include "expand.h"
 #include "print.h"
-#include "debug.h"
-#include "dbg_cmd.h"
+#include "read.h"
 
 /* Think of the below not as an enumeration but as #defines done in a
    way that we'll be able to use the value in a gdb. */
@@ -519,3 +521,19 @@ print_floc_stack (int i_pos, int i_max)
     printf ("\n");
   }
 }
+
+/*! Print the list makefiles read by read_makefiles().  */
+void print_read_makefiles (void) 
+{
+  dep_t *p_dep;
+  if (!p_dep) return;
+  for (p_dep = read_makefiles; p_dep; p_dep = p_dep->next) {
+    if (p_dep->file) {
+      if (p_dep != read_makefiles)
+	printf(", ");
+      printf("%s", p_dep->file->name);
+    }
+  }
+  printf("\n");
+}
+

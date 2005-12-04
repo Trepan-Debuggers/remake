@@ -1,4 +1,4 @@
-/* $Id: expand.h,v 1.3 2005/11/27 11:39:33 rockyb Exp $
+/* $Id: expand.h,v 1.4 2005/12/04 01:39:30 rockyb Exp $
 Header for variable expansion functions for GNU Make.
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -67,12 +67,12 @@ extern void restore_variable_buffer(char *buf, unsigned int len);
 extern char *variable_buffer_output(char *ptr, char *psz_string, 
 				    unsigned int length);
 
-/*! Scan LINE for variable references and expansion-function calls.
+/*! Scan PSZ_LINE for variable references and expansion-function calls.
    Build in `variable_buffer' the result of expanding the references and calls.
    Return the address of the resulting string, which is null-terminated
    and is valid only until the next time this function is called.  */
 
-extern char *variable_expand(char *line);
+extern char *variable_expand(char *psz_line);
 
 /** Expand PSZ_LINE. Expansion uses P_FILE_SET if it is not NULL. */
 extern char *variable_expand_set (char *psz_line, 
@@ -82,10 +82,10 @@ extern char *variable_expand_set (char *psz_line,
    LENGTH bytes of STRING are actually scanned.  If LENGTH is -1, scan until
    a null byte is found.
 
-   Write the results to LINE, which must point into `variable_buffer'.  If
+   Write the results to PSZ_LINE, which must point into `variable_buffer'.  If
    LINE is NULL, start at the beginning of the buffer.
-   Return a pointer to LINE, or to the beginning of the buffer if LINE is
-   NULL.  */
+   Return a pointer to PSZ_LINE, or to the beginning of the buffer if 
+   PSZ_LINE is NULL.  */
 
 char *variable_expand_string(char *line, char *string, long int length);
 

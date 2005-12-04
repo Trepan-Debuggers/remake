@@ -1,4 +1,4 @@
-/* $Id: hash.h,v 1.4 2005/12/03 18:29:20 rockyb Exp $
+/* $Id: hash.h,v 1.5 2005/12/04 01:39:30 rockyb Exp $
    hash.h -- decls for hash table
    Copyright (C) 1995, 1999, 2002, 2004, 2005 Free Software Foundation, Inc.
    Written by Greg McGary <gkm@gnu.org> <greg@mcgary.org>
@@ -20,6 +20,8 @@
 #ifndef _HASH_H__
 #define _HASH_H__
 
+#include "config.h"
+#include "types.h"
 #include <stdio.h>
 #include <ctype.h>
 
@@ -59,7 +61,7 @@ void *hash_delete (hash_table_t *ht, void const *item);
 void *hash_delete_at (hash_table_t *ht, void const *slot);
 void hash_delete_items (hash_table_t *ht);
 void hash_free_items (hash_table_t *ht);
-void hash_free (hash_table_t *ht, int free_items);
+void hash_free (hash_table_t *ht, bool b_free_items);
 void hash_map (hash_table_t *ht, hash_map_func_t map);
 void hash_map_arg (hash_table_t *ht, hash_map_arg_func_t map, 
 		       void *arg);

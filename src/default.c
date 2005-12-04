@@ -1,4 +1,4 @@
-/* $Id: default.c,v 1.3 2005/12/03 12:49:42 rockyb Exp $
+/* $Id: default.c,v 1.4 2005/12/04 01:39:30 rockyb Exp $
 Data base of default implicit rules for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96, 2004 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -29,7 +29,7 @@ Boston, MA 02111-1307, USA.  */
 
 /* Define GCC_IS_NATIVE if gcc is the native development environment on
    your system (gcc/bison/flex vs cc/yacc/lex).  */
-#if defined(__MSDOS__) || defined(__EMX__)
+#if defined(__MSDOS__) 
 # define GCC_IS_NATIVE
 #endif
 
@@ -38,20 +38,10 @@ Boston, MA 02111-1307, USA.  */
    `.s' must come last, so that a `.o' file will be made from
    a `.c' or `.p' or ... file rather than from a .s file.  */
 
-static char default_suffixes[]
-#ifdef VMS
-  = ".exe .olb .ln .obj .c .cxx .cc .pas .p .for .f .r .y .l .mar \
-.s .ss .i .ii .mod .sym .def .h .info .dvi .tex .texinfo .texi .txinfo \
-.w .ch .cweb .web .com .sh .elc .el";
-#elif defined(__EMX__)
-  = ".out .a .ln .o .c .cc .C .cpp .p .f .F .r .y .l .s .S \
-.mod .sym .def .h .info .dvi .tex .texinfo .texi .txinfo \
-.w .ch .web .sh .elc .el .obj .exe .dll .lib";
-#else
-  = ".out .a .ln .o .c .cc .C .cpp .p .f .F .r .y .l .s .S \
+static char default_suffixes[] = 
+".out .a .ln .o .c .cc .C .cpp .p .f .F .r .y .l .s .S \
 .mod .sym .def .h .info .dvi .tex .texinfo .texi .txinfo \
 .w .ch .web .sh .elc .el";
-#endif
 
 static struct pspec default_pattern_rules[] =
   {
@@ -61,13 +51,9 @@ static struct pspec default_pattern_rules[] =
     /* The X.out rules are only in BSD's default set because
        BSD Make has no null-suffix rules, so `foo.out' and
        `foo' are the same thing.  */
-#ifdef VMS
-    { "%.exe", "%",
-        "copy $< $@" },
-#else
     { "%.out", "%",
 	"@rm -f $@ \n cp $< $@" },
-#endif
+
     /* Syntax is "ctangle foo.w foo.ch foo.c".  */
     { "%.c", "%.w %.ch",
 	"$(CTANGLE) $^ $@" },
@@ -79,20 +65,6 @@ static struct pspec default_pattern_rules[] =
 
 static struct pspec default_terminal_rules[] =
   {
-#ifdef VMS
-    /* RCS.  */
-    { "%", "%$$5lv", /* Multinet style */
-        "if f$$search($@) .nes. \"\" then +$(CHECKOUT,v)" },
-    { "%", "[.$$rcs]%$$5lv", /* Multinet style */
-        "if f$$search($@) .nes. \"\" then +$(CHECKOUT,v)" },
-    { "%", "%_v", /* Normal style */
-        "if f$$search($@) .nes. \"\" then +$(CHECKOUT,v)" },
-    { "%", "[.rcs]%_v", /* Normal style */
-        "if f$$search($@) .nes. \"\" then +$(CHECKOUT,v)" },
-
-    /* SCCS.  */
-	/* ain't no SCCS on vms */
-#else
     /* RCS.  */
     { "%", "%,v",
 	"$(CHECKOUT,v)" },
@@ -106,7 +78,6 @@ static struct pspec default_terminal_rules[] =
 	"$(GET) $(GFLAGS) $(SCCS_OUTPUT_OPTION) $<" },
     { "%", "SCCS/s.%",
 	"$(GET) $(GFLAGS) $(SCCS_OUTPUT_OPTION) $<" },
-#endif /* !VMS */
     { 0, 0, 0 }
   };
 

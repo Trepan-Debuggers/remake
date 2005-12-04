@@ -1,4 +1,4 @@
-/* $Id: read.c,v 1.18 2005/12/03 12:49:42 rockyb Exp $
+/* $Id: read.c,v 1.19 2005/12/04 01:39:30 rockyb Exp $
 Reading and parsing of makefiles for GNU Make.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
@@ -114,7 +114,7 @@ static char *default_include_directories[] =
     "/usr/gnu/include",
     "/usr/local/include",
     "/usr/include",
-    0
+    NULL
   };
 
 /* List of directories to search for include files in  */
@@ -131,8 +131,7 @@ static unsigned int max_incl_len;
 const floc_t *reading_file = 0;
 
 /* The chain of makefiles read by read_makefile.  */
-
-static dep_t *read_makefiles = 0;
+dep_t *read_makefiles = NULL;
 
 static int eval_makefile (char *filename, int flags);
 static int eval (ebuffer_t *buffer, int flags);
@@ -2233,8 +2232,6 @@ parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip,
   char *q;
   char *name;
 
-#define VMS_COMMA 0
-
   while (1)
     {
       /* Skip whitespace; see if any more names are left.  */
@@ -2246,7 +2243,7 @@ parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip,
 
       /* Yes, find end of next name.  */
       q = p;
-      p = find_char_unquote (q, stopchar, VMS_COMMA, 1);
+      p = find_char_unquote (q, stopchar, 0, 1);
 #ifdef HAVE_DOS_PATHS
     /* For DOS paths, skip a "C:\..." or a "C:/..." until we find the
        first colon which isn't followed by a slash or a backslash.
@@ -2255,7 +2252,7 @@ parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip,
     if (stopchar == ':')
       while (p != 0 && !isspace ((unsigned char)*p) &&
              (p[1] == '\\' || p[1] == '/') && isalpha ((unsigned char)p[-1]))
-        p = find_char_unquote (p + 1, stopchar, VMS_COMMA, 1);
+        p = find_char_unquote (p + 1, stopchar, 0, 1);
 #endif
       if (p == 0)
 	p = q + strlen (q);
@@ -2499,7 +2496,7 @@ readline (ebuffer_t *ebuf)
       /* We got a newline, so add one to the count of lines.  */
       ++nlines;
 
-#if !defined(WINDOWS32) && !defined(__MSDOS__) && !defined(__EMX__)
+#if !defined(WINDOWS32) && !defined(__MSDOS__)
       /* Check to see if the line was really ended with CRLF; if so ignore
          the CR.  */
       if ((p - start) > 1 && p[-2] == '\r')
@@ -2507,7 +2504,7 @@ readline (ebuffer_t *ebuf)
           --p;
           p[-1] = '\n';
         }
-#endif
+#endif /* !WINDOWS2 && !__MSDOS__ */
 
       backslash = 0;
       for (p2 = p - 2; p2 >= start; --p2)
@@ -2732,9 +2729,9 @@ get_next_mword (char *buffer, char *delim, char **startp, unsigned int *length)
   return wtype;
 }
 
-/* Construct the list of include directories
-   from the arguments and the default list.  */
 
+/*! Construct the list of include directories
+   from the arguments and the default list.  */
 void
 construct_include_path (char **arg_dirs)
 {
@@ -2808,10 +2805,10 @@ construct_include_path (char **arg_dirs)
 
       EINTRLOOP (e, stat (default_include_directories[i], &stbuf));
       if (e == 0 && S_ISDIR (stbuf.st_mode))
-        dirs[idx++] = default_include_directories[i];
+        dirs[idx++] = strdup(default_include_directories[i]);
     }
 
-  dirs[idx] = 0;
+  dirs[idx] = NULL;
 
   /* Now compute the maximum length of any name in it.  */
 
@@ -2830,6 +2827,22 @@ construct_include_path (char **arg_dirs)
 
   include_directories = dirs;
 }
+
+/*! Free memory in include_directories and set that NULL.
+*/
+void
+free_include_directories (void) 
+{
+  if (include_directories) {
+    unsigned int i;
+    for (i=0; include_directories[i]; i++) {
+      free(include_directories[i]);
+    }
+    free(include_directories);
+    include_directories=NULL;
+  }
+}
+
 
 #if !defined(HAVE_TILDE_EXPAND)
 /* Expand ~ or ~USER at the beginning of NAME.

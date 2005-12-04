@@ -109,14 +109,15 @@ typedef struct file file_t;
 extern struct file *default_goal_file, *suffix_file, *default_file;
 
 
-extern file_t *lookup_file (char *name);
-extern file_t *enter_file  (char *name, const floc_t *floc);
-extern void remove_intermediates (int sig);
-extern void rename_file (file_t *file, char *name);
-extern void rehash_file (file_t *file, char *name);
-extern void set_command_state (file_t *file, enum cmd_state state);
-extern void init_hash_files (void);
-extern char *build_target_list (char *old_list);
+file_t *lookup_file (char *psz_name);
+file_t *enter_file  (char *psz_name, const floc_t *p_floc);
+void    free_file  (file_t *p_file);
+void    remove_intermediates (int sig);
+void    rename_file (file_t *p_file, char *psz_name);
+void    rehash_file (file_t *p_file, char *psz_name);
+void    set_command_state (file_t *file, enum cmd_state state);
+void    init_hash_files (void);
+char   *build_target_list (char *old_list);
 
 /*! Thing of the below as a bit mask rather than an enumeration and
     use print_target_mask;

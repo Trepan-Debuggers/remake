@@ -27,40 +27,44 @@ Boston, MA 02111-1307, USA.  */
   as the old one and return that.  The return value is malloc'd. The
   caller must thus free it.
  */
-struct dep *
-copy_dep_chain (dep_t *d)
+dep_t *
+copy_dep_chain (dep_t *p_dep)
 {
   dep_t *c;
-  dep_t *firstnew = 0;
-  dep_t *lastnew = 0;
+  dep_t *p_firstnew = NULL;
+  dep_t *p_lastnew  = NULL;
 
-  while (d != 0)
-    {
-      c = (dep_t *) xmalloc (sizeof (dep_t));
-      memmove ((char *) c, (char *) d, sizeof (dep_t));
-      if (c->name != 0)
-	c->name = xstrdup (c->name);
-      c->next = 0;
-      if (firstnew == 0)
-	firstnew = lastnew = c;
-      else
-	lastnew = lastnew->next = c;
+  for ( ; p_dep ; p_dep = p_dep->next) {
+    c = (dep_t *) xmalloc (sizeof (dep_t));
+    memmove ((char *) c, (char *) p_dep, sizeof (dep_t));
+    if (c->name != 0)
+      c->name = xstrdup (c->name);
+    c->next = 0;
+    if (p_firstnew == 0)
+      p_firstnew = p_lastnew = c;
+    else
+      p_lastnew = p_lastnew->next = c;
+    
+  }
 
-      d = d->next;
-    }
-
-  return firstnew;
+  return p_firstnew;
 }
-
-#ifdef	iAPX286
-/* The losing compiler on this machine can't handle this macro.  */
 
-char *
-dep_name (dep_t *dep)
+/*! Copy dependency chain making a new chain with the same contents
+  as the old one and return that.  The return value is malloc'd. The
+  caller must thus free it.
+ */
+void
+free_dep_chain (dep_t *p_dep)
 {
-  return dep->name == 0 ? dep->file->name : dep->name;
+  dep_t *p_dep_next;
+
+  for ( ; p_dep; p_dep = p_dep_next) {
+    p_dep_next = p_dep->next;
+    free(p_dep->name);
+    free(p_dep);
+  }
 }
-#endif
 
 /* Set the intermediate flag.  */
 static void

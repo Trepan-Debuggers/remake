@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.55 2005/12/03 12:49:42 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.56 2005/12/04 01:39:30 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -174,6 +174,7 @@ typedef struct {
 char *info_subcommands[] = {
   "line",
   "locals",
+  "makefiles",
   "target",
   "variables",
   "warranty",
@@ -756,32 +757,45 @@ static debug_return_t dbg_cmd_info (char *psz_arg)
   if (!psz_arg || 0==strlen(psz_arg)) {
     dbg_cmd_help("info");
   } else {
-    if (is_abbrev_of (psz_arg, "line", 1)) {
+    if (is_abbrev_of (psz_arg, "line", 2)) {
       /* We want output to be compatible with gdb output.*/
       if (p_stack_top && p_stack_top->p_target && 
 	  p_stack_top->p_target->floc.filenm) {
 	const floc_t *p_floc = &p_stack_top->p_target->floc;
 	if (!basename_filenames && strlen(p_floc->filenm) 
 	    && p_floc->filenm[0] != '/') 
-	  printf("Line %lu of \"%s/%s\"", p_floc->lineno, starting_directory,
+	  printf("Line %lu of \"%s/%s\"\n", 
+		 p_floc->lineno, starting_directory,
 		 p_floc->filenm);
 	else 
-	  printf("Line %lu of \"%s\"", p_floc->lineno, p_floc->filenm);
+	  printf("Line %lu of \"%s\"\n", p_floc->lineno, p_floc->filenm);
       } else {
 	printf("No line number info recorded.\n");
       }
       
-    } else if (is_abbrev_of (psz_arg, "locals", 1)) {
-      if (p_stack_top && p_stack_top->p_target) {
-	file_t *p_target = p_stack_top->p_target;
+    } else if (is_abbrev_of (psz_arg, "locals", 2)) {
+      char *psz_target = NULL;
+      char *psz_args   = NULL;
+      file_t *p_target = get_target(&psz_args, &psz_target);
+
+      if (p_target) {
 	if (!p_target->variables) {
-	  char *psz_target = p_target->name;
-	  p_target = lookup_file (psz_target);
-	  if (!p_target->variables) return debug_readloop;
+	  initialize_file_variables (p_target, 0);
+	  set_file_variables (p_target);
+	  if (!p_target->variables) {
+	    printf("Can't get varible information for target %s\n", 
+		   psz_target);
+	    return debug_readloop;
+	  }
 	}
-	hash_map_arg (&p_target->variables->set->table, 
-		      print_variable_info, NULL);
+      } else {
+	printf("No target information.\n");
+	return debug_readloop;
       }
+      hash_map_arg (&p_target->variables->set->table, 
+		    print_variable_info, NULL);
+    } else if (is_abbrev_of (psz_arg, "makefiles", 1)) {
+      print_read_makefiles();
     } else if (is_abbrev_of (psz_arg, "stack", 1)) {
       print_target_stack(p_stack_top, i_stack_pos, MAX_STACK_SHOW);
     } else if (is_abbrev_of (psz_arg, "target", 1)) {

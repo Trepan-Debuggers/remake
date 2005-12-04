@@ -1,6 +1,7 @@
-/* Target file hash table management for GNU Make.
+/* $Id: file.c,v 1.7 2005/12/04 01:39:30 rockyb Exp $
+Target file hash table management for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-2002, 2004 Free Software Foundation, Inc.
+2002, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -77,21 +78,6 @@ lookup_file (char *name)
   /* This is also done in parse_file_seq, so this is redundant
      for names read from makefiles.  It is here for names passed
      on the command line.  */
-#ifdef VMS
-# ifndef WANT_CASE_SENSITIVE_TARGETS
-  {
-    char *n;
-    lname = (char *) malloc (strlen (name) + 1);
-    for (n = name, ln = lname; *n != '\0'; ++n, ++ln)
-      *ln = isupper ((unsigned char)*n) ? tolower ((unsigned char)*n) : *n;
-    *ln = '\0';
-    name = lname;
-  }
-# endif
-
-  while (name[0] == '[' && name[1] == ']' && name[2] != '\0')
-      name += 2;
-#endif
   while (name[0] == '.' && name[1] == '/' && name[2] != '\0')
     {
       name += 2;
@@ -102,74 +88,37 @@ lookup_file (char *name)
 
   if (*name == '\0')
     /* It was all slashes after a dot.  */
-#ifdef VMS
-    name = "[]";
-#else
-#ifdef _AMIGA
-    name = "";
-#else
     name = "./";
-#endif /* AMIGA */
-#endif /* VMS */
 
   file_key.hname = name;
   f = (file_t *) hash_find_item (&files, &file_key);
-#if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
-  free (lname);
-#endif
   return f;
 }
 
 file_t *
-enter_file (char *name, const floc_t *floc)
+enter_file (char *name, const floc_t *p_floc)
 {
   file_t *f;
   file_t *new;
   file_t **file_slot;
   file_t file_key;
-#if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
-  char *lname, *ln;
-#endif
 
   assert (*name != '\0');
-
-#if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
-  {
-    char *n;
-    lname = (char *) malloc (strlen (name) + 1);
-    for (n = name, ln = lname; *n != '\0'; ++n, ++ln)
-      {
-        if (isupper ((unsigned char)*n))
-          *ln = tolower ((unsigned char)*n);
-        else
-          *ln = *n;
-      }
-
-    *ln = 0;
-    /* Creates a possible leak, old value of name is unreachable, but I
-       currently don't know how to fix it. */
-    name = lname;
-  }
-#endif
 
   file_key.hname = name;
   file_slot = (file_t **) hash_find_slot (&files, &file_key);
   f = *file_slot;
   if (! HASH_VACANT (f) && !f->double_colon)
     {
-#if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
-      free(lname);
-#endif
       return f;
     }
 
-  new = (file_t *) xmalloc (sizeof (file_t));
-  memset ((char *) new, 0, sizeof (file_t));
+  new = CALLOC(file_t, 1);
   new->name = new->hname = name;
   new->update_status = -1;
   new->tracing = 0;
-  if (floc) {
-    new->floc = *floc;
+  if (p_floc) {
+    new->floc = *p_floc;
   } else {
     new->floc.lineno = 0;
     new->floc.filenm = NULL;
@@ -188,6 +137,13 @@ enter_file (char *name, const floc_t *floc)
 
   return new;
 }
+
+void
+free_file (file_t *p_name)
+{
+  free(p_name);
+}
+
 
 /* Rename FILE to NAME.  This is not as simple as resetting
    the `name' member, since it must be put in a new hash bucket,
