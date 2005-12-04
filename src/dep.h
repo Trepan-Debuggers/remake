@@ -40,23 +40,21 @@ Boston, MA 02111-1307, USA.  */
 
    Note that the first two words of this match a struct nameseq.  */
 
-typedef struct dep
-  {
-    struct dep *next;
-    char *name;
-    struct file *file;
-    unsigned int changed : 8;
-    unsigned int ignore_mtime : 1;
-  } dep_t;
+struct dep {
+  dep_t *next;
+  char *name;
+  struct file *file;
+  unsigned int changed : 8;
+  unsigned int ignore_mtime : 1;
+};
 
 /* Structure used in chains of names, for parsing and globbing.  */
 
-typedef struct nameseq
-  {
-    struct nameseq *next;
-    char *name;
-    floc_t floc;
-  } nameseq_t;
+struct nameseq {
+  nameseq_t *next;
+  char *name;
+  floc_t floc;
+};
 
 #ifndef NO_ARCHIVES
 extern nameseq_t *ar_glob (char *arname, char *member_pattern, 

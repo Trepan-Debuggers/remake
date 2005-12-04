@@ -1,4 +1,4 @@
-/* $Id: default.c,v 1.5 2005/12/04 01:42:35 rockyb Exp $
+/* $Id: default.c,v 1.6 2005/12/04 13:22:48 rockyb Exp $
 Data base of default implicit rules for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96, 2004 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -523,7 +523,7 @@ install_default_suffix_rules (void)
   
   if (no_builtin_rules_flag) return;
   
-  for (s = default_suffix_rules; *s != 0; s += 2) {
+  for (s = default_suffix_rules; *s; s += 2) {
     file_t *f = enter_file (s[0], NILF);
     /* Don't clobber cmds given in a makefile if there were any.  */
     if (!f->cmds) {
@@ -533,18 +533,22 @@ install_default_suffix_rules (void)
   }
 }
 
+/*! Free memory associated with the default suffix list (.SUFFIXES) */
 void
-free_default_suffix_rules (void) 
+free_default_suffix (void) 
 {
   char **s;
   
   if (no_builtin_rules_flag) return;
-  
-  for (s = default_suffix_rules; *s != 0; s += 2) {
+
+  /* Free suffix rules. */
+  for (s = default_suffix_rules; *s; s += 2) {
     file_t *f = lookup_file (s[0]);
     /* Don't clobber cmds given in a makefile if there were any.  */
     if (f && f->cmds) free (f->cmds);
   }
+  if (suffix_file)
+    free_dep_chain(suffix_file->deps);
 }
 
 /*! Install the default pattern rules.  */
@@ -552,7 +556,7 @@ free_default_suffix_rules (void)
 void
 install_default_implicit_rules (void)
 {
-  struct pspec *p;
+  pspec_t *p;
 
   if (no_builtin_rules_flag)
     return;

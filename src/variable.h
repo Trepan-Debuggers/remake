@@ -88,22 +88,17 @@ typedef struct variable
 
 
 /** Structure that represents a variable set.  */
-
-typedef struct variable_set
-  {
-    hash_table_t table;	/* Hash table of variables.  */
-  } variable_set_t;
+struct variable_set {
+  hash_table_t table;	/**< Hash table of variables.  */
+};
 
 /** Structure that represents a list of variable sets.  */
-
-typedef struct variable_set_list
-  {
-    struct variable_set_list *next;	/* Link in the chain.  */
-    variable_set_t *set;		/* Variable set.  */
-  } variable_set_list_t;
+struct variable_set_list {
+  struct variable_set_list *next;   /*< Link in the chain.  */
+  variable_set_t *set;		    /*< Variable set.  */
+};
 
 /** Structure used for pattern-specific variables.  */
-
 struct pattern_var
   {
     struct pattern_var *next;

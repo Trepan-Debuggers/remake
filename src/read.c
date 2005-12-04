@@ -1,4 +1,4 @@
-/* $Id: read.c,v 1.19 2005/12/04 01:39:30 rockyb Exp $
+/* $Id: read.c,v 1.20 2005/12/04 13:22:48 rockyb Exp $
 Reading and parsing of makefiles for GNU Make.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
@@ -70,12 +70,11 @@ typedef struct
   } ebuffer_t;
 
 /* Types of "words" that can be read in a makefile.  */
-enum make_word_type
+typedef enum 
   {
      w_bogus, w_eol, w_static, w_variable, w_colon, w_dcolon, w_semicolon,
      w_varassign
-  };
-
+  } make_word_t;
 
 /* A `struct conditionals' contains the information describing
    all the active conditionals in a makefile.
@@ -151,7 +150,7 @@ static void record_target_var (nameseq_t *filenames, char *defn,
                                        variable_origin_t origin,
                                        bool b_exported,
                                        const floc_t *flocp);
-static enum make_word_type get_next_mword (char *buffer, char *delim,
+static make_word_t get_next_mword (char *buffer, char *delim,
                         char **startp, unsigned int *length);
 
 /* Read in all the makefiles and return the chain of their names.  */
@@ -908,7 +907,7 @@ eval (ebuffer_t *ebuf, int set_default)
          parts of the expanded buffer we haven't searched yet. */
 
       {
-        enum make_word_type wtype;
+        make_word_t wtype;
         variable_origin_t v_origin;
         bool b_exported;
         char *cmdleft, *semip, *lb_next;
@@ -2568,10 +2567,10 @@ readline (ebuffer_t *ebuf)
    makefile.  Don't use it where special rules hold sway (RHS of a variable,
    in a command list, etc.)  */
 
-static enum make_word_type
+static make_word_t
 get_next_mword (char *buffer, char *delim, char **startp, unsigned int *length)
 {
-  enum make_word_type wtype = w_bogus;
+  make_word_t wtype = w_bogus;
   char *p = buffer, *beg;
   char c;
 

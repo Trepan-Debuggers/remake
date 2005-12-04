@@ -1,4 +1,4 @@
-/* $Id: file.h,v 1.2 2005/12/04 01:44:16 rockyb Exp $
+/* $Id: file.h,v 1.3 2005/12/04 13:22:48 rockyb Exp $
 Definition of target file data structures for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -30,43 +30,42 @@ Boston, MA 02111-1307, USA.  */
 #include "make.h"
 #include "hash.h"
 
-struct file
-  {
+struct file {
     char *name;
     char *hname;                /* Hashed filename */
     char *vpath;                /* VPATH/vpath pathname */
     floc_t floc;                /* location in Makefile - for tracing */
-    struct dep *deps;		/* all dependencies, including duplicates */
-    struct commands *cmds;	/* Commands to execute for this target.  */
+    dep_t  *deps;		/* all dependencies, including duplicates */
+    commands_t *cmds;	        /* Commands to execute for this target.  */
     int command_flags;		/* Flags OR'd in for cmds; see commands.h.  */
     char *stem;			/* Implicit stem, if an implicit
     				   rule has been used */
-    struct dep *also_make;	/* Targets that are made by making this.  */
+    dep_t *also_make;	        /* Targets that are made by making this.  */
     FILE_TIMESTAMP last_mtime;	/* File's modtime, if already known.  */
     FILE_TIMESTAMP mtime_before_update;	/* File's modtime before any updating
                                            has been performed.  */
-    struct file *prev;		/* Previous entry for same file name;
+    file_t *prev;		/* Previous entry for same file name;
 				   used when there are multiple double-colon
 				   entries for the same file.  */
 
     /* File that this file was renamed to.  After any time that a
        file could be renamed, call `check_renamed' (below).  */
-    struct file *renamed;
+    file_t *renamed;
 
     /* List of variable sets used for this file.  */
-    struct variable_set_list *variables;
+    variable_set_list_t *variables;
 
     /* Pattern-specific variable reference for this target, or null if there
        isn't one.  Also see the pat_searched flag, below.  */
-    struct variable_set_list *pat_variables;
+    variable_set_list_t *pat_variables;
 
     /* Immediate dependent that caused this target to be remade,
        or nil if there isn't one.  */
-    struct file *parent;
+    file_t *parent;
 
     /* For a double-colon entry, this is the first double-colon entry for
        the same file.  Otherwise this is null.  */
-    struct file *double_colon;
+    file_t *double_colon;
 
     short int update_status;	/* Status of the last attempt to update,
 				   or -1 if none has been made.  */
@@ -103,18 +102,40 @@ struct file
     unsigned int considered:1;  /* equal to `considered' if file has been
                                    considered on current scan of goal chain */
     unsigned int tracing:1;     /* Nonzero if we should trace this target. */
-  };
+};
 
-typedef struct file file_t;
-
-extern struct file *default_goal_file, *suffix_file, *default_file;
+extern file_t *default_goal_file, *suffix_file, *default_file;
 
 
+/*! Access the hash table of all file records.
+   lookup_file  given a name, return the file_t * for that name,
+           or nil if there is none.
+   enter_file   similar, but create one if there is none. 
+ */
 file_t *lookup_file (char *psz_name);
+
 file_t *enter_file  (char *psz_name, const floc_t *p_floc);
 void    free_file  (file_t *p_file);
+
+/*!
+  Remove all nonprecious intermediate files.
+  If SIG is nonzero, this was caused by a fatal signal,
+  meaning that a different message will be printed, and
+  the message will go to stderr rather than stdout.  
+*/
 void    remove_intermediates (int sig);
+
+/*! Rename FILE to NAME.  This is not as simple as resetting
+   the `name' member, since it must be put in a new hash bucket,
+   and possibly merged with an existing file called NAME. 
+*/
 void    rename_file (file_t *p_file, char *psz_name);
+
+/*!
+ Rehash FILE to NAME.  This is not as simple as resetting
+ the `hname' member, since it must be put in a new hash bucket,
+ and possibly merged with an existing file called NAME.  
+*/
 void    rehash_file (file_t *p_file, char *psz_name);
 void    set_command_state (file_t *file, enum cmd_state state);
 void    init_hash_files (void);

@@ -1,4 +1,4 @@
-/* $Id: hash.h,v 1.5 2005/12/04 01:39:30 rockyb Exp $
+/* $Id: hash.h,v 1.6 2005/12/04 13:22:48 rockyb Exp $
    hash.h -- decls for hash table
    Copyright (C) 1995, 1999, 2002, 2004, 2005 Free Software Foundation, Inc.
    Written by Greg McGary <gkm@gnu.org> <greg@mcgary.org>
@@ -20,7 +20,6 @@
 #ifndef _HASH_H__
 #define _HASH_H__
 
-#include "config.h"
 #include "types.h"
 #include <stdio.h>
 #include <ctype.h>

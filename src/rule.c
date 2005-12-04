@@ -33,15 +33,15 @@ Boston, MA 02111-1307, USA.  */
 #include <alloca.h>
 #endif
 
-static void freerule PARAMS ((struct rule *rule, struct rule *lastrule));
+static void free_rule PARAMS ((rule_t *rule, rule_t *lastrule));
 
 /* Chain of all pattern rules.  */
 
-struct rule *pattern_rules;
+rule_t *pattern_rules;
 
 /* Pointer to last rule in the chain, so we can add onto the end.  */
 
-struct rule *last_pattern_rule;
+rule_t *last_pattern_rule;
 
 /* Number of rules in the chain.  */
 
@@ -71,14 +71,14 @@ unsigned int maxsuffix;
 /* Compute the maximum dependency length and maximum number of
    dependencies of all implicit rules.  Also sets the subdir
    flag for a rule when appropriate, possibly removing the rule
-   completely when appropriate.  */
-
+   completely when appropriate.
+*/
 void
 count_implicit_rule_limits (void)
 {
   char *name;
   int namelen;
-  struct rule *rule, *lastrule;
+  rule_t *rule, *lastrule;
 
   num_pattern_rules = max_pattern_targets = max_pattern_deps = 0;
   max_pattern_dep_length = 0;
@@ -91,7 +91,7 @@ count_implicit_rule_limits (void)
     {
       unsigned int ndeps = 0;
       dep_t *dep;
-      struct rule *next = rule->next;
+      rule_t *next = rule->next;
       unsigned int ntargets;
 
       ++num_pattern_rules;
@@ -219,10 +219,11 @@ convert_suffix_rule (char *target, char *source, struct commands *cmds)
   create_pattern_rule (names, percents, 0, deps, cmds, 0);
 }
 
-/* Convert old-style suffix rules to pattern rules.
-   All rules for the suffixes on the .SUFFIXES list
-   are converted and added to the chain of pattern rules.  */
-
+/*!
+ Convert old-style suffix rules to pattern rules.
+ All rules for the suffixes on the .SUFFIXES list
+ are converted and added to the chain of pattern rules.  
+*/
 void
 convert_to_pattern (void)
 {
@@ -284,18 +285,18 @@ convert_to_pattern (void)
 }
 
 
-/* Install the pattern rule RULE (whose fields have been filled in)
+/*! Install the pattern rule RULE (whose fields have been filled in)
    at the end of the list (so that any rules previously defined
    will take precedence).  If this rule duplicates a previous one
    (identical target and dependencies), the old one is replaced
    if OVERRIDE is nonzero, otherwise this new one is thrown out.
    When an old rule is replaced, the new one is put at the end of the
-   list.  Return nonzero if RULE is used; zero if not.  */
-
+   list.  Return nonzero if RULE is used; zero if not. 
+ */
 int
-new_pattern_rule (struct rule *rule, int override)
+new_pattern_rule (rule_t *rule, int override)
 {
-  struct rule *r, *lastrule;
+  rule_t *r, *lastrule;
   unsigned int i, j;
 
   rule->in_use = 0;
@@ -325,7 +326,7 @@ new_pattern_rule (struct rule *rule, int override)
 		if (override)
 		  {
 		    /* Remove the old rule.  */
-		    freerule (r, lastrule);
+		    free_rule (r, lastrule);
 		    /* Install the new one.  */
 		    if (pattern_rules == 0)
 		      pattern_rules = rule;
@@ -339,7 +340,7 @@ new_pattern_rule (struct rule *rule, int override)
 		else
 		  {
 		    /* The old rule stays intact.  Destroy the new one.  */
-		    freerule (rule, (struct rule *) 0);
+		    free_rule (rule, (rule_t *) 0);
 		    return 0;
 		  }
 	      }
@@ -362,7 +363,7 @@ new_pattern_rule (struct rule *rule, int override)
 }
 
 
-/* Install an implicit pattern rule based on the three text strings
+/*! Install an implicit pattern rule based on the three text strings
    in the structure P points to.  These strings come from one of
    the arrays of default implicit pattern rules.
    TERMINAL specifies what the `terminal' field of the rule should be.  */
@@ -370,20 +371,19 @@ new_pattern_rule (struct rule *rule, int override)
 void
 install_pattern_rule (struct pspec *p, int terminal)
 {
-  struct rule *r;
+  rule_t *r;
   char *ptr;
 
-  r = (struct rule *) xmalloc (sizeof (struct rule));
+  r              = CALLOC(rule_t, 1);
+  r->targets     = CALLOC(char *, 2);
+  r->suffixes    = CALLOC(char *, 2);
+  r->lens        = CALLOC(unsigned int, 2);
 
-  r->targets = (char **) xmalloc (2 * sizeof (char *));
-  r->suffixes = (char **) xmalloc (2 * sizeof (char *));
-  r->lens = (unsigned int *) xmalloc (2 * sizeof (unsigned int));
-
-  r->targets[1] = 0;
+  r->targets[1]  = 0;
   r->suffixes[1] = 0;
-  r->lens[1] = 0;
+  r->lens[1]     = 0;
 
-  r->lens[0] = strlen (p->target);
+  r->lens[0]     = strlen (p->target);
   /* These will all be string literals, but we malloc space for
      them anyway because somebody might want to free them later on.  */
   r->targets[0] = savestring (p->target, r->lens[0]);
@@ -396,14 +396,14 @@ install_pattern_rule (struct pspec *p, int terminal)
 
   ptr = p->dep;
   r->deps = (dep_t *) multi_glob (parse_file_seq (&ptr, '\0',
-                                                       sizeof (dep_t), 1,
-						       NILF),
-				       sizeof (dep_t));
+						  sizeof (dep_t), 1,
+						  NILF),
+				  sizeof (dep_t));
 
   if (new_pattern_rule (r, 0))
     {
-      r->terminal = terminal;
-      r->cmds = (struct commands *) xmalloc (sizeof (struct commands));
+      r->terminal              = terminal;
+      r->cmds                  = CALLOC(commands_t, 1);
       r->cmds->fileinfo.filenm = 0;
       r->cmds->fileinfo.lineno = 0;
       /* These will all be string literals, but we malloc space for them
@@ -413,15 +413,14 @@ install_pattern_rule (struct pspec *p, int terminal)
     }
 }
 
-
 /* Free all the storage used in RULE and take it out of the
    pattern_rules chain.  LASTRULE is the rule whose next pointer
    points to RULE.  */
 
 static void
-freerule (struct rule *rule, struct rule *lastrule)
+free_rule (rule_t *rule, rule_t *lastrule)
 {
-  struct rule *next = rule->next;
+  rule_t *next = rule->next;
   unsigned int i;
   dep_t *dep;
 
@@ -467,6 +466,16 @@ freerule (struct rule *rule, struct rule *lastrule)
   if (last_pattern_rule == rule)
     last_pattern_rule = lastrule;
 }
+
+/* Free all pattern rules */
+void 
+free_pattern_rules (void) 
+{
+  while (pattern_rules && pattern_rules->next) {
+    free_rule(pattern_rules->next, pattern_rules);
+  }
+}
+
 
 /* Create a new pattern rule with the targets in the nil-terminated
    array TARGETS.  If TARGET_PERCENTS is not nil, it is an array of
@@ -484,7 +493,7 @@ create_pattern_rule (char **targets, char **target_percents,
 		     int terminal, dep_t *deps,
                      struct commands *commands, int override)
 {
-  struct rule *r = (struct rule *) xmalloc (sizeof (struct rule));
+  rule_t *r = (rule_t *) xmalloc (sizeof (rule_t));
   unsigned int max_targets, i;
 
   r->cmds = commands;
@@ -526,7 +535,7 @@ create_pattern_rule (char **targets, char **target_percents,
 /* Print the data base of rules.  */
 
 static void			/* Useful to call from gdb.  */
-print_rule (struct rule *r)
+print_rule (rule_t *r)
 {
   unsigned int i;
   dep_t *d;
@@ -554,7 +563,7 @@ void
 print_rule_data_base (void)
 {
   unsigned int rules, terminal;
-  struct rule *r;
+  rule_t *r;
 
   puts (_("\n# Implicit Rules"));
 
@@ -575,14 +584,10 @@ print_rule_data_base (void)
   else
     {
       printf (_("\n# %u implicit rules, %u"), rules, terminal);
-#ifndef	NO_FLOAT
-      printf (" (%.1f%%)", (double) terminal / (double) rules * 100.0);
-#else
       {
 	int f = (terminal * 1000 + 5) / rules;
 	printf (" (%d.%d%%)", f/10, f%10);
       }
-#endif
       puts (_(" terminal."));
     }
 

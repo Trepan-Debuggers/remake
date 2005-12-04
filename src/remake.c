@@ -1,6 +1,7 @@
-/* Basic dependency engine for GNU Make.
+/* $Id: remake.c,v 1.11 2005/12/04 13:22:48 rockyb Exp $
+Basic dependency engine for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
-2002, 2004 Free Software Foundation, Inc.
+2002, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -1304,14 +1305,6 @@ f_mtime (file_t *file, int search)
 	FILE_TIMESTAMP adjustment = FAT_ADJ_OFFSET << FILE_TIMESTAMP_LO_BITS;
 	if (ORDINARY_MTIME_MIN + adjustment <= adjusted_mtime)
 	  adjusted_mtime -= adjustment;
-#elif defined(__EMX__)
-	/* FAT filesystems round time to the nearest even second!
-	   Allow for any file (NTFS or FAT) to perhaps suffer from this
-	   brain damage.  */
-	FILE_TIMESTAMP adjustment = (((FILE_TIMESTAMP_S (adjusted_mtime) & 1) == 0
-		       && FILE_TIMESTAMP_NS (adjusted_mtime) == 0)
-		      ? (FILE_TIMESTAMP) 1 << FILE_TIMESTAMP_LO_BITS
-		      : 0);
 #endif
 
 	/* If the file's time appears to be in the future, update our
@@ -1323,17 +1316,12 @@ f_mtime (file_t *file, int search)
 	    adjusted_now = now + (resolution - 1);
 	    if (adjusted_now < adjusted_mtime)
 	      {
-#ifdef NO_FLOAT
-		error (NILF, _("Warning: File `%s' has modification time in the future"),
-                       file->name);
-#else
 		double from_now =
 		  (FILE_TIMESTAMP_S (mtime) - FILE_TIMESTAMP_S (now)
 		   + ((FILE_TIMESTAMP_NS (mtime) - FILE_TIMESTAMP_NS (now))
 		      / 1e9));
 		error (NILF, _("Warning: File `%s' has modification time %.2g s in the future"),
 		       file->name, from_now);
-#endif
 		clock_skew_detected = 1;
 	      }
           }
@@ -1394,10 +1382,8 @@ library_search (char **lib, FILE_TIMESTAMP *mtime_ptr)
 {
   static char *dirs[] =
     {
-#ifndef _AMIGA
       "/lib",
       "/usr/lib",
-#endif
 #if defined(WINDOWS32) && !defined(LIBDIR)
 /*
  * This is completely up to the user at product install time. Just define

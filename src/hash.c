@@ -1,4 +1,4 @@
-/* $Id: hash.c,v 1.3 2005/12/04 01:39:30 rockyb Exp $
+/* $Id: hash.c,v 1.4 2005/12/04 13:22:48 rockyb Exp $
    hash.c -- hash table maintenance
    Copyright (C) 1995, 1999, 2002, 2004, 2005 Free Software Foundation, Inc.
    Written by Greg McGary <gkm@gnu.org> <greg@mcgary.org>
@@ -279,7 +279,6 @@ hash_rehash (hash_table_t *ht)
 void
 hash_print_stats (hash_table_t *ht, FILE *out_FILE)
 {
-  /* GKM FIXME: honor NO_FLOAT */
   fprintf (out_FILE, _("Load=%ld/%ld=%.0f%%, "), ht->ht_fill, ht->ht_size,
 	   100.0 * (double) ht->ht_fill / (double) ht->ht_size);
   fprintf (out_FILE, _("Rehash=%d, "), ht->ht_rehashes);

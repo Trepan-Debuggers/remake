@@ -38,6 +38,7 @@ void install_default_suffix_rules (void);
 /*! Install the default pattern rules.  */
 void install_default_implicit_rules (void);
 
-void free_default_suffix_rules (void);
+/*! Free memory associated with the default suffix list (.SUFFIXES) */
+void free_default_suffix (void);
 
 #endif /*DEFAULT_H*/

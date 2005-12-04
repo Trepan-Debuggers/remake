@@ -27,7 +27,7 @@ Boston, MA 02111-1307, USA.  */
 #include "job.h"
 
 /*! Command structure */
-typedef struct commands
+struct commands
   {
     floc_t fileinfo;	        /**< Where commands were defined.  */
     char *commands;		/**< Commands text.  */
@@ -38,7 +38,7 @@ typedef struct commands
     char *lines_flags;		/**< One set of flag bits for each line.  */
     int any_recurse;		/**< Nonzero if any `lines_recurse' elt has */
 				/**< the COMMANDS_RECURSE bit set.  */
-} commands_t;
+};
 
 /** Bits in `lines_flags'.  */
 #define	COMMANDS_RECURSE	1 /* Recurses: + or $(MAKE).  */

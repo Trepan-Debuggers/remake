@@ -1,4 +1,4 @@
-/* $Id: make.h,v 1.13 2005/12/03 12:49:42 rockyb Exp $
+/* $Id: make.h,v 1.14 2005/12/04 13:22:48 rockyb Exp $
 Miscellaneous global declarations and portability cruft for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -434,11 +434,7 @@ extern bool batch_mode_shell;
 extern unsigned int job_slots;
 extern int job_fds[2];
 extern int job_rfd;
-#ifndef NO_FLOAT
 extern double max_load_average;
-#else
-extern int max_load_average;
-#endif
 
 /*! The name we were invoked with.  */
 extern char *program;

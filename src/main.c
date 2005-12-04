@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.19 2005/12/04 01:39:30 rockyb Exp $
+/* $Id: main.c,v 1.20 2005/12/04 13:22:48 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -246,13 +246,8 @@ int job_rfd = -1;
    Negative values mean unlimited, while zero means limit to
    zero load (which could be useful to start infinite jobs remotely
    but one at a time locally).  */
-#ifndef NO_FLOAT
 double max_load_average = -1.0;
 double default_load_average = -1.0;
-#else
-int max_load_average = -1;
-int default_load_average = -1;
-#endif
 
 /* List of directories given with -C switches.  */
 
@@ -416,15 +411,12 @@ static const command_switch_t switches[] =
         "jobserver-fds" },
     { 'k', flag, (char *) &keep_going_flag, 1, 1, 0, 0,
         (char *) &default_keep_going_flag, "keep-going" },
-#ifndef NO_FLOAT
     { 'l', floating, (char *) &max_load_average, 1, 1, 0,
 	(char *) &default_load_average, (char *) &default_load_average,
 	"load-average" },
-#else
     { 'l', positive_int, (char *) &max_load_average, 1, 1, 0,
 	(char *) &default_load_average, (char *) &default_load_average,
 	"load-average" },
-#endif
     { 'm', ignore, 0, 0, 0, 0, 0, 0, 0 },
     { 'n', flag, (char *) &just_print_flag, 1, 1, 1, 0, 0, "just-print" },
     { 'o', string, (char *) &old_files, 0, 0, 0, 0, 0, "old-file" },
@@ -2287,7 +2279,6 @@ decode_switches (int argc, char **argv, int env)
 		      = *(unsigned int *) cs->noarg_value;
 		  break;
 
-#ifndef NO_FLOAT
 		case floating:
 		  if (optarg == 0 && optind < argc
 		      && (ISDIGIT (argv[optind][0]) || argv[optind][0] == '.'))
@@ -2299,7 +2290,6 @@ decode_switches (int argc, char **argv, int env)
 			 : *(double *) cs->noarg_value);
 
 		  break;
-#endif
 		}
 
 	      /* We've found the switch.  Stop looking.  */
@@ -2504,7 +2494,6 @@ define_makeflags (int all, int makefile)
 	    }
 	  break;
 
-#ifndef NO_FLOAT
 	case floating:
 	  if (all)
 	    {
@@ -2524,7 +2513,6 @@ define_makeflags (int all, int makefile)
 		}
 	    }
 	  break;
-#endif
 
 	case string:
 	  if (all)
@@ -2794,8 +2782,9 @@ die (int status)
   free_stringlist(debugger_opts);
 
   free_include_directories();
-  free_default_suffix_rules();
+  free_default_suffix();
   pop_variable_scope(true);
+  free_pattern_rules();
   free_dep_chain(read_makefiles);
   hash_free(&files, true);
 

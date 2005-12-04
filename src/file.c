@@ -1,4 +1,4 @@
-/* $Id: file.c,v 1.7 2005/12/04 01:39:30 rockyb Exp $
+/* $Id: file.c,v 1.8 2005/12/04 13:22:48 rockyb Exp $
 Target file hash table management for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -59,11 +59,11 @@ file_hash_cmp (const void *x, const void *y)
 /*! Whether or not .SECONDARY with no prerequisites was given.  */
 int all_secondary = 0;
 
-/* Access the hash table of all file records.
+/*! Access the hash table of all file records.
    lookup_file  given a name, return the file_t * for that name,
            or nil if there is none.
-   enter_file   similar, but create one if there is none.  */
-
+   enter_file   similar, but create one if there is none. 
+ */
 file_t *
 lookup_file (char *name)
 {
@@ -145,10 +145,10 @@ free_file (file_t *p_name)
 }
 
 
-/* Rename FILE to NAME.  This is not as simple as resetting
+/*! Rename FILE to NAME.  This is not as simple as resetting
    the `name' member, since it must be put in a new hash bucket,
-   and possibly merged with an existing file called NAME.  */
-
+   and possibly merged with an existing file called NAME. 
+*/
 void
 rename_file (file_t *from_file, char *to_hname)
 {
@@ -160,10 +160,11 @@ rename_file (file_t *from_file, char *to_hname)
     }
 }
 
-/* Rehash FILE to NAME.  This is not as simple as resetting
-   the `hname' member, since it must be put in a new hash bucket,
-   and possibly merged with an existing file called NAME.  */
-
+/*!
+ Rehash FILE to NAME.  This is not as simple as resetting
+ the `hname' member, since it must be put in a new hash bucket,
+ and possibly merged with an existing file called NAME.  
+*/
 void
 rehash_file (file_t *from_file, char *to_hname)
 {
@@ -278,11 +279,13 @@ rehash_file (file_t *from_file, char *to_hname)
     }
 }
 
-/* Remove all nonprecious intermediate files.
-   If SIG is nonzero, this was caused by a fatal signal,
-   meaning that a different message will be printed, and
-   the message will go to stderr rather than stdout.  */
 
+/*!
+  Remove all nonprecious intermediate files.
+  If SIG is nonzero, this was caused by a fatal signal,
+  meaning that a different message will be printed, and
+  the message will go to stderr rather than stdout.  
+*/
 void
 remove_intermediates (int sig)
 {

@@ -1,4 +1,4 @@
-/* $Id: types.h,v 1.3 2005/11/27 21:03:27 rockyb Exp $
+/* $Id: types.h,v 1.4 2005/12/04 13:22:48 rockyb Exp $
 Miscellaneous types
 Copyright (c) 2005 Rocky Bernstein <rocky@panix.com>
 This file is part of GNU Make.
@@ -39,16 +39,21 @@ Boston, MA 02111-1307, USA.  */
 #   define bool uint8_t
 #endif /*HAVE_STDBOOL_H*/
 
-typedef unsigned long int lineno_t;
+typedef unsigned long int        lineno_t;
 
 /** File location. Used in reporting where we are.*/
-struct floc
-  {
-    char    *filenm;
-    lineno_t lineno;
-  };
+struct floc {
+  char    *filenm;
+  lineno_t lineno;
+};
 
-typedef struct floc floc_t;
+typedef struct commands          commands_t;
+typedef struct dep               dep_t;
+typedef struct file              file_t;
+typedef struct floc              floc_t;
+typedef struct nameseq           nameseq_t;
+typedef struct pspec             pspec_t;
+typedef struct variable_set      variable_set_t;
+typedef struct variable_set_list variable_set_list_t;
 
-
-#endif /*MAKE_H*/
+#endif /*TYPES_H*/

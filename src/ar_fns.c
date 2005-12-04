@@ -1,4 +1,4 @@
-/* $Id: ar_fns.c,v 1.3 2005/12/01 08:30:34 rockyb Exp $
+/* $Id: ar_fns.c,v 1.4 2005/12/04 13:22:47 rockyb Exp $
 Interface to `ar' archives for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -19,7 +19,7 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#include "config.h"
+#include "types.h"
 
 #ifndef	NO_ARCHIVES
 
@@ -100,7 +100,7 @@ ar_member_date (char *name)
      not exist, because pattern_search assumes that files found in the data
      base exist or can be made.  */
   {
-    struct file *arfile;
+    file_t *arfile;
     arfile = lookup_file (arname);
     if (arfile == 0 && file_exists_p (arname))
       {

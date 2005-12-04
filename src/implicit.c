@@ -131,9 +131,8 @@ pattern_search (file_t *file, int archive,
   unsigned int fullstemlen = 0;
 
   /* Buffer in which we store all the rules that are possibly applicable.  */
-  struct rule **tryrules
-    = (struct rule **) xmalloc (num_pattern_rules * max_pattern_targets
-                                * sizeof (struct rule *));
+  rule_t **tryrules = 
+    CALLOC(rule_t *, num_pattern_rules * max_pattern_targets);
 
   /* Number of valid elements in TRYRULES.  */
   unsigned int nrules;
@@ -159,7 +158,7 @@ pattern_search (file_t *file, int archive,
   int specific_rule_matched = 0;
 
   unsigned int i = 0;  /* uninit checks OK */
-  struct rule *rule;
+  rule_t *rule;
   dep_t *dep;
 
   char *p, *vp;
@@ -558,7 +557,7 @@ pattern_search (file_t *file, int archive,
 	    }
 	}
 
-      dep = (dep_t *) xmalloc (sizeof (dep_t));
+      dep = CALLOC(dep_t, 1);
       dep->ignore_mtime = found_files_im[deps_found];
       s = found_files[deps_found];
       if (recursions == 0)
