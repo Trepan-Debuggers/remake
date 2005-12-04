@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.20 2005/12/04 13:22:48 rockyb Exp $
+/* $Id: main.c,v 1.21 2005/12/04 13:52:01 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -2776,7 +2776,6 @@ die (int status)
   free_stringlist(tracing_opts);
   free_stringlist(jobserver_fds);
   free_stringlist(directories);
-  free_stringlist(include_directories);
   free_stringlist(old_files);
   free_stringlist(new_files);
   free_stringlist(debugger_opts);
