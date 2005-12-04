@@ -1,4 +1,4 @@
-/* $Id: make.h,v 1.14 2005/12/04 13:22:48 rockyb Exp $
+/* $Id: make.h,v 1.15 2005/12/04 23:18:17 rockyb Exp $
 Miscellaneous global declarations and portability cruft for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -328,11 +328,26 @@ extern int strcmpi (const char *,const char *);
 #define S_(msg1,msg2,num)   ngettext (msg1,msg2,num)
 
 /* Handle other OSs.  */
-#if defined(HAVE_DOS_PATHS)
-# define PATH_SEPARATOR_CHAR ';'
-#else
-# define PATH_SEPARATOR_CHAR ':'
+
+#if defined(WINDOWS32) || defined(__CYGWIN__)
+#define WIN32_OR_CYGWIN
 #endif
+
+#ifdef __CYGWIN__
+#define strcaseequ(s1, s2) (strcasecmp((s1),(s2)) == 0)
+
+/* indicates whether or not we have Bourne shell */
+extern int no_default_sh_exe;
+
+/* is default_shell unixy? */
+extern int unixy_shell;
+
+extern char *end_of_token_w32();
+extern int find_and_set_default_shell(char *token);
+#endif /* __CYGWIN__ */
+
+#define PATH_SEPARATOR_CHAR path_separator_char_
+extern char path_separator_char_;
 
 #ifdef WINDOWS32
 # include <fcntl.h>

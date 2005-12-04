@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.19 2005/12/03 12:49:42 rockyb Exp $
+/* $Id: job.c,v 1.20 2005/12/04 23:18:16 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005
 Free Software Foundation, Inc.
@@ -47,6 +47,10 @@ Boston, MA 02111-1307, USA.  */
 
 
 /* Default shell to use.  */
+#ifdef __CYGWIN__
+int no_default_sh_exe = 0;
+#endif
+
 #ifdef WINDOWS32
 
 char *default_shell = "sh.exe";
@@ -62,10 +66,8 @@ bool batch_mode_shell = true;
 char *default_shell = "command.com";
 int batch_mode_shell = 0;
 
-#elif defined (__riscos__)
-
-char default_shell[] = "";
-bool batch_mode_shell = false;
+#elif defined(__CYGWIN__)
+char *default_shell = "/bin/sh";
 
 #else
 
@@ -603,7 +605,7 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
           c->file->update_status = 2;
           if (delete_on_error == -1)
             {
-              struct file *f = lookup_file (".DELETE_ON_ERROR");
+              file_t *f = lookup_file (".DELETE_ON_ERROR");
               delete_on_error = f != 0 && f->is_target;
             }
           if (exit_sig != 0 || delete_on_error)
@@ -1226,7 +1228,7 @@ static void start_job_command (child_t *p_child,
 static int
 start_waiting_job (child_t *c, target_stack_node_t *p_call_stack)
 {
-  struct file *f = c->file;
+  file_t *f = c->file;
 
   /* If we can start a job remotely, we always want to, and don't care about
      the local load average.  We record that the job should be started
@@ -1286,7 +1288,7 @@ start_waiting_job (child_t *c, target_stack_node_t *p_call_stack)
 void
 new_job (file_t *file, target_stack_node_t *p_call_stack)
 {
-  struct commands *cmds = file->cmds;
+  commands_t *cmds = file->cmds;
   child_t *c;
   char **lines;
   unsigned int i;
@@ -1942,36 +1944,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 
   char *sh_chars;
   char **sh_cmds;
-#elif defined (__EMX__)
-  static char sh_chars_dos[] = "*?[];|<>%^&()";
-  static char *sh_cmds_dos[] = { "break", "call", "cd", "chcp", "chdir", "cls",
-				 "copy", "ctty", "date", "del", "dir", "echo",
-				 "erase", "exit", "for", "goto", "if", "md",
-				 "mkdir", "path", "pause", "prompt", "rd",
-				 "rmdir", "rem", "ren", "rename", "set",
-				 "shift", "time", "type", "ver", "verify",
-				 "vol", ":", 0 };
-
-  static char sh_chars_os2[] = "*?[];|<>%^()\"'&";
-  static char *sh_cmds_os2[] = { "call", "cd", "chcp", "chdir", "cls", "copy",
-			     "date", "del", "detach", "dir", "echo",
-			     "endlocal", "erase", "exit", "for", "goto", "if",
-			     "keys", "md", "mkdir", "move", "path", "pause",
-			     "prompt", "rd", "rem", "ren", "rename", "rmdir",
-			     "set", "setlocal", "shift", "start", "time",
-                             "type", "ver", "verify", "vol", ":", 0 };
-
-  static char sh_chars_sh[]  = "#;\"*?[]&|<>(){}$`^~'";
-  static char *sh_cmds_sh[]  = { "echo", "cd", "eval", "exec", "exit", "login",
-				 "logout", "set", "umask", "wait", "while",
-				 "for", "case", "if", ":", ".", "break",
-				 "continue", "export", "read", "readonly",
-				 "shift", "times", "trap", "switch", "unset",
-                                 0 };
-  char *sh_chars;
-  char **sh_cmds;
-
-#elif defined (WINDOWS32)
+#elif defined(WIN32_OR_CYGWIN)
   static char sh_chars_dos[] = "\"|&<>";
   static char *sh_cmds_dos[] = { "break", "call", "cd", "chcp", "chdir", "cls",
 			     "copy", "ctty", "date", "del", "dir", "echo",
@@ -1991,9 +1964,6 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
                  0 };
   char*  sh_chars;
   char** sh_cmds;
-#elif defined(__riscos__)
-  static char sh_chars[] = "";
-  static char *sh_cmds[] = { 0 };
 #else  /* must be UNIX-ish */
   static char sh_chars[] = "#;\"*?[]&|<>(){}$`^~!";
   static char *sh_cmds[] = { ".", ":", "break", "case", "cd", "continue",
@@ -2012,13 +1982,23 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
   int slow_flag = 0;
 
   if (no_default_sh_exe) {
-    sh_cmds = sh_cmds_dos;
+    sh_cmds  = sh_cmds_dos;
     sh_chars = sh_chars_dos;
   } else {
-    sh_cmds = sh_cmds_sh;
+    sh_cmds  = sh_cmds_sh;
     sh_chars = sh_chars_sh;
   }
 #endif /* WINDOWS32 */
+
+#ifdef __CYGWIN__
+  if (!unixy_shell) {
+    sh_cmds  = sh_cmds_dos;
+    sh_chars = sh_chars_dos;
+  } else {
+    sh_cmds  = sh_cmds_sh;
+    sh_chars = sh_chars_sh;
+  }
+#endif /* __CYGWIN__ */
 
   if (restp != NULL)
     *restp = NULL;
@@ -2047,8 +2027,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
   }
   if (slow_flag)
     goto slow;
-#else  /* not WINDOWS32 */
-#if defined (__MSDOS__) || defined (__EMX__)
+#elif defined (__MSDOS__)
   else if (stricmp (shell, default_shell))
     {
       extern int _is_unixy_shell (const char *_path);
@@ -2069,18 +2048,10 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
     {
       sh_chars = sh_chars_dos;
       sh_cmds  = sh_cmds_dos;
-# ifdef __EMX__
-      if (_osmode == OS2_MODE)
-        {
-          sh_chars = sh_chars_os2;
-          sh_cmds = sh_cmds_os2;
-        }
-# endif
     }
 #else  /* !__MSDOS__ */
   else if (strcmp (shell, default_shell))
     goto slow;
-#endif /* !__MSDOS__ && !__EMX__ */
 #endif /* not WINDOWS32 */
 
   if (ifs != 0)
@@ -2322,7 +2293,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
   execute_by_shell = 1;	/* actually, call `system' if shell isn't unixy */
 #endif
 
-#ifdef WINDOWS32
+#ifdef WIN32_OR_CYGWIN
   /*
    * Not eating this whitespace caused things like
    *
@@ -2338,7 +2309,8 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
     ++line;
   if (*line == '\0')
     return 0;
-#endif /* WINDOWS32 */
+#endif /* WIN32_OR_CYGWIN */
+
   {
     /* SHELL may be a multi-word command.  Construct a command line
        "SHELL -c LINE", with all special chars in LINE escaped.
@@ -2346,12 +2318,22 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
        argument list.  */
 
     unsigned int shell_len = strlen (shell);
+#ifdef __CYGWIN__
+    static char minus_c[] = " /c ";
+#else 
     static char minus_c[] = " -c ";
+#endif
     unsigned int line_len = strlen (line);
 
     char *new_line = (char *) alloca (shell_len + (sizeof (minus_c) - 1)
 				      + (line_len * 2) + 1);
     char *command_ptr = NULL; /* used for batch_mode_shell mode */
+
+#ifdef __CYGWIN__
+    /* If using a Unix subshell, invoke it as "SHELL -c command_line" */
+    if (unixy_shell)
+      minus_c[1] = '-';
+#endif
 
     ap = new_line;
     memmove (ap, shell, shell_len);
@@ -2382,14 +2364,21 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 
 	    p = next_token (p);
 	    --p;
+
+#ifndef __CYGWIN__
             if (unixy_shell && !batch_mode_shell)
+#endif
               *ap++ = '\\';
 	    *ap++ = ' ';
 	    continue;
 	  }
 
         /* DOS shells don't know about backslash-escaping.  */
+#ifdef __CYGWIN__
+	if (
+#else
 	if (unixy_shell && !batch_mode_shell &&
+#endif
             (*p == '\\' || *p == '\'' || *p == '"'
              || isspace ((unsigned char)*p)
              || strchr (sh_chars, *p) != 0))
@@ -2446,7 +2435,11 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
       new_argv[2] = NULL;
     } else
 #endif /* WINDOWS32 */
+#ifdef __CYGWIN__
+    if (1)
+#else
     if (unixy_shell)
+#endif
       new_argv = construct_command_argv_internal (new_line, (char **) NULL,
                                                   (char *) 0, (char *) 0,
                                                   (char **) 0);
@@ -2510,57 +2503,66 @@ construct_command_argv (char *line, char **restp, file_t *file,
       strcpy (shell, p);
     }
 #endif
-#ifdef __EMX__
-    {
-      static const char *unixroot = NULL;
-      static const char *last_shell = "";
-      static int init = 0;
-      if (init == 0)
-	{
-	  unixroot = getenv ("UNIXROOT");
-	  /* unixroot must be NULL or not empty */
-	  if (unixroot && unixroot[0] == '\0') unixroot = NULL;
-	  init = 1;
-	}
-
-      /* if we have an unixroot drive and if shell is not default_shell
-         (which means it's either cmd.exe or the test has already been
-         performed) and if shell is an absolute path without drive letter,
-         try whether it exists e.g.: if "/bin/sh" does not exist use
-         "$UNIXROOT/bin/sh" instead.  */
-      if (unixroot && shell && strcmp (shell, last_shell) != 0
-	  && (shell[0] == '/' || shell[0] == '\\'))
-	{
-	  /* trying a new shell, check whether it exists */
-	  size_t size = strlen (shell);
-	  char *buf = xmalloc (size + 7);
-	  memcpy (buf, shell, size);
-	  memcpy (buf + size, ".exe", 5); /* including the trailing '\0' */
-          if (access (shell, F_OK) != 0 && access (buf, F_OK) != 0)
-	    {
-	      /* try the same for the unixroot drive */
-	      memmove (buf + 2, buf, size + 5);
-	      buf[0] = unixroot[0];
-	      buf[1] = unixroot[1];
-	      if (access (buf, F_OK) == 0)
-		/* we have found a shell! */
-		/* free(shell); */
-		shell = buf;
-	      else
-		free (buf);
-	    }
-	  else
-            free (buf);
-	}
-    }
-#endif /* __EMX__ */
 
     ifs = allocated_variable_expand_for_file ("$(IFS)", file);
 
     warn_undefined_variables_flag = save;
   }
 
+#ifndef __CYGWIN__
   argv = construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr);
+#else /* __CYGWIN__ */
+  if (unixy_shell)
+    {
+      argv = construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr);
+    }
+  else
+    {
+      /*  backslash '\' path separators are used when not using a
+	  unixy_shell so we need to escape each \ except those followed
+	  by a '\n' so that construct_command_argv_internal does not
+	  remove them */
+
+      char *converted_line;
+      char *l, *cl;
+
+      converted_line = (char *) alloca (1 + strlen (line) * 2);
+      assert (converted_line);
+
+      for (l = line, cl = converted_line; *l != 0; *cl++ = *l++)
+	if (*l == '\\' && l[1] != '\n')
+	  *cl++ = '\\';
+
+      *cl = 0;
+      argv = construct_command_argv_internal (converted_line, restp, shell, ifs, batch_filename_ptr);
+
+      /* Point restp back into the original command, if appropriate. */
+      if (restp && *restp)
+	{
+	  for (l = line, cl = converted_line; *l != 0 && cl != *restp; cl++, l++)
+	    if (*l == '\\' && l[1] != '\n')
+	      cl++;
+	  assert (cl == *restp);
+	  *restp = l;
+	}
+
+      /* OK, now we have to take the extra backslashes back out if
+	 we think we'll be invoking the windows command interpreter,
+	 which doesn't understand them. */
+      if (argv && argv[0] && argv[1] && argv[2]
+	  && strcmp (argv[0], default_shell) == 0
+	  && strcmp (argv[1], "/c") == 0)
+	{
+	  for (l = cl = argv[2]; *l; l++)
+	    {
+	    if (*l == '\\')
+	      l++;
+	    *cl++ = *l;
+	    }
+	  *cl = 0;
+	}
+    }
+#endif /* __CYGWIN__ */
 
   free (shell);
   free (ifs);

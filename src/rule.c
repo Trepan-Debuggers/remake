@@ -167,7 +167,7 @@ count_implicit_rule_limits (void)
    If SOURCE is nil, it means there should be no deps.  */
 
 static void
-convert_suffix_rule (char *target, char *source, struct commands *cmds)
+convert_suffix_rule (char *target, char *source, commands_t *cmds)
 {
   char *targname, *targpercent, *depname;
   char **names, **percents;
@@ -248,7 +248,7 @@ convert_to_pattern (void)
     {
       /* Make a rule that is just the suffix, with no deps or commands.
 	 This rule exists solely to disqualify match-anything rules.  */
-      convert_suffix_rule (dep_name (d), (char *) 0, (struct commands *) 0);
+      convert_suffix_rule (dep_name (d), (char *) 0, (commands_t *) NULL);
 
       f = d->file;
       if (f->cmds != 0)
@@ -451,7 +451,7 @@ free_rule (rule_t *rule, rule_t *lastrule)
        * If two suffixes that together make a two-suffix rule were each
        given twice in the .SUFFIXES list, and in the proper order, two
        identical pattern rules would be created and the second one would
-       be discarded here, but both would contain the same `struct commands'
+       be discarded here, but both would contain the same `commands_t'
        pointer from the `struct file' for the suffix rule.  */
 
   free ((char *) rule);
@@ -491,7 +491,7 @@ free_pattern_rules (void)
 void
 create_pattern_rule (char **targets, char **target_percents,
 		     int terminal, dep_t *deps,
-                     struct commands *commands, int override)
+                     commands_t *commands, int override)
 {
   rule_t *r = (rule_t *) xmalloc (sizeof (rule_t));
   unsigned int max_targets, i;

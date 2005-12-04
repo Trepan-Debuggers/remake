@@ -1,4 +1,4 @@
-/* $Id: default.c,v 1.6 2005/12/04 13:22:48 rockyb Exp $
+/* $Id: default.c,v 1.7 2005/12/04 23:18:16 rockyb Exp $
 Data base of default implicit rules for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96, 2004 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -29,7 +29,7 @@ Boston, MA 02111-1307, USA.  */
 
 /* Define GCC_IS_NATIVE if gcc is the native development environment on
    your system (gcc/bison/flex vs cc/yacc/lex).  */
-#if defined(__MSDOS__) 
+#if defined(__MSDOS__) || defined(__CYGWIN__)
 # define GCC_IS_NATIVE
 #endif
 

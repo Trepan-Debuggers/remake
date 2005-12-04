@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.22 2005/12/04 16:33:55 rockyb Exp $
+/* $Id: main.c,v 1.23 2005/12/04 23:18:17 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -46,11 +46,24 @@ MA 02111-1307, USA.  */
 #include <assert.h>
 #ifdef WINDOWS32
 #include <windows.h>
-#include <io.h>
 #include "pathstuff.h"
 #endif
-#ifdef HAVE_FCNTL_H
+#if defined(MAKE_JOBSERVER) && defined(HAVE_FCNTL_H)
 # include <fcntl.h>
+#endif
+
+#ifdef __CYGWIN__
+#define w32ify(s,r) (s)
+extern char *default_shell;
+typedef enum os_type {winNT, win95, win32s, unknown} os_type;
+#endif
+
+/* Use path_separator_char_ variable instead of using a preprocessor
+   define */
+#if defined(__MSDOS__) || defined(WINDOWS32)
+char path_separator_char_ = ';';
+#else
+char path_separator_char_ = ':';
 #endif
 
 extern void init_dir (void);
@@ -361,6 +374,8 @@ static const char *const usage[] =
     N_("\
   -v, --version                Print the version number of make and exit.\n"),
     N_("\
+  -V, --show-variables         Show variable expansions.\n"),
+    N_("\
   -w, --print-directory        Print the current directory.\n"),
     N_("\
   --no-print-directory         Turn off -w, even if it was turned on implicitly.\n"),
@@ -376,8 +391,12 @@ static const char *const usage[] =
   -X [type], --debugger[=TYPE] Enter debugger. TYPE may be\n\
                                \"preread\", \"preaction\", \"full\",\n\
                                \"error\", or \"fatal\".\n"),
+#ifdef __CYGWIN__
     N_("\
-  -V, --show-variables         Show variable expansions.\n"),
+  --unix                       Run in UNIX mode (use sh.exe subshell).\n"),
+    N_("\
+  --win32                      Run in Win32 mode (use Win32 subshell).\n"),
+#endif
     NULL
   };
 
@@ -444,6 +463,12 @@ static const command_switch_t switches[] =
 	"no-print-directory" },
     { CHAR_MAX+5, flag, (char *) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
 	"warn-undefined-variables" },
+#ifdef __CYGWIN__
+    { CHAR_MAX+6, flag, (char *) &unixy_shell, 1, 1, 0, 0, 0,
+        "unix" },
+    { CHAR_MAX+7, flag_off, (char *) &unixy_shell, 1, 1, 0, 0, 0,
+        "win32"} ,
+#endif
     { 0 }
   };
 
@@ -619,6 +644,24 @@ enter_command_line_file (name)
   return enter_file (xstrdup (name), NILF);
 }
 
+#ifdef __CYGWIN__
+#include <windows.h>
+/* Return which MS OS is being run.  Make's subshell is one thing
+   in Windows NT and another in Windows 95. */
+os_type
+get_os_type () 
+{
+  DWORD version = GetVersion ();
+
+  if (version < 0x80000000)
+    return winNT;
+  else if ((version & 0x80000000) && (version & 0xff) > 3)
+    return win95;
+  else
+    return win32s;
+}
+#endif
+
 #ifdef WINDOWS32
 /*
  * HANDLE runtime exceptions by avoiding a requestor on the GUI. Capture
@@ -692,9 +735,11 @@ handle_runtime_exceptions( struct _EXCEPTION_POINTERS *exinfo )
 #else
   exit(255);
   return (255); /* not reached */
-#endif
+#endif /*DEBUG*/
 }
+#endif /* WINDOWS32 */
 
+#ifdef WIN32_OR_CYGWIN
 /*
  * On WIN32 systems we don't have the luxury of a /bin directory that
  * is mapped globally to every drive mounted to the system. Since make could
@@ -730,6 +775,11 @@ find_and_set_default_shell (char *token)
   } else {
     char *p;
     struct variable *v = lookup_variable ("Path", 4);
+
+#ifdef __CYGWIN__
+    if (!v)
+      v = lookup_variable ("PATH", 4);
+#endif
 
     /*
      * Search Path for shell
@@ -773,12 +823,14 @@ find_and_set_default_shell (char *token)
     }
   }
 
+#ifndef __CYGWIN__
   /* naive test */
   if (!unixy_shell && sh_found &&
       (strstr(default_shell, "sh") || strstr(default_shell, "SH"))) {
     unixy_shell      = true;
     batch_mode_shell = false;
   }
+#endif /* __CYGWIN__ */
 
 #ifdef BATCH_MODE_ONLY_SHELL
   batch_mode_shell   = true;
@@ -786,7 +838,7 @@ find_and_set_default_shell (char *token)
 
   return (sh_found);
 }
-#endif  /* WINDOWS32 */
+#endif  /* WIN32_OR_CYGWIN */
 
 #ifdef  __MSDOS__
 
@@ -861,7 +913,24 @@ main (int argc, char **argv, char **envp)
   /* start off assuming we have no shell */
   unixy_shell = false;
   no_default_sh_exe = 1;
-#endif
+#endif /*WINDOWS32*/
+
+#ifdef __CYGWIN__
+  char *unix_path = NULL;
+  char *windows32_path = NULL;
+
+  {
+    char *make_mode_env;
+
+    /* Read the environment variable MAKE_MODE */
+    /* If it's not "UNIX", set unixy_shell to 0. */
+    make_mode_env = getenv ("MAKE_MODE");
+    if (!make_mode_env)
+      unixy_shell = access ("/bin/sh", X_OK) == 0;
+    else
+      unixy_shell = strcaseequ (make_mode_env, "UNIX");
+  }
+#endif /* __CYGWIN__ */
 
   global_argv = argv;
   /* Needed for OS/2 */
@@ -871,6 +940,18 @@ main (int argc, char **argv, char **envp)
   reading_file      = 0;
   b_in_debugger     = false;
   
+
+#ifdef __CYGWIN__
+  {
+    char *make_mode_env;
+
+    /* Read the environment variable MAKE_MODE */
+    /* If it's not "UNIX", set unixy_shell to 0. */
+    make_mode_env = getenv ("MAKE_MODE");
+    if (make_mode_env && !strcaseequ (make_mode_env, "UNIX"))
+      unixy_shell = false;
+  }
+#endif /* __CYGWIN__ */
 
 #if defined (__MSDOS__) && !defined (_POSIX_SOURCE)
   /* Request the most powerful version of `system', to
@@ -972,7 +1053,7 @@ main (int argc, char **argv, char **envp)
     {
       program = strrchr (argv[0], '/');
 
-#if defined(__MSDOS__)
+#if defined(__MSDOS__) || defined(__CYGWIN__)
       if (program == 0)
 	program = strrchr (argv[0], '\\');
       else
@@ -1039,14 +1120,16 @@ main (int argc, char **argv, char **envp)
 
       while (*ep != '=')
         ++ep;
-#ifdef WINDOWS32 
+
+#ifdef WIN32
       if (!unix_path && strneq(envp[i], "PATH=", 5))
         unix_path = ep+1;
       else if (!windows32_path && !strnicmp(envp[i], "Path=", 5)) {
         do_not_define = 1; /* it gets defined after loop exits */
         windows32_path = ep+1;
       }
-#endif
+#endif  /*WIN32*/
+
       /* The result of pointer arithmetic is cast to unsigned int for
 	 machines where ptrdiff_t is a different size that doesn't widen
 	 the same.  */
@@ -1144,6 +1227,42 @@ main (int argc, char **argv, char **envp)
 
   decode_debug_flags ();
 
+#ifdef __CYGWIN__
+  /* Now that the command line switches have been read in,
+     we need to set path_separator_char based on the contents
+     of unixy_shell since they might invoked make with --unix */
+  if (unixy_shell)
+    {
+      path_separator_char_ = ':';
+      default_shell = "/bin/sh.exe";
+    }
+  else
+    {
+      struct variable *v;
+      path_separator_char_ = ';';
+
+      v = lookup_variable ("ComSpec", 7);
+      if (!v)
+	v = lookup_variable ("COMSPEC", 7);
+      if (v)
+	{
+	  char *p;
+	  default_shell = strdup (v->value);
+	  while ((p = strchr (default_shell, '\\')) != NULL)
+	    *p = '/';
+	}
+      else
+	{
+	  if (get_os_type() == winNT)
+	    default_shell = "cmd.exe";
+	  else
+	    default_shell = "command.com";
+	  no_default_sh_exe = !find_and_set_default_shell (default_shell);
+	}
+    }
+  
+#endif /* __CYGWIN__ */
+
   /* Print version information.  */
 
   if (print_version_flag || print_data_base_flag || 
@@ -1154,6 +1273,11 @@ main (int argc, char **argv, char **envp)
   if (print_version_flag)
     die (0);
 
+  /* Set the "MAKE_COMMAND" variable to the name we were invoked with.
+     (If it is a relative pathname with a slash, prepend our directory name
+     so the result will run the same program regardless of the current dir.
+     If it is a name with no slash, we can only hope that PATH did not
+     find it in the current directory.)  */
 #ifdef WINDOWS32
   /*
    * Convert from backslashes to forward slashes for
@@ -1275,8 +1399,8 @@ main (int argc, char **argv, char **envp)
    * at the wrong place when it was first evaluated.
    */
    no_default_sh_exe = !find_and_set_default_shell(NULL);
-
 #endif /* WINDOWS32 */
+
   /* Figure out the level of recursion.  */
   {
     struct variable *v = lookup_variable (MAKELEVEL_NAME, MAKELEVEL_LENGTH);
@@ -1403,7 +1527,6 @@ main (int argc, char **argv, char **envp)
 	  }
     }
 
-#ifndef __EMX__ /* Don't use a SIGCHLD handler for OS/2 */
 #if defined(MAKE_JOBSERVER) || !defined(HAVE_WAIT_NOHANG)
   /* Set up to handle children dying.  This must be done before
      reading in the makefiles so that `shell' function calls will work.
@@ -1426,7 +1549,6 @@ main (int argc, char **argv, char **envp)
     bsd_signal (SIGCLD, child_handler);
 # endif
   }
-#endif
 #endif
 
   /* Let the user send us SIGUSR1 to toggle the -d flag during the run.  */
@@ -1593,7 +1715,7 @@ main (int argc, char **argv, char **envp)
       jobserver_fds->idx = 1;
       jobserver_fds->max = 1;
     }
-#endif
+#endif /* MAKE_JOBSERVER */
 
   /* Set up MAKEFLAGS and MFLAGS again, so they will be right.  */
 
