@@ -103,8 +103,8 @@ check-regression:
 		     rm -f tests/$$f; ln -s ../srctests/$$f tests; \
 		   done; fi ;; \
 	    esac; \
-	    echo "cd tests && $(PERL) ./run_make_tests.pl -make ../src/make$(EXEEXT) $(MAKETESTFLAGS)"; \
-	    cd tests && $(PERL) ./run_make_tests.pl -make ../src/make$(EXEEXT) $(MAKETESTFLAGS); \
+	    echo "cd tests && $(PERL) ./run_make_tests.pl --make ../src/make$(EXEEXT) $(MAKETESTFLAGS)"; \
+	    cd tests && $(PERL) ./run_make_tests.pl --make ../src/make$(EXEEXT) $(MAKETESTFLAGS); \
 	  else \
 	    echo "Can't find a working Perl ($(PERL)); the test suite requires Perl."; \
 	  fi; \
