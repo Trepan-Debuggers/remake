@@ -1,5 +1,5 @@
 #                                                                    -*-perl-*-
-# $Id: export,v 1.3 2005/12/04 19:35:59 rockyb Exp $
+# $Id: export,v 1.4 2005/12/04 19:40:34 rockyb Exp $
 $description = "Check GNU make export/unexport commands.";
 
 $details = "
@@ -15,7 +15,7 @@ TEST  9: exporting multiple variables on the same line
 TEST 10: unexporting multiple variables on the same line
 
 Cygwin (at least seems) to have trouble *removing* environment
-variables, so tests 4 and 5 are skipped.
+variables, so tests 4 and 5 are skipped on that platform.
 ";
 
 # The test driver cleans out our environment for us so we don't have to worry
