@@ -1,4 +1,4 @@
-/* $Id: dir.c,v 1.10 2005/12/03 12:49:42 rockyb Exp $
+/* $Id: dir.c,v 1.11 2005/12/04 23:49:49 rockyb Exp $
 Directory hashing for GNU Make.
 Copyright (C) 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -20,6 +20,7 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 #include "config.h"
+
 #include "ar_fns.h"
 #include "hash.h"
 #include "make.h"
