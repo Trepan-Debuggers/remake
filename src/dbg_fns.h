@@ -1,4 +1,4 @@
-/* $Id: dbg_fns.h,v 1.4 2005/12/02 12:12:09 rockyb Exp $
+/* $Id: dbg_fns.h,v 1.5 2005/12/04 01:42:35 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -22,7 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef DBG_FNS_H
 #define DBG_FNS_H
 
-#include "filedef.h"
+#include "file.h"
 #include "trace.h"
 
 extern floc_t *p_target_loc;

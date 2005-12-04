@@ -1,4 +1,4 @@
-/* $Id: remake.h,v 1.3 2005/12/02 12:12:09 rockyb Exp $
+/* $Id: remake.h,v 1.4 2005/12/04 01:42:35 rockyb Exp $
 Header for basic dependency engine for GNU Make.
 Copyright (C) 2004, 2005
 This file is part of GNU Make.
@@ -30,7 +30,7 @@ Boston, MA 02111-1307, USA.  */
 #define REMAKE_H
 
 #include "dep.h"
-#include "filedef.h"
+#include "file.h"
 
 /*! Return the mtime of a file, given a `struct file'.  Caches the
   time in the struct file to avoid excess stat calls.

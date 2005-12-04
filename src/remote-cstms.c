@@ -23,7 +23,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "make.h"
 #include "job.h"
-#include "filedef.h"
+#include "file.h"
 #include "commands.h"
 #include "debug.h"
 

@@ -24,7 +24,7 @@ Boston, MA 02111-1307, USA.  */
 #define TRACE_H
 
 #include "make.h"
-#include "filedef.h"
+#include "file.h"
 
 typedef enum {
   continue_execution,   /**< Get out of debug read loop and continue execution

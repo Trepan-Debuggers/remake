@@ -24,7 +24,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "make.h"
 #include "hash.h"
-#include "filedef.h"
+#include "file.h"
 
 /** Codes in a variable definition saying where the definition came from.
    Increasing numeric values signify less-overridable definitions.  */

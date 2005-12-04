@@ -1,4 +1,4 @@
-/* $Id: expand.h,v 1.4 2005/12/04 01:39:30 rockyb Exp $
+/* $Id: expand.h,v 1.5 2005/12/04 01:42:35 rockyb Exp $
 Header for variable expansion functions for GNU Make.
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -22,7 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #define EXPAND_H
 
 #include "variable.h"
-#include "filedef.h"
+#include "file.h"
 
 #define	allocated_variable_expand(line) \
   allocated_variable_expand_for_file (line, (file_t *) 0)

@@ -21,7 +21,7 @@ make_SOURCES =	ar_fns.c arscan.c commands.c dbg_cmd.c dbg_fns.c dbg_stack.c \
 EXTRA_make_SOURCES = remote-stub.c remote-cstms.c
 
 noinst_HEADERS = ar_fns.h arscan.h commands.h dbg_cmd.h dbg_fns.h dbg_stack.h \
-	         debug.h default.h dep.h expand.h filedef.h \
+	         debug.h default.h dep.h expand.h file.h \
 	         function.h getopt.h gettext.h hash.h implicit.h job.h \
 		 make.h print.h read.h remake.h remote-stub.h rule.h \
 		 trace.h types.h variable.h  vpath.h

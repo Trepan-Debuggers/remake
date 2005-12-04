@@ -1,4 +1,4 @@
-/* $Id: default.c,v 1.4 2005/12/04 01:39:30 rockyb Exp $
+/* $Id: default.c,v 1.5 2005/12/04 01:42:35 rockyb Exp $
 Data base of default implicit rules for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96, 2004 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -20,7 +20,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "make.h"
 #include "default.h"
-#include "filedef.h"
+#include "file.h"
 #include "variable.h"
 #include "read.h"
 #include "rule.h"
