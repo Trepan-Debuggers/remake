@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.21 2005/12/04 13:52:01 rockyb Exp $
+/* $Id: main.c,v 1.22 2005/12/04 16:33:55 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -841,13 +841,8 @@ open_tmpfile(char **name, const char *template)
 }
 
 
-#ifdef _AMIGA
-int
-main (int argc, char **argv)
-#else
 int
 main (int argc, char **argv, char **envp)
-#endif
 {
 
   static char *stdin_nm = 0;
@@ -1044,7 +1039,7 @@ main (int argc, char **argv, char **envp)
 
       while (*ep != '=')
         ++ep;
-#ifdef WINDOWS32
+#ifdef WINDOWS32 
       if (!unix_path && strneq(envp[i], "PATH=", 5))
         unix_path = ep+1;
       else if (!windows32_path && !strnicmp(envp[i], "Path=", 5)) {
