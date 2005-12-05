@@ -14,7 +14,7 @@ man_MANS =	make.1
 # maintainers.
 
 EXTRA_DIST =	README build.sh.in $(man_MANS) \
-		README.customs README.makedb getloadavg.c \
+		README.customs README.makedb \
 		SCOPTIONS SMakefile\
 		README.W32 TODO ChangeLog.GNUMake
 
