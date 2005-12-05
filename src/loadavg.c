@@ -1,4 +1,5 @@
-/* Get the system load averages.
+/* $Id: loadavg.c,v 1.3 2005/12/05 00:54:38 rockyb Exp $
+   Get the system load averages.
    Copyright (C) 1985, 86, 87, 88, 89, 91, 92, 93, 1994, 1995, 1997
    	Free Software Foundation, Inc.
 
@@ -60,7 +61,6 @@
    sony_news                    NEWS-OS (works at least for 4.1C)
    UMAX
    UMAX4_3
-   VMS
    WINDOWS32			No-op for Windows95/NT.
    __linux__			Linux: assumes /proc filesystem mounted.
    				Support from Michael K. Johnson.
@@ -361,7 +361,6 @@ extern int errno;
 
 # ifdef LOAD_AVE_TYPE
 
-#  ifndef VMS
 #   ifndef __linux__
 #    ifdef HAVE_NLIST_H
 #     include <nlist.h>
@@ -387,16 +386,6 @@ extern int errno;
 #     define LDAV_SYMBOL "_avenrun"
 #    endif /* LDAV_SYMBOL */
 #   endif /* __linux__ */
-
-#  else /* VMS */
-
-#   ifndef eunice
-#    include <iodef.h>
-#    include <descrip.h>
-#   else /* eunice */
-#    include <vms/iodef.h>
-#   endif /* eunice */
-#  endif /* VMS */
 
 #  ifndef LDAV_CVT
 #   define LDAV_CVT(n) ((double) (n))
@@ -482,9 +471,9 @@ static int getloadavg_initialized;
 /* Offset in kmem to seek to read load average, or 0 means invalid.  */
 static long offset;
 
-#if !defined(VMS) && !defined(sgi) && !defined(__linux__)
+#if !defined(sgi) && !defined(__linux__)
 static struct nlist nl[2];
-#endif /* Not VMS or sgi */
+#endif /* Not sgi */
 
 #ifdef SUNOS_5
 static kvm_t *kd;
@@ -498,9 +487,7 @@ static kvm_t *kd;
    or -1 if an error occurred.  */
 
 int
-getloadavg (loadavg, nelem)
-     double loadavg[];
-     int nelem;
+getloadavg (double loadavg[], int nelem)
 {
   int elem = 0;			/* Return value.  */
 
@@ -820,47 +807,7 @@ getloadavg (loadavg, nelem)
        : (load_ave.tl_avenrun.l[elem] / (double) load_ave.tl_lscale));
 # endif /* OSF_ALPHA */
 
-# if !defined (LDAV_DONE) && defined (VMS)
-  /* VMS specific code -- read from the Load Ave driver.  */
-
-  LOAD_AVE_TYPE load_ave[3];
-  static int getloadavg_initialized = 0;
-#  ifdef eunice
-  struct
-  {
-    int dsc$w_length;
-    char *dsc$a_pointer;
-  } descriptor;
-#  endif
-
-  /* Ensure that there is a channel open to the load ave device.  */
-  if (!getloadavg_initialized)
-    {
-      /* Attempt to open the channel.  */
-#  ifdef eunice
-      descriptor.dsc$w_length = 18;
-      descriptor.dsc$a_pointer = "$$VMS_LOAD_AVERAGE";
-#  else
-      $DESCRIPTOR (descriptor, "LAV0:");
-#  endif
-      if (sys$assign (&descriptor, &channel, 0, 0) & 1)
-	getloadavg_initialized = 1;
-    }
-
-  /* Read the load average vector.  */
-  if (getloadavg_initialized
-      && !(sys$qiow (0, channel, IO$_READVBLK, 0, 0, 0,
-		     load_ave, 12, 0, 0, 0, 0) & 1))
-    {
-      sys$dassgn (channel);
-      getloadavg_initialized = 0;
-    }
-
-  if (!getloadavg_initialized)
-    return -1;
-# endif /* VMS */
-
-# if !defined (LDAV_DONE) && defined(LOAD_AVE_TYPE) && !defined(VMS)
+# if !defined (LDAV_DONE) && defined(LOAD_AVE_TYPE) 
 
   /* UNIX-specific code -- read the average from /dev/kmem.  */
 
@@ -978,14 +925,14 @@ getloadavg (loadavg, nelem)
 #  define LDAV_DONE
 # endif /* !LDAV_DONE && LOAD_AVE_TYPE */
 
-# ifdef LDAV_DONE
-  return elem;
-# else
+# ifndef LDAV_DONE
   /* Set errno to zero to indicate that there was no particular error;
      this function just can't work at all on this system.  */
   errno = 0;
-  return -1;
-# endif
+  elem  = -1;
+# endif /*LDAV_DONE*/
+
+  return elem;
 }
 
 #endif /* ! HAVE_GETLOADAVG */
