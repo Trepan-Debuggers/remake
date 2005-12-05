@@ -526,7 +526,7 @@ print_floc_stack (int i_pos, int i_max)
 void print_read_makefiles (void) 
 {
   dep_t *p_dep;
-  if (!p_dep) return;
+  if (!read_makefiles) return;
   for (p_dep = read_makefiles; p_dep; p_dep = p_dep->next) {
     if (p_dep->file) {
       if (p_dep != read_makefiles)
