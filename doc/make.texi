@@ -7,11 +7,11 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.3 2005/11/27 16:49:56 rockyb Exp $
+@set RCSID $Id: make.texi,v 1.4 2005/12/05 14:39:15 rockyb Exp $
 @set EDITION 0.61
-@set VERSION 3.80
-@set UPDATED 23 Feb 2003
-@set UPDATE-MONTH Feb 2003
+@set VERSION 3.80+dbg
+@set UPDATED 10 Dec 2005
+@set UPDATE-MONTH Dec 2005
 @c ISBN provided by Lisa M. Opus Goldstein <opus@gnu.org>, 5 May 2004
 @set ISBN 1-882114-83-5
 
@@ -2665,6 +2665,9 @@ recommend you use the more selective ways to silence specific commands.
 for a particular run of @code{make}, use the @samp{-s} or
 @w{@samp{--silent}} option (@pxref{Options Summary}).
 
+As with those other methods, when one is debugging a programming
+silence is disabled when tracing.
+
 @findex .EXPORT_ALL_VARIABLES
 @item .EXPORT_ALL_VARIABLES
 
@@ -3226,6 +3229,10 @@ the makefile:
 @@echo About to make distribution files
 @end example
 
+If however one is tracing or in the midst of debugging it is useful to
+@emph{not} be silent. So tracing and debugging take precedence over
+``silence''.
+
 @cindex @code{-n}
 @cindex @code{--just-print}
 @cindex @code{--dry-run}
@@ -3241,12 +3248,14 @@ actually doing them.
 @cindex @code{--silent}
 @cindex @code{--quiet}
 @findex .SILENT
-The @samp{-s} or @samp{--silent}
-flag to @code{make} prevents all echoing, as if all commands
-started with @samp{@@}.  A rule in the makefile for the special target
-@code{.SILENT} without prerequisites has the same effect
-(@pxref{Special Targets, ,Special Built-in Target Names}).
-@code{.SILENT} is essentially obsolete since @samp{@@} is more flexible.@refill
+The @samp{-s} or @samp{--silent} flag to @code{make} prevents all
+echoing (unless tracing is in effect which has precedence). Using the
+@samp{--silent} flag as if all commands started with @samp{@@}.  A
+rule in the makefile for the special target @code{.SILENT} without
+prerequisites has the same effect (@pxref{Special Targets, ,Special
+Built-in Target Names}).  @code{.SILENT} is essentially obsolete since
+@samp{@@} is more flexible.@refill
+
 
 @node Execution, Parallel, Echoing, Commands
 @section Command Execution
@@ -7241,6 +7250,40 @@ Gives status on each Makefile as it is read in.
 @end table
 
 @item -e
+@cindex @code{-X}
+@item --debugger[=@var{options}]
+@cindex @code{--debugger}
+@c Extra blank line here makes the table look better.
+
+Enter the debugger.  Various points of entry and granularity of
+debugging can be chosen.  With no arguments, ``basic'' debug tracing
+is turned on and the debugger is entered @code{make} would execute the
+first command.  Possible arguments are
+below.
+
+@table @code
+@item normal
+This is the default behavior; ``basic'' debug tracing is turned on and
+the debugger is entered before executing the first command.
+
+@item preread
+The debugger is entered before any Makefile is read and stepping goes
+to the next Makefile read.
+
+@item full
+A level above @samp{basic}; includes messages about which makefiles were
+parsed, prerequisites that did not need to be rebuilt, etc.  This option
+also enables @samp{basic} messages.
+
+@item error
+The debugger is entered after hitting an error.
+
+@item fatal
+The debugger is entered after a fatal error.
+
+@end table
+
+@item -e
 @cindex @code{-e}
 @itemx --environment-overrides
 @cindex @code{--environment-overrides}
@@ -7440,6 +7483,30 @@ from complicated nests of recursive @code{make} commands.
 @xref{Recursion, ,Recursive Use of @code{make}}.  (In practice, you
 rarely need to specify this option since @samp{make} does it for you;
 see @ref{-w Option, ,The @samp{--print-directory} Option}.)
+
+@item -x
+@cindex @code{-x}
+@itemx --trace
+@cindex @code{--touch}
+@c Extra blank line here makes the table look better.
+
+Turn on tracing makefile execution. Various levels of granularity
+debugging can be chosen.  With no arguments, ``basic'' debug tracing
+is turned on and the debugger is entered @code{make} would execute the
+first command.  Possible arguments are below.
+
+@table @code
+@item normal
+This is the default behavior; ``basic'' debug tracing is turned on and
+the debugger is entered before executing the first command.
+
+@item read
+A little more verbose than ``normal''. Trace reading Makefiles
+
+@item full
+The most verbose tracing. 
+@end table
+
 
 @itemx --no-print-directory
 @cindex @code{--no-print-directory}
