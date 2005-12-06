@@ -1,5 +1,6 @@
-/* Implicit rule searching for GNU Make.
-Copyright (C) 1988,89,90,91,92,93,94,97,2000, 2004 
+/* $Id: implicit.c,v 1.7 2005/12/06 04:50:57 rockyb Exp $
+Implicit rule searching for GNU Make.
+Copyright (C) 1988,89,90,91,92,93,94,97,2000, 2004, 2005
 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -36,9 +37,9 @@ Boston, MA 02111-1307, USA.  */
 #include <alloca.h>
 #endif
 
-static int pattern_search PARAMS ((file_t *file, int archive, 
-				   unsigned int depth, 
-				   unsigned int recursions));
+static int pattern_search (file_t *file, int archive, 
+			   unsigned int depth, 
+			   unsigned int recursions);
 
 /*! For a FILE which has no commands specified, try to figure out some
    from the implicit pattern rules.

@@ -1,4 +1,4 @@
-/* $Id: make.h,v 1.15 2005/12/04 23:18:17 rockyb Exp $
+/* $Id: make.h,v 1.16 2005/12/06 04:50:57 rockyb Exp $
 Miscellaneous global declarations and portability cruft for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -45,28 +45,12 @@ char *alloca ();
 # endif
 #endif
 
-
-/* Use prototypes if available.  */
-#if defined (__cplusplus) || defined (__STDC__)
-# undef  PARAMS
-# define PARAMS(protos)  protos
-#else /* Not C++ or ANSI C.  */
-# undef  PARAMS
-# define PARAMS(protos)  ()
-#endif /* C++ or ANSI C.  */
-
 /* Specify we want GNU source code.  This must be defined before any
    system headers are included.  */
 
 #define _GNU_SOURCE 1
 
 #include "types.h"
-
-#ifdef  CRAY
-/* This must happen before #include <signal.h> so
-   that the declaration therein is changed.  */
-# define signal bsdsignal
-#endif
 
 /* If we're compiling for the dmalloc debugger, turn off string inlining.  */
 #if defined(HAVE_DMALLOC_H) && defined(__GNUC__)
@@ -282,30 +266,23 @@ extern char *strsignal (int i_signum);
    it's important to use the locale's definition of `digit' even when the
    host does not conform to POSIX.  */
 #define ISDIGIT(c) ((unsigned) (c) - '0' <= 9)
-#endif
+#endif /*ISDIGIT*/
 
-#ifndef iAPX286
-# define streq(a, b) \
+#define streq(a, b) \
    ((a) == (b) || \
     (*(a) == *(b) && (*(a) == '\0' || !strcmp ((a) + 1, (b) + 1))))
-# ifdef HAVE_CASE_INSENSITIVE_FS
+
+#ifdef HAVE_CASE_INSENSITIVE_FS
 /* This is only used on Windows/DOS platforms, so we assume strcmpi().  */
-#  define strieq(a, b) \
+# define strieq(a, b) \
     ((a) == (b) \
      || (tolower((unsigned char)*(a)) == tolower((unsigned char)*(b)) \
          && (*(a) == '\0' || !strcmpi ((a) + 1, (b) + 1))))
-# else
-#  define strieq(a, b) streq(a, b)
-# endif
 #else
-/* Buggy compiler can't handle this.  */
-# define streq(a, b) (strcmp ((a), (b)) == 0)
-# define strieq(a, b) (strcmp ((a), (b)) == 0)
+# define strieq(a, b) streq(a, b)
 #endif
+
 #define strneq(a, b, l) (strncmp ((a), (b), (l)) == 0)
-#ifdef  VMS
-extern int strcmpi (const char *,const char *);
-#endif
 
 #if defined(__GNUC__) || defined(ENUM_BITFIELDS)
 # define ENUM_BITFIELD(bits)    :bits

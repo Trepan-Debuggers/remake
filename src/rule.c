@@ -33,7 +33,7 @@ Boston, MA 02111-1307, USA.  */
 #include <alloca.h>
 #endif
 
-static void free_rule PARAMS ((rule_t *rule, rule_t *lastrule));
+static void free_rule (rule_t *rule, rule_t *lastrule);
 
 /* Chain of all pattern rules.  */
 

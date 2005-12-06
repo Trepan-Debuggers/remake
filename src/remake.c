@@ -1,4 +1,4 @@
-/* $Id: remake.c,v 1.12 2005/12/04 15:48:47 rockyb Exp $
+/* $Id: remake.c,v 1.13 2005/12/06 04:50:57 rockyb Exp $
 Basic dependency engine for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -65,17 +65,16 @@ unsigned int commands_started = 0;
 /* Current value for pruning the scan of the goal chain (toggle 0/1).  */
 static unsigned int considered;
 
-static int update_file PARAMS ((file_t *file, unsigned int depth,
-				target_stack_node_t *p_call_stack));
-static int update_file_1 PARAMS ((file_t *file, unsigned int depth,
-				  target_stack_node_t *p_call_stack));
-static int check_dep PARAMS ((file_t *file, unsigned int depth, 
+static int update_file (file_t *file, unsigned int depth,
+				target_stack_node_t *p_call_stack);
+static int update_file_1 (file_t *file, unsigned int depth,
+				  target_stack_node_t *p_call_stack);
+static int check_dep (file_t *file, unsigned int depth, 
 			      FILE_TIMESTAMP this_mtime, int *must_make_ptr,
-			      target_stack_node_t *p_call_stack));
-static int touch_file PARAMS ((file_t *file));
-static void remake_file PARAMS ((file_t *file, 
-				 target_stack_node_t *p_call_stack));
-static FILE_TIMESTAMP name_mtime PARAMS ((char *name));
+			      target_stack_node_t *p_call_stack);
+static int touch_file (file_t *file);
+static void remake_file (file_t *file, target_stack_node_t *p_call_stack);
+static FILE_TIMESTAMP name_mtime (char *name);
 static bool library_search (char **lib, FILE_TIMESTAMP *mtime_ptr);
 
 

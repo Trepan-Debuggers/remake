@@ -51,7 +51,8 @@ static struct vpath *general_vpath;
 
 static struct vpath *gpaths;
 
-static int selective_vpath_search PARAMS ((struct vpath *path, char **file, FILE_TIMESTAMP *mtime_ptr));
+static int selective_vpath_search (struct vpath *path, char **file, 
+				   FILE_TIMESTAMP *mtime_ptr);
 
 /* Reverse the chain of selective VPATH lists so they
    will be searched in the order given in the makefiles

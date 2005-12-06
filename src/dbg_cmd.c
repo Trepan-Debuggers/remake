@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.57 2005/12/04 02:21:59 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.58 2005/12/06 04:50:57 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -21,6 +21,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "make.h"
 #include "print.h"
+#include "dbg_break.h"
 #include "dbg_cmd.h"
 #include "dbg_fns.h"
 #include "dbg_stack.h"
@@ -172,6 +173,7 @@ typedef struct {
 } subcommand_info_t;
 
 char *info_subcommands[] = {
+  "break",
   "line",
   "locals",
   "makefiles",
@@ -253,8 +255,10 @@ cmd_initialize(void)
     _("Continue executing debugged Makefile until another breakpoint.");
 
   short_command['d'].func = &dbg_cmd_delete;
-  short_command['d'].use  = _("delete *target*");
-  short_command['d'].doc  = _("Delete target breakpoint.");
+  short_command['d'].use  = _("delete breakpoint numbers..");
+  short_command['d'].doc  = _("Delete some breakpoints." \
+"Arguments are breakpoint numbers with spaces in between.\n" \
+"To delete all breakpoints, give no argument.\n");
 
   short_command['D'].func = &dbg_cmd_frame_down;
   short_command['D'].use  = _("down [amount]");
@@ -606,7 +610,7 @@ dbg_cmd_show_stack (char *psz_amount)
   
   if (!psz_amount || !*psz_amount) {
     i_amount = MAX_STACK_SHOW;
-  } else if (!get_int(psz_amount, &i_amount)) {
+  } else if (!get_int(psz_amount, &i_amount, true)) {
       return debug_readloop;
   }
 
@@ -626,7 +630,7 @@ dbg_cmd_quit (char *psz_arg)
     exit(0);
   } else {
     int rc;
-    if (get_int(psz_arg, &rc)) 
+    if (get_int(psz_arg, &rc, true)) 
       exit(rc);
   }
   return debug_readloop;
@@ -646,35 +650,33 @@ static debug_return_t dbg_cmd_break (char *psz_target)
     return debug_readloop;
   }
 
-  if (p_target->tracing) {
-    printf("Breakpoint already set at target %s; nothing done.\n", psz_target);
-  } else {
-    p_target->tracing = 1;
-    printf("Breakpoint on target %s set.\n", psz_target);
-  }
-
+  add_breakpoint(p_target);
+  
   return debug_readloop;
 }
 
-/* Delete a breakpoint. */
-static debug_return_t dbg_cmd_delete (char *psz_target)
+/* 
+   Delete some breakpoints. Arguments are breakpoint numbers with spaces 
+   in between."To delete all breakpoints, give no argument.
+*/
+static debug_return_t 
+dbg_cmd_delete (char *psz_args)
 {
-  file_t *p_target;
+  int i_brkpt;
+  char *psz_word;
 
-  if (!psz_target || 0==strlen(psz_target))
-    return debug_readloop;
-  
-  p_target = lookup_file (psz_target);
-  if (!p_target) {
-    printf("Can't find target %s; breakpoint not cleared.\n", psz_target);
+  if (!psz_args || !*psz_args) {
+    while(i_breakpoints) 
+      remove_breakpoint(1);
     return debug_readloop;
   }
-
-  if (p_target->tracing) {
-    p_target->tracing = 0;
-    printf("Breakpoint on target %s cleared\n", psz_target);
-  } else {
-    printf("No breakpoint at target %s; nothing cleared.\n", psz_target);
+  
+  psz_word = get_word(&psz_args);
+  while ( psz_word && *psz_word ) {
+    if (get_int(psz_word, &i_brkpt, true)) {
+      remove_breakpoint(i_brkpt);
+    }
+    psz_word = get_word(&psz_args);
   }
 
   return debug_readloop;
@@ -794,6 +796,8 @@ static debug_return_t dbg_cmd_info (char *psz_arg)
       }
       hash_map_arg (&p_target->variables->set->table, 
 		    print_variable_info, NULL);
+    } else if (is_abbrev_of (psz_arg, "breakpoints", 1)) {
+      list_breakpoints();
     } else if (is_abbrev_of (psz_arg, "makefiles", 1)) {
       print_read_makefiles();
     } else if (is_abbrev_of (psz_arg, "stack", 1)) {
@@ -1045,7 +1049,7 @@ static debug_return_t dbg_cmd_set (char *psz_args)
       dbg_cmd_show("basename");
     } else if (is_abbrev_of (psz_varname, "debug", 3)) {
       int dbg_mask;
-      if (get_int(psz_args, &dbg_mask)) {
+      if (get_int(psz_args, &dbg_mask, true)) {
 	db_level = dbg_mask;
       }
     } else if (is_abbrev_of (psz_varname, "ignore-errors", 3)) {

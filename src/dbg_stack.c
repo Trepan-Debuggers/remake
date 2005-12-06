@@ -1,5 +1,5 @@
-/* $Id: dbg_stack.c,v 1.3 2005/12/01 07:14:12 rockyb Exp $
-Copyright (C) 2005 Free Software Foundation, Inc.
+/* $Id: dbg_stack.c,v 1.4 2005/12/06 04:50:57 rockyb Exp $
+Copyright (C) 2005 rocky@panix.com
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -40,7 +40,7 @@ dbg_cmd_frame_down (char *psz_amount)
 
   if (!psz_amount || !*psz_amount) {
     i_amount = 1;
-  } else if (!get_int(psz_amount, &i_amount)) {
+  } else if (!get_int(psz_amount, &i_amount, true)) {
       return debug_readloop;
   }
 
@@ -90,7 +90,7 @@ dbg_cmd_frame (char *psz_frame)
   if (!psz_frame || !*psz_frame) {
     return debug_readloop;
   } else {
-    if (!get_int(psz_frame, &i_frame))
+    if (!get_int(psz_frame, &i_frame, true))
       return debug_readloop;
   }
 

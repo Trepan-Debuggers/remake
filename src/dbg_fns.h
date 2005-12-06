@@ -1,4 +1,4 @@
-/* $Id: dbg_fns.h,v 1.5 2005/12/04 01:42:35 rockyb Exp $
+/* $Id: dbg_fns.h,v 1.6 2005/12/06 04:50:57 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -32,10 +32,13 @@ extern char   *psz_target_name;
    a real one hasn't been recorded on the stack. */
 extern floc_t  fake_floc;
 
-/*! Parse psz_arg for a signed integer. The value is returned in 
-    *pi_result. The retun value is true if parsing succeeded.
+/*! Parse psz_arg for a signed integer. The value is returned in
+    *pi_result. If warn is true, then we'll give a warning if no
+    integer found. The return value is true if parsing succeeded in
+    any event..
  */
-extern bool get_int(const char *psz_arg, /*out*/ int *pi_result);
+extern bool get_int(const char *psz_arg, /*out*/ int *pi_result,
+		    bool b_warn);
 
 /*! Parse psz_arg for a unsigned integer. The value is returned in 
     *pi_result. The retun value is true if parsing succeeded.

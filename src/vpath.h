@@ -24,7 +24,7 @@ Boston, MA 02111-1307, USA.  */
    will be searched in the order given in the makefiles
    and construct the list from the VPATH variable.  */
 
-extern void build_vpath_lists PARAMS ((void));
+extern void build_vpath_lists (void);
 
 /*! Construct the VPATH listing for the pattern and searchpath given.
 
@@ -45,11 +45,11 @@ extern void build_vpath_lists PARAMS ((void));
    the structure as well.  The new entry will be at the head of the
    VPATHS chain.  */
 
-extern void construct_vpath_list PARAMS ((char *pattern, char *dirpath));
+extern void construct_vpath_list (char *pattern, char *dirpath);
 
 /*! Search the GPATH list for a pathname string that matches the one
    passed in.  If it is found, return 1.  Otherwise we return 0.  */
-extern int gpath_search PARAMS ((char *file, unsigned int len));
+extern int gpath_search (char *file, unsigned int len);
 
 /*! Search the VPATH list whose pattern matches *FILE for a directory
    where the name pointed to by FILE exists.  If it is found, we set
@@ -57,10 +57,10 @@ extern int gpath_search PARAMS ((char *file, unsigned int len));
    (if MTIME_PTR is not NULL) to its modtime (or zero if no stat call
    was done), and return 1.  Otherwise we return 0.  */
 
-extern int vpath_search PARAMS ((char **file, FILE_TIMESTAMP *mtime_ptr));
+extern int vpath_search (char **file, FILE_TIMESTAMP *mtime_ptr);
 
 /*! Print the data base of VPATH search paths.  */
 
-extern void print_vpath_data_base PARAMS ((void));
+extern void print_vpath_data_base (void);
 
 #endif /* VPATH_H */

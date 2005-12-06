@@ -1,4 +1,4 @@
-/* $Id: dbg_fns.c,v 1.5 2005/12/02 12:12:09 rockyb Exp $
+/* $Id: dbg_fns.c,v 1.6 2005/12/06 04:50:57 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -46,11 +46,13 @@ floc_t  fake_floc;
 #define whitespace(c) (((c) == ' ') || ((c) == '\t'))
 #endif
 
-/*! Parse psz_arg for a signed integer. The value is returned in 
-    *pi_result and bool indicates whether the paring succeeded.
+/*! Parse psz_arg for a signed integer. The value is returned in
+    *pi_result. If warn is true, then we'll give a warning if no
+    integer found. The return value is true if parsing succeeded in
+    any event..
  */
 bool
-get_int(const char *psz_arg, int *pi_result) 
+get_int(const char *psz_arg, int *pi_result, bool b_warn) 
 {
   int i;
   char *endptr;
@@ -59,7 +61,8 @@ get_int(const char *psz_arg, int *pi_result)
 
   i = strtol(psz_arg, &endptr, 10);
   if (*endptr != '\0') {
-    printf("expecting %s to be an integer\n", psz_arg);
+    if (b_warn) 
+      printf("expecting %s to be an integer\n", psz_arg);
     return false;
   }
   *pi_result = i;

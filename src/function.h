@@ -1,5 +1,7 @@
-/* Builtin function expansion for GNU Make.
-Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004
+/* $Id: function.h,v 1.4 2005/12/06 04:50:57 rockyb Exp $
+
+Builtin function expansion for GNU Make.
+Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004, 2005
 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -31,7 +33,7 @@ extern void fold_newlines (char *buffer, unsigned int *length);
    invocation is found, expand it into the buffer at *OP, updating
    *OP, incrementing *STRINGP past the reference and returning
    nonzero.  If not, return zero.  */
-extern int handle_function PARAMS ((char **op, char **stringp));
+extern int handle_function (char **op, char **stringp);
 
 extern void hash_init_function_table (void);
 
@@ -42,13 +44,12 @@ extern void hash_init_function_table (void);
   If REPLACE_PERCENT is not nil, REPLACE has already been
   run through find_percent, and REPLACE_PERCENT is the result.  */
 
-extern char *patsubst_expand PARAMS ((char *o, char *text, char *pattern, 
-				      char *replace, char *pattern_percent, 
-				      char *replace_percent));
+extern char *patsubst_expand (char *o, char *text, char *pattern, 
+			      char *replace, char *pattern_percent, 
+			      char *replace_percent);
 
 /*! Return 1 if PATTERN matches STR, 0 if not.  */
-extern int pattern_matches PARAMS ((char *pattern, char *percent, 
-				    char *str));
+extern int pattern_matches (char *pattern, char *percent, char *str);
 
 /*! Store into VARIABLE_BUFFER at O the result of scanning TEXT and replacing
    each occurrence of SUBST with REPLACE. TEXT is null-terminated.  SLEN is
@@ -57,10 +58,10 @@ extern int pattern_matches PARAMS ((char *pattern, char *percent,
    whitespace-delimited words.  If SUFFIX_ONLY is nonzero, substitutions are
    done only at the ends of whitespace-delimited words.  */
 
-extern char * subst_expand PARAMS ((char *o, char *text, char *subst, 
-				    char *replace, unsigned int slen, 
-				    unsigned int rlen, int by_word, 
-				    int suffix_only));
+extern char * subst_expand (char *o, char *text, char *subst, 
+			    char *replace, unsigned int slen, 
+			    unsigned int rlen, int by_word, 
+			    int suffix_only);
 
 /*!
   $(eval <makefile string>)

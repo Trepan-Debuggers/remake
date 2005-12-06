@@ -1,4 +1,4 @@
-/* $Id: dbg_stack.h,v 1.3 2005/12/06 04:50:57 rockyb Exp $
+/* $Id: dbg_break.h,v 1.1 2005/12/06 04:50:57 rockyb Exp $
 Copyright (C) 2005 rocky@panix.com
 This file is part of GNU Make.
 
@@ -19,26 +19,31 @@ Boston, MA 02111-1307, USA.  */
 
 /** debugger command stack routines. */
 
-#ifndef DBG_STACK_H
-#define DBG_STACK_H
+#ifndef DBG_BREAK_H
+#define DBG_BREAK_H
 
-#include "trace.h"
+#include "types.h"
 
-extern int i_stack_pos;
+/*! Opaque type definition for an item in the breakpoint list. */
+typedef struct breakpoint_node breakpoint_node_t;
 
-/** Pointer to current target call stack at the place we are currently
-   focused on.
- */
-extern target_stack_node_t *p_stack;
-extern floc_stack_node_t   *p_floc_stack;
+/** Pointers to top/bottom of current breakpoint list. */
+extern breakpoint_node_t *p_breakpoint_top;
+extern breakpoint_node_t *p_breakpoint_bottom;
 
-/** Move reported target frame postition down by psz_amount. */
-debug_return_t dbg_cmd_frame_down (char *psz_amount);
+extern unsigned int i_breakpoints;
 
-/** Move reported target frame postition to absolute position psz_frame. */
-debug_return_t dbg_cmd_frame (char *psz_frame);
+/*! Add "p_target" to the list of breakpoints. Return true if 
+    there were no errors
+*/
+extern bool add_breakpoint (file_t *p_target);
 
-/** Move reported target frame postition up by psz_amount. */
-debug_return_t dbg_cmd_frame_up (char *psz_amount);
+/*! Remove breakpoint i from the list of breakpoints. Return true if 
+    there were no errors
+*/
+extern bool remove_breakpoint (unsigned int i);
 
-#endif /* DBG_STACK_H */
+/*! List breakpoints.*/
+extern void list_breakpoints (void);
+
+#endif /* DBG_BREAK_H */
