@@ -15,7 +15,6 @@ man_MANS =	make.1
 
 EXTRA_DIST =	README build.sh.in $(man_MANS) \
 		README.customs README.makedb \
-		SCOPTIONS SMakefile\
 		README.W32 TODO ChangeLog.GNUMake
 
 MAKE_HOST =	@MAKE_HOST@

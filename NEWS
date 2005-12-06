@@ -22,6 +22,10 @@ Version 3.80+dbg-0.5cvs
 
 * Add "info makefiles" to show what Makefiles have been read in.
 
+* Breakpoints can now be listed and deleted by number - like gdb.
+  This also helps ddd and should pave the way for more sophisticated
+  kinds of breaking/watching.
+
 * Add a number of aliases (e.g. backtrace, bt, !!) 
   and via an internal alias mechanism
 

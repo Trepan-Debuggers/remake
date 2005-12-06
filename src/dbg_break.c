@@ -1,4 +1,4 @@
-/* $Id: dbg_break.c,v 1.1 2005/12/06 04:50:57 rockyb Exp $
+/* $Id: dbg_break.c,v 1.2 2005/12/06 04:59:06 rockyb Exp $
 Copyright (C) 2005 rocky@panix.com
 This file is part of GNU Make.
 
@@ -138,7 +138,7 @@ list_breakpoints (void)
 
   printf(  "Num Type           Disp Enb target     What\n");
   for (p = p_breakpoint_top; p; p = p->p_next) {
-    printf("%3d breakpoint     keep y   %s at ", i,
+    printf("%3d breakpoint     keep y   in %s at ", i,
 	   p->p_target->name);
     print_floc_prefix(&(p->p_target->floc));
     printf("\n");
