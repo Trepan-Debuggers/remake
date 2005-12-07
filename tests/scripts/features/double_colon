@@ -124,4 +124,32 @@ $answer = "ok\n$make_name: Circular d <- d dependency dropped.\noops\n";
 
 unlink('foo','f1.h','f2.h');
 
+
+# TEST 9: make sure all rules in s double colon family get executed
+#         (Savannah bug #14334).
+#
+
+&touch('one');
+&touch('two');
+
+run_make_test('
+.PHONY: all
+all: result
+
+result:: one
+	@echo $^ >>$@
+	@echo $^
+
+result:: two
+	@echo $^ >>$@
+	@echo $^
+
+',
+'',
+'one
+two');
+
+unlink('result','one','two');
+
+# This tells the test driver that the perl test script executed properly.
 1;

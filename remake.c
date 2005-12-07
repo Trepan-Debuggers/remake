@@ -841,7 +841,6 @@ notice_finished_file (struct file *file)
 
   if ((ran && !file->phony) || touched)
     {
-      struct file *f;
       int i = 0;
 
       /* If -n, -t, or -q and all the commands are recursive, we ran them so
@@ -861,11 +860,34 @@ notice_finished_file (struct file *file)
 	i = 1;
 
       file->last_mtime = i == 0 ? UNKNOWN_MTIME : NEW_MTIME;
+    }
 
-      /* Propagate the change of modification time to all the double-colon
-	 entries for this file.  */
-      for (f = file->double_colon; f != 0; f = f->prev)
-	f->last_mtime = file->last_mtime;
+  if (file->double_colon)
+    {
+      /* If this is a double colon rule and it is the last one to be
+         updated, propagate the change of modification time to all the
+         double-colon entries for this file.
+
+         We do it on the last update because it is important to handle
+         individual entries as separate rules with separate timestamps
+         while they are treated as targets and then as one rule with the
+         unified timestamp when they are considered as a prerequisite
+         of some target.  */
+
+      struct file *f;
+      FILE_TIMESTAMP max_mtime = file->last_mtime;
+
+      /* Check that all rules were updated and at the same time find
+         the max timestamp.  We assume UNKNOWN_MTIME is newer then
+         any other value.  */
+      for (f = file->double_colon; f != 0 && f->updated; f = f->prev)
+        if (max_mtime != UNKNOWN_MTIME
+            && (f->last_mtime == UNKNOWN_MTIME || f->last_mtime > max_mtime))
+          max_mtime = f->last_mtime;
+
+      if (f == 0)
+        for (f = file->double_colon; f != 0; f = f->prev)
+          f->last_mtime = max_mtime;
     }
 
   if (ran && file->update_status != -1)
