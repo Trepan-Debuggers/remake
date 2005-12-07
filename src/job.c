@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.21 2005/12/07 01:37:18 rockyb Exp $
+/* $Id: job.c,v 1.22 2005/12/07 03:30:54 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005
 Free Software Foundation, Inc.
@@ -710,7 +710,7 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
 	    /* fatal_error_signal will die with the right signal.  */
 	    !handling_fatal_signal) {
 	  if ( (debugger_on_error & DEBUGGER_ON_FATAL) 
-	       || debugger_stepping || debugger_nexting )
+	       || i_debugger_stepping || i_debugger_nexting )
 	    enter_debugger(p_call_stack, &file, 2);
 	  die (2);
 	}
@@ -954,7 +954,7 @@ static void start_job_command (child_t *p_child,
      flag or non-echo (@) set before a command.
   */
 
-  if (just_print_flag || tracing || debugger_stepping || debugger_nexting
+  if (just_print_flag || tracing || i_debugger_stepping || i_debugger_nexting
       || (!(flags & COMMANDS_SILENT) && !silent_flag)) {
     if (tracing) printf("\t");
     message (0, "%s", p);

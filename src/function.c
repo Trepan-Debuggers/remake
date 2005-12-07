@@ -1,4 +1,4 @@
-/* $Id: function.c,v 1.13 2005/12/03 12:49:42 rockyb Exp $
+/* $Id: function.c,v 1.14 2005/12/07 03:30:54 rockyb Exp $
 Builtin expansion for GNU Make.
 Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004, 2005
 Free Software Foundation, Inc.
@@ -22,6 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #include "config.h"
 #include "debug.h"
 #include "dep.h"
+#include "dir_fns.h"
 #include "expand.h"
 #include "function.h"
 #include "print.h"
@@ -2076,4 +2077,10 @@ hash_init_function_table (void)
 	     function_table_entry_hash_cmp);
   hash_load (&function_table, function_table_init,
 	     FUNCTION_TABLE_ENTRIES, sizeof (struct function_table_entry));
+}
+
+void
+hash_free_function_table (void)
+{
+  hash_free (&function_table, false);
 }

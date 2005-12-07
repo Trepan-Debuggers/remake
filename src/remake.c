@@ -1,4 +1,4 @@
-/* $Id: remake.c,v 1.14 2005/12/07 01:37:18 rockyb Exp $
+/* $Id: remake.c,v 1.15 2005/12/07 03:30:54 rockyb Exp $
 Basic dependency engine for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -458,7 +458,7 @@ update_file_1 (file_t *file, unsigned int depth,
 
     DBF (DB_BASIC, _("File `%s' does not exist.\n"));
 
-    if ( debugger_stepping || debugger_nexting ) 
+    if ( i_debugger_stepping || i_debugger_nexting ) 
       enter_debugger(p_call_stack, file, 0);
 
   } else if (ORDINARY_MTIME_MIN <= this_mtime 
@@ -801,7 +801,7 @@ update_file_1 (file_t *file, unsigned int depth,
     p_call_stack2 = trace_push_target(p_call_stack, file, 1);
   }
 
-  if ( debugger_enabled && debugger_stepping ) 
+  if ( debugger_enabled && i_debugger_stepping ) 
     enter_debugger(p_call_stack2, file, 0);
 
   /* Now, take appropriate actions to remake the file.  */

@@ -1,4 +1,4 @@
-/* $Id: ar_fns.c,v 1.4 2005/12/04 13:22:47 rockyb Exp $
+/* $Id: ar_fns.c,v 1.5 2005/12/07 03:30:54 rockyb Exp $
 Interface to `ar' archives for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -24,6 +24,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef	NO_ARCHIVES
 
 #include "ar_fns.h"
+#include "dir_fns.h"
 #include "arscan.h"
 #include "print.h"
 #include "remake.h"

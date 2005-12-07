@@ -1,4 +1,4 @@
-/* $Id: hash.c,v 1.4 2005/12/04 13:22:48 rockyb Exp $
+/* $Id: hash.c,v 1.5 2005/12/07 03:30:54 rockyb Exp $
    hash.c -- hash table maintenance
    Copyright (C) 1995, 1999, 2002, 2004, 2005 Free Software Foundation, Inc.
    Written by Greg McGary <gkm@gnu.org> <greg@mcgary.org>
@@ -217,7 +217,7 @@ hash_free (hash_table_t *ht, bool b_free_items)
       ht->ht_empty_slots = ht->ht_size;
     }
   free (ht->ht_vec);
-  ht->ht_vec = 0;
+  ht->ht_vec      = NULL;
   ht->ht_capacity = 0;
 }
 

@@ -1,4 +1,4 @@
-/* $Id: debug.h,v 1.8 2005/12/04 13:22:47 rockyb Exp $
+/* $Id: debug.h,v 1.9 2005/12/07 03:30:54 rockyb Exp $
 Debugging macros and interface.
 Copyright (C) 1999, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -86,14 +86,14 @@ extern bool b_debugger_preread;
   Otherwise we decrement the step count.
 
 */
-extern unsigned int debugger_stepping;
+extern unsigned int i_debugger_stepping;
 
 /*! If nonzero, we are debugging after each "next" for that many times. 
   When we have a value 1, then we actually run the debugger read loop.
   Otherwise we decrement the step count.
 
 */
-extern unsigned int debugger_nexting;
+extern unsigned int i_debugger_nexting;
 
 /*! If nonzero, enter the debugger if we hit a fatal error.
 */

@@ -447,7 +447,7 @@ print_child_cmd (child_t *p_child, target_stack_node_t *p)
     printf("\n");
   }
 
-  if (debugger_stepping || p_child->file->tracing) {
+  if (i_debugger_stepping || p_child->file->tracing) {
     rc=enter_debugger(p, p_child->file, 0);
   }
 

@@ -1,4 +1,4 @@
-/* $Id: read.c,v 1.20 2005/12/04 13:22:48 rockyb Exp $
+/* $Id: read.c,v 1.21 2005/12/07 03:30:54 rockyb Exp $
 Reading and parsing of makefiles for GNU Make.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #include "debug.h"
 #include "commands.h"
 #include "dep.h"
+#include "dir_fns.h"
 #include "expand.h"
 #include "function.h"
 #include "rule.h"
@@ -404,7 +405,7 @@ eval_makefile (char *filename, int flags)
 			  b_in_debugger ? o_debugger: o_file,
                           f_append, 0);
 
-  if (b_debugger_preread && !b_in_debugger) 
+  if (b_debugger_preread && i_debugger_stepping && !b_in_debugger) 
     enter_debugger (NULL, NULL, 0);
 
   /* Evaluate the makefile */
@@ -2930,7 +2931,6 @@ tilde_expand (char *name)
 nameseq_t *
 multi_glob (nameseq_t *chain, unsigned int size)
 {
-  extern void dir_setup_glob ();
   nameseq_t *new = NULL;
   nameseq_t *old;
   nameseq_t *nexto;

@@ -1,4 +1,4 @@
-/* $Id: function.h,v 1.4 2005/12/06 04:50:57 rockyb Exp $
+/* $Id: function.h,v 1.5 2005/12/07 03:30:54 rockyb Exp $
 
 Builtin function expansion for GNU Make.
 Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004, 2005
@@ -36,6 +36,8 @@ extern void fold_newlines (char *buffer, unsigned int *length);
 extern int handle_function (char **op, char **stringp);
 
 extern void hash_init_function_table (void);
+
+extern void hash_free_function_table (void);
 
 /*! Store into VARIABLE_BUFFER at O the result of scanning TEXT
   and replacing strings matching PATTERN with REPLACE.

@@ -1,4 +1,4 @@
-/* $Id: implicit.c,v 1.7 2005/12/06 04:50:57 rockyb Exp $
+/* $Id: implicit.c,v 1.8 2005/12/07 03:30:54 rockyb Exp $
 Implicit rule searching for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,97,2000, 2004, 2005
 Free Software Foundation, Inc.
@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 #include "ar_fns.h"
 #include "debug.h"
 #include "dep.h"
+#include "dir_fns.h"
 #include "print.h"
 #include "implicit.h"
 #include "rule.h"

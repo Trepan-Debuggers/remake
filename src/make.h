@@ -1,4 +1,4 @@
-/* $Id: make.h,v 1.16 2005/12/06 04:50:57 rockyb Exp $
+/* $Id: make.h,v 1.17 2005/12/07 03:30:54 rockyb Exp $
 Miscellaneous global declarations and portability cruft for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -370,13 +370,6 @@ extern char *lindex (const char *, const char *, int);
 extern int alpha_compare (const void *, const void *);
 extern void print_spaces (unsigned int);
 extern FILE *open_tmpfile (char **, const char *);
-
-extern int dir_file_exists_p (char *, char *);
-extern int file_exists_p (char *);
-extern int file_impossible_p (char *);
-extern void file_impossible (char *);
-extern char *dir_name (char *);
-extern void hash_init_directories (void);
 
 extern void user_access (void);
 extern void make_access (void);

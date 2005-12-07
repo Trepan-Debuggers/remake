@@ -1,4 +1,4 @@
-/* $Id: dbg_break.c,v 1.2 2005/12/06 04:59:06 rockyb Exp $
+/* $Id: dbg_break.c,v 1.3 2005/12/07 03:30:54 rockyb Exp $
 Copyright (C) 2005 rocky@panix.com
 This file is part of GNU Make.
 
@@ -21,8 +21,9 @@ Boston, MA 02111-1307, USA.  */
 
 #include <assert.h>
 #include "dbg_break.h"
-#include "make.h"
 #include "file.h"
+#include "make.h"
+#include "print.h"
 
 /*! Node for an item in the target call stack */
 struct breakpoint_node
@@ -107,21 +108,20 @@ remove_breakpoint (unsigned int i)
       if (p->p_target->tracing) {
 	p->p_target->tracing = 0;
 	printf("Breakpoint on target %s cleared\n", p->p_target->name);
+	free(p);
+	return true;
       } else {
 	printf("No breakpoint at target %s; nothing cleared.\n", 
 	       p->p_target->name);
+	free(p);
+	return false;
       }
-
-      /* Free resources associated with breakpoint. */
-      free(p);
-
     } else {
       printf("Internal inconsistency - "
 	     "we should have found breakpoint %d but didn't\n", i);
       return false;
     }
   }
-  ;
 }
 
 /*! List breakpoints.*/

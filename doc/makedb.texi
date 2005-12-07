@@ -448,11 +448,11 @@ makedb<0> @b{where}
 No, we were triggered by checking dependecies from Makefile. And that
 was triggered by checking dependencies of ``all.'' (There's a bug in
 our debugger currently in that it doesn't show ``all.''). We can use
-the @code{step} command, @xref{Step}, to progress a little in the
+the @code{next} command, @xref{Next}, to progress a little in the
 interpretation or execution of the makefile:
 @smallexample
 @group
-makedb<1> @b{step}
+makedb<1> @b{next}
 
 (/tmp/remake/src/Makefile:277): ../config.status
 makedb<2> where
@@ -638,7 +638,7 @@ make.txt: ../doc/makedb.texi
 #  commands to execute (from `test2', line 6):
 	makeinfo --no-headers $< > $@
 
-makedb<1> @b{step 2}
+makedb<1> @b{next 2}
    /tmp/remake/src/test2:5	File `make.txt' does not exist.
   /tmp/remake/src/test2:5	Must remake target `make.txt'.
 
@@ -1340,7 +1340,8 @@ line of source code.  Either when continuing or when stepping,
 your script may stop even sooner, due to a breakpoint or a signal.
 
 @menu
-* Step::          running the next statement (step)
+* Step::          running the next statement in small increments (step)
+* Next::          running the next statement (next)
 * Skip::          skipping the next statement (skip)
 * Continue::      continuing execution (continue)
 @end menu
@@ -1351,13 +1352,27 @@ your script may stop even sooner, due to a breakpoint or a signal.
 @kindex step
 @kindex s @r{(@code{step})}
 @item step
-Continue processing your Makefile until control reaches a different
-interesting source line, then stop it and return control to
-@value{DBG}.  This command is abbreviated @code{s}. An alias for
-@code{step} is @code{next} or @code{n}.
+Continue processing your Makefile until control reaches the next
+target that needs to be remade.  This command is abbreviated @code{s}.
 
 @item step @ovar{count}
 Continue running as in @code{step}, but do so @var{count} times.  If a
+breakpoint is reached, or a signal not related to stepping occurs before
+@var{count} steps, stepping stops right away.
+@end table
+
+@node Next
+@subsubsection Next (@samp{next})
+@table @code
+@kindex step
+@kindex s @r{(@code{next})}
+@item step
+Continue processing your Makefile until control reaches a different
+interesting source line, then stop it and return control to
+@value{DBG}.  This command is abbreviated @code{n}. 
+
+@item step @ovar{count}
+Continue running as in @code{next}, but do so @var{count} times.  If a
 breakpoint is reached, or a signal not related to stepping occurs before
 @var{count} steps, stepping stops right away.
 @end table
@@ -1610,20 +1625,42 @@ $ @b{./make --debugger=preread}
 Reading makefiles...
 Reading makefile `Makefile'...
 
-(/home/src/external-cvs/remake/src/Makefile:1)
+(/tmp/remake/src/Makefile:1)
 makedb<0> @b{step}
-/home/src/external-cvs/remake/src/Makefile:324
+/tmp/remake/src/Makefile:324
 	Reading makefile `.deps/alloca.Po' (search path) (no ~ expansion)...
 
-(/home/src/external-cvs/remake/src/.deps/alloca.Po:1)
+(/tmp/remake/src/.deps/alloca.Po:1)
 makedb<1> @b{where}
 
-=>#0  /home/src/external-cvs/remake/src/.deps/alloca.Po:1
-  #1  /home/src/external-cvs/remake/src/Makefile:324
+=>#0  /tmp/remake/src/.deps/alloca.Po:1
+  #1  /tmp/remake/src/Makefile:324
+
+makedb<2> @b{next}
+/tmp/remake/src/Makefile:327
+	Reading makefile `.deps/getloadavg.Po' (search path) (no ~ expansion)...
+/tmp/remake/src/Makefile:328
+	Reading makefile `.deps/ar_fns.Po' (search path) (no ~ expansion)...
+/tmp/remake/src/Makefile:329
+
+... lots of lines deleted ...
+
+	Reading makefile `.deps/version.Po' (search path) (no ~ expansion)...
+/tmp/remake/src/Makefile:360
+	Reading makefile `.deps/vpath.Po' (search path) (no ~ expansion)...
+Updating goal targets....
+ /tmp/remake/src/Makefile:254	File `all' does not exist.
+
+(/tmp/remake/src/Makefile:254): all
+makedb<3> 
 @end group
 @end smallexample
 
 @noindent
+
+Note in the above @samp{step} goes on to the next read of a makefile
+while the @samp{next} command can be used to skip over all of the
+remaining reads.
 
 @node Selection
 @subsection Selecting a frame (@samp{up}, @samp{down}, @samp{frame})

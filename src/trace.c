@@ -1,4 +1,4 @@
-/* $Id: trace.c,v 1.3 2005/12/03 12:49:42 rockyb Exp $
+/* $Id: trace.c,v 1.4 2005/12/07 03:30:54 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -57,7 +57,7 @@ trace_push_target (target_stack_node_t *p, file_t *p_target,
       printf("\n");
     } 
 
-    if (b_debugger && debugger_stepping && p_target->cmds )
+    if (b_debugger && i_debugger_stepping && p_target->cmds )
       enter_debugger(new_node, p_target, 0);
     else if ( p_target->tracing )
       enter_debugger(new_node, p_target, 0);

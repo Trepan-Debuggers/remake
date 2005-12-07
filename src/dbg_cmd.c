@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.59 2005/12/07 01:37:18 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.60 2005/12/07 03:30:54 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -712,8 +712,8 @@ static debug_return_t dbg_cmd_comment (char *psz_arg)
 /* Continue running program. */
 static debug_return_t dbg_cmd_continue (char *psz_arg)
 {
-  debugger_stepping = 0;
-  debugger_nexting  = 0;
+  i_debugger_stepping = 0;
+  i_debugger_nexting  = 0;
   return continue_execution;
 }
 
@@ -846,11 +846,11 @@ static debug_return_t dbg_cmd_step (char *psz_arg)
 {
 
   if (!psz_arg || !*psz_arg) {
-    debugger_stepping = 1;
-    debugger_nexting  = 0;
+    i_debugger_stepping = 1;
+    i_debugger_nexting  = 0;
     return continue_execution;
   } 
-  if (get_uint(psz_arg, &debugger_stepping)) 
+  if (get_uint(psz_arg, &i_debugger_stepping)) 
     return continue_execution;
   else 
     return continue_execution;
@@ -861,11 +861,11 @@ static debug_return_t dbg_cmd_next (char *psz_arg)
 {
 
   if (!psz_arg || !*psz_arg) {
-    debugger_nexting  = 1;
-    debugger_stepping = 0;
+    i_debugger_nexting  = 1;
+    i_debugger_stepping = 0;
     return continue_execution;
   } 
-  if (get_uint(psz_arg, &debugger_nexting)) 
+  if (get_uint(psz_arg, &i_debugger_nexting)) 
     return continue_execution;
   else 
     return continue_execution;
@@ -1252,14 +1252,14 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
   char close_depth[MAX_NEST_DEPTH];
   unsigned int i = 0;
 
-  if ( debugger_stepping > 1 || debugger_nexting > 1 ) {
+  if ( i_debugger_stepping > 1 || i_debugger_nexting > 1 ) {
     /* Don't stop unless we are here from a breakpoint. But
        do decrement the step count. */
-    if (debugger_stepping)  debugger_stepping--;
-    if (debugger_nexting)   debugger_nexting--;
+    if (i_debugger_stepping)  i_debugger_stepping--;
+    if (i_debugger_nexting)   i_debugger_nexting--;
     if (!p_target->tracing) return continue_execution;
-  } else if (!debugger_on_error && !(debugger_stepping || debugger_nexting)
-	     && !p_target->tracing && -2 != err) 
+  } else if (!debugger_on_error && !(i_debugger_stepping || i_debugger_nexting)
+	     && p_target && !p_target->tracing && -2 != err) 
     return continue_execution;
   
   if (0 == i_init) {

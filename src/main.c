@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.24 2005/12/07 01:37:18 rockyb Exp $
+/* $Id: main.c,v 1.25 2005/12/07 03:30:54 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -23,6 +23,7 @@ MA 02111-1307, USA.  */
 #include "dbg_cmd.h"
 #include "debug.h"
 #include "default.h"
+#include "dir_fns.h"
 #include "expand.h"
 #include "function.h"
 #include "print.h"
@@ -162,14 +163,14 @@ stringlist_t *tracing_opts = NULL;
   Otherwise we decrement the step count.
 
 */
-unsigned int debugger_stepping = 0;
+unsigned int i_debugger_stepping = 0;
 
 /*! If nonzero, we are debugging after each "next" for that many times. 
   When we have a value 1, then we actually run the debugger read loop.
   Otherwise we decrement the step count.
 
 */
-unsigned int debugger_nexting = 0;
+unsigned int i_debugger_nexting = 0;
 
 /*! If nonzero, enter the debugger if we hit a fatal error.
 */
@@ -1178,10 +1179,10 @@ main (int argc, char **argv, char **envp)
 	
 	if ( 0 == strcmp(*p, "full") || b_debugger_preread
 	     || 0 == strcmp(*p, "preaction") ) {
-	  job_slots          =  1;
-	  debugger_stepping  =  1;
-	  debugger_nexting   =  0;
-	  debugger_enabled   =  1;
+	  job_slots            =  1;
+	  i_debugger_stepping  =  1;
+	  i_debugger_nexting   =  0;
+	  debugger_enabled     =  1;
 	  /* For now we'll do basic debugging. Later, "stepping'
  	     will stop here while next won't - either way no printing.
 	   */
@@ -2903,6 +2904,8 @@ die (int status)
   free_pattern_rules();
   free_dep_chain(read_makefiles);
   hash_free(&files, true);
+  hash_free_directories();
+  hash_free_function_table();
 
   exit (status);
 }
