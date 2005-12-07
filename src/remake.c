@@ -1,4 +1,4 @@
-/* $Id: remake.c,v 1.13 2005/12/06 04:50:57 rockyb Exp $
+/* $Id: remake.c,v 1.14 2005/12/07 01:37:18 rockyb Exp $
 Basic dependency engine for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -453,10 +453,17 @@ update_file_1 (file_t *file, unsigned int depth,
   this_mtime = file_mtime (file);
   check_renamed (file);
   noexist = this_mtime == NONEXISTENT_MTIME;
-  if (noexist)
+
+  if (noexist) {
+
     DBF (DB_BASIC, _("File `%s' does not exist.\n"));
-  else if (ORDINARY_MTIME_MIN <= this_mtime && this_mtime <= ORDINARY_MTIME_MAX
-	   && file->low_resolution_time)
+
+    if ( debugger_stepping || debugger_nexting ) 
+      enter_debugger(p_call_stack, file, 0);
+
+  } else if (ORDINARY_MTIME_MIN <= this_mtime 
+	     && this_mtime <= ORDINARY_MTIME_MAX
+	     && file->low_resolution_time)
     {
       /* Avoid spurious rebuilds due to low resolution time stamps.  */
       int ns = FILE_TIMESTAMP_NS (this_mtime);
@@ -794,7 +801,7 @@ update_file_1 (file_t *file, unsigned int depth,
     p_call_stack2 = trace_push_target(p_call_stack, file, 1);
   }
 
-  if ( debugger_enabled && debugger_nexting ) 
+  if ( debugger_enabled && debugger_stepping ) 
     enter_debugger(p_call_stack2, file, 0);
 
   /* Now, take appropriate actions to remake the file.  */

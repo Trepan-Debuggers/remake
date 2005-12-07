@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.58 2005/12/06 04:50:57 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.59 2005/12/07 01:37:18 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -97,18 +97,19 @@ static debug_return_t dbg_cmd_delete           (char *psz_arg);
 static debug_return_t dbg_cmd_eval             (char *psz_arg);
 static debug_return_t dbg_cmd_expand           (char *psz_arg);
 static debug_return_t dbg_cmd_help             (char *psz_arg);
-static debug_return_t dbg_cmd_show_command     (char *psz_arg);
 static debug_return_t dbg_cmd_info             (char *psz_arg);
 static debug_return_t dbg_cmd_target           (char *psz_arg);
+static debug_return_t dbg_cmd_next             (char *psz_arg);
 static debug_return_t dbg_cmd_print            (char *psz_arg);
 static debug_return_t dbg_cmd_quit             (char *psz_arg);
 static debug_return_t dbg_cmd_run              (char *psz_arg);
 static debug_return_t dbg_cmd_set              (char *psz_arg);
 static debug_return_t dbg_cmd_set_var_noexpand (char *psz_arg);
 static debug_return_t dbg_cmd_shell            (char *psz_arg);
+static debug_return_t dbg_cmd_show             (char *psz_arg);
+static debug_return_t dbg_cmd_show_command     (char *psz_arg);
 static debug_return_t dbg_cmd_show_stack       (char *psz_arg);
 static debug_return_t dbg_cmd_skip             (char *psz_arg);
-static debug_return_t dbg_cmd_show             (char *psz_arg);
 static debug_return_t dbg_cmd_step             (char *psz_arg);
 static debug_return_t dbg_cmd_write_cmds       (char *psz_arg);
 
@@ -120,6 +121,7 @@ typedef struct {
 /* Should be in alphabetic order by command name. */
 long_cmd_t commands[] = {
   { "break",    'b' },
+  { "break",    'L' },
   { "comment",  '#' },
   { "continue", 'c' },
   { "delete",   'd' },
@@ -247,7 +249,9 @@ cmd_initialize(void)
 {
   short_command['b'].func = &dbg_cmd_break;
   short_command['b'].use  = _("break *target*");
-  short_command['b'].doc  = _("Set a breakpoint at a target.");
+  short_command['b'].doc  = _("Set a breakpoint at a target.\n"
+"With a target name, set a break before running commands\n"
+"of that target.  Without argument, list all breaks.");
 
   short_command['c'].func = &dbg_cmd_continue;
   short_command['c'].use  = _("continue");
@@ -256,14 +260,14 @@ cmd_initialize(void)
 
   short_command['d'].func = &dbg_cmd_delete;
   short_command['d'].use  = _("delete breakpoint numbers..");
-  short_command['d'].doc  = _("Delete some breakpoints." \
-"Arguments are breakpoint numbers with spaces in between.\n" \
+  short_command['d'].doc  = _("Delete some breakpoints\n."
+"Arguments are breakpoint numbers with spaces in between.\n"
 "To delete all breakpoints, give no argument.\n");
 
   short_command['D'].func = &dbg_cmd_frame_down;
   short_command['D'].use  = _("down [amount]");
   short_command['D'].doc  = 
-    _("Select and print the target this one caused to be examined.\n" \
+    _("Select and print the target this one caused to be examined.\n"
       "\tAn argument says how many targets down to go.");
 
   short_command['e'].func = &dbg_cmd_eval;
@@ -293,13 +297,17 @@ cmd_initialize(void)
   short_command['k'].doc = 
     _("Skip execution of next command or action.\n" );
 
+  short_command['L'].func = &dbg_cmd_break;
+  short_command['L'].use  = short_command['b'].use;
+  short_command['L'].doc  = short_command['b'].doc;
+
   short_command['?'].func = &dbg_cmd_help;
   short_command['?'].use = short_command['h'].use;
   short_command['?'].doc = short_command['h'].doc;
   
-  short_command['n'].func = &dbg_cmd_step;
+  short_command['n'].func = &dbg_cmd_next;
   short_command['n'].use = _("next [amount]");
-  short_command['n'].doc = _("For now the same as step.");
+  short_command['n'].doc = _("Continue until the next command to be executed.");
 
   short_command['p'].func = &dbg_cmd_print;
   short_command['p'].use = _("print {*variable* [attrs...]}");
@@ -636,13 +644,18 @@ dbg_cmd_quit (char *psz_arg)
   return debug_readloop;
 }
 
-/* Set a breakpoint. */
+/* 
+Set a breakpoint at a target.  With a target name, set a break before
+running commands of that target.  Without argument, list all breaks.
+*/
 static debug_return_t dbg_cmd_break (char *psz_target)
 {
   file_t *p_target;
 
-  if (!psz_target || 0==strlen(psz_target))
+  if (!psz_target || !*psz_target) {
+    list_breakpoints();
     return debug_readloop;
+  }
   
   p_target = lookup_file (psz_target);
   if (!p_target) {
@@ -700,6 +713,7 @@ static debug_return_t dbg_cmd_comment (char *psz_arg)
 static debug_return_t dbg_cmd_continue (char *psz_arg)
 {
   debugger_stepping = 0;
+  debugger_nexting  = 0;
   return continue_execution;
 }
 
@@ -825,15 +839,33 @@ static debug_return_t dbg_cmd_skip (char *psz_arg)
   return skip_execution;
 }
 
-/* Step next command. */
+/* Step execution until another stopping point is reached Argument N
+   means do this N times (or until there's another reason to stop. */
+
 static debug_return_t dbg_cmd_step (char *psz_arg)
 {
 
   if (!psz_arg || !*psz_arg) {
     debugger_stepping = 1;
+    debugger_nexting  = 0;
     return continue_execution;
   } 
   if (get_uint(psz_arg, &debugger_stepping)) 
+    return continue_execution;
+  else 
+    return continue_execution;
+}
+
+/* Continue until the next command to be executed. */
+static debug_return_t dbg_cmd_next (char *psz_arg)
+{
+
+  if (!psz_arg || !*psz_arg) {
+    debugger_nexting  = 1;
+    debugger_stepping = 0;
+    return continue_execution;
+  } 
+  if (get_uint(psz_arg, &debugger_nexting)) 
     return continue_execution;
   else 
     return continue_execution;
@@ -1220,12 +1252,13 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
   char close_depth[MAX_NEST_DEPTH];
   unsigned int i = 0;
 
-  if ( debugger_stepping > 1 ) {
+  if ( debugger_stepping > 1 || debugger_nexting > 1 ) {
     /* Don't stop unless we are here from a breakpoint. But
        do decrement the step count. */
-    debugger_stepping--;
+    if (debugger_stepping)  debugger_stepping--;
+    if (debugger_nexting)   debugger_nexting--;
     if (!p_target->tracing) return continue_execution;
-  } else if (!debugger_on_error && !debugger_stepping 
+  } else if (!debugger_on_error && !(debugger_stepping || debugger_nexting)
 	     && !p_target->tracing && -2 != err) 
     return continue_execution;
   

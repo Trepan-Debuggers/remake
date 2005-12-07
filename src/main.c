@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.23 2005/12/04 23:18:17 rockyb Exp $
+/* $Id: main.c,v 1.24 2005/12/07 01:37:18 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -1180,7 +1180,7 @@ main (int argc, char **argv, char **envp)
 	     || 0 == strcmp(*p, "preaction") ) {
 	  job_slots          =  1;
 	  debugger_stepping  =  1;
-	  debugger_nexting   =  1;
+	  debugger_nexting   =  0;
 	  debugger_enabled   =  1;
 	  /* For now we'll do basic debugging. Later, "stepping'
  	     will stop here while next won't - either way no printing.
