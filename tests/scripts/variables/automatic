@@ -6,7 +6,7 @@ $details = "
  TEST #1 -- basic test of automatic variables: 
             \$\@, \$(\@D), \$(\@F), \$*, \$(*D), \$(*F)
             \$<, \$(<D), \$(<F), \$^, \$(^D) \$(^F), \$+ \$(+D), \$(+F)
-            \$?, \$(?D), and \$(?F) = bar.y
+            \$?, \$(?D), and \$(?F)
 
  TEST #2 & 3 -- test the SysV emulation of \$\$\@ etc.
 ";
