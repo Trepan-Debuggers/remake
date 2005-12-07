@@ -1,3 +1,7 @@
+2005-12-07  Boris Kolpackov  <boris@kolpackov.net>
+
+	* scripts/features/double_colon: Add a test for bug #14334.
+
 2005-11-17  Boris Kolpackov  <boris@kolpackov.net>
 
 	* scripts/functions/flavor: Add a test for the flavor function.

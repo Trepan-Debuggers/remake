@@ -1,3 +1,9 @@
+2005-12-07  Boris Kolpackov  <boris@kolpackov.net>
+
+	* remake.c (notice_finished_file): Propagate the change of
+	modification time to all the double-colon entries only if
+	it is the last one to be updated. Fixes bug #14334.
+
 2005-11-17  Boris Kolpackov  <boris@kolpackov.net>
 
 	* function.c (func_flavor): Implement the flavor function which
