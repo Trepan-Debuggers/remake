@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  November 2005
+  Decmber 2005
 
 Copyright (C) 2002, 2004, 2005  Free Software Foundation, Inc.
 See the end for copying conditions.
@@ -13,6 +13,9 @@ Version 3.80+dbg-0.5cvs
 
 * Errors in eval issued from the debugger no longer cause termintation.
 
+* Separation of "Step" and "Next. "Step" command granularity is now
+  "Next". "Step" stepping is more fine grained.
+
 * "target" command improvements:
    -  sets file variables if when showing file variables
      requested
@@ -22,21 +25,25 @@ Version 3.80+dbg-0.5cvs
 
 * Add "info makefiles" to show what Makefiles have been read in.
 
+* Add "info breakpoints"
+
 * Breakpoints can now be listed and deleted by number - like gdb.
   This also helps ddd and should pave the way for more sophisticated
   kinds of breaking/watching.
 
-* Add a number of aliases (e.g. backtrace, bt, !!) 
+* Add a number of aliases (e.g. backtrace, bt, !!, L)
   and via an internal alias mechanism
 
 * Remove hash stats on printing variables -- generally not wanted for
   users (rather than GNU Make maintainers)
 
-* Reduce memory leaks and uninitialized read reduced via valgrind.
+* Add explicit memory free and reduce reading uninitialized values.
 
 * Revise testing mechanism for a more modern use of Perl. Can specify 
   test program file name (./scripts/variables/special) test name
-  (variables/special). The former is works better with command completion.
+  (variables/special). The former is works better with command
+  completion. Document some more regression tests.
+
 
 * More document updates.
 
