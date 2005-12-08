@@ -1,4 +1,4 @@
-/* $Id: dbg_break.c,v 1.3 2005/12/07 03:30:54 rockyb Exp $
+/* $Id: dbg_break.c,v 1.4 2005/12/08 02:44:37 rockyb Exp $
 Copyright (C) 2005 rocky@panix.com
 This file is part of GNU Make.
 
@@ -29,6 +29,7 @@ Boston, MA 02111-1307, USA.  */
 struct breakpoint_node
 {
   file_t            *p_target;
+  unsigned int      i_num;
   breakpoint_node_t *p_next;
 };
 
@@ -49,15 +50,15 @@ add_breakpoint (file_t *p_target)
   if (!p_new) return false;
 
   /* Add breakpoint to list of breakpoints. */
-  if (!i_breakpoints) {
-    assert(!p_breakpoint_top && !p_breakpoint_bottom);
+  if (!p_breakpoint_top) {
+    assert(!p_breakpoint_bottom);
     p_breakpoint_top            = p_breakpoint_bottom = p_new;
   } else {
     p_breakpoint_bottom->p_next = p_new;
   }
   p_breakpoint_bottom           = p_new;
   p_new->p_target               = p_target;
-  i_breakpoints++;
+  p_new->i_num                  = ++i_breakpoints;
 
 
   /* Finally, note that we are tracing this target. */
@@ -66,7 +67,8 @@ add_breakpoint (file_t *p_target)
 	   p_target->name);
   } else {
     p_target->tracing = 1;
-    printf("Breakpoint on target %s set.\n", p_target->name);
+    printf("Breakpoint %d on target %s set.\n", 
+	   i_breakpoints, p_target->name);
   }
   return true;
   
@@ -84,30 +86,27 @@ remove_breakpoint (unsigned int i)
   }
   if (i > i_breakpoints) {
     printf("Breakpoint number %d is too high. " 
-	   "Only %d breakpoints have been set.\n", i, i_breakpoints);
+	   "%d is the highest breakpoint number.\n", i, i_breakpoints);
     return false;
   } else {
     /* Find breakpoint i */
     breakpoint_node_t *p_prev = NULL;
     breakpoint_node_t *p;
-    unsigned int j=1;
-    for (p = p_breakpoint_top; p && i>j; p = p->p_next) {
-      j++;
+    for (p = p_breakpoint_top; p && p->i_num != i; p = p->p_next) {
       p_prev = p;
     }
 
-    if (p && i==j) {
+    if (p && p->i_num == i) {
       /* Delete breakpoint */
       if (!p->p_next) p_breakpoint_bottom = p_prev;
       if ( (p == p_breakpoint_top) ) p_breakpoint_top = p->p_next;
 
       if (p_prev) p_prev->p_next = p->p_next;
 
-      i_breakpoints--;
-
       if (p->p_target->tracing) {
 	p->p_target->tracing = 0;
-	printf("Breakpoint on target %s cleared\n", p->p_target->name);
+	printf("Breakpoint %d on target %s cleared\n", 
+	       i, p->p_target->name);
 	free(p);
 	return true;
       } else {
@@ -117,8 +116,7 @@ remove_breakpoint (unsigned int i)
 	return false;
       }
     } else {
-      printf("Internal inconsistency - "
-	     "we should have found breakpoint %d but didn't\n", i);
+      printf("No Breakpoint number %d set.\n", i);
       return false;
     }
   }
@@ -129,20 +127,19 @@ void
 list_breakpoints (void) 
 {
   breakpoint_node_t *p;
-  unsigned int i=1;
 
-  if (!i_breakpoints) {
+  if (!p_breakpoint_top) {
     printf("No breakpoints.\n");
     return;
   }
 
   printf(  "Num Type           Disp Enb target     What\n");
   for (p = p_breakpoint_top; p; p = p->p_next) {
-    printf("%3d breakpoint     keep y   in %s at ", i,
+    printf("%3d breakpoint     keep y   in %s at ", 
+	   p->i_num,
 	   p->p_target->name);
     print_floc_prefix(&(p->p_target->floc));
     printf("\n");
-    i++;
   }
 }
  
