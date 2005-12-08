@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.25 2005/12/07 03:30:54 rockyb Exp $
+/* $Id: main.c,v 1.26 2005/12/08 04:26:25 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -115,7 +115,7 @@ typedef struct
 	ignore			/* Ignored.  */
       } type;
 
-    char *value_ptr;	/* Pointer to the value-holding variable.  */
+    stringlist_t **value_ptr;	/* Pointer to the value-holding variable.  */
 
     unsigned int env:1;		/* Can come from MAKEFLAGS.  */
     unsigned int toenv:1;	/* Should be put in MAKEFLAGS.  */
@@ -406,68 +406,68 @@ static const char *const usage[] =
 static const command_switch_t switches[] =
   {
     { 'b', ignore, 0, 0, 0, 0, 0, 0, 0 },
-    { 'B', flag, (char *) &always_make_flag, 1, 1, 0, 0, 0, "always-make" },
-    { CHAR_MAX+1, flag, (char *) &basename_filenames, 1, 1, 0, 0, 0, 
+    { 'B', flag, (stringlist_t **) &always_make_flag, 1, 1, 0, 0, 0, "always-make" },
+    { CHAR_MAX+1, flag, (stringlist_t **) &basename_filenames, 1, 1, 0, 0, 0, 
       "basename-filenames" },
-    { 'C', string, (char *) &directories, 0, 0, 0, 0, 0, "directory" },
-    { 'd', flag, (char *) &debug_flag, 1, 1, 0, 0, 0, 0 },
-    { CHAR_MAX+2, string, (char *) &db_flags, 1, 1, 0, "basic", 0, "debug" },
+    { 'C', string, &directories, 0, 0, 0, 0, 0, "directory" },
+    { 'd', flag, (stringlist_t **) &debug_flag, 1, 1, 0, 0, 0, 0 },
+    { CHAR_MAX+2, string, &db_flags, 1, 1, 0, "basic", 0, "debug" },
 #ifdef WINDOWS32
-    { 'D', flag, (char *) &suspend_flag, 1, 1, 0, 0, 0, "suspend-for-debug" },
+    { 'D', flag, (stringlist_t **) &suspend_flag, 1, 1, 0, 0, 0, "suspend-for-debug" },
 #endif
-    { 'e', flag, (char *) &env_overrides, 1, 1, 0, 0, 0,
+    { 'e', flag, (stringlist_t **) &env_overrides, 1, 1, 0, 0, 0,
         "environment-overrides", },
-    { 'E', flag, (char *) &extended_errors, 1, 1, 0, 0, 0,
+    { 'E', flag, (stringlist_t **) &extended_errors, 1, 1, 0, 0, 0,
         "extended-errors", },
-    { 'f', string, (char *) &makefiles, 0, 0, 0, 0, 0, "file" },
-    { 'h', flag, (char *) &print_usage_flag, 0, 0, 0, 0, 0, "help" },
-    { 'i', flag, (char *) &ignore_errors_flag, 1, 1, 0, 0, 0,
+    { 'f', string, &makefiles, 0, 0, 0, 0, 0, "file" },
+    { 'h', flag, (stringlist_t **) &print_usage_flag, 0, 0, 0, 0, 0, "help" },
+    { 'i', flag, (stringlist_t **) &ignore_errors_flag, 1, 1, 0, 0, 0,
         "ignore-errors" },
-    { 'I', string, (char *) &include_directories, 1, 1, 0, 0, 0,
+    { 'I', string, &include_directories, 1, 1, 0, 0, 0,
         "include-dir" },
-    { 'j', positive_int, (char *) &job_slots, 1, 1, 0, (char *) &inf_jobs,
+    { 'j', positive_int, (stringlist_t **) &job_slots, 1, 1, 0, (char *) &inf_jobs,
         (char *) &default_job_slots, "jobs" },
-    { CHAR_MAX+3, string, (char *) &jobserver_fds, 1, 1, 0, 0, 0,
+    { CHAR_MAX+3, string, &jobserver_fds, 1, 1, 0, 0, 0,
         "jobserver-fds" },
-    { 'k', flag, (char *) &keep_going_flag, 1, 1, 0, 0,
+    { 'k', flag, (stringlist_t **) &keep_going_flag, 1, 1, 0, 0,
         (char *) &default_keep_going_flag, "keep-going" },
-    { 'l', floating, (char *) &max_load_average, 1, 1, 0,
+    { 'l', floating, (stringlist_t **) &max_load_average, 1, 1, 0,
 	(char *) &default_load_average, (char *) &default_load_average,
 	"load-average" },
-    { 'l', positive_int, (char *) &max_load_average, 1, 1, 0,
+    { 'l', positive_int, (stringlist_t **) &max_load_average, 1, 1, 0,
 	(char *) &default_load_average, (char *) &default_load_average,
 	"load-average" },
     { 'm', ignore, 0, 0, 0, 0, 0, 0, 0 },
-    { 'n', flag, (char *) &just_print_flag, 1, 1, 1, 0, 0, "just-print" },
-    { 'o', string, (char *) &old_files, 0, 0, 0, 0, 0, "old-file" },
-    { 'p', flag, (char *) &print_data_base_flag, 1, 1, 0, 0, 0,
+    { 'n', flag, (stringlist_t **) &just_print_flag, 1, 1, 1, 0, 0, "just-print" },
+    { 'o', string, &old_files, 0, 0, 0, 0, 0, "old-file" },
+    { 'p', flag, (stringlist_t **) &print_data_base_flag, 1, 1, 0, 0, 0,
         "print-data-base" },
-    { 'q', flag, (char *) &question_flag, 1, 1, 1, 0, 0, "question" },
-    { 'r', flag, (char *) &no_builtin_rules_flag, 1, 1, 0, 0, 0,
+    { 'q', flag, (stringlist_t **) &question_flag, 1, 1, 1, 0, 0, "question" },
+    { 'r', flag, (stringlist_t **) &no_builtin_rules_flag, 1, 1, 0, 0, 0,
       "no-builtin-rules" },
-    { 'R', flag, (char *) &no_builtin_variables_flag, 1, 1, 0, 0, 0,
+    { 'R', flag, (stringlist_t **) &no_builtin_variables_flag, 1, 1, 0, 0, 0,
 	"no-builtin-variables" },
-    { 's', flag, (char *) &silent_flag, 1, 1, 0, 0, 0, "silent" },
-    { 'S', flag_off, (char *) &keep_going_flag, 1, 1, 0, 0,
+    { 's', flag, (stringlist_t **) &silent_flag, 1, 1, 0, 0, 0, "silent" },
+    { 'S', flag_off, (stringlist_t **) &keep_going_flag, 1, 1, 0, 0,
       (char *) &default_keep_going_flag, "no-keep-going" },
-    { 't', flag, (char *) &touch_flag, 1, 1, 1, 0, 0, "touch" },
-    { 'v', flag, (char *) &print_version_flag, 1, 1, 0, 0, 0, "version" },
-    { 'w', flag, (char *) &print_directory_flag, 1, 1, 0, 0, 0,
+    { 't', flag, (stringlist_t **) &touch_flag, 1, 1, 1, 0, 0, "touch" },
+    { 'v', flag, (stringlist_t **) &print_version_flag, 1, 1, 0, 0, 0, "version" },
+    { 'w', flag, (stringlist_t **) &print_directory_flag, 1, 1, 0, 0, 0,
         "print-directory" },
-    { 'x', string, (char *) &tracing_opts, 1, 1, 0, "normal", 0, "trace" },
-    { 'X', string, (char *) &debugger_opts, 1, 1, 0, 
+    { 'x', string, &tracing_opts, 1, 1, 0, "normal", 0, "trace" },
+    { 'X', string, &debugger_opts, 1, 1, 0, 
       "preaction", 0, "debugger" },
-    { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0, "what-if" },
-    { 'V', flag, (char *) &show_variable_definitions, 1, 1, 0, 0, 0,
+    { 'W', string, &new_files, 0, 0, 0, 0, 0, "what-if" },
+    { 'V', flag, (stringlist_t **) &show_variable_definitions, 1, 1, 0, 0, 0,
 	"show-variables" },
-    { CHAR_MAX+4, flag, (char *) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
+    { CHAR_MAX+4, flag, (stringlist_t **) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
 	"no-print-directory" },
-    { CHAR_MAX+5, flag, (char *) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
+    { CHAR_MAX+5, flag, (stringlist_t **) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
 	"warn-undefined-variables" },
 #ifdef __CYGWIN__
-    { CHAR_MAX+6, flag, (char *) &unixy_shell, 1, 1, 0, 0, 0,
+    { CHAR_MAX+6, flag, (stringlist_t **) &unixy_shell, 1, 1, 0, 0, 0,
         "unix" },
-    { CHAR_MAX+7, flag_off, (char *) &unixy_shell, 1, 1, 0, 0, 0,
+    { CHAR_MAX+7, flag_off, (stringlist_t **) &unixy_shell, 1, 1, 0, 0, 0,
         "win32"} ,
 #endif
     { 0 }
@@ -552,19 +552,28 @@ int not_parallel;
 int clock_skew_detected;
 
 
-/* Free resources associated with p_stringlist */
 static void 
-free_stringlist(stringlist_t *p_stringlist) 
+free_stringlist(stringlist_t *p_stringlist, bool b_stringlist_too) 
 {
   if (p_stringlist) {
     unsigned int i;
     for (i=0; i<p_stringlist->idx; i++)
       free(p_stringlist->list[i]);
     free(p_stringlist->list);
-    free(p_stringlist);
+    if (b_stringlist_too) free(p_stringlist);
   }
 }
 
+/* Free resources associated with p_stringlist */
+static void 
+free_command_switches(void) 
+{
+  const command_switch_t *cs;
+  for (cs = switches; cs->c != '\0'; ++cs) {
+    if (string == cs->type && cs->value_ptr) 
+      free_stringlist(*cs->value_ptr, false);
+  }
+}
 
 /* Mask of signals that are being caught with fatal_error_signal.  */
 #ifdef	POSIX
@@ -2890,13 +2899,14 @@ die (int status)
     }
 
   free(argv0);
-  free_stringlist(makefiles);
-  free_stringlist(tracing_opts);
-  free_stringlist(jobserver_fds);
-  free_stringlist(directories);
-  free_stringlist(old_files);
-  free_stringlist(new_files);
-  free_stringlist(debugger_opts);
+  free_command_switches();
+  free(makefiles);
+  free(tracing_opts);
+  free(jobserver_fds);
+  free(directories);
+  free(old_files);
+  free(new_files);
+  free(debugger_opts);
 
   free_include_directories();
   free_default_suffix();
