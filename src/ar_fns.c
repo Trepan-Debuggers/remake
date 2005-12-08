@@ -1,4 +1,4 @@
-/* $Id: ar_fns.c,v 1.5 2005/12/07 03:30:54 rockyb Exp $
+/* $Id: ar_fns.c,v 1.6 2005/12/08 04:24:16 rockyb Exp $
 Interface to `ar' archives for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -225,7 +225,7 @@ ar_glob_match (int desc UNUSED, char *mem, int truncated UNUSED,
 
 /* Return nonzero if PATTERN contains any metacharacters.
    Metacharacters can be quoted with backslashes if QUOTE is nonzero.  */
-static int
+int
 glob_pattern_p (const char *pattern, int quote)
 {
   const char *p;
