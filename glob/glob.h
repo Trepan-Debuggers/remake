@@ -1,4 +1,4 @@
-/* $Id: glob.h,v 1.4 2005/12/09 10:52:26 rockyb Exp $
+/* $Id: glob.h,v 1.5 2005/12/09 11:12:08 rockyb Exp $
 
    Copyright (C) 1991, 92, 95, 96, 97, 98, 2005 Free Software Foundation, Inc.
 
@@ -129,7 +129,7 @@ typedef struct
 
     /* If the GLOB_ALTDIRFUNC flag is set, the following functions
        are used instead of the normal file access functions.  */
-    void (*gl_closedir) (void *));
+    void (*gl_closedir) (void *);
     struct dirent64 *(*gl_readdir) (void *);
     __ptr_t (*gl_opendir) (__const char *);
     int (*gl_lstat) (__const char *, struct stat64 *);
