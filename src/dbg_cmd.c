@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.60 2005/12/07 03:30:54 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.61 2005/12/09 10:56:56 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -950,7 +950,7 @@ static debug_return_t dbg_cmd_target (char *psz_args)
 /* Write commands associated with a given target. */
 static debug_return_t dbg_cmd_write_cmds (char *psz_args) 
 {
-  file_t *p_target = NULL;;
+  file_t *p_target = NULL;
   char *psz_target = NULL;
   int b_stdout = 0;
 
