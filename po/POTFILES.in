@@ -4,7 +4,7 @@
 src/ar_fns.c
 src/arscan.c
 src/commands.c
-src/dir.c
+src/dir_fns.c
 src/expand.c
 src/file.c
 src/function.c
