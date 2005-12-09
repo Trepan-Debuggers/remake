@@ -1,4 +1,4 @@
-/* $Id: dbg_break.h,v 1.1 2005/12/06 04:50:57 rockyb Exp $
+/* $Id: dbg_break.h,v 1.2 2005/12/09 12:11:09 rockyb Exp $
 Copyright (C) 2005 rocky@panix.com
 This file is part of GNU Make.
 
@@ -17,7 +17,10 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/** debugger command stack routines. */
+/** \file dbg_break.h
+ *
+ *  \brief debugger command beakpoint routines.
+ */
 
 #ifndef DBG_BREAK_H
 #define DBG_BREAK_H

@@ -1,5 +1,4 @@
-/* $Id: hash.h,v 1.7 2005/12/09 08:39:03 rockyb Exp $
-   hash.h -- decls for hash table
+/* $Id: hash.h,v 1.8 2005/12/09 12:11:09 rockyb Exp $
    Copyright (C) 1995, 1999, 2002, 2004, 2005 Free Software Foundation, Inc.
    Written by Greg McGary <gkm@gnu.org> <greg@mcgary.org>
 
@@ -15,7 +14,13 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
+*/
+
+/** \file hash.h
+ *
+ *  \brief Declarations for GNU Make hash tables.
+ */
 
 #ifndef _HASH_H__
 #define _HASH_H__

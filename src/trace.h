@@ -1,5 +1,5 @@
-/* 
-Copyright (C) 2004 Free Software Foundation, Inc.
+/*$Id: trace.h,v 1.6 2005/12/09 12:11:09 rockyb Exp $
+Copyright (C) 2004, 2005 Rocky Bernstein <rocky@panix.com>
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -17,8 +17,10 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/* Header for routines related to tracing and debugging support */
-
+/** \file trace.h
+ *
+ *  \brief Header for routines related to tracing and debugging support.
+ */
 
 #ifndef TRACE_H
 #define TRACE_H

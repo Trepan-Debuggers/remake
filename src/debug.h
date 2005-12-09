@@ -1,4 +1,4 @@
-/* $Id: debug.h,v 1.9 2005/12/07 03:30:54 rockyb Exp $
+/* $Id: debug.h,v 1.10 2005/12/09 12:11:09 rockyb Exp $
 Debugging macros and interface.
 Copyright (C) 1999, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -18,13 +18,19 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+/** \file debug.h 
+ *
+ *  \brief Debugging macros and interface.
+ */
+
+
 #ifndef DEBUG_H
 #define DEBUG_H
 
 #include "types.h"
 
 /**
-   Imagine the below enums values as #define'd values rather than
+   Imagine the below enums values as define'd values rather than
    distinct values of an enum.
 */
 typedef enum {

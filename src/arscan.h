@@ -1,5 +1,5 @@
-/* header for scanning an archive file.
-Copyright (C) 2004 Free Software Foundation, Inc.
+/* $Id: arscan.h,v 1.3 2005/12/09 12:11:09 rockyb Exp $
+Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,6 +15,11 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 USA.  */
+
+/** \file arscan.h
+ *
+ *  \brief header for scanning an archive file.
+ */
 
 #ifndef	ARSCAN_H
 #define	ARSCAN_H

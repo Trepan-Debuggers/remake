@@ -1,5 +1,4 @@
-/* $Id: remake.h,v 1.4 2005/12/04 01:42:35 rockyb Exp $
-Header for basic dependency engine for GNU Make.
+/* $Id: remake.h,v 1.5 2005/12/09 12:11:09 rockyb Exp $
 Copyright (C) 2004, 2005
 This file is part of GNU Make.
 
@@ -17,6 +16,11 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
+
+/** \file remake.h
+ *
+ *  \brief Header for basic dependency engine for GNU Make.
+ */
 
 /*! Remake all the goals in the `struct dep' chain GOALS.  Return -1
    if nothing was done, 0 if all goals were updated successfully, or 1

@@ -1,4 +1,4 @@
-/* $Id: ar_fns.h,v 1.3 2005/12/04 23:49:49 rockyb Exp $
+/* $Id: ar_fns.h,v 1.4 2005/12/09 12:11:09 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -17,10 +17,15 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+/** \file ar_fns.h
+ *
+ *  \brief Interface to `ar' archives for GNU Make.
+ */
+
 #ifndef AR_FNS_H
 #define AR_FNS_H
 
-/* Specify we want GNU source code.  This must be defined before any
+/** Specify we want GNU source code.  This must be defined before any
    system headers are included.  */
 #define _GNU_SOURCE 1
 

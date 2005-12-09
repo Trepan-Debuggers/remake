@@ -1,5 +1,4 @@
-/* $Id: dir_fns.h,v 1.1 2005/12/07 03:30:54 rockyb Exp $
-Definition of directory routines for GNU Make.
+/* $Id: dir_fns.h,v 1.2 2005/12/09 12:11:09 rockyb Exp $
 
 Copyright (C) 2005 rocky@panix.com
 This file is part of GNU Make.
@@ -18,6 +17,12 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
+
+/** \file dir_fns.h
+ *
+ *  \brief Definition of directory routines for GNU Make.
+ */
+
 
 #ifndef __DIR_FNS_H__
 #define __DIR_FNS_H__

@@ -1,4 +1,4 @@
-/* 
+/* $Id: dbg_cmd.h,v 1.5 2005/12/09 12:11:09 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -16,6 +16,11 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
+
+/** \file dbg_cmd.h 
+ *
+ *  \brief GNU Make debugger interface
+ */
 
 #ifndef DBG_CMD_H
 #define DBG_CMD_H

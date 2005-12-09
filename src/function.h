@@ -1,6 +1,4 @@
-/* $Id: function.h,v 1.5 2005/12/07 03:30:54 rockyb Exp $
-
-Builtin function expansion for GNU Make.
+/* $Id: function.h,v 1.6 2005/12/09 12:11:09 rockyb Exp $
 Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004, 2005
 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -20,11 +18,17 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+/** \file function.h
+ *
+ *  \brief Builtin function expansion for GNU Make.
+ */
+
 #ifndef FUNCTION_H
 #define FUNCTION_H
 
 /*!
-  \r  is replaced on UNIX as well. Is this desirable?
+  Replace all carriage returns and linefeeds with spaces.
+  Carriage return is replaced on UNIX as well. Is this desirable?
  */
 extern void fold_newlines (char *buffer, unsigned int *length);
 
@@ -66,7 +70,7 @@ extern char * subst_expand (char *o, char *text, char *subst,
 			    int suffix_only);
 
 /*!
-  $(eval <makefile string>)
+  $(eval *makefile-string*)
 
   Always resolves to the empty string.
 

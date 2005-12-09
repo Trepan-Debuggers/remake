@@ -1,4 +1,4 @@
-/* Definition of data structures describing shell commands for GNU Make.
+/* $Id: commands.h,v 1.8 2005/12/09 12:11:09 rockyb Exp $
 Copyright (C) 1988, 1989, 1991, 1993, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -17,8 +17,11 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/* Structure that gives the commands to make a file
-   and information about where these commands came from.  */
+/** \file commands.h
+ *
+ *  \brief Definition of data structures describing shell commands for
+ *  GNU Make.
+ */
 
 #ifndef COMMANDS_H
 #define COMMANDS_H
@@ -26,7 +29,8 @@ Boston, MA 02111-1307, USA.  */
 #include "trace.h"
 #include "job.h"
 
-/*! Command structure */
+/*! Command structure. This gives the commands to make a file and
+   information about where these commands came from.  */
 struct commands
   {
     floc_t fileinfo;	        /**< Where commands were defined.  */

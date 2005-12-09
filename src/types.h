@@ -1,4 +1,4 @@
-/* $Id: types.h,v 1.4 2005/12/04 13:22:48 rockyb Exp $
+/* $Id: types.h,v 1.5 2005/12/09 12:11:09 rockyb Exp $
 Miscellaneous types
 Copyright (c) 2005 Rocky Bernstein <rocky@panix.com>
 This file is part of GNU Make.
@@ -17,6 +17,12 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
+
+/** \file types.h 
+ *
+ *  \brief Miscellaneous types
+ */
+
 
 #ifndef MAKE_TYPES_H
 #define MAKE_TYPES_H

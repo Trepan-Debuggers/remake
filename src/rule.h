@@ -1,5 +1,4 @@
-/* $Id: rule.h,v 1.3 2005/12/09 08:39:04 rockyb Exp $
-Definitions for using pattern rules in GNU Make.
+/* $Id: rule.h,v 1.4 2005/12/09 12:11:09 rockyb Exp $
 Copyright (C) 1988, 1989, 1991, 1992, 1993, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -18,23 +17,27 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/* Structure used for pattern rules.  */
+/** \file rule.h
+ *
+ *  \brief Definitions for using pattern rules in GNU Make.
+ */
 
 #include "types.h"
 
+/** Structure used for pattern rules.  */
 typedef struct rule
   {
     struct rule *next;
-    char **targets;		/* Targets of the rule.  */
-    unsigned int *lens;		/* Lengths of each target.  */
-    char **suffixes;		/* Suffixes (after `%') of each target.  */
-    dep_t *deps;		/* Dependencies of the rule.  */
-    commands_t *cmds;	          /* Commands to execute.  */
-    char terminal;		/* If terminal (double-colon).  */
-    char in_use;		/* If in use by a parent pattern_search.  */
+    char **targets;		/**< Targets of the rule.  */
+    unsigned int *lens;		/**< Lengths of each target.  */
+    char **suffixes;		/**< Suffixes (after `%') of each target.  */
+    dep_t *deps;		/**< Dependencies of the rule.  */
+    commands_t *cmds;	        /**< Commands to execute.  */
+    char terminal;		/**< If terminal (double-colon).  */
+    char in_use;		/**< If in use by a parent pattern_search.  */
   } rule_t;
 
-/* For calling install_pattern_rule.  */
+/*! For calling install_pattern_rule.  */
 struct pspec {
   char *target, *dep, *commands;
 };

@@ -1,5 +1,4 @@
-/* $Id: file.h,v 1.3 2005/12/04 13:22:48 rockyb Exp $
-Definition of target file data structures for GNU Make.
+/* $Id: file.h,v 1.4 2005/12/09 12:11:09 rockyb Exp $
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -19,10 +18,11 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+/** \file file.h
+ *
+ *  \brief Definition of target file data structures for GNU Make.
+ */
 
-/* Structure that represents the info on one file
-   that the makefile says how to make.
-   All of these are chained together through `next'.  */
 
 #ifndef FILE_H
 #define FILE_H
@@ -30,78 +30,84 @@ Boston, MA 02111-1307, USA.  */
 #include "make.h"
 #include "hash.h"
 
+/** This file structure represents the info on one file that the
+   makefile says how to make.  All of these are chained together
+   through `next'.  */
+
 struct file {
-    char *name;
-    char *hname;                /* Hashed filename */
-    char *vpath;                /* VPATH/vpath pathname */
-    floc_t floc;                /* location in Makefile - for tracing */
-    dep_t  *deps;		/* all dependencies, including duplicates */
-    commands_t *cmds;	        /* Commands to execute for this target.  */
-    int command_flags;		/* Flags OR'd in for cmds; see commands.h.  */
-    char *stem;			/* Implicit stem, if an implicit
-    				   rule has been used */
-    dep_t *also_make;	        /* Targets that are made by making this.  */
-    FILE_TIMESTAMP last_mtime;	/* File's modtime, if already known.  */
-    FILE_TIMESTAMP mtime_before_update;	/* File's modtime before any updating
+  char *name;
+  char *hname;                /**< Hashed filename */
+  char *vpath;                /**< VPATH/vpath pathname */
+  floc_t floc;                /**< location in Makefile - for tracing */
+  dep_t  *deps;	              /**< all dependencies, including duplicates */
+  commands_t *cmds;	      /**< Commands to execute for this target.  */
+  int command_flags;	      /**< Flags OR'd in for cmds; see commands.h.  */
+  char *stem;		      /**< Implicit stem, if an implicit
+				   rule has been used */
+  dep_t *also_make;	      /**< Targets that are made by making this.  */
+  FILE_TIMESTAMP last_mtime;  /**< File's modtime, if already known.  */
+  FILE_TIMESTAMP mtime_before_update;	/**< File's modtime before any updating
                                            has been performed.  */
-    file_t *prev;		/* Previous entry for same file name;
-				   used when there are multiple double-colon
-				   entries for the same file.  */
-
-    /* File that this file was renamed to.  After any time that a
+  file_t *prev;		      /**< Previous entry for same file name;
+				 used when there are multiple double-colon
+				 entries for the same file.  */
+  
+  /**< File that this file was renamed to.  After any time that a
        file could be renamed, call `check_renamed' (below).  */
-    file_t *renamed;
-
-    /* List of variable sets used for this file.  */
-    variable_set_list_t *variables;
-
-    /* Pattern-specific variable reference for this target, or null if there
+  file_t *renamed;
+  
+  /**< List of variable sets used for this file.  */
+  variable_set_list_t *variables;
+  
+  /**< Pattern-specific variable reference for this target, or null if there
        isn't one.  Also see the pat_searched flag, below.  */
-    variable_set_list_t *pat_variables;
-
-    /* Immediate dependent that caused this target to be remade,
+  variable_set_list_t *pat_variables;
+  
+  /**< Immediate dependent that caused this target to be remade,
        or nil if there isn't one.  */
-    file_t *parent;
-
-    /* For a double-colon entry, this is the first double-colon entry for
+  file_t *parent;
+  
+  /**< For a double-colon entry, this is the first double-colon entry for
        the same file.  Otherwise this is null.  */
-    file_t *double_colon;
-
-    short int update_status;	/* Status of the last attempt to update,
-				   or -1 if none has been made.  */
-
-    enum cmd_state		/* State of the commands.  */
-      {		/* Note: It is important that cs_not_started be zero.  */
-	cs_not_started,		/* Not yet started.  */
-	cs_deps_running,	/* Dep commands running.  */
-	cs_running,		/* Commands running.  */
-	cs_finished		/* Commands finished.  */
-      } command_state ENUM_BITFIELD (2);
-
-    unsigned int precious:1;	/* Non-0 means don't delete file on quit */
-    unsigned int low_resolution_time:1;	/* Nonzero if this file's time stamp
+  file_t *double_colon;
+  
+  short int update_status;	/**< Status of the last attempt to update,
+				     or -1 if none has been made.  */
+  
+  enum cmd_state		/**< State of the commands.  */
+    {		/* Note: It is important that cs_not_started be zero.  */
+      cs_not_started,		/**< Not yet started.  */
+      cs_deps_running,	/* Dep commands running.  */
+      cs_running,		/**< Commands running.  */
+      cs_finished		/**<  Commands finished.  */
+    } command_state ENUM_BITFIELD (2);
+  
+  unsigned int precious:1;	/**< Non-0 means don't delete file on quit */
+  unsigned int low_resolution_time:1; /**< Nonzero if this file's time stamp
 					   has only one-second resolution.  */
-    unsigned int tried_implicit:1; /* Nonzero if have searched
+  unsigned int tried_implicit:1; /**< Nonzero if have searched
 				      for implicit rule for making
 				      this file; don't search again.  */
-    unsigned int updating:1;	/* Nonzero while updating deps of this file */
-    unsigned int updated:1;	/* Nonzero if this file has been remade.  */
-    unsigned int is_target:1;	/* Nonzero if file is described as target.  */
-    unsigned int cmd_target:1;	/* Nonzero if file was given on cmd line.  */
-    unsigned int phony:1;	/* Nonzero if this is a phony file
-				   i.e., a dependency of .PHONY.  */
-    unsigned int intermediate:1;/* Nonzero if this is an intermediate file.  */
-    /* Nonzero, for an intermediate file,
-       means remove_intermediates should not delete it.  */
-    unsigned int secondary:1;
-    unsigned int dontcare:1;	/* Nonzero if no complaint is to be made if
-				   this target cannot be remade.  */
-    unsigned int ignore_vpath:1;/* Nonzero if we threw out VPATH name.  */
-    unsigned int pat_searched:1;/* Nonzero if we already searched for
-                                   pattern-specific variables.  */
-    unsigned int considered:1;  /* equal to `considered' if file has been
-                                   considered on current scan of goal chain */
-    unsigned int tracing:1;     /* Nonzero if we should trace this target. */
+  unsigned int updating:1;	/**< Nonzero while updating deps of this 
+				     file */
+  unsigned int updated:1;	/**< Nonzero if this file has been remade.  */
+  unsigned int is_target:1;	/**< Nonzero if file is described as target.
+				*/
+  unsigned int cmd_target:1;	/**< Nonzero if file was given on cmd line.  */
+  unsigned int phony:1;	        /**< Nonzero if this is a phony file
+				     i.e., a dependency of .PHONY.  */
+  unsigned int intermediate:1;  /**< Nonzero if this is an intermediate file.
+                                     Nonzero means remove_intermediates 
+				     should not delete it.  */
+  unsigned int secondary:1;
+  unsigned int dontcare:1;	/**< Nonzero if no complaint is to be made if
+				     this target cannot be remade.  */
+  unsigned int ignore_vpath:1;  /**< Nonzero if we threw out VPATH name.  */
+  unsigned int pat_searched:1;  /**< Nonzero if we already searched for
+				     pattern-specific variables.  */
+  unsigned int considered:1;    /**< equal to `considered' if file has been
+				     considered on current scan of goal chain*/
+  unsigned int tracing:1;       /**< Nonzero if we should trace this target. */
 };
 
 extern file_t *default_goal_file, *suffix_file, *default_file;

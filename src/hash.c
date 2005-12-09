@@ -1,4 +1,4 @@
-/* $Id: hash.c,v 1.6 2005/12/09 08:39:03 rockyb Exp $
+/* $Id: hash.c,v 1.7 2005/12/09 12:11:09 rockyb Exp $
    hash.c -- hash table maintenance
    Copyright (C) 1995, 1999, 2002, 2004, 2005 Free Software Foundation, Inc.
    Written by Greg McGary <gkm@gnu.org> <greg@mcgary.org>
@@ -25,8 +25,8 @@
 #define REALLOC(o, t, n) ((t *) xrealloc ((o), sizeof (t) * (n)))
 #define CLONE(o, t, n) ((t *) memcpy (MALLOC (t, (n)), (o), sizeof (t) * (n)))
 
-static void hash_rehash __P((hash_table_t* ht));
-static unsigned long round_up_2 __P((unsigned long rough));
+static void hash_rehash (hash_table_t* ht);
+static unsigned long round_up_2 (unsigned long rough);
 
 /* Implement double hashing with open addressing.  The table size is
    always a power of two.  The secondary (`increment') hash function

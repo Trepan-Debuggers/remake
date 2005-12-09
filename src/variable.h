@@ -1,5 +1,4 @@
 /* $id: variable.h,v 1.9 2005/12/02 12:12:09 rockyb Exp $
-Definitions for using variables in GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 2002, 2004, 2005
 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -18,6 +17,12 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
+
+/** \file variable.h
+ *
+ *  \brief Definitions for using variables in GNU Make.
+ */
+
 
 #ifndef VARIABLE_H
 #define VARIABLE_H

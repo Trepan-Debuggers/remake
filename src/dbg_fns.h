@@ -1,4 +1,4 @@
-/* $Id: dbg_fns.h,v 1.6 2005/12/06 04:50:57 rockyb Exp $
+/* $Id: dbg_fns.h,v 1.7 2005/12/09 12:11:09 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -17,7 +17,10 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/* debugger functions */
+/** \file dbg_fns.h 
+ *
+ *  \brief debugger helper functions.
+*/
 
 #ifndef DBG_FNS_H
 #define DBG_FNS_H

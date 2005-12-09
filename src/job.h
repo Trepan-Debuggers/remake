@@ -1,5 +1,4 @@
-/* $Id: job.h,v 1.7 2005/12/02 12:12:09 rockyb Exp $
-Definitions for managing subprocesses in GNU Make.
+/* $Id: job.h,v 1.8 2005/12/09 12:11:09 rockyb Exp $
 Copyright (C) 1992, 1993, 1996, 1999, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -17,6 +16,11 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
+
+/** \file job.h
+ *
+ *  \brief Definitions for managing subprocesses in GNU Make.
+ */
 
 #ifndef JOB_H
 #define JOB_H

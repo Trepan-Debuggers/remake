@@ -1,4 +1,4 @@
-/* $Id: function.c,v 1.14 2005/12/07 03:30:54 rockyb Exp $
+/* $Id: function.c,v 1.15 2005/12/09 12:11:09 rockyb Exp $
 Builtin expansion for GNU Make.
 Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004, 2005
 Free Software Foundation, Inc.
@@ -1249,8 +1249,9 @@ func_value (char *o, char **argv, const char *funcname UNUSED)
   return o;
 }
 
-/*
-  \r  is replaced on UNIX as well. Is this desirable?
+/*!
+  Replace all carriage returns and linefeeds with spaces.
+  Carriage return is replaced on UNIX as well. Is this desirable?
  */
 void
 fold_newlines (char *buffer, unsigned int *length)

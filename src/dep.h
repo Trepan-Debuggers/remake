@@ -1,5 +1,5 @@
-/* Definitions of dependency data structures for GNU Make.
-Copyright (C) 1988, 1989, 1991, 1992, 1993, 1996, 2004
+/* $Id: dep.h,v 1.5 2005/12/09 12:11:09 rockyb Exp $
+Copyright (C) 1988, 1989, 1991, 1992, 1993, 1996, 2004, 2005
 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -20,6 +20,11 @@ Boston, MA 02111-1307, USA.  */
 
 #ifndef DEP_H
 #define DEP_H
+
+/** \file dep.h
+ *
+ *  \brief Definitions of dependency data structures for GNU Make.
+ */
 
 #include "types.h"
 #include "hash.h"

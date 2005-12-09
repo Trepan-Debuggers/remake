@@ -1,5 +1,4 @@
-/* $Id: print.h,v 1.7 2005/12/04 01:39:30 rockyb Exp $
-Header for output or logging functions for GNU Make.
+/* $Id: print.h,v 1.8 2005/12/09 12:11:09 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -17,6 +16,12 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
+
+/** \file print.h
+ *
+ *  \brief Header for output or logging functions for GNU Make.
+ */
+
 
 #ifndef PRINT_H
 #define PRINT_H
