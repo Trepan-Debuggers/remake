@@ -1,3 +1,7 @@
+2005-12-09  Boris Kolpackov  <boris@kolpackov.net>
+
+	* scripts/features/patternrules: Add a test for bug #13022.
+
 2005-12-07  Boris Kolpackov  <boris@kolpackov.net>
 
 	* scripts/features/double_colon: Add a test for bug #14334.
