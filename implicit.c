@@ -928,6 +928,11 @@ pattern_search (struct file *file, int archive,
 	  if (f && f->precious)
             new->file->precious = 1;
 
+          /* Set the is_target flag so that this file is not treated
+             as intermediate by the pattern rule search algorithm and
+             file_exists_p cannot pick it up yet.  */
+          new->file->is_target = 1;
+
 	  file->also_make = new;
 	}
 

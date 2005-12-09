@@ -1,3 +1,9 @@
+2005-12-09  Boris Kolpackov  <boris@kolpackov.net>
+
+	* implicit.c (pattern_search): Mark other files that this rule
+	builds as targets so that they are not treated as intermediates
+	by the pattern rule search algorithm. Fixes bug #13022.
+
 2005-12-07  Boris Kolpackov  <boris@kolpackov.net>
 
 	* remake.c (notice_finished_file): Propagate the change of

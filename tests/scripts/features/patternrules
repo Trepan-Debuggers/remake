@@ -115,5 +115,35 @@ $(dir)/foo.bar:
 
 unlink("$dir/foo.bar");
 
+
+# TEST #5: make sure targets of a macthed implicit pattern rule never
+#          never considered intermediate (Savannah bug #13022).
+#
+run_make_test('
+.PHONY: all
+all: foo.c foo.o
+
+%.h %.c: %.in
+	touch $*.h
+	touch $*.c
+
+%.o: %.c %.h
+	echo $+ >$@
+
+%.o: %.c
+	@echo wrong rule
+
+foo.in:
+	touch $@
+
+',
+'',
+'touch foo.in
+touch foo.h
+touch foo.c
+echo foo.c foo.h >foo.o');
+
+unlink('foo.in', 'foo.h', 'foo.c', 'foo.o');
+
 # This tells the test driver that the perl test script executed properly.
 1;
