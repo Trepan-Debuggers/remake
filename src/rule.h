@@ -1,4 +1,4 @@
-/* $Id: rule.h,v 1.2 2005/12/04 13:22:48 rockyb Exp $
+/* $Id: rule.h,v 1.3 2005/12/09 08:39:04 rockyb Exp $
 Definitions for using pattern rules in GNU Make.
 Copyright (C) 1988, 1989, 1991, 1992, 1993, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -40,15 +40,28 @@ struct pspec {
 };
 
 
+/*! Chain of all pattern rules.  */
 extern rule_t *pattern_rules;
+
+/*! Pointer to last rule in the chain, so we can add onto the end.  */
 extern rule_t *last_pattern_rule;
+
+/*! Number of rules in the chain.  */
 extern unsigned int num_pattern_rules;
 
+/*! Maximum number of dependencies of any pattern rule.  */
 extern unsigned int max_pattern_deps;
+
 extern unsigned int max_pattern_targets;
+
+/*! Maximum length of the name of a dependencies of any pattern rule.  */
 extern unsigned int max_pattern_dep_length;
 
+/*! Pointer to structure for the file .SUFFIXES
+   whose dependencies are the suffixes to be searched.  */
 extern file_t *suffix_file;
+
+/*! Maximum length of a suffix.  */
 extern unsigned int maxsuffix;
 
 
@@ -68,7 +81,7 @@ void install_pattern_rule (pspec_t *p, int terminal);
  */
 int new_pattern_rule (rule_t *p_rule, int override);
 
-/* Compute the maximum dependency length and maximum number of
+/*! Compute the maximum dependency length and maximum number of
    dependencies of all implicit rules.  Also sets the subdir
    flag for a rule when appropriate, possibly removing the rule
    completely when appropriate.
@@ -97,7 +110,8 @@ void create_pattern_rule (char **targets, char **target_percents, int terminal,
 			  dep_t *deps, commands_t *commands, 
 			  int override);
 
-/* Free all pattern rules */
+
+/*! Free all pattern rules */
 void free_pattern_rules (void);
 
 

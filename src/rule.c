@@ -36,40 +36,33 @@ Boston, MA 02111-1307, USA.  */
 
 static void free_rule (rule_t *rule, rule_t *lastrule);
 
-/* Chain of all pattern rules.  */
-
+/*! Chain of all pattern rules.  */
 rule_t *pattern_rules;
 
-/* Pointer to last rule in the chain, so we can add onto the end.  */
-
+/*! Pointer to last rule in the chain, so we can add onto the end.  */
 rule_t *last_pattern_rule;
 
-/* Number of rules in the chain.  */
-
+/*! Number of rules in the chain.  */
 unsigned int num_pattern_rules;
 
 /* Maximum number of target patterns of any pattern rule.  */
 
 unsigned int max_pattern_targets;
 
-/* Maximum number of dependencies of any pattern rule.  */
-
+/*! Maximum number of dependencies of any pattern rule.  */
 unsigned int max_pattern_deps;
 
-/* Maximum length of the name of a dependencies of any pattern rule.  */
-
+/*! Maximum length of the name of a dependencies of any pattern rule.  */
 unsigned int max_pattern_dep_length;
 
-/* Pointer to structure for the file .SUFFIXES
+/*! Pointer to structure for the file .SUFFIXES
    whose dependencies are the suffixes to be searched.  */
+file_t *suffix_file;
 
-struct file *suffix_file;
-
-/* Maximum length of a suffix.  */
-
+/*! Maximum length of a suffix.  */
 unsigned int maxsuffix;
 
-/* Compute the maximum dependency length and maximum number of
+/*! Compute the maximum dependency length and maximum number of
    dependencies of all implicit rules.  Also sets the subdir
    flag for a rule when appropriate, possibly removing the rule
    completely when appropriate.
@@ -108,16 +101,11 @@ count_implicit_rule_limits (void)
 	{
 	  unsigned int len = strlen (dep->name);
 
-#ifdef VMS
 	  char *p = strrchr (dep->name, ']');
           char *p2;
           if (p == 0)
             p = strrchr (dep->name, ':');
           p2 = p != 0 ? strchr (dep->name, '%') : 0;
-#else
-	  char *p = strrchr (dep->name, '/');
-	  char *p2 = p != 0 ? strchr (dep->name, '%') : 0;
-#endif
 	  ndeps++;
 
 	  if (len > max_pattern_dep_length)
@@ -179,11 +167,7 @@ convert_suffix_rule (char *target, char *source, commands_t *cmds)
     /* Special case: TARGET being nil means we are defining a
        `.X.a' suffix rule; the target pattern is always `(%.o)'.  */
     {
-#ifdef VMS
-      targname = savestring ("(%.obj)", 7);
-#else
       targname = savestring ("(%.o)", 5);
-#endif
       targpercent = targname + 1;
     }
   else

@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.26 2005/12/08 04:26:25 rockyb Exp $
+/* $Id: main.c,v 1.27 2005/12/09 08:39:03 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -401,8 +401,13 @@ static const char *const usage[] =
     NULL
   };
 
-/* The table of command switches.  */
+/* The table of command switches. 
 
+   Note: the 3rd field, value_ptr, takes on different type, sometimes
+   stringlist_t **, sometimes int *, sometimes double *. We arbitrarily chose
+   stringlist_t ** and cast those values that are NOT stringlist_t ** 
+   (e.g. &always_make_flag) to make the the assignment work.
+*/
 static const command_switch_t switches[] =
   {
     { 'b', ignore, 0, 0, 0, 0, 0, 0, 0 },

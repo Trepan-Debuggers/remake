@@ -1,4 +1,4 @@
-/* $Id: hash.c,v 1.5 2005/12/07 03:30:54 rockyb Exp $
+/* $Id: hash.c,v 1.6 2005/12/09 08:39:03 rockyb Exp $
    hash.c -- hash table maintenance
    Copyright (C) 1995, 1999, 2002, 2004, 2005 Free Software Foundation, Inc.
    Written by Greg McGary <gkm@gnu.org> <greg@mcgary.org>
@@ -64,8 +64,7 @@ hash_init (hash_table_t *ht, unsigned long size,
   ht->ht_compare = hash_cmp;
 }
 
-/* Load an array of items into `ht'.  */
-
+/*! Load an array of items into `ht'.  */
 void
 hash_load (hash_table_t *ht, void *item_table,
            unsigned long cardinality, unsigned long size)
@@ -78,11 +77,10 @@ hash_load (hash_table_t *ht, void *item_table,
     }
 }
 
-/* Returns the address of the table slot matching `key'.  If `key' is
+/*! Returns the address of the table slot matching `key'.  If `key' is
    not found, return the address of an empty slot suitable for
    inserting `key'.  The caller is responsible for incrementing
    ht_fill on insertion.  */
-
 void **
 hash_find_slot (hash_table_t *ht, const void *key)
 {
@@ -176,6 +174,7 @@ hash_delete_at (hash_table_t *ht, const void *slot)
     return 0;
 }
 
+/*! Free just the items in hash tables ht. */
 void
 hash_free_items (hash_table_t *ht)
 {
@@ -206,6 +205,8 @@ hash_delete_items (hash_table_t *ht)
   ht->ht_empty_slots = ht->ht_size;
 }
 
+/*! Free memory allocated in hash tables ht. If b_free_items, free the items
+  in ht too. */
 void
 hash_free (hash_table_t *ht, bool b_free_items)
 {
@@ -221,6 +222,7 @@ hash_free (hash_table_t *ht, bool b_free_items)
   ht->ht_capacity = 0;
 }
 
+/*! run map() on every vacant hash item in use in ht. */
 void
 hash_map (hash_table_t *ht, hash_map_func_t map)
 {
@@ -234,6 +236,7 @@ hash_map (hash_table_t *ht, hash_map_func_t map)
     }
 }
 
+/*! run map with arg on every vacant hash item in use in ht. */
 void
 hash_map_arg (hash_table_t *ht, hash_map_arg_func_t map, void *arg)
 {
@@ -248,7 +251,6 @@ hash_map_arg (hash_table_t *ht, hash_map_arg_func_t map, void *arg)
 }
 
 /* Double the size of the hash table in the event of overflow... */
-
 static void
 hash_rehash (hash_table_t *ht)
 {
@@ -276,6 +278,7 @@ hash_rehash (hash_table_t *ht)
   free (old_vec);
 }
 
+/*! print hash statistics: percent in use, rehashes and collisions. */
 void
 hash_print_stats (hash_table_t *ht, FILE *out_FILE)
 {
@@ -288,9 +291,8 @@ hash_print_stats (hash_table_t *ht, FILE *out_FILE)
 	    : 0));
 }
 
-/* Dump all items into a NULL-terminated vector.  Use the
-   user-supplied vector, or malloc one.  */
-
+/*! Dump all items into a NULL-terminated vector.  Use the
+   user-supplied vector_0, or a malloc one if vector_0 is NULL.  */
 void **
 hash_dump (hash_table_t *ht, void **vector_0, qsort_cmp_t compare)
 {

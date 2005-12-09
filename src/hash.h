@@ -1,4 +1,4 @@
-/* $Id: hash.h,v 1.6 2005/12/04 13:22:48 rockyb Exp $
+/* $Id: hash.h,v 1.7 2005/12/09 08:39:03 rockyb Exp $
    hash.h -- decls for hash table
    Copyright (C) 1995, 1999, 2002, 2004, 2005 Free Software Foundation, Inc.
    Written by Greg McGary <gkm@gnu.org> <greg@mcgary.org>
@@ -50,21 +50,43 @@ typedef int (*qsort_cmp_t) (void const *, void const *);
 void hash_init(hash_table_t *ht, unsigned long size,
 	       hash_func_t hash_1, hash_func_t hash_2, 
 	       hash_cmp_func_t hash_cmp);
+
+/*! Load an array of items into `ht'.  */
 void hash_load (hash_table_t *ht, void *item_table, unsigned long cardinality, 
 		unsigned long size);
+
+/*! Returns the address of the table slot matching `key'.  If `key' is
+   not found, return the address of an empty slot suitable for
+   inserting `key'.  The caller is responsible for incrementing
+   ht_fill on insertion.  */
 void **hash_find_slot (hash_table_t *ht, void const *key);
+
 void *hash_find_item (hash_table_t *ht, void const *key);
 void *hash_insert (hash_table_t *ht, void *item);
 void *hash_insert_at (hash_table_t *ht, void *item, void const *slot);
 void *hash_delete (hash_table_t *ht, void const *item);
 void *hash_delete_at (hash_table_t *ht, void const *slot);
 void hash_delete_items (hash_table_t *ht);
+
+/*! Free just the items in hash tables ht. */
 void hash_free_items (hash_table_t *ht);
+
+/*! Free memory allocated in hash tables ht. If b_free_items, free the items
+  in ht too. */
 void hash_free (hash_table_t *ht, bool b_free_items);
+
+/*! run map() on every vacant hash item in use in ht. */
 void hash_map (hash_table_t *ht, hash_map_func_t map);
+
+/*! run map(arg) on every vacant hash item in use in ht. */
 void hash_map_arg (hash_table_t *ht, hash_map_arg_func_t map, 
 		       void *arg);
+
+/*! print hash statistics: percent in use, rehashes and collisions. */
 void hash_print_stats (hash_table_t *ht, FILE *out_FILE);
+
+/*! Dump all items into a NULL-terminated vector.  Use the
+   user-supplied vector_0, or a malloc one if vector_0 is NULL.  */
 void **hash_dump (hash_table_t *ht, void **vector_0, qsort_cmp_t compare);
 
 extern void *hash_deleted_item;
@@ -213,7 +235,7 @@ extern void *hash_deleted_item;
   return _result_; \
 } while (0)
 
-/* hash and comparison macros for address keys. */
+/*! hash and comparison macros for address keys. */
 
 #define ADDRESS_HASH_1(KEY, RESULT) INTEGER_HASH_1 (((unsigned long)(KEY)) >> 3, (RESULT))
 #define ADDRESS_HASH_2(KEY, RESULT) INTEGER_HASH_2 (((unsigned long)(KEY)) >> 3, (RESULT))
