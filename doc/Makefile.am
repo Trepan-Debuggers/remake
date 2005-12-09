@@ -11,7 +11,7 @@ TEXI2PDF = texi2dvi --pdf
 
 MOSTLYCLEANFILES = make.tgs make.pdf make.html makedb.cps makedb.kys makedb.html makedb.fns makedb.ps.gz makedb.pdf 
 
-CLEANFILES = make*.html make*.info
+CLEANFILES = make*.html make*.info*
 
 # Extra stuff to include in the distribution.
 

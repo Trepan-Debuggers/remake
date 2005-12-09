@@ -2,7 +2,8 @@
 
 transform = s,make,@MAKE_NAME@,
 
-ACLOCAL_AMFLAGS	=  -I config
+INCLUDES = -I$(top_srcdir)
+ACLOCAL_AMFLAGS	=  -I $(top_srcdir)/config
 
 bin_PROGRAMS =	make
 
