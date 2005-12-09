@@ -97,13 +97,15 @@ check-regression:
 	    case `cd $(srcdir); pwd` in `pwd`) : ;; \
 	      *) test -d tests || mkdir tests; \
 		 rm -f srctests; \
-		 if ln -s "$(srcdir)/tests" srctests; then \
+		 if ln -s "$(srcdir)/tests" $(top_builddir)/srctests; then \
 		   for f in run_make_tests run_make_tests.pl test_driver.pl scripts; do \
-		     rm -f tests/$$f; ln -s ../srctests/$$f tests; \
+		     rm -f tests/$$f; ln -s $(top_builddir)/srctests/$$f tests; \
 		   done; fi ;; \
 	    esac; \
-	    echo "cd tests && $(PERL) ./run_make_tests.pl --make ../src/make$(EXEEXT) $(MAKETESTFLAGS)"; \
-	    cd tests && $(PERL) ./run_make_tests.pl --make ../src/make$(EXEEXT) $(MAKETESTFLAGS); \
+	    if test $(top_srcdir) = $(top_builddir) ; then \
+	      echo "cd tests && $(PERL) ./run_make_tests.pl --make ../src/make$(EXEEXT) $(MAKETESTFLAGS)"; \
+	      cd tests && $(PERL) ./run_make_tests.pl --make ../src/make$(EXEEXT) $(MAKETESTFLAGS); \
+	    fi \
 	  else \
 	    echo "Can't find a working Perl ($(PERL)); the test suite requires Perl."; \
 	  fi; \

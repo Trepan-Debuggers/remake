@@ -9,9 +9,9 @@ Please send remake bug reports to <rocky@panix.com>.
 See the README file and the GNU remake manual for details on sending bug
 reports.
 
-Version 3.80+dbg-0.5cvs
+Version 3.80+dbg-0.5
 
-* Errors in eval issued from the debugger no longer cause termintation.
+* Errors in eval issued from the debugger no longer cause termination.
 
 * Separation of "Step" and "Next. "Step" command granularity is now
   "Next". "Step" stepping is more fine grained.
@@ -44,8 +44,10 @@ Version 3.80+dbg-0.5cvs
   (variables/special). The former is works better with command
   completion. Document some more regression tests.
 
+* Make build work outside of source tree. "make distcheck" doesn't bomb.
+  It doesn't run the regression tests though :-(
 
-* More document updates.
+* More document and doxygen updates.
 
 Version 3.80+dbg-0.4
 
