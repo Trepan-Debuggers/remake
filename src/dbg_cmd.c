@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.61 2005/12/09 10:56:56 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.62 2005/12/10 09:35:04 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -278,7 +278,7 @@ cmd_initialize(void)
   short_command['f'].use  = _("frame *n*");
   short_command['f'].doc  = 
     _("Move target frame to *n*; In contrast to \"up\" or \"down\",\n" \
-      "\tthis sets to an absolute postion. 0 is the top.");
+      "\tthis sets to an absolute position. 0 is the top.");
 
   short_command['h'].func = &dbg_cmd_help;
   short_command['h'].use  = _("help [command]");
