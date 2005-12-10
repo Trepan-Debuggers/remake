@@ -1,4 +1,4 @@
-/* $Id: dbg_break.h,v 1.2 2005/12/09 12:11:09 rockyb Exp $
+/* $Id: dbg_break.h,v 1.3 2005/12/10 02:50:32 rockyb Exp $
 Copyright (C) 2005 rocky@panix.com
 This file is part of GNU Make.
 
@@ -30,10 +30,14 @@ Boston, MA 02111-1307, USA.  */
 /*! Opaque type definition for an item in the breakpoint list. */
 typedef struct breakpoint_node breakpoint_node_t;
 
-/** Pointers to top/bottom of current breakpoint list. */
+/** Pointers to top of current breakpoint list. */
 extern breakpoint_node_t *p_breakpoint_top;
+
+/** Pointers to bottom of current breakpoint list. */
 extern breakpoint_node_t *p_breakpoint_bottom;
 
+/** The largest breakpoint number previously given. When a new
+    breakpoint is set it will be i_breakpoints+1. */
 extern unsigned int i_breakpoints;
 
 /*! Add "p_target" to the list of breakpoints. Return true if 

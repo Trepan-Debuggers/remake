@@ -1,5 +1,5 @@
-/* Template for the remote job exportation interface to GNU Make.
-Copyright (C) 2004 Free Software Foundation, Inc.
+/* $Id: remote-stub.h,v 1.3 2005/12/10 02:50:32 rockyb Exp $
+Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -17,8 +17,10 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/*! Return nonzero if the next job should be done remotely.  
-*/
+/** \file remote-stub.h
+ *
+ *  \brief Template for the remote job exportation interface to GNU
+ *  Make. */
 
 #ifndef REMOTE_STUB_H
 #define REMOTE_STUB_H

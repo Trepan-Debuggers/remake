@@ -31,8 +31,9 @@ Boston, MA 02111-1307, USA.  */
 #include "hash.h"
 #include "file.h"
 
-/** Codes in a variable definition saying where the definition came from.
-   Increasing numeric values signify less-overridable definitions.  */
+/*! \brief Codes in a variable definition saying where the definition
+   came from.  Increasing numeric values signify less-overridable
+   definitions.  */
 typedef enum {
   o_default,		/**< Variable from the default set.  */
   o_env,		/**< Variable from environment.  */
@@ -46,19 +47,19 @@ typedef enum {
 } variable_origin_t;
 
 typedef enum {
-  f_bogus,            /* Bogus (error) */
-  f_simple,           /* Simple definition (:=) */
-  f_recursive,        /* Recursive definition (=) */
-  f_append,           /* Appending definition (+=) */
-  f_conditional       /* Conditional definition (?=) */
+  f_bogus,            /**< Bogus (error) */
+  f_simple,           /**< Simple definition (:=) */
+  f_recursive,        /**< Recursive definition (=) */
+  f_append,           /**< Appending definition (+=) */
+  f_conditional       /**< Conditional definition (?=) */
 } variable_flavor_t;
-
-/** Structure that represents one variable definition.
-   Each bucket of the hash table is a chain of these,
-   chained through `next'.  */
 
 #define EXP_COUNT_BITS  15      /* This gets all the bitfields into 32 bits */
 #define EXP_COUNT_MAX   ((1<<EXP_COUNT_BITS)-1)
+
+/*! \brief Structure that represents one variable definition.  Each
+   bucket of the hash table is a chain of these, chained through
+   `next'.  */
 
 typedef struct variable
   {
@@ -92,25 +93,25 @@ typedef struct variable
   } variable_t;
 
 
-/** Structure that represents a variable set.  */
+/*! \brief Structure that represents a variable set.  */
 struct variable_set {
   hash_table_t table;	/**< Hash table of variables.  */
 };
 
-/** Structure that represents a list of variable sets.  */
+/*! \brief Structure that represents a list of variable sets.  */
 struct variable_set_list {
   struct variable_set_list *next;   /*< Link in the chain.  */
   variable_set_t *set;		    /*< Variable set.  */
 };
 
-/** Structure used for pattern-specific variables.  */
+/*! \brief Structure used for pattern-specific variables.  */
 struct pattern_var
   {
     struct pattern_var *next;
     char *target;
     unsigned int len;
     char *suffix;
-    struct variable variable;
+    variable_t variable;
   };
 
 extern char *variable_buffer;
@@ -228,29 +229,29 @@ variable_t *define_variable_in_set (const char *name,
 				    variable_set_t *set, 
 				    const floc_t *p_floc);
 
-/* Define a variable in the current variable set.  */
+/*! Define a variable in the current variable set.  */
 
 #define define_variable(n,l,v,o,r) \
           define_variable_in_set((n),(l),(v),(o),(r),\
                                  current_variable_set_list->set,NILF)
 
-/* Define a variable with a location in the current variable set.  */
+/*! Define a variable with a location in the current variable set.  */
 
 #define define_variable_loc(n,l,v,o,r,f) \
           define_variable_in_set((n),(l),(v),(o),(r),\
                                  current_variable_set_list->set,(f))
 
-/* Define a variable with a location in the global variable set.  */
+/*! Define a variable with a location in the global variable set.  */
 
 #define define_variable_global(n,l,v,o,r,f) \
           define_variable_in_set((n),(l),(v),(o),(r),NULL,(f))
 
-/* Define a variable in FILE's variable set.  */
+/*! Define a variable in FILE's variable set.  */
 
 #define define_variable_for_file(n,l,v,o,r,f) \
           define_variable_in_set((n),(l),(v),(o),(r),(f)->variables->set,NILF)
 
-/* Warn that NAME is an undefined variable.  */
+/*! Warn that NAME is an undefined variable.  */
 
 #define warn_undefined(n,l) do{\
                               if (warn_undefined_variables_flag) \
@@ -259,10 +260,14 @@ variable_t *define_variable_in_set (const char *name,
                                 (int)(l), (n)); \
                               }while(0)
 
+
+/*! Create a new environment for FILE's commands.  If FILE is nil,
+   this is for the `shell' function.  The child's MAKELEVEL variable
+   is incremented.  */
 extern char **target_environment (file_t *p_target);
 
-extern struct pattern_var *create_pattern_var (char *psz_target, 
-					       char *psz_suffix);
+extern pattern_var_t *create_pattern_var (char *psz_target, 
+					  char *psz_suffix);
 
 extern int export_all_variables;
 

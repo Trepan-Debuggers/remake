@@ -1,4 +1,4 @@
-/* $Id: file.h,v 1.4 2005/12/09 12:11:09 rockyb Exp $
+/* $Id: file.h,v 1.5 2005/12/10 02:50:32 rockyb Exp $
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -30,9 +30,9 @@ Boston, MA 02111-1307, USA.  */
 #include "make.h"
 #include "hash.h"
 
-/** This file structure represents the info on one file that the
-   makefile says how to make.  All of these are chained together
-   through `next'.  */
+/** \brief This file structure represents the info on one file that the
+    makefile says how to make.  All of these are chained together
+    through `next'.  */
 
 struct file {
   char *name;

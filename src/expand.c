@@ -1,4 +1,4 @@
-/* $Id: expand.c,v 1.8 2005/12/04 01:39:30 rockyb Exp $
+/* $Id: expand.c,v 1.9 2005/12/10 02:50:32 rockyb Exp $
 Variable expansion functions for GNU Make.
 Copyright (C) 1988, 89, 91, 92, 93, 95, 
 2004, 2005 Free Software Foundation, Inc.
@@ -68,8 +68,8 @@ variable_buffer_output (char *ptr, char *string, unsigned int length)
       variable_buffer_length = (newlen + 100 > 2 * variable_buffer_length
 				? newlen + 100
 				: 2 * variable_buffer_length);
-      variable_buffer = (char *) xrealloc (variable_buffer,
-					   variable_buffer_length);
+      variable_buffer = REALLOC (variable_buffer, char, 
+				 variable_buffer_length);
       ptr = variable_buffer + offset;
     }
 

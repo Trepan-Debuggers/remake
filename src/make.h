@@ -1,4 +1,4 @@
-/* $Id: make.h,v 1.17 2005/12/07 03:30:54 rockyb Exp $
+/* $Id: make.h,v 1.18 2005/12/10 02:50:32 rockyb Exp $
 Miscellaneous global declarations and portability cruft for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -151,11 +151,11 @@ extern unsigned int get_path_max (void);
 # define CHAR_BIT 8
 #endif
 
-/* Nonzero if the integer type T is signed.  */
+/** Nonzero if the integer type T is signed.  */
 #define INTEGER_TYPE_SIGNED(t) ((t) -1 < 0)
 
-/* The minimum and maximum values for the integer type T.
-   Use ~ (t) 0, not -1, for portability to 1's complement hosts.  */
+/** The minimum and maximum values for the integer type T.
+    Use ~ (t) 0, not -1, for portability to 1's complement hosts.  */
 #define INTEGER_TYPE_MINIMUM(t) \
   (! INTEGER_TYPE_SIGNED (t) ? (t) 0 : ~ (t) 0 << (sizeof (t) * CHAR_BIT - 1))
 #define INTEGER_TYPE_MAXIMUM(t) (~ (t) 0 - INTEGER_TYPE_MINIMUM (t))
@@ -338,10 +338,10 @@ extern int safe_stat(char *file, struct stat *sb);
 extern char *end_of_token_w32(char *s, char stopchar);
 extern int find_and_set_default_shell(char *token);
 
-/* indicates whether or not we have Bourne shell */
+/** indicates whether or not we have Bourne shell */
 extern int no_default_sh_exe;
 
-/* is default_shell unixy? */
+/** is default_shell unixy? */
 extern bool unixy_shell;
 #endif  /* WINDOWS32 */
 
@@ -352,6 +352,8 @@ extern bool unixy_shell;
 
 
 #define	CALLOC(t, n) ((t *) calloc (sizeof (t), (n)))
+#define MALLOC(t, n) ((t *) xmalloc (sizeof (t) * (n)))
+#define REALLOC(o, t, n) ((t *) xrealloc ((void *) (o), sizeof (t) * (n)))
 
 extern void die (int) __attribute__ ((noreturn));
 extern char *savestring (const char *, unsigned int);
@@ -406,10 +408,52 @@ extern void print_version (void);
 
 extern char **environ;
 
-extern int just_print_flag, silent_flag, ignore_errors_flag, keep_going_flag;
-extern int print_data_base_flag, question_flag, touch_flag, always_make_flag;
-extern int env_overrides, no_builtin_rules_flag, no_builtin_variables_flag;
-extern int print_version_flag, print_directory_flag;
+/*! The recognized command switches.  */
+
+/*! Nonzero means do not print commands to be executed (-s).  */
+extern int silent_flag;
+
+/*! Nonzero means just touch the files
+   that would appear to need remaking (-t)  */
+extern int touch_flag;
+
+/*! Nonzero means just print what commands would need to be executed,
+   don't actually execute them (-n).  */
+extern int just_print_flag;
+
+/*! Environment variables override makefile definitions.  */
+extern int env_overrides;
+
+/*! Nonzero means ignore status codes returned by commands
+   executed to remake files.  Just treat them all as successful (-i).  */
+
+extern int ignore_errors_flag;
+
+/*! Nonzero means don't remake anything, just print the data base
+   that results from reading the makefile (-p).  */
+
+extern int print_data_base_flag;
+
+/*! Nonzero means don't remake anything; just return a nonzero status
+   if the specified targets are not up to date (-q).  */
+
+extern int question_flag;
+
+/*! Nonzero means do not use any of the builtin rules (-r) / variables
+  (-R).  */
+extern int no_builtin_rules_flag;
+extern int no_builtin_variables_flag;
+
+/*! Nonzero means keep going even if remaking some file fails
+  (-k).  */
+extern int keep_going_flag;
+
+/*! Nonzero means print directory before starting and when done
+  (-w).  */
+extern int print_directory_flag;
+
+extern int always_make_flag;
+extern int print_directory_flag;
 extern int warn_undefined_variables_flag, posix_pedantic, not_parallel;
 extern int clock_skew_detected, rebuilding_makefiles;
 

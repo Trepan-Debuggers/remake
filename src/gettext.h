@@ -1,4 +1,4 @@
-/* Convenience header for conditional use of GNU <libintl.h>.
+/* $Id: gettext.h,v 1.2 2005/12/10 02:50:32 rockyb Exp $
    Copyright (C) 1995-1998, 2000-2002 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify it
@@ -15,6 +15,11 @@
    License along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
    USA.  */
+
+/** \file gettext.h
+ *
+ *  \brief Convenience header for conditional use of GNU <libintl.h>. 
+ */
 
 #ifndef _LIBGETTEXT_H
 #define _LIBGETTEXT_H 1

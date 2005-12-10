@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.27 2005/12/09 08:39:03 rockyb Exp $
+/* $Id: main.c,v 1.28 2005/12/10 02:50:32 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -131,25 +131,25 @@ typedef struct
 
 #define short_option(c) ((c) <= CHAR_MAX)
 
-/* The recognized command switches.  */
+/*! The recognized command switches.  */
 
-/* Nonzero means do not print commands to be executed (-s).  */
+/*! Nonzero means do not print commands to be executed (-s).  */
 
 int silent_flag;
 
-/* Nonzero means just touch the files
+/*! Nonzero means just touch the files
    that would appear to need remaking (-t)  */
 
 int touch_flag;
 
-/* Nonzero means just print what commands would need to be executed,
+/*! Nonzero means just print what commands would need to be executed,
    don't actually execute them (-n).  */
 
 int just_print_flag;
 
-/* Print debugging info (--debug).  */
+/*! Print debugging info (--debug).  */
 
-/* If 1, we give additional error reporting information. */
+/*! If 1, we give additional error reporting information. */
 int extended_errors = 0;
 
 /*! If 1, we print variable definitions. */
@@ -189,63 +189,67 @@ unsigned int debugger_enabled;
 int basename_filenames = 0;
 
 #ifdef WINDOWS32
-/* Suspend make in main for a short time to allow debugger to attach */
+/*! Suspend make in main for a short time to allow debugger to attach */
 
 int suspend_flag = 0;
 #endif
 
-/* Environment variables override makefile definitions.  */
+/*! Environment variables override makefile definitions.  */
 
 int env_overrides = 0;
 
-/* Nonzero means ignore status codes returned by commands
+/*! Nonzero means ignore status codes returned by commands
    executed to remake files.  Just treat them all as successful (-i).  */
 
 int ignore_errors_flag = 0;
 
-/* Nonzero means don't remake anything, just print the data base
+/*! Nonzero means don't remake anything, just print the data base
    that results from reading the makefile (-p).  */
 
 int print_data_base_flag = 0;
 
-/* Nonzero means don't remake anything; just return a nonzero status
+/*! Nonzero means don't remake anything; just return a nonzero status
    if the specified targets are not up to date (-q).  */
 
 int question_flag = 0;
 
-/* Nonzero means do not use any of the builtin rules (-r) / variables (-R).  */
+/*! Nonzero means do not use any of the builtin rules (-r) / variables
+  (-R).  */
 
 int no_builtin_rules_flag = 0;
 int no_builtin_variables_flag = 0;
 
-/* Nonzero means keep going even if remaking some file fails (-k).  */
+/*! Nonzero means keep going even if remaking some file fails
+  (-k).  */
 
 int keep_going_flag;
 int default_keep_going_flag = 0;
 
-/* Nonzero means print directory before starting and when done (-w).  */
+/*! Nonzero means print directory before starting and when done
+  (-w).  */
 
 int print_directory_flag = 0;
 
-/* Nonzero means ignore print_directory_flag and never print the directory.
-   This is necessary because print_directory_flag is set implicitly.  */
+/*! Nonzero means ignore print_directory_flag and never print the
+   directory.  This is necessary because print_directory_flag is set
+   implicitly.  */
 
 int inhibit_print_directory_flag = 0;
 
-/* Nonzero means print version information.  */
+/*! Nonzero means print version information.  */
 
 int print_version_flag = 0;
 
-/* List of makefiles given with -f switches.  */
+/*! List of makefiles given with -f switches.  */
 
 static stringlist_t *makefiles = NULL;
 
-/* Number of job slots (commands that can be run at once).  */
+/*! Number of job slots (commands that can be run at once).  */
 
 unsigned int job_slots = 1;
 unsigned int default_job_slots = 1;
 
-/* Value of job_slots that means no limit.  */
+/*! Value of job_slots that means no limit.  */
 
 static unsigned int inf_jobs = 0;
 
@@ -1846,9 +1850,8 @@ main (int argc, char **argv, char **envp)
 		}
 	    if (f == NULL || !f->double_colon)
 	      {
-                makefile_mtimes = (FILE_TIMESTAMP *)
-                  xrealloc ((char *) makefile_mtimes,
-                            (mm_idx + 1) * sizeof (FILE_TIMESTAMP));
+                makefile_mtimes = 
+                  REALLOC (makefile_mtimes, FILE_TIMESTAMP, mm_idx + 1);
 		makefile_mtimes[mm_idx++] = file_mtime_no_search (d->file);
 		last = d;
 		d = d->next;
@@ -2365,9 +2368,7 @@ decode_switches (int argc, char **argv, int env)
 		  else if (sl->idx == sl->max - 1)
 		    {
 		      sl->max += 5;
-		      sl->list = (char **)
-			xrealloc ((char *) sl->list,
-				  sl->max * sizeof (char *));
+		      sl->list = REALLOC (sl->list, char *, sl->max);
 		    }
 		  sl->list[sl->idx++] = strdup(optarg);
 		  sl->list[sl->idx] = 0;

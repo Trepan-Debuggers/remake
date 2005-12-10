@@ -1,4 +1,4 @@
-/* $Id: hash.h,v 1.8 2005/12/09 12:11:09 rockyb Exp $
+/* $Id: hash.h,v 1.9 2005/12/10 02:50:32 rockyb Exp $
    Copyright (C) 1995, 1999, 2002, 2004, 2005 Free Software Foundation, Inc.
    Written by Greg McGary <gkm@gnu.org> <greg@mcgary.org>
 
@@ -34,18 +34,23 @@ typedef int (*hash_cmp_func_t) (void const *x, void const *y);
 typedef void (*hash_map_func_t) (void const *item);
 typedef void (*hash_map_arg_func_t) (void const *item, void *arg);
 
+/** \brief hash table structure. We use hash tables for things like
+    variables, targets, directires and functions. */
 typedef struct {
   void **ht_vec;
-  unsigned long   ht_size;	 /* total number of slots (power of 2) */
-  unsigned long   ht_capacity;	 /* usable slots, limited by loading-factor */
-  unsigned long   ht_fill;	 /* items in table */
-  unsigned long   ht_empty_slots;/* empty slots not including deleted slots */
-  unsigned long   ht_collisions; /* # of failed calls to comparison function */
-  unsigned long   ht_lookups;	 /* # of queries */
-  unsigned int    ht_rehashes;	 /* # of times we've expanded table */
-  hash_func_t     ht_hash_1;	 /* primary hash function */
-  hash_func_t     ht_hash_2;	 /* secondary hash function */
-  hash_cmp_func_t ht_compare;	 /* comparison function */
+  unsigned long   ht_size;	 /**< total number of slots (power of 2) */
+  unsigned long   ht_capacity;	 /**< usable slots, limited by 
+				      loading-factor */
+  unsigned long   ht_fill;	 /**< items in table */
+  unsigned long   ht_empty_slots;/**< empty slots not including deleted 
+				      slots */
+  unsigned long   ht_collisions; /**< # of failed calls to comparison 
+				      function */
+  unsigned long   ht_lookups;	 /**< # of queries */
+  unsigned int    ht_rehashes;	 /**< # of times we've expanded table */
+  hash_func_t     ht_hash_1;	 /**< primary hash function */
+  hash_func_t     ht_hash_2;	 /**< secondary hash function */
+  hash_cmp_func_t ht_compare;	 /**< comparison function */
 } hash_table_t;
 
 hash_table_t files;

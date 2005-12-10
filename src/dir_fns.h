@@ -1,4 +1,4 @@
-/* $Id: dir_fns.h,v 1.2 2005/12/09 12:11:09 rockyb Exp $
+/* $Id: dir_fns.h,v 1.3 2005/12/10 02:50:32 rockyb Exp $
 
 Copyright (C) 2005 rocky@panix.com
 This file is part of GNU Make.
@@ -58,6 +58,5 @@ extern void hash_init_directories (void);
 extern void hash_free_directories (void);
 
 extern void dir_setup_glob(glob_t *gl);
-
 
 #endif /*__DIR_FNS_H__*/

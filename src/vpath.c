@@ -30,7 +30,7 @@ Boston, MA 02111-1307, USA.  */
 
 /* Structure used to represent a selective VPATH searchpath.  */
 
-struct vpath
+typedef struct vpath
   {
     struct vpath *next;	/* Pointer to next struct in the linked list.  */
     char *pattern;	/* The pattern to match.  */
@@ -38,21 +38,21 @@ struct vpath
     unsigned int patlen;/* Length of the pattern.  */
     char **searchpath;	/* Null-terminated list of directories.  */
     unsigned int maxlen;/* Maximum length of any entry in the list.  */
-  };
+  } vpath_t;
 
 /* Linked-list of all selective VPATHs.  */
 
-static struct vpath *vpaths;
+static vpath_t *vpaths;
 
 /* Structure for the general VPATH given in the variable.  */
 
-static struct vpath *general_vpath;
+static vpath_t *general_vpath;
 
 /* Structure for GPATH given in the variable.  */
 
-static struct vpath *gpaths;
+static vpath_t *gpaths;
 
-static int selective_vpath_search (struct vpath *path, char **file, 
+static int selective_vpath_search (vpath_t *path, char **file, 
 				   FILE_TIMESTAMP *mtime_ptr);
 
 /* Reverse the chain of selective VPATH lists so they
@@ -62,8 +62,8 @@ static int selective_vpath_search (struct vpath *path, char **file,
 void
 build_vpath_lists ()
 {
-  struct vpath *new = 0;
-  struct vpath *old, *nexto;
+  vpath_t *new = 0;
+  vpath_t *old, *nexto;
   char *p;
 
   /* Reverse the chain.  */
@@ -93,7 +93,7 @@ build_vpath_lists ()
   if (*p != '\0')
     {
       /* Save the list of vpaths.  */
-      struct vpath *save_vpaths = vpaths;
+      vpath_t *save_vpaths = vpaths;
 
       /* Empty `vpaths' so the new one will have no next, and `vpaths'
 	 will still be nil if P contains no existing directories.  */
@@ -125,7 +125,7 @@ build_vpath_lists ()
   if (*p != '\0')
     {
       /* Save the list of vpaths.  */
-      struct vpath *save_vpaths = vpaths;
+      vpath_t *save_vpaths = vpaths;
 
       /* Empty `vpaths' so the new one will have no next, and `vpaths'
 	 will still be nil if P contains no existing directories.  */
@@ -179,13 +179,13 @@ construct_vpath_list (char *pattern, char *dirpath)
   if (dirpath == 0)
     {
       /* Remove matching listings.  */
-      struct vpath *path, *lastpath;
+      vpath_t *path, *lastpath;
 
       lastpath = 0;
       path = vpaths;
       while (path != 0)
 	{
-	  struct vpath *next = path->next;
+	  vpath_t *next = path->next;
 
 	  if (pattern == 0
 	      || (((percent == 0 && path->percent == 0)
@@ -284,19 +284,18 @@ construct_vpath_list (char *pattern, char *dirpath)
 
   if (elem > 0)
     {
-      struct vpath *path;
+      vpath_t *path;
       /* ELEM is now incremented one element past the last
 	 entry, to where the nil-pointer terminator goes.
 	 Usually this is maxelem - 1.  If not, shrink down.  */
       if (elem < (maxelem - 1))
-	vpath = (char **) xrealloc ((char *) vpath,
-				    (elem + 1) * sizeof (char *));
+	vpath = REALLOC (vpath, char *, (elem + 1));
 
       /* Put the nil-pointer terminator on the end of the VPATH list.  */
       vpath[elem] = 0;
 
       /* Construct the vpath structure and put it into the linked list.  */
-      path = (struct vpath *) xmalloc (sizeof (struct vpath));
+      path = (vpath_t *) xmalloc (sizeof (vpath_t));
       path->searchpath = vpath;
       path->maxlen = maxvpath;
       path->next = vpaths;
@@ -341,7 +340,7 @@ gpath_search (char *file, unsigned int len)
 int
 vpath_search (char **file, FILE_TIMESTAMP *mtime_ptr)
 {
-  struct vpath *v;
+  vpath_t *v;
 
   /* If there are no VPATH entries or FILENAME starts at the root,
      there is nothing we can do.  */
@@ -374,7 +373,7 @@ vpath_search (char **file, FILE_TIMESTAMP *mtime_ptr)
    Otherwise we return 0.  */
 
 static int
-selective_vpath_search (struct vpath *path, char **file,
+selective_vpath_search (vpath_t *path, char **file,
                         FILE_TIMESTAMP *mtime_ptr)
 {
   int not_target;
@@ -551,7 +550,7 @@ void
 print_vpath_data_base (void)
 {
   unsigned int nvpaths;
-  struct vpath *v;
+  vpath_t *v;
 
   puts (_("\n# VPATH Search Paths\n"));
 

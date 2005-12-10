@@ -1,4 +1,4 @@
-/* $Id: function.c,v 1.15 2005/12/09 12:11:09 rockyb Exp $
+/* $Id: function.c,v 1.16 2005/12/10 02:50:32 rockyb Exp $
 Builtin expansion for GNU Make.
 Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004, 2005
 Free Software Foundation, Inc.
@@ -385,7 +385,7 @@ string_glob (char *line)
 	  if (idx + len + 1 > length)
 	    {
 	      length += (len + 1) * 2;
-	      result = (char *) xrealloc (result, length);
+	      result = REALLOC (result, char, length);
 	    }
 	  memmove (&result[idx], name, len);
 	  idx += len;

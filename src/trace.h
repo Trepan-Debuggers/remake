@@ -1,4 +1,4 @@
-/*$Id: trace.h,v 1.6 2005/12/09 12:11:09 rockyb Exp $
+/*$Id: trace.h,v 1.7 2005/12/10 02:50:32 rockyb Exp $
 Copyright (C) 2004, 2005 Rocky Bernstein <rocky@panix.com>
 This file is part of GNU Make.
 
@@ -44,7 +44,7 @@ typedef enum {
    "jobs" it's not really a stack but a tree. 
 */
 
-/*! Node for an item in the target call stack */
+/*! \brief Node for an item in the target call stack */
 typedef struct target_stack_node
   {
     file_t                   *p_target;

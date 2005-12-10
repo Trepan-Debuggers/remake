@@ -1,4 +1,4 @@
-/* $Id: debug.h,v 1.10 2005/12/09 12:11:09 rockyb Exp $
+/* $Id: debug.h,v 1.11 2005/12/10 02:50:32 rockyb Exp $
 Debugging macros and interface.
 Copyright (C) 1999, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -35,14 +35,14 @@ Boston, MA 02111-1307, USA.  */
 */
 typedef enum {
   DB_NONE           = 0x000,
-  DB_BASIC          = 0x001, /** targets which need to be made and status;
+  DB_BASIC          = 0x001, /**< targets which need to be made and status;
 				 also set when tracing or debugging */
   DB_VERBOSE        = 0x002,
   DB_JOBS           = 0x004,
   DB_IMPLICIT       = 0x008,
   DB_MAKEFILES      = 0x100,
-  DB_READMAKEFILES  = 0x200, /** Reading makefiles */
-  DB_CALLTRACE      = 0x400, /** GNU Make function call and returns */
+  DB_READMAKEFILES  = 0x200, /**< Reading makefiles */
+  DB_CALLTRACE      = 0x400, /**< GNU Make function call and returns */
   DB_ALL            = 0xfff
 } debug_level_mask_t;
 
@@ -63,14 +63,13 @@ extern debug_enter_debugger_t debug_dummy_enter_debugger_mask;
 /** bitmask of debug_level_mask values. */
 extern int db_level;
 
-/** The structure used to hold the list of strings given
+/** \brief The structure used to hold the list of strings given
     in command switches of a type that takes string arguments.  */
-
 typedef struct stringlist
 {
-  char **list;	/* Nil-terminated list of strings.  */
-  unsigned int idx;	/* Index into above.  */
-  unsigned int max;	/* Number of pointers allocated.  */
+  char **list;	        /**< Nil-terminated list of strings.  */
+  unsigned int idx;	/**< Index into above.  */
+  unsigned int max;	/**< Number of pointers allocated.  */
 } stringlist_t;
 
 extern int debug_flag;

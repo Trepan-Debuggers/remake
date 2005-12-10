@@ -1,4 +1,4 @@
-/* $Id: commands.h,v 1.8 2005/12/09 12:11:09 rockyb Exp $
+/* $Id: commands.h,v 1.9 2005/12/10 02:50:32 rockyb Exp $
 Copyright (C) 1988, 1989, 1991, 1993, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -29,8 +29,8 @@ Boston, MA 02111-1307, USA.  */
 #include "trace.h"
 #include "job.h"
 
-/*! Command structure. This gives the commands to make a file and
-   information about where these commands came from.  */
+/*! \brief Command structure. This gives the commands to make a file
+   and information about where these commands came from.  */
 struct commands
   {
     floc_t fileinfo;	        /**< Where commands were defined.  */

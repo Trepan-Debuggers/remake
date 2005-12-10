@@ -1,4 +1,4 @@
-/* $Id: rule.h,v 1.4 2005/12/09 12:11:09 rockyb Exp $
+/* $Id: rule.h,v 1.5 2005/12/10 02:50:32 rockyb Exp $
 Copyright (C) 1988, 1989, 1991, 1992, 1993, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -24,7 +24,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "types.h"
 
-/** Structure used for pattern rules.  */
+/** \brief Structure used for pattern rules.  */
 typedef struct rule
   {
     struct rule *next;

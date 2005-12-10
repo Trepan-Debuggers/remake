@@ -1,4 +1,4 @@
-/* $Id: variable.c,v 1.15 2005/12/04 23:18:17 rockyb Exp $
+/* $Id: variable.c,v 1.16 2005/12/10 02:50:32 rockyb Exp $
 Internals of variables for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -37,11 +37,11 @@ Boston, MA 02111-1307, USA.  */
 
 /* Chain of all pattern-specific variables.  */
 
-static struct pattern_var *pattern_vars;
+static pattern_var_t *pattern_vars;
 
 /* Pointer to last struct in the chain, so we can add onto the end.  */
 
-static struct pattern_var *last_pattern_var;
+static pattern_var_t *last_pattern_var;
 
 /*!
   Return a string describing origin.
@@ -82,13 +82,12 @@ origin2str(variable_origin_t origin)
 }
 
   
-/* Create a new pattern-specific variable struct.  */
-
-struct pattern_var *
+/*! Create a new pattern-specific variable struct.  */
+pattern_var_t *
 create_pattern_var (char *target, char *suffix)
 {
-  struct pattern_var *p
-    = (struct pattern_var *) xmalloc (sizeof (struct pattern_var));
+  pattern_var_t *p
+    = (pattern_var_t *) xmalloc (sizeof (pattern_var_t));
 
   if (last_pattern_var != 0)
     last_pattern_var->next = p;
@@ -106,10 +105,10 @@ create_pattern_var (char *target, char *suffix)
 
 /* Look up a target in the pattern-specific variable list.  */
 
-static struct pattern_var *
-lookup_pattern_var (struct pattern_var *start, char *target)
+static pattern_var_t *
+lookup_pattern_var (pattern_var_t *start, char *target)
 {
-  struct pattern_var *p;
+  pattern_var_t *p;
   unsigned int targlen = strlen(target);
 
   for (p = start ? start->next : pattern_vars; p != 0; p = p->next)
@@ -468,7 +467,7 @@ initialize_file_variables (struct file *file, int reading)
 
   if (!reading && !file->pat_searched)
     {
-      struct pattern_var *p;
+      pattern_var_t *p;
 
       p = lookup_pattern_var (0, file->name);
       if (p != 0)
@@ -711,12 +710,11 @@ define_automatic_variables (void)
 
 int export_all_variables;
 
-/* Create a new environment for FILE's commands.
-   If FILE is nil, this is for the `shell' function.
-   The child's MAKELEVEL variable is incremented.  */
-
+/*! Create a new environment for FILE's commands.  If FILE is nil,
+   this is for the `shell' function.  The child's MAKELEVEL variable
+   is incremented.  */
 char **
-target_environment (struct file *file)
+target_environment (file_t *file)
 {
   variable_set_list_t *set_list;
   variable_set_list_t *s;
@@ -1285,7 +1283,7 @@ print_variable_data_base (void)
   puts (_("\n# Pattern-specific Variable Values"));
 
   {
-    struct pattern_var *p;
+    pattern_var_t *p;
     int rules = 0;
 
     for (p = pattern_vars; p != 0; p = p->next)

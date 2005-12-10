@@ -1,4 +1,4 @@
-/* $Id: hash.c,v 1.7 2005/12/09 12:11:09 rockyb Exp $
+/* $Id: hash.c,v 1.8 2005/12/10 02:50:32 rockyb Exp $
    hash.c -- hash table maintenance
    Copyright (C) 1995, 1999, 2002, 2004, 2005 Free Software Foundation, Inc.
    Written by Greg McGary <gkm@gnu.org> <greg@mcgary.org>
@@ -21,8 +21,6 @@
 #include "make.h"
 #include "hash.h"
 
-#define MALLOC(t, n) ((t *) xmalloc (sizeof (t) * (n)))
-#define REALLOC(o, t, n) ((t *) xrealloc ((o), sizeof (t) * (n)))
 #define CLONE(o, t, n) ((t *) memcpy (MALLOC (t, (n)), (o), sizeof (t) * (n)))
 
 static void hash_rehash (hash_table_t* ht);

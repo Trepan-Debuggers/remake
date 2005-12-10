@@ -1,4 +1,4 @@
-/* $Id: job.h,v 1.8 2005/12/09 12:11:09 rockyb Exp $
+/* $Id: job.h,v 1.9 2005/12/10 02:50:32 rockyb Exp $
 Copyright (C) 1992, 1993, 1996, 1999, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -44,7 +44,7 @@ Boston, MA 02111-1307, USA.  */
 # define CLOSE_ON_EXEC(_d) (void) fcntl ((_d), F_SETFD, FD_CLOEXEC)
 #endif
 
-/** Structure describing a running or dead child process.  */
+/** \brief Structure describing a running or dead child process.  */
 typedef struct child
   {
     struct child *next;		/**< Link in the chain.  */

@@ -1,4 +1,4 @@
-/* Declarations for getopt.
+/* 
    Copyright (C) 1989,90,91,92,93,94,96,97 Free Software Foundation, Inc.
 
    NOTE: The canonical source of this file is maintained with the GNU C Library.
@@ -18,6 +18,15 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
    USA.  */
+
+/** \file getopt.h
+ *
+ * \brief Declarations for GNU getopt.
+ *
+ *
+ *   NOTE: The canonical source of this file is maintained with the GNU
+ *   C Library.
+ */
 
 #ifndef _GETOPT_H
 #define _GETOPT_H 1

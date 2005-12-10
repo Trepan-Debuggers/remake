@@ -1,4 +1,4 @@
-/* $Id: commands.c,v 1.12 2005/12/03 12:49:42 rockyb Exp $
+/* $Id: commands.c,v 1.13 2005/12/10 02:50:32 rockyb Exp $
 Command processing for GNU Make.
 Copyright (C) 1988,89,91,92,93,94,95,96,97, 2004, 2005
 Free Software Foundation, Inc.
@@ -302,10 +302,8 @@ chop_commands (commands_t *cmds)
 
       if (idx == nlines) {
 	nlines += 2;
-	lines  = (char **) xrealloc ((char *) lines,
-				     nlines * sizeof (char *));
-	line_no = (unsigned int *) xrealloc ((char *) line_no,
-					     nlines * sizeof (unsigned int *));
+	lines   = REALLOC (lines,   char *, nlines);
+        line_no = REALLOC (line_no, unsigned int, nlines);
       }
       lines[idx]     = savestring (p, end - p);
       line_no[idx++] = i_prev;
@@ -316,10 +314,8 @@ chop_commands (commands_t *cmds)
 
     if (idx != nlines) {
       nlines = idx;
-      lines  = (char **) xrealloc ((char *) lines,
-				   nlines * sizeof (char *));
-      line_no = (unsigned int *) xrealloc ((char *) line_no,
-					   nlines * sizeof (char *));
+      lines  =  REALLOC (lines, char *, nlines);
+      line_no = REALLOC (line_no, unsigned int, nlines);
     }
     
     cmds->ncommand_lines = nlines;

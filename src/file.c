@@ -1,4 +1,4 @@
-/* $Id: file.c,v 1.8 2005/12/04 13:22:48 rockyb Exp $
+/* $Id: file.c,v 1.9 2005/12/10 02:50:32 rockyb Exp $
 Target file hash table management for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -651,7 +651,7 @@ build_target_list (char *value)
       file_t **end = &fp[files.ht_size];
 
       /* Make sure we have at least MAX bytes in the allocated buffer.  */
-      value = xrealloc (value, max);
+      value = REALLOC (value, char, max);
 
       p = value;
       len = 0;
@@ -667,7 +667,7 @@ build_target_list (char *value)
                 unsigned long off = p - value;
 
                 max += EXPANSION_INCREMENT (l + 1);
-                value = xrealloc (value, max);
+                value = REALLOC (value, char, max);
                 p = &value[off];
               }
 
