@@ -178,7 +178,7 @@ be used just as a front-end for learning more about Makefiles and
 writing them with @value{MAKE}. 
 
 A degenerate and less-interactive form of debugging is @emph{tracing}
-in which one passivly watches some of the steps that go on in
+in which one passively watches some of the steps that go on in
 processing a Makefile.
 
 @menu
@@ -210,7 +210,7 @@ to make it easier to pick out from the surrounding output.
 @subsection Sample @value{MAKE} Trace Session
 
 A simplified form of debugging is @emph{tracing}. And so before we
-get into debugging proper, let's show some of the tracing abilites. 
+get into debugging proper, let's show some of the tracing abilities. 
 
 @value{MAKE} has had for a long time a ``debug'' flag (@code{--debug} or
 @code{-d}) which prints ``lots of debugging information.'' But I've
@@ -290,7 +290,7 @@ Clearly this information referring to rule stems, implicit
 prerequisites, @code{SIGCHLD}, pids, and unreaped children is intended
 for someone who is well versed with the internals of @value{MAKE}.
 
-But even for someone such as myself who has become more knowledgable
+But even for someone such as myself who has become more knowledgeable
 (through writing this debugger), it @emph{still} isn't all that
 helpful. @code{/bin/bash: bogus-command: command not found} you say?
 Okay but where in the Makefile source did that come from? Since we
@@ -396,7 +396,7 @@ So far so good -- still pretty simple output even though the Makefile
 in this case is pretty complex, is hundreds of lines long and has
 thousands of dependencies noted.  Digging just a little into this
 complexity, If we want to trace the files that were read in performing
-the above, we can use the suboption @code{read} on the @code{--trace}
+the above, we can use the sub-option @code{read} on the @code{--trace}
 option:
 @smallexample
 @group
@@ -422,7 +422,7 @@ make: `Makefile' is up to date.
 @subsection Simple @value{MAKE} Debug Sessions
 
 Now let's go into the debugger: for this use the @code{--debugger} or
-@code{-X} option. Again we'll use the Makefile from the sourcecode of
+@code{-X} option. Again we'll use the Makefile from the source code of
 this distribution.
 
 @smallexample
@@ -433,7 +433,7 @@ Reading makefiles...
 @end smallexample 
 
 Let's see where we are. In particular is this @emph{really} the
-top-level target? The @code{where} command, @xref{Backtrace}, shows
+top-level target? The @code{where} command, (see @ref{Backtrace}), shows
 you the target call stack:
 
 @smallexample
@@ -445,10 +445,10 @@ makedb<0> @b{where}
 @end group
 @end smallexample 
 
-No, we were triggered by checking dependecies from Makefile. And that
+No, we were triggered by checking dependencies from Makefile. And that
 was triggered by checking dependencies of ``all.'' (There's a bug in
 our debugger currently in that it doesn't show ``all.''). We can use
-the @code{next} command, @xref{Next}, to progress a little in the
+the @code{next} command, (@ref{Next}), to progress a little in the
 interpretation or execution of the makefile:
 @smallexample
 @group
@@ -500,7 +500,7 @@ all-am: Makefile make loadavg commands.h dbg_cmd.h dep.h expand.h filedef.h func
 However information may change depending on where Make is. In
 particular note that ``Implicit rule search has not been done.''
 
-If all of this is proceding too slowly, could set a
+If all of this is proceeding too slowly, could set a
 @code{breakpoint} on a target of interest, perhaps @code{all-am}. Like
 this:
 
@@ -516,8 +516,8 @@ Breakpoint on target all-am set.
 @end smallexample 
 
 The @code{restart} command was used to restart execution since we've
-already passed considering the "all-am" target. So let's @code{continue}
-execution and see what happens:
+already passed considering the "all-am" target. So let's
+@code{continue}, (@ref{Continue}, execution and see what happens:
 
 @smallexample
 
@@ -537,7 +537,7 @@ makedb<2> where
 
 We've seen we can get information about @value{MAKE}'s targets.  We
 can also get information about @value{MAKE}'s variables. That is done
-with the @code{print} command, @xref{Print}.
+with the @code{print} command. (See @ref{Print}.)
 
 @smallexample
   makedb<4> @b{print MAKE}
@@ -571,7 +571,8 @@ No location identification is given here since what I put in
 isn't a variable.
 
 But I can also @emph{change} values too using either @code{set} or
-@code{setq}. Let's see the difference between the two. 
+@code{setq}. (See @ref{set variable} and @ref{setq}.) Let's see the difference
+between the two.
 
 @smallexample
   makedb<7> @b{set MAKE $(MAKE_COMMAND)}
@@ -711,7 +712,7 @@ makeinfo --no-headers ../doc/makedb.texi > make.txt
 @end smallexample
 
 If we want to write out those commands as a shell script which we
-might want to execute, we can use the @code{write} command:
+might want to execute, we can use the @code{write} (@ref{Write}) command:
 @smallexample
 @group
 (/tmp/remake/src/test2:6): make.txt
@@ -726,7 +727,8 @@ makedb<7> @b{shell cat -n /tmp/make.txt.sh}
 @end smallexample
 
 And last we see that we can even issue a shell command (@code{cat -n
-/tmp/make.txt.sh}) via the debugger command @code{shell}.
+/tmp/make.txt.sh}) via the debugger command @code{shell}. (See
+@ref{Shell}.)
 
 @node Free Software
 @unnumberedsec Free software
@@ -1004,7 +1006,7 @@ nothing.  This is useful mainly in command files
 
 @node Help
 @section Getting help (@samp{help})
-@cindex online documentation
+@cindex on-line documentation
 
 Once inside the debugger, you can always ask it for information on its
 commands, using the command @code{help}.
@@ -1046,7 +1048,7 @@ Available commands are:
 
   frame *n*                 (f):
 	Move target frame to *n*; In contrast to "up" or "down",
-	this sets to an absolute postion. 0 is the top.
+	this sets to an absolute position. 0 is the top.
 
   help [command]            (h):
 	Display list of commands (i.e. this help text.)
@@ -1216,7 +1218,7 @@ in. The last Makefile listed is the one you started with (e.g. Makefile).
 Displays target information.
 
 @kindex info warranty
-@item info warrany
+@item info warranty
 Displays GNU Warranty
 
 @end table
@@ -1241,7 +1243,7 @@ another directory. The @code{quit} only terminates only the last one:
 the one that the debugger is in. @value{dBG} arranges for the debug
 flags to get passed down in recursive calls. Consequently when you
 quit one of the inner make calls, you may find yourself still in the
-deubugger but up a call level.
+debugger but up a call level.
 
 @end table
 
@@ -1250,7 +1252,7 @@ deubugger but up a call level.
 
 One important use of a debugger is to stop execution before it gets
 into trouble, so you can investigate and find out what is going
-on. However should @value{MAKE} accidently continue to termination,
+on. However should @value{MAKE} accidentally continue to termination,
 @value{DBG} has arranged for it not to leave the debugger without your
 explicit instruction. That way, you can restart the program using the
 same command arguments.
@@ -1308,7 +1310,7 @@ Breakpoint on target all set.
 @subsubsection Deleting breakpoints (@samp{delete})
 
 @cindex deleting breakpoints
-It may be desireable to eliminate a breakpoint once it
+It may be desirable to eliminate a breakpoint once it
 has done its job and you no longer want stop there.
 This is called @dfn{deleting} the breakpoint.  A breakpoint that has
 been deleted no longer exists; it is forgotten.
@@ -1407,9 +1409,9 @@ signal a program gets when you type an interrupt character (often
 @kbd{C-c}); @code{SIGALRM} occurs when the alarm clock timer goes off
 (which happens only if your program has requested an alarm).
 
-@value{MAKE} sets up some signal handlers of children it spawms.  When
+@value{MAKE} sets up some signal handlers of children it spawns.  When
 we are running under the debugger when and we get a signal the
-debugger read loop is enterd.
+debugger read loop is entered.
 
 @cindex fatal signals
 Some signals, including @code{SIGALRM}, are a normal part of the
@@ -1465,7 +1467,7 @@ values, you can use @code{show} with no arguments; you may also use
 @end table
 @c @end group
 
-Here are fource miscellaneous @code{show} subcommands, all of which are
+Here are force miscellaneous @code{show} subcommands, all of which are
 exceptional in lacking corresponding @code{set} commands:
 
 @table @code
@@ -1564,7 +1566,7 @@ frames in @value{DBG} commands.
 @cindex stack traces
 A backtrace is essentially the same as the call stack: a summary of
 how your script got where it is.  It shows one line per frame, for
-many frames, starting with the place that you sare stopped at (frame
+many frames, starting with the place that you are stopped at (frame
 zero), followed by its caller (frame one), and on up the stack.
 
 If @value{MAKE} is in the reading phase the backtrace shows the
@@ -1616,7 +1618,7 @@ makedb<1> @b{where}
 @end group
 @end smallexample
 
-However if we hae set debugging to stop before reading makefiles are
+However if we have set debugging to stop before reading makefiles are
 we are in the reading phase, we show included Makefiles:
 
 @smallexample
@@ -1922,8 +1924,15 @@ If you want to all list variables, use this command.
 @end table
 
 @node Evaluation/Execution
-@section Evaluating MAKE commands ( @samp{eval})
+@section Evaluation and Execution
 
+@menu
+* Eval::                 Evaluate a GNU Makefile string
+* Shell::                Execute a Shell command
+@end menu
+
+@node Eval
+@subsection Subsection Evaluating GNU MAKE commands ( @samp{eval})
 @table @code
 @kindex eval
 @kindex e @r{(@code{eval})}
@@ -1941,7 +1950,8 @@ using the ``setq'' debugger command, one could issue the command as
 
 @end table
 
-@section Running Shell commands ( @samp{shell})
+@node Shell
+@subsection Running Shell commands ( @samp{shell})
 
 @table @code
 @kindex shell
@@ -1993,7 +2003,7 @@ to show full pathnames.
 @item set ignore-errors @var{on/off/toggle}
 
 Use this to change whether you ignore errors. Turning it on is
-as though you started @value{MAKE} with the @code{--ingore-errors} option.
+as though you started @value{MAKE} with the @code{--ignore-errors} option.
 @end table
 
 @node set trace
@@ -2107,19 +2117,19 @@ switch to debugging a program in some other location, from an existing
 @value{DBG} buffer in Emacs.
 @end quotation
 
-By default, @kbd{M-x bashdb} calls the @code{make --debugger}.  If you
+By default, @kbd{M-x makedb} calls the @code{make --debugger}.  If you
 need to call @value{DBG} by a different name (for example, if you
 keep several configurations around, with different names) you can set
-the Emacs variable @code{gud-bashdb-command-name}; for example,
+the Emacs variable @code{gud-makedb-command-name}; for example,
 
 @example
-(setq gud-make-command-name "make")
+(setq gud-makedb-command-name "make")
 @end example
 
 @noindent
 (preceded by @kbd{M-:} or @kbd{ESC :}, or typed in the @code{*scratch*} buffer, or
 in your @file{.emacs} file) makes Emacs call the program named
-``@code{bash-debugger}'' instead.
+``@code{makedb}'' instead.
 
 In the @value{DBG} I/O buffer, you can use these special Emacs commands in
 addition to the standard Shell mode commands:
@@ -2160,21 +2170,6 @@ Go down the number of frames indicated by the numeric argument, like the
 
 @emph{Warning:} In Emacs v19, this command is @kbd{C-c C-d}.
 
-@item C-x &
-Read the number where the cursor is positioned, and insert it at the end
-of the @value{DBG} I/O buffer.  For example, if you wish to disassemble code
-around an address that was displayed earlier, type @kbd{disassemble};
-then move the cursor to the address display, and pick up the
-argument for @code{disassemble} by typing @kbd{C-x &}.
-
-You can customize this further by defining elements of the list
-@code{gdb-print-command}; once it is defined, you can format or
-otherwise process numbers picked up by @kbd{C-x &} before they are
-inserted.  A numeric argument to @kbd{C-x &} indicates that you
-wish special formatting, and also acts as an index to pick an element of the
-list.  If the list element is a string, the number to be inserted is
-formatted using the Emacs function @code{format}; otherwise the number
-is passed as an argument to the corresponding list element.
 @end table
 
 In any source file, the Emacs command @kbd{C-x SPC} (@code{gud-break})
@@ -2265,7 +2260,7 @@ for improvement of @value{MAKE} are welcome in any case.
 @cindex debugger bugs, reporting
 
 Submit bug reports for @value{MAKE}.  Until better mechanism is set up
-the prefered method is to submit them directly using
+the preferred method is to submit them directly using
 @email{rocky@@panix.com}. There are also a bug tracking system
 and, help, developer and open discussion forums which can be found via
 @uref{http://http://sourceforge.net/forum/?group_id=37260}.
