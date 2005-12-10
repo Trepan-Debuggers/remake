@@ -1,4 +1,4 @@
-$Id: how-to-make-a-release.txt,v 1.2 2005/11/27 23:12:14 rockyb Exp $
+$Id: how-to-make-a-release.txt,v 1.3 2005/12/10 10:20:11 rockyb Exp $
 
 - Let people know of a pending release,
   e.g. bashdb-devel@lists.sourceforge.net; no major changes before
@@ -6,7 +6,7 @@ $Id: how-to-make-a-release.txt,v 1.2 2005/11/27 23:12:14 rockyb Exp $
 
 - test on lots of platforms; sourceforge compile farm, for example
 
-- "make distcheck" should work - (but it doesn't at present)
+- "make distcheck" should work - (but it doesn't completely at present)
 
 - Go over Changelog and add NEWS. Update date of release.
 
