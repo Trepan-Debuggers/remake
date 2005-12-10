@@ -517,7 +517,7 @@ Breakpoint on target all-am set.
 
 The @code{restart} command was used to restart execution since we've
 already passed considering the "all-am" target. So let's
-@code{continue}, (@ref{Continue}, execution and see what happens:
+@code{continue}, (@ref{Continue}), execution and see what happens:
 
 @smallexample
 
@@ -1324,8 +1324,8 @@ when you continue execution.
 @cindex delete breakpoints
 @kindex delete
 @kindex d @r{(@code{delete})}
-@item delete @var{target-name}
-Delete the breakpoints specified as arguments. 
+@item delete @var{breakpoint-number}...
+Delete the breakpoints by breakpoint-number specified as arguments. 
 
 @end table
 
