@@ -1,3 +1,5 @@
+$Id: README.makedb,v 1.3 2005/12/10 09:36:02 rockyb Exp $
+
 See the file NEWS for the user-visible changes
 
 With steady progress, this debugger for make has gotten good enough to
@@ -53,12 +55,12 @@ OS's, they can be added. But it would have to be done in a way that
 doesn't make the rest of the code hard to read and maintain.
 
 Given this split in goals, I think it best to maintain this initially
-as a seperate track. Although this track is alpha, I think it has some
+as a separate track. Although this track is alpha, I think it has some
 important and useful changes and needs early exposure to best grow
 this the right way. I don't think it should be tied down to the GNU
 make 3.81 release schedule and similarly I don't think the 3.81
 release schedule should be tied down to having this be flawless
 either.
 
-Documentation for the revised GNU Make and GNU Make Debugge is in the
+Documentation for the revised GNU Make and GNU Make Debugger is in the
 doc directory.
