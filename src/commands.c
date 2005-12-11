@@ -1,4 +1,4 @@
-/* $Id: commands.c,v 1.13 2005/12/10 02:50:32 rockyb Exp $
+/* $Id: commands.c,v 1.14 2005/12/11 12:15:29 rockyb Exp $
 Command processing for GNU Make.
 Copyright (C) 1988,89,91,92,93,94,95,96,97, 2004, 2005
 Free Software Foundation, Inc.
@@ -19,11 +19,11 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#include "config.h"
 #include "make.h"
 #include "ar_fns.h"
 #include "commands.h"
 #include "expand.h"
+#include "misc.h"
 #include "print.h"
 #include "remake.h"
 #include "variable.h"
@@ -342,13 +342,11 @@ chop_commands (commands_t *cmds)
             flags |= COMMANDS_NOERROR;
             break;
           }
-      if (!(flags & COMMANDS_RECURSE))
-        {
-          unsigned int len = strlen (p);
-          if (sindex (p, len, "$(MAKE)", 7) != 0
-              || sindex (p, len, "${MAKE}", 7) != 0)
-            flags |= COMMANDS_RECURSE;
-        }
+
+      /* If no explicit '+' was given, look for MAKE variable references.  */
+      if (!(flags & COMMANDS_RECURSE)
+          && (strstr (p, "$(MAKE)") != 0 || strstr (p, "${MAKE}") != 0))
+        flags |= COMMANDS_RECURSE;
       
       cmds->lines_flags[idx] = flags;
       cmds->any_recurse |= flags & COMMANDS_RECURSE;

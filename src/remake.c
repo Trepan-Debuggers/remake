@@ -1,4 +1,4 @@
-/* $Id: remake.c,v 1.15 2005/12/07 03:30:54 rockyb Exp $
+/* $Id: remake.c,v 1.16 2005/12/11 12:15:29 rockyb Exp $
 Basic dependency engine for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -19,17 +19,18 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#include "print.h"
-#include "read.h"
-#include "vpath.h"
-#include "remake.h"
-#include "implicit.h"
 #include "commands.h"
+#include "dbg_cmd.h"
+#include "debug.h"
 #include "expand.h"
 #include "function.h"
-#include "debug.h"
-#include "dbg_cmd.h"
+#include "implicit.h"
+#include "misc.h"
+#include "print.h"
+#include "read.h"
+#include "remake.h"
 #include "trace.h"
+#include "vpath.h"
 
 #ifndef	NO_ARCHIVES
 #include "ar_fns.h"
@@ -1418,7 +1419,7 @@ library_search (char **lib, FILE_TIMESTAMP *mtime_ptr)
       int save = warn_undefined_variables_flag;
       warn_undefined_variables_flag = 0;
 
-      libpatterns = xstrdup (variable_expand ("$(strip $(.LIBPATTERNS))"));
+      libpatterns = strdup (variable_expand ("$(strip $(.LIBPATTERNS))"));
 
       warn_undefined_variables_flag = save;
     }
@@ -1459,7 +1460,7 @@ library_search (char **lib, FILE_TIMESTAMP *mtime_ptr)
       mtime = name_mtime (libbuf);
       if (mtime != NONEXISTENT_MTIME)
 	{
-	  *lib = xstrdup (libbuf);
+	  *lib = strdup (libbuf);
 	  if (mtime_ptr != 0)
 	    *mtime_ptr = mtime;
 	  return true;
@@ -1499,7 +1500,7 @@ library_search (char **lib, FILE_TIMESTAMP *mtime_ptr)
 	  mtime = name_mtime (buf);
 	  if (mtime != NONEXISTENT_MTIME)
 	    {
-	      *lib = xstrdup (buf);
+	      *lib = strdup (buf);
 	      if (mtime_ptr != 0)
 		*mtime_ptr = mtime;
 	      return true;

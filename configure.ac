@@ -1,12 +1,12 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(remake,3.80+dbg-0.5,rocky@panix.com)
+AC_INIT(remake,3.80+dbg-0.6cvs,rocky@panix.com)
 
 AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.22 2005/12/09 08:39:37 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.23 2005/12/11 12:15:29 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -136,10 +136,10 @@ if test "$ac_cv_func_gettimeofday" = yes; then
 	    [Define if you have a standard gettimeofday function])
 fi
 
-AC_CHECK_FUNCS(	memcpy memmove strchr strdup mkstemp mktemp fdopen \
-	        bsd_signal dup2 getcwd sigsetmask sigaction getgroups \
-		seteuid setegid setlinebuf setreuid setregid setvbuf pipe \
-		strerror strsignal)
+AC_CHECK_FUNCS(	atexit bsd_signal dup2  fdopen getcwd getgroups \
+		memcpy memmove mkstemp mktemp pipe \
+		setegid seteuid setlinebuf setreuid setregid setvbuf \
+	        sigaction sigsetmask strchr strdup strerror strsignal )
 
 make_FUNC_SETVBUF_REVERSED
 
@@ -316,12 +316,6 @@ if test "$make_cv_sa_restart" != no; then
   AC_DEFINE(HAVE_SA_RESTART, 1,
      [Define if <signal.h> defines the SA_RESTART constant.])
 fi
-
-# enable make_cv_sa_restart for OS/2 so that the jobserver will be enabled,
-# but do it after HAVE_SA_RESTART has been defined.
-case "$host_os" in
-  os2*) make_cv_sa_restart=yes ;;
-esac
 
 case "$ac_cv_func_pipe/$ac_cv_func_sigaction/$make_cv_sa_restart/$has_wait_nohang/$make_cv_job_server" in
   yes/yes/yes/yes/yes)

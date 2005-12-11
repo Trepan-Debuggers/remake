@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.22 2005/12/07 03:30:54 rockyb Exp $
+/* $Id: job.c,v 1.23 2005/12/11 12:15:29 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005
 Free Software Foundation, Inc.
@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #include "debug.h"
 #include "expand.h"
 #include "job.h"
+#include "misc.h"
 #include "print.h"
 #include "remake.h"
 #include "remote-stub.h"
@@ -2038,7 +2039,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
       unixy_shell = _is_unixy_shell (shell);
       /* we must allocate a copy of shell: construct_command_argv() will free
        * shell after this function returns.  */
-      default_shell = xstrdup (shell);
+      default_shell = strdup (shell);
     }
   if (unixy_shell)
     {
@@ -2427,10 +2428,10 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
       /* create argv */
       new_argv = (char **) xmalloc(3 * sizeof (char *));
       if (unixy_shell) {
-        new_argv[0] = xstrdup (shell);
+        new_argv[0] = strdup (shell);
         new_argv[1] = *batch_filename_ptr; /* only argv[0] gets freed later */
       } else {
-        new_argv[0] = xstrdup (*batch_filename_ptr);
+        new_argv[0] = strdup (*batch_filename_ptr);
         new_argv[1] = NULL;
       }
       new_argv[2] = NULL;

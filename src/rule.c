@@ -18,9 +18,10 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 #include "config.h"
+#include "commands.h"
 #include "dep.h"
 #include "dir_fns.h"
-#include "commands.h"
+#include "misc.h"
 #include "print.h"
 #include "read.h"
 #include "rule.h"
@@ -393,7 +394,7 @@ install_pattern_rule (struct pspec *p, int terminal)
       r->cmds->fileinfo.lineno = 0;
       /* These will all be string literals, but we malloc space for them
 	 anyway because somebody might want to free them later.  */
-      r->cmds->commands = xstrdup (p->commands);
+      r->cmds->commands = strdup (p->commands);
       r->cmds->command_lines = 0;
     }
 }

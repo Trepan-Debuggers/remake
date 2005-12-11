@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.28 2005/12/10 02:50:32 rockyb Exp $
+/* $Id: main.c,v 1.29 2005/12/11 12:15:29 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -29,6 +29,7 @@ MA 02111-1307, USA.  */
 #include "print.h"
 #include "read.h"
 #include "remake.h"
+#include "misc.h"
 #include "variable.h"
 #include "commands.h"
 #include "rule.h"
@@ -660,7 +661,7 @@ enter_command_line_file (name)
       name[2] = '\0';
     }
 
-  return enter_file (xstrdup (name), NILF);
+  return enter_file (strdup (name), NILF);
 }
 
 #ifdef __CYGWIN__
@@ -787,7 +788,7 @@ find_and_set_default_shell (char *token)
   } else if (file_exists_p(search_token)) {
     /* search token path was found */
     sprintf(sh_path, "%s", search_token);
-    default_shell = xstrdup(w32ify(sh_path,0));
+    default_shell = strdup(w32ify(sh_path,0));
     DB (DB_VERBOSE,
         (_("find_and_set_shell setting default_shell = %s\n"), default_shell));
     sh_found = 1;
@@ -814,7 +815,7 @@ find_and_set_default_shell (char *token)
 
         if (dir_file_exists_p(p, search_token)) {
           sprintf(sh_path, "%s/%s", p, search_token);
-          default_shell = xstrdup(w32ify(sh_path,0));
+          default_shell = strdup(w32ify(sh_path,0));
           sh_found = 1;
           *ep = PATH_SEPARATOR_CHAR;
 
@@ -831,7 +832,7 @@ find_and_set_default_shell (char *token)
       /* be sure to check last element of Path */
       if (p && *p && dir_file_exists_p(p, search_token)) {
           sprintf(sh_path, "%s/%s", p, search_token);
-          default_shell = xstrdup(w32ify(sh_path,0));
+          default_shell = strdup(w32ify(sh_path,0));
           sh_found = 1;
       }
 
@@ -950,6 +951,10 @@ main (int argc, char **argv, char **envp)
       unixy_shell = strcaseequ (make_mode_env, "UNIX");
   }
 #endif /* __CYGWIN__ */
+
+#ifdef HAVE_ATEXIT
+  atexit (close_stdout);
+#endif
 
   global_argv = argv;
   /* Needed for OS/2 */
@@ -1115,7 +1120,7 @@ main (int argc, char **argv, char **envp)
       directory_before_chdir = 0;
     }
   else
-    directory_before_chdir = xstrdup (current_directory);
+    directory_before_chdir = strdup (current_directory);
 #ifdef  __MSDOS__
   /* Make sure we will return to the initial directory, come what may.  */
   atexit (msdos_return_to_initial_directory);
@@ -1307,7 +1312,7 @@ main (int argc, char **argv, char **envp)
   if (strpbrk(argv[0], "/:\\") ||
       strstr(argv[0], "..") ||
       strneq(argv[0], "//", 2))
-    argv0 = xstrdup(w32ify(argv[0],1));
+    argv0 = strdup(w32ify(argv[0],1));
   else 
     argv0 = strdup(argv[0]);
 #elsif defined (__MSDOS__)
@@ -1532,7 +1537,7 @@ main (int argc, char **argv, char **envp)
 
 	    /* Replace the name that read_all_makefiles will
 	       see with the name of the temporary file.  */
-            makefiles->list[i] = xstrdup (stdin_nm);
+            makefiles->list[i] = strdup (stdin_nm);
 
 	    /* Make sure the temporary file will not be remade.  */
 	    f = enter_file (stdin_nm, NILF);

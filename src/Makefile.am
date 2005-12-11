@@ -26,7 +26,7 @@ noinst_HEADERS = ar_fns.h arscan.h commands.h \
 	         dbg_break.h dbg_cmd.h dbg_fns.h dbg_stack.h \
 	         debug.h default.h dep.h dir_fns.h expand.h file.h \
 	         function.h getopt.h gettext.h hash.h implicit.h job.h \
-		 make.h print.h read.h remake.h remote-stub.h rule.h \
+		 make.h misc.h print.h read.h remake.h remote-stub.h rule.h \
 		 trace.h types.h variable.h  vpath.h
 
 make_LDADD =	@LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@ @LIBINTL@

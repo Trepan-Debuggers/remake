@@ -1,4 +1,4 @@
-/* $Id: make.h,v 1.18 2005/12/10 02:50:32 rockyb Exp $
+/* $Id: make.h,v 1.19 2005/12/11 12:15:29 rockyb Exp $
 Miscellaneous global declarations and portability cruft for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -144,7 +144,6 @@ extern int errno;
 # define NEED_GET_PATH_MAX 1
 # define GET_PATH_MAX   (get_path_max ())
 # define PATH_VAR(var)  char *var = (char *) alloca (GET_PATH_MAX)
-extern unsigned int get_path_max (void);
 #endif
 
 #ifndef CHAR_BIT
@@ -319,7 +318,6 @@ extern int no_default_sh_exe;
 /* is default_shell unixy? */
 extern int unixy_shell;
 
-extern char *end_of_token_w32();
 extern int find_and_set_default_shell(char *token);
 #endif /* __CYGWIN__ */
 
@@ -335,7 +333,6 @@ extern char path_separator_char_;
 extern void sync_Path_environment(void);
 extern int kill(int pid, int sig);
 extern int safe_stat(char *file, struct stat *sb);
-extern char *end_of_token_w32(char *s, char stopchar);
 extern int find_and_set_default_shell(char *token);
 
 /** indicates whether or not we have Bourne shell */
@@ -356,26 +353,16 @@ extern bool unixy_shell;
 #define REALLOC(o, t, n) ((t *) xrealloc ((void *) (o), sizeof (t) * (n)))
 
 extern void die (int) __attribute__ ((noreturn));
-extern char *savestring (const char *, unsigned int);
 extern char *concat (const char *, const char *, const char *);
 extern char *xmalloc (unsigned int);
 extern char *xrealloc (char *, unsigned int);
-extern char *xstrdup (const char *);
-extern char *find_next_token (char **, unsigned int *);
-extern char *next_token (const char *);
-extern char *end_of_token (const char *);
 extern void collapse_continuations (char *);
-extern void remove_comments (char *);
-extern char *sindex (const char *, unsigned int, \
-		     const char *, unsigned int);
 extern char *lindex (const char *, const char *, int);
 extern int alpha_compare (const void *, const void *);
 extern void print_spaces (unsigned int);
 extern FILE *open_tmpfile (char **, const char *);
 
-extern void user_access (void);
 extern void make_access (void);
-extern void child_access (void);
 
 #ifdef  HAVE_VFORK_H
 # include <vfork.h>

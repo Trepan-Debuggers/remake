@@ -1,0 +1,29 @@
+#                                                                    -*-perl-*-
+# $Id: write,v 1.1 2005/12/11 12:15:29 rockyb Exp $
+
+$description = "The following test checks that writing to a full filesystem
+gives an error.";
+
+$details = "We use issue \"make --print-data-base\",  redirect
+output to /dev/full and check for a non-zero return code /dev/full.\n";
+
+return -1 if $port_type ne 'UNIX';
+
+open(MAKEFILE,"> $makefile");
+
+print MAKEFILE <<EOF;
+a: ;
+EOF
+
+close(MAKEFILE);
+
+if (run_make_with_options($makefile, "--print-data-base", '/dev/full',
+			  256)) {
+    ++$tests_passed;
+    $suite_passed = 1;
+} else {
+    $suite_passed = 0;
+}
+++$tests_run;
+
+1;

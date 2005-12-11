@@ -1,4 +1,4 @@
-/* $Id: dir_fns.c,v 1.1 2005/12/07 03:30:54 rockyb Exp $
+/* $Id: dir_fns.c,v 1.2 2005/12/11 12:15:29 rockyb Exp $
 Directory hashing for GNU Make.
 Copyright (C) 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -19,11 +19,9 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#include "config.h"
-
+#include "misc.h"
 #include "ar_fns.h"
 #include "hash.h"
-#include "make.h"
 
 #ifdef	HAVE_STDLIB_H
 #include <stdlib.h>
@@ -406,7 +404,7 @@ find_directory (char *name)
 	      /* Enter it in the contents hash table.  */
 	      dc->dev = st.st_dev;
 #ifdef WINDOWS32
-              dc->path_key = xstrdup (w32_path);
+              dc->path_key = strdup (w32_path);
 	      dc->ctime = st.st_ctime;
               dc->mtime = st.st_mtime;
 
@@ -713,7 +711,7 @@ file_impossible (char *psz_filename)
   /* Make a new entry and put it in the table.  */
 
   new = (struct dirfile *) xmalloc (sizeof (struct dirfile));
-  new->name = xstrdup (psz_filename);
+  new->name = strdup (psz_filename);
   new->length = strlen (psz_filename);
   new->impossible = 1;
   hash_insert (&dir->contents->dirfiles, new);

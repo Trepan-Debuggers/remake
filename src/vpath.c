@@ -18,14 +18,15 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 #include "dir_fns.h"
-#include "print.h"
-#include "read.h"
-#include "vpath.h"
 #include "function.h"
 #include "expand.h"
+#include "misc.h"
 #ifdef WINDOWS32
 #include "pathstuff.h"
 #endif
+#include "print.h"
+#include "read.h"
+#include "vpath.h"
 
 
 /* Structure used to represent a selective VPATH searchpath.  */
@@ -172,7 +173,7 @@ construct_vpath_list (char *pattern, char *dirpath)
 
   if (pattern != 0)
     {
-      pattern = xstrdup (pattern);
+      pattern = strdup (pattern);
       percent = find_percent (pattern);
     }
 

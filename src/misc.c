@@ -1,6 +1,8 @@
-/* Miscellaneous generic support functions for GNU Make.
+/* $Id: misc.c,v 1.5 2005/12/11 12:15:29 rockyb Exp $
+
+Miscellaneous generic support functions for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1997,
-2002 Free Software Foundation, Inc.
+2002, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -18,11 +20,12 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#include "debug.h"
+#include "dbg_cmd.h"
+#include "misc.h"
 #include "print.h"
 #include "read.h"
-#include "debug.h"
 #include "trace.h"
-#include "dbg_cmd.h"
 
 /* Variadic functions.  We go through contortions to allow proper function
    prototypes for both ANSI and pre-ANSI C compilers, and also for those
@@ -152,22 +155,6 @@ collapse_continuations (char *line)
 
   *out = '\0';
 }
-
-
-/* Remove comments from LINE.
-   This is done by copying the text at LINE onto itself.  */
-
-void
-remove_comments (char *line)
-{
-  char *comment;
-
-  comment = find_char_unquote (line, '#', 0, 0);
-
-  if (comment != 0)
-    /* Cut off the line at the #.  */
-    *comment = '\0';
-}
 
 /* Print N spaces (used in debug for target-depth).  */
 
@@ -212,7 +199,6 @@ concat (const char *s1, const char *s2, const char *s3)
 
 #undef xmalloc
 #undef xrealloc
-#undef xstrdup
 
 char *
 xmalloc (unsigned int size)
@@ -239,28 +225,6 @@ xrealloc (char *ptr, unsigned int size)
   return result;
 }
 
-
-char *
-xstrdup (const char *ptr)
-{
-  char *result;
-
-#ifdef HAVE_STRDUP
-  result = strdup (ptr);
-#else
-  result = (char *) malloc (strlen (ptr) + 1);
-#endif
-
-  if (result == 0)
-    fatal (NILF, _("virtual memory exhausted"));
-
-#ifdef HAVE_STRDUP
-  return result;
-#else
-  return strcpy(result, ptr);
-#endif
-}
-
 #endif  /* HAVE_DMALLOC_H */
 
 char *
@@ -273,41 +237,12 @@ savestring (const char *str, unsigned int length)
   return out;
 }
 
-/* Search string BIG (length BLEN) for an occurrence of
-   string SMALL (length SLEN).  Return a pointer to the
-   beginning of the first occurrence, or return nil if none found.  */
 
-char *
-sindex (const char *big, unsigned int blen,
-        const char *small, unsigned int slen)
-{
-  if (!blen)
-    blen = strlen (big);
-  if (!slen)
-    slen = strlen (small);
-
-  if (slen && blen >= slen)
-    {
-      unsigned int b;
-
-      /* Quit when there's not enough room left for the small string.  */
-      --slen;
-      blen -= slen;
-
-      for (b = 0; b < blen; ++b, ++big)
-        if (*big == *small && strneq (big + 1, small + 1, slen))
-          return (char *)big;
-    }
-
-  return 0;
-}
-
-/* Limited INDEX:
-   Search through the string STRING, which ends at LIMIT, for the character C.
-   Returns a pointer to the first occurrence, or nil if none is found.
-   Like INDEX except that the string searched ends where specified
-   instead of at the first null.  */
-
+/*! Limited INDEX:
+  Search through the string STRING, which ends at LIMIT, for the character C.
+  Returns a pointer to the first occurrence, or nil if none is found.
+  Like INDEX except that the string searched ends where specified
+  instead of at the first null.  */
 char *
 lindex (const char *s, const char *limit, int c)
 {
@@ -358,7 +293,7 @@ end_of_token_w32 (char *s, char stopchar)
 }
 #endif
 
-/* Return the address of the first nonwhitespace or null in the string S.  */
+/*! Return the address of the first nonwhitespace or null in the string S.  */
 
 char *
 next_token (const char *s)
@@ -368,8 +303,8 @@ next_token (const char *s)
   return (char *)s;
 }
 
-/* Find the next token in PTR; return the address of it, and store the
-   length of the token into *LENGTHPTR if LENGTHPTR is not nil.  */
+/*! Find the next token in PTR; return the address of it, and store the
+  length of the token into *LENGTHPTR if LENGTHPTR is not nil.  */
 
 char *
 find_next_token (char **ptr, unsigned int *lengthptr)
@@ -533,8 +468,8 @@ user_access (void)
 #endif	/* GETLOADAVG_PRIVILEGED */
 }
 
-/* Give the process appropriate permissions for access to
-   make data (i.e., the load average).  */
+/*! Give the process appropriate permissions for access to
+  make data (i.e., the load average).  */
 void
 make_access (void)
 {
@@ -581,8 +516,8 @@ make_access (void)
 #endif	/* GETLOADAVG_PRIVILEGED */
 }
 
-/* Give the process appropriate permissions for a child process.
-   This is like user_access, but you can't get back to make_access.  */
+/*! Give the process appropriate permissions for a child process.
+  This is like user_access, but you can't get back to make_access.  */
 void
 child_access (void)
 {
@@ -633,3 +568,49 @@ get_path_max (void)
   return value;
 }
 #endif
+
+
+/* This code is stolen from gnulib. Consider migrating to using
+   gnulib directly.
+
+   This is called only through atexit(), which means die() has already been
+   invoked.  So, call exit() here directly.  Apparently that works...?
+*/
+
+/*! Close standard output, exiting with status 'exit_failure' on
+   failure.  If a program writes *anything* to stdout, that program
+   should close stdout and make sure that it succeeds before exiting.
+   Otherwise, suppose that you go to the extreme of checking the
+   return status of every function that does an explicit write to
+   stdout.  The last printf can succeed in writing to the internal
+   stream buffer, and yet the fclose(stdout) could still fail (due
+   e.g., to a disk full error) when it tries to write out that
+   buffered data.  Thus, you would be left with an incomplete output
+   file and the offending program would exit successfully.  Even
+   calling fflush is not always sufficient, since some file systems
+   (NFS and CODA) buffer written/flushed data until an actual close
+   call.
+
+   Besides, it's wasteful to check the return value from every call
+   that writes to stdout -- just let the internal stream state record
+   the failure.  That's what the ferror test is checking below.
+
+   It's important to detect such failures and exit nonzero because many
+   tools (most notably `make' and other build-management systems) depend
+   on being able to detect failure in other tools via their exit status.  */
+
+void
+close_stdout (void)
+{
+  int prev_fail = ferror (stdout);
+  int fclose_fail = fclose (stdout);
+
+  if (prev_fail || fclose_fail)
+    {
+      if (fclose_fail)
+        error (NILF, _("write error: %s"), strerror (errno));
+      else
+        error (NILF, _("write error"));
+      exit (EXIT_FAILURE);
+    }
+}

@@ -1,4 +1,4 @@
-/* $Id: variable.c,v 1.16 2005/12/10 02:50:32 rockyb Exp $
+/* $Id: variable.c,v 1.17 2005/12/11 12:15:29 rockyb Exp $
 Internals of variables for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -19,13 +19,14 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#include "print.h"
-#include "variable.h"
+#include "commands.h"
 #include "debug.h"
 #include "dep.h"
 #include "expand.h"
-#include "commands.h"
+#include "misc.h"
+#include "print.h"
 #include "rule.h"
+#include "variable.h"
 
 #ifdef WINDOWS32
 #include "pathstuff.h"
@@ -235,7 +236,7 @@ define_variable_in_set (const char *name, unsigned int length,
 	{
 	  if (v->value != 0)
 	    free (v->value);
-	  v->value = xstrdup (value);
+	  v->value = strdup (value);
           if (p_floc != 0)
             v->fileinfo = *p_floc;
           else
@@ -252,7 +253,7 @@ define_variable_in_set (const char *name, unsigned int length,
   v->name = savestring (name, length);
   v->length = length;
   hash_insert_at (&set->table, v, var_slot);
-  v->value = xstrdup (value);
+  v->value = strdup (value);
   if (p_floc != 0)
     v->fileinfo = *p_floc;
   else
@@ -681,7 +682,7 @@ define_automatic_variables (void)
     {
       free (v->value);
       v->origin = o_file;
-      v->value = xstrdup (default_shell);
+      v->value = strdup (default_shell);
     }
 #endif
 

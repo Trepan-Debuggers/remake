@@ -1,4 +1,4 @@
-/* $Id: function.c,v 1.16 2005/12/10 02:50:32 rockyb Exp $
+/* $Id: function.c,v 1.17 2005/12/11 12:15:29 rockyb Exp $
 Builtin expansion for GNU Make.
 Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004, 2005
 Free Software Foundation, Inc.
@@ -20,14 +20,15 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 #include "config.h"
+#include "commands.h"
 #include "debug.h"
 #include "dep.h"
 #include "dir_fns.h"
 #include "expand.h"
 #include "function.h"
+#include "misc.h"
 #include "print.h"
 #include "read.h"
-#include "commands.h"
 
 /* alloca is in stdlib.h or alloca.h */
 #ifdef HAVE_STDLIB_H
@@ -115,7 +116,7 @@ subst_expand (char *o, char *text, char *subst, char *replace,
 	p = end_of_token (next_token (t));
       else
 	{
-	  p = sindex (t, tlen, subst, slen);
+	  p = strstr (t, subst);
 	  if (p == 0)
 	    {
 	      /* No more matches.  Output everything left on the end.  */
@@ -797,9 +798,8 @@ static char*
 func_findstring (char *o, char **argv, const char *funcname UNUSED)
 {
   /* Find the first occurrence of the first string in the second.  */
-  int i = strlen (argv[0]);
-  if (sindex (argv[1], 0, argv[0], i) != 0)
-    o = variable_buffer_output (o, argv[0], i);
+  if (strstr (argv[1], argv[0]) != 0)
+    o = variable_buffer_output (o, argv[0], strlen (argv[0]));
 
   return o;
 }
@@ -831,7 +831,7 @@ func_foreach (char *o, char **argv, const char *funcname UNUSED)
 
 	p[len] = '\0';
 	free (var->value);
-	var->value = (char *) xstrdup ((char*) p);
+	var->value = (char *) strdup ((char*) p);
 	p[len] = save;
       }
 

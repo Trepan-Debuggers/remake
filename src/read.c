@@ -1,4 +1,4 @@
-/* $Id: read.c,v 1.21 2005/12/07 03:30:54 rockyb Exp $
+/* $Id: read.c,v 1.22 2005/12/11 12:15:29 rockyb Exp $
 Reading and parsing of makefiles for GNU Make.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
@@ -29,6 +29,7 @@ Boston, MA 02111-1307, USA.  */
 #include "dir_fns.h"
 #include "expand.h"
 #include "function.h"
+#include "misc.h"
 #include "rule.h"
 #include "print.h"
 #include "read.h"
@@ -148,11 +149,14 @@ static void record_files (nameseq_t *filenames, char *pattern,
 			  int have_sysv_atvar,
 			  const floc_t *flocp, int set_default);
 static void record_target_var (nameseq_t *filenames, char *defn,
-                                       variable_origin_t origin,
-                                       bool b_exported,
-                                       const floc_t *flocp);
+			       variable_origin_t origin,
+			       bool b_exported,
+			       const floc_t *flocp);
 static make_word_t get_next_mword (char *buffer, char *delim,
-                        char **startp, unsigned int *length);
+				   char **startp, unsigned int *length);
+
+static void remove_comments (char *line);
+
 
 /* Read in all the makefiles and return the chain of their names.  */
 
@@ -195,7 +199,7 @@ read_all_makefiles (char **makefiles)
       {
 	if (*p != '\0')
 	  *p++ = '\0';
-        name = xstrdup (name);
+        name = strdup (name);
 	if ( eval_makefile (name, RM_NO_DEFAULT_GOAL|RM_INCLUDED|RM_DONTCARE) 
 	     < 2 )
           free (name);
@@ -376,7 +380,7 @@ eval_makefile (char *filename, int flags)
   deps->file = lookup_file (filename);
   if (deps->file == 0)
     {
-      deps->file = enter_file (xstrdup (filename), NILF);
+      deps->file = enter_file (strdup (filename), NILF);
       if (flags & RM_DONTCARE)
 	deps->file->dontcare = 1;
     }
@@ -1295,6 +1299,20 @@ eval (ebuffer_t *ebuf, int set_default)
   return 1;
 }
 
+/* Remove comments from LINE.
+   This is done by copying the text at LINE onto itself.  */
+static void
+remove_comments (char *line)
+{
+  char *comment;
+
+  comment = find_char_unquote (line, '#', 0, 0);
+
+  if (comment != 0)
+    /* Cut off the line at the #.  */
+    *comment = '\0';
+}
+
 
 /* Execute a `define' directive.
    The first line has already been read, and NAME is the name of
@@ -1669,7 +1687,7 @@ record_target_var (nameseq_t *filenames, char *defn,
           p = create_pattern_var (name, percent);
           p->variable.fileinfo = *flocp;
           v = parse_variable_definition (&p->variable, defn);
-          v->value = xstrdup (v->value);
+          v->value = strdup (v->value);
           if (!v)
             error (flocp, _("Malformed pattern-specific variable definition"));
           fname = p->target;
@@ -1716,7 +1734,7 @@ record_target_var (nameseq_t *filenames, char *defn,
             {
               if (v->value != 0)
                 free (v->value);
-              v->value = xstrdup (gv->value);
+              v->value = strdup (gv->value);
               v->origin = gv->origin;
               v->recursive = gv->recursive;
               v->append = 0;
@@ -2906,7 +2924,7 @@ tilde_expand (char *name)
       if (pwent != 0)
 	{
 	  if (userend == 0)
-	    return xstrdup (pwent->pw_dir);
+	    return strdup (pwent->pw_dir);
 	  else
 	    return concat (pwent->pw_dir, "/", userend + 1);
 	}
@@ -3027,7 +3045,7 @@ multi_glob (nameseq_t *chain, unsigned int size)
                     if (size > sizeof (nameseq_t))
                       memset (((char *) elt) + sizeof (nameseq_t),
 			      0, size - sizeof (nameseq_t));
-		    elt->name = xstrdup (gl.gl_pathv[i]);
+		    elt->name = strdup (gl.gl_pathv[i]);
 		    elt->next = new;
 		    new = elt;
 		  }

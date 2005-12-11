@@ -1,4 +1,4 @@
-/* $Id: implicit.c,v 1.8 2005/12/07 03:30:54 rockyb Exp $
+/* $Id: implicit.c,v 1.9 2005/12/11 12:15:29 rockyb Exp $
 Implicit rule searching for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,97,2000, 2004, 2005
 Free Software Foundation, Inc.
@@ -24,6 +24,7 @@ Boston, MA 02111-1307, USA.  */
 #include "debug.h"
 #include "dep.h"
 #include "dir_fns.h"
+#include "misc.h"
 #include "print.h"
 #include "implicit.h"
 #include "rule.h"
@@ -415,7 +416,7 @@ pattern_search (file_t *file, int archive,
 		  || ((!dep->changed || check_lastslash) && file_exists_p (p)))
 		{
 		  found_files_im[deps_found] = dep->ignore_mtime;
-		  found_files[deps_found++] = xstrdup (p);
+		  found_files[deps_found++] = strdup (p);
 		  continue;
 		}
 	      /* This code, given FILENAME = "lib/foo.o", dependency name
@@ -450,7 +451,7 @@ pattern_search (file_t *file, int archive,
 		  if (pattern_search (intermediate_file, 0, depth + 1,
 				      recursions + 1))
 		    {
-		      p = xstrdup (p);
+		      p = strdup (p);
 		      intermediate_patterns[deps_found]
 			= intermediate_file->name;
 		      intermediate_file->name = p;
@@ -460,7 +461,7 @@ pattern_search (file_t *file, int archive,
 		      /* Allocate an extra copy to go in FOUND_FILES,
 			 because every elt of FOUND_FILES is consumed
 			 or freed later.  */
-		      found_files[deps_found++] = xstrdup (p);
+		      found_files[deps_found++] = strdup (p);
 		      continue;
 		    }
 

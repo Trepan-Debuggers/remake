@@ -1,4 +1,4 @@
-/* $Id: expand.c,v 1.9 2005/12/10 02:50:32 rockyb Exp $
+/* $Id: expand.c,v 1.10 2005/12/11 12:15:29 rockyb Exp $
 Variable expansion functions for GNU Make.
 Copyright (C) 1988, 89, 91, 92, 93, 95, 
 2004, 2005 Free Software Foundation, Inc.
@@ -432,7 +432,7 @@ expand_argument (const char *str, const char *end)
   char *tmp;
 
   if (str == end)
-    return xstrdup("");
+    return strdup("");
 
   if (!end || *end == '\0')
     return allocated_variable_expand ((char *)str);

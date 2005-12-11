@@ -1,4 +1,4 @@
-/* $Id: function.h,v 1.6 2005/12/09 12:11:09 rockyb Exp $
+/* $Id: function.h,v 1.7 2005/12/11 12:15:29 rockyb Exp $
 Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004, 2005
 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -25,6 +25,8 @@ Boston, MA 02111-1307, USA.  */
 
 #ifndef FUNCTION_H
 #define FUNCTION_H
+
+#include "make.h"
 
 /*!
   Replace all carriage returns and linefeeds with spaces.
