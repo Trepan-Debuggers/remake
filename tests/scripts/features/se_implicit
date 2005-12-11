@@ -12,6 +12,7 @@ $dir =~ s,.*/([^/]+)$,../$1,;
 # Test #1: automatic variables.
 #
 run_make_test('
+.SECONDEXPANSION:
 .DEFAULT: ; @echo $@
 
 foo.a: bar baz
@@ -60,6 +61,7 @@ buz
 # Test #2: target/pattern -specific variables.
 #
 run_make_test('
+.SECONDEXPANSION:
 foo.x:
 
 foo.%: $$(%_a) $$(%_b) bar
@@ -81,6 +83,7 @@ baz
 # Test #3: order of prerequisites.
 #
 run_make_test('
+.SECONDEXPANSION:
 .DEFAULT: ; @echo $@
 
 all: foo bar baz
@@ -132,6 +135,7 @@ baz.2
 # Test #4: stem splitting logic.
 #
 run_make_test('
+.SECONDEXPANSION:
 $(dir)/tmp/bar.o:
 
 $(dir)/tmp/foo/bar.c: ; @echo $@
@@ -153,6 +157,7 @@ $dir/tmp/bar.o: {$dir/tmp/foo/bar.c} $dir/tmp/foo/bar.c $dir/tmp/bar/bar.c foo.h
 # Test #5: stem splitting logic and order-only prerequisites.
 #
 run_make_test('
+.SECONDEXPANSION:
 $(dir)/tmp/foo.o: $(dir)/tmp/foo.c
 $(dir)/tmp/foo.c: ; @echo $@
 bar.h: ; @echo $@
@@ -171,6 +176,7 @@ $dir/tmp/foo.o: {$dir/tmp/foo.c} {bar.h} $dir/tmp/foo.c
 # Test #6: lack of implicit prerequisites.
 #
 run_make_test('
+.SECONDEXPANSION:
 foo.o: foo.c
 foo.c: ; @echo $@
 
@@ -186,6 +192,7 @@ foo.o: {foo.c} foo.c
 # Test #7: Test stem from the middle of the name.
 #
 run_make_test('
+.SECONDEXPANSION:
 foobarbaz:
 
 foo%baz: % $$*.1
@@ -204,6 +211,7 @@ bar
 # Test #8: Make sure stem triple-expansion does not happen.
 #
 run_make_test('
+.SECONDEXPANSION:
 foo$$bar:
 
 f%r: % $$*.1

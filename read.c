@@ -2131,11 +2131,7 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
       targets[target_idx] = 0;
       target_percents[target_idx] = 0;
       if (deps)
-	{
-	  deps->need_2nd_expansion = second_expansion;
-	  /* We set this to indicate the prereq string hasn't been parsed.  */
-	  deps->staticpattern = 1;
-	}
+        deps->need_2nd_expansion = second_expansion;
       create_pattern_rule (targets, target_percents, two_colon, deps, cmds, 1);
       free ((char *) target_percents);
     }
