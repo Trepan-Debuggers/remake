@@ -1,3 +1,10 @@
+2005-12-11  Paul D. Smith  <psmith@gnu.org>
+
+	* implicit.c (pattern_search): If 2nd expansion is not set for
+	this implicit rule, replace the pattern with the stem directly,
+	and don't re-expand the variable list.  Along with the other
+	.SECONDEXPANSION changes below, fixes bug #13781.
+
 2005-12-09  Boris Kolpackov  <boris@kolpackov.net>
 
 	* implicit.c (pattern_search): Mark other files that this rule

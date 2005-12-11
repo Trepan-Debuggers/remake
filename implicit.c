@@ -502,41 +502,71 @@ pattern_search (struct file *file, int archive,
                   if (p == 0)
                     break; /* No more words */
 
-                  /* If the dependency name has %, substitute the stem.
-                     Watch out, we are going to do something tricky here. If
-                     we just replace % with the stem value, later, when we do
-                     the second expansion, we will re-expand this stem value
-                     once again. This is not good especially if you have
-                     certain characters in your stem (like $).
-
-                     Instead, we will replace % with $* and allow the second
-                     expansion to take care of it for us. This way (since $*
-                     is a simple variable) there won't be additional
-                     re-expansion of the stem.  */
+                  /* Is there a pattern in this prerequisite?  */
 
                   for (p2 = p; p2 < p + len && *p2 != '%'; ++p2)
                     ;
 
-                  if (p2 < p + len)
+                  if (dep->need_2nd_expansion)
                     {
-                      register unsigned int i = p2 - p;
-                      bcopy (p, depname, i);
-                      bcopy ("$*", depname + i, 2);
-                      bcopy (p2 + 1, depname + i + 2, len - i - 1);
-                      depname[len + 2 - 1] = '\0';
+                      /* If the dependency name has %, substitute the stem.
 
-                      if (check_lastslash)
-                        add_dir = 1;
+                         Watch out, we are going to do something tricky
+                         here. If we just replace % with the stem value,
+                         later, when we do the second expansion, we will
+                         re-expand this stem value once again. This is not
+                         good especially if you have certain characters in
+                         your stem (like $).
 
-                      had_stem = 1;
+                         Instead, we will replace % with $* and allow the
+                         second expansion to take care of it for us. This way
+                         (since $* is a simple variable) there won't be
+                         additional re-expansion of the stem.  */
+
+                      if (p2 < p + len)
+                        {
+                          register unsigned int i = p2 - p;
+                          bcopy (p, depname, i);
+                          bcopy ("$*", depname + i, 2);
+                          bcopy (p2 + 1, depname + i + 2, len - i - 1);
+                          depname[len + 2 - 1] = '\0';
+
+                          if (check_lastslash)
+                            add_dir = 1;
+
+                          had_stem = 1;
+                        }
+                      else
+                        {
+                          bcopy (p, depname, len);
+                          depname[len] = '\0';
+                        }
+
+                      p2 = variable_expand_for_file (depname, file);
                     }
                   else
                     {
-                      bcopy (p, depname, len);
-                      depname[len] = '\0';
-                    }
+                       if (p2 < p + len)
+                        {
+                          register unsigned int i = p2 - p;
+                          bcopy (p, depname, i);
+                          bcopy (stem_str, depname + i, stemlen);
+                          bcopy (p2 + 1, depname + i + stemlen, len - i - 1);
+                          depname[len + stemlen - 1] = '\0';
 
-                  p2 = variable_expand_for_file (depname, file);
+                          if (check_lastslash)
+                            add_dir = 1;
+
+                          had_stem = 1;
+                        }
+                      else
+                        {
+                          bcopy (p, depname, len);
+                          depname[len] = '\0';
+                        }
+
+                       p2 = depname;
+                    }
 
                   /* Parse the dependencies. */
 

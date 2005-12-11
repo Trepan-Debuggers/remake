@@ -1,3 +1,9 @@
+2005-12-11  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/misc/general4: Test implicit rules with '$' in the
+	prereq list & prereq patterns.
+	* scripts/features/se_implicit: Add in .SECONDEXPANSION settings.
+
 2005-12-09  Boris Kolpackov  <boris@kolpackov.net>
 
 	* scripts/features/patternrules: Add a test for bug #13022.
