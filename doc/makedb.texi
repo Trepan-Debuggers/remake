@@ -676,8 +676,8 @@ makedb<1> @b{info locals}
 @end smallexample
 
 The target ``all'' doesn't have any commands associated with it. If we
-@code{next} to a target that does, we can variables to see a full
-expansion of the commands that is about to be run:
+@code{next} to a target that does, we can see a full expansion of the
+command that is about to be run:
 
 @smallexample
 @group
