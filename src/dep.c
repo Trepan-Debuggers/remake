@@ -35,7 +35,7 @@ copy_dep_chain (dep_t *p_dep)
   dep_t *p_lastnew  = NULL;
 
   for ( ; p_dep ; p_dep = p_dep->next) {
-    c = (dep_t *) xmalloc (sizeof (dep_t));
+    c = CALLOC(dep_t, 1);
     memmove ((char *) c, (char *) p_dep, sizeof (dep_t));
     if (c->name != 0)
       c->name = strdup (c->name);
@@ -50,12 +50,57 @@ copy_dep_chain (dep_t *p_dep)
   return p_firstnew;
 }
 
+/*! Convert name sequence p_nameseq, into to a dependency chain
+  as the old one and return that.  The return value is malloc'd. The
+  caller must thus free it. p_nameseq is free'd.
+ */
+dep_t *
+nameseq_to_dep_chain (nameseq_t *p_nameseq) 
+{
+
+  if (!p_nameseq) return NULL;
+  else {
+    nameseq_t *p_nameseq_next;
+    dep_t *p_firstnew = NULL;
+    dep_t *p_lastnew  = NULL;
+    dep_t *c;
+  
+    for ( ; p_nameseq ; p_nameseq = p_nameseq_next) {
+      p_nameseq_next = p_nameseq->next;
+      c = CALLOC(dep_t, 1);
+
+      c->name = p_nameseq->name;
+
+      if (!p_firstnew)
+	p_firstnew = p_lastnew = c;
+      else
+	p_lastnew = p_lastnew->next = c;
+      
+      free(p_nameseq);
+    }
+    return p_firstnew;
+  }
+}
+
+
+/*! Free all p_namseq memory.  */
+void
+nameseq_free(nameseq_t *p_nameseq)
+{
+  nameseq_t *p_nameseq_next;
+
+  for ( ; p_nameseq; p_nameseq = p_nameseq_next) {
+    p_nameseq_next = p_nameseq->next;
+    free(p_nameseq->name);
+    free(p_nameseq);
+  }
+}
 /*! Copy dependency chain making a new chain with the same contents
   as the old one and return that.  The return value is malloc'd. The
   caller must thus free it.
  */
 void
-free_dep_chain (dep_t *p_dep)
+dep_chain_free (dep_t *p_dep)
 {
   dep_t *p_dep_next;
 
@@ -221,7 +266,7 @@ dep_hash_cmp (const void *x, const void *y)
      remove the one that isn't and keep the one that is.  */
 
   if (!cmp && dx->ignore_mtime != dy->ignore_mtime)
-    dx->ignore_mtime = dy->ignore_mtime = 0;
+    dx->ignore_mtime = dy->ignore_mtime = false;
 
   return cmp;
 }

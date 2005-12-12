@@ -1,4 +1,4 @@
-/* $Id: dep.h,v 1.6 2005/12/10 02:50:32 rockyb Exp $
+/* $Id: dep.h,v 1.7 2005/12/12 01:04:59 rockyb Exp $
 Copyright (C) 1988, 1989, 1991, 1992, 1993, 1996, 2004, 2005
 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -42,15 +42,14 @@ Boston, MA 02111-1307, USA.  */
 /** \brief Structure representing one dependency of a file.  Each
    struct file's `deps' points to a chain of these, chained through
    the `next'.
-
-   Note that the first two words of this match a struct nameseq.  */
+*/
 
 struct dep {
   dep_t *next;
   char *name;
-  struct file *file;
+  file_t *file;
   unsigned int changed : 8;
-  unsigned int ignore_mtime : 1;
+  bool ignore_mtime;
 };
 
 /** \brief Structure used in chains of names, for parsing and globbing.  */
@@ -78,7 +77,17 @@ extern int all_secondary;
 dep_t *copy_dep_chain (dep_t *p_dep);
 
 /*! Free memory associated with a dependency chain.  */
-void free_dep_chain (dep_t *p_dep);
+extern void dep_chain_free (dep_t *p_dep);
+
+/*! Free all p_namseq memory.  */
+extern void nameseq_free(nameseq_t *p_nameseq);
+
+/*! Convert name sequence p_nameseq, into to a dependency chain
+  as the old one and return that.  The return value is malloc'd. The
+  caller must thus free it. p_nameseq is free'd.
+ */
+extern dep_t * nameseq_to_dep_chain (nameseq_t *p_nameseq);
+
 
 dep_t *read_all_makefiles (char **makefiles);
 

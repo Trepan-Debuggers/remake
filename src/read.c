@@ -1,4 +1,4 @@
-/* $Id: read.c,v 1.22 2005/12/11 12:15:29 rockyb Exp $
+/* $Id: read.c,v 1.23 2005/12/12 01:04:59 rockyb Exp $
 Reading and parsing of makefiles for GNU Make.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
@@ -256,10 +256,8 @@ read_all_makefiles (char **makefiles)
 	  for (p = default_makefiles; *p != 0; ++p)
 	    {
 	      dep_t *d = CALLOC(dep_t, 1);
-	      d->name = 0;
 	      d->file = enter_file (*p, NILF);
 	      d->file->dontcare = 1;
-              d->ignore_mtime = 0;
 	      /* Tell update_goal_chain to bail out as soon as this file is
 		 made, and main not to die if we can't make this file.  */
 	      d->changed = RM_DONTCARE;
@@ -373,7 +371,7 @@ eval_makefile (char *filename, int flags)
     }
 
   /* Add FILENAME to the chain of read makefiles.  */
-  deps = (dep_t *) xmalloc (sizeof (dep_t));
+  deps = CALLOC(dep_t, 1);
   deps->next = read_makefiles;
   read_makefiles = deps;
   deps->name = 0;
@@ -539,6 +537,7 @@ eval (ebuffer_t *ebuf, int set_default)
       int len;
       char *p;
       char *p2;
+      nameseq_t *p_nameseq;
 
       /* Grab the next line to be evaluated */
       ebuf->floc.lineno += nlines;
@@ -1173,23 +1172,6 @@ eval (ebuffer_t *ebuf, int set_default)
             else
               break;
           }
-#ifdef _AMIGA
-        /* Here, the situation is quite complicated. Let's have a look
-           at a couple of targets:
-
-           install: dev:make
-
-           dev:make: make
-
-           dev:make:: xyz
-
-           The rule is that it's only a target, if there are TWO :'s
-           OR a space around the :.
-        */
-        if (p && !(isspace ((unsigned char)p[1]) || !p[1]
-                   || isspace ((unsigned char)p[-1])))
-          p = 0;
-#endif
 #ifdef HAVE_DOS_PATHS
         {
           int check_again;
@@ -1231,10 +1213,11 @@ eval (ebuffer_t *ebuf, int set_default)
           pattern = 0;
 
         /* Parse the dependencies.  */
-        deps = (dep_t *)
-          multi_glob (parse_file_seq (&p2, '|', 
-				      sizeof (dep_t), 1, fstart),
-                      sizeof (dep_t));
+	p_nameseq = 
+          multi_glob ( parse_file_seq (&p2, '|', sizeof (dep_t), 1, fstart),
+		       sizeof (dep_t) );
+        deps = nameseq_to_dep_chain(p_nameseq);
+
         if (*p2)
           {
             /* Files that follow '|' are special prerequisites that
@@ -1242,15 +1225,17 @@ eval (ebuffer_t *ebuf, int set_default)
                Their modification times are irrelevant.  */
             dep_t **deps_ptr = &deps;
             dep_t *d;
+	    nameseq_t *p_nameseq;
+
             for (deps_ptr = &deps; *deps_ptr; deps_ptr = &(*deps_ptr)->next)
               ;
             ++p2;
-            *deps_ptr = (dep_t *)
-              multi_glob (parse_file_seq (&p2, '\0', sizeof (dep_t), 1, 
-					  fstart),
-                          sizeof (dep_t));
+	    p_nameseq = 
+              multi_glob ( parse_file_seq (&p2, '\0', sizeof (dep_t), 1, 
+					  fstart), sizeof (dep_t) );
+            *deps_ptr = nameseq_to_dep_chain(p_nameseq);
             for (d = *deps_ptr; d != 0; d = d->next)
-              d->ignore_mtime = 1;
+              d->ignore_mtime = true;
           }
 
         commands_idx = 0;

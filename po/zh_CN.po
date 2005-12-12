@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.79.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-12-09 21:51-0500\n"
+"POT-Creation-Date: 2005-12-11 19:34-0500\n"
 "PO-Revision-Date: 2002-07-22 15:02+0800\n"
 "Last-Translator: Wang Li <charles@linux.net.cn>\n"
 "Language-Team: Chinese (simplified) <i18n-translation@lists.linux.net.cn>\n"
@@ -15,27 +15,27 @@ msgstr ""
 "Content-Type: text/plain; charset=gb2312\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/ar_fns.c:56
+#: src/ar_fns.c:57
 #, c-format
 msgid "attempt to use unsupported feature: `%s'"
 msgstr "试图使用不支持的功能：“%s”"
 
-#: src/ar_fns.c:166
+#: src/ar_fns.c:167
 #, c-format
 msgid "touch: Archive `%s' does not exist"
 msgstr "touch：归档文件“%s”不存在"
 
-#: src/ar_fns.c:169
+#: src/ar_fns.c:170
 #, c-format
 msgid "touch: `%s' is not a valid archive"
 msgstr "touch：“%s”不是合法的归档文件"
 
-#: src/ar_fns.c:176
+#: src/ar_fns.c:177
 #, c-format
 msgid "touch: Member `%s' does not exist in `%s'"
 msgstr "touch：在“%2$s”中不存在成员“%1$s”"
 
-#: src/ar_fns.c:183
+#: src/ar_fns.c:184
 #, c-format
 msgid "touch: Bad return code from ar_member_touch on `%s'"
 msgstr "touch：来自“%s”上的 ar_member_touch 的错误返回码"
@@ -59,44 +59,44 @@ msgstr "  日期 %s"
 msgid "  uid = %d, gid = %d, mode = 0%o.\n"
 msgstr "  uid = %d，gid = %d，mode = 0%o。\n"
 
-#: src/commands.c:419
+#: src/commands.c:417
 msgid "*** Break.\n"
 msgstr "*** 中断。\n"
 
-#: src/commands.c:512
+#: src/commands.c:510
 #, c-format
 msgid "*** [%s] Archive member `%s' may be bogus; not deleted"
 msgstr "*** [%s] 归档成员“%s”可能是假的；未删除"
 
-#: src/commands.c:515
+#: src/commands.c:513
 #, c-format
 msgid "*** Archive member `%s' may be bogus; not deleted"
 msgstr "*** 归档成员“%s”可能是假的；未删除"
 
-#: src/commands.c:527
+#: src/commands.c:525
 #, c-format
 msgid "*** [%s] Deleting file `%s'"
 msgstr "*** [%s] 正在删除文件“%s”"
 
-#: src/commands.c:529
+#: src/commands.c:527
 #, c-format
 msgid "*** Deleting file `%s'"
 msgstr "*** 正在删除文件“%s”"
 
-#: src/commands.c:569
+#: src/commands.c:567
 msgid "#  commands to execute"
 msgstr "#  要执行的命令"
 
-#: src/commands.c:572
+#: src/commands.c:570
 msgid " (built-in):"
 msgstr " (内置)："
 
-#: src/commands.c:574
+#: src/commands.c:572
 #, c-format
 msgid " (from `%s', line %lu):\n"
 msgstr " (从“%s”，行 %lu)：\n"
 
-#: src/dir_fns.c:810
+#: src/dir_fns.c:808
 msgid ""
 "\n"
 "# Directories\n"
@@ -104,52 +104,52 @@ msgstr ""
 "\n"
 "# 目录\n"
 
-#: src/dir_fns.c:822
+#: src/dir_fns.c:820
 #, c-format
 msgid "# %s: could not be stat'd.\n"
 msgstr "# %s：无法对其进行 stat 操作。\n"
 
-#: src/dir_fns.c:826
+#: src/dir_fns.c:824
 #, c-format
 msgid "# %s (key %s, mtime %d): could not be opened.\n"
 msgstr "# %s (关键字 %s，修改时间 %d)：无法打开。\n"
 
-#: src/dir_fns.c:829
+#: src/dir_fns.c:827
 #, c-format
 msgid "# %s (device %ld, inode %ld): could not be opened.\n"
 msgstr "# %s (设备 %ld，i-节点 %ld)：无法打开。\n"
 
-#: src/dir_fns.c:855
+#: src/dir_fns.c:853
 #, c-format
 msgid "# %s (key %s, mtime %d): "
 msgstr "# %s (关键字 %s，修改时间 %d)："
 
-#: src/dir_fns.c:858
+#: src/dir_fns.c:856
 #, c-format
 msgid "# %s (device %ld, inode %ld): "
 msgstr "# %s (设备 %ld，i-节点 %ld)："
 
-#: src/dir_fns.c:863 src/dir_fns.c:884
+#: src/dir_fns.c:861 src/dir_fns.c:882
 msgid "No"
 msgstr "无"
 
-#: src/dir_fns.c:866 src/dir_fns.c:887
+#: src/dir_fns.c:864 src/dir_fns.c:885
 msgid " files, "
 msgstr " 文件， "
 
-#: src/dir_fns.c:868 src/dir_fns.c:889
+#: src/dir_fns.c:866 src/dir_fns.c:887
 msgid "no"
 msgstr "无"
 
-#: src/dir_fns.c:871
+#: src/dir_fns.c:869
 msgid " impossibilities"
 msgstr ""
 
-#: src/dir_fns.c:875
+#: src/dir_fns.c:873
 msgid " so far."
 msgstr " 迄今为止。"
 
-#: src/dir_fns.c:892
+#: src/dir_fns.c:890
 #, c-format
 msgid " impossibilities in %lu directories.\n"
 msgstr ""
@@ -321,19 +321,19 @@ msgid ""
 "# "
 msgstr ""
 
-#: src/function.c:741
+#: src/function.c:742
 msgid "non-numeric first argument to `word' function"
 msgstr "“word”函数的第一个参数不是数值参数"
 
-#: src/function.c:745
+#: src/function.c:746
 msgid "first argument to `word' function must be greater than 0"
 msgstr "“word”函数的第一个参数必须大于 0"
 
-#: src/function.c:766
+#: src/function.c:767
 msgid "non-numeric first argument to `wordlist' function"
 msgstr "“wordlist”函数的第一个参数不是数值参数"
 
-#: src/function.c:768
+#: src/function.c:769
 msgid "non-numeric second argument to `wordlist' function"
 msgstr "“wordlist”函数的第二个参数不是数值参数"
 
@@ -471,407 +471,407 @@ msgstr ""
 msgid "Collisions=%ld/%ld=%.0f%%"
 msgstr ""
 
-#: src/implicit.c:54
+#: src/implicit.c:55
 #, c-format
 msgid "Looking for an implicit rule for `%s'.\n"
 msgstr "正在为“%s”寻找隐含规则。\n"
 
-#: src/implicit.c:70
+#: src/implicit.c:71
 #, c-format
 msgid "Looking for archive-member implicit rule for `%s'.\n"
 msgstr "正在为“%s”寻找归档成员隐含规则。\n"
 
-#: src/implicit.c:214
+#: src/implicit.c:215
 msgid "Avoiding implicit rule recursion.\n"
 msgstr "避免隐含规则递归。\n"
 
-#: src/implicit.c:352
+#: src/implicit.c:353
 #, c-format
 msgid "Trying pattern rule with stem `%.*s'.\n"
 msgstr "以主干“%.*s”尝试匹配模式规则。\n"
 
-#: src/implicit.c:393
+#: src/implicit.c:394
 #, c-format
 msgid "Rejecting impossible implicit prerequisite `%s'.\n"
 msgstr "拒绝不可能的隐含前提“%s”。\n"
 
-#: src/implicit.c:394
+#: src/implicit.c:395
 #, c-format
 msgid "Rejecting impossible rule prerequisite `%s'.\n"
 msgstr "拒绝不可能的规则前提“%s”。\n"
 
-#: src/implicit.c:404
+#: src/implicit.c:405
 #, c-format
 msgid "Trying implicit prerequisite `%s'.\n"
 msgstr "尝试隐含前提“%s”。\n"
 
-#: src/implicit.c:405
+#: src/implicit.c:406
 #, c-format
 msgid "Trying rule prerequisite `%s'.\n"
 msgstr "尝试规则前提“%s”。\n"
 
-#: src/implicit.c:427
+#: src/implicit.c:428
 #, c-format
 msgid "Found prerequisite `%s' as VPATH `%s'\n"
 msgstr ""
 
-#: src/implicit.c:445
+#: src/implicit.c:446
 #, c-format
 msgid "Looking for a rule with intermediate file `%s'.\n"
 msgstr "正在寻找使用中间文件“%s”的规则。\n"
 
-#: src/job.c:287
+#: src/job.c:288
 #, fuzzy
 msgid "Cannot create a temporary file\n"
 msgstr "fwrite (临时文件)"
 
-#: src/job.c:309
+#: src/job.c:310
 #, c-format
 msgid "[%s] Error %d (ignored)"
 msgstr "[%s] 错误 %d (忽略)"
 
-#: src/job.c:310
+#: src/job.c:311
 #, c-format
 msgid "*** [%s] Error %d"
 msgstr "*** [%s] 错误 %d"
 
-#: src/job.c:316 src/job.c:319
+#: src/job.c:317 src/job.c:320
 msgid " (core dumped)"
 msgstr " (core dumped)"
 
-#: src/job.c:405
+#: src/job.c:406
 msgid "*** Waiting for unfinished jobs...."
 msgstr "*** 正在等待未完成的任务...."
 
-#: src/job.c:434
+#: src/job.c:435
 #, c-format
 msgid "Live child 0x%08lx (%s) PID %ld %s\n"
 msgstr "活跃子进程 0x%08lx (%s) PID %ld %s\n"
 
-#: src/job.c:436 src/job.c:581 src/job.c:678 src/job.c:1261
+#: src/job.c:437 src/job.c:582 src/job.c:679 src/job.c:1262
 msgid " (remote)"
 msgstr " (远程)"
 
-#: src/job.c:578
+#: src/job.c:579
 #, c-format
 msgid "Reaping losing child 0x%08lx PID %ld %s\n"
 msgstr "正在中止失败的子进程 0x%08lx PID %ld %s\n"
 
-#: src/job.c:579
+#: src/job.c:580
 #, c-format
 msgid "Reaping winning child 0x%08lx PID %ld %s\n"
 msgstr "正在中止获胜的子进程 0x%08lx PID %ld %s\n"
 
-#: src/job.c:584
+#: src/job.c:585
 #, c-format
 msgid "Cleaning up temp batch file %s\n"
 msgstr "正在清除临时批文件 %s\n"
 
-#: src/job.c:676
+#: src/job.c:677
 #, fuzzy, c-format
 msgid "Removing child 0x%08lx PID %ld%s from chain.\n"
 msgstr "从链中删除子进程 0x%08lx PID %ld %s。\n"
 
-#: src/job.c:744
+#: src/job.c:745
 msgid "write jobserver"
 msgstr "写入任务服务器"
 
-#: src/job.c:746
+#: src/job.c:747
 #, c-format
 msgid "Released token for child 0x%08lx (%s).\n"
 msgstr "为子进程 0x%08lx (%s) 释放令牌(token)。\n"
 
-#: src/job.c:1195 src/job.c:1794
+#: src/job.c:1196 src/job.c:1795
 #, c-format
 msgid "process_easy() failed failed to launch process (e=%d)\n"
 msgstr "process_easy() 启动进程失败 (e=%d)\n"
 
-#: src/job.c:1199 src/job.c:1798
+#: src/job.c:1200 src/job.c:1799
 #, c-format
 msgid ""
 "\n"
 "Counted %d args in failed launch\n"
 msgstr ""
 
-#: src/job.c:1259
+#: src/job.c:1260
 #, c-format
 msgid "Putting child 0x%08lx (%s) PID %ld%s on the chain.\n"
 msgstr "将子进程 0x%08lx (%s) PID %ld%s 放入链。\n"
 
-#: src/job.c:1502
+#: src/job.c:1503
 #, c-format
 msgid "Obtained token for child 0x%08lx (%s).\n"
 msgstr ""
 
-#: src/job.c:1511
+#: src/job.c:1512
 msgid "read jobs pipe"
 msgstr "读取任务管道"
 
-#: src/job.c:1618
+#: src/job.c:1619
 msgid "cannot enforce load limits on this operating system"
 msgstr "无法在本操作系统中实施负载限制"
 
-#: src/job.c:1620
+#: src/job.c:1621
 msgid "cannot enforce load limit: "
 msgstr "无法实施负载限制："
 
-#: src/job.c:1694
+#: src/job.c:1695
 msgid "no more file handles: could not duplicate stdin\n"
 msgstr ""
 
-#: src/job.c:1696
+#: src/job.c:1697
 msgid "no more file handles: could not duplicate stdout\n"
 msgstr ""
 
-#: src/job.c:1724
+#: src/job.c:1725
 msgid "Could not restore stdin\n"
 msgstr ""
 
-#: src/job.c:1732
+#: src/job.c:1733
 msgid "Could not restore stdout\n"
 msgstr ""
 
-#: src/job.c:1824
+#: src/job.c:1825
 #, c-format
 msgid "make reaped child pid %d, still waiting for pid %d\n"
 msgstr "make 已中止的子进程 pid %d，仍在等待 pid %d\n"
 
-#: src/job.c:1843
+#: src/job.c:1844
 #, c-format
 msgid "%s: Command not found"
 msgstr "%s：命令未找到"
 
-#: src/job.c:1873
+#: src/job.c:1874
 #, c-format
 msgid "%s: Shell program not found"
 msgstr "%s：未找到 shell 程序"
 
-#: src/job.c:2036
+#: src/job.c:2037
 #, fuzzy, c-format
 msgid "$SHELL changed (was `%s', now `%s')\n"
 msgstr "$SHELL 已改变 (原为“%s”，现为“%s”)"
 
-#: src/job.c:2416
+#: src/job.c:2417
 #, c-format
 msgid "Creating temporary batch file %s\n"
 msgstr "正在创建临时批文件 %s\n"
 
-#: src/job.c:2462
+#: src/job.c:2463
 #, c-format
 msgid "%s (line %d) Bad shell context (!unixy && !batch_mode_shell)\n"
 msgstr ""
 
-#: src/main.c:321
+#: src/main.c:322
 msgid "Options:\n"
 msgstr "选项：\n"
 
-#: src/main.c:322
+#: src/main.c:323
 #, fuzzy
 msgid "  -b, -m                       Ignored for compatibility.\n"
 msgstr "忽略兼容性"
 
-#: src/main.c:324
+#: src/main.c:325
 msgid "  -B, --always-make            Unconditionally make all targets.\n"
 msgstr ""
 
-#: src/main.c:326
+#: src/main.c:327
 msgid "  --basename-filenames         Show files as basename only.\n"
 msgstr ""
 
-#: src/main.c:328
+#: src/main.c:329
 msgid ""
 "  -C DIRECTORY, --directory=DIRECTORY\n"
 "                               Change to DIRECTORY before doing anything.\n"
 msgstr ""
 
-#: src/main.c:331
+#: src/main.c:332
 #, fuzzy
 msgid "  -d                           Print lots of debugging information.\n"
 msgstr "打印大量调试信息"
 
-#: src/main.c:333
+#: src/main.c:334
 #, fuzzy
 msgid ""
 "  --debug[=FLAGS]              Print various types of debugging "
 "information.\n"
 msgstr "打印各种调试信息"
 
-#: src/main.c:335
+#: src/main.c:336
 msgid ""
 "  -e, --environment-overrides\n"
 "                               Environment variables override makefiles.\n"
 msgstr ""
 
-#: src/main.c:338
+#: src/main.c:339
 msgid ""
 "  -E, --extended-errors\n"
 "                               Additional error reporting.\n"
 msgstr ""
 
-#: src/main.c:341
+#: src/main.c:342
 msgid ""
 "  -f FILE, --file=FILE, --makefile=FILE\n"
 "                               Read FILE as a makefile.\n"
 msgstr ""
 
-#: src/main.c:344
+#: src/main.c:345
 #, fuzzy
 msgid "  -h, --help                   Print this message and exit.\n"
 msgstr "打印该消息并退出"
 
-#: src/main.c:346
+#: src/main.c:347
 #, fuzzy
 msgid "  -i, --ignore-errors          Ignore errors from commands.\n"
 msgstr "忽略来自命令的错误"
 
-#: src/main.c:348
+#: src/main.c:349
 msgid ""
 "  -I DIRECTORY, --include-dir=DIRECTORY\n"
 "                               Search DIRECTORY for included makefiles.\n"
 msgstr ""
 
-#: src/main.c:351
+#: src/main.c:352
 #, fuzzy
 msgid ""
 "  -j [N], --jobs[=N]           Allow N jobs at once; infinite jobs with no "
 "arg.\n"
 msgstr "同时允许 N 个任务；无参数表明允许无限个任务"
 
-#: src/main.c:353
+#: src/main.c:354
 #, fuzzy
 msgid ""
 "  -k, --keep-going             Keep going when some targets can't be made.\n"
 msgstr "当某些目标无法创建时仍然继续"
 
-#: src/main.c:355
+#: src/main.c:356
 msgid ""
 "  -l [N], --load-average[=N], --max-load[=N]\n"
 "                               Don't start multiple jobs unless load is "
 "below N.\n"
 msgstr ""
 
-#: src/main.c:358
+#: src/main.c:359
 msgid ""
 "  -n, --just-print, --dry-run, --recon\n"
 "                               Don't actually run any commands; just print "
 "them.\n"
 msgstr ""
 
-#: src/main.c:361
+#: src/main.c:362
 msgid ""
 "  -o FILE, --old-file=FILE, --assume-old=FILE\n"
 "                               Consider FILE to be very old and don't remake "
 "it.\n"
 msgstr ""
 
-#: src/main.c:364
+#: src/main.c:365
 #, fuzzy
 msgid "  -p, --print-data-base        Print make's internal database.\n"
 msgstr "打印 make 的内部数据库"
 
-#: src/main.c:366
+#: src/main.c:367
 #, fuzzy
 msgid ""
 "  -q, --question               Run no commands; exit status says if up to "
 "date.\n"
 msgstr "不运行任何命令；退出状态说明是否已全部更新"
 
-#: src/main.c:368
+#: src/main.c:369
 #, fuzzy
 msgid "  -r, --no-builtin-rules       Disable the built-in implicit rules.\n"
 msgstr "禁用内置隐含规则"
 
-#: src/main.c:370
+#: src/main.c:371
 #, fuzzy
 msgid ""
 "  -R, --no-builtin-variables   Disable the built-in variable settings.\n"
 msgstr "禁用内置变量设置"
 
-#: src/main.c:372
+#: src/main.c:373
 #, fuzzy
 msgid "  -s, --silent, --quiet        Don't echo commands.\n"
 msgstr "忽略来自命令的错误"
 
-#: src/main.c:374
+#: src/main.c:375
 msgid ""
 "  -S, --no-keep-going, --stop\n"
 "                               Turns off -k.\n"
 msgstr ""
 
-#: src/main.c:377
+#: src/main.c:378
 #, fuzzy
 msgid ""
 "  -t, --touch                  Touch targets instead of remaking them.\n"
 msgstr "touch 目标而不是重新创建它们"
 
-#: src/main.c:379
+#: src/main.c:380
 #, fuzzy
 msgid ""
 "  -v, --version                Print the version number of make and exit.\n"
 msgstr "打印 make 的版本号并退出"
 
-#: src/main.c:381
+#: src/main.c:382
 msgid "  -V, --show-variables         Show variable expansions.\n"
 msgstr ""
 
-#: src/main.c:383
+#: src/main.c:384
 #, fuzzy
 msgid "  -w, --print-directory        Print the current directory.\n"
 msgstr "打印当前目录"
 
-#: src/main.c:385
+#: src/main.c:386
 #, fuzzy
 msgid ""
 "  --no-print-directory         Turn off -w, even if it was turned on "
 "implicitly.\n"
 msgstr "即使 -w 默认开启，也要关闭 -w"
 
-#: src/main.c:387
+#: src/main.c:388
 msgid ""
 "  -W FILE, --what-if=FILE, --new-file=FILE, --assume-new=FILE\n"
 "                               Consider FILE to be infinitely new.\n"
 msgstr ""
 
-#: src/main.c:390
+#: src/main.c:391
 #, fuzzy
 msgid ""
 "  --warn-undefined-variables   Warn when an undefined variable is "
 "referenced.\n"
 msgstr "当引用未定义变量的时候发出警告"
 
-#: src/main.c:392
+#: src/main.c:393
 msgid ""
 "  -x, --trace[=TYPE]           Trace command execution TYPE  may be\n"
 "                               \"read\", \"normal\", \"full\".\n"
 msgstr ""
 
-#: src/main.c:395
+#: src/main.c:396
 msgid ""
 "  -X [type], --debugger[=TYPE] Enter debugger. TYPE may be\n"
 "                               \"preread\", \"preaction\", \"full\",\n"
 "                               \"error\", or \"fatal\".\n"
 msgstr ""
 
-#: src/main.c:400
+#: src/main.c:401
 msgid ""
 "  --unix                       Run in UNIX mode (use sh.exe subshell).\n"
 msgstr ""
 
-#: src/main.c:402
+#: src/main.c:403
 msgid ""
 "  --win32                      Run in Win32 mode (use Win32 subshell).\n"
 msgstr ""
 
-#: src/main.c:633
+#: src/main.c:634
 msgid "empty string invalid as file name"
 msgstr "空字符串是无效的文件名"
 
-#: src/main.c:709
+#: src/main.c:710
 #, c-format
 msgid "%s: Interrupt/Exception caught (code = 0x%x, addr = 0x%x)\n"
 msgstr "%s：捕获中断/异常 (代码 = 0x%x, 地址 = 0x%x)\n"
 
-#: src/main.c:716
+#: src/main.c:717
 #, c-format
 msgid ""
 "\n"
@@ -881,175 +881,175 @@ msgid ""
 "ExceptionAddress = %x\n"
 msgstr ""
 
-#: src/main.c:724
+#: src/main.c:725
 #, c-format
 msgid "Access violation: write operation at address %x\n"
 msgstr "访问冲突：地址 %x 处的写操作\n"
 
-#: src/main.c:725
+#: src/main.c:726
 #, c-format
 msgid "Access violation: read operation at address %x\n"
 msgstr "访问冲突：地址 %x处的读操作\n"
 
-#: src/main.c:792
+#: src/main.c:793
 #, c-format
 msgid "find_and_set_shell setting default_shell = %s\n"
 msgstr ""
 
-#: src/main.c:840
+#: src/main.c:841
 #, c-format
 msgid "find_and_set_shell path search set default_shell = %s\n"
 msgstr ""
 
-#: src/main.c:1241
+#: src/main.c:1246
 #, c-format
 msgid "%s is suspending for 30 seconds..."
 msgstr "%s 正在挂起 30 秒..."
 
-#: src/main.c:1243
+#: src/main.c:1248
 #, c-format
 msgid "done sleep(30). Continuing.\n"
 msgstr "睡眠完成(30)。继续。\n"
 
-#: src/main.c:1489
+#: src/main.c:1494
 msgid "Makefile from standard input specified twice."
 msgstr "两次指明来自标准输入的 makefile。"
 
-#: src/main.c:1523
+#: src/main.c:1528
 msgid "fopen (temporary file)"
 msgstr "fopen (临时文件)"
 
-#: src/main.c:1529
+#: src/main.c:1534
 msgid "fwrite (temporary file)"
 msgstr "fwrite (临时文件)"
 
-#: src/main.c:1615
+#: src/main.c:1620
 msgid "Do not specify -j or --jobs if sh.exe is not available."
 msgstr "如果 sh.exe 不可用，就不要给出 -j 或 --jobs。"
 
-#: src/main.c:1616
+#: src/main.c:1621
 msgid "Resetting make for single job mode."
 msgstr "将 make 重置为单任务模式。"
 
-#: src/main.c:1656
+#: src/main.c:1661
 msgid "internal error: multiple --jobserver-fds options"
 msgstr "内部错误：多个 --jobserver-fds 选项"
 
-#: src/main.c:1664
+#: src/main.c:1669
 #, c-format
 msgid "internal error: invalid --jobserver-fds string `%s'"
 msgstr "内部错误：非法 --jobserver-fds 字符串“%s”"
 
-#: src/main.c:1674
+#: src/main.c:1679
 msgid "warning: -jN forced in submake: disabling jobserver mode."
 msgstr ""
 
-#: src/main.c:1684
+#: src/main.c:1689
 msgid "dup jobserver"
 msgstr "复制任务服务器"
 
-#: src/main.c:1687
+#: src/main.c:1692
 msgid ""
 "warning: jobserver unavailable: using -j1.  Add `+' to parent make rule."
 msgstr ""
 
-#: src/main.c:1710
+#: src/main.c:1715
 msgid "creating jobs pipe"
 msgstr "正在创建任务管道"
 
-#: src/main.c:1723
+#: src/main.c:1728
 msgid "init jobserver pipe"
 msgstr "创始化任务服务器管道"
 
-#: src/main.c:1810
+#: src/main.c:1815
 msgid "Updating makefiles....\n"
 msgstr "正在更新 makefile....\n"
 
-#: src/main.c:1835
+#: src/main.c:1840
 #, c-format
 msgid "Makefile `%s' might loop; not remaking it.\n"
 msgstr "Makefile “%s”可能循环；不会重新创建它。\n"
 
-#: src/main.c:1913
+#: src/main.c:1918
 #, c-format
 msgid "Failed to remake makefile `%s'."
 msgstr "重新创建 makefile “%s” 失败。"
 
-#: src/main.c:1930
+#: src/main.c:1935
 #, c-format
 msgid "Included makefile `%s' was not found."
 msgstr "找不到被引入的 makefile “%s”"
 
-#: src/main.c:1935
+#: src/main.c:1940
 #, c-format
 msgid "Makefile `%s' was not found"
 msgstr "找不到 makefile “%s”"
 
-#: src/main.c:2003
+#: src/main.c:2008
 msgid "Couldn't change back to original directory."
 msgstr "无法回到原始目录。"
 
-#: src/main.c:2023
+#: src/main.c:2028
 msgid "Re-executing:"
 msgstr "重新执行："
 
-#: src/main.c:2059
+#: src/main.c:2064
 msgid "unlink (temporary file): "
 msgstr "删除 (临时文件)："
 
-#: src/main.c:2082
+#: src/main.c:2087
 msgid "No targets specified and no makefile found"
 msgstr "没有指明目标并且找不到 makefile"
 
-#: src/main.c:2084
+#: src/main.c:2089
 msgid "No targets"
 msgstr "无目标"
 
-#: src/main.c:2089
+#: src/main.c:2094
 msgid "Updating goal targets....\n"
 msgstr ""
 
-#: src/main.c:2115
+#: src/main.c:2120
 msgid "warning:  Clock skew detected.  Your build may be incomplete."
 msgstr "警告：检测到时钟错误。您的创建可能是不完整的。"
 
-#: src/main.c:2270
+#: src/main.c:2275
 #, c-format
 msgid "Usage: %s [options] [target] ...\n"
 msgstr "用法：%s [选项] [目标] ...\n"
 
-#: src/main.c:2276
+#: src/main.c:2281
 #, c-format
 msgid ""
 "\n"
 "This program built for %s\n"
 msgstr ""
 
-#: src/main.c:2278
+#: src/main.c:2283
 #, c-format
 msgid ""
 "\n"
 "This program built for %s (%s)\n"
 msgstr ""
 
-#: src/main.c:2281
+#: src/main.c:2286
 #, fuzzy, c-format
 msgid "Report bugs to <bug-make@gnu.org>\n"
 msgstr ""
 "\n"
 "错误报告到 <bug-make@gnu.org>。\n"
 
-#: src/main.c:2353
+#: src/main.c:2358
 #, fuzzy, c-format
 msgid "the `-%c' option requires a non-empty string argument"
 msgstr "“-%c”选项需要正整数参数"
 
-#: src/main.c:2403
+#: src/main.c:2408
 #, c-format
 msgid "the `-%c' option requires a positive integral argument"
 msgstr "“-%c”选项需要正整数参数"
 
-#: src/main.c:2829
+#: src/main.c:2834
 #, c-format
 msgid ""
 "%sThis is free software; see the source for copying conditions.\n"
@@ -1057,395 +1057,405 @@ msgid ""
 "%sPARTICULAR PURPOSE.\n"
 msgstr ""
 
-#: src/main.c:2835
+#: src/main.c:2840
 #, c-format
 msgid ""
 "\n"
 "%sThis program built for %s\n"
 msgstr ""
 
-#: src/main.c:2837
+#: src/main.c:2842
 #, c-format
 msgid ""
 "\n"
 "%sThis program built for %s (%s)\n"
 msgstr ""
 
-#: src/main.c:2855
+#: src/main.c:2860
 #, c-format
 msgid ""
 "\n"
 "# Make data base, printed on %s"
 msgstr ""
 
-#: src/main.c:2864
+#: src/main.c:2869
 #, c-format
 msgid ""
 "\n"
 "# Finished Make data base on %s\n"
 msgstr ""
 
-#: src/misc.c:223 src/misc.c:238 src/misc.c:255 src/read.c:3042
+#: src/misc.c:209 src/misc.c:224 src/read.c:3047
 msgid "virtual memory exhausted"
 msgstr "虚拟内存耗尽"
 
-#: src/misc.c:452
+#: src/misc.c:387
 #, fuzzy
 msgid "Initialized access"
 msgstr "已初始化"
 
-#: src/misc.c:531
+#: src/misc.c:466
 msgid "User access"
 msgstr ""
 
-#: src/misc.c:579
+#: src/misc.c:514
 msgid "Make access"
 msgstr ""
 
-#: src/misc.c:613
+#: src/misc.c:548
 msgid "Child access"
 msgstr ""
 
-#: src/read.c:169
+#: src/misc.c:611
+#, fuzzy, c-format
+msgid "write error: %s"
+msgstr "到 %s 的重定向错误输出\n"
+
+#: src/misc.c:613
+#, fuzzy
+msgid "write error"
+msgstr "写入任务服务器"
+
+#: src/read.c:173
 msgid "Reading makefiles...\n"
 msgstr "正在读入 makefiles...\n"
 
-#: src/read.c:322
+#: src/read.c:326
 #, c-format
 msgid "Reading makefile `%s'"
 msgstr "正在读入 makefile “%s”"
 
-#: src/read.c:324
+#: src/read.c:328
 #, c-format
 msgid " (no default goal)"
 msgstr ""
 
-#: src/read.c:326
+#: src/read.c:330
 #, c-format
 msgid " (search path)"
 msgstr " (搜索路径)"
 
-#: src/read.c:328
+#: src/read.c:332
 #, c-format
 msgid " (don't care)"
 msgstr ""
 
-#: src/read.c:330
+#: src/read.c:334
 #, c-format
 msgid " (no ~ expansion)"
 msgstr ""
 
-#: src/read.c:649
+#: src/read.c:654
 msgid "invalid syntax in conditional"
 msgstr "条件中含有无效语法"
 
-#: src/read.c:659
+#: src/read.c:664
 msgid "extraneous `endef'"
 msgstr "多于的“endef”"
 
-#: src/read.c:673 src/read.c:703 src/variable.c:1166
+#: src/read.c:678 src/read.c:708 src/variable.c:1167
 msgid "empty variable name"
 msgstr "空变量名"
 
-#: src/read.c:692
+#: src/read.c:697
 msgid "empty `override' directive"
 msgstr "空“override”指令"
 
-#: src/read.c:719
+#: src/read.c:724
 msgid "invalid `override' directive"
 msgstr "无效的“override”指令"
 
-#: src/read.c:896
+#: src/read.c:901
 msgid "commands commence before first target"
 msgstr ""
 
-#: src/read.c:948
+#: src/read.c:953
 msgid "missing rule before commands"
 msgstr "命令之前遗漏了规则"
 
-#: src/read.c:1037
+#: src/read.c:1042
 #, c-format
 msgid "missing separator%s"
 msgstr "遗漏分隔符 %s"
 
-#: src/read.c:1039
+#: src/read.c:1044
 msgid " (did you mean TAB instead of 8 spaces?)"
 msgstr " (您的意思是用 TAB 代替 8 个空格？)"
 
-#: src/read.c:1212
+#: src/read.c:1200
 msgid "missing target pattern"
 msgstr "无目标匹配"
 
-#: src/read.c:1215
+#: src/read.c:1203
 msgid "multiple target patterns"
 msgstr "多个目标匹配"
 
-#: src/read.c:1221
+#: src/read.c:1209
 #, c-format
 msgid "target pattern contains no `%%'"
 msgstr "目标模式不含有“%%”"
 
-#: src/read.c:1284
+#: src/read.c:1275
 msgid "missing `endif'"
 msgstr "遗漏“endif”"
 
-#: src/read.c:1362
+#: src/read.c:1367
 msgid "Extraneous text after `endef' directive"
 msgstr "“endef”指令后含有不该出现的文字"
 
-#: src/read.c:1396
+#: src/read.c:1401
 msgid "missing `endef', unterminated `define'"
 msgstr "遗漏“endef”，未终止的“define”"
 
-#: src/read.c:1448 src/read.c:1616
+#: src/read.c:1453 src/read.c:1621
 #, c-format
 msgid "Extraneous text after `%s' directive"
 msgstr "在“%s”指令之后含有不该出现的文字"
 
-#: src/read.c:1451
+#: src/read.c:1456
 #, c-format
 msgid "extraneous `%s'"
 msgstr "不该出现的“%s”"
 
-#: src/read.c:1456
+#: src/read.c:1461
 msgid "only one `else' per conditional"
 msgstr "每个条件只能有一个“else”"
 
-#: src/read.c:1674
+#: src/read.c:1679
 #, fuzzy
 msgid "Malformed pattern-specific variable definition"
 msgstr ""
 "\n"
 "# 没有 pattern-specific 变量的值。"
 
-#: src/read.c:1697
+#: src/read.c:1702
 msgid "Malformed target-specific variable definition"
 msgstr ""
 
-#: src/read.c:1788
+#: src/read.c:1793
 msgid "mixed implicit and static pattern rules"
 msgstr "混和的隐含和静态模式规则"
 
-#: src/read.c:1791
+#: src/read.c:1796
 msgid "mixed implicit and normal rules"
 msgstr "混和的隐含和普通规则"
 
-#: src/read.c:1832
+#: src/read.c:1837
 #, c-format
 msgid "target `%s' doesn't match the target pattern"
 msgstr "目标“%s”不匹配目标模式"
 
-#: src/read.c:1854
+#: src/read.c:1859
 #, c-format
 msgid "target `%s' leaves prerequisite pattern empty"
 msgstr ""
 
-#: src/read.c:1968 src/read.c:2068
+#: src/read.c:1973 src/read.c:2073
 #, c-format
 msgid "target file `%s' has both : and :: entries"
 msgstr "目标文件“%s”含有 : 和 :: 两种条目"
 
-#: src/read.c:1974
+#: src/read.c:1979
 #, c-format
 msgid "target `%s' given more than once in the same rule."
 msgstr "目标“%s”在同一个规则中给出了多次。"
 
-#: src/read.c:1983
+#: src/read.c:1988
 #, c-format
 msgid "warning: overriding commands for target `%s'"
 msgstr "警告：覆盖关于目标“%s”的命令"
 
-#: src/read.c:1986
+#: src/read.c:1991
 #, c-format
 msgid "warning: ignoring old commands for target `%s'"
 msgstr "警告：忽略关于目标“%s”的旧命令"
 
-#: src/read.c:2483
+#: src/read.c:2488
 msgid "warning: NUL character seen; rest of line ignored"
 msgstr "警告：遇到了 NUL 字符；忽略行的剩余部分"
 
-#: src/remake.c:242
+#: src/remake.c:243
 #, c-format
 msgid "Nothing to be done for `%s'."
 msgstr ""
 
-#: src/remake.c:243
+#: src/remake.c:244
 #, c-format
 msgid "`%s' is up to date."
 msgstr "“%s”是最新的。"
 
-#: src/remake.c:317
+#: src/remake.c:318
 #, c-format
 msgid "Pruning file `%s'.\n"
 msgstr "正在删除文件“%s”。\n"
 
-#: src/remake.c:365
+#: src/remake.c:366
 #, c-format
 msgid "%sNo rule to make target `%s'%s"
 msgstr "%s没有规则可以创建目标“%s”%s"
 
-#: src/remake.c:367
+#: src/remake.c:368
 #, c-format
 msgid "%sNo rule to make target `%s', needed by `%s'%s"
 msgstr "%1$s没有规则可以创建“%3$s”%4$s需要的目标“%2$s”"
 
-#: src/remake.c:396
+#: src/remake.c:397
 #, c-format
 msgid "Considering target file `%s'.\n"
 msgstr "正在考虑目标文件“%s”。\n"
 
-#: src/remake.c:403
+#: src/remake.c:404
 #, c-format
 msgid "Recently tried and failed to update file `%s'.\n"
 msgstr "最近已尝试过更新文件“%s”并失败。\n"
 
-#: src/remake.c:407
+#: src/remake.c:408
 #, c-format
 msgid "File `%s' was considered already.\n"
 msgstr "已考虑过文件“%s”。\n"
 
-#: src/remake.c:417
+#: src/remake.c:418
 #, c-format
 msgid "Still updating file `%s'.\n"
 msgstr "仍然在更新文件“%s”。\n"
 
-#: src/remake.c:420
+#: src/remake.c:421
 #, c-format
 msgid "Finished updating file `%s'.\n"
 msgstr "更新文件“%s”完成。\n"
 
-#: src/remake.c:459
+#: src/remake.c:460
 #, c-format
 msgid "File `%s' does not exist.\n"
 msgstr "文件“%s”不存在。\n"
 
-#: src/remake.c:471
+#: src/remake.c:472
 #, c-format
 msgid ""
 "*** Warning: .LOW_RESOLUTION_TIME file `%s' has a high resolution time stamp"
 msgstr ""
 
-#: src/remake.c:484 src/remake.c:991
+#: src/remake.c:485 src/remake.c:992
 #, c-format
 msgid "Found an implicit rule for `%s'.\n"
 msgstr "找到一条关于“%s”的隐含规则。\n"
 
-#: src/remake.c:486 src/remake.c:993
+#: src/remake.c:487 src/remake.c:994
 #, c-format
 msgid "No implicit rule found for `%s'.\n"
 msgstr "找不到关于“%s”的隐含规则。\n"
 
-#: src/remake.c:492 src/remake.c:999
+#: src/remake.c:493 src/remake.c:1000
 #, c-format
 msgid "Using default commands for `%s'.\n"
 msgstr "使用关于“%s”的默认命令。\n"
 
-#: src/remake.c:514 src/remake.c:1025
+#: src/remake.c:515 src/remake.c:1026
 #, c-format
 msgid "Circular %s <- %s dependency dropped."
 msgstr "放弃循环依赖 %s <- %s 。"
 
-#: src/remake.c:629
+#: src/remake.c:630
 #, c-format
 msgid "Finished prerequisites of target file `%s'.\n"
 msgstr "目标文件“%s”的前提已完成。\n"
 
-#: src/remake.c:635
+#: src/remake.c:636
 #, c-format
 msgid "The prerequisites of `%s' are being made.\n"
 msgstr "正在创建“%s”的前提。\n"
 
-#: src/remake.c:648
+#: src/remake.c:649
 #, c-format
 msgid "Giving up on target file `%s'.\n"
 msgstr "放弃目标文件“%s”。\n"
 
-#: src/remake.c:653
+#: src/remake.c:654
 #, c-format
 msgid "Target `%s' not remade because of errors."
 msgstr "由于错误目标“%s”并未重新创建。"
 
-#: src/remake.c:705
+#: src/remake.c:706
 #, fuzzy, c-format
 msgid "Prerequisite `%s' is order-only for target `%s'.\n"
 msgstr "前提“%s”比目标“%s”旧。\n"
 
-#: src/remake.c:710
+#: src/remake.c:711
 #, c-format
 msgid "Prerequisite `%s' of target `%s' does not exist.\n"
 msgstr "目标“%2$s”的前提“%1$s”不存在。\n"
 
-#: src/remake.c:715
+#: src/remake.c:716
 #, c-format
 msgid "Prerequisite `%s' is newer than target `%s'.\n"
 msgstr "前提“%s”比目标“%s”新。\n"
 
-#: src/remake.c:718
+#: src/remake.c:719
 #, c-format
 msgid "Prerequisite `%s' is older than target `%s'.\n"
 msgstr "前提“%s”比目标“%s”旧。\n"
 
-#: src/remake.c:736
+#: src/remake.c:737
 #, c-format
 msgid "Target `%s' is double-colon and has no prerequisites.\n"
 msgstr "目标“%s”是双冒号目标并且没有前提。\n"
 
-#: src/remake.c:743
+#: src/remake.c:744
 #, c-format
 msgid "No commands for `%s' and no prerequisites actually changed.\n"
 msgstr "没有关于“%s”的命令，并且实际上改变了的前提。\n"
 
-#: src/remake.c:748
+#: src/remake.c:749
 #, c-format
 msgid "Making `%s' due to always-make flag.\n"
 msgstr ""
 
-#: src/remake.c:756
+#: src/remake.c:757
 #, c-format
 msgid "No need to remake target `%s'"
 msgstr "不需要重新创建目标“%s”"
 
-#: src/remake.c:758
+#: src/remake.c:759
 #, c-format
 msgid "; using VPATH name `%s'"
 msgstr "；使用 VPATH 名称“%s”"
 
-#: src/remake.c:778
+#: src/remake.c:779
 #, c-format
 msgid "Must remake target `%s'.\n"
 msgstr "必须重新创建目标“%s”。\n"
 
-#: src/remake.c:784
+#: src/remake.c:785
 #, c-format
 msgid "  Ignoring VPATH name `%s'.\n"
 msgstr "  忽略 VPATH 名称 `%s'。\n"
 
-#: src/remake.c:815
+#: src/remake.c:816
 #, c-format
 msgid "Commands of `%s' are being run.\n"
 msgstr ""
 
-#: src/remake.c:822
+#: src/remake.c:823
 #, c-format
 msgid "Failed to remake target file `%s'.\n"
 msgstr "重新创建目标文件“%s”失败。\n"
 
-#: src/remake.c:825
+#: src/remake.c:826
 #, c-format
 msgid "Successfully remade target file `%s'.\n"
 msgstr "重新创建目标文件“%s”成功。\n"
 
-#: src/remake.c:828
+#: src/remake.c:829
 #, c-format
 msgid "Target file `%s' needs remade under -q.\n"
 msgstr "目标文件“%s”需要以 -q 选项重新创建。\n"
 
-#: src/remake.c:1329
+#: src/remake.c:1330
 #, fuzzy, c-format
 msgid "Warning: File `%s' has modification time %.2g s in the future"
 msgstr "*** 警告：文件“%s”的修改时间在将来 (%s > %s)"
 
-#: src/remake.c:1446
+#: src/remake.c:1447
 #, c-format
 msgid ".LIBPATTERNS element `%s' is not a pattern"
 msgstr ".LIBPATTERNS 的元素“%s”不是一个模式"
@@ -1455,7 +1465,7 @@ msgstr ".LIBPATTERNS 的元素“%s”不是一个模式"
 msgid "Customs won't export: %s\n"
 msgstr "用户不希望导出：%s\n"
 
-#: src/rule.c:553
+#: src/rule.c:556
 #, fuzzy
 msgid ""
 "\n"
@@ -1464,7 +1474,7 @@ msgstr ""
 "\n"
 "# 没有隐含规则。"
 
-#: src/rule.c:568
+#: src/rule.c:571
 msgid ""
 "\n"
 "# No implicit rules."
@@ -1472,7 +1482,7 @@ msgstr ""
 "\n"
 "# 没有隐含规则。"
 
-#: src/rule.c:571
+#: src/rule.c:574
 #, c-format
 msgid ""
 "\n"
@@ -1481,11 +1491,11 @@ msgstr ""
 "\n"
 "# %u 条隐含规则，%u"
 
-#: src/rule.c:576
+#: src/rule.c:579
 msgid " terminal."
 msgstr " 终端。"
 
-#: src/rule.c:584
+#: src/rule.c:587
 #, c-format
 msgid "BUG: num_pattern_rules wrong!  %u != %u"
 msgstr "错误：num_pattern_rules 出错！%u != %u"
@@ -1646,53 +1656,53 @@ msgstr "信息请求"
 msgid "Floating point co-processor not available"
 msgstr "浮点数协处理器不可用"
 
-#: src/variable.c:55
+#: src/variable.c:56
 msgid "default"
 msgstr "默认"
 
-#: src/variable.c:58
+#: src/variable.c:59
 msgid "environment"
 msgstr "环境"
 
-#: src/variable.c:61
+#: src/variable.c:62
 msgid "makefile"
 msgstr "makefile"
 
-#: src/variable.c:64
+#: src/variable.c:65
 msgid "environment under -e"
 msgstr ""
 
-#: src/variable.c:67
+#: src/variable.c:68
 msgid "command line"
 msgstr "命令行"
 
-#: src/variable.c:70
+#: src/variable.c:71
 msgid "`override' directive"
 msgstr "“override”指令"
 
-#: src/variable.c:73
+#: src/variable.c:74
 msgid "automatic"
 msgstr "自动"
 
-#: src/variable.c:76
+#: src/variable.c:77
 msgid "debugger"
 msgstr ""
 
-#: src/variable.c:80
+#: src/variable.c:81
 msgid "invalid"
 msgstr ""
 
-#: src/variable.c:1222
+#: src/variable.c:1223
 #, fuzzy, c-format
 msgid " (from `%s', line %lu)"
 msgstr " (从“%s”，行 %lu)：\n"
 
-#: src/variable.c:1267
+#: src/variable.c:1268
 #, fuzzy
 msgid "variable set hash-table stats:\n"
 msgstr "# 共有 %u 个变量存储于 %u 个杂凑单元中。\n"
 
-#: src/variable.c:1279
+#: src/variable.c:1280
 msgid ""
 "\n"
 "# Variables\n"
@@ -1700,7 +1710,7 @@ msgstr ""
 "\n"
 "# 变量\n"
 
-#: src/variable.c:1283
+#: src/variable.c:1284
 #, fuzzy
 msgid ""
 "\n"
@@ -1709,7 +1719,7 @@ msgstr ""
 "\n"
 "# Pattern-specific 变量的值"
 
-#: src/variable.c:1297
+#: src/variable.c:1298
 msgid ""
 "\n"
 "# No pattern-specific variable values."
@@ -1717,7 +1727,7 @@ msgstr ""
 "\n"
 "# 没有 pattern-specific 变量的值。"
 
-#: src/variable.c:1299
+#: src/variable.c:1300
 #, c-format
 msgid ""
 "\n"
@@ -1726,7 +1736,7 @@ msgstr ""
 "\n"
 "# %u 个 pattern-specific 变量的值"
 
-#: src/vpath.c:555
+#: src/vpath.c:556
 msgid ""
 "\n"
 "# VPATH Search Paths\n"
@@ -1734,11 +1744,11 @@ msgstr ""
 "\n"
 "# VPATH 搜索路径\n"
 
-#: src/vpath.c:572
+#: src/vpath.c:573
 msgid "# No `vpath' search paths."
 msgstr "# 没有“vpath”搜索路径。"
 
-#: src/vpath.c:574
+#: src/vpath.c:575
 #, c-format
 msgid ""
 "\n"
@@ -1747,7 +1757,7 @@ msgstr ""
 "\n"
 "# %u “vpath”搜索路径。\n"
 
-#: src/vpath.c:577
+#: src/vpath.c:578
 msgid ""
 "\n"
 "# No general (`VPATH' variable) search path."
@@ -1755,7 +1765,7 @@ msgstr ""
 "\n"
 "# 没有通用搜索路径(“VPATH”变量)。"
 
-#: src/vpath.c:583
+#: src/vpath.c:584
 msgid ""
 "\n"
 "# General (`VPATH' variable) search path:\n"
@@ -1792,9 +1802,6 @@ msgstr ""
 
 #~ msgid "Redirected input from %s\n"
 #~ msgstr "来自 %s 的重定向输入\n"
-
-#~ msgid "Redirected error to %s\n"
-#~ msgstr "到 %s 的重定向错误输出\n"
 
 #~ msgid "Redirected output to %s\n"
 #~ msgstr "到 %s 的重定向输出\n"

@@ -196,10 +196,8 @@ convert_suffix_rule (char *target, char *source, commands_t *cmds)
       depname = xmalloc (1 + len + 1);
       depname[0] = '%';
       memmove (depname + 1, source, len + 1);
-      deps = (dep_t *) xmalloc (sizeof (dep_t));
-      deps->next = 0;
+      deps = CALLOC(dep_t, 1);
       deps->name = depname;
-      deps->ignore_mtime = 0;
     }
 
   create_pattern_rule (names, percents, 0, deps, cmds, 0);
@@ -359,7 +357,8 @@ install_pattern_rule (struct pspec *p, int terminal)
 {
   rule_t *r;
   char *ptr;
-
+  nameseq_t * p_nameseq;
+  
   r              = CALLOC(rule_t, 1);
   r->targets     = CALLOC(char *, 2);
   r->suffixes    = CALLOC(char *, 2);
@@ -381,10 +380,11 @@ install_pattern_rule (struct pspec *p, int terminal)
     ++r->suffixes[0];
 
   ptr = p->dep;
-  r->deps = (dep_t *) multi_glob (parse_file_seq (&ptr, '\0',
-						  sizeof (dep_t), 1,
-						  NILF),
-				  sizeof (dep_t));
+  p_nameseq = 
+    multi_glob ( parse_file_seq (&ptr, '\0', sizeof (dep_t), 1, NILF), 
+		 sizeof (dep_t) );
+
+  r->deps = nameseq_to_dep_chain(p_nameseq);
 
   if (new_pattern_rule (r, 0))
     {

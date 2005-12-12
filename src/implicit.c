@@ -1,4 +1,4 @@
-/* $Id: implicit.c,v 1.9 2005/12/11 12:15:29 rockyb Exp $
+/* $Id: implicit.c,v 1.10 2005/12/12 01:04:59 rockyb Exp $
 Implicit rule searching for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,97,2000, 2004, 2005
 Free Software Foundation, Inc.
@@ -626,9 +626,8 @@ pattern_search (file_t *file, int archive,
     for (i = 0; rule->targets[i] != 0; ++i)
       if (i != matches[foundrule])
 	{
-	  dep_t *new = (dep_t *) xmalloc (sizeof (dep_t));
+	  dep_t *new = CALLOC(dep_t, 1);
 	  /* GKM FIMXE: handle '|' here too */
-	  new->ignore_mtime = 0;
 	  new->name = p = (char *) xmalloc (rule->lens[i] + fullstemlen + 1);
 	  memmove (p, rule->targets[i],
 		 rule->suffixes[i] - rule->targets[i] - 1);

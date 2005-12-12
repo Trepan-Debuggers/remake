@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.29 2005/12/11 12:15:29 rockyb Exp $
+/* $Id: main.c,v 1.30 2005/12/12 01:04:59 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -2071,10 +2071,7 @@ main (int argc, char **argv, char **envp)
       {
 	if (default_goal_file != 0)
 	  {
-	    goals = (dep_t *) xmalloc (sizeof (dep_t));
-	    goals->next = 0;
-	    goals->name = 0;
-            goals->ignore_mtime = 0;
+	    goals = CALLOC(dep_t, 1);
 	    goals->file = default_goal_file;
 	  }
       }
@@ -2222,17 +2219,17 @@ handle_non_switch_argument (arg, env)
 
       if (goals == 0)
 	{
-	  goals = (dep_t *) xmalloc (sizeof (dep_t));
+	  goals = CALLOC(dep_t, 1);
 	  lastgoal = goals;
 	}
       else
 	{
-	  lastgoal->next = (dep_t *) xmalloc (sizeof (dep_t));
+	  lastgoal->next = CALLOC(dep_t, 1);
 	  lastgoal = lastgoal->next;
 	}
       lastgoal->name = 0;
       lastgoal->file = f;
-      lastgoal->ignore_mtime = 0;
+      lastgoal->ignore_mtime = false;
 
       {
         /* Add this target name to the MAKECMDGOALS variable. */
@@ -2923,7 +2920,7 @@ die (int status)
   free_default_suffix();
   pop_variable_scope(true);
   free_pattern_rules();
-  free_dep_chain(read_makefiles);
+  dep_chain_free(read_makefiles);
   hash_free(&files, true);
   hash_free_directories();
   hash_free_function_table();

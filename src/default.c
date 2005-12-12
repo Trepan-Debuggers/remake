@@ -1,4 +1,4 @@
-/* $Id: default.c,v 1.7 2005/12/04 23:18:16 rockyb Exp $
+/* $Id: default.c,v 1.8 2005/12/12 01:04:59 rockyb Exp $
 Data base of default implicit rules for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96, 2004 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -503,10 +503,11 @@ set_default_suffixes (void)
   else
     {
       char *p = default_suffixes;
-      suffix_file->deps = (dep_t *)
-	multi_glob (parse_file_seq (&p, '\0', sizeof (dep_t), 1,
-				    NILF),
-		    sizeof (dep_t));
+      nameseq_t *p_nameseq = 
+	multi_glob ( parse_file_seq (&p, '\0', sizeof (dep_t), 1, NILF), 
+		     sizeof (dep_t) );
+
+      suffix_file->deps = nameseq_to_dep_chain(p_nameseq);
       (void) define_variable ("SUFFIXES", 8, default_suffixes, o_default, 0);
     }
 }
@@ -548,7 +549,7 @@ free_default_suffix (void)
     if (f && f->cmds) free (f->cmds);
   }
   if (suffix_file)
-    free_dep_chain(suffix_file->deps);
+    dep_chain_free(suffix_file->deps);
 }
 
 /*! Install the default pattern rules.  */
