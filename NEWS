@@ -11,7 +11,11 @@ reports.
 
 Version 3.80+dbg-0.6cvs
 
-* Fix bug in vpath regression.
+* Fix bug in vpath regression - was reading uninitialzed memory
+
+* Reorganize help command. Is more ddd-friendly (and more gdb like).
+
+* expand documentation 
 
 Version 3.80+dbg-0.5
 
