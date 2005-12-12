@@ -622,21 +622,15 @@ Reading makefiles...
 Updating goal targets....
  /tmp/remake/src/test2:3	File `all' does not exist.
 
-(/tmp/remake/src/test2:5): make.txt
+(/tmp/remake/src/test2:3): all
 @end group
 @end smallexample
 
 As before we'll use the @code{target} command to show information about
-@code{make.txt}:
+@code{all}:
 @smallexample
 @group
-./make -X -f test2
-Reading makefiles...
-Updating goal targets....
- /tmp/remake/src/test2:3	File `all' does not exist.
-
-(/tmp/remake/src/test2:3): all
-makedb<0> target
+makedb<0> @b{target}
 
 all: make.txt
 #  Implicit rule search has not been done.
@@ -662,7 +656,7 @@ all: make.txt
 @end group
 @end smallexample
 
-When asking about target information on line 5, we now see that a
+When asking about target information on line 3, we now see that a
 number of automatic variables have been set. We can also get
 information about just these variables using the command @code{target
 all variables} or @code{info locals}:
