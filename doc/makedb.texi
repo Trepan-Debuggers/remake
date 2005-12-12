@@ -704,7 +704,7 @@ rather than the ``commands'' option:
 
 @smallexample
 @group
-makedb<5> @b{target @ expand}
+makedb<5> @b{target @@ expand}
 
 make.txt:
 #  commands to execute (from `test2', line 6):
