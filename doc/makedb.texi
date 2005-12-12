@@ -705,7 +705,7 @@ makeinfo --no-headers ../doc/makedb.texi > make.txt
 @end smallexample
 
 Another way to do the above @code{target} and @code{examine} commands
-in one go is ito use the ``expand'' option on the @target{target} command
+in one go is ito use the ``expand'' option on the @code{target} command
 rather than the ``commands'' option:
 
 @smallexample
