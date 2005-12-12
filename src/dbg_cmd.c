@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.62 2005/12/10 09:35:04 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.63 2005/12/12 04:24:50 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -1309,8 +1309,15 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
     if (-1 == err) {
       printf("\n***Entering debugger because we encountered an error.\n");
     } else if (-2 == err) {
-      printf("\nDebugged Makefile terminated.  "
-	     "Use q to quit or R to restart\n");
+      if (0 == makelevel) {
+	printf("\nMakefile terminated.\n");
+	printf("Use q to quit or R to restart\n");
+      } else {
+	printf("\nMakefile finished at level %d. Use R to restart\n", 
+	       makelevel);
+	printf("the makefile at this level or s or n to continue "
+	       "in parent\n");
+      }
     } else {
       printf("\n***Entering debugger because we encountered a fatal error.\n");
       printf("***Exiting the debugger will exit make with exit code %d.\n", 
