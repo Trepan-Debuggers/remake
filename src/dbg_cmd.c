@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.63 2005/12/12 04:24:50 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.64 2005/12/12 14:04:35 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -121,7 +121,6 @@ typedef struct {
 /* Should be in alphabetic order by command name. */
 long_cmd_t commands[] = {
   { "break",    'b' },
-  { "break",    'L' },
   { "comment",  '#' },
   { "continue", 'c' },
   { "delete",   'd' },
@@ -157,7 +156,9 @@ typedef struct {
 
 alias_cmd_t aliases[] = {
   { "shell",    "!!" },
+  { "help",     "?" },
   { "help",     "??" },
+  { "break",    "L" },
   { "where",    "backtrace" },
   { "where",    "bt" },
   { "quit",     "exit" },
@@ -297,38 +298,33 @@ cmd_initialize(void)
   short_command['k'].doc = 
     _("Skip execution of next command or action.\n" );
 
-  short_command['L'].func = &dbg_cmd_break;
-  short_command['L'].use  = short_command['b'].use;
-  short_command['L'].doc  = short_command['b'].doc;
-
-  short_command['?'].func = &dbg_cmd_help;
-  short_command['?'].use = short_command['h'].use;
-  short_command['?'].doc = short_command['h'].doc;
-  
   short_command['n'].func = &dbg_cmd_next;
   short_command['n'].use = _("next [amount]");
-  short_command['n'].doc = _("Continue until the next command to be executed.");
+  short_command['n'].doc = 
+    _("Continue until the next command to be executed.\n"
+      "\tArgument N means do this N times (or until there's another\n"
+      "\treason to stop.");
 
   short_command['p'].func = &dbg_cmd_print;
   short_command['p'].use = _("print {*variable* [attrs...]}");
   short_command['p'].doc = 
-    _("Show a variable definition.\n" \
-      "\tThe value is shown with embedded\n" \
-      "\tvariable-references unexpanded. Don't include $ before a variable\n" \
-      "\tname. See also \"examine\".\n\n" \
-      "\tIf no variable is supplied, we try to use the\n" \
+    _("Show a variable definition.\n"
+      "\tThe value is shown with embedded\n"
+      "\tvariable-references unexpanded. Don't include $ before a variable\n"
+      "\tname. See also \"examine\".\n\n"
+      "\tIf no variable is supplied, we try to use the\n"
       "\tlast value given.\n"				
       );
 
   short_command['q'].func = &dbg_cmd_quit;
   short_command['q'].use = _("quit [exit-status]");
   short_command['q'].doc = 
-    _("Exit make. If a numeric argument is given, it will be the exit\n"\
-      "\tstatus this program reports back. Otherwise exit with status 0." \
+    _("Exit make. If a numeric argument is given, it will be the exit\n"
+      "\tstatus this program reports back. Otherwise exit with status 0."
       );
 
   short_command['R'].func = &dbg_cmd_run;
-  short_command['R'].doc = _("Run Makefile from the beginning.\n" \
+  short_command['R'].doc = _("Run Makefile from the beginning.\n"
    "\tYou may specify arguments to give it.\n" \
    "\tWith no arguments, uses arguments last specified (with \"run\")");
   short_command['R'].use = _("run");
@@ -336,8 +332,8 @@ cmd_initialize(void)
   short_command['s'].func = &dbg_cmd_step;
   short_command['s'].use = _("step [amount]");
   short_command['s'].doc = 
-    _("Step execution until another stopping point is reached.\n" \
-      "\tArgument N means do this N times (or until there's another\n " \
+    _("Step execution until another stopping point is reached.\n"
+      "\tArgument N means do this N times (or until there's another\n"
       "\treason to stop.");
 
   short_command['S'].func = &dbg_cmd_show;
@@ -398,7 +394,7 @@ cmd_initialize(void)
 
   short_command['='].func = &dbg_cmd_set;
   short_command['='].use =  
-    _("set {basename|debug|ignore-errors|keep-going|silent|trace|variable} *value*");
+    _("set {*option*|variable} *value*");
   short_command['='].doc  = 
     _("set basename {on|off|toggle} - show full name or basename?\n"
       "\tset debug debug-mask - like --debug value.\n\n"
@@ -503,30 +499,30 @@ dbg_cmd_help (char *psz_args)
   unsigned int i;
 
   if (!psz_args || !*psz_args) {
-    printf ("Available commands are: \n");
+    printf ("  Command                  Short Name  Aliases\n");
+    printf ("  ----------------------   ----------  ---------\n");
     for (i = 0; commands[i].long_name; i++) {
       unsigned int j;
       bool b_alias = false;
       uint8_t s=commands[i].short_name;
-      printf("  %-25s (%c):\n", 
+      printf("  %-31s (%c)", 
 	     short_command[s].use, commands[i].short_name);
-      printf("\t%s\n", short_command[s].doc);
       for (j = 0; aliases[j].alias; j++) {
 	if (strcmp (commands[i].long_name, aliases[j].command) == 0) {
 	  if (!b_alias) {
-	    printf("\tAlias(es): %s", aliases[j].alias);
+	    printf("  %s", aliases[j].alias);
 	    b_alias = true;
 	  } else {
 	    printf(", %s", aliases[j].alias);
 	  }
 	}
       }
-      if (b_alias) printf("\n");
       printf("\n");
     }
 
-    printf("Readline command line editing (emacs/vi mode) is available.\n");
-    printf("For more help, type h <cmd> or consult online-documentation.\n");
+    printf("\nReadline command line editing (emacs/vi mode) is available.\n");
+    printf("For more detailed help, type h <cmd> or consult "
+	   "online-documentation.\n");
     
   } else {
     short_cmd_t *p_command;
@@ -567,7 +563,7 @@ dbg_cmd_help (char *psz_args)
 	  }
 	}
       } else {
-	printf("  %s:\n\t%s\n", p_command->use, p_command->doc);
+	printf("%s\n", p_command->doc);
       }
       
     } else {
