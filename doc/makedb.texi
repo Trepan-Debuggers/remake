@@ -626,93 +626,108 @@ Updating goal targets....
 @end group
 @end smallexample
 
-As before we'll use the target command to show information about
+As before we'll use the @code{target} command to show information about
 @code{make.txt}:
 @smallexample
 @group
-makedb<0> @b{target}
+./make -X -f test2
+Reading makefiles...
+Updating goal targets....
+ /tmp/remake/src/test2:3	File `all' does not exist.
 
-make.txt: ../doc/makedb.texi
-#  Implicit rule search has not been done.
-#  File does not exist.
-#  File has not been updated.
-#  commands to execute (from `test2', line 6):
-	makeinfo --no-headers $< > $@
+(/tmp/remake/src/test2:3): all
+makedb<0> target
 
-makedb<1> @b{next 2}
-   /tmp/remake/src/test2:5	File `make.txt' does not exist.
-  /tmp/remake/src/test2:5	Must remake target `make.txt'.
-
-(/tmp/remake/src/test2:6): make.txt
-makedb<2> @b{t}
-
-make.txt: ../doc/makedb.texi
+all: make.txt
 #  Implicit rule search has not been done.
 #  Implicit/static pattern stem: `'
 #  File does not exist.
 #  File has not been updated.
 # automatic
-# @@ := make.txt
+# @@ := all
 # automatic
 # % := 
 # automatic
 # * := 
 # automatic
-# + := ../doc/makedb.texi
+# + := make.txt
 # automatic
 # | := 
 # automatic
-# < := ../doc/makedb.texi
+# < := all
 # automatic
-# ^ := ../doc/makedb.texi
+# ^ := make.txt
 # automatic
-# ? := ../doc/makedb.texi
-# variable set hash-table stats:
-# Load=8/32=25%, Rehash=0, Collisions=1/12=8%
-#  commands to execute (from `test2', line 6):
-	makeinfo --no-headers $< > $@
+# ? := 
 @end group
 @end smallexample
 
-Notice that the first time we asked for target info we were on line
-5. After @value{MAKE} decided we needed to update the target we went
-to line 6. When asking about target information on line 6, we now see
-that a number of automatic variables have been set. We can also get
+When asking about target information on line 5, we now see that a
+number of automatic variables have been set. We can also get
 information about just these variables using the command @code{target
-make.txt variables} or @code{info locals}:
+all variables} or @code{info locals}:
 
 @smallexample
 @group
-makedb<3> @b{info locals}
-@@ := make.txt
+makedb<1> @b{info locals}
+@@ := all
 % := 
 * := 
-+ := ../doc/makedb.texi
++ := make.txt
 | := 
-< := ../doc/makedb.texi
-^ := ../doc/makedb.texi
-? := ../doc/makedb.texi
+< := all
+^ := make.txt
+? := 
 @end group
 @end smallexample
 
-Since these variables are set we can use these variables to see a full
-expansion of the command that is going to get set:
+The target ``all'' doesn't have any commands associated with it. If we
+@code{next} to a target that does, we can variables to see a full
+expansion of the commands that is about to be run:
 
 @smallexample
 @group
-makedb<4> @b{target make.txt commands}
+makedb<2> @b{next}
+
+   /tmp/remake/src/test2:5	File `make.txt' does not exist.
+
+(/tmp/remake/src/test2:5): make.txt
+makedb<3> @b{target make.txt commands}
 
 make.txt:
 #  commands to execute (from `test2', line 6):
 	makeinfo --no-headers $< > $@@
-makedb<5> @b{x makeinfo --no-headers $< > $@@}
+
+makedb<4> @b{examine makeinfo --no-headers $< > $@@}
 makeinfo --no-headers ../doc/makedb.texi > make.txt
 
 @end group
 @end smallexample
 
-If we want to write out those commands as a shell script which we
-might want to execute, we can use the @code{write} (@ref{Write}) command:
+Another way to do the above @code{target} and @code{examine} commands
+in one go is ito use the ``expand'' option on the @target{target} command
+rather than the ``commands'' option:
+
+@smallexample
+@group
+makedb<5> @b{target @ expand}
+
+make.txt:
+#  commands to execute (from `test2', line 6):
+	-makeinfo --no-headers $< > $@
+	
+#  commands to execute (from `test2', line 6):
+	-makeinfo --no-headers ../doc/makedb.texi > make.txt
+	
+@end group
+@end smallexample
+
+Notice instead of giving the target name @code{make.txt}, @code{@@}
+works as well. 
+
+Now if we want to write out those commands as a shell script which
+we might want to execute, we can use the @code{write} (@ref{Write})
+command:
 @smallexample
 @group
 (/tmp/remake/src/test2:6): make.txt
