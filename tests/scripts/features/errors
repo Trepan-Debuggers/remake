@@ -1,3 +1,5 @@
+#                                                                    -*-perl-*-
+
 $description = "The following tests the -i option and the '-' in front of \n"
               ."commands to test that make ignores errors in these commands\n"
               ."and continues processing.";
@@ -14,11 +16,11 @@ $details = "This test runs two makes.  The first runs on a target with a \n"
 
 if ($vos)
 {
-   $delete_command = "delete_file";
+   $rm_command = "delete_file";
 }
 else
 {
-   $delete_command = "rm";
+   $rm_command = "rm";
 }
 
 open(MAKEFILE,"> $makefile");
@@ -26,11 +28,11 @@ open(MAKEFILE,"> $makefile");
 # The Contents of the MAKEFILE ...
 
 print MAKEFILE "clean:\n"
-              ."\t-$delete_command cleanit\n"
-              ."\t$delete_command foo\n"
+              ."\t-$rm_command cleanit\n"
+              ."\t$rm_command foo\n"
 	      ."clean2: \n"
-              ."\t$delete_command cleanit\n"
-              ."\t$delete_command foo\n";
+              ."\t$rm_command cleanit\n"
+              ."\t$rm_command foo\n";
 
 # END of Contents of MAKEFILE
 
@@ -39,16 +41,16 @@ close(MAKEFILE);
 &touch("foo");
 
 unlink("cleanit");
-$cleanit_error = `sh -c "$delete_command cleanit 2>&1"`;
+$cleanit_error = `sh -c "$rm_command cleanit 2>&1"`;
 $delete_error_code = $? >> 8;
 
 # TEST #1
 # -------
 
-$answer = "$delete_command cleanit\n"
+$answer = "$rm_command cleanit\n"
          . $cleanit_error
          ."$make_name: [clean] Error $delete_error_code (ignored)\n"
-         ."$delete_command foo\n";
+         ."$rm_command foo\n";
 
 &run_make_with_options($makefile,"",&get_logfile);
 
@@ -72,10 +74,10 @@ if (!$vos)
 # TEST #2
 # -------
 
-$answer = "$delete_command cleanit\n"
+$answer = "$rm_command cleanit\n"
          . $cleanit_error
          ."$make_name: [clean2] Error $delete_error_code (ignored)\n"
-         ."$delete_command foo\n";
+         ."$rm_command foo\n";
 
 &run_make_with_options($makefile,"clean2 -i",&get_logfile);
 

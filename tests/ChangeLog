@@ -1,3 +1,12 @@
+2005-12-12  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/parallelism, scripts/functions/wildcard,
+	scripts/targets/FORCE, scripts/targets/PHONY,
+	scripts/targets/SILENT: Use the default setting for
+	$delete_command.  Fixes bug #15085.
+
+	* run_make_tests.pl (get_this_pwd) [VMS]: Use -no_ask with delete_file.
+
 2005-12-11  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/misc/general4: Test implicit rules with '$' in the

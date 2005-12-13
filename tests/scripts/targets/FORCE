@@ -1,15 +1,8 @@
+#                                                                    -*-perl-*-
+
 $description = "The following tests rules without Commands or Dependencies.";
 
 $details = "If the rule ...\n";
-
-if ($vos)
-{
-   $delete_command = "delete_file";
-}
-else
-{
-   $delete_command = "rm";
-}
 
 open(MAKEFILE,"> $makefile");
 

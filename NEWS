@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  27 June 2005
+  12 December 2005
 
 Copyright (C) 2002,2003,2004,2005  Free Software Foundation, Inc.
 See the end for copying conditions.
@@ -10,7 +10,7 @@ manual, which is contained in this distribution as the file doc/make.texi.
 See the README file and the GNU make manual for instructions for
 reporting bugs.
 
-Version 3.81beta3
+Version 3.81beta4
 
 * GNU make is ported to OS/2.
 
