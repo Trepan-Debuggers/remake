@@ -1,4 +1,4 @@
-/* $Id: dbg_fns.c,v 1.6 2005/12/06 04:50:57 rockyb Exp $
+/* $Id: dbg_fns.c,v 1.7 2005/12/13 07:18:50 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -195,7 +195,10 @@ print_debugger_location(const file_t *p_target,
 	 do have it as part of the name, so use that. This happens for
 	 example with we've stopped before reading a Makefile.
       */
-      printf("\n(%s:0)\n", p_target->name);
+      if (p_target->phony)
+	printf("\n(%s: .PHONY target)\n", p_target->name);
+      else 
+	printf("\n(%s:0)\n", p_target->name);
     } else {
       printf("\n(");
       print_floc_prefix(p_target_loc);

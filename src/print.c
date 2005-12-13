@@ -495,7 +495,11 @@ print_target_stack (target_stack_node_t *p, int i_pos, int i_max)
       if (i_pos != -1) {
 	printf("%s", (i == i_pos) ? "=>" : "  ");
       }
-      printf ("#%u  %s at ??", i, p->p_target->name);
+      if (p->p_target->phony)
+	printf ("#%u  %s (.PHONY target)", i, p->p_target->name);
+      else 
+	printf ("#%u  %s at ??", i, p->p_target->name);
+
     }
     printf ("\n");
   }
