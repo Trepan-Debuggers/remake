@@ -1,9 +1,9 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT([GNU make],[3.81beta3],[bug-make@gnu.org])
+AC_INIT([GNU make],[3.81beta4],[bug-make@gnu.org])
 
 AC_PREREQ(2.59)
-AC_REVISION([[$Id: configure.in,v 1.137 2005/07/12 04:35:13 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.138 2005/12/13 14:44:17 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)

@@ -1,3 +1,8 @@
+2005-12-12  Paul D. Smith  <psmith@gnu.org>
+
+	* make.1: Fix some display errors and document all existing options.
+	Patch provided by Mike Frysinger <vapier@gentoo.org>.
+
 2005-12-11  Paul D. Smith  <psmith@gnu.org>
 
 	* implicit.c (pattern_search): If 2nd expansion is not set for

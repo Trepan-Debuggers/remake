@@ -183,11 +183,11 @@ sub print_help
 }
 
 sub get_this_pwd {
-  $delete_command = "rm";
+  $delete_command = 'rm -f';
   if ($has_POSIX) {
     $__pwd = POSIX::getcwd();
   } elsif ($vos) {
-    $delete_command = "delete_file";
+    $delete_command = "delete_file -no_ask";
     $__pwd = `++(current_dir)`;
   } else {
     # No idea... just try using pwd as a last resort.

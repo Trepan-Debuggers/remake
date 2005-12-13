@@ -13,16 +13,6 @@ test echo's all files which match '?.example' and
 [a-z0-9].example.  Lastly we clean up all of the files using
 the '*' wildcard as in the first test";
 
-if ($vos)
-{
-   $delete_command = "delete_file -no_ask";
-}
-else
-{
-   $delete_command = "rm";
-}
-
-
 open(MAKEFILE,"> $makefile");
 
 # The Contents of the MAKEFILE ...

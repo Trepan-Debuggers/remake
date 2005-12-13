@@ -18,11 +18,9 @@ if (!$parallel_jobs) {
 }
 
 if ($vos) {
-  $delete_command = "delete_file -no_ask";
   $sleep_command = "sleep -seconds";
 }
 else {
-  $delete_command = "rm -f";
   $sleep_command = "sleep";
 }
 
