@@ -1838,8 +1838,7 @@ record_target_var (struct nameseq *filenames, char *defn,
       /* Set up the variable to be *-specific.  */
       v->origin = origin;
       v->per_target = 1;
-      if (exported)
-        v->export = v_export;
+      v->export = exported ? v_export : v_default;
 
       /* If it's not an override, check to see if there was a command-line
          setting.  If so, reset the value.  */

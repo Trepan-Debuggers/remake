@@ -1,3 +1,9 @@
+2005-12-14  Boris Kolpackov  <boris@kolpackov.net>
+
+	* read.c (record_target_var): Initialize variable's export field
+	with v_default instead of leaving it "initialized" by whatever
+	garbage happened to be on the heap.
+
 2005-12-12  Paul D. Smith  <psmith@gnu.org>
 
 	* make.1: Fix some display errors and document all existing options.
