@@ -1,4 +1,4 @@
-/* $Id: dbg_fns.c,v 1.7 2005/12/13 07:18:50 rockyb Exp $
+/* $Id: dbg_fns.c,v 1.8 2005/12/14 14:18:25 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -20,6 +20,7 @@ Boston, MA 02111-1307, USA.  */
 /* Helper rutines for debugger command interface. */
 
 #include "config.h"
+#include "commands.h"
 #include "dbg_fns.h"
 #include "dbg_stack.h"
 #include "debug.h"
@@ -195,7 +196,18 @@ print_debugger_location(const file_t *p_target,
 	 do have it as part of the name, so use that. This happens for
 	 example with we've stopped before reading a Makefile.
       */
-      if (p_target->phony)
+      if (p_target->cmds) {
+	floc_t floc;
+	memcpy(&floc, &(p_target->cmds->fileinfo.filenm), sizeof(floc_t));
+	/* HACK: is it okay to assume that the target is on the line
+	   before the first command? Or should we list the line
+	   that the command starts on - so we know we've faked the location?
+	*/
+	floc.lineno--;
+	printf("\n(");
+	print_floc_prefix(&floc);
+	printf ("): %s\n", psz_target_name);
+      } else if (p_target->phony)
 	printf("\n(%s: .PHONY target)\n", p_target->name);
       else 
 	printf("\n(%s:0)\n", p_target->name);
