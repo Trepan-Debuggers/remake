@@ -465,40 +465,39 @@ print_target_stack (target_stack_node_t *p, int i_pos, int i_max)
   for ( ; p && i < i_max ; 
 	i++, p = p->p_parent  ) {
     floc_t floc;
-
+    file_t *p_target = p->p_target;
 
     /* If we don't have a line recorded for the target,
        but we do have one for the commands it runs,
        use that.
     */
-    if (p->p_target->floc.filenm) {
-      memcpy(&floc, &(p->p_target->floc), sizeof(floc_t));
-    } else if (p->p_target->cmds) {
-      memcpy(&floc, &(p->p_target->cmds->fileinfo.filenm), sizeof(floc_t));
+    if (p_target->floc.filenm) {
+      memcpy(&floc, &(p_target->floc), sizeof(floc_t));
+    } else if (p_target->cmds) {
+      memcpy(&floc, &(p_target->cmds->fileinfo.filenm), sizeof(floc_t));
       /* HACK: is it okay to assume that the target is on the line
 	 before the first command? Or should we list the line
 	 that the command starts on - so we know we've faked the location?
-       */
+      */
       floc.lineno--;
     } else {
-      floc.filenm = NULL;
+	floc.filenm = NULL;
     }
-    
     
     if (floc.filenm) {
       if (i_pos != -1) {
 	printf("%s", (i == i_pos) ? "=>" : "  ");
       }
-      printf ("#%u  %s at ", i, p->p_target->name);
+      printf ("#%u  %s at ", i, p_target->name);
       print_floc_prefix(&floc);
     } else {
       if (i_pos != -1) {
 	printf("%s", (i == i_pos) ? "=>" : "  ");
       }
-      if (p->p_target->phony)
-	printf ("#%u  %s (.PHONY target)", i, p->p_target->name);
+      if (p_target->phony)
+	printf ("#%u  %s (.PHONY target)", i, p_target->name);
       else 
-	printf ("#%u  %s at ??", i, p->p_target->name);
+	printf ("#%u  %s at ??", i, p_target->name);
 
     }
     printf ("\n");
