@@ -1,4 +1,4 @@
-/* $Id: debug.h,v 1.11 2005/12/10 02:50:32 rockyb Exp $
+/* $Id: debug.h,v 1.12 2005/12/15 02:42:38 rockyb Exp $
 Debugging macros and interface.
 Copyright (C) 1999, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -52,6 +52,9 @@ typedef enum {
   DEBUGGER_ON_SIG    = 0x4    /**< Enter debugger on getting a signal */
 } debug_enter_debugger_t;
   
+typedef enum {
+  DEBUGGER_QUIT_RC   = 77,    /**< debugger issued a "quit" command. */
+} debug_dummy_t;
 
 /** These variables are trickery to force the above enum symbol values to
     be recorded in debug symbol tables. It is used to allow one refer
@@ -158,6 +161,9 @@ extern stringlist_t *db_flags;
 RETSIGTYPE debug_signal_handler (int sig);
 #endif
 
+/*! Set the global db_level mask based on the command option list
+  db_flags.
+ */
 extern void decode_debug_flags (void);
 
 #endif /*DEBUG_H*/

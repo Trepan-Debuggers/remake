@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.23 2005/12/11 12:15:29 rockyb Exp $
+/* $Id: job.c,v 1.24 2005/12/15 02:42:38 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005
 Free Software Foundation, Inc.
@@ -176,7 +176,7 @@ static int start_waiting_job (child_t *c, target_stack_node_t *p_call_stack);
 
 /* Chain of all live (or recently deceased) children.  */
 
-child_t *children = 0;
+child_t *children = NULL;
 
 /* Number of children currently running.  */
 
@@ -211,7 +211,7 @@ w32_kill(int pid, int sig)
 
 /* This function creates a temporary file name with the given extension
  * the unixy param controls both the extension and the path separator
- * return an xmalloc'ed string of a newly created temp file or die.  */
+ * return an malloc'ed string of a newly created temp file or die.  */
 static char *
 create_batch_filename(char const *base, int unixy)
 {
@@ -269,7 +269,7 @@ create_batch_filename(char const *base, int unixy)
       else
         {
           const unsigned final_size = path_size + size + 1;
-          char *const path = (char *) xmalloc (final_size);
+          char *const path = MALLOC(char, final_size);
           memcpy (path, temp_path, final_size);
           CloseHandle (h);
           if (unixy)
@@ -389,8 +389,7 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
 
      we'll keep reaping children.  */
 
-  while ((children != 0 || shell_function_pid != 0)
-         && (block || REAP_MORE))
+  while ((children || shell_function_pid != 0) && (block || REAP_MORE))
     {
       int remote = 0;
       pid_t pid;
@@ -597,6 +596,13 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
       if (c->good_stdin)
         good_stdin_used = 0;
 
+      /* Debugger "quit" take precedence over --ignore-errors
+	 --keep-going, etc.
+       */
+      if (exit_code == DEBUGGER_QUIT_RC && debugger_enabled) {
+	die(DEBUGGER_QUIT_RC);
+      }
+      
       if (child_failed && !c->noerror && !ignore_errors_flag)
         {
           /* The commands failed.  Write an error message,
@@ -705,6 +711,14 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
 	
 	unblock_sigs ();
 	
+	/* Debugger "quit" take precedence over --ignore-errors
+	   --keep-going, etc.
+	*/
+	if (exit_code == DEBUGGER_QUIT_RC && debugger_enabled) {
+	  if (job_slots_used > 0) --job_slots_used;
+	  die(DEBUGGER_QUIT_RC);
+	}
+      
 	/* If the job failed, and the -k flag was not given, die,
 	   unless we are already in the process of dying.  */
 	if (!err && child_failed && !keep_going_flag &&
@@ -861,7 +875,7 @@ static void start_job_command (child_t *p_child,
 	   | p_child->file->cmds->lines_flags[p_child->command_line - 1]);
 
   p = p_child->command_ptr;
-  p_child->noerror = flags & COMMANDS_NOERROR;
+  p_child->noerror = (flags & COMMANDS_NOERROR) != 0;
 
   while (*p != '\0')
     {
@@ -1980,9 +1994,10 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
   char *end;
   int instring, word_has_equals, seen_nonequals, last_argument_was_empty;
   char **new_argv = 0;
+  char *argstr  = NULL;
 #ifdef WINDOWS32
   int slow_flag = 0;
-
+  
   if (no_default_sh_exe) {
     sh_cmds  = sh_cmds_dos;
     sh_chars = sh_chars_dos;
@@ -2064,10 +2079,10 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
   i = strlen (line) + 1;
 
   /* More than 1 arg per character is impossible.  */
-  new_argv = (char **) xmalloc (i * sizeof (char *));
+  new_argv = MALLOC(char *, i);
 
   /* All the args can fit in a buffer as big as LINE is.   */
-  ap = new_argv[0] = (char *) xmalloc (i);
+  ap = new_argv[0] = argstr = MALLOC(char, i);
   end = ap + i;
 
   /* I is how many complete arguments have been found.  */
@@ -2275,10 +2290,12 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 	  goto slow;
     }
 
-  if (new_argv[0] == 0)
+  if (new_argv[0] == 0) {
     /* Line was empty.  */
+    free (argstr);
+    free (new_argv);
     return 0;
-  else
+  } else
     return new_argv;
 
  slow:;
@@ -2426,7 +2443,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
       fclose (batch);
 
       /* create argv */
-      new_argv = (char **) xmalloc(3 * sizeof (char *));
+      new_argv = MALLOC(char *, 3);
       if (unixy_shell) {
         new_argv[0] = strdup (shell);
         new_argv[1] = *batch_filename_ptr; /* only argv[0] gets freed later */
@@ -2451,9 +2468,9 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
         /* With MSDOS shells, we must construct the command line here
            instead of recursively calling ourselves, because we
            cannot backslash-escape the special characters (see above).  */
-        new_argv = (char **) xmalloc (sizeof (char *));
+        new_argv = MALLOC(char *, 1);
         line_len = strlen (new_line) - shell_len - sizeof (minus_c) + 1;
-        new_argv[0] = xmalloc (line_len + 1);
+        new_argv[0] = MALLOC(char, line_len + 1);
         strncpy (new_argv[0],
                  new_line + shell_len + sizeof (minus_c) - 1, line_len);
         new_argv[0][line_len] = '\0';

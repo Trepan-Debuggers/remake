@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.64 2005/12/12 14:04:35 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.65 2005/12/15 02:42:38 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -39,7 +39,7 @@ enum {
   
 
 /* True if we are inside the debugger, false otherwise. */
-bool b_in_debugger = false;
+int in_debugger = false;
 
 #ifdef HAVE_LIBREADLINE
 #include <stdio.h>
@@ -96,6 +96,7 @@ static debug_return_t dbg_cmd_continue         (char *psz_arg);
 static debug_return_t dbg_cmd_delete           (char *psz_arg);
 static debug_return_t dbg_cmd_eval             (char *psz_arg);
 static debug_return_t dbg_cmd_expand           (char *psz_arg);
+static debug_return_t dbg_cmd_finish           (char *psz_arg);
 static debug_return_t dbg_cmd_help             (char *psz_arg);
 static debug_return_t dbg_cmd_info             (char *psz_arg);
 static debug_return_t dbg_cmd_target           (char *psz_arg);
@@ -127,6 +128,7 @@ long_cmd_t commands[] = {
   { "down",     'D' },
   { "eval" ,    'e' },
   { "examine" , 'x' },
+  { "finish"  , 'F' },
   { "frame"   , 'f' },
   { "help"    , 'h' },
   { "info"    , 'i' },
@@ -275,10 +277,17 @@ cmd_initialize(void)
   short_command['e'].use  = _("eval *string*");
   short_command['e'].doc  = _("parse and evaluate a string.");
 
+  short_command['F'].func = &dbg_cmd_finish;
+  short_command['F'].use  = _("finish");
+  short_command['F'].doc  = 
+    _("Continue execution until the end of the Makefile without the "
+      "usual tracing\n" 
+      "\tracing that \"continue\" would give.");
+
   short_command['f'].func = &dbg_cmd_frame;
   short_command['f'].use  = _("frame *n*");
   short_command['f'].doc  = 
-    _("Move target frame to *n*; In contrast to \"up\" or \"down\",\n" \
+    _("Move target frame to *n*; In contrast to \"up\" or \"down\",\n"
       "\tthis sets to an absolute position. 0 is the top.");
 
   short_command['h'].func = &dbg_cmd_help;
@@ -302,79 +311,81 @@ cmd_initialize(void)
   short_command['n'].use = _("next [amount]");
   short_command['n'].doc = 
     _("Continue until the next command to be executed.\n"
-      "\tArgument N means do this N times (or until there's another\n"
-      "\treason to stop.");
+      "Argument N means do this N times (or until there's another\n"
+      "reason to stop.");
 
   short_command['p'].func = &dbg_cmd_print;
   short_command['p'].use = _("print {*variable* [attrs...]}");
   short_command['p'].doc = 
     _("Show a variable definition.\n"
-      "\tThe value is shown with embedded\n"
-      "\tvariable-references unexpanded. Don't include $ before a variable\n"
-      "\tname. See also \"examine\".\n\n"
-      "\tIf no variable is supplied, we try to use the\n"
-      "\tlast value given.\n"				
+      "The value is shown with embedded\n"
+      "variable-references unexpanded. Don't include $ before a variable\n"
+      "name. See also \"examine\".\n\n"
+      "If no variable is supplied, we try to use the\n"
+      "last value given.\n"				
       );
 
   short_command['q'].func = &dbg_cmd_quit;
   short_command['q'].use = _("quit [exit-status]");
   short_command['q'].doc = 
     _("Exit make. If a numeric argument is given, it will be the exit\n"
-      "\tstatus this program reports back. Otherwise exit with status 0."
+      "status reported back. A status of 77 in a nested make will signals\n"
+      "termination in the parent. So if no numberic argument is given and\n"
+      "MAKELEVEL is 0, then status 0 is set; otherwise it is 77."
       );
 
   short_command['R'].func = &dbg_cmd_run;
   short_command['R'].doc = _("Run Makefile from the beginning.\n"
-   "\tYou may specify arguments to give it.\n" \
-   "\tWith no arguments, uses arguments last specified (with \"run\")");
+   "You may specify arguments to give it.\n" \
+   "With no arguments, uses arguments last specified (with \"run\")");
   short_command['R'].use = _("run");
 
   short_command['s'].func = &dbg_cmd_step;
   short_command['s'].use = _("step [amount]");
   short_command['s'].doc = 
     _("Step execution until another stopping point is reached.\n"
-      "\tArgument N means do this N times (or until there's another\n"
-      "\treason to stop.");
+      "Argument N means do this N times (or until there's another\n"
+      "reason to stop.");
 
   short_command['S'].func = &dbg_cmd_show;
   short_command['S'].use = _("show [thing]");
   short_command['S'].doc = 
     _("Show the state of thing.\n" \
-      "\tIf no 'thing' is specified, show everything there is to show.\n");
+      "If no 'thing' is specified, show everything there is to show.\n");
 
   short_command['t'].func = &dbg_cmd_target;
   short_command['t'].use = _("target");
   short_command['t'].doc = 
-    _("Show information about a target.\n" \
-      "\ttarget information is printed.\n" \
-      "\tThe following attributes names can be given after a target name:\n" \
-      "\t\t'attributes', 'commands', 'expand', 'depends', 'nonorder',\n" \
-      "\t\t'previous', 'state', 'time', 'variables'\n" \
-      "\tIf no variable or target name is supplied, we try to use the\n" \
-      "\tcurrent target name.\n"				
+    _("Show information about a target.\n" 
+      "target information is printed.\n"
+      "The following attributes names can be given after a target name:\n"
+      "\t'attributes', 'commands', 'expand', 'depends', 'nonorder',\n"
+      "\t'previous', 'state', 'time', 'variables'\n"
+      "If no variable or target name is supplied, we try to use the\n"
+      "current target name.\n"				
       );
 
   short_command['T'].func = &dbg_cmd_show_stack;
   short_command['T'].use  = _("where");
   short_command['T'].doc  = 
     _("Print target stack or Makefile include stack.\n" \
-      "\tAn argument specifies the maximum amount of entries to show.");
+      "An argument specifies the maximum amount of entries to show.");
 
   short_command['u'].func = &dbg_cmd_frame_up;
   short_command['u'].use  = _("up [amount]");
   short_command['u'].doc  = 
     _("Select and print target that caused this one to be examined.\n"
-      "\tAn argument says how many targets up to go.");
+      "An argument says how many targets up to go.");
 
   short_command['w'].func = &dbg_cmd_write_cmds;
   short_command['w'].use =  _("write [*target* [*filename*]]");
   short_command['w'].doc  = 
     _("writes the commands associated of a target to a file with MAKE\n"
-      "\tvariables expanded. If no target given, the basename of the current\n"
-      "\tis used. If a filename is supplied it is used. If it is the string\n"
-      "\t\"here\", we write the output to stdout. If no filename is\n"
-      "\tgiven then create the filename by prepending a directory name to\n"
-      "\tthe target name and then append \".sh\".");
+      "variables expanded. If no target given, the basename of the current\n"
+      "is used. If a filename is supplied it is used. If it is the string\n"
+      "\"here\", we write the output to stdout. If no filename is\n"
+      "given then create the filename by prepending a directory name to\n"
+      "the target name and then append \".sh\".");
 
   short_command['x'].func = &dbg_cmd_expand;
   short_command['x'].use =  _("examine *string*");
@@ -397,14 +408,14 @@ cmd_initialize(void)
     _("set {*option*|variable} *value*");
   short_command['='].doc  = 
     _("set basename {on|off|toggle} - show full name or basename?\n"
-      "\tset debug debug-mask - like --debug value.\n\n"
-      "\tset ignore-errors {on|off|toggle} - like --ignore-errors option\n\n"
-      "\tset keep-going {on|off|toggle} - like --keep-going option\n\n"
-      "\tset silent {on|off|toggle} - like --silent option\n\n"
-      "\tset trace {on|off|toggle} - set tracing status\n"
-      "\tset variable *var* *value*\n"
-      "\tSet MAKE variable to value. Variable definitions\n"
-      "\tinside VALUE are expanded before assignment occurs.\n"
+      "set debug debug-mask - like --debug value.\n\n"
+      "set ignore-errors {on|off|toggle} - like --ignore-errors option\n\n"
+      "set keep-going {on|off|toggle} - like --keep-going option\n\n"
+      "set silent {on|off|toggle} - like --silent option\n\n"
+      "set trace {on|off|toggle} - set tracing status\n"
+      "set variable *var* *value*\n"
+      "Set MAKE variable to value. Variable definitions\n"
+      "inside VALUE are expanded before assignment occurs.\n"
       );
 
   short_command['"'].func = &dbg_cmd_set_var_noexpand;
@@ -631,13 +642,24 @@ static debug_return_t
 dbg_cmd_quit (char *psz_arg)
 {
   if (!psz_arg || !*psz_arg) {
-    exit(0);
+    in_debugger = DEBUGGER_QUIT_RC;
+    die(DEBUGGER_QUIT_RC);
   } else {
     int rc;
     if (get_int(psz_arg, &rc, true)) 
-      exit(rc);
+      die(rc);
   }
   return debug_readloop;
+}
+
+/* Terminate execution. */
+static debug_return_t 
+dbg_cmd_finish (char *psz_arg)
+{
+  i_debugger_stepping = 0;
+  i_debugger_nexting  = 0;
+  db_level            = 0;
+  return continue_execution;
 }
 
 /* 
@@ -1311,7 +1333,7 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
       } else {
 	printf("\nMakefile finished at level %d. Use R to restart\n", 
 	       makelevel);
-	printf("the makefile at this level or s or n to continue "
+	printf("the makefile at this level or 's', 'n', or 'F' to continue "
 	       "in parent\n");
       }
     } else {
@@ -1323,7 +1345,7 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
 
   print_debugger_location(p_target, NULL);
   
-  b_in_debugger = true;
+  in_debugger = true;
 
   /* Loop reading and executing lines until the user quits. */
   for ( debug_return = debug_readloop; debug_return == debug_readloop; ) {
@@ -1344,7 +1366,7 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
       free (line);
     }
   }
-  b_in_debugger=false;
+  in_debugger=false;
 #endif /* HAVE_LIBREADLINE */
   return debug_return;
 }

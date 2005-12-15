@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.30 2005/12/12 01:04:59 rockyb Exp $
+/* $Id: main.c,v 1.31 2005/12/15 02:42:38 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -918,7 +918,7 @@ main (int argc, char **argv, char **envp)
 {
 
   static char *stdin_nm = 0;
-  struct file *f;
+  file_t *f;
   int i;
   int makefile_status = MAKE_SUCCESS;
   char **p;
@@ -962,7 +962,7 @@ main (int argc, char **argv, char **envp)
 
   default_goal_file = 0;
   reading_file      = 0;
-  b_in_debugger     = false;
+  in_debugger       = false;
   
 
 #ifdef __CYGWIN__
@@ -2869,9 +2869,15 @@ print_data_base (void)
 /* Exit with STATUS, cleaning up as necessary.  */
 
 void
-die (int status) 
+die (int i_status) 
 {
   static char dying = 0;
+
+  /* If we are quitting the debugger and we're at the top level, then
+     we'll change the exit status to 0, normal.
+   */
+  if (makelevel == 0 && i_status == DEBUGGER_QUIT_RC)
+    i_status = 0 ;
 
   if (!dying)
     {
@@ -2883,7 +2889,8 @@ die (int status)
 	print_version ();
 
       /* Wait for children to die.  */
-      for (err = (status != 0); job_slots_used > 0; err = 0)
+      err = (i_status != 0);
+      while (job_slots_used > 0)
 	reap_children (1, err, NULL);
 
       /* Let the remote job module clean up its state.  */
@@ -2925,5 +2932,5 @@ die (int status)
   hash_free_directories();
   hash_free_function_table();
 
-  exit (status);
+  exit (i_status);
 }

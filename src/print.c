@@ -201,10 +201,22 @@ fatal (flocp, fmt, va_alist)
 
   fputs (_(".  Stop.\n"), stderr);
 
-  if (!b_in_debugger) {
+  /* If in_debugger == 1 and we don't die or enter a the debugger again.
+     if in_debugger == 77 then we just propagate that wish.
+     
+   */
+  switch (in_debugger) {
+  case 0:
     if ( (debugger_on_error & DEBUGGER_ON_FATAL) || debugger_enabled )
       enter_debugger(NULL, NULL, 2);
     die (2);
+    break;
+  case DEBUGGER_QUIT_RC:
+    die(DEBUGGER_QUIT_RC);
+  default:
+  case 1: ;
+    break;
+    
   }
 }
 

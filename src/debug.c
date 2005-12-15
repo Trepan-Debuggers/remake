@@ -40,6 +40,9 @@ debug_signal_handler (int sig)
 }
 #endif
 
+/*! Set the global db_level mask based on the command option list
+  db_flags.
+ */
 void
 decode_debug_flags (void)
 {

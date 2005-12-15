@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.h,v 1.6 2005/12/11 12:15:29 rockyb Exp $
+/* $Id: dbg_cmd.h,v 1.7 2005/12/15 02:42:38 rockyb Exp $
 Copyright (C) 2005 rocky@panix.com
 This file is part of GNU Make.
 
@@ -26,7 +26,12 @@ Boston, MA 02111-1307, USA.  */
 #define DBG_CMD_H
 #include "job.h"
 
-extern bool b_in_debugger;
+/*! 
+  If 0 (or false) we are not in the debugger command read loop.
+  If 1 (or true) we are in the debugger command read loop.
+  If DEBUGGER_QUIT_RC we've requested to quit.
+ */
+extern int in_debugger;
 
 /*!
   debugger command interface. 

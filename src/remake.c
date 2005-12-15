@@ -1,4 +1,4 @@
-/* $Id: remake.c,v 1.16 2005/12/11 12:15:29 rockyb Exp $
+/* $Id: remake.c,v 1.17 2005/12/15 02:42:38 rockyb Exp $
 Basic dependency engine for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -776,7 +776,8 @@ update_file_1 (file_t *file, unsigned int depth,
       return 0;
     }
 
-  DBF (DB_BASIC, _("Must remake target `%s'.\n"));
+  DBF (DB_BASIC, _("Must remake target `%s'.")); 
+  DB (DB_BASIC, (_("%s\n"), file->phony ? " Is a phony target." : ""));
 
   /* It needs to be remade.  If it's VPATH and not reset via GPATH, toss the
      VPATH.  */

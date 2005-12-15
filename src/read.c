@@ -1,4 +1,4 @@
-/* $Id: read.c,v 1.23 2005/12/12 01:04:59 rockyb Exp $
+/* $Id: read.c,v 1.24 2005/12/15 02:42:38 rockyb Exp $
 Reading and parsing of makefiles for GNU Make.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
@@ -404,10 +404,10 @@ eval_makefile (char *filename, int flags)
 
   /* Add this makefile to the list. */
   do_variable_definition (&ebuf.floc, "MAKEFILE_LIST", filename, 
-			  b_in_debugger ? o_debugger: o_file,
+			  in_debugger ? o_debugger: o_file,
                           f_append, 0);
 
-  if (b_debugger_preread && i_debugger_stepping && !b_in_debugger) 
+  if (b_debugger_preread && i_debugger_stepping && !in_debugger) 
     enter_debugger (NULL, NULL, 0);
 
   /* Evaluate the makefile */
@@ -879,7 +879,7 @@ eval (ebuffer_t *ebuf, int set_default)
 	}
 
       if (try_variable_definition (fstart, p, 
-				   b_in_debugger ? o_debugger: o_file, 0))
+				   in_debugger ? o_debugger: o_file, 0))
 	/* This line has been dealt with.  */
 	goto rule_complete;
 
@@ -1704,8 +1704,7 @@ record_target_var (nameseq_t *filenames, char *defn,
       /* Set up the variable to be *-specific.  */
       v->origin = origin;
       v->per_target = 1;
-      if (b_exported)
-        v->export = v_export;
+      v->export = b_exported ? v_export : v_default;
 
       /* If it's not an override, check to see if there was a command-line
          setting.  If so, reset the value.  */

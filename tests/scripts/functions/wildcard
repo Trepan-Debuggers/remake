@@ -29,13 +29,13 @@ open(MAKEFILE,"> $makefile");
 
 print MAKEFILE <<EOM;
 .PHONY: print1 print2 clean
-print1: ;\@echo \$(wildcard example.*)
+print1: ;\@echo \$(sort \$(wildcard example.*))
 print2:
-\t\@echo \$(wildcard example.?)
-\t\@echo \$(wildcard example.[a-z0-9])
-\t\@echo \$(wildcard example.[!A-Za-z_\\!])
+\t\@echo \$(sort \$(wildcard example.?))
+\t\@echo \$(sort \$(wildcard example.[a-z0-9]))
+\t\@echo \$(sort \$(wildcard example.[!A-Za-z_\\!]))
 clean:
-\t$delete_command \$(wildcard example.*)
+\t$delete_command \$(sort \$(wildcard example.*))
 EOM
 
 # END of Contents of MAKEFILE
@@ -85,12 +85,11 @@ else
 
 &run_make_with_options($makefile,"clean",&get_logfile);
 
-&compare_output($answer,&get_logfile(1));
-
-if ((-f "example.1")||(-f "example.two")||(-f "example.3")||(-f "example.for"))
-{
+if ((-f "example.1")||(-f "example.two")||(-f "example.3")||(-f "example.for")) {
    $test_passed = 0;
 }
+
+&compare_output($answer,&get_logfile(1));
 
 
 1;
