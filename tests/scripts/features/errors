@@ -1,3 +1,5 @@
+# -*-Perl-*-
+# $Id: errors,v 1.5 2005/12/17 20:07:45 rockyb Exp $
 $description = "The following tests the -i option and the '-' in front of \n"
               ."commands to test that make ignores errors in these commands\n"
               ."and continues processing.";
@@ -50,7 +52,8 @@ $answer = "$delete_command cleanit\n"
          ."work/features/errors.mk:2: [clean] Error $delete_error_code (ignored)\n"
          ."$delete_command foo\n";
 
-&run_make_with_options($makefile,"",&get_logfile);
+&run_make_with_options($makefile, "--no-extended-errors",
+		       &get_logfile);
 
 # If make acted as planned, it should ignore the error from the first
 # command in the target and execute the second which deletes the file "foo"
@@ -77,7 +80,8 @@ $answer = "$delete_command cleanit\n"
          . "work/features/errors.mk:5: [clean2] Error $delete_error_code (ignored)\n"
          ."$delete_command foo\n";
 
-&run_make_with_options($makefile,"clean2 -i",&get_logfile);
+&run_make_with_options($makefile, "clean2 -i --no-extended-errors",
+		       &get_logfile);
 
 if (-f "foo") {
   $test_passed = 0;

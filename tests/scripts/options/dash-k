@@ -53,7 +53,8 @@ else {
   $error_code = 512;
 }
 
-&run_make_with_options($makefile, "-k", &get_logfile, $error_code);
+&run_make_with_options($makefile, "-k --basename-filenames", &get_logfile, 
+		       $error_code);
 
 # Create the answer to what should be produced by this Makefile
 $answer = "cc -c main.c
@@ -89,11 +90,18 @@ EOF
 
 close(MAKEFILE);
 
-&run_make_with_options($makefile2, "-k", &get_logfile, $error_code);
+&run_make_with_options($makefile2, "-k --basename-filenames", &get_logfile, 
+		       $error_code);
 
 $answer = "exit 1
 work/options/dash-k.mk.1:9: *** [foo.o] Error 1
-$make_name: Target `all' not remade because of errors.\n";
+
+#0  foo.o at work/options/dash-k.mk.1:9
+#1  lib at work/options/dash-k.mk.1:7
+#2  exe1 at work/options/dash-k.mk.1:5
+#3  all at work/options/dash-k.mk.1:3
+$make_name: Target `all' not remade because of errors.
+";
 
 &compare_output($answer, &get_logfile(1));
 

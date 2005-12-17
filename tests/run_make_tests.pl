@@ -162,7 +162,10 @@ sub run_make_with_options {
   }
 
   if ($code != $expected_code) {
-    print "Error running $make_path (expected $expected_code; got $code): $command\n";
+    my $rc        = $code >> 8;
+    my $expect_rc = $expected_code >> 8;
+    print "Error running $make_path (expected $expect_rc; " . 
+	  "got $rc): $command\n";
     $test_passed = 0;
     # If it's a SIGINT, stop here
     if ($code & 127) {

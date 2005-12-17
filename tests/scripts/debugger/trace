@@ -1,5 +1,5 @@
 # -*-Perl-*-
-# $Id: trace,v 1.4 2005/11/13 16:14:14 rockyb Exp $
+# $Id: trace,v 1.5 2005/12/17 20:07:45 rockyb Exp $
 $description = "The following checks tracing.\n";
 
 $details = "We test line tracing, showing a target stack, line numbers\n"
@@ -66,7 +66,7 @@ EOF
 close(MAKEFILE);
 
 # We used option --trace in test 1, use short option name -x this time.
-&run_make_with_options($makefile, "-E -x -i --basename-filenames",
+&run_make_with_options($makefile, "-x -i --basename-filenames",
 		       &get_logfile);
 
 # Create the answer to what should be produced by this Makefile
@@ -117,7 +117,7 @@ EOF
 close(MAKEFILE);
 
 # We used option --trace in test 1, use short option name -x this time.
-&run_make_with_options($makefile, "-E -x -i --basename-filenames",
+&run_make_with_options($makefile, "-x -i --basename-filenames",
 		       &get_logfile);
 
 # Create the answer to what should be produced by this Makefile
