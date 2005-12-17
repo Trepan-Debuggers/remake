@@ -159,7 +159,7 @@ err (p_call, fmt, va_alist)
   VA_END (args);
 
   putc ('\n', stderr);
-  if (extended_errors) {
+  if (!no_extended_errors) {
     if (p_call) 
       print_target_stack(p_call, -1, MAX_STACK_SHOW);
     else if (p_stack_floc_top)
@@ -257,7 +257,7 @@ fatal_err (flocp, fmt, va_alist)
   VA_END (args);
 
   fputs (_(".  Stop.\n"), stderr);
-  if (extended_errors) {
+  if (!no_extended_errors) {
     if (p_call) 
       print_target_stack(p_call, -1, MAX_STACK_SHOW);
     else if (p_stack_floc_top)

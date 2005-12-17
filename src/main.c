@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.32 2005/12/17 04:24:14 rockyb Exp $
+/* $Id: main.c,v 1.33 2005/12/17 19:44:10 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -33,8 +33,16 @@ MA 02111-1307, USA.  */
 #include "variable.h"
 #include "commands.h"
 #include "rule.h"
-#include "getopt.h"
 #include "vpath.h"
+
+/* FreeBSD 4 has getopt in unistd.h. So we include that before
+   getopt.h */
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 /* alloca is in stdlib.h or alloca.h */
 #ifdef HAVE_STDLIB_H
@@ -150,8 +158,8 @@ int just_print_flag;
 
 /*! Print debugging info (--debug).  */
 
-/*! If 1, we give additional error reporting information. */
-int extended_errors = 0;
+/*! If 1, we don't give additional error reporting information. */
+int no_extended_errors = 0;
 
 /*! If 1, we print variable definitions. */
 int show_variable_definitions = 0;
@@ -427,8 +435,8 @@ static const command_switch_t switches[] =
 #endif
     { 'e', flag, (stringlist_t **) &env_overrides, 1, 1, 0, 0, 0,
         "environment-overrides", },
-    { 'E', flag, (stringlist_t **) &extended_errors, 1, 1, 0, 0, 0,
-        "extended-errors", },
+    { CHAR_MAX+3, flag, (stringlist_t **) &no_extended_errors, 1, 1, 0, 0, 0,
+        "no-extended-errors", },
     { 'f', string, &makefiles, 0, 0, 0, 0, 0, "file" },
     { 'h', flag, (stringlist_t **) &print_usage_flag, 0, 0, 0, 0, 0, "help" },
     { 'i', flag, (stringlist_t **) &ignore_errors_flag, 1, 1, 0, 0, 0,
@@ -437,7 +445,7 @@ static const command_switch_t switches[] =
         "include-dir" },
     { 'j', positive_int, (stringlist_t **) &job_slots, 1, 1, 0, (char *) &inf_jobs,
         (char *) &default_job_slots, "jobs" },
-    { CHAR_MAX+3, string, &jobserver_fds, 1, 1, 0, 0, 0,
+    { CHAR_MAX+4, string, &jobserver_fds, 1, 1, 0, 0, 0,
         "jobserver-fds" },
     { 'k', flag, (stringlist_t **) &keep_going_flag, 1, 1, 0, 0,
         (char *) &default_keep_going_flag, "keep-going" },
@@ -470,14 +478,14 @@ static const command_switch_t switches[] =
     { 'W', string, &new_files, 0, 0, 0, 0, 0, "what-if" },
     { 'V', flag, (stringlist_t **) &show_variable_definitions, 1, 1, 0, 0, 0,
 	"show-variables" },
-    { CHAR_MAX+4, flag, (stringlist_t **) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
+    { CHAR_MAX+5, flag, (stringlist_t **) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
 	"no-print-directory" },
-    { CHAR_MAX+5, flag, (stringlist_t **) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
+    { CHAR_MAX+6, flag, (stringlist_t **) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
 	"warn-undefined-variables" },
 #ifdef __CYGWIN__
-    { CHAR_MAX+6, flag, (stringlist_t **) &unixy_shell, 1, 1, 0, 0, 0,
+    { CHAR_MAX+7, flag, (stringlist_t **) &unixy_shell, 1, 1, 0, 0, 0,
         "unix" },
-    { CHAR_MAX+7, flag_off, (stringlist_t **) &unixy_shell, 1, 1, 0, 0, 0,
+    { CHAR_MAX+8, flag_off, (stringlist_t **) &unixy_shell, 1, 1, 0, 0, 0,
         "win32"} ,
 #endif
     { 0 }
@@ -2928,7 +2936,7 @@ die (int i_status)
   pop_variable_scope(true);
   free_pattern_rules();
   dep_chain_free(read_makefiles);
-  hash_free(&files, true);
+  hash_free(&files, (free_fn_t) free_file);
   hash_free_directories();
   hash_free_function_table();
   free(goals);

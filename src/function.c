@@ -1,4 +1,4 @@
-/* $Id: function.c,v 1.17 2005/12/11 12:15:29 rockyb Exp $
+/* $Id: function.c,v 1.18 2005/12/17 19:44:09 rockyb Exp $
 Builtin expansion for GNU Make.
 Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004, 2005
 Free Software Foundation, Inc.
@@ -37,10 +37,6 @@ Boston, MA 02111-1307, USA.  */
 
 #ifdef HAVE_ALLOCA_H
 #include <alloca.h>
-#endif
-
-#ifdef _AMIGA
-#include "amiga.h"
 #endif
 
 static unsigned int i_trace_level=0;
@@ -363,7 +359,7 @@ string_glob (char *line)
 		       0, NILF),
 		      sizeof (struct nameseq));
 
-  if (result == 0)
+  if (!result)
     {
       length = 100;
       result = (char *) xmalloc (100);
@@ -1018,7 +1014,7 @@ func_filter_filterout (char *o, char **argv, const char *funcname)
     pp->str[pp->length] = pp->save_c;
 
   if (hashing)
-    hash_free (&a_word_table, 0);
+    hash_free (&a_word_table, NULL);
 
   return o;
 }
@@ -2083,5 +2079,5 @@ hash_init_function_table (void)
 void
 hash_free_function_table (void)
 {
-  hash_free (&function_table, false);
+  hash_free (&function_table, NULL);
 }

@@ -1,4 +1,4 @@
-/* $Id: hash.c,v 1.9 2005/12/17 04:24:14 rockyb Exp $
+/* $Id: hash.c,v 1.10 2005/12/17 19:44:10 rockyb Exp $
    hash.c -- hash table maintenance
    Copyright (C) 1995, 1999, 2002, 2004, 2005 Free Software Foundation, Inc.
    Written by Greg McGary <gkm@gnu.org> <greg@mcgary.org>
@@ -174,19 +174,19 @@ hash_delete_at (hash_table_t *ht, const void *slot)
 
 /*! Free just the items in hash tables ht. */
 void
-hash_free_items (hash_table_t *ht)
+hash_free_items (hash_table_t *p_ht, free_fn_t free_fn)
 {
-  void **vec = ht->ht_vec;
-  void **end = &vec[ht->ht_size];
-  for (; vec < end; vec++)
+  void **pp_vec = p_ht->ht_vec;
+  void **end = &pp_vec[p_ht->ht_size];
+  for (; pp_vec < end; pp_vec++)
     {
-      void *item = *vec;
-      if (!HASH_VACANT (item))
-	free (item);
-      *vec = 0;
+      void *p_item = *pp_vec;
+      if (!HASH_VACANT (p_item))
+	if (free_fn) (*free_fn)(p_item);
+      *pp_vec = NULL;
     }
-  ht->ht_fill = 0;
-  ht->ht_empty_slots = ht->ht_size;
+  p_ht->ht_fill = 0;
+  p_ht->ht_empty_slots = p_ht->ht_size;
 }
 
 void
@@ -206,10 +206,10 @@ hash_delete_items (hash_table_t *ht)
 /*! Free memory allocated in hash tables ht. If b_free_items, free the items
   in ht too. */
 void
-hash_free (hash_table_t *ht, bool b_free_items)
+hash_free (hash_table_t *ht, free_fn_t free_fn)
 {
-  if (b_free_items)
-    hash_free_items (ht);
+  if (free_fn)
+    hash_free_items (ht, free_fn);
   else
     {
       ht->ht_fill = 0;

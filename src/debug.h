@@ -1,4 +1,4 @@
-/* $Id: debug.h,v 1.12 2005/12/15 02:42:38 rockyb Exp $
+/* $Id: debug.h,v 1.13 2005/12/17 19:44:09 rockyb Exp $
 Debugging macros and interface.
 Copyright (C) 1999, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -77,8 +77,8 @@ typedef struct stringlist
 
 extern int debug_flag;
 
-/*! If 1, we give additional error reporting information. */
-extern int extended_errors;
+/*! If 1, we don't give additional error reporting information. */
+extern int no_extended_errors;
 
 /*! If 1, we show variable definitions */
 extern int show_variable_definitions;

@@ -1,4 +1,4 @@
-/* $Id: hash.h,v 1.9 2005/12/10 02:50:32 rockyb Exp $
+/* $Id: hash.h,v 1.10 2005/12/17 19:44:10 rockyb Exp $
    Copyright (C) 1995, 1999, 2002, 2004, 2005 Free Software Foundation, Inc.
    Written by Greg McGary <gkm@gnu.org> <greg@mcgary.org>
 
@@ -29,10 +29,11 @@
 #include <stdio.h>
 #include <ctype.h>
 
-typedef unsigned long (*hash_func_t) (void const *key);
-typedef int (*hash_cmp_func_t) (void const *x, void const *y);
-typedef void (*hash_map_func_t) (void const *item);
-typedef void (*hash_map_arg_func_t) (void const *item, void *arg);
+typedef void (*free_fn_t) (void *p_item);
+typedef unsigned long (*hash_func_t) (void const *p_key);
+typedef int (*hash_cmp_func_t) (void const *p_x, void const *p_y);
+typedef void (*hash_map_func_t) (void const *p_item);
+typedef void (*hash_map_arg_func_t) (void const *p_item, void *p_arg);
 
 /** \brief hash table structure. We use hash tables for things like
     variables, targets, directires and functions. */
@@ -57,7 +58,7 @@ hash_table_t files;
 
 typedef int (*qsort_cmp_t) (void const *, void const *);
 
-void hash_init(hash_table_t *ht, unsigned long size,
+void hash_init(hash_table_t *p_ht, unsigned long size,
 	       hash_func_t hash_1, hash_func_t hash_2, 
 	       hash_cmp_func_t hash_cmp);
 
@@ -69,35 +70,35 @@ void hash_load (hash_table_t *ht, void *item_table, unsigned long cardinality,
    not found, return the address of an empty slot suitable for
    inserting `key'.  The caller is responsible for incrementing
    ht_fill on insertion.  */
-void **hash_find_slot (hash_table_t *ht, void const *key);
+void **hash_find_slot (hash_table_t *p_ht, void const *p_key);
 
-void *hash_find_item (hash_table_t *ht, void const *key);
-void *hash_insert (hash_table_t *ht, void *item);
-void *hash_insert_at (hash_table_t *ht, void *item, void const *slot);
-void *hash_delete (hash_table_t *ht, void const *item);
-void *hash_delete_at (hash_table_t *ht, void const *slot);
-void hash_delete_items (hash_table_t *ht);
+void *hash_find_item (hash_table_t *p_ht, void const *p_key);
+void *hash_insert (hash_table_t *p_ht, void *p_item);
+void *hash_insert_at (hash_table_t *p_ht, void *p_item, void const *p_slot);
+void *hash_delete (hash_table_t *p_ht, void const *p_item);
+void *hash_delete_at (hash_table_t *p_ht, void const *p_slot);
+void hash_delete_items (hash_table_t *p_ht);
 
 /*! Free just the items in hash tables ht. */
-void hash_free_items (hash_table_t *ht);
+void hash_free_items (hash_table_t *p_ht, free_fn_t free_fn);
 
 /*! Free memory allocated in hash tables ht. If b_free_items, free the items
   in ht too. */
-void hash_free (hash_table_t *ht, bool b_free_items);
+void hash_free (hash_table_t *p_ht, free_fn_t free_fn);
 
 /*! run map() on every vacant hash item in use in ht. */
-void hash_map (hash_table_t *ht, hash_map_func_t map);
+void hash_map (hash_table_t *p_ht, hash_map_func_t map);
 
 /*! run map(arg) on every vacant hash item in use in ht. */
-void hash_map_arg (hash_table_t *ht, hash_map_arg_func_t map, 
+void hash_map_arg (hash_table_t *p_ht, hash_map_arg_func_t map, 
 		       void *arg);
 
 /*! print hash statistics: percent in use, rehashes and collisions. */
-void hash_print_stats (hash_table_t *ht, FILE *out_FILE);
+void hash_print_stats (hash_table_t *p_ht, FILE *p_out_FILE);
 
 /*! Dump all items into a NULL-terminated vector.  Use the
    user-supplied vector_0, or a malloc one if vector_0 is NULL.  */
-void **hash_dump (hash_table_t *ht, void **vector_0, qsort_cmp_t compare);
+void **hash_dump (hash_table_t *p_ht, void **pp_vector_0, qsort_cmp_t compare);
 
 extern void *hash_deleted_item;
 #define HASH_VACANT(item) ((item) == 0 || (void *) (item) == hash_deleted_item)

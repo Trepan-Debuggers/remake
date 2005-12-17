@@ -302,5 +302,5 @@ uniquize_deps (dep_t *chain)
 	}
     }
 
-  hash_free (&deps, 0);
+  hash_free (&deps, NULL);
 }

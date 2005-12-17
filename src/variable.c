@@ -1,4 +1,4 @@
-/* $Id: variable.c,v 1.17 2005/12/11 12:15:29 rockyb Exp $
+/* $Id: variable.c,v 1.18 2005/12/17 19:44:10 rockyb Exp $
 Internals of variables for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -503,11 +503,11 @@ initialize_file_variables (struct file *file, int reading)
 }
 
 static void
-free_variable_name_and_value (const void *item)
+free_variable_name_and_value (const void *p_item)
 {
-  variable_t *v = (variable_t *) item;
-  free (v->name);
-  free (v->value);
+  variable_t *p_v = (variable_t *) p_item;
+  FREE (p_v->name);
+  FREE (p_v->value);
 }
 
 /*! Pop the top set off the current_variable_set_list, and free all
@@ -525,7 +525,7 @@ pop_variable_scope (bool b_toplevel)
   current_variable_set_list = p_setlist->next;
 
   hash_map (&p_set->table, free_variable_name_and_value);
-  hash_free (&p_set->table, 1);
+  hash_free (&p_set->table, free);
 
   if (!b_toplevel) {
     free ((char *) p_setlist);
@@ -838,7 +838,7 @@ target_environment (file_t *file)
   (void) sprintf (*result, "%s=%u", MAKELEVEL_NAME, makelevel + 1);
   *++result = 0;
 
-  hash_free (&table, 0);
+  hash_free (&table, NULL);
 
   return result_0;
 }
