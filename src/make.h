@@ -1,4 +1,4 @@
-/* $Id: make.h,v 1.19 2005/12/11 12:15:29 rockyb Exp $
+/* $Id: make.h,v 1.20 2005/12/17 04:24:14 rockyb Exp $
 Miscellaneous global declarations and portability cruft for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -351,6 +351,7 @@ extern bool unixy_shell;
 #define	CALLOC(t, n) ((t *) calloc (sizeof (t), (n)))
 #define MALLOC(t, n) ((t *) xmalloc (sizeof (t) * (n)))
 #define REALLOC(o, t, n) ((t *) xrealloc ((void *) (o), sizeof (t) * (n)))
+#define FREE(p) {free(p); p = NULL;}
 
 extern void die (int) __attribute__ ((noreturn));
 extern char *concat (const char *, const char *, const char *);

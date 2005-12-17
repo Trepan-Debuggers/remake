@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.31 2005/12/15 02:42:38 rockyb Exp $
+/* $Id: main.c,v 1.32 2005/12/17 04:24:14 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -2067,16 +2067,16 @@ main (int argc, char **argv, char **envp)
     int status;
 
     /* If there were no command-line goals, use the default.  */
-    if (goals == 0)
+    if (!goals)
       {
-	if (default_goal_file != 0)
+	if (default_goal_file)
 	  {
 	    goals = CALLOC(dep_t, 1);
 	    goals->file = default_goal_file;
 	  }
       }
     else
-      lastgoal->next = 0;
+      lastgoal->next = NULL;
 
     if (!goals)
       {
@@ -2217,7 +2217,7 @@ handle_non_switch_argument (arg, env)
       struct file *f = enter_command_line_file (arg);
       f->cmd_target = 1;
 
-      if (goals == 0)
+      if (!goals)
 	{
 	  goals = CALLOC(dep_t, 1);
 	  lastgoal = goals;
@@ -2373,7 +2373,7 @@ decode_switches (int argc, char **argv, int env)
 		      sl->list = REALLOC (sl->list, char *, sl->max);
 		    }
 		  sl->list[sl->idx++] = strdup(optarg);
-		  sl->list[sl->idx] = 0;
+		  sl->list[sl->idx]   = NULL;
 		  break;
 
 		case positive_int:
@@ -2931,6 +2931,7 @@ die (int i_status)
   hash_free(&files, true);
   hash_free_directories();
   hash_free_function_table();
+  free(goals);
 
   exit (i_status);
 }

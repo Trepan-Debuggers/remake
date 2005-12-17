@@ -1,4 +1,4 @@
-/* $Id: default.c,v 1.8 2005/12/12 01:04:59 rockyb Exp $
+/* $Id: default.c,v 1.9 2005/12/17 04:24:14 rockyb Exp $
 Data base of default implicit rules for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96, 2004 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -83,73 +83,6 @@ static struct pspec default_terminal_rules[] =
 
 static char *default_suffix_rules[] =
   {
-#ifdef VMS
-    ".obj.exe",
-    "$(LINK.obj) $^ $(LOADLIBES) $(LDLIBS) $(CRT0) /exe=$@",
-    ".mar.exe",
-    "$(COMPILE.mar) $^ \n $(LINK.obj) $(subst .mar,.obj,$^) $(LOADLIBES) $(LDLIBS) $(CRT0) /exe=$@",
-    ".s.exe",
-    "$(COMPILE.s) $^ \n $(LINK.obj) $(subst .s,.obj,$^) $(LOADLIBES) $(LDLIBS) $(CRT0) /exe=$@",
-    ".c.exe",
-    "$(COMPILE.c) $^ \n $(LINK.obj) $(subst .c,.obj,$^) $(LOADLIBES) $(LDLIBS) $(CRT0) /exe=$@",
-    ".cc.exe",
-#ifdef GCC_IS_NATIVE
-    "$(COMPILE.cc) $^ \n $(LINK.obj) $(CXXSTARTUP),sys$$disk:[]$(subst .cc,.obj,$^) $(LOADLIBES) $(LXLIBS) $(LDLIBS) $(CXXRT0) /exe=$@",
-#else
-    "$(COMPILE.cc) $^ \n $(CXXLINK.obj) $(subst .cc,.obj,$^) $(LOADLIBES) $(LXLIBS) $(LDLIBS) $(CXXRT0) /exe=$@",
-    ".cxx.exe",
-    "$(COMPILE.cxx) $^ \n $(CXXLINK.obj) $(subst .cxx,.obj,$^) $(LOADLIBES) $(LXLIBS) $(LDLIBS) $(CXXRT0) /exe=$@",
-#endif
-    ".for.exe",
-    "$(COMPILE.for) $^ \n $(LINK.obj) $(subst .for,.obj,$^) $(LOADLIBES) $(LDLIBS) /exe=$@",
-    ".pas.exe",
-    "$(COMPILE.pas) $^ \n $(LINK.obj) $(subst .pas,.obj,$^) $(LOADLIBES) $(LDLIBS) /exe=$@",
-
-    ".com",
-    "copy $< >$@",
-
-    ".mar.obj",
-    "$(COMPILE.mar) /obj=$@ $<",
-    ".s.obj",
-    "$(COMPILE.s) /obj=$@ $<",
-    ".ss.obj",
-    "$(COMPILE.s) /obj=$@ $<",
-    ".c.i",
-    "$(COMPILE.c)/prep /list=$@ $<",
-    ".c.s",
-    "$(COMPILE.c)/noobj/machine /list=$@ $<",
-    ".i.s",
-    "$(COMPILE.c)/noprep/noobj/machine /list=$@ $<",
-    ".c.obj",
-    "$(COMPILE.c) /obj=$@ $<",
-    ".cc.ii",
-    "$(COMPILE.cc)/prep /list=$@ $<",
-    ".cc.ss",
-    "$(COMPILE.cc)/noobj/machine /list=$@ $<",
-    ".ii.ss",
-    "$(COMPILE.cc)/noprep/noobj/machine /list=$@ $<",
-    ".cc.obj",
-    "$(COMPILE.cc) /obj=$@ $<",
-    ".cxx.obj",
-    "$(COMPILE.cxx) /obj=$@ $<",
-    ".for.obj",
-    "$(COMPILE.for) /obj=$@ $<",
-    ".pas.obj",
-    "$(COMPILE.pas) /obj=$@ $<",
-
-    ".y.c",
-    "$(YACC.y) $< \n rename y_tab.c $@",
-    ".l.c",
-    "$(LEX.l) $< \n rename lexyy.c $@",
-
-    ".texinfo.info",
-    "$(MAKEINFO) $<",
-
-    ".tex.dvi",
-    "$(TEX) $<",
-
-#else /* ! VMS */
-
     ".o",
     "$(LINK.o) $^ $(LOADLIBES) $(LDLIBS) -o $@",
     ".s",
@@ -270,98 +203,11 @@ static char *default_suffix_rules[] =
 
     ".web.tex",
     "$(WEAVE) $<",
-
-#endif /* !VMS */
-
     0, 0,
   };
 
 static char *default_variables[] =
   {
-#ifdef VMS
-#ifdef __ALPHA
-    "ARCH", "ALPHA",
-#endif
-#ifdef __ia64
-    "ARCH", "IA64",
-#endif
-#ifdef __VAX
-    "ARCH", "VAX",
-#endif
-    "AR", "library/obj",
-    "ARFLAGS", "/replace",
-    "AS", "macro",
-    "MACRO", "macro",
-#ifdef GCC_IS_NATIVE
-    "CC", "gcc",
-#else
-    "CC", "cc",
-#endif
-    "CD", "builtin_cd",
-    "MAKE", "make",
-    "ECHO", "write sys$$output \"",
-#ifdef GCC_IS_NATIVE
-    "C++", "gcc/plus",
-    "CXX", "gcc/plus",
-#else
-    "C++", "cxx",
-    "CXX", "cxx",
-    "CXXLD", "cxxlink",
-#endif
-    "CO", "co",
-    "CPP", "$(CC) /preprocess_only",
-    "FC", "fortran",
-    /* System V uses these, so explicit rules using them should work.
-       However, there is no way to make implicit rules use them and FC.  */
-    "F77", "$(FC)",
-    "F77FLAGS", "$(FFLAGS)",
-    "LD", "link",
-    "LEX", "lex",
-    "PC", "pascal",
-    "YACC", "bison/yacc",
-    "YFLAGS", "/Define/Verbose",
-    "BISON", "bison",
-    "MAKEINFO", "makeinfo",
-    "TEX", "tex",
-    "TEXINDEX", "texindex",
-
-    "RM", "delete/nolog",
-
-    "CSTARTUP", "",
-#ifdef GCC_IS_NATIVE
-    "CRT0", ",sys$$library:vaxcrtl.olb/lib,gnu_cc_library:crt0.obj",
-    "CXXSTARTUP", "gnu_cc_library:crtbegin.obj",
-    "CXXRT0", ",sys$$library:vaxcrtl.olb/lib,gnu_cc_library:crtend.obj,gnu_cc_library:gxx_main.obj",
-    "LXLIBS", ",gnu_cc_library:libstdcxx.olb/lib,gnu_cc_library:libgccplus.olb/lib",
-    "LDLIBS", ",gnu_cc_library:libgcc.olb/lib",
-#else
-    "CRT0", "",
-    "CXXSTARTUP", "",
-    "CXXRT0", "",
-    "LXLIBS", "",
-    "LDLIBS", "",
-#endif
-
-    "LINK.obj", "$(LD) $(LDFLAGS)",
-#ifndef GCC_IS_NATIVE
-    "CXXLINK.obj", "$(CXXLD) $(LDFLAGS)",
-    "COMPILE.cxx", "$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH)",
-#endif
-    "COMPILE.c", "$(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH)",
-    "COMPILE.cc", "$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH)",
-    "YACC.y", "$(YACC) $(YFLAGS)",
-    "LEX.l", "$(LEX) $(LFLAGS)",
-    "COMPILE.for", "$(FC) $(FFLAGS) $(TARGET_ARCH)",
-    "COMPILE.pas", "$(PC) $(PFLAGS) $(CPPFLAGS) $(TARGET_ARCH)",
-    "COMPILE.mar", "$(MACRO) $(MACROFLAGS)",
-    "COMPILE.s", "$(AS) $(ASFLAGS) $(TARGET_MACH)",
-    "LINT.c", "$(LINT) $(LINTFLAGS) $(CPPFLAGS) $(TARGET_ARCH)",
-
-    "MV", "rename/new_version",
-    "CP", "copy",
-
-#else /* !VMS */
-
     "AR", "ar",
     "ARFLAGS", "rv",
     "AS", "as",
@@ -477,17 +323,11 @@ static char *default_variables[] =
     "SCCS_OUTPUT_OPTION", "-G$@",
 #endif
 
-#ifdef _AMIGA
-    ".LIBPATTERNS", "%.lib",
-#else
 #ifdef __MSDOS__
     ".LIBPATTERNS", "lib%.a $(DJDIR)/lib/lib%.a",
 #else
     ".LIBPATTERNS", "lib%.so lib%.a",
 #endif
-#endif
-
-#endif /* !VMS */
     0, 0
   };
 
@@ -529,7 +369,7 @@ install_default_suffix_rules (void)
     /* Don't clobber cmds given in a makefile if there were any.  */
     if (!f->cmds) {
       f->cmds = CALLOC(commands_t, 1);
-      f->cmds->commands = s[1];
+      f->cmds->commands = strdup(s[1]);
     }
   }
 }
@@ -546,7 +386,9 @@ free_default_suffix (void)
   for (s = default_suffix_rules; *s; s += 2) {
     file_t *f = lookup_file (s[0]);
     /* Don't clobber cmds given in a makefile if there were any.  */
-    if (f && f->cmds) free (f->cmds);
+    if (f && f->cmds) {
+      FREE (f->cmds);
+    }
   }
   if (suffix_file)
     dep_chain_free(suffix_file->deps);

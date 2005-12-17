@@ -1,4 +1,4 @@
-/* $Id: dir_fns.c,v 1.2 2005/12/11 12:15:29 rockyb Exp $
+/* $Id: dir_fns.c,v 1.3 2005/12/17 04:24:14 rockyb Exp $
 Directory hashing for GNU Make.
 Copyright (C) 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -978,13 +978,6 @@ read_dirstream (void * stream)
   return 0;
 }
 
-static void
-ansi_free(void *p)
-{
-    if (p)
-      free(p);
-}
-
 /* On 64 bit ReliantUNIX (5.44 and above) in LFS mode, stat() is actually a
  * macro for stat64().  If stat is a macro, make a local wrapper function to
  * invoke it.
@@ -1008,7 +1001,7 @@ dir_setup_glob (glob_t *gl)
   /* Bogus sunos4 compiler complains (!) about & before functions.  */
   gl->gl_opendir = open_dirstream;
   gl->gl_readdir = read_dirstream;
-  gl->gl_closedir = ansi_free;
+  gl->gl_closedir = free;
   gl->gl_stat = local_stat;
   /* We don't bother setting gl_lstat, since glob never calls it.
      The slot is only there for compatibility with 4.4 BSD.  */

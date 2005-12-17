@@ -93,10 +93,10 @@ message (int prefix, const char *fmt, va_alist)
 
 void
 #if __STDC__ && HAVE_STDVARARGS
-error (const struct floc *flocp, const char *fmt, ...)
+error (const floc_t *flocp, const char *fmt, ...)
 #else
 error (flocp, fmt, va_alist)
-     const struct floc *flocp;
+     const floc_t *flocp;
      const char *fmt;
      va_dcl
 #endif

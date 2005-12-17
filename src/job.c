@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.26 2005/12/15 02:58:36 rockyb Exp $
+/* $Id: job.c,v 1.27 2005/12/17 04:24:14 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005
 Free Software Foundation, Inc.
@@ -588,8 +588,7 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
         remove (c->sh_batch_file);
 
         /* all done with memory */
-        free (c->sh_batch_file);
-        c->sh_batch_file = NULL;
+        FREE (c->sh_batch_file);
       }
 
       /* If this child had the good stdin, say it is now free.  */

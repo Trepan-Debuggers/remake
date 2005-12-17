@@ -164,7 +164,7 @@ convert_suffix_rule (char *target, char *source, commands_t *cmds)
   dep_t *deps;
   unsigned int len;
 
-  if (target == 0)
+  if (!target)
     /* Special case: TARGET being nil means we are defining a
        `.X.a' suffix rule; the target pattern is always `(%.o)'.  */
     {
@@ -187,8 +187,8 @@ convert_suffix_rule (char *target, char *source, commands_t *cmds)
   percents[0] = targpercent;
   names[1] = percents[1] = 0;
 
-  if (source == 0)
-    deps = 0;
+  if (!source)
+    deps = NULL;
   else
     {
       /* Construct the dependency name.  */
@@ -232,7 +232,7 @@ convert_to_pattern (void)
     {
       /* Make a rule that is just the suffix, with no deps or commands.
 	 This rule exists solely to disqualify match-anything rules.  */
-      convert_suffix_rule (dep_name (d), (char *) 0, (commands_t *) NULL);
+      convert_suffix_rule (dep_name (d), (char *) NULL, (commands_t *) NULL);
 
       f = d->file;
       if (f->cmds != 0)
@@ -242,7 +242,7 @@ convert_to_pattern (void)
       /* Record a pattern for each of this suffix's two-suffix rules.  */
       slen = strlen (dep_name (d));
       memmove (rulename, dep_name (d), slen);
-      for (d2 = suffix_file->deps; d2 != 0; d2 = d2->next)
+      for (d2 = suffix_file->deps; d2; d2 = d2->next)
 	{
 	  s2len = strlen (dep_name (d2));
 
@@ -251,13 +251,13 @@ convert_to_pattern (void)
 
 	  memmove (rulename + slen, dep_name (d2), s2len + 1);
 	  f = lookup_file (rulename);
-	  if (f == 0 || f->cmds == 0)
+	  if (!f || !f->cmds)
 	    continue;
 
 	  if (s2len == 2 && rulename[slen] == '.' && rulename[slen + 1] == 'a')
 	    /* A suffix rule `.X.a:' generates the pattern rule `(%.o): %.X'.
 	       It also generates a normal `%.a: %.X' rule below.  */
-	    convert_suffix_rule ((char *) 0, /* Indicates `(%.o)'.  */
+	    convert_suffix_rule (NULL, /* Indicates `(%.o)'.  */
 				 dep_name (d),
 				 f->cmds);
 
@@ -410,8 +410,10 @@ free_rule (rule_t *rule, rule_t *lastrule)
   unsigned int i;
   dep_t *dep;
 
-  for (i = 0; rule->targets[i] != 0; ++i)
-    free (rule->targets[i]);
+  for (i = 0; rule->targets[i] != 0; ++i) {
+    FREE(rule->targets[i]);
+  }
+  
 
   dep = rule->deps;
   while (dep)
@@ -419,15 +421,15 @@ free_rule (rule_t *rule, rule_t *lastrule)
       dep_t *t;
 
       t = dep->next;
-      /* We might leak dep->name here, but I'm not sure how to fix this: I
-         think that pointer might be shared (e.g., in the file hash?)  */
-      free ((char *) dep);
+      FREE(dep->name);
+      free (dep);
       dep = t;
     }
 
-  free ((char *) rule->targets);
-  free ((char *) rule->suffixes);
-  free ((char *) rule->lens);
+  /* FIXME: Need to free cmd and cmd->commands. */
+  FREE(rule->targets);
+  FREE(rule->suffixes);
+  FREE(rule->lens);
 
   /* We can't free the storage for the commands because there
      are ways that they could be in more than one place:
