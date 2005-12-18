@@ -19,13 +19,14 @@
 
 @c
 @c Name of debugger program.  Used also for prompt string.
+@set REMAKE @sc{gnu} Remake
 @set MAKE @sc{gnu} Make
 
-@set DBG the @value{MAKE} debugger
-@set dBG The @value{MAKE} debugger
+@set DBG the @value{REMAKE} debugger
+@set dBG The @value{REMAKE} debugger
 @set DDD @acronym{DDD}
 
-@settitle @value{MAKE} Debugger
+@settitle @value{REMAKE} Debugger
 @setchapternewpage odd
 @c @setcontentsaftertitlepage
 
@@ -43,7 +44,7 @@
 @end macro
 
 @macro MAKE {}
-@value{MAKE}
+@value{REMAKE}
 @end macro
 
 @macro DBG {}
@@ -161,21 +162,21 @@ these) to help you catch bugs in the act:
 
 @itemize @bullet
 @item
-Have @value{MAKE} stop at specified places such as targets.
+Have @value{REMAKE} stop at specified places such as targets.
 
 @item
-Examine what has happened, when @value{MAKE} has stopped or encounters
+Examine what has happened, when @value{REMAKE} has stopped or encounters
 an error. 
 
 @item
-Change the internal state of things inside @value{MAKE}, so you can
+Change the internal state of things inside @value{REMAKE}, so you can
 experiment with correcting the effects of one bug and go on to
 discover another.
 @end itemize
 
 Although you can use the @value{DBG} to debug Makefiles, it can also
 be used just as a front-end for learning more about Makefiles and
-writing them with @value{MAKE}. 
+writing them with @value{REMAKE}. 
 
 A degenerate and less-interactive form of debugging is @emph{tracing}
 in which one passively watches some of the steps that go on in
@@ -187,7 +188,7 @@ processing a Makefile.
 @end menu
 
 @node Sample Sessions
-@section Sample @value{MAKE} Debugger Sessions
+@section Sample @value{REMAKE} Debugger Sessions
 
 You can use this manual at your leisure to read all about @value{DBG}.
 However, a handful of commands are enough to get started using the
@@ -199,7 +200,7 @@ to make it easier to pick out from the surrounding output.
 @end iftex
 
 @menu
-* Tracing Not::              How not to debug your program
+* Tracing Not::              How NOT to debug your program
 * Tracing::                  Using --trace or -x on a simple example
 * Tracing Makefile Reading:: A real-world trace.
 * Simple Debugging::         Getting into the Debugger (--debugging)
@@ -208,19 +209,24 @@ to make it easier to pick out from the surrounding output.
 @end menu
 
 @node Tracing Not
-@subsection How not to debug @value{MAKE}
+@subsection How NOT to debug @value{MAKE}
 
 A simplified form of debugging is @emph{tracing}. And so before we
-get into debugging proper, let's show some of the tracing abilities. 
+get into debugging proper, we'll discuss tracing.
 
 @value{MAKE} has had for a long time a ``debug'' flag (@code{--debug} or
-@code{-d}) which prints ``lots of debugging information.'' But I've
-found that gives way too much information to be helpful. 
+@code{-d}) which prints ``lots of debugging information.'' For the
+unwary one might think you just add this simple option and that's
+going to do what you want. Wrong!@footnote{From the standpoint of a
+nice user interface, this options should get replaced with
+@code{--trace}; At present, this base is probably a little to young to
+right nowmake such a bold change, tempting as it is to do.}
 
-Furthermore, debug-flag information @emph{omits} information that
-would be helpful.
+Alas, the @code{--debug} option gives way too much information to be
+helpful. Furthermore, debug-flag information @emph{omits} information
+that would be helpful.
 
-To understand this better here is a simple small Makefile with an invalid
+To elaborate upon this, here is a simple small Makefile with an invalid
 shell command in it:
 
 @smallexample
@@ -232,10 +238,11 @@ shell command in it:
 6: foo:
 7: 	@@if [ -n FOO ] ; \
 8: 	then echo "test okay"; fi
-9: 	bogus-command
+9: 	@@bogus-command
 @end smallexample 
 
-Now let's see what happens when we run ``debug'' from an unpatched @value{MAKE}:
+Now let's see what happens when we run ``debug'' from an unpatched
+@value{MAKE}:
 
 @smallexample
 $ @b{/usr/bin/make -d -f test1}
@@ -304,11 +311,17 @@ nice to list the line in the Makefile and full filename as well as the
 target name.
 
 @node Tracing
-@subsection Sample @value{MAKE} Trace Session
+@subsection Sample @value{REMAKE} Trace Sessions
 
-Let's try the new kind of trace we prove in this patched @value{MAKE}.
-We use the new option @code{--trace} which has the short-form option
-format @code{-x}. Again here's the sample Makefile:
+Okay so now that we know what @emph{not} to do, lets delve into things
+may be more helpful.
+
+There are variants of the @code{--debug} command option that provide
+shorter and more-interesting information. One is called ``basic''
+tracing. Another is the @code{--just-print} option.
+
+Again here's the sample Makefile:
+
 @smallexample
 1: # 
 2: SHELL=/bin/bash
@@ -318,8 +331,74 @@ format @code{-x}. Again here's the sample Makefile:
 6: foo:
 7: 	@@if [ -n FOO ] ; \
 8: 	then echo "test okay"; fi
-9: 	bogus-command
-@end smallexample 
+9: 	@@bogus-command
+@end smallexample
+
+In an unpatched @value{MAKE} version 3.81 (and earlier) @value{MAKE},
+@code{--just-print} gives this:
+
+@smallexample
+$ @b{make --just-print -f /tmp/test1}
+if [ -n FOO ] ; \
+then echo "test okay"; fi
+bogus-command
+@end smallexample
+
+Well, not much different from the original Makefile, except that
+information about where this gets run from is curiously missing. One
+of the goals of @value{REMAKE} is to include reference
+information. Here's what we give instead:
+
+@smallexample
+$ @b{make --just-print -f /tmp/test1}
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+/tmp/remake/src/test1:7: foo
+if [ -n FOO ] ; \
+then echo "test okay"; fi
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+/tmp/remake/src/test1:9: foo
+bogus-command
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+@end smallexample
+
+What's different is that we make more clear where in the file this
+command is getting run from and from what target. This may be a little
+bit subtle, but from the above output it is more apparent that there
+are @emph{two} commands that are getting run from target @code{foo}:
+one at line 7 and another at line 9.
+
+One last and perhaps also subtle point is the format of the location
+information. This format is similar to other debugger output. The
+above command is run insode a @sc{gnu} Emacs compilation buffer the format
+of the message is such that @code{compile-goto-error} will possition
+one at that point in the file in another Emacs window.
+
+Now let's try @code{--debug=basic} alluded to at the beginning of this
+section. In an unpatched @value{MAKE} version 3.81 (and earlier)
+@value{MAKE}, @code{--debug=basic} gives this:
+
+@smallexample
+$ @b{make --just-print -f /tmp/test1}
+GNU Make 3.80
+Copyright (C) 2002  Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.
+There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.
+Reading makefiles...
+Updating goal targets....
+ File `all' does not exist.
+   File `foo' does not exist.
+  Must remake target `foo'.
+test okay
+/bin/bash: bogus-command: command not found
+make: *** [foo] Error 127
+##########################################################
+@end smallexample
+
+Now let's try the new kind of trace we provide in this patched
+@value{REMAKE}.  We use the new option @code{--trace} which has the
+short-form option format @code{-x}.
 
 And here's the trace of it:
 @smallexample
@@ -327,65 +406,66 @@ And here's the trace of it:
 $ @b{remake --trace -f /tmp/test1}
 Reading makefiles...
 Updating goal targets....
- /tmp/test1:4	File `all' does not exist.
-/tmp/test1:6 foo
-   /tmp/test1:6	File `foo' does not exist.
-  /tmp/test1:6	Must remake target `foo'.
-/tmp/test1:7 foo
-	if [ -n FOO ] ; \
+ /tmp/remake/src/test1:4	File `all' does not exist.
+   /tmp/remake/src/test1:6	File `foo' does not exist.
+  /tmp/remake/src/test1:6	Must remake target `foo'.
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+/tmp/remake/src/test1:7: foo
+if [ -n FOO ] ; \
 then echo "test okay"; fi
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 test okay
-/tmp/test1:9 foo
-	bogus-command
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+/home/src/external-cvs/remake/src/test1:9: foo
+bogus-command
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 /bin/bash: bogus-command: command not found
 test1:9: *** [foo] Error 127
 
-#0  foo at /tmp/test1:9
-#1  all at /tmp/test1:4
+#0  foo at /tmp/remake/src/test1:9
+#1  all at /tmp/remake/src/test1:4
 Command-line arguments:
 	"--trace -f test1"
 @end group
 @end smallexample 
 
-Notice there is some debug output that is the same as the first run.
-For the first two lines example ``Reading makefiles...'' and
-``Updating goal targets...''. This is the ``basic'' output you would
-get in GNU Make using the option @code{--debug=basic}. There are some
-other lines that are the same but they have line numbers and
-filenames added. For example @code{/tmp/test1:4  File `foo' does not exist.}'
+So in some ways this is just a combination of the enhanced (with
+location information) @code{--just-print} option combined with the
+enhanced @code{--debug=basic} information.
 
-What is completely new is that we also show the line and targets
-before we execute any sort of shell command. The goal is simple trace
-output for a simple Makefile. (Although I think that the above may be
-improved, it is far better than what is in GNU make by default.)
-
-A slight subtlety you might not have noticed is that we echoed the
-command @code{if [ -n FOO ] ...} even though the original makefile had
-this set to be silent (in particular by preceding the command that
-starts ``if'' with an @@). When tracing, we override any silent
-execution (making execution more verbose); information is usually
-helpful in finding what's going on and what got run.
-
-After the error from the shell is printed and we report the return
-code (127), the stack of targets is listed. Were working on target
+What is completely new and hasn't been seen above is the information
+given when we hit an error.  After the error and we report the return
+code (127), the stack of targets is listed. We were working on target
 @code{foo} on line 9 of file @code{/tmp/test1} which was rebuilt
 because we were making target @code{all} on line 4 of file
 @code{/tmp/test1}.
 
-In sum, when we hit the error, the above trace gives some idea of why
-we decided to to run line 9 and what got executed before that, what
-targets were in the process of getting considered at the error, and
-how the program was run.
+In other words, when we hit the error, the above trace gives some idea
+of why we decided to to run line 9 and what got executed before that,
+what targets were in the process of getting considered at the error,
+and how the program was run.
+
+One last subtlety that you might not have noticed is that we echoed
+the command @code{boguscommand} even though the original makefile had
+this set to be silent (in particular by preceding that command with an
+@@). When tracing, we override any silent execution (making execution
+more verbose); information is usually helpful in finding what's going
+on and what got run.
+
+In sum, I hope I've conveyed the idea that the goal is simple trace
+output for a simple Makefile. Although I think that the above may be
+improved, it is far better than what has previously been available in
+GNU make.
 
 @node Tracing Makefile Reading
 @subsection Tracing Makefile Reading
 
-@value{MAKE} works like many other interpreters. First Makefiles are
-read in and parsed and then they are ``executed'' which in
-@value{MAKE} means that dependency checks are done and actions are
-performed based on those checks.  However there is quite a bit work
-that may be done just in portion which reads in the Makefiles and
-performs variable expansion.
+@value{MAKE} and @value{REMAKE} work like many other
+interpreters. First Makefiles are read in and parsed and then they are
+``executed'' which in @value{MAKE} means that dependency checks are
+done and actions are performed based on those checks.  However there
+is quite a bit work that may be done just in portion which reads in
+the Makefiles and performs variable expansion.
 
 To see this, let's use a real example -- the Makefile for the GNU Make
 + Debugger. For comparison, here is a simple trace:
@@ -440,11 +520,11 @@ Reading makefile `Makefile'...
 @end smallexample 
 
 @node Simple Debugging
-@subsection Simple @value{MAKE} Debug Sessions
+@subsection Simple @value{REMAKE} Debug Sessions
 
-Now let's go into the debugger: for this use the @code{--debugger} or
-@code{-X} option. Again we'll use the Makefile from the source code of
-this distribution.
+Now let's go into the debugger. To do this, use the @code{--debugger}
+or @code{-X} option. Again we'll use the Makefile from the source code
+of this distribution.
 
 @smallexample
 $  @b{remake --debugger}
@@ -536,7 +616,7 @@ such as @code{target ../aclocal.m4}, or used the @value{MAKE}
 automatic variable name @code{@@}.
 
 What is going on here is we are checking to see if the Makefile needs
-to be remade, and in doing this wee need to see if Makefile.in needs
+to be remade, and in doing this we need to see if Makefile.in needs
 to be remade and that depends on target @code{../aclocal.m4}. 
 
 We don't have to be stopped on a target to get information about it:
@@ -609,8 +689,8 @@ makedb<2> where
 @node Debugging Variables
 @subsection Debugging Variables
 
-We've seen we can get information about @value{MAKE}'s targets.  We
-can also get information about @value{MAKE}'s variables. That is done
+We've seen we can get information about @value{REMAKE}'s targets.  We
+can also get information about @value{REMAKE}'s variables. That is done
 with the @code{print} command. (See @ref{Print}.)
 
 @smallexample
@@ -920,7 +1000,7 @@ published by other publishers, at
 @url{http://www.fsf.org/doc/other-free-books.html}.
 
 @node Invocation
-@chapter Getting in and out and new @value{MAKE} Command Options
+@chapter Getting in and out and new @value{REMAKE} Command Options
 
 This chapter discusses how to start @value{DBG}, and how to get out of it.
 The essentials are:
@@ -964,7 +1044,7 @@ make --debugger @var{other-make-arguments...}
 make -X @var{other-make-arguments...}
 @end example
 
-This runs @value{MAKE} as it would normally do; that is Makefiles are
+This runs @value{REMAKE} as it would normally do; that is Makefiles are
 read and dependencies are checked. However it is in a ``stepping''
 mode and will go into the debugger read loop when before encounter in
 ``interesting'' target. An ``interesting'' target is one that has
@@ -986,20 +1066,20 @@ Here is a full list of debugger options and suboptions...
 @cindex @code{-X}
 The ``preread'' suboption enters the debugger after command-line
 options are parsed but before any Makefiles have been read. It also
-puts @value{MAKE} in step tracing mode and sets the debugger to enter
+puts @value{REMAKE} in step tracing mode and sets the debugger to enter
 if it encounters an error.
 
 The ``preaction suboption enters the debugger after command-line
 options are parsed and after Makefiles have been read, but before any
-action is performed. It also puts @value{MAKE} in step tracing mode
+action is performed. It also puts @value{REMAKE} in step tracing mode
 and sets the debugger to enter if it encounters an error.
 
 The ``error'' suboption enters the debugger when it encounters an
-error. Depending on other conditions, @value{MAKE} can ignore errors
+error. Depending on other conditions, @value{REMAKE} can ignore errors
 and continue processing. 
 
 The ``fatal'' suboption enters the debugger when it encounters a fatal
-error. A fatal error generally cause @value{MAKE} to abort execution.
+error. A fatal error generally cause @value{REMAKE} to abort execution.
 
 The ``full'' suboption is just a convenience for giving the ``enter,''
 ``error,'' and ``fatal'' options described above.
@@ -1010,7 +1090,7 @@ If no suboption is provided, ``full'' is assumed.
 @item --extended-errors
 @itemx -E
 @cindex @code{-E}
-This option causes @value{MAKE} to print a target stack trace if it
+This option causes @value{REMAKE} to print a target stack trace if it
 encounters an error.
 
 @item --trace @ovar{=suboption}
@@ -1019,7 +1099,7 @@ encounters an error.
 Causes target names which have commands associated with them to get
 printed before they are considered. If a target has multiple commands
 each one is printed before they are run whether or not the command has
-the @value{MAKE} @@ specifier which would otherwise cause them not to
+the @value{REMAKE} @@ specifier which would otherwise cause them not to
 echo. 
 
 This option also allows for suboptions, @code{read}, @code{normal},
@@ -1043,7 +1123,7 @@ command interpreter, use @code{quit} command (@pxref{Quit, ,Quitting
 the Make debugger}).
 
 @node Debugger Command Reference
-@chapter @value{MAKE} Debugger Command Reference
+@chapter @value{REMAKE} Debugger Command Reference
 
 You can abbreviate the long name of @value{DBG} command to the first
 few letters of the command name, if that abbreviation is unambiguous;
@@ -1066,7 +1146,7 @@ just @key{RET}. Some commands which require a parameter, such as
 @node Command Syntax
 @section Command syntax
 
-A @value{MAKE} debugger command is a single line of input.  There is
+A @value{REMAKE} debugger command is a single line of input.  There is
 no limit on how long it can be.  It starts with a command name, which
 is followed by arguments whose meaning depends on the command name.
 For example, the command @code{step} accepts an argument which is the
@@ -1141,7 +1221,7 @@ For more detailed help, type h <cmd> or consult online-documentation.
 
 @table @code
 @item help @var{command}
-With a command name as @code{help} argument, @value{MAKE} displays 
+With a command name as @code{help} argument, @value{REMAKE} displays 
 short information on how to use that command.
 
 @example
@@ -1222,7 +1302,7 @@ you do not supply @var{return-code}, @value{DBG} will terminate
 normally or with exit code 0. Otherwise it use the value of the 
 @var{return-code} as the exit code. Usually a 0 exit is a normal exit.
 
-Often when running @value{MAKE}, a recursive call is made or made in
+Often when running @value{REMAKE}, a recursive call is made or made in
 another directory. The @code{quit} only terminates only the last one:
 the one that the debugger is in. @value{dBG} arranges for the debug
 flags to get passed down in recursive calls. Consequently when you
@@ -1236,7 +1316,7 @@ debugger but up a call level.
 
 One important use of a debugger is to stop execution before it gets
 into trouble, so you can investigate and find out what is going
-on. However should @value{MAKE} accidentally continue to termination,
+on. However should @value{REMAKE} accidentally continue to termination,
 @value{DBG} has arranged for it not to leave the debugger without your
 explicit instruction. That way, you can restart the program using the
 same command arguments.
@@ -1257,7 +1337,7 @@ continue execution.
 @subsection Breakpoints
 
 @cindex breakpoints
-A @dfn{breakpoint} arranges for @value{MAKE} to stop whenever a
+A @dfn{breakpoint} arranges for @value{REMAKE} to stop whenever a
 certain point in the Makefile is reached.  
 
 You can set breakpoints with the @code{break} command and its variants
@@ -1393,7 +1473,7 @@ signal a program gets when you type an interrupt character (often
 @kbd{C-c}); @code{SIGALRM} occurs when the alarm clock timer goes off
 (which happens only if your program has requested an alarm).
 
-@value{MAKE} sets up some signal handlers of children it spawns.  When
+@value{REMAKE} sets up some signal handlers of children it spawns.  When
 we are running under the debugger when and we get a signal the
 debugger read loop is entered.
 
@@ -1411,7 +1491,7 @@ of the interrupt: to kill the program.
 
 In addition to @code{help}, you can use @value{DBG} commands
 @code{info} and @code{show} to inquire about the state of your
-program, or the state of @value{MAKE} itself.  Each command supports
+program, or the state of @value{REMAKE} itself.  Each command supports
 many topics of inquiry; here we introduce each of them in the
 appropriate context.  The listings under @code{info} in the Index
 point to all the sub-commands.  @xref{Command Index}.
@@ -1422,19 +1502,19 @@ point to all the sub-commands.  @xref{Command Index}.
 @kindex i @r{(@code{info})}
 @item info
 This command (abbreviated @code{i}) is for describing the state of
-your debugger setting.  For example, you can show whether @value{MAKE}
+your debugger setting.  For example, you can show whether @value{REMAKE}
 has set to ignore errors or not. 
 
 @kindex set
 @item set
-In addition to showing @value{MAKE} settings you can change them or
-change @value{MAKE} variables with @code{set}.  For example, you can
-change setting @value{MAKE} has whether to ignore errors.
+In addition to showing @value{REMAKE} settings you can change them or
+change @value{REMAKE} variables with @code{set}.  For example, you can
+change setting @value{REMAKE} has whether to ignore errors.
 
 @kindex show
 @item show
 In contrast to @code{info}, @code{show} is for describing the state of
-@value{MAKE} itself.
+@value{REMAKE} itself.
 You can change most of the things you can @code{show}, by using the
 related command @code{set}; 
 
@@ -1463,12 +1543,12 @@ Shows the list of commands previously entered
 @kindex show version
 @cindex version number
 @item show version
-Show what version of @value{MAKE} is running.  You should include this
+Show what version of @value{REMAKE} is running.  You should include this
 information in @value{DBG} bug-reports.  If multiple versions of
-@value{MAKE} are in use at your site, you may need to determine which
+@value{REMAKE} are in use at your site, you may need to determine which
 version you are running; as @value{DBG} evolves, new commands are
 introduced, and old ones may wither away. The version number is the
-same as the one announced when you start @value{MAKE}.
+same as the one announced when you start @value{REMAKE}.
 
 @kindex show warranty
 @item show warranty
@@ -1553,8 +1633,8 @@ how your script got where it is.  It shows one line per frame, for
 many frames, starting with the place that you are stopped at (frame
 zero), followed by its caller (frame one), and on up the stack.
 
-If @value{MAKE} is in the reading phase the backtrace shows the
-nesting of include files. If @value{MAKE} is in the interpretation
+If @value{REMAKE} is in the reading phase the backtrace shows the
+nesting of include files. If @value{REMAKE} is in the interpretation
 phase the backtrace shows the nesting of targets.
 
 @table @code
@@ -1729,7 +1809,7 @@ includes variable.
 @kindex p @r{(@code{print})}
 @item print @var{variable-name}
 
-Use @code{print} to display @value{MAKE}'s variables. As such,
+Use @code{print} to display @value{REMAKE}'s variables. As such,
 variable names should @emph{not} be preceded with a dollar sign.
 
 @smallexample
@@ -1762,7 +1842,7 @@ If you omit @var{variable}, @value{DBG} displays the last expression again.
 @kindex x @r{(@code{examine})}
 @kindex examine
 
-The @code{x} command expands the string given using @value{MAKE}'s
+The @code{x} command expands the string given using @value{REMAKE}'s
 internal variables. The expansion would be the same as if the string
 were given as a command inside the target.
 
@@ -1833,7 +1913,7 @@ Show the targets that this one depends on.
 
 @item expand
 Show the list of commands that need to get run in order to bring the
-target up to date with @value{MAKE} variables expanded.
+target up to date with @value{REMAKE} variables expanded.
 
 @item nonorder
 Show the dependencies that are not ordered.
@@ -1885,7 +1965,7 @@ single-letter variable name.
 @kindex write @r{[}@var{target} @var{filename|here}@r{]}
 @item write @r{[}@var{target} @ovar{filename|here}@r{]}
 
-Use this to write the command portion of a target with @value{MAKE}'s
+Use this to write the command portion of a target with @value{REMAKE}'s
 internal variables expanded.  If a filename is given that is the file
 where the expanded commands are written. If the filename is ``here''
 then it is not written to a file but output inside the debugger as
@@ -1953,7 +2033,7 @@ Invoke a shell to execute @var{command string}.
 @node Controlling Make
 @section Controlling @DBG (@samp{set})
 
-You can alter the way @value{MAKE}
+You can alter the way @value{REMAKE}
 interacts with you in various ways given below. 
 
 @menu
@@ -1985,7 +2065,7 @@ to show full pathnames.
 @item set ignore-errors @var{on/off/toggle}
 
 Use this to change whether you ignore errors. Turning it on is
-as though you started @value{MAKE} with the @code{--ignore-errors} option.
+as though you started @value{REMAKE} with the @code{--ignore-errors} option.
 @end table
 
 @node set trace
@@ -1996,7 +2076,7 @@ as though you started @value{MAKE} with the @code{--ignore-errors} option.
 @item set trace @var{on/off/toggle}
 
 Use this to change whether you want tracing or not. Turning it on is
-as though you started @value{MAKE} with the @code{--trace} option.
+as though you started @value{REMAKE} with the @code{--trace} option.
 @end table
 
 @node set variable
@@ -2008,6 +2088,57 @@ as though you started @value{MAKE} with the @code{--trace} option.
 Sets @var{variable} to the value @var{string}, but @var{string} is
 expanded first as it would be when you use @code{examine}.
 @end table
+
+One nice use of set variable in debugging is to set the value of
+@code{SHELL} to include tracing in that. Here's an example:
+
+@smallexample
+makedb<0> @b{set variable SHELL $(SHELL) -x}
+Variable SHELL now has value '/bin/sh -x'
+makedb<1> 
+@end smallexample 
+
+Now we'll show this in a real example - stepping (or actually
+``next''ing though the top-level makefile in the source distribution
+for @value{REMAKE}:
+
+@smallexample
+$ @b{remake -X}
+Reading makefiles...
+
+(/tmp/remake/Makefile:256)
+Makefile.in: Makefile.am config/readline.m4 gettext.m4 iconv.m4 lib-ld.m4 lib-link.m4 lib-prefix.m4 progtest.m4 acinclude.m4 configure.ac aclocal.m4
+makedb<0> @b{set variable SHELL $(SHELL) -x}
+Variable SHELL now has value '/bin/sh -x'
+makedb<1> @b{n}
+Updating goal targets....
+ /tmp/remake/Makefile:250	File `all' does not exist.
+
+(/tmp/remake/Makefile:250)
+all: config.h
+makedb<2> p SHELL
+Makefile:156 (origin: debugger) SHELL = /bin/bash -x
+makedb<3> @b{n}
+   Prerequisite `stamp-h1' is newer than target `config.h'.
+  /tmp/remake/Makefile:288	Must remake target `config.h'.
+
+(/tmp/remake/Makefile:288)
+config.h: stamp-h1
+makedb<4> @b{n}
+if test ! -f config.h; then \
+  rm -f stamp-h1; \
+  remake stamp-h1; \
+else :; fi
++ test '!' -f config.h
++ :
+  /tmp/remake/Makefile:288	Successfully remade target file `config.h'.
+@end smallexample 
+
+Above we see the script source code followed by the trace information
+-- we took the ``else'' branch which has the null statement ``:''.
+
+@emph{Probably in the future, we'll arrange some stepping or tracing
+mode perform this SHELL reassignment trick of adding @code{-x}.}
 
 @node setq
 @subsection Setting a variable to an unexpanded string (@samp{setq})
@@ -2171,11 +2302,11 @@ delete lines from the text, the line numbers that @value{DBG} knows cease
 to correspond properly with the code.
 
 @node DDD
-@section Using @value{MAKE} from @value{DDD}
+@section Using @value{REMAKE} from @value{DDD}
 @cindex DDD
 
-@value{MAKE} support is rather new in @value{DDD}. As a programming
-language, @value{MAKE} is not feature rich: there are no record
+@value{REMAKE} support is rather new in @value{DDD}. As a programming
+language, @value{REMAKE} is not feature rich: there are no record
 structures or hash tables (yet), no pointers, package variable scoping
 or methods. So much of the data display and visualization features of
 @value{DDD} are disabled.
@@ -2189,12 +2320,12 @@ commands are disabled.
 @cindex bugs
 @cindex reporting bugs
 
-Your bug reports play an essential role in making the @value{MAKE} reliable.
+Your bug reports play an essential role in making the @value{REMAKE} reliable.
 
 Reporting a bug may help you by bringing a solution to your problem, or it
 may not.  But in any case the principal function of a bug report is to help
-the entire community by making the next version of @value{MAKE} work better.  Bug
-reports are your contribution to the maintenance of @value{MAKE}.
+the entire community by making the next version of @value{REMAKE} work better.  Bug
+reports are your contribution to the maintenance of @value{REMAKE}.
 
 In order for a bug report to serve its purpose, you must include the
 information that enables us to fix the bug.
@@ -2216,24 +2347,24 @@ If you are not sure whether you have found a bug, here are some guidelines:
 @cindex crash of debugger
 @item
 If the debugger gets a fatal signal, for any input whatever, that is a
-@value{MAKE} bug.  Reliable debuggers never crash.
+@value{REMAKE} bug.  Reliable debuggers never crash.
 
 @cindex error on valid input
 @item
-If @value{MAKE} produces an error message for valid input, that is a
+If @value{REMAKE} produces an error message for valid input, that is a
 bug.  (Note that if you're cross debugging, the problem may also be
 somewhere in the connection to the target.)
 
 @cindex invalid input
 @item
-If @value{MAKE} does not produce an error message for invalid input,
+If @value{REMAKE} does not produce an error message for invalid input,
 that is a bug.  However, you should note that your idea of
 ``invalid input'' might be our idea of ``an extension'' or ``support
 for traditional practice''.
 
 @item
 If you are an experienced user of debugging tools, your suggestions
-for improvement of @value{MAKE} are welcome in any case.
+for improvement of @value{REMAKE} are welcome in any case.
 @end itemize
 
 @node Bug Reporting
@@ -2241,7 +2372,7 @@ for improvement of @value{MAKE} are welcome in any case.
 @cindex bug reports
 @cindex debugger bugs, reporting
 
-Submit bug reports for @value{MAKE}.  Until better mechanism is set up
+Submit bug reports for @value{REMAKE}.  Until better mechanism is set up
 the preferred method is to submit them directly using
 @email{rocky@@panix.com}. There are also a bug tracking system
 and, help, developer and open discussion forums which can be found via
@@ -2281,12 +2412,12 @@ To enable us to fix the bug, you should include all these things:
 
 @itemize @bullet
 @item
-The version of @value{MAKE}.  @value{MAKE} announces it if you start
+The version of @value{REMAKE}.  @value{REMAKE} announces it if you start
 with no arguments; you can also print it at any time using @code{version}
 command.
 
 Without this, we will not know whether there is any point in looking for
-the bug in the current version of @value{MAKE}.
+the bug in the current version of @value{REMAKE}.
 
 @item
 The type of machine you are using, and the operating system name and
@@ -2313,14 +2444,14 @@ reproduce the bug.
 A description of what behavior you observe that you believe is
 incorrect.  For example, ``It gets a fatal signal.''
 
-Of course, if the bug is that @value{MAKE} gets a fatal signal, then we
+Of course, if the bug is that @value{REMAKE} gets a fatal signal, then we
 will certainly notice it.  But if the bug is incorrect output, we might
 not notice unless it is glaringly wrong.  You might as well not give us
 a chance to make a mistake.
 
 Even if the problem you experience is a fatal signal, you should still
 say so explicitly.  Suppose something strange is going on, such as, your
-copy of @value{MAKE} is out of synch, or you have encountered a bug in
+copy of @value{REMAKE} is out of synch, or you have encountered a bug in
 the C library on your system.  (This has happened!)  Your copy might
 crash and ours would not.  If you told us to expect a crash, then when
 ours fails to crash, we would know that the bug was not happening for
@@ -2328,8 +2459,8 @@ us.  If you had not told us to expect a crash, then we would not be able
 to draw any conclusion from our observations.
 
 @item
-If you wish to suggest changes to the @value{MAKE} source, send us context
-diffs.  If you even discuss something in the @value{MAKE} source, refer to
+If you wish to suggest changes to the @value{REMAKE} source, send us context
+diffs.  If you even discuss something in the @value{REMAKE} source, refer to
 it by context, not by line number.
 
 The line numbers in our development sources will not match those in your
@@ -2368,7 +2499,7 @@ the necessary information, such as the test case, on the assumption that
 a patch is all we need.  We might see problems with your patch and decide
 to fix the problem another way, or we might not understand it at all.
 
-Sometimes with a program as complicated as @value{MAKE} it is very hard to
+Sometimes with a program as complicated as @value{REMAKE} it is very hard to
 construct an example that will make the program follow a certain path
 through the code.  If you do not send us the example, we will not be able
 to construct one, so we will not be able to verify that the bug is fixed.
@@ -2387,7 +2518,7 @@ things without first using the debugger to find the facts.
 @node History and Acknowledgments
 @chapter History and Acknowledgments
 
-My idea for a debugger for @value{MAKE} came about on working on a
+My idea for a debugger for @value{REMAKE} came about on working on a
 debugger for bash (@url{http://bashdb.sourceforge.net}). I knew the
 bash debugger was good enough when it was able to debug
 autoconf-generated script which are tens of thousands of lines long.
@@ -2399,17 +2530,17 @@ automake as well.
 
 After seeing an article on the auto-configuration mess
 @url{http://freshmeat.net/articles/view/889} I posted a query to ask
-if anyone was interested in writing a debugger for @value{MAKE}.
+if anyone was interested in writing a debugger for @value{REMAKE}.
 
 Almost year later and no takers, I was reminded of my query by
 accident when I got a query from one of the GNU mailing lists that I
-am on about slow e-mail posting to the @value{MAKE} mailing list.
+am on about slow e-mail posting to the @value{REMAKE} mailing list.
 
 I again suggested the idea of a debugger and was told how incredibly
 difficult it would be to write a debugger and how incredibly unique
-@value{MAKE} is. At that point I looked into the code and to my
+@value{REMAKE} is. At that point I looked into the code and to my
 surprise and delight I found that in contrast to BASH the code,
-@value{MAKE} is much smaller and written in a more modern coding
+@value{REMAKE} is much smaller and written in a more modern coding
 style; in fact it had most of the information stored that would be
 helpful in a debugger. All I would need to do is add a GNU readline
 for the debug loop, and extend to track line numbers and report line
