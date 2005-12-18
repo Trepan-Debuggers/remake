@@ -8,7 +8,6 @@ src/dir_fns.c
 src/expand.c
 src/file.c
 src/function.c
-src/getopt.c
 src/hash.c
 src/implicit.c
 src/job.c
