@@ -1,4 +1,5 @@
 #                                                                    -*-perl-*-
+#$Id: statipattrules,v 1.2 2005/12/18 02:05:45 rockyb Exp $
 $description = "Test handling of static pattern rules.";
 
 $details = "\
@@ -59,7 +60,10 @@ print MAKEFILE "foo: foo%: % ; \@echo $@\n";
 close(MAKEFILE);
 
 &run_make_with_options($makefile2, '', &get_logfile, 512);
-$answer = "$makefile2:1: *** target `foo' leaves prerequisite pattern empty.  Stop.\n";
+$answer = "$makefile2:1: *** target `foo' leaves prerequisite pattern empty.  Stop.
+Command-line arguments:
+	\"-f work/features/statipattrules.mk.1\"
+";
 &compare_output($answer, &get_logfile(1));
 
 

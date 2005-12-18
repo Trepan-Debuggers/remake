@@ -71,7 +71,10 @@ $answer = "later foo bar\n";
 # -------
 
 &run_make_with_options($makefile, "BOGUS=true", &get_logfile, 512);
-$answer = "$makefile:23: *** empty variable name.  Stop.\n";
+$answer = "$makefile:24: *** empty variable name.  Stop.
+Command-line arguments:
+	\"-f work/variables/flavors.mk BOGUS=true\"
+";
 &compare_output($answer, &get_logfile(1));
 
 # TEST #4

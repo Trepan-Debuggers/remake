@@ -6,7 +6,7 @@ AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.23 2005/12/11 12:15:29 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.24 2005/12/18 02:05:44 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -66,6 +66,21 @@ AC_HEADER_STAT
 AC_HEADER_TIME
 AC_CHECK_HEADERS(locale.h limits.h fcntl.h stdbool.h)
 AC_CHECK_HEADERS(sys/param.h sys/time.h sys/timeb.h)
+
+dnl FreeBSD 4 has getopt in unistd.h. So we include that before
+dnl getopt.h 
+AC_CHECK_HEADERS(unistd.h getopt.h)
+
+AC_CHECK_FUNC(getopt_long,
+              [AC_DEFINE(HAVE_GETOPT_LONG, 1, [long getopt support])],
+              [ # Some BSD (BSD/OS) have a gnugetopt library for this:
+               AC_CHECK_LIB([gnugetopt], [getopt_long],
+                            [AC_DEFINE(HAVE_GETOPT_LONG, 1,
+                                       [long getopt support])
+                             LIBGETOPT_LIB="-lgnugetopt"])
+              ])
+AC_SUBST(LIBGETOPT_LIB)
+
 AM_PROG_CC_C_O
 AM_PROG_CC_STDC
 AC_C_CONST

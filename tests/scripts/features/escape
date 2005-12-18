@@ -29,7 +29,10 @@ $answer = "cp foo\n";
 # TEST 2: This one should fail, since the ":" is unquoted.
 
 &run_make_with_options($makefile, "path=p:", &get_logfile, 512);
-$answer = "$makefile:1: *** target pattern contains no `%'.  Stop.\n";
+$answer = "$makefile:1: *** target pattern contains no `%'.  Stop.
+Command-line arguments:
+	\"-f work/features/escape.mk path=p:\"
+";
 &compare_output($answer,&get_logfile(1));
 
 # TEST 3: This one should work, since we escape the ":".
@@ -41,7 +44,10 @@ $answer = "cp p:foo\n";
 # TEST 4: This one should fail, since the escape char is escaped.
 
 &run_make_with_options($makefile, "'path=p\\\\:'", &get_logfile, 512);
-$answer = "$makefile:1: *** target pattern contains no `%'.  Stop.\n";
+$answer = "$makefile:1: *** target pattern contains no `%'.  Stop.
+Command-line arguments:
+	\"-f work/features/escape.mk path=p\\\\:\"
+";
 &compare_output($answer,&get_logfile(1));
 
 # TEST 5: This one should work

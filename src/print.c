@@ -552,3 +552,20 @@ void print_read_makefiles (void)
   printf("\n");
 }
 
+/*! Print the command line used to invode this program */
+void print_cmdline (void) 
+{
+  unsigned int i;
+  printf("Command-line arguments:");
+  if (global_argv[1]) {
+    printf("\n\t\"%s", global_argv[1]);
+    for (i = 2; global_argv[i]; i++) {
+      printf(" %s", global_argv[i]);
+    }
+    printf("\"");
+  } else {
+    printf(" none");
+  }
+  printf("\n");
+}
+

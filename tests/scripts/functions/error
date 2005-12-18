@@ -1,3 +1,5 @@
+#                                                                    -*-perl-*-
+#$Id: error,v 1.2 2005/12/18 02:05:45 rockyb Exp $
 $description = "\
 The following test creates a makefile to test the error function.";
 
@@ -32,25 +34,37 @@ close(MAKEFILE);
 # Test #1
 
 &run_make_with_options($makefile, "ERROR1=yes", &get_logfile, 512);
-$answer = "$makefile:2: *** error is yes.  Stop.\n";
+$answer = "$makefile:2: *** error is yes.  Stop.
+Command-line arguments:
+	\"-f work/functions/error.mk ERROR1=yes\"
+";
 &compare_output($answer,&get_logfile(1));
 
 # Test #2
 
 &run_make_with_options($makefile, "ERROR2=no", &get_logfile, 512);
-$answer = "$makefile:6: *** error is no.  Stop.\n";
+$answer = "$makefile:6: *** error is no.  Stop.
+Command-line arguments:
+	\"-f work/functions/error.mk ERROR2=no\"
+";
 &compare_output($answer,&get_logfile(1));
 
 # Test #3
 
 &run_make_with_options($makefile, "ERROR3=maybe", &get_logfile, 512);
-$answer = "Some stuff\n$makefile:10: *** error is maybe.  Stop.\n";
+$answer = "Some stuff\n$makefile:10: *** error is maybe.  Stop.
+Command-line arguments:
+	\"-f work/functions/error.mk ERROR3=maybe\"
+";
 &compare_output($answer,&get_logfile(1));
 
 # Test #4
 
 &run_make_with_options($makefile, "ERROR4=definitely", &get_logfile, 512);
-$answer = "Some stuff\n$makefile:14: *** error is definitely.  Stop.\n";
+$answer = "Some stuff\n$makefile:14: *** error is definitely.  Stop.
+Command-line arguments:
+	\"-f work/functions/error.mk ERROR4=definitely\"
+";
 &compare_output($answer,&get_logfile(1));
 
 # This tells the test driver that the perl test script executed properly.

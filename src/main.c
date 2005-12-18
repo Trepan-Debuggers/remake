@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.33 2005/12/17 19:44:10 rockyb Exp $
+/* $Id: main.c,v 1.34 2005/12/18 02:05:45 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -2884,7 +2884,7 @@ die (int i_status)
   /* If we are quitting the debugger and we're at the top level, then
      we'll change the exit status to 0, normal.
    */
-  if (makelevel == 0 && i_status == DEBUGGER_QUIT_RC)
+  if (makelevel == 0 && in_debugger == DEBUGGER_QUIT_RC)
     i_status = 0 ;
 
   if (!dying)
@@ -2920,6 +2920,11 @@ die (int i_status)
 
       log_working_directory (0);
     }
+
+  /* On an error, show how this was invoked. */
+  if (i_status && in_debugger != DEBUGGER_QUIT_RC & !no_extended_errors) {
+    print_cmdline();
+  }
 
   free(argv0);
   free_command_switches();

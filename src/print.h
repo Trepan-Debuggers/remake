@@ -1,4 +1,4 @@
-/* $Id: print.h,v 1.8 2005/12/09 12:11:09 rockyb Exp $
+/* $Id: print.h,v 1.9 2005/12/18 02:05:45 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -63,47 +63,50 @@ enum debug_print_enums_e {
 } debug_print_enums1;
 
 /*! Under -d, write a message describing the current IDs.  */
-void log_access (char *flavor);
+extern void log_access (char *flavor);
 
 /*! Write a message indicating that we've just entered or
   left (according to ENTERING) the current directory.  */
-void log_working_directory (int);
+extern void log_working_directory (int);
 
 /*! Print an error message from errno.  */
-void perror_with_name (const char *, const char *);
+extern void perror_with_name (const char *, const char *);
 
 /*! Print an error message from errno and exit.  */
-void pfatal_with_name (const char *psz_name);
+extern void pfatal_with_name (const char *psz_name);
 
 /*! Display a variable and its value. */
-void print_variable (variable_t *p_v);
+extern void print_variable (variable_t *p_v);
 
 /*! Display a variable and its value with all substitutions included. */
-void print_variable_expand (variable_t *p_v);
+extern void print_variable_expand (variable_t *p_v);
 
 /*! Display common file target prefix message output file target. */
-void print_file_target_prefix (const file_t *p_target);
+extern void print_file_target_prefix (const file_t *p_target);
 
 /*! Display common target prefix message. */
-void print_target_prefix (const char *p_name);
+extern void print_target_prefix (const char *p_name);
 
 /*! Display common prefix message output file target. */
-void print_floc_prefix (const floc_t *p_floc);
+extern void print_floc_prefix (const floc_t *p_floc);
 
 /*! Display common prefix message output file target. */
-debug_return_t print_child_cmd (child_t *p_child, 
+extern debug_return_t print_child_cmd (child_t *p_child, 
 				       target_stack_node_t *p);
 
 /*! Display the target stack i_pos is the position we are currently.
   i_max is the maximum number of entries to show.
  */
-void print_target_stack (target_stack_node_t *p, int i_pos, int i_max);
+extern void print_target_stack (target_stack_node_t *p, int i_pos, int i_max);
 
 /*! Display the Makefile read stack. i_pos is the position we are currently.
   i_max is the maximum number of entries to show. */
-void print_floc_stack (int i_pos, int i_max);
+extern void print_floc_stack (int i_pos, int i_max);
 
 /*! Print the list makefiles read by read_makefiles().  */
-void print_read_makefiles (void);
+extern void print_read_makefiles (void);
+
+/*! Print the command line used to invode this program */
+extern void print_cmdline (void);
 
 #endif /*PRINT_H*/
