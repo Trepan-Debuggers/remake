@@ -11,7 +11,8 @@ reports.
 
 Version 3.80+dbg-0.6cvs
 
-* On a fatal error we now show command arguments used to invoke program.
+* On a fatal error we now show command arguments used to invoke
+  program.
 
 * The default behavior on error is to show call trace. To turn off use
   --no-extended-errors. --extended-errors and -E no longer exist.
@@ -26,6 +27,8 @@ Version 3.80+dbg-0.6cvs
 * Reorganize help command. Is more ddd-friendly (and more gdb like).
 
 * More explicit frees of memory at termination. 
+
+* Give line numbers and target names on --just-print.
 
 * Expand documentation.
 
