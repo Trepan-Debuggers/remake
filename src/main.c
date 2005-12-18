@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.34 2005/12/18 02:05:45 rockyb Exp $
+/* $Id: main.c,v 1.35 2005/12/18 11:57:12 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -2922,7 +2922,7 @@ die (int i_status)
     }
 
   /* On an error, show how this was invoked. */
-  if (i_status && in_debugger != DEBUGGER_QUIT_RC & !no_extended_errors) {
+  if (i_status && (in_debugger != DEBUGGER_QUIT_RC) && !no_extended_errors) {
     print_cmdline();
   }
 
