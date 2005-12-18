@@ -1,5 +1,5 @@
 # -*-Perl-*-
-# $Id: trace,v 1.5 2005/12/17 20:07:45 rockyb Exp $
+# $Id: trace,v 1.6 2005/12/18 23:44:47 rockyb Exp $
 $description = "The following checks tracing.\n";
 
 $details = "We test line tracing, showing a target stack, line numbers\n"
@@ -31,11 +31,12 @@ close(MAKEFILE);
 $answer = "Reading makefiles...
 Updating goal targets....
  work/debugger/trace.mk:2	File `all' does not exist.
-work/debugger/trace.mk:4 foo
    work/debugger/trace.mk:4	File `foo' does not exist.
   work/debugger/trace.mk:4	Must remake target `foo'.
-work/debugger/trace.mk:5 foo
-	echo FOO here
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+work/debugger/trace.mk:5: foo
+echo FOO here
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 FOO here
   work/debugger/trace.mk:4	Successfully remade target file `foo'.
 work/debugger/trace.mk:2	Must remake target `all'.
@@ -74,13 +75,16 @@ close(MAKEFILE);
 $answer = "Reading makefiles...
 Updating goal targets....
  work/debugger/trace.mk:2	File `all' does not exist.
-work/debugger/trace.mk:3 foo
    work/debugger/trace.mk:3	File `foo' does not exist.
   work/debugger/trace.mk:3	Must remake target `foo'.
-work/debugger/trace.mk:4 foo
-	echo hi > /dev/null
-work/debugger/trace.mk:5 foo
-	exit 5
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+work/debugger/trace.mk:4: foo
+echo hi > /dev/null
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+work/debugger/trace.mk:5: foo
+exit 5
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 work/debugger/trace.mk:5: [foo] Error 5 (ignored)
 
 #0  foo at work/debugger/trace.mk:5
@@ -125,12 +129,13 @@ close(MAKEFILE);
 $answer = "Reading makefiles...
 Updating goal targets....
  work/debugger/trace.mk:4	File `all' does not exist.
-work/debugger/trace.mk:6 foo
    work/debugger/trace.mk:6	File `foo' does not exist.
   work/debugger/trace.mk:6	Must remake target `foo'.
-work/debugger/trace.mk:7 foo
-	if [ -n FOO ] ; \\
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+work/debugger/trace.mk:7: foo
+if [ -n FOO ] ; \\
 then echo \"test okay\"; fi
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 test okay
   work/debugger/trace.mk:6	Successfully remade target file `foo'.
 work/debugger/trace.mk:4	Must remake target `all'.
