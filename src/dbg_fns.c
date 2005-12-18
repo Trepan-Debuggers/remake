@@ -1,4 +1,4 @@
-/* $Id: dbg_fns.c,v 1.8 2005/12/14 14:18:25 rockyb Exp $
+/* $Id: dbg_fns.c,v 1.9 2005/12/18 12:30:49 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -24,6 +24,7 @@ Boston, MA 02111-1307, USA.  */
 #include "dbg_fns.h"
 #include "dbg_stack.h"
 #include "debug.h"
+#include "expand.h"
 #include "print.h"
 #include "trace.h"
 
@@ -225,6 +226,10 @@ print_debugger_location(const file_t *p_target,
       print_floc_prefix(p_stack_floc_top->p_floc);
       printf (")\n");
   }
+
+  /* Could/should generalize the below into a prompt string. */
+  dbg_cmd_show_exp("$@: $+", true);
+
 }
 
 /** Strip whitespace from the start and end of STRING.  Return a pointer
@@ -253,4 +258,50 @@ char *
 var_to_on_off(int i_bool) 
 {
   return i_bool ? "on" : "off";
+}
+
+/*! Show a expression. Set "expand" to 1 if you want variable
+   definitions inside the displayed value expanded.
+*/
+bool
+dbg_cmd_show_exp (char *psz_varname, bool expand) 
+{
+  if (!psz_varname || 0==strlen(psz_varname)) {
+    printf(_("You need to supply a variable name.\n"));
+    return false;
+  } else {
+    variable_t *p_v;
+    variable_set_t *p_set = NULL;
+    variable_set_list_t *p_file_vars = NULL;
+    if (p_stack && p_stack->p_target && p_stack->p_target->name) {
+      char *psz_target = p_stack->p_target->name;
+      file_t *p_target = lookup_file (psz_target);
+      initialize_file_variables (p_target, 0);
+      set_file_variables (p_target);
+      p_file_vars = p_target->variables;
+      p_set = p_file_vars->set;
+    }
+    if (p_set) {
+      p_v = lookup_variable_in_set(psz_varname, strlen(psz_varname), p_set);
+      if (!p_v) 
+	/* May be a global variable. */
+	p_v = lookup_variable (psz_varname, strlen (psz_varname));
+    } else {
+      p_v = lookup_variable (psz_varname, strlen (psz_varname));
+    }
+    if (p_v) {
+      if (expand) {
+	print_variable_expand(p_v);
+      } else
+	print_variable(p_v);
+    } else {
+      if (expand)
+	printf("%s\n", variable_expand_set(psz_varname, p_file_vars));
+      else {
+	printf("Can't find variable %s\n", psz_varname);
+	return false;
+      }
+    }
+  }
+  return true;
 }

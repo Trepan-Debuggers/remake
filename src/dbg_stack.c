@@ -1,4 +1,4 @@
-/* $Id: dbg_stack.c,v 1.4 2005/12/06 04:50:57 rockyb Exp $
+/* $Id: dbg_stack.c,v 1.5 2005/12/18 12:30:49 rockyb Exp $
 Copyright (C) 2005 rocky@panix.com
 This file is part of GNU Make.
 
@@ -75,7 +75,7 @@ dbg_cmd_frame_down (char *psz_amount)
     }
 
     print_debugger_location(NULL, p_floc_stack);
-    
+
   }
   
   return debug_readloop;

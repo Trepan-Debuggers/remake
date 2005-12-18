@@ -1,4 +1,4 @@
-/* $Id: dbg_fns.h,v 1.7 2005/12/09 12:11:09 rockyb Exp $
+/* $Id: dbg_fns.h,v 1.8 2005/12/18 12:30:49 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -81,5 +81,10 @@ extern char *stripwhite (char *string);
 
 /*! Show if i_bool is "on" or "off" */
 extern char *var_to_on_off(int i_bool);
+
+/*! Show a expression. Set "expand" to 1 if you want variable
+   definitions inside the displayed value expanded.
+*/
+extern bool dbg_cmd_show_exp(char *psz_arg, bool expand);
 
 #endif /* DBG_FNS_H*/

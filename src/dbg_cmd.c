@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.66 2005/12/18 01:32:22 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.67 2005/12/18 12:30:49 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -87,7 +87,6 @@ typedef struct {
   const char *use;		/* short command usage.  */
 } short_cmd_t;
 
-static int            dbg_cmd_show_exp(char *psz_arg, int expand);
 static debug_return_t dbg_cmd_set_var (char *psz_arg, int expand);
 
 static debug_return_t dbg_cmd_break            (char *psz_arg);
@@ -897,7 +896,7 @@ static debug_return_t dbg_cmd_print (char *psz_args)
     psz_name = get_word(&psz_args);
   }
   
-  if (dbg_cmd_show_exp(psz_name, 0)) {
+  if (dbg_cmd_show_exp(psz_name, false)) {
     if (psz_last_name) free(psz_last_name);
     psz_last_name = strdup(psz_name);
   }
@@ -1172,52 +1171,6 @@ static debug_return_t dbg_cmd_shell (char *psz_varname)
   return debug_readloop;
 }
 
-
-/* Show a expression. Set "expand" to 1 if you want variable
-   definitions inside the displayed value expanded.
-*/
-static int dbg_cmd_show_exp (char *psz_varname, int expand) 
-{
-  if (!psz_varname || 0==strlen(psz_varname)) {
-    printf(_("You need to supply a variable name.\n"));
-    return 0;
-  } else {
-    variable_t *p_v;
-    variable_set_t *p_set = NULL;
-    variable_set_list_t *p_file_vars = NULL;
-    if (p_stack && p_stack->p_target && p_stack->p_target->name) {
-      char *psz_target = p_stack->p_target->name;
-      file_t *p_target = lookup_file (psz_target);
-      initialize_file_variables (p_target, 0);
-      set_file_variables (p_target);
-      p_file_vars = p_target->variables;
-      p_set = p_file_vars->set;
-    }
-    if (p_set) {
-      p_v = lookup_variable_in_set(psz_varname, strlen(psz_varname), p_set);
-      if (!p_v) 
-	/* May be a global variable. */
-	p_v = lookup_variable (psz_varname, strlen (psz_varname));
-    } else {
-      p_v = lookup_variable (psz_varname, strlen (psz_varname));
-    }
-    if (p_v) {
-      if (expand) {
-	print_variable_expand(p_v);
-      } else
-	print_variable(p_v);
-    } else {
-      if (expand)
-	printf("%s\n", variable_expand_set(psz_varname, p_file_vars));
-      else {
-	printf("Can't find variable %s\n", psz_varname);
-	return 0;
-      }
-    }
-  }
-  return 1;
-}
-
 /* Show a string with variable references expanded. */
 static debug_return_t dbg_cmd_expand (char *psz_string) 
 {
@@ -1233,7 +1186,7 @@ static debug_return_t dbg_cmd_expand (char *psz_string)
     }
   }
   
-  if (dbg_cmd_show_exp(psz_string, 1)) {
+  if (dbg_cmd_show_exp(psz_string, true)) {
     if (psz_last_string) free(psz_last_string);
     psz_last_string = strdup(psz_string);
   }
@@ -1335,9 +1288,6 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
 
   print_debugger_location(p_target, NULL);
 
-  /* Could/should generalize the below into a prompt string. */
-  dbg_cmd_show_exp("$@: $? $+", true);
-  
   in_debugger = true;
 
   /* Loop reading and executing lines until the user quits. */
