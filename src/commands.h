@@ -1,4 +1,4 @@
-/* $Id: commands.h,v 1.9 2005/12/10 02:50:32 rockyb Exp $
+/* $Id: commands.h,v 1.10 2005/12/18 13:44:31 rockyb Exp $
 Copyright (C) 1988, 1989, 1991, 1993, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -29,25 +29,28 @@ Boston, MA 02111-1307, USA.  */
 #include "trace.h"
 #include "job.h"
 
+/*! Bits in `lines_flags'.  */
+typedef enum {
+   COMMANDS_RECURSE  = 	1, /**< Recurses: + or $(MAKE).  */
+   COMMANDS_SILENT   =	2, /**< Silent: @.  */
+   COMMANDS_NOERROR  =	4  /**< No errors: -.  */
+} line_flags_enum_t;
+  
 /*! \brief Command structure. This gives the commands to make a file
    and information about where these commands came from.  */
 struct commands
   {
-    floc_t fileinfo;	        /**< Where commands were defined.  */
-    char *commands;		/**< Commands text.  */
-    unsigned int ncommand_lines;/**< Number of command lines.  */
-    char **command_lines;	/**< Commands chopped up into lines.  */
-    unsigned int *line_no;	/**< line number offsets of chopped
-				     commands.  */
-    char *lines_flags;		/**< One set of flag bits for each line.  */
-    int any_recurse;		/**< Nonzero if any `lines_recurse' elt has */
-				/**< the COMMANDS_RECURSE bit set.  */
+    floc_t fileinfo;	            /**< Where commands were defined.  */
+    char *commands;		    /**< Commands text.  */
+    unsigned int ncommand_lines;    /**< Number of command lines.  */
+    char **command_lines;	    /**< Commands chopped up into lines.  */
+    unsigned int *line_no;	    /**< line number offsets of chopped
+				         commands.  */
+    line_flags_enum_t *lines_flags; /**< A set of flag bits for each line.  */
+    int any_recurse;		    /**< Nonzero if any `lines_recurse' 
+				         elt has the COMMANDS_RECURSE bit
+					 set.  */
 };
-
-/** Bits in `lines_flags'.  */
-#define	COMMANDS_RECURSE	1 /* Recurses: + or $(MAKE).  */
-#define	COMMANDS_SILENT		2 /* Silent: @.  */
-#define	COMMANDS_NOERROR	4 /* No errors: -.  */
 
 /*! Execute the commands to remake FILE.  If they are currently
    executing, return or have already finished executing, just return.

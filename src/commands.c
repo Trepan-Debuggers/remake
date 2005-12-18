@@ -1,4 +1,4 @@
-/* $Id: commands.c,v 1.14 2005/12/11 12:15:29 rockyb Exp $
+/* $Id: commands.c,v 1.15 2005/12/18 13:44:31 rockyb Exp $
 Command processing for GNU Make.
 Copyright (C) 1988,89,91,92,93,94,95,96,97, 2004, 2005
 Free Software Foundation, Inc.
@@ -323,7 +323,7 @@ chop_commands (commands_t *cmds)
     cmds->line_no        = line_no;
     
     cmds->any_recurse = 0;
-    cmds->lines_flags = (char *) xmalloc (nlines);
+    cmds->lines_flags = CALLOC(line_flags_enum_t, nlines);
     for (idx = 0; idx < nlines; ++idx) {
       int flags = 0;
       
