@@ -1887,11 +1887,9 @@ Show single-character automatic state variables (if defined):
 @item @@ - the target name
 @item % - target member name, when target is an the archive member
 @item * - the stem with which an implicit rule matches
-@item + - the duplicate dependencies 
-@item |
+@item + - like $^ but with the duplicate dependencies listed in order
 @item < - the name of the first prerequisite
-@item > - the names of all prerequisites in the order listed in the makefile
-@item ^ - the names of all prerequisites
+@item ^ - the names of all prerequisites (no duplicates)
 @item ? - the names of all prerequisites newer than the target (@@)
 @end itemize
 
