@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.67 2005/12/18 12:30:49 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.68 2005/12/18 16:43:02 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -163,8 +163,8 @@ alias_cmd_t aliases[] = {
   { "where",    "backtrace" },
   { "where",    "bt" },
   { "quit",     "exit" },
-  { "quit",     "return" },
   { "run",      "restart" },
+  { "quit",     "return" },
   { (char *)NULL, (char *) NULL}
 };
 

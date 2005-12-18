@@ -199,15 +199,16 @@ to make it easier to pick out from the surrounding output.
 @end iftex
 
 @menu
-* Tracing::
-* Tracing Makefile Reading::
-* Simple Debugging::            
+* Tracing Not::              How not to debug your program
+* Tracing::                  Using --trace or -x on a simple example
+* Tracing Makefile Reading:: A real-world trace.
+* Simple Debugging::         Getting into the Debugger (--debugging)
 * Debugging Variables::
 * Debugging Commands::
 @end menu
 
-@node Tracing
-@subsection Sample @value{MAKE} Trace Session
+@node Tracing Not
+@subsection How not to debug @value{MAKE}
 
 A simplified form of debugging is @emph{tracing}. And so before we
 get into debugging proper, let's show some of the tracing abilities. 
@@ -302,10 +303,25 @@ Makefile is when it is generated from @code{automake}, it would be
 nice to list the line in the Makefile and full filename as well as the
 target name.
 
-But now let's try the new kind of trace we prove in this patched
-@value{MAKE}.  We use the new option @code{--trace} which has the
-short-form option format @code{-x}
+@node Tracing
+@subsection Sample @value{MAKE} Trace Session
 
+Let's try the new kind of trace we prove in this patched @value{MAKE}.
+We use the new option @code{--trace} which has the short-form option
+format @code{-x}. Again here's the sample Makefile:
+@smallexample
+1: # 
+2: SHELL=/bin/bash
+3: 
+4: all: foo
+5: 
+6: foo:
+7: 	@@if [ -n FOO ] ; \
+8: 	then echo "test okay"; fi
+9: 	bogus-command
+@end smallexample 
+
+And here's the trace of it:
 @smallexample
 @group
 $ @b{remake --trace -f /tmp/test1}
@@ -323,6 +339,11 @@ test okay
 	bogus-command
 /bin/bash: bogus-command: command not found
 test1:9: *** [foo] Error 127
+
+#0  foo at /tmp/test1:9
+#1  all at /tmp/test1:4
+Command-line arguments:
+	"--trace -f test1"
 @end group
 @end smallexample 
 
@@ -345,28 +366,16 @@ starts ``if'' with an @@). When tracing, we override any silent
 execution (making execution more verbose); information is usually
 helpful in finding what's going on and what got run.
 
-So now when we hit the error, the above trace gives some idea of why
-we decided to to run line 9 and what got executed before that. 
+After the error from the shell is printed and we report the return
+code (127), the stack of targets is listed. Were working on target
+@code{foo} on line 9 of file @code{/tmp/test1} which was rebuilt
+because we were making target @code{all} on line 4 of file
+@code{/tmp/test1}.
 
-There is another option @code{--extended-errors} or @code{-E} which
-lists the stack of targets when @value{MAKE} hits an error. For the above,
-it looks like this:
-
-@smallexample
-$ @b{remake --extended-errors -x -f test1}
-remake -E --trace -f /tmp/test1
-Reading makefiles...
-Updating goal targets....
-
-... same output as before ...
-
-#0  foo at /tmp/test1:9
-#1  all at /tmp/test1:4
-@end smallexample 
-
-So we were working on target @code{foo} on line 9 of file
-@code{/tmp/test1} which was rebuilt because we were making target
-@code{all} on line 4 of file @code{/tmp/test1}.
+In sum, when we hit the error, the above trace gives some idea of why
+we decided to to run line 9 and what got executed before that, what
+targets were in the process of getting considered at the error, and
+how the program was run.
 
 @node Tracing Makefile Reading
 @subsection Tracing Makefile Reading
@@ -384,11 +393,24 @@ To see this, let's use a real example -- the Makefile for the GNU Make
 @group
 $ @b{remake --trace}
 Reading makefiles...
-/tmp/remake/src/Makefile:254 Makefile.in
-/tmp/remake/src/Makefile:276 ../config.status
-/tmp/remake/src/Makefile:279 ../configure
+/tmp/remake/src/Makefile:263 Makefile.in
+/tmp/remake/src/Makefile:290 ../aclocal.m4
+/tmp/remake/src/Makefile:285 ../config.status
+/tmp/remake/src/Makefile:288 ../configure
+/tmp/remake/src/Makefile:290 ../aclocal.m4
 Updating goal targets....
-make: `Makefile' is up to date.
+/tmp/remake/src/Makefile:259 all
+ /tmp/remake/src/Makefile:259	File `all' does not exist.
+/tmp/remake/src/Makefile:472 all-am
+   /tmp/remake/src/Makefile:472	File `all-am' does not exist.
+/tmp/remake/src/Makefile:321 make
+/tmp/remake/src/Makefile:318 loadavg
+/tmp/remake/src/.deps/loadavg-loadavg.Po:1 loadavg-loadavg.o
+  /tmp/remake/src/Makefile:472	Must remake target `all-am'. Is a phony target.
+  /tmp/remake/src/Makefile:472	Successfully remade target file `all-am'.
+/tmp/remake/src/Makefile:259	Must remake target `all'. Is a phony target.
+/tmp/remake/src/Makefile:259	Successfully remade target file `all'.
+remake: Nothing to be done for `all'.
 @end group
 @end smallexample 
 
@@ -403,18 +425,17 @@ option:
 $ @b{remake --trace=read Makefile}
 Reading makefiles...
 Reading makefile `Makefile'...
-/tmp/remake/src/Makefile:322
+/tmp/remake/src/Makefile:331
 	Reading makefile `.deps/alloca.Po' (search path) (no ~ expansion)...
-/tmp/remake/src/Makefile:323
+/tmp/remake/src/Makefile:332
 	Reading makefile `.deps/getloadavg.Po' (search path) (no ~ expansion)......
+
 ... about 32 more lines like the above ...
-/tmp/remake/src/Makefile:355
-	Reading makefile `.deps/vpath.Po' (search path) (no ~ expansion)...
-/tmp/remake/src/Makefile:254 Makefile.in
-/tmp/remake/src/Makefile:276 ../config.status
-/tmp/remake/src/Makefile:279 ../configure
-Updating goal targets....
-make: `Makefile' is up to date.
+
+/tmp/remake/src/Makefile:263 Makefile.in
+/tmp/remake/src/Makefile:290 ../aclocal.m4
+
+... same output as in previous example ...
 @end group
 @end smallexample 
 
@@ -429,72 +450,125 @@ this distribution.
 $  @b{remake --debugger}
 Reading makefiles...
 
-(/tmp/remake/src/Makefile:254): Makefile.in
+(/tmp/src/remake/src/Makefile:263)
+Makefile.in: Makefile.am ../config/readline.m4 ../gettext.m4 ../iconv.m4 ../lib-ld.m4 ../lib-link.m4 ../lib-prefix.m4 ../progtest.m4 ../acinclude.m4 ../configure.ac ../aclocal.m4
+makedb<0> 
 @end smallexample 
 
-Let's see where we are. In particular is this @emph{really} the
-top-level target? The @code{where} command, (see @ref{Backtrace}), shows
-you the target call stack:
+Before the prompt @code{makedb<0>}, we show the position in the file,
+the target @code{Makefile.in}, and the dependencies of this target
+@code{Makefile.am}, @code{..confiig/readline.m4} ....
+
+The ``0'' in the prompt @code{makedb<0>} is the comamnd history number
+it increments as we enter commands.
+
+Is this @emph{really} the top-level target? The @code{where} command,
+(see @ref{Backtrace}), shows you the target call stack:
 
 @smallexample
 @group
 makedb<0> @b{where}
 
-=>#0  Makefile.in at /tmp/remake/src/Makefile:254
-  #1  Makefile at /tmp/remake/src/Makefile:267
+=>#0  Makefile.in at /tmp/src/remake/src/Makefile:263
+  #1  Makefile at /tmp/src/remake/src/Makefile:276
+makedb<1> 
 @end group
 @end smallexample 
 
 No, we were triggered by checking dependencies from Makefile. And that
 was triggered by checking dependencies of ``all.'' (There's a bug in
-our debugger currently in that it doesn't show ``all.''). We can use
-the @code{next} command, (@ref{Next}), to progress a little in the
-interpretation or execution of the makefile:
+our debugger currently in that it doesn't show ``all.''). 
+
+Notice that the prompt now lists ``1'' since we entered a command.
+
+We can use the @code{step} command, (@ref{Step}), to progress a little
+in the interpretation or execution of the makefile:
 @smallexample
 @group
-makedb<1> @b{next}
+makedb<1> @b{step}
 
-(/tmp/remake/src/Makefile:277): ../config.status
-makedb<2> where
+(/tmp/src/remake/src/Makefile:290)
+../aclocal.m4: ../config/readline.m4 ../gettext.m4 ../iconv.m4 ../lib-ld.m4 ../lib-link.m4 ../lib-prefix.m4 ../progtest.m4 ../acinclude.m4 ../configure.ac
+makedb<2> @b{where}
 
-=>#0  ../config.status at /tmp/remake/src/Makefile:277
-  #1  Makefile at /tmp/remake/src/Makefile:267
+=>#0  ../aclocal.m4 at /tmp/remake/src/Makefile:290
+  #1  Makefile.in at /tmp/remake/src/Makefile:263
+  #2  Makefile at /tmp/remake/src/Makefile:276
 @end group
 @end smallexample 
 
-To get information about the make "target" we can use the @code{target},
-@xref{Target}, command:
+Before the prompt the debugger printed some information about the
+target, namely its name and dependencies. However if you want the full
+details about a target, one can use the @code{target} (@ref{Target}
+command:
 @smallexample
 @group
 makedb<3> @b{target}
 
-../config.status: ../configure
+../aclocal.m4: ../config/readline.m4 ../gettext.m4 ../iconv.m4 ../lib-ld.m4 ../lib-link.m4 ../lib-prefix.m4 ../progtest.m4 ../acinclude.m4 ../configure.ac
 #  Implicit rule search has not been done.
-#  Last modified 2005-11-16 21:46:13
+#  Implicit/static pattern stem: `'
+#  Last modified 2005-12-10 21:41:10
 #  File has not been updated.
-#  commands to execute (from `Makefile', line 278):
+# automatic
+# @ := ../aclocal.m4
+# automatic
+# % := 
+# automatic
+# * := 
+# automatic
+# + := ../config/readline.m4 ../gettext.m4 ../iconv.m4 ../lib-ld.m4 ../lib-link.m4 ../lib-prefix.m4 ../progtest.m4 ../acinclude.m4 ../configure.ac
+# automatic
+# | := 
+# automatic
+# < := ../config/readline.m4
+# automatic
+# ^ := ../config/readline.m4 ../gettext.m4 ../iconv.m4 ../lib-ld.m4 ../lib-link.m4 ../lib-prefix.m4 ../progtest.m4 ../acinclude.m4 ../configure.ac
+# automatic
+# ? := 
+#  commands to execute (from `Makefile', line 291):
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-
 @end group
 @end smallexample 
 
 I could have gotten the same output explicitly giving a target name
-such as @code{target ../config.status}.
+such as @code{target ../aclocal.m4}, or used the @value{MAKE}
+automatic variable name @code{@@}.
 
 What is going on here is we are checking to see if the Makefile needs
-to be remade and this is a dependency of target @code{all-am}. We
-don't have to be stopped on a target to get information about it:
+to be remade, and in doing this wee need to see if Makefile.in needs
+to be remade and that depends on target @code{../aclocal.m4}. 
+
+We don't have to be stopped on a target to get information about it:
 
 @smallexample
-makedb<3> @b{target all-am}
+makedb<4> @b{target all-am}
 
 target all-am
 
-all-am: Makefile make loadavg commands.h dbg_cmd.h dep.h expand.h filedef.h function.h gettext.h implicit.h make.h print.h remake.h rule.h variable.h vpath.h | arscan.h debug.h default.h getopt.h hash.h job.h read.h remote-stub.h trace.h
+all-am: Makefile make loadavg ar_fns.h arscan.h commands.h dbg_break.h dbg_cmd.h dbg_fns.h dbg_stack.h debug.h default.h dep.h dir_fns.h expand.h file.h function.h gettext.h hash.h implicit.h job.h make.h misc.h print.h read.h remake.h remote-stub.h rule.h trace.h types.h variable.h vpath.h
 #  Phony target (prerequisite of .PHONY).
 #  Implicit rule search has not been done.
+#  Implicit/static pattern stem: `'
 #  File does not exist.
 #  File has not been updated.
+# automatic
+# @ := all-am
+# automatic
+# % := 
+# automatic
+# * := 
+# automatic
+# + := Makefile make loadavg ar_fns.h arscan.h commands.h dbg_break.h dbg_cmd.h dbg_fns.h dbg_stack.h debug.h default.h dep.h dir_fns.h expand.h file.h function.h gettext.h hash.h implicit.h job.h make.h misc.h print.h read.h remake.h remote-stub.h rule.h trace.h types.h variable.h vpath.h
+# automatic
+# | := 
+# automatic
+# < := all-am
+# automatic
+# ^ := Makefile make loadavg ar_fns.h arscan.h commands.h dbg_break.h dbg_cmd.h dbg_fns.h dbg_stack.h debug.h default.h dep.h dir_fns.h expand.h file.h function.h gettext.h hash.h implicit.h job.h make.h misc.h print.h read.h remake.h remote-stub.h rule.h trace.h types.h variable.h vpath.h
+# automatic
+# ? := 
+makedb<5> 
 @end smallexample 
 
 However information may change depending on where Make is. In
@@ -528,8 +602,8 @@ Updating goal targets....
 /tmp/remake/src/Makefile:461: all-am
 makedb<2> where
 
-=>#0  all-am at /tmp/remake/src/Makefile:462
-  #1  all at /tmp/remake/src/Makefile:251
+=>#0  all-am at /tmp/src/remake/src/Makefile:472
+  #1  all at /tmp/src/remake/src/Makefile:259
 @end smallexample 
 
 @node Debugging Variables
@@ -1031,135 +1105,36 @@ display a short list of named classes of commands:
 @flushleft
 @smallexample
 makedb<0> @b{help}
-Available commands are: 
-  break *target*            (b):
-	Set a breakpoint at a target.
-
-  comment *text*            (#):
-	Ignore this line.
-
-  continue                  (c):
-	Continue executing debugged Makefile until another breakpoint.
-
-  delete *target*           (d):
-	Delete target breakpoint.
-
-  down [amount]             (D):
-	Select and print the target this one caused to be examined.
-	An argument says how many targets down to go.
-
-  eval *string*             (e):
-	parse and evaluate a string.
-
-  examine *string*          (x):
-	Show string with internal variables references expanded. See also 
-	"print".
-
-  frame *n*                 (f):
-	Move target frame to *n*; In contrast to "up" or "down",
-	this sets to an absolute position. 0 is the top.
-
-  help [command]            (h):
-	Display list of commands (i.e. this help text.)
-	with an command name, give only the help for that command.
-	Alias(es): ??
-
-  info [thing]              (i):
-	Show the state of thing.
-	If no 'thing' is specified, show everything there is to show.
-
-
-  next [amount]             (n):
-	For now the same as step.
-
-  print @{*variable* [attrs...]@} (p):
-	Show a variable definition.
-	The value is shown with embedded
-	variable-references unexpanded. Don't include $ before a variable
-	name. See also "examine".
-
-	If no variable is supplied, we try to use the
-	last value given.
-
-
-  quit [exit-status]        (q):
-	Exit make. If a numeric argument is given, it will be the exit
-	status this program reports back. Otherwise exit with status 0.
-	Alias(es): exit, return
-
-  run                       (R):
-	Run Makefile from the beginning.
-	You may specify arguments to give it.
-	With no arguments, uses arguments last specified (with "run")
-	Alias(es): restart
-
-  set @{basename|debug|ignore-errors|keep-going|silent|trace|variable@} *value* (=):
-	set basename @{on|off|toggle@} - show full name or basename?
-	set debug debug-mask - like --debug value.
-
-	set ignore-errors @{on|off|toggle@} - like --ignore-errors option
-
-	set keep-going @{on|off|toggle@} - like --keep-going option
-
-	set silent @{on|off|toggle@} - like --silent option
-
-	set trace @{on|off|toggle@} - set tracing status
-	set variable *var* *value*
-	Set MAKE variable to value. Variable definitions
-	inside VALUE are expanded before assignment occurs.
-
-
-  setq *variable* *value*   ("):
-	Set MAKE variable to value. Variable definitions
-	inside VALUE are not expanded before assignment occurs.
-
-  shell *string*            (!):
-	Execute the rest of the line as a shell.
-	Alias(es): !!
-
-  show [thing]              (S):
-	Show the state of thing.
-	If no 'thing' is specified, show everything there is to show.
-
-
-  skip                      (k):
-	Skip execution of next command or action.
-
-
-  step [amount]             (s):
-	Step execution until another stopping point is reached.
-	Argument N means do this N times (or until there's another
- 	reason to stop.
-
-  target                    (t):
-	Show information about a target.
-	target information is printed.
-	The following attributes names can be given after a target name:
-		'attributes', 'commands', 'expand', 'depends', 'nonorder',
-		'previous', 'state', 'time', 'variables'
-	If no variable or target name is supplied, we try to use the
-	current target name.
-
-
-  where                     (T):
-	Print target stack or Makefile include stack.
-	An argument specifies the maximum amount of entries to show.
-	Alias(es): backtrace, bt
-
-  write [*target* [*filename*]] (w):
-	writes the commands associated of a target to a file with MAKE
-	variables expanded. If no target given, the basename of the current
-	is used. If a filename is supplied it is used. If it is the string
-	"here", we write the output to stdout. If no filename is
-	given then create the filename by prepending a directory name to
-	the target name and then append ".sh".
-
-  up [amount]               (u):
-	Select and print target that caused this one to be examined.
-	An argument says how many targets up to go.
+  Command                  Short Name  Aliases
+  ----------------------   ----------  ---------
+  break *target*                  (b)  L
+  comment *text*                  (#)
+  continue                        (c)
+  delete breakpoint numbers..     (d)
+  down [amount]                   (D)
+  eval *string*                   (e)
+  examine *string*                (x)
+  finish                          (F)
+  frame *n*                       (f)
+  help [command]                  (h)  ?, ??
+  info [thing]                    (i)
+  next [amount]                   (n)
+  print @{*variable* [attrs...]@}   (p)
+  quit [exit-status]              (q)  exit, return
+  run                             (R)  restart
+  set @{*option*|variable@} *value* (=)
+  setq *variable* *value*         (")
+  shell *string*                  (!)  !!
+  show [thing]                    (S)
+  skip                            (k)
+  step [amount]                   (s)
+  target                          (t)
+  up [amount]                     (u)
+  where                           (T)  backtrace, bt
+  write [*target* [*filename*]]   (w)
 
 Readline command line editing (emacs/vi mode) is available.
-For more help, type h <cmd> or consult online-documentation.
+For more detailed help, type h <cmd> or consult online-documentation.
 @end smallexample
 @end flushleft
 @c the above line break eliminates huge line overfull...

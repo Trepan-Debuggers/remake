@@ -1,4 +1,4 @@
-/* $Id: dbg_fns.c,v 1.9 2005/12/18 12:30:49 rockyb Exp $
+/* $Id: dbg_fns.c,v 1.10 2005/12/18 16:43:02 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -207,7 +207,7 @@ print_debugger_location(const file_t *p_target,
 	floc.lineno--;
 	printf("\n(");
 	print_floc_prefix(&floc);
-	printf ("): %s\n", psz_target_name);
+	printf (")\n");
       } else if (p_target->phony)
 	printf("\n(%s: .PHONY target)\n", p_target->name);
       else 
@@ -215,7 +215,7 @@ print_debugger_location(const file_t *p_target,
     } else {
       printf("\n(");
       print_floc_prefix(p_target_loc);
-      printf ("): %s\n", psz_target_name);
+      printf (")\n");
     }
   } else if (p_stack_floc && p_stack_floc->p_floc) {
       printf("\n(");
