@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.65 2005/12/15 02:42:38 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.66 2005/12/18 01:32:22 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -746,17 +746,7 @@ static debug_return_t dbg_cmd_show (char *psz_arg)
     }
   } else {
     if (is_abbrev_of (psz_arg, "args", 3)) {
-      unsigned int i;
-      printf("Argument list to give Makefile when it is started is");
-      if (global_argv[1]) {
-	printf("\n\t\"%s", global_argv[1]);
-	for (i = 2; global_argv[i]; i++) {
-	  printf(" %s", global_argv[i]);
-	}
-      } else {
-	printf("\"");
-      }
-      printf("\".\n");
+      print_cmdline();
     } else if (is_abbrev_of (psz_arg, "basename", 4)) {
       printf("basename is %s.\n", var_to_on_off(basename_filenames));
     } else if (is_abbrev_of (psz_arg, "debug", 3)) {
@@ -1344,6 +1334,9 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
   }
 
   print_debugger_location(p_target, NULL);
+
+  /* Could/should generalize the below into a prompt string. */
+  dbg_cmd_show_exp("$@: $? $+", true);
   
   in_debugger = true;
 
