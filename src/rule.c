@@ -235,7 +235,7 @@ convert_to_pattern (void)
       convert_suffix_rule (dep_name (d), (char *) NULL, (commands_t *) NULL);
 
       f = d->file;
-      if (f->cmds != 0)
+      if (f->cmds)
 	/* Record a pattern for this suffix's null-suffix rule.  */
 	convert_suffix_rule ("", dep_name (d), f->cmds);
 
@@ -289,8 +289,8 @@ new_pattern_rule (rule_t *rule, int override)
   rule->next = 0;
 
   /* Search for an identical rule.  */
-  lastrule = 0;
-  for (r = pattern_rules; r != 0; lastrule = r, r = r->next)
+  lastrule = NULL;
+  for (r = pattern_rules; r; lastrule = r, r = r->next)
     for (i = 0; rule->targets[i] != 0; ++i)
       {
 	for (j = 0; r->targets[j] != 0; ++j)
@@ -333,10 +333,10 @@ new_pattern_rule (rule_t *rule, int override)
 
  matched:;
 
-  if (r == 0)
+  if (!r)
     {
       /* There was no rule to replace.  */
-      if (pattern_rules == 0)
+      if (!pattern_rules)
 	pattern_rules = rule;
       else
 	last_pattern_rule->next = rule;
@@ -353,7 +353,7 @@ new_pattern_rule (rule_t *rule, int override)
    TERMINAL specifies what the `terminal' field of the rule should be.  */
 
 void
-install_pattern_rule (struct pspec *p, int terminal)
+install_pattern_rule (pspec_t *p, int terminal)
 {
   rule_t *r;
   char *ptr;
@@ -392,10 +392,8 @@ install_pattern_rule (struct pspec *p, int terminal)
       r->cmds                  = CALLOC(commands_t, 1);
       r->cmds->fileinfo.filenm = 0;
       r->cmds->fileinfo.lineno = 0;
-      /* These will all be string literals, but we malloc space for them
-	 anyway because somebody might want to free them later.  */
-      r->cmds->commands = strdup (p->commands);
-      r->cmds->command_lines = 0;
+      r->cmds->commands        = p->commands;
+      r->cmds->command_lines   = 0;
     }
 }
 
@@ -410,7 +408,7 @@ free_rule (rule_t *rule, rule_t *lastrule)
   unsigned int i;
   dep_t *dep;
 
-  for (i = 0; rule->targets[i] != 0; ++i) {
+  for (i = 0; rule->targets[i]; ++i) {
     FREE(rule->targets[i]);
   }
   
@@ -426,7 +424,11 @@ free_rule (rule_t *rule, rule_t *lastrule)
       dep = t;
     }
 
-  /* FIXME: Need to free cmd and cmd->commands. */
+  /* FIXME: Need to free */
+#if 1
+  FREE(rule->cmds);
+#endif
+  
   FREE(rule->targets);
   FREE(rule->suffixes);
   FREE(rule->lens);
@@ -472,19 +474,24 @@ free_pattern_rules (void)
    It is a terminal rule if TERMINAL is nonzero.  This rule overrides
    identical rules with different commands if OVERRIDE is nonzero.
 
-   The storage for TARGETS and its elements is used and must not be freed
-   until the rule is destroyed.  The storage for TARGET_PERCENTS is not used;
-   it may be freed.  */
+   The storage for TARGETS and its elements is saved in PATTERN_RULES
+   and must not be freed until the rule is destroyed.  
+   The storage for TARGET_PERCENTS is not used; it should be freed by 
+   the caller.  */
 
 void
 create_pattern_rule (char **targets, char **target_percents,
 		     int terminal, dep_t *deps,
                      commands_t *commands, int override)
 {
-  rule_t *r = (rule_t *) xmalloc (sizeof (rule_t));
+  rule_t *r = CALLOC(rule_t, 1);
   unsigned int max_targets, i;
 
-  r->cmds = commands;
+  if (commands) {
+    r->cmds = MALLOC(commands_t, 1);
+    memcpy(r->cmds, commands, sizeof(commands_t));
+  }
+
   r->deps = deps;
   r->targets = targets;
 
@@ -543,7 +550,7 @@ print_rule (rule_t *r)
     printf (" %s", dep_name (d));
   putchar ('\n');
 
-  if (r->cmds != 0)
+  if (r->cmds)
     print_commands (NULL, r->cmds, false);
 }
 

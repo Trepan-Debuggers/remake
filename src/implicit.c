@@ -1,4 +1,4 @@
-/* $Id: implicit.c,v 1.10 2005/12/12 01:04:59 rockyb Exp $
+/* $Id: implicit.c,v 1.11 2005/12/18 13:30:33 rockyb Exp $
 Implicit rule searching for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,97,2000, 2004, 2005
 Free Software Foundation, Inc.
@@ -21,6 +21,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "config.h"
 #include "ar_fns.h"
+#include "commands.h"
 #include "debug.h"
 #include "dep.h"
 #include "dir_fns.h"
@@ -108,7 +109,7 @@ pattern_search (file_t *file, int archive,
   /* This is a file-object used as an argument in
      recursive calls.  It never contains any data
      except during a recursive call.  */
-  file_t *intermediate_file = 0;
+  file_t *intermediate_file = NULL;
 
   /* List of dependencies found recursively.  */
   file_t **intermediate_files
@@ -201,11 +202,11 @@ pattern_search (file_t *file, int archive,
      and may be considered.  Put them in TRYRULES.  */
 
   nrules = 0;
-  for (rule = pattern_rules; rule != 0; rule = rule->next)
+  for (rule = pattern_rules; rule; rule = rule->next)
     {
       /* If the pattern rule has deps but no commands, ignore it.
 	 Users cancel built-in rules by redefining them without commands.  */
-      if (rule->deps != 0 && rule->cmds == 0)
+      if (rule->deps && !rule->cmds)
 	continue;
 
       /* If this rule is in use by a parent pattern_search,
@@ -216,7 +217,7 @@ pattern_search (file_t *file, int archive,
 	  continue;
 	}
 
-      for (i = 0; rule->targets[i] != 0; ++i)
+      for (i = 0; rule->targets[i]; ++i)
 	{
 	  char *target = rule->targets[i];
 	  char *suffix = rule->suffixes[i];
@@ -438,7 +439,7 @@ pattern_search (file_t *file, int archive,
 
 	      if (intermed_ok)
 		{
-		  if (intermediate_file == 0)
+		  if (!intermediate_file)
 		    intermediate_file
 		      = (file_t *) alloca (sizeof (file_t));
 
@@ -541,7 +542,8 @@ pattern_search (file_t *file, int archive,
 	  file_t *imf = intermediate_files[deps_found];
 	  file_t *f = enter_file (imf->name, NILF);
 	  f->deps = imf->deps;
-	  f->cmds = imf->cmds;
+	  f->cmds = MALLOC(commands_t, 1);
+	  memcpy(f->cmds, imf->cmds, sizeof(commands_t));
 	  f->stem = imf->stem;
           f->also_make = imf->also_make;
 	  imf = lookup_file (intermediate_patterns[deps_found]);
@@ -611,12 +613,14 @@ pattern_search (file_t *file, int archive,
       /* We want to prepend the directory from
 	 the original FILENAME onto the stem.  */
       fullstemlen = dirlen + stemlen;
-      file->stem = (char *) xmalloc (fullstemlen + 1);
+      file->stem = MALLOC(char, fullstemlen + 1);
       memmove (file->stem, filename, dirlen);
       memmove (file->stem + dirlen, stem, stemlen);
       file->stem[fullstemlen] = '\0';
     }
 
+  file->cmds = MALLOC(commands_t, 1);
+  memcpy(file->cmds, rule->cmds, sizeof(commands_t));
   file->cmds = rule->cmds;
 
   /* If this rule builds other targets, too, put the others into FILE's

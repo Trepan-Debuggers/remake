@@ -1,4 +1,4 @@
-/* $Id: default.c,v 1.9 2005/12/17 04:24:14 rockyb Exp $
+/* $Id: default.c,v 1.10 2005/12/18 13:30:33 rockyb Exp $
 Data base of default implicit rules for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96, 2004 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -43,7 +43,7 @@ static char default_suffixes[] =
 .mod .sym .def .h .info .dvi .tex .texinfo .texi .txinfo \
 .w .ch .web .sh .elc .el";
 
-static struct pspec default_pattern_rules[] =
+static pspec_t default_pattern_rules[] =
   {
     { "(%)", "%",
 	"$(AR) $(ARFLAGS) $@ $<" },
@@ -387,6 +387,7 @@ free_default_suffix (void)
     file_t *f = lookup_file (s[0]);
     /* Don't clobber cmds given in a makefile if there were any.  */
     if (f && f->cmds) {
+      FREE (f->cmds->commands);
       FREE (f->cmds);
     }
   }
@@ -404,11 +405,14 @@ install_default_implicit_rules (void)
   if (no_builtin_rules_flag)
     return;
 
-  for (p = default_pattern_rules; p->target != 0; ++p)
+  for (p = default_pattern_rules; p->target; ++p) {
     install_pattern_rule (p, 0);
+  }
 
-  for (p = default_terminal_rules; p->target != 0; ++p)
+  for (p = default_terminal_rules; p->target; ++p) {
     install_pattern_rule (p, 1);
+  }
+  
 }
 
 /*!  

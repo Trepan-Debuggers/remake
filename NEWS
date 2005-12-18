@@ -11,11 +11,23 @@ reports.
 
 Version 3.80+dbg-0.6cvs
 
-* Fix bug in vpath regression - was reading uninitialzed memory
+* On a fatal error we now show command arguments used to invoke program.
+
+* The default behavior on error is to show call trace. To turn off use
+  --no-extended-errors. --extended-errors and -E no longer exist.
+
+* "quit" can now terminate several levels of nested make (if "make"
+  was called directly and not via a shell string).
+
+* prompt now shows target and prerequisites.
+
+* Fix bug in vpath regression test - was reading uninitialzed memory.
 
 * Reorganize help command. Is more ddd-friendly (and more gdb like).
 
-* expand documentation 
+* More explicit frees of memory at termination. 
+
+* Expand documentation.
 
 Version 3.80+dbg-0.5
 

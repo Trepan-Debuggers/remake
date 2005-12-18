@@ -12,7 +12,7 @@
 # this routine controls the whole mess; each test suite sets up a few
 # variables and then calls &toplevel, which does all the real work.
 
-# $Id: test_driver.pl,v 1.9 2005/12/11 12:15:29 rockyb Exp $
+# $Id: test_driver.pl,v 1.10 2005/12/18 13:30:33 rockyb Exp $
 
 sub print_standard_usage
 {
@@ -637,15 +637,14 @@ sub detach_default_output
 # run one command (passed as a list of arg 0 - n), returning 0 on success
 # and nonzero on failure.
 
-sub run_command
+sub run_command()
 {
-  local ($code);
-
   if ($debug)
   {
     print "\nrun_command: @_\n";
-    $code = system @_;
-    print "run_command: \"@_\" returned $code.\n";
+    my $code = system @_;
+    my $rc   = $code >> 8;
+    print "run_command: \"@_\" returned $rc.\n";
     return $code;
   }
 

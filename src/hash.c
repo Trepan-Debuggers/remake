@@ -1,4 +1,4 @@
-/* $Id: hash.c,v 1.10 2005/12/17 19:44:10 rockyb Exp $
+/* $Id: hash.c,v 1.11 2005/12/18 13:30:33 rockyb Exp $
    hash.c -- hash table maintenance
    Copyright (C) 1995, 1999, 2002, 2004, 2005 Free Software Foundation, Inc.
    Written by Greg McGary <gkm@gnu.org> <greg@mcgary.org>
@@ -45,7 +45,7 @@ hash_init (hash_table_t *ht, unsigned long size,
   ht->ht_size = round_up_2 (size);
   ht->ht_empty_slots = ht->ht_size;
   ht->ht_vec = (void**) CALLOC (struct token *, ht->ht_size);
-  if (ht->ht_vec == 0)
+  if (!ht->ht_vec)
     {
       fprintf (stderr, _("can't allocate %ld bytes for hash table: memory exhausted"),
 	       ht->ht_size * sizeof(struct token *));
@@ -180,10 +180,12 @@ hash_free_items (hash_table_t *p_ht, free_fn_t free_fn)
   void **end = &pp_vec[p_ht->ht_size];
   for (; pp_vec < end; pp_vec++)
     {
-      void *p_item = *pp_vec;
-      if (!HASH_VACANT (p_item))
-	if (free_fn) (*free_fn)(p_item);
-      *pp_vec = NULL;
+      if (pp_vec) {
+	void *p_item = *pp_vec;
+	if (!HASH_VACANT (p_item))
+	  if (free_fn) (*free_fn)(p_item);
+	*pp_vec = NULL;
+      }
     }
   p_ht->ht_fill = 0;
   p_ht->ht_empty_slots = p_ht->ht_size;
@@ -208,6 +210,12 @@ hash_delete_items (hash_table_t *ht)
 void
 hash_free (hash_table_t *ht, free_fn_t free_fn)
 {
+  if (!ht->ht_vec) {
+    ht->ht_fill = 0;
+    ht->ht_capacity = 0;
+    return;
+  }
+
   if (free_fn)
     hash_free_items (ht, free_fn);
   else

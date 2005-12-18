@@ -1,4 +1,4 @@
-/* $Id: file.c,v 1.10 2005/12/17 19:44:09 rockyb Exp $
+/* $Id: file.c,v 1.11 2005/12/18 13:30:33 rockyb Exp $
 Target file hash table management for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -207,9 +207,10 @@ rehash_file (file_t *from_file, char *to_hname)
 
       if (from_file->cmds != 0)
 	{
-	  if (to_file->cmds == 0)
-	    to_file->cmds = from_file->cmds;
-	  else if (from_file->cmds != to_file->cmds)
+	  if (!to_file->cmds) {
+	    to_file->cmds = MALLOC(commands_t, 1);
+	    memcpy(to_file->cmds, from_file->cmds, sizeof(commands_t));
+	  } else if (from_file->cmds != to_file->cmds)
 	    {
 	      /* We have two sets of commands.  We will go with the
 		 one given in the rule explicitly mentioning this name,

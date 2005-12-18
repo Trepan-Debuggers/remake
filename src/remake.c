@@ -1,4 +1,4 @@
-/* $Id: remake.c,v 1.17 2005/12/15 02:42:38 rockyb Exp $
+/* $Id: remake.c,v 1.18 2005/12/18 13:30:33 rockyb Exp $
 Basic dependency engine for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -239,7 +239,7 @@ update_goal_chain (dep_t *goals, int makefiles)
 		  && file->update_status == 0 && !g->changed
 		  /* Never give a message under -s or -q.  */
 		  && !silent_flag && !question_flag) {
-		message (1, ((file->phony || file->cmds == 0)
+		message (1, ((file->phony || !file->cmds)
 			     ? _("Nothing to be done for `%s'.")
 			     : _("`%s' is up to date.")),
 			 file->name);
@@ -479,7 +479,7 @@ update_file_1 (file_t *file, unsigned int depth,
   /* If file was specified as a target with no commands,
      come up with some default commands.  */
 
-  if (!file->phony && file->cmds == 0 && !file->tried_implicit)
+  if (!file->phony && !file->cmds && !file->tried_implicit)
     {
       if (try_implicit_rule (file, depth))
 	DBF (DB_IMPLICIT, _("Found an implicit rule for `%s'.\n"));
@@ -487,11 +487,11 @@ update_file_1 (file_t *file, unsigned int depth,
 	DBF (DB_IMPLICIT, _("No implicit rule found for `%s'.\n"));
       file->tried_implicit = 1;
     }
-  if (file->cmds == 0 && !file->is_target
-      && default_file != 0 && default_file->cmds != 0)
+  if (!file->cmds && !file->is_target && default_file && default_file->cmds)
     {
       DBF (DB_IMPLICIT, _("Using default commands for `%s'.\n"));
-      file->cmds = default_file->cmds;
+      file->cmds = MALLOC(commands_t, 1);
+      memcpy(file->cmds, default_file->cmds, sizeof(commands_t));
     }
 
   /* Update all non-intermediate files we depend on, if necessary,
@@ -863,7 +863,7 @@ notice_finished_file (file_t *file)
 	 or won when they ran (i.e. status is 0).  */
       && file->update_status == 0)
     {
-      if (file->cmds != 0 && file->cmds->any_recurse)
+      if (file->cmds && file->cmds->any_recurse)
 	{
 	  /* If all the command lines were recursive,
 	     we don't want to do the touching.  */
@@ -996,10 +996,11 @@ check_dep (file_t *file, unsigned int depth, FILE_TIMESTAMP this_mtime,
 	  file->tried_implicit = 1;
 	}
       if (file->cmds == 0 && !file->is_target
-	  && default_file != 0 && default_file->cmds != 0)
+	  && default_file && default_file->cmds != 0)
 	{
 	  DBF (DB_IMPLICIT, _("Using default commands for `%s'.\n"));
-	  file->cmds = default_file->cmds;
+	  file->cmds = MALLOC(commands_t, 1);
+	  memcpy(file->cmds, default_file->cmds, sizeof(commands_t));
 	}
 
       /* If the intermediate file actually exists
@@ -1128,7 +1129,7 @@ touch_file (file_t *file)
 static void
 remake_file (file_t *file, target_stack_node_t *p_call_stack)
 {
-  if (file->cmds == 0)
+  if (!file->cmds)
     {
       if (file->phony)
 	/* Phony target.  Pretend it succeeded.  */

@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.35 2005/12/18 11:57:12 rockyb Exp $
+/* $Id: main.c,v 1.36 2005/12/18 13:30:33 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -576,9 +576,9 @@ free_stringlist(stringlist_t *p_stringlist, bool b_stringlist_too)
   if (p_stringlist) {
     unsigned int i;
     for (i=0; i<p_stringlist->idx; i++)
-      free(p_stringlist->list[i]);
-    free(p_stringlist->list);
-    if (b_stringlist_too) free(p_stringlist);
+      FREE(p_stringlist->list[i]);
+    FREE(p_stringlist->list);
+    if (b_stringlist_too) FREE(p_stringlist);
   }
 }
 
@@ -2368,11 +2368,10 @@ decode_switches (int argc, char **argv, int env)
 		  sl = *(stringlist_t **) cs->value_ptr;
 		  if (!sl)
 		    {
-		      sl = (stringlist_t *)
-			xmalloc (sizeof (stringlist_t));
-		      sl->max = 5;
-		      sl->idx = 0;
-		      sl->list = (char **) xmalloc (5 * sizeof (char *));
+		      sl       = CALLOC(stringlist_t, 1);
+		      sl->max  = 5;
+		      sl->idx  = 0;
+		      sl->list = CALLOC(char *, 5);
 		      *(stringlist_t **) cs->value_ptr = sl;
 		    }
 		  else if (sl->idx == sl->max - 1)

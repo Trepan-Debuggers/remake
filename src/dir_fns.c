@@ -1,4 +1,4 @@
-/* $Id: dir_fns.c,v 1.4 2005/12/17 19:44:09 rockyb Exp $
+/* $Id: dir_fns.c,v 1.5 2005/12/18 13:30:33 rockyb Exp $
 Directory hashing for GNU Make.
 Copyright (C) 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -1017,7 +1017,12 @@ hash_init_directories (void)
 static void 
 dir_free_dirfile(dirfile_t *p_dirfile) 
 {
-  /*FREE(p_dirfile->name);*/
+  /* Sometimes p_dirfile->name is not null but whatever it's pointed
+     to doesn't exist. Some kind of sharing here? However
+     p_dirfile->length is 0 in these cases.
+
+   */
+  if (p_dirfile->length) free(p_dirfile->name);
   free(p_dirfile);
 }
 
@@ -1025,15 +1030,18 @@ dir_free_dirfile(dirfile_t *p_dirfile)
 static void 
 dir_free(directory_t *p_dir) 
 {
+  if (p_dir->contents)
+    hash_free(&(p_dir->contents->dirfiles), (free_fn_t) dir_free_dirfile);
   if (p_dir->name) FREE(p_dir->name);
   free(p_dir);
 }
 
-
+/*! Free hashes for directories and directory_contents. */
 void
 hash_free_directories (void)
 {
+#if 1
   hash_free(&directories, (free_fn_t) dir_free);
+#endif
   hash_free(&directory_contents, (free_fn_t) dir_free_dirfile);
 }
-

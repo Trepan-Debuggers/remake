@@ -1,4 +1,4 @@
-/* $Id: read.c,v 1.24 2005/12/15 02:42:38 rockyb Exp $
+/* $Id: read.c,v 1.25 2005/12/18 13:30:33 rockyb Exp $
 Reading and parsing of makefiles for GNU Make.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
@@ -1756,7 +1756,7 @@ record_files (nameseq_t *filenames, char *pattern, char *pattern_percent,
 
   if (commands_idx > 0)
     {
-      cmds = (commands_t *) xmalloc (sizeof(commands_t));
+      cmds = CALLOC(commands_t, 1);
       cmds->fileinfo.filenm = flocp->filenm;
       cmds->fileinfo.lineno = cmds_started;
       cmds->commands = savestring (commands, commands_idx);
@@ -1992,9 +1992,9 @@ record_files (nameseq_t *filenames, char *pattern, char *pattern_percent,
 	  f->is_target = 1;
 
 	  /* Defining .DEFAULT with no deps or cmds clears it.  */
-	  if (f == default_file && this == 0 && cmds == 0)
-	    f->cmds = 0;
-	  if (cmds != 0)
+	  if (f == default_file && this == 0 && !cmds)
+	    f->cmds = NULL;
+	  if (cmds)
 	    f->cmds = cmds;
 	  /* Defining .SUFFIXES with no dependencies
 	     clears out the list of suffixes.  */
@@ -2838,10 +2838,9 @@ free_include_directories (void)
   if (include_directories) {
     unsigned int i;
     for (i=0; include_directories[i]; i++) {
-      free(include_directories[i]);
+      FREE(include_directories[i]);
     }
-    free(include_directories);
-    include_directories=NULL;
+    FREE(include_directories);
   }
 }
 
@@ -3011,7 +3010,7 @@ multi_glob (nameseq_t *chain, unsigned int size)
 		      {
 			/* Find the end of the FOUND chain.  */
 			nameseq_t *f = found;
-			while (f->next != 0)
+			while (f->next)
 			  f = f->next;
 
 			/* Attach the chain being built to the end of the FOUND
@@ -3025,10 +3024,7 @@ multi_glob (nameseq_t *chain, unsigned int size)
 		else
 #endif /* !NO_ARCHIVES */
 		  {
-		    nameseq_t *elt = (nameseq_t *) xmalloc (size);
-                    if (size > sizeof (nameseq_t))
-                      memset (((char *) elt) + sizeof (nameseq_t),
-			      0, size - sizeof (nameseq_t));
+		    nameseq_t *elt = CALLOC(nameseq_t, size);
 		    elt->name = strdup (gl.gl_pathv[i]);
 		    elt->next = new;
 		    new = elt;
