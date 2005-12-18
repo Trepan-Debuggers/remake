@@ -1,4 +1,4 @@
-/* $Id: default.c,v 1.10 2005/12/18 13:30:33 rockyb Exp $
+/* $Id: default.c,v 1.11 2005/12/18 15:14:13 rockyb Exp $
 Data base of default implicit rules for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96, 2004 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -388,6 +388,7 @@ free_default_suffix (void)
     /* Don't clobber cmds given in a makefile if there were any.  */
     if (f && f->cmds) {
       FREE (f->cmds->commands);
+      FREE (f->cmds->line_no);
       FREE (f->cmds);
     }
   }

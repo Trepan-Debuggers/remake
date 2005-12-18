@@ -424,11 +424,10 @@ free_rule (rule_t *rule, rule_t *lastrule)
       dep = t;
     }
 
-  /* FIXME: Need to free */
-#if 1
+  if (rule->cmds && rule->cmds->line_no)
+    FREE(rule->cmds->line_no);
   FREE(rule->cmds);
-#endif
-  
+  FREE(rule->cmds);
   FREE(rule->targets);
   FREE(rule->suffixes);
   FREE(rule->lens);
