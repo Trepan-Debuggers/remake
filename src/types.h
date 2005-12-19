@@ -1,4 +1,4 @@
-/* $Id: types.h,v 1.6 2005/12/10 02:50:32 rockyb Exp $
+/* $Id: types.h,v 1.7 2005/12/19 08:23:41 rockyb Exp $
 Miscellaneous types
 Copyright (c) 2005 Rocky Bernstein <rocky@panix.com>
 This file is part of GNU Make.
@@ -58,9 +58,10 @@ typedef struct dep               dep_t;
 typedef struct file              file_t;
 typedef struct floc              floc_t;
 typedef struct nameseq           nameseq_t;
+typedef struct pattern_var       pattern_var_t;
 typedef struct pspec             pspec_t;
+typedef struct stringlist        stringlist_t;
 typedef struct variable_set      variable_set_t;
 typedef struct variable_set_list variable_set_list_t;
-typedef struct pattern_var       pattern_var_t;
 
 #endif /*TYPES_H*/

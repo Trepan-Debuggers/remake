@@ -1,4 +1,4 @@
-/* $Id: read.h,v 1.4 2005/12/09 12:11:09 rockyb Exp $ 
+/* $Id: read.h,v 1.5 2005/12/19 08:23:41 rockyb Exp $ 
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -26,6 +26,8 @@ Boston, MA 02111-1307, USA.  */
 #define READ_H
 
 #include "dep.h"
+
+extern stringlist_t *include_directories;
 
 /*! The chain of makefiles read by read_makefile.  */
 extern dep_t *read_makefiles;

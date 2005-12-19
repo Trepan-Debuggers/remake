@@ -20,7 +20,7 @@ rocky: Seems to fail intermitently - skipped for now.
 ";
 
 
-return -1 if !"";
+# return -1 if !"";
 
 open(MAKEFILE,"> $makefile");
 

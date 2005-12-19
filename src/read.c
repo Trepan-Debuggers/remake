@@ -1,4 +1,4 @@
-/* $Id: read.c,v 1.25 2005/12/18 13:30:33 rockyb Exp $
+/* $Id: read.c,v 1.26 2005/12/19 08:23:41 rockyb Exp $
 Reading and parsing of makefiles for GNU Make.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
@@ -117,10 +117,6 @@ static char *default_include_directories[] =
     "/usr/include",
     NULL
   };
-
-/* List of directories to search for include files in  */
-
-static char **include_directories;
 
 /* Maximum length of an element of the above.  */
 
@@ -356,9 +352,10 @@ eval_makefile (char *filename, int flags)
   if (ebuf.fp == 0 && (flags & RM_INCLUDED) && *filename != '/')
     {
       unsigned int i;
-      for (i = 0; include_directories[i] != 0; ++i)
+      char  **include_dirlist = include_directories->list;
+      for (i = 0; include_dirlist[i] != 0; ++i)
 	{
-	  char *name = concat (include_directories[i], "/", filename);
+	  char *name = concat (include_dirlist[i], "/", filename);
 	  ebuf.fp = fopen (name, "r");
 	  if (ebuf.fp == 0)
 	    free (name);
@@ -2498,7 +2495,7 @@ readline (ebuffer_t *ebuf)
       /* We got a newline, so add one to the count of lines.  */
       ++nlines;
 
-#if !defined(WINDOWS32) && !defined(__MSDOS__)
+#if !defined(WINDOWS32)
       /* Check to see if the line was really ended with CRLF; if so ignore
          the CR.  */
       if ((p - start) > 1 && p[-2] == '\r')
@@ -2506,7 +2503,7 @@ readline (ebuffer_t *ebuf)
           --p;
           p[-1] = '\n';
         }
-#endif /* !WINDOWS2 && !__MSDOS__ */
+#endif /* !WINDOWS2 */
 
       backslash = 0;
       for (p2 = p - 2; p2 >= start; --p2)
@@ -2744,19 +2741,17 @@ construct_include_path (char **arg_dirs)
 
   unsigned int defsize = (sizeof (default_include_directories)
 				   / sizeof (default_include_directories[0]));
-  unsigned int max = 5;
-  char **dirs = (char **) xmalloc ((5 + defsize) * sizeof (char *));
-  unsigned int idx = 0;
+  stringlist_t *dirlist = CALLOC(stringlist_t, 1);
 
-#ifdef  __MSDOS__
-  defsize++;
-#endif
+  dirlist->max  = 5 + defsize;
+  dirlist->idx  = 0;
+  dirlist->list = CALLOC(char *, dirlist->max);
 
-  /* First consider any dirs specified with -I switches.
-     Ignore dirs that don't exist.  */
+  /* First consider any directories specified with -I switches.
+     Ignore directories that don't exist.  */
 
-  if (arg_dirs != 0)
-    while (*arg_dirs != 0)
+  if (arg_dirs)
+    while (*arg_dirs)
       {
 	char *dir = *arg_dirs++;
         int e;
@@ -2764,42 +2759,26 @@ construct_include_path (char **arg_dirs)
 	if (dir[0] == '~')
 	  {
 	    char *expanded = tilde_expand (dir);
-	    if (expanded != 0)
+	    if (expanded) {
+	      free(dir);
 	      dir = expanded;
+	    }
 	  }
 
         EINTRLOOP (e, stat (dir, &stbuf));
 	if (e == 0 && S_ISDIR (stbuf.st_mode))
 	  {
-	    if (idx == max - 1)
+	    if (dirlist->idx == dirlist->max - 1)
 	      {
-		max += 5;
-		dirs = (char **)
-		  xrealloc ((char *) dirs, (max + defsize) * sizeof (char *));
+		dirlist->max += 5;
+		dirlist->list = REALLOC(dirlist->list, char *, 
+					dirlist->max + defsize);
 	      }
-	    dirs[idx++] = dir;
+	    dirlist->list[dirlist->idx++] = strdup(dir);
 	  }
-	else if (dir != arg_dirs[-1])
-	  free (dir);
       }
 
   /* Now add at the end the standard default dirs.  */
-
-#ifdef  __MSDOS__
-  {
-    /* The environment variable $DJDIR holds the root of the
-       DJGPP directory tree; add ${DJDIR}/include.  */
-    struct variable *djdir = lookup_variable ("DJDIR", 5);
-
-    if (djdir)
-      {
-	char *defdir = (char *) xmalloc (strlen (djdir->value) + 8 + 1);
-
-	strcat (strcpy (defdir, djdir->value), "/include");
-	dirs[idx++] = defdir;
-      }
-  }
-#endif
 
   for (i = 0; default_include_directories[i] != 0; ++i)
     {
@@ -2807,27 +2786,28 @@ construct_include_path (char **arg_dirs)
 
       EINTRLOOP (e, stat (default_include_directories[i], &stbuf));
       if (e == 0 && S_ISDIR (stbuf.st_mode))
-        dirs[idx++] = strdup(default_include_directories[i]);
+        dirlist->list[dirlist->idx++] = strdup(default_include_directories[i]);
     }
 
-  dirs[idx] = NULL;
+  dirlist->list[dirlist->idx] = NULL;
 
   /* Now compute the maximum length of any name in it.  */
 
   max_incl_len = 0;
-  for (i = 0; i < idx; ++i)
+  for (i = 0; i < dirlist->idx; ++i)
     {
-      unsigned int len = strlen (dirs[i]);
+      unsigned int len = strlen (dirlist->list[i]);
       /* If dir name is written with a trailing slash, discard it.  */
-      if (dirs[i][len - 1] == '/')
+      if (dirlist->list[i][len - 1] == '/')
 	/* We can't just clobber a null in because it may have come from
 	   a literal string and literal strings may not be writable.  */
-	dirs[i] = savestring (dirs[i], len - 1);
+	dirlist->list[i] = savestring (dirlist->list[i], len - 1);
       if (len > max_incl_len)
 	max_incl_len = len;
     }
 
-  include_directories = dirs;
+  free(include_directories);
+  include_directories = dirlist;
 }
 
 /*! Free memory in include_directories and set that NULL.
@@ -2836,9 +2816,15 @@ void
 free_include_directories (void) 
 {
   if (include_directories) {
-    unsigned int i;
-    for (i=0; include_directories[i]; i++) {
-      FREE(include_directories[i]);
+    if (include_directories->list) {
+      unsigned int i;
+      for (i=0; include_directories->list[i]; i++) {
+	FREE(include_directories->list[i]);
+      }
+      if (i > include_directories->max) {
+	message(0, "Internal inconsistency noted with include_directories -"
+		"in use: %d > max: %d", i, include_directories->max);
+      }
     }
     FREE(include_directories);
   }

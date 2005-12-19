@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.37 2005/12/19 06:52:42 rockyb Exp $
+/* $Id: main.c,v 1.38 2005/12/19 08:23:41 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -282,7 +282,7 @@ static stringlist_t *directories = NULL;
 
 /* List of include directories given with -I switches.  */
 
-static stringlist_t *include_directories = NULL;
+stringlist_t *include_directories = NULL;
 
 /* List of files given with -o switches.  */
 
@@ -1739,9 +1739,8 @@ main (int argc, char **argv, char **envp)
 
       /* Fill in the jobserver_fds struct for our children.  */
 
-      jobserver_fds = (stringlist_t *)
-                        xmalloc (sizeof (stringlist_t));
-      jobserver_fds->list = (char **) xmalloc (sizeof (char *));
+      jobserver_fds = CALLOC(stringlist_t, 1);
+      jobserver_fds->list = CALLOC(char *, 1);
       jobserver_fds->list[0] = xmalloc ((sizeof ("1024")*2)+1);
 
       sprintf (jobserver_fds->list[0], "%d,%d", job_fds[0], job_fds[1]);

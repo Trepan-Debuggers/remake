@@ -1,4 +1,4 @@
-/* $Id: debug.h,v 1.14 2005/12/19 06:52:42 rockyb Exp $
+/* $Id: debug.h,v 1.15 2005/12/19 08:23:41 rockyb Exp $
 Debugging macros and interface.
 Copyright (C) 1999, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -70,12 +70,12 @@ extern int db_level;
 
 /** \brief The structure used to hold the list of strings given
     in command switches of a type that takes string arguments.  */
-typedef struct stringlist
+struct stringlist
 {
   char **list;	        /**< Nil-terminated list of strings.  */
   unsigned int idx;	/**< Index into above.  */
   unsigned int max;	/**< Number of pointers allocated.  */
-} stringlist_t;
+};
 
 extern int debug_flag;
 
