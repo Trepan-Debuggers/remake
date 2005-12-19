@@ -1,4 +1,4 @@
-/* $Id: function.c,v 1.18 2005/12/17 19:44:09 rockyb Exp $
+/* $Id: function.c,v 1.19 2005/12/19 06:52:42 rockyb Exp $
 Builtin expansion for GNU Make.
 Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004, 2005
 Free Software Foundation, Inc.
@@ -1426,13 +1426,6 @@ msdos_openpipe (int* pipedes, int *pidp, char *text)
   Do shell spawning, with the naughty bits for different OSes.
  */
 
-#ifdef VMS
-
-/* VMS can't do $(shell ...)  */
-#define func_shell 0
-
-#else
-#ifndef _AMIGA
 static char *
 func_shell (char *o, char **argv, const char *funcname UNUSED)
 {
@@ -1614,96 +1607,6 @@ func_shell (char *o, char **argv, const char *funcname UNUSED)
   return o;
 }
 
-#else	/* _AMIGA */
-
-/* Do the Amiga version of func_shell.  */
-
-static char *
-func_shell (char *o, char **argv, const char *funcname)
-{
-  /* Amiga can't fork nor spawn, but I can start a program with
-     redirection of my choice.  However, this means that we
-     don't have an opportunity to reopen stdout to trap it.  Thus,
-     we save our own stdout onto a new descriptor and dup a temp
-     file's descriptor onto our stdout temporarily.  After we
-     spawn the shell program, we dup our own stdout back to the
-     stdout descriptor.  The buffer reading is the same as above,
-     except that we're now reading from a file.  */
-
-#include <dos/dos.h>
-#include <proto/dos.h>
-
-  BPTR child_stdout;
-  char tmp_output[FILENAME_MAX];
-  unsigned int maxlen = 200;
-  int cc, i;
-  char * buffer, * ptr;
-  char ** aptr;
-  int len = 0;
-  char* batch_filename = NULL;
-
-  /* Construct the argument list.  */
-  command_argv = construct_command_argv (argv[0], (char **) NULL,
-                                         (struct file *) 0, &batch_filename);
-  if (command_argv == 0)
-    return o;
-
-  /* Note the mktemp() is a security hole, but this only runs on Amiga.
-     Ideally we would use main.c:open_tmpfile(), but this uses a special
-     Open(), not fopen(), and I'm not familiar enough with the code to mess
-     with it.  */
-  strcpy (tmp_output, "t:MakeshXXXXXXXX");
-  mktemp (tmp_output);
-  child_stdout = Open (tmp_output, MODE_NEWFILE);
-
-  for (aptr=command_argv; *aptr; aptr++)
-    len += strlen (*aptr) + 1;
-
-  buffer = xmalloc (len + 1);
-  ptr = buffer;
-
-  for (aptr=command_argv; *aptr; aptr++)
-    {
-      strcpy (ptr, *aptr);
-      ptr += strlen (ptr) + 1;
-      *ptr ++ = ' ';
-      *ptr = 0;
-    }
-
-  ptr[-1] = '\n';
-
-  Execute (buffer, NULL, child_stdout);
-  free (buffer);
-
-  Close (child_stdout);
-
-  child_stdout = Open (tmp_output, MODE_OLDFILE);
-
-  buffer = xmalloc (maxlen);
-  i = 0;
-  do
-    {
-      if (i == maxlen)
-	{
-	  maxlen += 512;
-	  buffer = (char *) xrealloc (buffer, maxlen + 1);
-	}
-
-      cc = Read (child_stdout, &buffer[i], maxlen - i);
-      if (cc > 0)
-	i += cc;
-    } while (cc > 0);
-
-  Close (child_stdout);
-
-  fold_newlines (buffer, &i);
-  o = variable_buffer_output (o, buffer, i);
-  free (buffer);
-  return o;
-}
-#endif  /* _AMIGA */
-#endif  /* !VMS */
-
 #ifdef EXPERIMENTAL
 
 /*
@@ -1716,7 +1619,6 @@ func_eq (char* o, char **argv, char *funcname)
   o = variable_buffer_output (o,  result ? "1" : "", result);
   return o;
 }
-
 
 /*
   string-boolean not operator.

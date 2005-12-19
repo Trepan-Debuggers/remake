@@ -25,7 +25,6 @@ debug_enter_debugger_t debug_dummy_enter_debugger_mask;
 
 int db_level   = 0;
 int debug_flag = 0;
-int tracing    = 0; /*! If non-null, we are tracing execution */
 
 /*! If true, enter the debugger before reading any makefiles. */
 bool b_debugger_preread = false;

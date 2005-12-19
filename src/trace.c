@@ -1,4 +1,4 @@
-/* $Id: trace.c,v 1.4 2005/12/07 03:30:54 rockyb Exp $
+/* $Id: trace.c,v 1.5 2005/12/19 06:52:42 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -52,7 +52,7 @@ trace_push_target (target_stack_node_t *p, file_t *p_target,
   */
   if (p_target && p_target->floc.filenm != NULL) {
 
-    if ( tracing && (p_target->cmds || p_target->phony) ) {
+    if ( db_level & DB_VERBOSETRACE ) {
       print_file_target_prefix(p_target);
       printf("\n");
     } 

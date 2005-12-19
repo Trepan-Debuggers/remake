@@ -1,4 +1,4 @@
-/* $Id: remake.c,v 1.19 2005/12/18 15:14:13 rockyb Exp $
+/* $Id: remake.c,v 1.20 2005/12/19 06:52:42 rockyb Exp $
 Basic dependency engine for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -499,12 +499,17 @@ update_file_1 (file_t *file, unsigned int depth,
 
   lastd = 0;
   d = file->deps;
-  while (d != 0)
+  while (d)
     {
       FILE_TIMESTAMP mtime;
       int maybe_make;
       int dontcare = 0;
 
+      if (!d->file) {
+	d = d->next;
+	continue;
+      }
+      
       check_renamed (d->file);
 
       mtime = file_mtime (d->file);
@@ -517,7 +522,7 @@ update_file_1 (file_t *file, unsigned int depth,
 	  /* We cannot free D here because our the caller will still have
 	     a reference to it when we were called recursively via
 	     check_dep below.  */
-	  if (lastd == 0)
+	  if (!lastd)
 	    file->deps = d->next;
 	  else
 	    lastd->next = d->next;
@@ -576,8 +581,8 @@ update_file_1 (file_t *file, unsigned int depth,
 
   if (must_make || always_make_flag)
     {
-      for (d = file->deps; d != 0; d = d->next)
-	if (d->file->intermediate)
+      for (d = file->deps; d; d = d->next)
+	if (d->file && d->file->intermediate)
 	  {
             int dontcare = 0;
 

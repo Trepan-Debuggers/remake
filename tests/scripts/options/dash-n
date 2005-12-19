@@ -1,4 +1,5 @@
 #                                                                    -*-perl-*-
+# $Id: dash-n,v 1.3 2005/12/19 06:52:42 rockyb Exp $
 $description = "Test the -n option.\n";
 
 $details = "Try various uses of -n and ensure they all give the correct results.\n";

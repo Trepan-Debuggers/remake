@@ -1,4 +1,4 @@
-/* $Id: debug.h,v 1.13 2005/12/17 19:44:09 rockyb Exp $
+/* $Id: debug.h,v 1.14 2005/12/19 06:52:42 rockyb Exp $
 Debugging macros and interface.
 Copyright (C) 1999, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -40,6 +40,8 @@ typedef enum {
   DB_VERBOSE        = 0x002,
   DB_JOBS           = 0x004,
   DB_IMPLICIT       = 0x008,
+  DB_TRACE          = 0x010, /**< tracing */
+  DB_VERBOSETRACE   = 0x020, /**< A more verbose trace */
   DB_MAKEFILES      = 0x100,
   DB_READMAKEFILES  = 0x200, /**< Reading makefiles */
   DB_CALLTRACE      = 0x400, /**< GNU Make function call and returns */
@@ -82,9 +84,6 @@ extern int no_extended_errors;
 
 /*! If 1, we show variable definitions */
 extern int show_variable_definitions;
-
-/*! If non-null, we are tracing execution */
-extern int tracing;
 
 /*! If true, enter the debugger before reading any makefiles. */
 extern bool b_debugger_preread;

@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.36 2005/12/18 13:30:33 rockyb Exp $
+/* $Id: main.c,v 1.37 2005/12/19 06:52:42 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -1240,12 +1240,13 @@ main (int argc, char **argv, char **envp)
   
   if (tracing_opts) {
     char **p;
+    db_level |= (DB_BASIC | DB_TRACE);
     for (p = tracing_opts->list; *p != 0; ++p) {
-      if (0 == strcmp(*p, "read") || 0 == strcmp(*p, "full"))
+      if (0 == strcmp(*p, "read"))
 	db_level |= DB_READMAKEFILES;
+      else if (0 == strcmp(*p, "full"))
+	db_level |= (DB_VERBOSETRACE|DB_READMAKEFILES);
     }
-    tracing = 1;
-    db_level |= DB_BASIC;
   }
   
 #ifdef WINDOWS32
@@ -1297,8 +1298,8 @@ main (int argc, char **argv, char **envp)
 
   /* Print version information.  */
 
-  if (print_version_flag || print_data_base_flag || 
-      (db_level && !(debugger_opts || tracing)))
+  if ( print_version_flag || print_data_base_flag || 
+       (db_level && !(debugger_opts || (db_level & DB_TRACE))) )
     print_version ();
 
   /* `make --version' is supposed to just print the version and exit.  */

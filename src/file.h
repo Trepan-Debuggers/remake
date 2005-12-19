@@ -1,4 +1,4 @@
-/* $Id: file.h,v 1.5 2005/12/10 02:50:32 rockyb Exp $
+/* $Id: file.h,v 1.6 2005/12/19 06:52:42 rockyb Exp $
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -261,7 +261,8 @@ extern void file_timestamp_sprintf (char *p, FILE_TIMESTAMP ts);
    them, even if said dependents' modtimes are in the future.  */
 #define NEW_MTIME INTEGER_TYPE_MAXIMUM (FILE_TIMESTAMP)
 
-#define check_renamed(file) \
-  while ((file)->renamed != 0) (file) = (file)->renamed /* No ; here.  */
+#define check_renamed(file)						\
+  if (file)								\
+    while ((file)->renamed != 0) (file) = (file)->renamed /* No ; here.  */
 
 #endif /*FILE_H*/

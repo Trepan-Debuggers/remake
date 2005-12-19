@@ -1,4 +1,4 @@
-/* $Id: implicit.h,v 1.2 2005/12/09 12:11:09 rockyb Exp $
+/* $Id: implicit.h,v 1.3 2005/12/19 06:52:42 rockyb Exp $
 Copyright (C) 2004, 2005
 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -23,10 +23,10 @@ Boston, MA 02111-1307, USA.  */
  *  \brief Implicit rule searching for GNU Make.
  */
 
-/*! For a FILE which has no commands specified, try to figure out some
+/*! For a P_FILE which has no commands specified, try to figure out some
    from the implicit pattern rules.
-   Returns 1 if a suitable implicit rule was found,
-   after modifying FILE to contain the appropriate commands and deps,
-   or returns 0 if no implicit rule was found.  
+   Returns true if a suitable implicit rule was found,
+   after modifying P_FILE to contain the appropriate commands and deps,
+   or returns false if no implicit rule was found.  
 */
-extern int try_implicit_rule (file_t *p_file, unsigned int i_depth);
+extern bool try_implicit_rule (file_t *p_file, unsigned int i_depth);

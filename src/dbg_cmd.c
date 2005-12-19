@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.68 2005/12/18 16:43:02 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.69 2005/12/19 06:52:41 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -213,8 +213,6 @@ subcommand_var_info_t show_subcommands[] = {
     &keep_going_flag,    true},
   { "silent",        "Value of GNU Make --silent (or -s) flags",
     &silent_flag,        true},
-  { "trace",         "Show if we are tracing execution",
-    &tracing,            true},
   { "version",       "Show the version of GNU Make + dbg.",
     NULL,                false},
   { "warranty",      "Various kinds of warranty you do not have.",
@@ -239,8 +237,6 @@ subcommand_var_info_t set_subcommands[] = {
     &keep_going_flag,    true},
   { "silent",        "Set value of GNU Make --silent (or -s) flags",
     &silent_flag,        true},
-  { "trace",         "Set if we are tracing execution",
-    &tracing,            true},
   { "variable",      "Set the version of GNU Make + dbg",
     NULL,                false},
   { NULL, NULL, NULL, false }
@@ -758,8 +754,6 @@ static debug_return_t dbg_cmd_show (char *psz_arg)
       printf("keep-going is %s.\n", var_to_on_off(keep_going_flag));
     } else if (is_abbrev_of (psz_arg, "silent", 3)) {
       printf("silent is %s.\n", var_to_on_off(silent_flag));
-    } else if (is_abbrev_of (psz_arg, "trace", 3)) {
-      printf("trace is %s.\n", var_to_on_off(tracing));
     } else if (is_abbrev_of (psz_arg, "version", 3)) {
       printf("version: ");
       print_version();
@@ -1109,12 +1103,6 @@ static debug_return_t dbg_cmd_set (char *psz_args)
       else
 	on_off_toggle(psz_args, &silent_flag);
       dbg_cmd_show("silent");
-    } else if (is_abbrev_of (psz_varname, "trace", 3)) {
-      if (!psz_args || !*psz_args)
-	on_off_toggle("toggle", &tracing);
-      else
-	on_off_toggle(psz_args, &tracing);
-      dbg_cmd_show("trace");
     } else {
       /* Treat as set variable */
       return dbg_cmd_set_var(psz_args, 1);

@@ -453,12 +453,6 @@ print_child_cmd (child_t *p_child, target_stack_node_t *p)
 
   if (!p_child) return continue_execution;
 
-  if (tracing) {
-    print_floc_prefix(&(p->p_target->floc));
-    print_target_prefix(p_child->file->name);
-    printf("\n");
-  }
-
   if (i_debugger_stepping || p_child->file->tracing) {
     rc=enter_debugger(p, p_child->file, 0);
   }

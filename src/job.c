@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.29 2005/12/18 21:05:29 rockyb Exp $
+/* $Id: job.c,v 1.30 2005/12/19 06:52:42 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005
 Free Software Foundation, Inc.
@@ -972,16 +972,17 @@ static void start_job_command (child_t *p_child,
      flag or non-echo (@) set before a command.
   */
 
-  if (just_print_flag || tracing || i_debugger_stepping || i_debugger_nexting
+  if (just_print_flag || (db_level & DB_TRACE)
+      || i_debugger_stepping || i_debugger_nexting
       || (!(flags & COMMANDS_SILENT) && !silent_flag)) {
-    if (just_print_flag) {
-      message(0, "##########################################################");
+    if (just_print_flag || (db_level & DB_TRACE)) {
+      message(0, "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
       print_floc_prefix(&p_call_stack->p_target->floc);
       message(0, ": %s", p_child->file->name);
     }
     message (0, "%s", p);
-    if (just_print_flag || tracing) 
-      message(0, "##########################################################");
+    if (just_print_flag || (db_level & DB_TRACE)) 
+      message(0, "##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
   } else {
     log_working_directory (1);
     fflush (stdout);

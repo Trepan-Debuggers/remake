@@ -1,4 +1,4 @@
-/* $Id: implicit.c,v 1.11 2005/12/18 13:30:33 rockyb Exp $
+/* $Id: implicit.c,v 1.12 2005/12/19 06:52:42 rockyb Exp $
 Implicit rule searching for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,97,2000, 2004, 2005
 Free Software Foundation, Inc.
@@ -40,19 +40,21 @@ Boston, MA 02111-1307, USA.  */
 #include <alloca.h>
 #endif
 
-static int pattern_search (file_t *file, int archive, 
-			   unsigned int depth, 
-			   unsigned int recursions);
+static bool pattern_search (file_t *file, int archive, 
+			    unsigned int depth, 
+			    unsigned int recursions);
 
-/*! For a FILE which has no commands specified, try to figure out some
+/*! For a P_FILE which has no commands specified, try to figure out some
    from the implicit pattern rules.
-   Returns 1 if a suitable implicit rule was found,
+   Returns true if a suitable implicit rule was found,
    after modifying FILE to contain the appropriate commands and deps,
-   or returns 0 if no implicit rule was found.  
+   or returns false if no implicit rule was found.  
 */
-int
-try_implicit_rule (file_t *file, unsigned int depth)
+bool
+try_implicit_rule (file_t *p_file, unsigned int depth)
 {
+
+#define file p_file  
   DBF (DB_IMPLICIT, _("Looking for an implicit rule for `%s'.\n"));
 
   /* The order of these searches was previously reversed.  My logic now is
@@ -60,28 +62,29 @@ try_implicit_rule (file_t *file, unsigned int depth)
      (the archive search omits the archive name), it is more specific and
      should come first.  */
 
-  if (pattern_search (file, 0, depth, 0))
-    return 1;
+  if (pattern_search (p_file, 0, depth, 0))
+    return true;
 
 #ifndef	NO_ARCHIVES
   /* If this is an archive member reference, use just the
      archive member name to search for implicit rules.  */
-  if (ar_name (file->name))
+  if (ar_name (p_file->name))
     {
       DBF (DB_IMPLICIT,
            _("Looking for archive-member implicit rule for `%s'.\n"));
-      if (pattern_search (file, 1, depth, 0))
+      if (pattern_search (p_file, 1, depth, 0))
 	return 1;
     }
 #endif
 
-  return 0;
+#undef file
+  return false;
 }
 
 
 /* Search the pattern rules for a rule with an existing dependency to make
    FILE.  If a rule is found, the appropriate commands and deps are put in FILE
-   and 1 is returned.  If not, 0 is returned.
+   and true is returned.  If not, false is returned.
 
    If ARCHIVE is nonzero, FILE->name is of the form "LIB(MEMBER)".  A rule for
    "(MEMBER)" will be searched for, and "(MEMBER)" will not be chopped up into
@@ -93,7 +96,7 @@ try_implicit_rule (file_t *file, unsigned int depth)
 
    DEPTH is used for debugging messages.  */
 
-static int
+static bool
 pattern_search (file_t *file, int archive,
                 unsigned int depth, unsigned int recursions)
 {
@@ -176,11 +179,6 @@ pattern_search (file_t *file, int archive,
       /* Set LASTSLASH to point at the last slash in FILENAME
 	 but not counting any slash at the end.  (foo/bar/ counts as
 	 bar/ in directory foo/, not empty in directory foo/bar/.)  */
-#ifdef VMS
-      lastslash = strrchr (filename, ']');
-      if (lastslash == 0)
-	lastslash = strrchr (filename, ':');
-#else
       lastslash = strrchr (filename, '/');
 #ifdef HAVE_DOS_PATHS
       /* Handle backslashes (possibly mixed with forward slashes)
@@ -192,7 +190,6 @@ pattern_search (file_t *file, int archive,
 	if (lastslash == 0 && filename[0] && filename[1] == ':')
 	  lastslash = filename + 1;
       }
-#endif
 #endif
       if (lastslash != 0 && lastslash[1] == '\0')
 	lastslash = 0;
@@ -241,13 +238,7 @@ pattern_search (file_t *file, int archive,
 	  /* Set CHECK_LASTSLASH if FILENAME contains a directory
 	     prefix and the target pattern does not contain a slash.  */
 
-#ifdef VMS
-	  check_lastslash = lastslash != 0
-			    && ((strchr (target, ']') == 0)
-			        && (strchr (target, ':') == 0));
-#else
 	  check_lastslash = lastslash != 0 && strchr (target, '/') == 0;
-#endif
 	  if (check_lastslash)
 	    {
 	      /* In that case, don't include the
