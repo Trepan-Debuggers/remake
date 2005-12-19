@@ -5,5 +5,5 @@ Makefile.in
 Makefile
 remake.pot
 remove-potcdate.sed
-stamp.po
+stamp-po
 
