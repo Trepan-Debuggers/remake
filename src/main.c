@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.39 2005/12/20 04:45:36 rockyb Exp $
+/* $Id: main.c,v 1.40 2005/12/20 13:09:33 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -2881,6 +2881,9 @@ void
 die (int i_status) 
 {
   static char dying = 0;
+
+  if ( 0 == i_status && (i_debugger_stepping || i_debugger_nexting) )
+    enter_debugger(NULL, NULL, -2);
 
   /* If we are quitting the debugger and we're at the top level, then
      we'll change the exit status to 0, normal.
