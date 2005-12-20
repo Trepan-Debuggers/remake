@@ -6,12 +6,13 @@ Obtaining CVS Code
 You can obtain the GNU make source code via anonymous CVS from
 Sourceforge 
 
-  $ cvs -d:pserver:anoncvs@bashdb.sourceforge.net:/cvsroot/bashdb co remake
+$ cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/bashdb login
+$ cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/bashdb co -P remake
 
-You might want to use the "-z3" option to get compression, and you most
-certainly will want the -P option to avoid unneeded directories
-cluttering up your source.  Personally I add these (as well as -dP for
-update) to my ~/.cvsrc file.
+Use the "-z3" option to get compression, and you most certainly will
+want the -P option to avoid unneeded directories cluttering up your
+source.  Personally I add these (as well as -dP for update) to my
+~/.cvsrc file.
 
 
 If you have an older version of CVS, you might have to login first.
@@ -30,7 +31,7 @@ After checking out the code, you will need to perform these steps to get
 to the point where you can run "make".
 
 
- 1) $ autoreconf -i -s
+ 1) $ ./autogen.sh
 
     This rebuilds all the things that need rebuilding, installing
     missing files as symbolic links.
@@ -38,10 +39,6 @@ to the point where you can run "make".
     You may get warnings here about missing files like README, etc.
     Ignore them, they are harmless.
 
-
- 2) $ ./configure
-
-    Generate a Makefile
 
 At this point you have successfully brought your CVS copy of the GNU
 make source directory up to the point where it can be treated
@@ -91,4 +88,4 @@ the prerequisites are available of course).
 autoreconf -i -s && ./configure && make && make check && make distcheck
 
 
-$Id: README.cvs,v 1.1 2004/04/04 02:03:56 rockyb Exp $
+$Id: README.cvs,v 1.2 2005/12/20 01:56:21 rockyb Exp $
