@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.30 2005/12/19 06:52:42 rockyb Exp $
+/* $Id: job.c,v 1.31 2005/12/20 04:45:36 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005
 Free Software Foundation, Inc.
@@ -2519,9 +2519,14 @@ construct_command_argv (char *line, char **restp, file_t *file,
   {
     /* Turn off --warn-undefined-variables while we expand SHELL and IFS.  */
     int save = warn_undefined_variables_flag;
+    char shell_command[100] = "";
     warn_undefined_variables_flag = 0;
 
-    shell = allocated_variable_expand_for_file ("$(SHELL)", file);
+    sprintf(shell_command, "$(SHELL)%s", 
+	    (db_level & DB_SHELL_TRACE) ? " -x": "");
+    
+    shell = allocated_variable_expand_for_file (shell_command, file);
+
 #ifdef WINDOWS32
     /*
      * Convert to forward slashes so that construct_command_argv_internal()

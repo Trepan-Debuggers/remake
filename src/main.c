@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.38 2005/12/19 08:23:41 rockyb Exp $
+/* $Id: main.c,v 1.39 2005/12/20 04:45:36 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -296,8 +296,8 @@ static stringlist_t *new_files = NULL;
 
 static int print_usage_flag = 0;
 
-/* Do we want to go into a debugger or not?
-   Values are "error"     - enter on errors or fatal errors
+/*! Do we want to go into a debugger or not?
+  Values are "error"     - enter on errors or fatal errors
               "fatal"     - enter on fatal errors
               "preread"   - set to enter debugger before reading makefile(s)
               "preaction" - set to enter debugger before performing any 
@@ -400,7 +400,8 @@ static const char *const usage[] =
   --warn-undefined-variables   Warn when an undefined variable is referenced.\n"),
     N_("\
   -x, --trace[=TYPE]           Trace command execution TYPE  may be\n\
-                               \"read\", \"normal\", \"full\".\n"),
+                               \"read\", \"normal\", \"noshell\", "
+                               " or \"full\".\n"),
     N_("\
   -X [type], --debugger[=TYPE] Enter debugger. TYPE may be\n\
                                \"preread\", \"preaction\", \"full\",\n\
@@ -1217,8 +1218,7 @@ main (int argc, char **argv, char **envp)
 	  /* For now we'll do basic debugging. Later, "stepping'
  	     will stop here while next won't - either way no printing.
 	   */
-	  db_level          |=  DB_BASIC;
-	  db_level          |=  DB_CALLTRACE;
+	  db_level          |=  DB_BASIC | DB_CALLTRACE | DB_SHELL_TRACE;
 	} 
 	if ( 0 == strcmp(*p, "full")
 	     || 0 == strcmp(*p, "error") ) {
@@ -1240,12 +1240,14 @@ main (int argc, char **argv, char **envp)
   
   if (tracing_opts) {
     char **p;
-    db_level |= (DB_BASIC | DB_TRACE);
+    db_level |= (DB_BASIC | DB_TRACE | DB_SHELL_TRACE);
     for (p = tracing_opts->list; *p != 0; ++p) {
       if (0 == strcmp(*p, "read"))
 	db_level |= DB_READMAKEFILES;
       else if (0 == strcmp(*p, "full"))
 	db_level |= (DB_VERBOSETRACE|DB_READMAKEFILES);
+      else if (0 == strcmp(*p, "noshell"))
+	db_level |= (DB_VERBOSETRACE|DB_READMAKEFILES) & ~DB_SHELL_TRACE;
     }
   }
   

@@ -1,5 +1,5 @@
 # -*-Perl-*-
-# $Id: trace,v 1.6 2005/12/18 23:44:47 rockyb Exp $
+# $Id: trace,v 1.7 2005/12/20 04:45:37 rockyb Exp $
 $description = "The following checks tracing.\n";
 
 $details = "We test line tracing, showing a target stack, line numbers\n"
@@ -37,6 +37,7 @@ Updating goal targets....
 work/debugger/trace.mk:5: foo
 echo FOO here
 ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
++ echo FOO here
 FOO here
   work/debugger/trace.mk:4	Successfully remade target file `foo'.
 work/debugger/trace.mk:2	Must remake target `all'.
@@ -81,10 +82,12 @@ Updating goal targets....
 work/debugger/trace.mk:4: foo
 echo hi > /dev/null
 ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
++ echo hi
 ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 work/debugger/trace.mk:5: foo
 exit 5
 ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
++ exit 5
 work/debugger/trace.mk:5: [foo] Error 5 (ignored)
 
 #0  foo at work/debugger/trace.mk:5
@@ -136,6 +139,8 @@ work/debugger/trace.mk:7: foo
 if [ -n FOO ] ; \\
 then echo \"test okay\"; fi
 ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
++ '[' -n FOO ']'
++ echo 'test okay'
 test okay
   work/debugger/trace.mk:6	Successfully remade target file `foo'.
 work/debugger/trace.mk:4	Must remake target `all'.
