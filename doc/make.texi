@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.5 2005/12/11 10:10:35 rockyb Exp $
+@set RCSID $Id: make.texi,v 1.6 2005/12/20 04:08:21 rockyb Exp $
 @set EDITION 0.61
 @set VERSION 3.80+dbg
 @set UPDATED 10 Dec 2005
@@ -39,7 +39,7 @@ This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Make Manual}, for @code{make}, Version @value{VERSION}.
 
 Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-1998, 1999, 2000, 2002, 2003, 2004
+1998, 1999, 2000, 2002, 2003, 2004, 2005
 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
@@ -337,8 +337,6 @@ Makefile Conventions
 * Directory Variables::         Variables for Installation Directories
 * Standard Targets::            Standard Targets for Users
 * Install Command Categories::  Three categories of commands in the `install'
-
-Copying This Manual
 
 @end detailmenu
 @end menu
@@ -642,7 +640,7 @@ on the header file @file{defs.h}.
 A shell command follows each line that contains a target and
 prerequisites.  These shell commands say how to update the target file.
 A tab character must come at the beginning of every command line to
-distinguish commands lines from other lines in the makefile.  (Bear in
+distinguish command lines from other lines in the makefile.  (Bear in
 mind that @code{make} does not know anything about how the commands
 work.  It is up to you to supply commands that will update the target
 file properly.  All @code{make} does is execute the commands in the rule
@@ -1223,6 +1221,7 @@ in the makefiles.  @xref{Include, , Including Other Makefiles}.
 @section The Variable @code{MAKEFILE_LIST}
 @cindex makefiles, and @code{MAKEFILE_LIST} variable
 @cindex including (@code{MAKEFILE_LIST} variable)
+@vindex MAKEFILE_LIST
 
 As @code{make} reads various makefiles, including any obtained from the
 @code{MAKEFILES} variable, the command line, the default files, or
@@ -3165,8 +3164,8 @@ with no further work from you.  @xref{Remaking Makefiles}.
 
 Note that the @samp{.d} files contain target definitions; you should
 be sure to place the @code{include} directive @emph{after} the first,
-default target in your makefiles or run the risk of having a random
-object file become the default target.
+default goal in your makefiles or run the risk of having a random
+object file become the default goal.
 @xref{How Make Works}.
 
 @node Commands, Using Variables, Rules, Top
@@ -3365,6 +3364,7 @@ on MS-DOS unaltered if you have e.g. @file{sh.exe} installed in some
 directory along your @code{PATH}.
 
 @cindex environment, @code{SHELL} in
+@vindex MAKESHELL @r{(MS-DOS alternative to @code{SHELL})}
 Unlike most variables, the variable @code{SHELL} is never set from the
 environment.  This is because the @code{SHELL} environment variable is
 used to specify your personal choice of shell program for interactive
@@ -3741,9 +3741,15 @@ line, and if its name consists only of letters, numbers, and underscores.
 Some shells cannot cope with environment variable names consisting of
 characters other than letters, numbers, and underscores.
 
-The special variables @code{SHELL} and @code{MAKEFLAGS} are always
-exported (unless you unexport them).
-@code{MAKEFILES} is exported if you set it to anything.
+@cindex SHELL, exported value
+The value of the @code{make} variable @code{SHELL} is not exported.
+Instead, the value of the @code{SHELL} variable from the invoking
+environment is passed to the sub-@code{make}.  You can force
+@code{make} to export its value for @code{SHELL} by using the
+@code{export} directive, described below.
+
+The special variable @code{MAKEFLAGS} is always exported (unless you
+unexport it).  @code{MAKEFILES} is exported if you set it to anything.
 
 @code{make} automatically passes down variable values that were defined
 on the command line, by putting them in the @code{MAKEFLAGS} variable.
@@ -5146,28 +5152,28 @@ endef
 @cindex variables, environment
 @cindex environment
 Variables in @code{make} can come from the environment in which
-@code{make} is run.  Every environment variable that @code{make} sees when
-it starts up is transformed into a @code{make} variable with the same name
-and value.  But an explicit assignment in the makefile, or with a command
-argument, overrides the environment.  (If the @samp{-e} flag is specified,
-then values from the environment override assignments in the makefile.
-@xref{Options Summary, ,Summary of Options}.
-But this is not recommended practice.)
+@code{make} is run.  Every environment variable that @code{make} sees
+when it starts up is transformed into a @code{make} variable with the
+same name and value.  However, an explicit assignment in the makefile,
+or with a command argument, overrides the environment.  (If the
+@samp{-e} flag is specified, then values from the environment override
+assignments in the makefile.  @xref{Options Summary, ,Summary of
+Options}.  But this is not recommended practice.)
 
 Thus, by setting the variable @code{CFLAGS} in your environment, you can
 cause all C compilations in most makefiles to use the compiler switches you
 prefer.  This is safe for variables with standard or conventional meanings
-because you know that no makefile will use them for other things.  (But
+because you know that no makefile will use them for other things.  (Note
 this is not totally reliable; some makefiles set @code{CFLAGS} explicitly
 and therefore are not affected by the value in the environment.)
 
-When @code{make} is invoked recursively, variables defined in the
-outer invocation can be passed to inner invocations through the
-environment (@pxref{Recursion, ,Recursive Use of @code{make}}).  By
-default, only variables that came from the environment or the command
-line are passed to recursive invocations.  You can use the
-@code{export} directive to pass other variables.
-@xref{Variables/Recursion, , Communicating Variables to a
+When @code{make} runs a command script, variables defined in the
+makefile are placed into the environment of that command.  This allows
+you to pass values to sub-@code{make} invocations. (@pxref{Recursion,
+,Recursive Use of @code{make}}).  By default, only variables that came
+from the environment or the command line are passed to recursive
+invocations.  You can use the @code{export} directive to pass other
+variables.  @xref{Variables/Recursion, , Communicating Variables to a
 Sub-@code{make}}, for full details.
 
 Other use of variables from the environment is not recommended.  It is not
@@ -5176,6 +5182,7 @@ set up outside their control, since this would cause different users to get
 different results from the same makefile.  This is against the whole
 purpose of most makefiles.
 
+@cindex SHELL, import from environment
 Such problems would be especially likely with the variable @code{SHELL},
 which is normally present in the environment to specify the user's choice
 of interactive shell.  It would be very undesirable for this choice to
@@ -5183,6 +5190,15 @@ affect @code{make}.  So @code{make} ignores the environment value of
 @code{SHELL} (except on MS-DOS and MS-Windows, where @code{SHELL} is
 usually not set.  @xref{Execution, ,Special handling of SHELL on
 MS-DOS}.)@refill
+
+@cindex SHELL, export to environment
+The @code{SHELL} variable is special in another way: just as the value
+of the @code{make} variable @code{SHELL} is not taken from the
+environment, so also it is not placed into the environment of commands
+that @code{make} invokes.  Instead, the value of @code{SHELL} from the
+invoking environment is provided to the command.  You can use
+@code{export SHELL} to force the value of the @code{make} variable
+@code{SHELL} to be placed in the environment of commands.
 
 @node Target-specific, Pattern-specific, Environment, Using Variables
 @section Target-specific Variable Values
@@ -5445,8 +5461,9 @@ If the condition is true, @var{text-if-true} is used; otherwise,
 number of lines of text.
 
 The syntax of the @var{conditional-directive} is the same whether the
-conditional is simple or complex.  There are four different directives that
-test different conditions.  Here is a table of them:
+conditional is simple or complex; after an @code{else} or not.  There
+are four different directives that test different conditions.  Here is
+a table of them:
 
 @table @code
 @item ifeq (@var{arg1}, @var{arg2})
@@ -5528,7 +5545,8 @@ sets @samp{frobozz} to @samp{no}.
 @item ifndef @var{variable-name}
 If the variable @var{variable-name} has an empty value, the
 @var{text-if-true} is effective; otherwise, the @var{text-if-false},
-if any, is effective.
+if any, is effective.  The rules for expansion and testing of
+@var{variable-name} are identical to the @code{ifdef} directive.
 @end table
 
 Extra spaces are allowed and ignored at the beginning of the conditional
@@ -6792,7 +6810,6 @@ parsed as a switch or variable definition, respectively).  Even
 targets not in the makefile may be specified, if @code{make} can find
 implicit rules that say how to make them.
 
-@cindex @code{MAKECMDGOALS}
 @vindex MAKECMDGOALS
 @code{Make} will set the special variable @code{MAKECMDGOALS} to the
 list of goals you specified on the command line.  If no goals were given
@@ -9091,9 +9108,9 @@ foolib(hack.o) : hack.o
 @end example
 
 In fact, nearly all archive member targets are updated in just this way
-and there is an implicit rule to do it for you.  @emph{Note: The
+and there is an implicit rule to do it for you.  @strong{Please note:} The
 @samp{c} flag to @code{ar} is required if the archive file does not
-already exist.}
+already exist.
 
 To specify several members in the same archive, you can write all the
 member names together between the parentheses.  For example:
@@ -9711,7 +9728,7 @@ Remove all search paths previously specified in any @code{vpath}
 directive.
 @end table
 
-Here is a summary of the text manipulation functions (@pxref{Functions}):
+Here is a summary of the built-in functions (@pxref{Functions}):
 
 @table @code
 @item $(subst @var{from},@var{to},@var{text})
@@ -10046,7 +10063,7 @@ built, but rather only a prerequisite).
 The former means that you didn't provide any targets to be built on the
 command line, and @code{make} couldn't find any makefiles to read in.
 The latter means that some makefile was found, but it didn't contain any
-default target and none was given on the command line.  GNU @code{make}
+default goal and none was given on the command line.  GNU @code{make}
 has nothing to do in these situations.
 @xref{Makefile Arguments, ,Arguments to Specify the Makefile}.@refill
 

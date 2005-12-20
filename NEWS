@@ -15,14 +15,16 @@ Version 3.80+dbg-0.6cvs
   program.
 
 * The default behavior on error is to show call trace. To turn off use
-  --no-extended-errors. --extended-errors and -E no longer exist.
+  --no-extended-errors. Recently added --extended-errors and -E (not in
+  standard GNU Make) have been removed.
 
 * "quit" can now terminate several levels of nested make (if "make"
   was called directly and not via a shell string).
 
 * prompt now shows target and prerequisites.
 
-* Fix bug in vpath regression test - was reading uninitialzed memory.
+* Fix bugs and memory leaks involving improper use of memory can weak
+  casting.  (shown in the vpath regression test dash-I on cygwin).
 
 * Reorganize help command. Is more ddd-friendly (and more gdb like).
 

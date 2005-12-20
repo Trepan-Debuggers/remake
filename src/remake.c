@@ -1,4 +1,4 @@
-/* $Id: remake.c,v 1.20 2005/12/19 06:52:42 rockyb Exp $
+/* $Id: remake.c,v 1.21 2005/12/20 04:08:22 rockyb Exp $
 Basic dependency engine for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -482,7 +482,8 @@ update_file_1 (file_t *file, unsigned int depth,
   if (!file->phony && !file->cmds && !file->tried_implicit)
     {
       if (try_implicit_rule (file, depth))
-	DBF (DB_IMPLICIT, _("Found an implicit rule for `%s'.\n"));
+	DBF (DB_IMPLICIT|DB_VERBOSETRACE, 
+	     _("Found an implicit rule for `%s'.\n"));
       else
 	DBF (DB_IMPLICIT, _("No implicit rule found for `%s'.\n"));
       file->tried_implicit = 1;
@@ -995,9 +996,11 @@ check_dep (file_t *file, unsigned int depth, FILE_TIMESTAMP this_mtime,
       if (!file->phony && file->cmds == 0 && !file->tried_implicit)
 	{
 	  if (try_implicit_rule (file, depth))
-	    DBF (DB_IMPLICIT, _("Found an implicit rule for `%s'.\n"));
+	    DBF (DB_IMPLICIT|DB_VERBOSETRACE, 
+		 _("Found an implicit rule for `%s'.\n"));
 	  else
-	    DBF (DB_IMPLICIT, _("No implicit rule found for `%s'.\n"));
+	    DBF (DB_IMPLICIT,
+		 _("No implicit rule found for `%s'.\n"));
 	  file->tried_implicit = 1;
 	}
       if (file->cmds == 0 && !file->is_target

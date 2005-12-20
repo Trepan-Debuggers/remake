@@ -1,4 +1,4 @@
-/* $Id: debug.h,v 1.15 2005/12/19 08:23:41 rockyb Exp $
+/* $Id: debug.h,v 1.16 2005/12/20 04:08:22 rockyb Exp $
 Debugging macros and interface.
 Copyright (C) 1999, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -38,14 +38,20 @@ typedef enum {
   DB_BASIC          = 0x001, /**< targets which need to be made and status;
 				 also set when tracing or debugging */
   DB_VERBOSE        = 0x002,
-  DB_JOBS           = 0x004,
-  DB_IMPLICIT       = 0x008,
+  DB_JOBS           = 0x004, /**< Prints messages giving details on the 
+				  invocation of specific subcommands. 
+				  Can be set via --debug=jobs
+			     */
+  DB_IMPLICIT       = 0x008, /**< Prints messages describing the implicit 
+				  rule searches for each target. Can be
+				  set via --debug=implicit
+			     */
   DB_TRACE          = 0x010, /**< tracing */
   DB_VERBOSETRACE   = 0x020, /**< A more verbose trace */
   DB_MAKEFILES      = 0x100,
   DB_READMAKEFILES  = 0x200, /**< Reading makefiles */
   DB_CALLTRACE      = 0x400, /**< GNU Make function call and returns */
-  DB_ALL            = 0xfff
+  DB_ALL            = 0xfff  /**< Bitmask for all of the above. */
 } debug_level_mask_t;
 
 typedef enum {

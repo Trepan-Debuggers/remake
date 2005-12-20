@@ -1,5 +1,8 @@
 -----------------------------------
 
+GNU make tracing and debugging support by:
+    Rocky Bernstein <rocky@panix.com>
+
 GNU make development up to version 3.75 by:
     Roland McGrath <roland@gnu.org>
 
