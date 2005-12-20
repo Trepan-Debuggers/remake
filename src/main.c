@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.40 2005/12/20 13:09:33 rockyb Exp $
+/* $Id: main.c,v 1.41 2005/12/20 15:11:24 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -1206,7 +1206,7 @@ main (int argc, char **argv, char **envp)
       {
 	if (0 == strcmp(*p, "preread")) {
 	  b_debugger_preread  = true;
-	  db_level           |= DB_READMAKEFILES;
+	  db_level           |= DB_READ_MAKEFILES;
 	}
 	
 	if ( 0 == strcmp(*p, "full") || b_debugger_preread
@@ -1218,7 +1218,7 @@ main (int argc, char **argv, char **envp)
 	  /* For now we'll do basic debugging. Later, "stepping'
  	     will stop here while next won't - either way no printing.
 	   */
-	  db_level          |=  DB_BASIC | DB_CALLTRACE | DB_SHELL_TRACE;
+	  db_level          |=  DB_BASIC | DB_CALL | DB_SHELL | DB_MAKEFILES;
 	} 
 	if ( 0 == strcmp(*p, "full")
 	     || 0 == strcmp(*p, "error") ) {
@@ -1240,14 +1240,14 @@ main (int argc, char **argv, char **envp)
   
   if (tracing_opts) {
     char **p;
-    db_level |= (DB_BASIC | DB_TRACE | DB_SHELL_TRACE);
+    db_level |= (DB_BASIC | DB_TRACE | DB_SHELL);
     for (p = tracing_opts->list; *p != 0; ++p) {
       if (0 == strcmp(*p, "read"))
-	db_level |= DB_READMAKEFILES;
+	db_level |= DB_READ_MAKEFILES;
       else if (0 == strcmp(*p, "full"))
-	db_level |= (DB_VERBOSETRACE|DB_READMAKEFILES);
+	db_level |= (DB_VERBOSE|DB_READ_MAKEFILES);
       else if (0 == strcmp(*p, "noshell"))
-	db_level |= (DB_VERBOSETRACE|DB_READMAKEFILES) & ~DB_SHELL_TRACE;
+	db_level |= (DB_VERBOSE|DB_READ_MAKEFILES) & ~DB_SHELL;
     }
   }
   
@@ -2882,7 +2882,7 @@ die (int i_status)
 {
   static char dying = 0;
 
-  if ( 0 == i_status && (i_debugger_stepping || i_debugger_nexting) )
+  if ( DEBUGGER_QUIT_RC != in_debugger && debugger_enabled )
     enter_debugger(NULL, NULL, -2);
 
   /* If we are quitting the debugger and we're at the top level, then

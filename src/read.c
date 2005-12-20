@@ -1,4 +1,4 @@
-/* $Id: read.c,v 1.26 2005/12/19 08:23:41 rockyb Exp $
+/* $Id: read.c,v 1.27 2005/12/20 15:11:24 rockyb Exp $
 Reading and parsing of makefiles for GNU Make.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
@@ -311,7 +311,7 @@ eval_makefile (char *filename, int flags)
   ebuf.floc.filenm = filename;
   ebuf.floc.lineno = 1;
 
-  if (ISDB (DB_VERBOSE|DB_READMAKEFILES))
+  if (ISDB (DB_VERBOSE|DB_READ_MAKEFILES))
     {
       if (p_stack_floc_top && p_stack_floc_top->p_floc) {
 	print_floc_prefix(p_stack_floc_top->p_floc);

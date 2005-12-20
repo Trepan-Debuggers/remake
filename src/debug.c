@@ -77,7 +77,7 @@ decode_debug_flags (void)
               db_level |= DB_BASIC | DB_MAKEFILES;
               break;
             case 'r':
-              db_level |= DB_BASIC | DB_READMAKEFILES;
+              db_level |= DB_BASIC | DB_READ_MAKEFILES;
               break;
             case 'v':
               db_level |= DB_BASIC | DB_VERBOSE;

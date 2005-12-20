@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.69 2005/12/19 06:52:41 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.70 2005/12/20 15:11:23 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -745,7 +745,8 @@ static debug_return_t dbg_cmd_show (char *psz_arg)
     } else if (is_abbrev_of (psz_arg, "basename", 4)) {
       printf("basename is %s.\n", var_to_on_off(basename_filenames));
     } else if (is_abbrev_of (psz_arg, "debug", 3)) {
-      printf("debug is %d.\n", db_level);
+      printf("debug is 0x%x.\n", db_level);
+      print_db_level(db_level);
     } else if (is_abbrev_of (psz_arg, "commands", 3)) {
       dbg_cmd_show_command(psz_arg);
     } else if (is_abbrev_of (psz_arg, "ignore-errors", 3)) {

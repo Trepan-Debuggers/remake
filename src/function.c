@@ -1,4 +1,4 @@
-/* $Id: function.c,v 1.19 2005/12/19 06:52:42 rockyb Exp $
+/* $Id: function.c,v 1.20 2005/12/20 15:11:23 rockyb Exp $
 Builtin expansion for GNU Make.
 Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004, 2005
 Free Software Foundation, Inc.
@@ -1869,7 +1869,7 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
       for (i=0; argv[i+1]; ++i)
   	;
 
-      if (ISDB(DB_CALLTRACE)) {
+      if (ISDB(DB_CALL)) {
 	DBPRINTS ( (_("calling built-in %s("), fname), i_trace_level);
 	for (i=1; argv[i]; i++)
 	  {
@@ -1881,13 +1881,13 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
 
       psz_ret = expand_builtin_function (o, i, argv+1, entry_p);
       i_trace_level--;
-      if (ISDB(DB_CALLTRACE)) {
+      if (ISDB(DB_CALL)) {
 	unsigned int i_len=psz_ret - o;
 	if (i_len) {
 	  char psz_fmt[100] = {'\0'};
 	  snprintf(psz_fmt, sizeof(psz_fmt)-1, 
 		   _("%%s() returns \"%%%d.%ds\"\n"), i_len, i_len);
-	  DBSD (DB_CALLTRACE, (psz_fmt, fname, o), 
+	  DBSD (DB_CALL, (psz_fmt, fname, o), 
 		i_trace_level);
 	}
       }
@@ -1906,7 +1906,7 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
   if (v == 0 || *v->value == '\0')
     return o;
 
-  if (ISDB(DB_CALLTRACE)) {
+  if (ISDB(DB_CALL)) {
     DBPRINTS ( (_("calling %s("), fname), i_trace_level);
     for (i=1; argv[i]; i++)
     {
@@ -1964,7 +1964,7 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
   pop_variable_scope (false);
 
   i_trace_level--;
-  DBSD (DB_CALLTRACE, (_("%s() returns \"%s\"\n"), fname, o), i_trace_level);
+  DBSD (DB_CALL, (_("%s() returns \"%s\"\n"), fname, o), i_trace_level);
   return o + strlen (o);
 }
 

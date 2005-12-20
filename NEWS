@@ -14,6 +14,8 @@ Version 3.80+dbg-0.6cvs
 * On a fatal error we now show command arguments used to invoke
   program.
 
+* tracing now sets shell tracing (+x) when invoking commands
+
 * The default behavior on error is to show call trace. To turn off use
   --no-extended-errors. Recently added --extended-errors and -E (not in
   standard GNU Make) have been removed.
@@ -30,7 +32,11 @@ Version 3.80+dbg-0.6cvs
 
 * More explicit frees of memory at termination. 
 
-* Give line numbers and target names on --just-print.
+* Give line numbers and target names on --just-print. Print delmiters
+  around the commands.
+
+* More debug tracing funnelled through db_level. Debugger command
+  "show debug" shows the debug mask in a more understandable way.
 
 * Expand documentation.
 

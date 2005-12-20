@@ -1,4 +1,4 @@
-/* $Id: dbg_fns.c,v 1.10 2005/12/18 16:43:02 rockyb Exp $
+/* $Id: dbg_fns.c,v 1.11 2005/12/20 15:11:23 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -184,6 +184,27 @@ on_off_toggle(const char *psz_onoff, int *var)
     printf(_("expecting \"on\", \"off\", or \"toggle\"; got \"%s\" \n"),
 	   psz_onoff);
 }
+
+/*! Print an interpretation of the debug level mask. */
+void 
+print_db_level(debug_level_mask_t e_debug_level)
+{
+  if (e_debug_level & DB_BASIC)
+    printf("Basic tracing (0x%x)\n", DB_BASIC);
+  if (e_debug_level & DB_TRACE)
+    printf("Tracing (0x%x)\n", DB_TRACE);
+  if (e_debug_level & DB_VERBOSE)
+    printf("Verbose Tracing (0x%x)\n", DB_VERBOSE);
+  if (e_debug_level & DB_SHELL)
+    printf("Tracing shell commands 0x%x\n", DB_SHELL);
+  if (e_debug_level & DB_MAKEFILES)
+    printf("Tracing Rebuilding Makefiles 0x%x\n", DB_MAKEFILES);
+  if (e_debug_level & DB_READ_MAKEFILES)
+    printf("Tracing reading Makefiles 0x%x\n", DB_READ_MAKEFILES);
+  if (e_debug_level & DB_CALL)
+    printf("Tracing function call and returns 0x%x\n", DB_CALL);
+}
+
 
 /** Print where we are in the Makefile. */
 void 

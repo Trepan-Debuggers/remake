@@ -1,4 +1,4 @@
-/* $Id: dbg_fns.h,v 1.8 2005/12/18 12:30:49 rockyb Exp $
+/* $Id: dbg_fns.h,v 1.9 2005/12/20 15:11:23 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef DBG_FNS_H
 #define DBG_FNS_H
 
+#include "debug.h"
 #include "file.h"
 #include "trace.h"
 
@@ -86,5 +87,8 @@ extern char *var_to_on_off(int i_bool);
    definitions inside the displayed value expanded.
 */
 extern bool dbg_cmd_show_exp(char *psz_arg, bool expand);
+
+/*! Print an interpretation of the debug level mask. */
+extern void print_db_level(debug_level_mask_t e_debug_level);
 
 #endif /* DBG_FNS_H*/
