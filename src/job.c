@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.33 2005/12/20 15:11:24 rockyb Exp $
+/* $Id: job.c,v 1.34 2005/12/21 07:00:45 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005
 Free Software Foundation, Inc.
@@ -971,20 +971,28 @@ static void start_job_command (child_t *p_child,
      the debugger) takes precidences over and overrides any silent
      flag or non-echo (@) set before a command.
   */
-
-  if (just_print_flag || (db_level & DB_TRACE)
-      || i_debugger_stepping || i_debugger_nexting
-      || (!(flags & COMMANDS_SILENT) && !silent_flag)) {
-    message(0, "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-    if (just_print_flag || (db_level & DB_TRACE)) {
-      print_floc_prefix(&p_call_stack->p_target->floc);
-      message(0, ": %s", p_child->file->name);
+  
+  {
+    bool b_show_delimiters = just_print_flag 
+      || (db_level & DB_TRACE)
+      || i_debugger_stepping || i_debugger_nexting;
+    
+    if ( b_show_delimiters || (!(flags & COMMANDS_SILENT) && !silent_flag)) {
+      if (b_show_delimiters) 
+	message(0, 
+		"##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+      if (just_print_flag || (db_level & DB_TRACE)) {
+	print_floc_prefix(&p_call_stack->p_target->floc);
+	message(0, ": %s", p_child->file->name);
+      }
+      message (0, "%s", p);
+      if (b_show_delimiters) 
+	message(0, 
+		"##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+    } else {
+      log_working_directory (1);
+      fflush (stdout);
     }
-    message (0, "%s", p);
-    message(0, "##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-  } else {
-    log_working_directory (1);
-    fflush (stdout);
   }
   
   /* Tell update_goal_chain that a command has been started on behalf of
