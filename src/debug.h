@@ -1,4 +1,4 @@
-/* $Id: debug.h,v 1.19 2005/12/20 15:12:42 rockyb Exp $
+/* $Id: debug.h,v 1.20 2005/12/21 07:46:00 rockyb Exp $
 Debugging macros and interface.
 Copyright (C) 1999, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -30,8 +30,12 @@ Boston, MA 02111-1307, USA.  */
 #include "types.h"
 
 /**
-   Imagine the below enums values as define'd values rather than
-   distinct values of an enum.
+  \brief debug masks which control tracing output.
+
+  Imagine the below enums values as define'd values rather than
+  distinct values of an enum. The enum is more (gdb) debugger friendly
+  in showing what's set (e.g. DB_NONE, DB_ALL, or a single value
+  and in entering expressons (e.g print db_level & DB_BASIC).
 */
 typedef enum {
   DB_NONE           = 0x000, /**< Mask when none of the below are set. */

@@ -2166,7 +2166,7 @@ and source-file directory for your debugger."
 
 ;; ======================================================================
 ;;
-;; MAKEDB make debugger support. See http://bashdb.sourceforge.net
+;; MDB make debugger support. See http://bashdb.sourceforge.net
 ;;
 ;; AUTHOR:	Rocky Bernstein <rocky@panix.com>
 ;;
@@ -2174,17 +2174,17 @@ and source-file directory for your debugger."
 ;;
 ;; INVOCATION NOTES:
 ;;
-;; You invoke makedb-mode with:
+;; You invoke mdb-mode with:
 ;;
-;;    M-x makedb <enter>
+;;    M-x mdb <enter>
 ;;
 ;; It responds with:
 ;;
 ;;    Run make (like this): make --debugger
 ;;
 
-;; History of argument lists passed to makedb.
-(defvar gud-makedb-history nil)
+;; History of argument lists passed to mdb.
+(defvar gud-mdb-history nil)
 
 ;; Convert a command line as would be typed normally to run a script
 ;; into one that invokes an Emacs-enabled debugging session.
@@ -2196,7 +2196,7 @@ and source-file directory for your debugger."
 ;; receive a chunk of text which looks like it might contain the
 ;; beginning of a marker, we save it here between calls to the
 ;; filter.
-(defun gud-makedb-marker-filter (string)
+(defun gud-mdb-marker-filter (string)
   (setq gud-marker-acc (concat gud-marker-acc string))
   (let ((output ""))
 
@@ -2242,28 +2242,28 @@ and source-file directory for your debugger."
 
     output))
 
-(defcustom gud-makedb-command-name "make --debugger -f Makefile"
+(defcustom gud-mdb-command-name "make --debugger -f Makefile"
   "File name for executing bash debugger."
   :type 'string
   :group 'gud)
 
 ;;;###autoload
-(defun makedb (command-line)
-  "Run makedb on program FILE in buffer *gud-FILE*.
+(defun mdb (command-line)
+  "Run mdb on program FILE in buffer *gud-FILE*.
 The directory containing FILE becomes the initial working directory
 and source-file directory for your debugger."
   (interactive
-   (list (read-from-minibuffer "Run makedb (like this): "
-			       (if (consp gud-makedb-history)
-				   (car gud-makedb-history)
-				 (concat gud-makedb-command-name
+   (list (read-from-minibuffer "Run mdb (like this): "
+			       (if (consp gud-mdb-history)
+				   (car gud-mdb-history)
+				 (concat gud-mdb-command-name
 					 " "))
 			       gud-minibuffer-local-map nil
-			       '(gud-makedb-history . 1))))
+			       '(gud-mdb-history . 1))))
 
-  (gud-common-init command-line nil 'gud-makedb-marker-filter)
+  (gud-common-init command-line nil 'gud-mdb-marker-filter)
 
-  (set (make-local-variable 'gud-minor-mode) 'makedb)
+  (set (make-local-variable 'gud-minor-mode) 'mdb)
 
   (gud-def gud-break  "break %l"   "\C-b" "Set breakpoint at current line.")
   (gud-def gud-tbreak "tbreak %l"  "\C-t" "Set temporary breakpoint at current line.")
@@ -2279,9 +2279,9 @@ and source-file directory for your debugger."
   ;; Is this right?
   (gud-def gud-statement "eval %e" "\C-e" "Execute statement at point.")
 
-  (setq comint-prompt-regexp "^(makedb) ")
+  (setq comint-prompt-regexp "^(mdb) ")
   (setq paragraph-start comint-prompt-regexp)
-  (run-hooks 'makedb-mode-hook)
+  (run-hooks 'mdb-mode-hook)
   )
 
 ;;

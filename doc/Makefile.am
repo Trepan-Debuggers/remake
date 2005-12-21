@@ -6,23 +6,23 @@
 transform = s,make,@MAKE_NAME@,
 
 make_TEXINFOS = make.texi fdl.texi make-stds.texi
-makedb_TEXINFOS = makedb.texi 
+mdb_TEXINFOS = mdb.texi 
 TEXI2PDF = texi2dvi --pdf
 
-MOSTLYCLEANFILES = make.tgs make.pdf make.html makedb.cps makedb.kys makedb.html makedb.fns makedb.ps.gz makedb.pdf 
+MOSTLYCLEANFILES = make.tgs make.pdf make.html mdb.cps mdb.kys mdb.html mdb.fns mdb.ps.gz mdb.pdf 
 
 CLEANFILES = make*.html make*.info*
 
 # Extra stuff to include in the distribution.
 
 EXTRA_DIST =	doxygen/Doxyfile doxygen/run_doxygen fdl.texi make.texi \
-	        make-stds.texi makedb.texi makedb.info version-makedb.texi
+	        make-stds.texi mdb.texi mdb.info version-mdb.texi
 
 ## ----------------------------- ##
 ## Other documentation formats.  ##
 ## ----------------------------- ##
 
-all: makedb.info make.info
+all: mdb.info make.info
 
 reference:
 	-( cd ${top_srcdir} && $(MAKE) doxygen )
@@ -30,7 +30,7 @@ reference:
 doxygen:
 	-( cd ${top_srcdir}/doc/doxygen && /bin/sh ${srcdir}/run_doxygen )
 
-html: make.html makedb.html
+html: make.html mdb.html
 
 .texi.html:
 	texi2html $<

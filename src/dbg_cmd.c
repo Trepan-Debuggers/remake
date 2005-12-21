@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.70 2005/12/20 15:11:23 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.71 2005/12/21 07:46:00 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -1202,14 +1202,19 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
   char close_depth[MAX_NEST_DEPTH];
   unsigned int i = 0;
 
+  if ( in_debugger == DEBUGGER_QUIT_RC ) {
+    return continue_execution;
+  }
+  
   if ( i_debugger_stepping > 1 || i_debugger_nexting > 1 ) {
     /* Don't stop unless we are here from a breakpoint. But
        do decrement the step count. */
     if (i_debugger_stepping)  i_debugger_stepping--;
     if (i_debugger_nexting)   i_debugger_nexting--;
     if (!p_target->tracing) return continue_execution;
-  } else if (!debugger_on_error && !(i_debugger_stepping || i_debugger_nexting)
-	     && p_target && !p_target->tracing && -2 != err) 
+  } else if ( !debugger_on_error 
+	      && !(i_debugger_stepping || i_debugger_nexting) 
+	      && p_target && !p_target->tracing && -2 != err )
     return continue_execution;
   
   if (0 == i_init) {
@@ -1255,6 +1260,8 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
   
   open_depth[i] = close_depth[i] = '\0';
 
+  in_debugger = true;
+
   if (err) {
     if (-1 == err) {
       printf("\n***Entering debugger because we encountered an error.\n");
@@ -1267,6 +1274,7 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
 	       makelevel);
 	printf("the makefile at this level or 's', 'n', or 'F' to continue "
 	       "in parent\n");
+	in_debugger = DEBUGGER_QUIT_RC;
       }
     } else {
       printf("\n***Entering debugger because we encountered a fatal error.\n");
@@ -1277,15 +1285,13 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
 
   print_debugger_location(p_target, NULL);
 
-  in_debugger = true;
-
   /* Loop reading and executing lines until the user quits. */
   for ( debug_return = debug_readloop; debug_return == debug_readloop; ) {
     char prompt[PROMPT_LENGTH];
     char *line;
     char *s;
     
-    snprintf(prompt, PROMPT_LENGTH, "makedb%s%d%s ", 
+    snprintf(prompt, PROMPT_LENGTH, "mdb%s%d%s ", 
 	     open_depth, where_history(), close_depth);
     
     if ( (line = readline (prompt)) ) {
@@ -1298,7 +1304,10 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
       free (line);
     }
   }
-  in_debugger=false;
+
+  if (in_debugger != DEBUGGER_QUIT_RC)
+    in_debugger=false;
+  
 #endif /* HAVE_LIBREADLINE */
   return debug_return;
 }

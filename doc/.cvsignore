@@ -5,11 +5,11 @@ make*.html
 make.aux make.cp make.cps make.fn make.fns make.ky
 make.pg make.toc make.tp make.vr make.log
 make.dvi make.ps make.pdf
-makedb*.html
-makedb.aux makedb.cp makedb.cps makedb.fn makedb.fns makedb.ky
-makedb.pg makedb.toc makedb.tp makedb.vr makedb.log
-makedb.dvi makedb.ps makedb.pdf makedb.kys makedb.tmp
-makedb.info*
+mdb*.html
+mdb.aux mdb.cp mdb.cps mdb.fn mdb.fns mdb.ky
+mdb.pg mdb.toc mdb.tp mdb.vr mdb.log
+mdb.dvi mdb.ps mdb.pdf mdb.kys mdb.tmp
+mdb.info*
 stamp-vti
-version-makedb.texi
+version-mdb.texi
 gpl.texi

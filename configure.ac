@@ -6,7 +6,7 @@ AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.24 2005/12/18 02:05:44 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.25 2005/12/21 07:45:59 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -31,7 +31,7 @@ if test x$EMACS = xno ; then
   emacs_lisp=no
 else 
   $EMACS -batch -q -no-site-file -eval \
-  '(if (not (and (= emacs-major-version 21) (<= emacs-minor-version 3))) (error "This gud is for Emacs 21.0 to 21.3."))'
+  '(if (not (and (= emacs-major-version 21) (<= emacs-minor-version 4))) (error "This gud is for Emacs 21.0 to 21.3."))'
   if test $? -ne 0 ; then
     emacs_lisp=no
   fi
@@ -464,7 +464,7 @@ AC_CONFIG_FILES([Makefile        \
                  config/Makefile \
 		 doc/Makefile    \
 		 emacs/Makefile  \
-		 emacs/makedb.el \
+		 emacs/mdb.el \
 		 glob/Makefile   \
                  po/Makefile.in  \
 		 src/Makefile    \
