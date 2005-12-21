@@ -40,6 +40,12 @@ Version 3.80+dbg-0.6cvs
 
 * Expand documentation.
 
+* NOTE: the prompt has changed from "makedb" to "mdb" as has the 
+  Emacs Lisp command name to run the debugger. This change was made to 
+  avoid confusion between the Make debugger and a program which
+  creates a DBM file. If you were using ddd-3.3.12-test.tar.gz you
+  will need to get a newer version.
+
 Version 3.80+dbg-0.5
 
 * Errors in eval issued from the debugger no longer cause termination.
