@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.6 2005/12/20 04:08:21 rockyb Exp $
+@set RCSID $Id: make.texi,v 1.7 2005/12/23 02:31:55 rockyb Exp $
 @set EDITION 0.61
 @set VERSION 3.80+dbg
 @set UPDATED 10 Dec 2005
@@ -2289,6 +2289,11 @@ variable to an empty value.
 @cindex targets, phony
 @cindex targets without a file
 
+@menu
+* Phony Targets Prerequisites::
+* Phony Targets in Recursive Invocations::
+@end menu
+
 A phony target is one that is not really the name of a file.  It is just a
 name for some commands to be executed when you make an explicit request.
 There are two reasons to use a phony target: to avoid a conflict with
@@ -2344,6 +2349,9 @@ clean:
 @end group
 @end example
 
+@node Phony Targets in Recursive Invocations
+@subsection Phony Targets in Recursive Invocations
+
 Another example of the usefulness of phony targets is in conjunction
 with recursive invocations of @code{make} (for more information, see
 @ref{Recursion, ,Recursive Use of @code{make}}).  In this case the
@@ -2395,13 +2403,6 @@ built until after the @file{baz} subdirectory is complete; this kind of
 relationship declaration is particularly important when attempting
 parallel builds.
 
-A phony target should not be a prerequisite of a real target file; if it
-is, its commands are run every time @code{make} goes to update that
-file.  As long as a phony target is never a prerequisite of a real
-target, the phony target commands will be executed only when the phony
-target is a specified goal (@pxref{Goals, ,Arguments to Specify the
-Goals}).
-
 Phony targets can have prerequisites.  When one directory contains multiple
 programs, it is most convenient to describe all of the programs in one
 makefile @file{./Makefile}.  Since the target remade by default will be the
@@ -2443,6 +2444,36 @@ cleanobj :
 cleandiff :
         rm *.diff
 @end example
+
+@node Phony Targets Prerequisites
+@subsection Phony Targets Prerequisites
+
+Normally a phony target is not be a prerequisite of a real target
+file, because that would mean commands are run every time @code{make}
+goes to update that file.  
+
+However if you have targets which you want remade everytime you run
+make, then this using a phony target which has a real target is a
+convenient way to do it.
+
+For example, suppose one has a rule like:
+
+@example
+FORCE:
+
+.PHONY: FORCE
+
+# run compiler to produce preprocessor output into .pp file...
+%.pp : %.c FORCE
+@end example 
+
+Something like this can be for debugging macros and other
+oddities. The @code{%.pp} is never a normal target, but used
+explicitly on the command line like so:
+
+@smallexample
+make foo.pp
+@end smallexample 
 
 @node Force Targets, Empty Targets, Phony Targets, Rules
 @section Rules without Commands or Prerequisites
