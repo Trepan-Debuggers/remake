@@ -1,4 +1,4 @@
-/* $Id: expand.h,v 1.6 2005/12/09 12:11:09 rockyb Exp $
+/* $Id: expand.h,v 1.7 2005/12/23 04:20:38 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -66,7 +66,7 @@ extern char *recursively_expand_for_file(variable_t *v, file_t *file);
    each call to variable_buffer_output should be the first argument to
    the following call.  */
 
-extern void restore_variable_buffer(char *buf, unsigned int len);
+extern void restore_variable_buffer(char *p_buf, unsigned int len);
 
 extern char *variable_buffer_output(char *ptr, char *psz_string, 
 				    unsigned int length);

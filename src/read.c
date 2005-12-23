@@ -1,4 +1,4 @@
-/* $Id: read.c,v 1.27 2005/12/20 15:11:24 rockyb Exp $
+/* $Id: read.c,v 1.28 2005/12/23 04:20:38 rockyb Exp $
 Reading and parsing of makefiles for GNU Make.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
@@ -86,7 +86,7 @@ typedef enum
    the static structure `toplevel_conditionals' and is later changed
    to new structures for included makefiles.  */
 
-struct conditionals
+typedef struct conditionals
   {
     unsigned int if_cmds;	/* Depth of conditional nesting.  */
     unsigned int allocated;	/* Elts allocated in following arrays.  */
@@ -94,10 +94,10 @@ struct conditionals
                                    0=interpreting, 1=not yet interpreted,
                                    2=already interpreted */
     char *seen_else;		/* Have we already seen an `else'?  */
-  };
+  } conditionals_t;
 
-static struct conditionals toplevel_conditionals;
-static struct conditionals *conditionals = &toplevel_conditionals;
+static conditionals_t toplevel_conditionals;
+static conditionals_t *conditionals = &toplevel_conditionals;
 
 
 /* Default directories to search for include files in  */
@@ -273,13 +273,13 @@ read_all_makefiles (char **makefiles)
 
 /* Install a new conditional and return the previous one.  */
 
-static struct conditionals *
-install_conditionals (struct conditionals *new)
+static conditionals_t *
+install_conditionals (conditionals_t *new_conditionals)
 {
-  struct conditionals *save = conditionals;
+  conditionals_t *save = conditionals;
 
-  memset ((char *) new, 0, sizeof (*new));
-  conditionals = new;
+  memset ((char *) new_conditionals, 0, sizeof (*new_conditionals));
+  conditionals = new_conditionals;
 
   return save;
 }
@@ -287,7 +287,7 @@ install_conditionals (struct conditionals *new)
 /* Free the current conditionals and reinstate a saved one.  */
 
 static void
-restore_conditionals (struct conditionals *saved)
+restore_conditionals (conditionals_t *saved)
 {
   /* Free any space allocated by conditional_line.  */
   if (conditionals->ignoring)
@@ -304,6 +304,8 @@ eval_makefile (char *filename, int flags)
 {
   dep_t *deps;
   ebuffer_t ebuf;
+  conditionals_t *saved;
+  conditionals_t new;
   const floc_t *curfile;
   int makefile_errno;
   int r;
@@ -415,7 +417,11 @@ eval_makefile (char *filename, int flags)
   curfile = reading_file;
   reading_file = &ebuf.floc;
 
+  saved = install_conditionals (&new);
+
   r = eval (&ebuf, !(flags & RM_NO_DEFAULT_GOAL));
+
+  restore_conditionals (saved);
 
   reading_file = curfile;
 
@@ -430,8 +436,8 @@ int
 eval_buffer (char *buffer)
 {
   ebuffer_t ebuf;
-  struct conditionals *saved;
-  struct conditionals new;
+  conditionals_t *saved;
+  conditionals_t new;
   const floc_t *curfile;
   int r;
 
@@ -465,13 +471,7 @@ eval_buffer (char *buffer)
 
 /* Read file FILENAME as a makefile and add its contents to the data base.
 
-   SET_DEFAULT is true if we are allowed to set the default goal.
-
-   FILENAME is added to the `read_makefiles' chain.
-
-   Returns 0 if a file was not found or not read.
-   Returns 1 if FILENAME was found and read.
-   Returns 2 if FILENAME was read, and we kept a reference (don't free it).  */
+   SET_DEFAULT is true if we are allowed to set the default goal.  */
 
 static int
 eval (ebuffer_t *ebuf, int set_default)
@@ -594,8 +594,8 @@ eval (ebuffer_t *ebuf, int set_default)
 	{
 	  collapsed_length = linelen+1;
           if (collapsed)
-            free ((char *)collapsed);
-	  collapsed = (char *) xmalloc (collapsed_length);
+            free (collapsed);
+	  collapsed = CALLOC(char, collapsed_length);
 	}
       strcpy (collapsed, line);
       /* Collapse continuation lines.  */
@@ -820,8 +820,8 @@ eval (ebuffer_t *ebuf, int set_default)
 	{
 	  /* We have found an `include' line specifying a nested
 	     makefile to be read at this point.  */
-	  struct conditionals *save;
-          struct conditionals new_conditionals;
+	  conditionals_t *save;
+          conditionals_t new_conditionals;
 	  nameseq_t *files;
 	  /* "-include" (vs "include") says no error if the file does not
 	     exist.  "sinclude" is an alias for this from SGI.  */
@@ -831,7 +831,13 @@ eval (ebuffer_t *ebuf, int set_default)
 
           /* If no filenames, it's a no-op.  */
 	  if (*p == '\0')
-            continue;
+	    {
+	      print_floc_prefix(fstart);
+	      message (0,
+                     _(" ignoring `%sinclude' - no file name given"), 
+		       noerror ? "-" : "");
+	      continue;
+	    }
 
 	  /* Parse the list of file names.  */
 	  p2 = p;
@@ -1247,7 +1253,7 @@ eval (ebuffer_t *ebuf, int set_default)
             if (len + 2 > commands_len)
               {
                 commands_len = (len + 2) * 2;
-                commands = (char *) xrealloc (commands, commands_len);
+                commands = REALLOC(commands, char, commands_len);
               }
             memmove (commands, cmdleft, len);
             commands_idx += len;
@@ -1274,8 +1280,7 @@ eval (ebuffer_t *ebuf, int set_default)
   /* At eof, record the last rule.  */
   record_waiting_files ();
 
-  if (collapsed)
-    free (collapsed);
+  free (collapsed);
   free (commands);
 
   return 1;
@@ -1308,7 +1313,7 @@ do_define (char *name, unsigned int namelen,
   long nlines = 0;
   int nlevels = 1;
   unsigned int length = 100;
-  char *definition = (char *) xmalloc (length);
+  char *definition = CALLOC(char, length);
   unsigned int idx = 0;
   char *p;
 
@@ -1469,11 +1474,11 @@ conditional_line (char *line, const floc_t *flocp)
       return 0;
     }
 
-  if (conditionals->allocated == 0)
+  if (!conditionals->allocated)
     {
       conditionals->allocated = 5;
-      conditionals->ignoring = (char *) xmalloc (conditionals->allocated);
-      conditionals->seen_else = (char *) xmalloc (conditionals->allocated);
+      conditionals->ignoring  = CALLOC(char, conditionals->allocated);
+      conditionals->seen_else = CALLOC(char, conditionals->allocated);
     }
 
   ++conditionals->if_cmds;
