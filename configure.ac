@@ -6,7 +6,7 @@ AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.25 2005/12/21 07:45:59 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.26 2005/12/23 03:29:33 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -65,7 +65,7 @@ AC_HEADER_DIRENT
 AC_HEADER_STAT
 AC_HEADER_TIME
 AC_CHECK_HEADERS(locale.h limits.h fcntl.h stdbool.h)
-AC_CHECK_HEADERS(sys/param.h sys/time.h sys/timeb.h)
+AC_CHECK_HEADERS(sys/param.h sys/time.h sys/timeb.h signal.h)
 
 dnl FreeBSD 4 has getopt in unistd.h. So we include that before
 dnl getopt.h 
@@ -217,6 +217,13 @@ if test "$make_cv_union_wait" = yes; then
             [Define this if you have the "union wait" type in <sys/wait.h>.])
 fi
 AC_MSG_RESULT($make_cv_union_wait)
+
+ac_includes_default="$ac_includes_default
+#ifdef HAVE_SIGNAL_H
+#include <signal.h>
+#endif
+"
+AC_SYS_SIGLIST_DECLARED
 
 AC_ARG_WITH(make_name,
 [  --with-make-name        name to use as the program name (default remake)],

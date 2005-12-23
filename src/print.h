@@ -1,4 +1,4 @@
-/* $Id: print.h,v 1.9 2005/12/18 02:05:45 rockyb Exp $
+/* $Id: print.h,v 1.10 2005/12/23 03:29:34 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -71,6 +71,9 @@ extern void log_working_directory (int);
 
 /*! Print an error message from errno.  */
 extern void perror_with_name (const char *, const char *);
+
+/*! Print an error message from errno and exit.  */
+extern void pfatal_with_name_err (const char *psz_name, int errnum);
 
 /*! Print an error message from errno and exit.  */
 extern void pfatal_with_name (const char *psz_name);

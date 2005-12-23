@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.7 2005/12/23 02:31:55 rockyb Exp $
+@set RCSID $Id: make.texi,v 1.8 2005/12/23 03:29:33 rockyb Exp $
 @set EDITION 0.61
 @set VERSION 3.80+dbg
 @set UPDATED 10 Dec 2005
@@ -2447,7 +2447,6 @@ cleandiff :
 
 @node Phony Targets Prerequisites
 @subsection Phony Targets Prerequisites
-
 Normally a phony target is not be a prerequisite of a real target
 file, because that would mean commands are run every time @code{make}
 goes to update that file.  
@@ -2457,7 +2456,6 @@ make, then this using a phony target which has a real target is a
 convenient way to do it.
 
 For example, suppose one has a rule like:
-
 @example
 FORCE:
 

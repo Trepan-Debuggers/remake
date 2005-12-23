@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.34 2005/12/21 07:00:45 rockyb Exp $
+/* $Id: job.c,v 1.35 2005/12/23 03:29:33 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005
 Free Software Foundation, Inc.
@@ -1524,6 +1524,7 @@ new_job (file_t *file, target_stack_node_t *p_call_stack)
 
         /* Set interruptible system calls, and read() for a job token.  */
 	set_child_handler_action_flags (0);
+	errno = 0;
 	got_token = read (job_rfd, &token, 1);
 	saved_errno = errno;
 	set_child_handler_action_flags (SA_RESTART);
@@ -1538,9 +1539,14 @@ new_job (file_t *file, target_stack_node_t *p_call_stack)
 
         /* If the error _wasn't_ expected (EINTR or EBADF), punt.  Otherwise,
            go back and reap_children(), and try again.  */
-	errno = saved_errno;
-        if (errno != EINTR && errno != EBADF)
-          pfatal_with_name (_("read jobs pipe"));
+        if (saved_errno != EINTR && saved_errno != EBADF)
+	  {
+	    if (got_token == 0)
+	      fatal (NILF, _("read jobs pipe EOF"));
+	    else
+	      pfatal_with_name_err (_("read jobs pipe"), saved_errno);
+	  }
+        if (saved_errno == EBADF)
         if (errno == EBADF)
           DB (DB_JOBS, ("Read returned EBADF.\n"));
       }

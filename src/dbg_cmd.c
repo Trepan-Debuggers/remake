@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.71 2005/12/21 07:46:00 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.72 2005/12/23 03:29:33 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -325,7 +325,7 @@ cmd_initialize(void)
   short_command['q'].doc = 
     _("Exit make. If a numeric argument is given, it will be the exit\n"
       "status reported back. A status of 77 in a nested make will signals\n"
-      "termination in the parent. So if no numberic argument is given and\n"
+      "termination in the parent. So if no numeric argument is given and\n"
       "MAKELEVEL is 0, then status 0 is set; otherwise it is 77."
       );
 

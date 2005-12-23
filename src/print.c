@@ -298,8 +298,16 @@ perror_with_name (const char *str, const char *name)
     enter_debugger(NULL, NULL, -1);
 }
 
-/*! Print an error message from errno and exit.  */
+/*! Print an error message from errnum and exit.  */
+void
+pfatal_with_name_err (const char *psz_name, int errnum)
+{
+  fatal (NILF, _("%s: %s"), psz_name, strerror (errnum));
 
+  /* NOTREACHED */
+}
+
+/*! Print an error message from errno and exit.  */
 void
 pfatal_with_name (const char *psz_name)
 {

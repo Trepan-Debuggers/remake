@@ -1,4 +1,4 @@
-/* $Id: make.h,v 1.21 2005/12/18 13:30:33 rockyb Exp $
+/* $Id: make.h,v 1.22 2005/12/23 03:29:34 rockyb Exp $
 Miscellaneous global declarations and portability cruft for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -379,7 +379,7 @@ extern long int atol ();
 #endif  /* Not GNU C library or POSIX.  */
 
 #ifdef  HAVE_GETCWD
-# if !defined(__DECC)
+# if !defined(__DECC) && !defined(getcwd)
 extern char *getcwd ();
 # endif
 #else

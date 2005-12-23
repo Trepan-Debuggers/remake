@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.41 2005/12/20 15:11:24 rockyb Exp $
+/* $Id: main.c,v 1.42 2005/12/23 03:29:34 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -1714,6 +1714,20 @@ main (int argc, char **argv, char **envp)
         jobserver_fds = 0;
       }
   }
+
+#ifdef PIPE_BUF
+  if (job_slots > PIPE_BUF)
+#elif defined _POSIX_PIPE_BUF
+  if (job_slots > _POSIX_PIPE_BUF)
+#else
+  if (job_slots > 512)
+#endif
+    {
+      error (NILF,
+	     _("More parallel jobs (-jN) than this platform can handle requested."));
+      error (NILF, _("Resetting to single job (-j1) mode."));
+      job_slots = 1;
+    }
 
   /* If we have >1 slot but no jobserver-fds, then we're a top-level make.
      Set up the pipe and install the fds option for our children.  */
