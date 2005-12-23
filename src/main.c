@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.42 2005/12/23 03:29:34 rockyb Exp $
+/* $Id: main.c,v 1.43 2005/12/23 14:00:57 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -345,9 +345,6 @@ static const char *const usage[] =
   -e, --environment-overrides\n\
                                Environment variables override makefiles.\n"),
     N_("\
-  -E, --extended-errors\n\
-                               Additional error reporting.\n"),
-    N_("\
   -f FILE, --file=FILE, --makefile=FILE\n\
                                Read FILE as a makefile.\n"),
     N_("\
@@ -368,6 +365,8 @@ static const char *const usage[] =
   -n, --just-print, --dry-run, --recon\n\
                                Don't actually run any commands; just print them.\n"),
     N_("\
+  --no-extended-errors         Do not give additional error reporting.\n"),
+    N_("\
   -o FILE, --old-file=FILE, --assume-old=FILE\n\
                                Consider FILE to be very old and don't remake it.\n"),
     N_("\
@@ -381,8 +380,7 @@ static const char *const usage[] =
     N_("\
   -s, --silent, --quiet        Don't echo commands.\n"),
     N_("\
-  -S, --no-keep-going, --stop\n\
-                               Turns off -k.\n"),
+  -S, --no-keep-going, --stop  Turns off -k.\n"),
     N_("\
   -t, --touch                  Touch targets instead of remaking them.\n"),
     N_("\

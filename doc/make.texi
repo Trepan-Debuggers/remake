@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.8 2005/12/23 03:29:33 rockyb Exp $
+@set RCSID $Id: make.texi,v 1.9 2005/12/23 14:00:55 rockyb Exp $
 @set EDITION 0.61
 @set VERSION 3.80+dbg
 @set UPDATED 10 Dec 2005
@@ -2425,8 +2425,10 @@ prog3 : prog3.o sort.o utils.o
 @end example
 
 @noindent
-Now you can say just @samp{make} to remake all three programs, or specify
-as arguments the ones to remake (as in @samp{make prog1 prog3}).
+Now you can say just @samp{make} to remake all three programs, or
+specify as arguments the ones to remake (as in @samp{make prog1
+prog3}).  Phoniness is not inherited: the prerequisites of a phony
+target are not themselves phony, unless explicitly declared to be so.
 
 When one phony target is a prerequisite of another, it serves as a subroutine
 of the other.  For example, here @samp{make cleanall} will delete the
@@ -2465,7 +2467,7 @@ FORCE:
 %.pp : %.c FORCE
 @end example 
 
-Something like this can be for debugging macros and other
+Something like this can be used for debugging macros and other
 oddities. The @code{%.pp} is never a normal target, but used
 explicitly on the command line like so:
 
@@ -4957,7 +4959,7 @@ definition of the variable.  If you defined it first with @samp{:=},
 making it a simply-expanded variable, @samp{+=} adds to that
 simply-expanded definition, and expands the new text before appending it
 to the old value just as @samp{:=} does
-(@pxref{Setting, ,Setting Variables}, for a full explanation of @samp{:=}).
+(@pxref{Setting, ,Setting Variables} for a full explanation of @samp{:=}).
 In fact,
 
 @example
@@ -7295,11 +7297,9 @@ option also enables @samp{basic} messages.
 Gives status on each Makefile as it is read in.
 @end table
 
-@cindex @code{-E}
-@item --extended-errors
-@item -E
+@item --no-extended-errors
 
-Give a target stack trace when a fatal error is encountered.
+Do not give a target stack trace when a fatal error is encountered.
 
 @cindex @code{-X}
 @item --debugger[=@var{options}]
