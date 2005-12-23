@@ -38,6 +38,8 @@ Version 3.80+dbg-0.6cvs
 * More debug tracing funnelled through db_level. Debugger command
   "show debug" shows the debug mask in a more understandable way.
 
+* Incorporate patches from GNU/Linux make 3.80.
+
 * Expand documentation.
 
 * NOTE: the prompt has changed from "makedb" to "mdb" as has the 
