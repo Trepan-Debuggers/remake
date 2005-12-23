@@ -1,0 +1,2601 @@
+\input texinfo      @c -*-texinfo-*-
+@c Copyright 2004, 2005
+@c Rocky Bernstein for the Free Software Foundation
+@c
+@c TODO: 
+@c   - add examples for commands
+@c   - clean up/improve sample session
+@c   - help text is inaccurate and formatted too much to right.
+@c 
+
+@c Sets version and release names and dates. Frees us from changing
+@c this file when a new release comes along.
+
+@c %**start of header
+@c makeinfo ignores cmds prev to setfilename, so its arg cannot make use
+@c of @set vars.  However, you can override filename with makeinfo -o.
+@setfilename mdb.info
+@c 
+
+@c
+@c Name of debugger program.  Used also for prompt string.
+@set REMAKE @sc{gnu} Remake
+@set MAKE @sc{gnu} Make
+
+@set DBG the @value{REMAKE} debugger
+@set dBG The @value{REMAKE} debugger
+@set DDD @acronym{DDD}
+
+@settitle @value{REMAKE} Debugger
+@setchapternewpage odd
+@c @setcontentsaftertitlepage
+
+@c %**end of header
+
+@include version-mdb.texi
+
+@c A simple macro for optional variables.
+@macro ovar{varname}
+@r{[}@var{\varname\}@r{]}
+@end macro
+
+@macro DDD {}
+@acronym{DDD}
+@end macro
+
+@macro MAKE {}
+@value{REMAKE}
+@end macro
+
+@macro DBG {}
+@value{DBG}
+@end macro
+
+@iftex
+@c @smallbook
+@c @cropmarks
+@end iftex
+
+@finalout
+
+@c readline appendices use @vindex, @findex and @ftable,
+@c annotate.texi and gdbmi use @findex.
+@c @syncodeindex vr cp
+@c @syncodeindex fn cp
+
+@c THIS MANUAL REQUIRES TEXINFO 4.0 OR LATER.
+
+@c This is a dir.info fragment to support semi-automated addition of
+@c manuals to an info tree.
+@dircategory Programming & development tools.
+@direntry
+* mdb: (@value{DBG}).                     The @MAKE debugger.
+@end direntry
+
+@ifinfo
+This file documents the @sc{gnu} MAKE debugger
+
+
+This is the @value{EDITION} Edition, @value{UPDATED-MONTH},
+of @cite{Debugging with MDB: the @sc{gnu} Make Debugger}
+
+Copyright (C) 2004, 2005 Rocky Bernstein for the Free Software Foundation.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1 or
+any later version published by the Free Software Foundation; with the
+Invariant Sections being ``Free Software'' and ``Free Software Needs
+Free Documentation'', with the Front-Cover Texts being ``A GNU
+Manual,'' and with the Back-Cover Texts as in (a) below.
+
+(a) The Free Software Foundation's Back-Cover Text is: ``You have
+freedom to copy and modify this GNU Manual, like GNU software.  Copies
+published by the Free Software Foundation raise funds for GNU
+development.''
+@end ifinfo
+
+@titlepage
+@title The @sc{gnu} MAKE debugger
+@sp 1
+@subtitle @value{EDITION} Edition, for MAKE
+@subtitle @value{UPDATED-MONTH}
+@author Rocky Bernstein
+@page
+
+@vskip 0pt plus 1filll
+Copyright @copyright{} 2004, 2005 Rocky Bernstein for the Free Software
+Foundation.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1 or
+any later version published by the Free Software Foundation; with the
+Invariant Sections being ``Free Software'' and ``Free Software Needs
+Free Documentation'', with the Front-Cover Texts being ``A GNU Manual,''
+and with the Back-Cover Texts as in (a) below.
+
+(a) The Free Software Foundation's Back-Cover Text is: ``You have
+freedom to copy and modify this GNU Manual, like GNU software.  Copies
+published by the Free Software Foundation raise funds for GNU
+development.''
+@end titlepage
+@page
+
+@ifnottex
+@node Top, Summary, (dir), (dir)
+
+@top Using with @value{DBG}
+
+This file describes @value{DBG}
+
+This is the @value{EDITION} Edition, @value{UPDATED-MONTH}
+
+Copyright (C) 2004, 2005 Rocky Bernstein
+
+@menu
+* Summary::                     Overview of Debugger with a sample session
+
+* Invocation::                  Getting in and out and GNU Make command options
+* Debugger Command Reference::  @value{DBG} command reference
+
+* Front Ends::                  Using @value{DBG} from a front-end user interface
+
+* Make Debugger Bugs::          Reporting bugs
+* History and Acknowledgments:: History and Acknowledgments
+
+Indexes (nodes containing large menus)
+* Command Index::             An item for each command name.
+* General Index::             An item for each concept.
+@end menu
+
+@end ifnottex
+
+@contents
+
+@node Summary
+@chapter Summary of the GNU Make Debugger
+
+The purpose of a debugger such as @value{DBG} is to allow you to see what is
+going on ``inside'' @value{DBG} when it processes a Makefile.
+
+@value{dBG} can do four main kinds of things (plus other things in support of
+these) to help you catch bugs in the act:
+
+@itemize @bullet
+@item
+Have @value{REMAKE} stop at specified places such as targets.
+
+@item
+Examine what has happened, when @value{REMAKE} has stopped or encounters
+an error. 
+
+@item
+Change the internal state of things inside @value{REMAKE}, so you can
+experiment with correcting the effects of one bug and go on to
+discover another.
+@end itemize
+
+Although you can use the @value{DBG} to debug Makefiles, it can also
+be used just as a front-end for learning more about Makefiles and
+writing them with @value{REMAKE}. 
+
+A degenerate and less-interactive form of debugging is @emph{tracing}
+in which one passively watches some of the steps that go on in
+processing a Makefile.
+
+@menu
+* Sample Sessions::             Sample GNU Make Debugger sessions
+* Free Software::               Freely redistributable software
+@end menu
+
+@node Sample Sessions
+@section Sample @value{REMAKE} Debugger Sessions
+
+You can use this manual at your leisure to read all about @value{DBG}.
+However, a handful of commands are enough to get started using the
+debugger.  This chapter illustrates those commands.
+
+@iftex
+In this sample session, we emphasize user input like this: @b{input},
+to make it easier to pick out from the surrounding output.
+@end iftex
+
+@menu
+* Tracing Not::              How NOT to debug your program
+* Tracing::                  Using --trace or -x on a simple example
+* Tracing Makefile Reading:: A real-world trace.
+* Simple Debugging::         Getting into the Debugger (--debugging)
+* Debugging Variables::
+* Debugging Commands::
+@end menu
+
+@node Tracing Not
+@subsection How NOT to debug @value{MAKE}
+
+A simplified form of debugging is @emph{tracing}. Often this may be
+good enough to understand what might have gone wrong. In fact, in the
+Unix shell world (@code{tcsh}, @code{csh}, @code{bash}, @code{sh})
+prior to my debugger for bash (@url{http://bashdb.sourceforge.net})
+tracing along with print statements was about all that was available 
+to debug a program. 
+
+And so before we get into debugging proper, we'll discuss tracing.
+
+@value{MAKE} has had for a long time a ``debug'' flag (@code{--debug} or
+@code{-d}) which prints ``lots of debugging information.'' For the
+unwary one might think you just add this simple option and that's
+going to do what you want. Wrong!@footnote{From the standpoint of a
+nice user interface, this options should get replaced with
+@code{--trace}; At present, this base is probably a little to young to
+right nowmake such a bold change, tempting as it is to do.}
+
+Alas, the @code{--debug} option gives way too much information to be
+helpful. Furthermore, debug-flag information @emph{omits} information
+that would be helpful.
+
+To elaborate upon this, here is a simple small Makefile with an invalid
+shell command in it:
+
+@smallexample
+!: # Makefile to show off tracing
+2: .PHONY: all
+3: all: foo
+4: 
+5: foo:
+6: 	@@case $(MAKE) in \
+7: 	*/remake|remake) echo "Enlightended!";; \
+8: 	*/make|make) echo "This is what most folks use.";; \
+9: 	esac
+10: 	@@bogus-command
+@end smallexample 
+
+Now let's see what happens when we run ``debug'' from an unpatched
+@value{MAKE}:
+
+@smallexample
+$ @b{/usr/bin/make -d -f test1.mk}
+Copyright (C) 2002  Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.
+There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.
+Reading makefiles...
+Reading makefile `test1.mk'...
+Updating makefiles....
+ Considering target file `test1.mk'.
+  Looking for an implicit rule for `test1.mk'.
+  Trying pattern rule with stem `test1.mk'.
+  Trying implicit prerequisite `test1.mk.o'.
+  Trying pattern rule with stem `test1.mk'.
+  Trying implicit prerequisite `test1.mk.c'.
+
+... over 350 lines later ...
+
+ No need to remake target `test1.mk'.
+Updating goal targets....
+Considering target file `all'.
+ File `all' does not exist.
+  Considering target file `foo'.
+   File `foo' does not exist.
+   Finished prerequisites of target file `foo'.
+  Must remake target `foo'.
+This is what most folks use.
+Got a SIGCHLD; 1 unreaped children.
+Putting child 0x095b1310 (foo) PID 13440 on the chain.
+Live child 0x095b1310 (foo) PID 13440 
+Reaping winning child 0x095b1310 PID 13440 
+make: bogus-command: Command not found
+Got a SIGCHLD; 1 unreaped children.
+Live child 0x095b1310 (foo) PID 13441 
+Reaping losing child 0x095b1310 PID 13441 
+make: *** [foo] Error 127
+Removing child 0x095b1310 PID 13441 from chain.
+@end smallexample 
+
+The output would have been about twice as long were it not for the
+fact that we declared @code{all} a ``phony'' target.
+
+Clearly this information referring to rule stems, implicit
+prerequisites, @code{SIGCHLD}, pids, and unreaped children is intended
+for someone who is well versed with the internals of @value{MAKE}.
+
+But even for someone such as myself who has become more knowledgeable
+(through writing this debugger), it @emph{still} isn't all that
+helpful. ``@code{make: bogus-command: command not found}'' you say?
+Okay but where in the Makefile source did that come from? Since we
+added the debug output we see ``foo'' listed beforehand after skipping
+800 lines, but in a normal make, there would have been no mention
+of ``foo.'' In our simple example tracking down the location is easy.
+But when you have a Makefile which is hundreds of lines long as any
+Makefile is when it is generated from @code{automake}, it would be
+nice to list the line in the Makefile and full filename as well as the
+target name.
+
+@node Tracing
+@subsection Sample @value{REMAKE} Trace Sessions
+
+Okay so now that we know what @emph{not} to do, lets delve into things
+may be more helpful.
+
+There are variants of the @code{--debug} command option that provide
+shorter and more-interesting information. One is called ``basic''
+tracing. Another is the @code{--just-print} option.
+
+Again here's the sample Makefile:
+
+@smallexample
+!: # Makefile to show off tracing
+2: .PHONY: all
+3: all: foo
+4: 
+5: foo:
+6: 	@@case $(MAKE) in \
+7: 	*/remake|remake) echo "Enlightended!";; \
+8: 	*/make|make) echo "This is what most folks use.";; \
+9: 	esac
+10: 	@@bogus-command
+@end smallexample 
+
+In an unpatched @value{MAKE} version 3.81 (and earlier) @value{MAKE},
+@code{--just-print} gives this:
+
+@smallexample
+$ @b{make --just-print -f test1.mk}
+case make in \
+*/remake|remake) echo "Enlightended!";; \
+*/make|make) echo "This is what most folks use.";; \
+esac
+This is what most folks use.
+bogus-command
+@end smallexample
+
+Well, not much different from the original Makefile, except that
+information about where this gets run from is curiously missing. One
+of the goals of @value{REMAKE} is to include reference
+information. Here's what we give instead:
+
+@smallexample
+$ @b{make --just-print -f test.mk1}
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+/tmp/test1.mk:6: foo
+case /tmp/remake/src/./make in \
+*/remake|remake) echo "Enlightended!";; \
+*/make|make) echo "This is what most folks use.";; \
+esac
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+This is what most folks use.
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+/tmp/test1.mk:10: foo
+bogus-command
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+@end smallexample
+
+What's different is that we make more clear where in the file this
+command is getting run from and from what target. This may be a little
+bit subtle, but from the above output it is more apparent that there
+are @emph{two} separate commands@footnote{or ``jobs'' in the
+terminology used when we used @code{--debug}} that are getting run
+from target @code{foo}: one at line 6 and another at line 10.
+
+One last and perhaps also subtle point is the format of the location
+information. This format is similar to other debugger output. The
+above command is run insode a @sc{gnu} Emacs compilation buffer the format
+of the message is such that @code{compile-goto-error} will possition
+one at that point in the file in another Emacs window.
+
+Now let's try @code{--debug=basic} alluded to at the beginning of this
+section. In an unpatched @value{MAKE} version 3.81 (and earlier)
+@value{MAKE} @code{--debug=basic} gives this:
+
+@smallexample
+$ @b{make --debug=basic -f test1.mk}
+GNU Make 3.80
+Copyright (C) 2002  Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.
+There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.
+Reading makefiles...
+Updating goal targets....
+ File `all' does not exist.
+   File `foo' does not exist.
+  Must remake target `foo'.
+This is what most folks use.
+make: bogus-command: Command not found
+make: *** [foo] Error 127
+##########################################################
+@end smallexample
+
+Now let's try the new kind of trace we provide in this patched
+@value{REMAKE}.  We use the new option @code{--trace} which has the
+short-form option format @code{-x}.
+
+And here's the trace of it:
+@smallexample
+@group
+$ @b{remake --trace -f test1.mk}
+Reading makefiles...
+Updating goal targets....
+ /tmp/test1.mk:3	File `all' does not exist.
+   /tmp/test1.mk:5	File `foo' does not exist.
+  /tmp/test1.mk:5	Must remake target `foo'.
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+/tmp/test1.mk:6: foo
+case /tmp/remake/src/./make in \
+*/remake|remake) echo "Enlightended!";; \
+*/make|make) echo "This is what most folks use.";; \
+esac
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
++ case /tmp/remake/src/./make in
++ echo 'This is what most folks use.'
+This is what most folks use.
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+/tmp/remake/src/test1.mk:10: foo
+bogus-command
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
++ bogus-command
+/bin/sh: bogus-command: command not found
+test1.mk:10: *** [foo] Error 127
+
+#0  foo at /tmp/test1.mk:10
+#1  all at /tmp/test1.mk:3
+Command-line arguments:
+	"--trace -f test1.mk"
+@end group
+@end smallexample 
+
+So in some ways this is just a combination of the enhanced (with
+location information) @code{--just-print} option combined with the
+enhanced @code{--debug=basic} information.
+
+What is completely new and hasn't been seen above is the information
+given when we hit an error.  After the error and we report the return
+code (127), the stack of targets is listed. We were working on target
+@code{foo} on line 10 of file @code{/tmp/test1.mk} which was rebuilt
+because we were making target @code{all} on line 3 of file
+@code{/tmp/test1.mk}.
+
+In other words, when we hit the error, the above trace gives some idea
+of why we decided to to run line 9 and what got executed before that,
+what targets were in the process of getting considered at the error,
+and how the program was run.
+
+One last subtlety that you might not have noticed is that we echoed
+the command @code{boguscommand} even though the original makefile had
+this set to be silent (in particular by preceding that command with an
+@@). When tracing, we override any silent execution (making execution
+more verbose); information is usually helpful in finding what's going
+on and what got run.
+
+In sum, I hope I've conveyed the idea that the goal is simple trace
+output for a simple Makefile. Although I think that the above may be
+improved, it is far better than what has previously been available in
+GNU make.
+
+@node Tracing Makefile Reading
+@subsection Tracing Makefile Reading
+
+@value{MAKE} and @value{REMAKE} work like many other
+interpreters. First Makefiles are read in and parsed and then they are
+``executed'' which in @value{MAKE} means that dependency checks are
+done and actions are performed based on those checks.  However there
+is quite a bit work that may be done just in portion which reads in
+the Makefiles and performs variable expansion.
+
+To see this, let's use a real example -- the Makefile for the GNU Make
++ Debugger. For comparison, here is a simple trace:
+@smallexample
+@group
+$ @b{remake --trace}
+Reading makefiles...
+Updating goal targets....
+ /tmp/remake/src/Makefile:257	File `all' does not exist.
+   /tmp/remake/src/Makefile:470	File `all-am' does not exist.
+  /tmp/remake/src/Makefile:470	Must remake target `all-am'. Is a phony target.
+  /tmp/remake/src/Makefile:470	Successfully remade target file `all-am'.
+/tmp/remake/src/Makefile:257	Must remake target `all'. Is a phony target.
+/tmp/remake/src/Makefile:257	Successfully remade target file `all'.
+remake: Nothing to be done for `all'.
+@end group
+@end smallexample 
+
+So far so good -- still pretty simple output even though the Makefile
+in this case is pretty complex, is hundreds of lines long and has
+thousands of dependencies noted.  Digging just a little into this
+complexity, If we want to trace the files that were read in performing
+the above, we can use the sub-option @code{read} on the @code{--trace}
+option:
+@smallexample
+@group
+$ @b{remake --trace=read Makefile}
+Reading makefiles...
+Reading makefile `Makefile'...
+/tmp/remake/src/Makefile:329
+	Reading makefile `.deps/alloca.Po' (search path) (no ~ expansion)...
+/tmp/remake/src/Makefile:330
+	Reading makefile `.deps/getloadavg.Po' (search path) (no ~ expansion)...
+... about 32 more lines like the above ...
+
+Updating goal targets....
+remake: `Makefile' is up to date.
+
+@end group
+@end smallexample 
+
+@node Simple Debugging
+@subsection Simple @value{REMAKE} Debug Sessions
+
+Now let's go into the debugger. To do this, use the @code{--debugger}
+or @code{-X} option. Again we'll use the Makefile from the source code
+of this distribution.
+
+@smallexample
+$  @b{remake --debugger}
+Reading makefiles...
+
+(/tmp/src/remake/src/Makefile:263)
+Makefile.in: Makefile.am ../config/readline.m4 ../gettext.m4 ../iconv.m4 ../lib-ld.m4 ../lib-link.m4 ../lib-prefix.m4 ../progtest.m4 ../acinclude.m4 ../configure.ac ../aclocal.m4
+mdb<0> 
+@end smallexample 
+
+Before the prompt @code{mdb<0>}, we show the position in the file,
+the target @code{Makefile.in}, and the dependencies of this target
+@code{Makefile.am}, @code{..confiig/readline.m4} ....
+
+The ``0'' in the prompt @code{mdb<0>} is the comamnd history number
+it increments as we enter commands.
+
+Is this @emph{really} the top-level target? The @code{where} command,
+(see @ref{Backtrace}), shows you the target call stack:
+
+@smallexample
+@group
+mdb<0> @b{where}
+
+=>#0  Makefile.in at /tmp/src/remake/src/Makefile:263
+  #1  Makefile at /tmp/src/remake/src/Makefile:276
+mdb<1> 
+@end group
+@end smallexample 
+
+No, we were triggered by checking dependencies from Makefile. And that
+was triggered by checking dependencies of ``all.'' (There's a bug in
+our debugger currently in that it doesn't show ``all.''). 
+
+Notice that the prompt now lists ``1'' since we entered a command.
+
+We can use the @code{step} command, (@ref{Step}), to progress a little
+in the interpretation or execution of the makefile:
+@smallexample
+@group
+mdb<1> @b{step}
+
+(/tmp/src/remake/src/Makefile:290)
+../aclocal.m4: ../config/readline.m4 ../gettext.m4 ../iconv.m4 ../lib-ld.m4 ../lib-link.m4 ../lib-prefix.m4 ../progtest.m4 ../acinclude.m4 ../configure.ac
+mdb<2> @b{where}
+
+=>#0  ../aclocal.m4 at /tmp/remake/src/Makefile:290
+  #1  Makefile.in at /tmp/remake/src/Makefile:263
+  #2  Makefile at /tmp/remake/src/Makefile:276
+@end group
+@end smallexample 
+
+Before the prompt the debugger printed some information about the
+target, namely its name and dependencies. However if you want the full
+details about a target, one can use the @code{target} (@ref{Target}
+command:
+@smallexample
+@group
+mdb<3> @b{target}
+
+../aclocal.m4: ../config/readline.m4 ../gettext.m4 ../iconv.m4 ../lib-ld.m4 ../lib-link.m4 ../lib-prefix.m4 ../progtest.m4 ../acinclude.m4 ../configure.ac
+#  Implicit rule search has not been done.
+#  Implicit/static pattern stem: `'
+#  Last modified 2005-12-10 21:41:10
+#  File has not been updated.
+# automatic
+# @ := ../aclocal.m4
+# automatic
+# % := 
+# automatic
+# * := 
+# automatic
+# + := ../config/readline.m4 ../gettext.m4 ../iconv.m4 ../lib-ld.m4 ../lib-link.m4 ../lib-prefix.m4 ../progtest.m4 ../acinclude.m4 ../configure.ac
+# automatic
+# | := 
+# automatic
+# < := ../config/readline.m4
+# automatic
+# ^ := ../config/readline.m4 ../gettext.m4 ../iconv.m4 ../lib-ld.m4 ../lib-link.m4 ../lib-prefix.m4 ../progtest.m4 ../acinclude.m4 ../configure.ac
+# automatic
+# ? := 
+#  commands to execute (from `Makefile', line 291):
+	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+@end group
+@end smallexample 
+
+I could have gotten the same output explicitly giving a target name
+such as @code{target ../aclocal.m4}, or used the @value{MAKE}
+automatic variable name @code{@@}.
+
+What is going on here is we are checking to see if the Makefile needs
+to be remade, and in doing this we need to see if Makefile.in needs
+to be remade and that depends on target @code{../aclocal.m4}. 
+
+We don't have to be stopped on a target to get information about it:
+
+@smallexample
+mdb<4> @b{target all-am}
+
+target all-am
+
+all-am: Makefile make loadavg ar_fns.h arscan.h commands.h dbg_break.h dbg_cmd.h dbg_fns.h dbg_stack.h debug.h default.h dep.h dir_fns.h expand.h file.h function.h gettext.h hash.h implicit.h job.h make.h misc.h print.h read.h remake.h remote-stub.h rule.h trace.h types.h variable.h vpath.h
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  Implicit/static pattern stem: `'
+#  File does not exist.
+#  File has not been updated.
+# automatic
+# @ := all-am
+# automatic
+# % := 
+# automatic
+# * := 
+# automatic
+# + := Makefile make loadavg ar_fns.h arscan.h commands.h dbg_break.h dbg_cmd.h dbg_fns.h dbg_stack.h debug.h default.h dep.h dir_fns.h expand.h file.h function.h gettext.h hash.h implicit.h job.h make.h misc.h print.h read.h remake.h remote-stub.h rule.h trace.h types.h variable.h vpath.h
+# automatic
+# | := 
+# automatic
+# < := all-am
+# automatic
+# ^ := Makefile make loadavg ar_fns.h arscan.h commands.h dbg_break.h dbg_cmd.h dbg_fns.h dbg_stack.h debug.h default.h dep.h dir_fns.h expand.h file.h function.h gettext.h hash.h implicit.h job.h make.h misc.h print.h read.h remake.h remote-stub.h rule.h trace.h types.h variable.h vpath.h
+# automatic
+# ? := 
+mdb<5> 
+@end smallexample 
+
+However information may change depending on where Make is. In
+particular note that ``Implicit rule search has not been done.''
+
+If all of this is proceeding too slowly, could set a
+@code{breakpoint} on a target of interest, perhaps @code{all-am}. Like
+this:
+
+@smallexample
+mdb<4> @b{restart}
+Changing directory to /tmp/remake/src and restarting...
+Reading makefiles...
+
+
+/tmp/remake/src/Makefile:255: Makefile.in
+mdb<0> @b{break all-am}
+Breakpoint on target all-am set.
+@end smallexample 
+
+The @code{restart} command was used to restart execution since we've
+already passed considering the "all-am" target. So let's
+@code{continue}, (@ref{Continue}), execution and see what happens:
+
+@smallexample
+
+mdb<1> @b{continue}
+Updating goal targets....
+ /tmp/remake/src/Makefile:250	File `all' does not exist.
+
+/tmp/remake/src/Makefile:461: all-am
+mdb<2> where
+
+=>#0  all-am at /tmp/src/remake/src/Makefile:472
+  #1  all at /tmp/src/remake/src/Makefile:259
+@end smallexample 
+
+@node Debugging Variables
+@subsection Debugging Variables
+
+We've seen we can get information about @value{REMAKE}'s targets.  We
+can also get information about @value{REMAKE}'s variables. That is done
+with the @code{print} command. (See @ref{Print}.)
+
+@smallexample
+  mdb<4> @b{print MAKE}
+  (origin default) MAKE = $(MAKE_COMMAND)
+@end smallexample 
+
+The @code{(origin default)} means this is a built-in
+definition. There is another print which does full expansion
+of the variables. So if I run @code{x} (@code{examine}) instead I get:
+
+@smallexample
+  mdb<5> @b{examine MAKE}
+ (origin default) MAKE := /tmp/remake/src/./make
+@end smallexample 
+
+Note that in printing expanded values we use ``:='' while non-expanded
+values we use ``=''. This output matches the semantics of these
+assignment operators.
+
+In fact, @code{examine} doesn't need a variable name, it will work
+with a string. So I could type ``@code{x This is $(MAKE)}'' or
+``@code{x $(bin_PROGRAMS) $(noinst_PROGRAMS)}''. For the latter, I
+get:
+
+@smallexample
+  mdb<6> @b{x $(bin_PROGRAMS) $(noinst_PROGRAMS)}
+  make loadavg
+@end smallexample 
+
+No location identification is given here since what I put in
+isn't a variable.
+
+But I can also @emph{change} values too using either @code{set} or
+@code{setq}. (See @ref{set variable} and @ref{setq}.) Let's see the difference
+between the two.
+
+@smallexample
+  mdb<7> @b{set MAKE $(MAKE_COMMAND)}
+  Variable MAKE now has value '/tmp/remake/src/./make'
+  mdb<8> @b{setq MAKE $(MAKE_COMMAND)}
+  Variable MAKE now has value '$(MAKE_COMMAND)'
+@end smallexample 
+
+So with @code{set}, the value in the expression @code{$(MAKE_COMMAND)}
+is expanded before the variable definition is assigned. With
+@code{setq}, @xref{setq}, the internal variables are kept
+unexpanded. Which you use or want is up to you.
+
+Note the irregular syntax of @code{set} and @code{"setq}. Don't put an
+equal sign (@code{=}) between the variable and the expression. That
+is, @code{set MAKE = $(MAKE_COMMAND)}" gives:
+
+@smallexample
+  Variable MAKE now has value '= /tmp/remake/src/./make'
+@end smallexample 
+
+which is probably not what you want.  One may optionally put in the 
+the word "variable" when using @code{set}, one must not supply
+it with "setq."  Down the line, someone (maybe @emph{you!}) will
+probably put in a command parser.  
+
+@node Debugging Commands
+@subsection Debugging Commands
+
+Now consider the following sample Makefile:
+@smallexample
+@group
+$ @b{cat -n test2}
+1 PACKAGE=make
+2 
+3 all: $(PACKAGE).txt
+4 
+5 $(PACKAGE).txt: ../doc/mdb.texi
+6 	makeinfo --no-headers $< > $@
+@end group
+@end smallexample
+
+@smallexample
+@group
+$ @b{remake -X -f test2}
+Reading makefiles...
+Updating goal targets....
+ /tmp/remake/src/test2:3	File `all' does not exist.
+
+(/tmp/remake/src/test2:3): all
+@end group
+@end smallexample
+
+As before we'll use the @code{target} command to show information about
+@code{all}:
+@smallexample
+@group
+mdb<0> @b{target}
+
+all: make.txt
+#  Implicit rule search has not been done.
+#  Implicit/static pattern stem: `'
+#  File does not exist.
+#  File has not been updated.
+# automatic
+# @@ := all
+# automatic
+# % := 
+# automatic
+# * := 
+# automatic
+# + := make.txt
+# automatic
+# | := 
+# automatic
+# < := all
+# automatic
+# ^ := make.txt
+# automatic
+# ? := 
+@end group
+@end smallexample
+
+When asking about target information on line 3, we now see that a
+number of automatic variables have been set. We can also get
+information about just these variables using the command @code{target
+all variables} or @code{info locals}:
+
+@smallexample
+@group
+mdb<1> @b{info locals}
+@@ := all
+% := 
+* := 
++ := make.txt
+| := 
+< := all
+^ := make.txt
+? := 
+@end group
+@end smallexample
+
+The target ``all'' doesn't have any commands associated with it. If we
+@code{next} to a target that does, we can see a full expansion of the
+command that is about to be run:
+
+@smallexample
+@group
+mdb<2> @b{next}
+
+   /tmp/remake/src/test2:5	File `make.txt' does not exist.
+
+(/tmp/remake/src/test2:5): make.txt
+mdb<3> @b{target make.txt commands}
+
+make.txt:
+#  commands to execute (from `test2', line 6):
+	makeinfo --no-headers $< > $@@
+
+mdb<4> @b{examine makeinfo --no-headers $< > $@@}
+makeinfo --no-headers ../doc/mdb.texi > make.txt
+
+@end group
+@end smallexample
+
+Another way to do the above @code{target} and @code{examine} commands
+in one go is ito use the ``expand'' option on the @code{target} command
+rather than the ``commands'' option:
+
+@smallexample
+@group
+mdb<5> @b{target @@ expand}
+
+make.txt:
+#  commands to execute (from `test2', line 6):
+	-makeinfo --no-headers $< > $@
+	
+#  commands to execute (from `test2', line 6):
+	-makeinfo --no-headers ../doc/mdb.texi > make.txt
+	
+@end group
+@end smallexample
+
+Notice instead of giving the target name @code{make.txt}, @code{@@}
+works as well. 
+
+Now if we want to write out those commands as a shell script which
+we might want to execute, we can use the @code{write} (@ref{Write})
+command:
+@smallexample
+@group
+(/tmp/remake/src/test2:6): make.txt
+mdb<6> @b{write}
+File "/tmp/make.txt.sh" written.
+mdb<7> @b{shell cat -n /tmp/make.txt.sh}
+     1	#!/bin/sh
+     2	#/tmp/remake/src/test2:5
+     3	makeinfo --no-headers ../doc/mdb.texi > make.txt
+     4	
+@end group
+@end smallexample
+
+And last we see that we can even issue a shell command (@code{cat -n
+/tmp/make.txt.sh}) via the debugger command @code{shell}. (See
+@ref{Shell}.)
+
+@node Free Software
+@unnumberedsec Free software
+
+@value{DBG} is @dfn{free software}, protected by the @sc{gnu}
+General Public License
+(GPL).  The GPL gives you the freedom to copy or adapt a licensed
+program---but every person getting a copy also gets with it the
+freedom to modify that copy (which means that they must get access to
+the source code), and the freedom to distribute further copies.
+Typical software companies use copyrights to limit your freedoms; the
+Free Software Foundation uses the GPL to preserve these freedoms.
+
+Fundamentally, the General Public License is a license which says that
+you have these freedoms and that you cannot take these freedoms away
+from anyone else.
+
+@unnumberedsec Free Software Needs Free Documentation
+
+The biggest deficiency in the free software community today is not in
+the software---it is the lack of good free documentation that we can
+include with the free software.  Many of our most important
+programs do not come with free reference manuals and free introductory
+texts.  Documentation is an essential part of any software package;
+when an important free software package does not come with a free
+manual and a free tutorial, that is a major gap.  We have many such
+gaps today.
+
+Consider Perl, for instance.  The tutorial manuals that people
+normally use are non-free.  How did this come about?  Because the
+authors of those manuals published them with restrictive terms---no
+copying, no modification, source files not available---which exclude
+them from the free software world.
+
+That wasn't the first time this sort of thing happened, and it was far
+from the last.  Many times we have heard a GNU user eagerly describe a
+manual that he is writing, his intended contribution to the community,
+only to learn that he had ruined everything by signing a publication
+contract to make it non-free.
+
+Free documentation, like free software, is a matter of freedom, not
+price.  The problem with the non-free manual is not that publishers
+charge a price for printed copies---that in itself is fine.  (The Free
+Software Foundation sells printed copies of manuals, too.)  The
+problem is the restrictions on the use of the manual.  Free manuals
+are available in source code form, and give you permission to copy and
+modify.  Non-free manuals do not allow this.
+
+The criteria of freedom for a free manual are roughly the same as for
+free software.  Redistribution (including the normal kinds of
+commercial redistribution) must be permitted, so that the manual can
+accompany every copy of the program, both on-line and on paper.
+
+Permission for modification of the technical content is crucial too.
+When people modify the software, adding or changing features, if they
+are conscientious they will change the manual too---so they can
+provide accurate and clear documentation for the modified program.  A
+manual that leaves you no choice but to write a new manual to document
+a changed version of the program is not really available to our
+community.
+
+Some kinds of limits on the way modification is handled are
+acceptable.  For example, requirements to preserve the original
+author's copyright notice, the distribution terms, or the list of
+authors, are ok.  It is also no problem to require modified versions
+to include notice that they were modified.  Even entire sections that
+may not be deleted or changed are acceptable, as long as they deal
+with nontechnical topics (like this one).  These kinds of restrictions
+are acceptable because they don't obstruct the community's normal use
+of the manual.
+
+However, it must be possible to modify all the @emph{technical}
+content of the manual, and then distribute the result in all the usual
+media, through all the usual channels.  Otherwise, the restrictions
+obstruct the use of the manual, it is not free, and we need another
+manual to replace it.
+
+Please spread the word about this issue.  Our community continues to
+lose manuals to proprietary publishing.  If we spread the word that
+free software needs free reference manuals and free tutorials, perhaps
+the next person who wants to contribute by writing documentation will
+realize, before it is too late, that only free manuals contribute to
+the free software community.
+
+If you are writing documentation, please insist on publishing it under
+the GNU Free Documentation License or another free documentation
+license.  Remember that this decision requires your approval---you
+don't have to let the publisher decide.  Some commercial publishers
+will use a free license if you insist, but they will not propose the
+option; it is up to you to raise the issue and say firmly that this is
+what you want.  If the publisher you are dealing with refuses, please
+try other publishers.  If you're not sure whether a proposed license
+is free, write to @email{licensing@@gnu.org}.
+
+You can encourage commercial publishers to sell more free, copylefted
+manuals and tutorials by buying them, and particularly by buying
+copies from the publishers that paid for their writing or for major
+improvements.  Meanwhile, try to avoid buying non-free documentation
+at all.  Check the distribution terms of a manual before you buy it,
+and insist that whoever seeks your business must respect your freedom.
+Check the history of the book, and try to reward the publishers that
+have paid or pay the authors to work on it.
+
+The Free Software Foundation maintains a list of free documentation
+published by other publishers, at
+@url{http://www.fsf.org/doc/other-free-books.html}.
+
+@node Invocation
+@chapter Getting in and out and new @value{REMAKE} Command Options
+
+This chapter discusses how to start @value{DBG}, and how to get out of it.
+The essentials are:
+@itemize @bullet
+@item
+type @samp{make --debugger @emph{make options}} to start @value{DBG}.
+@item
+and type @kbd{quit} or @kbd{C-d} inside the debugger to exit.
+@end itemize
+
+You don't have to use the command-line interface. At present there is
+a front-end available via GNU Emacs which can be entered
+via the Emacs command @code{M-x mdb} after loading Emacs' Grand
+Unified Debugger, @code{gud}. See @ref{Emacs,,Using @value{DBG} from
+@sc{gnu} Emacs}. In the future there may be support in a @value{DDD}
+as well.
+
+@menu
+* Starting the GNU Make debugger::    How to enter the @value{DBG}
+* Quitting the GNU Make debugger::    How to leave the @value{DBG}
+@end menu
+@menu
+@end menu
+
+
+@node Starting the GNU Make debugger
+@section Starting the GNU Make debugger
+
+@emph{Note: it is important to use a debugger-enabled GNU Make. You will
+get usage help output if a patched GNU Make is not used.}
+
+As mentioned above, one can enter @value{DBG} via Emacs (and perhaps
+later DDD). However you don't have to use either of these. And these still
+need a way on their own to get things started.
+
+The enter @value{DBG} from a command line, use the @samp{--debugger}
+or it's short form @samp{-X} option:
+
+@example
+make --debugger @var{other-make-arguments...}
+make -X @var{other-make-arguments...}
+@end example
+
+This runs @value{REMAKE} as it would normally do; that is Makefiles are
+read and dependencies are checked. However it is in a ``stepping''
+mode and will go into the debugger read loop when before encounter in
+``interesting'' target. An ``interesting'' target is one that has
+commands associated with it to rebuild the target.
+
+A suboption to the @code{--debugger} (or @code{-X}) option specifies
+under what conditions to enter the debugger; it is specified by
+putting an equals sign (`=') and then the suboption; for example:
+
+@example
+make -X=preread @var{other-make-arguments...}
+@end example
+
+Here is a full list of debugger options and suboptions...
+
+@table @code
+@item --debugger @ovar{preread | preaction | full | error | fatal}
+@itemx -X @ovar{preread | preaction | full | error | fatal}
+@cindex @code{-X}
+The ``preread'' suboption enters the debugger after command-line
+options are parsed but before any Makefiles have been read. It also
+puts @value{REMAKE} in step tracing mode and sets the debugger to enter
+if it encounters an error.
+
+The ``preaction suboption enters the debugger after command-line
+options are parsed and after Makefiles have been read, but before any
+action is performed. It also puts @value{REMAKE} in step tracing mode
+and sets the debugger to enter if it encounters an error.
+
+The ``error'' suboption enters the debugger when it encounters an
+error. Depending on other conditions, @value{REMAKE} can ignore errors
+and continue processing. 
+
+The ``fatal'' suboption enters the debugger when it encounters a fatal
+error. A fatal error generally cause @value{REMAKE} to abort execution.
+
+The ``full'' suboption is just a convenience for giving the ``enter,''
+``error,'' and ``fatal'' options described above.
+execution.
+
+If no suboption is provided, ``full'' is assumed.
+
+@item --no-extended-errors
+This option causes @value{REMAKE} to @emph{not} print a target stack
+trace if it encounters an error.
+
+@item --trace @ovar{=suboption}
+@itemx -x
+@cindex @code{-x}
+Causes target names which have commands associated with them to get
+printed before they are considered. If a target has multiple commands
+each one is printed before they are run whether or not the command has
+the @value{REMAKE} @@ specifier which would otherwise cause them not to
+echo. 
+
+This option also allows for suboptions, @code{read}, @code{normal},
+and @code{full}. The default is @code{normal}; @code{read} adds
+tracing as Makefiles are read.
+
+tracing is independent of the @code{--debugger} option and can be used
+in conjunction with it. Inside the debugger one can have the same
+effect by issuing the debugger @code{set trace on} command.
+
+@end table
+
+@node Quitting the GNU Make debugger
+@section Quitting the GNU Make debugger
+
+@cindex interrupt
+An interrupt (often @kbd{C-c}) does not exit from @value{DBG}, but
+rather terminates the action of any @value{DBG} command that is in
+progress and returns to @value{DBG} command level.  Inside a debugger
+command interpreter, use @code{quit} command (@pxref{Quit, ,Quitting
+the Make debugger}).
+
+@node Debugger Command Reference
+@chapter @value{REMAKE} Debugger Command Reference
+
+You can abbreviate the long name of @value{DBG} command to the first
+few letters of the command name, if that abbreviation is unambiguous;
+and you can repeat the @code{next} o r@code{step} commands by typing
+just @key{RET}. Some commands which require a parameter, such as 
+@code{print} remember the argument that was given to them. 
+
+@menu
+* Command Syntax::       How to give commands to the @value{DBG}
+* Help::                 How to ask for help (help)
+* Quit::                 Leaving the debugger (quit)
+* Stopping::             Stopping and continuing (break, watch, step, cont...)
+* Information::          Status and Debugger settings (info, show)
+* Stack::                Examining the stack (where, up, down, frame)
+* Data::                 Examining data (print, target, examine, info variables)
+* Evaluation/Execution:: Arbitrary execution (eval, shell)
+* Controlling Make::     Controlling make (annotate, file, prompt...)
+@end menu
+
+@node Command Syntax
+@section Command syntax
+
+A @value{REMAKE} debugger command is a single line of input.  There is
+no limit on how long it can be.  It starts with a command name, which
+is followed by arguments whose meaning depends on the command name.
+For example, the command @code{step} accepts an argument which is the
+number of times to step, as in @samp{step 5}.  You can also use the
+@code{step} command with no arguments.  Some commands do not allow any
+arguments. In commands that have attributes, the attribute can be
+abbreviated to the minimum string that makes it unique. For example
+``commands''in @code{target all commands} can be shortened to
+``command'' or ``com'' or just ``c''.
+
+@cindex repeating next/step commands
+@kindex RET @r{(repeat last command)}
+A blank line as input to @value{DBG} (typing just @key{RET}) means to
+repeat the previous next or step command.  
+
+@kindex # @r{(a comment)}
+@cindex comment
+Any text from a @kbd{#} to the end of the line is a comment; it does
+nothing.  This is useful mainly in command files 
+
+@node Help
+@section Getting help (@samp{help})
+@cindex on-line documentation
+
+Once inside the debugger, you can always ask it for information on its
+commands, using the command @code{help}.
+
+@table @code
+@kindex h @r{(@code{help})}
+@item help
+@itemx h
+You can use @code{help} (abbreviated @code{h}) with no arguments to
+display a short list of named classes of commands:
+@end table 
+
+@flushleft
+@smallexample
+mdb<0> @b{help}
+  Command                  Short Name  Aliases
+  ----------------------   ----------  ---------
+  break *target*                  (b)  L
+  comment *text*                  (#)
+  continue                        (c)
+  delete breakpoint numbers..     (d)
+  down [amount]                   (D)
+  eval *string*                   (e)
+  examine *string*                (x)
+  finish                          (F)
+  frame *n*                       (f)
+  help [command]                  (h)  ?, ??
+  info [thing]                    (i)
+  next [amount]                   (n)
+  print @{*variable* [attrs...]@}   (p)
+  quit [exit-status]              (q)  exit, return
+  run                             (R)  restart
+  set @{*option*|variable@} *value* (=)
+  setq *variable* *value*         (")
+  shell *string*                  (!)  !!
+  show [thing]                    (S)
+  skip                            (k)
+  step [amount]                   (s)
+  target                          (t)
+  up [amount]                     (u)
+  where                           (T)  backtrace, bt
+  write [*target* [*filename*]]   (w)
+
+Readline command line editing (emacs/vi mode) is available.
+For more detailed help, type h <cmd> or consult online-documentation.
+@end smallexample
+@end flushleft
+@c the above line break eliminates huge line overfull...
+
+@table @code
+@item help @var{command}
+With a command name as @code{help} argument, @value{REMAKE} displays 
+short information on how to use that command.
+
+@example
+mdb<3> @b{help where}
+  where:
+	Show target stack.
+@end example
+
+In addition to @code{help}, you can use the debugger command
+@code{info} to inquire about the state of your script, or the state of
+@value{DBG} itself.  The listings under @code{info} in the Index
+point to all the sub-commands.  @xref{Command Index}.
+@end table
+
+@c @group
+@table @code
+@kindex info
+@kindex i @r{(@code{info})}
+@item info
+This command (abbreviated @code{i}) is for describing the state of
+your program.  For example, you can list the arguments given to your
+script with @code{info args}.  You can get a complete list of the
+@code{info} sub-commands with @w{@code{help info}}.
+
+@example
+mdb<0> @b{help info}
+  info [thing]:
+	Show the state of thing.
+	If no 'thing' is specified, show everything there is to show.
+
+	Available info subcommands are:
+	 line locals makefiles target variables warranty
+@end example
+@end table
+
+Subcommands can be abbreviated with the minimum number of letters to
+make that subcommand distinct from another. For example @code{info lo}
+is the same as @code{info locals} and @code{info li} is the same as
+@code{info line}.
+
+@table @code
+@kindex info line
+@item info line
+Shows the line number and file of for the place that you are currently
+stopped.
+
+@kindex info locals
+@item info locals
+Displays a the values of the automatic variables.
+
+@kindex info makefiles
+@item info makefiles
+Displays the list of Makefiles read in the order that they were read
+in. The last Makefile listed is the one you started with (e.g. Makefile).
+
+@kindex info target
+@item info target
+Displays target information.
+
+@kindex info warranty
+@item info warranty
+Displays GNU Warranty
+
+@end table
+
+@node Quit
+@section Quitting @value{DBG} (@samp{quit})
+
+@table @code
+@kindex quit @r{[}@var{return-code}@r{]}
+@kindex q @r{(@code{quit})}
+@item quit @ovar{return-code}
+@itemx q  @r{[}@var{return-code}@r{]}
+
+To exit @value{DBG}, use the @code{quit} command (abbreviated
+@code{q}), or type an end-of-file character (usually @kbd{C-d}).  If
+you do not supply @var{return-code}, @value{DBG} will terminate
+normally or with exit code 0. Otherwise it use the value of the 
+@var{return-code} as the exit code. Usually a 0 exit is a normal exit.
+
+Often when running @value{REMAKE}, a recursive call is made or made in
+another directory. The @code{quit} only terminates only the last one:
+the one that the debugger is in. @value{dBG} arranges for the debug
+flags to get passed down in recursive calls. Consequently when you
+quit one of the inner make calls, you may find yourself still in the
+debugger but up a call level.
+
+@end table
+
+@node Stopping
+@section Stopping and Resuming Execution
+
+One important use of a debugger is to stop execution before it gets
+into trouble, so you can investigate and find out what is going
+on. However should @value{REMAKE} accidentally continue to termination,
+@value{DBG} has arranged for it not to leave the debugger without your
+explicit instruction. That way, you can restart the program using the
+same command arguments.
+
+Inside @value{DBG}, your script may stop for any of several reasons,
+such as a signal, a breakpoint, or reaching a new line after a
+debugger command such as @code{step}.  You may then examine and
+change variables, set new breakpoints or remove old ones, and then
+continue execution.  
+
+@menu
+* Breakpoints::          Breakpoints, watchpoints (break, clear)
+* Resuming Execution::   Resuming execution (continue, step, next, skip)
+* Signals::              Signals
+@end menu
+
+@node Breakpoints
+@subsection Breakpoints
+
+@cindex breakpoints
+A @dfn{breakpoint} arranges for @value{REMAKE} to stop whenever a
+certain point in the Makefile is reached.  
+
+You can set breakpoints with the @code{break} command and its variants
+(@pxref{Set Breaks, ,Setting breakpoints}), to specify the place where
+your script should stop by target name.
+
+@menu
+* Set Breaks::                      Setting breakpoints (break)
+* Delete Breaks::                   Deleting breakpoints (delete, clear)
+@end menu
+
+@node Set Breaks
+@subsubsection Setting breakpoints (@samp{break})
+
+@kindex break
+@kindex b @r{(@code{break})}
+@cindex latest breakpoint
+Breakpoints are set with the @code{break} command (abbreviated
+@code{b}).  
+
+@table @code
+@item break @var{target}
+Set a breakpoint at @var{target} in the current Makefile.
+@end table
+
+Examples:
+@example
+mdb<0> @b{break all}
+
+Breakpoint on target all set.
+@end example
+
+@node Delete Breaks
+@subsubsection Deleting breakpoints (@samp{delete})
+
+@cindex deleting breakpoints
+It may be desirable to eliminate a breakpoint once it
+has done its job and you no longer want stop there.
+This is called @dfn{deleting} the breakpoint.  A breakpoint that has
+been deleted no longer exists; it is forgotten.
+
+It is not necessary to delete a breakpoint to proceed past it.  @DBG
+automatically ignores breakpoints on the first instruction to be executed
+when you continue execution.
+
+@table @code
+
+@cindex delete breakpoints
+@kindex delete
+@kindex d @r{(@code{delete})}
+@item delete @var{breakpoint-number}...
+Delete the breakpoints by breakpoint-number specified as arguments. 
+
+@end table
+
+@node Resuming Execution
+@subsection Resuming Execution
+
+@cindex stepping
+@cindex continuing
+@cindex resuming execution
+@dfn{Continuing} means resuming program execution until your script
+completes normally.  In contrast, @dfn{stepping} means executing just
+one more ``step'' of your script, where ``step'' may mean either one
+line of source code.  Either when continuing or when stepping,
+your script may stop even sooner, due to a breakpoint or a signal.
+
+@menu
+* Next::          running the next statement (next)
+* Step::          running the next statement in small increments (step)
+* Skip::          skipping the next statement (skip)
+* Continue::      continuing execution (continue)
+@end menu
+
+@node Next
+@subsubsection Next (@samp{next})
+@table @code
+@kindex step
+@kindex s @r{(@code{next})}
+@item next
+Continue processing your Makefile until control reaches a different
+interesting source line, then stop it and return control to
+@value{DBG}.  This command is abbreviated @code{n}. 
+
+@item next @ovar{count}
+Continue running as in @code{next}, but do so @var{count} times.  If a
+breakpoint is reached, or a signal not related to stepping occurs before
+@var{count} steps, stepping stops right away.
+@end table
+
+@node Step
+@subsubsection Step (@samp{step})
+@table @code
+@kindex step
+@kindex s @r{(@code{step})}
+@item step
+Stepping is like @code{next} but it is more fine-grained. It will stop
+at every target that needs to be remade whether or not there are
+commands associated with it.
+
+If there are multiple commands associated with a target @code{step}
+will stop before each one.
+
+@item step @ovar{count}
+Continue running as in @code{step}, but do so @var{count} times.  If a
+breakpoint is reached, or a signal not related to stepping occurs before
+@var{count} steps, stepping stops right away.
+@end table
+
+@node Skip
+@subsubsection Skip (@samp{skip})
+@table @code
+@kindex skip
+@item skip @ovar{count}
+Skip executing the remaining commands of the target you are stopped at.
+This may be useful if you have an action that ``fixes'' existing code in
+a Makefile. 
+@end table
+
+@node Continue
+@subsubsection Continue (@samp{continue})
+@table @code
+@kindex continue
+@kindex c @r{(@code{continue})}
+Resume program execution, at the address where your script last
+stopped; any breakpoints set at that address are bypassed.  
+@end table
+
+@node Signals
+@subsection Signals
+@cindex signals
+
+A signal is an asynchronous event that can happen in a program.  The
+operating system defines the possible kinds of signals, and gives each
+kind a name and a number.  For example, in Unix @code{SIGINT} is the
+signal a program gets when you type an interrupt character (often
+@kbd{C-c}); @code{SIGALRM} occurs when the alarm clock timer goes off
+(which happens only if your program has requested an alarm).
+
+@value{REMAKE} sets up some signal handlers of children it spawns.  When
+we are running under the debugger when and we get a signal the
+debugger read loop is entered.
+
+@cindex fatal signals
+Some signals, including @code{SIGALRM}, are a normal part of the
+functioning of your program.  Others, such as @code{SIGSEGV}, indicate
+errors; these signals are @dfn{fatal} (they kill your program
+immediately) if the program has not specified in advance some other
+way to handle the signal.  @code{SIGINT} does not indicate an error in
+your program, but it is normally fatal so it can carry out the purpose
+of the interrupt: to kill the program.
+
+@node Information
+@section Status and Debugger Settings (@samp{info}, @samp{show}, @samp{set})
+
+In addition to @code{help}, you can use @value{DBG} commands
+@code{info} and @code{show} to inquire about the state of your
+program, or the state of @value{REMAKE} itself.  Each command supports
+many topics of inquiry; here we introduce each of them in the
+appropriate context.  The listings under @code{info} in the Index
+point to all the sub-commands.  @xref{Command Index}.
+
+@c @group
+@table @code
+@kindex info
+@kindex i @r{(@code{info})}
+@item info
+This command (abbreviated @code{i}) is for describing the state of
+your debugger setting.  For example, you can show whether @value{REMAKE}
+has set to ignore errors or not. 
+
+@kindex set
+@item set
+In addition to showing @value{REMAKE} settings you can change them or
+change @value{REMAKE} variables with @code{set}.  For example, you can
+change setting @value{REMAKE} has whether to ignore errors.
+
+@kindex show
+@item show
+In contrast to @code{info}, @code{show} is for describing the state of
+@value{REMAKE} itself.
+You can change most of the things you can @code{show}, by using the
+related command @code{set}; 
+
+The distinction between @code{info} and @code{show} however is a bit
+fuzzy and is kept here to try to follow the GDB interface.
+
+@kindex info set
+To display all the settable parameters and their current
+values, you can use @code{show} with no arguments; you may also use
+@code{info set}.  Both commands produce the same display.
+@c FIXME: "info set" violates the rule that "info" is for state of
+@c FIXME...program.  Ck w/ GNU: "info set" to be called something else,
+@c FIXME...or change desc of rule---eg "state of prog and debugging session"?
+@end table
+@c @end group
+
+Here are force miscellaneous @code{show} subcommands, all of which are
+exceptional in lacking corresponding @code{set} commands:
+
+@table @code
+@kindex show command
+@cindex history
+@item show command
+Shows the list of commands previously entered
+
+@kindex show version
+@cindex version number
+@item show version
+Show what version of @value{REMAKE} is running.  You should include this
+information in @value{DBG} bug-reports.  If multiple versions of
+@value{REMAKE} are in use at your site, you may need to determine which
+version you are running; as @value{DBG} evolves, new commands are
+introduced, and old ones may wither away. The version number is the
+same as the one announced when you start @value{REMAKE}.
+
+@kindex show warranty
+@item show warranty
+Display the @sc{gnu} ``NO WARRANTY'' statement, or a warranty,
+if your version of @value{DBG} comes with one.
+
+@end table
+
+@node Stack
+@section Examining the Stack (@samp{where}, @samp{frame}, @samp{up}, @samp{down})
+
+When you enter the debugger, one thing you'll probably want to know is
+where it stopped and some idea of how it got there.
+
+@cindex target stack
+Each time your Makefile performs dependency checking (sometimes as
+implicit rules or pattern-substitution rules), information about the
+target that caused the new target to be considered action is saved on
+a stack.  This target call stack then is this a history of the
+dependency checks that got you to the point that you are currently
+stopped at.
+
+@cindex selected frame
+One of the stack frames is @dfn{selected} by @value{DBG} and many
+@value{DBG} commands refer implicitly to the selected frame.  In
+particular, whenever you ask @value{DBG} to list lines without giving
+a line number or location the value is found in the selected frame.
+There are special @value{DBG} commands to select whichever frame you
+are interested in. @xref{Selection, ,Selecting a frame}.
+
+When your program stops, @value{DBG} automatically selects the
+currently executing frame and describes it briefly, similar to the
+@code{frame} command.
+
+
+@menu
+* Frames::                      Stack frames
+* Backtrace::                   Backtraces (where)
+* Selection::                   Selecting a frame (up, down, frame)
+
+@end menu
+
+@node Frames
+@subsection Stack frames
+
+@cindex frame, definition
+@cindex target stack frame
+The target stack is divided up into contiguous pieces called
+@dfn{stack frames}, or @dfn{frames} for short. The frame contains the
+line number of the target which triggered the next one to be
+considered, the Makefile file name that the line in that refers to a
+target name. When some of this information is be missing you may see a
+filename shown as ``null'' or have line number 0.
+
+@cindex initial frame
+@cindex outermost frame
+@cindex innermost frame
+When your script is started, the stack has only one frame, that of the
+function @code{main}.  This is called the @dfn{initial} frame or the
+@dfn{outermost} frame.  Each time a function is called, a new frame is
+made.  Each time a function returns, the frame for that function invocation
+is eliminated.  If a function is recursive, there can be many frames for
+the same function.  The frame for the function in which execution is
+actually occurring is called the @dfn{innermost} frame.  This is the most
+recently created of all the stack frames that still exist.
+
+@cindex frame number
+@value{DBG} assigns numbers to all existing stack frames, starting with
+zero for the innermost frame, one for the frame that called it,
+and so on upward.  These numbers do not really exist in your script;
+they are assigned by @value{DBG} to give you a way of designating stack
+frames in @value{DBG} commands.
+
+@node Backtrace
+@subsection Backtraces (@samp{where})
+
+@cindex backtraces
+@cindex tracebacks
+@cindex stack traces
+A backtrace is essentially the same as the call stack: a summary of
+how your script got where it is.  It shows one line per frame, for
+many frames, starting with the place that you are stopped at (frame
+zero), followed by its caller (frame one), and on up the stack.
+
+If @value{REMAKE} is in the reading phase the backtrace shows the
+nesting of include files. If @value{REMAKE} is in the interpretation
+phase the backtrace shows the nesting of targets.
+
+@table @code
+@kindex backtrace
+@item where
+@itemx backtrace
+@itemx bt
+@itemx T
+If we are reading Makefiles, print a backtrace of the included
+Makefile stack. If we are evaluating the Makefile to bring targets up
+to date, print a backtrace of the target stack. In either case, we print
+line per frame.
+
+@item where @var{n}
+@itemx backtrace @var{n}
+@itemx bt @var{n}
+@itemx T @var{n}
+Similar, but print only the innermost @var{n} frames. A negative
+number prints the outermost @var{n} frames.
+
+@end table
+
+@kindex where
+
+Each line in the backtrace shows the frame number and the function
+name, the source file name and line number, as well as the function name.
+
+Here is an example of a backtrace taken a program in the
+regression-tests @file{parm.sh}.
+
+@smallexample
+@group
+@b{./make -X}
+
+/tmp/remake/src/Makefile:228: Makefile.in
+mdb<0> @b{step}
+
+/tmp/remake/src/Makefile:263: make
+mdb<1> @b{where}
+
+=>#0  make at /tmp/remake/src/Makefile:263
+  #1  all-am at /tmp/remake/src/Makefile:386
+  #2  all at /tmp/remake/src/Makefile:224
+
+@end group
+@end smallexample
+
+However if we have set debugging to stop before reading makefiles are
+we are in the reading phase, we show included Makefiles:
+
+@smallexample
+@group
+$ @b{./make --debugger=preread}
+Reading makefiles...
+Reading makefile `Makefile'...
+
+(/tmp/remake/src/Makefile:1)
+mdb<0> @b{step}
+/tmp/remake/src/Makefile:324
+	Reading makefile `.deps/alloca.Po' (search path) (no ~ expansion)...
+
+(/tmp/remake/src/.deps/alloca.Po:1)
+mdb<1> @b{where}
+
+=>#0  /tmp/remake/src/.deps/alloca.Po:1
+  #1  /tmp/remake/src/Makefile:324
+
+mdb<2> @b{next}
+/tmp/remake/src/Makefile:327
+	Reading makefile `.deps/getloadavg.Po' (search path) (no ~ expansion)...
+/tmp/remake/src/Makefile:328
+	Reading makefile `.deps/ar_fns.Po' (search path) (no ~ expansion)...
+/tmp/remake/src/Makefile:329
+
+... lots of lines deleted ...
+
+	Reading makefile `.deps/version.Po' (search path) (no ~ expansion)...
+/tmp/remake/src/Makefile:360
+	Reading makefile `.deps/vpath.Po' (search path) (no ~ expansion)...
+Updating goal targets....
+ /tmp/remake/src/Makefile:254	File `all' does not exist.
+
+(/tmp/remake/src/Makefile:254): all
+mdb<3> 
+@end group
+@end smallexample
+
+@noindent
+
+Note in the above @samp{step} goes on to the next read of a makefile
+while the @samp{next} command can be used to skip over all of the
+remaining reads.
+
+@node Selection
+@subsection Selecting a frame (@samp{up}, @samp{down}, @samp{frame})
+
+Commands for printing targets script work on whichever
+stack frame is selected at the moment.  Here are the commands for
+selecting a stack frame; all of them finish by printing a brief
+description of the stack frame just selected.
+
+@table @code
+@kindex up
+@item up @var{n}
+Move @var{n} frames up the stack.  For positive numbers @var{n}, this
+advances toward the outermost frame, to higher frame numbers, to frames
+that have existed longer.  @var{n} defaults to one.
+
+@kindex down
+@kindex do @r{(@code{down})}
+@item down @var{n}
+Move @var{n} frames down the stack.  For positive numbers @var{n}, this
+advances toward the innermost frame, to lower frame numbers, to frames
+that were created more recently.  @var{n} defaults to one.  You may
+abbreviate @code{down} as @code{do}.
+@end table
+
+All of these commands end by printing two lines of output describing the
+frame.  The first line shows the frame number, the function name, the
+arguments, and the source file and line number of execution in that
+frame.  The second line shows the text of that source line.
+
+@need 100
+For example:
+
+@smallexample
+@group
+mdb<8> @b{up}
+/tmp/remake/src/Makefile:386: all-am
+mdb<8> @b{T}
+  #0  make at /tmp/remake/src/Makefile:263
+=>#1  all-am at /tmp/remake/src/Makefile:386
+  #2  all at /tmp/remake/src/Makefile:224
+@end group
+@end smallexample
+
+@table @code
+@kindex frame
+@cindex current stack frame
+@item frame @var{args}
+The @code{frame} command allows you to move from one stack frame to
+another, and to print the stack frame you select.  @var{args} is the
+the stack frame number.  Without an argument, @code{frame} prints the
+current stack frame.
+@end table
+
+@node Data
+@section Examining Data
+
+@menu
+* Print::                  Print variable info
+* Examine::                Print a string expanded
+* Target::                 Print target Info
+* Write::                  Write commands of a target
+* Info Variables::         Print all variables
+@end menu
+
+@node Print
+@subsection Print variable info (@samp{print})
+
+@cindex printing data
+@cindex examining data
+@kindex print
+
+One way to examine variables the @code{print}
+command (abbreviated @code{p}). However a more versatile print command
+is @code{x}; it can print arbitrary string expands which of course
+includes variable.
+
+@table @code
+@kindex print
+@kindex p @r{(@code{print})}
+@item print @var{variable-name}
+
+Use @code{print} to display @value{REMAKE}'s variables. As such,
+variable names should @emph{not} be preceded with a dollar sign.
+
+@smallexample
+@group
+mdb<0> @b{print SHELL}
+Makefile:168 (origin: makefile) SHELL = /bin/sh
+
+/tmp/remake/Makefile:243: Makefile.in
+mdb<1> @b{print $MAKE}   # don't use $
+Can't find variable $MAKE
+
+/tmp/remake/Makefile:243: Makefile.in
+mdb<1> @b{print shell}   # note case is significant
+Can't find variable shell
+@end group
+@end smallexample
+
+
+@item print
+@itemx p
+
+If you omit @var{variable}, @value{DBG} displays the last expression again.
+@end table
+
+@node Examine
+@subsection Print a string expanded (@samp{examine})
+
+@table @code
+@item x @var{string}
+@kindex x @r{(@code{examine})}
+@kindex examine
+
+The @code{x} command expands the string given using @value{REMAKE}'s
+internal variables. The expansion would be the same as if the string
+were given as a command inside the target.
+
+@smallexample
+@group
+mdb<0> @b{examine MAKE}
+(origin default) MAKE := /tmp/remake/src/./make
+
+
+/tmp/remake/src/Makefile:264: Makefile.in
+
+mdb<1> @b{print MAKE}  # note the difference with the ``print''
+(origin default) MAKE = $(MAKE_COMMAND)
+
+mdb<2> @b{examine $(MAKE)}   # Note using $( ) doesn't matter here...
+/tmp/remake/src/./make          # except in output format - no origin info
+
+/tmp/remake/src/Makefile:264: Makefile.in
+
+mdb<2> @b{p COMPILE}
+Makefile:104 (origin: makefile) COMPILE := $(CC) $(DEFS) $(DEFAULT_INCLUDES) 
+
+/tmp/remake/src/Makefile:264: Makefile.in
+mdb<10> @b{x compile starts: $(CC) $(DEFS) $(DEFAULT_INCLUDES)}
+compile starts: gcc -DLOCALEDIR=\"\" -DLIBDIR=\"/usr/local/lib\" -DINCLUDEDIR=\"/usr/local/include\" -DHAVE_CONFIG_H -I. -I..
+
+@end group
+@end smallexample
+@end table
+
+@node Target
+@subsection Examining Targets (@samp{target})
+
+@value{DBG} can print information about targets.  When your script
+stops, @value{DBG} spontaneously prints the line and target name
+where it stopped.  Likewise, when you select a stack frame
+(@pxref{Selection, ,Selecting a frame}), @value{DBG} the default 
+target name is changed.
+
+@table @code
+@item target
+@itemx t
+print information about the current target.
+
+
+@item target @var{target}
+@itemx t @var{target}
+Print information about @var{target}. A list of attributes can be
+specified after the target name. The list of attributes names are 
+
+@table @kbd
+@item attributes
+Show the list of ``attributes'' associated with the target. Attributes
+can be:
+@itemize @bullet
+@item implicit rule search has been done
+@item phony: has no file associated with it
+@item precious: 
+@item a command-line target
+@end itemize
+
+@item commands
+Show the list of commands that need to get run in order to bring the
+target up to date.
+
+@item depends
+Show the targets that this one depends on.
+
+@item expand
+Show the list of commands that need to get run in order to bring the
+target up to date with @value{REMAKE} variables expanded.
+
+@item nonorder
+Show the dependencies that are not ordered.
+
+@item previous
+@item state
+Show status of target:
+@itemize @bullet
+@item Successfully updated
+@item Needs to be updated
+@item Failed to be updated
+@item Invalid - error of some sort
+@end itemize
+
+@item time
+This shows the time that the file was last modified and if the file
+has been brought up to date. If it is not up to date you will see the
+message ``File is very old.'' If a target is ``phony'', i.e. doesn't
+have file associated with it, the message ``File does not exist.''
+will appear instead of the time. In some cases you may see
+``Modification time never checked.''
+
+@item variables
+Show single-character automatic state variables (if defined):
+@itemize @bullet
+@item @@ - the target name
+@item % - target member name, when target is an the archive member
+@item * - the stem with which an implicit rule matches
+@item + - like $^ but with the duplicate dependencies listed in order
+@item < - the name of the first prerequisite
+@item ^ - the names of all prerequisites (no duplicates)
+@item ? - the names of all prerequisites newer than the target (@@)
+@end itemize
+
+Note that there are other automatic variables defined based on
+these. In particular those that have a `D' or `F' suffix, e.g. $(@@D),
+or $(*F). These however are not listed here but can shown in a
+@code{print} command or figured out from their corresponding
+single-letter variable name.
+
+@end table
+
+@end table
+
+@node Write
+@subsection Write commands of a target (@samp{write})
+
+@table @code
+@kindex write @r{[}@var{target} @var{filename|here}@r{]}
+@item write @r{[}@var{target} @ovar{filename|here}@r{]}
+
+Use this to write the command portion of a target with @value{REMAKE}'s
+internal variables expanded.  If a filename is given that is the file
+where the expanded commands are written. If the filename is ``here''
+then it is not written to a file but output inside the debugger as
+other debugger command behaves. And if no file name is given a
+filename based on the target name is created.
+
+@end table
+
+@node Info Variables
+@subsection Print all variables (@samp{info variables})
+
+@table @code
+@item info variables
+@kindex info variables
+
+If you want to all list variables, use this command.
+
+@end table
+
+@node Evaluation/Execution
+@section Evaluation and Execution
+
+@menu
+* Eval::                 Evaluate a GNU Makefile string
+* Shell::                Execute a Shell command
+@end menu
+
+@node Eval
+@subsection Subsection Evaluating GNU MAKE commands ( @samp{eval})
+@table @code
+@kindex eval
+@kindex e @r{(@code{eval})}
+@cindex shell escape
+@item eval @var{command string}
+@itemx e
+
+A powerful command is the ability to enter MAKE fragments and have
+them interpreted on the fly. This can be done using the @code{eval}
+command. For example to ``include'' a makefile, you might enter
+@code{eval include ...}. Some of the other commands given
+elsewhere can be performed by @code{eval}. In particular, instead of
+using the ``setq'' debugger command, one could issue the command as
+@code{eval VAR=value}.
+
+@end table
+
+@node Shell
+@subsection Running Shell commands ( @samp{shell})
+
+@table @code
+@kindex shell
+@kindex ! @r{(@code{shell})}
+@cindex shell escape
+@item shell @var{command string}
+@itemx !
+
+If you need to execute occasional shell commands during your
+debugging session, there is no need to leave or suspend @value{DBG}; you can
+just use the @code{shell} command or its alias @code{!}.
+
+Invoke a shell to execute @var{command string}.
+
+@end table
+
+@node Controlling Make
+@section Controlling @DBG (@samp{set})
+
+You can alter the way @value{REMAKE}
+interacts with you in various ways given below. 
+
+@menu
+* set basename::      Annotation Level (set basename)
+* set ignore-errors:: Ignoring errors
+* set trace::         Set tracing 
+* set variable::      Set a variable to an expanded string
+* setq::              Set a variable to an unexpanded string
+@end menu
+
+@node set basename
+@subsection Basename (@samp{set basename})
+
+@table @code
+@kindex set basename
+@item set basename @var{on/off/toggle}
+The basename level controls how much information @value{DBG} prints
+when it has to show a file name. When this is on we just show the base
+filename part an not the path info. When @value{DBG} is run as a
+subprocess of @sc{gnu} Emacs of @value{DDD}, it is important 
+to show full pathnames.
+@end table
+
+@node set ignore-errors
+@subsection Ignoring errors (@samp{set ignore-errors})
+
+@table @code
+@kindex set ignore-errors
+@item set ignore-errors @var{on/off/toggle}
+
+Use this to change whether you ignore errors. Turning it on is
+as though you started @value{REMAKE} with the @code{--ignore-errors} option.
+@end table
+
+@node set trace
+@subsection Tracing (@samp{set basename})
+
+@table @code
+@kindex set trace
+@item set trace @var{on/off/toggle}
+
+Use this to change whether you want tracing or not. Turning it on is
+as though you started @value{REMAKE} with the @code{--trace} option.
+@end table
+
+@node set variable
+@subsection Setting a variable to an expanded string (@samp{set variable})
+
+@table @code
+@kindex set variable @var{variable} @var{string}
+
+Sets @var{variable} to the value @var{string}, but @var{string} is
+expanded first as it would be when you use @code{examine}.
+@end table
+
+One nice use of set variable in debugging is to set the value of
+@code{SHELL} to include tracing in that. Here's an example:
+
+@smallexample
+mdb<0> @b{set variable SHELL $(SHELL) -x}
+Variable SHELL now has value '/bin/sh -x'
+mdb<1> 
+@end smallexample 
+
+Now we'll show this in a real example - stepping (or actually
+``next''ing though the top-level makefile in the source distribution
+for @value{REMAKE}:
+
+@smallexample
+$ @b{remake -X}
+Reading makefiles...
+
+(/tmp/remake/Makefile:256)
+Makefile.in: Makefile.am config/readline.m4 gettext.m4 iconv.m4 lib-ld.m4 lib-link.m4 lib-prefix.m4 progtest.m4 acinclude.m4 configure.ac aclocal.m4
+mdb<0> @b{set variable SHELL $(SHELL) -x}
+Variable SHELL now has value '/bin/sh -x'
+mdb<1> @b{n}
+Updating goal targets....
+ /tmp/remake/Makefile:250	File `all' does not exist.
+
+(/tmp/remake/Makefile:250)
+all: config.h
+mdb<2> p SHELL
+Makefile:156 (origin: debugger) SHELL = /bin/bash -x
+mdb<3> @b{n}
+   Prerequisite `stamp-h1' is newer than target `config.h'.
+  /tmp/remake/Makefile:288	Must remake target `config.h'.
+
+(/tmp/remake/Makefile:288)
+config.h: stamp-h1
+mdb<4> @b{n}
+if test ! -f config.h; then \
+  rm -f stamp-h1; \
+  remake stamp-h1; \
+else :; fi
++ test '!' -f config.h
++ :
+  /tmp/remake/Makefile:288	Successfully remade target file `config.h'.
+@end smallexample 
+
+Above we see the script source code followed by the trace information
+-- we took the ``else'' branch which has the null statement ``:''.
+
+@emph{Probably in the future, we'll arrange some stepping or tracing
+mode perform this SHELL reassignment trick of adding @code{-x}.}
+
+@node setq
+@subsection Setting a variable to an unexpanded string (@samp{setq})
+@subsection Basename (@samp{setq})
+
+@table @code
+@kindex setq @var{variable} @var{string}
+@item setq @var{variable} @var{string}
+
+Sets @var{variable} to the value @var{string}, but @var{string} is
+@emph{not} expanded first as it is not you use @code{print}.
+@end table
+
+@node Front Ends
+@chapter Using @value{DBG} from a front-end user interface
+
+The only front-ends that can use @value{DBG} as a back-end debugger is
+@sc{gnu} Emacs. In the future an interface via @value{DDD}may be
+available.
+
+@menu
+* Emacs::      Using @value{DBG} from @sc{gnu} Emacs
+* DDD::        Using @value{DBG} from @value{DDD}
+@end menu
+
+
+@node Emacs
+@section Using @value{DBG} from @sc{gnu} Emacs
+
+@cindex Emacs
+@cindex @sc{gnu} Emacs
+A special interface allows you to use @sc{gnu} Emacs to view (and
+edit) the source files for the program you are debugging with
+@value{DBG}.
+
+To use this interface, use the command @kbd{M-x mdb} in GNU Emacs.
+Give the executable file you want to debug as an argument.  This
+command starts @value{DBG} as a subprocess of GNU Emacs, with input and
+output through a newly created GNU Emacs buffer.
+
+Using @value{DBG} under GNU Emacs is just like using @value{DBG}
+normally except for two things:
+
+@itemize @bullet
+@item
+All ``terminal'' input and output goes through the GNU Emacs buffer.
+@end itemize
+
+This applies both to @value{DBG} commands and their output, and to the input
+and output done by the program you are debugging.
+
+This is useful because it means that you can copy the text of previous
+commands and input them again; you can even use parts of the output
+in this way.
+
+All the facilities of Emacs' Shell mode are available for interacting
+with your script.  In particular, you can send signals the usual
+way---for example, @kbd{C-c C-c} for an interrupt, @kbd{C-c C-z} for a
+stop.
+
+@itemize @bullet
+@item
+@value{DBG} displays source code through GNU Emacs.
+@end itemize
+
+Each time @value{DBG} displays a stack frame, Emacs automatically finds the
+source file for that frame and puts an arrow (@samp{=>}) at the
+left margin of the current line.  Emacs uses a separate buffer for
+source display, and splits the screen to show both your @value{DBG} session
+and the source.
+
+Explicit @value{DBG} @code{list} or search commands still produce output as
+usual, but you probably have no reason to use them from Emacs.
+
+@quotation
+@emph{Warning:} If the directory where your script resides is not your
+current directory, it can be easy to confuse Emacs about the location of
+the source files, in which case the auxiliary display buffer does not
+appear to show your source.  @value{DBG} can find programs by searching your
+environment's @code{PATH} variable, so the @value{DBG} input and output
+session proceeds normally; but Emacs does not get enough information
+back from @value{DBG} to locate the source files in this situation.  To
+avoid this problem, either start @value{DBG} mode from the directory where
+your script resides, or specify an absolute file name when prompted for the
+@kbd{M-x gdb} argument.
+
+A similar confusion can result if you use the @value{DBG} @code{file} command to
+switch to debugging a program in some other location, from an existing
+@value{DBG} buffer in Emacs.
+@end quotation
+
+By default, @kbd{M-x mdb} calls the @code{make --debugger}.  If you
+need to call @value{DBG} by a different name (for example, if you
+keep several configurations around, with different names) you can set
+the Emacs variable @code{gud-mdb-command-name}; for example,
+
+@example
+(setq gud-mdb-command-name "make")
+@end example
+
+@noindent
+(preceded by @kbd{M-:} or @kbd{ESC :}, or typed in the @code{*scratch*} buffer, or
+in your @file{.emacs} file) makes Emacs call the program named
+``@code{mdb}'' instead.
+
+In the @value{DBG} I/O buffer, you can use these special Emacs commands in
+addition to the standard Shell mode commands:
+
+@table @kbd
+@item C-h m
+Describe the features of Emacs' @value{DBG} Mode.
+
+@item M-s
+Execute to another source line, like the @value{DBG} @code{step} command; also
+update the display window to show the current file and location.
+
+@item M-n
+Execute to next source line in this function, skipping all function
+calls, like the @value{DBG} @code{next} command.  Then update the display window
+to show the current file and location.
+
+@item C-c C-f
+Execute until exit from the selected stack frame, like the @value{DBG}
+@code{finish} command.
+
+@item M-c
+Continue execution of your script, like the @value{DBG} @code{continue}
+command.
+
+@emph{Warning:} In Emacs v19, this command is @kbd{C-c C-p}.
+
+@item M-u
+Go up the number of frames indicated by the numeric argument
+(@pxref{Arguments, , Numeric Arguments, Emacs, The @sc{gnu} Emacs Manual}),
+like the @value{DBG} @code{up} command.
+
+@emph{Warning:} In Emacs v19, this command is @kbd{C-c C-u}.
+
+@item M-d
+Go down the number of frames indicated by the numeric argument, like the
+@value{DBG} @code{down} command.
+
+@emph{Warning:} In Emacs v19, this command is @kbd{C-c C-d}.
+
+@end table
+
+In any source file, the Emacs command @kbd{C-x SPC} (@code{gud-break})
+tells @value{DBG} to set a breakpoint on the source line point is on.
+
+If you accidentally delete the source-display buffer, an easy way to get
+it back is to type the command @code{frame} in the @value{DBG} buffer, to
+request a frame display; when you run under Emacs, this recreates
+the source buffer if necessary to show you the context of the current
+frame.
+
+The source files displayed in Emacs are in ordinary Emacs buffers
+which are visiting the source files in the usual way.  You can edit
+the files with these buffers if you wish; but keep in mind that @value{DBG}
+communicates with Emacs in terms of line numbers.  If you add or
+delete lines from the text, the line numbers that @value{DBG} knows cease
+to correspond properly with the code.
+
+@node DDD
+@section Using @value{REMAKE} from @value{DDD}
+@cindex DDD
+
+@value{REMAKE} support is rather new in @value{DDD}. As a programming
+language, @value{REMAKE} is not feature rich: there are no record
+structures or hash tables (yet), no pointers, package variable scoping
+or methods. So much of the data display and visualization features of
+@value{DDD} are disabled.
+
+As with any scripting or interpreted language (e.g. Perl), one can't
+step by a single machine-language instruction. So the ddd Stepi/Nexti
+commands are disabled.
+
+@node Make Debugger Bugs
+@chapter Reporting Bugs
+@cindex bugs
+@cindex reporting bugs
+
+Your bug reports play an essential role in making the @value{REMAKE} reliable.
+
+Reporting a bug may help you by bringing a solution to your problem, or it
+may not.  But in any case the principal function of a bug report is to help
+the entire community by making the next version of @value{REMAKE} work better.  Bug
+reports are your contribution to the maintenance of @value{REMAKE}.
+
+In order for a bug report to serve its purpose, you must include the
+information that enables us to fix the bug.
+
+@menu
+* Bug Criteria::                Have you found a bug?
+* Bug Reporting::               How to report bugs
+@end menu
+
+@node Bug Criteria
+@section Have you found a bug?
+@cindex bug criteria
+
+If you are not sure whether you have found a bug, here are some guidelines:
+
+@itemize @bullet
+@cindex fatal signal
+@cindex debugger crash
+@cindex crash of debugger
+@item
+If the debugger gets a fatal signal, for any input whatever, that is a
+@value{REMAKE} bug.  Reliable debuggers never crash.
+
+@cindex error on valid input
+@item
+If @value{REMAKE} produces an error message for valid input, that is a
+bug.  (Note that if you're cross debugging, the problem may also be
+somewhere in the connection to the target.)
+
+@cindex invalid input
+@item
+If @value{REMAKE} does not produce an error message for invalid input,
+that is a bug.  However, you should note that your idea of
+``invalid input'' might be our idea of ``an extension'' or ``support
+for traditional practice''.
+
+@item
+If you are an experienced user of debugging tools, your suggestions
+for improvement of @value{REMAKE} are welcome in any case.
+@end itemize
+
+@node Bug Reporting
+@section How to report bugs
+@cindex bug reports
+@cindex debugger bugs, reporting
+
+Submit bug reports for @value{REMAKE}.  Until better mechanism is set up
+the preferred method is to submit them directly using
+@email{rocky@@panix.com}. There are also a bug tracking system
+and, help, developer and open discussion forums which can be found via
+@uref{http://http://sourceforge.net/forum/?group_id=37260}.
+
+Although this code shares a lot with BASH, the debugger is of course
+not yet supported by the BASH team, so if there is a debugger problem 
+reporting it via bashbug or to @email{bug-bash@@gnu.org} or posted to
+the newsgroup @code{gnu.bash.bug} probably won't help, unless you are
+sure the bug resides in the vanilla bash code and and show that. 
+
+The fundamental principle of reporting bugs usefully is this:
+@strong{report all the facts}.  If you are not sure whether to state a
+fact or leave it out, state it!
+
+Often people omit facts because they think they know what causes the
+problem and assume that some details do not matter.  Thus, you might
+assume that the name of the variable you use in an example does not matter.
+Well, probably it does not, but one cannot be sure.  Perhaps the bug is a
+stray memory reference which happens to fetch from the location where that
+name is stored in memory; perhaps, if the name were different, the contents
+of that location would fool the debugger into doing the right thing despite
+the bug.  Play it safe and give a specific, complete example.  That is the
+easiest thing for you to do, and the most helpful.
+
+Keep in mind that the purpose of a bug report is to enable us to fix the
+bug.  It may be that the bug has been reported previously, but neither
+you nor we can know that unless your bug report is complete and
+self-contained.
+
+Sometimes people give a few sketchy facts and ask, ``Does this ring a
+bell?''  Those bug reports are useless, and we urge everyone to
+@emph{refuse to respond to them} except to chide the sender to report
+bugs properly.
+
+To enable us to fix the bug, you should include all these things:
+
+@itemize @bullet
+@item
+The version of @value{REMAKE}.  @value{REMAKE} announces it if you start
+with no arguments; you can also print it at any time using @code{version}
+command.
+
+Without this, we will not know whether there is any point in looking for
+the bug in the current version of @value{REMAKE}.
+
+@item
+The type of machine you are using, and the operating system name and
+version number.
+
+@item
+What compiler (and its version) was used to compile BASH---e.g.
+``@code{gcc}--3.1''.
+
+@item
+The command arguments you gave the compiler to compile your example and
+observe the bug.  For example, did you use @samp{-O}?  To guarantee
+you will not omit something important, list them all.  A copy of the
+Makefile (or the output from make) is sufficient.
+
+If we were to try to guess the arguments, we would probably guess wrong
+and then we might not encounter the bug.
+
+@item
+A complete input script, and all necessary source files, that will
+reproduce the bug.
+
+@item
+A description of what behavior you observe that you believe is
+incorrect.  For example, ``It gets a fatal signal.''
+
+Of course, if the bug is that @value{REMAKE} gets a fatal signal, then we
+will certainly notice it.  But if the bug is incorrect output, we might
+not notice unless it is glaringly wrong.  You might as well not give us
+a chance to make a mistake.
+
+Even if the problem you experience is a fatal signal, you should still
+say so explicitly.  Suppose something strange is going on, such as, your
+copy of @value{REMAKE} is out of synch, or you have encountered a bug in
+the C library on your system.  (This has happened!)  Your copy might
+crash and ours would not.  If you told us to expect a crash, then when
+ours fails to crash, we would know that the bug was not happening for
+us.  If you had not told us to expect a crash, then we would not be able
+to draw any conclusion from our observations.
+
+@item
+If you wish to suggest changes to the @value{REMAKE} source, send us context
+diffs.  If you even discuss something in the @value{REMAKE} source, refer to
+it by context, not by line number.
+
+The line numbers in our development sources will not match those in your
+sources.  Your line numbers would convey no useful information to us.
+
+@end itemize
+
+Here are some things that are not necessary:
+
+@itemize @bullet
+@item
+A description of the envelope of the bug.
+
+Often people who encounter a bug spend a lot of time investigating
+which changes to the input file will make the bug go away and which
+changes will not affect it.
+
+This is often time consuming and not very useful, because the way we
+will find the bug is by running a single example under the debugger
+with breakpoints, not by pure deduction from a series of examples.
+We recommend that you save your time for something else.
+
+Of course, if you can find a simpler example to report @emph{instead}
+of the original one, that is a convenience for us.  Errors in the
+output will be easier to spot, running under the debugger will take
+less time, and so on.
+
+However, simplification is not vital; if you do not want to do this,
+report the bug anyway and send us the entire test case you used.
+
+@item
+A patch for the bug.
+
+A patch for the bug does help us if it is a good one.  But do not omit
+the necessary information, such as the test case, on the assumption that
+a patch is all we need.  We might see problems with your patch and decide
+to fix the problem another way, or we might not understand it at all.
+
+Sometimes with a program as complicated as @value{REMAKE} it is very hard to
+construct an example that will make the program follow a certain path
+through the code.  If you do not send us the example, we will not be able
+to construct one, so we will not be able to verify that the bug is fixed.
+
+And if we cannot understand what bug you are trying to fix, or why your
+patch should be an improvement, we will not install it.  A test case will
+help us to understand.
+
+@item
+A guess about what the bug is or what it depends on.
+
+Such guesses are usually wrong.  Even we cannot guess right about such
+things without first using the debugger to find the facts.
+@end itemize
+
+@node History and Acknowledgments
+@chapter History and Acknowledgments
+
+My idea for a debugger for @value{REMAKE} came about on working on a
+debugger for bash (@url{http://bashdb.sourceforge.net}). I knew the
+bash debugger was good enough when it was able to debug
+autoconf-generated script which are tens of thousands of lines long.
+
+But almost immediately after scaling this new height, I became sunk
+deep in depression when I realized that to debug the configuration
+mess I also needed to deal with Makefiles, if not also autoconf, and
+automake as well.
+
+After seeing an article on the auto-configuration mess
+@url{http://freshmeat.net/articles/view/889} I posted a query to ask
+if anyone was interested in writing a debugger for @value{REMAKE}.
+
+Almost year later and no takers, I was reminded of my query by
+accident when I got a query from one of the GNU mailing lists that I
+am on about slow e-mail posting to the @value{REMAKE} mailing list.
+
+I again suggested the idea of a debugger and was told how incredibly
+difficult it would be to write a debugger and how incredibly unique
+@value{REMAKE} is. At that point I looked into the code and to my
+surprise and delight I found that in contrast to BASH the code,
+@value{REMAKE} is much smaller and written in a more modern coding
+style; in fact it had most of the information stored that would be
+helpful in a debugger. All I would need to do is add a GNU readline
+for the debug loop, extend to save a target stack and track line
+numbers and report line numbers better. But this last part I'd been
+through with the bash debugger.
+
+All in all, I've been very pleased at how far I've been able to get
+with much less effort than needed for the bash debugger. That's not to
+say that much work isn't still needed or that the overall design
+couldn't be improved.
+
+This documentation was modified from the GNU Bash Debugger (bashdb) Reference
+manual (which in turn was modified from GNU Bash debugger (gdb).
+
+Additions to this section are particularly welcome.  If you or your
+friends (or enemies, to be evenhanded) have been unfairly omitted from
+this list, we would like to add your names!
+
+@c The readline documentation is distributed with the readline code
+@c and consists of the two following files:
+@c     rluser.texinfo
+@c     inc-hist.texinfo
+@c Use -I with makeinfo to point to the appropriate directory,
+@c environment var TEXINPUTS with TeX.
+@c @include rluser.texinfo
+@c @include hsuser.texinfo
+
+@c @include gpl.texi
+
+@c @include fdl.texi
+
+@node Command Index
+@unnumbered Command Index
+@printindex ky
+
+@node General Index
+@unnumbered General Index
+@printindex cp
+
+@tex
+% I think something like @colophon should be in texinfo.  In the
+% meantime:
+\long\def\colophon{\hbox to0pt{}\vfill
+\centerline{The body of this manual is set in}
+\centerline{\fontname\tenrm,}
+\centerline{with headings in {\bf\fontname\tenbf}}
+\centerline{and examples in {\tt\fontname\tentt}.}
+\centerline{{\it\fontname\tenit\/},}
+\centerline{{\bf\fontname\tenbf}, and}
+\centerline{{\sl\fontname\tensl\/}}
+\centerline{are used for emphasis.}\vfill}
+\page\colophon
+% Blame: doc@cygnus.com, 1991.
+@end tex
+
+@bye
