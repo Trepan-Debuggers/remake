@@ -1,5 +1,5 @@
 # -*-Perl-*-
-# $Id: trace,v 1.7 2005/12/20 04:45:37 rockyb Exp $
+# $Id: trace,v 1.8 2005/12/24 14:53:14 rockyb Exp $
 $description = "The following checks tracing.\n";
 
 $details = "We test line tracing, showing a target stack, line numbers\n"
@@ -123,6 +123,28 @@ EOF
 
 close(MAKEFILE);
 
+# Shells vary in output. For example, for echo "test okay"
+# some give 'test okay' while other omit the quotes.
+# So we'll issue the command that make should issue
+# and compare against that.
+
+# Pick up what the name of the shell is. Perhaps this
+# should done more globally.
+
+my @lines = `echo 'all: ;\@echo \$(SHELL)' | $make_path -f -`;
+if (@lines < 1) {
+  return -1;
+}
+
+chomp @lines;
+# Well, actually we want shell plus tracing.
+$shell = "$lines[0] -x";
+
+# Compute what the output should be for this shell.
+my $foo_lines = "if [ -n FOO ] ; then echo \"test okay\"; fi";
+my $foo_output = `echo '$foo_lines' | $shell - 2>&1`;
+chomp $foo_output;
+
 # We used option --trace in test 1, use short option name -x this time.
 &run_make_with_options($makefile, "-x -i --basename-filenames",
 		       &get_logfile);
@@ -139,9 +161,7 @@ work/debugger/trace.mk:7: foo
 if [ -n FOO ] ; \\
 then echo \"test okay\"; fi
 ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-+ '[' -n FOO ']'
-+ echo 'test okay'
-test okay
+$foo_output
   work/debugger/trace.mk:6	Successfully remade target file `foo'.
 work/debugger/trace.mk:4	Must remake target `all'.
 work/debugger/trace.mk:4	Successfully remade target file `all'.
