@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.79.1\n"
 "Report-Msgid-Bugs-To: rocky@panix.com\n"
-"POT-Creation-Date: 2005-12-23 22:57-0500\n"
+"POT-Creation-Date: 2005-12-23 23:33-0500\n"
 "PO-Revision-Date: 2001-09-02 18:21+02:00\n"
 "Last-Translator: Byrial Ole Jensen <byrial@image.dk>\n"
 "Language-Team: Danish <dansk@klid.dk>\n"
@@ -614,215 +614,221 @@ msgstr "Opretter midlertidig jobfil %s\n"
 msgid "%s (line %d) Bad shell context (!unixy && !batch_mode_shell)\n"
 msgstr "%s (linje %d) Forkert skal-kontekst (!unixy && !batch_mode_shell)\n"
 
-#: src/main.c:330
+#: src/main.c:333
 msgid "Options:\n"
 msgstr "Tilvalg:\n"
 
-#: src/main.c:331
+#: src/main.c:334
 #, fuzzy
 msgid "  -b, -m                       Ignored for compatibility.\n"
 msgstr "Ignoreret af hensyn til kompabilitet"
 
-#: src/main.c:333
+#: src/main.c:336
 msgid "  -B, --always-make            Unconditionally make all targets.\n"
 msgstr ""
 
-#: src/main.c:335
+#: src/main.c:338
 msgid "  --basename-filenames         Show files as basename only.\n"
 msgstr ""
 
-#: src/main.c:337
+#: src/main.c:340
 msgid ""
 "  -C DIRECTORY, --directory=DIRECTORY\n"
 "                               Change to DIRECTORY before doing anything.\n"
 msgstr ""
 
-#: src/main.c:340
+#: src/main.c:343
 #, fuzzy
 msgid "  -d                           Print lots of debugging information.\n"
 msgstr "Udskriv en masse fejlsøgningsinformation"
 
-#: src/main.c:342
+#: src/main.c:345
 #, fuzzy
 msgid ""
 "  --debug[=FLAGS]              Print various types of debugging "
 "information.\n"
 msgstr "Udskriv forskellige slags fejlsøgningsinformation"
 
-#: src/main.c:344
+#: src/main.c:347
 msgid ""
 "  -e, --environment-overrides\n"
 "                               Environment variables override makefiles.\n"
 msgstr ""
 
-#: src/main.c:347
+#: src/main.c:350
 msgid ""
 "  -f FILE, --file=FILE, --makefile=FILE\n"
 "                               Read FILE as a makefile.\n"
 msgstr ""
 
-#: src/main.c:350
+#: src/main.c:353
 #, fuzzy
 msgid "  -h, --help                   Print this message and exit.\n"
 msgstr "Udskriv denne besked og afslut"
 
-#: src/main.c:352
+#: src/main.c:355
 #, fuzzy
 msgid "  -i, --ignore-errors          Ignore errors from commands.\n"
 msgstr "Ignorér fejl fra kommandoer"
 
-#: src/main.c:354
+#: src/main.c:357
 msgid ""
 "  -I DIRECTORY, --include-dir=DIRECTORY\n"
 "                               Search DIRECTORY for included makefiles.\n"
 msgstr ""
 
-#: src/main.c:357
+#: src/main.c:360
 #, fuzzy
 msgid ""
 "  -j [N], --jobs[=N]           Allow N jobs at once; infinite jobs with no "
 "arg.\n"
 msgstr "Tillad N samtidige job; uendelig mange job uden argument"
 
-#: src/main.c:359
+#: src/main.c:362
 #, fuzzy
 msgid ""
 "  -k, --keep-going             Keep going when some targets can't be made.\n"
 msgstr "Fortsæt selvom nogen mål ikke kan skabes"
 
-#: src/main.c:361
+#: src/main.c:364
 msgid ""
 "  -l [N], --load-average[=N], --max-load[=N]\n"
 "                               Don't start multiple jobs unless load is "
 "below N.\n"
 msgstr ""
 
-#: src/main.c:364
+#: src/main.c:367
+msgid ""
+"  -L, --check-symlink-times    Use the latest mtime between symlinks and "
+"target.\n"
+msgstr ""
+
+#: src/main.c:369
 msgid ""
 "  -n, --just-print, --dry-run, --recon\n"
 "                               Don't actually run any commands; just print "
 "them.\n"
 msgstr ""
 
-#: src/main.c:367
+#: src/main.c:372
 msgid ""
 "  --no-extended-errors         Do not give additional error reporting.\n"
 msgstr ""
 
-#: src/main.c:369
+#: src/main.c:374
 msgid ""
 "  -o FILE, --old-file=FILE, --assume-old=FILE\n"
 "                               Consider FILE to be very old and don't remake "
 "it.\n"
 msgstr ""
 
-#: src/main.c:372
+#: src/main.c:377
 #, fuzzy
 msgid "  -p, --print-data-base        Print make's internal database.\n"
 msgstr "Udskriv makes interne database"
 
-#: src/main.c:374
+#: src/main.c:379
 #, fuzzy
 msgid ""
 "  -q, --question               Run no commands; exit status says if up to "
 "date.\n"
 msgstr "Udfør ingen kommandoer; afslutningskoden fortæller status"
 
-#: src/main.c:376
+#: src/main.c:381
 #, fuzzy
 msgid "  -r, --no-builtin-rules       Disable the built-in implicit rules.\n"
 msgstr "Slå de indbyggede implicitte regler fra"
 
-#: src/main.c:378
+#: src/main.c:383
 #, fuzzy
 msgid ""
 "  -R, --no-builtin-variables   Disable the built-in variable settings.\n"
 msgstr "Slå de indbyggede variabelværdier fra"
 
-#: src/main.c:380
+#: src/main.c:385
 #, fuzzy
 msgid "  -s, --silent, --quiet        Don't echo commands.\n"
 msgstr "Ignorér fejl fra kommandoer"
 
-#: src/main.c:382
+#: src/main.c:387
 msgid "  -S, --no-keep-going, --stop  Turns off -k.\n"
 msgstr ""
 
-#: src/main.c:384
+#: src/main.c:389
 #, fuzzy
 msgid ""
 "  -t, --touch                  Touch targets instead of remaking them.\n"
 msgstr "Berør mål i stedet for at genskabe dem"
 
-#: src/main.c:386
+#: src/main.c:391
 #, fuzzy
 msgid ""
 "  -v, --version                Print the version number of make and exit.\n"
 msgstr "Udskriv makes versionnummer og afslut"
 
-#: src/main.c:388
+#: src/main.c:393
 msgid "  -V, --show-variables         Show variable expansions.\n"
 msgstr ""
 
-#: src/main.c:390
+#: src/main.c:395
 #, fuzzy
 msgid "  -w, --print-directory        Print the current directory.\n"
 msgstr "Udskriv det aktuelle katalog"
 
-#: src/main.c:392
+#: src/main.c:397
 #, fuzzy
 msgid ""
 "  --no-print-directory         Turn off -w, even if it was turned on "
 "implicitly.\n"
 msgstr "Slå -w fra, selv hvis det var slået til automatisk"
 
-#: src/main.c:394
+#: src/main.c:399
 msgid ""
 "  -W FILE, --what-if=FILE, --new-file=FILE, --assume-new=FILE\n"
 "                               Consider FILE to be infinitely new.\n"
 msgstr ""
 
-#: src/main.c:397
+#: src/main.c:402
 #, fuzzy
 msgid ""
 "  --warn-undefined-variables   Warn when an undefined variable is "
 "referenced.\n"
 msgstr "Advar når en udefineret variabel bruges"
 
-#: src/main.c:399
+#: src/main.c:404
 msgid ""
 "  -x, --trace[=TYPE]           Trace command execution TYPE  may be\n"
 "                               \"read\", \"normal\", \"noshell\",  or \"full"
 "\".\n"
 msgstr ""
 
-#: src/main.c:403
+#: src/main.c:408
 msgid ""
 "  -X [type], --debugger[=TYPE] Enter debugger. TYPE may be\n"
 "                               \"preread\", \"preaction\", \"full\",\n"
 "                               \"error\", or \"fatal\".\n"
 msgstr ""
 
-#: src/main.c:408
+#: src/main.c:413
 msgid ""
 "  --unix                       Run in UNIX mode (use sh.exe subshell).\n"
 msgstr ""
 
-#: src/main.c:410
+#: src/main.c:415
 msgid ""
 "  --win32                      Run in Win32 mode (use Win32 subshell).\n"
 msgstr ""
 
-#: src/main.c:641
+#: src/main.c:648
 msgid "empty string invalid as file name"
 msgstr "en tom streng er ugyldig som filnavn"
 
-#: src/main.c:717
+#: src/main.c:724
 #, c-format
 msgid "%s: Interrupt/Exception caught (code = 0x%x, addr = 0x%x)\n"
 msgstr "%s: Interrupt/undtagelse fanget (kode = 0x%x, addr = 0x%x)\n"
 
-#: src/main.c:724
+#: src/main.c:731
 #, c-format
 msgid ""
 "\n"
@@ -837,185 +843,189 @@ msgstr ""
 "ExceptionFlags = %x\n"
 "ExceptionAddress = %x\n"
 
-#: src/main.c:732
+#: src/main.c:739
 #, c-format
 msgid "Access violation: write operation at address %x\n"
 msgstr "Adgangskrænkelse: skriveoperation på adresse %x\n"
 
-#: src/main.c:733
+#: src/main.c:740
 #, c-format
 msgid "Access violation: read operation at address %x\n"
 msgstr "Adgangskrænkelse: læseoperation på adresse %x\n"
 
-#: src/main.c:800
+#: src/main.c:807
 #, c-format
 msgid "find_and_set_shell setting default_shell = %s\n"
 msgstr "find_and_set_shell sætter default_shell = %s\n"
 
-#: src/main.c:848
+#: src/main.c:855
 #, c-format
 msgid "find_and_set_shell path search set default_shell = %s\n"
 msgstr "find_and_set_shell stisøgning sætter default_shell = %s\n"
 
-#: src/main.c:1255
+#: src/main.c:1262
 #, c-format
 msgid "%s is suspending for 30 seconds..."
 msgstr "%s er standset i 30 sekunder..."
 
-#: src/main.c:1257
+#: src/main.c:1264
 #, c-format
 msgid "done sleep(30). Continuing.\n"
 msgstr "udført sleep(30). Fortsætter.\n"
 
-#: src/main.c:1503
+#: src/main.c:1510
 msgid "Makefile from standard input specified twice."
 msgstr "Makefil fra standard-ind er angivet to gange."
 
-#: src/main.c:1537
+#: src/main.c:1544
 msgid "fopen (temporary file)"
 msgstr "fopen (midlertidig fil)"
 
-#: src/main.c:1543
+#: src/main.c:1550
 msgid "fwrite (temporary file)"
 msgstr "fwrite (midlertidig fil)"
 
-#: src/main.c:1629
+#: src/main.c:1636
 msgid "Do not specify -j or --jobs if sh.exe is not available."
 msgstr "Angiv ikke -j eller --jobs hvis sh.exe ikke er tilgængelig."
 
-#: src/main.c:1630
+#: src/main.c:1637
 msgid "Resetting make for single job mode."
 msgstr "Sætter make tilbage til enkelt job-tilstand."
 
-#: src/main.c:1670
+#: src/main.c:1677
 msgid "internal error: multiple --jobserver-fds options"
 msgstr "intern fejl: flere '--jobserver-fds'-tilvalg"
 
-#: src/main.c:1678
+#: src/main.c:1685
 #, c-format
 msgid "internal error: invalid --jobserver-fds string `%s'"
 msgstr "intern fejl: ugyldig '--jobserver-fds'-streng '%s'"
 
-#: src/main.c:1688
+#: src/main.c:1695
 msgid "warning: -jN forced in submake: disabling jobserver mode."
 msgstr "advarsel: tvunget -jN i undermake: slår jobserver tilstand fra."
 
-#: src/main.c:1698
+#: src/main.c:1705
 msgid "dup jobserver"
 msgstr "dup jobserver"
 
-#: src/main.c:1701
+#: src/main.c:1708
 msgid ""
 "warning: jobserver unavailable: using -j1.  Add `+' to parent make rule."
 msgstr ""
 "advarsel: jobserver ikke tilgængelig: bruger -j1. Tilføj '+' til "
 "ophavsmakeregel."
 
-#: src/main.c:1725
+#: src/main.c:1732
 msgid "More parallel jobs (-jN) than this platform can handle requested."
 msgstr ""
 
-#: src/main.c:1726
+#: src/main.c:1733
 msgid "Resetting to single job (-j1) mode."
 msgstr "Sætter tilbage til enkelt job-tilstand (-j1)."
 
-#: src/main.c:1738
+#: src/main.c:1745
 msgid "creating jobs pipe"
 msgstr "oprettelse af jobledning"
 
-#: src/main.c:1751
+#: src/main.c:1758
 msgid "init jobserver pipe"
 msgstr "klargøring af jobserver-ledning"
 
-#: src/main.c:1837
+#: src/main.c:1776
+msgid "Symbolic links not supported: disabling -L."
+msgstr ""
+
+#: src/main.c:1852
 msgid "Updating makefiles....\n"
 msgstr "Opdaterer makefiler....\n"
 
-#: src/main.c:1862
+#: src/main.c:1877
 #, c-format
 msgid "Makefile `%s' might loop; not remaking it.\n"
 msgstr "Makefilen '%s' får måske make til at gå i ring; genskaber den ikke.\n"
 
-#: src/main.c:1940
+#: src/main.c:1955
 #, c-format
 msgid "Failed to remake makefile `%s'."
 msgstr "Genskabelse af makefilen '%s' mislykkedes."
 
-#: src/main.c:1957
+#: src/main.c:1972
 #, c-format
 msgid "Included makefile `%s' was not found."
 msgstr "Inkluderet makefil '%s' blev ikke fundet."
 
-#: src/main.c:1962
+#: src/main.c:1977
 #, c-format
 msgid "Makefile `%s' was not found"
 msgstr "Makefil '%s' blev ikke fundet."
 
-#: src/main.c:2030
+#: src/main.c:2045
 msgid "Couldn't change back to original directory."
 msgstr "Kunne ikke skifte tilbage til det originale katalog."
 
-#: src/main.c:2050
+#: src/main.c:2065
 msgid "Re-executing:"
 msgstr "Udfører igen:"
 
-#: src/main.c:2086
+#: src/main.c:2101
 msgid "unlink (temporary file): "
 msgstr "unlink (midlertidig fil): "
 
-#: src/main.c:2106
+#: src/main.c:2121
 msgid "No targets specified and no makefile found"
 msgstr "Ingen angivne mål og ingen makefil fundet"
 
-#: src/main.c:2108
+#: src/main.c:2123
 msgid "No targets"
 msgstr "Ingen mål"
 
-#: src/main.c:2113
+#: src/main.c:2128
 msgid "Updating goal targets....\n"
 msgstr "Opdaterer endemål....\n"
 
-#: src/main.c:2139
+#: src/main.c:2154
 msgid "warning:  Clock skew detected.  Your build may be incomplete."
 msgstr "advarsel: Fejl i urets tid opdaget. Din bygning kan være ukomplet."
 
-#: src/main.c:2294
+#: src/main.c:2309
 #, c-format
 msgid "Usage: %s [options] [target] ...\n"
 msgstr "Brug: %s [tilvalg] [mål] ...\n"
 
-#: src/main.c:2300
+#: src/main.c:2315
 #, c-format
 msgid ""
 "\n"
 "This program built for %s\n"
 msgstr ""
 
-#: src/main.c:2302
+#: src/main.c:2317
 #, c-format
 msgid ""
 "\n"
 "This program built for %s (%s)\n"
 msgstr ""
 
-#: src/main.c:2305
+#: src/main.c:2320
 #, fuzzy, c-format
 msgid "Report bugs to <bug-make@gnu.org>\n"
 msgstr ""
 "\n"
 "Send fejlmeldinger (på engelsk) til <bug-make@gnu.org>.\n"
 
-#: src/main.c:2377
+#: src/main.c:2392
 #, fuzzy, c-format
 msgid "the `-%c' option requires a non-empty string argument"
 msgstr "'-%c'-tilvalget kræver et positivt heltalligt argument"
 
-#: src/main.c:2426
+#: src/main.c:2441
 #, c-format
 msgid "the `-%c' option requires a positive integral argument"
 msgstr "'-%c'-tilvalget kræver et positivt heltalligt argument"
 
-#: src/main.c:2852
+#: src/main.c:2867
 #, fuzzy, c-format
 msgid ""
 "%sThis is free software; see the source for copying conditions.\n"
@@ -1033,14 +1043,14 @@ msgstr ""
 "%sSend fejlmeldinger (på engelsk) til <bug-make@gnu.org>.\n"
 "\n"
 
-#: src/main.c:2858
+#: src/main.c:2873
 #, c-format
 msgid ""
 "\n"
 "%sThis program built for %s\n"
 msgstr ""
 
-#: src/main.c:2860
+#: src/main.c:2875
 #, c-format
 msgid ""
 "\n"
@@ -1048,7 +1058,7 @@ msgid ""
 msgstr ""
 
 # %s giver dato og klokkeslæt
-#: src/main.c:2878
+#: src/main.c:2893
 #, c-format
 msgid ""
 "\n"
@@ -1058,7 +1068,7 @@ msgstr ""
 "# Makedatabase, udskrevet %s"
 
 # %s giver dato og klokkeslæt
-#: src/main.c:2887
+#: src/main.c:2902
 #, c-format
 msgid ""
 "\n"
@@ -1446,7 +1456,7 @@ msgstr "Med -q trænger målfilen '%s' til at blive genskabt.\n"
 msgid "Warning: File `%s' has modification time %.2g s in the future"
 msgstr "*** Advarsel: Ændringstiden for filen '%s' er i fremtiden (%s > %s)"
 
-#: src/remake.c:1457
+#: src/remake.c:1530
 #, c-format
 msgid ".LIBPATTERNS element `%s' is not a pattern"
 msgstr ".LIBPATTERNS-element '%s' er ikke et mønster"
