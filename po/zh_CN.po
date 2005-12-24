@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.79.1\n"
 "Report-Msgid-Bugs-To: rocky@panix.com\n"
-"POT-Creation-Date: 2005-12-23 23:33-0500\n"
+"POT-Creation-Date: 2005-12-24 11:31-0500\n"
 "PO-Revision-Date: 2002-07-22 15:02+0800\n"
 "Last-Translator: Wang Li <charles@linux.net.cn>\n"
 "Language-Team: Chinese (simplified) <i18n-translation@lists.linux.net.cn>\n"
@@ -611,221 +611,221 @@ msgstr "正在创建临时批文件 %s\n"
 msgid "%s (line %d) Bad shell context (!unixy && !batch_mode_shell)\n"
 msgstr ""
 
-#: src/main.c:333
+#: src/main.c:335
 msgid "Options:\n"
 msgstr "选项：\n"
 
-#: src/main.c:334
+#: src/main.c:336
 #, fuzzy
 msgid "  -b, -m                       Ignored for compatibility.\n"
 msgstr "忽略兼容性"
 
-#: src/main.c:336
+#: src/main.c:338
 msgid "  -B, --always-make            Unconditionally make all targets.\n"
 msgstr ""
 
-#: src/main.c:338
+#: src/main.c:340
 msgid "  --basename-filenames         Show files as basename only.\n"
 msgstr ""
 
-#: src/main.c:340
+#: src/main.c:342
 msgid ""
 "  -C DIRECTORY, --directory=DIRECTORY\n"
 "                               Change to DIRECTORY before doing anything.\n"
 msgstr ""
 
-#: src/main.c:343
+#: src/main.c:345
 #, fuzzy
 msgid "  -d                           Print lots of debugging information.\n"
 msgstr "打印大量调试信息"
 
-#: src/main.c:345
+#: src/main.c:347
 #, fuzzy
 msgid ""
 "  --debug[=FLAGS]              Print various types of debugging "
 "information.\n"
 msgstr "打印各种调试信息"
 
-#: src/main.c:347
+#: src/main.c:349
 msgid ""
 "  -e, --environment-overrides\n"
 "                               Environment variables override makefiles.\n"
 msgstr ""
 
-#: src/main.c:350
+#: src/main.c:352
 msgid ""
 "  -f FILE, --file=FILE, --makefile=FILE\n"
 "                               Read FILE as a makefile.\n"
 msgstr ""
 
-#: src/main.c:353
+#: src/main.c:355
 #, fuzzy
 msgid "  -h, --help                   Print this message and exit.\n"
 msgstr "打印该消息并退出"
 
-#: src/main.c:355
+#: src/main.c:357
 #, fuzzy
 msgid "  -i, --ignore-errors          Ignore errors from commands.\n"
 msgstr "忽略来自命令的错误"
 
-#: src/main.c:357
+#: src/main.c:359
 msgid ""
 "  -I DIRECTORY, --include-dir=DIRECTORY\n"
 "                               Search DIRECTORY for included makefiles.\n"
 msgstr ""
 
-#: src/main.c:360
+#: src/main.c:362
 #, fuzzy
 msgid ""
 "  -j [N], --jobs[=N]           Allow N jobs at once; infinite jobs with no "
 "arg.\n"
 msgstr "同时允许 N 个任务；无参数表明允许无限个任务"
 
-#: src/main.c:362
+#: src/main.c:364
 #, fuzzy
 msgid ""
 "  -k, --keep-going             Keep going when some targets can't be made.\n"
 msgstr "当某些目标无法创建时仍然继续"
 
-#: src/main.c:364
+#: src/main.c:366
 msgid ""
 "  -l [N], --load-average[=N], --max-load[=N]\n"
 "                               Don't start multiple jobs unless load is "
 "below N.\n"
 msgstr ""
 
-#: src/main.c:367
+#: src/main.c:369
 msgid ""
 "  -L, --check-symlink-times    Use the latest mtime between symlinks and "
 "target.\n"
 msgstr ""
 
-#: src/main.c:369
+#: src/main.c:371
 msgid ""
 "  -n, --just-print, --dry-run, --recon\n"
 "                               Don't actually run any commands; just print "
 "them.\n"
 msgstr ""
 
-#: src/main.c:372
+#: src/main.c:374
 msgid ""
 "  --no-extended-errors         Do not give additional error reporting.\n"
 msgstr ""
 
-#: src/main.c:374
+#: src/main.c:376
 msgid ""
 "  -o FILE, --old-file=FILE, --assume-old=FILE\n"
 "                               Consider FILE to be very old and don't remake "
 "it.\n"
 msgstr ""
 
-#: src/main.c:377
+#: src/main.c:379
 #, fuzzy
 msgid "  -p, --print-data-base        Print make's internal database.\n"
 msgstr "打印 make 的内部数据库"
 
-#: src/main.c:379
+#: src/main.c:381
 #, fuzzy
 msgid ""
 "  -q, --question               Run no commands; exit status says if up to "
 "date.\n"
 msgstr "不运行任何命令；退出状态说明是否已全部更新"
 
-#: src/main.c:381
+#: src/main.c:383
 #, fuzzy
 msgid "  -r, --no-builtin-rules       Disable the built-in implicit rules.\n"
 msgstr "禁用内置隐含规则"
 
-#: src/main.c:383
+#: src/main.c:385
 #, fuzzy
 msgid ""
 "  -R, --no-builtin-variables   Disable the built-in variable settings.\n"
 msgstr "禁用内置变量设置"
 
-#: src/main.c:385
+#: src/main.c:387
 #, fuzzy
 msgid "  -s, --silent, --quiet        Don't echo commands.\n"
 msgstr "忽略来自命令的错误"
 
-#: src/main.c:387
+#: src/main.c:389
 msgid "  -S, --no-keep-going, --stop  Turns off -k.\n"
 msgstr ""
 
-#: src/main.c:389
+#: src/main.c:391
 #, fuzzy
 msgid ""
 "  -t, --touch                  Touch targets instead of remaking them.\n"
 msgstr "touch 目标而不是重新创建它们"
 
-#: src/main.c:391
+#: src/main.c:393
 #, fuzzy
 msgid ""
 "  -v, --version                Print the version number of make and exit.\n"
 msgstr "打印 make 的版本号并退出"
 
-#: src/main.c:393
+#: src/main.c:395
 msgid "  -V, --show-variables         Show variable expansions.\n"
 msgstr ""
 
-#: src/main.c:395
+#: src/main.c:397
 #, fuzzy
 msgid "  -w, --print-directory        Print the current directory.\n"
 msgstr "打印当前目录"
 
-#: src/main.c:397
+#: src/main.c:399
 #, fuzzy
 msgid ""
 "  --no-print-directory         Turn off -w, even if it was turned on "
 "implicitly.\n"
 msgstr "即使 -w 默认开启，也要关闭 -w"
 
-#: src/main.c:399
+#: src/main.c:401
 msgid ""
 "  -W FILE, --what-if=FILE, --new-file=FILE, --assume-new=FILE\n"
 "                               Consider FILE to be infinitely new.\n"
 msgstr ""
 
-#: src/main.c:402
+#: src/main.c:404
 #, fuzzy
 msgid ""
 "  --warn-undefined-variables   Warn when an undefined variable is "
 "referenced.\n"
 msgstr "当引用未定义变量的时候发出警告"
 
-#: src/main.c:404
+#: src/main.c:406
 msgid ""
 "  -x, --trace[=TYPE]           Trace command execution TYPE  may be\n"
 "                               \"read\", \"normal\", \"noshell\",  or \"full"
 "\".\n"
 msgstr ""
 
-#: src/main.c:408
+#: src/main.c:410
 msgid ""
 "  -X [type], --debugger[=TYPE] Enter debugger. TYPE may be\n"
 "                               \"preread\", \"preaction\", \"full\",\n"
 "                               \"error\", or \"fatal\".\n"
 msgstr ""
 
-#: src/main.c:413
+#: src/main.c:415
 msgid ""
 "  --unix                       Run in UNIX mode (use sh.exe subshell).\n"
 msgstr ""
 
-#: src/main.c:415
+#: src/main.c:417
 msgid ""
 "  --win32                      Run in Win32 mode (use Win32 subshell).\n"
 msgstr ""
 
-#: src/main.c:648
+#: src/main.c:650
 msgid "empty string invalid as file name"
 msgstr "空字符串是无效的文件名"
 
-#: src/main.c:724
+#: src/main.c:726
 #, c-format
 msgid "%s: Interrupt/Exception caught (code = 0x%x, addr = 0x%x)\n"
 msgstr "%s：捕获中断/异常 (代码 = 0x%x, 地址 = 0x%x)\n"
 
-#: src/main.c:731
+#: src/main.c:733
 #, c-format
 msgid ""
 "\n"
@@ -835,187 +835,187 @@ msgid ""
 "ExceptionAddress = %x\n"
 msgstr ""
 
-#: src/main.c:739
+#: src/main.c:741
 #, c-format
 msgid "Access violation: write operation at address %x\n"
 msgstr "访问冲突：地址 %x 处的写操作\n"
 
-#: src/main.c:740
+#: src/main.c:742
 #, c-format
 msgid "Access violation: read operation at address %x\n"
 msgstr "访问冲突：地址 %x处的读操作\n"
 
-#: src/main.c:807
+#: src/main.c:809
 #, c-format
 msgid "find_and_set_shell setting default_shell = %s\n"
 msgstr ""
 
-#: src/main.c:855
+#: src/main.c:857
 #, c-format
 msgid "find_and_set_shell path search set default_shell = %s\n"
 msgstr ""
 
-#: src/main.c:1262
+#: src/main.c:1264
 #, c-format
 msgid "%s is suspending for 30 seconds..."
 msgstr "%s 正在挂起 30 秒..."
 
-#: src/main.c:1264
+#: src/main.c:1266
 #, c-format
 msgid "done sleep(30). Continuing.\n"
 msgstr "睡眠完成(30)。继续。\n"
 
-#: src/main.c:1510
+#: src/main.c:1512
 msgid "Makefile from standard input specified twice."
 msgstr "两次指明来自标准输入的 makefile。"
 
-#: src/main.c:1544
+#: src/main.c:1546
 msgid "fopen (temporary file)"
 msgstr "fopen (临时文件)"
 
-#: src/main.c:1550
+#: src/main.c:1552
 msgid "fwrite (temporary file)"
 msgstr "fwrite (临时文件)"
 
-#: src/main.c:1636
+#: src/main.c:1638
 msgid "Do not specify -j or --jobs if sh.exe is not available."
 msgstr "如果 sh.exe 不可用，就不要给出 -j 或 --jobs。"
 
-#: src/main.c:1637
+#: src/main.c:1639
 msgid "Resetting make for single job mode."
 msgstr "将 make 重置为单任务模式。"
 
-#: src/main.c:1677
+#: src/main.c:1679
 msgid "internal error: multiple --jobserver-fds options"
 msgstr "内部错误：多个 --jobserver-fds 选项"
 
-#: src/main.c:1685
+#: src/main.c:1687
 #, c-format
 msgid "internal error: invalid --jobserver-fds string `%s'"
 msgstr "内部错误：非法 --jobserver-fds 字符串“%s”"
 
-#: src/main.c:1695
+#: src/main.c:1697
 msgid "warning: -jN forced in submake: disabling jobserver mode."
 msgstr ""
 
-#: src/main.c:1705
+#: src/main.c:1707
 msgid "dup jobserver"
 msgstr "复制任务服务器"
 
-#: src/main.c:1708
+#: src/main.c:1710
 msgid ""
 "warning: jobserver unavailable: using -j1.  Add `+' to parent make rule."
 msgstr ""
 
-#: src/main.c:1732
+#: src/main.c:1734
 msgid "More parallel jobs (-jN) than this platform can handle requested."
 msgstr ""
 
-#: src/main.c:1733
+#: src/main.c:1735
 msgid "Resetting to single job (-j1) mode."
 msgstr "重置为单任务模式 (-j1)。"
 
-#: src/main.c:1745
+#: src/main.c:1747
 msgid "creating jobs pipe"
 msgstr "正在创建任务管道"
 
-#: src/main.c:1758
+#: src/main.c:1760
 msgid "init jobserver pipe"
 msgstr "创始化任务服务器管道"
 
-#: src/main.c:1776
+#: src/main.c:1778
 msgid "Symbolic links not supported: disabling -L."
 msgstr ""
 
-#: src/main.c:1852
+#: src/main.c:1854
 msgid "Updating makefiles....\n"
 msgstr "正在更新 makefile....\n"
 
-#: src/main.c:1877
+#: src/main.c:1879
 #, c-format
 msgid "Makefile `%s' might loop; not remaking it.\n"
 msgstr "Makefile “%s”可能循环；不会重新创建它。\n"
 
-#: src/main.c:1955
+#: src/main.c:1957
 #, c-format
 msgid "Failed to remake makefile `%s'."
 msgstr "重新创建 makefile “%s” 失败。"
 
-#: src/main.c:1972
+#: src/main.c:1974
 #, c-format
 msgid "Included makefile `%s' was not found."
 msgstr "找不到被引入的 makefile “%s”"
 
-#: src/main.c:1977
+#: src/main.c:1979
 #, c-format
 msgid "Makefile `%s' was not found"
 msgstr "找不到 makefile “%s”"
 
-#: src/main.c:2045
+#: src/main.c:2047
 msgid "Couldn't change back to original directory."
 msgstr "无法回到原始目录。"
 
-#: src/main.c:2065
+#: src/main.c:2067
 msgid "Re-executing:"
 msgstr "重新执行："
 
-#: src/main.c:2101
+#: src/main.c:2103
 msgid "unlink (temporary file): "
 msgstr "删除 (临时文件)："
 
-#: src/main.c:2121
+#: src/main.c:2123
 msgid "No targets specified and no makefile found"
 msgstr "没有指明目标并且找不到 makefile"
 
-#: src/main.c:2123
+#: src/main.c:2125
 msgid "No targets"
 msgstr "无目标"
 
-#: src/main.c:2128
+#: src/main.c:2130
 msgid "Updating goal targets....\n"
 msgstr ""
 
-#: src/main.c:2154
+#: src/main.c:2156
 msgid "warning:  Clock skew detected.  Your build may be incomplete."
 msgstr "警告：检测到时钟错误。您的创建可能是不完整的。"
 
-#: src/main.c:2309
+#: src/main.c:2311
 #, c-format
 msgid "Usage: %s [options] [target] ...\n"
 msgstr "用法：%s [选项] [目标] ...\n"
 
-#: src/main.c:2315
+#: src/main.c:2317
 #, c-format
 msgid ""
 "\n"
 "This program built for %s\n"
 msgstr ""
 
-#: src/main.c:2317
+#: src/main.c:2319
 #, c-format
 msgid ""
 "\n"
 "This program built for %s (%s)\n"
 msgstr ""
 
-#: src/main.c:2320
+#: src/main.c:2322
 #, fuzzy, c-format
 msgid "Report bugs to <bug-make@gnu.org>\n"
 msgstr ""
 "\n"
 "错误报告到 <bug-make@gnu.org>。\n"
 
-#: src/main.c:2392
+#: src/main.c:2394
 #, fuzzy, c-format
 msgid "the `-%c' option requires a non-empty string argument"
 msgstr "“-%c”选项需要正整数参数"
 
-#: src/main.c:2441
+#: src/main.c:2443
 #, c-format
 msgid "the `-%c' option requires a positive integral argument"
 msgstr "“-%c”选项需要正整数参数"
 
-#: src/main.c:2867
+#: src/main.c:2869
 #, c-format
 msgid ""
 "%sThis is free software; see the source for copying conditions.\n"
@@ -1023,28 +1023,28 @@ msgid ""
 "%sPARTICULAR PURPOSE.\n"
 msgstr ""
 
-#: src/main.c:2873
+#: src/main.c:2875
 #, c-format
 msgid ""
 "\n"
 "%sThis program built for %s\n"
 msgstr ""
 
-#: src/main.c:2875
+#: src/main.c:2877
 #, c-format
 msgid ""
 "\n"
 "%sThis program built for %s (%s)\n"
 msgstr ""
 
-#: src/main.c:2893
+#: src/main.c:2895
 #, c-format
 msgid ""
 "\n"
 "# Make data base, printed on %s"
 msgstr ""
 
-#: src/main.c:2902
+#: src/main.c:2904
 #, c-format
 msgid ""
 "\n"
