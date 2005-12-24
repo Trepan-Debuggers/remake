@@ -1,4 +1,4 @@
-$Id: how-to-make-a-release.txt,v 1.4 2005/12/24 21:28:44 rockyb Exp $
+$Id: how-to-make-a-release.txt,v 1.5 2005/12/24 21:56:33 rockyb Exp $
 
 - Let people know of a pending release,
   e.g. bashdb-devel@lists.sourceforge.net; no major changes before
@@ -23,7 +23,7 @@ $Id: how-to-make-a-release.txt,v 1.4 2005/12/24 21:28:44 rockyb Exp $
 
 - make documentation
   cd doc
-  make makedb.html make.html makedb.dvi
+  make mdb.html make.html mdb.dvi
   cd doxygen; ./run_doxygen
 
 - Tag release in CVS: 

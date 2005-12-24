@@ -1,5 +1,4 @@
-/* $Id: make.h,v 1.23 2005/12/24 04:32:10 rockyb Exp $
-Miscellaneous global declarations and portability cruft for GNU Make.
+/* $Id: make.h,v 1.24 2005/12/24 21:56:33 rockyb Exp $
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -18,6 +17,11 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
+
+/** \file make.h 
+ *
+ * \brief Miscellaneous global declarations and portability cruft for GNU
+ *  Make. */
 
 /* We use <config.h> instead of "config.h" so that a compilation
    using -I. -I$srcdir will use ./config.h rather than $srcdir/config.h
@@ -221,12 +225,9 @@ extern void exit (int) __attribute__ ((noreturn));
 
 #endif /* Standard headers.  */
 
-/* These should be in stdlib.h.  Make sure we have them.  */
-#ifndef EXIT_SUCCESS
-# define EXIT_SUCCESS 0
-#endif
 #ifndef EXIT_FAILURE
-# define EXIT_FAILURE 0
+/** EXIT_FAILURE This should be in stdlib.h.  Make sure it is defined. */
+# define EXIT_FAILURE 1
 #endif
 
 #ifndef  ANSI_STRING
@@ -492,9 +493,19 @@ extern int handling_fatal_signal;
 #define MAX(_a,_b) ((_a)>(_b)?(_a):(_b))
 #endif
 
-#define MAKE_SUCCESS 0
-#define MAKE_TROUBLE 1
-#define MAKE_FAILURE 2
+/* \brief the exit codes that the GNU Make gives. */
+typedef enum {
+  MAKE_SUCCESS = 0, /**< GNU Make completed okay */
+  MAKE_TROUBLE = 1, /**< A we ran failed */
+  MAKE_FAILURE = 2  /**< GNU Make had an internal error/failure */
+} make_exit_code_t;
+
+/** This variable is trickery to force the above enum symbol values to
+    be recorded in debug symbol tables. It is used to allow one refer
+    to above enumeration values in a debugger and debugger
+    expressions */
+extern make_exit_code_t make_exit_code;
+
 
 /* Set up heap debugging library dmalloc.  */
 

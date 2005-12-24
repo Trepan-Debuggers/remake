@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.45 2005/12/24 16:17:52 rockyb Exp $
+/* $Id: main.c,v 1.46 2005/12/24 21:56:33 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -324,6 +324,12 @@ int always_make_flag = 0;
 /* If nonzero, we're in the "try to rebuild makefiles" phase.  */
 
 int rebuilding_makefiles = 0;
+
+/** This variable is trickery to force the above enum symbol values to
+    be recorded in debug symbol tables. It is used to allow one refer
+    to above enumeration values in a debugger and debugger
+    expressions */
+make_exit_code_t make_exit_code;
 
 
 /* The usage output.  We write it this way to make life easier for the

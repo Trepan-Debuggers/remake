@@ -1,4 +1,4 @@
-/* $Id: rule.h,v 1.5 2005/12/10 02:50:32 rockyb Exp $
+/* $Id: rule.h,v 1.6 2005/12/24 21:56:33 rockyb Exp $
 Copyright (C) 1988, 1989, 1991, 1992, 1993, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -37,7 +37,7 @@ typedef struct rule
     char in_use;		/**< If in use by a parent pattern_search.  */
   } rule_t;
 
-/*! For calling install_pattern_rule.  */
+/*! \brief For calling install_pattern_rule.  */
 struct pspec {
   char *target, *dep, *commands;
 };

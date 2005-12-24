@@ -1,4 +1,4 @@
-/*$Id: trace.h,v 1.7 2005/12/10 02:50:32 rockyb Exp $
+/*$Id: trace.h,v 1.8 2005/12/24 21:56:33 rockyb Exp $
 Copyright (C) 2004, 2005 Rocky Bernstein <rocky@panix.com>
 This file is part of GNU Make.
 
@@ -64,7 +64,7 @@ extern target_stack_node_t *trace_push_target (target_stack_node_t *p,
 /*! Pop the next target from the call stack.. */
 extern void trace_pop_target (target_stack_node_t *p);
 
-/*! Node for an item in the "include Makefile" stack */
+/*! \brief Node for an item in the "include Makefile" stack */
 typedef struct floc_stack_node
   {
     floc_t                 *p_floc;
