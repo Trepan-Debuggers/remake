@@ -1,4 +1,4 @@
-/* $Id: function.c,v 1.20 2005/12/20 15:11:23 rockyb Exp $
+/* $Id: function.c,v 1.21 2005/12/24 03:56:00 rockyb Exp $
 Builtin expansion for GNU Make.
 Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004, 2005
 Free Software Foundation, Inc.
@@ -499,16 +499,27 @@ func_origin (char *o, char **argv, const char *funcname UNUSED)
   return o;
 }
 
-#ifdef VMS
-# define IS_PATHSEP(c) ((c) == ']')
-#else
-# ifdef HAVE_DOS_PATHS
-#  define IS_PATHSEP(c) ((c) == '/' || (c) == '\\')
-# else
-#  define IS_PATHSEP(c) ((c) == '/')
-# endif
-#endif
+static char *
+func_flavor (char *o, char **argv, const char *funcname UNUSED)
+{
+  variable_t *v = lookup_variable (argv[0], strlen (argv[0]));
 
+  if (v == 0)
+    o = variable_buffer_output (o, "undefined", 9);
+  else
+    if (v->recursive)
+      o = variable_buffer_output (o, "recursive", 9);
+    else
+      o = variable_buffer_output (o, "simple", 6);
+
+  return o;
+}
+
+#ifdef HAVE_DOS_PATHS
+#  define IS_PATHSEP(c) ((c) == '/' || (c) == '\\')
+#else
+#  define IS_PATHSEP(c) ((c) == '/')
+#endif
 
 static char *
 func_notdir_suffix (char *o, char **argv, const char *funcname)
@@ -677,6 +688,22 @@ func_firstword (char *o, char **argv, const char *funcname UNUSED)
   return o;
 }
 
+static char *
+func_lastword (char *o, char **argv, const char *funcname UNUSED)
+{
+  unsigned int i;
+  char *words = argv[0];    /* Use a temp variable for find_next_token */
+  char *p = 0;
+  char *t;
+
+  while ((t = find_next_token (&words, &i)))
+    p = t;
+
+  if (p != 0)
+    o = variable_buffer_output (o, p, i);
+
+  return o;
+}
 
 static char *
 func_words (char *o, char **argv, const char *funcname UNUSED)
@@ -1076,11 +1103,22 @@ func_error (char *o, char **argv, const char *funcname)
     }
   strcpy (p, *argvp);
 
-  if (*funcname == 'e')
+  switch (*funcname) {
+  case 'e':
     fatal (reading_file, "%s", msg);
-
-  /* The warning function expands to the empty string.  */
-  error (reading_file, "%s", msg);
+    
+  case 'w':
+    error (reading_file, "%s", msg);
+    break;
+    
+  case 'i':
+    printf ("%s\n", msg);
+    fflush(stdout);
+    break;
+    
+  default:
+    fatal (reading_file, "Internal error: func_error: '%s'", funcname);
+  }
 
   return o;
 }
@@ -1637,6 +1675,158 @@ func_not (char* o, char **argv, char *funcname)
 #endif
 
 
+/* Return the absolute name of file NAME which does not contain any `.',
+   `..' components nor any repeated path separators ('/').   */
+
+static char *
+abspath (const char *name, char *apath)
+{
+  char *dest;
+  const char *start, *end, *apath_limit;
+
+  if (name[0] == '\0' || apath == NULL)
+    return NULL;
+
+  apath_limit = apath + GET_PATH_MAX;
+
+  if (name[0] != '/')
+    {
+      /* It is unlikely we would make it until here but just to make sure. */
+      if (!starting_directory)
+	return NULL;
+
+      strcpy (apath, starting_directory);
+
+      dest = strchr (apath, '\0');
+    }
+  else
+    {
+      apath[0] = '/';
+      dest = apath + 1;
+    }
+
+  for (start = end = name; *start != '\0'; start = end)
+    {
+      unsigned long len;
+
+      /* Skip sequence of multiple path-separators.  */
+      while (*start == '/')
+	++start;
+
+      /* Find end of path component.  */
+      for (end = start; *end != '\0' && *end != '/'; ++end)
+        ;
+
+      len = end - start;
+
+      if (len == 0)
+	break;
+      else if (len == 1 && start[0] == '.')
+	/* nothing */;
+      else if (len == 2 && start[0] == '.' && start[1] == '.')
+	{
+	  /* Back up to previous component, ignore if at root already.  */
+	  if (dest > apath + 1)
+	    while ((--dest)[-1] != '/');
+	}
+      else
+	{
+	  if (dest[-1] != '/')
+            *dest++ = '/';
+
+	  if (dest + len >= apath_limit)
+            return NULL;
+
+	  dest = memcpy (dest, start, len);
+          dest += len;
+	  *dest = '\0';
+	}
+    }
+
+  /* Unless it is root strip trailing separator.  */
+  if (dest > apath + 1 && dest[-1] == '/')
+    --dest;
+
+  *dest = '\0';
+
+  return apath;
+}
+
+static char *
+func_realpath (char *o, char **argv, const char *funcname UNUSED)
+{
+  /* Expand the argument.  */
+  char *p = argv[0];
+  char *path = 0;
+  int doneany = 0;
+  unsigned int len = 0;
+  PATH_VAR (in);
+  PATH_VAR (out);
+
+  while ((path = find_next_token (&p, &len)) != 0)
+    {
+      if (len < GET_PATH_MAX)
+        {
+          strncpy (in, path, len);
+          in[len] = '\0';
+
+          if
+          (
+#ifdef HAVE_REALPATH
+            realpath (in, out)
+#else
+            abspath (in, out)
+#endif
+          )
+            {
+              o = variable_buffer_output (o, out, strlen (out));
+              o = variable_buffer_output (o, " ", 1);
+              doneany = 1;
+            }
+        }
+    }
+
+  /* Kill last space.  */
+  if (doneany)
+    --o;
+
+ return o;
+}
+
+static char *
+func_abspath (char *o, char **argv, const char *funcname UNUSED)
+{
+  /* Expand the argument.  */
+  char *p = argv[0];
+  char *path = 0;
+  int doneany = 0;
+  unsigned int len = 0;
+  PATH_VAR (in);
+  PATH_VAR (out);
+
+  while ((path = find_next_token (&p, &len)) != 0)
+    {
+      if (len < GET_PATH_MAX)
+        {
+          strncpy (in, path, len);
+          in[len] = '\0';
+
+          if (abspath (in, out))
+            {
+              o = variable_buffer_output (o, out, strlen (out));
+              o = variable_buffer_output (o, " ", 1);
+              doneany = 1;
+            }
+        }
+    }
+
+  /* Kill last space.  */
+  if (doneany)
+    --o;
+
+ return o;
+}
+
 /* Lookup table for builtin functions.
 
    This doesn't have to be sorted; we use a straight lookup.  We might gain
@@ -1655,6 +1845,7 @@ static char *func_call (char *p_o, char **argv, const char *p_funcname);
 static struct function_table_entry function_table_init[] =
 {
  /* Name/size */                    /* MIN MAX EXP? Function */
+  { STRING_SIZE_TUPLE("abspath"),       0,  1,  1,  func_abspath},
   { STRING_SIZE_TUPLE("addprefix"),     2,  2,  1,  func_addsuffix_addprefix},
   { STRING_SIZE_TUPLE("addsuffix"),     2,  2,  1,  func_addsuffix_addprefix},
   { STRING_SIZE_TUPLE("basename"),      0,  1,  1,  func_basename_dir},
@@ -1666,8 +1857,11 @@ static struct function_table_entry function_table_init[] =
   { STRING_SIZE_TUPLE("filter-out"),    2,  2,  1,  func_filter_filterout},
   { STRING_SIZE_TUPLE("findstring"),    2,  2,  1,  func_findstring},
   { STRING_SIZE_TUPLE("firstword"),     0,  1,  1,  func_firstword},
+  { STRING_SIZE_TUPLE("flavor"),        0,  1,  1,  func_flavor},
   { STRING_SIZE_TUPLE("join"),          2,  2,  1,  func_join},
+  { STRING_SIZE_TUPLE("lastword"),      0,  1,  1,  func_lastword},
   { STRING_SIZE_TUPLE("patsubst"),      3,  3,  1,  func_patsubst},
+  { STRING_SIZE_TUPLE("realpath"),      0,  1,  1,  func_realpath},
   { STRING_SIZE_TUPLE("shell"),         0,  1,  1,  func_shell},
   { STRING_SIZE_TUPLE("sort"),          0,  1,  1,  func_sort},
   { STRING_SIZE_TUPLE("strip"),         0,  1,  1,  func_strip},
@@ -1678,6 +1872,7 @@ static struct function_table_entry function_table_init[] =
   { STRING_SIZE_TUPLE("origin"),        0,  1,  1,  func_origin},
   { STRING_SIZE_TUPLE("foreach"),       3,  3,  0,  func_foreach},
   { STRING_SIZE_TUPLE("call"),          1,  0,  1,  func_call},
+  { STRING_SIZE_TUPLE("info"),          0,  1,  1,  func_error},
   { STRING_SIZE_TUPLE("error"),         0,  1,  1,  func_error},
   { STRING_SIZE_TUPLE("warning"),       0,  1,  1,  func_error},
   { STRING_SIZE_TUPLE("if"),            2,  3,  0,  func_if},
