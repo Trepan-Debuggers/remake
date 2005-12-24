@@ -6,7 +6,7 @@ AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.28 2005/12/24 04:32:08 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.29 2005/12/24 16:17:52 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -80,6 +80,7 @@ AC_CHECK_FUNC(getopt_long,
                              LIBGETOPT_LIB="-lgnugetopt"])
               ])
 AC_SUBST(LIBGETOPT_LIB)
+AM_CONDITIONAL(USE_GETOPT, test "$ac_cv_func_getopt_long" = no)
 
 AM_PROG_CC_C_O
 AM_PROG_CC_STDC

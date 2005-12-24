@@ -1,5 +1,5 @@
 # -*-Perl-*-
-# $Id: trace,v 1.8 2005/12/24 14:53:14 rockyb Exp $
+# $Id: trace,v 1.9 2005/12/24 16:17:52 rockyb Exp $
 $description = "The following checks tracing.\n";
 
 $details = "We test line tracing, showing a target stack, line numbers\n"
@@ -142,7 +142,7 @@ $shell = "$lines[0] -x";
 
 # Compute what the output should be for this shell.
 my $foo_lines = "if [ -n FOO ] ; then echo \"test okay\"; fi";
-my $foo_output = `echo '$foo_lines' | $shell - 2>&1`;
+my $foo_output = `echo '$foo_lines' | $shell 2>&1`;
 chomp $foo_output;
 
 # We used option --trace in test 1, use short option name -x this time.

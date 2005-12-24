@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.44 2005/12/24 04:32:10 rockyb Exp $
+/* $Id: main.c,v 1.45 2005/12/24 16:17:52 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -42,6 +42,8 @@ MA 02111-1307, USA.  */
 #endif
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
+#else 
+#include "getopt.h"
 #endif
 
 /* alloca is in stdlib.h or alloca.h */

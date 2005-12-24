@@ -7,10 +7,18 @@ ACLOCAL_AMFLAGS	=  -I $(top_srcdir)/config
 
 bin_PROGRAMS =	make
 
+getopt_sources = getopt.c getopt1.c getopt.h
+
 if USE_CUSTOMS
   remote =	remote-cstms.c
 else
   remote =	remote-stub.c
+endif
+
+if USE_GETOPT
+   add_getopt_sources = $(getopt_sources)
+else
+   add_getopt_sources =
 endif
 
 make_SOURCES =	ar_fns.c arscan.c commands.c \
@@ -19,14 +27,14 @@ make_SOURCES =	ar_fns.c arscan.c commands.c \
 		function.c hash.c implicit.c job.c \
 	        main.c misc.c print.c read.c remake.c $(remote) rule.c \
 	        signame.c trace.c variable.c version.c vpath.c \
-	        $(getopt_sources) 
+	        $(add_getopt_sources) 
 
-EXTRA_make_SOURCES = remote-stub.c remote-cstms.c
+EXTRA_make_SOURCES = remote-stub.c remote-cstms.c $(getopt_sources)
 
 noinst_HEADERS = ar_fns.h arscan.h commands.h \
 	         dbg_break.h dbg_cmd.h dbg_fns.h dbg_stack.h \
 	         debug.h default.h dep.h dir_fns.h expand.h file.h \
-	         function.h gettext.h hash.h implicit.h job.h \
+	         function.h getopt.h gettext.h hash.h implicit.h job.h \
 		 make.h misc.h print.h read.h remake.h remote-stub.h rule.h \
 		 trace.h types.h variable.h  vpath.h
 
