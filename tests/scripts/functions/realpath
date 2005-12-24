@@ -1,0 +1,72 @@
+#                                                                    -*-perl-*-
+#$Id: realpath,v 1.1 2005/12/24 03:31:44 rockyb Exp $
+$description = "Test the realpath functions.";
+
+$details = "";
+
+run_make_test('
+ifneq ($(realpath .),$(CURDIR))
+  $(error )
+endif
+
+ifneq ($(realpath ./),$(CURDIR))
+  $(error )
+endif
+
+ifneq ($(realpath .///),$(CURDIR))
+  $(error )
+endif
+
+ifneq ($(realpath /),/)
+  $(error )
+endif
+
+ifneq ($(realpath ///),/)
+  $(error )
+endif
+
+ifneq ($(realpath /.),/)
+  $(error )
+endif
+
+ifneq ($(realpath ///.),/)
+  $(error )
+endif
+
+ifneq ($(realpath /./),/)
+  $(error )
+endif
+
+ifneq ($(realpath /.///),/)
+  $(error )
+endif
+
+ifneq ($(realpath /..),/)
+  $(error )
+endif
+
+ifneq ($(realpath ///..),/)
+  $(error )
+endif
+
+ifneq ($(realpath /../),/)
+  $(error )
+endif
+
+ifneq ($(realpath /..///),/)
+  $(error )
+endif
+
+ifneq ($(realpath . /..),$(CURDIR) /)
+  $(error )
+endif
+
+.PHONY: all
+all: ; @:
+',
+'',
+'');
+
+
+# This tells the test driver that the perl test script executed properly.
+1;
