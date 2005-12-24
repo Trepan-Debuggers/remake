@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.9 2005/12/23 14:00:55 rockyb Exp $
+@set RCSID $Id: make.texi,v 1.10 2005/12/24 03:18:07 rockyb Exp $
 @set EDITION 0.61
 @set VERSION 3.80+dbg
 @set UPDATED 10 Dec 2005
@@ -272,6 +272,7 @@ Functions for Transforming Text
 * Value Function::              Return the un-expanded value of a variable.
 * Eval Function::               Evaluate the arguments as makefile syntax.
 * Origin Function::             Find where a variable got its value.
+* Flavor Function::             Find out the flavor of a variable.
 * Shell Function::              Substitute the output of a shell command.
 * Make Control Functions::      Functions that control how make runs.
 
@@ -5664,6 +5665,7 @@ call, just as a variable might be substituted.
 * Value Function::              Return the un-expanded value of a variable.
 * Eval Function::               Evaluate the arguments as makefile syntax.
 * Origin Function::             Find where a variable got its value.
+* Flavor Function::             Find out the flavor of a variable.
 * Shell Function::              Substitute the output of a shell command.
 * Make Control Functions::      Functions that control how make runs.
 @end menu
@@ -5984,10 +5986,11 @@ returns @samp{bar}.
 @cindex selecting word lists
 Returns the list of words in @var{text} starting with word @var{s} and
 ending with word @var{e} (inclusive).  The legitimate values of @var{s}
-and @var{e} start from 1.  If @var{s} is bigger than the number of words
-in @var{text}, the value is empty.  If @var{e} is bigger than the number
-of words in @var{text}, words up to the end of @var{text} are returned.
-If @var{s} is greater than @var{e}, nothing is returned.  For example,
+start from 1; @var{e} may start from 0.  If @var{s} is bigger than the
+number of words in @var{text}, the value is empty.  If @var{e} is
+bigger than the number of words in @var{text}, words up to the end of
+@var{text} are returned.  If @var{s} is greater than @var{e}, nothing
+is returned.  For example,
 
 @example
 $(wordlist 2, 3, foo bar baz)
@@ -6541,7 +6544,7 @@ clean:
 @end group
 @end example
 
-@node Origin Function, Shell Function, Eval Function, Functions
+@node Origin Function, Flavor Function, Eval Function, Functions
 @section The @code{origin} Function
 @findex origin
 @cindex variables, origin of
@@ -6650,7 +6653,49 @@ Here the redefinition takes place if @samp{$(origin bletch)} returns either
 @samp{environment} or @samp{environment override}.
 @xref{Text Functions, , Functions for String Substitution and Analysis}.
 
-@node Shell Function, Make Control Functions, Origin Function, Functions
+@node Flavor Function, Shell Function, Origin Function, Functions
+@section The @code{flavor} Function
+@findex flavor
+@cindex variables, flavor of
+@cindex flavor of variable
+
+The @code{flavor} function is unlike most other functions (and like
+@code{origin} function) in that it does not operate on the values of
+variables; it tells you something @emph{about} a variable. Specifically,
+it tells you the flavor of a variable
+(@pxref{Flavors, ,The Two Flavors of Variables}).
+
+The syntax of the @code{flavor} function is:
+
+@example
+$(flavor @var{variable})
+@end example
+
+Note that @var{variable} is the @emph{name} of a variable to inquire about;
+not a @emph{reference} to that variable.  Therefore you would not normally
+use a @samp{$} or parentheses when writing it.  (You can, however, use a
+variable reference in the name if you want the name not to be a constant.)
+
+The result of this function is a string that identifies the flavor of the
+variable @var{variable}:
+
+@table @samp
+@item undefined
+
+if @var{variable} was never defined.
+
+@item recursive
+
+if @var{variable} is a recursively expanded variable.
+
+@item simple
+
+if @var{variable} is a simply expanded variable.
+
+@end table
+
+
+@node Shell Function, Make Control Functions, Flavor Function, Functions
 @section The @code{shell} Function
 @findex shell
 @cindex commands, expansion
@@ -9860,6 +9905,12 @@ Return a string describing how the @code{make} variable @var{variable} was
 defined.@*
 @xref{Origin Function, , The @code{origin} Function}.
 
+@item $(flavor @var{variable})
+
+Return a string describing the flavor of the @code{make} variable
+@var{variable}.@*
+@xref{Flavor Function, , The @code{flavor} Function}.
+
 @item $(foreach @var{var},@var{words},@var{text})
 
 Evaluate @var{text} with @var{var} bound to each word in @var{words},
@@ -9962,7 +10013,9 @@ Directory search path for files not found in the current directory.@*
 
 The name of the system default command interpreter, usually @file{/bin/sh}.
 You can set @code{SHELL} in the makefile to change the shell used to run
-commands.  @xref{Execution, ,Command Execution}.
+commands.  @xref{Execution, ,Command Execution}.  The @code{SHELL}
+variable is handled specially when importing from and exporting to the
+environment.  @xref{Environment, ,Using Variable from the Environment}.
 
 @item MAKESHELL
 
