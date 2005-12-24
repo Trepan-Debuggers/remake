@@ -7,10 +7,10 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.11 2005/12/24 03:48:57 rockyb Exp $
+@set RCSID $Id: make.texi,v 1.12 2005/12/24 04:03:49 rockyb Exp $
 @set EDITION 0.61
 @set VERSION 3.80+dbg
-@set UPDATED 10 Dec 2005
+@set UPDATED 25 Dec 2005
 @set UPDATE-MONTH Dec 2005
 @c ISBN provided by Lisa M. Opus Goldstein <opus@gnu.org>, 5 May 2004
 @set ISBN 1-882114-83-5
