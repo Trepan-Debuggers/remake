@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.43 2005/12/23 14:00:57 rockyb Exp $
+/* $Id: main.c,v 1.44 2005/12/24 04:32:10 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -234,6 +234,9 @@ int no_builtin_variables_flag = 0;
 int keep_going_flag;
 int default_keep_going_flag = 0;
 
+/*! Nonzero means check symlink mtimes. (-L) */
+int check_symlink_flag = 0;
+
 /*! Nonzero means print directory before starting and when done
   (-w).  */
 
@@ -362,6 +365,8 @@ static const char *const usage[] =
   -l [N], --load-average[=N], --max-load[=N]\n\
                                Don't start multiple jobs unless load is below N.\n"),
     N_("\
+  -L, --check-symlink-times    Use the latest mtime between symlinks and target.\n"),
+    N_("\
   -n, --just-print, --dry-run, --recon\n\
                                Don't actually run any commands; just print them.\n"),
     N_("\
@@ -454,6 +459,8 @@ static const command_switch_t switches[] =
     { 'l', positive_int, (stringlist_t **) &max_load_average, 1, 1, 0,
 	(char *) &default_load_average, (char *) &default_load_average,
 	"load-average" },
+    { 'L', flag, (stringlist_t **) &check_symlink_flag, 1, 1, 0, 0, 0,
+      "check-symlink-times" },
     { 'm', ignore, 0, 0, 0, 0, 0, 0, 0 },
     { 'n', flag, (stringlist_t **) &just_print_flag, 1, 1, 1, 0, 0, "just-print" },
     { 'o', string, &old_files, 0, 0, 0, 0, 0, "old-file" },
@@ -1762,6 +1769,14 @@ main (int argc, char **argv, char **envp)
       jobserver_fds->max = 1;
     }
 #endif /* MAKE_JOBSERVER */
+
+#ifndef MAKE_SYMLINKS
+  if (check_symlink_flag)
+    {
+      error (NILF, _("Symbolic links not supported: disabling -L."));
+      check_symlink_flag = 0;
+    }
+#endif
 
   /* Set up MAKEFLAGS and MFLAGS again, so they will be right.  */
 

@@ -1,4 +1,4 @@
-/* $Id: make.h,v 1.22 2005/12/23 03:29:34 rockyb Exp $
+/* $Id: make.h,v 1.23 2005/12/24 04:32:10 rockyb Exp $
 Miscellaneous global declarations and portability cruft for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -435,6 +435,9 @@ extern int no_builtin_variables_flag;
 /*! Nonzero means keep going even if remaking some file fails
   (-k).  */
 extern int keep_going_flag;
+
+/*! Nonzero means check symlink mtimes. (-L) */
+int check_symlink_flag;
 
 /*! Nonzero means print directory before starting and when done
   (-w).  */

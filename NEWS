@@ -40,6 +40,8 @@ Version 3.80+dbg-0.60
 
 * Incorporate patches from GNU/Linux make 3.80.
 
+* Incorporate new functions from GNU Make 3.81: abspath, realpath, lastword
+
 * Expand documentation.
 
 * NOTE: the prompt has changed from "makedb" to "mdb" as has the 

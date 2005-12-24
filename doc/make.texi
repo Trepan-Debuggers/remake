@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.12 2005/12/24 04:03:49 rockyb Exp $
+@set RCSID $Id: make.texi,v 1.13 2005/12/24 04:32:09 rockyb Exp $
 @set EDITION 0.61
 @set VERSION 3.80+dbg
 @set UPDATED 25 Dec 2005
@@ -7573,6 +7573,16 @@ Specifies that no new jobs (commands) should be started if there are
 other jobs running and the load average is at least @var{load} (a
 floating-point number).  With no argument, removes a previous load
 limit.  @xref{Parallel, ,Parallel Execution}.
+
+@item -L
+@cindex @code{-L}
+@itemx --check-symlink-times
+@cindex @code{--check-symlink-times}
+On systems that support symbolic links, this option causes @code{make}
+to consider the timestamps on any symbolic links in addition to the
+timestamp on the file referenced by those links.  When this option is
+provided, the most recent timestamp among the file and the symbolic
+links is taken as the modification time for this target file.
 
 @item -n
 @cindex @code{-n}

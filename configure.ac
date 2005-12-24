@@ -6,7 +6,7 @@ AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.27 2005/12/23 14:00:53 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.28 2005/12/24 04:32:08 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -152,7 +152,7 @@ if test "$ac_cv_func_gettimeofday" = yes; then
 fi
 
 AC_CHECK_FUNCS(	atexit bsd_signal dup2  fdopen getcwd getgroups \
-		memcpy memmove mkstemp mktemp pipe \
+		lstat memcpy memmove mkstemp mktemp pipe readlink \
 		setegid seteuid setlinebuf setreuid setregid setvbuf \
 	        sigaction sigsetmask strchr strdup strerror strsignal )
 
@@ -343,6 +343,14 @@ case "$ac_cv_func_pipe/$ac_cv_func_sigaction/$make_cv_sa_restart/$has_wait_nohan
   yes/yes/yes/yes/yes)
     AC_DEFINE(MAKE_JOBSERVER, 1,
               [Define this to enable job server support in GNU make.]);;
+esac
+
+# if we have both lstat() and readlink() then we can support symlink
+# timechecks.
+case "$ac_cv_func_lstat/$ac_cv_func_readlink" in
+  yes/yes)
+    AC_DEFINE(MAKE_SYMLINKS, 1,
+              [Define this to enable symbolic link timestamp checking.]);;
 esac
 
 # Find the SCCS commands, so we can include them in our default rules.

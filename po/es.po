@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU make 3.79.1\n"
 "Report-Msgid-Bugs-To: rocky@panix.com\n"
-"POT-Creation-Date: 2005-12-23 08:14-0500\n"
+"POT-Creation-Date: 2005-12-23 22:57-0500\n"
 "PO-Revision-Date: 2001-12-28 12:24+0100\n"
 "Last-Translator: Max de Mendizábal <max@upn.mx>\n"
 "Language-Team: Spanish <es@li.org>\n"
@@ -416,77 +416,77 @@ msgid ""
 "# "
 msgstr ""
 
-#: src/function.c:738
+#: src/function.c:765
 msgid "non-numeric first argument to `word' function"
 msgstr "el primer argumento de la función `word' no es numérico"
 
-#: src/function.c:742
+#: src/function.c:769
 msgid "first argument to `word' function must be greater than 0"
 msgstr "el primer argumento de la función `word' debe ser mayor a 0"
 
-#: src/function.c:763
+#: src/function.c:790
 msgid "non-numeric first argument to `wordlist' function"
 msgstr "el primer argumento de la función `wordlist' no es numérico"
 
-#: src/function.c:765
+#: src/function.c:792
 msgid "non-numeric second argument to `wordlist' function"
 msgstr "el primer argumento de la función `wordlist' no es numérico"
 
-#: src/function.c:1312
+#: src/function.c:1350
 #, c-format
 msgid "create_child_process: DuplicateHandle(In) failed (e=%d)\n"
 msgstr "create_child_process: fallo en DuplicateHandle(In), (e=%d)\n"
 
-#: src/function.c:1323
+#: src/function.c:1361
 #, c-format
 msgid "create_child_process: DuplicateHandle(Err) failed (e=%d)\n"
 msgstr "create_child_process: fallo en DuplicateHandle(Err), (e=%d)\n"
 
-#: src/function.c:1328
+#: src/function.c:1366
 #, c-format
 msgid "CreatePipe() failed (e=%d)\n"
 msgstr "Fallo en CreatePipe(), (e=%d)\n"
 
-#: src/function.c:1333
+#: src/function.c:1371
 msgid "windows32_openpipe (): process_init_fd() failed\n"
 msgstr "windows32_openpipe (): fallo en process_init_fd()\n"
 
-#: src/function.c:1576
+#: src/function.c:1614
 #, c-format
 msgid "Cleaning up temporary batch file %s\n"
 msgstr "Limpiando el archivo temporal %s\n"
 
-#: src/function.c:1703
+#: src/function.c:1898
 #, c-format
 msgid "Insufficient number of arguments (%d) to function `%s'"
 msgstr "Número de argumentos (%d) insuficientes para la función `%s'"
 
-#: src/function.c:1714
+#: src/function.c:1909
 #, c-format
 msgid "Unimplemented on this platform: function `%s'"
 msgstr "No implementado en esta plataforma: función `%s'"
 
-#: src/function.c:1765
+#: src/function.c:1960
 #, c-format
 msgid "unterminated call to function `%s': missing `%c'"
 msgstr "la llamada a la función `%s' no concluyó: falta `%c'"
 
-#: src/function.c:1873
+#: src/function.c:2068
 #, c-format
 msgid "calling built-in %s("
 msgstr ""
 
-#: src/function.c:1889
+#: src/function.c:2084
 #, c-format
 msgid "%%s() returns \"%%%d.%ds\"\n"
 msgstr ""
 
-#: src/function.c:1910
+#: src/function.c:2105
 #, c-format
 msgid "calling %s("
 msgstr ""
 
-#: src/function.c:1967
+#: src/function.c:2162
 #, c-format
 msgid "%s() returns \"%s\"\n"
 msgstr ""
@@ -841,17 +841,11 @@ msgstr ""
 
 #: src/main.c:347
 msgid ""
-"  -E, --extended-errors\n"
-"                               Additional error reporting.\n"
-msgstr ""
-
-#: src/main.c:350
-msgid ""
 "  -f FILE, --file=FILE, --makefile=FILE\n"
 "                               Read FILE as a makefile.\n"
 msgstr ""
 
-#: src/main.c:353
+#: src/main.c:350
 #, fuzzy
 msgid "  -h, --help                   Print this message and exit.\n"
 msgstr "Muestra este mensaje y finaliza"
@@ -862,12 +856,12 @@ msgstr "Muestra este mensaje y finaliza"
 # tambien.
 # No me gusta este mensaje, preferiría: Se ignoran los errores obtenidos
 # en la ejecución de las instrucciones  em+
-#: src/main.c:355
+#: src/main.c:352
 #, fuzzy
 msgid "  -i, --ignore-errors          Ignore errors from commands.\n"
 msgstr "No se toman en cuenta los errores provenientes de los comandos"
 
-#: src/main.c:357
+#: src/main.c:354
 msgid ""
 "  -I DIRECTORY, --include-dir=DIRECTORY\n"
 "                               Search DIRECTORY for included makefiles.\n"
@@ -876,7 +870,7 @@ msgstr ""
 # Yo traduciría "infinite" por "infinitos", no por "una infinidad", que
 # parece que son muchos menos... sv
 # Ok. mm
-#: src/main.c:360
+#: src/main.c:357
 #, fuzzy
 msgid ""
 "  -j [N], --jobs[=N]           Allow N jobs at once; infinite jobs with no "
@@ -887,27 +881,32 @@ msgstr ""
 
 # No entiendo por qué aquí empleas subjuntivo: "pudieron". sv
 # Es incorrecto. Es una de las opciones `k' que dice... mm
-#: src/main.c:362
+#: src/main.c:359
 #, fuzzy
 msgid ""
 "  -k, --keep-going             Keep going when some targets can't be made.\n"
 msgstr "Sigue avanzando aún cuando no se puedan crear algunos objetivos"
 
-#: src/main.c:364
+#: src/main.c:361
 msgid ""
 "  -l [N], --load-average[=N], --max-load[=N]\n"
 "                               Don't start multiple jobs unless load is "
 "below N.\n"
 msgstr ""
 
-#: src/main.c:367
+#: src/main.c:364
 msgid ""
 "  -n, --just-print, --dry-run, --recon\n"
 "                               Don't actually run any commands; just print "
 "them.\n"
 msgstr ""
 
-#: src/main.c:370
+#: src/main.c:367
+msgid ""
+"  --no-extended-errors         Do not give additional error reporting.\n"
+msgstr ""
+
+#: src/main.c:369
 msgid ""
 "  -o FILE, --old-file=FILE, --assume-old=FILE\n"
 "                               Consider FILE to be very old and don't remake "
@@ -916,12 +915,12 @@ msgstr ""
 
 # de 'make' em+
 # ok. mm
-#: src/main.c:373
+#: src/main.c:372
 #, fuzzy
 msgid "  -p, --print-data-base        Print make's internal database.\n"
 msgstr "Se imprime la base de datos interna de `make'"
 
-#: src/main.c:375
+#: src/main.c:374
 #, fuzzy
 msgid ""
 "  -q, --question               Run no commands; exit status says if up to "
@@ -935,7 +934,7 @@ msgstr ""
 # ¡ Por favor ! , ¿ pero qué es eso de interconstruidas ?
 # Pon almacenadas internamente, que es exactamente lo que son :) em+
 # Bueno, bajo protesta. mm
-#: src/main.c:377
+#: src/main.c:376
 #, fuzzy
 msgid "  -r, --no-builtin-rules       Disable the built-in implicit rules.\n"
 msgstr "Se deshabilitan las reglas implícitas almacenadas internamente"
@@ -945,7 +944,7 @@ msgstr "Se deshabilitan las reglas implícitas almacenadas internamente"
 # ¡ Por favor ! , ¿ pero qué es eso de interconstruidas ?
 # Pon almacenadas internamente, que es exactamente lo que son :) em+
 # Bueno, bajo protesta. mm
-#: src/main.c:379
+#: src/main.c:378
 #, fuzzy
 msgid ""
 "  -R, --no-builtin-variables   Disable the built-in variable settings.\n"
@@ -957,15 +956,13 @@ msgstr "Se deshabilitan los ajustes a las variables interconstruídas"
 # tambien.
 # No me gusta este mensaje, preferiría: Se ignoran los errores obtenidos
 # en la ejecución de las instrucciones  em+
-#: src/main.c:381
+#: src/main.c:380
 #, fuzzy
 msgid "  -s, --silent, --quiet        Don't echo commands.\n"
 msgstr "No se toman en cuenta los errores provenientes de los comandos"
 
-#: src/main.c:383
-msgid ""
-"  -S, --no-keep-going, --stop\n"
-"                               Turns off -k.\n"
+#: src/main.c:382
+msgid "  -S, --no-keep-going, --stop  Turns off -k.\n"
 msgstr ""
 
 # Se *tocan*, ¿no? sv
@@ -973,7 +970,7 @@ msgstr ""
 #
 # Pues entonces cámbialo arriba tambien em+
 # En donde? mm
-#: src/main.c:386
+#: src/main.c:384
 #, fuzzy
 msgid ""
 "  -t, --touch                  Touch targets instead of remaking them.\n"
@@ -981,18 +978,18 @@ msgstr "Se tocan los objetivos en vez de reconstruirlos"
 
 # Me comería el "Se" inicial. "Muestra la versión..." sv
 # Ok. mm
-#: src/main.c:388
+#: src/main.c:386
 #, fuzzy
 msgid ""
 "  -v, --version                Print the version number of make and exit.\n"
 msgstr "Muestra la versión del make y finaliza"
 
-#: src/main.c:390
+#: src/main.c:388
 msgid "  -V, --show-variables         Show variable expansions.\n"
 msgstr ""
 
 # Lo mismo. sv
-#: src/main.c:392
+#: src/main.c:390
 #, fuzzy
 msgid "  -w, --print-directory        Print the current directory.\n"
 msgstr "Muestra el directorio actual"
@@ -1002,14 +999,14 @@ msgstr "Muestra el directorio actual"
 # apaga luz Mari Luz apaga luz ,que yo no puedo vivir con
 # tanta luz ... ( canción tradicional ) ( no lo pude evitar ) em+
 # Juar, Juar, Juar. Coincido, pero el sentido es el mismo. mm
-#: src/main.c:394
+#: src/main.c:392
 #, fuzzy
 msgid ""
 "  --no-print-directory         Turn off -w, even if it was turned on "
 "implicitly.\n"
 msgstr "Desactiva -w, aún cuando haya sido activado implícitamente"
 
-#: src/main.c:396
+#: src/main.c:394
 msgid ""
 "  -W FILE, --what-if=FILE, --new-file=FILE, --assume-new=FILE\n"
 "                               Consider FILE to be infinitely new.\n"
@@ -1017,48 +1014,48 @@ msgstr ""
 
 # Lo mismo. sv
 # Todas estas parecen descripciones de opciones.
-#: src/main.c:399
+#: src/main.c:397
 #, fuzzy
 msgid ""
 "  --warn-undefined-variables   Warn when an undefined variable is "
 "referenced.\n"
 msgstr "Advierte cuando se hace una referencia a una variable no definida"
 
-#: src/main.c:401
+#: src/main.c:399
 msgid ""
 "  -x, --trace[=TYPE]           Trace command execution TYPE  may be\n"
 "                               \"read\", \"normal\", \"noshell\",  or \"full"
 "\".\n"
 msgstr ""
 
-#: src/main.c:405
+#: src/main.c:403
 msgid ""
 "  -X [type], --debugger[=TYPE] Enter debugger. TYPE may be\n"
 "                               \"preread\", \"preaction\", \"full\",\n"
 "                               \"error\", or \"fatal\".\n"
 msgstr ""
 
-#: src/main.c:410
+#: src/main.c:408
 msgid ""
 "  --unix                       Run in UNIX mode (use sh.exe subshell).\n"
 msgstr ""
 
-#: src/main.c:412
+#: src/main.c:410
 msgid ""
 "  --win32                      Run in Win32 mode (use Win32 subshell).\n"
 msgstr ""
 
-#: src/main.c:643
+#: src/main.c:641
 msgid "empty string invalid as file name"
 msgstr "no se permite que una cadena vacía sea el nombre de un archivo"
 
-#: src/main.c:719
+#: src/main.c:717
 #, c-format
 msgid "%s: Interrupt/Exception caught (code = 0x%x, addr = 0x%x)\n"
 msgstr ""
 "%s: Se atrapó una interrupción/excepción (código = 0x%x, dirección = 0x%x)\n"
 
-#: src/main.c:726
+#: src/main.c:724
 #, c-format
 msgid ""
 "\n"
@@ -1073,103 +1070,103 @@ msgstr ""
 "Banderas de excepción %x\n"
 "Dirección de la excepción %x\n"
 
-#: src/main.c:734
+#: src/main.c:732
 #, c-format
 msgid "Access violation: write operation at address %x\n"
 msgstr "Violación de acceso: operación de escritura en la dirección %x\n"
 
-#: src/main.c:735
+#: src/main.c:733
 #, c-format
 msgid "Access violation: read operation at address %x\n"
 msgstr "Violación de acceso: operación de lectura en la dirección %x\n"
 
-#: src/main.c:802
+#: src/main.c:800
 #, c-format
 msgid "find_and_set_shell setting default_shell = %s\n"
 msgstr "la variable find_and_set_shell puesta como default_shell = %s\n"
 
-#: src/main.c:850
+#: src/main.c:848
 #, c-format
 msgid "find_and_set_shell path search set default_shell = %s\n"
 msgstr ""
 "la ruta de búsqueda find_and_set_shell está puesta como default_shell = %s\n"
 
-#: src/main.c:1257
+#: src/main.c:1255
 #, c-format
 msgid "%s is suspending for 30 seconds..."
 msgstr "%s está suspendida por 30 segundos..."
 
-#: src/main.c:1259
+#: src/main.c:1257
 #, c-format
 msgid "done sleep(30). Continuing.\n"
 msgstr "se hizo un sleep(30). Continuando.\n"
 
-#: src/main.c:1505
+#: src/main.c:1503
 msgid "Makefile from standard input specified twice."
 msgstr ""
 "El archivo Makefile ha sido especificado dos veces desde la entrada estándard"
 
-#: src/main.c:1539
+#: src/main.c:1537
 msgid "fopen (temporary file)"
 msgstr "fopen (archivo temporal)"
 
-#: src/main.c:1545
+#: src/main.c:1543
 msgid "fwrite (temporary file)"
 msgstr "fwrite (archivo temporal)"
 
-#: src/main.c:1631
+#: src/main.c:1629
 msgid "Do not specify -j or --jobs if sh.exe is not available."
 msgstr "No especifique -j o --jobs si sh.exe no está disponible."
 
-#: src/main.c:1632
+#: src/main.c:1630
 msgid "Resetting make for single job mode."
 msgstr "Reajustando a make para el modo monotarea."
 
-#: src/main.c:1672
+#: src/main.c:1670
 msgid "internal error: multiple --jobserver-fds options"
 msgstr "error interno: hay varias opciones --jobserver-fds"
 
-#: src/main.c:1680
+#: src/main.c:1678
 #, c-format
 msgid "internal error: invalid --jobserver-fds string `%s'"
 msgstr "error interno: cadena --jobserver-fds inválida `%s'"
 
-#: src/main.c:1690
+#: src/main.c:1688
 msgid "warning: -jN forced in submake: disabling jobserver mode."
 msgstr ""
 "atención: se fuerza a -jN en el submake: se deshabilita el modo de servidor "
 "de tareas."
 
-#: src/main.c:1700
+#: src/main.c:1698
 msgid "dup jobserver"
 msgstr "servidor de tareas duplicado"
 
-#: src/main.c:1703
+#: src/main.c:1701
 msgid ""
 "warning: jobserver unavailable: using -j1.  Add `+' to parent make rule."
 msgstr ""
 "atención: el servidor de tareas no está disponible: se utilizará -j1. Añada `"
 "+' a la regla padre del make."
 
-#: src/main.c:1727
+#: src/main.c:1725
 msgid "More parallel jobs (-jN) than this platform can handle requested."
 msgstr ""
 
-#: src/main.c:1728
+#: src/main.c:1726
 msgid "Resetting to single job (-j1) mode."
 msgstr "Reajustando al modo monotarea (-j1)."
 
-#: src/main.c:1740
+#: src/main.c:1738
 msgid "creating jobs pipe"
 msgstr "creando una tubería de trabajos"
 
-#: src/main.c:1753
+#: src/main.c:1751
 msgid "init jobserver pipe"
 msgstr "se inicializa la tubería al servidor de tareas"
 
 # Antes pusiste "makefiles". Coherencia. sv
 # Cierto. mm
-#: src/main.c:1839
+#: src/main.c:1837
 msgid "Updating makefiles....\n"
 msgstr "Actualizando archivos makefiles....\n"
 
@@ -1179,56 +1176,56 @@ msgstr "Actualizando archivos makefiles....\n"
 # Pondría ( como en un mensaje anterior ) se autoreferencia ... em+
 # He puesto makefile con minúsculas , par ser coherentes em+
 # Ok. Es más breve. mm.
-#: src/main.c:1864
+#: src/main.c:1862
 #, c-format
 msgid "Makefile `%s' might loop; not remaking it.\n"
 msgstr "El makefile `%s' se autoreferencia; por lo cual no se reconstruye.\n"
 
 # Lo mismo. sv
-#: src/main.c:1942
+#: src/main.c:1940
 #, c-format
 msgid "Failed to remake makefile `%s'."
 msgstr "Fallo al reconstruir el makefile `%s'."
 
 # Lo mismo. sv
-#: src/main.c:1959
+#: src/main.c:1957
 #, c-format
 msgid "Included makefile `%s' was not found."
 msgstr "No se encontró el makefile incluído `%s'."
 
 # Lo mismo. sv
-#: src/main.c:1964
+#: src/main.c:1962
 #, c-format
 msgid "Makefile `%s' was not found"
 msgstr "No se encontró el Makefile `%s'"
 
-#: src/main.c:2032
+#: src/main.c:2030
 msgid "Couldn't change back to original directory."
 msgstr "No se pudo regresar al directorio original."
 
-#: src/main.c:2052
+#: src/main.c:2050
 msgid "Re-executing:"
 msgstr "Re-ejecutando:"
 
-#: src/main.c:2088
+#: src/main.c:2086
 msgid "unlink (temporary file): "
 msgstr "unlink (archivo temporal)"
 
 # Sugerencia: "No se especificó ningún objetivo ... " sv
 # Ok. Me gusta. mm
-#: src/main.c:2108
+#: src/main.c:2106
 msgid "No targets specified and no makefile found"
 msgstr "No se especificó ningún objetivo y no se encontró ningún makefile"
 
-#: src/main.c:2110
+#: src/main.c:2108
 msgid "No targets"
 msgstr "No hay objetivos"
 
-#: src/main.c:2115
+#: src/main.c:2113
 msgid "Updating goal targets....\n"
 msgstr "Actualizando los objetivos finales....\n"
 
-#: src/main.c:2141
+#: src/main.c:2139
 msgid "warning:  Clock skew detected.  Your build may be incomplete."
 msgstr ""
 "atención: Se ha detectado una desviación en el reloj. La construcción podría "
@@ -1239,26 +1236,26 @@ msgstr ""
 # "target" es "objetivo", no "objetivos". Fíjate que lleva puntos
 # suspensivos, permitiendo así varios objetivos. sv
 # Ok. mm
-#: src/main.c:2296
+#: src/main.c:2294
 #, c-format
 msgid "Usage: %s [options] [target] ...\n"
 msgstr "Modo de empleo: %s [opciones] [objetivo] ...\n"
 
-#: src/main.c:2302
+#: src/main.c:2300
 #, c-format
 msgid ""
 "\n"
 "This program built for %s\n"
 msgstr ""
 
-#: src/main.c:2304
+#: src/main.c:2302
 #, c-format
 msgid ""
 "\n"
 "This program built for %s (%s)\n"
 msgstr ""
 
-#: src/main.c:2307
+#: src/main.c:2305
 #, fuzzy, c-format
 msgid "Report bugs to <bug-make@gnu.org>\n"
 msgstr ""
@@ -1267,21 +1264,21 @@ msgstr ""
 
 # Me comería el "de" de "requiere de" sv
 # Ok. mm
-#: src/main.c:2379
+#: src/main.c:2377
 #, fuzzy, c-format
 msgid "the `-%c' option requires a non-empty string argument"
 msgstr "la opción `-%c' requiere un argumento positivo y entero"
 
 # Me comería el "de" de "requiere de" sv
 # Ok. mm
-#: src/main.c:2428
+#: src/main.c:2426
 #, c-format
 msgid "the `-%c' option requires a positive integral argument"
 msgstr "la opción `-%c' requiere un argumento positivo y entero"
 
 # De esto hablaremos otro día. sv
 # Si. Es bastante complicado. mm
-#: src/main.c:2854
+#: src/main.c:2852
 #, fuzzy, c-format
 msgid ""
 "%sThis is free software; see the source for copying conditions.\n"
@@ -1300,21 +1297,21 @@ msgstr ""
 "%sReporte los errores a <bug-make@gnu.org>.\n"
 "\n"
 
-#: src/main.c:2860
+#: src/main.c:2858
 #, c-format
 msgid ""
 "\n"
 "%sThis program built for %s\n"
 msgstr ""
 
-#: src/main.c:2862
+#: src/main.c:2860
 #, c-format
 msgid ""
 "\n"
 "%sThis program built for %s (%s)\n"
 msgstr ""
 
-#: src/main.c:2880
+#: src/main.c:2878
 #, c-format
 msgid ""
 "\n"
@@ -1328,7 +1325,7 @@ msgstr ""
 # Porqué 'del', o pones 'del programa' Make o pones
 # 'de Make' em+
 # Ok. mm
-#: src/main.c:2889
+#: src/main.c:2887
 #, c-format
 msgid ""
 "\n"

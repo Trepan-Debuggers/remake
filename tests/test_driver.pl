@@ -12,7 +12,7 @@
 # this routine controls the whole mess; each test suite sets up a few
 # variables and then calls &toplevel, which does all the real work.
 
-# $Id: test_driver.pl,v 1.10 2005/12/18 13:30:33 rockyb Exp $
+# $Id: test_driver.pl,v 1.11 2005/12/24 04:32:10 rockyb Exp $
 
 sub print_standard_usage
 {
@@ -442,13 +442,13 @@ sub run_each_test
       $status = "ok     ($tests_passed passed)";
       for ($i = $num_of_tmpfiles; $i; $i--)
       {
-        &delete ($tmp_filename . &num_suffix ($i) );
+        &rmfiles ($tmp_filename . &num_suffix ($i) );
       }
 
       for ($i = $num_of_logfiles ? $num_of_logfiles : 1; $i; $i--)
       {
-        &delete ($log_filename . &num_suffix ($i) );
-        &delete ($base_filename . &num_suffix ($i) );
+        &rmfiles ($log_filename . &num_suffix ($i) );
+        &rmfiles ($base_filename . &num_suffix ($i) );
       }
     }
     elsif ($code > 0) {
@@ -479,9 +479,9 @@ sub run_each_test
 # If the keep flag is not set, this subroutine deletes all filenames that
 # are sent to it.
 
-sub delete
+sub rmfiles
 {
-  local(@files) = @_;
+  my(@files) = @_;
 
   if (!$keep)
   {
@@ -497,10 +497,10 @@ sub delete
 
 sub get_caller
 {
-  local($depth);
-  local($package);
-  local($filename);
-  local($linenum);
+  my($depth);
+  my($package);
+  my($filename);
+  my($linenum);
 
   $depth = defined ($_[0]) ? $_[0] : 1;
   ($package, $filename, $linenum) = caller ($depth + 1);
@@ -509,8 +509,8 @@ sub get_caller
 
 sub error
 {
-  local($message) = $_[0];
-  local($caller) = &get_caller (1);
+  my($message) = $_[0];
+  my($caller) = &get_caller (1);
 
   if (defined ($_[1]))
   {
@@ -522,8 +522,8 @@ sub error
 
 sub compare_output
 {
-  local($answer,$logfile) = @_;
-  local($slurp);
+  my($answer,$logfile) = @_;
+  my($slurp);
 
   print "Comparing Output ........ " if $debug;
 
@@ -551,7 +551,7 @@ sub compare_output
     print "\nCreating Difference File ...\n" if $debug;
 
     # Create the difference file
-    local($command) = "diff -c " . &get_basefile . " " . $logfile;
+    my($command) = "diff -c " . &get_basefile . " " . $logfile;
     &run_command_with_output(&get_difffile,$command);
 
   }
@@ -562,8 +562,8 @@ sub compare_output
 
 sub read_file_into_string
 {
-  local($filename) = @_;
-  local($oldslash) = $/;
+  my($filename) = @_;
+  my($oldslash) = $/;
 
   undef $/;
 
@@ -1010,7 +1010,7 @@ sub compare_dir_tree
 
 sub num_suffix
 {
-  local($num) = @_;
+  my($num) = @_;
 
   if (--$num > 0) {
     return "$extext$num";
@@ -1029,7 +1029,7 @@ sub num_suffix
 
 sub get_logfile
 {
-  local($no_increment) = @_;
+  my($no_increment) = @_;
 
   $num_of_logfiles += !$no_increment;
 
@@ -1061,7 +1061,7 @@ sub get_difffile
 
 sub get_tmpfile
 {
-  local($no_increment) = @_;
+  my($no_increment) = @_;
 
   $num_of_tmpfiles += !$no_increment;
 

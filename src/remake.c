@@ -1,4 +1,4 @@
-/* $Id: remake.c,v 1.22 2005/12/20 15:11:24 rockyb Exp $
+/* $Id: remake.c,v 1.23 2005/12/24 04:32:10 rockyb Exp $
 Basic dependency engine for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -1375,18 +1375,91 @@ f_mtime (file_t *file, int search)
 static FILE_TIMESTAMP
 name_mtime (char *name)
 {
+  FILE_TIMESTAMP mtime;
   struct stat st;
   int e;
 
   EINTRLOOP (e, stat (name, &st));
-  if (e != 0)
+  if (e == 0)
+    mtime = FILE_TIMESTAMP_STAT_MODTIME (name, st);
+  else if (errno == ENOENT || errno == ENOTDIR)
+    mtime = NONEXISTENT_MTIME;
+  else
     {
-      if (errno != ENOENT && errno != ENOTDIR)
-        perror_with_name ("stat:", name);
+      perror_with_name ("stat: ", name);
       return NONEXISTENT_MTIME;
     }
 
-  return FILE_TIMESTAMP_STAT_MODTIME (name, st);
+  /* If we get here we either found it, or it doesn't exist.
+     If it doesn't exist see if we can use a symlink mtime instead.  */
+
+#ifdef MAKE_SYMLINKS
+#ifndef S_ISLNK
+# define S_ISLNK(_m)     (((_m)&S_IFMT)==S_IFLNK)
+#endif
+  if (check_symlink_flag)
+    {
+      PATH_VAR (lpath);
+
+      /* Check each symbolic link segment (if any).  Find the latest mtime
+         amongst all of them (and the target file of course).
+         Note that we have already successfully dereferenced all the links
+         above.  So, if we run into any error trying to lstat(), or
+         readlink(), or whatever, something bizarre-o happened.  Just give up
+         and use whatever mtime we've already computed at that point.  */
+      strcpy (lpath, name);
+      while (1)
+        {
+          FILE_TIMESTAMP ltime;
+          PATH_VAR (lbuf);
+          long llen;
+          char *p;
+
+          EINTRLOOP (e, lstat (lpath, &st));
+          if (e)
+            {
+              /* Just take what we have so far.  */
+              if (errno != ENOENT && errno != ENOTDIR)
+                perror_with_name ("lstat: ", lpath);
+              break;
+            }
+
+          /* If this is not a symlink, we're done (we started with the real
+             file's mtime so we don't need to test it again).  */
+          if (!S_ISLNK (st.st_mode))
+            break;
+
+          /* If this mtime is newer than what we had, keep the new one.  */
+          ltime = FILE_TIMESTAMP_STAT_MODTIME (lpath, st);
+          if (ltime > mtime)
+            mtime = ltime;
+
+          /* Set up to check the file pointed to by this link.  */
+          EINTRLOOP (llen, readlink (lpath, lbuf, GET_PATH_MAX));
+          if (llen < 0)
+            {
+              /* Eh?  Just take what we have.  */
+              perror_with_name ("readlink: ", lpath);
+              break;
+            }
+          lbuf[llen] = '\0';
+
+          /* If the target is fully-qualified or the source is just a
+             filename, then the new path is the target.  Otherwise it's the
+             source directory plus the target.  */
+          if (lbuf[0] == '/' || (p = strrchr (lpath, '/')) == NULL)
+            strcpy (lpath, lbuf);
+          else if ((p - lpath) + llen + 2 > GET_PATH_MAX)
+            /* Eh?  Path too long!  Again, just go with what we have.  */
+            break;
+          else
+            /* Create the next step in the symlink chain.  */
+            strcpy (p+1, lbuf);
+        }
+    }
+#endif
+
+  return mtime;
 }
 
 
