@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.10 2005/12/24 03:18:07 rockyb Exp $
+@set RCSID $Id: make.texi,v 1.11 2005/12/24 03:48:57 rockyb Exp $
 @set EDITION 0.61
 @set VERSION 3.80+dbg
 @set UPDATED 10 Dec 2005
@@ -1239,11 +1239,11 @@ If a makefile named @code{Makefile} has this content:
 
 @example
 @group
-name1 := $(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))
+name1 := $(lastword $(MAKEFILE_LIST))
 
 include inc.mk
 
-name2 := $(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))
+name2 := $(lastword $(MAKEFILE_LIST))
 
 all:
         @@echo name1 = $(name1)
@@ -1485,7 +1485,12 @@ immediate if the variable was previously set as a simple variable
 
 All instances of conditional syntax are parsed immediately, in their
 entirety; this includes the @code{ifdef}, @code{ifeq}, @code{ifndef},
-and @code{ifneq} forms.
+and @code{ifneq} forms.  Of course this means that automatic variables
+cannot be used in conditional statements, as automatic variables are
+not set until the command script for that rule is invoked.  If you
+need to use automatic variables in a conditional you @emph{must} use
+shell conditional syntax, in your command script proper, for these
+tests, not @code{make} conditionals.
 
 @subheading Rule Definition
 @cindex target, expansion
@@ -3321,17 +3326,59 @@ foo : bar/lose
 @cindex @code{\} (backslash), in commands
 @cindex quoting newline, in commands
 @cindex newline, quoting, in commands
-If you would like to split a single shell command into multiple lines of
-text, you must use a backslash at the end of all but the last subline.
-Such a sequence of lines is combined into a single line, by deleting the
-backslash-newline sequences, before passing it to the shell.  Thus, the
-following is equivalent to the preceding example:
+A shell command can be split into multiple lines of text by placing a
+backslash before each newline.  Such a sequence of lines is provided
+to the shell as a single command script.  The backslash and newline
+are preserved in the shell command.  If the first character on the
+line after a backslash-newline is a tab, the tab will @emph{not} be
+included in the shell command.  So, this makefile:
 
 @example
 @group
-foo : bar/lose
-        cd bar;  \
-        gobble lose > ../foo
+all :
+        @@echo no\
+space
+        @@echo no\
+        space
+@end group
+@end example
+
+consists of two separate shell commands where the output is:
+
+@example
+@group
+nospace
+nospace
+@end group
+@end example
+
+As a more complex example, this makefile:
+
+@example
+@group
+all : ; @@echo 'hello \
+        world' ; echo "hello \
+    world"
+@end group
+@end example
+
+will run one shell with a command script of:
+
+@example
+@group
+echo 'hello \
+world' ; echo "hello \
+    world"
+@end group
+@end example
+
+which, according to shell quoting rules, will yield the following output:
+
+@example
+@group
+hello \
+world
+hello     world
 @end group
 @end example
 
@@ -5487,10 +5534,25 @@ else
 endif
 @end example
 
+or:
+
+@example
+@var{conditional-directive}
+@var{text-if-one-is-true}
+else @var{conditional-directive}
+@var{text-if-true}
+else
+@var{text-if-false}
+endif
+@end example
+
 @noindent
-If the condition is true, @var{text-if-true} is used; otherwise,
-@var{text-if-false} is used instead.  The @var{text-if-false} can be any
-number of lines of text.
+There can be as many ``@code{else} @var{conditional-directive}''
+clauses as necessary.  Once a given condition is true,
+@var{text-if-true} is used and no other clause is used; if no
+condition is true then @var{text-if-false} is used.  The
+@var{text-if-true} and @var{text-if-false} can be any number of lines
+of text.
 
 The syntax of the @var{conditional-directive} is the same whether the
 conditional is simple or complex; after an @code{else} or not.  There
@@ -5536,12 +5598,26 @@ compare them.  If they are different, the @var{text-if-true} is
 effective; otherwise, the @var{text-if-false}, if any, is effective.
 
 @item ifdef @var{variable-name}
-If the variable @var{variable-name} has a non-empty value, the
-@var{text-if-true} is effective; otherwise, the @var{text-if-false},
-if any, is effective.  Variables that have never been defined have an
-empty value.  The variable @var{variable-name} is itself expanded, so
-it could be a variable or function that expands to the name of a
-variable.
+The @code{ifdef} form takes the @emph{name} of a variable as its
+argument, not a reference to a variable.  The value of that variable
+has a non-empty value, the @var{text-if-true} is effective; otherwise,
+the @var{text-if-false}, if any, is effective.  Variables that have
+never been defined have an empty value.  The text @var{variable-name}
+is expanded, so it could be a variable or function that expands
+to the name of a variable.  For example:
+
+@example
+bar = true
+foo = bar
+ifdef $(foo)
+frobozz = yes
+endif
+@end example
+
+The variable reference @code{$(foo)} is expanded, yielding @code{bar},
+which is considered to be the name of a variable.  The variable
+@code{bar} is not expanded, but its value is examined to determine if
+it is non-empty.
 
 Note that @code{ifdef} only tests whether a variable has a value.  It
 does not expand the variable to see if that value is nonempty.
@@ -6024,6 +6100,25 @@ $(firstword foo bar)
 produces the result @samp{foo}.  Although @code{$(firstword
 @var{text})} is the same as @code{$(word 1,@var{text})}, the
 @code{firstword} function is retained for its simplicity.@refill
+
+
+@item $(lastword @var{names}@dots{})
+@findex lastword
+@cindex words, extracting last
+The argument @var{names} is regarded as a series of names, separated
+by whitespace.  The value is the last name in the series.
+
+For example,
+
+@example
+$(lastword foo bar)
+@end example
+
+@noindent
+produces the result @samp{bar}.  Although @code{$(lastword
+@var{text})} is the same as @code{$(word $(words @var{text}),@var{text})},
+the @code{lastword} function was added for its simplicity and better
+performance.@refill
 @end table
 
 Here is a realistic example of the use of @code{subst} and
@@ -6213,6 +6308,27 @@ wildcard characters (as in shell file name patterns).  The result of
 @code{wildcard} is a space-separated list of the names of existing files
 that match the pattern.
 @xref{Wildcards, ,Using Wildcard Characters in File Names}.
+
+@item $(realpath @var{names}@dots{})
+@findex realpath
+@cindex realpath
+@cindex file name, realpath of
+For each file name in @var{names} return the canonical absolute name.
+A canonical name does not contain any @code{.} or @code{..} components,
+nor any repeated path separators (@code{/}) or symlinks. In case of a
+failure the empty string is returned. Consult the @code{realpath(3)}
+documentation for a list of possible failure causes.
+
+@item $(abspath @var{names}@dots{})
+@findex abspath
+@cindex abspath
+@cindex file name, abspath of
+For each file name in @var{names} return an absolute name that does
+not contain any @code{.} or @code{..} components, nor any repeated path
+separators (@code{/}). Note that in contrast to @code{realpath}
+function, @code{abspath} does not resolve symlinks and does not require
+the file names to refer to an existing file or directory. Use the
+@code{wildcard} function to test for existence.
 @end table
 
 @node Foreach Function, If Function, File Name Functions, Functions
@@ -6796,6 +6912,13 @@ and the resulting message is displayed, but processing of the makefile
 continues.
 
 The result of the expansion of this function is the empty string.
+
+@item $(info @var{text}@dots{})
+@findex info
+@cindex printing messages
+This function does nothing more than print its (expanded) argument(s)
+to standard output.  No makefile name or line number is added.  The
+result of the expansion of this function is the empty string.
 @end table
 
 @node Running, Implicit Rules, Functions, Top
@@ -9833,6 +9956,26 @@ Select words in @var{text} that @emph{do not} match any of the @var{pattern} wor
 Sort the words in @var{list} lexicographically, removing duplicates.@*
 @xref{Text Functions, , Functions for String Substitution and Analysis}.
 
+@item $(word @var{n},@var{text})
+Extract the @var{n}th word (one-origin) of @var{text}.@*
+@xref{Text Functions, , Functions for String Substitution and Analysis}.
+
+@item $(words @var{text})
+Count the number of words in @var{text}.@*
+@xref{Text Functions, , Functions for String Substitution and Analysis}.
+
+@item $(wordlist @var{s},@var{e},@var{text})
+Returns the list of words in @var{text} from @var{s} to @var{e}.@*
+@xref{Text Functions, , Functions for String Substitution and Analysis}.
+
+@item $(firstword @var{names}@dots{})
+Extract the first word of @var{names}.@*
+@xref{Text Functions, , Functions for String Substitution and Analysis}.
+
+@item $(lastword @var{names}@dots{})
+Extract the last word of @var{names}.@*
+@xref{Text Functions, , Functions for String Substitution and Analysis}.
+
 @item $(dir @var{names}@dots{})
 Extract the directory part of each file name.@*
 @xref{File Name Functions, ,Functions for File Names}.
@@ -9861,26 +10004,21 @@ Prepend @var{prefix} to each word in @var{names}.@*
 Join two parallel lists of words.@*
 @xref{File Name Functions, ,Functions for File Names}.
 
-@item $(word @var{n},@var{text})
-Extract the @var{n}th word (one-origin) of @var{text}.@*
-@xref{File Name Functions, ,Functions for File Names}.
-
-@item $(words @var{text})
-Count the number of words in @var{text}.@*
-@xref{File Name Functions, ,Functions for File Names}.
-
-@item $(wordlist @var{s},@var{e},@var{text})
-Returns the list of words in @var{text} from @var{s} to @var{e}.@*
-@xref{File Name Functions, ,Functions for File Names}.
-
-@item $(firstword @var{names}@dots{})
-Extract the first word of @var{names}.@*
-@xref{File Name Functions, ,Functions for File Names}.
-
 @item $(wildcard @var{pattern}@dots{})
 Find file names matching a shell file name pattern (@emph{not} a
 @samp{%} pattern).@*
 @xref{Wildcard Function, ,The Function @code{wildcard}}.
+
+@item $(realpath @var{names}@dots{})
+For each file name in @var{names}, expand to an absolute name that
+does not contain any @code{.}, @code{..}, nor symlinks.@*
+@xref{File Name Functions, ,Functions for File Names}.
+
+@item $(abspath @var{names}@dots{})
+For each file name in @var{names}, expand to an absolute name that
+does not contain any @code{.} or @code{..} components, but preserves
+symlinks.@*
+@xref{File Name Functions, ,Functions for File Names}.
 
 @item $(error @var{text}@dots{})
 
