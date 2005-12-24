@@ -1,4 +1,4 @@
-$Id: how-to-make-a-release.txt,v 1.5 2005/12/24 21:56:33 rockyb Exp $
+$Id: how-to-make-a-release.txt,v 1.6 2005/12/24 22:12:10 rockyb Exp $
 
 - Let people know of a pending release,
   e.g. bashdb-devel@lists.sourceforge.net; no major changes before
@@ -27,6 +27,7 @@ $Id: how-to-make-a-release.txt,v 1.5 2005/12/24 21:56:33 rockyb Exp $
   cd doxygen; ./run_doxygen
 
 - Tag release in CVS: 
+   cd ../.. # Or get in top_srcdir
    cvs log -h configure.ac
    cvs tag release_<0_3> . (replace <0_3> with the right value)
 
@@ -50,9 +51,9 @@ $Id: how-to-make-a-release.txt,v 1.5 2005/12/24 21:56:33 rockyb Exp $
 
   The NEWS file is your friend.
 
-- copy remake and makedb manual to web page:
-     cd ../remake/doc && make make.html makedb.html
-     scp make.html makedb.html id@bashdb.sourceforge.net:/home/groups/b/ba/bashdb/htdocs/remake/
+- copy remake and mdb manual to web page:
+     cd ../remake/doc && make make.html mdb.html
+     scp make.html mdb.html id@bashdb.sourceforge.net:/home/groups/b/ba/bashdb/htdocs/remake/
 
 - copy doxygen HTML to web pages:
   cd doc/doxygen/html
