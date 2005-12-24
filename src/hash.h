@@ -1,4 +1,4 @@
-/* $Id: hash.h,v 1.10 2005/12/17 19:44:10 rockyb Exp $
+/* $Id: hash.h,v 1.11 2005/12/24 21:31:42 rockyb Exp $
    Copyright (C) 1995, 1999, 2002, 2004, 2005 Free Software Foundation, Inc.
    Written by Greg McGary <gkm@gnu.org> <greg@mcgary.org>
 
@@ -36,7 +36,7 @@ typedef void (*hash_map_func_t) (void const *p_item);
 typedef void (*hash_map_arg_func_t) (void const *p_item, void *p_arg);
 
 /** \brief hash table structure. We use hash tables for things like
-    variables, targets, directires and functions. */
+    variables, targets, directories and functions. */
 typedef struct {
   void **ht_vec;
   unsigned long   ht_size;	 /**< total number of slots (power of 2) */
