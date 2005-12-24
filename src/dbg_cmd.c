@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.72 2005/12/23 03:29:33 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.73 2005/12/24 03:09:26 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -593,7 +593,7 @@ dbg_cmd_show_command (char *psz_arg)
 #ifdef HAVE_HISTORY_LIST
   HIST_ENTRY **hist_list = history_list();
   unsigned int i_line;
-  for (i_line=0; *hist_list; i_line++, *hist_list++) {
+  for (i_line=0; *hist_list; i_line++, *hist_list +=1) {
     printf("%5d  %s\n", i_line, (*hist_list)->line);
   }
 #endif
@@ -1066,7 +1066,7 @@ static debug_return_t dbg_cmd_set (char *psz_args)
     char *psz_varname = get_word(&psz_args);
 
     while (*psz_args && whitespace (*psz_args))
-      *psz_args++;
+      *psz_args +=1;
 
     if (is_abbrev_of (psz_varname, "variable", 3)) {
       return dbg_cmd_set_var(psz_args, 3);
@@ -1126,7 +1126,7 @@ static debug_return_t dbg_cmd_set_var (char *psz_args, int expand)
     unsigned int u_len = strlen(psz_varname);
 
     while (*psz_args && whitespace (*psz_args))
-      *psz_args++;
+      *psz_args +=1;
 
     p_v = lookup_variable (psz_varname, u_len);
 

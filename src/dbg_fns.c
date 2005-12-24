@@ -1,4 +1,4 @@
-/* $Id: dbg_fns.c,v 1.11 2005/12/20 15:11:23 rockyb Exp $
+/* $Id: dbg_fns.c,v 1.12 2005/12/24 03:09:26 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -101,7 +101,7 @@ get_word(char **ppsz_str)
   
   /* Skip leading blanks. */
   while (**ppsz_str && whitespace (**ppsz_str))
-    **ppsz_str++;
+    **ppsz_str += 1;
 
   /* Word starts here at first non blank character. */
   psz_word = *ppsz_str;
