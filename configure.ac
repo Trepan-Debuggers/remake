@@ -6,7 +6,7 @@ AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.31 2005/12/25 12:55:49 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.32 2005/12/25 12:56:05 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -232,7 +232,7 @@ MAKE_NAME="$make_name"
 AC_SUBST(MAKE_NAME)
 
 AC_ARG_WITH(default_shell,
-[  --with-default-shell    program do use for SHELL],
+[  --with-default-shell    program to use for SHELL],
 default_shell="${withval}", default_shell="/bin/sh")
 DEFAULT_SHELL="$default_shell"
 
