@@ -1,4 +1,4 @@
-/* $Id: file.h,v 1.7 2005/12/25 20:53:01 rockyb Exp $
+/* $Id: file.h,v 1.8 2005/12/25 20:59:40 rockyb Exp $
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -280,7 +280,12 @@ typedef enum {
 			+ ORDINARY_MTIME_MIN + FILE_TIMESTAMPS_PER_S - 1)
   /**< The largest ordinary timestamp.  */
 } mtime_status_t;
-  
+
+/** This variable is trickery to force the above enum symbol values to
+    be recorded in debug symbol tables. It is used to allow one refer
+    to above enumeration values in a debugger and debugger
+    expressions */
+extern mtime_status_t debugger_mtime_status;
 
 #define check_renamed(file)						\
   if (file)								\

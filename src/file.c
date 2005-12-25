@@ -1,4 +1,4 @@
-/* $Id: file.c,v 1.12 2005/12/25 20:53:01 rockyb Exp $
+/* $Id: file.c,v 1.13 2005/12/25 20:59:40 rockyb Exp $
 Target file hash table management for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -27,11 +27,12 @@ Boston, MA 02111-1307, USA.  */
 #include "commands.h"
 #include "debug.h"
 
-/* The below variable is to make sure the enumerations are accessible
+/* The below variables are to make sure the enumerations are accessible
    in a debugger. */
-print_target_mask_t debugger_enum_mask;
+print_target_mask_t  debugger_enum_mask;
+mtime_status_t       debugger_mtime_status;
 
-/* Hash table of files the makefile knows how to make.  */
+/** Hash table of files the makefile knows how to make.  */
 
 static unsigned long
 file_hash_1 (const void *key)
@@ -69,9 +70,6 @@ lookup_file (char *name)
 {
   file_t *f;
   file_t file_key;
-#if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
-  char *lname, *ln;
-#endif
 
   assert (*name != '\0');
 
