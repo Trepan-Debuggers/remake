@@ -1,12 +1,12 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(remake,3.80+dbg-0.60,rocky@panix.com)
+AC_INIT(remake,3.80+dbg-0.61cvs,rocky@panix.com)
 
 AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.29 2005/12/24 16:17:52 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.30 2005/12/25 10:10:49 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -231,6 +231,19 @@ AC_ARG_WITH(make_name,
 make_name="${withval}", make_name="remake")
 MAKE_NAME="$make_name"
 AC_SUBST(MAKE_NAME)
+
+AC_ARG_WITH(default_shell,
+[  --with-default-shell    program do use for SHELL],
+default_shell="${withval}", default_shell="/bin/sh")
+DEFAULT_SHELL="$default_shell"
+
+## Could set default shell defaults here.
+##case $host_os in
+##     cygwin*|mingw*) ;;
+##     *) ;;
+##esac
+
+AC_SUBST(DEFAULT_SHELL)
 
 #
 # Check for readline to see if we can add debugging support.
@@ -480,10 +493,11 @@ AC_CONFIG_FILES([Makefile        \
                  config/Makefile \
 		 doc/Makefile    \
 		 emacs/Makefile  \
-		 emacs/mdb.el \
+		 emacs/mdb.el    \
 		 glob/Makefile   \
                  po/Makefile.in  \
 		 src/Makefile    \
+		 src/os.h        \
 		 tests/scripts/debugger/general
 		 ])
 

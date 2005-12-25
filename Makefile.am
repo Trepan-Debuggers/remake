@@ -14,7 +14,7 @@ man_MANS =	make.1
 # maintainers.
 
 EXTRA_DIST =	README build.sh.in $(man_MANS) \
-		README.customs README.makedb getloadavg.c \
+		README.customs README.mdb getloadavg.c \
 		README.W32 TODO ChangeLog.GNUMake
 
 MAKE_HOST =	@MAKE_HOST@
