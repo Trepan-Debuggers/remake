@@ -1,5 +1,5 @@
-/* $Id: ar_fns.h,v 1.4 2005/12/09 12:11:09 rockyb Exp $
-Copyright (C) 2005 Free Software Foundation, Inc.
+/* $Id: ar_fns.h,v 1.5 2005/12/25 10:08:35 rockyb Exp $
+Copyright (C) 2005 rocky@panix.com
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -29,26 +29,43 @@ Boston, MA 02111-1307, USA.  */
    system headers are included.  */
 #define _GNU_SOURCE 1
 
+#include "types.h"
 #include <time.h>
 
-/*! Return nonzero if PSZ_NAME is an archive-member reference, zero if not.
+/*! 
+   See if psz_name is an archive-member reference or not.
+
    An archive-member reference is a name like `lib(member)'.  If a
    name like `lib((entry))' is used, a fatal error is signaled at the
    attempt to use this unsupported feature.
-*/
-extern int ar_name(char *psz_name);
 
-/*! Parse the archive-member reference NAME into the archive and
-   member names.  Put the malloc'd archive name in *ARNAME_P if
-   ARNAME_P is non-nil; put the malloc'd member name in *MEMNAME_P if
-   MEMNAME_P is non-nil.
+   @param psz_name archive-member reference to look up.
+   @return true if psz_name is an archive-member reference, false if not.
 */
-extern void ar_parse_name (char *name, char **arname_p, char **memname_p);
+extern bool ar_name(char *psz_name);
 
-/*! Set the archive-member NAME's modtime to now.  */
+/*! 
+   Parse the archive-member reference into the archive and
+   member names.  
+
+   @param psz_name archive-member name to look up.
+   @param ppsz_arname place where the malloc'd archive name if it is non-nil
+   @param ppsz_memname place to put malloc'd member name if it is non-nil
+*/
+extern void ar_parse_name (char *psz_name, char **ppsz_arname, 
+			   char **ppsz_memname);
+
+/*! Set the archive-member modtime to now.  
+  @param psz_name member modtime name to set
+  @return 0 if things went okay 1; if not.
+*/
 extern int ar_touch (char *psz_name);
 
-/*! Return the modtime of PSZ_NAME.  */
-extern time_t ar_member_date (char *);
+/*! 
+  Get modtime date of an archive member.
+  @param psz_name archive-member name to retrieve modtime of
+  @return the modtime for psz_name. 
+*/
+extern time_t ar_member_date (char *psz_name);
 
 #endif /*AR_FNS_H*/

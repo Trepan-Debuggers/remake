@@ -1,4 +1,4 @@
-/* $Id: job.h,v 1.9 2005/12/10 02:50:32 rockyb Exp $
+/* $Id: job.h,v 1.10 2005/12/25 10:08:35 rockyb Exp $
 Copyright (C) 1992, 1993, 1996, 1999, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -53,7 +53,7 @@ typedef struct child
 				   this could be a pattern target.
 				 */
 
-    struct file *file;		/**< File being remade.  */
+    file_t *file;		/**< File being remade.  */
                                 /**< Note this can be different from the
 				   file of fileinfo. The above might be
 				   a pattern target, while this is a target

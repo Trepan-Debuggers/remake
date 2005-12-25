@@ -1,4 +1,4 @@
-/* $Id: ar_fns.c,v 1.7 2005/12/11 12:15:29 rockyb Exp $
+/* $Id: ar_fns.c,v 1.8 2005/12/25 10:08:35 rockyb Exp $
 Interface to `ar' archives for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -40,41 +40,43 @@ Boston, MA 02111-1307, USA.  */
    name like `lib((entry))' is used, a fatal error is signaled at the
    attempt to use this unsupported feature.
 */
-int
-ar_name (char *name)
+bool
+ar_name (char *psz_name)
 {
-  char *p = strchr (name, '(');
+  char *p = strchr (psz_name, '(');
   char *end;
 
-  if (p == 0 || p == name)
-    return 0;
+  if (p == 0 || p == psz_name)
+    return false;
 
   end = p + strlen (p) - 1;
   if (*end != ')')
-    return 0;
+    return false;
 
   if (p[1] == '(' && end[-1] == ')')
-    fatal (NILF, _("attempt to use unsupported feature: `%s'"), name);
+    fatal (NILF, _("attempt to use unsupported feature: `%s'"), psz_name);
 
-  return 1;
+  return true;
 }
 
+/*! 
+   Parse the archive-member reference into the archive and
+   member names.  
 
-/*! Parse the archive-member reference NAME into the archive and
-   member names.  Put the malloc'd archive name in *ARNAME_P if
-   ARNAME_P is non-nil; put the malloc'd member name in *MEMNAME_P if
-   MEMNAME_P is non-nil.
+   @param psz_name archive-member reference to look up.
+   @param arname_p place where the malloc'd archive name if it is non-nil
+   @param memname_p place to put malloc'd member name if it is non-nil
 */
 void
-ar_parse_name (char *name, char **arname_p, char **memname_p)
+ar_parse_name (char *psz_name, char **ppsz_arname, char **ppsz_memname)
 {
-  char *p = strchr (name, '('), *end = name + strlen (name) - 1;
+  char *p = strchr (psz_name, '('), *end = psz_name + strlen (psz_name) - 1;
 
-  if (arname_p != 0)
-    *arname_p = savestring (name, p - name);
+  if (ppsz_arname)
+    *ppsz_arname = savestring (psz_name, p - psz_name);
 
-  if (memname_p != 0)
-    *memname_p = savestring (p + 1, end - (p + 1));
+  if (ppsz_memname)
+    *ppsz_memname = savestring (p + 1, end - (p + 1));
 }
 
 static long int 
@@ -135,21 +137,23 @@ ar_member_date_1 (int desc UNUSED, char *mem, int truncated,
   return ar_name_equal (name, mem, truncated) ? date : 0;
 }
 
-/* Set the archive-member NAME's modtime to now.  */
-
+/*! Set the archive-member modtime to now.  
+  @param psz_name member modtime name to set
+  @return 0 if things went okay 1 if not.
+*/
 int
-ar_touch (char *name)
+ar_touch (char *psz_name)
 {
   char *arname, *memname;
   int arname_used = 0;
   int val;
 
-  ar_parse_name (name, &arname, &memname);
+  ar_parse_name (psz_name, &arname, &memname);
 
   /* Make sure we know the modtime of the archive itself before we
      touch the member, since this will change the archive itself.  */
   {
-    struct file *arfile;
+    file_t *arfile;
     arfile = lookup_file (arname);
     if (arfile == 0)
       {
@@ -181,7 +185,8 @@ ar_touch (char *name)
       break;
     default:
       error (NILF,
-             _("touch: Bad return code from ar_member_touch on `%s'"), name);
+             _("touch: Bad return code from ar_member_touch on `%s'"), 
+	     psz_name);
     }
 
   if (!arname_used)
@@ -193,14 +198,14 @@ ar_touch (char *name)
 
 /* State of an `ar_glob' run, passed to `ar_glob_match'.  */
 
-struct ar_glob_state
+typedef struct ar_glob_state
   {
     char *arname;
     char *pattern;
     unsigned int size;
     struct nameseq *chain;
     unsigned int n;
-  };
+  } ar_glob_state_t;
 
 /* This function is called by `ar_scan' to match one archive
    element against the pattern in STATE.  */
@@ -209,7 +214,7 @@ static long int
 ar_glob_match (int desc UNUSED, char *mem, int truncated UNUSED,
 	       long int hdrpos UNUSED, long int datapos UNUSED,
                long int size UNUSED, long int date UNUSED, int uid UNUSED,
-               int gid UNUSED, int mode UNUSED, struct ar_glob_state *state)
+               int gid UNUSED, int mode UNUSED, ar_glob_state_t *state)
 {
   if (fnmatch (state->pattern, mem, FNM_PATHNAME|FNM_PERIOD) == 0)
     {
@@ -263,7 +268,7 @@ glob_pattern_p (const char *pattern, int quote)
 struct nameseq *
 ar_glob (char *arname, char *member_pattern, unsigned int size)
 {
-  struct ar_glob_state state;
+  ar_glob_state_t state;
   char **names;
   struct nameseq *n;
   unsigned int i;

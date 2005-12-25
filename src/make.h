@@ -1,4 +1,4 @@
-/* $Id: make.h,v 1.24 2005/12/24 21:56:33 rockyb Exp $
+/* $Id: make.h,v 1.25 2005/12/25 10:08:35 rockyb Exp $
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -314,12 +314,9 @@ extern char *strsignal (int i_signum);
 #define strcaseequ(s1, s2) (strcasecmp((s1),(s2)) == 0)
 
 /* indicates whether or not we have Bourne shell */
-extern int no_default_sh_exe;
+extern bool no_default_sh_exe;
 
-/* is default_shell unixy? */
-extern int unixy_shell;
-
-extern int find_and_set_default_shell(char *token);
+extern int find_and_set_default_shell(char *p_token);
 #endif /* __CYGWIN__ */
 
 #define PATH_SEPARATOR_CHAR path_separator_char_
@@ -334,10 +331,10 @@ extern char path_separator_char_;
 extern void sync_Path_environment(void);
 extern int kill(int pid, int sig);
 extern int safe_stat(char *file, struct stat *sb);
-extern int find_and_set_default_shell(char *token);
+extern int find_and_set_default_shell(char *p_token);
 
 /** indicates whether or not we have Bourne shell */
-extern int no_default_sh_exe;
+extern bool no_default_sh_exe;
 
 /** is default_shell unixy? */
 extern bool unixy_shell;
@@ -391,10 +388,6 @@ extern char *getwd ();
 extern const floc_t *reading_file;
 
 
-/*! Print version information.
-*/
-extern void print_version (void);
-
 extern char **environ;
 
 /*! The recognized command switches.  */
@@ -485,6 +478,18 @@ extern char *version_string, *remote_description, *make_host;
 extern unsigned int commands_started;
 
 extern int handling_fatal_signal;
+
+/* is default_shell unixy? */
+extern int unixy_shell;
+
+/**! The default value of SHELL and the shell that is used when issuing
+   commands on targets.
+*/
+char *default_shell;
+
+/*! Print version information.
+*/
+extern void print_version (void);
 
 #ifndef MIN
 #define MIN(_a,_b) ((_a)<(_b)?(_a):(_b))

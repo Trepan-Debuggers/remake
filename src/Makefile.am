@@ -1,4 +1,6 @@
-# This is a -*-Makefile-*-, or close enough
+## Process this file with automake to create Makefile.in.
+## Copyright 2002, 2004, 2005 Free Software Foundation, Inc.
+## This is a -*-Makefile-*-, or close enough
 
 transform = s,make,@MAKE_NAME@,
 
@@ -35,7 +37,8 @@ noinst_HEADERS = ar_fns.h arscan.h commands.h \
 	         dbg_break.h dbg_cmd.h dbg_fns.h dbg_stack.h \
 	         debug.h default.h dep.h dir_fns.h expand.h file.h \
 	         function.h getopt.h gettext.h hash.h implicit.h job.h \
-		 make.h misc.h print.h read.h remake.h remote-stub.h rule.h \
+		 make.h misc.h os.h print.h \
+	         read.h remake.h remote-stub.h rule.h \
 		 trace.h types.h variable.h  vpath.h
 
 make_LDADD =	@LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@ @LIBINTL@ \
@@ -45,11 +48,6 @@ DEFS =		-DLOCALEDIR=\"$(localedir)\" -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(inc
 
 AM_CPPFLAGS =	$(GLOBINC)
 
-
-# Extra stuff to include in the distribution.
-# Note we need all the glob stuff here, rather than in glob/Makefile.am,
-# because often that directory isn't built on the systems used by the
-# maintainers.
 
 MAKE_HOST =	@MAKE_HOST@
 
@@ -74,6 +72,9 @@ loadavg.o: loadavg.c
 	$(COMPILE) -DTEST -c `test -f '$<' || echo '$(srcdir)/'`$<
 
 
+
+# Extra stuff to include in the distribution.
+EXTRA_DIST =	os.h.in
 
 # Forward targets
 

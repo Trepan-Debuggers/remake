@@ -1,4 +1,4 @@
-/* $Id: arscan.c,v 1.6 2005/12/01 08:30:34 rockyb Exp $
+/* $Id: arscan.c,v 1.7 2005/12/25 10:08:35 rockyb Exp $
 Library function for scanning an archive file.
 Copyright (C) 1987, 89, 91, 92, 93, 94, 95, 97, 2004, 2005
 Free Software Foundation, Inc.
@@ -110,11 +110,10 @@ struct ar_hdr
 # define   AR_HDR_SIZE	(sizeof (struct ar_hdr))
 #endif
 
-/* Takes three arguments ARCHIVE, FUNCTION and ARG.
+/*! 
+   Open the given archive, find its members one by one,
+   and for each one call function with the following arguments:
 
-   Open the archive named ARCHIVE, find its members one by one,
-   and for each one call FUNCTION with the following arguments:
-     archive file descriptor for reading the data,
      member name,
      member name might be truncated flag,
      member header position in file,
@@ -124,19 +123,20 @@ struct ar_hdr
      member uid,
      member gid,
      member protection mode,
-     ARG.
+     argument supplied as the last parameter.
 
-   The descriptor is poised to read the data of the member
-   when FUNCTION is called.  It does not matter how much
-   data FUNCTION reads.
+   @param archive  archive file descriptor for reading the data.
+   This descriptor is poised to read the data of the member
+   when function is called.  It does not matter how much
+   data function reads.
 
-   If FUNCTION returns nonzero, we immediately return
-   what FUNCTION returned.
+   @param function function to call for each member. If function
+   returns nonzero, we immediately return what FUNCTION returned.
 
-   Returns -1 if archive does not exist,
-   Returns -2 if archive has invalid format.
-   Returns 0 if have scanned successfully.  */
+   @param arg the argument given to function on each iteration.
 
+   @return -1 if archive does not exist, -2 if archive has invalid
+   format, and 0 if have scanned successfully.  */
 long int
 ar_scan (char *archive, long int (*function)(), long int arg)
 {
@@ -518,12 +518,20 @@ ar_scan (char *archive, long int (*function)(), long int arg)
   return 0;
 }
 
-/*! Return nonzero iff NAME matches MEM.
-   If TRUNCATED is nonzero, MEM may be truncated to
-   sizeof (struct ar_hdr.ar_name) - 1.
+/*! 
+  See if an archive member is equal to given name.
+
+  @param name name to test 
+
+  @param mem name to test against. 
+
+  @param truncated if nonzero, MEM may be truncated to sizeof (struct
+  ar_hdr.ar_name) - 1.
+  
+  @return nonzero iff NAME matches MEM.
 */
 int
-ar_name_equal (char *name, char *mem, int truncated)
+ar_name_equal (char *name, char *mem, bool truncated)
 {
   char *p;
 
@@ -561,12 +569,17 @@ ar_member_pos (int desc UNUSED, char *mem, int truncated,
   return hdrpos;
 }
 
-/*! Set date of member MEMNAME in archive ARNAME to current time.
-   Returns 0 if successful,
-   -1 if file ARNAME does not exist,
-   -2 if not a valid archive,
-   -3 if other random system call error (including file read-only),
-   1 if valid but member MEMNAME does not exist.  
+/*! 
+   Set date of member in archive to current time.
+  
+   @param arname name of archive
+
+   @param memname name of member in archive
+
+   @return 0 if successful, -1 if file ARNAME does not exist, -2 if
+   not a valid archive, -3 if other random system call error
+   (including file read-only), 1 if valid but member MEMNAME does not
+   exist.
 */
 int
 ar_member_touch (char *arname, char *memname)
@@ -629,7 +642,7 @@ ar_member_touch (char *arname, char *memname)
 #ifdef TEST
 
 long int
-describe_member (int desc, char *name, int truncated,
+describe_member (int desc, char *name, bool truncated,
 		 long int hdrpos, long int datapos, long int size,
                  long int date, int uid, int gid, int mode)
 {

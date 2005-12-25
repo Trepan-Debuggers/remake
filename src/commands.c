@@ -1,4 +1,4 @@
-/* $Id: commands.c,v 1.15 2005/12/18 13:44:31 rockyb Exp $
+/* $Id: commands.c,v 1.16 2005/12/25 10:08:35 rockyb Exp $
 Command processing for GNU Make.
 Copyright (C) 1988,89,91,92,93,94,95,96,97, 2004, 2005
 Free Software Foundation, Inc.
@@ -46,8 +46,10 @@ extern int remote_kill (int id, int sig);
 extern int getpid ();
 #endif
 
-/* Set FILE's automatic variables up.  */
-
+/*! 
+  Set up automatic variables for a file.  
+  @param p_file a pointer to the file to set up.
+*/
 void
 set_file_variables (file_t *p_file)
 {
@@ -254,8 +256,11 @@ set_file_variables (file_t *p_file)
 #undef	DEFINE_VARIABLE
 }
 
-/*! Chop CMDS up into individual command lines if necessary.  Also set
+/*! 
+   Chop commands into individual command lines if necessary.  Also set
    the `lines_flags' and `any_recurse' members.
+
+   @param p_cmds a pointer to the commands to chop up.
 */
 void
 chop_commands (commands_t *cmds)
@@ -354,10 +359,17 @@ chop_commands (commands_t *cmds)
   }
 }
 
-/*! Execute the commands to remake FILE.  If they are currently
-   executing, return or have already finished executing, just return.
-   Otherwise, fork off a child process to run the first command line
-   in the sequence.  
+/*! 
+  Execute the commands to remake P_FILE.  If they are currently
+  executing, return or have already finished executing, just return.
+  Otherwise, fork off a child process to run the first command line
+  in the sequence.  
+  
+  @param p_file pointer to file to remake.
+
+  @param p_call_stack pointer to current target call stack. This is
+  passed down for information reporting.
+  
 */
 void
 execute_file_commands (file_t *file, target_stack_node_t *p_call_stack)
@@ -555,9 +567,11 @@ delete_child_targets (child_t *p_child)
 
 
 /*! 
-  Print out the commands in p_CMDS. If b_expand is true expand the
-  commands to remove MAKE variables. p_target is used to set automatic
-  variables if it is non-null
+  Print out the commands.
+
+  @param p_cmds location of commands to print out.
+  @param p_target used to set automatic variables if it is non-null.
+  @param b_expand if true, expand the commands to remove MAKE variables.
 */
 void
 print_commands (file_t *p_target, commands_t *p_cmds, bool b_expand)

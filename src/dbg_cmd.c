@@ -1,5 +1,5 @@
-/* $Id: dbg_cmd.c,v 1.73 2005/12/24 03:09:26 rockyb Exp $
-Copyright (C) 2004, 2005 Free Software Foundation, Inc.
+/* $Id: dbg_cmd.c,v 1.74 2005/12/25 10:08:35 rockyb Exp $
+Copyright (C) 2004, 2005 rocky@panix.com
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify

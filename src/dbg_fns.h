@@ -1,5 +1,5 @@
-/* $Id: dbg_fns.h,v 1.9 2005/12/20 15:11:23 rockyb Exp $
-Copyright (C) 2005 Free Software Foundation, Inc.
+/* $Id: dbg_fns.h,v 1.10 2005/12/25 10:08:35 rockyb Exp $
+Copyright (C) 2005 rocky@panix.com
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify

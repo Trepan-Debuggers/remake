@@ -1,4 +1,4 @@
-/* $Id: variable.c,v 1.18 2005/12/17 19:44:10 rockyb Exp $
+/* $Id: variable.c,v 1.19 2005/12/25 10:08:35 rockyb Exp $
 Internals of variables for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -625,11 +625,6 @@ merge_variable_set_lists (variable_set_list_t **setlist0,
 void
 define_automatic_variables (void)
 {
-#ifdef WIN32_OR_CYGWIN
-  extern char* default_shell;
-#else
-  extern char default_shell[];
-#endif
   variable_t *v;
   char buf[200];
 
@@ -1028,8 +1023,6 @@ do_variable_definition (const floc_t *p_floc, const char *varname,
 #ifdef WINDOWS32
   if ((origin == o_file || origin == o_override) && streq (varname, "SHELL"))
     {
-      extern char *default_shell;
-
       /* Call shell locator function. If it returns TRUE, then
 	 set no_default_sh_exe to indicate sh was found and
          set new value for SHELL variable.  */
@@ -1042,7 +1035,7 @@ do_variable_definition (const floc_t *p_floc, const char *varname,
                                        ? current_variable_set_list->set
                                        : NULL),
                                       p_floc);
-          no_default_sh_exe = 0;
+          no_default_sh_exe = false;
         }
       else
         v = lookup_variable (varname, strlen (varname));

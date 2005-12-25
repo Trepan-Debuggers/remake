@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.35 2005/12/23 03:29:33 rockyb Exp $
+/* $Id: job.c,v 1.36 2005/12/25 10:08:35 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005
 Free Software Foundation, Inc.
@@ -26,7 +26,9 @@ Boston, MA 02111-1307, USA.  */
 #include "debug.h"
 #include "expand.h"
 #include "job.h"
+#include "make.h"
 #include "misc.h"
+#include "os.h"
 #include "print.h"
 #include "remake.h"
 #include "remote-stub.h"
@@ -46,35 +48,23 @@ Boston, MA 02111-1307, USA.  */
 #include <alloca.h>
 #endif
 
-
 /* Default shell to use.  */
 #ifdef __CYGWIN__
-int no_default_sh_exe = 0;
+bool no_default_sh_exe = false;
 #endif
 
 #ifdef WINDOWS32
-
-char *default_shell = "sh.exe";
-int no_default_sh_exe = 1;
+boo no_default_sh_exe = true;
 bool batch_mode_shell = true;
-
 #elif defined (__MSDOS__)
 
 /* The default shell is a pointer so we can change it if Makefile
    says so.  It is without an explicit path so we get a chance
    to search the $PATH for it (since MSDOS doesn't have standard
    directories we could trust).  */
-char *default_shell = "command.com";
-int batch_mode_shell = 0;
-
-#elif defined(__CYGWIN__)
-char *default_shell = "/bin/sh";
-
-#else
-
-char default_shell[] = "/bin/sh";
 bool batch_mode_shell = false;
-
+#else 
+bool batch_mode_shell = false;
 #endif
 
 #ifdef __MSDOS__
@@ -2077,6 +2067,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
       unixy_shell = _is_unixy_shell (shell);
       /* we must allocate a copy of shell: construct_command_argv() will free
        * shell after this function returns.  */
+      free(default_shell);
       default_shell = strdup (shell);
     }
   if (unixy_shell)

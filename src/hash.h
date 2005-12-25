@@ -1,4 +1,4 @@
-/* $Id: hash.h,v 1.11 2005/12/24 21:31:42 rockyb Exp $
+/* $Id: hash.h,v 1.12 2005/12/25 10:08:35 rockyb Exp $
    Copyright (C) 1995, 1999, 2002, 2004, 2005 Free Software Foundation, Inc.
    Written by Greg McGary <gkm@gnu.org> <greg@mcgary.org>
 
@@ -22,8 +22,8 @@
  *  \brief Declarations for GNU Make hash tables.
  */
 
-#ifndef _HASH_H__
-#define _HASH_H__
+#ifndef _HASH_H_
+#define _HASH_H_
 
 #include "types.h"
 #include <stdio.h>
@@ -255,4 +255,4 @@ extern void *hash_deleted_item;
 #define return_ADDRESS_HASH_2(KEY) return_INTEGER_HASH_2 (((unsigned long)(KEY)) >> 3)
 #define return_ADDRESS_COMPARE(X, Y) return_INTEGER_COMPARE ((X), (Y))
 
-#endif /* _HASH_H__ */
+#endif /* _HASH_H_ */

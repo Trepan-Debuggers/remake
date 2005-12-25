@@ -1,4 +1,4 @@
-/* $Id: commands.h,v 1.10 2005/12/18 13:44:31 rockyb Exp $
+/* $Id: commands.h,v 1.11 2005/12/25 10:08:35 rockyb Exp $
 Copyright (C) 1988, 1989, 1991, 1993, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -29,14 +29,16 @@ Boston, MA 02111-1307, USA.  */
 #include "trace.h"
 #include "job.h"
 
-/*! Bits in `lines_flags'.  */
+/*! \brief bits in `lines_flags'.  */
 typedef enum {
    COMMANDS_RECURSE  = 	1, /**< Recurses: + or $(MAKE).  */
    COMMANDS_SILENT   =	2, /**< Silent: @.  */
    COMMANDS_NOERROR  =	4  /**< No errors: -.  */
 } line_flags_enum_t;
   
-/*! \brief Command structure. This gives the commands to make a file
+/*! \brief Command structure. 
+
+   This gives the commands to make a file
    and information about where these commands came from.  */
 struct commands
   {
@@ -52,34 +54,52 @@ struct commands
 					 set.  */
 };
 
-/*! Execute the commands to remake FILE.  If they are currently
-   executing, return or have already finished executing, just return.
-   Otherwise, fork off a child process to run the first command line
-   in the sequence.  
+/*! 
+  Execute the commands to remake P_FILE.  If they are currently
+  executing, return or have already finished executing, just return.
+  Otherwise, fork off a child process to run the first command line
+  in the sequence.  
+  
+  @param p_file  pointer to file to remake.
+
+  @param p_call_stack pointer to current target call stack. This is
+  passed down for information reporting.
+  
 */
 extern void execute_file_commands (file_t *p_file, 
 				   target_stack_node_t *p_call_stack);
 
 /*! 
-  Print out the commands in p_CMDS. If b_expand is true expand the
-  commands to remove MAKE variables. p_target is used to set automatic
-  variables if it is non-null
+  Print out the commands.
+
+  @param p_cmds location of commands to print out.
+  @param p_target used to set automatic variables if it is non-null.
+  @param b_expand if true, expand the commands to remove MAKE variables.
 */
 extern void print_commands (file_t *p_target, commands_t *p_cmds, 
 			    bool b_expand);
 
-/*! Delete all non-precious targets of CHILD unless they were already
-   deleted.  Set the flag in CHILD to say they've been deleted.  
+/*! 
+  Delete all non-precious targets of P_CHILD unless they were already
+  deleted.  Set the flag in P_CHILD to say they've been deleted.  
+
+  @param p_child  a pointer to the child target to work on.
 */
 extern void delete_child_targets (child_t *p_child);
 
-/*! Chop CMDS up into individual command lines if necessary.  Also set
+/*! 
+   Chop commands into individual command lines if necessary.  Also set
    the `lines_flags' and `any_recurse' members.
+
+   @param p_cmds a pointer to the commands to chop up.
 */
 extern void chop_commands (commands_t *p_cmds);
 
-/*! Set FILE's automatic variables up.  */
-extern void set_file_variables(file_t *file);
+/*! 
+  Set up automatic variables for a file.  
+  @param p_file a pointer to the file to set up.
+*/
+extern void set_file_variables(file_t *p_file);
 
 
 #endif /*COMMANDS_H*/

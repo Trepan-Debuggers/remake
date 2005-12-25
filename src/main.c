@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.46 2005/12/24 21:56:33 rockyb Exp $
+/* $Id: main.c,v 1.47 2005/12/25 10:08:35 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -19,6 +19,7 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
 MA 02111-1307, USA.  */
 
+#include "commands.h"
 #include "config.h"
 #include "dbg_cmd.h"
 #include "debug.h"
@@ -26,13 +27,13 @@ MA 02111-1307, USA.  */
 #include "dir_fns.h"
 #include "expand.h"
 #include "function.h"
+#include "misc.h"
+#include "os.h"
 #include "print.h"
 #include "read.h"
 #include "remake.h"
-#include "misc.h"
-#include "variable.h"
-#include "commands.h"
 #include "rule.h"
+#include "variable.h"
 #include "vpath.h"
 
 /* FreeBSD 4 has getopt in unistd.h. So we include that before
@@ -66,7 +67,6 @@ MA 02111-1307, USA.  */
 
 #ifdef __CYGWIN__
 #define w32ify(s,r) (s)
-extern char *default_shell;
 typedef enum os_type {winNT, win95, win32s, unknown} os_type;
 #endif
 
@@ -330,6 +330,11 @@ int rebuilding_makefiles = 0;
     to above enumeration values in a debugger and debugger
     expressions */
 make_exit_code_t make_exit_code;
+
+/**! The default value of SHELL and the shell that is used when issuing
+   commands on targets.
+*/
+char *default_shell;
 
 
 /* The usage output.  We write it this way to make life easier for the
@@ -796,7 +801,6 @@ find_and_set_default_shell (char *token)
   int sh_found = 0;
   char* search_token;
   PATH_VAR(sh_path);
-  extern char *default_shell;
 
   if (!token)
     search_token = default_shell;
@@ -985,7 +989,7 @@ main (int argc, char **argv, char **envp)
   default_goal_file = 0;
   reading_file      = 0;
   in_debugger       = false;
-  
+  default_shell     = strdup(DEFAULT_SHELL);
 
 #ifdef __CYGWIN__
   {
@@ -1282,7 +1286,8 @@ main (int argc, char **argv, char **envp)
   if (unixy_shell)
     {
       path_separator_char_ = ':';
-      default_shell = "/bin/sh.exe";
+      free(default_shell);
+      default_shell = strdup("/bin/sh.exe");
     }
   else
     {
@@ -1653,7 +1658,6 @@ main (int argc, char **argv, char **envp)
     extern int _is_unixy_shell (const char *_path);
     struct variable *shv = lookup_variable ("SHELL", 5);
     extern bool unixy_shell;
-    extern char *default_shell;
 
     if (shv && *shv->value)
       {
@@ -2966,6 +2970,7 @@ die (int i_status)
   }
 
   free(argv0);
+  free(default_shell);
   free_command_switches();
   free(makefiles);
   free(tracing_opts);
