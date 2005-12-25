@@ -116,9 +116,9 @@ sub run_make_test
 
 # The old-fashioned way...
 sub run_make_with_options {
-  local ($filename,$options,$logname,$expected_code,$input_file) = @_;
-  local($code);
-  local($command) = $make_path;
+  my ($filename,$options,$logname,$expected_code,$input_file) = @_;
+  my($code);
+  my($command) = $make_path;
 
   $expected_code = 0 unless defined($expected_code);
 
@@ -205,7 +205,7 @@ sub set_defaults
 {
    # $profile = 1;
    $testee = "GNU make";
-   $make_path = "make";
+   $make_path = undef;
    $tmpfilesuffix = "mk";
    $pwd = &get_this_pwd;
 }

@@ -6,7 +6,7 @@ AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.30 2005/12/25 10:10:49 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.31 2005/12/25 12:55:49 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -41,7 +41,6 @@ fi
 AC_CANONICAL_HOST
 AC_AIX
 AC_ISC_POSIX
-AC_MINIX
 
 AM_MISSING_PROG(CVS2CL, cvs2cl, $missing_dir)
 AM_MAINTAINER_MODE
@@ -237,13 +236,43 @@ AC_ARG_WITH(default_shell,
 default_shell="${withval}", default_shell="/bin/sh")
 DEFAULT_SHELL="$default_shell"
 
-## Could set default shell defaults here.
-##case $host_os in
-##     cygwin*|mingw*) ;;
-##     *) ;;
-##esac
+AC_ARG_WITH(shell_trace,
+[  --with-shell-trace     option to pass to shell to have it trace commands (default -x)],
+shell_trace="${withval}", shell_trace="-x")
 
-AC_SUBST(DEFAULT_SHELL)
+## Set OS-specific default shell.
+case $host_os in
+    cygwin*|mingw*) ;;
+    solaris*)
+      ## The System V Release 4 /bin/sh can't handle
+      ## -x -c in that order.
+      for sh in /bin/bash /usr/xpg4/bin/sh; do
+        if test -x "$sh" ; then
+          default_shell=$sh
+	  break
+        fi
+      done
+      ;;
+
+     *) ;;
+esac
+
+AC_MSG_CHECKING(if $default_shell can be used to trace commands using $shell_trace)
+sh_is_ok=`$default_shell $shell_trace -c ':' 2>&1`
+if test "+ :" != "$sh_is_ok" ; then
+   AC_MSG_RESULT(no)
+   AC_MSG_WARN([Disabling shell tracing. Run again using --with-default_shell])
+   AC_MSG_WARN([or using --with-shell_trace if you know of a shell that])
+   AC_MSG_WARN([supports tracing with *sh* *shell_option* -c (in that order)"])
+else
+   AC_MSG_RESULT(yes)
+fi
+
+AC_DEFINE_UNQUOTED(SHELL_TRACE, ["$shell_trace"], 
+     [Define this to be what you need to add to turn on shell tracing])
+
+AC_DEFINE_UNQUOTED(DEFAULT_SHELL, ["$default_shell"],
+     [Define this to the default  to be used $(SHELL)])
 
 #
 # Check for readline to see if we can add debugging support.
@@ -497,7 +526,6 @@ AC_CONFIG_FILES([Makefile        \
 		 glob/Makefile   \
                  po/Makefile.in  \
 		 src/Makefile    \
-		 src/os.h        \
 		 tests/scripts/debugger/general
 		 ])
 

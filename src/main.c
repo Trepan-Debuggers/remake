@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.47 2005/12/25 10:08:35 rockyb Exp $
+/* $Id: main.c,v 1.48 2005/12/25 12:55:58 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
@@ -28,7 +28,6 @@ MA 02111-1307, USA.  */
 #include "expand.h"
 #include "function.h"
 #include "misc.h"
-#include "os.h"
 #include "print.h"
 #include "read.h"
 #include "remake.h"

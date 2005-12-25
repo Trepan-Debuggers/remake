@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.36 2005/12/25 10:08:35 rockyb Exp $
+/* $Id: job.c,v 1.37 2005/12/25 12:55:58 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005
 Free Software Foundation, Inc.
@@ -28,7 +28,6 @@ Boston, MA 02111-1307, USA.  */
 #include "job.h"
 #include "make.h"
 #include "misc.h"
-#include "os.h"
 #include "print.h"
 #include "remake.h"
 #include "remote-stub.h"
@@ -2527,7 +2526,7 @@ construct_command_argv (char *line, char **restp, file_t *file,
     warn_undefined_variables_flag = 0;
 
     sprintf(shell_command, "$(SHELL)%s", 
-	    (db_level & DB_SHELL) ? " -x": "");
+	    (db_level & DB_SHELL) ? " " SHELL_TRACE : "");
     
     shell = allocated_variable_expand_for_file (shell_command, file);
 

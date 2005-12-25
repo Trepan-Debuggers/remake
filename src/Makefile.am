@@ -37,7 +37,7 @@ noinst_HEADERS = ar_fns.h arscan.h commands.h \
 	         dbg_break.h dbg_cmd.h dbg_fns.h dbg_stack.h \
 	         debug.h default.h dep.h dir_fns.h expand.h file.h \
 	         function.h getopt.h gettext.h hash.h implicit.h job.h \
-		 make.h misc.h os.h print.h \
+		 make.h misc.h print.h \
 	         read.h remake.h remote-stub.h rule.h \
 		 trace.h types.h variable.h  vpath.h
 
@@ -74,7 +74,7 @@ loadavg.o: loadavg.c
 
 
 # Extra stuff to include in the distribution.
-EXTRA_DIST =	os.h.in
+EXTRA_DIST =	
 
 # Forward targets
 
