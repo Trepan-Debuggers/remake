@@ -1,4 +1,4 @@
-/* $Id: file.c,v 1.11 2005/12/18 13:30:33 rockyb Exp $
+/* $Id: file.c,v 1.12 2005/12/25 20:53:01 rockyb Exp $
 Target file hash table management for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -374,8 +374,8 @@ set_command_state (file_t *file, enum cmd_state state)
     d->file->command_state = state;
 }
 
-/* Convert an external file timestamp to internal form.  */
 
+/** Convert an external file timestamp to internal form.  */
 FILE_TIMESTAMP
 file_timestamp_cons (const char *fname, time_t s, int ns)
 {
@@ -396,7 +396,7 @@ file_timestamp_cons (const char *fname, time_t s, int ns)
   return ts;
 }
 
-/* Return the current time as a file timestamp, setting *RESOLUTION to
+/** Return the current time as a file timestamp, setting *RESOLUTION to
    its resolution.  */
 FILE_TIMESTAMP
 file_timestamp_now (int *resolution)
@@ -446,8 +446,13 @@ file_timestamp_now (int *resolution)
   return file_timestamp_cons (0, s, ns);
 }
 
-/* Place into the buffer P a printable representation of the file
-   timestamp TS.  */
+/** 
+    Place into the buffer P a printable representation of the file
+    timestamp TS.
+    
+    @param p output buffer for printable timestamp
+    @param ts timestamp to convert.
+ */
 void
 file_timestamp_sprintf (char *p, FILE_TIMESTAMP ts)
 {

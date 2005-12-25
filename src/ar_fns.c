@@ -1,4 +1,4 @@
-/* $Id: ar_fns.c,v 1.8 2005/12/25 10:08:35 rockyb Exp $
+/* $Id: ar_fns.c,v 1.9 2005/12/25 20:53:01 rockyb Exp $
 Interface to `ar' archives for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -113,7 +113,7 @@ ar_member_date (char *name)
       }
 
     if (arfile != 0)
-      (void) f_mtime (arfile, 0);
+      (void) f_mtime (arfile, false);
   }
 
   val = ar_scan (arname, ar_member_date_1, (long int) memname);
@@ -161,7 +161,7 @@ ar_touch (char *psz_name)
 	arname_used = 1;
       }
 
-    (void) f_mtime (arfile, 0);
+    (void) f_mtime (arfile, false);
   }
 
   val = 1;

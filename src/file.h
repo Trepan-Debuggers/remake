@@ -1,4 +1,4 @@
-/* $Id: file.h,v 1.6 2005/12/19 06:52:42 rockyb Exp $
+/* $Id: file.h,v 1.7 2005/12/25 20:53:01 rockyb Exp $
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -22,7 +22,6 @@ Boston, MA 02111-1307, USA.  */
  *
  *  \brief Definition of target file data structures for GNU Make.
  */
-
 
 #ifndef FILE_H
 #define FILE_H
@@ -113,10 +112,9 @@ struct file {
 extern file_t *default_goal_file, *suffix_file, *default_file;
 
 
-/*! Access the hash table of all file records.
-   lookup_file  given a name, return the file_t * for that name,
-           or nil if there is none.
-   enter_file   similar, but create one if there is none. 
+/*! Access the hash table of all file records.  lookup_file given a
+   name, return the file_t * for that name, or nil if there is none.
+   enter_file similar, but create one if there is none.
  */
 file_t *lookup_file (char *psz_name);
 
@@ -125,26 +123,37 @@ void    free_file  (file_t *p_file);
 
 /*!
   Remove all nonprecious intermediate files.
-  If SIG is nonzero, this was caused by a fatal signal,
+
+  @param sig if is nonzero, this was caused by a fatal signal,
   meaning that a different message will be printed, and
   the message will go to stderr rather than stdout.  
 */
 void    remove_intermediates (int sig);
 
-/*! Rename FILE to NAME.  This is not as simple as resetting
-   the `name' member, since it must be put in a new hash bucket,
-   and possibly merged with an existing file called NAME. 
+/*! 
+  Rename p_file to psz_name.  This is not as simple as resetting the
+  `name' member, since it must be put in a new hash bucket, and
+  possibly merged with an existing file called psz_name.
+  
+  @param p_file pointer to file to rename
+  @param psz_name new name
 */
 void    rename_file (file_t *p_file, char *psz_name);
 
 /*!
- Rehash FILE to NAME.  This is not as simple as resetting
- the `hname' member, since it must be put in a new hash bucket,
- and possibly merged with an existing file called NAME.  
+  Rehash p_file to psz_name.  This is not as simple as resetting
+  the `hname' member, since it must be put in a new hash bucket,
+  and possibly merged with an existing file called NAME.  
+  
+  @param p_file pointer to file to rehash
+  @param psz_name new name
 */
 void    rehash_file (file_t *p_file, char *psz_name);
+
 void    set_command_state (file_t *file, enum cmd_state state);
+
 void    init_hash_files (void);
+
 char   *build_target_list (char *old_list);
 
 /*! Thing of the below as a bit mask rather than an enumeration and
@@ -186,7 +195,7 @@ extern void  print_target_props (file_t *p_target, print_target_mask_t i_mask);
     file_timestamp_cons (fname, (st).st_mtime, 0)
 #endif
 
-/* If FILE_TIMESTAMP is 64 bits (or more), use nanosecond resolution.
+/** If FILE_TIMESTAMP is 64 bits (or more), use nanosecond resolution.
    (Multiply by 2**30 instead of by 10**9 to save time at the cost of
    slightly decreasing the number of available timestamps.)  With
    64-bit FILE_TIMESTAMP, this stops working on 2514-05-30 01:53:04
@@ -199,7 +208,7 @@ extern void  print_target_props (file_t *p_target, print_target_mask_t i_mask);
 #define FILE_TIMESTAMP_NS(ts) ((int) (((ts) - ORDINARY_MTIME_MIN) \
 				      & ((1 << FILE_TIMESTAMP_LO_BITS) - 1)))
 
-/* Upper bound on length of string "YYYY-MM-DD HH:MM:SS.NNNNNNNNN"
+/** Upper bound on length of string "YYYY-MM-DD HH:MM:SS.NNNNNNNNN"
    representing a file timestamp.  The upper bound is not necessarily 19,
    since the year might be less than -999 or greater than 9999.
 
@@ -217,49 +226,61 @@ extern void  print_target_props (file_t *p_target, print_target_mask_t i_mask);
     * 302 / 1000) \
    + 1 + 1 + 4 + 25)
 
-extern FILE_TIMESTAMP file_timestamp_cons (char const *,
-						   time_t, int);
-extern FILE_TIMESTAMP file_timestamp_now (int *);
+/** Convert an external file timestamp to internal form.  */
+extern FILE_TIMESTAMP file_timestamp_cons (char const *fname, time_t s, 
+					   int ns);
 
+/** Return the current time as a file timestamp, setting *RESOLUTION to
+   its resolution.  */
+extern FILE_TIMESTAMP file_timestamp_now (int *resolution);
+
+/** 
+    Place into the buffer P a printable representation of the file
+    timestamp TS.
+    
+    @param p output buffer for printable timestamp
+    @param ts timestamp to convert.
+ */
 extern void file_timestamp_sprintf (char *p, FILE_TIMESTAMP ts);
 
-/* Return the mtime of file F (a file_t *), caching it.
+/** Return the mtime of file F (a file_t *), caching it.
    The value is NONEXISTENT_MTIME if the file does not exist.  */
-#define file_mtime(f) file_mtime_1 ((f), 1)
-/* Return the mtime of file F (a file_t *), caching it.
+#define file_mtime(f) file_mtime_1 ((f), true)
+
+/** Return the mtime of file F (a file_t *), caching it.
    Don't search using vpath for the file--if it doesn't actually exist,
    we don't find it.
    The value is NONEXISTENT_MTIME if the file does not exist.  */
-#define file_mtime_no_search(f) file_mtime_1 ((f), 0)
+#define file_mtime_no_search(f) file_mtime_1 ((f), false)
 
 #define file_mtime_1(f, v) \
   ((f)->last_mtime == UNKNOWN_MTIME ? f_mtime ((f), v) : (f)->last_mtime)
 
-/* Special timestamp values.  */
+/** Special timestamp values.  */
+typedef enum {
+  UNKNOWN_MTIME     = 0, /**< The file's timestamp is not yet known.  */
+  NONEXISTENT_MTIME = 1, /**< The file does not exist.  */
+  OLD_MTIME         = 2, /**< The file does not exist, and we assume that it
+			    is older than any actual file.  */
 
-/*! The file's timestamp is not yet known.  */
-#define UNKNOWN_MTIME 0
+  ORDINARY_MTIME_MIN = (OLD_MTIME + 1),
+  /**< The smallest ordinary timestamp. */
 
-/*! The file does not exist.  */
-#define NONEXISTENT_MTIME 1
+  NEW_MTIME  = INTEGER_TYPE_MAXIMUM (FILE_TIMESTAMP),
+  /**< Modtime value to use for `infinitely new'.  We used to get the
+   current time from the system and use that whenever we wanted `new'.
+   But that causes trouble when the machine running make and the
+   machine holding a file have different ideas about what time it is;
+   and can also lose for `force' targets, which need to be considered
+   newer than anything that depends on them, even if said dependents'
+   modtimes are in the future.  */
 
-/*! The file does not exist, and we assume that it is older than any
-   actual file.  */
-#define OLD_MTIME 2
-
-/*! The smallest and largest ordinary timestamps.  */
-#define ORDINARY_MTIME_MIN (OLD_MTIME + 1)
-#define ORDINARY_MTIME_MAX ((FILE_TIMESTAMP_S (NEW_MTIME) \
+  ORDINARY_MTIME_MAX = ((FILE_TIMESTAMP_S (NEW_MTIME) \
 			     << FILE_TIMESTAMP_LO_BITS) \
-			    + ORDINARY_MTIME_MIN + FILE_TIMESTAMPS_PER_S - 1)
-
-/*! Modtime value to use for `infinitely new'.  We used to get the current time
-   from the system and use that whenever we wanted `new'.  But that causes
-   trouble when the machine running make and the machine holding a file have
-   different ideas about what time it is; and can also lose for `force'
-   targets, which need to be considered newer than anything that depends on
-   them, even if said dependents' modtimes are in the future.  */
-#define NEW_MTIME INTEGER_TYPE_MAXIMUM (FILE_TIMESTAMP)
+			+ ORDINARY_MTIME_MIN + FILE_TIMESTAMPS_PER_S - 1)
+  /**< The largest ordinary timestamp.  */
+} mtime_status_t;
+  
 
 #define check_renamed(file)						\
   if (file)								\

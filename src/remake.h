@@ -1,4 +1,4 @@
-/* $Id: remake.h,v 1.5 2005/12/09 12:11:09 rockyb Exp $
+/* $Id: remake.h,v 1.6 2005/12/25 20:53:01 rockyb Exp $
 Copyright (C) 2004, 2005
 This file is part of GNU Make.
 
@@ -36,15 +36,22 @@ Boston, MA 02111-1307, USA.  */
 #include "dep.h"
 #include "file.h"
 
-/*! Return the mtime of a file, given a `struct file'.  Caches the
-  time in the struct file to avoid excess stat calls.
-  
-  If the file is not found, and SEARCH is nonzero, VPATH searching and
-  replacement is done.  If that fails, a library (-lLIBNAME) is tried
-  and the library's actual name (/lib/libLIBNAME.a, etc.) is
-  substituted into FILE.  */
+/*! 
+  Get the mtime of a file.  If the file is not found, and search is
+  nonzero, VPATH searching and replacement is done.  If that fails, a
+  library (-lLIBNAME) is tried and the library's actual name
+  (/lib/libLIBNAME.a, etc.) is substituted in
 
-extern FILE_TIMESTAMP f_mtime (file_t *file, int search);
+
+  @param p_file pointer to file to get mtime of. To avoid excess stat calls,
+  the time in the file is cached.
+
+  @param search whether to do vpath searching.
+
+  @return the mtime of a file.  
+*/
+
+extern FILE_TIMESTAMP f_mtime (file_t *p_file, bool search);
 
 /*! Set FILE's `updated' flag and re-check its mtime and the mtime's
   of all files listed in its `also_make' member.  Under -t, this

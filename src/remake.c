@@ -1,4 +1,4 @@
-/* $Id: remake.c,v 1.23 2005/12/24 04:32:10 rockyb Exp $
+/* $Id: remake.c,v 1.24 2005/12/25 20:53:01 rockyb Exp $
 Basic dependency engine for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -950,7 +950,7 @@ notice_finished_file (file_t *file)
 	     We do this instead of just invalidating the cached time
 	     so that a vpath_search can happen.  Otherwise, it would
 	     never be done because the target is already updated.  */
-	  (void) f_mtime (d->file, 0);
+	  (void) f_mtime (d->file, false);
       }
   else if (file->update_status == -1)
     /* Nothing was done for FILE, but it needed nothing done.
@@ -1182,7 +1182,7 @@ remake_file (file_t *file, target_stack_node_t *p_call_stack)
    FILE.  */
 
 FILE_TIMESTAMP
-f_mtime (file_t *file, int search)
+f_mtime (file_t *file, bool search)
 {
   FILE_TIMESTAMP mtime;
 

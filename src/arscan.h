@@ -1,4 +1,4 @@
-/* $Id: arscan.h,v 1.4 2005/12/25 10:08:35 rockyb Exp $
+/* $Id: arscan.h,v 1.5 2005/12/25 20:53:01 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
@@ -28,18 +28,18 @@ USA.  */
    Open the given archive, find its members one by one,
    and for each one call function with the following arguments:
 
-     member name,
-     member name might be truncated flag,
-     member header position in file,
-     member data position in file,
-     member data size,
-     member date,
-     member uid,
-     member gid,
-     member protection mode,
-     argument supplied as the last parameter.
+   -  member name,
+   -  member name might be truncated flag,
+   -  member header position in file,
+   -  member data position in file,
+   -  member data size,
+   -  member date,
+   -  member uid,
+   -  member gid,
+   -  member protection mode,
+   -  argument supplied as the last parameter.
 
-   @param archive  archive file descriptor for reading the data.
+   @param archive archive file descriptor for reading the data.
    This descriptor is poised to read the data of the member
    when function is called.  It does not matter how much
    data function reads.
@@ -72,15 +72,17 @@ extern int ar_name_equal (char *name, char *mem, bool truncated);
 /*! 
    Set date of member in archive to current time.
   
-   @param arname name of archive
+   @param psz_arname name of archive
 
-   @param memname name of member in archive
+   @param psz_memname name of member in archive
 
-   @return 0 if successful, -1 if file ARNAME does not exist, -2 if
-   not a valid archive, -3 if other random system call error
-   (including file read-only), 1 if valid but member MEMNAME does not
-   exist.
+   @return 
+   -  0 if successful, 
+   - -1 if file p_arname does not exist, 
+   - -2 if not a valid archive, 
+   - -3 if other random system call error (including file read-only), 
+   -  1 if valid but member psz_memname does not exist.
 */
-extern int ar_member_touch (char *arname, char *memname);
+extern int ar_member_touch (char *psz_arname, char *psz_memname);
 
 #endif /*ARSCAN_H*/
