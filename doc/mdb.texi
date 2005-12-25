@@ -377,7 +377,7 @@ from target @code{foo}: one at line 6 and another at line 10.
 
 One last and perhaps also subtle point is the format of the location
 information. This format is similar to other debugger output. The
-above command is run insode a @sc{gnu} Emacs compilation buffer the format
+above command is run inside a @sc{gnu} Emacs compilation buffer the format
 of the message is such that @code{compile-goto-error} will possition
 one at that point in the file in another Emacs window.
 
@@ -453,12 +453,12 @@ because we were making target @code{all} on line 3 of file
 @code{/tmp/test1.mk}.
 
 In other words, when we hit the error, the above trace gives some idea
-of why we decided to to run line 9 and what got executed before that,
+of why we decided to to run line 10 and what got executed before that,
 what targets were in the process of getting considered at the error,
 and how the program was run.
 
 One last subtlety that you might not have noticed is that we echoed
-the command @code{boguscommand} even though the original makefile had
+the command @code{bogus-command} even though the original makefile had
 this set to be silent (in particular by preceding that command with an
 @@). When tracing, we override any silent execution (making execution
 more verbose); information is usually helpful in finding what's going
@@ -537,7 +537,7 @@ mdb<0>
 
 Before the prompt @code{mdb<0>}, we show the position in the file,
 the target @code{Makefile.in}, and the dependencies of this target
-@code{Makefile.am}, @code{..confiig/readline.m4} ....
+@code{Makefile.am}, @code{..config/readline.m4} ....
 
 The ``0'' in the prompt @code{mdb<0>} is the comamnd history number
 it increments as we enter commands.
@@ -2536,18 +2536,19 @@ if anyone was interested in writing a debugger for @value{REMAKE}.
 
 Almost year later and no takers, I was reminded of my query by
 accident when I got a query from one of the GNU mailing lists that I
-am on about slow e-mail posting to the @value{REMAKE} mailing list.
+am on about slow e-mail posting to the @value{MAKE} mailing list.
 
 I again suggested the idea of a debugger and was told how incredibly
 difficult it would be to write a debugger and how incredibly unique
-@value{REMAKE} is. At that point I looked into the code and to my
+@value{MAKE} is. At that point I looked into the code and to my
 surprise and delight I found that in contrast to BASH the code,
-@value{REMAKE} is much smaller and written in a more modern coding
-style; in fact it had most of the information stored that would be
-helpful in a debugger. All I would need to do is add a GNU readline
-for the debug loop, extend to save a target stack and track line
-numbers and report line numbers better. But this last part I'd been
-through with the bash debugger.
+@value{MAKE} is much smaller and written in a more modern coding style
+(although certainly it could use much improvement). In fact, it had
+most of the information stored that would be helpful in a
+debugger. All I would need to do is add a GNU readline for the debug
+loop, extend to save a target stack and track line numbers and report
+line numbers better. But this last part I'd been through with the bash
+debugger.
 
 All in all, I've been very pleased at how far I've been able to get
 with much less effort than needed for the bash debugger. That's not to
