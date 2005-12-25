@@ -12,7 +12,7 @@
 # this routine controls the whole mess; each test suite sets up a few
 # variables and then calls &toplevel, which does all the real work.
 
-# $Id: test_driver.pl,v 1.11 2005/12/24 04:32:10 rockyb Exp $
+# $Id: test_driver.pl,v 1.12 2005/12/25 10:48:07 rockyb Exp $
 
 sub print_standard_usage
 {
@@ -309,6 +309,12 @@ sub parse_command_line
   print "\nDEBUG ON\n" if $debug;
   print_usage() if $usage;
   print_help() if $help;
+
+  if (!defined($make_path)) {
+      print "\n***NOTE: --make option was not set... " .
+	  "I guess we'll just use \"make\" then.\n\n";
+      $make_path = 'make';
+  }
 
   # Turn a filename into a script test name by dropping directory
   # portion before optional /scripts (which is where all tests are
