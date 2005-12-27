@@ -291,7 +291,7 @@ Removing child 0x095b1310 PID 13441 from chain.
 @end smallexample 
 
 The output would have been about twice as long were it not for the
-fact that we declared @code{all} a ``phony'' target.
+fact that we declared @code{all} a ``phony'' target!
 
 Clearly this information referring to rule stems, implicit
 prerequisites, @code{SIGCHLD}, pids, and unreaped children is intended
@@ -302,7 +302,7 @@ But even for someone such as myself who has become more knowledgeable
 helpful. ``@code{make: bogus-command: command not found}'' you say?
 Okay but where in the Makefile source did that come from? Since we
 added the debug output we see ``foo'' listed beforehand after skipping
-800 lines, but in a normal make, there would have been no mention
+hundreds of lines, but in a normal make, there would have been no mention
 of ``foo.'' In our simple example tracking down the location is easy.
 But when you have a Makefile which is hundreds of lines long as any
 Makefile is when it is generated from @code{automake}, it would be
@@ -348,8 +348,12 @@ bogus-command
 @end smallexample
 
 Well, not much different from the original Makefile, except that
-information about where this gets run from is curiously missing. One
-of the goals of @value{REMAKE} is to include reference
+information about where this gets run from is curiously missing. If
+there had been several targets that had commands, from the output it
+would not be possible to determine which command was associated with
+which target.
+
+One of the goals of @value{REMAKE} is to include reference
 information. Here's what we give instead:
 
 @smallexample
@@ -445,12 +449,12 @@ So in some ways this is just a combination of the enhanced (with
 location information) @code{--just-print} option combined with the
 enhanced @code{--debug=basic} information.
 
-What is completely new and hasn't been seen above is the information
-given when we hit an error.  After the error and we report the return
-code (127), the stack of targets is listed. We were working on target
-@code{foo} on line 10 of file @code{/tmp/test1.mk} which was rebuilt
-because we were making target @code{all} on line 3 of file
-@code{/tmp/test1.mk}.
+What is completely new and hasn't been seen above is the shell tracing
+information and information given when we hit an error.  After the
+error and we report the return code (127), the stack of targets is
+listed. We were working on target @code{foo} on line 10 of file
+@code{/tmp/test1.mk} which was rebuilt because we were making target
+@code{all} on line 3 of file @code{/tmp/test1.mk}.
 
 In other words, when we hit the error, the above trace gives some idea
 of why we decided to to run line 10 and what got executed before that,
