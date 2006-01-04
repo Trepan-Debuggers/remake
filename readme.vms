@@ -48,6 +48,68 @@ for this is to set this switch just prior to calling main: in an
 initialization routine. This adds more complexity and more VMS specific
 code. It is easier to tell the compiler NOT to map the routine names
 with a simple change in makefile.vms.
+
+Some notes on case sensitive names in rules and on the disk. In the VMS
+template for CONFIG.H case sensitive rules can be enabled with defining
+WANT_CASE_SENSITIVE_TARGETS. For recent version of VMS there is a case
+sensitive file system: ODS5. To make use of that, additionally un-defining
+the HAVE_CASE_INSENSITIVE_FS is required. As these are C macros, different
+versions of make need to be built to have any case sensitivity for VMS
+working. Unfortunately, for ODS5 disks that's not all.
+
+- Usually DCL upcases command line tokens (except strings) and usually the
+  file system is case blind (similar to how Windows systems work)
+	$ set proc/parse=extended/case=sensitive
+  preserves lower and UPPER on the command line and (for this process and all
+  sub-processes) enables case sensitivity in the file system
+
+- Usually the CRTL tries to reverse what DCL did with command line tokens, it
+  lowercases all tokens (except strings)
+	$ define DECC$ARGV_PARSE_STYLE enable
+  passes (the now preserved) lower and UPPER from the command line to main()
+
+- Usually the CRTL upcases the arguments to open() and friends
+	$ define DECC$EFS_CASE_PRESERVE enable
+  preserves the names as is.
+
+It is important to know that not all VMS tools are ready for case sensitivity.
+With this setup some tools may not work as expected. The setup should not
+blindly be applied for all users in default login procedures.
+
+Example? The poor coding gives a compiler message, showing that there are
+different files:
+
+$ dir
+
+Directory ODS5DISK[HB]
+
+A.c;1               B.c;1               c.c;1               X.c;1
+x.c;1
+
+Total of 5 files.
+$ ods5make x.obj
+cc    /obj=x.obj x.c
+
+foo(){lowercase_x();}
+......^
+%CC-I-IMPLICITFUNC, In this statement, the identifier "lowercase_x" is implicitly declared as a function.
+at line number 1 in file ODS5DISK[HB]x.c;1
+$ mc SYS$SYSDEVICE:[HARTMUT.MAKE_3_80P]ods5make X.obj
+cc    /obj=X.obj X.c
+
+foo() {UPPERCASE_X();}
+.......^
+%CC-I-IMPLICITFUNC, In this statement, the identifier "UPPERCASE_X" is implicitly declared as a function.
+at line number 1 in file ODS5DISK[HB]X.c;1
+$ dir
+
+Directory ODS5DISK[HB]
+
+A.c;1               B.c;1               c.c;1               X.c;1
+x.c;1               X.obj;1             x.obj;1
+
+Total of 7 files.
+$
 
 This is the VMS port of GNU Make done by Hartmut.Becker@compaq.com.
 

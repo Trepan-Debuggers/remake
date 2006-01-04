@@ -1,6 +1,10 @@
-Port of GNU make to Microsoft Windows 95/98/NT/2000/XP
-Builds natively with MSVC 2.x, 4.x, 5.x, 6.x and MSVC.NET 7.x.
-Also builds with the MinGW port of GCC 3.x (tested with GCC 3.4.2).
+This version of GNU make has been tested on Microsoft Windows 2000/XP/2003.
+It has also been used on Windows 95/98/NT, and on OS/2.
+
+It builds natively with MSVC 2.x, 4.x, 5.x, 6.x, and 2003 as well as
+.NET 7.x and .NET 2003.
+
+It builds with the MinGW port of GCC 3.x (tested with GCC 3.4.2).
 
 The Windows 32-bit port of GNU make is maintained jointly by various
 people.  It was originally made by Rob Tulloh.
@@ -234,23 +238,23 @@ SAMBA/NTFS/VFAT:
 	package using SAMBA as my file server. The reason seems to be
 	related to the way VC++ 4.0 changes the case name of the pdb
 	filename it is passed on the command line. It seems to change
-	the name always to to lower case. I contend that
-	the VC++ compiler should not change the casename of files that
-	are passed as arguments on the command line. I don't think this
-	was a problem in MSVC 2.x, but I know it is a problem in MSVC 4.x.
+	the name always to to lower case. I contend that the VC++
+	compiler should not change the casename of files that are passed
+	as arguments on the command line. I don't think this was a
+	problem in MSVC 2.x, but I know it is a problem in MSVC 4.x.
 
 	The package builds fine on VFAT and NTFS filesystems.
 
 	Most all of the development I have done to date has been using
 	NTFS and long file names. I have not done any considerable work
-	under VFAT. VFAT users may wish to be aware that this port
-	of make does respect case sensitivity.
+	under VFAT. VFAT users may wish to be aware that this port of
+	make does respect case sensitivity.
 
 FAT:
 
-	Version 3.76 added support for FAT filesystems. Make
-	works around some difficulties with stat'ing of
-	files and caching of filenames and directories internally.
+	Version 3.76 added support for FAT filesystems. Make works
+	around some difficulties with stat'ing of files and caching of
+	filenames and directories internally.
 
 Bug reports:
 

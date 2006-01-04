@@ -668,7 +668,7 @@ handle_runtime_exceptions( struct _EXCEPTION_POINTERS *exinfo )
     {
       sprintf(errmsg,
               _("%s: Interrupt/Exception caught (code = 0x%lx, addr = 0x%lx)\n"),
-              prg, exrec->ExceptionCode, exrec->ExceptionAddress);
+              prg, exrec->ExceptionCode, (DWORD)exrec->ExceptionAddress);
       fprintf(stderr, errmsg);
       exit(255);
     }
@@ -676,7 +676,7 @@ handle_runtime_exceptions( struct _EXCEPTION_POINTERS *exinfo )
   sprintf(errmsg,
           _("\nUnhandled exception filter called from program %s\nExceptionCode = %lx\nExceptionFlags = %lx\nExceptionAddress = %lx\n"),
           prg, exrec->ExceptionCode, exrec->ExceptionFlags,
-          exrec->ExceptionAddress);
+          (DWORD)exrec->ExceptionAddress);
 
   if (exrec->ExceptionCode == EXCEPTION_ACCESS_VIOLATION
       && exrec->NumberParameters >= 2)

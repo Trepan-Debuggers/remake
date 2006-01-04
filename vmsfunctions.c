@@ -90,7 +90,10 @@ readdir (DIR *dir)
   dentry->d_namlen = dnam->nam$b_name + dnam->nam$b_type;
   strncpy (dentry->d_name, dnam->nam$l_name, dentry->d_namlen);
   dentry->d_name[dentry->d_namlen] = '\0';
+
+#ifdef HAVE_CASE_INSENSITIVE_FS
   uppercasify (dentry->d_name);
+#endif
 
   return (dentry);
 }

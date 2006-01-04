@@ -59,7 +59,7 @@ EXTRA_DIST =	README build.sh.in $(man_MANS) \
 		README.Amiga Makefile.ami config.ami make.lnk amiga.c amiga.h \
 		README.DOS Makefile.DOS configure.bat dosbuild.bat configh.dos\
 		README.W32 NMakefile config.h.W32 build_w32.bat subproc.bat \
-		make_msvc_net2003.sln make_msvc_net2003.vcproj \
+		make_msvc_net2003.sln make_msvc_net2003.vcproj prepare_w32.bat\
 		readme.vms makefile.vms makefile.com config.h-vms \
 		vmsdir.h vmsfunctions.c vmsify.c
 
@@ -137,7 +137,7 @@ check-loadavg: loadavg$(EXEEXT)
 	-./loadavg$(EXEEXT)
 
 # The loadavg function is invoked during "make check" to test getloadavg.
-noinst_PROGRAMS = loadavg
+check_PROGRAMS = loadavg
 nodist_loadavg_SOURCES = getloadavg.c
 loadavg_CPPFLAGS = -DTEST
 loadavg_LDADD = @GETLOADAVG_LIBS@

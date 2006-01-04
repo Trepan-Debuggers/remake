@@ -1,5 +1,13 @@
 /* config.h.W32				-*-C-*-  */
 
+/* Suppress some Visual C++ warnings.
+   Maybe after the code cleanup for ISO C we can remove some/all of these.  */
+#if _MSC_VER > 1000
+# pragma warning(disable:4100) /* unreferenced formal parameter */
+# pragma warning(disable:4127) /* conditional expression is constant */
+# pragma warning(disable:4702) /* unreachable code */
+#endif
+
 /* Define to 1 if the `closedir' function returns void instead of `int'. */
 /* #undef CLOSEDIR_VOID */
 

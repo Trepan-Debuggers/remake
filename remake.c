@@ -530,7 +530,10 @@ update_file_1 (struct file *file, unsigned int depth)
 	break;
 
       if (!running)
-	d->changed = file_mtime (d->file) != mtime;
+        /* The prereq is considered changed if the timestamp has changed while
+           it was built, OR it doesn't exist.  */
+	d->changed = ((file_mtime (d->file) != mtime)
+                      || (mtime == NONEXISTENT_MTIME));
 
       lastd = d;
       d = d->next;

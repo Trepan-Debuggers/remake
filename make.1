@@ -319,6 +319,17 @@ except that the modification time is changed only in the imagination of
 .TP 0.5i
 .B \-\-warn\-undefined\-variables
 Warn when an undefined variable is referenced.
+.SH "EXIT STATUS"
+GNU
+.I make
+exits with a status of zero if all makefiles were successfully parsed
+and no targets that were built failed.  A status of one will be returned
+if the
+.B \-q
+flag was used and
+.I make
+determines that a target needs to be rebuilt.  A status of two will be
+returned if any errors were encountered.
 .SH "SEE ALSO"
 .I "The GNU Make Manual"
 .SH BUGS

@@ -1,3 +1,9 @@
+2006-01-03  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/variables/automatic: Add a test for bug #8154.
+
+	* README: Update to reflect the current state of the test suite.
+
 2005-12-12  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/features/parallelism, scripts/functions/wildcard,
