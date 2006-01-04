@@ -87,11 +87,22 @@ run_make_test('
 mbr.b: mbr.src
 	@echo $*
 
-mbr.src: ; @:
+mbr.src: ; @:',
+              '',
+              'mbr');
 
-',
-'',
-'mbr
-');
+# TEST #3 -- test for Savannah bug #8154
+# Make sure that nonexistent prerequisites are listed in $?, since they are
+# considered reasons for the target to be rebuilt.
+#
+touch('foo');
+
+run_make_test('
+foo: bar ; @echo "\$$? = $?"
+bar: ;',
+              '',
+              '$? = bar');
+
+unlink('foo');
 
 1;

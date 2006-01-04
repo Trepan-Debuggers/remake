@@ -1,3 +1,63 @@
+2006-01-04  Paul D. Smith  <psmith@gnu.org>
+
+	* readme.vms: Updates for case-insensitive VMS file systems from
+	Hartmut Becker <Hartmut.Becker@hp.com>.
+	* dir.c (vms_hash): Ditto.
+	* vmsify.c (copyto): Ditto.
+	* vmsfunctions.c (readdir): Ditto.
+
+	* make.1: Add a section on the exit codes for make.
+
+	* doc/make.texi: A number of minor updates to the documentation.
+
+2006-01-03  Paul D. Smith  <psmith@gnu.org>
+
+	* remake.c (update_file_1): Mark a prerequisite changed if it
+	doesn't exist.
+
+	* read.c (eval): Be sure to strip off trailing whitespace from the
+	prerequisites list properly.  Also, initialize all fields in
+	struct dep when creating a new one.
+
+2005-12-28  Paul D. Smith  <psmith@gnu.org>
+
+	* config.h.W32.template [WINDOWS32]: Add in some pragmas to
+	disable warnings for MSC.
+	Patch by Rob Tulloh <rtulloh@yahoo.com>.
+
+2005-12-18  Paul D. Smith  <psmith@gnu.org>
+
+	* Makefile.am (EXTRA_DIST): Distribute prepare_w32.bat.
+
+2005-12-17  Eli Zaretskii  <eliz@gnu.org>
+
+	* doc/make.texi (Execution): Add a footnote about changes in
+	handling of backslash-newline sequences.  Mention the differences
+	on MS-DOS and MS-Windows.
+
+	* NEWS: More details about building the MinGW port and a pointer
+	to README.W32.  Fix the section name that describes the new
+	backward-incompatible processing of backslash-newline sequences.
+	The special processing of SHELL set to "cmd" is only relevant to
+	MS-Windows, not MS-DOS.
+
+2005-12-17  Eli Zaretskii  <eliz@gnu.org>
+
+	* main.c (handle_runtime_exceptions): Cast exrec->ExceptionAddress
+	to DWORD, to avoid compiler warnings.
+	* job.c (exec_command): Cast hWaitPID and hPID to DWORD, and
+	use %ld in format, to avoid compiler warnings.
+
+	* doc/make.texi (Special Targets): Fix a typo.
+	(Appending): Fix cross-reference to Setting.
+	(Special Variables, Secondary Expansion, File Name Functions)
+	(Flavor Function, Pattern Match, Quick Reference): Ensure two
+	periods after a sentence.
+	(Execution): Add @: after "e.g.".
+	(Environment): Fix punctuation.
+	(Target-specific, Call Function, Quick Reference): Add @: after "etc."
+	(Shell Function, Target-specific): Add @: after "vs."
+
 2005-12-14  Boris Kolpackov  <boris@kolpackov.net>
 
 	* read.c (record_target_var): Initialize variable's export field

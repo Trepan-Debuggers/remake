@@ -1177,10 +1177,12 @@ eval (struct ebuffer *ebuf, int set_default)
             /* Put all the prerequisites here; they'll be parsed later.  */
             deps = (struct dep *) xmalloc (sizeof (struct dep));
             deps->next = 0;
-            deps->name = xstrdup (beg);
+            deps->name = savestring (beg, end - beg + 1);
+            deps->file = 0;
+            deps->changed = 0;
+            deps->ignore_mtime = 0;
             deps->staticpattern = 0;
             deps->need_2nd_expansion = 0;
-            deps->file = 0;
           }
         else
           deps = 0;

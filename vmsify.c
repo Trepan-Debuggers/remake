@@ -79,9 +79,11 @@ copyto (char **to, char **from, char upto, int as_dir)
 	}
       else
 	{
+#ifdef HAVE_CASE_INSENSITIVE_FS
 	  if (isupper ((unsigned char)**from))
 	    **to = tolower ((unsigned char)**from);
 	  else
+#endif
 	    **to = **from;
 	}
       (*to)++;

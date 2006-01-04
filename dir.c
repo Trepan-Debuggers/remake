@@ -155,7 +155,11 @@ vms_hash (char *name)
   while (*name)
     {
       unsigned char uc = *name;
+#ifdef HAVE_CASE_INSENSITIVE_FS
       h = (h << 4) + (isupper (uc) ? tolower (uc) : uc);
+#else
+      h = (h << 4) + uc;
+#endif
       name++;
       g = h & 0xf0000000;
       if (g)

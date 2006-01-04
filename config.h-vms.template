@@ -350,7 +350,7 @@
 /* Define for case insensitve filenames */
 #define HAVE_CASE_INSENSITIVE_FS 1
 
-/* VMS specific, define it if you want to use case sensitve targets */
+/* VMS specific, define it if you want to use case sensitive targets */
 /* #undef WANT_CASE_SENSITIVE_TARGETS */
 
 /* VMS specific, V7.0 has opendir() and friends, so it's undefined */

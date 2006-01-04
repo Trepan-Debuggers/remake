@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  12 December 2005
+  28 December 2005
 
 Copyright (C) 2002,2003,2004,2005  Free Software Foundation, Inc.
 See the end for copying conditions.
@@ -14,7 +14,9 @@ Version 3.81beta4
 
 * GNU make is ported to OS/2.
 
-* GNU make is ported to MinGW.
+* GNU make is ported to MinGW.  The MinGW build is only supported by
+  the build_w32.bat batch file; see the file README.W32 for more
+  details.
 
 * WARNING: Backward-incompatibility!
   GNU make now implements a generic "second expansion" feature on the
@@ -36,8 +38,11 @@ Version 3.81beta4
 
 * WARNING: Backward-incompatibility!
   In order to comply with POSIX, the way in which GNU make processes
-  backslash-newline sequences in command strings has changed.  See the
-  GNU make manual section "Shell Execution" for details.
+  backslash-newline sequences in command strings has changed.  If your
+  makefiles use backslash-newline sequences inside of single-quoted
+  strings in command scripts you will be impacted by this change.  See
+  the GNU make manual section "Command Execution" (node "Execution") for
+  details.
 
 * New command-line option: -L (--check-symlink-times).  On systems that
   support symbolic links, if this option is given then GNU make will
@@ -45,7 +50,7 @@ Version 3.81beta4
   used to resolve target files.  The default behavior remains as it
   always has: use the modification time of the actual target file only.
 
-* The "else" conditional line can now be followed by any other legal
+* The "else" conditional line can now be followed by any other valid
   conditional on the same line: this does not increase the depth of the
   conditional nesting, so only one "endif" is required to close the
   conditional.
@@ -98,10 +103,13 @@ Version 3.81beta4
      an enhancement to POSIX, if you export the make variable SHELL then
      it will be set in the environment, just as before.
 
-* On DOS and MS Windows systems, explicitly setting SHELL to a pathname
-  ending in "cmd" or "cmd.exe" (case-insensitive) will force GNU make to
-  use the DOS command interpreter in batch mode even if a UNIX-like
-  shell could be found on the system.
+* On MS Windows systems, explicitly setting SHELL to a pathname ending
+  in "cmd" or "cmd.exe" (case-insensitive) will force GNU make to use
+  the DOS command interpreter in batch mode even if a UNIX-like shell
+  could be found on the system.
+
+* On VMS there is now support for case-sensitive filesystems such as ODS5.
+  See the readme.vms file for information.
 
 * Updated to autoconf 2.59, automake 1.9.5, and gettext 0.14.1.  Users
   should not be impacted.
@@ -109,6 +117,10 @@ Version 3.81beta4
 * New translations for Swedish, Chinese (simplified), Ukrainian,
   Belarusian, Finnish, Kinyarwandan, and Irish.  Many updated
   translations.
+
+A complete list of bugs fixed in this version is available here:
+
+  http://savannah.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=101
 
 
 Version 3.80
@@ -187,6 +199,11 @@ Version 3.80
   See ABOUT-NLS for more information.
 
 * Updated to autoconf 2.54 and automake 1.7.  Users should not be impacted.
+
+A complete list of bugs fixed in this version is available here:
+
+  http://savannah.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=102
+
 
 Version 3.79.1
 

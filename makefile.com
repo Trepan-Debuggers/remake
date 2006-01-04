@@ -12,7 +12,7 @@ $! zinser@decus.de (preferred) or zinser@sysdev.deutsche-boerse.com
 $
 $! hb
 $! But don't ask Martin Zinser about the lines, I added/changed.
-$! In case of an error do some cleanup 
+$! In case of an error do some cleanup
 $ on error then $ goto cleanup
 $! in case somebody set up her/his own symbol for cc
 $ set symbol/scope=(nolocal,noglobal)
@@ -33,7 +33,7 @@ $  then
 $   if f$trnlnm("SYS").eqs."" then def/nolog sys sys$library:
 $   ccopt = ""
 $  else
-$   ccopt = "/decc/prefix=all"
+$   ccopt = "/decc/prefix=(all,except=(globfree,glob))"
 $   if f$trnlnm("SYS").eqs.""
 $    then
 $     if f$trnlnm("DECC$LIBRARY_INCLUDE").nes.""
@@ -68,7 +68,7 @@ $   gosub check_cc_qual
 $ endif
 $ filelist = "alloca ar arscan commands default dir expand file function " + -
              "hash implicit job main misc read remake remote-stub rule " + -
-	     "signame variable version vmsfunctions vmsify vpath " + - 
+	     "signame variable version vmsfunctions vmsify vpath " + -
 	     "[.glob]glob [.glob]fnmatch getopt1 getopt"
 $ copy config.h-vms config.h
 $ n=0
@@ -101,12 +101,12 @@ $! Check if this is a define relating to the properties of the C/C++
 $! compiler
 $!
 $CHECK_CC_QUAL:
-$ open/write tmpc 'tc 
+$ open/write tmpc 'tc
 $ ccqual = "/warn=(disable=questcompare)"
 $ write tmpc "#include <stdio.h>"
 $ write tmpc "unsigned int i = 1;"
 $ write tmpc "int main(){"
-$ write tmpc "if (i < 0){printf(""Mission impossible\n"");}}"  
+$ write tmpc "if (i < 0){printf(""Mission impossible\n"");}}"
 $ close tmpc
 $ gosub cc_qual_check
 $ return
@@ -122,7 +122,7 @@ $ cc 'ccqual' 'tmpnam'
 $ if $status then cc_qual = true
 $ set message/fac/ident/sever/text
 $ delete/nolog 'tmpnam'.*;*
-$ if cc_qual then ccopt = ccopt + ccqual 
+$ if cc_qual then ccopt = ccopt + ccqual
 $ return
 $!------------------------------------------------------------------------------
 $!
@@ -131,8 +131,8 @@ $ ploc = f$locate("]",p1)
 $ filnam = p1
 $ if ploc .lt. f$length(p1) then filnam=f$extract(ploc+1,100,p1)
 $ write optf "''filnam'"
-$ cc'ccopt'/include=([],[.glob]) - 
-  /define=("allocated_variable_expand_for_file=alloc_var_expand_for_file","unlink=remove","HAVE_CONFIG_H","VMS") - 
+$ cc'ccopt'/include=([],[.glob]) -
+  /define=("allocated_variable_expand_for_file=alloc_var_expand_for_file","unlink=remove","HAVE_CONFIG_H","VMS") -
   'p1'
 $ exit
 $ endsubroutine : compileit
