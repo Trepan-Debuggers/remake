@@ -1,5 +1,5 @@
 #                                                                    -*-perl-*-
-# $Id: automatic,v 1.6 2005/12/07 04:03:56 rockyb Exp $
+# $Id: automatic,v 1.7 2006/01/05 11:24:54 rockyb Exp $
 $description = "Test automatic variable setting.";
 
 $details = "
@@ -103,5 +103,30 @@ $answer = ".x\n$dir/foo.x\n\$.x\n\$@.x\n$dir.x\nfoo.x\n$dir/bar.x\nbar.x\n";
 $answer = ".x\n$dir/x.z.x\n\$.x\n\$@.x\n$dir.x\nx.z.x\n.y\n$dir/y.z.y\n\$.y\n\$@.y\n$dir.y\ny.z.y\n";
 &compare_output($answer, &get_logfile(1));
 
+# TEST #3 -- test for Savannah bug #12320.
+#
+run_make_test('
+.SUFFIXES: .b .src
+
+mbr.b: mbr.src
+	@echo $*
+
+mbr.src: ; @:',
+              '',
+              'mbr');
+
+# TEST #4 -- test for Savannah bug #8154
+# Make sure that nonexistent prerequisites are listed in $?, since they are
+# considered reasons for the target to be rebuilt.
+#
+touch('foo');
+
+run_make_test('
+foo: bar ; @echo "\$$? = $?"
+bar: ;',
+              '',
+              '$? = bar');
+
+unlink('foo');
 notest:
 1;
