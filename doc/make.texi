@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.13 2005/12/24 04:32:09 rockyb Exp $
+@set RCSID $Id: make.texi,v 1.14 2006/01/05 11:11:29 rockyb Exp $
 @set EDITION 0.61
 @set VERSION 3.80+dbg
 @set UPDATED 25 Dec 2005
@@ -2382,8 +2382,8 @@ build the rest of the directories even when one fails.  This can be
 overcome by adding shell commands to note the error and exit, but then
 it will do so even if @code{make} is invoked with the @code{-k} option,
 which is unfortunate.  Second, and perhaps more importantly, you cannot
-take advantage of the parallel build capabilities of make using this
-method, since there is only one rule.
+take advantage of @code{make}'s ability to build targets in parallel
+(@pxref{Parallel, ,Parallel Execution}), since there is only one rule.
 
 By declaring the subdirectories as phony targets (you must do this as
 the subdirectory obviously always exists; otherwise it won't be built)
@@ -3305,20 +3305,27 @@ by making a new subshell for each line.  (In practice, @code{make} may
 take shortcuts that do not affect the results.)
 
 @cindex @code{cd} (shell command)
-@strong{Please note:} this implies that shell commands such as @code{cd}
-that set variables local to each process will not affect the following
-command lines. @footnote{On MS-DOS, the value of current working
-directory is @strong{global}, so changing it @emph{will} affect the
-following command lines on those systems.}  If you want to use @code{cd}
-to affect the next command, put the two on a single line with a
-semicolon between them.  Then @code{make} will consider them a single
-command and pass them, together, to a shell which will execute them in
-sequence.  For example:
+@strong{Please note:} this implies that shell commands such as
+@code{cd} that set variables local to each process will not affect the
+following command lines.@footnote{On MS-DOS, the value of current
+working directory is @strong{global}, so changing it @emph{will}
+affect the following command lines on those systems.}  If you want to
+use @code{cd} to affect the next command, put them on a single line.
+Then @code{make} will consider them a single command and pass them
+both to a single shell which will execute them in sequence.  For
+example:
 
 @example
 foo : bar/lose
-        cd bar; gobble lose > ../foo
+        cd $(@@D) && gobble $(@@F) > ../$@@
 @end example
+
+@noindent
+Here we use the shell AND operator (@code{&&}) so that if the
+@code{cd} command fails, the script will fail without trying to invoke
+the @code{gobble} command in the wrong directory, which could very
+easily cause problems (in this case it would certainly cause
+@file{../foo} to be truncated, at least).
 
 @cindex commands, backslash (@code{\}) in
 @cindex commands, quoting newlines in
@@ -3340,15 +3347,22 @@ all :
 space
         @@echo no\
         space
+        @@echo one \
+        space
+        @@echo one\
+         space
 @end group
 @end example
 
-consists of two separate shell commands where the output is:
+@noindent
+consists of four separate shell commands where the output is:
 
 @example
 @group
 nospace
 nospace
+one space
+one space
 @end group
 @end example
 
@@ -3362,6 +3376,7 @@ all : ; @@echo 'hello \
 @end group
 @end example
 
+@noindent
 will run one shell with a command script of:
 
 @example
@@ -3372,6 +3387,7 @@ world' ; echo "hello \
 @end group
 @end example
 
+@noindent
 which, according to shell quoting rules, will yield the following output:
 
 @example
@@ -3381,6 +3397,13 @@ world
 hello     world
 @end group
 @end example
+
+@noindent
+Notice how the backslash/newline pair was removed inside the string quoted
+with double quotes (@code{"..."}), but not from the string quoted with single
+quotes (@code{'...'}).  This is the way the default shell (@file{/bin/sh})
+handles backslash/newline pairs.  If you specify a different shell in your
+makefiles it may treat them differently.
 
 @vindex SHELL
 The program used as the shell is taken from the variable @code{SHELL}.
@@ -3439,7 +3462,7 @@ pathname of the shell, exactly as things are on Unix.
 
 The effect of the above DOS-specific processing is that a Makefile that
 says @samp{SHELL = /bin/sh} (as many Unix makefiles do), will work
-on MS-DOS unaltered if you have e.g. @file{sh.exe} installed in some
+on MS-DOS unaltered if you have e.g.@: @file{sh.exe} installed in some
 directory along your @code{PATH}.
 
 @cindex environment, @code{SHELL} in
@@ -5007,7 +5030,7 @@ definition of the variable.  If you defined it first with @samp{:=},
 making it a simply-expanded variable, @samp{+=} adds to that
 simply-expanded definition, and expands the new text before appending it
 to the old value just as @samp{:=} does
-(@pxref{Setting, ,Setting Variables} for a full explanation of @samp{:=}).
+(see @ref{Setting, ,Setting Variables}, for a full explanation of @samp{:=}).
 In fact,
 
 @example
@@ -5248,7 +5271,7 @@ and therefore are not affected by the value in the environment.)
 
 When @code{make} runs a command script, variables defined in the
 makefile are placed into the environment of that command.  This allows
-you to pass values to sub-@code{make} invocations. (@pxref{Recursion,
+you to pass values to sub-@code{make} invocations (@pxref{Recursion,
 ,Recursive Use of @code{make}}).  By default, only variables that came
 from the environment or the command line are passed to recursive
 invocations.  You can use the @code{export} directive to pass other
@@ -5325,7 +5348,7 @@ conditional (@samp{?=}).  All variables that appear within the
 target: thus, any previously-defined target-specific variable values
 will be in effect.  Note that this variable is actually distinct from
 any ``global'' value: the two variables do not have to have the same
-flavor (recursive vs. static).
+flavor (recursive vs.@: static).
 
 Target-specific variables have the same priority as any other makefile
 variable.  Variables provided on the command-line (and in the
@@ -5336,7 +5359,7 @@ variable value to be preferred.
 There is one more special feature of target-specific variables: when
 you define a target-specific variable that variable value is also in
 effect for all prerequisites of this target, and all their
-prerequisites, etc. (unless those prerequisites override that variable
+prerequisites, etc.@: (unless those prerequisites override that variable
 with their own target-specific variable value).  So, for example, a
 statement like this:
 
@@ -6325,7 +6348,7 @@ documentation for a list of possible failure causes.
 @cindex file name, abspath of
 For each file name in @var{names} return an absolute name that does
 not contain any @code{.} or @code{..} components, nor any repeated path
-separators (@code{/}). Note that in contrast to @code{realpath}
+separators (@code{/}).  Note that, in contrast to @code{realpath}
 function, @code{abspath} does not resolve symlinks and does not require
 the file names to refer to an existing file or directory. Use the
 @code{wildcard} function to test for existence.
@@ -6523,7 +6546,7 @@ LS := $(call pathsearch,ls)
 Now the variable LS contains @code{/bin/ls} or similar.
 
 The @code{call} function can be nested.  Each recursive invocation gets
-its own local values for @code{$(1)}, etc. that mask the values of
+its own local values for @code{$(1)}, etc.@: that mask the values of
 higher-level @code{call}.  For example, here is an implementation of a
 @dfn{map} function:
 
@@ -6777,9 +6800,9 @@ Here the redefinition takes place if @samp{$(origin bletch)} returns either
 
 The @code{flavor} function is unlike most other functions (and like
 @code{origin} function) in that it does not operate on the values of
-variables; it tells you something @emph{about} a variable. Specifically,
-it tells you the flavor of a variable
-(@pxref{Flavors, ,The Two Flavors of Variables}).
+variables; it tells you something @emph{about} a variable.
+Specifically, it tells you the flavor of a variable (@pxref{Flavors,
+,The Two Flavors of Variables}).
 
 The syntax of the @code{flavor} function is:
 
@@ -6836,7 +6859,7 @@ function calls are expanded (@pxref{Reading Makefiles, , How
 @code{make} Reads a Makefile}).  Because this function involves
 spawning a new shell, you should carefully consider the performance
 implications of using the @code{shell} function within recursively
-expanded variables vs. simply expanded variables (@pxref{Flavors, ,The
+expanded variables vs.@: simply expanded variables (@pxref{Flavors, ,The
 Two Flavors of Variables}).
 
 Here are some examples of the use of the @code{shell} function:
@@ -6936,6 +6959,7 @@ find out which files are out of date without changing them.
 By giving arguments when you run @code{make}, you can do any of these
 things and many others.
 
+@cindex exit status of make
 The exit status of @code{make} is always one of three values:
 @table @code
 @item 0
@@ -7915,13 +7939,19 @@ available unless the makefile explicitly overrides or cancels them.
 canceling or overriding an implicit rule.  The @samp{-r} or
 @samp{--no-builtin-rules} option cancels all predefined rules.
 
+This manual only documents the default rules available on POSIX-based
+operating systems.  Other operating systems, Windows, etc. may have
+different sets of default rules.  To see the full list of default
+rules and variables available in your version of GNU @code{make}, run
+@samp{make -p} in a directory with no makefile.
+
 Not all of these rules will always be defined, even when the @samp{-r}
 option is not given.  Many of the predefined implicit rules are
 implemented in @code{make} as suffix rules, so which ones will be
 defined depends on the @dfn{suffix list} (the list of prerequisites of
 the special target @code{.SUFFIXES}).  The default suffix list is:
 @code{.out}, @code{.a}, @code{.ln}, @code{.o}, @code{.c}, @code{.cc},
-@code{.C}, @code{.p}, @code{.f}, @code{.F}, @code{.r}, @code{.y},
+@code{.C}, @code{.cpp}, @code{.p}, @code{.f}, @code{.F}, @code{.r}, @code{.y},
 @code{.l}, @code{.s}, @code{.S}, @code{.mod}, @code{.sym}, @code{.def},
 @code{.h}, @code{.info}, @code{.dvi}, @code{.tex}, @code{.texinfo},
 @code{.texi}, @code{.txinfo}, @code{.w}, @code{.ch} @code{.web},
@@ -7946,12 +7976,13 @@ a command of the form @samp{$(CC) -c $(CPPFLAGS) $(CFLAGS)}.@refill
 @item Compiling C++ programs
 @cindex C++, rule to compile
 @pindex g++
-@pindex .C
 @pindex .cc
-@file{@var{n}.o} is made automatically from @file{@var{n}.cc} or
-@file{@var{n}.C} with a command of the form @samp{$(CXX) -c $(CPPFLAGS)
-$(CXXFLAGS)}.  We encourage you to use the suffix @samp{.cc} for C++
-source files instead of @samp{.C}.@refill
+@pindex .cpp
+@pindex .C
+@file{@var{n}.o} is made automatically from @file{@var{n}.cc},
+@file{@var{n}.cpp}, or @file{@var{n}.C} with a command of the form
+@samp{$(CXX) -c $(CPPFLAGS) $(CXXFLAGS)}.  We encourage you to use the
+suffix @samp{.cc} for C++ source files instead of @samp{.C}.@refill
 
 @item Compiling Pascal programs
 @cindex Pascal, rule to compile
@@ -8212,11 +8243,11 @@ the value @w{@samp{; mv $*.o $@@}}.
 @cindex flags for compilers
 
 The commands in built-in implicit rules make liberal use of certain
-predefined variables.  You can alter these variables in the makefile,
-with arguments to @code{make}, or in the environment to alter how the
-implicit rules work without redefining the rules themselves.  You can
-cancel all variables used by implicit rules with the @samp{-R} or
-@samp{--no-builtin-variables} option.
+predefined variables.  You can alter the values of these variables in
+the makefile, with arguments to @code{make}, or in the environment to
+alter how the implicit rules work without redefining the rules
+themselves.  You can cancel all variables used by implicit rules with
+the @samp{-R} or @samp{--no-builtin-variables} option.
 
 For example, the command used to compile a C source file actually says
 @samp{$(CC) -c $(CFLAGS) $(CPPFLAGS)}.  The default values of the variables
@@ -8235,7 +8266,15 @@ some command arguments, but it must start with an actual executable program
 name.)  If a variable value contains more than one argument, separate them
 with spaces.
 
-Here is a table of variables used as names of programs in built-in rules:
+The following tables describe of some of the more commonly-used predefined
+variables.  This list is not exhaustive, and the default values shown here may
+not be what is selected by @code{make} for your environment.  To see the
+complete list of predefined variables for your instance of GNU @code{make} you
+can run @samp{make -p} in a directory with no makefiles.
+
+Here is a table of some of the more common variables used as names of
+programs in built-in rules:
+makefiles.
 
 @table @code
 @item AR
@@ -8245,12 +8284,17 @@ Archive-maintaining program; default @samp{ar}.
 
 @item AS
 @vindex AS
-Program for doing assembly; default @samp{as}.
+Program for compiling assembly files; default @samp{as}.
 @pindex as
 
 @item CC
 @vindex CC
 Program for compiling C programs; default @samp{cc}.
+@pindex cc
+
+@item CO
+@vindex CO
+Program for checking out files from RCS; default @samp{co}.
 @pindex cc
 
 @item CXX
@@ -8281,24 +8325,28 @@ Program for extracting a file from SCCS; default @samp{get}.
 
 @item LEX
 @vindex LEX
-Program to use to turn Lex grammars into C programs or Ratfor programs;
-default @samp{lex}.
+Program to use to turn Lex grammars into source code; default @samp{lex}.
 @pindex lex
+
+@item YACC
+@vindex YACC
+Program to use to turn Yacc grammars into source code; default @samp{yacc}.
+@pindex yacc
+
+@item LINT
+@vindex LINT
+Program to use to run lint on source code; default @samp{lint}.
+@pindex lint
+
+@item M2C
+@vindex M2C
+Program to use to compile Modula-2 source code; default @samp{m2c}.
+@pindex m2c
 
 @item PC
 @vindex PC
 Program for compiling Pascal programs; default @samp{pc}.
 @pindex pc
-
-@item YACC
-@vindex YACC
-Program to use to turn Yacc grammars into C programs; default @samp{yacc}.
-@pindex yacc
-
-@item YACCR
-@vindex YACCR
-Program to use to turn Yacc grammars into Ratfor
-programs; default @samp{yacc -r}.
 
 @item MAKEINFO
 @vindex MAKEINFO
@@ -8385,12 +8433,16 @@ Extra flags to give to the SCCS @code{get} program.
 
 @item LDFLAGS
 @vindex LDFLAGS
-Extra flags to give to compilers when they are
-supposed to invoke the linker, @samp{ld}.
+Extra flags to give to compilers when they are supposed to invoke the linker,
+@samp{ld}.
 
 @item LFLAGS
 @vindex LFLAGS
 Extra flags to give to Lex.
+
+@item YFLAGS
+@vindex YFLAGS
+Extra flags to give to Yacc.
 
 @item PFLAGS
 @vindex PFLAGS
@@ -8400,9 +8452,9 @@ Extra flags to give to the Pascal compiler.
 @vindex RFLAGS
 Extra flags to give to the Fortran compiler for Ratfor programs.
 
-@item YFLAGS
-@vindex YFLAGS
-Extra flags to give to Yacc.
+@item LINTFLAGS
+@vindex LINTFLAGS
+Extra flags to give to lint.
 @end table
 
 @node Chained Rules, Pattern Rules, Implicit Variables, Implicit Rules
@@ -8671,8 +8723,9 @@ for the source file name.
 It's very important that you recognize the limited scope in which
 automatic variable values are available: they only have values within
 the command script.  In particular, you cannot use them anywhere
-within the target or prerequisite lists of a rule; they have no value
-there and will expand to the empty string.  A common mistake is
+within the target list of a rule; they have no value there and will
+expand to the empty string.  Also, they cannot be accessed directly
+within the prerequisite list of a rule.  A common mistake is
 attempting to use @code{$@@} within the prerequisites list in a rule;
 this will not work.  However, see below for information on the
 SysV-style @code{$$@@} variables.
@@ -8721,7 +8774,9 @@ prerequisites which are archive members, only the member named is used
 (@pxref{Archives}).  A target has only one prerequisite on each other file
 it depends on, no matter how many times each file is listed as a
 prerequisite.  So if you list a prerequisite more than once for a target,
-the value of @code{$^} contains just one copy of the name.
+the value of @code{$^} contains just one copy of the name.  This list
+does @strong{not} contain any of the order-only prerequisites; for those
+see the @samp{$|} variable, below.
 @cindex prerequisites, list of all
 @cindex list of all prerequisites
 
@@ -10068,7 +10123,7 @@ and concatenate the results.@*
 @item $(call @var{var},@var{param},@dots{})
 
 Evaluate the variable @var{var} replacing any references to @code{$(1)},
-@code{$(2)} with the first, second, etc. @var{param} values.@*
+@code{$(2)} with the first, second, etc.@: @var{param} values.@*
 @xref{Call Function, ,The @code{call} Function}.
 
 @item $(eval @var{text})

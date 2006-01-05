@@ -1,5 +1,6 @@
+## $Id: Makefile.am,v 1.18 2006/01/05 11:11:29 rockyb Exp $
 ## Process this file with automake to create Makefile.in.
-## Copyright 2002, 2004, 2005 Free Software Foundation, Inc.
+## Copyright 2002, 2004, 2005, 2006 Free Software Foundation, Inc.
 ## This is a -*-Makefile-*-, or close enough
 
 transform = s,make,@MAKE_NAME@,
@@ -61,7 +62,7 @@ check-loadavg: loadavg$(EXEEXT)
 	-./loadavg$(EXEEXT)
 
 # The loadavg function is invoked during "make check" to test getloadavg.
-noinst_PROGRAMS = loadavg
+check_PROGRAMS = loadavg
 loadavg_CPPFLAGS = -DTEST
 loadavg_LDADD = @GETLOADAVG_LIBS@
 

@@ -16,7 +16,7 @@ CLEANFILES = make*.html make*.info*
 # Extra stuff to include in the distribution.
 
 EXTRA_DIST =	doxygen/Doxyfile doxygen/run_doxygen fdl.texi make.texi \
-	        make-stds.texi mdb.texi mdb.info version-mdb.texi
+	        make.info make-stds.texi mdb.texi mdb.info version-mdb.texi
 
 ## ----------------------------- ##
 ## Other documentation formats.  ##

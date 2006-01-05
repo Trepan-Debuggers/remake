@@ -1,6 +1,6 @@
-/* $Id: job.c,v 1.37 2005/12/25 12:55:58 rockyb Exp $
+/* $Id: job.c,v 1.38 2006/01/05 11:11:29 rockyb Exp $
 Job execution and handling for GNU Make.
-Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005
+Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005, 2006
 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -1849,7 +1849,7 @@ exec_command (char **argv, char **envp)
       else
           fprintf(stderr,
                   _("make reaped child pid %d, still waiting for pid %d\n"),
-                  hWaitPID, hPID);
+		  (DWORD)hWaitPID, (DWORD)hPID);
     }
 
   /* return child's exit code as our exit code */

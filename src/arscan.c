@@ -1,6 +1,6 @@
-/* $Id: arscan.c,v 1.7 2005/12/25 10:08:35 rockyb Exp $
+/* $Id: arscan.c,v 1.8 2006/01/05 11:11:29 rockyb Exp $
 Library function for scanning an archive file.
-Copyright (C) 1987, 89, 91, 92, 93, 94, 95, 97, 2004, 2005
+Copyright (C) 1987, 89, 91, 92, 93, 94, 95, 97, 2004, 2005, 2006
 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
@@ -114,18 +114,18 @@ struct ar_hdr
    Open the given archive, find its members one by one,
    and for each one call function with the following arguments:
 
-     member name,
-     member name might be truncated flag,
-     member header position in file,
-     member data position in file,
-     member data size,
-     member date,
-     member uid,
-     member gid,
-     member protection mode,
-     argument supplied as the last parameter.
+   -  member name,
+   -  member name might be truncated flag,
+   -  member header position in file,
+   -  member data position in file,
+   -  member data size,
+   -  member date,
+   -  member uid,
+   -  member gid,
+   -  member protection mode,
+   -  argument supplied as the last parameter.
 
-   @param archive  archive file descriptor for reading the data.
+   @param archive archive file descriptor for reading the data.
    This descriptor is poised to read the data of the member
    when function is called.  It does not matter how much
    data function reads.
@@ -135,8 +135,11 @@ struct ar_hdr
 
    @param arg the argument given to function on each iteration.
 
-   @return -1 if archive does not exist, -2 if archive has invalid
-   format, and 0 if have scanned successfully.  */
+   @return 
+    -  0 if scanned successfully.  
+    - -1 if archive does not exist, 
+    - -2 if archive has invalid format, 
+*/
 long int
 ar_scan (char *archive, long int (*function)(), long int arg)
 {

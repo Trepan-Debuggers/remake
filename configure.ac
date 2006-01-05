@@ -6,7 +6,7 @@ AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.32 2005/12/25 12:56:05 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.33 2006/01/05 11:11:28 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -47,7 +47,7 @@ AM_MAINTAINER_MODE
 
 # Enable gettext, in "external" mode.
 
-AM_GNU_GETTEXT_VERSION(0.11.5)
+AM_GNU_GETTEXT_VERSION(0.14.1)
 AM_GNU_GETTEXT([external])
 
 # This test must come as early as possible after the compiler configuration
@@ -63,8 +63,8 @@ AC_HEADER_STDC
 AC_HEADER_DIRENT
 AC_HEADER_STAT
 AC_HEADER_TIME
-AC_CHECK_HEADERS(locale.h limits.h fcntl.h stdbool.h)
-AC_CHECK_HEADERS(sys/param.h sys/time.h sys/timeb.h signal.h)
+AC_CHECK_HEADERS(locale.h limits.h fcntl.h stdbool.h \
+		 sys/param.h sys/time.h sys/timeb.h signal.h)
 
 dnl FreeBSD 4 has getopt in unistd.h. So we include that before
 dnl getopt.h 
@@ -151,12 +151,12 @@ if test "$ac_cv_func_gettimeofday" = yes; then
 	    [Define if you have a standard gettimeofday function])
 fi
 
-AC_CHECK_FUNCS(	atexit bsd_signal dup2  fdopen getcwd getgroups \
+AC_CHECK_FUNCS(	atexit bsd_signal dup2 fdopen getcwd getgroups \
 		lstat memcpy memmove mkstemp mktemp pipe readlink \
 		setegid seteuid setlinebuf setreuid setregid setvbuf \
 	        sigaction sigsetmask strchr strdup strerror strsignal )
 
-make_FUNC_SETVBUF_REVERSED
+AC_FUNC_SETVBUF_REVERSED
 
 # strcoll() is used by the GNU glob library
 AC_FUNC_STRCOLL
@@ -184,8 +184,14 @@ if test "$ac_cv_header_nlist_h" = yes; then
   fi
 fi
 
-AC_CHECK_DECLS([sys_siglist])
-
+AC_CHECK_DECLS([sys_siglist, _sys_siglist, __sys_siglist], , ,
+  [AC_INCLUDES_DEFAULT
+#include <signal.h>
+/* NetBSD declares sys_siglist in unistd.h.  */
+#if HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+])
 
 # Check out the wait reality.
 AC_CHECK_HEADERS(sys/wait.h)
@@ -214,7 +220,7 @@ AC_CACHE_VAL(make_cv_union_wait, [dnl
     [make_cv_union_wait=no])])
 if test "$make_cv_union_wait" = yes; then
   AC_DEFINE(HAVE_UNION_WAIT, 1,
-            [Define this if you have the "union wait" type in <sys/wait.h>.])
+            [Define this if you have the \`union wait' type in <sys/wait.h>.])
 fi
 AC_MSG_RESULT($make_cv_union_wait)
 
@@ -358,6 +364,15 @@ AC_ARG_WITH(customs,
 # Tell automake about this, so it can include the right .c files.
 AM_CONDITIONAL(USE_CUSTOMS, test "$use_customs" = true)
 
+# See if the user asked to handle case insensitive file systems.
+
+AH_TEMPLATE(HAVE_CASE_INSENSITIVE_FS, [Use case insensitive file names])
+AC_ARG_ENABLE(case-insensitive-file-system,
+  AC_HELP_STRING([--enable-case-insensitive-file-system],
+		 [enable case insensitive file system support]),
+  case_insensitive_fs="yes" AC_DEFINE(HAVE_CASE_INSENSITIVE_FS),
+  case_insensitive_fs="no")
+
 # See if we can handle the job server feature, and if the user wants it.
 
 AC_ARG_ENABLE(job-server,
@@ -455,6 +470,18 @@ AM_CONDITIONAL(USE_LOCAL_GLOB, test "$make_cv_sys_gnu_glob" = no)
 AC_DEFINE_UNQUOTED(MAKE_HOST,"$host",[Build host information.])
 MAKE_HOST="$host"
 AC_SUBST(MAKE_HOST)
+
+w32_target_env=no
+AM_CONDITIONAL([WINDOWSENV], false)
+
+case "$host" in
+  *-*-mingw32)
+    AM_CONDITIONAL(WINDOWSENV, true)
+    w32_target_env=yes
+    AC_DEFINE([WINDOWS32], [1], [Use platform specific coding])
+    AC_DEFINE([HAVE_DOS_PATHS], [1], [Use platform specific coding])
+    ;;
+esac
 
 # Include the Maintainer's Makefile section, if it's here.
 

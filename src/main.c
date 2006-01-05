@@ -1,7 +1,7 @@
-/* $Id: main.c,v 1.48 2005/12/25 12:55:58 rockyb Exp $
+/* $Id: main.c,v 1.49 2006/01/05 11:11:29 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
-2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -734,7 +734,7 @@ handle_runtime_exceptions( struct _EXCEPTION_POINTERS *exinfo )
     {
       sprintf(errmsg,
               _("%s: Interrupt/Exception caught (code = 0x%x, addr = 0x%x)\n"),
-              prg, exrec->ExceptionCode, exrec->ExceptionAddress);
+              prg, exrec->ExceptionCode, (DWORD)exrec->ExceptionAddress);
       fprintf(stderr, errmsg);
       exit(255);
     }
@@ -742,7 +742,7 @@ handle_runtime_exceptions( struct _EXCEPTION_POINTERS *exinfo )
   sprintf(errmsg,
           _("\nUnhandled exception filter called from program %s\nExceptionCode = %x\nExceptionFlags = %x\nExceptionAddress = %x\n"),
           prg, exrec->ExceptionCode, exrec->ExceptionFlags,
-          exrec->ExceptionAddress);
+          (DWORD)exrec->ExceptionAddress);
 
   if (exrec->ExceptionCode == EXCEPTION_ACCESS_VIOLATION
       && exrec->NumberParameters >= 2)

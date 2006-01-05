@@ -1070,17 +1070,18 @@ Here is a full list of debugger options and suboptions...
 @cindex @code{-X}
 The ``preread'' suboption enters the debugger after command-line
 options are parsed but before any Makefiles have been read. It also
-puts @value{REMAKE} in step tracing mode and sets the debugger to enter
+puts @value{REMAKE} in step-tracing mode and sets the debugger to enter
 if it encounters an error.
 
-The ``preaction suboption enters the debugger after command-line
+The ``preaction'' suboption enters the debugger after command-line
 options are parsed and after Makefiles have been read, but before any
-action is performed. It also puts @value{REMAKE} in step tracing mode
+action is performed. It also puts @value{REMAKE} in step-tracing mode
 and sets the debugger to enter if it encounters an error.
 
 The ``error'' suboption enters the debugger when it encounters an
 error. Depending on other conditions, @value{REMAKE} can ignore errors
-and continue processing. 
+and continue processing. So the overall effect could be like the
+@code{--keep-going} flag.
 
 The ``fatal'' suboption enters the debugger when it encounters a fatal
 error. A fatal error generally cause @value{REMAKE} to abort execution.

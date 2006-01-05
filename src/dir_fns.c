@@ -1,7 +1,7 @@
-/* $Id: dir_fns.c,v 1.6 2005/12/19 23:48:17 rockyb Exp $
+/* $Id: dir_fns.c,v 1.7 2006/01/05 11:11:29 rockyb Exp $
 Directory hashing for GNU Make.
 Copyright (C) 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -332,9 +332,9 @@ find_directory (char *name)
   char* w32_path;
   char  fs_label[BUFSIZ];
   char  fs_type[BUFSIZ];
-  long  fs_serno;
-  long  fs_flags;
-  long  fs_len;
+  unsigned long  fs_serno;
+  unsigned long  fs_flags;
+  unsigned long  fs_len;
 #endif
 
   dir_key.name = name;

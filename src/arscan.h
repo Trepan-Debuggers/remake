@@ -1,5 +1,5 @@
-/* $Id: arscan.h,v 1.5 2005/12/25 20:53:01 rockyb Exp $
-Copyright (C) 2004, 2005 Free Software Foundation, Inc.
+/* $Id: arscan.h,v 1.6 2006/01/05 11:11:29 rockyb Exp $
+Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -49,8 +49,11 @@ USA.  */
 
    @param arg the argument given to function on each iteration.
 
-   @return -1 if archive does not exist, -2 if archive has invalid
-   format, and 0 if have scanned successfully.  */
+   @return 
+    -  0 if scanned successfully.  
+    - -1 if archive does not exist, 
+    - -2 if archive has invalid format, 
+*/
 
 extern long int ar_scan (char *archive, 
 			 long int (*function) (), long int arg);
