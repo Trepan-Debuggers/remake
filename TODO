@@ -18,6 +18,10 @@ that, something hacky for saving and passing state as is done in the
 bash debugger has to be done. For now, I'll probably live with no
 global state.
 
+:-( More support of tracing in the first phase where variables are 
+    set and built-in functions get called. There is call tracing, but
+    that is just a small bit.
+
 :-( More complete debugger history commands.
 
 :-( Add a debugger profile mechanism. (Should be a stack of file
@@ -43,4 +47,4 @@ There are probably many make-specific commands (e.g like the ones
 listed above). Using the debugger will probably uncover many areas.
 such as specialized things to trace.
 
-$Id: TODO,v 1.5 2005/11/27 12:38:37 rockyb Exp $
+$Id: TODO,v 1.6 2006/01/08 09:15:29 rockyb Exp $
