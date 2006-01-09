@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.15 2006/01/09 04:37:30 rockyb Exp $
+@set RCSID $Id: make.texi,v 1.16 2006/01/09 04:46:53 rockyb Exp $
 @set EDITION 0.61
 @set VERSION 3.80+dbg
 @set UPDATED 25 Dec 2005
@@ -3710,9 +3710,16 @@ times to prevent other sorts of trouble.
 @cindex subdirectories, recursion for
 
 Recursive use of @code{make} means using @code{make} as a command in a
-makefile.  This technique is useful when you want separate makefiles for
-various subsystems that compose a larger system.  For example, suppose you
-have a subdirectory @file{subdir} which has its own makefile, and you would
+makefile.  This technique has been used to separate makefiles for
+various subsystems that compose a larger system.  However this can
+lead to slower makefiles and makefiles which don't work when running
+make in parallel because of dependencies which span
+subdirectories. See ``Recursive Make Considered Harmfull'' by Peter
+Miller @url{http://aegis.sourceforge.net/auug97.pdf}.
+
+However should you decide to go this route (and @code{automake}
+typically does), we'll give an example. Suppose you have a
+subdirectory @file{subdir} which has its own makefile, and you would
 like the containing directory's makefile to run @code{make} on the
 subdirectory.  You can do it by writing this:
 
