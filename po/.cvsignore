@@ -1,9 +1,11 @@
 *.gmo
 *.po
-POTFILES
-Makefile.in
 Makefile
+Makefile.in
+Makefile.in.in
+Makevars.template
+POTFILES
+po/Rules-quot
 remake.pot
 remove-potcdate.sed
 stamp-po
-
