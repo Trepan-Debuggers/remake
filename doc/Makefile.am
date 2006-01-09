@@ -3,19 +3,19 @@
 ## Makefile for GNU make documentation.
 ## Copyright 2002, 2004, 2005 Free Software Foundation, Inc.
 
-transform = s,make,@MAKE_NAME@,
+transform := s,make,@MAKE_NAME@,
 
-make_TEXINFOS = make.texi fdl.texi make-stds.texi
-mdb_TEXINFOS = mdb.texi 
-TEXI2PDF = texi2dvi --pdf
+make_TEXINFOS := make.texi fdl.texi make-stds.texi
+mdb_TEXINFOS := mdb.texi 
+TEXI2PDF := texi2dvi --pdf
 
-MOSTLYCLEANFILES = make.tgs make.pdf make.html mdb.cps mdb.kys mdb.html mdb.fns mdb.ps.gz mdb.pdf 
+MOSTLYCLEANFILES := make.tgs make.pdf make.html mdb.cps mdb.kys mdb.html mdb.fns mdb.ps.gz mdb.pdf 
 
-CLEANFILES = make*.html make*.info*
+CLEANFILES := make*.html make*.info*
 
 # Extra stuff to include in the distribution.
 
-EXTRA_DIST =	doxygen/Doxyfile doxygen/run_doxygen fdl.texi make.texi \
+EXTRA_DIST :=	doxygen/Doxyfile doxygen/run_doxygen fdl.texi make.texi \
 	        make.info make-stds.texi mdb.texi mdb.info version-mdb.texi
 
 ## ----------------------------- ##

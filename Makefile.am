@@ -1,23 +1,23 @@
 # This is a -*-Makefile-*-, or close enough
 
-AUTOMAKE_OPTIONS = dist-bzip2 check-news
+AUTOMAKE_OPTIONS := dist-bzip2 check-news
 
-transform = s,make,@MAKE_NAME@,
+transform := s,make,@MAKE_NAME@,
 
-SUBDIRS =	glob config po doc src emacs
+SUBDIRS :=	glob config po doc src emacs
 
-man_MANS =	make.1
+man_MANS :=	make.1
 
 # Extra stuff to include in the distribution.
 # Note we need all the glob stuff here, rather than in glob/Makefile.am,
 # because often that directory isn't built on the systems used by the
 # maintainers.
 
-EXTRA_DIST =	README build.sh.in $(man_MANS) \
+EXTRA_DIST :=	README build.sh.in $(man_MANS) \
 		README.customs README.mdb getloadavg.c \
 		README.W32 TODO ChangeLog.GNUMake
 
-MAKE_HOST =	@MAKE_HOST@
+MAKE_HOST :=	@MAKE_HOST@
 
 
 # Forward targets
@@ -27,7 +27,7 @@ html:
 
 # --------------- Internationalization Section
 
-localedir =	$(datadir)/locale
+localedir :=	$(datadir)/locale
 
 # --------------- Local INSTALL Section
 
@@ -89,7 +89,7 @@ check-local: check-regression
 # If we're building outside the tree, we use symlinks to make a local copy of
 # the test suite.  Unfortunately the test suite itself isn't localizable yet.
 #
-MAKETESTFLAGS =
+MAKETESTFLAGS :=
 
 check-regression:
 	@if test -f "$(srcdir)/tests/run_make_tests"; then \
