@@ -1,12 +1,12 @@
 ## Process this file with automake to create Makefile.in.
 
 ## Makefile for GNU make documentation.
-## Copyright 2002, 2004, 2005 Free Software Foundation, Inc.
+## Copyright 2002, 2004, 2005, 2006 Free Software Foundation, Inc.
 
 transform := s,make,@MAKE_NAME@,
 
-make_TEXINFOS := make.texi fdl.texi make-stds.texi
-mdb_TEXINFOS := mdb.texi 
+info_TEXINFOS := make.texi mdb.texi
+make_TEXINFOS := fdl.texi make-stds.texi
 TEXI2PDF := texi2dvi --pdf
 
 MOSTLYCLEANFILES := make.tgs make.pdf make.html mdb.cps mdb.kys mdb.html mdb.fns mdb.ps.gz mdb.pdf 
