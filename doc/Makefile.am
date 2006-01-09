@@ -24,6 +24,8 @@ EXTRA_DIST :=	doxygen/Doxyfile doxygen/run_doxygen fdl.texi make.texi \
 
 all: mdb.info make.info
 
+$(srcdir)/version-mdb.texi: $(srcdir)/stamp-vti
+
 reference:
 	-( cd ${top_srcdir} && $(MAKE) doxygen )
 
