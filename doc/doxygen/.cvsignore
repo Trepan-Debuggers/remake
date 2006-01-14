@@ -1,3 +1,4 @@
-make.xml
-latex
+Doxyfile
 html
+latex
+make.xml
