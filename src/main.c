@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.49 2006/01/05 11:11:29 rockyb Exp $
+/* $Id: main.c,v 1.50 2006/01/21 13:40:21 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
@@ -414,9 +414,9 @@ static const char *const usage[] =
     N_("\
   --warn-undefined-variables   Warn when an undefined variable is referenced.\n"),
     N_("\
-  -x, --trace[=TYPE]           Trace command execution TYPE  may be\n\
-                               \"read\", \"normal\", \"noshell\", "
-                               " or \"full\".\n"),
+  -x, --trace[=TYPE]           Trace command execution TYPE may be\n\
+                               \"command\", \"read\", \"normal\",\"\
+                               \"noshell\", or \"full\".\n"),
     N_("\
   -X [type], --debugger[=TYPE] Enter debugger. TYPE may be\n\
                                \"preread\", \"preaction\", \"full\",\n\
@@ -1256,15 +1256,22 @@ main (int argc, char **argv, char **envp)
   
   if (tracing_opts) {
     char **p;
-    db_level |= (DB_BASIC | DB_TRACE | DB_SHELL);
-    for (p = tracing_opts->list; *p != 0; ++p) {
-      if (0 == strcmp(*p, "read"))
-	db_level |= DB_READ_MAKEFILES;
-      else if (0 == strcmp(*p, "full"))
-	db_level |= (DB_VERBOSE|DB_READ_MAKEFILES);
-      else if (0 == strcmp(*p, "noshell"))
-	db_level |= (DB_VERBOSE|DB_READ_MAKEFILES) & ~DB_SHELL;
-    }
+    db_level |= (DB_TRACE | DB_SHELL);
+    if (!tracing_opts->list)
+      db_level |= (DB_BASIC);
+    else 
+      for (p = tracing_opts->list; *p != 0; ++p) {
+	if (0 == strcmp(*p, "command"))
+	  ;
+	else if (0 == strcmp(*p, "full"))
+	  db_level |= (DB_VERBOSE|DB_READ_MAKEFILES);
+	else if (0 == strcmp(*p, "normal"))
+	  db_level |= (DB_BASIC | DB_TRACE | DB_SHELL);
+	else if (0 == strcmp(*p, "noshell"))
+	  db_level |= (DB_VERBOSE|DB_READ_MAKEFILES) & ~DB_SHELL;
+	else if (0 == strcmp(*p, "read"))
+	  db_level |= DB_READ_MAKEFILES;
+      }
   }
   
 #ifdef WINDOWS32

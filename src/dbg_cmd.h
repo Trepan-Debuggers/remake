@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.h,v 1.7 2005/12/15 02:42:38 rockyb Exp $
+/* $Id: dbg_cmd.h,v 1.8 2006/01/21 13:40:21 rockyb Exp $
 Copyright (C) 2005 rocky@panix.com
 This file is part of GNU Make.
 
@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef DBG_CMD_H
 #define DBG_CMD_H
 #include "job.h"
+#include "buildargv.h"
 
 /*! 
   If 0 (or false) we are not in the debugger command read loop.

@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.19 2006/01/09 04:37:30 rockyb Exp $
+## $Id: Makefile.am,v 1.20 2006/01/21 13:40:21 rockyb Exp $
 ## Process this file with automake to create Makefile.in.
 ## Copyright 2002, 2004, 2005, 2006 Free Software Foundation, Inc.
 ## This is a -*-Makefile-*-, or close enough
@@ -24,7 +24,7 @@ else
    add_getopt_sources :=
 endif
 
-make_SOURCES :=	ar_fns.c arscan.c commands.c \
+make_SOURCES :=	ar_fns.c arscan.c buildargv.c commands.c \
 	        dbg_break.c dbg_cmd.c dbg_fns.c dbg_stack.c \
 	        debug.c default.c dep.c dir_fns.c expand.c file.c \
 		function.c hash.c implicit.c job.c \
@@ -34,7 +34,7 @@ make_SOURCES :=	ar_fns.c arscan.c commands.c \
 
 EXTRA_make_SOURCES := remote-stub.c remote-cstms.c $(getopt_sources)
 
-noinst_HEADERS := ar_fns.h arscan.h commands.h \
+noinst_HEADERS := ar_fns.h arscan.h buildargv.h commands.h \
 	         dbg_break.h dbg_cmd.h dbg_fns.h dbg_stack.h \
 	         debug.h default.h dep.h dir_fns.h expand.h file.h \
 	         function.h getopt.h gettext.h hash.h implicit.h job.h \

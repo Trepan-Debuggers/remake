@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.74 2005/12/25 10:08:35 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.75 2006/01/21 13:40:21 rockyb Exp $
 Copyright (C) 2004, 2005 rocky@panix.com
 This file is part of GNU Make.
 
@@ -607,7 +607,15 @@ dbg_cmd_run (char *psz_arg)
   printf("Changing directory to %s and restarting...\n", 
 	 directory_before_chdir);
   chdir (directory_before_chdir);
-  execvp (global_argv[0], global_argv);
+  char **ppsz_argv = global_argv;
+  const char *psz_make_cmd = global_argv[0];
+  if (psz_arg && strlen(psz_arg)) {
+    unsigned int len = strlen(global_argv[0]) + strlen(psz_arg) + 2;
+    char *psz_full_args = CALLOC(char, len);
+    snprintf(psz_full_args, len, "%s %s", global_argv[0], psz_arg);
+    ppsz_argv = buildargv(psz_full_args);
+  }
+  execvp (psz_make_cmd, ppsz_argv);
   /* NOT USED: */
   return debug_readloop;
 }
