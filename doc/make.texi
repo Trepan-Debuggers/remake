@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.16 2006/01/09 04:46:53 rockyb Exp $
+@set RCSID $Id: make.texi,v 1.17 2006/01/21 13:43:42 rockyb Exp $
 @set EDITION 0.61
 @set VERSION 3.80+dbg
 @set UPDATED 25 Dec 2005
@@ -7755,9 +7755,18 @@ is turned on and the debugger is entered @code{make} would execute the
 first command.  Possible arguments are below.
 
 @table @code
+@item commands
+Just turn on tracing of commands that are executed. We suppress the
+supression of commands using @samp{@@}. In other words, all commands
+are echoed.
+
 @item normal
-This is the default behavior; ``basic'' debug tracing is turned on and
-the debugger is entered before executing the first command.
+This is the default behavior; ``basic'' debug tracing is turned on,
+command tracing is turned on and the debugger is entered before
+executing the first command.
+
+@item noshell
+Don't run shell commands.
 
 @item read
 A little more verbose than ``normal''. Trace reading Makefiles
