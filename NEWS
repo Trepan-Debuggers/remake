@@ -17,6 +17,10 @@ Version 3.80+dbg-0.61cvs
 * Add configure option --with-shell-trace to specify how to turn on
   tracing when running shell commands.
 
+* Add --trace=normal. 
+
+* run wasn't reading any (optional) arguments supplied.
+
 * More doxygen documentation and docuementation improvements.
 
 Version 3.80+dbg-0.60
