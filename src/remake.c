@@ -1,4 +1,4 @@
-/* $Id: remake.c,v 1.25 2006/01/05 11:11:29 rockyb Exp $
+/* $Id: remake.c,v 1.26 2006/02/01 11:31:30 rockyb Exp $
 Basic dependency engine for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005, 2006 Free Software Foundation, Inc.
@@ -170,7 +170,8 @@ update_goal_chain (dep_t *goals, int makefiles)
               /* Set the goal's `changed' flag if any commands were started
                  by calling update_file above.  We check this flag below to
                  decide when to give an "up to date" diagnostic.  */
-              g->changed += commands_started - ocommands_started;
+              if (commands_started > ocommands_started)
+                g->changed = 1;
 
               /* If we updated a file and STATUS was not already 1, set it to
                  1 if updating failed, or to 0 if updating succeeded.  Leave

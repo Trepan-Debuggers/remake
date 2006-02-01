@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.50 2006/01/21 13:40:21 rockyb Exp $
+/* $Id: main.c,v 1.51 2006/02/01 11:31:30 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
@@ -1650,12 +1650,6 @@ main (int argc, char **argv, char **envp)
   /* look one last time after reading all Makefiles */
   if (no_default_sh_exe)
     no_default_sh_exe = !find_and_set_default_shell(NULL);
-
-  if (no_default_sh_exe && job_slots != 1) {
-    error (NILF, _("Do not specify -j or --jobs if sh.exe is not available."));
-    error (NILF, _("Resetting make for single job mode."));
-    job_slots = 1;
-  }
 #endif /* WINDOWS32 */
 
 #if defined (__MSDOS__)

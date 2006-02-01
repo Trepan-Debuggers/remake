@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.17 2006/01/21 13:43:42 rockyb Exp $
+@set RCSID $Id: make.texi,v 1.18 2006/02/01 11:31:29 rockyb Exp $
 @set EDITION 0.61
 @set VERSION 3.80+dbg
 @set UPDATED 25 Dec 2005
@@ -2283,7 +2283,7 @@ each pattern in the list with @var{name} and perform the above directory
 searches using that library filename.  If no library is found, the next
 word in the list will be used.
 
-The default value for @code{.LIBPATTERNS} is ``@samp{lib%.so lib%.a}'',
+The default value for @code{.LIBPATTERNS} is @samp{lib%.so lib%.a},
 which provides the default behavior described above.
 
 You can turn off link library expansion completely by setting this
@@ -4552,7 +4552,6 @@ Sub-@code{make}}, for information about @code{MAKELEVEL}.)
 @example
 @group
 ifeq (0,$@{MAKELEVEL@})
-cur-dir   := $(shell pwd)
 whoami    := $(shell whoami)
 host-type := $(shell arch)
 MAKE := $@{MAKE@} host-type=$@{host-type@} whoami=$@{whoami@}
@@ -4567,7 +4566,7 @@ An advantage of this use of @samp{:=} is that a typical
 @example
 @group
 $@{subdirs@}:
-      $@{MAKE@} cur-dir=$@{cur-dir@}/$@@ -C $@@ all
+        $@{MAKE@} -C $@@ all
 @end group
 @end example
 
@@ -8609,10 +8608,11 @@ with @samp{s.}, ends in @samp{.c} and is at least five characters long.
 that the @samp{%} matches is called the @dfn{stem}.@refill
 
 @samp{%} in a prerequisite of a pattern rule stands for the same stem
-that was matched by the @samp{%} in the target.  In order for
-the pattern rule to apply, its target pattern must match the file name
-under consideration, and its prerequisite patterns must name files that
-exist or can be made.  These files become prerequisites of the target.
+that was matched by the @samp{%} in the target.  In order for the
+pattern rule to apply, its target pattern must match the file name
+under consideration and all of its prerequisites (after pattern
+substitution) must name files that exist or can be made.  These files
+become prerequisites of the target.
 @cindex prerequisite pattern, implicit
 
 Thus, a rule of the form
@@ -8802,6 +8802,12 @@ This is like @samp{$^}, but prerequisites listed more than once are
 duplicated in the order they were listed in the makefile.  This is
 primarily useful for use in linking commands where it is meaningful to
 repeat library file names in a particular order.
+
+@vindex $|
+@vindex | @r{(automatic variable)}
+@item $|
+The names of all the order-only prerequisites, with spaces between
+them.
 
 @vindex $*
 @vindex * @r{(automatic variable)}

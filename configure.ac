@@ -6,7 +6,7 @@ AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.33 2006/01/05 11:11:28 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.34 2006/02/01 11:31:17 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -336,6 +336,10 @@ else
 fi
 
 AC_SUBST(HAVE_READLINE)
+REMAKE_SOURCE_PATH="`pwd`"
+AC_DEFINE_UNQUOTED(REMAKE_SOURCE_PATH, "$REMAKE_SOURCE_PATH",
+	[Full path to remake top_sourcedir.])
+AC_SUBST(REMAKE_SOURCE_PATH)
 
 # See if the user wants to use pmake's "customs" distributed build capability
 
@@ -550,6 +554,7 @@ AC_CONFIG_FILES([Makefile        \
 		 doc/Makefile    \
 		 emacs/Makefile  \
 		 emacs/mdb.el    \
+		 doc/doxygen/Doxyfile \
 		 glob/Makefile   \
                  po/Makefile.in  \
 		 src/Makefile    \

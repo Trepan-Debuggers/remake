@@ -20,6 +20,7 @@ EXTRA_DIST :=	README build.sh.in $(man_MANS) \
 MAKE_HOST :=	@MAKE_HOST@
 
 
+test: check
 # Forward targets
 
 html:
@@ -121,18 +122,20 @@ MAINTAINERCLEANFILES = ChangeLog
 
 @MAINT_MAKEFILE@
 
+PHONY := html test
+
 if MAINTAINER_MODE
 
-.PHONY: html ChangeLog
+PHONY += ChangeLog
 ChangeLog:
 	$(CVS2CL) -W 450 --header $(srcdir)/cvs2cl_header --utc -w -I ChangeLog --usermap $(srcdir)/cvs2cl_usermap -P 
 
 ACLOCAL_AMFLAGS= -I . -I config
 
 else 
-.PHONY: html
 
 ACLOCAL_AMFLAGS	=  -I config
 
 endif
 
+.PHONY: $(PHONY)

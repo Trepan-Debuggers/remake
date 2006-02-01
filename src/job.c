@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.38 2006/01/05 11:11:29 rockyb Exp $
+/* $Id: job.c,v 1.39 2006/02/01 11:31:30 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005, 2006
 Free Software Foundation, Inc.
@@ -198,11 +198,12 @@ w32_kill(int pid, int sig)
   return ((process_kill((HANDLE)pid, sig) == TRUE) ? 0 : -1);
 }
 
-/* This function creates a temporary file name with the given extension
- * the unixy param controls both the extension and the path separator
- * return an malloc'ed string of a newly created temp file or die.  */
+/* This function creates a temporary file name with an extension specified
+ * by the unixy arg.
+ * Return an xmalloc'ed string of a newly created temp file and its
+ * file descriptor, or die.  */
 static char *
-create_batch_filename(char const *base, int unixy)
+create_batch_file (char const *base, int unixy, int *fd)
 {
   const char *const ext = unixy ? "sh" : "bat";
   const char *error = NULL;
@@ -260,7 +261,7 @@ create_batch_filename(char const *base, int unixy)
           const unsigned final_size = path_size + size + 1;
           char *const path = MALLOC(char, final_size);
           memcpy (path, temp_path, final_size);
-          CloseHandle (h);
+          *fd = _open_osfhandle ((long)h, 0);
           if (unixy)
             {
               char *p;
@@ -273,6 +274,7 @@ create_batch_filename(char const *base, int unixy)
         }
     }
 
+  *fd = -1;
   if (error == NULL)
     error = _("Cannot create a temporary file\n");
   fatal (NILF, error);
@@ -1213,7 +1215,7 @@ static void start_job_command (child_t *p_child,
         int i;
         unblock_sigs();
         fprintf(stderr,
-          _("process_easy() failed failed to launch process (e=%d)\n"),
+          _("process_easy() failed to launch process (e=%ld)\n"),
           process_last_err(hPID));
                for (i = 0; argv[i]; i++)
                  fprintf(stderr, "%s ", argv[i]);
@@ -1260,7 +1262,12 @@ start_waiting_job (child_t *c, target_stack_node_t *p_call_stack)
 
   /* If we are running at least one job already and the load average
      is too high, make this one wait.  */
-  if (!c->remote && job_slots_used > 0 && load_too_high ())
+  if (!c->remote
+      && ((job_slots_used > 0 && load_too_high ())
+#ifdef WINDOWS32
+	  || (process_used_slots () >= MAXIMUM_WAIT_OBJECTS)
+#endif
+	  ))
     {
       /* Put this child on the chain of children waiting for the load average
          to go down.  */
@@ -1627,6 +1634,12 @@ load_too_high (void)
   static time_t last_now;
   double load, guess;
   time_t now;
+
+#ifdef WINDOWS32
+  /* sub_proc.c cannot wait for more than MAXIMUM_WAIT_OBJECTS children */
+  if (process_used_slots () >= MAXIMUM_WAIT_OBJECTS)
+    return 1;
+#endif
 
   if (max_load_average < 0)
     return 0;
@@ -2436,19 +2449,21 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
        command line (e.g. Cygnus GNUWIN32 sh.exe on WIN32 systems).  In these
        cases, run commands via a script file.  */
     if ((no_default_sh_exe || batch_mode_shell) && batch_filename_ptr) {
+      int temp_fd;
       FILE* batch = NULL;
       int id = GetCurrentProcessId();
       PATH_VAR(fbuf);
 
       /* create a file name */
       sprintf(fbuf, "make%d", id);
-      *batch_filename_ptr = create_batch_filename (fbuf, unixy_shell);
+      *batch_filename_ptr = create_batch_file (fbuf, unixy_shell, &temp_fd);
 
       DB (DB_JOBS, (_("Creating temporary batch file %s\n"),
                     *batch_filename_ptr));
 
-      /* create batch file to execute command */
-      batch = fopen (*batch_filename_ptr, "w");
+      /* Create a FILE object for the batch file, and write to it the
+	 commands to be executed.  */
+      batch = _fdopen (temp_fd, "w");
       if (!unixy_shell)
         fputs ("@echo off\n", batch);
       fputs (command_ptr, batch);
