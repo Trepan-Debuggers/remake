@@ -1,3 +1,9 @@
+2006-02-01  Paul D. Smith  <psmith@gnu.org>
+
+	* dir.c (dir_contents_file_exists_p) [WINDOWS32]: Make sure
+	variable st is not used when it's not initialized.
+	Patch from Eli Zaretskii <eliz@gnu.org>.
+
 2006-01-31  Paul D. Smith  <psmith@gnu.org>
 
 	* README.W32.template: Applied patch #4785 from
