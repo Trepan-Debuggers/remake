@@ -630,13 +630,13 @@ dir_contents_file_exists_p (struct directory_contents *dir, char *filename)
        * filesystems force a rehash always as mtime does not change
        * on directories (ugh!).
        */
-      if (dir->path_key
-	  && (dir->fs_flags & FS_FAT
-	      || (stat(dir->path_key, &st) == 0
-		  && st.st_mtime > dir->mtime)))
+      if (dir->path_key)
 	{
-	  /* reset date stamp to show most recent re-process */
-	  dir->mtime = st.st_mtime;
+          if (!(dir->fs_flags & FS_FAT)
+              && (stat(dir->path_key, &st) == 0
+                  && st.st_mtime > dir->mtime))
+            /* reset date stamp to show most recent re-process */
+            dir->mtime = st.st_mtime;
 
 	  /* make sure directory can still be opened */
 	  dir->dirstream = opendir(dir->path_key);
