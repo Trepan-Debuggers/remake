@@ -23,11 +23,12 @@
 #
 LIB = lib
 CC = cl
+MAKE = nmake
 
 OUTDIR=.
 MAKEFILE=NMakefile
 
-CFLAGS_any = /nologo /MT /W3 /GX /Z7 /YX /D WIN32 /D WINDOWS32 /D _WINDOWS  -I. -I../include -I../../
+CFLAGS_any = /nologo /MT /W4 /GX /Z7 /YX /D WIN32 /D WINDOWS32 /D _WINDOWS  -I. -I../include -I../../
 CFLAGS_debug = $(CFLAGS_any) /Od /D _DEBUG /FR.\WinDebug\ /Fp.\WinDebug\subproc.pch /Fo.\WinDebug/
 CFLAGS_release = $(CFLAGS_any) /O2 /FR.\WinRel\ /Fp.\WinRel\subproc.pch /Fo.\WinRel/
 

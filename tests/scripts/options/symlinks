@@ -1,12 +1,17 @@
 #                                                                    -*-perl-*-
-# $Id: symlinks,v 1.1 2005/12/24 04:32:10 rockyb Exp $
+# $Id: symlinks,v 1.2 2006/02/01 11:32:07 rockyb Exp $
 
 $description = "Test the -L option.";
 
 $details = "Verify that symlink handling with and without -L works properly.";
 
 # Only run these tests if the system sypports symlinks
-if (eval { symlink("",""); 1 }) {
+
+# Apparently the Windows port of Perl reports that it does support symlinks
+# (in that the symlink() function doesn't fail) but it really doesn't, so
+# check for it explicitly.
+
+if ($port_type ne 'W32' && eval { symlink("",""); 1 }) {
 
   # Set up a symlink sym -> dep
   # We'll make both dep and targ older than sym

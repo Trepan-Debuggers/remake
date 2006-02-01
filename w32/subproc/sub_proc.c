@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <process.h>  /* for msvc _beginthreadex, _endthreadex */
+#include <signal.h>
 #include <windows.h>
 
 #include "sub_proc.h"
@@ -30,7 +31,7 @@ typedef struct sub_process_t {
 } sub_process;
 
 /* keep track of children so we can implement a waitpid-like routine */
-static sub_process *proc_array[256];
+static sub_process *proc_array[MAXIMUM_WAIT_OBJECTS];
 static int proc_index = 0;
 static int fake_exits_pending = 0;
 
@@ -65,7 +66,7 @@ process_adjust_wait_state(sub_process* pproc)
 static sub_process *
 process_wait_for_any_private(void)
 {
-	HANDLE handles[256];
+	HANDLE handles[MAXIMUM_WAIT_OBJECTS];
 	DWORD retval, which;
 	int i;
 
@@ -119,7 +120,17 @@ process_kill(HANDLE proc, int signal)
 void
 process_register(HANDLE proc)
 {
-	proc_array[proc_index++] = (sub_process *) proc;
+	if (proc_index < MAXIMUM_WAIT_OBJECTS)
+		proc_array[proc_index++] = (sub_process *) proc;
+}
+
+/*
+ * Return the number of processes that we are still waiting for.
+ */
+int
+process_used_slots(void)
+{
+	return proc_index;
 }
 
 /*
@@ -522,7 +533,8 @@ process_begin(
 
 			pproc->last_err = GetLastError();
 			pproc->lerrno = E_FORK;
-			fprintf(stderr, "process_begin: CreateProcess(%s, %s, ...) failed.\n", exec_path, command_line);
+			fprintf(stderr, "process_begin: CreateProcess(%s, %s, ...) failed.\n",
+                                exec_path ? exec_path : "NULL", command_line);
 			if (envblk) free(envblk);
 			free( command_line );
 			return(-1);
@@ -536,15 +548,15 @@ process_begin(
 	/* Close the halves of the pipes we don't need */
 	if (pproc->sv_stdin) {
 		CloseHandle((HANDLE)pproc->sv_stdin[1]);
-		(HANDLE)pproc->sv_stdin[1] = 0;
+		pproc->sv_stdin[1] = 0;
 	}
 	if (pproc->sv_stdout) {
 		CloseHandle((HANDLE)pproc->sv_stdout[1]);
-		(HANDLE)pproc->sv_stdout[1] = 0;
+		pproc->sv_stdout[1] = 0;
 	}
 	if (pproc->sv_stderr) {
 		CloseHandle((HANDLE)pproc->sv_stderr[1]);
-		(HANDLE)pproc->sv_stderr[1] = 0;
+		pproc->sv_stderr[1] = 0;
 	}
 
 	free( command_line );
@@ -657,24 +669,24 @@ process_pipe_io(
 	sub_process *pproc = (sub_process *)proc;
 	bool_t stdin_eof = FALSE, stdout_eof = FALSE, stderr_eof = FALSE;
 	HANDLE childhand = (HANDLE) pproc->pid;
-	HANDLE tStdin, tStdout, tStderr;
+	HANDLE tStdin = NULL, tStdout = NULL, tStderr = NULL;
 	DWORD dwStdin, dwStdout, dwStderr;
 	HANDLE wait_list[4];
 	DWORD wait_count;
 	DWORD wait_return;
 	HANDLE ready_hand;
 	bool_t child_dead = FALSE;
-
+	BOOL GetExitCodeResult;
 
 	/*
 	 *  Create stdin thread, if needed
 	 */
-    pproc->inp = stdin_data;
-    pproc->incnt = stdin_data_len;
+	pproc->inp = stdin_data;
+	pproc->incnt = stdin_data_len;
 	if (!pproc->inp) {
 		stdin_eof = TRUE;
 		CloseHandle((HANDLE)pproc->sv_stdin[0]);
-		(HANDLE)pproc->sv_stdin[0] = 0;
+		pproc->sv_stdin[0] = 0;
 	} else {
 		tStdin = (HANDLE) _beginthreadex( 0, 1024,
 			(unsigned (__stdcall *) (void *))proc_stdin_thread, pproc, 0,
@@ -739,7 +751,7 @@ process_pipe_io(
 
 		if (ready_hand == tStdin) {
 			CloseHandle((HANDLE)pproc->sv_stdin[0]);
-			(HANDLE)pproc->sv_stdin[0] = 0;
+			pproc->sv_stdin[0] = 0;
 			CloseHandle(tStdin);
 			tStdin = 0;
 			stdin_eof = TRUE;
@@ -747,7 +759,7 @@ process_pipe_io(
 		} else if (ready_hand == tStdout) {
 
 		  	CloseHandle((HANDLE)pproc->sv_stdout[0]);
-			(HANDLE)pproc->sv_stdout[0] = 0;
+			pproc->sv_stdout[0] = 0;
 			CloseHandle(tStdout);
 			tStdout = 0;
 		  	stdout_eof = TRUE;
@@ -755,14 +767,21 @@ process_pipe_io(
 		} else if (ready_hand == tStderr) {
 
 			CloseHandle((HANDLE)pproc->sv_stderr[0]);
-			(HANDLE)pproc->sv_stderr[0] = 0;
+			pproc->sv_stderr[0] = 0;
 			CloseHandle(tStderr);
 			tStderr = 0;
 			stderr_eof = TRUE;
 
 		} else if (ready_hand == childhand) {
 
-			if (GetExitCodeProcess(childhand, &pproc->exit_code) == FALSE) {
+			DWORD ierr;
+			GetExitCodeResult = GetExitCodeProcess(childhand, &ierr);
+			if (ierr == CONTROL_C_EXIT) {
+				pproc->signal = SIGINT;
+			} else {
+				pproc->exit_code = ierr;
+			}
+			if (GetExitCodeResult == FALSE) {
 				pproc->last_err = GetLastError();
 				pproc->lerrno = E_SCALL;
 				goto done;
@@ -809,6 +828,8 @@ process_file_io(
 	sub_process *pproc;
 	HANDLE childhand;
 	DWORD wait_return;
+	BOOL GetExitCodeResult;
+        DWORD ierr;
 
 	if (proc == NULL)
 		pproc = process_wait_for_any_private();
@@ -852,7 +873,13 @@ process_file_io(
 		goto done2;
 	}
 
-	if (GetExitCodeProcess(childhand, &pproc->exit_code) == FALSE) {
+	GetExitCodeResult = GetExitCodeProcess(childhand, &ierr);
+	if (ierr == CONTROL_C_EXIT) {
+		pproc->signal = SIGINT;
+	} else {
+		pproc->exit_code = ierr;
+	}
+	if (GetExitCodeResult == FALSE) {
 		pproc->last_err = GetLastError();
 		pproc->lerrno = E_SCALL;
 	}
@@ -1152,6 +1179,10 @@ process_easy(
   HANDLE hErr;
   HANDLE hProcess;
 
+  if (proc_index >= MAXIMUM_WAIT_OBJECTS) {
+	DB (DB_JOBS, ("process_easy: All process slots used up\n"));
+	return INVALID_HANDLE_VALUE;
+  }
   if (DuplicateHandle(GetCurrentProcess(),
                       GetStdHandle(STD_INPUT_HANDLE),
                       GetCurrentProcess(),
@@ -1160,7 +1191,7 @@ process_easy(
                       TRUE,
                       DUPLICATE_SAME_ACCESS) == FALSE) {
     fprintf(stderr,
-            "process_easy: DuplicateHandle(In) failed (e=%d)\n",
+            "process_easy: DuplicateHandle(In) failed (e=%ld)\n",
             GetLastError());
     return INVALID_HANDLE_VALUE;
   }
@@ -1172,7 +1203,7 @@ process_easy(
                       TRUE,
                       DUPLICATE_SAME_ACCESS) == FALSE) {
     fprintf(stderr,
-           "process_easy: DuplicateHandle(Out) failed (e=%d)\n",
+           "process_easy: DuplicateHandle(Out) failed (e=%ld)\n",
            GetLastError());
     return INVALID_HANDLE_VALUE;
   }
@@ -1184,7 +1215,7 @@ process_easy(
                       TRUE,
                       DUPLICATE_SAME_ACCESS) == FALSE) {
     fprintf(stderr,
-            "process_easy: DuplicateHandle(Err) failed (e=%d)\n",
+            "process_easy: DuplicateHandle(Err) failed (e=%ld)\n",
             GetLastError());
     return INVALID_HANDLE_VALUE;
   }
@@ -1193,6 +1224,9 @@ process_easy(
 
   if (process_begin(hProcess, argv, envp, argv[0], NULL)) {
     fake_exits_pending++;
+    /* process_begin() failed: make a note of that.  */
+    if (!((sub_process*) hProcess)->last_err)
+      ((sub_process*) hProcess)->last_err = -1;
     ((sub_process*) hProcess)->exit_code = process_last_err(hProcess);
 
     /* close up unused handles */
