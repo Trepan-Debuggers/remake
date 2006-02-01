@@ -111,6 +111,10 @@ Version 3.81beta4
 * On VMS there is now support for case-sensitive filesystems such as ODS5.
   See the readme.vms file for information.
 
+* Parallel builds (-jN) no longer require a working Bourne shell on
+  Windows platforms.  They work even with the stock Windows shells, such
+  as cmd.exe and command.com.
+
 * Updated to autoconf 2.59, automake 1.9.5, and gettext 0.14.1.  Users
   should not be impacted.
 

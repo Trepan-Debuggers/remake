@@ -8,7 +8,7 @@ already performed this step; however, for completeness, you can obtain
 the GNU make source code via anonymous CVS from the FSF's Savannah
 project <http://savannah.gnu.org/projects/make/>:
 
-  $ cvs -d:pserver:anoncvs@subversions.gnu.org:/cvsroot/make co make
+  $ cvs -d:pserver:anoncvs@cvs.savannah.gnu.org:/sources/make co make
 
 You might want to use the "-z3" option to get compression, and you most
 certainly will want the -P option to avoid unneeded directories
@@ -91,6 +91,28 @@ T. and the AutoToolers!
 
 
 That's it, you're done!
+
+
+Windows builds from CVS
+-----------------------
+
+IF you have managed to successfully perform the 1st two or three steps of
+the general build procedure as explained above:
+
+  $ autoreconf [-i] -s
+  $ ./configure
+ [$ make update]
+
+THEN proceed with file README.W32.
+
+ELSE ignore the general build procedure, instead execute the following
+command lines at a Windows command prompt:
+
+  if not exist README.W32 copy README.W32.template README.W32
+  if not exist config.h.W32 copy config.h.W32.template config.h.W32
+  if not exist NMakefile copy NMakefile.template NMakefile
+
+Now proceed with file README.W32.
 
 
 Appendix A - For The Brave

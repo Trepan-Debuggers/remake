@@ -27,7 +27,8 @@
 				ForceConformanceInForLoopScope="TRUE"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
-				Detect64BitPortabilityProblems="TRUE"
+				SuppressStartupBanner="TRUE"
+				Detect64BitPortabilityProblems="FALSE"
 				DebugInformationFormat="4"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -44,7 +45,9 @@
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCPreBuildEventTool"
+				Description="Copying config.h.W32 to config.h"
+				CommandLine="if not exist config.h copy config.h.W32 config.h"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -74,7 +77,7 @@
 				ForceConformanceInForLoopScope="TRUE"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
-				Detect64BitPortabilityProblems="TRUE"
+				Detect64BitPortabilityProblems="FALSE"
 				DebugInformationFormat="3"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -92,7 +95,9 @@
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCPreBuildEventTool"
+				Description="Copying config.h.W32 to config.h"
+				CommandLine="if not exist config.h copy config.h.W32 config.h"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool

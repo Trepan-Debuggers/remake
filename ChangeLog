@@ -1,3 +1,50 @@
+2006-01-31  Paul D. Smith  <psmith@gnu.org>
+
+	* README.W32.template: Applied patch #4785 from
+	Markus Mauhart <qwe123@chello.at>.
+	* README.cvs: Applied patch #4786 from
+	Markus Mauhart <qwe123@chello.at>.
+	* make_msvc_net2003.vcproj [WINDOWS32]: New version from
+	Markus Mauhart <qwe123@chello.at>.
+
+	* main.c: Update the copyright year in the version output.
+	* prepare_w32.bat: Remove this file from the distribution.
+
+2006-01-21  Eli Zaretskii  <eliz@gnu.org>
+
+	* remake.c (update_goal_chain): Set g->changed instead of
+	incrementing it, as it is only 8-bit wide, and could overflow if
+	many commands got started in update_file.
+
+	* w32/include/sub_proc.h: Add a prototype for process_used_slots.
+
+	* w32/subproc/sub_proc.c: Change dimension of proc_array[] to
+	MAXIMUM_WAIT_OBJECTS.
+	(process_wait_for_any_private): Change dimension of handles[]
+	array to MAXIMUM_WAIT_OBJECTS.
+	(process_used_slots): New function.
+	(process_register): Don't register more processes than the
+	available number of slots.
+	(process_easy): Don't start new processes if all slots are used	up.
+
+	* job.c (load_too_high, start_waiting_jobs) [WINDOWS32]: If there
+	are already more children than sub_proc.c can handle, behave as if
+	the load were too high.
+	(start_job_command): Fix a typo in error message when process_easy
+	fails.
+
+2006-01-14  Eli Zaretskii  <eliz@gnu.org>
+
+	* main.c (main) [WINDOWS32]: Don't refuse to run with -jN, even if
+	the shell is not sh.exe.
+
+	* job.c (create_batch_file): Renamed from create_batch_filename;
+	all callers changed.  Don't close the temporary file; return its
+	file descriptor instead.  New arg FD allows to return the file
+	descriptor.
+	(construct_command_argv_internal): Use _fdopen instead of fopen to
+	open the batch file.
+
 2006-01-04  Paul D. Smith  <psmith@gnu.org>
 
 	* readme.vms: Updates for case-insensitive VMS file systems from
@@ -24,10 +71,6 @@
 	* config.h.W32.template [WINDOWS32]: Add in some pragmas to
 	disable warnings for MSC.
 	Patch by Rob Tulloh <rtulloh@yahoo.com>.
-
-2005-12-18  Paul D. Smith  <psmith@gnu.org>
-
-	* Makefile.am (EXTRA_DIST): Distribute prepare_w32.bat.
 
 2005-12-17  Eli Zaretskii  <eliz@gnu.org>
 

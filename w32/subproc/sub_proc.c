@@ -31,7 +31,7 @@ typedef struct sub_process_t {
 } sub_process;
 
 /* keep track of children so we can implement a waitpid-like routine */
-static sub_process *proc_array[256];
+static sub_process *proc_array[MAXIMUM_WAIT_OBJECTS];
 static int proc_index = 0;
 static int fake_exits_pending = 0;
 
@@ -66,7 +66,7 @@ process_adjust_wait_state(sub_process* pproc)
 static sub_process *
 process_wait_for_any_private(void)
 {
-	HANDLE handles[256];
+	HANDLE handles[MAXIMUM_WAIT_OBJECTS];
 	DWORD retval, which;
 	int i;
 
@@ -120,7 +120,17 @@ process_kill(HANDLE proc, int signal)
 void
 process_register(HANDLE proc)
 {
-	proc_array[proc_index++] = (sub_process *) proc;
+	if (proc_index < MAXIMUM_WAIT_OBJECTS)
+		proc_array[proc_index++] = (sub_process *) proc;
+}
+
+/*
+ * Return the number of processes that we are still waiting for.
+ */
+int
+process_used_slots(void)
+{
+	return proc_index;
 }
 
 /*
@@ -1169,6 +1179,10 @@ process_easy(
   HANDLE hErr;
   HANDLE hProcess;
 
+  if (proc_index >= MAXIMUM_WAIT_OBJECTS) {
+	DB (DB_JOBS, ("process_easy: All process slots used up\n"));
+	return INVALID_HANDLE_VALUE;
+  }
   if (DuplicateHandle(GetCurrentProcess(),
                       GetStdHandle(STD_INPUT_HANDLE),
                       GetCurrentProcess(),

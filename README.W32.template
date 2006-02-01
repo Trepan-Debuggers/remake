@@ -9,52 +9,63 @@ It builds with the MinGW port of GCC 3.x (tested with GCC 3.4.2).
 The Windows 32-bit port of GNU make is maintained jointly by various
 people.  It was originally made by Rob Tulloh.
 
-To build with MinGW:
 
-	1. Edit config.h.W32 to your liking (especially the few
-           shell-related defines near the end).
+Do this first, regardless of the build method you choose:
+---------------------------------------------------------
 
-	2. Invoke build_w32.bat with the "gcc" argument:
+ 0. If your sources come from CVS, read the Windows-specific section of
+    README.cvs.
 
-		build_w32 gcc
+ 1. At the Windows command prompt run:
 
-	   This produces gnumake.exe in the current directory.
+	if not exist config.h copy config.h.W32 config.h
 
-To build with nmake:
-
-	1. Make sure cl.exe is in your %Path%. Example:
-
-		set Path=%Path%;c:/msdev/bin
-
-	2. Make sure %include% is set to msvc include directory. Example:
-
-		set include=c:/msdev/include
-
-	3. Make sure %lib% is set to msvc lib directory. Example:
-
-		set lib=c:/msdev/lib
-
-	4. nmake /f NMakefile
+    Then edit config.h to your liking (especially the few shell-related
+    defines near the end, or HAVE_CASE_INSENSITIVE_FS which corresponds
+    to './configure --enable-case-insensitive-file-system').
 
 
-    A short cut to steps 1, 2, and 3 is to run VCVARS32.bat before
-    invoking nmake. For example:
+Using make_msvc_net2003.vcproj
+------------------------------
 
-        c:
-        cd \msdev\bin
-        VCVARS32.bat
-	cd \path\to\make-%VERSION%
+ 2. Open make_msvc_net2003.vcproj in MSVS71 or MSVC71 or any compatible IDE,
+    then build this project as usual.
+
+
+Building with (MinGW-)GCC using build_w32.bat
+---------------------------------------------
+
+ 2. Open a W32 command prompt for your installed (MinGW-)GCC, setup a
+    correct PATH and other environment variables for it, then execute ...
+
+	build_w32.bat gcc
+
+    This produces gnumake.exe in the current directory.
+
+
+Building with (MSVC++-)cl using build_w32.bat or NMakefile
+----------------------------------------------------------
+
+ 2. Open a W32 command prompt for your installed (MSVC++-)cl, setup a
+    correct PATH and other environment variables for it (usually via
+    executing vcvars32.bat or vsvars32.bat from the cl-installation,
+    e.g. "%VS71COMNTOOLS%vsvars32.bat"; or using a corresponding start
+    menue entry from the cl-installation), then execute EITHER ...
+
+	build_w32.bat
+
+    (this produces WinDebug/gnumake.exe and WinRel/gnumake.exe)
+
+    ... OR ...
+
 	nmake /f NMakefile
 
-There is a bat file (build_w32.bat) for folks who have fear of nmake.
-
-Outputs:
-
-	WinDebug/make.exe
-	WinRel/make.exe
+    (this produces WinDebug/make.exe and WinRel/make.exe).
 
 
+-------------------
 -- Notes/Caveats --
+-------------------
 
 GNU make on Windows 32-bit platforms:
 
