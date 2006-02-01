@@ -159,7 +159,8 @@ update_goal_chain (struct dep *goals)
 	      /* Set the goal's `changed' flag if any commands were started
 		 by calling update_file above.  We check this flag below to
 		 decide when to give an "up to date" diagnostic.  */
-	      g->changed += commands_started - ocommands_started;
+              if (commands_started > ocommands_started)
+                g->changed = 1;
 
               /* If we updated a file and STATUS was not already 1, set it to
                  1 if updating failed, or to 0 if updating succeeded.  Leave

@@ -4,14 +4,14 @@
 /*
  * Component Name:
  *
- * $Date: 2005/02/10 00:10:58 $
+ * $Date: 2006/02/01 07:54:22 $
  *
  * $Source: /sources/make/make/w32/include/sub_proc.h,v $
  *
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  */
 
-/* $Id: sub_proc.h,v 1.5 2005/02/10 00:10:58 psmith Exp $ */
+/* $Id: sub_proc.h,v 1.6 2006/02/01 07:54:22 psmith Exp $ */
 
 #define EXTERN_DECL(entry, args) extern entry args
 #define VOID_DECL void
@@ -29,6 +29,7 @@ EXTERN_DECL(HANDLE process_wait_for_any, (VOID_DECL));
 EXTERN_DECL(void process_register, (HANDLE proc));
 EXTERN_DECL(HANDLE process_easy, (char** argv, char** env));
 EXTERN_DECL(BOOL process_kill, (HANDLE proc, int signal));
+EXTERN_DECL(int process_used_slots, (VOID_DECL));
 
 /* support routines */
 EXTERN_DECL(long process_errno, (HANDLE proc));

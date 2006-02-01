@@ -4,7 +4,9 @@
    Maybe after the code cleanup for ISO C we can remove some/all of these.  */
 #if _MSC_VER > 1000
 # pragma warning(disable:4100) /* unreferenced formal parameter */
+# pragma warning(disable:4102) /* unreferenced label */
 # pragma warning(disable:4127) /* conditional expression is constant */
+# pragma warning(disable:4131) /* uses old-style declarator */
 # pragma warning(disable:4702) /* unreachable code */
 #endif
 

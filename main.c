@@ -1595,12 +1595,6 @@ main (int argc, char **argv, char **envp)
   /* look one last time after reading all Makefiles */
   if (no_default_sh_exe)
     no_default_sh_exe = !find_and_set_default_shell(NULL);
-
-  if (no_default_sh_exe && job_slots != 1) {
-    error (NILF, _("Do not specify -j or --jobs if sh.exe is not available."));
-    error (NILF, _("Resetting make for single job mode."));
-    job_slots = 1;
-  }
 #endif /* WINDOWS32 */
 
 #if defined (__MSDOS__) || defined (__EMX__)
@@ -2944,7 +2938,7 @@ print_version (void)
      word "Copyright", so it hardly seems worth it.  */
 
   printf ("%sGNU Make %s\n\
-%sCopyright (C) 2003  Free Software Foundation, Inc.\n",
+%sCopyright (C) 2006  Free Software Foundation, Inc.\n",
           precede, version_string, precede);
 
   printf (_("%sThis is free software; see the source for copying conditions.\n\

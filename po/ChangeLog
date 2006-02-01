@@ -1,3 +1,7 @@
+2006-01-28  Paul D. Smith  <psmith@gnu.org>
+
+	* LINGUAS: Added new translation for Vietnamese (vi).
+
 2005-07-14  Paul D. Smith  <psmith@gnu.org>
 
 	* LINGUAS: Added new translation for Indonesian (id).
