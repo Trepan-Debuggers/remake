@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.75 2006/01/21 13:40:21 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.76 2006/02/01 18:07:55 rockyb Exp $
 Copyright (C) 2004, 2005 rocky@panix.com
 This file is part of GNU Make.
 
@@ -592,9 +592,10 @@ dbg_cmd_show_command (char *psz_arg)
 
 #ifdef HAVE_HISTORY_LIST
   HIST_ENTRY **hist_list = history_list();
-  unsigned int i_line;
-  for (i_line=0; *hist_list; i_line++, *hist_list +=1) {
-    printf("%5d  %s\n", i_line, (*hist_list)->line);
+  unsigned int i;
+  if (!hist_list) return debug_readloop;
+  for (i=0; hist_list[i]; i++) {
+    printf("%5d  %s\n", i, hist_list[i]->line);
   }
 #endif
   return debug_readloop;
@@ -744,8 +745,10 @@ static debug_return_t dbg_cmd_show (char *psz_arg)
   if (!psz_arg || 0==strlen(psz_arg)) {
     unsigned int i;
     for (i=0; show_subcommands[i].name; i++) {
-      if ( 0 != strcmp(show_subcommands[i].name, "warranty") )
-	dbg_cmd_show((char *) show_subcommands[i].name);
+      if ( 0 == strcmp(show_subcommands[i].name, "warranty") ||
+	   0 == strcmp(show_subcommands[i].name, "history"))
+	continue;
+      dbg_cmd_show((char *) show_subcommands[i].name);
     }
   } else {
     if (is_abbrev_of (psz_arg, "args", 3)) {
@@ -1229,11 +1232,7 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
     rl_initialize ();
     cmd_initialize();
     i_init = 1;
-    /* where_history() returns 0 when no commands are initialized and
-       0 when the first one is set. Thus, if we don't add a dummy
-       initial command as we do below, we'll get history item 0 listed
-       twice.  I don't know a better way to fix. */
-    add_history (""); 
+    using_history ();
   }
 
   /* Set initial frame position reporting area: 0 is bottom. */
