@@ -1,4 +1,4 @@
-/* $Id: dir_fns.c,v 1.7 2006/01/05 11:11:29 rockyb Exp $
+/* $Id: dir_fns.c,v 1.8 2006/02/01 21:14:47 rockyb Exp $
 Directory hashing for GNU Make.
 Copyright (C) 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
@@ -511,13 +511,13 @@ dir_contents_file_exists_p (directory_contents_t *dir, char *filename)
        * filesystems force a rehash always as mtime does not change
        * on directories (ugh!).
        */
-      if (dir->path_key
-	  && (dir->fs_flags & FS_FAT
-	      || (stat(dir->path_key, &st) == 0
-		  && st.st_mtime > dir->mtime)))
+      if (dir->path_key)
 	{
-	  /* reset date stamp to show most recent re-process */
-	  dir->mtime = st.st_mtime;
+          if (!(dir->fs_flags & FS_FAT)
+              && (stat(dir->path_key, &st) == 0
+                  && st.st_mtime > dir->mtime))
+            /* reset date stamp to show most recent re-process */
+            dir->mtime = st.st_mtime;
 
 	  /* make sure directory can still be opened */
 	  dir->dirstream = opendir(dir->path_key);
