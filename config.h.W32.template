@@ -198,13 +198,13 @@
 /*#define HAVE_STDINT_H 1*/
 
 /* Define to 1 if you have the <stdlib.h> header file. */
-/* #define HAVE_STDLIB_H 1*/
+#define HAVE_STDLIB_H 1
 
 /* Define to 1 if you have the `strcasecmp' function. */
 /* #undef HAVE_STRCASECMP */
 
 /* Define to 1 if you have the `strchr' function. */
-/* #define HAVE_STRCHR 1 */
+#define HAVE_STRCHR 1
 
 /* Define to 1 if you have the `strcoll' function and it is properly defined.
    */
@@ -308,7 +308,7 @@
 #define PACKAGE "%PACKAGE%"
 
 /* Define to 1 if the C compiler supports function prototypes. */
-/*#define PROTOTYPES 1*/
+#define PROTOTYPES 1
 
 /* Define as the return type of signal handlers (`int' or `void'). */
 #define RETSIGTYPE void

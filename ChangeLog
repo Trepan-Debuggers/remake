@@ -6,6 +6,17 @@
 	-W, don't overwrite it with the real mtime.
 	Fixes Savannah bug #15341.
 
+	Updates from Markus Mauhart <qwe123@chello.at>:
+
+	* w32/subproc/sub_proc.c (process_begin): Remove no-op tests.
+	(process_signal, process_last_err, process_exit_code): Manage
+	invalid handle values.
+	(process_{outbuf,errbuf,outcnt,errcnt,pipes}): Unused and don't
+	manage invalid handles; remove them.
+	* job.c (start_job_command) [WINDOWS32]: Jump out on error.
+	* config.h.W32.template [WINDOWS32]: Set flags for Windows builds.
+	* README.cvs: Updates for building from CVS.
+
 2006-02-05  Paul D. Smith  <psmith@gnu.org>
 
 	* file.c (enter_file): Keep track of the last double_colon entry,
@@ -34,7 +45,7 @@
 	* README.cvs: Applied patch #4786 from
 	Markus Mauhart <qwe123@chello.at>.
 	* make_msvc_net2003.vcproj [WINDOWS32]: New version from
-	Markus Mauhart <qwe123@chello.at>.
+	J. Grant <jg@jguk.org>.
 
 	* main.c: Update the copyright year in the version output.
 	* prepare_w32.bat: Remove this file from the distribution.

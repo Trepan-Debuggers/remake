@@ -13,12 +13,10 @@ people.  It was originally made by Rob Tulloh.
 Do this first, regardless of the build method you choose:
 ---------------------------------------------------------
 
- 0. If your sources come from CVS, read the Windows-specific section of
-    README.cvs.
-
  1. At the Windows command prompt run:
 
-	if not exist config.h copy config.h.W32 config.h
+      if not exist NMakefile copy NMakefile.template NMakefile
+      if not exist config.h copy config.h.W32 config.h
 
     Then edit config.h to your liking (especially the few shell-related
     defines near the end, or HAVE_CASE_INSENSITIVE_FS which corresponds

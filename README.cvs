@@ -96,23 +96,13 @@ That's it, you're done!
 Windows builds from CVS
 -----------------------
 
-IF you have managed to successfully perform the 1st two or three steps of
-the general build procedure as explained above:
+If you have a UNIX emulation like CYGWIN you can opt to run the general
+build procedure above; it will work.  Be sure to read
+README.W32.template for information on options you might want to use
+when running ./configure.
 
-  $ autoreconf [-i] -s
-  $ ./configure
- [$ make update]
-
-THEN proceed with file README.W32.
-
-ELSE ignore the general build procedure, instead execute the following
-command lines at a Windows command prompt:
-
-  if not exist README.W32 copy README.W32.template README.W32
-  if not exist config.h.W32 copy config.h.W32.template config.h.W32
-  if not exist NMakefile copy NMakefile.template NMakefile
-
-Now proceed with file README.W32.
+If you can't or don't want to do that, then rename the file
+README.W32.template to README.W32 and follow those instructions.
 
 
 Appendix A - For The Brave
