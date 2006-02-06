@@ -289,6 +289,17 @@ directory_contents_hash_2 (const void *key_0)
   return hash;
 }
 
+/* Sometimes it's OK to use subtraction to get this value:
+     result = X - Y;
+   But, if we're not sure of the type of X and Y they may be too large for an
+   int (on a 64-bit system for example).  So, use ?: instead.
+   See Savannah bug #15534.
+
+   NOTE!  This macro has side-effects!
+*/
+
+#define MAKECMP(_x,_y)  ((_x)<(_y)?-1:((_x)==(_y)?0:1))
+
 static int
 directory_contents_hash_cmp (const void *xv, const void *yv)
 {
@@ -300,28 +311,28 @@ directory_contents_hash_cmp (const void *xv, const void *yv)
   ISTRING_COMPARE (x->path_key, y->path_key, result);
   if (result)
     return result;
-  result = x->ctime - y->ctime;
+  result = MAKECMP(x->ctime, y->ctime);
   if (result)
     return result;
 #else
 # ifdef VMS
-  result = x->ino[0] - y->ino[0];
+  result = MAKECMP(x->ino[0], y->ino[0]);
   if (result)
     return result;
-  result = x->ino[1] - y->ino[1];
+  result = MAKECMP(x->ino[1], y->ino[1]);
   if (result)
     return result;
-  result = x->ino[2] - y->ino[2];
+  result = MAKECMP(x->ino[2], y->ino[2]);
   if (result)
     return result;
 # else
-  result = x->ino - y->ino;
+  result = MAKECMP(x->ino, y->ino);
   if (result)
     return result;
 # endif
 #endif /* WINDOWS32 */
 
-  return x->dev - y->dev;
+  return MAKECMP(x->dev, y->dev);
 }
 
 /* Table of directory contents hashed by device and inode number.  */

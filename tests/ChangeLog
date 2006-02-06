@@ -1,3 +1,7 @@
+2006-02-06  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/options/dash-W: Add a test for bug #15341.
+
 2006-01-03  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/variables/automatic: Add a test for bug #8154.

@@ -42,6 +42,7 @@ struct file
     struct file *prev;		/* Previous entry for same file name;
 				   used when there are multiple double-colon
 				   entries for the same file.  */
+    struct file *last;          /* Last entry for the same file name.  */
 
     /* File that this file was renamed to.  After any time that a
        file could be renamed, call `check_renamed' (below).  */
