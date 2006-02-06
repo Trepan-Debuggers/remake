@@ -1,3 +1,26 @@
+2006-02-06  Paul D. Smith  <psmith@gnu.org>
+
+	* vpath.c (selective_vpath_search): If the file we find has a
+	timestamp from -o or -W, use that instead of the real time.
+	* remake.c (f_mtime): If the mtime is a special token from -o or
+	-W, don't overwrite it with the real mtime.
+	Fixes Savannah bug #15341.
+
+2006-02-05  Paul D. Smith  <psmith@gnu.org>
+
+	* file.c (enter_file): Keep track of the last double_colon entry,
+	to avoid walking the list every time we want to add a new one.
+	Fixes Savannah bug #15533.
+	* filedef.h (struct file): Add a new LAST pointer.
+
+	* dir.c (directory_contents_hash_cmp): Don't use subtraction to do
+	the comparison.  For 64-bits systems the result of the subtraction
+	might not fit into an int.  Use comparison instead.
+	Fixes Savannah bug #15534.
+
+	* doc/make.texi: Update the chapter on writing commands to reflect
+	the changes made in 3.81 for backslash/newline and SHELL handling.
+
 2006-02-01  Paul D. Smith  <psmith@gnu.org>
 
 	* dir.c (dir_contents_file_exists_p) [WINDOWS32]: Make sure

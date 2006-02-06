@@ -180,14 +180,16 @@ enter_file (char *name)
   new->update_status = -1;
 
   if (HASH_VACANT (f))
-    hash_insert_at (&files, new, file_slot);
+    {
+      new->last = new;
+      hash_insert_at (&files, new, file_slot);
+    }
   else
     {
       /* There is already a double-colon entry for this file.  */
       new->double_colon = f;
-      while (f->prev != 0)
-	f = f->prev;
-      f->prev = new;
+      f->last->prev = new;
+      f->last = new;
     }
 
   return new;
@@ -718,13 +720,17 @@ snap_deps (void)
 	    f2->command_flags |= COMMANDS_SILENT;
     }
 
-  f = lookup_file (".POSIX");
-  if (f != 0 && f->is_target)
-    posix_pedantic = 1;
-
   f = lookup_file (".NOTPARALLEL");
   if (f != 0 && f->is_target)
     not_parallel = 1;
+
+#ifndef NO_MINUS_C_MINUS_O
+  /* If .POSIX was defined, remove OUTPUT_OPTION to comply.  */
+  /* This needs more work: what if the user sets this in the makefile?
+  if (posix_pedantic)
+    define_variable (STRING_SIZE_TUPLE("OUTPUT_OPTION"), "", o_default, 1);
+  */
+#endif
 
   /* Remember that we've done this. */
   snapped_deps = 1;
