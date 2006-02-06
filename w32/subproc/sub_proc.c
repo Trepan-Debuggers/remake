@@ -173,54 +173,58 @@ process_wait_for_any(void)
 }
 
 long
-process_errno(HANDLE proc)
+process_signal(HANDLE proc)
 {
-	return (((sub_process *)proc)->lerrno);
+        if (proc == INVALID_HANDLE_VALUE) return 0;
+        return (((sub_process *)proc)->signal);
 }
 
 long
-process_signal(HANDLE proc)
-{
-	return (((sub_process *)proc)->signal);
-}
-
-	long
 process_last_err(HANDLE proc)
 {
+        if (proc == INVALID_HANDLE_VALUE) return ERROR_INVALID_HANDLE;
 	return (((sub_process *)proc)->last_err);
 }
 
-	long
+long
 process_exit_code(HANDLE proc)
 {
+        if (proc == INVALID_HANDLE_VALUE) return EXIT_FAILURE;
 	return (((sub_process *)proc)->exit_code);
 }
 
-	char *
+/*
+2006-02:
+All the following functions are currently unused.
+All of them would crash gmake if called with argument INVALID_HANDLE_VALUE.
+Hence whoever wants to use one of this functions must invent and implement
+a reasonable error handling for this function.
+
+char *
 process_outbuf(HANDLE proc)
 {
 	return (((sub_process *)proc)->outp);
 }
 
-	char *
+char *
 process_errbuf(HANDLE proc)
 {
 	return (((sub_process *)proc)->errp);
 }
 
-	int
+int
 process_outcnt(HANDLE proc)
 {
 	return (((sub_process *)proc)->outcnt);
 }
 
-	int
+int
 process_errcnt(HANDLE proc)
 {
 	return (((sub_process *)proc)->errcnt);
 }
 
-	void
+void
 process_pipes(HANDLE proc, int pipes[3])
 {
 	pipes[0] = ((sub_process *)proc)->sv_stdin[0];
@@ -228,7 +232,7 @@ process_pipes(HANDLE proc, int pipes[3])
 	pipes[2] = ((sub_process *)proc)->sv_stderr[0];
 	return;
 }
-
+*/
 
 	HANDLE
 process_init()
@@ -379,7 +383,7 @@ find_file(char *exec_path, LPOFSTRUCT file_info)
 /*
  * Description:   Create the child process to be helped
  *
- * Returns:
+ * Returns: success <=> 0
  *
  * Notes/Dependencies:
  */
@@ -546,18 +550,12 @@ process_begin(
 	CloseHandle(procInfo.hThread);
 
 	/* Close the halves of the pipes we don't need */
-	if (pproc->sv_stdin) {
-		CloseHandle((HANDLE)pproc->sv_stdin[1]);
-		pproc->sv_stdin[1] = 0;
-	}
-	if (pproc->sv_stdout) {
-		CloseHandle((HANDLE)pproc->sv_stdout[1]);
-		pproc->sv_stdout[1] = 0;
-	}
-	if (pproc->sv_stderr) {
-		CloseHandle((HANDLE)pproc->sv_stderr[1]);
-		pproc->sv_stderr[1] = 0;
-	}
+        CloseHandle((HANDLE)pproc->sv_stdin[1]);
+        CloseHandle((HANDLE)pproc->sv_stdout[1]);
+        CloseHandle((HANDLE)pproc->sv_stderr[1]);
+        pproc->sv_stdin[1] = 0;
+        pproc->sv_stdout[1] = 0;
+        pproc->sv_stderr[1] = 0;
 
 	free( command_line );
 	if (envblk) free(envblk);
