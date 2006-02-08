@@ -383,7 +383,7 @@ child_error (char *target_name, int exit_code, int exit_sig, int coredump,
 {
   if (ignored && silent_flag)
     return;
-
+    
 #ifdef VMS
   if (!(exit_code & 1))
       error (NILF,
@@ -718,7 +718,7 @@ reap_children (int block, int err)
       if (c->good_stdin)
         good_stdin_used = 0;
 
-      dontcare = c->file->dontcare;
+      dontcare = c->dontcare;
 
       if (child_failed && !c->noerror && !ignore_errors_flag)
         {
@@ -1611,6 +1611,10 @@ new_job (struct file *file)
   c->file = file;
   c->command_lines = lines;
   c->sh_batch_file = NULL;
+
+  /* Cache dontcare flag because file->dontcare can be changed once we
+     return. Check dontcare inheritance mechanism for details.  */
+  c->dontcare = file->dontcare;
 
   /* Fetch the first command line to be run.  */
   job_next_command (c);

@@ -63,6 +63,7 @@ struct child
 
     unsigned int good_stdin:1;	/* Nonzero if this child has a good stdin.  */
     unsigned int deleted:1;	/* Nonzero if targets have been deleted.  */
+    unsigned int dontcare:1;    /* Saved dontcare flag.  */
   };
 
 extern struct child *children;
