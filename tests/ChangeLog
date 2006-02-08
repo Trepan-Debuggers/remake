@@ -1,3 +1,7 @@
+2006-02-08  Boris Kolpackov  <boris@kolpackov.net>
+
+	* scripts/features/parallelism: Add a test for bug #15641.
+
 2006-02-06  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/options/dash-W: Add a test for bug #15341.

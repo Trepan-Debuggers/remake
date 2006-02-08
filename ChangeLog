@@ -1,3 +1,10 @@
+2006-02-08  Boris Kolpackov  <boris@kolpackov.net>
+
+	* job.h (struct child): Add dontcare bitfield.
+	* job.c (new_job): Cache dontcare flag.
+	* job.c (reap_children): Use cached dontcare flag instead of the
+	one in struct file. Fixes Savannah bug #15641.
+
 2006-02-06  Paul D. Smith  <psmith@gnu.org>
 
 	* vpath.c (selective_vpath_search): If the file we find has a

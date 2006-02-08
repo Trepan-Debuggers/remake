@@ -108,4 +108,22 @@ Ok done',
              512);
 
 
+# Test for Savannah bug #15641.
+#
+run_make_test('
+.PHONY: all
+all:; @:
+
+-include foo.d
+
+foo.d: comp
+	@echo building $@
+
+comp: mod_a.o mod_b.o; @:
+
+mod_a.o mod_b.o:
+	@exit 1
+', '-j2', '');
+
+
 1;
