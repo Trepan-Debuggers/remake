@@ -1,4 +1,4 @@
-/* $Id: dir_fns.c,v 1.8 2006/02/01 21:14:47 rockyb Exp $
+/* $Id: dir_fns.c,v 1.9 2006/02/09 02:53:25 rockyb Exp $
 Directory hashing for GNU Make.
 Copyright (C) 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
@@ -195,6 +195,17 @@ directory_contents_hash_1 (const void *key_0)
   return hash;
 }
 
+/* Sometimes it's OK to use subtraction to get this value:
+     result = X - Y;
+   But, if we're not sure of the type of X and Y they may be too large for an
+   int (on a 64-bit system for example).  So, use ?: instead.
+   See Savannah bug #15534.
+
+   NOTE!  This macro has side-effects!
+*/
+
+#define MAKECMP(_x,_y)  ((_x)<(_y)?-1:((_x)==(_y)?0:1))
+
 static unsigned long
 directory_contents_hash_2 (const void *key_0)
 {
@@ -223,16 +234,16 @@ directory_contents_hash_cmp (const void *xv, const void *yv)
   ISTRING_COMPARE (x->path_key, y->path_key, result);
   if (result)
     return result;
-  result = x->ctime - y->ctime;
+  result = MAKECMP(x->ctime, y->ctime);
   if (result)
     return result;
 #else
-  result = x->ino - y->ino;
+  result = MAKECMP(x->ino, y->ino);
   if (result)
     return result;
 #endif /* WINDOWS32 */
 
-  return x->dev - y->dev;
+  return MAKECMP(x->dev, y->dev);
 }
 
 /* Table of directory contents hashed by device and inode number.  */

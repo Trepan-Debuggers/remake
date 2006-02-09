@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.40 2006/02/09 02:29:06 rockyb Exp $
+/* $Id: job.c,v 1.41 2006/02/09 02:53:25 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005, 2006
 Free Software Foundation, Inc.
@@ -1223,9 +1223,10 @@ static void start_job_command (child_t *p_child,
         fprintf(stderr,
           _("process_easy() failed to launch process (e=%ld)\n"),
           process_last_err(hPID));
-               for (i = 0; argv[i]; i++)
-                 fprintf(stderr, "%s ", argv[i]);
-               fprintf(stderr, _("\nCounted %d args in failed launch\n"), i);
+	for (i = 0; argv[i]; i++)
+	  fprintf(stderr, "%s ", argv[i]);
+	fprintf(stderr, _("\nCounted %d args in failed launch\n"), i);
+        goto error;
       }
   }
 #endif /* WINDOWS32 */

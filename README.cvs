@@ -78,17 +78,6 @@ That's it, you're done!
 Windows builds from CVS
 -----------------------
 
-IF autogen.sh described works 
-THEN proceed with file README.W32.
+You need to have cygwin installed. It's possible it might build on MinGW.
 
-ELSE ignore the general build procedure, instead execute the following
-command lines at a Windows command prompt:
-
-  if not exist README.W32 copy README.W32.template README.W32
-  if not exist config.h.W32 copy config.h.W32.template config.h.W32
-  if not exist NMakefile copy NMakefile.template NMakefile
-
-Now proceed with file README.W32.
-
-
-$Id: README.cvs,v 1.3 2006/02/01 11:31:17 rockyb Exp $
+$Id: README.cvs,v 1.4 2006/02/09 02:53:24 rockyb Exp $
