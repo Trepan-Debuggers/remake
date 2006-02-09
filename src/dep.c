@@ -23,6 +23,15 @@ Boston, MA 02111-1307, USA.  */
 #include "variable.h"
 #include "commands.h"
 
+/* Remember whether snap_deps has been invoked: we need this to be sure we
+   don't add new rules (via $(eval ...)) afterwards.  In the future it would
+   be nice to support this, but it means we'd need to re-run snap_deps() or
+   at least its functionality... it might mean changing snap_deps() to be run
+   per-file, so we can invoke it after the eval... or remembering which files
+   in the hash have been snapped (a new boolean flag?) and having snap_deps()
+   only work on files which have not yet been snapped. */
+int snapped_deps = 0;
+
 /*! Copy dependency chain making a new chain with the same contents
   as the old one and return that.  The return value is malloc'd. The
   caller must thus free it.
@@ -233,13 +242,20 @@ snap_deps (hash_table_t *p_files)
 	    f2->command_flags |= COMMANDS_SILENT;
     }
 
-  f = lookup_file (".POSIX");
-  if (f != 0 && f->is_target)
-    posix_pedantic = 1;
-
   f = lookup_file (".NOTPARALLEL");
   if (f != 0 && f->is_target)
     not_parallel = 1;
+
+#ifndef NO_MINUS_C_MINUS_O
+  /* If .POSIX was defined, remove OUTPUT_OPTION to comply.  */
+  /* This needs more work: what if the user sets this in the makefile?
+  if (posix_pedantic)
+    define_variable (STRING_SIZE_TUPLE("OUTPUT_OPTION"), "", o_default, 1);
+  */
+#endif
+
+  /* Remember that we've done this. */
+  snapped_deps = 1;
 }
 
 static unsigned long

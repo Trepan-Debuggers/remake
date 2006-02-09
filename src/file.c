@@ -1,4 +1,4 @@
-/* $Id: file.c,v 1.13 2005/12/25 20:59:40 rockyb Exp $
+/* $Id: file.c,v 1.14 2006/02/09 05:58:55 rockyb Exp $
 Target file hash table management for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -122,16 +122,15 @@ enter_file (char *name, const floc_t *p_floc)
     new->floc.filenm = NULL;
   }
 
-  if (HASH_VACANT (f))
+  if (HASH_VACANT (f)) {
+    new->last = new;
     hash_insert_at (&files, new, file_slot);
-  else
-    {
-      /* There is already a double-colon entry for this file.  */
-      new->double_colon = f;
-      while (f->prev != 0)
-	f = f->prev;
-      f->prev = new;
-    }
+  } else {
+    /* There is already a double-colon entry for this file.  */
+    new->double_colon = f;
+    f->last->prev = new;
+    f->last = new;
+  }
 
   return new;
 }

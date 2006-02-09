@@ -1,4 +1,4 @@
-/* $Id: file.h,v 1.8 2005/12/25 20:59:40 rockyb Exp $
+/* $Id: file.h,v 1.9 2006/02/09 05:58:55 rockyb Exp $
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -50,6 +50,7 @@ struct file {
   file_t *prev;		      /**< Previous entry for same file name;
 				 used when there are multiple double-colon
 				 entries for the same file.  */
+  file_t *last;               /**< Last entry for the same file name.  */
   
   /**< File that this file was renamed to.  After any time that a
        file could be renamed, call `check_renamed' (below).  */

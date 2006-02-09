@@ -470,11 +470,27 @@ selective_vpath_search (vpath_t *path, char **file,
 
 	 In December 1993 I loosened this restriction to allow a file
 	 to be chosen if it is mentioned as a target in a makefile.  This
-	 seem logical.  */
+	 seems logical.
+
+         Special handling for -W / -o: make sure we preserve the special
+         values here.  Actually this whole thing is a little bogus: I think
+         we should ditch the name/hname thing and look into the renamed
+         capability that already exists for files: that is, have a new struct
+         file* entry for the VPATH-found file, and set the renamed field if
+         we use it.
+      */
       {
 	struct file *f = lookup_file (name);
 	if (f != 0)
-	  exists = not_target || f->is_target;
+          {
+            exists = not_target || f->is_target;
+            if (exists && mtime_ptr
+                && (f->last_mtime == OLD_MTIME || f->last_mtime == NEW_MTIME))
+              {
+                *mtime_ptr = f->last_mtime;
+                mtime_ptr = 0;
+              }
+          }
       }
 
       if (!exists)
@@ -521,6 +537,13 @@ selective_vpath_search (vpath_t *path, char **file,
                   exists = 0;
                   continue;
                 }
+
+              /* Store the modtime into *MTIME_PTR for the caller.  */
+              if (mtime_ptr != 0)
+                {
+                  *mtime_ptr = FILE_TIMESTAMP_STAT_MODTIME (name, st);
+                  mtime_ptr = 0;
+                }
             }
 
           /* We have found a file.
@@ -528,13 +551,10 @@ selective_vpath_search (vpath_t *path, char **file,
 
           *file = savestring (name, (n + 1 - name) + flen);
 
+          /* If we get here and mtime_ptr hasn't been set, record
+             UNKNOWN_MTIME to indicate this.  */
           if (mtime_ptr != 0)
-            /* Store the modtime into *MTIME_PTR for the caller.
-               If we have had no need to stat the file here,
-               we record UNKNOWN_MTIME to indicate this.  */
-            *mtime_ptr = (exists_in_cache
-                          ? FILE_TIMESTAMP_STAT_MODTIME (name, st)
-                          : UNKNOWN_MTIME);
+            *mtime_ptr = UNKNOWN_MTIME;
 
           free (name);
           return 1;
