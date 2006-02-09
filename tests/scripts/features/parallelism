@@ -18,66 +18,38 @@ if (!$parallel_jobs) {
 }
 
 if ($vos) {
-  $delete_command = "delete_file -no_ask";
   $sleep_command = "sleep -seconds";
 }
 else {
-  $delete_command = "rm -f";
   $sleep_command = "sleep";
 }
 
-open(MAKEFILE,"> $makefile");
 
-print MAKEFILE <<"EOF";
+run_make_test("
 all : def_1 def_2 def_3
 def_1 : ; \@echo ONE; $sleep_command 3 ; echo TWO
 def_2 : ; \@$sleep_command 2 ; echo THREE
-def_3 : ; \@$sleep_command 1 ; echo FOUR
-EOF
-
-close(MAKEFILE);
-
-&run_make_with_options($makefile, "-j 4", &get_logfile);
-$answer = "ONE\nFOUR\nTHREE\nTWO\n";
-&compare_output($answer, &get_logfile(1));
-
+def_3 : ; \@$sleep_command 1 ; echo FOUR",
+              '-j4', "ONE\nFOUR\nTHREE\nTWO");
 
 # Test parallelism with included files.  Here we sleep/echo while
 # building the included files, to test that they are being built in
 # parallel.
-
-$makefile2 = &get_tmpfile;
-
-open(MAKEFILE,"> $makefile2");
-
-print MAKEFILE <<"EOF";
+run_make_test("
 all: 1 2; \@echo success
-
 -include 1.inc 2.inc
-
-1.inc: ; \@echo ONE.inc; $sleep_command 2; echo TWO.inc; echo "1: ; \@echo ONE; $sleep_command 2; echo TWO" > \$\@
-2.inc: ; \@$sleep_command 1; echo THREE.inc; echo "2: ; \@$sleep_command 1; echo THREE" > \$\@
-EOF
-
-close(MAKEFILE);
-
-&run_make_with_options("$makefile2", "-j 4", &get_logfile);
-$answer = "ONE.inc\nTHREE.inc\nTWO.inc\nONE\nTHREE\nTWO\nsuccess\n";
-&compare_output($answer, &get_logfile(1));
+1.inc: ; \@echo ONE.inc; $sleep_command 2; echo TWO.inc; echo '1: ; \@echo ONE; $sleep_command 2; echo TWO' > \$\@
+2.inc: ; \@$sleep_command 1; echo THREE.inc; echo '2: ; \@$sleep_command 1; echo THREE' > \$\@",
+              "-j4",
+              "ONE.inc\nTHREE.inc\nTWO.inc\nONE\nTHREE\nTWO\nsuccess\n");
 
 unlink('1.inc', '2.inc');
 
 
 # Test parallelism with included files--this time recurse first and make
 # sure the jobserver works.
-
-$makefile3 = &get_tmpfile;
-
-open(MAKEFILE,"> $makefile3");
-
-print MAKEFILE <<"EOF";
-recurse: ; \@\$(MAKE) --no-print-directory -f $makefile3 INC=yes all
-
+run_make_test("
+recurse: ; \@\$(MAKE) --no-print-directory -f #MAKEFILE# INC=yes all
 all: 1 2; \@echo success
 
 INC = no
@@ -85,16 +57,82 @@ ifeq (\$(INC),yes)
 -include 1.inc 2.inc
 endif
 
-1.inc: ; \@echo ONE.inc; $sleep_command 2; echo TWO.inc; echo "1: ; \@echo ONE; $sleep_command 2; echo TWO" > \$\@
-2.inc: ; \@$sleep_command 1; echo THREE.inc; echo "2: ; \@$sleep_command 1; echo THREE" > \$\@
-EOF
-
-close(MAKEFILE);
-
-&run_make_with_options("$makefile3", "-j 4", &get_logfile);
-$answer = "ONE.inc\nTHREE.inc\nTWO.inc\nONE\nTHREE\nTWO\nsuccess\n";
-&compare_output($answer, &get_logfile(1));
+1.inc: ; \@echo ONE.inc; $sleep_command 2; echo TWO.inc; echo '1: ; \@echo ONE; $sleep_command 2; echo TWO' > \$\@
+2.inc: ; \@$sleep_command 1; echo THREE.inc; echo '2: ; \@$sleep_command 1; echo THREE' > \$\@",
+              "-j4",
+              "ONE.inc\nTHREE.inc\nTWO.inc\nONE\nTHREE\nTWO\nsuccess\n");
 
 unlink('1.inc', '2.inc');
+
+# Grant Taylor reports a problem where tokens can be lost (not written back
+# to the pipe when they should be): this happened when there is a $(shell ...)
+# function in an exported recursive variable.  I added some code to check
+# for this situation and print a message if it occurred.  This test used
+# to trigger this code when I added it but no longer does after the fix.
+
+run_make_test("
+export HI = \$(shell \$(\$\@.CMD))
+first.CMD = echo hi
+second.CMD = $sleep_command 4; echo hi
+
+.PHONY: all first second
+all: first second
+
+first second: ; \@echo \$\@; $sleep_command 1; echo \$\@",
+              '-j2', "first\nfirst\nsecond\nsecond");
+
+# Michael Matz <matz@suse.de> reported a bug where if make is running in
+# parallel without -k and two jobs die in a row, but not too close to each
+# other, then make will quit without waiting for the rest of the jobs to die.
+
+run_make_test("
+.PHONY: all fail.1 fail.2 fail.3 ok
+all: fail.1 ok fail.2 fail.3
+
+fail.1 fail.2 fail.3:
+	\@sleep \$(patsubst fail.%,%,\$\@)
+	\@echo Fail
+	\@exit 1
+
+ok:
+	\@sleep 4
+	\@echo Ok done",
+              '-rR -j5', 'Fail
+#MAKE#: *** [fail.1] Error 1
+#MAKE#: *** Waiting for unfinished jobs....
+#MAKE#: *** Waiting for unfinished jobs....
+Fail
+#MAKE#: *** Waiting for unfinished jobs....
+#MAKE#: *** [fail.2] Error 1
+#MAKE#: *** Waiting for unfinished jobs....
+#MAKE#: *** Waiting for unfinished jobs....
+Fail
+#MAKE#: *** Waiting for unfinished jobs....
+#MAKE#: *** [fail.3] Error 1
+#MAKE#: *** Waiting for unfinished jobs....
+#MAKE#: *** Waiting for unfinished jobs....
+Ok done
+Command-line arguments:
+	"-f work/features/parallelism.mk.4 -rR -j5"',
+             512);
+
+
+# Test for Savannah bug #15641.
+#
+run_make_test('
+.PHONY: all
+all:; @:
+
+-include foo.d
+
+foo.d: comp
+	@echo building $@
+
+comp: mod_a.o mod_b.o; @:
+
+mod_a.o mod_b.o:
+	@exit 1
+', '-j2', '');
+
 
 1;

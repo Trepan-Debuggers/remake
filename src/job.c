@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.39 2006/02/01 11:31:30 rockyb Exp $
+/* $Id: job.c,v 1.40 2006/02/09 02:29:06 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005, 2006
 Free Software Foundation, Inc.
@@ -388,6 +388,7 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
       child_t *lastc, *c;
       int child_failed;
       int any_remote, any_local;
+      int dontcare;
 
       if (err && block)
 	{
@@ -586,6 +587,8 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
       if (c->good_stdin)
         good_stdin_used = 0;
 
+      dontcare = c->dontcare;
+
       /* Debugger "quit" take precedence over --ignore-errors
 	 --keep-going, etc.
        */
@@ -602,7 +605,10 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
           /* The commands failed.  Write an error message,
              delete non-precious targets, and abort.  */
           static int delete_on_error = -1;
-          child_error (c, p_call_stack, exit_code, exit_sig, coredump, 0);
+
+          if (!dontcare)
+	    child_error (c, p_call_stack, exit_code, exit_sig, coredump, 0);
+
           c->file->update_status = 2;
           if (delete_on_error == -1)
             {
@@ -715,7 +721,7 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
       
 	/* If the job failed, and the -k flag was not given, die,
 	   unless we are already in the process of dying.  */
-	if (!err && child_failed && !keep_going_flag &&
+	if (!err && child_failed && !dontcare && !keep_going_flag &&
 	    /* fatal_error_signal will die with the right signal.  */
 	    !handling_fatal_signal) {
 	  if ( (debugger_on_error & DEBUGGER_ON_FATAL) 
@@ -1444,6 +1450,10 @@ new_job (file_t *file, target_stack_node_t *p_call_stack)
   c->command_lines = lines;
   c->sh_batch_file = NULL;
   c->tracing       = file->tracing;
+
+  /* Cache dontcare flag because file->dontcare can be changed once we
+     return. Check dontcare inheritance mechanism for details.  */
+  c->dontcare      = file->dontcare;
 
   /* Fetch the first command line to be run.  */
   job_next_command (c);

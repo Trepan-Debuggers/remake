@@ -1,4 +1,4 @@
-/* $Id: job.h,v 1.10 2005/12/25 10:08:35 rockyb Exp $
+/* $Id: job.h,v 1.11 2006/02/09 02:29:06 rockyb Exp $
 Copyright (C) 1992, 1993, 1996, 1999, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -79,6 +79,7 @@ typedef struct child
     unsigned int good_stdin:1;	/**< Nonzero if this child has a good stdin. */
     unsigned int deleted:1;	/**< Nonzero if targets have been deleted.  */
     unsigned int tracing:1;	/**< Nonzero child should be traced.  */
+    unsigned int dontcare:1;    /**< Saved don't-care-on-failure flag.  */
   } child_t;
 
 extern struct child *children;
