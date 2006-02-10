@@ -12,6 +12,7 @@
 #                        (and others)
 
 $valgrind = 0;              # invoke make with valgrind
+$valgrind_args = '--num-callers=15 --tool=memcheck --leak-check=full';
 $pure_log = undef;
 
 require "test_driver.pl";
@@ -314,7 +315,8 @@ sub set_more_defaults
      open(VALGRIND, "> valgrind.out")
        || die "Cannot open valgrind.out: $!\n";
      #  -q --leak-check=yes
-     $make_path = "valgrind --num-callers=15 --logfile-fd=".fileno(VALGRIND)." $make_path";
+     exists $ENV{VALGRIND_ARGS} and $valgrind_args = $ENV{VALGRIND_ARGS};
+     $make_path = "valgrind --log-fd=".fileno(VALGRIND)." $valgrind_args $make_path";
      # F_SETFD is 2
      fcntl(VALGRIND, 2, 0) or die "fcntl(setfd) failed: $!\n";
      system("echo Starting on `date` 1>&".fileno(VALGRIND));

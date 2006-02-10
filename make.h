@@ -382,7 +382,7 @@ extern int unixy_shell;
 
 struct floc
   {
-    char *filenm;
+    const char *filenm;
     unsigned long lineno;
   };
 #define NILF ((struct floc *)0)
@@ -465,6 +465,13 @@ extern void close_stdout PARAMS ((void));
 
 extern char *strip_whitespace PARAMS ((const char **begpp, const char **endpp));
 
+/* String caching  */
+extern void strcache_init PARAMS ((void));
+extern void strcache_print_stats PARAMS ((const char *prefix));
+extern int strcache_iscached PARAMS ((const char *str));
+extern const char *strcache_add PARAMS ((const char *str));
+extern const char *strcache_add_len PARAMS ((const char *str, int len));
+extern int strcache_setbufsize PARAMS ((int size));
 
 #ifdef  HAVE_VFORK_H
 # include <vfork.h>

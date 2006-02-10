@@ -95,6 +95,14 @@ Version 3.81beta4
    - $(info ...) prints its arguments to stdout.  No makefile name or
      line number info, etc. is printed.
    - $(flavor ...) returns the flavor of a variable.
+   - $(or ...) provides a short-circuiting OR conditional: each argument
+     is expanded.  The first true (non-empty) argument is returned; no
+     further arguments are expanded.  Expands to empty if there are no
+     true arguments.
+   - $(and ...) provides a short-circuiting AND conditional: each
+     argument is expanded.  The first false (empty) argument is
+     returned; no further arguments are expanded.  Expands to the last
+     argument if all arguments are true.
 
 * Changes made for POSIX compatibility:
    - Only touch targets (under -t) if they have at least one command.

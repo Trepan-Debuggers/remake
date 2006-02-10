@@ -1,3 +1,28 @@
+2006-02-10  Paul D. Smith  <psmith@gnu.org>
+
+	A new internal capability: the string cache is a read-only cache
+	of strings, with a hash table interface for fast lookup.  Nothing
+	in the cache will ever be freed, so there's no need for reference
+	counting, etc.  This is the beginning of a full solution for
+	Savannah bug #15182, but for now we only store makefile names here.
+
+	* strcache.c: New file.  Implement a read-only string cache.
+	* make.h: Add prototypes for new functions.
+	* main.c (initialize_global_hash_tables): Initialize the string cache.
+	(print_data_base): Print string cache stats.
+	* read.c (eval_makefile): Use the string cache to store makefile
+	names.  Rewrite the string allocation to be sure we free everything.
+
+2006-02-09  Paul D. Smith  <psmith@gnu.org>
+
+	* function.c (func_or): Implement a short-circuiting OR function.
+	(func_and): Implement a short-circuiting AND function.
+	(function_table_init): Update the table with the new functions.
+	* doc/make.texi (Conditional Functions): Changed the "if" section
+	to one on general conditional functions.  Added documentation for
+	$(and ...) and $(or ...) functions.
+	* NEWS: Note new $(and ...) and $(or ...) functions.
+
 2006-02-08  Boris Kolpackov  <boris@kolpackov.net>
 
 	* job.h (struct child): Add dontcare bitfield.

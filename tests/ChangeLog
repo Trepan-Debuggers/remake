@@ -1,3 +1,13 @@
+2006-02-09  Paul D. Smith  <psmith@gnu.org>
+
+	* run_make_tests.pl (set_more_defaults): Update valgrind support
+	for newer versions.
+	* test_driver.pl (toplevel): Skip all hidden files/directories (ones
+	beginning with ".").
+
+	* scripts/functions/andor: Tests for $(and ..) and $(or ...)
+	functions.
+
 2006-02-08  Boris Kolpackov  <boris@kolpackov.net>
 
 	* scripts/features/parallelism: Add a test for bug #15641.
@@ -471,9 +481,8 @@
 
 2002-07-11  Paul D. Smith  <psmith@gnu.org>
 
-	* run_make_tests.pl (valid_option): Add support for Valgrind
-	<http://developer.kde.org/~sewardj/>.  Use -valgrind option to the
-	test suite.
+	* run_make_tests.pl (valid_option): Add support for Valgrind.  Use
+	-valgrind option to the test suite.
 	(set_more_defaults): Set up the file descriptor to capture
 	Valgrind output.  We have to unset its close-on-exec flag; we
 	hardcode the value for F_SETFD (2) rather than load it; hopefully

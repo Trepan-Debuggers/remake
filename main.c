@@ -537,6 +537,7 @@ static void
 initialize_global_hash_tables (void)
 {
   init_hash_global_variable_set ();
+  strcache_init ();
   init_hash_files ();
   hash_init_directories ();
   hash_init_function_table ();
@@ -2974,6 +2975,7 @@ print_data_base (void)
   print_rule_data_base ();
   print_file_data_base ();
   print_vpath_data_base ();
+  strcache_print_stats ("#");
 
   when = time ((time_t *) 0);
   printf (_("\n# Finished Make data base on %s\n"), ctime (&when));
