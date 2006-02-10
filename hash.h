@@ -63,8 +63,8 @@ void hash_load __P((struct hash_table *ht, void *item_table,
 		    unsigned long cardinality, unsigned long size));
 void **hash_find_slot __P((struct hash_table *ht, void const *key));
 void *hash_find_item __P((struct hash_table *ht, void const *key));
-void *hash_insert __P((struct hash_table *ht, void *item));
-void *hash_insert_at __P((struct hash_table *ht, void *item, void const *slot));
+void *hash_insert __P((struct hash_table *ht, const void *item));
+void *hash_insert_at __P((struct hash_table *ht, const void *item, void const *slot));
 void *hash_delete __P((struct hash_table *ht, void const *item));
 void *hash_delete_at __P((struct hash_table *ht, void const *slot));
 void hash_delete_items __P((struct hash_table *ht));

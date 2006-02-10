@@ -126,18 +126,18 @@ hash_find_item (struct hash_table *ht, const void *key)
 }
 
 void *
-hash_insert (struct hash_table *ht, void *item)
+hash_insert (struct hash_table *ht, const void *item)
 {
   void **slot = hash_find_slot (ht, item);
-  void *old_item = slot ? *slot : 0;
+  const void *old_item = slot ? *slot : 0;
   hash_insert_at (ht, item, slot);
-  return ((HASH_VACANT (old_item)) ? 0 : old_item);
+  return (void *)((HASH_VACANT (old_item)) ? 0 : old_item);
 }
 
 void *
-hash_insert_at (struct hash_table *ht, void *item, const void *slot)
+hash_insert_at (struct hash_table *ht, const void *item, const void *slot)
 {
-  void *old_item = *(void **) slot;
+  const void *old_item = *(void **) slot;
   if (HASH_VACANT (old_item))
     {
       ht->ht_fill++;

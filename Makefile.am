@@ -24,7 +24,7 @@ endif
 make_SOURCES =	ar.c arscan.c commands.c default.c dir.c expand.c file.c \
 		function.c getopt.c getopt1.c implicit.c job.c main.c \
 		misc.c read.c remake.c $(remote) rule.c signame.c \
-		variable.c version.c vpath.c hash.c
+		strcache.c variable.c version.c vpath.c hash.c
 
 EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c
 

@@ -311,10 +311,12 @@ eval_makefile (char *filename, int flags)
   struct dep *deps;
   struct ebuffer ebuf;
   const struct floc *curfile;
+  char *expanded = 0;
+  char *included = 0;
   int makefile_errno;
   int r;
 
-  ebuf.floc.filenm = filename;
+  ebuf.floc.filenm = strcache_add (filename);
   ebuf.floc.lineno = 1;
 
   if (ISDB (DB_VERBOSE))
@@ -337,7 +339,7 @@ eval_makefile (char *filename, int flags)
      in which case it was already done.  */
   if (!(flags & RM_NO_TILDE) && filename[0] == '~')
     {
-      char *expanded = tilde_expand (filename);
+      expanded = tilde_expand (filename);
       if (expanded != 0)
 	filename = expanded;
     }
@@ -354,16 +356,18 @@ eval_makefile (char *filename, int flags)
       register unsigned int i;
       for (i = 0; include_directories[i] != 0; ++i)
 	{
-	  char *name = concat (include_directories[i], "/", filename);
-	  ebuf.fp = fopen (name, "r");
-	  if (ebuf.fp == 0)
-	    free (name);
-	  else
+	  included = concat (include_directories[i], "/", filename);
+	  ebuf.fp = fopen (included, "r");
+	  if (ebuf.fp)
 	    {
-	      filename = name;
+	      filename = included;
 	      break;
 	    }
+          free (included);
 	}
+      /* If we're not using it, we already freed it above.  */
+      if (filename != included)
+        included = 0;
     }
 
   /* Add FILENAME to the chain of read makefiles.  */
@@ -374,8 +378,6 @@ eval_makefile (char *filename, int flags)
   deps->file = lookup_file (filename);
   if (deps->file == 0)
     deps->file = enter_file (xstrdup (filename));
-  if (filename != ebuf.floc.filenm)
-    free (filename);
   filename = deps->file->name;
   deps->changed = flags;
   deps->ignore_mtime = 0;
@@ -383,6 +385,11 @@ eval_makefile (char *filename, int flags)
   deps->need_2nd_expansion = 0;
   if (flags & RM_DONTCARE)
     deps->file->dontcare = 1;
+
+  if (expanded)
+    free (expanded);
+  if (included)
+    free (included);
 
   /* If the makefile can't be found at all, give up entirely.  */
 

@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.41 2006/02/06 16:22:01 psmith Exp $
+@set RCSID $Id: make.texi,v 1.42 2006/02/10 05:29:00 psmith Exp $
 @set EDITION 0.70
 @set VERSION 3.81
 @set UPDATED 5 Feb 2006
@@ -224,6 +224,16 @@ Writing the Commands in Rules
 * Sequences::                   Defining canned sequences of commands.
 * Empty Commands::              Defining useful, do-nothing commands.
 
+Command Syntax
+
+* Splitting Lines::             Breaking long command lines for readability.
+* Variables in Commands::       Using @code{make} variables in commands.
+
+Command Execution
+
+* Choosing the Shell::          How @code{make} chooses the shell used
+                                  to run commands.
+
 Recursive Use of @code{make}
 
 * MAKE Variable::               The special effects of using @samp{$(MAKE)}.
@@ -268,8 +278,8 @@ Functions for Transforming Text
 * Syntax of Functions::         How to write a function call.
 * Text Functions::              General-purpose text manipulation functions.
 * File Name Functions::         Functions for manipulating file names.
+* Conditional Functions::       Functions that implement conditions.
 * Foreach Function::            Repeat some text with controlled variation.
-* If Function::                 Conditionally expand a value.
 * Call Function::               Expand a user-defined function.
 * Value Function::              Return the un-expanded value of a variable.
 * Eval Function::               Evaluate the arguments as makefile syntax.
@@ -6199,8 +6209,8 @@ call, just as a variable might be substituted.
 * Syntax of Functions::         How to write a function call.
 * Text Functions::              General-purpose text manipulation functions.
 * File Name Functions::         Functions for manipulating file names.
+* Conditional Functions::       Functions that implement conditions.
 * Foreach Function::            Repeat some text with controlled variation.
-* If Function::                 Conditionally expand a value.
 * Call Function::               Expand a user-defined function.
 * Value Function::              Return the un-expanded value of a variable.
 * Eval Function::               Evaluate the arguments as makefile syntax.
@@ -6620,7 +6630,7 @@ used so that the new value is assigned even if the previous value of
 @code{CFLAGS} was specified with a command argument (@pxref{Override
 Directive, , The @code{override} Directive}).
 
-@node File Name Functions, Foreach Function, Text Functions, Functions
+@node File Name Functions, Conditional Functions, Text Functions, Functions
 @section Functions for File Names
 @cindex functions, for file names
 @cindex file name functions
@@ -6796,7 +6806,60 @@ the file names to refer to an existing file or directory.  Use the
 @code{wildcard} function to test for existence.
 @end table
 
-@node Foreach Function, If Function, File Name Functions, Functions
+@node Conditional Functions, Foreach Function, File Name Functions, Functions
+@section Functions for Conditionals
+@findex if
+@cindex conditional expansion
+There are three functions that provide conditional expansion.  A key
+aspect of these functions is that not all of the arguments are
+expanded initially.  Only those arguments which need to be expanded,
+will be expanded.
+
+@table @code
+@item $(if @var{condition},@var{then-part}[,@var{else-part}])
+@findex if
+The @code{if} function provides support for conditional expansion in a
+functional context (as opposed to the GNU @code{make} makefile
+conditionals such as @code{ifeq} (@pxref{Conditional Syntax, ,Syntax of
+Conditionals}).
+
+The first argument, @var{condition}, first has all preceding and
+trailing whitespace stripped, then is expanded.  If it expands to any
+non-empty string, then the condition is considered to be true.  If it
+expands to an empty string, the condition is considered to be false.
+
+If the condition is true then the second argument, @var{then-part}, is
+evaluated and this is used as the result of the evaluation of the entire
+@code{if} function.
+
+If the condition is false then the third argument, @var{else-part}, is
+evaluated and this is the result of the @code{if} function.  If there is
+no third argument, the @code{if} function evaluates to nothing (the
+empty string).
+
+Note that only one of the @var{then-part} or the @var{else-part} will be
+evaluated, never both.  Thus, either can contain side-effects (such as
+@code{shell} function calls, etc.)
+
+@item $(or @var{condition1}[,@var{condition2}[,@var{condition3}@dots{}]])
+@findex or
+The @code{or} function provides a ``short-circuiting'' OR operation.
+Each argument is expanded, in order.  If an argument expands to a
+non-empty string the processing stops and the result of the expansion
+is that string.  If, after all arguments are expanded, all of them are
+false (empty), then the result of the expansion is the empty string.
+
+@item $(and @var{condition1}[,@var{condition2}[,@var{condition3}@dots{}]])
+@findex and
+The @code{and} function provides a ``short-circuiting'' AND operation.
+Each argument is expanded, in order.  If an argument expands to an
+empty string the processing stops and the result of the expansion is
+the empty string.  If all arguments expand to a non-empty string then
+the result of the expansion is the expansion of the last argument.
+
+@end table
+
+@node Foreach Function, Call Function, Conditional Functions, Functions
 @section The @code{foreach} Function
 @findex foreach
 @cindex words, iterating over
@@ -6884,41 +6947,7 @@ might be useful if the value of @code{find_files} references the variable
 whose name is @samp{Esta escrito en espanol!} (es un nombre bastante largo,
 no?), but it is more likely to be a mistake.
 
-@node If Function, Call Function, Foreach Function, Functions
-@section The @code{if} Function
-@findex if
-@cindex conditional expansion
-
-The @code{if} function provides support for conditional expansion in a
-functional context (as opposed to the GNU @code{make} makefile
-conditionals such as @code{ifeq} (@pxref{Conditional Syntax, ,Syntax of
-Conditionals}).
-
-An @code{if} function call can contain either two or three arguments:
-
-@example
-$(if @var{condition},@var{then-part}[,@var{else-part}])
-@end example
-
-The first argument, @var{condition}, first has all preceding and
-trailing whitespace stripped, then is expanded.  If it expands to any
-non-empty string, then the condition is considered to be true.  If it
-expands to an empty string, the condition is considered to be false.
-
-If the condition is true then the second argument, @var{then-part}, is
-evaluated and this is used as the result of the evaluation of the entire
-@code{if} function.
-
-If the condition is false then the third argument, @var{else-part}, is
-evaluated and this is the result of the @code{if} function.  If there is
-no third argument, the @code{if} function evaluates to nothing (the
-empty string).
-
-Note that only one of the @var{then-part} or the @var{else-part} will be
-evaluated, never both.  Thus, either can contain side-effects (such as
-@code{shell} function calls, etc.)
-
-@node Call Function, Value Function, If Function, Functions
+@node Call Function, Value Function, Foreach Function, Functions
 @section The @code{call} Function
 @findex call
 @cindex functions, user defined
