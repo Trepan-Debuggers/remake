@@ -1,21 +1,19 @@
 /* Implicit rule searching for GNU Make.
-Copyright (C) 1988,1989,1990,1991,1992,1993,1994,1997,2000,2004,2005 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
+1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
-GNU Make is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+GNU Make is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2, or (at your option) any later version.
 
-GNU Make is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with GNU Make; see the file COPYING.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-Boston, MA 02111-1307, USA.  */
+You should have received a copy of the GNU General Public License along with
+GNU Make; see the file COPYING.  If not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 
 #include "make.h"
 #include "filedef.h"
@@ -261,9 +259,9 @@ pattern_search (struct file *file, int archive,
      that is not just `%'.  */
   int specific_rule_matched = 0;
 
-  register unsigned int i = 0;  /* uninit checks OK */
-  register struct rule *rule;
-  register struct dep *dep, *expl_d;
+  unsigned int i = 0;  /* uninit checks OK */
+  struct rule *rule;
+  struct dep *dep, *expl_d;
 
   char *p, *vname;
 
@@ -666,12 +664,10 @@ pattern_search (struct file *file, int archive,
                  anyway, no matter which implicit rule we choose. */
 
               for (expl_d = file->deps; expl_d != 0; expl_d = expl_d->next)
-                if (strcmp (dep_name (expl_d), name) == 0) break;
-
+                if (streq (dep_name (expl_d), name))
+                  break;
               if (expl_d != 0)
                 continue;
-
-
 
               /* The DEP->changed flag says that this dependency resides in a
                  nonexistent directory.  So we normally can skip looking for
@@ -684,9 +680,7 @@ pattern_search (struct file *file, int archive,
               if (((f = lookup_file (name)) != 0 && f->is_target)
                   /*|| ((!dep->changed || check_lastslash) && */
                   || file_exists_p (name))
-                {
-                  continue;
-                }
+                continue;
 
               /* This code, given FILENAME = "lib/foo.o", dependency name
                  "lib/foo.c", and VPATH=src, searches for "src/lib/foo.c".  */

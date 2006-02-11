@@ -4879,7 +4879,7 @@ Sun Jul 24 02:15:30 1988  Roland McGrath  (mcgrath at tully.Berkeley.EDU)
 
 	* variable.c (expand_function): Made `foreach' function put
 	spaces between output texts like it's supposed to.
-	
+
 Sat Jul 23 17:32:55 1988  Roland McGrath  (mcgrath at tully.Berkeley.EDU)
 
 	* rule.c (default_suffixes, default_suffix_rules): Added rule
@@ -4909,20 +4909,20 @@ Fri Jul 22 23:13:16 1988  Roland McGrath  (mcgrath at tully.Berkeley.EDU)
 
 	* commands.c (execute_file_commands): Fixed a bug wherein
 	random memory could get written for files with no deps.
-	
+
 Wed Jul 20 19:30:31 1988  Roland McGrath  (mcgrath at tully.Berkeley.EDU)
 
 	* read.c (readline): Fix bug wherein it would not recognize a
 	backslash-newline if the buffer filled up and was enlarged
 	right before reading the newline.
-	
+
 Tue Jul 19 19:55:02 1988  Roland McGrath  (mcgrath at chilli.Berkeley.EDU)
 
 	* read.c: Added default suffix rules for .cc (using $(C++),
 	which defaults to `g++', and $(C++FLAGS)), .tex, .dvi, .web
 	and .cweb (using $(TEX), $(WEAVE), $(TANGLE), $(CWEAVE) and
 	$(CTANGLE)).
-	
+
 Sat Jul 16 21:24:28 1988  Roland McGrath  (mcgrath at tully.Berkeley.EDU)
 
 	* Made error formats use %u rather than %ld for line numbers,
@@ -4972,9 +4972,27 @@ Sat Jul 16 21:24:28 1988  Roland McGrath  (mcgrath at tully.Berkeley.EDU)
 
 	* variable.c (pattern_matches): Fix a bug that made patterns
 	not beginning with `%' never match.
-	
+
 Fri Jul 15 21:01:44 1988  Roland McGrath  (mcgrath at tully.Berkeley.EDU)
 
 	* Took Make out of RCS.
 
 	* Split the monolithic `make.c' into several smaller files.
+
+
+
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
+1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006 Free Software Foundation, Inc.
+This file is part of GNU Make.
+
+GNU Make is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2, or (at your option) any later version.
+
+GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+GNU Make; see the file COPYING.  If not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.

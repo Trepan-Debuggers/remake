@@ -41,17 +41,13 @@ port the current tests to whatever you do :).
 The Rest of the List
 --------------------
 
- 1) Allow variables/functions to expand to other make rules which are
-    then interpreted, with newlines handled correctly.  This is a
-    biggee, and is on my plate.  I already have partially-working code.
-
- 2) Option to check more than timestamps to determine if targets have
+ 1) Option to check more than timestamps to determine if targets have
     changed.  This is also a very big one.  It's _close_ to my plate :),
     and I have very definite ideas about how I would like it done.
     Please pick something else unless you must have this feature.  If
     you try it, please work _extremely_ closely with me on it.
 
- 2a) Possibly a special case of this is the .KEEP_STATE feature of Sun's
+ 1a) Possibly a special case of this is the .KEEP_STATE feature of Sun's
      make.  Some great folks at W U. in Canada did an implementation of
      this for a class project.  Their approach is reasonable and
      workable, but doesn't really fit into my ideas for #2.  Maybe
@@ -60,7 +56,7 @@ The Rest of the List
 
      [K R Praveen <praveen@cair.res.in>]
 
- 3) Currently you can use "%.foo %.bar : %.baz" to mean that one
+ 2) Currently you can use "%.foo %.bar : %.baz" to mean that one
     invocation of the rule builds both targets.  GNU make needs a way to
     do that for explicit rules, too.  I heard a rumor that some versions
     of make all you to say "a.foo + a.bar : a.baz" to do this (i.e., a
@@ -68,25 +64,22 @@ The Rest of the List
     best syntax or not... what if you say "a.foo + a.bar a.bam : a.baz";
     what does that mean?
 
- 4) Multi-token pattern rule matching (allow %1/%2.c : %1/obj/%2.o,
+ 3) Multi-token pattern rule matching (allow %1/%2.c : %1/obj/%2.o,
     etc., or something like that).  I have an implementation of this
     already, it just needs some refinement... maybe.  Additionally I
     think it only works for static pattern rules; it might need to be
     fixed up to work with normal pattern rules, too.
 
- 5) More robust clock skew detection algorithm: less false hits.  I have
-    some notes on this from various discussions.
+ 4) Provide a .TARGETS variable, containing the names of the targets
+    defined in the makefile.
 
- 6) Provide MAKETARGETS and MAKEVARIABLES variables, containing the
-    names of the targets and variables defined in the makefile.
-
-    Actually, I now think a $(targets ...) function, at least, would be
+    Actually, I now think a $(targets ...) function, at least, might be
     better than a MAKETARGETS variable.  The argument would be types of
     targets to list: "phony" is the most useful one.  I suppose
     "default" might also be useful.  Maybe some others; check the
-    bitfields to see what might be handy.  This one is pretty easy.
+    bitfields to see what might be handy.
 
- 7) Some sort of operating-system independent way of handling paths
+ 5) Some sort of operating-system independent way of handling paths
     would be outstanding, so makefiles can be written for UNIX, VMS,
     DOS, MS-Windows, Amiga, etc. with a minimum of specialization.
 
@@ -95,18 +88,12 @@ The Rest of the List
     dunno, maybe something like $[...]?  This may well not be worth
     doing until #1 is done.
 
- 9) Right now the .PRECIOUS, .INTERMEDIATE, and .SECONDARY
+ 6) Right now the .PRECIOUS, .INTERMEDIATE, and .SECONDARY
     pseudo-targets have different capabilities.  For example, .PRECIOUS
     can take a "%", the others can't.  Etc.  These should all work the
     same, insofar as that makes sense.
 
-10) A syntax that specifies a build order _without_ implying a
-    dependency relationship.  That is, a way to say "A must be built
-    before B" that doesn't force B to be built when A changes.  This is
-    very important for parallel builds: sometimes you need some stuff
-    done first but you don't want to rebuild everything because of it.
-
-11) Improved debugging/logging/etc. capabilities.  Part of this is done:
+ 7) Improved debugging/logging/etc. capabilities.  Part of this is done:
     I introduced a number of debugging enhancements.  Tim Magill is (I
     think) looking into options to control output more selectively.
     One thing I want to do in debugging is add a flag to allow debugging
@@ -115,7 +102,7 @@ The Rest of the List
     you just can't figure it out.  The way variables are expanded now
     means this isn't 100% trivial, but it probably won't be hard.
 
-12) Integration of Guile as an embedded scripting language.  This means:
+ 8) Integration of Guile as an embedded scripting language.  This means:
     allowing Guile functions to be declared in makefiles somehow, then
     providing a syntax for invoking them.  At least one formulation of
     that would have the function resolve to a string which would be
@@ -138,3 +125,21 @@ The Rest of the List
     in the first place?
 
     Something to think about.
+
+
+-------------------------------------------------------------------------------
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
+1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006 Free Software Foundation, Inc.
+This file is part of GNU Make.
+
+GNU Make is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2, or (at your option) any later version.
+
+GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+GNU Make; see the file COPYING.  If not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
