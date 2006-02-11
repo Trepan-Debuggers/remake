@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.42 2006/02/10 05:29:00 psmith Exp $
+@set RCSID $Id: make.texi,v 1.43 2006/02/11 19:02:22 psmith Exp $
 @set EDITION 0.70
 @set VERSION 3.81
 @set UPDATED 5 Feb 2006
@@ -61,12 +61,13 @@ Texts.  A copy of the license is included in the section entitled
 @author Richard M. Stallman, Roland McGrath, Paul D. Smith
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-1996, 1997, 1998, 1999, 2000, 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
+1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+Free Software Foundation, Inc.
 @sp 2
 Published by the Free Software Foundation @*
-59 Temple Place -- Suite 330, @*
-Boston, MA 02111-1307 USA @*
+51 Franklin St. -- Fifth Floor @*
+Boston, MA 02110-1301 USA @*
 ISBN @value{ISBN} @*
 
 Permission is granted to copy, distribute and/or modify this document

@@ -158,6 +158,9 @@
 				RelativePath=".\hash.c">
 			</File>
 			<File
+				RelativePath=".\strcache.c">
+			</File>
+			<File
 				RelativePath=".\implicit.c">
 			</File>
 			<File

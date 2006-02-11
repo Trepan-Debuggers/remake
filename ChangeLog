@@ -1,3 +1,7 @@
+2006-02-11  Paul D. Smith  <psmith@gnu.org>
+
+	* (ALL FILES): Updated copyright and license notices.
+
 2006-02-10  Paul D. Smith  <psmith@gnu.org>
 
 	A new internal capability: the string cache is a read-only cache
@@ -12,6 +16,12 @@
 	(print_data_base): Print string cache stats.
 	* read.c (eval_makefile): Use the string cache to store makefile
 	names.  Rewrite the string allocation to be sure we free everything.
+
+2006-02-10  Eli Zaretskii  <eliz@gnu.org>
+
+	* dir.c (dir_contents_file_exists_p): Don't opendir if the
+	directory time stamp didn't change, except on FAT filesystems.
+	Suggested by J. David Bryan <jdbryan@acm.org>.
 
 2006-02-09  Paul D. Smith  <psmith@gnu.org>
 
@@ -2527,3 +2537,20 @@ See ChangeLog.2, available in the CVS repository at:
 	http://savannah.gnu.org/cvs/?group=make
 
 for earlier changes.
+
+
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
+1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006 Free Software Foundation, Inc.
+This file is part of GNU Make.
+
+GNU Make is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2, or (at your option) any later version.
+
+GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+GNU Make; see the file COPYING.  If not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.

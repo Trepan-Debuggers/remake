@@ -69,7 +69,7 @@ $ endif
 $ filelist = "alloca ar arscan commands default dir expand file function " + -
              "hash implicit job main misc read remake remote-stub rule " + -
 	     "signame variable version vmsfunctions vmsify vpath " + -
-	     "[.glob]glob [.glob]fnmatch getopt1 getopt"
+	     "[.glob]glob [.glob]fnmatch getopt1 getopt strcache"
 $ copy config.h-vms config.h
 $ n=0
 $ open/write optf make.opt
@@ -95,7 +95,7 @@ $ if f$trnlnm("OPTF").nes."" then $ close optf
 $ if f$search("make.opt").nes."" then $ del make.opt;*
 $ exit
 $!
-$!------------------------------------------------------------------------------
+$!-----------------------------------------------------------------------------
 $!
 $! Check if this is a define relating to the properties of the C/C++
 $! compiler
@@ -111,7 +111,7 @@ $ close tmpc
 $ gosub cc_qual_check
 $ return
 $!
-$!------------------------------------------------------------------------------
+$!-----------------------------------------------------------------------------
 $!
 $! Check for properties of C/C++ compiler
 $!
@@ -124,7 +124,7 @@ $ set message/fac/ident/sever/text
 $ delete/nolog 'tmpnam'.*;*
 $ if cc_qual then ccopt = ccopt + ccqual
 $ return
-$!------------------------------------------------------------------------------
+$!-----------------------------------------------------------------------------
 $!
 $ compileit : subroutine
 $ ploc = f$locate("]",p1)
@@ -136,3 +136,20 @@ $ cc'ccopt'/include=([],[.glob]) -
   'p1'
 $ exit
 $ endsubroutine : compileit
+$!
+$!-----------------------------------------------------------------------------
+$!Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
+$!1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006 Free Software Foundation, Inc.
+$!This file is part of GNU Make.
+$!
+$!GNU Make is free software; you can redistribute it and/or modify it under the
+$!terms of the GNU General Public License as published by the Free Software
+$!Foundation; either version 2, or (at your option) any later version.
+$!
+$!GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+$!WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+$!A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+$!
+$!You should have received a copy of the GNU General Public License along with
+$!GNU Make; see the file COPYING.  If not, write to the Free Software
+$!Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.

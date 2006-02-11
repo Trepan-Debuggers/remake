@@ -1,22 +1,19 @@
 /* Directory hashing for GNU Make.
-Copyright (C) 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-2002,2003 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
+1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
-GNU Make is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+GNU Make is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2, or (at your option) any later version.
 
-GNU Make is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with GNU Make; see the file COPYING.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-Boston, MA 02111-1307, USA.  */
+You should have received a copy of the GNU General Public License along with
+GNU Make; see the file COPYING.  If not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 
 #include "make.h"
 #include "hash.h"
@@ -643,19 +640,26 @@ dir_contents_file_exists_p (struct directory_contents *dir, char *filename)
        */
       if (dir->path_key)
 	{
-          if (!(dir->fs_flags & FS_FAT)
-              && (stat(dir->path_key, &st) == 0
-                  && st.st_mtime > dir->mtime))
-            /* reset date stamp to show most recent re-process */
-            dir->mtime = st.st_mtime;
+          if ((dir->fs_flags & FS_FAT) != 0)
+	    {
+	      dir->mtime = time ((time_t *) 0);
+	      rehash = 1;
+	    }
+	  else if (stat(dir->path_key, &st) == 0 && st.st_mtime > dir->mtime)
+	    {
+	      /* reset date stamp to show most recent re-process.  */
+	      dir->mtime = st.st_mtime;
+	      rehash = 1;
+	    }
 
-	  /* make sure directory can still be opened */
-	  dir->dirstream = opendir(dir->path_key);
+          /* If it has been already read in, all done.  */
+	  if (!rehash)
+	    return 0;
 
-	  if (dir->dirstream)
-	    rehash = 1;
-	  else
-	    return 0; /* couldn't re-read - fail */
+          /* make sure directory can still be opened; if not return.  */
+          dir->dirstream = opendir(dir->path_key);
+          if (!dir->dirstream)
+            return 0;
 	}
       else
 #endif

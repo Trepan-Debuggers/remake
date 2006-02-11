@@ -15,3 +15,19 @@ gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I.. -I. -I../include -I../.. -DWINDOWS3
 gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I.. -I. -I../include -I../.. -DWINDOWS32 -c sub_proc.c -o ../../sub_proc.o
 gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I.. -I. -I../include -I../.. -DWINDOWS32 -c w32err.c -o ../../w32err.o
 :BuildEnd
+
+@rem Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
+@rem 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006 Free Software Foundation, Inc.
+@rem This file is part of GNU Make.
+
+@rem GNU Make is free software; you can redistribute it and/or modify it under the
+@rem terms of the GNU General Public License as published by the Free Software
+@rem Foundation; either version 2, or (at your option) any later version.
+
+@rem GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+@rem WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+@rem A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+@rem You should have received a copy of the GNU General Public License along with
+@rem GNU Make; see the file COPYING.  If not, write to the Free Software
+@rem Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
