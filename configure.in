@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 #
-# Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-# 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006 Free Software Foundation, Inc.
+# Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
+# 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under the
@@ -19,7 +19,7 @@
 AC_INIT([GNU make],[3.81rc1],[bug-make@gnu.org])
 
 AC_PREREQ(2.59)
-AC_REVISION([[$Id: configure.in,v 1.139 2006/02/11 19:02:22 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.140 2006/02/11 22:16:04 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)

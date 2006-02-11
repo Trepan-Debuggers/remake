@@ -1,10 +1,26 @@
+@echo off
+rem Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+rem 2006 Free Software Foundation, Inc.
+rem This file is part of GNU Make.
+
+rem GNU Make is free software; you can redistribute it and/or modify it under the
+rem terms of the GNU General Public License as published by the Free Software
+rem Foundation; either version 2, or (at your option) any later version.
+
+rem GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+rem WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+rem A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+rem You should have received a copy of the GNU General Public License along with
+rem GNU Make; see the file COPYING.  If not, write to the Free Software
+rem Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 
 if not exist config.h copy config.h.W32 config.h
 cd w32\subproc
-@echo "Creating the subproc library"
+echo "Creating the subproc library"
 %ComSpec% /c build.bat %1
 cd ..\..
-@echo off
+
 if exist link.dbg del link.dbg
 if exist link.rel del link.rel
 echo "Creating GNU Make for Windows 9X/NT/2K/XP"
@@ -179,19 +195,3 @@ gcc -mthreads -Wall -gstabs+ -ggdb3 -O2 -I. -I./glob -I./w32/include -DWINDOWS32
 gcc -mthreads -gstabs+ -ggdb3 -o gnumake.exe variable.o rule.o remote-stub.o commands.o file.o getloadavg.o default.o signame.o expand.o dir.o main.o getopt1.o job.o read.o version.o getopt.o arscan.o remake.o misc.o hash.o strcache.o ar.o function.o vpath.o implicit.o glob.o fnmatch.o pathstuff.o w32_misc.o sub_proc.o w32err.o -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lodbc32 -lodbccp32
 :BuildEnd
 echo on
-
-rem Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-rem 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006 Free Software Foundation, Inc.
-rem This file is part of GNU Make.
-
-rem GNU Make is free software; you can redistribute it and/or modify it under the
-rem terms of the GNU General Public License as published by the Free Software
-rem Foundation; either version 2, or (at your option) any later version.
-
-rem GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
-rem WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-rem A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-
-rem You should have received a copy of the GNU General Public License along with
-rem GNU Make; see the file COPYING.  If not, write to the Free Software
-rem Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
