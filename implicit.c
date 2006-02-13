@@ -346,17 +346,28 @@ pattern_search (struct file *file, int archive,
 	  /* Set CHECK_LASTSLASH if FILENAME contains a directory
 	     prefix and the target pattern does not contain a slash.  */
 
+          check_lastslash = 0;
+          if (lastslash)
+            {
 #ifdef VMS
-	  check_lastslash = lastslash != 0
-			    && ((strchr (target, ']') == 0)
-			        && (strchr (target, ':') == 0));
+              check_lastslash = (strchr (target, ']') == 0
+                                 && strchr (target, ':') == 0);
 #else
-	  check_lastslash = lastslash != 0 && strchr (target, '/') == 0;
+              check_lastslash = strchr (target, '/') == 0;
+#ifdef HAVE_DOS_PATHS
+              /* Didn't find it yet: check for DOS-type directories.  */
+              if (!check_lastslash)
+                {
+                  char *b = strrchr (target, '\\');
+                  check_lastslash = !(b ? b > lastslash
+                                      : (target[0] && target[1] == ':'));
+                }
 #endif
+#endif
+            }
 	  if (check_lastslash)
 	    {
-	      /* In that case, don't include the
-		 directory prefix in STEM here.  */
+	      /* If so, don't include the directory prefix in STEM here.  */
 	      unsigned int difference = lastslash - filename + 1;
 	      if (difference > stemlen)
 		continue;

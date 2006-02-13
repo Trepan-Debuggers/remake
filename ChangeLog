@@ -1,3 +1,9 @@
+2006-02-13  Paul D. Smith  <psmith@gnu.org>
+
+	* implicit.c (pattern_search): Add checking for DOS pathnames to
+	the pattern rule target LASTSLASH manipulation.
+	Fixes Savannah bug #11183.
+
 2006-02-11  Paul D. Smith  <psmith@gnu.org>
 
 	* (ALL FILES): Updated copyright and license notices.
