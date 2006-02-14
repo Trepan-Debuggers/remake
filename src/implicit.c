@@ -1,4 +1,4 @@
-/* $Id: implicit.c,v 1.12 2005/12/19 06:52:42 rockyb Exp $
+/* $Id: implicit.c,v 1.13 2006/02/14 03:05:52 rockyb Exp $
 Implicit rule searching for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,97,2000, 2004, 2005
 Free Software Foundation, Inc.
@@ -238,11 +238,22 @@ pattern_search (file_t *file, int archive,
 	  /* Set CHECK_LASTSLASH if FILENAME contains a directory
 	     prefix and the target pattern does not contain a slash.  */
 
-	  check_lastslash = lastslash != 0 && strchr (target, '/') == 0;
+          check_lastslash = 0;
+          if (lastslash)
+	    {
+#ifdef HAVE_DOS_PATHS
+              /* Didn't find it yet: check for DOS-type directories.  */
+              if (!check_lastslash)
+                {
+                  char *b = strrchr (target, '\\');
+                  check_lastslash = !(b ? b > lastslash
+                                      : (target[0] && target[1] == ':'));
+                }
+#endif
+            }
 	  if (check_lastslash)
 	    {
-	      /* In that case, don't include the
-		 directory prefix in STEM here.  */
+	      /* If so, don't include the directory prefix in STEM here.  */
 	      unsigned int difference = lastslash - filename + 1;
 	      if (difference > stemlen)
 		continue;
