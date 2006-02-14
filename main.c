@@ -1110,6 +1110,10 @@ main (int argc, char **argv, char **envp)
   define_variable (".FEATURES", 9,
                    "target-specific order-only second-expansion else-if",
                    o_default, 0);
+#ifndef NO_ARCHIVES
+  do_variable_definition (NILF, ".FEATURES", "archives",
+                          o_default, f_append, 0);
+#endif
 #ifdef MAKE_JOBSERVER
   do_variable_definition (NILF, ".FEATURES", "jobserver",
                           o_default, f_append, 0);

@@ -539,14 +539,6 @@ initialize_file_variables (struct file *file, int reading)
 /* Pop the top set off the current variable set list,
    and free all its storage.  */
 
-static void
-free_variable_name_and_value (const void *item)
-{
-  struct variable *v = (struct variable *) item;
-  free (v->name);
-  free (v->value);
-}
-
 struct variable_set_list *
 create_new_variable_set (void)
 {
@@ -563,6 +555,23 @@ create_new_variable_set (void)
   setlist->next = current_variable_set_list;
 
   return setlist;
+}
+
+static void
+free_variable_name_and_value (const void *item)
+{
+  struct variable *v = (struct variable *) item;
+  free (v->name);
+  free (v->value);
+}
+
+void
+free_variable_set (struct variable_set_list *list)
+{
+  hash_map (&list->set->table, free_variable_name_and_value);
+  hash_free (&list->set->table, 1);
+  free ((char *) list->set);
+  free ((char *) list);
 }
 
 /* Create a new variable set and push it on the current setlist.

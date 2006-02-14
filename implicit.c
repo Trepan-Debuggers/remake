@@ -77,24 +77,25 @@ struct idep
 };
 
 static void
-free_idep_chain (struct idep* p)
+free_idep_chain (struct idep *p)
 {
-  register struct idep* n;
-  register struct file *f;
+  struct idep *n;
+  struct file *f;
 
   for (; p != 0; p = n)
     {
       n = p->next;
 
       if (p->name)
+        free (p->name);
+
+      f = p->intermediate_file;
+      if (f != 0)
         {
-          free (p->name);
-
-          f = p->intermediate_file;
-
-          if (f != 0
-              && (f->stem < f->name
-                  || f->stem > f->name + strlen (f->name)))
+          /*          if (f->variables)
+                      free_variable_set (f->variables); */
+          if (f->stem < f->name
+              || f->stem > f->name + strlen (f->name))
             free (f->stem);
         }
 
@@ -742,6 +743,8 @@ pattern_search (struct file *file, int archive,
                   /* If we have tried to find P as an intermediate
                      file and failed, mark that name as impossible
                      so we won't go through the search again later.  */
+                  if (intermediate_file->variables)
+                    free_variable_set (intermediate_file->variables);
                   file_impossible (name);
                 }
 

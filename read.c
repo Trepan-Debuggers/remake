@@ -186,10 +186,7 @@ read_all_makefiles (char **makefiles)
       {
 	if (*p != '\0')
 	  *p++ = '\0';
-        name = xstrdup (name);
-	if (eval_makefile (name,
-                           RM_NO_DEFAULT_GOAL|RM_INCLUDED|RM_DONTCARE) < 2)
-          free (name);
+	eval_makefile (name, RM_NO_DEFAULT_GOAL|RM_INCLUDED|RM_DONTCARE);
       }
 
     free (value);
@@ -810,7 +807,10 @@ eval (struct ebuffer *ebuf, int set_default)
 
           /* If no filenames, it's a no-op.  */
 	  if (*p == '\0')
-            continue;
+            {
+              free (p);
+              continue;
+            }
 
 	  /* Parse the list of file names.  */
 	  p2 = p;
@@ -840,12 +840,9 @@ eval (struct ebuffer *ebuf, int set_default)
 
               r = eval_makefile (name, (RM_INCLUDED | RM_NO_TILDE
                                         | (noerror ? RM_DONTCARE : 0)));
-	      if (!r)
-                {
-                  if (!noerror)
-                    error (fstart, "%s: %s", name, strerror (errno));
-                  free (name);
-                }
+	      if (!r && !noerror)
+                error (fstart, "%s: %s", name, strerror (errno));
+              free (name);
 	    }
 
 	  /* Restore conditional state.  */

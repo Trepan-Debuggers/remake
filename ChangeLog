@@ -1,3 +1,21 @@
+2006-02-14  Paul D. Smith  <psmith@gnu.org>
+
+	* read.c (eval): Even if the included filenames expands to the
+	empty string we still need to free the allocated buffer.
+
+	* implicit.c (pattern_search): If we allocated a variable set for
+	an impossible file, free it.
+	* variable.c (free_variable_set): New function.
+	* variable.h: Declare it.
+
+	* read.c (read_all_makefiles): Makefile names are kept in the
+	strcache, so there's never any need to alloc/free them.
+	(eval): Ditto.
+
+	* main.c (main): Add "archives" to the .FEATURES variable if
+	archive support is enabled.
+	* doc/make.texi (Special Variables): Document it.
+
 2006-02-13  Paul D. Smith  <psmith@gnu.org>
 
 	* implicit.c (pattern_search): Add checking for DOS pathnames to
