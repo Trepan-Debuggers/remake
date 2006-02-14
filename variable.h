@@ -136,6 +136,7 @@ extern char *recursively_expand_for_file PARAMS ((struct variable *v,
 
 /* variable.c */
 extern struct variable_set_list *create_new_variable_set PARAMS ((void));
+extern void free_variable_set PARAMS ((struct variable_set_list *));
 extern struct variable_set_list *push_new_variable_scope PARAMS ((void));
 extern void pop_variable_scope PARAMS ((void));
 extern void define_automatic_variables PARAMS ((void));

@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.43 2006/02/11 19:02:22 psmith Exp $
+@set RCSID $Id: make.texi,v 1.44 2006/02/14 15:42:18 psmith Exp $
 @set EDITION 0.70
 @set VERSION 3.81
 @set UPDATED 5 Feb 2006
@@ -1369,28 +1369,33 @@ Expands to a list of special features supported by this version of
 @code{make}.  Possible values include:
 
 @table @samp
-@item target-specific
-Supports target-specific and pattern-specific variable assignments.
-@xref{Target-specific, ,Target-specific Variable Values}.
 
-@item order-only
-Supports order-only prerequisites.  @xref{Prerequisite Types, ,Types
-of Prerequisites}.
+@item archives
+Supports @code{ar} (archive) files using special filename syntax.
+@xref{Archives, ,Using @code{make} to Update Archive Files}.
 
-@item second-expansion
-Supports secondary expansion of prerequisite lists.
-
-@item jobserver
-Supports ``job server'' enhanced parallel builds.  @xref{Parallel,
-,Parallel Execution}.
+@item check-symlink
+Supports the @code{-L} (@code{--check-symlink-times}) flag.
+@xref{Options Summary, ,Summary of Options}.
 
 @item else-if
 Supports ``else if'' non-nested conditionals.  @xref{Conditional
 Syntax, ,Syntax of Conditionals}.
 
-@item check-symlink
-Supports the @code{-L} (@code{--check-symlink-times}) flag.
-@xref{Options Summary, ,Summary of Options}.
+@item jobserver
+Supports ``job server'' enhanced parallel builds.  @xref{Parallel,
+,Parallel Execution}.
+
+@item second-expansion
+Supports secondary expansion of prerequisite lists.
+
+@item order-only
+Supports order-only prerequisites.  @xref{Prerequisite Types, ,Types
+of Prerequisites}.
+
+@item target-specific
+Supports target-specific and pattern-specific variable assignments.
+@xref{Target-specific, ,Target-specific Variable Values}.
 
 @end table
 
@@ -2047,10 +2052,10 @@ directory for each user (such as MS-DOS or MS-Windows), this
 functionality can be simulated by setting the environment variable
 @var{HOME}.@refill
 
-Wildcard expansion happens automatically in targets, in prerequisites,
-and in commands (where the shell does the expansion).  In other
-contexts, wildcard expansion happens only if you request it explicitly
-with the @code{wildcard} function.
+Wildcard expansion is performed by @code{make} automatically in
+targets and in prerequisites.  In commands the shell is responsible
+for wildcard expansion.  In other contexts, wildcard expansion happens
+only if you request it explicitly with the @code{wildcard} function.
 
 The special significance of a wildcard character can be turned off by
 preceding it with a backslash.  Thus, @file{foo\*bar} would refer to a
