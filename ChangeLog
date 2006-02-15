@@ -1,3 +1,24 @@
+2006-02-15  Paul D. Smith  <psmith@gnu.org>
+
+	Fix for Savannah bug #106.
+
+	* expand.c (expanding_var): Keep track of which variable we're
+	expanding.  If no variable is being expanded, it's the same as
+	reading_file.
+	* make.h (expanding_var): Declare it.
+	* expand.c (recursively_expand_for_file): Set expanding_var to the
+	current variable we're expanding, unless there's no file info in
+	it (could happen if it comes from the command line or a default
+	variable).  Restore it before we exit.
+	* expand.c (variable_expand_string): Use the expanding_var file
+	info instead of the reading_file info.
+	* function.c (check_numeric): Ditto.
+	(func_word): Ditto.
+	(func_wordlist): Ditto.
+	(func_error): Ditto.
+	(expand_builtin_function): Ditto.
+	(handle_function): Ditto.
+
 2006-02-14  Paul D. Smith  <psmith@gnu.org>
 
 	* read.c (eval): Even if the included filenames expands to the
