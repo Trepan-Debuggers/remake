@@ -497,6 +497,7 @@ extern char *getwd ();
 #endif
 
 extern const struct floc *reading_file;
+extern const struct floc **expanding_var;
 
 extern char **environ;
 

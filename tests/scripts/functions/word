@@ -46,11 +46,7 @@ $answer = "6\n"
 
 # Test error conditions
 
-$makefile2 = &get_tmpfile;
-
-open(MAKEFILE, "> $makefile2");
-print MAKEFILE <<'EOF';
-FOO = foo bar biz baz
+run_make_test('FOO = foo bar biz baz
 
 word-e1: ; @echo $(word ,$(FOO))
 word-e2: ; @echo $(word abc ,$(FOO))
@@ -58,35 +54,78 @@ word-e3: ; @echo $(word 1a,$(FOO))
 
 wordlist-e1: ; @echo $(wordlist ,,$(FOO))
 wordlist-e2: ; @echo $(wordlist abc ,,$(FOO))
-wordlist-e3: ; @echo $(wordlist 1, 12a ,$(FOO))
+wordlist-e3: ; @echo $(wordlist 1, 12a ,$(FOO))',
+              'word-e1',
+              "#MAKEFILE#:3: *** non-numeric first argument to `word' function: ''.  Stop.",
+              512);
 
-EOF
+run_make_test(undef,
+              'word-e2',
+              "#MAKEFILE#:4: *** non-numeric first argument to `word' function: 'abc '.  Stop.",
+              512);
 
-close(MAKEFILE);
+run_make_test(undef,
+              'word-e3',
+              "#MAKEFILE#:5: *** non-numeric first argument to `word' function: '1a'.  Stop.",
+              512);
 
-&run_make_with_options($makefile2, 'word-e1', &get_logfile, 512);
-$answer = "$makefile2:3: *** non-numeric first argument to `word' function: ''.  Stop.\n";
-&compare_output($answer, &get_logfile(1));
+run_make_test(undef,
+              'wordlist-e1',
+              "#MAKEFILE#:7: *** non-numeric first argument to `wordlist' function: ''.  Stop.",
+              512);
 
-&run_make_with_options($makefile2, 'word-e2', &get_logfile, 512);
-$answer = "$makefile2:4: *** non-numeric first argument to `word' function: 'abc '.  Stop.\n";
-&compare_output($answer, &get_logfile(1));
+run_make_test(undef,
+              'wordlist-e2',
+              "#MAKEFILE#:8: *** non-numeric first argument to `wordlist' function: 'abc '.  Stop.",
+              512);
 
-&run_make_with_options($makefile2, 'word-e3', &get_logfile, 512);
-$answer = "$makefile2:5: *** non-numeric first argument to `word' function: '1a'.  Stop.\n";
-&compare_output($answer, &get_logfile(1));
+run_make_test(undef,
+              'wordlist-e3',
+              "#MAKEFILE#:9: *** non-numeric second argument to `wordlist' function: ' 12a '.  Stop.",
+              512);
 
-&run_make_with_options($makefile2, 'wordlist-e1', &get_logfile, 512);
-$answer = "$makefile2:7: *** non-numeric first argument to `wordlist' function: ''.  Stop.\n";
-&compare_output($answer, &get_logfile(1));
+# Test error conditions again, but this time in a variable reference
 
-&run_make_with_options($makefile2, 'wordlist-e2', &get_logfile, 512);
-$answer = "$makefile2:8: *** non-numeric first argument to `wordlist' function: 'abc '.  Stop.\n";
-&compare_output($answer, &get_logfile(1));
+run_make_test('FOO = foo bar biz baz
 
-&run_make_with_options($makefile2, 'wordlist-e3', &get_logfile, 512);
-$answer = "$makefile2:9: *** non-numeric second argument to `wordlist' function: ' 12a '.  Stop.\n";
-&compare_output($answer, &get_logfile(1));
+W = $(word $x,$(FOO))
+WL = $(wordlist $s,$e,$(FOO))
+
+word-e: ; @echo $(W)
+wordlist-e: ; @echo $(WL)',
+              'word-e x=',
+              "#MAKEFILE#:3: *** non-numeric first argument to `word' function: ''.  Stop.",
+              512);
+
+run_make_test(undef,
+              'word-e x=abc',
+              "#MAKEFILE#:3: *** non-numeric first argument to `word' function: 'abc'.  Stop.",
+              512);
+
+run_make_test(undef,
+              'word-e x=0',
+              "#MAKEFILE#:3: *** first argument to `word' function must be greater than 0.  Stop.",
+              512);
+
+run_make_test(undef,
+              'wordlist-e s= e=',
+              "#MAKEFILE#:4: *** non-numeric first argument to `wordlist' function: ''.  Stop.",
+              512);
+
+run_make_test(undef,
+              'wordlist-e s=abc e=',
+              "#MAKEFILE#:4: *** non-numeric first argument to `wordlist' function: 'abc'.  Stop.",
+              512);
+
+run_make_test(undef,
+              'wordlist-e s=4 e=12a',
+              "#MAKEFILE#:4: *** non-numeric second argument to `wordlist' function: '12a'.  Stop.",
+              512);
+
+run_make_test(undef,
+              'wordlist-e s=0 e=12',
+              "#MAKEFILE#:4: *** invalid first argument to `wordlist' function: `0'.  Stop.",
+              512);
 
 
 # TEST #8 -- test $(firstword )

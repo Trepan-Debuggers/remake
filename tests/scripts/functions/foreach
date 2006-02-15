@@ -57,4 +57,25 @@ $(foreach x,FOREACH,$(eval $(value mktarget)))',
               '',
               'FOREACH');
 
+
+# TEST 2: Check some error conditions.
+
+run_make_test('
+x = $(foreach )
+y = $x
+
+all: ; @echo $y',
+              '',
+              "#MAKEFILE#:2: *** insufficient number of arguments (1) to function `foreach'.  Stop.",
+              512);
+
+run_make_test('
+x = $(foreach )
+y := $x
+
+all: ; @echo $y',
+              '',
+              "#MAKEFILE#:2: *** insufficient number of arguments (1) to function `foreach'.  Stop.",
+              512);
+
 1;

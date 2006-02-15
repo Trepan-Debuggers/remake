@@ -743,7 +743,7 @@ check_numeric (const char *s, const char *message)
       break;
 
   if (s <= end || end - beg < 0)
-    fatal (reading_file, "%s: '%s'", message, beg);
+    fatal (*expanding_var, "%s: '%s'", message, beg);
 }
 
 
@@ -760,7 +760,8 @@ func_word (char *o, char **argv, const char *funcname UNUSED)
   i =  atoi (argv[0]);
 
   if (i == 0)
-    fatal (reading_file, _("first argument to `word' function must be greater than 0"));
+    fatal (*expanding_var,
+           _("first argument to `word' function must be greater than 0"));
 
 
   end_p = argv[1];
@@ -787,7 +788,7 @@ func_wordlist (char *o, char **argv, const char *funcname UNUSED)
 
   start = atoi (argv[0]);
   if (start < 1)
-    fatal (reading_file,
+    fatal (*expanding_var,
            "invalid first argument to `wordlist' function: `%d'", start);
 
   count = atoi (argv[1]) - start + 1;
@@ -1115,7 +1116,7 @@ func_error (char *o, char **argv, const char *funcname)
       break;
 
     default:
-      fatal (reading_file, "Internal error: func_error: '%s'", funcname);
+      fatal (*expanding_var, "Internal error: func_error: '%s'", funcname);
   }
 
   /* The warning function expands to the empty string.  */
@@ -2100,8 +2101,8 @@ expand_builtin_function (char *o, int argc, char **argv,
                          const struct function_table_entry *entry_p)
 {
   if (argc < (int)entry_p->minimum_args)
-    fatal (reading_file,
-           _("Insufficient number of arguments (%d) to function `%s'"),
+    fatal (*expanding_var,
+           _("insufficient number of arguments (%d) to function `%s'"),
            argc, entry_p->name);
 
   /* I suppose technically some function could do something with no
@@ -2112,8 +2113,8 @@ expand_builtin_function (char *o, int argc, char **argv,
     return o;
 
   if (!entry_p->func_ptr)
-    fatal (reading_file, _("Unimplemented on this platform: function `%s'"),
-           entry_p->name);
+    fatal (*expanding_var,
+           _("unimplemented on this platform: function `%s'"), entry_p->name);
 
   return entry_p->func_ptr (o, argv, entry_p->name);
 }
@@ -2162,7 +2163,7 @@ handle_function (char **op, char **stringp)
       break;
 
   if (count >= 0)
-    fatal (reading_file,
+    fatal (*expanding_var,
 	   _("unterminated call to function `%s': missing `%c'"),
 	   entry_p->name, closeparen);
 

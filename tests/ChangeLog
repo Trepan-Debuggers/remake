@@ -1,3 +1,15 @@
+2006-02-15  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/functions/error: Make sure filename/lineno information
+	is related to where the error is expanded, not where it's set.
+	* scripts/functions/warning: Ditto.
+	* scripts/functions/foreach: Check for different error conditions.
+	* scripts/functions/word: Ditto.
+	* scripts/variables/negative: Test some variable reference failure
+	conditions.
+	* scripts/options/warn-undefined-variables: Test the
+	--warn-undefined-variables flag.
+
 2006-02-09  Paul D. Smith  <psmith@gnu.org>
 
 	* run_make_tests.pl (set_more_defaults): Update valgrind support
