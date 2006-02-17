@@ -1,3 +1,9 @@
+2006-02-17  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/targetvars: Test a complex construction which
+	guarantees that we have to merge variable lists of different
+	sizes.  Tests for Savannah bug #15757.
+
 2006-02-15  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/functions/error: Make sure filename/lineno information

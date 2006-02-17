@@ -1,3 +1,12 @@
+2006-02-17  Paul D. Smith  <psmith@gnu.org>
+
+	* variable.c (merge_variable_set_lists): Don't try to merge the
+	global_setlist.  Not only is this useless, but it can lead to
+	circularities in the linked list, if global_setlist->next in one
+	list gets set to point to another list which also ends in
+	global_setlist.
+	Fixes Savannah bug #15757.
+
 2006-02-15  Paul D. Smith  <psmith@gnu.org>
 
 	Fix for Savannah bug #106.

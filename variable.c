@@ -665,21 +665,27 @@ void
 merge_variable_set_lists (struct variable_set_list **setlist0,
                           struct variable_set_list *setlist1)
 {
-  register struct variable_set_list *list0 = *setlist0;
+  struct variable_set_list *to = *setlist0;
   struct variable_set_list *last0 = 0;
 
-  while (setlist1 != 0 && list0 != 0)
+  /* If there's nothing to merge, stop now.  */
+  if (!setlist1)
+    return;
+
+  /* This loop relies on the fact that all setlists terminate with the global
+     setlist (before NULL).  If that's not true, arguably we SHOULD die.  */
+  while (setlist1 != &global_setlist && to != &global_setlist)
     {
-      struct variable_set_list *next = setlist1;
+      struct variable_set_list *from = setlist1;
       setlist1 = setlist1->next;
 
-      merge_variable_sets (list0->set, next->set);
+      merge_variable_sets (to->set, from->set);
 
-      last0 = list0;
-      list0 = list0->next;
+      last0 = to;
+      to = to->next;
     }
 
-  if (setlist1 != 0)
+  if (setlist1 != &global_setlist)
     {
       if (last0 == 0)
 	*setlist0 = setlist1;
