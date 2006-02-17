@@ -267,4 +267,29 @@ close(MAKEFILE);
 $answer = "no build information\n";
 &compare_output($answer, &get_logfile(1));
 
+# TEST #17
+
+# Test a merge of set_lists for files, where one list is much longer
+# than the other.  See Savannah bug #15757.
+
+mkdir('t1');
+touch('t1/rules.mk');
+
+run_make_test('
+VPATH = t1
+include rules.mk
+.PHONY: all
+all: foo.x
+foo.x : rules.mk ; @echo MYVAR=$(MYVAR) FOOVAR=$(FOOVAR) ALLVAR=$(ALLVAR)
+all: ALLVAR = xxx
+foo.x: FOOVAR = bar
+rules.mk : MYVAR = foo
+.INTERMEDIATE: foo.x rules.mk
+',
+              '-I t1',
+              'MYVAR= FOOVAR=bar ALLVAR=xxx');
+
+rmfiles('t1/rules.mk');
+rmdir('t1');
+
 1;
