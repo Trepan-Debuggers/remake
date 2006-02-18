@@ -1,24 +1,22 @@
-/* $Id: variable.c,v 1.20 2006/02/18 11:52:50 rockyb Exp $
+/* $Id: variable.c,v 1.21 2006/02/18 13:18:17 rockyb Exp $
 Internals of variables for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996, 1997,
 2002, 2004, 2005, 2006 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
-GNU Make is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+GNU Make is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2, or (at your option) any later version.
 
-GNU Make is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with GNU Make; see the file COPYING.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-Boston, MA 02111-1307, USA.  */
+You should have received a copy of the GNU General Public License along with
+GNU Make; see the file COPYING.  If not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 
+#include <assert.h>
 #include "commands.h"
 #include "debug.h"
 #include "dep.h"
@@ -482,10 +480,32 @@ initialize_file_variables (struct file *file, int reading)
           current_variable_set_list = file->pat_variables;
 
           do
-            /* We found one, so insert it into the set.  */
-            do_variable_definition (&p->variable.fileinfo, p->variable.name,
-                                    p->variable.value, p->variable.origin,
-                                    p->variable.flavor, 1);
+            {
+              /* We found one, so insert it into the set.  */
+
+              struct variable *v;
+
+              if (p->variable.flavor == f_simple)
+                {
+                  v = define_variable_loc (
+                    p->variable.name, strlen (p->variable.name),
+                    p->variable.value, p->variable.origin,
+                    0, &p->variable.fileinfo);
+
+                  v->flavor = f_simple;
+                }
+              else
+                {
+                  v = do_variable_definition (
+                    &p->variable.fileinfo, p->variable.name,
+                    p->variable.value, p->variable.origin,
+                    p->variable.flavor, 1);
+                }
+
+              /* Also mark it as a per-target and copy export status. */
+              v->per_target = p->variable.per_target;
+              v->export = p->variable.export;
+            }
           while ((p = lookup_pattern_var (p, file->name)) != 0);
 
           current_variable_set_list = global;
@@ -508,30 +528,6 @@ free_variable_name_and_value (const void *p_item)
   variable_t *p_v = (variable_t *) p_item;
   FREE (p_v->name);
   FREE (p_v->value);
-}
-
-/*! Pop the top set off the current_variable_set_list, and free all
-   its storage.  If b_toplevel set we have the top-most global scope
-   and some things don't get freed because they weren't malloc'd.
-*/
-void 
-pop_variable_scope (bool b_toplevel)
-{
-  variable_set_list_t *p_setlist = current_variable_set_list;
-  variable_set_t *p_set;
-
-  if (!p_setlist) return;
-  p_set = p_setlist->set;
-  current_variable_set_list = p_setlist->next;
-
-  hash_map (&p_set->table, free_variable_name_and_value);
-  hash_free (&p_set->table, free);
-
-  if (!b_toplevel) {
-    free ((char *) p_setlist);
-    free ((char *) p_set);
-  }
-  
 }
 
 /*! Create a new variable set and push it on the current setlist.  */
@@ -560,7 +556,62 @@ create_new_variable_set (void)
 variable_set_list_t *
 push_new_variable_scope (void)
 {
-  return (current_variable_set_list = create_new_variable_set());
+  current_variable_set_list = create_new_variable_set();
+  if (current_variable_set_list->next == &global_setlist)
+    {
+      /* It was the global, so instead of new -> &global we want to replace
+         &global with the new one and have &global -> new, with current still
+         pointing to &global  */
+      struct variable_set *set = current_variable_set_list->set;
+      current_variable_set_list->set = global_setlist.set;
+      global_setlist.set = set;
+      current_variable_set_list->next = global_setlist.next;
+      global_setlist.next = current_variable_set_list;
+      current_variable_set_list = &global_setlist;
+    }
+  return (current_variable_set_list);
+}
+
+/*! Pop the top set off the current_variable_set_list, and free all
+   its storage.  If b_toplevel set we have the top-most global scope
+   and some things don't get freed because they weren't malloc'd.
+*/
+void
+pop_variable_scope (bool b_toplevel)
+{
+  variable_set_list_t *p_setlist;
+  variable_set_t *p_set;
+
+  /* Can't call this if there's no scope to pop!  */
+  if (!current_variable_set_list->next) return;
+
+  if (current_variable_set_list != &global_setlist)
+    {
+      /* We're not pointing to the global setlist, so pop this one.  */
+      p_setlist = current_variable_set_list;
+      p_set = p_setlist->set;
+      current_variable_set_list = p_setlist->next;
+    }
+  else
+    {
+      /* This set is the one in the global_setlist, but there is another global
+         set beyond that.  We want to copy that set to global_setlist, then
+         delete what used to be in global_setlist.  */
+      p_setlist = global_setlist.next;
+      p_set = global_setlist.set;
+      global_setlist.set  = p_setlist->set;
+      global_setlist.next = p_setlist->next;
+    }
+
+  /* Free the one we no longer need.  */
+  hash_map (&p_set->table, free_variable_name_and_value);
+  hash_free (&p_set->table, free);
+
+  if (!b_toplevel) {
+    free ((char *) p_setlist);
+    free ((char *) p_set);
+  }
+  
 }
 
 /*! Merge FROM_SET into TO_SET, freeing unused storage in
@@ -605,7 +656,7 @@ merge_variable_set_lists (variable_set_list_t **setlist0,
 
   /* This loop relies on the fact that all setlists terminate with the global
      setlist (before NULL).  If that's not true, arguably we SHOULD die.  */
-  while (setlist1 != &global_setlist && to != &global_setlist)
+  while (setlist1 != &global_setlist && to && to != &global_setlist)
     {
       variable_set_list_t *from = setlist1;
       setlist1 = setlist1->next;
@@ -672,7 +723,6 @@ define_automatic_variables (void)
   /* This won't override any definition, but it
      will provide one if there isn't one there.  */
   v = define_variable ("SHELL", 5, default_shell, o_default, 0);
-  v->export = v_export;		/* Always export SHELL.  */
 
   /* On MSDOS we do use SHELL from environment, since it isn't a
      standard environment variable on MSDOS, so whoever sets it, does
@@ -782,7 +832,15 @@ target_environment (file_t *file)
 		break;
 
 	      case v_noexport:
-		continue;
+                /* If this is the SHELL variable and it's not exported, then
+                   add the value from our original environment.  */
+                if (streq (v->name, "SHELL"))
+                  {
+                    extern variable_t shell_var;
+                    v = &shell_var;
+                    break;
+                  }
+                continue;
 
 	      case v_ifset:
 		if (v->origin == o_default)
@@ -960,7 +1018,7 @@ do_variable_definition (const floc_t *p_floc, const char *varname,
   if ((origin == o_file || origin == o_override)
       && strcmp (varname, "SHELL") == 0)
     {
-      char shellpath[PATH_MAX];
+      PATH_VAR (shellpath);
       extern char * __dosexec_find_on_path (const char *, char *[], char *);
 
       /* See if we can find "/bin/sh.exe", "/bin/sh.com", etc.  */
@@ -1072,6 +1130,12 @@ do_variable_definition (const floc_t *p_floc, const char *varname,
 /*! Try to interpret LINE (a null-terminated string) as a variable
     definition.
 
+   ORIGIN may be o_file, o_override, o_env, o_env_override,
+   or o_command specifying that the variable definition comes
+   from a makefile, an override directive, the environment with
+   or without the -e switch, or the command line.
+
+   See the comments for parse_variable_definition().
    If LINE was recognized as a variable definition, a pointer to its `struct
    variable' is returned.  If LINE is not a variable definition, NULL is
    returned.  */

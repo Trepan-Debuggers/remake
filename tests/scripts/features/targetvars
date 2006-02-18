@@ -37,6 +37,8 @@ eight: BAR = eight
 # Test the export keyword with per-target variables
 nine: ; @echo $(FOO) $(BAR) $$FOO $$BAR
 nine: FOO = wallace
+nine-a: export BAZ = baz
+nine-a: ; @echo $$BAZ
 # Test = escaping
 EQ = =
 ten: one\=two
@@ -84,6 +86,12 @@ $answer = "eight: seven eight\nseven: seven seven\n";
 
 &run_make_with_options($makefile, "nine", &get_logfile);
 $answer = "wallace bar wallace bar\n";
+&compare_output($answer,&get_logfile(1));
+
+# TEST #5-a
+
+&run_make_with_options($makefile, "nine-a", &get_logfile);
+$answer = "baz\n";
 &compare_output($answer,&get_logfile(1));
 
 # TEST #6
@@ -239,5 +247,49 @@ $answer = "ok ok bar nopat\nok ok bar nopat\n";
 $answer = "ok ok foo pat\nok ok foo pat\n";
 &compare_output($answer, &get_logfile(1));
 
+
+# Test #16
+# Test target-specific variables with very long command line
+# (> make default buffer length)
+
+$makefile7 = &get_tmpfile;
+
+open(MAKEFILE, "> $makefile7");
+print MAKEFILE <<'EOF';
+base_metals_fmd_reports.sun5 base_metals_fmd_reports CreateRealPositions        CreateMarginFunds deals_changed_since : BUILD_OBJ=$(shell if [ -f               "build_information.generate" ]; then echo "$(OBJ_DIR)/build_information.o"; else echo "no build information"; fi  )
+
+deals_changed_since: ; @echo $(BUILD_OBJ)
+
+EOF
+close(MAKEFILE);
+
+&run_make_with_options("$makefile7", '', &get_logfile);
+$answer = "no build information\n";
+&compare_output($answer, &get_logfile(1));
+
+# TEST #17
+
+# Test a merge of set_lists for files, where one list is much longer
+# than the other.  See Savannah bug #15757.
+
+mkdir('t1');
+touch('t1/rules.mk');
+
+run_make_test('
+VPATH = t1
+include rules.mk
+.PHONY: all
+all: foo.x
+foo.x : rules.mk ; @echo MYVAR=$(MYVAR) FOOVAR=$(FOOVAR) ALLVAR=$(ALLVAR)
+all: ALLVAR = xxx
+foo.x: FOOVAR = bar
+rules.mk : MYVAR = foo
+.INTERMEDIATE: foo.x rules.mk
+',
+              '-I t1',
+              'MYVAR= FOOVAR=bar ALLVAR=xxx');
+
+rmfiles('t1/rules.mk');
+rmdir('t1');
 
 1;

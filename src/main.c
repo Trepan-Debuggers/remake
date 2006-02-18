@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.51 2006/02/01 11:31:30 rockyb Exp $
+/* $Id: main.c,v 1.52 2006/02/18 13:18:17 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
@@ -323,6 +323,10 @@ int always_make_flag = 0;
 /* If nonzero, we're in the "try to rebuild makefiles" phase.  */
 
 int rebuilding_makefiles = 0;
+
+/* Remember the original value of the SHELL variable, from the environment.  */
+
+variable_t shell_var;
 
 /** This variable is trickery to force the above enum symbol values to
     be recorded in debug symbol tables. It is used to allow one refer
@@ -949,6 +953,7 @@ main (int argc, char **argv, char **envp)
   char **p;
   dep_t *read_makefiles;
   PATH_VAR (current_directory);
+  unsigned int restarts = 0;
 #ifdef WINDOWS32
   char *unix_path = NULL;
   char *windows32_path = NULL;
@@ -1183,14 +1188,35 @@ main (int argc, char **argv, char **envp)
 	 machines where ptrdiff_t is a different size that doesn't widen
 	 the same.  */
       if (!do_not_define)
-        define_variable (envp[i], (unsigned int) (ep - envp[i]),
-                         ep + 1, o_env, 1)
-	/* Force exportation of every variable culled from the environment.
-	   We used to rely on target_environment's v_default code to do this.
-	   But that does not work for the case where an environment variable
-	   is redefined in a makefile with `override'; it should then still
-	   be exported, because it was originally in the environment.  */
-	->export = v_export;
+        {
+          variable_t *v;
+	  v = define_variable (envp[i], (unsigned int) (ep - envp[i]),
+                               ep + 1, o_env, 1);
+	  /* Force exportation of every variable culled from the environment.
+	     We used to rely on target_environment's v_default code to do this.
+	     But that does not work for the case where an environment variable
+	     is redefined in a makefile with `override'; it should then still
+	     be exported, because it was originally in the environment.  */
+          v->export = v_export;
+          /* Another wrinkle is that POSIX says the value of SHELL set in the
+             makefile won't change the value of SHELL given to subprocesses  */
+          if (streq (v->name, "SHELL"))
+            {
+#ifndef __MSDOS__
+              v->export = v_noexport;
+#endif
+              shell_var.name = "SHELL";
+              shell_var.value = strdup (ep + 1);
+            }
+
+          /* If MAKE_RESTARTS is set, remember it but don't export it.  */
+          if (streq (v->name, "MAKE_RESTARTS"))
+            {
+              v->export = v_noexport;
+              restarts = (unsigned int) atoi (ep + 1);
+            }
+        }
+
     }
 #ifdef WINDOWS32
     /*

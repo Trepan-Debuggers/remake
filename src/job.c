@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.41 2006/02/09 02:53:25 rockyb Exp $
+/* $Id: job.c,v 1.42 2006/02/18 13:18:17 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005, 2006
 Free Software Foundation, Inc.
@@ -52,7 +52,11 @@ Boston, MA 02111-1307, USA.  */
 bool no_default_sh_exe = false;
 #endif
 
+/* Default shell to use.  */
 #ifdef WINDOWS32
+#include <windows.h>
+
+char *default_shell = "sh.exe";
 boo no_default_sh_exe = true;
 bool batch_mode_shell = true;
 #elif defined (__MSDOS__)
@@ -61,8 +65,10 @@ bool batch_mode_shell = true;
    says so.  It is without an explicit path so we get a chance
    to search the $PATH for it (since MSDOS doesn't have standard
    directories we could trust).  */
+char *default_shell = "command.com";
 bool batch_mode_shell = false;
 #else 
+char *default_shell = "/bin/sh";
 bool batch_mode_shell = false;
 #endif
 
