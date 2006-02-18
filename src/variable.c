@@ -1,7 +1,7 @@
-/* $Id: variable.c,v 1.19 2005/12/25 10:08:35 rockyb Exp $
+/* $Id: variable.c,v 1.20 2006/02/18 11:52:50 rockyb Exp $
 Internals of variables for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996, 1997,
-2002, 2004, 2005 Free Software Foundation, Inc.
+2002, 2004, 2005, 2006 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -596,21 +596,27 @@ void
 merge_variable_set_lists (variable_set_list_t **setlist0,
                           variable_set_list_t *setlist1)
 {
-  variable_set_list_t *list0 = *setlist0;
+  variable_set_list_t *to    = *setlist0;
   variable_set_list_t *last0 = 0;
 
-  while (setlist1 != 0 && list0 != 0)
+  /* If there's nothing to merge, stop now.  */
+  if (!setlist1)
+    return;
+
+  /* This loop relies on the fact that all setlists terminate with the global
+     setlist (before NULL).  If that's not true, arguably we SHOULD die.  */
+  while (setlist1 != &global_setlist && to != &global_setlist)
     {
-      variable_set_list_t *next = setlist1;
+      variable_set_list_t *from = setlist1;
       setlist1 = setlist1->next;
 
-      merge_variable_sets (list0->set, next->set);
+      merge_variable_sets (to->set, from->set);
 
-      last0 = list0;
-      list0 = list0->next;
+      last0 = to;
+      to = to->next;
     }
 
-  if (setlist1 != 0)
+  if (setlist1 != &global_setlist)
     {
       if (last0 == 0)
 	*setlist0 = setlist1;
