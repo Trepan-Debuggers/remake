@@ -6,7 +6,7 @@ AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.35 2006/02/18 23:31:07 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.36 2006/02/19 00:23:58 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -556,6 +556,7 @@ AC_CONFIG_FILES([Makefile        \
 		 emacs/mdb.el    \
 		 doc/doxygen/Doxyfile \
 		 glob/Makefile   \
+                 po/Makefile.in  \
                  po/Makefile     \
 		 src/Makefile    \
 		 tests/scripts/debugger/general
