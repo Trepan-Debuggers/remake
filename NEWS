@@ -1,13 +1,8 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  11 February 2006
+  19 February 2006
 
-Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software
-Foundation, Inc.
-This file is part of GNU Make.
-
-See the end of this file for copying conditions.
+See the end of this file for copyrights and conditions.
 
 All changes mentioned here are more fully described in the GNU make
 manual, which is contained in this distribution as the file doc/make.texi.
@@ -980,6 +975,11 @@ Version 3.05
 (Changes from versions 1 through 3.05 were never recorded.  Sorry.)
 
 -------------------------------------------------------------------------------
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
+1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software
+Foundation, Inc.
+This file is part of GNU Make.
+
 GNU Make is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
 Foundation; either version 2, or (at your option) any later version.
