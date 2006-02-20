@@ -157,7 +157,7 @@ set_file_variables (struct file *file)
       plus_len++;
 
     if (plus_len > plus_max)
-      plus_value = (char *) xmalloc (plus_max = plus_len);
+      plus_value = xrealloc (plus_value, plus_max = plus_len);
     cp = plus_value;
 
     qmark_len = plus_len + 1;	/* Will be this or less.  */
@@ -206,11 +206,11 @@ set_file_variables (struct file *file)
     cp = caret_value = plus_value; /* Reuse the buffer; it's big enough.  */
 
     if (qmark_len > qmark_max)
-      qmark_value = (char *) xmalloc (qmark_max = qmark_len);
+      qmark_value = xrealloc (qmark_value, qmark_max = qmark_len);
     qp = qmark_value;
 
     if (bar_len > bar_max)
-      bar_value = (char *) xmalloc (bar_max = bar_len);
+      bar_value = xrealloc (bar_value, bar_max = bar_len);
     bp = bar_value;
 
     for (d = file->deps; d != 0; d = d->next)

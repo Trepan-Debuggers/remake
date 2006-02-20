@@ -1,3 +1,25 @@
+2006-02-19  Paul D. Smith  <psmith@gnu.org>
+
+	* commands.c (set_file_variables): Realloc, not malloc, the static
+	string values to avoid memory leaks.
+
+	* expand.c (recursively_expand_for_file): Only set reading_file to
+	an initialized value.
+
+	* implicit.c (pattern_search): We need to make a copy of the stem
+	if we get it from an intermediate dep, since those get freed.
+
+	* file.c (lookup_file) [VMS]: Don't lowercase special targets that
+	begin with ".".
+	(enter_file) [VMS]: Ditto.
+	Patch provided by Hartmut Becker <Hartmut.Becker@hp.com>.
+
+2006-02-18  Eli Zaretskii  <eliz@gnu.org>
+
+        * job.c (construct_command_argv_internal): Don't create a temporary
+	script/batch file if we are under -n.  Call _setmode to switch the
+	script file stream to text mode.
+
 2006-02-17  Paul D. Smith  <psmith@gnu.org>
 
 	* variable.c (merge_variable_set_lists): Don't try to merge the
