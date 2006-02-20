@@ -90,14 +90,9 @@ free_idep_chain (struct idep *p)
         free (p->name);
 
       f = p->intermediate_file;
-      if (f != 0)
-        {
-          /*          if (f->variables)
-                      free_variable_set (f->variables); */
-          if (f->stem < f->name
-              || f->stem > f->name + strlen (f->name))
-            free (f->stem);
-        }
+      if (f != 0
+          && (f->stem < f->name || f->stem > f->name + strlen (f->name)))
+        free (f->stem);
 
       free (p);
     }
@@ -841,7 +836,7 @@ pattern_search (struct file *file, int archive,
 
 	  f->deps = imf->deps;
 	  f->cmds = imf->cmds;
-	  f->stem = imf->stem;
+	  f->stem = xstrdup (imf->stem);
           f->also_make = imf->also_make;
           f->is_target = 1;
 

@@ -88,14 +88,15 @@ lookup_file (char *name)
      on the command line.  */
 #ifdef VMS
 # ifndef WANT_CASE_SENSITIVE_TARGETS
-  {
-    register char *n;
-    lname = (char *) malloc (strlen (name) + 1);
-    for (n = name, ln = lname; *n != '\0'; ++n, ++ln)
-      *ln = isupper ((unsigned char)*n) ? tolower ((unsigned char)*n) : *n;
-    *ln = '\0';
-    name = lname;
-  }
+  if (*name != '.')
+    {
+      register char *n;
+      lname = (char *) malloc (strlen (name) + 1);
+      for (n = name, ln = lname; *n != '\0'; ++n, ++ln)
+        *ln = isupper ((unsigned char)*n) ? tolower ((unsigned char)*n) : *n;
+      *ln = '\0';
+      name = lname;
+    }
 # endif
 
   while (name[0] == '[' && name[1] == ']' && name[2] != '\0')
@@ -124,7 +125,8 @@ lookup_file (char *name)
   file_key.hname = name;
   f = (struct file *) hash_find_item (&files, &file_key);
 #if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
-  free (lname);
+  if (*name != '.')
+    free (lname);
 #endif
   return f;
 }
@@ -143,22 +145,23 @@ enter_file (char *name)
   assert (*name != '\0');
 
 #if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
-  {
-    register char *n;
-    lname = (char *) malloc (strlen (name) + 1);
-    for (n = name, ln = lname; *n != '\0'; ++n, ++ln)
-      {
-        if (isupper ((unsigned char)*n))
-          *ln = tolower ((unsigned char)*n);
-        else
-          *ln = *n;
-      }
+  if (*name != '.')
+    {
+      register char *n;
+      lname = (char *) malloc (strlen (name) + 1);
+      for (n = name, ln = lname; *n != '\0'; ++n, ++ln)
+        {
+          if (isupper ((unsigned char)*n))
+            *ln = tolower ((unsigned char)*n);
+          else
+            *ln = *n;
+        }
 
-    *ln = 0;
-    /* Creates a possible leak, old value of name is unreachable, but I
-       currently don't know how to fix it. */
-    name = lname;
-  }
+      *ln = 0;
+      /* Creates a possible leak, old value of name is unreachable, but I
+         currently don't know how to fix it. */
+      name = lname;
+    }
 #endif
 
   file_key.hname = name;
@@ -167,7 +170,8 @@ enter_file (char *name)
   if (! HASH_VACANT (f) && !f->double_colon)
     {
 #if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
-      free(lname);
+      if (*name != '.')
+        free (lname);
 #endif
       return f;
     }

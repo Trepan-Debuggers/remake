@@ -2770,6 +2770,8 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
     /* Some shells do not work well when invoked as 'sh -c xxx' to run a
        command line (e.g. Cygnus GNUWIN32 sh.exe on WIN32 systems).  In these
        cases, run commands via a script file.  */
+    if (just_print_flag)
+      ; /* Do nothing here.  */
     if ((no_default_sh_exe || batch_mode_shell) && batch_filename_ptr) {
       int temp_fd;
       FILE* batch = NULL;
@@ -2784,8 +2786,9 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
                     *batch_filename_ptr));
 
       /* Create a FILE object for the batch file, and write to it the
-	 commands to be executed.  */
-      batch = _fdopen (temp_fd, "w");
+	 commands to be executed.  Put the batch file in TEXT mode.  */
+      _setmode (temp_fd, _O_TEXT);
+      batch = _fdopen (temp_fd, "wt");
       if (!unixy_shell)
         fputs ("@echo off\n", batch);
       fputs (command_ptr, batch);
