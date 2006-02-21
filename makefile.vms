@@ -32,7 +32,7 @@ CP = copy
 #
 
 ifeq ($(CC),cc)
-CFLAGS = $(defines) /include=([],[.glob])/prefix=(all,except=(glob,globfree))/standard=relaxed
+CFLAGS = $(defines) /include=([],[.glob])/prefix=(all,except=(glob,globfree))/standard=relaxed/warn=(disable=questcompare)
 else
 CFLAGS = $(defines) /include=([],[.glob])
 endif

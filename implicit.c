@@ -80,19 +80,21 @@ static void
 free_idep_chain (struct idep *p)
 {
   struct idep *n;
-  struct file *f;
 
   for (; p != 0; p = n)
     {
       n = p->next;
 
       if (p->name)
-        free (p->name);
+        {
+          struct file *f = p->intermediate_file;
 
-      f = p->intermediate_file;
-      if (f != 0
-          && (f->stem < f->name || f->stem > f->name + strlen (f->name)))
-        free (f->stem);
+          if (f != 0
+              && (f->stem < f->name || f->stem > f->name + strlen (f->name)))
+            free (f->stem);
+
+          free (p->name);
+        }
 
       free (p);
     }
@@ -836,7 +838,7 @@ pattern_search (struct file *file, int archive,
 
 	  f->deps = imf->deps;
 	  f->cmds = imf->cmds;
-	  f->stem = xstrdup (imf->stem);
+	  f->stem = imf->stem;
           f->also_make = imf->also_make;
           f->is_target = 1;
 
