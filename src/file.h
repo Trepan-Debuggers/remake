@@ -1,4 +1,4 @@
-/* $Id: file.h,v 1.9 2006/02/09 05:58:55 rockyb Exp $
+/* $Id: file.h,v 1.10 2006/02/27 03:17:51 rockyb Exp $
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -119,7 +119,14 @@ extern file_t *default_goal_file, *suffix_file, *default_file;
  */
 file_t *lookup_file (char *psz_name);
 
+/*! Enter PSZ_NAME into the file hash table if it is not already
+  there and return a pointer to that.  If the entry is in the file
+  hash table, return that entry.  Some file fields are initialized on
+  new entry.
+ */
 file_t *enter_file  (char *psz_name, const floc_t *p_floc);
+
+/*! Free memory associated with p_file. */
 void    free_file  (file_t *p_file);
 
 /*!

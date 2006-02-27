@@ -1,4 +1,4 @@
-/* $Id: file.c,v 1.14 2006/02/09 05:58:55 rockyb Exp $
+/* $Id: file.c,v 1.15 2006/02/27 03:17:51 rockyb Exp $
 Target file hash table management for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -93,17 +93,22 @@ lookup_file (char *name)
   return f;
 }
 
+/*! Enter PSZ_NAME into the file hash table if it is not already
+  there and return a pointer to that.  If the entry is in the file
+  hash table, return that entry.  Some file fields are initialized on
+  new entry.
+ */
 file_t *
-enter_file (char *name, const floc_t *p_floc)
+enter_file (char *psz_name, const floc_t *p_floc)
 {
   file_t *f;
   file_t *new;
   file_t **file_slot;
   file_t file_key;
 
-  assert (*name != '\0');
+  assert (*psz_name != '\0');
 
-  file_key.hname = name;
+  file_key.hname = psz_name;
   file_slot = (file_t **) hash_find_slot (&files, &file_key);
   f = *file_slot;
   if (! HASH_VACANT (f) && !f->double_colon)
@@ -112,7 +117,7 @@ enter_file (char *name, const floc_t *p_floc)
     }
 
   new = CALLOC(file_t, 1);
-  new->name = new->hname = name;
+  new->name = new->hname = psz_name;
   new->update_status = -1;
   new->tracing = 0;
   if (p_floc) {
@@ -135,6 +140,7 @@ enter_file (char *name, const floc_t *p_floc)
   return new;
 }
 
+/*! Free memory associated with p_file. */
 void
 free_file (file_t *p_file)
 {

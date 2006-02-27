@@ -1,4 +1,4 @@
-/* $Id: buildargv.c,v 1.1 2006/01/21 13:40:21 rockyb Exp $ */
+/* $Id: buildargv.c,v 1.2 2006/02/27 03:17:51 rockyb Exp $ */
 /* Create and destroy argument vectors (argv's)
    Copyright (C) 1992, 2001 Free Software Foundation, Inc.
    Written by Fred Fish @ Cygnus Support
@@ -24,7 +24,9 @@ Boston, MA 02111-1307, USA.  */
    libiberty.
 */
 #include <ctype.h>
+#ifdef HAVE_ALLOCA_H
 #include <alloca.h>
+#endif
 #include <string.h>
 #include <stdlib.h>
 #include "buildargv.h"
