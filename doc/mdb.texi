@@ -1,5 +1,5 @@
 \input texinfo      @c -*-texinfo-*-
-@c Copyright 2004, 2005
+@c Copyright 2004, 2005, 2006
 @c Rocky Bernstein for the Free Software Foundation
 @c
 @c TODO: 
@@ -22,7 +22,7 @@
 @set REMAKE @sc{gnu} Remake
 @set MAKE @sc{gnu} Make
 
-@set DBG the @value{REMAKE} debugger
+@set DBG the @value{MAKE} debugger
 @set dBG The @value{REMAKE} debugger
 @set DDD @acronym{DDD}
 
@@ -103,8 +103,8 @@ development.''
 @page
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 2004, 2005 Rocky Bernstein for the Free Software
-Foundation.
+Copyright @copyright{} 2004, 2005, 2006 Rocky Bernstein for the Free
+Software Foundation.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
@@ -123,13 +123,13 @@ development.''
 @ifnottex
 @node Top, Summary, (dir), (dir)
 
-@top Using with @value{DBG}
+@top Using @value{DBG}
 
 This file describes @value{DBG}
 
 This is the @value{EDITION} Edition, @value{UPDATED-MONTH}
 
-Copyright (C) 2004, 2005 Rocky Bernstein
+Copyright (C) 2004, 2005, 2006 Rocky Bernstein
 
 @menu
 * Summary::                     Overview of Debugger with a sample session
@@ -1135,15 +1135,16 @@ just @key{RET}. Some commands which require a parameter, such as
 @code{print} remember the argument that was given to them. 
 
 @menu
-* Command Syntax::       How to give commands to the @value{DBG}
-* Help::                 How to ask for help (help)
-* Quit::                 Leaving the debugger (quit)
-* Stopping::             Stopping and continuing (break, watch, step, cont...)
-* Information::          Status and Debugger settings (info, show)
-* Stack::                Examining the stack (where, up, down, frame)
-* Data::                 Examining data (print, target, examine, info variables)
-* Evaluation/Execution:: Arbitrary execution (eval, shell)
-* Controlling Make::     Controlling make (annotate, file, prompt...)
+* Command Syntax::        How to give commands to the @value{DBG}
+* Help::                  How to ask for help (help)
+* Quit::                  Leaving the debugger (quit)
+* Stopping::              Stopping and continuing (break, watch, step, cont...)
+* Information::           Status and Debugger settings (info, show)
+* Stack::                 Examining the stack (where, up, down, frame)
+* Data::                  Examining data (print, target, examine, info variables)
+* Evaluation/Execution::  Arbitrary execution (eval, shell)
+* Interfacing to the OS:: Interfacing to the OS (cd, pwd)
+* Controlling Make::      Controlling make (annotate, file, prompt...)
 @end menu
 
 @node Command Syntax
@@ -2034,6 +2035,27 @@ debugging session, there is no need to leave or suspend @value{DBG}; you can
 just use the @code{shell} command or its alias @code{!}.
 
 Invoke a shell to execute @var{command string}.
+
+@end table
+
+@node Interfacing to the OS
+@section Interfacing to the OS (@samp{cd}, @samp{pwd})
+
+@table @code
+@kindex cd @var{directory}
+@cindex change working directory
+@item cd
+
+Set working directory to @var{directory} for debugger and program
+being debugged.  The change does not take effect for the program being
+debugged until the next time it is started.
+
+@kindex pwd
+@cindex print working directory
+@item pwd
+@itemx !
+
+Prints the working directory as the program sees things.
 
 @end table
 
