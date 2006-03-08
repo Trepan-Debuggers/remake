@@ -238,7 +238,7 @@ sub set_more_defaults
    #
    # This is probably not specific enough.
    #
-   if ($osname =~ /Windows/i || $osname =~ /MINGW32/i) {
+   if ($osname =~ /Windows/i || $osname =~ /MINGW32/i || $osname =~ /CYGWIN_NT/i) {
      $port_type = 'W32';
    }
    # Bleah, the osname is so variable on DOS.  This kind of bites.

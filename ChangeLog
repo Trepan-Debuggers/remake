@@ -1,3 +1,9 @@
+2006-03-04  Eli Zaretskii  <eliz@gnu.org>
+
+	* variable.c (do_variable_definition) [WINDOWS32]: Call the shell
+	locator function find_and_set_default_shell if SHELL came from the
+	command line.
+
 2006-02-20  Paul D. Smith  <psmith@gnu.org>
 
 	* variable.c (merge_variable_set_lists): It's legal for *setlist0
