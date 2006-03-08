@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.52 2006/02/18 13:18:17 rockyb Exp $
+/* $Id: main.c,v 1.53 2006/03/08 16:01:05 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
@@ -1264,10 +1264,8 @@ main (int argc, char **argv, char **envp)
 	} 
 	if ( 0 == strcmp(*p, "full")
 	     || 0 == strcmp(*p, "error") ) {
-	  debugger_on_error  |=  DEBUGGER_ON_ERROR;
-	}
-	if ( 0 == strcmp(*p, "full")
-	     || 0 == strcmp(*p, "fatal") ) {
+	  debugger_on_error  |=  (DEBUGGER_ON_ERROR|DEBUGGER_ON_FATAL);
+	} else if ( 0 == strcmp(*p, "fatal") ) {
 	  debugger_on_error  |=  DEBUGGER_ON_FATAL;
 	}
       }
