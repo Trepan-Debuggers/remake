@@ -1168,7 +1168,8 @@ do_variable_definition (const struct floc *flocp, const char *varname,
   else
 #endif /* __MSDOS__ */
 #ifdef WINDOWS32
-  if ((origin == o_file || origin == o_override) && streq (varname, "SHELL"))
+  if ((origin == o_file || origin == o_override || origin == o_command)
+      && streq (varname, "SHELL"))
     {
       extern char *default_shell;
 

@@ -272,7 +272,7 @@ $answer = "no build information\n";
 # Test a merge of set_lists for files, where one list is much longer
 # than the other.  See Savannah bug #15757.
 
-mkdir('t1');
+mkdir('t1', 0777);
 touch('t1/rules.mk');
 
 run_make_test('
