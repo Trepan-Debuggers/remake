@@ -188,12 +188,13 @@ __inline
 # ifndef __SASC
 #  ifdef WINDOWS32
 static void *
+my_realloc (void *p, unsigned int n)
 #  else
 static char *
-# endif
 my_realloc (p, n)
      char *p;
      unsigned int n;
+# endif
 {
   /* These casts are the for sake of the broken Ultrix compiler,
      which warns of illegal pointer combinations otherwise.  */

@@ -28,7 +28,7 @@
 # this routine controls the whole mess; each test suite sets up a few
 # variables and then calls &toplevel, which does all the real work.
 
-# $Id: test_driver.pl,v 1.18 2006/02/11 22:16:05 psmith Exp $
+# $Id: test_driver.pl,v 1.19 2006/03/10 02:20:45 psmith Exp $
 
 
 # The number of test categories we've run
@@ -427,8 +427,7 @@ sub run_each_test
       $diffext = 'd';
       $baseext = 'b';
       $extext = '';
-   }
-    else {
+    } else {
       $logext = 'log';
       $diffext = 'diff';
       $baseext = 'base';
@@ -459,12 +458,9 @@ sub run_each_test
     if (!defined($code))
     {
       $suite_passed = 0;
-      if (length ($@))
-      {
+      if (length ($@)) {
         warn "\n*** Test died ($testname): $@\n";
-      }
-      else
-      {
+      } else {
         warn "\n*** Couldn't run $perl_testname\n";
       }
     }
@@ -490,7 +486,7 @@ sub run_each_test
         &rmfiles ($base_filename . &num_suffix ($i) );
       }
     }
-    elsif ($code > 0) {
+    elsif (!defined $code || $code > 0) {
       $status = "FAILED ($tests_passed/$tests_run passed)";
     }
     elsif ($code < 0) {

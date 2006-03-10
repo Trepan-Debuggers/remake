@@ -1,3 +1,15 @@
+2006-03-09  Paul Smith  <psmith@gnu.org>
+
+	* scripts/features/escape: Use "pre:" not "p:" to avoid conflicts
+	with DOS drive letters.  Fixes Savannah bug #15947.
+
+	* test_driver.pl (run_each_test): Set the status properly even
+	when a test fails to execute.  Fixes Savannah bug #15942.
+
+	* scripts/functions/foreach: Use a different environment variable
+	other than PATH to avoid differences with Windows platforms.
+	Fixes Savannah bug #15938.
+
 2006-03-05  Paul D. Smith  <psmith@gnu.org>
 
 	* run_make_tests.pl (set_more_defaults): Add CYGWIN_NT as a port

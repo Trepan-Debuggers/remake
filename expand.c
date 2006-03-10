@@ -101,7 +101,7 @@ recursively_expand_for_file (struct variable *v, struct file *file)
   char *value;
   const struct floc *this_var;
   const struct floc **saved_varp;
-  struct variable_set_list *save;
+  struct variable_set_list *save = 0;
   int set_reading = 0;
 
   /* Don't install a new location if this location is empty.
