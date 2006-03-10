@@ -2770,9 +2770,13 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
     /* Some shells do not work well when invoked as 'sh -c xxx' to run a
        command line (e.g. Cygnus GNUWIN32 sh.exe on WIN32 systems).  In these
        cases, run commands via a script file.  */
-    if (just_print_flag)
-      ; /* Do nothing here.  */
-    if ((no_default_sh_exe || batch_mode_shell) && batch_filename_ptr) {
+    if (just_print_flag) {
+      /* Need to allocate new_argv, although it's unused, because
+        start_job_command will want to free it and its 0'th element.  */
+      new_argv = (char **) xmalloc(2 * sizeof (char *));
+      new_argv[0] = xstrdup ("");
+      new_argv[1] = NULL;
+    } else if ((no_default_sh_exe || batch_mode_shell) && batch_filename_ptr) {
       int temp_fd;
       FILE* batch = NULL;
       int id = GetCurrentProcessId();

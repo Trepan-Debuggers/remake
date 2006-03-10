@@ -530,9 +530,11 @@ update_file_1 (struct file *file, unsigned int depth)
 
       if (!running)
         /* The prereq is considered changed if the timestamp has changed while
-           it was built, OR it doesn't exist.  */
+           it was built, OR it doesn't exist.
+	   This causes the Linux kernel build to break.  We'll defer this
+	   fix until GNU make 3.82 to give them time to update.  */
 	d->changed = ((file_mtime (d->file) != mtime)
-                      || (mtime == NONEXISTENT_MTIME));
+                      /* || (mtime == NONEXISTENT_MTIME) */);
 
       lastd = d;
       d = d->next;

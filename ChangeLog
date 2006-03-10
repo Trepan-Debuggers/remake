@@ -1,3 +1,17 @@
+2006-03-09  Paul Smith  <psmith@gnu.org>
+
+	* remake.c (update_file_1): Revert the change of 3 Jan 2006 which
+	listed non-existent files as changed.  Turns out there's a bug in
+	the Linux kernel builds which means that this change causes
+	everything to rebuild every time.  We will re-introduce this fix
+	in the next release, to give them time to fix their build system.
+	Fixes Savannah bug #16002.
+	Introduces Savannah bug #16051.
+	
+	* implicit.c (pattern_search) [DOS_PATHS]: Look for DOS paths if
+	we *don't* find UNIX "/".
+	Reported by David Ergo <david.ergo@alterface.com>
+
 2006-03-04  Eli Zaretskii  <eliz@gnu.org>
 
 	* variable.c (do_variable_definition) [WINDOWS32]: Call the shell
@@ -24,6 +38,17 @@
 	begin with ".".
 	(enter_file) [VMS]: Ditto.
 	Patch provided by Hartmut Becker <Hartmut.Becker@hp.com>.
+
+2006-02-24  Eli Zaretskii  <eliz@gnu.org>
+
+	* job.c (construct_command_argv_internal): Fix last change.
+
+	* w32/subproc/sub_proc.c (process_pipe_io): Make dwStdin,
+        dwStdout, and dwStderr unsigned int: avoids compiler warnings in
+        the calls to _beginthreadex.
+
+	* expand.c (recursively_expand_for_file): Initialize `save' to
+        prevent compiler warnings.
 
 2006-02-18  Eli Zaretskii  <eliz@gnu.org>
 

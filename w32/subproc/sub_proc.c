@@ -685,7 +685,7 @@ process_pipe_io(
 	bool_t stdin_eof = FALSE, stdout_eof = FALSE, stderr_eof = FALSE;
 	HANDLE childhand = (HANDLE) pproc->pid;
 	HANDLE tStdin = NULL, tStdout = NULL, tStderr = NULL;
-	DWORD dwStdin, dwStdout, dwStderr;
+	unsigned int dwStdin, dwStdout, dwStderr;
 	HANDLE wait_list[4];
 	DWORD wait_count;
 	DWORD wait_return;
@@ -704,8 +704,8 @@ process_pipe_io(
 		pproc->sv_stdin[0] = 0;
 	} else {
 		tStdin = (HANDLE) _beginthreadex( 0, 1024,
-			(unsigned (__stdcall *) (void *))proc_stdin_thread, pproc, 0,
-			(unsigned int *) &dwStdin);
+			(unsigned (__stdcall *) (void *))proc_stdin_thread,
+						  pproc, 0, &dwStdin);
 		if (tStdin == 0) {
 			pproc->last_err = GetLastError();
 			pproc->lerrno = E_SCALL;
@@ -718,10 +718,10 @@ process_pipe_io(
 	 */
 	tStdout = (HANDLE) _beginthreadex( 0, 1024,
 		(unsigned (__stdcall *) (void *))proc_stdout_thread, pproc, 0,
-		(unsigned int *) &dwStdout);
+		&dwStdout);
 	tStderr = (HANDLE) _beginthreadex( 0, 1024,
 		(unsigned (__stdcall *) (void *))proc_stderr_thread, pproc, 0,
-		(unsigned int *) &dwStderr);
+		&dwStderr);
 
 	if (tStdout == 0 || tStderr == 0) {
 

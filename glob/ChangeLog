@@ -1,3 +1,8 @@
+2006-02-24  Eli Zaretskii  <eliz@gnu.org>
+
+	* glob.c (my_malloc) [WINDOWS32]: Provide a full ISO C prototype,
+        to avoid compiler warnings.
+
 2005-06-25  Paul D. Smith  <psmith@gnu.org>
 
 	* fnmatch.h, glob.h [WINDOWS32]: Fix ifdefs in headers.

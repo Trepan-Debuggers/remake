@@ -6,55 +6,53 @@ Make sure that escaping of `:' works in target names.
 Make sure escaping of whitespace works in target names.
 Make sure that escaping of '#' works.";
 
-open(MAKEFILE,"> $makefile");
-
-print MAKEFILE <<'EOF';
-$(path)foo : ; @echo cp $^ $@
-
-foo\ bar: ; @echo 'touch "$@"'
-
-sharp: foo\#bar.ext
-foo\#bar.ext: ; @echo foo\#bar.ext = '$@'
-EOF
 
 close(MAKEFILE);
 
 
 # TEST 1
 
-&run_make_with_options($makefile, "", &get_logfile);
-$answer = "cp foo\n";
-&compare_output($answer,&get_logfile(1));
+run_make_test('
+$(path)foo : ; @echo "touch ($@)"
+
+foo\ bar: ; @echo "touch ($@)"
+
+sharp: foo\#bar.ext
+foo\#bar.ext: ; @echo "foo#bar.ext = ($@)"',
+	      '',
+	      'touch (foo)');
 
 # TEST 2: This one should fail, since the ":" is unquoted.
 
-&run_make_with_options($makefile, "path=p:", &get_logfile, 512);
-$answer = "$makefile:1: *** target pattern contains no `%'.  Stop.\n";
-&compare_output($answer,&get_logfile(1));
+run_make_test(undef,
+	      'path=pre:',
+	      "#MAKEFILE#:2: *** target pattern contains no `%'.  Stop.",
+	      512);
 
 # TEST 3: This one should work, since we escape the ":".
 
-&run_make_with_options($makefile, "'path=p\\:'", &get_logfile, 0);
-$answer = "cp p:foo\n";
-&compare_output($answer,&get_logfile(1));
+run_make_test(undef,
+	      "'path=pre\\:'",
+	      'touch (pre:foo)');
 
 # TEST 4: This one should fail, since the escape char is escaped.
 
-&run_make_with_options($makefile, "'path=p\\\\:'", &get_logfile, 512);
-$answer = "$makefile:1: *** target pattern contains no `%'.  Stop.\n";
-&compare_output($answer,&get_logfile(1));
+run_make_test(undef,
+	      "'path=pre\\\\:'",
+	      "#MAKEFILE#:2: *** target pattern contains no `%'.  Stop.",
+	      512);
 
 # TEST 5: This one should work
 
-&run_make_with_options($makefile, "'foo bar'", &get_logfile, 0);
-$answer = "touch \"foo bar\"\n";
-&compare_output($answer,&get_logfile(1));
+run_make_test(undef,
+	      "'foo bar'",
+	      'touch (foo bar)');
 
 # TEST 6: Test escaped comments
 
-&run_make_with_options($makefile, "sharp", &get_logfile, 0);
-$answer = "foo#bar.ext = foo#bar.ext\n";
-&compare_output($answer,&get_logfile(1));
+run_make_test(undef,
+	      'sharp',
+	      'foo#bar.ext = (foo#bar.ext)');
 
 # This tells the test driver that the perl test script executed properly.
 1;

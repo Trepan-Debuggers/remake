@@ -10,7 +10,10 @@ $details = "Verify that symlink handling with and without -L works properly.";
 # (in that the symlink() function doesn't fail) but it really doesn't, so
 # check for it explicitly.
 
-if ($port_type ne 'W32' && eval { symlink("",""); 1 }) {
+if ($port_type eq 'W32' || !( eval { symlink("",""); 1 })) {
+  # This test is N/A 
+  -1;
+} else {
 
   # Set up a symlink sym -> dep
   # We'll make both dep and targ older than sym
@@ -60,6 +63,6 @@ if ($port_type ne 'W32' && eval { symlink("",""); 1 }) {
 
 
   rmfiles('targ', 'sym');
-}
 
-1;
+  1;
+}

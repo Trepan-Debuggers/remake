@@ -354,7 +354,7 @@ pattern_search (struct file *file, int archive,
               check_lastslash = strchr (target, '/') == 0;
 #ifdef HAVE_DOS_PATHS
               /* Didn't find it yet: check for DOS-type directories.  */
-              if (!check_lastslash)
+              if (check_lastslash)
                 {
                   char *b = strrchr (target, '\\');
                   check_lastslash = !(b ? b > lastslash
