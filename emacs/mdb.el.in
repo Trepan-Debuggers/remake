@@ -1,5 +1,7 @@
 ;;;-*-Emacs-Lisp-*-
-;;; $Id: mdb.el.in,v 1.2 2006/02/09 02:29:03 rockyb Exp $
+(defconst mdb-version "$Id: mdb.el.in,v 1.3 2006/03/11 12:08:03 rockyb Exp $"
+  "`mdb-mode' version number.")
+;;; $Id: mdb.el.in,v 1.3 2006/03/11 12:08:03 rockyb Exp $
 ;;; GNU Make debugger mode via GUD and makedb
 
 ;; Copyright (C) 2004, 2005, 2006 Rocky Bernstein (rocky@panix.com) 
@@ -186,10 +188,268 @@ and source-file directory for your debugger."
   (local-set-key [menu-bar debug up] '("Up Stack" . gud-up))
   (local-set-key [menu-bar debug down] '("Down Stack" . gud-down))
 
-  (setq comint-prompt-regexp "^(mdb) ")
+  (setq comint-prompt-regexp "^mdb<.*> ")
   (setq paragraph-start comint-prompt-regexp)
   (run-hooks 'mdb-mode-hook)
   )
 
 (provide 'mdb)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; mdbtrack --- tracking mdb debugger in an Emacs shell window
+;;; Modified from  python-mode in particular the part:
+;; pdbtrack support contributed by Ken Manheimer, April 2001.
+
+;;; Code:
+
+(require 'comint)
+(require 'custom)
+(require 'cl)
+(require 'compile)
+
+
+;; user definable variables
+;; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+(defcustom mdb-mdbtrack-do-tracking-p t
+  "*Controls whether the mdbtrack feature is enabled or not.
+When non-nil, mdbtrack is enabled in all comint-based buffers,
+e.g. shell buffers and the *Python* buffer.  When using mdb to debug a
+Python program, mdbtrack notices the mdb prompt and displays the
+source file and line that the program is stopped at, much the same way
+as gud-mode does for debugging C programs with gdb."
+  :type 'boolean
+  :group 'make)
+(make-variable-buffer-local 'mdb-mdbtrack-do-tracking-p)
+
+(defcustom mdbtrack-minor-mode-string " MDB"
+  "*String to use in the minor mode list when mdbtrack is enabled."
+  :type 'string
+  :group 'make)
+
+(defcustom mdb-temp-directory
+  (let ((ok '(lambda (x)
+	       (and x
+		    (setq x (expand-file-name x)) ; always true
+		    (file-directory-p x)
+		    (file-writable-p x)
+		    x))))
+    (or (funcall ok (getenv "TMPDIR"))
+	(funcall ok "/usr/tmp")
+	(funcall ok "/tmp")
+	(funcall ok "/var/tmp")
+	(funcall ok  ".")
+	(error
+	 "Couldn't find a usable temp directory -- set `mdb-temp-directory'")))
+  "*Directory used for temporary files created by a *Python* process.
+By default, the first directory from this list that exists and that you
+can write into: the value (if any) of the environment variable TMPDIR,
+/usr/tmp, /tmp, /var/tmp, or the current directory."
+  :type 'string
+  :group 'make)
+
+(defcustom py-jump-on-exception t
+  "*Jump to innermost exception frame in  buffer.
+When this variable is non-nil and an exception occurs when running
+make code synchronously in a subprocess, jump immediately to the
+source code of the innermost traceback frame."
+  :type 'boolean
+  :group 'make)
+
+(defcustom py-pdbtrack-do-tracking-p t
+  "*Controls whether the pdbtrack feature is enabled or not.
+When non-nil, pdbtrack is enabled in all comint-based buffers,
+e.g. shell buffers and the *Python* buffer.  When using pdb to debug a
+Python program, pdbtrack notices the pdb prompt and displays the
+source file and line that the program is stopped at, much the same way
+as gud-mode does for debugging C programs with gdb."
+  :type 'boolean
+  :group 'python)
+(make-variable-buffer-local 'py-pdbtrack-do-tracking-p)
+
+(defcustom mdb-pdbtrack-minor-mode-string " MDB"
+  "*String to use in the minor mode list when mdbtrack is enabled."
+  :type 'string
+  :group 'make)
+
+
+;; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+;; NO USER DEFINABLE VARIABLES BEYOND THIS POINT
+
+;; have to bind mdb-file-queue before installing the kill-emacs-hook
+(defvar mdb-file-queue nil
+  "Queue of Makefile temp files awaiting execution.
+Currently-active file is at the head of the list.")
+
+(defvar mdb-mdbtrack-tracking-p t)
+
+
+;; Constants
+
+(defconst mdb-position-re 
+  "\\(^\\|\n\\)(\\([^:]+\\):\\([0-9]*\\)).*\n"
+  "Regular expression for a mdb position")
+
+(defconst mdb-marker-regexp-file-group 2
+  "Group position in mdb-postiion-re that matches the file name.")
+
+(defconst mdb-marker-regexp-line-group 3
+  "Group position in mdb-position-re that matches the line number.")
+
+
+
+(defconst mdb-traceback-line-re
+  "^#[0-9]+[ \t]+\\((\\([a-zA-Z-.]+\\) at (\\(\\([a-zA-Z]:\\)?[^:\n]*\\):\\([0-9]*\\)).*\n"
+  "Regular expression that describes tracebacks.")
+
+;; mdbtrack contants
+(defconst mdb-mdbtrack-stack-entry-regexp
+  "^=>#[0-9]+[ \t]+\\((\\([a-zA-Z-.]+\\) at (\\(\\([a-zA-Z]:\\)?[^:\n]*\\):\\([0-9]*\\)).*\n"
+  "Regular expression mdbtrack uses to find a stack trace entry.")
+
+(defconst mdb-mdbtrack-input-prompt "\nmdb<+.*>+ "
+  "Regular expression mdbtrack uses to recognize a mdb prompt.")
+
+(defconst mdb-mdbtrack-track-range 10000
+  "Max number of characters from end of buffer to search for stack entry.")
+
+
+;; Utilities
+(defmacro mdb-safe (&rest body)
+  "Safely execute BODY, return nil if an error occurred."
+  (` (condition-case nil
+	 (progn (,@ body))
+       (error nil))))
+
+
+;;;###autoload
+
+(defun mdb-mdbtrack-overlay-arrow (activation)
+  "Activate or de arrow at beginning-of-line in current buffer."
+  ;; This was derived/simplified from edebug-overlay-arrow
+  (cond (activation
+	 (setq overlay-arrow-position (make-marker))
+	 (setq pos (point))
+	 (setq overlay-arrow-string "=>")
+	 (set-marker overlay-arrow-position (point) (current-buffer))
+	 (setq mdb-mdbtrack-tracking-p t))
+	(mdb-mdbtrack-tracking-p
+	 (setq overlay-arrow-position nil)
+	 (setq mdb-mdbtrack-tracking-p nil))
+	))
+
+(defun mdb-mdbtrack-track-stack-file (text)
+  "Show the file indicated by the mdb stack entry line, in a separate window.
+Activity is disabled if the buffer-local variable
+`mdb-mdbtrack-do-tracking-p' is nil.
+
+We depend on the mdb input prompt matching `mdb-mdbtrack-input-prompt'
+at the beginning of the line.
+" 
+  ;; Instead of trying to piece things together from partial text
+  ;; (which can be almost useless depending on Emacs version), we
+  ;; monitor to the point where we have the next pdb prompt, and then
+  ;; check all text from comint-last-input-end to process-mark.
+  ;;
+  ;; Also, we're very conservative about clearing the overlay arrow,
+  ;; to minimize residue.  This means, for instance, that executing
+  ;; other pdb commands wipe out the highlight.  You can always do a
+  ;; 'where' (aka 'w') command to reveal the overlay arrow.
+  (let* ((origbuf (current-buffer))
+	 (currproc (get-buffer-process origbuf)))
+
+    (if (not (and currproc mdb-mdbtrack-do-tracking-p))
+        (mdb-mdbtrack-overlay-arrow nil)
+
+      (let* ((procmark (process-mark currproc))
+             (block (buffer-substring (max comint-last-input-end
+                                           (- procmark
+                                              mdb-mdbtrack-track-range))
+                                      procmark))
+             target target_fname target_lineno)
+
+        (if (not (string-match (concat mdb-mdbtrack-input-prompt "$") block))
+            (mdb-mdbtrack-overlay-arrow nil)
+
+          (setq target (mdb-mdbtrack-get-source-buffer block))
+
+          (if (stringp target)
+              (message "mdbtrack: %s" target)
+
+            (setq target_lineno (car target))
+            (setq target_buffer (cadr target))
+            (setq target_fname (buffer-file-name target_buffer))
+            (switch-to-buffer-other-window target_buffer)
+            (goto-line target_lineno)
+            (message "mdbtrack: line %s, file %s" target_lineno target_fname)
+            (mdb-mdbtrack-overlay-arrow t)
+            (pop-to-buffer origbuf t)
+
+            )))))
+  )
+
+(defun mdb-mdbtrack-get-source-buffer (block)
+  "Return line number and buffer of code indicated by block's traceback text.
+
+We look first to visit the file indicated in the trace.
+
+Failing that, we look for the most recently visited python-mode buffer
+with the same name or having 
+having the named function.
+
+If we're unable find the source code we return a string describing the
+problem as best as we can determine."
+
+  (if (not (string-match mdb-position-re block))
+
+      "line number cue not found"
+
+    (let* ((filename (match-string mdb-marker-regexp-file-group block))
+           (lineno (string-to-int 
+		    (match-string mdb-marker-regexp-line-group block)))
+           funcbuffer)
+
+      (cond ((file-exists-p filename)
+             (list lineno (find-file-noselect filename)))
+
+            ((= (elt filename 0) ?\<)
+             (format "(Non-file source: '%s')" filename))
+
+            (t (format "Not found: %s" filename)))
+      )
+    )
+  )
+
+
+;;; Subprocess commands
+
+
+
+;; mdbtrack functions
+(defun mdb-mdbtrack-toggle-stack-tracking (arg)
+  (interactive "P")
+  (if (not (get-buffer-process (current-buffer)))
+      (error "No process associated with buffer '%s'" (current-buffer)))
+  ;; missing or 0 is toggle, >0 turn on, <0 turn off
+  (if (or (not arg)
+	  (zerop (setq arg (prefix-numeric-value arg))))
+      (setq mdb-mdbtrack-do-tracking-p (not mdb-mdbtrack-do-tracking-p))
+    (setq mdb-mdbtrack-do-tracking-p (> arg 0)))
+  (message "%sabled Make's mdbtrack"
+           (if mdb-mdbtrack-do-tracking-p "En" "Dis")))
+
+(defun turn-on-mdbtrack ()
+  (interactive)
+  (mdb-mdbtrack-toggle-stack-tracking 1))
+
+(defun turn-off-mdbtrack ()
+  (interactive)
+  (mdb-mdbtrack-toggle-stack-tracking 0))
+
+;; mdbtrack
+(add-hook 'comint-output-filter-functions 'mdb-mdbtrack-track-stack-file)
+
+
+;;; mdbtrack.el ends here
 ;;; mdb.el ends here
