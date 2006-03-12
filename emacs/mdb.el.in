@@ -1,7 +1,7 @@
 ;;;-*-Emacs-Lisp-*-
-(defconst mdb-version "$Id: mdb.el.in,v 1.3 2006/03/11 12:08:03 rockyb Exp $"
+(defconst mdb-version "$Id: mdb.el.in,v 1.4 2006/03/12 11:54:20 rockyb Exp $"
   "`mdb-mode' version number.")
-;;; $Id: mdb.el.in,v 1.3 2006/03/11 12:08:03 rockyb Exp $
+;;; $Id: mdb.el.in,v 1.4 2006/03/12 11:54:20 rockyb Exp $
 ;;; GNU Make debugger mode via GUD and makedb
 
 ;; Copyright (C) 2004, 2005, 2006 Rocky Bernstein (rocky@panix.com) 
@@ -207,6 +207,12 @@ and source-file directory for your debugger."
 (require 'custom)
 (require 'cl)
 (require 'compile)
+(require 'shell)
+
+(defgroup mdbtrack nil
+  "mdb file tracking by watching the prompt."
+  :prefix "mdb-mdbtrack-"
+  :group 'shell)
 
 
 ;; user definable variables
@@ -246,30 +252,6 @@ as gud-mode does for debugging C programs with gdb."
 By default, the first directory from this list that exists and that you
 can write into: the value (if any) of the environment variable TMPDIR,
 /usr/tmp, /tmp, /var/tmp, or the current directory."
-  :type 'string
-  :group 'make)
-
-(defcustom py-jump-on-exception t
-  "*Jump to innermost exception frame in  buffer.
-When this variable is non-nil and an exception occurs when running
-make code synchronously in a subprocess, jump immediately to the
-source code of the innermost traceback frame."
-  :type 'boolean
-  :group 'make)
-
-(defcustom py-pdbtrack-do-tracking-p t
-  "*Controls whether the pdbtrack feature is enabled or not.
-When non-nil, pdbtrack is enabled in all comint-based buffers,
-e.g. shell buffers and the *Python* buffer.  When using pdb to debug a
-Python program, pdbtrack notices the pdb prompt and displays the
-source file and line that the program is stopped at, much the same way
-as gud-mode does for debugging C programs with gdb."
-  :type 'boolean
-  :group 'python)
-(make-variable-buffer-local 'py-pdbtrack-do-tracking-p)
-
-(defcustom mdb-pdbtrack-minor-mode-string " MDB"
-  "*String to use in the minor mode list when mdbtrack is enabled."
   :type 'string
   :group 'make)
 
@@ -349,12 +331,12 @@ at the beginning of the line.
 " 
   ;; Instead of trying to piece things together from partial text
   ;; (which can be almost useless depending on Emacs version), we
-  ;; monitor to the point where we have the next pdb prompt, and then
+  ;; monitor to the point where we have the next mdb prompt, and then
   ;; check all text from comint-last-input-end to process-mark.
   ;;
   ;; Also, we're very conservative about clearing the overlay arrow,
   ;; to minimize residue.  This means, for instance, that executing
-  ;; other pdb commands wipe out the highlight.  You can always do a
+  ;; other mdb commands wipe out the highlight.  You can always do a
   ;; 'where' (aka 'w') command to reveal the overlay arrow.
   (let* ((origbuf (current-buffer))
 	 (currproc (get-buffer-process origbuf)))
@@ -449,6 +431,12 @@ problem as best as we can determine."
 
 ;; mdbtrack
 (add-hook 'comint-output-filter-functions 'mdb-mdbtrack-track-stack-file)
+
+;; Add a designator to the minor mode strings
+(or (assq 'mdb-mdbtrack-minor-mode-string minor-mode-alist)
+    (push '(mdb-mdbtrack-is-tracking-p
+	    mdb-mdbtrack-minor-mode-string)
+	  minor-mode-alist))
 
 
 ;;; mdbtrack.el ends here
