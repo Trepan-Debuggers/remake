@@ -292,4 +292,16 @@ rules.mk : MYVAR = foo
 rmfiles('t1/rules.mk');
 rmdir('t1');
 
+# TEST #18
+
+# Test appending to a simple variable containing a "$": avoid a
+# double-expansion.  See Savannah bug #15913.
+
+run_make_test("
+VAR := \$\$FOO
+foo: VAR += BAR
+foo: ; \@echo '\$(VAR)'",
+              '',
+              '$FOO BAR');
+
 1;

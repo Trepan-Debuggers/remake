@@ -1,3 +1,11 @@
+2006-03-14  Paul D. Smith  <psmith@gnu.org>
+
+	* expand.c (variable_append): Instead of appending everything then
+	expanding the result, we expand (or not, if it's simple) each part
+	as we add it.
+	(allocated_variable_append): Don't expand the final result.
+	Fixes Savannah bug #15913.
+
 2006-03-09  Paul Smith  <psmith@gnu.org>
 
 	* remake.c (update_file_1): Revert the change of 3 Jan 2006 which
@@ -7,7 +15,7 @@
 	in the next release, to give them time to fix their build system.
 	Fixes Savannah bug #16002.
 	Introduces Savannah bug #16051.
-	
+
 	* implicit.c (pattern_search) [DOS_PATHS]: Look for DOS paths if
 	we *don't* find UNIX "/".
 	Reported by David Ergo <david.ergo@alterface.com>
