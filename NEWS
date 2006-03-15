@@ -17,6 +17,14 @@ Version 3.81rc2
   the build_w32.bat batch file; see the file README.W32 for more
   details.
 
+* WARNING: Future backward-incompatibility!
+  Up to and including this release, the '$?' variable does not contain
+  any prerequisite that does not exist, even though that prerequisite
+  might have caused the target to rebuild.  Starting with the _next_
+  release of GNU make, '$?' will contain all prerequisites that caused
+  the target to be considered out of date.  See this Savannah bug:
+  http://savannah.gnu.org/bugs/index.php?func=detailitem&item_id=16051
+
 * WARNING: Backward-incompatibility!
   GNU make now implements a generic "second expansion" feature on the
   prerequisites of both explicit and implicit (pattern) rules.  In order

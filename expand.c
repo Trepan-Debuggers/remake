@@ -501,14 +501,19 @@ variable_append (const char *name, unsigned int length,
   if (buf > variable_buffer)
     buf = variable_buffer_output (buf, " ", 1);
 
-  return variable_buffer_output (buf, v->value, strlen (v->value));
+  /* Either expand it or copy it, depending.  */
+  if (! v->recursive)
+    return variable_buffer_output (buf, v->value, strlen (v->value));
+
+  buf = variable_expand_string (buf, v->value, strlen (v->value));
+  return (buf + strlen (buf));
 }
 
 
 static char *
 allocated_variable_append (const struct variable *v)
 {
-  char *val, *retval;
+  char *val;
 
   /* Construct the appended variable value.  */
 
@@ -524,12 +529,7 @@ allocated_variable_append (const struct variable *v)
   variable_buffer = obuf;
   variable_buffer_length = olen;
 
-  /* Now expand it and return that.  */
-
-  retval = allocated_variable_expand (val);
-
-  free (val);
-  return retval;
+  return val;
 }
 
 /* Like variable_expand_for_file, but the returned string is malloc'd.
