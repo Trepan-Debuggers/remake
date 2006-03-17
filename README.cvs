@@ -49,7 +49,7 @@ After checking out the code, you will need to perform these steps to get
 to the point where you can run "make".
 
 
- 1) $ autoreconf -i -s
+ 1) $ autoreconf -i
 
     This rebuilds all the things that need rebuilding, installing
     missing files as symbolic links.
@@ -133,10 +133,12 @@ prerequisites are available of course).
 This list is eminently suitable for a quick swipe o' the mouse and a
 swift click o' mouse-2 into an xterm.  Go for it!
 
-
-autoreconf -i -s
+autoreconf -i
 ./configure
 make update
 make
 make check
-make distcheck
+
+Or, all-in-one:
+
+autoreconf -i && ./configure && make update && make && make check
