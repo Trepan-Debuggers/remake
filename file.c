@@ -460,6 +460,7 @@ expand_deps (struct file *f)
 {
   struct dep *d;
   struct dep *old = f->deps;
+  char *file_stem = f->stem;
   unsigned int last_dep_has_cmds = f->updating;
   int initialized = 0;
 
@@ -491,20 +492,29 @@ expand_deps (struct file *f)
 
               free (d->name);
               d->name = savestring (buffer, o - buffer);
-              d->staticpattern = 0;
+              d->staticpattern = 0; /* Clear staticpattern so that we don't
+                                       re-expand %s below. */
             }
 
           /* We are going to do second expansion so initialize file variables
-             for the file. */
+             for the file. Since the stem for static pattern rules comes from
+             individual dep lines, we will temporarily set f->stem to d->stem.
+          */
           if (!initialized)
             {
               initialize_file_variables (f, 0);
               initialized = 1;
             }
 
+          if (d->stem != 0)
+            f->stem = d->stem;
+
           set_file_variables (f);
 
           p = variable_expand_for_file (d->name, f);
+
+          if (d->stem != 0)
+            f->stem = file_stem;
         }
 
       /* Parse the prerequisites.  */
@@ -527,12 +537,12 @@ expand_deps (struct file *f)
                   /* We have to handle empty stems specially, because that
                      would be equivalent to $(patsubst %,dp->name,) which
                      will always be empty.  */
-                  if (f->stem[0] == '\0')
+                  if (d->stem[0] == '\0')
                     /* This needs memmove() in ISO C.  */
                     bcopy (percent+1, percent, strlen (percent));
                   else
                     {
-                      char *o = patsubst_expand (buffer, f->stem, pattern,
+                      char *o = patsubst_expand (buffer, d->stem, pattern,
                                                  dp->name, pattern+1,
                                                  percent+1);
                       if (o == buffer)
@@ -552,7 +562,9 @@ expand_deps (struct file *f)
                         dp = new = new->next;
                       else
                         dp = dl->next = dp->next;
-                      free ((char *)df);
+                      /* @@ Are we leaking df->name here?  */
+                      df->name = 0;
+                      free_dep (df);
                       continue;
                     }
                 }
@@ -604,7 +616,7 @@ expand_deps (struct file *f)
         }
     }
 
-  free_ns_chain ((struct nameseq *) old);
+  free_dep_chain (old);
 }
 
 /* For each dependency of each file, make the `struct dep' point

@@ -1850,7 +1850,7 @@ main (int argc, char **argv, char **envp)
 			last->next = d->next;
 
 		      /* Free the storage.  */
-		      free ((char *) d);
+                      free_dep (d);
 
 		      d = last == 0 ? read_makefiles : last->next;
 
@@ -2172,12 +2172,7 @@ main (int argc, char **argv, char **envp)
                   }
               }
 
-            goals = (struct dep *) xmalloc (sizeof (struct dep));
-            goals->next = 0;
-            goals->name = 0;
-            goals->ignore_mtime = 0;
-            goals->staticpattern = 0;
-            goals->need_2nd_expansion = 0;
+            goals = alloc_dep ();
             goals->file = default_goal_file;
           }
       }
@@ -2333,19 +2328,16 @@ handle_non_switch_argument (char *arg, int env)
 
       if (goals == 0)
 	{
-	  goals = (struct dep *) xmalloc (sizeof (struct dep));
+	  goals = alloc_dep ();
 	  lastgoal = goals;
 	}
       else
 	{
-	  lastgoal->next = (struct dep *) xmalloc (sizeof (struct dep));
+	  lastgoal->next = alloc_dep ();
 	  lastgoal = lastgoal->next;
 	}
-      lastgoal->name = 0;
+
       lastgoal->file = f;
-      lastgoal->ignore_mtime = 0;
-      lastgoal->staticpattern = 0;
-      lastgoal->need_2nd_expansion = 0;
 
       {
         /* Add this target name to the MAKECMDGOALS variable. */

@@ -28,7 +28,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 
 /* Structure representing one dependency of a file.
    Each struct file's `deps' points to a chain of these,
-   chained through the `next'.
+   chained through the `next'. `stem' is the stem for this
+   dep line of static pattern rule or NULL.
 
    Note that the first two words of this match a struct nameseq.  */
 
@@ -36,6 +37,7 @@ struct dep
   {
     struct dep *next;
     char *name;
+    char *stem;
     struct file *file;
     unsigned int changed : 8;
     unsigned int ignore_mtime : 1;
@@ -72,6 +74,8 @@ extern struct nameseq *ar_glob PARAMS ((char *arname, char *member_pattern, unsi
 extern char *dep_name ();
 #endif
 
+extern struct dep *alloc_dep PARAMS ((void));
+extern void free_dep PARAMS ((struct dep *d));
 extern struct dep *copy_dep_chain PARAMS ((const struct dep *d));
 extern void free_dep_chain PARAMS ((struct dep *d));
 extern void free_ns_chain PARAMS ((struct nameseq *n));

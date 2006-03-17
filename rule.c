@@ -201,12 +201,8 @@ convert_suffix_rule (char *target, char *source, struct commands *cmds)
       depname = xmalloc (1 + len + 1);
       depname[0] = '%';
       bcopy (source, depname + 1, len + 1);
-      deps = (struct dep *) xmalloc (sizeof (struct dep));
-      deps->next = 0;
+      deps = alloc_dep ();
       deps->name = depname;
-      deps->ignore_mtime = 0;
-      deps->staticpattern = 0;
-      deps->need_2nd_expansion = 0;
     }
 
   create_pattern_rule (names, percents, 0, deps, cmds, 0);
@@ -428,7 +424,8 @@ freerule (struct rule *rule, struct rule *lastrule)
       t = dep->next;
       /* We might leak dep->name here, but I'm not sure how to fix this: I
          think that pointer might be shared (e.g., in the file hash?)  */
-      free ((char *) dep);
+      dep->name = 0; /* Make sure free_dep does not free name.  */
+      free_dep (dep);
       dep = t;
     }
 

@@ -248,13 +248,9 @@ read_all_makefiles (char **makefiles)
 	    tail = tail->next;
 	  for (p = default_makefiles; *p != 0; ++p)
 	    {
-	      struct dep *d = (struct dep *) xmalloc (sizeof (struct dep));
-	      d->name = 0;
+	      struct dep *d = alloc_dep ();
 	      d->file = enter_file (*p);
 	      d->file->dontcare = 1;
-              d->ignore_mtime = 0;
-              d->staticpattern = 0;
-              d->need_2nd_expansion = 0;
 	      /* Tell update_goal_chain to bail out as soon as this file is
 		 made, and main not to die if we can't make this file.  */
 	      d->changed = RM_DONTCARE;
@@ -366,18 +362,14 @@ eval_makefile (char *filename, int flags)
     }
 
   /* Add FILENAME to the chain of read makefiles.  */
-  deps = (struct dep *) xmalloc (sizeof (struct dep));
+  deps = alloc_dep ();
   deps->next = read_makefiles;
   read_makefiles = deps;
-  deps->name = 0;
   deps->file = lookup_file (filename);
   if (deps->file == 0)
     deps->file = enter_file (xstrdup (filename));
   filename = deps->file->name;
   deps->changed = flags;
-  deps->ignore_mtime = 0;
-  deps->staticpattern = 0;
-  deps->need_2nd_expansion = 0;
   if (flags & RM_DONTCARE)
     deps->file->dontcare = 1;
 
@@ -1177,14 +1169,8 @@ eval (struct ebuffer *ebuf, int set_default)
         if (beg <= end && *beg != '\0')
           {
             /* Put all the prerequisites here; they'll be parsed later.  */
-            deps = (struct dep *) xmalloc (sizeof (struct dep));
-            deps->next = 0;
+            deps = alloc_dep ();
             deps->name = savestring (beg, end - beg + 1);
-            deps->file = 0;
-            deps->changed = 0;
-            deps->ignore_mtime = 0;
-            deps->staticpattern = 0;
-            deps->need_2nd_expansion = 0;
           }
         else
           deps = 0;
@@ -2111,7 +2097,10 @@ record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
                                      pattern_percent+1, percent+1);
           f->stem = savestring (buffer, o - buffer);
           if (this)
-            this->staticpattern = 1;
+            {
+              this->staticpattern = 1;
+              this->stem = xstrdup (f->stem);
+            }
         }
 
       /* Free name if not needed further.  */
