@@ -134,11 +134,12 @@ move_if_change =  if test -r $(target) && cmp -s $(target).t $(target); then \
 po_repo = http://www.iro.umontreal.ca/translation/maint/$(PACKAGE)
 .PHONY: do-po-update po-update
 do-po-update:
-	tmppo=/tmp/$(PACKAGE)-$(VERSION)-po &&\
-	rm -rf $$tmppo && \
-	mkdir $$tmppo && \
-	(cd $$tmppo && $(WGET) -r -l1 -nd --no-parent -A '*.po' $(po_repo)) &&\
-	cp $$tmppo/*.po po
+	tmppo="/tmp/po-$(PACKAGE)-$(VERSION).$$$$" \
+	  && rm -rf "$$tmppo" \
+	  && mkdir "$$tmppo" \
+	  && (cd "$$tmppo" \
+		&& $(WGET) -r -l1 -nd --no-parent -A '*.po' $(po_repo)) \
+	  && cp "$$tmppo"/*.po po && rm -rf "$$tmppo"
 	cd po && $(MAKE) update-po
 	$(MAKE) po-check
 

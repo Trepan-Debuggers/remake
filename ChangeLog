@@ -1,3 +1,9 @@
+2006-03-17  Paul D. Smith  <psmith@gnu.org>
+
+	* maintMakefile (do-po-update): Rewrite this rule to clean up and
+	allow multiple concurrent runs.
+	Patch from Joseph Myers <joseph@codesourcery.com>
+
 2006-03-17  Boris Kolpackov  <boris@kolpackov.net>
 
 	* dep.h (struct dep): Add the stem field.
