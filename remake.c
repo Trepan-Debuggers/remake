@@ -994,13 +994,13 @@ check_dep (struct file *file, unsigned int depth,
 		  if (lastd == 0)
 		    {
 		      file->deps = d->next;
-		      free ((char *) d);
+                      free_dep (d);
 		      d = file->deps;
 		    }
 		  else
 		    {
 		      lastd->next = d->next;
-		      free ((char *) d);
+                      free_dep (d);
 		      d = lastd->next;
 		    }
 		  continue;

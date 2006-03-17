@@ -67,4 +67,45 @@ foo.baz: ;@:
 ',
               '', '');
 
+
+# TEST #6: make sure the second stem does not overwrite the first
+#          perprerequisite's stem (Savannah bug #16053).
+#
+run_make_test('
+all.foo.bar: %.foo.bar: %.one
+
+all.foo.bar: %.bar: %.two
+
+all.foo.bar:
+	@echo $*
+	@echo $^
+
+.DEFAULT:;@:
+',
+'',
+'all.foo
+all.one all.foo.two');
+
+
+# TEST #7: make sure the second stem does not overwrite the first
+#          perprerequisite's stem when second expansion is enabled
+#          (Savannah bug #16053).
+#
+run_make_test('
+.SECONDEXPANSION:
+
+all.foo.bar: %.foo.bar: %.one $$*-one
+
+all.foo.bar: %.bar: %.two $$*-two
+
+all.foo.bar:
+	@echo $*
+	@echo $^
+
+.DEFAULT:;@:
+',
+'',
+'all.foo
+all.one all-one all.foo.two all.foo-two');
+
 1;

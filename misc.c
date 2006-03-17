@@ -479,6 +479,32 @@ find_next_token (char **ptr, unsigned int *lengthptr)
   return p;
 }
 
+
+/* Allocate a new `struct dep' with all fields initialized to 0.   */
+
+struct dep *
+alloc_dep ()
+{
+  struct dep *d = (struct dep *) xmalloc (sizeof (struct dep));
+  bzero ((char *) d, sizeof (struct dep));
+  return d;
+}
+
+
+/* Free `struct dep' along with `name' and `stem'.   */
+
+void
+free_dep (struct dep *d)
+{
+  if (d->name != 0)
+    free (d->name);
+
+  if (d->stem != 0)
+    free (d->stem);
+
+  free ((char *)d);
+}
+
 /* Copy a chain of `struct dep', making a new chain
    with the same contents as the old one.  */
 
@@ -493,8 +519,12 @@ copy_dep_chain (const struct dep *d)
     {
       c = (struct dep *) xmalloc (sizeof (struct dep));
       bcopy ((char *) d, (char *) c, sizeof (struct dep));
+
       if (c->name != 0)
 	c->name = xstrdup (c->name);
+      if (c->stem != 0)
+	c->stem = xstrdup (c->stem);
+
       c->next = 0;
       if (firstnew == 0)
 	firstnew = lastnew = c;
@@ -516,14 +546,12 @@ free_dep_chain (struct dep *d)
     {
       struct dep *df = d;
       d = d->next;
-
-      free (df->name);
-      free ((char *)df);
+      free_dep (df);
     }
 }
 
 /* Free a chain of `struct nameseq'. Each nameseq->name is freed
-   as well.  Can be used on `struct dep' chains.*/
+   as well.  For `struct dep' chains use free_dep_chain.  */
 
 void
 free_ns_chain (struct nameseq *n)

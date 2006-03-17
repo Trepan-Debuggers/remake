@@ -1,3 +1,18 @@
+2006-03-17  Boris Kolpackov  <boris@kolpackov.net>
+
+	* dep.h (struct dep): Add the stem field.
+	* misc.c (alloc_dep, free_dep): New functions.
+	(copy_dep_chain): Copy stem.
+	(free_dep_chain): Use free_dep.
+	* read.c (record_files): Store stem in the dependency line.
+	* file.c (expand_deps): Use stem stored in the dependency line. Use
+	free_dep_chain instead of free_ns_chain.
+	* implicit.c (pattern_search): Use alloc_dep and free_dep.
+	* read.c (read_all_makefiles, eval_makefile, eval): Ditto.
+	* main.c (main, handle_non_switch_argument): Ditto.
+	* remake.c (check_dep): Ditto.
+	* rule.c (convert_suffix_rule, freerule): Ditto.
+
 2006-03-14  Paul D. Smith  <psmith@gnu.org>
 
 	* expand.c (variable_append): Instead of appending everything then
@@ -155,7 +170,7 @@
 
 2006-02-08  Boris Kolpackov  <boris@kolpackov.net>
 
-	* job.h (struct child): Add dontcare bitfield.
+	* job.h (struct child): Add the dontcare bitfield.
 	* job.c (new_job): Cache dontcare flag.
 	* job.c (reap_children): Use cached dontcare flag instead of the
 	one in struct file. Fixes Savannah bug #15641.

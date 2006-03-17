@@ -1,3 +1,7 @@
+2006-03-17  Boris Kolpackov  <boris@kolpackov.net>
+
+	* scripts/features/statipattrules: Add tests for bug #16053.
+
 2006-03-09  Paul Smith  <psmith@gnu.org>
 
 	* scripts/features/escape: Use "pre:" not "p:" to avoid conflicts
