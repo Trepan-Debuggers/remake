@@ -1,4 +1,4 @@
-/* $Id: dbg_fns.h,v 1.10 2005/12/25 10:08:35 rockyb Exp $
+/* $Id: dbg_fns.h,v 1.11 2006/03/19 12:17:44 rockyb Exp $
 Copyright (C) 2005 rocky@panix.com
 This file is part of GNU Make.
 
@@ -90,5 +90,8 @@ extern bool dbg_cmd_show_exp(char *psz_arg, bool expand);
 
 /*! Print an interpretation of the debug level mask. */
 extern void print_db_level(debug_level_mask_t e_debug_level);
+
+/*! See if psz_varname is $varname or $(varname) */
+extern void try_without_dollar(const char *psz_varname);
 
 #endif /* DBG_FNS_H*/

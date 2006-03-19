@@ -1,4 +1,4 @@
-/* $Id: dbg_fns.c,v 1.12 2005/12/24 03:09:26 rockyb Exp $
+/* $Id: dbg_fns.c,v 1.13 2006/03/19 12:17:44 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -281,6 +281,25 @@ var_to_on_off(int i_bool)
   return i_bool ? "on" : "off";
 }
 
+/*! See if psz_varname is $varname or $(varname) */
+void 
+try_without_dollar(const char *psz_varname) 
+{
+  printf("Can't find variable `%s'.\n", psz_varname);
+  if (psz_varname && psz_varname[0] == '$') {
+    const char *psz_nodollar = &(psz_varname[1]);
+    char *psz_try = calloc(1, strlen(psz_varname));
+    if (psz_nodollar && 1 == sscanf(psz_nodollar, "(%s)", psz_try)) {
+      /* Remove trailing ')' */
+      if ( ')' == psz_try[strlen(psz_try)-1] )
+	psz_try[strlen(psz_try)-1]='\0';
+      printf(_("Did you mean `%s'?\n"), psz_try);
+    } else
+      printf(_("Did you mean `%s'?\n"), psz_nodollar);
+    free(psz_try);
+  }
+}
+
 /*! Show a expression. Set "expand" to 1 if you want variable
    definitions inside the displayed value expanded.
 */
@@ -319,7 +338,7 @@ dbg_cmd_show_exp (char *psz_varname, bool expand)
       if (expand)
 	printf("%s\n", variable_expand_set(psz_varname, p_file_vars));
       else {
-	printf("Can't find variable %s\n", psz_varname);
+	try_without_dollar(psz_varname);
 	return false;
       }
     }

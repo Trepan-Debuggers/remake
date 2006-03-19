@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.77 2006/03/08 01:09:00 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.78 2006/03/19 12:17:44 rockyb Exp $
 Copyright (C) 2004, 2005 rocky@panix.com
 This file is part of GNU Make.
 
@@ -1230,7 +1230,7 @@ static debug_return_t dbg_cmd_set_var (char *psz_args, int expand)
       printf(_("Variable %s now has value '%s'\n"), psz_varname,
 	     psz_value);
     } else {
-      printf(_("Can't find variable %s\n"), psz_varname);
+      try_without_dollar(psz_varname);
     }
   }
   return debug_readloop;
