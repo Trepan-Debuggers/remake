@@ -1295,10 +1295,10 @@ Displays GNU Warranty
 @section Quitting @value{DBG} (@samp{quit})
 
 @table @code
-@kindex quit @r{[}@var{return-code}@r{]}
+@kindex quit @ovar{return-code}
 @kindex q @r{(@code{quit})}
 @item quit @ovar{return-code}
-@itemx q  @r{[}@var{return-code}@r{]}
+@itemx q  @ovar{return-code}
 
 To exit @value{DBG}, use the @code{quit} command (abbreviated
 @code{q}), or type an end-of-file character (usually @kbd{C-d}).  If
@@ -1970,7 +1970,7 @@ single-letter variable name.
 @subsection Write commands of a target (@samp{write})
 
 @table @code
-@kindex write @r{[}@var{target} @var{filename|here}@r{]}
+@kindex write @ovar{@var{target} @var{filename|here}}
 @item write @r{[}@var{target} @ovar{filename|here}@r{]}
 
 Use this to write the command portion of a target with @value{REMAKE}'s

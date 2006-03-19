@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.78 2006/03/19 12:17:44 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.79 2006/03/19 20:38:14 rockyb Exp $
 Copyright (C) 2004, 2005 rocky@panix.com
 This file is part of GNU Make.
 
@@ -1128,6 +1128,13 @@ static debug_return_t dbg_cmd_write_cmds (char *psz_args)
 		p_target->floc.filenm, p_target->floc.lineno);
       }
       
+      { 
+	char wd[300];
+	if (getcwd (wd, sizeof(wd))) {
+	  fprintf(outfd, "#cd %s\n", wd);
+	}
+      }
+	
       initialize_file_variables (p_target, 0);
       set_file_variables (p_target);
 

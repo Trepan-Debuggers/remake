@@ -1,4 +1,4 @@
-$Id: how-to-make-a-release.txt,v 1.6 2005/12/24 22:12:10 rockyb Exp $
+$Id: how-to-make-a-release.txt,v 1.7 2006/03/19 20:38:13 rockyb Exp $
 
 - Let people know of a pending release,
   e.g. bashdb-devel@lists.sourceforge.net; no major changes before
@@ -28,7 +28,7 @@ $Id: how-to-make-a-release.txt,v 1.6 2005/12/24 22:12:10 rockyb Exp $
 
 - Tag release in CVS: 
    cd ../.. # Or get in top_srcdir
-   cvs log -h configure.ac
+   cvs log -h configure.ac   # To see tags
    cvs tag release_<0_3> . (replace <0_3> with the right value)
 
 - "make distcheck" one more time
