@@ -126,4 +126,33 @@ mod_a.o mod_b.o:
 ', '-j2', '');
 
 
+# Make sure that all jobserver FDs are closed if we need to re-exec the
+# master copy.
+
+run_make_test('
+submake: ; @$(MAKE) --no-print-directory -f #MAKEFILE# fdprint 5>output
+
+dependfile: ; @echo FOO=bar > $@
+
+INCL := true
+
+FOO=foo
+ifeq ($(INCL),true)
+-include dependfile
+endif
+
+fdprint: ; @echo hi >&5 && echo "$(FOO)"
+
+recurse: ; @$(MAKE) --no-print-directory -f #MAKEFILE# submake INCL=true',
+              '-j2',
+              'bar');
+
+unlink('dependfile');
+
+
+# Do it again, this time where the include is done by the non-master make.
+run_make_test(undef, '-j2 recurse INCL=false', 'bar');
+
+unlink('dependfile');
+
 1;

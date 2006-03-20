@@ -1,3 +1,9 @@
+2006-03-19  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/parallelism: Test that the jobserver is
+	properly managed when we have to re-exec the master instance of
+	make.
+
 2006-03-17  Boris Kolpackov  <boris@kolpackov.net>
 
 	* scripts/features/statipattrules: Add tests for bug #16053.

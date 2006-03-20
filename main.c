@@ -81,6 +81,7 @@ extern void exit PARAMS ((int)) __attribute__ ((noreturn));
 extern double atof ();
 #endif
 
+static void clean_jobserver PARAMS ((int status));
 static void print_data_base PARAMS ((void));
 static void print_version PARAMS ((void));
 static void decode_switches PARAMS ((int argc, char **argv, int env));
@@ -1969,6 +1970,8 @@ main (int argc, char **argv, char **envp)
 
 	  log_working_directory (0);
 
+          clean_jobserver (0);
+
 	  if (makefiles != 0)
 	    {
 	      /* These names might have changed.  */
@@ -2957,7 +2960,7 @@ print_version (void)
 /* Print a bunch of information about this and that.  */
 
 static void
-print_data_base (void)
+print_data_base ()
 {
   time_t when;
 
@@ -2974,6 +2977,56 @@ print_data_base (void)
   when = time ((time_t *) 0);
   printf (_("\n# Finished Make data base on %s\n"), ctime (&when));
 }
+
+static void
+clean_jobserver (int status)
+{
+  char token = '+';
+
+  /* Sanity: have we written all our jobserver tokens back?  If our
+     exit status is 2 that means some kind of syntax error; we might not
+     have written all our tokens so do that now.  If tokens are left
+     after any other error code, that's bad.  */
+
+  if (job_fds[0] != -1 && jobserver_tokens)
+    {
+      if (status != 2)
+        error (NILF,
+               "INTERNAL: Exiting with %u jobserver tokens (should be 0)!",
+               jobserver_tokens);
+      else
+        while (jobserver_tokens--)
+          {
+            int r;
+
+            EINTRLOOP (r, write (job_fds[1], &token, 1));
+            if (r != 1)
+              perror_with_name ("write", "");
+          }
+    }
+
+
+  /* Sanity: If we're the master, were all the tokens written back?  */
+
+  if (master_job_slots)
+    {
+      /* We didn't write one for ourself, so start at 1.  */
+      unsigned int tcnt = 1;
+
+      /* Close the write side, so the read() won't hang.  */
+      close (job_fds[1]);
+
+      while (read (job_fds[0], &token, 1) == 1)
+        ++tcnt;
+
+      if (tcnt != master_job_slots)
+        error (NILF,
+               "INTERNAL: Exiting with %u jobserver tokens available; should be %u!",
+               tcnt, master_job_slots);
+
+      close (job_fds[0]);
+    }
+}
 
 /* Exit with STATUS, cleaning up as necessary.  */
 
@@ -2984,7 +3037,6 @@ die (int status)
 
   if (!dying)
     {
-      char token = '+';
       int err;
 
       dying = 1;
@@ -3006,47 +3058,7 @@ die (int status)
       if (print_data_base_flag)
 	print_data_base ();
 
-      /* Sanity: have we written all our jobserver tokens back?  If our
-         exit status is 2 that means some kind of syntax error; we might not
-         have written all our tokens so do that now.  If tokens are left
-         after any other error code, that's bad.  */
-
-      if (job_fds[0] != -1 && jobserver_tokens)
-        {
-          if (status != 2)
-            error (NILF,
-                   "INTERNAL: Exiting with %u jobserver tokens (should be 0)!",
-                   jobserver_tokens);
-          else
-            while (jobserver_tokens--)
-              {
-                int r;
-
-                EINTRLOOP (r, write (job_fds[1], &token, 1));
-                if (r != 1)
-                  perror_with_name ("write", "");
-              }
-        }
-
-
-      /* Sanity: If we're the master, were all the tokens written back?  */
-
-      if (master_job_slots)
-        {
-          /* We didn't write one for ourself, so start at 1.  */
-          unsigned int tcnt = 1;
-
-          /* Close the write side, so the read() won't hang.  */
-          close (job_fds[1]);
-
-          while ((err = read (job_fds[0], &token, 1)) == 1)
-            ++tcnt;
-
-          if (tcnt != master_job_slots)
-            error (NILF,
-                   "INTERNAL: Exiting with %u jobserver tokens available; should be %u!",
-                   tcnt, master_job_slots);
-        }
+      clean_jobserver (status);
 
       /* Try to move back to the original directory.  This is essential on
 	 MS-DOS (where there is really only one process), and on Unix it

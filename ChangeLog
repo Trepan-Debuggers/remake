@@ -1,3 +1,18 @@
+2006-03-19  Paul D. Smith  <psmith@gnu.org>
+
+	* remake.c (update_file): Add alloca(0) to clean up alloca'd
+	memory on hosts that don't support it directly.
+
+	* README.cvs: Add information on steps for making a release (to
+	make sure I don't forget any).
+
+	* main.c (clean_jobserver): Move jobserver cleanup code into a new
+	function.
+	(die): Cleanup code was removed from here; call the new function.
+	(main): If we are re-execing, clean up the jobserver first so we
+	don't leak file descriptors.
+	Fix bug reported by Craig Fithian <craig.fithian@citigroup.com>.
+
 2006-03-17  Paul D. Smith  <psmith@gnu.org>
 
 	* maintMakefile (do-po-update): Rewrite this rule to clean up and

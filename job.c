@@ -716,7 +716,7 @@ reap_children (int block, int err)
       if (c->good_stdin)
         good_stdin_used = 0;
 
-      dontcare = c->dontcare;
+      dontcare = c->file->dontcare;
 
       if (child_failed && !c->noerror && !ignore_errors_flag)
         {

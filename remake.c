@@ -264,6 +264,7 @@ update_goal_chain (struct dep *goals)
       just_print_flag = n;
       job_slots = j;
     }
+
   return status;
 }
 
@@ -305,6 +306,9 @@ update_file (struct file *file, unsigned int depth)
 
       status |= update_file_1 (f, depth);
       check_renamed (f);
+
+      /* Clean up any alloca() used during the update.  */
+      alloca (0);
 
       /* If we got an error, don't bother with double_colon etc.  */
       if (status != 0 && !keep_going_flag)
