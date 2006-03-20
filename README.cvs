@@ -152,7 +152,7 @@ what you do:
 
   Make sure the "Steps to Release" are complete and committed and tagged.
 
-  cvs -d :pserver:anonymous@cvs.savannah.gnu.org:/source/make \
+  cvs -d :pserver:anonymous@cvs.savannah.gnu.org:/sources/make \
      export -r<RTAG> -d make-release make
 
   cd make-release
