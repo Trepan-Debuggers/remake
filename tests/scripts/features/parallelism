@@ -147,12 +147,12 @@ recurse: ; @$(MAKE) --no-print-directory -f #MAKEFILE# submake INCL=true',
               '-j2',
               'bar');
 
-unlink('dependfile');
+unlink('dependfile', 'output');
 
 
 # Do it again, this time where the include is done by the non-master make.
 run_make_test(undef, '-j2 recurse INCL=false', 'bar');
 
-unlink('dependfile');
+unlink('dependfile', 'output');
 
 1;
