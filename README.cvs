@@ -82,6 +82,18 @@ That is, you can just run:
 to build and install GNU make.
 
 
+Windows builds from CVS
+-----------------------
+
+If you have a UNIX emulation like CYGWIN you can opt to run the general
+build procedure above; it will work.  Be sure to read
+README.W32.template for information on options you might want to use
+when running ./configure.
+
+If you can't or don't want to do that, then rename the file
+README.W32.template to README.W32 and follow those instructions.
+
+
 Creating a Package
 ------------------
 
@@ -107,19 +119,65 @@ converting to Automake is worth the trouble!  A big "huzzah!" to Tom
 T. and the AutoToolers!
 
 
-That's it, you're done!
+Steps to Release
+----------------
+
+Here are the things that need to be done (in more or less this order)
+before making an official release:
+
+  * Update the configure.in file with the new release number.
+  * Update the NEWS file with the release number and date.
+  * Update the doc/make.texi file with the release number and date.
+    Check the variables EDITION, VERSION, UPDATED, and UPDATE-MONTH.
+  * Create the new release in the Savannah "Bugs" Administration for
+    both the "Component Version" and "Fixed Release" fields.
+  * Create the new release in the Savannah "Patches" Administration for
+    the "Fixed Release" field.
+  * Update the Savannah bug list URL in the NEWS file to use the correct
+    "Fixed Release" ID number.
+  * Run "make distcheck" to be sure it all works.
+  * Commit everything.
+  * cvs tag -r<RTAG> where RTAG is constructed by replacing each "." in
+    the version with "-" and prefixing it with "make-".
 
 
-Windows builds from CVS
------------------------
+Publishing a Package
+--------------------
 
-If you have a UNIX emulation like CYGWIN you can opt to run the general
-build procedure above; it will work.  Be sure to read
-README.W32.template for information on options you might want to use
-when running ./configure.
+In order to publish a package on the FSF FTP site, either the release
+site ftp://ftp.gnu.org, or the prerelease site ftp://alpha.gnu.org, you
+first need to have my GPG private key and my passphrase to unlock it.
+And, you can't have them!  So there!  But, just so I remember here's
+what you do:
 
-If you can't or don't want to do that, then rename the file
-README.W32.template to README.W32 and follow those instructions.
+  Make sure the "Steps to Release" are complete and committed and tagged.
+
+  cvs -d :pserver:anonymous@cvs.savannah.gnu.org:/source/make \
+     export -r<RTAG> -d make-release make
+
+  cd make-release
+
+  <run the commands above to build the release>
+
+  make upload-alpha             # for alpha.gnu.org (pre-releases)
+       -OR-
+  make upload-ftp               # for ftp.gnu.org (official releases)
+
+It will ask for the GPG passphrase _THREE_ times.  Sigh.
+
+
+Where to Announce
+-----------------
+
+Create the announcement in a text file, then sign it with GPG.  Upload
+to gnu.org, then login and send from my account there.
+
+Email to: make-alpha@gnu.org, bug-make@gnu.org, help-make@gnu.org, make-w32@gnu.org.
+Email to: info-gnu@gnu.org
+
+Add a news item to the Savannah project site.
+
+Add an update to freshmeat.net.
 
 
 Appendix A - For The Brave
