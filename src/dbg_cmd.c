@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.79 2006/03/19 20:38:14 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.80 2006/03/20 04:11:42 rockyb Exp $
 Copyright (C) 2004, 2005 rocky@panix.com
 This file is part of GNU Make.
 
@@ -838,7 +838,7 @@ dbg_cmd_pwd (char *psz_args)
   if (!psz_args || 0==strlen(psz_args)) {
     char wd[300];
     if (NULL == getcwd (wd, sizeof(wd))) {
-      printf (_("cannot get current directory %s"), strerror(errno));
+      printf (_("cannot get current directory %s\n"), strerror(errno));
     } else {
       printf (_("Working directory %s.\n"), wd);
     }
