@@ -1,4 +1,4 @@
-/* $Id: dbg_fns.c,v 1.13 2006/03/19 12:17:44 rockyb Exp $
+/* $Id: dbg_fns.c,v 1.14 2006/03/21 12:11:42 rockyb Exp $
 Copyright (C) 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -316,10 +316,12 @@ dbg_cmd_show_exp (char *psz_varname, bool expand)
     if (p_stack && p_stack->p_target && p_stack->p_target->name) {
       char *psz_target = p_stack->p_target->name;
       file_t *p_target = lookup_file (psz_target);
-      initialize_file_variables (p_target, 0);
-      set_file_variables (p_target);
-      p_file_vars = p_target->variables;
-      p_set = p_file_vars->set;
+      if (p_target) {
+	initialize_file_variables (p_target, 0);
+	set_file_variables (p_target);
+	p_file_vars = p_target->variables;
+	p_set = p_file_vars->set;
+      }
     }
     if (p_set) {
       p_v = lookup_variable_in_set(psz_varname, strlen(psz_varname), p_set);
