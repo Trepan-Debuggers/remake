@@ -1,3 +1,9 @@
+2006-03-22  Boris Kolpackov  <boris@kolpackov.net>
+
+	* implicit.c (pattern_search): Call set_file_variables only
+	if we have prerequisites that need second expansion. Fixes
+	Savannah bug #16140.
+
 2006-03-19  Paul D. Smith  <psmith@gnu.org>
 
 	* remake.c (update_file): Add alloca(0) to clean up alloca'd
