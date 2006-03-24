@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.79.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-02-26 21:57-0500\n"
+"POT-Creation-Date: 2006-03-23 22:55-0500\n"
 "PO-Revision-Date: 2002-07-22 15:02+0800\n"
 "Last-Translator: Wang Li <charles@linux.net.cn>\n"
 "Language-Team: Chinese (simplified) <i18n-translation@lists.linux.net.cn>\n"
@@ -493,7 +493,7 @@ msgstr "*** 正在等待未完成的任务...."
 msgid "Live child 0x%08lx (%s) PID %ld %s\n"
 msgstr "活跃子进程 0x%08lx (%s) PID %ld %s\n"
 
-#: src/job.c:434 src/job.c:579 src/job.c:691 src/job.c:1302
+#: src/job.c:434 src/job.c:579 src/job.c:691 src/job.c:1304
 msgid " (remote)"
 msgstr " (远程)"
 
@@ -526,92 +526,92 @@ msgstr "写入任务服务器"
 msgid "Released token for child 0x%08lx (%s).\n"
 msgstr "为子进程 0x%08lx (%s) 释放令牌(token)。\n"
 
-#: src/job.c:1230
+#: src/job.c:1232
 #, fuzzy, c-format
 msgid "process_easy() failed to launch process (e=%ld)\n"
 msgstr "process_easy() 启动进程失败 (e=%d)\n"
 
-#: src/job.c:1234 src/job.c:1855
+#: src/job.c:1236 src/job.c:1857
 #, c-format
 msgid ""
 "\n"
 "Counted %d args in failed launch\n"
 msgstr ""
 
-#: src/job.c:1300
+#: src/job.c:1302
 #, c-format
 msgid "Putting child 0x%08lx (%s) PID %ld%s on the chain.\n"
 msgstr "将子进程 0x%08lx (%s) PID %ld%s 放入链。\n"
 
-#: src/job.c:1548
+#: src/job.c:1550
 #, c-format
 msgid "Obtained token for child 0x%08lx (%s).\n"
 msgstr ""
 
-#: src/job.c:1558
+#: src/job.c:1560
 #, fuzzy
 msgid "read jobs pipe EOF"
 msgstr "读取任务管道"
 
-#: src/job.c:1560
+#: src/job.c:1562
 msgid "read jobs pipe"
 msgstr "读取任务管道"
 
-#: src/job.c:1675
+#: src/job.c:1677
 msgid "cannot enforce load limits on this operating system"
 msgstr "无法在本操作系统中实施负载限制"
 
-#: src/job.c:1677
+#: src/job.c:1679
 msgid "cannot enforce load limit: "
 msgstr "无法实施负载限制："
 
-#: src/job.c:1751
+#: src/job.c:1753
 msgid "no more file handles: could not duplicate stdin\n"
 msgstr ""
 
-#: src/job.c:1753
+#: src/job.c:1755
 msgid "no more file handles: could not duplicate stdout\n"
 msgstr ""
 
-#: src/job.c:1781
+#: src/job.c:1783
 msgid "Could not restore stdin\n"
 msgstr ""
 
-#: src/job.c:1789
+#: src/job.c:1791
 msgid "Could not restore stdout\n"
 msgstr ""
 
-#: src/job.c:1851
+#: src/job.c:1853
 #, c-format
 msgid "process_easy() failed failed to launch process (e=%d)\n"
 msgstr "process_easy() 启动进程失败 (e=%d)\n"
 
-#: src/job.c:1881
+#: src/job.c:1883
 #, c-format
 msgid "make reaped child pid %d, still waiting for pid %d\n"
 msgstr "make 已中止的子进程 pid %d，仍在等待 pid %d\n"
 
-#: src/job.c:1900
+#: src/job.c:1902
 #, c-format
 msgid "%s: Command not found"
 msgstr "%s：命令未找到"
 
-#: src/job.c:1930
+#: src/job.c:1932
 #, c-format
 msgid "%s: Shell program not found"
 msgstr "%s：未找到 shell 程序"
 
-#: src/job.c:2094
+#: src/job.c:2096
 #, fuzzy, c-format
 msgid "$SHELL changed (was `%s', now `%s')\n"
 msgstr "$SHELL 已改变 (原为“%s”，现为“%s”)"
 
-#: src/job.c:2478
+#: src/job.c:2480
 #, c-format
 msgid "Creating temporary batch file %s\n"
 msgstr "正在创建临时批文件 %s\n"
 
-#: src/job.c:2525
+#: src/job.c:2527
 #, c-format
 msgid "%s (line %d) Bad shell context (!unixy && !batch_mode_shell)\n"
 msgstr ""
@@ -860,159 +860,159 @@ msgstr ""
 msgid "find_and_set_shell path search set default_shell = %s\n"
 msgstr ""
 
-#: src/main.c:1306
+#: src/main.c:1304
 #, c-format
 msgid "%s is suspending for 30 seconds..."
 msgstr "%s 正在挂起 30 秒..."
 
-#: src/main.c:1308
+#: src/main.c:1306
 #, c-format
 msgid "done sleep(30). Continuing.\n"
 msgstr "睡眠完成(30)。继续。\n"
 
-#: src/main.c:1555
+#: src/main.c:1553
 msgid "Makefile from standard input specified twice."
 msgstr "两次指明来自标准输入的 makefile。"
 
-#: src/main.c:1589
+#: src/main.c:1587
 msgid "fopen (temporary file)"
 msgstr "fopen (临时文件)"
 
-#: src/main.c:1595
+#: src/main.c:1593
 msgid "fwrite (temporary file)"
 msgstr "fwrite (临时文件)"
 
-#: src/main.c:1715
+#: src/main.c:1713
 msgid "internal error: multiple --jobserver-fds options"
 msgstr "内部错误：多个 --jobserver-fds 选项"
 
-#: src/main.c:1723
+#: src/main.c:1721
 #, c-format
 msgid "internal error: invalid --jobserver-fds string `%s'"
 msgstr "内部错误：非法 --jobserver-fds 字符串“%s”"
 
-#: src/main.c:1733
+#: src/main.c:1731
 msgid "warning: -jN forced in submake: disabling jobserver mode."
 msgstr ""
 
-#: src/main.c:1743
+#: src/main.c:1741
 msgid "dup jobserver"
 msgstr "复制任务服务器"
 
-#: src/main.c:1746
+#: src/main.c:1744
 msgid ""
 "warning: jobserver unavailable: using -j1.  Add `+' to parent make rule."
 msgstr ""
 
-#: src/main.c:1770
+#: src/main.c:1768
 msgid "More parallel jobs (-jN) than this platform can handle requested."
 msgstr ""
 
-#: src/main.c:1771
+#: src/main.c:1769
 msgid "Resetting to single job (-j1) mode."
 msgstr "重置为单任务模式 (-j1)。"
 
-#: src/main.c:1783
+#: src/main.c:1781
 msgid "creating jobs pipe"
 msgstr "正在创建任务管道"
 
-#: src/main.c:1796
+#: src/main.c:1794
 msgid "init jobserver pipe"
 msgstr "创始化任务服务器管道"
 
-#: src/main.c:1814
+#: src/main.c:1812
 msgid "Symbolic links not supported: disabling -L."
 msgstr ""
 
-#: src/main.c:1890
+#: src/main.c:1888
 msgid "Updating makefiles....\n"
 msgstr "正在更新 makefile....\n"
 
-#: src/main.c:1915
+#: src/main.c:1913
 #, c-format
 msgid "Makefile `%s' might loop; not remaking it.\n"
 msgstr "Makefile “%s”可能循环；不会重新创建它。\n"
 
-#: src/main.c:1993
+#: src/main.c:1991
 #, c-format
 msgid "Failed to remake makefile `%s'."
 msgstr "重新创建 makefile “%s” 失败。"
 
-#: src/main.c:2010
+#: src/main.c:2008
 #, c-format
 msgid "Included makefile `%s' was not found."
 msgstr "找不到被引入的 makefile “%s”"
 
-#: src/main.c:2015
+#: src/main.c:2013
 #, c-format
 msgid "Makefile `%s' was not found"
 msgstr "找不到 makefile “%s”"
 
-#: src/main.c:2083
+#: src/main.c:2081
 msgid "Couldn't change back to original directory."
 msgstr "无法回到原始目录。"
 
-#: src/main.c:2103
+#: src/main.c:2101
 msgid "Re-executing:"
 msgstr "重新执行："
 
-#: src/main.c:2139
+#: src/main.c:2137
 msgid "unlink (temporary file): "
 msgstr "删除 (临时文件)："
 
-#: src/main.c:2159
+#: src/main.c:2157
 msgid "No targets specified and no makefile found"
 msgstr "没有指明目标并且找不到 makefile"
 
-#: src/main.c:2161
+#: src/main.c:2159
 msgid "No targets"
 msgstr "无目标"
 
-#: src/main.c:2166
+#: src/main.c:2164
 msgid "Updating goal targets....\n"
 msgstr ""
 
-#: src/main.c:2192
+#: src/main.c:2190
 msgid "warning:  Clock skew detected.  Your build may be incomplete."
 msgstr "警告：检测到时钟错误。您的创建可能是不完整的。"
 
-#: src/main.c:2347
+#: src/main.c:2345
 #, c-format
 msgid "Usage: %s [options] [target] ...\n"
 msgstr "用法：%s [选项] [目标] ...\n"
 
-#: src/main.c:2353
+#: src/main.c:2351
 #, c-format
 msgid ""
 "\n"
 "This program built for %s\n"
 msgstr ""
 
-#: src/main.c:2355
+#: src/main.c:2353
 #, c-format
 msgid ""
 "\n"
 "This program built for %s (%s)\n"
 msgstr ""
 
-#: src/main.c:2358
+#: src/main.c:2356
 #, fuzzy, c-format
 msgid "Report bugs to <bug-make@gnu.org>\n"
 msgstr ""
 "\n"
 "错误报告到 <bug-make@gnu.org>。\n"
 
-#: src/main.c:2430
+#: src/main.c:2428
 #, fuzzy, c-format
 msgid "the `-%c' option requires a non-empty string argument"
 msgstr "“-%c”选项需要正整数参数"
 
-#: src/main.c:2479
+#: src/main.c:2477
 #, c-format
 msgid "the `-%c' option requires a positive integral argument"
 msgstr "“-%c”选项需要正整数参数"
 
-#: src/main.c:2905
+#: src/main.c:2903
 #, c-format
 msgid ""
 "%sThis is free software; see the source for copying conditions.\n"
@@ -1020,28 +1020,28 @@ msgid ""
 "%sPARTICULAR PURPOSE.\n"
 msgstr ""
 
-#: src/main.c:2911
+#: src/main.c:2909
 #, c-format
 msgid ""
 "\n"
 "%sThis program built for %s\n"
 msgstr ""
 
-#: src/main.c:2913
+#: src/main.c:2911
 #, c-format
 msgid ""
 "\n"
 "%sThis program built for %s (%s)\n"
 msgstr ""
 
-#: src/main.c:2931
+#: src/main.c:2929
 #, c-format
 msgid ""
 "\n"
 "# Make data base, printed on %s"
 msgstr ""
 
-#: src/main.c:2940
+#: src/main.c:2938
 #, c-format
 msgid ""
 "\n"

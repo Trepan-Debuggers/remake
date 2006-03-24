@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.79.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-02-26 21:57-0500\n"
+"POT-Creation-Date: 2006-03-23 22:55-0500\n"
 "PO-Revision-Date: 2002-08-02 14:28+0200\n"
 "Last-Translator: Tomas Gradin <tg@df.lth.se>\n"
 "Language-Team: Swedish <sv@li.org>\n"
@@ -495,7 +495,7 @@ msgstr "*** Inväntar oavslutade jobb..."
 msgid "Live child 0x%08lx (%s) PID %ld %s\n"
 msgstr "Levande barnprocess 0x%08lx (%s) PID %ld %s\n"
 
-#: src/job.c:434 src/job.c:579 src/job.c:691 src/job.c:1302
+#: src/job.c:434 src/job.c:579 src/job.c:691 src/job.c:1304
 msgid " (remote)"
 msgstr " (fjärr)"
 
@@ -528,12 +528,12 @@ msgstr "skriver till jobbserver"
 msgid "Released token for child 0x%08lx (%s).\n"
 msgstr "Frigjorde symbol för barnprocessen 0x%08lx (%s).\n"
 
-#: src/job.c:1230
+#: src/job.c:1232
 #, fuzzy, c-format
 msgid "process_easy() failed to launch process (e=%ld)\n"
 msgstr "process_easy() misslyckades med processtart (e=%d)\n"
 
-#: src/job.c:1234 src/job.c:1855
+#: src/job.c:1236 src/job.c:1857
 #, c-format
 msgid ""
 "\n"
@@ -542,80 +542,80 @@ msgstr ""
 "\n"
 "Räknade till %d argument vid misslyckad start\n"
 
-#: src/job.c:1300
+#: src/job.c:1302
 #, c-format
 msgid "Putting child 0x%08lx (%s) PID %ld%s on the chain.\n"
 msgstr "För upp barnprocessen 0x%08lx (%s) PID %ld%s på kedjan.\n"
 
-#: src/job.c:1548
+#: src/job.c:1550
 #, c-format
 msgid "Obtained token for child 0x%08lx (%s).\n"
 msgstr "Erhöll symbol för barnprocessen 0x%08lx (%s).\n"
 
-#: src/job.c:1558
+#: src/job.c:1560
 #, fuzzy
 msgid "read jobs pipe EOF"
 msgstr "läser från jobbledning"
 
-#: src/job.c:1560
+#: src/job.c:1562
 msgid "read jobs pipe"
 msgstr "läser från jobbledning"
 
-#: src/job.c:1675
+#: src/job.c:1677
 msgid "cannot enforce load limits on this operating system"
 msgstr "kan inte upprätthålla lastbegränsningar i detta operativsystem"
 
-#: src/job.c:1677
+#: src/job.c:1679
 msgid "cannot enforce load limit: "
 msgstr "kan inte upprätthålla lastbegränsning: "
 
-#: src/job.c:1751
+#: src/job.c:1753
 msgid "no more file handles: could not duplicate stdin\n"
 msgstr ""
 
-#: src/job.c:1753
+#: src/job.c:1755
 msgid "no more file handles: could not duplicate stdout\n"
 msgstr ""
 
-#: src/job.c:1781
+#: src/job.c:1783
 msgid "Could not restore stdin\n"
 msgstr ""
 
-#: src/job.c:1789
+#: src/job.c:1791
 msgid "Could not restore stdout\n"
 msgstr ""
 
-#: src/job.c:1851
+#: src/job.c:1853
 #, c-format
 msgid "process_easy() failed failed to launch process (e=%d)\n"
 msgstr "process_easy() misslyckades med processtart (e=%d)\n"
 
-#: src/job.c:1881
+#: src/job.c:1883
 #, c-format
 msgid "make reaped child pid %d, still waiting for pid %d\n"
 msgstr "make inhöstade barnprocessen pid %d, inväntar pid %d\n"
 
-#: src/job.c:1900
+#: src/job.c:1902
 #, c-format
 msgid "%s: Command not found"
 msgstr "%s: Kommandot hittades inte"
 
-#: src/job.c:1930
+#: src/job.c:1932
 #, c-format
 msgid "%s: Shell program not found"
 msgstr "%s: Skalprogrammet hittades inte"
 
-#: src/job.c:2094
+#: src/job.c:2096
 #, fuzzy, c-format
 msgid "$SHELL changed (was `%s', now `%s')\n"
 msgstr "$SHELL ändrades (var \"%s\", är nu \"%s\")"
 
-#: src/job.c:2478
+#: src/job.c:2480
 #, c-format
 msgid "Creating temporary batch file %s\n"
 msgstr "Skapar tillfällig omgångsfil %s\n"
 
-#: src/job.c:2525
+#: src/job.c:2527
 #, c-format
 msgid "%s (line %d) Bad shell context (!unixy && !batch_mode_shell)\n"
 msgstr "%s (rad %d) Felaktigt skalsammanhang (!unixy && !batch_mode_shell)\n"
@@ -869,145 +869,145 @@ msgstr "find_and_set_shell ger default_shell = %s\n"
 msgid "find_and_set_shell path search set default_shell = %s\n"
 msgstr "find_and_set_shell-sökvägen gav default_shell = %s\n"
 
-#: src/main.c:1306
+#: src/main.c:1304
 #, c-format
 msgid "%s is suspending for 30 seconds..."
 msgstr "%s suspenderas i 30 sekunder..."
 
-#: src/main.c:1308
+#: src/main.c:1306
 #, c-format
 msgid "done sleep(30). Continuing.\n"
 msgstr "färdig med sleep(30). Fortsätter.\n"
 
-#: src/main.c:1555
+#: src/main.c:1553
 msgid "Makefile from standard input specified twice."
 msgstr "Makefil från standardinkanalen angavs dubbelt."
 
-#: src/main.c:1589
+#: src/main.c:1587
 msgid "fopen (temporary file)"
 msgstr "fopen (tillfällig fil)"
 
-#: src/main.c:1595
+#: src/main.c:1593
 msgid "fwrite (temporary file)"
 msgstr "fwrite (tillfällig fil)"
 
-#: src/main.c:1715
+#: src/main.c:1713
 msgid "internal error: multiple --jobserver-fds options"
 msgstr "internt fel: flera \"--jobserver-fds\"-flaggor"
 
-#: src/main.c:1723
+#: src/main.c:1721
 #, c-format
 msgid "internal error: invalid --jobserver-fds string `%s'"
 msgstr "internt fel: ogiltig \"--jobserver-fds\"-sträng \"%s\""
 
-#: src/main.c:1733
+#: src/main.c:1731
 msgid "warning: -jN forced in submake: disabling jobserver mode."
 msgstr "varning: -jN framtvingat i del-make: inaktiverar jobbserverläge."
 
-#: src/main.c:1743
+#: src/main.c:1741
 msgid "dup jobserver"
 msgstr "duplicerar jobbserver"
 
-#: src/main.c:1746
+#: src/main.c:1744
 msgid ""
 "warning: jobserver unavailable: using -j1.  Add `+' to parent make rule."
 msgstr ""
 "varning: jobbserver otillgänglig: använder -j1. Lägg till \"+\" i "
 "föräldraregeln."
 
-#: src/main.c:1770
+#: src/main.c:1768
 msgid "More parallel jobs (-jN) than this platform can handle requested."
 msgstr ""
 
-#: src/main.c:1771
+#: src/main.c:1769
 msgid "Resetting to single job (-j1) mode."
 msgstr "Återställer till enkeljobbsläge (-j1)."
 
-#: src/main.c:1783
+#: src/main.c:1781
 msgid "creating jobs pipe"
 msgstr "skapar jobbledning"
 
-#: src/main.c:1796
+#: src/main.c:1794
 msgid "init jobserver pipe"
 msgstr "iordningställer ledning till jobbserver"
 
-#: src/main.c:1814
+#: src/main.c:1812
 msgid "Symbolic links not supported: disabling -L."
 msgstr ""
 
-#: src/main.c:1890
+#: src/main.c:1888
 msgid "Updating makefiles....\n"
 msgstr "Uppdaterar makefiler...\n"
 
-#: src/main.c:1915
+#: src/main.c:1913
 #, c-format
 msgid "Makefile `%s' might loop; not remaking it.\n"
 msgstr "Makefilen \"%s\" torde loopa; återskapas inte.\n"
 
-#: src/main.c:1993
+#: src/main.c:1991
 #, c-format
 msgid "Failed to remake makefile `%s'."
 msgstr "Misslyckades med att återskapa makefilen \"%s\"."
 
-#: src/main.c:2010
+#: src/main.c:2008
 #, c-format
 msgid "Included makefile `%s' was not found."
 msgstr "Den inkluderade makefilen \"%s\" hittades inte."
 
-#: src/main.c:2015
+#: src/main.c:2013
 #, c-format
 msgid "Makefile `%s' was not found"
 msgstr "Makefilen \"%s\" hittades inte"
 
-#: src/main.c:2083
+#: src/main.c:2081
 msgid "Couldn't change back to original directory."
 msgstr "Kunde inte återgå till ursprungskatalogen."
 
-#: src/main.c:2103
+#: src/main.c:2101
 msgid "Re-executing:"
 msgstr "Utför på nytt:"
 
-#: src/main.c:2139
+#: src/main.c:2137
 msgid "unlink (temporary file): "
 msgstr "avlänka (tillfällig fil): "
 
-#: src/main.c:2159
+#: src/main.c:2157
 msgid "No targets specified and no makefile found"
 msgstr "Inga mål angavs och ingen makefil hittades"
 
-#: src/main.c:2161
+#: src/main.c:2159
 msgid "No targets"
 msgstr "Inga mål"
 
-#: src/main.c:2166
+#: src/main.c:2164
 msgid "Updating goal targets....\n"
 msgstr "Uppdaterar slutmål...\n"
 
-#: src/main.c:2192
+#: src/main.c:2190
 msgid "warning:  Clock skew detected.  Your build may be incomplete."
 msgstr ""
 "varning:  Klockförskjutning upptäckt.  Bygget kan ha blivit ofullständigt."
 
-#: src/main.c:2347
+#: src/main.c:2345
 #, c-format
 msgid "Usage: %s [options] [target] ...\n"
 msgstr "Användning: %s [flaggor] [mål] ...\n"
 
-#: src/main.c:2353
+#: src/main.c:2351
 #, c-format
 msgid ""
 "\n"
 "This program built for %s\n"
 msgstr ""
 
-#: src/main.c:2355
+#: src/main.c:2353
 #, c-format
 msgid ""
 "\n"
 "This program built for %s (%s)\n"
 msgstr ""
 
-#: src/main.c:2358
+#: src/main.c:2356
 #, fuzzy, c-format
 msgid "Report bugs to <bug-make@gnu.org>\n"
 msgstr ""
@@ -1015,17 +1015,17 @@ msgstr ""
 "Anmäl fel till <bug-make@gnu.org>.\n"
 "Skicka synpunkter på översättningen till <sv@li.org>.\n"
 
-#: src/main.c:2430
+#: src/main.c:2428
 #, fuzzy, c-format
 msgid "the `-%c' option requires a non-empty string argument"
 msgstr "flaggan \"-%c\" kräver ett positivt heltal som argument"
 
-#: src/main.c:2479
+#: src/main.c:2477
 #, c-format
 msgid "the `-%c' option requires a positive integral argument"
 msgstr "flaggan \"-%c\" kräver ett positivt heltal som argument"
 
-#: src/main.c:2905
+#: src/main.c:2903
 #, fuzzy, c-format
 msgid ""
 "%sThis is free software; see the source for copying conditions.\n"
@@ -1044,21 +1044,21 @@ msgstr ""
 "%sSkicka synpunkter på översättningen till <sv@li.org>.\n"
 "\n"
 
-#: src/main.c:2911
+#: src/main.c:2909
 #, c-format
 msgid ""
 "\n"
 "%sThis program built for %s\n"
 msgstr ""
 
-#: src/main.c:2913
+#: src/main.c:2911
 #, c-format
 msgid ""
 "\n"
 "%sThis program built for %s (%s)\n"
 msgstr ""
 
-#: src/main.c:2931
+#: src/main.c:2929
 #, c-format
 msgid ""
 "\n"
@@ -1067,7 +1067,7 @@ msgstr ""
 "\n"
 "# Make-databas, utskriven %s"
 
-#: src/main.c:2940
+#: src/main.c:2938
 #, c-format
 msgid ""
 "\n"

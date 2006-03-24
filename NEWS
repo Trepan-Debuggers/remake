@@ -7,13 +7,20 @@ Please send remake bug reports to <rocky@panix.com>.
 See the README file and the GNU remake manual for details on sending bug
 reports.
 
-Version 3.80+dbg-0.61cvs
+Version 3.80+dbg-0.61
+2006-03-24
 
-* Some 3.81 features and bugfixes have been incorporated. At present
-  not everything is there. 
+* Add comint shell tracking - taken from python's pdbtrack
 
-* Add configure option --with-default-shell to specify the default
-  value for SHELL.
+* Add gdb's cd and pwd commands.
+  
+* "write" command now adds "cd <directory name>" as a comment.
+  
+* configure options:
+   --with-default-shell to specify the default value
+     for SHELL (useful on say Solaris), 
+   --with-shell-trace to specify the option to turn on tracing, e.g. (-x).
+
   
 * Add configure option --with-shell-trace to specify how to turn on
   tracing when running shell commands.
@@ -22,9 +29,16 @@ Version 3.80+dbg-0.61cvs
 
 * run wasn't reading any (optional) arguments supplied.
 
-* More doxygen documentation and docuementation improvements.
+* Guard against dereferencing NULL pointers.
+
+* Some 3.81 features and bugfixes have been incorporated. At present
+  not everything is there. 
+
+* More doxygen documentation and docuementation improvements. Note
+  debugger options in Manual page.
 
 Version 3.80+dbg-0.60
+2005-12-25
 
 * On a fatal error we now show command arguments used to invoke
   program.
@@ -45,7 +59,7 @@ Version 3.80+dbg-0.60
 
 * Reorganize help command. Is more ddd-friendly (and more gdb like).
 
-* More explicit frees of memory at termination. 
+* More explicit free's of memory at termination. 
 
 * Give line numbers and target names on --just-print. Print delmiters
   around the commands.
@@ -66,6 +80,7 @@ Version 3.80+dbg-0.60
   will need to get a newer version.
 
 Version 3.80+dbg-0.5
+2005-12-10 
 
 * Errors in eval issued from the debugger no longer cause termination.
 
@@ -107,6 +122,7 @@ Version 3.80+dbg-0.5
 * Remove AMIGA support :-(
 
 Version 3.80+dbg-0.4
+2005-12-10 
 
 * Add eval!
 

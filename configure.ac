@@ -1,12 +1,12 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(remake,3.80+dbg-0.61cvs,rocky@panix.com)
+AC_INIT(remake,3.80+dbg-0.61,rockyb@users.sourceforge.net)
 
 AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.36 2006/02/19 00:23:58 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.37 2006/03/24 22:33:32 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)

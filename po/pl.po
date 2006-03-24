@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.74.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-02-26 21:57-0500\n"
+"POT-Creation-Date: 2006-03-23 22:55-0500\n"
 "PO-Revision-Date: 1996-08-27 21:20+0200\n"
 "Last-Translator: Pawe³ Krawczyk <kravietz@pipeta.chemia.pk.edu.pl>\n"
 "Language-Team: Polish <pl@li.org>\n"
@@ -507,7 +507,7 @@ msgstr "*** Czekam na niezakoñczone zadania...."
 msgid "Live child 0x%08lx (%s) PID %ld %s\n"
 msgstr "¯yj±cy potomek 0x%08lx PID %d%s\n"
 
-#: src/job.c:434 src/job.c:579 src/job.c:691 src/job.c:1302
+#: src/job.c:434 src/job.c:579 src/job.c:691 src/job.c:1304
 msgid " (remote)"
 msgstr " (zdalne)"
 
@@ -540,91 +540,91 @@ msgstr ""
 msgid "Released token for child 0x%08lx (%s).\n"
 msgstr "Zbieram %s potomka 0x%08lx PID %d%s\n"
 
-#: src/job.c:1230
+#: src/job.c:1232
 #, c-format
 msgid "process_easy() failed to launch process (e=%ld)\n"
 msgstr ""
 
-#: src/job.c:1234 src/job.c:1855
+#: src/job.c:1236 src/job.c:1857
 #, c-format
 msgid ""
 "\n"
 "Counted %d args in failed launch\n"
 msgstr ""
 
-#: src/job.c:1300
+#: src/job.c:1302
 #, fuzzy, c-format
 msgid "Putting child 0x%08lx (%s) PID %ld%s on the chain.\n"
 msgstr "Wstawiam potomka 0x%08lx PID %05d%s do kolejki.\n"
 
-#: src/job.c:1548
+#: src/job.c:1550
 #, fuzzy, c-format
 msgid "Obtained token for child 0x%08lx (%s).\n"
 msgstr "Zbieram %s potomka 0x%08lx PID %d%s\n"
 
-#: src/job.c:1558
+#: src/job.c:1560
 msgid "read jobs pipe EOF"
 msgstr ""
 
-#: src/job.c:1560
+#: src/job.c:1562
 msgid "read jobs pipe"
 msgstr ""
 
-#: src/job.c:1675
+#: src/job.c:1677
 msgid "cannot enforce load limits on this operating system"
 msgstr "niemo¿liwe wymuszenie limitów obci±¿enia w tym systemie"
 
-#: src/job.c:1677
+#: src/job.c:1679
 msgid "cannot enforce load limit: "
 msgstr "niemo¿liwe wymuszenie limitu obci±¿enia: "
 
-#: src/job.c:1751
+#: src/job.c:1753
 msgid "no more file handles: could not duplicate stdin\n"
 msgstr ""
 
-#: src/job.c:1753
+#: src/job.c:1755
 msgid "no more file handles: could not duplicate stdout\n"
 msgstr ""
 
-#: src/job.c:1781
+#: src/job.c:1783
 msgid "Could not restore stdin\n"
 msgstr ""
 
-#: src/job.c:1789
+#: src/job.c:1791
 msgid "Could not restore stdout\n"
 msgstr ""
 
-#: src/job.c:1851
+#: src/job.c:1853
 #, c-format
 msgid "process_easy() failed failed to launch process (e=%d)\n"
 msgstr ""
 
-#: src/job.c:1881
+#: src/job.c:1883
 #, c-format
 msgid "make reaped child pid %d, still waiting for pid %d\n"
 msgstr ""
 
-#: src/job.c:1900
+#: src/job.c:1902
 #, c-format
 msgid "%s: Command not found"
 msgstr "%s: Polecenie nie znalezione"
 
-#: src/job.c:1930
+#: src/job.c:1932
 #, c-format
 msgid "%s: Shell program not found"
 msgstr "%s: Nie znaleziono programu pow³oki"
 
-#: src/job.c:2094
+#: src/job.c:2096
 #, c-format
 msgid "$SHELL changed (was `%s', now `%s')\n"
 msgstr ""
 
-#: src/job.c:2478
+#: src/job.c:2480
 #, fuzzy, c-format
 msgid "Creating temporary batch file %s\n"
 msgstr "fopen (plik tymczasowy)"
 
-#: src/job.c:2525
+#: src/job.c:2527
 #, c-format
 msgid "%s (line %d) Bad shell context (!unixy && !batch_mode_shell)\n"
 msgstr ""
@@ -873,160 +873,160 @@ msgstr ""
 msgid "find_and_set_shell path search set default_shell = %s\n"
 msgstr ""
 
-#: src/main.c:1306
+#: src/main.c:1304
 #, c-format
 msgid "%s is suspending for 30 seconds..."
 msgstr ""
 
-#: src/main.c:1308
+#: src/main.c:1306
 #, c-format
 msgid "done sleep(30). Continuing.\n"
 msgstr ""
 
-#: src/main.c:1555
+#: src/main.c:1553
 msgid "Makefile from standard input specified twice."
 msgstr ""
 
-#: src/main.c:1589
+#: src/main.c:1587
 msgid "fopen (temporary file)"
 msgstr "fopen (plik tymczasowy)"
 
-#: src/main.c:1595
+#: src/main.c:1593
 msgid "fwrite (temporary file)"
 msgstr "fwrite (plik tymczasowy)"
 
-#: src/main.c:1715
+#: src/main.c:1713
 msgid "internal error: multiple --jobserver-fds options"
 msgstr ""
 
-#: src/main.c:1723
+#: src/main.c:1721
 #, c-format
 msgid "internal error: invalid --jobserver-fds string `%s'"
 msgstr ""
 
-#: src/main.c:1733
+#: src/main.c:1731
 msgid "warning: -jN forced in submake: disabling jobserver mode."
 msgstr ""
 
-#: src/main.c:1743
+#: src/main.c:1741
 msgid "dup jobserver"
 msgstr ""
 
-#: src/main.c:1746
+#: src/main.c:1744
 msgid ""
 "warning: jobserver unavailable: using -j1.  Add `+' to parent make rule."
 msgstr ""
 
-#: src/main.c:1770
+#: src/main.c:1768
 msgid "More parallel jobs (-jN) than this platform can handle requested."
 msgstr ""
 
-#: src/main.c:1771
+#: src/main.c:1769
 msgid "Resetting to single job (-j1) mode."
 msgstr ""
 
-#: src/main.c:1783
+#: src/main.c:1781
 msgid "creating jobs pipe"
 msgstr ""
 
-#: src/main.c:1796
+#: src/main.c:1794
 msgid "init jobserver pipe"
 msgstr ""
 
-#: src/main.c:1814
+#: src/main.c:1812
 msgid "Symbolic links not supported: disabling -L."
 msgstr ""
 
-#: src/main.c:1890
+#: src/main.c:1888
 #, fuzzy
 msgid "Updating makefiles....\n"
 msgstr "Uaktualniam makefile...."
 
-#: src/main.c:1915
+#: src/main.c:1913
 #, c-format
 msgid "Makefile `%s' might loop; not remaking it.\n"
 msgstr "Makefile `%s' mo¿e siê zapêtliæ; nie przetwarzam go.\n"
 
-#: src/main.c:1993
+#: src/main.c:1991
 #, c-format
 msgid "Failed to remake makefile `%s'."
 msgstr "Nie uda³o siê zrobiæ makefile `%s'."
 
-#: src/main.c:2010
+#: src/main.c:2008
 #, c-format
 msgid "Included makefile `%s' was not found."
 msgstr "Nie znaleziono w³±czanych makefile `%s'."
 
-#: src/main.c:2015
+#: src/main.c:2013
 #, c-format
 msgid "Makefile `%s' was not found"
 msgstr "Nie znaleziono makefile `%s'"
 
-#: src/main.c:2083
+#: src/main.c:2081
 msgid "Couldn't change back to original directory."
 msgstr "Niemo¿liwy powrót do katalogu startowego."
 
-#: src/main.c:2103
+#: src/main.c:2101
 msgid "Re-executing:"
 msgstr "Ponownie uruchamiam:"
 
-#: src/main.c:2139
+#: src/main.c:2137
 #, fuzzy
 msgid "unlink (temporary file): "
 msgstr "fopen (plik tymczasowy)"
 
-#: src/main.c:2159
+#: src/main.c:2157
 msgid "No targets specified and no makefile found"
 msgstr "Nie poda³e¶ obiektów lub nie znalaz³em makefile"
 
-#: src/main.c:2161
+#: src/main.c:2159
 msgid "No targets"
 msgstr "Brak obiektów"
 
-#: src/main.c:2166
+#: src/main.c:2164
 #, fuzzy
 msgid "Updating goal targets....\n"
 msgstr "Uaktualniam obiekty docelowe...."
 
-#: src/main.c:2192
+#: src/main.c:2190
 msgid "warning:  Clock skew detected.  Your build may be incomplete."
 msgstr ""
 
-#: src/main.c:2347
+#: src/main.c:2345
 #, c-format
 msgid "Usage: %s [options] [target] ...\n"
 msgstr "U¿ycie: %s [opcje] [obiekt] ...\n"
 
-#: src/main.c:2353
+#: src/main.c:2351
 #, c-format
 msgid ""
 "\n"
 "This program built for %s\n"
 msgstr ""
 
-#: src/main.c:2355
+#: src/main.c:2353
 #, c-format
 msgid ""
 "\n"
 "This program built for %s (%s)\n"
 msgstr ""
 
-#: src/main.c:2358
+#: src/main.c:2356
 #, c-format
 msgid "Report bugs to <bug-make@gnu.org>\n"
 msgstr ""
 
-#: src/main.c:2430
+#: src/main.c:2428
 #, fuzzy, c-format
 msgid "the `-%c' option requires a non-empty string argument"
 msgstr "opcja `-%c' wymaga argumentu ca³kowitego dodatniego"
 
-#: src/main.c:2479
+#: src/main.c:2477
 #, c-format
 msgid "the `-%c' option requires a positive integral argument"
 msgstr "opcja `-%c' wymaga argumentu ca³kowitego dodatniego"
 
-#: src/main.c:2905
+#: src/main.c:2903
 #, fuzzy, c-format
 msgid ""
 "%sThis is free software; see the source for copying conditions.\n"
@@ -1041,21 +1041,21 @@ msgstr ""
 "%slub PRZYDATNO¦CI DO KONKRETNYCH CELÓW.\n"
 "\n"
 
-#: src/main.c:2911
+#: src/main.c:2909
 #, c-format
 msgid ""
 "\n"
 "%sThis program built for %s\n"
 msgstr ""
 
-#: src/main.c:2913
+#: src/main.c:2911
 #, c-format
 msgid ""
 "\n"
 "%sThis program built for %s (%s)\n"
 msgstr ""
 
-#: src/main.c:2931
+#: src/main.c:2929
 #, c-format
 msgid ""
 "\n"
@@ -1064,7 +1064,7 @@ msgstr ""
 "\n"
 "# Baza danych Make, wy¶wietlana na %s"
 
-#: src/main.c:2940
+#: src/main.c:2938
 #, c-format
 msgid ""
 "\n"
