@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.42 2006/02/18 13:18:17 rockyb Exp $
+/* $Id: job.c,v 1.43 2006/03/24 16:00:18 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005, 2006
 Free Software Foundation, Inc.
@@ -985,8 +985,10 @@ static void start_job_command (child_t *p_child,
 	message(0, 
 		"##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
       if (just_print_flag || (db_level & DB_TRACE)) {
-	print_floc_prefix(&p_call_stack->p_target->floc);
-	message(0, ": %s", p_child->file->name);
+	if (p_call_stack && p_call_stack->p_target)
+	  print_floc_prefix(&p_call_stack->p_target->floc);
+	if (p_child && p_child->file && p_child->file->name)
+	  message(0, ": %s", p_child->file->name);
       }
       message (0, "%s", p);
       if (b_show_delimiters) 
