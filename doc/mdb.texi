@@ -220,13 +220,13 @@ to debug a program.
 
 And so before we get into debugging proper, we'll discuss tracing.
 
-@value{MAKE} has had for a long time a ``debug'' flag (@code{--debug} or
-@code{-d}) which prints ``lots of debugging information.'' For the
+@value{MAKE} has had for a long time a ``debug'' flag (@code{--debug}
+or @code{-d}) which prints ``lots of debugging information.'' For the
 unwary one might think you just add this simple option and that's
 going to do what you want. Wrong!@footnote{From the standpoint of a
 nice user interface, this options should get replaced with
-@code{--trace}; At present, this base is probably a little to young to
-right nowmake such a bold change, tempting as it is to do.}
+@code{--trace}. At present, this change is probably a little to young to
+to make such a bold change, tempting as it is to do.}
 
 Alas, the @code{--debug} option gives way too much information to be
 helpful. Furthermore, debug-flag information @emph{omits} information
@@ -543,7 +543,7 @@ Before the prompt @code{mdb<0>}, we show the position in the file,
 the target @code{Makefile.in}, and the dependencies of this target
 @code{Makefile.am}, @code{..config/readline.m4} ....
 
-The ``0'' in the prompt @code{mdb<0>} is the comamnd history number
+The ``0'' in the prompt @code{mdb<0>} is the command history number
 it increments as we enter commands.
 
 Is this @emph{really} the top-level target? The @code{where} command,
@@ -887,9 +887,10 @@ mdb<6> @b{write}
 File "/tmp/make.txt.sh" written.
 mdb<7> @b{shell cat -n /tmp/make.txt.sh}
      1	#!/bin/sh
-     2	#/tmp/remake/src/test2:5
-     3	makeinfo --no-headers ../doc/mdb.texi > make.txt
-     4	
+     2  # cd /tmp/remake/src/
+     3	#/tmp/remake/src/test2:5
+     4	makeinfo --no-headers ../doc/mdb.texi > make.txt
+     5	
 @end group
 @end smallexample
 
