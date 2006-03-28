@@ -1,4 +1,4 @@
-/* $Id: expand.c,v 1.10 2005/12/11 12:15:29 rockyb Exp $
+/* $Id: expand.c,v 1.11 2006/03/28 23:11:01 rockyb Exp $
 Variable expansion functions for GNU Make.
 Copyright (C) 1988, 89, 91, 92, 93, 95, 
 2004, 2005 Free Software Foundation, Inc.
@@ -447,7 +447,7 @@ expand_argument (const char *str, const char *end)
 /** Expand PSZ_LINE for FILE.  Error messages refer to the file and
    line where FILE's commands were found.  Expansion uses FILE's
    variable set list.  */
-static char *
+char *
 variable_expand_for_file (char *psz_line, file_t *file)
 {
   char *result;

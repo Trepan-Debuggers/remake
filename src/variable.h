@@ -124,6 +124,8 @@ extern variable_set_list_t *current_variable_set_list;
  */
 const char *origin2str(variable_origin_t origin);
 
+extern void free_variable_set (struct variable_set_list *list);
+
 /*! Create a new variable set and push it on the current setlist.  */
 extern variable_set_list_t *create_new_variable_set (void);
 

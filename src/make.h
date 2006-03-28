@@ -1,4 +1,4 @@
-/* $Id: make.h,v 1.25 2005/12/25 10:08:35 rockyb Exp $
+/* $Id: make.h,v 1.26 2006/03/28 23:11:01 rockyb Exp $
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -349,7 +349,7 @@ extern bool unixy_shell;
 #define	CALLOC(t, n) ((t *) calloc  (sizeof (t), (n)))
 #define MALLOC(t, n) ((t *) xmalloc (sizeof (t) * (n)))
 #define REALLOC(o, t, n) ((t *) xrealloc ((void *) (o), sizeof (t) * (n)))
-#define FREE(p) {free(p); p = NULL;}
+#define FREE(p) if (p) { free(p); p = NULL;}
 
 extern void die (int) __attribute__ ((noreturn));
 extern char *concat (const char *, const char *, const char *);

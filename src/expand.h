@@ -1,4 +1,4 @@
-/* $Id: expand.h,v 1.7 2005/12/23 04:20:38 rockyb Exp $
+/* $Id: expand.h,v 1.8 2006/03/28 23:11:01 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -77,6 +77,11 @@ extern char *variable_buffer_output(char *ptr, char *psz_string,
    and is valid only until the next time this function is called.  */
 
 extern char *variable_expand(char *psz_line);
+
+/*! Expand PSZ_LINE for FILE.  Error messages refer to the file and
+   line where FILE's commands were found.  Expansion uses FILE's
+   variable set list.  */
+extern char *variable_expand_for_file (char *line, file_t *file);
 
 /** Expand PSZ_LINE. Expansion uses P_FILE_SET if it is not NULL. */
 extern char *variable_expand_set (char *psz_line, 

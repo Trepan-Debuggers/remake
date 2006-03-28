@@ -32,6 +32,26 @@ Boston, MA 02111-1307, USA.  */
    only work on files which have not yet been snapped. */
 int snapped_deps = 0;
 
+/*! Allocate a new `struct dep' with all fields initialized to 0.   */
+
+dep_t *
+alloc_dep ()
+{
+  struct dep *d = CALLOC (dep_t, 1);
+  return d;
+}
+
+
+/*! Free `struct dep' along with `name' and `stem'.   */
+
+void
+free_dep (struct dep *d)
+{
+  FREE (d->name);
+  FREE (d->stem);
+  free (d);
+}
+
 /*! Copy dependency chain making a new chain with the same contents
   as the old one and return that.  The return value is malloc'd. The
   caller must thus free it.

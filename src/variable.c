@@ -1,4 +1,4 @@
-/* $Id: variable.c,v 1.21 2006/02/18 13:18:17 rockyb Exp $
+/* $Id: variable.c,v 1.22 2006/03/28 23:11:01 rockyb Exp $
 Internals of variables for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996, 1997,
 2002, 2004, 2005, 2006 Free Software Foundation, Inc.
@@ -528,6 +528,15 @@ free_variable_name_and_value (const void *p_item)
   variable_t *p_v = (variable_t *) p_item;
   FREE (p_v->name);
   FREE (p_v->value);
+}
+
+void
+free_variable_set (struct variable_set_list *list)
+{
+  hash_map (&list->set->table, free_variable_name_and_value);
+  hash_free (&list->set->table, free);
+  free ((char *) list->set);
+  free ((char *) list);
 }
 
 /*! Create a new variable set and push it on the current setlist.  */

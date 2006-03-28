@@ -1,4 +1,4 @@
-/* $Id: dep.h,v 1.7 2005/12/12 01:04:59 rockyb Exp $
+/* $Id: dep.h,v 1.8 2006/03/28 23:11:01 rockyb Exp $
 Copyright (C) 1988, 1989, 1991, 1992, 1993, 1996, 2004, 2005
 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -47,9 +47,12 @@ Boston, MA 02111-1307, USA.  */
 struct dep {
   dep_t *next;
   char *name;
+  char *stem;
   file_t *file;
   unsigned int changed : 8;
   bool ignore_mtime;
+  unsigned int staticpattern : 1;
+  unsigned int need_2nd_expansion : 1;
 };
 
 /** \brief Structure used in chains of names, for parsing and globbing.  */
@@ -69,6 +72,12 @@ extern nameseq_t *ar_glob (char *arname, char *member_pattern,
 extern int all_secondary;
 
 #define dep_name(d) ((d)->name == 0 ? (d)->file->name : (d)->name)
+
+/*! Allocate a new `struct dep' with all fields initialized to 0.   */
+extern dep_t *alloc_dep (void);
+
+/*! Free `struct dep' along with `name' and `stem'.   */
+extern void free_dep (dep_t *d);
 
 /*! Copy dependency chain making a new chain with the same contents
   as the old one and return that.  The return value is malloc'd. The
