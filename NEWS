@@ -240,6 +240,16 @@ Fork from version 3.80
 * Emacs debug interface makedb.el and a patched to gud.el
 
 
+Version 3.81rc2
+
+* WARNING: Future backward-incompatibility!
+  Up to and including this release, the '$?' variable does not contain
+  any prerequisite that does not exist, even though that prerequisite
+  might have caused the target to rebuild.  Starting with the _next_
+  release of GNU make, '$?' will contain all prerequisites that caused
+  the target to be considered out of date.  See this Savannah bug:
+  http://savannah.gnu.org/bugs/index.php?func=detailitem&item_id=16051
+
 Version 3.80
 
 * A new feature exists: order-only prerequisites.  These prerequisites

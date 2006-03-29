@@ -1,23 +1,21 @@
-/* $Id: expand.c,v 1.11 2006/03/28 23:11:01 rockyb Exp $
+/* $Id: expand.c,v 1.12 2006/03/29 04:48:29 rockyb Exp $
 Variable expansion functions for GNU Make.
-Copyright (C) 1988, 89, 91, 92, 93, 95, 
-2004, 2005 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
+1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software
+Foundation, Inc.
 This file is part of GNU Make.
 
-GNU Make is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+GNU Make is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2, or (at your option) any later version.
 
-GNU Make is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with GNU Make; see the file COPYING.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-Boston, MA 02111-1307, USA.  */
+You should have received a copy of the GNU General Public License along with
+GNU Make; see the file COPYING.  If not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 
 #include "print.h"
 #include "read.h"
@@ -26,12 +24,9 @@ Boston, MA 02111-1307, USA.  */
 #include "function.h"
 #include "rule.h"
 
-#ifdef HAVE_ALLOCA_H
-#include <alloca.h>
-#endif
-
-#include <assert.h>
-
+/* Initially, any errors reported when expanding strings will be reported
+   against the file where the error appears.  */
+const struct floc **expanding_var = &reading_file;
 
 /* The next two describe the variable output buffer.
    This buffer is used to hold the variable-expansion of a line of the
@@ -102,14 +97,32 @@ char *
 recursively_expand_for_file (variable_t *v, file_t *file)
 {
   char *value;
+  const floc_t *this_var;
+  const floc_t **saved_varp;
   variable_set_list_t *save = 0;
   int set_reading = 0;
+
+  /* Don't install a new location if this location is empty.
+     This can happen for command-line variables, builtin variables, etc.  */
+  saved_varp = expanding_var;
+  if (v->fileinfo.filenm)
+    {
+      this_var = &v->fileinfo;
+      expanding_var = &this_var;
+    }
+
+  /* If we have no other file-reading context, use the variable's context. */
+  if (!reading_file)
+    {
+      set_reading = 1;
+      reading_file = &v->fileinfo;
+    }
 
   if (v->expanding)
     {
       if (!v->exp_count)
         /* Expanding V causes infinite recursion.  Lose.  */
-        fatal (reading_file,
+        fatal (*expanding_var,
                _("Recursive variable `%s' references itself (eventually)"),
                v->name);
       --v->exp_count;
@@ -119,13 +132,6 @@ recursively_expand_for_file (variable_t *v, file_t *file)
     {
       save = current_variable_set_list;
       current_variable_set_list = file->variables;
-    }
-
-  /* If we have no other file-reading context, use the variable's context. */
-  if (!reading_file)
-    {
-      set_reading = 1;
-      reading_file = &v->fileinfo;
     }
 
   v->expanding = 1;
@@ -139,6 +145,8 @@ recursively_expand_for_file (variable_t *v, file_t *file)
     reading_file = 0;
   if (file)
     current_variable_set_list = save;
+
+  expanding_var = saved_varp;
 
   return value;
 }
@@ -251,7 +259,7 @@ variable_expand_string (char *psz_line, char *string, long length)
 	    end = strchr (beg, closeparen);
 	    if (end == 0)
               /* Unterminated variable reference.  */
-              fatal (reading_file, _("unterminated variable reference"));
+              fatal (*expanding_var, _("unterminated variable reference"));
 	    p1 = lindex (beg, end, '$');
 	    if (p1 != 0)
 	      {
@@ -379,19 +387,7 @@ variable_expand_string (char *psz_line, char *string, long length)
 
 	  /* A $ followed by a random char is a variable reference:
 	     $a is equivalent to $(a).  */
-	  {
-	    /* We could do the expanding here, but this way
-	       avoids code repetition at a small performance cost.  */
-	    char name[5];
-	    name[0] = '$';
-	    name[1] = '(';
-	    name[2] = *p;
-	    name[3] = ')';
-	    name[4] = '\0';
-	    p1 = allocated_variable_expand (name);
-	    o = variable_buffer_output (o, p1, strlen (p1));
-	    free (p1);
-	  }
+          o = reference_variable (o, p, 1);
 
 	  break;
 	}
@@ -519,14 +515,19 @@ variable_append (const char *name, unsigned int length,
   if (buf > variable_buffer)
     buf = variable_buffer_output (buf, " ", 1);
 
-  return variable_buffer_output (buf, v->value, strlen (v->value));
+  /* Either expand it or copy it, depending.  */
+  if (! v->recursive)
+    return variable_buffer_output (buf, v->value, strlen (v->value));
+
+  buf = variable_expand_string (buf, v->value, strlen (v->value));
+  return (buf + strlen (buf));
 }
 
 
 static char *
 allocated_variable_append (const variable_t *v)
 {
-  char *val, *retval;
+  char *val;
 
   /* Construct the appended variable value.  */
 
@@ -542,12 +543,7 @@ allocated_variable_append (const variable_t *v)
   variable_buffer = obuf;
   variable_buffer_length = olen;
 
-  /* Now expand it and return that.  */
-
-  retval = allocated_variable_expand (val);
-
-  free (val);
-  return retval;
+  return val;
 }
 
 /*! Like variable_expand_for_file, but the returned string is malloc'd.

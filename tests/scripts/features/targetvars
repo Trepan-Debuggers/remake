@@ -272,7 +272,7 @@ $answer = "no build information\n";
 # Test a merge of set_lists for files, where one list is much longer
 # than the other.  See Savannah bug #15757.
 
-mkdir('t1');
+mkdir('t1', 0777);
 touch('t1/rules.mk');
 
 run_make_test('
@@ -291,5 +291,17 @@ rules.mk : MYVAR = foo
 
 rmfiles('t1/rules.mk');
 rmdir('t1');
+
+# TEST #18
+
+# Test appending to a simple variable containing a "$": avoid a
+# double-expansion.  See Savannah bug #15913.
+
+run_make_test("
+VAR := \$\$FOO
+foo: VAR += BAR
+foo: ; \@echo '\$(VAR)'",
+              '',
+              '$FOO BAR');
 
 1;
