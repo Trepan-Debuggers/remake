@@ -211,14 +211,16 @@ to make it easier to pick out from the surrounding output.
 @node Tracing Not
 @subsection How NOT to debug @value{MAKE}
 
+Before we get into debugging proper, we'll discuss tracing and a
+pitfall the author once made in his first attempt to debug a large and
+mysterious @code{Makefile}. Chances you may have have happened to you too.
+
 A simplified form of debugging is @emph{tracing}. Often this may be
 good enough to understand what might have gone wrong. In fact, in the
 Unix shell world (@code{tcsh}, @code{csh}, @code{bash}, @code{sh})
 prior to my debugger for bash (@url{http://bashdb.sourceforge.net})
 tracing along with print statements was about all that was available 
 to debug a program. 
-
-And so before we get into debugging proper, we'll discuss tracing.
 
 @value{MAKE} has had for a long time a ``debug'' flag (@code{--debug}
 or @code{-d}) which prints ``lots of debugging information.'' For the
@@ -232,8 +234,8 @@ Alas, the @code{--debug} option gives way too much information to be
 helpful. Furthermore, debug-flag information @emph{omits} information
 that would be helpful.
 
-To elaborate upon this, here is a simple small Makefile with an invalid
-shell command in it:
+To elaborate upon this, here is a simple small @code{Makefile} with an
+invalid shell command in it:
 
 @smallexample
 !: # Makefile to show off tracing
@@ -248,7 +250,7 @@ shell command in it:
 10: 	@@bogus-command
 @end smallexample 
 
-Now let's see what happens when we run ``debug'' from an unpatched
+But now let's see what happens when we run ``debug'' from an unpatched
 @value{MAKE}:
 
 @smallexample
@@ -299,15 +301,18 @@ for someone who is well versed with the internals of @value{MAKE}.
 
 But even for someone such as myself who has become more knowledgeable
 (through writing this debugger), it @emph{still} isn't all that
-helpful. ``@code{make: bogus-command: command not found}'' you say?
-Okay but where in the Makefile source did that come from? Since we
-added the debug output we see ``foo'' listed beforehand after skipping
-hundreds of lines, but in a normal make, there would have been no mention
-of ``foo.'' In our simple example tracking down the location is easy.
-But when you have a Makefile which is hundreds of lines long as any
-Makefile is when it is generated from @code{automake}, it would be
-nice to list the line in the Makefile and full filename as well as the
-target name.
+helpful. In the midst of the above jumble, the program reports:
+@smallexample
+make: bogus-command: command not found
+@end smallexample
+?? Okay. But where in the source @code{Makefile} did that come from?
+Since we added the debug output we see ``@code{foo}'' listed
+beforehand after skipping hundreds of lines, but in a normal make,
+there would have been no mention of ``@code{foo}.'' In our simple example
+tracking down the location is easy.  But when you have a @code{Makefile}
+which is hundreds of lines long as any Makefile is when it is
+generated from @code{automake}, it would be nice to list the line in
+the Makefile and full filename as well as the target name.
 
 @node Tracing
 @subsection Sample @value{REMAKE} Trace Sessions
@@ -406,6 +411,11 @@ make: bogus-command: Command not found
 make: *** [foo] Error 127
 ##########################################################
 @end smallexample
+
+The @code{--debug=basic} command-line switch also works in
+@value{REMAKE} as well if that's all you want.@footnote{Actually the
+output is a little bit different here since we give a more context
+about the position when a fatal error is encountered.}
 
 Now let's try the new kind of trace we provide in this patched
 @value{REMAKE}.  We use the new option @code{--trace} which has the
@@ -559,9 +569,13 @@ mdb<1>
 @end group
 @end smallexample 
 
-No, we were triggered by checking dependencies from Makefile. And that
-was triggered by checking dependencies of ``all.'' (There's a bug in
-our debugger currently in that it doesn't show ``all.''). 
+No, we were triggered by checking dependencies from
+@code{Makefile}.@footnote{for a while I thought there was a bug in
+@code{remake} since I the default goal target @code{all} is not
+listed. But the above is correct. In fact, GNU Make @emph{first} tries
+to remake the Makefile it has read in. See ``How Makefiles are
+Remade'' in the GNU Make manual for details.}
+
 
 Notice that the prompt now lists ``1'' since we entered a command.
 
