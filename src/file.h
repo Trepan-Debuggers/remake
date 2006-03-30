@@ -1,4 +1,4 @@
-/* $Id: file.h,v 1.10 2006/02/27 03:17:51 rockyb Exp $
+/* $Id: file.h,v 1.11 2006/03/30 05:01:49 rockyb Exp $
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -298,5 +298,8 @@ extern mtime_status_t debugger_mtime_status;
 #define check_renamed(file)						\
   if (file)								\
     while ((file)->renamed != 0) (file) = (file)->renamed /* No ; here.  */
+
+/*! Expand and parse each dependency line. */
+extern void expand_deps (file_t *f);
 
 #endif /*FILE_H*/

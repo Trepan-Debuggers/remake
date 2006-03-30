@@ -30,7 +30,7 @@ Boston, MA 02111-1307, USA.  */
    per-file, so we can invoke it after the eval... or remembering which files
    in the hash have been snapped (a new boolean flag?) and having snap_deps()
    only work on files which have not yet been snapped. */
-int snapped_deps = 0;
+bool snapped_deps = false;
 
 /*! Allocate a new `struct dep' with all fields initialized to 0.   */
 
@@ -45,7 +45,7 @@ alloc_dep ()
 /*! Free `struct dep' along with `name' and `stem'.   */
 
 void
-free_dep (struct dep *d)
+dep_free (dep_t *d)
 {
   FREE (d->name);
   FREE (d->stem);
@@ -124,27 +124,13 @@ nameseq_free(nameseq_t *p_nameseq)
     free(p_nameseq);
   }
 }
-/*! Copy dependency chain making a new chain with the same contents
-  as the old one and return that.  The return value is malloc'd. The
-  caller must thus free it.
- */
-void
-dep_chain_free (dep_t *p_dep)
-{
-  dep_t *p_dep_next;
 
-  for ( ; p_dep; p_dep = p_dep_next) {
-    p_dep_next = p_dep->next;
-    free(p_dep->name);
-    free(p_dep);
-  }
-}
 
-/* Set the intermediate flag.  */
-static void
+/*! Set the intermediate flag.  */
+void
 set_intermediate (const void *item)
 {
-  struct file *f = (struct file *) item;
+  file_t *f = (file_t *) item;
   f->intermediate = 1;
 }
 
@@ -275,7 +261,19 @@ snap_deps (hash_table_t *p_files)
 #endif
 
   /* Remember that we've done this. */
-  snapped_deps = 1;
+  snapped_deps = true;
+}
+
+/*! Free a chain of 'struct dep'.  */
+void
+dep_chain_free (dep_t *d)
+{
+  while (d)
+    {
+      dep_t *df = d;
+      d = d->next;
+      dep_free (df);
+    }
 }
 
 static unsigned long
