@@ -1,4 +1,4 @@
-/* $Id: function.c,v 1.22 2006/01/05 11:11:29 rockyb Exp $
+/* $Id: function.c,v 1.23 2006/03/30 07:49:28 rockyb Exp $
 Builtin expansion for GNU Make.
 Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004, 2005
 Free Software Foundation, Inc.
@@ -722,12 +722,12 @@ func_words (char *o, char **argv, const char *funcname UNUSED)
   return o;
 }
 
-/* Set begpp to point to the first non-whitespace character of the string,
- * and endpp to point to the last non-whitespace character of the string.
- * If the string is empty or contains nothing but whitespace, endpp will be
- * begpp-1.
+/*! Set begpp to point to the first non-whitespace character of the string,
+  and endpp to point to the last non-whitespace character of the string.
+  If the string is empty or contains nothing but whitespace, endpp will be
+  begpp-1.
  */
-static char *
+char *
 strip_whitespace (const char **begpp, const char **endpp)
 {
   while (*begpp <= *endpp && isspace ((unsigned char)**begpp))

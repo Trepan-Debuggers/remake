@@ -1,4 +1,4 @@
-/* $Id: implicit.c,v 1.16 2006/03/30 05:01:49 rockyb Exp $
+/* $Id: implicit.c,v 1.17 2006/03/30 07:53:42 rockyb Exp $
 Implicit rule searching for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software
@@ -813,13 +813,13 @@ pattern_search (file_t *file, int archive,
          this implicit rule. */
 
       dep = file->deps;
-      while (dep != 0)
+      while (dep)
         {
           dep_t *next = dep->next;
           dep_free (dep);
           dep = next;
         }
-      file->deps = 0;
+      file->deps = NULL;
   }
 
   expl_d = file->deps; /* We will add them at the end. */
@@ -963,7 +963,7 @@ pattern_search (file_t *file, int archive,
 	  p += fullstemlen;
 	  memcpy (p, rule->suffixes[i],
 		 rule->lens[i] - (rule->suffixes[i] - rule->targets[i]) + 1);
-	  new->file = enter_file (new->name, NULL);
+	  new->file = enter_file (new->name, NILF);
 	  new->next = file->also_make;
 
 	  /* Set precious flag. */

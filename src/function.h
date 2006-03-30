@@ -1,4 +1,4 @@
-/* $Id: function.h,v 1.7 2005/12/11 12:15:29 rockyb Exp $
+/* $Id: function.h,v 1.8 2006/03/30 07:49:28 rockyb Exp $
 Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004, 2005
 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -58,6 +58,13 @@ extern char *patsubst_expand (char *o, char *text, char *pattern,
 
 /*! Return 1 if PATTERN matches STR, 0 if not.  */
 extern int pattern_matches (char *pattern, char *percent, char *str);
+
+/*! Set begpp to point to the first non-whitespace character of the string,
+  and endpp to point to the last non-whitespace character of the string.
+  If the string is empty or contains nothing but whitespace, endpp will be
+  begpp-1.
+ */
+extern char *strip_whitespace (const char **begpp, const char **endpp);
 
 /*! Store into VARIABLE_BUFFER at O the result of scanning TEXT and replacing
    each occurrence of SUBST with REPLACE. TEXT is null-terminated.  SLEN is
