@@ -19,6 +19,8 @@
 AUTOMAKE_OPTIONS = 1.8 dist-bzip2 check-news ansi2knr
 ACLOCAL_AMFLAGS	=  -I config
 
+MAKE_HOST =	@MAKE_HOST@
+
 # Only process if target is MS-Windows
 if WINDOWSENV
   MAYBE_W32 =	w32
@@ -65,9 +67,6 @@ endif
 
 
 # Extra stuff to include in the distribution.
-# Note we need all the glob stuff here, rather than in glob/Makefile.am,
-# because often that directory isn't built on the systems used by the
-# maintainers.
 
 EXTRA_DIST =	README build.sh.in $(man_MANS) \
 		README.customs README.OS2 \
@@ -79,8 +78,9 @@ EXTRA_DIST =	README build.sh.in $(man_MANS) \
 		readme.vms makefile.vms makefile.com config.h-vms \
 		vmsdir.h vmsfunctions.c vmsify.c
 
-MAKE_HOST =	@MAKE_HOST@
+# This is built during configure, but behind configure's back
 
+DISTCLEANFILES = build.sh
 
 # Forward targets
 

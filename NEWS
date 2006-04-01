@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  19 March 2006
+  1 April 2006
 
 See the end of this file for copyrights and conditions.
 
@@ -9,7 +9,7 @@ manual, which is contained in this distribution as the file doc/make.texi.
 See the README file and the GNU make manual for instructions for
 reporting bugs.
 
-Version 3.81rc2
+Version 3.81
 
 * GNU make is ported to OS/2.
 
@@ -147,7 +147,7 @@ Version 3.81rc2
 
 A complete list of bugs fixed in this version is available here:
 
-  http://savannah.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=101
+  http://savannah.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=103
 
 
 Version 3.80

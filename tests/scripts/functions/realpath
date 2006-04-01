@@ -20,15 +20,7 @@ ifneq ($(realpath /),/)
   $(error )
 endif
 
-ifneq ($(realpath ///),/)
-  $(error )
-endif
-
 ifneq ($(realpath /.),/)
-  $(error )
-endif
-
-ifneq ($(realpath ///.),/)
   $(error )
 endif
 
@@ -41,10 +33,6 @@ ifneq ($(realpath /.///),/)
 endif
 
 ifneq ($(realpath /..),/)
-  $(error )
-endif
-
-ifneq ($(realpath ///..),/)
   $(error )
 endif
 
@@ -63,8 +51,31 @@ endif
 .PHONY: all
 all: ; @:
 ',
-'',
-'');
+              '',
+              '');
+
+# On Windows platforms, "//" means something special.  So, don't do these
+# tests there.
+
+if ($port_type ne 'W32') {
+  run_make_test('
+ifneq ($(realpath ///),/)
+  $(error )
+endif
+
+ifneq ($(realpath ///.),/)
+  $(error )
+endif
+
+ifneq ($(realpath ///..),/)
+  $(error )
+endif
+
+.PHONY: all
+all: ; @:',
+                '',
+                '');
+}
 
 
 # This tells the test driver that the perl test script executed properly.

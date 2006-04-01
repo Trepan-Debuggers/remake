@@ -469,13 +469,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
  * Define if you have the Cygnus "Cygwin" GNU Windows32 tool set.
  * Do NOT define BATCH_MODE_ONLY_SHELL if you define HAVE_CYGWIN_SHELL
  */
-/*#define HAVE_CYGWIN_SHELL*/
+/*#define HAVE_CYGWIN_SHELL 1 */
 
 /*
  * Define if you have the MKS tool set or shell. Do NOT define
  * BATCH_MODE_ONLY_SHELL if you define HAVE_MKS_SHELL
  */
-/*#define HAVE_MKS_SHELL */
+/*#define HAVE_MKS_SHELL 1 */
 
 /*
  * Enforce the mutual exclusivity restriction.

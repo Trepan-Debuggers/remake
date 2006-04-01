@@ -2,5 +2,6 @@
 config.*
 mkinstalldirs
 texinfo.tex
+mdate-sh
 
 Makefile Makefile.in

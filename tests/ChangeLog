@@ -1,3 +1,8 @@
+2006-04-01  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/functions/realpath: Don't run tests with multiple
+	initial slashes on Windows: those paths mean something different.
+
 2006-03-19  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/features/parallelism: Test that the jobserver is

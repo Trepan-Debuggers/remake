@@ -634,7 +634,7 @@ static enum { make, user } current_access;
 /* Under -d, write a message describing the current IDs.  */
 
 static void
-log_access (char *flavor)
+log_access (const char *flavor)
 {
   if (! ISDB (DB_JOBS))
     return;
