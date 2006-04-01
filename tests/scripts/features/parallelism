@@ -128,31 +128,37 @@ mod_a.o mod_b.o:
 
 # Make sure that all jobserver FDs are closed if we need to re-exec the
 # master copy.
+#
+# First, find the "default" file descriptors we normally use
+# Then make sure they're still used.
+#
+# Right now we don't have a way to run a makefile and capture the output
+# without checking it, so we can't really write this test.
 
-run_make_test('
-submake: ; @$(MAKE) --no-print-directory -f #MAKEFILE# fdprint 5>output
+# run_make_test('
+# submake: ; @$(MAKE) --no-print-directory -f #MAKEFILE# fdprint 5>output
 
-dependfile: ; @echo FOO=bar > $@
+# dependfile: ; @echo FOO=bar > $@
 
-INCL := true
+# INCL := true
 
-FOO=foo
-ifeq ($(INCL),true)
--include dependfile
-endif
+# FOO=foo
+# ifeq ($(INCL),true)
+# -include dependfile
+# endif
 
-fdprint: ; @echo hi >&5 && echo "$(FOO)"
+# fdprint: ; @echo $(filter --jobserver%,$(MAKEFLAGS))
 
-recurse: ; @$(MAKE) --no-print-directory -f #MAKEFILE# submake INCL=true',
-              '-j2',
-              'bar');
+# recurse: ; @$(MAKE) --no-print-directory -f #MAKEFILE# submake INCL=true',
+#               '-j2 INCL=false fdprint',
+#               'bar');
 
-unlink('dependfile', 'output');
+# unlink('dependfile', 'output');
 
 
-# Do it again, this time where the include is done by the non-master make.
-run_make_test(undef, '-j2 recurse INCL=false', 'bar');
+# # Do it again, this time where the include is done by the non-master make.
+# run_make_test(undef, '-j2 recurse INCL=false', 'bar');
 
-unlink('dependfile', 'output');
+# unlink('dependfile', 'output');
 
 1;

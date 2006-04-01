@@ -30,3 +30,5 @@ hp700 hp834 mips sol2 i486-linux
 customs
 
 install-sh mkinstalldirs
+
+.directive.asc

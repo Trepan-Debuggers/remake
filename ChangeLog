@@ -1,3 +1,39 @@
+2006-04-01  Paul D. Smith  <psmith@gnu.org>
+
+	Version 3.81 released.
+
+	* NEWS: Updated for 3.81.
+
+	* README.cvs: Mention that vpath builds are not supported out of
+	CVS.  Fixes Savannah bug #16236.
+	Remove update of make.texi from the list of things to do; we use
+	version.texi now.
+
+2006-03-26  Paul D. Smith  <psmith@gnu.org>
+
+	* doc/make.texi: Clean up licensing.  Use @copying and version.texi
+	support from automake, as described in the Texinfo manual.
+
+2006-03-25  Eli Zaretskii  <eliz@gnu.org>
+
+	* implicit.c (pattern_search) [HAVE_DOS_PATHS]: Don't compare b
+	with lastslash, since the latter points to filename, not to
+	target.
+	* job.c (construct_command_argv_internal) [HAVE_DOS_PATHS]:
+	Declare and define sh_chars_sh[].
+
+2006-03-23  Paul D. Smith  <psmith@gnu.org>
+
+	* configure.in: Look for build.sh.in in $srcdir so it will be
+	built for remote configurations as well.
+
+	* Makefile.am: Make sure to clean up build.sh during distclean.
+	Fixes Savannah bug #16166.
+
+	* misc.c (log_access): Takes a const char *.
+	* function.c (fold_newlines): Takes an unsigned int *.
+	Both fixes for Savannah bug #16170.
+
 2006-03-22  Boris Kolpackov  <boris@kolpackov.net>
 
 	* implicit.c (pattern_search): Call set_file_variables only

@@ -1,54 +1,59 @@
 \input texinfo                @c -*- Texinfo -*-
 @c %**start of header
 @setfilename make.info
+
+@include version.texi
+@set EDITION 0.70
+@set RCSID $Id: make.texi,v 1.45 2006/04/01 06:36:40 psmith Exp $
+
 @settitle GNU @code{make}
 @setchapternewpage odd
-@c %**end of header
-
+@c Combine the variable and function indices:
+@syncodeindex vr fn
+@c Combine the program and concept indices:
+@syncodeindex pg cp
 @c FSF publishers: format makebook.texi instead of using this file directly.
-
-@set RCSID $Id: make.texi,v 1.44 2006/02/14 15:42:18 psmith Exp $
-@set EDITION 0.70
-@set VERSION 3.81
-@set UPDATED 5 Feb 2006
-@set UPDATE-MONTH Feb 2006
 @c ISBN provided by Lisa M. Opus Goldstein <opus@gnu.org>, 5 May 2004
 @set ISBN 1-882114-83-5
+@c %**end of header
+
+@copying
+This file documents the GNU @code{make} utility, which determines
+automatically which pieces of a large program need to be recompiled,
+and issues the commands to recompile them.
+
+This is Edition @value{EDITION}, last updated @value{UPDATED},
+of @cite{The GNU Make Manual}, for GNU @code{make} version @value{VERSION}.
+
+Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
+1996, 1997, 1998, 1999, 2000, 2002, 2003, 2004, 2005, 2006
+Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover Texts being ``A GNU Manual,''
+and with the Back-Cover Texts as in (a) below.  A copy of the
+license is included in the section entitled ``GNU Free Documentation
+License.''
+
+(a) The FSF's Back-Cover Text is: ``You have freedom to copy and modify
+this GNU Manual, like GNU software.  Copies published by the Free
+Software Foundation raise funds for GNU development.''
+@end quotation
+@end copying
 
 @c finalout
 
 @c ISPELL CHECK: done, 10 June 1993 --roland
 @c ISPELL CHECK: done, 2000-06-25 --Martin Buchholz
 
-@c Combine the variable and function indices:
-@syncodeindex vr fn
-@c Combine the program and concept indices:
-@syncodeindex pg cp
 
 @dircategory GNU Packages
 @direntry
 * Make: (make).            Remake files automatically.
 @end direntry
-
-@ifnottex
-This file documents the GNU Make utility, which determines
-automatically which pieces of a large program need to be recompiled,
-and issues the commands to recompile them.
-
-This is Edition @value{EDITION}, last updated @value{UPDATED},
-of @cite{The GNU Make Manual}, for @code{make}, Version @value{VERSION}.
-
-Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-1998, 1999, 2000, 2002, 2003, 2004, 2005, 2006
-Free Software Foundation, Inc.
-
-Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.1 or
-any later version published by the Free Software Foundation; with no
-Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
-Texts.  A copy of the license is included in the section entitled
-``GNU Free Documentation License''.
-@end ifnottex
 
 @iftex
 @shorttitlepage GNU Make
@@ -57,52 +62,28 @@ Texts.  A copy of the license is included in the section entitled
 @title GNU Make
 @subtitle A Program for Directing Recompilation
 @subtitle GNU @code{make} Version @value{VERSION}
-@subtitle @value{UPDATE-MONTH}
+@subtitle @value{UPDATED-MONTH}
 @author Richard M. Stallman, Roland McGrath, Paul D. Smith
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
-Free Software Foundation, Inc.
+@insertcopying
 @sp 2
 Published by the Free Software Foundation @*
 51 Franklin St. -- Fifth Floor @*
 Boston, MA 02110-1301 USA @*
 ISBN @value{ISBN} @*
-
-Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.1 or
-any later version published by the Free Software Foundation; with the
-Invariant Sections being ``GNU General Public License'', the Front-Cover
-Texts being ``A GNU Manual'', and with the Back-Cover Texts being as in
-(a) below.  A copy of the license is included in the section entitled
-``GNU Free Documentation License''.
-
-(a) The FSF's Back-Cover Text is:
-
-@quotation
-      You have freedom to copy and modify this GNU Manual, like GNU
-      software.  Copies published by the Free Software Foundation raise
-      funds for GNU development.
-@end quotation
 @sp 2
 Cover art by Etienne Suvasa.
 @end titlepage
-@page
+
+@summarycontents
+@contents
 
 @ifnottex
 @node Top, Overview, (dir), (dir)
-@top Make
+@top GNU @code{make}
 
-The GNU @code{make} utility automatically determines which pieces of a
-large program need to be recompiled, and issues the commands to
-recompile them.@refill
-
-This edition of the @cite{GNU Make Manual},
-last updated @value{UPDATED},
-documents GNU @code{make} Version @value{VERSION}.@refill
-
-This manual describes @code{make} and contains the following chapters:@refill
+@insertcopying
 @end ifnottex
 
 @menu
@@ -11120,6 +11101,4 @@ tar.zoo: $(SRCS) $(AUX)
 
 @printindex fn
 
-@summarycontents
-@contents
 @bye

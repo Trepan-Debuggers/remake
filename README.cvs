@@ -45,6 +45,11 @@ Gettext, and any tools that those utilities require (GNU m4, Perl,
 etc.).  See the configure.in file to find the minimum versions of each
 of these tools.  You will also need a copy of wget.
 
+When building from CVS you must build in the source directory: "VPATH
+builds" from remote directories are not supported.  Once you've created
+a distribution, of course, you can unpack it and do a VPATH build from
+there.
+
 After checking out the code, you will need to perform these steps to get
 to the point where you can run "make".
 
@@ -127,8 +132,6 @@ before making an official release:
 
   * Update the configure.in file with the new release number.
   * Update the NEWS file with the release number and date.
-  * Update the doc/make.texi file with the release number and date.
-    Check the variables EDITION, VERSION, UPDATED, and UPDATE-MONTH.
   * Create the new release in the Savannah "Bugs" Administration for
     both the "Component Version" and "Fixed Release" fields.
   * Create the new release in the Savannah "Patches" Administration for
@@ -169,8 +172,11 @@ It will ask for the GPG passphrase _THREE_ times.  Sigh.
 Where to Announce
 -----------------
 
-Create the announcement in a text file, then sign it with GPG.  Upload
-to gnu.org, then login and send from my account there.
+Create the announcement in a text file, then sign it with GPG.
+
+  gpg --clearsign <announcement.txt>
+
+Upload to gnu.org, then login and send from my account there.
 
 Email to: make-alpha@gnu.org, bug-make@gnu.org, help-make@gnu.org, make-w32@gnu.org.
 Email to: info-gnu@gnu.org

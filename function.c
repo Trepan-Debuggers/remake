@@ -1390,8 +1390,8 @@ func_value (char *o, char **argv, const char *funcname UNUSED)
 /*
   \r  is replaced on UNIX as well. Is this desirable?
  */
-void
-fold_newlines (char *buffer, int *length)
+static void
+fold_newlines (char *buffer, unsigned int *length)
 {
   char *dst = buffer;
   char *src = buffer;
@@ -1578,7 +1578,6 @@ static char *
 func_shell (char *o, char **argv, const char *funcname UNUSED)
 {
   char* batch_filename = NULL;
-  unsigned int i;
 
 #ifdef __MSDOS__
   FILE *fpipe;
@@ -1672,9 +1671,8 @@ func_shell (char *o, char **argv, const char *funcname UNUSED)
 #endif
     {
       /* We are the parent.  */
-
       char *buffer;
-      unsigned int maxlen;
+      unsigned int maxlen, i;
       int cc;
 
       /* Record the PID for reap_children.  */
@@ -1737,17 +1735,15 @@ func_shell (char *o, char **argv, const char *funcname UNUSED)
 
       if (shell_function_completed == -1)
 	{
-	  /* This most likely means that the execvp failed,
-	     so we should just write out the error message
-	     that came in over the pipe from the child.  */
+	  /* This likely means that the execvp failed, so we should just
+	     write the error message in the pipe from the child.  */
 	  fputs (buffer, stderr);
 	  fflush (stderr);
 	}
       else
 	{
-	  /* The child finished normally.  Replace all
-	     newlines in its output with spaces, and put
-	     that in the variable output buffer.  */
+	  /* The child finished normally.  Replace all newlines in its output
+	     with spaces, and put that in the variable output buffer.  */
 	  fold_newlines (buffer, &i);
 	  o = variable_buffer_output (o, buffer, i);
 	}
@@ -1779,8 +1775,8 @@ func_shell (char *o, char **argv, const char *funcname)
 
   BPTR child_stdout;
   char tmp_output[FILENAME_MAX];
-  unsigned int maxlen = 200;
-  int cc, i;
+  unsigned int maxlen = 200, i;
+  int cc;
   char * buffer, * ptr;
   char ** aptr;
   int len = 0;

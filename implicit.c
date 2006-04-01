@@ -356,9 +356,8 @@ pattern_search (struct file *file, int archive,
               /* Didn't find it yet: check for DOS-type directories.  */
               if (check_lastslash)
                 {
-                  char *b = strrchr (target, '\\');
-                  check_lastslash = !(b ? b > lastslash
-                                      : (target[0] && target[1] == ':'));
+                  char *b = strchr (target, '\\');
+                  check_lastslash = !(b || (target[0] && target[1] == ':'));
                 }
 #endif
 #endif
