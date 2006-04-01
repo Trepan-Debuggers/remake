@@ -140,7 +140,7 @@ before making an official release:
     "Fixed Release" ID number.
   * Run "make distcheck" to be sure it all works.
   * Commit everything.
-  * cvs tag -r<RTAG> where RTAG is constructed by replacing each "." in
+  * cvs tag <RTAG> where RTAG is constructed by replacing each "." in
     the version with "-" and prefixing it with "make-".
 
 
