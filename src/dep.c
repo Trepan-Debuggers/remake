@@ -250,7 +250,7 @@ snap_deps (hash_table_t *p_files)
 
   f = lookup_file (".NOTPARALLEL");
   if (f != 0 && f->is_target)
-    not_parallel = 1;
+    not_parallel = true;
 
 #ifndef NO_MINUS_C_MINUS_O
   /* If .POSIX was defined, remove OUTPUT_OPTION to comply.  */

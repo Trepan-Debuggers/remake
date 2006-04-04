@@ -1,4 +1,4 @@
-/* $Id: read.c,v 1.28 2005/12/23 04:20:38 rockyb Exp $
+/* $Id: read.c,v 1.29 2006/04/04 22:57:33 rockyb Exp $
 Reading and parsing of makefiles for GNU Make.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
@@ -1783,7 +1783,7 @@ record_files (nameseq_t *filenames, char *pattern, char *pattern_percent,
          which means we cannot use its value during parsing.  */
 
       if (streq (name, ".POSIX"))
-        posix_pedantic = 1;
+        posix_pedantic = true;
 
       implicit_percent = find_percent (name);
       implicit |= implicit_percent != 0;

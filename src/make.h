@@ -1,4 +1,4 @@
-/* $Id: make.h,v 1.26 2006/03/28 23:11:01 rockyb Exp $
+/* $Id: make.h,v 1.27 2006/04/04 22:57:33 rockyb Exp $
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -439,8 +439,29 @@ extern int print_directory_flag;
 
 extern int always_make_flag;
 extern int print_directory_flag;
-extern int warn_undefined_variables_flag, posix_pedantic, not_parallel;
-extern int clock_skew_detected, rebuilding_makefiles;
+extern int warn_undefined_variables_flag;
+extern int rebuilding_makefiles;
+
+/*! True if some rule detected clock skew; we keep track so (a) we only
+   print one warning about it during the run, and (b) we can print a final
+   warning at the end of the run. */
+
+extern bool clock_skew_detected;
+
+/*! True if we have seen the `.NOTPARALLEL' target.
+   This turns off parallel builds for this invocation of make.  */
+
+extern bool not_parallel;
+
+/*! True if we have seen the magic `.POSIX' target.
+   This turns on pedantic compliance with POSIX.2.  */
+
+extern bool posix_pedantic;
+
+/*! True if we have seen the '.SECONDEXPANSION' target.
+   This turns on secondary expansion of prerequisites.  */
+
+extern bool second_expansion;
 
 /*! can we run commands via 'sh -c xxx' or must we use batch files? */
 extern bool batch_mode_shell;

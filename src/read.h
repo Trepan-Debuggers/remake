@@ -1,4 +1,4 @@
-/* $Id: read.h,v 1.5 2005/12/19 08:23:41 rockyb Exp $ 
+/* $Id: read.h,v 1.6 2006/04/04 22:57:33 rockyb Exp $ 
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -67,10 +67,6 @@ nameseq_t *parse_file_seq (char **stringp, int stopchar,
    from the arguments and the default list.  
 */
 extern void construct_include_path (char **arg_dirs);
-
-/*! Free memory in include_directories and set that NULL.
-*/
-void free_include_directories (void);
 
 /*! Expand ~ or ~USER at the beginning of NAME.
    Return a newly malloc'd string or 0.  

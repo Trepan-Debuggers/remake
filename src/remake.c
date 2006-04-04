@@ -1,4 +1,4 @@
-/* $Id: remake.c,v 1.27 2006/02/09 05:58:55 rockyb Exp $
+/* $Id: remake.c,v 1.28 2006/04/04 22:57:33 rockyb Exp $
 Basic dependency engine for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005, 2006 Free Software Foundation, Inc.
@@ -1345,7 +1345,7 @@ f_mtime (file_t *file, bool search)
 		    / 1e9));
 	      error (NILF, _("Warning: File `%s' has modification time %.2g s in the future"),
 		     file->name, from_now);
-	      clock_skew_detected = 1;
+	      clock_skew_detected = true;
 	    }
           }
     }

@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.53 2006/03/08 16:01:05 rockyb Exp $
+/* $Id: main.c,v 1.54 2006/04/04 22:57:33 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
@@ -578,18 +578,18 @@ file_t *default_file = NULL;
 /* Nonzero if we have seen the magic `.POSIX' target.
    This turns on pedantic compliance with POSIX.2.  */
 
-int posix_pedantic;
+bool posix_pedantic = false;
 
 /* Nonzero if we have seen the `.NOTPARALLEL' target.
    This turns off parallel builds for this invocation of make.  */
 
-int not_parallel;
+bool not_parallel = false;
 
 /* Nonzero if some rule detected clock skew; we keep track so (a) we only
    print one warning about it during the run, and (b) we can print a final
    warning at the end of the run. */
 
-int clock_skew_detected;
+bool clock_skew_detected;
 
 
 static void 
@@ -2938,6 +2938,26 @@ print_data_base (void)
   printf (_("\n# Finished Make data base on %s\n"), ctime (&when));
 }
 
+/*! Free memory in include_directories and set that NULL.
+*/
+static void
+free_include_directories (void) 
+{
+  if (include_directories) {
+    if (include_directories->list) {
+      unsigned int i;
+      for (i=0; include_directories->list[i]; i++) {
+	FREE(include_directories->list[i]);
+      }
+      if (i > include_directories->max) {
+	message(0, "Internal inconsistency noted with include_directories -"
+		"in use: %d > max: %d", i, include_directories->max);
+      }
+    }
+    FREE(include_directories);
+  }
+}
+
 /* Exit with STATUS, cleaning up as necessary.  */
 
 void
