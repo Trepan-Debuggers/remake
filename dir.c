@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 # include <dirent.h>
 # define NAMLEN(dirent) strlen((dirent)->d_name)
 # ifdef VMS
-extern char *vmsify PARAMS ((char *name, int type));
+char *vmsify (char *name, int type);
 # endif
 #else
 # define dirent direct
@@ -411,8 +411,8 @@ dirfile_hash_cmp (const void *xv, const void *yv)
 #define DIRFILE_BUCKETS 107
 #endif
 
-static int dir_contents_file_exists_p PARAMS ((struct directory_contents *dir, char *filename));
-static struct directory *find_directory PARAMS ((char *name));
+static int dir_contents_file_exists_p (struct directory_contents *dir, char *filename);
+static struct directory *find_directory (char *name);
 
 /* Find the directory named NAME and return its `struct directory'.  */
 
@@ -1092,8 +1092,8 @@ struct dirstream
   };
 
 /* Forward declarations.  */
-static __ptr_t open_dirstream PARAMS ((const char *));
-static struct dirent *read_dirstream PARAMS ((__ptr_t));
+static __ptr_t open_dirstream (const char *);
+static struct dirent *read_dirstream (__ptr_t);
 
 static __ptr_t
 open_dirstream (const char *directory)
@@ -1180,7 +1180,7 @@ ansi_free (void *p)
  */
 #ifndef stat
 # ifndef VMS
-extern int stat PARAMS ((const char *path, struct stat *sbuf));
+int stat (const char *path, struct stat *sbuf);
 # endif
 # define local_stat stat
 #else

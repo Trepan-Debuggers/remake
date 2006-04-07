@@ -36,7 +36,7 @@ struct function_table_entry
     unsigned char minimum_args;
     unsigned char maximum_args;
     char expand_args;
-    char *(*func_ptr) PARAMS ((char *output, char **argv, const char *fname));
+    char *(*func_ptr) (char *output, char **argv, const char *fname);
   };
 
 static unsigned long
@@ -2040,7 +2040,7 @@ func_abspath (char *o, char **argv, const char *funcname UNUSED)
    EXPAND_ARGS means that all arguments should be expanded before invocation.
    Functions that do namespace tricks (foreach) don't automatically expand.  */
 
-static char *func_call PARAMS ((char *o, char **argv, const char *funcname));
+static char *func_call (char *o, char **argv, const char *funcname);
 
 
 static struct function_table_entry function_table_init[] =

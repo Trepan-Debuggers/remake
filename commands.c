@@ -33,10 +33,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 # define FILE_LIST_SEPARATOR ' '
 #endif
 
-extern int remote_kill PARAMS ((int id, int sig));
+int remote_kill (int id, int sig);
 
 #ifndef	HAVE_UNISTD_H
-extern int getpid ();
+int getpid ();
 #endif
 
 /* Set FILE's automatic variables up.  */

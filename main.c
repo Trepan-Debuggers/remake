@@ -56,39 +56,39 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 int __stack = 20000; /* Make sure we have 20K of stack space */
 #endif
 
-extern void init_dir PARAMS ((void));
-extern void remote_setup PARAMS ((void));
-extern void remote_cleanup PARAMS ((void));
-extern RETSIGTYPE fatal_error_signal PARAMS ((int sig));
+void init_dir (void);
+void remote_setup (void);
+void remote_cleanup (void);
+RETSIGTYPE fatal_error_signal (int sig);
 
-extern void print_variable_data_base PARAMS ((void));
-extern void print_dir_data_base PARAMS ((void));
-extern void print_rule_data_base PARAMS ((void));
-extern void print_file_data_base PARAMS ((void));
-extern void print_vpath_data_base PARAMS ((void));
+void print_variable_data_base (void);
+void print_dir_data_base (void);
+void print_rule_data_base (void);
+void print_file_data_base (void);
+void print_vpath_data_base (void);
 
 #if defined HAVE_WAITPID || defined HAVE_WAIT3
 # define HAVE_WAIT_NOHANG
 #endif
 
 #ifndef	HAVE_UNISTD_H
-extern int chdir ();
+int chdir ();
 #endif
 #ifndef	STDC_HEADERS
 # ifndef sun			/* Sun has an incorrect decl in a header.  */
-extern void exit PARAMS ((int)) __attribute__ ((noreturn));
+void exit (int) __attribute__ ((noreturn));
 # endif
-extern double atof ();
+double atof ();
 #endif
 
-static void clean_jobserver PARAMS ((int status));
-static void print_data_base PARAMS ((void));
-static void print_version PARAMS ((void));
-static void decode_switches PARAMS ((int argc, char **argv, int env));
-static void decode_env_switches PARAMS ((char *envar, unsigned int len));
-static void define_makeflags PARAMS ((int all, int makefile));
-static char *quote_for_env PARAMS ((char *out, char *in));
-static void initialize_global_hash_tables PARAMS ((void));
+static void clean_jobserver (int status);
+static void print_data_base (void);
+static void print_version (void);
+static void decode_switches (int argc, char **argv, int env);
+static void decode_env_switches (char *envar, unsigned int len);
+static void define_makeflags (int all, int makefile);
+static char *quote_for_env (char *out, char *in);
+static void initialize_global_hash_tables (void);
 
 
 /* The structure that describes an accepted command switch.  */
@@ -841,8 +841,8 @@ msdos_return_to_initial_directory (void)
 }
 #endif
 
-extern char *mktemp PARAMS ((char *template));
-extern int mkstemp PARAMS ((char *template));
+char *mktemp (char *template);
+int mkstemp (char *template);
 
 FILE *
 open_tmpfile(char **name, const char *template)
@@ -1543,7 +1543,7 @@ main (int argc, char **argv, char **envp)
 
      If none of these are true, we don't need a signal handler at all.  */
   {
-    extern RETSIGTYPE child_handler PARAMS ((int sig));
+    RETSIGTYPE child_handler (int sig);
 # if defined SIGCHLD
     bsd_signal (SIGCHLD, child_handler);
 # endif

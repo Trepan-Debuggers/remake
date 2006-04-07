@@ -98,7 +98,7 @@ static int amiga_batch_file;
 # endif
 # include <starlet.h>
 # include <lib$routines.h>
-static void vmsWaitForChildren PARAMS ((int *));
+static void vmsWaitForChildren (int *);
 #endif
 
 #ifdef WINDOWS32
@@ -130,7 +130,7 @@ extern int wait3 ();
 #endif /* Have waitpid.  */
 
 #if !defined (wait) && !defined (POSIX)
-extern int wait ();
+int wait ();
 #endif
 
 #ifndef	HAVE_UNION_WAIT
@@ -175,32 +175,32 @@ extern int wait ();
 #endif	/* Don't have `union wait'.  */
 
 #ifndef	HAVE_UNISTD_H
-extern int dup2 ();
-extern int execve ();
-extern void _exit ();
+int dup2 ();
+int execve ();
+void _exit ();
 # ifndef VMS
-extern int geteuid ();
-extern int getegid ();
-extern int setgid ();
-extern int getgid ();
+int geteuid ();
+int getegid ();
+int setgid ();
+int getgid ();
 # endif
 #endif
 
-extern char *allocated_variable_expand_for_file PARAMS ((char *line, struct file *file));
+char *allocated_variable_expand_for_file (char *line, struct file *file);
 
-extern int getloadavg PARAMS ((double loadavg[], int nelem));
-extern int start_remote_job PARAMS ((char **argv, char **envp, int stdin_fd,
-		int *is_remote, int *id_ptr, int *used_stdin));
-extern int start_remote_job_p PARAMS ((int));
-extern int remote_status PARAMS ((int *exit_code_ptr, int *signal_ptr,
-		int *coredump_ptr, int block));
+int getloadavg (double loadavg[], int nelem);
+int start_remote_job (char **argv, char **envp, int stdin_fd, int *is_remote,
+                      int *id_ptr, int *used_stdin);
+int start_remote_job_p (int);
+int remote_status (int *exit_code_ptr, int *signal_ptr, int *coredump_ptr,
+                   int block);
 
-RETSIGTYPE child_handler PARAMS ((int));
-static void free_child PARAMS ((struct child *));
-static void start_job_command PARAMS ((struct child *child));
-static int load_too_high PARAMS ((void));
-static int job_next_command PARAMS ((struct child *));
-static int start_waiting_job PARAMS ((struct child *));
+RETSIGTYPE child_handler (int);
+static void free_child (struct child *);
+static void start_job_command (struct child *child);
+static int load_too_high (void);
+static int job_next_command (struct child *);
+static int start_waiting_job (struct child *);
 
 /* Chain of all live (or recently deceased) children.  */
 

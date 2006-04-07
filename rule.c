@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 #include "variable.h"
 #include "rule.h"
 
-static void freerule PARAMS ((struct rule *rule, struct rule *lastrule));
+static void freerule (struct rule *rule, struct rule *lastrule);
 
 /* Chain of all pattern rules.  */
 

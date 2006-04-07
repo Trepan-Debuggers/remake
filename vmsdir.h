@@ -67,10 +67,11 @@ typedef struct DIR
 #define NULL 0
 #endif
 
-extern	DIR *opendir PARAMS (());
-extern	struct direct *readdir PARAMS ((DIR *dfd));
 #define rewinddir(dirp)	seekdir((dirp), (long)0)
-extern	int closedir PARAMS ((DIR *dfd));
-extern char *vmsify PARAMS ((char *name, int type));
+
+DIR *opendir ();
+struct direct *readdir (DIR *dfd);
+int closedir (DIR *dfd);
+char *vmsify (char *name, int type);
 
 #endif /* VMSDIR_H */

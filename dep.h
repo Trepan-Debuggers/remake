@@ -55,31 +55,31 @@ struct nameseq
   };
 
 
-extern struct nameseq *multi_glob PARAMS ((struct nameseq *chain, unsigned int size));
+struct nameseq *multi_glob (struct nameseq *chain, unsigned int size);
 #ifdef VMS
-extern struct nameseq *parse_file_seq ();
+struct nameseq *parse_file_seq ();
 #else
-extern struct nameseq *parse_file_seq PARAMS ((char **stringp, int stopchar, unsigned int size, int strip));
+struct nameseq *parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip);
 #endif
-extern char *tilde_expand PARAMS ((char *name));
+char *tilde_expand (char *name);
 
 #ifndef NO_ARCHIVES
-extern struct nameseq *ar_glob PARAMS ((char *arname, char *member_pattern, unsigned int size));
+struct nameseq *ar_glob (char *arname, char *member_pattern, unsigned int size);
 #endif
 
 #ifndef	iAPX286
 #define dep_name(d) ((d)->name == 0 ? (d)->file->name : (d)->name)
 #else
 /* Buggy compiler can't hack this.  */
-extern char *dep_name ();
+char *dep_name ();
 #endif
 
-extern struct dep *alloc_dep PARAMS ((void));
-extern void free_dep PARAMS ((struct dep *d));
-extern struct dep *copy_dep_chain PARAMS ((const struct dep *d));
-extern void free_dep_chain PARAMS ((struct dep *d));
-extern void free_ns_chain PARAMS ((struct nameseq *n));
-extern struct dep *read_all_makefiles PARAMS ((char **makefiles));
-extern int eval_buffer PARAMS ((char *buffer));
-extern int update_goal_chain PARAMS ((struct dep *goals));
-extern void uniquize_deps PARAMS ((struct dep *));
+struct dep *alloc_dep (void);
+void free_dep (struct dep *d);
+struct dep *copy_dep_chain (const struct dep *d);
+void free_dep_chain (struct dep *d);
+void free_ns_chain (struct nameseq *n);
+struct dep *read_all_makefiles (char **makefiles);
+int eval_buffer (char *buffer);
+int update_goal_chain (struct dep *goals);
+void uniquize_deps (struct dep *);
