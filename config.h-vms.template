@@ -409,14 +409,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 #define glob     gnu_glob
 #endif
 
-#if defined (__cplusplus) || (defined (__STDC__) && __STDC__)
-#undef  PARAMS
-#define PARAMS(protos)  protos
-#else /* Not C++ or ANSI C.  */
-#undef  PARAMS
-#define PARAMS(protos)  ()
-#endif /* C++ or ANSI C.  */
-
 /* Define if using alloca.c.  */
 /* #undef C_ALLOCA */
 /* maybe this should be placed into make.h */

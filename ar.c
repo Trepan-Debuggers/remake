@@ -25,10 +25,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 #include <fnmatch.h>
 
 /* Defined in arscan.c.  */
-extern long int ar_scan PARAMS ((char *archive, long int (*function) (), long int arg));
-extern int ar_name_equal PARAMS ((char *name, char *mem, int truncated));
+extern long int ar_scan (char *archive, long int (*function) (), long int arg);
+extern int ar_name_equal (char *name, char *mem, int truncated);
 #ifndef VMS
-extern int ar_member_touch PARAMS ((char *arname, char *memname));
+extern int ar_member_touch (char *arname, char *memname);
 #endif
 
 /* Return nonzero if NAME is an archive-member reference, zero if not.
@@ -72,8 +72,8 @@ ar_parse_name (char *name, char **arname_p, char **memname_p)
     *memname_p = savestring (p + 1, end - (p + 1));
 }
 
-static long int ar_member_date_1 PARAMS ((int desc, char *mem, int truncated, long int hdrpos,
-	long int datapos, long int size, long int date, int uid, int gid, int mode, char *name));
+static long int ar_member_date_1 (int desc, char *mem, int truncated, long int hdrpos,
+	long int datapos, long int size, long int date, int uid, int gid, int mode, char *name);
 
 /* Return the modtime of NAME.  */
 

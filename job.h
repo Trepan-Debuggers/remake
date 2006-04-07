@@ -66,31 +66,31 @@ struct child
 
 extern struct child *children;
 
-extern void new_job PARAMS ((struct file *file));
-extern void reap_children PARAMS ((int block, int err));
-extern void start_waiting_jobs PARAMS ((void));
+void new_job (struct file *file);
+void reap_children (int block, int err);
+void start_waiting_jobs (void);
 
-extern char **construct_command_argv PARAMS ((char *line, char **restp, struct file *file, char** batch_file));
+char **construct_command_argv (char *line, char **restp, struct file *file, char** batch_file);
 #ifdef VMS
-extern int child_execute_job PARAMS ((char *argv, struct child *child));
+int child_execute_job (char *argv, struct child *child);
 #elif defined(__EMX__)
-extern int child_execute_job PARAMS ((int stdin_fd, int stdout_fd, char **argv, char **envp));
+int child_execute_job (int stdin_fd, int stdout_fd, char **argv, char **envp);
 #else
-extern void child_execute_job PARAMS ((int stdin_fd, int stdout_fd, char **argv, char **envp));
+void child_execute_job (int stdin_fd, int stdout_fd, char **argv, char **envp);
 #endif
 #ifdef _AMIGA
-extern void exec_command PARAMS ((char **argv));
+void exec_command (char **argv);
 #elif defined(__EMX__)
-extern int exec_command PARAMS ((char **argv, char **envp));
+int exec_command (char **argv, char **envp);
 #else
-extern void exec_command PARAMS ((char **argv, char **envp));
+void exec_command (char **argv, char **envp);
 #endif
 
 extern unsigned int job_slots_used;
 
-extern void block_sigs PARAMS ((void));
+void block_sigs (void);
 #ifdef POSIX
-extern void unblock_sigs PARAMS ((void));
+void unblock_sigs (void);
 #else
 #ifdef	HAVE_SIGSETMASK
 extern int fatal_signal_mask;

@@ -9,6 +9,12 @@ manual, which is contained in this distribution as the file doc/make.texi.
 See the README file and the GNU make manual for instructions for
 reporting bugs.
 
+Version 3.81.90
+
+* Compiling GNU make now requires a conforming ISO C 1989 compiler and
+  standard runtime library.
+
+
 Version 3.81
 
 * GNU make is ported to OS/2.

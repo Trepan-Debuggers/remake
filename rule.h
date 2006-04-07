@@ -49,12 +49,10 @@ extern struct file *suffix_file;
 extern unsigned int maxsuffix;
 
 
-extern void install_pattern_rule PARAMS ((struct pspec *p, int terminal));
-extern int new_pattern_rule PARAMS ((struct rule *rule, int override));
-extern void count_implicit_rule_limits PARAMS ((void));
-extern void convert_to_pattern PARAMS ((void));
-extern void create_pattern_rule PARAMS ((char **targets,
-                                         char **target_percents, int terminal,
-                                         struct dep *deps,
-                                         struct commands *commands,
-                                         int override));
+void install_pattern_rule (struct pspec *p, int terminal);
+int new_pattern_rule (struct rule *rule, int override);
+void count_implicit_rule_limits (void);
+void convert_to_pattern (void);
+void create_pattern_rule (char **targets, char **target_percents,
+                          int terminal, struct dep *deps,
+                          struct commands *commands, int override);

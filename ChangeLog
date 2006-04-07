@@ -1,3 +1,20 @@
+2006-04-06  Paul D. Smith  <psmith@gnu.org>
+
+	* configure.in: Removed AM_C_PROTOTYPES.  Starting now on we
+	require an ISO C 1989 standard compiler and runtime library.
+
+	* Makefile.am: Remove the ansi2knr feature.
+
+	* make.h: Remove the PARAMS() macro definition and all uses of it.
+
+	* amiga.h, ar.c, arscan.c: Remove all uses of the PARAMS() macro.
+	* commands.c, commands.h, config.h-vms.template: Ditto.
+	* dep.h, dir.c, expand.c, filedef.h, function.c: Ditto.
+	* implicit.c, job.c, job.h, main.c, read.c, remake.c: Ditto.
+	* rule.c, rule.h, variable.h, vmsdir.h, vmsjobs.c, vpath.c: Ditto.
+
+	* NEWS: Update.
+
 2006-04-01  Paul D. Smith  <psmith@gnu.org>
 
 	Version 3.81 released.

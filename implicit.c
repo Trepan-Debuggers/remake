@@ -25,9 +25,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 #include "job.h"      /* struct child, used inside commands.h */
 #include "commands.h" /* set_file_variables */
 
-static int
-pattern_search PARAMS ((struct file *file, int archive,
-                        unsigned int depth, unsigned int recursions));
+static int pattern_search (struct file *file, int archive,
+                           unsigned int depth, unsigned int recursions);
 
 /* For a FILE which has no commands specified, try to figure out some
    from the implicit pattern rules.

@@ -93,7 +93,7 @@ initialize_variable_output (void)
 
 /* Recursively expand V.  The returned string is malloc'd.  */
 
-static char *allocated_variable_append PARAMS ((const struct variable *v));
+static char *allocated_variable_append (const struct variable *v);
 
 char *
 recursively_expand_for_file (struct variable *v, struct file *file)

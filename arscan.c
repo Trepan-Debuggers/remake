@@ -134,7 +134,7 @@ VMS_get_member_info (struct dsc$descriptor_s *module, unsigned long *rfa)
    Returns 0 if have scanned successfully.  */
 
 long int
-ar_scan (char *archive, long int (*function) PARAMS ((void)), long int arg)
+ar_scan (char *archive, long int (*function) (void), long int arg)
 {
   char *p;
 

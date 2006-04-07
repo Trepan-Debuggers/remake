@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 #include <descrip.h>
 #include <clidef.h>
 
-extern char *vmsify PARAMS ((char *name, int type));
+char *vmsify (char *name, int type);
 
 static int vms_jobsefnmask = 0;
 

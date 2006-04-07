@@ -16,7 +16,7 @@
 # GNU Make; see the file COPYING.  If not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 
-AUTOMAKE_OPTIONS = 1.8 dist-bzip2 check-news ansi2knr
+AUTOMAKE_OPTIONS = 1.8 dist-bzip2 check-news
 ACLOCAL_AMFLAGS	=  -I config
 
 MAKE_HOST =	@MAKE_HOST@

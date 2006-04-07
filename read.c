@@ -37,7 +37,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 #ifndef VMS
 #include <pwd.h>
 #else
-struct passwd *getpwnam PARAMS ((char *name));
+struct passwd *getpwnam (char *name);
 #endif
 #endif
 #endif /* !WINDOWS32 */
@@ -123,27 +123,26 @@ const struct floc *reading_file = 0;
 
 static struct dep *read_makefiles = 0;
 
-static int eval_makefile PARAMS ((char *filename, int flags));
-static int eval PARAMS ((struct ebuffer *buffer, int flags));
+static int eval_makefile (char *filename, int flags);
+static int eval (struct ebuffer *buffer, int flags);
 
-static long readline PARAMS ((struct ebuffer *ebuf));
-static void do_define PARAMS ((char *name, unsigned int namelen,
-                               enum variable_origin origin,
-                               struct ebuffer *ebuf));
-static int conditional_line PARAMS ((char *line, int len, const struct floc *flocp));
-static void record_files PARAMS ((struct nameseq *filenames, char *pattern, char *pattern_percent,
-			struct dep *deps, unsigned int cmds_started, char *commands,
-			unsigned int commands_idx, int two_colon,
-                        const struct floc *flocp));
-static void record_target_var PARAMS ((struct nameseq *filenames, char *defn,
-                                       enum variable_origin origin,
-                                       int enabled,
-                                       const struct floc *flocp));
-static enum make_word_type get_next_mword PARAMS ((char *buffer, char *delim,
-                        char **startp, unsigned int *length));
-static void remove_comments PARAMS ((char *line));
-static char *find_char_unquote PARAMS ((char *string, int stop1,
-                                        int stop2, int blank, int ignorevars));
+static long readline (struct ebuffer *ebuf);
+static void do_define (char *name, unsigned int namelen,
+                       enum variable_origin origin, struct ebuffer *ebuf);
+static int conditional_line (char *line, int len, const struct floc *flocp);
+static void record_files (struct nameseq *filenames, char *pattern,
+                          char *pattern_percent, struct dep *deps,
+                          unsigned int cmds_started, char *commands,
+                          unsigned int commands_idx, int two_colon,
+                          const struct floc *flocp);
+static void record_target_var (struct nameseq *filenames, char *defn,
+                               enum variable_origin origin, int enabled,
+                               const struct floc *flocp);
+static enum make_word_type get_next_mword (char *buffer, char *delim,
+                                           char **startp, unsigned int *length);
+static void remove_comments (char *line);
+static char *find_char_unquote (char *string, int stop1, int stop2,
+                                int blank, int ignorevars);
 
 /* Read in all the makefiles and return the chain of their names.  */
 

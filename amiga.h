@@ -15,6 +15,5 @@ You should have received a copy of the GNU General Public License along with
 GNU Make; see the file COPYING.  If not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 
-extern int MyExecute PARAMS ((char ** argv));
-extern char * wildcard_expansion PARAMS ((char * wc, char * o));
-
+int MyExecute (char ** argv);
+char * wildcard_expansion (char * wc, char * o);
