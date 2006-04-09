@@ -238,7 +238,7 @@ update_goal_chain (struct dep *goals)
 		lastgoal->next = g->next;
 
 	      /* Free the storage.  */
-	      free ((char *) g);
+	      free (g);
 
 	      g = lastgoal == 0 ? goals : lastgoal->next;
 
@@ -1061,7 +1061,7 @@ touch_file (struct file *file)
       else
 	{
 	  struct stat statbuf;
-	  char buf;
+	  char buf = 'x';
           int e;
 
           EINTRLOOP (e, fstat (fd, &statbuf));
@@ -1191,10 +1191,10 @@ f_mtime (struct file *file, int search)
 
 	  /* free (file->name); */
 
-	  name = (char *) xmalloc (arlen + 1 + memlen + 2);
-	  bcopy (arname, name, arlen);
+	  name = xmalloc (arlen + 1 + memlen + 2);
+	  memcpy (name, arname, arlen);
 	  name[arlen] = '(';
-	  bcopy (memname, name + arlen + 1, memlen);
+	  memcpy (name + arlen + 1, memname, memlen);
 	  name[arlen + 1 + memlen] = ')';
 	  name[arlen + 1 + memlen + 1] = '\0';
 

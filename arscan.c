@@ -320,7 +320,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
   {
     char buf[SARMAG];
     register int nread = read (desc, buf, SARMAG);
-    if (nread != SARMAG || bcmp (buf, ARMAG, SARMAG))
+    if (nread != SARMAG || memcmp (buf, ARMAG, SARMAG))
       {
 	(void) close (desc);
 	return -2;
@@ -329,7 +329,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 #else
 #ifdef AIAMAG
   {
-    register int nread = read (desc, (char *) &fl_header, FL_HSZ);
+    register int nread = read (desc, &fl_header, FL_HSZ);
 
     if (nread != FL_HSZ)
       {
@@ -339,7 +339,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 #ifdef AIAMAGBIG
     /* If this is a "big" archive, then set the flag and
        re-read the header into the "big" structure. */
-    if (!bcmp (fl_header.fl_magic, AIAMAGBIG, SAIAMAG))
+    if (!memcmp (fl_header.fl_magic, AIAMAGBIG, SAIAMAG))
       {
 	big_archive = 1;
 
@@ -351,7 +351,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 	  }
 
 	/* re-read the header into the "big" structure */
-	nread = read (desc, (char *) &fl_header_big, FL_HSZ_BIG);
+	nread = read (desc, &fl_header_big, FL_HSZ_BIG);
 	if (nread != FL_HSZ_BIG)
 	  {
 	    (void) close (desc);
@@ -361,7 +361,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
     else
 #endif
        /* Check to make sure this is a "normal" archive. */
-      if (bcmp (fl_header.fl_magic, AIAMAG, SAIAMAG))
+      if (memcmp (fl_header.fl_magic, AIAMAG, SAIAMAG))
 	{
           (void) close (desc);
           return -2;
@@ -455,7 +455,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 #ifdef AIAMAGBIG
 	if (big_archive)
 	  {
-	    nread = read (desc, (char *) &member_header_big,
+	    nread = read (desc, &member_header_big,
 			  AR_MEMHDR_SZ(member_header_big) );
 
 	    if (nread != AR_MEMHDR_SZ(member_header_big))
@@ -487,7 +487,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 	else
 #endif
 	  {
-	    nread = read (desc, (char *) &member_header,
+	    nread = read (desc, &member_header,
 			  AR_MEMHDR_SZ(member_header) );
 
 	    if (nread != AR_MEMHDR_SZ(member_header))
@@ -525,7 +525,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 		       eltmode, arg);
 
 #else	/* Not AIAMAG.  */
-	nread = read (desc, (char *) &member_header, AR_HDR_SIZE);
+	nread = read (desc, &member_header, AR_HDR_SIZE);
 	if (nread == 0)
 	  /* No data left means end of file; that is OK.  */
 	  break;
@@ -534,13 +534,13 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 #if defined(ARFMAG) || defined(ARFZMAG)
 	    || (
 # ifdef ARFMAG
-                bcmp (member_header.ar_fmag, ARFMAG, 2)
+                memcmp (member_header.ar_fmag, ARFMAG, 2)
 # else
                 1
 # endif
                 &&
 # ifdef ARFZMAG
-                bcmp (member_header.ar_fmag, ARFZMAG, 2)
+                memcmp (member_header.ar_fmag, ARFZMAG, 2)
 # else
                 1
 # endif
@@ -553,7 +553,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 	  }
 
 	name = namebuf;
-	bcopy (member_header.ar_name, name, sizeof member_header.ar_name);
+	memcpy (name, member_header.ar_name, sizeof member_header.ar_name);
 	{
 	  register char *p = name + sizeof member_header.ar_name;
 	  do
@@ -593,7 +593,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
  	    {
  	      int namesize = atoi (name + 3);
 
- 	      name = (char *) alloca (namesize + 1);
+ 	      name = alloca (namesize + 1);
  	      nread = read (desc, name, namesize);
  	      if (nread != namesize)
  		{
@@ -664,7 +664,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
  	    char *clear;
  	    char *limit;
 
- 	    namemap = (char *) alloca (eltsize);
+ 	    namemap = alloca (eltsize);
  	    nread = read (desc, namemap, eltsize);
  	    if (nread != eltsize)
  	      {
@@ -775,12 +775,12 @@ ar_member_touch (char *arname, char *memname)
   /* Read in this member's header */
   if (lseek (fd, pos, 0) < 0)
     goto lose;
-  if (AR_HDR_SIZE != read (fd, (char *) &ar_hdr, AR_HDR_SIZE))
+  if (AR_HDR_SIZE != read (fd, &ar_hdr, AR_HDR_SIZE))
     goto lose;
   /* Write back the header, thus touching the archive file.  */
   if (lseek (fd, pos, 0) < 0)
     goto lose;
-  if (AR_HDR_SIZE != write (fd, (char *) &ar_hdr, AR_HDR_SIZE))
+  if (AR_HDR_SIZE != write (fd, &ar_hdr, AR_HDR_SIZE))
     goto lose;
   /* The file's mtime is the time we we want.  */
   EINTRLOOP (i, fstat (fd, &statbuf));
@@ -800,7 +800,7 @@ ar_member_touch (char *arname, char *memname)
   /* Write back this member's header */
   if (lseek (fd, pos, 0) < 0)
     goto lose;
-  if (AR_HDR_SIZE != write (fd, (char *) &ar_hdr, AR_HDR_SIZE))
+  if (AR_HDR_SIZE != write (fd, &ar_hdr, AR_HDR_SIZE))
     goto lose;
   close (fd);
   return 0;

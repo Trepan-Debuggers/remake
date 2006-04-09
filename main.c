@@ -895,10 +895,7 @@ main (int argc, char **argv, char **envp)
 #endif
 {
   static char *stdin_nm = 0;
-  struct file *f;
-  int i;
   int makefile_status = MAKE_SUCCESS;
-  char **p;
   struct dep *read_makefiles;
   PATH_VAR (current_directory);
   unsigned int restarts = 0;
@@ -1021,7 +1018,7 @@ main (int argc, char **argv, char **envp)
   setvbuf (stdout, _IOLBF, xmalloc (BUFSIZ), BUFSIZ);
 # else	/* setvbuf not reversed.  */
   /* Some buggy systems lose if we pass 0 instead of allocating ourselves.  */
-  setvbuf (stdout, (char *) 0, _IOLBF, BUFSIZ);
+  setvbuf (stdout, 0, _IOLBF, BUFSIZ);
 # endif	/* setvbuf reversed.  */
 #elif HAVE_SETLINEBUF
   setlinebuf (stdout);
@@ -1129,57 +1126,63 @@ main (int argc, char **argv, char **envp)
      from the environment.  */
 
 #ifndef _AMIGA
-  for (i = 0; envp[i] != 0; ++i)
-    {
-      int do_not_define = 0;
-      char *ep = envp[i];
+  {
+    unsigned int i;
 
-      while (*ep != '\0' && *ep != '=')
-        ++ep;
+    for (i = 0; envp[i] != 0; ++i)
+      {
+        int do_not_define = 0;
+        char *ep = envp[i];
+
+        while (*ep != '\0' && *ep != '=')
+          ++ep;
 #ifdef WINDOWS32
-      if (!unix_path && strneq(envp[i], "PATH=", 5))
-        unix_path = ep+1;
-      else if (!strnicmp(envp[i], "Path=", 5)) {
-        do_not_define = 1; /* it gets defined after loop exits */
-        if (!windows32_path)
-          windows32_path = ep+1;
-      }
-#endif
-      /* The result of pointer arithmetic is cast to unsigned int for
-	 machines where ptrdiff_t is a different size that doesn't widen
-	 the same.  */
-      if (!do_not_define)
-        {
-          struct variable *v;
-
-          v = define_variable (envp[i], (unsigned int) (ep - envp[i]),
-                               ep + 1, o_env, 1);
-          /* Force exportation of every variable culled from the environment.
-             We used to rely on target_environment's v_default code to do this.
-             But that does not work for the case where an environment variable
-             is redefined in a makefile with `override'; it should then still
-             be exported, because it was originally in the environment.  */
-          v->export = v_export;
-
-          /* Another wrinkle is that POSIX says the value of SHELL set in the
-             makefile won't change the value of SHELL given to subprocesses  */
-          if (streq (v->name, "SHELL"))
-            {
-#ifndef __MSDOS__
-              v->export = v_noexport;
-#endif
-              shell_var.name = "SHELL";
-              shell_var.value = xstrdup (ep + 1);
-            }
-
-          /* If MAKE_RESTARTS is set, remember it but don't export it.  */
-          if (streq (v->name, "MAKE_RESTARTS"))
-            {
-              v->export = v_noexport;
-              restarts = (unsigned int) atoi (ep + 1);
-            }
+        if (!unix_path && strneq(envp[i], "PATH=", 5))
+          unix_path = ep+1;
+        else if (!strnicmp(envp[i], "Path=", 5)) {
+          do_not_define = 1; /* it gets defined after loop exits */
+          if (!windows32_path)
+            windows32_path = ep+1;
         }
-    }
+#endif
+        /* The result of pointer arithmetic is cast to unsigned int for
+           machines where ptrdiff_t is a different size that doesn't widen
+           the same.  */
+        if (!do_not_define)
+          {
+            struct variable *v;
+
+            v = define_variable (envp[i], (unsigned int) (ep - envp[i]),
+                                 ep + 1, o_env, 1);
+            /* Force exportation of every variable culled from the
+               environment.  We used to rely on target_environment's
+               v_default code to do this.  But that does not work for the
+               case where an environment variable is redefined in a makefile
+               with `override'; it should then still be exported, because it
+               was originally in the environment.  */
+            v->export = v_export;
+
+            /* Another wrinkle is that POSIX says the value of SHELL set in
+               the makefile won't change the value of SHELL given to
+               subprocesses.  */
+            if (streq (v->name, "SHELL"))
+              {
+#ifndef __MSDOS__
+                v->export = v_noexport;
+#endif
+                shell_var.name = "SHELL";
+                shell_var.value = xstrdup (ep + 1);
+              }
+
+            /* If MAKE_RESTARTS is set, remember it but don't export it.  */
+            if (streq (v->name, "MAKE_RESTARTS"))
+              {
+                v->export = v_noexport;
+                restarts = (unsigned int) atoi (ep + 1);
+              }
+          }
+      }
+  }
 #ifdef WINDOWS32
     /* If we didn't find a correctly spelled PATH we define PATH as
      * either the first mispelled value or an empty string
@@ -1328,7 +1331,7 @@ main (int argc, char **argv, char **envp)
 	}
 
       /* Now allocate a buffer big enough and fill it.  */
-      p = value = (char *) alloca (len);
+      p = value = alloca (len);
       for (cv = command_variables; cv != 0; cv = cv->next)
 	{
 	  v = cv->variable;
@@ -1358,31 +1361,34 @@ main (int argc, char **argv, char **envp)
 
   /* If there were -C flags, move ourselves about.  */
   if (directories != 0)
-    for (i = 0; directories->list[i] != 0; ++i)
-      {
-	char *dir = directories->list[i];
-        char *expanded = 0;
-	if (dir[0] == '~')
-	  {
-            expanded = tilde_expand (dir);
-	    if (expanded != 0)
-	      dir = expanded;
-	  }
-#ifdef WINDOWS32
-        /* WINDOWS32 chdir() doesn't work if the directory has a trailing '/'
-           But allow -C/ just in case someone wants that.  */
+    {
+      unsigned int i;
+      for (i = 0; directories->list[i] != 0; ++i)
         {
-          char *p = dir + strlen (dir) - 1;
-          while (p > dir && (p[0] == '/' || p[0] == '\\'))
-            --p;
-          p[1] = '\0';
-        }
+          char *dir = directories->list[i];
+          char *expanded = 0;
+          if (dir[0] == '~')
+            {
+              expanded = tilde_expand (dir);
+              if (expanded != 0)
+                dir = expanded;
+            }
+#ifdef WINDOWS32
+          /* WINDOWS32 chdir() doesn't work if the directory has a trailing '/'
+             But allow -C/ just in case someone wants that.  */
+          {
+            char *p = dir + strlen (dir) - 1;
+            while (p > dir && (p[0] == '/' || p[0] == '\\'))
+              --p;
+            p[1] = '\0';
+          }
 #endif
-	if (chdir (dir) < 0)
-	  pfatal_with_name (dir);
-	if (expanded)
-	  free (expanded);
-      }
+          if (chdir (dir) < 0)
+            pfatal_with_name (dir);
+          if (expanded)
+            free (expanded);
+        }
+    }
 
 #ifdef WINDOWS32
   /*
@@ -1420,8 +1426,8 @@ main (int argc, char **argv, char **envp)
 
   /* Construct the list of include directories to search.  */
 
-  construct_include_path (include_directories == 0 ? (char **) 0
-			  : include_directories->list);
+  construct_include_path (include_directories == 0
+                          ? 0 : include_directories->list);
 
   /* Figure out where we are now, after chdir'ing.  */
   if (directories == 0)
@@ -1452,7 +1458,7 @@ main (int argc, char **argv, char **envp)
 
   if (makefiles != 0)
     {
-      register unsigned int i;
+      unsigned int i;
       for (i = 0; i < makefiles->idx; ++i)
 	if (makefiles->list[i][0] == '-' && makefiles->list[i][1] == '\0')
 	  {
@@ -1485,8 +1491,7 @@ main (int argc, char **argv, char **envp)
                )
 	      tmpdir = DEFAULT_TMPDIR;
 
-            template = (char *) alloca (strlen (tmpdir)
-                                        + sizeof (DEFAULT_TMPFILE) + 1);
+            template = alloca (strlen (tmpdir) + sizeof (DEFAULT_TMPFILE) + 1);
 	    strcpy (template, tmpdir);
 
 #ifdef HAVE_DOS_PATHS
@@ -1510,21 +1515,23 @@ main (int argc, char **argv, char **envp)
 		if (n > 0 && fwrite (buf, 1, n, outfile) != n)
 		  pfatal_with_name (_("fwrite (temporary file)"));
 	      }
-	    (void) fclose (outfile);
+	    fclose (outfile);
 
 	    /* Replace the name that read_all_makefiles will
 	       see with the name of the temporary file.  */
             makefiles->list[i] = xstrdup (stdin_nm);
 
 	    /* Make sure the temporary file will not be remade.  */
-	    f = enter_file (stdin_nm);
-	    f->updated = 1;
-	    f->update_status = 0;
-	    f->command_state = cs_finished;
- 	    /* Can't be intermediate, or it'll be removed too early for
-               make re-exec.  */
- 	    f->intermediate = 0;
-	    f->dontcare = 0;
+            {
+              struct file *f = enter_file (stdin_nm);
+              f->updated = 1;
+              f->update_status = 0;
+              f->command_state = cs_finished;
+              /* Can't be intermediate, or it'll be removed too early for
+                 make re-exec.  */
+              f->intermediate = 0;
+              f->dontcare = 0;
+            }
 	  }
     }
 
@@ -1593,7 +1600,7 @@ main (int argc, char **argv, char **envp)
   /* Read all the makefiles.  */
 
   read_makefiles
-    = read_all_makefiles (makefiles == 0 ? (char **) 0 : makefiles->list);
+    = read_all_makefiles (makefiles == 0 ? 0 : makefiles->list);
 
 #ifdef WINDOWS32
   /* look one last time after reading all Makefiles */
@@ -1729,7 +1736,7 @@ main (int argc, char **argv, char **envp)
 
       jobserver_fds = (struct stringlist *)
                         xmalloc (sizeof (struct stringlist));
-      jobserver_fds->list = (char **) xmalloc (sizeof (char *));
+      jobserver_fds->list = xmalloc (sizeof (char *));
       jobserver_fds->list[0] = xmalloc ((sizeof ("1024")*2)+1);
 
       sprintf (jobserver_fds->list[0], "%d,%d", job_fds[0], job_fds[1]);
@@ -1782,20 +1789,24 @@ main (int argc, char **argv, char **envp)
      as possible into the future).  If restarts is set we'll do -W later.  */
 
   if (old_files != 0)
-    for (p = old_files->list; *p != 0; ++p)
-      {
-	f = enter_command_line_file (*p);
-	f->last_mtime = f->mtime_before_update = OLD_MTIME;
-	f->updated = 1;
-	f->update_status = 0;
-	f->command_state = cs_finished;
-      }
+    {
+      char **p;
+      for (p = old_files->list; *p != 0; ++p)
+        {
+          struct file *f = enter_command_line_file (*p);
+          f->last_mtime = f->mtime_before_update = OLD_MTIME;
+          f->updated = 1;
+          f->update_status = 0;
+          f->command_state = cs_finished;
+        }
+    }
 
   if (!restarts && new_files != 0)
     {
+      char **p;
       for (p = new_files->list; *p != 0; ++p)
 	{
-	  f = enter_command_line_file (*p);
+	  struct file *f = enter_command_line_file (*p);
 	  f->last_mtime = f->mtime_before_update = NEW_MTIME;
 	}
     }
@@ -1827,7 +1838,7 @@ main (int argc, char **argv, char **envp)
 	d = read_makefiles;
 	while (d != 0)
 	  {
-	    register struct file *f = d->file;
+	    struct file *f = d->file;
 	    if (f->double_colon)
 	      for (f = f->double_colon; f != NULL; f = f->prev)
 		{
@@ -1860,9 +1871,9 @@ main (int argc, char **argv, char **envp)
 		}
 	    if (f == NULL || !f->double_colon)
 	      {
-                makefile_mtimes = (FILE_TIMESTAMP *)
-                  xrealloc ((char *) makefile_mtimes,
-                            (mm_idx + 1) * sizeof (FILE_TIMESTAMP));
+                makefile_mtimes = xrealloc (makefile_mtimes,
+                                            (mm_idx+1)
+                                            * sizeof (FILE_TIMESTAMP));
 		makefile_mtimes[mm_idx++] = file_mtime_no_search (d->file);
 		last = d;
 		d = d->next;
@@ -1991,8 +2002,8 @@ main (int argc, char **argv, char **envp)
           /* Add -o option for the stdin temporary file, if necessary.  */
           if (stdin_nm)
             {
-              nargv = (char **) xmalloc ((nargc + 2) * sizeof (char *));
-              bcopy ((char *) argv, (char *) nargv, argc * sizeof (char *));
+              nargv = xmalloc ((nargc + 2) * sizeof (char *));
+              memcpy (nargv, argv, argc * sizeof (char *));
               nargv[nargc++] = concat ("-o", stdin_nm, "");
               nargv[nargc] = 0;
             }
@@ -2028,28 +2039,24 @@ main (int argc, char **argv, char **envp)
 	    }
 
 #ifndef _AMIGA
-	  for (p = environ; *p != 0; ++p)
-            {
-              if (strneq (*p, MAKELEVEL_NAME, MAKELEVEL_LENGTH)
-                  && (*p)[MAKELEVEL_LENGTH] == '=')
-                {
-                  /* The SGI compiler apparently can't understand
-                     the concept of storing the result of a function
-                     in something other than a local variable.  */
-                  char *sgi_loses;
-                  sgi_loses = (char *) alloca (40);
-                  *p = sgi_loses;
-                  sprintf (*p, "%s=%u", MAKELEVEL_NAME, makelevel);
-                }
-              if (strneq (*p, "MAKE_RESTARTS=", 14))
-                {
-                  char *sgi_loses;
-                  sgi_loses = (char *) alloca (40);
-                  *p = sgi_loses;
-                  sprintf (*p, "MAKE_RESTARTS=%u", restarts);
-                  restarts = 0;
-                }
-            }
+          {
+            char **p;
+            for (p = environ; *p != 0; ++p)
+              {
+                if (strneq (*p, MAKELEVEL_NAME, MAKELEVEL_LENGTH)
+                    && (*p)[MAKELEVEL_LENGTH] == '=')
+                  {
+                    *p = alloca (40);
+                    sprintf (*p, "%s=%u", MAKELEVEL_NAME, makelevel);
+                  }
+                if (strneq (*p, "MAKE_RESTARTS=", 14))
+                  {
+                    *p = alloca (40);
+                    sprintf (*p, "MAKE_RESTARTS=%u", restarts);
+                    restarts = 0;
+                  }
+              }
+          }
 #else /* AMIGA */
 	  {
 	    char buffer[256];
@@ -2115,7 +2122,7 @@ main (int argc, char **argv, char **envp)
 
       /* Free the makefile mtimes (if we allocated any).  */
       if (makefile_mtimes)
-        free ((char *) makefile_mtimes);
+        free (makefile_mtimes);
     }
 
   /* Set up `MAKEFLAGS' again for the normal targets.  */
@@ -2127,9 +2134,10 @@ main (int argc, char **argv, char **envp)
   /* If restarts is set we haven't set up -W files yet, so do that now.  */
   if (restarts && new_files != 0)
     {
+      char **p;
       for (p = new_files->list; *p != 0; ++p)
 	{
-	  f = enter_command_line_file (*p);
+	  struct file *f = enter_command_line_file (*p);
 	  f->last_mtime = f->mtime_before_update = NEW_MTIME;
 	}
     }
@@ -2315,7 +2323,7 @@ handle_non_switch_argument (char *arg, int env)
           break;
 
       if (! cv) {
-        cv = (struct command_variable *) xmalloc (sizeof (*cv));
+        cv = xmalloc (sizeof (*cv));
         cv->variable = v;
         cv->next = command_variables;
         command_variables = cv;
@@ -2344,23 +2352,23 @@ handle_non_switch_argument (char *arg, int env)
 
       {
         /* Add this target name to the MAKECMDGOALS variable. */
-        struct variable *v;
+        struct variable *gv;
         char *value;
 
-        v = lookup_variable (STRING_SIZE_TUPLE ("MAKECMDGOALS"));
-        if (v == 0)
+        gv = lookup_variable (STRING_SIZE_TUPLE ("MAKECMDGOALS"));
+        if (gv == 0)
           value = f->name;
         else
           {
             /* Paste the old and new values together */
             unsigned int oldlen, newlen;
 
-            oldlen = strlen (v->value);
+            oldlen = strlen (gv->value);
             newlen = strlen (f->name);
-            value = (char *) alloca (oldlen + 1 + newlen + 1);
-            bcopy (v->value, value, oldlen);
+            value = alloca (oldlen + 1 + newlen + 1);
+            memcpy (value, gv->value, oldlen);
             value[oldlen] = ' ';
-            bcopy (f->name, &value[oldlen + 1], newlen + 1);
+            memcpy (&value[oldlen + 1], f->name, newlen + 1);
           }
         define_variable ("MAKECMDGOALS", 12, value, o_default, 0);
       }
@@ -2475,15 +2483,14 @@ decode_switches (int argc, char **argv, int env)
 			xmalloc (sizeof (struct stringlist));
 		      sl->max = 5;
 		      sl->idx = 0;
-		      sl->list = (char **) xmalloc (5 * sizeof (char *));
+		      sl->list = xmalloc (5 * sizeof (char *));
 		      *(struct stringlist **) cs->value_ptr = sl;
 		    }
 		  else if (sl->idx == sl->max - 1)
 		    {
 		      sl->max += 5;
-		      sl->list = (char **)
-			xrealloc ((char *) sl->list,
-				  sl->max * sizeof (char *));
+		      sl->list = xrealloc (sl->list,
+                                           sl->max * sizeof (char *));
 		    }
 		  sl->list[sl->idx++] = optarg;
 		  sl->list[sl->idx] = 0;
@@ -2570,7 +2577,7 @@ decode_switches (int argc, char **argv, int env)
 static void
 decode_env_switches (char *envar, unsigned int len)
 {
-  char *varref = (char *) alloca (2 + len + 2);
+  char *varref = alloca (2 + len + 2);
   char *value, *p;
   int argc;
   char **argv;
@@ -2578,7 +2585,7 @@ decode_env_switches (char *envar, unsigned int len)
   /* Get the variable's value.  */
   varref[0] = '$';
   varref[1] = '(';
-  bcopy (envar, &varref[2], len);
+  memcpy (&varref[2], envar, len);
   varref[2 + len] = ')';
   varref[2 + len + 1] = '\0';
   value = variable_expand (varref);
@@ -2590,12 +2597,12 @@ decode_env_switches (char *envar, unsigned int len)
     return;
 
   /* Allocate a vector that is definitely big enough.  */
-  argv = (char **) alloca ((1 + len + 1) * sizeof (char *));
+  argv = alloca ((1 + len + 1) * sizeof (char *));
 
   /* Allocate a buffer to copy the value into while we split it into words
      and unquote it.  We must use permanent storage for this because
      decode_switches may store pointers into the passed argument words.  */
-  p = (char *) xmalloc (2 * len);
+  p = xmalloc (2 * len);
 
   /* getopt will look at the arguments starting at ARGV[1].
      Prepend a spacer word.  */
@@ -2683,7 +2690,7 @@ define_makeflags (int all, int makefile)
   unsigned int flagslen = 0;
 #define	ADD_FLAG(ARG, LEN) \
   do {									      \
-    struct flag *new = (struct flag *) alloca (sizeof (struct flag));	      \
+    struct flag *new = alloca (sizeof (struct flag));                         \
     new->cs = cs;							      \
     new->arg = (ARG);							      \
     new->next = flags;							      \
@@ -2731,7 +2738,7 @@ define_makeflags (int all, int makefile)
 		ADD_FLAG ("1", 1);
 	      else
 		{
-		  char *buf = (char *) alloca (30);
+		  char *buf = alloca (30);
 		  sprintf (buf, "%u", *(unsigned int *) cs->value_ptr);
 		  ADD_FLAG (buf, strlen (buf));
 		}
@@ -2752,7 +2759,7 @@ define_makeflags (int all, int makefile)
 		ADD_FLAG ("", 0); /* Optional value omitted; see below.  */
 	      else
 		{
-		  char *buf = (char *) alloca (100);
+		  char *buf = alloca (100);
 		  sprintf (buf, "%g", *(double *) cs->value_ptr);
 		  ADD_FLAG (buf, strlen (buf));
 		}
@@ -2783,8 +2790,8 @@ define_makeflags (int all, int makefile)
 
   /* Construct the value in FLAGSTRING.
      We allocate enough space for a preceding dash and trailing null.  */
-  flagstring = (char *) alloca (1 + flagslen + 1);
-  bzero (flagstring, 1 + flagslen + 1);
+  flagstring = alloca (1 + flagslen + 1);
+  memset (flagstring, '\0', 1 + flagslen + 1);
   p = flagstring;
   words = 1;
   *p++ = '-';
@@ -2876,12 +2883,12 @@ define_makeflags (int all, int makefile)
       /* Copy in the string.  */
       if (posix_pedantic)
 	{
-	  bcopy (posixref, p, sizeof posixref - 1);
+	  memcpy (p, posixref, sizeof posixref - 1);
 	  p += sizeof posixref - 1;
 	}
       else
 	{
-	  bcopy (ref, p, sizeof ref - 1);
+	  memcpy (p, ref, sizeof ref - 1);
 	  p += sizeof ref - 1;
 	}
     }

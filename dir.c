@@ -450,7 +450,7 @@ find_directory (char *name)
       /* The directory was not found.  Create a new entry for it.  */
 
       p = name + strlen (name);
-      dir = (struct directory *) xmalloc (sizeof (struct directory));
+      dir = xmalloc (sizeof (struct directory));
       dir->name = savestring (name, p - name);
       hash_insert_at (&directories, dir, dir_slot);
       /* The directory is not in the name hash table.
@@ -561,7 +561,7 @@ find_directory (char *name)
 		  if (open_directories == MAX_OPEN_DIRECTORIES)
 		    /* We have too many directories open already.
 		       Read the entire directory and then close it.  */
-		    (void) dir_contents_file_exists_p (dc, (char *) 0);
+		    (void) dir_contents_file_exists_p (dc, 0);
 		}
 	    }
 
@@ -702,7 +702,7 @@ dir_contents_file_exists_p (struct directory_contents *dir, char *filename)
       if (! rehash || HASH_VACANT (*dirfile_slot))
 #endif
 	{
-	  df = (struct dirfile *) xmalloc (sizeof (struct dirfile));
+	  df = xmalloc (sizeof (struct dirfile));
 	  df->name = savestring (d->d_name, len);
 	  df->length = len;
 	  df->impossible = 0;
@@ -755,7 +755,7 @@ file_exists_p (char *name)
   dirend = strrchr (name, ']');
   if (dirend == 0)
     dirend = strrchr (name, ':');
-  if (dirend == (char *)0)
+  if (dirend == 0)
     return dir_file_exists_p ("[]", name);
 #else /* !VMS */
   dirend = strrchr (name, '/');
@@ -789,8 +789,8 @@ file_exists_p (char *name)
 	  (*dirend == '/' || *dirend == '\\' || *dirend == ':'))
 	dirend++;
 #endif
-      dirname = (char *) alloca (dirend - name + 1);
-      bcopy (name, dirname, dirend - name);
+      dirname = alloca (dirend - name + 1);
+      memcpy (dirname, name, dirend - name);
       dirname[dirend - name] = '\0';
     }
   return dir_file_exists_p (dirname, slash + 1);
@@ -849,8 +849,8 @@ file_impossible (char *filename)
 	      (*dirend == '/' || *dirend == '\\' || *dirend == ':'))
 	    dirend++;
 #endif
-	  dirname = (char *) alloca (dirend - p + 1);
-	  bcopy (p, dirname, dirend - p);
+	  dirname = alloca (dirend - p + 1);
+	  memcpy (dirname, p, dirend - p);
 	  dirname[dirend - p] = '\0';
 	}
       dir = find_directory (dirname);
@@ -863,7 +863,7 @@ file_impossible (char *filename)
 	 structure for it, but leave it out of the contents hash table.  */
       dir->contents = (struct directory_contents *)
 	xmalloc (sizeof (struct directory_contents));
-      bzero ((char *) dir->contents, sizeof (struct directory_contents));
+      memset (dir->contents, '\0', sizeof (struct directory_contents));
     }
 
   if (dir->contents->dirfiles.ht_vec == 0)
@@ -874,7 +874,7 @@ file_impossible (char *filename)
 
   /* Make a new entry and put it in the table.  */
 
-  new = (struct dirfile *) xmalloc (sizeof (struct dirfile));
+  new = xmalloc (sizeof (struct dirfile));
   new->name = xstrdup (filename);
   new->length = strlen (filename);
   new->impossible = 1;
@@ -930,8 +930,8 @@ file_impossible_p (char *filename)
 	      (*dirend == '/' || *dirend == '\\' || *dirend == ':'))
 	    dirend++;
 #endif
-	  dirname = (char *) alloca (dirend - filename + 1);
-	  bcopy (p, dirname, dirend - p);
+	  dirname = alloca (dirend - filename + 1);
+	  memcpy (dirname, p, dirend - p);
 	  dirname[dirend - p] = '\0';
 	}
       dir = find_directory (dirname)->contents;
@@ -1099,7 +1099,7 @@ static __ptr_t
 open_dirstream (const char *directory)
 {
   struct dirstream *new;
-  struct directory *dir = find_directory ((char *)directory);
+  struct directory *dir = find_directory (directory);
 
   if (dir->contents == 0 || dir->contents->dirfiles.ht_vec == 0)
     /* DIR->contents is nil if the directory could not be stat'd.
@@ -1109,9 +1109,9 @@ open_dirstream (const char *directory)
   /* Read all the contents of the directory now.  There is no benefit
      in being lazy, since glob will want to see every file anyway.  */
 
-  (void) dir_contents_file_exists_p (dir->contents, (char *) 0);
+  dir_contents_file_exists_p (dir->contents, 0);
 
-  new = (struct dirstream *) xmalloc (sizeof (struct dirstream));
+  new = xmalloc (sizeof (struct dirstream));
   new->contents = dir->contents;
   new->dirfile_slot = (struct dirfile **) new->contents->dirfiles.ht_vec;
 

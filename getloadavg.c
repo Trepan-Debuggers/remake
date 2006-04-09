@@ -704,7 +704,7 @@ getloadavg (double loadavg[], int nelem)
       for (i = 0; i < conf.config_maxclass; ++i)
 	{
 	  struct class_stats stats;
-	  bzero ((char *) &stats, sizeof stats);
+	  memset (&stats, '\0', sizeof stats);
 
 	  desc.sd_type = CPUTYPE_CLASS;
 	  desc.sd_objid = i;

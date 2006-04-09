@@ -216,7 +216,7 @@ ar_glob_match (int desc UNUSED, char *mem, int truncated UNUSED,
   if (fnmatch (state->pattern, mem, FNM_PATHNAME|FNM_PERIOD) == 0)
     {
       /* We have a match.  Add it to the chain.  */
-      struct nameseq *new = (struct nameseq *) xmalloc (state->size);
+      struct nameseq *new = xmalloc (state->size);
       new->name = concat (state->arname, mem, ")");
       new->next = state->chain;
       state->chain = new;
@@ -276,8 +276,8 @@ ar_glob (char *arname, char *member_pattern, unsigned int size)
   /* Scan the archive for matches.
      ar_glob_match will accumulate them in STATE.chain.  */
   i = strlen (arname);
-  state.arname = (char *) alloca (i + 2);
-  bcopy (arname, state.arname, i);
+  state.arname = alloca (i + 2);
+  memcpy (state.arname, arname, i);
   state.arname[i] = '(';
   state.arname[i + 1] = '\0';
   state.pattern = member_pattern;
@@ -290,13 +290,13 @@ ar_glob (char *arname, char *member_pattern, unsigned int size)
     return 0;
 
   /* Now put the names into a vector for sorting.  */
-  names = (char **) alloca (state.n * sizeof (char *));
+  names = alloca (state.n * sizeof (char *));
   i = 0;
   for (n = state.chain; n != 0; n = n->next)
     names[i++] = n->name;
 
   /* Sort them alphabetically.  */
-  qsort ((char *) names, i, sizeof (*names), alpha_compare);
+  qsort (names, i, sizeof (*names), alpha_compare);
 
   /* Put them back into the chain in the sorted order.  */
   i = 0;

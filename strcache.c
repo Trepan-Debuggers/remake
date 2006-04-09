@@ -43,7 +43,7 @@ static struct strcache *
 new_cache()
 {
   struct strcache *new;
-  new = (struct strcache *) xmalloc (sizeof (*new) + bufsize);
+  new = xmalloc (sizeof (*new) + bufsize);
   new->end = new->buffer;
   new->count = 0;
   new->bytesfree = bufsize;
@@ -118,7 +118,7 @@ static const char *
 add_hash (const char *str, int len)
 {
   /* Look up the string in the hash.  If it's there, return it.  */
-  char **slot = (char **) hash_find_slot (&strings, str);
+  char *const *slot = (char *const *) hash_find_slot (&strings, str);
   const char *key = *slot;
 
   if (!HASH_VACANT (key))

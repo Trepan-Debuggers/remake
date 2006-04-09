@@ -44,8 +44,7 @@ static struct pattern_var *last_pattern_var;
 struct pattern_var *
 create_pattern_var (char *target, char *suffix)
 {
-  register struct pattern_var *p
-    = (struct pattern_var *) xmalloc (sizeof (struct pattern_var));
+  register struct pattern_var *p = xmalloc (sizeof (struct pattern_var));
 
   if (last_pattern_var != 0)
     last_pattern_var->next = p;
@@ -206,7 +205,7 @@ define_variable_in_set (const char *name, unsigned int length,
 
   /* Create a new variable definition and add it to the hash table.  */
 
-  v = (struct variable *) xmalloc (sizeof (struct variable));
+  v = xmalloc (sizeof (struct variable));
   v->name = savestring (name, length);
   v->length = length;
   hash_insert_at (&set->table, v, var_slot);
@@ -314,7 +313,7 @@ handle_special_var (struct variable *var)
                 p = &var->value[off];
               }
 
-            bcopy (v->name, p, l);
+            memcpy (p, v->name, l);
             p += l;
             *(p++) = ' ';
           }
@@ -450,7 +449,7 @@ initialize_file_variables (struct file *file, int reading)
     {
       l = (struct variable_set_list *)
 	xmalloc (sizeof (struct variable_set_list));
-      l->set = (struct variable_set *) xmalloc (sizeof (struct variable_set));
+      l->set = xmalloc (sizeof (struct variable_set));
       hash_init (&l->set->table, PERFILE_VARIABLE_BUCKETS,
                  variable_hash_1, variable_hash_2, variable_hash_cmp);
       file->variables = l;
@@ -545,7 +544,7 @@ create_new_variable_set (void)
   register struct variable_set_list *setlist;
   register struct variable_set *set;
 
-  set = (struct variable_set *) xmalloc (sizeof (struct variable_set));
+  set = xmalloc (sizeof (struct variable_set));
   hash_init (&set->table, SMALL_SCOPE_VARIABLE_BUCKETS,
 	     variable_hash_1, variable_hash_2, variable_hash_cmp);
 
@@ -570,8 +569,8 @@ free_variable_set (struct variable_set_list *list)
 {
   hash_map (&list->set->table, free_variable_name_and_value);
   hash_free (&list->set->table, 1);
-  free ((char *) list->set);
-  free ((char *) list);
+  free (list->set);
+  free (list);
 }
 
 /* Create a new variable set and push it on the current setlist.
@@ -627,10 +626,10 @@ pop_variable_scope (void)
     }
 
   /* Free the one we no longer need.  */
-  free ((char *) setlist);
+  free (setlist);
   hash_map (&set->table, free_variable_name_and_value);
   hash_free (&set->table, 1);
-  free ((char *) set);
+  free (set);
 }
 
 /* Merge FROM_SET into TO_SET, freeing unused storage in FROM_SET.  */
@@ -942,7 +941,7 @@ target_environment (struct file *file)
   makelevel_key.length = MAKELEVEL_LENGTH;
   hash_delete (&table, &makelevel_key);
 
-  result = result_0 = (char **) xmalloc ((table.ht_fill + 2) * sizeof (char *));
+  result = result_0 = xmalloc ((table.ht_fill + 2) * sizeof (char *));
 
   v_slot = (struct variable **) table.ht_vec;
   v_end = v_slot + table.ht_size;
@@ -977,8 +976,8 @@ target_environment (struct file *file)
 	  }
       }
 
-  *result = (char *) xmalloc (100);
-  (void) sprintf (*result, "%s=%u", MAKELEVEL_NAME, makelevel + 1);
+  *result = xmalloc (100);
+  sprintf (*result, "%s=%u", MAKELEVEL_NAME, makelevel + 1);
   *++result = 0;
 
   hash_free (&table, 0);
@@ -1076,10 +1075,10 @@ do_variable_definition (const struct floc *flocp, const char *varname,
 
             oldlen = strlen (v->value);
             vallen = strlen (val);
-            p = (char *) alloca (oldlen + 1 + vallen + 1);
-            bcopy (v->value, p, oldlen);
+            p = alloca (oldlen + 1 + vallen + 1);
+            memcpy (p, v->value, oldlen);
             p[oldlen] = ' ';
-            bcopy (val, &p[oldlen + 1], vallen + 1);
+            memcpy (&p[oldlen + 1], val, vallen + 1);
           }
       }
     }
@@ -1105,7 +1104,7 @@ do_variable_definition (const struct floc *flocp, const char *varname,
       extern char * __dosexec_find_on_path (const char *, char *[], char *);
 
       /* See if we can find "/bin/sh.exe", "/bin/sh.com", etc.  */
-      if (__dosexec_find_on_path (p, (char **)0, shellpath))
+      if (__dosexec_find_on_path (p, NULL, shellpath))
 	{
 	  char *p;
 
@@ -1141,11 +1140,11 @@ do_variable_definition (const struct floc *flocp, const char *varname,
 	     executable extensions) along the $PATH.  */
 	  if (pathv)
 	    pathlen = strlen (pathv->value);
-	  path_string = (char *)xmalloc (5 + pathlen + 2 + 1);
+	  path_string = xmalloc (5 + pathlen + 2 + 1);
 	  /* On MSDOS, current directory is considered as part of $PATH.  */
 	  sprintf (path_string, "PATH=.;%s", pathv ? pathv->value : "");
 	  fake_env[0] = path_string;
-	  fake_env[1] = (char *)0;
+	  fake_env[1] = 0;
 	  if (__dosexec_find_on_path (shellbase, fake_env, shellpath))
 	    {
 	      char *p;
@@ -1307,8 +1306,8 @@ parse_variable_definition (struct variable *v, char *line)
   v->value = p;
 
   /* Expand the name, so "$(foo)bar = baz" works.  */
-  name = (char *) alloca (end - beg + 1);
-  bcopy (beg, name, end - beg);
+  name = alloca (end - beg + 1);
+  memcpy (name, beg, end - beg);
   name[end - beg] = '\0';
   v->name = allocated_variable_expand (name);
 
@@ -1359,8 +1358,8 @@ try_variable_definition (const struct floc *flocp, char *line,
 static void
 print_variable (const void *item, void *arg)
 {
-  const struct variable *v = (struct variable *) item;
-  const char *prefix = (char *) arg;
+  const struct variable *v = item;
+  const char *prefix = arg;
   const char *origin;
 
   switch (v->origin)

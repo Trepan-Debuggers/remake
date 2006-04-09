@@ -301,7 +301,7 @@ create_batch_file (char const *base, int unixy, int *fd)
       else
         {
           const unsigned final_size = path_size + size + 1;
-          char *const path = (char *) xmalloc (final_size);
+          char *const path = xmalloc (final_size);
           memcpy (path, temp_path, final_size);
           *fd = _open_osfhandle ((long)h, 0);
           if (unixy)
@@ -875,7 +875,7 @@ free_child (struct child *child)
       register unsigned int i;
       for (i = 0; i < child->file->cmds->ncommand_lines; ++i)
 	free (child->command_lines[i]);
-      free ((char *) child->command_lines);
+      free (child->command_lines);
     }
 
   if (child->environment != 0)
@@ -883,10 +883,10 @@ free_child (struct child *child)
       register char **ep = child->environment;
       while (*ep != 0)
 	free (*ep++);
-      free ((char *) child->environment);
+      free (child->environment);
     }
 
-  free ((char *) child);
+  free (child);
 }
 
 #ifdef POSIX
@@ -931,7 +931,7 @@ set_child_handler_action_flags (int set_handler, int set_alarm)
   signal (SIGCHLD, SIG_DFL);
 #endif
 
-  bzero ((char *) &sa, sizeof sa);
+  memset (&sa, '\0', sizeof sa);
   sa.sa_handler = child_handler;
   sa.sa_flags = set_handler ? 0 : SA_RESTART;
 #if defined SIGCHLD
@@ -1037,7 +1037,7 @@ start_job_command (struct child *child)
     {
 #ifndef VMS
       free (argv[0]);
-      free ((char *) argv);
+      free (argv);
 #endif
       child->file->update_status = 1;
       notice_finished_file (child->file);
@@ -1052,7 +1052,7 @@ start_job_command (struct child *child)
       if (argv)
         {
           free (argv[0]);
-          free ((char *) argv);
+          free (argv);
         }
 #endif
       argv = 0;
@@ -1113,7 +1113,7 @@ start_job_command (struct child *child)
       && argv[3] == NULL)
     {
       free (argv[0]);
-      free ((char *) argv);
+      free (argv);
       goto next_command;
     }
 #endif  /* !VMS && !_AMIGA */
@@ -1124,7 +1124,7 @@ start_job_command (struct child *child)
     {
 #ifndef VMS
       free (argv[0]);
-      free ((char *) argv);
+      free (argv);
 #endif
       goto next_command;
     }
@@ -1402,7 +1402,7 @@ start_job_command (struct child *child)
   /* Free the storage used by the child's argument list.  */
 #ifndef VMS
   free (argv[0]);
-  free ((char *) argv);
+  free (argv);
 #endif
 
   return;
@@ -1500,7 +1500,7 @@ new_job (struct file *file)
   chop_commands (cmds);
 
   /* Expand the command lines and store the results in LINES.  */
-  lines = (char **) xmalloc (cmds->ncommand_lines * sizeof (char *));
+  lines = xmalloc (cmds->ncommand_lines * sizeof (char *));
   for (i = 0; i < cmds->ncommand_lines; ++i)
     {
       /* Collapse backslash-newline combinations that are inside variable
@@ -1526,7 +1526,7 @@ new_job (struct file *file)
 	    /* Copy the text between the end of the last chunk
 	       we processed (where IN points) and the new chunk
 	       we are about to process (where REF points).  */
-	    bcopy (in, out, ref - in);
+	    memmove (out, in, ref - in);
 
 	  /* Move both pointers past the boring stuff.  */
 	  out += ref - in;
@@ -1604,8 +1604,8 @@ new_job (struct file *file)
   /* Start the command sequence, record it in a new
      `struct child', and add that to the chain.  */
 
-  c = (struct child *) xmalloc (sizeof (struct child));
-  bzero ((char *)c, sizeof (struct child));
+  c = xmalloc (sizeof (struct child));
+  memset (c, '\0', sizeof (struct child));
   c->file = file;
   c->command_lines = lines;
   c->sh_batch_file = NULL;
@@ -2115,7 +2115,7 @@ exec_command (char **argv, char **envp)
           ++argc;
 # endif
 
-	new_argv = (char **) alloca ((1 + argc + 1) * sizeof (char *));
+	new_argv = alloca ((1 + argc + 1) * sizeof (char *));
 	new_argv[0] = shell;
 
 # ifdef __EMX__
@@ -2308,9 +2308,9 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
                              "shift", "switch", "test", "times", "trap",
                              "umask", "wait", "while", 0 };
 #endif
-  register int i;
-  register char *p;
-  register char *ap;
+  int i;
+  char *p;
+  char *ap;
   char *end;
   int instring, word_has_equals, seen_nonequals, last_argument_was_empty;
   char **new_argv = 0;
@@ -2342,10 +2342,10 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 #ifdef WINDOWS32
   else if (strcmp (shell, default_shell))
   {
-    char *s1 = _fullpath(NULL, shell, 0);
-    char *s2 = _fullpath(NULL, default_shell, 0);
+    char *s1 = _fullpath (NULL, shell, 0);
+    char *s2 = _fullpath (NULL, default_shell, 0);
 
-    slow_flag = strcmp((s1 ? s1 : ""), (s2 ? s2 : ""));
+    slow_flag = strcmp ((s1 ? s1 : ""), (s2 ? s2 : ""));
 
     if (s1)
       free (s1);
@@ -2398,10 +2398,10 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
   i = strlen (line) + 1;
 
   /* More than 1 arg per character is impossible.  */
-  new_argv = (char **) xmalloc (i * sizeof (char *));
+  new_argv = xmalloc (i * sizeof (char *));
 
   /* All the args can fit in a buffer as big as LINE is.   */
-  ap = new_argv[0] = argstr = (char *) xmalloc (i);
+  ap = new_argv[0] = argstr = xmalloc (i);
   end = ap + i;
 
   /* I is how many complete arguments have been found.  */
@@ -2618,7 +2618,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
     {
       /* Line was empty.  */
       free (argstr);
-      free ((char *)new_argv);
+      free (new_argv);
       return 0;
     }
 
@@ -2631,7 +2631,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
     {
       /* Free the old argument list we were working on.  */
       free (argstr);
-      free ((char *)new_argv);
+      free (new_argv);
     }
 
 #ifdef __MSDOS__
@@ -2644,7 +2644,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
     char *buffer;
     char *dptr;
 
-    buffer = (char *)xmalloc (strlen (line)+1);
+    buffer = xmalloc (strlen (line)+1);
 
     ptr = line;
     for (dptr=buffer; *ptr; )
@@ -2661,7 +2661,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
     }
     *dptr = 0;
 
-    new_argv = (char **) xmalloc (2 * sizeof (char *));
+    new_argv = xmalloc (2 * sizeof (char *));
     new_argv[0] = buffer;
     new_argv[1] = 0;
   }
@@ -2697,8 +2697,8 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 #endif
     unsigned int line_len = strlen (line);
 
-    char *new_line = (char *) alloca (shell_len + (sizeof (minus_c) - 1)
-				      + (line_len * 2) + 1);
+    char *new_line = alloca (shell_len + (sizeof (minus_c)-1)
+                             + (line_len*2) + 1);
     char *command_ptr = NULL; /* used for batch_mode_shell mode */
 
 # ifdef __EMX__ /* is this necessary? */
@@ -2707,9 +2707,9 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 # endif
 
     ap = new_line;
-    bcopy (shell, ap, shell_len);
+    memcpy (ap, shell, shell_len);
     ap += shell_len;
-    bcopy (minus_c, ap, sizeof (minus_c) - 1);
+    memcpy (ap, minus_c, sizeof (minus_c) - 1);
     ap += sizeof (minus_c) - 1;
     command_ptr = ap;
     for (p = line; *p != '\0'; ++p)
@@ -2773,7 +2773,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
     if (just_print_flag) {
       /* Need to allocate new_argv, although it's unused, because
         start_job_command will want to free it and its 0'th element.  */
-      new_argv = (char **) xmalloc(2 * sizeof (char *));
+      new_argv = xmalloc(2 * sizeof (char *));
       new_argv[0] = xstrdup ("");
       new_argv[1] = NULL;
     } else if ((no_default_sh_exe || batch_mode_shell) && batch_filename_ptr) {
@@ -2800,7 +2800,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
       fclose (batch);
 
       /* create argv */
-      new_argv = (char **) xmalloc(3 * sizeof (char *));
+      new_argv = xmalloc(3 * sizeof (char *));
       if (unixy_shell) {
         new_argv[0] = xstrdup (shell);
         new_argv[1] = *batch_filename_ptr; /* only argv[0] gets freed later */
@@ -2812,9 +2812,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
     } else
 #endif /* WINDOWS32 */
     if (unixy_shell)
-      new_argv = construct_command_argv_internal (new_line, (char **) NULL,
-                                                  (char *) 0, (char *) 0,
-                                                  (char **) 0);
+      new_argv = construct_command_argv_internal (new_line, 0, 0, 0, 0);
 #ifdef __EMX__
     else if (!unixy_shell)
       {
@@ -2872,10 +2870,10 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
           size_t sh_len = strlen (shell);
 
           /* exactly 3 arguments + NULL */
-          new_argv = (char **) xmalloc (4 * sizeof (char *));
+          new_argv = xmalloc (4 * sizeof (char *));
           /* Exactly strlen(shell) + strlen("/c") + strlen(line) + 3 times
              the trailing '\0' */
-          new_argv[0] = (char *) malloc (sh_len + line_len + 5);
+          new_argv[0] = xmalloc (sh_len + line_len + 5);
           memcpy (new_argv[0], shell, sh_len + 1);
           new_argv[1] = new_argv[0] + sh_len + 1;
           memcpy (new_argv[1], "/c", 3);
@@ -2890,7 +2888,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
         /* With MSDOS shells, we must construct the command line here
            instead of recursively calling ourselves, because we
            cannot backslash-escape the special characters (see above).  */
-        new_argv = (char **) xmalloc (sizeof (char *));
+        new_argv = xmalloc (sizeof (char *));
         line_len = strlen (new_line) - shell_len - sizeof (minus_c) + 1;
         new_argv[0] = xmalloc (line_len + 1);
         strncpy (new_argv[0],
@@ -2948,7 +2946,7 @@ construct_command_argv (char *line, char **restp, struct file *file,
       argc++;
     }
 
-  argv = (char **)malloc (argc * sizeof (char *));
+  argv = xmalloc (argc * sizeof (char *));
   if (argv == 0)
     abort ();
 

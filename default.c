@@ -555,7 +555,7 @@ install_default_suffix_rules (void)
       /* Don't clobber cmds given in a makefile if there were any.  */
       if (f->cmds == 0)
 	{
-	  f->cmds = (struct commands *) xmalloc (sizeof (struct commands));
+	  f->cmds = xmalloc (sizeof (struct commands));
 	  f->cmds->fileinfo.filenm = 0;
 	  f->cmds->commands = s[1];
 	  f->cmds->command_lines = 0;

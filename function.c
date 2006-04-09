@@ -284,8 +284,8 @@ pattern_matches (char *pattern, char *percent, char *str)
   if (percent == 0)
     {
       unsigned int len = strlen (pattern) + 1;
-      char *new_chars = (char *) alloca (len);
-      bcopy (pattern, new_chars, len);
+      char *new_chars = alloca (len);
+      memcpy (new_chars, pattern, len);
       pattern = new_chars;
       percent = find_percent (pattern);
       if (percent == 0)
@@ -357,7 +357,7 @@ string_glob (char *line)
   if (result == 0)
     {
       length = 100;
-      result = (char *) xmalloc (100);
+      result = xmalloc (100);
     }
 
   idx = 0;
@@ -367,7 +367,7 @@ string_glob (char *line)
       unsigned int len = strlen (name);
 
       struct nameseq *next = chain->next;
-      free ((char *) chain);
+      free (chain);
       chain = next;
 
       /* multi_glob will pass names without globbing metacharacters
@@ -377,9 +377,9 @@ string_glob (char *line)
 	  if (idx + len + 1 > length)
 	    {
 	      length += (len + 1) * 2;
-	      result = (char *) xrealloc (result, length);
+	      result = xrealloc (result, length);
 	    }
-	  bcopy (name, &result[idx], len);
+	  memcpy (&result[idx], name, len);
 	  idx += len;
 	  result[idx++] = ' ';
 	}
@@ -732,7 +732,7 @@ strip_whitespace (const char **begpp, const char **endpp)
 }
 
 static void
-check_numeric (const char *s, const char *message)
+check_numeric (const char *s, const char *msg)
 {
   const char *end = s + strlen (s) - 1;
   const char *beg = s;
@@ -743,7 +743,7 @@ check_numeric (const char *s, const char *message)
       break;
 
   if (s <= end || end - beg < 0)
-    fatal (*expanding_var, "%s: '%s'", message, beg);
+    fatal (*expanding_var, "%s: '%s'", msg, beg);
 }
 
 
@@ -853,7 +853,7 @@ func_foreach (char *o, char **argv, const char *funcname UNUSED)
 
 	p[len] = '\0';
 	free (var->value);
-	var->value = (char *) xstrdup ((char*) p);
+	var->value = xstrdup ((char*) p);
 	p[len] = save;
       }
 
@@ -941,7 +941,7 @@ func_filter_filterout (char *o, char **argv, const char *funcname)
   pattail = &pathead;
   while ((p = find_next_token (&pat_iterator, &len)) != 0)
     {
-      struct a_pattern *pat = (struct a_pattern *) alloca (sizeof (struct a_pattern));
+      struct a_pattern *pat = alloca (sizeof (struct a_pattern));
 
       *pattail = pat;
       pattail = &pat->next;
@@ -964,7 +964,7 @@ func_filter_filterout (char *o, char **argv, const char *funcname)
   wordtail = &wordhead;
   while ((p = find_next_token (&word_iterator, &len)) != 0)
     {
-      struct a_word *word = (struct a_word *) alloca (sizeof (struct a_word));
+      struct a_word *word = alloca (sizeof (struct a_word));
 
       *wordtail = word;
       wordtail = &word->next;
@@ -1091,7 +1091,7 @@ func_error (char *o, char **argv, const char *funcname)
   for (len=0, argvp=argv; *argvp != 0; ++argvp)
     len += strlen (*argvp) + 2;
 
-  p = msg = (char *) alloca (len + 1);
+  p = msg = alloca (len + 1);
 
   for (argvp=argv; argvp[1] != 0; ++argvp)
     {
@@ -1145,8 +1145,7 @@ func_sort (char *o, char **argv, const char *funcname UNUSED)
       if (wordi >= nwords - 1)
 	{
 	  nwords = (2 * nwords) + 5;
-	  words = (char **) xrealloc ((char *) words,
-				      nwords * sizeof (char *));
+	  words = xrealloc (words, nwords * sizeof (char *));
 	}
       words[wordi++] = savestring (p, len);
     }
@@ -1155,7 +1154,7 @@ func_sort (char *o, char **argv, const char *funcname UNUSED)
     return o;
 
   /* Now sort the list of words.  */
-  qsort ((char *) words, wordi, sizeof (char *), alpha_compare);
+  qsort (words, wordi, sizeof (char *), alpha_compare);
 
   /* Now write the sorted list.  */
   for (i = 0; i < wordi; ++i)
@@ -1612,7 +1611,7 @@ func_shell (char *o, char **argv, const char *funcname UNUSED)
   /* For error messages.  */
   if (reading_file && reading_file->filenm)
     {
-      error_prefix = (char *) alloca (strlen (reading_file->filenm)+11+4);
+      error_prefix = alloca (strlen (reading_file->filenm)+11+4);
       sprintf (error_prefix,
 	       "%s:%lu: ", reading_file->filenm, reading_file->lineno);
     }
@@ -1682,16 +1681,16 @@ func_shell (char *o, char **argv, const char *funcname UNUSED)
 
       /* Free the storage only the child needed.  */
       free (command_argv[0]);
-      free ((char *) command_argv);
+      free (command_argv);
 
       /* Close the write side of the pipe.  */
-      (void) close (pipedes[1]);
+      close (pipedes[1]);
 #endif
 
       /* Set up and read from the pipe.  */
 
       maxlen = 200;
-      buffer = (char *) xmalloc (maxlen + 1);
+      buffer = xmalloc (maxlen + 1);
 
       /* Read from the pipe until it gets EOF.  */
       for (i = 0; ; i += cc)
@@ -1699,7 +1698,7 @@ func_shell (char *o, char **argv, const char *funcname UNUSED)
 	  if (i == maxlen)
 	    {
 	      maxlen += 512;
-	      buffer = (char *) xrealloc (buffer, maxlen + 1);
+	      buffer = xrealloc (buffer, maxlen + 1);
 	    }
 
 	  EINTRLOOP (cc, read (pipedes[0], &buffer[i], maxlen - i));
@@ -1826,7 +1825,7 @@ func_shell (char *o, char **argv, const char *funcname)
       if (i == maxlen)
 	{
 	  maxlen += 512;
-	  buffer = (char *) xrealloc (buffer, maxlen + 1);
+	  buffer = xrealloc (buffer, maxlen + 1);
 	}
 
       cc = Read (child_stdout, &buffer[i], maxlen - i);
@@ -2166,7 +2165,7 @@ handle_function (char **op, char **stringp)
   *stringp = end;
 
   /* Get some memory to store the arg pointers.  */
-  argvp = argv = (char **) alloca (sizeof (char *) * (nargs + 2));
+  argvp = argv = alloca (sizeof (char *) * (nargs + 2));
 
   /* Chop the string into arguments, then a nul.  As soon as we hit
      MAXIMUM_ARGS (if it's >0) assume the rest of the string is part of the
@@ -2280,7 +2279,7 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
   if (v == 0 || *v->value == '\0')
     return o;
 
-  body = (char *) alloca (flen + 4);
+  body = alloca (flen + 4);
   body[0] = '$';
   body[1] = '(';
   memcpy (body + 2, fname, flen);

@@ -98,7 +98,7 @@ start_remote_job_p (int first_p)
 	  /* Normalize the current directory path name to something
 	     that should work on all machines exported to.  */
 
-	  normalized_cwd = (char *) xmalloc (GET_PATH_MAX);
+	  normalized_cwd = xmalloc (GET_PATH_MAX);
 	  strcpy (normalized_cwd, starting_directory);
 	  if (Customs_NormPath (normalized_cwd, GET_PATH_MAX) < 0)
 	    /* Path normalization failure means using Customs

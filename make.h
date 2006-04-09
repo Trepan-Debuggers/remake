@@ -141,7 +141,7 @@ extern int errno;
 #else
 # define NEED_GET_PATH_MAX 1
 # define GET_PATH_MAX   (get_path_max ())
-# define PATH_VAR(var)  char *var = (char *) alloca (GET_PATH_MAX)
+# define PATH_VAR(var)  char *var = alloca (GET_PATH_MAX)
 unsigned int get_path_max (void);
 #endif
 
@@ -218,9 +218,9 @@ unsigned int get_path_max (void);
 # ifdef HAVE_STDLIB_H
 #  include <stdlib.h>
 # else
-char *malloc (int);
-char *realloc (char *, int);
-void free (char *);
+void *malloc (int);
+void *realloc (void *, int);
+void free (void *);
 
 void abort (void) __attribute__ ((noreturn));
 void exit (int) __attribute__ ((noreturn));
@@ -233,37 +233,10 @@ void exit (int) __attribute__ ((noreturn));
 # define EXIT_SUCCESS 0
 #endif
 #ifndef EXIT_FAILURE
-# define EXIT_FAILURE 0
+# define EXIT_FAILURE 1
 #endif
 
-#ifdef  ANSI_STRING
-
-# ifndef bcmp
-#  define bcmp(s1, s2, n)   memcmp ((s1), (s2), (n))
-# endif
-# ifndef bzero
-#  define bzero(s, n)       memset ((s), 0, (n))
-# endif
-# if defined(HAVE_MEMMOVE) && !defined(bcopy)
-#  define bcopy(s, d, n)    memmove ((d), (s), (n))
-# endif
-
-#else   /* Not ANSI_STRING.  */
-
-# ifndef HAVE_STRCHR
-#  define strchr(s, c)      index((s), (c))
-#  define strrchr(s, c)     rindex((s), (c))
-# endif
-
-# ifndef bcmp
-int bcmp (const char *, const char *, int);
-# endif
-# ifndef bzero
-void bzero (char *, int);
-#endif
-# ifndef bcopy
-void bcopy (const char *b1, char *b2, int);
-# endif
+#ifndef  ANSI_STRING
 
 /* SCO Xenix has a buggy macro definition in <string.h>.  */
 #undef  strerror
@@ -407,8 +380,8 @@ void pfatal_with_name (const char *) __attribute__ ((noreturn));
 void perror_with_name (const char *, const char *);
 char *savestring (const char *, unsigned int);
 char *concat (const char *, const char *, const char *);
-char *xmalloc (unsigned int);
-char *xrealloc (char *, unsigned int);
+void *xmalloc (unsigned int);
+void *xrealloc (void *, unsigned int);
 char *xstrdup (const char *);
 char *find_next_token (char **, unsigned int *);
 char *next_token (const char *);

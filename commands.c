@@ -57,12 +57,12 @@ set_file_variables (struct file *file)
       char *p;
 
       p = strchr (file->name, '(');
-      at = (char *) alloca (p - file->name + 1);
-      bcopy (file->name, at, p - file->name);
+      at = alloca (p - file->name + 1);
+      memcpy (at, file->name, p - file->name);
       at[p - file->name] = '\0';
       len = strlen (p + 1);
-      percent = (char *) alloca (len);
-      bcopy (p + 1, percent, len - 1);
+      percent = alloca (len);
+      memcpy (percent, p + 1, len - 1);
       percent[len - 1] = '\0';
     }
   else
@@ -78,7 +78,6 @@ set_file_variables (struct file *file)
       /* In Unix make, $* is set to the target name with
 	 any suffix in the .SUFFIXES list stripped off for
 	 explicit rules.  We store this in the `stem' member.  */
-      register struct dep *d;
       char *name;
       unsigned int len;
 
@@ -176,7 +175,7 @@ set_file_variables (struct file *file)
 #endif
             len = strlen (c);
 
-          bcopy (c, cp, len);
+          memcpy (cp, c, len);
           cp += len;
           *cp++ = FILE_LIST_SEPARATOR;
           if (! d->changed)
@@ -229,18 +228,18 @@ set_file_variables (struct file *file)
 
         if (d->ignore_mtime)
           {
-	    bcopy (c, bp, len);
+	    memcpy (bp, c, len);
 	    bp += len;
 	    *bp++ = FILE_LIST_SEPARATOR;
 	  }
 	else
 	  {
-            bcopy (c, cp, len);
+            memcpy (cp, c, len);
             cp += len;
             *cp++ = FILE_LIST_SEPARATOR;
             if (d->changed)
               {
-                bcopy (c, qp, len);
+                memcpy (qp, c, len);
                 qp += len;
                 *qp++ = FILE_LIST_SEPARATOR;
               }
@@ -283,7 +282,7 @@ chop_commands (struct commands *cmds)
 	 and the CMDS->any_recurse flag.  */
 
   nlines = 5;
-  lines = (char **) xmalloc (5 * sizeof (char *));
+  lines = xmalloc (5 * sizeof (char *));
   idx = 0;
   p = cmds->commands;
   while (*p != '\0')
@@ -309,8 +308,7 @@ chop_commands (struct commands *cmds)
       if (idx == nlines)
         {
           nlines += 2;
-          lines = (char **) xrealloc ((char *) lines,
-                                      nlines * sizeof (char *));
+          lines = xrealloc (lines, nlines * sizeof (char *));
         }
       lines[idx++] = savestring (p, end - p);
       p = end;
@@ -321,15 +319,14 @@ chop_commands (struct commands *cmds)
   if (idx != nlines)
     {
       nlines = idx;
-      lines = (char **) xrealloc ((char *) lines,
-                                  nlines * sizeof (char *));
+      lines = xrealloc (lines, nlines * sizeof (char *));
     }
 
   cmds->ncommand_lines = nlines;
   cmds->command_lines = lines;
 
   cmds->any_recurse = 0;
-  cmds->lines_flags = (char *) xmalloc (nlines);
+  cmds->lines_flags = xmalloc (nlines);
   for (idx = 0; idx < nlines; ++idx)
     {
       int flags = 0;
@@ -580,7 +577,7 @@ delete_child_targets (struct child *child)
     return;
 
   /* Delete the target file if it changed.  */
-  delete_target (child->file, (char *) 0);
+  delete_target (child->file, 0);
 
   /* Also remove any non-precious targets listed in the `also_make' member.  */
   for (d = child->file->also_make; d != 0; d = d->next)

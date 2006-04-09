@@ -196,8 +196,8 @@ construct_vpath_list (char *pattern, char *dirpath)
 
 	      /* Free its unused storage.  */
 	      free (path->pattern);
-	      free ((char *) path->searchpath);
-	      free ((char *) path);
+	      free (path->searchpath);
+	      free (path);
 	    }
 	  else
 	    lastpath = path;
@@ -224,7 +224,7 @@ construct_vpath_list (char *pattern, char *dirpath)
     if (*p++ == PATH_SEPARATOR_CHAR || isblank ((unsigned char)*p))
       ++maxelem;
 
-  vpath = (char **) xmalloc (maxelem * sizeof (char *));
+  vpath = xmalloc (maxelem * sizeof (char *));
   maxvpath = 0;
 
   /* Skip over any initial separators and blanks.  */
@@ -285,14 +285,13 @@ construct_vpath_list (char *pattern, char *dirpath)
 	 entry, to where the nil-pointer terminator goes.
 	 Usually this is maxelem - 1.  If not, shrink down.  */
       if (elem < (maxelem - 1))
-	vpath = (char **) xrealloc ((char *) vpath,
-				    (elem + 1) * sizeof (char *));
+	vpath = xrealloc (vpath, (elem+1) * sizeof (char *));
 
       /* Put the nil-pointer terminator on the end of the VPATH list.  */
       vpath[elem] = 0;
 
       /* Construct the vpath structure and put it into the linked list.  */
-      path = (struct vpath *) xmalloc (sizeof (struct vpath));
+      path = xmalloc (sizeof (struct vpath));
       path->searchpath = vpath;
       path->maxlen = maxvpath;
       path->next = vpaths;
@@ -306,7 +305,7 @@ construct_vpath_list (char *pattern, char *dirpath)
   else
     {
       /* There were no entries, so free whatever space we allocated.  */
-      free ((char *) vpath);
+      free (vpath);
       if (pattern != 0)
 	free (pattern);
     }
@@ -414,7 +413,7 @@ selective_vpath_search (struct vpath *path, char **file,
      a slash, the directory prefix that came with *FILE,
      another slash (although this one may not always be
      necessary), the filename, and a null terminator.  */
-  name = (char *) xmalloc (maxvpath + 1 + name_dplen + 1 + flen + 1);
+  name = xmalloc (maxvpath + 1 + name_dplen + 1 + flen + 1);
 
   /* Try each VPATH entry.  */
   for (i = 0; vpath[i] != 0; ++i)
@@ -425,7 +424,7 @@ selective_vpath_search (struct vpath *path, char **file,
 
       /* Put the next VPATH entry into NAME at N and increment N past it.  */
       vlen = strlen (vpath[i]);
-      bcopy (vpath[i], n, vlen);
+      memcpy (n, vpath[i], vlen);
       n += vlen;
 
       /* Add the directory prefix already in *FILE.  */
@@ -434,7 +433,7 @@ selective_vpath_search (struct vpath *path, char **file,
 #ifndef VMS
 	  *n++ = '/';
 #endif
-	  bcopy (*file, n, name_dplen);
+	  memcpy (n, *file, name_dplen);
 	  n += name_dplen;
 	}
 
@@ -448,11 +447,11 @@ selective_vpath_search (struct vpath *path, char **file,
       if (n != name && n[-1] != '/')
 	{
 	  *n = '/';
-	  bcopy (filename, n + 1, flen + 1);
+	  memcpy (n + 1, filename, flen + 1);
 	}
       else
 #endif
-	bcopy (filename, n, flen + 1);
+	memcpy (n, filename, flen + 1);
 
       /* Check if the file is mentioned in a makefile.  If *FILE is not
 	 a target, that is enough for us to decide this file exists.
