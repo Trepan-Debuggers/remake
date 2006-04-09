@@ -1,3 +1,30 @@
+2006-04-09  Paul D. Smith  <psmith@gnu.org>
+
+	* maintMakefile: Add some extra warning options (GCC 4.1 only?)
+
+	* expand.c, implicit.c, main.c, read.c: Rename variables so that
+	inner-scope variables don't mask outer-scope variables.
+
+	* ar.c, arscan.c, commands.c, default.c, dir.c, expand.c, file.c:
+	* function.c, getloadavg.c, implicit.c, job.c, main.c, misc.c, read.c:
+	* remake.c, remote-cstms.c, rule.c, strcache.c, variable.c:
+	* vmsfunctions.c, vmsify.c, vpath.c: Remove all casts of returned
+	values from memory allocation functions: they return void* and so
+	don't need to be cast.  Also remove (char *) casts of arguments to
+	xrealloc().
+
+	* configure.in: Remove checks for memcpy/memmove/strchr.
+
+	* make.h: Remove bcmp/bcopy/bzero/strchr/strrchr macros.
+
+	* ar.c, arscan.c, commands.c, dir.c: Convert all bzero/bcopy/bcmp
+	calls to memset/memcpy/memmove/memcmp calls.
+	* expand.c, file.c, function.c, getloadavg.c, implicit.c: Ditto.
+	* job.c, main.c, misc.c, read.c, remake.c, rule.c: Ditto.
+	* variable.c, vpath.c: Ditto.
+
+	* make.h (EXIT_FAILURE): Should be 1, not 0.
+
 2006-04-06  Paul D. Smith  <psmith@gnu.org>
 
 	* configure.in: Removed AM_C_PROTOTYPES.  Starting now on we

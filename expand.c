@@ -65,12 +65,11 @@ variable_buffer_output (char *ptr, char *string, unsigned int length)
       variable_buffer_length = (newlen + 100 > 2 * variable_buffer_length
 				? newlen + 100
 				: 2 * variable_buffer_length);
-      variable_buffer = (char *) xrealloc (variable_buffer,
-					   variable_buffer_length);
+      variable_buffer = xrealloc (variable_buffer, variable_buffer_length);
       ptr = variable_buffer + offset;
     }
 
-  bcopy (string, ptr, length);
+  memcpy (ptr, string, length);
   return ptr + length;
 }
 
@@ -84,7 +83,7 @@ initialize_variable_output (void)
   if (variable_buffer == 0)
     {
       variable_buffer_length = 200;
-      variable_buffer = (char *) xmalloc (variable_buffer_length);
+      variable_buffer = xmalloc (variable_buffer_length);
       variable_buffer[0] = '\0';
     }
 
@@ -196,8 +195,8 @@ reference_variable (char *o, char *name, unsigned int length)
 char *
 variable_expand_string (char *line, char *string, long length)
 {
-  register struct variable *v;
-  register char *p, *o, *p1;
+  struct variable *v;
+  char *p, *o, *p1;
   char save_char = '\0';
   unsigned int line_offset;
 
@@ -333,15 +332,14 @@ variable_expand_string (char *line, char *string, long length)
                         /* Copy the pattern and the replacement.  Add in an
                            extra % at the beginning to use in case there
                            isn't one in the pattern.  */
-                        pattern = (char *) alloca (subst_end - subst_beg + 2);
+                        pattern = alloca (subst_end - subst_beg + 2);
                         *(pattern++) = '%';
-                        bcopy (subst_beg, pattern, subst_end - subst_beg);
+                        memcpy (pattern, subst_beg, subst_end - subst_beg);
                         pattern[subst_end - subst_beg] = '\0';
 
-                        replace = (char *) alloca (replace_end
-                                                   - replace_beg + 2);
+                        replace = alloca (replace_end - replace_beg + 2);
                         *(replace++) = '%';
-                        bcopy (replace_beg, replace,
+                        memcpy (replace, replace_beg,
                                replace_end - replace_beg);
                         replace[replace_end - replace_beg] = '\0';
 
@@ -433,10 +431,10 @@ expand_argument (const char *str, const char *end)
     return xstrdup("");
 
   if (!end || *end == '\0')
-    return allocated_variable_expand ((char *)str);
+    return allocated_variable_expand (str);
 
-  tmp = (char *) alloca (end - str + 1);
-  bcopy (str, tmp, end - str);
+  tmp = alloca (end - str + 1);
+  memcpy (tmp, str, end - str);
   tmp[end - str] = '\0';
 
   return allocated_variable_expand (tmp);

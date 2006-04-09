@@ -134,7 +134,7 @@ trnlog (char *name)
     }
   reslt[resltlen] = '\0';
 
-  s = (char *)malloc (resltlen+1);
+  s = malloc (resltlen+1);
   if (s == 0)
     return "";
   strcpy (s, reslt);

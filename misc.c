@@ -171,14 +171,14 @@ concat (const char *s1, const char *s2, const char *s3)
   len2 = *s2 != '\0' ? strlen (s2) : 0;
   len3 = *s3 != '\0' ? strlen (s3) : 0;
 
-  result = (char *) xmalloc (len1 + len2 + len3 + 1);
+  result = xmalloc (len1 + len2 + len3 + 1);
 
   if (*s1 != '\0')
-    bcopy (s1, result, len1);
+    memcpy (result, s1, len1);
   if (*s2 != '\0')
-    bcopy (s2, result + len1, len2);
+    memcpy (result + len1, s2, len2);
   if (*s3 != '\0')
-    bcopy (s3, result + len1 + len2, len3);
+    memcpy (result + len1 + len2, s3, len3);
   *(result + len1 + len2 + len3) = '\0';
 
   return result;
@@ -335,21 +335,21 @@ pfatal_with_name (const char *name)
 #undef xrealloc
 #undef xstrdup
 
-char *
+void *
 xmalloc (unsigned int size)
 {
   /* Make sure we don't allocate 0, for pre-ANSI libraries.  */
-  char *result = (char *) malloc (size ? size : 1);
+  void *result = malloc (size ? size : 1);
   if (result == 0)
     fatal (NILF, _("virtual memory exhausted"));
   return result;
 }
 
 
-char *
-xrealloc (char *ptr, unsigned int size)
+void *
+xrealloc (void *ptr, unsigned int size)
 {
-  char *result;
+  void *result;
 
   /* Some older implementations of realloc() don't conform to ANSI.  */
   if (! size)
@@ -369,7 +369,7 @@ xstrdup (const char *ptr)
 #ifdef HAVE_STRDUP
   result = strdup (ptr);
 #else
-  result = (char *) malloc (strlen (ptr) + 1);
+  result = malloc (strlen (ptr) + 1);
 #endif
 
   if (result == 0)
@@ -378,7 +378,7 @@ xstrdup (const char *ptr)
 #ifdef HAVE_STRDUP
   return result;
 #else
-  return strcpy(result, ptr);
+  return strcpy (result, ptr);
 #endif
 }
 
@@ -387,9 +387,9 @@ xstrdup (const char *ptr)
 char *
 savestring (const char *str, unsigned int length)
 {
-  register char *out = (char *) xmalloc (length + 1);
+  char *out = xmalloc (length + 1);
   if (length > 0)
-    bcopy (str, out, length);
+    memcpy (out, str, length);
   out[length] = '\0';
   return out;
 }
@@ -485,8 +485,8 @@ find_next_token (char **ptr, unsigned int *lengthptr)
 struct dep *
 alloc_dep ()
 {
-  struct dep *d = (struct dep *) xmalloc (sizeof (struct dep));
-  bzero ((char *) d, sizeof (struct dep));
+  struct dep *d = xmalloc (sizeof (struct dep));
+  memset (d, '\0', sizeof (struct dep));
   return d;
 }
 
@@ -502,7 +502,7 @@ free_dep (struct dep *d)
   if (d->stem != 0)
     free (d->stem);
 
-  free ((char *)d);
+  free (d);
 }
 
 /* Copy a chain of `struct dep', making a new chain
@@ -517,8 +517,8 @@ copy_dep_chain (const struct dep *d)
 
   while (d != 0)
     {
-      c = (struct dep *) xmalloc (sizeof (struct dep));
-      bcopy ((char *) d, (char *) c, sizeof (struct dep));
+      c = xmalloc (sizeof (struct dep));
+      memcpy (c, d, sizeof (struct dep));
 
       if (c->name != 0)
 	c->name = xstrdup (c->name);

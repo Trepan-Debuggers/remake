@@ -124,9 +124,9 @@ count_implicit_rule_limits (void)
 		  if (name != 0)
 		    free (name);
 		  namelen = p - dep->name;
-		  name = (char *) xmalloc (namelen + 1);
+		  name = xmalloc (namelen + 1);
 		}
-	      bcopy (dep->name, name, p - dep->name);
+	      memcpy (name, dep->name, p - dep->name);
 	      name[p - dep->name] = '\0';
 
 	      /* In the deps of an implicit rule the `changed' flag
@@ -182,12 +182,12 @@ convert_suffix_rule (char *target, char *source, struct commands *cmds)
       len = strlen (target);
       targname = xmalloc (1 + len + 1);
       targname[0] = '%';
-      bcopy (target, targname + 1, len + 1);
+      memcpy (targname + 1, target, len + 1);
       targpercent = targname;
     }
 
-  names = (char **) xmalloc (2 * sizeof (char *));
-  percents = (char **) alloca (2 * sizeof (char *));
+  names = xmalloc (2 * sizeof (char *));
+  percents = alloca (2 * sizeof (char *));
   names[0] = targname;
   percents[0] = targpercent;
   names[1] = percents[1] = 0;
@@ -200,7 +200,7 @@ convert_suffix_rule (char *target, char *source, struct commands *cmds)
       len = strlen (source);
       depname = xmalloc (1 + len + 1);
       depname[0] = '%';
-      bcopy (source, depname + 1, len + 1);
+      memcpy (depname + 1, source, len + 1);
       deps = alloc_dep ();
       deps->name = depname;
     }
@@ -230,13 +230,13 @@ convert_to_pattern (void)
 	maxsuffix = namelen;
     }
 
-  rulename = (char *) alloca ((maxsuffix * 2) + 1);
+  rulename = alloca ((maxsuffix * 2) + 1);
 
   for (d = suffix_file->deps; d != 0; d = d->next)
     {
       /* Make a rule that is just the suffix, with no deps or commands.
 	 This rule exists solely to disqualify match-anything rules.  */
-      convert_suffix_rule (dep_name (d), (char *) 0, (struct commands *) 0);
+      convert_suffix_rule (dep_name (d), 0, 0);
 
       f = d->file;
       if (f->cmds != 0)
@@ -245,7 +245,7 @@ convert_to_pattern (void)
 
       /* Record a pattern for each of this suffix's two-suffix rules.  */
       slen = strlen (dep_name (d));
-      bcopy (dep_name (d), rulename, slen);
+      memcpy (rulename, dep_name (d), slen);
       for (d2 = suffix_file->deps; d2 != 0; d2 = d2->next)
 	{
 	  s2len = strlen (dep_name (d2));
@@ -253,7 +253,7 @@ convert_to_pattern (void)
 	  if (slen == s2len && streq (dep_name (d), dep_name (d2)))
 	    continue;
 
-	  bcopy (dep_name (d2), rulename + slen, s2len + 1);
+	  memcpy (rulename + slen, dep_name (d2), s2len + 1);
 	  f = lookup_file (rulename);
 	  if (f == 0 || f->cmds == 0)
 	    continue;
@@ -261,7 +261,7 @@ convert_to_pattern (void)
 	  if (s2len == 2 && rulename[slen] == '.' && rulename[slen + 1] == 'a')
 	    /* A suffix rule `.X.a:' generates the pattern rule `(%.o): %.X'.
 	       It also generates a normal `%.a: %.X' rule below.  */
-	    convert_suffix_rule ((char *) 0, /* Indicates `(%.o)'.  */
+	    convert_suffix_rule (NULL, /* Indicates `(%.o)'.  */
 				 dep_name (d),
 				 f->cmds);
 
@@ -362,11 +362,11 @@ install_pattern_rule (struct pspec *p, int terminal)
   register struct rule *r;
   char *ptr;
 
-  r = (struct rule *) xmalloc (sizeof (struct rule));
+  r = xmalloc (sizeof (struct rule));
 
-  r->targets = (char **) xmalloc (2 * sizeof (char *));
-  r->suffixes = (char **) xmalloc (2 * sizeof (char *));
-  r->lens = (unsigned int *) xmalloc (2 * sizeof (unsigned int));
+  r->targets = xmalloc (2 * sizeof (char *));
+  r->suffixes = xmalloc (2 * sizeof (char *));
+  r->lens = xmalloc (2 * sizeof (unsigned int));
 
   r->targets[1] = 0;
   r->suffixes[1] = 0;
@@ -391,7 +391,7 @@ install_pattern_rule (struct pspec *p, int terminal)
   if (new_pattern_rule (r, 0))
     {
       r->terminal = terminal;
-      r->cmds = (struct commands *) xmalloc (sizeof (struct commands));
+      r->cmds = xmalloc (sizeof (struct commands));
       r->cmds->fileinfo.filenm = 0;
       r->cmds->fileinfo.lineno = 0;
       /* These will all be string literals, but we malloc space for them
@@ -429,9 +429,9 @@ freerule (struct rule *rule, struct rule *lastrule)
       dep = t;
     }
 
-  free ((char *) rule->targets);
-  free ((char *) rule->suffixes);
-  free ((char *) rule->lens);
+  free (rule->targets);
+  free (rule->suffixes);
+  free (rule->lens);
 
   /* We can't free the storage for the commands because there
      are ways that they could be in more than one place:
@@ -444,7 +444,7 @@ freerule (struct rule *rule, struct rule *lastrule)
        be discarded here, but both would contain the same `struct commands'
        pointer from the `struct file' for the suffix rule.  */
 
-  free ((char *) rule);
+  free (rule);
 
   if (pattern_rules == rule)
     if (lastrule != 0)
@@ -474,24 +474,22 @@ create_pattern_rule (char **targets, char **target_percents,
                      struct commands *commands, int override)
 {
   unsigned int max_targets, i;
-  struct rule *r = (struct rule *) xmalloc (sizeof (struct rule));
+  struct rule *r = xmalloc (sizeof (struct rule));
 
   r->cmds = commands;
   r->deps = deps;
   r->targets = targets;
 
   max_targets = 2;
-  r->lens = (unsigned int *) xmalloc (2 * sizeof (unsigned int));
-  r->suffixes = (char **) xmalloc (2 * sizeof (char *));
+  r->lens = xmalloc (2 * sizeof (unsigned int));
+  r->suffixes = xmalloc (2 * sizeof (char *));
   for (i = 0; targets[i] != 0; ++i)
     {
       if (i == max_targets - 1)
 	{
 	  max_targets += 5;
-	  r->lens = (unsigned int *)
-	    xrealloc ((char *) r->lens, max_targets * sizeof (unsigned int));
-	  r->suffixes = (char **)
-	    xrealloc ((char *) r->suffixes, max_targets * sizeof (char *));
+	  r->lens = xrealloc (r->lens, max_targets * sizeof (unsigned int));
+	  r->suffixes = xrealloc (r->suffixes, max_targets * sizeof (char *));
 	}
       r->lens[i] = strlen (targets[i]);
       r->suffixes[i] = (target_percents == 0 ? find_percent (targets[i])
@@ -502,10 +500,8 @@ create_pattern_rule (char **targets, char **target_percents,
 
   if (i < max_targets - 1)
     {
-      r->lens = (unsigned int *) xrealloc ((char *) r->lens,
-					   (i + 1) * sizeof (unsigned int));
-      r->suffixes = (char **) xrealloc ((char *) r->suffixes,
-					(i + 1) * sizeof (char *));
+      r->lens = xrealloc (r->lens, (i + 1) * sizeof (unsigned int));
+      r->suffixes = xrealloc (r->suffixes, (i + 1) * sizeof (char *));
     }
 
   if (new_pattern_rule (r, override))

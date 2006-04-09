@@ -78,7 +78,7 @@ lookup_file (char *name)
   register struct file *f;
   struct file file_key;
 #if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
-  register char *lname, *ln;
+  char *lname, *ln;
 #endif
 
   assert (*name != '\0');
@@ -90,8 +90,8 @@ lookup_file (char *name)
 # ifndef WANT_CASE_SENSITIVE_TARGETS
   if (*name != '.')
     {
-      register char *n;
-      lname = (char *) malloc (strlen (name) + 1);
+      char *n;
+      lname = xmalloc (strlen (name) + 1);
       for (n = name, ln = lname; *n != '\0'; ++n, ++ln)
         *ln = isupper ((unsigned char)*n) ? tolower ((unsigned char)*n) : *n;
       *ln = '\0';
@@ -147,8 +147,8 @@ enter_file (char *name)
 #if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
   if (*name != '.')
     {
-      register char *n;
-      lname = (char *) malloc (strlen (name) + 1);
+      char *n;
+      lname = xmalloc (strlen (name) + 1);
       for (n = name, ln = lname; *n != '\0'; ++n, ++ln)
         {
           if (isupper ((unsigned char)*n))
@@ -176,8 +176,8 @@ enter_file (char *name)
       return f;
     }
 
-  new = (struct file *) xmalloc (sizeof (struct file));
-  bzero ((char *) new, sizeof (struct file));
+  new = xmalloc (sizeof (struct file));
+  memset (new, '\0', sizeof (struct file));
   new->name = new->hname = name;
   new->update_status = -1;
 
@@ -539,7 +539,7 @@ expand_deps (struct file *f)
                      will always be empty.  */
                   if (d->stem[0] == '\0')
                     /* This needs memmove() in ISO C.  */
-                    bcopy (percent+1, percent, strlen (percent));
+                    memmove (percent, percent+1, strlen (percent));
                   else
                     {
                       char *o = patsubst_expand (buffer, d->stem, pattern,
@@ -1030,7 +1030,7 @@ build_target_list (char *value)
                 p = &value[off];
               }
 
-            bcopy (f->name, p, l);
+            memcpy (p, f->name, l);
             p += l;
             *(p++) = ' ';
           }

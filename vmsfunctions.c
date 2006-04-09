@@ -37,7 +37,7 @@ opendir (char *dspec)
   struct DIR *dir  = (struct DIR *)xmalloc (sizeof (struct DIR));
   struct NAM *dnam = (struct NAM *)xmalloc (sizeof (struct NAM));
   struct FAB *dfab = &dir->fab;
-  char *searchspec = (char *)xmalloc (MAXNAMLEN + 1);
+  char *searchspec = xmalloc (MAXNAMLEN + 1);
 
   memset (dir, 0, sizeof *dir);
 

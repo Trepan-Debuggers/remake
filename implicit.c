@@ -222,30 +222,27 @@ pattern_search (struct file *file, int archive,
   unsigned int remove_explicit_deps = 0;
 
   /* Names of possible dependencies are constructed in this buffer.  */
-  register char *depname = (char *) alloca (namelen + max_pattern_dep_length);
+  char *depname = alloca (namelen + max_pattern_dep_length);
 
   /* The start and length of the stem of FILENAME for the current rule.  */
-  register char *stem = 0;
-  register unsigned int stemlen = 0;
-  register unsigned int fullstemlen = 0;
+  char *stem = 0;
+  unsigned int stemlen = 0;
+  unsigned int fullstemlen = 0;
 
   /* Buffer in which we store all the rules that are possibly applicable.  */
-  struct rule **tryrules
-    = (struct rule **) xmalloc (num_pattern_rules * max_pattern_targets
-                                * sizeof (struct rule *));
+  struct rule **tryrules = xmalloc (num_pattern_rules * max_pattern_targets
+                                    * sizeof (struct rule *));
 
   /* Number of valid elements in TRYRULES.  */
   unsigned int nrules;
 
   /* The numbers of the rule targets of each rule
      in TRYRULES that matched the target file.  */
-  unsigned int *matches
-    = (unsigned int *) alloca (num_pattern_rules * sizeof (unsigned int));
+  unsigned int *matches = alloca (num_pattern_rules * sizeof (unsigned int));
 
   /* Each element is nonzero if LASTSLASH was used in
      matching the corresponding element of TRYRULES.  */
-  char *checked_lastslash
-    = (char *) alloca (num_pattern_rules * sizeof (char));
+  char *checked_lastslash = alloca (num_pattern_rules * sizeof (char));
 
   /* The index in TRYRULES of the rule we found.  */
   unsigned int foundrule;
@@ -257,7 +254,7 @@ pattern_search (struct file *file, int archive,
      that is not just `%'.  */
   int specific_rule_matched = 0;
 
-  unsigned int i = 0;  /* uninit checks OK */
+  unsigned int ri;  /* uninit checks OK */
   struct rule *rule;
   struct dep *dep, *expl_d;
 
@@ -306,6 +303,8 @@ pattern_search (struct file *file, int archive,
   nrules = 0;
   for (rule = pattern_rules; rule != 0; rule = rule->next)
     {
+      unsigned int ti;
+
       /* If the pattern rule has deps but no commands, ignore it.
 	 Users cancel built-in rules by redefining them without commands.  */
       if (rule->deps != 0 && rule->cmds == 0)
@@ -319,10 +318,10 @@ pattern_search (struct file *file, int archive,
 	  continue;
 	}
 
-      for (i = 0; rule->targets[i] != 0; ++i)
+      for (ti = 0; rule->targets[ti] != 0; ++ti)
 	{
-	  char *target = rule->targets[i];
-	  char *suffix = rule->suffixes[i];
+	  char *target = rule->targets[ti];
+	  char *suffix = rule->suffixes[ti];
 	  int check_lastslash;
 
 	  /* Rules that can match any filename and are not terminal
@@ -331,14 +330,14 @@ pattern_search (struct file *file, int archive,
 	  if (recursions > 0 && target[1] == '\0' && !rule->terminal)
 	    continue;
 
-	  if (rule->lens[i] > namelen)
+	  if (rule->lens[ti] > namelen)
 	    /* It can't possibly match.  */
 	    continue;
 
 	  /* From the lengths of the filename and the pattern parts,
 	     find the stem: the part of the filename that matches the %.  */
 	  stem = filename + (suffix - target - 1);
-	  stemlen = namelen - rule->lens[i] + 1;
+	  stemlen = namelen - rule->lens[ti] + 1;
 
 	  /* Set CHECK_LASTSLASH if FILENAME contains a directory
 	     prefix and the target pattern does not contain a slash.  */
@@ -404,7 +403,7 @@ pattern_search (struct file *file, int archive,
 	     target in MATCHES.  If several targets of the same rule match,
 	     that rule will be in TRYRULES more than once.  */
 	  tryrules[nrules] = rule;
-	  matches[nrules] = i;
+	  matches[nrules] = ti;
 	  checked_lastslash[nrules] = check_lastslash;
 	  ++nrules;
 	}
@@ -413,15 +412,15 @@ pattern_search (struct file *file, int archive,
   /* If we have found a matching rule that won't match all filenames,
      retroactively reject any non-"terminal" rules that do always match.  */
   if (specific_rule_matched)
-    for (i = 0; i < nrules; ++i)
-      if (!tryrules[i]->terminal)
+    for (ri = 0; ri < nrules; ++ri)
+      if (!tryrules[ri]->terminal)
 	{
-	  register unsigned int j;
-	  for (j = 0; tryrules[i]->targets[j] != 0; ++j)
-	    if (tryrules[i]->targets[j][1] == '\0')
+	  unsigned int j;
+	  for (j = 0; tryrules[ri]->targets[j] != 0; ++j)
+	    if (tryrules[ri]->targets[j][1] == '\0')
 	      break;
-	  if (tryrules[i]->targets[j] != 0)
-	    tryrules[i] = 0;
+	  if (tryrules[ri]->targets[j] != 0)
+	    tryrules[ri] = 0;
 	}
 
   /* We are going to do second expansion so initialize file variables
@@ -435,14 +434,14 @@ pattern_search (struct file *file, int archive,
 	 If it does, expand its dependencies (as substituted)
 	 and chain them in DEPS.  */
 
-      for (i = 0; i < nrules; i++)
+      for (ri = 0; ri < nrules; ri++)
 	{
           struct file *f;
           unsigned int failed = 0;
 	  int check_lastslash;
           int file_variables_set = 0;
 
-	  rule = tryrules[i];
+	  rule = tryrules[ri];
 
           remove_explicit_deps = 0;
 
@@ -463,9 +462,9 @@ pattern_search (struct file *file, int archive,
 	  /* From the lengths of the filename and the matching pattern parts,
 	     find the stem: the part of the filename that matches the %.  */
 	  stem = filename
-	    + (rule->suffixes[matches[i]] - rule->targets[matches[i]]) - 1;
-	  stemlen = namelen - rule->lens[matches[i]] + 1;
-	  check_lastslash = checked_lastslash[i];
+	    + (rule->suffixes[matches[ri]] - rule->targets[matches[ri]]) - 1;
+	  stemlen = namelen - rule->lens[matches[ri]] + 1;
+	  check_lastslash = checked_lastslash[ri];
 	  if (check_lastslash)
 	    {
 	      stem += lastslash - filename + 1;
@@ -532,10 +531,10 @@ pattern_search (struct file *file, int archive,
 
                       if (p2 < p + len)
                         {
-                          register unsigned int i = p2 - p;
-                          bcopy (p, depname, i);
-                          bcopy ("$*", depname + i, 2);
-                          bcopy (p2 + 1, depname + i + 2, len - i - 1);
+                          unsigned int i = p2 - p;
+                          memcpy (depname, p, i);
+                          memcpy (depname + i, "$*", 2);
+                          memcpy (depname + i + 2, p2 + 1, len - i - 1);
                           depname[len + 2 - 1] = '\0';
 
                           if (check_lastslash)
@@ -545,7 +544,7 @@ pattern_search (struct file *file, int archive,
                         }
                       else
                         {
-                          bcopy (p, depname, len);
+                          memcpy (depname, p, len);
                           depname[len] = '\0';
                         }
 
@@ -564,10 +563,10 @@ pattern_search (struct file *file, int archive,
                     {
                        if (p2 < p + len)
                         {
-                          register unsigned int i = p2 - p;
-                          bcopy (p, depname, i);
-                          bcopy (stem_str, depname + i, stemlen);
-                          bcopy (p2 + 1, depname + i + stemlen, len - i - 1);
+                          unsigned int i = p2 - p;
+                          memcpy (depname, p, i);
+                          memcpy (depname + i, stem_str, stemlen);
+                          memcpy (depname + i + stemlen, p2 + 1, len - i - 1);
                           depname[len + stemlen - 1] = '\0';
 
                           if (check_lastslash)
@@ -577,7 +576,7 @@ pattern_search (struct file *file, int archive,
                         }
                       else
                         {
-                          bcopy (p, depname, len);
+                          memcpy (depname, p, len);
                           depname[len] = '\0';
                         }
 
@@ -615,14 +614,14 @@ pattern_search (struct file *file, int archive,
 
                               if (add_dir)
                                 {
-                                  char *p = d->name;
+                                  char *n = d->name;
 
-                                  d->name = xmalloc (strlen (p) + l + 1);
+                                  d->name = xmalloc (strlen (n) + l + 1);
 
-                                  bcopy (filename, d->name, l);
-                                  bcopy (p, d->name + l, strlen (p) + 1);
+                                  memcpy (d->name, filename, l);
+                                  memcpy (d->name + l, n, strlen (n) + 1);
 
-                                  free (p);
+                                  free (n);
                                 }
 
                               if (had_stem)
@@ -666,7 +665,7 @@ pattern_search (struct file *file, int archive,
                         ? _("Rejecting impossible implicit prerequisite `%s'.\n")
                         : _("Rejecting impossible rule prerequisite `%s'.\n"),
                         name));
-                  tryrules[i] = 0;
+                  tryrules[ri] = 0;
 
                   failed = 1;
                   break;
@@ -722,14 +721,13 @@ pattern_search (struct file *file, int archive,
               if (intermed_ok)
                 {
                   if (intermediate_file == 0)
-                    intermediate_file
-                      = (struct file *) alloca (sizeof (struct file));
+                    intermediate_file = alloca (sizeof (struct file));
 
                   DBS (DB_IMPLICIT,
                        (_("Looking for a rule with intermediate file `%s'.\n"),
                         name));
 
-                  bzero ((char *) intermediate_file, sizeof (struct file));
+                  memset (intermediate_file, '\0', sizeof (struct file));
                   intermediate_file->name = name;
                   if (pattern_search (intermediate_file,
                                       0,
@@ -777,7 +775,7 @@ pattern_search (struct file *file, int archive,
 
       /* If we found an applicable rule without
 	 intermediate files, don't try with them.  */
-      if (i < nrules)
+      if (ri < nrules)
 	break;
 
       rule = 0;
@@ -788,7 +786,7 @@ pattern_search (struct file *file, int archive,
   if (rule == 0)
     goto done;
 
-  foundrule = i;
+  foundrule = ri;
 
   /* If we are recursing, store the pattern that matched
      FILENAME in FILE->name for use in upper levels.  */
@@ -922,9 +920,9 @@ pattern_search (struct file *file, int archive,
       /* We want to prepend the directory from
 	 the original FILENAME onto the stem.  */
       fullstemlen = dirlen + stemlen;
-      file->stem = (char *) xmalloc (fullstemlen + 1);
-      bcopy (filename, file->stem, dirlen);
-      bcopy (stem, file->stem + dirlen, stemlen);
+      file->stem = xmalloc (fullstemlen + 1);
+      memcpy (file->stem, filename, dirlen);
+      memcpy (file->stem + dirlen, stem, stemlen);
       file->stem[fullstemlen] = '\0';
     }
 
@@ -942,26 +940,26 @@ pattern_search (struct file *file, int archive,
      `also_make' member.  */
 
   if (rule->targets[1] != 0)
-    for (i = 0; rule->targets[i] != 0; ++i)
-      if (i != matches[foundrule])
+    for (ri = 0; rule->targets[ri] != 0; ++ri)
+      if (ri != matches[foundrule])
 	{
 	  struct file *f;
 	  struct dep *new = alloc_dep ();
 
 	  /* GKM FIMXE: handle '|' here too */
-	  new->name = p = (char *) xmalloc (rule->lens[i] + fullstemlen + 1);
-	  bcopy (rule->targets[i], p,
-		 rule->suffixes[i] - rule->targets[i] - 1);
-	  p += rule->suffixes[i] - rule->targets[i] - 1;
-	  bcopy (file->stem, p, fullstemlen);
+	  new->name = p = xmalloc (rule->lens[ri] + fullstemlen + 1);
+	  memcpy (p, rule->targets[ri],
+                  rule->suffixes[ri] - rule->targets[ri] - 1);
+	  p += rule->suffixes[ri] - rule->targets[ri] - 1;
+	  memcpy (p, file->stem, fullstemlen);
 	  p += fullstemlen;
-	  bcopy (rule->suffixes[i], p,
-		 rule->lens[i] - (rule->suffixes[i] - rule->targets[i]) + 1);
+	  memcpy (p, rule->suffixes[ri],
+                  rule->lens[ri] - (rule->suffixes[ri] - rule->targets[ri])+1);
 	  new->file = enter_file (new->name);
 	  new->next = file->also_make;
 
 	  /* Set precious flag. */
-	  f = lookup_file (rule->targets[i]);
+	  f = lookup_file (rule->targets[ri]);
 	  if (f && f->precious)
             new->file->precious = 1;
 
