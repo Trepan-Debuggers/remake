@@ -6,7 +6,7 @@ AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.37 2006/03/24 22:33:32 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.38 2006/07/29 10:55:22 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -464,7 +464,7 @@ AC_CACHE_VAL(make_cv_sys_gnu_glob, [
  ], [AC_MSG_RESULT(yes)
 make_cv_sys_gnu_glob=yes], [AC_MSG_RESULT([no; using local copy])
 AC_SUBST(GLOBINC) GLOBINC='-I$(top_srcdir)/glob'
-AC_SUBST(GLOBLIB) GLOBLIB='$(top_srcdir)/glob/libglob.a'
+AC_SUBST(GLOBLIB) GLOBLIB='$(top_builddir)/glob/libglob.a'
 make_cv_sys_gnu_glob=no])])
 # Tell automake about this, so it can build the right .c files.
 AM_CONDITIONAL(USE_LOCAL_GLOB, test "$make_cv_sys_gnu_glob" = no)
