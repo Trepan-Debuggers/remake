@@ -1,3 +1,69 @@
+2006-09-30  Paul Smith  <psmith@paulandlesley.org>
+
+	* doc/make.texi (MAKEFILE_LIST Variable): Modify reference to
+	point to lastword since the example was updated.
+	Fixes Savannah bug #16304.
+	(Secondary Expansion): Correct example description.
+	Fixes Savannah bug #16468.
+	(Makefile Contents): Clarify that comments cannot appear within
+	variable references or function calls.
+	Fixes Savannah bug #16577.
+	(Special Targets): Clarify how .NOTPARALLEL works in recursion.
+	Fixes Savannah bug #17701.
+	Reported by Ralf Wildenhues <Ralf.Wildenhues@gmx.de>:
+	(Prerequisite Types): Added an example of using	order-only
+	prerequisites.  Fixes Savannah bug #17880.
+	(Rule Syntax): "lise" -> "list"
+	(Multiple Rules): ... -> @dots{}
+	(Splitting Lines): ditto.
+
+	* remake.c (update_file_1): Prereqs that don't exist should be
+	considered changed, for the purposes of $?.
+	Fixes Savannah bug #16051.
+
+	* make.1: Remove extraneous "+".
+	Fixes Savannah bug #16652.
+
+2006-09-06  Paul D. Smith  <psmith@gnu.org>
+
+	* configure.in: Include sys/types.h when checking for sys/wait.h.
+
+2006-08-18  Eli Zaretskii  <eliz@gnu.org>
+
+	* configure.in (PATH_SEPARATOR_CHAR): Define to the value of
+	$PATH_SEPARATOR.
+
+	* make.h (PATH_SEPARATOR_CHAR): Define only if still undefined.
+	Normally, it is defined in config.h.
+
+	* config/dospaths.m4 <ac_cv_dos_paths>: Define to yes on Cygwin as
+	well.
+
+	* job.c (construct_command_argv_internal) [HAVE_DOS_PATHS]: Define
+	sh_chars_sh for Windows platforms that emulate Unix.
+
+2006-05-07  Paul D. Smith  <psmith@gnu.org>
+
+	* README.OS2.template: Updates provided by Andreas Buening
+	<andreas.buening@nexgo.de>.
+
+2006-04-30  Paul D. Smith  <psmith@gnu.org>
+
+	* make.h: Include <direct.h> if HAVE_DIRECT_H.
+	* config.h.W32.template (HAVE_DIRECT_H): Set it if it's available.
+
+2006-04-26  Paul D. Smith  <psmith@gnu.org>
+
+	* README.cvs: Add a reminder to notify the GNU translation robot.
+
+	* doc/make.texi: Change @direcategory (requested by Karl Berry).
+
+2006-04-20  Paul D. Smith  <psmith@gnu.org>
+
+	* maintMakefile (po-check): Use Perl instead of grep -E, for systems
+	that don't have extended grep.
+	(cvsclean): Use $(PERL) instead of perl.
+
 2006-04-09  Paul D. Smith  <psmith@gnu.org>
 
 	* maintMakefile: Add some extra warning options (GCC 4.1 only?)

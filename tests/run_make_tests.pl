@@ -228,11 +228,6 @@ sub set_more_defaults
    local($string);
    local($index);
 
-   # Make sure we're in the C locale for those systems that support it,
-   # so sorting, etc. is predictable.
-   #
-   $ENV{LANG} = 'C';
-
    # find the type of the port.  We do this up front to have a single
    # point of change if it needs to be tweaked.
    #

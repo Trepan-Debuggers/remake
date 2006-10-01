@@ -13,7 +13,7 @@ GNU make supports both shell types. The following list defines the order
 that is used to determine the shell:
 
  1. The shell specified by the environment variable MAKESHELL.
- 2. The shell specified by the SHELL variable within a Makefile. As on
+ 2. The shell specified by the SHELL variable within a Makefile. Like
     Unix, SHELL is NOT taken from the environment.
  3. The shell specified by the COMSPEC environment variable.
  4. The shell specified by the OS2_SHELL environment variable.
@@ -64,7 +64,7 @@ A standard Unix like build environment:
  - GNU texinfo (you can use 3.1 (gnuinfo.zip), but I recommend 4.0)
 
 If you want to recreate the configuration files (developers only!)
-you need also: GNU m4 1.4, autoconf 2.59, automake 1.8.2 (or compatible)
+you need also: GNU m4 1.4, autoconf 2.59, automake 1.9.6 (or compatible)
 
 
 III. ***** COMPILATION AND INSTALLATION *****
@@ -83,7 +83,7 @@ b) Installation into x:/usr
 
    Note: Although it is possible to compile make using "./configure",
          "make", "make install" this is not recommended.  In particular,
-         you must ALWAYS use LDFLAGS="-Zstack 0x8000" because the default
+         you must ALWAYS use LDFLAGS="-Zstack 0x6000" because the default
          stack size is far to small and make will not work properly!
 
 Recommended environment variables and installation options:
@@ -91,13 +91,13 @@ Recommended environment variables and installation options:
     export ac_executable_extensions=".exe"
     export CPPFLAGS="-D__ST_MT_ERRNO__"
     export CFLAGS="-O2 -Zomf -Zmt"
-    export LDFLAGS="-Zcrtdll -Zlinker /exepack:2 -Zlinker /pm:vio -Zstack 0x8000"
+    export LDFLAGS="-Zcrtdll -Zlinker /exepack:2 -Zlinker /pm:vio -Zstack 0x6000"
     export RANLIB="echo"
     ./configure --prefix=x:/usr --infodir=x:/usr/share/info --mandir=x:/usr/share/man --without-included-gettext
     make AR=emxomfar
     make install
 
-Note: If you use gcc 2.9.x or higher I recommend to set also LIBS="-lgcc"
+Note: If you use gcc 2.9.x I recommend to set also LIBS="-lgcc"
 
 Note: You can add -DNO_CMD_DEFAULT and -DNO_CHDIR2 to CPPFLAGS.
       See section I. for details.
@@ -148,15 +148,15 @@ To run the testsuite do the following:
 
   export CPPFLAGS="-D__ST_MT_ERRNO__ -DNO_CMD_DEFAULT -DNO_CHDIR2"
   export CFLAGS="-Zomf -O2 -Zmt"
-  export LDFLAGS="-Zcrtdll -s -Zlinker /exepack:2 -Zlinker /pm:vio -Zstack 0x8000"
+  export LDFLAGS="-Zcrtdll -s -Zlinker /exepack:2 -Zlinker /pm:vio -Zstack 0x6000"
   export RANLIB="echo"
   ./configure --prefix=x:/usr --disable-nls
   make AR=emxomfar
   make check
 
-All tests should work fine with the exception of "default_names" which
-is because OS/2 file systems are not case sensitive ("makefile" and
-"Makefile" specify the same file).
+All tests should work fine with the exception of one of the "INCLUDE_DIRS"
+tests which will fail if your /usr/include directory is on a drive different
+from the make source tree.
 
 
 -------------------------------------------------------------------------------

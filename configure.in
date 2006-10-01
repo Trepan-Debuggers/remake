@@ -19,7 +19,7 @@
 AC_INIT([GNU make],[3.81.90],[bug-make@gnu.org])
 
 AC_PREREQ(2.59)
-AC_REVISION([[$Id: configure.in,v 1.144 2006/04/09 22:09:24 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.145 2006/10/01 05:38:38 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -191,7 +191,7 @@ AC_CHECK_DECLS([sys_siglist, _sys_siglist, __sys_siglist], , ,
 
 
 # Check out the wait reality.
-AC_CHECK_HEADERS(sys/wait.h)
+AC_CHECK_HEADERS(sys/wait.h,,,[[#include <sys/types.h>]])
 AC_CHECK_FUNCS(waitpid wait3)
 AC_MSG_CHECKING(for union wait)
 AC_CACHE_VAL(make_cv_union_wait, [dnl
@@ -380,6 +380,8 @@ case "$host" in
     AC_DEFINE([HAVE_DOS_PATHS], [1], [Use platform specific coding])
     ;;
 esac
+
+AC_DEFINE_UNQUOTED(PATH_SEPARATOR_CHAR,'$PATH_SEPARATOR',[Define to the character that separates directories in PATH.])
 
 # Include the Maintainer's Makefile section, if it's here.
 

@@ -437,7 +437,7 @@ lookup_variable_in_set (const char *name, unsigned int length,
    rule, then we will use the "root" double-colon target's variable set as the
    parent of FILE's variable set.
 
-   If we're READing a makefile, don't do the pattern variable search now,
+   If we're READING a makefile, don't do the pattern variable search now,
    since the pattern variable might not have been defined yet.  */
 
 void

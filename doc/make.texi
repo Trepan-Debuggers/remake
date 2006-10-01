@@ -4,7 +4,7 @@
 
 @include version.texi
 @set EDITION 0.70
-@set RCSID $Id: make.texi,v 1.45 2006/04/01 06:36:40 psmith Exp $
+@set RCSID $Id: make.texi,v 1.46 2006/10/01 05:38:38 psmith Exp $
 
 @settitle GNU @code{make}
 @setchapternewpage odd
@@ -50,7 +50,7 @@ Software Foundation raise funds for GNU development.''
 @c ISPELL CHECK: done, 2000-06-25 --Martin Buchholz
 
 
-@dircategory GNU Packages
+@dircategory Software development
 @direntry
 * Make: (make).            Remake files automatically.
 @end direntry
@@ -1009,6 +1009,10 @@ it) is effectively blank, and is ignored.  If you want a literal
 appear on any line in the makefile, although they are treated
 specially in certain situations.
 
+You cannot use comments within variable references or function calls:
+any instance of @code{#} will be treated literally (rather than as the
+start of a comment) inside a variable reference or function call.
+
 Within a command script (if the line begins with a TAB character) the
 entire line is passed to the shell, just as with any other line that
 begins with a TAB.  The shell decides how to interpret the text:
@@ -1251,10 +1255,10 @@ name2 = inc.mk
 @end group
 @end example
 
-@xref{Text Functions}, for more information on the @code{word} and
-@code{words} functions used above.  @xref{Flavors, The Two Flavors of
-Variables}, for more information on simply-expanded (@code{:=})
-variable definitions.
+@xref{Text Functions}, for more information on the @code{lastword}
+function used above.  @xref{Flavors, The Two Flavors of Variables},
+for more information on simply-expanded (@code{:=}) variable
+definitions.
 
 @node Special Variables, Remaking Makefiles, MAKEFILE_LIST Variable, Makefiles
 @comment  node-name,  next,  previous,  up
@@ -1744,7 +1748,7 @@ In the first prerequisite list, all three variables (@code{$$<},
 second, they will have values @code{foo.1}, @code{foo.1 bar.1}, and
 @code{foo.1 bar.1} respectively.  In the third they will have values
 @code{foo.1}, @code{foo.1 bar.1 foo.2 bar.2}, and @code{foo.1 bar.1
-foo.2 bar.2} respectively.
+foo.2 bar.2 foo.1 foo.1 bar.1 foo.1 bar.1} respectively.
 
 Rules undergo secondary expansion in makefile order, except that
 the rule with the command script is always evaluated last.
@@ -1937,7 +1941,7 @@ references, if you really want a dollar sign in a target or
 prerequisite you must write two of them, @samp{$$} (@pxref{Using
 Variables, ,How to Use Variables}).  If you have enabled secondary
 expansion (@pxref{Secondary Expansion}) and you want a literal dollar
-sign in the prerequisites lise, you must actually write @emph{four}
+sign in the prerequisites list, you must actually write @emph{four}
 dollar signs (@samp{$$$$}).
 
 You may split a long line by inserting a backslash followed by a
@@ -2000,10 +2004,41 @@ symbol are normal; any prerequisites to the right are order-only:
 
 The normal prerequisites section may of course be empty.  Also, you
 may still declare multiple lines of prerequisites for the same target:
-they are appended appropriately.  Note that if you declare the same
-file to be both a normal and an order-only prerequisite, the normal
-prerequisite takes precedence (since they are a strict superset of the
-behavior of an order-only prerequisite).
+they are appended appropriately (normal prerequisites are appended to
+the list of normal prerequisites; order-only prerequisites are
+appended to the list of order-only prerequisites).  Note that if you
+declare the same file to be both a normal and an order-only
+prerequisite, the normal prerequisite takes precedence (since they
+have a strict superset of the behavior of an order-only prerequisite).
+
+Consider an example where your targets are to be placed in a separate
+directory, and that directory might not exist before @code{make} is
+run.  In this situation, you want the directory to be created before
+any targets are placed into it but, because the timestamps on
+directories change whenever a file is added, removed, or renamed, we
+certainly don't want to rebuild all the targets whenever the
+directory's timestamp changes.  One way to manage this is with
+order-only prerequisites: make the directory an order-only
+prerequisite on all the targets:
+
+@example
+OBJDIR := objdir
+OBJS := $(addprefix $(OBJDIR)/,foo.o bar.o baz.o)
+
+$(OBJDIR)/%.o : %.c
+        $(COMPILE.c) $(OUTPUT_OPTION) $<
+
+all: $(OBJS)
+
+$(OBJS): | $(OBJDIR)
+
+$(OBJDIR):
+        mkdir $(OBJDIR)
+@end example
+
+Now the rule to create the @file{objdir} directory will be run, if
+needed, before any @samp{.o} is built, but no @samp{.o} will be built
+because the @file{objdir} directory timestamp changed.
 
 @node Wildcards, Directory Search, Prerequisite Types, Rules
 @section Using Wildcard Characters in File Names
@@ -2995,11 +3030,11 @@ Sub-@code{make}}.
 @item .NOTPARALLEL
 @cindex parallel execution, overriding
 
-If @code{.NOTPARALLEL} is mentioned as a target, then this invocation of
-@code{make} will be run serially, even if the @samp{-j} option is
-given.  Any recursively invoked @code{make} command will still be run in
-parallel (unless its makefile contains this target).  Any prerequisites
-on this target are ignored.
+If @code{.NOTPARALLEL} is mentioned as a target, then this invocation
+of @code{make} will be run serially, even if the @samp{-j} option is
+given.  Any recursively invoked @code{make} command will still run
+commands in parallel (unless its makefile also contains this target).
+Any prerequisites on this target are ignored.
 @end table
 
 Any defined implicit rule suffix also counts as a special target if it
@@ -3093,7 +3128,7 @@ more than one rule gives commands for the same file, @code{make} uses
 the last set given and prints an error message.  (As a special case,
 if the file's name begins with a dot, no error message is printed.
 This odd behavior is only for compatibility with other implementations
-of @code{make}... you should avoid using it).  Occasionally it is
+of @code{make}@dots{} you should avoid using it).  Occasionally it is
 useful to have the same target invoke multiple commands which are
 defined in different parts of your makefile; you can use
 @dfn{double-colon rules} (@pxref{Double-Colon}) for this.
@@ -3652,11 +3687,12 @@ hello     world
 @end example
 
 @noindent
-Notice how the backslash/newline pair was removed inside the string quoted
-with double quotes (@code{"..."}), but not from the string quoted with single
-quotes (@code{'...'}).  This is the way the default shell (@file{/bin/sh})
-handles backslash/newline pairs.  If you specify a different shell in your
-makefiles it may treat them differently.
+Notice how the backslash/newline pair was removed inside the string
+quoted with double quotes (@code{"@dots{}"}), but not from the string
+quoted with single quotes (@code{'@dots{}'}).  This is the way the
+default shell (@file{/bin/sh}) handles backslash/newline pairs.  If
+you specify a different shell in your makefiles it may treat them
+differently.
 
 Sometimes you want to split a long line inside of single quotes, but
 you don't want the backslash-newline to appear in the quoted content.
@@ -3942,7 +3978,9 @@ GNU @code{make} knows how to execute several commands at once.
 Normally, @code{make} will execute only one command at a time, waiting
 for it to finish before executing the next.  However, the @samp{-j} or
 @samp{--jobs} option tells @code{make} to execute many commands
-simultaneously.@refill
+simultaneously.  You can inhibit parallelism in a particular makefile
+with the @code{.NOTPARALLEL} pseudo-target (@pxref{Special
+Targets,Special Built-in Target Names}).@refill
 
 On MS-DOS, the @samp{-j} option has no effect, since that system doesn't
 support multi-processing.

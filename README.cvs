@@ -169,6 +169,13 @@ what you do:
 It will ask for the GPG passphrase _THREE_ times.  Sigh.
 
 
+For both final releases and pre-releases, send an email with the URL of
+the package to the GNU translation robot to allow the translators to
+work on it:
+
+     <translation@iro.umontreal.ca>
+
+
 Where to Announce
 -----------------
 
