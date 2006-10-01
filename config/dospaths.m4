@@ -22,7 +22,7 @@ AC_DEFUN([pds_AC_DOS_PATHS],
     AC_CACHE_CHECK([whether system uses MSDOS-style paths], [ac_cv_dos_paths],
       [
         AC_COMPILE_IFELSE([
-#if !defined _WIN32 && !defined __WIN32__ && !defined __MSDOS__ && !defined __EMX__ && !defined __MSYS__
+#if !defined _WIN32 && !defined __WIN32__ && !defined __MSDOS__ && !defined __EMX__ && !defined __MSYS__ && !defined __CYGWIN__
 neither MSDOS nor Windows nor OS2
 #endif
 ],

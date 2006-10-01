@@ -81,6 +81,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
    */
 #define HAVE_DIRENT_H 1
 
+/* Define to 1 if you have the <direct.h> header file, and it defines getcwd()
+   and chdir().
+   */
+#if (defined(_MSC_VER) || defined(__BORLANDC__)) && !defined(__INTERIX)
+# define HAVE_DIRECT_H 1
+#endif
+
 /* Define to 1 if you don't have `vprintf' but do have `_doprnt.' */
 /* #undef HAVE_DOPRNT */
 

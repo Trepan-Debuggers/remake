@@ -138,7 +138,7 @@ void free_variable_set (struct variable_set_list *);
 struct variable_set_list *push_new_variable_scope (void);
 void pop_variable_scope (void);
 void define_automatic_variables (void);
-void initialize_file_variables (struct file *file, int read);
+void initialize_file_variables (struct file *file, int reading);
 void print_file_variables (struct file *file);
 void print_variable_set (struct variable_set *set, char *prefix);
 void merge_variable_set_lists (struct variable_set_list **to_list,

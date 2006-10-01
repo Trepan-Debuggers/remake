@@ -28,7 +28,7 @@
 # this routine controls the whole mess; each test suite sets up a few
 # variables and then calls &toplevel, which does all the real work.
 
-# $Id: test_driver.pl,v 1.19 2006/03/10 02:20:45 psmith Exp $
+# $Id: test_driver.pl,v 1.20 2006/10/01 05:38:38 psmith Exp $
 
 
 # The number of test categories we've run
@@ -78,9 +78,9 @@ sub resetENV
 sub toplevel
 {
   # Pull in benign variables from the user's environment
-  #
+
   foreach (# UNIX-specific things
-           'TZ', 'LANG', 'TMPDIR', 'HOME', 'USER', 'LOGNAME', 'PATH',
+           'TZ', 'TMPDIR', 'HOME', 'USER', 'LOGNAME', 'PATH',
            # Purify things
            'PURIFYOPTIONS',
            # Windows NT-specific stuff
@@ -91,6 +91,10 @@ sub toplevel
           ) {
     $makeENV{$_} = $ENV{$_} if $ENV{$_};
   }
+
+  # Make sure our compares are not foiled by locale differences
+
+  $makeENV{LC_ALL} = 'C';
 
   # Replace the environment with the new one
   #

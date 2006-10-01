@@ -91,11 +91,12 @@ CVS-CLEAN-FILES +=	$(maintFILES) $(TEMPLATES) $(MTEMPLATES) NMakefile \
 # This rule tries to clean the tree right down to how it looks when you do a
 # virgin CVS checkout.
 
-# This is potentially dangerous since it removes _ANY FILE_ that is not in
-# CVS.  Including files you might mean to add to CVS but haven't yet...
-# I only use this in subdirectories where it's unlikely we have any new
-# files.  Stil...
-cvsclean = perl -e '$$k{CVS} = 1; open(E,"< CVS/Entries") || die "CVS/Entries: $$!\n"; while (defined ($$_ = <E>)) { m%^/([^/]*)% or next; $$k{$$1} = 1; } close(E) || die "CVS/Entries: $$!\n"; opendir(D, ".") || die ".: $$!\n"; while (defined ($$_ = readdir(D))) { -f $$_ && ! exists $$k{$$_} && unlink($$_); } closedir(D) || die ".: $$!\n";'
+# This target is potentially dangerous since it removes _ANY FILE_ that
+# is not in CVS.  Including files you might mean to add to CVS but
+# haven't yet...  I only use this in subdirectories where it's unlikely
+# we have any new files.  Still... be careful!!
+
+cvsclean = $(PERL) -e '$$k{CVS} = 1; open(E,"< CVS/Entries") || die "CVS/Entries: $$!\n"; while (defined ($$_ = <E>)) { m%^/([^/]*)% or next; $$k{$$1} = 1; } close(E) || die "CVS/Entries: $$!\n"; opendir(D, ".") || die ".: $$!\n"; while (defined ($$_ = readdir(D))) { -f $$_ && ! exists $$k{$$_} && unlink($$_); } closedir(D) || die ".: $$!\n";'
 
 .PHONY: cvs-clean
 cvs-clean: maintainer-clean
@@ -214,8 +215,8 @@ changelog-check:
 # Ignore make.h; it defines _().
 po-check:
 	if test -f po/POTFILES.in; then \
-	  grep -E -v '^(#|$$)' po/POTFILES.in | sort > $@-1; \
-	  grep -E -l '\b_\(' *.c *.h | grep -v make.h | sort > $@-2; \
+	  grep '^[^#]' po/POTFILES.in | sort > $@-1; \
+	  $(PERL) -wn -e 'if (/\b_\(/) { $$ARGV eq "make.h" || print "$$ARGV\n" and close ARGV }' *.c *.h | sort > $@-2; \
 	  diff -u $@-1 $@-2 || exit 1; \
 	  rm -f $@-1 $@-2; \
 	fi

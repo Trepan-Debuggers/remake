@@ -1,3 +1,14 @@
+2006-10-01  Paul Smith  <psmith@paulandlesley.org>
+
+	* run_make_tests.pl (set_more_defaults): Remove setting of LANG in
+	ENV here.  This doesn't always work.
+	* test_driver.pl (toplevel): Set LC_ALL to 'C' in the make
+	environment.  Fixes Savannah bug #16698.
+
+2006-09-30  Paul Smith  <psmith@paulandlesley.org>
+
+	* scripts/variables/automatic: Add back the test for bug #8154.
+
 2006-04-01  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/functions/realpath: Don't run tests with multiple

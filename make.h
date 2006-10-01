@@ -311,16 +311,18 @@ int strcmpi (const char *,const char *);
 #define S_(msg1,msg2,num)   ngettext (msg1,msg2,num)
 
 /* Handle other OSs.  */
-#if defined(HAVE_DOS_PATHS)
-# define PATH_SEPARATOR_CHAR ';'
-#elif defined(VMS)
-# define PATH_SEPARATOR_CHAR ','
-#else
-# define PATH_SEPARATOR_CHAR ':'
+#ifndef PATH_SEPARATOR_CHAR
+# if defined(HAVE_DOS_PATHS)
+#  define PATH_SEPARATOR_CHAR ';'
+# elif defined(VMS)
+#  define PATH_SEPARATOR_CHAR ','
+# else
+#  define PATH_SEPARATOR_CHAR ':'
+# endif
 #endif
 
-/* This is needed for getcwd() and chdir().  */
-#if defined(_MSC_VER) || defined(__BORLANDC__)
+/* This is needed for getcwd() and chdir(), on some W32 systems.  */
+#if defined(HAVE_DIRECT_H)
 # include <direct.h>
 #endif
 

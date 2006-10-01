@@ -95,17 +95,16 @@ mbr.src: ; @:',
 # Make sure that nonexistent prerequisites are listed in $?, since they are
 # considered reasons for the target to be rebuilt.
 #
-# This was undone due to Savannah bug #16002.  We'll re-do it in the next
-# release.  See Savannah bug #16051.
+# See also Savannah bugs #16002 and #16051.
 
-#touch('foo');
-#
-#run_make_test('
-#foo: bar ; @echo "\$$? = $?"
-#bar: ;',
-#              '',
-#              '$? = bar');
-#
-#unlink('foo');
+touch('foo');
+
+run_make_test('
+foo: bar ; @echo "\$$? = $?"
+bar: ;',
+              '',
+              '$? = bar');
+
+unlink('foo');
 
 1;

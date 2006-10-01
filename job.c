@@ -2307,6 +2307,12 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
                              "login", "logout", "read", "readonly", "set",
                              "shift", "switch", "test", "times", "trap",
                              "umask", "wait", "while", 0 };
+# ifdef HAVE_DOS_PATHS
+  /* This is required if the MSYS/Cygwin ports (which do not define
+     WINDOWS32) are compiled with HAVE_DOS_PATHS defined, which uses
+     sh_chars_sh[] directly (see below).  */
+  static char *sh_chars_sh = sh_chars;
+# endif	 /* HAVE_DOS_PATHS */
 #endif
   int i;
   char *p;
