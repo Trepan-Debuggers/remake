@@ -921,12 +921,11 @@ notice_finished_file (struct file *file)
     file->update_status = 0;
 }
 
-/* Check whether another file (whose mtime is THIS_MTIME)
-   needs updating on account of a dependency which is file FILE.
-   If it does, store 1 in *MUST_MAKE_PTR.
-   In the process, update any non-intermediate files
-   that FILE depends on (including FILE itself).
-   Return nonzero if any updating failed.  */
+/* Check whether another file (whose mtime is THIS_MTIME) needs updating on
+   account of a dependency which is file FILE.  If it does, store 1 in
+   *MUST_MAKE_PTR.  In the process, update any non-intermediate files that
+   FILE depends on (including FILE itself).  Return nonzero if any updating
+   failed.  */
 
 static int
 check_dep (struct file *file, unsigned int depth,
@@ -940,8 +939,8 @@ check_dep (struct file *file, unsigned int depth,
 
   if (file->phony || !file->intermediate)
     {
-      /* If this is a non-intermediate file, update it and record
-         whether it is newer than THIS_MTIME.  */
+      /* If this is a non-intermediate file, update it and record whether it
+         is newer than THIS_MTIME.  */
       FILE_TIMESTAMP mtime;
       dep_status = update_file (file, depth);
       check_renamed (file);
@@ -970,18 +969,18 @@ check_dep (struct file *file, unsigned int depth,
 	  file->cmds = default_file->cmds;
 	}
 
-      /* If the intermediate file actually exists
-	 and is newer, then we should remake from it.  */
       check_renamed (file);
       mtime = file_mtime (file);
       check_renamed (file);
       if (mtime != NONEXISTENT_MTIME && mtime > this_mtime)
+        /* If the intermediate file actually exists and is newer, then we
+           should remake from it.  */
 	*must_make_ptr = 1;
-	  /* Otherwise, update all non-intermediate files we depend on,
-	     if necessary, and see whether any of them is more
-	     recent than the file on whose behalf we are checking.  */
       else
 	{
+          /* Otherwise, update all non-intermediate files we depend on, if
+             necessary, and see whether any of them is more recent than the
+             file on whose behalf we are checking.  */
 	  struct dep *lastd;
 
 	  lastd = 0;

@@ -1,4 +1,45 @@
-2006-09-30  Paul Smith  <psmith@paulandlesley.org>
+2006-11-18  Paul Smith  <psmith@gnu.org>
+
+	* strcache.c (strcache_add_len): Don't allocate a new buffer
+	unless the string is not already nil-terminated.  Technically this
+	is a violation of the standard, since we may be passed an array
+	that is not long enough to test one past.  However, in make this
+	is never true since we only use nil-terminated strings.
+
+	* read.c (eval, do_define): Use cmd_prefix instead of '\t'.
+
+	* main.c: New global cmd_prefix, defaults to '\t'.
+	* job.c (construct_command_argv_internal): Use cmd_prefix instead
+	of '\t'.
+
+	* dir.c: Constified.
+	(dir_contents_file_exists_p): Check for an error return	from
+	readdir(), just in case.
+
+	* commands.c: Constified.
+	* default.c: Constified.
+	* expand.c: Constified.
+	* function.c: Partial constification.
+	* variable.c: Partial constification.
+	* vmsify.c: Constification.  Hard to test this but I hope I didn't
+	screw it up!
+	* vpath.c: Partial constification.
+
+2006-11-16  Eli Zaretskii  <eliz@gnu.org>
+
+	* main.c (main) [HAVE_DOS_PATHS]: Treat DOS style argv[0] with
+	backslashes and drive letters as absolute.
+
+2006-10-22  Paul Smith  <psmith@gnu.org>
+
+	* main.c (struct command_switch): Use const and void*.
+
+2006-10-21  Paul Smith  <psmith@gnu.org>
+
+	* ar.c: Constified.
+	* arscan.c: Constified.
+
+2006-09-30  Paul Smith  <psmith@gnu.org>
 
 	* doc/make.texi (MAKEFILE_LIST Variable): Modify reference to
 	point to lastword since the example was updated.

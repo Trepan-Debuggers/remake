@@ -186,8 +186,6 @@ int getgid ();
 # endif
 #endif
 
-char *allocated_variable_expand_for_file (char *line, struct file *file);
-
 int getloadavg (double loadavg[], int nelem);
 int start_remote_job (char **argv, char **envp, int stdin_fd, int *is_remote,
                       int *id_ptr, int *used_stdin);
@@ -2446,8 +2444,8 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
                   *(ap++) = *(p++);
                   *(ap++) = *p;
                 }
-              /* If there's a TAB here, skip it.  */
-              if (p[1] == '\t')
+              /* If there's a command prefix char here, skip it.  */
+              if (p[1] == cmd_prefix)
                 ++p;
             }
 	  else if (*p == '\n' && restp != NULL)
@@ -2496,8 +2494,9 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 		/* Throw out the backslash and newline.  */
                 ++p;
 
-		/* If there is a tab after a backslash-newline, remove it.  */
-		if (p[1] == '\t')
+		/* If there is a command prefix after a backslash-newline,
+		   remove it.  */
+		if (p[1] == cmd_prefix)
                   ++p;
 
                 /* If there's nothing in this argument yet, skip any
@@ -2744,7 +2743,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 	      }
 
 	    ++p;
-	    if (p[1] == '\t')
+	    if (p[1] == cmd_prefix)
 	      ++p;
 
 	    continue;
@@ -2835,8 +2834,9 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
             if (q[0] == '\\' && q[1] == '\n')
               {
                 q += 2; /* remove '\\' and '\n' */
-                if (q[0] == '\t')
-                  q++; /* remove 1st tab in the next line */
+		/* Remove any command prefix in the next line */
+                if (q[0] == cmd_prefix)
+                  q++;
               }
             else
               *p++ = *q++;

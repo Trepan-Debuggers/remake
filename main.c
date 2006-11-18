@@ -107,14 +107,14 @@ struct command_switch
 	ignore			/* Ignored.  */
       } type;
 
-    char *value_ptr;	/* Pointer to the value-holding variable.  */
+    void *value_ptr;	/* Pointer to the value-holding variable.  */
 
     unsigned int env:1;		/* Can come from MAKEFLAGS.  */
     unsigned int toenv:1;	/* Should be put in MAKEFLAGS.  */
     unsigned int no_makefile:1;	/* Don't propagate when remaking makefiles.  */
 
-    char *noarg_value;	/* Pointer to value used if no argument is given.  */
-    char *default_value;/* Pointer to default value.  */
+    const void *noarg_value;	/* Pointer to value used if no arg given.  */
+    const void *default_value;	/* Pointer to default value.  */
 
     char *long_name;		/* Long option name.  */
   };
@@ -156,6 +156,10 @@ static struct stringlist *db_flags;
 static int debug_flag = 0;
 
 int db_level = 0;
+
+/* Output level (--verbosity).  */
+
+static struct stringlist *verbosity_flags;
 
 #ifdef WINDOWS32
 /* Suspend make in main for a short time to allow debugger to attach */
@@ -281,6 +285,10 @@ int rebuilding_makefiles = 0;
 
 struct variable shell_var;
 
+/* This character introduces a command: it's the first char on the line.  */
+
+char cmd_prefix = '\t';
+
 
 /* The usage output.  We write it this way to make life easier for the
    translators, especially those trying to translate to right-to-left
@@ -362,59 +370,52 @@ static const char *const usage[] =
 static const struct command_switch switches[] =
   {
     { 'b', ignore, 0, 0, 0, 0, 0, 0, 0 },
-    { 'B', flag, (char *) &always_make_set, 1, 1, 0, 0, 0, "always-make" },
-    { 'C', string, (char *) &directories, 0, 0, 0, 0, 0, "directory" },
-    { 'd', flag, (char *) &debug_flag, 1, 1, 0, 0, 0, 0 },
-    { CHAR_MAX+1, string, (char *) &db_flags, 1, 1, 0, "basic", 0, "debug" },
+    { 'B', flag, &always_make_set, 1, 1, 0, 0, 0, "always-make" },
+    { 'C', string, &directories, 0, 0, 0, 0, 0, "directory" },
+    { 'd', flag, &debug_flag, 1, 1, 0, 0, 0, 0 },
+    { CHAR_MAX+1, string, &db_flags, 1, 1, 0, "basic", 0, "debug" },
 #ifdef WINDOWS32
-    { 'D', flag, (char *) &suspend_flag, 1, 1, 0, 0, 0, "suspend-for-debug" },
+    { 'D', flag, &suspend_flag, 1, 1, 0, 0, 0, "suspend-for-debug" },
 #endif
-    { 'e', flag, (char *) &env_overrides, 1, 1, 0, 0, 0,
-      "environment-overrides", },
-    { 'f', string, (char *) &makefiles, 0, 0, 0, 0, 0, "file" },
-    { 'h', flag, (char *) &print_usage_flag, 0, 0, 0, 0, 0, "help" },
-    { 'i', flag, (char *) &ignore_errors_flag, 1, 1, 0, 0, 0,
-      "ignore-errors" },
-    { 'I', string, (char *) &include_directories, 1, 1, 0, 0, 0,
+    { 'e', flag, &env_overrides, 1, 1, 0, 0, 0, "environment-overrides", },
+    { 'f', string, &makefiles, 0, 0, 0, 0, 0, "file" },
+    { 'h', flag, &print_usage_flag, 0, 0, 0, 0, 0, "help" },
+    { 'i', flag, &ignore_errors_flag, 1, 1, 0, 0, 0, "ignore-errors" },
+    { 'I', string, &include_directories, 1, 1, 0, 0, 0,
       "include-dir" },
-    { 'j', positive_int, (char *) &job_slots, 1, 1, 0, (char *) &inf_jobs,
-      (char *) &default_job_slots, "jobs" },
-    { CHAR_MAX+2, string, (char *) &jobserver_fds, 1, 1, 0, 0, 0,
-      "jobserver-fds" },
-    { 'k', flag, (char *) &keep_going_flag, 1, 1, 0, 0,
-      (char *) &default_keep_going_flag, "keep-going" },
+    { 'j', positive_int, &job_slots, 1, 1, 0, &inf_jobs, &default_job_slots,
+      "jobs" },
+    { CHAR_MAX+2, string, &jobserver_fds, 1, 1, 0, 0, 0, "jobserver-fds" },
+    { 'k', flag, &keep_going_flag, 1, 1, 0, 0, &default_keep_going_flag,
+      "keep-going" },
 #ifndef NO_FLOAT
-    { 'l', floating, (char *) &max_load_average, 1, 1, 0,
-      (char *) &default_load_average, (char *) &default_load_average,
-      "load-average" },
+    { 'l', floating, &max_load_average, 1, 1, 0, &default_load_average,
+      &default_load_average, "load-average" },
 #else
-    { 'l', positive_int, (char *) &max_load_average, 1, 1, 0,
-      (char *) &default_load_average, (char *) &default_load_average,
-      "load-average" },
+    { 'l', positive_int, &max_load_average, 1, 1, 0, &default_load_average,
+      &default_load_average, "load-average" },
 #endif
-    { 'L', flag, (char *) &check_symlink_flag, 1, 1, 0, 0, 0,
-      "check-symlink-times" },
+    { 'L', flag, &check_symlink_flag, 1, 1, 0, 0, 0, "check-symlink-times" },
     { 'm', ignore, 0, 0, 0, 0, 0, 0, 0 },
-    { 'n', flag, (char *) &just_print_flag, 1, 1, 1, 0, 0, "just-print" },
-    { 'o', string, (char *) &old_files, 0, 0, 0, 0, 0, "old-file" },
-    { 'p', flag, (char *) &print_data_base_flag, 1, 1, 0, 0, 0,
-      "print-data-base" },
-    { 'q', flag, (char *) &question_flag, 1, 1, 1, 0, 0, "question" },
-    { 'r', flag, (char *) &no_builtin_rules_flag, 1, 1, 0, 0, 0,
-      "no-builtin-rules" },
-    { 'R', flag, (char *) &no_builtin_variables_flag, 1, 1, 0, 0, 0,
+    { 'n', flag, &just_print_flag, 1, 1, 1, 0, 0, "just-print" },
+    { 'o', string, &old_files, 0, 0, 0, 0, 0, "old-file" },
+    { 'p', flag, &print_data_base_flag, 1, 1, 0, 0, 0, "print-data-base" },
+    { 'q', flag, &question_flag, 1, 1, 1, 0, 0, "question" },
+    { 'r', flag, &no_builtin_rules_flag, 1, 1, 0, 0, 0, "no-builtin-rules" },
+    { 'R', flag, &no_builtin_variables_flag, 1, 1, 0, 0, 0,
       "no-builtin-variables" },
-    { 's', flag, (char *) &silent_flag, 1, 1, 0, 0, 0, "silent" },
-    { 'S', flag_off, (char *) &keep_going_flag, 1, 1, 0, 0,
-      (char *) &default_keep_going_flag, "no-keep-going" },
-    { 't', flag, (char *) &touch_flag, 1, 1, 1, 0, 0, "touch" },
-    { 'v', flag, (char *) &print_version_flag, 1, 1, 0, 0, 0, "version" },
-    { 'w', flag, (char *) &print_directory_flag, 1, 1, 0, 0, 0,
-      "print-directory" },
-    { CHAR_MAX+3, flag, (char *) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
+    { 's', flag, &silent_flag, 1, 1, 0, 0, 0, "silent" },
+    { 'S', flag_off, &keep_going_flag, 1, 1, 0, 0, &default_keep_going_flag,
+      "no-keep-going" },
+    { 't', flag, &touch_flag, 1, 1, 1, 0, 0, "touch" },
+    { 'v', flag, &print_version_flag, 1, 1, 0, 0, 0, "version" },
+    { CHAR_MAX+3, string, &verbosity_flags, 1, 1, 0, 0, 0,
+      "verbosity" },
+    { 'w', flag, &print_directory_flag, 1, 1, 0, 0, 0, "print-directory" },
+    { CHAR_MAX+4, flag, &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
       "no-print-directory" },
-    { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0, "what-if" },
-    { CHAR_MAX+4, flag, (char *) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
+    { 'W', string, &new_files, 0, 0, 0, 0, 0, "what-if" },
+    { CHAR_MAX+5, flag, &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
       "warn-undefined-variables" },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
@@ -831,15 +832,14 @@ find_and_set_default_shell (char *token)
 }
 #endif  /* WINDOWS32 */
 
-#ifdef  __MSDOS__
-
+#ifdef __MSDOS__
 static void
 msdos_return_to_initial_directory (void)
 {
   if (directory_before_chdir)
     chdir (directory_before_chdir);
 }
-#endif
+#endif  /* __MSDOS__ */
 
 char *mktemp (char *template);
 int mkstemp (char *template);
@@ -1291,7 +1291,7 @@ main (int argc, char **argv, char **envp)
   if (current_directory[0] != '\0'
       && argv[0] != 0
       && (argv[0][0] != '/' && (argv[0][0] == '\0' || argv[0][1] != ':'))
-#ifdef __EMX__
+# ifdef __EMX__
       /* do not prepend cwd if argv[0] contains no '/', e.g. "make" */
       && (strchr (argv[0], '/') != 0 || strchr (argv[0], '\\') != 0)
 # endif
@@ -1299,7 +1299,12 @@ main (int argc, char **argv, char **envp)
     argv[0] = concat (current_directory, "/", argv[0]);
 #else  /* !__MSDOS__ */
   if (current_directory[0] != '\0'
-      && argv[0] != 0 && argv[0][0] != '/' && strchr (argv[0], '/') != 0)
+      && argv[0] != 0 && argv[0][0] != '/' && strchr (argv[0], '/') != 0
+#ifdef HAVE_DOS_PATHS
+      && (argv[0][0] != '\\' && (!argv[0][0] || argv[0][1] != ':'))
+      && strchr (argv[0], '\\') != 0
+#endif
+      )
     argv[0] = concat (current_directory, "/", argv[0]);
 #endif /* !__MSDOS__ */
 #endif /* WINDOWS32 */
@@ -1669,6 +1674,9 @@ main (int argc, char **argv, char **envp)
     if (sscanf (cp, "%d,%d", &job_fds[0], &job_fds[1]) != 2)
       fatal (NILF,
              _("internal error: invalid --jobserver-fds string `%s'"), cp);
+
+    DB (DB_JOBS,
+	(_("Jobserver client (fds %d,%d)\n"), job_fds[0], job_fds[1]));
 
     /* The combination of a pipe + !job_slots means we're using the
        jobserver.  If !job_slots and we don't have a pipe, we can start
@@ -2468,7 +2476,7 @@ decode_switches (int argc, char **argv, int env)
 		    break;
 
 		  if (optarg == 0)
-		    optarg = cs->noarg_value;
+		    optarg = xstrdup (cs->noarg_value);
                   else if (*optarg == '\0')
                     {
                       error (NILF, _("the `-%c' option requires a non-empty string argument"),

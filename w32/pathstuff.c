@@ -83,7 +83,7 @@ convert_Path_to_windows32(char *Path, char to_delim)
  * Convert to forward slashes. Resolve to full pathname optionally
  */
 char *
-w32ify(char *filename, int resolve)
+w32ify(const char *filename, int resolve)
 {
     static char w32_path[FILENAME_MAX];
     char *p;

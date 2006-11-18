@@ -67,8 +67,8 @@ char *vmsify (char *name, int type);
 #define _USE_LFN 0
 #endif
 
-static char *
-dosify (char *filename)
+static const char *
+dosify (const char *filename)
 {
   static char dos_filename[14];
   char *df;
@@ -117,8 +117,8 @@ dosify (char *filename)
 #endif
 
 #ifdef HAVE_CASE_INSENSITIVE_FS
-static char *
-downcase (char *filename)
+static const char *
+downcase (const char *filename)
 {
   static PATH_VAR (new_filename);
   char *df;
@@ -130,11 +130,11 @@ downcase (char *filename)
   df = new_filename;
 
   /* First, transform the name part.  */
-  for (i = 0; *filename != '\0'; ++i)
-  {
-    *df++ = tolower ((unsigned char)*filename);
-    ++filename;
-  }
+  while (*filename != '\0')
+    {
+      *df++ = tolower ((unsigned char)*filename);
+      ++filename;
+    }
 
   *df = 0;
 
@@ -214,27 +214,24 @@ struct directory_contents
   {
     dev_t dev;			/* Device and inode numbers of this dir.  */
 #ifdef WINDOWS32
-    /*
-     * Inode means nothing on WINDOWS32. Even file key information is
-     * unreliable because it is random per file open and undefined
-     * for remote filesystems. The most unique attribute I can
-     * come up with is the fully qualified name of the directory. Beware
-     * though, this is also unreliable. I'm open to suggestion on a better
-     * way to emulate inode.
-     */
+    /* Inode means nothing on WINDOWS32. Even file key information is
+     * unreliable because it is random per file open and undefined for remote
+     * filesystems. The most unique attribute I can come up with is the fully
+     * qualified name of the directory. Beware though, this is also
+     * unreliable. I'm open to suggestion on a better way to emulate inode.  */
     char *path_key;
     int   ctime;
     int   mtime;        /* controls check for stale directory cache */
     int   fs_flags;     /* FS_FAT, FS_NTFS, ... */
-#define FS_FAT      0x1
-#define FS_NTFS     0x2
-#define FS_UNKNOWN  0x4
+# define FS_FAT      0x1
+# define FS_NTFS     0x2
+# define FS_UNKNOWN  0x4
 #else
-#ifdef VMS
+# ifdef VMS
     ino_t ino[3];
-#else
+# else
     ino_t ino;
-#endif
+# endif
 #endif /* WINDOWS32 */
     struct hash_table dirfiles;	/* Files in this directory.  */
     DIR *dirstream;		/* Stream reading this directory.  */
@@ -243,7 +240,7 @@ struct directory_contents
 static unsigned long
 directory_contents_hash_1 (const void *key_0)
 {
-  struct directory_contents const *key = (struct directory_contents const *) key_0;
+  const struct directory_contents *key = key_0;
   unsigned long hash;
 
 #ifdef WINDOWS32
@@ -266,7 +263,7 @@ directory_contents_hash_1 (const void *key_0)
 static unsigned long
 directory_contents_hash_2 (const void *key_0)
 {
-  struct directory_contents const *key = (struct directory_contents const *) key_0;
+  const struct directory_contents *key = key_0;
   unsigned long hash;
 
 #ifdef WINDOWS32
@@ -301,8 +298,8 @@ directory_contents_hash_2 (const void *key_0)
 static int
 directory_contents_hash_cmp (const void *xv, const void *yv)
 {
-  struct directory_contents const *x = (struct directory_contents const *) xv;
-  struct directory_contents const *y = (struct directory_contents const *) yv;
+  const struct directory_contents *x = xv;
+  const struct directory_contents *y = yv;
   int result;
 
 #ifdef WINDOWS32
@@ -338,7 +335,7 @@ static struct hash_table directory_contents;
 
 struct directory
   {
-    char *name;			/* Name of the directory.  */
+    const char *name;			/* Name of the directory.  */
 
     /* The directory's contents.  This data may be shared by several
        entries in the hash table, which refer to the same directory
@@ -349,20 +346,20 @@ struct directory
 static unsigned long
 directory_hash_1 (const void *key)
 {
-  return_ISTRING_HASH_1 (((struct directory const *) key)->name);
+  return_ISTRING_HASH_1 (((const struct directory *) key)->name);
 }
 
 static unsigned long
 directory_hash_2 (const void *key)
 {
-  return_ISTRING_HASH_2 (((struct directory const *) key)->name);
+  return_ISTRING_HASH_2 (((const struct directory *) key)->name);
 }
 
 static int
 directory_hash_cmp (const void *x, const void *y)
 {
-  return_ISTRING_COMPARE (((struct directory const *) x)->name,
-			  ((struct directory const *) y)->name);
+  return_ISTRING_COMPARE (((const struct directory *) x)->name,
+			  ((const struct directory *) y)->name);
 }
 
 /* Table of directories hashed by name.  */
@@ -379,7 +376,7 @@ static unsigned int open_directories = 0;
 
 struct dirfile
   {
-    char *name;			/* Name of the file.  */
+    const char *name;		/* Name of the file.  */
     short length;
     short impossible;		/* This file is impossible.  */
   };
@@ -399,8 +396,8 @@ dirfile_hash_2 (const void *key)
 static int
 dirfile_hash_cmp (const void *xv, const void *yv)
 {
-  struct dirfile const *x = ((struct dirfile const *) xv);
-  struct dirfile const *y = ((struct dirfile const *) yv);
+  const struct dirfile *x = xv;
+  const struct dirfile *y = yv;
   int result = x->length - y->length;
   if (result)
     return result;
@@ -411,17 +408,18 @@ dirfile_hash_cmp (const void *xv, const void *yv)
 #define DIRFILE_BUCKETS 107
 #endif
 
-static int dir_contents_file_exists_p (struct directory_contents *dir, char *filename);
-static struct directory *find_directory (char *name);
+static int dir_contents_file_exists_p (struct directory_contents *dir,
+                                       const char *filename);
+static struct directory *find_directory (const char *name);
 
 /* Find the directory named NAME and return its `struct directory'.  */
 
 static struct directory *
-find_directory (char *name)
+find_directory (const char *name)
 {
-  register char *p;
-  register struct directory *dir;
-  register struct directory **dir_slot;
+  const char *p;
+  struct directory *dir;
+  struct directory **dir_slot;
   struct directory dir_key;
   int r;
 #ifdef WINDOWS32
@@ -451,7 +449,7 @@ find_directory (char *name)
 
       p = name + strlen (name);
       dir = xmalloc (sizeof (struct directory));
-      dir->name = savestring (name, p - name);
+      dir->name = strcache_add_len (name, p - name);
       hash_insert_at (&directories, dir, dir_slot);
       /* The directory is not in the name hash table.
 	 Find its device and inode numbers, and look it up by them.  */
@@ -549,8 +547,8 @@ find_directory (char *name)
 	      hash_insert_at (&directory_contents, dc, dc_slot);
 	      ENULLLOOP (dc->dirstream, opendir (name));
 	      if (dc->dirstream == 0)
-                /* Couldn't open the directory.  Mark this by
-                   setting the `files' member to a nil pointer.  */
+                /* Couldn't open the directory.  Mark this by setting the
+                   `files' member to a nil pointer.  */
                 dc->dirfiles.ht_vec = 0;
 	      else
 		{
@@ -561,7 +559,7 @@ find_directory (char *name)
 		  if (open_directories == MAX_OPEN_DIRECTORIES)
 		    /* We have too many directories open already.
 		       Read the entire directory and then close it.  */
-		    (void) dir_contents_file_exists_p (dc, 0);
+		    dir_contents_file_exists_p (dc, 0);
 		}
 	    }
 
@@ -577,7 +575,8 @@ find_directory (char *name)
    FILENAME must contain no slashes.  */
 
 static int
-dir_contents_file_exists_p (struct directory_contents *dir, char *filename)
+dir_contents_file_exists_p (struct directory_contents *dir,
+                            const char *filename)
 {
   unsigned int hash;
   struct dirfile *df;
@@ -588,10 +587,9 @@ dir_contents_file_exists_p (struct directory_contents *dir, char *filename)
 #endif
 
   if (dir == 0 || dir->dirfiles.ht_vec == 0)
-    {
     /* The directory could not be stat'd or opened.  */
-      return 0;
-    }
+    return 0;
+
 #ifdef __MSDOS__
   filename = dosify (filename);
 #endif
@@ -621,11 +619,9 @@ dir_contents_file_exists_p (struct directory_contents *dir, char *filename)
 	}
       dirfile_key.name = filename;
       dirfile_key.length = strlen (filename);
-      df = (struct dirfile *) hash_find_item (&dir->dirfiles, &dirfile_key);
+      df = hash_find_item (&dir->dirfiles, &dirfile_key);
       if (df)
-	{
-	  return !df->impossible;
-	}
+        return !df->impossible;
     }
 
   /* The file was not found in the hashed list.
@@ -646,7 +642,7 @@ dir_contents_file_exists_p (struct directory_contents *dir, char *filename)
 	      dir->mtime = time ((time_t *) 0);
 	      rehash = 1;
 	    }
-	  else if (stat(dir->path_key, &st) == 0 && st.st_mtime > dir->mtime)
+	  else if (stat (dir->path_key, &st) == 0 && st.st_mtime > dir->mtime)
 	    {
 	      /* reset date stamp to show most recent re-process.  */
 	      dir->mtime = st.st_mtime;
@@ -658,7 +654,7 @@ dir_contents_file_exists_p (struct directory_contents *dir, char *filename)
 	    return 0;
 
           /* make sure directory can still be opened; if not return.  */
-          dir->dirstream = opendir(dir->path_key);
+          dir->dirstream = opendir (dir->path_key);
           if (!dir->dirstream)
             return 0;
 	}
@@ -677,7 +673,11 @@ dir_contents_file_exists_p (struct directory_contents *dir, char *filename)
 
       ENULLLOOP (d, readdir (dir->dirstream));
       if (d == 0)
-        break;
+        {
+          if (errno)
+            fatal (NILF, "INTERNAL: readdir: %s\n", strerror (errno));
+          break;
+        }
 
 #if defined(VMS) && defined(HAVE_DIRENT_H)
       /* In VMS we get file versions too, which have to be stripped off */
@@ -703,16 +703,14 @@ dir_contents_file_exists_p (struct directory_contents *dir, char *filename)
 #endif
 	{
 	  df = xmalloc (sizeof (struct dirfile));
-	  df->name = savestring (d->d_name, len);
+	  df->name = strcache_add_len (d->d_name, len);
 	  df->length = len;
 	  df->impossible = 0;
 	  hash_insert_at (&dir->dirfiles, df, dirfile_slot);
 	}
       /* Check if the name matches the one we're searching for.  */
       if (filename != 0 && strieq (d->d_name, filename))
-	{
-	  return 1;
-	}
+        return 1;
     }
 
   /* If the directory has been completely read in,
@@ -731,7 +729,7 @@ dir_contents_file_exists_p (struct directory_contents *dir, char *filename)
    FILENAME must contain no slashes.  */
 
 int
-dir_file_exists_p (char *dirname, char *filename)
+dir_file_exists_p (const char *dirname, const char *filename)
 {
   return dir_contents_file_exists_p (find_directory (dirname)->contents,
 				     filename);
@@ -740,11 +738,11 @@ dir_file_exists_p (char *dirname, char *filename)
 /* Return 1 if the file named NAME exists.  */
 
 int
-file_exists_p (char *name)
+file_exists_p (const char *name)
 {
-  char *dirend;
-  char *dirname;
-  char *slash;
+  const char *dirend;
+  const char *dirname;
+  const char *slash;
 
 #ifndef	NO_ARCHIVES
   if (ar_name (name))
@@ -762,7 +760,7 @@ file_exists_p (char *name)
 #ifdef HAVE_DOS_PATHS
   /* Forward and backslashes might be mixed.  We need the rightmost one.  */
   {
-    char *bslash = strrchr(name, '\\');
+    const char *bslash = strrchr(name, '\\');
     if (!dirend || bslash > dirend)
       dirend = bslash;
     /* The case of "d:file".  */
@@ -783,15 +781,17 @@ file_exists_p (char *name)
     dirname = "/";
   else
     {
+      char *p;
 #ifdef HAVE_DOS_PATHS
   /* d:/ and d: are *very* different...  */
       if (dirend < name + 3 && name[1] == ':' &&
 	  (*dirend == '/' || *dirend == '\\' || *dirend == ':'))
 	dirend++;
 #endif
-      dirname = alloca (dirend - name + 1);
-      memcpy (dirname, name, dirend - name);
-      dirname[dirend - name] = '\0';
+      p = alloca (dirend - name + 1);
+      memcpy (p, name, dirend - name);
+      p[dirend - name] = '\0';
+      dirname = p;
     }
   return dir_file_exists_p (dirname, slash + 1);
 }
@@ -801,12 +801,12 @@ file_exists_p (char *name)
    as an intermediate file, and it has failed.  */
 
 void
-file_impossible (char *filename)
+file_impossible (const char *filename)
 {
-  char *dirend;
-  register char *p = filename;
-  register struct directory *dir;
-  register struct dirfile *new;
+  const char *dirend;
+  const char *p = filename;
+  struct directory *dir;
+  struct dirfile *new;
 
 #ifdef VMS
   dirend = strrchr (p, ']');
@@ -820,7 +820,7 @@ file_impossible (char *filename)
 # ifdef HAVE_DOS_PATHS
   /* Forward and backslashes might be mixed.  We need the rightmost one.  */
   {
-    char *bslash = strrchr(p, '\\');
+    const char *bslash = strrchr(p, '\\');
     if (!dirend || bslash > dirend)
       dirend = bslash;
     /* The case of "d:file".  */
@@ -837,21 +837,23 @@ file_impossible (char *filename)
 #endif /* VMS */
   else
     {
-      char *dirname;
-      char *slash = dirend;
+      const char *dirname;
+      const char *slash = dirend;
       if (dirend == p)
 	dirname = "/";
       else
 	{
+          char *cp;
 #ifdef HAVE_DOS_PATHS
 	  /* d:/ and d: are *very* different...  */
 	  if (dirend < p + 3 && p[1] == ':' &&
 	      (*dirend == '/' || *dirend == '\\' || *dirend == ':'))
 	    dirend++;
 #endif
-	  dirname = alloca (dirend - p + 1);
-	  memcpy (dirname, p, dirend - p);
-	  dirname[dirend - p] = '\0';
+	  cp = alloca (dirend - p + 1);
+	  memcpy (cp, p, dirend - p);
+	  cp[dirend - p] = '\0';
+          dirname = cp;
 	}
       dir = find_directory (dirname);
       filename = p = slash + 1;
@@ -861,8 +863,7 @@ file_impossible (char *filename)
     {
       /* The directory could not be stat'd.  We allocate a contents
 	 structure for it, but leave it out of the contents hash table.  */
-      dir->contents = (struct directory_contents *)
-	xmalloc (sizeof (struct directory_contents));
+      dir->contents = xmalloc (sizeof (struct directory_contents));
       memset (dir->contents, '\0', sizeof (struct directory_contents));
     }
 
@@ -875,8 +876,8 @@ file_impossible (char *filename)
   /* Make a new entry and put it in the table.  */
 
   new = xmalloc (sizeof (struct dirfile));
-  new->name = xstrdup (filename);
   new->length = strlen (filename);
+  new->name = strcache_add_len (filename, new->length);
   new->impossible = 1;
   hash_insert (&dir->contents->dirfiles, new);
 }
@@ -884,12 +885,12 @@ file_impossible (char *filename)
 /* Return nonzero if FILENAME has been marked impossible.  */
 
 int
-file_impossible_p (char *filename)
+file_impossible_p (const char *filename)
 {
-  char *dirend;
-  register char *p = filename;
-  register struct directory_contents *dir;
-  register struct dirfile *dirfile;
+  const char *dirend;
+  const char *p = filename;
+  struct directory_contents *dir;
+  struct dirfile *dirfile;
   struct dirfile dirfile_key;
 
 #ifdef VMS
@@ -901,7 +902,7 @@ file_impossible_p (char *filename)
 #ifdef HAVE_DOS_PATHS
   /* Forward and backslashes might be mixed.  We need the rightmost one.  */
   {
-    char *bslash = strrchr(filename, '\\');
+    const char *bslash = strrchr(filename, '\\');
     if (!dirend || bslash > dirend)
       dirend = bslash;
     /* The case of "d:file".  */
@@ -918,21 +919,23 @@ file_impossible_p (char *filename)
 #endif /* VMS */
   else
     {
-      char *dirname;
-      char *slash = dirend;
+      const char *dirname;
+      const char *slash = dirend;
       if (dirend == filename)
 	dirname = "/";
       else
 	{
+          char *cp;
 #ifdef HAVE_DOS_PATHS
 	  /* d:/ and d: are *very* different...  */
 	  if (dirend < filename + 3 && filename[1] == ':' &&
 	      (*dirend == '/' || *dirend == '\\' || *dirend == ':'))
 	    dirend++;
 #endif
-	  dirname = alloca (dirend - filename + 1);
-	  memcpy (dirname, p, dirend - p);
-	  dirname[dirend - p] = '\0';
+	  cp = alloca (dirend - filename + 1);
+	  memcpy (cp, p, dirend - p);
+	  cp[dirend - p] = '\0';
+          dirname = cp;
 	}
       dir = find_directory (dirname)->contents;
       p = filename = slash + 1;
@@ -954,7 +957,7 @@ file_impossible_p (char *filename)
 
   dirfile_key.name = filename;
   dirfile_key.length = strlen (filename);
-  dirfile = (struct dirfile *) hash_find_item (&dir->dirfiles, &dirfile_key);
+  dirfile = hash_find_item (&dir->dirfiles, &dirfile_key);
   if (dirfile)
     return dirfile->impossible;
 
@@ -964,8 +967,8 @@ file_impossible_p (char *filename)
 /* Return the already allocated name in the
    directory hash table that matches DIR.  */
 
-char *
-dir_name (char *dir)
+const char *
+dir_name (const char *dir)
 {
   return find_directory (dir)->name;
 }
@@ -975,10 +978,10 @@ dir_name (char *dir)
 void
 print_dir_data_base (void)
 {
-  register unsigned int files;
-  register unsigned int impossible;
-  register struct directory **dir_slot;
-  register struct directory **dir_end;
+  unsigned int files;
+  unsigned int impossible;
+  struct directory **dir_slot;
+  struct directory **dir_end;
 
   puts (_("\n# Directories\n"));
 
@@ -988,7 +991,7 @@ print_dir_data_base (void)
   dir_end = dir_slot + directories.ht_size;
   for ( ; dir_slot < dir_end; dir_slot++)
     {
-      register struct directory *dir = *dir_slot;
+      struct directory *dir = *dir_slot;
       if (! HASH_VACANT (dir))
 	{
 	  if (dir->contents == 0)
@@ -1013,16 +1016,16 @@ print_dir_data_base (void)
 	    }
 	  else
 	    {
-	      register unsigned int f = 0;
-	      register unsigned int im = 0;
-	      register struct dirfile **files_slot;
-	      register struct dirfile **files_end;
+	      unsigned int f = 0;
+	      unsigned int im = 0;
+	      struct dirfile **files_slot;
+	      struct dirfile **files_end;
 
 	      files_slot = (struct dirfile **) dir->contents->dirfiles.ht_vec;
 	      files_end = files_slot + dir->contents->dirfiles.ht_size;
 	      for ( ; files_slot < files_end; files_slot++)
 		{
-		  register struct dirfile *df = *files_slot;
+		  struct dirfile *df = *files_slot;
 		  if (! HASH_VACANT (df))
 		    {
 		      if (df->impossible)
@@ -1212,5 +1215,6 @@ hash_init_directories (void)
   hash_init (&directories, DIRECTORY_BUCKETS,
 	     directory_hash_1, directory_hash_2, directory_hash_cmp);
   hash_init (&directory_contents, DIRECTORY_BUCKETS,
-	     directory_contents_hash_1, directory_contents_hash_2, directory_contents_hash_cmp);
+	     directory_contents_hash_1, directory_contents_hash_2,
+             directory_contents_hash_cmp);
 }

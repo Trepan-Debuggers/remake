@@ -159,7 +159,7 @@ init_hash_global_variable_set (void)
 
 struct variable *
 define_variable_in_set (const char *name, unsigned int length,
-                        char *value, enum variable_origin origin,
+                        const char *value, enum variable_origin origin,
                         int recursive, struct variable_set *set,
                         const struct floc *flocp)
 {

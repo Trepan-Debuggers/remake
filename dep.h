@@ -64,7 +64,7 @@ struct nameseq *parse_file_seq (char **stringp, int stopchar, unsigned int size,
 char *tilde_expand (char *name);
 
 #ifndef NO_ARCHIVES
-struct nameseq *ar_glob (char *arname, char *member_pattern, unsigned int size);
+struct nameseq *ar_glob (const char *arname, const char *member_pattern, unsigned int size);
 #endif
 
 #ifndef	iAPX286

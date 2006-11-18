@@ -55,7 +55,7 @@ char *variable_buffer;
    the following call.  */
 
 char *
-variable_buffer_output (char *ptr, char *string, unsigned int length)
+variable_buffer_output (char *ptr, const char *string, unsigned int length)
 {
   register unsigned int newlen = length + (ptr - variable_buffer);
 
@@ -159,9 +159,9 @@ recursively_expand_for_file (struct variable *v, struct file *file)
 __inline
 #endif
 static char *
-reference_variable (char *o, char *name, unsigned int length)
+reference_variable (char *o, const char *name, unsigned int length)
 {
-  register struct variable *v;
+  struct variable *v;
   char *value;
 
   v = lookup_variable (name, length);
@@ -190,28 +190,38 @@ reference_variable (char *o, char *name, unsigned int length)
    Write the results to LINE, which must point into `variable_buffer'.  If
    LINE is NULL, start at the beginning of the buffer.
    Return a pointer to LINE, or to the beginning of the buffer if LINE is
-   NULL.  */
-
+   NULL.
+ */
 char *
-variable_expand_string (char *line, char *string, long length)
+variable_expand_string (char *line, const char *string, long length)
 {
   struct variable *v;
-  char *p, *o, *p1;
-  char save_char = '\0';
+  const char *p, *p1;
+  char *abuf = NULL;
+  char *o;
   unsigned int line_offset;
 
   if (!line)
     line = initialize_variable_output();
-
-  p = string;
   o = line;
   line_offset = line - variable_buffer;
 
-  if (length >= 0)
+  if (length == 0)
     {
-      save_char = string[length];
-      string[length] = '\0';
+      variable_buffer_output (o, "", 1);
+      return (variable_buffer);
     }
+
+  /* If we want a subset of the string, allocate a temporary buffer for it.
+     Most of the functions we use here don't work with length limits.  */
+  if (length > 0 && string[length] != '\0')
+    {
+      abuf = xmalloc(length+1);
+      memcpy(abuf, string, length);
+      abuf[length] = '\0';
+      string = abuf;
+    }
+  p = string;
 
   while (1)
     {
@@ -242,10 +252,11 @@ variable_expand_string (char *line, char *string, long length)
 	  {
 	    char openparen = *p;
 	    char closeparen = (openparen == '(') ? ')' : '}';
-	    register char *beg = p + 1;
-	    int free_beg = 0;
-	    char *op, *begp;
-	    char *end, *colon;
+            const char *begp;
+	    const char *beg = p + 1;
+	    char *op;
+            char *abeg = NULL;
+	    const char *end, *colon;
 
 	    op = o;
 	    begp = p;
@@ -281,8 +292,8 @@ variable_expand_string (char *line, char *string, long length)
 		   such as `$($(a)'.  */
 		if (count < 0)
 		  {
-		    beg = expand_argument (beg, p); /* Expand the name.  */
-		    free_beg = 1; /* Remember to free BEG when finished.  */
+		    abeg = expand_argument (beg, p); /* Expand the name.  */
+		    beg = abeg;
 		    end = strchr (beg, '\0');
 		  }
 	      }
@@ -300,7 +311,7 @@ variable_expand_string (char *line, char *string, long length)
 	    if (colon)
 	      {
 		/* This looks like a substitution reference: $(FOO:A=B).  */
-		char *subst_beg, *subst_end, *replace_beg, *replace_end;
+		const char *subst_beg, *subst_end, *replace_beg, *replace_end;
 
 		subst_beg = colon + 1;
 		subst_end = lindex (subst_beg, end, '=');
@@ -373,8 +384,8 @@ variable_expand_string (char *line, char *string, long length)
 		 Look up the value of the variable.  */
 		o = reference_variable (o, beg, end - beg);
 
-	  if (free_beg)
-	    free (beg);
+	  if (abeg)
+	    free (abeg);
 	  }
 	  break;
 
@@ -398,10 +409,10 @@ variable_expand_string (char *line, char *string, long length)
 	++p;
     }
 
-  if (save_char)
-    string[length] = save_char;
+  if (abuf)
+    free (abuf);
 
-  (void)variable_buffer_output (o, "", 1);
+  variable_buffer_output (o, "", 1);
   return (variable_buffer + line_offset);
 }
 
@@ -411,7 +422,7 @@ variable_expand_string (char *line, char *string, long length)
    and is valid only until the next time this function is called.  */
 
 char *
-variable_expand (char *line)
+variable_expand (const char *line)
 {
   return variable_expand_string(NULL, line, (long)-1);
 }
@@ -444,7 +455,7 @@ expand_argument (const char *str, const char *end)
    FILE's commands were found.  Expansion uses FILE's variable set list.  */
 
 char *
-variable_expand_for_file (char *line, struct file *file)
+variable_expand_for_file (const char *line, struct file *file)
 {
   char *result;
   struct variable_set_list *save;
@@ -534,7 +545,7 @@ allocated_variable_append (const struct variable *v)
    This function is called a lot.  It wants to be efficient.  */
 
 char *
-allocated_variable_expand_for_file (char *line, struct file *file)
+allocated_variable_expand_for_file (const char *line, struct file *file)
 {
   char *value;
 

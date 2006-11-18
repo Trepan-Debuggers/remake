@@ -29,10 +29,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 struct vpath
   {
     struct vpath *next;	/* Pointer to next struct in the linked list.  */
-    char *pattern;	/* The pattern to match.  */
-    char *percent;	/* Pointer into `pattern' where the `%' is.  */
+    const char *pattern;/* The pattern to match.  */
+    const char *percent;/* Pointer into `pattern' where the `%' is.  */
     unsigned int patlen;/* Length of the pattern.  */
-    char **searchpath;	/* Null-terminated list of directories.  */
+    const char **searchpath; /* Null-terminated list of directories.  */
     unsigned int maxlen;/* Maximum length of any entry in the list.  */
   };
 
@@ -90,13 +90,14 @@ build_vpath_lists ()
     {
       /* Save the list of vpaths.  */
       struct vpath *save_vpaths = vpaths;
+      char gp[] = "%";
 
       /* Empty `vpaths' so the new one will have no next, and `vpaths'
 	 will still be nil if P contains no existing directories.  */
       vpaths = 0;
 
       /* Parse P.  */
-      construct_vpath_list ("%", p);
+      construct_vpath_list (gp, p);
 
       /* Store the created path as the general path,
 	 and restore the old list of vpaths.  */
@@ -122,13 +123,14 @@ build_vpath_lists ()
     {
       /* Save the list of vpaths.  */
       struct vpath *save_vpaths = vpaths;
+      char gp[] = "%";
 
       /* Empty `vpaths' so the new one will have no next, and `vpaths'
 	 will still be nil if P contains no existing directories.  */
       vpaths = 0;
 
       /* Parse P.  */
-      construct_vpath_list ("%", p);
+      construct_vpath_list (gp, p);
 
       /* Store the created path as the GPATH,
 	 and restore the old list of vpaths.  */
@@ -159,23 +161,20 @@ build_vpath_lists ()
 void
 construct_vpath_list (char *pattern, char *dirpath)
 {
-  register unsigned int elem;
-  register char *p;
-  register char **vpath;
-  register unsigned int maxvpath;
+  unsigned int elem;
+  char *p;
+  const char **vpath;
+  unsigned int maxvpath;
   unsigned int maxelem;
-  char *percent = NULL;
+  const char *percent = NULL;
 
   if (pattern != 0)
-    {
-      pattern = xstrdup (pattern);
-      percent = find_percent (pattern);
-    }
+    percent = find_percent (pattern);
 
   if (dirpath == 0)
     {
       /* Remove matching listings.  */
-      register struct vpath *path, *lastpath;
+      struct vpath *path, *lastpath;
 
       lastpath = 0;
       path = vpaths;
@@ -195,7 +194,6 @@ construct_vpath_list (char *pattern, char *dirpath)
 		lastpath->next = next;
 
 	      /* Free its unused storage.  */
-	      free (path->pattern);
 	      free (path->searchpath);
 	      free (path);
 	    }
@@ -205,14 +203,16 @@ construct_vpath_list (char *pattern, char *dirpath)
 	  path = next;
 	}
 
-      if (pattern != 0)
-	free (pattern);
       return;
     }
 
 #ifdef WINDOWS32
     convert_vpath_to_windows32(dirpath, ';');
 #endif
+
+  /* Skip over any initial separators and blanks.  */
+  while (*dirpath == PATH_SEPARATOR_CHAR || isblank ((unsigned char)*dirpath))
+    ++dirpath;
 
   /* Figure out the maximum number of VPATH entries and put it in
      MAXELEM.  We start with 2, one before the first separator and one
@@ -224,15 +224,11 @@ construct_vpath_list (char *pattern, char *dirpath)
     if (*p++ == PATH_SEPARATOR_CHAR || isblank ((unsigned char)*p))
       ++maxelem;
 
-  vpath = xmalloc (maxelem * sizeof (char *));
+  vpath = xmalloc (maxelem * sizeof (const char *));
   maxvpath = 0;
 
-  /* Skip over any initial separators and blanks.  */
-  p = dirpath;
-  while (*p == PATH_SEPARATOR_CHAR || isblank ((unsigned char)*p))
-    ++p;
-
   elem = 0;
+  p = dirpath;
   while (*p != '\0')
     {
       char *v;
@@ -254,23 +250,12 @@ construct_vpath_list (char *pattern, char *dirpath)
       if (len > 1 && p[-1] == '/')
 	--len;
 
+      /* Put the directory on the vpath list.  */
       if (len > 1 || *v != '.')
 	{
-	  v = savestring (v, len);
-
-	  /* Verify that the directory actually exists.  */
-
-	  if (dir_file_exists_p (v, ""))
-	    {
-	      /* It does.  Put it in the list.  */
-	      vpath[elem++] = dir_name (v);
-	      free (v);
-	      if (len > maxvpath)
-		maxvpath = len;
-	    }
-	  else
-	    /* The directory does not exist.  Omit from the list.  */
-	    free (v);
+          vpath[elem++] = dir_name (strcache_add_len (v, len));
+          if (len > maxvpath)
+            maxvpath = len;
 	}
 
       /* Skip over separators and blanks between entries.  */
@@ -285,10 +270,10 @@ construct_vpath_list (char *pattern, char *dirpath)
 	 entry, to where the nil-pointer terminator goes.
 	 Usually this is maxelem - 1.  If not, shrink down.  */
       if (elem < (maxelem - 1))
-	vpath = xrealloc (vpath, (elem+1) * sizeof (char *));
+	vpath = xrealloc (vpath, (elem+1) * sizeof (const char *));
 
       /* Put the nil-pointer terminator on the end of the VPATH list.  */
-      vpath[elem] = 0;
+      vpath[elem] = NULL;
 
       /* Construct the vpath structure and put it into the linked list.  */
       path = xmalloc (sizeof (struct vpath));
@@ -298,26 +283,22 @@ construct_vpath_list (char *pattern, char *dirpath)
       vpaths = path;
 
       /* Set up the members.  */
-      path->pattern = pattern;
-      path->percent = percent;
+      path->pattern = strcache_add (pattern);
+      path->percent = path->pattern + (percent - pattern);
       path->patlen = strlen (pattern);
     }
   else
-    {
-      /* There were no entries, so free whatever space we allocated.  */
-      free (vpath);
-      if (pattern != 0)
-	free (pattern);
-    }
+    /* There were no entries, so free whatever space we allocated.  */
+    free (vpath);
 }
 
 /* Search the GPATH list for a pathname string that matches the one passed
    in.  If it is found, return 1.  Otherwise we return 0.  */
 
 int
-gpath_search (char *file, unsigned int len)
+gpath_search (const char *file, unsigned int len)
 {
-  char **gp;
+  const char **gp;
 
   if (gpaths && (len <= gpaths->maxlen))
     for (gp = gpaths->searchpath; *gp != NULL; ++gp)
@@ -336,7 +317,7 @@ gpath_search (char *file, unsigned int len)
 int
 vpath_search (char **file, FILE_TIMESTAMP *mtime_ptr)
 {
-  register struct vpath *v;
+  struct vpath *v;
 
   /* If there are no VPATH entries or FILENAME starts at the root,
      there is nothing we can do.  */
@@ -375,7 +356,7 @@ selective_vpath_search (struct vpath *path, char **file,
   int not_target;
   char *name, *n;
   char *filename;
-  register char **vpath = path->searchpath;
+  const char **vpath = path->searchpath;
   unsigned int maxvpath = path->maxlen;
   register unsigned int i;
   unsigned int flen, vlen, name_dplen;
@@ -565,8 +546,8 @@ selective_vpath_search (struct vpath *path, char **file,
 void
 print_vpath_data_base (void)
 {
-  register unsigned int nvpaths;
-  register struct vpath *v;
+  unsigned int nvpaths;
+  struct vpath *v;
 
   puts (_("\n# VPATH Search Paths\n"));
 
@@ -593,8 +574,8 @@ print_vpath_data_base (void)
     puts (_("\n# No general (`VPATH' variable) search path."));
   else
     {
-      register char **path = general_vpath->searchpath;
-      register unsigned int i;
+      const char **path = general_vpath->searchpath;
+      unsigned int i;
 
       fputs (_("\n# General (`VPATH' variable) search path:\n# "), stdout);
 

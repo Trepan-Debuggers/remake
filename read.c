@@ -527,7 +527,7 @@ eval (struct ebuffer *ebuf, int set_default)
 
       /* Check for a shell command line first.
 	 If it is not one, we can stop treating tab specially.  */
-      if (line[0] == '\t')
+      if (line[0] == cmd_prefix)
 	{
 	  if (no_targets)
 	    /* Ignore the commands in a rule with no targets.  */
@@ -848,7 +848,7 @@ eval (struct ebuffer *ebuf, int set_default)
       /* This line starts with a tab but was not caught above because there
          was no preceding target, and the line might have been usable as a
          variable definition.  But now we know it is definitely lossage.  */
-      if (line[0] == '\t')
+      if (line[0] == cmd_prefix)
         fatal(fstart, _("commands commence before first target"));
 
       /* This line describes some target files.  This is complicated by
@@ -1351,7 +1351,7 @@ do_define (char *name, unsigned int namelen,
          another define, or ends one.  */
 
       /* Stop if we find an 'endef' */
-      if (line[0] != '\t')
+      if (line[0] != cmd_prefix)
         {
           p = next_token (line);
           len = strlen (p);
@@ -2223,7 +2223,7 @@ find_char_unquote (char *string, int stop1, int stop2, int blank,
   return 0;
 }
 
-/* Search PATTERN for an unquoted %.  */
+/* Search PATTERN for an unquoted % and handle quoting.  */
 
 char *
 find_percent (char *pattern)

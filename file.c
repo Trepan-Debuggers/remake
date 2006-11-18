@@ -123,7 +123,7 @@ lookup_file (char *name)
 #endif /* VMS */
 
   file_key.hname = name;
-  f = (struct file *) hash_find_item (&files, &file_key);
+  f = hash_find_item (&files, &file_key);
 #if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
   if (*name != '.')
     free (lname);

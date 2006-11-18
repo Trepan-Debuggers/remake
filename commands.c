@@ -44,8 +44,8 @@ int getpid ();
 void
 set_file_variables (struct file *file)
 {
-  struct dep *d;
-  char *at, *percent, *star, *less;
+  const struct dep *d;
+  const char *at, *percent, *star, *less;
 
 #ifndef	NO_ARCHIVES
   /* If the target is an archive member `lib(member)',
@@ -54,16 +54,19 @@ set_file_variables (struct file *file)
   if (ar_name (file->name))
     {
       unsigned int len;
+      const char *cp;
       char *p;
 
-      p = strchr (file->name, '(');
-      at = alloca (p - file->name + 1);
-      memcpy (at, file->name, p - file->name);
-      at[p - file->name] = '\0';
-      len = strlen (p + 1);
-      percent = alloca (len);
-      memcpy (percent, p + 1, len - 1);
-      percent[len - 1] = '\0';
+      cp = strchr (file->name, '(');
+      p = alloca (cp - file->name + 1);
+      memcpy (p, file->name, cp - file->name);
+      p[cp - file->name] = '\0';
+      at = p;
+      len = strlen (cp + 1);
+      p = alloca (len);
+      memcpy (p, cp + 1, len - 1);
+      p[len - 1] = '\0';
+      percent = p;
     }
   else
 #endif	/* NO_ARCHIVES.  */
@@ -78,7 +81,7 @@ set_file_variables (struct file *file)
       /* In Unix make, $* is set to the target name with
 	 any suffix in the .SUFFIXES list stripped off for
 	 explicit rules.  We store this in the `stem' member.  */
-      char *name;
+      const char *name;
       unsigned int len;
 
 #ifndef	NO_ARCHIVES
@@ -136,7 +139,7 @@ set_file_variables (struct file *file)
 
   {
     static char *plus_value=0, *bar_value=0, *qmark_value=0;
-    static unsigned int qmark_max=0, plus_max=0, bar_max=0;
+    static unsigned int plus_max=0, bar_max=0, qmark_max=0;
 
     unsigned int qmark_len, plus_len, bar_len;
     char *cp;
@@ -163,7 +166,7 @@ set_file_variables (struct file *file)
     for (d = file->deps; d != 0; d = d->next)
       if (! d->ignore_mtime)
         {
-          char *c = dep_name (d);
+          const char *c = dep_name (d);
 
 #ifndef	NO_ARCHIVES
           if (ar_name (c))
@@ -214,7 +217,7 @@ set_file_variables (struct file *file)
 
     for (d = file->deps; d != 0; d = d->next)
       {
-	char *c = dep_name (d);
+	const char *c = dep_name (d);
 
 #ifndef	NO_ARCHIVES
 	if (ar_name (c))
@@ -267,7 +270,7 @@ set_file_variables (struct file *file)
 void
 chop_commands (struct commands *cmds)
 {
-  register char *p;
+  const char *p;
   unsigned int nlines, idx;
   char **lines;
 
@@ -287,7 +290,7 @@ chop_commands (struct commands *cmds)
   p = cmds->commands;
   while (*p != '\0')
     {
-      char *end = p;
+      const char *end = p;
     find_end:;
       end = strchr (end, '\n');
       if (end == 0)
@@ -295,7 +298,7 @@ chop_commands (struct commands *cmds)
       else if (end > p && end[-1] == '\\')
         {
           int backslash = 1;
-          register char *b;
+          const char *b;
           for (b = end - 2; b >= p && *b == '\\'; --b)
             backslash = !backslash;
           if (backslash)
@@ -364,7 +367,7 @@ chop_commands (struct commands *cmds)
 void
 execute_file_commands (struct file *file)
 {
-  register char *p;
+  const char *p;
 
   /* Don't go through all the preparations if
      the commands are nothing but whitespace.  */
@@ -452,7 +455,7 @@ fatal_error_signal (int sig)
 
   if (sig == SIGTERM)
     {
-      register struct child *c;
+      struct child *c;
       for (c = children; c != 0; c = c->next)
 	if (!c->remote)
 	  (void) kill (c->pid, SIGTERM);
@@ -470,7 +473,7 @@ fatal_error_signal (int sig)
 #endif
     )
     {
-      register struct child *c;
+      struct child *c;
 
       /* Remote children won't automatically get signals sent
 	 to the process group, so we must send them.  */
@@ -522,7 +525,7 @@ fatal_error_signal (int sig)
    and it has changed on disk since we last stat'd it.  */
 
 static void
-delete_target (struct file *file, char *on_behalf_of)
+delete_target (struct file *file, const char *on_behalf_of)
 {
   struct stat st;
   int e;
@@ -577,7 +580,7 @@ delete_child_targets (struct child *child)
     return;
 
   /* Delete the target file if it changed.  */
-  delete_target (child->file, 0);
+  delete_target (child->file, NULL);
 
   /* Also remove any non-precious targets listed in the `also_make' member.  */
   for (d = child->file->also_make; d != 0; d = d->next)
@@ -589,9 +592,9 @@ delete_child_targets (struct child *child)
 /* Print out the commands in CMDS.  */
 
 void
-print_commands (struct commands *cmds)
+print_commands (const struct commands *cmds)
 {
-  register char *s;
+  const char *s;
 
   fputs (_("#  commands to execute"), stdout);
 
@@ -604,7 +607,7 @@ print_commands (struct commands *cmds)
   s = cmds->commands;
   while (*s != '\0')
     {
-      char *end;
+      const char *end;
 
       while (isspace ((unsigned char)*s))
 	++s;

@@ -396,17 +396,28 @@ char *find_percent (char *);
 FILE *open_tmpfile (char **, const char *);
 
 #ifndef NO_ARCHIVES
-int ar_name (char *);
-void ar_parse_name (char *, char **, char **);
-int ar_touch (char *);
-time_t ar_member_date (char *);
+int ar_name (const char *);
+void ar_parse_name (const char *, char **, char **);
+int ar_touch (const char *);
+time_t ar_member_date (const char *);
+
+typedef long int (*ar_member_func_t) (int desc, const char *mem, int truncated,
+				      long int hdrpos, long int datapos,
+				      long int size, long int date, int uid,
+				      int gid, int mode, const void *arg);
+
+long int ar_scan (const char *archive, ar_member_func_t function, const void *arg);
+int ar_name_equal (const char *name, const char *mem, int truncated);
+#ifndef VMS
+int ar_member_touch (const char *arname, const char *memname);
+#endif
 #endif
 
-int dir_file_exists_p (char *, char *);
-int file_exists_p (char *);
-int file_impossible_p (char *);
-void file_impossible (char *);
-char *dir_name (char *);
+int dir_file_exists_p (const char *, const char *);
+int file_exists_p (const char *);
+int file_impossible_p (const char *);
+void file_impossible (const char *);
+const char *dir_name (const char *);
 void hash_init_directories (void);
 
 void define_default_variables (void);
@@ -417,7 +428,7 @@ void install_default_implicit_rules (void);
 void build_vpath_lists (void);
 void construct_vpath_list (char *pattern, char *dirpath);
 int vpath_search (char **file, FILE_TIMESTAMP *mtime_ptr);
-int gpath_search (char *file, unsigned int len);
+int gpath_search (const char *file, unsigned int len);
 
 void construct_include_path (char **arg_dirs);
 
@@ -476,6 +487,8 @@ extern int second_expansion, clock_skew_detected, rebuilding_makefiles;
 
 /* can we run commands via 'sh -c xxx' or must we use batch files? */
 extern int batch_mode_shell;
+
+extern char cmd_prefix;
 
 extern unsigned int job_slots;
 extern int job_fds[2];
@@ -574,4 +587,3 @@ extern int handling_fatal_signal;
 
 #define ENULLLOOP(_v,_c)   do{ errno = 0; \
                                while (((_v)=_c)==0 && errno==EINTR); }while(0)
-

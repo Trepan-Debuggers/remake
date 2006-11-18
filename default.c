@@ -302,7 +302,7 @@ static char *default_suffix_rules[] =
     0, 0,
   };
 
-static char *default_variables[] =
+static const char *default_variables[] =
   {
 #ifdef VMS
 #ifdef __ALPHA
@@ -544,14 +544,14 @@ set_default_suffixes (void)
 void
 install_default_suffix_rules (void)
 {
-  register char **s;
+  char **s;
 
   if (no_builtin_rules_flag)
     return;
 
- for (s = default_suffix_rules; *s != 0; s += 2)
+  for (s = default_suffix_rules; *s != 0; s += 2)
     {
-      register struct file *f = enter_file (s[0]);
+      struct file *f = enter_file (s[0]);
       /* Don't clobber cmds given in a makefile if there were any.  */
       if (f->cmds == 0)
 	{
@@ -569,7 +569,7 @@ install_default_suffix_rules (void)
 void
 install_default_implicit_rules (void)
 {
-  register struct pspec *p;
+  struct pspec *p;
 
   if (no_builtin_rules_flag)
     return;
@@ -584,11 +584,11 @@ install_default_implicit_rules (void)
 void
 define_default_variables (void)
 {
-  register char **s;
+  const char **s;
 
   if (no_builtin_variables_flag)
     return;
 
   for (s = default_variables; *s != 0; s += 2)
-    (void) define_variable (s[0], strlen (s[0]), s[1], o_default, 1);
+    define_variable (s[0], strlen (s[0]), s[1], o_default, 1);
 }
