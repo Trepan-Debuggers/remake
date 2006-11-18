@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 #endif
 
 #ifndef	NO_ARCHIVES
-
+
 #ifdef VMS
 #include <lbrdef.h>
 #include <mhddef.h>
@@ -134,7 +134,7 @@ VMS_get_member_info (struct dsc$descriptor_s *module, unsigned long *rfa)
    Returns 0 if have scanned successfully.  */
 
 long int
-ar_scan (char *archive, long int (*function) (void), long int arg)
+ar_scan (const char *archive, ar_member_func_t function, const void *arg)
 {
   char *p;
 
@@ -301,7 +301,7 @@ struct ar_hdr
    Returns 0 if have scanned successfully.  */
 
 long int
-ar_scan (char *archive, long int (*function)(), long int arg)
+ar_scan (const char *archive, ar_member_func_t function, const void *arg)
 {
 #ifdef AIAMAG
   FL_HDR fl_header;
@@ -313,7 +313,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
   int long_name = 0;
 #endif
   char *namemap = 0;
-  register int desc = open (archive, O_RDONLY, 0);
+  int desc = open (archive, O_RDONLY, 0);
   if (desc < 0)
     return -1;
 #ifdef SARMAG
@@ -706,9 +706,9 @@ ar_scan (char *archive, long int (*function)(), long int arg)
    sizeof (struct ar_hdr.ar_name) - 1.  */
 
 int
-ar_name_equal (char *name, char *mem, int truncated)
+ar_name_equal (const char *name, const char *mem, int truncated)
 {
-  char *p;
+  const char *p;
 
   p = strrchr (name, '/');
   if (p != 0)
@@ -737,10 +737,10 @@ ar_name_equal (char *name, char *mem, int truncated)
 #ifndef VMS
 /* ARGSUSED */
 static long int
-ar_member_pos (int desc UNUSED, char *mem, int truncated,
+ar_member_pos (int desc UNUSED, const char *mem, int truncated,
 	       long int hdrpos, long int datapos UNUSED, long int size UNUSED,
                long int date UNUSED, int uid UNUSED, int gid UNUSED,
-               int mode UNUSED, char *name)
+               int mode UNUSED, const void *name)
 {
   if (!ar_name_equal (name, mem, truncated))
     return 0;
@@ -755,9 +755,9 @@ ar_member_pos (int desc UNUSED, char *mem, int truncated,
    1 if valid but member MEMNAME does not exist.  */
 
 int
-ar_member_touch (char *arname, char *memname)
+ar_member_touch (const char *arname, const char *memname)
 {
-  long int pos = ar_scan (arname, ar_member_pos, (long int) memname);
+  long int pos = ar_scan (arname, ar_member_pos, memname);
   int fd;
   struct ar_hdr ar_hdr;
   int i;
@@ -816,9 +816,9 @@ ar_member_touch (char *arname, char *memname)
 #ifdef TEST
 
 long int
-describe_member (int desc, char *name, int truncated,
+describe_member (int desc, const char *name, int truncated,
 		 long int hdrpos, long int datapos, long int size,
-                 long int date, int uid, int gid, int mode)
+                 long int date, int uid, int gid, int mode, const void *arg)
 {
   extern char *ctime ();
 
@@ -834,7 +834,7 @@ describe_member (int desc, char *name, int truncated,
 int
 main (int argc, char **argv)
 {
-  ar_scan (argv[1], describe_member);
+  ar_scan (argv[1], describe_member, NULL);
   return 0;
 }
 

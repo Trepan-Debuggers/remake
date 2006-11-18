@@ -155,11 +155,17 @@ strcache_add (const char *str)
 const char *
 strcache_add_len (const char *str, int len)
 {
-  char *key = alloca (len + 1);
-  memcpy (key, str, len);
-  key[len] = '\0';
+  /* If we're not given a nul-terminated string we have to create one, because
+     the hashing functions expect it.  */
+  if (str[len] != '\0')
+    {
+      char *key = alloca (len + 1);
+      memcpy (key, str, len);
+      key[len] = '\0';
+      str = key;
+    }
 
-  return add_hash (key, len);
+  return add_hash (str, len);
 }
 
 int

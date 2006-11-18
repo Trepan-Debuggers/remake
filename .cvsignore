@@ -21,7 +21,7 @@ config.ami configh.dos config.h.W32 config.h-vms
 
 loadavg loadavg.c make
 
-.deps .dep_segment
+.deps .dep_segment ID TAGS
 
 _*
 sun4 i386 i386-netbsd hp300-netbsd hp300 rs6000 sun3 news800 amiga

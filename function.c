@@ -42,22 +42,22 @@ struct function_table_entry
 static unsigned long
 function_table_entry_hash_1 (const void *keyv)
 {
-  struct function_table_entry const *key = (struct function_table_entry const *) keyv;
+  const struct function_table_entry *key = keyv;
   return_STRING_N_HASH_1 (key->name, key->len);
 }
 
 static unsigned long
 function_table_entry_hash_2 (const void *keyv)
 {
-  struct function_table_entry const *key = (struct function_table_entry const *) keyv;
+  const struct function_table_entry *key = keyv;
   return_STRING_N_HASH_2 (key->name, key->len);
 }
 
 static int
 function_table_entry_hash_cmp (const void *xv, const void *yv)
 {
-  struct function_table_entry const *x = (struct function_table_entry const *) xv;
-  struct function_table_entry const *y = (struct function_table_entry const *) yv;
+  const struct function_table_entry *x = xv;
+  const struct function_table_entry *y = yv;
   int result = x->len - y->len;
   if (result)
     return result;
@@ -277,7 +277,7 @@ lookup_function (const char *s)
 /* Return 1 if PATTERN matches STR, 0 if not.  */
 
 int
-pattern_matches (char *pattern, char *percent, char *str)
+pattern_matches (const char *pattern, const char *percent, const char *str)
 {
   unsigned int sfxlen, strlength;
 
@@ -286,10 +286,10 @@ pattern_matches (char *pattern, char *percent, char *str)
       unsigned int len = strlen (pattern) + 1;
       char *new_chars = alloca (len);
       memcpy (new_chars, pattern, len);
-      pattern = new_chars;
-      percent = find_percent (pattern);
+      percent = find_percent (new_chars);
       if (percent == 0)
-	return streq (pattern, str);
+	return streq (new_chars, str);
+      pattern = new_chars;
     }
 
   sfxlen = strlen (percent + 1);
@@ -2120,15 +2120,15 @@ expand_builtin_function (char *o, int argc, char **argv,
    *STRINGP past the reference and returning nonzero.  If not, return zero.  */
 
 int
-handle_function (char **op, char **stringp)
+handle_function (char **op, const char **stringp)
 {
   const struct function_table_entry *entry_p;
   char openparen = (*stringp)[0];
   char closeparen = openparen == '(' ? ')' : '}';
-  char *beg;
-  char *end;
+  const char *beg;
+  const char *end;
   int count = 0;
-  register char *p;
+  char *abeg = NULL;
   char **argv, **argvp;
   int nargs;
 
@@ -2175,36 +2175,47 @@ handle_function (char **op, char **stringp)
      not, make a duplicate of the string and point into that, nul-terminating
      each argument.  */
 
-  if (!entry_p->expand_args)
+  if (entry_p->expand_args)
+    {
+      const char *p;
+      for (p=beg, nargs=0; p <= end; ++argvp)
+        {
+          const char *next;
+
+          ++nargs;
+
+          if (nargs == entry_p->maximum_args
+              || (! (next = find_next_argument (openparen, closeparen, p, end))))
+            next = end;
+
+          *argvp = expand_argument (p, next);
+          p = next + 1;
+        }
+    }
+  else
     {
       int len = end - beg;
+      char *p, *aend;
 
-      p = xmalloc (len+1);
-      memcpy (p, beg, len);
-      p[len] = '\0';
-      beg = p;
-      end = beg + len;
-    }
+      abeg = xmalloc (len+1);
+      memcpy (abeg, beg, len);
+      abeg[len] = '\0';
+      aend = abeg + len;
 
-  for (p=beg, nargs=0; p <= end; ++argvp)
-    {
-      char *next;
-
-      ++nargs;
-
-      if (nargs == entry_p->maximum_args
-          || (! (next = find_next_argument (openparen, closeparen, p, end))))
-        next = end;
-
-      if (entry_p->expand_args)
-        *argvp = expand_argument (p, next);
-      else
+      for (p=abeg, nargs=0; p <= aend; ++argvp)
         {
+          char *next;
+
+          ++nargs;
+
+          if (nargs == entry_p->maximum_args
+              || (! (next = find_next_argument (openparen, closeparen, p, aend))))
+            next = aend;
+
           *argvp = p;
           *next = '\0';
+          p = next + 1;
         }
-
-      p = next + 1;
     }
   *argvp = NULL;
 
@@ -2215,8 +2226,8 @@ handle_function (char **op, char **stringp)
   if (entry_p->expand_args)
     for (argvp=argv; *argvp != 0; ++argvp)
       free (*argvp);
-  else
-    free (beg);
+  if (abeg)
+    free (abeg);
 
   return 1;
 }
