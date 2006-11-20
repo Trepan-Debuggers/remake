@@ -214,8 +214,8 @@ void hash_init_function_table (void);
 variable_t *lookup_variable (const char *name, unsigned int length);
 
 variable_t *lookup_variable_in_set (const char *name, 
-					   unsigned int length,
-					   const variable_set_t *set);
+				    unsigned int length,
+				    const variable_set_t *set);
 
 /*! Define variable named NAME with value VALUE in SET.  VALUE is copied.
   LENGTH is the length of NAME, which does not need to be null-terminated.
@@ -225,7 +225,8 @@ variable_t *lookup_variable_in_set (const char *name,
   that it should be recursively re-expanded.  */
 
 variable_t *define_variable_in_set (const char *name, 
-				    unsigned int length, char *value,
+				    unsigned int length, 
+				    const char *value,
 				    variable_origin_t origin, 
 				    int recursive,
 				    variable_set_t *set, 

@@ -1,4 +1,4 @@
-/* $Id: variable.c,v 1.22 2006/03/28 23:11:01 rockyb Exp $
+/* $Id: variable.c,v 1.23 2006/11/20 10:31:25 rockyb Exp $
 Internals of variables for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996, 1997,
 2002, 2004, 2005, 2006 Free Software Foundation, Inc.
@@ -201,7 +201,7 @@ init_hash_global_variable_set (void)
 
 variable_t *
 define_variable_in_set (const char *name, unsigned int length,
-                        char *value, variable_origin_t origin,
+                        const char *value, variable_origin_t origin,
                         int recursive, variable_set_t *set,
                         const floc_t *p_floc)
 {
