@@ -1,4 +1,4 @@
-/* $Id: default.c,v 1.11 2005/12/18 15:14:13 rockyb Exp $
+/* $Id: default.c,v 1.12 2006/11/20 10:29:13 rockyb Exp $
 Data base of default implicit rules for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96, 2004 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -206,7 +206,7 @@ static char *default_suffix_rules[] =
     0, 0,
   };
 
-static char *default_variables[] =
+static const char *default_variables[] =
   {
     "AR", "ar",
     "ARFLAGS", "rv",
@@ -423,11 +423,11 @@ install_default_implicit_rules (void)
 void
 define_default_variables (void)
 {
-  char **s;
+  const char **s;
 
   if (no_builtin_variables_flag)
     return;
 
   for (s = default_variables; *s != 0; s += 2)
-    (void) define_variable (s[0], strlen (s[0]), s[1], o_default, 1);
+    define_variable (s[0], strlen (s[0]), s[1], o_default, 1);
 }

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.79.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-03-23 22:55-0500\n"
+"POT-Creation-Date: 2006-11-20 03:43-0500\n"
 "PO-Revision-Date: 2001-05-24 05:25+300\n"
 "Last-Translator: Nilgün Belma Bugüner <nilgun@fide.org>\n"
 "Language-Team: Turkish <tr@li.org>\n"
@@ -154,164 +154,164 @@ msgstr " çok uzak."
 msgid " impossibilities in %lu directories.\n"
 msgstr " %u dizinlerinde olanaksýzlýklar.\n"
 
-#: src/expand.c:113
+#: src/expand.c:126
 #, c-format
 msgid "Recursive variable `%s' references itself (eventually)"
 msgstr "Çevrimsel deðiþken `%s' tekrar kendine baðýntýlý (sonuçta)"
 
-#: src/expand.c:254
+#: src/expand.c:262
 msgid "unterminated variable reference"
 msgstr "sonlandýrýlmamýþ deðiþken baðýntýsý"
 
-#: src/file.c:223
+#: src/file.c:227
 #, c-format
 msgid "Commands were specified for file `%s' at %s:%lu,"
 msgstr "`%s' dosyasý için komutlar %s:%lu de belirtildi,"
 
-#: src/file.c:228
+#: src/file.c:232
 #, c-format
 msgid "Commands for file `%s' were found by implicit rule search,"
 msgstr "`%s' dosyasý için komutlar örtük kural aramasýnda bulundu,"
 
-#: src/file.c:231
+#: src/file.c:235
 #, c-format
 msgid "but `%s' is now considered the same file as `%s'."
 msgstr "fakat `%s' þimdi `%s' dosyasý ile ayný dosya olarak düþünülmeli."
 
-#: src/file.c:234
+#: src/file.c:238
 #, c-format
 msgid "Commands for `%s' will be ignored in favor of those for `%s'."
 msgstr "`%s' dosyasý için komutlar `%s' lehine yoksayýlmýþ olacak."
 
-#: src/file.c:254
+#: src/file.c:258
 #, c-format
 msgid "can't rename single-colon `%s' to double-colon `%s'"
 msgstr "tek-sütun `%s', çift-sütun `%s' olarak yeniden adlandýrýlamaz"
 
-#: src/file.c:259
+#: src/file.c:263
 #, c-format
 msgid "can't rename double-colon `%s' to single-colon `%s'"
 msgstr "çift-sütun `%s', tek-sütun `%s' olarak yeniden adlandýrýlamaz"
 
-#: src/file.c:336
+#: src/file.c:340
 #, c-format
 msgid "*** Deleting intermediate file `%s'"
 msgstr "*** Aracý dosya `%s' siliniyor"
 
-#: src/file.c:340
+#: src/file.c:344
 #, fuzzy
 msgid "Removing intermediate files...\n"
 msgstr "*** Aracý dosya `%s' siliniyor"
 
-#: src/file.c:395
+#: src/file.c:600
 #, c-format
 msgid "%s: Timestamp out of range; substituting %s"
 msgstr "%s: Tarih damgasý kapsamdýþý; yerine %s kullanýlýyor"
 
-#: src/file.c:396
+#: src/file.c:601
 msgid "Current time"
 msgstr "Þu an"
 
-#: src/file.c:510
+#: src/file.c:715
 msgid "# Not a target:"
 msgstr "# Bir hedef deðil:"
 
-#: src/file.c:539
+#: src/file.c:744
 msgid "#  Precious file (prerequisite of .PRECIOUS)."
 msgstr "#  Kýymetli dosya (.PRECIOUS  önceden gerekliliði)."
 
-#: src/file.c:541
+#: src/file.c:746
 msgid "#  Phony target (prerequisite of .PHONY)."
 msgstr "#  Sahte hedef (.PHONY önceden gerekliliði)."
 
-#: src/file.c:543
+#: src/file.c:748
 msgid "#  Command-line target."
 msgstr "#  Komut-satýrý hedefi."
 
-#: src/file.c:545
+#: src/file.c:750
 #, fuzzy
 msgid "#  A default, MAKEFILES, or -include/sinclude makefile."
 msgstr ""
 "#  Bir öntanýmlý ya da MAKEFILES çevre deðiþkeni ile atanmýþ bir make dosyasý"
 
-#: src/file.c:547
+#: src/file.c:752
 msgid "#  Implicit rule search has been done."
 msgstr "#  Örtük kural araþtýrmasý yapýlmýþtý."
 
-#: src/file.c:548
+#: src/file.c:753
 msgid "#  Implicit rule search has not been done."
 msgstr "#  Örtük kural araþtýrmasý yapýlmamýþtý."
 
-#: src/file.c:550
+#: src/file.c:755
 #, c-format
 msgid "#  Implicit/static pattern stem: `%s'\n"
 msgstr "#  Örtük/deðiþmeyen kalýp kökü: `%s'\n"
 
-#: src/file.c:552
+#: src/file.c:757
 msgid "#  File is an intermediate prerequisite."
 msgstr ""
 "#  Orta seviyede önceden gerekli bir dosya (öncelikle gerekli dosyalara "
 "aracýlýk eden dosya)"
 
-#: src/file.c:555
+#: src/file.c:760
 msgid "#  Also makes:"
 msgstr "#  Oluþtursa da:"
 
-#: src/file.c:565
+#: src/file.c:770
 msgid "#  Modification time never checked."
 msgstr "#  Deðiþiklik zamaný hiç kontrol edilmedi."
 
-#: src/file.c:567
+#: src/file.c:772
 msgid "#  File does not exist."
 msgstr "#  Dosya yok."
 
-#: src/file.c:569
+#: src/file.c:774
 msgid "#  File is very old."
 msgstr "#  Dosya çok eski."
 
-#: src/file.c:574
+#: src/file.c:779
 #, c-format
 msgid "#  Last modified %s\n"
 msgstr "#  Son deðiþiklik tarihi %s\n"
 
-#: src/file.c:577
+#: src/file.c:782
 msgid "#  File has been updated."
 msgstr "#  Dosya güncelleþtirilmiþti."
 
-#: src/file.c:578
+#: src/file.c:783
 msgid "#  File has not been updated."
 msgstr "#  Dosya güncelleþtirilmemiþti."
 
-#: src/file.c:586
+#: src/file.c:791
 msgid "#  Commands currently running (THIS IS A BUG)."
 msgstr "#  Komutlar þu an iþlemlerini sürdürüyor (BU BÝR YAZILIM HATASI)."
 
-#: src/file.c:589
+#: src/file.c:794
 msgid "#  Dependencies commands running (THIS IS A BUG)."
 msgstr ""
 "#  Baðýmlýlýklarýn komutlarý iþlemlerini sürdürüyor (BU BÝR YAZILIM HATASI)."
 
-#: src/file.c:598
+#: src/file.c:803
 msgid "#  Successfully updated."
 msgstr "#   Tamamen güncellendi."
 
-#: src/file.c:602
+#: src/file.c:807
 msgid "#  Needs to be updated (-q is set)."
 msgstr "#   Güncellenmiþ olmasý gerekir (-q verildi)."
 
-#: src/file.c:605
+#: src/file.c:810
 msgid "#  Failed to be updated."
 msgstr "#  Güncellenmiþ olamadý."
 
-#: src/file.c:608
+#: src/file.c:813
 msgid "#  Invalid value in `update_status' member!"
 msgstr "#  `update_status' üyesinde geçersiz deðer!"
 
-#: src/file.c:615
+#: src/file.c:820
 msgid "#  Invalid value in `command_state' member!"
 msgstr "#  `command_state' üyesinde geçersiz deðer!"
 
-#: src/file.c:639
+#: src/file.c:844
 msgid ""
 "\n"
 "# Files"
@@ -319,7 +319,7 @@ msgstr ""
 "\n"
 "# Dosya"
 
-#: src/file.c:643
+#: src/file.c:848
 msgid ""
 "\n"
 "# files hash-table stats:\n"
@@ -431,41 +431,41 @@ msgstr "`%s' için bir örtük kural arýyor.\n"
 msgid "Looking for archive-member implicit rule for `%s'.\n"
 msgstr "`%s' için arþiv-üyesi örtük kural arýyor.\n"
 
-#: src/implicit.c:213
+#: src/implicit.c:332
 msgid "Avoiding implicit rule recursion.\n"
 msgstr "Örtük kural çevrimi görmezden geliniyor.\n"
 
-#: src/implicit.c:356
+#: src/implicit.c:480
 #, c-format
 msgid "Trying pattern rule with stem `%.*s'.\n"
 msgstr "`%.*s' köküyle kalýp kuralý deneniyor.\n"
 
-#: src/implicit.c:397
+#: src/implicit.c:672
 #, c-format
 msgid "Rejecting impossible implicit prerequisite `%s'.\n"
 msgstr "Örtük önceden gereklilik `%s' olanaksýz olduðundan reddediliyor.\n"
 
-#: src/implicit.c:398
+#: src/implicit.c:673
 #, c-format
 msgid "Rejecting impossible rule prerequisite `%s'.\n"
 msgstr "Kural önceden gerekliliði `%s' olanaksýz olduðundan reddediliyor.\n"
 
-#: src/implicit.c:408
+#: src/implicit.c:683
 #, c-format
 msgid "Trying implicit prerequisite `%s'.\n"
 msgstr "Örtük önceden gereklilik `%s' deneniyor.\n"
 
-#: src/implicit.c:409
+#: src/implicit.c:684
 #, c-format
 msgid "Trying rule prerequisite `%s'.\n"
 msgstr "Kural önceden gerekliliði `%s' deneniyor.\n"
 
-#: src/implicit.c:431
+#: src/implicit.c:715
 #, c-format
 msgid "Found prerequisite `%s' as VPATH `%s'\n"
 msgstr "Önceden gereklilik `%s' VPATH `%s' olarak bulundu.\n"
 
-#: src/implicit.c:449
+#: src/implicit.c:735
 #, c-format
 msgid "Looking for a rule with intermediate file `%s'.\n"
 msgstr "Aracý dosya `%s' ile bir kural arýyor.\n"
@@ -1080,33 +1080,33 @@ msgstr ""
 "\n"
 "# %s üzerindeki Make veri tabaný tamamlandý\n"
 
-#: src/misc.c:209 src/misc.c:224 src/read.c:3031
+#: src/misc.c:207 src/misc.c:222 src/read.c:3031
 msgid "virtual memory exhausted"
 msgstr "sanal bellek tükendi"
 
-#: src/misc.c:387
+#: src/misc.c:385
 #, fuzzy
 msgid "Initialized access"
 msgstr "Hazýrlandý"
 
-#: src/misc.c:466
+#: src/misc.c:464
 msgid "User access"
 msgstr ""
 
-#: src/misc.c:514
+#: src/misc.c:512
 msgid "Make access"
 msgstr ""
 
-#: src/misc.c:548
+#: src/misc.c:546
 msgid "Child access"
 msgstr ""
 
-#: src/misc.c:611
+#: src/misc.c:609
 #, fuzzy, c-format
 msgid "write error: %s"
 msgstr "%s e yönlendirilmiþ hata\n"
 
-#: src/misc.c:613
+#: src/misc.c:611
 #, fuzzy
 msgid "write error"
 msgstr "iþ-sunucusu yazýyor"
@@ -1148,7 +1148,7 @@ msgstr "þartlý ifade de yazýlýþ hatasý"
 msgid "extraneous `endef'"
 msgstr "yersiz `endef'"
 
-#: src/read.c:673 src/read.c:703 src/variable.c:1230
+#: src/read.c:673 src/read.c:703 src/variable.c:1239
 msgid "empty variable name"
 msgstr "boþ deðiþken ismi"
 
@@ -1473,7 +1473,7 @@ msgstr ".LIBPATTERNS elemaný `%s' bir kalýp deðil"
 msgid "Customs won't export: %s\n"
 msgstr "Özelleþtirilmiþ olanlar dýþarý aktarýlmayacak: %s\n"
 
-#: src/rule.c:562
+#: src/rule.c:557
 #, fuzzy
 msgid ""
 "\n"
@@ -1482,7 +1482,7 @@ msgstr ""
 "\n"
 "# Örtük kural yok."
 
-#: src/rule.c:577
+#: src/rule.c:572
 msgid ""
 "\n"
 "# No implicit rules."
@@ -1490,7 +1490,7 @@ msgstr ""
 "\n"
 "# Örtük kural yok."
 
-#: src/rule.c:580
+#: src/rule.c:575
 #, c-format
 msgid ""
 "\n"
@@ -1499,11 +1499,11 @@ msgstr ""
 "\n"
 "# %u örtük kural, %u"
 
-#: src/rule.c:585
+#: src/rule.c:580
 msgid " terminal."
 msgstr " terminal."
 
-#: src/rule.c:593
+#: src/rule.c:588
 #, c-format
 msgid "BUG: num_pattern_rules wrong!  %u != %u"
 msgstr "YAZILIM HATASI: num_pattern_rules yanlýþ!  %u != %u"
@@ -1700,17 +1700,17 @@ msgstr ""
 msgid "invalid"
 msgstr ""
 
-#: src/variable.c:1286
+#: src/variable.c:1295
 #, fuzzy, c-format
 msgid " (from `%s', line %lu)"
 msgstr " (`%s'den, satýr %lu):\n"
 
-#: src/variable.c:1331
+#: src/variable.c:1340
 #, fuzzy
 msgid "variable set hash-table stats:\n"
 msgstr "# %u deðiþken; %u hash tablosu içinde.\n"
 
-#: src/variable.c:1343
+#: src/variable.c:1352
 msgid ""
 "\n"
 "# Variables\n"
@@ -1718,7 +1718,7 @@ msgstr ""
 "\n"
 "# Deðiþken\n"
 
-#: src/variable.c:1347
+#: src/variable.c:1356
 #, fuzzy
 msgid ""
 "\n"
@@ -1727,7 +1727,7 @@ msgstr ""
 "\n"
 "# Örneðe duyarlý deðiþken deðeri"
 
-#: src/variable.c:1361
+#: src/variable.c:1370
 msgid ""
 "\n"
 "# No pattern-specific variable values."
@@ -1735,7 +1735,7 @@ msgstr ""
 "\n"
 "# Örneðe duyarlý deðiþken deðeri yok."
 
-#: src/variable.c:1363
+#: src/variable.c:1372
 #, c-format
 msgid ""
 "\n"

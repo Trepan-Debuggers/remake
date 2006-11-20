@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU make 3.78.90\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-03-23 22:55-0500\n"
+"POT-Creation-Date: 2006-11-20 03:43-0500\n"
 "PO-Revision-Date: 2000-03-17 17:06+0300\n"
 "Last-Translator: Fábio Henrique F. Silva <fabiohfs@mail.com>\n"
 "Language-Team: Brazilian Portuguese <ldp-br@bazar.conectiva.com.br>\n"
@@ -156,161 +156,161 @@ msgstr " longe."
 msgid " impossibilities in %lu directories.\n"
 msgstr " impossibilidades em %u diretórios.\n"
 
-#: src/expand.c:113
+#: src/expand.c:126
 #, c-format
 msgid "Recursive variable `%s' references itself (eventually)"
 msgstr "Variável recursiva `%s' faz referência a ela mesma (eventualmente)"
 
-#: src/expand.c:254
+#: src/expand.c:262
 msgid "unterminated variable reference"
 msgstr "referência a variável não finalizada"
 
-#: src/file.c:223
+#: src/file.c:227
 #, c-format
 msgid "Commands were specified for file `%s' at %s:%lu,"
 msgstr "Comandos especificados para o arquivo `%s' em %s:%lu,"
 
-#: src/file.c:228
+#: src/file.c:232
 #, c-format
 msgid "Commands for file `%s' were found by implicit rule search,"
 msgstr "Comandos para o arquivo `%s' encontrados por regra implícita,"
 
-#: src/file.c:231
+#: src/file.c:235
 #, c-format
 msgid "but `%s' is now considered the same file as `%s'."
 msgstr "mas `%s' é considerado o mesmo arquivo que `%s'."
 
-#: src/file.c:234
+#: src/file.c:238
 #, c-format
 msgid "Commands for `%s' will be ignored in favor of those for `%s'."
 msgstr "Comandos para `%s' serão ignorados em favor daqueles para `%s'."
 
-#: src/file.c:254
+#: src/file.c:258
 #, c-format
 msgid "can't rename single-colon `%s' to double-colon `%s'"
 msgstr "não pôde renomear de dois-pontos `%s' para dois-pontos duplos `%s'"
 
-#: src/file.c:259
+#: src/file.c:263
 #, c-format
 msgid "can't rename double-colon `%s' to single-colon `%s'"
 msgstr "não pôde renomer de dois-pontos duplos `%s' para dois-pontos `%s'"
 
-#: src/file.c:336
+#: src/file.c:340
 #, c-format
 msgid "*** Deleting intermediate file `%s'"
 msgstr "** Apagando arquivo intermediário `%s'"
 
-#: src/file.c:340
+#: src/file.c:344
 #, fuzzy
 msgid "Removing intermediate files...\n"
 msgstr "** Apagando arquivo intermediário `%s'"
 
-#: src/file.c:395
+#: src/file.c:600
 #, c-format
 msgid "%s: Timestamp out of range; substituting %s"
 msgstr ""
 
-#: src/file.c:396
+#: src/file.c:601
 msgid "Current time"
 msgstr ""
 
-#: src/file.c:510
+#: src/file.c:715
 msgid "# Not a target:"
 msgstr "# Não é um alvo:"
 
-#: src/file.c:539
+#: src/file.c:744
 msgid "#  Precious file (prerequisite of .PRECIOUS)."
 msgstr "# Arquivo importante (prerequisito de .PRECIOUS)."
 
-#: src/file.c:541
+#: src/file.c:746
 msgid "#  Phony target (prerequisite of .PHONY)."
 msgstr "# Alvo Falso (prerequisito de .PHONY)."
 
-#: src/file.c:543
+#: src/file.c:748
 msgid "#  Command-line target."
 msgstr "# Linha de Comando do Alvo."
 
-#: src/file.c:545
+#: src/file.c:750
 #, fuzzy
 msgid "#  A default, MAKEFILES, or -include/sinclude makefile."
 msgstr "# Um Padrão ou arquivo MAKEFILES"
 
-#: src/file.c:547
+#: src/file.c:752
 msgid "#  Implicit rule search has been done."
 msgstr "# Pesquisa por regra implícita concluida."
 
-#: src/file.c:548
+#: src/file.c:753
 msgid "#  Implicit rule search has not been done."
 msgstr "# Pesquisa por regra implícita não concluida."
 
-#: src/file.c:550
+#: src/file.c:755
 #, c-format
 msgid "#  Implicit/static pattern stem: `%s'\n"
 msgstr "# Padrão Implícito/Estático: `%s'\n"
 
-#: src/file.c:552
+#: src/file.c:757
 msgid "#  File is an intermediate prerequisite."
 msgstr "# O arquivo é um pré-requisito intermediário."
 
-#: src/file.c:555
+#: src/file.c:760
 msgid "#  Also makes:"
 msgstr "# Também faz:"
 
-#: src/file.c:565
+#: src/file.c:770
 msgid "#  Modification time never checked."
 msgstr "# O Período da modificação nunca foi verificado."
 
-#: src/file.c:567
+#: src/file.c:772
 msgid "#  File does not exist."
 msgstr "# O Arquivo não existe."
 
-#: src/file.c:569
+#: src/file.c:774
 #, fuzzy
 msgid "#  File is very old."
 msgstr "# O Arquivo foi atualizado."
 
-#: src/file.c:574
+#: src/file.c:779
 #, c-format
 msgid "#  Last modified %s\n"
 msgstr "# Última modificação %s\n"
 
-#: src/file.c:577
+#: src/file.c:782
 msgid "#  File has been updated."
 msgstr "# O Arquivo foi atualizado."
 
-#: src/file.c:578
+#: src/file.c:783
 msgid "#  File has not been updated."
 msgstr "# O Arquivo não foi atualizado."
 
-#: src/file.c:586
+#: src/file.c:791
 msgid "#  Commands currently running (THIS IS A BUG)."
 msgstr "# Comandos em execução (ISTO É UMA FALHA)."
 
-#: src/file.c:589
+#: src/file.c:794
 msgid "#  Dependencies commands running (THIS IS A BUG)."
 msgstr "# Comandos de dependências em execução (ISTO É UMA FALHA)."
 
-#: src/file.c:598
+#: src/file.c:803
 msgid "#  Successfully updated."
 msgstr "# Atualizado com sucesso."
 
-#: src/file.c:602
+#: src/file.c:807
 msgid "#  Needs to be updated (-q is set)."
 msgstr "# Precisa ser atualizado (-q está definido)."
 
-#: src/file.c:605
+#: src/file.c:810
 msgid "#  Failed to be updated."
 msgstr "# Problemas com a atualização."
 
-#: src/file.c:608
+#: src/file.c:813
 msgid "#  Invalid value in `update_status' member!"
 msgstr "# Valor inválido no membro `update_status' !"
 
-#: src/file.c:615
+#: src/file.c:820
 msgid "#  Invalid value in `command_state' member!"
 msgstr "# Valor inválido no membro `command_state' !"
 
-#: src/file.c:639
+#: src/file.c:844
 msgid ""
 "\n"
 "# Files"
@@ -318,7 +318,7 @@ msgstr ""
 "\n"
 "# Arquivos"
 
-#: src/file.c:643
+#: src/file.c:848
 msgid ""
 "\n"
 "# files hash-table stats:\n"
@@ -431,41 +431,41 @@ msgstr "Procurando por uma regra implícita para `%s'.\n"
 msgid "Looking for archive-member implicit rule for `%s'.\n"
 msgstr "Procurando por uma regra implícita de arquivo-membro para `%s'.\n"
 
-#: src/implicit.c:213
+#: src/implicit.c:332
 msgid "Avoiding implicit rule recursion.\n"
 msgstr "Evitando recursão em regra implícita.\n"
 
-#: src/implicit.c:356
+#: src/implicit.c:480
 #, c-format
 msgid "Trying pattern rule with stem `%.*s'.\n"
 msgstr "Tentando padrão para regra com `%.*s'.\n"
 
-#: src/implicit.c:397
+#: src/implicit.c:672
 #, c-format
 msgid "Rejecting impossible implicit prerequisite `%s'.\n"
 msgstr "Rejeitando pré-requisitos implícitos `%s'.\n"
 
-#: src/implicit.c:398
+#: src/implicit.c:673
 #, c-format
 msgid "Rejecting impossible rule prerequisite `%s'.\n"
 msgstr "Rejeitando pré-requisito para regra `%s'.\n"
 
-#: src/implicit.c:408
+#: src/implicit.c:683
 #, c-format
 msgid "Trying implicit prerequisite `%s'.\n"
 msgstr "Tentando pré-requisito implícito `%s'.\n"
 
-#: src/implicit.c:409
+#: src/implicit.c:684
 #, c-format
 msgid "Trying rule prerequisite `%s'.\n"
 msgstr "Tentanto pré-requisito para a regra `%s'.\n"
 
-#: src/implicit.c:431
+#: src/implicit.c:715
 #, c-format
 msgid "Found prerequisite `%s' as VPATH `%s'\n"
 msgstr "Pré-requisito `%s' encontrado como VPATH `%s'\n"
 
-#: src/implicit.c:449
+#: src/implicit.c:735
 #, c-format
 msgid "Looking for a rule with intermediate file `%s'.\n"
 msgstr "Procurando uma regra com o arquivo intermediário `%s'.\n"
@@ -1074,33 +1074,33 @@ msgstr ""
 "\n"
 "# Bando de dados do Make finalizado em %s\n"
 
-#: src/misc.c:209 src/misc.c:224 src/read.c:3031
+#: src/misc.c:207 src/misc.c:222 src/read.c:3031
 msgid "virtual memory exhausted"
 msgstr "A memória virtual encheu"
 
-#: src/misc.c:387
+#: src/misc.c:385
 #, fuzzy
 msgid "Initialized access"
 msgstr "Inicializado"
 
-#: src/misc.c:466
+#: src/misc.c:464
 msgid "User access"
 msgstr ""
 
-#: src/misc.c:514
+#: src/misc.c:512
 msgid "Make access"
 msgstr ""
 
-#: src/misc.c:548
+#: src/misc.c:546
 msgid "Child access"
 msgstr ""
 
-#: src/misc.c:611
+#: src/misc.c:609
 #, fuzzy, c-format
 msgid "write error: %s"
 msgstr "Erro redirecionado para %s\n"
 
-#: src/misc.c:613
+#: src/misc.c:611
 #, fuzzy
 msgid "write error"
 msgstr "gravar jobserver"
@@ -1142,7 +1142,7 @@ msgstr "síntaxe inválida na condicional"
 msgid "extraneous `endef'"
 msgstr "`endef' extranho"
 
-#: src/read.c:673 src/read.c:703 src/variable.c:1230
+#: src/read.c:673 src/read.c:703 src/variable.c:1239
 msgid "empty variable name"
 msgstr "nome de variável vazio"
 
@@ -1463,7 +1463,7 @@ msgstr "O elemento .LIBPATTERNS `%s' não é um padrão"
 msgid "Customs won't export: %s\n"
 msgstr "Customizações não exportadas: %s\n"
 
-#: src/rule.c:562
+#: src/rule.c:557
 #, fuzzy
 msgid ""
 "\n"
@@ -1472,7 +1472,7 @@ msgstr ""
 "\n"
 "# Faltam as regras implícitas."
 
-#: src/rule.c:577
+#: src/rule.c:572
 msgid ""
 "\n"
 "# No implicit rules."
@@ -1480,7 +1480,7 @@ msgstr ""
 "\n"
 "# Faltam as regras implícitas."
 
-#: src/rule.c:580
+#: src/rule.c:575
 #, c-format
 msgid ""
 "\n"
@@ -1489,11 +1489,11 @@ msgstr ""
 "\n"
 "# %u regras implícitas, %u"
 
-#: src/rule.c:585
+#: src/rule.c:580
 msgid " terminal."
 msgstr ""
 
-#: src/rule.c:593
+#: src/rule.c:588
 #, c-format
 msgid "BUG: num_pattern_rules wrong!  %u != %u"
 msgstr "ERRO: num_pattern_rules errada! %u != %u"
@@ -1691,17 +1691,17 @@ msgstr ""
 msgid "invalid"
 msgstr ""
 
-#: src/variable.c:1286
+#: src/variable.c:1295
 #, fuzzy, c-format
 msgid " (from `%s', line %lu)"
 msgstr " (de `%s', linha %lu):\n"
 
-#: src/variable.c:1331
+#: src/variable.c:1340
 #, fuzzy
 msgid "variable set hash-table stats:\n"
 msgstr "# %u variáveis em %u hash buckets.\n"
 
-#: src/variable.c:1343
+#: src/variable.c:1352
 msgid ""
 "\n"
 "# Variables\n"
@@ -1709,7 +1709,7 @@ msgstr ""
 "\n"
 "# Variáveis\n"
 
-#: src/variable.c:1347
+#: src/variable.c:1356
 #, fuzzy
 msgid ""
 "\n"
@@ -1718,7 +1718,7 @@ msgstr ""
 "\n"
 "# Valores da variável de padrões específicos"
 
-#: src/variable.c:1361
+#: src/variable.c:1370
 msgid ""
 "\n"
 "# No pattern-specific variable values."
@@ -1726,7 +1726,7 @@ msgstr ""
 "\n"
 "# Faltam valores para variável de padrões específicos"
 
-#: src/variable.c:1363
+#: src/variable.c:1372
 #, c-format
 msgid ""
 "\n"

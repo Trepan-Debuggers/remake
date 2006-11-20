@@ -1,4 +1,4 @@
-/* $Id: arscan.c,v 1.8 2006/01/05 11:11:29 rockyb Exp $
+/* $Id: arscan.c,v 1.9 2006/11/20 10:29:13 rockyb Exp $
 Library function for scanning an archive file.
 Copyright (C) 1987, 89, 91, 92, 93, 94, 95, 97, 2004, 2005, 2006
 Free Software Foundation, Inc.
@@ -141,7 +141,7 @@ struct ar_hdr
     - -2 if archive has invalid format, 
 */
 long int
-ar_scan (char *archive, long int (*function)(), long int arg)
+ar_scan (const char *archive, long int (*function)(), const void *arg)
 {
 #ifdef AIAMAG
   FL_HDR fl_header;
@@ -534,9 +534,9 @@ ar_scan (char *archive, long int (*function)(), long int arg)
   @return nonzero iff NAME matches MEM.
 */
 int
-ar_name_equal (char *name, char *mem, bool truncated)
+ar_name_equal (const char *name, char *mem, bool truncated)
 {
-  char *p;
+  const char *p;
 
   p = strrchr (name, '/');
   if (p != 0)
@@ -565,7 +565,7 @@ static long int
 ar_member_pos (int desc UNUSED, char *mem, int truncated,
 	       long int hdrpos, long int datapos UNUSED, long int size UNUSED,
                long int date UNUSED, int uid UNUSED, int gid UNUSED,
-               int mode UNUSED, char *name)
+               int mode UNUSED, const void *name)
 {
   if (!ar_name_equal (name, mem, truncated))
     return 0;
@@ -585,9 +585,9 @@ ar_member_pos (int desc UNUSED, char *mem, int truncated,
    exist.
 */
 int
-ar_member_touch (char *arname, char *memname)
+ar_member_touch (const char *arname, const char *memname)
 {
-  long int pos = ar_scan (arname, ar_member_pos, (long int) memname);
+  long int pos = ar_scan (arname, ar_member_pos, memname);
   int fd;
   struct ar_hdr ar_hdr;
   int i;
@@ -645,9 +645,9 @@ ar_member_touch (char *arname, char *memname)
 #ifdef TEST
 
 long int
-describe_member (int desc, char *name, bool truncated,
+describe_member (int desc, const char *name, bool truncated,
 		 long int hdrpos, long int datapos, long int size,
-                 long int date, int uid, int gid, int mode)
+                 long int date, int uid, int gid, int mode, const void *arg)
 {
   extern char *ctime ();
 
@@ -663,7 +663,7 @@ describe_member (int desc, char *name, bool truncated,
 int
 main (int argc, char **argv)
 {
-  ar_scan (argv[1], describe_member);
+  ar_scan (argv[1], describe_member, NULL);
   return 0;
 }
 

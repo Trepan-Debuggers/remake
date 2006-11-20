@@ -1,4 +1,4 @@
-/* $Id: arscan.h,v 1.6 2006/01/05 11:11:29 rockyb Exp $
+/* $Id: arscan.h,v 1.7 2006/11/20 10:29:13 rockyb Exp $
 Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
@@ -55,8 +55,8 @@ USA.  */
     - -2 if archive has invalid format, 
 */
 
-extern long int ar_scan (char *archive, 
-			 long int (*function) (), long int arg);
+extern long int ar_scan (const char *psz_archive, 
+			 long int (*function) (), const void *arg);
 
 /*! 
   See if an archive member is equal to given name.
@@ -70,7 +70,7 @@ extern long int ar_scan (char *archive,
   
   @return nonzero iff NAME matches MEM.
 */
-extern int ar_name_equal (char *name, char *mem, bool truncated);
+extern int ar_name_equal (const char *name, char *mem, bool truncated);
 
 /*! 
    Set date of member in archive to current time.
@@ -86,6 +86,6 @@ extern int ar_name_equal (char *name, char *mem, bool truncated);
    - -3 if other random system call error (including file read-only), 
    -  1 if valid but member psz_memname does not exist.
 */
-extern int ar_member_touch (char *psz_arname, char *psz_memname);
+extern int ar_member_touch (const char *psz_arname, const char *psz_memname);
 
 #endif /*ARSCAN_H*/

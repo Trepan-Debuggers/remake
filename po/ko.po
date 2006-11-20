@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU make 3.79.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-03-23 22:55-0500\n"
+"POT-Creation-Date: 2006-11-20 03:43-0500\n"
 "PO-Revision-Date: 2001-06-08 01:30+0900\n"
 "Last-Translator: Changwoo Ryu <cwryu@debian.org>\n"
 "Language-Team: Korean <ko@li.org>\n"
@@ -156,160 +156,160 @@ msgstr " 지금까지."
 msgid " impossibilities in %lu directories.\n"
 msgstr " %u개의 디렉토리에서 불가능.\n"
 
-#: src/expand.c:113
+#: src/expand.c:126
 #, c-format
 msgid "Recursive variable `%s' references itself (eventually)"
 msgstr "재귀 변수 `%s'는 자기 자신을 참조하고 있습니다 (결국)"
 
-#: src/expand.c:254
+#: src/expand.c:262
 msgid "unterminated variable reference"
 msgstr "종결되지 않은 변수 참조"
 
-#: src/file.c:223
+#: src/file.c:227
 #, c-format
 msgid "Commands were specified for file `%s' at %s:%lu,"
 msgstr "파일 `%s'의 %s:%lu에서 명령어가 지정되었습니다,"
 
-#: src/file.c:228
+#: src/file.c:232
 #, c-format
 msgid "Commands for file `%s' were found by implicit rule search,"
 msgstr "파일 `%s'를 위한 명령을 묵시적 규칙 탐색으로 찾았습니다."
 
-#: src/file.c:231
+#: src/file.c:235
 #, c-format
 msgid "but `%s' is now considered the same file as `%s'."
 msgstr "하지만 `%s'는 이제 `%s'와 같은 파일로 간주됩니다."
 
-#: src/file.c:234
+#: src/file.c:238
 #, c-format
 msgid "Commands for `%s' will be ignored in favor of those for `%s'."
 msgstr "`%s'에 대한 명령어는 `%s'에 대한 명령어가 우선하므로 무시됩니다.."
 
-#: src/file.c:254
+#: src/file.c:258
 #, c-format
 msgid "can't rename single-colon `%s' to double-colon `%s'"
 msgstr "단일 콜론 `%s'를 이중 콜론 `%s'로 이름바꿀 수 없습니다"
 
-#: src/file.c:259
+#: src/file.c:263
 #, c-format
 msgid "can't rename double-colon `%s' to single-colon `%s'"
 msgstr "이중 콜론 `%s'를 단일 콜론 `%s'로 이름바꿀 수 없습니다"
 
-#: src/file.c:336
+#: src/file.c:340
 #, c-format
 msgid "*** Deleting intermediate file `%s'"
 msgstr "*** 중간 파일 `%s'을(를) 주입니다"
 
-#: src/file.c:340
+#: src/file.c:344
 #, fuzzy
 msgid "Removing intermediate files...\n"
 msgstr "*** 중간 파일 `%s'을(를) 주입니다"
 
-#: src/file.c:395
+#: src/file.c:600
 #, c-format
 msgid "%s: Timestamp out of range; substituting %s"
 msgstr "%s: 타임스탬프가 범위를 벗어납니다; %s을(를) 대체합니다"
 
-#: src/file.c:396
+#: src/file.c:601
 msgid "Current time"
 msgstr "현재 시각"
 
-#: src/file.c:510
+#: src/file.c:715
 msgid "# Not a target:"
 msgstr "# 타겟이 아님:"
 
-#: src/file.c:539
+#: src/file.c:744
 msgid "#  Precious file (prerequisite of .PRECIOUS)."
 msgstr "#  프레시어스 파일 (.PRECIOUS의 선행조건)."
 
-#: src/file.c:541
+#: src/file.c:746
 msgid "#  Phony target (prerequisite of .PHONY)."
 msgstr "#  포니 타겟 (.PHONY의 선행조건)."
 
-#: src/file.c:543
+#: src/file.c:748
 msgid "#  Command-line target."
 msgstr "#  명령행 타겟."
 
-#: src/file.c:545
+#: src/file.c:750
 #, fuzzy
 msgid "#  A default, MAKEFILES, or -include/sinclude makefile."
 msgstr "#  기본 메이크파일 혹은 MAKEFILES 메이크파일."
 
-#: src/file.c:547
+#: src/file.c:752
 msgid "#  Implicit rule search has been done."
 msgstr "#  묵시적 규칙 탐색이 완료되었습니다."
 
-#: src/file.c:548
+#: src/file.c:753
 msgid "#  Implicit rule search has not been done."
 msgstr "#  묵시적 규칙 탐색이 완료되지 않았습니다."
 
-#: src/file.c:550
+#: src/file.c:755
 #, c-format
 msgid "#  Implicit/static pattern stem: `%s'\n"
 msgstr "#  묵시적/고정 패턴 스템: `%s'\n"
 
-#: src/file.c:552
+#: src/file.c:757
 msgid "#  File is an intermediate prerequisite."
 msgstr "#  파일이 중간단계의 선행조건입니다."
 
-#: src/file.c:555
+#: src/file.c:760
 msgid "#  Also makes:"
 msgstr "#  다음도 만듭니다:"
 
-#: src/file.c:565
+#: src/file.c:770
 msgid "#  Modification time never checked."
 msgstr "#  변경 시각이 결코 검사되지 않았음."
 
-#: src/file.c:567
+#: src/file.c:772
 msgid "#  File does not exist."
 msgstr "#  파일이 존재하지 않습니다."
 
-#: src/file.c:569
+#: src/file.c:774
 msgid "#  File is very old."
 msgstr "#  파일이 매우 오래되었습니다."
 
-#: src/file.c:574
+#: src/file.c:779
 #, c-format
 msgid "#  Last modified %s\n"
 msgstr "#  마지막 변경 %s\n"
 
-#: src/file.c:577
+#: src/file.c:782
 msgid "#  File has been updated."
 msgstr "#  파일이 갱신되었습니다."
 
-#: src/file.c:578
+#: src/file.c:783
 msgid "#  File has not been updated."
 msgstr "#  파일이 갱신되지 않았습니다."
 
-#: src/file.c:586
+#: src/file.c:791
 msgid "#  Commands currently running (THIS IS A BUG)."
 msgstr "#  현재 실행중인 명령 (이것은 버그입니다)."
 
-#: src/file.c:589
+#: src/file.c:794
 msgid "#  Dependencies commands running (THIS IS A BUG)."
 msgstr "#  현재 실행중인 의존성 (이것은 버그입니다)."
 
-#: src/file.c:598
+#: src/file.c:803
 msgid "#  Successfully updated."
 msgstr "#  성공적으로 갱신됨."
 
-#: src/file.c:602
+#: src/file.c:807
 msgid "#  Needs to be updated (-q is set)."
 msgstr "#  갱신될 필요가 있음 (-q 설정됨)."
 
-#: src/file.c:605
+#: src/file.c:810
 msgid "#  Failed to be updated."
 msgstr "#  갱신에 실패함."
 
-#: src/file.c:608
+#: src/file.c:813
 msgid "#  Invalid value in `update_status' member!"
 msgstr "#  `update_status' 멤버에 값이 잘못되었습니다!"
 
-#: src/file.c:615
+#: src/file.c:820
 msgid "#  Invalid value in `command_state' member!"
 msgstr "#  `command_status' 멤버에 값이 잘못되었습니다!"
 
-#: src/file.c:639
+#: src/file.c:844
 msgid ""
 "\n"
 "# Files"
@@ -317,7 +317,7 @@ msgstr ""
 "\n"
 "# 파일"
 
-#: src/file.c:643
+#: src/file.c:848
 msgid ""
 "\n"
 "# files hash-table stats:\n"
@@ -429,43 +429,43 @@ msgstr "`%s'에 대한 묵시적 규칙을 찾고 있습니다.\n"
 msgid "Looking for archive-member implicit rule for `%s'.\n"
 msgstr "`%s'에 대한 아카이브멤버 묵시적 규칙을 찾고 있습니다.\n"
 
-#: src/implicit.c:213
+#: src/implicit.c:332
 msgid "Avoiding implicit rule recursion.\n"
 msgstr "묵시적 규칙의 재귀를 피함.\n"
 
 # 스템stem이란 패턴 룰에서 prefix/suffix를 제외한 나머지를 말한다.
 # 예를 들어 `%.c'라는 패턴에 `hello.c'가 들어 맞았을 경우 stem은 `hello'이다.
-#: src/implicit.c:356
+#: src/implicit.c:480
 #, c-format
 msgid "Trying pattern rule with stem `%.*s'.\n"
 msgstr "스템 `%.*s'에서부터 패턴 규칙 시도.\n"
 
-#: src/implicit.c:397
+#: src/implicit.c:672
 #, c-format
 msgid "Rejecting impossible implicit prerequisite `%s'.\n"
 msgstr "불가능한 묵시적 선행조건 `%s'은(는) 거부됩니다.\n"
 
-#: src/implicit.c:398
+#: src/implicit.c:673
 #, c-format
 msgid "Rejecting impossible rule prerequisite `%s'.\n"
 msgstr "불가능한 규칙 선행조건 `%s'은(는) 거부됩니다.\n"
 
-#: src/implicit.c:408
+#: src/implicit.c:683
 #, c-format
 msgid "Trying implicit prerequisite `%s'.\n"
 msgstr "묵시적 선행조건 `%s'을(를) 시도합니다\n"
 
-#: src/implicit.c:409
+#: src/implicit.c:684
 #, c-format
 msgid "Trying rule prerequisite `%s'.\n"
 msgstr "규칙 선행조건 `%s'을(를) 시도합니다.\n"
 
-#: src/implicit.c:431
+#: src/implicit.c:715
 #, c-format
 msgid "Found prerequisite `%s' as VPATH `%s'\n"
 msgstr "VPATH `%2$s'에서 선행조건 `%1$s'을(를) 찾았습니다\n"
 
-#: src/implicit.c:449
+#: src/implicit.c:735
 #, c-format
 msgid "Looking for a rule with intermediate file `%s'.\n"
 msgstr "중간 파일 `%s'에 대한 묵시적 규칙을 찾고 있습니다.\n"
@@ -1082,34 +1082,34 @@ msgstr ""
 "\n"
 "# 메이크 데이타 베이스 마침, %s에서\n"
 
-#: src/misc.c:209 src/misc.c:224 src/read.c:3031
+#: src/misc.c:207 src/misc.c:222 src/read.c:3031
 msgid "virtual memory exhausted"
 msgstr "가상 메모리가 고갈됨"
 
-#: src/misc.c:387
+#: src/misc.c:385
 #, fuzzy
 msgid "Initialized access"
 msgstr "초기화됨"
 
-#: src/misc.c:466
+#: src/misc.c:464
 msgid "User access"
 msgstr ""
 
-#: src/misc.c:514
+#: src/misc.c:512
 msgid "Make access"
 msgstr ""
 
-#: src/misc.c:548
+#: src/misc.c:546
 msgid "Child access"
 msgstr ""
 
-#: src/misc.c:611
+#: src/misc.c:609
 #, fuzzy, c-format
 msgid "write error: %s"
 msgstr "오류를 %s으로(로) 리다이렉트합니다\n"
 
 # ??? 디버깅 메세지
-#: src/misc.c:613
+#: src/misc.c:611
 #, fuzzy
 msgid "write error"
 msgstr "작업서버 쓰기"
@@ -1151,7 +1151,7 @@ msgstr "조건문에 부적절한 문법이 쓰임"
 msgid "extraneous `endef'"
 msgstr "여분의 `endef'"
 
-#: src/read.c:673 src/read.c:703 src/variable.c:1230
+#: src/read.c:673 src/read.c:703 src/variable.c:1239
 msgid "empty variable name"
 msgstr "빈 변수 이름"
 
@@ -1474,7 +1474,7 @@ msgstr ".LIBPATTERNS의 원소 `%s'이(가) 패턴이 아닙니다"
 msgid "Customs won't export: %s\n"
 msgstr "Customs은 export되지 않을 것입니다: %s\n"
 
-#: src/rule.c:562
+#: src/rule.c:557
 #, fuzzy
 msgid ""
 "\n"
@@ -1483,7 +1483,7 @@ msgstr ""
 "\n"
 "# 묵시적 규칙 없음."
 
-#: src/rule.c:577
+#: src/rule.c:572
 msgid ""
 "\n"
 "# No implicit rules."
@@ -1491,7 +1491,7 @@ msgstr ""
 "\n"
 "# 묵시적 규칙 없음."
 
-#: src/rule.c:580
+#: src/rule.c:575
 #, c-format
 msgid ""
 "\n"
@@ -1500,11 +1500,11 @@ msgstr ""
 "\n"
 "# %u개의 묵시적 규칙, %u"
 
-#: src/rule.c:585
+#: src/rule.c:580
 msgid " terminal."
 msgstr " 터미널."
 
-#: src/rule.c:593
+#: src/rule.c:588
 #, c-format
 msgid "BUG: num_pattern_rules wrong!  %u != %u"
 msgstr "버그: num_pattern_rules 오류!  %u != %u"
@@ -1701,17 +1701,17 @@ msgstr ""
 msgid "invalid"
 msgstr ""
 
-#: src/variable.c:1286
+#: src/variable.c:1295
 #, fuzzy, c-format
 msgid " (from `%s', line %lu)"
 msgstr " (`%s'에서, %lu번째 줄):\n"
 
-#: src/variable.c:1331
+#: src/variable.c:1340
 #, fuzzy
 msgid "variable set hash-table stats:\n"
 msgstr "# %2$u개의 해쉬 버킷에 %1$u개의 변수.\n"
 
-#: src/variable.c:1343
+#: src/variable.c:1352
 msgid ""
 "\n"
 "# Variables\n"
@@ -1719,7 +1719,7 @@ msgstr ""
 "\n"
 "# 변수\n"
 
-#: src/variable.c:1347
+#: src/variable.c:1356
 #, fuzzy
 msgid ""
 "\n"
@@ -1728,7 +1728,7 @@ msgstr ""
 "\n"
 "# 패턴을 위한 변수 값들"
 
-#: src/variable.c:1361
+#: src/variable.c:1370
 msgid ""
 "\n"
 "# No pattern-specific variable values."
@@ -1736,7 +1736,7 @@ msgstr ""
 "\n"
 "# 패턴을 위한 변수 값들이 없습니다."
 
-#: src/variable.c:1363
+#: src/variable.c:1372
 #, c-format
 msgid ""
 "\n"

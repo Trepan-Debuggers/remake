@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU make 3.79.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-03-23 22:55-0500\n"
+"POT-Creation-Date: 2006-11-20 03:43-0500\n"
 "PO-Revision-Date: 2001-12-28 12:24+0100\n"
 "Last-Translator: Max de Mendizábal <max@upn.mx>\n"
 "Language-Team: Spanish <es@li.org>\n"
@@ -177,7 +177,7 @@ msgstr " imposibilidades en %u directorios.\n"
 # ejemplo em+
 # Mejor lo eliminamos. Es de alguna forma reiterativo e innecesario.
 # Lo de `al final' puede ser más confuso. mm
-#: src/expand.c:113
+#: src/expand.c:126
 #, c-format
 msgid "Recursive variable `%s' references itself (eventually)"
 msgstr "La variable recursiva `%s' se auto-referencia"
@@ -185,18 +185,18 @@ msgstr "La variable recursiva `%s' se auto-referencia"
 # No me gusta nada ( lo siento )
 # ¿ Qué tal : La referencia a una variable está sin terminar em+
 # Creo que tienes razón la voz pasiva es muy desagradable. mm.
-#: src/expand.c:254
+#: src/expand.c:262
 msgid "unterminated variable reference"
 msgstr "la referencia a la variable está sin terminar"
 
-#: src/file.c:223
+#: src/file.c:227
 #, c-format
 msgid "Commands were specified for file `%s' at %s:%lu,"
 msgstr "Las instrucciones fueron especificadas para el archivo `%s' en %s:%lu,"
 
 # Buscando en las legras implícitas em+
 # Utilicé por búsqueda en para evitar el gerundio. mm
-#: src/file.c:228
+#: src/file.c:232
 #, c-format
 msgid "Commands for file `%s' were found by implicit rule search,"
 msgstr ""
@@ -205,7 +205,7 @@ msgstr ""
 
 # "now" es "ahora". ¿te lo has comido consciente o inconscientemente? sv
 # inconscientemente. mm
-#: src/file.c:231
+#: src/file.c:235
 #, c-format
 msgid "but `%s' is now considered the same file as `%s'."
 msgstr "pero `%s' se considera ahora como el mismo archivo que `%s'."
@@ -214,7 +214,7 @@ msgstr "pero `%s' se considera ahora como el mismo archivo que `%s'."
 # "To ignore" *no* es ignorar. sv
 # Propongo "no serán tenidas en cuenta" a falta de algo mejor.
 # Ok. Mi necedad sobrepasa el milenio. mm
-#: src/file.c:234
+#: src/file.c:238
 #, c-format
 msgid "Commands for `%s' will be ignored in favor of those for `%s'."
 msgstr ""
@@ -224,47 +224,47 @@ msgstr ""
 # Me suena que eso de colon es algo así como punto, dos puntos o punto y coma.
 # ¿Podrías comprobarlo? sv
 # Es un punto sencillo (.). A ver si te gusta mi propuesta. mm
-#: src/file.c:254
+#: src/file.c:258
 #, c-format
 msgid "can't rename single-colon `%s' to double-colon `%s'"
 msgstr "no se puede cambiar un punto (.) `%s' por dos puntos (:) `%s'"
 
 # Lo mismo. sv
-#: src/file.c:259
+#: src/file.c:263
 #, c-format
 msgid "can't rename double-colon `%s' to single-colon `%s'"
 msgstr "no se pueden cambiar dos puntos (:) `%s' por un punto (.) `%s'"
 
 # Propongo un cambio en el tiempo verbal: Se borra el archivo temporal. sv
 # Ok. mm
-#: src/file.c:336
+#: src/file.c:340
 #, c-format
 msgid "*** Deleting intermediate file `%s'"
 msgstr "*** Se borra el archivo temporal `%s'"
 
 # Propongo un cambio en el tiempo verbal: Se borra el archivo temporal. sv
 # Ok. mm
-#: src/file.c:340
+#: src/file.c:344
 #, fuzzy
 msgid "Removing intermediate files...\n"
 msgstr "*** Se borra el archivo temporal `%s'"
 
-#: src/file.c:395
+#: src/file.c:600
 #, c-format
 msgid "%s: Timestamp out of range; substituting %s"
 msgstr "%s: Fecha fuera de intervalo; sustituyéndola %s"
 
-#: src/file.c:396
+#: src/file.c:601
 msgid "Current time"
 msgstr "Hora actual"
 
-#: src/file.c:510
+#: src/file.c:715
 msgid "# Not a target:"
 msgstr "# No es un objetivo:"
 
 # Pondría: es una dependencia de em+
 # Si, tienes razón. mm
-#: src/file.c:539
+#: src/file.c:744
 msgid "#  Precious file (prerequisite of .PRECIOUS)."
 msgstr "#  Archivo valioso (es una dependencia de .PRECIOUS)."
 
@@ -276,7 +276,7 @@ msgstr "#  Archivo valioso (es una dependencia de .PRECIOUS)."
 # No. Incondicional no es una traducción correcta. Que tal si al rato
 # se les ocurre hacer una nueva instrucción .INCONDITIONAL.
 # Si quieres podríamos pensar en otra traducción como señuelo o algo así. mm
-#: src/file.c:541
+#: src/file.c:746
 msgid "#  Phony target (prerequisite of .PHONY)."
 msgstr "#  objetivo falso (dependencia de .PHONY)."
 
@@ -287,7 +287,7 @@ msgstr "#  objetivo falso (dependencia de .PHONY)."
 # Están traduciendo commands como comandos? Son más bien ordenes o
 # instrucciones. Por mi parte no hay problema, incluso me gusta más
 # comandos, pero es un anglicismo. mm
-#: src/file.c:543
+#: src/file.c:748
 msgid "#  Command-line target."
 msgstr "#  Objetivo de línea de instrucciones."
 
@@ -299,7 +299,7 @@ msgstr "#  Objetivo de línea de instrucciones."
 # Así pues tu traducción es completamente equivocada, lo siento.
 # Pondría: Fichero por defecto o definido en la variable MAKEFILE em+
 # Cierto, lo has entendido bien. Arreglo acorde. mm
-#: src/file.c:545
+#: src/file.c:750
 #, fuzzy
 msgid "#  A default, MAKEFILES, or -include/sinclude makefile."
 msgstr "#  Archivo por defecto o definido en la variable MAKEFILE."
@@ -308,7 +308,7 @@ msgstr "#  Archivo por defecto o definido en la variable MAKEFILE."
 # Ok. Es más literal. mm
 # Atención ! , es la búsqueda 'de'reglas implícitas em+
 # Ok. Ojo, debo pluralizar regla e implícita. Platicarlo con Ulrich. mm
-#: src/file.c:547
+#: src/file.c:752
 msgid "#  Implicit rule search has been done."
 msgstr "#  La búsqueda de reglas implícitas ha sido efectuada."
 
@@ -316,22 +316,22 @@ msgstr "#  La búsqueda de reglas implícitas ha sido efectuada."
 # Ok. Es más literal. mm
 # Atención ! , es la búsqueda 'de'reglas implícitas em+
 # Ok. Ojo, debo pluralizar regla e implícita. Platicarlo con Ulrich. mm
-#: src/file.c:548
+#: src/file.c:753
 msgid "#  Implicit rule search has not been done."
 msgstr "#  La búsqueda de reglas implícitas ha sido efectuada."
 
-#: src/file.c:550
+#: src/file.c:755
 #, c-format
 msgid "#  Implicit/static pattern stem: `%s'\n"
 msgstr "#  rama del patrón implícita/estática: `%s'\n"
 
-#: src/file.c:552
+#: src/file.c:757
 msgid "#  File is an intermediate prerequisite."
 msgstr "#  El archivo es una dependencia intermedia."
 
 # Sugerencia: "crea". sv
 # Ok. Aunque, viendolo bien, que tal "hace"? mm.
-#: src/file.c:555
+#: src/file.c:760
 msgid "#  Also makes:"
 msgstr "#  También hace:"
 
@@ -339,52 +339,52 @@ msgstr "#  También hace:"
 # Ok. Mejora. mm
 # No pondría nunca, sino simplemente 'no se comprobó 'em+
 # Si, es lo mismo pero es más español. mm
-#: src/file.c:565
+#: src/file.c:770
 msgid "#  Modification time never checked."
 msgstr "#  La fecha de modificación no se comprobó."
 
-#: src/file.c:567
+#: src/file.c:772
 msgid "#  File does not exist."
 msgstr "#  El archivo no existe."
 
-#: src/file.c:569
+#: src/file.c:774
 msgid "#  File is very old."
 msgstr "#  El archivo es muy viejo."
 
-#: src/file.c:574
+#: src/file.c:779
 #, c-format
 msgid "#  Last modified %s\n"
 msgstr "#  Última modificación %s\n"
 
-#: src/file.c:577
+#: src/file.c:782
 msgid "#  File has been updated."
 msgstr "#  El archivo ha sido actualizado."
 
-#: src/file.c:578
+#: src/file.c:783
 msgid "#  File has not been updated."
 msgstr "#  El archivo ha sido actualizado."
 
-#: src/file.c:586
+#: src/file.c:791
 msgid "#  Commands currently running (THIS IS A BUG)."
 msgstr "#  Las instrucciones siguen ejecutándose (ESTO ES UN BUG)."
 
 # ¿No sería más bien "las instrucciones de las dependencias"? sv
 # Si, que babas soy. Ahora corrijo. mm
-#: src/file.c:589
+#: src/file.c:794
 msgid "#  Dependencies commands running (THIS IS A BUG)."
 msgstr ""
 "#  Las instrucciones de las dependencias siguen ejecutándose (ESTO ES UN "
 "BUG)."
 
-#: src/file.c:598
+#: src/file.c:803
 msgid "#  Successfully updated."
 msgstr "#  Actualizado con éxito."
 
-#: src/file.c:602
+#: src/file.c:807
 msgid "#  Needs to be updated (-q is set)."
 msgstr "#  Necesita ser actualizado (la opción -q está activa)."
 
-#: src/file.c:605
+#: src/file.c:810
 msgid "#  Failed to be updated."
 msgstr "#  Fallo al ser actualizado."
 
@@ -392,16 +392,16 @@ msgstr "#  Fallo al ser actualizado."
 # Gracias. No lo puse porque no se como poner ese símbolo con el
 # iso-accents-mode y luego se me olvidó. Por cierto, como se hace?
 # también tengo duda de la interrogación abierta.
-#: src/file.c:608
+#: src/file.c:813
 msgid "#  Invalid value in `update_status' member!"
 msgstr "#  ¡Valor inválido en el miembro `update_status'!"
 
 # ## Lo mismo.
-#: src/file.c:615
+#: src/file.c:820
 msgid "#  Invalid value in `command_state' member!"
 msgstr "#  ¡Valor inválido en el miembro `command_state'!"
 
-#: src/file.c:639
+#: src/file.c:844
 msgid ""
 "\n"
 "# Files"
@@ -409,7 +409,7 @@ msgstr ""
 "\n"
 "# Archivos"
 
-#: src/file.c:643
+#: src/file.c:848
 msgid ""
 "\n"
 "# files hash-table stats:\n"
@@ -535,7 +535,7 @@ msgstr "Buscando una regla implícita para el miembro del archivo `%s'.\n"
 # Me gusta evade, pero evita es correcto. Acepto tu sugerencia. mm
 # No me gusta se evita, pondría evitando em+
 # Ok. Pero a mi paranoia de evitar gerundios dónde la dejas? mm
-#: src/implicit.c:213
+#: src/implicit.c:332
 msgid "Avoiding implicit rule recursion.\n"
 msgstr "Evitando la recursión en la regla implícita.\n"
 
@@ -547,7 +547,7 @@ msgstr "Evitando la recursión en la regla implícita.\n"
 # De momento cambio la regla patron por una regla de patron , y
 # pondría a toda costa gerundio ( intentando ) em+
 # Ok con el gerundio. Pero también tengo que meditarlo. mm
-#: src/implicit.c:356
+#: src/implicit.c:480
 #, c-format
 msgid "Trying pattern rule with stem `%.*s'.\n"
 msgstr "Intentando una regla de patrón con la ramificación `%.*s'.\n"
@@ -559,7 +559,7 @@ msgstr "Intentando una regla de patrón con la ramificación `%.*s'.\n"
 # aparecer tal y como está ahora (Se rechaza la dependencia imposible
 #  `%s' `%s )'em+
 # Ok. mm
-#: src/implicit.c:397
+#: src/implicit.c:672
 #, c-format
 msgid "Rejecting impossible implicit prerequisite `%s'.\n"
 msgstr "Se rechaza la dependencia imposible `%s'.\n"
@@ -571,7 +571,7 @@ msgstr "Se rechaza la dependencia imposible `%s'.\n"
 # aparecer tal y como está ahora (Se rechaza la dependencia imposible
 #  `%s' `%s )'em+
 # Ok. mm
-#: src/implicit.c:398
+#: src/implicit.c:673
 #, c-format
 msgid "Rejecting impossible rule prerequisite `%s'.\n"
 msgstr "Se rechaza la regla de dependencia imposible `%s'.\n"
@@ -583,7 +583,7 @@ msgstr "Se rechaza la regla de dependencia imposible `%s'.\n"
 # Me gusta evade, pero evita es correcto. Acepto tu sugerencia. mm
 # No me gusta se evita, pondría evitando em+
 # Ok. Pero a mi paranoia de evitar gerundios dónde la dejas? mm
-#: src/implicit.c:408
+#: src/implicit.c:683
 #, c-format
 msgid "Trying implicit prerequisite `%s'.\n"
 msgstr "Probando la dependencia implícita `%s'.\n"
@@ -596,17 +596,17 @@ msgstr "Probando la dependencia implícita `%s'.\n"
 # De momento cambio la regla patron por una regla de patron , y
 # pondría a toda costa gerundio ( intentando ) em+
 # Ok con el gerundio. Pero también tengo que meditarlo. mm
-#: src/implicit.c:409
+#: src/implicit.c:684
 #, c-format
 msgid "Trying rule prerequisite `%s'.\n"
 msgstr "Intentando la regla de dependencia `%s'.\n"
 
-#: src/implicit.c:431
+#: src/implicit.c:715
 #, c-format
 msgid "Found prerequisite `%s' as VPATH `%s'\n"
 msgstr "Se encontró la dependencia `%s' como la VPATH `%s'.\n"
 
-#: src/implicit.c:449
+#: src/implicit.c:735
 #, c-format
 msgid "Looking for a rule with intermediate file `%s'.\n"
 msgstr "Se busca una regla con el archivo intermedio `%s'.\n"
@@ -1344,24 +1344,24 @@ msgstr ""
 # Propongo eliminar la palabra virtual. sv
 # Pero si es muy bonita. :) Bueno. Como ya platicamos puede que sea
 # una buena idea pero, por ahora la dejaría. mm
-#: src/misc.c:209 src/misc.c:224 src/read.c:3031
+#: src/misc.c:207 src/misc.c:222 src/read.c:3031
 msgid "virtual memory exhausted"
 msgstr "memoria virtual agotada"
 
-#: src/misc.c:387
+#: src/misc.c:385
 #, fuzzy
 msgid "Initialized access"
 msgstr "Inicializado"
 
-#: src/misc.c:466
+#: src/misc.c:464
 msgid "User access"
 msgstr ""
 
-#: src/misc.c:514
+#: src/misc.c:512
 msgid "Make access"
 msgstr ""
 
-#: src/misc.c:548
+#: src/misc.c:546
 msgid "Child access"
 msgstr ""
 
@@ -1374,12 +1374,12 @@ msgstr ""
 #  else
 #    printf ("%s[%u]: %s ", program, makelevel, message);
 # Como notarás lo del directorio va en otro lado.
-#: src/misc.c:611
+#: src/misc.c:609
 #, fuzzy, c-format
 msgid "write error: %s"
 msgstr "Se redirecciona el error a %s\n"
 
-#: src/misc.c:613
+#: src/misc.c:611
 #, fuzzy
 msgid "write error"
 msgstr "escribir en el servidor de tareas"
@@ -1425,7 +1425,7 @@ msgstr "sintaxis no válida en condicional"
 msgid "extraneous `endef'"
 msgstr "el `endef' es irrelevante o está mal colocado"
 
-#: src/read.c:673 src/read.c:703 src/variable.c:1230
+#: src/read.c:673 src/read.c:703 src/variable.c:1239
 msgid "empty variable name"
 msgstr "nombre de variable vacío"
 
@@ -1818,7 +1818,7 @@ msgstr "El elemento .LIBPATTERNS `%s' no es un patrón"
 msgid "Customs won't export: %s\n"
 msgstr "Los valores definidos por el usuario no se exportarán: %s\n"
 
-#: src/rule.c:562
+#: src/rule.c:557
 msgid ""
 "\n"
 "# Implicit Rules"
@@ -1826,7 +1826,7 @@ msgstr ""
 "\n"
 "# Reglas implícitas."
 
-#: src/rule.c:577
+#: src/rule.c:572
 msgid ""
 "\n"
 "# No implicit rules."
@@ -1834,7 +1834,7 @@ msgstr ""
 "\n"
 "# No hay reglas implícitas."
 
-#: src/rule.c:580
+#: src/rule.c:575
 #, c-format
 msgid ""
 "\n"
@@ -1843,7 +1843,7 @@ msgstr ""
 "\n"
 "# %u reglas implícitas, %u"
 
-#: src/rule.c:585
+#: src/rule.c:580
 msgid " terminal."
 msgstr " terminal."
 
@@ -1851,7 +1851,7 @@ msgstr " terminal."
 # Gracias. mm
 # ¿ qué tal erróneo ? em+
 # Si, suena mejor. mm
-#: src/rule.c:593
+#: src/rule.c:588
 #, c-format
 msgid "BUG: num_pattern_rules wrong!  %u != %u"
 msgstr "BUG: ¡num_pattern_rules erróneo!  %u != %u"
@@ -2112,7 +2112,7 @@ msgstr ""
 msgid "invalid"
 msgstr "Señal %d"
 
-#: src/variable.c:1286
+#: src/variable.c:1295
 #, fuzzy, c-format
 msgid " (from `%s', line %lu)"
 msgstr " (de `%s', linea %lu):\n"
@@ -2122,12 +2122,12 @@ msgstr " (de `%s', linea %lu):\n"
 # Estos mensajes son para debug, no creo que haga falta usar cubetas ;) em+
 # Tienes razón, si el debugueador no lo entiende pues, ... que se
 # dedique a otra cosa. mm
-#: src/variable.c:1331
+#: src/variable.c:1340
 #, fuzzy
 msgid "variable set hash-table stats:\n"
 msgstr "# hay %u variables en %u `hash buckets´.\n"
 
-#: src/variable.c:1343
+#: src/variable.c:1352
 msgid ""
 "\n"
 "# Variables\n"
@@ -2135,7 +2135,7 @@ msgstr ""
 "\n"
 "# Variables\n"
 
-#: src/variable.c:1347
+#: src/variable.c:1356
 #, fuzzy
 msgid ""
 "\n"
@@ -2144,7 +2144,7 @@ msgstr ""
 "\n"
 "# Valores de variables específicas al patrón"
 
-#: src/variable.c:1361
+#: src/variable.c:1370
 msgid ""
 "\n"
 "# No pattern-specific variable values."
@@ -2152,7 +2152,7 @@ msgstr ""
 "\n"
 "# No hay valores de variables específicas al patrón."
 
-#: src/variable.c:1363
+#: src/variable.c:1372
 #, c-format
 msgid ""
 "\n"

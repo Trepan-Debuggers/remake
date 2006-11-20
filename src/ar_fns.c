@@ -1,4 +1,4 @@
-/* $Id: ar_fns.c,v 1.9 2005/12/25 20:53:01 rockyb Exp $
+/* $Id: ar_fns.c,v 1.10 2006/11/20 10:29:13 rockyb Exp $
 Interface to `ar' archives for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -41,10 +41,10 @@ Boston, MA 02111-1307, USA.  */
    attempt to use this unsupported feature.
 */
 bool
-ar_name (char *psz_name)
+ar_name (const char *psz_name)
 {
-  char *p = strchr (psz_name, '(');
-  char *end;
+  const char *p = strchr (psz_name, '(');
+  const char *end;
 
   if (p == 0 || p == psz_name)
     return false;
@@ -68,9 +68,10 @@ ar_name (char *psz_name)
    @param memname_p place to put malloc'd member name if it is non-nil
 */
 void
-ar_parse_name (char *psz_name, char **ppsz_arname, char **ppsz_memname)
+ar_parse_name (const char *psz_name, char **ppsz_arname, char **ppsz_memname)
 {
-  char *p = strchr (psz_name, '('), *end = psz_name + strlen (psz_name) - 1;
+  const char   *p = strchr (psz_name, '(');
+  const char *end = psz_name + strlen (psz_name) - 1;
 
   if (ppsz_arname)
     *ppsz_arname = savestring (psz_name, p - psz_name);
@@ -87,14 +88,14 @@ ar_member_date_1 (int desc, char *mem, int truncated, long int hdrpos,
 /* Return the modtime of NAME.  */
 
 time_t
-ar_member_date (char *name)
+ar_member_date (const char *psz_name)
 {
   char *arname;
-  int arname_used = 0;
   char *memname;
+  int arname_used = 0;
   long int val;
 
-  ar_parse_name (name, &arname, &memname);
+  ar_parse_name (psz_name, &arname, &memname);
 
   /* Make sure we know the modtime of the archive itself because we are
      likely to be called just before commands to remake a member are run,
@@ -116,7 +117,7 @@ ar_member_date (char *name)
       (void) f_mtime (arfile, false);
   }
 
-  val = ar_scan (arname, ar_member_date_1, (long int) memname);
+  val = ar_scan (arname, ar_member_date_1, memname);
 
   if (!arname_used)
     free (arname);
@@ -142,7 +143,7 @@ ar_member_date_1 (int desc UNUSED, char *mem, int truncated,
   @return 0 if things went okay 1 if not.
 */
 int
-ar_touch (char *psz_name)
+ar_touch (const char *psz_name)
 {
   char *arname, *memname;
   int arname_used = 0;
@@ -201,7 +202,7 @@ ar_touch (char *psz_name)
 typedef struct ar_glob_state
   {
     char *arname;
-    char *pattern;
+    const char *pattern;
     unsigned int size;
     struct nameseq *chain;
     unsigned int n;
@@ -211,11 +212,12 @@ typedef struct ar_glob_state
    element against the pattern in STATE.  */
 
 static long int
-ar_glob_match (int desc UNUSED, char *mem, int truncated UNUSED,
+ar_glob_match (int desc UNUSED, const char *mem, int truncated UNUSED,
 	       long int hdrpos UNUSED, long int datapos UNUSED,
                long int size UNUSED, long int date UNUSED, int uid UNUSED,
-               int gid UNUSED, int mode UNUSED, ar_glob_state_t *state)
+               int gid UNUSED, int mode UNUSED, const void *arg)
 {
+  ar_glob_state_t *state = (ar_glob_state_t *) arg;
   if (fnmatch (state->pattern, mem, FNM_PATHNAME|FNM_PERIOD) == 0)
     {
       /* We have a match.  Add it to the chain.  */
@@ -266,7 +268,7 @@ glob_pattern_p (const char *pattern, int quote)
    Return a malloc'd chain of matching elements (or nil if none).  */
 
 struct nameseq *
-ar_glob (char *arname, char *member_pattern, unsigned int size)
+ar_glob (const char *psz_arname, char *member_pattern, unsigned int size)
 {
   ar_glob_state_t state;
   char **names;
@@ -278,16 +280,16 @@ ar_glob (char *arname, char *member_pattern, unsigned int size)
 
   /* Scan the archive for matches.
      ar_glob_match will accumulate them in STATE.chain.  */
-  i = strlen (arname);
+  i = strlen (psz_arname);
   state.arname = (char *) alloca (i + 2);
-  memmove (state.arname, arname, i);
+  memmove (state.arname, psz_arname, i);
   state.arname[i] = '(';
   state.arname[i + 1] = '\0';
   state.pattern = member_pattern;
   state.size = size;
   state.chain = 0;
   state.n = 0;
-  (void) ar_scan (arname, ar_glob_match, (long int) &state);
+  ar_scan (psz_arname, ar_glob_match, &state);
 
   if (state.chain == 0)
     return 0;

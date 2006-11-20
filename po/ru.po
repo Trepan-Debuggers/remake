@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.79.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-03-23 22:55-0500\n"
+"POT-Creation-Date: 2006-11-20 03:43-0500\n"
 "PO-Revision-Date: 2002-01-07 19:34GMT+06\n"
 "Last-Translator: Denis Perchine <dyp@perchine.com>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -158,165 +158,165 @@ msgstr " на текущий момент."
 msgid " impossibilities in %lu directories.\n"
 msgstr " недостижимых целей в %u каталогах.\n"
 
-#: src/expand.c:113
+#: src/expand.c:126
 #, c-format
 msgid "Recursive variable `%s' references itself (eventually)"
 msgstr "Рекурсивная переменная `%s' ссылается сама на себя (в результате)"
 
-#: src/expand.c:254
+#: src/expand.c:262
 msgid "unterminated variable reference"
 msgstr "незавершенная ссылка на переменную"
 
-#: src/file.c:223
+#: src/file.c:227
 #, c-format
 msgid "Commands were specified for file `%s' at %s:%lu,"
 msgstr "Команды для файла `%s' были заданы в %s:%lu,"
 
-#: src/file.c:228
+#: src/file.c:232
 #, c-format
 msgid "Commands for file `%s' were found by implicit rule search,"
 msgstr "Команды для файла `%s' были найдены из неявного правила,"
 
-#: src/file.c:231
+#: src/file.c:235
 #, c-format
 msgid "but `%s' is now considered the same file as `%s'."
 msgstr "но `%s' и `%s' теперь считаются одним и тем же файлом. "
 
-#: src/file.c:234
+#: src/file.c:238
 #, c-format
 msgid "Commands for `%s' will be ignored in favor of those for `%s'."
 msgstr ""
 "Команды для `%s' игнорируются, вместо них будут использованы команды для `%"
 "s'."
 
-#: src/file.c:254
+#: src/file.c:258
 #, c-format
 msgid "can't rename single-colon `%s' to double-colon `%s'"
 msgstr ""
 "невозможно переименовать `%s' с одним двоеточием в `%s' с двумя двоеточиями"
 
-#: src/file.c:259
+#: src/file.c:263
 #, c-format
 msgid "can't rename double-colon `%s' to single-colon `%s'"
 msgstr ""
 "невозможно переименовать `%s' с двумя двоеточиями в `%s' с одним двоеточием"
 
-#: src/file.c:336
+#: src/file.c:340
 #, c-format
 msgid "*** Deleting intermediate file `%s'"
 msgstr "*** Удаление промежуточного файла `%s'"
 
-#: src/file.c:340
+#: src/file.c:344
 #, fuzzy
 msgid "Removing intermediate files...\n"
 msgstr "*** Удаление промежуточного файла `%s'"
 
-#: src/file.c:395
+#: src/file.c:600
 #, c-format
 msgid "%s: Timestamp out of range; substituting %s"
 msgstr "%s: Временной штамп выходит за пределы диапазона; подставляем %s"
 
-#: src/file.c:396
+#: src/file.c:601
 msgid "Current time"
 msgstr "Текущее время"
 
-#: src/file.c:510
+#: src/file.c:715
 msgid "# Not a target:"
 msgstr "# Не является целью:"
 
-#: src/file.c:539
+#: src/file.c:744
 msgid "#  Precious file (prerequisite of .PRECIOUS)."
 msgstr "#  Ценный файл (зависимость .PRECIOUS)."
 
-#: src/file.c:541
+#: src/file.c:746
 msgid "#  Phony target (prerequisite of .PHONY)."
 msgstr "#  Псевдоцель (зависимость от .PHONY)."
 
-#: src/file.c:543
+#: src/file.c:748
 msgid "#  Command-line target."
 msgstr "#  Цель, вызываемая из командной строки."
 
-#: src/file.c:545
+#: src/file.c:750
 #, fuzzy
 msgid "#  A default, MAKEFILES, or -include/sinclude makefile."
 msgstr "#  makefile по умолчанию или из MAKEFILES."
 
-#: src/file.c:547
+#: src/file.c:752
 msgid "#  Implicit rule search has been done."
 msgstr "#  Производился поиск неявных правил"
 
-#: src/file.c:548
+#: src/file.c:753
 msgid "#  Implicit rule search has not been done."
 msgstr "#  Поиск неявных правил не производился."
 
-#: src/file.c:550
+#: src/file.c:755
 #, c-format
 msgid "#  Implicit/static pattern stem: `%s'\n"
 msgstr "#  Основа неявного или статического образца: `%s'\n"
 
-#: src/file.c:552
+#: src/file.c:757
 msgid "#  File is an intermediate prerequisite."
 msgstr "#  Файл -- промежуточная зависимость."
 
-#: src/file.c:555
+#: src/file.c:760
 msgid "#  Also makes:"
 msgstr "#  Собирает также:"
 
-#: src/file.c:565
+#: src/file.c:770
 msgid "#  Modification time never checked."
 msgstr "#  Время изменения ни разу не проверялось."
 
-#: src/file.c:567
+#: src/file.c:772
 msgid "#  File does not exist."
 msgstr "#  Файл не существует."
 
-#: src/file.c:569
+#: src/file.c:774
 msgid "#  File is very old."
 msgstr "# Файл очень старый."
 
-#: src/file.c:574
+#: src/file.c:779
 #, c-format
 msgid "#  Last modified %s\n"
 msgstr "#  Время последнего изменения %s\n"
 
-#: src/file.c:577
+#: src/file.c:782
 msgid "#  File has been updated."
 msgstr "#  Файл был обновлен."
 
-#: src/file.c:578
+#: src/file.c:783
 msgid "#  File has not been updated."
 msgstr "#  Файл не был обновлен."
 
-#: src/file.c:586
+#: src/file.c:791
 msgid "#  Commands currently running (THIS IS A BUG)."
 msgstr "#  В данный момент выполняются некоторые команды (ЭТО ОШИБКА)."
 
-#: src/file.c:589
+#: src/file.c:794
 msgid "#  Dependencies commands running (THIS IS A BUG)."
 msgstr ""
 "#  В данный момент выполняются команды некоторой зависимости (ЭТО ОШИБКА)."
 
-#: src/file.c:598
+#: src/file.c:803
 msgid "#  Successfully updated."
 msgstr "#  Успешно обновлено."
 
-#: src/file.c:602
+#: src/file.c:807
 msgid "#  Needs to be updated (-q is set)."
 msgstr "#  Должно быть обновлено (задан ключ -q)."
 
-#: src/file.c:605
+#: src/file.c:810
 msgid "#  Failed to be updated."
 msgstr "#  Попытка обновления безуспешна."
 
-#: src/file.c:608
+#: src/file.c:813
 msgid "#  Invalid value in `update_status' member!"
 msgstr "#  Неверное значение члена `update_status'!"
 
-#: src/file.c:615
+#: src/file.c:820
 msgid "#  Invalid value in `command_state' member!"
 msgstr "#  Неверное значение члена `command_state'!"
 
-#: src/file.c:639
+#: src/file.c:844
 msgid ""
 "\n"
 "# Files"
@@ -324,7 +324,7 @@ msgstr ""
 "\n"
 "# Файлы"
 
-#: src/file.c:643
+#: src/file.c:848
 msgid ""
 "\n"
 "# files hash-table stats:\n"
@@ -436,41 +436,41 @@ msgstr "Поиск неявного правила для `%s'.\n"
 msgid "Looking for archive-member implicit rule for `%s'.\n"
 msgstr "Поиск неявного правила для элемента архива `%s'.\n"
 
-#: src/implicit.c:213
+#: src/implicit.c:332
 msgid "Avoiding implicit rule recursion.\n"
 msgstr "Избежание рекурсивного вызова неявного правила.\n"
 
-#: src/implicit.c:356
+#: src/implicit.c:480
 #, c-format
 msgid "Trying pattern rule with stem `%.*s'.\n"
 msgstr "Попытка применения правила с образцом, основа `%.*s'.\n"
 
-#: src/implicit.c:397
+#: src/implicit.c:672
 #, c-format
 msgid "Rejecting impossible implicit prerequisite `%s'.\n"
 msgstr "Отвержение невозможной неявной зависимости `%s'.\n"
 
-#: src/implicit.c:398
+#: src/implicit.c:673
 #, c-format
 msgid "Rejecting impossible rule prerequisite `%s'.\n"
 msgstr "Отвержение невозможной зависимости правила `%s'.\n"
 
-#: src/implicit.c:408
+#: src/implicit.c:683
 #, c-format
 msgid "Trying implicit prerequisite `%s'.\n"
 msgstr "Попытка применения неявной зависимости `%s'.\n"
 
-#: src/implicit.c:409
+#: src/implicit.c:684
 #, c-format
 msgid "Trying rule prerequisite `%s'.\n"
 msgstr "Попытка применения правила зависимости `%s'.\n"
 
-#: src/implicit.c:431
+#: src/implicit.c:715
 #, c-format
 msgid "Found prerequisite `%s' as VPATH `%s'\n"
 msgstr "Обнаружена зависимость `%s' в виде VPATH `%s'\n"
 
-#: src/implicit.c:449
+#: src/implicit.c:735
 #, c-format
 msgid "Looking for a rule with intermediate file `%s'.\n"
 msgstr "Поиск правила с промежуточным файлом `%s'.\n"
@@ -1097,33 +1097,33 @@ msgstr ""
 "\n"
 "# Печать базы данных Make завершена %s\n"
 
-#: src/misc.c:209 src/misc.c:224 src/read.c:3031
+#: src/misc.c:207 src/misc.c:222 src/read.c:3031
 msgid "virtual memory exhausted"
 msgstr "виртуальная память исчерпана"
 
-#: src/misc.c:387
+#: src/misc.c:385
 #, fuzzy
 msgid "Initialized access"
 msgstr "Инициализирован"
 
-#: src/misc.c:466
+#: src/misc.c:464
 msgid "User access"
 msgstr ""
 
-#: src/misc.c:514
+#: src/misc.c:512
 msgid "Make access"
 msgstr ""
 
-#: src/misc.c:548
+#: src/misc.c:546
 msgid "Child access"
 msgstr ""
 
-#: src/misc.c:611
+#: src/misc.c:609
 #, fuzzy, c-format
 msgid "write error: %s"
 msgstr "Поток ошибок перенаправлен в %s\n"
 
-#: src/misc.c:613
+#: src/misc.c:611
 #, fuzzy
 msgid "write error"
 msgstr "пишу в сервер задач"
@@ -1165,7 +1165,7 @@ msgstr "неверный синтаксис в условном выражении"
 msgid "extraneous `endef'"
 msgstr "излишний `endef'"
 
-#: src/read.c:673 src/read.c:703 src/variable.c:1230
+#: src/read.c:673 src/read.c:703 src/variable.c:1239
 msgid "empty variable name"
 msgstr "пустое имя переменной"
 
@@ -1486,7 +1486,7 @@ msgstr "Элемент .LIBPATTERNS `%s' не является образцом"
 msgid "Customs won't export: %s\n"
 msgstr "Не экспортируемые настройки: %s\n"
 
-#: src/rule.c:562
+#: src/rule.c:557
 #, fuzzy
 msgid ""
 "\n"
@@ -1495,7 +1495,7 @@ msgstr ""
 "\n"
 "# Неявных правил нет."
 
-#: src/rule.c:577
+#: src/rule.c:572
 msgid ""
 "\n"
 "# No implicit rules."
@@ -1503,7 +1503,7 @@ msgstr ""
 "\n"
 "# Неявных правил нет."
 
-#: src/rule.c:580
+#: src/rule.c:575
 #, c-format
 msgid ""
 "\n"
@@ -1512,11 +1512,11 @@ msgstr ""
 "\n"
 "# Неявных правил: %u, терминальных: %u"
 
-#: src/rule.c:585
+#: src/rule.c:580
 msgid " terminal."
 msgstr "."
 
-#: src/rule.c:593
+#: src/rule.c:588
 #, c-format
 msgid "BUG: num_pattern_rules wrong!  %u != %u"
 msgstr "ОШИБКА: неверное значение num_pattern_rules! %u != %u"
@@ -1713,17 +1713,17 @@ msgstr ""
 msgid "invalid"
 msgstr ""
 
-#: src/variable.c:1286
+#: src/variable.c:1295
 #, fuzzy, c-format
 msgid " (from `%s', line %lu)"
 msgstr "  (из `%s', строка %lu):\n"
 
-#: src/variable.c:1331
+#: src/variable.c:1340
 #, fuzzy
 msgid "variable set hash-table stats:\n"
 msgstr "# %u переменных в %u ячейках хеш-таблицы.\n"
 
-#: src/variable.c:1343
+#: src/variable.c:1352
 msgid ""
 "\n"
 "# Variables\n"
@@ -1731,7 +1731,7 @@ msgstr ""
 "\n"
 "# Переменные\n"
 
-#: src/variable.c:1347
+#: src/variable.c:1356
 #, fuzzy
 msgid ""
 "\n"
@@ -1740,7 +1740,7 @@ msgstr ""
 "\n"
 "# Значения переменных особенные для маски"
 
-#: src/variable.c:1361
+#: src/variable.c:1370
 msgid ""
 "\n"
 "# No pattern-specific variable values."
@@ -1748,7 +1748,7 @@ msgstr ""
 "\n"
 "# Нет значений переменных особенных для маски"
 
-#: src/variable.c:1363
+#: src/variable.c:1372
 #, c-format
 msgid ""
 "\n"

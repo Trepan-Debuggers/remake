@@ -1,4 +1,4 @@
-/* $Id: ar_fns.h,v 1.5 2005/12/25 10:08:35 rockyb Exp $
+/* $Id: ar_fns.h,v 1.6 2006/11/20 10:29:13 rockyb Exp $
 Copyright (C) 2005 rocky@panix.com
 This file is part of GNU Make.
 
@@ -42,7 +42,7 @@ Boston, MA 02111-1307, USA.  */
    @param psz_name archive-member reference to look up.
    @return true if psz_name is an archive-member reference, false if not.
 */
-extern bool ar_name(char *psz_name);
+extern bool ar_name(const char *psz_name);
 
 /*! 
    Parse the archive-member reference into the archive and
@@ -52,20 +52,20 @@ extern bool ar_name(char *psz_name);
    @param ppsz_arname place where the malloc'd archive name if it is non-nil
    @param ppsz_memname place to put malloc'd member name if it is non-nil
 */
-extern void ar_parse_name (char *psz_name, char **ppsz_arname, 
+extern void ar_parse_name (const char *psz_name, char **ppsz_arname, 
 			   char **ppsz_memname);
 
 /*! Set the archive-member modtime to now.  
   @param psz_name member modtime name to set
   @return 0 if things went okay 1; if not.
 */
-extern int ar_touch (char *psz_name);
+extern int ar_touch (const char *psz_name);
 
 /*! 
   Get modtime date of an archive member.
   @param psz_name archive-member name to retrieve modtime of
   @return the modtime for psz_name. 
 */
-extern time_t ar_member_date (char *psz_name);
+extern time_t ar_member_date (const char *psz_name);
 
 #endif /*AR_FNS_H*/

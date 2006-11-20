@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.79.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-03-23 22:55-0500\n"
+"POT-Creation-Date: 2006-11-20 03:43-0500\n"
 "PO-Revision-Date: 2002-03-30 21:33+0300\n"
 "Last-Translator: Eli Zaretskii <eliz@gnu.org>\n"
 "Language-Team: Hebrew <eliz@gnu.org>\n"
@@ -157,161 +157,161 @@ msgstr " so far."
 msgid " impossibilities in %lu directories.\n"
 msgstr " impossibilities in %u directories.\n"
 
-#: src/expand.c:113
+#: src/expand.c:126
 #, c-format
 msgid "Recursive variable `%s' references itself (eventually)"
 msgstr "(רבד לש ופוסב) ומצעל היינפהל םרוג `%s' יביסרוקר הנתשמ"
 
-#: src/expand.c:254
+#: src/expand.c:262
 msgid "unterminated variable reference"
 msgstr "הכלהכ תמייתסמ הניא הנתשמל היינפה"
 
-#: src/file.c:223
+#: src/file.c:227
 #, c-format
 msgid "Commands were specified for file `%s' at %s:%lu,"
 msgstr ",`%s' ץבוק רובע תודוקפ ונתינ %s ץבוקב %lu הרושב"
 
-#: src/file.c:228
+#: src/file.c:232
 #, c-format
 msgid "Commands for file `%s' were found by implicit rule search,"
 msgstr ",םישרופמ-יתלב םיללכב שופיח י\"ע ואצמנ `%s' ץבוק רובע תודוקפ"
 
-#: src/file.c:231
+#: src/file.c:235
 #, c-format
 msgid "but `%s' is now considered the same file as `%s'."
 msgstr ".ץבוק ותואל התע םיבשחנ `%s' ןהו `%s' ןה םלואו"
 
-#: src/file.c:234
+#: src/file.c:238
 #, c-format
 msgid "Commands for `%s' will be ignored in favor of those for `%s'."
 msgstr ".`%s' רובע ולא לע תופידע `%s' רובע תודוקפ"
 
-#: src/file.c:254
+#: src/file.c:258
 #, c-format
 msgid "can't rename single-colon `%s' to double-colon `%s'"
 msgstr "`%s' םידדוב םייתודוקנמ `%s' םילופכ םייתודוקנל ךופהל ןתינ אל"
 
-#: src/file.c:259
+#: src/file.c:263
 #, c-format
 msgid "can't rename double-colon `%s' to single-colon `%s'"
 msgstr "`%s' םילופכ םייתודוקנמ `%s' םידדוב םייתודוקנל ךופהל ןתינ אל"
 
-#: src/file.c:336
+#: src/file.c:340
 #, c-format
 msgid "*** Deleting intermediate file `%s'"
 msgstr "*** `%s' םייניב ץבוק קחומ ***"
 
-#: src/file.c:340
+#: src/file.c:344
 #, fuzzy
 msgid "Removing intermediate files...\n"
 msgstr "*** `%s' םייניב ץבוק קחומ ***"
 
-#: src/file.c:395
+#: src/file.c:600
 #, c-format
 msgid "%s: Timestamp out of range; substituting %s"
 msgstr "רתומה םוחתל ץוחמ הניהש ,%s לש ןמזה תמיתח תא %s-ב ףילחמ"
 
-#: src/file.c:396
+#: src/file.c:601
 msgid "Current time"
 msgstr "תכרעמ ןועש"
 
 #  See the comment above about translations of text printed under -p.
-#: src/file.c:510
+#: src/file.c:715
 msgid "# Not a target:"
 msgstr "# Not a target:"
 
-#: src/file.c:539
+#: src/file.c:744
 msgid "#  Precious file (prerequisite of .PRECIOUS)."
 msgstr "#  Precious file (prerequisite of .PRECIOUS)."
 
-#: src/file.c:541
+#: src/file.c:746
 msgid "#  Phony target (prerequisite of .PHONY)."
 msgstr "#  Phony target (prerequisite of .PHONY)."
 
-#: src/file.c:543
+#: src/file.c:748
 msgid "#  Command-line target."
 msgstr "#  Command-line target."
 
-#: src/file.c:545
+#: src/file.c:750
 #, fuzzy
 msgid "#  A default, MAKEFILES, or -include/sinclude makefile."
 msgstr "#  A default or MAKEFILES makefile."
 
-#: src/file.c:547
+#: src/file.c:752
 msgid "#  Implicit rule search has been done."
 msgstr "#  Implicit rule search has been done."
 
-#: src/file.c:548
+#: src/file.c:753
 msgid "#  Implicit rule search has not been done."
 msgstr "#  Implicit rule search has not been done."
 
-#: src/file.c:550
+#: src/file.c:755
 #, c-format
 msgid "#  Implicit/static pattern stem: `%s'\n"
 msgstr "#  Implicit/static pattern stem: `%s'\n"
 
-#: src/file.c:552
+#: src/file.c:757
 msgid "#  File is an intermediate prerequisite."
 msgstr "#  File is an intermediate prerequisite."
 
-#: src/file.c:555
+#: src/file.c:760
 msgid "#  Also makes:"
 msgstr "#  Also makes:"
 
-#: src/file.c:565
+#: src/file.c:770
 msgid "#  Modification time never checked."
 msgstr "#  Modification time never checked."
 
-#: src/file.c:567
+#: src/file.c:772
 msgid "#  File does not exist."
 msgstr "#  File does not exist."
 
-#: src/file.c:569
+#: src/file.c:774
 msgid "#  File is very old."
 msgstr "#  File is very old."
 
-#: src/file.c:574
+#: src/file.c:779
 #, c-format
 msgid "#  Last modified %s\n"
 msgstr "#  Last modified %s\n"
 
-#: src/file.c:577
+#: src/file.c:782
 msgid "#  File has been updated."
 msgstr "#  File has been updated."
 
-#: src/file.c:578
+#: src/file.c:783
 msgid "#  File has not been updated."
 msgstr "#  File has not been updated."
 
-#: src/file.c:586
+#: src/file.c:791
 msgid "#  Commands currently running (THIS IS A BUG)."
 msgstr "#  Commands currently running (THIS IS A BUG)."
 
-#: src/file.c:589
+#: src/file.c:794
 msgid "#  Dependencies commands running (THIS IS A BUG)."
 msgstr "#  Dependencies commands running (THIS IS A BUG)."
 
-#: src/file.c:598
+#: src/file.c:803
 msgid "#  Successfully updated."
 msgstr "#  Successfully updated."
 
-#: src/file.c:602
+#: src/file.c:807
 msgid "#  Needs to be updated (-q is set)."
 msgstr "#  Needs to be updated (-q is set)."
 
-#: src/file.c:605
+#: src/file.c:810
 msgid "#  Failed to be updated."
 msgstr "#  Failed to be updated."
 
-#: src/file.c:608
+#: src/file.c:813
 msgid "#  Invalid value in `update_status' member!"
 msgstr "#  Invalid value in `update_status' member!"
 
-#: src/file.c:615
+#: src/file.c:820
 msgid "#  Invalid value in `command_state' member!"
 msgstr "#  Invalid value in `command_state' member!"
 
-#: src/file.c:639
+#: src/file.c:844
 msgid ""
 "\n"
 "# Files"
@@ -319,7 +319,7 @@ msgstr ""
 "\n"
 "# Files"
 
-#: src/file.c:643
+#: src/file.c:848
 msgid ""
 "\n"
 "# files hash-table stats:\n"
@@ -431,41 +431,41 @@ msgstr ".`%s' רובע שרופמ-יתלב ללכ שפחמ\n"
 msgid "Looking for archive-member implicit rule for `%s'.\n"
 msgstr ".`%s' רובע ןויכרא ירבאל שרופמ-יתלב ללכ שפחמ\n"
 
-#: src/implicit.c:213
+#: src/implicit.c:332
 msgid "Avoiding implicit rule recursion.\n"
 msgstr ".תשרופמ-יתלב היסרוקרמ ענמנ\n"
 
-#: src/implicit.c:356
+#: src/implicit.c:480
 #, c-format
 msgid "Trying pattern rule with stem `%.*s'.\n"
 msgstr ".`%.*s' שרוש םע תינבת ללכ הסנמ\n"
 
-#: src/implicit.c:397
+#: src/implicit.c:672
 #, c-format
 msgid "Rejecting impossible implicit prerequisite `%s'.\n"
 msgstr ".תירשפא-יתלב הניהש םושמ `%s' תשרופמ-יתלב םדק תשירד החוד\n"
 
-#: src/implicit.c:398
+#: src/implicit.c:673
 #, c-format
 msgid "Rejecting impossible rule prerequisite `%s'.\n"
 msgstr ".תירשפא-יתלב הניהש םושמ `%s' םדק תשירד החוד\n"
 
-#: src/implicit.c:408
+#: src/implicit.c:683
 #, c-format
 msgid "Trying implicit prerequisite `%s'.\n"
 msgstr ".`%s' תשרופמ-יתלב םדק תשירד הסנמ\n"
 
-#: src/implicit.c:409
+#: src/implicit.c:684
 #, c-format
 msgid "Trying rule prerequisite `%s'.\n"
 msgstr ".`%s' םדק תשירד ללכ הסנמ\n"
 
-#: src/implicit.c:431
+#: src/implicit.c:715
 #, c-format
 msgid "Found prerequisite `%s' as VPATH `%s'\n"
 msgstr "`%s' םדק תשירדכ VPATH `%s' יתאצמ\n"
 
-#: src/implicit.c:449
+#: src/implicit.c:735
 #, c-format
 msgid "Looking for a rule with intermediate file `%s'.\n"
 msgstr ".`%s' ינמז ץבוק םע ללכ שפחמ\n"
@@ -1080,35 +1080,35 @@ msgstr ""
 "\n"
 "# Finished Make data base on %s\n"
 
-#: src/misc.c:209 src/misc.c:224 src/read.c:3031
+#: src/misc.c:207 src/misc.c:222 src/read.c:3031
 msgid "virtual memory exhausted"
 msgstr "ילאוטריוה ןורכזה רמגנ"
 
-#: src/misc.c:387
+#: src/misc.c:385
 #, fuzzy
 msgid "Initialized access"
 msgstr "Initialized"
 
-#: src/misc.c:466
+#: src/misc.c:464
 msgid "User access"
 msgstr ""
 
-#: src/misc.c:514
+#: src/misc.c:512
 msgid "Make access"
 msgstr ""
 
-#: src/misc.c:548
+#: src/misc.c:546
 msgid "Child access"
 msgstr ""
 
-#: src/misc.c:611
+#: src/misc.c:609
 #, fuzzy, c-format
 msgid "write error: %s"
 msgstr "%s-ל תואיגש תיינפה\n"
 
 #  Here and elsewhere leading strings passed to perror are not translated,
 #  since they will be followed by an error message in English.
-#: src/misc.c:613
+#: src/misc.c:611
 #, fuzzy
 msgid "write error"
 msgstr "write jobserver"
@@ -1150,7 +1150,7 @@ msgstr "יאנת לש יוגש ריבחת"
 msgid "extraneous `endef'"
 msgstr "רתוימ `endef'"
 
-#: src/read.c:673 src/read.c:703 src/variable.c:1230
+#: src/read.c:673 src/read.c:703 src/variable.c:1239
 msgid "empty variable name"
 msgstr "קיר הנתשמ םש"
 
@@ -1471,7 +1471,7 @@ msgstr "תינבת וניא .LIBPATTERNS לש `%s' טנמלא"
 msgid "Customs won't export: %s\n"
 msgstr "%s אציימ וניא Customs\n"
 
-#: src/rule.c:562
+#: src/rule.c:557
 #, fuzzy
 msgid ""
 "\n"
@@ -1480,7 +1480,7 @@ msgstr ""
 "\n"
 "# No implicit rules."
 
-#: src/rule.c:577
+#: src/rule.c:572
 msgid ""
 "\n"
 "# No implicit rules."
@@ -1488,7 +1488,7 @@ msgstr ""
 "\n"
 "# No implicit rules."
 
-#: src/rule.c:580
+#: src/rule.c:575
 #, c-format
 msgid ""
 "\n"
@@ -1497,11 +1497,11 @@ msgstr ""
 "\n"
 "# %u implicit rules, %u"
 
-#: src/rule.c:585
+#: src/rule.c:580
 msgid " terminal."
 msgstr " terminal."
 
-#: src/rule.c:593
+#: src/rule.c:588
 #, c-format
 msgid "BUG: num_pattern_rules wrong!  %u != %u"
 msgstr "BUG: num_pattern_rules wrong!  %u != %u"
@@ -1700,17 +1700,17 @@ msgstr ""
 msgid "invalid"
 msgstr ""
 
-#: src/variable.c:1286
+#: src/variable.c:1295
 #, fuzzy, c-format
 msgid " (from `%s', line %lu)"
 msgstr " (from `%s', line %lu):\n"
 
-#: src/variable.c:1331
+#: src/variable.c:1340
 #, fuzzy
 msgid "variable set hash-table stats:\n"
 msgstr "# %u variables in %u hash buckets.\n"
 
-#: src/variable.c:1343
+#: src/variable.c:1352
 msgid ""
 "\n"
 "# Variables\n"
@@ -1718,7 +1718,7 @@ msgstr ""
 "\n"
 "# Variables\n"
 
-#: src/variable.c:1347
+#: src/variable.c:1356
 #, fuzzy
 msgid ""
 "\n"
@@ -1727,7 +1727,7 @@ msgstr ""
 "\n"
 "# Pattern-specific variable values"
 
-#: src/variable.c:1361
+#: src/variable.c:1370
 msgid ""
 "\n"
 "# No pattern-specific variable values."
@@ -1735,7 +1735,7 @@ msgstr ""
 "\n"
 "# No pattern-specific variable values."
 
-#: src/variable.c:1363
+#: src/variable.c:1372
 #, c-format
 msgid ""
 "\n"
