@@ -1,4 +1,4 @@
-/* $Id: function.c,v 1.23 2006/03/30 07:49:28 rockyb Exp $
+/* $Id: function.c,v 1.24 2006/12/18 10:12:25 rockyb Exp $
 Builtin expansion for GNU Make.
 Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004, 2005
 Free Software Foundation, Inc.
@@ -54,22 +54,22 @@ struct function_table_entry
 static unsigned long
 function_table_entry_hash_1 (const void *keyv)
 {
-  struct function_table_entry const *key = (struct function_table_entry const *) keyv;
+  const struct function_table_entry *key = keyv;
   return_STRING_N_HASH_1 (key->name, key->len);
 }
 
 static unsigned long
 function_table_entry_hash_2 (const void *keyv)
 {
-  struct function_table_entry const *key = (struct function_table_entry const *) keyv;
+  const struct function_table_entry *key = keyv;
   return_STRING_N_HASH_2 (key->name, key->len);
 }
 
 static int
 function_table_entry_hash_cmp (const void *xv, const void *yv)
 {
-  struct function_table_entry const *x = (struct function_table_entry const *) xv;
-  struct function_table_entry const *y = (struct function_table_entry const *) yv;
+  const struct function_table_entry *x = xv;
+  const struct function_table_entry *y = yv;
   int result = x->len - y->len;
   if (result)
     return result;
@@ -282,19 +282,20 @@ lookup_function (const char *s)
 /*! Return 1 if PATTERN matches STR, 0 if not.  */
 
 int
-pattern_matches (char *pattern, char *percent, char *str)
+pattern_matches (char *pattern, const char *percent, 
+		 const char *str)
 {
   unsigned int sfxlen, strlength;
 
   if (percent == 0)
     {
       unsigned int len = strlen (pattern) + 1;
-      char *new_chars = (char *) alloca (len);
+      char *new_chars = alloca (len);
       memmove (new_chars, pattern, len);
-      pattern = new_chars;
       percent = find_percent (pattern);
       if (percent == 0)
         return streq (pattern, str);
+      pattern = new_chars;
     }
 
   sfxlen = strlen (percent + 1);
@@ -1926,7 +1927,7 @@ handle_function (char **op, char **stringp)
   char *beg;
   char *end;
   int count = 0;
-  char *p;
+  char *abeg = NULL;
   char **argv, **argvp;
   int nargs;
 
@@ -1957,13 +1958,13 @@ handle_function (char **op, char **stringp)
 
   if (count >= 0)
     fatal (reading_file,
-           _("unterminated call to function `%s': missing `%c'"),
-           entry_p->name, closeparen);
+	   _("unterminated call to function `%s': missing `%c'"),
+	   entry_p->name, closeparen);
 
   *stringp = end;
 
   /* Get some memory to store the arg pointers.  */
-  argvp = argv = (char **) alloca (sizeof (char *) * (nargs + 2));
+  argvp = argv = alloca (sizeof (char *) * (nargs + 2));
 
   /* Chop the string into arguments, then a nul.  As soon as we hit
      MAXIMUM_ARGS (if it's >0) assume the rest of the string is part of the
@@ -1973,36 +1974,47 @@ handle_function (char **op, char **stringp)
      not, make a duplicate of the string and point into that, nul-terminating
      each argument.  */
 
-  if (!entry_p->expand_args)
+  if (entry_p->expand_args)
+    {
+      const char *p;
+      for (p=beg, nargs=0; p <= end; ++argvp)
+        {
+          const char *next;
+
+          ++nargs;
+
+          if (nargs == entry_p->maximum_args
+              || (! (next = find_next_argument (openparen, closeparen, p, end))))
+            next = end;
+
+          *argvp = expand_argument (p, next);
+          p = next + 1;
+        }
+    }
+  else
     {
       int len = end - beg;
+      char *p, *aend;
 
-      p = xmalloc (len+1);
-      memcpy (p, beg, len);
-      p[len] = '\0';
-      beg = p;
-      end = beg + len;
-    }
+      abeg = xmalloc (len+1);
+      memcpy (abeg, beg, len);
+      abeg[len] = '\0';
+      aend = abeg + len;
 
-  for (p=beg, nargs=0; p <= end; ++argvp)
-    {
-      char *next;
-
-      ++nargs;
-
-      if (nargs == entry_p->maximum_args
-          || (! (next = find_next_argument (openparen, closeparen, p, end))))
-        next = end;
-
-      if (entry_p->expand_args)
-        *argvp = expand_argument (p, next);
-      else
+      for (p=abeg, nargs=0; p <= aend; ++argvp)
         {
+          char *next;
+
+          ++nargs;
+
+          if (nargs == entry_p->maximum_args
+              || (! (next = find_next_argument (openparen, closeparen, p, aend))))
+            next = aend;
+
           *argvp = p;
           *next = '\0';
+          p = next + 1;
         }
-
-      p = next + 1;
     }
   *argvp = NULL;
 
@@ -2013,8 +2025,8 @@ handle_function (char **op, char **stringp)
   if (entry_p->expand_args)
     for (argvp=argv; *argvp != 0; ++argvp)
       free (*argvp);
-  else
-    free (beg);
+  if (abeg)
+    free (abeg);
 
   return 1;
 }

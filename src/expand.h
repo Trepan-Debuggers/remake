@@ -1,4 +1,4 @@
-/* $Id: expand.h,v 1.8 2006/03/28 23:11:01 rockyb Exp $
+/* $Id: expand.h,v 1.9 2006/12/18 10:12:25 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -68,7 +68,7 @@ extern char *recursively_expand_for_file(variable_t *v, file_t *file);
 
 extern void restore_variable_buffer(char *p_buf, unsigned int len);
 
-extern char *variable_buffer_output(char *ptr, char *psz_string, 
+extern char *variable_buffer_output(char *ptr, const char *psz_string, 
 				    unsigned int length);
 
 /*! Scan PSZ_LINE for variable references and expansion-function calls.
@@ -96,6 +96,7 @@ extern char *variable_expand_set (char *psz_line,
    Return a pointer to PSZ_LINE, or to the beginning of the buffer if 
    PSZ_LINE is NULL.  */
 
-char *variable_expand_string(char *line, char *string, long int length);
+char *variable_expand_string(char *line, char *string, 
+			     long int length);
 
 #endif /*EXPAND_H*/

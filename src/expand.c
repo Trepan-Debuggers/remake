@@ -1,4 +1,4 @@
-/* $Id: expand.c,v 1.12 2006/03/29 04:48:29 rockyb Exp $
+/* $Id: expand.c,v 1.13 2006/12/18 10:12:25 rockyb Exp $
 Variable expansion functions for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software
@@ -53,7 +53,8 @@ char *variable_buffer;
    the following call.  */
 
 char *
-variable_buffer_output (char *ptr, char *string, unsigned int length)
+variable_buffer_output (char *ptr, const char *string, 
+			unsigned int length)
 {
   unsigned int newlen = length + (ptr - variable_buffer);
 
@@ -157,7 +158,7 @@ recursively_expand_for_file (variable_t *v, file_t *file)
 __inline
 #endif
 static char *
-reference_variable (char *o, char *name, unsigned int length)
+reference_variable (char *o, const char *name, unsigned int length)
 {
   variable_t *v;
   char *value;
@@ -188,7 +189,8 @@ reference_variable (char *o, char *name, unsigned int length)
    Write the results to PSZ_LINE, which must point into `variable_buffer'.  If
    PSZ_LINE is NULL, start at the beginning of the buffer.
    Return a pointer to PSZ_LINE, or to the beginning of the buffer if LINE is
-   NULL.  */
+   NULL.  
+*/
 char *
 variable_expand_string (char *psz_line, char *string, long length)
 {
@@ -218,7 +220,10 @@ variable_expand_string (char *psz_line, char *string, long length)
 
       p1 = strchr (p, '$');
 
-      o = variable_buffer_output (o, p, p1 != 0 ? p1 - p : strlen (p) + 1);
+      o = variable_buffer_output (o, p, 
+				  p1 != 0 
+				  ? (unsigned int)(p1 - p) 
+				  : strlen (p) + 1);
 
       if (p1 == 0)
 	break;
@@ -273,9 +278,10 @@ variable_expand_string (char *psz_line, char *string, long length)
 		    else if (*p == closeparen && --count < 0)
 		      break;
 		  }
-		/* If COUNT is >= 0, there were unmatched opening parens
-		   or braces, so we go to the simple case of a variable name
-		   such as `$($(a)'.  */
+
+		/* If COUNT is >= 0, there were unmatched opening
+		   parens or braces, so we go to the simple case of a
+		   variable name such as `$($(a)'.  */
 		if (count < 0)
 		  {
 		    beg = expand_argument (beg, p); /* Expand the name.  */
@@ -401,7 +407,7 @@ variable_expand_string (char *psz_line, char *string, long length)
   if (save_char)
     string[length] = save_char;
 
-  (void)variable_buffer_output (o, "", 1);
+  variable_buffer_output (o, "", 1);
   return (variable_buffer + line_offset);
 }
 

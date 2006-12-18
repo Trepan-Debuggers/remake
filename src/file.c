@@ -1,4 +1,4 @@
-/* $Id: file.c,v 1.16 2006/03/30 05:01:49 rockyb Exp $
+/* $Id: file.c,v 1.17 2006/12/18 10:12:25 rockyb Exp $
 Target file hash table management for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 2002, 2004, 2005 Free Software Foundation, Inc.
@@ -93,7 +93,7 @@ lookup_file (char *name)
     name = "./";
 
   file_key.hname = name;
-  f = (file_t *) hash_find_item (&files, &file_key);
+  f = hash_find_item (&files, &file_key);
   return f;
 }
 
