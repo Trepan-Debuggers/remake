@@ -1,4 +1,4 @@
-/* $Id: job.c,v 1.43 2006/03/24 16:00:18 rockyb Exp $
+/* $Id: job.c,v 1.44 2006/12/30 21:05:18 rockyb Exp $
 Job execution and handling for GNU Make.
 Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99, 2004, 2005, 2006
 Free Software Foundation, Inc.
@@ -2203,7 +2203,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 		   remove it from the source line which will be echoed,
 		   since it was most likely used to line
 		   up the continued line with the previous one.  */
-		if (*p == '\t')
+		if (*p == cmd_prefix)
                   /* Note these overlap and strcpy() is undefined for
                      overlapping objects in ANSI C.  The strlen() _IS_ right,
                      since we need to copy the nul byte too.  */
@@ -2423,7 +2423,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 	       remove it from the source line which will be echoed,
 	       since it was most likely used to line
 	       up the continued line with the previous one.  */
-	    if (*p == '\t')
+	    if (*p == cmd_prefix)
 	      memmove (p, p + 1, strlen (p));
 
 	    p = next_token (p);

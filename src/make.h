@@ -1,4 +1,4 @@
-/* $Id: make.h,v 1.27 2006/04/04 22:57:33 rockyb Exp $
+/* $Id: make.h,v 1.28 2006/12/30 21:05:18 rockyb Exp $
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -465,6 +465,11 @@ extern bool second_expansion;
 
 /*! can we run commands via 'sh -c xxx' or must we use batch files? */
 extern bool batch_mode_shell;
+
+/*! This character introduces a command: it's the first char on the
+    line.  */
+
+extern char cmd_prefix;
 
 extern unsigned int job_slots;
 extern int job_fds[2];

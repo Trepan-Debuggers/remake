@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.54 2006/04/04 22:57:33 rockyb Exp $
+/* $Id: main.c,v 1.55 2006/12/30 21:05:18 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
@@ -131,8 +131,8 @@ typedef struct
     unsigned int toenv:1;	/* Should be put in MAKEFLAGS.  */
     unsigned int no_makefile:1;	/* Don't propagate when remaking makefiles.  */
 
-    char *noarg_value;	/* Pointer to value used if no argument is given.  */
-    char *default_value;/* Pointer to default value.  */
+    const void *noarg_value;	/* Pointer to value used if no argument is given.  */
+    const void *default_value;  /* Pointer to default value.  */
 
     char *long_name;		/* Long option name.  */
   }  command_switch_t;
@@ -324,9 +324,15 @@ int always_make_flag = 0;
 
 int rebuilding_makefiles = 0;
 
-/* Remember the original value of the SHELL variable, from the environment.  */
+/** Remember the original value of the SHELL variable, from the
+  environment.  */
 
 variable_t shell_var;
+
+/** This character introduces a command: it's the first char on the
+  line.  */
+
+char cmd_prefix = '\t';
 
 /** This variable is trickery to force the above enum symbol values to
     be recorded in debug symbol tables. It is used to allow one refer
@@ -334,15 +340,15 @@ variable_t shell_var;
     expressions */
 make_exit_code_t make_exit_code;
 
-/**! The default value of SHELL and the shell that is used when issuing
-   commands on targets.
+/** The default value of SHELL and the shell that is used when issuing
+  commands on targets.
 */
 char *default_shell;
 
 
-/* The usage output.  We write it this way to make life easier for the
-   translators, especially those trying to translate to right-to-left
-   languages like Hebrew.  */
+/** The usage output.  We write it this way to make life easier for the
+    translators, especially those trying to translate to right-to-left
+    languages like Hebrew.  */
 
 static const char *const usage[] =
   {
@@ -1720,6 +1726,9 @@ main (int argc, char **argv, char **envp)
       fatal (NILF,
              _("internal error: invalid --jobserver-fds string `%s'"), cp);
 
+    DB (DB_JOBS,
+	(_("Jobserver client (fds %d,%d)\n"), job_fds[0], job_fds[1]));
+
     /* The combination of a pipe + !job_slots means we're using the
        jobserver.  If !job_slots and we don't have a pipe, we can start
        infinite jobs.  If we see both a pipe and job_slots >0 that means the
@@ -2422,7 +2431,7 @@ decode_switches (int argc, char **argv, int env)
 		    break;
 
 		  if (optarg == 0)
-		    optarg = cs->noarg_value;
+		    optarg = strdup (cs->noarg_value);
                   else if (*optarg == '\0')
                     {
                       error (NILF, _("the `-%c' option requires a non-empty string argument"),
