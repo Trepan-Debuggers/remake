@@ -1,4 +1,4 @@
-/* $Id: read.c,v 1.29 2006/04/04 22:57:33 rockyb Exp $
+/* $Id: read.c,v 1.30 2006/12/30 21:12:26 rockyb Exp $
 Reading and parsing of makefiles for GNU Make.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
@@ -553,7 +553,7 @@ eval (ebuffer_t *ebuf, int set_default)
 
       /* Check for a shell command line first.
 	 If it is not one, we can stop treating tab specially.  */
-      if (line[0] == '\t')
+      if (line[0] == cmd_prefix)
 	{
 	  if (no_targets)
 	    /* Ignore the commands in a rule with no targets.  */
@@ -1345,7 +1345,7 @@ do_define (char *name, unsigned int namelen,
          another define, or ends one.  */
 
       /* Stop if we find an 'endef' */
-      if (line[0] != '\t')
+      if (line[0] != cmd_prefix)
         {
           p = next_token (line);
           len = strlen (p);
@@ -2143,11 +2143,11 @@ record_files (nameseq_t *filenames, char *pattern, char *pattern_percent,
     }
 }
 
-/* Search STRING for an unquoted STOPCHAR or blank (if BLANK is nonzero).
-   Backslashes quote STOPCHAR, blanks if BLANK is nonzero, and backslash.
-   Quoting backslashes are removed from STRING by compacting it into
-   itself.  Returns a pointer to the first unquoted STOPCHAR if there is
-   one, or nil if there are none.  */
+/** Search STRING for an unquoted STOPCHAR or blank (if BLANK is nonzero).
+    Backslashes quote STOPCHAR, blanks if BLANK is nonzero, and backslash.
+    Quoting backslashes are removed from STRING by compacting it into
+    itself.  Returns a pointer to the first unquoted STOPCHAR if there is
+    one, or nil if there are none.  */
 
 char *
 find_char_unquote (char *string, int stop1, int stop2, int blank)
@@ -2205,7 +2205,7 @@ find_char_unquote (char *string, int stop1, int stop2, int blank)
   return 0;
 }
 
-/* Search PATTERN for an unquoted %.  */
+/** Search PATTERN for an unquoted % and handle quoting.  */
 
 char *
 find_percent (char *pattern)
@@ -2213,18 +2213,18 @@ find_percent (char *pattern)
   return find_char_unquote (pattern, '%', 0, 0);
 }
 
-/*! Parse a string into a sequence of filenames represented as a chain
-   of nameseq_t's in reverse order and return that chain.
+/** Parse a string into a sequence of filenames represented as a chain
+    of nameseq_t's in reverse order and return that chain.
 
-   The string is passed as STRINGP, the address of a string pointer.
-   The string pointer is updated to point at the first character
-   not parsed, which either is a null char or equals STOPCHAR.
-
-   SIZE is how big to construct chain elements.
-   This is useful if we want them actually to be other structures
-   that have room for additional info.
-
-   If STRIP is nonzero, strip `./'s off the beginning.  */
+    The string is passed as STRINGP, the address of a string pointer.
+    The string pointer is updated to point at the first character
+    not parsed, which either is a null char or equals STOPCHAR.
+    
+    SIZE is how big to construct chain elements.
+    This is useful if we want them actually to be other structures
+    that have room for additional info.
+    
+    If STRIP is nonzero, strip `./'s off the beginning.  */
 
 nameseq_t *
 parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip,
