@@ -268,7 +268,7 @@ construct_vpath_list (char *pattern, char *dirpath)
 	  if (dir_file_exists_p (v, ""))
 	    {
 	      /* It does.  Put it in the list.  */
-	      vpath[elem++] = dir_name (v);
+	      vpath[elem++] = strdup(dir_name (v));
 	      free (v);
 	      if (len > maxvpath)
 		maxvpath = len;
@@ -293,7 +293,7 @@ construct_vpath_list (char *pattern, char *dirpath)
 	vpath = REALLOC (vpath, char *, (elem + 1));
 
       /* Put the nil-pointer terminator on the end of the VPATH list.  */
-      vpath[elem] = 0;
+      vpath[elem] = NULL;
 
       /* Construct the vpath structure and put it into the linked list.  */
       path = (vpath_t *) xmalloc (sizeof (vpath_t));
