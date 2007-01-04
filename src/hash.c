@@ -1,4 +1,4 @@
-/* $Id: hash.c,v 1.11 2005/12/18 13:30:33 rockyb Exp $
+/* $Id: hash.c,v 1.12 2007/01/04 12:03:20 rockyb Exp $
    hash.c -- hash table maintenance
    Copyright (C) 1995, 1999, 2002, 2004, 2005 Free Software Foundation, Inc.
    Written by Greg McGary <gkm@gnu.org> <greg@mcgary.org>
@@ -125,15 +125,15 @@ void *
 hash_insert (hash_table_t *ht, void *item)
 {
   void **slot = hash_find_slot (ht, item);
-  void *old_item = slot ? *slot : 0;
+  const void *old_item = slot ? *slot : 0;
   hash_insert_at (ht, item, slot);
-  return ((HASH_VACANT (old_item)) ? 0 : old_item);
+  return (void *)((HASH_VACANT (old_item)) ? 0 : old_item);
 }
 
 void *
-hash_insert_at (hash_table_t *ht, void *item, const void *slot)
+hash_insert_at (hash_table_t *ht, const void *item, const void *slot)
 {
-  void *old_item = *(void **) slot;
+  const void *old_item = *(void **) slot;
   if (HASH_VACANT (old_item))
     {
       ht->ht_fill++;

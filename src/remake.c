@@ -1,7 +1,7 @@
-/* $Id: remake.c,v 1.28 2006/04/04 22:57:33 rockyb Exp $
+/* $Id: remake.c,v 1.29 2007/01/04 12:03:20 rockyb Exp $
 Basic dependency engine for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
-2002, 2004, 2005, 2006 Free Software Foundation, Inc.
+2002, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -962,12 +962,11 @@ notice_finished_file (file_t *file)
     file->update_status = 0;
 }
 
-/* Check whether another file (whose mtime is THIS_MTIME)
-   needs updating on account of a dependency which is file FILE.
-   If it does, store 1 in *MUST_MAKE_PTR.
-   In the process, update any non-intermediate files
-   that FILE depends on (including FILE itself).
-   Return nonzero if any updating failed.  */
+/** Check whether another file (whose mtime is THIS_MTIME) needs updating on
+    account of a dependency which is file FILE.  If it does, store 1 in
+    *MUST_MAKE_PTR.  In the process, update any non-intermediate files that
+    FILE depends on (including FILE itself).  Return nonzero if any updating
+    failed.  */
 
 static int
 check_dep (file_t *file, unsigned int depth, FILE_TIMESTAMP this_mtime, 
@@ -981,8 +980,8 @@ check_dep (file_t *file, unsigned int depth, FILE_TIMESTAMP this_mtime,
   p_call_stack = trace_push_target(p_call_stack, file, 1);
 
   if (!file->intermediate)
-    /* If this is a non-intermediate file, update it and record
-       whether it is newer than THIS_MTIME.  */
+      /* If this is a non-intermediate file, update it and record whether it
+         is newer than THIS_MTIME.  */
     {
       FILE_TIMESTAMP mtime;
       dep_status = update_file (file, depth, p_call_stack);
@@ -1015,18 +1014,18 @@ check_dep (file_t *file, unsigned int depth, FILE_TIMESTAMP this_mtime,
           memcpy(file->cmds, default_file->cmds, sizeof(commands_t));
         }
 
-      /* If the intermediate file actually exists
-         and is newer, then we should remake from it.  */
       check_renamed (file);
       mtime = file_mtime (file);
       check_renamed (file);
       if (mtime != NONEXISTENT_MTIME && mtime > this_mtime)
+        /* If the intermediate file actually exists and is newer, then we
+           should remake from it.  */
         *must_make_ptr = 1;
-          /* Otherwise, update all non-intermediate files we depend on,
-             if necessary, and see whether any of them is more
-             recent than the file on whose behalf we are checking.  */
       else
         {
+          /* Otherwise, update all non-intermediate files we depend on, if
+             necessary, and see whether any of them is more recent than the
+             file on whose behalf we are checking.  */
           dep_t *lastd;
 
           lastd = 0;

@@ -1,4 +1,4 @@
-/* $Id: read.h,v 1.6 2006/04/04 22:57:33 rockyb Exp $ 
+/* $Id: read.h,v 1.7 2007/01/04 12:03:20 rockyb Exp $ 
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
@@ -41,7 +41,8 @@ int eval_buffer (char *buffer);
    itself.  Returns a pointer to the first unquoted STOPCHAR if there is
    one, or nil if there are none.  */
 
-char *find_char_unquote (char *string, int stop1, int stop2, int blank);
+char *find_char_unquote (char *string, int stop1, int stop2, 
+			 int blank);
 
 /*! Search PATTERN for an unquoted %.  */
 char *find_percent (char *pattern);

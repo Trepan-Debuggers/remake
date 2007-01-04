@@ -1,4 +1,4 @@
-/* $Id: dir_fns.c,v 1.9 2006/02/09 02:53:25 rockyb Exp $
+/* $Id: dir_fns.c,v 1.10 2007/01/04 12:03:20 rockyb Exp $
 Directory hashing for GNU Make.
 Copyright (C) 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
@@ -251,7 +251,7 @@ static hash_table_t directory_contents;
 
 typedef struct directory
   {
-    char *name;			/* Name of the directory.  */
+    const char *name;		/* Name of the directory.  */
 
     /* The directory's contents.  This data may be shared by several
        entries in the hash table, which refer to the same directory
@@ -293,7 +293,7 @@ static unsigned int open_directories = 0;
 
 typedef struct dirfile
   {
-    char *name;			/* Name of the file.  */
+    const char *name;		/* Name of the file.  */
     short length;
     short impossible;		/* This file is impossible.  */
   } dirfile_t;
@@ -326,15 +326,15 @@ dirfile_hash_cmp (const void *xv, const void *yv)
 #endif
 
 static int dir_contents_file_exists_p (directory_contents_t *p_dir, 
-				       char *p_filename);
-static directory_t *find_directory (char *psz_name);
+				       const char *p_filename);
+static directory_t *find_directory (const char *psz_name);
 
 /* Find the directory named NAME and return its `directory_t'.  */
 
 static directory_t *
-find_directory (char *name)
+find_directory (const char *name)
 {
-  char *p;
+  const char *p;
   directory_t *dir;
   directory_t **dir_slot;
   directory_t dir_key;
@@ -469,7 +469,7 @@ find_directory (char *name)
    FILENAME must contain no slashes.  */
 
 static int
-dir_contents_file_exists_p (directory_contents_t *dir, char *filename)
+dir_contents_file_exists_p (directory_contents_t *dir, const char *filename)
 {
   unsigned int hash;
   dirfile_t *df;
@@ -797,8 +797,8 @@ file_impossible_p (char *psz_filename)
 
 /* Return the already allocated name in the
    directory hash table that matches DIR.  */
-char *
-dir_name (char *psz_dir)
+const char *
+dir_name (const char *psz_dir)
 {
   return find_directory (psz_dir)->name;
 }
@@ -1024,37 +1024,9 @@ hash_init_directories (void)
 	     directory_contents_hash_1, directory_contents_hash_2, directory_contents_hash_cmp);
 }
 
-/* Free memory consumed by p_dir. */
-static void 
-dir_free_dirfile(dirfile_t *p_dirfile) 
-{
-  /* Sometimes p_dirfile->name is not null but whatever it's pointed
-     to doesn't exist. Some kind of sharing here? However
-     p_dirfile->length is 0 in these cases.
-
-   */
-  if (p_dirfile->length) FREE(p_dirfile->name);
-  FREE(p_dirfile);
-}
-
-/* Free memory consumed by p_dir. */
-static void 
-dir_free(directory_t *p_dir) 
-{
-  if (p_dir->contents)
-    hash_free(&(p_dir->contents->dirfiles), (free_fn_t) dir_free_dirfile);
-  if (p_dir->name) FREE(p_dir->name);
-  FREE(p_dir);
-}
-
 /*! Free hashes for directories and directory_contents. */
 void
 hash_free_directories (void)
 {
-  hash_free(&directories, (free_fn_t) dir_free);
-#if FIXED
-  hash_free(&directory_contents, (free_fn_t) dir_free_dirfile);
-#else 
   hash_free(&directory_contents, free);
-#endif
 }

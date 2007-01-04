@@ -1,7 +1,7 @@
-/* $Id: variable.c,v 1.23 2006/11/20 10:31:25 rockyb Exp $
+/* $Id: variable.c,v 1.24 2007/01/04 12:03:20 rockyb Exp $
 Internals of variables for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996, 1997,
-2002, 2004, 2005, 2006 Free Software Foundation, Inc.
+2002, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the

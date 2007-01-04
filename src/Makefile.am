@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.20 2006/01/21 13:40:21 rockyb Exp $
+## $Id: Makefile.am,v 1.21 2007/01/04 12:03:19 rockyb Exp $
 ## Process this file with automake to create Makefile.in.
 ## Copyright 2002, 2004, 2005, 2006 Free Software Foundation, Inc.
 ## This is a -*-Makefile-*-, or close enough
@@ -29,7 +29,7 @@ make_SOURCES :=	ar_fns.c arscan.c buildargv.c commands.c \
 	        debug.c default.c dep.c dir_fns.c expand.c file.c \
 		function.c hash.c implicit.c job.c \
 	        main.c misc.c print.c read.c remake.c $(remote) rule.c \
-	        signame.c trace.c variable.c version.c vpath.c \
+	        signame.c strcache.c trace.c variable.c version.c vpath.c \
 	        $(add_getopt_sources) 
 
 EXTRA_make_SOURCES := remote-stub.c remote-cstms.c $(getopt_sources)
@@ -40,7 +40,7 @@ noinst_HEADERS := ar_fns.h arscan.h buildargv.h commands.h \
 	         function.h getopt.h gettext.h hash.h implicit.h job.h \
 		 make.h misc.h print.h \
 	         read.h remake.h remote-stub.h rule.h \
-		 trace.h types.h variable.h  vpath.h
+		 strcache.h trace.h types.h variable.h  vpath.h
 
 make_LDADD :=	@LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@ @LIBINTL@ \
 	        @LIBGETOPT_LIB@

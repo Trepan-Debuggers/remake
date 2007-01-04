@@ -1,4 +1,4 @@
-/* $Id: hash.h,v 1.12 2005/12/25 10:08:35 rockyb Exp $
+/* $Id: hash.h,v 1.13 2007/01/04 12:03:20 rockyb Exp $
    Copyright (C) 1995, 1999, 2002, 2004, 2005 Free Software Foundation, Inc.
    Written by Greg McGary <gkm@gnu.org> <greg@mcgary.org>
 
@@ -74,7 +74,8 @@ void **hash_find_slot (hash_table_t *p_ht, void const *p_key);
 
 void *hash_find_item (hash_table_t *p_ht, void const *p_key);
 void *hash_insert (hash_table_t *p_ht, void *p_item);
-void *hash_insert_at (hash_table_t *p_ht, void *p_item, void const *p_slot);
+void *hash_insert_at (hash_table_t *p_ht, const void *p_item, 
+		      void const *p_slot);
 void *hash_delete (hash_table_t *p_ht, void const *p_item);
 void *hash_delete_at (hash_table_t *p_ht, void const *p_slot);
 void hash_delete_items (hash_table_t *p_ht);

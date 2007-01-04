@@ -1,4 +1,4 @@
-/* $Id: dir_fns.h,v 1.4 2005/12/17 19:44:09 rockyb Exp $
+/* $Id: dir_fns.h,v 1.5 2007/01/04 12:03:20 rockyb Exp $
 
 Copyright (C) 2005 rocky@panix.com
 This file is part of GNU Make.
@@ -49,7 +49,7 @@ extern int file_impossible_p (char *psz_filename);
 
 /* Return the already allocated name in the
    directory hash table that matches DIR.  */
-extern char *dir_name (char *psz_dir);
+extern const char *dir_name (const char *psz_dir);
 
 /*! Initialize directory hash tables */
 extern void hash_init_directories (void);

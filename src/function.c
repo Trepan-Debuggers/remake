@@ -1,4 +1,4 @@
-/* $Id: function.c,v 1.24 2006/12/18 10:12:25 rockyb Exp $
+/* $Id: function.c,v 1.25 2007/01/04 12:03:20 rockyb Exp $
 Builtin expansion for GNU Make.
 Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004, 2005
 Free Software Foundation, Inc.
@@ -282,7 +282,7 @@ lookup_function (const char *s)
 /*! Return 1 if PATTERN matches STR, 0 if not.  */
 
 int
-pattern_matches (char *pattern, const char *percent, 
+pattern_matches (const char *pattern, const char *percent, 
 		 const char *str)
 {
   unsigned int sfxlen, strlength;
@@ -292,7 +292,7 @@ pattern_matches (char *pattern, const char *percent,
       unsigned int len = strlen (pattern) + 1;
       char *new_chars = alloca (len);
       memmove (new_chars, pattern, len);
-      percent = find_percent (pattern);
+      percent = find_percent (new_chars);
       if (percent == 0)
         return streq (pattern, str);
       pattern = new_chars;

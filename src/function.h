@@ -1,4 +1,4 @@
-/* $Id: function.h,v 1.9 2006/12/18 10:12:25 rockyb Exp $
+/* $Id: function.h,v 1.10 2007/01/04 12:03:20 rockyb Exp $
 Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004, 2005
 Free Software Foundation, Inc.
 This file is part of GNU Make.
@@ -57,7 +57,7 @@ extern char *patsubst_expand (char *o, char *text, char *pattern,
 			      char *replace_percent);
 
 /*! Return 1 if PATTERN matches STR, 0 if not.  */
-extern int pattern_matches (char *pattern, const char *percent, 
+extern int pattern_matches (const char *pattern, const char *percent, 
 			    const char *str);
 
 /*! Set begpp to point to the first non-whitespace character of the string,
