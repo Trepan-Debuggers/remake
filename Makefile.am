@@ -13,9 +13,15 @@ man_MANS :=	make.1
 # because often that directory isn't built on the systems used by the
 # maintainers.
 
+M4_DIST :=	gettext.m4 glibc21.m4 iconv.m4 isc-posix.m4 \
+		intdiv0.m4 inttypes-pri.m4 inttypes.m4 inttypes_h.m4 \
+		isc-posix.m4 lcmessage.m4 lib-ld.m4 lib-link.m4 lib-prefix.m4 \
+		progtest.m4 stdint_h.m4 uintmax_t.m4 ulonglong.m4 
+
+
 EXTRA_DIST :=	README build.sh.in $(man_MANS) \
 		README.customs README.mdb getloadavg.c \
-		README.W32 TODO ChangeLog.GNUMake
+		README.W32 TODO ChangeLog.GNUMake $(M4_DIST)
 
 MAKE_HOST :=	@MAKE_HOST@
 
