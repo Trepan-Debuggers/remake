@@ -31,19 +31,13 @@ include /usr/share/dpatch/dpatch.make
 
 config.status: patch configure
 	dh_testdir
-	# Add here commands to configure the package.
 	./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs"
-
 
 build: build-stamp
 
 build-stamp:  patch config.status
 	dh_testdir
-
-	# Add here commands to compile the package.
 	$(MAKE)
-	#docbook-to-man debian/remake-3.80+dbg.sgml > remake-3.80+dbg.1
-
 	touch $@
 
 clean: clean-patched unpatch
@@ -60,7 +54,6 @@ endif
 ifneq "$(wildcard /usr/share/misc/config.guess)" ""
 	cp -f /usr/share/misc/config.guess config.guess
 endif
-
 
 	dh_clean 
 
@@ -86,21 +79,14 @@ binary-arch: build install
 	dh_installchangelogs ChangeLog
 	dh_installdocs
 	dh_installexamples
-#	dh_install
-#	dh_installmenu
-#	dh_installdebconf
-#	dh_installemacsen
-#	dh_installpam
-#	dh_installmime
-#	dh_python
+	dh_install
+	dh_installemacsen
 #	dh_installinfo
 	dh_installman
 	dh_link
 	dh_strip
 	dh_compress
 	dh_fixperms
-#	dh_perl
-#	dh_makeshlibs
 	dh_installdeb
 	dh_shlibdeps
 	dh_gencontrol
