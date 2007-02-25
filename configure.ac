@@ -16,13 +16,13 @@ dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 dnl 02111-1307, USA.
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(remake,3.80+dbg0.62cvs,rocky@gnu.org)
+AC_INIT(remake,3.80+dbg0.62cvs,bashdb-remake@lists.sourceforge.net)
 
 AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.39 2007/02/25 13:34:49 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.40 2007/02/25 22:31:11 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -570,11 +570,11 @@ esac
 AC_CONFIG_FILES([Makefile        \
                  config/Makefile \
 		 doc/Makefile    \
+		 doc/make.1      \
 		 emacs/Makefile  \
 		 emacs/mdb.el    \
 		 doc/doxygen/Doxyfile \
 		 glob/Makefile   \
-		 make.1          \
                  po/Makefile.in  \
                  po/Makefile     \
 		 src/Makefile    \

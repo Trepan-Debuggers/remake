@@ -1,15 +1,19 @@
-Makefile Makefile.in
-fdl.texi make-stds.texi texinfo.tex
-make.info*
+Makefile 
+Makefile.in
+fdl.texi 
+gpl.texi
 make*.html
+make-stds.texi
+make.1
 make.aux make.cp make.cps make.fn make.fns make.ky
-make.pg make.toc make.tp make.vr make.log
 make.dvi make.ps make.pdf
+make.info*
+make.pg make.toc make.tp make.vr make.log
 mdb*.html
 mdb.aux mdb.cp mdb.cps mdb.fn mdb.fns mdb.ky
-mdb.pg mdb.toc mdb.tp mdb.vr mdb.log
 mdb.dvi mdb.ps mdb.pdf mdb.kys mdb.tmp
 mdb.info*
+mdb.pg mdb.toc mdb.tp mdb.vr mdb.log
 stamp-vti
+texinfo.tex
 version-mdb.texi
-gpl.texi
