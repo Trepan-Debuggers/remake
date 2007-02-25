@@ -1,5 +1,5 @@
 #!/bin/sh
-# prerm script for remake-3.80+dbg
+# prerm script for remake
 #
 # see: dh_installdeb(1)
 

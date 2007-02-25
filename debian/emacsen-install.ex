@@ -1,12 +1,12 @@
 #! /bin/sh -e
-# /usr/lib/emacsen-common/packages/install/remake-3.80+dbg
+# /usr/lib/emacsen-common/packages/install/remake
 
 # Written by Jim Van Zandt <jrv@debian.org>, borrowing heavily
 # from the install scripts for gettext by Santiago Vila
 # <sanvila@ctv.es> and octave by Dirk Eddelbuettel <edd@debian.org>.
 
 FLAVOR=$1
-PACKAGE=remake-3.80+dbg
+PACKAGE=remake
 
 if [ ${FLAVOR} = emacs ]; then exit 0; fi
 

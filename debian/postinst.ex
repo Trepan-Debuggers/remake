@@ -1,5 +1,5 @@
 #!/bin/sh
-# postinst script for remake-3.80+dbg
+# postinst script for remake
 #
 # see: dh_installdeb(1)
 

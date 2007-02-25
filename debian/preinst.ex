@@ -1,5 +1,5 @@
 #!/bin/sh
-# preinst script for remake-3.80+dbg
+# preinst script for remake
 #
 # see: dh_installdeb(1)
 

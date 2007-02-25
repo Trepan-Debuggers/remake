@@ -1,5 +1,5 @@
 #!/bin/sh
-# postrm script for remake-3.80+dbg
+# postrm script for remake
 #
 # see: dh_installdeb(1)
 

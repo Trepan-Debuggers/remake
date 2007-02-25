@@ -24,7 +24,12 @@ else
 	CFLAGS += -O2
 endif
 
-config.status: configure
+# no parallel execution -- required for dpatch
+.NOTPARALLEL:
+
+include /usr/share/dpatch/dpatch.make
+
+config.status: patch configure
 	dh_testdir
 	# Add here commands to configure the package.
 	./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs"
@@ -32,7 +37,7 @@ config.status: configure
 
 build: build-stamp
 
-build-stamp:  config.status
+build-stamp:  patch config.status
 	dh_testdir
 
 	# Add here commands to compile the package.
@@ -41,7 +46,8 @@ build-stamp:  config.status
 
 	touch $@
 
-clean:
+clean: clean-patched unpatch
+clean-patched:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp 
@@ -65,7 +71,7 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/remake-3.80+dbg.
-	$(MAKE) DESTDIR=$(CURDIR)/debian/remake-3.80+dbg install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/remake install
 
 
 # Build architecture-independent files here.
@@ -81,14 +87,11 @@ binary-arch: build install
 	dh_installexamples
 #	dh_install
 #	dh_installmenu
-#	dh_installdebconf	
-#	dh_installlogrotate
+#	dh_installdebconf
 #	dh_installemacsen
 #	dh_installpam
 #	dh_installmime
 #	dh_python
-#	dh_installinit
-#	dh_installcron
 #	dh_installinfo
 	dh_installman
 	dh_link
