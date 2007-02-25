@@ -40,6 +40,12 @@ GNU make porting efforts:
       Eli Zaretskii <eliz@is.elta.co.il>
 
 -----------------------------------
+GNU make packaging
+
+ Yaroslav Halchenko - Debian
+ Detlef Reichelt    - SuSE Packman
+
+-----------------------------------
 Other contributors:
 
   Janet Carson <janet_carson@tivoli.com>
@@ -55,6 +61,8 @@ Other contributors:
   Andreas Schwab <schwab@issan.informatik.uni-dortmund.de>
   Carl Staelin (Princeton University)
   Ian Stewartson (Data Logic Limited)
+
+  David Korn (yes, *that* one)
 
 With suggestions/comments/bug reports from a cast of ... well ...
 hundreds, anyway :)
