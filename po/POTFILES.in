@@ -1,0 +1,22 @@
+# List of source files containing translatable strings.
+# Copyright (C) 2002, 2005 Free Software Foundation, Inc.
+
+src/ar_fns.c
+src/arscan.c
+src/commands.c
+src/dir_fns.c
+src/expand.c
+src/file.c
+src/function.c
+src/hash.c
+src/implicit.c
+src/job.c
+src/main.c
+src/misc.c
+src/read.c
+src/remake.c
+src/remote-cstms.c
+src/rule.c
+src/signame.c
+src/variable.c
+src/vpath.c
