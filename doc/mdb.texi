@@ -1,5 +1,5 @@
 \input texinfo      @c -*-texinfo-*-
-@c Copyright 2004, 2005, 2006
+@c Copyright 2004, 2005, 2006, 2007
 @c Rocky Bernstein for the Free Software Foundation
 @c
 @c TODO: 
@@ -76,13 +76,14 @@
 This file documents the @sc{gnu} MAKE debugger
 
 
-This is the @value{EDITION} Edition, @value{UPDATED-MONTH},
+This is the @value{EDITION} Edition, @value{UPDATED},
 of @cite{Debugging with MDB: the @sc{gnu} Make Debugger}
 
-Copyright (C) 2004, 2005 Rocky Bernstein for the Free Software Foundation.
+Copyright (C) 2004, 2005, 2007 Rocky Bernstein for the Free Software Foundation.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
+@ifset DEBIANHASBECOMEREASONABLE
 any later version published by the Free Software Foundation; with the
 Invariant Sections being ``Free Software'' and ``Free Software Needs
 Free Documentation'', with the Front-Cover Texts being ``A GNU
@@ -92,6 +93,11 @@ Manual,'' and with the Back-Cover Texts as in (a) below.
 freedom to copy and modify this GNU Manual, like GNU software.  Copies
 published by the Free Software Foundation raise funds for GNU
 development.''
+@end ifset
+@ifclear DEBIANHASBECOMEREASONABLE
+any later version published by the Free Software Foundation; with no
+Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+@end ifclear
 @end ifinfo
 
 @titlepage
@@ -101,13 +107,21 @@ development.''
 @subtitle @value{UPDATED-MONTH}
 @author Rocky Bernstein
 @page
+@tex
+{\parskip=0pt
+\hfill (Send bugs and comments on bashdb to bug-bashdb\@sourceforge.net.)\par
+\hfill {\it Debugging with BASH}\par
+\hfill \TeX{}info \texinfoversion\par
+}
+@end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 2004, 2005, 2006 Rocky Bernstein for the Free
+Copyright @copyright{} 2004, 2005, 2006, 2007 Rocky Bernstein for the Free
 Software Foundation.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
+@ifset DEBIANHASBECOMEREASONABLE
 any later version published by the Free Software Foundation; with the
 Invariant Sections being ``Free Software'' and ``Free Software Needs
 Free Documentation'', with the Front-Cover Texts being ``A GNU Manual,''
@@ -117,6 +131,11 @@ and with the Back-Cover Texts as in (a) below.
 freedom to copy and modify this GNU Manual, like GNU software.  Copies
 published by the Free Software Foundation raise funds for GNU
 development.''
+@end ifset
+@ifclear DEBIANHASBECOMEREASONABLE
+any later version published by the Free Software Foundation; with no
+Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+@end ifclear
 @end titlepage
 @page
 
@@ -129,7 +148,7 @@ This file describes @value{DBG}
 
 This is the @value{EDITION} Edition, @value{UPDATED-MONTH}
 
-Copyright (C) 2004, 2005, 2006 Rocky Bernstein
+Copyright (C) 2004, 2005, 2006, 2007 Rocky Bernstein
 
 @menu
 * Summary::                     Overview of Debugger with a sample session

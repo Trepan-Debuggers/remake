@@ -1,12 +1,28 @@
+dnl Copyright (C) 2003, 2004, 2007 Rocky Bernstein <rocky@gnu.org>
+dnl
+dnl This program is free software; you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation; either version 2, or (at your option)
+dnl any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program; if not, write to the Free Software
+dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+dnl 02111-1307, USA.
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(remake,3.80+dbg-0.61,rockyb@users.sourceforge.net)
+AC_INIT(remake,3.80+dbg0.62cvs,rocky@gnu.org)
 
 AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.38 2006/07/29 10:55:22 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.39 2007/02/25 13:34:49 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -236,6 +252,8 @@ AC_ARG_WITH(make_name,
 make_name="${withval}", make_name="remake")
 MAKE_NAME="$make_name"
 AC_SUBST(MAKE_NAME)
+MAKE_NAME_UPPER=`echo $make_name | tr a-z A-Z`
+AC_SUBST(MAKE_NAME_UPPER)
 
 AC_ARG_WITH(default_shell,
 [  --with-default-shell    program to use for SHELL],
@@ -556,6 +574,7 @@ AC_CONFIG_FILES([Makefile        \
 		 emacs/mdb.el    \
 		 doc/doxygen/Doxyfile \
 		 glob/Makefile   \
+		 make.1          \
                  po/Makefile.in  \
                  po/Makefile     \
 		 src/Makefile    \

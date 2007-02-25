@@ -1,8 +1,8 @@
-.TH MAKE 1L "13 January 2006" "GNU" "LOCAL USER COMMANDS"
+.TH @MAKE_NAME_UPPER@ 1 "13 January 2006" "GNU" "LOCAL USER COMMANDS"
 .SH NAME
-make \- GNU make utility to maintain groups of programs
+@MAKE_NAME@ \- GNU make utility to maintain groups of programs
 .SH SYNOPSIS
-.B "make "
+.B "@MAKE_NAME@ "
 [
 .B \-f
 .I makefile
@@ -239,7 +239,7 @@ option, the last one is effective.
 If the
 .B \-j
 option is given without an argument,
-.IR make
+.IR @MAKE_NAME@
 will not limit the number of jobs that can run simultaneously.
 .TP 0.5i
 .BR \-k , " \-\-keep\-going"
@@ -277,7 +277,7 @@ This also prints the version information given by the
 .B \-v
 switch (see below).
 To print the data base without trying to remake any files, use
-.B make
+.B @MAKE_NAME@
 .B \-p
 .BI \-f /dev/null.
 .TP 0.5i
@@ -316,7 +316,7 @@ Touch files (mark them up to date without really changing them)
 instead of running their commands.
 This is used to pretend that the commands were done, in order to fool
 future invocations of
-.IR make .
+.IR @MAKE_NAME@ .
 .TP 0.5i
 .BR \-v , " \-\-version"
 Print the version of the

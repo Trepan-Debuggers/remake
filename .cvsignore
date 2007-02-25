@@ -50,7 +50,7 @@ build.sh.in build.sh
 SMakefile NMakefile Makefile.DOS
 config.ami configh.dos config.h.W32 config.h-vms
 
-loadavg loadavg.c make
+make make.1
 
 .deps .dep_segment
 

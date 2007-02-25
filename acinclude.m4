@@ -88,7 +88,7 @@ changequote([,])dnl
 dnl ---------------------------------------------------------------------------
 dnl From Paul Eggert <eggert@twinsun.com>
 
-AC_DEFUN(AC_STRUCT_ST_MTIM_NSEC,
+AC_DEFUN([AC_STRUCT_ST_MTIM_NSEC],
  [AC_CACHE_CHECK([for nanoseconds field of struct stat.st_mtim],
    ac_cv_struct_st_mtim_nsec,
    [ac_save_CPPFLAGS="$CPPFLAGS"

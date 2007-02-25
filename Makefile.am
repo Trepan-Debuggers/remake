@@ -21,7 +21,7 @@ M4_DIST :=	gettext.m4 glibc21.m4 iconv.m4 isc-posix.m4 \
 
 EXTRA_DIST :=	README build.sh.in $(man_MANS) \
 		README.customs README.mdb getloadavg.c \
-		README.W32 TODO ChangeLog.GNUMake $(M4_DIST)
+		README.W32 TODO ChangeLog.GNUMake $(M4_DIST) make.1.in
 
 MAKE_HOST :=	@MAKE_HOST@
 
