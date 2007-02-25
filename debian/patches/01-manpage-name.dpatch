@@ -1,0 +1,22 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 01-manpage-name.dpatch by Yaroslav Halchenko <debian@onerussian.com>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: No description.
+
+@DPATCH@
+diff -urNad trunk~/make.1 trunk/make.1
+--- trunk~/make.1	2007-02-24 23:56:49.000000000 -0500
++++ trunk/make.1	2007-02-25 01:26:19.000000000 -0500
+@@ -1,8 +1,8 @@
+-.TH MAKE 1L "13 January 2006" "GNU" "LOCAL USER COMMANDS"
++.TH REMAKE 1L "13 January 2006" "GNU" "LOCAL USER COMMANDS"
+ .SH NAME
+-make \- GNU make utility to maintain groups of programs
++remake \- the fork of GNU make utility to maintain groups of programs
+ .SH SYNOPSIS
+-.B "make "
++.B "remake "
+ [
+ .B \-f
+ .I makefile
