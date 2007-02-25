@@ -1,0 +1,6 @@
+remake (3.80+dbg0.61~dfsg.1-1~pre1) unstable; urgency=low
+
+  * Initial release (Closes: #411174)
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Sat, 24 Feb 2007 19:49:34 -0500
+

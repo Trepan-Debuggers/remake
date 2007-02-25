@@ -1,0 +1,23 @@
+Source: remake
+Section: devel
+Priority: extra
+Maintainer: Yaroslav Halchenko <debian@onerussian.com>
+Build-Depends: debhelper (>= 5), autotools-dev
+Standards-Version: 3.7.2
+
+Package: remake
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: GNU make fork with improved error reporting and debugging
+ Modernized version of GNU make utility that adds improved error
+ reporting, the ability to trace execution in a comprehensible way, and
+ a debugger. Some of the features of the debugger are:
+  * see the target call stack
+  * set breakpoints on targets
+  * show and set variables
+  * execute arbitrary "make" code
+  * issue shell commands while stopped in the middle of execution
+  * inspect target descriptions
+  * write a file with the commands of the target expanded
+ .
+  Homepage: http://bashdb.sourceforge.net/remake/

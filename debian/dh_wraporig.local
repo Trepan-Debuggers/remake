@@ -1,0 +1,65 @@
+#!/bin/bash
+#-------------------------- =+- Shell script -+= --------------------------
+#
+# @file      dh_wraporig.local
+# @date      Sat Feb 24 20:28:36 2007
+# @brief
+#
+#
+#  Yaroslav Halchenko
+#  web:     http://www.onerussian.com
+#  e-mail:  yoh@onerussian.com                              ICQ#: 60653192
+#
+# DESCRIPTION (NOTES):
+#
+# Configuration file for dh_wraporig to strip out obsolete or non-DFSG
+# compliant material
+#
+#
+# COPYRIGHT: Yaroslav Halchenko 2007
+#
+# LICENSE:
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the 
+#  Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
+#  MA 02110-1301, USA.
+#
+# On Debian system see /usr/share/common-licenses/GPL for the full license.
+#
+#-----------------\____________________________________/------------------
+
+# later on should be changed to svn-upgrade
+# but now that would just annoy
+post_command=
+
+#
+# files/directories to delete. bash patterns
+delete_files='doc'
+
+#
+# suffix to attach
+suffix_out=~dfsg
+
+#
+# for now we better simply create a symlink
+do_orig_symlink=" pleasedo ;-) "
+
+#
+# do we need original tarball? I guess so for now,
+# if not - uncomment
+#do_delete_originals=" kill the beast "
+
+#
+# Create README.Debian-source
+do_create_readme=" of course "
