@@ -3,10 +3,15 @@ GNU make NEWS                                               -*-indented-text-*-
 
 See the end of this file for copyrights and conditions.
 
-Please send remake bug reports to <rocky@panix.com>.
+Please send remake bug reports to <bashdb-remake@lists.sourceforge.net>.
 See the README file and the GNU remake manual for details on sending bug
 reports.
 
+Version 3.80+dbg0.62cvs
+Changes to make more Debian compatibility. 
+
+Track some GNU Make 3.81 changes.
+
 Version 3.80+dbg-0.61
 2006-03-24
 
