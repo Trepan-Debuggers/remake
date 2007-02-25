@@ -5,4 +5,5 @@ README.mdb
 README.W32
 TODO
 ChangeLog.GNUMake
+debian/TODO.Debian
 debian/README.Debian-source
