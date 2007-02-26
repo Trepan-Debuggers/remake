@@ -8,8 +8,10 @@ http://svn.debian.org/wsvn/pkg-exppsy/tools/dh_wraporig
 
 For this package dh_wraporig performed following actions:
 * Extracted files from
-md5:c3d67e6a0b1a95a153a2f3687f385ed9  ../remake_3.80+dbg0.61.orig.tar.gz
+md5:3f87787e92c7b9c91af4f5c8616d25e8  ../tarballs/remake-3.80+dbg0.62cvs.tar.gz
 
 * Removed following files/directories:
- doc
+ doc/make.{texi,info*,html}* INFO: following patches were present to be applied to the original source
+at build time00-dfsg-no-doc
+01-manpage-name
 

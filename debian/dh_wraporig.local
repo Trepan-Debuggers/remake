@@ -45,7 +45,7 @@ post_command=
 
 #
 # files/directories to delete. bash patterns
-delete_files='doc'
+delete_files='doc/make.{texi,info*,html}'
 
 #
 # suffix to attach
