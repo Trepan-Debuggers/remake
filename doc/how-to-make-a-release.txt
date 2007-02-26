@@ -1,4 +1,9 @@
-$Id: how-to-make-a-release.txt,v 1.8 2006/03/28 23:11:01 rockyb Exp $
+$Id: how-to-make-a-release.txt,v 1.9 2007/02/26 21:46:29 rockyb Exp $
+
+I'm absent-minded and use this for making general a release, posting
+announcements, and updating site documentation. It's possible there's
+information for other purposes such as for packages. However your
+milage may vary.
 
 - Let people know of a pending release,
   e.g. bashdb-devel@lists.sourceforge.net; no major changes before
@@ -21,7 +26,10 @@ $Id: how-to-make-a-release.txt,v 1.8 2006/03/28 23:11:01 rockyb Exp $
 
 - autogen.sh && make && make check
 
-- make documentation
+- recreate the documentation so we can put it on the public website:
+  (In theory be could/should be done after the release but if there's
+  a problem we want to know about it beforehand)
+
   cd doc
   make mdb.html make.html mdb.dvi
   cd doxygen; ./run_doxygen
