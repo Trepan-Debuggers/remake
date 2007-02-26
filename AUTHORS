@@ -3,6 +3,13 @@
 GNU make tracing and debugging support by:
     Rocky Bernstein <rocky@panix.com>
 
+GNU remake packaging
+
+ Yaroslav Halchenko - Debian
+ Detlef Reichelt    - SuSE Packman
+
+-----------------------------------
+
 GNU make development up to version 3.75 by:
     Roland McGrath <roland@gnu.org>
 
@@ -38,12 +45,6 @@ GNU make porting efforts:
       DJ Delorie <dj@delorie.com>
       Rob Tulloh <rob_tulloh@tivoli.com>
       Eli Zaretskii <eliz@is.elta.co.il>
-
------------------------------------
-GNU make packaging
-
- Yaroslav Halchenko - Debian
- Detlef Reichelt    - SuSE Packman
 
 -----------------------------------
 Other contributors:

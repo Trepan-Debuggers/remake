@@ -1,6 +1,7 @@
-.TH @MAKE_NAME_UPPER@ 1 "13 January 2006" "GNU" "LOCAL USER COMMANDS"
+.\" -*- nroff -*-
+.TH @MAKE_NAME_UPPER@ 1 "25 February 2007" "GNU" "LOCAL USER COMMANDS"
 .SH NAME
-@MAKE_NAME@ \- GNU make utility to maintain groups of programs
+@MAKE_NAME@ \- A patched GNU make with a debuger, better tracing and error reporting
 .SH SYNOPSIS
 .B "@MAKE_NAME@ "
 [
@@ -22,95 +23,24 @@ which are made from the Texinfo source files
 .BR make.texi .
 and 
 .BR mdb.texi
-The latter describes debugger behaviour.
+The latter describes debugger behavior.
 .SH DESCRIPTION
 .LP
 The purpose of the
 .I make
-utility is to determine automatically which
-pieces of a large program need to be recompiled, and issue the commands to
-recompile them.
-The manual describes the GNU implementation of
-.IR make ,
-which was written by Richard Stallman and Roland McGrath, and is
-largely maintained by Paul Smith.
-Our examples show C programs, since they are most common, but you can use
-.I make
-with any programming language whose compiler can be run with a
-shell command.
-In fact,
-.I make
-is not limited to programs.
-You can use it to describe any task where some files must be
-updated automatically from others whenever the others change.
-.LP
-To prepare to use
-.IR make ,
-you must write a file called the
-.I makefile
-that describes the relationships among files in your program, and the
-states the commands for updating each file.
-In a program, typically the executable file is updated from object
-files, which are in turn made by compiling source files.
-.LP
-Once a suitable makefile exists, each time you change some source files,
-this simple shell command:
-.sp 1
-.RS
-.B make
-.RE
-.sp 1
-suffices to perform all necessary recompilations.
-The
-.I make
-program uses the makefile data base and the last-modification times
-of the files to decide which of the files need to be updated.
-For each of those files, it issues the commands recorded in the data base.
-.LP
-.I make
-executes commands in the
-.I makefile
-to update
-one or more target
-.IR names ,
-where
-.I name
-is typically a program.
-If no
-.B \-f
-option is present,
-.I make
-will look for the makefiles
-.IR GNUmakefile ,
-.IR makefile ,
-and
-.IR Makefile ,
-in that order.
-.LP
-Normally you should call your makefile either
-.I makefile
-or
-.IR Makefile .
-(We recommend
-.I Makefile
-because it appears prominently near the beginning of a directory
-listing, right near other important files such as
-.IR  README .)
-The first name checked,
-.IR GNUmakefile ,
-is not recommended for most makefiles.
-You should use this name if you have a makefile that is specific to GNU
-.IR make ,
-and will not be understood by other versions of
-.IR make .
-If
-.I makefile
-is `\-', the standard input is read.
-.LP
-.I make
-updates a target if it depends on prerequisite files
-that have been modified since the target was last modified,
-or if the target does not exist.
+utility is to determine automatically which pieces of a large program
+need to be recompiled, and issue the commands to recompile
+them. See documentation on GNU make for more information.
+.PP
+However in this patched version we add a debugger which can be entered
+either initially (option -X or --debugger) or on an error
+(--debugger=error). We also add better tracing facilities (option -x) and we
+report postion information better. When an error is encountered more
+information is given automatically.
+.PP
+See also the home <http://bashdb.sf.net/remake> page for more
+information.
+
 .SH OPTIONS
 .sp 1
 .TP 0.5i
