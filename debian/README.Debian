@@ -1,6 +1,8 @@
 remake for Debian
 --------------------------
 
-<possible notes regarding this package - if none, delete this file>
+A set of patches from main make debian package is not applied (yet) to
+remake, so, probably, remake is prone to some bugs fixed in the most
+recent upstream or in debian releases of make.
 
- -- Yaroslav Halchenko <debian@onerussian.com>  Sat, 24 Feb 2007 19:49:34 -0500
+ -- Yaroslav Halchenko <debian@onerussian.com>, Tue, 27 Feb 2007 09:24:30 -0500

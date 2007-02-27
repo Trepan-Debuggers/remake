@@ -1,4 +1,4 @@
-remake (3.80+dbg0.62~cvs~dfsg.1-1~pre2) unstable; urgency=low
+remake (3.80+dbg0.62~dfsg.1-1~pre3) unstable; urgency=low
 
   * Initial release (Closes: #411174)
    - No testing for emacs during build - just install mdb.el
