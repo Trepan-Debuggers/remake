@@ -5,9 +5,9 @@
 ## DP: No description.
 
 @DPATCH@
-diff -urNad remake-3.80+dbg0.62~cvs~dfsg.1~/doc/Makefile.am remake-3.80+dbg0.62~cvs~dfsg.1/doc/Makefile.am
---- remake-3.80+dbg0.62~cvs~dfsg.1~/doc/Makefile.am	2007-02-26 20:30:58.000000000 -0500
-+++ remake-3.80+dbg0.62~cvs~dfsg.1/doc/Makefile.am	2007-02-26 20:30:59.000000000 -0500
+diff -urNad remake-3.80+dbg0.62~dfsg.1~/doc/Makefile.am remake-3.80+dbg0.62~dfsg.1/doc/Makefile.am
+--- remake-3.80+dbg0.62~dfsg.1~/doc/Makefile.am	2007-02-26 12:23:36.000000000 -0500
++++ remake-3.80+dbg0.62~dfsg.1/doc/Makefile.am	2007-02-27 09:47:29.000000000 -0500
 @@ -5,8 +5,8 @@
  
  transform := s,make,@MAKE_NAME@,
@@ -45,10 +45,31 @@ diff -urNad remake-3.80+dbg0.62~cvs~dfsg.1~/doc/Makefile.am remake-3.80+dbg0.62~
  
  .texi.html:
  	texi2html $<
-diff -urNad remake-3.80+dbg0.62~cvs~dfsg.1~/doc/Makefile.in remake-3.80+dbg0.62~cvs~dfsg.1/doc/Makefile.in
---- remake-3.80+dbg0.62~cvs~dfsg.1~/doc/Makefile.in	2007-02-26 20:30:58.000000000 -0500
-+++ remake-3.80+dbg0.62~cvs~dfsg.1/doc/Makefile.in	2007-02-26 20:31:30.000000000 -0500
-@@ -176,8 +176,7 @@
+diff -urNad remake-3.80+dbg0.62~dfsg.1~/doc/Makefile.in remake-3.80+dbg0.62~dfsg.1/doc/Makefile.in
+--- remake-3.80+dbg0.62~dfsg.1~/doc/Makefile.in	2007-02-27 09:04:22.000000000 -0500
++++ remake-3.80+dbg0.62~dfsg.1/doc/Makefile.in	2007-02-27 09:48:34.000000000 -0500
+@@ -52,14 +52,14 @@
+ CONFIG_CLEAN_FILES = make.1
+ SOURCES =
+ DIST_SOURCES =
+-INFO_DEPS = make.info $(srcdir)/mdb.info
++INFO_DEPS = $(srcdir)/mdb.info
+ TEXINFO_TEX = $(top_srcdir)/config/texinfo.tex
+ am__TEXINFO_TEX_DIR = $(top_srcdir)/config
+-DVIS = make.dvi mdb.dvi
+-PDFS = make.pdf mdb.pdf
+-PSS = make.ps mdb.ps
+-HTMLS = make.html mdb.html
+-TEXINFOS = make.texi mdb.texi
++DVIS = mdb.dvi
++PDFS = mdb.pdf
++PSS = mdb.ps
++HTMLS = mdb.html
++TEXINFOS = mdb.texi
+ TEXI2DVI = texi2dvi
+ MAKEINFOHTML = $(MAKEINFO) --html
+ AM_MAKEINFOHTMLFLAGS = $(AM_MAKEINFOFLAGS)
+@@ -200,8 +200,7 @@
  
  # Extra stuff to include in the distribution.
  EXTRA_DIST := doxygen/Doxyfile doxygen/Doxyfile.in doxygen/Doxyfile \
@@ -56,26 +77,9 @@ diff -urNad remake-3.80+dbg0.62~cvs~dfsg.1~/doc/Makefile.in remake-3.80+dbg0.62~
 -	        make.info make-stds.texi mdb.texi mdb.info version-mdb.texi
 +	        doxygen/run_doxygen mdb.texi mdb.info version-mdb.texi
  
- subdir = doc
- ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-@@ -187,11 +186,11 @@
- DIST_SOURCES =
- TEXINFO_TEX = $(top_srcdir)/config/texinfo.tex
- am__TEXINFO_TEX_DIR = $(top_srcdir)/config
--INFO_DEPS = make.info mdb.info
--DVIS = make.dvi mdb.dvi
--PDFS = make.pdf mdb.pdf
--PSS = make.ps mdb.ps
--TEXINFOS = make.texi mdb.texi
-+INFO_DEPS = mdb.info
-+DVIS = mdb.dvi
-+PDFS = mdb.pdf
-+PSS = mdb.ps
-+TEXINFOS = mdb.texi
- DIST_COMMON = $(make_TEXINFOS) $(srcdir)/Makefile.in Makefile.am \
- 	make.1.in stamp-vti version-mdb.texi
  all: all-am
-@@ -437,7 +436,7 @@
+ 
+@@ -516,7 +515,7 @@
  	pdf-am ps ps-am uninstall uninstall-am uninstall-info-am
  
  
