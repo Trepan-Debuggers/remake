@@ -2,7 +2,7 @@ Source: remake
 Section: devel
 Priority: extra
 Maintainer: Yaroslav Halchenko <debian@onerussian.com>
-Build-Depends: debhelper (>= 5), autotools-dev, dpatch
+Build-Depends: debhelper (>= 5), autotools-dev, dpatch, libreadline-dev
 Standards-Version: 3.7.2
 
 Package: remake
