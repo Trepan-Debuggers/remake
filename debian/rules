@@ -65,8 +65,6 @@ install: build
 
 	# Add here commands to install the package into debian/remake-3.80+dbg.
 	$(MAKE) DESTDIR=$(CURDIR)/debian/remake install
-	# need to rename manpage to incorporate subsection
-	mv $(CURDIR)/debian/remake/usr/share/man/man1/remake.1{,L}
 
 # Build architecture-independent files here.
 binary-indep: build install

@@ -1,0 +1,86 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 00-dfsg-no-makedoc.dpatch by Yaroslav Halchenko <debian@onerussian.com>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: No description.
+
+@DPATCH@
+diff -urNad remake-3.80+dbg0.62~cvs~dfsg.1~/doc/Makefile.am remake-3.80+dbg0.62~cvs~dfsg.1/doc/Makefile.am
+--- remake-3.80+dbg0.62~cvs~dfsg.1~/doc/Makefile.am	2007-02-26 20:30:58.000000000 -0500
++++ remake-3.80+dbg0.62~cvs~dfsg.1/doc/Makefile.am	2007-02-26 20:30:59.000000000 -0500
+@@ -5,8 +5,8 @@
+ 
+ transform := s,make,@MAKE_NAME@,
+ 
+-info_TEXINFOS := make.texi mdb.texi
+-make_TEXINFOS := fdl.texi make-stds.texi
++info_TEXINFOS := mdb.texi
++make_TEXINFOS := fdl.texi
+ TEXI2PDF := texi2dvi --pdf
+ 
+ MOSTLYCLEANFILES := make.tgs make.pdf make.html mdb.cps mdb.kys mdb.html mdb.fns mdb.ps.gz mdb.pdf 
+@@ -16,14 +16,13 @@
+ # Extra stuff to include in the distribution.
+ 
+ EXTRA_DIST :=	doxygen/Doxyfile doxygen/Doxyfile.in doxygen/Doxyfile \
+-	        doxygen/run_doxygen fdl.texi make.texi \
+-	        make.info make-stds.texi mdb.texi mdb.info version-mdb.texi
++	        doxygen/run_doxygen mdb.texi mdb.info version-mdb.texi
+ 
+ ## ----------------------------- ##
+ ## Other documentation formats.  ##
+ ## ----------------------------- ##
+ 
+-all: mdb.info make.info
++all: mdb.info
+ 
+ $(srcdir)/version-mdb.texi: $(srcdir)/stamp-vti
+ 
+@@ -33,7 +32,7 @@
+ doxygen:
+ 	-( cd ${top_srcdir}/doc/doxygen && /bin/sh ${srcdir}/run_doxygen )
+ 
+-html: make.html mdb.html
++html: mdb.html
+ 
+ .texi.html:
+ 	texi2html $<
+diff -urNad remake-3.80+dbg0.62~cvs~dfsg.1~/doc/Makefile.in remake-3.80+dbg0.62~cvs~dfsg.1/doc/Makefile.in
+--- remake-3.80+dbg0.62~cvs~dfsg.1~/doc/Makefile.in	2007-02-26 20:30:58.000000000 -0500
++++ remake-3.80+dbg0.62~cvs~dfsg.1/doc/Makefile.in	2007-02-26 20:31:30.000000000 -0500
+@@ -176,8 +176,7 @@
+ 
+ # Extra stuff to include in the distribution.
+ EXTRA_DIST := doxygen/Doxyfile doxygen/Doxyfile.in doxygen/Doxyfile \
+-	        doxygen/run_doxygen fdl.texi make.texi \
+-	        make.info make-stds.texi mdb.texi mdb.info version-mdb.texi
++	        doxygen/run_doxygen mdb.texi mdb.info version-mdb.texi
+ 
+ subdir = doc
+ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
+@@ -187,11 +186,11 @@
+ DIST_SOURCES =
+ TEXINFO_TEX = $(top_srcdir)/config/texinfo.tex
+ am__TEXINFO_TEX_DIR = $(top_srcdir)/config
+-INFO_DEPS = make.info mdb.info
+-DVIS = make.dvi mdb.dvi
+-PDFS = make.pdf mdb.pdf
+-PSS = make.ps mdb.ps
+-TEXINFOS = make.texi mdb.texi
++INFO_DEPS = mdb.info
++DVIS = mdb.dvi
++PDFS = mdb.pdf
++PSS = mdb.ps
++TEXINFOS = mdb.texi
+ DIST_COMMON = $(make_TEXINFOS) $(srcdir)/Makefile.in Makefile.am \
+ 	make.1.in stamp-vti version-mdb.texi
+ all: all-am
+@@ -437,7 +436,7 @@
+ 	pdf-am ps ps-am uninstall uninstall-am uninstall-info-am
+ 
+ 
+-all: mdb.info make.info
++all: mdb.info
+ 
+ $(srcdir)/version-mdb.texi: $(srcdir)/stamp-vti
+ 
