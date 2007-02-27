@@ -1,4 +1,4 @@
-$Id: how-to-make-a-release.txt,v 1.9 2007/02/26 21:46:29 rockyb Exp $
+$Id: how-to-make-a-release.txt,v 1.10 2007/02/27 13:56:55 rockyb Exp $
 
 I'm absent-minded and use this for making general a release, posting
 announcements, and updating site documentation. It's possible there's
@@ -6,7 +6,7 @@ information for other purposes such as for packages. However your
 milage may vary.
 
 - Let people know of a pending release,
-  e.g. bashdb-devel@lists.sourceforge.net; no major changes before
+  e.g. bashdb-remake@lists.sf.net; no major changes before
   release, please
 
 - test on lots of platforms; sourceforge compile farm, for example
@@ -16,7 +16,7 @@ milage may vary.
 - Go over Changelog and add NEWS. Update date of release.
 
 - Remove "cvs" from configure.ac's release name. E.g.
-    AC_INIT(remake,3.80+dbg-0.3cvs,rocky@panix.com)
+    AC_INIT(remake,3.80+dbg-0.3cvs,bashdb-remake@lists.sourceforge.net)
                                ^^^
     ...
 

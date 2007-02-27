@@ -16,13 +16,13 @@ dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 dnl 02111-1307, USA.
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(remake,3.80+dbg-0.62cvs,bashdb-remake@lists.sourceforge.net)
+AC_INIT(remake,3.80+dbg-0.62,bashdb-remake@lists.sourceforge.net)
 
 AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.41 2007/02/27 05:02:26 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.42 2007/02/27 13:56:53 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)

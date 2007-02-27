@@ -8,13 +8,15 @@ See the README file and the GNU remake manual for details on sending bug
 reports.
 
 
-Version 3.80+dbg0.62cvs
-2007-03-01
+Version 3.80+dbg-0.62
+2007-02-27
 
 * Changes to make more Debian compatibile. 
 
 * Track some GNU Make 3.81 changes, which include a bugfix
   and making more strings "const". 
+
+* Miscellaneous bugfixes
 
 Version 3.80+dbg-0.61
 2006-03-24
