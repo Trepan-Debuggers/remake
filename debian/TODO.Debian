@@ -1,4 +1,0 @@
-* clarify is really emacs necessary at build time and finish
-  debian/patches/00-no-emacstest
-
-* Edit/remove README.Debian
