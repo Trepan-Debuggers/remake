@@ -1,4 +1,4 @@
-$Id: README.mdb,v 1.2 2007/02/27 05:02:26 rockyb Exp $
+$Id: README.mdb,v 1.3 2007/02/28 09:26:13 myamato Exp $
 
 See the file NEWS for the user-visible changes
 
@@ -45,7 +45,7 @@ historically didn't support automake and autoconf.  These custom
 Makefiles and scripts too have been removed. For those older OS's,
 there's always good old GNU make.
 
-I do not denegrate any of these OS's or tools, but I don't
+I do not denigrate any of these OS's or tools, but I don't
 generally have access to them and don't test releases on them. It
 would be dishonest to claim support for them at this
 point. Furthermore all of that custom code has made GNU Make much more
