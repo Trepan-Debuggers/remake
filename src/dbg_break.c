@@ -1,4 +1,4 @@
-/* $Id: dbg_break.c,v 1.4 2005/12/08 02:44:37 rockyb Exp $
+/* $Id: dbg_break.c,v 1.5 2007/02/28 09:33:58 myamato Exp $
 Copyright (C) 2005 rocky@panix.com
 This file is part of GNU Make.
 
@@ -72,7 +72,7 @@ add_breakpoint (file_t *p_target)
   }
   return true;
   
-};
+}
 
 /*! Remove breakpoint i from the list of breakpoints. Return true if 
     there were no errors
