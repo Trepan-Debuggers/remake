@@ -1,4 +1,4 @@
-$Id: how-to-make-a-release.txt,v 1.10 2007/02/27 13:56:55 rockyb Exp $
+$Id: how-to-make-a-release.txt,v 1.11 2007/02/28 05:33:46 rockyb Exp $
 
 I'm absent-minded and use this for making general a release, posting
 announcements, and updating site documentation. It's possible there's
@@ -61,8 +61,8 @@ milage may vary.
 
 - copy remake and mdb manual to web page:
      cd ../remake/doc && make make.html mdb.html
-     scp make.html mdb.html id@bashdb.sourceforge.net:/home/groups/b/ba/bashdb/htdocs/remake/
-
+     scp mdb.html id@bashdb.sourceforge.net:/home/groups/b/ba/bashdb/htdocs/remake/
+     scp make.html id@bashdb.sourceforge.net:/home/groups/b/ba/bashdb/htdocs/remake/
 - copy doxygen HTML to web pages:
   cd doc/doxygen/html
   scp *.html id@bashdb.sourceforge.net:/home/groups/b/ba/bashdb/htdocs/remake/doxygen/
