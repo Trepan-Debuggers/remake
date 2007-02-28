@@ -41,7 +41,8 @@ remake documentation (mdb.info) copyright 2004-2007 Rocky Bernstein
  Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 
 Due to agreement that FDL 1.2 with no IS, FCT and no BCT is
-DFSG-compatible, text of FDL 1.2 is shipped along.
+DFSG-compatible, text of FDL 1.2 is shipped along and can be found in
+`/usr/share/doc/remake/fdl.txt.gz'.
 
 ----------------------------------------------------------------------
 
