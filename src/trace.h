@@ -1,6 +1,6 @@
-/*$Id: trace.h,v 1.8 2005/12/24 21:56:33 rockyb Exp $
-Copyright (C) 2004, 2005 Rocky Bernstein <rocky@panix.com>
-This file is part of GNU Make.
+/*$Id: trace.h,v 1.9 2007/02/28 16:53:13 rockyb Exp $
+Copyright (C) 2004, 2005, 2007 Rocky Bernstein <rocky@gnu.org>
+This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -36,8 +36,10 @@ typedef enum {
 			     commands.  */
   skip_execution,       /**< Get out of debug read loop, but skip execution 
 			     of next command or action. */
-  debug_readloop        /**< Stay in debugger read loop - used only
+  debug_readloop,       /**< Stay in debugger read loop - used only
 			   inside debugger read loop. */
+  debug_cmd_error       /**< Command error but stay in debugger read loop - 
+                             used only inside debugger read loop. */
 } debug_return_t;
 
 /*! A call "stack". Well, since we'll have to deal with multiple child

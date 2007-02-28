@@ -1,6 +1,6 @@
-/* $Id: dbg_cmd.c,v 1.80 2006/03/20 04:11:42 rockyb Exp $
-Copyright (C) 2004, 2005 rocky@panix.com
-This file is part of GNU Make.
+/* $Id: dbg_cmd.c,v 1.81 2007/02/28 16:53:13 rockyb Exp $
+Copyright (C) 2004, 2005, 2007 rocky@gnu.org
+This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -99,8 +99,8 @@ static debug_return_t dbg_cmd_expand           (char *psz_arg);
 static debug_return_t dbg_cmd_finish           (char *psz_arg);
 static debug_return_t dbg_cmd_help             (char *psz_arg);
 static debug_return_t dbg_cmd_info             (char *psz_arg);
-static debug_return_t dbg_cmd_target           (char *psz_arg);
 static debug_return_t dbg_cmd_next             (char *psz_arg);
+static debug_return_t dbg_cmd_list             (char *psz_arg);
 static debug_return_t dbg_cmd_pwd              (char *psz_arg);
 static debug_return_t dbg_cmd_print            (char *psz_arg);
 static debug_return_t dbg_cmd_quit             (char *psz_arg);
@@ -112,6 +112,7 @@ static debug_return_t dbg_cmd_show             (char *psz_arg);
 static debug_return_t dbg_cmd_show_command     (char *psz_arg);
 static debug_return_t dbg_cmd_show_stack       (char *psz_arg);
 static debug_return_t dbg_cmd_skip             (char *psz_arg);
+static debug_return_t dbg_cmd_target           (char *psz_arg);
 static debug_return_t dbg_cmd_step             (char *psz_arg);
 static debug_return_t dbg_cmd_write_cmds       (char *psz_arg);
 
@@ -134,6 +135,7 @@ long_cmd_t commands[] = {
   { "frame"   , 'f' },
   { "help"    , 'h' },
   { "info"    , 'i' },
+  { "list"    , 'l' },
   { "next"    , 'n' },
   { "print"   , 'p' },
   { "pwd"     , 'P' },
@@ -250,35 +252,37 @@ static void
 cmd_initialize(void) 
 {
   short_command['b'].func = &dbg_cmd_break;
-  short_command['b'].use  = _("break *target*");
+  short_command['b'].use  = _("break TARGET");
   short_command['b'].doc  = _("Set a breakpoint at a target.\n"
 "With a target name, set a break before running commands\n"
 "of that target.  Without argument, list all breaks.");
 
   short_command['C'].func = &dbg_cmd_chdir;
-  short_command['C'].use  = _("cd *dir*");
+  short_command['C'].use  = _("cd DIR");
   short_command['C'].doc  = 
     _("Set the working directory to DIR.");
 
   short_command['c'].func = &dbg_cmd_continue;
-  short_command['c'].use  = _("continue");
+  short_command['c'].use  = _("continue [TARGET]");
   short_command['c'].doc  = 
-    _("Continue executing debugged Makefile until another breakpoint.");
+    _("Continue executing debugged Makefile until another breakpoint\n"
+"or stopping point. If a target is given and valid we set a breakpoint at\n"
+"that target before continuing.");
 
   short_command['d'].func = &dbg_cmd_delete;
   short_command['d'].use  = _("delete breakpoint numbers..");
   short_command['d'].doc  = _("Delete some breakpoints\n."
 "Arguments are breakpoint numbers with spaces in between.\n"
-"To delete all breakpoints, give no argument.\n");
+"To delete all breakpoints, give no argument.");
 
   short_command['D'].func = &dbg_cmd_frame_down;
-  short_command['D'].use  = _("down [amount]");
+  short_command['D'].use  = _("down [AMOUNT]");
   short_command['D'].doc  = 
     _("Select and print the target this one caused to be examined.\n"
       "\tAn argument says how many targets down to go.");
 
   short_command['e'].func = &dbg_cmd_eval;
-  short_command['e'].use  = _("eval *string*");
+  short_command['e'].use  = _("eval STRING");
   short_command['e'].doc  = _("parse and evaluate a string.");
 
   short_command['F'].func = &dbg_cmd_finish;
@@ -289,44 +293,52 @@ cmd_initialize(void)
       "\tracing that \"continue\" would give.");
 
   short_command['f'].func = &dbg_cmd_frame;
-  short_command['f'].use  = _("frame *n*");
+  short_command['f'].use  = _("frame N");
   short_command['f'].doc  = 
-    _("Move target frame to *n*; In contrast to \"up\" or \"down\",\n"
+    _("Move target frame to N; In contrast to \"up\" or \"down\",\n"
       "\tthis sets to an absolute position. 0 is the top.");
 
   short_command['h'].func = &dbg_cmd_help;
-  short_command['h'].use  = _("help [command]");
+  short_command['h'].use  = _("help [COMMAND]");
   short_command['h'].doc = 
     _("Display list of commands (i.e. this help text.)\n"		\
       "\twith an command name, give only the help for that command.");
 
   short_command['i'].func = &dbg_cmd_info;
-  short_command['i'].use = _("info [thing]");
+  short_command['i'].use = _("info [THING]");
   short_command['i'].doc = 
     _("Show the state of thing.\n" \
-      "\tIf no 'thing' is specified, show everything there is to show.\n");
+      "\tIf no 'thing' is specified, show everything there is to show.");
 
   short_command['k'].func = &dbg_cmd_skip;
   short_command['k'].use = _("skip");
   short_command['k'].doc = 
-    _("Skip execution of next command or action.\n" );
+    _("Skip execution of next command or action." );
+
+  short_command['l'].func = &dbg_cmd_list;
+  short_command['l'].use = _("list [TARGET]");
+  short_command['l'].doc = 
+    _("List target dependencies and commands. Without a target name we\n"
+"use the current target. A target name of '-' will use the parent target on\n"
+"the target stack.\n"
+ );
 
   short_command['n'].func = &dbg_cmd_next;
-  short_command['n'].use = _("next [amount]");
+  short_command['n'].use = _("next [AMOUNT]");
   short_command['n'].doc = 
     _("Continue until the next command to be executed.\n"
-      "Argument N means do this N times (or until there's another\n"
+      "Argument AMOUNT means do this AMOUNT times (or until there's another\n"
       "reason to stop.");
 
   short_command['p'].func = &dbg_cmd_print;
-  short_command['p'].use = _("print {*variable* [attrs...]}");
+  short_command['p'].use = _("print {VARIABLE [attrs...]}");
   short_command['p'].doc = 
     _("Show a variable definition.\n"
       "The value is shown with embedded\n"
       "variable-references unexpanded. Don't include $ before a variable\n"
       "name. See also \"examine\".\n\n"
       "If no variable is supplied, we try to use the\n"
-      "last value given.\n"				
+      "last value given."				
       );
 
   short_command['P'].func = &dbg_cmd_pwd;
@@ -350,20 +362,20 @@ cmd_initialize(void)
   short_command['R'].use = _("run");
 
   short_command['s'].func = &dbg_cmd_step;
-  short_command['s'].use = _("step [amount]");
+  short_command['s'].use = _("step [AMOUNT]");
   short_command['s'].doc = 
     _("Step execution until another stopping point is reached.\n"
-      "Argument N means do this N times (or until there's another\n"
+      "Argument AMOUNT means do this AMOUNT times (or until there's another\n"
       "reason to stop.");
 
   short_command['S'].func = &dbg_cmd_show;
   short_command['S'].use = _("show [thing]");
   short_command['S'].doc = 
     _("Show the state of thing.\n" \
-      "If no 'thing' is specified, show everything there is to show.\n");
+      "If no 'thing' is specified, show everything there is to show.");
 
   short_command['t'].func = &dbg_cmd_target;
-  short_command['t'].use = _("target");
+  short_command['t'].use = _("target [target-name] [info1 [info2...]]");
   short_command['t'].doc = 
     _("Show information about a target.\n" 
       "target information is printed.\n"
@@ -381,13 +393,13 @@ cmd_initialize(void)
       "An argument specifies the maximum amount of entries to show.");
 
   short_command['u'].func = &dbg_cmd_frame_up;
-  short_command['u'].use  = _("up [amount]");
+  short_command['u'].use  = _("up [AMOUNT]");
   short_command['u'].doc  = 
     _("Select and print target that caused this one to be examined.\n"
       "An argument says how many targets up to go.");
 
   short_command['w'].func = &dbg_cmd_write_cmds;
-  short_command['w'].use =  _("write [*target* [*filename*]]");
+  short_command['w'].use =  _("write [TARGET [FILENAME]]");
   short_command['w'].doc  = 
     _("writes the commands associated of a target to a file with MAKE\n"
       "variables expanded. If no target given, the basename of the current\n"
@@ -397,24 +409,24 @@ cmd_initialize(void)
       "the target name and then append \".sh\".");
 
   short_command['x'].func = &dbg_cmd_expand;
-  short_command['x'].use =  _("examine *string*");
+  short_command['x'].use =  _("examine STRING");
   short_command['x'].doc  = 
     _("Show string with internal variables references expanded. See also \n"
       "\t\"print\".");
 
   short_command['#'].func = &dbg_cmd_comment;
-  short_command['#'].use =  _("comment *text*");
+  short_command['#'].use =  _("comment TEXT");
   short_command['#'].doc  = 
     _("Ignore this line.");
 
   short_command['!'].func = &dbg_cmd_shell;
-  short_command['!'].use =  _("shell *string*");
+  short_command['!'].use =  _("shell STRING");
   short_command['!'].doc  = 
     _("Execute the rest of the line as a shell.");
 
   short_command['='].func = &dbg_cmd_set;
   short_command['='].use =  
-    _("set {*option*|variable} *value*");
+    _("set {*option*|variable} VALUE");
   short_command['='].doc  = 
     _("set basename {on|off|toggle} - show full name or basename?\n"
       "set debug debug-mask - like --debug value.\n\n"
@@ -424,15 +436,14 @@ cmd_initialize(void)
       "set trace {on|off|toggle} - set tracing status\n"
       "set variable *var* *value*\n"
       "Set MAKE variable to value. Variable definitions\n"
-      "inside VALUE are expanded before assignment occurs.\n"
+      "inside VALUE are expanded before assignment occurs."
       );
 
   short_command['"'].func = &dbg_cmd_set_var_noexpand;
-  short_command['"'].use =  _("setq *variable* *value*");
+  short_command['"'].use =  _("setq *variable* VALUE");
   short_command['"'].doc  = 
     _("Set MAKE variable to value. Variable definitions\n"
       "\tinside VALUE are not expanded before assignment occurs.");
-
 }
 
 /* Look up NAME as the name of a command, and return a pointer to that
@@ -529,7 +540,7 @@ dbg_cmd_break (char *psz_target)
   p_target = lookup_file (psz_target);
   if (!p_target) {
     printf("Can't find target %s; breakpoint not set.\n", psz_target);
-    return debug_readloop;
+    return debug_cmd_error;
   }
 
   add_breakpoint(p_target);
@@ -564,6 +575,13 @@ dbg_cmd_comment (char *psz_arg)
 static debug_return_t 
 dbg_cmd_continue (char *psz_arg)
 {
+  if (psz_arg && *psz_arg) {
+    if (debug_cmd_error == dbg_cmd_break(psz_arg)) {
+      printf(_("Not continuing under these circumstatnces.\n"));
+      return debug_cmd_error;
+    }
+  }
+
   i_debugger_stepping = 0;
   i_debugger_nexting  = 0;
   return continue_execution;
@@ -709,6 +727,7 @@ dbg_cmd_help (char *psz_args)
 	  }
 	}
       } else {
+	printf("%s\n\n", p_command->use);
 	printf("%s\n", p_command->doc);
       }
       
@@ -781,11 +800,55 @@ dbg_cmd_info (char *psz_arg)
     } else if (is_abbrev_of (psz_arg, "warranty", 1)) {
       printf(WARRANTY);
     } else {
-      printf("Undefined command \"%s\". Try \"help info\"\n", psz_arg);
+      printf(_("Undefined command \"%s\". Try \"help info\"\n"), psz_arg);
     }
   }
   
   return debug_readloop;
+}
+
+/* Continue until the next command to be executed. */
+#define DEPENDS_COMMANDS " depends commands"
+static debug_return_t 
+dbg_cmd_list (char *psz_arg)
+{
+  char   *psz_target = NULL;
+  char   *target_cmd = NULL;
+  file_t *p_target;
+
+  if (psz_arg && 0 == strcmp(psz_arg, "-")) {
+    /* Show info for parent target. */
+    if (p_stack_top) {
+      /* We have a target stack  */
+      target_stack_node_t *p=p_stack;
+
+      if (!p) {
+	printf(_("We don't seem to have a target to get parent of.\n"));
+	return debug_cmd_error;
+      }
+    
+      p = p->p_parent;
+      if (!p) {
+	printf(_("We don't seem to have a parent target.\n"));
+	return debug_cmd_error;
+      }
+      p_target = p->p_target;
+      psz_target = p_target->name;
+    } else {
+	printf(_("We don't seem to have a target stack to get parent of.\n"));
+	return debug_cmd_error;
+    }
+  } else {
+    p_target = get_target(&psz_arg, &psz_target);
+  }
+
+  if (!p_target) {
+    printf(_("Trouble getting a target name.\n"));
+    return debug_cmd_error;
+  }
+  target_cmd = CALLOC(char, strlen(psz_target) + 1 + strlen(DEPENDS_COMMANDS));
+  sprintf(target_cmd, "%s%s", psz_target, DEPENDS_COMMANDS);
+  return dbg_cmd_target(target_cmd);
 }
 
 /* Continue until the next command to be executed. */
@@ -1358,7 +1421,8 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
   print_debugger_location(p_target, NULL);
 
   /* Loop reading and executing lines until the user quits. */
-  for ( debug_return = debug_readloop; debug_return == debug_readloop; ) {
+  for ( debug_return = debug_readloop; 
+	debug_return == debug_readloop || debug_return == debug_cmd_error; ) {
     char prompt[PROMPT_LENGTH];
     char *line;
     char *s;
@@ -1366,7 +1430,9 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
     snprintf(prompt, PROMPT_LENGTH, "mdb%s%d%s ", 
 	     open_depth, where_history(), close_depth);
     
-    if ( (line = readline (prompt)) ) {
+    line = readline (prompt);
+
+    if ( line ) {
       if ( *(s=stripwhite(line)) ) {
 	add_history (s);
 	debug_return=execute_line(s);
@@ -1374,7 +1440,8 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
 	debug_return=dbg_cmd_step("");
       }
       free (line);
-    }
+    } else 
+      dbg_cmd_quit(NULL);
   }
 
   if (in_debugger != DEBUGGER_QUIT_RC)

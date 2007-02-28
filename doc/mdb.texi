@@ -1046,7 +1046,7 @@ The essentials are:
 @item
 type @samp{make --debugger @emph{make options}} to start @value{DBG}.
 @item
-and type @kbd{quit} or @kbd{C-d} inside the debugger to exit.
+and type @kbd{quit}, @kbd{C-c}, or @kbd{C-d} inside the debugger to exit.
 @end itemize
 
 You don't have to use the command-line interface. At present there is
@@ -1156,8 +1156,9 @@ effect by issuing the debugger @code{set trace on} command.
 An interrupt (often @kbd{C-c}) does not exit from @value{DBG}, but
 rather terminates the action of any @value{DBG} command that is in
 progress and returns to @value{DBG} command level.  Inside a debugger
-command interpreter, use @code{quit} command (@pxref{Quit, ,Quitting
-the Make debugger}).
+command interpreter however @kbd{C-c}, @kbd{C-d}, and @code{quit}
+will terminate the program. (See @pxref{Quit, ,Quitting the Make
+debugger}).
 
 @node Debugger Command Reference
 @chapter @value{REMAKE} Debugger Command Reference
@@ -1227,7 +1228,7 @@ mdb<0> @b{help}
   ----------------------   ----------  ---------
   break *target*                  (b)  L
   comment *text*                  (#)
-  continue                        (c)
+  continue [target]               (c)
   delete breakpoint numbers..     (d)
   down [amount]                   (D)
   eval *string*                   (e)
@@ -1411,7 +1412,6 @@ Breakpoint on target all set.
 @node Delete Breaks
 @subsubsection Deleting breakpoints (@samp{delete})
 
-@cindex deleting breakpoints
 It may be desirable to eliminate a breakpoint once it
 has done its job and you no longer want stop there.
 This is called @dfn{deleting} the breakpoint.  A breakpoint that has
@@ -1453,15 +1453,15 @@ your script may stop even sooner, due to a breakpoint or a signal.
 @node Next
 @subsubsection Next (@samp{next})
 @table @code
-@kindex step
-@kindex s @r{(@code{next})}
+@kindex next
+@kindex n @r{(@code{next})}
 @item next
 Continue processing your Makefile until control reaches a different
 interesting source line, then stop it and return control to
 @value{DBG}.  This command is abbreviated @code{n}. 
 
 @item next @ovar{count}
-Continue running as in @code{next}, but do so @var{count} times.  If a
+Continue running as in @code{next}, @var{count} times.  If a
 breakpoint is reached, or a signal not related to stepping occurs before
 @var{count} steps, stepping stops right away.
 @end table
@@ -1480,7 +1480,7 @@ If there are multiple commands associated with a target @code{step}
 will stop before each one.
 
 @item step @ovar{count}
-Continue running as in @code{step}, but do so @var{count} times.  If a
+Continue running as in @code{step}, so @var{count} times.  If a
 breakpoint is reached, or a signal not related to stepping occurs before
 @var{count} steps, stepping stops right away.
 @end table
@@ -1500,8 +1500,11 @@ a Makefile.
 @table @code
 @kindex continue
 @kindex c @r{(@code{continue})}
+@item continue @ovar{target}
 Resume program execution, at the address where your script last
-stopped; any breakpoints set at that address are bypassed.  
+stopped. If you specify a target name, a breakpoint is set at that
+target before contining. If the target is invalid though, an error is
+given and we don't continue.
 @end table
 
 @node Signals
@@ -1830,6 +1833,7 @@ current stack frame.
 * Print::                  Print variable info
 * Examine::                Print a string expanded
 * Target::                 Print target Info
+* List::                   List-like target Info
 * Write::                  Write commands of a target
 * Info Variables::         Print all variables
 @end menu
@@ -1999,6 +2003,12 @@ single-letter variable name.
 @end table
 
 @end table
+
+@node List
+@subsection ``Listing'' Targets (@samp{list})
+
+This is really a short-hand for issing a @code{target} commmand with
+parameters @code{depends} and @code{comamnds}. 
 
 @node Write
 @subsection Write commands of a target (@samp{write})
