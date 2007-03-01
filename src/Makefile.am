@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.21 2007/01/04 12:03:19 rockyb Exp $
+## $Id: Makefile.am,v 1.22 2007/03/01 16:10:59 rockyb Exp $
 ## Process this file with automake to create Makefile.in.
 ## Copyright 2002, 2004, 2005, 2006 Free Software Foundation, Inc.
 ## This is a -*-Makefile-*-, or close enough
@@ -45,12 +45,16 @@ noinst_HEADERS := ar_fns.h arscan.h buildargv.h commands.h \
 make_LDADD :=	@LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@ @LIBINTL@ \
 	        @LIBGETOPT_LIB@
 
-DEFS :=		-DLOCALEDIR=\"$(localedir)\" -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\" @DEFS@
+DEFS =		-DLOCALEDIR=\"$(localedir)\" -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\" @DEFS@
 
 AM_CPPFLAGS :=	$(GLOBINC)
 
 
 MAKE_HOST :=	@MAKE_HOST@
+
+# --------------- Internationalization Section
+
+localedir =     $(datadir)/locale
 
 
 .PHONY: check-loadavg 

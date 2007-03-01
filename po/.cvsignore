@@ -5,6 +5,7 @@ Makefile.in
 Makefile.in.in
 Makevars.template
 POTFILES
+Rules-quot
 po/Rules-quot
 remake.pot
 remove-potcdate.sed
