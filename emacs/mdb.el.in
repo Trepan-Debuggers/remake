@@ -1,10 +1,10 @@
 ;;;-*-Emacs-Lisp-*-
-(defconst mdb-version "$Id: mdb.el.in,v 1.5 2006/03/19 20:38:14 rockyb Exp $"
+(defconst mdb-version "$Id: mdb.el.in,v 1.6 2007/03/01 03:30:55 rockyb Exp $"
   "`mdb-mode' version number.")
-;;; $Id: mdb.el.in,v 1.5 2006/03/19 20:38:14 rockyb Exp $
-;;; GNU Make debugger mode via GUD and makedb
+;;; $Id: mdb.el.in,v 1.6 2007/03/01 03:30:55 rockyb Exp $
+;;; GNU Make debugger mode via GUD and mdb
 
-;; Copyright (C) 2004, 2005, 2006 Rocky Bernstein (rocky@panix.com) 
+;; Copyright (C) 2004, 2005, 2006, 2007 Rocky Bernstein (rocky@gnu.org) 
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -31,11 +31,28 @@
 
 ;; Codes:
 (require 'gud)
+(require 'comint)
+
 ;; ======================================================================
 ;; mdb functions
 
 ;; History of argument lists passed to mdb.
 (defvar gud-mdb-history nil)
+
+(defconst gud-mdb-marker-regexp
+  "\\(?:^\\|\n\\)(\\(\\(?:[a-zA-Z]:\\)?[-a-zA-Z0-9_/.\\\\ ]+\\):\\([0-9]+\\))"
+  "Regular expression used to find a file location given by pydb.
+
+Program-location lines look like this:
+   (/tmp/Makefile:15):
+or MS Windows:
+   (e:\\Documents and Settings\\jsmith\\My Documents\\Makefile:3)
+")
+
+(defconst gud-mdb-marker-regexp-file-group 1
+  "Group position in gud-pydb-marker-regexp that matches the file name.")
+(defconst gud-mdb-marker-regexp-line-group 2
+  "Group position in gud-pydb-marker-regexp that matches the line number.")
 
 ;; Convert a command line as would be typed normally to run a script
 ;; into one that invokes an Emacs-enabled debugging session.
@@ -81,14 +98,18 @@
     ;;   (/src/remake/Makefile:16):
     ;; but we also allow DOS drive letters
     ;;   (d:/src/remake/Makefile:16):
-    (while (string-match "\\(^\\|\n\\)(\\(\\([a-zA-Z]:\\)?[^:\n]*\\):\\([0-9]*\\)).*\n"
-			 gud-marker-acc)
+    (while (string-match gud-mdb-marker-regexp gud-marker-acc)
       (setq
 
-       ;; Extract the frame position from the marker.
        gud-last-frame
-       (cons (match-string 2 gud-marker-acc)
-	     (string-to-int (match-string 4 gud-marker-acc)))
+       ;; Extract the frame position from the marker.
+       (cons (substring gud-marker-acc 
+			(match-beginning gud-bashdb-marker-regexp-file-group) 
+			(match-end gud-bashdb-marker-regexp-file-group))
+	     (string-to-int 
+	      (substring gud-marker-acc
+			 (match-beginning gud-bashdb-marker-regexp-line-group)
+			 (match-end gud-bashdb-marker-regexp-line-group))))
 
        ;; Append any text before the marker to the output we're going
        ;; to return - we don't include the marker in this text.

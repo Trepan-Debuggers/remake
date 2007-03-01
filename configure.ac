@@ -22,7 +22,7 @@ AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.43 2007/02/28 16:53:10 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.44 2007/03/01 03:30:54 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -567,17 +567,18 @@ esac
 # We only generate the build.sh if we have a build.sh.in; we won't have
 # one before we've created a distribution.
 
-AC_CONFIG_FILES([Makefile        \
-                 config/Makefile \
-		 doc/Makefile    \
-		 doc/make.1      \
-		 emacs/Makefile  \
-		 emacs/mdb.el    \
+AC_CONFIG_FILES([Makefile             \
+                 config/Makefile      \
+		 doc/Makefile         \
+		 doc/make.1           \
+		 emacs/Makefile       \
+		 emacs/mdb.el         \
+		 emacs/mdb-test.el    \
 		 doc/doxygen/Doxyfile \
-		 glob/Makefile   \
-                 po/Makefile.in  \
-                 po/Makefile     \
-		 src/Makefile    \
+		 glob/Makefile        \
+                 po/Makefile.in       \
+                 po/Makefile          \
+		 src/Makefile         \
 		 tests/scripts/debugger/general
 		 ])
 

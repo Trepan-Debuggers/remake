@@ -1,4 +1,5 @@
 Makefile
 Makefile.in
 mdb.el
+mdb-test.el
 
