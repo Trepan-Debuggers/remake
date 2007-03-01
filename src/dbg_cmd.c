@@ -1,4 +1,4 @@
-/* $Id: dbg_cmd.c,v 1.81 2007/02/28 16:53:13 rockyb Exp $
+/* $Id: dbg_cmd.c,v 1.82 2007/03/01 12:49:59 rockyb Exp $
 Copyright (C) 2004, 2005, 2007 rocky@gnu.org
 This file is part of GNU Make (remake variant).
 
@@ -495,7 +495,7 @@ execute_line (char *psz_line)
   }
   if (!command)
     {
-      fprintf (stderr, "No such debugger command: %s.\n", psz_word);
+      fprintf (stderr, _("No such debugger command: %s.\n"), psz_word);
       return debug_readloop;
     }
 

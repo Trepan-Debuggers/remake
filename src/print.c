@@ -1,7 +1,7 @@
 /* Output or logging functions for GNU Make.  
 
-Copyright (C) 2004, 2005 Free Software Foundation, Inc.  This file is part
-of GNU Make.
+Copyright (C) 2004, 2005, 2007 Free Software Foundation, Inc.  
+This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -390,7 +390,7 @@ print_variable (variable_t *p_v)
   if (p_v) {
     const char *psz_origin = origin2str(p_v->origin);
     if (NULL != p_v->fileinfo.filenm) {
-      printf("%s:%lu (origin: %s) %s = %s\n", 
+      printf(_("%s:%lu (origin: %s) %s = %s\n"), 
 	     p_v->fileinfo.filenm, p_v->fileinfo.lineno,
 	     psz_origin,
 	     p_v->name, p_v->value);
@@ -407,7 +407,7 @@ print_variable_expand (variable_t *p_v)
   if (p_v) {
     const char *psz_origin = origin2str(p_v->origin);
     if (NULL != p_v->fileinfo.filenm) {
-      printf("%s:%lu (origin: %s) %s := %s\n", 
+      printf(_("%s:%lu (origin: %s) %s := %s\n"), 
 	     p_v->fileinfo.filenm, p_v->fileinfo.lineno,
 	     psz_origin,
 	     p_v->name, variable_expand(p_v->value));
@@ -558,7 +558,7 @@ void print_read_makefiles (void)
 void print_cmdline (void) 
 {
   unsigned int i;
-  printf("Command-line arguments:");
+  printf(_("Command-line arguments:"));
   if (global_argv[1]) {
     printf("\n\t\"%s", global_argv[1]);
     for (i = 2; global_argv[i]; i++) {
@@ -566,7 +566,7 @@ void print_cmdline (void)
     }
     printf("\"");
   } else {
-    printf(" none");
+    printf(_(" none"));
   }
   printf("\n");
 }

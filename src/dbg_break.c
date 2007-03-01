@@ -1,6 +1,6 @@
-/* $Id: dbg_break.c,v 1.5 2007/02/28 09:33:58 myamato Exp $
-Copyright (C) 2005 rocky@panix.com
-This file is part of GNU Make.
+/* $Id: dbg_break.c,v 1.6 2007/03/01 12:49:59 rockyb Exp $
+Copyright (C) 2005, 2007 rocky@gnu.org
+This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -63,11 +63,11 @@ add_breakpoint (file_t *p_target)
 
   /* Finally, note that we are tracing this target. */
   if (p_target->tracing) {
-    printf("Breakpoint already set at target %s; nothing done.\n", 
+    printf(_("Breakpoint already set at target %s; nothing done.\n"), 
 	   p_target->name);
   } else {
     p_target->tracing = 1;
-    printf("Breakpoint %d on target %s set.\n", 
+    printf(_("Breakpoint %d on target %s set.\n"), 
 	   i_breakpoints, p_target->name);
   }
   return true;
@@ -81,12 +81,12 @@ bool
 remove_breakpoint (unsigned int i) 
 {
   if (!i) {
-    printf("Invalid Breakpoint number 0.\n");
+    printf(_("Invalid Breakpoint number 0.\n"));
     return false;
   }
   if (i > i_breakpoints) {
-    printf("Breakpoint number %d is too high. " 
-	   "%d is the highest breakpoint number.\n", i, i_breakpoints);
+    printf(_("Breakpoint number %d is too high. " 
+	   "%d is the highest breakpoint number.\n"), i, i_breakpoints);
     return false;
   } else {
     /* Find breakpoint i */
@@ -105,18 +105,18 @@ remove_breakpoint (unsigned int i)
 
       if (p->p_target->tracing) {
 	p->p_target->tracing = 0;
-	printf("Breakpoint %d on target %s cleared\n", 
+	printf(_("Breakpoint %d on target %s cleared\n"), 
 	       i, p->p_target->name);
 	free(p);
 	return true;
       } else {
-	printf("No breakpoint at target %s; nothing cleared.\n", 
+	printf(_("No breakpoint at target %s; nothing cleared.\n"), 
 	       p->p_target->name);
 	free(p);
 	return false;
       }
     } else {
-      printf("No Breakpoint number %d set.\n", i);
+      printf(_("No Breakpoint number %d set.\n"), i);
       return false;
     }
   }
@@ -129,7 +129,7 @@ list_breakpoints (void)
   breakpoint_node_t *p;
 
   if (!p_breakpoint_top) {
-    printf("No breakpoints.\n");
+    printf(_("No breakpoints.\n"));
     return;
   }
 

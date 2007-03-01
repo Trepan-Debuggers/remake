@@ -11,10 +11,13 @@ reports.
 Version 3.80+dbg-0.63cvs
 
 * Add a "list" command. Basically same as "target x depends commands" 
-  for now. list - shows the parent. 
+  for now. "list -" shows the parent. 
 
 * Help commands now show short usage.
 
+* Ctrl-d leaves debugger 
+
+* Add Emacs regression test and allow space in filename for MS Windows
 
 Version 3.80+dbg-0.62
 2007-02-27
