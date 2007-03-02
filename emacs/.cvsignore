@@ -1,5 +1,5 @@
 Makefile
 Makefile.in
-mdb.el
+elc-stamp
 mdb-test.el
-
+mdb.el
