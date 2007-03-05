@@ -8,6 +8,12 @@ GNU remake packaging
  Yaroslav Halchenko - Debian
  Detlef Reichelt    - SuSE Packman
 
+Patches
+  David Korn (yes, *that* one)
+
+Translators 
+ Yuri Kozlov        - Russian
+
 -----------------------------------
 
 GNU make development up to version 3.75 by:
@@ -63,7 +69,8 @@ Other contributors:
   Carl Staelin (Princeton University)
   Ian Stewartson (Data Logic Limited)
 
-  David Korn (yes, *that* one)
+And the invaluable help of translators listed the respective files in
+po/*.po
 
 With suggestions/comments/bug reports from a cast of ... well ...
 hundreds, anyway :)
