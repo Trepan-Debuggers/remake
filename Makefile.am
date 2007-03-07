@@ -1,29 +1,29 @@
 # This is a -*-Makefile-*-, or close enough
 
-AUTOMAKE_OPTIONS := dist-bzip2 check-news
+AUTOMAKE_OPTIONS = dist-bzip2 check-news
 
-transform := s,make,@MAKE_NAME@,
+transform = s,make,@MAKE_NAME@,
 
-SUBDIRS :=	glob config po doc src emacs
+SUBDIRS =	glob config po doc src emacs
 
-man_MANS :=	doc/make.1
+man_MANS =	doc/make.1
 
 # Extra stuff to include in the distribution.
 # Note we need all the glob stuff here, rather than in glob/Makefile.am,
 # because often that directory isn't built on the systems used by the
 # maintainers.
 
-M4_DIST :=	gettext.m4 glibc21.m4 iconv.m4 isc-posix.m4 \
+M4_DIST =	gettext.m4 glibc21.m4 iconv.m4 isc-posix.m4 \
 		intdiv0.m4 inttypes-pri.m4 inttypes.m4 inttypes_h.m4 \
 		isc-posix.m4 lcmessage.m4 lib-ld.m4 lib-link.m4 lib-prefix.m4 \
 		progtest.m4 stdint_h.m4 uintmax_t.m4 ulonglong.m4 
 
 
-EXTRA_DIST :=	README build.sh.in $(man_MANS) \
+EXTRA_DIST =	README build.sh.in $(man_MANS) \
 		README.customs README.mdb getloadavg.c \
 		README.W32 TODO ChangeLog.GNUMake $(M4_DIST) doc/make.1.in
 
-MAKE_HOST :=	@MAKE_HOST@
+MAKE_HOST =	@MAKE_HOST@
 
 
 test: check
@@ -34,7 +34,7 @@ html:
 
 # --------------- Internationalization Section
 
-localedir :=	$(datadir)/locale
+localedir =	$(datadir)/locale
 
 # --------------- Local INSTALL Section
 

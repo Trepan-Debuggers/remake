@@ -22,7 +22,7 @@ AM_PATH_LISPDIR
 
 AC_PREREQ(2.54)
 
-AC_REVISION([[$Id: configure.ac,v 1.44 2007/03/01 03:30:54 rockyb Exp $]])
+AC_REVISION([[$Id: configure.ac,v 1.45 2007/03/07 12:44:35 rockyb Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -34,7 +34,6 @@ AM_INIT_AUTOMAKE
 AC_PROG_MAKE_SET
 
 # Checks for programs.
-AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_RANLIB
 AC_PROG_CPP
