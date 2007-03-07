@@ -1,14 +1,14 @@
-$Id: README.mdb,v 1.3 2007/02/28 09:26:13 myamato Exp $
+$Id: README.mdb,v 1.4 2007/03/07 12:31:04 rockyb Exp $
 
 See the file NEWS for the user-visible changes
 
-With steady progress, this debugger for make has gotten good enough to
-be called "alpha" and good enough to make available in public.
+With steady progress, this project is good enough to be called "alpha"
+and make available.
 
-What I have here is preliminary; it here so people can get a feel for
-what a debugger for GNU Make might look like. I've been able to
-compile this on GNU/Linux and other Unixes. For the debugger, you
-should have GNU readline installed.
+GNU readline (http://tiswww.tis.case.edu/~chet/readline/rltop.html) is
+needed for the debugger portion. But without it you will still get
+better position information, error reporting, and better tracing
+execution tracing.
 
 Although there are a number of gaps listed in TODO, (like the ability
 to keep global state global across subshell returns), the debugger is
