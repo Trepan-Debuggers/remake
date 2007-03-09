@@ -1,4 +1,4 @@
-/* $Id: main.c,v 1.55 2006/12/30 21:05:18 rockyb Exp $
+/* $Id: main.c,v 1.56 2007/03/09 02:35:43 rockyb Exp $
 Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
@@ -253,6 +253,10 @@ int inhibit_print_directory_flag = 0;
 
 int print_version_flag = 0;
 
+/*! Nonzero means --trace=noshell.  */
+
+int no_shell_trace = 0;
+
 /*! List of makefiles given with -f switches.  */
 
 static stringlist_t *makefiles = NULL;
@@ -425,8 +429,10 @@ static const char *const usage[] =
   --warn-undefined-variables   Warn when an undefined variable is referenced.\n"),
     N_("\
   -x, --trace[=TYPE]           Trace command execution TYPE may be\n\
-                               \"command\", \"read\", \"normal\",\"\
+                               \"command\", \"read\", \"normal\",\"\n\
                                \"noshell\", or \"full\".\n"),
+    N_("\
+  -y                           same as --trace=\"noshell\"\n"),
     N_("\
   -X [type], --debugger[=TYPE] Enter debugger. TYPE may be\n\
                                \"preread\", \"preaction\", \"full\",\n\
@@ -503,6 +509,7 @@ static const command_switch_t switches[] =
     { 'x', string, &tracing_opts, 1, 1, 0, "normal", 0, "trace" },
     { 'X', string, &debugger_opts, 1, 1, 0, 
       "preaction", 0, "debugger" },
+    { 'y', flag, (stringlist_t **) &no_shell_trace, 1, 1, 0, 0, 0, "noshell" },
     { 'W', string, &new_files, 0, 0, 0, 0, 0, "what-if" },
     { 'V', flag, (stringlist_t **) &show_variable_definitions, 1, 1, 0, 0, 0,
 	"show-variables" },
@@ -1283,7 +1290,10 @@ main (int argc, char **argv, char **envp)
     
 #endif
   }
-  
+
+  if (no_shell_trace) 
+    db_level = DB_BASIC | DB_TRACE;
+    
   if (tracing_opts) {
     char **p;
     db_level |= (DB_TRACE | DB_SHELL);
@@ -1298,7 +1308,7 @@ main (int argc, char **argv, char **envp)
 	else if (0 == strcmp(*p, "normal"))
 	  db_level |= (DB_BASIC | DB_TRACE | DB_SHELL);
 	else if (0 == strcmp(*p, "noshell"))
-	  db_level |= (DB_VERBOSE|DB_READ_MAKEFILES) & ~DB_SHELL;
+	  db_level = DB_BASIC | DB_TRACE;
 	else if (0 == strcmp(*p, "read"))
 	  db_level |= DB_READ_MAKEFILES;
       }
