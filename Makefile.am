@@ -96,7 +96,7 @@ check-local: check-regression
 # If we're building outside the tree, we use symlinks to make a local copy of
 # the test suite.  Unfortunately the test suite itself isn't localizable yet.
 #
-MAKETESTFLAGS :=
+MAKETESTFLAGS =
 
 check-regression:
 	@if test -f "$(srcdir)/tests/run_make_tests"; then \
@@ -128,7 +128,7 @@ MAINTAINERCLEANFILES = ChangeLog
 
 @MAINT_MAKEFILE@
 
-PHONY := html test
+PHONY = html test
 
 if MAINTAINER_MODE
 

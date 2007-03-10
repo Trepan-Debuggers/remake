@@ -3,7 +3,7 @@
 ## Makefile for GNU make documentation.
 ## Copyright 2002, 2004, 2005, 2006 Free Software Foundation, Inc.
 
-transform := s,make,@MAKE_NAME@,
+transform = s,make,@MAKE_NAME@,
 
 info_TEXINFOS = make.texi mdb.texi
 make_TEXINFOS = fdl.texi make-stds.texi

@@ -1,7 +1,7 @@
 ;;;-*-Emacs-Lisp-*-
-(defconst mdb-version "$Id: mdb.el.in,v 1.7 2007/03/02 20:05:40 rockyb Exp $"
+(defconst mdb-version "$Id: mdb.el.in,v 1.8 2007/03/10 16:37:59 rockyb Exp $"
   "`mdb-mode' version number.")
-;;; $Id: mdb.el.in,v 1.7 2007/03/02 20:05:40 rockyb Exp $
+;;; $Id: mdb.el.in,v 1.8 2007/03/10 16:37:59 rockyb Exp $
 ;;; GNU Make debugger mode via GUD and mdb
 
 ;; Copyright (C) 2004, 2005, 2006, 2007 Rocky Bernstein (rocky@gnu.org) 
@@ -333,7 +333,6 @@ Currently-active file is at the head of the list.")
   ;; This was derived/simplified from edebug-overlay-arrow
   (cond (activation
 	 (setq overlay-arrow-position (make-marker))
-	 (setq pos (point))
 	 (setq overlay-arrow-string "=>")
 	 (set-marker overlay-arrow-position (point) (current-buffer))
 	 (setq mdb-mdbtrack-tracking-p t))
@@ -379,16 +378,15 @@ at the beginning of the line.
 
           (if (stringp target)
               (message "mdbtrack: %s" target)
-
-            (setq target_lineno (car target))
-            (setq target_buffer (cadr target))
-            (setq target_fname (buffer-file-name target_buffer))
-            (switch-to-buffer-other-window target_buffer)
-            (goto-line target_lineno)
-            (message "mdbtrack: line %s, file %s" target_lineno target_fname)
-            (mdb-mdbtrack-overlay-arrow t)
-            (pop-to-buffer origbuf t)
-
+	    
+            (let* ((target_lineno (car target))
+		   (target_buffer (cadr target))
+		   (target_fname (buffer-file-name target_buffer)))
+	      (switch-to-buffer-other-window target_buffer)
+	      (goto-line target_lineno)
+	      (message "mdbtrack: line %s, file %s" target_lineno target_fname)
+	      (mdb-mdbtrack-overlay-arrow t)
+	      (pop-to-buffer origbuf t))
             )))))
   )
 
