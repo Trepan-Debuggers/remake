@@ -1,9 +1,24 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html401/loose.dtd">
-<HTML lang=en>
-<HEAD>
-  <TITLE>
-  Remake - GNU Make with comprehensible tracing and a debugger
-  </TITLE>
+<html lang=en>
+<head>
+  <title>Remake - GNU Make with comprehensible tracing and a debugger</title>
+  <style type="text/css">
+   body {margin: 4px; color: black; background: white;}
+   h3 { text-align: center;}
+   table {margin: 0;}
+
+   table td {padding: 0; border-width: 0; vertical-align: top;
+             text-align: left; 
+             font-size: 110%; padding: 2px;
+             font-family: Verdana, Arial, Helvetica, sans-serif;}
+   table th {padding: 0; border-width: 0; vertical-align: top;
+             text-align: right;
+             font-weight: bold; 
+             font-size: 110%; padding: 2px;
+             font-family: Verdana, Arial, Helvetica, sans-serif;}
+   a:link {color: #1F00FF;}
+   a:visited {color: #9900DD;}
+  </style>
   <LINK REV="made" HREF="mailto:rockyb@users.sourceforge.net">
   <META NAME="keywords" CONTENT="GNU make debugger">
   <META NAME="keywords" CONTENT="GNU makefile debugger">
@@ -12,10 +27,9 @@
   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
 </HEAD>
 
-<BODY lang="en" BGCOLOR="#FFFFFF" TEXT="#000000" LINK="#1F00FF" 
-      ALINK="#FF0000" VLINK="#9900DD">
+<body>
 
-<H3>Remake - GNU Make with comprehensible tracing and a debugger</H3>
+<h3>Remake - GNU Make with comprehensible tracing and a debugger</h3>
 <P>
 <HR>
 <P><tt>remake</tt> is a patched and modernized version of GNU make
@@ -38,79 +52,62 @@ We also have a couple of cool debuggers for
 <a href="http://bashdb.sourceforge.net">GNU Bash</a> and 
 <a href="http://bashdb.sourceforge.net/pydb">Python</a>.
 
+<hr>
 <center>
-<table WIDTH="80%" BORDER=0 CELLPADDING=10 CELLSPACING=0>
+<table WIDTH="80%">
 
  <tr>
-   <th ALIGN=RIGHT VALIGN=TOP>
-   <font SIZE="+1">
-   <b><a HREF="download.html"> Download</a></b></font></th>
-  <td ALIGN=Left VALIGN=TOP colspan="2">
-     Get the latest version here.
-  </td>
+   <th><a HREF="download.html"> Download</a></th>
+    <td colspan="2">Get the latest version here.</td>
  </tr>
-
  <tr>
-  <th ALIGN=RIGHT VALIGN=TOP>
-   <font SIZE="+1"><b><a HREF="http://bashdb.sourceforge.net/remake/mdb.html">
-    mdb Documentation</a></b></font></th>
-  <td VALIGN=TOP>
-   Debugger documentation online.
-  </td>
-  <th ALIGN=RIGHT VALIGN=TOP>
-   <font SIZE="+1"><b><a HREF="http://bashdb.sourceforge.net/remake/make.html">
-    GNU Make Documentation</a></b></font></th>
+  <th>
+   <a HREF="http://bashdb.sourceforge.net/remake/mdb.html">
+    mdb Documentation</a></th>
+  <td>Debugger documentation online.</td>
+  <th><a HREF="http://bashdb.sourceforge.net/remake/make.html">
+      GNU Make Documentation</a></th>
   <td>
    GNU Make documentation online with small additions for the debugger options.
   </td>
  </tr>
 
  <tr>
-  <th ALIGN=RIGHT VALIGN=TOP>
-   <font SIZE="+1"><b>
-    Screenshot 
-    <a HREF="remake-ddd.png">[ddd]</a>
-    </b></font></th>
-  <td VALIGN=TOP>
+  <th><a HREF="remake-ddd.png">Screenshot</a></th>
+  <td>
    A screenshot of remake under DDD
   </td>
-  <th ALIGN=RIGHT VALIGN=TOP>
-   <font SIZE="+1"><b><a HREF="http://showmedo.com/videos/video?name=linuxBernsteinMakeDebug1&amp;fromSeriesID=40">Video Demo</a></b></font></th>
-  <td >
+  <th>
+   <a HREF="http://showmedo.com/videos/video?name=linuxBernsteinMakeDebug1&amp;fromSeriesID=40">Video Demo</a></th>
+  <td>
      Short (14 minute) demo of introducing debugging Makefiles
   </td>
  </tr>
 
  <tr>
-  <th ALIGN=RIGHT VALIGN=TOP>
-   <font SIZE="+1"><b>
-   <a HREF="http://bashdb.cvs.sourceforge.net/bashdb/remake/">
-    CVS</a></b></font></th>
-  <td VALIGN=TOP>
+  <th><a HREF="http://bashdb.cvs.sourceforge.net/bashdb/remake/">
+      CVS</a></th>
+  <td>
     Browse the CVS Tree
   </td>
-  <TH ALIGN=RIGHT VALIGN=TOP>
-   <FONT SIZE="+1"><B><A HREF="http://sourceforge.net/cvs/?group_id=61395">
-    Development</A></B></FONT></TH>
-  <TD VALIGN=TOP>
+  <TH><A HREF="http://sourceforge.net/cvs/?group_id=61395">
+    Development</A></TH>
+  <TD>
     Instructions for accessing the CVS repository
-  </TD
+  </TD>
  </TR>
 
  <TR>
-  <TH ALIGN=RIGHT VALIGN=TOP>
-   <FONT SIZE="+1"><B><A HREF="doxygen/index.html">
-    Source-code Header Documentation</A></B></FONT></TH>
-  <TD VALIGN=TOP>
-   If you want to study the source code, here is header documentation
-    - courtesy of doxygen </TD>
-  <th ALIGN=RIGHT VALIGN=TOP>
-   <font SIZE="+1"><b>
+  <th>
    <a HREF="http://sourceforge.net/projects/bashdb">
-    Sourceforge</a></b></font></th>
-  <td VALIGN=TOP>
-   The <code>sourceforge.net</code> project page.
+    Sourceforge</a></th>
+  <td>The <code>sf.net</code> project page.
   </td>
+  <TH> <A HREF="doxygen/index.html">
+    Header Documentation</A></TH>
+  <TD>
+   If you want to study the source code, here is header documentation
+    - courtesy of doxygen</TD>
  </tr>
 </table>
 </center>
@@ -120,6 +117,6 @@ We also have a couple of cool debuggers for
 <a href="http://sourceforge.net"> <img src="http://sourceforge.net/sflogo.php?group_id=61395" alt="SourceForge Logo"></a>
 
 <p>
-<i>$Id: index.html,v 1.4 2007/03/10 16:10:37 rockyb Exp $</i>
+<i>$Id: index.html,v 1.5 2007/03/15 09:33:18 rockyb Exp $</i>
 </body>
 </html>
