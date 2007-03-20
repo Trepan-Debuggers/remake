@@ -334,8 +334,8 @@ int strcmpi (const char *,const char *);
 
 void sync_Path_environment (void);
 int kill (int pid, int sig);
-char *end_of_token_w32 (char *s, char stopchar);
-int find_and_set_default_shell (char *token);
+char *end_of_token_w32 (const char *s, char stopchar);
+int find_and_set_default_shell (const char *token);
 
 /* indicates whether or not we have Bourne shell */
 extern int no_default_sh_exe;
@@ -385,7 +385,7 @@ char *concat (const char *, const char *, const char *);
 void *xmalloc (unsigned int);
 void *xrealloc (void *, unsigned int);
 char *xstrdup (const char *);
-char *find_next_token (char **, unsigned int *);
+char *find_next_token (const char **, unsigned int *);
 char *next_token (const char *);
 char *end_of_token (const char *);
 void collapse_continuations (char *);
@@ -393,6 +393,7 @@ char *lindex (const char *, const char *, int);
 int alpha_compare (const void *, const void *);
 void print_spaces (unsigned int);
 char *find_percent (char *);
+const char *find_percent_cached (const char **);
 FILE *open_tmpfile (char **, const char *);
 
 #ifndef NO_ARCHIVES
@@ -427,10 +428,10 @@ void install_default_implicit_rules (void);
 
 void build_vpath_lists (void);
 void construct_vpath_list (char *pattern, char *dirpath);
-int vpath_search (char **file, FILE_TIMESTAMP *mtime_ptr);
+const char *vpath_search (const char *file, FILE_TIMESTAMP *mtime_ptr);
 int gpath_search (const char *file, unsigned int len);
 
-void construct_include_path (char **arg_dirs);
+void construct_include_path (const char **arg_dirs);
 
 void user_access (void);
 void make_access (void);
@@ -585,5 +586,5 @@ extern int handling_fatal_signal;
    NULL at the end of the directory--and _doesn't_ reset errno.  So, we have
    to do it ourselves here.  */
 
-#define ENULLLOOP(_v,_c)   do{ errno = 0; \
-                               while (((_v)=_c)==0 && errno==EINTR); }while(0)
+#define ENULLLOOP(_v,_c)   do { errno = 0; (_v) = _c; } \
+                           while((_v)==0 && errno==EINTR)

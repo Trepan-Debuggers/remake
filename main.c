@@ -67,6 +67,8 @@ void print_rule_data_base (void);
 void print_file_data_base (void);
 void print_vpath_data_base (void);
 
+void verify_file_data_base (void);
+
 #if defined HAVE_WAITPID || defined HAVE_WAIT3
 # define HAVE_WAIT_NOHANG
 #endif
@@ -87,7 +89,7 @@ static void print_version (void);
 static void decode_switches (int argc, char **argv, int env);
 static void decode_env_switches (char *envar, unsigned int len);
 static void define_makeflags (int all, int makefile);
-static char *quote_for_env (char *out, char *in);
+static char *quote_for_env (char *out, const char *in);
 static void initialize_global_hash_tables (void);
 
 
@@ -102,6 +104,7 @@ struct command_switch
 	flag,			/* Turn int flag on.  */
 	flag_off,		/* Turn int flag off.  */
 	string,			/* One string per switch.  */
+	filename,		/* A string containing a file name.  */
 	positive_int,		/* A positive integer.  */
 	floating,		/* A floating-point number (double).  */
 	ignore			/* Ignored.  */
@@ -128,7 +131,7 @@ struct command_switch
 
 struct stringlist
   {
-    char **list;	/* Nil-terminated list of strings.  */
+    const char **list;	/* Nil-terminated list of strings.  */
     unsigned int idx;	/* Index into above.  */
     unsigned int max;	/* Number of pointers allocated.  */
   };
@@ -371,17 +374,17 @@ static const struct command_switch switches[] =
   {
     { 'b', ignore, 0, 0, 0, 0, 0, 0, 0 },
     { 'B', flag, &always_make_set, 1, 1, 0, 0, 0, "always-make" },
-    { 'C', string, &directories, 0, 0, 0, 0, 0, "directory" },
+    { 'C', filename, &directories, 0, 0, 0, 0, 0, "directory" },
     { 'd', flag, &debug_flag, 1, 1, 0, 0, 0, 0 },
     { CHAR_MAX+1, string, &db_flags, 1, 1, 0, "basic", 0, "debug" },
 #ifdef WINDOWS32
     { 'D', flag, &suspend_flag, 1, 1, 0, 0, 0, "suspend-for-debug" },
 #endif
     { 'e', flag, &env_overrides, 1, 1, 0, 0, 0, "environment-overrides", },
-    { 'f', string, &makefiles, 0, 0, 0, 0, 0, "file" },
+    { 'f', filename, &makefiles, 0, 0, 0, 0, 0, "file" },
     { 'h', flag, &print_usage_flag, 0, 0, 0, 0, 0, "help" },
     { 'i', flag, &ignore_errors_flag, 1, 1, 0, 0, 0, "ignore-errors" },
-    { 'I', string, &include_directories, 1, 1, 0, 0, 0,
+    { 'I', filename, &include_directories, 1, 1, 0, 0, 0,
       "include-dir" },
     { 'j', positive_int, &job_slots, 1, 1, 0, &inf_jobs, &default_job_slots,
       "jobs" },
@@ -398,7 +401,7 @@ static const struct command_switch switches[] =
     { 'L', flag, &check_symlink_flag, 1, 1, 0, 0, 0, "check-symlink-times" },
     { 'm', ignore, 0, 0, 0, 0, 0, 0, 0 },
     { 'n', flag, &just_print_flag, 1, 1, 1, 0, 0, "just-print" },
-    { 'o', string, &old_files, 0, 0, 0, 0, 0, "old-file" },
+    { 'o', filename, &old_files, 0, 0, 0, 0, 0, "old-file" },
     { 'p', flag, &print_data_base_flag, 1, 1, 0, 0, 0, "print-data-base" },
     { 'q', flag, &question_flag, 1, 1, 1, 0, 0, "question" },
     { 'r', flag, &no_builtin_rules_flag, 1, 1, 0, 0, 0, "no-builtin-rules" },
@@ -414,7 +417,7 @@ static const struct command_switch switches[] =
     { 'w', flag, &print_directory_flag, 1, 1, 0, 0, 0, "print-directory" },
     { CHAR_MAX+4, flag, &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
       "no-print-directory" },
-    { 'W', string, &new_files, 0, 0, 0, 0, 0, "what-if" },
+    { 'W', filename, &new_files, 0, 0, 0, 0, 0, "what-if" },
     { CHAR_MAX+5, flag, &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
       "warn-undefined-variables" },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
@@ -543,17 +546,20 @@ initialize_global_hash_tables (void)
   hash_init_function_table ();
 }
 
-static struct file *
-enter_command_line_file (char *name)
+static const char *
+expand_command_line_file (char *name)
 {
+  const char *cp;
+  char *expanded = 0;
+
   if (name[0] == '\0')
     fatal (NILF, _("empty string invalid as file name"));
 
   if (name[0] == '~')
     {
-      char *expanded = tilde_expand (name);
+      expanded = tilde_expand (name);
       if (expanded != 0)
-	name = expanded;	/* Memory leak; I don't care.  */
+	name = expanded;
     }
 
   /* This is also done in parse_file_seq, so this is redundant
@@ -577,7 +583,12 @@ enter_command_line_file (char *name)
       name[2] = '\0';
     }
 
-  return enter_file (xstrdup (name));
+  cp = strcache_add (name);
+
+  if (expanded)
+    free (expanded);
+
+  return cp;
 }
 
 /* Toggle -d on receipt of SIGUSR1.  */
@@ -593,7 +604,7 @@ debug_signal_handler (int sig UNUSED)
 static void
 decode_debug_flags (void)
 {
-  char **pp;
+  const char **pp;
 
   if (debug_flag)
     db_level = DB_ALL;
@@ -728,9 +739,10 @@ handle_runtime_exceptions( struct _EXCEPTION_POINTERS *exinfo )
  */
 
 int
-find_and_set_default_shell (char *token)
+find_and_set_default_shell (const char *token)
 {
   int sh_found = 0;
+  char *atoken = 0;
   char *search_token;
   char *tokend;
   PATH_VAR(sh_path);
@@ -739,8 +751,7 @@ find_and_set_default_shell (char *token)
   if (!token)
     search_token = default_shell;
   else
-    search_token = token;
-
+    atoken = search_token = xstrdup (token);
 
   /* If the user explicitly requests the DOS cmd shell, obey that request.
      However, make sure that's what they really want by requiring the value
@@ -766,10 +777,10 @@ find_and_set_default_shell (char *token)
              (token == NULL || !strcmp (search_token, default_shell))) {
     /* no new information, path already set or known */
     sh_found = 1;
-  } else if (file_exists_p(search_token)) {
+  } else if (file_exists_p (search_token)) {
     /* search token path was found */
-    sprintf(sh_path, "%s", search_token);
-    default_shell = xstrdup(w32ify(sh_path,0));
+    sprintf (sh_path, "%s", search_token);
+    default_shell = xstrdup (w32ify (sh_path, 0));
     DB (DB_VERBOSE,
         (_("find_and_set_shell setting default_shell = %s\n"), default_shell));
     sh_found = 1;
@@ -782,31 +793,31 @@ find_and_set_default_shell (char *token)
       char *ep;
 
       p  = v->value;
-      ep = strchr(p, PATH_SEPARATOR_CHAR);
+      ep = strchr (p, PATH_SEPARATOR_CHAR);
 
       while (ep && *ep) {
         *ep = '\0';
 
-        if (dir_file_exists_p(p, search_token)) {
-          sprintf(sh_path, "%s/%s", p, search_token);
-          default_shell = xstrdup(w32ify(sh_path,0));
+        if (dir_file_exists_p (p, search_token)) {
+          sprintf (sh_path, "%s/%s", p, search_token);
+          default_shell = xstrdup (w32ify (sh_path, 0));
           sh_found = 1;
           *ep = PATH_SEPARATOR_CHAR;
 
           /* terminate loop */
-          p += strlen(p);
+          p += strlen (p);
         } else {
           *ep = PATH_SEPARATOR_CHAR;
            p = ++ep;
         }
 
-        ep = strchr(p, PATH_SEPARATOR_CHAR);
+        ep = strchr (p, PATH_SEPARATOR_CHAR);
       }
 
       /* be sure to check last element of Path */
-      if (p && *p && dir_file_exists_p(p, search_token)) {
-          sprintf(sh_path, "%s/%s", p, search_token);
-          default_shell = xstrdup(w32ify(sh_path,0));
+      if (p && *p && dir_file_exists_p (p, search_token)) {
+          sprintf (sh_path, "%s/%s", p, search_token);
+          default_shell = xstrdup (w32ify (sh_path, 0));
           sh_found = 1;
       }
 
@@ -819,7 +830,7 @@ find_and_set_default_shell (char *token)
 
   /* naive test */
   if (!unixy_shell && sh_found &&
-      (strstr(default_shell, "sh") || strstr(default_shell, "SH"))) {
+      (strstr (default_shell, "sh") || strstr (default_shell, "SH"))) {
     unixy_shell = 1;
     batch_mode_shell = 0;
   }
@@ -827,6 +838,9 @@ find_and_set_default_shell (char *token)
 #ifdef BATCH_MODE_ONLY_SHELL
   batch_mode_shell = 1;
 #endif
+
+  if (atoken)
+    free (atoken);
 
   return (sh_found);
 }
@@ -1228,7 +1242,7 @@ main (int argc, char **argv, char **envp)
   decode_env_switches (STRING_SIZE_TUPLE ("MAKEFLAGS"));
 #if 0
   /* People write things like:
-     	MFLAGS="CC=gcc -pipe" "CFLAGS=-g"
+        MFLAGS="CC=gcc -pipe" "CFLAGS=-g"
      and we set the -p, -i and -e switches.  Doesn't seem quite right.  */
   decode_env_switches (STRING_SIZE_TUPLE ("MFLAGS"));
 #endif
@@ -1296,7 +1310,7 @@ main (int argc, char **argv, char **envp)
       && (strchr (argv[0], '/') != 0 || strchr (argv[0], '\\') != 0)
 # endif
       )
-    argv[0] = concat (current_directory, "/", argv[0]);
+    argv[0] = xstrdup (concat (current_directory, "/", argv[0]));
 #else  /* !__MSDOS__ */
   if (current_directory[0] != '\0'
       && argv[0] != 0 && argv[0][0] != '/' && strchr (argv[0], '/') != 0
@@ -1305,7 +1319,7 @@ main (int argc, char **argv, char **envp)
       && strchr (argv[0], '\\') != 0
 #endif
       )
-    argv[0] = concat (current_directory, "/", argv[0]);
+    argv[0] = xstrdup (concat (current_directory, "/", argv[0]));
 #endif /* !__MSDOS__ */
 #endif /* WINDOWS32 */
 #endif
@@ -1370,14 +1384,7 @@ main (int argc, char **argv, char **envp)
       unsigned int i;
       for (i = 0; directories->list[i] != 0; ++i)
         {
-          char *dir = directories->list[i];
-          char *expanded = 0;
-          if (dir[0] == '~')
-            {
-              expanded = tilde_expand (dir);
-              if (expanded != 0)
-                dir = expanded;
-            }
+          const char *dir = directories->list[i];
 #ifdef WINDOWS32
           /* WINDOWS32 chdir() doesn't work if the directory has a trailing '/'
              But allow -C/ just in case someone wants that.  */
@@ -1390,8 +1397,6 @@ main (int argc, char **argv, char **envp)
 #endif
           if (chdir (dir) < 0)
             pfatal_with_name (dir);
-          if (expanded)
-            free (expanded);
         }
     }
 
@@ -1524,11 +1529,11 @@ main (int argc, char **argv, char **envp)
 
 	    /* Replace the name that read_all_makefiles will
 	       see with the name of the temporary file.  */
-            makefiles->list[i] = xstrdup (stdin_nm);
+            makefiles->list[i] = strcache_add (stdin_nm);
 
 	    /* Make sure the temporary file will not be remade.  */
             {
-              struct file *f = enter_file (stdin_nm);
+              struct file *f = enter_file (strcache_add (stdin_nm));
               f->updated = 1;
               f->update_status = 0;
               f->command_state = cs_finished;
@@ -1595,7 +1600,7 @@ main (int argc, char **argv, char **envp)
   /* Define the default variables.  */
   define_default_variables ();
 
-  default_file = enter_file (".DEFAULT");
+  default_file = enter_file (strcache_add (".DEFAULT"));
 
   {
     struct variable *v = define_variable (".DEFAULT_GOAL", 13, "", o_file, 0);
@@ -1660,7 +1665,7 @@ main (int argc, char **argv, char **envp)
 
   if (jobserver_fds)
   {
-    char *cp;
+    const char *cp;
     unsigned int ui;
 
     for (ui=1; ui < jobserver_fds->idx; ++ui)
@@ -1719,6 +1724,7 @@ main (int argc, char **argv, char **envp)
 
   if (job_slots > 1)
     {
+      char *cp;
       char c = '+';
 
       if (pipe (job_fds) < 0 || (job_rfd = dup (job_fds[0])) < 0)
@@ -1742,12 +1748,13 @@ main (int argc, char **argv, char **envp)
 
       /* Fill in the jobserver_fds struct for our children.  */
 
+      cp = xmalloc ((sizeof ("1024")*2)+1);
+      sprintf (cp, "%d,%d", job_fds[0], job_fds[1]);
+
       jobserver_fds = (struct stringlist *)
                         xmalloc (sizeof (struct stringlist));
       jobserver_fds->list = xmalloc (sizeof (char *));
-      jobserver_fds->list[0] = xmalloc ((sizeof ("1024")*2)+1);
-
-      sprintf (jobserver_fds->list[0], "%d,%d", job_fds[0], job_fds[1]);
+      jobserver_fds->list[0] = cp;
       jobserver_fds->idx = 1;
       jobserver_fds->max = 1;
     }
@@ -1798,10 +1805,10 @@ main (int argc, char **argv, char **envp)
 
   if (old_files != 0)
     {
-      char **p;
+      const char **p;
       for (p = old_files->list; *p != 0; ++p)
         {
-          struct file *f = enter_command_line_file (*p);
+          struct file *f = enter_file (*p);
           f->last_mtime = f->mtime_before_update = OLD_MTIME;
           f->updated = 1;
           f->update_status = 0;
@@ -1811,10 +1818,10 @@ main (int argc, char **argv, char **envp)
 
   if (!restarts && new_files != 0)
     {
-      char **p;
+      const char **p;
       for (p = new_files->list; *p != 0; ++p)
 	{
-	  struct file *f = enter_command_line_file (*p);
+	  struct file *f = enter_file (*p);
 	  f->last_mtime = f->mtime_before_update = NEW_MTIME;
 	}
     }
@@ -2000,9 +2007,10 @@ main (int argc, char **argv, char **envp)
 		  {
 		    char *p = &argv[i][2];
 		    if (*p == '\0')
-		      argv[++i] = makefiles->list[j];
+                      /* This cast is OK since we never modify argv.  */
+		      argv[++i] = (char *) makefiles->list[j];
 		    else
-		      argv[i] = concat ("-f", makefiles->list[j], "");
+		      argv[i] = xstrdup (concat ("-f", makefiles->list[j], ""));
 		    ++j;
 		  }
 	    }
@@ -2012,25 +2020,20 @@ main (int argc, char **argv, char **envp)
             {
               nargv = xmalloc ((nargc + 2) * sizeof (char *));
               memcpy (nargv, argv, argc * sizeof (char *));
-              nargv[nargc++] = concat ("-o", stdin_nm, "");
+              nargv[nargc++] = xstrdup (concat ("-o", stdin_nm, ""));
               nargv[nargc] = 0;
             }
 
 	  if (directories != 0 && directories->idx > 0)
 	    {
-	      char bad;
+	      int bad = 1;
 	      if (directory_before_chdir != 0)
 		{
 		  if (chdir (directory_before_chdir) < 0)
-		    {
 		      perror_with_name ("chdir", "");
-		      bad = 1;
-		    }
 		  else
 		    bad = 0;
 		}
-	      else
-		bad = 1;
 	      if (bad)
 		fatal (NILF, _("Couldn't change back to original directory."));
 	    }
@@ -2142,10 +2145,10 @@ main (int argc, char **argv, char **envp)
   /* If restarts is set we haven't set up -W files yet, so do that now.  */
   if (restarts && new_files != 0)
     {
-      char **p;
+      const char **p;
       for (p = new_files->list; *p != 0; ++p)
 	{
-	  struct file *f = enter_command_line_file (*p);
+	  struct file *f = enter_file (*p);
 	  f->last_mtime = f->mtime_before_update = NEW_MTIME;
 	}
     }
@@ -2184,7 +2187,7 @@ main (int argc, char **argv, char **envp)
                     if (ns->next != 0)
                       fatal (NILF, _(".DEFAULT_GOAL contains more than one target"));
 
-                    default_goal_file = enter_file (ns->name);
+                    default_goal_file = enter_file (strcache_add (ns->name));
 
                     ns->name = 0; /* It was reused by enter_file(). */
                     free_ns_chain (ns);
@@ -2287,6 +2290,7 @@ init_switches (void)
 	  break;
 
 	case string:
+        case filename:
 	case positive_int:
 	case floating:
 	  if (short_option (switches[i].c))
@@ -2342,7 +2346,7 @@ handle_non_switch_argument (char *arg, int env)
       /* Not an option or variable definition; it must be a goal
 	 target!  Enter it as a file and add it to the dep chain of
 	 goals.  */
-      struct file *f = enter_command_line_file (arg);
+      struct file *f = enter_file (strcache_add (expand_command_line_file (arg)));
       f->cmd_target = 1;
 
       if (goals == 0)
@@ -2361,7 +2365,7 @@ handle_non_switch_argument (char *arg, int env)
       {
         /* Add this target name to the MAKECMDGOALS variable. */
         struct variable *gv;
-        char *value;
+        const char *value;
 
         gv = lookup_variable (STRING_SIZE_TUPLE ("MAKECMDGOALS"));
         if (gv == 0)
@@ -2370,13 +2374,15 @@ handle_non_switch_argument (char *arg, int env)
           {
             /* Paste the old and new values together */
             unsigned int oldlen, newlen;
+            char *vp;
 
             oldlen = strlen (gv->value);
             newlen = strlen (f->name);
-            value = alloca (oldlen + 1 + newlen + 1);
-            memcpy (value, gv->value, oldlen);
-            value[oldlen] = ' ';
-            memcpy (&value[oldlen + 1], f->name, newlen + 1);
+            vp = alloca (oldlen + 1 + newlen + 1);
+            memcpy (vp, gv->value, oldlen);
+            vp[oldlen] = ' ';
+            memcpy (&vp[oldlen + 1], f->name, newlen + 1);
+            value = vp;
           }
         define_variable ("MAKECMDGOALS", 12, value, o_default, 0);
       }
@@ -2472,6 +2478,7 @@ decode_switches (int argc, char **argv, int env)
 		  break;
 
 		case string:
+		case filename:
 		  if (!doit)
 		    break;
 
@@ -2500,7 +2507,10 @@ decode_switches (int argc, char **argv, int env)
 		      sl->list = xrealloc (sl->list,
                                            sl->max * sizeof (char *));
 		    }
-		  sl->list[sl->idx++] = optarg;
+                  if (cs->type == filename)
+                    sl->list[sl->idx++] = expand_command_line_file (optarg);
+                  else
+                    sl->list[sl->idx++] = optarg;
 		  sl->list[sl->idx] = 0;
 		  break;
 
@@ -2641,7 +2651,7 @@ decode_env_switches (char *envar, unsigned int len)
        definition.  Add a dash and pass it along to decode_switches.  We
        need permanent storage for this in case decode_switches saves
        pointers into the value.  */
-    argv[1] = concat ("-", argv[1], "");
+    argv[1] = xstrdup (concat ("-", argv[1], ""));
 
   /* Parse those words.  */
   decode_switches (argc, argv, 1);
@@ -2654,7 +2664,7 @@ decode_env_switches (char *envar, unsigned int len)
    Allocating space for OUT twice the length of IN is always sufficient.  */
 
 static char *
-quote_for_env (char *out, char *in)
+quote_for_env (char *out, const char *in)
 {
   while (*in != '\0')
     {
@@ -2692,7 +2702,7 @@ define_makeflags (int all, int makefile)
     {
       struct flag *next;
       const struct command_switch *cs;
-      char *arg;
+      const char *arg;
     };
   struct flag *flags = 0;
   unsigned int flagslen = 0;
@@ -2716,9 +2726,6 @@ define_makeflags (int all, int makefile)
     if (cs->toenv && (!makefile || !cs->no_makefile))
       switch (cs->type)
 	{
-	default:
-	  abort ();
-
 	case ignore:
 	  break;
 
@@ -2775,21 +2782,25 @@ define_makeflags (int all, int makefile)
 	  break;
 #endif
 
+	case filename:
 	case string:
 	  if (all)
 	    {
 	      struct stringlist *sl = *(struct stringlist **) cs->value_ptr;
 	      if (sl != 0)
 		{
-		  /* Add the elements in reverse order, because
-		     all the flags get reversed below; and the order
-		     matters for some switches (like -I).  */
-		  register unsigned int i = sl->idx;
+		  /* Add the elements in reverse order, because all the flags
+		     get reversed below; and the order matters for some
+		     switches (like -I).  */
+		  unsigned int i = sl->idx;
 		  while (i-- > 0)
 		    ADD_FLAG (sl->list[i], strlen (sl->list[i]));
 		}
 	    }
 	  break;
+
+	default:
+	  abort ();
 	}
 
   flagslen += 4 + sizeof posixref; /* Four more for the possible " -- ".  */
@@ -3072,6 +3083,8 @@ die (int status)
 
       if (print_data_base_flag)
 	print_data_base ();
+
+      verify_file_data_base ();
 
       clean_jobserver (status);
 

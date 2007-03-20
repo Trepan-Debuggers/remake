@@ -522,23 +522,23 @@ static const char *default_variables[] =
 void
 set_default_suffixes (void)
 {
-  suffix_file = enter_file (".SUFFIXES");
+  suffix_file = enter_file (strcache_add (".SUFFIXES"));
 
   if (no_builtin_rules_flag)
-    (void) define_variable ("SUFFIXES", 8, "", o_default, 0);
+    define_variable ("SUFFIXES", 8, "", o_default, 0);
   else
     {
       char *p = default_suffixes;
       suffix_file->deps = (struct dep *)
 	multi_glob (parse_file_seq (&p, '\0', sizeof (struct dep), 1),
 		    sizeof (struct dep));
-      (void) define_variable ("SUFFIXES", 8, default_suffixes, o_default, 0);
+      define_variable ("SUFFIXES", 8, default_suffixes, o_default, 0);
     }
 }
 
 /* Enter the default suffix rules as file rules.  This used to be done in
    install_default_implicit_rules, but that loses because we want the
-   suffix rules installed before reading makefiles, and thee pattern rules
+   suffix rules installed before reading makefiles, and the pattern rules
    installed after.  */
 
 void
@@ -551,7 +551,7 @@ install_default_suffix_rules (void)
 
   for (s = default_suffix_rules; *s != 0; s += 2)
     {
-      struct file *f = enter_file (s[0]);
+      struct file *f = enter_file (strcache_add (s[0]));
       /* Don't clobber cmds given in a makefile if there were any.  */
       if (f->cmds == 0)
 	{

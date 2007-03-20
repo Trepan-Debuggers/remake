@@ -226,7 +226,8 @@ po-check:
 ## ------------------------- ##
 
 # This target creates the upload artifacts.
-# Sign it with my key.
+# Sign it with my key.  If you don't have my key/passphrase then sorry,
+# you're SOL! :)
 
 GPG = gpg
 GPGFLAGS = -u 6338B6D4
@@ -234,21 +235,24 @@ GPGFLAGS = -u 6338B6D4
 DIST_ARCHIVES_SIG = $(addsuffix .sig,$(DIST_ARCHIVES))
 DIST_ARCHIVES_DIRECTIVE = $(addsuffix .directive.asc,$(DIST_ARCHIVES))
 
+# A simple rule to test signing, etc.
 .PHONY: distsign
 distsign: $(DIST_ARCHIVES_SIG) $(DIST_ARCHIVES_DIRECTIVE)
 
-$(DIST_ARCHIVES_DIRECTIVE): .directive.asc
-	cp $< $@
-
 %.sig : %
 	@echo "Signing file '$<':"
-	$(GPG) $(GPGFLAGS) -o $@ -b $<
+	$(GPG) $(GPGFLAGS) -o "$@" -b "$<"
 
-.directive.asc:
+%.directive.asc: %
 	@echo "Creating directive file '$@':"
-	@echo 'directory: make' > .directive
-	$(GPG) $(GPGFLAGS) -o $@ --clearsign .directive
-	@rm -f .directive
+	@( \
+	   echo 'verstion: 1.1'; \
+	   echo 'directory: make'; \
+	   echo 'filename: $*'; \
+	   echo 'comment: Official upload of GNU make version $(VERSION)'; \
+	 ) > "$*.directive"
+	$(GPG) $(GPGFLAGS) -o "$@" --clearsign "$*.directive"
+	@rm -f "$*.directive"
 
 # Upload the artifacts
 
@@ -258,11 +262,11 @@ gnu-url = ftp-upload.gnu.org /incoming
 UPLOADS = upload-alpha upload-ftp
 .PHONY: $(UPLOADS)
 $(UPLOADS): $(DIST_ARCHIVES) $(DIST_ARCHIVES_SIG) $(DIST_ARCHIVES_DIRECTIVE)
-	$(FTPPUT) $(gnu-url)/$(@:upload-%=%) $^
+	$(FTPPUT) "$(gnu-url)/$(@:upload-%=%)" $^
 
 
-# Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
-# Free Software Foundation, Inc.
+# Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
+# 2007 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under the
