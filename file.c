@@ -69,16 +69,16 @@ static int all_secondary = 0;
 
 /* Access the hash table of all file records.
    lookup_file  given a name, return the struct file * for that name,
-           or nil if there is none.
-   enter_file   similar, but create one if there is none.  */
+                or nil if there is none.
+*/
 
 struct file *
-lookup_file (char *name)
+lookup_file (const char *name)
 {
-  register struct file *f;
+  struct file *f;
   struct file file_key;
 #if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
-  char *lname, *ln;
+  char *lname;
 #endif
 
   assert (*name != '\0');
@@ -90,8 +90,9 @@ lookup_file (char *name)
 # ifndef WANT_CASE_SENSITIVE_TARGETS
   if (*name != '.')
     {
-      char *n;
-      lname = xmalloc (strlen (name) + 1);
+      const char *n;
+      char *ln;
+      lname = xstrdup (name);
       for (n = name, ln = lname; *n != '\0'; ++n, ++ln)
         *ln = isupper ((unsigned char)*n) ? tolower ((unsigned char)*n) : *n;
       *ln = '\0';
@@ -112,15 +113,13 @@ lookup_file (char *name)
 
   if (*name == '\0')
     /* It was all slashes after a dot.  */
-#ifdef VMS
+#if defined(VMS)
     name = "[]";
-#else
-#ifdef _AMIGA
+#elif defined(_AMIGA)
     name = "";
 #else
     name = "./";
-#endif /* AMIGA */
-#endif /* VMS */
+#endif
 
   file_key.hname = name;
   f = hash_find_item (&files, &file_key);
@@ -128,39 +127,41 @@ lookup_file (char *name)
   if (*name != '.')
     free (lname);
 #endif
+
   return f;
 }
 
+/* Look up a file record for file NAME and return it.
+   Create a new record if one doesn't exist.  NAME will be stored in the
+   new record so it should be constant or in the strcache etc.
+ */
+
 struct file *
-enter_file (char *name)
+enter_file (const char *name)
 {
-  register struct file *f;
-  register struct file *new;
-  register struct file **file_slot;
+  struct file *f;
+  struct file *new;
+  struct file **file_slot;
   struct file file_key;
-#if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
-  char *lname, *ln;
-#endif
 
   assert (*name != '\0');
+  assert (strcache_iscached (name));
 
 #if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
   if (*name != '.')
     {
-      char *n;
-      lname = xmalloc (strlen (name) + 1);
+      const char *n;
+      char *lname, *ln;
+      lname = xstrdup (name);
       for (n = name, ln = lname; *n != '\0'; ++n, ++ln)
-        {
-          if (isupper ((unsigned char)*n))
-            *ln = tolower ((unsigned char)*n);
-          else
-            *ln = *n;
-        }
+        if (isupper ((unsigned char)*n))
+          *ln = tolower ((unsigned char)*n);
+        else
+          *ln = *n;
 
-      *ln = 0;
-      /* Creates a possible leak, old value of name is unreachable, but I
-         currently don't know how to fix it. */
-      name = lname;
+      *ln = '\0';
+      name = strcache_add (lname);
+      free (lname);
     }
 #endif
 
@@ -168,13 +169,7 @@ enter_file (char *name)
   file_slot = (struct file **) hash_find_slot (&files, &file_key);
   f = *file_slot;
   if (! HASH_VACANT (f) && !f->double_colon)
-    {
-#if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
-      if (*name != '.')
-        free (lname);
-#endif
-      return f;
-    }
+    return f;
 
   new = xmalloc (sizeof (struct file));
   memset (new, '\0', sizeof (struct file));
@@ -197,27 +192,12 @@ enter_file (char *name)
   return new;
 }
 
-/* Rename FILE to NAME.  This is not as simple as resetting
-   the `name' member, since it must be put in a new hash bucket,
-   and possibly merged with an existing file called NAME.  */
-
-void
-rename_file (struct file *from_file, char *to_hname)
-{
-  rehash_file (from_file, to_hname);
-  while (from_file)
-    {
-      from_file->name = from_file->hname;
-      from_file = from_file->prev;
-    }
-}
-
 /* Rehash FILE to NAME.  This is not as simple as resetting
    the `hname' member, since it must be put in a new hash bucket,
    and possibly merged with an existing file called NAME.  */
 
 void
-rehash_file (struct file *from_file, char *to_hname)
+rehash_file (struct file *from_file, const char *to_hname)
 {
   struct file file_key;
   struct file **file_slot;
@@ -225,108 +205,130 @@ rehash_file (struct file *from_file, char *to_hname)
   struct file *deleted_file;
   struct file *f;
 
+  /* If it's already that name, we're done.  */
   file_key.hname = to_hname;
-  if (0 == file_hash_cmp (from_file, &file_key))
+  if (! file_hash_cmp (from_file, &file_key))
     return;
 
+  /* Find the end of the renamed list for the "from" file.  */
   file_key.hname = from_file->hname;
   while (from_file->renamed != 0)
     from_file = from_file->renamed;
   if (file_hash_cmp (from_file, &file_key))
-    /* hname changed unexpectedly */
+    /* hname changed unexpectedly!! */
     abort ();
 
+  /* Remove the "from" file from the hash.  */
   deleted_file = hash_delete (&files, from_file);
   if (deleted_file != from_file)
     /* from_file isn't the one stored in files */
     abort ();
 
+  /* Find where the newly renamed file will go in the hash.  */
   file_key.hname = to_hname;
   file_slot = (struct file **) hash_find_slot (&files, &file_key);
   to_file = *file_slot;
 
+  /* Change the hash name for this file.  */
   from_file->hname = to_hname;
   for (f = from_file->double_colon; f != 0; f = f->prev)
     f->hname = to_hname;
 
+  /* If the new name doesn't exist yet just set it to the renamed file.  */
   if (HASH_VACANT (to_file))
-    hash_insert_at (&files, from_file, file_slot);
+    {
+      hash_insert_at (&files, from_file, file_slot);
+      return;
+    }
+
+  /* TO_FILE already exists under TO_HNAME.
+     We must retain TO_FILE and merge FROM_FILE into it.  */
+
+  if (from_file->cmds != 0)
+    {
+      if (to_file->cmds == 0)
+        to_file->cmds = from_file->cmds;
+      else if (from_file->cmds != to_file->cmds)
+        {
+          /* We have two sets of commands.  We will go with the
+             one given in the rule explicitly mentioning this name,
+             but give a message to let the user know what's going on.  */
+          if (to_file->cmds->fileinfo.filenm != 0)
+            error (&from_file->cmds->fileinfo,
+                   _("Commands were specified for file `%s' at %s:%lu,"),
+                   from_file->name, to_file->cmds->fileinfo.filenm,
+                   to_file->cmds->fileinfo.lineno);
+          else
+            error (&from_file->cmds->fileinfo,
+                   _("Commands for file `%s' were found by implicit rule search,"),
+                   from_file->name);
+          error (&from_file->cmds->fileinfo,
+                 _("but `%s' is now considered the same file as `%s'."),
+                 from_file->name, to_hname);
+          error (&from_file->cmds->fileinfo,
+                 _("Commands for `%s' will be ignored in favor of those for `%s'."),
+                 to_hname, from_file->name);
+        }
+    }
+
+  /* Merge the dependencies of the two files.  */
+
+  if (to_file->deps == 0)
+    to_file->deps = from_file->deps;
   else
     {
-      /* TO_FILE already exists under TO_HNAME.
-	 We must retain TO_FILE and merge FROM_FILE into it.  */
+      struct dep *deps = to_file->deps;
+      while (deps->next != 0)
+        deps = deps->next;
+      deps->next = from_file->deps;
+    }
 
-      if (from_file->cmds != 0)
-	{
-	  if (to_file->cmds == 0)
-	    to_file->cmds = from_file->cmds;
-	  else if (from_file->cmds != to_file->cmds)
-	    {
-	      /* We have two sets of commands.  We will go with the
-		 one given in the rule explicitly mentioning this name,
-		 but give a message to let the user know what's going on.  */
-	      if (to_file->cmds->fileinfo.filenm != 0)
-                error (&from_file->cmds->fileinfo,
-		       _("Commands were specified for file `%s' at %s:%lu,"),
-		       from_file->name, to_file->cmds->fileinfo.filenm,
-		       to_file->cmds->fileinfo.lineno);
-	      else
-		error (&from_file->cmds->fileinfo,
-		       _("Commands for file `%s' were found by implicit rule search,"),
-		       from_file->name);
-	      error (&from_file->cmds->fileinfo,
-		     _("but `%s' is now considered the same file as `%s'."),
-		     from_file->name, to_hname);
-	      error (&from_file->cmds->fileinfo,
-		     _("Commands for `%s' will be ignored in favor of those for `%s'."),
-		     to_hname, from_file->name);
-	    }
-	}
+  merge_variable_set_lists (&to_file->variables, from_file->variables);
 
-      /* Merge the dependencies of the two files.  */
-
-      if (to_file->deps == 0)
-	to_file->deps = from_file->deps;
+  if (to_file->double_colon && from_file->is_target && !from_file->double_colon)
+    fatal (NILF, _("can't rename single-colon `%s' to double-colon `%s'"),
+           from_file->name, to_hname);
+  if (!to_file->double_colon  && from_file->double_colon)
+    {
+      if (to_file->is_target)
+        fatal (NILF, _("can't rename double-colon `%s' to single-colon `%s'"),
+               from_file->name, to_hname);
       else
-	{
-	  register struct dep *deps = to_file->deps;
-	  while (deps->next != 0)
-	    deps = deps->next;
-	  deps->next = from_file->deps;
-	}
+        to_file->double_colon = from_file->double_colon;
+    }
 
-      merge_variable_set_lists (&to_file->variables, from_file->variables);
+  if (from_file->last_mtime > to_file->last_mtime)
+    /* %%% Kludge so -W wins on a file that gets vpathized.  */
+    to_file->last_mtime = from_file->last_mtime;
 
-      if (to_file->double_colon && from_file->is_target && !from_file->double_colon)
-	fatal (NILF, _("can't rename single-colon `%s' to double-colon `%s'"),
-	       from_file->name, to_hname);
-      if (!to_file->double_colon  && from_file->double_colon)
-	{
-	  if (to_file->is_target)
-	    fatal (NILF, _("can't rename double-colon `%s' to single-colon `%s'"),
-		   from_file->name, to_hname);
-	  else
-	    to_file->double_colon = from_file->double_colon;
-	}
-
-      if (from_file->last_mtime > to_file->last_mtime)
-	/* %%% Kludge so -W wins on a file that gets vpathized.  */
-	to_file->last_mtime = from_file->last_mtime;
-
-      to_file->mtime_before_update = from_file->mtime_before_update;
+  to_file->mtime_before_update = from_file->mtime_before_update;
 
 #define MERGE(field) to_file->field |= from_file->field
-      MERGE (precious);
-      MERGE (tried_implicit);
-      MERGE (updating);
-      MERGE (updated);
-      MERGE (is_target);
-      MERGE (cmd_target);
-      MERGE (phony);
-      MERGE (ignore_vpath);
+  MERGE (precious);
+  MERGE (tried_implicit);
+  MERGE (updating);
+  MERGE (updated);
+  MERGE (is_target);
+  MERGE (cmd_target);
+  MERGE (phony);
+  MERGE (ignore_vpath);
 #undef MERGE
 
-      from_file->renamed = to_file;
+  from_file->renamed = to_file;
+}
+
+/* Rename FILE to NAME.  This is not as simple as resetting
+   the `name' member, since it must be put in a new hash bucket,
+   and possibly merged with an existing file called NAME.  */
+
+void
+rename_file (struct file *from_file, const char *to_hname)
+{
+  rehash_file (from_file, to_hname);
+  while (from_file)
+    {
+      from_file->name = from_file->hname;
+      from_file = from_file->prev;
     }
 }
 
@@ -338,8 +340,8 @@ rehash_file (struct file *from_file, char *to_hname)
 void
 remove_intermediates (int sig)
 {
-  register struct file **file_slot;
-  register struct file **file_end;
+  struct file **file_slot;
+  struct file **file_end;
   int doneany = 0;
 
   /* If there's no way we will ever remove anything anyway, punt early.  */
@@ -354,7 +356,7 @@ remove_intermediates (int sig)
   for ( ; file_slot < file_end; file_slot++)
     if (! HASH_VACANT (*file_slot))
       {
-	register struct file *f = *file_slot;
+	struct file *f = *file_slot;
         /* Is this file eligible for automatic deletion?
            Yes, IFF: it's marked intermediate, it's not secondary, it wasn't
            given on the command-line, and it's either a -include makefile or
@@ -444,7 +446,6 @@ parse_prereqs (char *p)
   return new;
 }
 
-
 /* Set the intermediate flag.  */
 
 static void
@@ -460,7 +461,7 @@ expand_deps (struct file *f)
 {
   struct dep *d;
   struct dep *old = f->deps;
-  char *file_stem = f->stem;
+  const char *file_stem = f->stem;
   unsigned int last_dep_has_cmds = f->updating;
   int initialized = 0;
 
@@ -476,9 +477,13 @@ expand_deps (struct file *f)
         continue;
 
       /* Create the dependency list.
-         If we're not doing 2nd expansion, then it's just the name.  */
+         If we're not doing 2nd expansion, then it's just the name.  We will
+         still need to massage it though.  */
       if (! d->need_2nd_expansion)
-        p = d->name;
+        {
+          p = variable_expand ("");
+          variable_buffer_output (p, d->name, strlen (d->name) + 1);
+        }
       else
         {
           /* If it's from a static pattern rule, convert the patterns into
@@ -490,8 +495,7 @@ expand_deps (struct file *f)
 
               o = subst_expand (buffer, d->name, "%", "$*", 1, 2, 0);
 
-              free (d->name);
-              d->name = savestring (buffer, o - buffer);
+              d->name = strcache_add_len (buffer, o - buffer);
               d->staticpattern = 0; /* Clear staticpattern so that we don't
                                        re-expand %s below. */
             }
@@ -525,48 +529,47 @@ expand_deps (struct file *f)
          plain prerequisite names.  */
       if (new && d->staticpattern)
         {
-          char *pattern = "%";
+          const char *pattern = "%";
           char *buffer = variable_expand ("");
           struct dep *dp = new, *dl = 0;
 
           while (dp != 0)
             {
-              char *percent = find_percent (dp->name);
+              char *percent;
+              int nl = strlen (dp->name) + 1;
+              char *nm = alloca (nl);
+              memcpy (nm, dp->name, nl);
+              percent = find_percent (nm);
               if (percent)
                 {
+                  char *o;
+
                   /* We have to handle empty stems specially, because that
                      would be equivalent to $(patsubst %,dp->name,) which
                      will always be empty.  */
                   if (d->stem[0] == '\0')
-                    /* This needs memmove() in ISO C.  */
-                    memmove (percent, percent+1, strlen (percent));
-                  else
                     {
-                      char *o = patsubst_expand (buffer, d->stem, pattern,
-                                                 dp->name, pattern+1,
-                                                 percent+1);
-                      if (o == buffer)
-                        dp->name[0] = '\0';
-                      else
-                        {
-                          free (dp->name);
-                          dp->name = savestring (buffer, o - buffer);
-                        }
+                      memmove (percent, percent+1, strlen (percent));
+                      o = variable_buffer_output (buffer, nm, strlen (nm) + 1);
                     }
+                  else
+                    o = patsubst_expand_pat (buffer, d->stem, pattern, nm,
+                                             pattern+1, percent+1);
 
                   /* If the name expanded to the empty string, ignore it.  */
-                  if (dp->name[0] == '\0')
+                  if (buffer[0] == '\0')
                     {
                       struct dep *df = dp;
                       if (dp == new)
                         dp = new = new->next;
                       else
                         dp = dl->next = dp->next;
-                      /* @@ Are we leaking df->name here?  */
-                      df->name = 0;
                       free_dep (df);
                       continue;
                     }
+
+                  /* Save the name.  */
+                  dp->name = strcache_add_len (buffer, o - buffer);
                 }
               dl = dp;
               dp = dp->next;
@@ -579,8 +582,6 @@ expand_deps (struct file *f)
           d1->file = lookup_file (d1->name);
           if (d1->file == 0)
             d1->file = enter_file (d1->name);
-          else
-            free (d1->name);
           d1->name = 0;
           d1->staticpattern = 0;
           d1->need_2nd_expansion = 0;
@@ -635,26 +636,24 @@ snap_deps (void)
   struct file **file_slot;
   struct file **file_end;
 
-  /* Perform second expansion and enter each dependency
-     name as a file. */
+  /* Perform second expansion and enter each dependency name as a file. */
 
-  /* Expand .SUFFIXES first; it's dependencies are used for
-     $$* calculation. */
+  /* Expand .SUFFIXES first; it's dependencies are used for $$* calculation. */
   for (f = lookup_file (".SUFFIXES"); f != 0; f = f->prev)
     expand_deps (f);
 
-  /* We must use hash_dump (), because within this loop
-     we might add new files to the table, possibly causing
-     an in-situ table expansion.  */
+  /* For every target that's not .SUFFIXES, expand its dependencies.
+     We must use hash_dump (), because within this loop we might add new files
+     to the table, possibly causing an in-situ table expansion.  */
   file_slot_0 = (struct file **) hash_dump (&files, 0, 0);
   file_end = file_slot_0 + files.ht_fill;
   for (file_slot = file_slot_0; file_slot < file_end; file_slot++)
     for (f = *file_slot; f != 0; f = f->prev)
-      {
-        if (strcmp (f->name, ".SUFFIXES") != 0)
-          expand_deps (f);
-      }
+      if (strcmp (f->name, ".SUFFIXES") != 0)
+        expand_deps (f);
   free (file_slot_0);
+
+  /* Now manage all the special targets.  */
 
   for (f = lookup_file (".PRECIOUS"); f != 0; f = f->prev)
     for (d = f->deps; d != 0; d = d->next)
@@ -678,35 +677,26 @@ snap_deps (void)
 	}
 
   for (f = lookup_file (".INTERMEDIATE"); f != 0; f = f->prev)
-    {
-      /* .INTERMEDIATE with deps listed
-	 marks those deps as intermediate files.  */
-      for (d = f->deps; d != 0; d = d->next)
-	for (f2 = d->file; f2 != 0; f2 = f2->prev)
-	  f2->intermediate = 1;
-      /* .INTERMEDIATE with no deps does nothing.
-	 Marking all files as intermediates is useless
-	 since the goal targets would be deleted after they are built.  */
-    }
+    /* Mark .INTERMEDIATE deps as intermediate files.  */
+    for (d = f->deps; d != 0; d = d->next)
+      for (f2 = d->file; f2 != 0; f2 = f2->prev)
+        f2->intermediate = 1;
+    /* .INTERMEDIATE with no deps does nothing.
+       Marking all files as intermediates is useless since the goal targets
+       would be deleted after they are built.  */
 
   for (f = lookup_file (".SECONDARY"); f != 0; f = f->prev)
-    {
-      /* .SECONDARY with deps listed
-	 marks those deps as intermediate files
-	 in that they don't get rebuilt if not actually needed;
-	 but unlike real intermediate files,
-	 these are not deleted after make finishes.  */
-      if (f->deps)
-        for (d = f->deps; d != 0; d = d->next)
-          for (f2 = d->file; f2 != 0; f2 = f2->prev)
-            f2->intermediate = f2->secondary = 1;
-      /* .SECONDARY with no deps listed marks *all* files that way.  */
-      else
-        {
-          all_secondary = 1;
-          hash_map (&files, set_intermediate);
-        }
-    }
+    /* Mark .SECONDARY deps as both intermediate and secondary.  */
+    if (f->deps)
+      for (d = f->deps; d != 0; d = d->next)
+        for (f2 = d->file; f2 != 0; f2 = f2->prev)
+          f2->intermediate = f2->secondary = 1;
+    /* .SECONDARY with no deps listed marks *all* files that way.  */
+    else
+      {
+        all_secondary = 1;
+        hash_map (&files, set_intermediate);
+      }
 
   f = lookup_file (".EXPORT_ALL_VARIABLES");
   if (f != 0 && f->is_target)
@@ -853,11 +843,10 @@ file_timestamp_sprintf (char *p, FILE_TIMESTAMP ts)
     sprintf (p, "%lu", (unsigned long) t);
   p += strlen (p);
 
-  /* Append nanoseconds as a fraction, but remove trailing zeros.
-     We don't know the actual timestamp resolution, since clock_getres
-     applies only to local times, whereas this timestamp might come
-     from a remote filesystem.  So removing trailing zeros is the
-     best guess that we can do.  */
+  /* Append nanoseconds as a fraction, but remove trailing zeros.  We don't
+     know the actual timestamp resolution, since clock_getres applies only to
+     local times, whereas this timestamp might come from a remote filesystem.
+     So removing trailing zeros is the best guess that we can do.  */
   sprintf (p, ".%09d", FILE_TIMESTAMP_NS (ts));
   p += strlen (p) - 1;
   while (*p == '0')
@@ -872,7 +861,7 @@ file_timestamp_sprintf (char *p, FILE_TIMESTAMP ts)
 static void
 print_file (const void *item)
 {
-  struct file *f = (struct file *) item;
+  const struct file *f = item;
   struct dep *d;
   struct dep *ood = 0;
 
@@ -992,6 +981,39 @@ print_file_data_base (void)
 
   fputs (_("\n# files hash-table stats:\n# "), stdout);
   hash_print_stats (&files, stdout);
+}
+
+/* Verify the integrity of the data base of files.  */
+
+#define VERIFY_CACHED(_p,_n) \
+    do{\
+        if (_p->_n && _p->_n[0] && !strcache_iscached (_p->_n)) \
+          printf ("%s: Field %s not cached: %s\n", _p->name, # _n, _p->_n); \
+    }while(0)
+
+static void
+verify_file (const void *item)
+{
+  const struct file *f = item;
+  const struct dep *d;
+
+  VERIFY_CACHED (f, name);
+  VERIFY_CACHED (f, hname);
+  VERIFY_CACHED (f, vpath);
+  VERIFY_CACHED (f, stem);
+
+  /* Check the deps.  */
+  for (d = f->deps; d != 0; d = d->next)
+    {
+      VERIFY_CACHED (d, name);
+      VERIFY_CACHED (d, stem);
+    }
+}
+
+void
+verify_file_data_base (void)
+{
+  hash_map (&files, verify_file);
 }
 
 #define EXPANSION_INCREMENT(_l)  ((((_l) / 500) + 1) * 500)

@@ -42,7 +42,7 @@ static struct pattern_var *last_pattern_var;
 /* Create a new pattern-specific variable struct.  */
 
 struct pattern_var *
-create_pattern_var (char *target, char *suffix)
+create_pattern_var (const char *target, const char *suffix)
 {
   register struct pattern_var *p = xmalloc (sizeof (struct pattern_var));
 
@@ -63,14 +63,14 @@ create_pattern_var (char *target, char *suffix)
 /* Look up a target in the pattern-specific variable list.  */
 
 static struct pattern_var *
-lookup_pattern_var (struct pattern_var *start, char *target)
+lookup_pattern_var (struct pattern_var *start, const char *target)
 {
   struct pattern_var *p;
   unsigned int targlen = strlen(target);
 
   for (p = start ? start->next : pattern_vars; p != 0; p = p->next)
     {
-      char *stem;
+      const char *stem;
       unsigned int stemlen;
 
       if (p->len > targlen)
@@ -962,7 +962,7 @@ target_environment (struct file *file)
 		strcmp(v->name, "PATH") == 0)
 	      convert_Path_to_windows32(value, ';');
 #endif
-	    *result++ = concat (v->name, "=", value);
+	    *result++ = xstrdup (concat (v->name, "=", value));
 	    free (value);
 	  }
 	else
@@ -972,7 +972,7 @@ target_environment (struct file *file)
                 strcmp(v->name, "PATH") == 0)
               convert_Path_to_windows32(v->value, ';');
 #endif
-	    *result++ = concat (v->name, "=", v->value);
+	    *result++ = xstrdup (concat (v->name, "=", v->value));
 	  }
       }
 
@@ -990,10 +990,11 @@ target_environment (struct file *file)
 
 struct variable *
 do_variable_definition (const struct floc *flocp, const char *varname,
-                        char *value, enum variable_origin origin,
+                        const char *value, enum variable_origin origin,
                         enum variable_flavor flavor, int target_var)
 {
-  char *p, *alloc_value = NULL;
+  const char *p;
+  char *alloc_value = NULL;
   struct variable *v;
   int append = 0;
   int conditional = 0;
@@ -1058,7 +1059,8 @@ do_variable_definition (const struct floc *flocp, const char *varname,
             /* Paste the old and new values together in VALUE.  */
 
             unsigned int oldlen, vallen;
-            char *val;
+            const char *val;
+            char *tp;
 
             val = value;
             if (v->recursive)
@@ -1075,10 +1077,11 @@ do_variable_definition (const struct floc *flocp, const char *varname,
 
             oldlen = strlen (v->value);
             vallen = strlen (val);
-            p = alloca (oldlen + 1 + vallen + 1);
-            memcpy (p, v->value, oldlen);
-            p[oldlen] = ' ';
-            memcpy (&p[oldlen + 1], val, vallen + 1);
+            tp = alloca (oldlen + 1 + vallen + 1);
+            memcpy (tp, v->value, oldlen);
+            tp[oldlen] = ' ';
+            memcpy (&tp[oldlen + 1], val, vallen + 1);
+            p = tp;
           }
       }
     }
@@ -1106,20 +1109,19 @@ do_variable_definition (const struct floc *flocp, const char *varname,
       /* See if we can find "/bin/sh.exe", "/bin/sh.com", etc.  */
       if (__dosexec_find_on_path (p, NULL, shellpath))
 	{
-	  char *p;
+	  char *tp;
 
-	  for (p = shellpath; *p; p++)
-	    {
-	      if (*p == '\\')
-		*p = '/';
-	    }
+	  for (tp = shellpath; *tp; tp++)
+            if (*tp == '\\')
+              *tp = '/';
+
 	  v = define_variable_loc (varname, strlen (varname),
                                    shellpath, origin, flavor == f_recursive,
                                    flocp);
 	}
       else
 	{
-	  char *shellbase, *bslash;
+	  const char *shellbase, *bslash;
 	  struct variable *pathv = lookup_variable ("PATH", 4);
 	  char *path_string;
 	  char *fake_env[2];
@@ -1147,13 +1149,12 @@ do_variable_definition (const struct floc *flocp, const char *varname,
 	  fake_env[1] = 0;
 	  if (__dosexec_find_on_path (shellbase, fake_env, shellpath))
 	    {
-	      char *p;
+	      char *tp;
 
-	      for (p = shellpath; *p; p++)
-		{
-		  if (*p == '\\')
-		    *p = '/';
-		}
+	      for (tp = shellpath; *tp; tp++)
+                if (*tp == '\\')
+                  *tp = '/';
+
 	      v = define_variable_loc (varname, strlen (varname),
                                        shellpath, origin,
                                        flavor == f_recursive, flocp);
@@ -1473,7 +1474,7 @@ print_variable_data_base (void)
 /* Print all the local variables of FILE.  */
 
 void
-print_file_variables (struct file *file)
+print_file_variables (const struct file *file)
 {
   if (file->variables != 0)
     print_variable_set (file->variables->set, "# ");
@@ -1500,7 +1501,7 @@ sync_Path_environment (void)
    * Create something WINDOWS32 world can grok
    */
   convert_Path_to_windows32 (path, ';');
-  environ_path = concat ("PATH", "=", path);
+  environ_path = xstrdup (concat ("PATH", "=", path));
   putenv (environ_path);
   free (path);
 }

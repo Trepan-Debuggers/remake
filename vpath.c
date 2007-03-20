@@ -48,12 +48,10 @@ static struct vpath *general_vpath;
 
 static struct vpath *gpaths;
 
-static int selective_vpath_search (struct vpath *path, char **file,
-                                   FILE_TIMESTAMP *mtime_ptr);
 
-/* Reverse the chain of selective VPATH lists so they
-   will be searched in the order given in the makefiles
-   and construct the list from the VPATH variable.  */
+/* Reverse the chain of selective VPATH lists so they will be searched in the
+   order given in the makefiles and construct the list from the VPATH
+   variable.  */
 
 void
 build_vpath_lists ()
@@ -284,8 +282,8 @@ construct_vpath_list (char *pattern, char *dirpath)
 
       /* Set up the members.  */
       path->pattern = strcache_add (pattern);
-      path->percent = path->pattern + (percent - pattern);
       path->patlen = strlen (pattern);
+      path->percent = percent ? path->pattern + (percent - pattern) : 0;
     }
   else
     /* There were no entries, so free whatever space we allocated.  */
@@ -308,57 +306,23 @@ gpath_search (const char *file, unsigned int len)
   return 0;
 }
 
-/* Search the VPATH list whose pattern matches *FILE for a directory
-   where the name pointed to by FILE exists.  If it is found, we set *FILE to
-   the newly malloc'd name of the existing file, *MTIME_PTR (if MTIME_PTR is
-   not NULL) to its modtime (or zero if no stat call was done), and return 1.
-   Otherwise we return 0.  */
 
-int
-vpath_search (char **file, FILE_TIMESTAMP *mtime_ptr)
-{
-  struct vpath *v;
+/* Search the given VPATH list for a directory where the name pointed to by
+   FILE exists.  If it is found, we return a cached name of the existing file
+   and set *MTIME_PTR (if MTIME_PTR is not NULL) to its modtime (or zero if no
+   stat call was done).  Otherwise we return NULL.  */
 
-  /* If there are no VPATH entries or FILENAME starts at the root,
-     there is nothing we can do.  */
-
-  if (**file == '/'
-#ifdef HAVE_DOS_PATHS
-      || **file == '\\'
-      || (*file)[1] == ':'
-#endif
-      || (vpaths == 0 && general_vpath == 0))
-    return 0;
-
-  for (v = vpaths; v != 0; v = v->next)
-    if (pattern_matches (v->pattern, v->percent, *file))
-      if (selective_vpath_search (v, file, mtime_ptr))
-	return 1;
-
-  if (general_vpath != 0
-      && selective_vpath_search (general_vpath, file, mtime_ptr))
-    return 1;
-
-  return 0;
-}
-
-
-/* Search the given VPATH list for a directory where the name pointed
-   to by FILE exists.  If it is found, we set *FILE to the newly malloc'd
-   name of the existing file, *MTIME_PTR (if MTIME_PTR is not NULL) to
-   its modtime (or zero if no stat call was done), and we return 1.
-   Otherwise we return 0.  */
-
-static int
-selective_vpath_search (struct vpath *path, char **file,
+static const char *
+selective_vpath_search (struct vpath *path, const char *file,
                         FILE_TIMESTAMP *mtime_ptr)
 {
   int not_target;
-  char *name, *n;
-  char *filename;
+  char *name;
+  const char *n;
+  const char *filename;
   const char **vpath = path->searchpath;
   unsigned int maxvpath = path->maxlen;
-  register unsigned int i;
+  unsigned int i;
   unsigned int flen, vlen, name_dplen;
   int exists = 0;
 
@@ -366,73 +330,73 @@ selective_vpath_search (struct vpath *path, char **file,
      If and only if it is NOT a target, we will accept prospective
      files that don't exist but are mentioned in a makefile.  */
   {
-    struct file *f = lookup_file (*file);
+    struct file *f = lookup_file (file);
     not_target = f == 0 || !f->is_target;
   }
 
-  flen = strlen (*file);
+  flen = strlen (file);
 
   /* Split *FILE into a directory prefix and a name-within-directory.
-     NAME_DPLEN gets the length of the prefix; FILENAME gets the
-     pointer to the name-within-directory and FLEN is its length.  */
+     NAME_DPLEN gets the length of the prefix; FILENAME gets the pointer to
+     the name-within-directory and FLEN is its length.  */
 
-  n = strrchr (*file, '/');
+  n = strrchr (file, '/');
 #ifdef HAVE_DOS_PATHS
   /* We need the rightmost slash or backslash.  */
   {
-    char *bslash = strrchr(*file, '\\');
+    const char *bslash = strrchr(file, '\\');
     if (!n || bslash > n)
       n = bslash;
   }
 #endif
-  name_dplen = n != 0 ? n - *file : 0;
-  filename = name_dplen > 0 ? n + 1 : *file;
+  name_dplen = n != 0 ? n - file : 0;
+  filename = name_dplen > 0 ? n + 1 : file;
   if (name_dplen > 0)
     flen -= name_dplen + 1;
 
-  /* Allocate enough space for the biggest VPATH entry,
-     a slash, the directory prefix that came with *FILE,
-     another slash (although this one may not always be
-     necessary), the filename, and a null terminator.  */
-  name = xmalloc (maxvpath + 1 + name_dplen + 1 + flen + 1);
+  /* Get enough space for the biggest VPATH entry, a slash, the directory
+     prefix that came with FILE, another slash (although this one may not
+     always be necessary), the filename, and a null terminator.  */
+  name = alloca (maxvpath + 1 + name_dplen + 1 + flen + 1);
 
   /* Try each VPATH entry.  */
   for (i = 0; vpath[i] != 0; ++i)
     {
       int exists_in_cache = 0;
+      char *p;
 
-      n = name;
+      p = name;
 
-      /* Put the next VPATH entry into NAME at N and increment N past it.  */
+      /* Put the next VPATH entry into NAME at P and increment P past it.  */
       vlen = strlen (vpath[i]);
-      memcpy (n, vpath[i], vlen);
-      n += vlen;
+      memcpy (p, vpath[i], vlen);
+      p += vlen;
 
       /* Add the directory prefix already in *FILE.  */
       if (name_dplen > 0)
 	{
 #ifndef VMS
-	  *n++ = '/';
+	  *p++ = '/';
 #endif
-	  memcpy (n, *file, name_dplen);
-	  n += name_dplen;
+	  memcpy (p, file, name_dplen);
+	  p += name_dplen;
 	}
 
 #ifdef HAVE_DOS_PATHS
       /* Cause the next if to treat backslash and slash alike.  */
-      if (n != name && n[-1] == '\\' )
-	n[-1] = '/';
+      if (p != name && p[-1] == '\\' )
+	p[-1] = '/';
 #endif
       /* Now add the name-within-directory at the end of NAME.  */
 #ifndef VMS
-      if (n != name && n[-1] != '/')
+      if (p != name && p[-1] != '/')
 	{
-	  *n = '/';
-	  memcpy (n + 1, filename, flen + 1);
+	  *p = '/';
+	  memcpy (p + 1, filename, flen + 1);
 	}
       else
 #endif
-	memcpy (n, filename, flen + 1);
+	memcpy (p, filename, flen + 1);
 
       /* Check if the file is mentioned in a makefile.  If *FILE is not
 	 a target, that is enough for us to decide this file exists.
@@ -479,7 +443,7 @@ selective_vpath_search (struct vpath *path, char **file,
 #else
 	  /* Clobber a null into the name at the last slash.
 	     Now NAME is the name of the directory to look in.  */
-	  *n = '\0';
+	  *p = '\0';
 
 	  /* We know the directory is in the hash table now because either
 	     construct_vpath_list or the code just above put it there.
@@ -500,7 +464,7 @@ selective_vpath_search (struct vpath *path, char **file,
 
 #ifndef VMS
 	  /* Put the slash back in NAME.  */
-	  *n = '/';
+	  *p = '/';
 #endif
 
 	  if (exists_in_cache)	/* Makefile-mentioned file need not exist.  */
@@ -523,21 +487,56 @@ selective_vpath_search (struct vpath *path, char **file,
             }
 
           /* We have found a file.
-             Store the name we found into *FILE for the caller.  */
-
-          *file = savestring (name, (n + 1 - name) + flen);
-
-          /* If we get here and mtime_ptr hasn't been set, record
+             If we get here and mtime_ptr hasn't been set, record
              UNKNOWN_MTIME to indicate this.  */
           if (mtime_ptr != 0)
             *mtime_ptr = UNKNOWN_MTIME;
 
-          free (name);
-          return 1;
+          /* Store the name we found and return it.  */
+
+          return strcache_add_len (name, (p + 1 - name) + flen);
 	}
     }
 
-  free (name);
+  return 0;
+}
+
+
+/* Search the VPATH list whose pattern matches FILE for a directory where FILE
+   exists.  If it is found, return the cached name of an existing file, and
+   set *MTIME_PTR (if MTIME_PTR is not NULL) to its modtime (or zero if no
+   stat call was done).  Otherwise we return 0.  */
+
+const char *
+vpath_search (const char *file, FILE_TIMESTAMP *mtime_ptr)
+{
+  struct vpath *v;
+
+  /* If there are no VPATH entries or FILENAME starts at the root,
+     there is nothing we can do.  */
+
+  if (file[0] == '/'
+#ifdef HAVE_DOS_PATHS
+      || file[0] == '\\' || file[1] == ':'
+#endif
+      || (vpaths == 0 && general_vpath == 0))
+    return 0;
+
+  for (v = vpaths; v != 0; v = v->next)
+    if (pattern_matches (v->pattern, v->percent, file))
+      {
+        const char *p = selective_vpath_search (v, file, mtime_ptr);
+        if (p)
+          return p;
+      }
+
+  if (general_vpath != 0)
+    {
+      const char *p = selective_vpath_search (general_vpath, file, mtime_ptr);
+      if (p)
+        return p;
+    }
+
   return 0;
 }
 

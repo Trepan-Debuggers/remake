@@ -68,9 +68,9 @@ try_implicit_rule (struct file *file, unsigned int depth)
 struct idep
 {
   struct idep *next;              /* struct dep -compatible interface */
-  char *name;                     /* name of the prerequisite */
+  const char *name;               /* name of the prerequisite */
   struct file *intermediate_file; /* intermediate file, 0 otherwise */
-  char *intermediate_pattern;     /* pattern for intermediate file */
+  const char *intermediate_pattern; /* pattern for intermediate file */
   unsigned char had_stem;         /* had % substituted with stem */
   unsigned char ignore_mtime;     /* ignore_mtime flag */
 };
@@ -83,18 +83,6 @@ free_idep_chain (struct idep *p)
   for (; p != 0; p = n)
     {
       n = p->next;
-
-      if (p->name)
-        {
-          struct file *f = p->intermediate_file;
-
-          if (f != 0
-              && (f->stem < f->name || f->stem > f->name + strlen (f->name)))
-            free (f->stem);
-
-          free (p->name);
-        }
-
       free (p);
     }
 }
@@ -105,9 +93,9 @@ free_idep_chain (struct idep *p)
    length of the word.  */
 
 static char *
-get_next_word (char *buffer, unsigned int *length)
+get_next_word (const char *buffer, unsigned int *length)
 {
-  char *p = buffer, *beg;
+  const char *p = buffer, *beg;
   char c;
 
   /* Skip any leading whitespace.  */
@@ -178,7 +166,7 @@ get_next_word (char *buffer, unsigned int *length)
   if (length)
     *length = p - beg;
 
-  return beg;
+  return (char *)beg;
 }
 
 /* Search the pattern rules for a rule with an existing dependency to make
@@ -200,7 +188,7 @@ pattern_search (struct file *file, int archive,
                 unsigned int depth, unsigned int recursions)
 {
   /* Filename we are searching for a rule for.  */
-  char *filename = archive ? strchr (file->name, '(') : file->name;
+  const char *filename = archive ? strchr (file->name, '(') : file->name;
 
   /* Length of FILENAME.  */
   unsigned int namelen = strlen (filename);
@@ -225,7 +213,7 @@ pattern_search (struct file *file, int archive,
   char *depname = alloca (namelen + max_pattern_dep_length);
 
   /* The start and length of the stem of FILENAME for the current rule.  */
-  char *stem = 0;
+  const char *stem = 0;
   unsigned int stemlen = 0;
   unsigned int fullstemlen = 0;
 
@@ -257,8 +245,6 @@ pattern_search (struct file *file, int archive,
   unsigned int ri;  /* uninit checks OK */
   struct rule *rule;
   struct dep *dep, *expl_d;
-
-  char *p, *vname;
 
   struct idep *d;
   struct idep **id_ptr;
@@ -318,10 +304,10 @@ pattern_search (struct file *file, int archive,
 	  continue;
 	}
 
-      for (ti = 0; rule->targets[ti] != 0; ++ti)
+      for (ti = 0; ti < rule->num; ++ti)
 	{
-	  char *target = rule->targets[ti];
-	  char *suffix = rule->suffixes[ti];
+	  const char *target = rule->targets[ti];
+	  const char *suffix = rule->suffixes[ti];
 	  int check_lastslash;
 
 	  /* Rules that can match any filename and are not terminal
@@ -416,11 +402,12 @@ pattern_search (struct file *file, int archive,
       if (!tryrules[ri]->terminal)
 	{
 	  unsigned int j;
-	  for (j = 0; tryrules[ri]->targets[j] != 0; ++j)
+	  for (j = 0; j < tryrules[ri]->num; ++j)
 	    if (tryrules[ri]->targets[j][1] == '\0')
-	      break;
-	  if (tryrules[ri]->targets[j] != 0)
-	    tryrules[ri] = 0;
+              {
+                tryrules[ri] = 0;
+                break;
+              }
 	}
 
   /* We are going to do second expansion so initialize file variables
@@ -486,6 +473,7 @@ pattern_search (struct file *file, int archive,
 	  for (dep = rule->deps; dep != 0; dep = dep->next)
 	    {
               unsigned int len;
+              char *p;
               char *p2;
               unsigned int order_only = 0; /* Set if '|' was seen. */
 
@@ -614,14 +602,10 @@ pattern_search (struct file *file, int archive,
 
                               if (add_dir)
                                 {
-                                  char *n = d->name;
-
-                                  d->name = xmalloc (strlen (n) + l + 1);
-
-                                  memcpy (d->name, filename, l);
-                                  memcpy (d->name + l, n, strlen (n) + 1);
-
-                                  free (n);
+                                  char *n = alloca (strlen (d->name) + l + 1);
+                                  memcpy (n, filename, l);
+                                  memcpy (n+l, d->name, strlen (d->name) + 1);
+                                  d->name = strcache_add (n);
                                 }
 
                               if (had_stem)
@@ -653,7 +637,7 @@ pattern_search (struct file *file, int archive,
 
           for (d = deps; d != 0; d = d->next)
             {
-              char *name = d->name;
+              const char *name = d->name;
 
               if (file_impossible_p (name))
                 {
@@ -701,17 +685,16 @@ pattern_search (struct file *file, int archive,
 
               /* This code, given FILENAME = "lib/foo.o", dependency name
                  "lib/foo.c", and VPATH=src, searches for "src/lib/foo.c".  */
-              vname = name;
-              if (vpath_search (&vname, (FILE_TIMESTAMP *) 0))
-                {
-                  DBS (DB_IMPLICIT,
-                       (_("Found prerequisite `%s' as VPATH `%s'\n"),
-                        name,
-                        vname));
-
-                  free (vname);
-                  continue;
-                }
+              {
+                const char *vname = vpath_search (name, 0);
+                if (vname)
+                  {
+                    DBS (DB_IMPLICIT,
+                         (_("Found prerequisite `%s' as VPATH `%s'\n"),
+                          name, vname));
+                    continue;
+                  }
+              }
 
 
               /* We could not find the file in any place we should look.  Try
@@ -734,10 +717,9 @@ pattern_search (struct file *file, int archive,
                                       depth + 1,
                                       recursions + 1))
                     {
-                      d->intermediate_file = intermediate_file;
                       d->intermediate_pattern = intermediate_file->name;
-
-                      intermediate_file->name = xstrdup (name);
+                      intermediate_file->name = strcache_add (name);
+                      d->intermediate_file = intermediate_file;
                       intermediate_file = 0;
 
                       continue;
@@ -819,7 +801,7 @@ pattern_search (struct file *file, int archive,
 
   for (d = deps; d != 0; d = d->next)
     {
-      register char *s;
+      const char *s;
 
       if (d->intermediate_file != 0)
 	{
@@ -839,7 +821,7 @@ pattern_search (struct file *file, int archive,
           if (f != 0)
             f->precious = 1;
           else
-            f = enter_file (imf->name);
+            f = enter_file (strcache_add (imf->name));
 
 	  f->deps = imf->deps;
 	  f->cmds = imf->cmds;
@@ -859,9 +841,6 @@ pattern_search (struct file *file, int archive,
 	  for (dep = f->deps; dep != 0; dep = dep->next)
 	    {
 	      dep->file = enter_file (dep->name);
-              /* enter_file uses dep->name _if_ we created a new file.  */
-              if (dep->name != dep->file->name)
-                free (dep->name);
 	      dep->name = 0;
 	      dep->file->tried_implicit |= dep->changed;
 	    }
@@ -875,17 +854,10 @@ pattern_search (struct file *file, int archive,
 	{
 	  dep->file = lookup_file (s);
 	  if (dep->file == 0)
-	    /* enter_file consumes S's storage.  */
 	    dep->file = enter_file (s);
-	  else
-	    /* A copy of S is already allocated in DEP->file->name.
-	       So we can free S.  */
-	    free (s);
 	}
       else
-	{
-	  dep->name = s;
-	}
+        dep->name = s;
 
       if (d->intermediate_file == 0 && tryrules[foundrule]->terminal)
 	{
@@ -910,20 +882,22 @@ pattern_search (struct file *file, int archive,
     {
       /* Always allocate new storage, since STEM might be
          on the stack for an intermediate file.  */
-      file->stem = savestring (stem, stemlen);
+      file->stem = strcache_add_len (stem, stemlen);
       fullstemlen = stemlen;
     }
   else
     {
       int dirlen = (lastslash + 1) - filename;
+      char *sp;
 
       /* We want to prepend the directory from
 	 the original FILENAME onto the stem.  */
       fullstemlen = dirlen + stemlen;
-      file->stem = xmalloc (fullstemlen + 1);
-      memcpy (file->stem, filename, dirlen);
-      memcpy (file->stem + dirlen, stem, stemlen);
-      file->stem[fullstemlen] = '\0';
+      sp = alloca (fullstemlen + 1);
+      memcpy (sp, filename, dirlen);
+      memcpy (sp + dirlen, stem, stemlen);
+      sp[fullstemlen] = '\0';
+      file->stem = strcache_add (sp);
     }
 
   file->cmds = rule->cmds;
@@ -939,15 +913,15 @@ pattern_search (struct file *file, int archive,
   /* If this rule builds other targets, too, put the others into FILE's
      `also_make' member.  */
 
-  if (rule->targets[1] != 0)
-    for (ri = 0; rule->targets[ri] != 0; ++ri)
+  if (rule->num > 1)
+    for (ri = 0; ri < rule->num; ++ri)
       if (ri != matches[foundrule])
 	{
+          char *p = alloca (rule->lens[ri] + fullstemlen + 1);
 	  struct file *f;
 	  struct dep *new = alloc_dep ();
 
 	  /* GKM FIMXE: handle '|' here too */
-	  new->name = p = xmalloc (rule->lens[ri] + fullstemlen + 1);
 	  memcpy (p, rule->targets[ri],
                   rule->suffixes[ri] - rule->targets[ri] - 1);
 	  p += rule->suffixes[ri] - rule->targets[ri] - 1;
@@ -955,6 +929,7 @@ pattern_search (struct file *file, int archive,
 	  p += fullstemlen;
 	  memcpy (p, rule->suffixes[ri],
                   rule->lens[ri] - (rule->suffixes[ri] - rule->targets[ri])+1);
+          new->name = strcache_add (p);
 	  new->file = enter_file (new->name);
 	  new->next = file->also_make;
 

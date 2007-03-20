@@ -190,7 +190,8 @@ sub run_make_with_options {
 
 sub print_usage
 {
-   &print_standard_usage ("run_make_tests", "[-make_path make_pathname]");
+   &print_standard_usage ("run_make_tests",
+                          "[-make_path make_pathname] [-valgrind]",);
 }
 
 sub print_help

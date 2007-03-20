@@ -66,8 +66,8 @@ static int check_dep (struct file *file, unsigned int depth,
                       FILE_TIMESTAMP this_mtime, int *must_make_ptr);
 static int touch_file (struct file *file);
 static void remake_file (struct file *file);
-static FILE_TIMESTAMP name_mtime (char *name);
-static int library_search (char **lib, FILE_TIMESTAMP *mtime_ptr);
+static FILE_TIMESTAMP name_mtime (const char *name);
+static const char *library_search (const char *lib, FILE_TIMESTAMP *mtime_ptr);
 
 
 /* Remake all the goals in the `struct dep' chain GOALS.  Return -1 if nothing
@@ -913,7 +913,7 @@ notice_finished_file (struct file *file)
 	     We do this instead of just invalidating the cached time
 	     so that a vpath_search can happen.  Otherwise, it would
 	     never be done because the target is already updated.  */
-	  (void) f_mtime (d->file, 0);
+	  f_mtime (d->file, 0);
       }
   else if (file->update_status == -1)
     /* Nothing was done for FILE, but it needed nothing done.
@@ -1152,7 +1152,6 @@ f_mtime (struct file *file, int search)
 
       char *arname, *memname;
       struct file *arfile;
-      int arname_used = 0;
       time_t member_date;
 
       /* Find the archive's name.  */
@@ -1162,10 +1161,7 @@ f_mtime (struct file *file, int search)
 	 Also allow for its name to be changed via VPATH search.  */
       arfile = lookup_file (arname);
       if (arfile == 0)
-	{
-	  arfile = enter_file (arname);
-	  arname_used = 1;
-	}
+        arfile = enter_file (strcache_add (arname));
       mtime = f_mtime (arfile, search);
       check_renamed (arfile);
       if (search && strcmp (arfile->hname, arname))
@@ -1176,20 +1172,11 @@ f_mtime (struct file *file, int search)
           char *name;
 	  unsigned int arlen, memlen;
 
-	  if (!arname_used)
-	    {
-	      free (arname);
-	      arname_used = 1;
-	    }
-
-	  arname = arfile->hname;
-	  arlen = strlen (arname);
+	  arlen = strlen (arfile->hname);
 	  memlen = strlen (memname);
 
-	  /* free (file->name); */
-
 	  name = xmalloc (arlen + 1 + memlen + 2);
-	  memcpy (name, arname, arlen);
+	  memcpy (name, arfile->hname, arlen);
 	  name[arlen] = '(';
 	  memcpy (name + arlen + 1, memname, memlen);
 	  name[arlen + 1 + memlen] = ')';
@@ -1204,9 +1191,7 @@ f_mtime (struct file *file, int search)
           check_renamed (file);
 	}
 
-      if (!arname_used)
-	free (arname);
-      free (memname);
+      free (arname);
 
       file->low_resolution_time = 1;
 
@@ -1227,11 +1212,11 @@ f_mtime (struct file *file, int search)
       if (mtime == NONEXISTENT_MTIME && search && !file->ignore_vpath)
 	{
 	  /* If name_mtime failed, search VPATH.  */
-	  char *name = file->name;
-	  if (vpath_search (&name, &mtime)
+	  const char *name = vpath_search (file->name, &mtime);
+	  if (name
 	      /* Last resort, is it a library (-lxxx)?  */
-	      || (name[0] == '-' && name[1] == 'l'
-		  && library_search (&name, &mtime)))
+	      || (file->name[0] == '-' && file->name[1] == 'l'
+		  && (name = library_search (file->name, &mtime)) != 0))
 	    {
 	      if (mtime != UNKNOWN_MTIME)
 		/* vpath_search and library_search store UNKNOWN_MTIME
@@ -1350,7 +1335,7 @@ f_mtime (struct file *file, int search)
    much cleaner.  */
 
 static FILE_TIMESTAMP
-name_mtime (char *name)
+name_mtime (const char *name)
 {
   FILE_TIMESTAMP mtime;
   struct stat st;
@@ -1444,8 +1429,8 @@ name_mtime (char *name)
    suitable library file in the system library directories and the VPATH
    directories.  */
 
-static int
-library_search (char **lib, FILE_TIMESTAMP *mtime_ptr)
+static const char *
+library_search (const char *lib, FILE_TIMESTAMP *mtime_ptr)
 {
   static char *dirs[] =
     {
@@ -1466,14 +1451,15 @@ library_search (char **lib, FILE_TIMESTAMP *mtime_ptr)
 
   static char *libpatterns = NULL;
 
-  char *libname = &(*lib)[2];	/* Name without the `-l'.  */
+  const char *libname = lib+2;	/* Name without the '-l'.  */
   FILE_TIMESTAMP mtime;
 
   /* Loop variables for the libpatterns value.  */
-  char *p, *p2;
+  char *p;
+  const char *p2;
   unsigned int len;
 
-  char *file, **dp;
+  char **dp;
 
   /* If we don't have libpatterns, get it.  */
   if (!libpatterns)
@@ -1522,20 +1508,18 @@ library_search (char **lib, FILE_TIMESTAMP *mtime_ptr)
       mtime = name_mtime (libbuf);
       if (mtime != NONEXISTENT_MTIME)
 	{
-	  *lib = xstrdup (libbuf);
 	  if (mtime_ptr != 0)
 	    *mtime_ptr = mtime;
-	  return 1;
+	  return strcache_add (libbuf);
 	}
 
       /* Now try VPATH search on that.  */
 
-      file = libbuf;
-      if (vpath_search (&file, mtime_ptr))
-	{
-	  *lib = file;
-	  return 1;
-	}
+      {
+        const char *file = vpath_search (libbuf, mtime_ptr);
+        if (file)
+          return file;
+      }
 
       /* Now try the standard set of directories.  */
 
@@ -1562,10 +1546,9 @@ library_search (char **lib, FILE_TIMESTAMP *mtime_ptr)
 	  mtime = name_mtime (buf);
 	  if (mtime != NONEXISTENT_MTIME)
 	    {
-	      *lib = xstrdup (buf);
 	      if (mtime_ptr != 0)
 		*mtime_ptr = mtime;
-	      return 1;
+	      return strcache_add (buf);
 	    }
 	}
     }

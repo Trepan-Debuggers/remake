@@ -1,10 +1,31 @@
+2007-03-19  Paul Smith  <psmith@gnu.org>
+
+	* ALL: Use the strcache for all file name strings, or other
+	strings which we will never free.  The goal is to save memory by
+	avoiding duplicate copies of strings.  However, at the moment this
+	doesn't save much memory in most situations: due to secondary
+	expansion we actually save prerequisite lists twice (once before
+	the secondary expansion, and then again after it's been parsed
+	into individual file names in the dep list).  We will resolve this
+	in a future change, by doing the parsing up-front for targets
+	where secondary expansion is not set.
+
+	Moving things into the strcache also allows us to use const
+	pointers in many more places.
+
+2007-01-03  Paul Smith  <psmith@gnu.org>
+
+	* make.h (ENULLLOOP): Reset errno after each failed invocation of
+	the function, not just the first.  Fixes Savannah bug #18680.
+
 2006-11-18  Paul Smith  <psmith@gnu.org>
 
 	* strcache.c (strcache_add_len): Don't allocate a new buffer
 	unless the string is not already nil-terminated.  Technically this
 	is a violation of the standard, since we may be passed an array
 	that is not long enough to test one past.  However, in make this
-	is never true since we only use nil-terminated strings.
+	is never true since we only use nil-terminated strings or
+	sub-strings thereof.
 
 	* read.c (eval, do_define): Use cmd_prefix instead of '\t'.
 
@@ -24,6 +45,7 @@
 	* vmsify.c: Constification.  Hard to test this but I hope I didn't
 	screw it up!
 	* vpath.c: Partial constification.
+	* w32/pathstuff.c: Partial constification.
 
 2006-11-16  Eli Zaretskii  <eliz@gnu.org>
 

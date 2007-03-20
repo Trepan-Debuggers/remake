@@ -99,9 +99,9 @@ struct variable_set_list
 struct pattern_var
   {
     struct pattern_var *next;
-    char *target;
+    const char *suffix;
+    const char *target;
     unsigned int len;
-    char *suffix;
     struct variable variable;
   };
 
@@ -123,10 +123,13 @@ void restore_variable_buffer (char *buf, unsigned int len);
 /* function.c */
 int handle_function (char **op, const char **stringp);
 int pattern_matches (const char *pattern, const char *percent, const char *str);
-char *subst_expand (char *o, char *text, char *subst, char *replace,
-                    unsigned int slen, unsigned int rlen, int by_word);
-char *patsubst_expand (char *o, char *text, char *pattern, char *replace,
-                       char *pattern_percent, char *replace_percent);
+char *subst_expand (char *o, const char *text, const char *subst,
+                    const char *replace, unsigned int slen, unsigned int rlen,
+                    int by_word);
+char *patsubst_expand_pat (char *o, const char *text, const char *pattern,
+                           const char *replace, const char *pattern_percent,
+                           const char *replace_percent);
+char *patsubst_expand (char *o, const char *text, char *pattern, char *replace);
 
 /* expand.c */
 char *recursively_expand_for_file (struct variable *v, struct file *file);
@@ -139,12 +142,12 @@ struct variable_set_list *push_new_variable_scope (void);
 void pop_variable_scope (void);
 void define_automatic_variables (void);
 void initialize_file_variables (struct file *file, int reading);
-void print_file_variables (struct file *file);
+void print_file_variables (const struct file *file);
 void print_variable_set (struct variable_set *set, char *prefix);
 void merge_variable_set_lists (struct variable_set_list **to_list,
                                struct variable_set_list *from_list);
 struct variable *do_variable_definition (const struct floc *flocp,
-                                         const char *name, char *value,
+                                         const char *name, const char *value,
                                          enum variable_origin origin,
                                          enum variable_flavor flavor,
                                          int target_var);
@@ -198,7 +201,8 @@ struct variable *define_variable_in_set (const char *name, unsigned int length,
 
 char **target_environment (struct file *file);
 
-struct pattern_var *create_pattern_var (char *target, char *suffix);
+struct pattern_var *create_pattern_var (const char *target,
+                                        const char *suffix);
 
 extern int export_all_variables;
 

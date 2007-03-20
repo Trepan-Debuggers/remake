@@ -74,11 +74,11 @@ static struct hash_table function_table;
    whitespace-delimited words.  */
 
 char *
-subst_expand (char *o, char *text, char *subst, char *replace,
+subst_expand (char *o, const char *text, const char *subst, const char *replace,
               unsigned int slen, unsigned int rlen, int by_word)
 {
-  char *t = text;
-  char *p;
+  const char *t = text;
+  const char *p;
 
   if (slen == 0 && !by_word)
     {
@@ -123,10 +123,7 @@ subst_expand (char *o, char *text, char *subst, char *replace,
 	o = variable_buffer_output (o, replace, rlen);
 
       /* Advance T past the string to be replaced.  */
-      {
-        char *nt = p + slen;
-        t = nt;
-      }
+      t = p + slen;
     } while (*t != '\0');
 
   return o;
@@ -144,23 +141,15 @@ subst_expand (char *o, char *text, char *subst, char *replace,
 */
 
 char *
-patsubst_expand (char *o, char *text, char *pattern, char *replace,
-                 char *pattern_percent, char *replace_percent)
+patsubst_expand_pat (char *o, const char *text,
+                     const char *pattern, const char *replace,
+                     const char *pattern_percent, const char *replace_percent)
 {
   unsigned int pattern_prepercent_len, pattern_postpercent_len;
   unsigned int replace_prepercent_len, replace_postpercent_len;
-  char *t;
+  const char *t;
   unsigned int len;
   int doneany = 0;
-
-  /* We call find_percent on REPLACE before checking PATTERN so that REPLACE
-     will be collapsed before we call subst_expand if PATTERN has no %.  */
-  if (!replace_percent)
-    {
-      replace_percent = find_percent (replace);
-      if (replace_percent)
-        ++replace_percent;
-    }
 
   /* Record the length of REPLACE before and after the % so we don't have to
      compute these lengths more than once.  */
@@ -175,12 +164,6 @@ patsubst_expand (char *o, char *text, char *pattern, char *replace,
       replace_postpercent_len = 0;
     }
 
-  if (!pattern_percent)
-    {
-      pattern_percent = find_percent (pattern);
-      if (pattern_percent)
-        ++pattern_percent;
-    }
   if (!pattern_percent)
     /* With no % in the pattern, this is just a simple substitution.  */
     return subst_expand (o, text, pattern, replace,
@@ -250,6 +233,32 @@ patsubst_expand (char *o, char *text, char *pattern, char *replace,
     --o;
 
   return o;
+}
+
+/* Store into VARIABLE_BUFFER at O the result of scanning TEXT
+   and replacing strings matching PATTERN with REPLACE.
+   If PATTERN_PERCENT is not nil, PATTERN has already been
+   run through find_percent, and PATTERN_PERCENT is the result.
+   If REPLACE_PERCENT is not nil, REPLACE has already been
+   run through find_percent, and REPLACE_PERCENT is the result.
+   Note that we expect PATTERN_PERCENT and REPLACE_PERCENT to point to the
+   character _AFTER_ the %, not to the % itself.
+*/
+
+char *
+patsubst_expand (char *o, const char *text, char *pattern, char *replace)
+{
+  const char *pattern_percent = find_percent (pattern);
+  const char *replace_percent = find_percent (replace);
+
+  /* If there's a percent in the pattern or replacement skip it.  */
+  if (replace_percent)
+    ++replace_percent;
+  if (pattern_percent)
+    ++pattern_percent;
+
+  return patsubst_expand_pat (o, text, pattern, replace,
+                              pattern_percent, replace_percent);
 }
 
 
@@ -343,8 +352,8 @@ string_glob (char *line)
 {
   static char *result = 0;
   static unsigned int length;
-  register struct nameseq *chain;
-  register unsigned int idx;
+  struct nameseq *chain;
+  unsigned int idx;
 
   chain = multi_glob (parse_file_seq
 		      (&line, '\0', sizeof (struct nameseq),
@@ -363,7 +372,7 @@ string_glob (char *line)
   idx = 0;
   while (chain != 0)
     {
-      register char *name = chain->name;
+      const char *name = chain->name;
       unsigned int len = strlen (name);
 
       struct nameseq *next = chain->next;
@@ -383,8 +392,6 @@ string_glob (char *line)
 	  idx += len;
 	  result[idx++] = ' ';
 	}
-
-      free (name);
     }
 
   /* Kill the last space and terminate the string.  */
@@ -403,7 +410,7 @@ string_glob (char *line)
 static char *
 func_patsubst (char *o, char **argv, const char *funcname UNUSED)
 {
-  o = patsubst_expand (o, argv[2], argv[0], argv[1], (char *) 0, (char *) 0);
+  o = patsubst_expand (o, argv[2], argv[0], argv[1]);
   return o;
 }
 
@@ -417,10 +424,10 @@ func_join (char *o, char **argv, const char *funcname UNUSED)
      by the corresponding word of the second argument.
      If the two arguments have a different number of words,
      the excess words are just output separated by blanks.  */
-  register char *tp;
-  register char *pp;
-  char *list1_iterator = argv[0];
-  char *list2_iterator = argv[1];
+  const char *tp;
+  const char *pp;
+  const char *list1_iterator = argv[0];
+  const char *list2_iterator = argv[1];
   do
     {
       unsigned int len1, len2;
@@ -452,7 +459,7 @@ static char *
 func_origin (char *o, char **argv, const char *funcname UNUSED)
 {
   /* Expand the argument.  */
-  register struct variable *v = lookup_variable (argv[0], strlen (argv[0]));
+  struct variable *v = lookup_variable (argv[0], strlen (argv[0]));
   if (v == 0)
     o = variable_buffer_output (o, "undefined", 9);
   else
@@ -491,7 +498,7 @@ func_origin (char *o, char **argv, const char *funcname UNUSED)
 static char *
 func_flavor (char *o, char **argv, const char *funcname UNUSED)
 {
-  register struct variable *v = lookup_variable (argv[0], strlen (argv[0]));
+  struct variable *v = lookup_variable (argv[0], strlen (argv[0]));
 
   if (v == 0)
     o = variable_buffer_output (o, "undefined", 9);
@@ -519,8 +526,8 @@ static char *
 func_notdir_suffix (char *o, char **argv, const char *funcname)
 {
   /* Expand the argument.  */
-  char *list_iterator = argv[0];
-  char *p2 =0;
+  const char *list_iterator = argv[0];
+  const char *p2;
   int doneany =0;
   unsigned int len=0;
 
@@ -528,7 +535,7 @@ func_notdir_suffix (char *o, char **argv, const char *funcname)
   int is_notdir = !is_suffix;
   while ((p2 = find_next_token (&list_iterator, &len)) != 0)
     {
-      char *p = p2 + len;
+      const char *p = p2 + len;
 
 
       while (p >= p2 && (!is_suffix || *p != '.'))
@@ -563,13 +570,12 @@ func_notdir_suffix (char *o, char **argv, const char *funcname)
 	  doneany = 1;
 	}
     }
+
   if (doneany)
     /* Kill last space.  */
     --o;
 
-
   return o;
-
 }
 
 
@@ -577,68 +583,68 @@ static char *
 func_basename_dir (char *o, char **argv, const char *funcname)
 {
   /* Expand the argument.  */
-  char *p3 = argv[0];
-  char *p2=0;
+  const char *p3 = argv[0];
+  const char *p2;
   int doneany=0;
   unsigned int len=0;
-  char *p=0;
+
   int is_basename= streq (funcname, "basename");
   int is_dir= !is_basename;
 
   while ((p2 = find_next_token (&p3, &len)) != 0)
-	{
-	  p = p2 + len;
-	  while (p >= p2 && (!is_basename  || *p != '.'))
-	    {
-	      if (IS_PATHSEP (*p))
-		break;
-	      	    --p;
-	    }
+    {
+      const char *p = p2 + len;
+      while (p >= p2 && (!is_basename  || *p != '.'))
+        {
+          if (IS_PATHSEP (*p))
+            break;
+          --p;
+        }
 
-	  if (p >= p2 && (is_dir))
-	    o = variable_buffer_output (o, p2, ++p - p2);
-	  else if (p >= p2 && (*p == '.'))
-	    o = variable_buffer_output (o, p2, p - p2);
+      if (p >= p2 && (is_dir))
+        o = variable_buffer_output (o, p2, ++p - p2);
+      else if (p >= p2 && (*p == '.'))
+        o = variable_buffer_output (o, p2, p - p2);
 #ifdef HAVE_DOS_PATHS
-	/* Handle the "d:foobar" case */
-	  else if (p2[0] && p2[1] == ':' && is_dir)
-	    o = variable_buffer_output (o, p2, 2);
+      /* Handle the "d:foobar" case */
+      else if (p2[0] && p2[1] == ':' && is_dir)
+        o = variable_buffer_output (o, p2, 2);
 #endif
-	  else if (is_dir)
+      else if (is_dir)
 #ifdef VMS
-	    o = variable_buffer_output (o, "[]", 2);
+        o = variable_buffer_output (o, "[]", 2);
 #else
 #ifndef _AMIGA
-	    o = variable_buffer_output (o, "./", 2);
+      o = variable_buffer_output (o, "./", 2);
 #else
-	    ; /* Just a nop...  */
+      ; /* Just a nop...  */
 #endif /* AMIGA */
 #endif /* !VMS */
-	  else
-	    /* The entire name is the basename.  */
-	    o = variable_buffer_output (o, p2, len);
+      else
+        /* The entire name is the basename.  */
+        o = variable_buffer_output (o, p2, len);
 
-	  o = variable_buffer_output (o, " ", 1);
-	  doneany = 1;
-	}
-      if (doneany)
-	/* Kill last space.  */
-	--o;
+      o = variable_buffer_output (o, " ", 1);
+      doneany = 1;
+    }
 
+  if (doneany)
+    /* Kill last space.  */
+    --o;
 
- return o;
+  return o;
 }
 
 static char *
 func_addsuffix_addprefix (char *o, char **argv, const char *funcname)
 {
   int fixlen = strlen (argv[0]);
-  char *list_iterator = argv[1];
+  const char *list_iterator = argv[1];
   int is_addprefix = streq (funcname, "addprefix");
   int is_addsuffix = !is_addprefix;
 
   int doneany = 0;
-  char *p;
+  const char *p;
   unsigned int len;
 
   while ((p = find_next_token (&list_iterator, &len)) != 0)
@@ -673,8 +679,8 @@ static char *
 func_firstword (char *o, char **argv, const char *funcname UNUSED)
 {
   unsigned int i;
-  char *words = argv[0];    /* Use a temp variable for find_next_token */
-  char *p = find_next_token (&words, &i);
+  const char *words = argv[0];    /* Use a temp variable for find_next_token */
+  const char *p = find_next_token (&words, &i);
 
   if (p != 0)
     o = variable_buffer_output (o, p, i);
@@ -686,9 +692,9 @@ static char *
 func_lastword (char *o, char **argv, const char *funcname UNUSED)
 {
   unsigned int i;
-  char *words = argv[0];    /* Use a temp variable for find_next_token */
-  char *p = 0;
-  char *t;
+  const char *words = argv[0];    /* Use a temp variable for find_next_token */
+  const char *p;
+  const char *t;
 
   while ((t = find_next_token (&words, &i)))
     p = t;
@@ -703,7 +709,7 @@ static char *
 func_words (char *o, char **argv, const char *funcname UNUSED)
 {
   int i = 0;
-  char *word_iterator = argv[0];
+  const char *word_iterator = argv[0];
   char buf[20];
 
   while (find_next_token (&word_iterator, (unsigned int *) 0) != 0)
@@ -711,7 +717,6 @@ func_words (char *o, char **argv, const char *funcname UNUSED)
 
   sprintf (buf, "%d", i);
   o = variable_buffer_output (o, buf, strlen (buf));
-
 
   return o;
 }
@@ -751,18 +756,17 @@ check_numeric (const char *s, const char *msg)
 static char *
 func_word (char *o, char **argv, const char *funcname UNUSED)
 {
-  char *end_p=0;
-  int i=0;
-  char *p=0;
+  const char *end_p;
+  const char *p;
+  int i;
 
   /* Check the first argument.  */
   check_numeric (argv[0], _("non-numeric first argument to `word' function"));
-  i =  atoi (argv[0]);
+  i = atoi (argv[0]);
 
   if (i == 0)
     fatal (*expanding_var,
            _("first argument to `word' function must be greater than 0"));
-
 
   end_p = argv[1];
   while ((p = find_next_token (&end_p, 0)) != 0)
@@ -795,8 +799,8 @@ func_wordlist (char *o, char **argv, const char *funcname UNUSED)
 
   if (count > 0)
     {
-      char *p;
-      char *end_p = argv[2];
+      const char *p;
+      const char *end_p = argv[2];
 
       /* Find the beginning of the "start"th word.  */
       while (((p = find_next_token (&end_p, 0)) != 0) && --start)
@@ -816,7 +820,7 @@ func_wordlist (char *o, char **argv, const char *funcname UNUSED)
   return o;
 }
 
-static char*
+static char *
 func_findstring (char *o, char **argv, const char *funcname UNUSED)
 {
   /* Find the first occurrence of the first string in the second.  */
@@ -832,13 +836,13 @@ func_foreach (char *o, char **argv, const char *funcname UNUSED)
   /* expand only the first two.  */
   char *varname = expand_argument (argv[0], NULL);
   char *list = expand_argument (argv[1], NULL);
-  char *body = argv[2];
+  const char *body = argv[2];
 
   int doneany = 0;
-  char *list_iterator = list;
-  char *p;
+  const char *list_iterator = list;
+  const char *p;
   unsigned int len;
-  register struct variable *var;
+  struct variable *var;
 
   push_new_variable_scope ();
   var = define_variable (varname, strlen (varname), "", o_automatic, 0);
@@ -848,14 +852,8 @@ func_foreach (char *o, char **argv, const char *funcname UNUSED)
     {
       char *result = 0;
 
-      {
-	char save = p[len];
-
-	p[len] = '\0';
-	free (var->value);
-	var->value = xstrdup ((char*) p);
-	p[len] = save;
-      }
+      free (var->value);
+      var->value = savestring (p, len);
 
       result = allocated_variable_expand (body);
 
@@ -928,8 +926,8 @@ func_filter_filterout (char *o, char **argv, const char *funcname)
 
   struct hash_table a_word_table;
   int is_filter = streq (funcname, "filter");
-  char *pat_iterator = argv[0];
-  char *word_iterator = argv[1];
+  const char *pat_iterator = argv[0];
+  const char *word_iterator = argv[1];
   int literals = 0;
   int words = 0;
   int hashing = 0;
@@ -985,7 +983,8 @@ func_filter_filterout (char *o, char **argv, const char *funcname)
   hashing = (literals >= 2 && (literals * words) >= 10);
   if (hashing)
     {
-      hash_init (&a_word_table, words, a_word_hash_1, a_word_hash_2, a_word_hash_cmp);
+      hash_init (&a_word_table, words, a_word_hash_1, a_word_hash_2,
+                 a_word_hash_cmp);
       for (wp = wordhead; wp != 0; wp = wp->next)
 	{
 	  struct a_word *owp = hash_insert (&a_word_table, wp);
@@ -1009,7 +1008,7 @@ func_filter_filterout (char *o, char **argv, const char *funcname)
 	      struct a_word a_word_key;
 	      a_word_key.str = pp->str;
 	      a_word_key.length = pp->length;
-	      wp = (struct a_word *) hash_find_item (&a_word_table, &a_word_key);
+	      wp = hash_find_item (&a_word_table, &a_word_key);
 	      while (wp)
 		{
 		  wp->matched |= 1;
@@ -1049,13 +1048,13 @@ func_filter_filterout (char *o, char **argv, const char *funcname)
 static char *
 func_strip (char *o, char **argv, const char *funcname UNUSED)
 {
-  char *p = argv[0];
-  int doneany =0;
+  const char *p = argv[0];
+  int doneany = 0;
 
   while (*p != '\0')
     {
       int i=0;
-      char *word_start=0;
+      const char *word_start;
 
       while (isspace ((unsigned char)*p))
 	++p;
@@ -1072,6 +1071,7 @@ func_strip (char *o, char **argv, const char *funcname UNUSED)
   if (doneany)
     /* Kill the last space.  */
     --o;
+
   return o;
 }
 
@@ -1130,46 +1130,61 @@ func_error (char *o, char **argv, const char *funcname)
 static char *
 func_sort (char *o, char **argv, const char *funcname UNUSED)
 {
-  char **words = 0;
-  int nwords = 0;
-  register int wordi = 0;
-
-  /* Chop ARGV[0] into words and put them in WORDS.  */
-  char *t = argv[0];
+  const char *t;
+  char **words;
+  int wordi;
   char *p;
   unsigned int len;
   int i;
 
+  /* Find the maximum number of words we'll have.  */
+  t = argv[0];
+  wordi = 1;
+  while (*t != '\0')
+    {
+      char c = *(t++);
+
+      if (! isspace ((unsigned char)c))
+        continue;
+
+      ++wordi;
+
+      while (isspace ((unsigned char)*t))
+        ++t;
+    }
+
+  words = xmalloc (wordi * sizeof (char *));
+
+  /* Now assign pointers to each string in the array.  */
+  t = argv[0];
+  wordi = 0;
   while ((p = find_next_token (&t, &len)) != 0)
     {
-      if (wordi >= nwords - 1)
-	{
-	  nwords = (2 * nwords) + 5;
-	  words = xrealloc (words, nwords * sizeof (char *));
-	}
-      words[wordi++] = savestring (p, len);
+      ++t;
+      p[len] = '\0';
+      words[wordi++] = p;
     }
 
-  if (!wordi)
-    return o;
-
-  /* Now sort the list of words.  */
-  qsort (words, wordi, sizeof (char *), alpha_compare);
-
-  /* Now write the sorted list.  */
-  for (i = 0; i < wordi; ++i)
+  if (wordi)
     {
-      len = strlen (words[i]);
-      if (i == wordi - 1 || strlen (words[i + 1]) != len
-          || strcmp (words[i], words[i + 1]))
+      /* Now sort the list of words.  */
+      qsort (words, wordi, sizeof (char *), alpha_compare);
+
+      /* Now write the sorted list, uniquified.  */
+      for (i = 0; i < wordi; ++i)
         {
-          o = variable_buffer_output (o, words[i], len);
-          o = variable_buffer_output (o, " ", 1);
+          len = strlen (words[i]);
+          if (i == wordi - 1 || strlen (words[i + 1]) != len
+              || strcmp (words[i], words[i + 1]))
+            {
+              o = variable_buffer_output (o, words[i], len);
+              o = variable_buffer_output (o, " ", 1);
+            }
         }
-      free (words[i]);
+
+      /* Kill the last space.  */
+      --o;
     }
-  /* Kill the last space.  */
-  --o;
 
   free (words);
 
@@ -1215,11 +1230,9 @@ func_if (char *o, char **argv, const char *funcname UNUSED)
 
   argv += 1 + !result;
 
-  if (argv[0])
+  if (*argv)
     {
-      char *expansion;
-
-      expansion = expand_argument (argv[0], NULL);
+      char *expansion = expand_argument (*argv, NULL);
 
       o = variable_buffer_output (o, expansion, strlen (expansion));
 
@@ -1336,7 +1349,6 @@ func_and (char *o, char **argv, const char *funcname UNUSED)
 static char *
 func_wildcard (char *o, char **argv, const char *funcname UNUSED)
 {
-
 #ifdef _AMIGA
    o = wildcard_expansion (argv[0], o);
 #else
@@ -1576,22 +1588,20 @@ msdos_openpipe (int* pipedes, int *pidp, char *text)
 static char *
 func_shell (char *o, char **argv, const char *funcname UNUSED)
 {
-  char* batch_filename = NULL;
+  char *batch_filename = NULL;
 
 #ifdef __MSDOS__
   FILE *fpipe;
 #endif
   char **command_argv;
-  char *error_prefix;
+  const char *error_prefix;
   char **envp;
   int pipedes[2];
   int pid;
 
 #ifndef __MSDOS__
   /* Construct the argument list.  */
-  command_argv = construct_command_argv (argv[0],
-					 (char **) NULL, (struct file *) 0,
-                                         &batch_filename);
+  command_argv = construct_command_argv (argv[0], NULL, NULL, &batch_filename);
   if (command_argv == 0)
     return o;
 #endif
@@ -1603,6 +1613,8 @@ func_shell (char *o, char **argv, const char *funcname UNUSED)
      var was not explicitly exported, but just appeared in the
      calling environment.
 
+     See Savannah bug #10593.
+
   envp = target_environment (NILF);
   */
 
@@ -1611,35 +1623,31 @@ func_shell (char *o, char **argv, const char *funcname UNUSED)
   /* For error messages.  */
   if (reading_file && reading_file->filenm)
     {
-      error_prefix = alloca (strlen (reading_file->filenm)+11+4);
-      sprintf (error_prefix,
-	       "%s:%lu: ", reading_file->filenm, reading_file->lineno);
+      char *p = alloca (strlen (reading_file->filenm)+11+4);
+      sprintf (p, "%s:%lu: ", reading_file->filenm, reading_file->lineno);
+      error_prefix = p;
     }
   else
     error_prefix = "";
 
-#ifdef WINDOWS32
-
-  windows32_openpipe (pipedes, &pid, command_argv, envp);
-
-  if (pipedes[0] < 0) {
-	/* open of the pipe failed, mark as failed execution */
-    shell_function_completed = -1;
-
-	return o;
-  } else
-
-#elif defined(__MSDOS__)
-
+#if defined(__MSDOS__)
   fpipe = msdos_openpipe (pipedes, &pid, argv[0]);
   if (pipedes[0] < 0)
     {
       perror_with_name (error_prefix, "pipe");
       return o;
     }
+#elif defined(WINDOWS32)
+  windows32_openpipe (pipedes, &pid, command_argv, envp);
+  if (pipedes[0] < 0)
+    {
+      /* open of the pipe failed, mark as failed execution */
+      shell_function_completed = -1;
 
+      return o;
+    }
+  else
 #else
-
   if (pipe (pipedes) < 0)
     {
       perror_with_name (error_prefix, "pipe");
@@ -1647,7 +1655,6 @@ func_shell (char *o, char **argv, const char *funcname UNUSED)
     }
 
 # ifdef __EMX__
-
   /* close some handles that are unnecessary for the child process */
   CLOSE_ON_EXEC(pipedes[1]);
   CLOSE_ON_EXEC(pipedes[0]);
@@ -1655,18 +1662,14 @@ func_shell (char *o, char **argv, const char *funcname UNUSED)
   pid = child_execute_job (0, pipedes[1], command_argv, envp);
   if (pid < 0)
     perror_with_name (error_prefix, "spawn");
-
 # else /* ! __EMX__ */
-
   pid = vfork ();
   if (pid < 0)
     perror_with_name (error_prefix, "fork");
   else if (pid == 0)
     child_execute_job (0, pipedes[1], command_argv, envp);
   else
-
 # endif
-
 #endif
     {
       /* We are the parent.  */
@@ -1863,7 +1866,7 @@ func_eq (char *o, char **argv, char *funcname)
 static char *
 func_not (char *o, char **argv, char *funcname)
 {
-  char *s = argv[0];
+  const char *s = argv[0];
   int result = 0;
   while (isspace ((unsigned char)*s))
     s++;
@@ -1956,8 +1959,8 @@ static char *
 func_realpath (char *o, char **argv, const char *funcname UNUSED)
 {
   /* Expand the argument.  */
-  char *p = argv[0];
-  char *path = 0;
+  const char *p = argv[0];
+  const char *path = 0;
   int doneany = 0;
   unsigned int len = 0;
   PATH_VAR (in);
@@ -1970,14 +1973,13 @@ func_realpath (char *o, char **argv, const char *funcname UNUSED)
           strncpy (in, path, len);
           in[len] = '\0';
 
-          if
-          (
+          if (
 #ifdef HAVE_REALPATH
-            realpath (in, out)
+              realpath (in, out)
 #else
-            abspath (in, out)
+              abspath (in, out)
 #endif
-          )
+             )
             {
               o = variable_buffer_output (o, out, strlen (out));
               o = variable_buffer_output (o, " ", 1);
@@ -1990,15 +1992,15 @@ func_realpath (char *o, char **argv, const char *funcname UNUSED)
   if (doneany)
     --o;
 
- return o;
+  return o;
 }
 
 static char *
 func_abspath (char *o, char **argv, const char *funcname UNUSED)
 {
   /* Expand the argument.  */
-  char *p = argv[0];
-  char *path = 0;
+  const char *p = argv[0];
+  const char *path = 0;
   int doneany = 0;
   unsigned int len = 0;
   PATH_VAR (in);
@@ -2024,7 +2026,7 @@ func_abspath (char *o, char **argv, const char *funcname UNUSED)
   if (doneany)
     --o;
 
- return o;
+  return o;
 }
 
 /* Lookup table for builtin functions.
@@ -2268,13 +2270,11 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
   /* Are we invoking a builtin function?  */
 
   entry_p = lookup_function (fname);
-
   if (entry_p)
     {
       /* How many arguments do we have?  */
       for (i=0; argv[i+1]; ++i)
   	;
-
       return expand_builtin_function (o, i, argv+1, entry_p);
     }
 

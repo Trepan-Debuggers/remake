@@ -1124,29 +1124,28 @@ open_dirstream (const char *directory)
 static struct dirent *
 read_dirstream (__ptr_t stream)
 {
-  struct dirstream *const ds = (struct dirstream *) stream;
-  struct directory_contents *dc = ds->contents;
-  struct dirfile **dirfile_end = (struct dirfile **) dc->dirfiles.ht_vec + dc->dirfiles.ht_size;
   static char *buf;
   static unsigned int bufsz;
 
+  struct dirstream *const ds = (struct dirstream *) stream;
+  struct directory_contents *dc = ds->contents;
+  struct dirfile **dirfile_end = (struct dirfile **) dc->dirfiles.ht_vec + dc->dirfiles.ht_size;
+
   while (ds->dirfile_slot < dirfile_end)
     {
-      register struct dirfile *df = *ds->dirfile_slot++;
+      struct dirfile *df = *ds->dirfile_slot++;
       if (! HASH_VACANT (df) && !df->impossible)
 	{
-	  /* The glob interface wants a `struct dirent',
-	     so mock one up.  */
+	  /* The glob interface wants a `struct dirent', so mock one up.  */
 	  struct dirent *d;
 	  unsigned int len = df->length + 1;
-	  if (sizeof *d - sizeof d->d_name + len > bufsz)
+          unsigned int sz = sizeof (*d) - sizeof (d->d_name) + len;
+	  if (sz > bufsz)
 	    {
-	      if (buf != 0)
-		free (buf);
 	      bufsz *= 2;
-	      if (sizeof *d - sizeof d->d_name + len > bufsz)
-		bufsz = sizeof *d - sizeof d->d_name + len;
-	      buf = xmalloc (bufsz);
+	      if (sz > bufsz)
+		bufsz = sz;
+	      buf = xrealloc (buf, bufsz);
 	    }
 	  d = (struct dirent *) buf;
 #ifdef __MINGW32__
@@ -1200,7 +1199,6 @@ local_stat (const char *path, struct stat *buf)
 void
 dir_setup_glob (glob_t *gl)
 {
-  /* Bogus sunos4 compiler complains (!) about & before functions.  */
   gl->gl_opendir = open_dirstream;
   gl->gl_readdir = read_dirstream;
   gl->gl_closedir = ansi_free;

@@ -36,8 +36,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 struct dep
   {
     struct dep *next;
-    char *name;
-    char *stem;
+    const char *name;
+    const char *stem;
     struct file *file;
     unsigned int changed : 8;
     unsigned int ignore_mtime : 1;
@@ -51,7 +51,7 @@ struct dep
 struct nameseq
   {
     struct nameseq *next;
-    char *name;
+    const char *name;
   };
 
 
@@ -61,25 +61,20 @@ struct nameseq *parse_file_seq ();
 #else
 struct nameseq *parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip);
 #endif
-char *tilde_expand (char *name);
+char *tilde_expand (const char *name);
 
 #ifndef NO_ARCHIVES
 struct nameseq *ar_glob (const char *arname, const char *member_pattern, unsigned int size);
 #endif
 
-#ifndef	iAPX286
 #define dep_name(d) ((d)->name == 0 ? (d)->file->name : (d)->name)
-#else
-/* Buggy compiler can't hack this.  */
-char *dep_name ();
-#endif
 
 struct dep *alloc_dep (void);
 void free_dep (struct dep *d);
 struct dep *copy_dep_chain (const struct dep *d);
 void free_dep_chain (struct dep *d);
 void free_ns_chain (struct nameseq *n);
-struct dep *read_all_makefiles (char **makefiles);
+struct dep *read_all_makefiles (const char **makefiles);
 int eval_buffer (char *buffer);
 int update_goal_chain (struct dep *goals);
 void uniquize_deps (struct dep *);

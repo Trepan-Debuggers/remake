@@ -10,9 +10,9 @@ $dir = cwd;
 $dir =~ s,.*/([^/]+)$,../$1,;
 
 
-#  TEST #1: Make sure that multiple patterns where the same target
-#           can be built are searched even if the first one fails
-#           to match properly.
+# TEST #0: Make sure that multiple patterns where the same target
+#          can be built are searched even if the first one fails
+#          to match properly.
 #
 
 run_make_test('
@@ -45,7 +45,7 @@ a: void
 '',
 '');
 
-# TEST #2: make sure files that are built via implicit rules are marked
+# TEST #1: make sure files that are built via implicit rules are marked
 #          as targets (Savannah bug #12202).
 #
 run_make_test('
@@ -69,7 +69,7 @@ foo.in: ; @:
 foo.out');
 
 
-# TEST #3: make sure intermidite files that also happened to be
+# TEST #2: make sure intermediate files that also happened to be
 #          prerequisites are not removed (Savannah bug #12267).
 #
 run_make_test('
@@ -96,7 +96,7 @@ $dir/foo.o");
 unlink("$dir/foo.c");
 
 
-# TEST #4: make sure precious flag is set properly for targets
+# TEST #3: make sure precious flag is set properly for targets
 #          that are built via implicit rules (Savannah bug #13218).
 #
 run_make_test('
@@ -116,7 +116,7 @@ $(dir)/foo.bar:
 unlink("$dir/foo.bar");
 
 
-# TEST #5: make sure targets of a macthed implicit pattern rule never
+# TEST #4: make sure targets of a matched implicit pattern rule are
 #          never considered intermediate (Savannah bug #13022).
 #
 run_make_test('

@@ -25,14 +25,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 
 struct file
   {
-    char *name;
-    char *hname;                /* Hashed filename */
-    char *vpath;                /* VPATH/vpath pathname */
+    const char *name;
+    const char *hname;          /* Hashed filename */
+    const char *vpath;          /* VPATH/vpath pathname */
     struct dep *deps;		/* all dependencies, including duplicates */
     struct commands *cmds;	/* Commands to execute for this target.  */
     int command_flags;		/* Flags OR'd in for cmds; see commands.h.  */
-    char *stem;			/* Implicit stem, if an implicit
-    				   rule has been used */
+    const char *stem;		/* Implicit stem, if an implicit
+                                   rule has been used */
     struct dep *also_make;	/* Targets that are made by making this.  */
     FILE_TIMESTAMP last_mtime;	/* File's modtime, if already known.  */
     FILE_TIMESTAMP mtime_before_update;	/* File's modtime before any updating
@@ -101,13 +101,13 @@ extern struct file *default_goal_file, *suffix_file, *default_file;
 extern char **default_goal_name;
 
 
-struct file *lookup_file (char *name);
-struct file *enter_file (char *name);
+struct file *lookup_file (const char *name);
+struct file *enter_file (const char *name);
 struct dep *parse_prereqs (char *prereqs);
 void remove_intermediates (int sig);
 void snap_deps (void);
-void rename_file (struct file *file, char *name);
-void rehash_file (struct file *file, char *name);
+void rename_file (struct file *file, const char *name);
+void rehash_file (struct file *file, const char *name);
 void set_command_state (struct file *file, enum cmd_state state);
 void notice_finished_file (struct file *file);
 void init_hash_files (void);

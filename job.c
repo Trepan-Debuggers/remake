@@ -374,8 +374,8 @@ _is_unixy_shell (const char *path)
    Append "(ignored)" if IGNORED is nonzero.  */
 
 static void
-child_error (char *target_name, int exit_code, int exit_sig, int coredump,
-             int ignored)
+child_error (const char *target_name,
+             int exit_code, int exit_sig, int coredump, int ignored)
 {
   if (ignored && silent_flag)
     return;

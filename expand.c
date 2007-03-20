@@ -360,7 +360,9 @@ variable_expand_string (char *line, const char *string, long length)
 			if (ppercent)
                           {
                             ++ppercent;
-                            rpercent = 0;
+                            rpercent = find_percent (replace);
+                            if (rpercent)
+                              ++rpercent;
                           }
 			else
                           {
@@ -370,8 +372,8 @@ variable_expand_string (char *line, const char *string, long length)
                             --replace;
                           }
 
-                        o = patsubst_expand (o, value, pattern, replace,
-                                             ppercent, rpercent);
+                        o = patsubst_expand_pat (o, value, pattern, replace,
+                                                 ppercent, rpercent);
 
 			if (v->recursive)
 			  free (value);
