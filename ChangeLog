@@ -1,3 +1,8 @@
+2007-03-21  Paul Smith  <psmith@gnu.org>
+
+	* configure.in: Don't turn on case-insensitive file system support
+	if --disable-... is given.  Fixes Savannah bug #19348.
+
 2007-03-19  Paul Smith  <psmith@gnu.org>
 
 	* ALL: Use the strcache for all file name strings, or other
@@ -226,7 +231,7 @@
 	(die): Cleanup code was removed from here; call the new function.
 	(main): If we are re-execing, clean up the jobserver first so we
 	don't leak file descriptors.
-	Fix bug reported by Craig Fithian <craig.fithian@citigroup.com>.
+	Reported by Craig Fithian <craig.fithian@citigroup.com>
 
 2006-03-17  Paul D. Smith  <psmith@gnu.org>
 
