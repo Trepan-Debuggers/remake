@@ -19,7 +19,7 @@
 AC_INIT([GNU make],[3.81.90],[bug-make@gnu.org])
 
 AC_PREREQ(2.59)
-AC_REVISION([[$Id: configure.in,v 1.145 2006/10/01 05:38:38 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.146 2007/03/21 13:49:34 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -261,9 +261,10 @@ AM_CONDITIONAL(USE_CUSTOMS, test "$use_customs" = true)
 AH_TEMPLATE(HAVE_CASE_INSENSITIVE_FS, [Use case insensitive file names])
 AC_ARG_ENABLE(case-insensitive-file-system,
   AC_HELP_STRING([--enable-case-insensitive-file-system],
-		 [enable case insensitive file system support]),
-  case_insensitive_fs="yes" AC_DEFINE(HAVE_CASE_INSENSITIVE_FS),
-  case_insensitive_fs="no")
+		 [assume file systems are case insensitive]),
+  [case $enableval in
+     yes) AC_DEFINE(HAVE_CASE_INSENSITIVE_FS) ;;
+   esac])
 
 # See if we can handle the job server feature, and if the user wants it.
 
