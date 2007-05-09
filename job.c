@@ -358,7 +358,7 @@ _is_unixy_shell (const char *path)
 
   i = 0;
   while (known_os2shells[i] != NULL) {
-    if (stricmp (name, known_os2shells[i]) == 0) /* strcasecmp() */
+    if (strcasecmp (name, known_os2shells[i]) == 0)
       return 0; /* not a unix shell */
     i++;
   }
@@ -494,7 +494,7 @@ reap_children (int block, int err)
 	 pre-POSIX systems.  We keep the count only because... it's there...
 
 	 The test and decrement are not atomic; if it is compiled into:
-	 	register = dead_children - 1;
+		register = dead_children - 1;
 		dead_children = register;
 	 a SIGCHLD could come between the two instructions.
 	 child_handler increments dead_children.
@@ -2360,7 +2360,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
     goto slow;
 #else  /* not WINDOWS32 */
 #if defined (__MSDOS__) || defined (__EMX__)
-  else if (stricmp (shell, default_shell))
+  else if (strcasecmp (shell, default_shell))
     {
       extern int _is_unixy_shell (const char *_path);
 

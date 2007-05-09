@@ -556,6 +556,33 @@ free_ns_chain (struct nameseq *ns)
     }
 }
 
+
+#if !HAVE_STRCASECMP && !HAVE_STRICMP && !HAVE_STRCMPI
+
+/* If we don't have strcasecmp() (from POSIX), or anything that can substitute
+   for it, define our own version.  */
+
+int
+strcasecmp (const char *s1, const char *s2)
+{
+  while (1)
+    {
+      int c1 = (int) *(s1++);
+      int c2 = (int) *(s2++);
+
+      if (isalpha (c1))
+        c1 = tolower (c1);
+      if (isalpha (c2))
+        c2 = tolower (c2);
+
+      if (c1 != '\0' && c1 == c2)
+        continue;
+
+      return (c1 - c2);
+    }
+}
+#endif
+
 #ifdef	GETLOADAVG_PRIVILEGED
 
 #ifdef POSIX

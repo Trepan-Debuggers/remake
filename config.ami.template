@@ -262,8 +262,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 /* Define if you have the socket function.  */
 /* #undef HAVE_SOCKET */
 
-/* Define if you have the strcasecmp function.  */
+/* Define to 1 if you have the strcasecmp function.  */
 /* #undef HAVE_STRCASECMP */
+
+/* Define to 1 if you have the strcmpi function.  */
+/* #undef HAVE_STRCMPI */
+
+/* Define to 1 if you have the stricmp function.  */
+/* #undef HAVE_STRICMP */
 
 /* Define if you have the strerror function.  */
 #define HAVE_STRERROR 1

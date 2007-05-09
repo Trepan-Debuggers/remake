@@ -272,11 +272,10 @@ char *strsignal (int signum);
    ((a) == (b) || \
     (*(a) == *(b) && (*(a) == '\0' || !strcmp ((a) + 1, (b) + 1))))
 # ifdef HAVE_CASE_INSENSITIVE_FS
-/* This is only used on Windows/DOS platforms, so we assume strcmpi().  */
 #  define strieq(a, b) \
     ((a) == (b) \
      || (tolower((unsigned char)*(a)) == tolower((unsigned char)*(b)) \
-         && (*(a) == '\0' || !strcmpi ((a) + 1, (b) + 1))))
+         && (*(a) == '\0' || !strcasecmp ((a) + 1, (b) + 1))))
 # else
 #  define strieq(a, b) streq(a, b)
 # endif
@@ -286,9 +285,6 @@ char *strsignal (int signum);
 # define strieq(a, b) (strcmp ((a), (b)) == 0)
 #endif
 #define strneq(a, b, l) (strncmp ((a), (b), (l)) == 0)
-#ifdef  VMS
-int strcmpi (const char *,const char *);
-#endif
 
 #if defined(__GNUC__) || defined(ENUM_BITFIELDS)
 # define ENUM_BITFIELD(bits)    :bits
@@ -474,6 +470,17 @@ char *getwd ();
 # define getcwd(buf, len)       getwd (buf)
 #endif
 
+#if !HAVE_STRCASECMP
+# if HAVE_STRICMP
+#  define strcasecmp stricmp
+# elif HAVE_STRCMPI
+#  define strcasecmp strcmpi
+# else
+/* Create our own, in misc.c */
+int strcasecmp (const char *s1, const char *s2);
+# endif
+#endif
+
 extern const struct floc *reading_file;
 extern const struct floc **expanding_var;
 
@@ -542,12 +549,7 @@ extern int handling_fatal_signal;
 # endif
 #endif
 
-
 #ifdef __EMX__
-# if !HAVE_STRCASECMP
-#  define strcasecmp stricmp
-# endif
-
 # if !defined chdir
 #  define chdir _chdir2
 # endif

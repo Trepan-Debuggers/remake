@@ -226,6 +226,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 /* Define to 1 if you have the `strcasecmp' function. */
 /* #undef HAVE_STRCASECMP */
 
+/* Define to 1 if you have the `strcmpi' function. */
+#define HAVE_STRCMPI 1
+
+/* Define to 1 if you have the `stricmp' function. */
+/* #undef HAVE_STRICMP */
+
 /* Define to 1 if you have the `strchr' function. */
 #define HAVE_STRCHR 1
 

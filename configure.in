@@ -19,7 +19,7 @@
 AC_INIT([GNU make],[3.81.90],[bug-make@gnu.org])
 
 AC_PREREQ(2.59)
-AC_REVISION([[$Id: configure.in,v 1.146 2007/03/21 13:49:34 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.147 2007/05/09 02:01:53 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -68,7 +68,7 @@ AC_CHECK_HEADERS(stdlib.h locale.h unistd.h limits.h fcntl.h string.h \
 # Set a flag if we have an ANSI C compiler
 if test "$ac_cv_prog_cc_stdc" != no; then
   AC_DEFINE(HAVE_ANSI_COMPILER, 1,
-	      [Define if your compiler conforms to the ANSI C standard.])
+	      [Define to 1 if your compiler conforms to the ANSI C standard.])
 fi
 
 
@@ -119,7 +119,7 @@ if test "$make_cv_file_timestamp_hi_res" = yes; then
   AC_SEARCH_LIBS(clock_gettime, [rt posix4])
   if test "$ac_cv_search_clock_gettime" != no; then
     AC_DEFINE(HAVE_CLOCK_GETTIME, 1,
-	      [Define if you have the clock_gettime function.])
+	      [Define to 1 if you have the clock_gettime function.])
   fi
 fi
 
@@ -143,7 +143,7 @@ AC_CACHE_CHECK([for standard gettimeofday], ac_cv_func_gettimeofday,
 		  [ac_cv_func_gettimeofday="no (cross-compiling)"])])
 if test "$ac_cv_func_gettimeofday" = yes; then
   AC_DEFINE(HAVE_GETTIMEOFDAY, 1,
-	    [Define if you have a standard gettimeofday function])
+	    [Define to 1 if you have a standard gettimeofday function])
 fi
 
 AC_CHECK_FUNCS( strdup mkstemp mktemp fdopen \
@@ -153,6 +153,11 @@ AC_CHECK_FUNCS( strdup mkstemp mktemp fdopen \
 		lstat readlink atexit)
 
 AC_FUNC_SETVBUF_REVERSED
+
+# Rumor has it that strcasecmp lives in -lresolv on some odd systems.
+# It doesn't hurt much to use our own if we can't find it so I don't
+# make the effort here.
+AC_CHECK_FUNCS(strcasecmp strcmpi stricmp)
 
 # strcoll() is used by the GNU glob library
 AC_FUNC_STRCOLL
@@ -176,7 +181,7 @@ if test "$ac_cv_header_nlist_h" = yes; then
 	[make_cv_nlist_struct=no])
   if test "$make_cv_nlist_struct" = yes; then
     AC_DEFINE(NLIST_STRUCT, 1,
-       [Define if struct nlist.n_name is a pointer rather than an array.])
+       [Define to 1 if struct nlist.n_name is a pointer rather than an array.])
   fi
 fi
 
@@ -217,7 +222,7 @@ AC_CACHE_VAL(make_cv_union_wait, [dnl
     [make_cv_union_wait=no])])
 if test "$make_cv_union_wait" = yes; then
   AC_DEFINE(HAVE_UNION_WAIT, 1,
-            [Define this if you have the \`union wait' type in <sys/wait.h>.])
+            [Define to 1 if you have the \`union wait' type in <sys/wait.h>.])
 fi
 AC_MSG_RESULT($make_cv_union_wait)
 
@@ -225,7 +230,7 @@ AC_MSG_RESULT($make_cv_union_wait)
 # If we're building on Windows/DOS/OS/2, add some support for DOS drive specs.
 if test "$PATH_SEPARATOR" = ';'; then
   AC_DEFINE(HAVE_DOS_PATHS, 1,
-            [Define this if your system requires backslashes or drive specs in pathnames.])
+            [Define to 1 if your system requires backslashes or drive specs in pathnames.])
 fi
 
 
@@ -287,7 +292,7 @@ AC_CACHE_CHECK(for SA_RESTART, make_cv_sa_restart, [
 
 if test "$make_cv_sa_restart" != no; then
   AC_DEFINE(HAVE_SA_RESTART, 1,
-     [Define if <signal.h> defines the SA_RESTART constant.])
+     [Define to 1 if <signal.h> defines the SA_RESTART constant.])
 fi
 
 # enable make_cv_sa_restart for OS/2 so that the jobserver will be enabled,
@@ -299,7 +304,7 @@ esac
 case "$ac_cv_func_pipe/$ac_cv_func_sigaction/$make_cv_sa_restart/$has_wait_nohang/$make_cv_job_server" in
   yes/yes/yes/yes/yes)
     AC_DEFINE(MAKE_JOBSERVER, 1,
-              [Define this to enable job server support in GNU make.]);;
+              [Define to 1 to enable job server support in GNU make.]);;
 esac
 
 # if we have both lstat() and readlink() then we can support symlink
@@ -307,7 +312,7 @@ esac
 case "$ac_cv_func_lstat/$ac_cv_func_readlink" in
   yes/yes)
     AC_DEFINE(MAKE_SYMLINKS, 1,
-              [Define this to enable symbolic link timestamp checking.]);;
+              [Define to 1 to enable symbolic link timestamp checking.]);;
 esac
 
 # Find the SCCS commands, so we can include them in our default rules.
@@ -334,7 +339,7 @@ if ( /usr/sccs/admin -n s.conftest || admin -n s.conftest ) >/dev/null 2>&1 &&
     fi])
   case "$make_cv_sys_get_minus_G" in
     yes) AC_DEFINE(SCCS_GET_MINUS_G, 1,
-           [Define this if the SCCS 'get' command understands the '-G<file>' option.]);;
+           [Define to 1 if the SCCS 'get' command understands the '-G<file>' option.]);;
   esac
 fi
 rm -f s.conftest conftoast

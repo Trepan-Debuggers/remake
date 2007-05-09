@@ -2274,7 +2274,7 @@ func_call (char *o, char **argv, const char *funcname UNUSED)
     {
       /* How many arguments do we have?  */
       for (i=0; argv[i+1]; ++i)
-  	;
+        ;
       return expand_builtin_function (o, i, argv+1, entry_p);
     }
 
