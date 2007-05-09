@@ -1,3 +1,25 @@
+2007-05-08  Paul Smith  <psmith@gnu.org>
+
+	Fix Savannah bug #19656:
+
+	* configure.in: Check for strcasecmp(), strcmpi(), and stricmp().
+
+	* make.h: Change all case-insensitive string compares to use
+	strcasecmp() (from POSIX).  If we don't have that but do have one
+	of the others, define strcasecmp to be one of those instead.  If
+	we don't have any, declare a prototype for our own version.
+
+	* misc.c (strcasecmp): Use this if we can't find any native
+	case-insensitive string comparison function.
+	* vmsfunctions.c: Remove strcmpi(); we'll use misc.c:strcasecmp().
+	* main.c (find_and_set_default_shell): Use strcasecmp() instead of
+	strcmpi().
+	* job.c (_is_unixy_shell, construct_command_argv_internal): Use
+	strcasecmp() instead of stricmp().
+	* hash.h (ISTRING_COMPARE, return_ISTRING_COMPARE): Use strcasecmp()
+	instead of strcmpi().
+	* acinclude.m4: Remove the strcasecmp() check from here.
+
 2007-03-21  Paul Smith  <psmith@gnu.org>
 
 	* configure.in: Don't turn on case-insensitive file system support

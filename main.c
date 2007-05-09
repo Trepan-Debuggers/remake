@@ -1,6 +1,6 @@
 /* Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software
+1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007 Free Software
 Foundation, Inc.
 This file is part of GNU Make.
 
@@ -761,11 +761,11 @@ find_and_set_default_shell (const char *token)
   if (((tokend == search_token
         || (tokend > search_token
             && (tokend[-1] == '/' || tokend[-1] == '\\')))
-       && !strcmpi (tokend, "cmd"))
+       && !strcasecmp (tokend, "cmd"))
       || ((tokend - 4 == search_token
            || (tokend - 4 > search_token
                && (tokend[-5] == '/' || tokend[-5] == '\\')))
-          && !strcmpi (tokend - 4, "cmd.exe"))) {
+          && !strcasecmp (tokend - 4, "cmd.exe"))) {
     batch_mode_shell = 1;
     unixy_shell = 0;
     sprintf (sh_path, "%s", search_token);

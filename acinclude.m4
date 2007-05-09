@@ -62,9 +62,6 @@ fi
 #
 AC_CHECK_FUNCS(gethostbyname,,[
 	CF_RECHECK_FUNC(gethostbyname,nsl,cf_cv_netlibs)])
-#
-AC_CHECK_FUNCS(strcasecmp,,[
-	CF_RECHECK_FUNC(strcasecmp,resolv,cf_cv_netlibs)])
 ])
 LIBS="$LIBS $cf_cv_netlibs"
 test $cf_test_netlibs = no && echo "$cf_cv_netlibs" >&AC_FD_MSG
