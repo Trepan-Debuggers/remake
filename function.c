@@ -693,7 +693,7 @@ func_lastword (char *o, char **argv, const char *funcname UNUSED)
 {
   unsigned int i;
   const char *words = argv[0];    /* Use a temp variable for find_next_token */
-  const char *p;
+  const char *p = NULL;
   const char *t;
 
   while ((t = find_next_token (&words, &i)))
