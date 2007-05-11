@@ -803,7 +803,7 @@ notice_finished_file (struct file *file)
 
   if (touch_flag
       /* The update status will be:
-	 	-1	if this target was not remade;
+		-1	if this target was not remade;
 		0	if 0 or more commands (+ or ${MAKE}) were run and won;
 		1	if some commands were run and lost.
 	 We touch the target if it has commands which either were not run

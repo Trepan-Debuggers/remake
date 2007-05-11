@@ -4,7 +4,7 @@
 
 @include version.texi
 @set EDITION 0.70
-@set RCSID $Id: make.texi,v 1.46 2006/10/01 05:38:38 psmith Exp $
+@set RCSID $Id: make.texi,v 1.47 2007/05/11 20:57:21 psmith Exp $
 
 @settitle GNU @code{make}
 @setchapternewpage odd
@@ -2939,10 +2939,6 @@ If @code{.SECONDEXPANSION} is mentioned as a target anywhere in the
 makefile, then all prerequisite lists defined @emph{after} it appears
 will be expanded a second time after all makefiles have been read in.
 @xref{Secondary Expansion, ,Secondary Expansion}.
-
-The prerequisites of the special target @code{.SUFFIXES} are the list
-of suffixes to be used in checking for suffix rules.
-@xref{Suffix Rules, , Old-Fashioned Suffix Rules}.
 
 @findex .DELETE_ON_ERROR
 @item .DELETE_ON_ERROR
@@ -8390,17 +8386,18 @@ implemented in @code{make} as suffix rules, so which ones will be
 defined depends on the @dfn{suffix list} (the list of prerequisites of
 the special target @code{.SUFFIXES}).  The default suffix list is:
 @code{.out}, @code{.a}, @code{.ln}, @code{.o}, @code{.c}, @code{.cc},
-@code{.C}, @code{.cpp}, @code{.p}, @code{.f}, @code{.F}, @code{.r}, @code{.y},
-@code{.l}, @code{.s}, @code{.S}, @code{.mod}, @code{.sym}, @code{.def},
-@code{.h}, @code{.info}, @code{.dvi}, @code{.tex}, @code{.texinfo},
-@code{.texi}, @code{.txinfo}, @code{.w}, @code{.ch} @code{.web},
-@code{.sh}, @code{.elc}, @code{.el}.  All of the implicit rules
-described below whose prerequisites have one of these suffixes are
-actually suffix rules.  If you modify the suffix list, the only
-predefined suffix rules in effect will be those named by one or two of
-the suffixes that are on the list you specify; rules whose suffixes fail
-to be on the list are disabled.  @xref{Suffix Rules, ,Old-Fashioned
-Suffix Rules}, for full details on suffix rules.
+@code{.C}, @code{.cpp}, @code{.p}, @code{.f}, @code{.F}, @code{.m},
+@code{.r}, @code{.y}, @code{.l}, @code{.ym}, @code{.lm}, @code{.s},
+@code{.S}, @code{.mod}, @code{.sym}, @code{.def}, @code{.h},
+@code{.info}, @code{.dvi}, @code{.tex}, @code{.texinfo}, @code{.texi},
+@code{.txinfo}, @code{.w}, @code{.ch} @code{.web}, @code{.sh},
+@code{.elc}, @code{.el}.  All of the implicit rules described below
+whose prerequisites have one of these suffixes are actually suffix
+rules.  If you modify the suffix list, the only predefined suffix
+rules in effect will be those named by one or two of the suffixes that
+are on the list you specify; rules whose suffixes fail to be on the
+list are disabled.  @xref{Suffix Rules, ,Old-Fashioned Suffix Rules},
+for full details on suffix rules.
 
 @table @asis
 @item Compiling C programs
@@ -8731,20 +8728,10 @@ Program for compiling assembly files; default @samp{as}.
 Program for compiling C programs; default @samp{cc}.
 @pindex cc
 
-@item CO
-@vindex CO
-Program for checking out files from RCS; default @samp{co}.
-@pindex cc
-
 @item CXX
 @vindex CXX
 Program for compiling C++ programs; default @samp{g++}.
 @pindex g++
-
-@item CO
-@vindex CO
-Program for extracting a file from RCS; default @samp{co}.
-@pindex co
 
 @item CPP
 @vindex CPP
@@ -8756,6 +8743,21 @@ default @samp{$(CC) -E}.
 Program for compiling or preprocessing Fortran and Ratfor programs;
 default @samp{f77}.
 @pindex f77
+
+@item M2C
+@vindex M2C
+Program to use to compile Modula-2 source code; default @samp{m2c}.
+@pindex m2c
+
+@item PC
+@vindex PC
+Program for compiling Pascal programs; default @samp{pc}.
+@pindex pc
+
+@item CO
+@vindex CO
+Program for extracting a file from RCS; default @samp{co}.
+@pindex co
 
 @item GET
 @vindex GET
@@ -8776,16 +8778,6 @@ Program to use to turn Yacc grammars into source code; default @samp{yacc}.
 @vindex LINT
 Program to use to run lint on source code; default @samp{lint}.
 @pindex lint
-
-@item M2C
-@vindex M2C
-Program to use to compile Modula-2 source code; default @samp{m2c}.
-@pindex m2c
-
-@item PC
-@vindex PC
-Program for compiling Pascal programs; default @samp{pc}.
-@pindex pc
 
 @item MAKEINFO
 @vindex MAKEINFO

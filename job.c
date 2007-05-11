@@ -1482,10 +1482,10 @@ start_waiting_job (struct child *c)
 void
 new_job (struct file *file)
 {
-  register struct commands *cmds = file->cmds;
-  register struct child *c;
+  struct commands *cmds = file->cmds;
+  struct child *c;
   char **lines;
-  register unsigned int i;
+  unsigned int i;
 
   /* Let any previously decided-upon jobs that are waiting
      for the load to go down start before this new one.  */
@@ -1723,7 +1723,16 @@ new_job (struct file *file)
 
   /* The job is now primed.  Start it running.
      (This will notice if there are in fact no commands.)  */
-  (void) start_waiting_job (c);
+  if (cmds->fileinfo.filenm)
+    DB (DB_BASIC, (_("Invoking commands from %s:%lu to update target `%s'.\n"),
+                   cmds->fileinfo.filenm, cmds->fileinfo.lineno,
+                   c->file->name));
+  else
+    DB (DB_BASIC, (_("Invoking builtin commands to update target `%s'.\n"),
+                   c->file->name));
+
+
+  start_waiting_job (c);
 
   if (job_slots == 1 || not_parallel)
     /* Since there is only one job slot, make things run linearly.

@@ -1,3 +1,19 @@
+2007-05-11  Paul Smith  <psmith@gnu.org>
+
+	* job.c (new_job): Add debug info to specify where make found the
+	command script it is running to build a target.
+	Fixes Savannah bug #18617.
+
+	* default.c (default_suffixes,default_suffix_rules,default_variables):
+	Add support for Objective C.  Fixes Savannah bug #16389.
+	Based on a patch provided by Peter O'Gorman <peter@pogma.com>.
+
+	* function.c (func_lastword): Initialize p.
+
+	* doc/make.texi (Eval Function, Implicit Variables, Special Targets):
+	Doc fixes noticed by Bob <twobanjobob@sbcglobal.net>.  Patch from
+	Dave Korn <dave.korn@artimi.com>
+
 2007-05-08  Paul Smith  <psmith@gnu.org>
 
 	Fix Savannah bug #19656:
