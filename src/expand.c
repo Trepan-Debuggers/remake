@@ -1,4 +1,4 @@
-/* $Id: expand.c,v 1.13 2006/12/18 10:12:25 rockyb Exp $
+/* $Id: expand.c,v 1.14 2007/06/19 11:50:52 rockyb Exp $
 Variable expansion functions for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software
@@ -453,20 +453,23 @@ char *
 variable_expand_for_file (char *psz_line, file_t *file)
 {
   char *result;
-  variable_set_list_t *save;
+  variable_set_list_t *savev;
+  const floc_t *savef;
 
   if (file == 0)
     return variable_expand (psz_line);
 
-  save = current_variable_set_list;
+  savev = current_variable_set_list;
   current_variable_set_list = file->variables;
+
+  savef = reading_file;
   if (file->cmds && file->cmds->fileinfo.filenm)
     reading_file = &file->cmds->fileinfo;
   else
     reading_file = 0;
   result = variable_expand (psz_line);
-  current_variable_set_list = save;
-  reading_file = 0;
+  current_variable_set_list = savev;
+  reading_file = savef;
 
   return result;
 }

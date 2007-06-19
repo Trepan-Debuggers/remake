@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.19 2006/02/09 05:58:52 rockyb Exp $
+@set RCSID $Id: make.texi,v 1.20 2007/06/19 11:50:51 rockyb Exp $
 @set EDITION 0.61
 @set VERSION 3.80+dbg
 @set UPDATED 25 Dec 2005
@@ -1537,7 +1537,7 @@ constructs within the makefile.  We say that expansion is
 @code{make} will expand any variables or functions in that section of a
 construct as the makefile is parsed.  We say that expansion is
 @dfn{deferred} if expansion is not performed immediately.  Expansion of
-deferred construct is not performed until either the construct appears
+a deferred construct is not performed until either the construct appears
 later in an immediate context, or until the second phase.
 
 You may not be familiar with some of these constructs yet.  You can
