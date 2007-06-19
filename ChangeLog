@@ -1,3 +1,13 @@
+2007-06-13  Paul Smith  <psmith@gnu.org>
+
+	* doc/make.texi (Reading Makefiles): "Expansion of deferred" ->
+	"Expansion of a deferred"
+	Fixes Savannah bug #20018.
+
+	* expand.c (variable_expand_for_file): Preserve the value of
+	reading_file rather than setting it to 0 at the end.
+	Fixes Savannah bug #20033.
+
 2007-05-11  Paul Smith  <psmith@gnu.org>
 
 	* job.c (new_job): Add debug info to specify where make found the

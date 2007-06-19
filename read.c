@@ -463,7 +463,7 @@ eval (struct ebuffer *ebuf, int set_default)
 
 #define record_waiting_files()						      \
   do									      \
-    { 									      \
+    {									      \
       if (filenames != 0)						      \
         {                                                                     \
 	  fi.lineno = tgts_started;                                           \
@@ -570,7 +570,7 @@ eval (struct ebuffer *ebuf, int set_default)
       remove_comments (collapsed);
 
       /* Compare a word, both length and contents. */
-#define	word1eq(s) 	(wlen == sizeof(s)-1 && strneq (s, p, sizeof(s)-1))
+#define	word1eq(s)	(wlen == sizeof(s)-1 && strneq (s, p, sizeof(s)-1))
       p = collapsed;
       while (isspace ((unsigned char)*p))
 	++p;
@@ -608,7 +608,7 @@ eval (struct ebuffer *ebuf, int set_default)
 
       if (!in_ignored_define)
 	{
- 	  int i = conditional_line (p, wlen, fstart);
+	  int i = conditional_line (p, wlen, fstart);
           if (i != -2)
             {
               if (i == -1)

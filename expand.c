@@ -460,20 +460,25 @@ char *
 variable_expand_for_file (const char *line, struct file *file)
 {
   char *result;
-  struct variable_set_list *save;
+  struct variable_set_list *savev;
+  const struct floc *savef;
 
   if (file == 0)
     return variable_expand (line);
 
-  save = current_variable_set_list;
+  savev = current_variable_set_list;
   current_variable_set_list = file->variables;
+
+  savef = reading_file;
   if (file->cmds && file->cmds->fileinfo.filenm)
     reading_file = &file->cmds->fileinfo;
   else
     reading_file = 0;
+
   result = variable_expand (line);
-  current_variable_set_list = save;
-  reading_file = 0;
+
+  current_variable_set_list = savev;
+  reading_file = savef;
 
   return result;
 }
