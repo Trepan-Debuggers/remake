@@ -4,7 +4,7 @@
 
 @include version.texi
 @set EDITION 0.70
-@set RCSID $Id: make.texi,v 1.48 2007/06/19 04:47:58 psmith Exp $
+@set RCSID $Id: make.texi,v 1.49 2007/07/04 19:35:21 psmith Exp $
 
 @settitle GNU @code{make}
 @setchapternewpage odd
@@ -26,7 +26,7 @@ This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Make Manual}, for GNU @code{make} version @value{VERSION}.
 
 Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-1996, 1997, 1998, 1999, 2000, 2002, 2003, 2004, 2005, 2006
+1996, 1997, 1998, 1999, 2000, 2002, 2003, 2004, 2005, 2006, 2007
 Free Software Foundation, Inc.
 
 @quotation
@@ -38,9 +38,9 @@ and with the Back-Cover Texts as in (a) below.  A copy of the
 license is included in the section entitled ``GNU Free Documentation
 License.''
 
-(a) The FSF's Back-Cover Text is: ``You have freedom to copy and modify
-this GNU Manual, like GNU software.  Copies published by the Free
-Software Foundation raise funds for GNU development.''
+(a) The FSF's Back-Cover Text is: ``You are free to copy and modify
+this GNU Manual. Buying copies from GNU Press supports the FSF in
+developing GNU and promoting software freedom.''
 @end quotation
 @end copying
 
