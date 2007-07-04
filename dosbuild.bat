@@ -1,19 +1,20 @@
 @echo off
-rem Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free
-rem Software Foundation, Inc.
+rem Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+rem Free Software Foundation, Inc.
 rem This file is part of GNU Make.
-
-rem GNU Make is free software; you can redistribute it and/or modify it under the
-rem terms of the GNU General Public License as published by the Free Software
-rem Foundation; either version 2, or (at your option) any later version.
-
-rem GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
-rem WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-rem A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-
-rem You should have received a copy of the GNU General Public License along with
-rem GNU Make; see the file COPYING.  If not, write to the Free Software
-rem Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+rem
+rem GNU Make is free software; you can redistribute it and/or modify it under
+rem the terms of the GNU General Public License as published by the Free
+rem Software Foundation; either version 3 of the License, or (at your option)
+rem any later version.
+rem
+rem GNU Make is distributed in the hope that it will be useful, but WITHOUT
+rem ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+rem FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for.
+rem more details.
+rem
+rem You should have received a copy of the GNU General Public License along
+rem with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 echo Building Make for MSDOS
 

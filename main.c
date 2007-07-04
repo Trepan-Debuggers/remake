@@ -6,15 +6,15 @@ This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2, or (at your option) any later version.
+Foundation; either version 3 of the License, or (at your option) any later
+version.
 
 GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-GNU Make; see the file COPYING.  If not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
+this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "make.h"
 #include "dep.h"
@@ -2956,25 +2956,25 @@ print_version (void)
     /* Do it only once.  */
     return;
 
+  printf ("%sGNU Make %s\n", precede, version_string);
+
+  if (!remote_description || *remote_description == '\0')
+    printf (_("%sBuilt for %s\n"), precede, make_host);
+  else
+    printf (_("%sBuilt for %s (%s)\n"),
+            precede, make_host, remote_description);
+
   /* Print this untranslated.  The coding standards recommend translating the
      (C) to the copyright symbol, but this string is going to change every
      year, and none of the rest of it should be translated (including the
      word "Copyright", so it hardly seems worth it.  */
 
-  printf ("%sGNU Make %s\n\
-%sCopyright (C) 2006  Free Software Foundation, Inc.\n",
-          precede, version_string, precede);
+  printf ("%sCopyright (C) 2007  Free Software Foundation, Inc.\n", precede);
 
-  printf (_("%sThis is free software; see the source for copying conditions.\n\
-%sThere is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A\n\
-%sPARTICULAR PURPOSE.\n"),
+  printf (_("%sLicense GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n\
+%sThis is free software: you are free to change and redistribute it.\n\
+%sThere is NO WARRANTY, to the extent permitted by law.\n"),
             precede, precede, precede);
-
-  if (!remote_description || *remote_description == '\0')
-    printf (_("\n%sThis program built for %s\n"), precede, make_host);
-  else
-    printf (_("\n%sThis program built for %s (%s)\n"),
-            precede, make_host, remote_description);
 
   printed_version = 1;
 

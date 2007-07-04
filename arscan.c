@@ -1,20 +1,20 @@
 /* Library function for scanning an archive file.
 Copyright (C) 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software Foundation,
-Inc.
+1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007 Free Software
+Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2, or (at your option) any later version.
+Foundation; either version 3 of the License, or (at your option) any later
+version.
 
 GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-GNU Make; see the file COPYING.  If not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
+this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "make.h"
 
@@ -563,11 +563,11 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
 #ifndef AIAMAG
 	  /* If the member name is "//" or "ARFILENAMES/" this may be
 	     a list of file name mappings.  The maximum file name
- 	     length supported by the standard archive format is 14
- 	     characters.  This member will actually always be the
- 	     first or second entry in the archive, but we don't check
- 	     that.  */
- 	  is_namemap = (!strcmp (name, "//")
+	     length supported by the standard archive format is 14
+	     characters.  This member will actually always be the
+	     first or second entry in the archive, but we don't check
+	     that.  */
+	  is_namemap = (!strcmp (name, "//")
 			|| !strcmp (name, "ARFILENAMES/"));
 #endif	/* Not AIAMAG. */
 	  /* On some systems, there is a slash after each member name.  */
@@ -575,35 +575,35 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
 	    *p = '\0';
 
 #ifndef AIAMAG
- 	  /* If the member name starts with a space or a slash, this
- 	     is an index into the file name mappings (used by GNU ar).
- 	     Otherwise if the member name looks like #1/NUMBER the
- 	     real member name appears in the element data (used by
- 	     4.4BSD).  */
- 	  if (! is_namemap
- 	      && (name[0] == ' ' || name[0] == '/')
- 	      && namemap != 0)
+	  /* If the member name starts with a space or a slash, this
+	     is an index into the file name mappings (used by GNU ar).
+	     Otherwise if the member name looks like #1/NUMBER the
+	     real member name appears in the element data (used by
+	     4.4BSD).  */
+	  if (! is_namemap
+	      && (name[0] == ' ' || name[0] == '/')
+	      && namemap != 0)
 	    {
 	      name = namemap + atoi (name + 1);
 	      long_name = 1;
 	    }
- 	  else if (name[0] == '#'
- 		   && name[1] == '1'
- 		   && name[2] == '/')
- 	    {
- 	      int namesize = atoi (name + 3);
+	  else if (name[0] == '#'
+		   && name[1] == '1'
+		   && name[2] == '/')
+	    {
+	      int namesize = atoi (name + 3);
 
- 	      name = alloca (namesize + 1);
- 	      nread = read (desc, name, namesize);
- 	      if (nread != namesize)
- 		{
- 		  close (desc);
- 		  return -2;
- 		}
- 	      name[namesize] = '\0';
+	      name = alloca (namesize + 1);
+	      nread = read (desc, name, namesize);
+	      if (nread != namesize)
+		{
+		  close (desc);
+		  return -2;
+		}
+	      name[namesize] = '\0';
 
 	      long_name = 1;
- 	    }
+	    }
 #endif /* Not AIAMAG. */
 	}
 
@@ -644,7 +644,7 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
 
 #ifdef AIAMAGBIG
 	if (big_archive)
-          sscanf (member_header_big.ar_nxtmem, "%20ld", &member_offset);
+         sscanf (member_header_big.ar_nxtmem, "%20ld", &member_offset);
 	else
 #endif
 	  sscanf (member_header.ar_nxtmem, "%12ld", &member_offset);
@@ -656,38 +656,38 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
 	  }
 #else
 
- 	/* If this member maps archive names, we must read it in.  The
- 	   name map will always precede any members whose names must
- 	   be mapped.  */
+	/* If this member maps archive names, we must read it in.  The
+	   name map will always precede any members whose names must
+	   be mapped.  */
 	if (is_namemap)
- 	  {
- 	    char *clear;
- 	    char *limit;
+	  {
+	    char *clear;
+	    char *limit;
 
- 	    namemap = alloca (eltsize);
- 	    nread = read (desc, namemap, eltsize);
- 	    if (nread != eltsize)
- 	      {
- 		(void) close (desc);
- 		return -2;
- 	      }
+	    namemap = alloca (eltsize);
+	    nread = read (desc, namemap, eltsize);
+	    if (nread != eltsize)
+	      {
+		(void) close (desc);
+		return -2;
+	      }
 
- 	    /* The names are separated by newlines.  Some formats have
- 	       a trailing slash.  Null terminate the strings for
- 	       convenience.  */
- 	    limit = namemap + eltsize;
- 	    for (clear = namemap; clear < limit; clear++)
- 	      {
- 		if (*clear == '\n')
- 		  {
- 		    *clear = '\0';
- 		    if (clear[-1] == '/')
- 		      clear[-1] = '\0';
- 		  }
- 	      }
+	    /* The names are separated by newlines.  Some formats have
+	       a trailing slash.  Null terminate the strings for
+	       convenience.  */
+	    limit = namemap + eltsize;
+	    for (clear = namemap; clear < limit; clear++)
+	      {
+		if (*clear == '\n')
+		  {
+		    *clear = '\0';
+		    if (clear[-1] == '/')
+		      clear[-1] = '\0';
+		  }
+	      }
 
 	    is_namemap = 0;
- 	  }
+	  }
 
 	member_offset += AR_HDR_SIZE + eltsize;
 	if (member_offset % 2 != 0)
