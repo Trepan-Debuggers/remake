@@ -1,3 +1,23 @@
+2007-07-13  Paul Smith  <psmith@gnu.org>
+
+	Install a timeout so tests can never loop infinitely.
+	Original idea and patch for a single-test version provided by
+	Icarus Sparry <savannah@icarus.freeuk.com>
+
+	* test_driver.pl (_run_command): New function: this is called by
+	other functions to actually run a command.  Before we run it,
+	install a SIGALRM handler and set up a timer to go off in the
+	future (default is 5s; this can be overridden by individual tests).
+	(run_command): Call it.
+	(run_command_with_output): Call it.
+
+	* run_make_tests.pl (run_make_with_options): Override the default
+	timeout if the caller requests it.
+	(run_make_test): Pass any timeout override to run_make_with_options.
+
+	* scripts/features/parallelism: Increase the timeout for long tests.
+	* scripts/options/dash-l: Ditto.
+
 2006-10-01  Paul Smith  <psmith@paulandlesley.org>
 
 	* run_make_tests.pl (set_more_defaults): Remove setting of LANG in

@@ -483,6 +483,7 @@ expand_deps (struct file *f)
         {
           p = variable_expand ("");
           variable_buffer_output (p, d->name, strlen (d->name) + 1);
+          p = variable_buffer;
         }
       else
         {
@@ -495,7 +496,8 @@ expand_deps (struct file *f)
 
               o = subst_expand (buffer, d->name, "%", "$*", 1, 2, 0);
 
-              d->name = strcache_add_len (buffer, o - buffer);
+              d->name = strcache_add_len (variable_buffer,
+                                          o - variable_buffer);
               d->staticpattern = 0; /* Clear staticpattern so that we don't
                                        re-expand %s below. */
             }

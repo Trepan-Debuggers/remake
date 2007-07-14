@@ -69,6 +69,7 @@ unlink('1.inc', '2.inc');
 # function in an exported recursive variable.  I added some code to check
 # for this situation and print a message if it occurred.  This test used
 # to trigger this code when I added it but no longer does after the fix.
+# We have to increase the timeout from the default (5s) on this test.
 
 run_make_test("
 export HI = \$(shell \$(\$\@.CMD))
@@ -79,7 +80,7 @@ second.CMD = $sleep_command 4; echo hi
 all: first second
 
 first second: ; \@echo \$\@; $sleep_command 1; echo \$\@",
-              '-j2', "first\nfirst\nsecond\nsecond");
+              '-j2', "first\nfirst\nsecond\nsecond", 0, 7);
 
 # Michael Matz <matz@suse.de> reported a bug where if make is running in
 # parallel without -k and two jobs die in a row, but not too close to each

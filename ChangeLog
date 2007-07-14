@@ -1,3 +1,10 @@
+2007-07-13  Paul Smith  <psmith@gnu.org>
+
+	* file.c (expand_deps): Use variable_buffer as the start of the
+	buffer, not the original pointer (in case it was reallocated).
+	Fix suggested by Rafi Einstein <rafi.einstein@formalism-labs.com>.
+	Fixes Savannah bug #20452.
+
 2007-07-04  Paul Smith  <psmith@gnu.org>
 
 	* (ALL FILES): Update to GPLv3.
