@@ -82,7 +82,7 @@ $old_makefile = undef;
 
 sub run_make_test
 {
-  local ($makestring, $options, $answer, $err_code) = @_;
+  local ($makestring, $options, $answer, $err_code, $timeout) = @_;
 
   # If the user specified a makefile string, create a new makefile to contain
   # it.  If the first value is not defined, use the last one (if there is
@@ -121,7 +121,8 @@ sub run_make_test
   $answer =~ s/#MAKE#/$make_name/g;
   $answer =~ s/#PWD#/$pwd/g;
 
-  &run_make_with_options($makefile, $options, &get_logfile(0), $err_code);
+  run_make_with_options($makefile, $options, &get_logfile(0),
+                        $err_code, $timeout);
   &compare_output($answer, &get_logfile(1));
 
   $old_makefile = $makefile;
@@ -130,7 +131,7 @@ sub run_make_test
 
 # The old-fashioned way...
 sub run_make_with_options {
-  local ($filename,$options,$logname,$expected_code) = @_;
+  local ($filename,$options,$logname,$expected_code,$timeout) = @_;
   local($code);
   local($command) = $make_path;
 
@@ -151,7 +152,15 @@ sub run_make_with_options {
     print VALGRIND "\n\nExecuting: $command\n";
   }
 
-  $code = &run_command_with_output($logname,$command);
+
+  {
+      my $old_timeout = $test_timeout;
+      $test_timeout = $timeout if $timeout;
+
+      $code = &run_command_with_output($logname,$command);
+
+      $test_timeout = $old_timeout;
+  }
 
   # Check to see if we have Purify errors.  If so, keep the logfile.
   # For this to work you need to build with the Purify flag -exit-status=yes
