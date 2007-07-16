@@ -1,3 +1,5 @@
+#                                                                    -*-perl-*-
+
 $description = "The following test creates a makefile to test the -C dir \n"
               ."option in make.  This option tells make to change to \n"
               ."directory dir before reading the makefile.";
@@ -33,16 +35,15 @@ chdir $workdir;
 $wpath = &get_this_pwd;
 chdir $pwd;
 
+if (-f $example) {
+  $test_passed = 0;
+}
+
 # Create the answer to what should be produced by this Makefile
 $answer = "$make_name: Entering directory `$wpath'\n"
         . "$delete_command EXAMPLE_FILE\n"
         . "$make_name: Leaving directory `$wpath'\n";
 
 &compare_output($answer,&get_logfile(1));
-
-if (-f $example)
-{
-   $test_passed = 0;
-}
 
 1;

@@ -12,7 +12,7 @@
 # this routine controls the whole mess; each test suite sets up a few
 # variables and then calls &toplevel, which does all the real work.
 
-# $Id: test_driver.pl,v 1.12 2005/12/25 10:48:07 rockyb Exp $
+# $Id: test_driver.pl,v 1.13 2007/07/16 01:58:04 rockyb Exp $
 
 sub print_standard_usage
 {
@@ -61,6 +61,34 @@ sub init() {
   # Yeesh.  This whole test environment is such a hack!
   $test_passed = 1;
 
+  # Timeout in seconds.  If the test takes longer than this we'll fail it.
+  $test_timeout = 5;
+
+  # %makeENV is the cleaned-out environment.
+  %makeENV = ();
+  
+  # %extraENV are any extra environment variables the tests might want to set.
+  # These are RESET AFTER EVERY TEST!
+  %extraENV = ();
+
+  # %origENV is the caller's original environment
+  %origENV = %ENV;
+}
+
+sub resetENV
+{
+  # We used to say "%ENV = ();" but this doesn't work in Perl 5.000
+  # through Perl 5.004.  It was fixed in Perl 5.004_01, but we don't
+  # want to require that here, so just delete each one individually.
+  foreach $v (keys %ENV) {
+    delete $ENV{$v};
+  }
+
+  %ENV = %makeENV;
+  foreach $v (keys %extraENV) {
+    $ENV{$v} = $extraENV{$v};
+    delete $extraENV{$v};
+  }
 }
 
 sub toplevel
@@ -640,6 +668,35 @@ sub detach_default_output
          || &error ("ddo: $! closing SAVEDOSerr\n", 1);
 }
 
+# This runs a command without any debugging info.
+sub _run_command
+{
+  my $code;
+
+  # We reset this before every invocation.  On Windows I think there is only
+  # one environment, not one per process, so I think that variables set in
+  # test scripts might leak into subsequent tests if this isn't reset--???
+  resetENV();
+
+  eval {
+      local $SIG{ALRM} = sub { die "timeout\n"; };
+      alarm $test_timeout;
+      $code = system @_;
+      alarm 0;
+  };
+  if ($@) {
+      # The eval failed.  If it wasn't SIGALRM then die.
+      $@ eq "timeout\n" or die;
+
+      # Timed out.  Resend the alarm to our process group to kill the children.
+      $SIG{ALRM} = 'IGNORE';
+      kill -14, $$;
+      $code = 14;
+  }
+
+  return $code;
+}
+
 # run one command (passed as a list of arg 0 - n), returning 0 on success
 # and nonzero on failure.
 
@@ -648,7 +705,7 @@ sub run_command()
   if ($debug)
   {
     print "\nrun_command: @_\n";
-    my $code = system @_;
+    my $code = _run_command(@_);
     my $rc   = $code >> 8;
     print "run_command: \"@_\" returned $rc.\n";
     return $code;

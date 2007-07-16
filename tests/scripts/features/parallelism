@@ -69,6 +69,7 @@ unlink('1.inc', '2.inc');
 # function in an exported recursive variable.  I added some code to check
 # for this situation and print a message if it occurred.  This test used
 # to trigger this code when I added it but no longer does after the fix.
+# We have to increase the timeout from the default (5s) on this test.
 
 run_make_test("
 export HI = \$(shell \$(\$\@.CMD))
@@ -79,7 +80,7 @@ second.CMD = $sleep_command 4; echo hi
 all: first second
 
 first second: ; \@echo \$\@; $sleep_command 1; echo \$\@",
-              '-j2', "first\nfirst\nsecond\nsecond");
+              '-j2', "first\nfirst\nsecond\nsecond", 0, 7);
 
 # Michael Matz <matz@suse.de> reported a bug where if make is running in
 # parallel without -k and two jobs die in a row, but not too close to each
@@ -100,20 +101,11 @@ ok:
               '-rR -j5', 'Fail
 #MAKE#: *** [fail.1] Error 1
 #MAKE#: *** Waiting for unfinished jobs....
-#MAKE#: *** Waiting for unfinished jobs....
 Fail
-#MAKE#: *** Waiting for unfinished jobs....
 #MAKE#: *** [fail.2] Error 1
-#MAKE#: *** Waiting for unfinished jobs....
-#MAKE#: *** Waiting for unfinished jobs....
 Fail
-#MAKE#: *** Waiting for unfinished jobs....
 #MAKE#: *** [fail.3] Error 1
-#MAKE#: *** Waiting for unfinished jobs....
-#MAKE#: *** Waiting for unfinished jobs....
-Ok done
-Command-line arguments:
-	"-f work/features/parallelism.mk.4 -rR -j5"',
+Ok done',
              512);
 
 
@@ -134,5 +126,40 @@ mod_a.o mod_b.o:
 	@exit 1
 ', '-j2', '');
 
+
+# Make sure that all jobserver FDs are closed if we need to re-exec the
+# master copy.
+#
+# First, find the "default" file descriptors we normally use
+# Then make sure they're still used.
+#
+# Right now we don't have a way to run a makefile and capture the output
+# without checking it, so we can't really write this test.
+
+# run_make_test('
+# submake: ; @$(MAKE) --no-print-directory -f #MAKEFILE# fdprint 5>output
+
+# dependfile: ; @echo FOO=bar > $@
+
+# INCL := true
+
+# FOO=foo
+# ifeq ($(INCL),true)
+# -include dependfile
+# endif
+
+# fdprint: ; @echo $(filter --jobserver%,$(MAKEFLAGS))
+
+# recurse: ; @$(MAKE) --no-print-directory -f #MAKEFILE# submake INCL=true',
+#               '-j2 INCL=false fdprint',
+#               'bar');
+
+# unlink('dependfile', 'output');
+
+
+# # Do it again, this time where the include is done by the non-master make.
+# run_make_test(undef, '-j2 recurse INCL=false', 'bar');
+
+# unlink('dependfile', 'output');
 
 1;
