@@ -982,6 +982,12 @@ check_dep (struct file *file, unsigned int depth,
              necessary, and see whether any of them is more recent than the
              file on whose behalf we are checking.  */
 	  struct dep *lastd;
+          int deps_running = 0;
+
+          /* Reset this target's state so that we check it fresh.  It could be
+             that it's already been checked as part of an order-only
+             prerequisite and so wasn't rebuilt then, but should be now.  */
+          set_command_state (file, cs_not_started);
 
 	  lastd = 0;
 	  d = file->deps;
@@ -1020,14 +1026,17 @@ check_dep (struct file *file, unsigned int depth,
 
 	      if (d->file->command_state == cs_running
 		  || d->file->command_state == cs_deps_running)
-		/* Record that some of FILE's deps are still being made.
-		   This tells the upper levels to wait on processing it until
-		   the commands are finished.  */
-		set_command_state (file, cs_deps_running);
+		deps_running = 1;
 
 	      lastd = d;
 	      d = d->next;
 	    }
+
+          if (deps_running)
+            /* Record that some of FILE's deps are still being made.
+               This tells the upper levels to wait on processing it until the
+               commands are finished.  */
+            set_command_state (file, cs_deps_running);
 	}
     }
 
