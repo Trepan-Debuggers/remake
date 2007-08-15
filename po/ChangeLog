@@ -1,3 +1,8 @@
+2007-08-15  Paul Smith  <psmith@gnu.org>
+
+	* LINGUAS: The Kinyarwanda (rw) translation has disappeared from
+	the translation site, so remove it.
+
 2006-01-28  Paul D. Smith  <psmith@gnu.org>
 
 	* LINGUAS: Added new translation for Vietnamese (vi).

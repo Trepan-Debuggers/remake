@@ -1,3 +1,16 @@
+2007-08-15  Paul Smith  <psmith@gnu.org>
+
+	These test cases were contributed by
+	Icarus Sparry <savannah@icarus.freeuk.com> and J. David Bryan for
+	Savannah bugs #3330 and #15919.
+
+	* scripts/targets/SECONDARY: Add tests for Savannah bugs 3330 and
+	15919.
+
+	* scripts/features/parallelism: Add tests for wrong answer/hang
+	combining INTERMEDIATE, order-only prereqs, and parallelism.
+	See Savannah bugs 3330 and 15919.
+
 2007-07-13  Paul Smith  <psmith@gnu.org>
 
 	Install a timeout so tests can never loop infinitely.

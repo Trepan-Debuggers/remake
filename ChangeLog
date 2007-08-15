@@ -1,3 +1,16 @@
+2007-08-15  Paul Smith  <psmith@gnu.org>
+
+	* doc/make.texi (GNU Free Documentation License): The fdl.texi
+	file has had the section info removed, so add some to make.texi
+	before we include it.
+
+2007-08-15  Icarus Sparry  <savannah@icarus.freeuk.com>
+
+	* remake.c (check_dep): Reset the target state for intermediate
+	files.  They might have been considered before but not updated
+	then (order-only for example) but they will be this time.
+	Fixes Savannah bug #'s 3330 and 15919.
+
 2007-07-13  Paul Smith  <psmith@gnu.org>
 
 	* file.c (expand_deps): Use variable_buffer as the start of the

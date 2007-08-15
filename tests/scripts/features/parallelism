@@ -127,6 +127,20 @@ mod_a.o mod_b.o:
 ', '-j2', '');
 
 
+# TEST #9 -- Savannah bugs 3330 and 15919
+# In earlier versions of make this will either give the wrong answer, or hang.
+
+utouch(-10, 'target');
+run_make_test('target: intermed ; touch $@
+
+.INTERMEDIATE: intermed
+intermed: | phony ; touch $@
+
+.PHONY: phony
+phony: ; : phony', '-rR -j', ': phony');
+unlink('target');
+
+
 # Make sure that all jobserver FDs are closed if we need to re-exec the
 # master copy.
 #
