@@ -1,4 +1,4 @@
-/* $Id: remake.c,v 1.29 2007/01/04 12:03:20 rockyb Exp $
+/* $Id: remake.c,v 1.30 2007/08/17 02:01:10 rockyb Exp $
 Basic dependency engine for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
 2002, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
@@ -1027,6 +1027,12 @@ check_dep (file_t *file, unsigned int depth, FILE_TIMESTAMP this_mtime,
              necessary, and see whether any of them is more recent than the
              file on whose behalf we are checking.  */
           dep_t *lastd;
+          int deps_running = 0;
+
+          /* Reset this target's state so that we check it fresh.  It could be
+             that it's already been checked as part of an order-only
+             prerequisite and so wasn't rebuilt then, but should be now.  */
+          set_command_state (file, cs_not_started);
 
           lastd = 0;
           d = file->deps;
@@ -1065,15 +1071,18 @@ check_dep (file_t *file, unsigned int depth, FILE_TIMESTAMP this_mtime,
 
               if (d->file->command_state == cs_running
                   || d->file->command_state == cs_deps_running)
-                /* Record that some of FILE's deps are still being made.
-                   This tells the upper levels to wait on processing it until
-                   the commands are finished.  */
-                set_command_state (file, cs_deps_running);
+		deps_running = 1;
 
               lastd = d;
               d = d->next;
             }
-        }
+
+          if (deps_running)
+            /* Record that some of FILE's deps are still being made.
+               This tells the upper levels to wait on processing it until the
+               commands are finished.  */
+            set_command_state (file, cs_deps_running);
+	}
     }
 
   trace_pop_target(p_call_stack);

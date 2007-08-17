@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texi,v 1.20 2007/06/19 11:50:51 rockyb Exp $
+@set RCSID $Id: make.texi,v 1.21 2007/08/17 02:01:09 rockyb Exp $
 @set EDITION 0.61
 @set VERSION 3.80+dbg
 @set UPDATED 25 Dec 2005
@@ -10968,6 +10968,9 @@ tar.zoo: $(SRCS) $(AUX)
 @end example
 
 @raisesections
+@node GNU Free Documentation License, Concept Index, Complex Makefile, Top
+@appendixsec GNU Free Documentation License
+@cindex FDL, GNU Free Documentation License
 @include fdl.texi
 @lowersections
 
