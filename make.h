@@ -329,7 +329,7 @@ char *strsignal (int signum);
 # define kill(_pid,_sig) w32_kill((_pid),(_sig))
 
 void sync_Path_environment (void);
-int kill (int pid, int sig);
+int w32_kill (int pid, int sig);
 char *end_of_token_w32 (const char *s, char stopchar);
 int find_and_set_default_shell (const char *token);
 

@@ -16,6 +16,11 @@ rem
 rem You should have received a copy of the GNU General Public License along
 rem with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+if exist config.h.W32 GoTo NotCVS
+sed -n "s/^AC_INIT(\[GNU make\],\[\([^]]\+\)\].*/s,%%VERSION%%,\1,g/p" configure.in > config.h.W32.sed
+echo s,%%PACKAGE%%,make,g >> config.h.W32.sed
+sed -f config.h.W32.sed config.h.W32.template > config.h.W32
+:NotCVS
 if not exist config.h copy config.h.W32 config.h
 cd w32\subproc
 echo "Creating the subproc library"
