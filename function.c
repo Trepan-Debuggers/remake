@@ -1601,7 +1601,8 @@ func_shell (char *o, char **argv, const char *funcname UNUSED)
 
 #ifndef __MSDOS__
   /* Construct the argument list.  */
-  command_argv = construct_command_argv (argv[0], NULL, NULL, &batch_filename);
+  command_argv = construct_command_argv (argv[0], NULL, NULL, 0,
+                                         &batch_filename);
   if (command_argv == 0)
     return o;
 #endif
@@ -1785,8 +1786,8 @@ func_shell (char *o, char **argv, const char *funcname)
   char* batch_filename = NULL;
 
   /* Construct the argument list.  */
-  command_argv = construct_command_argv (argv[0], (char **) NULL,
-                                         (struct file *) 0, &batch_filename);
+  command_argv = construct_command_argv (argv[0], NULL, NULL, 0,
+                                         &batch_filename);
   if (command_argv == 0)
     return o;
 
