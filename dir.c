@@ -454,24 +454,27 @@ find_directory (const char *name)
       /* The directory is not in the name hash table.
 	 Find its device and inode numbers, and look it up by them.  */
 
-#ifdef WINDOWS32
-      /* Remove any trailing '\'.  Windows32 stat fails even on valid
-         directories if they end in '\'. */
-      if (p[-1] == '\\')
-        p[-1] = '\0';
-#endif
-
 #ifdef VMS
       r = vmsstat_dir (name, &st);
+#elif defined(WINDOWS32)
+      {
+        char tem[MAXPATHLEN], *tstart, *tend;
+
+        /* Remove any trailing slashes.  Windows32 stat fails even on
+           valid directories if they end in a slash. */
+        memcpy (tem, name, p - name + 1);
+        tstart = tem;
+        if (tstart[1] == ':')
+          tstart += 2;
+        for (tend = tem + (p - name - 1);
+             tend > tstart && (*tend == '/' || *tend == '\\');
+             tend--)
+          *tend = '\0';
+
+        r = stat (tem, &st);
+      }
 #else
       EINTRLOOP (r, stat (name, &st));
-#endif
-
-#ifdef WINDOWS32
-      /* Put back the trailing '\'.  If we don't, we're permanently
-         truncating the value!  */
-      if (p[-1] == '\0')
-        p[-1] = '\\';
 #endif
 
       if (r < 0)

@@ -1,3 +1,15 @@
+2007-10-10  Eli Zaretskii  <eliz@gnu.org>
+
+	* dir.c (find_directory) [WINDOWS32]: Remove trailing slashes from
+	pathnames, with const strings.
+	* build_w32.bat [WINDOWS32]: If no config.h.W32 exists, create one
+	from the template (used for building from CVS, not a dist).
+
+2007-10-10  Paul Smith  <psmith@gnu.org>
+
+	* make.h: Add a prototype for w32_kill() (change suggested by
+	Yongwei Wu <wuyongwei@gmail.com>).
+
 2007-08-15  Paul Smith  <psmith@gnu.org>
 
 	* doc/make.texi (GNU Free Documentation License): The fdl.texi
