@@ -70,11 +70,17 @@ convert_Path_to_windows32(char *Path, char to_delim)
             } else
                 /* all finished, force abort */
                 p += strlen(p);
+        } else if (*p == '"') { /* a quoted directory */
+            for (p++; *p && *p != '"'; p++) /* skip quoted part */
+                ;
+            etok = strpbrk(p, ":;");        /* find next delimiter */
+            *etok = to_delim;
+            p = ++etok;
         } else {
             /* found another one, no drive letter */
             *etok = to_delim;
             p = ++etok;
-	}
+        }
 
     return Path;
 }

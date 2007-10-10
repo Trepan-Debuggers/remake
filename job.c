@@ -1016,7 +1016,9 @@ start_job_command (struct child *child)
 #ifdef VMS
     argv = p;
 #else
-    argv = construct_command_argv (p, &end, child->file, &child->sh_batch_file);
+    argv = construct_command_argv (p, &end, child->file,
+				   child->file->cmds->lines_flags[child->command_line - 1],
+				   &child->sh_batch_file);
 #endif
     if (end == NULL)
       child->command_ptr = NULL;
@@ -2200,11 +2202,17 @@ void clean_tmp (void)
    If *RESTP is NULL, newlines will be ignored.
 
    SHELL is the shell to use, or nil to use the default shell.
-   IFS is the value of $IFS, or nil (meaning the default).  */
+   IFS is the value of $IFS, or nil (meaning the default).
+
+   FLAGS is the value of lines_flags for this command line.  It is
+   used in the WINDOWS32 port to check whether + or $(MAKE) were found
+   in this command line, in which case the effect of just_print_flag
+   is overridden.  */
 
 static char **
 construct_command_argv_internal (char *line, char **restp, char *shell,
-                                 char *ifs, char **batch_filename_ptr)
+                                 char *ifs, int flags,
+				 char **batch_filename_ptr)
 {
 #ifdef __MSDOS__
   /* MSDOS supports both the stock DOS shell and ports of Unixy shells.
@@ -2784,7 +2792,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
     /* Some shells do not work well when invoked as 'sh -c xxx' to run a
        command line (e.g. Cygnus GNUWIN32 sh.exe on WIN32 systems).  In these
        cases, run commands via a script file.  */
-    if (just_print_flag) {
+    if (just_print_flag && !(flags & COMMANDS_RECURSE)) {
       /* Need to allocate new_argv, although it's unused, because
         start_job_command will want to free it and its 0'th element.  */
       new_argv = xmalloc(2 * sizeof (char *));
@@ -2826,7 +2834,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
     } else
 #endif /* WINDOWS32 */
     if (unixy_shell)
-      new_argv = construct_command_argv_internal (new_line, 0, 0, 0, 0);
+      new_argv = construct_command_argv_internal (new_line, 0, 0, 0, flags, 0);
 #ifdef __EMX__
     else if (!unixy_shell)
       {
@@ -2937,7 +2945,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 
 char **
 construct_command_argv (char *line, char **restp, struct file *file,
-                        char **batch_filename_ptr)
+                        int cmd_flags, char **batch_filename_ptr)
 {
   char *shell, *ifs;
   char **argv;
@@ -3049,7 +3057,8 @@ construct_command_argv (char *line, char **restp, struct file *file,
     warn_undefined_variables_flag = save;
   }
 
-  argv = construct_command_argv_internal (line, restp, shell, ifs, batch_filename_ptr);
+  argv = construct_command_argv_internal (line, restp, shell, ifs,
+                                          cmd_flags, batch_filename_ptr);
 
   free (shell);
   free (ifs);

@@ -70,7 +70,8 @@ void new_job (struct file *file);
 void reap_children (int block, int err);
 void start_waiting_jobs (void);
 
-char **construct_command_argv (char *line, char **restp, struct file *file, char** batch_file);
+char **construct_command_argv (char *line, char **restp, struct file *file,
+                               int cmd_flags, char** batch_file);
 #ifdef VMS
 int child_execute_job (char *argv, struct child *child);
 #elif defined(__EMX__)

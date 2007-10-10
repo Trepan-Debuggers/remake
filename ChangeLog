@@ -10,6 +10,11 @@
 	* make.h: Add a prototype for w32_kill() (change suggested by
 	Yongwei Wu <wuyongwei@gmail.com>).
 
+2007-09-21  Eli Zaretskii  <eliz@gnu.org>
+
+	* w32/pathstuff.c (convert_Path_to_windows32): Handle quoted
+	directories in Path.
+
 2007-08-15  Paul Smith  <psmith@gnu.org>
 
 	* doc/make.texi (GNU Free Documentation License): The fdl.texi
@@ -22,6 +27,17 @@
 	files.  They might have been considered before but not updated
 	then (order-only for example) but they will be this time.
 	Fixes Savannah bug #'s 3330 and 15919.
+
+2007-07-21  Eli Zaretskii  <eliz@gnu.org>
+
+	Fix Savannah bug #20549:
+	* function.c (func_shell): Call construct_command_argv with zero
+	value of FLAGS.
+	* job.c (construct_command_argv_internal): New argument FLAGS; all
+	callers changed.
+	[WINDOWS32]: If FLAGS has the COMMANDS_RECURSE bit set, ignore
+	just_print_flag.
+	* job.h (construct_command_argv_internal): Update prototype.
 
 2007-07-13  Paul Smith  <psmith@gnu.org>
 
