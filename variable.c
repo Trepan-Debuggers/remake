@@ -1188,7 +1188,24 @@ do_variable_definition (const struct floc *flocp, const char *varname,
           no_default_sh_exe = 0;
         }
       else
-        v = lookup_variable (varname, strlen (varname));
+        {
+          if (alloc_value)
+            free (alloc_value);
+
+          alloc_value = allocated_variable_expand (p);
+          if (find_and_set_default_shell (alloc_value))
+            {
+              v = define_variable_in_set (varname, strlen (varname), p,
+                                          origin, flavor == f_recursive,
+                                          (target_var
+                                           ? current_variable_set_list->set
+                                           : NULL),
+                                          flocp);
+              no_default_sh_exe = 0;
+            }
+          else
+            v = lookup_variable (varname, strlen (varname));
+        }
     }
   else
 #endif

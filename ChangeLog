@@ -1,3 +1,9 @@
+2007-10-12  Eli Zaretskii  <eliz@gnu.org>
+
+	* variable.c (do_variable_definition): Allow $(SHELL) to expand to
+	a more complex value than a simple shell: if it's not a default
+	shell now then expand it and see if is a default shell then.
+
 2007-10-10  Eli Zaretskii  <eliz@gnu.org>
 
 	* dir.c (find_directory) [WINDOWS32]: Remove trailing slashes from
