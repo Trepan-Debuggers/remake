@@ -21,11 +21,11 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /*
  * Component Name:
  *
- * $Date: 2007/07/04 19:35:22 $
+ * $Date: 2007/10/24 20:06:32 $
  *
  * $Source: /sources/make/make/w32/include/sub_proc.h,v $
  *
- * $Id: sub_proc.h,v 1.9 2007/07/04 19:35:22 psmith Exp $
+ * $Id: sub_proc.h,v 1.10 2007/10/24 20:06:32 eliz Exp $
  */
 
 #define EXTERN_DECL(entry, args) extern entry args
