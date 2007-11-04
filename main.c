@@ -320,7 +320,7 @@ static const char *const usage[] =
     N_("\
   -h, --help                  Print this message and exit.\n"),
     N_("\
-  -i, --ignore-errors         Ignore errors from commands.\n"),
+  -i, --ignore-errors         Ignore errors from recipes.\n"),
     N_("\
   -I DIRECTORY, --include-dir=DIRECTORY\n\
                               Search DIRECTORY for included makefiles.\n"),
@@ -335,20 +335,20 @@ static const char *const usage[] =
   -L, --check-symlink-times   Use the latest mtime between symlinks and target.\n"),
     N_("\
   -n, --just-print, --dry-run, --recon\n\
-                              Don't actually run any commands; just print them.\n"),
+                              Don't actually run any recipe; just print them.\n"),
     N_("\
   -o FILE, --old-file=FILE, --assume-old=FILE\n\
                               Consider FILE to be very old and don't remake it.\n"),
     N_("\
   -p, --print-data-base       Print make's internal database.\n"),
     N_("\
-  -q, --question              Run no commands; exit status says if up to date.\n"),
+  -q, --question              Run no recipe; exit status says if up to date.\n"),
     N_("\
   -r, --no-builtin-rules      Disable the built-in implicit rules.\n"),
     N_("\
   -R, --no-builtin-variables  Disable the built-in variable settings.\n"),
     N_("\
-  -s, --silent, --quiet       Don't echo commands.\n"),
+  -s, --silent, --quiet       Don't echo recipes.\n"),
     N_("\
   -S, --no-keep-going, --stop\n\
                               Turns off -k.\n"),
@@ -1117,6 +1117,7 @@ main (int argc, char **argv, char **envp)
   /* Initialize the special variables.  */
   define_variable (".VARIABLES", 10, "", o_default, 0)->special = 1;
   /* define_variable (".TARGETS", 8, "", o_default, 0)->special = 1; */
+  define_variable (".RECIPEPREFIX", 13, "", o_default, 0)->special = 1;
 
   /* Set up .FEATURES */
   define_variable (".FEATURES", 9,

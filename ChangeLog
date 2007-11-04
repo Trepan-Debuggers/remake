@@ -1,3 +1,11 @@
+2007-11-04  Paul Smith  <psmith@gnu.org>
+
+	* doc/make.texi: Convert references to "commands", "command
+	lines", and "command script" to "recipe".
+	* NEWS: Ditto.
+	* commands.c, file.c, job.c, remake.c, read.c, variable.c, main.c:
+	Ditto.
+
 2007-10-12  Eli Zaretskii  <eliz@gnu.org>
 
 	* variable.c (do_variable_definition): Allow $(SHELL) to expand to
@@ -20,6 +28,47 @@
 
 	* w32/pathstuff.c (convert_Path_to_windows32): Handle quoted
 	directories in Path.
+
+2007-09-12  Paul Smith  <psmith@gnu.org>
+
+	* doc/make.texi: Applied wording cleanups from Savannah patch #6195.
+	Provided by Diego Biurrun <diego@biurrun.de>
+	(Complex Makefile): Remove .PHONY setting for tar: patch #6196.
+	Provided by Diego Biurrun <diego@biurrun.de>
+
+2007-09-11  Paul Smith  <psmith@gnu.org>
+
+	* doc/make.texi (Special Variables): Moved this into the "How to
+	Use Variables" chapter.  Added a table entry for .RECIPEPREFIX.
+	(MAKEFILE_LIST) No longer a section; this was added into the
+	"Special Variables" section.
+	(Rule Introduction): Reference .RECIPEPREFIX.
+	(Simple Makefile): Ditto.
+	(Rule Syntax): Ditto.
+	(Command Syntax): Ditto.
+	(Error Messages): Ditto.
+
+2007-09-10  Paul Smith  <psmith@gnu.org>
+
+	* commands.c (print_commands): Don't print an extra line in the
+	command scripts.  Prefix the command scripts with cmd_prefix, not \t.
+
+	* read.c (construct_include_path): Add the full string to the cache; we
+	were chopping the last char.
+
+	* NEWS: Announce the .RECIPEPREFIX special variable.
+	* variable.c (lookup_special_var): Rename from handle_special_var().
+	(lookup_variable): Call the new name.
+	(set_special_var): New function: handle setting of special variables.
+	When setting .RECIPEPREFIX, reset the cmd_prefix global variable.
+	(do_variable_definition): Call it.
+	* make.h (RECIPEPREFIX_DEFAULT): Define the default command prefix char.
+	(RECIPEPREFIX_NAME): Define the command prefix special variable name.
+	* main.c (main): Create the .RECIPEPREFIX special variable.
+	* read.c (eval): Remove the cmd_prefix characters from the command
+	scripts here, so they're not stored in the commands array at all,
+	rather than waiting and stripping them out during command construction.
+	* job.c (construct_command_argv_internal): Don't skip cmd_prefix here.
 
 2007-08-15  Paul Smith  <psmith@gnu.org>
 

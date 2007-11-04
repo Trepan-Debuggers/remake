@@ -14,6 +14,13 @@ Version 3.81.90
 * Compiling GNU make now requires a conforming ISO C 1989 compiler and
   standard runtime library.
 
+* New special variable: .RECIPEPREFIX allows you to reset the recipe
+  introduction character from the default (TAB) to something else.  The
+  first character of this variable value is the new recipe introduction
+  character.  If the variable is set to the empty string, TAB is used
+  again.  It can be set and reset at will; rules will be parsed
+  according to the current value.
+
 
 Version 3.81
 
@@ -50,13 +57,14 @@ Version 3.81
   of this SysV feature you will need to update them.
 
 * WARNING: Backward-incompatibility!
+
   In order to comply with POSIX, the way in which GNU make processes
-  backslash-newline sequences in command strings has changed.  If your
-  makefiles use backslash-newline sequences inside of single-quoted
-  strings in command scripts you will be impacted by this change.  See
-  the GNU make manual subsection "Splitting Command Lines" (node
-  "Splitting Lines"), in section "Command Syntax", chapter "Writing the
-  Commands in Rules", for details.
+  backslash-newline sequences in recipes has changed.  If your makefiles
+  use backslash-newline sequences inside of single-quoted strings in
+  recipes you will be impacted by this change.  See the GNU make manual
+  subsection "Splitting Recipe Lines" (node "Splitting Lines"), in
+  section "Recipe Syntax", chapter "Writing Recipe in Rules", for
+  details.
 
 * WARNING: Backward-incompatibility!
   Some previous versions of GNU make had a bug where "#" in a function
@@ -65,7 +73,7 @@ Version 3.81
   fixed: if your makefile uses "\#" in a function invocation the
   backslash is now preserved, so you'll need to remove it.
 
-* New command-line option: -L (--check-symlink-times).  On systems that
+* New command line option: -L (--check-symlink-times).  On systems that
   support symbolic links, if this option is given then GNU make will
   use the most recent modification time of any symbolic links that are
   used to resolve target files.  The default behavior remains as it
@@ -126,7 +134,7 @@ Version 3.81
      argument if all arguments are true.
 
 * Changes made for POSIX compatibility:
-   - Only touch targets (under -t) if they have at least one command.
+   - Only touch targets (under -t) if they have a recipe.
    - Setting the SHELL make variable does NOT change the value of the
      SHELL environment variable given to programs invoked by make.  As
      an enhancement to POSIX, if you export the make variable SHELL then
@@ -199,7 +207,7 @@ Version 3.80
   expanded it returns a complete list of variable names defined by all
   makefiles at that moment.
 
-* A new command-line option is defined, -B or --always-make.  If
+* A new command line option is defined, -B or --always-make.  If
   specified GNU make will consider all targets out-of-date even if they
   would otherwise not be.
 
@@ -480,7 +488,7 @@ Version 3.72
 
 * The `MAKEFLAGS' variable (in the environment or in a makefile) can now
   contain variable definitions itself; these are treated just like
-  command-line variable definitions.  Make will automatically insert any
+  command line variable definitions.  Make will automatically insert any
   variable definitions from the environment value of `MAKEFLAGS' or from
   the command line, into the `MAKEFLAGS' value exported to children.  The
   `MAKEOVERRIDES' variable previously included in the value of `$(MAKE)'
@@ -489,8 +497,8 @@ Version 3.72
   in the environment when its size is limited.
 
 * If `.DELETE_ON_ERROR' appears as a target, Make will delete the target of
-  a rule if it has changed when its commands exit with a nonzero status,
-  just as when the commands get a signal.
+  a rule if it has changed when its recipe exits with a nonzero status,
+  just as when the recipe gets a signal.
 
 * The automatic variable `$+' is new.  It lists all the dependencies like
   `$^', but preserves duplicates listed in the makefile.  This is useful
@@ -500,9 +508,9 @@ Version 3.72
 * You can now specify the `.IGNORE' and `.SILENT' special targets with
   dependencies to limit their effects to those files.  If a file appears as
   a dependency of `.IGNORE', then errors will be ignored while running the
-  commands to update that file.  Likewise if a file appears as a dependency
-  of `.SILENT', then the commands to update that file will not be printed
-  before they are run.  (This change was made to conform to POSIX.2.)
+  recipe to update that file.  Likewise if a file appears as a dependency
+  of `.SILENT', then the recipe to update that file will not be printed
+  before it is run.  (This change was made to conform to POSIX.2.)
 
 Version 3.71
 
@@ -550,22 +558,22 @@ Version 3.69
   Make, and a string describing the remote job support compiled in (if any).
   Thus the value (in this release) is something like `3.69' or `3.69-Customs'.
 
-* Commands in an invocation of the `shell' function are no longer run with
-  a modified environment like target commands are.  As in versions before
+* Commands in an invocation of the `shell' function are no longer run
+  with a modified environment like recipes are.  As in versions before
   3.68, they now run with the environment that `make' started with.  We
   have reversed the change made in version 3.68 because it turned out to
   cause a paradoxical situation in cases like:
 
 	export variable = $(shell echo value)
 
-  When Make attempted to put this variable in the environment for a target
-  command, it would try expand the value by running the shell command
+  When Make attempted to put this variable in the environment for a
+  recipe, it would try expand the value by running the shell command
   `echo value'.  In version 3.68, because it constructed an environment
   for that shell command in the same way, Make would begin to go into an
   infinite loop and then get a fatal error when it detected the loop.
 
-* The commands given for `.DEFAULT' are now used for phony targets with no
-  commands.
+* The recipe given for `.DEFAULT' is now used for phony targets with no
+  recipe.
 
 Version 3.68
 
@@ -589,8 +597,8 @@ Version 3.68
   no error (not even a warning) for a nonexistent makefile.
 
 * Commands in an invocation of the `shell' function are now run with a
-  modified environment like target commands are, so you can use `export' et
-  al to set up variables for them.  They used to run with the environment
+  modified environment like recipes are, so you can use `export' et al
+  to set up variables for them.  They used to run with the environment
   that `make' started with.
 
 Version 3.66
@@ -634,8 +642,8 @@ Version 3.63
   change directory, and recursive use of Make, now set `-w' automatically.
 
 * Multiple double-colon rules for the same target will no longer have their
-  commands run simultaneously under -j, as this could result in the two
-  commands trying to change the file at the same time and interfering with
+  recipes run simultaneously under -j, as this could result in the two
+  recipes trying to change the file at the same time and interfering with
   one another.
 
 * The `SHELL' variable is now never taken from the environment.
@@ -647,7 +655,7 @@ Version 3.63
   that tells you what all the options are and what they do.  Try `make --help'.
 
 * There are two new directives: `export' and `unexport'.  All variables are
-  no longer automatically put into the environments of the commands that
+  no longer automatically put into the environments of the recipe lines that
   Make runs.  Instead, only variables specified on the command line or in
   the environment are exported by default.  To export others, use:
 	export VARIABLE
@@ -662,8 +670,8 @@ Version 3.63
   to get the old behavior.  See the node `Variables/Recursion' in the manual
   for a full description.
 
-* The commands from the `.DEFAULT' special target are only applied to
-  targets which have no rules at all, not all targets with no commands.
+* The recipe from the `.DEFAULT' special target is only applied to
+  targets which have no rules at all, not all targets with no recipe.
   This change was made for compatibility with Unix make.
 
 * All fatal error messages now contain `***', so they are easy to find in
@@ -715,8 +723,8 @@ Version 3.61
 * Built-in rules for C++ source files with the `.C' suffix.
   We still recommend that you use `.cc' instead.
 
-* If commands are given too many times for a single target,
-  the last set given is used, and a warning message is printed.
+* If a recipe is given too many times for a single target, the last one
+  given is used, and a warning message is printed.
 
 * Error messages about makefiles are in standard GNU error format,
   so C-x ` in Emacs works on them.
@@ -733,7 +741,7 @@ Version 3.60
 
 * Archives on AIX now supposedly work.
 
-* When the commands specified for .DEFAULT are used to update a target,
+* When the recipes specified for .DEFAULT are used to update a target,
   the $< automatic variable is given the same value as $@ for that target.
   This is how Unix make behaves, and this behavior is mandated by POSIX.2.
 
@@ -758,18 +766,18 @@ Version 3.57
 
 Version 3.55
 
-* There is now a Unix man page for GNU Make.  It is certainly not a replacement
-for the Texinfo manual, but it documents the basic functionality and the
-switches.  For full documentation, you should still read the Texinfo manual.
-Thanks to Dennis Morse of Stanford University for contributing the initial
-version of this.
+* There is now a Unix man page for GNU Make.  It is certainly not a
+  replacement for the Texinfo manual, but it documents the basic
+  functionality and the switches.  For full documentation, you should
+  still read the Texinfo manual.  Thanks to Dennis Morse of Stanford
+  University for contributing the initial version of this.
 
-* Variables which are defined by default (e.g., `CC') will no longer be put
-into the environment for child processes.  (If these variables are reset by the
-environment, makefiles, or the command line, they will still go into the
-environment.)
+* Variables which are defined by default (e.g., `CC') will no longer be
+  put into the environment for child processes.  (If these variables are
+  reset by the environment, makefiles, or the command line, they will
+  still go into the environment.)
 
-* Makefiles which have commands but no dependencies (and thus are always
+* Makefiles which have recipes but no dependencies (and thus are always
   considered out of date and in need of remaking), will not be remade (if they
   were being remade only because they were makefiles).  This means that GNU
   Make will no longer go into an infinite loop when fed the makefiles that
@@ -781,45 +789,45 @@ pathname (instead of a `%' pattern).
 Version 3.51
 
 * When removing intermediate files, only one `rm' command line is printed,
-listing all file names.
+  listing all file names.
 
 * There are now automatic variables `$(^D)', `$(^F)', `$(?D)', and `$(?F)'.
-These are the directory-only and file-only versions of `$^' and `$?'.
+  These are the directory-only and file-only versions of `$^' and `$?'.
 
 * Library dependencies given as `-lNAME' will use "libNAME.a" in the current
-directory if it exists.
+  directory if it exists.
 
 * The automatic variable `$($/)' is no longer defined.
 
-* Leading `+' characters on a command line make that line be executed even
-under -n, -t, or -q (as if the line contained `$(MAKE)').
+* Leading `+' characters on a recipe line make that line be executed even
+  under -n, -t, or -q (as if the line contained `$(MAKE)').
 
-* For command lines containing `$(MAKE)', `${MAKE}', or leading `+' characters,
-only those lines are executed, not their entire rules.
-(This is how Unix make behaves for lines containing `$(MAKE)' or `${MAKE}'.)
+* For recipe lines containing `$(MAKE)', `${MAKE}', or leading `+' characters,
+  only those lines are executed, not the entire recipe.
+  (This is how Unix make behaves for lines containing `$(MAKE)' or `${MAKE}'.)
 
 Version 3.50
 
 * Filenames in rules will now have ~ and ~USER expanded.
 
 * The `-p' output has been changed so it can be used as a makefile.
-(All information that isn't specified by makefiles is prefaced with comment
-characters.)
+  (All information that isn't specified by makefiles is prefaced with comment
+  characters.)
 
 Version 3.49
 
 * The % character can be quoted with backslash in implicit pattern rules,
-static pattern rules, `vpath' directives, and `patsubst', `filter', and
-`filter-out' functions.  A warning is issued if a `vpath' directive's
-pattern contains no %.
+  static pattern rules, `vpath' directives, and `patsubst', `filter', and
+  `filter-out' functions.  A warning is issued if a `vpath' directive's
+  pattern contains no %.
 
 * The `wildcard' variable expansion function now expands ~ and ~USER.
 
-* Messages indicating failed commands now contain the target name:
+* Messages indicating failed recipe lines now contain the target name:
 	make: *** [target] Error 1
 
 * The `-p' output format has been changed somewhat to look more like
-makefile rules and to give all information that Make has about files.
+  makefile rules and to give all information that Make has about files.
 
 Version 3.48
 
@@ -828,49 +836,49 @@ Version 3.47
 * The `-l' switch with no argument removes any previous load-average limit.
 
 * When the `-w' switch is in effect, and Make has updated makefiles,
-it will write a `Leaving directory' messagfe before re-executing itself.
-This makes the `directory change tracking' changes to Emacs's compilation
-commands work properly.
+  it will write a `Leaving directory' message before re-executing itself.
+  This makes the `directory change tracking' changes to Emacs's compilation
+  commands work properly.
 
 Version 3.46
 
 * The automatic variable `$*' is now defined for explicit rules,
-as it is in Unix make.
+  as it is in Unix make.
 
 Version 3.45
 
 * The `-j' switch is now put in the MAKEFLAGS and MFLAGS variables when
-specified without an argument (indicating infinite jobs).
-The `-l' switch is not always put in the MAKEFLAGS and MFLAGS variables.
+  specified without an argument (indicating infinite jobs).
+  The `-l' switch is not always put in the MAKEFLAGS and MFLAGS variables.
 
-* Make no longer checks hashed directories after running commands.
-The behavior implemented in 3.41 caused too much slowdown.
+* Make no longer checks hashed directories after running recipes.
+  The behavior implemented in 3.41 caused too much slowdown.
 
 Version 3.44
 
 * A dependency is NOT considered newer than its dependent if
-they have the same modification time.  The behavior implemented
-in 3.43 conflicts with RCS.
+  they have the same modification time.  The behavior implemented
+  in 3.43 conflicts with RCS.
 
 Version 3.43
 
 * Dependency loops are no longer fatal errors.
 
 * A dependency is considered newer than its dependent if
-they have the same modification time.
+  they have the same modification time.
 
 Version 3.42
 
 * The variables F77 and F77FLAGS are now set by default to $(FC) and
-$(FFLAGS).  Makefiles designed for System V make may use these variables in
-explicit rules and expect them to be set.  Unfortunately, there is no way to
-make setting these affect the Fortran implicit rules unless FC and FFLAGS
-are not used (and these are used by BSD make).
+  $(FFLAGS).  Makefiles designed for System V make may use these variables in
+  explicit rules and expect them to be set.  Unfortunately, there is no way to
+  make setting these affect the Fortran implicit rules unless FC and FFLAGS
+  are not used (and these are used by BSD make).
 
 Version 3.41
 
-* Make now checks to see if its hashed directories are changed by commands.
-Other makes that hash directories (Sun, 4.3 BSD) don't do this.
+* Make now checks to see if its hashed directories are changed by recipes.
+  Other makes that hash directories (Sun, 4.3 BSD) don't do this.
 
 Version 3.39
 
@@ -879,7 +887,7 @@ Version 3.39
 Version 3.32
 
 * A file beginning with a dot can be the default target if it also contains
-a slash (e.g., `../bin/foo').  (Unix make allows this as well.)
+  a slash (e.g., `../bin/foo').  (Unix make allows this as well.)
 
 Version 3.31
 
@@ -888,8 +896,8 @@ Version 3.31
 * Yet more USG stuff.
 
 * Minimal support for Microport System V (a 16-bit machine and a
-brain-damaged compiler).  This has even lower priority than other USG
-support, so if it gets beyond trivial, I will take it out completely.
+  brain-damaged compiler).  This has even lower priority than other USG
+  support, so if it gets beyond trivial, I will take it out completely.
 
 * Revamped default implicit rules (not much visible change).
 
@@ -900,13 +908,13 @@ Version 3.30
 * Improved support for USG and HPUX (hopefully).
 
 * A variable reference like `$(foo:a=b)', if `a' contains a `%', is
-equivalent to `$(patsubst a,b,$(foo))'.
+  equivalent to `$(patsubst a,b,$(foo))'.
 
-* Defining .DEFAULT with no deps or commands clears its commands.
+* Defining .DEFAULT with no deps or recipe clears its recipe.
 
-* New default implicit rules for .S (cpp, then as), and .sh (copy and make
-executable).  All default implicit rules that use cpp (even indirectly), use
-$(CPPFLAGS).
+* New default implicit rules for .S (cpp, then as), and .sh (copy and
+  make executable).  All default implicit rules that use cpp (even
+  indirectly), use $(CPPFLAGS).
 
 Version 3.29
 
@@ -915,21 +923,21 @@ Version 3.29
 Version 3.28
 
 * New option: "-l LOAD" says not to start any new jobs while others are
-running if the load average is not below LOAD (a floating-point number).
+  running if the load average is not below LOAD (a floating-point number).
 
 * There is support in place for implementations of remote command execution
-in Make.  See the file remote.c.
+  in Make.  See the file remote.c.
 
 Version 3.26
 
 * No more than 10 directories will be kept open at once.
-(This number can be changed by redefining MAX_OPEN_DIRECTORIES in dir.c.)
+  (This number can be changed by redefining MAX_OPEN_DIRECTORIES in dir.c.)
 
 Version 3.25
 
 * Archive files will have their modification times recorded before doing
-anything that might change their modification times by updating an archive
-member.
+  anything that might change their modification times by updating an archive
+  member.
 
 Version 3.20
 
@@ -938,25 +946,25 @@ Version 3.20
 Version 3.19
 
 * The recursion level indications in error messages are much shorter than
-they were in version 3.14.
+  they were in version 3.14.
 
 Version 3.18
 
 * Leading spaces before directives are ignored (as documented).
 
 * Included makefiles can determine the default goal target.
-(System V Make does it this way, so we are being compatible).
+  (System V Make does it this way, so we are being compatible).
 
 Version 3.14.
 
 * Variables that are defaults built into Make will not be put in the
-environment for children.  This just saves some environment space and,
-except under -e, will be transparent to sub-makes.
+  environment for children.  This just saves some environment space and,
+  except under -e, will be transparent to sub-makes.
 
 * Error messages from sub-makes will indicate the level of recursion.
 
 * Hopefully some speed-up for large directories due to a change in the
-directory hashing scheme.
+  directory hashing scheme.
 
 * One child will always get a standard input that is usable.
 
@@ -965,7 +973,7 @@ directory hashing scheme.
 Version 3.13.
 
 * Count parentheses inside expansion function calls so you can
-have nested calls: `$(sort $(foreach x,a b,$(x)))'.
+  have nested calls: `$(sort $(foreach x,a b,$(x)))'.
 
 Version 3.12.
 
@@ -981,15 +989,15 @@ Version 3.12.
 
 * Makefiles will be updated and re-read if necessary.
 
-* Can now run several commands at once (parallelism), -j option.
+* Can now run several recipes at once (parallelism), -j option.
 
 * Error messages will contain the level of Make recursion, if any.
 
 * The `MAKEFLAGS' and `MFLAGS' variables will be scanned for options after
-makefiles are read.
+  makefiles are read.
 
-* A double-colon rule with no dependencies will always have its commands run.
-(This is how both the BSD and System V versions of Make do it.)
+* A double-colon rule with no dependencies will always have its recipe run.
+  (This is how both the BSD and System V versions of Make do it.)
 
 Version 3.05
 

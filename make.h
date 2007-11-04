@@ -496,6 +496,9 @@ extern int second_expansion, clock_skew_detected, rebuilding_makefiles;
 /* can we run commands via 'sh -c xxx' or must we use batch files? */
 extern int batch_mode_shell;
 
+/* Resetting the command script introduction prefix character.  */
+#define RECIPEPREFIX_NAME          ".RECIPEPREFIX"
+#define RECIPEPREFIX_DEFAULT       '\t'
 extern char cmd_prefix;
 
 extern unsigned int job_slots;

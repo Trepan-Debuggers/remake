@@ -1724,13 +1724,13 @@ new_job (struct file *file)
   ++jobserver_tokens;
 
   /* The job is now primed.  Start it running.
-     (This will notice if there are in fact no commands.)  */
+     (This will notice if there is in fact no recipe.)  */
   if (cmds->fileinfo.filenm)
-    DB (DB_BASIC, (_("Invoking commands from %s:%lu to update target `%s'.\n"),
+    DB (DB_BASIC, (_("Invoking recipe from %s:%lu to update target `%s'.\n"),
                    cmds->fileinfo.filenm, cmds->fileinfo.lineno,
                    c->file->name));
   else
-    DB (DB_BASIC, (_("Invoking builtin commands to update target `%s'.\n"),
+    DB (DB_BASIC, (_("Invoking builtin recipe to update target `%s'.\n"),
                    c->file->name));
 
 
@@ -2461,9 +2461,6 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
                   *(ap++) = *(p++);
                   *(ap++) = *p;
                 }
-              /* If there's a command prefix char here, skip it.  */
-              if (p[1] == cmd_prefix)
-                ++p;
             }
 	  else if (*p == '\n' && restp != NULL)
 	    {
@@ -2510,11 +2507,6 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 	      {
 		/* Throw out the backslash and newline.  */
                 ++p;
-
-		/* If there is a command prefix after a backslash-newline,
-		   remove it.  */
-		if (p[1] == cmd_prefix)
-                  ++p;
 
                 /* If there's nothing in this argument yet, skip any
                    whitespace before the start of the next word.  */
@@ -2743,9 +2735,8 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 	  }
 	else if (*p == '\\' && p[1] == '\n')
 	  {
-	    /* POSIX says we keep the backslash-newline, but throw out
-               the next char if it's a TAB.  If we don't have a POSIX
-               shell on DOS/Windows/OS2, mimic the pre-POSIX behavior
+	    /* POSIX says we keep the backslash-newline.  If we don't have a
+               POSIX shell on DOS/Windows/OS2, mimic the pre-POSIX behavior
                and remove the backslash/newline.  */
 #if defined (__MSDOS__) || defined (__EMX__) || defined (WINDOWS32)
 # define PRESERVE_BSNL  unixy_shell
@@ -2758,11 +2749,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 		*(ap++) = '\\';
 		*(ap++) = '\n';
 	      }
-
 	    ++p;
-	    if (p[1] == cmd_prefix)
-	      ++p;
-
 	    continue;
 	  }
 
@@ -2849,12 +2836,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
         while (*q != '\0')
           {
             if (q[0] == '\\' && q[1] == '\n')
-              {
-                q += 2; /* remove '\\' and '\n' */
-		/* Remove any command prefix in the next line */
-                if (q[0] == cmd_prefix)
-                  q++;
-              }
+              q += 2; /* remove '\\' and '\n' */
             else
               *p++ = *q++;
           }

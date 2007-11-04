@@ -1,3 +1,16 @@
+2007-11-04  Paul Smith  <psmith@gnu.org>
+
+	* scripts/functions/eval: Update error message for command -> recipe.
+
+	* test_driver.pl (compare_output): Allow the answer to be a regex,
+	if surrounded by '/'.
+	* scripts/misc/close_stdout: Use a regex for the answer, since
+	sometimes the error will have a description and sometimes it won't.
+
+2007-09-10  Paul Smith  <psmith@gnu.org>
+
+	* scripts/variables/special: Add tests for .RECIPEPREFIX variable.
+
 2007-08-15  Paul Smith  <psmith@gnu.org>
 
 	These test cases were contributed by

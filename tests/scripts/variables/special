@@ -50,5 +50,68 @@ all:
 # $answer = "X1 =\nX2 = all\nLAST = all foo\n";
 # &compare_output($answer, &get_logfile(1));
 
+# Test the .RECIPEPREFIX variable
+&run_make_test('
+define foo
+: foo-one \
+foo-two
+: foo-three
+	: foo-four
+endef
+
+orig: ; : orig-one
+	: orig-two \
+orig-three \
+	orig-four \
+		orig-five \\\\
+	: orig-six
+	$(foo)
+
+.RECIPEPREFIX = >
+test: ; : test-one
+>: test-two \
+test-three \
+>test-four \
+>	test-five \\\\
+>: test-six
+>$(foo)
+
+.RECIPEPREFIX =
+reset: ; : reset-one
+	: reset-two \
+reset-three \
+	reset-four \
+		reset-five \\\\
+	: reset-six
+	$(foo)
+',
+               'orig test reset',
+               ': orig-one
+: orig-two \
+orig-three \
+orig-four \
+	orig-five \\\\
+: orig-six
+: foo-one foo-two
+: foo-three
+: foo-four
+: test-one
+: test-two \
+test-three \
+test-four \
+	test-five \\\\
+: test-six
+: foo-one foo-two
+: foo-three
+: foo-four
+: reset-one
+: reset-two \
+reset-three \
+reset-four \
+	reset-five \\\\
+: reset-six
+: foo-one foo-two
+: foo-three
+: foo-four');
 
 1;
