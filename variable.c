@@ -252,7 +252,7 @@ define_variable_in_set (const char *name, unsigned int length,
 #define EXPANSION_INCREMENT(_l)  ((((_l) / 500) + 1) * 500)
 
 static struct variable *
-handle_special_var (struct variable *var)
+lookup_special_var (struct variable *var)
 {
   static unsigned long last_var_count = 0;
 
@@ -352,7 +352,7 @@ lookup_variable (const char *name, unsigned int length)
 
       v = (struct variable *) hash_find_item ((struct hash_table *) &set->table, &var_key);
       if (v)
-	return v->special ? handle_special_var (v) : v;
+	return v->special ? lookup_special_var (v) : v;
     }
 
 #ifdef VMS
@@ -985,6 +985,20 @@ target_environment (struct file *file)
   return result_0;
 }
 
+static struct variable *
+set_special_var (struct variable *var)
+{
+  if (streq (var->name, RECIPEPREFIX_NAME))
+    {
+      /* The user is resetting the command introduction prefix.  This has to
+         happen immediately, so that subsequent rules are interpreted
+         properly.  */
+      cmd_prefix = var->value[0]=='\0' ? RECIPEPREFIX_DEFAULT : var->value[0];
+    }
+
+  return var;
+}
+
 /* Given a variable, a value, and a flavor, define the variable.
    See the try_variable_definition() function for details on the parameters. */
 
@@ -1019,7 +1033,7 @@ do_variable_definition (const struct floc *flocp, const char *varname,
          The value is set IFF the variable is not defined yet. */
       v = lookup_variable (varname, strlen (varname));
       if (v)
-        return v;
+        return v->special ? set_special_var (v) : v;
 
       conditional = 1;
       flavor = f_recursive;
@@ -1227,7 +1241,7 @@ do_variable_definition (const struct floc *flocp, const char *varname,
   if (alloc_value)
     free (alloc_value);
 
-  return v;
+  return v->special ? set_special_var (v) : v;
 }
 
 /* Try to interpret LINE (a null-terminated string) as a variable definition.

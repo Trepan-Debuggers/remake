@@ -596,7 +596,7 @@ print_commands (const struct commands *cmds)
 {
   const char *s;
 
-  fputs (_("#  commands to execute"), stdout);
+  fputs (_("#  recipe to execute"), stdout);
 
   if (cmds->fileinfo.filenm == 0)
     puts (_(" (built-in):"));
@@ -609,15 +609,12 @@ print_commands (const struct commands *cmds)
     {
       const char *end;
 
-      while (isspace ((unsigned char)*s))
-	++s;
-
       end = strchr (s, '\n');
       if (end == 0)
 	end = s + strlen (s);
 
-      printf ("\t%.*s\n", (int) (end - s), s);
+      printf ("%c%.*s\n", cmd_prefix, (int) (end - s), s);
 
-      s = end;
+      s = end + (end[0] == '\n');
     }
 }

@@ -255,18 +255,18 @@ rehash_file (struct file *from_file, const char *to_hname)
              but give a message to let the user know what's going on.  */
           if (to_file->cmds->fileinfo.filenm != 0)
             error (&from_file->cmds->fileinfo,
-                   _("Commands were specified for file `%s' at %s:%lu,"),
+                   _("Recipe was specified for file `%s' at %s:%lu,"),
                    from_file->name, to_file->cmds->fileinfo.filenm,
                    to_file->cmds->fileinfo.lineno);
           else
             error (&from_file->cmds->fileinfo,
-                   _("Commands for file `%s' were found by implicit rule search,"),
+                   _("Recipe for file `%s' was found by implicit rule search,"),
                    from_file->name);
           error (&from_file->cmds->fileinfo,
                  _("but `%s' is now considered the same file as `%s'."),
                  from_file->name, to_hname);
           error (&from_file->cmds->fileinfo,
-                 _("Commands for `%s' will be ignored in favor of those for `%s'."),
+                 _("Recipe for `%s' will be ignored in favor of the one for `%s'."),
                  to_hname, from_file->name);
         }
     }
@@ -359,7 +359,7 @@ remove_intermediates (int sig)
 	struct file *f = *file_slot;
         /* Is this file eligible for automatic deletion?
            Yes, IFF: it's marked intermediate, it's not secondary, it wasn't
-           given on the command-line, and it's either a -include makefile or
+           given on the command line, and it's either a -include makefile or
            it's not precious.  */
 	if (f->intermediate && (f->dontcare || !f->precious)
 	    && !f->secondary && !f->cmd_target)
@@ -895,7 +895,7 @@ print_file (const void *item)
   if (f->phony)
     puts (_("#  Phony target (prerequisite of .PHONY)."));
   if (f->cmd_target)
-    puts (_("#  Command-line target."));
+    puts (_("#  Command line target."));
   if (f->dontcare)
     puts (_("#  A default, MAKEFILES, or -include/sinclude makefile."));
   puts (f->tried_implicit
@@ -929,10 +929,10 @@ print_file (const void *item)
   switch (f->command_state)
     {
     case cs_running:
-      puts (_("#  Commands currently running (THIS IS A BUG)."));
+      puts (_("#  Recipe currently running (THIS IS A BUG)."));
       break;
     case cs_deps_running:
-      puts (_("#  Dependencies commands running (THIS IS A BUG)."));
+      puts (_("#  Dependencies recipe running (THIS IS A BUG)."));
       break;
     case cs_not_started:
     case cs_finished:

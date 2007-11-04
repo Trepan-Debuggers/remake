@@ -29,7 +29,7 @@
 # this routine controls the whole mess; each test suite sets up a few
 # variables and then calls &toplevel, which does all the real work.
 
-# $Id: test_driver.pl,v 1.23 2007/07/14 02:57:46 psmith Exp $
+# $Id: test_driver.pl,v 1.24 2007/11/04 21:54:02 psmith Exp $
 
 
 # The number of test categories we've run
@@ -661,15 +661,23 @@ sub compare_output
     $answer_matched = 1;
   } else {
     # See if it is a slash or CRLF problem
-    local ($answer_mod) = $answer;
+    local ($answer_mod, $slurp_mod) = ($answer, $slurp);
 
     $answer_mod =~ tr,\\,/,;
     $answer_mod =~ s,\r\n,\n,gs;
 
-    $slurp =~ tr,\\,/,;
-    $slurp =~ s,\r\n,\n,gs;
+    $slurp_mod =~ tr,\\,/,;
+    $slurp_mod =~ s,\r\n,\n,gs;
 
-    $answer_matched = ($slurp eq $answer_mod);
+    $answer_matched = ($slurp_mod eq $answer_mod);
+
+    # If it still doesn't match, see if the answer might be a regex.
+    if (!$answer_matched && $answer =~ m,^/(.+)/$,) {
+      $answer_matched = ($slurp =~ /$1/);
+      if (!$answer_matched && $answer_mod =~ m,^/(.+)/$,) {
+          $answer_matched = ($slurp_mod =~ /$1/);
+      }
+    }
   }
 
   if ($answer_matched && $test_passed)

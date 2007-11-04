@@ -460,7 +460,7 @@ update_file_1 (struct file *file, unsigned int depth)
   if (file->cmds == 0 && !file->is_target
       && default_file != 0 && default_file->cmds != 0)
     {
-      DBF (DB_IMPLICIT, _("Using default commands for `%s'.\n"));
+      DBF (DB_IMPLICIT, _("Using default recipe for `%s'.\n"));
       file->cmds = default_file->cmds;
     }
 
@@ -711,7 +711,7 @@ update_file_1 (struct file *file, unsigned int depth)
     {
       must_make = 0;
       DBF (DB_VERBOSE,
-           _("No commands for `%s' and no prerequisites actually changed.\n"));
+           _("No recipe for `%s' and no prerequisites actually changed.\n"));
     }
   else if (!must_make && file->cmds != 0 && always_make_flag)
     {
@@ -761,7 +761,7 @@ update_file_1 (struct file *file, unsigned int depth)
 
   if (file->command_state != cs_finished)
     {
-      DBF (DB_VERBOSE, _("Commands of `%s' are being run.\n"));
+      DBF (DB_VERBOSE, _("Recipe of `%s' is being run.\n"));
       return 0;
     }
 
