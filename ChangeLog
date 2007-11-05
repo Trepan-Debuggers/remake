@@ -6,6 +6,11 @@
 	* commands.c, file.c, job.c, remake.c, read.c, variable.c, main.c:
 	Ditto.
 
+2007-10-27  Bruno Haible  <bruno@clisp.org>
+
+	* remake.c (f_mtime): Print time difference values between 100 and
+	ULONG_MAX in fixed-point notation rather than in exponention notation.
+
 2007-10-12  Eli Zaretskii  <eliz@gnu.org>
 
 	* variable.c (do_variable_definition): Allow $(SHELL) to expand to
