@@ -1,3 +1,14 @@
+2007-12-22  Juan Manuel Guerrero  <juan.guerrero@gmx.de>  (tiny change)
+
+	* configh.dos.template [__DJGPP__]: Replace HAVE_SYS_SIGLIST with
+	HAVE_DECL_SYS_SIGLIST.
+
+	* job.c (child_execute_job): Remove __MSDOS__ because MSDOS/DJGPP
+	build does not use child_execute_job.
+
+	* variable.c (define_automatic_variables) [__MSDOS__]: Always
+	export the SHELL environment variable to the child.
+
 2007-12-22  Eli Zaretskii  <eliz@gnu.org>
 
 	* config.h.W32: Include sys/types.h.
