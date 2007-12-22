@@ -794,6 +794,9 @@ define_automatic_variables (void)
   /* This won't override any definition, but it will provide one if there
      isn't one there.  */
   v = define_variable ("SHELL", 5, default_shell, o_default, 0);
+#ifdef __MSDOS__
+  v->export = v_export;  /*  Export always SHELL.  */
+#endif
 
   /* On MSDOS we do use SHELL from environment, since it isn't a standard
      environment variable on MSDOS, so whoever sets it, does that on purpose.

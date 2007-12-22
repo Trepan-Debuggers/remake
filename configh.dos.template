@@ -25,7 +25,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 # define SYS_SIGLIST_DECLARED 1
 
 /* Define to 1 if the C library defines the variable `_sys_siglist'.  */
-# define HAVE_SYS_SIGLIST 1
+# define HAVE_DECL_SYS_SIGLIST 1
 
 #else
 
