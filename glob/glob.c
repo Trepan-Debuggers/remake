@@ -190,12 +190,15 @@ __inline
 #  ifdef WINDOWS32
 static void *
 my_realloc (void *p, unsigned int n)
+#  elif defined(__DJGPP__)
+static void *
+my_realloc (void *p, size_t n)
 #  else
 static char *
 my_realloc (p, n)
      char *p;
      unsigned int n;
-# endif
+#  endif
 {
   /* These casts are the for sake of the broken Ultrix compiler,
      which warns of illegal pointer combinations otherwise.  */
