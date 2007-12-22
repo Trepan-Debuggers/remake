@@ -1,5 +1,8 @@
 2007-12-22  Eli Zaretskii  <eliz@gnu.org>
 
+	* config.h.W32: Include sys/types.h.
+	[!_PID_T_] (pid_t): Define only if not already defined by sys/types.h.
+
 	* vpath.c (construct_vpath_list) [HAVE_DOS_PATHS]: Support VPATH
 	values that use `:' in drive letters, when PATH_SEPARATOR_CHAR is
 	also `:'.

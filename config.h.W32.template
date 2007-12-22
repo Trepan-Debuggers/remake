@@ -418,11 +418,16 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef const */
 
+#include <sys/types.h>
+
 /* Define to `int' if <sys/types.h> doesn't define. */
 #define gid_t int
 
 /* Define to `int' if <sys/types.h> does not define. */
+/* GCC 4.x reportedly defines pid_t.  */
+#ifndef _PID_T_
 #define pid_t int
+#endif
 
 /* Define to `int' if <sys/types.h> doesn't define. */
 #define uid_t int
