@@ -1,3 +1,24 @@
+2007-12-22  Eli Zaretskii  <eliz@gnu.org>
+
+	Suggested by Juan Manuel Guerrero <juan.guerrero@gmx.de>:
+
+	* Makefile.DOS.template (info_TEXINFOS): Remove unused variable.
+	(TEXINFOS): Value changed to `doc/make.texi'.
+	(.SUFFIXES): Use .texi instead of .texinfo.
+	(make.info, make.dvi): Depend on doc/make.texi.
+	(.texi.info): New target, instead of ".texinfo.info".  Change -I
+	switch to $(MAKEINFO) to look in doc/.  Use --no-split.
+	(.texi): New target, instead of ".texinfo".  Change -I switch to
+	$(MAKEINFO) to look in doc/.  Use --no-split.
+	(.texi.dvi): New target, instead of ".texinfo.dvi".  Change -I
+	switch to $(MAKEINFO) to look in doc/.
+	(install-info-am, uninstall-info): Don't look for "*.i[0-9]" and
+	"*.i[0-9][0-9]" (due to --no-split above).
+	(noinst_TEXINFOS, TEXI2HTML, TEXI2HTML_FLAGS): New variables.
+	(html, make_1.html): New targets.
+	(.PHONY): Add "html".
+	(.SUFFIXES): Add .html.
+
 2007-12-22  Juan Manuel Guerrero  <juan.guerrero@gmx.de>  (tiny change)
 
 	* configh.dos.template [__DJGPP__]: Replace HAVE_SYS_SIGLIST with
