@@ -918,15 +918,18 @@ target_environment (struct file *file)
 		break;
 
 	      case v_noexport:
-                /* If this is the SHELL variable and it's not exported, then
-                   add the value from our original environment.  */
-                if (streq (v->name, "SHELL"))
-                  {
-                    extern struct variable shell_var;
-                    v = &shell_var;
-                    break;
-                  }
-                continue;
+		{
+		  /* If this is the SHELL variable and it's not exported,
+		     then add the value from our original environment, if
+		     the original environment defined a value for SHELL.  */
+		  extern struct variable shell_var;
+		  if (streq (v->name, "SHELL") && shell_var.value)
+		    {
+		      v = &shell_var;
+		      break;
+		    }
+		  continue;
+		}
 
 	      case v_ifset:
 		if (v->origin == o_default)
