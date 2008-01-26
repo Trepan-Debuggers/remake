@@ -1,3 +1,8 @@
+2008-01-26  Eli Zaretskii  <eliz@gnu.org>
+
+	* variable.c (target_environment): Don't use shell_var if its
+	`value' field is NULL.
+
 2007-12-22  Eli Zaretskii  <eliz@gnu.org>
 
 	Suggested by Juan Manuel Guerrero <juan.guerrero@gmx.de>:
