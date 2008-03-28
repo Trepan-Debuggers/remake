@@ -1,3 +1,13 @@
+2008-03-27  Paul Smith  <psmith@gnu.org>
+
+	Fix Savannah bug #22379:
+	* ar.c (ar_glob_match): Zero the allocated structure.
+	* read.c (parse_file_seq): Ditto.
+
+2008-03-08  Brian Dessent  <brian@dessent.net>
+
+	* maintMakefile: Update Translation Project location.
+
 2008-01-26  Eli Zaretskii  <eliz@gnu.org>
 
 	* variable.c (target_environment): Don't use shell_var if its
