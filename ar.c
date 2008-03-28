@@ -196,6 +196,7 @@ ar_glob_match (int desc UNUSED, const char *mem, int truncated UNUSED,
     {
       /* We have a match.  Add it to the chain.  */
       struct nameseq *new = xmalloc (state->size);
+      memset (new, '\0', state->size);
       new->name = strcache_add (concat (state->arname, mem, ")"));
       new->next = state->chain;
       state->chain = new;

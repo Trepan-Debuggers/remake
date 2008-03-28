@@ -2426,6 +2426,7 @@ parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip)
 
       /* Add it to the front of the chain.  */
       new1 = xmalloc (size);
+      memset (new1, '\0', size);
       new1->name = name;
       new1->next = new;
       new = new1;
