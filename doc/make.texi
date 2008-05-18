@@ -4,7 +4,7 @@
 
 @include version.texi
 @set EDITION 0.70
-@set RCSID $Id: make.texi,v 1.51 2007/11/04 21:54:01 psmith Exp $
+@set RCSID $Id: make.texi,v 1.52 2008/05/18 15:11:40 psmith Exp $
 
 @settitle GNU @code{make}
 @setchapternewpage odd
@@ -2654,7 +2654,7 @@ contents do not matter, and usually are empty.
 
 The purpose of the empty target file is to record, with its
 last-modification time, when the rule's recipe was last executed.  It
-does so because one of the commands in the recipeis a @code{touch}
+does so because one of the commands in the recipe is a @code{touch}
 command to update the target file.
 
 The empty target file should have some prerequisites (otherwise it
