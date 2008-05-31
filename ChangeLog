@@ -1,3 +1,10 @@
+2008-05-31  Eli Zaretskii  <eliz@gnu.org>
+
+	* README.W32.template: Remove obsolete text about non-support for
+	-jN without Unixy shell.  Remove obsolete text about not supplying
+	Visual Studio project files (we do supply them).  Modify text to
+	prefer GCC builds to MSC builds.
+
 2008-04-02  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* doc/make.texi (Empty Targets): Fix typo.
