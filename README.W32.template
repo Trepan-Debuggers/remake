@@ -1,10 +1,10 @@
 This version of GNU make has been tested on Microsoft Windows 2000/XP/2003.
 It has also been used on Windows 95/98/NT, and on OS/2.
 
-It builds natively with MSVC 2.x, 4.x, 5.x, 6.x, and 2003 as well as
-.NET 7.x and .NET 2003.
+It builds with the MinGW port of GCC (tested with GCC 3.4.2).
 
-It builds with the MinGW port of GCC 3.x (tested with GCC 3.4.2).
+It also builds with MSVC 2.x, 4.x, 5.x, 6.x, and 2003 as well as
+with .NET 7.x and .NET 2003.
 
 The Windows 32-bit port of GNU make is maintained jointly by various
 people.  It was originally made by Rob Tulloh.
@@ -27,7 +27,8 @@ Using make_msvc_net2003.vcproj
 ------------------------------
 
  2. Open make_msvc_net2003.vcproj in MSVS71 or MSVC71 or any compatible IDE,
-    then build this project as usual.
+    then build this project as usual.  There's also a solution file for
+    Studio 2003.
 
 
 Building with (MinGW-)GCC using build_w32.bat
@@ -68,10 +69,12 @@ Building with (MSVC++-)cl using build_w32.bat or NMakefile
 GNU make on Windows 32-bit platforms:
 
 	This version of make is ported natively to Windows32 platforms
-	(Windows NT 3.51, Windows NT 4.0, Windows 95, and Windows 98). It
-	does not rely on any 3rd party software or add-on packages for
-	building. The only thing needed is a version of Visual C++,
-	which is the predominant compiler used on Windows32 platforms.
+	(Windows NT 3.51, Windows NT 4.0, Windows 2000, Windows XP,
+	Windows 95, and Windows 98). It does not rely on any 3rd party
+	software or add-on packages for building. The only thing
+	needed is a Windows compiler.  Two compilers supported
+	officially are the MinGW port of GNU GCC, and the various
+	versions of the Microsoft C compiler.
 
 	Do not confuse this port of GNU make with other Windows32 projects
 	which provide a GNU make binary. These are separate projects
@@ -79,11 +82,11 @@ GNU make on Windows 32-bit platforms:
 
 GNU make and sh.exe:
 
-	This port prefers you have a working sh.exe somewhere on your
-	system. If you don't have sh.exe, the port falls back to
-	MSDOS mode for launching programs (via a batch file).
-	The MSDOS mode style execution has not been tested that
-	carefully though (The author uses GNU bash as sh.exe).
+	This port prefers if you have a working sh.exe somewhere on
+	your system. If you don't have sh.exe, the port falls back to
+	MSDOS mode for launching programs (via a batch file).  The
+	MSDOS mode style execution has not been tested that carefully
+	though (The author uses GNU bash as sh.exe).
 
 	There are very few true ports of Bourne shell for NT right now.
 	There is a version of GNU bash available from Cygnus "Cygwin"
@@ -108,9 +111,25 @@ GNU make and brain-dead shells (BATCH_MODE_ONLY_SHELL):
 
 	A native Windows32 system with no Bourne shell will also run
 	in batch mode.  All command lines will be put into batch files
-	and executed via $(COMSPEC) (%COMSPEC%).  Note that parallel
-        builds (-j) require a working Bourne shell; they will not work
-        with COM.
+	and executed via $(COMSPEC) (%COMSPEC%).  However, parallel
+	builds ARE supported with Windows shells (cmd.exe and
+	command.com).  See the next section about some peculiarities
+	of parallel builds on Windows.
+
+Support for parallel builds
+
+	Parallel builds (-jN) are supported in this port, with 2
+	limitations:
+
+	  - The number of concurrent processes has a hard limit of 64,
+            due to the way this port implements waiting for its
+            subprocesses;
+
+	  - The job server method (available when Make runs on Posix
+            platforms) is not supported, which means you must pass an
+            explicit -jN switch to sub-Make's in a recursive Makefile.
+            If a sub-Make does not receive an explicit -jN switch, it
+            will default to -j1, i.e. no parallelism in sub-Make's.
 
 GNU make and Cygnus GNU Windows32 tools:
 
@@ -171,29 +190,11 @@ GNU make test suite:
 	on Windows NT). All tests pass in an environment that includes
 	sh.exe.  Tests were performed on both Windows NT and Windows 95.
 
-Building GNU make on Windows NT and Windows 95/98 with Microsoft Visual C:
-
-	I did not provide a Visual C project file with this port as
-	the project file would not be considered freely distributable
-	(or so I think). It is easy enough to create one, though, if
-	you know how to use Visual C.
-
-	I build the program statically to avoid problems locating DLL's
-	on machines that may not have MSVC runtime installed. If you
-	prefer, you can change make to build with shared libraries by
-	changing /MT to /MD in the NMakefile (or in build_w32.bat).
-
-	The program has not been built for non-Intel architectures (yet).
-
-	I have not tried to build with any other compilers than MSVC. I
-	have heard that this is possible though so don't be afraid to
-	notify me of your successes!
-
 Pathnames and white space:
 
 	Unlike Unix, Windows 95/NT systems encourage pathnames which
 	contain white space (e.g. C:\Program Files\). These sorts of
-	pathnames are legal under Unix too, but are never encouraged.
+	pathnames are valid on Unix too, but are never encouraged.
 	There is at least one place in make (VPATH/vpath handling) where
 	paths containing white space will simply not work. There may be
 	others too. I chose to not try and port make in such a way so
@@ -272,7 +273,7 @@ Bug reports:
 
 -------------------------------------------------------------------------------
 Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-2006, 2007 Free Software Foundation, Inc.
+2006, 2007, 2008 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
