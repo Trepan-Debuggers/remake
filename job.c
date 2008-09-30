@@ -2746,7 +2746,11 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 	    if (PRESERVE_BSNL)
 	      {
 		*(ap++) = '\\';
-		*(ap++) = '\\';
+		/* Only non-batch execution needs another backslash,
+		   because it will be passed through a recursive
+		   invocation of this function.  */
+		if (!batch_mode_shell)
+		  *(ap++) = '\\';
 		*(ap++) = '\n';
 	      }
 	    ++p;
@@ -2807,6 +2811,8 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
       fputs (command_ptr, batch);
       fputc ('\n', batch);
       fclose (batch);
+      DB (DB_JOBS, (_("Batch file contents:%s\n\t%s\n"),
+		    !unixy_shell ? "\n\t@echo off" : "", command_ptr));
 
       /* create argv */
       new_argv = xmalloc(3 * sizeof (char *));
