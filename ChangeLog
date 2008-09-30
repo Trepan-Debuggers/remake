@@ -1,3 +1,9 @@
+2008-09-30  David Russo  <d-russo@ti.com>  (tiny change)
+
+	* job.c (construct_command_argv_internal): Avoid extra backslash
+	in batch-mode Unixy shells.  Under DB_JOBS, display the contents
+	of the batch file.
+
 2008-05-31  Eli Zaretskii  <eliz@gnu.org>
 
 	* README.W32.template: Remove obsolete text about non-support for
