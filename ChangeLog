@@ -1,3 +1,10 @@
+2008-09-30  Eli Zaretskii  <eliz@gnu.org>
+
+	* build_w32.bat (GCCBuild): Use "-gdwarf-2 -g3" instead of
+	"-gstabs+ -ggdb3".
+
+	* w32/subproc/build.bat (GCCBuild): Likewise.
+
 2008-09-30  David Russo  <d-russo@ti.com>  (tiny change)
 
 	* job.c (construct_command_argv_internal): Avoid extra backslash
