@@ -2,7 +2,9 @@
 #
 # Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
 # 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
-# This file is part of GNU Make.
+# Copyright (C) 2008 rocky@gnu.org
+#
+# This file is part of GNU Make (remake variant).
 #
 # GNU Make is free software; you can redistribute it and/or modify it under the
 # terms of the GNU General Public License as published by the Free Software
@@ -16,8 +18,9 @@
 # GNU Make; see the file COPYING.  If not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 
-AC_INIT([GNU make],[3.81],[bug-make@gnu.org])
+AC_INIT([GNU make],[3.81+dbg-0.1cvs],[bashdb-remake@lists.sourceforge.net])
 
+AM_PATH_LISPDIR
 AC_PREREQ(2.59)
 AC_REVISION([[$Id: configure.in,v 1.142 2006/04/01 06:36:40 psmith Exp $]])
 
@@ -28,6 +31,7 @@ AC_CONFIG_HEADERS(config.h)
 
 # Automake setup
 AM_INIT_AUTOMAKE([1.9])
+AC_PROG_MAKE_SET
 
 # Checks for programs.
 AC_PROG_CC
@@ -38,11 +42,25 @@ AC_CHECK_PROG(AR, ar, ar, ar)
 # Perl is needed for the test suite (only)
 AC_CHECK_PROG(PERL, perl, perl, perl)
 
+AC_PATH_PROG(EMACS, emacs, no)
+if test x$EMACS = xno ; then
+  emacs_lisp=no
+else 
+  $EMACS -batch -q -no-site-file -eval \
+  '(if (not (and (= emacs-major-version 21) (<= emacs-minor-version 4))) (error "This gud is for Emacs 21.0 to 21.3."))'
+  if test $? -ne 0 ; then
+    emacs_lisp=no
+  fi
+fi
+
 # Specialized system macros
 AC_CANONICAL_HOST
 AC_AIX
 AC_ISC_POSIX
 AC_MINIX
+
+AM_MISSING_PROG(CVS2CL, cvs2cl, $missing_dir)
+AM_MAINTAINER_MODE
 
 # Needed for ansi2knr
 AM_C_PROTOTYPES
@@ -224,6 +242,125 @@ if test "$make_cv_union_wait" = yes; then
 fi
 AC_MSG_RESULT($make_cv_union_wait)
 
+
+ac_includes_default="$ac_includes_default
+#ifdef HAVE_SIGNAL_H
+#include <signal.h>
+#endif
+"
+AC_SYS_SIGLIST_DECLARED
+
+AC_ARG_WITH(make_name,
+[  --with-make-name        name to use as the program name (default remake)],
+make_name="${withval}", make_name="remake")
+MAKE_NAME="$make_name"
+AC_SUBST(MAKE_NAME)
+MAKE_NAME_UPPER=`echo $make_name | tr a-z A-Z`
+AC_SUBST(MAKE_NAME_UPPER)
+
+AC_ARG_WITH(default_shell,
+[  --with-default-shell    program to use for SHELL],
+default_shell="${withval}", default_shell="/bin/sh")
+DEFAULT_SHELL="$default_shell"
+
+AC_ARG_WITH(shell_trace,
+[  --with-shell-trace     option to pass to shell to have it trace commands (default -x)],
+shell_trace="${withval}", shell_trace="-x")
+
+## Set OS-specific default shell.
+case $host_os in
+    cygwin*|mingw*) ;;
+    solaris*)
+      ## The System V Release 4 /bin/sh can't handle
+      ## -x -c in that order.
+      for sh in /bin/bash /usr/xpg4/bin/sh; do
+        if test -x "$sh" ; then
+          default_shell=$sh
+	  break
+        fi
+      done
+      ;;
+
+     *) ;;
+esac
+
+AC_MSG_CHECKING(if $default_shell can be used to trace commands using $shell_trace)
+sh_is_ok=`$default_shell $shell_trace -c ':' 2>&1`
+if test "+ :" != "$sh_is_ok" ; then
+   AC_MSG_RESULT(no)
+   AC_MSG_WARN([Disabling shell tracing. Run again using --with-default_shell])
+   AC_MSG_WARN([or using --with-shell_trace if you know of a shell that])
+   AC_MSG_WARN([supports tracing with *sh* *shell_option* -c (in that order)"])
+else
+   AC_MSG_RESULT(yes)
+fi
+
+AC_DEFINE_UNQUOTED(SHELL_TRACE, ["$shell_trace"], 
+     [Define this to be what you need to add to turn on shell tracing])
+
+AC_DEFINE_UNQUOTED(DEFAULT_SHELL, ["$default_shell"],
+     [Define this to the default  to be used $(SHELL)])
+
+#
+# Check for readline to see if we can add debugging support.
+#
+AC_ARG_WITH(readline, 
+	    [  --with-readline         enable readline (for debugger)], 
+	    have_readline=$withval, enable_readline=yes)
+
+AC_CHECK_HEADER(readline/readline.h, [], [have_readline=no])
+
+if test "$enable_readline" = yes; then
+   VL_LIB_READLINE
+   AC_MSG_CHECKING(for tilde_expand() in <readline/readline.h>)
+   AC_TRY_RUN([
+#include <stdio.h>
+#include <readline/readline.h>
+
+int main(int argc, char **argv) {
+  char *s = tilde_expand ("~");
+  return 0;
+}], [AC_MSG_RESULT(yes); ac_have_tilde_expand=yes; 
+     AC_DEFINE(HAVE_TILDE_EXPAND, [], 
+     [Define this <readline/readline.h> defines tilde_expand()])],
+     [AC_MSG_RESULT(no); ac_have_tilde_expand=no],
+     [AC_MSG_RESULT(no); ac_have_tilde_expand=no])
+else 
+   AC_MSG_WARN([libreadline is needed for the debugger. I'll build "make"])
+   AC_MSG_WARN([with trace support, but you won't be able enter the])
+   AC_MSG_WARN([debugger.])
+fi
+
+if test "$enable_readline" = yes; then
+   VL_LIB_READLINE
+   AC_MSG_CHECKING(for history_list() in <readline/readline.h>)
+   AC_TRY_RUN([
+#include <stdio.h>
+#include <readline/readline.h>
+#include <readline/history.h>
+
+int main(int argc, char **argv) {
+  HIST_ENTRY **hist_list;
+
+      rl_initialize ();
+   hist_list = history_list();
+  return 0;
+}], [AC_MSG_RESULT(yes); ac_have_history_list=yes; 
+     AC_DEFINE(HAVE_HISTORY_LIST, [], 
+     [Define this <readline/readline.h> defines history_list()])],
+     [AC_MSG_RESULT(no); ac_have_history_list=no],
+     [AC_MSG_RESULT(no); ac_have_history_list=no])
+else 
+   AC_MSG_WARN([libreadline is needed for the debugger. I'll build "make"])
+   AC_MSG_WARN([with trace support, but you won't be able enter the])
+   AC_MSG_WARN([debugger.])
+fi
+
+AC_SUBST(HAVE_READLINE)
+REMAKE_SOURCE_PATH="`pwd`"
+AC_DEFINE_UNQUOTED(REMAKE_SOURCE_PATH, "$REMAKE_SOURCE_PATH",
+	[Full path to remake top_sourcedir.])
+AC_SUBST(REMAKE_SOURCE_PATH)
 
 # If we're building on Windows/DOS/OS/2, add some support for DOS drive specs.
 if test "$PATH_SEPARATOR" = ';'; then
@@ -442,11 +579,19 @@ esac
 
 
 # Specify what files are to be created.
-AC_CONFIG_FILES(Makefile glob/Makefile po/Makefile.in config/Makefile doc/Makefile w32/Makefile)
+AC_CONFIG_FILES([Makefile        \
+		 config/Makefile \
+		 doc/Makefile    \
+		 emacs/Makefile  \
+		 glob/Makefile   \
+		 po/Makefile.in  \
+		 w32/Makefile])
 
 # OK, do it!
 
 AC_OUTPUT
+
+AM_CONDITIONAL(INSTALL_EMACS_LISP, test "x$lispdir" != "x")
 
 # We only generate the build.sh if we have a build.sh.in; we won't have
 # one before we've created a distribution.
