@@ -10,6 +10,7 @@
 /config.h.in
 /config.log
 /config.status
+/configure
 /loadavg
 /make
 /stamp-h1
