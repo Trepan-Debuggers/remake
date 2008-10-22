@@ -51,7 +51,11 @@ EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c
 noinst_HEADERS = buildargv.h commands.h dep.h filedef.h job.h make.h \
                  rule.h variable.h \
 	         dbg_break.h dbg_cmd.h dbg_fns.h dbg_stack.h \
-		 debug.h getopt.h gettext.h hash.h trace.h print.h
+	         debug.h dep.h dir_fns.h expand.h file.h \
+		 function.h getopt.h gettext.h hash.h \
+		 make.h print.h \
+	         read.h rule.h \
+	         trace.h types.h variable.h
 
 make_LDADD =	@LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@ @LIBINTL@
 # Only process if target is MS-Windows
