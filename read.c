@@ -340,7 +340,7 @@ eval_makefile (char *filename, int flags)
      in which case it was already done.  */
   if (!(flags & RM_NO_TILDE) && filename[0] == '~')
     {
-      expanded = tilde_expand (filename);
+      expanded = make_tilde_expand (filename);
       if (expanded != 0)
 	filename = expanded;
     }
@@ -378,7 +378,7 @@ eval_makefile (char *filename, int flags)
   deps->name = 0;
   deps->file = lookup_file (filename);
   if (deps->file == 0)
-    deps->file = enter_file (strdup (filename), NILF);
+    deps->file = enter_file (xstrdup (filename), NILF);
   filename = deps->file->name;
   deps->changed = flags;
   if (flags & RM_DONTCARE)
@@ -2875,7 +2875,7 @@ construct_include_path (char **arg_dirs)
 
 	if (dir[0] == '~')
 	  {
-	    char *expanded = tilde_expand (dir);
+	    char *expanded = make_tilde_expand (dir);
 	    if (expanded != 0)
 	      dir = expanded;
 	  }
@@ -2951,7 +2951,7 @@ construct_include_path (char **arg_dirs)
    Return a newly malloc'd string or 0.  */
 
 char *
-tilde_expand (char *name)
+make_tilde_expand (char *name)
 {
 #ifndef VMS
   if (name[1] == '/' || name[1] == '\0')
@@ -3052,7 +3052,7 @@ multi_glob (nameseq_t *chain, unsigned int size)
 
       if (old->name[0] == '~')
 	{
-	  char *newname = tilde_expand (old->name);
+	  char *newname = make_tilde_expand (old->name);
 	  if (newname != 0)
 	    {
 	      free (old->name);
