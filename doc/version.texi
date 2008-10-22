@@ -1,0 +1,4 @@
+@set UPDATED 21 October 2008
+@set UPDATED-MONTH October 2008
+@set EDITION 3.81+dbg-0.1cvs
+@set VERSION 3.81+dbg-0.1cvs
