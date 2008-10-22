@@ -1,5 +1,11 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
+  2008
+
+Version 3.81+dbg-0.1cvs
+
+Merge in code from 3.80+dbg-0.63cvs
+
   1 April 2006
 
 See the end of this file for copyrights and conditions.

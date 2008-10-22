@@ -13,4 +13,6 @@
 /configure
 /loadavg
 /make
+/make-*.bz2
+/make-*.gz
 /stamp-h1
