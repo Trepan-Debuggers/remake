@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 
 #include <glob.h>
 
+#include "dir_fns.h"
 #include "dbg_cmd.h"
 #include "debug.h"
 #include "dep.h"
@@ -108,7 +109,7 @@ static char *default_include_directories[] =
     "/usr/local/include",
     "/usr/include",
 #endif
-    0
+    NULL
   };
 
 /* List of directories to search for include files in  */
@@ -275,12 +276,12 @@ read_all_makefiles (char **makefiles)
 /* Install a new conditional and return the previous one.  */
 
 static conditionals_t *
-install_conditionals (conditionals_t *new)
+install_conditionals (conditionals_t *new_conditionals)
 {
   conditionals_t *save = conditionals;
 
-  bzero ((char *) new, sizeof (*new));
-  conditionals = new;
+  bzero ((char *) new_conditionals, sizeof (*new_conditionals));
+  conditionals = new_conditionals;
 
   return save;
 }
@@ -303,8 +304,8 @@ restore_conditionals (conditionals_t *saved)
 static int
 eval_makefile (char *filename, int flags)
 {
-  struct dep *deps;
-  struct ebuffer ebuf;
+  dep_t *deps;
+  ebuffer_t ebuf;
   const struct floc *curfile;
   char *expanded = 0;
   char *included = 0;
@@ -354,7 +355,7 @@ eval_makefile (char *filename, int flags)
      search the included makefile search path for this makefile.  */
   if (ebuf.fp == 0 && (flags & RM_INCLUDED) && *filename != '/')
     {
-      register unsigned int i;
+      unsigned int i;
       for (i = 0; include_directories[i] != 0; ++i)
 	{
 	  included = concat (include_directories[i], "/", filename);
@@ -432,10 +433,10 @@ eval_makefile (char *filename, int flags)
 int
 eval_buffer (char *buffer)
 {
-  struct ebuffer ebuf;
-  struct conditionals *saved;
-  struct conditionals new;
-  const struct floc *curfile;
+  ebuffer_t ebuf;
+  conditionals_t *saved;
+  conditionals_t new;
+  const floc_t *curfile;
   int r;
 
   /* Evaluate the buffer */
@@ -473,7 +474,7 @@ eval_buffer (char *buffer)
 
 
 static int
-eval (struct ebuffer *ebuf, int set_default)
+eval (ebuffer_t *ebuf, int set_default)
 {
   char *collapsed = 0;
   unsigned int collapsed_length = 0;
@@ -483,8 +484,8 @@ eval (struct ebuffer *ebuf, int set_default)
   unsigned int cmds_started, tgts_started;
   int ignoring = 0, in_ignored_define = 0;
   int no_targets = 0;		/* Set when reading a rule without targets.  */
-  struct nameseq *filenames = 0;
-  struct dep *deps = 0;
+  nameseq_t *filenames = 0;
+  dep_t *deps = 0;
   long nlines = 0;
   int two_colon = 0;
   char *pattern = 0, *pattern_percent;
@@ -550,7 +551,7 @@ eval (struct ebuffer *ebuf, int set_default)
 
       /* Check for a shell command line first.
 	 If it is not one, we can stop treating tab specially.  */
-      if (line[0] == '\t')
+      if (line[0] == cmd_prefix)
 	{
 	  if (no_targets)
 	    /* Ignore the commands in a rule with no targets.  */
@@ -641,9 +642,11 @@ eval (struct ebuffer *ebuf, int set_default)
  	  int i = conditional_line (p, len, fstart);
           if (i != -2)
             {
-              if (i == -1)
-                fatal (fstart, _("invalid syntax in conditional"));
-
+              if (i == -1) 
+		{
+		  fatal (fstart, _("invalid syntax in conditional"));
+		  return 0;
+		}
               ignoring = i;
               continue;
             }
@@ -651,8 +654,10 @@ eval (struct ebuffer *ebuf, int set_default)
 
       if (word1eq ("endef"))
 	{
-	  if (!in_ignored_define)
+	  if (!in_ignored_define) {
 	    fatal (fstart, _("extraneous `endef'"));
+	    return 0;
+	  }
           in_ignored_define = 0;
 	  continue;
 	}
@@ -663,8 +668,10 @@ eval (struct ebuffer *ebuf, int set_default)
 	    in_ignored_define = 1;
 	  else
 	    {
-              if (*p2 == '\0')
+              if (*p2 == '\0') {
                 fatal (fstart, _("empty variable name"));
+		return 0;
+	      }
 
 	      /* Let the variable name be the whole rest of the line,
 		 with trailing blanks stripped (comments have already been
@@ -691,8 +698,10 @@ eval (struct ebuffer *ebuf, int set_default)
 	      else
 		{
 		  p2 = next_token (p2 + 6);
-                  if (*p2 == '\0')
+                  if (*p2 == '\0') {
                     fatal (fstart, _("empty variable name"));
+		    return 0;
+		  }
 
 		  /* Let the variable name be the whole rest of the line,
 		     with trailing blanks stripped (comments have already been
@@ -829,9 +838,9 @@ eval (struct ebuffer *ebuf, int set_default)
 	  /* Parse the list of file names.  */
 	  p2 = p;
 	  files = multi_glob (parse_file_seq (&p2, '\0',
-					      sizeof (struct nameseq),
+					      sizeof (nameseq_t),
 					      1),
-			      sizeof (struct nameseq));
+			      sizeof (nameseq_t));
 	  free (p);
 
 	  /* Save the state of conditionals and start
@@ -873,8 +882,11 @@ eval (struct ebuffer *ebuf, int set_default)
       /* This line starts with a tab but was not caught above because there
          was no preceding target, and the line might have been usable as a
          variable definition.  But now we know it is definitely lossage.  */
-      if (line[0] == '\t')
-        fatal(fstart, _("commands commence before first target"));
+      if (line[0] == '\t') 
+	{
+	  fatal(fstart, _("commands commence before first target"));
+	  return 0;
+	}
 
       /* This line describes some target files.  This is complicated by
          the existence of target-specific variables, because we can't
@@ -887,8 +899,8 @@ eval (struct ebuffer *ebuf, int set_default)
          parts of the expanded buffer we haven't searched yet. */
 
       {
-        enum make_word_type wtype;
-        enum variable_origin v_origin;
+        make_word_t wtype;
+        variable_origin_t v_origin;
         int exported;
         char *cmdleft, *semip, *lb_next;
         unsigned int len, plen = 0;
@@ -924,8 +936,10 @@ eval (struct ebuffer *ebuf, int set_default)
         switch (wtype)
           {
           case w_eol:
-            if (cmdleft != 0)
+            if (cmdleft != 0) {
               fatal(fstart, _("missing rule before commands"));
+	      return 0;
+	    }
             /* This line contained something but turned out to be nothing
                but whitespace (a comment?).  */
             continue;
@@ -1009,12 +1023,14 @@ eval (struct ebuffer *ebuf, int set_default)
            it.  If so, we can't parse this line so punt.  */
         if (wtype == w_eol)
           {
-            if (*p2 != '\0')
+            if (*p2 != '\0') {
               /* There's no need to be ivory-tower about this: check for
                  one of the most common bugs found in makefiles...  */
               fatal (fstart, _("missing separator%s"),
                      !strneq(line, "        ", 8) ? ""
                      : _(" (did you mean TAB instead of 8 spaces?)"));
+	      return 0;
+	    }
             continue;
           }
 
@@ -1022,9 +1038,9 @@ eval (struct ebuffer *ebuf, int set_default)
            looking for targets.  */
         *colonp = '\0';
         filenames = multi_glob (parse_file_seq (&p2, '\0',
-                                                sizeof (struct nameseq),
+                                                sizeof (nameseq_t),
                                                 1),
-                                sizeof (struct nameseq));
+                                sizeof (nameseq_t));
         *p2 = ':';
 
         if (!filenames)
@@ -1168,8 +1184,8 @@ eval (struct ebuffer *ebuf, int set_default)
 #endif
         if (p != 0)
           {
-            struct nameseq *target;
-            target = parse_file_seq (&p2, ':', sizeof (struct nameseq), 1);
+            nameseq_t *target;
+            target = parse_file_seq (&p2, ':', sizeof (nameseq_t), 1);
             ++p2;
             if (target == 0)
               fatal (fstart, _("missing target pattern"));
@@ -1177,8 +1193,10 @@ eval (struct ebuffer *ebuf, int set_default)
               fatal (fstart, _("multiple target patterns"));
             pattern = target->name;
             pattern_percent = find_percent (pattern);
-            if (pattern_percent == 0)
+            if (pattern_percent == 0) {
               fatal (fstart, _("target pattern contains no `%%'"));
+	      return 0;
+	    }
             free ((char *)target);
           }
         else
@@ -1450,7 +1468,7 @@ do_define (char *name, unsigned int namelen,
    1 if following text should be ignored.  */
 
 static int
-conditional_line (char *line, int len, const struct floc *flocp)
+conditional_line (char *line, int len, const floc_t *flocp)
 {
   char *cmdname;
   enum { c_ifdef, c_ifndef, c_ifeq, c_ifneq, c_else, c_endif } cmdtype;
@@ -1548,7 +1566,7 @@ conditional_line (char *line, int len, const struct floc *flocp)
       goto DONE;
     }
 
-  if (conditionals->allocated == 0)
+  if (!conditionals->allocated)
     {
       conditionals->allocated = 5;
       conditionals->ignoring = (char *) xmalloc (conditionals->allocated);
@@ -1781,9 +1799,9 @@ uniquize_deps (struct dep *chain)
    variable value list.  */
 
 static void
-record_target_var (struct nameseq *filenames, char *defn,
-                   enum variable_origin origin, int exported,
-                   const struct floc *flocp)
+record_target_var (nameseq_t *filenames, char *defn,
+                   variable_origin_t origin, int exported,
+                   const floc_t *flocp)
 {
   nameseq_t *nextf;
   variable_set_list_t *global;
@@ -1893,13 +1911,13 @@ static void
 record_files (nameseq_t *filenames, char *pattern, char *pattern_percent,
               dep_t *deps, unsigned int cmds_started, char *commands,
               unsigned int commands_idx, int two_colon,
-              const struct floc *flocp)
+              const floc_t *flocp)
 {
-  struct nameseq *nextf;
+  nameseq_t *nextf;
   int implicit = 0;
   unsigned int max_targets = 0, target_idx = 0;
   char **targets = 0, **target_percents = 0;
-  struct commands *cmds;
+  commands_t *cmds;
 
   /* If we've already snapped deps, that means we're in an eval being
      resolved after the makefiles have been read in.  We can't add more rules
@@ -1923,7 +1941,7 @@ record_files (nameseq_t *filenames, char *pattern, char *pattern_percent,
     {
       char *name = filenames->name;
       struct file *f;
-      struct dep *this = 0;
+      dep_t *this = 0;
       char *implicit_percent;
 
       nextf = filenames->next;
@@ -1933,7 +1951,7 @@ record_files (nameseq_t *filenames, char *pattern, char *pattern_percent,
          so that we can immediately use the value.  */
 
       if (streq (name, ".POSIX"))
-        posix_pedantic = 1;
+        posix_pedantic = true;
       else if (streq (name, ".SECONDEXPANSION"))
         second_expansion = 1;
 
@@ -2018,9 +2036,9 @@ record_files (nameseq_t *filenames, char *pattern, char *pattern_percent,
 	  f->is_target = 1;
 
 	  /* Defining .DEFAULT with no deps or cmds clears it.  */
-	  if (f == default_file && this == 0 && cmds == 0)
-	    f->cmds = 0;
-	  if (cmds != 0)
+	  if (f == default_file && this == 0 && !cmds)
+	    f->cmds = NULL;
+	  if (cmds)
 	    f->cmds = cmds;
 
 	  /* Defining .SUFFIXES with no dependencies clears out the list of
@@ -2152,21 +2170,21 @@ record_files (nameseq_t *filenames, char *pattern, char *pattern_percent,
     }
 }
 
-/* Search STRING for an unquoted STOPCHAR or blank (if BLANK is nonzero).
-   Backslashes quote STOPCHAR, blanks if BLANK is nonzero, and backslash.
-   Quoting backslashes are removed from STRING by compacting it into
-   itself.  Returns a pointer to the first unquoted STOPCHAR if there is
-   one, or nil if there are none.  STOPCHARs inside variable references are
-   ignored if IGNOREVARS is true.
-
-   STOPCHAR _cannot_ be '$' if IGNOREVARS is true.  */
+/** Search STRING for an unquoted STOPCHAR or blank (if BLANK is nonzero).
+    Backslashes quote STOPCHAR, blanks if BLANK is nonzero, and backslash.
+    Quoting backslashes are removed from STRING by compacting it into
+    itself.  Returns a pointer to the first unquoted STOPCHAR if there is
+    one, or nil if there are none.  STOPCHARs inside variable references are
+    ignored if IGNOREVARS is true.
+    
+    STOPCHAR _cannot_ be '$' if IGNOREVARS is true.  */
 
 static char *
 find_char_unquote (char *string, int stop1, int stop2, int blank,
                    int ignorevars)
 {
   unsigned int string_len = 0;
-  register char *p = string;
+  char *p = string;
 
   if (ignorevars)
     ignorevars = '$';
@@ -2269,7 +2287,7 @@ find_percent (char *pattern)
 
    If STRIP is nonzero, strip `./'s off the beginning.  */
 
-struct nameseq *
+nameseq_t *
 parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip)
 {
   nameseq_t *new = 0;
@@ -2556,7 +2574,7 @@ readstring (ebuffer_t *ebuf)
 }
 
 static long
-readline (struct ebuffer *ebuf)
+readline (ebuffer_t *ebuf)
 {
   char *p;
   char *end;
@@ -2615,7 +2633,7 @@ readline (struct ebuffer *ebuf)
           --p;
           p[-1] = '\n';
         }
-#endif
+#endif /* !WINDOWS2 */
 
       backslash = 0;
       for (p2 = p - 2; p2 >= start; --p2)
@@ -2679,10 +2697,10 @@ readline (struct ebuffer *ebuf)
    makefile.  Don't use it where special rules hold sway (RHS of a variable,
    in a command list, etc.)  */
 
-static enum make_word_type
+static make_word_t
 get_next_mword (char *buffer, char *delim, char **startp, unsigned int *length)
 {
-  enum make_word_type wtype = w_bogus;
+  make_word_t wtype = w_bogus;
   char *p = buffer, *beg;
   char c;
 
@@ -2840,13 +2858,14 @@ get_next_mword (char *buffer, char *delim, char **startp, unsigned int *length)
   return wtype;
 }
 
-/* Construct the list of include directories
+
+/*! Construct the list of include directories
    from the arguments and the default list.  */
 
 void
 construct_include_path (char **arg_dirs)
 {
-  register unsigned int i;
+  unsigned int i;
 #ifdef VAXC		/* just don't ask ... */
   stat_t stbuf;
 #else
@@ -2854,7 +2873,7 @@ construct_include_path (char **arg_dirs)
 #endif
   /* Table to hold the dirs.  */
 
-  register unsigned int defsize = (sizeof (default_include_directories)
+  unsigned int defsize = (sizeof (default_include_directories)
 				   / sizeof (default_include_directories[0]));
   register unsigned int max = 5;
   register char **dirs = (char **) xmalloc ((5 + defsize) * sizeof (char *));
@@ -2864,11 +2883,11 @@ construct_include_path (char **arg_dirs)
   defsize++;
 #endif
 
-  /* First consider any dirs specified with -I switches.
-     Ignore dirs that don't exist.  */
+  /* First consider any directories specified with -I switches.
+     Ignore directories that don't exist.  */
 
-  if (arg_dirs != 0)
-    while (*arg_dirs != 0)
+  if (arg_dirs)
+    while (*arg_dirs)
       {
 	char *dir = *arg_dirs++;
         int e;
@@ -2876,7 +2895,7 @@ construct_include_path (char **arg_dirs)
 	if (dir[0] == '~')
 	  {
 	    char *expanded = make_tilde_expand (dir);
-	    if (expanded != 0)
+	    if (expanded)
 	      dir = expanded;
 	  }
 
@@ -2922,7 +2941,7 @@ construct_include_path (char **arg_dirs)
         dirs[idx++] = default_include_directories[i];
     }
 
-  dirs[idx] = 0;
+  dirs[idx] = NULL;
 
   /* Now compute the maximum length of any name in it. Also add each
      dir to the .INCLUDE_DIRS variable.  */
@@ -3034,10 +3053,9 @@ make_tilde_expand (char *name)
 nameseq_t *
 multi_glob (nameseq_t *chain, unsigned int size)
 {
-  extern void dir_setup_glob ();
-  register struct nameseq *new = 0;
-  register struct nameseq *old;
-  struct nameseq *nexto;
+  nameseq_t *new = NULL;
+  nameseq_t *old;
+  nameseq_t *nexto;
   glob_t gl;
 
   dir_setup_glob (&gl);
@@ -3095,11 +3113,11 @@ multi_glob (nameseq_t *chain, unsigned int size)
 			/* No matches.  Use MEMNAME as-is.  */
 			unsigned int alen = strlen (gl.gl_pathv[i]);
 			unsigned int mlen = strlen (memname);
-			struct nameseq *elt
-			  = (struct nameseq *) xmalloc (size);
-                        if (size > sizeof (struct nameseq))
-                          bzero (((char *) elt) + sizeof (struct nameseq),
-                                 size - sizeof (struct nameseq));
+			nameseq_t *elt
+			  = (nameseq_t *) xmalloc (size);
+                        if (size > sizeof (nameseq_t))
+                          bzero (((char *) elt) + sizeof (nameseq_t),
+                                 size - sizeof (nameseq_t));
 			elt->name = (char *) xmalloc (alen + 1 + mlen + 2);
 			bcopy (gl.gl_pathv[i], elt->name, alen);
 			elt->name[alen] = '(';
@@ -3127,8 +3145,8 @@ multi_glob (nameseq_t *chain, unsigned int size)
 		else
 #endif /* !NO_ARCHIVES */
 		  {
-		    struct nameseq *elt = (struct nameseq *) xmalloc (size);
-                    if (size > sizeof (struct nameseq))
+		    nameseq_t *elt = (nameseq_t *) xmalloc (size);
+                    if (size > sizeof (nameseq_t))
                       bzero (((char *) elt) + sizeof (struct nameseq),
                              size - sizeof (struct nameseq));
 		    elt->name = xstrdup (gl.gl_pathv[i]);

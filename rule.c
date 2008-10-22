@@ -18,6 +18,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 
 #include "make.h"
 #include "dep.h"
+#include "dir_fns.h"
 #include "filedef.h"
 #include "job.h"
 #include "commands.h"
