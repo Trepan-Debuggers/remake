@@ -641,7 +641,7 @@ enter_command_line_file (char *name)
 
   if (name[0] == '~')
     {
-      char *expanded = tilde_expand (name);
+      char *expanded = make_tilde_expand (name);
       if (expanded != 0)
 	name = expanded;	/* Memory leak; I don't care.  */
     }
@@ -1260,6 +1260,43 @@ main (int argc, char **argv, char **envp)
 #endif
   decode_switches (argc, argv, 0);
 
+  /* debugging sets some things */
+  if (debugger_opts) {
+    char **p;
+    for (p = debugger_opts->list; *p != 0; ++p)
+      {
+	if (0 == strcmp(*p, "preread")) {
+	  b_debugger_preread  = true;
+	  db_level           |= DB_READ_MAKEFILES;
+	}
+	
+	if ( 0 == strcmp(*p, "full") || b_debugger_preread
+	     || 0 == strcmp(*p, "preaction") ) {
+	  job_slots            =  1;
+	  i_debugger_stepping  =  1;
+	  i_debugger_nexting   =  0;
+	  debugger_enabled     =  1;
+	  /* For now we'll do basic debugging. Later, "stepping'
+ 	     will stop here while next won't - either way no printing.
+	   */
+	  db_level          |=  DB_BASIC | DB_CALL | DB_SHELL | DB_MAKEFILES;
+	} 
+	if ( 0 == strcmp(*p, "full")
+	     || 0 == strcmp(*p, "error") ) {
+	  debugger_on_error  |=  (DEBUGGER_ON_ERROR|DEBUGGER_ON_FATAL);
+	} else if ( 0 == strcmp(*p, "fatal") ) {
+	  debugger_on_error  |=  DEBUGGER_ON_FATAL;
+	}
+      }
+#ifndef HAVE_LIBREADLINE
+    error (NILF, 
+	   "warning: you specified a debugger option, but you don't have readline support");
+    error (NILF, 
+	   "debugger support compiled in. Debugger options will be ignored.");
+    
+#endif
+  }
+
   if (no_shell_trace) 
     db_level = DB_BASIC | DB_TRACE;
     
@@ -1421,7 +1458,7 @@ main (int argc, char **argv, char **envp)
         char *expanded = 0;
 	if (dir[0] == '~')
 	  {
-            expanded = tilde_expand (dir);
+            expanded = make_tilde_expand (dir);
 	    if (expanded != 0)
 	      dir = expanded;
 	  }

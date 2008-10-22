@@ -64,7 +64,7 @@ extern struct nameseq *parse_file_seq ();
 #else
 extern struct nameseq *parse_file_seq PARAMS ((char **stringp, int stopchar, unsigned int size, int strip));
 #endif
-extern char *tilde_expand PARAMS ((char *name));
+extern char *make_tilde_expand PARAMS ((char *name));
 
 #ifndef NO_ARCHIVES
 extern struct nameseq *ar_glob PARAMS ((char *arname, char *member_pattern, unsigned int size));

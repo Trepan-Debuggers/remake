@@ -57,7 +57,7 @@ extern void construct_include_path (char **arg_dirs);
 /*! Expand ~ or ~USER at the beginning of NAME.
    Return a newly malloc'd string or 0.  
 */
-char *tilde_expand (char *name);
+char *make_tilde_expand (char *name);
 
 /*! Given a chain of struct nameseq's describing a sequence of filenames,
    in reverse of the intended order, return a new chain describing the
