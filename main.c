@@ -95,7 +95,7 @@ static void initialize_global_hash_tables PARAMS ((void));
 
 /* The structure that describes an accepted command switch.  */
 
-struct command_switch
+typedef struct command_switch
   {
     int c;			/* The switch character.  */
 
@@ -319,9 +319,21 @@ int always_make_flag = 0;
 
 int rebuilding_makefiles = 0;
 
-/* Remember the original value of the SHELL variable, from the environment.  */
+/** Remember the original value of the SHELL variable, from the
+  environment.  */
 
-struct variable shell_var;
+variable_t shell_var;
+
+/** This character introduces a command: it's the first char on the
+  line.  */
+
+char cmd_prefix = '\t';
+
+/** This variable is trickery to force the above enum symbol values to
+    be recorded in debug symbol tables. It is used to allow one refer
+    to above enumeration values in a debugger and debugger
+    expressions */
+make_exit_code_t make_exit_code;
 
 
 /** The usage output.  We write it this way to make life easier for the
@@ -423,7 +435,7 @@ static const char *const usage[] =
    stringlist_t ** and cast those values that are NOT stringlist_t ** 
    (e.g. &always_make_flag) to make the the assignment work.
 */
-static const struct command_switch switches[] =
+static const command_switch_t switches[] =
   {
     { 'b', ignore, 0, 0, 0, 0, 0, 0, 0 },
     { 'B', flag, (char *) &always_make_set, 1, 1, 0, 0, 0, "always-make" },
@@ -1310,18 +1322,22 @@ main (int argc, char **argv, char **envp)
       && (strchr (argv[0], '/') != 0 || strchr (argv[0], '\\') != 0)
 # endif
       )
-    argv[0] = concat (current_directory, "/", argv[0]);
+    argv0 = concat (current_directory, "/", argv[0]);
+  else 
+    argv0 = strdup(argv[0]);
 #else  /* !__MSDOS__ */
   if (current_directory[0] != '\0'
       && argv[0] != 0 && argv[0][0] != '/' && strchr (argv[0], '/') != 0)
-    argv[0] = concat (current_directory, "/", argv[0]);
+    argv0 = concat (current_directory, "/", argv[0]);
+  else 
+    argv0 = strdup(argv[0]);
 #endif /* !__MSDOS__ */
 #endif /* WINDOWS32 */
 #endif
 
   /* The extra indirection through $(MAKE_COMMAND) is done
      for hysterical raisins.  */
-  (void) define_variable ("MAKE_COMMAND", 12, argv[0], o_default, 0);
+  (void) define_variable ("MAKE_COMMAND", 12, argv0, o_default, 0);
   (void) define_variable ("MAKE", 4, "$(MAKE_COMMAND)", o_default, 1);
 
   if (command_variables != 0)
@@ -1453,7 +1469,7 @@ main (int argc, char **argv, char **envp)
 #endif
 	{
 #ifdef	HAVE_GETCWD
-	  perror_with_name ("getcwd", "");
+	  perror_with_name ("getcwd: ", "");
 #else
 	  error (NILF, "getwd: %s", current_directory);
 #endif
@@ -1467,9 +1483,9 @@ main (int argc, char **argv, char **envp)
 
   /* Read any stdin makefiles into temporary files.  */
 
-  if (makefiles != 0)
+  if (makefiles)
     {
-      register unsigned int i;
+      unsigned int i;
       for (i = 0; i < makefiles->idx; ++i)
 	if (makefiles->list[i][0] == '-' && makefiles->list[i][1] == '\0')
 	  {
@@ -1753,7 +1769,7 @@ main (int argc, char **argv, char **envp)
       jobserver_fds->idx = 1;
       jobserver_fds->max = 1;
     }
-#endif
+#endif /* MAKE_JOBSERVER */
 
 #ifndef MAKE_SYMLINKS
   if (check_symlink_flag)
@@ -1767,7 +1783,7 @@ main (int argc, char **argv, char **envp)
 
   define_makeflags (1, 0);
 
-  /* Make each `struct dep' point at the `struct file' for the file
+  /* Make each `dep_t' point at the `struct file' for the file
      depended on.  Also do magic for special targets.  */
 
   snap_deps ();
@@ -1839,12 +1855,12 @@ main (int argc, char **argv, char **envp)
       /* Remove any makefiles we don't want to try to update.
 	 Also record the current modtimes so we can compare them later.  */
       {
-	register struct dep *d, *last;
+	dep_t *d, *last;
 	last = 0;
 	d = read_makefiles;
 	while (d != 0)
 	  {
-	    register struct file *f = d->file;
+	    file_t *f = d->file;
 	    if (f->double_colon)
 	      for (f = f->double_colon; f != NULL; f = f->prev)
 		{
@@ -1916,7 +1932,7 @@ main (int argc, char **argv, char **envp)
 	       in updating or could not be found at all.  */
 	    int any_failed = 0;
 	    unsigned int i;
-            struct dep *d;
+            dep_t *d;
 
 	    for (i = 0, d = read_makefiles; d != 0; ++i, d = d->next)
               {
@@ -2160,7 +2176,7 @@ main (int argc, char **argv, char **envp)
     int status;
 
     /* If there were no command-line goals, use the default.  */
-    if (goals == 0)
+    if (!goals)
       {
         if (**default_goal_name != '\0')
           {
@@ -2197,8 +2213,7 @@ main (int argc, char **argv, char **envp)
           }
       }
     else
-      lastgoal->next = 0;
-
+      lastgoal->next = NULL;
 
     if (!goals)
       {
@@ -2346,7 +2361,7 @@ handle_non_switch_argument (char *arg, int env)
       struct file *f = enter_command_line_file (arg);
       f->cmd_target = 1;
 
-      if (goals == 0)
+      if (!goals)
 	{
 	  goals = alloc_dep ();
 	  lastgoal = goals;
@@ -2418,9 +2433,9 @@ static void
 decode_switches (int argc, char **argv, int env)
 {
   int bad = 0;
-  register const struct command_switch *cs;
-  register struct stringlist *sl;
-  register int c;
+  const command_switch_t *cs;
+  stringlist_t *sl=NULL;
+  int c;
 
   /* getopt does most of the parsing for us.
      First, get its vectors set up.  */
@@ -2509,7 +2524,7 @@ decode_switches (int argc, char **argv, int env)
 		case positive_int:
                   /* See if we have an option argument; if we do require that
                      it's all digits, not something like "10foo".  */
-		  if (optarg == 0 && argc > optind)
+		  if (!optarg && argc > optind)
                     {
                       const char *cp;
                       for (cp=argv[optind]; ISDIGIT (cp[0]); ++cp)
@@ -2616,7 +2631,7 @@ decode_env_switches (char *envar, unsigned int len)
 
   /* getopt will look at the arguments starting at ARGV[1].
      Prepend a spacer word.  */
-  argv[0] = 0;
+  argv[0] = NULL;
   argc = 1;
   argv[argc] = p;
   while (*value != '\0')
@@ -2679,11 +2694,11 @@ define_makeflags (int all, int makefile)
 {
   static const char ref[] = "$(MAKEOVERRIDES)";
   static const char posixref[] = "$(-*-command-variables-*-)";
-  register const struct command_switch *cs;
+  const command_switch_t *cs;
   char *flagstring;
-  register char *p;
+  char *p;
   unsigned int words;
-  struct variable *v;
+  variable_t *v;
 
   /* We will construct a linked list of `struct flag's describing
      all the flags which need to go in MAKEFLAGS.  Then, once we
@@ -2693,7 +2708,7 @@ define_makeflags (int all, int makefile)
   struct flag
     {
       struct flag *next;
-      const struct command_switch *cs;
+      const command_switch_t *cs;
       char *arg;
     };
   struct flag *flags = 0;
@@ -2780,13 +2795,13 @@ define_makeflags (int all, int makefile)
 	case string:
 	  if (all)
 	    {
-	      struct stringlist *sl = *(struct stringlist **) cs->value_ptr;
+	      stringlist_t *sl = *(stringlist_t **) cs->value_ptr;
 	      if (sl != 0)
 		{
 		  /* Add the elements in reverse order, because
 		     all the flags get reversed below; and the order
 		     matters for some switches (like -I).  */
-		  register unsigned int i = sl->idx;
+		  unsigned int i = sl->idx;
 		  while (i-- > 0)
 		    ADD_FLAG (sl->list[i], strlen (sl->list[i]));
 		}
@@ -2934,8 +2949,8 @@ define_makeflags (int all, int makefile)
     v->export = v_export;
 }
 
-/* Print version information.  */
-
+/*! Print version information.
+*/
 void
 print_version (void)
 {
@@ -2952,8 +2967,8 @@ print_version (void)
      year, and none of the rest of it should be translated (including the
      word "Copyright", so it hardly seems worth it.  */
 
-  printf ("%sGNU Make %s\n\
-%sCopyright (C) 2006  Free Software Foundation, Inc.\n",
+  printf ("%sGNU Make + Debugger %s\n\
+%sCopyright (C) 2002, 2003, 2004, 2006, 2008 Free Software Foundation, Inc.\n",
           precede, version_string, precede);
 
   printf (_("%sThis is free software; see the source for copying conditions.\n\
@@ -2977,7 +2992,7 @@ print_version (void)
 /* Print a bunch of information about this and that.  */
 
 static void
-print_data_base ()
+print_data_base (void)
 {
   time_t when;
 
@@ -3051,6 +3066,15 @@ void
 die (int status)
 {
   static char dying = 0;
+
+  if ( DEBUGGER_QUIT_RC != in_debugger && debugger_enabled )
+    enter_debugger(NULL, NULL, -2);
+
+  /* If we are quitting the debugger and we're at the top level, then
+     we'll change the exit status to 0, normal.
+   */
+  if (makelevel == 0 && in_debugger == DEBUGGER_QUIT_RC)
+    status = 0 ;
 
   if (!dying)
     {
