@@ -1259,6 +1259,30 @@ main (int argc, char **argv, char **envp)
   decode_env_switches (STRING_SIZE_TUPLE ("MFLAGS"));
 #endif
   decode_switches (argc, argv, 0);
+
+  if (no_shell_trace) 
+    db_level = DB_BASIC | DB_TRACE;
+    
+  if (tracing_opts) {
+    char **p;
+    db_level |= (DB_TRACE | DB_SHELL);
+    if (!tracing_opts->list)
+      db_level |= (DB_BASIC);
+    else 
+      for (p = tracing_opts->list; *p != 0; ++p) {
+	if (0 == strcmp(*p, "command"))
+	  ;
+	else if (0 == strcmp(*p, "full"))
+	  db_level |= (DB_VERBOSE|DB_READ_MAKEFILES);
+	else if (0 == strcmp(*p, "normal"))
+	  db_level |= (DB_BASIC | DB_TRACE | DB_SHELL);
+	else if (0 == strcmp(*p, "noshell"))
+	  db_level = DB_BASIC | DB_TRACE;
+	else if (0 == strcmp(*p, "read"))
+	  db_level |= DB_READ_MAKEFILES;
+      }
+  }
+  
 #ifdef WINDOWS32
   if (suspend_flag) {
         fprintf(stderr, "%s (pid = %ld)\n", argv[0], GetCurrentProcessId());
