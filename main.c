@@ -19,13 +19,14 @@ GNU Make; see the file COPYING.  If not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 
 #include "make.h"
+#include "dbg_cmd.h"
+#include "debug.h"
 #include "dep.h"
 #include "filedef.h"
 #include "variable.h"
 #include "job.h"
 #include "commands.h"
 #include "rule.h"
-#include "debug.h"
 #include "getopt.h"
 
 #include <assert.h>
@@ -119,29 +120,29 @@ struct command_switch
     char *default_value;/* Pointer to default value.  */
 
     char *long_name;		/* Long option name.  */
-  };
+  }  command_switch_t;
 
 /* True if C is a switch value that corresponds to a short option.  */
 
 #define short_option(c) ((c) <= CHAR_MAX)
 
-/* The recognized command switches.  */
+/*! The recognized command switches.  */
 
-/* Nonzero means do not print commands to be executed (-s).  */
+/*! Nonzero means do not print commands to be executed (-s).  */
 
 int silent_flag;
 
-/* Nonzero means just touch the files
+/*! Nonzero means just touch the files
    that would appear to need remaking (-t)  */
 
 int touch_flag;
 
-/* Nonzero means just print what commands would need to be executed,
+/*! Nonzero means just print what commands would need to be executed,
    don't actually execute them (-n).  */
 
 int just_print_flag;
 
-/* Print debugging info (--debug).  */
+/*! Print debugging info (--debug).  */
 
 /*! If 1, we don't give additional error reporting information. */
 int no_extended_errors = 0;
@@ -183,54 +184,57 @@ unsigned int debugger_enabled;
 int basename_filenames = 0;
 
 #ifdef WINDOWS32
-/* Suspend make in main for a short time to allow debugger to attach */
+/*! Suspend make in main for a short time to allow debugger to attach */
 
 int suspend_flag = 0;
 #endif
 
-/* Environment variables override makefile definitions.  */
+/*! Environment variables override makefile definitions.  */
 
 int env_overrides = 0;
 
-/* Nonzero means ignore status codes returned by commands
+/*! Nonzero means ignore status codes returned by commands
    executed to remake files.  Just treat them all as successful (-i).  */
 
 int ignore_errors_flag = 0;
 
-/* Nonzero means don't remake anything, just print the data base
+/*! Nonzero means don't remake anything, just print the data base
    that results from reading the makefile (-p).  */
 
 int print_data_base_flag = 0;
 
-/* Nonzero means don't remake anything; just return a nonzero status
+/*! Nonzero means don't remake anything; just return a nonzero status
    if the specified targets are not up to date (-q).  */
 
 int question_flag = 0;
 
-/* Nonzero means do not use any of the builtin rules (-r) / variables (-R).  */
+/*! Nonzero means do not use any of the builtin rules (-r) / variables
+  (-R).  */
 
 int no_builtin_rules_flag = 0;
 int no_builtin_variables_flag = 0;
 
-/* Nonzero means keep going even if remaking some file fails (-k).  */
+/*! Nonzero means keep going even if remaking some file fails
+  (-k).  */
 
 int keep_going_flag;
 int default_keep_going_flag = 0;
 
-/* Nonzero means check symlink mtimes.  */
-
+/*! Nonzero means check symlink mtimes. (-L) */
 int check_symlink_flag = 0;
 
-/* Nonzero means print directory before starting and when done (-w).  */
+/*! Nonzero means print directory before starting and when done
+  (-w).  */
 
 int print_directory_flag = 0;
 
-/* Nonzero means ignore print_directory_flag and never print the directory.
-   This is necessary because print_directory_flag is set implicitly.  */
+/*! Nonzero means ignore print_directory_flag and never print the
+   directory.  This is necessary because print_directory_flag is set
+   implicitly.  */
 
 int inhibit_print_directory_flag = 0;
 
-/* Nonzero means print version information.  */
+/*! Nonzero means print version information.  */
 
 int print_version_flag = 0;
 
@@ -238,17 +242,17 @@ int print_version_flag = 0;
 
 int no_shell_trace = 0;
 
-/* List of makefiles given with -f switches.  */
+/*! List of makefiles given with -f switches.  */
 
-static struct stringlist *makefiles = 0;
+static stringlist_t *makefiles = NULL;
 
-/* Number of job slots (commands that can be run at once).  */
+/*! Number of job slots (commands that can be run at once).  */
 
 unsigned int job_slots = 1;
 unsigned int default_job_slots = 1;
 static unsigned int master_job_slots = 0;
 
-/* Value of job_slots that means no limit.  */
+/*! Value of job_slots that means no limit.  */
 
 static unsigned int inf_jobs = 0;
 
@@ -321,9 +325,9 @@ int rebuilding_makefiles = 0;
 struct variable shell_var;
 
 
-/* The usage output.  We write it this way to make life easier for the
-   translators, especially those trying to translate to right-to-left
-   languages like Hebrew.  */
+/** The usage output.  We write it this way to make life easier for the
+    translators, especially those trying to translate to right-to-left
+    languages like Hebrew.  */
 
 static const char *const usage[] =
   {
@@ -413,8 +417,13 @@ static const char *const usage[] =
     NULL
   };
 
-/* The table of command switches.  */
+/* The table of command switches. 
 
+   Note: the 3rd field, value_ptr, takes on different type, sometimes
+   stringlist_t **, sometimes int *, sometimes double *. We arbitrarily chose
+   stringlist_t ** and cast those values that are NOT stringlist_t ** 
+   (e.g. &always_make_flag) to make the the assignment work.
+*/
 static const struct command_switch switches[] =
   {
     { 'b', ignore, 0, 0, 0, 0, 0, 0, 0 },
@@ -723,7 +732,7 @@ handle_runtime_exceptions( struct _EXCEPTION_POINTERS *exinfo )
 #else
   exit(255);
   return (255); /* not reached */
-#endif
+#endif /*DEBUG*/
 }
 
 /*
@@ -827,12 +836,12 @@ find_and_set_default_shell (char *token)
   /* naive test */
   if (!unixy_shell && sh_found &&
       (strstr(default_shell, "sh") || strstr(default_shell, "SH"))) {
-    unixy_shell = 1;
-    batch_mode_shell = 0;
+    unixy_shell      = true;
+    batch_mode_shell = false;
   }
 
 #ifdef BATCH_MODE_ONLY_SHELL
-  batch_mode_shell = 1;
+  batch_mode_shell   = true;
 #endif
 
   return (sh_found);
@@ -903,11 +912,11 @@ main (int argc, char **argv, char **envp)
 #endif
 {
   static char *stdin_nm = 0;
-  struct file *f;
+  file_t *f;
   int i;
   int makefile_status = MAKE_SUCCESS;
   char **p;
-  struct dep *read_makefiles;
+  dep_t *read_makefiles;
   PATH_VAR (current_directory);
   unsigned int restarts = 0;
 #ifdef WINDOWS32
@@ -917,7 +926,7 @@ main (int argc, char **argv, char **envp)
   SetUnhandledExceptionFilter(handle_runtime_exceptions);
 
   /* start off assuming we have no shell */
-  unixy_shell = 0;
+  unixy_shell = false;
   no_default_sh_exe = 1;
 #endif
 
@@ -933,7 +942,7 @@ main (int argc, char **argv, char **envp)
         setrlimit (RLIMIT_STACK, &rlim);
       }
   }
-#endif
+#endif /* __CYGWIN__ */
 
 #ifdef HAVE_ATEXIT
   atexit (close_stdout);
@@ -944,7 +953,8 @@ main (int argc, char **argv, char **envp)
   initialize_main(&argc, &argv);
 
   default_goal_file = 0;
-  reading_file = 0;
+  reading_file      = 0;
+  in_debugger       = false;
 
 #if defined (__MSDOS__) && !defined (_POSIX_SOURCE)
   /* Request the most powerful version of `system', to
@@ -1098,7 +1108,7 @@ main (int argc, char **argv, char **envp)
 #endif
     {
 #ifdef	HAVE_GETCWD
-      perror_with_name ("getcwd", "");
+      perror_with_name ("getcwd: ", "");
 #else
       error (NILF, "getwd: %s", current_directory);
 #endif
@@ -1159,9 +1169,8 @@ main (int argc, char **argv, char **envp)
 	 the same.  */
       if (!do_not_define)
         {
-          struct variable *v;
-
-          v = define_variable (envp[i], (unsigned int) (ep - envp[i]),
+          variable_t *v;
+	  v = define_variable (envp[i], (unsigned int) (ep - envp[i]),
                                ep + 1, o_env, 1);
           /* Force exportation of every variable culled from the environment.
              We used to rely on target_environment's v_default code to do this.
