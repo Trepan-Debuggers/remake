@@ -148,22 +148,86 @@ extern struct variable_set_list *create_new_variable_set PARAMS ((void));
 const char *origin2str(variable_origin_t origin);
 
 extern void free_variable_set PARAMS ((struct variable_set_list *));
+
+/*! Create a new variable set, push it on the current setlist,
+  and assign current_variable_set_list to it. 
+ */
 extern struct variable_set_list *push_new_variable_scope PARAMS ((void));
+
+/*! Pop the top set off the current_variable_set_list, and free all
+   its storage.  If b_toplevel set we have the top-most global scope
+   and some things don't get freed because they weren't malloc'd.
+*/
 extern void pop_variable_scope PARAMS ((void));
+
+/*! Define the automatic variables, and record the addresses of their
+  structures so we can change their values quickly.  */
 extern void define_automatic_variables PARAMS ((void));
+
+/*! Initialize FILE's variable set list.  If FILE already has a
+   variable set list, the topmost variable set is left intact, but the
+   the rest of the chain is replaced with FILE->parent's setlist.  If
+   FILE is a double-colon rule, then we will use the "root"
+   double-colon target's variable set as the parent of FILE's variable
+   set.
+
+   If we're READing a makefile, don't do the pattern variable search now,
+   since the pattern variable might not have been defined yet.  */
 extern void initialize_file_variables PARAMS ((struct file *file, int read));
-extern void print_file_variables PARAMS ((struct file *file));
-extern void print_variable_set PARAMS ((struct variable_set *set, char *prefix));
+
+/*! Print all the local variables of P_TARGET.  Lines output have "# "
+    prepended. If you want hash table statistics too, set b_hash_stats
+    true.
+*/
+extern void print_file_variables PARAMS ((struct file *file, 
+					  bool b_hash_stats));
+
+/*! Print all the variables in SET.  PREFIX is printed before the
+   actual variable definitions (everything else is comments).  If you
+   want hash table statistics too, set b_hash_stats true.
+*/
+
+/*! Print the data base of variables.  */
+
+extern void print_variable_data_base (void);
+
+/** Print information for variable V, prefixing it with PREFIX.  */
+extern void print_variable_info (const void *item, void *arg);
+
+/*! Print all the variables in SET.  PREFIX is printed before the
+   actual variable definitions (everything else is comments).  If you
+   want hash table statistics too, set b_hash_stats true.
+*/
+extern void print_variable_set PARAMS ((struct variable_set *set, 
+					char *prefix, bool b_hash_stats));
+
+/*! Merge FROM_SET into TO_SET, freeing unused storage in
+    FROM_SET.  */
 extern void merge_variable_set_lists PARAMS ((struct variable_set_list **to_list, struct variable_set_list *from_list));
+
+/*! Given a variable, a value, and a flavor, define the variable.  See
+   the try_variable_definition() function for details on the
+   parameters. */
 extern struct variable *do_variable_definition PARAMS ((const struct floc *flocp, const char *name, char *value, enum variable_origin origin, enum variable_flavor flavor, int target_var));
-extern struct variable *parse_variable_definition PARAMS ((struct variable *v, char *line));
-extern struct variable *try_variable_definition PARAMS ((const struct floc *flocp, char *line, enum variable_origin origin, int target_var));
-extern void init_hash_global_variable_set PARAMS ((void));
-extern void hash_init_function_table PARAMS ((void));
+
+/*! Try to interpret LINE (a null-terminated string) as a variable
+    definition.
+
+   If LINE was recognized as a variable definition, a pointer to its `struct
+   variable' is returned.  If LINE is not a variable definition, NULL is
+   returned.  */
+extern variable_t *parse_variable_definition PARAMS ((struct variable *v, char *line));
+
+variable_t *try_variable_definition PARAMS ((const struct floc *flocp, char *line, enum variable_origin origin, int target_var));
+
+void init_hash_global_variable_set PARAMS ((void));
+
+void hash_init_function_table PARAMS ((void));
 extern struct variable *lookup_variable PARAMS ((const char *name, unsigned int length));
-extern struct variable *lookup_variable_in_set PARAMS ((const char *name,
-                                                        unsigned int length,
-                                                        const struct variable_set *set));
+
+struct variable *lookup_variable_in_set PARAMS ((const char *name,
+						 unsigned int length,
+						 const struct variable_set *set));
 
 extern struct variable *define_variable_in_set
     PARAMS ((const char *name, unsigned int length, char *value,

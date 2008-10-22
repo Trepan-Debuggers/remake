@@ -565,6 +565,11 @@ extern bool second_expansion;
 /* can we run commands via 'sh -c xxx' or must we use batch files? */
 extern int batch_mode_shell;
 
+/*! This character introduces a command: it's the first char on the
+    line.  */
+
+extern char cmd_prefix;
+
 extern unsigned int job_slots;
 extern int job_fds[2];
 extern int job_rfd;
@@ -580,6 +585,11 @@ extern char *program;
 extern char **global_argv;
 
 extern char *starting_directory;
+
+/*! Our current directory before processing any -C options.  */
+extern char *directory_before_chdir;
+
+/*! Value of the MAKELEVEL variable at startup (or 0).  */
 extern unsigned int makelevel;
 
 /*! If nonzero, the basename of filenames is in giving locations. Normally,
@@ -596,6 +606,17 @@ extern unsigned int commands_started;
 
 extern int handling_fatal_signal;
 
+/* is default_shell unixy? */
+extern int unixy_shell;
+
+/**! The default value of SHELL and the shell that is used when issuing
+   commands on targets.
+*/
+extern char default_shell[];
+
+/*! Print version information.
+*/
+extern void print_version (void);
 
 #ifndef MIN
 #define MIN(_a,_b) ((_a)<(_b)?(_a):(_b))

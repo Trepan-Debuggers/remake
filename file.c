@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 
 #include "dep.h"
 #include "filedef.h"
+#include "file.h"
 #include "job.h"
 #include "commands.h"
 #include "variable.h"
@@ -38,25 +39,25 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
    only work on files which have not yet been snapped. */
 int snapped_deps = 0;
 
-/* Hash table of files the makefile knows how to make.  */
+/** Hash table of files the makefile knows how to make.  */
 
 static unsigned long
 file_hash_1 (const void *key)
 {
-  return_ISTRING_HASH_1 (((struct file const *) key)->hname);
+  return_ISTRING_HASH_1 (((file_t const *) key)->hname);
 }
 
 static unsigned long
 file_hash_2 (const void *key)
 {
-  return_ISTRING_HASH_2 (((struct file const *) key)->hname);
+  return_ISTRING_HASH_2 (((file_t const *) key)->hname);
 }
 
 static int
 file_hash_cmp (const void *x, const void *y)
 {
-  return_ISTRING_COMPARE (((struct file const *) x)->hname,
-			  ((struct file const *) y)->hname);
+  return_ISTRING_COMPARE (((file_t const *) x)->hname,
+			  ((file_t const *) y)->hname);
 }
 
 #ifndef	FILE_BUCKETS
@@ -64,19 +65,19 @@ file_hash_cmp (const void *x, const void *y)
 #endif
 static struct hash_table files;
 
-/* Whether or not .SECONDARY with no prerequisites was given.  */
-static int all_secondary = 0;
+/*! Whether or not .SECONDARY with no prerequisites was given.  */
+int all_secondary = 0;
 
-/* Access the hash table of all file records.
-   lookup_file  given a name, return the struct file * for that name,
+/*! Access the hash table of all file records.
+   lookup_file  given a name, return the file_t * for that name,
            or nil if there is none.
-   enter_file   similar, but create one if there is none.  */
-
-struct file *
+   enter_file   similar, but create one if there is none. 
+ */
+file_t *
 lookup_file (char *name)
 {
-  register struct file *f;
-  struct file file_key;
+  file_t *f;
+  file_t file_key;
 #if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
   register char *lname, *ln;
 #endif
@@ -204,12 +205,12 @@ enter_file (char *name, const floc_t *p_floc)
   return new;
 }
 
-/* Rename FILE to NAME.  This is not as simple as resetting
+/*! Rename FILE to NAME.  This is not as simple as resetting
    the `name' member, since it must be put in a new hash bucket,
    and possibly merged with an existing file called NAME.  */
 
 void
-rename_file (struct file *from_file, char *to_hname)
+rename_file (file_t *from_file, char *to_hname)
 {
   rehash_file (from_file, to_hname);
   while (from_file)
@@ -219,18 +220,19 @@ rename_file (struct file *from_file, char *to_hname)
     }
 }
 
-/* Rehash FILE to NAME.  This is not as simple as resetting
-   the `hname' member, since it must be put in a new hash bucket,
-   and possibly merged with an existing file called NAME.  */
-
+/*!
+ Rehash FILE to NAME.  This is not as simple as resetting
+ the `hname' member, since it must be put in a new hash bucket,
+ and possibly merged with an existing file called NAME.  
+*/
 void
-rehash_file (struct file *from_file, char *to_hname)
+rehash_file (file_t *from_file, char *to_hname)
 {
-  struct file file_key;
-  struct file **file_slot;
-  struct file *to_file;
-  struct file *deleted_file;
-  struct file *f;
+  file_t file_key;
+  file_t **file_slot;
+  file_t *to_file;
+  file_t *deleted_file;
+  file_t *f;
 
   file_key.hname = to_hname;
   if (0 == file_hash_cmp (from_file, &file_key))
@@ -249,7 +251,7 @@ rehash_file (struct file *from_file, char *to_hname)
     abort ();
 
   file_key.hname = to_hname;
-  file_slot = (struct file **) hash_find_slot (&files, &file_key);
+  file_slot = (file_t **) hash_find_slot (&files, &file_key);
   to_file = *file_slot;
 
   from_file->hname = to_hname;
@@ -296,7 +298,7 @@ rehash_file (struct file *from_file, char *to_hname)
 	to_file->deps = from_file->deps;
       else
 	{
-	  register struct dep *deps = to_file->deps;
+	  dep_t *deps = to_file->deps;
 	  while (deps->next != 0)
 	    deps = deps->next;
 	  deps->next = from_file->deps;
@@ -337,16 +339,18 @@ rehash_file (struct file *from_file, char *to_hname)
     }
 }
 
-/* Remove all nonprecious intermediate files.
-   If SIG is nonzero, this was caused by a fatal signal,
-   meaning that a different message will be printed, and
-   the message will go to stderr rather than stdout.  */
 
+/*!
+  Remove all nonprecious intermediate files.
+  If SIG is nonzero, this was caused by a fatal signal,
+  meaning that a different message will be printed, and
+  the message will go to stderr rather than stdout.  
+*/
 void
 remove_intermediates (int sig)
 {
-  register struct file **file_slot;
-  register struct file **file_end;
+  file_t **file_slot;
+  file_t **file_end;
   int doneany = 0;
 
   /* If there's no way we will ever remove anything anyway, punt early.  */
@@ -356,12 +360,12 @@ remove_intermediates (int sig)
   if (sig && just_print_flag)
     return;
 
-  file_slot = (struct file **) files.ht_vec;
+  file_slot = (file_t **) files.ht_vec;
   file_end = file_slot + files.ht_size;
   for ( ; file_slot < file_end; file_slot++)
     if (! HASH_VACANT (*file_slot))
       {
-	register struct file *f = *file_slot;
+	file_t *f = *file_slot;
         /* Is this file eligible for automatic deletion?
            Yes, IFF: it's marked intermediate, it's not secondary, it wasn't
            given on the command-line, and it's either a -include makefile or
@@ -462,7 +466,7 @@ set_intermediate (const void *item)
 }
 
 /* Expand and parse each dependency line. */
-static void
+void
 expand_deps (struct file *f)
 {
   struct dep *d;
@@ -792,7 +796,7 @@ file_timestamp_cons (const char *fname, time_t s, int ns)
   return ts;
 }
 
-/* Return the current time as a file timestamp, setting *RESOLUTION to
+/** Return the current time as a file timestamp, setting *RESOLUTION to
    its resolution.  */
 FILE_TIMESTAMP
 file_timestamp_now (int *resolution)
@@ -842,8 +846,13 @@ file_timestamp_now (int *resolution)
   return file_timestamp_cons (0, s, ns);
 }
 
-/* Place into the buffer P a printable representation of the file
-   timestamp TS.  */
+/** 
+    Place into the buffer P a printable representation of the file
+    timestamp TS.
+    
+    @param p output buffer for printable timestamp
+    @param ts timestamp to convert.
+ */
 void
 file_timestamp_sprintf (char *p, FILE_TIMESTAMP ts)
 {
@@ -874,120 +883,151 @@ file_timestamp_sprintf (char *p, FILE_TIMESTAMP ts)
   *p = '\0';
 }
 
-/* Print the data base of files.  */
 
-static void
-print_file (const void *item)
+/*! Print some or all properties of the data base of files.
+*/
+void
+print_target_props (file_t *p_target, print_target_mask_t i_mask)
 {
-  struct file *f = (struct file *) item;
-  struct dep *d;
-  struct dep *ood = 0;
+  dep_t *d;
+  dep_t *ood = 0;
 
   putchar ('\n');
-  if (!f->is_target)
+  if (!p_target->is_target)
     puts (_("# Not a target:"));
-  printf ("%s:%s", f->name, f->double_colon ? ":" : "");
+  printf ("%s:%s", p_target->name, p_target->double_colon ? ":" : "");
 
-  /* Print all normal dependencies; note any order-only deps.  */
-  for (d = f->deps; d != 0; d = d->next)
-    if (! d->ignore_mtime)
-      printf (" %s", dep_name (d));
-    else if (! ood)
-      ood = d;
-
-  /* Print order-only deps, if we have any.  */
-  if (ood)
-    {
-      printf (" | %s", dep_name (ood));
-      for (d = ood->next; d != 0; d = d->next)
-        if (d->ignore_mtime)
-          printf (" %s", dep_name (d));
-    }
-
+  if (i_mask & PRINT_TARGET_DEPEND) {
+    
+    /* Print all normal dependencies; note any order-only deps.  */
+    for (d = p_target->deps; d != 0; d = d->next)
+      if (! d->ignore_mtime)
+	printf (" %s", dep_name (d));
+      else if (! ood)
+	ood = d;
+  }
+  
+  if (i_mask & PRINT_TARGET_ORDER) {
+    /* Print order-only deps, if we have any.  */
+    if (ood)
+      {
+	printf (" | %s", dep_name (ood));
+	for (d = ood->next; d != 0; d = d->next)
+	  if (d->ignore_mtime)
+	    printf (" %s", dep_name (d));
+      }
+  }
+  
   putchar ('\n');
 
-  if (f->precious)
-    puts (_("#  Precious file (prerequisite of .PRECIOUS)."));
-  if (f->phony)
-    puts (_("#  Phony target (prerequisite of .PHONY)."));
-  if (f->cmd_target)
-    puts (_("#  Command-line target."));
-  if (f->dontcare)
-    puts (_("#  A default, MAKEFILES, or -include/sinclude makefile."));
-  puts (f->tried_implicit
-        ? _("#  Implicit rule search has been done.")
-        : _("#  Implicit rule search has not been done."));
-  if (f->stem != 0)
-    printf (_("#  Implicit/static pattern stem: `%s'\n"), f->stem);
-  if (f->intermediate)
-    puts (_("#  File is an intermediate prerequisite."));
-  if (f->also_make != 0)
-    {
-      fputs (_("#  Also makes:"), stdout);
-      for (d = f->also_make; d != 0; d = d->next)
-	printf (" %s", dep_name (d));
-      putchar ('\n');
-    }
-  if (f->last_mtime == UNKNOWN_MTIME)
-    puts (_("#  Modification time never checked."));
-  else if (f->last_mtime == NONEXISTENT_MTIME)
-    puts (_("#  File does not exist."));
-  else if (f->last_mtime == OLD_MTIME)
-    puts (_("#  File is very old."));
-  else
-    {
-      char buf[FILE_TIMESTAMP_PRINT_LEN_BOUND + 1];
-      file_timestamp_sprintf (buf, f->last_mtime);
-      printf (_("#  Last modified %s\n"), buf);
-    }
-  puts (f->updated
-        ? _("#  File has been updated.") : _("#  File has not been updated."));
-  switch (f->command_state)
-    {
-    case cs_running:
-      puts (_("#  Commands currently running (THIS IS A BUG)."));
-      break;
-    case cs_deps_running:
-      puts (_("#  Dependencies commands running (THIS IS A BUG)."));
-      break;
-    case cs_not_started:
-    case cs_finished:
-      switch (f->update_status)
-	{
-	case -1:
-	  break;
-	case 0:
-	  puts (_("#  Successfully updated."));
-	  break;
-	case 1:
-	  assert (question_flag);
-	  puts (_("#  Needs to be updated (-q is set)."));
-	  break;
-	case 2:
-	  puts (_("#  Failed to be updated."));
-	  break;
-	default:
-	  puts (_("#  Invalid value in `update_status' member!"));
-	  fflush (stdout);
-	  fflush (stderr);
-	  abort ();
-	}
-      break;
-    default:
-      puts (_("#  Invalid value in `command_state' member!"));
-      fflush (stdout);
-      fflush (stderr);
-      abort ();
-    }
+  if (i_mask & PRINT_TARGET_ATTRS) {
+    
+    if (p_target->precious)
+      puts (_("#  Precious file (prerequisite of .PRECIOUS)."));
+    if (p_target->phony)
+      puts (_("#  Phony target (prerequisite of .PHONY)."));
+    if (p_target->cmd_target)
+      puts (_("#  Command-line target."));
+    if (p_target->dontcare)
+      puts (_("#  A default, MAKEFILES, or -include/sinclude makefile."));
+    puts (p_target->tried_implicit
+	  ? _("#  Implicit rule search has been done.")
+	  : _("#  Implicit rule search has not been done."));
+    if (p_target->stem != 0)
+      printf (_("#  Implicit/static pattern stem: `%s'\n"), p_target->stem);
+    if (p_target->intermediate)
+      puts (_("#  File is an intermediate prerequisite."));
+    if (p_target->also_make != 0)
+      {
+	fputs (_("#  Also makes:"), stdout);
+	for (d = p_target->also_make; d != 0; d = d->next)
+	  printf (" %s", dep_name (d));
+	putchar ('\n');
+      }
+  }
 
-  if (f->variables != 0)
-    print_file_variables (f);
+  if (i_mask & PRINT_TARGET_TIME) {
+    
+    if (p_target->last_mtime == UNKNOWN_MTIME)
+      puts (_("#  Modification time never checked."));
+    else if (p_target->last_mtime == NONEXISTENT_MTIME)
+      puts (_("#  File does not exist."));
+    else if (p_target->last_mtime == OLD_MTIME)
+      puts (_("#  File is very old."));
+    else
+      {
+	char buf[FILE_TIMESTAMP_PRINT_LEN_BOUND + 1];
+	file_timestamp_sprintf (buf, p_target->last_mtime);
+	printf (_("#  Last modified %s\n"), buf);
+      }
+    puts (p_target->updated
+	  ? _("#  File has been updated.")
+	  : _("#  File has not been updated."));
+  }
 
-  if (f->cmds != 0)
-    print_commands (f->cmds);
+  if (i_mask & PRINT_TARGET_STATE) {
+    
+    switch (p_target->command_state)
+      {
+      case cs_running:
+	puts (_("#  Commands currently running (THIS IS A BUG)."));
+	break;
+      case cs_deps_running:
+	puts (_("#  Dependencies commands running (THIS IS A BUG)."));
+	break;
+      case cs_not_started:
+      case cs_finished:
+	switch (p_target->update_status)
+	  {
+	  case -1:
+	    break;
+	  case 0:
+	    puts (_("#  Successfully updated."));
+	    break;
+	  case 1:
+	    assert (question_flag);
+	    puts (_("#  Needs to be updated (-q is set)."));
+	    break;
+	  case 2:
+	    puts (_("#  Failed to be updated."));
+	    break;
+	  default:
+	    puts (_("#  Invalid value in `update_status' member!"));
+	    fflush (stdout);
+	    fflush (stderr);
+	    abort ();
+	  }
+	break;
+      default:
+	puts (_("#  Invalid value in `command_state' member!"));
+	fflush (stdout);
+	fflush (stderr);
+	abort ();
+      }
+  }
+  
 
-  if (f->prev)
-    print_file ((const void *) f->prev);
+  if (p_target->variables != 0 && i_mask & PRINT_TARGET_VARS)
+    print_file_variables (p_target, i_mask & PRINT_TARGET_VARS_HASH);
+
+  if (p_target->cmds != 0 && i_mask & PRINT_TARGET_CMDS)
+    print_commands (p_target, p_target->cmds, false);
+
+  if (p_target->cmds != 0 && i_mask & PRINT_TARGET_CMDS_EXP)
+    print_commands (p_target, p_target->cmds, true);
+
+  if (p_target->prev && i_mask & PRINT_TARGET_PREV)
+    print_target_props (p_target->prev, i_mask);
+}
+
+/*! 
+Print the data base of files.
+*/
+void
+print_target (const void *item)
+{
+  file_t *p_target = (file_t *) item;
+  print_target_props(p_target, PRINT_TARGET_ALL);
 }
 
 void
@@ -995,7 +1035,7 @@ print_file_data_base (void)
 {
   puts (_("\n# Files"));
 
-  hash_map (&files, print_file);
+  hash_map (&files, print_target);
 
   fputs (_("\n# files hash-table stats:\n# "), stdout);
   hash_print_stats (&files, stdout);

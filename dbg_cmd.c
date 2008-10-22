@@ -20,6 +20,7 @@ Boston, MA 02111-1307, USA.  */
 /* debugger command interface. */
 
 #include "make.h"
+#include "file.h"
 #include "print.h"
 #include "dbg_break.h"
 #include "dbg_cmd.h"
