@@ -426,13 +426,6 @@ extern int ar_touch PARAMS ((char *));
 extern time_t ar_member_date PARAMS ((char *));
 #endif
 
-extern int dir_file_exists_p PARAMS ((char *, char *));
-extern int file_exists_p PARAMS ((char *));
-extern int file_impossible_p PARAMS ((char *));
-extern void file_impossible PARAMS ((char *));
-extern char *dir_name PARAMS ((char *));
-extern void hash_init_directories PARAMS ((void));
-
 extern void define_default_variables PARAMS ((void));
 extern void set_default_suffixes PARAMS ((void));
 extern void install_default_suffix_rules PARAMS ((void));
