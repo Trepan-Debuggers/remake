@@ -604,15 +604,18 @@ extern int handling_fatal_signal;
 #define MAX(_a,_b) ((_a)>(_b)?(_a):(_b))
 #endif
 
-#ifdef VMS
-#  define MAKE_SUCCESS 1
-#  define MAKE_TROUBLE 2
-#  define MAKE_FAILURE 3
-#else
-#  define MAKE_SUCCESS 0
-#  define MAKE_TROUBLE 1
-#  define MAKE_FAILURE 2
-#endif
+/* \brief the exit codes that the GNU Make gives. */
+typedef enum {
+  MAKE_SUCCESS = 0, /**< GNU Make completed okay */
+  MAKE_TROUBLE = 1, /**< A we ran failed */
+  MAKE_FAILURE = 2  /**< GNU Make had an internal error/failure */
+} make_exit_code_t;
+
+/** This variable is trickery to force the above enum symbol values to
+    be recorded in debug symbol tables. It is used to allow one refer
+    to above enumeration values in a debugger and debugger
+    expressions */
+extern make_exit_code_t make_exit_code;
 
 /* Set up heap debugging library dmalloc.  */
 
