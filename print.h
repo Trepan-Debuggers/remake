@@ -1,5 +1,7 @@
 /* $Id: print.h,v 1.10 2005/12/23 03:29:34 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
+Copyright (C) 2008 R. Bernstein <rocky@gnu.org>
+
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -33,16 +35,16 @@ Boston, MA 02111-1307, USA.  */
 /*! Fancy processing for variadic functions in both ANSI and pre-ANSI
    compilers.  */
 #if defined __STDC__ && __STDC__
-void message (int prefix, const char *fmt, ...)
+extern void message (int prefix, const char *fmt, ...)
                      __attribute__ ((__format__ (__printf__, 2, 3)));
-void error (const floc_t *flocp, const char *fmt, ...)
+extern void error (const floc_t *flocp, const char *fmt, ...)
                    __attribute__ ((__format__ (__printf__, 2, 3)));
-void fatal (const floc_t *flocp, const char *fmt, ...)
+extern void fatal (const floc_t *flocp, const char *fmt, ...)
                    __attribute__ ((__format__ (__printf__, 2, 3)));
 #else
-void message ();
-void error ();
-void fatal ();
+extern void message ();
+extern void error ();
+extern void fatal ();
 #endif
 
 /*! Versions of error and fatal with the ability to show call-stack. */

@@ -2,6 +2,7 @@
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software
 Foundation, Inc.
+Copyright (C) 2008 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -19,6 +20,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 #include "make.h"
 #include "dep.h"
 #include "debug.h"
+#include "print.h"
 
 /* Variadic functions.  We go through contortions to allow proper function
    prototypes for both ANSI and pre-ANSI C compilers, and also for those
@@ -183,109 +185,6 @@ concat (const char *s1, const char *s2, const char *s3)
 
   return result;
 }
-
-/* Print a message on stdout.  */
-
-void
-#if HAVE_ANSI_COMPILER && USE_VARIADIC && HAVE_STDARG_H
-message (int prefix, const char *fmt, ...)
-#else
-message (prefix, fmt, va_alist)
-     int prefix;
-     const char *fmt;
-     va_dcl
-#endif
-{
-#if USE_VARIADIC
-  va_list args;
-#endif
-
-  log_working_directory (1);
-
-  if (fmt != 0)
-    {
-      if (prefix)
-	{
-	  if (makelevel == 0)
-	    printf ("%s: ", program);
-	  else
-	    printf ("%s[%u]: ", program, makelevel);
-	}
-      VA_START (args, fmt);
-      VA_PRINTF (stdout, fmt, args);
-      VA_END (args);
-      putchar ('\n');
-    }
-
-  fflush (stdout);
-}
-
-/* Print an error message.  */
-
-void
-#if HAVE_ANSI_COMPILER && USE_VARIADIC && HAVE_STDARG_H
-error (const struct floc *flocp, const char *fmt, ...)
-#else
-error (flocp, fmt, va_alist)
-     const struct floc *flocp;
-     const char *fmt;
-     va_dcl
-#endif
-{
-#if USE_VARIADIC
-  va_list args;
-#endif
-
-  log_working_directory (1);
-
-  if (flocp && flocp->filenm)
-    fprintf (stderr, "%s:%lu: ", flocp->filenm, flocp->lineno);
-  else if (makelevel == 0)
-    fprintf (stderr, "%s: ", program);
-  else
-    fprintf (stderr, "%s[%u]: ", program, makelevel);
-
-  VA_START(args, fmt);
-  VA_PRINTF (stderr, fmt, args);
-  VA_END (args);
-
-  putc ('\n', stderr);
-  fflush (stderr);
-}
-
-/* Print an error message and exit.  */
-
-void
-#if HAVE_ANSI_COMPILER && USE_VARIADIC && HAVE_STDARG_H
-fatal (const struct floc *flocp, const char *fmt, ...)
-#else
-fatal (flocp, fmt, va_alist)
-     const struct floc *flocp;
-     const char *fmt;
-     va_dcl
-#endif
-{
-#if USE_VARIADIC
-  va_list args;
-#endif
-
-  log_working_directory (1);
-
-  if (flocp && flocp->filenm)
-    fprintf (stderr, "%s:%lu: *** ", flocp->filenm, flocp->lineno);
-  else if (makelevel == 0)
-    fprintf (stderr, "%s: *** ", program);
-  else
-    fprintf (stderr, "%s[%u]: *** ", program, makelevel);
-
-  VA_START(args, fmt);
-  VA_PRINTF (stderr, fmt, args);
-  VA_END (args);
-
-  fputs (_(".  Stop.\n"), stderr);
-
-  die (2);
-}
 
 #ifndef HAVE_STRERROR
 
@@ -308,22 +207,12 @@ strerror (int errnum)
 }
 #endif
 
-/* Print an error message from errno.  */
-
-void
-perror_with_name (const char *str, const char *name)
-{
-  error (NILF, _("%s%s: %s"), str, name, strerror (errno));
-}
-
 /* Print an error message from errno and exit.  */
 
 void
 pfatal_with_name (const char *name)
 {
   fatal (NILF, _("%s: %s"), name, strerror (errno));
-
-  /* NOTREACHED */
 }
 
 /* Like malloc but get fatal error if memory is exhausted.  */

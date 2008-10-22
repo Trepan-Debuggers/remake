@@ -1,6 +1,6 @@
 /* $Id: dbg_break.h,v 1.3 2005/12/10 02:50:32 rockyb Exp $
-Copyright (C) 2005 rocky@panix.com
-This file is part of GNU Make.
+Copyright (C) 2005, 2008 R. Bernstein <rocky@gnu.org>
+This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

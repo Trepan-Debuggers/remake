@@ -1,7 +1,8 @@
 /* $Id: types.h,v 1.8 2005/12/25 10:08:35 rockyb Exp $
 Miscellaneous types
-Copyright (c) 2005 Rocky Bernstein <rocky@panix.com>
-This file is part of GNU Make.
+Copyright (c) 2005, 2008  Rocky Bernstein <rocky@panix.com>
+
+This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -50,8 +51,8 @@ typedef unsigned long int lineno_t;
 /** \brief File location. 
     Used in reporting where we are.*/
 struct floc {
-  char    *filenm; /**< The file name */
-  lineno_t lineno; /**< The line number in the above file. */
+  const char *filenm; /**< The file name */
+  lineno_t lineno;    /**< The line number in the above file. */
 };
 #define NILF ((struct floc *)0)
 

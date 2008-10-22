@@ -1,5 +1,7 @@
 /* $Id: read.h,v 1.7 2007/01/04 12:03:20 rockyb Exp $ 
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
+Copyright (C) 2008 R. Bernstein <rocky@gnu.org>
+
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -46,23 +48,6 @@ char *find_char_unquote (char *string, int stop1, int stop2,
 
 /*! Search PATTERN for an unquoted %.  */
 char *find_percent (char *pattern);
-
-
-/*! Parse a string into a sequence of filenames represented as a chain
-   of struct nameseq's in reverse order and return that chain.
-
-   The string is passed as STRINGP, the address of a string pointer.
-   The string pointer is updated to point at the first character
-   not parsed, which either is a null char or equals STOPCHAR.
-
-   SIZE is how big to construct chain elements.
-   This is useful if we want them actually to be other structures
-   that have room for additional info.
-
-   If STRIP is nonzero, strip `./'s off the beginning.
-*/
-nameseq_t *parse_file_seq (char **stringp, int stopchar, 
-				unsigned int size, int strip, floc_t *floc);
 
 /*! Construct the list of include directories
    from the arguments and the default list.  

@@ -1,7 +1,9 @@
 /* Definitions for managing subprocesses in GNU Make.
 Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
-This file is part of GNU Make.
+Copyright (C) 2008 R. Bernstein <rocky@gnu.org>
+
+This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -37,7 +39,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 
 /* Structure describing a running or dead child process.  */
 
-struct child
+typedef struct child
   {
     struct child *next;		/* Link in the chain.  */
 
@@ -62,7 +64,7 @@ struct child
     unsigned int good_stdin:1;	/* Nonzero if this child has a good stdin.  */
     unsigned int deleted:1;	/* Nonzero if targets have been deleted.  */
     unsigned int dontcare:1;    /* Saved dontcare flag.  */
-  };
+  } child_t;
 
 extern struct child *children;
 

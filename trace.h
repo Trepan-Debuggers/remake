@@ -1,5 +1,6 @@
-/*$Id: trace.h,v 1.9 2007/02/28 16:53:13 rockyb Exp $
-Copyright (C) 2004, 2005, 2007 Rocky Bernstein <rocky@gnu.org>
+/*
+Copyright (C) 2004, 2005, 2007, 2008 Rocky Bernstein <rocky@gnu.org>
+
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -25,8 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef TRACE_H
 #define TRACE_H
 
-#include "make.h"
-#include "file.h"
+#include "filedef.h"
 
 typedef enum {
   continue_execution,   /**< Get out of debug read loop and continue execution

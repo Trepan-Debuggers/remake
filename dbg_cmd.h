@@ -1,6 +1,6 @@
 /* $Id: dbg_cmd.h,v 1.8 2006/01/21 13:40:21 rockyb Exp $
-Copyright (C) 2005 rocky@panix.com
-This file is part of GNU Make.
+Copyright (C) 2005, 2008 R. Bernstein <rocky@gnu.org>
+This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #define DBG_CMD_H
 #include "job.h"
 #include "buildargv.h"
+#include "trace.h"
 
 /*! 
   If 0 (or false) we are not in the debugger command read loop.

@@ -1,6 +1,6 @@
 /* $Id: expand.h,v 1.9 2006/12/18 10:12:25 rockyb Exp $
-Copyright (C) 2004, 2005 Free Software Foundation, Inc.
-This file is part of GNU Make.
+Copyright (C) 2005 R. Bernstein <rocky@gnu.org>
+This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -27,9 +27,6 @@ Boston, MA 02111-1307, USA.  */
 
 #include "variable.h"
 #include "filedef.h"
-
-#define	allocated_variable_expand(line) \
-  allocated_variable_expand_for_file (line, (file_t *) 0)
 
 /*! Like variable_expand_for_file, but the returned string is malloc'd.
    This function is called a lot.  It wants to be efficient.  */
@@ -68,20 +65,8 @@ extern char *recursively_expand_for_file(variable_t *v, file_t *file);
 
 extern void restore_variable_buffer(char *p_buf, unsigned int len);
 
-extern char *variable_buffer_output(char *ptr, const char *psz_string, 
+extern char *variable_buffer_output(char *ptr, char *psz_string, 
 				    unsigned int length);
-
-/*! Scan PSZ_LINE for variable references and expansion-function calls.
-   Build in `variable_buffer' the result of expanding the references and calls.
-   Return the address of the resulting string, which is null-terminated
-   and is valid only until the next time this function is called.  */
-
-extern char *variable_expand(char *psz_line);
-
-/*! Expand PSZ_LINE for FILE.  Error messages refer to the file and
-   line where FILE's commands were found.  Expansion uses FILE's
-   variable set list.  */
-extern char *variable_expand_for_file (char *line, file_t *file);
 
 /** Expand PSZ_LINE. Expansion uses P_FILE_SET if it is not NULL. */
 extern char *variable_expand_set (char *psz_line, 

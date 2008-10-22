@@ -1,6 +1,6 @@
 /* $Id: dbg_fns.h,v 1.11 2006/03/19 12:17:44 rockyb Exp $
-Copyright (C) 2005 rocky@panix.com
-This file is part of GNU Make.
+Copyright (C) 2005, 2008 R. Bernstein <rocky@gnu.org>
+This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

@@ -2,6 +2,8 @@
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software
 Foundation, Inc.
+Copyright (C) 2008 R. Bernstein <rocky@gnu.org>
+
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -19,6 +21,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 /* We use <config.h> instead of "config.h" so that a compilation
    using -I. -I$srcdir will use ./config.h rather than $srcdir/config.h
    (which it would do because make.h was found in $srcdir).  */
+
+#ifndef MAKE_H
+#define MAKE_H
+
 #include <config.h>
 #undef  HAVE_CONFIG_H
 #define HAVE_CONFIG_H 1
@@ -53,6 +59,7 @@ char *alloca ();
 
 #define _GNU_SOURCE 1
 
+#include "types.h"
 
 #ifdef  CRAY
 /* This must happen before #include <signal.h> so
@@ -378,14 +385,11 @@ extern int no_default_sh_exe;
 extern int unixy_shell;
 #endif  /* WINDOWS32 */
 
-struct floc
-  {
-    const char *filenm;
-    unsigned long lineno;
-  };
-#define NILF ((struct floc *)0)
-
 #define STRING_SIZE_TUPLE(_s) (_s), (sizeof (_s)-1)
+#define	CALLOC(t, n) ((t *) calloc  (sizeof (t), (n)))
+#define MALLOC(t, n) ((t *) xmalloc (sizeof (t) * (n)))
+#define REALLOC(o, t, n) ((t *) xrealloc ((void *) (o), sizeof (t) * (n)))
+#define FREE(p) if (p) { free(p); p = NULL;}
 
 
 /* We have to have stdarg.h or varargs.h AND v*printf or doprnt to use
@@ -397,22 +401,8 @@ struct floc
 # endif
 #endif
 
-#if HAVE_ANSI_COMPILER && USE_VARIADIC && HAVE_STDARG_H
-extern void message (int prefix, const char *fmt, ...)
-                     __attribute__ ((__format__ (__printf__, 2, 3)));
-extern void error (const struct floc *flocp, const char *fmt, ...)
-                   __attribute__ ((__format__ (__printf__, 2, 3)));
-extern void fatal (const struct floc *flocp, const char *fmt, ...)
-                   __attribute__ ((noreturn, __format__ (__printf__, 2, 3)));
-#else
-extern void message ();
-extern void error ();
-extern void fatal ();
-#endif
-
 extern void die PARAMS ((int)) __attribute__ ((noreturn));
 extern void log_working_directory PARAMS ((int));
-extern void pfatal_with_name PARAMS ((const char *)) __attribute__ ((noreturn));
 extern void perror_with_name PARAMS ((const char *, const char *));
 extern char *savestring PARAMS ((const char *, unsigned int));
 extern char *concat PARAMS ((const char *, const char *, const char *));
@@ -501,12 +491,76 @@ extern const struct floc **expanding_var;
 
 extern char **environ;
 
-extern int just_print_flag, silent_flag, ignore_errors_flag, keep_going_flag;
-extern int print_data_base_flag, question_flag, touch_flag, always_make_flag;
-extern int env_overrides, no_builtin_rules_flag, no_builtin_variables_flag;
-extern int print_version_flag, print_directory_flag, check_symlink_flag;
-extern int warn_undefined_variables_flag, posix_pedantic, not_parallel;
-extern int second_expansion, clock_skew_detected, rebuilding_makefiles;
+/*! The recognized command switches.  */
+
+/*! Nonzero means do not print commands to be executed (-s).  */
+extern int silent_flag;
+
+/*! Nonzero means just touch the files
+   that would appear to need remaking (-t)  */
+extern int touch_flag;
+
+/*! Nonzero means just print what commands would need to be executed,
+   don't actually execute them (-n).  */
+extern int just_print_flag;
+
+/*! Environment variables override makefile definitions.  */
+extern int env_overrides;
+
+/*! Nonzero means ignore status codes returned by commands
+   executed to remake files.  Just treat them all as successful (-i).  */
+
+extern int ignore_errors_flag;
+
+/*! Nonzero means don't remake anything, just print the data base
+   that results from reading the makefile (-p).  */
+
+extern int print_data_base_flag;
+
+/*! Nonzero means don't remake anything; just return a nonzero status
+   if the specified targets are not up to date (-q).  */
+
+extern int question_flag;
+
+/*! Nonzero means do not use any of the builtin rules (-r) / variables
+  (-R).  */
+extern int no_builtin_rules_flag;
+extern int no_builtin_variables_flag;
+
+/*! Nonzero means keep going even if remaking some file fails
+  (-k).  */
+extern int keep_going_flag;
+
+/*! Nonzero means check symlink mtimes. (-L) */
+int check_symlink_flag;
+
+/*! Nonzero means print directory before starting and when done
+  (-w).  */
+extern int print_directory_flag;
+
+extern int always_make_flag;
+extern int print_directory_flag;
+extern int warn_undefined_variables_flag;
+extern int rebuilding_makefiles;
+
+/*! True if some rule detected clock skew; we keep track so (a) we only
+   print one warning about it during the run, and (b) we can print a final
+   warning at the end of the run. */
+
+extern bool clock_skew_detected;
+
+extern int print_version_flag;
+extern bool not_parallel;
+
+/*! True if we have seen the magic `.POSIX' target.
+   This turns on pedantic compliance with POSIX.2.  */
+
+extern bool posix_pedantic;
+
+/*! True if we have seen the '.SECONDEXPANSION' target.
+   This turns on secondary expansion of prerequisites.  */
+
+extern bool second_expansion;
 
 /* can we run commands via 'sh -c xxx' or must we use batch files? */
 extern int batch_mode_shell;
@@ -521,8 +575,21 @@ extern int max_load_average;
 #endif
 
 extern char *program;
+
+/*! Our initial arguments -- used for debugger restart execvp.  */
+extern char **global_argv;
+
 extern char *starting_directory;
 extern unsigned int makelevel;
+
+/*! If nonzero, the basename of filenames is in giving locations. Normally,
+    giving a file directory location helps a debugger frontend
+    when we change directories. For regression tests it is helpful to 
+    list just the basename part as that doesn't change from installation
+    to installation. Users may have their preferences too.
+*/
+extern int basename_filenames;
+
 extern char *version_string, *remote_description, *make_host;
 
 extern unsigned int commands_started;
@@ -609,3 +676,4 @@ extern int handling_fatal_signal;
 #define ENULLLOOP(_v,_c)   do{ errno = 0; \
                                while (((_v)=_c)==0 && errno==EINTR); }while(0)
 
+#endif /*MAKE_H*/

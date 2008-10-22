@@ -1,6 +1,6 @@
 /* $Id: dbg_stack.h,v 1.4 2005/12/09 12:11:09 rockyb Exp $
-Copyright (C) 2005 rocky@panix.com
-This file is part of GNU Make.
+Copyright (C) 2005 R. Bernstein rocky@gnu.org
+This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
