@@ -20,6 +20,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 
 #include <assert.h>
 
+#include "print.h"
+#include "expand.h"
 #include "filedef.h"
 #include "job.h"
 #include "commands.h"
@@ -465,6 +467,22 @@ variable_expand_for_file (char *line, struct file *file)
   reading_file = 0;
 
   return result;
+}
+
+/** Expand PSZ_LINE. Expansion uses P_FILE_SET if it is not NULL. */
+char *
+variable_expand_set (char *psz_line, variable_set_list_t *p_file_vars)
+{
+  char *psz_result;
+  variable_set_list_t *p_vars_save;
+
+  p_vars_save = current_variable_set_list;
+  if (p_file_vars)
+    current_variable_set_list = p_file_vars;
+  psz_result = variable_expand (psz_line);
+  current_variable_set_list = p_vars_save;
+
+  return psz_result;
 }
 
 /* Like allocated_variable_expand, but for += target-specific variables.

@@ -2,6 +2,8 @@
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software
 Foundation, Inc.
+Copyright (C) 2008 R. Bernstein <rocky@gnu.org>
+
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -123,17 +125,6 @@ struct command_switch
 
 #define short_option(c) ((c) <= CHAR_MAX)
 
-/* The structure used to hold the list of strings given
-   in command switches of a type that takes string arguments.  */
-
-struct stringlist
-  {
-    char **list;	/* Nil-terminated list of strings.  */
-    unsigned int idx;	/* Index into above.  */
-    unsigned int max;	/* Number of pointers allocated.  */
-  };
-
-
 /* The recognized command switches.  */
 
 /* Nonzero means do not print commands to be executed (-s).  */
@@ -152,10 +143,44 @@ int just_print_flag;
 
 /* Print debugging info (--debug).  */
 
-static struct stringlist *db_flags;
-static int debug_flag = 0;
+/*! If 1, we don't give additional error reporting information. */
+int no_extended_errors = 0;
 
-int db_level = 0;
+/*! If 1, we print variable definitions. */
+int show_variable_definitions = 0;
+
+/*! If non-null, we are tracing execution */
+stringlist_t *tracing_opts = NULL;
+
+/*! If nonzero, we are debugging after each "step" for that many times. 
+  When we have a value 1, then we actually run the debugger read loop.
+  Otherwise we decrement the step count.
+
+*/
+unsigned int i_debugger_stepping = 0;
+
+/*! If nonzero, we are debugging after each "next" for that many times. 
+  When we have a value 1, then we actually run the debugger read loop.
+  Otherwise we decrement the step count.
+
+*/
+unsigned int i_debugger_nexting = 0;
+
+/*! If nonzero, enter the debugger if we hit a fatal error.
+*/
+unsigned int debugger_on_error = 0;
+
+/*! If nonzero, we have requested some sort of debugging.
+*/
+unsigned int debugger_enabled;
+
+/*! If nonzero, the basename of filenames is in giving locations. Normally,
+    giving a file directory location helps a debugger frontend
+    when we change directories. For regression tests it is helpful to 
+    list just the basename part as that doesn't change from installation
+    to installation. Users may have their preferences too.
+*/
+int basename_filenames = 0;
 
 #ifdef WINDOWS32
 /* Suspend make in main for a short time to allow debugger to attach */
@@ -209,6 +234,10 @@ int inhibit_print_directory_flag = 0;
 
 int print_version_flag = 0;
 
+/*! Nonzero means --trace=noshell.  */
+
+int no_shell_trace = 0;
+
 /* List of makefiles given with -f switches.  */
 
 static struct stringlist *makefiles = 0;
@@ -225,7 +254,7 @@ static unsigned int inf_jobs = 0;
 
 /* File descriptors for the jobs pipe.  */
 
-static struct stringlist *jobserver_fds = 0;
+static stringlist_t *jobserver_fds = NULL;
 
 int job_fds[2] = { -1, -1 };
 int job_rfd = -1;
@@ -244,23 +273,33 @@ int default_load_average = -1;
 
 /* List of directories given with -C switches.  */
 
-static struct stringlist *directories = 0;
+static stringlist_t *directories = NULL;
 
 /* List of include directories given with -I switches.  */
 
-static struct stringlist *include_directories = 0;
+stringlist_t *include_directories = NULL;
 
 /* List of files given with -o switches.  */
 
-static struct stringlist *old_files = 0;
+static stringlist_t *old_files = NULL;
 
 /* List of files given with -W switches.  */
 
-static struct stringlist *new_files = 0;
+static stringlist_t *new_files = NULL;
 
 /* If nonzero, we should just print usage and exit.  */
 
 static int print_usage_flag = 0;
+
+/*! Do we want to go into a debugger or not?
+  Values are "error"     - enter on errors or fatal errors
+              "fatal"     - enter on fatal errors
+              "preread"   - set to enter debugger before reading makefile(s)
+              "preaction" - set to enter debugger before performing any 
+	                    actions(s)
+              "full"     - "enter" + "error" + "fatal"
+*/
+static stringlist_t* debugger_opts = NULL;
 
 /* If nonzero, we should print a warning message
    for each reference to an undefined variable.  */
@@ -290,68 +329,85 @@ static const char *const usage[] =
   {
     N_("Options:\n"),
     N_("\
-  -b, -m                      Ignored for compatibility.\n"),
+  -b, -m                       Ignored for compatibility.\n"),
     N_("\
-  -B, --always-make           Unconditionally make all targets.\n"),
+  -B, --always-make            Unconditionally make all targets.\n"),
+    N_("\
+  --basename-filenames         Show files as basename only.\n"),
     N_("\
   -C DIRECTORY, --directory=DIRECTORY\n\
-                              Change to DIRECTORY before doing anything.\n"),
+                               Change to DIRECTORY before doing anything.\n"),
     N_("\
-  -d                          Print lots of debugging information.\n"),
+  -d                           Print lots of debugging information.\n"),
     N_("\
-  --debug[=FLAGS]             Print various types of debugging information.\n"),
+  --debug[=FLAGS]              Print various types of debugging information.\n"),
     N_("\
   -e, --environment-overrides\n\
-                              Environment variables override makefiles.\n"),
+                               Environment variables override makefiles.\n"),
     N_("\
   -f FILE, --file=FILE, --makefile=FILE\n\
-                              Read FILE as a makefile.\n"),
+                               Read FILE as a makefile.\n"),
     N_("\
-  -h, --help                  Print this message and exit.\n"),
+  -h, --help                   Print this message and exit.\n"),
     N_("\
-  -i, --ignore-errors         Ignore errors from commands.\n"),
+  -i, --ignore-errors          Ignore errors from commands.\n"),
     N_("\
   -I DIRECTORY, --include-dir=DIRECTORY\n\
-                              Search DIRECTORY for included makefiles.\n"),
+                               Search DIRECTORY for included makefiles.\n"),
     N_("\
-  -j [N], --jobs[=N]          Allow N jobs at once; infinite jobs with no arg.\n"),
+  -j [N], --jobs[=N]           Allow N jobs at once; infinite jobs with no arg.\n"),
     N_("\
-  -k, --keep-going            Keep going when some targets can't be made.\n"),
+  -k, --keep-going             Keep going when some targets can't be made.\n"),
     N_("\
   -l [N], --load-average[=N], --max-load[=N]\n\
-                              Don't start multiple jobs unless load is below N.\n"),
+                               Don't start multiple jobs unless load is below N.\n"),
     N_("\
-  -L, --check-symlink-times   Use the latest mtime between symlinks and target.\n"),
+  -L, --check-symlink-times    Use the latest mtime between symlinks and target.\n"),
     N_("\
   -n, --just-print, --dry-run, --recon\n\
-                              Don't actually run any commands; just print them.\n"),
+                               Don't actually run any commands; just print them.\n"),
+    N_("\
+  --no-extended-errors         Do not give additional error reporting.\n"),
     N_("\
   -o FILE, --old-file=FILE, --assume-old=FILE\n\
-                              Consider FILE to be very old and don't remake it.\n"),
+                               Consider FILE to be very old and don't remake it.\n"),
     N_("\
-  -p, --print-data-base       Print make's internal database.\n"),
+  -p, --print-data-base        Print make's internal database.\n"),
     N_("\
-  -q, --question              Run no commands; exit status says if up to date.\n"),
+  -q, --question               Run no commands; exit status says if up to date.\n"),
     N_("\
-  -r, --no-builtin-rules      Disable the built-in implicit rules.\n"),
+  -r, --no-builtin-rules       Disable the built-in implicit rules.\n"),
     N_("\
-  -R, --no-builtin-variables  Disable the built-in variable settings.\n"),
+  -R, --no-builtin-variables   Disable the built-in variable settings.\n"),
     N_("\
-  -s, --silent, --quiet       Don't echo commands.\n"),
+  -s, --silent, --quiet        Don't echo commands.\n"),
     N_("\
-  -S, --no-keep-going, --stop\n\
-                              Turns off -k.\n"),
+  -S, --no-keep-going, --stop  Turns off -k.\n"),
     N_("\
-  -t, --touch                 Touch targets instead of remaking them.\n"),
+  -t, --touch                  Touch targets instead of remaking them.\n"),
     N_("\
-  -v, --version               Print the version number of make and exit.\n"),
+  -v, --version                Print the version number of make and exit.\n"),
     N_("\
-  -w, --print-directory       Print the current directory.\n"),
+  -V, --show-variables         Show variable expansions.\n"),
     N_("\
-  --no-print-directory        Turn off -w, even if it was turned on implicitly.\n"),
+  -w, --print-directory        Print the current directory.\n"),
+    N_("\
+  --no-print-directory         Turn off -w, even if it was turned on implicitly.\n"),
     N_("\
   -W FILE, --what-if=FILE, --new-file=FILE, --assume-new=FILE\n\
-                              Consider FILE to be infinitely new.\n"),
+                               Consider FILE to be infinitely new.\n"),
+    N_("\
+  --warn-undefined-variables   Warn when an undefined variable is referenced.\n"),
+    N_("\
+  -x, --trace[=TYPE]           Trace command execution TYPE may be\n\
+                               \"command\", \"read\", \"normal\",\"\n\
+                               \"noshell\", or \"full\".\n"),
+    N_("\
+  -y                           same as --trace=\"noshell\"\n"),
+    N_("\
+  -X [type], --debugger[=TYPE] Enter debugger. TYPE may be\n\
+                               \"preread\", \"preaction\", \"full\",\n\
+                               \"error\", or \"fatal\".\n"),
     N_("\
   --warn-undefined-variables  Warn when an undefined variable is referenced.\n"),
     NULL
@@ -363,6 +419,8 @@ static const struct command_switch switches[] =
   {
     { 'b', ignore, 0, 0, 0, 0, 0, 0, 0 },
     { 'B', flag, (char *) &always_make_set, 1, 1, 0, 0, 0, "always-make" },
+    { CHAR_MAX+5, flag, (char *) &basename_filenames, 1, 1, 0, 0, 0, 
+      "basename-filenames" },
     { 'C', string, (char *) &directories, 0, 0, 0, 0, 0, "directory" },
     { 'd', flag, (char *) &debug_flag, 1, 1, 0, 0, 0, 0 },
     { CHAR_MAX+1, string, (char *) &db_flags, 1, 1, 0, "basic", 0, "debug" },
@@ -371,6 +429,8 @@ static const struct command_switch switches[] =
 #endif
     { 'e', flag, (char *) &env_overrides, 1, 1, 0, 0, 0,
       "environment-overrides", },
+    { CHAR_MAX+6, flag, (char *) &no_extended_errors, 1, 1, 0, 0, 0,
+        "no-extended-errors", },
     { 'f', string, (char *) &makefiles, 0, 0, 0, 0, 0, "file" },
     { 'h', flag, (char *) &print_usage_flag, 0, 0, 0, 0, 0, "help" },
     { 'i', flag, (char *) &ignore_errors_flag, 1, 1, 0, 0, 0,
@@ -411,9 +471,15 @@ static const struct command_switch switches[] =
     { 'v', flag, (char *) &print_version_flag, 1, 1, 0, 0, 0, "version" },
     { 'w', flag, (char *) &print_directory_flag, 1, 1, 0, 0, 0,
       "print-directory" },
+    { 'x', string, (char *) &tracing_opts, 1, 1, 0, "normal", 0, "trace" },
+    { 'X', string, (char *) &debugger_opts, 1, 1, 0, 
+      "preaction", 0, "debugger" },
+    { 'y', flag, (char *) &no_shell_trace, 1, 1, 0, 0, 0, "noshell" },
+    { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0, "what-if" },
+    { 'V', flag, (char *) &show_variable_definitions, 1, 1, 0, 0, 0,
+	"show-variables" },
     { CHAR_MAX+3, flag, (char *) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
       "no-print-directory" },
-    { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0, "what-if" },
     { CHAR_MAX+4, flag, (char *) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
       "warn-undefined-variables" },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
@@ -436,7 +502,7 @@ static struct option long_option_aliases[] =
 
 /* List of goal targets.  */
 
-static struct dep *goals, *lastgoal;
+static dep_t *goals, *lastgoal;
 
 /* List of variables which were defined on the command line
    (or, equivalently, in MAKEFLAGS).  */
@@ -448,27 +514,32 @@ struct command_variable
   };
 static struct command_variable *command_variables;
 
-/* The name we were invoked with.  */
 
-char *program;
+/*! Value of argv[0] which seems to get modified. Can we merge this with
+    program below? */
+static char *argv0 = NULL;
 
-/* Our current directory before processing any -C options.  */
+/*! The name we were invoked with.  */
+char *program = NULL;
 
-char *directory_before_chdir;
+/*! Our initial arguments -- used for debugger restart execvp.  */
+char **global_argv;
 
-/* Our current directory after processing all -C options.  */
-
+/*! Our current directory after processing all -C options.  */
 char *starting_directory;
 
-/* Value of the MAKELEVEL variable at startup (or 0).  */
+/*! Our current directory before processing any -C options.  */
+char *directory_before_chdir = NULL;
 
+
+/*! Value of the MAKELEVEL variable at startup (or 0).  */
 unsigned int makelevel;
 
 /* First file defined in the makefile whose name does not
    start with `.'.  This is the default to remake if the
    command line does not specify.  */
 
-struct file *default_goal_file;
+file_t *default_goal_file = NULL;
 
 /* Pointer to the value of the .DEFAULT_GOAL special
    variable.  */
@@ -478,28 +549,28 @@ char ** default_goal_name;
    whose commands are used for any file that has none of its own.
    This is zero if the makefiles do not define .DEFAULT.  */
 
-struct file *default_file;
+file_t *default_file = NULL;
 
 /* Nonzero if we have seen the magic `.POSIX' target.
    This turns on pedantic compliance with POSIX.2.  */
 
-int posix_pedantic;
+bool posix_pedantic = false;
 
 /* Nonzero if we have seen the '.SECONDEXPANSION' target.
    This turns on secondary expansion of prerequisites.  */
 
-int second_expansion;
+bool second_expansion;
 
 /* Nonzero if we have seen the `.NOTPARALLEL' target.
    This turns off parallel builds for this invocation of make.  */
 
-int not_parallel;
+bool not_parallel = false;
 
 /* Nonzero if some rule detected clock skew; we keep track so (a) we only
    print one warning about it during the run, and (b) we can print a final
    warning at the end of the run. */
 
-int clock_skew_detected;
+bool clock_skew_detected;
 
 /* Mask of signals that are being caught with fatal_error_signal.  */
 
@@ -577,69 +648,6 @@ enter_command_line_file (char *name)
     }
 
   return enter_file (xstrdup (name));
-}
-
-/* Toggle -d on receipt of SIGUSR1.  */
-
-#ifdef SIGUSR1
-static RETSIGTYPE
-debug_signal_handler (int sig UNUSED)
-{
-  db_level = db_level ? DB_NONE : DB_BASIC;
-}
-#endif
-
-static void
-decode_debug_flags (void)
-{
-  char **pp;
-
-  if (debug_flag)
-    db_level = DB_ALL;
-
-  if (!db_flags)
-    return;
-
-  for (pp=db_flags->list; *pp; ++pp)
-    {
-      const char *p = *pp;
-
-      while (1)
-        {
-          switch (tolower (p[0]))
-            {
-            case 'a':
-              db_level |= DB_ALL;
-              break;
-            case 'b':
-              db_level |= DB_BASIC;
-              break;
-            case 'i':
-              db_level |= DB_BASIC | DB_IMPLICIT;
-              break;
-            case 'j':
-              db_level |= DB_JOBS;
-              break;
-            case 'm':
-              db_level |= DB_BASIC | DB_MAKEFILES;
-              break;
-            case 'v':
-              db_level |= DB_BASIC | DB_VERBOSE;
-              break;
-            default:
-              fatal (NILF, _("unknown debug level specification `%s'"), p);
-            }
-
-          while (*(++p) != '\0')
-            if (*p == ',' || *p == ' ')
-              break;
-
-          if (*p == '\0')
-            break;
-
-          ++p;
-        }
-    }
 }
 
 #ifdef WINDOWS32
@@ -931,6 +939,7 @@ main (int argc, char **argv, char **envp)
   atexit (close_stdout);
 #endif
 
+  global_argv = argv;
   /* Needed for OS/2 */
   initialize_main(&argc, &argv);
 
@@ -2391,7 +2400,7 @@ print_usage (int bad)
     fprintf (usageto, _("\nThis program built for %s (%s)\n"),
              make_host, remote_description);
 
-  fprintf (usageto, _("Report bugs to <bug-make@gnu.org>\n"));
+  fprintf (usageto, _("Report bugs to <bashdb-remake@lists.sf.net>\n"));
 }
 
 /* Decode switches from ARGC and ARGV.
@@ -3072,58 +3081,4 @@ die (int status)
     }
 
   exit (status);
-}
-
-/* Write a message indicating that we've just entered or
-   left (according to ENTERING) the current directory.  */
-
-void
-log_working_directory (int entering)
-{
-  static int entered = 0;
-
-  /* Print nothing without the flag.  Don't print the entering message
-     again if we already have.  Don't print the leaving message if we
-     haven't printed the entering message.  */
-  if (! print_directory_flag || entering == entered)
-    return;
-
-  entered = entering;
-
-  if (print_data_base_flag)
-    fputs ("# ", stdout);
-
-  /* Use entire sentences to give the translators a fighting chance.  */
-
-  if (makelevel == 0)
-    if (starting_directory == 0)
-      if (entering)
-        printf (_("%s: Entering an unknown directory\n"), program);
-      else
-        printf (_("%s: Leaving an unknown directory\n"), program);
-    else
-      if (entering)
-        printf (_("%s: Entering directory `%s'\n"),
-                program, starting_directory);
-      else
-        printf (_("%s: Leaving directory `%s'\n"),
-                program, starting_directory);
-  else
-    if (starting_directory == 0)
-      if (entering)
-        printf (_("%s[%u]: Entering an unknown directory\n"),
-                program, makelevel);
-      else
-        printf (_("%s[%u]: Leaving an unknown directory\n"),
-                program, makelevel);
-    else
-      if (entering)
-        printf (_("%s[%u]: Entering directory `%s'\n"),
-                program, makelevel, starting_directory);
-      else
-        printf (_("%s[%u]: Leaving directory `%s'\n"),
-                program, makelevel, starting_directory);
-
-  /* Flush stdout to be sure this comes before any stderr output.  */
-  fflush (stdout);
 }

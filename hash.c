@@ -2,6 +2,8 @@
    Copyright (C) 1995, 1999, 2002 Free Software Foundation, Inc.
    Written by Greg McGary <gkm@gnu.org> <greg@mcgary.org>
 
+   Copyright (C) 2008 R. Bernstein <rocky@gnu.org>
+
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2, or (at your option)
@@ -19,9 +21,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 #include "make.h"
 #include "hash.h"
 
-#define	CALLOC(t, n) ((t *) calloc (sizeof (t), (n)))
-#define MALLOC(t, n) ((t *) xmalloc (sizeof (t) * (n)))
-#define REALLOC(o, t, n) ((t *) xrealloc ((o), sizeof (t) * (n)))
 #define CLONE(o, t, n) ((t *) memcpy (MALLOC (t, (n)), (o), sizeof (t) * (n)))
 
 static void hash_rehash __P((struct hash_table* ht));

@@ -2,6 +2,8 @@
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software
 Foundation, Inc.
+Copyright (c) 2005, 2008  Rocky Bernstein <rocky@gnu.org>
+
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -21,6 +23,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 #include <assert.h>
 
 #include "dep.h"
+#include "expand.h"
 #include "filedef.h"
 #include "job.h"
 #include "commands.h"
@@ -38,6 +41,44 @@ static struct pattern_var *pattern_vars;
 /* Pointer to last struct in the chain, so we can add onto the end.  */
 
 static struct pattern_var *last_pattern_var;
+
+/*!
+  Return a string describing origin.
+ */
+const char *
+origin2str(variable_origin_t origin) 
+{
+  switch (origin)
+    {
+    case o_default:
+      return _("default");
+      break;
+    case o_env:
+      return _("environment");
+      break;
+    case o_file:
+      return _("makefile");
+      break;
+    case o_env_override:
+      return _("environment under -e");
+      break;
+    case o_command:
+      return _("command line");
+      break;
+    case o_override:
+      return _("`override' directive");
+      break;
+    case o_automatic:
+      return _("automatic");
+      break;
+    case o_debugger:
+      return _("debugger");
+      break;
+    case o_invalid:
+    default:
+      return _("invalid");
+    }
+}
 
 /* Create a new pattern-specific variable struct.  */
 

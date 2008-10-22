@@ -1,7 +1,8 @@
 /* $Id: function.h,v 1.10 2007/01/04 12:03:20 rockyb Exp $
 Copyright (C) 1988, 1989, 1991-1997, 1999, 2002, 2004, 2005
 Free Software Foundation, Inc.
-This file is part of GNU Make.
+Copyright (C) 2005 R. Bernstein <rocky@gnu.org>
+This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

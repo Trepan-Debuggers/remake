@@ -1,5 +1,7 @@
 /* $Id: trace.c,v 1.6 2005/12/20 15:11:24 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
+Copyright (C) 2008 R. Bernstein <rocky@gnu.org>
+
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify

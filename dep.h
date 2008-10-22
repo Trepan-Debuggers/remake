@@ -16,6 +16,9 @@ You should have received a copy of the GNU General Public License along with
 GNU Make; see the file COPYING.  If not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 
+#ifndef DEP_H
+#define DEP_H
+
 /* Flag bits for the second argument to `read_makefile'.
    These flags are saved in the `changed' field of each
    `struct dep' in the chain returned by `read_all_makefiles'.  */
@@ -83,3 +86,5 @@ extern struct dep *read_all_makefiles PARAMS ((char **makefiles));
 extern int eval_buffer PARAMS ((char *buffer));
 extern int update_goal_chain PARAMS ((struct dep *goals));
 extern void uniquize_deps PARAMS ((struct dep *));
+
+#endif /*DEP_H*/

@@ -21,6 +21,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
    that the makefile says how to make.
    All of these are chained together through `next'.  */
 
+#ifndef FILEDEF_H
+#define FILEDEF_H
+
+#include "make.h"
+#include "types.h"
 #include "hash.h"
 
 struct file
@@ -28,6 +33,7 @@ struct file
     char *name;
     char *hname;                /* Hashed filename */
     char *vpath;                /* VPATH/vpath pathname */
+    floc_t floc;                /** location in Makefile - for tracing */
     struct dep *deps;		/* all dependencies, including duplicates */
     struct commands *cmds;	/* Commands to execute for this target.  */
     int command_flags;		/* Flags OR'd in for cmds; see commands.h.  */
@@ -94,6 +100,7 @@ struct file
                                    pattern-specific variables.  */
     unsigned int considered:1;  /* equal to 'considered' if file has been
                                    considered on current scan of goal chain */
+    unsigned int tracing:1;     /* Nonzero if we should trace this target. */
   };
 
 
@@ -200,3 +207,5 @@ extern FILE_TIMESTAMP f_mtime PARAMS ((struct file *file, int search));
 
 /* Have we snapped deps yet?  */
 extern int snapped_deps;
+
+#endif /*FILE_H*/

@@ -1,6 +1,6 @@
 /* Output or logging functions for GNU Make.  
 
-Copyright (C) 2004, 2005, 2007 Free Software Foundation, Inc.  
+Copyright (C) 2004, 2005, 2007, 2008 Free Software Foundation, Inc.  
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -298,22 +298,6 @@ perror_with_name (const char *str, const char *name)
     enter_debugger(NULL, NULL, -1);
 }
 
-/*! Print an error message from errnum and exit.  */
-void
-pfatal_with_name_err (const char *psz_name, int errnum)
-{
-  fatal (NILF, _("%s: %s"), psz_name, strerror (errnum));
-
-  /* NOTREACHED */
-}
-
-/*! Print an error message from errno and exit.  */
-void
-pfatal_with_name (const char *psz_name)
-{
-  fatal (NILF, _("%s: %s"), psz_name, strerror (errno));
-}
-
 /*! Under -d, write a message describing the current IDs.  */
 
 void
@@ -381,6 +365,9 @@ log_working_directory (int entering)
       else
         printf (_("%s[%u]: Leaving directory `%s'\n"),
                 program, makelevel, starting_directory);
+
+  /* Flush stdout to be sure this comes before any stderr output.  */
+  fflush (stdout);
 }
 
 /*! Display a variable and its value. */

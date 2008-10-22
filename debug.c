@@ -1,5 +1,5 @@
 /* Debugging macros and interface.
-  Copyright (c) 2005 Rocky Bernstein <rocky@panix.com>
+  Copyright (c) 2005 Rocky Bernstein <rocky@gnu.org>
 
 GNU Make is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

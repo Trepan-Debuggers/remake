@@ -2,6 +2,8 @@
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software
 Foundation, Inc.
+Copyright (c) 2008  Rocky Bernstein <rocky@gnu.org>
+
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -16,12 +18,16 @@ You should have received a copy of the GNU General Public License along with
 GNU Make; see the file COPYING.  If not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 
+
+#ifndef VARIABLE_H
+#define VARIABLE_H
+
 #include "hash.h"
+#include "filedef.h"
 
 /* Codes in a variable definition saying where the definition came from.
    Increasing numeric values signify less-overridable definitions.  */
-enum variable_origin
-  {
+typedef enum variable_origin {
     o_default,		/* Variable from the default set.  */
     o_env,		/* Variable from environment.  */
     o_file,		/* Variable given in a makefile.  */
@@ -29,17 +35,18 @@ enum variable_origin
     o_command,		/* Variable given by user.  */
     o_override, 	/* Variable from an `override' directive.  */
     o_automatic,	/* Automatic variable -- cannot be set.  */
+    o_debugger,  	/** set inside debugger.  */
     o_invalid		/* Core dump time.  */
-  };
+  } variable_origin_t;
 
-enum variable_flavor
-  {
+typedef enum variable_flavor {
     f_bogus,            /* Bogus (error) */
     f_simple,           /* Simple definition (:=) */
     f_recursive,        /* Recursive definition (=) */
     f_append,           /* Appending definition (+=) */
     f_conditional       /* Conditional definition (?=) */
-  };
+} variable_flavor_t;
+
 
 /* Structure that represents one variable definition.
    Each bucket of the hash table is a chain of these,
@@ -48,7 +55,7 @@ enum variable_flavor
 #define EXP_COUNT_BITS  15      /* This gets all the bitfields into 32 bits */
 #define EXP_COUNT_MAX   ((1<<EXP_COUNT_BITS)-1)
 
-struct variable
+typedef struct variable
   {
     char *name;			/* Variable name.  */
     int length;			/* strlen (name) */
@@ -69,7 +76,7 @@ struct variable
     enum variable_flavor
       flavor ENUM_BITFIELD (3);	/* Variable flavor.  */
     enum variable_origin
-      origin ENUM_BITFIELD (3);	/* Variable origin.  */
+      origin ENUM_BITFIELD (4);	/* Variable origin.  */
     enum variable_export
       {
 	v_export,		/* Export this variable.  */
@@ -77,7 +84,7 @@ struct variable
 	v_ifset,		/* Export it if it has a non-default value.  */
 	v_default		/* Decide in target_environment.  */
       } export ENUM_BITFIELD (2);
-  };
+  } variable_t;
 
 /* Structure that represents a variable set.  */
 
@@ -109,15 +116,13 @@ extern char *variable_buffer;
 extern struct variable_set_list *current_variable_set_list;
 
 /* expand.c */
-extern char *variable_buffer_output PARAMS ((char *ptr, char *string, unsigned int length));
+extern char *allocated_variable_expand_for_file PARAMS ((char *line, struct file *file));
 extern char *variable_expand PARAMS ((char *line));
 extern char *variable_expand_for_file PARAMS ((char *line, struct file *file));
 extern char *allocated_variable_expand_for_file PARAMS ((char *line, struct file *file));
 #define	allocated_variable_expand(line) \
   allocated_variable_expand_for_file (line, (struct file *) 0)
 extern char *expand_argument PARAMS ((const char *str, const char *end));
-extern char *variable_expand_string PARAMS ((char *line, char *string,
-                                             long length));
 extern void install_variable_buffer PARAMS ((char **bufp, unsigned int *lenp));
 extern void restore_variable_buffer PARAMS ((char *buf, unsigned int len));
 
@@ -136,6 +141,12 @@ extern char *recursively_expand_for_file PARAMS ((struct variable *v,
 
 /* variable.c */
 extern struct variable_set_list *create_new_variable_set PARAMS ((void));
+
+/*!
+  Return a string describing origin.
+ */
+const char *origin2str(variable_origin_t origin);
+
 extern void free_variable_set PARAMS ((struct variable_set_list *));
 extern struct variable_set_list *push_new_variable_scope PARAMS ((void));
 extern void pop_variable_scope PARAMS ((void));
@@ -198,3 +209,5 @@ extern int export_all_variables;
 
 #define MAKELEVEL_NAME "MAKELEVEL"
 #define MAKELEVEL_LENGTH (sizeof (MAKELEVEL_NAME) - 1)
+
+#endif /*VARIABLE_H*/
