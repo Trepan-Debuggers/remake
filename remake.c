@@ -1168,7 +1168,7 @@ f_mtime (struct file *file, int search)
       arfile = lookup_file (arname);
       if (arfile == 0)
 	{
-	  arfile = enter_file (arname);
+          arfile = enter_file (arname, NILF);
 	  arname_used = 1;
 	}
       mtime = f_mtime (arfile, search);

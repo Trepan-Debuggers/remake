@@ -109,7 +109,7 @@ extern char **default_goal_name;
 
 
 extern struct file *lookup_file PARAMS ((char *name));
-extern struct file *enter_file PARAMS ((char *name));
+extern struct file *enter_file PARAMS ((char *name, const floc_t *p_floc));
 extern struct dep *parse_prereqs PARAMS ((char *prereqs));
 extern void remove_intermediates PARAMS ((int sig));
 extern void snap_deps PARAMS ((void));

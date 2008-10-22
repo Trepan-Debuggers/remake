@@ -842,7 +842,7 @@ pattern_search (struct file *file, int archive,
           if (f != 0)
             f->precious = 1;
           else
-            f = enter_file (imf->name);
+            f = enter_file (imf->name, &(imf->floc));
 
 	  f->deps = imf->deps;
 	  f->cmds = imf->cmds;
@@ -861,7 +861,7 @@ pattern_search (struct file *file, int archive,
 	  f->tried_implicit = 1;
 	  for (dep = f->deps; dep != 0; dep = dep->next)
 	    {
-	      dep->file = enter_file (dep->name);
+	      dep->file = enter_file (dep->name, &(file->floc));
               /* enter_file uses dep->name _if_ we created a new file.  */
               if (dep->name != dep->file->name)
                 free (dep->name);
@@ -879,7 +879,7 @@ pattern_search (struct file *file, int archive,
 	  dep->file = lookup_file (s);
 	  if (dep->file == 0)
 	    /* enter_file consumes S's storage.  */
-	    dep->file = enter_file (s);
+	    dep->file = enter_file (s, &(file->floc));
 	  else
 	    /* A copy of S is already allocated in DEP->file->name.
 	       So we can free S.  */
@@ -958,7 +958,7 @@ pattern_search (struct file *file, int archive,
 	  p += fullstemlen;
 	  bcopy (rule->suffixes[i], p,
 		 rule->lens[i] - (rule->suffixes[i] - rule->targets[i]) + 1);
-	  new->file = enter_file (new->name);
+	  new->file = enter_file (new->name, NILF);
 	  new->next = file->also_make;
 
 	  /* Set precious flag. */
