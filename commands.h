@@ -45,7 +45,17 @@ struct commands
 #define	COMMANDS_NOERROR	4 /* No errors: -.  */
 
 extern void execute_file_commands PARAMS ((struct file *file));
-extern void print_commands PARAMS ((struct commands *cmds));
+
+/*! 
+  Print out the commands.
+
+  @param p_cmds location of commands to print out.
+  @param p_target used to set automatic variables if it is non-null.
+  @param b_expand if true, expand the commands to remove MAKE variables.
+*/
+extern void print_commands (file_t *p_target, commands_t *p_cmds, 
+			    bool b_expand);
+
 extern void delete_child_targets PARAMS ((struct child *child));
 extern void chop_commands PARAMS ((struct commands *cmds));
 extern void set_file_variables PARAMS ((struct file *file));

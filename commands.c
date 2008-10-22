@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 #include "variable.h"
 #include "job.h"
 #include "commands.h"
+#include "expand.h"
 #ifdef WINDOWS32
 #include <windows.h>
 #include "w32err.h"
@@ -589,22 +590,38 @@ delete_child_targets (struct child *child)
   child->deleted = 1;
 }
 
-/* Print out the commands in CMDS.  */
+/*! 
+  Print out the commands.
 
+  @param p_cmds location of commands to print out.
+  @param p_target used to set automatic variables if it is non-null.
+  @param b_expand if true, expand the commands to remove MAKE variables.
+*/
 void
-print_commands (struct commands *cmds)
+print_commands (file_t *p_target, commands_t *p_cmds, bool b_expand)
 {
-  register char *s;
+  char *s;
 
   fputs (_("#  commands to execute"), stdout);
 
-  if (cmds->fileinfo.filenm == 0)
+  if (p_cmds->fileinfo.filenm == 0)
     puts (_(" (built-in):"));
   else
     printf (_(" (from `%s', line %lu):\n"),
-            cmds->fileinfo.filenm, cmds->fileinfo.lineno);
+            p_cmds->fileinfo.filenm, p_cmds->fileinfo.lineno);
 
-  s = cmds->commands;
+  if (b_expand && p_target) {
+    variable_set_list_t *p_file_vars = NULL;
+    variable_set_t *p_set = NULL;
+    initialize_file_variables (p_target, 0);
+    set_file_variables (p_target);
+    p_file_vars = p_target->variables;
+    p_set = p_file_vars->set;
+    s = variable_expand_set(p_cmds->commands, p_file_vars);
+  } else {
+    s = p_cmds->commands;
+  }
+
   while (*s != '\0')
     {
       char *end;
