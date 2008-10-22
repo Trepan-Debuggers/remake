@@ -420,7 +420,7 @@ extern char *find_percent PARAMS ((char *));
 extern FILE *open_tmpfile PARAMS ((char **, const char *));
 
 #ifndef NO_ARCHIVES
-extern int ar_name PARAMS ((char *));
+extern bool ar_name PARAMS ((char *));
 extern void ar_parse_name PARAMS ((char *, char **, char **));
 extern int ar_touch PARAMS ((char *));
 extern time_t ar_member_date PARAMS ((char *));

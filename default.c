@@ -522,7 +522,7 @@ static char *default_variables[] =
 void
 set_default_suffixes (void)
 {
-  suffix_file = enter_file (".SUFFIXES");
+  suffix_file = enter_file (".SUFFIXES", NILF);
 
   if (no_builtin_rules_flag)
     (void) define_variable ("SUFFIXES", 8, "", o_default, 0);
@@ -551,7 +551,7 @@ install_default_suffix_rules (void)
 
  for (s = default_suffix_rules; *s != 0; s += 2)
     {
-      register struct file *f = enter_file (s[0]);
+      file_t *f = enter_file (s[0], NILF);
       /* Don't clobber cmds given in a makefile if there were any.  */
       if (f->cmds == 0)
 	{

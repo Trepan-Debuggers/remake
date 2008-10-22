@@ -31,35 +31,38 @@ extern int ar_name_equal PARAMS ((char *name, char *mem, int truncated));
 extern int ar_member_touch PARAMS ((char *arname, char *memname));
 #endif
 
-/* Return nonzero if NAME is an archive-member reference, zero if not.
+/*! Return nonzero if NAME is an archive-member reference, zero if not.
    An archive-member reference is a name like `lib(member)'.
    If a name like `lib((entry))' is used, a fatal error is signaled at
    the attempt to use this unsupported feature.  */
 
-int
+bool
 ar_name (char *name)
 {
   char *p = strchr (name, '(');
   char *end;
 
   if (p == 0 || p == name)
-    return 0;
+    return false;
 
   end = p + strlen (p) - 1;
   if (*end != ')')
-    return 0;
+    return false;
 
   if (p[1] == '(' && end[-1] == ')')
     fatal (NILF, _("attempt to use unsupported feature: `%s'"), name);
 
-  return 1;
+  return true;
 }
 
+/*! 
+   Parse the archive-member reference into the archive and
+   member names.  
 
-/* Parse the archive-member reference NAME into the archive and member names.
-   Put the malloc'd archive name in *ARNAME_P if ARNAME_P is non-nil;
-   put the malloc'd member name in *MEMNAME_P if MEMNAME_P is non-nil.  */
-
+   @param psz_name archive-member reference to look up.
+   @param arname_p place where the malloc'd archive name if it is non-nil
+   @param memname_p place to put malloc'd member name if it is non-nil
+*/
 void
 ar_parse_name (char *name, char **arname_p, char **memname_p)
 {
@@ -95,16 +98,16 @@ ar_member_date (char *name)
      not exist, because pattern_search assumes that files found in the data
      base exist or can be made.  */
   {
-    struct file *arfile;
+    file_t *arfile;
     arfile = lookup_file (arname);
     if (arfile == 0 && file_exists_p (arname))
       {
-	arfile = enter_file (arname);
+	arfile = enter_file (arname, NILF);
 	arname_used = 1;
       }
 
     if (arfile != 0)
-      (void) f_mtime (arfile, 0);
+      (void) f_mtime (arfile, false);
   }
 
   val = ar_scan (arname, ar_member_date_1, (long int) memname);
@@ -143,22 +146,22 @@ ar_touch (char *name)
 {
   char *arname, *memname;
   int arname_used = 0;
-  register int val;
+  int val;
 
   ar_parse_name (name, &arname, &memname);
 
   /* Make sure we know the modtime of the archive itself before we
      touch the member, since this will change the archive itself.  */
   {
-    struct file *arfile;
+    file_t *arfile;
     arfile = lookup_file (arname);
     if (arfile == 0)
       {
-	arfile = enter_file (arname);
+	arfile = enter_file (arname, NILF);
 	arname_used = 1;
       }
 
-    (void) f_mtime (arfile, 0);
+    (void) f_mtime (arfile, false);
   }
 
   val = 1;
@@ -195,14 +198,14 @@ ar_touch (char *name)
 
 /* State of an `ar_glob' run, passed to `ar_glob_match'.  */
 
-struct ar_glob_state
+typedef struct ar_glob_state
   {
     char *arname;
     char *pattern;
     unsigned int size;
     struct nameseq *chain;
     unsigned int n;
-  };
+  } ar_glob_state_t;
 
 /* This function is called by `ar_scan' to match one archive
    element against the pattern in STATE.  */
@@ -228,7 +231,7 @@ ar_glob_match (int desc UNUSED, char *mem, int truncated UNUSED,
 
 /* Return nonzero if PATTERN contains any metacharacters.
    Metacharacters can be quoted with backslashes if QUOTE is nonzero.  */
-static int
+int
 glob_pattern_p (const char *pattern, int quote)
 {
   const char *p;

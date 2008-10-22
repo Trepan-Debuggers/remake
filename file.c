@@ -132,12 +132,12 @@ lookup_file (char *name)
 }
 
 struct file *
-enter_file (char *name)
+enter_file (char *name, const floc_t *p_floc)
 {
-  register struct file *f;
-  register struct file *new;
-  register struct file **file_slot;
-  struct file file_key;
+  file_t *f;
+  file_t *new;
+  file_t **file_slot;
+  file_t file_key;
 #if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
   char *lname, *ln;
 #endif
@@ -180,6 +180,13 @@ enter_file (char *name)
   bzero ((char *) new, sizeof (struct file));
   new->name = new->hname = name;
   new->update_status = -1;
+  new->tracing = 0;
+  if (p_floc) {
+    new->floc = *p_floc;
+  } else {
+    new->floc.lineno = 0;
+    new->floc.filenm = NULL;
+  }
 
   if (HASH_VACANT (f))
     {
@@ -578,7 +585,7 @@ expand_deps (struct file *f)
         {
           d1->file = lookup_file (d1->name);
           if (d1->file == 0)
-            d1->file = enter_file (d1->name);
+            d1->file = enter_file (d1->name, NILF);
           else
             free (d1->name);
           d1->name = 0;

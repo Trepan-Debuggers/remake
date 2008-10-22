@@ -656,7 +656,7 @@ enter_command_line_file (char *name)
       name[2] = '\0';
     }
 
-  return enter_file (xstrdup (name));
+  return enter_file (strdup (name), NILF);
 }
 
 #ifdef WINDOWS32
@@ -1535,7 +1535,7 @@ main (int argc, char **argv, char **envp)
             makefiles->list[i] = xstrdup (stdin_nm);
 
 	    /* Make sure the temporary file will not be remade.  */
-	    f = enter_file (stdin_nm);
+	    f = enter_file (stdin_nm, NILF);
 	    f->updated = 1;
 	    f->update_status = 0;
 	    f->command_state = cs_finished;
@@ -1601,7 +1601,7 @@ main (int argc, char **argv, char **envp)
   /* Define the default variables.  */
   define_default_variables ();
 
-  default_file = enter_file (".DEFAULT");
+  default_file = enter_file (".DEFAULT", NILF);
 
   {
     struct variable *v = define_variable (".DEFAULT_GOAL", 13, "", o_file, 0);
@@ -2186,7 +2186,7 @@ main (int argc, char **argv, char **envp)
                     if (ns->next != 0)
                       fatal (NILF, _(".DEFAULT_GOAL contains more than one target"));
 
-                    default_goal_file = enter_file (ns->name);
+                    default_goal_file = enter_file (ns->name, NILF);
 
                     ns->name = 0; /* It was reused by enter_file(). */
                     free_ns_chain (ns);
