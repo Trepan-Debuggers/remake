@@ -51,22 +51,22 @@ struct passwd *getpwnam PARAMS ((char *name));
    eval'ing.
 */
 
-struct ebuffer
+typedef struct ebuffer
   {
     char *buffer;       /* Start of the current line in the buffer.  */
     char *bufnext;      /* Start of the next line in the buffer.  */
     char *bufstart;     /* Start of the entire buffer.  */
     unsigned int size;  /* Malloc'd size of buffer. */
     FILE *fp;           /* File, or NULL if this is an internal buffer.  */
-    struct floc floc;   /* Info on the file in fp (if any).  */
-  };
+    floc_t floc;        /* Info on the file in fp (if any).  */
+  } ebuffer_t;
 
 /* Types of "words" that can be read in a makefile.  */
-enum make_word_type
+typedef enum make_word_type
   {
      w_bogus, w_eol, w_static, w_variable, w_colon, w_dcolon, w_semicolon,
      w_varassign
-  };
+  } make_word_t;
 
 
 /* A `struct conditionals' contains the information describing
@@ -77,7 +77,7 @@ enum make_word_type
    the static structure `toplevel_conditionals' and is later changed
    to new structures for included makefiles.  */
 
-struct conditionals
+typedef struct conditionals
   {
     unsigned int if_cmds;	/* Depth of conditional nesting.  */
     unsigned int allocated;	/* Elts allocated in following arrays.  */
@@ -85,10 +85,10 @@ struct conditionals
                                    0=interpreting, 1=not yet interpreted,
                                    2=already interpreted */
     char *seen_else;		/* Have we already seen an `else'?  */
-  };
+  } conditionals_t;
 
-static struct conditionals toplevel_conditionals;
-static struct conditionals *conditionals = &toplevel_conditionals;
+static conditionals_t toplevel_conditionals;
+static conditionals_t *conditionals = &toplevel_conditionals;
 
 
 /* Default directories to search for include files in  */
@@ -122,7 +122,7 @@ static unsigned int max_incl_len;
 /* The filename and pointer to line number of the
    makefile currently being read in.  */
 
-const struct floc *reading_file = 0;
+const floc_t *reading_file = 0;
 
 /* The chain of makefiles read by read_makefile.  */
 dep_t *read_makefiles = NULL;
@@ -151,7 +151,7 @@ static char *find_char_unquote PARAMS ((char *string, int stop1,
 
 /* Read in all the makefiles and return the chain of their names.  */
 
-struct dep *
+dep_t *
 read_all_makefiles (char **makefiles)
 {
   unsigned int num_makefiles = 0;
@@ -201,8 +201,8 @@ read_all_makefiles (char **makefiles)
   if (makefiles != 0)
     while (*makefiles != 0)
       {
-	struct dep *tail = read_makefiles;
-	register struct dep *d;
+	dep_t *tail = read_makefiles;
+	dep_t *d;
 
 	if (! eval_makefile (*makefiles, 0))
 	  perror_with_name ("", *makefiles);
@@ -246,13 +246,13 @@ read_all_makefiles (char **makefiles)
 	{
 	  /* No default makefile was found.  Add the default makefiles to the
 	     `read_makefiles' chain so they will be updated if possible.  */
-	  struct dep *tail = read_makefiles;
+	  dep_t *tail = read_makefiles;
 	  /* Add them to the tail, after any MAKEFILES variable makefiles.  */
 	  while (tail != 0 && tail->next != 0)
 	    tail = tail->next;
 	  for (p = default_makefiles; *p != 0; ++p)
 	    {
-	      struct dep *d = alloc_dep ();
+	      dep_t *d = alloc_dep ();
 	      d->file = enter_file (*p, NILF);
 	      d->file->dontcare = 1;
 	      /* Tell update_goal_chain to bail out as soon as this file is
@@ -274,10 +274,10 @@ read_all_makefiles (char **makefiles)
 
 /* Install a new conditional and return the previous one.  */
 
-static struct conditionals *
-install_conditionals (struct conditionals *new)
+static conditionals_t *
+install_conditionals (conditionals_t *new)
 {
-  struct conditionals *save = conditionals;
+  conditionals_t *save = conditionals;
 
   bzero ((char *) new, sizeof (*new));
   conditionals = new;
@@ -288,7 +288,7 @@ install_conditionals (struct conditionals *new)
 /* Free the current conditionals and reinstate a saved one.  */
 
 static void
-restore_conditionals (struct conditionals *saved)
+restore_conditionals (conditionals_t *saved)
 {
   /* Free any space allocated by conditional_line.  */
   if (conditionals->ignoring)
@@ -314,8 +314,12 @@ eval_makefile (char *filename, int flags)
   ebuf.floc.filenm = strcache_add (filename);
   ebuf.floc.lineno = 1;
 
-  if (ISDB (DB_VERBOSE))
+  if (ISDB (DB_VERBOSE|DB_READ_MAKEFILES))
     {
+      if (p_stack_floc_top && p_stack_floc_top->p_floc) {
+	print_floc_prefix(p_stack_floc_top->p_floc);
+	printf ("\n\t");
+      }
       printf (_("Reading makefile `%s'"), filename);
       if (flags & RM_NO_DEFAULT_GOAL)
 	printf (_(" (no default goal)"));
@@ -327,6 +331,8 @@ eval_makefile (char *filename, int flags)
 	printf (_(" (no ~ expansion)"));
       puts ("...");
     }
+
+  trace_push_floc(&ebuf.floc);
 
   /* First, get a stream to read.  */
 
@@ -369,6 +375,7 @@ eval_makefile (char *filename, int flags)
   deps = alloc_dep ();
   deps->next = read_makefiles;
   read_makefiles = deps;
+  deps->name = 0;
   deps->file = lookup_file (filename);
   if (deps->file == 0)
     deps->file = enter_file (strdup (filename), NILF);
@@ -390,12 +397,17 @@ eval_makefile (char *filename, int flags)
 	 attempt, rather from FILENAME itself.  Restore it in case the
 	 caller wants to use it in a message.  */
       errno = makefile_errno;
+      trace_pop_floc();
       return 0;
     }
 
   /* Add this makefile to the list. */
-  do_variable_definition (&ebuf.floc, "MAKEFILE_LIST", filename, o_file,
+  do_variable_definition (&ebuf.floc, "MAKEFILE_LIST", filename, 
+			  in_debugger ? o_debugger: o_file,
                           f_append, 0);
+
+  if (b_debugger_preread && i_debugger_stepping && !in_debugger) 
+    enter_debugger (NULL, NULL, 0);
 
   /* Evaluate the makefile */
 
@@ -413,6 +425,7 @@ eval_makefile (char *filename, int flags)
 
   free (ebuf.bufstart);
   alloca (0);
+  trace_pop_floc();
   return r;
 }
 
@@ -431,10 +444,15 @@ eval_buffer (char *buffer)
   ebuf.buffer = ebuf.bufnext = ebuf.bufstart = buffer;
   ebuf.fp = NULL;
 
-  ebuf.floc = *reading_file;
-
-  curfile = reading_file;
-  reading_file = &ebuf.floc;
+  if (reading_file) {
+    ebuf.floc    = *reading_file;
+    curfile      = reading_file;
+    reading_file = &ebuf.floc;
+  } else {
+    ebuf.floc.filenm = NULL;
+    ebuf.floc.lineno = 0;
+    curfile          = NULL;
+  }
 
   saved = install_conditionals (&new);
 
@@ -470,8 +488,8 @@ eval (struct ebuffer *ebuf, int set_default)
   long nlines = 0;
   int two_colon = 0;
   char *pattern = 0, *pattern_percent;
-  struct floc *fstart;
-  struct floc fi;
+  floc_t *fstart;
+  floc_t fi;
 
 #define record_waiting_files()						      \
   do									      \
@@ -705,7 +723,7 @@ eval (struct ebuffer *ebuf, int set_default)
             export_all_variables = 1;
           else
             {
-              struct variable *v;
+              variable_t *v;
 
               v = try_variable_definition (fstart, p2, o_file, 0);
               if (v != 0)
@@ -742,7 +760,7 @@ eval (struct ebuffer *ebuf, int set_default)
           else
             {
               unsigned int len;
-              struct variable *v;
+              variable_t *v;
               char *ap;
 
               /* Expand the line so we can use indirect and constructed
@@ -792,9 +810,9 @@ eval (struct ebuffer *ebuf, int set_default)
 	{
 	  /* We have found an `include' line specifying a nested
 	     makefile to be read at this point.  */
-	  struct conditionals *save;
-          struct conditionals new_conditionals;
-	  struct nameseq *files;
+	  conditionals_t *save;
+          conditionals_t new_conditionals;
+	  nameseq_t *files;
 	  /* "-include" (vs "include") says no error if the file does not
 	     exist.  "sinclude" is an alias for this from SGI.  */
 	  int noerror = (p[0] != 'i');
@@ -827,7 +845,7 @@ eval (struct ebuffer *ebuf, int set_default)
 	  /* Read each included makefile.  */
 	  while (files != 0)
 	    {
-	      struct nameseq *next = files->next;
+	      nameseq_t *next = files->next;
 	      char *name = files->name;
               int r;
 
@@ -847,7 +865,8 @@ eval (struct ebuffer *ebuf, int set_default)
           goto rule_complete;
 	}
 
-      if (try_variable_definition (fstart, p, o_file, 0))
+      if (try_variable_definition (fstart, p, 
+				   in_debugger ? o_debugger: o_file, 0))
 	/* This line has been dealt with.  */
 	goto rule_complete;
 
@@ -1105,8 +1124,8 @@ eval (struct ebuffer *ebuf, int set_default)
         p = strchr (p2, ':');
         while (p != 0 && p[-1] == '\\')
           {
-            register char *q = &p[-1];
-            register int backslash = 0;
+            char *q = &p[-1];
+            int backslash = 0;
             while (*q-- == '\\')
               backslash = !backslash;
             if (backslash)
@@ -1321,9 +1340,9 @@ remove_comments (char *line)
 
 static void
 do_define (char *name, unsigned int namelen,
-           enum variable_origin origin, struct ebuffer *ebuf)
+           variable_origin_t origin, ebuffer_t *ebuf)
 {
-  struct floc defstart;
+  floc_t defstart;
   long nlines = 0;
   int nlevels = 1;
   unsigned int length = 100;
@@ -1644,7 +1663,7 @@ conditional_line (char *line, int len, const struct floc *flocp)
       /* Find the end of the second string.  */
       if (termin == ')')
 	{
-	  register int count = 0;
+	  int count = 0;
 	  s2 = next_token (line);
 	  for (line = s2; *line != '\0'; ++line)
 	    {
@@ -1766,8 +1785,8 @@ record_target_var (struct nameseq *filenames, char *defn,
                    enum variable_origin origin, int exported,
                    const struct floc *flocp)
 {
-  struct nameseq *nextf;
-  struct variable_set_list *global;
+  nameseq_t *nextf;
+  variable_set_list_t *global;
 
   global = current_variable_set_list;
 
@@ -1777,7 +1796,7 @@ record_target_var (struct nameseq *filenames, char *defn,
   for (; filenames != 0; filenames = nextf)
     {
       struct variable *v;
-      register char *name = filenames->name;
+      char *name = filenames->name;
       char *fname;
       char *percent;
       struct pattern_var *p;
@@ -1871,8 +1890,8 @@ record_target_var (struct nameseq *filenames, char *defn,
    that are not incorporated into other data structures.  */
 
 static void
-record_files (struct nameseq *filenames, char *pattern, char *pattern_percent,
-              struct dep *deps, unsigned int cmds_started, char *commands,
+record_files (nameseq_t *filenames, char *pattern, char *pattern_percent,
+              dep_t *deps, unsigned int cmds_started, char *commands,
               unsigned int commands_idx, int two_colon,
               const struct floc *flocp)
 {
@@ -2206,7 +2225,7 @@ find_char_unquote (char *string, int stop1, int stop2, int blank,
       if (p > string && p[-1] == '\\')
 	{
 	  /* Search for more backslashes.  */
-	  register int i = -2;
+	  int i = -2;
 	  while (&p[i] >= string && p[i] == '\\')
 	    --i;
 	  ++i;
@@ -2233,7 +2252,7 @@ find_char_unquote (char *string, int stop1, int stop2, int blank,
   return 0;
 }
 
-/* Search PATTERN for an unquoted %.  */
+/** Search PATTERN for an unquoted % and handle quoting.  */
 
 char *
 find_percent (char *pattern)
@@ -2241,12 +2260,8 @@ find_percent (char *pattern)
   return find_char_unquote (pattern, '%', 0, 0, 0);
 }
 
-/* Parse a string into a sequence of filenames represented as a
-   chain of struct nameseq's in reverse order and return that chain.
-
-   The string is passed as STRINGP, the address of a string pointer.
-   The string pointer is updated to point at the first character
-   not parsed, which either is a null char or equals STOPCHAR.
+/** Parse a string into a sequence of filenames represented as a chain
+    of nameseq_t's in reverse order and return that chain.
 
    SIZE is how big to construct chain elements.
    This is useful if we want them actually to be other structures
@@ -2257,8 +2272,8 @@ find_percent (char *pattern)
 struct nameseq *
 parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip)
 {
-  struct nameseq *new = 0;
-  struct nameseq *new1, *lastnew1;
+  nameseq_t *new = 0;
+  nameseq_t *new1, *lastnew1;
   char *p = *stringp;
   char *q;
   char *name;
@@ -2365,7 +2380,7 @@ parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip)
 #endif
 
       /* Add it to the front of the chain.  */
-      new1 = (struct nameseq *) xmalloc (size);
+      new1 = (nameseq_t *) xmalloc (size);
       new1->name = name;
       new1->next = new;
       new = new1;
@@ -2388,7 +2403,7 @@ parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip)
 	/* NEW1 ends with a `)' but does not contain a `('.
 	   Look back for an elt with an opening `(' but no closing `)'.  */
 
-	struct nameseq *n = new1->next, *lastn = new1;
+	nameseq_t *n = new1->next, *lastn = new1;
 	char *paren = 0;
 	while (n != 0 && (paren = strchr (n->name, '(')) == 0)
 	  {
@@ -2498,7 +2513,7 @@ parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip)
  */
 
 static unsigned long
-readstring (struct ebuffer *ebuf)
+readstring (ebuffer_t *ebuf)
 {
   char *eol;
 
@@ -3006,7 +3021,7 @@ tilde_expand (char *name)
   return 0;
 }
 
-/* Given a chain of struct nameseq's describing a sequence of filenames,
+/* Given a chain of nameseq_t's describing a sequence of filenames,
    in reverse of the intended order, return a new chain describing the
    result of globbing the filenames.  The new chain is in forward order.
    The links of the old chain are freed or used in the new chain.
@@ -3016,8 +3031,8 @@ tilde_expand (char *name)
    This is useful if we want them actually to be other structures
    that have room for additional info.  */
 
-struct nameseq *
-multi_glob (struct nameseq *chain, unsigned int size)
+nameseq_t *
+multi_glob (nameseq_t *chain, unsigned int size)
 {
   extern void dir_setup_glob ();
   register struct nameseq *new = 0;
@@ -3066,14 +3081,14 @@ multi_glob (struct nameseq *chain, unsigned int size)
 	{
 	case 0:			/* Success.  */
 	  {
-	    register int i = gl.gl_pathc;
+	    int i = gl.gl_pathc;
 	    while (i-- > 0)
 	      {
 #ifndef NO_ARCHIVES
 		if (memname != 0)
 		  {
 		    /* Try to glob on MEMNAME within the archive.  */
-		    struct nameseq *found
+		    nameseq_t *found
 		      = ar_glob (gl.gl_pathv[i], memname, size);
 		    if (found == 0)
 		      {
@@ -3097,8 +3112,8 @@ multi_glob (struct nameseq *chain, unsigned int size)
 		    else
 		      {
 			/* Find the end of the FOUND chain.  */
-			struct nameseq *f = found;
-			while (f->next != 0)
+			nameseq_t *f = found;
+			while (f->next)
 			  f = f->next;
 
 			/* Attach the chain being built to the end of the FOUND
