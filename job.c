@@ -54,7 +54,7 @@ int batch_mode_shell = 0;
    to search the $PATH for it (since MSDOS doesn't have standard
    directories we could trust).  */
 char *default_shell = "command.com";
-int batch_mode_shell = 0;
+bool batch_mode_shell = false;
 
 #elif defined (__EMX__)
 
@@ -723,6 +723,17 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
 
       dontcare = c->dontcare;
 
+      /* Debugger "quit" takes precedence over --ignore-errors
+	 --keep-going, etc.
+       */
+      if (exit_code == DEBUGGER_QUIT_RC && debugger_enabled) {
+	if (job_slots_used > 0) --job_slots_used;
+	c->file->update_status = 0;
+	free_child (c);
+	in_debugger = DEBUGGER_QUIT_RC;
+	die(DEBUGGER_QUIT_RC);
+      }
+      
       if (child_failed && !c->noerror && !ignore_errors_flag)
         {
           /* The commands failed.  Write an error message,
