@@ -28,7 +28,13 @@ if WINDOWSENV
   W32LIB =	-Lw32 -lw32
 endif
 
-SUBDIRS =	glob config po doc $(MAYBE_W32)
+if INSTALL_EMACS_LISP
+emacs = emacs
+else
+emacs =
+endif
+
+SUBDIRS =	glob config po doc $(emacs) $(MAYBE_W32)
 
 bin_PROGRAMS =	make
 

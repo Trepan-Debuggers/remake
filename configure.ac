@@ -43,15 +43,19 @@ AC_CHECK_PROG(AR, ar, ar, ar)
 AC_CHECK_PROG(PERL, perl, perl, perl)
 
 AC_PATH_PROG(EMACS, emacs, no)
-if test x$EMACS = xno ; then
-  emacs_lisp=no
-else 
+if test x$EMACS != xno ; then
   $EMACS -batch -q -no-site-file -eval \
-  '(if (not (and (= emacs-major-version 21) (<= emacs-minor-version 4))) (error "This gud is for Emacs 21.0 to 21.3."))'
+  '(if (<= emacs-major-version 21)
+     (progn
+       (error "You need GNU Emacs 22 or better for GNU Emacs support.")
+       (kill-emacs 1)
+     ))'
   if test $? -ne 0 ; then
-    emacs_lisp=no
+    EMACS=no
   fi
 fi
+AM_CONDITIONAL(INSTALL_EMACS_LISP, 
+	       [test "x$lispdir" != "x" -a "x$EMACS" != "xno"])
 
 # Specialized system macros
 AC_CANONICAL_HOST
@@ -579,19 +583,20 @@ esac
 
 
 # Specify what files are to be created.
-AC_CONFIG_FILES([Makefile        \
-		 config/Makefile \
-		 doc/Makefile    \
-		 emacs/Makefile  \
-		 glob/Makefile   \
-		 po/Makefile.in  \
+AC_CONFIG_FILES([Makefile           \
+		 config/Makefile    \
+		 doc/Makefile       \
+		 emacs/Makefile     \
+		 emacs/mdb.el       \
+		 emacs/mdb-test.el  \
+		 glob/Makefile      \
+		 po/Makefile.in     \
 		 w32/Makefile])
 
 # OK, do it!
 
 AC_OUTPUT
 
-AM_CONDITIONAL(INSTALL_EMACS_LISP, test "x$lispdir" != "x")
 
 # We only generate the build.sh if we have a build.sh.in; we won't have
 # one before we've created a distribution.
