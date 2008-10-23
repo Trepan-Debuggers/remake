@@ -746,7 +746,7 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
           c->file->update_status = 2;
           if (delete_on_error == -1)
             {
-              struct file *f = lookup_file (".DELETE_ON_ERROR");
+              file_t *f = lookup_file (".DELETE_ON_ERROR");
               delete_on_error = f != 0 && f->is_target;
             }
           if (exit_sig != 0 || delete_on_error)
@@ -839,6 +839,14 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
 
       unblock_sigs ();
 
+      /* Debugger "quit" takes precedence over --ignore-errors
+	 --keep-going, etc.
+      */
+      if (exit_code == DEBUGGER_QUIT_RC && debugger_enabled) {
+	in_debugger = DEBUGGER_QUIT_RC;
+	die(DEBUGGER_QUIT_RC);
+      }
+      
       /* If the job failed, and the -k flag was not given, die,
          unless we are already in the process of dying.  */
       if (!err && child_failed && !dontcare && !keep_going_flag &&
@@ -856,7 +864,7 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
 /* Free the storage allocated for CHILD.  */
 
 static void
-free_child (struct child *child)
+free_child (child_t *child)
 {
   if (!jobserver_tokens)
     fatal (NILF, "INTERNAL: Freeing child 0x%08lx (%s) but no tokens left!\n",
@@ -887,7 +895,7 @@ free_child (struct child *child)
 
   if (child->command_lines != 0)
     {
-      register unsigned int i;
+      unsigned int i;
       for (i = 0; i < child->file->cmds->ncommand_lines; ++i)
 	free (child->command_lines[i]);
       free ((char *) child->command_lines);
@@ -895,7 +903,7 @@ free_child (struct child *child)
 
   if (child->environment != 0)
     {
-      register char **ep = child->environment;
+      char **ep = child->environment;
       while (*ep != 0)
 	free (*ep++);
       free ((char *) child->environment);
@@ -908,6 +916,7 @@ free_child (struct child *child)
 extern sigset_t fatal_signal_set;
 #endif
 
+/*! block getting any maskable signals.  */
 void
 block_sigs (void)
 {
@@ -921,6 +930,7 @@ block_sigs (void)
 }
 
 #ifdef POSIX
+/*! Remove blocks on signals.  */
 void
 unblock_sigs (void)
 {
@@ -1495,8 +1505,9 @@ start_waiting_job (child_t *c, target_stack_node_t *p_call_stack)
   return 1;
 }
 
-/* Create a `struct child' for FILE and start its commands running.  */
-
+/*!
+ Create a `struct child' for FILE and start its commands running.
+*/
 void
 new_job (file_t *file, target_stack_node_t *p_call_stack)
 {
@@ -1620,11 +1631,14 @@ new_job (file_t *file, target_stack_node_t *p_call_stack)
   /* Start the command sequence, record it in a new
      `struct child', and add that to the chain.  */
 
-  c = (struct child *) xmalloc (sizeof (struct child));
-  bzero ((char *)c, sizeof (struct child));
-  c->file = file;
+  c = (child_t *) xmalloc (sizeof (child_t));
+  bzero ((char *)c, sizeof (child_t));
+  c->fileinfo      = cmds->fileinfo;
+  c->line_no       = cmds->line_no;
+  c->file          = file;
   c->command_lines = lines;
   c->sh_batch_file = NULL;
+  c->tracing       = file->tracing;
 
   /* Cache dontcare flag because file->dontcare can be changed once we
      return. Check dontcare inheritance mechanism for details.  */
@@ -2324,13 +2338,13 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
                              "shift", "switch", "test", "times", "trap",
                              "umask", "wait", "while", 0 };
 #endif
-  register int i;
-  register char *p;
-  register char *ap;
+  int i;
+  char *p;
+  char *ap;
   char *end;
   int instring, word_has_equals, seen_nonequals, last_argument_was_empty;
   char **new_argv = 0;
-  char *argstr = 0;
+  char *argstr  = NULL;
 #ifdef WINDOWS32
   int slow_flag = 0;
 
@@ -2586,7 +2600,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 	       If so, have the shell handle it.  */
 	    if (i == 1)
 	      {
-		register int j;
+		int j;
 		for (j = 0; sh_cmds[j] != 0; ++j)
                   {
                     if (streq (sh_cmds[j], new_argv[0]))
@@ -2624,7 +2638,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 
   if (i == 1)
     {
-      register int j;
+      int j;
       for (j = 0; sh_cmds[j] != 0; ++j)
 	if (streq (sh_cmds[j], new_argv[0]))
 	  goto slow;
@@ -2925,12 +2939,13 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 }
 #endif /* !VMS */
 
-/* Figure out the argument list necessary to run LINE as a command.  Try to
-   avoid using a shell.  This routine handles only ' quoting, and " quoting
-   when no backslash, $ or ` characters are seen in the quotes.  Starting
-   quotes may be escaped with a backslash.  If any of the characters in
-   sh_chars[] is seen, or any of the builtin commands listed in sh_cmds[]
-   is the first word of a line, the shell is used.
+/*! Figure out the argument list necessary to run LINE as a command.
+   Try to avoid using a shell.  This routine handles only ' quoting,
+   and " quoting when no backslash, $ or ` characters are seen in the
+   quotes.  Starting quotes may be escaped with a backslash.  If any
+   of the characters in sh_chars[] is seen, or any of the builtin
+   commands listed in sh_cmds[] is the first word of a line, the shell
+   is used.
 
    If RESTP is not NULL, *RESTP is set to point to the first newline in LINE.
    If *RESTP is NULL, newlines will be ignored.
@@ -2939,7 +2954,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
    variable expansion for $(SHELL) and $(IFS).  */
 
 char **
-construct_command_argv (char *line, char **restp, struct file *file,
+construct_command_argv (char *line, char **restp, file_t *file,
                         char **batch_filename_ptr)
 {
   char *shell, *ifs;

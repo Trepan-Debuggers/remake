@@ -28,16 +28,23 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 #include "trace.h"
 #include "job.h"
 
+/*! \brief Command structure. 
+
+   This gives the commands to make a file
+   and information about where these commands came from.  */
 struct commands
   {
-    struct floc fileinfo;	/* Where commands were defined.  */
-    char *commands;		/* Commands text.  */
-    unsigned int ncommand_lines;/* Number of command lines.  */
-    char **command_lines;	/* Commands chopped up into lines.  */
-    char *lines_flags;		/* One set of flag bits for each line.  */
-    int any_recurse;		/* Nonzero if any `lines_recurse' elt has */
-				/* the COMMANDS_RECURSE bit set.  */
-  };
+    floc_t fileinfo;	            /**< Where commands were defined.  */
+    char *commands;		    /**< Commands text.  */
+    unsigned int ncommand_lines;    /**< Number of command lines.  */
+    char **command_lines;	    /**< Commands chopped up into lines.  */
+    unsigned int *line_no;	    /**< line number offsets of chopped
+				         commands.  */
+    char *lines_flags;		    /**< A set of flag bits for each line.  */
+    int any_recurse;		    /**< Nonzero if any `lines_recurse' 
+				         elt has the COMMANDS_RECURSE bit
+					 set.  */
+};
 
 /* Bits in `lines_flags'.  */
 #define	COMMANDS_RECURSE	1 /* Recurses: + or $(MAKE).  */

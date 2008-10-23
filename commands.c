@@ -40,10 +40,12 @@ extern int remote_kill PARAMS ((int id, int sig));
 extern int getpid ();
 #endif
 
-/* Set FILE's automatic variables up.  */
-
+/*! 
+  Set up automatic variables for a file.  
+  @param file a pointer to the file to set up.
+*/
 void
-set_file_variables (struct file *file)
+set_file_variables (file_t *file)
 {
   struct dep *d;
   char *at, *percent, *star, *less;
@@ -79,7 +81,7 @@ set_file_variables (struct file *file)
       /* In Unix make, $* is set to the target name with
 	 any suffix in the .SUFFIXES list stripped off for
 	 explicit rules.  We store this in the `stem' member.  */
-      register struct dep *d;
+      dep_t *d;
       char *name;
       unsigned int len;
 
@@ -263,15 +265,15 @@ set_file_variables (struct file *file)
 #undef	DEFINE_VARIABLE
 }
 
-/* Chop CMDS up into individual command lines if necessary.
-   Also set the `lines_flags' and `any_recurse' members.  */
+/*! 
+   Chop commands into individual command lines if necessary.  Also set
+   the `lines_flags' and `any_recurse' members.
 
+   @param cmds a pointer to the commands to chop up.
+*/
 void
-chop_commands (struct commands *cmds)
+chop_commands (commands_t *cmds)
 {
-  register char *p;
-  unsigned int nlines, idx;
-  char **lines;
 
   /* If we don't have any commands,
      or we already parsed them, never mind.  */
@@ -279,96 +281,114 @@ chop_commands (struct commands *cmds)
   if (!cmds || cmds->command_lines != 0)
     return;
 
-  /* Chop CMDS->commands up into lines in CMDS->command_lines.
-	 Also set the corresponding CMDS->lines_flags elements,
-	 and the CMDS->any_recurse flag.  */
+  else {
+    unsigned int  nlines  = 5;
+    unsigned int *line_no  = (unsigned int *) xmalloc (5 * sizeof (unsigned int *));
+    char        **lines    = (char **) xmalloc (5 * sizeof (char *));
+    unsigned int  i_line   = 0; /* Temporary line number. */
+    unsigned int  i_prev   = 0; /* Temporary previous line number. */
+    unsigned int  idx      = 0; /* Current index into lines/line_no*/
+    char         *p        = cmds->commands;
 
-  nlines = 5;
-  lines = (char **) xmalloc (5 * sizeof (char *));
-  idx = 0;
-  p = cmds->commands;
-  while (*p != '\0')
-    {
+    /* Chop CMDS->commands up into lines in CMDS->command_lines.
+       Also set the corresponding CMDS->lines_flags elements,
+       and the CMDS->any_recurse flag.  */
+    
+    while (*p != '\0') {
       char *end = p;
     find_end:;
       end = strchr (end, '\n');
       if (end == 0)
-        end = p + strlen (p);
-      else if (end > p && end[-1] == '\\')
-        {
-          int backslash = 1;
-          register char *b;
-          for (b = end - 2; b >= p && *b == '\\'; --b)
-            backslash = !backslash;
-          if (backslash)
-            {
-              ++end;
-              goto find_end;
-            }
-        }
-
-      if (idx == nlines)
-        {
-          nlines += 2;
-          lines = (char **) xrealloc ((char *) lines,
-                                      nlines * sizeof (char *));
-        }
-      lines[idx++] = savestring (p, end - p);
+	end = p + strlen (p);
+      else if (end > p && end[-1] == '\\') {
+	bool backslash = true;
+	char *b;
+	for (b = end - 2; b >= p && *b == '\\'; --b)
+	  backslash = !backslash;
+	if (backslash)
+	  {
+	    i_line++;
+	    ++end;
+	    goto find_end;
+	  }
+      } else 
+	i_line++;
+      
+      if (idx == nlines) {
+	nlines += 2;
+	lines = (char **) xrealloc ((char *) lines,
+				    nlines * sizeof (char *));
+	line_no = (unsigned int *) xrealloc ((char *) line_no,
+					     nlines * sizeof (unsigned int));
+      }
+      lines[idx]     = savestring (p, end - p);
+      line_no[idx++] = i_prev;
+      i_prev         = i_line;
       p = end;
-      if (*p != '\0')
-        ++p;
+      if (*p != '\0') ++p;
     }
-
-  if (idx != nlines)
-    {
-      nlines = idx;
-      lines = (char **) xrealloc ((char *) lines,
-                                  nlines * sizeof (char *));
+    
+    if (idx != nlines) {
+	nlines = idx;
+	lines = (char **) xrealloc ((char *) lines,
+				    nlines * sizeof (char *));
+	line_no = (unsigned int *) xrealloc ((char *) line_no,
+					     nlines * sizeof (unsigned int));
     }
-
-  cmds->ncommand_lines = nlines;
-  cmds->command_lines = lines;
-
-  cmds->any_recurse = 0;
-  cmds->lines_flags = (char *) xmalloc (nlines);
-  for (idx = 0; idx < nlines; ++idx)
-    {
-      int flags = 0;
-
-      for (p = lines[idx];
-           isblank ((unsigned char)*p) || *p == '-' || *p == '@' || *p == '+';
-           ++p)
-        switch (*p)
-          {
-          case '+':
-            flags |= COMMANDS_RECURSE;
-            break;
-          case '@':
-            flags |= COMMANDS_SILENT;
-            break;
-          case '-':
-            flags |= COMMANDS_NOERROR;
-            break;
-          }
-
-      /* If no explicit '+' was given, look for MAKE variable references.  */
-      if (!(flags & COMMANDS_RECURSE)
-          && (strstr (p, "$(MAKE)") != 0 || strstr (p, "${MAKE}") != 0))
-        flags |= COMMANDS_RECURSE;
-
-      cmds->lines_flags[idx] = flags;
-      cmds->any_recurse |= flags & COMMANDS_RECURSE;
-    }
+    
+    cmds->ncommand_lines = nlines;
+    cmds->command_lines  = lines;
+    cmds->line_no        = line_no;
+    
+    cmds->any_recurse = 0;
+    cmds->lines_flags = (char *) xmalloc (nlines);
+    for (idx = 0; idx < nlines; ++idx)
+      {
+	int flags = 0;
+	
+	for (p = lines[idx];
+	     isblank ((unsigned char)*p) || *p == '-' || *p == '@' || *p == '+';
+	     ++p)
+	  switch (*p)
+	    {
+	    case '+':
+	      flags |= COMMANDS_RECURSE;
+	      break;
+	    case '@':
+	      flags |= COMMANDS_SILENT;
+	      break;
+	    case '-':
+	      flags |= COMMANDS_NOERROR;
+	      break;
+	    }
+	
+	/* If no explicit '+' was given, look for MAKE variable references.  */
+	if (!(flags & COMMANDS_RECURSE)
+	    && (strstr (p, "$(MAKE)") != 0 || strstr (p, "${MAKE}") != 0))
+	  flags |= COMMANDS_RECURSE;
+	
+	cmds->lines_flags[idx] = flags;
+	cmds->any_recurse |= flags & COMMANDS_RECURSE;
+      }
+  }
 }
 
-/* Execute the commands to remake FILE.  If they are currently executing,
-   return or have already finished executing, just return.  Otherwise,
-   fork off a child process to run the first command line in the sequence.  */
+/*! 
+  Execute the commands to remake FILE.  If they are currently
+  executing, return or have already finished executing, just return.
+  Otherwise, fork off a child process to run the first command line
+  in the sequence.  
+  
+  @param file pointer to file to remake.
 
+  @param call_stack pointer to current target call stack. This is
+  passed down for information reporting.
+  
+*/
 void
 execute_file_commands (file_t *file, target_stack_node_t *p_call_stack)
 {
-  register char *p;
+  char *p;
 
   /* Don't go through all the preparations if
      the commands are nothing but whitespace.  */
@@ -456,7 +476,7 @@ fatal_error_signal (int sig)
 
   if (sig == SIGTERM)
     {
-      register struct child *c;
+      child_t *c;
       for (c = children; c != 0; c = c->next)
 	if (!c->remote)
 	  (void) kill (c->pid, SIGTERM);
@@ -474,7 +494,7 @@ fatal_error_signal (int sig)
 #endif
     )
     {
-      register struct child *c;
+      child_t *c;
 
       /* Remote children won't automatically get signals sent
 	 to the process group, so we must send them.  */
@@ -573,21 +593,21 @@ delete_target (struct file *file, char *on_behalf_of)
    Set the flag in CHILD to say they've been deleted.  */
 
 void
-delete_child_targets (struct child *child)
+delete_child_targets (child_t *p_child)
 {
-  struct dep *d;
+  dep_t *p_dep;
 
-  if (child->deleted)
+  if (p_child->deleted)
     return;
 
   /* Delete the target file if it changed.  */
-  delete_target (child->file, (char *) 0);
+  delete_target (p_child->file, (char *) 0);
 
   /* Also remove any non-precious targets listed in the `also_make' member.  */
-  for (d = child->file->also_make; d != 0; d = d->next)
-    delete_target (d->file, child->file->name);
+  for (p_dep = p_child->file->also_make; p_dep != 0; p_dep = p_dep->next)
+    delete_target (p_dep->file, p_child->file->name);
 
-  child->deleted = 1;
+  p_child->deleted = 1;
 }
 
 /*! 
