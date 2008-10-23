@@ -16,16 +16,19 @@ You should have received a copy of the GNU General Public License along with
 GNU Make; see the file COPYING.  If not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 
+#include "types.h"
 #include "make.h"
+#include "dbg_cmd.h"
+#include "debug.h"
+#include "expand.h"
+#include "job.h"
+#include "print.h"
 
 #include <assert.h>
 
-#include "job.h"
-#include "debug.h"
 #include "filedef.h"
 #include "commands.h"
 #include "variable.h"
-#include "debug.h"
 
 #include <string.h>
 
@@ -34,8 +37,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 #include <windows.h>
 
 char *default_shell = "sh.exe";
-int no_default_sh_exe = 1;
-int batch_mode_shell = 1;
+bool no_default_sh_exe = true;
+bool batch_mode_shell = true;
 HANDLE main_thread;
 
 #elif defined (_AMIGA)
@@ -56,7 +59,7 @@ int batch_mode_shell = 0;
 #elif defined (__EMX__)
 
 char *default_shell = "/bin/sh";
-int batch_mode_shell = 0;
+bool batch_mode_shell = false;
 
 #elif defined (VMS)
 
@@ -67,12 +70,12 @@ int batch_mode_shell = 0;
 #elif defined (__riscos__)
 
 char default_shell[] = "";
-int batch_mode_shell = 0;
+bool batch_mode_shell = false;
 
 #else
 
 char default_shell[] = "/bin/sh";
-int batch_mode_shell = 0;
+bool batch_mode_shell = false;
 
 #endif
 
@@ -197,14 +200,16 @@ extern int remote_status PARAMS ((int *exit_code_ptr, int *signal_ptr,
 
 RETSIGTYPE child_handler PARAMS ((int));
 static void free_child PARAMS ((struct child *));
-static void start_job_command PARAMS ((struct child *child));
+static void start_job_command PARAMS ((child_t *child,
+				       target_stack_node_t *p_call_stack));
 static int load_too_high PARAMS ((void));
 static int job_next_command PARAMS ((struct child *));
-static int start_waiting_job PARAMS ((struct child *));
+static int start_waiting_job PARAMS ((child_t *c, 
+				      target_stack_node_t *p_call_stack));
 
 /* Chain of all live (or recently deceased) children.  */
 
-struct child *children = 0;
+child_t *children = NULL;
 
 /* Number of children currently running.  */
 
@@ -216,7 +221,7 @@ static int good_stdin_used = 0;
 
 /* Chain of children waiting to run until the load average goes down.  */
 
-static struct child *waiting_jobs = 0;
+static child_t *waiting_jobs = 0;
 
 /* Non-zero if we use a *real* shell (always so on Unix).  */
 
@@ -444,7 +449,7 @@ extern int shell_function_pid, shell_function_completed;
    print an error message first.  */
 
 void
-reap_children (int block, int err)
+reap_children (int block, int err, target_stack_node_t *p_call_stack)
 {
 #ifndef WINDOWS32
   WAIT_T status;
@@ -466,27 +471,26 @@ reap_children (int block, int err)
 
      we'll keep reaping children.  */
 
-  while ((children != 0 || shell_function_pid != 0)
-         && (block || REAP_MORE))
+  while ((children || shell_function_pid != 0) && (block || REAP_MORE))
     {
       int remote = 0;
       pid_t pid;
       int exit_code, exit_sig, coredump;
-      register struct child *lastc, *c;
+      child_t *lastc, *c;
       int child_failed;
       int any_remote, any_local;
       int dontcare;
 
       if (err && block)
 	{
-          static int printed = 0;
+          static bool printed = false;
 
 	  /* We might block for a while, so let the user know why.
              Only print this message once no matter how many jobs are left.  */
 	  fflush (stdout);
           if (!printed)
             error (NILF, _("*** Waiting for unfinished jobs...."));
-          printed = 1;
+          printed = true;
 	}
 
       /* We have one less dead child to reap.  As noted in
@@ -764,7 +768,7 @@ reap_children (int block, int err)
                      Also, start_remote_job may need state set up
                      by start_remote_job_p.  */
                   c->remote = start_remote_job_p (0);
-                  start_job_command (c);
+                  start_job_command (c, p_call_stack);
                   /* Fatal signals are left blocked in case we were
                      about to put that child on the chain.  But it is
                      already there, so it is safe for a fatal signal to
@@ -964,7 +968,8 @@ set_child_handler_action_flags (int set_handler, int set_alarm)
    it can be cleaned up in the event of a fatal signal.  */
 
 static void
-start_job_command (struct child *child)
+start_job_command (child_t *child, 
+		   target_stack_node_t *p_call_stack)
 {
 #if !defined(_AMIGA) && !defined(WINDOWS32)
   static int bad_stdin = -1;
@@ -1066,7 +1071,7 @@ start_job_command (struct child *child)
 #endif
       /* This line has no commands.  Go to the next.  */
       if (job_next_command (child))
-	start_job_command (child);
+	start_job_command (child, p_call_stack);
       else
 	{
 	  /* No more commands.  Make sure we're "running"; we might not be if
@@ -1418,7 +1423,7 @@ start_job_command (struct child *child)
    the load was too high and the child was put on the `waiting_jobs' chain.  */
 
 static int
-start_waiting_job (struct child *c)
+start_waiting_job (child_t *c, target_stack_node_t *p_call_stack)
 {
   struct file *f = c->file;
 
@@ -1446,7 +1451,7 @@ start_waiting_job (struct child *c)
     }
 
   /* Start the first command; reap_children will run later command lines.  */
-  start_job_command (c);
+  start_job_command (c, p_call_stack);
 
   switch (f->command_state)
     {
@@ -1482,19 +1487,19 @@ start_waiting_job (struct child *c)
 /* Create a `struct child' for FILE and start its commands running.  */
 
 void
-new_job (struct file *file)
+new_job (file_t *file, target_stack_node_t *p_call_stack)
 {
-  register struct commands *cmds = file->cmds;
-  register struct child *c;
+  commands_t *cmds = file->cmds;
+  child_t *c;
   char **lines;
-  register unsigned int i;
+  unsigned int i;
 
   /* Let any previously decided-upon jobs that are waiting
      for the load to go down start before this new one.  */
-  start_waiting_jobs ();
+  start_waiting_jobs (p_call_stack);
 
   /* Reap any children that might have finished recently.  */
-  reap_children (0, 0);
+  reap_children (0, 0, p_call_stack);
 
   /* Chop the commands up into lines if they aren't already.  */
   chop_commands (cmds);
@@ -1622,7 +1627,7 @@ new_job (struct file *file)
 
   if (job_slots != 0)
     while (job_slots_used == job_slots)
-      reap_children (1, 0);
+      reap_children (1, 0, p_call_stack);
 
 #ifdef MAKE_JOBSERVER
   /* If we are controlling multiple jobs make sure we have a token before
@@ -1681,11 +1686,11 @@ new_job (struct file *file)
           }
 
         /* Reap anything that's currently waiting.  */
-        reap_children (0, 0);
+        reap_children (0, 0, p_call_stack);
 
         /* Kick off any jobs we have waiting for an opportunity that
            can run now (ie waiting for load). */
-        start_waiting_jobs ();
+        start_waiting_jobs (p_call_stack);
 
         /* If our "free" slot has become available, use it; we don't need an
            actual token.  */
@@ -1725,13 +1730,13 @@ new_job (struct file *file)
 
   /* The job is now primed.  Start it running.
      (This will notice if there are in fact no commands.)  */
-  (void) start_waiting_job (c);
+  (void) start_waiting_job (c, p_call_stack);
 
   if (job_slots == 1 || not_parallel)
     /* Since there is only one job slot, make things run linearly.
        Wait for the child to die, setting the state to `cs_finished'.  */
     while (file->command_state == cs_running)
-      reap_children (1, 0);
+      reap_children (1, 0, p_call_stack);
 
   return;
 }
@@ -1865,7 +1870,7 @@ load_too_high (void)
 /* Start jobs that are waiting for the load to be lower.  */
 
 void
-start_waiting_jobs (void)
+start_waiting_jobs (target_stack_node_t *p_call_stack)
 {
   struct child *job;
 
@@ -1875,7 +1880,7 @@ start_waiting_jobs (void)
   do
     {
       /* Check for recently deceased descendants.  */
-      reap_children (0, 0);
+      reap_children (0, 0, NULL);
 
       /* Take a job off the waiting list.  */
       job = waiting_jobs;
@@ -1884,7 +1889,7 @@ start_waiting_jobs (void)
       /* Try to start that job.  We break out of the loop as soon
 	 as start_waiting_job puts one back on the waiting list.  */
     }
-  while (start_waiting_job (job) && waiting_jobs != 0);
+  while (start_waiting_job (job, p_call_stack) && waiting_jobs != 0);
 
   return;
 }

@@ -63,11 +63,16 @@ unsigned int commands_started = 0;
 /* Current value for pruning the scan of the goal chain (toggle 0/1).  */
 static unsigned int considered;
 
-static int update_file PARAMS ((struct file *file, unsigned int depth));
-static int update_file_1 PARAMS ((struct file *file, unsigned int depth));
-static int check_dep PARAMS ((struct file *file, unsigned int depth, FILE_TIMESTAMP this_mtime, int *must_make_ptr));
-static int touch_file PARAMS ((struct file *file));
-static void remake_file PARAMS ((struct file *file));
+static int update_file PARAMS ((file_t *file, unsigned int depth,
+				target_stack_node_t *p_call_stack));
+static int update_file_1 PARAMS ((file_t *file, unsigned int depth,
+                                  target_stack_node_t *p_call_stack));
+static int check_dep PARAMS ((file_t *file, unsigned int depth, 
+			      FILE_TIMESTAMP this_mtime, int *must_make_ptr,
+                              target_stack_node_t *p_call_stack));
+static int touch_file PARAMS ((file_t *file));
+static void remake_file PARAMS ((file_t *file, 
+				 target_stack_node_t *p_call_stack));
 static FILE_TIMESTAMP name_mtime PARAMS ((char *name));
 static int library_search PARAMS ((char **lib, FILE_TIMESTAMP *mtime_ptr));
 
@@ -116,11 +121,11 @@ update_goal_chain (struct dep *goals)
 
       /* Start jobs that are waiting for the load to go down.  */
 
-      start_waiting_jobs ();
+      start_waiting_jobs (NULL);
 
       /* Wait for a child to die.  */
 
-      reap_children (1, 0);
+      reap_children (1, 0, NULL);
 
       lastgoal = 0;
       g = goals;
@@ -136,6 +141,8 @@ update_goal_chain (struct dep *goals)
 	    {
 	      unsigned int ocommands_started;
 	      int x;
+              target_stack_node_t *p_call_stack = 
+                trace_push_target(NULL, file, 1);
 	      check_renamed (file);
 	      if (rebuilding_makefiles)
 		{
@@ -154,7 +161,8 @@ update_goal_chain (struct dep *goals)
 		 actually run.  */
 	      ocommands_started = commands_started;
 
-	      x = update_file (file, rebuilding_makefiles ? 1 : 0);
+              x = update_file (file, rebuilding_makefiles ? 1 : 0, 
+			       p_call_stack);
 	      check_renamed (file);
 
 	      /* Set the goal's `changed' flag if any commands were started
@@ -208,6 +216,8 @@ update_goal_chain (struct dep *goals)
 	      /* Keep track if any double-colon entry is not finished.
                  When they are all finished, the goal is finished.  */
 	      any_not_updated |= !file->updated;
+
+              trace_pop_target(p_call_stack);
 
 	      if (stop)
 		break;
@@ -284,10 +294,11 @@ update_goal_chain (struct dep *goals)
    each is considered in turn.  */
 
 static int
-update_file (struct file *file, unsigned int depth)
+update_file (file_t *file, unsigned int depth, 
+             target_stack_node_t *p_call_stack)
 {
-  register int status = 0;
-  register struct file *f;
+  int status = 0;
+  file_t *f;
 
   f = file->double_colon ? file->double_colon : file;
 
@@ -307,7 +318,7 @@ update_file (struct file *file, unsigned int depth)
     {
       f->considered = considered;
 
-      status |= update_file_1 (f, depth);
+      status |= update_file_1 (f, depth, p_call_stack);
       check_renamed (f);
 
       /* Clean up any alloca() used during the update.  */
@@ -337,7 +348,7 @@ update_file (struct file *file, unsigned int depth)
         f->considered = considered;
 
         for (d = f->deps; d != 0; d = d->next)
-          status |= update_file (d->file, depth + 1);
+	  status |= update_file (d->file, depth + 1, p_call_stack);
       }
 
   return status;
@@ -370,13 +381,15 @@ complain (const struct file *file)
 /* Consider a single `struct file' and update it as appropriate.  */
 
 static int
-update_file_1 (struct file *file, unsigned int depth)
+update_file_1 (struct file *file, unsigned int depth,
+               target_stack_node_t *p_call_stack)
 {
-  register FILE_TIMESTAMP this_mtime;
+  FILE_TIMESTAMP this_mtime;
   int noexist, must_make, deps_changed;
   int dep_status = 0;
   register struct dep *d, *lastd;
   int running = 0;
+  target_stack_node_t *p_call_stack2;
 
   DBF (DB_VERBOSE, _("Considering target file `%s'.\n"));
 
@@ -423,6 +436,22 @@ update_file_1 (struct file *file, unsigned int depth)
 
   /* Notice recursive update of the same file.  */
   start_updating (file);
+
+  /* In some contexts, we get called twice and in other cases once.
+     Ideally I'd like to figure out where to put the push's and
+     pops to do the right thing. Until then there's the below
+     hackery to test.  */
+  if (p_call_stack && p_call_stack->p_target) {
+    file_t *p_stack_target = p_call_stack->p_target;
+    if ((file->floc.filenm && p_stack_target->floc.filenm
+         && 0 == strcmp(file->floc.filenm, p_stack_target->floc.filenm)) ||
+        (NULL == file->floc.filenm && NULL == p_stack_target->floc.filenm)) 
+      p_call_stack2 = p_call_stack;
+    else 
+      p_call_stack2 = trace_push_target(p_call_stack, file, 1);
+  } else {
+    p_call_stack2 = trace_push_target(p_call_stack, file, 1);
+  }
 
   /* Looking at the file's modtime beforehand allows the possibility
      that its name may be changed by a VPATH search, and thus it may
@@ -508,7 +537,8 @@ update_file_1 (struct file *file, unsigned int depth)
         }
 
 
-      dep_status |= check_dep (d->file, depth, this_mtime, &maybe_make);
+      dep_status |= check_dep (d->file, depth, this_mtime, &maybe_make, 
+                               p_call_stack2);
 
       /* Restore original dontcare flag. */
       if (rebuilding_makefiles)
@@ -569,7 +599,7 @@ update_file_1 (struct file *file, unsigned int depth)
               }
 
 
-	    dep_status |= update_file (d->file, depth);
+            dep_status |= update_file (d->file, depth, p_call_stack);
 
             /* Restore original dontcare flag. */
             if (rebuilding_makefiles)
@@ -599,6 +629,8 @@ update_file_1 (struct file *file, unsigned int depth)
 	  }
     }
 
+  if (p_call_stack != p_call_stack2) 
+    trace_pop_target(p_call_stack2);
   finish_updating (file);
 
   DBF (DB_VERBOSE, _("Finished prerequisites of target file `%s'.\n"));
@@ -760,8 +792,30 @@ update_file_1 (struct file *file, unsigned int depth)
       file->ignore_vpath = 1;
     }
 
+  /* In some contexts, we get called twice and in other cases once.
+     Ideally I'd like to figure out where to put the push's and
+     pops to do the right thing. Until then there's the below
+     hackery to test.  */
+  if (p_call_stack && p_call_stack->p_target) {
+    file_t *p_stack_target = p_call_stack->p_target;
+    if ((file->floc.filenm && p_stack_target->floc.filenm
+         && 0 == strcmp(file->floc.filenm, p_stack_target->floc.filenm)) ||
+        (NULL == file->floc.filenm && NULL == p_stack_target->floc.filenm)) 
+      p_call_stack2 = p_call_stack;
+    else 
+      p_call_stack2 = trace_push_target(p_call_stack, file, 1);
+  } else {
+    p_call_stack2 = trace_push_target(p_call_stack, file, 1);
+  }
+
+  if ( i_debugger_stepping || (i_debugger_nexting && file->cmds) ) 
+    enter_debugger(p_call_stack2, file, 0);
+
   /* Now, take appropriate actions to remake the file.  */
-  remake_file (file);
+  remake_file (file, p_call_stack);
+
+  if (p_call_stack != p_call_stack2) 
+    trace_pop_target(p_call_stack2);
 
   if (file->command_state != cs_finished)
     {
@@ -933,21 +987,22 @@ notice_finished_file (struct file *file)
    Return nonzero if any updating failed.  */
 
 static int
-check_dep (struct file *file, unsigned int depth,
-           FILE_TIMESTAMP this_mtime, int *must_make_ptr)
+check_dep (file_t *file, unsigned int depth, FILE_TIMESTAMP this_mtime, 
+           int *must_make_ptr, target_stack_node_t *p_call_stack)
 {
   struct dep *d;
   int dep_status = 0;
 
   ++depth;
   start_updating (file);
+  p_call_stack = trace_push_target(p_call_stack, file, 1);
 
   if (file->phony || !file->intermediate)
     {
       /* If this is a non-intermediate file, update it and record
          whether it is newer than THIS_MTIME.  */
       FILE_TIMESTAMP mtime;
-      dep_status = update_file (file, depth);
+      dep_status = update_file (file, depth, p_call_stack);
       check_renamed (file);
       mtime = file_mtime (file);
       check_renamed (file);
@@ -1015,8 +1070,8 @@ check_dep (struct file *file, unsigned int depth,
 
 	      d->file->parent = file;
               maybe_make = *must_make_ptr;
-	      dep_status |= check_dep (d->file, depth, this_mtime,
-                                       &maybe_make);
+              dep_status |= check_dep (d->file, depth, this_mtime,
+                                       &maybe_make, p_call_stack);
               if (! d->ignore_mtime)
                 *must_make_ptr = maybe_make;
 	      check_renamed (d->file);
@@ -1036,6 +1091,7 @@ check_dep (struct file *file, unsigned int depth,
 	}
     }
 
+  trace_pop_target(p_call_stack);
   finish_updating (file);
   return dep_status;
 }
@@ -1097,7 +1153,7 @@ touch_file (struct file *file)
    Return the status from executing FILE's commands.  */
 
 static void
-remake_file (struct file *file)
+remake_file (file_t *file, target_stack_node_t *p_call_stack)
 {
   if (file->cmds == 0)
     {
@@ -1123,7 +1179,7 @@ remake_file (struct file *file)
       /* The normal case: start some commands.  */
       if (!touch_flag || file->cmds->any_recurse)
 	{
-	  execute_file_commands (file);
+          execute_file_commands (file, p_call_stack);
 	  return;
 	}
 

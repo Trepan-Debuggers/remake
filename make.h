@@ -556,7 +556,7 @@ extern bool posix_pedantic;
 extern bool second_expansion;
 
 /* can we run commands via 'sh -c xxx' or must we use batch files? */
-extern int batch_mode_shell;
+extern bool batch_mode_shell;
 
 /*! This character introduces a command: it's the first char on the
     line.  */
