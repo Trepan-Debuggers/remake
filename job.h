@@ -20,13 +20,15 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 #ifndef SEEN_JOB_H
 #define SEEN_JOB_H
 
+#include "trace.h"
+
 #ifdef HAVE_FCNTL_H
 # include <fcntl.h>
 #else
 # include <sys/file.h>
 #endif
 
-/* How to set close-on-exec for a file descriptor.  */
+/** How to set close-on-exec for a file descriptor.  */
 
 #if !defined F_SETFD
 # define CLOSE_ON_EXEC(_d)
@@ -37,40 +39,51 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 # define CLOSE_ON_EXEC(_d) (void) fcntl ((_d), F_SETFD, FD_CLOEXEC)
 #endif
 
-/* Structure describing a running or dead child process.  */
-
+/** \brief Structure describing a running or dead child process.  */
 typedef struct child
   {
-    struct child *next;		/* Link in the chain.  */
+    struct child *next;		/**< Link in the chain.  */
 
-    struct file *file;		/* File being remade.  */
+    floc_t fileinfo;	        /**< Where commands were defined. Note:
+				   this could be a pattern target.
+				 */
 
-    char **environment;		/* Environment for commands.  */
+    file_t *file;		/**< File being remade.  */
+                                /**< Note this can be different from the
+				   file of fileinfo. The above might be
+				   a pattern target, while this is a target
+				   which matches the pattern target and thus
+				   uses it. For example we may have
+				   main.o here while fileinfo might match
+				   .c.o . 
+				 */
 
-    char **command_lines;	/* Array of variable-expanded cmd lines.  */
-    unsigned int command_line;	/* Index into above.  */
-    char *command_ptr;		/* Ptr into command_lines[command_line].  */
+    char **environment;		/**< Environment for commands.  */
 
-    pid_t pid;			/* Child process's ID number.  */
-#ifdef VMS
-    int efn;			/* Completion event flag number */
-    int cstatus;		/* Completion status */
-#endif
-    char *sh_batch_file;        /* Script file for shell commands */
-    unsigned int remote:1;	/* Nonzero if executing remotely.  */
+    char **command_lines;	/**< Array of variable-expanded cmd lines.  */
+    unsigned int *line_no;	/**< line # offsets of chopped commands. */
+    unsigned int command_line;	/**< Index into above.  */
+    char *command_ptr;		/**< Ptr into command_lines[command_line].  */
 
-    unsigned int noerror:1;	/* Nonzero if commands contained a `-'.  */
+    pid_t pid;			/**< Child process's ID number.  */
+    char *sh_batch_file;        /**< Script file for shell commands */
+    unsigned int remote:1;	/**< Nonzero if executing remotely.  */
 
-    unsigned int good_stdin:1;	/* Nonzero if this child has a good stdin.  */
-    unsigned int deleted:1;	/* Nonzero if targets have been deleted.  */
-    unsigned int dontcare:1;    /* Saved dontcare flag.  */
+    unsigned int noerror:1;	/**< Nonzero if commands contained a `-'.  */
+
+    unsigned int good_stdin:1;	/**< Nonzero if this child has a good stdin. */
+    unsigned int deleted:1;	/**< Nonzero if targets have been deleted.  */
+    unsigned int tracing:1;	/**< Nonzero child should be traced.  */
+    unsigned int dontcare:1;    /**< Saved don't-care-on-failure flag.  */
   } child_t;
 
 extern struct child *children;
 
-extern void new_job PARAMS ((struct file *file));
-extern void reap_children PARAMS ((int block, int err));
-extern void start_waiting_jobs PARAMS ((void));
+extern void new_job PARAMS ((file_t *file, target_stack_node_t *p_call_stack));
+extern void reap_children PARAMS ((int block, int err, 
+				   target_stack_node_t *p_call_stack));
+
+extern void start_waiting_jobs (target_stack_node_t *p_call_stack);
 
 extern char **construct_command_argv PARAMS ((char *line, char **restp, struct file *file, char** batch_file));
 #ifdef VMS

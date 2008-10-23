@@ -366,7 +366,7 @@ chop_commands (struct commands *cmds)
    fork off a child process to run the first command line in the sequence.  */
 
 void
-execute_file_commands (struct file *file)
+execute_file_commands (file_t *file, target_stack_node_t *p_call_stack)
 {
   register char *p;
 
@@ -392,7 +392,7 @@ execute_file_commands (struct file *file)
   set_file_variables (file);
 
   /* Start the commands running.  */
-  new_job (file);
+  new_job (file, p_call_stack);
 }
 
 /* This is set while we are inside fatal_error_signal,
@@ -488,12 +488,12 @@ fatal_error_signal (int sig)
       /* Clean up the children.  We don't just use the call below because
 	 we don't want to print the "Waiting for children" message.  */
       while (job_slots_used > 0)
-	reap_children (1, 0);
+	reap_children (1, 0, NULL);
     }
   else
     /* Wait for our children to die.  */
     while (job_slots_used > 0)
-      reap_children (1, 1);
+      reap_children (1, 1, NULL);
 
   /* Delete any non-precious intermediate files that were made.  */
 
