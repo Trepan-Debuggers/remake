@@ -698,6 +698,8 @@ RANLIB
 CPP
 AR
 PERL
+INSTALL_EMACS_LISP_TRUE
+INSTALL_EMACS_LISP_FALSE
 build
 build_cpu
 build_vendor
@@ -745,9 +747,7 @@ USE_LOCAL_GLOB_FALSE
 MAKE_HOST
 WINDOWSENV_TRUE
 WINDOWSENV_FALSE
-LTLIBOBJS
-INSTALL_EMACS_LISP_TRUE
-INSTALL_EMACS_LISP_FALSE'
+LTLIBOBJS'
 ac_subst_files='MAINT_MAKEFILE'
       ac_precious_vars='build_alias
 host_alias
@@ -4045,15 +4045,25 @@ echo "${ECHO_T}no" >&6; }
 fi
 
 
-if test x$EMACS = xno ; then
-  emacs_lisp=no
-else
+if test x$EMACS != xno ; then
   $EMACS -batch -q -no-site-file -eval \
-  '(if (not (and (= emacs-major-version 21) (<= emacs-minor-version 4))) (error "This gud is for Emacs 21.0 to 21.3."))'
+  '(if (<= emacs-major-version 21)
+     (progn
+       (error "You need GNU Emacs 22 or better for GNU Emacs support.")
+       (kill-emacs 1)
+     ))'
   if test $? -ne 0 ; then
-    emacs_lisp=no
+    EMACS=no
   fi
 fi
+ if test "x$lispdir" != "x" -a "x$EMACS" != "xno"; then
+  INSTALL_EMACS_LISP_TRUE=
+  INSTALL_EMACS_LISP_FALSE='#'
+else
+  INSTALL_EMACS_LISP_TRUE='#'
+  INSTALL_EMACS_LISP_FALSE=
+fi
+
 
 # Specialized system macros
 # Make sure we can run config.sub.
@@ -15688,7 +15698,7 @@ esac
 
 
 # Specify what files are to be created.
-ac_config_files="$ac_config_files Makefile config/Makefile doc/Makefile emacs/Makefile glob/Makefile po/Makefile.in w32/Makefile"
+ac_config_files="$ac_config_files Makefile config/Makefile doc/Makefile emacs/Makefile emacs/mdb.el emacs/mdb-test.el glob/Makefile po/Makefile.in w32/Makefile"
 
 
 # OK, do it!
@@ -15800,6 +15810,13 @@ if test -z "${am__fastdepCC_TRUE}" && test -z "${am__fastdepCC_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"am__fastdepCC\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 echo "$as_me: error: conditional \"am__fastdepCC\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${INSTALL_EMACS_LISP_TRUE}" && test -z "${INSTALL_EMACS_LISP_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"INSTALL_EMACS_LISP\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"INSTALL_EMACS_LISP\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -16319,6 +16336,8 @@ do
     "config/Makefile") CONFIG_FILES="$CONFIG_FILES config/Makefile" ;;
     "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
     "emacs/Makefile") CONFIG_FILES="$CONFIG_FILES emacs/Makefile" ;;
+    "emacs/mdb.el") CONFIG_FILES="$CONFIG_FILES emacs/mdb.el" ;;
+    "emacs/mdb-test.el") CONFIG_FILES="$CONFIG_FILES emacs/mdb-test.el" ;;
     "glob/Makefile") CONFIG_FILES="$CONFIG_FILES glob/Makefile" ;;
     "po/Makefile.in") CONFIG_FILES="$CONFIG_FILES po/Makefile.in" ;;
     "w32/Makefile") CONFIG_FILES="$CONFIG_FILES w32/Makefile" ;;
@@ -16471,6 +16490,8 @@ RANLIB!$RANLIB$ac_delim
 CPP!$CPP$ac_delim
 AR!$AR$ac_delim
 PERL!$PERL$ac_delim
+INSTALL_EMACS_LISP_TRUE!$INSTALL_EMACS_LISP_TRUE$ac_delim
+INSTALL_EMACS_LISP_FALSE!$INSTALL_EMACS_LISP_FALSE$ac_delim
 build!$build$ac_delim
 build_cpu!$build_cpu$ac_delim
 build_vendor!$build_vendor$ac_delim
@@ -16481,8 +16502,6 @@ host_vendor!$host_vendor$ac_delim
 host_os!$host_os$ac_delim
 GREP!$GREP$ac_delim
 EGREP!$EGREP$ac_delim
-CVS2CL!$CVS2CL$ac_delim
-MAINTAINER_MODE_TRUE!$MAINTAINER_MODE_TRUE$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 94; then
@@ -16528,6 +16547,8 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+CVS2CL!$CVS2CL$ac_delim
+MAINTAINER_MODE_TRUE!$MAINTAINER_MODE_TRUE$ac_delim
 MAINTAINER_MODE_FALSE!$MAINTAINER_MODE_FALSE$ac_delim
 MAINT!$MAINT$ac_delim
 U!$U$ac_delim
@@ -16566,7 +16587,7 @@ WINDOWSENV_FALSE!$WINDOWSENV_FALSE$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 36; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 38; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
@@ -17274,14 +17295,6 @@ if test "$no_create" != yes; then
   $ac_cs_success || { (exit 1); exit 1; }
 fi
 
-
- if test "x$lispdir" != "x"; then
-  INSTALL_EMACS_LISP_TRUE=
-  INSTALL_EMACS_LISP_FALSE='#'
-else
-  INSTALL_EMACS_LISP_TRUE='#'
-  INSTALL_EMACS_LISP_FALSE=
-fi
 
 
 # We only generate the build.sh if we have a build.sh.in; we won't have
