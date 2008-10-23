@@ -381,9 +381,10 @@ _is_unixy_shell (const char *path)
    Append "(ignored)" if IGNORED is nonzero.  */
 
 static void
-child_error (char *target_name, int exit_code, int exit_sig, int coredump,
-             int ignored)
+child_error (child_t *p_child, target_stack_node_t *p_call_stack,
+	     int exit_code, int exit_sig, int coredump, int ignored)
 {
+  char *target_name = p_child->file->name;
   if (ignored && silent_flag)
     return;
 
@@ -395,13 +396,13 @@ child_error (char *target_name, int exit_code, int exit_sig, int coredump,
              target_name, exit_code);
 #else
   if (exit_sig == 0)
-    error (NILF, ignored ? _("[%s] Error %d (ignored)") :
-	   _("*** [%s] Error %d"),
-	   target_name, exit_code);
+    err (p_call_stack, ignored ? _("[%s] Error %d (ignored)") :
+	 _("*** [%s] Error %d"),
+	 target_name, exit_code);
   else
-    error (NILF, "*** [%s] %s%s",
-	   target_name, strsignal (exit_sig),
-	   coredump ? _(" (core dumped)") : "");
+    err (p_call_stack, "*** [%s] %s%s",
+	 target_name, strsignal (exit_sig),
+	 coredump ? _(" (core dumped)") : "");
 #endif /* VMS */
 }
 
@@ -729,7 +730,7 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
           static int delete_on_error = -1;
 
           if (!dontcare)
-            child_error (c->file->name, exit_code, exit_sig, coredump, 0);
+	    child_error (c, p_call_stack, exit_code, exit_sig, coredump, 0);
 
           c->file->update_status = 2;
           if (delete_on_error == -1)
@@ -745,8 +746,7 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
           if (child_failed)
             {
               /* The commands failed, but we don't care.  */
-              child_error (c->file->name,
-                           exit_code, exit_sig, coredump, 1);
+              child_error (c, p_call_stack, exit_code, exit_sig, coredump, 1);
               child_failed = 0;
             }
 

@@ -637,11 +637,17 @@ sub error
 sub compare_output
 {
   local($answer,$logfile) = @_;
-  local($slurp, $answer_matched) = ('', 0);
+  local($slurp) = ('');
+  $slurp = &read_file_into_string ($logfile);
+  &compare_output_string($answer, $slurp, $logfile);
+}
+
+sub compare_output_string
+{
+  local($answer,$slurp,$logfile) = @_;
+  local($answer_matched) = (0);
 
   print "Comparing Output ........ " if $debug;
-
-  $slurp = &read_file_into_string ($logfile);
 
   # For make, get rid of any time skew error before comparing--too bad this
   # has to go into the "generic" driver code :-/
@@ -673,7 +679,11 @@ sub compare_output
   }
 
   if (! $answer_matched) {
-    print "DIFFERENT OUTPUT\n" if $debug;
+      if ($debug) {
+	  print "DIFFERENT OUTPUT\n";
+	  print "+++1:\n$answer\n";
+	  print "+++2:\n$slurp\n";
+      }
 
     &create_file (&get_basefile, $answer);
 
