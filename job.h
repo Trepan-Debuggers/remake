@@ -66,6 +66,10 @@ typedef struct child
     char *command_ptr;		/**< Ptr into command_lines[command_line].  */
 
     pid_t pid;			/**< Child process's ID number.  */
+#ifdef VMS
+    int efn;			/* Completion event flag number */
+    int cstatus;		/* Completion status */
+#endif
     char *sh_batch_file;        /**< Script file for shell commands */
     unsigned int remote:1;	/**< Nonzero if executing remotely.  */
 
@@ -103,8 +107,10 @@ extern void exec_command PARAMS ((char **argv, char **envp));
 
 extern unsigned int job_slots_used;
 
+/*! block getting any maskable signals.  */
 extern void block_sigs PARAMS ((void));
 #ifdef POSIX
+/*! Remove blocks on signals.  */
 extern void unblock_sigs PARAMS ((void));
 #else
 #ifdef	HAVE_SIGSETMASK
