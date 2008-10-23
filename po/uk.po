@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.80\n"
 "Report-Msgid-Bugs-To: bug-make@gnu.org\n"
-"POT-Creation-Date: 2008-10-22 06:28-0400\n"
+"POT-Creation-Date: 2008-10-23 06:47-0400\n"
 "PO-Revision-Date: 2002-12-05 20:07+0200\n"
 "Last-Translator: Volodymyr M. Lisivka <lvm@mystery.lviv.net>\n"
 "Language-Team: Ukrainian <translation-team-uk@lists.sourceforge.net>\n"
@@ -541,163 +541,163 @@ msgstr ""
 msgid "Looking for a rule with intermediate file `%s'.\n"
 msgstr "Пошук правила з пром╕жним файлом \"%s\".\n"
 
-#: job.c:321
+#: job.c:326
 #, fuzzy
 msgid "Cannot create a temporary file\n"
 msgstr "fwrite (тимчасовий файл)"
 
-#: job.c:388
+#: job.c:394
 #, c-format
 msgid "*** [%s] Error 0x%x (ignored)"
 msgstr "[%s] Помилка 0x%x (про╕гнорована)"
 
-#: job.c:389
+#: job.c:395
 #, c-format
 msgid "*** [%s] Error 0x%x"
 msgstr "*** [%s] Помилка 0x%x"
 
-#: job.c:393
+#: job.c:399
 #, c-format
 msgid "[%s] Error %d (ignored)"
 msgstr "[%s] Помилка %d (╕гнорована)"
 
-#: job.c:394
+#: job.c:400
 #, c-format
 msgid "*** [%s] Error %d"
 msgstr "*** [%s] Помилка %d"
 
-#: job.c:399
+#: job.c:405
 msgid " (core dumped)"
 msgstr " (зроблений дамп пам'ят╕)"
 
-#: job.c:488
+#: job.c:493
 msgid "*** Waiting for unfinished jobs...."
 msgstr "*** Оч╕кування завершення завдань..."
 
-#: job.c:518
+#: job.c:523
 #, c-format
 msgid "Live child 0x%08lx (%s) PID %ld %s\n"
 msgstr "Незавершений нащадок 0x%08lx (%s) PID %ld %s\n"
 
-#: job.c:520 job.c:701 job.c:804 job.c:1457
+#: job.c:525 job.c:706 job.c:808 job.c:1462
 msgid " (remote)"
 msgstr " (в╕ддалений)"
 
-#: job.c:698
+#: job.c:703
 #, fuzzy, c-format
 msgid "Reaping losing child 0x%08lx PID %ld %s\n"
 msgstr "Обробка результат╕в %s прац╕ нащадка 0x%08lx PID %d%s\n"
 
-#: job.c:699
+#: job.c:704
 #, fuzzy, c-format
 msgid "Reaping winning child 0x%08lx PID %ld %s\n"
 msgstr "Обробка результат╕в %s прац╕ нащадка 0x%08lx PID %d%s\n"
 
-#: job.c:704
+#: job.c:709
 #, c-format
 msgid "Cleaning up temp batch file %s\n"
 msgstr "Знищення тимчасового командного файлу %s\n"
 
-#: job.c:802
+#: job.c:806
 #, c-format
 msgid "Removing child 0x%08lx PID %ld%s from chain.\n"
 msgstr ""
 
-#: job.c:862
+#: job.c:866
 msgid "write jobserver"
 msgstr ""
 
-#: job.c:864
+#: job.c:868
 #, fuzzy, c-format
 msgid "Released token for child 0x%08lx (%s).\n"
 msgstr "Обробка результат╕в %s прац╕ нащадка 0x%08lx PID %d%s\n"
 
-#: job.c:1383
+#: job.c:1388
 #, c-format
 msgid "process_easy() failed to launch process (e=%ld)\n"
 msgstr ""
 
-#: job.c:1387 job.c:2020
+#: job.c:1392 job.c:2025
 #, c-format
 msgid ""
 "\n"
 "Counted %d args in failed launch\n"
 msgstr ""
 
-#: job.c:1455
+#: job.c:1460
 #, fuzzy, c-format
 msgid "Putting child 0x%08lx (%s) PID %ld%s on the chain.\n"
 msgstr "Вставляю нащадка 0x%08lx PID %d%s у ланцюжок активних нащадк╕в.\n"
 
-#: job.c:1709
+#: job.c:1714
 #, fuzzy, c-format
 msgid "Obtained token for child 0x%08lx (%s).\n"
 msgstr "Обробка результат╕в %s прац╕ нащадка 0x%08lx PID %d%s\n"
 
-#: job.c:1718
+#: job.c:1723
 msgid "read jobs pipe"
 msgstr ""
 
-#: job.c:1832
+#: job.c:1837
 msgid "cannot enforce load limits on this operating system"
 msgstr ""
 "ця операц╕йна система не дозволя╓ встановлювати обмеження на завантаження"
 
-#: job.c:1834
+#: job.c:1839
 msgid "cannot enforce load limit: "
 msgstr "неможливо встановити обмеження на завантаження: "
 
-#: job.c:1907
+#: job.c:1912
 msgid "no more file handles: could not duplicate stdin\n"
 msgstr ""
 
-#: job.c:1909
+#: job.c:1914
 msgid "no more file handles: could not duplicate stdout\n"
 msgstr ""
 
-#: job.c:1937
+#: job.c:1942
 msgid "Could not restore stdin\n"
 msgstr ""
 
-#: job.c:1945
+#: job.c:1950
 msgid "Could not restore stdout\n"
 msgstr ""
 
-#: job.c:2016
+#: job.c:2021
 #, c-format
 msgid "process_easy() failed failed to launch process (e=%ld)\n"
 msgstr ""
 
-#: job.c:2046
+#: job.c:2051
 #, c-format
 msgid "make reaped child pid %ld, still waiting for pid %ld\n"
 msgstr ""
 
-#: job.c:2085
+#: job.c:2090
 #, c-format
 msgid "%s: Command not found"
 msgstr "%s: Команда не знайдена"
 
-#: job.c:2145
+#: job.c:2150
 #, c-format
 msgid "%s: Shell program not found"
 msgstr "%s: Командний процесор не знайдений"
 
-#: job.c:2154
+#: job.c:2159
 msgid "spawnvpe: environment space might be exhausted"
 msgstr ""
 
-#: job.c:2363
+#: job.c:2368
 #, fuzzy, c-format
 msgid "$SHELL changed (was `%s', now `%s')\n"
 msgstr "$SHELL зм╕нено (було \"%s\", тепер \"%s\")"
 
-#: job.c:2789
+#: job.c:2794
 #, fuzzy, c-format
 msgid "Creating temporary batch file %s\n"
 msgstr "fopen (тимчасовий файл)"
 
-#: job.c:2902
+#: job.c:2907
 #, c-format
 msgid "%s (line %d) Bad shell context (!unixy && !batch_mode_shell)\n"
 msgstr "%s (рядок %d) Поганий контекст оболник (!unixy && !batch_mode_shell)\n"
@@ -1340,193 +1340,193 @@ msgstr "попередження: ╕гнорування старих команд для ц╕л╕ \"%s\""
 msgid "warning: NUL character seen; rest of line ignored"
 msgstr "попередження: зустр╕нутий символ NUL; ╕гнору╓ться до к╕нця рядки"
 
-#: remake.c:232
+#: remake.c:242
 #, c-format
 msgid "Nothing to be done for `%s'."
 msgstr "Ц╕ль \"%s\" не вимага╓ виконання команд."
 
-#: remake.c:233
+#: remake.c:243
 #, c-format
 msgid "`%s' is up to date."
 msgstr "\"%s\" не вимага╓ оновлення."
 
-#: remake.c:300
+#: remake.c:311
 #, fuzzy, c-format
 msgid "Pruning file `%s'.\n"
 msgstr "Все ще оновлю╓ться файл \"%s\".\n"
 
-#: remake.c:352
+#: remake.c:363
 #, c-format
 msgid "%sNo rule to make target `%s'%s"
 msgstr "%sНема правила для створення ц╕л╕ \"%s\"%s"
 
-#: remake.c:354
+#: remake.c:365
 #, c-format
 msgid "%sNo rule to make target `%s', needed by `%s'%s"
 msgstr "%sНема правила для створення ц╕л╕ \"%s\", необх╕дно╖ для \"%s\"%s"
 
-#: remake.c:381
+#: remake.c:394
 #, c-format
 msgid "Considering target file `%s'.\n"
 msgstr "Обробка ц╕льового файлу \"%s\".\n"
 
-#: remake.c:388
+#: remake.c:401
 #, c-format
 msgid "Recently tried and failed to update file `%s'.\n"
 msgstr "Попередня спроба оновити файл \"%s\" завершилася безусп╕шно.\n"
 
-#: remake.c:403
+#: remake.c:416
 #, c-format
 msgid "File `%s' was considered already.\n"
 msgstr "Файл \"%s\" вже було оброблено.\n"
 
-#: remake.c:413
+#: remake.c:426
 #, c-format
 msgid "Still updating file `%s'.\n"
 msgstr "Все ще оновлю╓ться файл \"%s\".\n"
 
-#: remake.c:416
+#: remake.c:429
 #, c-format
 msgid "Finished updating file `%s'.\n"
 msgstr "Оновлення файлу \"%s\" завершено.\n"
 
-#: remake.c:437
+#: remake.c:466
 #, c-format
 msgid "File `%s' does not exist.\n"
 msgstr "Файл \"%s\" не ╕сну╓.\n"
 
-#: remake.c:444
+#: remake.c:473
 #, c-format
 msgid ""
 "*** Warning: .LOW_RESOLUTION_TIME file `%s' has a high resolution time stamp"
 msgstr ""
 
-#: remake.c:457 remake.c:965
+#: remake.c:486 remake.c:1020
 #, c-format
 msgid "Found an implicit rule for `%s'.\n"
 msgstr "Знайдено неявне правило для \"%s\".\n"
 
-#: remake.c:459 remake.c:967
+#: remake.c:488 remake.c:1022
 #, c-format
 msgid "No implicit rule found for `%s'.\n"
 msgstr "Не знайдено неявних правил для \"%s\".\n"
 
-#: remake.c:465 remake.c:973
+#: remake.c:494 remake.c:1028
 #, c-format
 msgid "Using default commands for `%s'.\n"
 msgstr "Використання команд по замовчуванню для \"%s\".\n"
 
-#: remake.c:487 remake.c:999
+#: remake.c:516 remake.c:1054
 #, c-format
 msgid "Circular %s <- %s dependency dropped."
 msgstr "Цикл╕чна залежн╕сть %s <- %s пропущена."
 
-#: remake.c:604
+#: remake.c:636
 #, fuzzy, c-format
 msgid "Finished prerequisites of target file `%s'.\n"
 msgstr "Оновлення ц╕лей, в╕д яких залежить ц╕льовий файл \"%s\", довершено.\n"
 
-#: remake.c:610
+#: remake.c:642
 #, c-format
 msgid "The prerequisites of `%s' are being made.\n"
 msgstr "Ц╕л╕, в╕д яких залежить \"%s\", збираються.\n"
 
-#: remake.c:623
+#: remake.c:655
 #, c-format
 msgid "Giving up on target file `%s'.\n"
 msgstr "Авар╕йний зупинка на ц╕льовому файл╕ \"%s\".\n"
 
-#: remake.c:628
+#: remake.c:660
 #, c-format
 msgid "Target `%s' not remade because of errors."
 msgstr "Ц╕ль \"%s\" не була перез╕брана через помилки."
 
-#: remake.c:680
+#: remake.c:712
 #, c-format
 msgid "Prerequisite `%s' is order-only for target `%s'.\n"
 msgstr ""
 
-#: remake.c:685
+#: remake.c:717
 #, fuzzy, c-format
 msgid "Prerequisite `%s' of target `%s' does not exist.\n"
 msgstr "Файл \"%s\" не ╕сну╓.\n"
 
-#: remake.c:690
+#: remake.c:722
 #, fuzzy, c-format
 msgid "Prerequisite `%s' is newer than target `%s'.\n"
 msgstr "Залежна ц╕ль \"%s\" оновлялася %s н╕ж залежна в╕д не╖ \"%s\".\n"
 
-#: remake.c:693
+#: remake.c:725
 #, fuzzy, c-format
 msgid "Prerequisite `%s' is older than target `%s'.\n"
 msgstr "Залежна ц╕ль \"%s\" оновлялася %s н╕ж залежна в╕д не╖ \"%s\".\n"
 
-#: remake.c:711
+#: remake.c:743
 #, c-format
 msgid "Target `%s' is double-colon and has no prerequisites.\n"
 msgstr "Ц╕ль \"%s\" оголошена з двома двокрапками ╕ не ма╓ залежностей.\n"
 
-#: remake.c:718
+#: remake.c:750
 #, fuzzy, c-format
 msgid "No commands for `%s' and no prerequisites actually changed.\n"
 msgstr "Команди для \"%s\" не задан╕, ╕ залежност╕ не були зм╕нен╕.\n"
 
-#: remake.c:723
+#: remake.c:755
 #, c-format
 msgid "Making `%s' due to always-make flag.\n"
 msgstr ""
 
-#: remake.c:731
+#: remake.c:763
 #, fuzzy, c-format
 msgid "No need to remake target `%s'"
 msgstr "Нема необх╕дност╕ перезбирати ц╕ль \"%s\".\n"
 
-#: remake.c:733
+#: remake.c:765
 #, c-format
 msgid "; using VPATH name `%s'"
 msgstr ""
 
-#: remake.c:753
+#: remake.c:785
 #, c-format
 msgid "Must remake target `%s'.\n"
 msgstr "Необх╕дно перез╕брати ц╕ль \"%s\".\n"
 
-#: remake.c:759
+#: remake.c:791
 #, c-format
 msgid "  Ignoring VPATH name `%s'.\n"
 msgstr ""
 
-#: remake.c:768
+#: remake.c:822
 #, c-format
 msgid "Commands of `%s' are being run.\n"
 msgstr "Команди для \"%s\" зараз виконуються.\n"
 
-#: remake.c:775
+#: remake.c:829
 #, c-format
 msgid "Failed to remake target file `%s'.\n"
 msgstr "Спроба перез╕брати ц╕льовий файл \"%s\" безусп╕шна.\n"
 
-#: remake.c:778
+#: remake.c:832
 #, c-format
 msgid "Successfully remade target file `%s'.\n"
 msgstr "Ц╕льовий файл \"%s\" усп╕шно перез╕браний.\n"
 
-#: remake.c:781
+#: remake.c:835
 #, c-format
 msgid "Target file `%s' needs remade under -q.\n"
 msgstr "Ц╕льовий файл \"%s\" вимага╓ перезб╕рки з ключом -q.\n"
 
-#: remake.c:1309
+#: remake.c:1365
 #, c-format
 msgid "Warning: File `%s' has modification time in the future"
 msgstr "Увага: Файл \"%s\" ма╓ майбутн╕й час зм╕ни"
 
-#: remake.c:1316
+#: remake.c:1372
 #, c-format
 msgid "Warning: File `%s' has modification time %.2g s in the future"
 msgstr "Увага: Файл \"%s\" ма╓ час зм╕ни %.2g с в майбутньому"
 
-#: remake.c:1514
+#: remake.c:1570
 #, c-format
 msgid ".LIBPATTERNS element `%s' is not a pattern"
 msgstr ""

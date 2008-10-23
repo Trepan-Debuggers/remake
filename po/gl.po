@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.80\n"
 "Report-Msgid-Bugs-To: bug-make@gnu.org\n"
-"POT-Creation-Date: 2008-10-22 06:28-0400\n"
+"POT-Creation-Date: 2008-10-23 06:47-0400\n"
 "PO-Revision-Date: 2002-10-05 14:46+0200\n"
 "Last-Translator: Jacobo Tarrio <jtarrio@trasno.net>\n"
 "Language-Team: Galician <gpul-traduccion@ceu.fi.udc.es>\n"
@@ -534,83 +534,83 @@ msgstr "Atopouse a o prerrequisito `%s' coma VPATH `%s'\n"
 msgid "Looking for a rule with intermediate file `%s'.\n"
 msgstr "Buscando unha regra co ficheiro intermedio `%s'.\n"
 
-#: job.c:321
+#: job.c:326
 #, fuzzy
 msgid "Cannot create a temporary file\n"
 msgstr "fwrite (ficheiro temporal)"
 
-#: job.c:388
+#: job.c:394
 #, c-format
 msgid "*** [%s] Error 0x%x (ignored)"
 msgstr "*** [%s] Erro 0x%x (ignorado)"
 
-#: job.c:389
+#: job.c:395
 #, c-format
 msgid "*** [%s] Error 0x%x"
 msgstr "*** [%s] Erro 0x%x"
 
-#: job.c:393
+#: job.c:399
 #, c-format
 msgid "[%s] Error %d (ignored)"
 msgstr "[%s] Erro %d (ignorado)"
 
-#: job.c:394
+#: job.c:400
 #, c-format
 msgid "*** [%s] Error %d"
 msgstr "*** [%s] Erro %d"
 
-#: job.c:399
+#: job.c:405
 msgid " (core dumped)"
 msgstr " (memoria envorcada)"
 
-#: job.c:488
+#: job.c:493
 msgid "*** Waiting for unfinished jobs...."
 msgstr "*** Agardando por traballos non rematados...."
 
-#: job.c:518
+#: job.c:523
 #, c-format
 msgid "Live child 0x%08lx (%s) PID %ld %s\n"
 msgstr "Proceso fillo vivo 0x%08lx (%s) PID %ld %s\n"
 
-#: job.c:520 job.c:701 job.c:804 job.c:1457
+#: job.c:525 job.c:706 job.c:808 job.c:1462
 msgid " (remote)"
 msgstr " (remoto)"
 
-#: job.c:698
+#: job.c:703
 #, c-format
 msgid "Reaping losing child 0x%08lx PID %ld %s\n"
 msgstr "Colleitando o proceso fillo perdedor 0x%08lx PID %ld %s\n"
 
-#: job.c:699
+#: job.c:704
 #, c-format
 msgid "Reaping winning child 0x%08lx PID %ld %s\n"
 msgstr "Colleitando o proceso fillo gañador 0x%08lx PID %ld %s\n"
 
-#: job.c:704
+#: job.c:709
 #, c-format
 msgid "Cleaning up temp batch file %s\n"
 msgstr "Limpando o ficheiro de lotes temporal %s\n"
 
-#: job.c:802
+#: job.c:806
 #, c-format
 msgid "Removing child 0x%08lx PID %ld%s from chain.\n"
 msgstr "Eliminando o proceso fillo 0x%08lx PID %ld%s da cadea.\n"
 
-#: job.c:862
+#: job.c:866
 msgid "write jobserver"
 msgstr "write jobserver"
 
-#: job.c:864
+#: job.c:868
 #, c-format
 msgid "Released token for child 0x%08lx (%s).\n"
 msgstr "Liberouse un elemento para o proceso fillo 0x%08lx (%s).\n"
 
-#: job.c:1383
+#: job.c:1388
 #, fuzzy, c-format
 msgid "process_easy() failed to launch process (e=%ld)\n"
 msgstr "process_easy() non puido lanza-lo proceso (e=%d)\n"
 
-#: job.c:1387 job.c:2020
+#: job.c:1392 job.c:2025
 #, c-format
 msgid ""
 "\n"
@@ -619,80 +619,80 @@ msgstr ""
 "\n"
 "Contáronse %d argumentos no lanzamento que fallou\n"
 
-#: job.c:1455
+#: job.c:1460
 #, c-format
 msgid "Putting child 0x%08lx (%s) PID %ld%s on the chain.\n"
 msgstr "Poñendo o proceso fillo 0x%08lx (%s) PID %ld%s na cadea.\n"
 
-#: job.c:1709
+#: job.c:1714
 #, c-format
 msgid "Obtained token for child 0x%08lx (%s).\n"
 msgstr "Obtívose un elemento para o proceso fillo 0x%08lx (%s).\n"
 
-#: job.c:1718
+#: job.c:1723
 msgid "read jobs pipe"
 msgstr "lectura do cano de traballos"
 
-#: job.c:1832
+#: job.c:1837
 msgid "cannot enforce load limits on this operating system"
 msgstr "non se poden impoñer límites de carga neste sistema operativo"
 
-#: job.c:1834
+#: job.c:1839
 msgid "cannot enforce load limit: "
 msgstr "non se pode impoñer un límite de carga: "
 
-#: job.c:1907
+#: job.c:1912
 msgid "no more file handles: could not duplicate stdin\n"
 msgstr ""
 
-#: job.c:1909
+#: job.c:1914
 msgid "no more file handles: could not duplicate stdout\n"
 msgstr ""
 
-#: job.c:1937
+#: job.c:1942
 msgid "Could not restore stdin\n"
 msgstr ""
 
-#: job.c:1945
+#: job.c:1950
 msgid "Could not restore stdout\n"
 msgstr ""
 
-#: job.c:2016
+#: job.c:2021
 #, fuzzy, c-format
 msgid "process_easy() failed failed to launch process (e=%ld)\n"
 msgstr "process_easy() non puido lanza-lo proceso (e=%d)\n"
 
-#: job.c:2046
+#: job.c:2051
 #, fuzzy, c-format
 msgid "make reaped child pid %ld, still waiting for pid %ld\n"
 msgstr ""
 "make colleitou un proceso fillo de pid %d, ainda se agarda polo pid %d\n"
 
-#: job.c:2085
+#: job.c:2090
 #, c-format
 msgid "%s: Command not found"
 msgstr "%s: Comando non atopado"
 
-#: job.c:2145
+#: job.c:2150
 #, c-format
 msgid "%s: Shell program not found"
 msgstr "%s: Intérprete de comandos non atopado"
 
-#: job.c:2154
+#: job.c:2159
 msgid "spawnvpe: environment space might be exhausted"
 msgstr ""
 
-#: job.c:2363
+#: job.c:2368
 #, fuzzy, c-format
 msgid "$SHELL changed (was `%s', now `%s')\n"
 msgstr "O valor de $SHELL cambiou (antes era `%s', agora `%s')"
 
-#: job.c:2789
+#: job.c:2794
 #, c-format
 msgid "Creating temporary batch file %s\n"
 msgstr "Creando un ficheiro por lotes temporal %s\n"
 
-#: job.c:2902
+#: job.c:2907
 #, c-format
 msgid "%s (line %d) Bad shell context (!unixy && !batch_mode_shell)\n"
 msgstr ""
@@ -1414,62 +1414,62 @@ msgstr "aviso: ignóranse os comandos antigos do obxectivo `%s'"
 msgid "warning: NUL character seen; rest of line ignored"
 msgstr "aviso: viuse un carácter NUL; ignórase o resto da liña"
 
-#: remake.c:232
+#: remake.c:242
 #, c-format
 msgid "Nothing to be done for `%s'."
 msgstr "Non hai nada que facer para `%s'"
 
-#: remake.c:233
+#: remake.c:243
 #, c-format
 msgid "`%s' is up to date."
 msgstr "`%s' está actualizado."
 
-#: remake.c:300
+#: remake.c:311
 #, c-format
 msgid "Pruning file `%s'.\n"
 msgstr "Podando o ficheiro `%s'.\n"
 
-#: remake.c:352
+#: remake.c:363
 #, c-format
 msgid "%sNo rule to make target `%s'%s"
 msgstr "%sNon hai unha regra para face-lo obxectivo `%s'%s"
 
-#: remake.c:354
+#: remake.c:365
 #, c-format
 msgid "%sNo rule to make target `%s', needed by `%s'%s"
 msgstr "%sNon hai unha regra para face-lo obxectivo `%s', que precisa `%s'%s"
 
-#: remake.c:381
+#: remake.c:394
 #, c-format
 msgid "Considering target file `%s'.\n"
 msgstr "Considerando o ficheiro obxectivo `%s'.\n"
 
-#: remake.c:388
+#: remake.c:401
 #, c-format
 msgid "Recently tried and failed to update file `%s'.\n"
 msgstr "Hai pouco probouse a actualiza-lo ficheiro `%s' e non se puido.\n"
 
-#: remake.c:403
+#: remake.c:416
 #, c-format
 msgid "File `%s' was considered already.\n"
 msgstr "O ficheiro `%s' xa fora considerado.\n"
 
-#: remake.c:413
+#: remake.c:426
 #, c-format
 msgid "Still updating file `%s'.\n"
 msgstr "Ainda se está actualizando o ficheiro `%s'.\n"
 
-#: remake.c:416
+#: remake.c:429
 #, c-format
 msgid "Finished updating file `%s'.\n"
 msgstr "Rematouse de actualiza-lo ficheiro `%s'.\n"
 
-#: remake.c:437
+#: remake.c:466
 #, c-format
 msgid "File `%s' does not exist.\n"
 msgstr "O ficheiro `%s' non existe.\n"
 
-#: remake.c:444
+#: remake.c:473
 #, c-format
 msgid ""
 "*** Warning: .LOW_RESOLUTION_TIME file `%s' has a high resolution time stamp"
@@ -1477,132 +1477,132 @@ msgstr ""
 "*** Aviso: o ficheiro `%s' de .LOW_RESOLUTION_TIME ten unha marca de tempo "
 "de alta resolución"
 
-#: remake.c:457 remake.c:965
+#: remake.c:486 remake.c:1020
 #, c-format
 msgid "Found an implicit rule for `%s'.\n"
 msgstr "Atopouse unha regra implícita de `%s'.\n"
 
-#: remake.c:459 remake.c:967
+#: remake.c:488 remake.c:1022
 #, c-format
 msgid "No implicit rule found for `%s'.\n"
 msgstr "Non se atopou unha regra implícita para `%s'.\n"
 
-#: remake.c:465 remake.c:973
+#: remake.c:494 remake.c:1028
 #, c-format
 msgid "Using default commands for `%s'.\n"
 msgstr "Usando os comandos por defecto para `%s'.\n"
 
-#: remake.c:487 remake.c:999
+#: remake.c:516 remake.c:1054
 #, c-format
 msgid "Circular %s <- %s dependency dropped."
 msgstr "A dependencia circular %s <- %s foi eliminada."
 
-#: remake.c:604
+#: remake.c:636
 #, c-format
 msgid "Finished prerequisites of target file `%s'.\n"
 msgstr "Rematáronse os prerrequisitos do ficheiro obxectivo `%s'.\n"
 
-#: remake.c:610
+#: remake.c:642
 #, c-format
 msgid "The prerequisites of `%s' are being made.\n"
 msgstr "Estan a se face-los prerrequisitos de `%s'.\n"
 
-#: remake.c:623
+#: remake.c:655
 #, c-format
 msgid "Giving up on target file `%s'.\n"
 msgstr "Abandonando no ficheiro obxectivo `%s'.\n"
 
-#: remake.c:628
+#: remake.c:660
 #, c-format
 msgid "Target `%s' not remade because of errors."
 msgstr "Non se refai o obxectivo `%s' a causa dos erros."
 
-#: remake.c:680
+#: remake.c:712
 #, c-format
 msgid "Prerequisite `%s' is order-only for target `%s'.\n"
 msgstr "O prerrequisito `%s' é só-orde para o obxectivo `%s'.\n"
 
-#: remake.c:685
+#: remake.c:717
 #, c-format
 msgid "Prerequisite `%s' of target `%s' does not exist.\n"
 msgstr "O prerrequisito `%s' do obxectivo `%s' non existe.\n"
 
-#: remake.c:690
+#: remake.c:722
 #, c-format
 msgid "Prerequisite `%s' is newer than target `%s'.\n"
 msgstr "O prerrequisito `%s' é máis novo có obxectivo `%s'.\n"
 
-#: remake.c:693
+#: remake.c:725
 #, c-format
 msgid "Prerequisite `%s' is older than target `%s'.\n"
 msgstr "O prerrequisito `%s' é máis vello có obxectivo `%s'.\n"
 
-#: remake.c:711
+#: remake.c:743
 #, c-format
 msgid "Target `%s' is double-colon and has no prerequisites.\n"
 msgstr "O obxectivo `%s' ten catro puntos e non ten prerrequisitos.\n"
 
-#: remake.c:718
+#: remake.c:750
 #, c-format
 msgid "No commands for `%s' and no prerequisites actually changed.\n"
 msgstr "Non hai comandos de `%s', e non cambiaron os prerrequisitos.\n"
 
-#: remake.c:723
+#: remake.c:755
 #, c-format
 msgid "Making `%s' due to always-make flag.\n"
 msgstr "Facendo `%s' debido á marca de sempre-facer.\n"
 
-#: remake.c:731
+#: remake.c:763
 #, c-format
 msgid "No need to remake target `%s'"
 msgstr "Non é preciso reface-lo obxectivo `%s'"
 
-#: remake.c:733
+#: remake.c:765
 #, c-format
 msgid "; using VPATH name `%s'"
 msgstr "; usando o nome de VPATH `%s'"
 
-#: remake.c:753
+#: remake.c:785
 #, c-format
 msgid "Must remake target `%s'.\n"
 msgstr "Debe refacerse o obxectivo `%s'.\n"
 
-#: remake.c:759
+#: remake.c:791
 #, c-format
 msgid "  Ignoring VPATH name `%s'.\n"
 msgstr "  Ignorando o nome VPATH `%s'.\n"
 
-#: remake.c:768
+#: remake.c:822
 #, c-format
 msgid "Commands of `%s' are being run.\n"
 msgstr "Estanse a executa-los comandos de `%s'.\n"
 
-#: remake.c:775
+#: remake.c:829
 #, c-format
 msgid "Failed to remake target file `%s'.\n"
 msgstr "Non se puido reface-lo ficheiro obxectivo `%s'.\n"
 
-#: remake.c:778
+#: remake.c:832
 #, c-format
 msgid "Successfully remade target file `%s'.\n"
 msgstr "O ficheiro obxectivo `%s' foi feito de novo con éxito.\n"
 
-#: remake.c:781
+#: remake.c:835
 #, c-format
 msgid "Target file `%s' needs remade under -q.\n"
 msgstr "O ficheiro obxectivo `%s' precisa refacerse con -q.\n"
 
-#: remake.c:1309
+#: remake.c:1365
 #, c-format
 msgid "Warning: File `%s' has modification time in the future"
 msgstr "Aviso: O ficheiro `%s' ten unha data de modificación no futuro"
 
-#: remake.c:1316
+#: remake.c:1372
 #, c-format
 msgid "Warning: File `%s' has modification time %.2g s in the future"
 msgstr "Aviso: O ficheiro `%s' ten unha data de modificación %.2g s. no futuro"
 
-#: remake.c:1514
+#: remake.c:1570
 #, c-format
 msgid ".LIBPATTERNS element `%s' is not a pattern"
 msgstr "O elemento de .LIBPATTERNS `%s' non é un patrón"
