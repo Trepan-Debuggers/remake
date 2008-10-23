@@ -82,14 +82,18 @@ cat ${VP}foo.c bar.c > foo.b 2>/dev/null || exit 1
 
 &touchfiles("$VP/notarget.c", "notarget.b", "notarget.d");
 
-&run_make_with_options($makefile,"notarget",&get_logfile,512);
+$logfile = &get_logfile;
+&run_make_with_options($makefile,"notarget",$logfile,512);
 
 $answer = "not creating notarget.c from notarget.d
 cat notarget.c > notarget.b 2>/dev/null || exit 1
 $make_name: *** [notarget.b] Error 1
+
+#0  notarget.b at ??
+#1  notarget (.PHONY target)
 ";
 
-&compare_output($answer,&get_logfile(1));
+&compare_output($answer,$logfile);
 
 # Test intermediate file handling (part 1)
 

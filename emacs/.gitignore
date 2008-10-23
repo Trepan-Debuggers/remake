@@ -1,2 +1,6 @@
 /Makefile
 /Makefile.in
+/elc-stamp
+/mdb-test.el
+/mdb.el
+/mdb.elc
