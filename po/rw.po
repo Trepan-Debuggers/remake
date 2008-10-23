@@ -16,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.80\n"
 "Report-Msgid-Bugs-To: bug-make@gnu.org\n"
-"POT-Creation-Date: 2008-10-22 06:28-0400\n"
+"POT-Creation-Date: 2008-10-23 06:47-0400\n"
 "PO-Revision-Date: 2005-04-04 10:55-0700\n"
 "Last-Translator: Steven Michael Murphy <murf@e-tools.com>\n"
 "Language-Team: Kinyarwanda <translation-team-rw@lists.sourceforge.net>\n"
@@ -574,168 +574,168 @@ msgstr "Nka"
 msgid "Looking for a rule with intermediate file `%s'.\n"
 msgstr "kugirango a Na: IDOSIYE"
 
-#: job.c:321
+#: job.c:326
 #, fuzzy
 msgid "Cannot create a temporary file\n"
 msgstr "By'igihe gito IDOSIYE"
 
-#: job.c:388
+#: job.c:394
 #, c-format
 msgid "*** [%s] Error 0x%x (ignored)"
 msgstr ""
 
-#: job.c:389
+#: job.c:395
 #, c-format
 msgid "*** [%s] Error 0x%x"
 msgstr ""
 
-#: job.c:393
+#: job.c:399
 #, c-format
 msgid "[%s] Error %d (ignored)"
 msgstr ""
 
 # sw/source\ui\utlui\initui.src:RID_SW_SHELLRES.STR_CALC_DEFAULT.text
-#: job.c:394
+#: job.c:400
 #, fuzzy, c-format
 msgid "*** [%s] Error %d"
 msgstr "***[%s]Ikosa**"
 
-#: job.c:399
+#: job.c:405
 msgid " (core dumped)"
 msgstr ""
 
-#: job.c:488
+#: job.c:493
 #, fuzzy
 msgid "*** Waiting for unfinished jobs...."
 msgstr "***kugirango"
 
-#: job.c:518
+#: job.c:523
 #, c-format
 msgid "Live child 0x%08lx (%s) PID %ld %s\n"
 msgstr ""
 
-#: job.c:520 job.c:701 job.c:804 job.c:1457
+#: job.c:525 job.c:706 job.c:808 job.c:1462
 msgid " (remote)"
 msgstr ""
 
-#: job.c:698
+#: job.c:703
 #, c-format
 msgid "Reaping losing child 0x%08lx PID %ld %s\n"
 msgstr ""
 
-#: job.c:699
+#: job.c:704
 #, c-format
 msgid "Reaping winning child 0x%08lx PID %ld %s\n"
 msgstr ""
 
-#: job.c:704
+#: job.c:709
 #, fuzzy, c-format
 msgid "Cleaning up temp batch file %s\n"
 msgstr "Hejuru IDOSIYE"
 
-#: job.c:802
+#: job.c:806
 #, fuzzy, c-format
 msgid "Removing child 0x%08lx PID %ld%s from chain.\n"
 msgstr "Bivuye"
 
-#: job.c:862
+#: job.c:866
 #, fuzzy
 msgid "write jobserver"
 msgstr "Kwandika"
 
-#: job.c:864
+#: job.c:868
 #, fuzzy, c-format
 msgid "Released token for child 0x%08lx (%s).\n"
 msgstr "kugirango"
 
-#: job.c:1383
+#: job.c:1388
 #, fuzzy, c-format
 msgid "process_easy() failed to launch process (e=%ld)\n"
 msgstr "Byanze Byanze Kuri E"
 
-#: job.c:1387 job.c:2020
+#: job.c:1392 job.c:2025
 #, fuzzy, c-format
 msgid ""
 "\n"
 "Counted %d args in failed launch\n"
 msgstr "in Byanze"
 
-#: job.c:1455
+#: job.c:1460
 #, fuzzy, c-format
 msgid "Putting child 0x%08lx (%s) PID %ld%s on the chain.\n"
 msgstr "ku i"
 
-#: job.c:1709
+#: job.c:1714
 #, fuzzy, c-format
 msgid "Obtained token for child 0x%08lx (%s).\n"
 msgstr "kugirango"
 
-#: job.c:1718
+#: job.c:1723
 #, fuzzy
 msgid "read jobs pipe"
 msgstr "Gusoma"
 
-#: job.c:1832
+#: job.c:1837
 #, fuzzy
 msgid "cannot enforce load limits on this operating system"
 msgstr "Ibirimo Imbibi ku iyi Sisitemu"
 
-#: job.c:1834
+#: job.c:1839
 #, fuzzy
 msgid "cannot enforce load limit: "
 msgstr "Ibirimo"
 
-#: job.c:1907
+#: job.c:1912
 msgid "no more file handles: could not duplicate stdin\n"
 msgstr ""
 
-#: job.c:1909
+#: job.c:1914
 msgid "no more file handles: could not duplicate stdout\n"
 msgstr ""
 
-#: job.c:1937
+#: job.c:1942
 msgid "Could not restore stdin\n"
 msgstr ""
 
-#: job.c:1945
+#: job.c:1950
 msgid "Could not restore stdout\n"
 msgstr ""
 
-#: job.c:2016
+#: job.c:2021
 #, fuzzy, c-format
 msgid "process_easy() failed failed to launch process (e=%ld)\n"
 msgstr "Byanze Byanze Kuri E"
 
-#: job.c:2046
+#: job.c:2051
 #, fuzzy, c-format
 msgid "make reaped child pid %ld, still waiting for pid %ld\n"
 msgstr "Ubwoko Tegereza kugirango"
 
-#: job.c:2085
+#: job.c:2090
 #, fuzzy, c-format
 msgid "%s: Command not found"
 msgstr "%s:OYA Byabonetse"
 
-#: job.c:2145
+#: job.c:2150
 #, fuzzy, c-format
 msgid "%s: Shell program not found"
 msgstr "%s:Porogaramu OYA Byabonetse"
 
-#: job.c:2154
+#: job.c:2159
 msgid "spawnvpe: environment space might be exhausted"
 msgstr ""
 
-#: job.c:2363
+#: job.c:2368
 #, fuzzy, c-format
 msgid "$SHELL changed (was `%s', now `%s')\n"
 msgstr "$Byahinduwe NONEAHA"
 
-#: job.c:2789
+#: job.c:2794
 #, fuzzy, c-format
 msgid "Creating temporary batch file %s\n"
 msgstr "By'igihe gito IDOSIYE"
 
-#: job.c:2902
+#: job.c:2907
 #, fuzzy, c-format
 msgid "%s (line %d) Bad shell context (!unixy && !batch_mode_shell)\n"
 msgstr "%s(Umurongo Igikonoshwa Imvugiro"
@@ -1418,193 +1418,193 @@ msgstr "Iburira ki/ bishaje Amabwiriza kugirango Intego"
 msgid "warning: NUL character seen; rest of line ignored"
 msgstr "Iburira Inyuguti Bya Umurongo"
 
-#: remake.c:232
+#: remake.c:242
 #, fuzzy, c-format
 msgid "Nothing to be done for `%s'."
 msgstr "Kuri Byakozwe kugirango"
 
-#: remake.c:233
+#: remake.c:243
 #, fuzzy, c-format
 msgid "`%s' is up to date."
 msgstr "`%s'ni Hejuru Kuri Itariki"
 
-#: remake.c:300
+#: remake.c:311
 #, fuzzy, c-format
 msgid "Pruning file `%s'.\n"
 msgstr "IDOSIYE"
 
-#: remake.c:352
+#: remake.c:363
 #, fuzzy, c-format
 msgid "%sNo rule to make target `%s'%s"
 msgstr "%sNoKuri Ubwoko Intego"
 
-#: remake.c:354
+#: remake.c:365
 #, fuzzy, c-format
 msgid "%sNo rule to make target `%s', needed by `%s'%s"
 msgstr "%sNoKuri Ubwoko Intego ku"
 
-#: remake.c:381
+#: remake.c:394
 #, fuzzy, c-format
 msgid "Considering target file `%s'.\n"
 msgstr "Intego IDOSIYE"
 
-#: remake.c:388
+#: remake.c:401
 #, fuzzy, c-format
 msgid "Recently tried and failed to update file `%s'.\n"
 msgstr "Na Byanze Kuri Kuvugurura IDOSIYE"
 
-#: remake.c:403
+#: remake.c:416
 #, fuzzy, c-format
 msgid "File `%s' was considered already.\n"
 msgstr "Idosiye"
 
-#: remake.c:413
+#: remake.c:426
 #, fuzzy, c-format
 msgid "Still updating file `%s'.\n"
 msgstr "Ivugurura IDOSIYE"
 
-#: remake.c:416
+#: remake.c:429
 #, fuzzy, c-format
 msgid "Finished updating file `%s'.\n"
 msgstr "Ivugurura IDOSIYE"
 
-#: remake.c:437
+#: remake.c:466
 #, fuzzy, c-format
 msgid "File `%s' does not exist.\n"
 msgstr "Idosiye OYA"
 
-#: remake.c:444
+#: remake.c:473
 #, fuzzy, c-format
 msgid ""
 "*** Warning: .LOW_RESOLUTION_TIME file `%s' has a high resolution time stamp"
 msgstr "***IDOSIYE a kirekire Imikemurire Igihe"
 
-#: remake.c:457 remake.c:965
+#: remake.c:486 remake.c:1020
 #, fuzzy, c-format
 msgid "Found an implicit rule for `%s'.\n"
 msgstr "kugirango"
 
-#: remake.c:459 remake.c:967
+#: remake.c:488 remake.c:1022
 #, fuzzy, c-format
 msgid "No implicit rule found for `%s'.\n"
 msgstr "Byabonetse kugirango"
 
-#: remake.c:465 remake.c:973
+#: remake.c:494 remake.c:1028
 #, fuzzy, c-format
 msgid "Using default commands for `%s'.\n"
 msgstr "Mburabuzi Amabwiriza kugirango"
 
-#: remake.c:487 remake.c:999
+#: remake.c:516 remake.c:1054
 #, c-format
 msgid "Circular %s <- %s dependency dropped."
 msgstr ""
 
-#: remake.c:604
+#: remake.c:636
 #, fuzzy, c-format
 msgid "Finished prerequisites of target file `%s'.\n"
 msgstr "Bya Intego IDOSIYE"
 
-#: remake.c:610
+#: remake.c:642
 #, fuzzy, c-format
 msgid "The prerequisites of `%s' are being made.\n"
 msgstr "Bya"
 
-#: remake.c:623
+#: remake.c:655
 #, fuzzy, c-format
 msgid "Giving up on target file `%s'.\n"
 msgstr "Hejuru ku Intego IDOSIYE"
 
-#: remake.c:628
+#: remake.c:660
 #, fuzzy, c-format
 msgid "Target `%s' not remade because of errors."
 msgstr "OYA Bya Amakosa"
 
-#: remake.c:680
+#: remake.c:712
 #, fuzzy, c-format
 msgid "Prerequisite `%s' is order-only for target `%s'.\n"
 msgstr "ni Itondekanya kugirango Intego"
 
-#: remake.c:685
+#: remake.c:717
 #, fuzzy, c-format
 msgid "Prerequisite `%s' of target `%s' does not exist.\n"
 msgstr "Bya Intego OYA"
 
-#: remake.c:690
+#: remake.c:722
 #, fuzzy, c-format
 msgid "Prerequisite `%s' is newer than target `%s'.\n"
 msgstr "ni Intego"
 
-#: remake.c:693
+#: remake.c:725
 #, fuzzy, c-format
 msgid "Prerequisite `%s' is older than target `%s'.\n"
 msgstr "ni Intego"
 
-#: remake.c:711
+#: remake.c:743
 #, fuzzy, c-format
 msgid "Target `%s' is double-colon and has no prerequisites.\n"
 msgstr "ni MAHARAKUBIRI Na Oya"
 
-#: remake.c:718
+#: remake.c:750
 #, fuzzy, c-format
 msgid "No commands for `%s' and no prerequisites actually changed.\n"
 msgstr "Amabwiriza kugirango Na Oya Byahinduwe"
 
-#: remake.c:723
+#: remake.c:755
 #, fuzzy, c-format
 msgid "Making `%s' due to always-make flag.\n"
 msgstr "Kuri Buri gihe Ubwoko Ibendera"
 
-#: remake.c:731
+#: remake.c:763
 #, fuzzy, c-format
 msgid "No need to remake target `%s'"
 msgstr "Kuri Intego"
 
-#: remake.c:733
+#: remake.c:765
 #, fuzzy, c-format
 msgid "; using VPATH name `%s'"
 msgstr ";ikoresha Izina:"
 
-#: remake.c:753
+#: remake.c:785
 #, fuzzy, c-format
 msgid "Must remake target `%s'.\n"
 msgstr "Intego"
 
-#: remake.c:759
+#: remake.c:791
 #, fuzzy, c-format
 msgid "  Ignoring VPATH name `%s'.\n"
 msgstr "Kwirengagiza Izina:"
 
-#: remake.c:768
+#: remake.c:822
 #, fuzzy, c-format
 msgid "Commands of `%s' are being run.\n"
 msgstr "Bya Gukoresha"
 
-#: remake.c:775
+#: remake.c:829
 #, fuzzy, c-format
 msgid "Failed to remake target file `%s'.\n"
 msgstr "Kuri Intego IDOSIYE"
 
-#: remake.c:778
+#: remake.c:832
 #, fuzzy, c-format
 msgid "Successfully remade target file `%s'.\n"
 msgstr "Intego IDOSIYE"
 
-#: remake.c:781
+#: remake.c:835
 #, fuzzy, c-format
 msgid "Target file `%s' needs remade under -q.\n"
 msgstr "IDOSIYE Q"
 
-#: remake.c:1309
+#: remake.c:1365
 #, fuzzy, c-format
 msgid "Warning: File `%s' has modification time in the future"
 msgstr "Idosiye Igihe in i"
 
-#: remake.c:1316
+#: remake.c:1372
 #, fuzzy, c-format
 msgid "Warning: File `%s' has modification time %.2g s in the future"
 msgstr "Idosiye Igihe S in i"
 
-#: remake.c:1514
+#: remake.c:1570
 #, fuzzy, c-format
 msgid ".LIBPATTERNS element `%s' is not a pattern"
 msgstr ""

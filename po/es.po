@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU make 3.81-b3\n"
 "Report-Msgid-Bugs-To: bug-make@gnu.org\n"
-"POT-Creation-Date: 2008-10-22 06:28-0400\n"
+"POT-Creation-Date: 2008-10-23 06:47-0400\n"
 "PO-Revision-Date: 2005-06-28 19:59-0500\n"
 "Last-Translator: Max de Mendizábal <max@upn.mx>\n"
 "Language-Team: Spanish <es@li.org>\n"
@@ -698,28 +698,28 @@ msgstr "Se encontró la dependencia `%s' como la VPATH `%s'.\n"
 msgid "Looking for a rule with intermediate file `%s'.\n"
 msgstr "Se busca una regla con el archivo intermedio `%s'.\n"
 
-#: job.c:321
+#: job.c:326
 msgid "Cannot create a temporary file\n"
 msgstr "No se puede crear un archivo temporal\n"
 
 # Lo mismo. sv
-#: job.c:388
+#: job.c:394
 #, c-format
 msgid "*** [%s] Error 0x%x (ignored)"
 msgstr "*** [%s] Error 0x%x (no tiene efecto)"
 
-#: job.c:389
+#: job.c:395
 #, c-format
 msgid "*** [%s] Error 0x%x"
 msgstr "*** [%s] Error 0x%x"
 
 # Lo mismo. sv
-#: job.c:393
+#: job.c:399
 #, c-format
 msgid "[%s] Error %d (ignored)"
 msgstr "[%s] Error %d (no tiene efecto)"
 
-#: job.c:394
+#: job.c:400
 #, c-format
 msgid "*** [%s] Error %d"
 msgstr "*** [%s] Error %d"
@@ -728,73 +728,73 @@ msgstr "*** [%s] Error %d"
 # volcado de `core' no significa nada, que te parece si mejor dejamos
 # el core dumped, o bien volcado del núcleo o algo así. Por el momento
 # no cambio nada. mm
-#: job.c:399
+#: job.c:405
 msgid " (core dumped)"
 msgstr " (core dumped) [Núcleo vaciado a un archivo]"
 
 # ¿Y job -> trabajos? sv
 # Si, pero no hablas de una computadora multi-trabajos sino multi-tareas.
 # Por eso elegí tareas. Lo platicamos con más calma? mm
-#: job.c:488
+#: job.c:493
 msgid "*** Waiting for unfinished jobs...."
 msgstr "*** Se espera a que terminen otras tareas...."
 
 # ¿De verdad se dice "vivo"? Si es un proceso, se me ocurre "activo". sv
 # Me gusta lo de activo. mm
-#: job.c:518
+#: job.c:523
 #, c-format
 msgid "Live child 0x%08lx (%s) PID %ld %s\n"
 msgstr "Hijo activo 0x%08lx (%s) PID %ld %s\n"
 
-#: job.c:520 job.c:701 job.c:804 job.c:1457
+#: job.c:525 job.c:706 job.c:808 job.c:1462
 msgid " (remote)"
 msgstr " (remoto)"
 
 # Lo mismo, pon Proceso hijo, y quita lo que hay
 # entre paréntesis em+
-#: job.c:698
+#: job.c:703
 #, c-format
 msgid "Reaping losing child 0x%08lx PID %ld %s\n"
 msgstr "Se pierde al proceso hijo descarriado 0x%08lx PID %ld %s\n"
 
 # Lo mismo, pon Proceso hijo, y quita lo que hay
 # entre paréntesis em+
-#: job.c:699
+#: job.c:704
 #, c-format
 msgid "Reaping winning child 0x%08lx PID %ld %s\n"
 msgstr "Se gana al proceso hijo descarriado 0x%08lx PID %ld %s\n"
 
 # Give up no es enfocar, es abandonar, o desistir em+
 # Si, metí la pata. mm
-#: job.c:704
+#: job.c:709
 #, c-format
 msgid "Cleaning up temp batch file %s\n"
 msgstr "Se limpia el archivo temporal %s\n"
 
 # Proceso hijo em+
 # Ok.
-#: job.c:802
+#: job.c:806
 #, c-format
 msgid "Removing child 0x%08lx PID %ld%s from chain.\n"
 msgstr "Se elimina al proceso hijo 0x%08lx PID %ld%s de la cadena.\n"
 
-#: job.c:862
+#: job.c:866
 msgid "write jobserver"
 msgstr "escribir en el servidor de tareas"
 
 # Lo mismo, pon Proceso hijo, y quita lo que hay
 # entre paréntesis em+
-#: job.c:864
+#: job.c:868
 #, c-format
 msgid "Released token for child 0x%08lx (%s).\n"
 msgstr "Se libera el token para el proceso hijo 0x%08lx (%s).\n"
 
-#: job.c:1383
+#: job.c:1388
 #, fuzzy, c-format
 msgid "process_easy() failed to launch process (e=%ld)\n"
 msgstr "fallo en process_easy() al lanzar el proceso (e=%d)\n"
 
-#: job.c:1387 job.c:2020
+#: job.c:1392 job.c:2025
 #, c-format
 msgid ""
 "\n"
@@ -805,57 +805,57 @@ msgstr ""
 
 # Proceso hijo em+
 # Ok.
-#: job.c:1455
+#: job.c:1460
 #, c-format
 msgid "Putting child 0x%08lx (%s) PID %ld%s on the chain.\n"
 msgstr "Se pone al proceso hijo 0x%08lx (%s) PID %ld%s en la cadena.\n"
 
 # Lo mismo, pon Proceso hijo, y quita lo que hay
 # entre paréntesis em+
-#: job.c:1709
+#: job.c:1714
 #, c-format
 msgid "Obtained token for child 0x%08lx (%s).\n"
 msgstr "Se obtiene el token para el proceso hijo 0x%08lx (%s).\n"
 
-#: job.c:1718
+#: job.c:1723
 msgid "read jobs pipe"
 msgstr "tubería de trabajos leídos"
 
-#: job.c:1832
+#: job.c:1837
 msgid "cannot enforce load limits on this operating system"
 msgstr "no se pueden forzar los límites de carga en este sistema operativo"
 
-#: job.c:1834
+#: job.c:1839
 msgid "cannot enforce load limit: "
 msgstr "no se puede forzar la carga límite: "
 
-#: job.c:1907
+#: job.c:1912
 msgid "no more file handles: could not duplicate stdin\n"
 msgstr "no hay más manejadores de archivos: no se puede duplicar stdin\n"
 
-#: job.c:1909
+#: job.c:1914
 msgid "no more file handles: could not duplicate stdout\n"
 msgstr "no hay más manejadores de archivos: no se puede duplicar stdout\n"
 
-#: job.c:1937
+#: job.c:1942
 msgid "Could not restore stdin\n"
 msgstr "No se puede restaurar stdin\n"
 
-#: job.c:1945
+#: job.c:1950
 msgid "Could not restore stdout\n"
 msgstr "No se puede restaurar stdout\n"
 
-#: job.c:2016
+#: job.c:2021
 #, fuzzy, c-format
 msgid "process_easy() failed failed to launch process (e=%ld)\n"
 msgstr "fallo en process_easy() al lanzar el proceso (e=%d)\n"
 
-#: job.c:2046
+#: job.c:2051
 #, fuzzy, c-format
 msgid "make reaped child pid %ld, still waiting for pid %ld\n"
 msgstr "hacer un hijo descarriado %d, aún esperando el pid %d\n"
 
-#: job.c:2085
+#: job.c:2090
 #, c-format
 msgid "%s: Command not found"
 msgstr "%s: No se encontró el programa"
@@ -866,26 +866,26 @@ msgstr "%s: No se encontró el programa"
 # yo pensaria que me falta un programa en mi sistema que se
 # llame shell. No se ha encontrado el 'shell'em+
 # Es bueno contar con una segunda opinión ... mm
-#: job.c:2145
+#: job.c:2150
 #, c-format
 msgid "%s: Shell program not found"
 msgstr "%s: No se ha encontrado el `shell'"
 
-#: job.c:2154
+#: job.c:2159
 msgid "spawnvpe: environment space might be exhausted"
 msgstr "spawnvpe: el espacio ambiental podría estar agotado"
 
-#: job.c:2363
+#: job.c:2368
 #, c-format
 msgid "$SHELL changed (was `%s', now `%s')\n"
 msgstr "$SHELL ha cambiado (era `%s' y ahora es `%s')\n"
 
-#: job.c:2789
+#: job.c:2794
 #, c-format
 msgid "Creating temporary batch file %s\n"
 msgstr "Se crea el archivo temporal %s\n"
 
-#: job.c:2902
+#: job.c:2907
 #, c-format
 msgid "%s (line %d) Bad shell context (!unixy && !batch_mode_shell)\n"
 msgstr ""
@@ -1729,29 +1729,29 @@ msgstr "atención: se ignoran las instrucciones viejas para el objetivo `%s'"
 msgid "warning: NUL character seen; rest of line ignored"
 msgstr "atención: hay un carácter NUL; se ignora el resto de la línea"
 
-#: remake.c:232
+#: remake.c:242
 #, c-format
 msgid "Nothing to be done for `%s'."
 msgstr "No se hace nada para `%s'."
 
-#: remake.c:233
+#: remake.c:243
 #, c-format
 msgid "`%s' is up to date."
 msgstr "`%s' está actualizado."
 
-#: remake.c:300
+#: remake.c:311
 #, c-format
 msgid "Pruning file `%s'.\n"
 msgstr "Se continúa actualizando el archivo `%s'.\n"
 
 # Sugerencia: No hay ninguna regla... sv
 # Como una no hay ninguna. mm
-#: remake.c:352
+#: remake.c:363
 #, c-format
 msgid "%sNo rule to make target `%s'%s"
 msgstr "%sNo hay ninguna regla para construir el objetivo `%s'%s"
 
-#: remake.c:354
+#: remake.c:365
 #, c-format
 msgid "%sNo rule to make target `%s', needed by `%s'%s"
 msgstr ""
@@ -1763,7 +1763,7 @@ msgstr ""
 # de las que aparecen al hacer un make con la opción -d ( debug )
 # se refiere a lo que dice Santiago, es decir, 'archivo objetivo'  em+
 # Ok creo que tienen razón. mm
-#: remake.c:381
+#: remake.c:394
 #, c-format
 msgid "Considering target file `%s'.\n"
 msgstr "Se considera el archivo objetivo `%s'.\n"
@@ -1774,32 +1774,32 @@ msgstr "Se considera el archivo objetivo `%s'.\n"
 # o bien "Se intentó sin éxito actualizar ..."
 # ¿Qué te parece? sv
 # Bien y tiene razón. mm
-#: remake.c:388
+#: remake.c:401
 #, c-format
 msgid "Recently tried and failed to update file `%s'.\n"
 msgstr "Se intentó, sin éxito, actualizar el archivo `%s'.\n"
 
-#: remake.c:403
+#: remake.c:416
 #, c-format
 msgid "File `%s' was considered already.\n"
 msgstr "El archivo `%s' ya fue considerado.\n"
 
-#: remake.c:413
+#: remake.c:426
 #, c-format
 msgid "Still updating file `%s'.\n"
 msgstr "Se continúa actualizando el archivo `%s'.\n"
 
-#: remake.c:416
+#: remake.c:429
 #, c-format
 msgid "Finished updating file `%s'.\n"
 msgstr "Se terminó de actualizar el archivo `%s'.\n"
 
-#: remake.c:437
+#: remake.c:466
 #, c-format
 msgid "File `%s' does not exist.\n"
 msgstr "El archivo `%s' no existe.\n"
 
-#: remake.c:444
+#: remake.c:473
 #, c-format
 msgid ""
 "*** Warning: .LOW_RESOLUTION_TIME file `%s' has a high resolution time stamp"
@@ -1807,26 +1807,26 @@ msgstr ""
 "*** Atención: el archivo .LOW_RESOLUTION_TIME `%s' tiene una resolución "
 "demasiado alta"
 
-#: remake.c:457 remake.c:965
+#: remake.c:486 remake.c:1020
 #, c-format
 msgid "Found an implicit rule for `%s'.\n"
 msgstr "Se encontró una regla implícita para `%s'.\n"
 
 # Se ha encontrado em+
 # Ok, pero procuro evitar como a la muerte los gerundios. mm
-#: remake.c:459 remake.c:967
+#: remake.c:488 remake.c:1022
 #, c-format
 msgid "No implicit rule found for `%s'.\n"
 msgstr "No se ha encontrado una regla implícita para `%s'.\n"
 
 # Por defecto, como haces arriba em+
 # en efecto, mm
-#: remake.c:465 remake.c:973
+#: remake.c:494 remake.c:1028
 #, c-format
 msgid "Using default commands for `%s'.\n"
 msgstr "Se utilizan las instrucciones por defecto para `%s'.\n"
 
-#: remake.c:487 remake.c:999
+#: remake.c:516 remake.c:1054
 #, c-format
 msgid "Circular %s <- %s dependency dropped."
 msgstr "Se elimina la dependencia circular %s <- %s."
@@ -1834,73 +1834,73 @@ msgstr "Se elimina la dependencia circular %s <- %s."
 # Lo mismo de antes con "target file". sv
 # Estoy de acuerdo con él ( por una vez ;) ) em+
 # Ok. mm
-#: remake.c:604
+#: remake.c:636
 #, c-format
 msgid "Finished prerequisites of target file `%s'.\n"
 msgstr "Se terminaron las dependencias del archivo objetivo `%s'.\n"
 
-#: remake.c:610
+#: remake.c:642
 #, c-format
 msgid "The prerequisites of `%s' are being made.\n"
 msgstr "Se están construyendo las dependencias de `%s'.\n"
 
 # Give up no es enfocar, es abandonar, o desistir em+
 # Si, metí la pata. mm
-#: remake.c:623
+#: remake.c:655
 #, c-format
 msgid "Giving up on target file `%s'.\n"
 msgstr "Se abandona el archivo objetivo `%s'.\n"
 
-#: remake.c:628
+#: remake.c:660
 #, c-format
 msgid "Target `%s' not remade because of errors."
 msgstr "Debido a los errores, el objetivo `%s' no se reconstruyó."
 
-#: remake.c:680
+#: remake.c:712
 #, c-format
 msgid "Prerequisite `%s' is order-only for target `%s'.\n"
 msgstr "El prerequisito `%s' es posterior al objetivo `%s'.\n"
 
-#: remake.c:685
+#: remake.c:717
 #, c-format
 msgid "Prerequisite `%s' of target `%s' does not exist.\n"
 msgstr "La dependencia `%s' del blanco `%s' no existe.\n"
 
-#: remake.c:690
+#: remake.c:722
 #, c-format
 msgid "Prerequisite `%s' is newer than target `%s'.\n"
 msgstr "La dependencia `%s' es más reciente que el objetivo `%s'.\n"
 
-#: remake.c:693
+#: remake.c:725
 #, c-format
 msgid "Prerequisite `%s' is older than target `%s'.\n"
 msgstr "La dependencia `%s' es posterior al objetivo `%s'.\n"
 
 # Ahorra espacio, y pon '::'  en vez de eso :) em+
 # Bueno, no es mala idea. A ver si te gusta lo que puse. mm
-#: remake.c:711
+#: remake.c:743
 #, c-format
 msgid "Target `%s' is double-colon and has no prerequisites.\n"
 msgstr ""
 "El objetivo `%s' es de tipo dos puntos dos veces (::)\n"
 "y no tiene dependencias.\n"
 
-#: remake.c:718
+#: remake.c:750
 #, c-format
 msgid "No commands for `%s' and no prerequisites actually changed.\n"
 msgstr "No hay instrucciones para `%s' y ninguna dependencia cambió.\n"
 
-#: remake.c:723
+#: remake.c:755
 #, c-format
 msgid "Making `%s' due to always-make flag.\n"
 msgstr "Haciendo `%s' debido a la bandera always-make.\n"
 
-#: remake.c:731
+#: remake.c:763
 #, c-format
 msgid "No need to remake target `%s'"
 msgstr "No es necesario reconstruir el objetivo `%s'."
 
-#: remake.c:733
+#: remake.c:765
 #, c-format
 msgid "; using VPATH name `%s'"
 msgstr "; se usa el nombre del VPATH `%s'"
@@ -1908,17 +1908,17 @@ msgstr "; se usa el nombre del VPATH `%s'"
 # Revisa todo el po con un search, y mira a ver si decides usar
 # regenerar o reconstruir ( prefiero lo último 10000 veces ) em+
 # Ok, buena propuesta. mm
-#: remake.c:753
+#: remake.c:785
 #, c-format
 msgid "Must remake target `%s'.\n"
 msgstr "Se debe reconstruir el objetivo `%s'.\n"
 
-#: remake.c:759
+#: remake.c:791
 #, c-format
 msgid "  Ignoring VPATH name `%s'.\n"
 msgstr "  Se ignora el nombre del VPATH `%s'.\n"
 
-#: remake.c:768
+#: remake.c:822
 #, c-format
 msgid "Commands of `%s' are being run.\n"
 msgstr "Las instrucciones de `%s' se están ejecutando.\n"
@@ -1926,41 +1926,41 @@ msgstr "Las instrucciones de `%s' se están ejecutando.\n"
 # Target file no es archivo de objetivos, sino el archivo objetivo
 # make no tiene ningún archivo de objetivos em+
 # Ok. mm
-#: remake.c:775
+#: remake.c:829
 #, c-format
 msgid "Failed to remake target file `%s'.\n"
 msgstr "Fallo al reconstruir el archivo objetivo `%s'.\n"
 
 # Lo mismo em+
 # Ok. mm
-#: remake.c:778
+#: remake.c:832
 #, c-format
 msgid "Successfully remade target file `%s'.\n"
 msgstr "Se reconstruyó con éxito el archivo objetivo `%s'.\n"
 
 # Otra vez em+
 # Ok, no te puedes quejar de falta de consistencia en este caso! mm
-#: remake.c:781
+#: remake.c:835
 #, c-format
 msgid "Target file `%s' needs remade under -q.\n"
 msgstr "Se necesita reconstruir el archivo objetivo `%s' con la opción -q.\n"
 
 # Ubicada :)) , que tal futura, a secas ? em+
 # Bueno, sonaba como StarTrek, muy chido, pero acepto tu sugerencia. mm
-#: remake.c:1309
+#: remake.c:1365
 #, c-format
 msgid "Warning: File `%s' has modification time in the future"
 msgstr "Atención: El archivo `%s' tiene una hora de modificación en el futuro"
 
 # Ubicada :)) , que tal futura, a secas ? em+
 # Bueno, sonaba como StarTrek, muy chido, pero acepto tu sugerencia. mm
-#: remake.c:1316
+#: remake.c:1372
 #, c-format
 msgid "Warning: File `%s' has modification time %.2g s in the future"
 msgstr ""
 "Atención: El archivo `%s' tiene una hora de modificación %.2g en el futuro"
 
-#: remake.c:1514
+#: remake.c:1570
 #, c-format
 msgid ".LIBPATTERNS element `%s' is not a pattern"
 msgstr "El elemento .LIBPATTERNS `%s' no es un patrón"
