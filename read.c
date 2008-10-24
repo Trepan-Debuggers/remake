@@ -408,7 +408,7 @@ eval_makefile (char *filename, int flags)
                           f_append, 0);
 
   if (b_debugger_preread && i_debugger_stepping && !in_debugger) 
-    enter_debugger (NULL, NULL, 0);
+    enter_debugger (NULL, NULL, 0, DEBUG_READ_HIT);
 
   /* Evaluate the makefile */
 

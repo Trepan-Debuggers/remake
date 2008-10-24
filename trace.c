@@ -60,9 +60,9 @@ trace_push_target (target_stack_node_t *p, file_t *p_target,
     } 
 
     if (b_debugger && i_debugger_stepping && p_target->cmds )
-      enter_debugger(new_node, p_target, 0);
+      enter_debugger(new_node, p_target, 0, DEBUG_STEP_HIT);
     else if ( p_target->tracing )
-      enter_debugger(new_node, p_target, 0);
+      enter_debugger(new_node, p_target, 0, DEBUG_STEP_HIT);
   }
   
   return new_node;

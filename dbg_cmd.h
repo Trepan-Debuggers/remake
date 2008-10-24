@@ -35,10 +35,20 @@ Boston, MA 02111-1307, USA.  */
  */
 extern int in_debugger;
 
+typedef enum 
+  {
+    DEBUG_BREAKPOINT_HIT   = 1,
+    DEBUG_GOAL_UPDATED_HIT = 2,
+    DEBUG_READ_HIT         = 3,
+    DEBUG_ERROR_HIT        = 4,
+    DEBUG_STEP_HIT         = 5
+  } debug_enter_reason_t;
+
 /*!
   debugger command interface. 
 */
 extern debug_return_t enter_debugger (target_stack_node_t *p, 
-				      file_t *p_target, int err);
+				      file_t *p_target, int err,
+				      debug_enter_reason_t reason);
 
 #endif /* DBG_CMD_H*/
