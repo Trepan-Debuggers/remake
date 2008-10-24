@@ -4,7 +4,7 @@
 ;;; $Id: mdb.el.in,v 1.8 2007/03/10 16:37:59 rockyb Exp $
 ;;; GNU Make debugger mode via GUD and mdb
 
-;; Copyright (C) 2004, 2005, 2006, 2007 Rocky Bernstein (rocky@gnu.org) 
+;; Copyright (C) 2004, 2005, 2006, 2007, 2008 Rocky Bernstein (rocky@gnu.org) 
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -214,8 +214,6 @@ and source-file directory for your debugger."
   (run-hooks 'mdb-mode-hook)
   )
 
-(provide 'mdb)
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; mdbtrack --- tracking mdb debugger in an Emacs shell window
@@ -285,7 +283,7 @@ can write into: the value (if any) of the environment variable TMPDIR,
   "Queue of Makefile temp files awaiting execution.
 Currently-active file is at the head of the list.")
 
-(defvar mdb-mdbtrack-tracking-p t)
+(defvar mdb-mdbtrack-tracking-p nil)
 
 
 ;; Constants
@@ -299,8 +297,6 @@ Currently-active file is at the head of the list.")
 
 (defconst mdb-marker-regexp-line-group 3
   "Group position in mdb-position-re that matches the line number.")
-
-
 
 (defconst mdb-traceback-line-re
   "^#[0-9]+[ \t]+\\((\\([a-zA-Z-.]+\\) at (\\(\\([a-zA-Z]:\\)?[^:\n]*\\):\\([0-9]*\\)).*\n"
@@ -420,6 +416,20 @@ problem as best as we can determine."
 
 
 ;; mdbtrack functions
+(define-minor-mode mdbtrack-mode ()
+  "Minor mode for tracking GNU Make debugging inside a process shell."
+  :init-value nil
+  ;; The indicator for the mode line.
+  :lighter bashdbtrack-minor-mode-text
+  ;; The minor mode bindings.
+  :global nil
+  :group 'mdb
+  (mdb-mdbtrack-toggle-stack-tracking 1)
+  (setq mdbtrack-is-tracking-p t)
+  (local-set-key "\C-cg" 'mdb-goto-trace-line)
+  (add-hook 'comint-output-filter-functions 'mdb-mdbtrack-track-stack-file)
+  (run-mode-hooks 'bashdbtrack-mode-hook))
+
 (defun mdb-mdbtrack-toggle-stack-tracking (arg)
   (interactive "P")
   (if (not (get-buffer-process (current-buffer)))
@@ -433,15 +443,19 @@ problem as best as we can determine."
            (if mdb-mdbtrack-do-tracking-p "En" "Dis")))
 
 (defun turn-on-mdbtrack ()
+  "Turn on mdbtrack mode.
+
+This function is designed to be added to hooks, for example:
+  (add-hook 'comint-mode-hook 'turn-on-mdbtrack-mode)"
   (interactive)
-  (mdb-mdbtrack-toggle-stack-tracking 1))
+  (mdbtrack-mode 1))
 
 (defun turn-off-mdbtrack ()
   (interactive)
+  (remove-hook 'comint-output-filter-functions 
+	       'mdb-mdbtrack-track-stack-file)
+  (setq mdbtrack-is-tracking-p nil)
   (mdb-mdbtrack-toggle-stack-tracking 0))
-
-;; mdbtrack
-(add-hook 'comint-output-filter-functions 'mdb-mdbtrack-track-stack-file)
 
 ;; Add a designator to the minor mode strings
 (or (assq 'mdb-mdbtrack-minor-mode-string minor-mode-alist)
@@ -451,4 +465,7 @@ problem as best as we can determine."
 
 
 ;;; mdbtrack.el ends here
+
+(provide 'mdb)
+
 ;;; mdb.el ends here

@@ -243,6 +243,12 @@ update_goal_chain (struct dep *goals)
 			     : _("`%s' is up to date.")),
 			 file->name);
 
+                /* FIXME: Add be another variable/option to control
+                   entry here as well?
+                */
+                if ( debugger_enabled )
+                  enter_debugger(NULL, file, -2);
+
 	      /* This goal is finished.  Remove it from the chain.  */
 	      if (lastgoal == 0)
 		goals = g->next;
