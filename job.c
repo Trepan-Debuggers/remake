@@ -404,6 +404,14 @@ child_error (child_t *p_child, target_stack_node_t *p_call_stack,
 	 target_name, strsignal (exit_sig),
 	 coredump ? _(" (core dumped)") : "");
 #endif /* VMS */
+
+  /* If have enabled debugging but haven't entered the debugger above
+     because we haven't set to debug on error, enter the debugger now.
+     FIXME: Add be another variable/option to control entry here as
+     well?
+   */
+  if (! (debugger_on_error & DEBUGGER_ON_ERROR) && debugger_enabled )
+    enter_debugger(p_call_stack, p_child->file, exit_code);
 }
 
 
@@ -835,29 +843,42 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
       else
         lastc->next = c->next;
 
-      free_child (c);
+      {
+	/* Save file info in case we need to use it in the debugger
+	 */
+	file_t file;
 
-      unblock_sigs ();
+	memcpy(&file, c->file, sizeof(file_t));
 
-      /* Debugger "quit" takes precedence over --ignore-errors
+	free_child (c);
+
+	unblock_sigs ();
+
+	/* Debugger "quit" takes precedence over --ignore-errors
 	 --keep-going, etc.
-      */
-      if (exit_code == DEBUGGER_QUIT_RC && debugger_enabled) {
-	in_debugger = DEBUGGER_QUIT_RC;
-	die(DEBUGGER_QUIT_RC);
-      }
+	*/
+	if (exit_code == DEBUGGER_QUIT_RC && debugger_enabled) {
+	  in_debugger = DEBUGGER_QUIT_RC;
+	  die(DEBUGGER_QUIT_RC);
+	}
       
-      /* If the job failed, and the -k flag was not given, die,
-         unless we are already in the process of dying.  */
-      if (!err && child_failed && !dontcare && !keep_going_flag &&
-          /* fatal_error_signal will die with the right signal.  */
-          !handling_fatal_signal)
-        die (2);
-
+	/* If the job failed, and the -k flag was not given, die,
+	   unless we are already in the process of dying.  */
+	if (!err && child_failed && !dontcare && !keep_going_flag &&
+	    /* fatal_error_signal will die with the right signal.  */
+	    !handling_fatal_signal) 
+	  {
+	    if ( (debugger_on_error & DEBUGGER_ON_FATAL) 
+		 || i_debugger_stepping || i_debugger_nexting )
+	      enter_debugger(p_call_stack, &file, 2);
+	    die (2);
+	  }
+      }
+	
       /* Only block for one child.  */
       block = 0;
     }
-
+  
   return;
 }
 
