@@ -557,7 +557,7 @@ void print_read_makefiles (bool b_full)
   printf("\n");
 }
 
-/*! Print the command line used to invode this program */
+/*! Print the command line used to invoke Make. */
 void print_cmdline (void) 
 {
   unsigned int i;
