@@ -187,6 +187,7 @@ char *info_subcommands[] = {
   "break",
   "line",
   "locals",
+  "files",
   "makefiles",
   "target",
   "variables",
@@ -787,8 +788,10 @@ dbg_cmd_info (char *psz_arg)
 		    print_variable_info, NULL);
     } else if (is_abbrev_of (psz_arg, "breakpoints", 1)) {
       list_breakpoints();
+    } else if (is_abbrev_of (psz_arg, "files", 1)) {
+      print_read_makefiles(true);
     } else if (is_abbrev_of (psz_arg, "makefiles", 1)) {
-      print_read_makefiles();
+      print_read_makefiles(false);
     } else if (is_abbrev_of (psz_arg, "stack", 1)) {
       print_target_stack(p_stack_top, i_stack_pos, MAX_STACK_SHOW);
     } else if (is_abbrev_of (psz_arg, "target", 1)) {

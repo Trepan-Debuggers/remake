@@ -526,16 +526,32 @@ print_floc_stack (int i_pos, int i_max)
   }
 }
 
+/*! Print the file information.  */
+void print_file (file_t *p_file) 
+{
+  char buf[FILE_TIMESTAMP_PRINT_LEN_BOUND + 1];
+  printf("File %s:\n", p_file->name);
+  file_timestamp_sprintf (buf, p_file->last_mtime);
+  printf("\tLast modified: %s\n",  buf);
+  file_timestamp_sprintf (buf, p_file->mtime_before_update);
+  printf("\tBefore update: %s\n",  buf);
+}
+
 /*! Print the list makefiles read by read_makefiles().  */
-void print_read_makefiles (void) 
+void print_read_makefiles (bool b_full) 
 {
   dep_t *p_dep;
   if (!read_makefiles) return;
   for (p_dep = read_makefiles; p_dep; p_dep = p_dep->next) {
     if (p_dep->file) {
-      if (p_dep != read_makefiles)
-	printf(", ");
-      printf("%s", p_dep->file->name);
+      if (b_full)
+	print_file(p_dep->file);
+      else 
+	{
+	  if (p_dep != read_makefiles)
+	    printf(", ");
+	  printf("%s", p_dep->file->name);
+	}
     }
   }
   printf("\n");
