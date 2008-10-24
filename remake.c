@@ -19,6 +19,7 @@ GNU Make; see the file COPYING.  If not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 
 #include "make.h"
+#include "dbg_cmd.h"
 #include "filedef.h"
 #include "job.h"
 #include "commands.h"
@@ -245,7 +246,7 @@ update_goal_chain (struct dep *goals)
 			   file->name);
 		  
 		  if ( debugger_enabled && b_debugger_goal )
-		    enter_debugger(NULL, file, -2);
+		    enter_debugger(NULL, file, -2, DEBUG_GOAL_UPDATED_HIT);
 		}
 
 	      /* This goal is finished.  Remove it from the chain.  */
@@ -470,7 +471,7 @@ update_file_1 (struct file *file, unsigned int depth,
   if (noexist) {
       DBF (DB_BASIC, _("File `%s' does not exist.\n"));
       if ( i_debugger_stepping || (i_debugger_nexting && file->cmds) ) 
-	enter_debugger(p_call_stack, file, 0);
+	enter_debugger(p_call_stack, file, 0, DEBUG_STEP_HIT);
   } else if (ORDINARY_MTIME_MIN <= this_mtime && this_mtime <= ORDINARY_MTIME_MAX
 	   && file->low_resolution_time)
     {
@@ -816,7 +817,7 @@ update_file_1 (struct file *file, unsigned int depth,
   }
 
   if ( i_debugger_stepping || (i_debugger_nexting && file->cmds) ) 
-    enter_debugger(p_call_stack2, file, 0);
+    enter_debugger(p_call_stack2, file, 0, DEBUG_STEP_HIT);
 
   /* Now, take appropriate actions to remake the file.  */
   remake_file (file, p_call_stack);

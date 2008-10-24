@@ -121,7 +121,7 @@ error (flocp, fmt, va_alist)
   putc ('\n', stderr);
   fflush (stderr);
   if (debugger_on_error & DEBUGGER_ON_ERROR) 
-    enter_debugger(NULL, NULL, -1);
+    enter_debugger(NULL, NULL, -1, DEBUG_ERROR_HIT);
 }
 
 void
@@ -167,7 +167,7 @@ err (p_call, fmt, va_alist)
   }
   fflush (stderr);
   if (debugger_on_error & DEBUGGER_ON_ERROR) 
-    enter_debugger(p_call, p_target, -1);
+    enter_debugger(p_call, p_target, -1, DEBUG_ERROR_HIT);
 }
 
 /* Print an error message and exit.  */
@@ -208,7 +208,7 @@ fatal (flocp, fmt, va_alist)
   switch (in_debugger) {
   case 0:
     if ( (debugger_on_error & DEBUGGER_ON_FATAL) || debugger_enabled )
-      enter_debugger(NULL, NULL, 2);
+      enter_debugger(NULL, NULL, 2, DEBUG_ERROR_HIT);
     die (2);
     break;
   case DEBUGGER_QUIT_RC:
@@ -264,7 +264,7 @@ fatal_err (flocp, fmt, va_alist)
       print_floc_stack(-1, MAX_STACK_SHOW);
   }
   if ( (debugger_on_error & DEBUGGER_ON_FATAL) || debugger_enabled )
-    enter_debugger(p_call, p_target, 2);
+    enter_debugger(p_call, p_target, 2, DEBUG_ERROR_HIT);
   die (2);
 }
 
@@ -295,7 +295,7 @@ perror_with_name (const char *str, const char *name)
 {
   error (NILF, _("%s%s: %s"), str, name, strerror (errno));
   if (debugger_on_error & DEBUGGER_ON_ERROR) 
-    enter_debugger(NULL, NULL, -1);
+    enter_debugger(NULL, NULL, -1, DEBUG_ERROR_HIT);
 }
 
 /*! Under -d, write a message describing the current IDs.  */
@@ -446,10 +446,13 @@ print_child_cmd (child_t *p_child, target_stack_node_t *p)
 {
   debug_return_t rc = continue_execution;
 
+
   if (!p_child) return continue_execution;
 
   if (i_debugger_stepping || p_child->file->tracing) {
-    rc=enter_debugger(p, p_child->file, 0);
+    debug_enter_reason_t reason = p_child->file->tracing 
+      ? DEBUG_BREAKPOINT_HIT : DEBUG_STEP_HIT;
+    rc=enter_debugger(p, p_child->file, 0, reason);
   }
 
   return rc;

@@ -3136,7 +3136,7 @@ die (int status)
   static char dying = 0;
 
   if ( DEBUGGER_QUIT_RC != in_debugger && debugger_enabled )
-    enter_debugger(NULL, NULL, -2);
+    enter_debugger(NULL, NULL, -2, DEBUG_ERROR_HIT);
 
   /* If we are quitting the debugger and we're at the top level, then
      we'll change the exit status to 0, normal.

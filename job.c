@@ -411,7 +411,7 @@ child_error (child_t *p_child, target_stack_node_t *p_call_stack,
      well?
    */
   if (! (debugger_on_error & DEBUGGER_ON_ERROR) && debugger_enabled )
-    enter_debugger(p_call_stack, p_child->file, exit_code);
+    enter_debugger(p_call_stack, p_child->file, exit_code, DEBUG_ERROR_HIT);
 }
 
 
@@ -870,7 +870,7 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
 	  {
 	    if ( (debugger_on_error & DEBUGGER_ON_FATAL) 
 		 || i_debugger_stepping || i_debugger_nexting )
-	      enter_debugger(p_call_stack, &file, 2);
+	      enter_debugger(p_call_stack, &file, 2, DEBUG_ERROR_HIT);
 	    die (2);
 	  }
       }

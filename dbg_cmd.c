@@ -42,6 +42,8 @@ enum {
 /* True if we are inside the debugger, false otherwise. */
 int in_debugger = false;
 
+static debug_enter_reason_t last_stop_reason;
+
 #ifdef HAVE_LIBREADLINE
 #include <stdio.h>
 #include <stdlib.h>
@@ -189,6 +191,7 @@ char *info_subcommands[] = {
   "locals",
   "files",
   "makefiles",
+  "program",
   "target",
   "variables",
   "warranty",
@@ -792,6 +795,29 @@ dbg_cmd_info (char *psz_arg)
       print_read_makefiles(true);
     } else if (is_abbrev_of (psz_arg, "makefiles", 1)) {
       print_read_makefiles(false);
+    } else if (is_abbrev_of (psz_arg, "program", 1)) {
+      switch (last_stop_reason) 
+	{
+	case DEBUG_BREAKPOINT_HIT:
+	  printf("Program stopped at a breakpoint.a\n");
+	  break;
+	case DEBUG_GOAL_UPDATED_HIT:
+	  printf("Program stopped for updating a goal.\n");
+	  printf("\n");
+	  break;
+	case DEBUG_READ_HIT:
+	  printf("Program stopped for reading a file.\n");
+	  printf("\n");
+	  break;
+	case DEBUG_ERROR_HIT:
+	  printf("Program stopped after an error encountered.\n");
+	  printf("\n");
+	  break;
+	case DEBUG_STEP_HIT:
+	  printf("Program stopped in stepping.\n");
+	  printf("\n");
+	  break;
+	}
     } else if (is_abbrev_of (psz_arg, "stack", 1)) {
       print_target_stack(p_stack_top, i_stack_pos, MAX_STACK_SHOW);
     } else if (is_abbrev_of (psz_arg, "target", 1)) {
@@ -1350,7 +1376,8 @@ static debug_return_t dbg_cmd_shell (char *psz_varname)
 #define MAX_NEST_DEPTH 10
 
 debug_return_t
-enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
+enter_debugger (target_stack_node_t *p, file_t *p_target, int err,
+		debug_enter_reason_t reason)
 {
   debug_return_t debug_return = debug_readloop;
 #ifdef HAVE_LIBREADLINE
@@ -1358,6 +1385,8 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err)
   char open_depth[MAX_NEST_DEPTH];
   char close_depth[MAX_NEST_DEPTH];
   unsigned int i = 0;
+
+  last_stop_reason = reason;
 
   if ( in_debugger == DEBUGGER_QUIT_RC ) {
     return continue_execution;

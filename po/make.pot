@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-make@gnu.org\n"
-"POT-Creation-Date: 2008-10-23 06:47-0400\n"
+"POT-Creation-Date: 2008-10-23 15:12-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -79,39 +79,39 @@ msgstr ""
 msgid "  uid = %d, gid = %d, mode = 0%o.\n"
 msgstr ""
 
-#: commands.c:423
+#: commands.c:443
 msgid "*** Break.\n"
 msgstr ""
 
-#: commands.c:546
+#: commands.c:566
 #, c-format
 msgid "*** [%s] Archive member `%s' may be bogus; not deleted"
 msgstr ""
 
-#: commands.c:549
+#: commands.c:569
 #, c-format
 msgid "*** Archive member `%s' may be bogus; not deleted"
 msgstr ""
 
-#: commands.c:562
+#: commands.c:582
 #, c-format
 msgid "*** [%s] Deleting file `%s'"
 msgstr ""
 
-#: commands.c:564
+#: commands.c:584
 #, c-format
 msgid "*** Deleting file `%s'"
 msgstr ""
 
-#: commands.c:605
+#: commands.c:625
 msgid "#  commands to execute"
 msgstr ""
 
-#: commands.c:608
+#: commands.c:628
 msgid " (built-in):"
 msgstr ""
 
-#: commands.c:610
+#: commands.c:630
 #, c-format
 msgid " (from `%s', line %lu):\n"
 msgstr ""
@@ -562,7 +562,7 @@ msgstr ""
 msgid "Live child 0x%08lx (%s) PID %ld %s\n"
 msgstr ""
 
-#: job.c:525 job.c:706 job.c:808 job.c:1462
+#: job.c:525 job.c:706 job.c:819 job.c:1483
 msgid " (remote)"
 msgstr ""
 
@@ -581,105 +581,105 @@ msgstr ""
 msgid "Cleaning up temp batch file %s\n"
 msgstr ""
 
-#: job.c:806
+#: job.c:817
 #, c-format
 msgid "Removing child 0x%08lx PID %ld%s from chain.\n"
 msgstr ""
 
-#: job.c:866
+#: job.c:885
 msgid "write jobserver"
 msgstr ""
 
-#: job.c:868
+#: job.c:887
 #, c-format
 msgid "Released token for child 0x%08lx (%s).\n"
 msgstr ""
 
-#: job.c:1388
+#: job.c:1409
 #, c-format
 msgid "process_easy() failed to launch process (e=%ld)\n"
 msgstr ""
 
-#: job.c:1392 job.c:2025
+#: job.c:1413 job.c:2050
 #, c-format
 msgid ""
 "\n"
 "Counted %d args in failed launch\n"
 msgstr ""
 
-#: job.c:1460
+#: job.c:1481
 #, c-format
 msgid "Putting child 0x%08lx (%s) PID %ld%s on the chain.\n"
 msgstr ""
 
-#: job.c:1714
+#: job.c:1739
 #, c-format
 msgid "Obtained token for child 0x%08lx (%s).\n"
 msgstr ""
 
-#: job.c:1723
+#: job.c:1748
 msgid "read jobs pipe"
 msgstr ""
 
-#: job.c:1837
+#: job.c:1862
 msgid "cannot enforce load limits on this operating system"
 msgstr ""
 
-#: job.c:1839
+#: job.c:1864
 msgid "cannot enforce load limit: "
 msgstr ""
 
-#: job.c:1912
+#: job.c:1937
 msgid "no more file handles: could not duplicate stdin\n"
 msgstr ""
 
-#: job.c:1914
+#: job.c:1939
 msgid "no more file handles: could not duplicate stdout\n"
 msgstr ""
 
-#: job.c:1942
+#: job.c:1967
 msgid "Could not restore stdin\n"
 msgstr ""
 
-#: job.c:1950
+#: job.c:1975
 msgid "Could not restore stdout\n"
 msgstr ""
 
-#: job.c:2021
+#: job.c:2046
 #, c-format
 msgid "process_easy() failed failed to launch process (e=%ld)\n"
 msgstr ""
 
-#: job.c:2051
+#: job.c:2076
 #, c-format
 msgid "make reaped child pid %ld, still waiting for pid %ld\n"
 msgstr ""
 
-#: job.c:2090
+#: job.c:2115
 #, c-format
 msgid "%s: Command not found"
 msgstr ""
 
-#: job.c:2150
+#: job.c:2175
 #, c-format
 msgid "%s: Shell program not found"
 msgstr ""
 
-#: job.c:2159
+#: job.c:2184
 msgid "spawnvpe: environment space might be exhausted"
 msgstr ""
 
-#: job.c:2368
+#: job.c:2393
 #, c-format
 msgid "$SHELL changed (was `%s', now `%s')\n"
 msgstr ""
 
-#: job.c:2794
+#: job.c:2819
 #, c-format
 msgid "Creating temporary batch file %s\n"
 msgstr ""
 
-#: job.c:2907
+#: job.c:2932
 #, c-format
 msgid "%s (line %d) Bad shell context (!unixy && !batch_mode_shell)\n"
 msgstr ""

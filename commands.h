@@ -28,6 +28,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 #include "trace.h"
 #include "job.h"
 
+/*! \brief bits in `lines_flags'.  */
+typedef enum {
+   COMMANDS_RECURSE  = 	1, /**< Recurses: + or $(MAKE).  */
+   COMMANDS_SILENT   =	2, /**< Silent: @.  */
+   COMMANDS_NOERROR  =	4  /**< No errors: -.  */
+} line_flags_enum_t;
+  
 /*! \brief Command structure. 
 
    This gives the commands to make a file
