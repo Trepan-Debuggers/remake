@@ -462,9 +462,11 @@ update_file_1 (struct file *file, unsigned int depth,
   this_mtime = file_mtime (file);
   check_renamed (file);
   noexist = this_mtime == NONEXISTENT_MTIME;
-  if (noexist)
-    DBF (DB_BASIC, _("File `%s' does not exist.\n"));
-  else if (ORDINARY_MTIME_MIN <= this_mtime && this_mtime <= ORDINARY_MTIME_MAX
+  if (noexist) {
+      DBF (DB_BASIC, _("File `%s' does not exist.\n"));
+      if ( i_debugger_stepping || (i_debugger_nexting && file->cmds) ) 
+	enter_debugger(p_call_stack, file, 0);
+  } else if (ORDINARY_MTIME_MIN <= this_mtime && this_mtime <= ORDINARY_MTIME_MAX
 	   && file->low_resolution_time)
     {
       /* Avoid spurious rebuilds due to low resolution time stamps.  */
