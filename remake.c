@@ -237,17 +237,16 @@ update_goal_chain (struct dep *goals)
 		     any commands were actually started for this goal.  */
 		  && file->update_status == 0 && !g->changed
 		  /* Never give a message under -s or -q.  */
-		  && !silent_flag && !question_flag)
-		message (1, ((file->phony || file->cmds == 0)
-			     ? _("Nothing to be done for `%s'.")
-			     : _("`%s' is up to date.")),
-			 file->name);
-
-                /* FIXME: Add be another variable/option to control
-                   entry here as well?
-                */
-                if ( debugger_enabled )
-                  enter_debugger(NULL, file, -2);
+		  && !silent_flag && !question_flag) 
+		{
+		  message (1, ((file->phony || file->cmds == 0)
+			       ? _("Nothing to be done for `%s'.")
+			       : _("`%s' is up to date.")),
+			   file->name);
+		  
+		  if ( debugger_enabled && b_debugger_goal )
+		    enter_debugger(NULL, file, -2);
+		}
 
 	      /* This goal is finished.  Remove it from the chain.  */
 	      if (lastgoal == 0)

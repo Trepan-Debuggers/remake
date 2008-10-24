@@ -297,6 +297,7 @@ static int print_usage_flag = 0;
 /*! Do we want to go into a debugger or not?
   Values are "error"     - enter on errors or fatal errors
               "fatal"     - enter on fatal errors
+              "goal"      - set to enter debugger before updating goal
               "preread"   - set to enter debugger before reading makefile(s)
               "preaction" - set to enter debugger before performing any 
 	                    actions(s)
@@ -421,8 +422,8 @@ static const char *const usage[] =
   -y                           same as --trace=\"noshell\"\n"),
     N_("\
   -X [type], --debugger[=TYPE] Enter debugger. TYPE may be\n\
-                               \"preread\", \"preaction\", \"full\",\n\
-                               \"error\", or \"fatal\".\n"),
+                               \"goal\", \"preread\", \"preaction\",\n\
+                               \"full\", \"error\", or \"fatal\".\n"),
     N_("\
   --warn-undefined-variables  Warn when an undefined variable is referenced.\n"),
     NULL
@@ -1270,6 +1271,11 @@ main (int argc, char **argv, char **envp)
 	  db_level           |= DB_READ_MAKEFILES;
 	}
 	
+	if (0 == strcmp(*p, "goal")) {
+	  b_debugger_goal  = true;
+	  db_level           |= DB_UPDATE_GOAL;
+	}
+	
 	if ( 0 == strcmp(*p, "full") || b_debugger_preread
 	     || 0 == strcmp(*p, "preaction") ) {
 	  job_slots            =  1;
@@ -1279,7 +1285,8 @@ main (int argc, char **argv, char **envp)
 	  /* For now we'll do basic debugging. Later, "stepping'
  	     will stop here while next won't - either way no printing.
 	   */
-	  db_level          |=  DB_BASIC | DB_CALL | DB_SHELL | DB_MAKEFILES;
+	  db_level          |=  DB_BASIC | DB_CALL | DB_SHELL | DB_UPDATE_GOAL
+	                    |   DB_MAKEFILES;
 	} 
 	if ( 0 == strcmp(*p, "full")
 	     || 0 == strcmp(*p, "error") ) {

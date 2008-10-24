@@ -199,7 +199,9 @@ print_db_level(debug_level_mask_t e_debug_level)
     printf("Tracing shell commands 0x%x\n", DB_SHELL);
   if (e_debug_level & DB_MAKEFILES)
     printf("Tracing Rebuilding Makefiles 0x%x\n", DB_MAKEFILES);
-  if (e_debug_level & DB_READ_MAKEFILES)
+  if (e_debug_level & DB_UPDATE_GOAL)
+    printf("Tracing Goal target updates 0x%x\n", DB_MAKEFILES);
+  if (e_debug_level & DB_UPDATE_GOAL)
     printf("Tracing reading Makefiles 0x%x\n", DB_READ_MAKEFILES);
   if (e_debug_level & DB_CALL)
     printf("Tracing function call and returns 0x%x\n", DB_CALL);
