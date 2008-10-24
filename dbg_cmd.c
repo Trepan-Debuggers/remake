@@ -942,6 +942,7 @@ dbg_cmd_run (char *psz_arg)
     char *psz_full_args = CALLOC(char, len);
     snprintf(psz_full_args, len, "%s %s", global_argv[0], psz_arg);
     ppsz_argv = buildargv(psz_full_args);
+    free(psz_full_args);
   }
   execvp (psz_make_cmd, ppsz_argv);
   /* NOT USED: */
@@ -985,6 +986,19 @@ dbg_cmd_show_stack (char *psz_amount)
 
   if (p_stack_floc_top) 
     print_floc_stack (i_stack_pos, i_amount);
+  
+  /* If we are in a recursive Make, show the command invocation */
+  if (makelevel > 0) 
+    {
+      unsigned int i;
+      printf("Most-recent (level %d) invocation:\n\t", makelevel);
+      printf("%s ", global_argv[0]);
+      for (i = 1; global_argv[i]; i++) {
+	printf(" %s", global_argv[i]);
+      }
+      printf("\n");
+    }
+  
   return debug_readloop;
 }
 

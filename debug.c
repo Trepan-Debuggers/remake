@@ -26,8 +26,13 @@ debug_enter_debugger_t debug_dummy_enter_debugger_mask;
 int db_level   = 0;
 int debug_flag = 0;
 
+/*! If true, enter the debugger before updating goal. */
+bool b_debugger_goal = false;
+
 /*! If true, enter the debugger before reading any makefiles. */
 bool b_debugger_preread = false;
+stringlist_t *db_flags;
+
 stringlist_t *db_flags;
 
 /** Toggle -d on receipt of SIGUSR1.  */

@@ -55,6 +55,7 @@ typedef enum {
   DB_MAKEFILES      = 0x100,
   DB_READ_MAKEFILES = 0x200, /**< Reading makefiles */
   DB_CALL           = 0x400, /**< GNU Make function call and returns */
+  DB_UPDATE_GOAL    = 0x800, /**< GNU Make function call and returns */
   DB_ALL            = 0xfff  /**< Bitmask for all of the above. */
 } debug_level_mask_t;
 
@@ -94,6 +95,9 @@ extern int no_extended_errors;
 
 /*! If 1, we show variable definitions */
 extern int show_variable_definitions;
+
+/*! If true, enter the debugger before updating goal target. */
+extern bool b_debugger_goal;
 
 /*! If true, enter the debugger before reading any makefiles. */
 extern bool b_debugger_preread;
