@@ -28,6 +28,7 @@ Boston, MA 02111-1307, USA.  */
 #include "debug.h"
 #include "filedef.h"
 #include "trace.h"
+#include "rule.h"
 
 extern floc_t *p_target_loc;
 extern char   *psz_target_name;
@@ -93,5 +94,9 @@ extern void print_db_level(debug_level_mask_t e_debug_level);
 
 /*! See if psz_varname is $varname or $(varname) */
 extern void try_without_dollar(const char *psz_varname);
+
+extern void dbg_print_invocation(void);
+
+extern rule_t *find_rule (const char *psz_name);
 
 #endif /* DBG_FNS_H*/

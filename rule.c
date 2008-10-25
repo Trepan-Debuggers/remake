@@ -513,13 +513,12 @@ create_pattern_rule (char **targets, char **target_percents,
     r->terminal = terminal;
 }
 
-/* Print the data base of rules.  */
-
-static void			/* Useful to call from gdb.  */
-print_rule (struct rule *r)
+/*! Show information about a given rule. Useful from the debugger or gdb.  */
+void	
+print_rule (rule_t *r, bool b_verbose)
 {
-  register unsigned int i;
-  register struct dep *d;
+  int i;
+  dep_t *d;
 
   for (i = 0; r->targets[i] != 0; ++i)
     {
@@ -534,17 +533,19 @@ print_rule (struct rule *r)
 
   for (d = r->deps; d != 0; d = d->next)
     printf (" %s", dep_name (d));
-  putchar ('\n');
 
+  if (!b_verbose) return;
+  putchar ('\n');
   if (r->cmds != 0)
     print_commands (NULL, r->cmds, false);
 }
 
+/*!  Print the data base of rules.  */
 void
-print_rule_data_base (void)
+print_rule_data_base (bool b_verbose)
 {
-  register unsigned int rules, terminal;
-  register struct rule *r;
+  unsigned int rules, terminal;
+  rule_t *r;
 
   puts (_("\n# Implicit Rules"));
 
@@ -554,11 +555,16 @@ print_rule_data_base (void)
       ++rules;
 
       putchar ('\n');
-      print_rule (r);
+      print_rule (r, b_verbose);
 
       if (r->terminal)
 	++terminal;
     }
+
+  if (!b_verbose) {
+    printf("\n");
+    return;
+  }
 
   if (rules == 0)
     puts (_("\n# No implicit rules."));
