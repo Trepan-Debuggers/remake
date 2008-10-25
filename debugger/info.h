@@ -25,7 +25,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef DBG_INFO_H
 #define DBG_INFO_H
 
-#include "dbg_cmd.h"
+#include "cmd.h"
 #include "trace.h"
 
 extern debug_enter_reason_t last_stop_reason;

@@ -20,7 +20,7 @@ Boston, MA 02111-1307, USA.  */
 /** debugger command stack routines. */
 
 #include <assert.h>
-#include "dbg_break.h"
+#include "break.h"
 #include "filedef.h"
 #include "make.h"
 #include "print.h"

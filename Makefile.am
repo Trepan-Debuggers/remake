@@ -48,8 +48,8 @@ endif
 
 
 make_SOURCES =	ar.c arscan.c buildargv.c commands.c \
-	        dbg_break.c dbg_cmd.c dbg_fns.c \
-		dbg_info.c dbg_stack.c \
+	        debugger/break.c debugger/cmd.c debugger/fns.c \
+		debugger/info.c debugger/stack.c \
 	        debug.c default.c dir.c expand.c file.c \
 		function.c getopt.c getopt1.c implicit.c job.c main.c \
 		misc.c print.c read.c remake.c $(remote) rule.c signame.c \
@@ -59,8 +59,8 @@ EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c
 
 noinst_HEADERS = buildargv.h commands.h dep.h filedef.h job.h make.h \
                  rule.h variable.h \
-	         dbg_break.h dbg_cmd.h dbg_fns.h \
-		 dbg_info.h dbg_stack.h \
+	         debugger/break.h debugger/cmd.h debugger/fns.h \
+		 debugger/info.h debugger/stack.h \
 	         debug.h dep.h dir_fns.h expand.h file.h \
 		 function.h getopt.h gettext.h hash.h \
 		 make.h print.h \

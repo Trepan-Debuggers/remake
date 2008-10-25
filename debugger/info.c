@@ -21,10 +21,10 @@ Boston, MA 02111-1307, USA.  */
 
 #include "file.h"
 #include "print.h"
-#include "dbg_cmd.h"
-#include "dbg_fns.h"
-#include "dbg_info.h"
-#include "dbg_stack.h"
+#include "cmd.h"
+#include "fns.h"
+#include "info.h"
+#include "stack.h"
 #include "debug.h"
 
 const char *WARRANTY = 

@@ -19,8 +19,8 @@ Boston, MA 02111-1307, USA.  */
 
 /* debugger command interface. */
 
-#include "dbg_fns.h"
-#include "dbg_stack.h"
+#include "fns.h"
+#include "stack.h"
 #include "commands.h"
 
 int i_stack_pos = 0;
