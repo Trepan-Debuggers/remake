@@ -19,6 +19,8 @@
 AUTOMAKE_OPTIONS = 1.8 dist-bzip2 check-news ansi2knr
 ACLOCAL_AMFLAGS	=  -I config
 
+transform = s,make,@MAKE_NAME@,
+
 MAKE_HOST =	@MAKE_HOST@
 
 # Only process if target is MS-Windows
