@@ -18,7 +18,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 
 /* Structure used for pattern rules.  */
 
-struct rule
+#ifndef RULE_H
+#define RULE_H
+
+typedef struct rule
   {
     struct rule *next;
     char **targets;		/* Targets of the rule.  */
@@ -28,7 +31,7 @@ struct rule
     struct commands *cmds;	/* Commands to execute.  */
     char terminal;		/* If terminal (double-colon).  */
     char in_use;		/* If in use by a parent pattern_search.  */
-  };
+  } rule_t;
 
 /* For calling install_pattern_rule.  */
 struct pspec
@@ -58,3 +61,8 @@ extern void create_pattern_rule PARAMS ((char **targets,
                                          struct dep *deps,
                                          struct commands *commands,
                                          int override));
+
+/*! Show information about a given rule. Useful from the debugger or gdb.  */
+extern void print_rule (rule_t *r, bool b_verbose);
+
+#endif /* RULE_H*/

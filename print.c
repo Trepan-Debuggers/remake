@@ -541,20 +541,15 @@ void print_file (file_t *p_file)
 }
 
 /*! Print the list makefiles read by read_makefiles().  */
-void print_read_makefiles (bool b_full) 
+void print_read_makefiles(void)
 {
   dep_t *p_dep;
   if (!read_makefiles) return;
   for (p_dep = read_makefiles; p_dep; p_dep = p_dep->next) {
     if (p_dep->file) {
-      if (b_full)
-	print_file(p_dep->file);
-      else 
-	{
-	  if (p_dep != read_makefiles)
-	    printf(", ");
-	  printf("%s", p_dep->file->name);
-	}
+      if (p_dep != read_makefiles)
+	printf(", ");
+      printf("%s", p_dep->file->name);
     }
   }
   printf("\n");

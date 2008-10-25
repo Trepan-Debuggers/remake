@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #include "debug.h"
 #include "expand.h"
 #include "print.h"
+#include "rule.h"
 #include "trace.h"
 
 #ifdef HAVE_STRING_H
@@ -349,3 +350,28 @@ dbg_cmd_show_exp (char *psz_varname, bool expand)
   }
   return true;
 }
+
+void dbg_print_invocation(void) 
+{
+  unsigned int i;
+  printf("%s ", global_argv[0]);
+  for (i = 1; global_argv[i]; i++) {
+    printf(" %s", global_argv[i]);
+  }
+  printf("\n");
+}
+
+rule_t *find_rule (const char *psz_name)
+{
+  rule_t *r;
+
+  for (r = pattern_rules; r != 0; r = r->next)
+    {
+      unsigned int i;
+      for (i = 0; r->targets[i] != 0; ++i)
+	if (0 == strcmp(r->targets[i], psz_name)) return r;
+    }
+  return NULL;
+}
+
+  

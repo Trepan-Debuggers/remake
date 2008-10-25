@@ -89,9 +89,7 @@ static debug_return_t dbg_cmd_shell            (char *psz_arg);
 static debug_return_t dbg_cmd_show             (char *psz_arg);
 static debug_return_t dbg_cmd_show_command     (char *psz_arg);
 static debug_return_t dbg_cmd_skip             (char *psz_arg);
-static debug_return_t dbg_cmd_target           (char *psz_arg);
 static debug_return_t dbg_cmd_step             (char *psz_arg);
-static debug_return_t dbg_cmd_where            (char *psz_arg);
 static debug_return_t dbg_cmd_write_cmds       (char *psz_arg);
 
 typedef struct {
@@ -165,6 +163,7 @@ char *info_subcommands[] = {
   "line",
   "locals",
   "files",
+  "frame",
   "makefiles",
   "program",
   "rules",
@@ -224,7 +223,7 @@ subcommand_var_info_t set_subcommands[] = {
     &keep_going_flag,    true},
   { "silent",        "Set value of GNU Make --silent (or -s) flags",
     &silent_flag,        true},
-  { "variable",      "Set the version of GNU Make + dbg",
+  { "variable",      "Set a GNU Make variable",
     NULL,                false},
   { NULL, NULL, NULL, false }
 };
@@ -883,7 +882,7 @@ dbg_cmd_show_command (char *psz_arg)
 }
 
 /* Show target call stack info. */
-static debug_return_t 
+debug_return_t 
 dbg_cmd_where (char *psz_amount)
 {
   int i_amount;
@@ -903,15 +902,9 @@ dbg_cmd_where (char *psz_amount)
   /* If we are in a recursive Make, show the command invocation */
   if (makelevel > 0) 
     {
-      unsigned int i;
       printf("Most-recent (level %d) invocation:\n\t", makelevel);
-      printf("%s ", global_argv[0]);
-      for (i = 1; global_argv[i]; i++) {
-	printf(" %s", global_argv[i]);
-      }
-      printf("\n");
+      dbg_print_invocation();
     }
-  
   return debug_readloop;
 }
 
@@ -982,7 +975,7 @@ dbg_cmd_step (char *psz_arg)
 }
 
 /* Show a variable or target definition. */
-static debug_return_t dbg_cmd_target (char *psz_args) 
+debug_return_t dbg_cmd_target (char *psz_args) 
 {
   file_t *p_target;
   char   *psz_target;

@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 #include "fns.h"
 #include "info.h"
 #include "stack.h"
+#include "rule.h"
 #include "debug.h"
 
 const char *WARRANTY = 
@@ -53,12 +54,13 @@ const char *WARRANTY =
 
 /* Give some help info. */
 debug_return_t 
-dbg_cmd_info (char *psz_arg)
+dbg_cmd_info (char *psz_args)
 {
-  if (!psz_arg || 0==strlen(psz_arg)) {
+  if (!psz_args || 0==strlen(psz_args)) {
     dbg_cmd_help("info");
   } else {
-    if (is_abbrev_of (psz_arg, "line", 2)) {
+    char *psz_subcmd = get_word(&psz_args);
+    if (is_abbrev_of (psz_subcmd, "line", 2)) {
       /* We want output to be compatible with gdb output.*/
       if (p_stack_top && p_stack_top->p_target && 
 	  p_stack_top->p_target->floc.filenm) {
@@ -74,17 +76,17 @@ dbg_cmd_info (char *psz_arg)
 	printf("No line number info recorded.\n");
       }
       
-    } else if (is_abbrev_of (psz_arg, "locals", 2)) {
+    } else if (is_abbrev_of (psz_subcmd, "locals", 2)) {
       char *psz_target = NULL;
-      char *psz_args   = NULL;
-      file_t *p_target = get_target(&psz_args, &psz_target);
+      char *psz_subcmds   = NULL;
+      file_t *p_target = get_target(&psz_subcmds, &psz_target);
 
       if (p_target) {
 	if (!p_target->variables) {
 	  initialize_file_variables (p_target, 0);
 	  set_file_variables (p_target);
 	  if (!p_target->variables) {
-	    printf("Can't get varible information for target %s\n", 
+	    printf("Can't get variable information for target %s\n", 
 		   psz_target);
 	    return debug_readloop;
 	  }
@@ -95,52 +97,82 @@ dbg_cmd_info (char *psz_arg)
       }
       hash_map_arg (&p_target->variables->set->table, 
 		    print_variable_info, NULL);
-    } else if (is_abbrev_of (psz_arg, "breakpoints", 1)) {
+    } else if (is_abbrev_of (psz_subcmd, "breakpoints", 1)) {
       list_breakpoints();
-    } else if (is_abbrev_of (psz_arg, "files", 1)) {
-      print_read_makefiles(true);
-    } else if (is_abbrev_of (psz_arg, "makefiles", 1)) {
-      print_read_makefiles(false);
-    } else if (is_abbrev_of (psz_arg, "program", 1)) {
+    } else if (is_abbrev_of (psz_subcmd, "makefiles", 1) ||
+	       is_abbrev_of (psz_subcmd, "files", 2)) {
+      if (0 == strlen(psz_args))
+	print_read_makefiles();
+      else if (0 == strcmp(psz_args, "verbose"))
+	print_file_data_base ();
+      else 
+	dbg_cmd_target(psz_args);
+    } else if (is_abbrev_of (psz_subcmd, "frame", 2)) {
+      dbg_cmd_where(psz_args);
+    } else if (is_abbrev_of (psz_subcmd, "program", 1)) {
+      printf(_("Starting directory `%s'\n"), starting_directory);
+      printf(_("Program invocation:\n"));
+      printf("\t");
+      dbg_print_invocation();
+      printf(_("Recursion level: %d\n"), makelevel);
       switch (last_stop_reason) 
 	{
 	case DEBUG_BREAKPOINT_HIT:
-	  printf("Program stopped at a breakpoint.a\n");
+	  printf(_("Program stopped at a breakpoint.\n"));
 	  break;
 	case DEBUG_GOAL_UPDATED_HIT:
-	  printf("Program stopped for updating a goal.\n");
+	  printf(_("Program stopped for updating a goal.\n"));
 	  printf("\n");
 	  break;
 	case DEBUG_READ_HIT:
-	  printf("Program stopped for reading a file.\n");
+	  printf(_("Program stopped for reading a file.\n"));
 	  printf("\n");
 	  break;
 	case DEBUG_ERROR_HIT:
-	  printf("Program stopped after an error encountered.\n");
+	  printf(_("Program stopped after an error encountered.\n"));
 	  printf("\n");
 	  break;
 	case DEBUG_STEP_HIT:
-	  printf("Program stopped in stepping.\n");
+	  printf(_("Program stopped in stepping.\n"));
 	  printf("\n");
 	  break;
 	}
-    } else if (is_abbrev_of (psz_arg, "rules", 1)) {
-      print_rule_data_base ();
-    } else if (is_abbrev_of (psz_arg, "stack", 1)) {
-      print_target_stack(p_stack_top, i_stack_pos, MAX_STACK_SHOW);
-    } else if (is_abbrev_of (psz_arg, "target", 1)) {
-      if (p_stack_top && p_stack_top->p_target && p_stack_top->p_target->name)
-	printf("target: %s\n", p_stack_top->p_target->name);
+    } else if (is_abbrev_of (psz_subcmd, "rules", 1)) {
+      if (0 == strlen(psz_args))
+	print_rule_data_base (false);
+      else if (0 == strcmp(psz_args, "verbose"))
+	print_rule_data_base (true);
       else 
-	printf("target unknown\n");
-    } else if (is_abbrev_of (psz_arg, "variables", 1)) {
+	{
+	  rule_t *r = find_rule(psz_args);
+	  if (r) 
+	    print_rule(r, true);
+	  else
+	    printf(_("Rule %s not found.\n"), psz_args);
+	}
+    } else if (is_abbrev_of (psz_subcmd, "stack", 1)) {
+      print_target_stack(p_stack_top, i_stack_pos, MAX_STACK_SHOW);
+    } else if (is_abbrev_of (psz_subcmd, "target", 1)) {
+      if (0 == strlen(psz_args))
+	{
+	  if (p_stack_top && p_stack_top->p_target && 
+	      p_stack_top->p_target->name)
+	    printf("target: %s\n", p_stack_top->p_target->name);
+	  else 
+	    {
+	      printf("target unknown\n");
+	    }
+	} 
+      else
+	dbg_cmd_target(psz_args);
+    } else if (is_abbrev_of (psz_subcmd, "variables", 1)) {
       print_variable_data_base();
-    } else if (is_abbrev_of (psz_arg, "vpath", 1)) {
+    } else if (is_abbrev_of (psz_subcmd, "vpath", 1)) {
       print_vpath_data_base ();
-    } else if (is_abbrev_of (psz_arg, "warranty", 1)) {
+    } else if (is_abbrev_of (psz_subcmd, "warranty", 1)) {
       printf(WARRANTY);
     } else {
-      printf(_("Undefined command \"%s\". Try \"help info\"\n"), psz_arg);
+      printf(_("Undefined command \"%s\". Try \"help info\"\n"), psz_subcmd);
     }
   }
   
