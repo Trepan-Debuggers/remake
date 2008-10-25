@@ -50,5 +50,6 @@ typedef enum
 extern debug_return_t enter_debugger (target_stack_node_t *p, 
 				      file_t *p_target, int err,
 				      debug_enter_reason_t reason);
+extern debug_return_t dbg_cmd_help   (char *psz_arg);
 
 #endif /* DBG_CMD_H*/

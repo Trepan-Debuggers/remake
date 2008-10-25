@@ -1,44 +1,43 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR Free Software Foundation, Inc.
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Copyright (C) 2002, 2003 Free Software Foundation, Inc.
+# Ales Nyakhaychyk <nab@mail.by>, 2002, 2003.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: make 3.80\n"
 "Report-Msgid-Bugs-To: bug-make@gnu.org\n"
 "POT-Creation-Date: 2008-10-24 20:13-0400\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2003-10-21 11:50+0300\n"
+"Last-Translator: Ales Nyakhaychyk <nab@mail.by>\n"
+"Language-Team: Belarusian <i18n@mova.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 0.9.6\n"
 
 #: ar.c:54
 #, c-format
 msgid "attempt to use unsupported feature: `%s'"
-msgstr ""
+msgstr "спроба выкарыстаць непадтрымліваемую мажлівасьць: \"%s\""
 
 #: ar.c:141
 msgid "touch archive member is not available on VMS"
-msgstr ""
+msgstr "дакрананьне да ўдзельніку архіва недаступна на VMS"
 
 #: ar.c:172
 #, c-format
 msgid "touch: Archive `%s' does not exist"
-msgstr ""
+msgstr "touch: архіў \"%s\" ня йснуе"
 
 #: ar.c:175
 #, c-format
 msgid "touch: `%s' is not a valid archive"
-msgstr ""
+msgstr "touch: \"%s\" - гэта не рэчаісны архіў"
 
 #: ar.c:182
 #, c-format
 msgid "touch: Member `%s' does not exist in `%s'"
-msgstr ""
+msgstr "touch: удзельнік \"%s\" ня йснуе ў \"%s\""
 
 #: ar.c:189
 #, c-format
@@ -67,17 +66,17 @@ msgstr ""
 
 #: arscan.c:826
 msgid " (name might be truncated)"
-msgstr ""
+msgstr " (назва мусіла быць абрэзана)"
 
 #: arscan.c:828
 #, c-format
 msgid "  Date %s"
-msgstr ""
+msgstr "  Дата %s"
 
 #: arscan.c:829
 #, c-format
 msgid "  uid = %d, gid = %d, mode = 0%o.\n"
-msgstr ""
+msgstr "  uid = %d, gid = %d, рэжым = 0%o.\n"
 
 #: commands.c:443
 msgid "*** Break.\n"
@@ -96,31 +95,33 @@ msgstr ""
 #: commands.c:582
 #, c-format
 msgid "*** [%s] Deleting file `%s'"
-msgstr ""
+msgstr "*** [%s] Выдаляецца файл \"%s\""
 
 #: commands.c:584
 #, c-format
 msgid "*** Deleting file `%s'"
-msgstr ""
+msgstr "*** Выдаляецца файл \"%s\""
 
 #: commands.c:625
 msgid "#  commands to execute"
-msgstr ""
+msgstr "#  загады для выкананьня"
 
 #: commands.c:628
 msgid " (built-in):"
-msgstr ""
+msgstr " (убудаваны):"
 
 #: commands.c:630
 #, c-format
 msgid " (from `%s', line %lu):\n"
-msgstr ""
+msgstr " (з\"%s\", радок %lu):\n"
 
 #: dir.c:984
 msgid ""
 "\n"
 "# Directories\n"
 msgstr ""
+"\n"
+"# Тэчкі\n"
 
 #: dir.c:996
 #, c-format
@@ -159,15 +160,15 @@ msgstr ""
 
 #: dir.c:1051 dir.c:1072
 msgid "No"
-msgstr ""
+msgstr "Не"
 
 #: dir.c:1054 dir.c:1075
 msgid " files, "
-msgstr ""
+msgstr " файлаў, "
 
 #: dir.c:1056 dir.c:1077
 msgid "no"
-msgstr ""
+msgstr "не"
 
 #: dir.c:1059
 msgid " impossibilities"
@@ -175,7 +176,7 @@ msgstr ""
 
 #: dir.c:1063
 msgid " so far."
-msgstr ""
+msgstr " так далёка."
 
 #: dir.c:1080
 #, c-format
@@ -228,20 +229,20 @@ msgstr ""
 
 #: file.c:396
 msgid "Removing intermediate files...\n"
-msgstr ""
+msgstr "Выдаляюцца прамежкавыя файлы...\n"
 
 #: file.c:792
 #, c-format
 msgid "%s: Timestamp out of range; substituting %s"
-msgstr ""
+msgstr "%s: адбітак часу па-за дапушчальнымі межамі, падстаўляецца %s"
 
 #: file.c:793
 msgid "Current time"
-msgstr ""
+msgstr "Бягучы час"
 
 #: file.c:897
 msgid "# Not a target:"
-msgstr ""
+msgstr "# Ня мэта:"
 
 #: file.c:926
 msgid "#  Precious file (prerequisite of .PRECIOUS)."
@@ -278,36 +279,36 @@ msgstr ""
 
 #: file.c:942
 msgid "#  Also makes:"
-msgstr ""
+msgstr "#  Так сама робяцца:"
 
 #: file.c:952
 msgid "#  Modification time never checked."
-msgstr ""
+msgstr "#  Час зьмяненьня ніколі не правяраўся."
 
 #: file.c:954
 msgid "#  File does not exist."
-msgstr ""
+msgstr "#  Файл ня йснуе."
 
 #: file.c:956
 msgid "#  File is very old."
-msgstr ""
+msgstr "#  Файл вельмі стары."
 
 #: file.c:961
 #, c-format
 msgid "#  Last modified %s\n"
-msgstr ""
+msgstr "#  Апошняе зьмяненьне %s\n"
 
 #: file.c:964
 msgid "#  File has been updated."
-msgstr ""
+msgstr "#  Файл быў абноўлены."
 
 #: file.c:965
 msgid "#  File has not been updated."
-msgstr ""
+msgstr "#  Файл ня быў абноўлены."
 
 #: file.c:973
 msgid "#  Commands currently running (THIS IS A BUG)."
-msgstr ""
+msgstr "#  Загады, што выконваюцца зараз (ГЭТА - ПАМЫЛКА)."
 
 #: file.c:976
 msgid "#  Dependencies commands running (THIS IS A BUG)."
@@ -315,7 +316,7 @@ msgstr ""
 
 #: file.c:985
 msgid "#  Successfully updated."
-msgstr ""
+msgstr "#  Пасьпяхова абноўлены."
 
 #: file.c:989
 msgid "#  Needs to be updated (-q is set)."
@@ -338,6 +339,8 @@ msgid ""
 "\n"
 "# Files"
 msgstr ""
+"\n"
+"# Файлы"
 
 #: file.c:1040
 msgid ""
@@ -373,13 +376,13 @@ msgid "create_child_process: DuplicateHandle(Err) failed (e=%ld)\n"
 msgstr ""
 
 #: function.c:1472
-#, c-format
+#, fuzzy, c-format
 msgid "CreatePipe() failed (e=%ld)\n"
-msgstr ""
+msgstr "памылка ў CreatePipe() (e=%d)\n"
 
 #: function.c:1477
 msgid "windows32_openpipe (): process_init_fd() failed\n"
-msgstr ""
+msgstr "windows32_openpipe (): памылка ў process_init_fd()\n"
 
 #: function.c:1728
 #, c-format
@@ -392,9 +395,9 @@ msgid "insufficient number of arguments (%d) to function `%s'"
 msgstr ""
 
 #: function.c:2116
-#, c-format
+#, fuzzy, c-format
 msgid "unimplemented on this platform: function `%s'"
-msgstr ""
+msgstr "Ня зроблена для гэтае плятформы: функцыя \"%s\""
 
 #: function.c:2166
 #, c-format
@@ -404,57 +407,57 @@ msgstr ""
 #: getopt.c:663
 #, c-format
 msgid "%s: option `%s' is ambiguous\n"
-msgstr ""
+msgstr "%s: выбар \"%s\" - неадназначы.\n"
 
 #: getopt.c:687
 #, c-format
 msgid "%s: option `--%s' doesn't allow an argument\n"
-msgstr ""
+msgstr "%s: выбар \"--%s\" не дазваляе довад.\n"
 
 #: getopt.c:692
 #, c-format
 msgid "%s: option `%c%s' doesn't allow an argument\n"
-msgstr ""
+msgstr "%s: выбар \"%c%s\" не дазваляе довад.\n"
 
 #: getopt.c:709 getopt.c:882
 #, c-format
 msgid "%s: option `%s' requires an argument\n"
-msgstr ""
+msgstr "%s: выбар \"%s\" патрабуе довад.\n"
 
 #: getopt.c:738
 #, c-format
 msgid "%s: unrecognized option `--%s'\n"
-msgstr ""
+msgstr "%s: нераспазнаны выбар \"--%s\".\n"
 
 #: getopt.c:742
 #, c-format
 msgid "%s: unrecognized option `%c%s'\n"
-msgstr ""
+msgstr "%s: нераспазнаны выбар \"%c%s\".\n"
 
 #: getopt.c:768
 #, c-format
 msgid "%s: illegal option -- %c\n"
-msgstr ""
+msgstr "%s: недапушчальны выбар -- %c.\n"
 
 #: getopt.c:771
 #, c-format
 msgid "%s: invalid option -- %c\n"
-msgstr ""
+msgstr "%s: нерэчаісны выбар -- %c.\n"
 
 #: getopt.c:801 getopt.c:931
 #, c-format
 msgid "%s: option requires an argument -- %c\n"
-msgstr ""
+msgstr "%s: выбар патрабуе довад -- %c.\n"
 
 #: getopt.c:848
 #, c-format
 msgid "%s: option `-W %s' is ambiguous\n"
-msgstr ""
+msgstr "%s: выбар \"-W %s\" - неадназначын.\n"
 
 #: getopt.c:866
 #, c-format
 msgid "%s: option `-W %s' doesn't allow an argument\n"
-msgstr ""
+msgstr "%s: выбар \"-W %s\" не дазваляе довад.\n"
 
 #: hash.c:50
 #, c-format
@@ -526,8 +529,9 @@ msgid "Looking for a rule with intermediate file `%s'.\n"
 msgstr ""
 
 #: job.c:326
+#, fuzzy
 msgid "Cannot create a temporary file\n"
-msgstr ""
+msgstr "fwrite (часовы файл)"
 
 #: job.c:394
 #, c-format
@@ -537,7 +541,7 @@ msgstr ""
 #: job.c:395
 #, c-format
 msgid "*** [%s] Error 0x%x"
-msgstr ""
+msgstr "*** [%s] Памылка 0x%x"
 
 #: job.c:399
 #, c-format
@@ -547,7 +551,7 @@ msgstr ""
 #: job.c:400
 #, c-format
 msgid "*** [%s] Error %d"
-msgstr ""
+msgstr "*** [%s] Памылка %d"
 
 #: job.c:405
 msgid " (core dumped)"
@@ -555,7 +559,7 @@ msgstr ""
 
 #: job.c:501
 msgid "*** Waiting for unfinished jobs...."
-msgstr ""
+msgstr "*** Чакаюцца незавершаныя працы...."
 
 #: job.c:531
 #, c-format
@@ -658,7 +662,7 @@ msgstr ""
 #: job.c:2136
 #, c-format
 msgid "%s: Command not found"
-msgstr ""
+msgstr "%s: загад не адшуканы"
 
 #: job.c:2196
 #, c-format
@@ -670,9 +674,9 @@ msgid "spawnvpe: environment space might be exhausted"
 msgstr ""
 
 #: job.c:2414
-#, c-format
+#, fuzzy, c-format
 msgid "$SHELL changed (was `%s', now `%s')\n"
-msgstr ""
+msgstr "$SHELL зьменена (раней \"%s\", зараз \"%s\")"
 
 #: job.c:2840
 #, c-format
@@ -686,7 +690,7 @@ msgstr ""
 
 #: main.c:346
 msgid "Options:\n"
-msgstr ""
+msgstr "Выбары:\n"
 
 #: main.c:347
 msgid "  -b, -m                       Ignored for compatibility.\n"
@@ -707,8 +711,10 @@ msgid ""
 msgstr ""
 
 #: main.c:356
+#, fuzzy
 msgid "  -d                           Print lots of debugging information.\n"
 msgstr ""
+"  -h, --help                  Друкуе гэтае паведамленьне й выходзіць.\n"
 
 #: main.c:358
 msgid ""
@@ -717,10 +723,13 @@ msgid ""
 msgstr ""
 
 #: main.c:360
+#, fuzzy
 msgid ""
 "  -e, --environment-overrides\n"
 "                               Environment variables override makefiles.\n"
 msgstr ""
+"  -S, --no-keep-going, --stop\n"
+"                               Выключае -k.\n"
 
 #: main.c:363
 msgid ""
@@ -729,8 +738,10 @@ msgid ""
 msgstr ""
 
 #: main.c:366
+#, fuzzy
 msgid "  -h, --help                   Print this message and exit.\n"
 msgstr ""
+"  -h, --help                  Друкуе гэтае паведамленьне й выходзіць.\n"
 
 #: main.c:368
 msgid "  -i, --ignore-errors          Ignore errors from commands.\n"
@@ -786,8 +797,9 @@ msgid ""
 msgstr ""
 
 #: main.c:390
+#, fuzzy
 msgid "  -p, --print-data-base        Print make's internal database.\n"
-msgstr ""
+msgstr "  -p, --print-data-base        Друкуе нутраную базу даньняў make.\n"
 
 #: main.c:392
 msgid ""
@@ -805,36 +817,46 @@ msgid ""
 msgstr ""
 
 #: main.c:398
+#, fuzzy
 msgid "  -s, --silent, --quiet        Don't echo commands.\n"
-msgstr ""
+msgstr "  -s, --silent, --quiet        Не адлюстроўваць загады.\n"
 
 #: main.c:400
+#, fuzzy
 msgid "  -S, --no-keep-going, --stop  Turns off -k.\n"
 msgstr ""
+"  -S, --no-keep-going, --stop\n"
+"                               Выключае -k.\n"
 
 #: main.c:402
+#, fuzzy
 msgid ""
 "  -t, --touch                  Touch targets instead of remaking them.\n"
 msgstr ""
+"  -h, --help                  Друкуе гэтае паведамленьне й выходзіць.\n"
 
 #: main.c:404
+#, fuzzy
 msgid ""
 "  -v, --version                Print the version number of make and exit.\n"
 msgstr ""
+"  -h, --help                  Друкуе гэтае паведамленьне й выходзіць.\n"
 
 #: main.c:406
 msgid "  -V, --show-variables         Show variable expansions.\n"
 msgstr ""
 
 #: main.c:408
+#, fuzzy
 msgid "  -w, --print-directory        Print the current directory.\n"
-msgstr ""
+msgstr "  -w, --print-directory        Друкуе бягучую тэчку.\n"
 
 #: main.c:410
+#, fuzzy
 msgid ""
 "  --no-print-directory         Turn off -w, even if it was turned on "
 "implicitly.\n"
-msgstr ""
+msgstr "  -w, --print-directory        Друкуе бягучую тэчку.\n"
 
 #: main.c:412
 msgid ""
@@ -874,7 +896,7 @@ msgstr ""
 
 #: main.c:641
 msgid "empty string invalid as file name"
-msgstr ""
+msgstr "пусты радок нерэчаісны ў якасьці назвы файла"
 
 #: main.c:699
 #, c-format
@@ -914,7 +936,7 @@ msgstr ""
 #: main.c:1333
 #, c-format
 msgid "%s is suspending for 30 seconds..."
-msgstr ""
+msgstr "%s спынена на 30 сэкундаў..."
 
 #: main.c:1335
 #, c-format
@@ -923,19 +945,19 @@ msgstr ""
 
 #: main.c:1567
 msgid "Makefile from standard input specified twice."
-msgstr ""
+msgstr "Makefile са стандартнага ўводу зададзены двойчы."
 
 #: main.c:1606 vmsjobs.c:486
 msgid "fopen (temporary file)"
-msgstr ""
+msgstr "fopen (часовы файл)"
 
 #: main.c:1612
 msgid "fwrite (temporary file)"
-msgstr ""
+msgstr "fwrite (часовы файл)"
 
 #: main.c:1741
 msgid "Parallel jobs (-j) are not supported on this platform."
-msgstr ""
+msgstr "Паралельня працы (-j) не падтрымліваюцца на гэтае плятхорме."
 
 #: main.c:1742
 msgid "Resetting to single job (-j1) mode."
@@ -965,7 +987,7 @@ msgstr ""
 
 #: main.c:1811
 msgid "creating jobs pipe"
-msgstr ""
+msgstr "ствараецца трубаправод прац"
 
 #: main.c:1826
 msgid "init jobserver pipe"
@@ -977,7 +999,7 @@ msgstr ""
 
 #: main.c:1921
 msgid "Updating makefiles....\n"
-msgstr ""
+msgstr "Абнаўляюцца make-файлы....\n"
 
 #: main.c:1946
 #, c-format
@@ -997,7 +1019,7 @@ msgstr ""
 #: main.c:2047
 #, c-format
 msgid "Makefile `%s' was not found"
-msgstr ""
+msgstr "Makefile \"%s\" ня знойдзен"
 
 #: main.c:2117
 msgid "Couldn't change back to original directory."
@@ -1010,7 +1032,7 @@ msgstr ""
 
 #: main.c:2241
 msgid "unlink (temporary file): "
-msgstr ""
+msgstr "unlink (часовы файл): "
 
 #: main.c:2270
 msgid ".DEFAULT_GOAL contains more than one target"
@@ -1022,7 +1044,7 @@ msgstr ""
 
 #: main.c:2291
 msgid "No targets"
-msgstr ""
+msgstr "Няма мэт"
 
 #: main.c:2296
 msgid "Updating goal targets....\n"
@@ -1035,7 +1057,7 @@ msgstr ""
 #: main.c:2483
 #, c-format
 msgid "Usage: %s [options] [target] ...\n"
-msgstr ""
+msgstr "Выкарыстаньне: %s [выбары] [мэта] ...\n"
 
 #: main.c:2489
 #, c-format
@@ -1043,6 +1065,8 @@ msgid ""
 "\n"
 "This program built for %s\n"
 msgstr ""
+"\n"
+"Гэта праграма пабудавана для %s\n"
 
 #: main.c:2491
 #, c-format
@@ -1050,21 +1074,23 @@ msgid ""
 "\n"
 "This program built for %s (%s)\n"
 msgstr ""
+"\n"
+"Гэта праграма падубавана для %s (%s)\n"
 
 #: main.c:2494
-#, c-format
+#, fuzzy, c-format
 msgid "Report bugs to <bashdb-remake@lists.sf.net>\n"
-msgstr ""
+msgstr "Паведамляйце пра памылкі на <bug-make@gnu.org>.\n"
 
 #: main.c:2566
-#, c-format
+#, fuzzy, c-format
 msgid "the `-%c' option requires a non-empty string argument"
-msgstr ""
+msgstr "выбар \"-%c\" патрабуе станоўчы цэлы довад"
 
 #: main.c:2618
 #, c-format
 msgid "the `-%c' option requires a positive integral argument"
-msgstr ""
+msgstr "выбар \"-%c\" патрабуе станоўчы цэлы довад"
 
 #: main.c:3042
 #, c-format
@@ -1073,20 +1099,27 @@ msgid ""
 "%sThere is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A\n"
 "%sPARTICULAR PURPOSE.\n"
 msgstr ""
+"%s    Гэта вольнае праграмнае забесьпячэньне; глядзіце зыходны код для\n"
+"%sпагадненьня аб распаўсюджваньні. Ня йснуе НІЯКАЕ гарантыі, нават аб\n"
+"%sмагчымасьці выкарыстньня зь якой небудзь мэтай.\n"
 
 #: main.c:3048
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "%sThis program built for %s\n"
 msgstr ""
+"\n"
+"Гэта праграма пабудавана для %s\n"
 
 #: main.c:3050
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "\n"
 "%sThis program built for %s (%s)\n"
 msgstr ""
+"\n"
+"Гэта праграма падубавана для %s (%s)\n"
 
 #: main.c:3068
 #, c-format
@@ -1105,21 +1138,21 @@ msgstr ""
 #: misc.c:205
 #, c-format
 msgid "Unknown error %d"
-msgstr ""
+msgstr "Невядомая памылка %d"
 
 #: misc.c:215
 #, c-format
 msgid "%s: %s"
-msgstr ""
+msgstr "%s: %s"
 
 #: misc.c:233 misc.c:248 misc.c:265 read.c:3164
 msgid "virtual memory exhausted"
-msgstr ""
+msgstr "віртуальная памяць вычарпана"
 
 #: misc.c:535
 #, c-format
 msgid "%s: user %lu (real %lu), group %lu (real %lu)\n"
-msgstr ""
+msgstr "%s: карыстальнік %lu (насамрэч %lu), група %lu (насамрэч %lu)\n"
 
 #: misc.c:556
 msgid "Initialized access"
@@ -1143,27 +1176,28 @@ msgid "write error: %s"
 msgstr ""
 
 #: misc.c:783
+#, fuzzy
 msgid "write error"
-msgstr ""
+msgstr "Памылка шыны"
 
 #: read.c:165
 msgid "Reading makefiles...\n"
-msgstr ""
+msgstr "Чытаюцца make-файлы...\n"
 
 #: read.c:324
 #, c-format
 msgid "Reading makefile `%s'"
-msgstr ""
+msgstr "Чытаецца make-файл \"%s\""
 
 #: read.c:326
 #, c-format
 msgid " (no default goal)"
-msgstr ""
+msgstr " (няма дапомнае мэты)"
 
 #: read.c:328
 #, c-format
 msgid " (search path)"
-msgstr ""
+msgstr " (пошук шляху)"
 
 #: read.c:330
 #, c-format
@@ -1193,7 +1227,7 @@ msgstr ""
 
 #: read.c:718
 msgid "invalid `override' directive"
-msgstr ""
+msgstr "нерэчаісная дырэктыва \"override\""
 
 #: read.c:887
 msgid "commands commence before first target"
@@ -1201,16 +1235,16 @@ msgstr ""
 
 #: read.c:940
 msgid "missing rule before commands"
-msgstr ""
+msgstr "прапушчана правіла перад загадамі"
 
 #: read.c:1029
 #, c-format
 msgid "missing separator%s"
-msgstr ""
+msgstr "прапушчан падзяляльнік %s"
 
 #: read.c:1031
 msgid " (did you mean TAB instead of 8 spaces?)"
-msgstr ""
+msgstr " (вы маеце на ўвазе TAB замест 8 прагалаў?)"
 
 #: read.c:1191
 msgid "missing target pattern"
@@ -1227,7 +1261,7 @@ msgstr ""
 
 #: read.c:1327
 msgid "missing `endif'"
-msgstr ""
+msgstr "прапушчаны \"endif\""
 
 #: read.c:1418
 msgid "Extraneous text after `endef' directive"
@@ -1235,7 +1269,7 @@ msgstr ""
 
 #: read.c:1452
 msgid "missing `endef', unterminated `define'"
-msgstr ""
+msgstr "прапушчаны \"endef\", незавершаны \"define\""
 
 #: read.c:1495
 #, c-format
@@ -1245,7 +1279,7 @@ msgstr ""
 #: read.c:1504 read.c:1518
 #, c-format
 msgid "extraneous `%s'"
-msgstr ""
+msgstr "зьнешні \"%s\""
 
 #: read.c:1523
 msgid "only one `else' per conditional"
@@ -1299,12 +1333,12 @@ msgstr ""
 #: remake.c:244
 #, c-format
 msgid "Nothing to be done for `%s'."
-msgstr ""
+msgstr "Нічога ня было зроблена для \"%s\"."
 
 #: remake.c:245
 #, c-format
 msgid "`%s' is up to date."
-msgstr ""
+msgstr "\"%s\" - састарэл(а)."
 
 #: remake.c:317
 #, c-format
@@ -1314,12 +1348,12 @@ msgstr ""
 #: remake.c:369
 #, c-format
 msgid "%sNo rule to make target `%s'%s"
-msgstr ""
+msgstr "%sНяма правіла каб зрабіць мэту \"%s\"%s"
 
 #: remake.c:371
 #, c-format
 msgid "%sNo rule to make target `%s', needed by `%s'%s"
-msgstr ""
+msgstr "%s Няма правіла каб зрабіць мэту \"%s\", патрэбную для \"%s\"%s"
 
 #: remake.c:400
 #, c-format
@@ -1334,22 +1368,22 @@ msgstr ""
 #: remake.c:422
 #, c-format
 msgid "File `%s' was considered already.\n"
-msgstr ""
+msgstr "Файл \"%s\" ужо быў разгледжаны.\n"
 
 #: remake.c:432
 #, c-format
 msgid "Still updating file `%s'.\n"
-msgstr ""
+msgstr "Усё яшэ абнаўляецца файл \"%s\".\n"
 
 #: remake.c:435
 #, c-format
 msgid "Finished updating file `%s'.\n"
-msgstr ""
+msgstr "Скончана абнаўленьне файла \"%s\".\n"
 
 #: remake.c:472
 #, c-format
 msgid "File `%s' does not exist.\n"
-msgstr ""
+msgstr "Файл \"%s\" ня йснуе.\n"
 
 #: remake.c:481
 #, c-format
@@ -1475,12 +1509,12 @@ msgstr ""
 #: remake.c:1373
 #, c-format
 msgid "Warning: File `%s' has modification time in the future"
-msgstr ""
+msgstr "Увага! Файл \"%s\" мае час зьмяненьня, які шчэ не надышоў."
 
 #: remake.c:1380
 #, c-format
 msgid "Warning: File `%s' has modification time %.2g s in the future"
-msgstr ""
+msgstr "Увага! Файл \"%s\" мае час зьмяненьня %.2g с, які шчэ не надышоў."
 
 #: remake.c:1578
 #, c-format
@@ -1513,7 +1547,7 @@ msgstr ""
 
 #: rule.c:576
 msgid " terminal."
-msgstr ""
+msgstr " тэрмінал."
 
 #: rule.c:584
 #, c-format
@@ -1522,7 +1556,7 @@ msgstr ""
 
 #: signame.c:85
 msgid "unknown signal"
-msgstr ""
+msgstr "невядомы сыгнал"
 
 #: signame.c:93
 msgid "Hangup"
@@ -1538,7 +1572,7 @@ msgstr ""
 
 #: signame.c:102
 msgid "Illegal Instruction"
-msgstr ""
+msgstr "Недапушчальная інструкцыя"
 
 #: signame.c:105
 msgid "Trace/breakpoint trap"
@@ -1562,11 +1596,11 @@ msgstr ""
 
 #: signame.c:122
 msgid "Killed"
-msgstr ""
+msgstr "Забіты"
 
 #: signame.c:125
 msgid "Bus error"
-msgstr ""
+msgstr "Памылка шыны"
 
 #: signame.c:128
 msgid "Segmentation fault"
@@ -1574,11 +1608,11 @@ msgstr ""
 
 #: signame.c:131
 msgid "Bad system call"
-msgstr ""
+msgstr "Дрэнны сыстэмны выклік"
 
 #: signame.c:134
 msgid "Broken pipe"
-msgstr ""
+msgstr "Зламаны трубаправод"
 
 #: signame.c:137
 msgid "Alarm clock"
@@ -1586,7 +1620,7 @@ msgstr ""
 
 #: signame.c:140
 msgid "Terminated"
-msgstr ""
+msgstr "Завершаны"
 
 #: signame.c:143
 msgid "User defined signal 1"
@@ -1606,19 +1640,19 @@ msgstr ""
 
 #: signame.c:160
 msgid "Stopped"
-msgstr ""
+msgstr "Спынен"
 
 #: signame.c:163
 msgid "Stopped (tty input)"
-msgstr ""
+msgstr "Спынен (tty увод)"
 
 #: signame.c:166
 msgid "Stopped (tty output)"
-msgstr ""
+msgstr "Спынен (вывад на tty)"
 
 #: signame.c:169
 msgid "Stopped (signal)"
-msgstr ""
+msgstr "Спынена (сыгнал)"
 
 #: signame.c:172
 msgid "CPU time limit exceeded"
@@ -1638,7 +1672,7 @@ msgstr ""
 
 #: signame.c:187
 msgid "Window changed"
-msgstr ""
+msgstr "Акно зьменена"
 
 #: signame.c:190
 msgid "Continued"
@@ -1650,7 +1684,7 @@ msgstr ""
 
 #: signame.c:200 signame.c:209
 msgid "I/O possible"
-msgstr ""
+msgstr "магчым У/В"
 
 #: signame.c:203
 msgid "SIGWIND"
@@ -1666,11 +1700,11 @@ msgstr ""
 
 #: signame.c:215
 msgid "Danger signal"
-msgstr ""
+msgstr "Сыгнал пагрозы"
 
 #: signame.c:218
 msgid "Information request"
-msgstr ""
+msgstr "Запыт аб зьвестках"
 
 #: signame.c:221
 msgid "Floating point co-processor not available"
@@ -1700,15 +1734,15 @@ msgstr ""
 
 #: variable.c:54 variable.c:1410
 msgid "default"
-msgstr ""
+msgstr "дапомны"
 
 #: variable.c:57 variable.c:1413
 msgid "environment"
-msgstr ""
+msgstr "асяродзьдзе"
 
 #: variable.c:60 variable.c:1416
 msgid "makefile"
-msgstr ""
+msgstr "make-файл"
 
 #: variable.c:63 variable.c:1419
 msgid "environment under -e"
@@ -1716,15 +1750,15 @@ msgstr ""
 
 #: variable.c:66 variable.c:1422
 msgid "command line"
-msgstr ""
+msgstr "загадны радок"
 
 #: variable.c:69 variable.c:1425
 msgid "`override' directive"
-msgstr ""
+msgstr "дырэктыва \"override\""
 
 #: variable.c:72 variable.c:1428
 msgid "automatic"
-msgstr ""
+msgstr "аўтаматычна"
 
 #: variable.c:75
 msgid "debugger"
@@ -1737,7 +1771,7 @@ msgstr ""
 #: variable.c:1437 variable.c:1487
 #, c-format
 msgid " (from `%s', line %lu)"
-msgstr ""
+msgstr " (з \"%s\", радок %lu)"
 
 #: variable.c:1532
 msgid "variable set hash-table stats:\n"
@@ -1748,6 +1782,8 @@ msgid ""
 "\n"
 "# Variables\n"
 msgstr ""
+"\n"
+"# Пераменныя\n"
 
 #: variable.c:1548
 msgid ""
@@ -1771,7 +1807,7 @@ msgstr ""
 #: variable.h:264
 #, c-format
 msgid "warning: undefined variable `%.*s'"
-msgstr ""
+msgstr "Увага! Нявызначаная пераменная \"%.*s\""
 
 #: vmsfunctions.c:94
 #, c-format
@@ -1816,17 +1852,17 @@ msgstr ""
 #: vmsjobs.c:457
 #, c-format
 msgid "Unknown builtin command '%s'\n"
-msgstr ""
+msgstr "Невядомы ўбудаваны загад \"%s\".\n"
 
 #: vmsjobs.c:479
 #, c-format
 msgid "Error, empty command\n"
-msgstr ""
+msgstr "Памылка! Парожні загад.\n"
 
 #: vmsjobs.c:491
 #, c-format
 msgid "Redirected input from %s\n"
-msgstr ""
+msgstr "Перанакіраваны ўвод з %s\n"
 
 #: vmsjobs.c:498
 #, c-format
@@ -1836,7 +1872,7 @@ msgstr ""
 #: vmsjobs.c:505
 #, c-format
 msgid "Redirected output to %s\n"
-msgstr ""
+msgstr "Перанакіраваны вывад у %s\n"
 
 #: vmsjobs.c:568
 #, c-format
@@ -1877,3 +1913,65 @@ msgid ""
 "# General (`VPATH' variable) search path:\n"
 "# "
 msgstr ""
+
+#, fuzzy
+#~ msgid "%s: Entering an unknown directory\n"
+#~ msgstr "%s: уваход у невядомую тэчку"
+
+#, fuzzy
+#~ msgid "%s: Leaving an unknown directory\n"
+#~ msgstr "%s: выхад зь невядомае тэчкі"
+
+#~ msgid "%s: Entering directory `%s'\n"
+#~ msgstr "%s: уваход у тэчку \"%s\"\n"
+
+#~ msgid "%s: Leaving directory `%s'\n"
+#~ msgstr "%s: выхад з тэчкі \"%s\"\n"
+
+#, fuzzy
+#~ msgid "%s[%u]: Entering an unknown directory\n"
+#~ msgstr "%s[%u]: уваход у невядомую тэчку"
+
+#, fuzzy
+#~ msgid "%s[%u]: Leaving an unknown directory\n"
+#~ msgstr "%s[%u]: выхад зь невядомае тэчкі"
+
+#~ msgid "%s[%u]: Entering directory `%s'\n"
+#~ msgstr "%s[%u]: уваход у тэчку \"%s\"\n"
+
+#~ msgid "%s[%u]: Leaving directory `%s'\n"
+#~ msgstr "%s[%u]: выхад з тэчкі \"%s\"\n"
+
+#~ msgid "%s%s: %s"
+#~ msgstr "%s%s: %s"
+
+#~ msgid "Do not specify -j or --jobs if sh.exe is not available."
+#~ msgstr "Не задавайце -j ці --jobs, калі sh.exe недаступны."
+
+#~ msgid "no file name for `%sinclude'"
+#~ msgstr "няма назвы файла для \"%sinclude\""
+
+#~ msgid ""
+#~ "\n"
+#~ "# No files."
+#~ msgstr ""
+#~ "\n"
+#~ "# Няма файлаў."
+
+#~ msgid "DIRECTORY"
+#~ msgstr "ТЭЧКА"
+
+#~ msgid "FILE"
+#~ msgstr "ФАЙЛ"
+
+#~ msgid "Read FILE as a makefile"
+#~ msgstr "Чытае ФАЙЛ як make-файл"
+
+#~ msgid "Entering"
+#~ msgstr "Уваход у"
+
+#~ msgid "Leaving"
+#~ msgstr "выхад з"
+
+#~ msgid "# No variables."
+#~ msgstr "# Няма пераменных."
