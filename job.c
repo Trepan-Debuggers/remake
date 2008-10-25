@@ -18,7 +18,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 
 #include "types.h"
 #include "make.h"
-#include "dbg_cmd.h"
+#include "debugger/cmd.h"
 #include "debug.h"
 #include "expand.h"
 #include "job.h"
