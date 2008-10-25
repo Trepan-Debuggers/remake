@@ -283,7 +283,7 @@ can write into: the value (if any) of the environment variable TMPDIR,
   "Queue of Makefile temp files awaiting execution.
 Currently-active file is at the head of the list.")
 
-(defvar mdb-mdbtrack-tracking-p nil)
+(defvar mdbtrack-is-tracking-p nil)
 
 
 ;; Constants
@@ -323,10 +323,10 @@ Currently-active file is at the head of the list.")
 	 (setq overlay-arrow-position (make-marker))
 	 (setq overlay-arrow-string "=>")
 	 (set-marker overlay-arrow-position (point) (current-buffer))
-	 (setq mdb-mdbtrack-tracking-p t))
-	(mdb-mdbtrack-tracking-p
+	 (setq mdbtrack-is-tracking-p t))
+	(mdbtrack-is-tracking-p
 	 (setq overlay-arrow-position nil)
-	 (setq mdb-mdbtrack-tracking-p nil))
+	 (setq mdbtrack-is-tracking-p nil))
 	))
 
 (defun mdb-mdbtrack-track-stack-file (text)
