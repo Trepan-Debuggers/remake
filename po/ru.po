@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.79.1\n"
 "Report-Msgid-Bugs-To: bug-make@gnu.org\n"
-"POT-Creation-Date: 2008-10-24 20:13-0400\n"
+"POT-Creation-Date: 2008-10-25 09:47-0400\n"
 "PO-Revision-Date: 2002-01-07 19:34GMT+06\n"
 "Last-Translator: Denis Perchine <dyp@perchine.com>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -1576,7 +1576,7 @@ msgstr "Элемент .LIBPATTERNS `%s' не является образцом"
 msgid "Customs won't export: %s\n"
 msgstr "Не экспортируемые настройки: %s\n"
 
-#: rule.c:549
+#: rule.c:550
 #, fuzzy
 msgid ""
 "\n"
@@ -1585,7 +1585,7 @@ msgstr ""
 "\n"
 "# Неявных правил нет."
 
-#: rule.c:564
+#: rule.c:570
 msgid ""
 "\n"
 "# No implicit rules."
@@ -1593,7 +1593,7 @@ msgstr ""
 "\n"
 "# Неявных правил нет."
 
-#: rule.c:567
+#: rule.c:573
 #, c-format
 msgid ""
 "\n"
@@ -1602,11 +1602,11 @@ msgstr ""
 "\n"
 "# Неявных правил: %u, терминальных: %u"
 
-#: rule.c:576
+#: rule.c:582
 msgid " terminal."
 msgstr "."
 
-#: rule.c:584
+#: rule.c:590
 #, c-format
 msgid "BUG: num_pattern_rules wrong!  %u != %u"
 msgstr "ОШИБКА: неверное значение num_pattern_rules! %u != %u"

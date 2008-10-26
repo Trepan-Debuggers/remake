@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU make 3.80\n"
 "Report-Msgid-Bugs-To: bug-make@gnu.org\n"
-"POT-Creation-Date: 2008-10-24 20:13-0400\n"
+"POT-Creation-Date: 2008-10-25 09:47-0400\n"
 "PO-Revision-Date: 2002-11-16 17:06+0300\n"
 "Last-Translator: Fábio Henrique F. Silva <fabiohfs@mail.com>\n"
 "Language-Team: Brazilian Portuguese <ldp-br@bazar.conectiva.com.br>\n"
@@ -1598,7 +1598,7 @@ msgstr "O elemento .LIBPATTERNS `%s' não é um padrão"
 msgid "Customs won't export: %s\n"
 msgstr "Customizações não exportadas: %s\n"
 
-#: rule.c:549
+#: rule.c:550
 msgid ""
 "\n"
 "# Implicit Rules"
@@ -1606,7 +1606,7 @@ msgstr ""
 "\n"
 "# Regras implícitas."
 
-#: rule.c:564
+#: rule.c:570
 msgid ""
 "\n"
 "# No implicit rules."
@@ -1614,7 +1614,7 @@ msgstr ""
 "\n"
 "# Faltam as regras implícitas."
 
-#: rule.c:567
+#: rule.c:573
 #, c-format
 msgid ""
 "\n"
@@ -1623,11 +1623,11 @@ msgstr ""
 "\n"
 "# %u regras implícitas, %u"
 
-#: rule.c:576
+#: rule.c:582
 msgid " terminal."
 msgstr " terminal."
 
-#: rule.c:584
+#: rule.c:590
 #, c-format
 msgid "BUG: num_pattern_rules wrong!  %u != %u"
 msgstr "ERRO: num_pattern_rules errada! %u != %u"

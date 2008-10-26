@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.80\n"
 "Report-Msgid-Bugs-To: bug-make@gnu.org\n"
-"POT-Creation-Date: 2008-10-24 20:13-0400\n"
+"POT-Creation-Date: 2008-10-25 09:47-0400\n"
 "PO-Revision-Date: 2003-10-12 18:01+0200\n"
 "Last-Translator: Hrvoje Niksic <hniksic@xemacs.org>\n"
 "Language-Team: Croatian <lokalizacija@linux.hr>\n"
@@ -1601,7 +1601,7 @@ msgstr "Element .LIBPATTERNS `%s' nije uzorak"
 msgid "Customs won't export: %s\n"
 msgstr "Customs neæe eksportirati: %s\n"
 
-#: rule.c:549
+#: rule.c:550
 msgid ""
 "\n"
 "# Implicit Rules"
@@ -1609,7 +1609,7 @@ msgstr ""
 "\n"
 "# Implicitni Propisi"
 
-#: rule.c:564
+#: rule.c:570
 msgid ""
 "\n"
 "# No implicit rules."
@@ -1617,7 +1617,7 @@ msgstr ""
 "\n"
 "# Nema implicitnih propisa."
 
-#: rule.c:567
+#: rule.c:573
 #, c-format
 msgid ""
 "\n"
@@ -1626,11 +1626,11 @@ msgstr ""
 "\n"
 "# %u implicitnih propisa, %u"
 
-#: rule.c:576
+#: rule.c:582
 msgid " terminal."
 msgstr " zavr¹ni."
 
-#: rule.c:584
+#: rule.c:590
 #, c-format
 msgid "BUG: num_pattern_rules wrong!  %u != %u"
 msgstr "BUG: pogre¹an num_pattern_rules!  %u != %u"

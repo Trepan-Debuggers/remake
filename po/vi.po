@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make-3.81-b3\n"
 "Report-Msgid-Bugs-To: bug-make@gnu.org\n"
-"POT-Creation-Date: 2008-10-24 20:13-0400\n"
+"POT-Creation-Date: 2008-10-25 09:47-0400\n"
 "PO-Revision-Date: 2006-02-05 19:19+1030\n"
 "Last-Translator: Clytie Siddall <clytie@riverland.net.au>\n"
 "Language-Team: Vietnamese <gnomevi-list@lists.sourceforge.net>\n"
@@ -1648,7 +1648,7 @@ msgstr "Yếu tố « .LIBPATTERNS » (các mẫu thư viên) « %s » không ph
 msgid "Customs won't export: %s\n"
 msgstr "Thuế quan không xuất được: %s\n"
 
-#: rule.c:549
+#: rule.c:550
 msgid ""
 "\n"
 "# Implicit Rules"
@@ -1656,7 +1656,7 @@ msgstr ""
 "\n"
 "# Quy tắc ngầm"
 
-#: rule.c:564
+#: rule.c:570
 msgid ""
 "\n"
 "# No implicit rules."
@@ -1664,7 +1664,7 @@ msgstr ""
 "\n"
 "# Không có quy tắc ngầm."
 
-#: rule.c:567
+#: rule.c:573
 #, c-format
 msgid ""
 "\n"
@@ -1673,11 +1673,11 @@ msgstr ""
 "\n"
 "# %u quy tắc ngầm, %u"
 
-#: rule.c:576
+#: rule.c:582
 msgid " terminal."
 msgstr " thiết bị cuối"
 
-#: rule.c:584
+#: rule.c:590
 #, c-format
 msgid "BUG: num_pattern_rules wrong!  %u != %u"
 msgstr "LỖI: « num_pattern_rules » (số quy tắc mẫu) không đúng!  %u != %u"

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU make 3.79.1\n"
 "Report-Msgid-Bugs-To: bug-make@gnu.org\n"
-"POT-Creation-Date: 2008-10-24 20:13-0400\n"
+"POT-Creation-Date: 2008-10-25 09:47-0400\n"
 "PO-Revision-Date: 2001-06-08 01:30+0900\n"
 "Last-Translator: Changwoo Ryu <cwryu@debian.org>\n"
 "Language-Team: Korean <ko@li.org>\n"
@@ -1557,7 +1557,7 @@ msgstr ".LIBPATTERNS의 원소 `%s'이(가) 패턴이 아닙니다"
 msgid "Customs won't export: %s\n"
 msgstr "Customs은 export되지 않을 것입니다: %s\n"
 
-#: rule.c:549
+#: rule.c:550
 #, fuzzy
 msgid ""
 "\n"
@@ -1566,7 +1566,7 @@ msgstr ""
 "\n"
 "# 묵시적 규칙 없음."
 
-#: rule.c:564
+#: rule.c:570
 msgid ""
 "\n"
 "# No implicit rules."
@@ -1574,7 +1574,7 @@ msgstr ""
 "\n"
 "# 묵시적 규칙 없음."
 
-#: rule.c:567
+#: rule.c:573
 #, c-format
 msgid ""
 "\n"
@@ -1583,11 +1583,11 @@ msgstr ""
 "\n"
 "# %u개의 묵시적 규칙, %u"
 
-#: rule.c:576
+#: rule.c:582
 msgid " terminal."
 msgstr " 터미널."
 
-#: rule.c:584
+#: rule.c:590
 #, c-format
 msgid "BUG: num_pattern_rules wrong!  %u != %u"
 msgstr "버그: num_pattern_rules 오류!  %u != %u"
