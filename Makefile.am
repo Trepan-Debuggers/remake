@@ -100,6 +100,10 @@ EXTRA_DIST =	README build.sh.in $(man_MANS) \
 
 DISTCLEANFILES = build.sh
 
+MOSTLYCLEANFILES = make.tgs make.pdf make.html mdb.cps mdb.kys mdb.html mdb.fns mdb.ps.gz mdb.pdf 
+
+CLEANFILES = make*.html make*.info*
+
 # Forward targets
 
 html:
