@@ -586,6 +586,7 @@ esac
 AC_CONFIG_FILES([Makefile           \
 		 config/Makefile    \
 		 doc/Makefile       \
+		 doc/make.1         \
 		 emacs/Makefile     \
 		 emacs/mdb.el       \
 		 emacs/mdb-test.el  \

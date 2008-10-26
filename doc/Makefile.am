@@ -32,4 +32,8 @@ html: make_1.html
 make_1.html: $(info_TEXINFOS) $(make_TEXINFOS)
 	$(TEXI2HTML) $(TEXI2HTML_FLAGS) $(srcdir)/make.texi
 
+man_make = make.1
+
+EXTRA_DIST = make.1.in
+
 .PHONY: html
