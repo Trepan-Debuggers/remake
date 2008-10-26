@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.80\n"
 "Report-Msgid-Bugs-To: bug-make@gnu.org\n"
-"POT-Creation-Date: 2008-10-24 20:13-0400\n"
+"POT-Creation-Date: 2008-10-25 09:47-0400\n"
 "PO-Revision-Date: 2002-10-05 18:13+0300\n"
 "Last-Translator: Nilgün Belma Bugüner <nilgun@superonline.com>\n"
 "Language-Team: Turkish <gnu-tr-u12a@lists.sourceforge.net>\n"
@@ -1599,7 +1599,7 @@ msgstr ".LIBPATTERNS elemanı `%s' bir kalıp değil"
 msgid "Customs won't export: %s\n"
 msgstr "Özelleştirilmiş olanlar dışarı aktarılmayacak: %s\n"
 
-#: rule.c:549
+#: rule.c:550
 msgid ""
 "\n"
 "# Implicit Rules"
@@ -1607,7 +1607,7 @@ msgstr ""
 "\n"
 "# Örtük Kurallar"
 
-#: rule.c:564
+#: rule.c:570
 msgid ""
 "\n"
 "# No implicit rules."
@@ -1615,7 +1615,7 @@ msgstr ""
 "\n"
 "# Örtük kural yok."
 
-#: rule.c:567
+#: rule.c:573
 #, c-format
 msgid ""
 "\n"
@@ -1624,11 +1624,11 @@ msgstr ""
 "\n"
 "# %u örtük kural, %u"
 
-#: rule.c:576
+#: rule.c:582
 msgid " terminal."
 msgstr " terminal."
 
-#: rule.c:584
+#: rule.c:590
 #, c-format
 msgid "BUG: num_pattern_rules wrong!  %u != %u"
 msgstr "YAZILIM HATASI: num_pattern_rules yanlış!  %u != %u"

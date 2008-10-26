@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GNU make 3.79\n"
 "Report-Msgid-Bugs-To: bug-make@gnu.org\n"
-"POT-Creation-Date: 2008-10-24 20:13-0400\n"
+"POT-Creation-Date: 2008-10-25 09:47-0400\n"
 "PO-Revision-Date: 2005-07-17 22:00+0700\n"
 "Last-Translator: Arif E. Nugroho <arif_endro@yahoo.com>\n"
 "Language-Team: Indonesian <translation-team-id@lists.sourceforge.net>\n"
@@ -1555,7 +1555,7 @@ msgstr ".LIBPATTERNS elemen `%s' bukan merupakan sebuah pattern"
 msgid "Customs won't export: %s\n"
 msgstr "Custom tidak akan men-export: %s\n"
 
-#: rule.c:549
+#: rule.c:550
 #, fuzzy
 msgid ""
 "\n"
@@ -1564,7 +1564,7 @@ msgstr ""
 "\n"
 "# Tidak ada aturan implisit."
 
-#: rule.c:564
+#: rule.c:570
 msgid ""
 "\n"
 "# No implicit rules."
@@ -1572,7 +1572,7 @@ msgstr ""
 "\n"
 "# Tidak ada aturan implisit."
 
-#: rule.c:567
+#: rule.c:573
 #, c-format
 msgid ""
 "\n"
@@ -1581,11 +1581,11 @@ msgstr ""
 "\n"
 "# %u aturan implisit, %u"
 
-#: rule.c:576
+#: rule.c:582
 msgid " terminal."
 msgstr " terminal."
 
-#: rule.c:584
+#: rule.c:590
 #, c-format
 msgid "BUG: num_pattern_rules wrong!  %u != %u"
 msgstr "BUG: num_pattern_rules salah! %u != %u"

@@ -3,7 +3,7 @@
 @setfilename make.info
 
 @include version.texi
-@set EDITION 0.70
+@set EDITION 0.70a
 @set RCSID $Id: make.texi,v 1.45 2006/04/01 06:36:40 psmith Exp $
 
 @settitle GNU @code{make}
@@ -7949,6 +7949,45 @@ By default, the above messages are not enabled while trying to remake
 the makefiles.  This option enables messages while rebuilding makefiles,
 too.  Note that the @samp{all} option does enable this option.  This
 option also enables @samp{basic} messages.
+
+@item r (@i{read})
+Gives status on each Makefile as it is read in.
+@end table
+
+@item --no-extended-errors
+
+Do not give a target stack trace when a fatal error is encountered.
+
+@item --debugger[=@var{options}]
+@cindex @code{--debugger}
+@c Extra blank line here makes the table look better.
+
+Enter the debugger.  Various points of entry and granularity of
+debugging can be chosen.  With no arguments, ``basic'' debug tracing
+is turned on and the debugger is entered @code{make} would execute the
+first command.  Possible arguments are
+below.
+
+@table @code
+@item normal
+This is the default behavior; ``basic'' debug tracing is turned on and
+the debugger is entered before executing the first command.
+
+@item preread
+The debugger is entered before any Makefile is read and stepping goes
+to the next Makefile read.
+
+@item full
+A level above @samp{basic}; includes messages about which makefiles were
+parsed, prerequisites that did not need to be rebuilt, etc.  This option
+also enables @samp{basic} messages.
+
+@item error
+The debugger is entered after hitting an error.
+
+@item fatal
+The debugger is entered after a fatal error.
+
 @end table
 
 @item -e
@@ -8162,6 +8201,39 @@ from complicated nests of recursive @code{make} commands.
 rarely need to specify this option since @samp{make} does it for you;
 see @ref{-w Option, ,The @samp{--print-directory} Option}.)
 
+@item -x
+@cindex @code{-x}
+@itemx --trace
+@cindex @code{--touch}
+@c Extra blank line here makes the table look better.
+
+Turn on tracing makefile execution. Various levels of granularity
+debugging can be chosen.  With no arguments, ``basic'' debug tracing
+is turned on and the debugger is entered @code{make} would execute the
+first command.  Possible arguments are below.
+
+@table @code
+@item commands
+Just turn on tracing of commands that are executed. We suppress the
+supression of commands using @samp{@@}. In other words, all commands
+are echoed.
+
+@item normal
+This is the default behavior; ``basic'' debug tracing is turned on,
+command tracing is turned on and the debugger is entered before
+executing the first command.
+
+@item noshell
+Don't run shell commands.
+
+@item read
+A little more verbose than ``normal''. Trace reading Makefiles
+
+@item full
+The most verbose tracing. 
+@end table
+
+
 @itemx --no-print-directory
 @cindex @code{--no-print-directory}
 Disable printing of the working directory under @code{-w}.
@@ -8245,7 +8317,7 @@ retained for compatibility.
 * Chained Rules::               How to use a chain of implicit rules.
 * Pattern Rules::               How to define new implicit rules.
 * Last Resort::                 How to define commands for rules which
-                                  cannot find any.
+                                cannot find any.
 * Suffix Rules::                The old-fashioned style of implicit rule.
 * Implicit Rule Search::        The precise algorithm for applying
                                   implicit rules.

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.80\n"
 "Report-Msgid-Bugs-To: bug-make@gnu.org\n"
-"POT-Creation-Date: 2008-10-24 20:13-0400\n"
+"POT-Creation-Date: 2008-10-25 09:47-0400\n"
 "PO-Revision-Date: 2002-10-05 22:56+0200\n"
 "Last-Translator: Byrial Ole Jensen <byrial@image.dk>\n"
 "Language-Team: Danish <dansk@klid.dk>\n"
@@ -1594,7 +1594,7 @@ msgstr ".LIBPATTERNS-element '%s' er ikke et mønster"
 msgid "Customs won't export: %s\n"
 msgstr "Customs kan ikke eksporteres: %s\n"
 
-#: rule.c:549
+#: rule.c:550
 msgid ""
 "\n"
 "# Implicit Rules"
@@ -1602,7 +1602,7 @@ msgstr ""
 "\n"
 "# Implicitte regler."
 
-#: rule.c:564
+#: rule.c:570
 msgid ""
 "\n"
 "# No implicit rules."
@@ -1610,7 +1610,7 @@ msgstr ""
 "\n"
 "# Ingen implicitte regler."
 
-#: rule.c:567
+#: rule.c:573
 #, c-format
 msgid ""
 "\n"
@@ -1619,11 +1619,11 @@ msgstr ""
 "\n"
 "# %u implicitte regler, %u"
 
-#: rule.c:576
+#: rule.c:582
 msgid " terminal."
 msgstr " terminale."
 
-#: rule.c:584
+#: rule.c:590
 #, c-format
 msgid "BUG: num_pattern_rules wrong!  %u != %u"
 msgstr "FEJL: num_pattern_rules forkert! %u != %u"

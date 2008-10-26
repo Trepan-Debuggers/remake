@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.81-b3\n"
 "Report-Msgid-Bugs-To: bug-make@gnu.org\n"
-"POT-Creation-Date: 2008-10-24 20:13-0400\n"
+"POT-Creation-Date: 2008-10-25 09:47-0400\n"
 "PO-Revision-Date: 2005-06-28 10:16-0500\n"
 "Last-Translator: Kevin Patrick Scannell <scannell@SLU.EDU>\n"
 "Language-Team: Irish <ga@li.org>\n"
@@ -1616,7 +1616,7 @@ msgstr "Níl eilimint .LIBPATTERNS `%s' ina patrún"
 msgid "Customs won't export: %s\n"
 msgstr "Ní easpórtálfar Customs: %s\n"
 
-#: rule.c:549
+#: rule.c:550
 msgid ""
 "\n"
 "# Implicit Rules"
@@ -1624,7 +1624,7 @@ msgstr ""
 "\n"
 "# Rialacha Intuigthe"
 
-#: rule.c:564
+#: rule.c:570
 msgid ""
 "\n"
 "# No implicit rules."
@@ -1632,7 +1632,7 @@ msgstr ""
 "\n"
 "# Níl aon riail intuigthe."
 
-#: rule.c:567
+#: rule.c:573
 #, c-format
 msgid ""
 "\n"
@@ -1641,11 +1641,11 @@ msgstr ""
 "\n"
 "# %u riail intuigthe, %u"
 
-#: rule.c:576
+#: rule.c:582
 msgid " terminal."
 msgstr " teirminéal."
 
-#: rule.c:584
+#: rule.c:590
 #, c-format
 msgid "BUG: num_pattern_rules wrong!  %u != %u"
 msgstr "FABHT: num_pattern_rules mícheart!  %u != %u"

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.79.1\n"
 "Report-Msgid-Bugs-To: bug-make@gnu.org\n"
-"POT-Creation-Date: 2008-10-24 20:13-0400\n"
+"POT-Creation-Date: 2008-10-25 09:47-0400\n"
 "PO-Revision-Date: 2002-03-30 21:33+0300\n"
 "Last-Translator: Eli Zaretskii <eliz@gnu.org>\n"
 "Language-Team: Hebrew <eliz@gnu.org>\n"
@@ -1554,7 +1554,7 @@ msgstr "תינבת וניא .LIBPATTERNS לש `%s' טנמלא"
 msgid "Customs won't export: %s\n"
 msgstr "%s אציימ וניא Customs\n"
 
-#: rule.c:549
+#: rule.c:550
 #, fuzzy
 msgid ""
 "\n"
@@ -1563,7 +1563,7 @@ msgstr ""
 "\n"
 "# No implicit rules."
 
-#: rule.c:564
+#: rule.c:570
 msgid ""
 "\n"
 "# No implicit rules."
@@ -1571,7 +1571,7 @@ msgstr ""
 "\n"
 "# No implicit rules."
 
-#: rule.c:567
+#: rule.c:573
 #, c-format
 msgid ""
 "\n"
@@ -1580,11 +1580,11 @@ msgstr ""
 "\n"
 "# %u implicit rules, %u"
 
-#: rule.c:576
+#: rule.c:582
 msgid " terminal."
 msgstr " terminal."
 
-#: rule.c:584
+#: rule.c:590
 #, c-format
 msgid "BUG: num_pattern_rules wrong!  %u != %u"
 msgstr "BUG: num_pattern_rules wrong!  %u != %u"
