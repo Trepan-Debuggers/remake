@@ -18,7 +18,7 @@
 # GNU Make; see the file COPYING.  If not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 
-AC_INIT([GNU make],[3.81+dbg-0.1cvs],[bashdb-remake@lists.sourceforge.net])
+AC_INIT([GNU make],[3.81+dbg-0.1],[bashdb-remake@lists.sourceforge.net])
 
 AM_PATH_LISPDIR
 AC_PREREQ(2.59)
@@ -63,7 +63,7 @@ AC_AIX
 AC_ISC_POSIX
 AC_MINIX
 
-AM_MISSING_PROG(CVS2CL, cvs2cl, $missing_dir)
+AM_MISSING_PROG(GIT2CL, git2cl, $missing_dir)
 AM_MAINTAINER_MODE
 
 # Needed for ansi2knr
