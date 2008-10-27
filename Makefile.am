@@ -166,7 +166,7 @@ check-local: check-regression check-loadavg
 	echo "$$dashes"; \
 	echo
 
-.PHONY: check-loadavg check-regression
+PHONY = check-loadavg check-regression
 
 check-loadavg: loadavg$(EXEEXT)
 	@echo The system uptime program believes the load average to be:
@@ -209,12 +209,23 @@ check-regression:
 	 fi
 
 
+PHONY =
+
 # --------------- Maintainer's Section
 
 # Tell automake that I haven't forgotten about this file and it will be
 # created before we build a distribution (see maintMakefile in the CVS
 # distribution).
 
+if MAINTAINER_MODE
+
+PHONY += ChangeLog
+ChangeLog:
+	git log --pretty --numstat --summary | git2cl > ChangeLog
+endif
+
 README:
 
 @MAINT_MAKEFILE@
+
+.PHONY: $(PHONY)
