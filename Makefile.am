@@ -180,6 +180,12 @@ nodist_loadavg_SOURCES = getloadavg.c
 loadavg_CPPFLAGS = -DTEST
 loadavg_LDADD = @GETLOADAVG_LIBS@
 
+loadavg.o: loadavg.c
+	source='$<' object='$@' libtool=no \
+	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' \
+	$(CCDEPMODE) $(depcomp) \
+	$(COMPILE) -DTEST -c `test -f '$<' || echo '$(srcdir)/'`$<
+
 # > check-regression
 #
 # Look for the make test suite, and run it if found and we can find perl.
@@ -208,8 +214,6 @@ check-regression:
 	  echo "Can't find the GNU Make test suite ($(srcdir)/tests)."; \
 	 fi
 
-
-PHONY =
 
 # --------------- Maintainer's Section
 

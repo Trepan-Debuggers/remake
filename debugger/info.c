@@ -56,6 +56,7 @@ const char *WARRANTY =
 debug_return_t 
 dbg_cmd_info (char *psz_args)
 {
+#ifdef HAVE_LIBREADLINE
   if (!psz_args || 0==strlen(psz_args)) {
     dbg_cmd_help("info");
   } else {
@@ -176,6 +177,7 @@ dbg_cmd_info (char *psz_args)
     }
   }
   
+#endif /* HAVE_LIBREADLINE */
   return debug_readloop;
 }
 
