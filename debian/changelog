@@ -1,3 +1,9 @@
+remake (3.81+dbg0.1-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 30 Oct 2008 10:41:46 -0400
+
 remake (3.80+dbg0.62~dfsg.1-1) unstable; urgency=low
 
   * Initial release (Closes: #411174)
