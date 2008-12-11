@@ -1,4 +1,4 @@
-This directory contains the 3.79 release of GNU Make.
+This directory contains the 3.80 release of GNU Make.
 
 See the file NEWS for the user-visible changes from previous releases.
 In addition, there have been bugs fixed.
@@ -23,6 +23,14 @@ Make, try using `build.sh' instead.
 GNU Make is free software.  See the file COPYING for copying conditions.
 
 
+Downloading
+-----------
+
+GNU Make can be obtained in many different ways.  See a description here:
+
+  http://www.gnu.org/software/software.html
+
+
 Documentation
 -------------
 
@@ -35,7 +43,21 @@ site.  There is information there about ordering hardcopy documentation.
   http://www.gnu.org/doc/doc.html
   http://www.gnu.org/manual/manual.html
 
-You can also find the latest versions of GNU Make from there.
+
+Development
+-----------
+
+GNU Make development is hosted by Savannah, the FSF's online development
+management tool.  Savannah is here:
+
+  http://savannah.gnu.org
+
+And the GNU Make development page is here:
+
+  http://savannah.gnu.org/projects/make/
+
+You can find most information concerning the development of GNU Make at
+this site.
 
 
 Bug Reporting
@@ -45,13 +67,10 @@ You can send GNU make bug reports to <bug-make@gnu.org>.  Please see the
 section of the GNU make manual entitled `Problems and Bugs' for
 information on submitting useful and complete bug reports.
 
-You can also use the FSF's online bug tracking system to submit new
-problem reports or search for existing ones.  A web interface is
-available here:
+You can also use the online bug tracking system in the Savannah GNU Make
+project to submit new problem reports or search for existing ones:
 
-  http://www-gnats.gnu.org:8080/cgi-bin/wwwgnats.pl
-
-Use the Category "make".
+  http://savannah.gnu.org/bugs/?group_id=71
 
 If you need help using GNU make, try these forums:
 
@@ -60,6 +79,17 @@ If you need help using GNU make, try these forums:
   news:gnu.utils.help
   news:gnu.utils.bug
 
+  http://savannah.gnu.org/support/?group_id=71
+
+You may also find interesting patches to GNU Make available here:
+
+  http://savannah.gnu.org/patch/?group_id=71
+
+Note these patches are provided by our users as a service and we make no
+statements regarding their correctness.  Please contact the authors
+directly if you have a problem or suggestion for a patch available on
+this page.
+
 
 CVS Access
 ----------
@@ -67,15 +97,46 @@ CVS Access
 The GNU make source repository is available via anonymous CVS from the
 GNU Subversions CVS server; look here for details:
 
-  http://www.gnu.org/software/devel.html
+  http://savannah.gnu.org/cvs/?group_id=71
 
 Please note: you won't be able to build GNU make from CVS without
-installing appropriate maintainer's tools, such as automake, autoconf,
-GNU make, and GCC.  There are no instructions on this included with the
-tree, so you must be familiar with the installation and use of these
-tools.  We make no guarantees about the contents or quality of the
-latest code in the CVS repository: it is not unheard of for code that is
-known to be broken to be checked in.  Use at your own risk.
+installing appropriate maintainer's tools, such as GNU m4, automake,
+autoconf, Perl, GNU make, and GCC.  See the README.cvs file for hints on
+how to build GNU make once these tools are available.  We make no
+guarantees about the contents or quality of the latest code in the CVS
+repository: it is not unheard of for code that is known to be broken to
+be checked in.  Use at your own risk.
+
+
+System-specific Notes
+---------------------
+
+It has been reported that the XLC 1.2 compiler on AIX 3.2 is buggy such
+that if you compile make with `cc -O' on AIX 3.2, it will not work correctly.
+It is said that using `cc' without `-O' does work.
+
+One area that is often a problem in configuration and porting is the code
+to check the system's current load average.  To make it easier to test and
+debug this code, you can do `make check-loadavg' to see if it works
+properly on your system.  (You must run `configure' beforehand, but you
+need not build Make itself to run this test.)
+
+Another potential source of porting problems is the support for large
+files (LFS) in configure for those operating systems that provide it.
+Please report any bugs that you find in this area.  If you run into
+difficulties, then as a workaround you should be able to disable LFS by
+adding the `--disable-largefile' option to the `configure' script.
+
+On systems that support micro- and nano-second timestamp values and
+where stat(2) provides this information, GNU make will use it when
+comparing timestamps to get the most accurate possible result.  However,
+note that many current implementations of tools that *set* timestamps do
+not preserve micro- or nano-second granularity.  This means that "cp -p"
+and other similar tools (tar, etc.) may not exactly duplicate timestamps
+with micro- and nano-second granularity on some systems.  If your build
+system contains rules that depend on proper behavior of tools like "cp
+-p", you should consider using the .LOW_RESOLUTION_TIME pseudo-target to
+force make to treat them properly.  See the manual for details.
 
 
 Ports
@@ -101,23 +162,3 @@ Please note there are two _separate_ ports of GNU make for Microsoft
 systems: a native Windows tool built with (for example) MSVC or Cygwin,
 and a DOS-based tool built with DJGPP.  Please be sure you are looking
 at the right README!
-
-
-System-specific Notes
----------------------
-
-It has been reported that the XLC 1.2 compiler on AIX 3.2 is buggy such
-that if you compile make with `cc -O' on AIX 3.2, it will not work correctly.
-It is said that using `cc' without `-O' does work.
-
-One area that is often a problem in configuration and porting is the code
-to check the system's current load average.  To make it easier to test and
-debug this code, you can do `make check-loadavg' to see if it works
-properly on your system.  (You must run `configure' beforehand, but you
-need not build Make itself to run this test.)
-
-Another potential source of porting problems is the support for large
-files (LFS) in configure for those operating systems that provide it.
-Please report any bugs that you find in this area.  If you run into
-difficulties, then as a workaround you should be able to disable LFS by
-adding the `--disable-largefile' option to the `configure' script.

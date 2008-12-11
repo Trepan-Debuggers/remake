@@ -1,5 +1,6 @@
 /* Basic dependency engine for GNU Make.
-Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
+2002 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -57,6 +58,9 @@ extern int try_implicit_rule PARAMS ((struct file *file, unsigned int depth));
 
 /* Incremented when a command is started (under -n, when one would be).  */
 unsigned int commands_started = 0;
+
+/* Current value for pruning the scan of the goal chain (toggle 0/1).  */
+static unsigned int considered;
 
 static int update_file PARAMS ((struct file *file, unsigned int depth));
 static int update_file_1 PARAMS ((struct file *file, unsigned int depth));
@@ -390,9 +394,19 @@ update_file_1 (file, depth)
 
   this_mtime = file_mtime (file);
   check_renamed (file);
-  noexist = this_mtime == (FILE_TIMESTAMP) -1;
+  noexist = this_mtime == NONEXISTENT_MTIME;
   if (noexist)
     DBF (DB_BASIC, _("File `%s' does not exist.\n"));
+  else if (ORDINARY_MTIME_MIN <= this_mtime && this_mtime <= ORDINARY_MTIME_MAX
+	   && file->low_resolution_time)
+    {
+      /* Avoid spurious rebuilds due to low resolution time stamps.  */
+      int ns = FILE_TIMESTAMP_NS (this_mtime);
+      if (ns != 0)
+	error (NILF, _("*** Warning: .LOW_RESOLUTION_TIME file `%s' has a high resolution time stamp"),
+	       file->name);
+      this_mtime += FILE_TIMESTAMPS_PER_S - 1 - ns;
+    }
 
   must_make = noexist;
 
@@ -422,6 +436,7 @@ update_file_1 (file, depth)
   while (d != 0)
     {
       FILE_TIMESTAMP mtime;
+      int maybe_make;
 
       check_renamed (d->file);
 
@@ -444,7 +459,11 @@ update_file_1 (file, depth)
 	}
 
       d->file->parent = file;
-      dep_status |= check_dep (d->file, depth, this_mtime, &must_make);
+      maybe_make = must_make;
+      dep_status |= check_dep (d->file, depth, this_mtime, &maybe_make);
+      if (! d->ignore_mtime)
+        must_make = maybe_make;
+
       check_renamed (d->file);
 
       {
@@ -473,7 +492,7 @@ update_file_1 (file, depth)
   /* Now we know whether this target needs updating.
      If it does, update all the intermediate files we depend on.  */
 
-  if (must_make)
+  if (must_make || always_make_flag)
     {
       for (d = file->deps; d != 0; d = d->next)
 	if (d->file->intermediate)
@@ -525,7 +544,7 @@ update_file_1 (file, depth)
       file->update_status = dep_status;
       notice_finished_file (file);
 
-      depth--;
+      --depth;
 
       DBF (DB_VERBOSE, _("Giving up on target file `%s'.\n"));
 
@@ -548,7 +567,7 @@ update_file_1 (file, depth)
        file's bookkeeping (updated, but not_started is bogus state).  */
     set_command_state (file, cs_not_started);
 
-  /* Now record which dependencies are more
+  /* Now record which prerequisites are more
      recent than this file, so we can define $?.  */
 
   deps_changed = 0;
@@ -557,17 +576,21 @@ update_file_1 (file, depth)
       FILE_TIMESTAMP d_mtime = file_mtime (d->file);
       check_renamed (d->file);
 
-#if 1	/* %%% In version 4, remove this code completely to
+      if (! d->ignore_mtime)
+        {
+#if 1
+          /* %%% In version 4, remove this code completely to
 	   implement not remaking deps if their deps are newer
 	   than their parents.  */
-      if (d_mtime == (FILE_TIMESTAMP) -1 && !d->file->intermediate)
-	/* We must remake if this dep does not
-	   exist and is not intermediate.  */
-	must_make = 1;
+          if (d_mtime == NONEXISTENT_MTIME && !d->file->intermediate)
+            /* We must remake if this dep does not
+               exist and is not intermediate.  */
+            must_make = 1;
 #endif
 
-      /* Set DEPS_CHANGED if this dep actually changed.  */
-      deps_changed |= d->changed;
+          /* Set DEPS_CHANGED if this dep actually changed.  */
+          deps_changed |= d->changed;
+        }
 
       /* Set D->changed if either this dep actually changed,
 	 or its dependent, FILE, is older or does not exist.  */
@@ -577,7 +600,12 @@ update_file_1 (file, depth)
 	{
           const char *fmt = 0;
 
-	  if (d_mtime == (FILE_TIMESTAMP) -1)
+          if (d->ignore_mtime)
+            {
+              if (ISDB (DB_VERBOSE))
+                fmt = _("Prerequisite `%s' is order-only for target `%s'.\n");
+            }
+          else if (d_mtime == NONEXISTENT_MTIME)
             {
               if (ISDB (DB_BASIC))
                 fmt = _("Prerequisite `%s' of target `%s' does not exist.\n");
@@ -608,11 +636,17 @@ update_file_1 (file, depth)
       DBF (DB_BASIC,
            _("Target `%s' is double-colon and has no prerequisites.\n"));
     }
-  else if (!noexist && file->is_target && !deps_changed && file->cmds == 0)
+  else if (!noexist && file->is_target && !deps_changed && file->cmds == 0
+           && !always_make_flag)
     {
       must_make = 0;
       DBF (DB_VERBOSE,
            _("No commands for `%s' and no prerequisites actually changed.\n"));
+    }
+  else if (!must_make && file->cmds != 0 && always_make_flag)
+    {
+      must_make = 1;
+      DBF (DB_VERBOSE, _("Making `%s' due to always-make flag.\n"));
     }
 
   if (!must_make)
@@ -693,6 +727,7 @@ notice_finished_file (file)
 {
   struct dep *d;
   int ran = file->command_state == cs_running;
+  int touched = 0;
 
   file->command_state = cs_finished;
   file->updated = 1;
@@ -721,24 +756,36 @@ notice_finished_file (file)
 	  if (file->phony)
 	    file->update_status = 0;
 	  else
-	    /* Should set file's modification date and do nothing else.  */
-	    file->update_status = touch_file (file);
+            {
+              /* Should set file's modification date and do nothing else.  */
+              file->update_status = touch_file (file);
+
+              /* Pretend we ran a real touch command, to suppress the
+                 "`foo' is up to date" message.  */
+              commands_started++;
+
+              /* Request for the timestamp to be updated (and distributed
+                 to the double-colon entries). Simply setting ran=1 would
+                 almost have done the trick, but messes up with the also_make
+                 updating logic below.  */
+              touched = 1;
+            }
 	}
     }
 
-  if (file->mtime_before_update == 0)
+  if (file->mtime_before_update == UNKNOWN_MTIME)
     file->mtime_before_update = file->last_mtime;
 
-  if (ran && !file->phony)
+  if ((ran && !file->phony) || touched)
     {
       struct file *f;
       int i = 0;
 
-      /* If -n or -q and all the commands are recursive, we ran them so
+      /* If -n, -t, or -q and all the commands are recursive, we ran them so
          really check the target's mtime again.  Otherwise, assume the target
          would have been updated. */
 
-      if (question_flag || just_print_flag)
+      if (question_flag || just_print_flag || touch_flag)
         {
           for (i = file->cmds->ncommand_lines; i > 0; --i)
             if (! (file->cmds->lines_flags[i-1] & COMMANDS_RECURSE))
@@ -750,11 +797,11 @@ notice_finished_file (file)
       else if (file->is_target && file->cmds == 0)
 	i = 1;
 
-      file->last_mtime = i == 0 ? 0 : NEW_MTIME;
+      file->last_mtime = i == 0 ? UNKNOWN_MTIME : NEW_MTIME;
 
       /* Propagate the change of modification time to all the double-colon
 	 entries for this file.  */
-      for (f = file->double_colon; f != 0; f = f->next)
+      for (f = file->double_colon; f != 0; f = f->prev)
 	f->last_mtime = file->last_mtime;
     }
 
@@ -796,7 +843,7 @@ check_dep (file, depth, this_mtime, must_make_ptr)
      FILE_TIMESTAMP this_mtime;
      int *must_make_ptr;
 {
-  register struct dep *d;
+  struct dep *d;
   int dep_status = 0;
 
   ++depth;
@@ -811,7 +858,7 @@ check_dep (file, depth, this_mtime, must_make_ptr)
       check_renamed (file);
       mtime = file_mtime (file);
       check_renamed (file);
-      if (mtime == (FILE_TIMESTAMP) -1 || mtime > this_mtime)
+      if (mtime == NONEXISTENT_MTIME || mtime > this_mtime)
 	*must_make_ptr = 1;
     }
   else
@@ -839,19 +886,21 @@ check_dep (file, depth, this_mtime, must_make_ptr)
       check_renamed (file);
       mtime = file_mtime (file);
       check_renamed (file);
-      if (mtime != (FILE_TIMESTAMP) -1 && mtime > this_mtime)
+      if (mtime != NONEXISTENT_MTIME && mtime > this_mtime)
 	*must_make_ptr = 1;
 	  /* Otherwise, update all non-intermediate files we depend on,
 	     if necessary, and see whether any of them is more
 	     recent than the file on whose behalf we are checking.  */
       else
 	{
-	  register struct dep *lastd;
+	  struct dep *lastd;
 
 	  lastd = 0;
 	  d = file->deps;
 	  while (d != 0)
 	    {
+              int maybe_make;
+
 	      if (is_updating (d->file))
 		{
 		  error (NILF, _("Circular %s <- %s dependency dropped."),
@@ -872,8 +921,11 @@ check_dep (file, depth, this_mtime, must_make_ptr)
 		}
 
 	      d->file->parent = file;
+              maybe_make = *must_make_ptr;
 	      dep_status |= check_dep (d->file, depth, this_mtime,
-                                       must_make_ptr);
+                                       &maybe_make);
+              if (! d->ignore_mtime)
+                *must_make_ptr = maybe_make;
 	      check_renamed (d->file);
 	      if (dep_status != 0 && !keep_going_flag)
 		break;
@@ -920,13 +972,8 @@ touch_file (file)
 	{
 	  struct stat statbuf;
 	  char buf;
-	  int status;
 
-	  do
-	    status = fstat (fd, &statbuf);
-	  while (status < 0 && EINTR_SET);
-
-	  if (status < 0)
+	  if (fstat (fd, &statbuf) < 0)
 	    TOUCH_ERROR ("touch: fstat: ");
 	  /* Rewrite character 0 same as it already is.  */
 	  if (read (fd, &buf, 1) < 0)
@@ -1039,6 +1086,7 @@ f_mtime (file, search)
       char *arname, *memname;
       struct file *arfile;
       int arname_used = 0;
+      time_t member_date;
 
       /* Find the archive's name.  */
       ar_parse_name (file->name, &arname, &memname);
@@ -1093,18 +1141,23 @@ f_mtime (file, search)
 	free (arname);
       free (memname);
 
-      if (mtime == (FILE_TIMESTAMP) -1)
-	/* The archive doesn't exist, so it's members don't exist either.  */
-	return (FILE_TIMESTAMP) -1;
+      file->low_resolution_time = 1;
 
-      mtime = FILE_TIMESTAMP_FROM_S_AND_NS (ar_member_date (file->hname), 0);
+      if (mtime == NONEXISTENT_MTIME)
+	/* The archive doesn't exist, so its members don't exist either.  */
+	return NONEXISTENT_MTIME;
+
+      member_date = ar_member_date (file->hname);
+      mtime = (member_date == (time_t) -1
+               ? NONEXISTENT_MTIME
+               : file_timestamp_cons (file->hname, member_date, 0));
     }
   else
 #endif
     {
       mtime = name_mtime (file->name);
 
-      if (mtime == (FILE_TIMESTAMP) -1 && search && !file->ignore_vpath)
+      if (mtime == NONEXISTENT_MTIME && search && !file->ignore_vpath)
 	{
 	  /* If name_mtime failed, search VPATH.  */
 	  char *name = file->name;
@@ -1113,8 +1166,8 @@ f_mtime (file, search)
 	      || (name[0] == '-' && name[1] == 'l'
 		  && library_search (&name, &mtime)))
 	    {
-	      if (mtime != 0)
-		/* vpath_search and library_search store zero in MTIME
+	      if (mtime != UNKNOWN_MTIME)
+		/* vpath_search and library_search store UNKNOWN_MTIME
 		   if they didn't need to do a stat call for their work.  */
 		file->last_mtime = mtime;
 
@@ -1142,41 +1195,47 @@ f_mtime (file, search)
 
        We only need to do this once, for now. */
 
-    static FILE_TIMESTAMP now = 0;
     if (!clock_skew_detected
-        && mtime != (FILE_TIMESTAMP)-1 && mtime > now
-        && !file->updated)
+	&& mtime != NONEXISTENT_MTIME
+	&& !file->updated)
       {
-	/* This file's time appears to be in the future.
-	   Update our concept of the present, and compare again.  */
+	static FILE_TIMESTAMP adjusted_now;
 
-	now = file_timestamp_now ();
+	FILE_TIMESTAMP adjusted_mtime = mtime;
 
-#ifdef WINDOWS32
-	/*
-	 * FAT filesystems round time to nearest even second(!). Just
-	 * allow for any file (NTFS or FAT) to perhaps suffer from this
-	 * braindamage.
-	 */
-	if (mtime > now && (((mtime % 2) == 0) && ((mtime-1) > now)))
-#else
-#ifdef __MSDOS__
-	/* Scrupulous testing indicates that some Windows
-	   filesystems can set file times up to 3 sec into the future!  */
-	if (mtime > now + 3)
-#else
-        if (mtime > now)
+#if defined(WINDOWS32) || defined(__MSDOS__)
+	/* Experimentation has shown that FAT filesystems can set file times
+	   up to 3 seconds into the future!  Play it safe.  */
+
+#define FAT_ADJ_OFFSET  (FILE_TIMESTAMP) 3
+
+	FILE_TIMESTAMP adjustment = FAT_ADJ_OFFSET << FILE_TIMESTAMP_LO_BITS;
+	if (ORDINARY_MTIME_MIN + adjustment <= adjusted_mtime)
+	  adjusted_mtime -= adjustment;
 #endif
-#endif
-          {
-	    char mtimebuf[FILE_TIMESTAMP_PRINT_LEN_BOUND + 1];
-	    char nowbuf[FILE_TIMESTAMP_PRINT_LEN_BOUND + 1];
 
-	    file_timestamp_sprintf (mtimebuf, mtime);
-	    file_timestamp_sprintf (nowbuf, now);
-            error (NILF, _("*** Warning: File `%s' has modification time in the future (%s > %s)"),
-                   file->name, mtimebuf, nowbuf);
-            clock_skew_detected = 1;
+	/* If the file's time appears to be in the future, update our
+	   concept of the present and try once more.  */
+	if (adjusted_now < adjusted_mtime)
+	  {
+	    int resolution;
+	    FILE_TIMESTAMP now = file_timestamp_now (&resolution);
+	    adjusted_now = now + (resolution - 1);
+	    if (adjusted_now < adjusted_mtime)
+	      {
+#ifdef NO_FLOAT
+		error (NILF, _("Warning: File `%s' has modification time in the future"),
+                       file->name);
+#else
+		double from_now =
+		  (FILE_TIMESTAMP_S (mtime) - FILE_TIMESTAMP_S (now)
+		   + ((FILE_TIMESTAMP_NS (mtime) - FILE_TIMESTAMP_NS (now))
+		      / 1e9));
+		error (NILF, _("Warning: File `%s' has modification time %.2g s in the future"),
+		       file->name, from_now);
+#endif
+		clock_skew_detected = 1;
+	      }
           }
       }
   }
@@ -1192,7 +1251,8 @@ f_mtime (file, search)
 	 been built by us but was found now, it existed before make
 	 started.  So, turn off the intermediate bit so make doesn't
 	 delete it, since it didn't create it.  */
-      if (mtime != (FILE_TIMESTAMP)-1 && file->command_state == cs_not_started
+      if (mtime != NONEXISTENT_MTIME && file->command_state == cs_not_started
+	  && file->command_state == cs_not_started
 	  && !file->tried_implicit && file->intermediate)
 	file->intermediate = 0;
 
@@ -1213,10 +1273,14 @@ name_mtime (name)
 {
   struct stat st;
 
-  if (stat (name, &st) < 0)
-    return (FILE_TIMESTAMP) -1;
+  if (stat (name, &st) != 0)
+    {
+      if (errno != ENOENT && errno != ENOTDIR)
+        perror_with_name ("stat:", name);
+      return NONEXISTENT_MTIME;
+    }
 
-  return FILE_TIMESTAMP_STAT_MODTIME (st);
+  return FILE_TIMESTAMP_STAT_MODTIME (name, st);
 }
 
 
@@ -1302,7 +1366,7 @@ library_search (lib, mtime_ptr)
 
       /* Look first for `libNAME.a' in the current directory.  */
       mtime = name_mtime (libbuf);
-      if (mtime != (FILE_TIMESTAMP) -1)
+      if (mtime != NONEXISTENT_MTIME)
 	{
 	  *lib = xstrdup (libbuf);
 	  if (mtime_ptr != 0)
@@ -1342,7 +1406,7 @@ library_search (lib, mtime_ptr)
 	{
 	  sprintf (buf, "%s/%s", *dp, libbuf);
 	  mtime = name_mtime (buf);
-	  if (mtime != (FILE_TIMESTAMP) -1)
+	  if (mtime != NONEXISTENT_MTIME)
 	    {
 	      *lib = xstrdup (buf);
 	      if (mtime_ptr != 0)

@@ -1,5 +1,6 @@
 /* Miscellaneous global declarations and portability cruft for GNU Make.
-Copyright (C) 1988,89,90,91,92,93,94,95,96,97,99 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
+2002 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -17,17 +18,27 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/* AIX requires this to be the first thing in the file.  */
-#if defined (_AIX) && !defined (__GNUC__)
- #pragma alloca
-#endif
-
 /* We use <config.h> instead of "config.h" so that a compilation
    using -I. -I$srcdir will use ./config.h rather than $srcdir/config.h
    (which it would do because make.h was found in $srcdir).  */
 #include <config.h>
 #undef  HAVE_CONFIG_H
 #define HAVE_CONFIG_H 1
+
+/* AIX requires this to be the first thing in the file.  */
+#ifndef __GNUC__
+# if HAVE_ALLOCA_H
+#  include <alloca.h>
+# else
+#  ifdef _AIX
+ #pragma alloca
+#  else
+#   ifndef alloca /* predefined by HP cc +Olibcalls */
+char *alloca ();
+#   endif
+#  endif
+# endif
+#endif
 
 
 /* Use prototypes if available.  */
@@ -39,14 +50,10 @@ Boston, MA 02111-1307, USA.  */
 # define PARAMS(protos)  ()
 #endif /* C++ or ANSI C.  */
 
+/* Specify we want GNU source code.  This must be defined before any
+   system headers are included.  */
 
-#include "gettext.h"
-#define _(Text)     gettext (Text)
-#define N_(Text)    gettext_noop (Text)
-
-#if !HAVE_SETLOCALE
-# define setlocale(Category, Locale) /* empty */
-#endif
+#define _GNU_SOURCE 1
 
 
 #ifdef  CRAY
@@ -60,7 +67,6 @@ Boston, MA 02111-1307, USA.  */
 # define __NO_STRING_INLINES
 #endif
 
-#define _GNU_SOURCE 1
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <signal.h>
@@ -72,19 +78,22 @@ Boston, MA 02111-1307, USA.  */
    <sys/timeb.h>?  If any does not, configure should check for it.  */
 # include <sys/timeb.h>
 #endif
-#include <time.h>
+
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+
 #include <errno.h>
 
 #ifndef errno
 extern int errno;
-#endif
-
-/* A shortcut for EINTR checking.  Note you should be careful when negating
-   this!  That might not mean what you want if EINTR is not available.  */
-#ifdef EINTR
-# define EINTR_SET (errno == EINTR)
-#else
-# define EINTR_SET (0)
 #endif
 
 #ifndef isblank
@@ -115,6 +124,10 @@ extern int errno;
 
 #ifndef sigmask
 # define sigmask(sig)   (1 << ((sig) - 1))
+#endif
+
+#ifndef HAVE_SA_RESTART
+# define SA_RESTART 0
 #endif
 
 #ifdef  HAVE_LIMITS_H
@@ -181,6 +194,8 @@ extern unsigned int get_path_max PARAMS ((void));
 # include <unixlib.h>
 # include <unixio.h>
 # include <perror.h>
+/* Needed to use alloca on VMS.  */
+# include <builtins.h>
 #endif
 
 #ifndef __attribute__
@@ -223,6 +238,14 @@ extern void exit PARAMS ((int)) __attribute__ ((noreturn));
 
 #endif /* Standard headers.  */
 
+/* These should be in stdlib.h.  Make sure we have them.  */
+#ifndef EXIT_SUCCESS
+# define EXIT_SUCCESS 0
+#endif
+#ifndef EXIT_FAILURE
+# define EXIT_FAILURE 0
+#endif
+
 #ifdef  ANSI_STRING
 
 # ifndef bcmp
@@ -262,26 +285,13 @@ extern void bcopy PARAMS ((const char *b1, char *b2, int));
 extern char *strerror PARAMS ((int errnum));
 #endif
 
-#ifdef __GNUC__
-# undef alloca
-# define alloca(n)      __builtin_alloca (n)
-#else   /* Not GCC.  */
-# ifdef HAVE_ALLOCA_H
-#  include <alloca.h>
-# else /* Not HAVE_ALLOCA_H.  */
-#  ifndef _AIX
-extern char *alloca ();
-#  endif /* Not AIX.  */
-# endif /* HAVE_ALLOCA_H.  */
-#endif /* GCC.  */
+#if HAVE_INTTYPES_H
+# include <inttypes.h>
+#endif
+#define FILE_TIMESTAMP uintmax_t
 
-#ifdef ST_MTIM_NSEC
-# if HAVE_INTTYPES_H
-#  include <inttypes.h>
-# endif
-# define FILE_TIMESTAMP uintmax_t
-#else
-# define FILE_TIMESTAMP time_t
+#if !defined(HAVE_STRSIGNAL)
+extern char *strsignal PARAMS ((int signum));
 #endif
 
 /* ISDIGIT offers the following features:
@@ -289,10 +299,10 @@ extern char *alloca ();
    - It's guaranteed to evaluate its argument exactly once.
       NOTE!  Make relies on this behavior, don't change it!
    - It's typically faster.
-   Posix 1003.2-1992 section 2.5.2.1 page 50 lines 1556-1558 says that
+   POSIX 1003.2-1992 section 2.5.2.1 page 50 lines 1556-1558 says that
    only '0' through '9' are digits.  Prefer ISDIGIT to isdigit() unless
    it's important to use the locale's definition of `digit' even when the
-   host does not conform to Posix.  */
+   host does not conform to POSIX.  */
 #define ISDIGIT(c) ((unsigned) (c) - '0' <= 9)
 
 #ifndef iAPX286
@@ -318,21 +328,27 @@ extern char *alloca ();
 extern int strcmpi (const char *,const char *);
 #endif
 
-/* Add to VAR the hashing value of C, one character in a name.  */
-#define HASH(var, c) \
-  ((var += (c)), (var = ((var) << 7) + ((var) >> 20)))
-#ifdef HAVE_CASE_INSENSITIVE_FS /* Fold filenames */
-# define HASHI(var, c) \
-   ((var += tolower((unsigned char)(c))), (var = ((var) << 7) + ((var) >> 20)))
-#else
-# define HASHI(var, c) HASH(var,c)
-#endif
-
 #if defined(__GNUC__) || defined(ENUM_BITFIELDS)
 # define ENUM_BITFIELD(bits)    :bits
 #else
 # define ENUM_BITFIELD(bits)
 #endif
+
+/* Handle gettext and locales.  */
+
+#if HAVE_LOCALE_H
+# include <locale.h>
+#else
+# define setlocale(category, locale)
+#endif
+
+#include <gettext.h>
+
+#define _(msgid)            gettext (msgid)
+#define N_(msgid)           gettext_noop (msgid)
+#define S_(msg1,msg2,num)   ngettext (msg1,msg2,num)
+
+/* Handle other OSs.  */
 
 #if defined(__MSDOS__) || defined(WINDOWS32)
 # define PATH_SEPARATOR_CHAR ';'
@@ -370,6 +386,8 @@ struct floc
   };
 #define NILF ((struct floc *)0)
 
+#define STRING_SIZE_TUPLE(_s) (_s), (sizeof (_s)-1)
+
 
 /* Fancy processing for variadic functions in both ANSI and pre-ANSI
    compilers.  */
@@ -388,15 +406,15 @@ extern void fatal ();
 
 extern void die PARAMS ((int)) __attribute__ ((noreturn));
 extern void log_working_directory PARAMS ((int));
-extern void pfatal_with_name PARAMS ((char *)) __attribute__ ((noreturn));
-extern void perror_with_name PARAMS ((char *, char *));
+extern void pfatal_with_name PARAMS ((const char *)) __attribute__ ((noreturn));
+extern void perror_with_name PARAMS ((const char *, const char *));
 extern char *savestring PARAMS ((const char *, unsigned int));
-extern char *concat PARAMS ((char *, char *, char *));
+extern char *concat PARAMS ((const char *, const char *, const char *));
 extern char *xmalloc PARAMS ((unsigned int));
 extern char *xrealloc PARAMS ((char *, unsigned int));
 extern char *xstrdup PARAMS ((const char *));
 extern char *find_next_token PARAMS ((char **, unsigned int *));
-extern char *next_token PARAMS ((char *));
+extern char *next_token PARAMS ((const char *));
 extern char *end_of_token PARAMS ((char *));
 extern void collapse_continuations PARAMS ((char *));
 extern void remove_comments PARAMS((char *));
@@ -405,7 +423,7 @@ extern char *sindex PARAMS ((const char *, unsigned int, \
 extern char *lindex PARAMS ((const char *, const char *, int));
 extern int alpha_compare PARAMS ((const void *, const void *));
 extern void print_spaces PARAMS ((unsigned int));
-extern char *find_char_unquote PARAMS ((char *, char *, int));
+extern char *find_char_unquote PARAMS ((char *, int, int, int));
 extern char *find_percent PARAMS ((char *));
 extern FILE *open_tmpfile PARAMS ((char **, const char *));
 
@@ -421,6 +439,7 @@ extern int file_exists_p PARAMS ((char *));
 extern int file_impossible_p PARAMS ((char *));
 extern void file_impossible PARAMS ((char *));
 extern char *dir_name PARAMS ((char *));
+extern void hash_init_directories PARAMS ((void));
 
 extern void define_default_variables PARAMS ((void));
 extern void set_default_suffixes PARAMS ((void));
@@ -468,7 +487,7 @@ extern const struct floc *reading_file;
 extern char **environ;
 
 extern int just_print_flag, silent_flag, ignore_errors_flag, keep_going_flag;
-extern int print_data_base_flag, question_flag, touch_flag;
+extern int print_data_base_flag, question_flag, touch_flag, always_make_flag;
 extern int env_overrides, no_builtin_rules_flag, no_builtin_variables_flag;
 extern int print_version_flag, print_directory_flag;
 extern int warn_undefined_variables_flag, posix_pedantic, not_parallel;
@@ -504,29 +523,40 @@ extern int handling_fatal_signal;
 #endif
 
 #ifdef VMS
-# ifndef EXIT_FAILURE
-#  define EXIT_FAILURE 3
-# endif
-# ifndef EXIT_SUCCESS
-#  define EXIT_SUCCESS 1
-# endif
-# ifndef EXIT_TROUBLE
-#  define EXIT_TROUBLE 2
-# endif
+#  define MAKE_SUCCESS 1
+#  define MAKE_TROUBLE 2
+#  define MAKE_FAILURE 3
 #else
-# ifndef EXIT_FAILURE
-#  define EXIT_FAILURE 2
-# endif
-# ifndef EXIT_SUCCESS
-#  define EXIT_SUCCESS 0
-# endif
-# ifndef EXIT_TROUBLE
-#  define EXIT_TROUBLE 1
-# endif
+#  define MAKE_SUCCESS 0
+#  define MAKE_TROUBLE 1
+#  define MAKE_FAILURE 2
 #endif
 
 /* Set up heap debugging library dmalloc.  */
 
 #ifdef HAVE_DMALLOC_H
 #include <dmalloc.h>
+#endif
+
+
+/* If we have broken SA_RESTART support, then wrap stat() and readdir() with
+   versions that handle EINTR.  Note that there are still plenty of system
+   calls that can fail with EINTR but this, reportedly, gets the vast
+   majority of failure cases.  If you still experience failures you'll need
+   to either get a system where SA_RESTART works, or you need to avoid -j.  */
+
+#ifdef HAVE_BROKEN_RESTART
+
+/* Here we make an assumption that a system with a broken SA_RESTART has
+   dirent.h.  Right now the only system I know of in this category is PTX, and
+   it does have dirent.h.
+*/
+#include <dirent.h>
+
+#define stat(_f,_b)     atomic_stat ((_f), (_b))
+#define readdir(_d)     atomic_readdir (_d)
+
+extern int atomic_stat PARAMS ((const char *file, struct stat *buf));
+extern struct dirent *atomic_readdir PARAMS ((DIR *dir));
+
 #endif

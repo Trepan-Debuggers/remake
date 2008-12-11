@@ -1,7 +1,7 @@
 # -*-Makefile-*- template for DJGPP
 # Makefile.in generated automatically by automake 1.2 from Makefile.am
 
-# Copyright (C) 1994, 1995-1998, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-1998, 1999, 2002 Free Software Foundation, Inc.
 # This Makefile.DOS is free software; the Free Software Foundation
 # gives unlimited permission to copy, distribute and modify it.
 
@@ -15,26 +15,25 @@ VPATH = $(srcdir)
 prefix = /dev/env/DJDIR
 exec_prefix = ${prefix}
 
-bindir = ${exec_prefix}/bin
-datadir = ${prefix}/share
-libdir = ${prefix}/lib
-infodir = ${prefix}/info
-# DJGPP doesn't have separate man tree, use info instead.
-mandir = ${prefix}/info
-includedir = ${prefix}/include
+bindir = /bin
+datadir = /share
+libdir = /lib
+infodir = /info
+mandir = /man
+includedir = /include
 oldincludedir = c:/djgpp/include
 
-DESTDIR =
+DESTDIR = /dev/env/DJDIR
 
 pkgdatadir = $(datadir)/make
 pkglibdir = $(libdir)/make
 pkgincludedir = $(includedir)/make
-localedir = $(prefix)/share/locale
+localedir = $(datadir)/locale
 
-INSTALL = ${bindir}/ginstall -c
-INSTALL_PROGRAM = ${bindir}/ginstall -c
-INSTALL_DATA = ${bindir}/ginstall -c -m 644
-INSTALL_SCRIPT = ${bindir}/ginstall -c
+INSTALL = ${exec_prefix}/bin/ginstall -c
+INSTALL_PROGRAM = ${exec_prefix}/bin/ginstall -c
+INSTALL_DATA = ${exec_prefix}/bin/ginstall -c -m 644
+INSTALL_SCRIPT = ${exec_prefix}/bin/ginstall -c
 transform = s,x,x,
 
 # This will fail even if they don't have a Unix-like shell (stock DOS
@@ -48,22 +47,26 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+EXEEXT = .exe
+OBJEXT = o
+
 AR = ar
+AWK = gawk
 CC = gcc
 CPP = gcc -E
 LIBOBJS =
-MAKEINFO = ${bindir}/makeinfo
+MAKEINFO = ${exec_prefix}/bin/makeinfo
 PACKAGE = make
 PERL = perl
 RANLIB = ranlib
 REMOTE = stub
-VERSION = 3.79
+VERSION = 3.80
 
 AUTOMAKE_OPTIONS = 1.2
 
-bin_PROGRAMS =	make
+bin_PROGRAMS =	make$(EXEEXT)
 
-make_SOURCES =	ar.c arscan.c commands.c dir.c expand.c file.c function.c getopt.c implicit.c job.c main.c misc.c read.c remake.c rule.c signame.c variable.c vpath.c default.c version.c getopt1.c remote-$(REMOTE).c
+make_SOURCES =	ar.c arscan.c commands.c default.c dir.c expand.c file.c function.c getopt.c getopt1.c implicit.c job.c main.c misc.c read.c remake.c rule.c signame.c variable.c version.c vpath.c hash.c remote-$(REMOTE).c
 # This should include the glob/ prefix
 libglob_a_SOURCES =	glob/fnmatch.c glob/glob.c glob/fnmatch.h glob/glob.h
 make_LDADD =	  glob/libglob.a
@@ -78,7 +81,7 @@ BUILT_SOURCES =	README build.sh-in
 EXTRA_DIST = 	$(BUILT_SOURCES) $(man_MANS) README.customs remote-cstms.c  make-stds.texi texinfo.tex SCOPTIONS SMakefile  Makefile.ami README.Amiga config.ami amiga.c amiga.h  NMakefile README.DOS configh.dos configure.bat makefile.com  README.W32 build_w32.bat config.h-W32 subproc.bat make.lnk  config.h-vms makefile.vms readme.vms vmsdir.h vmsfunctions.c  vmsify.c
 
 SUBDIRS =	glob
-mkinstalldirs = ${bindir}/gmkdir -p
+mkinstalldirs = ${exec_prefix}/bin/gmkdir -p
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES =  build.sh
 PROGRAMS =  $(bin_PROGRAMS)
@@ -90,7 +93,7 @@ DEFS =  -I. -I$(srcdir) -I.
 CPPFLAGS = -DHAVE_CONFIG_H
 LDFLAGS =
 LIBS =
-make_OBJECTS =  ar.o arscan.o commands.o dir.o expand.o file.o function.o getopt.o implicit.o job.o main.o misc.o read.o remake.o rule.o signame.o variable.o vpath.o default.o version.o getopt1.o remote-$(REMOTE).o
+make_OBJECTS =  ar.o arscan.o commands.o default.o dir.o expand.o file.o function.o getopt.o getopt1.o implicit.o job.o main.o misc.o read.o remake.o rule.o signame.o variable.o version.o vpath.o hash.o remote-$(REMOTE).o
 make_DEPENDENCIES =    glob/libglob.a
 make_LDFLAGS =
 libglob_a_LIBADD =
@@ -100,7 +103,7 @@ CFLAGS = -O2 -g
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
 LINK = $(CC) $(CFLAGS) $(LDFLAGS) -o $@
 TEXI2DVI = texi2dvi
-TEXINFO_TEX = $(srcdir)/texinfo.tex
+TEXINFO_TEX = $(srcdir)/config/texinfo.tex
 INFO_DEPS = make.info
 DVIS = make.dvi
 TEXINFOS = make.texinfo
@@ -108,8 +111,7 @@ man1dir = $(mandir)/man1
 MANS = $(man_MANS)
 
 NROFF = nroff
-DIST_COMMON =  README ABOUT-NLS AUTHORS COPYING ChangeLog INSTALL Makefile.am  Makefile.in NEWS acconfig.h aclocal.m4 alloca.c build.sh.in config.h.in  configure configure.in getloadavg.c gettext.c install-sh missing mkinstalldirs  stamp-h.in texinfo.tex
-
+DIST_COMMON =  README ABOUT-NLS AUTHORS COPYING ChangeLog INSTALL Makefile.am  Makefile.in NEWS acconfig.h aclocal.m4 alloca.c build.sh-in config.h-in  configure configure.in getloadavg.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
@@ -122,7 +124,7 @@ HEADERS = $(wildcard $(srcdir)/*.h)
 default: all
 
 .SUFFIXES:
-.SUFFIXES: .S .c .dvi .info .o .ps .s .texi .texinfo .txi
+.SUFFIXES: .c .dvi .info .o .obj .ps .texinfo .tex
 
 mostlyclean-hdr:
 
@@ -154,17 +156,11 @@ uninstall-binPROGRAMS:
 .c.o:
 	$(COMPILE) -c $<
 
-.s.o:
-	$(COMPILE) -c $<
-
-.S.o:
-	$(COMPILE) -c $<
-
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
 
 mostlyclean-compile:
-	-rm -f *.o *.exe make.new core
+	-rm -f *.$(OBJEXT) *$(EXEEXT) make.new core
 
 clean-compile:
 
@@ -173,7 +169,7 @@ distclean-compile:
 
 maintainer-clean-compile:
 
-make: $(make_OBJECTS) $(make_DEPENDENCIES)
+make$(EXEEXT): $(make_OBJECTS) $(make_DEPENDENCIES)
 	@command.com /c if exist make del make
 	@command.com /c if exist make.exe del make.exe
 	$(LINK) $(make_LDFLAGS) $(make_OBJECTS) $(make_LDADD) $(LIBS)
@@ -184,29 +180,19 @@ make.dvi: make.texinfo
 
 DVIPS = dvips
 
-.texi.info:
-	$(MAKEINFO) $(srcdir)/$< -o ./$@
-
-.texi.dvi:
-	TEXINPUTS="$(srcdir);$$TEXINPUTS"    MAKEINFO='$(MAKEINFO) -I $(srcdir)' $(TEXI2DVI) $<
-
-.texi:
-	$(MAKEINFO) $(srcdir)/$< -o ./$@
-
 .texinfo.info:
-	$(MAKEINFO) $(srcdir)/$< -o ./$@
+	@command.com /c if exist make.info* del make.info*
+	@command.com /c if exist make.i* del make.i*
+	$(MAKEINFO) -I$(srcdir) $< -o ./$@
 
 .texinfo:
-	$(MAKEINFO) $(srcdir)/$< -o ./$@
+	@command.com /c if exist make.info* del make.info*
+	@command.com /c if exist make.i* del make.i*
+	$(MAKEINFO) -I$(srcdir) $< -o ./$@
 
 .texinfo.dvi:
 	TEXINPUTS="$(srcdir);$$TEXINPUTS"    MAKEINFO='$(MAKEINFO) -I $(srcdir)' $(TEXI2DVI) $<
 
-.txi.info:
-	$(MAKEINFO) $(srcdir)/$< -o ./$@
-
-.txi.dvi:
-	TEXINPUTS="$(srcdir);$$TEXINPUTS"    MAKEINFO='$(MAKEINFO) -I $(srcdir)' $(TEXI2DVI) $<
 
 .dvi.ps:
 	$(DVIPS) $< -o $@
@@ -545,8 +531,6 @@ check-regression:
 .NOEXPORT:
 
 # --------------- DEPENDENCIES
-#
-alloca.o: alloca.c config.h
 ar.o: ar.c make.h config.h gettext.h filedef.h dep.h glob/fnmatch.h
 arscan.o: arscan.c make.h config.h gettext.h
 commands.o: commands.c make.h config.h gettext.h dep.h filedef.h \
@@ -557,13 +541,11 @@ dir.o: dir.c make.h config.h gettext.h glob/glob.h
 expand.o: expand.c make.h config.h gettext.h filedef.h job.h commands.h \
 	variable.h rule.h
 file.o: file.c make.h config.h gettext.h dep.h filedef.h job.h \
-	commands.h variable.h
+	commands.h variable.h debug.h
 function.o: function.c make.h config.h gettext.h filedef.h variable.h \
 	dep.h job.h commands.h debug.h
-getloadavg.o: getloadavg.c config.h
 getopt.o: getopt.c config.h gettext.h getopt.h
 getopt1.o: getopt1.c config.h getopt.h
-gettext.o: gettext.c config.h gettext.h
 implicit.o: implicit.c make.h config.h gettext.h rule.h dep.h filedef.h \
 	debug.h
 job.o: job.c make.h config.h gettext.h job.h debug.h filedef.h \
@@ -579,9 +561,133 @@ remote-stub.o: remote-stub.c make.h config.h gettext.h filedef.h job.h \
 	commands.h
 rule.o: rule.c make.h config.h gettext.h dep.h filedef.h job.h \
 	commands.h variable.h rule.h
-signame.o: signame.c make.h config.h gettext.h signame.h
+signame.o: signame.c make.h config.h gettext.h
 variable.o: variable.c make.h config.h gettext.h dep.h filedef.h job.h \
 	commands.h variable.h rule.h
 version.o: version.c config.h
 vpath.o: vpath.c make.h config.h gettext.h filedef.h variable.h
 
+# --------------- DEPENDENCIES
+#
+# dummy
+# dummy
+ar.o : \
+ ar.c make.h config.h \
+ getopt.h \
+ gettext.h filedef.h \
+ hash.h dep.h
+arscan.o : \
+ arscan.c make.h config.h \
+ getopt.h \
+ gettext.h \
+
+commands.o : \
+ commands.c make.h config.h \
+ getopt.h \
+ gettext.h dep.h \
+ filedef.h hash.h variable.h job.h commands.h
+default.o : \
+ default.c make.h config.h \
+ getopt.h \
+ gettext.h rule.h \
+ dep.h filedef.h hash.h job.h commands.h variable.h
+dir.o : \
+ dir.c make.h config.h \
+ getopt.h \
+ gettext.h hash.h \
+
+expand.o : \
+ expand.c make.h config.h \
+ getopt.h \
+ gettext.h \
+ filedef.h hash.h job.h commands.h variable.h \
+ rule.h
+file.o : \
+ file.c make.h config.h \
+ getopt.h \
+ gettext.h \
+ dep.h filedef.h hash.h job.h commands.h \
+ variable.h debug.h
+function.o : \
+ function.c make.h config.h \
+ getopt.h \
+ gettext.h filedef.h \
+ hash.h variable.h dep.h job.h commands.h debug.h
+getopt.o : \
+ getopt.c config.h \
+
+getopt1.o : \
+ getopt1.c config.h getopt.h \
+
+hash.o : \
+ hash.c make.h config.h \
+ getopt.h \
+ gettext.h hash.h
+implicit.o : \
+ implicit.c make.h config.h \
+ getopt.h \
+ gettext.h rule.h \
+ dep.h filedef.h hash.h debug.h
+job.o : \
+ job.c make.h config.h \
+ getopt.h \
+ gettext.h \
+ job.h debug.h filedef.h hash.h commands.h \
+ variable.h \
+
+loadavg-loadavg.o : \
+ loadavg.c config.h \
+ make.h \
+ getopt.h \
+ gettext.h \
+
+main.o : \
+ main.c make.h config.h \
+ getopt.h \
+ gettext.h dep.h \
+ filedef.h hash.h variable.h job.h commands.h rule.h debug.h \
+
+misc.o : \
+ misc.c make.h config.h \
+ getopt.h \
+ gettext.h dep.h \
+ debug.h
+read.o : \
+ read.c make.h config.h \
+ getopt.h \
+ gettext.h \
+ dep.h filedef.h hash.h \
+ job.h commands.h variable.h rule.h debug.h
+remake.o : \
+ remake.c make.h config.h \
+ getopt.h \
+ gettext.h filedef.h \
+ hash.h job.h commands.h dep.h variable.h debug.h \
+
+# dummy
+remote-stub.o : \
+ remote-stub.c make.h config.h \
+ getopt.h \
+ gettext.h filedef.h \
+ hash.h job.h commands.h
+rule.o : \
+ rule.c make.h config.h \
+ getopt.h \
+ gettext.h dep.h \
+ filedef.h hash.h job.h commands.h variable.h rule.h
+signame.o : \
+ signame.c make.h config.h \
+ getopt.h \
+ gettext.h
+variable.o : \
+ variable.c make.h config.h \
+ getopt.h \
+ gettext.h dep.h \
+ filedef.h hash.h job.h commands.h variable.h rule.h
+version.o : \
+ version.c config.h
+vpath.o : \
+ vpath.c make.h config.h \
+ getopt.h \
+ gettext.h filedef.h \
+ hash.h variable.h

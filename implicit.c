@@ -1,5 +1,5 @@
 /* Implicit rule searching for GNU Make.
-Copyright (C) 1988,89,90,91,92,93,94,97 Free Software Foundation, Inc.
+Copyright (C) 1988,89,90,91,92,93,94,97,2000 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -100,7 +100,7 @@ pattern_search (file, archive, depth, recursions)
 
   /* List of dependencies found recursively.  */
   struct file **intermediate_files
-    = (struct file **) alloca (max_pattern_deps * sizeof (struct file *));
+    = (struct file **) xmalloc (max_pattern_deps * sizeof (struct file *));
 
   /* List of the patterns used to find intermediate files.  */
   char **intermediate_patterns
@@ -117,11 +117,12 @@ pattern_search (file, archive, depth, recursions)
   /* The start and length of the stem of FILENAME for the current rule.  */
   register char *stem = 0;
   register unsigned int stemlen = 0;
+  register unsigned int fullstemlen = 0;
 
   /* Buffer in which we store all the rules that are possibly applicable.  */
   struct rule **tryrules
-    = (struct rule **) alloca (num_pattern_rules * max_pattern_targets
-			       * sizeof (struct rule *));
+    = (struct rule **) xmalloc (num_pattern_rules * max_pattern_targets
+                                * sizeof (struct rule *));
 
   /* Number of valid elements in TRYRULES.  */
   unsigned int nrules;
@@ -167,7 +168,7 @@ pattern_search (file, archive, depth, recursions)
 	lastslash = strrchr (filename, ':');
 #else
       lastslash = strrchr (filename, '/');
-#if defined(__MSDOS__) || defined(WINDOWS32)
+#ifdef HAVE_DOS_PATHS
       /* Handle backslashes (possibly mixed with forward slashes)
 	 and the case of "d:file".  */
       {
@@ -398,8 +399,8 @@ pattern_search (file, archive, depth, recursions)
 		 directory (the one gotten by prepending FILENAME's directory),
 		 so it might actually exist.  */
 
-	      if ((!dep->changed || check_lastslash)
-		  && (lookup_file (p) != 0 || file_exists_p (p)))
+	      if (lookup_file (p) != 0
+		  || ((!dep->changed || check_lastslash) && file_exists_p (p)))
 		{
 		  found_files[deps_found++] = xstrdup (p);
 		  continue;
@@ -494,7 +495,7 @@ pattern_search (file, archive, depth, recursions)
   /* RULE is nil if the loop went all the way
      through the list and everything failed.  */
   if (rule == 0)
-    return 0;
+    goto done;
 
   foundrule = i;
 
@@ -542,10 +543,10 @@ pattern_search (file, archive, depth, recursions)
 	      dep->name = 0;
 	      dep->file->tried_implicit |= dep->changed;
 	    }
-	  num_intermediates++;
 	}
 
       dep = (struct dep *) xmalloc (sizeof (struct dep));
+      dep->ignore_mtime = 0;
       s = found_files[deps_found];
       if (recursions == 0)
 	{
@@ -582,18 +583,23 @@ pattern_search (file, archive, depth, recursions)
     }
 
   if (!checked_lastslash[foundrule])
-    /* Always allocate new storage, since STEM might be
-       on the stack for an intermediate file.  */
-    file->stem = savestring (stem, stemlen);
+    {
+      /* Always allocate new storage, since STEM might be
+         on the stack for an intermediate file.  */
+      file->stem = savestring (stem, stemlen);
+      fullstemlen = stemlen;
+    }
   else
     {
+      int dirlen = (lastslash + 1) - filename;
+
       /* We want to prepend the directory from
 	 the original FILENAME onto the stem.  */
-      file->stem = (char *) xmalloc (((lastslash + 1) - filename)
-				     + stemlen + 1);
-      bcopy (filename, file->stem, (lastslash + 1) - filename);
-      bcopy (stem, file->stem + ((lastslash + 1) - filename), stemlen);
-      file->stem[((lastslash + 1) - filename) + stemlen] = '\0';
+      fullstemlen = dirlen + stemlen;
+      file->stem = (char *) xmalloc (fullstemlen + 1);
+      bcopy (filename, file->stem, dirlen);
+      bcopy (stem, file->stem + dirlen, stemlen);
+      file->stem[fullstemlen] = '\0';
     }
 
   file->cmds = rule->cmds;
@@ -606,12 +612,14 @@ pattern_search (file, archive, depth, recursions)
       if (i != matches[foundrule])
 	{
 	  struct dep *new = (struct dep *) xmalloc (sizeof (struct dep));
-	  new->name = p = (char *) xmalloc (rule->lens[i] + stemlen + 1);
+	  /* GKM FIMXE: handle '|' here too */
+	  new->ignore_mtime = 0;
+	  new->name = p = (char *) xmalloc (rule->lens[i] + fullstemlen + 1);
 	  bcopy (rule->targets[i], p,
 		 rule->suffixes[i] - rule->targets[i] - 1);
 	  p += rule->suffixes[i] - rule->targets[i] - 1;
-	  bcopy (stem, p, stemlen);
-	  p += stemlen;
+	  bcopy (file->stem, p, fullstemlen);
+	  p += fullstemlen;
 	  bcopy (rule->suffixes[i], p,
 		 rule->lens[i] - (rule->suffixes[i] - rule->targets[i]) + 1);
 	  new->file = enter_file (new->name);
@@ -619,6 +627,9 @@ pattern_search (file, archive, depth, recursions)
 	  file->also_make = new;
 	}
 
+ done:
+  free (intermediate_files);
+  free (tryrules);
 
-  return 1;
+  return rule != 0;
 }

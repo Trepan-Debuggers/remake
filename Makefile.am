@@ -1,62 +1,64 @@
 # This is a -*-Makefile-*-, or close enough
 
-AUTOMAKE_OPTIONS = 1.4
+AUTOMAKE_OPTIONS = 1.7 dist-bzip2 check-news
+ACLOCAL_AMFLAGS	=  -I config
 
-SUBDIRS =	$(GLOBDIR) i18n
+SUBDIRS =	glob config po doc
 
 bin_PROGRAMS =	make
 
-# These source files also have gettext references
-SRCS	     =  ar.c arscan.c commands.c dir.c expand.c file.c function.c \
-		getopt.c implicit.c job.c main.c misc.c read.c remake.c \
-		rule.c signame.c variable.c vpath.c
+if USE_CUSTOMS
+  remote =	remote-cstms.c
+else
+  remote =	remote-stub.c
+endif
 
-make_SOURCES =	$(SRCS) default.c remote-$(REMOTE).c version.c \
-		getopt1.c
+make_SOURCES =	ar.c arscan.c commands.c default.c dir.c expand.c file.c \
+		function.c getopt.c getopt1.c implicit.c job.c main.c \
+		misc.c read.c remake.c $(remote) rule.c signame.c \
+		variable.c version.c vpath.c hash.c
+
+EXTRA_make_SOURCES = remote-stub.c remote-cstms.c
 
 noinst_HEADERS = commands.h dep.h filedef.h job.h make.h rule.h variable.h \
-		debug.h signame.h getopt.h gettext.h
+		debug.h getopt.h gettext.h hash.h
 
-make_LDADD =	$(LIBOBJS) @ALLOCA@ $(GLOBLIB)
+make_LDADD =	@LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@ @LIBINTL@
 
 man_MANS =	make.1
-info_TEXINFOS =	make.texinfo
 
-DEFS =		-DALIASPATH=\"$(aliaspath)\" -DLOCALEDIR=\"$(localedir)\" -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\" @DEFS@
+DEFS =		-DLOCALEDIR=\"$(localedir)\" -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\" @DEFS@
 
-INCLUDES =	-I. -I$(srcdir) $(GLOBINC)
+AM_CPPFLAGS =	$(GLOBINC)
 
-EXTRA_DIST = 	README build.sh.in $(man_MANS) README.customs remote-cstms.c\
-		make-stds.texi SCOPTIONS SMakefile\
+
+# Extra stuff to include in the distribution.
+# Note we need all the glob stuff here, rather than in glob/Makefile.am,
+# because often that directory isn't built on the systems used by the
+# maintainers.
+
+EXTRA_DIST =	README build.sh.in $(man_MANS)\
+		README.customs\
+		SCOPTIONS SMakefile\
 		README.Amiga Makefile.ami config.ami make.lnk amiga.c amiga.h\
 		README.DOS Makefile.DOS configure.bat dosbuild.bat configh.dos\
 		README.W32 NMakefile config.h.W32 build_w32.bat subproc.bat\
-		readme.vms makefile.vms makefile.com config.h-vms vmsdir.h\
-		vmsfunctions.c vmsify.c\
-		gettext.c\
-		glob/COPYING.LIB glob/ChangeLog glob/Makefile.am\
-		glob/Makefile.ami glob/Makefile.in glob/SCOPTIONS\
-		glob/SMakefile glob/configure.bat glob/fnmatch.c\
-		glob/fnmatch.h glob/glob.c glob/glob.h
-
-MOSTLYCLEANFILES = loadavg.c
-CLEANFILES =	loadavg
+		readme.vms makefile.vms makefile.com config.h-vms \
+		vmsdir.h vmsfunctions.c vmsify.c
 
 MAKE_HOST =	@MAKE_HOST@
 
 
+# Forward targets
+
+html:
+	cd doc && $(MAKE) $(AM_MAKEFLAGS) $@
+
+.PHONY: html
+
 # --------------- Internationalization Section
 
-POTFILES     =	$(SRCS) remote-cstms.c vmsfunctions.c
-
-localedir    =	$(prefix)/share/locale
-aliaspath    =	$(localedir):.
-
-all-local: $(srcdir)/stamp-pot
-
-$(srcdir)/stamp-pot: $(POTFILES)
-	@echo "$(POTFILES)" > $@
-
+localedir =	$(datadir)/locale
 
 # --------------- Local INSTALL Section
 
@@ -93,7 +95,7 @@ install-exec-local:
 #
 dist-hook:
 	(cd $(srcdir); \
-	 sub=`find w32 tests -follow \( -name CVS -prune -o -name work -prune \) -o \( -name \*.orig -o -name \*.rej -o -name \*~ -prune \) -o -type f -print`; \
+	 sub=`find w32 tests -follow \( -name CVS -prune -o -name .cvsignore -o -name work -prune \) -o \( -name \*.orig -o -name \*.rej -o -name \*~ -prune \) -o -type f -print`; \
 	 tar chf - $$sub) \
 	| (cd $(distdir); tar xfBp -)
 
@@ -111,24 +113,20 @@ check-local: check-regression check-loadavg
 
 .PHONY: check-loadavg check-regression
 
-# > check-loadavg
-#
-loadavg: loadavg.c config.h
-	@rm -f loadavg
-	$(LINK) -DTEST $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(make_LDFLAGS) loadavg.c $(LIBS)
-
-# We copy getloadavg.c into a different file rather than compiling it
-# directly because some compilers clobber getloadavg.o in the process.
-#
-loadavg.c: getloadavg.c
-	ln $(srcdir)/getloadavg.c loadavg.c || \
-	  cp $(srcdir)/getloadavg.c loadavg.c
-
 check-loadavg: loadavg
 	@echo The system uptime program believes the load average to be:
 	-uptime
-	@echo The GNU load average checking code believes:
+	@echo The GNU load average checking code thinks:
 	-./loadavg
+
+# The loadavg function is invoked during "make check" to test getloadavg.
+noinst_PROGRAMS = loadavg
+loadavg_SOURCES = loadavg.c
+loadavg_CFLAGS = -DTEST
+loadavg_LDADD = @GETLOADAVG_LIBS@
+
+loadavg.c: $(srcdir)/getloadavg.c
+	cp $(srcdir)/getloadavg.c loadavg.c
 
 # > check-regression
 #
@@ -157,12 +155,6 @@ check-regression:
 	 else \
 	  echo "Can't find the GNU Make test suite ($(srcdir)/tests)."; \
 	 fi
-
-
-# --------------- Local CLEAN section
-
-maintainer-clean-local:
-	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
 
 
 # --------------- Maintainer's Section

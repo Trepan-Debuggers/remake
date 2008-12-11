@@ -28,7 +28,7 @@ next: ; @echo $x$(space)$y
 
 define multi
 @echo hi
-@echo there
+echo there
 endef
 
 ifdef BOGUS
@@ -36,6 +36,16 @@ define
 @echo error
 endef
 endif
+
+define outer
+ define inner
+  A = B
+ endef
+endef
+
+$(eval $(outer))
+
+outer: ; @echo $(inner)
 
 EOF
 
@@ -47,7 +57,7 @@ close(MAKEFILE);
 # -------
 
 &run_make_with_options($makefile, "", &get_logfile);
-$answer = "hi\nthere\nHello\n";
+$answer = "hi\necho there\nthere\nHello\n";
 &compare_output($answer, &get_logfile(1));
 
 # TEST #2
@@ -62,6 +72,13 @@ $answer = "later foo bar\n";
 
 &run_make_with_options($makefile, "BOGUS=true", &get_logfile, 512);
 $answer = "$makefile:23: *** empty variable name.  Stop.\n";
+&compare_output($answer, &get_logfile(1));
+
+# TEST #4
+# -------
+
+&run_make_with_options($makefile, "outer", &get_logfile);
+$answer = "A = B\n";
 &compare_output($answer, &get_logfile(1));
 
 

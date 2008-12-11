@@ -51,7 +51,7 @@ defines="-DALIASPATH=\"${aliaspath}\" -DLOCALEDIR=\"${localedir}\" -DLIBDIR=\"${
 set -e
 
 # These are all the objects we need to link together.
-objs="ar.o arscan.o commands.o dir.o expand.o file.o function.o getopt.o implicit.o job.o main.o misc.o read.o remake.o rule.o signame.o variable.o vpath.o default.o version.o getopt1.o remote-${REMOTE}.o ${extras} ${ALLOCA}"
+objs="ar.o arscan.o commands.o default.o dir.o expand.o file.o function.o getopt.o getopt1.o implicit.o job.o main.o misc.o read.o remake.o rule.o signame.o variable.o version.o vpath.o hash.o remote-${REMOTE}.o ${extras} ${ALLOCA}"
 
 if [ x"$GLOBLIB" != x ]; then
   objs="$objs glob/fnmatch.o glob/glob.o"

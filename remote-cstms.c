@@ -83,7 +83,7 @@ start_remote_job_p (first_p)
 	 Customs requires a privileged source port be used.  */
       make_access ();
 
-      if (ISDB (DB_EXTRA))
+      if (ISDB (DB_JOBS))
         Rpc_Debug(1);
 
       /* Ping the daemon once to see if it is there.  */
@@ -124,8 +124,8 @@ start_remote_job_p (first_p)
   status = Customs_Host (EXPORT_SAME, &permit);
   if (status != RPC_SUCCESS)
     {
-      DB (DB_EXTRA, (_("Customs won't export: %s\n"),
-                     Rpc_ErrorMessage (status)));
+      DB (DB_JOBS, (_("Customs won't export: %s\n"),
+                    Rpc_ErrorMessage (status)));
       return 0;
     }
 

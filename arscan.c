@@ -66,7 +66,7 @@ VMS_get_member_info (module, rfa)
 
   status = lbr$set_module (&VMS_lib_idx, rfa, &bufdesc,
 			   &bufdesc.dsc$w_length, 0);
-  if (! status)
+  if (! (status & 1))
     {
       error (NILF, _("lbr$set_module failed to extract module info, status = %d"),
 	     status);
@@ -79,7 +79,11 @@ VMS_get_member_info (module, rfa)
   mhd = (struct mhddef *) filename;
 
 #ifdef __DECC
-  val = decc$fix_time (&mhd->mhd$l_datim);
+  /* John Fowler <jfowler@nyx.net> writes this is needed in his environment,
+   * but that decc$fix_time() isn't documented to work this way.  Let me
+   * know if this causes problems in other VMS environments.
+   */
+  val = decc$fix_time (&mhd->mhd$l_datim) + timezone - daylight*3600;
 #endif
 
   for (i = 0; i < module->dsc$w_length; i++)
@@ -150,7 +154,7 @@ ar_scan (archive, function, arg)
 
   status = lbr$ini_control (&VMS_lib_idx, &func, &type, 0);
 
-  if (! status)
+  if (! (status & 1))
     {
       error (NILF, _("lbr$ini_control failed with status = %d"),status);
       return -2;
@@ -161,7 +165,7 @@ ar_scan (archive, function, arg)
 
   status = lbr$open (&VMS_lib_idx, &libdesc, 0, 0, 0, 0, 0);
 
-  if (! status)
+  if (! (status & 1))
     {
       error (NILF, _("unable to open library `%s' to lookup member `%s'"),
 	     archive, (char *)arg);
@@ -232,7 +236,25 @@ ar_scan (archive, function, arg)
 #endif
 
 #ifndef WINDOWS32
-# include <ar.h>
+# ifndef __BEOS__
+#  include <ar.h>
+# else
+   /* BeOS 5 doesn't have <ar.h> but has archives in the same format
+    * as many other Unices.  This was taken from GNU binutils for BeOS.
+    */
+#  define ARMAG	"!<arch>\n"	/* String that begins an archive file.  */
+#  define SARMAG 8		/* Size of that string.  */
+#  define ARFMAG "`\n"		/* String in ar_fmag at end of each header.  */
+struct ar_hdr
+  {
+    char ar_name[16];		/* Member file name, sometimes / terminated. */
+    char ar_date[12];		/* File date, decimal seconds since Epoch.  */
+    char ar_uid[6], ar_gid[6];	/* User and group IDs, in ASCII decimal.  */
+    char ar_mode[8];		/* File mode, in ASCII octal.  */
+    char ar_size[10];		/* File size, in ASCII decimal.  */
+    char ar_fmag[2];		/* Always contains ARFMAG.  */
+  };
+# endif
 #else
 /* These should allow us to read Windows (VC++) libraries (according to Frank
  * Libbrecht <frankl@abzx.belgium.hp.com>)
@@ -775,8 +797,8 @@ ar_member_touch (arname, memname)
   if (AR_HDR_SIZE != write (fd, (char *) &ar_hdr, AR_HDR_SIZE))
     goto lose;
   /* The file's mtime is the time we we want.  */
-  while (fstat (fd, &statbuf) < 0 && EINTR_SET)
-    ;
+  if (fstat (fd, &statbuf) < 0)
+    goto lose;
 #if defined(ARFMAG) || defined(ARFZMAG) || defined(AIAMAG) || defined(WINDOWS32)
   /* Advance member's time to that time */
   for (i = 0; i < sizeof ar_hdr.ar_date; i++)

@@ -38,7 +38,8 @@ struct dep
     struct dep *next;
     char *name;
     struct file *file;
-    int changed;
+    unsigned int changed : 8;
+    unsigned int ignore_mtime : 1;
   };
 
 
@@ -72,5 +73,6 @@ extern char *dep_name ();
 
 extern struct dep *copy_dep_chain PARAMS ((struct dep *d));
 extern struct dep *read_all_makefiles PARAMS ((char **makefiles));
+extern int eval_buffer PARAMS ((char *buffer));
 extern int update_goal_chain PARAMS ((struct dep *goals, int makefiles));
 extern void uniquize_deps PARAMS ((struct dep *));

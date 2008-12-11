@@ -11,11 +11,16 @@
 #                         [-make <make prog>]
 #                        (and others)
 
+$valgrind = 0;              # invoke make with valgrind
+
 require "test_driver.pl";
+
+#$SIG{INT} = sub { print STDERR "Caught a signal!\n"; die @_; };
 
 sub valid_option
 {
    local($option) = @_;
+
    if ($option =~ /^-make([-_]?path)?$/)
    {
       $make_path = shift @argv;
@@ -25,6 +30,11 @@ sub valid_option
 	 exit 0;
       }
       return 1;
+   }
+
+   if ($option =~ /^-valgrind$/i) {
+     $valgrind = 1;
+     return 1;
    }
 
 # This doesn't work--it _should_!  Someone needs to fix this badly.
@@ -56,6 +66,10 @@ sub run_make_with_options
       $command .= " $options";
    }
 
+   if ($valgrind) {
+     print VALGRIND "\n\nExecuting: $command\n";
+   }
+
    $code = &run_command_with_output($logname,$command);
 
    # Check to see if we have Purify errors.  If so, keep the logfile.
@@ -81,6 +95,11 @@ sub run_make_with_options
    {
       print "Error running $make_path ($code): $command\n";
       $test_passed = 0;
+      # If it's a SIGINT, stop here
+      if ($code & 127) {
+        print STDERR "\nCaught signal ".($code & 127)."!\n";
+        exit($code);
+      }
       return 0;
    }
 
@@ -214,6 +233,21 @@ sub set_more_defaults
    }
    else {
      $parallel_jobs = 1;
+   }
+
+   # Set up for valgrind, if requested.
+
+   if ($valgrind) {
+#     use POSIX qw(:fcntl_h);
+#     require Fcntl;
+     open(VALGRIND, "> valgrind.out")
+       || die "Cannot open valgrind.out: $!\n";
+     #  -q --leak-check=yes
+     $make_path = "valgrind --num-callers=15 --logfile-fd=".fileno(VALGRIND)." $make_path";
+     # F_SETFD is 2
+     fcntl(VALGRIND, 2, 0) or die "fcntl(setfd) failed: $!\n";
+     system("echo Starting on `date` 1>&".fileno(VALGRIND));
+     print "Enabled valgrind support.\n";
    }
 }
 

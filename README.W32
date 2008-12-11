@@ -28,7 +28,7 @@ To build with nmake on Windows NT, Windows 95, or Windows 98:
         c:
         cd \msdev\bin
         VCVARS32.bat
-	cd \path\to\make-3.79
+	cd \path\to\make-3.80
 	nmake /f NMakefile
 
 There is a bat file (build_w32.bat) for folks who have fear of nmake.
@@ -139,7 +139,7 @@ GNU make handling of drive letters in pathnames (PATH, vpath, VPATH):
 GNU make test suite:
 
 	I verified all functionality with a slightly modified version
-	of make-test-3.79 (modifications to get test suite to run
+	of make-test-3.80 (modifications to get test suite to run
 	on Windows NT). All tests pass in an environment that includes
 	sh.exe.  Tests were performed on both Windows NT and Windows 95.
 

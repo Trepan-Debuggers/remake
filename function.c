@@ -1,5 +1,5 @@
 /* Builtin function expansion for GNU Make.
-Copyright (C) 1988,1989,1991-1997,1999 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1991-1997, 1999, 2002 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -39,6 +39,37 @@ struct function_table_entry
     char expand_args;
     char *(*func_ptr) PARAMS ((char *output, char **argv, const char *fname));
   };
+
+static unsigned long
+function_table_entry_hash_1 (keyv)
+    const void *keyv;
+{
+  struct function_table_entry const *key = (struct function_table_entry const *) keyv;
+  return_STRING_N_HASH_1 (key->name, key->len);
+}
+
+static unsigned long
+function_table_entry_hash_2 (keyv)
+    const void *keyv;
+{
+  struct function_table_entry const *key = (struct function_table_entry const *) keyv;
+  return_STRING_N_HASH_2 (key->name, key->len);
+}
+
+static int
+function_table_entry_hash_cmp (xv, yv)
+    const void *xv;
+    const void *yv;
+{
+  struct function_table_entry const *x = (struct function_table_entry const *) xv;
+  struct function_table_entry const *y = (struct function_table_entry const *) yv;
+  int result = x->len - y->len;
+  if (result)
+    return result;
+  return_STRING_N_COMPARE (x->name, y->name, x->len);
+}
+
+static struct hash_table function_table;
 
 
 /* Store into VARIABLE_BUFFER at O the result of scanning TEXT and replacing
@@ -92,10 +123,10 @@ subst_expand (o, text, subst, replace, slen, rlen, by_word, suffix_only)
       /* If we're substituting only by fully matched words,
 	 or only at the ends of words, check that this case qualifies.  */
       if ((by_word
-	   && ((p > t && !isblank (p[-1]))
-	       || (p[slen] != '\0' && !isblank (p[slen]))))
+	   && ((p > t && !isblank ((unsigned char)p[-1]))
+	       || (p[slen] != '\0' && !isblank ((unsigned char)p[slen]))))
 	  || (suffix_only
-	      && (p[slen] != '\0' && !isblank (p[slen]))))
+	      && (p[slen] != '\0' && !isblank ((unsigned char)p[slen]))))
 	/* Struck out.  Output the rest of the string that is
 	   no longer to be replaced.  */
 	o = variable_buffer_output (o, subst, slen);
@@ -128,7 +159,7 @@ patsubst_expand (o, text, pattern, replace, pattern_percent, replace_percent)
   unsigned int pattern_prepercent_len, pattern_postpercent_len;
   unsigned int replace_prepercent_len, replace_postpercent_len = 0;
   char *t;
-  int len;
+  unsigned int len;
   int doneany = 0;
 
   /* We call find_percent on REPLACE before checking PATTERN so that REPLACE
@@ -221,25 +252,25 @@ patsubst_expand (o, text, pattern, replace, pattern_percent, replace_percent)
 }
 
 
-/* Look up a function by name.
-   The table is currently small enough that it's not really worthwhile to use
-   a fancier lookup algorithm.  If it gets larger, maybe...
-*/
+/* Look up a function by name.  */
 
 static const struct function_table_entry *
-lookup_function (table, s)
-     const struct function_table_entry *table;
+lookup_function (s)
      const char *s;
 {
-  int len = strlen (s);
+  const char *e = s;
 
-  for (; table->name != NULL; ++table)
-    if (table->len <= len
-        && (isblank (s[table->len]) || s[table->len] == '\0')
-        && strneq (s, table->name, table->len))
-      return table;
+  while (*e && ( (*e >= 'a' && *e <= 'z') || *e == '-'))
+    e++;
+  if (*e == '\0' || isblank ((unsigned char) *e))
+    {
+      struct function_table_entry function_table_entry_key;
+      function_table_entry_key.name = s;
+      function_table_entry_key.len = e - s;
 
-  return NULL;
+      return hash_find_item (&function_table, &function_table_entry_key);
+    }
+  return 0;
 }
 
 
@@ -472,13 +503,13 @@ func_origin (o, argv, funcname)
 }
 
 #ifdef VMS
-#define IS_PATHSEP(c) ((c) == ']')
+# define IS_PATHSEP(c) ((c) == ']')
 #else
-#if defined(__MSDOS__) || defined(WINDOWS32)
-#define IS_PATHSEP(c) ((c) == '/' || (c) == '\\')
-#else
-#define IS_PATHSEP(c) ((c) == '/')
-#endif
+# ifdef HAVE_DOS_PATHS
+#  define IS_PATHSEP(c) ((c) == '/' || (c) == '\\')
+# else
+#  define IS_PATHSEP(c) ((c) == '/')
+# endif
 #endif
 
 
@@ -516,7 +547,7 @@ func_notdir_suffix (o, argv, funcname)
 	    continue;
 	  o = variable_buffer_output (o, p, len - (p - p2));
 	}
-#if defined(WINDOWS32) || defined(__MSDOS__)
+#ifdef HAVE_DOS_PATHS
       /* Handle the case of "d:foo/bar".  */
       else if (streq (funcname, "notdir") && p2[0] && p2[1] == ':')
 	{
@@ -572,7 +603,7 @@ func_basename_dir (o, argv, funcname)
 	    o = variable_buffer_output (o, p2, ++p - p2);
 	  else if (p >= p2 && (*p == '.'))
 	    o = variable_buffer_output (o, p2, p - p2);
-#if defined(WINDOWS32) || defined(__MSDOS__)
+#ifdef HAVE_DOS_PATHS
 	/* Handle the "d:foobar" case */
 	  else if (p2[0] && p2[1] == ':' && is_dir)
 	    o = variable_buffer_output (o, p2, 2);
@@ -738,7 +769,7 @@ func_word (o, argv, funcname)
   i =  atoi (argv[0]);
 
   if (i == 0)
-    fatal (reading_file, _("the `word' function takes a positive index argument"));
+    fatal (reading_file, _("first argument to `word' function must be greater than 0"));
 
 
   end_p = argv[1];
@@ -862,8 +893,45 @@ func_foreach (o, argv, funcname)
 struct a_word
 {
   struct a_word *next;
+  struct a_word *chain;
   char *str;
+  int length;
   int matched;
+};
+
+static unsigned long
+a_word_hash_1 (key)
+    const void *key;
+{
+  return_STRING_HASH_1 (((struct a_word const *) key)->str);
+}
+
+static unsigned long
+a_word_hash_2 (key)
+    const void *key;
+{
+  return_STRING_HASH_2 (((struct a_word const *) key)->str);
+}
+
+static int
+a_word_hash_cmp (x, y)
+    const void *x;
+    const void *y;
+{
+  int result = ((struct a_word const *) x)->length - ((struct a_word const *) y)->length;
+  if (result)
+    return result;
+  return_STRING_COMPARE (((struct a_word const *) x)->str,
+			 ((struct a_word const *) y)->str);
+}
+
+struct a_pattern
+{
+  struct a_pattern *next;
+  char *str;
+  char *percent;
+  int length;
+  int save_c;
 };
 
 static char *
@@ -872,54 +940,107 @@ func_filter_filterout (o, argv, funcname)
      char **argv;
      const char *funcname;
 {
-  struct a_word *wordhead = 0;
-  struct a_word *wordtail = 0;
+  struct a_word *wordhead;
+  struct a_word **wordtail;
+  struct a_word *wp;
+  struct a_pattern *pathead;
+  struct a_pattern **pattail;
+  struct a_pattern *pp;
 
+  struct hash_table a_word_table;
   int is_filter = streq (funcname, "filter");
-  char *patterns = argv[0];
+  char *pat_iterator = argv[0];
   char *word_iterator = argv[1];
-
+  int literals = 0;
+  int words = 0;
+  int hashing = 0;
   char *p;
   unsigned int len;
 
-  /* Chop ARGV[1] up into words and then run each pattern through.  */
+  /* Chop ARGV[0] up into patterns to match against the words.  */
+
+  pattail = &pathead;
+  while ((p = find_next_token (&pat_iterator, &len)) != 0)
+    {
+      struct a_pattern *pat = (struct a_pattern *) alloca (sizeof (struct a_pattern));
+
+      *pattail = pat;
+      pattail = &pat->next;
+
+      if (*pat_iterator != '\0')
+	++pat_iterator;
+
+      pat->str = p;
+      pat->length = len;
+      pat->save_c = p[len];
+      p[len] = '\0';
+      pat->percent = find_percent (p);
+      if (pat->percent == 0)
+	literals++;
+    }
+  *pattail = 0;
+
+  /* Chop ARGV[1] up into words to match against the patterns.  */
+
+  wordtail = &wordhead;
   while ((p = find_next_token (&word_iterator, &len)) != 0)
     {
-      struct a_word *w = (struct a_word *)alloca (sizeof (struct a_word));
-      if (wordhead == 0)
-	wordhead = w;
-      else
-	wordtail->next = w;
-      wordtail = w;
+      struct a_word *word = (struct a_word *) alloca (sizeof (struct a_word));
+
+      *wordtail = word;
+      wordtail = &word->next;
 
       if (*word_iterator != '\0')
 	++word_iterator;
+
       p[len] = '\0';
-      w->str = p;
-      w->matched = 0;
+      word->str = p;
+      word->length = len;
+      word->matched = 0;
+      word->chain = 0;
+      words++;
+    }
+  *wordtail = 0;
+
+  /* Only use a hash table if arg list lengths justifies the cost.  */
+  hashing = (literals >= 2 && (literals * words) >= 10);
+  if (hashing)
+    {
+      hash_init (&a_word_table, words, a_word_hash_1, a_word_hash_2, a_word_hash_cmp);
+      for (wp = wordhead; wp != 0; wp = wp->next)
+	{
+	  struct a_word *owp = hash_insert (&a_word_table, wp);
+	  if (owp)
+	    wp->chain = owp;
+	}
     }
 
-  if (wordhead != 0)
+  if (words)
     {
-      char *pat_iterator = patterns;
       int doneany = 0;
-      struct a_word *wp;
-
-      wordtail->next = 0;
 
       /* Run each pattern through the words, killing words.  */
-      while ((p = find_next_token (&pat_iterator, &len)) != 0)
+      for (pp = pathead; pp != 0; pp = pp->next)
 	{
-	  char *percent;
-	  char save = p[len];
-	  p[len] = '\0';
-
-	  percent = find_percent (p);
-	  for (wp = wordhead; wp != 0; wp = wp->next)
-	    wp->matched |= (percent == 0 ? streq (p, wp->str)
-			    : pattern_matches (p, percent, wp->str));
-
-	  p[len] = save;
+	  if (pp->percent)
+	    for (wp = wordhead; wp != 0; wp = wp->next)
+	      wp->matched |= pattern_matches (pp->str, pp->percent, wp->str);
+	  else if (hashing)
+	    {
+	      struct a_word a_word_key;
+	      a_word_key.str = pp->str;
+	      a_word_key.length = pp->length;
+	      wp = (struct a_word *) hash_find_item (&a_word_table, &a_word_key);
+	      while (wp)
+		{
+		  wp->matched |= 1;
+		  wp = wp->chain;
+		}
+	    }
+	  else
+	    for (wp = wordhead; wp != 0; wp = wp->next)
+	      wp->matched |= (wp->length == pp->length
+			      && strneq (pp->str, wp->str, wp->length));
 	}
 
       /* Output the words that matched (or didn't, for filter-out).  */
@@ -935,6 +1056,12 @@ func_filter_filterout (o, argv, funcname)
 	/* Kill the last space.  */
 	--o;
     }
+
+  for (pp = pathead; pp != 0; pp = pp->next)
+    pp->str[pp->length] = pp->save_c;
+
+  if (hashing)
+    hash_free (&a_word_table, 0);
 
   return o;
 }
@@ -991,7 +1118,7 @@ func_error (o, argv, funcname)
   for (len=0, argvp=argv; *argvp != 0; ++argvp)
     len += strlen (*argvp) + 2;
 
-  p = msg = alloca (len + 1);
+  p = msg = (char *) alloca (len + 1);
 
   for (argvp=argv; argvp[1] != 0; ++argvp)
     {
@@ -1141,6 +1268,42 @@ func_wildcard (o, argv, funcname)
 }
 
 /*
+  $(eval <makefile string>)
+
+  Always resolves to the empty string.
+
+  Treat the arguments as a segment of makefile, and parse them.
+*/
+
+static char *
+func_eval (o, argv, funcname)
+     char *o;
+     char **argv;
+     const char *funcname;
+{
+  eval_buffer (argv[0]);
+
+  return o;
+}
+
+
+static char *
+func_value (o, argv, funcname)
+     char *o;
+     char **argv;
+     const char *funcname;
+{
+  /* Look up the variable.  */
+  struct variable *v = lookup_variable (argv[0], strlen (argv[0]));
+
+  /* Copy its value into the output buffer without expanding it.  */
+  if (v)
+    o = variable_buffer_output (o, v->value, strlen(v->value));
+
+  return o;
+}
+
+/*
   \r  is replaced on UNIX as well. Is this desirable?
  */
 void
@@ -1274,7 +1437,7 @@ msdos_openpipe (int* pipedes, int *pidp, char *text)
   extern int dos_command_running, dos_status;
 
   /* Make sure not to bother processing an empty line.  */
-  while (isblank (*text))
+  while (isblank ((unsigned char)*text))
     ++text;
   if (*text == '\0')
     return 0;
@@ -1435,8 +1598,7 @@ func_shell (o, argv, funcname)
       buffer = (char *) xmalloc (maxlen + 1);
 
       /* Read from the pipe until it gets EOF.  */
-      i = 0;
-      do
+      for (i = 0; ; i += cc)
 	{
 	  if (i == maxlen)
 	    {
@@ -1444,12 +1606,11 @@ func_shell (o, argv, funcname)
 	      buffer = (char *) xrealloc (buffer, maxlen + 1);
 	    }
 
-	  errno = 0;
 	  cc = read (pipedes[0], &buffer[i], maxlen - i);
-	  if (cc > 0)
-	    i += cc;
+	  if (cc <= 0)
+	    break;
 	}
-      while (cc > 0 || EINTR_SET);
+      buffer[i] = '\0';
 
       /* Close the read side of the pipe.  */
 #ifdef  __MSDOS__
@@ -1620,8 +1781,6 @@ func_not (char* o, char **argv, char *funcname)
 #endif
 
 
-#define STRING_SIZE_TUPLE(_s) (_s), (sizeof (_s)-1)
-
 /* Lookup table for builtin functions.
 
    This doesn't have to be sorted; we use a straight lookup.  We might gain
@@ -1637,44 +1796,47 @@ func_not (char* o, char **argv, char *funcname)
 static char *func_call PARAMS ((char *o, char **argv, const char *funcname));
 
 
-static struct function_table_entry function_table[] =
+static struct function_table_entry function_table_init[] =
 {
  /* Name/size */                    /* MIN MAX EXP? Function */
   { STRING_SIZE_TUPLE("addprefix"),     2,  2,  1,  func_addsuffix_addprefix},
   { STRING_SIZE_TUPLE("addsuffix"),     2,  2,  1,  func_addsuffix_addprefix},
-  { STRING_SIZE_TUPLE("basename"),      1,  1,  1,  func_basename_dir},
-  { STRING_SIZE_TUPLE("dir"),           1,  1,  1,  func_basename_dir},
-  { STRING_SIZE_TUPLE("notdir"),        1,  1,  1,  func_notdir_suffix},
+  { STRING_SIZE_TUPLE("basename"),      0,  1,  1,  func_basename_dir},
+  { STRING_SIZE_TUPLE("dir"),           0,  1,  1,  func_basename_dir},
+  { STRING_SIZE_TUPLE("notdir"),        0,  1,  1,  func_notdir_suffix},
   { STRING_SIZE_TUPLE("subst"),         3,  3,  1,  func_subst},
-  { STRING_SIZE_TUPLE("suffix"),        1,  1,  1,  func_notdir_suffix},
+  { STRING_SIZE_TUPLE("suffix"),        0,  1,  1,  func_notdir_suffix},
   { STRING_SIZE_TUPLE("filter"),        2,  2,  1,  func_filter_filterout},
   { STRING_SIZE_TUPLE("filter-out"),    2,  2,  1,  func_filter_filterout},
   { STRING_SIZE_TUPLE("findstring"),    2,  2,  1,  func_findstring},
-  { STRING_SIZE_TUPLE("firstword"),     1,  1,  1,  func_firstword},
+  { STRING_SIZE_TUPLE("firstword"),     0,  1,  1,  func_firstword},
   { STRING_SIZE_TUPLE("join"),          2,  2,  1,  func_join},
   { STRING_SIZE_TUPLE("patsubst"),      3,  3,  1,  func_patsubst},
-  { STRING_SIZE_TUPLE("shell"),         1,  1,  1,  func_shell},
-  { STRING_SIZE_TUPLE("sort"),          1,  1,  1,  func_sort},
-  { STRING_SIZE_TUPLE("strip"),         1,  1,  1,  func_strip},
-  { STRING_SIZE_TUPLE("wildcard"),      1,  1,  1,  func_wildcard},
+  { STRING_SIZE_TUPLE("shell"),         0,  1,  1,  func_shell},
+  { STRING_SIZE_TUPLE("sort"),          0,  1,  1,  func_sort},
+  { STRING_SIZE_TUPLE("strip"),         0,  1,  1,  func_strip},
+  { STRING_SIZE_TUPLE("wildcard"),      0,  1,  1,  func_wildcard},
   { STRING_SIZE_TUPLE("word"),          2,  2,  1,  func_word},
   { STRING_SIZE_TUPLE("wordlist"),      3,  3,  1,  func_wordlist},
-  { STRING_SIZE_TUPLE("words"),         1,  1,  1,  func_words},
-  { STRING_SIZE_TUPLE("origin"),        1,  1,  1,  func_origin},
+  { STRING_SIZE_TUPLE("words"),         0,  1,  1,  func_words},
+  { STRING_SIZE_TUPLE("origin"),        0,  1,  1,  func_origin},
   { STRING_SIZE_TUPLE("foreach"),       3,  3,  0,  func_foreach},
   { STRING_SIZE_TUPLE("call"),          1,  0,  1,  func_call},
-  { STRING_SIZE_TUPLE("error"),         1,  1,  1,  func_error},
-  { STRING_SIZE_TUPLE("warning"),       1,  1,  1,  func_error},
+  { STRING_SIZE_TUPLE("error"),         0,  1,  1,  func_error},
+  { STRING_SIZE_TUPLE("warning"),       0,  1,  1,  func_error},
   { STRING_SIZE_TUPLE("if"),            2,  3,  0,  func_if},
+  { STRING_SIZE_TUPLE("value"),         0,  1,  1,  func_value},
+  { STRING_SIZE_TUPLE("eval"),          0,  1,  1,  func_eval},
 #ifdef EXPERIMENTAL
   { STRING_SIZE_TUPLE("eq"),            2,  2,  1,  func_eq},
-  { STRING_SIZE_TUPLE("not"),           1,  1,  1,  func_not},
+  { STRING_SIZE_TUPLE("not"),           0,  1,  1,  func_not},
 #endif
-  { 0 }
 };
+
+#define FUNCTION_TABLE_ENTRIES (sizeof (function_table_init) / sizeof (struct function_table_entry))
 
 
-/* These must come after the definition of function_table[].  */
+/* These must come after the definition of function_table.  */
 
 static char *
 expand_builtin_function (o, argc, argv, entry_p)
@@ -1683,10 +1845,17 @@ expand_builtin_function (o, argc, argv, entry_p)
      char **argv;
      struct function_table_entry *entry_p;
 {
-  if (argc < entry_p->minimum_args)
+  if (argc < (int)entry_p->minimum_args)
     fatal (reading_file,
            _("Insufficient number of arguments (%d) to function `%s'"),
            argc, entry_p->name);
+
+  /* I suppose technically some function could do something with no
+     arguments, but so far none do, so just test it for all functions here
+     rather than in each one.  We can change it later if necessary.  */
+
+  if (!argc)
+    return o;
 
   if (!entry_p->func_ptr)
     fatal (reading_file, _("Unimplemented on this platform: function `%s'"),
@@ -1717,7 +1886,7 @@ handle_function (op, stringp)
 
   beg = *stringp + 1;
 
-  entry_p = lookup_function (function_table, beg);
+  entry_p = lookup_function (beg);
 
   if (!entry_p)
     return 0;
@@ -1769,9 +1938,7 @@ handle_function (op, stringp)
       end = beg + len;
     }
 
-  p = beg;
-  nargs = 0;
-  for (p=beg, nargs=0; p < end; ++argvp)
+  for (p=beg, nargs=0; p <= end; ++argvp)
     {
       char *next;
 
@@ -1819,10 +1986,11 @@ func_call (o, argv, funcname)
 {
   char *fname;
   char *cp;
-  int flen;
   char *body;
+  int flen;
   int i;
   const struct function_table_entry *entry_p;
+  struct variable *v;
 
   /* There is no way to define a variable with a space in the name, so strip
      leading and trailing whitespace as a favor to the user.  */
@@ -1841,7 +2009,7 @@ func_call (o, argv, funcname)
 
   /* Are we invoking a builtin function?  */
 
-  entry_p = lookup_function (function_table, fname);
+  entry_p = lookup_function (fname);
 
   if (entry_p)
     {
@@ -1853,11 +2021,18 @@ func_call (o, argv, funcname)
     }
 
   /* Not a builtin, so the first argument is the name of a variable to be
-     expanded and interpreted as a function.  Create the variable
-     reference.  */
+     expanded and interpreted as a function.  Find it.  */
   flen = strlen (fname);
 
-  body = alloca (flen + 4);
+  v = lookup_variable (fname, flen);
+
+  if (v == 0)
+    warn_undefined (fname, flen);
+
+  if (v == 0 || *v->value == '\0')
+    return o;
+
+  body = (char *) alloca (flen + 4);
   body[0] = '$';
   body[1] = '(';
   memcpy (body + 2, fname, flen);
@@ -1873,15 +2048,29 @@ func_call (o, argv, funcname)
       char num[11];
 
       sprintf (num, "%d", i);
-      define_variable (num, strlen (num), *argv, o_automatic, 1);
+      define_variable (num, strlen (num), *argv, o_automatic, 0);
     }
 
   /* Expand the body in the context of the arguments, adding the result to
      the variable buffer.  */
 
+  v->exp_count = EXP_COUNT_MAX;
+
   o = variable_expand_string (o, body, flen+3);
+
+  v->exp_count = 0;
 
   pop_variable_scope ();
 
   return o + strlen (o);
+}
+
+void
+hash_init_function_table ()
+{
+  hash_init (&function_table, FUNCTION_TABLE_ENTRIES * 2,
+	     function_table_entry_hash_1, function_table_entry_hash_2,
+	     function_table_entry_hash_cmp);
+  hash_load (&function_table, function_table_init,
+	     FUNCTION_TABLE_ENTRIES, sizeof (struct function_table_entry));
 }

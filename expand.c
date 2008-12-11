@@ -17,9 +17,10 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#include "make.h"
+
 #include <assert.h>
 
-#include "make.h"
 #include "filedef.h"
 #include "job.h"
 #include "commands.h"
@@ -91,19 +92,31 @@ initialize_variable_output ()
 
 /* Recursively expand V.  The returned string is malloc'd.  */
 
-static char *allocated_variable_append PARAMS ((struct variable *v));
+static char *allocated_variable_append PARAMS ((const struct variable *v));
 
 char *
-recursively_expand (v)
-     register struct variable *v;
+recursively_expand_for_file (v, file)
+     struct variable *v;
+     struct file *file;
 {
   char *value;
+  struct variable_set_list *save = 0;
 
   if (v->expanding)
-    /* Expanding V causes infinite recursion.  Lose.  */
-    fatal (reading_file,
-           _("Recursive variable `%s' references itself (eventually)"),
-           v->name);
+    {
+      if (!v->exp_count)
+        /* Expanding V causes infinite recursion.  Lose.  */
+        fatal (reading_file,
+               _("Recursive variable `%s' references itself (eventually)"),
+               v->name);
+      --v->exp_count;
+    }
+
+  if (file)
+    {
+      save = current_variable_set_list;
+      current_variable_set_list = file->variables;
+    }
 
   v->expanding = 1;
   if (v->append)
@@ -112,22 +125,10 @@ recursively_expand (v)
     value = allocated_variable_expand (v->value);
   v->expanding = 0;
 
+  if (file)
+    current_variable_set_list = save;
+
   return value;
-}
-
-/* Warn that NAME is an undefined variable.  */
-
-#ifdef __GNUC__
-__inline
-#endif
-static void
-warn_undefined (name, length)
-     char *name;
-     unsigned int length;
-{
-  if (warn_undefined_variables_flag)
-    error (reading_file,
-           _("warning: undefined variable `%.*s'"), (int)length, name);
 }
 
 /* Expand a simple reference to variable NAME, which is LENGTH chars long.  */
@@ -279,7 +280,7 @@ variable_expand_string (line, string, length)
 	       Is the resultant text a substitution reference?  */
 
 	    colon = lindex (beg, end, ':');
-	    if (colon != 0)
+	    if (colon)
 	      {
 		/* This looks like a substitution reference: $(FOO:A=B).  */
 		char *subst_beg, *subst_end, *replace_beg, *replace_end;
@@ -367,7 +368,7 @@ variable_expand_string (line, string, length)
 	  break;
 
 	default:
-	  if (isblank (p[-1]))
+	  if (isblank ((unsigned char)p[-1]))
 	    break;
 
 	  /* A $ followed by a random char is a variable reference:
@@ -426,6 +427,9 @@ expand_argument (str, end)
 {
   char *tmp;
 
+  if (str == end)
+    return xstrdup("");
+
   if (!end || *end == '\0')
     tmp = str;
   else
@@ -465,52 +469,72 @@ variable_expand_for_file (line, file)
   return result;
 }
 
-/* Like allocated_variable_expand, but we first expand this variable in the
-    context of the next variable set, then we append the expanded value.  */
+/* Like allocated_variable_expand, but for += target-specific variables.
+   First recursively construct the variable value from its appended parts in
+   any upper variable sets.  Then expand the resulting value.  */
+
+static char *
+variable_append (name, length, set)
+     const char *name;
+     unsigned int length;
+     const struct variable_set_list *set;
+{
+  const struct variable *v;
+  char *buf = 0;
+
+  /* If there's nothing left to check, return the empty buffer.  */
+  if (!set)
+    return initialize_variable_output ();
+
+  /* Try to find the variable in this variable set.  */
+  v = lookup_variable_in_set (name, length, set->set);
+
+  /* If there isn't one, look to see if there's one in a set above us.  */
+  if (!v)
+    return variable_append (name, length, set->next);
+
+  /* If this variable type is append, first get any upper values.
+     If not, initialize the buffer.  */
+  if (v->append)
+    buf = variable_append (name, length, set->next);
+  else
+    buf = initialize_variable_output ();
+
+  /* Append this value to the buffer, and return it.
+     If we already have a value, first add a space.  */
+  if (buf > variable_buffer)
+    buf = variable_buffer_output (buf, " ", 1);
+
+  return variable_buffer_output (buf, v->value, strlen (v->value));
+}
+
 
 static char *
 allocated_variable_append (v)
-     struct variable *v;
+     const struct variable *v;
 {
-  struct variable_set_list *save;
-  int len = strlen (v->name);
-  char *var = alloca (len + 4);
-  char *value;
+  char *val, *retval;
+
+  /* Construct the appended variable value.  */
 
   char *obuf = variable_buffer;
   unsigned int olen = variable_buffer_length;
 
   variable_buffer = 0;
 
-  assert(current_variable_set_list->next != 0);
-  save = current_variable_set_list;
-  current_variable_set_list = current_variable_set_list->next;
-
-  var[0] = '$';
-  var[1] = '(';
-  strcpy (&var[2], v->name);
-  var[len+2] = ')';
-  var[len+3] = '\0';
-
-  value = variable_expand_for_file (var, 0);
-
-  current_variable_set_list = save;
-
-  value += strlen (value);
-  value = variable_buffer_output (value, " ", 1);
-  value = variable_expand_string (value, v->value, (long)-1);
-
-  value = variable_buffer;
-
-#if 0
-  /* Waste a little memory and save time.  */
-  value = xrealloc (value, strlen (value))
-#endif
+  val = variable_append (v->name, strlen (v->name), current_variable_set_list);
+  variable_buffer_output (val, "", 1);
+  val = variable_buffer;
 
   variable_buffer = obuf;
   variable_buffer_length = olen;
 
-  return value;
+  /* Now expand it and return that.  */
+
+  retval = allocated_variable_expand (val);
+
+  free (val);
+  return retval;
 }
 
 /* Like variable_expand_for_file, but the returned string is malloc'd.

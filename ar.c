@@ -1,5 +1,6 @@
 /* Interface to `ar' archives for GNU Make.
-Copyright (C) 1988,89,90,91,92,93,97 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1997,
+2002 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -41,9 +42,14 @@ int
 ar_name (name)
      char *name;
 {
-  char *p = strchr (name, '('), *end = name + strlen (name) - 1;
+  char *p = strchr (name, '(');
+  char *end;
 
-  if (p == 0 || p == name || *end != ')')
+  if (p == 0 || p == name)
+    return 0;
+
+  end = p + strlen (p) - 1;
+  if (*end != ')')
     return 0;
 
   if (p[1] == '(' && end[-1] == ')')

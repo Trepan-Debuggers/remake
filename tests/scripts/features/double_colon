@@ -51,9 +51,11 @@ $answer = "aaa\nbbb\n";
 
 # TEST 1: As above, in parallel
 
-&run_make_with_options($makefile, "-j10 all", &get_logfile, 0);
-$answer = "aaa\nbbb\n";
-&compare_output($answer, &get_logfile(1));
+if ($parallel_jobs) {
+  &run_make_with_options($makefile, "-j10 all", &get_logfile, 0);
+  $answer = "aaa\nbbb\n";
+  &compare_output($answer, &get_logfile(1));
+}
 
 # TEST 2: A simple double-colon rule that is the goal target
 
@@ -63,13 +65,15 @@ $answer = "aaa\naaa done\nbbb\n";
 
 # TEST 3: As above, in parallel
 
-&run_make_with_options($makefile, "-j10 bar", &get_logfile, 0);
-$answer = "aaa\naaa done\nbbb\n";
-&compare_output($answer, &get_logfile(1));
+if ($parallel_jobs) {
+  &run_make_with_options($makefile, "-j10 bar", &get_logfile, 0);
+  $answer = "aaa\naaa done\nbbb\n";
+  &compare_output($answer, &get_logfile(1));
+}
 
 # TEST 4: Each double-colon rule is supposed to be run individually
 
-&touch('f2.h');
+&utouch(-5, 'f2.h');
 &touch('foo');
 
 &run_make_with_options($makefile, "foo", &get_logfile, 0);
@@ -78,13 +82,15 @@ $answer = "f1.h\nfoo FIRST\n";
 
 # TEST 5: Again, in parallel.
 
-&run_make_with_options($makefile, "-j10 foo", &get_logfile, 0);
-$answer = "f1.h\nfoo FIRST\n";
-&compare_output($answer, &get_logfile(1));
+if ($parallel_jobs) {
+  &run_make_with_options($makefile, "-j10 foo", &get_logfile, 0);
+  $answer = "f1.h\nfoo FIRST\n";
+  &compare_output($answer, &get_logfile(1));
+}
 
 # TEST 6: Each double-colon rule is supposed to be run individually
 
-&touch('f1.h');
+&utouch(-5, 'f1.h');
 unlink('f2.h');
 &touch('foo');
 
@@ -94,9 +100,11 @@ $answer = "f2.h\nfoo SECOND\n";
 
 # TEST 7: Again, in parallel.
 
-&run_make_with_options($makefile, "-j10 foo", &get_logfile, 0);
-$answer = "f2.h\nfoo SECOND\n";
-&compare_output($answer, &get_logfile(1));
+if ($parallel_jobs) {
+  &run_make_with_options($makefile, "-j10 foo", &get_logfile, 0);
+  $answer = "f2.h\nfoo SECOND\n";
+  &compare_output($answer, &get_logfile(1));
+}
 
 # TEST 8: Test circular dependency check; PR/1671
 
@@ -108,9 +116,11 @@ $answer = "ok\n$make_name: Circular d <- d dependency dropped.\noops\n";
 #
 # Hmm... further testing indicates this might be timing-dependent?
 #
-#&run_make_with_options($makefile, "-j10 biz", &get_logfile, 0);
-#$answer = "aaa\ntwo\nbbb\n";
-#&compare_output($answer, &get_logfile(1));
+#if ($parallel_jobs) {
+#  &run_make_with_options($makefile, "-j10 biz", &get_logfile, 0);
+#  $answer = "aaa\ntwo\nbbb\n";
+#  &compare_output($answer, &get_logfile(1));
+#}
 
 unlink('foo','f1.h','f2.h');
 

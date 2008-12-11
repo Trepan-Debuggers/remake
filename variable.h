@@ -1,5 +1,5 @@
 /* Definitions for using variables in GNU Make.
-Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 2002 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -17,6 +17,8 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#include "hash.h"
+
 /* Codes in a variable definition saying where the definition came from.
    Increasing numeric values signify less-overridable definitions.  */
 enum variable_origin
@@ -31,23 +33,44 @@ enum variable_origin
     o_invalid		/* Core dump time.  */
   };
 
+enum variable_flavor
+  {
+    f_bogus,            /* Bogus (error) */
+    f_simple,           /* Simple definition (:=) */
+    f_recursive,        /* Recursive definition (=) */
+    f_append,           /* Appending definition (+=) */
+    f_conditional       /* Conditional definition (?=) */
+  };
+
 /* Structure that represents one variable definition.
    Each bucket of the hash table is a chain of these,
    chained through `next'.  */
 
+#define EXP_COUNT_BITS  15      /* This gets all the bitfields into 32 bits */
+
+#define EXP_COUNT_MAX   ((1<<EXP_COUNT_BITS)-1)
+
 struct variable
   {
-    struct variable *next;	/* Link in the chain.  */
     char *name;			/* Variable name.  */
+    int length;			/* strlen (name) */
     char *value;		/* Variable value.  */
     struct floc fileinfo;       /* Where the variable was defined.  */
-    enum variable_origin
-      origin ENUM_BITFIELD (3);	/* Variable origin.  */
     unsigned int recursive:1;	/* Gets recursively re-evaluated.  */
-    unsigned int expanding:1;	/* Nonzero if currently being expanded.  */
     unsigned int per_target:1;	/* Nonzero if a target-specific variable.  */
     unsigned int append:1;	/* Nonzero if an appending target-specific
                                    variable.  */
+    unsigned int special:1;     /* Nonzero if this is a special variable. */
+    unsigned int expanding:1;	/* Nonzero if currently being expanded.  */
+    unsigned int exp_count:EXP_COUNT_BITS;
+                                /* If >1, allow this many self-referential
+                                   expansions.  */
+
+    enum variable_origin
+      origin ENUM_BITFIELD (3);	/* Variable origin.  */
+
+    unsigned int exportable:1;  /* Nonzero if the variable _could_ be
+                                   exported.  */
     enum variable_export
       {
 	v_export,		/* Export this variable.  */
@@ -61,8 +84,7 @@ struct variable
 
 struct variable_set
   {
-    struct variable **table;	/* Hash table of variables.  */
-    unsigned int buckets;	/* Number of hash buckets in `table'.  */
+    struct hash_table table;	/* Hash table of variables.  */
   };
 
 /* Structure that represents a list of variable sets.  */
@@ -95,7 +117,9 @@ extern char *patsubst_expand PARAMS ((char *o, char *text, char *pattern, char *
 		char *pattern_percent, char *replace_percent));
 
 /* expand.c */
-extern char *recursively_expand PARAMS ((struct variable *v));
+extern char *recursively_expand_for_file PARAMS ((struct variable *v,
+                                                  struct file *file));
+#define recursively_expand(v)   recursively_expand_for_file (v, NULL)
 
 /* variable.c */
 extern struct variable_set_list *create_new_variable_set PARAMS ((void));
@@ -106,12 +130,17 @@ extern void initialize_file_variables PARAMS ((struct file *file, int read));
 extern void print_file_variables PARAMS ((struct file *file));
 extern void print_variable_set PARAMS ((struct variable_set *set, char *prefix));
 extern void merge_variable_set_lists PARAMS ((struct variable_set_list **setlist0, struct variable_set_list *setlist1));
+extern struct variable *do_variable_definition PARAMS ((const struct floc *flocp, const char *name, char *value, enum variable_origin origin, enum variable_flavor flavor, int target_var));
 extern struct variable *try_variable_definition PARAMS ((const struct floc *flocp, char *line, enum variable_origin origin, int target_var));
-
-extern struct variable *lookup_variable PARAMS ((char *name, unsigned int length));
+extern void init_hash_global_variable_set PARAMS ((void));
+extern void hash_init_function_table PARAMS ((void));
+extern struct variable *lookup_variable PARAMS ((const char *name, unsigned int length));
+extern struct variable *lookup_variable_in_set PARAMS ((const char *name,
+                                                        unsigned int length,
+                                                        const struct variable_set *set));
 
 extern struct variable *define_variable_in_set
-    PARAMS ((char *name, unsigned int length, char *value,
+    PARAMS ((const char *name, unsigned int length, char *value,
              enum variable_origin origin, int recursive,
              struct variable_set *set, const struct floc *flocp));
 
@@ -127,11 +156,28 @@ extern struct variable *define_variable_in_set
           define_variable_in_set((n),(l),(v),(o),(r),\
                                  current_variable_set_list->set,(f))
 
+/* Define a variable with a location in the global variable set.  */
+
+#define define_variable_global(n,l,v,o,r,f) \
+          define_variable_in_set((n),(l),(v),(o),(r),NULL,(f))
+
 /* Define a variable in FILE's variable set.  */
 
 #define define_variable_for_file(n,l,v,o,r,f) \
           define_variable_in_set((n),(l),(v),(o),(r),(f)->variables->set,NILF)
 
+/* Warn that NAME is an undefined variable.  */
+
+#define warn_undefined(n,l) do{\
+                              if (warn_undefined_variables_flag) \
+                                error (reading_file, \
+                                       _("warning: undefined variable `%.*s'"), \
+                                (int)(l), (n)); \
+                              }while(0)
+
 extern char **target_environment PARAMS ((struct file *file));
 
 extern int export_all_variables;
+
+#define MAKELEVEL_NAME "MAKELEVEL"
+#define MAKELEVEL_LENGTH (sizeof (MAKELEVEL_NAME) - 1)

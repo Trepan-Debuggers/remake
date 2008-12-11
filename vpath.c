@@ -222,7 +222,7 @@ construct_vpath_list (pattern, dirpath)
   maxelem = 2;
   p = dirpath;
   while (*p != '\0')
-    if (*p++ == PATH_SEPARATOR_CHAR || isblank (*p))
+    if (*p++ == PATH_SEPARATOR_CHAR || isblank ((unsigned char)*p))
       ++maxelem;
 
   vpath = (char **) xmalloc (maxelem * sizeof (char *));
@@ -230,7 +230,7 @@ construct_vpath_list (pattern, dirpath)
 
   /* Skip over any initial separators and blanks.  */
   p = dirpath;
-  while (*p == PATH_SEPARATOR_CHAR || isblank (*p))
+  while (*p == PATH_SEPARATOR_CHAR || isblank ((unsigned char)*p))
     ++p;
 
   elem = 0;
@@ -241,7 +241,8 @@ construct_vpath_list (pattern, dirpath)
 
       /* Find the end of this entry.  */
       v = p;
-      while (*p != '\0' && *p != PATH_SEPARATOR_CHAR && !isblank (*p))
+      while (*p != '\0' && *p != PATH_SEPARATOR_CHAR
+	     && !isblank ((unsigned char)*p))
 	++p;
 
       len = p - v;
@@ -274,7 +275,7 @@ construct_vpath_list (pattern, dirpath)
 	}
 
       /* Skip over separators and blanks between entries.  */
-      while (*p == PATH_SEPARATOR_CHAR || isblank (*p))
+      while (*p == PATH_SEPARATOR_CHAR || isblank ((unsigned char)*p))
 	++p;
     }
 
@@ -347,7 +348,7 @@ vpath_search (file, mtime_ptr)
      there is nothing we can do.  */
 
   if (**file == '/'
-#if defined (WINDOWS32) || defined (__MSDOS__)
+#ifdef HAVE_DOS_PATHS
       || **file == '\\'
       || (*file)[1] == ':'
 #endif
@@ -403,7 +404,7 @@ selective_vpath_search (path, file, mtime_ptr)
      pointer to the name-within-directory and FLEN is its length.  */
 
   n = strrchr (*file, '/');
-#if defined (WINDOWS32) || defined (__MSDOS__)
+#ifdef HAVE_DOS_PATHS
   /* We need the rightmost slash or backslash.  */
   {
     char *bslash = strrchr(*file, '\\');
@@ -444,7 +445,7 @@ selective_vpath_search (path, file, mtime_ptr)
 	  n += name_dplen;
 	}
 
-#if defined (WINDOWS32) || defined (__MSDOS__)
+#ifdef HAVE_DOS_PATHS
       /* Cause the next if to treat backslash and slash alike.  */
       if (n != name && n[-1] == '\\' )
 	n[-1] = '/';
@@ -524,10 +525,10 @@ selective_vpath_search (path, file, mtime_ptr)
 	      if (mtime_ptr != 0)
 		/* Store the modtime into *MTIME_PTR for the caller.
 		   If we have had no need to stat the file here,
-		   we record a zero modtime to indicate this.  */
+		   we record UNKNOWN_MTIME to indicate this.  */
 		*mtime_ptr = (exists_in_cache
-			      ? FILE_TIMESTAMP_STAT_MODTIME (st)
-			      : (FILE_TIMESTAMP) 0);
+			      ? FILE_TIMESTAMP_STAT_MODTIME (name, st)
+			      : UNKNOWN_MTIME);
 
 	      free (name);
 	      return 1;

@@ -24,9 +24,9 @@
 #
 
 # Ultrix 2.2 make doesn't expand the value of VPATH.
-VPATH = /make-3.79/
+VPATH = /make-3.80/
 # This must repeat the value, because configure will remove `VPATH = .'.
-srcdir = /make-3.79/
+srcdir = /make-3.80/
 
 CC = sc
 RM = delete
@@ -214,42 +214,125 @@ glob-clean glob-realclean:
 
 # --------------- DEPENDENCIES
 #
-alloca.o: alloca.c config.h
-ar.o: ar.c make.h config.h gettext.h filedef.h dep.h glob/fnmatch.h
-arscan.o: arscan.c make.h config.h gettext.h
-commands.o: commands.c make.h config.h gettext.h dep.h filedef.h \
-	variable.h job.h commands.h
-default.o: default.c make.h config.h gettext.h rule.h dep.h filedef.h \
-	job.h commands.h variable.h
-dir.o: dir.c make.h config.h gettext.h glob/glob.h
-expand.o: expand.c make.h config.h gettext.h filedef.h job.h commands.h \
-	variable.h rule.h
-file.o: file.c make.h config.h gettext.h dep.h filedef.h job.h \
-	commands.h variable.h
-function.o: function.c make.h config.h gettext.h filedef.h variable.h \
-	dep.h job.h commands.h debug.h
-getloadavg.o: getloadavg.c config.h
-getopt.o: getopt.c config.h gettext.h getopt.h
-getopt1.o: getopt1.c config.h getopt.h
-gettext.o: gettext.c config.h gettext.h
-implicit.o: implicit.c make.h config.h gettext.h rule.h dep.h filedef.h \
-	debug.h
-job.o: job.c make.h config.h gettext.h job.h debug.h filedef.h \
-	commands.h variable.h
-main.o: main.c make.h config.h gettext.h dep.h filedef.h variable.h \
-	job.h commands.h rule.h debug.h getopt.h
-misc.o: misc.c make.h config.h gettext.h dep.h debug.h
-read.o: read.c make.h config.h gettext.h glob/glob.h dep.h filedef.h \
-	job.h commands.h variable.h rule.h debug.h
-remake.o: remake.c make.h config.h gettext.h filedef.h job.h commands.h \
-	dep.h variable.h debug.h
-remote-stub.o: remote-stub.c make.h config.h gettext.h filedef.h job.h \
-	commands.h
-rule.o: rule.c make.h config.h gettext.h dep.h filedef.h job.h \
-	commands.h variable.h rule.h
-signame.o: signame.c make.h config.h gettext.h signame.h
-variable.o: variable.c make.h config.h gettext.h dep.h filedef.h job.h \
-	commands.h variable.h rule.h
-version.o: version.c config.h
-vpath.o: vpath.c make.h config.h gettext.h filedef.h variable.h
+# dummy
+# dummy
+ar.o : \
+ ar.c make.h config.h \
+ getopt.h \
+ gettext.h filedef.h \
+ hash.h dep.h
+arscan.o : \
+ arscan.c make.h config.h \
+ getopt.h \
+ gettext.h \
 
+commands.o : \
+ commands.c make.h config.h \
+ getopt.h \
+ gettext.h dep.h \
+ filedef.h hash.h variable.h job.h commands.h
+default.o : \
+ default.c make.h config.h \
+ getopt.h \
+ gettext.h rule.h \
+ dep.h filedef.h hash.h job.h commands.h variable.h
+dir.o : \
+ dir.c make.h config.h \
+ getopt.h \
+ gettext.h hash.h \
+
+expand.o : \
+ expand.c make.h config.h \
+ getopt.h \
+ gettext.h \
+ filedef.h hash.h job.h commands.h variable.h \
+ rule.h
+file.o : \
+ file.c make.h config.h \
+ getopt.h \
+ gettext.h \
+ dep.h filedef.h hash.h job.h commands.h \
+ variable.h debug.h
+function.o : \
+ function.c make.h config.h \
+ getopt.h \
+ gettext.h filedef.h \
+ hash.h variable.h dep.h job.h commands.h debug.h
+getopt.o : \
+ getopt.c config.h \
+
+getopt1.o : \
+ getopt1.c config.h getopt.h \
+
+hash.o : \
+ hash.c make.h config.h \
+ getopt.h \
+ gettext.h hash.h
+implicit.o : \
+ implicit.c make.h config.h \
+ getopt.h \
+ gettext.h rule.h \
+ dep.h filedef.h hash.h debug.h
+job.o : \
+ job.c make.h config.h \
+ getopt.h \
+ gettext.h \
+ job.h debug.h filedef.h hash.h commands.h \
+ variable.h \
+
+loadavg-loadavg.o : \
+ loadavg.c config.h \
+ make.h \
+ getopt.h \
+ gettext.h \
+
+main.o : \
+ main.c make.h config.h \
+ getopt.h \
+ gettext.h dep.h \
+ filedef.h hash.h variable.h job.h commands.h rule.h debug.h \
+
+misc.o : \
+ misc.c make.h config.h \
+ getopt.h \
+ gettext.h dep.h \
+ debug.h
+read.o : \
+ read.c make.h config.h \
+ getopt.h \
+ gettext.h \
+ dep.h filedef.h hash.h \
+ job.h commands.h variable.h rule.h debug.h
+remake.o : \
+ remake.c make.h config.h \
+ getopt.h \
+ gettext.h filedef.h \
+ hash.h job.h commands.h dep.h variable.h debug.h \
+
+# dummy
+remote-stub.o : \
+ remote-stub.c make.h config.h \
+ getopt.h \
+ gettext.h filedef.h \
+ hash.h job.h commands.h
+rule.o : \
+ rule.c make.h config.h \
+ getopt.h \
+ gettext.h dep.h \
+ filedef.h hash.h job.h commands.h variable.h rule.h
+signame.o : \
+ signame.c make.h config.h \
+ getopt.h \
+ gettext.h
+variable.o : \
+ variable.c make.h config.h \
+ getopt.h \
+ gettext.h dep.h \
+ filedef.h hash.h job.h commands.h variable.h rule.h
+version.o : \
+ version.c config.h
+vpath.o : \
+ vpath.c make.h config.h \
+ getopt.h \
+ gettext.h filedef.h \
+ hash.h variable.h

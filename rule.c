@@ -230,6 +230,7 @@ convert_suffix_rule (target, source, cmds)
       deps = (struct dep *) xmalloc (sizeof (struct dep));
       deps->next = 0;
       deps->name = depname;
+      deps->ignore_mtime = 0;
     }
 
   create_pattern_rule (names, percents, 0, deps, cmds, 0);
@@ -653,7 +654,7 @@ print_rule_data_base ()
   register unsigned int rules, terminal;
   register struct rule *r;
 
-  puts ("\n# Implicit Rules");
+  puts (_("\n# Implicit Rules"));
 
   rules = terminal = 0;
   for (r = pattern_rules; r != 0; r = r->next)

@@ -9,13 +9,6 @@
 /* #undef _ALL_SOURCE */
 #endif
 
-/* Define if using alloca.c.  */
-/* #undef C_ALLOCA */
-/* maybe this should be placed into make.h */
-#if	defined(__VAX) && defined(__DECC)
-#define alloca(n)	__ALLOCA(n)
-#endif
-
 /* Define to 1 if NLS is requested.  */
 /* #undef ENABLE_NLS */
 
@@ -49,6 +42,10 @@
 
 /* Define if the `getloadavg' function needs to be run setuid or setgid.  */
 /* #undef GETLOADAVG_PRIVILEGED */
+
+/* Define to `unsigned long' or `unsigned long long'
+   if <inttypes.h> doesn't define.  */
+#define uintmax_t unsigned long
 
 /* Define to `int' if <sys/types.h> doesn't define.  */
 /* #undef gid_t */
@@ -199,7 +196,7 @@
 #define PACKAGE "make"
 
 /* Version of this package (needed by automake) */
-#define VERSION "3.79"
+#define VERSION "3.80"
 
 /* Define to the name of the SCCS `get' command.  */
 /* #undef SCCS_GET */
@@ -341,6 +338,9 @@
 /* Define if you have the sun library (-lsun).  */
 /* #undef HAVE_LIBSUN */
 
+/* Use high resolution file timestamps if nonzero. */
+#define FILE_TIMESTAMP_HI_RES 0
+
 /* Define for case insensitve filenames */
 #define HAVE_CASE_INSENSITIVE_FS 1
 
@@ -391,6 +391,13 @@
 #undef  PARAMS
 #define PARAMS(protos)  ()
 #endif /* C++ or ANSI C.  */
+
+/* Define if using alloca.c.  */
+/* #undef C_ALLOCA */
+/* maybe this should be placed into make.h */
+#if	defined(__VAX) && defined(__DECC)
+#define alloca(n)	__ALLOCA(n)
+#endif
 
 /* Build host information. */
 #define MAKE_HOST "VMS"

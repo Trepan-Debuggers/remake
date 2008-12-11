@@ -7,10 +7,9 @@
 #include "proc.h"
 #include "w32err.h"
 #include "config.h"
+#include "debug.h"
 
 static char *make_command_line(char *shell_name, char *exec_path, char **argv);
-
-extern int debug_flag; /* from make */
 
 typedef struct sub_process_t {
 	int sv_stdin[2];
@@ -506,10 +505,9 @@ process_begin(
 		if (envblk) free(envblk);
 		return -1;
 	} else {
-		if (debug_flag)
-			printf("CreateProcess(%s,%s,...)\n",
-				exec_path ? exec_path : "NULL",
-				command_line ? command_line : "NULL");
+		DB (DB_JOBS, ("CreateProcess(%s,%s,...)\n",
+			exec_path ? exec_path : "NULL",
+			command_line ? command_line : "NULL"));
 		if (CreateProcess(
 			exec_path,
 			command_line,

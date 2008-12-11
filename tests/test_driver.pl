@@ -113,7 +113,7 @@ sub toplevel
     print "Finding tests...\n";
     opendir (SCRIPTDIR, $scriptpath)
 	|| &error ("Couldn't opendir $scriptpath: $!\n");
-    @dirs = readdir (SCRIPTDIR);
+    @dirs = grep (!/^(\.\.?|CVS|RCS)$/, readdir (SCRIPTDIR) );
     closedir (SCRIPTDIR);
     foreach $dir (@dirs)
     {
@@ -124,7 +124,7 @@ sub toplevel
            || &error ("Couldn't mkdir $workpath/$dir: $!\n");
       opendir (SCRIPTDIR, "$scriptpath/$dir")
 	  || &error ("Couldn't opendir $scriptpath/$dir: $!\n");
-      @files = readdir (SCRIPTDIR);
+      @files = grep (!/^(\.\.?|CVS|RCS)$/, readdir (SCRIPTDIR) );
       closedir (SCRIPTDIR);
       foreach $test (@files)
       {
@@ -588,10 +588,8 @@ sub compare_output
 
   # For make, get rid of any time skew error before comparing--too bad this
   # has to go into the "generic" driver code :-/
-  $slurp =~ s/^.*modification time in the future.*\n//g;
-  $slurp =~ s/\n.*modification time in the future.*//g;
-  $slurp =~ s/^.*Clock skew detected.*\n//g;
-  $slurp =~ s/\n.*Clock skew detected.*//g;
+  $slurp =~ s/^.*modification time .*in the future.*\n//gm;
+  $slurp =~ s/^.*Clock skew detected.*\n//gm;
 
   if ($slurp eq $answer)
   {
@@ -777,7 +775,7 @@ sub remove_directory_tree_inner
   $subdirhandle++;
   while ($object = readdir ($dirhandle))
   {
-    if ($object eq "." || $object eq "..")
+    if ($object =~ /^(\.\.?|CVS|RCS)$/)
     {
       next;
     }
@@ -825,13 +823,27 @@ sub remove_directory_tree_inner
 
 sub touch
 {
-  local (@filenames) = @_;
   local ($file);
 
-  foreach $file (@filenames) {
+  foreach $file (@_) {
     (open(T, ">> $file") && print(T "\n") && close(T))
 	|| &error("Couldn't touch $file: $!\n", 1);
   }
+}
+
+# Touch with a time offset.  To DTRT, call touch() then use stat() to get the
+# access/mod time for each file and apply the offset.
+
+sub utouch
+{
+  local ($off) = shift;
+  local ($file);
+
+  &touch(@_);
+
+  local (@s) = stat($_[0]);
+
+  utime($s[8]+$off, $s[9]+$off, @_);
 }
 
 # open a file, write some stuff to it, and close it.
@@ -912,7 +924,7 @@ sub compare_dir_tree
   local (@allfiles);
 
   opendir (DIR, $basedir) || &error ("Couldn't open $basedir: $!\n", 1);
-  @allfiles = grep (!/^\.\.?$/, readdir (DIR) );
+  @allfiles = grep (!/^(\.\.?|CVS|RCS)$/, readdir (DIR) );
   closedir (DIR);
   if ($debug)
   {
@@ -955,7 +967,7 @@ sub compare_dir_tree
       {
         @files = readdir (DIR);
         closedir (DIR);
-        @files = grep (!/^\.\.?$/ && ($_ = "$path/$_"), @files);
+        @files = grep (!/^(\.\.?|CVS|RCS)$/ && ($_ = "$path/$_"), @files);
         push (@allfiles, @files);
         if ($debug)
         {

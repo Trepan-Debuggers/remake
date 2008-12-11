@@ -1,3 +1,157 @@
+2002-09-23  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/escape: Test handling of escaped comment
+	characters in targets and prerequisites.
+
+2002-09-18  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/export: Test export/unexport of multiple
+	variables in a single command.
+
+2002-09-17  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/targetvars: Tests for Bug #940: test
+	target-specific and pattern-specific variables in conjunction with
+	double-colon targets.
+
+2002-09-10  Paul D. Smith  <psmith@gnu.org>
+
+	* test_driver.pl (compare_output): Match the new format for time
+	skew error messages.
+
+	* scripts/features/export: Created.  Add tests for export/unexport
+	capabilities, including exporting/unexporting expanded variables.
+
+	* scripts/features/conditionals: Add a test for expanded variables
+	in ifdef conditionals.
+
+2002-09-04  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/reinvoke: Change touch/sleep combos to utouch
+	invocations.
+	* scripts/features/vpathgpath: Ditto.
+	* scripts/features/vpathplus: Ditto.
+	* scripts/options/dash-n: Ditto.
+	* scripts/targets/INTERMEDIATE: Ditto.
+	* scripts/targets/SECONDARY: Ditto.
+
+	* scripts/options/dash-t: Added a test for the -t bug fixed by
+	Henning Makholm.  This test was also contributed by Henning.
+
+	* scripts/misc/general4: Add a test suite for obscure algorithmic
+	features of make.  First test: make sure creation subdirectories
+	as prerequisites of targets works properly.
+
+	* scripts/misc/version: Remove this bogus test.
+
+2002-08-07  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/misc/general3: Add a test for makefiles that don't end
+	in newlines.
+
+	* scripts/variables/special: Create tests for the special
+	variables (.VARIABLES and .TARGETS).  Comment out .TARGETS test
+	for now as it's not yet supported.
+
+2002-08-01  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/options/dash-B: Add a test for the new -B option.
+
+2002-07-11  Paul D. Smith  <psmith@gnu.org>
+
+	* run_make_tests.pl (valid_option): Add support for Valgrind
+	<http://developer.kde.org/~sewardj/>.  Use -valgrind option to the
+	test suite.
+	(set_more_defaults): Set up the file descriptor to capture
+	Valgrind output.  We have to unset its close-on-exec flag; we
+	hardcode the value for F_SETFD (2) rather than load it; hopefully
+	this will help us avoid breaking the Windows/DOS test suite.
+
+2002-07-10  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/variables/automatic: Add some tests for $$@, $$(@D), and
+	$$(@F).
+
+	* test_driver.pl (utouch): Create a new function that creates a
+	file with a specific timestamp offset.  Use of this function will
+	let us avoid lots of annoying sleep() invocations in the tests
+	just to get proper timestamping, which will make the tests run a
+	lot faster.  So far it's only used in the automatic test suite.
+
+2002-07-09  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/variables/automatic: Create a test for automatic variables.
+
+2002-07-08  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/order_only: Test new order-only prerequisites.
+
+2002-07-07  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/functions/eval: Test new function.
+	* scripts/functions/value: Test new function.
+	* scripts/variables/MAKEFILE_LIST: Test new variable.
+
+2002-04-28  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/functions/call: New test: transitive closure
+	implementation using $(call ...) to test variable recursion.
+
+2002-04-21  Paul D. Smith  <psmith@gnu.org>
+
+	* test_driver.pl (compare_dir_tree): Ignore CVS and RCS
+	directories in the script directories.
+
+2001-05-02  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/variables/flavors: Test define/endef scripts where only
+	one of the command lines is quiet.
+
+2000-06-22  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/options/dash-q: New file; test the -q option.  Includes
+	a test for PR/1780.
+
+2000-06-21  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/features/targetvars: Added a test for PR/1709: allowing
+	semicolons in target-specific variable values.
+
+2000-06-19  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/functions/addsuffix: Test for an empty final argument.
+	Actually this bug might have happened for any function, but this
+	one was handy.
+
+2000-06-17  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* scripts/options/general: If parallel jobs are not supported,
+	expect a warning message from Make.
+
+2000-06-15  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* scripts/options/general: Don't try -jN with N != 1 if parallel
+	jobs are not supported.
+
+2000-05-24  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/options/general: Test general option processing (PR/1716).
+
+2000-04-11  Paul D. Smith  <psmith@gnu.org>
+
+	* scripts/functions/strip: Test empty value to strip (PR/1689).
+
+2000-04-08  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* scripts/features/reinvoke: Sleep before updating the target
+	files in the first test, to ensure its time stamp really gets
+	newer; otherwise Make might re-exec more than once.
+
+2000-04-07  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* scripts/features/double_colon: Don't run the parallel tests if
+	parallel jobs aren't supported.
+
 2000-04-04  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/functions/word: wordlist doesn't swap arguments anymore.

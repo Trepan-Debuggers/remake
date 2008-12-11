@@ -1,5 +1,6 @@
 /* Miscellaneous generic support functions for GNU Make.
-Copyright (C) 1988,89,90,91,92,93,94,95,97 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1997,
+2002 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -49,6 +50,7 @@ Boston, MA 02111-1307, USA.  */
 # define va_alist a1, a2, a3, a4, a5, a6, a7, a8
 # define va_dcl char *a1, *a2, *a3, *a4, *a5, *a6, *a7, *a8;
 # define VA_START(args, lastarg)
+# define VA_PRINTF(fp, lastarg, args) fprintf((fp), (lastarg), va_alist)
 # define VA_END(args)
 #endif
 
@@ -120,7 +122,7 @@ collapse_continuations (line)
       if (backslash)
 	{
 	  in = next_token (in);
-	  while (out > line && isblank (out[-1]))
+	  while (out > line && isblank ((unsigned char)out[-1]))
 	    --out;
 	  *out++ = ' ';
 	}
@@ -161,7 +163,7 @@ remove_comments (line)
 {
   char *comment;
 
-  comment = find_char_unquote (line, "#", 0);
+  comment = find_char_unquote (line, '#', 0, 0);
 
   if (comment != 0)
     /* Cut off the line at the #.  */
@@ -172,7 +174,7 @@ remove_comments (line)
 
 void
 print_spaces (n)
-     register unsigned int n;
+     unsigned int n;
 {
   while (n-- > 0)
     putchar (' ');
@@ -184,10 +186,10 @@ print_spaces (n)
 
 char *
 concat (s1, s2, s3)
-     register char *s1, *s2, *s3;
+     const char *s1, *s2, *s3;
 {
-  register unsigned int len1, len2, len3;
-  register char *result;
+  unsigned int len1, len2, len3;
+  char *result;
 
   len1 = *s1 != '\0' ? strlen (s1) : 0;
   len2 = *s2 != '\0' ? strlen (s2) : 0;
@@ -335,18 +337,18 @@ strerror (errnum)
 
 void
 perror_with_name (str, name)
-     char *str, *name;
+     const char *str, *name;
 {
-  error (NILF, "%s%s: %s", str, name, strerror (errno));
+  error (NILF, _("%s%s: %s"), str, name, strerror (errno));
 }
 
 /* Print an error message from errno and exit.  */
 
 void
 pfatal_with_name (name)
-     char *name;
+     const char *name;
 {
-  fatal (NILF, "%s: %s", name, strerror (errno));
+  fatal (NILF, _("%s: %s"), name, strerror (errno));
 
   /* NOTREACHED */
 }
@@ -478,7 +480,7 @@ char *
 end_of_token (s)
      char *s;
 {
-  while (*s != '\0' && !isblank (*s))
+  while (*s != '\0' && !isblank ((unsigned char)*s))
     ++s;
   return s;
 }
@@ -495,7 +497,8 @@ end_of_token_w32 (s, stopchar)
   register char *p = s;
   register int backslash = 0;
 
-  while (*p != '\0' && *p != stopchar && (backslash || !isblank (*p)))
+  while (*p != '\0' && *p != stopchar
+	 && (backslash || !isblank ((unsigned char)*p)))
     {
       if (*p++ == '\\')
         {
@@ -518,13 +521,11 @@ end_of_token_w32 (s, stopchar)
 
 char *
 next_token (s)
-     char *s;
+     const char *s;
 {
-  register char *p = s;
-
-  while (isblank (*p))
-    ++p;
-  return p;
+  while (isblank ((unsigned char)*s))
+    ++s;
+  return (char *)s;
 }
 
 /* Find the next token in PTR; return the address of it, and store the
@@ -650,7 +651,7 @@ log_access (flavor)
      but we write this one to stderr because it might be
      run in a child fork whose stdout is piped.  */
 
-  fprintf (stderr, _("%s access: user %lu (real %lu), group %lu (real %lu)\n"),
+  fprintf (stderr, _("%s: user %lu (real %lu), group %lu (real %lu)\n"),
 	   flavor, (unsigned long) geteuid (), (unsigned long) getuid (),
            (unsigned long) getegid (), (unsigned long) getgid ());
   fflush (stderr);
@@ -671,7 +672,7 @@ init_access ()
   if (user_uid == -1 || user_gid == -1 || make_uid == -1 || make_gid == -1)
     pfatal_with_name ("get{e}[gu]id");
 
-  log_access (_("Initialized"));
+  log_access (_("Initialized access"));
 
   current_access = make;
 #endif
@@ -750,7 +751,7 @@ user_access ()
 
   current_access = user;
 
-  log_access ("User");
+  log_access (_("User access"));
 
 #endif	/* GETLOADAVG_PRIVILEGED */
 }
@@ -798,7 +799,7 @@ make_access ()
 
   current_access = make;
 
-  log_access ("Make");
+  log_access (_("Make access"));
 
 #endif	/* GETLOADAVG_PRIVILEGED */
 }
@@ -832,7 +833,7 @@ child_access ()
     pfatal_with_name ("child_access: setregid");
 #endif
 
-  log_access ("Child");
+  log_access (_("Child access"));
 
 #endif	/* GETLOADAVG_PRIVILEGED */
 }
@@ -855,3 +856,38 @@ get_path_max ()
   return value;
 }
 #endif
+
+
+#ifdef HAVE_BROKEN_RESTART
+
+#undef stat
+#undef readdir
+
+int
+atomic_stat(file, buf)
+     const char *file;
+     struct stat *buf;
+{
+  int r;
+
+  while ((r = stat (file, buf)) < 0)
+    if (errno != EINTR)
+      break;
+
+  return r;
+}
+
+struct dirent *
+atomic_readdir(dir)
+     DIR *dir;
+{
+  struct dirent *r;
+
+  while ((r = readdir (dir)) == NULL)
+    if (errno != EINTR)
+      break;
+
+  return r;
+}
+
+#endif  /* HAVE_BROKEN_RESTART */

@@ -1,5 +1,6 @@
 /* Argument parsing and main program of GNU Make.
-Copyright (C) 1988,89,90,91,94,95,96,97,98,99 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1994, 1995, 1996, 1997, 1998, 1999,
+2002 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -75,6 +76,8 @@ static void decode_switches PARAMS ((int argc, char **argv, int env));
 static void decode_env_switches PARAMS ((char *envar, unsigned int len));
 static void define_makeflags PARAMS ((int all, int makefile));
 static char *quote_for_env PARAMS ((char *out, char *in));
+static void initialize_global_hash_tables PARAMS ((void));
+
 
 /* The structure that describes an accepted command switch.  */
 
@@ -102,9 +105,6 @@ struct command_switch
     char *default_value;/* Pointer to default value.  */
 
     char *long_name;		/* Long option name.  */
-    char *argdesc;		/* Descriptive word for argument.  */
-    char *description;		/* Description for usage message.  */
-                                /* 0 means internal; don't display help.  */
   };
 
 /* True if C is a switch value that corresponds to a short option.  */
@@ -249,113 +249,142 @@ static int print_usage_flag = 0;
    for each reference to an undefined variable.  */
 
 int warn_undefined_variables_flag;
+
+/* If nonzero, always build all targets, regardless of whether
+   they appear out of date or not.  */
+
+int always_make_flag = 0;
 
+/* The usage output.  We write it this way to make life easier for the
+   translators, especially those trying to translate to right-to-left
+   languages like Hebrew.  */
+
+static const char *const usage[] =
+  {
+    N_("Options:\n"),
+    N_("\
+  -b, -m                      Ignored for compatibility.\n"),
+    N_("\
+  -B, --always-make           Unconditionally make all targets.\n"),
+    N_("\
+  -C DIRECTORY, --directory=DIRECTORY\n\
+                              Change to DIRECTORY before doing anything.\n"),
+    N_("\
+  -d                          Print lots of debugging information.\n"),
+    N_("\
+  --debug[=FLAGS]             Print various types of debugging information.\n"),
+    N_("\
+  -e, --environment-overrides\n\
+                              Environment variables override makefiles.\n"),
+    N_("\
+  -f FILE, --file=FILE, --makefile=FILE\n\
+                              Read FILE as a makefile.\n"),
+    N_("\
+  -h, --help                  Print this message and exit.\n"),
+    N_("\
+  -i, --ignore-errors         Ignore errors from commands.\n"),
+    N_("\
+  -I DIRECTORY, --include-dir=DIRECTORY\n\
+                              Search DIRECTORY for included makefiles.\n"),
+    N_("\
+  -j [N], --jobs[=N]          Allow N jobs at once; infinite jobs with no arg.\n"),
+    N_("\
+  -k, --keep-going            Keep going when some targets can't be made.\n"),
+    N_("\
+  -l [N], --load-average[=N], --max-load[=N]\n\
+                              Don't start multiple jobs unless load is below N.\n"),
+    N_("\
+  -n, --just-print, --dry-run, --recon\n\
+                              Don't actually run any commands; just print them.\n"),
+    N_("\
+  -o FILE, --old-file=FILE, --assume-old=FILE\n\
+                              Consider FILE to be very old and don't remake it.\n"),
+    N_("\
+  -p, --print-data-base       Print make's internal database.\n"),
+    N_("\
+  -q, --question              Run no commands; exit status says if up to date.\n"),
+    N_("\
+  -r, --no-builtin-rules      Disable the built-in implicit rules.\n"),
+    N_("\
+  -R, --no-builtin-variables  Disable the built-in variable settings.\n"),
+    N_("\
+  -s, --silent, --quiet       Don't echo commands.\n"),
+    N_("\
+  -S, --no-keep-going, --stop\n\
+                              Turns off -k.\n"),
+    N_("\
+  -t, --touch                 Touch targets instead of remaking them.\n"),
+    N_("\
+  -v, --version               Print the version number of make and exit.\n"),
+    N_("\
+  -w, --print-directory       Print the current directory.\n"),
+    N_("\
+  --no-print-directory        Turn off -w, even if it was turned on implicitly.\n"),
+    N_("\
+  -W FILE, --what-if=FILE, --new-file=FILE, --assume-new=FILE\n\
+                              Consider FILE to be infinitely new.\n"),
+    N_("\
+  --warn-undefined-variables  Warn when an undefined variable is referenced.\n"),
+    NULL
+  };
+
 /* The table of command switches.  */
 
 static const struct command_switch switches[] =
   {
-    { 'b', ignore, 0, 0, 0, 0, 0, 0,
-	0, 0,
-	N_("Ignored for compatibility") },
-    { 'C', string, (char *) &directories, 0, 0, 0, 0, 0,
-	"directory", N_("DIRECTORY"),
-	N_("Change to DIRECTORY before doing anything") },
-    { 'd', flag, (char *) &debug_flag, 1, 1, 0, 0, 0,
-	0, 0,
-	N_("Print lots of debugging information") },
-    { CHAR_MAX+1, string, (char *) &db_flags, 1, 1, 0,
-        "basic", 0,
-	"debug", N_("FLAGS"),
-	N_("Print various types of debugging information") },
+    { 'b', ignore, 0, 0, 0, 0, 0, 0, 0 },
+    { 'B', flag, (char *) &always_make_flag, 1, 1, 0, 0, 0, "always-make" },
+    { 'C', string, (char *) &directories, 0, 0, 0, 0, 0, "directory" },
+    { 'd', flag, (char *) &debug_flag, 1, 1, 0, 0, 0, 0 },
+    { CHAR_MAX+1, string, (char *) &db_flags, 1, 1, 0, "basic", 0, "debug" },
 #ifdef WINDOWS32
-    { 'D', flag, (char *) &suspend_flag, 1, 1, 0, 0, 0,
-        "suspend-for-debug", 0,
-        N_("Suspend process to allow a debugger to attach") },
+    { 'D', flag, (char *) &suspend_flag, 1, 1, 0, 0, 0, "suspend-for-debug" },
 #endif
     { 'e', flag, (char *) &env_overrides, 1, 1, 0, 0, 0,
-	"environment-overrides", 0,
-	N_("Environment variables override makefiles") },
-    { 'f', string, (char *) &makefiles, 0, 0, 0, 0, 0,
-	"file", N_("FILE"),
-	N_("Read FILE as a makefile") },
-    { 'h', flag, (char *) &print_usage_flag, 0, 0, 0, 0, 0,
-	"help", 0,
-	N_("Print this message and exit") },
+        "environment-overrides", },
+    { 'f', string, (char *) &makefiles, 0, 0, 0, 0, 0, "file" },
+    { 'h', flag, (char *) &print_usage_flag, 0, 0, 0, 0, 0, "help" },
     { 'i', flag, (char *) &ignore_errors_flag, 1, 1, 0, 0, 0,
-	"ignore-errors", 0,
-	N_("Ignore errors from commands") },
+        "ignore-errors" },
     { 'I', string, (char *) &include_directories, 1, 1, 0, 0, 0,
-	"include-dir", N_("DIRECTORY"),
-	N_("Search DIRECTORY for included makefiles") },
-    { 'j',
-        positive_int, (char *) &job_slots, 1, 1, 0,
-	(char *) &inf_jobs, (char *) &default_job_slots,
-	"jobs", "N",
-	N_("Allow N jobs at once; infinite jobs with no arg") },
+        "include-dir" },
+    { 'j', positive_int, (char *) &job_slots, 1, 1, 0, (char *) &inf_jobs,
+        (char *) &default_job_slots, "jobs" },
     { CHAR_MAX+2, string, (char *) &jobserver_fds, 1, 1, 0, 0, 0,
-        "jobserver-fds", 0,
-        0 },
-    { 'k', flag, (char *) &keep_going_flag, 1, 1, 0,
-	0, (char *) &default_keep_going_flag,
-	"keep-going", 0,
-	N_("Keep going when some targets can't be made") },
+        "jobserver-fds" },
+    { 'k', flag, (char *) &keep_going_flag, 1, 1, 0, 0,
+        (char *) &default_keep_going_flag, "keep-going" },
 #ifndef NO_FLOAT
     { 'l', floating, (char *) &max_load_average, 1, 1, 0,
 	(char *) &default_load_average, (char *) &default_load_average,
-	"load-average", "N",
-	N_("Don't start multiple jobs unless load is below N") },
+	"load-average" },
 #else
     { 'l', positive_int, (char *) &max_load_average, 1, 1, 0,
 	(char *) &default_load_average, (char *) &default_load_average,
-	"load-average", "N",
-	N_("Don't start multiple jobs unless load is below N") },
+	"load-average" },
 #endif
-    { 'm', ignore, 0, 0, 0, 0, 0, 0,
-	0, 0,
-	"-b" },
-    { 'n', flag, (char *) &just_print_flag, 1, 1, 1, 0, 0,
-	"just-print", 0,
-	N_("Don't actually run any commands; just print them") },
-    { 'o', string, (char *) &old_files, 0, 0, 0, 0, 0,
-	"old-file", N_("FILE"),
-	N_("Consider FILE to be very old and don't remake it") },
+    { 'm', ignore, 0, 0, 0, 0, 0, 0, 0 },
+    { 'n', flag, (char *) &just_print_flag, 1, 1, 1, 0, 0, "just-print" },
+    { 'o', string, (char *) &old_files, 0, 0, 0, 0, 0, "old-file" },
     { 'p', flag, (char *) &print_data_base_flag, 1, 1, 0, 0, 0,
-	"print-data-base", 0,
-	N_("Print make's internal database") },
-    { 'q', flag, (char *) &question_flag, 1, 1, 1, 0, 0,
-	"question", 0,
-	N_("Run no commands; exit status says if up to date") },
+        "print-data-base" },
+    { 'q', flag, (char *) &question_flag, 1, 1, 1, 0, 0, "question" },
     { 'r', flag, (char *) &no_builtin_rules_flag, 1, 1, 0, 0, 0,
-	"no-builtin-rules", 0,
-	N_("Disable the built-in implicit rules") },
+      "no-builtin-rules" },
     { 'R', flag, (char *) &no_builtin_variables_flag, 1, 1, 0, 0, 0,
-	"no-builtin-variables", 0,
-	N_("Disable the built-in variable settings") },
-    { 's', flag, (char *) &silent_flag, 1, 1, 0, 0, 0,
-	"silent", 0,
-	N_("Don't echo commands") },
-    { 'S', flag_off, (char *) &keep_going_flag, 1, 1, 0,
-	0, (char *) &default_keep_going_flag,
-	"no-keep-going", 0,
-	N_("Turns off -k") },
-    { 't', flag, (char *) &touch_flag, 1, 1, 1, 0, 0,
-	"touch", 0,
-	N_("Touch targets instead of remaking them") },
-    { 'v', flag, (char *) &print_version_flag, 1, 1, 0, 0, 0,
-	"version", 0,
-	N_("Print the version number of make and exit") },
+	"no-builtin-variables" },
+    { 's', flag, (char *) &silent_flag, 1, 1, 0, 0, 0, "silent" },
+    { 'S', flag_off, (char *) &keep_going_flag, 1, 1, 0, 0,
+      (char *) &default_keep_going_flag, "no-keep-going" },
+    { 't', flag, (char *) &touch_flag, 1, 1, 1, 0, 0, "touch" },
+    { 'v', flag, (char *) &print_version_flag, 1, 1, 0, 0, 0, "version" },
     { 'w', flag, (char *) &print_directory_flag, 1, 1, 0, 0, 0,
-	"print-directory", 0,
-	N_("Print the current directory") },
+        "print-directory" },
     { CHAR_MAX+3, flag, (char *) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
-	"no-print-directory", 0,
-	N_("Turn off -w, even if it was turned on implicitly") },
-    { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0,
-	"what-if", N_("FILE"),
-	N_("Consider FILE to be infinitely new") },
+	"no-print-directory" },
+    { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0, "what-if" },
     { CHAR_MAX+4, flag, (char *) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
-	"warn-undefined-variables", 0,
-	N_("Warn when an undefined variable is referenced") },
+	"warn-undefined-variables" },
     { '\0', }
   };
 
@@ -373,12 +402,6 @@ static struct option long_option_aliases[] =
     { "recon",		no_argument,		0, 'n' },
     { "makefile",	required_argument,	0, 'f' },
   };
-
-/* The usage message prints the descriptions of options starting in
-   this column.  Make sure it leaves enough room for the longest
-   description to fit in less than 80 characters.  */
-
-#define	DESCRIPTION_COLUMN	30
 
 /* List of goal targets.  */
 
@@ -443,10 +466,42 @@ int clock_skew_detected;
 #ifdef	POSIX
 sigset_t fatal_signal_set;
 #else
-#ifdef	HAVE_SIGSETMASK
+# ifdef	HAVE_SIGSETMASK
 int fatal_signal_mask;
+# endif
 #endif
+
+#if !defined HAVE_BSD_SIGNAL && !defined bsd_signal
+# if !defined HAVE_SIGACTION
+#  define bsd_signal signal
+# else
+typedef RETSIGTYPE (*bsd_signal_ret_t) ();
+
+static bsd_signal_ret_t
+bsd_signal (sig, func)
+     int sig;
+     bsd_signal_ret_t func;
+{
+  struct sigaction act, oact;
+  act.sa_handler = func;
+  act.sa_flags = SA_RESTART;
+  sigemptyset (&act.sa_mask);
+  sigaddset (&act.sa_mask, sig);
+  if (sigaction (sig, &act, &oact) != 0)
+    return SIG_ERR;
+  return oact.sa_handler;
+}
+# endif
 #endif
+
+static void
+initialize_global_hash_tables ()
+{
+  init_hash_global_variable_set ();
+  init_hash_files ();
+  hash_init_directories ();
+  hash_init_function_table ();
+}
 
 static struct file *
 enter_command_line_file (name)
@@ -819,13 +874,6 @@ int main (int argc, char ** argv)
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 
-#if !defined (HAVE_STRSIGNAL) && !defined (HAVE_SYS_SIGLIST)
-  {
-    extern void signame_init ();
-    signame_init ();
-  }
-#endif
-
 #ifdef	POSIX
   sigemptyset (&fatal_signal_set);
 #define	ADD_SIG(sig)	sigaddset (&fatal_signal_set, sig)
@@ -839,8 +887,8 @@ int main (int argc, char ** argv)
 #endif
 
 #define	FATAL_SIG(sig)							      \
-  if (signal ((sig), fatal_error_signal) == SIG_IGN)			      \
-    (void) signal ((sig), SIG_IGN);					      \
+  if (bsd_signal (sig, fatal_error_signal) == SIG_IGN)			      \
+    bsd_signal (sig, SIG_IGN);						      \
   else									      \
     ADD_SIG (sig);
 
@@ -852,6 +900,13 @@ int main (int argc, char ** argv)
 #endif
   FATAL_SIG (SIGINT);
   FATAL_SIG (SIGTERM);
+
+#ifdef __MSDOS__
+  /* Windows 9X delivers FP exceptions in child programs to their
+     parent!  We don't want Make to die when a child divides by zero,
+     so we work around that lossage by catching SIGFPE.  */
+  FATAL_SIG (SIGFPE);
+#endif
 
 #ifdef	SIGDANGER
   FATAL_SIG (SIGDANGER);
@@ -872,24 +927,24 @@ int main (int argc, char ** argv)
 
 #ifdef HAVE_WAIT_NOHANG
 # if defined SIGCHLD
-  (void) signal (SIGCHLD, SIG_DFL);
+  (void) bsd_signal (SIGCHLD, SIG_DFL);
 # endif
 # if defined SIGCLD && SIGCLD != SIGCHLD
-  (void) signal (SIGCLD, SIG_DFL);
+  (void) bsd_signal (SIGCLD, SIG_DFL);
 # endif
 #endif
 
   /* Make sure stdout is line-buffered.  */
 
-#ifdef	HAVE_SETLINEBUF
-  setlinebuf (stdout);
-#else
-#ifndef	SETVBUF_REVERSED
-  setvbuf (stdout, (char *) 0, _IOLBF, BUFSIZ);
-#else	/* setvbuf not reversed.  */
-  /* Some buggy systems lose if we pass 0 instead of allocating ourselves.  */
+#ifdef HAVE_SETVBUF
+# ifdef SETVBUF_REVERSED
   setvbuf (stdout, _IOLBF, xmalloc (BUFSIZ), BUFSIZ);
-#endif	/* setvbuf reversed.  */
+# else	/* setvbuf not reversed.  */
+  /* Some buggy systems lose if we pass 0 instead of allocating ourselves.  */
+  setvbuf (stdout, (char *) 0, _IOLBF, BUFSIZ);
+# endif	/* setvbuf reversed.  */
+#elif HAVE_SETLINEBUF
+  setlinebuf (stdout);
 #endif	/* setlinebuf missing.  */
 
   /* Figure out where this program lives.  */
@@ -928,6 +983,8 @@ int main (int argc, char ** argv)
   /* Set up to access user data (files).  */
   user_access ();
 
+  initialize_global_hash_tables ();
+
   /* Figure out where we are.  */
 
 #ifdef WINDOWS32
@@ -950,6 +1007,10 @@ int main (int argc, char ** argv)
   /* Make sure we will return to the initial directory, come what may.  */
   atexit (msdos_return_to_initial_directory);
 #endif
+
+  /* Initialize the special variables.  */
+  define_variable (".VARIABLES", 10, "", o_default, 0)->special = 1;
+  /* define_variable (".TARGETS", 8, "", o_default, 0); */
 
   /* Read in variables from the environment.  It is important that this be
      done before $(MAKE) is figured out so its definitions will not be
@@ -1194,8 +1255,8 @@ int main (int argc, char ** argv)
 #endif /* WINDOWS32 */
   /* Figure out the level of recursion.  */
   {
-    struct variable *v = lookup_variable ("MAKELEVEL", 9);
-    if (v != 0 && *v->value != '\0' && *v->value != '-')
+    struct variable *v = lookup_variable (MAKELEVEL_NAME, MAKELEVEL_LENGTH);
+    if (v != 0 && v->value[0] != '\0' && v->value[0] != '-')
       makelevel = (unsigned int) atoi (v->value);
     else
       makelevel = 0;
@@ -1255,17 +1316,47 @@ int main (int argc, char ** argv)
 	       and thus re-read the makefiles, we read standard input
 	       into a temporary file and read from that.  */
 	    FILE *outfile;
+            char *template, *tmpdir;
 
             if (stdin_nm)
               fatal (NILF, _("Makefile from standard input specified twice."));
 
 #ifdef VMS
-# define TMP_TEMPLATE   "sys$scratch:GmXXXXXX"
+# define DEFAULT_TMPDIR     "sys$scratch:"
 #else
-# define TMP_TEMPLATE   "/tmp/GmXXXXXX"
+# ifdef P_tmpdir
+#  define DEFAULT_TMPDIR    P_tmpdir
+# else
+#  define DEFAULT_TMPDIR    "/tmp"
+# endif
 #endif
+#define DEFAULT_TMPFILE     "GmXXXXXX"
 
-	    outfile = open_tmpfile (&stdin_nm, TMP_TEMPLATE);
+	    if (((tmpdir = getenv ("TMPDIR")) == NULL || *tmpdir == '\0')
+#if defined __MSDOS__ || defined(WINDOWS32)
+                /* These are also used commonly on these platforms.  */
+                && ((tmpdir = getenv ("TEMP")) == NULL || *tmpdir == '\0')
+                && ((tmpdir = getenv ("TMP")) == NULL || *tmpdir == '\0')
+#endif
+               )
+	      tmpdir = DEFAULT_TMPDIR;
+
+            template = (char *) alloca (strlen (tmpdir)
+                                        + sizeof (DEFAULT_TMPFILE) + 1);
+	    strcpy (template, tmpdir);
+
+#ifdef HAVE_DOS_PATHS
+	    if (strchr ("/\\", template[strlen (template) - 1]) == NULL)
+	      strcat (template, "/");
+#else
+# ifndef VMS
+	    if (template[strlen (template) - 1] != '/')
+	      strcat (template, "/");
+# endif /* !VMS */
+#endif /* !HAVE_DOS_PATHS */
+
+	    strcat (template, DEFAULT_TMPFILE);
+	    outfile = open_tmpfile (&stdin_nm, template);
 	    if (outfile == 0)
 	      pfatal_with_name (_("fopen (temporary file)"));
 	    while (!feof (stdin))
@@ -1308,34 +1399,18 @@ int main (int argc, char ** argv)
      If none of these are true, we don't need a signal handler at all.  */
   {
     extern RETSIGTYPE child_handler PARAMS ((int sig));
-
-# if defined HAVE_SIGACTION
-    struct sigaction sa;
-
-    bzero ((char *)&sa, sizeof (struct sigaction));
-    sa.sa_handler = child_handler;
-#  if defined SA_INTERRUPT
-    /* This is supposed to be the default, but what the heck... */
-    sa.sa_flags = SA_INTERRUPT;
-#  endif
-#  define HANDLESIG(s) sigaction (s, &sa, NULL)
-# else
-#  define HANDLESIG(s) signal (s, child_handler)
-# endif
-
-    /* OK, now actually install the handlers.  */
 # if defined SIGCHLD
-    (void) HANDLESIG (SIGCHLD);
+    bsd_signal (SIGCHLD, child_handler);
 # endif
 # if defined SIGCLD && SIGCLD != SIGCHLD
-    (void) HANDLESIG (SIGCLD);
+    bsd_signal (SIGCLD, child_handler);
 # endif
   }
 #endif
 
   /* Let the user send us SIGUSR1 to toggle the -d flag during the run.  */
 #ifdef SIGUSR1
-  (void) signal (SIGUSR1, debug_signal_handler);
+  bsd_signal (SIGUSR1, debug_signal_handler);
 #endif
 
   /* Define the initial list of suffixes for old-style rules.  */
@@ -1490,9 +1565,8 @@ int main (int argc, char ** argv)
          want job_slots to be 0 to indicate we're using the jobserver.  */
 
       while (--job_slots)
-        while (write (job_fds[1], &c, 1) != 1)
-          if (!EINTR_SET)
-            pfatal_with_name (_("init jobserver pipe"));
+        if (write (job_fds[1], &c, 1) != 1)
+	  pfatal_with_name (_("init jobserver pipe"));
 
       /* Fill in the jobserver_fds struct for our children.  */
 
@@ -1538,7 +1612,7 @@ int main (int argc, char ** argv)
 
   build_vpath_lists ();
 
-  /* Mark files given with -o flags as very old (00:00:01.00 Jan 1, 1970)
+  /* Mark files given with -o flags as very old
      and as having been updated already, and files given with -W flags as
      brand new (time-stamp as far as possible into the future).  */
 
@@ -1546,7 +1620,7 @@ int main (int argc, char ** argv)
     for (p = old_files->list; *p != 0; ++p)
       {
 	f = enter_command_line_file (*p);
-	f->last_mtime = f->mtime_before_update = (FILE_TIMESTAMP) 1;
+	f->last_mtime = f->mtime_before_update = OLD_MTIME;
 	f->updated = 1;
 	f->update_status = 0;
 	f->command_state = cs_finished;
@@ -1636,10 +1710,11 @@ int main (int argc, char ** argv)
       switch (update_goal_chain (read_makefiles, 1))
 	{
 	case 1:
-	default:
-#define BOGUS_UPDATE_STATUS 0
-	  assert (BOGUS_UPDATE_STATUS);
-	  break;
+          /* The only way this can happen is if the user specified -q and asked
+           * for one of the makefiles to be remade as a target on the command
+           * line.  Since we're not actually updating anything with -q we can
+           * treat this as "did nothing".
+           */
 
 	case -1:
 	  /* Did nothing.  */
@@ -1679,7 +1754,7 @@ int main (int argc, char ** argv)
                         error (NILF, _("Failed to remake makefile `%s'."),
                                d->file->name);
                         mtime = file_mtime_no_search (d->file);
-                        any_remade |= (mtime != (FILE_TIMESTAMP) -1
+                        any_remade |= (mtime != NONEXISTENT_MTIME
                                        && mtime != makefile_mtimes[i]);
                       }
                   }
@@ -1770,7 +1845,8 @@ int main (int argc, char ** argv)
 
 #ifndef _AMIGA
 	  for (p = environ; *p != 0; ++p)
-	    if (strneq (*p, "MAKELEVEL=", 10))
+	    if ((*p)[MAKELEVEL_LENGTH] == '='
+		&& strneq (*p, MAKELEVEL_NAME, MAKELEVEL_LENGTH))
 	      {
 		/* The SGI compiler apparently can't understand
 		   the concept of storing the result of a function
@@ -1778,7 +1854,7 @@ int main (int argc, char ** argv)
 		char *sgi_loses;
 		sgi_loses = (char *) alloca (40);
 		*p = sgi_loses;
-		sprintf (*p, "MAKELEVEL=%u", makelevel);
+		sprintf (*p, "%s=%u", MAKELEVEL_NAME, makelevel);
 		break;
 	      }
 #else /* AMIGA */
@@ -1786,12 +1862,12 @@ int main (int argc, char ** argv)
 	    char buffer[256];
 	    int len;
 
-	    len = GetVar ("MAKELEVEL", buffer, sizeof (buffer), GVF_GLOBAL_ONLY);
+	    len = GetVar (MAKELEVEL_NAME, buffer, sizeof (buffer), GVF_GLOBAL_ONLY);
 
 	    if (len != -1)
 	    {
 	    sprintf (buffer, "%u", makelevel);
-	      SetVar ("MAKELEVEL", buffer, -1, GVF_GLOBAL_ONLY);
+	      SetVar (MAKELEVEL_NAME, buffer, -1, GVF_GLOBAL_ONLY);
 	    }
 	  }
 #endif
@@ -1819,6 +1895,11 @@ int main (int argc, char ** argv)
 	  exit (0);
 #endif
 	  /* NOTREACHED */
+
+	default:
+#define BOGUS_UPDATE_STATUS 0
+	  assert (BOGUS_UPDATE_STATUS);
+	  break;
 	}
 
       db_level = orig_db_level;
@@ -1843,6 +1924,7 @@ int main (int argc, char ** argv)
 	    goals = (struct dep *) xmalloc (sizeof (struct dep));
 	    goals->next = 0;
 	    goals->name = 0;
+            goals->ignore_mtime = 0;
 	    goals->file = default_goal_file;
 	  }
       }
@@ -1867,16 +1949,16 @@ int main (int argc, char ** argv)
         /* Nothing happened.  */
       case 0:
         /* Updated successfully.  */
-        status = EXIT_SUCCESS;
+        status = MAKE_SUCCESS;
+        break;
+      case 1:
+        /* We are under -q and would run some commands.  */
+        status = MAKE_TROUBLE;
         break;
       case 2:
         /* Updating failed.  POSIX.2 specifies exit status >1 for this;
            but in VMS, there is only success and failure.  */
-        status = EXIT_FAILURE ? 2 : EXIT_FAILURE;
-        break;
-      case 1:
-        /* We are under -q and would run some commands.  */
-        status = EXIT_FAILURE;
+        status = MAKE_FAILURE;
         break;
       default:
         abort ();
@@ -2000,6 +2082,7 @@ handle_non_switch_argument (arg, env)
 	}
       lastgoal->name = 0;
       lastgoal->file = f;
+      lastgoal->ignore_mtime = 0;
 
       {
         /* Add this target name to the MAKECMDGOALS variable. */
@@ -2032,7 +2115,8 @@ static void
 print_usage (bad)
      int bad;
 {
-  register const struct command_switch *cs;
+  extern char *make_host;
+  const char *const *cpp;
   FILE *usageto;
 
   if (print_version_flag)
@@ -2042,88 +2126,16 @@ print_usage (bad)
 
   fprintf (usageto, _("Usage: %s [options] [target] ...\n"), program);
 
-  fputs (_("Options:\n"), usageto);
-  for (cs = switches; cs->c != '\0'; ++cs)
-    {
-      char buf[1024], shortarg[50], longarg[50], *p;
+  for (cpp = usage; *cpp; ++cpp)
+    fputs (_(*cpp), usageto);
 
-      if (!cs->description || cs->description[0] == '-')
-	continue;
+  if (!remote_description || *remote_description == '\0')
+    fprintf (usageto, _("\nThis program built for %s\n"), make_host);
+  else
+    fprintf (usageto, _("\nThis program built for %s (%s)\n"),
+             make_host, remote_description);
 
-      switch (long_options[cs - switches].has_arg)
-	{
-	case no_argument:
-	  shortarg[0] = longarg[0] = '\0';
-	  break;
-	case required_argument:
-	  sprintf (longarg, "=%s", gettext (cs->argdesc));
-	  sprintf (shortarg, " %s", gettext (cs->argdesc));
-	  break;
-	case optional_argument:
-	  sprintf (longarg, "[=%s]", gettext (cs->argdesc));
-	  sprintf (shortarg, " [%s]", gettext (cs->argdesc));
-	  break;
-	}
-
-      p = buf;
-
-      if (short_option (cs->c))
-	{
-	  sprintf (buf, "  -%c%s", cs->c, shortarg);
-	  p += strlen (p);
-	}
-      if (cs->long_name != 0)
-	{
-	  unsigned int i;
-	  sprintf (p, "%s--%s%s",
-		   !short_option (cs->c) ? "  " : ", ",
-		   cs->long_name, longarg);
-	  p += strlen (p);
-	  for (i = 0; i < (sizeof (long_option_aliases) /
-			   sizeof (long_option_aliases[0]));
-	       ++i)
-	    if (long_option_aliases[i].val == cs->c)
-	      {
-		sprintf (p, ", --%s%s",
-			 long_option_aliases[i].name, longarg);
-		p += strlen (p);
-	      }
-	}
-      {
-	const struct command_switch *ncs = cs;
-	while ((++ncs)->c != '\0')
-	  if (ncs->description
-              && ncs->description[0] == '-'
-              && ncs->description[1] == cs->c)
-	    {
-	      /* This is another switch that does the same
-		 one as the one we are processing.  We want
-		 to list them all together on one line.  */
-	      sprintf (p, ", -%c%s", ncs->c, shortarg);
-	      p += strlen (p);
-	      if (ncs->long_name != 0)
-		{
-		  sprintf (p, ", --%s%s", ncs->long_name, longarg);
-		  p += strlen (p);
-		}
-	    }
-      }
-
-      if (p - buf > DESCRIPTION_COLUMN - 2)
-	/* The list of option names is too long to fit on the same
-	   line with the description, leaving at least two spaces.
-	   Print it on its own line instead.  */
-	{
-	  fprintf (usageto, "%s\n", buf);
-	  buf[0] = '\0';
-	}
-
-      fprintf (usageto, "%*s%s.\n",
-	       - DESCRIPTION_COLUMN,
-	       buf, gettext (cs->description));
-    }
-
-  fprintf (usageto, _("\nReport bugs to <bug-make@gnu.org>.\n"));
+  fprintf (usageto, _("Report bugs to <bug-make@gnu.org>\n"));
 }
 
 /* Decode switches from ARGC and ARGV.
@@ -2219,9 +2231,16 @@ decode_switches (argc, argv, env)
 		  break;
 
 		case positive_int:
-		  if (optarg == 0 && argc > optind
-                      && ISDIGIT (argv[optind][0]))
-		    optarg = argv[optind++];
+                  /* See if we have an option argument; if we do require that
+                     it's all digits, not something like "10foo".  */
+		  if (optarg == 0 && argc > optind)
+                    {
+                      const char *cp;
+                      for (cp=argv[optind]; ISDIGIT (cp[0]); ++cp)
+                        ;
+                      if (cp[0] == '\0')
+                        optarg = argv[optind++];
+                    }
 
 		  if (!doit)
 		    break;
@@ -2229,11 +2248,16 @@ decode_switches (argc, argv, env)
 		  if (optarg != 0)
 		    {
 		      int i = atoi (optarg);
-		      if (i < 1)
+                      const char *cp;
+
+                      /* Yes, I realize we're repeating this in some cases.  */
+                      for (cp = optarg; ISDIGIT (cp[0]); ++cp)
+                        ;
+
+		      if (i < 1 || cp[0] != '\0')
 			{
-			  if (doit)
-			    error (NILF, _("the `-%c' option requires a positive integral argument"),
-				   cs->c);
+                          error (NILF, _("the `-%c' option requires a positive integral argument"),
+                                 cs->c);
 			  bad = 1;
 			}
 		      else
@@ -2325,14 +2349,14 @@ decode_env_switches (envar, len)
     {
       if (*value == '\\' && value[1] != '\0')
 	++value;		/* Skip the backslash.  */
-      else if (isblank (*value))
+      else if (isblank ((unsigned char)*value))
 	{
 	  /* End of the word.  */
 	  *p++ = '\0';
 	  argv[++argc] = p;
 	  do
 	    ++value;
-	  while (isblank (*value));
+	  while (isblank ((unsigned char)*value));
 	  continue;
 	}
       *p++ = *value++;
@@ -2365,7 +2389,7 @@ quote_for_env (out, in)
     {
       if (*in == '$')
 	*out++ = '$';
-      else if (isblank (*in) || *in == '\\')
+      else if (isblank ((unsigned char)*in) || *in == '\\')
         *out++ = '\\';
       *out++ = *in++;
     }
@@ -2643,7 +2667,6 @@ define_makeflags (all, makefile)
 static void
 print_version ()
 {
-  extern char *make_host;
   static int printed_version = 0;
 
   char *precede = print_data_base_flag ? "# " : "";
@@ -2652,20 +2675,19 @@ print_version ()
     /* Do it only once.  */
     return;
 
-  printf ("%sGNU Make version %s", precede, version_string);
-  if (remote_description != 0 && *remote_description != '\0')
-    printf ("-%s", remote_description);
+  /* Print this untranslated.  The coding standards recommend translating the
+     (C) to the copyright symbol, but this string is going to change every
+     year, and none of the rest of it should be translated (including the
+     word "Copyright", so it hardly seems worth it.  */
 
-  printf (_(", by Richard Stallman and Roland McGrath.\n\
-%sBuilt for %s\n\
-%sCopyright (C) 1988, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99\n\
-%s\tFree Software Foundation, Inc.\n\
-%sThis is free software; see the source for copying conditions.\n\
+  printf ("%sGNU Make %s\n\
+%sCopyright (C) 2002  Free Software Foundation, Inc.\n",
+          precede, version_string, precede);
+
+  printf (_("%sThis is free software; see the source for copying conditions.\n\
 %sThere is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A\n\
-%sPARTICULAR PURPOSE.\n\n\
-%sReport bugs to <bug-make@gnu.org>.\n\n"),
-          precede, make_host,
-	  precede, precede, precede, precede, precede, precede);
+%sPARTICULAR PURPOSE.\n"),
+            precede, precede, precede);
 
   printed_version = 1;
 
@@ -2746,7 +2768,6 @@ log_working_directory (entering)
      int entering;
 {
   static int entered = 0;
-  char *msg = entering ? _("Entering") : _("Leaving");
 
   /* Print nothing without the flag.  Don't print the entering message
      again if we already have.  Don't print the leaving message if we
@@ -2759,13 +2780,34 @@ log_working_directory (entering)
   if (print_data_base_flag)
     fputs ("# ", stdout);
 
-  if (makelevel == 0)
-    printf ("%s: %s ", program, msg);
-  else
-    printf ("%s[%u]: %s ", program, makelevel, msg);
+  /* Use entire sentences to give the translators a fighting chance.  */
 
-  if (starting_directory == 0)
-    puts (_("an unknown directory"));
+  if (makelevel == 0)
+    if (starting_directory == 0)
+      if (entering)
+        printf (_("%s: Entering an unknown directory"), program);
+      else
+        printf (_("%s: Leaving an unknown directory"), program);
+    else
+      if (entering)
+        printf (_("%s: Entering directory `%s'\n"),
+                program, starting_directory);
+      else
+        printf (_("%s: Leaving directory `%s'\n"),
+                program, starting_directory);
   else
-    printf (_("directory `%s'\n"), starting_directory);
+    if (starting_directory == 0)
+      if (entering)
+        printf (_("%s[%u]: Entering an unknown directory"),
+                program, makelevel);
+      else
+        printf (_("%s[%u]: Leaving an unknown directory"),
+                program, makelevel);
+    else
+      if (entering)
+        printf (_("%s[%u]: Entering directory `%s'\n"),
+                program, makelevel, starting_directory);
+      else
+        printf (_("%s[%u]: Leaving directory `%s'\n"),
+                program, makelevel, starting_directory);
 }

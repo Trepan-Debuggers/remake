@@ -33,9 +33,7 @@ close(MAKEFILE);
 
 # TEST #0
 
-&touch('foo.f');
-&touch('bar.f');
-sleep($wtime);
+&utouch(-20, 'foo.f', 'bar.f');
 
 &run_make_with_options($makefile,'foo.d',&get_logfile);
 $answer = "cp foo.f foo.e\ncp foo.e foo.d\nrm foo.e\n";
@@ -49,7 +47,7 @@ $answer = "$make_name: `foo.d' is up to date.\n";
 
 # TEST #2
 
-sleep($wtime);
+&utouch(-10, 'foo.d');
 &touch('foo.f');
 
 &run_make_with_options($makefile,'foo.d',&get_logfile);
@@ -59,7 +57,7 @@ $answer = "cp foo.f foo.e\ncp foo.e foo.d\nrm foo.e\n";
 # TEST #3
 
 &run_make_with_options($makefile,'foo.c',&get_logfile);
-$answer = "cp foo.f foo.e\ncp bar.f bar.e\ncat foo.e bar.e > foo.c\nrm foo.e bar.e\n";
+$answer = "cp foo.f foo.e\ncp bar.f bar.e\ncat foo.e bar.e > foo.c\nrm bar.e foo.e\n";
 &compare_output($answer, &get_logfile(1));
 
 # TEST #4
@@ -70,11 +68,11 @@ $answer = "$make_name: `foo.c' is up to date.\n";
 
 # TEST #5
 
-sleep($wtime);
+&utouch(-10, 'foo.c');
 &touch('foo.f');
 
 &run_make_with_options($makefile,'foo.c',&get_logfile);
-$answer = "cp foo.f foo.e\ncp bar.f bar.e\ncat foo.e bar.e > foo.c\nrm foo.e bar.e\n";
+$answer = "cp foo.f foo.e\ncp bar.f bar.e\ncat foo.e bar.e > foo.c\nrm bar.e foo.e\n";
 &compare_output($answer, &get_logfile(1));
 
 # TEST #6 -- added for PR/1669: don't remove files mentioned on the cmd line.

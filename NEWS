@@ -1,8 +1,8 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  27 Mar 2000
+  03 October 2002
 
-Copyright (C) 1992,93,94,95,96,97,98,99,2000 Free Software Foundation, Inc.
+Copyright (C) 2002  Free Software Foundation, Inc.
 See the end for copying conditions.
 
 All changes mentioned here are more fully described in the GNU make
@@ -11,6 +11,92 @@ manual, which is contained in this distribution as the file make.texinfo.
 Please send GNU make bug reports to <bug-make@gnu.org>.
 See the README file and the GNU make manual for details on sending bug
 reports.
+
+Version 3.80
+
+* A new feature exists: order-only prerequisites.  These prerequisites
+  affect the order in which targets are built, but they do not impact
+  the rebuild/no-rebuild decision of their dependents.  That is to say,
+  they allow you to require target B be built before target A, without
+  requiring that target A will always be rebuilt if target B is updated.
+  Patch for this feature provided by Greg McGary <greg@mcgary.org>.
+
+* For compatibility with SysV make, GNU make now supports the peculiar
+  syntax $$@, $$(@D), and $$(@F) in the prerequisites list of a rule.
+  This syntax is only valid within explicit and static pattern rules: it
+  cannot be used in implicit (suffix or pattern) rules.  Edouard G. Parmelan
+  <egp@free.fr> provided a patch implementing this feature; however, I
+  decided to implement it in a different way.
+
+* The argument to the "ifdef" conditional is now expanded before it's
+  tested, so it can be a constructed variable name.
+
+  Similarly, the arguments to "export" (when not used in a variable
+  definition context) and "unexport" are also now expanded.
+
+* A new function is defined: $(value ...).  The argument to this
+  function is the _name_ of a variable.  The result of the function is
+  the value of the variable, without having been expanded.
+
+* A new function is defined: $(eval ...).  The arguments to this
+  function should expand to makefile commands, which will then be
+  evaluated as if they had appeared in the makefile.  In combination
+  with define/endef multiline variable definitions this is an extremely
+  powerful capability.  The $(value ...) function is also sometimes
+  useful here.
+
+* A new built-in variable is defined, $(MAKEFILE_LIST).  It contains a
+  list of each makefile GNU make has read, or started to read, in the
+  order in which they were encountered.  So, the last filename in the
+  list when a makefile is just being read (before any includes) is the
+  name of the current makefile.
+
+* A new built-in variable is defined: $(.VARIABLES).  When it is
+  expanded it returns a complete list of variable names defined by all
+  makefiles at that moment.
+
+* A new command-line option is defined, -B or --always-make.  If
+  specified GNU make will consider all targets out-of-date even if they
+  would otherwise not be.
+
+* The arguments to $(call ...) functions were being stored in $1, $2,
+  etc. as recursive variables, even though they are fully expanded
+  before assignment.  This means that escaped dollar signs ($$ etc.)
+  were not behaving properly.  Now the arguments are stored as simple
+  variables.  This may mean that if you added extra escaping to your
+  $(call ...) function arguments you will need to undo it now.
+
+* The variable invoked by $(call ...) can now be recursive: unlike other
+  variables it can reference itself and this will not produce an error
+  when it is used as the first argument to $(call ...) (but only then).
+
+* New pseudo-target .LOW_RESOLUTION_TIME, superseding the configure
+  option --disable-nsec-timestamps.  You might need this if your build
+  process depends on tools like "cp -p" preserving time stamps, since
+  "cp -p" (right now) doesn't preserve the subsecond portion of a time
+  stamp.
+
+* Updated translations for French, Galician, German, Japanese, Korean,
+  and Russian.  New translations for Croatian, Danish, Hebrew, and
+  Turkish.
+
+* Updated internationalization support to Gettext 0.11.5.
+  GNU make now uses Gettext's "external" feature, and does not include
+  any internationalization code itself.  Configure will search your
+  system for an existing implementation of GNU Gettext (only GNU Gettext
+  is acceptable) and use it if it exists.  If not, NLS will be disabled.
+  See ABOUT-NLS for more information.
+
+* Updated to autoconf 2.54 and automake 1.7.  Users should not be impacted.
+
+Version 3.79.1
+
+* .SECONDARY with no prerequisites now prevents any target from being
+  removed because make thinks it's an intermediate file, not just those
+  listed in the makefile.
+
+* New configure option --disable-nsec-timestamps, but this was
+  superseded in later versions by the .LOW_RESOLUTION_TIME pseudo-target.
 
 Version 3.79
 
@@ -32,21 +118,21 @@ Version 3.79
   explicitly within a make rule you may need to re-examine your use for
   correctness given this change.
 
-* A new psuedo-target .NOTPARALLEL is available.  If defined, the
+* A new pseudo-target .NOTPARALLEL is available.  If defined, the
   current makefile is run serially regardless of the value of -j.
   However, submakes are still eligible for parallel execution.
 
 * The --debug option has changed: it now allows optional flags
   controlling the amount and type of debugging output.  By default only
   a minimal amount information is generated, displaying the names of
-  "normal" targets (not makefiles) were deemed out of date and in need
-  of being rebuilt.
+  "normal" targets (not makefiles) that were deemed out of date and in
+  need of being rebuilt.
 
   Note that the -d option behaves as before: it takes no arguments and
   all debugging information is generated.
 
 * The `-p' (print database) output now includes filename and linenumber
-  information for variable definitions, to help debugging.
+  information for variable definitions, to aid debugging.
 
 * The wordlist function no longer reverses its arguments if the "start"
   value is greater than the "end" value.  If that's true, nothing is
