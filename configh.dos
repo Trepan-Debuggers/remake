@@ -3,10 +3,10 @@
 #include <sys/config.h>
 
 /* Name of this package (needed by automake) */
-#define PACKAGE "%PACKAGE%"
+#define PACKAGE "make"
 
 /* Version of this package (needed by automake) */
-#define VERSION "%VERSION%"
+#define VERSION "3.79"
 
 #if __DJGPP__ > 2 || __DJGPP_MINOR__ > 1
 

@@ -7,7 +7,7 @@
 
 @c FSF publishers: format makebook.texi instead of using this file directly.
 
-@set RCSID $Id: make.texinfo,v 2.187 2000/04/05 16:02:55 psmith Exp $
+@set RCSID $Id: make.texinfo,v 2.186 1999/11/17 07:34:05 psmith Exp $
 @set EDITION 0.55
 @set VERSION 3.79
 @set UPDATED 04 April 2000

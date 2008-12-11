@@ -39,8 +39,8 @@ Version 3.79
 * The --debug option has changed: it now allows optional flags
   controlling the amount and type of debugging output.  By default only
   a minimal amount information is generated, displaying the names of
-  "normal" targets (not makefiles) that were deemed out of date and in
-  need of being rebuilt.
+  "normal" targets (not makefiles) were deemed out of date and in need
+  of being rebuilt.
 
   Note that the -d option behaves as before: it takes no arguments and
   all debugging information is generated.

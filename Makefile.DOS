@@ -57,15 +57,15 @@ PACKAGE = make
 PERL = perl
 RANLIB = ranlib
 REMOTE = stub
-VERSION = %VERSION%
+VERSION = 3.79
 
 AUTOMAKE_OPTIONS = 1.2
 
-bin_PROGRAMS =	%PROGRAMS%
+bin_PROGRAMS =	make
 
-make_SOURCES =	%SOURCES%
+make_SOURCES =	ar.c arscan.c commands.c dir.c expand.c file.c function.c getopt.c implicit.c job.c main.c misc.c read.c remake.c rule.c signame.c variable.c vpath.c default.c version.c getopt1.c remote-$(REMOTE).c
 # This should include the glob/ prefix
-libglob_a_SOURCES =	%GLOB_SOURCES%
+libglob_a_SOURCES =	glob/fnmatch.c glob/glob.c glob/fnmatch.h glob/glob.h
 make_LDADD =	  glob/libglob.a
 
 info_TEXINFOS =	make.texinfo
@@ -90,11 +90,11 @@ DEFS =  -I. -I$(srcdir) -I.
 CPPFLAGS = -DHAVE_CONFIG_H
 LDFLAGS =
 LIBS =
-make_OBJECTS =  %OBJECTS%
+make_OBJECTS =  ar.o arscan.o commands.o dir.o expand.o file.o function.o getopt.o implicit.o job.o main.o misc.o read.o remake.o rule.o signame.o variable.o vpath.o default.o version.o getopt1.o remote-$(REMOTE).o
 make_DEPENDENCIES =    glob/libglob.a
 make_LDFLAGS =
 libglob_a_LIBADD =
-libglob_a_OBJECTS =  %GLOB_OBJECTS%
+libglob_a_OBJECTS =  fnmatch.o glob.o
 noinst_LIBRARIES =	glob/libglob.a
 CFLAGS = -O2 -g
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
@@ -543,3 +543,45 @@ check-regression:
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
+
+# --------------- DEPENDENCIES
+#
+alloca.o: alloca.c config.h
+ar.o: ar.c make.h config.h gettext.h filedef.h dep.h glob/fnmatch.h
+arscan.o: arscan.c make.h config.h gettext.h
+commands.o: commands.c make.h config.h gettext.h dep.h filedef.h \
+	variable.h job.h commands.h
+default.o: default.c make.h config.h gettext.h rule.h dep.h filedef.h \
+	job.h commands.h variable.h
+dir.o: dir.c make.h config.h gettext.h glob/glob.h
+expand.o: expand.c make.h config.h gettext.h filedef.h job.h commands.h \
+	variable.h rule.h
+file.o: file.c make.h config.h gettext.h dep.h filedef.h job.h \
+	commands.h variable.h
+function.o: function.c make.h config.h gettext.h filedef.h variable.h \
+	dep.h job.h commands.h debug.h
+getloadavg.o: getloadavg.c config.h
+getopt.o: getopt.c config.h gettext.h getopt.h
+getopt1.o: getopt1.c config.h getopt.h
+gettext.o: gettext.c config.h gettext.h
+implicit.o: implicit.c make.h config.h gettext.h rule.h dep.h filedef.h \
+	debug.h
+job.o: job.c make.h config.h gettext.h job.h debug.h filedef.h \
+	commands.h variable.h
+main.o: main.c make.h config.h gettext.h dep.h filedef.h variable.h \
+	job.h commands.h rule.h debug.h getopt.h
+misc.o: misc.c make.h config.h gettext.h dep.h debug.h
+read.o: read.c make.h config.h gettext.h glob/glob.h dep.h filedef.h \
+	job.h commands.h variable.h rule.h debug.h
+remake.o: remake.c make.h config.h gettext.h filedef.h job.h commands.h \
+	dep.h variable.h debug.h
+remote-stub.o: remote-stub.c make.h config.h gettext.h filedef.h job.h \
+	commands.h
+rule.o: rule.c make.h config.h gettext.h dep.h filedef.h job.h \
+	commands.h variable.h rule.h
+signame.o: signame.c make.h config.h gettext.h signame.h
+variable.o: variable.c make.h config.h gettext.h dep.h filedef.h job.h \
+	commands.h variable.h rule.h
+version.o: version.c config.h
+vpath.o: vpath.c make.h config.h gettext.h filedef.h variable.h
+

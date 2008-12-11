@@ -2,13 +2,13 @@
 
 /* Define if on AIX 3.
    System headers sometimes define this.
-   We just want to avoid a redefinition error message.  */
+   We just want to avoid a redefinition error message.	*/
 #ifndef _ALL_SOURCE
 /* #undef _ALL_SOURCE */
 #endif
 
 /* Define if using alloca.c.  */
-/* #undef C_ALLOCA */
+#define C_ALLOCA
 
 /* Define if the closedir function returns void instead of int.  */
 /* #undef CLOSEDIR_VOID */
@@ -27,12 +27,10 @@
 /* #undef GETLOADAVG_PRIVILEGED */
 
 /* Define to `int' if <sys/types.h> doesn't define.  */
-#undef gid_t
 #define gid_t int
 
 /* Define if you have alloca, as a function or macro.  */
-#undef HAVE_ALLOCA
-#define HAVE_ALLOCA 1
+/* #undef HAVE_ALLOCA */
 
 /* Define if you have <alloca.h> and it should be used (not on Ultrix).  */
 /* #undef HAVE_ALLOCA_H */
@@ -52,8 +50,7 @@
 /* Define if the `long double' type works.  */
 /* #undef HAVE_LONG_DOUBLE */
 
-/* Define if you support file names longer than 14 characters.  */
-#undef HAVE_LONG_FILE_NAMES
+/* Define if you support file names longer than 14 characters.	*/
 #define HAVE_LONG_FILE_NAMES 1
 
 /* Define if you have a working `mmap' system call.  */
@@ -69,19 +66,16 @@
 /* Define if your struct stat has st_blocks.  */
 /* #undef HAVE_ST_BLOCKS */
 
-/* Define if you have the strcoll function and it is properly defined.  */
-#undef HAVE_STRCOLL
+/* Define if you have the strcoll function and it is properly defined.	*/
 #define HAVE_STRCOLL 1
 
 /* Define if your struct stat has st_rdev.  */
-#undef HAVE_ST_RDEV
 #define HAVE_ST_RDEV 1
 
 /* Define if you have the strftime function.  */
-#undef HAVE_STRFTIME
 #define HAVE_STRFTIME 1
 
-/* Define if you have <sys/wait.h> that is POSIX.1 compatible.  */
+/* Define if you have <sys/wait.h> that is POSIX.1 compatible.	*/
 /* #undef HAVE_SYS_WAIT_H */
 
 /* Define if your struct tm has tm_zone.  */
@@ -89,27 +83,24 @@
 
 /* Define if you don't have tm_zone but do have the external array
    tzname.  */
-#undef HAVE_TZNAME
 #define HAVE_TZNAME 1
 
 /* Define if you have <unistd.h>.  */
-/* #undef HAVE_UNISTD_H */
+#define HAVE_UNISTD_H 1
 
 /* Define if utime(file, NULL) sets file's timestamp to the present.  */
-#undef HAVE_UTIME_NULL
-#define HAVE_UTIME_NULL 1
+/* #undef HAVE_UTIME_NULL */
 
 /* Define if you have <vfork.h>.  */
 /* #undef HAVE_VFORK_H */
 
 /* Define if you have the vprintf function.  */
-#undef HAVE_VPRINTF
 #define HAVE_VPRINTF 1
 
 /* Define if you have the wait3 system call.  */
 /* #undef HAVE_WAIT3 */
 
-/* Define if on MINIX.  */
+/* Define if on MINIX.	*/
 /* #undef _MINIX */
 
 /* Define if your struct nlist has an n_un member.  */
@@ -122,7 +113,6 @@
 /* #undef NO_MINUS_C_MINUS_O */
 
 /* Define to `int' if <sys/types.h> doesn't define.  */
-#undef pid_t
 #define pid_t int
 
 /* Define if the system does not provide POSIX.1 features except
@@ -130,11 +120,9 @@
 /* #undef _POSIX_1_SOURCE */
 
 /* Define if you need to in order for stat and other things to work.  */
-#undef _POSIX_SOURCE
-#define _POSIX_SOURCE 1
+/* #undef _POSIX_SOURCE */
 
 /* Define as the return type of signal handlers (int or void).  */
-#undef RETSIGTYPE
 #define RETSIGTYPE void
 
 /* Define if the setvbuf function takes the buffering type as its second
@@ -149,14 +137,13 @@
 	STACK_DIRECTION < 0 => grows toward lower addresses
 	STACK_DIRECTION = 0 => direction of growth unknown
  */
-/* #undef STACK_DIRECTION */
+#define STACK_DIRECTION -1
 
 /* Define if the `S_IS*' macros in <sys/stat.h> do not work properly.  */
 /* #undef STAT_MACROS_BROKEN */
 
-/* Define if you have the ANSI C header files.  */
-#undef STDC_HEADERS
-#define STDC_HEADERS 1
+/* Define if you have the ANSI C header files.	*/
+#define STDC_HEADERS
 
 /* Define on System V Release 4.  */
 /* #undef SVR4 */
@@ -165,7 +152,6 @@
 /* #undef SYS_SIGLIST_DECLARED */
 
 /* Define to `int' if <sys/types.h> doesn't define.  */
-#undef uid_t
 #define uid_t int
 
 /* Define for Encore UMAX.  */
@@ -179,14 +165,13 @@
 /* #undef vfork */
 
 /* Name of this package (needed by automake) */
-#define PACKAGE "%PACKAGE%"
+#define PACKAGE "make"
 
 /* Version of this package (needed by automake) */
-#define VERSION "%VERSION%"
+#define VERSION "3.79"
 
 /* Define to the name of the SCCS `get' command.  */
-#undef SCCS_GET
-#define SCCS_GET "echo no sccs get"
+#define SCCS_GET "get"
 
 /* Define this if the SCCS `get' command understands the `-G<file>' option.  */
 /* #undef SCCS_GET_MINUS_G */
@@ -208,11 +193,9 @@
 /* #undef HAVE_UNION_WAIT */
 
 /* Define if you have the dup2 function.  */
-#undef HAVE_DUP2
-#define HAVE_DUP2 1
+/* #undef HAVE_DUP2 */
 
 /* Define if you have the getcwd function.  */
-#undef HAVE_GETCWD
 #define HAVE_GETCWD 1
 
 /* Define if you have the getgroups function.  */
@@ -224,15 +207,10 @@
 /* Define if you have the gethostname function.  */
 /* #undef HAVE_GETHOSTNAME */
 
-/* Define if you have the getloadavg function.  */
-/* #undef HAVE_GETLOADAVG */
-
 /* Define if you have the memmove function.  */
-#undef HAVE_MEMMOVE
 #define HAVE_MEMMOVE 1
 
 /* Define if you have the mktemp function.  */
-#undef HAVE_MKTEMP
 #define HAVE_MKTEMP 1
 
 /* Define if you have the psignal function.  */
@@ -247,7 +225,7 @@
 /* Define if you have the seteuid function.  */
 /* #undef HAVE_SETEUID */
 
-/* Define if you have the setlinebuf function.  */
+/* Define if you have the setlinebuf function.	*/
 /* #undef HAVE_SETLINEBUF */
 
 /* Define if you have the setregid function.  */
@@ -256,7 +234,7 @@
 /* Define if you have the setreuid function.  */
 /* #undef HAVE_SETREUID */
 
-/* Define if you have the sigsetmask function.  */
+/* Define if you have the sigsetmask function.	*/
 /* #undef HAVE_SIGSETMASK */
 
 /* Define if you have the socket function.  */
@@ -266,7 +244,6 @@
 /* #undef HAVE_STRCASECMP */
 
 /* Define if you have the strerror function.  */
-#undef HAVE_STRERROR
 #define HAVE_STRERROR 1
 
 /* Define if you have the strsignal function.  */
@@ -279,33 +256,31 @@
 /* #undef HAVE_WAITPID */
 
 /* Define if you have the <dirent.h> header file.  */
-#undef HAVE_DIRENT_H
 #define HAVE_DIRENT_H 1
 
 /* Define if you have the <fcntl.h> header file.  */
-#undef HAVE_FCNTL_H
 #define HAVE_FCNTL_H 1
 
 /* Define if you have the <limits.h> header file.  */
-#undef HAVE_LIMITS_H
 #define HAVE_LIMITS_H 1
 
 /* Define if you have the <mach/mach.h> header file.  */
 /* #undef HAVE_MACH_MACH_H */
 
 /* Define if you have the <memory.h> header file.  */
-#undef HAVE_MEMORY_H
-#define HAVE_MEMORY_H 1
+/* #undef HAVE_MEMORY_H */
 
 /* Define if you have the <ndir.h> header file.  */
 /* #undef HAVE_NDIR_H */
 
+/* Define if you have the <stdlib.h> header file.  */
+/* #undef HAVE_STDLIB_H */
+
 /* Define if you have the <string.h> header file.  */
-#undef HAVE_STRING_H
 #define HAVE_STRING_H 1
 
 /* Define if you have the <sys/dir.h> header file.  */
-/* #undef HAVE_SYS_DIR_H */
+#define HAVE_SYS_DIR_H 1
 
 /* Define if you have the <sys/ndir.h> header file.  */
 /* #undef HAVE_SYS_NDIR_H */
@@ -314,14 +289,13 @@
 /* #undef HAVE_SYS_PARAM_H */
 
 /* Define if you have the <sys/timeb.h> header file.  */
-#undef HAVE_SYS_TIMEB_H
-#define HAVE_SYS_TIMEB_H 1
+/* #undef HAVE_SYS_TIMEB_H */
 
 /* Define if you have the <sys/wait.h> header file.  */
 /* #undef HAVE_SYS_WAIT_H */
 
 /* Define if you have the <unistd.h> header file.  */
-/* #undef HAVE_UNISTD_H */
+#define HAVE_UNISTD_H 1
 
 /* Define if you have the dgc library (-ldgc).  */
 /* #undef HAVE_LIBDGC */
@@ -332,43 +306,8 @@
 /* Define if you have the sun library (-lsun).  */
 /* #undef HAVE_LIBSUN */
 
+/* Define for Case Insensitve behavior */
+#define HAVE_CASE_INSENSITIVE_FS
+
 /* Build host information. */
-#define MAKE_HOST "Windows32"
-
-/*
- * Refer to README.W32 for info on the following settings
- */
-
-/*
- * If you have a shell that does not grok 'sh -c quoted-command-line'
- * correctly, you need this setting. Please see below for specific
- * shell support.
- */
-#undef BATCH_MODE_ONLY_SHELL
-#define BATCH_MODE_ONLY_SHELL 1
-
-/*
- * Define if you have the Cygnus "Cygwin" GNU Windows32 tool set.
- * Do NOT define BATCH_MODE_ONLY_SHELL if you define HAVE_CYGWIN_SHELL
- */
-#undef HAVE_CYGWIN_SHELL
-
-/*
- * Define if you have the MKS tool set or shell. Do NOT define
- * BATCH_MODE_ONLY_SHELL if you define HAVE_MKS_SHELL
- */
-#undef HAVE_MKS_SHELL
-
-/*
- * Enforce the mutual exclusivity restriction.
- */
-#ifdef HAVE_MKS_SHELL
-#undef BATCH_MODE_ONLY_SHELL
-#endif
-
-#ifdef HAVE_CYGWIN_SHELL
-#undef BATCH_MODE_ONLY_SHELL
-#endif
-
-/* Define if you prefer Case Insensitive behavior */
-#undef HAVE_CASE_INSENSITIVE_FS
+#define MAKE_HOST "Amiga"

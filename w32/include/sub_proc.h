@@ -6,7 +6,7 @@
  *
  * $Date: 1997/08/27 20:34:23 $
  *
- * $Source: /sources/make/make/w32/include/sub_proc.h,v $
+ * $Source: /home/cvs/make/w32/include/sub_proc.h,v $
  *
  * $Revision: 1.4 $
  */
