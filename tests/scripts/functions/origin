@@ -15,42 +15,27 @@ defined per the following list:
 'override'             defined by override in makefile
 'automatic'            Automatic variable\n";
 
-# On WIN32 systems, HOME is meaningless. SystemRoot should be defined
-# though.  With DJGPP, HOME is not guaranteed to be defined.  Use DJDIR
-# instead.
-#
-$homevar = (($port_type eq 'Windows') ? "SystemRoot"
-	    : (($port_type eq 'DOS') ? "DJDIR"
-	       : "HOME"));
+# Set an environment variable
+$extraENV{MAKETEST} = 1;
 
-open(MAKEFILE,"> $makefile");
-
-print MAKEFILE <<EOF;
+run_make_test('
 foo := bletch garf
-auto_var = udef CC $homevar MAKE foo CFLAGS WHITE \@
-av = \$(foreach var, \$(auto_var), \$(origin \$(var)) )
+auto_var = undefined CC MAKETEST MAKE foo CFLAGS WHITE @
+av = $(foreach var, $(auto_var), $(origin $(var)) )
 override WHITE := BLACK
 all: auto
-\t\@echo \$(origin undefined)
-\t\@echo \$(origin CC)
-\t\@echo \$(origin $homevar)
-\t\@echo \$(origin MAKE)
-\t\@echo \$(origin foo)
-\t\@echo \$(origin CFLAGS)
-\t\@echo \$(origin WHITE)
-\t\@echo \$(origin \@)
+	@echo $(origin undefined)
+	@echo $(origin CC)
+	@echo $(origin MAKETEST)
+	@echo $(origin MAKE)
+	@echo $(origin foo)
+	@echo $(origin CFLAGS)
+	@echo $(origin WHITE)
+	@echo $(origin @)
 auto :
-\t\@echo \$(av)
-EOF
-
-close(MAKEFILE);
-
-&run_make_with_options($makefile,
-                      "-e WHITE=WHITE CFLAGS=",
-                      &get_logfile);
-
-# Create the answer to what should be produced by this Makefile
-$answer = "undefined default environment default file command line override automatic
+	@echo $(av)',
+	      '-e WHITE=WHITE CFLAGS=',
+	      'undefined default environment default file command line override automatic
 undefined
 default
 environment
@@ -58,9 +43,9 @@ default
 file
 command line
 override
-automatic\n";
+automatic');
 
-
-&compare_output($answer,&get_logfile(1));
+# Reset an environment variable
+delete $extraENV{MAKETEST};
 
 1;

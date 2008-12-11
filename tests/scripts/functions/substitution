@@ -1,32 +1,33 @@
-$description = "The following test creates a makefile to ...";
+#                                                                    -*-perl-*-
+
+$description = "Test the subst and patsubst functions";
 
 $details = "";
 
-open(MAKEFILE,"> $makefile");
+# Generic patsubst test: test both the function and variable form.
 
-# The Contents of the MAKEFILE ...
+run_make_test('
+foo := a.o b.o c.o
+bar := $(foo:.o=.c)
+bar2:= $(foo:%.o=%.c)
+bar3:= $(patsubst %.c,%.o,x.c.c bar.c)
+all:;@echo $(bar); echo $(bar2); echo $(bar3)',
+'',
+'a.c b.c c.c
+a.c b.c c.c
+x.c.o bar.o');
 
-print MAKEFILE "foo := a.o b.o c.o\n"
-              ."bar := \$(foo:.o=.c)\n"
-	      ."bar2:= \$(foo:%.o=%.c)\n"
-              ."bar3:= \$(patsubst %.c,%.o,x.c.c bar.c)\n"
-              ."all:\n"
-              ."\t\@echo \$(bar)\n"
-              ."\t\@echo \$(bar2)\n"
-              ."\t\@echo \$(bar3)\n";
+# Patsubst without '%'--shouldn't match because the whole word has to match
+# in patsubst.  Based on a bug report by Markus Mauhart <qwe123@chello.at>
 
-# END of Contents of MAKEFILE
+run_make_test('all:;@echo $(patsubst Foo,Repl,FooFoo)', '', 'FooFoo');
 
-close(MAKEFILE);
+# Variable subst where a pattern matches multiple times in a single word.
+# Based on a bug report by Markus Mauhart <qwe123@chello.at>
 
-&run_make_with_options($makefile,"",&get_logfile);
-
-# Create the answer to what should be produced by this Makefile
-$answer = "a.c b.c c.c\n"
-         ."a.c b.c c.c\n"
-         ."x.c.o bar.o\n";
-
-&compare_output($answer,&get_logfile(1));
+run_make_test('
+A := fooBARfooBARfoo
+all:;@echo $(A:fooBARfoo=REPL)', '', 'fooBARREPL');
 
 1;
 

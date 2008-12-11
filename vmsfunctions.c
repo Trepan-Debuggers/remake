@@ -1,7 +1,23 @@
-/* vmsfunctions.c */
+/* VMS functions
+Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+2006 Free Software Foundation, Inc.
+This file is part of GNU Make.
+
+GNU Make is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2, or (at your option) any later version.
+
+GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+GNU Make; see the file COPYING.  If not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 
 #include "make.h"
 #include "debug.h"
+#include "job.h"
 
 #ifdef __DECC
 #include <starlet.h>
@@ -16,8 +32,7 @@
 #ifdef HAVE_VMSDIR_H
 
 DIR *
-opendir (dspec)
-     char *dspec;
+opendir (char *dspec)
 {
   struct DIR *dir  = (struct DIR *)xmalloc (sizeof (struct DIR));
   struct NAM *dnam = (struct NAM *)xmalloc (sizeof (struct NAM));
@@ -60,8 +75,7 @@ opendir (dspec)
   while (0)
 
 struct direct *
-readdir (dir)
-     DIR * dir;
+readdir (DIR *dir)
 {
   struct FAB *dfab = &dir->fab;
   struct NAM *dnam = (struct NAM *)(dfab->fab$l_nam);
@@ -91,14 +105,16 @@ readdir (dir)
   dentry->d_namlen = dnam->nam$b_name + dnam->nam$b_type;
   strncpy (dentry->d_name, dnam->nam$l_name, dentry->d_namlen);
   dentry->d_name[dentry->d_namlen] = '\0';
+
+#ifdef HAVE_CASE_INSENSITIVE_FS
   uppercasify (dentry->d_name);
+#endif
 
   return (dentry);
 }
 
 int
-closedir (dir)
-     DIR *dir;
+closedir (DIR *dir)
 {
   if (dir != NULL)
     {
@@ -115,8 +131,7 @@ closedir (dir)
 #endif /* compiled for OpenVMS prior to V7.x */
 
 char *
-getwd (cwd)
-     char *cwd;
+getwd (char *cwd)
 {
   static char buf[512];
 
@@ -127,9 +142,7 @@ getwd (cwd)
 }
 
 int
-vms_stat (name, buf)
-     char *name;
-     struct stat *buf;
+vms_stat (char *name, struct stat *buf)
 {
   int status;
   int i;
@@ -226,8 +239,7 @@ vms_stat (name, buf)
 }
 
 char *
-cvt_time (tval)
-     unsigned long tval;
+cvt_time (unsigned long tval)
 {
   static long int date[2];
   static char str[27];
@@ -247,9 +259,7 @@ cvt_time (tval)
 }
 
 int
-strcmpi (s1, s2)
-    const char *s1;
-    const char *s2;
+strcmpi (const char *s1, const char *s2)
 {
   while (*s1 != '\0' && toupper(*s1) == toupper(*s2))
     {

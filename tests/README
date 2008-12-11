@@ -1,33 +1,36 @@
-This is release 3.78 (September 6, 1999) of the GNU make test
-suite.  See the file NEWS for some of the changes since the last
-release.
+The test suite was originally written by Steve McGee and Chris Arthur.
+It is covered by the GNU General Public License (Version 2), described
+in the file COPYING.  It has been maintained as part of GNU make proper
+since GNU make 3.78.
 
-This release is made by psmith@gnu.org to correspond to GNU make 3.78.
-It won't work correctly for versions before that.  In addition to some
-infrastructure changes I've added a number of new tests.
+This entire test suite, including all test files, are copyright and
+distributed under the following terms:
 
-Rob Tulloh has contributed changes to get the suite running on NT.
+ -----------------------------------------------------------------------------
+ Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
+ 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+ This file is part of GNU Make.
 
-Eli Zaretskii and Esa A E Peuha <peuha@cc.helsinki.fi> have contributed
-changes to get the suite running on DJGPP/DOS.
+ GNU Make is free software; you can redistribute it and/or modify it under the
+ terms of the GNU General Public License as published by the Free Software
+ Foundation; either version 2, or (at your option) any later version.
 
-This package has a number of problems which preclude me from
-distributing it with make as a default "make check" test suite.  The
-most serious of these is that it's not parallelizable: it scribbles all
-over its installation directory and so can only test one make at a
-time.  I simply don't have time to do more with this than I am so far;
-I'm very actively interested in finding someone willing to overhaul the
-test suite infrastructure.  If you're interested, contact me (see below)!
+ GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-The test suite thus far has been written by Steve McGee, Chris Arthur,
-and Paul D. Smith.  It is covered by the GNU General Public License
-(Version 2), described in the file COPYING.
+ You should have received a copy of the GNU General Public License along with
+ GNU Make; see the file COPYING.  If not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ -----------------------------------------------------------------------------
 
-The test suite requires Perl and is known to work with Perl 4.036 and
-Perl 5.004 (available from ftp.gnu.org, and portable to many machines).
-Earlier or later versions may work; I don't know.  It assumes that the
-first "diff" it finds is GNU diff, but that only matters if a test
-fails.
+The test suite requires Perl.  These days, you should have at least Perl
+5.004 (available from ftp.gnu.org, and portable to many machines).  It
+used to work with Perl 4.036 but official support for Perl 4.x was
+abandoned a long time ago, due to lack of testbeds, as well as interest.
+
+The test suite assumes that the first "diff" it finds on your PATH is
+GNU diff, but that only matters if a test fails.
 
 To run the test suite on a UNIX system, use "perl ./run_make_tests"
 (or just "./run_make_tests" if you have a perl on your PATH).
@@ -43,18 +46,14 @@ relative paths and when make is called something other than "make" (like
 "gmake").
 
 Tests cannot end with a "~" character, as the test suite will ignore any
-that do (I was tired of having it run my Emacs backup files as test :)
-
-If you want to run the tests in parallel, you should use the mkshadow
-script included here to create temporary "copies" (via symbolic links)
-of the test suite, one for each parallel job.  This is a pain and one
-day maybe the test suite will be rewritten so it's no longer
-necessary--volunteers welcome!
+that do (I was tired of having it run my Emacs backup files as tests :))
 
 Also, sometimes the tests may behave strangely on networked
 filesystems.  You can use mkshadow to create a copy of the test suite in
 /tmp or similar, and try again.  If the error disappears, it's an issue
-with your network or file server, not GNU make (I believe).
+with your network or file server, not GNU make (I believe).  This
+shouldn't happen very often anymore: I've done a lot of work on the
+tests to reduce the impacts of this situation.
 
 The options/dash-l test will not really test anything if the copy of
 make you are using can't obtain the system load.  Some systems require
@@ -72,8 +71,33 @@ expected result.
 There is a -help option which will give you more information about the
 other possible options for the test suite.
 
+
+Open Issues
+-----------
+
+The test suite has a number of problems which should be addressed.  One
+VERY serious one is that there is no real documentation.  You just have
+to see the existing tests.  Use the newer tests: many of the tests
+haven't been updated to use the latest/greatest test methods.  See the
+ChangeLog in the tests directory for pointers.
+
+The second serious problem is that it's not parallelizable: it scribbles
+all over its installation directory and so can only test one make at a
+time.  The third serious problem is that it's not relocatable: the only
+way it works when you build out of the source tree is to create
+symlinks, which doesn't work on every system and is bogus to boot.  The
+fourth serious problem is that it doesn't create its own sandbox when
+running tests, so that if a test forgets to clean up after itself that
+can impact future tests.
+
+
+Bugs
+----
+
 Any complaints/suggestions/bugs/etc. for the test suite itself (as
-opposed to problems in make that the suite finds) should be sent to
-psmith@gnu.org.  Enjoy!
+opposed to problems in make that the suite finds) should be handled the
+same way as normal GNU make bugs/problems (see the README for GNU make).
+
+
                                                 Paul D. Smith
 						Chris Arthur

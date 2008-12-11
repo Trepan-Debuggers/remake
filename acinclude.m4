@@ -1,6 +1,25 @@
 dnl acinclude.m4 -- Extra macros needed for GNU make.
 dnl
 dnl Automake will incorporate this into its generated aclocal.m4.
+dnl Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+dnl Free Software Foundation, Inc.
+dnl This file is part of GNU Make.
+dnl
+dnl GNU Make is free software; you can redistribute it and/or modify it
+dnl under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation; either version 2, or (at your option)
+dnl any later version.
+dnl
+dnl GNU Make is distributed in the hope that it will be useful, but
+dnl WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+dnl General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with GNU Make; see the file COPYING.  If not, write to the
+dnl Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
+dnl MA 02110-1301 USA.
+
 
 dnl ---------------------------------------------------------------------------
 dnl Got this from the lynx 2.8 distribution.
@@ -88,7 +107,7 @@ changequote([,])dnl
 dnl ---------------------------------------------------------------------------
 dnl From Paul Eggert <eggert@twinsun.com>
 
-AC_DEFUN(AC_STRUCT_ST_MTIM_NSEC,
+AC_DEFUN([AC_STRUCT_ST_MTIM_NSEC],
  [AC_CACHE_CHECK([for nanoseconds field of struct stat.st_mtim],
    ac_cv_struct_st_mtim_nsec,
    [ac_save_CPPFLAGS="$CPPFLAGS"
@@ -101,64 +120,16 @@ AC_DEFUN(AC_STRUCT_ST_MTIM_NSEC,
     for ac_val in tv_nsec _tv_nsec st__tim.tv_nsec; do
       CPPFLAGS="$ac_save_CPPFLAGS -DST_MTIM_NSEC=$ac_val"
       AC_TRY_COMPILE([#include <sys/types.h>
-#include <sys/stat.h>], [struct stat s; s.st_mtim.ST_MTIM_NSEC;],
+#include <sys/stat.h>
+	], [struct stat s; s.st_mtim.ST_MTIM_NSEC;],
         [ac_cv_struct_st_mtim_nsec=$ac_val; break])
     done
-    CPPFLAGS="$ac_save_CPPFLAGS"])
+    CPPFLAGS="$ac_save_CPPFLAGS"
+   ])
 
   if test $ac_cv_struct_st_mtim_nsec != no; then
-    AC_DEFINE_UNQUOTED(ST_MTIM_NSEC, $ac_cv_struct_st_mtim_nsec, [Define if 'struct stat' contains a nanoseconds field])
+    AC_DEFINE_UNQUOTED([ST_MTIM_NSEC], [$ac_cv_struct_st_mtim_nsec],
+	[Define if struct stat contains a nanoseconds field])
   fi
  ]
 )
-
-
-dnl ---------------------------------------------------------------------------
-dnl This will be in the next version of autoconf; take this out then!
-
-# make_FUNC_SETVBUF_REVERSED
-# ------------------------
-AC_DEFUN([make_FUNC_SETVBUF_REVERSED],
-[AC_REQUIRE([AC_C_PROTOTYPES])dnl
-AC_CACHE_CHECK(whether setvbuf arguments are reversed,
-  ac_cv_func_setvbuf_reversed,
-  [ac_cv_func_setvbuf_reversed=no
-   AC_LINK_IFELSE(
-     [AC_LANG_PROGRAM(
-	[[#include <stdio.h>
-#	  if PROTOTYPES
-	   int (setvbuf) (FILE *, int, char *, size_t);
-#	  endif]],
-	[[char buf; return setvbuf (stdout, _IOLBF, &buf, 1);]])],
-     [AC_LINK_IFELSE(
-	[AC_LANG_PROGRAM(
-	   [[#include <stdio.h>
-#	     if PROTOTYPES
-	      int (setvbuf) (FILE *, int, char *, size_t);
-#	     endif]],
-	   [[char buf; return setvbuf (stdout, &buf, _IOLBF, 1);]])],
-	[# It compiles and links either way, so it must not be declared
-	 # with a prototype and most likely this is a K&R C compiler.
-	 # Try running it.
-	 AC_RUN_IFELSE(
-	   [AC_LANG_PROGRAM(
-	      [[#include <stdio.h>]],
-	      [[/* This call has the arguments reversed.
-		   A reversed system may check and see that the address of buf
-		   is not _IOLBF, _IONBF, or _IOFBF, and return nonzero.  */
-		char buf;
-		if (setvbuf (stdout, _IOLBF, &buf, 1) != 0)
-		  exit (1);
-		putchar ('\r');
-		exit (0); /* Non-reversed systems SEGV here.  */]])],
-	   ac_cv_func_setvbuf_reversed=yes,
-	   rm -f core core.* *.core,
-	   [[: # Assume setvbuf is not reversed when cross-compiling.]])]
-	ac_cv_func_setvbuf_reversed=yes)])])
-if test $ac_cv_func_setvbuf_reversed = yes; then
-  AC_DEFINE(SETVBUF_REVERSED, 1,
-            [Define to 1 if the `setvbuf' function takes the buffering type as
-             its second argument and the buffer pointer as the third, as on
-             System V before release 3.])
-fi
-])# make_FUNC_SETVBUF_REVERSED

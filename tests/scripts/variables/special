@@ -4,12 +4,7 @@ $description = "Test special GNU make variables.";
 
 $details = "";
 
-$makefile2 = &get_tmpfile;
-
-
-open(MAKEFILE, "> $makefile");
-
-print MAKEFILE <<'EOF';
+&run_make_test('
 
 X1 := $(sort $(filter FOO BAR,$(.VARIABLES)))
 
@@ -23,21 +18,12 @@ all:
 	@echo X1 = $(X1)
 	@echo X2 = $(X2)
 	@echo LAST = $(sort $(filter FOO BAR,$(.VARIABLES)))
-
-EOF
-
-close(MAKEFILE);
-
-# TEST #1
-# -------
-
-&run_make_with_options($makefile, "", &get_logfile);
-$answer = "X1 =\nX2 = FOO\nLAST = BAR FOO\n";
-&compare_output($answer, &get_logfile(1));
+',
+               '', "X1 =\nX2 = FOO\nLAST = BAR FOO\n");
 
 
 
-
+# $makefile2 = &get_tmpfile;
 # open(MAKEFILE, "> $makefile2");
 
 # print MAKEFILE <<'EOF';

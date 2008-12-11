@@ -1,12 +1,23 @@
-/*
-  vmsify.c
+/* vmsify.c -- Module for vms <-> unix file name conversion
+Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+2006 Free Software Foundation, Inc.
+This file is part of GNU Make.
 
-  Module for vms <-> unix file name conversion
+GNU Make is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2, or (at your option) any later version.
 
-  Written by Klaus Kämpf (kkaempf@progis.de)
-  of proGIS Software, Aachen, Germany
+GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-*/
+You should have received a copy of the GNU General Public License along with
+GNU Make; see the file COPYING.  If not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
+
+/* Written by Klaus Kämpf (kkaempf@progis.de)
+   of proGIS Software, Aachen, Germany */
+
 
 #include <stdio.h>
 #include <string.h>
@@ -79,9 +90,11 @@ copyto (char **to, char **from, char upto, int as_dir)
 	}
       else
 	{
+#ifdef HAVE_CASE_INSENSITIVE_FS
 	  if (isupper ((unsigned char)**from))
 	    **to = tolower ((unsigned char)**from);
 	  else
+#endif
 	    **to = **from;
 	}
       (*to)++;
@@ -196,9 +209,7 @@ enum namestate { N_START, N_DEVICE, N_OPEN, N_DOT, N_CLOSED, N_DONE };
 */
 
 char *
-vmsify (name, type)
-    char *name;
-    int type;
+vmsify (char *name, int type)
 {
 /* max 255 device
    max 39 directory

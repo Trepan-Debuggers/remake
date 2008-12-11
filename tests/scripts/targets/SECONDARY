@@ -81,5 +81,45 @@ $answer = "cp foo.f foo.e\ncp foo.e foo.c\n";
 
 unlink('foo.f', 'foo.e', 'foo.d', 'foo.c');
 
+# TEST #7 -- test the "global" .SECONDARY, with no targets.
+
+$makefile2 = &get_tmpfile;
+
+open(MAKEFILE, "> $makefile2");
+
+print MAKEFILE <<'EOF';
+.SECONDARY:
+
+final: intermediate
+intermediate: source
+
+final intermediate source:
+	echo $< > $@
+EOF
+
+close(MAKEFILE);
+
+&utouch(-10, 'source');
+touch('final');
+
+&run_make_with_options($makefile2, '', &get_logfile);
+$answer = "$make_name: `final' is up to date.\n";
+&compare_output($answer, &get_logfile(1));
+
+unlink('source', 'final', 'intermediate');
+
+
+# TEST #8 -- test the "global" .SECONDARY, with .PHONY.
+
+touch('version2');
+run_make_test('
+.PHONY: version
+.SECONDARY:
+version2: version ; @echo GOOD
+all: version2',
+              'all', 'GOOD');
+
+unlink('version2');
+
 # This tells the test driver that the perl test script executed properly.
 1;

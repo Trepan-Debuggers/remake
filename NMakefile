@@ -1,36 +1,33 @@
-# NOTE: If you have no `make' program at all to process this makefile, run
-# `build_w32.bat' instead.
+# -*-Makefile-*- to build GNU make with nmake
 #
-# Copyright (C) 1988,89,91,92,93,94,95,96,97 Free Software Foundation, Inc.
+# NOTE: If you have no 'make' program at all to process this makefile,
+# run 'build_w32.bat' instead.
+#
+# Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+# 2006 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
-# GNU Make is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
+# GNU Make is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2, or (at your option) any later version.
 #
-# GNU Make is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+# GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License
-# along with GNU Make; see the file COPYING.  If not, write to
-# the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-# Boston, MA 02111-1307, USA.
-
-#
-#       NMakefile for GNU Make
-#
+# You should have received a copy of the GNU General Public License along with
+# GNU Make; see the file COPYING.  If not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 
 LINK = link
 CC = cl
+MAKE = nmake
 
 OUTDIR=.
 MAKEFILE=NMakefile
 SUBPROC_MAKEFILE=NMakefile
 
-CFLAGS_any = /nologo /MT /W3 /GX /Zi /YX /I . /I glob /I w32/include /D WIN32 /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H
+CFLAGS_any = /nologo /MT /W4 /GX /Zi /YX /I . /I glob /I w32/include /D WIN32 /D WINDOWS32 /D _CONSOLE /D HAVE_CONFIG_H
 CFLAGS_debug = $(CFLAGS_any) /Od /D DEBUG /D _DEBUG /FR.\WinDebug/ /Fp.\WinDebug/make.pch /Fo.\WinDebug/ /Fd.\WinDebug/make.pdb
 CFLAGS_release = $(CFLAGS_any) /O2 /D NDEBUG /FR.\WinRel/ /Fp.\WinRel/make.pch /Fo.\WinRel/
 
@@ -88,6 +85,7 @@ OBJS = \
 	$(OUTDIR)/getloadavg.obj \
 	$(OUTDIR)/getopt.obj \
 	$(OUTDIR)/getopt1.obj \
+	$(OUTDIR)/hash.obj \
 	$(OUTDIR)/implicit.obj \
 	$(OUTDIR)/job.obj \
 	$(OUTDIR)/main.obj \
@@ -97,6 +95,7 @@ OBJS = \
 	$(OUTDIR)/remote-stub.obj \
 	$(OUTDIR)/rule.obj \
 	$(OUTDIR)/signame.obj \
+	$(OUTDIR)/strcache.obj \
 	$(OUTDIR)/variable.obj \
 	$(OUTDIR)/version.obj \
 	$(OUTDIR)/vpath.obj \
@@ -124,125 +123,157 @@ $(OUTDIR)/pathstuff.obj : w32/pathstuff.c
 
 # --------------- DEPENDENCIES
 #
+
+# .deps/alloca.Po
 # dummy
+
+# .deps/ar.Po
+ar.o ar.o: ar.c make.h config.h \
+  getopt.h \
+  gettext.h filedef.h hash.h dep.h \
+
+# .deps/arscan.Po
+arscan.o arscan.o: arscan.c make.h config.h \
+  getopt.h \
+  gettext.h \
+
+# .deps/commands.Po
+commands.o commands.o: commands.c make.h config.h \
+  getopt.h \
+  gettext.h dep.h filedef.h hash.h variable.h \
+  job.h commands.h
+
+# .deps/default.Po
+default.o default.o: default.c make.h config.h \
+  getopt.h \
+  gettext.h filedef.h hash.h variable.h rule.h \
+  dep.h job.h commands.h
+
+# .deps/dir.Po
+dir.o dir.o: dir.c make.h config.h \
+  getopt.h \
+  gettext.h hash.h \
+
+# .deps/expand.Po
+expand.o expand.o: expand.c make.h config.h \
+  getopt.h \
+  gettext.h filedef.h hash.h \
+  job.h commands.h \
+  variable.h rule.h
+
+# .deps/file.Po
+file.o file.o: file.c make.h config.h \
+  getopt.h \
+  gettext.h dep.h filedef.h \
+  hash.h job.h commands.h \
+  variable.h debug.h
+
+# .deps/function.Po
+function.o function.o: function.c make.h config.h \
+  getopt.h \
+  gettext.h filedef.h hash.h variable.h dep.h \
+  job.h commands.h debug.h
+
+# .deps/getloadavg.Po
 # dummy
-ar.o : \
- ar.c make.h config.h \
- getopt.h \
- gettext.h filedef.h \
- hash.h dep.h
-arscan.o : \
- arscan.c make.h config.h \
- getopt.h \
- gettext.h \
 
-commands.o : \
- commands.c make.h config.h \
- getopt.h \
- gettext.h dep.h \
- filedef.h hash.h variable.h job.h commands.h
-default.o : \
- default.c make.h config.h \
- getopt.h \
- gettext.h rule.h \
- dep.h filedef.h hash.h job.h commands.h variable.h
-dir.o : \
- dir.c make.h config.h \
- getopt.h \
- gettext.h hash.h \
+# .deps/getopt.Po
+getopt.o getopt.o: getopt.c config.h \
 
-expand.o : \
- expand.c make.h config.h \
- getopt.h \
- gettext.h \
- filedef.h hash.h job.h commands.h variable.h \
- rule.h
-file.o : \
- file.c make.h config.h \
- getopt.h \
- gettext.h \
- dep.h filedef.h hash.h job.h commands.h \
- variable.h debug.h
-function.o : \
- function.c make.h config.h \
- getopt.h \
- gettext.h filedef.h \
- hash.h variable.h dep.h job.h commands.h debug.h
-getopt.o : \
- getopt.c config.h \
+# .deps/getopt1.Po
+getopt1.o getopt1.o: getopt1.c config.h getopt.h \
 
-getopt1.o : \
- getopt1.c config.h getopt.h \
+# .deps/hash.Po
+hash.o hash.o: hash.c make.h config.h \
+  getopt.h \
+  gettext.h hash.h
 
-hash.o : \
- hash.c make.h config.h \
- getopt.h \
- gettext.h hash.h
-implicit.o : \
- implicit.c make.h config.h \
- getopt.h \
- gettext.h rule.h \
- dep.h filedef.h hash.h debug.h
-job.o : \
- job.c make.h config.h \
- getopt.h \
- gettext.h \
- job.h debug.h filedef.h hash.h commands.h \
- variable.h \
+# .deps/implicit.Po
+implicit.o implicit.o: implicit.c make.h config.h \
+  getopt.h \
+  gettext.h filedef.h hash.h rule.h dep.h debug.h \
+  variable.h job.h \
+  commands.h
 
-loadavg-loadavg.o : \
- loadavg.c config.h \
- make.h \
- getopt.h \
- gettext.h \
+# .deps/job.Po
+job.o job.o: job.c make.h config.h \
+  getopt.h \
+  gettext.h job.h \
+  debug.h filedef.h hash.h \
+  commands.h variable.h \
 
-main.o : \
- main.c make.h config.h \
- getopt.h \
- gettext.h dep.h \
- filedef.h hash.h variable.h job.h commands.h rule.h debug.h \
+# .deps/loadavg-getloadavg.Po
+loadavg-getloadavg.o loadavg-getloadavg.o: getloadavg.c config.h \
+  make.h \
+  getopt.h \
+  gettext.h \
 
-misc.o : \
- misc.c make.h config.h \
- getopt.h \
- gettext.h dep.h \
- debug.h
-read.o : \
- read.c make.h config.h \
- getopt.h \
- gettext.h \
- dep.h filedef.h hash.h \
- job.h commands.h variable.h rule.h debug.h
-remake.o : \
- remake.c make.h config.h \
- getopt.h \
- gettext.h filedef.h \
- hash.h job.h commands.h dep.h variable.h debug.h \
+# .deps/main.Po
+main.o main.o: main.c make.h config.h \
+  getopt.h \
+  gettext.h dep.h filedef.h hash.h variable.h \
+  job.h commands.h rule.h \
+  debug.h getopt.h \
 
+# .deps/misc.Po
+misc.o misc.o: misc.c make.h config.h \
+  getopt.h \
+  gettext.h dep.h debug.h
+
+# .deps/read.Po
+read.o read.o: read.c make.h config.h \
+  getopt.h \
+  gettext.h \
+  dep.h filedef.h hash.h job.h \
+  commands.h variable.h rule.h debug.h \
+
+# .deps/remake.Po
+remake.o remake.o: remake.c make.h config.h \
+  getopt.h \
+  gettext.h filedef.h hash.h job.h \
+  commands.h dep.h \
+  variable.h debug.h
+
+# .deps/remote-cstms.Po
 # dummy
-remote-stub.o : \
- remote-stub.c make.h config.h \
- getopt.h \
- gettext.h filedef.h \
- hash.h job.h commands.h
-rule.o : \
- rule.c make.h config.h \
- getopt.h \
- gettext.h dep.h \
- filedef.h hash.h job.h commands.h variable.h rule.h
-signame.o : \
- signame.c make.h config.h \
- getopt.h \
- gettext.h
-variable.o : \
- variable.c make.h config.h \
- getopt.h \
- gettext.h dep.h \
- filedef.h hash.h job.h commands.h variable.h rule.h
-version.o : \
- version.c config.h
-vpath.o : \
- vpath.c make.h config.h \
- getopt.h \
- gettext.h filedef.h \
- hash.h variable.h
+
+# .deps/remote-stub.Po
+remote-stub.o remote-stub.o: remote-stub.c make.h config.h \
+  getopt.h \
+  gettext.h filedef.h hash.h job.h \
+  commands.h
+
+# .deps/rule.Po
+rule.o rule.o: rule.c make.h config.h \
+  getopt.h \
+  gettext.h dep.h filedef.h hash.h job.h \
+  commands.h variable.h \
+  rule.h
+
+# .deps/signame.Po
+signame.o signame.o: signame.c make.h config.h \
+  getopt.h \
+  gettext.h
+
+# .deps/strcache.Po
+strcache.o strcache.o: strcache.c make.h config.h \
+  getopt.h \
+  gettext.h hash.h
+
+# .deps/variable.Po
+variable.o variable.o: variable.c make.h config.h \
+  getopt.h \
+  gettext.h dep.h filedef.h \
+  hash.h job.h commands.h \
+  variable.h rule.h
+
+# .deps/version.Po
+version.o version.o: version.c config.h
+
+# .deps/vmsjobs.Po
+# dummy
+
+# .deps/vpath.Po
+vpath.o vpath.o: vpath.c make.h config.h \
+  getopt.h \
+  gettext.h filedef.h hash.h variable.h

@@ -1,28 +1,24 @@
-$description = "The following test creates a makefile to test the -C dir \n"
-              ."option in make.  This option tells make to change to \n"
-              ."directory dir before reading the makefile.";
+#                                                                    -*-perl-*-
 
-$details = "This test is similar to the clean test except that this test\n"
-          ."creates the file to delete in the work directory instead of\n"
-          ."the current directory.  Make is called from another directory\n"
-          ."using the -C workdir option so that it can both find the \n"
-          ."makefile and the file to delete in the work directory. ";
+$description = "Test the -C option to GNU make.";
 
-$example = $workdir . $pathsep . "EXAMPLE_FILE";
+$details = "\
+This test is similar to the clean test except that this test creates the file
+to delete in the work directory instead of the current directory.  Make is
+called from another directory using the -C workdir option so that it can both
+find the makefile and the file to delete in the work directory.";
+
+$example = $workdir . $pathsep . "EXAMPLE";
 
 open(MAKEFILE,"> $makefile");
-
-# The Contents of the MAKEFILE ...
-
-print MAKEFILE "all: \n";
-print MAKEFILE "\t\@echo This makefile did not clean the dir ... good\n";
-print MAKEFILE "clean: \n";
-print MAKEFILE "\t$delete_command EXAMPLE_FILE\n";
-
-# END of Contents of MAKEFILE
-
+print MAKEFILE <<EOF;
+all: ; \@echo This makefile did not clean the dir ... good
+clean: ; $delete_command EXAMPLE\$(ext)
+EOF
 close(MAKEFILE);
 
+# TEST #1
+# -------
 &touch($example);
 
 &run_make_with_options("${testname}.mk",
@@ -33,16 +29,43 @@ chdir $workdir;
 $wpath = &get_this_pwd;
 chdir $pwd;
 
+if (-f $example) {
+  $test_passed = 0;
+}
+
 # Create the answer to what should be produced by this Makefile
 $answer = "$make_name: Entering directory `$wpath'\n"
-        . "$delete_command EXAMPLE_FILE\n"
+        . "$delete_command EXAMPLE\n"
         . "$make_name: Leaving directory `$wpath'\n";
 
 &compare_output($answer,&get_logfile(1));
 
-if (-f $example)
-{
-   $test_passed = 0;
+
+# TEST #2
+# -------
+# Do it again with trailing "/"; this should work the same
+
+$example .= "slash";
+
+&touch($example);
+
+&run_make_with_options("${testname}.mk",
+	               "-C $workdir/ clean ext=slash",
+		       &get_logfile);
+
+chdir $workdir;
+$wpath = &get_this_pwd;
+chdir $pwd;
+
+if (-f $example) {
+  $test_passed = 0;
 }
+
+# Create the answer to what should be produced by this Makefile
+$answer = "$make_name: Entering directory `$wpath'\n"
+        . "$delete_command EXAMPLEslash\n"
+        . "$make_name: Leaving directory `$wpath'\n";
+
+&compare_output($answer,&get_logfile(1));
 
 1;

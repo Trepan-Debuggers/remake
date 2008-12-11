@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/env perl
 # -*-perl-*-
 
 # Test driver for the Make test suite
@@ -11,9 +11,30 @@
 #                         [-make <make prog>]
 #                        (and others)
 
+# Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
+# 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+# This file is part of GNU Make.
+#
+# GNU Make is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2, or (at your option) any later version.
+#
+# GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# GNU Make; see the file COPYING.  If not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+
 $valgrind = 0;              # invoke make with valgrind
+$valgrind_args = '--num-callers=15 --tool=memcheck --leak-check=full';
+$pure_log = undef;
 
 require "test_driver.pl";
+
+# Some target systems might not have the POSIX module...
+$has_POSIX = eval { require "POSIX.pm" };
 
 #$SIG{INT} = sub { print STDERR "Caught a signal!\n"; die @_; };
 
@@ -37,7 +58,7 @@ sub valid_option
      return 1;
    }
 
-# This doesn't work--it _should_!  Someone needs to fix this badly.
+# This doesn't work--it _should_!  Someone badly needs to fix this.
 #
 #   elsif ($option =~ /^-work([-_]?dir)?$/)
 #   {
@@ -48,66 +69,123 @@ sub valid_option
    return 0;
 }
 
-sub run_make_with_options
+
+# This is an "all-in-one" function.  Arguments are as follows:
+#
+#  [0] (string):  The makefile to be tested.  undef means use the last one.
+#  [1] (string):  Arguments to pass to make.
+#  [2] (string):  Answer we should get back.
+#  [3] (integer): Exit code we expect.  A missing code means 0 (success)
+
+$old_makefile = undef;
+
+sub run_make_test
 {
-   local ($filename,$options,$logname,$expected_code) = @_;
-   local($code);
-   local($command) = $make_path;
+  local ($makestring, $options, $answer, $err_code) = @_;
 
-   $expected_code = 0 unless defined($expected_code);
+  # If the user specified a makefile string, create a new makefile to contain
+  # it.  If the first value is not defined, use the last one (if there is
+  # one).
 
-   if ($filename)
-   {
-      $command .= " -f $filename";
-   }
+  if (! defined $makestring) {
+    defined $old_makefile
+      || die "run_make_test(undef) invoked before run_make_test('...')\n";
+    $makefile = $old_makefile;
+  } else {
+    if (! defined($makefile)) {
+      $makefile = &get_tmpfile();
+    }
 
-   if ($options)
-   {
-      $command .= " $options";
-   }
+    # Make sure it ends in a newline.
+    $makestring && $makestring !~ /\n$/s and $makestring .= "\n";
 
-   if ($valgrind) {
-     print VALGRIND "\n\nExecuting: $command\n";
-   }
+    # Replace @MAKEFILE@ with the makefile name and @MAKE@ with the path to
+    # make
+    $makestring =~ s/#MAKEFILE#/$makefile/g;
+    $makestring =~ s/#MAKEPATH#/$mkpath/g;
+    $makestring =~ s/#MAKE#/$make_name/g;
+    $makestring =~ s/#PWD#/$pwd/g;
 
-   $code = &run_command_with_output($logname,$command);
+    # Populate the makefile!
+    open(MAKEFILE, "> $makefile") || die "Failed to open $makefile: $!\n";
+    print MAKEFILE $makestring;
+    close(MAKEFILE) || die "Failed to write $makefile: $!\n";
+  }
 
-   # Check to see if we have Purify errors.  If so, keep the logfile.
-   # For this to work you need to build with the Purify flag -exit-status=yes
+  # Do the same processing on $answer as we did on $makestring.
 
-   if ($pure_log && -f $pure_log) {
-     if ($code & 0x7000) {
-       $code &= ~0x7000;
+  $answer && $answer !~ /\n$/s and $answer .= "\n";
+  $answer =~ s/#MAKEFILE#/$makefile/g;
+  $answer =~ s/#MAKEPATH#/$mkpath/g;
+  $answer =~ s/#MAKE#/$make_name/g;
+  $answer =~ s/#PWD#/$pwd/g;
 
-       # If we have a purify log, save it
-       $tn = $pure_testname . ($num_of_logfiles ? ".$num_of_logfiles" : "");
-       print("Renaming purify log file to $tn\n") if $debug;
-       rename($pure_log, "$tn")
-	 || die "Can't rename $log to $tn: $!\n";
-       ++$purify_errors;
-     }
-     else {
-       unlink($pure_log);
-     }
-   }
+  &run_make_with_options($makefile, $options, &get_logfile(0), $err_code);
+  &compare_output($answer, &get_logfile(1));
 
-   if ($code != $expected_code)
-   {
-      print "Error running $make_path ($code): $command\n";
-      $test_passed = 0;
-      # If it's a SIGINT, stop here
-      if ($code & 127) {
-        print STDERR "\nCaught signal ".($code & 127)."!\n";
-        exit($code);
-      }
-      return 0;
-   }
+  $old_makefile = $makefile;
+  $makefile = undef;
+}
 
-   if ($profile & $vos)
-   {
-      system "add_profile $make_path";
-   }
-1;
+# The old-fashioned way...
+sub run_make_with_options {
+  local ($filename,$options,$logname,$expected_code) = @_;
+  local($code);
+  local($command) = $make_path;
+
+  $expected_code = 0 unless defined($expected_code);
+
+  # Reset to reflect this one test.
+  $test_passed = 1;
+
+  if ($filename) {
+    $command .= " -f $filename";
+  }
+
+  if ($options) {
+    $command .= " $options";
+  }
+
+  if ($valgrind) {
+    print VALGRIND "\n\nExecuting: $command\n";
+  }
+
+  $code = &run_command_with_output($logname,$command);
+
+  # Check to see if we have Purify errors.  If so, keep the logfile.
+  # For this to work you need to build with the Purify flag -exit-status=yes
+
+  if ($pure_log && -f $pure_log) {
+    if ($code & 0x7000) {
+      $code &= ~0x7000;
+
+      # If we have a purify log, save it
+      $tn = $pure_testname . ($num_of_logfiles ? ".$num_of_logfiles" : "");
+      print("Renaming purify log file to $tn\n") if $debug;
+      rename($pure_log, "$tn")
+        || die "Can't rename $log to $tn: $!\n";
+      ++$purify_errors;
+    } else {
+      unlink($pure_log);
+    }
+  }
+
+  if ($code != $expected_code) {
+    print "Error running $make_path (expected $expected_code; got $code): $command\n";
+    $test_passed = 0;
+    # If it's a SIGINT, stop here
+    if ($code & 127) {
+      print STDERR "\nCaught signal ".($code & 127)."!\n";
+      exit($code);
+    }
+    return 0;
+  }
+
+  if ($profile & $vos) {
+    system "add_profile $make_path";
+  }
+
+  1;
 }
 
 sub print_usage
@@ -122,12 +200,14 @@ sub print_help
 }
 
 sub get_this_pwd {
-  if ($vos) {
-    $delete_command = "delete_file";
+  $delete_command = 'rm -f';
+  if ($has_POSIX) {
+    $__pwd = POSIX::getcwd();
+  } elsif ($vos) {
+    $delete_command = "delete_file -no_ask";
     $__pwd = `++(current_dir)`;
-  }
-  else {
-    $delete_command = "rm";
+  } else {
+    # No idea... just try using pwd as a last resort.
     chop ($__pwd = `pwd`);
   }
 
@@ -158,7 +238,7 @@ sub set_more_defaults
    #
    # This is probably not specific enough.
    #
-   if ($osname =~ /Windows/i) {
+   if ($osname =~ /Windows/i || $osname =~ /MINGW32/i || $osname =~ /CYGWIN_NT/i) {
      $port_type = 'W32';
    }
    # Bleah, the osname is so variable on DOS.  This kind of bites.
@@ -168,6 +248,10 @@ sub set_more_defaults
    # match and be pretty specific.
    elsif ($osname =~ /^([^ ]*|[^ ]* [^ ]*)D(OS|os|ev) /) {
      $port_type = 'DOS';
+   }
+   # Check for OS/2
+   elsif ($osname =~ m%OS/2%) {
+     $port_type = 'OS/2';
    }
    # Everything else, right now, is UNIX.  Note that we should integrate
    # the VOS support into this as well and get rid of $vos; we'll do
@@ -179,14 +263,18 @@ sub set_more_defaults
    # On DOS/Windows system the filesystem apparently can't track
    # timestamps with second granularity (!!).  Change the sleep time
    # needed to force a file to be considered "old".
-   #
-   $wtime = $port_type eq 'UNIX' ? 1 : 4;
+   $wtime = $port_type eq 'UNIX' ? 1 : $port_type eq 'OS/2' ? 2 : 4;
+
+   print "Port type: $port_type\n" if $debug;
+   print "Make path: $make_path\n" if $debug;
 
    # Find the full pathname of Make.  For DOS systems this is more
    # complicated, so we ask make itself.
-
-   $make_path = `sh -c 'echo "all:;\@echo \\\$(MAKE)" | $make_path -f-'`;
-   chop $make_path;
+   my $mk = `sh -c 'echo "all:;\@echo \\\$(MAKE)" | $make_path -f-'`;
+   chop $mk;
+   $mk or die "FATAL ERROR: Cannot determine the value of \$(MAKE):\n
+'echo \"all:;\@echo \\\$(MAKE)\" | $make_path -f-' failed!\n";
+   $make_path = $mk;
    print "Make\t= `$make_path'\n" if $debug;
 
    $string = `$make_path -v -f /dev/null 2> /dev/null`;
@@ -222,10 +310,12 @@ sub set_more_defaults
 
    # Get Purify log info--if any.
 
-   $ENV{PURIFYOPTIONS} =~ /.*-logfile=([^ ]+)/;
-   $pure_log = $1 || '';
-   $pure_log =~ s/%v/$make_name/;
-   $purify_errors = 0;
+   if (exists $ENV{PURIFYOPTIONS}
+       && $ENV{PURIFYOPTIONS} =~ /.*-logfile=([^ ]+)/) {
+     $pure_log = $1 || '';
+     $pure_log =~ s/%v/$make_name/;
+     $purify_errors = 0;
+   }
 
    $string = `sh -c "$make_path -j 2 -f /dev/null 2>&1"`;
    if ($string =~ /not supported/) {
@@ -238,12 +328,11 @@ sub set_more_defaults
    # Set up for valgrind, if requested.
 
    if ($valgrind) {
-#     use POSIX qw(:fcntl_h);
-#     require Fcntl;
      open(VALGRIND, "> valgrind.out")
        || die "Cannot open valgrind.out: $!\n";
      #  -q --leak-check=yes
-     $make_path = "valgrind --num-callers=15 --logfile-fd=".fileno(VALGRIND)." $make_path";
+     exists $ENV{VALGRIND_ARGS} and $valgrind_args = $ENV{VALGRIND_ARGS};
+     $make_path = "valgrind --log-fd=".fileno(VALGRIND)." $valgrind_args $make_path";
      # F_SETFD is 2
      fcntl(VALGRIND, 2, 0) or die "fcntl(setfd) failed: $!\n";
      system("echo Starting on `date` 1>&".fileno(VALGRIND));

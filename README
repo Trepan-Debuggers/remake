@@ -1,4 +1,4 @@
-This directory contains the 3.80 release of GNU Make.
+This directory contains the 3.81 release of GNU Make.
 
 See the file NEWS for the user-visible changes from previous releases.
 In addition, there have been bugs fixed.
@@ -70,7 +70,7 @@ information on submitting useful and complete bug reports.
 You can also use the online bug tracking system in the Savannah GNU Make
 project to submit new problem reports or search for existing ones:
 
-  http://savannah.gnu.org/bugs/?group_id=71
+  http://savannah.gnu.org/bugs/?group=make
 
 If you need help using GNU make, try these forums:
 
@@ -79,11 +79,11 @@ If you need help using GNU make, try these forums:
   news:gnu.utils.help
   news:gnu.utils.bug
 
-  http://savannah.gnu.org/support/?group_id=71
+  http://savannah.gnu.org/support/?group=make
 
 You may also find interesting patches to GNU Make available here:
 
-  http://savannah.gnu.org/patch/?group_id=71
+  http://savannah.gnu.org/patch/?group=make
 
 Note these patches are provided by our users as a service and we make no
 statements regarding their correctness.  Please contact the authors
@@ -97,7 +97,7 @@ CVS Access
 The GNU make source repository is available via anonymous CVS from the
 GNU Subversions CVS server; look here for details:
 
-  http://savannah.gnu.org/cvs/?group_id=71
+  http://savannah.gnu.org/cvs/?group=make
 
 Please note: you won't be able to build GNU make from CVS without
 installing appropriate maintainer's tools, such as GNU m4, automake,
@@ -112,8 +112,14 @@ System-specific Notes
 ---------------------
 
 It has been reported that the XLC 1.2 compiler on AIX 3.2 is buggy such
-that if you compile make with `cc -O' on AIX 3.2, it will not work correctly.
-It is said that using `cc' without `-O' does work.
+that if you compile make with `cc -O' on AIX 3.2, it will not work
+correctly.  It is said that using `cc' without `-O' does work.
+
+The standard /bin/sh on SunOS 4.1.3_U1 and 4.1.4 is broken and cannot be
+used to configure GNU make.  Please install a different shell such as
+bash or pdksh in order to run "configure".  See this message for more
+information:
+  http://mail.gnu.org/archive/html/bug-autoconf/2003-10/msg00190.html
 
 One area that is often a problem in configuration and porting is the code
 to check the system's current load average.  To make it easier to test and
@@ -162,3 +168,22 @@ Please note there are two _separate_ ports of GNU make for Microsoft
 systems: a native Windows tool built with (for example) MSVC or Cygwin,
 and a DOS-based tool built with DJGPP.  Please be sure you are looking
 at the right README!
+
+
+-------------------------------------------------------------------------------
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
+1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software Foundation,
+Inc.
+This file is part of GNU Make.
+
+GNU Make is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2, or (at your option) any later version.
+
+GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+GNU Make; see the file COPYING.  If not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.

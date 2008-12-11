@@ -1,9 +1,34 @@
 # This is a -*-Makefile-*-, or close enough
+#
+# Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+# Free Software Foundation, Inc.
+# This file is part of GNU Make.
+#
+# GNU Make is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2, or (at your option) any later version.
+#
+# GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# GNU Make; see the file COPYING.  If not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 
-AUTOMAKE_OPTIONS = 1.7 dist-bzip2 check-news
+AUTOMAKE_OPTIONS = 1.8 dist-bzip2 check-news ansi2knr
 ACLOCAL_AMFLAGS	=  -I config
 
-SUBDIRS =	glob config po doc
+MAKE_HOST =	@MAKE_HOST@
+
+# Only process if target is MS-Windows
+if WINDOWSENV
+  MAYBE_W32 =	w32
+  W32INC =	-I $(top_srcdir)/w32/include
+  W32LIB =	-Lw32 -lw32
+endif
+
+SUBDIRS =	glob config po doc $(MAYBE_W32)
 
 bin_PROGRAMS =	make
 
@@ -13,41 +38,49 @@ else
   remote =	remote-stub.c
 endif
 
+
 make_SOURCES =	ar.c arscan.c commands.c default.c dir.c expand.c file.c \
 		function.c getopt.c getopt1.c implicit.c job.c main.c \
 		misc.c read.c remake.c $(remote) rule.c signame.c \
-		variable.c version.c vpath.c hash.c
+		strcache.c variable.c version.c vpath.c hash.c
 
-EXTRA_make_SOURCES = remote-stub.c remote-cstms.c
+EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c
 
 noinst_HEADERS = commands.h dep.h filedef.h job.h make.h rule.h variable.h \
 		debug.h getopt.h gettext.h hash.h
 
 make_LDADD =	@LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@ @LIBINTL@
+# Only process if target is MS-Windows
+if WINDOWSENV
+    make_LDADD += $(W32LIB)
+endif
 
 man_MANS =	make.1
 
 DEFS =		-DLOCALEDIR=\"$(localedir)\" -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\" @DEFS@
 
 AM_CPPFLAGS =	$(GLOBINC)
+# Only process if target is MS-Windows
+if WINDOWSENV
+    AM_CPPFLAGS +=	$(W32INC)
+endif
 
 
 # Extra stuff to include in the distribution.
-# Note we need all the glob stuff here, rather than in glob/Makefile.am,
-# because often that directory isn't built on the systems used by the
-# maintainers.
 
-EXTRA_DIST =	README build.sh.in $(man_MANS)\
-		README.customs\
-		SCOPTIONS SMakefile\
-		README.Amiga Makefile.ami config.ami make.lnk amiga.c amiga.h\
+EXTRA_DIST =	README build.sh.in $(man_MANS) \
+		README.customs README.OS2 \
+		SCOPTIONS SMakefile \
+		README.Amiga Makefile.ami config.ami make.lnk amiga.c amiga.h \
 		README.DOS Makefile.DOS configure.bat dosbuild.bat configh.dos\
-		README.W32 NMakefile config.h.W32 build_w32.bat subproc.bat\
+		README.W32 NMakefile config.h.W32 build_w32.bat subproc.bat \
+		make_msvc_net2003.sln make_msvc_net2003.vcproj \
 		readme.vms makefile.vms makefile.com config.h-vms \
 		vmsdir.h vmsfunctions.c vmsify.c
 
-MAKE_HOST =	@MAKE_HOST@
+# This is built during configure, but behind configure's back
 
+DISTCLEANFILES = build.sh
 
 # Forward targets
 
@@ -113,20 +146,17 @@ check-local: check-regression check-loadavg
 
 .PHONY: check-loadavg check-regression
 
-check-loadavg: loadavg
+check-loadavg: loadavg$(EXEEXT)
 	@echo The system uptime program believes the load average to be:
 	-uptime
 	@echo The GNU load average checking code thinks:
-	-./loadavg
+	-./loadavg$(EXEEXT)
 
 # The loadavg function is invoked during "make check" to test getloadavg.
-noinst_PROGRAMS = loadavg
-loadavg_SOURCES = loadavg.c
-loadavg_CFLAGS = -DTEST
+check_PROGRAMS = loadavg
+nodist_loadavg_SOURCES = getloadavg.c
+loadavg_CPPFLAGS = -DTEST
 loadavg_LDADD = @GETLOADAVG_LIBS@
-
-loadavg.c: $(srcdir)/getloadavg.c
-	cp $(srcdir)/getloadavg.c loadavg.c
 
 # > check-regression
 #
@@ -147,8 +177,8 @@ check-regression:
 		     rm -f tests/$$f; ln -s ../srctests/$$f tests; \
 		   done; fi ;; \
 	    esac; \
-	    echo "cd tests && $(PERL) ./run_make_tests.pl -make ../make $(MAKETESTFLAGS)"; \
-	    cd tests && $(PERL) ./run_make_tests.pl -make ../make $(MAKETESTFLAGS); \
+	    echo "cd tests && $(PERL) ./run_make_tests.pl -make ../make$(EXEEXT) $(MAKETESTFLAGS)"; \
+	    cd tests && $(PERL) ./run_make_tests.pl -make ../make$(EXEEXT) $(MAKETESTFLAGS); \
 	  else \
 	    echo "Can't find a working Perl ($(PERL)); the test suite requires Perl."; \
 	  fi; \
@@ -158,5 +188,11 @@ check-regression:
 
 
 # --------------- Maintainer's Section
+
+# Tell automake that I haven't forgotten about this file and it will be
+# created before we build a distribution (see maintMakefile in the CVS
+# distribution).
+
+README:
 
 @MAINT_MAKEFILE@

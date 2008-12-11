@@ -1,21 +1,19 @@
 /* Running commands on Amiga
-Copyright (C) 1995, 1996 Free Software Foundation, Inc.
+Copyright (C) 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
+2005, 2006 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
-GNU Make is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+GNU Make is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2, or (at your option) any later version.
 
-GNU Make is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with GNU Make; see the file COPYING.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA.  */
+You should have received a copy of the GNU General Public License along with
+GNU Make; see the file COPYING.  If not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 
 #include "make.h"
 #include "variable.h"
@@ -30,8 +28,7 @@ static const char Amiga_version[] = "$VER: Make 3.74.3 (12.05.96) \n"
 		    "Amiga Port by A. Digulla (digulla@home.lake.de)";
 
 int
-MyExecute (argv)
-char ** argv;
+MyExecute (char **argv)
 {
     char * buffer, * ptr;
     char ** aptr;
@@ -92,8 +89,7 @@ char ** argv;
 }
 
 char *
-wildcard_expansion (wc, o)
-char * wc, * o;
+wildcard_expansion (char *wc, char *o)
 {
 #   define PATH_SIZE	1024
     struct AnchorPath * apath;

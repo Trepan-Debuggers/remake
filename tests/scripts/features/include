@@ -2,7 +2,8 @@
 
 $description = "Test various forms of the GNU make `include' command.";
 
-$details = "Test include, -include, sinclude and various regressions involving them.
+$details = "\
+Test include, -include, sinclude and various regressions involving them.
 Test extra whitespace at the end of the include, multiple -includes and
 sincludes (should not give an error) and make sure that errors are reported
 for targets that were also -included.";
@@ -15,7 +16,7 @@ open(MAKEFILE,"> $makefile");
 
 print MAKEFILE <<EOF;
 \#Extra space at the end of the following file name
-include $makefile2                  
+include $makefile2
 all: ; \@echo There should be no errors for this makefile.
 
 -include nonexistent.mk
@@ -46,16 +47,74 @@ $answer = "There should be no errors for this makefile.\n";
 $answer = "This is another included makefile\n";
 &compare_output($answer, &get_logfile(1));
 
+$makefile = undef;
+
 # Try to build the "error" target; this will fail since we don't know
 # how to create makeit.mk, but we should also get a message (even though
 # the -include suppressed it during the makefile read phase, we should
 # see one during the makefile run phase).
 
-# The fix to this caused more problems than the error, so I removed it.
-# pds -- 22 Jan 2000
+run_make_test
+  ('
+-include foo.mk
+error: foo.mk ; @echo $@
+',
+   '',
+   "#MAKE#: *** No rule to make target `foo.mk', needed by `error'.  Stop.\n",
+   512
+  );
 
-#&run_make_with_options($makefile, "error", &get_logfile, 512);
-#$answer = "$make_name: *** No rule to make target `makeit.mk', needed by `error'.\n";
-#&compare_output($answer, &get_logfile(1));
+# Make sure that target-specific variables don't impact things.  This could
+# happen because a file record is created when a target-specific variable is
+# set.
+
+run_make_test
+  ('
+bar.mk: foo := baz
+-include bar.mk
+hello: ; @echo hello
+',
+   '',
+   "hello\n"
+  );
+
+
+# Test inheritance of dontcare flag when rebuilding makefiles.
+#
+run_make_test('
+.PHONY: all
+all: ; @:
+
+-include foo
+
+foo: bar; @:
+', '', '');
+
+1;
+
+
+# Make sure that we don't die when the command fails but we dontcare.
+# (Savannah bug #13216).
+#
+run_make_test('
+.PHONY: all
+all:; @:
+
+-include foo
+
+foo: bar; @:
+
+bar:; @exit 1
+', '', '');
+
+# Check include, sinclude, -include with no filenames.
+# (Savannah bug #1761).
+
+run_make_test('
+.PHONY: all
+all:; @:
+include
+-include
+sinclude', '', '');
 
 1;

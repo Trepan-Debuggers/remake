@@ -1,5 +1,23 @@
-@echo Building Make for MSDOS
-@rem Echo ON so they will see what is going on.
+@echo off
+rem Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free
+rem Software Foundation, Inc.
+rem This file is part of GNU Make.
+
+rem GNU Make is free software; you can redistribute it and/or modify it under the
+rem terms of the GNU General Public License as published by the Free Software
+rem Foundation; either version 2, or (at your option) any later version.
+
+rem GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+rem WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+rem A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+rem You should have received a copy of the GNU General Public License along with
+rem GNU Make; see the file COPYING.  If not, write to the Free Software
+rem Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+
+echo Building Make for MSDOS
+
+rem Echo ON so they will see what is going on.
 @echo on
 gcc  -c -I. -I./glob -DHAVE_CONFIG_H -O2 -g commands.c -o commands.o
 gcc  -c -I. -I./glob -DHAVE_CONFIG_H -O2 -g job.c -o job.o
@@ -16,6 +34,8 @@ gcc  -c -I. -I./glob -DHAVE_CONFIG_H -O2 -g variable.c -o variable.o
 gcc  -c -I. -I./glob -DHAVE_CONFIG_H -O2 -g expand.c -o expand.o
 gcc  -c -I. -I./glob -DHAVE_CONFIG_H -O2 -g function.c -o function.o
 gcc  -c -I. -I./glob -DHAVE_CONFIG_H -O2 -g vpath.c -o vpath.o
+gcc  -c -I. -I./glob -DHAVE_CONFIG_H -O2 -g hash.c -o hash.o
+gcc  -c -I. -I./glob -DHAVE_CONFIG_H -O2 -g strcache.c -o strcache.o
 gcc  -c -I. -I./glob -DHAVE_CONFIG_H -O2 -g version.c -o version.o
 gcc  -c -I. -I./glob -DHAVE_CONFIG_H -O2 -g ar.c -o ar.o
 gcc  -c -I. -I./glob -DHAVE_CONFIG_H -O2 -g arscan.c -o arscan.o
@@ -32,7 +52,7 @@ ar rv libglob.a glob.o fnmatch.o
 cd ..
 echo commands.o > respf.$$$
 for %%f in (job dir file misc main read remake rule implicit default variable) do echo %%f.o >> respf.$$$
-for %%f in (expand function vpath version ar arscan signame remote-stub getopt getopt1) do echo %%f.o >> respf.$$$
+for %%f in (expand function vpath hash strcache version ar arscan signame remote-stub getopt getopt1) do echo %%f.o >> respf.$$$
 echo glob/libglob.a >> respf.$$$
 @echo Linking...
 @echo on

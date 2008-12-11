@@ -1,4 +1,4 @@
-#                                                               -*-perl-mode-*-
+#                                                                    -*-perl-*-
 
 $description = "The following test creates a makefile to test
 makelevels in Make. It prints \$(MAKELEVEL) and then
@@ -9,7 +9,6 @@ open(MAKEFILE,"> $makefile");
 # The Contents of the MAKEFILE ...
 
 print MAKEFILE <<EOF;
-SHELL = /bin/sh
 all:
 \t\@echo MAKELEVEL is \$(MAKELEVEL)
 \techo \$\$MAKELEVEL

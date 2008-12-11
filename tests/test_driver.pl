@@ -1,23 +1,82 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 # -*-perl-*-
-
+#
 # Modification history:
 # Written 91-12-02 through 92-01-01 by Stephen McGee.
 # Modified 92-02-11 through 92-02-22 by Chris Arthur to further generalize.
-# End of modification history
+#
+# Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+# 2001, 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+# This file is part of GNU Make.
+#
+# GNU Make is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2, or (at your option) any later version.
+#
+# GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# GNU Make; see the file COPYING.  If not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+
 
 # Test driver routines used by a number of test suites, including
 # those for SCS, make, roll_dir, and scan_deps (?).
-
+#
 # this routine controls the whole mess; each test suite sets up a few
 # variables and then calls &toplevel, which does all the real work.
 
+# $Id: test_driver.pl,v 1.19 2006/03/10 02:20:45 psmith Exp $
+
+
+# The number of test categories we've run
+$categories_run = 0;
+# The number of test categroies that have passed
+$categories_passed = 0;
+# The total number of individual tests that have been run
+$total_tests_run = 0;
+# The total number of individual tests that have passed
+$total_tests_passed = 0;
+# The number of tests in this category that have been run
+$tests_run = 0;
+# The number of tests in this category that have passed
+$tests_passed = 0;
+
+
+# Yeesh.  This whole test environment is such a hack!
+$test_passed = 1;
+
+
+# %makeENV is the cleaned-out environment.
+%makeENV = ();
+
+# %extraENV are any extra environment variables the tests might want to set.
+# These are RESET AFTER EVERY TEST!
+%extraENV = ();
+
+# %origENV is the caller's original environment
+%origENV = %ENV;
+
+sub resetENV
+{
+  # We used to say "%ENV = ();" but this doesn't work in Perl 5.000
+  # through Perl 5.004.  It was fixed in Perl 5.004_01, but we don't
+  # want to require that here, so just delete each one individually.
+  foreach $v (keys %ENV) {
+    delete $ENV{$v};
+  }
+
+  %ENV = %makeENV;
+  foreach $v (keys %extraENV) {
+    $ENV{$v} = $extraENV{$v};
+    delete $extraENV{$v};
+  }
+}
+
 sub toplevel
 {
-  # Get a clean environment
-
-  %makeENV = ();
-
   # Pull in benign variables from the user's environment
   #
   foreach (# UNIX-specific things
@@ -37,15 +96,7 @@ sub toplevel
   #
   %origENV = %ENV;
 
-  # We used to say "%ENV = ();" but this doesn't work in Perl 5.000
-  # through Perl 5.004.  It was fixed in Perl 5.004_01, but we don't
-  # want to require that here, so just delete each one individually.
-
-  foreach $v (keys %ENV) {
-    delete $ENV{$v};
-  }
-
-  %ENV = %makeENV;
+  resetENV();
 
   $| = 1;                     # unbuffered output
 
@@ -113,22 +164,21 @@ sub toplevel
     print "Finding tests...\n";
     opendir (SCRIPTDIR, $scriptpath)
 	|| &error ("Couldn't opendir $scriptpath: $!\n");
-    @dirs = grep (!/^(\.\.?|CVS|RCS)$/, readdir (SCRIPTDIR) );
+    @dirs = grep (!/^(\..*|CVS|RCS)$/, readdir (SCRIPTDIR) );
     closedir (SCRIPTDIR);
     foreach $dir (@dirs)
     {
-      next if ($dir =~ /^\.\.?$/ || $dir eq 'CVS' || $dir eq 'RCS'
-               || ! -d "$scriptpath/$dir");
+      next if ($dir =~ /^(\..*|CVS|RCS)$/ || ! -d "$scriptpath/$dir");
       push (@rmdirs, $dir);
       mkdir ("$workpath/$dir", 0777)
            || &error ("Couldn't mkdir $workpath/$dir: $!\n");
       opendir (SCRIPTDIR, "$scriptpath/$dir")
 	  || &error ("Couldn't opendir $scriptpath/$dir: $!\n");
-      @files = grep (!/^(\.\.?|CVS|RCS)$/, readdir (SCRIPTDIR) );
+      @files = grep (!/^(\..*|CVS|RCS|.*~)$/, readdir (SCRIPTDIR) );
       closedir (SCRIPTDIR);
       foreach $test (@files)
       {
-        next if $test =~ /~$/ || -d $test;
+        -d $test and next;
 	push (@TESTS, "$dir/$test");
       }
     }
@@ -150,17 +200,24 @@ sub toplevel
 
   $| = 1;
 
-  if ($num_failed)
+  $categories_failed = $categories_run - $categories_passed;
+  $total_tests_failed = $total_tests_run - $total_tests_passed;
+
+  if ($total_tests_failed)
   {
-    print "\n$num_failed Test";
-    print "s" unless $num_failed == 1;
+    print "\n$total_tests_failed Test";
+    print "s" unless $total_tests_failed == 1;
+    print " in $categories_failed Categor";
+    print ($categories_failed == 1 ? "y" : "ies");
     print " Failed (See .$diffext files in $workdir dir for details) :-(\n\n";
     return 0;
   }
   else
   {
-    print "\n$counter Test";
-    print "s" unless $counter == 1;
+    print "\n$total_tests_passed Test";
+    print "s" unless $total_tests_passed == 1;
+    print " in $categories_passed Categor";
+    print ($categories_passed == 1 ? "y" : "ies");
     print " Complete ... No Failures :-)\n\n";
     return 1;
   }
@@ -348,16 +405,17 @@ sub print_banner
 
 sub run_each_test
 {
-  $counter = 0;
+  $categories_run = 0;
 
   foreach $testname (sort @TESTS)
   {
-    $counter++;
-    $test_passed = 1;       # reset by test on failure
+    ++$categories_run;
+    $suite_passed = 1;       # reset by test on failure
     $num_of_logfiles = 0;
     $num_of_tmpfiles = 0;
     $description = "";
     $details = "";
+    $old_makefile = undef;
     $testname =~ s/^$scriptpath$pathsep//;
     $perl_testname = "$scriptpath$pathsep$testname";
     $testname =~ s/(\.pl|\.perl)$//;
@@ -369,8 +427,7 @@ sub run_each_test
       $diffext = 'd';
       $baseext = 'b';
       $extext = '';
-   }
-    else {
+    } else {
       $logext = 'log';
       $diffext = 'diff';
       $baseext = 'base';
@@ -390,48 +447,51 @@ sub run_each_test
     print $output;
 
     # Run the actual test!
-    #
+    $tests_run = 0;
+    $tests_passed = 0;
     $code = do $perl_testname;
+
+    $total_tests_run += $tests_run;
+    $total_tests_passed += $tests_passed;
+
+    # How did it go?
     if (!defined($code))
     {
-      $test_passed = 0;
-      if (length ($@))
-      {
+      $suite_passed = 0;
+      if (length ($@)) {
         warn "\n*** Test died ($testname): $@\n";
-      }
-      else
-      {
+      } else {
         warn "\n*** Couldn't run $perl_testname\n";
       }
     }
     elsif ($code == -1) {
-      $test_passed = 0;
+      $suite_passed = 0;
     }
     elsif ($code != 1 && $code != -1) {
-      $test_passed = 0;
+      $suite_passed = 0;
       warn "\n*** Test returned $code\n";
     }
 
-    if ($test_passed) {
-      $status = "ok";
+    if ($suite_passed) {
+      ++$categories_passed;
+      $status = "ok     ($tests_passed passed)";
       for ($i = $num_of_tmpfiles; $i; $i--)
       {
-        &delete ($tmp_filename . &num_suffix ($i) );
+        &rmfiles ($tmp_filename . &num_suffix ($i) );
       }
 
       for ($i = $num_of_logfiles ? $num_of_logfiles : 1; $i; $i--)
       {
-        &delete ($log_filename . &num_suffix ($i) );
-        &delete ($base_filename . &num_suffix ($i) );
+        &rmfiles ($log_filename . &num_suffix ($i) );
+        &rmfiles ($base_filename . &num_suffix ($i) );
       }
     }
-    elsif ($code > 0) {
-      $status = "FAILED";
-      $num_failed++;
+    elsif (!defined $code || $code > 0) {
+      $status = "FAILED ($tests_passed/$tests_run passed)";
     }
     elsif ($code < 0) {
       $status = "N/A";
-      --$counter;
+      --$categories_run;
     }
 
     # If the verbose option has been specified, then a short description
@@ -466,7 +526,7 @@ sub run_each_test
 # If the keep flag is not set, this subroutine deletes all filenames that
 # are sent to it.
 
-sub delete
+sub rmfiles
 {
   local(@files) = @_;
 
@@ -577,12 +637,9 @@ sub error
 sub compare_output
 {
   local($answer,$logfile) = @_;
-  local($slurp);
+  local($slurp, $answer_matched) = ('', 0);
 
-  if ($debug)
-  {
-    print "Comparing Output ........ ";
-  }
+  print "Comparing Output ........ " if $debug;
 
   $slurp = &read_file_into_string ($logfile);
 
@@ -591,33 +648,45 @@ sub compare_output
   $slurp =~ s/^.*modification time .*in the future.*\n//gm;
   $slurp =~ s/^.*Clock skew detected.*\n//gm;
 
-  if ($slurp eq $answer)
+  ++$tests_run;
+
+  if ($slurp eq $answer) {
+    $answer_matched = 1;
+  } else {
+    # See if it is a slash or CRLF problem
+    local ($answer_mod) = $answer;
+
+    $answer_mod =~ tr,\\,/,;
+    $answer_mod =~ s,\r\n,\n,gs;
+
+    $slurp =~ tr,\\,/,;
+    $slurp =~ s,\r\n,\n,gs;
+
+    $answer_matched = ($slurp eq $answer_mod);
+  }
+
+  if ($answer_matched && $test_passed)
   {
-    if ($debug)
-    {
-      print "ok\n";
-    }
+    print "ok\n" if $debug;
+    ++$tests_passed;
     return 1;
   }
-  else
-  {
-    if ($debug)
-    {
-      print "DIFFERENT OUTPUT\n";
-    }
-    $test_passed = 0;
+
+  if (! $answer_matched) {
+    print "DIFFERENT OUTPUT\n" if $debug;
+
     &create_file (&get_basefile, $answer);
 
-    if ($debug)
-    {
-      print "\nCreating Difference File ...\n";
-    }
+    print "\nCreating Difference File ...\n" if $debug;
+
     # Create the difference file
+
     local($command) = "diff -c " . &get_basefile . " " . $logfile;
     &run_command_with_output(&get_difffile,$command);
-
-    return 0;
   }
+
+  $suite_passed = 0;
+  return 0;
 }
 
 sub read_file_into_string
@@ -701,15 +770,16 @@ sub run_command
 {
   local ($code);
 
-  if ($debug)
-  {
-    print "\nrun_command: @_\n";
-    $code = system @_;
-    print "run_command: \"@_\" returned $code.\n";
-    return $code;
-  }
+  # We reset this before every invocation.  On Windows I think there is only
+  # one environment, not one per process, so I think that variables set in
+  # test scripts might leak into subsequent tests if this isn't reset--???
+  resetENV();
 
-  return system @_;
+  print "\nrun_command: @_\n" if $debug;
+  $code = system @_;
+  print "run_command: \"@_\" returned $code.\n" if $debug;
+
+  return $code;
 }
 
 # run one command (passed as a list of arg 0 - n, with arg 0 being the
@@ -722,13 +792,16 @@ sub run_command_with_output
   local ($filename) = shift;
   local ($code);
 
+  # We reset this before every invocation.  On Windows I think there is only
+  # one environment, not one per process, so I think that variables set in
+  # test scripts might leak into subsequent tests if this isn't reset--???
+  resetENV();
+
   &attach_default_output ($filename);
   $code = system @_;
   &detach_default_output;
-  if ($debug)
-  {
-    print "run_command_with_output: \"@_\" returned $code.\n";
-  }
+
+  print "run_command_with_output: '@_' returned $code.\n" if $debug;
 
   return $code;
 }

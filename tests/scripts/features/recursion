@@ -1,61 +1,55 @@
 #                                                                    -*-perl-*-
-$description = "The following test creates a makefile to ...\n";
+$description = "Test recursion.";
 
 $details = "DETAILS";
 
-open(MAKEFILE,"> $makefile");
+# Test some basic recursion.
+run_make_test('
+all:
+	$(MAKE) -f #MAKEFILE# foo
+foo:
+	@echo $(MAKE)
+	@echo MAKELEVEL = $(MAKELEVEL)
+	$(MAKE) -f #MAKEFILE# last
+last:
+	@echo $(MAKE)
+	@echo MAKELEVEL = $(MAKELEVEL)
+	@echo THE END
+',
+              ('CFLAGS=-O -w' . ($parallel_jobs ? '-j 2' : '')),
+              ($vos
+               ? "#MAKE#: Entering directory `#PWD#'
+make 'CFLAGS=-O' -f #MAKEFILE# foo
+make CFLAGS=-O
+MAKELEVEL = 0
+make 'CFLAGS=-O' -f #MAKEFILE# last
+make CFLAGS=-O
+MAKELEVEL = 0
+THE END
+#MAKE#: Leaving directory `#PWD#'"
+               : "#MAKE#: Entering directory `#PWD#'
+#MAKEPATH# -f #MAKEFILE# foo
+#MAKE#[1]: Entering directory `#PWD#'
+#MAKEPATH#
+MAKELEVEL = 1
+#MAKEPATH# -f #MAKEFILE# last
+#MAKE#[2]: Entering directory `#PWD#'
+#MAKEPATH#
+MAKELEVEL = 2
+THE END
+#MAKE#[2]: Leaving directory `#PWD#'
+#MAKE#[1]: Leaving directory `#PWD#'
+#MAKE#: Leaving directory `#PWD#'"));
 
-# The Contents of the MAKEFILE ...
 
-print MAKEFILE "all: \n"
-              ."\t\$(MAKE) -f $makefile foo \n"
-              ."foo: \n"
-              ."\t\@echo \$(MAKE) \n"
-              ."\t\@echo MAKELEVEL = \$(MAKELEVEL)\n"
-              ."\t\$(MAKE) -f $makefile last \n"
-              ."last: \n"
-              ."\t\@echo \$(MAKE) \n"
-              ."\t\@echo MAKELEVEL = \$(MAKELEVEL) \n"
-              ."\t\@echo THE END\n";
-
-# END of Contents of MAKEFILE
-
-close(MAKEFILE);
-
-if ($vos)
-{
-   $answer = "$make_name: Entering directory \`$pwd\'\n"
-            ."make 'CFLAGS=-O' -f $makefile foo \n"
-            ."make CFLAGS=-O\n"
-            ."MAKELEVEL = 0\n"
-            ."make 'CFLAGS=-O' -f $makefile last \n"
-            ."make CFLAGS=-O\n"
-            ."MAKELEVEL = 0\n"
-            ."THE END\n"
-            ."$make_name: Leaving directory `$pwd'\n";
-}
-else
-{
-   $answer = "$make_name: Entering directory `$pwd'\n"
-            ."$mkpath -f $makefile foo \n"
-            ."${make_name}[1]: Entering directory `$pwd'\n"
-            ."$mkpath\n"
-            ."MAKELEVEL = 1\n"
-            ."$mkpath -f $makefile last \n"
-            ."${make_name}[2]: Entering directory `$pwd'\n"
-            ."$mkpath\n"
-            ."MAKELEVEL = 2\n"
-            ."THE END\n"
-            ."${make_name}[2]: Leaving directory `$pwd'\n"
-            ."${make_name}[1]: Leaving directory `$pwd'\n"
-            ."$make_name: Leaving directory `$pwd'\n";
-}
-
-$mkoptions = "CFLAGS=-O -w";
-$mkoptions .= " -j 2" if ($parallel_jobs);
-
-&run_make_with_options($makefile,$mkoptions,&get_logfile,0);
-
-&compare_output($answer,&get_logfile(1));
+# Test command line overrides.
+run_make_test('
+recur: all ; @$(MAKE) --no-print-directory -f #MAKEFILE# a=AA all
+all: ; @echo "MAKEOVERRIDES = $(MAKEOVERRIDES)"
+',
+              'a=ZZ',
+              'MAKEOVERRIDES = a=ZZ
+MAKEOVERRIDES = a=AA
+');
 
 1;

@@ -1,4 +1,19 @@
-/* config.h.in.  Generated automatically from configure.in by autoheader.  */
+/* config.h -- hand-massaged for Amiga                                  -*-C-*-
+Copyright (C) 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
+2005, 2006 Free Software Foundation, Inc.
+This file is part of GNU Make.
+
+GNU Make is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2, or (at your option) any later version.
+
+GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+GNU Make; see the file COPYING.  If not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 
 /* Define if on AIX 3.
    System headers sometimes define this.
@@ -146,6 +161,9 @@
 /* Define if the `S_IS*' macros in <sys/stat.h> do not work properly.  */
 /* #undef STAT_MACROS_BROKEN */
 
+/* Define if your compiler conforms to the ANSI C standard. */
+#define HAVE_ANSI_COMPILER 1
+
 /* Define if you have the ANSI C header files.	*/
 #define STDC_HEADERS
 
@@ -172,7 +190,7 @@
 #define PACKAGE "make"
 
 /* Version of this package (needed by automake) */
-#define VERSION "3.80"
+#define VERSION "3.81"
 
 /* Define to the name of the SCCS `get' command.  */
 #define SCCS_GET "get"
@@ -276,6 +294,9 @@
 
 /* Define if you have the <ndir.h> header file.  */
 /* #undef HAVE_NDIR_H */
+
+/* Define to 1 if you have the <stdarg.h> header file. */
+#define HAVE_STDARG_H 1
 
 /* Define if you have the <stdlib.h> header file.  */
 /* #undef HAVE_STDLIB_H */

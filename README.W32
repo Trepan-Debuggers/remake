@@ -1,45 +1,69 @@
-Port of GNU make to Windows NT and Windows 95
-Builds natively with MSVC 2.x or MSVC 4.x compilers.
-Should also build fine with MSVC 5.x and 6.x (though not confirmed).
+This version of GNU make has been tested on Microsoft Windows 2000/XP/2003.
+It has also been used on Windows 95/98/NT, and on OS/2.
 
-This Windows 32-bit port of GNU make is maintained primarily by Rob
-Tulloh, who is also the author of this README.
+It builds natively with MSVC 2.x, 4.x, 5.x, 6.x, and 2003 as well as
+.NET 7.x and .NET 2003.
 
-To build with nmake on Windows NT, Windows 95, or Windows 98:
+It builds with the MinGW port of GCC 3.x (tested with GCC 3.4.2).
 
-	1. Make sure cl.exe is in your %Path%. Example:
-
-		set Path=%Path%;c:/msdev/bin
-
-	2. Make sure %include% is set to msvc include directory. Example:
-
-		set include=c:/msdev/include
-
-	3. Make sure %lib% is set to msvc lib directory. Example:
-
-		set lib=c:/msdev/lib
-
-	4. nmake /f NMakefile
+The Windows 32-bit port of GNU make is maintained jointly by various
+people.  It was originally made by Rob Tulloh.
 
 
-    A short cut to steps 1, 2, and 3 is to run VCVARS32.bat before
-    invoking namke. For example:
+Do this first, regardless of the build method you choose:
+---------------------------------------------------------
 
-        c:
-        cd \msdev\bin
-        VCVARS32.bat
-	cd \path\to\make-3.80
+ 1. At the Windows command prompt run:
+
+      if not exist NMakefile copy NMakefile.template NMakefile
+      if not exist config.h copy config.h.W32 config.h
+
+    Then edit config.h to your liking (especially the few shell-related
+    defines near the end, or HAVE_CASE_INSENSITIVE_FS which corresponds
+    to './configure --enable-case-insensitive-file-system').
+
+
+Using make_msvc_net2003.vcproj
+------------------------------
+
+ 2. Open make_msvc_net2003.vcproj in MSVS71 or MSVC71 or any compatible IDE,
+    then build this project as usual.
+
+
+Building with (MinGW-)GCC using build_w32.bat
+---------------------------------------------
+
+ 2. Open a W32 command prompt for your installed (MinGW-)GCC, setup a
+    correct PATH and other environment variables for it, then execute ...
+
+	build_w32.bat gcc
+
+    This produces gnumake.exe in the current directory.
+
+
+Building with (MSVC++-)cl using build_w32.bat or NMakefile
+----------------------------------------------------------
+
+ 2. Open a W32 command prompt for your installed (MSVC++-)cl, setup a
+    correct PATH and other environment variables for it (usually via
+    executing vcvars32.bat or vsvars32.bat from the cl-installation,
+    e.g. "%VS71COMNTOOLS%vsvars32.bat"; or using a corresponding start
+    menue entry from the cl-installation), then execute EITHER ...
+
+	build_w32.bat
+
+    (this produces WinDebug/gnumake.exe and WinRel/gnumake.exe)
+
+    ... OR ...
+
 	nmake /f NMakefile
 
-There is a bat file (build_w32.bat) for folks who have fear of nmake.
-
-Outputs:
-
-	WinDebug/make.exe
-	WinRel/make.exe
+    (this produces WinDebug/make.exe and WinRel/make.exe).
 
 
+-------------------
 -- Notes/Caveats --
+-------------------
 
 GNU make on Windows 32-bit platforms:
 
@@ -63,14 +87,14 @@ GNU make and sh.exe:
 
 	There are very few true ports of Bourne shell for NT right now.
 	There is a version of GNU bash available from Cygnus "Cygwin"
-	porting effort (http://sourceware.cygnus.com/cygwin).
+	porting effort (http://www.cygwin.com/).
 	Other possibilities are the MKS version of sh.exe, or building
         your own with a package like NutCracker (DataFocus) or Portage
-        (Consensys).
+        (Consensys).  Also MinGW includes sh (http://mingw.org/).
 
 GNU make and brain-dead shells (BATCH_MODE_ONLY_SHELL):
 
-	Some versions of Bourne shell does not behave well when invoked
+	Some versions of Bourne shell do not behave well when invoked
 	as 'sh -c' from CreateProcess().  The main problem is they seem
 	to have a hard time handling quoted strings correctly. This can
 	be circumvented by writing commands to be executed to a batch
@@ -79,11 +103,14 @@ GNU make and brain-dead shells (BATCH_MODE_ONLY_SHELL):
 	To work around this difficulty, this version of make supports
 	a batch mode.  When BATCH_MODE_ONLY_SHELL is defined at compile
 	time, make forces all command lines to be executed via script
-	files instead of by command line.
+	files instead of by command line.  In this mode you must have a
+	working sh.exe in order to use parallel builds (-j).
 
 	A native Windows32 system with no Bourne shell will also run
 	in batch mode.  All command lines will be put into batch files
-	and executed via $(COMSPEC) (%COMSPEC%).
+	and executed via $(COMSPEC) (%COMSPEC%).  Note that parallel
+        builds (-j) require a working Bourne shell; they will not work
+        with COM.
 
 GNU make and Cygnus GNU Windows32 tools:
 
@@ -128,7 +155,8 @@ GNU make handling of drive letters in pathnames (PATH, vpath, VPATH):
 	Please note that you are free to mix colon and semi-colon in the
 	specification of paths.	 Make is able to figure out the intended
 	result and convert the paths internally to the format needed
-	when interacting with the operating system.
+	when interacting with the operating system, providing the path
+	is not within quotes, e.g. "x:/test/test.c".
 
 	You are encouraged to use colon as the separator character.
 	This should ease the pain of deciding how to handle various path
@@ -139,7 +167,7 @@ GNU make handling of drive letters in pathnames (PATH, vpath, VPATH):
 GNU make test suite:
 
 	I verified all functionality with a slightly modified version
-	of make-test-3.80 (modifications to get test suite to run
+	of make-test-3.81 (modifications to get test suite to run
 	on Windows NT). All tests pass in an environment that includes
 	sh.exe.  Tests were performed on both Windows NT and Windows 95.
 
@@ -164,15 +192,17 @@ Building GNU make on Windows NT and Windows 95/98 with Microsoft Visual C:
 Pathnames and white space:
 
 	Unlike Unix, Windows 95/NT systems encourage pathnames which
-	contain white space (e.g. C:\Program Files\). These sorts of pathnames
-	are legal under Unix too, but are never encouraged. There is
-	at least one place in make (VPATH/vpath handling) where paths
-	containing white space will simply not work. There may be others
-	too. I chose to not try and port make in such a way so that
-	these sorts of paths could be handled. I offer these suggestions
-	as workarounds:
+	contain white space (e.g. C:\Program Files\). These sorts of
+	pathnames are legal under Unix too, but are never encouraged.
+	There is at least one place in make (VPATH/vpath handling) where
+	paths containing white space will simply not work. There may be
+	others too. I chose to not try and port make in such a way so
+	that these sorts of paths could be handled. I offer these
+	suggestions as workarounds:
 
-		1. Use 8.3 notation
+		1. Use 8.3 notation. i.e. "x:/long~1/", which is actually
+		   "x:\longpathtest".  Type "dir /x" to view these filenames
+		   within the cmd.exe shell.
 		2. Rename the directory so it does not contain white space.
 
 	If you are unhappy with this choice, this is free software
@@ -217,25 +247,42 @@ SAMBA/NTFS/VFAT:
 	package using SAMBA as my file server. The reason seems to be
 	related to the way VC++ 4.0 changes the case name of the pdb
 	filename it is passed on the command line. It seems to change
-	the name always to to lower case. I contend that
-	the VC++ compiler should not change the casename of files that
-	are passed as arguments on the command line. I don't think this
-	was a problem in MSVC 2.x, but I know it is a problem in MSVC 4.x.
+	the name always to to lower case. I contend that the VC++
+	compiler should not change the casename of files that are passed
+	as arguments on the command line. I don't think this was a
+	problem in MSVC 2.x, but I know it is a problem in MSVC 4.x.
 
 	The package builds fine on VFAT and NTFS filesystems.
 
 	Most all of the development I have done to date has been using
 	NTFS and long file names. I have not done any considerable work
-	under VFAT. VFAT users may wish to be aware that this port
-	of make does respect case sensitivity.
+	under VFAT. VFAT users may wish to be aware that this port of
+	make does respect case sensitivity.
 
 FAT:
 
-	Version 3.76 added support for FAT filesystems. Make
-	works around some difficulties with stat'ing of
-	files and caching of filenames and directories internally.
+	Version 3.76 added support for FAT filesystems. Make works
+	around some difficulties with stat'ing of files and caching of
+	filenames and directories internally.
 
 Bug reports:
 
 	Please submit bugs via the normal bug reporting mechanism which
 	is described in the GNU make manual and the base README.
+
+-------------------------------------------------------------------------------
+Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+2006 Free Software Foundation, Inc.
+This file is part of GNU Make.
+
+GNU Make is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2, or (at your option) any later version.
+
+GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+GNU Make; see the file COPYING.  If not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.

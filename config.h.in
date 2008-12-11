@@ -35,11 +35,17 @@
    */
 #undef HAVE_ALLOCA_H
 
-/* This system has SA_RESTART, but it doesn't work properly. */
-#undef HAVE_BROKEN_RESTART
+/* Define if your compiler conforms to the ANSI C standard. */
+#undef HAVE_ANSI_COMPILER
+
+/* Define to 1 if you have the `atexit' function. */
+#undef HAVE_ATEXIT
 
 /* Define to 1 if you have the `bsd_signal' function. */
 #undef HAVE_BSD_SIGNAL
+
+/* Use case insensitive file names */
+#undef HAVE_CASE_INSENSITIVE_FS
 
 /* Define if you have the clock_gettime function. */
 #undef HAVE_CLOCK_GETTIME
@@ -48,12 +54,27 @@
    */
 #undef HAVE_DCGETTEXT
 
+/* Define to 1 if you have the declaration of `sys_siglist', and to 0 if you
+   don't. */
+#undef HAVE_DECL_SYS_SIGLIST
+
+/* Define to 1 if you have the declaration of `_sys_siglist', and to 0 if you
+   don't. */
+#undef HAVE_DECL__SYS_SIGLIST
+
+/* Define to 1 if you have the declaration of `__sys_siglist', and to 0 if you
+   don't. */
+#undef HAVE_DECL___SYS_SIGLIST
+
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 #undef HAVE_DIRENT_H
 
 /* Define to 1 if you don't have `vprintf' but do have `_doprnt.' */
 #undef HAVE_DOPRNT
+
+/* Use platform specific coding */
+#undef HAVE_DOS_PATHS
 
 /* Define to 1 if you have the `dup2' function. */
 #undef HAVE_DUP2
@@ -82,6 +103,9 @@
 /* Define to 1 if you have the `getloadavg' function. */
 #undef HAVE_GETLOADAVG
 
+/* Define to 1 if you have the `getrlimit' function. */
+#undef HAVE_GETRLIMIT
+
 /* Define if the GNU gettext() function is already present or preinstalled. */
 #undef HAVE_GETTEXT
 
@@ -105,6 +129,9 @@
 
 /* Define to 1 if you have the <locale.h> header file. */
 #undef HAVE_LOCALE_H
+
+/* Define to 1 if you have the `lstat' function. */
+#undef HAVE_LSTAT
 
 /* Define to 1 if you have the <mach/mach.h> header file. */
 #undef HAVE_MACH_MACH_H
@@ -136,6 +163,12 @@
 /* Define to 1 if you have the `pstat_getdynamic' function. */
 #undef HAVE_PSTAT_GETDYNAMIC
 
+/* Define to 1 if you have the `readlink' function. */
+#undef HAVE_READLINK
+
+/* Define to 1 if you have the `realpath' function. */
+#undef HAVE_REALPATH
+
 /* Define if <signal.h> defines the SA_RESTART constant. */
 #undef HAVE_SA_RESTART
 
@@ -157,6 +190,9 @@
 /* Define to 1 if you have the `setreuid' function. */
 #undef HAVE_SETREUID
 
+/* Define to 1 if you have the `setrlimit' function. */
+#undef HAVE_SETRLIMIT
+
 /* Define to 1 if you have the `setvbuf' function. */
 #undef HAVE_SETVBUF
 
@@ -168,6 +204,9 @@
 
 /* Define to 1 if you have the `socket' function. */
 #undef HAVE_SOCKET
+
+/* Define to 1 if you have the <stdarg.h> header file. */
+#undef HAVE_STDARG_H
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
@@ -214,6 +253,9 @@
 /* Define to 1 if you have the <sys/param.h> header file. */
 #undef HAVE_SYS_PARAM_H
 
+/* Define to 1 if you have the <sys/resource.h> header file. */
+#undef HAVE_SYS_RESOURCE_H
+
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
 
@@ -229,11 +271,14 @@
 /* Define to 1 if you have the <sys/wait.h> header file. */
 #undef HAVE_SYS_WAIT_H
 
-/* Define this if you have the `union wait' type in <sys/wait.h>. */
+/* Define this if you have the \`union wait' type in <sys/wait.h>. */
 #undef HAVE_UNION_WAIT
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
+
+/* Define to 1 if you have the <varargs.h> header file. */
+#undef HAVE_VARARGS_H
 
 /* Define to 1 if you have the `vfork' function. */
 #undef HAVE_VFORK
@@ -261,6 +306,9 @@
 
 /* Define this to enable job server support in GNU make. */
 #undef MAKE_JOBSERVER
+
+/* Define this to enable symbolic link timestamp checking. */
+#undef MAKE_SYMLINKS
 
 /* Define to 1 if your `struct nlist' has an `n_un' member. Obsolete, depend
    on `HAVE_STRUCT_NLIST_N_UN_N_NAME */
@@ -310,9 +358,9 @@
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be
    automatically deduced at run-time.
-        STACK_DIRECTION > 0 => grows toward higher addresses
-        STACK_DIRECTION < 0 => grows toward lower addresses
-        STACK_DIRECTION = 0 => direction of growth unknown */
+	STACK_DIRECTION > 0 => grows toward higher addresses
+	STACK_DIRECTION < 0 => grows toward lower addresses
+	STACK_DIRECTION = 0 => direction of growth unknown */
 #undef STACK_DIRECTION
 
 /* Define to 1 if the `S_IS*' macros in <sys/stat.h> do not work properly. */
@@ -321,14 +369,11 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
-/* Define if 'struct stat' contains a nanoseconds field */
+/* Define if struct stat contains a nanoseconds field */
 #undef ST_MTIM_NSEC
 
 /* Define to 1 on System V Release 4. */
 #undef SVR4
-
-/* Define to 1 if `sys_siglist' is declared by <signal.h> or <unistd.h>. */
-#undef SYS_SIGLIST_DECLARED
 
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #undef TIME_WITH_SYS_TIME
@@ -342,6 +387,9 @@
 
 /* Version number of package */
 #undef VERSION
+
+/* Use platform specific coding */
+#undef WINDOWS32
 
 /* Define if using the dmalloc debugging malloc package */
 #undef WITH_DMALLOC
