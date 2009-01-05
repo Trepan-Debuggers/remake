@@ -1,5 +1,5 @@
 /* 
-Copyright (C) 2005, 2008 R. Bernstein rocky@gnu.org
+Copyright (C) 2005, 2008, 2009 R. Bernstein rocky@gnu.org
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -166,7 +166,8 @@ dbg_cmd_frame_up (char *psz_amount)
       psz_target_name = p->p_target->name;
       
       p_target_loc    = &(p->p_target->floc);
-      if (!p->p_target->floc.filenm && p->p_target->cmds->fileinfo.filenm) {
+      if (!p->p_target->floc.filenm && p->p_target->cmds &&
+	  p->p_target->cmds->fileinfo.filenm) {
 	/* Fake the location based on the commands - it's better than
 	   nothing...
 	*/
