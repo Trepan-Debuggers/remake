@@ -1,0 +1,264 @@
+2008-10-26  R. Bernstein <rocky@gnu.org>
+
+	* Makefile.am, configure.ac, doc/.gitignore, doc/Makefile.am,
+	doc/version.texi: Administriva - make "make dist work again".
+
+2008-10-26  R. Bernstein <rocky@gnu.org>
+
+	* doc/make.1.in: Add a manual page. Clean more doc files.
+
+2008-10-26  R. Bernstein <rocky@gnu.org>
+
+	* doc/make.texi, po/be.po, po/da.po, po/de.po, po/es.po, po/fi.po,
+	po/fr.po, po/ga.po, po/gl.po, po/he.po, po/hr.po, po/id.po,
+	po/ja.po, po/ko.po, po/make.pot, po/nl.po, po/pl.po, po/pt_BR.po,
+	po/ru.po, po/rw.po, po/sv.po, po/tr.po, po/uk.po, po/vi.po,
+	po/zh_CN.po: Add descriptions of debugger options
+
+2008-10-25  R. Bernstein <rocky@gnu.org>
+
+	* debugger/cmd.c, debugger/cmd.h, debugger/fns.c, debugger/fns.h,
+	debugger/info.c, print.c, print.h, rule.c, rule.h, trace.c: More
+	"info" information. Specifically "info program", "info rule", "info
+	file/makefile".
+
+2008-10-24  R. Bernstein <rocky@gnu.org>
+
+	* emacs/mdb.el.in: Remove GNU Emacs compile warnings (caused by a
+	bug ;-)
+
+2008-10-24  R. Bernstein <rocky@gnu.org>
+
+	* .deps/.gitignore, Makefile.am, dbg_break.c, dbg_break.h,
+	dbg_cmd.c, dbg_cmd.h, dbg_fns.c, dbg_fns.h, dbg_info.c, dbg_info.h,
+	dbg_stack.c, dbg_stack.h, debugger/break.c, debugger/break.h,
+	debugger/cmd.c, debugger/cmd.h, debugger/fns.c, debugger/fns.h,
+	debugger/info.c, debugger/info.h, debugger/stack.c,
+	debugger/stack.h, job.c, main.c, print.c, read.c, remake.c, trace.c: 
+	Move debugger files into its own directory.
+
+2008-10-24  R. Bernstein <rocky@gnu.org>
+
+	* Makefile.am: Install under the name 'remake' by default.
+
+2008-10-24  R. Bernstein <rocky@gnu.org>
+
+	* dbg_cmd.c, dbg_cmd.h, dbg_info.c, dbg_info.h, emacs/.gitignore,
+	po/be.po, po/da.po, po/de.po, po/es.po, po/fi.po, po/fr.po,
+	po/ga.po, po/gl.po, po/he.po, po/hr.po, po/id.po, po/ja.po,
+	po/ko.po, po/make.pot, po/nl.po, po/pl.po, po/pt_BR.po, po/ru.po,
+	po/rw.po, po/sv.po, po/tr.po, po/uk.po, po/vi.po, po/zh_CN.po: Add
+	'info rules' and 'info vpath'. Reinstate translation files. Put info
+	in its own file.
+
+2008-10-24  R. Bernstein <rocky@gnu.org>
+
+	* Makefile.am: Add 'info rules and 'info vpath'. Split out info into
+	its own file.
+
+2008-10-24  R. Bernstein <rocky@gnu.org>
+
+	* commands.h, dbg_cmd.c, dbg_cmd.h, job.c, main.c, po/be.po,
+	po/da.po, po/de.po, po/es.po, po/fi.po, po/fr.po, po/ga.po,
+	po/gl.po, po/he.po, po/hr.po, po/id.po, po/ja.po, po/ko.po,
+	po/make.pot, po/nl.po, po/pl.po, po/pt_BR.po, po/ru.po, po/rw.po,
+	po/sv.po, po/tr.po, po/uk.po, po/vi.po, po/zh_CN.po, print.c,
+	read.c, remake.c, trace.c: Add "info program" with reason we are
+	stopped inside the debugger
+
+2008-10-24  R. Bernstein <rocky@gnu.org>
+
+	* print.c: Cosmetic comment typo.
+
+2008-10-24  R. Bernstein <rocky@gnu.org>
+
+	* dbg_cmd.c, print.c, print.h: Add "info files" which is more
+	verbose information regarding "info makefiles".
+
+2008-10-24  R. Bernstein <rocky@gnu.org>
+
+	* dbg_cmd.c, dbg_fns.c, debug.c, debug.h, main.c, remake.c: Add
+	option to turn off goal update stop. On recursive makes, show
+	command invocation.
+
+2008-10-24  R. Bernstein <rocky@gnu.org>
+
+	* emacs/mdb.el.in, remake.c: Merge in another debugger call. Sync up
+	emacs code with bashdb a little.
+
+2008-10-24  R. Bernstein <rocky@gnu.org>
+
+	* remake.c: Merge in another 'enter-debugger' from prior remake.
+
+2008-10-24  R. Bernstein <rocky@gnu.org>
+
+	* job.c: Merge in another 'enter_debugger' from remake
+
+2008-10-23  R. Bernstein <rocky@gnu.org>
+
+	* commands.c, commands.h, job.c: command line number merge from
+	remake. Track line numbers for a target -- useful if a target has
+	more than one line to run.
+
+2008-10-23  R. Bernstein <rocky@gnu.org>
+
+	* job.c: old/new merger
+
+2008-10-23  R. Bernstein <rocky@gnu.org>
+
+	* job.h: job.h merge with old/new code.
+
+2008-10-23  R. Bernstein <rocky@gnu.org>
+
+	* configure: configure is derived from configure.ac
+
+2008-10-23  R. Bernstein <rocky@gnu.org>
+
+	* config/Makefile.am, po/be.po, po/da.po, po/de.po, po/es.po,
+	po/fi.po, po/fr.po, po/ga.po, po/gl.po, po/he.po, po/hr.po,
+	po/id.po, po/ja.po, po/ko.po, po/make.pot, po/nl.po, po/pl.po,
+	po/pt_BR.po, po/ru.po, po/rw.po, po/sv.po, po/tr.po, po/uk.po,
+	po/vi.po, po/zh_CN.po: Add ommitted readline.h
+
+2008-10-23  R. Bernstein <rocky@gnu.org>
+
+	* emacs/.gitignore, job.c, tests/scripts/features/errors,
+	tests/scripts/features/patternrules,
+	tests/scripts/features/vpathplus, tests/scripts/options/dash-k,
+	tests/test_driver.pl: Give traceback on error unless
+	--no-extended-errors is set. (Merge child_error from pevious remake)
+
+
+2008-10-22  R. Bernstein <rocky@gnu.org>
+
+	* Makefile.am, configure, configure.ac, emacs/mdb.el.in: 
+	Add/build/install emacs code
+
+2008-10-22  R. Bernstein <rocky@gnu.org>
+
+	* commands.c, commands.h, function.c, job.c, job.h, main.c, make.h,
+	remake.c: Pass target contexts down as we recurse targets. We can
+	now step/next inside of Makefiles!
+
+2008-10-22  R. Bernstein <rocky@gnu.org>
+
+	* doc/version.texi: Start to bring job.c in line with remake.
+	Debugger "quit" override --keep-going. . More work is needed.
+
+2008-10-22  R. Bernstein <rocky@gnu.org>
+
+	* doc/.gitignore, po/.gitignore, po/be.po, po/da.po, po/de.po,
+	po/es.po, po/fi.po, po/fr.po, po/ga.po, po/gl.po, po/he.po,
+	po/hr.po, po/id.po, po/ja.po, po/ko.po, po/nl.po, po/pl.po,
+	po/pt_BR.po, po/ru.po, po/rw.po, po/sv.po, po/tr.po, po/uk.po,
+	po/vi.po, po/zh_CN.po: gettext hell
+
+2008-10-22  R. Bernstein <rocky@gnu.org>
+
+	* .gitignore, Makefile.am, NEWS, doc/make.info, doc/make.info-1,
+	doc/make.info-2, doc/stamp-vti, doc/version.texi, po/.gitignore,
+	po/be.gmo, po/be.po, po/da.gmo, po/da.po, po/de.gmo, po/de.po,
+	po/es.gmo, po/es.po, po/fi.gmo, po/fi.po, po/fr.gmo, po/fr.po,
+	po/ga.gmo, po/ga.po, po/gl.gmo, po/gl.po, po/he.gmo, po/he.po,
+	po/hr.gmo, po/hr.po, po/id.gmo, po/id.po, po/ja.gmo, po/ja.po,
+	po/ko.gmo, po/ko.po, po/make.pot, po/nl.gmo, po/nl.po, po/pl.gmo,
+	po/pl.po, po/pt_BR.gmo, po/pt_BR.po, po/ru.gmo, po/ru.po,
+	po/rw.gmo, po/rw.po, po/sv.gmo, po/sv.po, po/tr.gmo, po/tr.po,
+	po/uk.gmo, po/uk.po, po/vi.gmo, po/vi.po, po/zh_CN.gmo, po/zh_CN.po: 
+	Administrivia and things to make building a release feasable.
+
+2008-10-22  R. Bernstein <rocky@gnu.org>
+
+	* ar.c, dir.c, dir_fns.h, implicit.c, make.h, read.c, rule.c,
+	vpath.c: Allow continuation after a fatal error fatal(). More
+	merges.
+
+2008-10-22  R. Bernstein <rocky@gnu.org>
+
+	* dep.h, main.c, read.c, read.h: Make -X/--debugger now at least
+	calls the debugger on error exit!
+
+2008-10-22  R. Bernstein <rocky@gnu.org>
+
+	* main.c: remake's -x and -y option now do something
+
+2008-10-22  R. Bernstein <rocky@gnu.org>
+
+	* main.c: More remake main.c code merged
+
+2008-10-21  R. Bernstein <rocky@gnu.org>
+
+	* config/readline.h, file.h: Move over files from remake
+
+2008-10-21  R. Bernstein <rocky@gnu.org>
+
+	* commands.c, commands.h, dbg_cmd.c, file.c, filedef.h, function.c,
+	main.c, make.h, rule.c, variable.c, variable.h: Add variable print
+	routines from remake -- print without hash stats and masks to
+	indicate what to show.
+
+2008-10-21  R. Bernstein <rocky@gnu.org>
+
+	* read.c: Add push/pop of file location in recursive makefile
+	reading.
+
+2008-10-21  R. Bernstein <rocky@gnu.org>
+
+	* ar.c, commands.c, default.c, file.c, filedef.h, implicit.c,
+	main.c, make.h, read.c, remake.c: Conver enter_file() to save file
+	location.
+
+2008-10-21  R. Bernstein <rocky@gnu.org>
+
+	* main.c, make.h, tests/.gitignore: Merge more of remake's main.
+
+2008-10-21  R. Bernstein <rocky@gnu.org>
+
+	* .gitignore, doc/.gitignore: Administrivia
+
+2008-10-21  R. Bernstein <rocky@gnu.org>
+
+	* Makefile.am, buildargv.c, buildargv.h, commands.h, configure,
+	dbg_break.c, dbg_break.h, dbg_cmd.c, dbg_cmd.h, dbg_fns.c,
+	dbg_fns.h, dbg_stack.c, dbg_stack.h, debug.c, debug.h, dep.h,
+	expand.c, expand.h, filedef.h, function.c, function.h, hash.c,
+	job.h, main.c, make.h, misc.c, print.c, print.h, read.c, read.h,
+	remake.c, trace.c, trace.h, types.h, variable.c, variable.h: Merge
+	in more of remake debugger code
+
+2008-10-21  R. Bernstein <rocky@gnu.org>
+
+	* autogen.sh, config/.gitignore, config/readline.m4, configure,
+	configure.ac, configure.in, emacs/.gitignore, emacs/Makefile.am,
+	emacs/elk-test.el, emacs/gud.el, emacs/mdb-test.el.in,
+	emacs/mdb.el.in: autotools merge with remake: Add tracing and
+	readline testing. Add emacs files
+
+2008-10-21  R. Bernstein <rocky@gnu.org>
+
+	* .deps/.gitignore, .gitignore, config/.gitignore, configure,
+	doc/.gitignore, doc/stamp-vti, doc/version.texi, glob/.gitignore,
+	po/.gitignore, w32/.gitignore: More administrivia
+
+2008-10-21  R. Bernstein <rocky@gnu.org>
+
+	* autogen.sh: Administrivia - a script to get us started from git
+	checkout
+
+2008-10-21  R. Bernstein <rocky@sanchez.(none)>
+
+	* .gitignore, Makefile.in, aclocal.m4, buildargv.c, buildargv.h,
+	config.h.in, config/.gitignore, config/Makefile.in, dbg_break.c,
+	dbg_break.h, dbg_cmd.c, dbg_cmd.h, dbg_fns.c, dbg_fns.h,
+	dbg_stack.c, dbg_stack.h, debug.c, doc/.gitignore, doc/Makefile.in,
+	expand.h, function.h, glob/.gitignore, glob/Makefile.in,
+	po/.gitignore, print.c, print.h, read.h, trace.c, trace.h, types.h,
+	w32/.gitignore, w32/Makefile, w32/Makefile.in: Add debugger files
+	from remake. Main options added and some types and definitions moved
+	around. Regression tests work! No actions other than showing options
+	exist though.
+
+2008-10-20  R. Bernstein <rocky@sanchez.(none)>
+
+	* Initial repository
+
