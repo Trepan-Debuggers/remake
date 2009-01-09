@@ -18,8 +18,8 @@
 TEXI2HTML = texi2html
 TEXI2HTML_FLAGS = -split_chapter
 
-info_TEXINFOS =	make.texi
-make_TEXINFOS = fdl.texi make-stds.texi
+info_TEXINFOS =
+make_TEXINFOS =
 
 CLEANFILES = make*.html
 
@@ -27,7 +27,7 @@ CLEANFILES = make*.html
 ## Other documentation formats.  ##
 ## ----------------------------- ##
 
-html: make_1.html
+html:
 
 make_1.html: $(info_TEXINFOS) $(make_TEXINFOS)
 	$(TEXI2HTML) $(TEXI2HTML_FLAGS) $(srcdir)/make.texi
