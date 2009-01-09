@@ -2,6 +2,10 @@ GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
   2008
 
+Version 3.81+dbg-0.2 - Sam Woodward Release
+
+* Bug in trying to fake file information for a .PHONY target
+
 Version 3.81+dbg-0.1
 
 * Merge in code from 3.80+dbg-0.63cvs. 
