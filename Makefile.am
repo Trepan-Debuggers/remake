@@ -73,8 +73,6 @@ if WINDOWSENV
     make_LDADD += $(W32LIB)
 endif
 
-man_MANS =	make.1
-
 DEFS =		-DLOCALEDIR=\"$(localedir)\" -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\" @DEFS@
 
 AM_CPPFLAGS =	$(GLOBINC)

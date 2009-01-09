@@ -148,7 +148,7 @@ This file describes @value{DBG}
 
 This is the @value{EDITION} Edition, @value{UPDATED-MONTH}
 
-Copyright (C) 2004, 2005, 2006, 2007 Rocky Bernstein
+Copyright (C) 2004, 2005, 2006, 2007, 2009 Rocky Bernstein
 
 @menu
 * Summary::                     Overview of Debugger with a sample session
