@@ -1,5 +1,3 @@
-$Id: README.mdb,v 1.1 2005/12/25 10:10:49 rockyb Exp $
-
 See the file NEWS for the user-visible changes
 
 With steady progress, this debugger for make has gotten good enough to
@@ -32,12 +30,12 @@ I think some of this has been going on in the GNU make source as well
 (albeit more slowly).
 
 Although none of this is strictly needed for better error reporting
-and debugging, but any code I may have to deal with, I tent to 
-want to make more palatable.
+and debugging, any code I may have to comprehend with I tend to make
+more palatable.
 
 On the other hand, what has *not* been all that important has been
 ensuring this builds and runs on a C compiler that isn't
-C99-compliant.  I don't test VMS and AMIGA, EMX and OS/2 and other
+C99-compliant.  I don't test VMS, AMIGA, EMX, riscos, OS/2 or other
 less-used OS's. There is a bit of specialized conditional compilation,
 custom Makefiles, and build systems on OS's that historically didn't
 support automake and autoconf. If it this still works, great. If not,
