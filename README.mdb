@@ -1,0 +1,61 @@
+$Id: README.mdb,v 1.1 2005/12/25 10:10:49 rockyb Exp $
+
+See the file NEWS for the user-visible changes
+
+With steady progress, this debugger for make has gotten good enough to
+be called "beta". Standard GNU Make regression tests passes.
+
+Although there are a number of gaps listed in TODO, (like the ability
+to keep global state global across subshell returns), the debugger is
+very usable -- at least for me. It passes many (but not all)
+regression tests. So I don't recommend this for day-to-day production
+where obscure features of GNU Make are used; but it is very handy for
+debugging.
+
+In the process of the small changes to add better support for error
+reporting and debugging, I've been also making changes to the code to
+make more modern conventions. For example:
+
+ - the source code now lives in a src directory,
+ - configure.ac rather than configure.in is used, 
+ - the prototypes for xxx.c are in xxx.h 
+ - typedefs are used
+ - "register" removed 
+ - documentary comments at are found beginning of a function 
+   are in the headers in doxygen format.
+ - headers can be included in any order since they include what they need
+ - headers have tests to make sure they are included only once. 
+ - gcc -Wall warnings have been removed
+
+Although none of this is strictly needed for better error reporting
+and debugging, any code I may have to deal with, I may as well make as
+palatable as possible. 
+
+On the other hand, what has *not* been all that important has been
+ensuring this builds and runs on a C compiler that isn't
+C99-compliant.  I've removed support for VMS and AMIGA, EMX and OS/2
+and other less-used OS's. There was a bit of specialized conditional
+compilation, custom Makefiles, and build systems on OS's that
+historically didn't support automake and autoconf.  These custom
+Makefiles and scripts too have been removed. For those older OS's,
+there's always good old GNU make version 3.80.
+
+I am religiously against any of these OS's or tools, but I don't
+generally have access to them and don't test releases on them. It
+would be dishonest to claim support for them at this
+point. Furthermore all of that custom code has made GNU Make much more
+bulky, less comprehensible and harder to comprehend and change. Should
+someone be fervently devout in the reinstatement or support of these
+OS's, they can be added. But it would have to be done in a way that
+doesn't make the rest of the code hard to read and maintain.
+
+Given this split in goals, I think it best to maintain this initially
+as a separate track. Although this track is alpha, I think it has some
+important and useful changes and needs early exposure to best grow
+this the right way. I don't think it should be tied down to the GNU
+make 3.81 release schedule and similarly I don't think the 3.81
+release schedule should be tied down to having this be flawless
+either.
+
+Documentation for the revised GNU Make and GNU Make Debugger is in the
+doc directory.
