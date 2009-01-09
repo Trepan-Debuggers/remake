@@ -1,8 +1,20 @@
-remake (3.81+dbg0.1-1) unstable; urgency=low
+remake (3.81+dbg0.1~dfsg.1-1) unstable; urgency=low
 
-  * New upstream release
+  * New upstream release (??? Closes: #499956)
+  * Due to upstream switch to git, remake git repository now containts
+    sources for vanilla make, remake, and Debian packaging.
+  * Added VCS fields into the header.
+  * Extended list of copyright holders due to added pieces.
+  * Not using dpatch any longer.
+  * Redoing DFSG complience of a new remake:
+    - documents with GFDL with cover pages (info/html) are removed
+      and FDL license is no longer shipped
+    - remake-specific info file is no longer present/shipped
+    - vanilla make changelog is no longer shipped, please refer to
+      /usr/share/doc/make/changelog.gz if needed
+  * Updated complience to policy 3.8.0
 
- -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 30 Oct 2008 10:41:46 -0400
+ -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 08 Jan 2009 21:48:42 -0500
 
 remake (3.80+dbg0.62~dfsg.1-1) unstable; urgency=low
 

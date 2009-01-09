@@ -2,8 +2,11 @@ Source: remake
 Section: devel
 Priority: extra
 Maintainer: Yaroslav Halchenko <debian@onerussian.com>
-Build-Depends: debhelper (>= 5), autotools-dev, dpatch, libreadline-dev, gettext
-Standards-Version: 3.7.2
+Build-Depends: debhelper (>= 5), autotools-dev, libreadline-dev, gettext
+Homepage: http://bashdb.sourceforge.net/remake/
+Vcs-Browser: http://git.onerussian.com/?p=deb/remake.git
+Vcs-git: http://git.onerussian.com/vcs/deb/remake.git
+Standards-Version: 3.8.0
 
 Package: remake
 Architecture: any
@@ -19,5 +22,3 @@ Description: GNU make fork with improved error reporting and debugging
   * issue shell commands while stopped in the middle of execution
   * inspect target descriptions
   * write a file with the commands of the target expanded
- .
-  Homepage: http://bashdb.sourceforge.net/remake/

@@ -9,7 +9,9 @@ Upstream Author: Rocky Bernstein <rocky@panix.com>
 
 Copyright:
  Original GNU Make: 1988-2007 Free Software Foundation, Inc
- remake patchset:   2004-2007 Rocky Bernstein <rocky@panix.com>
+ ansi2knr:          1989, 2000 Aladdin Enterprises
+ elk-test.el:       2006 Nikolaj Schumacher
+ remake patchset:   2004-2008 Rocky Bernstein <rocky@panix.com>
 
 License:
 

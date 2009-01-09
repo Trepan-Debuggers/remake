@@ -27,21 +27,18 @@ endif
 # no parallel execution -- required for dpatch
 .NOTPARALLEL:
 
-include /usr/share/dpatch/dpatch.make
-
-config.status: patch configure
+config.status: configure
 	dh_testdir
 	./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs"
 
 build: build-stamp
 
-build-stamp:  patch config.status
+build-stamp: config.status
 	dh_testdir
 	$(MAKE)
 	touch $@
 
-clean: clean-patched unpatch
-clean-patched:
+clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp

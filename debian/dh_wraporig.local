@@ -45,7 +45,7 @@ post_command=
 
 #
 # files/directories to delete. bash patterns
-delete_files='doc/make.{texi,info*,html} doc/{make-stds,fdl}.*'
+delete_files='git rm doc/{make{.texi,-stds.texi},fdl.texi}'
 
 #
 # suffix to attach
@@ -53,7 +53,8 @@ suffix_out=~dfsg
 
 #
 # for now we better simply create a symlink
-do_orig_symlink=" pleasedo ;-) "
+do_orig_symlink=
+#" pleasedo ;-) "
 
 #
 # do we need original tarball? I guess so for now,
