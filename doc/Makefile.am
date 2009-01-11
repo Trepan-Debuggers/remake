@@ -18,8 +18,8 @@
 TEXI2HTML = texi2html
 TEXI2HTML_FLAGS = -split_chapter
 
-info_TEXINFOS =
-make_TEXINFOS =
+info_TEXINFOS = mdb.texi
+make_TEXINFOS = 
 
 CLEANFILES = make*.html
 

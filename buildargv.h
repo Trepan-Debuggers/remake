@@ -3,7 +3,7 @@
    Copyright (C) 1992, 2001 Free Software Foundation, Inc.
    Written by Fred Fish @ Cygnus Support
 
-   Copyright (C) 2008 R. Bernsetin rocky@gnu.org
+   Copyright (C) 2008 R. Bernstein rocky@gnu.org
 
 This file is part of the libiberty library.
 Libiberty is free software; you can redistribute it and/or
