@@ -73,8 +73,6 @@ if WINDOWSENV
     make_LDADD += $(W32LIB)
 endif
 
-man_MANS =	make.1
-
 DEFS =		-DLOCALEDIR=\"$(localedir)\" -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\" @DEFS@
 
 AM_CPPFLAGS =	$(GLOBINC)
@@ -94,7 +92,7 @@ EXTRA_DIST =	README build.sh.in $(man_MANS) \
 		README.W32 NMakefile config.h.W32 build_w32.bat subproc.bat \
 		make_msvc_net2003.sln make_msvc_net2003.vcproj \
 		readme.vms makefile.vms makefile.com config.h-vms \
-		vmsdir.h vmsfunctions.c vmsify.c
+		vmsdir.h vmsfunctions.c vmsify.c README.mdb TODO
 
 # This is built during configure, but behind configure's back
 

@@ -1,0 +1,46 @@
+Most of what's here are things I know need to be done. Volunteers are
+welcome. I'll probably do only the things that either most interest me
+or I most want to have. So even though something below may be a major
+gap, Things marked :-( are important but something I'll probably live
+with.
+
+
+:-( Should have remote invocation interface so debugger command loop
+can live outside of the make environment. With this global state like
+breakpoints would survive across forks and subshells returns. Without
+that, something hacky for saving and passing state as is done in the
+bash debugger has to be done. For now, I'll probably live with no
+global state.
+
+:-( Ability to save breakpoints and debugger state on a restart.
+
+:-( Add a debugger profile mechanism. (Should be a stack of file
+descriptors so profiles can nest).
+
+:-( Redo command parsing. Make more like gdb. 
+  trace -> set trace
+  set foo bar -> set variable foo = bar
+  add set annotate
+
+:-( More debugger regression tests, existing regression tests should work.
+
+:-( Allow breakpoint on file:line. 
+
+:-( MAKELEVEL seems buggy
+
+:-( "expand" doesn't handle automatic variables
+
+:-( better line info stored for commands 
+
+:-( Run until recursive call? 
+
+:-( breakpoint actions? 
+
+:-( More sophisticated debugger inquiries such as comparing two target
+    timestamps, listing targets that need remaking.
+
+There are probably many make-specific commands (e.g like the ones
+listed above). Using the debugger will probably uncover many areas.
+such as specialized things to trace.
+
+$Id: TODO,v 1.3 2005/11/15 01:37:45 rockyb Exp $
