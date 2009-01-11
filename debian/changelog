@@ -1,6 +1,7 @@
-remake (3.81+dbg0.1~dfsg.1-1~pre1) unstable; urgency=low
+remake (3.81+dbg0.1~dfsg.1-1~pre2) unstable; urgency=low
 
-  * New upstream release (??? Closes: #499956)
+  * New upstream release: resolved issue with deprecated emacs
+    list syntax (Closes: #499956)
   * Due to upstream switch to git, remake git repository now contains
     sources for vanilla make, remake, and Debian packaging.
   * Added VCS fields into the header.
