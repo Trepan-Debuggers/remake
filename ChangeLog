@@ -1,4 +1,3 @@
-<<<<<<< HEAD:ChangeLog
 2009-01-09  R. Bernstein <rocky@gnu.org>
 
 	* README.mdb: doc fixes
@@ -29,8 +28,6 @@
 	* doc/mdb.texi, make.1: Fix up documentaiton weirdnesses (spotted by
 	Yarik the wise)
 
-=======
->>>>>>> 55108b2301a052c5c95370900d57a961f61bf2ab:ChangeLog
 2009-01-08  R. Bernstein <rocky@sanchez.(none)>
 
 	* ChangeLog, NEWS, configure.ac, doc/version.texi, po/be.po,
@@ -6628,7 +6625,7 @@
 1996-07-20  roland <roland>
 
 	* config.h-vms.template, makefile.vms, readme.vms, remake.c,
-	vmsify.c: Sat Jul 20 12:32:10 1996  Klaus Kämpf (kkaempf@progis.de)
+	vmsify.c: Sat Jul 20 12:32:10 1996  Klaus KÃ¤mpf (kkaempf@progis.de)
 	* remake.c (f_mtime) [VMS]: Add missing `if' conditional for future
 	modtime check. 	* config.h-vms, makefile.vms, readme.vms, vmsify.c:
 	Update address.
