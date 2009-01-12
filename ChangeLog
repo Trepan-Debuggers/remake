@@ -1,3 +1,4 @@
+<<<<<<< HEAD:ChangeLog
 2009-01-09  R. Bernstein <rocky@gnu.org>
 
 	* README.mdb: doc fixes
@@ -28,6 +29,8 @@
 	* doc/mdb.texi, make.1: Fix up documentaiton weirdnesses (spotted by
 	Yarik the wise)
 
+=======
+>>>>>>> 55108b2301a052c5c95370900d57a961f61bf2ab:ChangeLog
 2009-01-08  R. Bernstein <rocky@sanchez.(none)>
 
 	* ChangeLog, NEWS, configure.ac, doc/version.texi, po/be.po,

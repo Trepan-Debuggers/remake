@@ -1,4 +1,4 @@
-@set UPDATED 27 December 2008
-@set UPDATED-MONTH December 2008
+@set UPDATED 10 January 2009
+@set UPDATED-MONTH January 2009
 @set EDITION 3.81+dbg-0.2
 @set VERSION 3.81+dbg-0.2

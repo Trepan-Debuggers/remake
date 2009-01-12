@@ -15,6 +15,8 @@
 # GNU Make; see the file COPYING.  If not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 
+transform := s,make,@MAKE_NAME@,
+
 TEXI2HTML = texi2html
 TEXI2HTML_FLAGS = -split_chapter
 
@@ -32,7 +34,7 @@ html: make_1.html
 make_1.html: $(info_TEXINFOS) $(make_TEXINFOS)
 	$(TEXI2HTML) $(TEXI2HTML_FLAGS) $(srcdir)/make.texi
 
-man_make = make.1
+man_MANS = make.1
 
 EXTRA_DIST = make.1.in
 
