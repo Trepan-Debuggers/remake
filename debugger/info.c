@@ -171,7 +171,7 @@ dbg_cmd_info (char *psz_args)
     } else if (is_abbrev_of (psz_subcmd, "vpath", 1)) {
       print_vpath_data_base ();
     } else if (is_abbrev_of (psz_subcmd, "warranty", 1)) {
-      printf(WARRANTY);
+      printf("%s", WARRANTY);
     } else {
       printf(_("Undefined command \"%s\". Try \"help info\"\n"), psz_subcmd);
     }
