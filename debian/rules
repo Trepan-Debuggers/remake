@@ -31,15 +31,12 @@ configure:
 config.status: configure
 	dh_testdir
 
-ifneq "$(wildcard /usr/share/misc/config.sub)" ""
 	cp -f /usr/share/misc/config.sub config.sub
-endif
-ifneq "$(wildcard /usr/share/misc/config.guess)" ""
 	cp -f /usr/share/misc/config.guess config.guess
-endif
 
 	./configure --enable-maintainer-mode --host=$(DEB_HOST_GNU_TYPE) \
-	  --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man \
+	  --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr \
+	  --mandir=\$${prefix}/share/man \
 	  --infodir=\$${prefix}/share/info \
 	  --with-lispdir=\$${prefix}/share/emacs/site-lisp/remake \
 	  CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs"
@@ -70,6 +67,9 @@ install: build
 
 	# Add here commands to install the package into debian/remake-3.80+dbg.
 	$(MAKE) DESTDIR=$(CURDIR)/debian/remake install
+	# install .el manually to assure it is installed even
+	# if there were no emacs available so autoscripts skipped it
+	cp -f emacs/mdb.el $(CURDIR)/debian/remake/usr/share/emacs/site-lisp/remake
 
 # Build architecture-independent files here.
 binary-indep: build install
