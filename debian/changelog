@@ -1,7 +1,10 @@
-remake (3.81+dbg0.1~dfsg.1-1~pre2) unstable; urgency=low
+remake (3.81+dbg0.2~dfsg.1-1~pre2) unstable; urgency=low
 
-  * New upstream release: resolved issue with deprecated emacs
+  * New upstream release(s): resolved issue with deprecated emacs
     list syntax (Closes: #499956)
+  * Using upstream checkout 6cd278da77b84b795295e5cc944a6cdc56f95031
+    instead of the latest release, since there were few fixes introduced
+    since the release
   * Due to upstream switch to git, remake git repository now contains
     sources for vanilla make, remake, and Debian packaging.
   * Added VCS fields into the header.
@@ -11,9 +14,11 @@ remake (3.81+dbg0.1~dfsg.1-1~pre2) unstable; urgency=low
     - documents with GFDL with cover pages (info/html) are removed
       and FDL license is no longer shipped
     - remake-specific info file is no longer present/shipped
-    - vanilla make changelog is no longer shipped, please refer to
-      /usr/share/doc/make/changelog.gz if needed
+    - vanilla make changelog is no longer shipped separate,
+      please refer to /usr/share/doc/make/changelog.gz which contains
+      entries for both make and remake
   * Updated compliance to policy 3.8.0
+  * Using autotools at package build time
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 08 Jan 2009 21:48:42 -0500
 
