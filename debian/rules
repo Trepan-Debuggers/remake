@@ -24,9 +24,6 @@ else
 	CFLAGS += -O2
 endif
 
-# no parallel execution -- required for dpatch
-.NOTPARALLEL:
-
 config.status: configure
 	dh_testdir
 	./configure --enable-maintainer-mode --host=$(DEB_HOST_GNU_TYPE) \
