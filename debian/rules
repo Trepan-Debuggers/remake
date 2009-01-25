@@ -40,7 +40,9 @@ endif
 
 	./configure --enable-maintainer-mode --host=$(DEB_HOST_GNU_TYPE) \
 	  --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man \
-	  --infodir=\$${prefix}/share/info CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs"
+	  --infodir=\$${prefix}/share/info \
+	  --with-lispdir=\$${prefix}/share/emacs/site-lisp/remake \
+	  CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs"
 
 build: build-stamp
 
@@ -56,7 +58,7 @@ clean:
 
 	[ ! -f Makefile ] || $(MAKE) distclean
 
-	rm -f config.sub config.guess
+	rm -f config.sub config.guess po/*.gmo
 
 	dh_clean
 
