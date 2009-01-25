@@ -53,9 +53,13 @@ clean:
 	dh_testroot
 	rm -f build-stamp
 
-	[ ! -f Makefile ] || $(MAKE) distclean
+	[ ! -f Makefile ] || $(MAKE) maintainer-clean
 
-	rm -f config.sub config.guess po/*.gmo
+	# remove auto-tools generated files
+	rm -f Makefile.in config.h.in config/Makefile.in doc/Makefile.in \
+	 emacs/Makefile.in glob/Makefile.in w32/Makefile.in config/elisp-comp \
+	 configure aclocal.m4 po/remake.pot
+	rm -f config.sub config.guess
 
 	dh_clean
 

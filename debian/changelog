@@ -1,4 +1,4 @@
-remake (3.81+dbg0.2~dfsg.1-1~pre3) unstable; urgency=low
+remake (3.81+dbg0.2~dfsg.1-1~pre4) unstable; urgency=low
 
   * New upstream release(s): resolved issue with deprecated emacs
     list syntax (Closes: #499956)
@@ -18,7 +18,8 @@ remake (3.81+dbg0.2~dfsg.1-1~pre3) unstable; urgency=low
       please refer to /usr/share/doc/make/changelog.gz which contains
       entries for both make and remake
   * Updated compliance to policy 3.8.0
-  * Using autotools at package build time
+  * Using autotools at package build time, it required also custom clean
+    up in clean rule of debian/rules
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 08 Jan 2009 21:48:42 -0500
 
