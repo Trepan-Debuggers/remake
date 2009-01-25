@@ -1,8 +1,8 @@
-remake (3.81+dbg0.2~dfsg.1-1~pre4) unstable; urgency=low
+remake (3.81+dbg0.2~dfsg.1-1) unstable; urgency=low
 
   * New upstream release(s): resolved issue with deprecated emacs
     list syntax (Closes: #499956)
-  * Using upstream checkout 6cd278da77b84b795295e5cc944a6cdc56f95031
+  * Using upstream checkout 43ea2cdf4a8cec7c1c1b9827046e71258b77008f
     instead of the latest release, since there were few fixes introduced
     since the release
   * Due to upstream switch to git, remake git repository now contains
