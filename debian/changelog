@@ -1,4 +1,4 @@
-remake (3.81+dbg0.2~dfsg.1-1~pre2) unstable; urgency=low
+remake (3.81+dbg0.2~dfsg.1-1~pre3) unstable; urgency=low
 
   * New upstream release(s): resolved issue with deprecated emacs
     list syntax (Closes: #499956)
