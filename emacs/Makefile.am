@@ -16,7 +16,7 @@
 #$Id: Makefile.am,v 1.4 2007/03/01 03:30:55 rockyb Exp $
 
 EXTRA_DIST = elk-test.el mdb.el mdb.el.in mdb-test.el.in
-ELCFILES  = mdb.elc
+ELCFILES  =
 if INSTALL_EMACS_LISP
 lisp_LISP = mdb.el 
 endif
