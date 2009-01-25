@@ -1,3 +1,33 @@
+2009-01-09  R. Bernstein <rocky@gnu.org>
+
+	* README.mdb: doc fixes
+
+2009-01-09  R. Bernstein <rocky@gnu.org>
+
+	* README.mdb: Update README.mdb
+
+2009-01-09  R. Bernstein <rocky@gnu.org>
+
+	* Makefile.am, README.mdb, TODO: Add back TODO and README.mdb
+
+2009-01-09  R. Bernstein <rocky@gnu.org>
+
+	* doc/.gitignore: Administrivia
+
+2009-01-09  R. Bernstein <rocky@gnu.org>
+
+	* Makefile.am, NEWS, doc/Makefile.am, doc/mdb.texi,
+	doc/version.texi, po/be.po, po/da.po, po/de.po, po/es.po, po/fi.po,
+	po/fr.po, po/ga.po, po/gl.po, po/he.po, po/hr.po, po/id.po,
+	po/ja.po, po/ko.po, po/nl.po, po/pl.po, po/pt_BR.po, po/ru.po,
+	po/rw.po, po/sv.po, po/tr.po, po/uk.po, po/vi.po, po/zh_CN.po: Fix
+	up documentaiton weirdnesses (spotted by Yarik the wise)
+
+2009-01-09  R. Bernstein <rocky@gnu.org>
+
+	* doc/mdb.texi, make.1: Fix up documentaiton weirdnesses (spotted by
+	Yarik the wise)
+
 2009-01-08  R. Bernstein <rocky@sanchez.(none)>
 
 	* ChangeLog, NEWS, configure.ac, doc/version.texi, po/be.po,
@@ -6595,7 +6625,7 @@
 1996-07-20  roland <roland>
 
 	* config.h-vms.template, makefile.vms, readme.vms, remake.c,
-	vmsify.c: Sat Jul 20 12:32:10 1996  Klaus Kämpf (kkaempf@progis.de)
+	vmsify.c: Sat Jul 20 12:32:10 1996  Klaus KÃ¤mpf (kkaempf@progis.de)
 	* remake.c (f_mtime) [VMS]: Add missing `if' conditional for future
 	modtime check. 	* config.h-vms, makefile.vms, readme.vms, vmsify.c:
 	Update address.

@@ -1,5 +1,5 @@
 /* $Id: dbg_cmd.c,v 1.82 2007/03/01 12:49:59 rockyb Exp $
-Copyright (C) 2004, 2005, 2007, 2008 R. Bernstein rocky@gnu.org
+Copyright (C) 2004, 2005, 2007, 2008, 2009 R. Bernstein rocky@gnu.org
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -940,7 +940,7 @@ static debug_return_t dbg_cmd_show (char *psz_arg)
       print_version();
     } else if (is_abbrev_of (psz_arg, "warranty", 3)) {
       printf("warranty: ");
-      printf(WARRANTY);
+      printf("%s", WARRANTY);
     } else {
       printf("Undefined command \"%s\". Try \"help show\"\n", psz_arg);
     }
@@ -1129,6 +1129,16 @@ static debug_return_t dbg_cmd_write_cmds (char *psz_args)
       }
       
       if (!b_stdout) {
+	struct stat buf;
+	if (0 == fstat(fileno(outfd), &buf)) {
+	  mode_t mode = buf.st_mode;
+	  if (buf.st_mode & S_IRUSR) mode |= S_IXUSR;
+	  if (buf.st_mode & S_IRGRP) mode |= S_IXGRP;
+	  if (buf.st_mode & S_IROTH) mode |= S_IXOTH;
+	  if (0 != fchmod(fileno(outfd), mode)) {
+	    printf(_("Can't set execute mode on \"%s\".\n"), psz_filename);
+	  }
+	}
 	fclose(outfd);
 	printf(_("File \"%s\" written.\n"), psz_filename);
 	free(psz_filename);
