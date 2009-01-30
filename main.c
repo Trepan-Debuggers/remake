@@ -3036,7 +3036,8 @@ print_version (void)
      word "Copyright", so it hardly seems worth it.  */
 
   printf ("%sGNU Make + Debugger %s\n\
-%sCopyright (C) 2002, 2003, 2004, 2006, 2008 Free Software Foundation, Inc.\n",
+%sCopyright (C) 2002, 2003, 2004, 2006, 2008 Free Software Foundation, Inc.\n\
+Copyright (C) 2009 Rocky Bernstein\n",
           precede, version_string, precede);
 
   printf (_("%sThis is free software; see the source for copying conditions.\n\

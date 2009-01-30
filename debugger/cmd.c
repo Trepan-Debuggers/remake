@@ -703,8 +703,8 @@ dbg_cmd_help (char *psz_args)
 	      help_cmd_set_show("set %s -- %s", &(set_subcommands[i]));
 	      return debug_readloop;
 	    }
-	    printf("There is no \"set %s\" command.\n", psz_args);
 	  }
+	  printf("There is no \"set %s\" command.\n", psz_args);
 	}
       } else {
 	printf("%s\n\n", p_command->use);
