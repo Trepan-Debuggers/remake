@@ -1,3 +1,8 @@
+2009-03-07  Eli Zaretskii  <eliz@gnu.org>
+
+	* function.c (func_shell): Don't close pipedes[1] if it is -1.
+	Fixes Savannah bug #20495.
+
 2008-09-30  Eli Zaretskii  <eliz@gnu.org>
 
 	* build_w32.bat (GCCBuild): Use "-gdwarf-2 -g3" instead of

@@ -1687,8 +1687,11 @@ func_shell (char *o, char **argv, const char *funcname UNUSED)
       free (command_argv[0]);
       free (command_argv);
 
-      /* Close the write side of the pipe.  */
-      close (pipedes[1]);
+      /* Close the write side of the pipe.  We test for -1, since
+	 pipedes[1] is -1 on MS-Windows, and some versions of MS
+	 libraries barf when `close' is called with -1.  */
+      if (pipedes[1] >= 0)
+	close (pipedes[1]);
 #endif
 
       /* Set up and read from the pipe.  */
