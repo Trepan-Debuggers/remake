@@ -1,6 +1,6 @@
 /* Path conversion for Windows pathnames.
 Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
-2007 Free Software Foundation, Inc.
+2007, 2009 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -49,6 +49,9 @@ convert_Path_to_windows32(char *Path, char to_delim)
     char *p;            /* points to element of old Path */
 
     /* is this a multi-element Path ? */
+    /* FIXME: Perhaps use ":;\"" in strpbrk to convert all quotes to
+       delimiters as well, as a way to handle quoted directories in
+       PATH?  */
     for (p = Path, etok = strpbrk(p, ":;");
          etok;
          etok = strpbrk(p, ":;"))
@@ -74,8 +77,11 @@ convert_Path_to_windows32(char *Path, char to_delim)
             for (p++; *p && *p != '"'; p++) /* skip quoted part */
                 ;
             etok = strpbrk(p, ":;");        /* find next delimiter */
-            *etok = to_delim;
-            p = ++etok;
+            if (etok) {
+                *etok = to_delim;
+                p = ++etok;
+	    } else
+                p += strlen(p);
         } else {
             /* found another one, no drive letter */
             *etok = to_delim;
