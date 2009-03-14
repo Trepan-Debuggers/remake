@@ -1,6 +1,6 @@
 /* Process handling for Windows.
 Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-2006, 2007 Free Software Foundation, Inc.
+2006, 2007 2009 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -28,6 +28,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "debug.h"
 
 static char *make_command_line(char *shell_name, char *exec_path, char **argv);
+extern char *xmalloc (unsigned int);
 
 typedef struct sub_process_t {
 	int sv_stdin[2];
@@ -347,53 +348,54 @@ process_init_fd(HANDLE stdinh, HANDLE stdouth, HANDLE stderrh)
 
 
 static HANDLE
-find_file(char *exec_path, LPOFSTRUCT file_info)
+find_file(const char *exec_path, const char *path_var,
+	  char *full_fname, DWORD full_len)
 {
 	HANDLE exec_handle;
 	char *fname;
 	char *ext;
+	DWORD req_len;
+	int i;
+	static const char *extensions[] =
+	  /* Should .com come before no-extension case?  */
+	  { ".exe", ".cmd", ".bat", "", ".com", NULL };
 
-	fname = malloc(strlen(exec_path) + 5);
+	fname = xmalloc(strlen(exec_path) + 5);
 	strcpy(fname, exec_path);
 	ext = fname + strlen(fname);
 
-	strcpy(ext, ".exe");
-	if ((exec_handle = (HANDLE)OpenFile(fname, file_info,
-			OF_READ | OF_SHARE_COMPAT)) != (HANDLE)HFILE_ERROR) {
-		free(fname);
-		return(exec_handle);
-	}
-
-	strcpy(ext, ".cmd");
-	if ((exec_handle = (HANDLE)OpenFile(fname, file_info,
-			OF_READ | OF_SHARE_COMPAT)) != (HANDLE)HFILE_ERROR) {
-		free(fname);
-		return(exec_handle);
-	}
-
-	strcpy(ext, ".bat");
-	if ((exec_handle = (HANDLE)OpenFile(fname, file_info,
-			OF_READ | OF_SHARE_COMPAT)) != (HANDLE)HFILE_ERROR) {
-		free(fname);
-		return(exec_handle);
-	}
-
-	/* should .com come before this case? */
-	if ((exec_handle = (HANDLE)OpenFile(exec_path, file_info,
-			OF_READ | OF_SHARE_COMPAT)) != (HANDLE)HFILE_ERROR) {
-		free(fname);
-		return(exec_handle);
-	}
-
-	strcpy(ext, ".com");
-	if ((exec_handle = (HANDLE)OpenFile(fname, file_info,
-			OF_READ | OF_SHARE_COMPAT)) != (HANDLE)HFILE_ERROR) {
-		free(fname);
-		return(exec_handle);
+	for (i = 0; extensions[i]; i++) {
+		strcpy(ext, extensions[i]);
+		if (((req_len = SearchPath (path_var, fname, NULL, full_len,
+					    full_fname, NULL)) > 0
+		     /* For compatibility with previous code, which
+			used OpenFile, and with Windows operation in
+			general, also look in various default
+			locations, such as Windows directory and
+			Windows System directory.  Warning: this also
+			searches PATH in the Make's environment, which
+			might not be what the Makefile wants, but it
+			seems to be OK as a fallback, after the
+			previous SearchPath failed to find on child's
+			PATH.  */
+		     || (req_len = SearchPath (NULL, fname, NULL, full_len,
+					       full_fname, NULL)) > 0)
+		    && req_len <= full_len
+		    && (exec_handle =
+				CreateFile(full_fname,
+					   GENERIC_READ,
+					   FILE_SHARE_READ | FILE_SHARE_WRITE,
+					   NULL,
+					   OPEN_EXISTING,
+					   FILE_ATTRIBUTE_NORMAL,
+					   NULL)) != INVALID_HANDLE_VALUE) {
+			free(fname);
+			return(exec_handle);
+		}
 	}
 
 	free(fname);
-	return(exec_handle);
+	return INVALID_HANDLE_VALUE;
 }
 
 
@@ -416,6 +418,9 @@ process_begin(
 	char *shell_name = 0;
 	int file_not_found=0;
 	HANDLE exec_handle;
+	char exec_fname[MAX_PATH];
+	const char *path_var = NULL;
+	char **ep;
 	char buf[256];
 	DWORD bytes_returned;
 	DWORD flags;
@@ -423,8 +428,6 @@ process_begin(
 	STARTUPINFO startInfo;
 	PROCESS_INFORMATION procInfo;
 	char *envblk=NULL;
-	OFSTRUCT file_info;
-
 
 	/*
 	 *  Shell script detection...  if the exec_path starts with #! then
@@ -433,16 +436,26 @@ process_begin(
 	 *  hard-code the path to the shell or perl or whatever:  Instead, we
 	 *  assume it's in the path somewhere (generally, the NT tools
 	 *  bin directory)
-	 *  We use OpenFile here because it is capable of searching the Path.
 	 */
 
-	exec_handle = find_file(exec_path, &file_info);
+	/* Use the Makefile's value of PATH to look for the program to
+	   execute, because it could be different from Make's PATH
+	   (e.g., if the target sets its own value.  */
+	for (ep = envp; ep; ep++) {
+		if (strncmp (*ep, "PATH=", 5) == 0
+		    || strncmp (*ep, "Path=", 5) == 0) {
+			path_var = *ep + 5;
+			break;
+		}
+	}
+	exec_handle = find_file(exec_path, path_var,
+				exec_fname, sizeof(exec_fname));
 
 	/*
-	 * If we couldn't open the file, just assume that Windows32 will be able
-	 * to find and execute it.
+	 * If we couldn't open the file, just assume that Windows will be
+	 * somehow able to find and execute it.
 	 */
-	if (exec_handle == (HANDLE)HFILE_ERROR) {
+	if (exec_handle == INVALID_HANDLE_VALUE) {
 		file_not_found++;
 	}
 	else {
@@ -496,8 +509,7 @@ process_begin(
 	if (file_not_found)
 		command_line = make_command_line( shell_name, exec_path, argv);
 	else
-		command_line = make_command_line( shell_name, file_info.szPathName,
-				 argv);
+		command_line = make_command_line( shell_name, exec_fname, argv);
 
 	if ( command_line == NULL ) {
 		pproc->last_err = 0;
@@ -517,7 +529,7 @@ process_begin(
 	if ((shell_name) || (file_not_found)) {
 		exec_path = 0;	/* Search for the program in %Path% */
 	} else {
-		exec_path = file_info.szPathName;
+		exec_path = exec_fname;
 	}
 
 	/*
