@@ -1,3 +1,15 @@
+2009-03-14  Eli Zaretskii  <eliz@gnu.org>
+
+	* w32/subproc/sub_proc.c <top level>: Update Copyright years.  Add
+	prototype for xmalloc.
+	(find_file): Accept 3 arguments PATH_VAR, FULL_FNAME, and FULL_LEN
+	instead of an LPOFSTRUCT pointer.  Use xmalloc instead of malloc.
+	Loop over an array of extensions, instead of duplicating the same
+	code inline.  Use SearchPath followed by CreateFile, instead of
+	the obsolete OpenFile.  Fixes Savannah bug #17277.
+	(process_begin): Find $(PATH) in `envp', and pass a pointer to it
+	to `find_file'.  Fixes Savannah bug #25662.
+
 2009-03-07  Eli Zaretskii  <eliz@gnu.org>
 
 	* function.c (func_shell): Don't close pipedes[1] if it is -1.
