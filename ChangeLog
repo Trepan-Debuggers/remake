@@ -1,5 +1,8 @@
 2009-03-14  Eli Zaretskii  <eliz@gnu.org>
 
+	* w32/pathstuff.c (convert_Path_to_windows32): Fix last change.
+	Fixes Savannah bug #25412.
+
 	* w32/subproc/sub_proc.c <top level>: Update Copyright years.  Add
 	prototype for xmalloc.
 	(find_file): Accept 3 arguments PATH_VAR, FULL_FNAME, and FULL_LEN
