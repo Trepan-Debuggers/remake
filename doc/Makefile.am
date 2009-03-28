@@ -20,7 +20,8 @@ transform := s,make,@MAKE_NAME@,
 TEXI2HTML = texi2html
 TEXI2HTML_FLAGS = -split_chapter
 
-info_TEXINFOS = make.texi mdb.texi
+# info_TEXINFOS = make.texi mdb.texi
+info_TEXINFOS = mdb.texi
 make_TEXINFOS = fdl.texi make-stds.texi
 
 CLEANFILES = make*.html
