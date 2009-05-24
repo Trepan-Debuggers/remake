@@ -1,3 +1,8 @@
+2009-05-24  Paul Smith  <psmith@gnu.org>
+
+	* doc/make.texi: Fix the ISBN for the GNU make manual.  Incorrect
+	value noticed by Hans Stol <hans.stol@nc3a.nato.int>.
+
 2009-03-14  Eli Zaretskii  <eliz@gnu.org>
 
 	* w32/pathstuff.c (convert_Path_to_windows32): Fix last change.

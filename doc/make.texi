@@ -4,7 +4,7 @@
 
 @include version.texi
 @set EDITION 0.70
-@set RCSID $Id: make.texi,v 1.52 2008/05/18 15:11:40 psmith Exp $
+@set RCSID $Id: make.texi,v 1.53 2009/05/24 19:06:04 psmith Exp $
 
 @settitle GNU @code{make}
 @setchapternewpage odd
@@ -13,8 +13,8 @@
 @c Combine the program and concept indices:
 @syncodeindex pg cp
 @c FSF publishers: format makebook.texi instead of using this file directly.
-@c ISBN provided by Lisa M. Opus Goldstein <opus@gnu.org>, 5 May 2004
-@set ISBN 1-882114-83-5
+@c ISBN confirmed by Jasimin Huang <jasimin@fsf.org> on 25 Mar 2009
+@set ISBN 1-882114-83-3
 @c %**end of header
 
 @copying
