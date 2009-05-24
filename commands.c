@@ -313,7 +313,7 @@ chop_commands (struct commands *cmds)
           nlines += 2;
           lines = xrealloc (lines, nlines * sizeof (char *));
         }
-      lines[idx++] = savestring (p, end - p);
+      lines[idx++] = xstrndup (p, end - p);
       p = end;
       if (*p != '\0')
         ++p;

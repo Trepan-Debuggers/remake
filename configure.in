@@ -20,7 +20,7 @@
 AC_INIT([GNU make],[3.81.90],[bug-make@gnu.org])
 
 AC_PREREQ(2.59)
-AC_REVISION([[$Id: configure.in,v 1.148 2007/07/04 19:35:17 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.149 2009/05/24 18:31:18 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -147,7 +147,7 @@ if test "$ac_cv_func_gettimeofday" = yes; then
 	    [Define to 1 if you have a standard gettimeofday function])
 fi
 
-AC_CHECK_FUNCS( strdup mkstemp mktemp fdopen \
+AC_CHECK_FUNCS( strdup strndup mkstemp mktemp fdopen \
 	        bsd_signal dup2 getcwd realpath sigsetmask sigaction \
                 getgroups seteuid setegid setlinebuf setreuid setregid \
                 getrlimit setrlimit setvbuf pipe strerror strsignal \
