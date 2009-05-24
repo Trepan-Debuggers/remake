@@ -206,7 +206,7 @@ define_variable_in_set (const char *name, unsigned int length,
   /* Create a new variable definition and add it to the hash table.  */
 
   v = xmalloc (sizeof (struct variable));
-  v->name = savestring (name, length);
+  v->name = xstrndup (name, length);
   v->length = length;
   hash_insert_at (&set->table, v, var_slot);
   v->value = xstrdup (value);

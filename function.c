@@ -853,7 +853,7 @@ func_foreach (char *o, char **argv, const char *funcname UNUSED)
       char *result = 0;
 
       free (var->value);
-      var->value = savestring (p, len);
+      var->value = xstrndup (p, len);
 
       result = allocated_variable_expand (body);
 

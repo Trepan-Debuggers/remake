@@ -776,7 +776,7 @@ eval (struct ebuffer *ebuf, int set_default)
 	  p = find_next_token (&cp, &l);
 	  if (p != 0)
 	    {
-	      vpat = savestring (p, l);
+	      vpat = xstrndup (p, l);
 	      p = find_next_token (&cp, &l);
 	      /* No searchpath means remove all previous
 		 selective VPATH's with the same pattern.  */
@@ -1891,7 +1891,7 @@ record_files (struct nameseq *filenames, const char *pattern,
       cmds = xmalloc (sizeof (struct commands));
       cmds->fileinfo.filenm = flocp->filenm;
       cmds->fileinfo.lineno = cmds_started;
-      cmds->commands = savestring (commands, commands_idx);
+      cmds->commands = xstrndup (commands, commands_idx);
       cmds->command_lines = 0;
     }
   else
@@ -2399,7 +2399,7 @@ parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip)
 #ifdef VMS
 /* VMS filenames can have a ':' in them but they have to be '\'ed but we need
  *  to remove this '\' before we can use the filename.
- * Savestring called because q may be read-only string constant.
+ * xstrdup called because q may be read-only string constant.
  */
 	{
 	  char *qbase = xstrdup (q);

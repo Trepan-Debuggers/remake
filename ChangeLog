@@ -18,6 +18,17 @@
 	* function.c (func_shell): Don't close pipedes[1] if it is -1.
 	Fixes Savannah bug #20495.
 
+2008-10-26  Paul Smith  <psmith@gnu.org>
+
+	* configure.in: Check for strndup().
+	* misc.c (xstrndup): Rename savestring to xstrndup.  Use strndup
+	if it's available.
+	* make.h: Rename savestring to xstrndup.
+	* commands.c (chop_commands): Ditto.
+	* function.c (func_foreach): Ditto.
+	* read.c (eval, record_files): Ditto.
+	* variable.c (define_variable_in_set): Ditto.
+
 2008-09-30  Eli Zaretskii  <eliz@gnu.org>
 
 	* build_w32.bat (GCCBuild): Use "-gdwarf-2 -g3" instead of
