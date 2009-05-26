@@ -1,3 +1,18 @@
+2009-05-25  Paul Smith  <psmith@gnu.org>
+
+	Reworked the parser for variable assignments to allow multiple
+	modifiers, and in any order.  Also allows variable and
+	prerequisites to be modifier names ('export', 'private', etc.)
+
+	* NEWS: Add notes about user-visible changes.
+
+	* read.c (struct vmodifiers): Remember what modifiers were seen.
+	(parse_var_assignment): New function to parse variable assignments.
+	(eval): Call the new function.  Handle variable assignments earlier.
+
+	* variable.c (parse_variable_definition): Only parse; don't create var.
+	(assign_variable_definition): Call parse, then create the var.
+
 2009-05-24  Paul Smith  <psmith@gnu.org>
 
 	* doc/make.texi: Fix the ISBN for the GNU make manual.  Incorrect
@@ -22,6 +37,21 @@
 
 	* function.c (func_shell): Don't close pipedes[1] if it is -1.
 	Fixes Savannah bug #20495.
+
+2009-02-23  Ramon Garcia  <ramon.garcia.f@gmail.com>
+
+	Introduce a new keyword "private" which applies to target-specific
+	variables and prevents their values from being inherited.
+
+	* variable.h (struct variable): Add private_var flag to each variable.
+	Add a flag to specify which list entry switches to the parent target.
+	* variable.c (define_variable_in_set): Initialize private_var flag.
+	(lookup_variable): Skip private variables in parent contexts.
+	(initialize_file_variables): Set next_is_parent appropriately.
+	(print_variable): Show the private_var flag.
+	* read.c (eval): Recognize the private keyword.
+	(record_target_var): Set private_var.
+	* doc/make.texi (Suppressing Inheritance): Add documentation.
 
 2008-10-26  Paul Smith  <psmith@gnu.org>
 

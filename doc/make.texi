@@ -4,7 +4,7 @@
 
 @include version.texi
 @set EDITION 0.70
-@set RCSID $Id: make.texi,v 1.53 2009/05/24 19:06:04 psmith Exp $
+@set RCSID $Id: make.texi,v 1.54 2009/05/26 01:31:41 psmith Exp $
 
 @settitle GNU @code{make}
 @setchapternewpage odd
@@ -240,6 +240,7 @@ How to Use Variables
                                   basis.
 * Pattern-specific::            Target-specific variable values can be applied
                                   to a group of targets that match a pattern.
+* Suppressing Inheritance::     Suppress inheritance of variables.
 * Special Variables::           Variables with special meaning or behavior.
 
 Advanced Features for Reference to Variables
@@ -4691,6 +4692,7 @@ they have particular specialized uses.  @xref{Automatic Variables}.
                                   basis.
 * Pattern-specific::            Target-specific variable values can be applied
                                   to a group of targets that match a pattern.
+* Suppressing Inheritance::     Suppress inheritance of variables.
 * Special Variables::           Variables with special meaning or behavior.
 @end menu
 
@@ -5625,19 +5627,9 @@ Set a target-specific variable value like this:
 @var{target} @dots{} : @var{variable-assignment}
 @end example
 
-@noindent
-or like this:
-
-@example
-@var{target} @dots{} : override @var{variable-assignment}
-@end example
-
-@noindent
-or like this:
-
-@example
-@var{target} @dots{} : export @var{variable-assignment}
-@end example
+Target-specific variable assignments can be prefixed with any or all of the
+special keywords @code{export}, @code{override}, or @code{private};
+these apply their normal behavior to this instance of the variable only.
 
 Multiple @var{target} values create a target-specific variable value for
 each member of the target list individually.
@@ -5683,7 +5675,7 @@ will cause that prerequisite to be built and the prerequisite will
 inherit the target-specific value from the first target.  It will
 ignore the target-specific values from any other targets.
 
-@node Pattern-specific, Special Variables, Target-specific, Using Variables
+@node Pattern-specific, Suppressing Inheritance, Target-specific, Using Variables
 @section Pattern-specific Variable Values
 @cindex pattern-specific variables
 @cindex variables, pattern-specific
@@ -5704,15 +5696,6 @@ Set a pattern-specific variable value like this:
 @example
 @var{pattern} @dots{} : @var{variable-assignment}
 @end example
-
-@noindent
-or like this:
-
-@example
-@var{pattern} @dots{} : override @var{variable-assignment}
-@end example
-
-@noindent
 where @var{pattern} is a %-pattern.  As with target-specific variable
 values, multiple @var{pattern} values create a pattern-specific variable
 value for each pattern individually.  The @var{variable-assignment} can
@@ -5729,7 +5712,43 @@ For example:
 will assign @code{CFLAGS} the value of @samp{-O} for all targets
 matching the pattern @code{%.o}.
 
-@node Special Variables,  , Pattern-specific, Using Variables
+@node Suppressing Inheritance, Special Variables, Pattern-specific, Using Variables
+@section Suppressing Inheritance
+@findex private
+@cindex suppressing inheritance
+@cindex inheritance, suppressing
+
+As described in previous sections, @code{make} variables are inherited
+by prerequisites.  This capability allows you to modify the behavior
+of a prerequisite based on which targets caused it to be rebuilt.  For
+example, you might set a target-specific variable on a @code{debug}
+target, then running @samp{make debug} will cause that variable to be
+inherited by all prerequisites of @code{debug}, while just running
+@samp{make all} (for example) would not have that assignment.
+
+Sometimes, however, you may not want a variable to be inherited.  For
+these situations, @code{make} provides the @code{private} modifier.
+Although this modifier can be used with any variable assignment, it
+makes the most sense with target- and pattern-specific variables.  Any
+variable marked @code{private} will be visible to its local target but
+will not be inherited by prerequisites of that target.  A global
+variable marked @code{private} will be visible in the global scope but
+will not be inherited by any target, and hence will not be visible
+in any recipe.
+
+As an example, consider this makefile:
+@example
+EXTRA_CFLAGS =
+
+prog: private EXTRA_CFLAGS = -L/usr/local/lib
+prog: a.o b.o
+@end example
+
+Due to the @code{private} modifier, @code{a.o} and @code{b.o} will not
+inherit the @code{EXTRA_CFLAGS} variable assignment from the
+@code{progs} target.
+
+@node Special Variables,  , Suppressing Inheritance, Using Variables
 @comment  node-name,  next,  previous,  up
 @section Other Special Variables
 @cindex makefiles, and special variables
