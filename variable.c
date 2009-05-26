@@ -138,7 +138,7 @@ variable_hash_cmp (const void *xv, const void *yv)
 
 static struct variable_set global_variable_set;
 static struct variable_set_list global_setlist
-  = { 0, &global_variable_set };
+  = { 0, &global_variable_set, 0 };
 struct variable_set_list *current_variable_set_list = &global_setlist;
 
 /* Implement variables.  */
@@ -221,6 +221,7 @@ define_variable_in_set (const char *name, unsigned int length,
   v->exp_count = 0;
   v->per_target = 0;
   v->append = 0;
+  v->private_var = 0;
   v->export = v_default;
 
   v->exportable = 1;
@@ -340,6 +341,7 @@ lookup_variable (const char *name, unsigned int length)
 {
   const struct variable_set_list *setlist;
   struct variable var_key;
+  int is_parent = 0;
 
   var_key.name = (char *) name;
   var_key.length = length;
@@ -351,8 +353,10 @@ lookup_variable (const char *name, unsigned int length)
       struct variable *v;
 
       v = (struct variable *) hash_find_item ((struct hash_table *) &set->table, &var_key);
-      if (v)
+      if (v && (!is_parent || !v->private_var))
 	return v->special ? lookup_special_var (v) : v;
+
+      is_parent |= setlist->next_is_parent;
     }
 
 #ifdef VMS
@@ -463,6 +467,7 @@ initialize_file_variables (struct file *file, int reading)
     {
       initialize_file_variables (file->double_colon, reading);
       l->next = file->double_colon->variables;
+      l->next_is_parent = 0;
       return;
     }
 
@@ -473,6 +478,7 @@ initialize_file_variables (struct file *file, int reading)
       initialize_file_variables (file->parent, reading);
       l->next = file->parent->variables;
     }
+  l->next_is_parent = 1;
 
   /* If we're not reading makefiles and we haven't looked yet, see if
      we can find pattern variables for this target.  */
@@ -518,6 +524,7 @@ initialize_file_variables (struct file *file, int reading)
               /* Also mark it as a per-target and copy export status. */
               v->per_target = p->variable.per_target;
               v->export = p->variable.export;
+              v->private_var = p->variable.private_var;
             }
           while ((p = lookup_pattern_var (p, file->name)) != 0);
 
@@ -531,7 +538,9 @@ initialize_file_variables (struct file *file, int reading)
   if (file->pat_variables != 0)
     {
       file->pat_variables->next = l->next;
+      file->pat_variables->next_is_parent = l->next_is_parent;
       l->next = file->pat_variables;
+      l->next_is_parent = 0;
     }
 }
 
@@ -552,6 +561,7 @@ create_new_variable_set (void)
     xmalloc (sizeof (struct variable_set_list));
   setlist->set = set;
   setlist->next = current_variable_set_list;
+  setlist->next_is_parent = 0;
 
   return setlist;
 }
@@ -623,6 +633,7 @@ pop_variable_scope (void)
       set = global_setlist.set;
       global_setlist.set = setlist->set;
       global_setlist.next = setlist->next;
+      global_setlist.next_is_parent = setlist->next_is_parent;
     }
 
   /* Free the one we no longer need.  */
@@ -1250,66 +1261,32 @@ do_variable_definition (const struct floc *flocp, const char *varname,
   return v->special ? set_special_var (v) : v;
 }
 
-/* Try to interpret LINE (a null-terminated string) as a variable definition.
+/* Parse P (a null-terminated string) as a variable definition.
 
-   ORIGIN may be o_file, o_override, o_env, o_env_override,
-   or o_command specifying that the variable definition comes
-   from a makefile, an override directive, the environment with
-   or without the -e switch, or the command line.
+   If it is not a variable definition, return NULL.
 
-   See the comments for parse_variable_definition().
+   If it is a variable definition, return a pointer to the char after the
+   assignment token and set *FLAVOR to the type of variable assignment.  */
 
-   If LINE was recognized as a variable definition, a pointer to its `struct
-   variable' is returned.  If LINE is not a variable definition, NULL is
-   returned.  */
-
-struct variable *
-parse_variable_definition (struct variable *v, char *line)
+char *
+parse_variable_definition (const char *p, enum variable_flavor *flavor)
 {
-  register int c;
-  register char *p = line;
-  register char *beg;
-  register char *end;
-  enum variable_flavor flavor = f_bogus;
-  char *name;
+  int wspace = 0;
+
+  p = next_token (p);
 
   while (1)
     {
-      c = *p++;
+      int c = *p++;
+
+      /* If we find a comment or EOS, it's not a variable definition.  */
       if (c == '\0' || c == '#')
-	return 0;
-      if (c == '=')
+	return NULL;
+
+      if (c == '$')
 	{
-	  end = p - 1;
-	  flavor = f_recursive;
-	  break;
-	}
-      else if (c == ':')
-	if (*p == '=')
-	  {
-	    end = p++ - 1;
-	    flavor = f_simple;
-	    break;
-	  }
-	else
-	  /* A colon other than := is a rule line, not a variable defn.  */
-	  return 0;
-      else if (c == '+' && *p == '=')
-	{
-	  end = p++ - 1;
-	  flavor = f_append;
-	  break;
-	}
-      else if (c == '?' && *p == '=')
-        {
-          end = p++ - 1;
-          flavor = f_conditional;
-          break;
-        }
-      else if (c == '$')
-	{
-	  /* This might begin a variable expansion reference.  Make sure we
-	     don't misrecognize chars inside the reference as =, := or +=.  */
+	  /* This begins a variable expansion reference.  Make sure we don't
+	     treat chars inside the reference as assignment tokens.  */
 	  char closeparen;
 	  int count;
 	  c = *p++;
@@ -1318,7 +1295,8 @@ parse_variable_definition (struct variable *v, char *line)
 	  else if (c == '{')
 	    closeparen = '}';
 	  else
-	    continue;		/* Nope.  */
+            /* '$$' or '$X'.  Either way, nothing special to do here.  */
+	    continue;
 
 	  /* P now points past the opening paren or brace.
 	     Count parens or braces until it is matched.  */
@@ -1333,15 +1311,84 @@ parse_variable_definition (struct variable *v, char *line)
 		  break;
 		}
 	    }
+          continue;
 	}
+
+      /* If we find whitespace skip it, and remember we found it.  */
+      if (isblank ((unsigned char)c))
+        {
+          wspace = 1;
+          p = next_token (p);
+          c = *p++;
+        }
+
+
+      if (c == '=')
+	{
+	  *flavor = f_recursive;
+	  return (char *)p;
+	}
+      /* Match assignment variants (:=, +=, ?=)  */
+      else if (*p == '=')
+        {
+          switch (c)
+            {
+              case ':':
+                *flavor = f_simple;
+                break;
+              case '+':
+                *flavor = f_append;
+                break;
+              case '?':
+                *flavor = f_conditional;
+                break;
+              default:
+                /* If we skipped whitespace, non-assignments means no var.  */
+                if (wspace)
+                  return NULL;
+
+                /* Might be assignment, or might be $= or #=.  Check.  */
+                continue;
+            }
+          return (char *)++p;
+        }
+      else if (c == ':')
+        /* A colon other than := is a rule line, not a variable defn.  */
+        return NULL;
+
+      /* If we skipped whitespace, non-assignments means no var.  */
+      if (wspace)
+        return NULL;
     }
-  v->flavor = flavor;
+
+  return (char *)p;
+}
+
+/* Try to interpret LINE (a null-terminated string) as a variable definition.
+
+   If LINE was recognized as a variable definition, a pointer to its `struct
+   variable' is returned.  If LINE is not a variable definition, NULL is
+   returned.  */
+
+struct variable *
+assign_variable_definition (struct variable *v, char *line)
+{
+  char *beg;
+  char *end;
+  enum variable_flavor flavor;
+  char *name;
 
   beg = next_token (line);
+  line = parse_variable_definition (beg, &flavor);
+  if (!line)
+    return NULL;
+
+  end = line - (flavor == f_recursive ? 1 : 2);
   while (end > beg && isblank ((unsigned char)end[-1]))
     --end;
-  p = next_token (p);
-  v->value = p;
+  line = next_token (line);
+  v->value = line;
+  v->flavor = flavor;
 
   /* Expand the name, so "$(foo)bar = baz" works.  */
   name = alloca (end - beg + 1);
@@ -1362,7 +1409,7 @@ parse_variable_definition (struct variable *v, char *line)
    from a makefile, an override directive, the environment with
    or without the -e switch, or the command line.
 
-   See the comments for parse_variable_definition().
+   See the comments for assign_variable_definition().
 
    If LINE was recognized as a variable definition, a pointer to its `struct
    variable' is returned.  If LINE is not a variable definition, NULL is
@@ -1380,7 +1427,7 @@ try_variable_definition (const struct floc *flocp, char *line,
   else
     v.fileinfo.filenm = 0;
 
-  if (!parse_variable_definition (&v, line))
+  if (!assign_variable_definition (&v, line))
     return 0;
 
   vp = do_variable_definition (flocp, v.name, v.value,
@@ -1429,6 +1476,8 @@ print_variable (const void *item, void *arg)
     }
   fputs ("# ", stdout);
   fputs (origin, stdout);
+  if (v->private_var)
+    fputs (" private", stdout);
   if (v->fileinfo.filenm)
     printf (_(" (from `%s', line %lu)"),
             v->fileinfo.filenm, v->fileinfo.lineno);
@@ -1440,7 +1489,7 @@ print_variable (const void *item, void *arg)
     printf ("define %s\n%s\nendef\n", v->name, v->value);
   else
     {
-      register char *p;
+      char *p;
 
       printf ("%s %s= ", v->name, v->recursive ? v->append ? "+" : "" : ":");
 

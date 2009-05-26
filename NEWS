@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  1 April 2006
+  25 May 2009
 
 See the end of this file for copyrights and conditions.
 
@@ -14,12 +14,30 @@ Version 3.81.90
 * Compiling GNU make now requires a conforming ISO C 1989 compiler and
   standard runtime library.
 
+* The parser for variable assignments has been enhanced to allow multiple
+  modifiers ('export', 'override', 'private' (see below)) on the same line as
+  variables, including define/endef variables, and in any order.  Also, it is
+  possible to create variables and targets named as these modifiers.
+
+* WARNING: Backward-incompatibility!
+  As a result of the parser changes, two backward-compatibility issues exist:
+  first, a prerequisite containing an "=" cannot be escaped with a backslash
+  any longer.  You must create a variable containing an "=" and use that
+  variable in the prerequisite.  Second, variable names can no longer contain
+  whitespace, unless you put the whitespace in a variable and use the
+  variable.
+
 * New special variable: .RECIPEPREFIX allows you to reset the recipe
-  introduction character from the default (TAB) to something else.  The
-  first character of this variable value is the new recipe introduction
-  character.  If the variable is set to the empty string, TAB is used
-  again.  It can be set and reset at will; rules will be parsed
-  according to the current value.
+  introduction character from the default (TAB) to something else.  The first
+  character of this variable value is the new recipe introduction character.
+  If the variable is set to the empty string, TAB is used again.  It can be
+  set and reset at will; recipes will use the value active when they were
+  first parsed.
+
+* New variable modifier 'private': prefixing a variable assignment with the
+  modifier 'private' suppresses inheritance of that variable by
+  prerequisites.  This is most useful for target- and pattern-specific
+  variables.
 
 
 Version 3.81

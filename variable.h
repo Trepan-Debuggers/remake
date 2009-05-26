@@ -59,10 +59,12 @@ struct variable
                                    variable.  */
     unsigned int conditional:1; /* Nonzero if set with a ?=. */
     unsigned int per_target:1;	/* Nonzero if a target-specific variable.  */
-    unsigned int special:1;     /* Nonzero if this is a special variable. */
+    unsigned int special:1;     /* Nonzero if this is a special variable.  */
     unsigned int exportable:1;  /* Nonzero if the variable _could_ be
                                    exported.  */
     unsigned int expanding:1;	/* Nonzero if currently being expanded.  */
+    unsigned int private_var:1; /* Nonzero avoids inheritance of this
+                                   target-specific variable.  */
     unsigned int exp_count:EXP_COUNT_BITS;
                                 /* If >1, allow this many self-referential
                                    expansions.  */
@@ -92,6 +94,7 @@ struct variable_set_list
   {
     struct variable_set_list *next;	/* Link in the chain.  */
     struct variable_set *set;		/* Variable set.  */
+    int next_is_parent;                 /* True if next is a parent target.  */
   };
 
 /* Structure used for pattern-specific variables.  */
@@ -151,7 +154,9 @@ struct variable *do_variable_definition (const struct floc *flocp,
                                          enum variable_origin origin,
                                          enum variable_flavor flavor,
                                          int target_var);
-struct variable *parse_variable_definition (struct variable *v, char *line);
+char *parse_variable_definition (const char *line,
+                                 enum variable_flavor *flavor);
+struct variable *assign_variable_definition (struct variable *v, char *line);
 struct variable *try_variable_definition (const struct floc *flocp, char *line,
                                           enum variable_origin origin,
                                           int target_var);

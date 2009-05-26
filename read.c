@@ -56,6 +56,17 @@ struct ebuffer
     struct floc floc;   /* Info on the file in fp (if any).  */
   };
 
+/* Track the modifiers we can have on variable assignments */
+
+struct vmodifiers
+  {
+    unsigned int assign_v:1;
+    unsigned int define_v:1;
+    unsigned int export_v:1;
+    unsigned int override_v:1;
+    unsigned int private_v:1;
+  };
+
 /* Types of "words" that can be read in a makefile.  */
 enum make_word_type
   {
@@ -125,8 +136,9 @@ static int eval_makefile (const char *filename, int flags);
 static int eval (struct ebuffer *buffer, int flags);
 
 static long readline (struct ebuffer *ebuf);
-static void do_define (char *name, unsigned int namelen,
-                       enum variable_origin origin, struct ebuffer *ebuf);
+static struct variable *do_define (char *name, unsigned int namelen,
+                                   enum variable_origin origin,
+                                   struct ebuffer *ebuf);
 static int conditional_line (char *line, int len, const struct floc *flocp);
 static void record_files (struct nameseq *filenames, const char *pattern,
                           const char *pattern_percent, struct dep *deps,
@@ -134,13 +146,21 @@ static void record_files (struct nameseq *filenames, const char *pattern,
                           unsigned int commands_idx, int two_colon,
                           const struct floc *flocp);
 static void record_target_var (struct nameseq *filenames, char *defn,
-                               enum variable_origin origin, int enabled,
+                               enum variable_origin origin,
+                               struct vmodifiers *vmod,
                                const struct floc *flocp);
 static enum make_word_type get_next_mword (char *buffer, char *delim,
                                            char **startp, unsigned int *length);
 static void remove_comments (char *line);
 static char *find_char_unquote (char *string, int stop1, int stop2,
                                 int blank, int ignorevars);
+
+
+/* Compare a word, both length and contents.
+   P must point to the word to be tested, and WLEN must be the length.
+*/
+#define	word1eq(s)	(wlen == sizeof(s)-1 && strneq (s, p, sizeof(s)-1))
+
 
 /* Read in all the makefiles and return the chain of their names.  */
 
@@ -434,8 +454,75 @@ eval_buffer (char *buffer)
   alloca (0);
   return r;
 }
+
+/* Check LINE to see if it's a variable assignment.
+
+   It might use one of the modifiers "export", "override", "private", or it
+   might be one of the conditional tokens like "ifdef", "include", etc.
+
+   If it's not a variable assignment, VMOD.V_ASSIGN is 0.  Returns LINE.
+
+   Returns a pointer to the first non-modifier character, and sets VMOD
+   based on the modifiers found if any, plus V_ASSIGN is 1.
+ */
+char *
+parse_var_assignment (const char *line, struct vmodifiers *vmod)
+{
+  const char *p;
+  memset (vmod, '\0', sizeof (*vmod));
+
+  /* Find the start of the next token.  If there isn't one we're done.  */
+  line = next_token (line);
+  if (*line == '\0')
+    return (char *)line;
+
+  p = line;
+  while (1)
+    {
+      int wlen;
+      const char *p2;
+      enum variable_flavor flavor;
+
+      p2 = parse_variable_definition (p, &flavor);
+
+      /* If this is a variable assignment, we're done.  */
+      if (p2)
+        break;
+
+      /* It's not a variable; see if it's a modifier.  */
+      p2 = end_of_token (p);
+      wlen = p2 - p;
+
+      if (word1eq ("export"))
+        vmod->export_v = 1;
+      else if (word1eq ("override"))
+        vmod->override_v = 1;
+      else if (word1eq ("private"))
+        vmod->private_v = 1;
+      else if (word1eq ("define"))
+        {
+          /* We can't have modifiers after 'define' */
+          vmod->define_v = 1;
+          p = next_token (p2);
+          break;
+        }
+      else
+        /* Not a variable or modifier: this is not a variable assignment.  */
+        return (char *)line;
+
+      /* It was a modifier.  Try the next word.  */
+      p = next_token (p2);
+      if (*p == '\0')
+        return (char *)line;
+    }
+
+  /* Found a variable assignment.  */
+  vmod->assign_v = 1;
+  return (char *)p;
+}
 
 
+
 /* Read file FILENAME as a makefile and add its contents to the data base.
 
    SET_DEFAULT is true if we are allowed to set the default goal.  */
@@ -502,7 +589,9 @@ eval (struct ebuffer *ebuf, int set_default)
       unsigned int wlen;
       char *p;
       char *p2;
+      struct vmodifiers vmod;
 
+      /* At the top of this loop, we are starting a brand new line.  */
       /* Grab the next line to be evaluated */
       ebuf->floc.lineno += nlines;
       nlines = readline (ebuf);
@@ -527,7 +616,7 @@ eval (struct ebuffer *ebuf, int set_default)
 	    continue;
 
 	  /* If there is no preceding rule line, don't treat this line
-	     as a command, even though it begins with a tab character.
+	     as a command, even though it begins with a recipe prefix.
 	     SunOS 4 make appears to behave this way.  */
 
 	  if (filenames != 0)
@@ -566,7 +655,7 @@ eval (struct ebuffer *ebuf, int set_default)
 	    }
 	}
 
-      /* This line is not a shell command line.  Don't worry about tabs.
+      /* This line is not a shell command line.  Don't worry about whitespace.
          Get more space if we need it; we don't need to preserve the current
          contents of the buffer.  */
 
@@ -575,6 +664,7 @@ eval (struct ebuffer *ebuf, int set_default)
 	  collapsed_length = linelen+1;
           if (collapsed)
             free (collapsed);
+          /* Don't need xrealloc: we don't need to preserve the content.  */
 	  collapsed = xmalloc (collapsed_length);
 	}
       strcpy (collapsed, line);
@@ -582,183 +672,113 @@ eval (struct ebuffer *ebuf, int set_default)
       collapse_continuations (collapsed);
       remove_comments (collapsed);
 
-      /* Compare a word, both length and contents. */
-#define	word1eq(s)	(wlen == sizeof(s)-1 && strneq (s, p, sizeof(s)-1))
-      p = collapsed;
-      while (isspace ((unsigned char)*p))
-	++p;
-
-      if (*p == '\0')
-	/* This line is completely empty--ignore it.  */
-	continue;
-
-      /* Find the end of the first token.  Note we don't need to worry about
-       * ":" here since we compare tokens by length (so "export" will never
-       * be equal to "export:").
-       */
-      for (p2 = p+1; *p2 != '\0' && !isspace ((unsigned char)*p2); ++p2)
-        ;
-      wlen = p2 - p;
-
-      /* Find the start of the second token.  If it looks like a target or
-         variable definition it can't be a preprocessor token so skip
-         them--this allows variables/targets named `ifdef', `export', etc. */
-      while (isspace ((unsigned char)*p2))
-        ++p2;
-
-      if ((p2[0] == ':' || p2[0] == '+' || p2[0] == '=') && p2[1] == '\0')
+      /* See if this is a variable assignment.  We need to do this early, to
+         allow variables with names like 'ifdef', 'export', 'private', etc.  */
+      p = parse_var_assignment(collapsed, &vmod);
+      if (vmod.assign_v)
         {
-          /* It can't be a preprocessor token so skip it if we're ignoring */
-          if (ignoring)
-            continue;
+          struct variable *v;
+          enum variable_origin origin = vmod.override_v ? o_override : o_file;
 
-          goto skip_conditionals;
-        }
-
-      /* We must first check for conditional and `define' directives before
-	 ignoring anything, since they control what we will do with
-	 following lines.  */
-
-      if (!in_ignored_define)
-	{
-	  int i = conditional_line (p, wlen, fstart);
-          if (i != -2)
+          /* If we're ignoring then we're done now.  */
+	  if (ignoring)
             {
-              if (i == -1)
-                fatal (fstart, _("invalid syntax in conditional"));
-
-              ignoring = i;
+              if (vmod.define_v)
+                in_ignored_define = 1;
               continue;
             }
-	}
 
-      if (word1eq ("endef"))
-	{
-	  if (!in_ignored_define)
-	    fatal (fstart, _("extraneous `endef'"));
-          in_ignored_define = 0;
-	  continue;
-	}
-
-      if (word1eq ("define"))
-	{
-	  if (ignoring)
-	    in_ignored_define = 1;
-	  else
-	    {
-              if (*p2 == '\0')
+          /* If it's a multi-line define / endef, manage that.  */
+          if (vmod.define_v)
+            {
+              if (*p == '\0')
                 fatal (fstart, _("empty variable name"));
 
-	      /* Let the variable name be the whole rest of the line,
-		 with trailing blanks stripped (comments have already been
-		 removed), so it could be a complex variable/function
-		 reference that might contain blanks.  */
-	      p = strchr (p2, '\0');
-	      while (isblank ((unsigned char)p[-1]))
-		--p;
-	      do_define (p2, p - p2, o_file, ebuf);
-	    }
-	  continue;
-	}
-
-      if (word1eq ("override"))
-        {
-	  if (*p2 == '\0')
-	    error (fstart, _("empty `override' directive"));
-
-	  if (strneq (p2, "define", 6)
-	      && (isblank ((unsigned char)p2[6]) || p2[6] == '\0'))
-	    {
-	      if (ignoring)
-		in_ignored_define = 1;
-	      else
-		{
-		  p2 = next_token (p2 + 6);
-                  if (*p2 == '\0')
-                    fatal (fstart, _("empty variable name"));
-
-		  /* Let the variable name be the whole rest of the line,
-		     with trailing blanks stripped (comments have already been
-		     removed), so it could be a complex variable/function
-		     reference that might contain blanks.  */
-		  p = strchr (p2, '\0');
-		  while (isblank ((unsigned char)p[-1]))
-		    --p;
-		  do_define (p2, p - p2, o_override, ebuf);
-		}
-	    }
-	  else if (!ignoring
-		   && !try_variable_definition (fstart, p2, o_override, 0))
-	    error (fstart, _("invalid `override' directive"));
-
-	  continue;
-	}
-
-      if (ignoring)
-	/* Ignore the line.  We continue here so conditionals
-	   can appear in the middle of a rule.  */
-	continue;
-
-      if (word1eq ("export"))
-	{
-          /* 'export' by itself causes everything to be exported. */
-	  if (*p2 == '\0')
-            export_all_variables = 1;
+              /* Let the variable name be the whole rest of the line,
+                 with trailing blanks stripped (comments have already been
+                 removed), so it could be a complex variable/function
+                 reference that might contain blanks.  */
+              p2 = p + strlen (p);
+              while (isblank ((unsigned char)p2[-1]))
+                --p2;
+              v = do_define (p, p2 - p, origin, ebuf);
+            }
           else
             {
-              struct variable *v;
-
-              v = try_variable_definition (fstart, p2, o_file, 0);
-              if (v != 0)
-                v->export = v_export;
-              else
-                {
-                  unsigned int l;
-                  const char *cp;
-                  char *ap;
-
-                  /* Expand the line so we can use indirect and constructed
-                     variable names in an export command.  */
-                  cp = ap = allocated_variable_expand (p2);
-
-                  for (p = find_next_token (&cp, &l); p != 0;
-                       p = find_next_token (&cp, &l))
-                    {
-                      v = lookup_variable (p, l);
-                      if (v == 0)
-                        v = define_variable_loc (p, l, "", o_file, 0, fstart);
-                      v->export = v_export;
-                    }
-
-                  free (ap);
-                }
+              v = try_variable_definition (fstart, p, origin, 0);
+              assert (v != NULL);
             }
+
+          if (vmod.export_v)
+            v->export = v_export;
+          if (vmod.private_v)
+            v->private_var = 1;
+
+          /* This line has been dealt with.  */
           goto rule_complete;
+        }
+
+      /* If this line is completely empty, ignore it.  */
+      if (*p == '\0')
+	continue;
+
+      p2 = end_of_token (p);
+      wlen = p2 - p;
+      p2 = next_token (p2);
+
+      /* If we're in an ignored define, skip this line (but maybe get out).  */
+      if (in_ignored_define)
+	{
+          /* See if this is an endef line (plus optional comment).  */
+          if (word1eq ("endef") && (*p2 == '\0' || *p2 == '#'))
+            in_ignored_define = 0;
+
+	  continue;
 	}
 
-      if (word1eq ("unexport"))
+      /* Check for conditional state changes.  */
+      {
+        int i = conditional_line (p, wlen, fstart);
+        if (i != -2)
+          {
+            if (i == -1)
+              fatal (fstart, _("invalid syntax in conditional"));
+
+            ignoring = i;
+            continue;
+          }
+      }
+
+      /* Nothing to see here... move along.  */
+      if (ignoring)
+	continue;
+
+      /* Manage the "export" keyword used outside of variable assignment
+         as well as "unexport".  */
+      if (word1eq ("export") || word1eq ("unexport"))
 	{
+          int exporting = *p == 'u' ? 0 : 1;
+
+          /* (un)export by itself causes everything to be (un)exported. */
 	  if (*p2 == '\0')
-	    export_all_variables = 0;
+            export_all_variables = exporting;
           else
             {
               unsigned int l;
-              struct variable *v;
               const char *cp;
               char *ap;
 
               /* Expand the line so we can use indirect and constructed
-                 variable names in an unexport command.  */
+                 variable names in an (un)export command.  */
               cp = ap = allocated_variable_expand (p2);
 
               for (p = find_next_token (&cp, &l); p != 0;
                    p = find_next_token (&cp, &l))
                 {
-                  v = lookup_variable (p, l);
+                  struct variable *v = lookup_variable (p, l);
                   if (v == 0)
                     v = define_variable_loc (p, l, "", o_file, 0, fstart);
-
-                  v->export = v_noexport;
+                  v->export = exporting ? v_export : v_noexport;
                 }
 
               free (ap);
@@ -766,7 +786,7 @@ eval (struct ebuffer *ebuf, int set_default)
           goto rule_complete;
 	}
 
- skip_conditionals:
+      /* Handle the special syntax for vpath.  */
       if (word1eq ("vpath"))
 	{
           const char *cp;
@@ -791,6 +811,7 @@ eval (struct ebuffer *ebuf, int set_default)
           goto rule_complete;
 	}
 
+      /* Handle include and variants.  */
       if (word1eq ("include") || word1eq ("-include") || word1eq ("sinclude"))
 	{
 	  /* We have found an `include' line specifying a nested
@@ -849,10 +870,6 @@ eval (struct ebuffer *ebuf, int set_default)
           goto rule_complete;
 	}
 
-      if (try_variable_definition (fstart, p, o_file, 0))
-	/* This line has been dealt with.  */
-	goto rule_complete;
-
       /* This line starts with a tab but was not caught above because there
          was no preceding target, and the line might have been usable as a
          variable definition.  But now we know it is definitely lossage.  */
@@ -871,8 +888,6 @@ eval (struct ebuffer *ebuf, int set_default)
 
       {
         enum make_word_type wtype;
-        enum variable_origin v_origin;
-        int exported;
         char *cmdleft, *semip, *lb_next;
         unsigned int plen = 0;
         char *colonp;
@@ -1038,31 +1053,8 @@ eval (struct ebuffer *ebuf, int set_default)
             p2 = variable_buffer + l;
           }
 
-        /* See if it's an "override" or "export" keyword; if so see if what
-           comes after it looks like a variable definition.  */
-
-        wtype = get_next_mword (p2, NULL, &p, &wlen);
-
-        v_origin = o_file;
-        exported = 0;
-        if (wtype == w_static)
-          {
-            if (word1eq ("override"))
-              {
-                v_origin = o_override;
-                wtype = get_next_mword (p+wlen, NULL, &p, &wlen);
-              }
-            else if (word1eq ("export"))
-              {
-                exported = 1;
-                wtype = get_next_mword (p+wlen, NULL, &p, &wlen);
-              }
-          }
-
-        if (wtype != w_eol)
-          wtype = get_next_mword (p+wlen, NULL, NULL, NULL);
-
-        if (wtype == w_varassign)
+        p2 = parse_var_assignment (p2, &vmod);
+        if (vmod.assign_v)
           {
             /* If there was a semicolon found, add it back, plus anything
                after it.  */
@@ -1074,7 +1066,9 @@ eval (struct ebuffer *ebuf, int set_default)
                                         semip, strlen (semip)+1);
                 p = variable_buffer + l;
               }
-            record_target_var (filenames, p, v_origin, exported, fstart);
+            record_target_var (filenames, p2,
+                               vmod.override_v ? o_override : o_file,
+                               &vmod, fstart);
             filenames = 0;
             continue;
           }
@@ -1319,7 +1313,7 @@ remove_comments (char *line)
    The first line has already been read, and NAME is the name of
    the variable to be defined.  The following lines remain to be read.  */
 
-static void
+static struct variable *
 do_define (char *name, unsigned int namelen,
            enum variable_origin origin, struct ebuffer *ebuf)
 {
@@ -1382,6 +1376,8 @@ do_define (char *name, unsigned int namelen,
 
               if (--nlevels == 0)
                 {
+                  struct variable *v;
+
                   /* Define the variable.  */
                   if (idx == 0)
                     definition[0] = '\0';
@@ -1389,10 +1385,10 @@ do_define (char *name, unsigned int namelen,
                     definition[idx - 1] = '\0';
 
                   /* Always define these variables in the global set.  */
-                  define_variable_global (var, strlen (var), definition,
-                                          origin, 1, &defstart);
+                  v = define_variable_global (var, strlen (var), definition,
+                                              origin, 1, &defstart);
                   free (definition);
-                  return;
+                  return (v);
                 }
             }
         }
@@ -1413,9 +1409,6 @@ do_define (char *name, unsigned int namelen,
 
   /* No `endef'!!  */
   fatal (&defstart, _("missing `endef', unterminated `define'"));
-
-  /* NOTREACHED */
-  return;
 }
 
 /* Interpret conditional commands "ifdef", "ifndef", "ifeq",
@@ -1763,7 +1756,7 @@ uniquize_deps (struct dep *chain)
 
 static void
 record_target_var (struct nameseq *filenames, char *defn,
-                   enum variable_origin origin, int exported,
+                   enum variable_origin origin, struct vmodifiers *vmod,
                    const struct floc *flocp)
 {
   struct nameseq *nextf;
@@ -1795,7 +1788,7 @@ record_target_var (struct nameseq *filenames, char *defn,
           p->variable.fileinfo = *flocp;
           /* I don't think this can fail since we already determined it was a
              variable definition.  */
-          v = parse_variable_definition (&p->variable, defn);
+          v = assign_variable_definition (&p->variable, defn);
           assert (v != 0);
 
           if (v->flavor == f_simple)
@@ -1825,14 +1818,15 @@ record_target_var (struct nameseq *filenames, char *defn,
           current_variable_set_list = f->variables;
           v = try_variable_definition (flocp, defn, origin, 1);
           if (!v)
-            error (flocp, _("Malformed target-specific variable definition"));
+            fatal (flocp, _("Malformed target-specific variable definition"));
           current_variable_set_list = global;
         }
 
       /* Set up the variable to be *-specific.  */
       v->origin = origin;
       v->per_target = 1;
-      v->export = exported ? v_export : v_default;
+      v->private_var = vmod->private_v;
+      v->export = vmod->export_v ? v_export : v_default;
 
       /* If it's not an override, check to see if there was a command-line
          setting.  If so, reset the value.  */

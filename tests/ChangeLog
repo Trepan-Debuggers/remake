@@ -1,3 +1,11 @@
+2009-05-25  Paul Smith  <psmith@gnu.org>
+
+	* scripts/features/export: Test new variable parsing abilities.
+
+2009-02-23  Ramon Garcia  <ramon.garcia.f@gmail.com>
+
+	* scripts/variables/private: Create a new suite of tests for 'private'.
+
 2007-11-04  Paul Smith  <psmith@gnu.org>
 
 	* scripts/functions/eval: Update error message for command -> recipe.
