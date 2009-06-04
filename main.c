@@ -468,15 +468,13 @@ char *starting_directory;
 
 unsigned int makelevel;
 
-/* First file defined in the makefile whose name does not
-   start with `.'.  This is the default to remake if the
-   command line does not specify.  */
+/* Pointer to the value of the .DEFAULT_GOAL special variable.
+   The value will be the name of the goal to remake if the command line
+   does not override it.  It can be set by the makefile, or else it's
+   the first target defined in the makefile whose name does not start
+   with '.'.  */
 
-struct file *default_goal_file;
-
-/* Pointer to the value of the .DEFAULT_GOAL special
-   variable.  */
-char ** default_goal_name;
+struct variable * default_goal_var;
 
 /* Pointer to structure for the file .DEFAULT
    whose commands are used for any file that has none of its own.
@@ -945,7 +943,6 @@ main (int argc, char **argv, char **envp)
   /* Needed for OS/2 */
   initialize_main(&argc, &argv);
 
-  default_goal_file = 0;
   reading_file = 0;
 
 #if defined (__MSDOS__) && !defined (_POSIX_SOURCE)
@@ -1186,6 +1183,7 @@ main (int argc, char **argv, char **envp)
                 v->export = v_noexport;
 #endif
                 shell_var.name = "SHELL";
+                shell_var.length = 5;
                 shell_var.value = xstrdup (ep + 1);
               }
 
@@ -1603,10 +1601,7 @@ main (int argc, char **argv, char **envp)
 
   default_file = enter_file (strcache_add (".DEFAULT"));
 
-  {
-    struct variable *v = define_variable (".DEFAULT_GOAL", 13, "", o_file, 0);
-    default_goal_name = &v->value;
-  }
+  default_goal_var = define_variable (".DEFAULT_GOAL", 13, "", o_file, 0);
 
   /* Read all the makefiles.  */
 
@@ -2159,61 +2154,71 @@ main (int argc, char **argv, char **envp)
   if (stdin_nm && unlink (stdin_nm) < 0 && errno != ENOENT)
     perror_with_name (_("unlink (temporary file): "), stdin_nm);
 
+  /* If there were no command-line goals, use the default.  */
+  if (goals == 0)
+    {
+      char *p;
+
+      if (default_goal_var->recursive)
+        p = variable_expand (default_goal_var->value);
+      else
+        {
+          p = variable_buffer_output (variable_buffer, default_goal_var->value,
+                                      strlen (default_goal_var->value));
+          *p = '\0';
+          p = variable_buffer;
+        }
+
+      if (*p != '\0')
+        {
+          struct file *f = lookup_file (p);
+
+          /* If .DEFAULT_GOAL is a non-existent target, enter it into the
+             table and let the standard logic sort it out. */
+          if (f == 0)
+            {
+              struct nameseq *ns;
+
+              ns = multi_glob (parse_file_seq (&p, '\0', sizeof (struct nameseq), 1),
+                               sizeof (struct nameseq));
+              if (ns)
+                {
+                  /* .DEFAULT_GOAL should contain one target. */
+                  if (ns->next != 0)
+                    fatal (NILF, _(".DEFAULT_GOAL contains more than one target"));
+
+                  f = enter_file (strcache_add (ns->name));
+
+                  ns->name = 0; /* It was reused by enter_file(). */
+                  free_ns_chain (ns);
+                }
+            }
+
+          if (f)
+            {
+              goals = alloc_dep ();
+              goals->file = f;
+            }
+        }
+    }
+  else
+    lastgoal->next = 0;
+
+
+  if (!goals)
+    {
+      if (read_makefiles == 0)
+        fatal (NILF, _("No targets specified and no makefile found"));
+
+      fatal (NILF, _("No targets"));
+    }
+
+  /* Update the goals.  */
+
+  DB (DB_BASIC, (_("Updating goal targets....\n")));
+
   {
     int status;
-
-    /* If there were no command-line goals, use the default.  */
-    if (goals == 0)
-      {
-        if (**default_goal_name != '\0')
-          {
-            if (default_goal_file == 0 ||
-                strcmp (*default_goal_name, default_goal_file->name) != 0)
-              {
-                default_goal_file = lookup_file (*default_goal_name);
-
-                /* In case user set .DEFAULT_GOAL to a non-existent target
-                   name let's just enter this name into the table and let
-                   the standard logic sort it out. */
-                if (default_goal_file == 0)
-                  {
-                    struct nameseq *ns;
-                    char *p = *default_goal_name;
-
-                    ns = multi_glob (
-                      parse_file_seq (&p, '\0', sizeof (struct nameseq), 1),
-                      sizeof (struct nameseq));
-
-                    /* .DEFAULT_GOAL should contain one target. */
-                    if (ns->next != 0)
-                      fatal (NILF, _(".DEFAULT_GOAL contains more than one target"));
-
-                    default_goal_file = enter_file (strcache_add (ns->name));
-
-                    ns->name = 0; /* It was reused by enter_file(). */
-                    free_ns_chain (ns);
-                  }
-              }
-
-            goals = alloc_dep ();
-            goals->file = default_goal_file;
-          }
-      }
-    else
-      lastgoal->next = 0;
-
-
-    if (!goals)
-      {
-        if (read_makefiles == 0)
-          fatal (NILF, _("No targets specified and no makefile found"));
-
-        fatal (NILF, _("No targets"));
-      }
-
-    /* Update the goals.  */
-
-    DB (DB_BASIC, (_("Updating goal targets....\n")));
 
     switch (update_goal_chain (goals))
     {

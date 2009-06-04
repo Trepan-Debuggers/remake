@@ -917,7 +917,8 @@ pattern_search (struct file *file, int archive,
     for (ri = 0; ri < rule->num; ++ri)
       if (ri != matches[foundrule])
 	{
-          char *p = alloca (rule->lens[ri] + fullstemlen + 1);
+          char *nm = alloca (rule->lens[ri] + fullstemlen + 1);
+          char *p = nm;
 	  struct file *f;
 	  struct dep *new = alloc_dep ();
 
@@ -929,7 +930,7 @@ pattern_search (struct file *file, int archive,
 	  p += fullstemlen;
 	  memcpy (p, rule->suffixes[ri],
                   rule->lens[ri] - (rule->suffixes[ri] - rule->targets[ri])+1);
-          new->name = strcache_add (p);
+          new->name = strcache_add (nm);
 	  new->file = enter_file (new->name);
 	  new->next = file->also_make;
 

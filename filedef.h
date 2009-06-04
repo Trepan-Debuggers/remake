@@ -97,8 +97,7 @@ struct file
   };
 
 
-extern struct file *default_goal_file, *suffix_file, *default_file;
-extern char **default_goal_name;
+extern struct file *suffix_file, *default_file;
 
 
 struct file *lookup_file (const char *name);

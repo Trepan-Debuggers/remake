@@ -112,11 +112,13 @@ collapse_continuations (char *line)
       /* Skip the newline.  */
       ++in;
 
-      /* If the newline is quoted, discard following whitespace
-	 and any preceding whitespace; leave just one space.  */
+      /* If the newline is escaped, discard following whitespace leaving just
+	 one space.  POSIX requires that each backslash/newline/following
+	 whitespace sequence be reduced to a single space.  */
       if (backslash)
 	{
 	  in = next_token (in);
+          /* Removing this loop will fix Savannah bug #16670: do we want to? */
 	  while (out > line && isblank ((unsigned char)out[-1]))
 	    --out;
 	  *out++ = ' ';

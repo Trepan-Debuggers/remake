@@ -1,3 +1,67 @@
+2009-06-04  Paul Smith  <psmith@gnu.org>
+
+	* maintMakefile: Modify access of config and gnulib Savannah
+	modules to use GIT instead of CVS.
+
+	* main.c (main): Initialize the LENGTH field in SHELL_VAR.
+	Fixes Savannah bug #24655.
+
+	* read.c (eval_buffer): Don't dereference reading_file if it's NULL;
+	this can happen during some invocations of $(eval ...) for example.
+	Fixes Savannah bug #24588.  Patch by Lars Jessen <ljessen@ljessen.dk>
+
+2009-06-02  Paul Smith  <psmith@gnu.org>
+
+	* configure.in: Check for fileno()
+	* read.c (eval_makefile): If fileno() is available, set CLOSE_ON_EXEC
+	for the makefile file so invocations of $(shell ...) don't inherit it.
+	Fixes Savannah bug #24277.
+
+2009-06-01  Paul Smith  <psmith@gnu.org>
+
+	* main.c (main): The previous fix for .DEFAULT_GOAL had issues;
+	expansion was handled incorrectly.  Rework the default goal
+	handling to save the variable only.  Remove default_goal_file and
+	default_goal_name.
+	* read.c (eval): Check default_goal_var, not default_goal_name.
+	* read.c (record_target_var): Don't check default_goal_file here.
+
+2009-05-31  Paul Smith  <psmith@gnu.org>
+
+	* main.c (main): Expand the .DEFAULT_GOAL variable before using
+	it, and if the multi_glob() returns nothing (say it expanded to
+	nothing but spaces) then don't crash.  Fixes Savannah bug #25697.
+
+	* doc/make.texi (Quick Reference): Add $(if ..), $(or ..), and
+	$(and ..) to the reference.  Fixes Savannah bug #25694.
+
+	* make.1: Be clear that some recipes will be executed even with -n.
+	* doc/make.texi: Ditto.  Fixes Savannah bug #25460.
+
+	* doc/make.texi (Override Directive): Make more clear how
+	overrides and appends interact.
+	Elucidates part of Savannah bug #26207.
+
+	* read.c (record_target_var): Don't reset the origin on
+	target-specific variables; try_variable_definition() will handle
+	this correctly.  Fixes Savannah bug #26207.
+
+	* maintMakefile (do-po-update): Copy PO files into $(top_srcdir).
+	Fixes Savannah bug #25712.
+
+	* implicit.c (pattern_search): Keep a pointer to the beginning of
+	the filename and save that instead of the constructed pointer.
+	Fixes Savannah bug #26593.
+	Patch by Mark Seaborn <mrs@mythic-beasts.com>
+
+2009-05-30  Paul Smith  <psmith@gnu.org>
+
+	* doc/make.texi (Multi-Line): Add a description of the new abilities
+	of define/endef.  Rename "Sequences" to "Multi-Line" and fix some
+	"command sequence" vs. "recipe" syntax.
+	* read.c (do_define): Modify to allow assignment tokens (=, :=, etc.)
+	after a define, to create variables with those flavors.
+
 2009-05-25  Paul Smith  <psmith@gnu.org>
 
 	Reworked the parser for variable assignments to allow multiple

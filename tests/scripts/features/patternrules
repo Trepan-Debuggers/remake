@@ -145,5 +145,20 @@ echo foo.c foo.h >foo.o');
 
 unlink('foo.in', 'foo.h', 'foo.c', 'foo.o');
 
+# TEST #5: make sure both prefix and suffix patterns work with multiple
+#          target patterns (Savannah bug #26593).
+#
+run_make_test('
+all: foo.s1 foo.s2 p1.foo p2.foo
+
+p1.% p2.%: %.orig
+	@echo $@
+%.s1 %.s2: %.orig
+	@echo $@
+
+.PHONY: foo.orig
+',
+              '', "foo.s1\np1.foo\n");
+
 # This tells the test driver that the perl test script executed properly.
 1;
