@@ -123,5 +123,12 @@ baz.1
 baz.2
 ');
 
+# TEST #4: eval in a context where there is no reading_file
+run_make_test('
+.SECONDEXPANSION:
+all : $$(eval $$(info test))
+',            '', "test\n#MAKE#: Nothing to be done for `all'.\n");
+
+
 # This tells the test driver that the perl test script executed properly.
 1;

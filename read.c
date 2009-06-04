@@ -136,8 +136,7 @@ static int eval_makefile (const char *filename, int flags);
 static int eval (struct ebuffer *buffer, int flags);
 
 static long readline (struct ebuffer *ebuf);
-static struct variable *do_define (char *name, unsigned int namelen,
-                                   enum variable_origin origin,
+static struct variable *do_define (char *name, enum variable_origin origin,
                                    struct ebuffer *ebuf);
 static int conditional_line (char *line, int len, const struct floc *flocp);
 static void record_files (struct nameseq *filenames, const char *pattern,
@@ -400,6 +399,12 @@ eval_makefile (const char *filename, int flags)
       return 0;
     }
 
+  /* Set close-on-exec to avoid leaking the makefile to children, such as
+     $(shell ...).  */
+#ifdef HAVE_FILENO
+  CLOSE_ON_EXEC (fileno (ebuf.fp));
+#endif
+
   /* Add this makefile to the list. */
   do_variable_definition (&ebuf.floc, "MAKEFILE_LIST", filename, o_file,
                           f_append, 0);
@@ -438,7 +443,10 @@ eval_buffer (char *buffer)
   ebuf.buffer = ebuf.bufnext = ebuf.bufstart = buffer;
   ebuf.fp = NULL;
 
-  ebuf.floc = *reading_file;
+  if (reading_file)
+    ebuf.floc = *reading_file;
+  else
+    ebuf.floc.filenm = NULL;
 
   curfile = reading_file;
   reading_file = &ebuf.floc;
@@ -688,26 +696,12 @@ eval (struct ebuffer *ebuf, int set_default)
               continue;
             }
 
-          /* If it's a multi-line define / endef, manage that.  */
           if (vmod.define_v)
-            {
-              if (*p == '\0')
-                fatal (fstart, _("empty variable name"));
-
-              /* Let the variable name be the whole rest of the line,
-                 with trailing blanks stripped (comments have already been
-                 removed), so it could be a complex variable/function
-                 reference that might contain blanks.  */
-              p2 = p + strlen (p);
-              while (isblank ((unsigned char)p2[-1]))
-                --p2;
-              v = do_define (p, p2 - p, origin, ebuf);
-            }
+            v = do_define (p, origin, ebuf);
           else
-            {
-              v = try_variable_definition (fstart, p, origin, 0);
-              assert (v != NULL);
-            }
+            v = try_variable_definition (fstart, p, origin, 0);
+
+          assert (v != NULL);
 
           if (vmod.export_v)
             v->export = v_export;
@@ -1205,10 +1199,9 @@ eval (struct ebuffer *ebuf, int set_default)
 
            Because the target is not recorded until after ifeq directive is
            evaluated the .DEFAULT_GOAL does not contain foo yet as one
-           would expect. Because of this we have to move some of the logic
-           here.  */
+           would expect. Because of this we have to move the logic here.  */
 
-        if (**default_goal_name == '\0' && set_default)
+        if (set_default && default_goal_var->value[0] == '\0')
           {
             const char *name;
             struct dep *d;
@@ -1314,45 +1307,60 @@ remove_comments (char *line)
    the variable to be defined.  The following lines remain to be read.  */
 
 static struct variable *
-do_define (char *name, unsigned int namelen,
-           enum variable_origin origin, struct ebuffer *ebuf)
+do_define (char *name, enum variable_origin origin, struct ebuffer *ebuf)
 {
+  struct variable *v;
+  enum variable_flavor flavor;
   struct floc defstart;
-  long nlines = 0;
   int nlevels = 1;
   unsigned int length = 100;
   char *definition = xmalloc (length);
   unsigned int idx = 0;
-  char *p;
-
-  /* Expand the variable name.  */
-  char *var = alloca (namelen + 1);
-  memcpy (var, name, namelen);
-  var[namelen] = '\0';
-  var = variable_expand (var);
+  char *p, *var;
 
   defstart = ebuf->floc;
 
+  p = parse_variable_definition (name, &flavor);
+  if (p == NULL)
+    /* No assignment token, so assume recursive.  */
+    flavor = f_recursive;
+  else
+    {
+      if (*(next_token (p)) != '\0')
+        error (&defstart, _("extraneous text after `define' directive"));
+
+      /* Chop the string before the assignment token to get the name.  */
+      p[flavor == f_recursive ? -1 : -2] = '\0';
+    }
+
+  /* Expand the variable name and find the beginning (NAME) and end.  */
+  var = allocated_variable_expand (name);
+  name = next_token (var);
+  if (*name == '\0')
+    fatal (&defstart, _("empty variable name"));
+  p = name + strlen (name) - 1;
+  while (p > name && isblank ((unsigned char)*p))
+    --p;
+  p[1] = '\0';
+
+  /* Now read the value of the variable.  */
   while (1)
     {
       unsigned int len;
       char *line;
+      long nlines = readline (ebuf);
 
-      nlines = readline (ebuf);
-      ebuf->floc.lineno += nlines;
-
-      /* If there is nothing left to eval, we're done. */
+      /* If there is nothing left to be eval'd, there's no 'endef'!!  */
       if (nlines < 0)
-        break;
+        fatal (&defstart, _("missing `endef', unterminated `define'"));
 
+      ebuf->floc.lineno += nlines;
       line = ebuf->buffer;
 
       collapse_continuations (line);
 
       /* If the line doesn't begin with a tab, test to see if it introduces
-         another define, or ends one.  */
-
-      /* Stop if we find an 'endef' */
+         another define, or ends one.  Stop if we find an 'endef' */
       if (line[0] != cmd_prefix)
         {
           p = next_token (line);
@@ -1370,30 +1378,16 @@ do_define (char *name, unsigned int namelen,
             {
               p += 5;
               remove_comments (p);
-              if (*next_token (p) != '\0')
+              if (*(next_token (p)) != '\0')
                 error (&ebuf->floc,
-                       _("Extraneous text after `endef' directive"));
+                       _("extraneous text after `endef' directive"));
 
               if (--nlevels == 0)
-                {
-                  struct variable *v;
-
-                  /* Define the variable.  */
-                  if (idx == 0)
-                    definition[0] = '\0';
-                  else
-                    definition[idx - 1] = '\0';
-
-                  /* Always define these variables in the global set.  */
-                  v = define_variable_global (var, strlen (var), definition,
-                                              origin, 1, &defstart);
-                  free (definition);
-                  return (v);
-                }
+                break;
             }
         }
 
-      /* Otherwise add this line to the variable definition.  */
+      /* Add this line to the variable definition.  */
       len = strlen (line);
       if (idx + len + 1 > length)
         {
@@ -1407,8 +1401,16 @@ do_define (char *name, unsigned int namelen,
       definition[idx++] = '\n';
     }
 
-  /* No `endef'!!  */
-  fatal (&defstart, _("missing `endef', unterminated `define'"));
+  /* We've got what we need; define the variable.  */
+  if (idx == 0)
+    definition[0] = '\0';
+  else
+    definition[idx - 1] = '\0';
+
+  v = do_variable_definition (&defstart, name, definition, origin, flavor, 0);
+  free (definition);
+  free (var);
+  return (v);
 }
 
 /* Interpret conditional commands "ifdef", "ifndef", "ifeq",
@@ -1791,6 +1793,7 @@ record_target_var (struct nameseq *filenames, char *defn,
           v = assign_variable_definition (&p->variable, defn);
           assert (v != 0);
 
+          v->origin = origin;
           if (v->flavor == f_simple)
             v->value = allocated_variable_expand (v->value);
           else
@@ -1823,14 +1826,13 @@ record_target_var (struct nameseq *filenames, char *defn,
         }
 
       /* Set up the variable to be *-specific.  */
-      v->origin = origin;
       v->per_target = 1;
       v->private_var = vmod->private_v;
       v->export = vmod->export_v ? v_export : v_default;
 
       /* If it's not an override, check to see if there was a command-line
          setting.  If so, reset the value.  */
-      if (origin != o_override)
+      if (v->origin != o_override)
         {
           struct variable *gv;
           int len = strlen(v->name);
@@ -2097,12 +2099,6 @@ record_files (struct nameseq *filenames, const char *pattern,
         }
 
       name = f->name;
-
-      /* If this target is a default target, update DEFAULT_GOAL_FILE.  */
-      if (streq (*default_goal_name, name)
-          && (default_goal_file == 0
-              || ! streq (default_goal_file->name, name)))
-        default_goal_file = f;
     }
 
   if (implicit)

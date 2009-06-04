@@ -738,7 +738,8 @@ snap_deps (void)
   */
 #endif
 
-  /* Remember that we've done this. */
+  /* Remember that we've done this.  Once done we can no longer define
+     new targets.  */
   snapped_deps = 1;
 }
 

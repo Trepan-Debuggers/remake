@@ -1,4 +1,26 @@
+2009-06-04  Paul Smith  <psmith@gnu.org>
+
+	* scripts/features/se_explicit: Add tests for Savannah bug #24588.
+
+2009-05-31  Paul Smith  <psmith@gnu.org>
+
+	* scripts/variables/DEFAULT_GOAL: Add tests for Savannah bug #25697.
+
+	* scripts/features/targetvars: Add tests of overrides for Savannah
+	bug #26207.
+	* scripts/features/patspecific_vars: Ditto.
+
+	* scripts/features/patternrules: Add a test for Savannah bug #26593.
+
+2009-05-30  Paul Smith  <psmith@gnu.org>
+
+	* scripts/variables/flavors: Update with new variable flavor tests.
+	* scripts/variables/define: Create a new set of tests for
+	define/endef and move those aspects of the flavors suite here.
+
 2009-05-25  Paul Smith  <psmith@gnu.org>
+
+	* scripts/features/targetvars: Ditto.
 
 	* scripts/features/export: Test new variable parsing abilities.
 

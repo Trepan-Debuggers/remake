@@ -143,14 +143,12 @@ do-po-update:
 	  && mkdir "$$tmppo" \
 	  && (cd "$$tmppo" \
 		&& $(WGET) -r -l1 -nd --no-parent -A '*.po' $(po_repo)) \
-	  && cp "$$tmppo"/*.po po && rm -rf "$$tmppo"
+	  && cp "$$tmppo"/*.po $(top_srcdir)/po && rm -rf "$$tmppo"
 	cd po && $(MAKE) update-po
 	$(MAKE) po-check
 
 po-update:
-	if test -d "po"; then \
-	  $(MAKE) do-po-update; \
-	fi
+	[ -d "po" ] && $(MAKE) do-po-update
 
 # -------------------------- #
 # Updating GNU build files.  #
@@ -160,29 +158,30 @@ po-update:
 # with each of the files that belongs to some other package and is
 # regularly updated from the specified URL.
 
-savannah-url = http://savannah.gnu.org/cgi-bin/viewcvs/~checkout~
+cvs-url = http://savannah.gnu.org/cgi-bin/viewcvs/~checkout~
+git-url = http://git.savannah.gnu.org/cgit
 target = $(patsubst get-%,%,$@)
 
-config-url = $(savannah-url)/config/config/$(patsubst get-config/%,%,$@)
+config-url = $(git-url)/config.git/plain/$(patsubst get-config/%,%,$@)
 get-config/config.guess get-config/config.sub:
 	@echo $(WGET) $(config-url) -O $(target) \
 	  && $(WGET) $(config-url) -O $(target).t \
 	  && $(move_if_change)
 
-gnulib-url = $(savannah-url)/gnulib/gnulib/build-aux/$(patsubst get-config/%,%,$@)
+gnulib-url = $(git-url)/gnulib.git/plain/build-aux/$(patsubst get-config/%,%,$@)
 get-config/texinfo.tex:
 	@echo $(WGET) $(gnulib-url) -O $(target) \
 	  && $(WGET) $(gnulib-url) -O $(target).t \
 	  && $(move_if_change)
 
-gnustandards-url = $(savannah-url)/gnustandards/gnustandards/$(patsubst get-doc/%,%,$@)
+gnustandards-url = $(cvs-url)/gnustandards/gnustandards/$(patsubst get-doc/%,%,$@)
 get-doc/make-stds.texi get-doc/fdl.texi:
 	@echo $(WGET) $(gnustandards-url) -O $(target) \
 	  && $(WGET) $(gnustandards-url) -O $(target).t \
 	  && $(move_if_change)
 
-.PHONY: cvs-update
-cvs-update: get-config/texinfo.tex get-config/config.guess get-config/config.sub get-doc/make-stds.texi get-doc/fdl.texi
+.PHONY: scm-update
+scm-update: get-config/texinfo.tex get-config/config.guess get-config/config.sub get-doc/make-stds.texi get-doc/fdl.texi
 
 
 # --------------------- #
@@ -190,7 +189,7 @@ cvs-update: get-config/texinfo.tex get-config/config.guess get-config/config.sub
 # --------------------- #
 
 .PHONY: update
-update: po-update cvs-update
+update: po-update scm-update
 
 
 ## --------------- ##
@@ -204,7 +203,7 @@ local-check: po-check changelog-check
 # copyright-check writable-files
 
 changelog-check:
-	if head ChangeLog | grep 'Version $(VERSION)' >/dev/null; then \
+	if head $(top_srcdir)/ChangeLog | grep 'Version $(VERSION)' >/dev/null; then \
 	  :; \
 	else \
 	  echo "$(VERSION) not in ChangeLog" 1>&2; \

@@ -219,11 +219,23 @@ rmdir('t1');
 # Test appending to a simple variable containing a "$": avoid a
 # double-expansion.  See Savannah bug #15913.
 
-run_make_test("
-VAR := \$\$FOO
+run_make_test('
+VAR := $$FOO
 foo: VAR += BAR
-foo: ; \@echo '\$(VAR)'",
+foo: ; @echo '."'".'$(VAR)'."'".'
+',
               '', '$FOO BAR');
+
+# TEST #19: Override with append variables
+
+run_make_test('
+a: override FOO += f1
+a: FOO += f2
+a: ; @echo "$(FOO)"
+',
+              '', "f1\n");
+
+run_make_test(undef, 'FOO=C', "C f1\n");
 
 # TEST #19: Test define/endef variables as target-specific vars
 
