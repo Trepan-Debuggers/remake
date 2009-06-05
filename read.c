@@ -680,9 +680,14 @@ eval (struct ebuffer *ebuf, int set_default)
       collapse_continuations (collapsed);
       remove_comments (collapsed);
 
+      /* Get rid if starting space (including formfeed, vtab, etc.)  */
+      p = collapsed;
+      while (isspace ((unsigned char)*p))
+        ++p;
+
       /* See if this is a variable assignment.  We need to do this early, to
          allow variables with names like 'ifdef', 'export', 'private', etc.  */
-      p = parse_var_assignment(collapsed, &vmod);
+      p = parse_var_assignment(p, &vmod);
       if (vmod.assign_v)
         {
           struct variable *v;

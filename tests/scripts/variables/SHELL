@@ -51,6 +51,6 @@ $extraENV{SHELL} = $mshell;
 
 run_make_test("all: export SHELL := /./$mshell\n".'
 all:;@echo "$(SHELL) $$SHELL"
-', '', "/./$mshell $mshell");
+', '', "/./$mshell /./$mshell");
 
 1;

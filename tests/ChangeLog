@@ -1,5 +1,10 @@
 2009-06-04  Paul Smith  <psmith@gnu.org>
 
+	* scripts/variables/SHELL: The export target-specific SHELL test
+	has an incorrect known-good-value.
+
+	* scripts/misc/general4: Check for whitespace (ffeed, vtab, etc.)
+
 	* scripts/features/se_explicit: Add tests for Savannah bug #24588.
 
 2009-05-31  Paul Smith  <psmith@gnu.org>
