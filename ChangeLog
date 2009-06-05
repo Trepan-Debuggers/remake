@@ -1,5 +1,7 @@
 2009-06-04  Paul Smith  <psmith@gnu.org>
 
+	* read.c (eval): Skip initial whitespace (ffeed, vtab, etc.)
+
 	* maintMakefile: Modify access of config and gnulib Savannah
 	modules to use GIT instead of CVS.
 

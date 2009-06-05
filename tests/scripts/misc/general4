@@ -80,4 +80,17 @@ dir/subdir/%.$$a: dir/subdir/%.$$b ; @echo 'cp $< $@'
 !,
               '', "mkdir -p dir/subdir\ntouch dir/subdir/file.\$b\ncp dir/subdir/file.\$b dir/subdir/file.\$a\n");
 
+# Test odd whitespace at the beginning of a line
+
+run_make_test("
+all:
+   \f
+
+    \\
+ \f  \\
+    \013 \\
+all: ; \@echo hi
+",
+              '', "hi\n");
+
 1;
