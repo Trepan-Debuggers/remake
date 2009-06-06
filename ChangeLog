@@ -3,6 +3,8 @@
 	* remake.c (check_dep): Only set the target's state to not-started
 	if it's not already running.  Found this while testing -j10 builds
 	of glibc: various targets were being rebuilt multiple times.
+	Fix from Knut St. Osmundsen; fixes a problem reported in Savannah
+	bug #15919.
 
 	* read.c (multi_glob): Don't pass GLOB_NOCHECK to glob(3); instead
 	handle the GLOB_NOMATCH error.  This is to work around Sourceware.org
