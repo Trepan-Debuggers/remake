@@ -984,10 +984,11 @@ check_dep (struct file *file, unsigned int depth,
 	  struct dep *lastd;
           int deps_running = 0;
 
-          /* Reset this target's state so that we check it fresh.  It could be
-             that it's already been checked as part of an order-only
+          /* If this target is not running, set it's state so that we check it
+             fresh.  It could be it was checked as part of an order-only
              prerequisite and so wasn't rebuilt then, but should be now.  */
-          set_command_state (file, cs_not_started);
+          if (file->command_state != cs_running)
+            set_command_state (file, cs_not_started);
 
 	  lastd = 0;
 	  d = file->deps;
