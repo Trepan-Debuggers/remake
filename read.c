@@ -3083,6 +3083,9 @@ multi_glob (struct nameseq *chain, unsigned int size)
 
   for (old = chain; old != 0; old = nexto)
     {
+      int r;
+      const char **nlist = 0;
+      int i = 0;
       const char *gname;
 #ifndef NO_ARCHIVES
       char *arname = 0;
@@ -3109,76 +3112,78 @@ multi_glob (struct nameseq *chain, unsigned int size)
 	}
 #endif /* !NO_ARCHIVES */
 
-      switch (glob (gname, GLOB_NOCHECK|GLOB_ALTDIRFUNC, NULL, &gl))
+      r = glob (gname, GLOB_NOSORT|GLOB_ALTDIRFUNC, NULL, &gl);
+      switch (r)
 	{
-	case 0:			/* Success.  */
-	  {
-	    int i = gl.gl_pathc;
-	    while (i-- > 0)
-	      {
-#ifndef NO_ARCHIVES
-		if (memname != 0)
-		  {
-		    /* Try to glob on MEMNAME within the archive.  */
-		    struct nameseq *found
-		      = ar_glob (gl.gl_pathv[i], memname, size);
-		    if (! found)
-		      {
-			/* No matches.  Use MEMNAME as-is.  */
-			unsigned int alen = strlen (gl.gl_pathv[i]);
-			unsigned int mlen = strlen (memname);
-                        char *name;
-			struct nameseq *elt = xmalloc (size);
-                        memset (elt, '\0', size);
-
-                        name = alloca (alen + 1 + mlen + 2);
-			memcpy (name, gl.gl_pathv[i], alen);
-			name[alen] = '(';
-			memcpy (name+alen+1, memname, mlen);
-			name[alen + 1 + mlen] = ')';
-			name[alen + 1 + mlen + 1] = '\0';
-                        elt->name = strcache_add (name);
-			elt->next = new;
-			new = elt;
-		      }
-		    else
-		      {
-			/* Find the end of the FOUND chain.  */
-			struct nameseq *f = found;
-			while (f->next != 0)
-			  f = f->next;
-
-			/* Attach the chain being built to the end of the FOUND
-			   chain, and make FOUND the new NEW chain.  */
-			f->next = new;
-			new = found;
-		      }
-		  }
-		else
-#endif /* !NO_ARCHIVES */
-		  {
-		    struct nameseq *elt = xmalloc (size);
-                    memset (elt, '\0', size);
-		    elt->name = strcache_add (gl.gl_pathv[i]);
-		    elt->next = new;
-		    new = elt;
-		  }
-	      }
-	    globfree (&gl);
-	    free (old);
-	    break;
-	  }
-
 	case GLOB_NOSPACE:
 	  fatal (NILF, _("virtual memory exhausted"));
-	  break;
+
+	case 0:
+          /* Success.  */
+          i = gl.gl_pathc;
+          nlist = (const char **)gl.gl_pathv;
+          break;
 
 	default:
-	  old->next = new;
-	  new = old;
+          /* Not a match or another error; keep this name.  */
+          i = 1;
+          nlist = &gname;
 	  break;
 	}
 
+      /* For each matched element, add it to the list.  */
+      while (i-- > 0)
+#ifndef NO_ARCHIVES
+        if (memname != 0)
+          {
+            /* Try to glob on MEMNAME within the archive.  */
+            struct nameseq *found
+              = ar_glob (nlist[i], memname, size);
+            if (! found)
+              {
+                /* No matches.  Use MEMNAME as-is.  */
+                unsigned int alen = strlen (nlist[i]);
+                unsigned int mlen = strlen (memname);
+                char *name;
+                struct nameseq *elt = xmalloc (size);
+                memset (elt, '\0', size);
+
+                name = alloca (alen + 1 + mlen + 2);
+                memcpy (name, nlist[i], alen);
+                name[alen] = '(';
+                memcpy (name+alen+1, memname, mlen);
+                name[alen + 1 + mlen] = ')';
+                name[alen + 1 + mlen + 1] = '\0';
+                elt->name = strcache_add (name);
+                elt->next = new;
+                new = elt;
+              }
+            else
+              {
+                /* Find the end of the FOUND chain.  */
+                struct nameseq *f = found;
+                while (f->next != 0)
+                  f = f->next;
+
+                /* Attach the chain being built to the end of the FOUND
+                   chain, and make FOUND the new NEW chain.  */
+                f->next = new;
+                new = found;
+              }
+          }
+        else
+#endif /* !NO_ARCHIVES */
+          {
+            struct nameseq *elt = xmalloc (size);
+            memset (elt, '\0', size);
+            elt->name = strcache_add (nlist[i]);
+            elt->next = new;
+            new = elt;
+          }
+
+      if (r == 0)
+        globfree (&gl);
+      free (old);
 #ifndef NO_ARCHIVES
       if (arname)
         free (arname);

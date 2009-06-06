@@ -1,3 +1,13 @@
+2009-06-06  Paul Smith  <psmith@gnu.org>
+
+	* remake.c (check_dep): Only set the target's state to not-started
+	if it's not already running.  Found this while testing -j10 builds
+	of glibc: various targets were being rebuilt multiple times.
+
+	* read.c (multi_glob): Don't pass GLOB_NOCHECK to glob(3); instead
+	handle the GLOB_NOMATCH error.  This is to work around Sourceware.org
+	Bugzilla bug 10246.
+
 2009-06-04  Paul Smith  <psmith@gnu.org>
 
 	* read.c (eval): Skip initial whitespace (ffeed, vtab, etc.)

@@ -49,8 +49,11 @@ all:;@echo "$(SHELL) $$SHELL"
 
 $extraENV{SHELL} = $mshell;
 
-run_make_test("all: export SHELL := /./$mshell\n".'
-all:;@echo "$(SHELL) $$SHELL"
-', '', "/./$mshell /./$mshell");
+run_make_test("
+SHELL := /././$mshell
+one: two
+two: export SHELL := /./$mshell\n".'
+one two:;@echo "$@: $(SHELL) $$SHELL"
+', '', "two: /./$mshell /./$mshell\none: /././$mshell $mshell\n");
 
 1;
