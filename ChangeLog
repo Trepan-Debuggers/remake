@@ -1,5 +1,10 @@
 2009-06-07  Paul Smith  <psmith@gnu.org>
 
+	* file.c (snap_deps): Set SNAPPED_DEPS at the start of snapping,
+	not the end, to catch second expansion $(eval ...) defining new
+	target/prereq relationships during snap_deps.
+	Fixes Savannah bug #24622.
+
 	* read.c (record_files): The second-expansion "f->updating" hack
 	was not completely correct: if assumed that the target with
 	commands always had prerequisites; if one didn't then the ordering

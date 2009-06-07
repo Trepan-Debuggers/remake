@@ -86,31 +86,19 @@ run_make_test('
 all: foo bar baz
 
 # Subtest #1
-#
 foo: foo.1; @:
-
 foo: foo.2
-
 foo: foo.3
 
-
 # Subtest #2
-#
 bar: bar.2
-
 bar: bar.1; @:
-
 bar: bar.3
 
-
 # Subtest #3
-#
 baz: baz.1
-
 baz: baz.2
-
 baz: ; @:
-
 ',
 '',
 'foo.1
@@ -129,6 +117,18 @@ run_make_test('
 all : $$(eval $$(info test))
 ',            '', "test\n#MAKE#: Nothing to be done for `all'.\n");
 
+# TEST #5: (NEGATIVE) catch eval in a prereq list trying to create new
+# target/prereq relationships.
+
+run_make_test('
+.SECONDEXPANSION:
+proj1.exe : proj1.o $$(eval $$(test))
+define test
+proj1.o : proj1.c
+proj1.c: proj1.h
+endef
+',
+              '', "#MAKE#: *** prerequisites cannot be defined in recipes.  Stop.\n", 512);
 
 # This tells the test driver that the perl test script executed properly.
 1;
