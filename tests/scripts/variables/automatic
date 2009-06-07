@@ -107,4 +107,16 @@ bar: ;',
 
 unlink('foo');
 
+# TEST #4: ensure prereq ordering is correct when the commmand target has none
+# See Savannah bug #21198
+
+run_make_test('
+all : A B
+all : ; @echo $@ -- $^ -- $<
+all : C D
+all : E F
+A B C D E F G H : ; @:
+',
+              '', "all -- A B C D E F -- A\n");
+
 1;

@@ -2019,21 +2019,37 @@ record_files (struct nameseq *filenames, const char *pattern,
                     d_ptr = &(*d_ptr)->next;
 
                   if (cmds != 0)
-                    /* This is the rule with commands, so put its deps
-                       last. The rationale behind this is that $< expands to
-                       the first dep in the chain, and commands use $<
-                       expecting to get the dep that rule specifies.  However
-                       the second expansion algorithm reverses the order thus
-                       we need to make it last here.  */
-                    (*d_ptr)->next = this;
+                    {
+                      /* This is the rule with commands, so put its deps
+                         last. The rationale behind this is that $< expands to
+                         the first dep in the chain, and commands use $<
+                         expecting to get the dep that rule specifies.  However
+                         the second expansion algorithm reverses the order thus
+                         we need to make it last here.  */
+                      (*d_ptr)->next = this;
+                      /* This is a hack. I need a way to communicate to
+                         snap_deps() that the last dependency line in this
+                         file came with commands (so that logic in snap_deps()
+                         can put it in front and all this $< -logic works). I
+                         cannot simply rely on file->cmds being not 0 because
+                         of the cases like the following:
+
+                         foo: bar
+                         foo:
+                         ...
+
+                         I am going to temporarily "borrow" UPDATING member in
+                         `struct file' for this.   */
+                      f->updating = 1;
+                    }
                   else
                     {
-                      /* This is the rule without commands. Put its
-                         dependencies at the end but before dependencies from
-                         the rule with commands (if any). This way everything
-                         appears in makefile order.  */
-
-                      if (f->cmds != 0)
+                      /* This is a rule without commands.  If we already have
+                         a rule with commands and prerequisites (see "hack"
+                         comment above), put these prereqs at the end but
+                         before prereqs from the rule with commands. This way
+                         everything appears in makefile order.  */
+                      if (f->updating)
                         {
                           this->next = *d_ptr;
                           *d_ptr = this;
@@ -2044,22 +2060,6 @@ record_files (struct nameseq *filenames, const char *pattern,
                 }
               else
                 f->deps = this;
-
-              /* This is a hack. I need a way to communicate to snap_deps()
-                 that the last dependency line in this file came with commands
-                 (so that logic in snap_deps() can put it in front and all
-                 this $< -logic works). I cannot simply rely on file->cmds
-                 being not 0 because of the cases like the following:
-
-                 foo: bar
-                 foo:
-                     ...
-
-                 I am going to temporarily "borrow" UPDATING member in
-                 `struct file' for this.   */
-
-              if (cmds != 0)
-                f->updating = 1;
 	    }
 	}
       else

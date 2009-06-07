@@ -1,4 +1,23 @@
+2009-06-07  Paul Smith  <psmith@gnu.org>
+
+	* read.c (record_files): The second-expansion "f->updating" hack
+	was not completely correct: if assumed that the target with
+	commands always had prerequisites; if one didn't then the ordering
+	was messed up.  Fixed for now to use f->updating to decide whether
+	to preserve the last element in the deps list... but this whole
+	area of constructing and reversing the deps list is too confusing
+	and needs to be reworked.  Fixes Savannah bug #21198.
+
 2009-06-06  Paul Smith  <psmith@gnu.org>
+
+	* hash.c (hash_insert): Remove useless test for NULL.
+	Fixes Savannah bug #21823.
+
+	* make.h: Move SET_STACK_SIZE determination to make.h.
+	* main.c (main): New global variable, STACK_LIMIT, holds the
+	original stack limit when make was started.
+	* job.c (start_job_command): Reset the stack limit, if we changed it.
+	Fixes Savannah bug #22010.
 
 	* remake.c (check_dep): Only set the target's state to not-started
 	if it's not already running.  Found this while testing -j10 builds
