@@ -1,5 +1,8 @@
 2009-06-07  Paul Smith  <psmith@gnu.org>
 
+	* scripts/features/se_explicit: Make sure we catch defining
+	prereqs during snap_deps().  Savannah bug #24622.
+
 	* scripts/variables/automatic: Check prereq ordering when the
 	target with the recipe has no prereqs.  Savannah bug #21198.
 

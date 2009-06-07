@@ -638,6 +638,10 @@ snap_deps (void)
   struct file **file_slot;
   struct file **file_end;
 
+  /* Remember that we've done this.  Once we start snapping deps we can no
+     longer define new targets.  */
+  snapped_deps = 1;
+
   /* Perform second expansion and enter each dependency name as a file. */
 
   /* Expand .SUFFIXES first; it's dependencies are used for $$* calculation. */
@@ -737,10 +741,6 @@ snap_deps (void)
     define_variable (STRING_SIZE_TUPLE("OUTPUT_OPTION"), "", o_default, 1);
   */
 #endif
-
-  /* Remember that we've done this.  Once done we can no longer define
-     new targets.  */
-  snapped_deps = 1;
 }
 
 /* Set the `command_state' member of FILE and all its `also_make's.  */
