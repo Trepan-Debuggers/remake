@@ -1275,6 +1275,12 @@ start_job_command (struct child *child)
           if (job_rfd >= 0)
             close (job_rfd);
 
+#ifdef SET_STACK_SIZE
+          /* Reset limits, if necessary.  */
+          if (stack_limit.rlim_cur)
+            setrlimit (RLIMIT_STACK, &stack_limit);
+#endif
+
 	  child_execute_job (child->good_stdin ? 0 : bad_stdin, 1,
                              argv, child->environment);
 	}
@@ -2252,7 +2258,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 				 "for", "case", "if", ":", ".", "break",
 				 "continue", "export", "read", "readonly",
 				 "shift", "times", "trap", "switch", "unset",
-                                 0 };
+                                 "ulimit", 0 };
 
   char *sh_chars;
   char **sh_cmds;

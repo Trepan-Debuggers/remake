@@ -1465,28 +1465,23 @@ library_search (const char *lib, FILE_TIMESTAMP *mtime_ptr)
       0
     };
 
-  static char *libpatterns = NULL;
-
-  const char *libname = lib+2;	/* Name without the '-l'.  */
+  const char *file = 0;
+  char *libpatterns;
   FILE_TIMESTAMP mtime;
 
   /* Loop variables for the libpatterns value.  */
   char *p;
   const char *p2;
   unsigned int len;
+  unsigned int liblen;
 
   char **dp;
 
-  /* If we don't have libpatterns, get it.  */
-  if (!libpatterns)
-    {
-      int save = warn_undefined_variables_flag;
-      warn_undefined_variables_flag = 0;
+  libpatterns = xstrdup (variable_expand ("$(.LIBPATTERNS)"));
 
-      libpatterns = xstrdup (variable_expand ("$(strip $(.LIBPATTERNS))"));
-
-      warn_undefined_variables_flag = save;
-    }
+  /* Skip the '-l'.  */
+  lib += 2;
+  liblen = strlen (lib);
 
   /* Loop through all the patterns in .LIBPATTERNS, and search on each one.  */
   p2 = libpatterns;
@@ -1497,7 +1492,7 @@ library_search (const char *lib, FILE_TIMESTAMP *mtime_ptr)
       static int libdir_maxlen = -1;
       char *libbuf = variable_expand ("");
 
-      /* Expand the pattern using LIBNAME as a replacement.  */
+      /* Expand the pattern using LIB as a replacement.  */
       {
 	char c = p[len];
 	char *p3, *p4;
@@ -1506,16 +1501,13 @@ library_search (const char *lib, FILE_TIMESTAMP *mtime_ptr)
 	p3 = find_percent (p);
 	if (!p3)
 	  {
-	    /* Give a warning if there is no pattern, then remove the
-	       pattern so it's ignored next time.  */
+	    /* Give a warning if there is no pattern.  */
 	    error (NILF, _(".LIBPATTERNS element `%s' is not a pattern"), p);
-	    for (; len; --len, ++p)
-	      *p = ' ';
-	    *p = c;
+            p[len] = c;
 	    continue;
 	  }
 	p4 = variable_buffer_output (libbuf, p, p3-p);
-	p4 = variable_buffer_output (p4, libname, strlen (libname));
+	p4 = variable_buffer_output (p4, lib, liblen);
 	p4 = variable_buffer_output (p4, p3+1, len - (p3-p));
 	p[len] = c;
       }
@@ -1526,15 +1518,16 @@ library_search (const char *lib, FILE_TIMESTAMP *mtime_ptr)
 	{
 	  if (mtime_ptr != 0)
 	    *mtime_ptr = mtime;
-	  return strcache_add (libbuf);
+	  file = strcache_add (libbuf);
+          goto fini;
 	}
 
       /* Now try VPATH search on that.  */
 
       {
-        const char *file = vpath_search (libbuf, mtime_ptr);
+        file = vpath_search (libbuf, mtime_ptr);
         if (file)
-          return file;
+          goto fini;
       }
 
       /* Now try the standard set of directories.  */
@@ -1564,10 +1557,13 @@ library_search (const char *lib, FILE_TIMESTAMP *mtime_ptr)
 	    {
 	      if (mtime_ptr != 0)
 		*mtime_ptr = mtime;
-	      return strcache_add (buf);
+	      file = strcache_add (buf);
+              goto fini;
 	    }
 	}
     }
 
-  return 0;
+ fini:
+  free (libpatterns);
+  return file;
 }

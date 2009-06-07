@@ -340,6 +340,14 @@ extern int no_default_sh_exe;
 extern int unixy_shell;
 #endif  /* WINDOWS32 */
 
+#if defined(HAVE_SYS_RESOURCE_H) && defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
+# define SET_STACK_SIZE
+#endif
+#ifdef SET_STACK_SIZE
+# include <sys/resource.h>
+struct rlimit stack_limit;
+#endif
+
 struct floc
   {
     const char *filenm;

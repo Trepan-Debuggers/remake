@@ -44,14 +44,6 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 # include <fcntl.h>
 #endif
 
-#if defined(HAVE_SYS_RESOURCE_H) && defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
-# define SET_STACK_SIZE
-#endif
-
-#ifdef SET_STACK_SIZE
-# include <sys/resource.h>
-#endif
-
 #ifdef _AMIGA
 int __stack = 20000; /* Make sure we have 20K of stack space */
 #endif
@@ -219,6 +211,13 @@ int print_version_flag = 0;
 /* List of makefiles given with -f switches.  */
 
 static struct stringlist *makefiles = 0;
+
+/* Size of the stack when we started.  */
+
+#ifdef SET_STACK_SIZE
+struct rlimit stack_limit;
+#endif
+
 
 /* Number of job slots (commands that can be run at once).  */
 
@@ -928,11 +927,15 @@ main (int argc, char **argv, char **envp)
     struct rlimit rlim;
 
     /* Set the stack limit huge so that alloca does not fail.  */
-    if (getrlimit (RLIMIT_STACK, &rlim) == 0)
+    if (getrlimit (RLIMIT_STACK, &rlim) == 0
+        && rlim.rlim_cur > 0 && rlim.rlim_cur < rlim.rlim_max)
       {
+        stack_limit = rlim;
         rlim.rlim_cur = rlim.rlim_max;
         setrlimit (RLIMIT_STACK, &rlim);
       }
+    else
+      stack_limit.rlim_cur = 0;
   }
 #endif
 

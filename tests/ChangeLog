@@ -1,3 +1,11 @@
+2009-06-07  Paul Smith  <psmith@gnu.org>
+
+	* scripts/variables/automatic: Check prereq ordering when the
+	target with the recipe has no prereqs.  Savannah bug #21198.
+
+	* scripts/variables/LIBPATTERNS: Add a new set of test for
+	$(.LIBPATTERNS) (previously untested!)
+
 2009-06-04  Paul Smith  <psmith@gnu.org>
 
 	* scripts/variables/SHELL: The export target-specific SHELL test

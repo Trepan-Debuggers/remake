@@ -126,7 +126,7 @@ void *
 hash_insert (struct hash_table *ht, const void *item)
 {
   void **slot = hash_find_slot (ht, item);
-  const void *old_item = slot ? *slot : 0;
+  const void *old_item = *slot;
   hash_insert_at (ht, item, slot);
   return (void *)((HASH_VACANT (old_item)) ? 0 : old_item);
 }
