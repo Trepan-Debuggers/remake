@@ -91,7 +91,7 @@ readdir (DIR *dir)
 
   if (!((i = sys$search (dfab)) & 1))
     {
-      DB (DB_VERBOSE, (_("sys$search failed with %d\n"), i));
+      DB (DB_VERBOSE, (_("sys$search() failed with %d\n"), i));
       return (NULL);
     }
 

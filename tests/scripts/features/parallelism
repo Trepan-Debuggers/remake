@@ -140,6 +140,29 @@ intermed: | phony ; touch $@
 phony: ; : phony', '-rR -j', ': phony');
 unlink('target');
 
+# TEST #10: Don't put --jobserver-fds into a re-exec'd MAKEFLAGS.
+# We can't test this directly because there's no way a makefile can
+# show the value of MAKEFLAGS we were re-exec'd with.  We can intuit it
+# by looking for "disabling jobserver mode" warnings; we should only
+# get one from the original invocation and none from the re-exec.
+# See Savannah bug #18124
+
+run_make_test(q!
+-include inc.mk
+recur:
+#	@echo 'MAKEFLAGS = $(MAKEFLAGS)'
+	@rm -f inc.mk
+	@$(MAKE) -j2 -f #MAKEFILE# all
+all:
+#	@echo 'MAKEFLAGS = $(MAKEFLAGS)'
+	@echo $@
+inc.mk:
+#	@echo 'MAKEFLAGS = $(MAKEFLAGS)'
+	@echo 'FOO = bar' > $@
+!,
+              '--no-print-directory -j2', "#MAKE#[1]: warning: -jN forced in submake: disabling jobserver mode.\nall\n");
+
+unlink('inc.mk');
 
 # Make sure that all jobserver FDs are closed if we need to re-exec the
 # master copy.

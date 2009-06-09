@@ -66,7 +66,7 @@ VMS_get_member_info (struct dsc$descriptor_s *module, unsigned long *rfa)
 			   &bufdesc.dsc$w_length, 0);
   if (! (status & 1))
     {
-      error (NILF, _("lbr$set_module failed to extract module info, status = %d"),
+      error (NILF, _("lbr$set_module() failed to extract module info, status = %d"),
 	     status);
 
       lbr$close (&VMS_lib_idx);
@@ -151,7 +151,7 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
 
   if (! (status & 1))
     {
-      error (NILF, _("lbr$ini_control failed with status = %d"),status);
+      error (NILF, _("lbr$ini_control() failed with status = %d"), status);
       return -2;
     }
 

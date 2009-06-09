@@ -237,6 +237,15 @@ a: ; @echo "$(FOO)"
 
 run_make_test(undef, 'FOO=C', "C f1\n");
 
+# TEST #20: Check for continuation after semicolons
+
+run_make_test(q!
+a: A = 'hello; \
+world'
+a: ; @echo $(A)
+!,
+              '', "hello; world\n");
+
 # TEST #19: Test define/endef variables as target-specific vars
 
 # run_make_test('

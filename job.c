@@ -551,7 +551,7 @@ reap_children (int block, int err)
 		pid = WAIT_NOHANG (&status);
 	      else
 #endif
-		pid = wait (&status);
+		EINTRLOOP(pid, wait (&status));
 #endif /* !VMS */
 	    }
 	  else
@@ -2028,7 +2028,7 @@ exec_command (char **argv, char **envp)
     {
       int i;
       fprintf(stderr,
-              _("process_easy() failed failed to launch process (e=%ld)\n"),
+              _("process_easy() failed to launch process (e=%ld)\n"),
               process_last_err(hPID));
       for (i = 0; argv[i]; i++)
           fprintf(stderr, "%s ", argv[i]);

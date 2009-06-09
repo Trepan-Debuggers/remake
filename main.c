@@ -80,7 +80,7 @@ static void print_data_base (void);
 static void print_version (void);
 static void decode_switches (int argc, char **argv, int env);
 static void decode_env_switches (char *envar, unsigned int len);
-static void define_makeflags (int all, int makefile);
+static const char *define_makeflags (int all, int makefile);
 static char *quote_for_env (char *out, const char *in);
 static void initialize_global_hash_tables (void);
 
@@ -516,7 +516,7 @@ int fatal_signal_mask;
 # if !defined HAVE_SIGACTION
 #  define bsd_signal signal
 # else
-typedef RETSIGTYPE (*bsd_signal_ret_t) ();
+typedef RETSIGTYPE (*bsd_signal_ret_t) (int);
 
 static bsd_signal_ret_t
 bsd_signal (int sig, bsd_signal_ret_t func)
@@ -767,8 +767,8 @@ find_and_set_default_shell (const char *token)
     unixy_shell = 0;
     sprintf (sh_path, "%s", search_token);
     default_shell = xstrdup (w32ify (sh_path, 0));
-    DB (DB_VERBOSE,
-        (_("find_and_set_shell setting default_shell = %s\n"), default_shell));
+    DB (DB_VERBOSE, (_("find_and_set_shell() setting default_shell = %s\n"),
+                     default_shell));
     sh_found = 1;
   } else if (!no_default_sh_exe &&
              (token == NULL || !strcmp (search_token, default_shell))) {
@@ -778,8 +778,8 @@ find_and_set_default_shell (const char *token)
     /* search token path was found */
     sprintf (sh_path, "%s", search_token);
     default_shell = xstrdup (w32ify (sh_path, 0));
-    DB (DB_VERBOSE,
-        (_("find_and_set_shell setting default_shell = %s\n"), default_shell));
+    DB (DB_VERBOSE, (_("find_and_set_shell() setting default_shell = %s\n"),
+                     default_shell));
     sh_found = 1;
   } else {
     char *p;
@@ -820,7 +820,7 @@ find_and_set_default_shell (const char *token)
 
       if (sh_found)
         DB (DB_VERBOSE,
-            (_("find_and_set_shell path search set default_shell = %s\n"),
+            (_("find_and_set_shell() path search set default_shell = %s\n"),
              default_shell));
     }
   }
@@ -1663,60 +1663,60 @@ main (int argc, char **argv, char **envp)
   /* If the jobserver-fds option is seen, make sure that -j is reasonable.  */
 
   if (jobserver_fds)
-  {
-    const char *cp;
-    unsigned int ui;
+    {
+      const char *cp;
+      unsigned int ui;
 
-    for (ui=1; ui < jobserver_fds->idx; ++ui)
-      if (!streq (jobserver_fds->list[0], jobserver_fds->list[ui]))
-        fatal (NILF, _("internal error: multiple --jobserver-fds options"));
+      for (ui=1; ui < jobserver_fds->idx; ++ui)
+        if (!streq (jobserver_fds->list[0], jobserver_fds->list[ui]))
+          fatal (NILF, _("internal error: multiple --jobserver-fds options"));
 
-    /* Now parse the fds string and make sure it has the proper format.  */
+      /* Now parse the fds string and make sure it has the proper format.  */
 
-    cp = jobserver_fds->list[0];
+      cp = jobserver_fds->list[0];
 
-    if (sscanf (cp, "%d,%d", &job_fds[0], &job_fds[1]) != 2)
-      fatal (NILF,
-             _("internal error: invalid --jobserver-fds string `%s'"), cp);
+      if (sscanf (cp, "%d,%d", &job_fds[0], &job_fds[1]) != 2)
+        fatal (NILF,
+               _("internal error: invalid --jobserver-fds string `%s'"), cp);
 
-    DB (DB_JOBS,
-	(_("Jobserver client (fds %d,%d)\n"), job_fds[0], job_fds[1]));
+      DB (DB_JOBS,
+          (_("Jobserver client (fds %d,%d)\n"), job_fds[0], job_fds[1]));
 
-    /* The combination of a pipe + !job_slots means we're using the
-       jobserver.  If !job_slots and we don't have a pipe, we can start
-       infinite jobs.  If we see both a pipe and job_slots >0 that means the
-       user set -j explicitly.  This is broken; in this case obey the user
-       (ignore the jobserver pipe for this make) but print a message.  */
+      /* The combination of a pipe + !job_slots means we're using the
+         jobserver.  If !job_slots and we don't have a pipe, we can start
+         infinite jobs.  If we see both a pipe and job_slots >0 that means the
+         user set -j explicitly.  This is broken; in this case obey the user
+         (ignore the jobserver pipe for this make) but print a message.  */
 
-    if (job_slots > 0)
-      error (NILF,
-             _("warning: -jN forced in submake: disabling jobserver mode."));
-
-    /* Create a duplicate pipe, that will be closed in the SIGCHLD
-       handler.  If this fails with EBADF, the parent has closed the pipe
-       on us because it didn't think we were a submake.  If so, print a
-       warning then default to -j1.  */
-
-    else if ((job_rfd = dup (job_fds[0])) < 0)
-      {
-        if (errno != EBADF)
-          pfatal_with_name (_("dup jobserver"));
-
+      if (job_slots > 0)
         error (NILF,
-               _("warning: jobserver unavailable: using -j1.  Add `+' to parent make rule."));
-        job_slots = 1;
-      }
+               _("warning: -jN forced in submake: disabling jobserver mode."));
 
-    if (job_slots > 0)
-      {
-        close (job_fds[0]);
-        close (job_fds[1]);
-        job_fds[0] = job_fds[1] = -1;
-        free (jobserver_fds->list);
-        free (jobserver_fds);
-        jobserver_fds = 0;
-      }
-  }
+      /* Create a duplicate pipe, that will be closed in the SIGCHLD
+         handler.  If this fails with EBADF, the parent has closed the pipe
+         on us because it didn't think we were a submake.  If so, print a
+         warning then default to -j1.  */
+
+      else if ((job_rfd = dup (job_fds[0])) < 0)
+        {
+          if (errno != EBADF)
+            pfatal_with_name (_("dup jobserver"));
+
+          error (NILF,
+                 _("warning: jobserver unavailable: using -j1.  Add `+' to parent make rule."));
+          job_slots = 1;
+        }
+
+      if (job_slots > 0)
+        {
+          close (job_fds[0]);
+          close (job_fds[1]);
+          job_fds[0] = job_fds[1] = -1;
+          free (jobserver_fds->list);
+          free (jobserver_fds);
+          jobserver_fds = 0;
+        }
+    }
 
   /* If we have >1 slot but no jobserver-fds, then we're a top-level make.
      Set up the pipe and install the fds option for our children.  */
@@ -1834,8 +1834,8 @@ main (int argc, char **argv, char **envp)
 
       FILE_TIMESTAMP *makefile_mtimes = 0;
       unsigned int mm_idx = 0;
-      char **nargv = argv;
-      int nargc = argc;
+      char **nargv;
+      int nargc;
       int orig_db_level = db_level;
       int status;
 
@@ -2004,8 +2004,7 @@ main (int argc, char **argv, char **envp)
 	      for (i = 1; i < argc; ++i)
 		if (strneq (argv[i], "-f", 2)) /* XXX */
 		  {
-		    char *p = &argv[i][2];
-		    if (*p == '\0')
+		    if (argv[i][2] == '\0')
                       /* This cast is OK since we never modify argv.  */
 		      argv[++i] = (char *) makefiles->list[j];
 		    else
@@ -2015,6 +2014,7 @@ main (int argc, char **argv, char **envp)
 	    }
 
           /* Add -o option for the stdin temporary file, if necessary.  */
+          nargc = argc;
           if (stdin_nm)
             {
               nargv = xmalloc ((nargc + 2) * sizeof (char *));
@@ -2022,6 +2022,8 @@ main (int argc, char **argv, char **envp)
               nargv[nargc++] = xstrdup (concat ("-o", stdin_nm, ""));
               nargv[nargc] = 0;
             }
+          else
+            nargv = argv;
 
 	  if (directories != 0 && directories->idx > 0)
 	    {
@@ -2038,6 +2040,14 @@ main (int argc, char **argv, char **envp)
 	    }
 
           ++restarts;
+
+          /* Reset makeflags in case they were changed.  */
+          {
+            const char *pv = define_makeflags (1, 1);
+            char *p = alloca (sizeof ("MAKEFLAGS=") + strlen (pv) + 1);
+            sprintf (p, "MAKEFLAGS=%s", pv);
+            putenv (p);
+          }
 
 	  if (ISDB (DB_BASIC))
 	    {
@@ -2691,7 +2701,7 @@ quote_for_env (char *out, const char *in)
    command switches.  Include options with args if ALL is nonzero.
    Don't include options with the `no_makefile' flag set if MAKEFILE.  */
 
-static void
+static const char *
 define_makeflags (int all, int makefile)
 {
   static const char ref[] = "$(MAKEOVERRIDES)";
@@ -2931,13 +2941,12 @@ define_makeflags (int all, int makefile)
   /* Terminate the string.  */
   *p = '\0';
 
-  v = define_variable ("MAKEFLAGS", 9,
-		       /* If there are switches, omit the leading dash
-			  unless it is a single long option with two
-			  leading dashes.  */
-		       &flagstring[(flagstring[0] == '-'
-				    && flagstring[1] != '-')
-				   ? 1 : 0],
+  /* If there are switches, omit the leading dash unless it is a single long
+     option with two leading dashes.  */
+  if (flagstring[0] == '-' && flagstring[1] != '-')
+    ++flagstring;
+
+  v = define_variable ("MAKEFLAGS", 9, flagstring,
 		       /* This used to use o_env, but that lost when a
 			  makefile defined MAKEFLAGS.  Makefiles set
 			  MAKEFLAGS to add switches, but we still want
@@ -2945,11 +2954,14 @@ define_makeflags (int all, int makefile)
 			  switches.  Of course, an override or command
 			  definition will still take precedence.  */
 		       o_file, 1);
+
   if (! all)
     /* The first time we are called, set MAKEFLAGS to always be exported.
        We should not do this again on the second call, because that is
        after reading makefiles which might have done `unexport MAKEFLAGS'. */
     v->export = v_export;
+
+  return v->value;
 }
 
 /* Print version information.  */
@@ -2978,7 +2990,7 @@ print_version (void)
      year, and none of the rest of it should be translated (including the
      word "Copyright", so it hardly seems worth it.  */
 
-  printf ("%sCopyright (C) 2007  Free Software Foundation, Inc.\n", precede);
+  printf ("%sCopyright (C) 2009  Free Software Foundation, Inc.\n", precede);
 
   printf (_("%sLicense GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n\
 %sThis is free software: you are free to change and redistribute it.\n\
@@ -3060,6 +3072,17 @@ clean_jobserver (int status)
                tcnt, master_job_slots);
 
       close (job_fds[0]);
+
+      /* Clean out jobserver_fds so we don't pass this information to any
+         sub-makes.  Also reset job_slots since it will be put on the command
+         line, not in MAKEFLAGS.  */
+      job_slots = default_job_slots;
+      if (jobserver_fds)
+        {
+          free (jobserver_fds->list);
+          free (jobserver_fds);
+          jobserver_fds = 0;
+        }
     }
 }
 
