@@ -1,3 +1,13 @@
+2009-06-09  Paul Smith  <psmith@gnu.org>
+
+	* scripts/features/parallelism: Add a test for re-exec with
+	jobserver master override.  Savannah bug #18124.
+
+2009-06-08  Paul Smith  <psmith@gnu.org>
+
+	* scripts/features/targetvars: Add a test for continued target
+	vars after a semicolon.  Savannah bug #17521.
+
 2009-06-07  Paul Smith  <psmith@gnu.org>
 
 	* scripts/features/se_explicit: Make sure we catch defining

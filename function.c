@@ -1461,7 +1461,7 @@ windows32_openpipe (int *pipedes, int *pid_p, char **command_argv, char **envp)
 		      0,
 		      TRUE,
 		      DUPLICATE_SAME_ACCESS) == FALSE) {
-    fatal (NILF, _("create_child_process: DuplicateHandle(In) failed (e=%ld)\n"),
+    fatal (NILF, _("windows32_openpipe(): DuplicateHandle(In) failed (e=%ld)\n"),
 	   GetLastError());
 
   }
@@ -1472,7 +1472,7 @@ windows32_openpipe (int *pipedes, int *pid_p, char **command_argv, char **envp)
 		      0,
 		      TRUE,
 		      DUPLICATE_SAME_ACCESS) == FALSE) {
-    fatal (NILF, _("create_child_process: DuplicateHandle(Err) failed (e=%ld)\n"),
+    fatal (NILF, _("windows32_open_pipe(): DuplicateHandle(Err) failed (e=%ld)\n"),
 	   GetLastError());
   }
 
@@ -1482,7 +1482,7 @@ windows32_openpipe (int *pipedes, int *pid_p, char **command_argv, char **envp)
   hProcess = process_init_fd(hIn, hChildOutWr, hErr);
 
   if (!hProcess)
-    fatal (NILF, _("windows32_openpipe (): process_init_fd() failed\n"));
+    fatal (NILF, _("windows32_openpipe(): process_init_fd() failed\n"));
 
   /* make sure that CreateProcess() has Path it needs */
   sync_Path_environment();
