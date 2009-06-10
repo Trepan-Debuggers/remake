@@ -12,7 +12,7 @@
 #                        (and others)
 
 # Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-# 2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+# 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
@@ -28,9 +28,14 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 $valgrind = 0;              # invoke make with valgrind
-$valgrind_args = '--num-callers=15 --tool=memcheck --leak-check=full';
+$valgrind_args = '';
+$memcheck_args = '--num-callers=15 --tool=memcheck --leak-check=full';
+$massif_args = '--num-callers=15 --tool=massif --alloc-fn=xmalloc --alloc-fn=xrealloc --alloc-fn=xstrdup --alloc-fn=xstrndup';
 $pure_log = undef;
+
+$command_string = '';
 
 require "test_driver.pl";
 
@@ -54,9 +59,16 @@ sub valid_option
       return 1;
    }
 
-   if ($option =~ /^-valgrind$/i) {
-     $valgrind = 1;
-     return 1;
+   if ($option =~ /^-(valgrind|memcheck)$/i) {
+       $valgrind = 1;
+       $valgrind_args = $memcheck_args;
+       return 1;
+   }
+
+   if ($option =~ /^-massif$/i) {
+       $valgrind = 1;
+       $valgrind_args = $massif_args;
+       return 1;
    }
 
 # This doesn't work--it _should_!  Someone badly needs to fix this.
@@ -148,6 +160,8 @@ sub run_make_with_options {
     $command .= " $options";
   }
 
+  $command_string = "$command\n";
+
   if ($valgrind) {
     print VALGRIND "\n\nExecuting: $command\n";
   }
@@ -155,7 +169,10 @@ sub run_make_with_options {
 
   {
       my $old_timeout = $test_timeout;
-      $test_timeout = $timeout if $timeout;
+      $timeout and $test_timeout = $timeout;
+
+      # If valgrind is enabled, turn off the timeout check
+      $valgrind and $test_timeout = 0;
 
       $code = &run_command_with_output($logname,$command);
 
@@ -183,10 +200,12 @@ sub run_make_with_options {
   if ($code != $expected_code) {
     print "Error running $make_path (expected $expected_code; got $code): $command\n";
     $test_passed = 0;
+    $runf = &get_runfile;
+    &create_file (&get_runfile, $command_string);
     # If it's a SIGINT, stop here
     if ($code & 127) {
       print STDERR "\nCaught signal ".($code & 127)."!\n";
-      exit($code);
+      ($code & 127) == 2 and exit($code);
     }
     return 0;
   }
@@ -195,19 +214,28 @@ sub run_make_with_options {
     system "add_profile $make_path";
   }
 
-  1;
+  return 1;
 }
 
 sub print_usage
 {
    &print_standard_usage ("run_make_tests",
-                          "[-make_path make_pathname] [-valgrind]",);
+                          "[-make_path make_pathname] [-memcheck] [-massif]",);
 }
 
 sub print_help
 {
-   &print_standard_help ("-make_path",
-          "\tYou may specify the pathname of the copy of make to run.");
+   &print_standard_help (
+        "-make_path",
+        "\tYou may specify the pathname of the copy of make to run.",
+        "-valgrind",
+        "-memcheck",
+        "\tRun the test suite under valgrind's memcheck tool.",
+        "\tChange the default valgrind args with the VALGRIND_ARGS env var.",
+        "-massif",
+        "\tRun the test suite under valgrind's massif toool.",
+        "\tChange the default valgrind args with the VALGRIND_ARGS env var."
+       );
 }
 
 sub get_this_pwd {
@@ -334,11 +362,12 @@ sub set_more_defaults
    # Set up for valgrind, if requested.
 
    if ($valgrind) {
+     my $args = $valgrind_args;
      open(VALGRIND, "> valgrind.out")
        || die "Cannot open valgrind.out: $!\n";
      #  -q --leak-check=yes
-     exists $ENV{VALGRIND_ARGS} and $valgrind_args = $ENV{VALGRIND_ARGS};
-     $make_path = "valgrind --log-fd=".fileno(VALGRIND)." $valgrind_args $make_path";
+     exists $ENV{VALGRIND_ARGS} and $args = $ENV{VALGRIND_ARGS};
+     $make_path = "valgrind --log-fd=".fileno(VALGRIND)." $args $make_path";
      # F_SETFD is 2
      fcntl(VALGRIND, 2, 0) or die "fcntl(setfd) failed: $!\n";
      system("echo Starting on `date` 1>&".fileno(VALGRIND));

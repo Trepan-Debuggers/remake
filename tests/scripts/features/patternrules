@@ -15,11 +15,13 @@ $dir =~ s,.*/([^/]+)$,../$1,;
 #          to match properly.
 #
 
-run_make_test('
+run_make_test(q!
 .PHONY: all
 
 all: case.1 case.2 case.3
-a: void
+
+# We can't have this, due to "Implicit Rule Search Algorithm" step 5c
+#xxx: void
 
 # 1 - existing file
 %.1: void
@@ -41,9 +43,7 @@ a: void
 	@exit 0
 
 3.implicit-phony:
-',
-'',
-'');
+!, '', '');
 
 # TEST #1: make sure files that are built via implicit rules are marked
 #          as targets (Savannah bug #12202).
@@ -159,6 +159,36 @@ p1.% p2.%: %.orig
 .PHONY: foo.orig
 ',
               '', "foo.s1\np1.foo\n");
+
+# TEST 6: Make sure that non-target files are still eligible to be created
+# as part of implicit rule chaining.  Savannah bug #17752.
+
+run_make_test(q!
+BIN = xyz
+COPY = $(BIN).cp
+SRC = $(BIN).c
+allbroken: $(COPY) $(BIN) ; @echo ok
+$(SRC): ; @echo 'main(){}' > $@
+%.cp: % ; @cp $< $@
+% : %.c ; @cp $< $@
+clean: ; @rm -rf $(SRC) $(COPY) $(BIN)
+!,
+              '', "ok\n");
+
+unlink(qw(xyz xyz.cp xyz.c));
+
+# TEST 7: Make sure that all prereqs of all "also_make" targets get created
+# before any of the things that depend on any of them.  Savannah bug #19108.
+
+run_make_test(q!
+final: x ; @echo $@
+x: x.t1 x.t2 ; @echo $@
+x.t2: dep
+dep: ; @echo $@
+%.t1 %.t2: ; @echo $*.t1 ; echo $*.t2
+!,
+              '', "dep\nx.t1\nx.t2\nx\nfinal\n");
+
 
 # This tells the test driver that the perl test script executed properly.
 1;

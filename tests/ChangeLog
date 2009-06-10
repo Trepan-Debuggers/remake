@@ -1,5 +1,21 @@
 2009-06-09  Paul Smith  <psmith@gnu.org>
 
+	* scripts/features/patternrules: Test that dependencies of
+	"also_make" targets are created properly.  Savannah bug #19108.
+
+	* test_driver.pl (compare_output): Create a "run" file for failed
+	tests containing the command that was run.
+	(get_runfile): New function.
+
+	* run_make_tests.pl (valid_option): Enhanced support for valgrind:
+	allow memcheck and massif tools.
+
+	* scripts/features/patternrules: Have to comment out a line in the
+	first test due to backing out a change that broke the implicit
+	rule search algorithm.  Savannah bug #17752.
+	* scripts/misc/general4: Remove a test that is redundant with
+	patternrules.
+
 	* scripts/features/parallelism: Add a test for re-exec with
 	jobserver master override.  Savannah bug #18124.
 

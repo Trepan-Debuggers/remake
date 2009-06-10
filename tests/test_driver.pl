@@ -6,7 +6,7 @@
 # Modified 92-02-11 through 92-02-22 by Chris Arthur to further generalize.
 #
 # Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-# 2001, 2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+# 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
@@ -29,7 +29,7 @@
 # this routine controls the whole mess; each test suite sets up a few
 # variables and then calls &toplevel, which does all the real work.
 
-# $Id: test_driver.pl,v 1.24 2007/11/04 21:54:02 psmith Exp $
+# $Id: test_driver.pl,v 1.25 2009/06/10 02:21:13 psmith Exp $
 
 
 # The number of test categories we've run
@@ -435,16 +435,19 @@ sub run_each_test
       $logext = 'l';
       $diffext = 'd';
       $baseext = 'b';
+      $runext = 'r';
       $extext = '';
     } else {
       $logext = 'log';
       $diffext = 'diff';
       $baseext = 'base';
+      $runext = 'run';
       $extext = '.';
     }
     $log_filename = "$testpath.$logext";
     $diff_filename = "$testpath.$diffext";
     $base_filename = "$testpath.$baseext";
+    $run_filename = "$testpath.$runext";
     $tmp_filename = "$testpath.$tmpfilesuffix";
 
     &setup_for_test;          # suite-defined
@@ -691,6 +694,7 @@ sub compare_output
     print "DIFFERENT OUTPUT\n" if $debug;
 
     &create_file (&get_basefile, $answer);
+    &create_file (&get_runfile, $command_string);
 
     print "\nCreating Difference File ...\n" if $debug;
 
@@ -698,6 +702,8 @@ sub compare_output
 
     local($command) = "diff -c " . &get_basefile . " " . $logfile;
     &run_command_with_output(&get_difffile,$command);
+  } else {
+      &rmfiles ();
   }
 
   $suite_passed = 0;
@@ -828,7 +834,7 @@ sub run_command_with_output
 {
   my $filename = shift;
 
-  print "\nrun_command_with_output($filename): @_\n" if $debug;
+  print "\nrun_command_with_output($filename,$runname): @_\n" if $debug;
   &attach_default_output ($filename);
   my $code = _run_command(@_);
   &detach_default_output;
@@ -1199,6 +1205,15 @@ sub get_basefile
 sub get_difffile
 {
   return ($diff_filename . &num_suffix ($num_of_logfiles));
+}
+
+# This subroutine returns a command filename with a number appended
+# to the end corresponding to how many logfiles (and thus command files)
+# have been created in the current running test.
+
+sub get_runfile
+{
+  return ($run_filename . &num_suffix ($num_of_logfiles));
 }
 
 # just like logfile, only a generic tmp filename for use by the test.

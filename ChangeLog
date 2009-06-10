@@ -1,5 +1,13 @@
 2009-06-09  Paul Smith  <psmith@gnu.org>
 
+	* remake.c (update_file_1): When rebuilding deps of FILE, also try
+	to rebuild the deps of all the also_make targets for that file.
+	Fixes Savannah bug #19108.
+
+	* implicit.c (pattern_search): Undo test for is_target, added by
+	BorisK on 21 Sep 2004.  This goes against step 5c in the "Implicit
+	Rule Search Algorithm".  Fixes Savannah bug #17752.
+
 	* main.c (clean_jobserver): Clear the jobserver_fds options and
 	set job_slots to the default when we clean up.
 	(define_makeflags): Return the new MAKEFLAGS value.
