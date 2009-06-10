@@ -423,7 +423,6 @@ pattern_search (struct file *file, int archive,
 
       for (ri = 0; ri < nrules; ri++)
 	{
-          struct file *f;
           unsigned int failed = 0;
 	  int check_lastslash;
           int file_variables_set = 0;
@@ -678,7 +677,7 @@ pattern_search (struct file *file, int archive,
                  so it might actually exist.  */
 
               /* @@ dep->changed check is disabled. */
-              if (((f = lookup_file (name)) != 0 && f->is_target)
+              if (lookup_file (name) != 0
                   /*|| ((!dep->changed || check_lastslash) && */
                   || file_exists_p (name))
                 continue;
