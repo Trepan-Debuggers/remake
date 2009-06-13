@@ -584,7 +584,7 @@ pattern_search (struct file *file, int archive,
                           parse_file_seq (&p2,
                                           order_only ? '\0' : '|',
                                           sizeof (struct idep),
-                                          1), sizeof (struct idep));
+                                          1), sizeof (struct idep), 0);
 
                       /* @@ It would be nice to teach parse_file_seq or
                          multi_glob to add prefix. This would save us some

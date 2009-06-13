@@ -836,7 +836,7 @@ eval (struct ebuffer *ebuf, int set_default)
 	  files = multi_glob (parse_file_seq (&p2, '\0',
 					      sizeof (struct nameseq),
 					      1),
-			      sizeof (struct nameseq));
+			      sizeof (struct nameseq), 0);
 	  free (p);
 
 	  /* Save the state of conditionals and start
@@ -1021,7 +1021,7 @@ eval (struct ebuffer *ebuf, int set_default)
         filenames = multi_glob (parse_file_seq (&p2, '\0',
                                                 sizeof (struct nameseq),
                                                 1),
-                                sizeof (struct nameseq));
+                                sizeof (struct nameseq), 0);
         *p2 = ':';
 
         if (!filenames)
@@ -3069,10 +3069,12 @@ tilde_expand (const char *name)
 
    SIZE is how big to construct chain elements.
    This is useful if we want them actually to be other structures
-   that have room for additional info.  */
+   that have room for additional info.
+
+   If EXISTS_ONLY is true only return existing files.  */
 
 struct nameseq *
-multi_glob (struct nameseq *chain, unsigned int size)
+multi_glob (struct nameseq *chain, unsigned int size, int exists_only)
 {
   void dir_setup_glob (glob_t *);
   struct nameseq *new = 0;
@@ -3125,8 +3127,16 @@ multi_glob (struct nameseq *chain, unsigned int size)
           nlist = (const char **)gl.gl_pathv;
           break;
 
+        case GLOB_NOMATCH:
+          if (exists_only)
+            {
+              i = 0;
+              break;
+            }
+          /* FALLTHROUGH */
+
 	default:
-          /* Not a match or another error; keep this name.  */
+          /* By default keep this name.  */
           i = 1;
           nlist = &gname;
 	  break;

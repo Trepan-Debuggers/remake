@@ -1,4 +1,12 @@
+2009-06-13  Paul Smith  <psmith@gnu.org>
+
+	* scripts/functions/wildcard: Test that wildcards with
+	non-existent glob matchers return empty.
+
 2009-06-09  Paul Smith  <psmith@gnu.org>
+
+	* scripts/options/dash-B: Test the $? works correctly with -B.
+	Savannah bug #17825.
 
 	* scripts/features/patternrules: Test that dependencies of
 	"also_make" targets are created properly.  Savannah bug #19108.
