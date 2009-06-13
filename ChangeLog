@@ -1,5 +1,9 @@
 2009-06-13  Paul Smith  <psmith@gnu.org>
 
+	* ar.c (ar_name): Ensure that targets with empty parens aren't
+	considered archive member references: archive members must have a
+	non-empty "member" string.  Fixes Savannah bug #18435.
+
 	* function.c (string_glob): Rely on multi_glob() to determine
 	whether files exist or not.  Remove call to file_exists_p() which
 	is not always correct.  Fixes Savannah bug #21231.
