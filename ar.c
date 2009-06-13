@@ -24,8 +24,9 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "dep.h"
 #include <fnmatch.h>
 
-/* Return nonzero if NAME is an archive-member reference, zero if not.
-   An archive-member reference is a name like `lib(member)'.
+/* Return nonzero if NAME is an archive-member reference, zero if not.  An
+   archive-member reference is a name like `lib(member)' where member is a
+   non-empty string.
    If a name like `lib((entry))' is used, a fatal error is signaled at
    the attempt to use this unsupported feature.  */
 
@@ -39,7 +40,7 @@ ar_name (const char *name)
     return 0;
 
   end = p + strlen (p) - 1;
-  if (*end != ')')
+  if (*end != ')' || end == p + 1)
     return 0;
 
   if (p[1] == '(' && end[-1] == ')')
