@@ -2193,7 +2193,7 @@ main (int argc, char **argv, char **envp)
               struct nameseq *ns;
 
               ns = multi_glob (parse_file_seq (&p, '\0', sizeof (struct nameseq), 1),
-                               sizeof (struct nameseq));
+                               sizeof (struct nameseq), 0);
               if (ns)
                 {
                   /* .DEFAULT_GOAL should contain one target. */

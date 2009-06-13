@@ -1,4 +1,22 @@
+2009-06-13  Paul Smith  <psmith@gnu.org>
+
+	* function.c (string_glob): Rely on multi_glob() to determine
+	whether files exist or not.  Remove call to file_exists_p() which
+	is not always correct.  Fixes Savannah bug #21231.
+	* read.c (multi_glob): Add a new argument EXISTS_ONLY; if true
+	then only files that really exist will be returned.
+	* dep.h: Add new argument to multi_glob().
+	* rule.c (install_pattern_rule): Ditto.
+	* read.c (eval): Ditto.
+	* main.c (main): Ditto.
+	* implicit.c (pattern_search): Ditto.
+	* file.c (parse_prereqs): Ditto.
+	* default.c (set_default_suffixes): Ditto.
+
 2009-06-09  Paul Smith  <psmith@gnu.org>
+
+	* commands.c (set_file_variables): If always_make_flag is set,
+	always add the prereq to $?.  Fixes Savannah bug #17825.
 
 	* remake.c (update_file_1): When rebuilding deps of FILE, also try
 	to rebuild the deps of all the also_make targets for that file.

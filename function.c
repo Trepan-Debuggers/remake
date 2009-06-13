@@ -361,7 +361,7 @@ string_glob (char *line)
 			  That would break examples like:
 			  $(patsubst ./%.c,obj/%.o,$(wildcard ./?*.c)).  */
 		       0),
-		      sizeof (struct nameseq));
+		      sizeof (struct nameseq), 1);
 
   if (result == 0)
     {
@@ -372,26 +372,20 @@ string_glob (char *line)
   idx = 0;
   while (chain != 0)
     {
-      const char *name = chain->name;
-      unsigned int len = strlen (name);
-
       struct nameseq *next = chain->next;
+      unsigned int len = strlen (chain->name);
+
+      if (idx + len + 1 > length)
+        {
+          length += (len + 1) * 2;
+          result = xrealloc (result, length);
+        }
+      memcpy (&result[idx], chain->name, len);
+      idx += len;
+      result[idx++] = ' ';
+
       free (chain);
       chain = next;
-
-      /* multi_glob will pass names without globbing metacharacters
-	 through as is, but we want only files that actually exist.  */
-      if (file_exists_p (name))
-	{
-	  if (idx + len + 1 > length)
-	    {
-	      length += (len + 1) * 2;
-	      result = xrealloc (result, length);
-	    }
-	  memcpy (&result[idx], name, len);
-	  idx += len;
-	  result[idx++] = ' ';
-	}
     }
 
   /* Kill the last space and terminate the string.  */

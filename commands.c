@@ -240,7 +240,7 @@ set_file_variables (struct file *file)
             memcpy (cp, c, len);
             cp += len;
             *cp++ = FILE_LIST_SEPARATOR;
-            if (d->changed)
+            if (d->changed || always_make_flag)
               {
                 memcpy (qp, c, len);
                 qp += len;

@@ -55,7 +55,7 @@ struct nameseq
   };
 
 
-struct nameseq *multi_glob (struct nameseq *chain, unsigned int size);
+struct nameseq *multi_glob (struct nameseq *chain, unsigned int size, int exists_only);
 #ifdef VMS
 struct nameseq *parse_file_seq ();
 #else
