@@ -1,5 +1,10 @@
 2009-06-13  Paul Smith  <psmith@gnu.org>
 
+	* doc/make.texi (MAKEFILES Variable): Be explicit that files
+	included by MAKEFILES cannot give default goals.
+	* read.c (eval): If set_default is not set, pass the no-default-goal
+	value when we read included makefiles.  Fixes Savannah bug #13401.
+
 	* ar.c (ar_name): Ensure that targets with empty parens aren't
 	considered archive member references: archive members must have a
 	non-empty "member" string.  Fixes Savannah bug #18435.

@@ -857,8 +857,10 @@ eval (struct ebuffer *ebuf, int set_default)
 	      free (files);
 	      files = next;
 
-              r = eval_makefile (name, (RM_INCLUDED | RM_NO_TILDE
-                                        | (noerror ? RM_DONTCARE : 0)));
+              r = eval_makefile (name,
+                                 (RM_INCLUDED | RM_NO_TILDE
+                                  | (noerror ? RM_DONTCARE : 0)
+                                  | (set_default ? 0 : RM_NO_DEFAULT_GOAL)));
 	      if (!r && !noerror)
                 error (fstart, "%s: %s", name, strerror (errno));
 	    }

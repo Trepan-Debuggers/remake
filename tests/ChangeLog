@@ -1,5 +1,9 @@
 2009-06-13  Paul Smith  <psmith@gnu.org>
 
+	* scripts/variables/MAKEFILES: Verify that MAKEFILES included
+	files (and files included by them) don't set the default goal.
+	Savannah bug #13401.
+
 	* scripts/functions/wildcard: Test that wildcards with
 	non-existent glob matchers return empty.
 
