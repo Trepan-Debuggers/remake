@@ -4,7 +4,7 @@
 
 @include version.texi
 @set EDITION 0.70
-@set RCSID $Id: make.texi,v 1.55 2009/06/04 06:30:27 psmith Exp $
+@set RCSID $Id: make.texi,v 1.56 2009/06/13 23:10:53 psmith Exp $
 
 @settitle GNU @code{make}
 @setchapternewpage odd
@@ -1191,11 +1191,12 @@ For compatibility with some other @code{make} implementations,
 @vindex MAKEFILES
 If the environment variable @code{MAKEFILES} is defined, @code{make}
 considers its value as a list of names (separated by whitespace) of
-additional makefiles to be read before the others.  This works much like
-the @code{include} directive: various directories are searched for those
-files (@pxref{Include, ,Including Other Makefiles}).  In addition, the
-default goal is never taken from one of these makefiles and it is not an
-error if the files listed in @code{MAKEFILES} are not found.@refill
+additional makefiles to be read before the others.  This works much
+like the @code{include} directive: various directories are searched
+for those files (@pxref{Include, ,Including Other Makefiles}).  In
+addition, the default goal is never taken from one of these makefiles
+(or any makefile included by them) and it is not an error if the files
+listed in @code{MAKEFILES} are not found.@refill
 
 @cindex recursion, and @code{MAKEFILES} variable
 The main use of @code{MAKEFILES} is in communication between recursive
