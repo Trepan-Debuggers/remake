@@ -1,3 +1,11 @@
+2009-06-14  Paul Smith  <psmith@gnu.org>
+
+	* remake.c (update_file_1): Remember the original file we marked
+	as updating, so we can clear that flag again.  If we find a target
+	via vpath, FILE might change.
+	(check_dep): Ditto.  Fixes Savannah bug #13529.
+	Patch by Reid Madsen <reid.madsen@tek.com>.
+
 2009-06-13  Paul Smith  <psmith@gnu.org>
 
 	* doc/make.texi (MAKEFILES Variable): Be explicit that files
