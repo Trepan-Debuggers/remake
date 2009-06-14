@@ -1,3 +1,9 @@
+2009-06-14  Paul Smith  <psmith@gnu.org>
+
+	* scripts/features/vpath: Verify we don't get bogus circular
+	dependency warnings if we choose a different file via vpath during
+	update.  Savannah bug #13529.
+
 2009-06-13  Paul Smith  <psmith@gnu.org>
 
 	* scripts/variables/MAKEFILES: Verify that MAKEFILES included
