@@ -373,6 +373,7 @@ update_file_1 (struct file *file, unsigned int depth)
   FILE_TIMESTAMP this_mtime;
   int noexist, must_make, deps_changed;
   int dep_status = 0;
+  struct file *ofile;
   struct dep *d, *ad;
   struct dep amake;
   int running = 0;
@@ -422,6 +423,10 @@ update_file_1 (struct file *file, unsigned int depth)
 
   /* Notice recursive update of the same file.  */
   start_updating (file);
+
+  /* We might change file if we find a different one via vpath;
+     remember this one to turn off updating.  */
+  ofile = file;
 
   /* Looking at the file's modtime beforehand allows the possibility
      that its name may be changed by a VPATH search, and thus it may
@@ -608,6 +613,7 @@ update_file_1 (struct file *file, unsigned int depth)
     }
 
   finish_updating (file);
+  finish_updating (ofile);
 
   DBF (DB_VERBOSE, _("Finished prerequisites of target file `%s'.\n"));
 
@@ -943,11 +949,16 @@ static int
 check_dep (struct file *file, unsigned int depth,
            FILE_TIMESTAMP this_mtime, int *must_make_ptr)
 {
+  struct file *ofile;
   struct dep *d;
   int dep_status = 0;
 
   ++depth;
   start_updating (file);
+
+  /* We might change file if we find a different one via vpath;
+     remember this one to turn off updating.  */
+  ofile = file;
 
   if (file->phony || !file->intermediate)
     {
@@ -1054,6 +1065,8 @@ check_dep (struct file *file, unsigned int depth,
     }
 
   finish_updating (file);
+  finish_updating (ofile);
+
   return dep_status;
 }
 
