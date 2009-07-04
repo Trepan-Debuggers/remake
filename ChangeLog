@@ -1,9 +1,14 @@
+2009-07-04  Eli Zaretskii  <eliz@gnu.org>
+
+	* function.c (func_realpath) [!HAVE_REALPATH]: Require the file to
+	exist, as realpath(3) does where it's supported.
+
 2006-07-04  Eli Zaretskii  <eliz@gnu.org>
 
 	* function.c (IS_ABSOLUTE, ROOT_LEN): New macros.
 	(abspath): Support systems that define HAVE_DOS_PATHS (have
 	drive letters in their file names).  Use IS_PATHSEP instead of a
-	literal '/' comparison.
+	literal '/' comparison.  Fixes Savannah bug #26886.
 
 2009-06-14  Paul Smith  <psmith@gnu.org>
 
