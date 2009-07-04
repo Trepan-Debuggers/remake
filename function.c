@@ -1875,6 +1875,14 @@ func_not (char *o, char **argv, char *funcname)
 #endif
 
 
+#ifdef HAVE_DOS_PATHS
+#define IS_ABSOLUTE(n) (n[0] && n[1] == ':')
+#define ROOT_LEN 3
+#else
+#define IS_ABSOLUTE(n) (n[0] == '/')
+#define ROOT_LEN 1
+#endif
+
 /* Return the absolute name of file NAME which does not contain any `.',
    `..' components nor any repeated path separators ('/').   */
 
@@ -1883,13 +1891,14 @@ abspath (const char *name, char *apath)
 {
   char *dest;
   const char *start, *end, *apath_limit;
+  unsigned long root_len = ROOT_LEN;
 
   if (name[0] == '\0' || apath == NULL)
     return NULL;
 
   apath_limit = apath + GET_PATH_MAX;
 
-  if (name[0] != '/')
+  if (!IS_ABSOLUTE(name))
     {
       /* It is unlikely we would make it until here but just to make sure. */
       if (!starting_directory)
@@ -1897,12 +1906,40 @@ abspath (const char *name, char *apath)
 
       strcpy (apath, starting_directory);
 
+#ifdef HAVE_DOS_PATHS
+      if (IS_PATHSEP(name[0]))
+	{
+	  /* We have /foo, an absolute file name except for the drive
+	     letter.  Assume the missing drive letter is the current
+	     drive, which we can get if we remove from starting_directory
+	     everything past the root directory.  */
+	  apath[root_len] = '\0';
+	}
+#endif
+
       dest = strchr (apath, '\0');
     }
   else
     {
-      apath[0] = '/';
-      dest = apath + 1;
+      strncpy (apath, name, root_len);
+      apath[root_len] = '\0';
+      dest = apath + root_len;
+      /* Get past the root, since we already copied it.  */
+      name += root_len;
+#ifdef HAVE_DOS_PATHS
+      if (!IS_PATHSEP(apath[2]))
+	{
+	  /* Convert d:foo into d:./foo and increase root_len.  */
+	  apath[2] = '.';
+	  apath[3] = '/';
+	  dest++;
+	  root_len++;
+	  /* strncpy above copied one character too many.  */
+	  name--;
+	}
+      else
+	apath[2] = '/';	/* make sure it's a forward slash */
+#endif
     }
 
   for (start = end = name; *start != '\0'; start = end)
@@ -1910,11 +1947,11 @@ abspath (const char *name, char *apath)
       unsigned long len;
 
       /* Skip sequence of multiple path-separators.  */
-      while (*start == '/')
+      while (IS_PATHSEP(*start))
 	++start;
 
       /* Find end of path component.  */
-      for (end = start; *end != '\0' && *end != '/'; ++end)
+      for (end = start; *end != '\0' && !IS_PATHSEP(*end); ++end)
         ;
 
       len = end - start;
@@ -1926,12 +1963,12 @@ abspath (const char *name, char *apath)
       else if (len == 2 && start[0] == '.' && start[1] == '.')
 	{
 	  /* Back up to previous component, ignore if at root already.  */
-	  if (dest > apath + 1)
-	    while ((--dest)[-1] != '/');
+	  if (dest > apath + root_len)
+	    for (--dest; !IS_PATHSEP(dest[-1]); --dest);
 	}
       else
 	{
-	  if (dest[-1] != '/')
+	  if (!IS_PATHSEP(dest[-1]))
             *dest++ = '/';
 
 	  if (dest + len >= apath_limit)
@@ -1944,7 +1981,7 @@ abspath (const char *name, char *apath)
     }
 
   /* Unless it is root strip trailing separator.  */
-  if (dest > apath + 1 && dest[-1] == '/')
+  if (dest > apath + root_len && IS_PATHSEP(dest[-1]))
     --dest;
 
   *dest = '\0';
