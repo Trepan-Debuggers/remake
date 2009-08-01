@@ -2327,7 +2327,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
                              "eval", "exec", "exit", "export", "for", "if",
                              "login", "logout", "read", "readonly", "set",
                              "shift", "switch", "test", "times", "trap",
-                             "umask", "wait", "while", 0 };
+                             "ulimit", "umask", "unset", "wait", "while", 0 };
 # ifdef HAVE_DOS_PATHS
   /* This is required if the MSYS/Cygwin ports (which do not define
      WINDOWS32) are compiled with HAVE_DOS_PATHS defined, which uses
