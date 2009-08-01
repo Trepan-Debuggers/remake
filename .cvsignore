@@ -7,6 +7,7 @@ stamp-*
 makebook*
 
 .*gdbinit
+.gdb_history
 
 *.dep *.dvi *.toc *.aux *.log
 *.cp *.cps *.fn *.fns *.vr *.vrs *.tp *.tps *.ky *.kys *.pg *.pgs

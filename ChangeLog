@@ -1,3 +1,14 @@
+2009-07-29  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+        * job.c (construct_command_argv_internal): Add "ulimit" and
+        "unset" to the sh_cmds for Unixy shells.
+
+2009-07-29  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+        * configure.in: Move side-effects outside AC_CACHE_VAL arguments
+        that set make_cv_sys_gnu_glob, so they are also correctly set
+        when the cache has been populated before.
+
 2009-07-04  Eli Zaretskii  <eliz@gnu.org>
 
 	* function.c (func_realpath) [!HAVE_REALPATH]: Require the file to
@@ -215,6 +226,11 @@
 
 	* function.c (func_shell): Don't close pipedes[1] if it is -1.
 	Fixes Savannah bug #20495.
+
+2009-02-28  Ralf Wildenhues  <address@hidden>
+
+        * doc/make.texi (Instead of Execution): Document interaction of
+        -t with phony targets.
 
 2009-02-23  Ramon Garcia  <ramon.garcia.f@gmail.com>
 

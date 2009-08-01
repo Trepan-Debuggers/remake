@@ -4,7 +4,7 @@
 
 @include version.texi
 @set EDITION 0.70
-@set RCSID $Id: make.texi,v 1.56 2009/06/13 23:10:53 psmith Exp $
+@set RCSID $Id: make.texi,v 1.57 2009/08/01 22:09:40 psmith Exp $
 
 @settitle GNU @code{make}
 @setchapternewpage odd
@@ -7792,6 +7792,11 @@ the @samp{+} character or the strings @samp{$(MAKE)} or @samp{$@{MAKE@}}
 is run regardless of these options.  Other lines in the same rule are
 not run unless they too begin with @samp{+} or contain @samp{$(MAKE)} or
 @samp{$@{MAKE@}} (@xref{MAKE Variable, ,How the @code{MAKE} Variable Works}.)
+
+@cindex phony targets and recipe execution
+The @samp{-t} flag prevents phony targets (@pxref{Phony Targets}) from
+being updated, unless there are recipe lines beginning with @samp{+}
+or containing @samp{$(MAKE)} or @samp{$@{MAKE@}}.
 
 The @samp{-W} flag provides two features:
 

@@ -20,7 +20,7 @@
 AC_INIT([GNU make],[3.81.90],[bug-make@gnu.org])
 
 AC_PREREQ(2.59)
-AC_REVISION([[$Id: configure.in,v 1.150 2009/06/04 06:30:27 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.151 2009/08/01 22:09:40 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -347,7 +347,6 @@ rm -f s.conftest conftoast
 
 # Check the system to see if it provides GNU glob.  If not, use our
 # local version.
-
 AC_MSG_CHECKING(if system libc has GNU glob)
 AC_CACHE_VAL(make_cv_sys_gnu_glob, [
  AC_EGREP_CPP(gnu glob,[
@@ -364,9 +363,14 @@ AC_CACHE_VAL(make_cv_sys_gnu_glob, [
 #endif
  ], [AC_MSG_RESULT(yes)
 make_cv_sys_gnu_glob=yes], [AC_MSG_RESULT([no; using local copy])
-AC_SUBST(GLOBINC) GLOBINC='-I$(srcdir)/glob'
-AC_SUBST(GLOBLIB) GLOBLIB=glob/libglob.a
 make_cv_sys_gnu_glob=no])])
+if test "$make_cv_sys_gnu_glob" = no; then
+  GLOBINC='-I$(srcdir)/glob'
+  GLOBLIB=glob/libglob.a
+fi
+AC_SUBST(GLOBINC)
+AC_SUBST(GLOBLIB)
+
 # Tell automake about this, so it can build the right .c files.
 AM_CONDITIONAL(USE_LOCAL_GLOB, test "$make_cv_sys_gnu_glob" = no)
 
