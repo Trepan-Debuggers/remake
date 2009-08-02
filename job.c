@@ -1600,7 +1600,7 @@ new_job (struct file *file)
       /* There are no more references in this line to worry about.
 	 Copy the remaining uninteresting text to the output.  */
       if (out != in)
-	strcpy (out, in);
+	memmove (out, in, strlen (in) + 1);
 
       /* Finally, expand the line.  */
       lines[i] = allocated_variable_expand_for_file (cmds->command_lines[i],

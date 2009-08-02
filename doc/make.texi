@@ -4,7 +4,7 @@
 
 @include version.texi
 @set EDITION 0.70
-@set RCSID $Id: make.texi,v 1.57 2009/08/01 22:09:40 psmith Exp $
+@set RCSID $Id: make.texi,v 1.58 2009/08/02 16:05:42 psmith Exp $
 
 @settitle GNU @code{make}
 @setchapternewpage odd
@@ -8478,7 +8478,7 @@ for full details on suffix rules.
 @pindex .o
 @pindex .c
 @file{@var{n}.o} is made automatically from @file{@var{n}.c} with
-a recipe of the form @samp{$(CC) -c $(CPPFLAGS) $(CFLAGS)}.@refill
+a recipe of the form @samp{$(CC) $(CPPFLAGS) $(CFLAGS) -c}.@refill
 
 @item Compiling C++ programs
 @cindex C++, rule to compile
@@ -8488,7 +8488,7 @@ a recipe of the form @samp{$(CC) -c $(CPPFLAGS) $(CFLAGS)}.@refill
 @pindex .C
 @file{@var{n}.o} is made automatically from @file{@var{n}.cc},
 @file{@var{n}.cpp}, or @file{@var{n}.C} with a recipe of the form
-@samp{$(CXX) -c $(CPPFLAGS) $(CXXFLAGS)}.  We encourage you to use the
+@samp{$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c}.  We encourage you to use the
 suffix @samp{.cc} for C++ source files instead of @samp{.C}.@refill
 
 @item Compiling Pascal programs
@@ -8496,7 +8496,7 @@ suffix @samp{.cc} for C++ source files instead of @samp{.C}.@refill
 @pindex pc
 @pindex .p
 @file{@var{n}.o} is made automatically from @file{@var{n}.p}
-with the recipe @samp{$(PC) -c $(PFLAGS)}.@refill
+with the recipe @samp{$(PC) $(PFLAGS) -c}.@refill
 
 @item Compiling Fortran and Ratfor programs
 @cindex Fortran, rule to compile
@@ -8511,11 +8511,11 @@ Fortran compiler.  The precise recipe used is as follows:@refill
 
 @table @samp
 @item .f
-@samp{$(FC) -c $(FFLAGS)}.
+@samp{$(FC) $(FFLAGS) -c}.
 @item .F
-@samp{$(FC) -c $(FFLAGS) $(CPPFLAGS)}.
+@samp{$(FC) $(FFLAGS) $(CPPFLAGS) -c}.
 @item .r
-@samp{$(FC) -c $(FFLAGS) $(RFLAGS)}.
+@samp{$(FC) $(FFLAGS) $(RFLAGS) -c}.
 @end table
 
 @item Preprocessing Fortran and Ratfor programs
@@ -8526,9 +8526,9 @@ program.  The precise recipe used is as follows:@refill
 
 @table @samp
 @item .F
-@samp{$(FC) -F $(CPPFLAGS) $(FFLAGS)}.
+@samp{$(FC) $(CPPFLAGS) $(FFLAGS) -F}.
 @item .r
-@samp{$(FC) -F $(FFLAGS) $(RFLAGS)}.
+@samp{$(FC) $(FFLAGS) $(RFLAGS) -F}.
 @end table
 
 @item Compiling Modula-2 programs

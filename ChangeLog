@@ -1,3 +1,15 @@
+2009-08-01  Paul Smith  <psmith@gnu.org>
+
+	* expand.c (expand_argument): If the argument is large enough use
+	xmalloc() instead of alloca().  Fixes Savannah bug #27143.
+
+	* variable.c (do_variable_definition): Avoid using alloca() to
+	hold values, which can be large.  Fixes Savannah bug #23960.
+
+	* job.c (new_job): Use memmove() instead of strcpy() since both
+	pointers are in the same memory block.  Fixes Savannah bug #27148.
+	Patch by Petr Machata.
+
 2009-07-29  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
         * job.c (construct_command_argv_internal): Add "ulimit" and

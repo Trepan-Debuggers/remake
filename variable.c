@@ -1091,7 +1091,7 @@ do_variable_definition (const struct floc *flocp, const char *varname,
 
             unsigned int oldlen, vallen;
             const char *val;
-            char *tp;
+            char *tp = NULL;
 
             val = value;
             if (v->recursive)
@@ -1104,15 +1104,17 @@ do_variable_definition (const struct floc *flocp, const char *varname,
                  when it was set; and from the expanded new value.  Allocate
                  memory for the expansion as we may still need the rest of the
                  buffer if we're looking at a target-specific variable.  */
-              val = alloc_value = allocated_variable_expand (val);
+              val = tp = allocated_variable_expand (val);
 
             oldlen = strlen (v->value);
             vallen = strlen (val);
-            tp = alloca (oldlen + 1 + vallen + 1);
-            memcpy (tp, v->value, oldlen);
-            tp[oldlen] = ' ';
-            memcpy (&tp[oldlen + 1], val, vallen + 1);
-            p = tp;
+            p = alloc_value = xmalloc (oldlen + 1 + vallen + 1);
+            memcpy (alloc_value, v->value, oldlen);
+            alloc_value[oldlen] = ' ';
+            memcpy (&alloc_value[oldlen + 1], val, vallen + 1);
+
+            if (tp)
+              free (tp);
           }
       }
     }
@@ -1220,10 +1222,10 @@ do_variable_definition (const struct floc *flocp, const char *varname,
         }
       else
         {
-          if (alloc_value)
-            free (alloc_value);
+          char *tp = alloc_value;
 
           alloc_value = allocated_variable_expand (p);
+
           if (find_and_set_default_shell (alloc_value))
             {
               v = define_variable_in_set (varname, strlen (varname), p,
@@ -1236,6 +1238,9 @@ do_variable_definition (const struct floc *flocp, const char *varname,
             }
           else
             v = lookup_variable (varname, strlen (varname));
+
+          if (tp)
+            free (tp);
         }
     }
   else

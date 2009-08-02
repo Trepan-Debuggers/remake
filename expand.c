@@ -438,7 +438,8 @@ variable_expand (const char *line)
 char *
 expand_argument (const char *str, const char *end)
 {
-  char *tmp;
+  char *tmp, *alloc = NULL;
+  char *r;
 
   if (str == end)
     return xstrdup("");
@@ -446,11 +447,20 @@ expand_argument (const char *str, const char *end)
   if (!end || *end == '\0')
     return allocated_variable_expand (str);
 
-  tmp = alloca (end - str + 1);
+  if (end - str + 1 > 1000)
+    tmp = alloc = xmalloc (end - str + 1);
+  else
+    tmp = alloca (end - str + 1);
+
   memcpy (tmp, str, end - str);
   tmp[end - str] = '\0';
 
-  return allocated_variable_expand (tmp);
+  r = allocated_variable_expand (tmp);
+
+  if (alloc)
+    free (alloc);
+
+  return r;
 }
 
 /* Expand LINE for FILE.  Error messages refer to the file and line where
@@ -562,11 +572,6 @@ allocated_variable_expand_for_file (const char *line, struct file *file)
   variable_buffer = 0;
 
   value = variable_expand_for_file (line, file);
-
-#if 0
-  /* Waste a little memory and save time.  */
-  value = xrealloc (value, strlen (value))
-#endif
 
   variable_buffer = obuf;
   variable_buffer_length = olen;
