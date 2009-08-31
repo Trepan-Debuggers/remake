@@ -1480,6 +1480,9 @@ windows32_openpipe (int *pipedes, int *pid_p, char **command_argv, char **envp)
 
   /* make sure that CreateProcess() has Path it needs */
   sync_Path_environment();
+  /* `sync_Path_environment' may realloc `environ', so take note of
+     the new value.  */
+  envp = environ;
 
   if (!process_begin(hProcess, command_argv, envp, command_argv[0], NULL)) {
     /* register process for wait */

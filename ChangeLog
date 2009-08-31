@@ -1,3 +1,8 @@
+2009-08-31  Eli Zaretskii  <eliz@gnu.org>
+
+	* function.c (windows32_openpipe): Update envp after calling
+	sync_Path_environment.
+
 2009-08-01  Paul Smith  <psmith@gnu.org>
 
 	* expand.c (expand_argument): If the argument is large enough use
