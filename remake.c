@@ -82,7 +82,6 @@ int
 update_goal_chain (struct dep *goals)
 {
   int t = touch_flag, q = question_flag, n = just_print_flag;
-  unsigned int j = job_slots;
   int status = -1;
 
 #define	MTIME(file) (rebuilding_makefiles ? file_mtime_no_search (file) \
@@ -263,7 +262,6 @@ update_goal_chain (struct dep *goals)
       touch_flag = t;
       question_flag = q;
       just_print_flag = n;
-      job_slots = j;
     }
 
   return status;
@@ -872,7 +870,7 @@ notice_finished_file (struct file *file)
          really check the target's mtime again.  Otherwise, assume the target
          would have been updated. */
 
-      if (question_flag || just_print_flag || touch_flag)
+      if (question_flag || just_print_flag || touch_flag && file->cmds != 0)
         {
           for (i = file->cmds->ncommand_lines; i > 0; --i)
             if (! (file->cmds->lines_flags[i-1] & COMMANDS_RECURSE))

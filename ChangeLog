@@ -3,7 +3,20 @@
 	* function.c (windows32_openpipe): Update envp after calling
 	sync_Path_environment.
 
+2009-08-02  Paul Smith  <psmith@gnu.org>
+
+	* remake.c (notice_finished_file): Ensure file->cmds is not null
+	before looping through them.  Fixes Savannah bug #21824.
+
+	* doc/make.texi (Wildcard Examples): Clarify when objects is
+	wildcard-expanded.  Fixes Savannah bug #24509.  Patch by Martin Dorey.
+	(Include): Clarify the behavior of -include.
+	Fixes Savannah bug #18963.
+
 2009-08-01  Paul Smith  <psmith@gnu.org>
+
+	* doc/make.texi (Catalogue of Rules): Clarify where -c, -F,
+	etc. come on the command line.  Fixes Savannah bug #27093.
 
 	* expand.c (expand_argument): If the argument is large enough use
 	xmalloc() instead of alloca().  Fixes Savannah bug #27143.
