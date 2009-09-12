@@ -4,7 +4,7 @@
 
 @include version.texi
 @set EDITION 0.70
-@set RCSID $Id: make.texi,v 1.58 2009/08/02 16:05:42 psmith Exp $
+@set RCSID $Id: make.texi,v 1.59 2009/09/12 21:28:34 psmith Exp $
 
 @settitle GNU @code{make}
 @setchapternewpage odd
@@ -1171,7 +1171,7 @@ Only after it has tried to find a way to remake a makefile and failed,
 will @code{make} diagnose the missing makefile as a fatal error.
 
 If you want @code{make} to simply ignore a makefile which does not exist
-and cannot be remade, with no error message, use the @w{@code{-include}}
+or cannot be remade, with no error message, use the @w{@code{-include}}
 directive instead of @code{include}, like this:
 
 @example
@@ -1179,7 +1179,10 @@ directive instead of @code{include}, like this:
 @end example
 
 This acts like @code{include} in every way except that there is no
-error (not even a warning) if any of the @var{filenames} do not exist.
+error (not even a warning) if any of the @var{filenames} (or any
+prerequisites of any of the @var{filenames}) do not exist or cannot be
+remade.
+
 For compatibility with some other @code{make} implementations,
 @code{sinclude} is another name for @w{@code{-include}}.
 
@@ -1966,9 +1969,11 @@ objects = *.o
 
 @noindent
 then the value of the variable @code{objects} is the actual string
-@samp{*.o}.  However, if you use the value of @code{objects} in a target,
-prerequisite, or recipe, wildcard expansion will take place at that time.
-To set @code{objects} to the expansion, instead use:
+@samp{*.o}.  However, if you use the value of @code{objects} in a
+target or prerequisite, wildcard expansion will take place there.  If
+you use the value of @code{objects} in a recipe, the shell may perform
+wildcard expansion when the recipe runs.  To set @code{objects} to the
+expansion, instead use:
 
 @example
 objects := $(wildcard *.o)
