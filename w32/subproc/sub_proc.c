@@ -441,13 +441,14 @@ process_begin(
 	/* Use the Makefile's value of PATH to look for the program to
 	   execute, because it could be different from Make's PATH
 	   (e.g., if the target sets its own value.  */
-	for (ep = envp; ep; ep++) {
-		if (strncmp (*ep, "PATH=", 5) == 0
-		    || strncmp (*ep, "Path=", 5) == 0) {
-			path_var = *ep + 5;
-			break;
+	if (envp)
+		for (ep = envp; *ep; ep++) {
+			if (strncmp (*ep, "PATH=", 5) == 0
+			    || strncmp (*ep, "Path=", 5) == 0) {
+				path_var = *ep + 5;
+				break;
+			}
 		}
-	}
 	exec_handle = find_file(exec_path, path_var,
 				exec_fname, sizeof(exec_fname));
 
