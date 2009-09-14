@@ -1,3 +1,8 @@
+2009-09-14  Rafi Einstein  <rafi.einstein@gmail.com>  (tiny patch)
+
+	* w32/subproc/sub_proc.c (process_begin): Check *ep non-NULL
+	inside the loop that looks up environment for PATH.
+
 2009-08-31  Eli Zaretskii  <eliz@gnu.org>
 
 	* function.c (windows32_openpipe): Update envp after calling
