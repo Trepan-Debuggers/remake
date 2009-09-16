@@ -979,7 +979,7 @@ target_environment (struct file *file)
 		strcmp(v->name, "PATH") == 0)
 	      convert_Path_to_windows32(value, ';');
 #endif
-	    *result++ = xstrdup (concat (v->name, "=", value));
+	    *result++ = xstrdup (concat (3, v->name, "=", value));
 	    free (value);
 	  }
 	else
@@ -989,7 +989,7 @@ target_environment (struct file *file)
                 strcmp(v->name, "PATH") == 0)
               convert_Path_to_windows32(v->value, ';');
 #endif
-	    *result++ = xstrdup (concat (v->name, "=", v->value));
+	    *result++ = xstrdup (concat (3, v->name, "=", v->value));
 	  }
       }
 
@@ -1324,7 +1324,10 @@ parse_variable_definition (const char *p, enum variable_flavor *flavor)
         {
           wspace = 1;
           p = next_token (p);
-          c = *p++;
+          c = *p;
+          if (c == '\0')
+            return NULL;
+          ++p;
         }
 
 
@@ -1333,8 +1336,9 @@ parse_variable_definition (const char *p, enum variable_flavor *flavor)
 	  *flavor = f_recursive;
 	  return (char *)p;
 	}
+
       /* Match assignment variants (:=, +=, ?=)  */
-      else if (*p == '=')
+      if (*p == '=')
         {
           switch (c)
             {
@@ -1592,7 +1596,7 @@ sync_Path_environment (void)
    * Create something WINDOWS32 world can grok
    */
   convert_Path_to_windows32 (path, ';');
-  environ_path = xstrdup (concat ("PATH", "=", path));
+  environ_path = xstrdup (concat (3, "PATH", "=", path));
   putenv (environ_path);
   free (path);
 }

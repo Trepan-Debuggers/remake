@@ -55,22 +55,30 @@ struct nameseq
   };
 
 
-struct nameseq *multi_glob (struct nameseq *chain, unsigned int size, int exists_only);
+#define PARSEFS_NONE    (0x0000)
+#define PARSEFS_NOSTRIP (0x0001)
+#define PARSEFS_NOGLOB  (0x0002)
+#define PARSEFS_EXISTS  (0x0004)
+#define PARSEFS_NOCACHE (0x0008)
+
 #ifdef VMS
 struct nameseq *parse_file_seq ();
 #else
-struct nameseq *parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip);
+struct nameseq *parse_file_seq (char **stringp, unsigned int size,
+                                int stopchar, const char *prefix, int flags);
 #endif
+
 char *tilde_expand (const char *name);
 
 #ifndef NO_ARCHIVES
 struct nameseq *ar_glob (const char *arname, const char *member_pattern, unsigned int size);
 #endif
 
-#define dep_name(d) ((d)->name == 0 ? (d)->file->name : (d)->name)
+#define dep_name(d)     ((d)->name == 0 ? (d)->file->name : (d)->name)
 
-struct dep *alloc_dep (void);
-void free_dep (struct dep *d);
+#define alloc_dep()     (xcalloc (sizeof (struct dep)))
+#define free_dep(_d)    free (_d)
+
 struct dep *copy_dep_chain (const struct dep *d);
 void free_dep_chain (struct dep *d);
 void free_ns_chain (struct nameseq *n);

@@ -196,9 +196,8 @@ ar_glob_match (int desc UNUSED, const char *mem, int truncated UNUSED,
   if (fnmatch (state->pattern, mem, FNM_PATHNAME|FNM_PERIOD) == 0)
     {
       /* We have a match.  Add it to the chain.  */
-      struct nameseq *new = xmalloc (state->size);
-      memset (new, '\0', state->size);
-      new->name = strcache_add (concat (state->arname, mem, ")"));
+      struct nameseq *new = xcalloc (state->size);
+      new->name = strcache_add (concat (4, state->arname, "(", mem, ")"));
       new->next = state->chain;
       state->chain = new;
       ++state->n;
@@ -249,7 +248,6 @@ ar_glob (const char *arname, const char *member_pattern, unsigned int size)
   struct ar_glob_state state;
   struct nameseq *n;
   const char **names;
-  char *name;
   unsigned int i;
 
   if (! glob_pattern_p (member_pattern, 1))
@@ -257,12 +255,7 @@ ar_glob (const char *arname, const char *member_pattern, unsigned int size)
 
   /* Scan the archive for matches.
      ar_glob_match will accumulate them in STATE.chain.  */
-  i = strlen (arname);
-  name = alloca (i + 2);
-  memcpy (name, arname, i);
-  name[i] = '(';
-  name[i + 1] = '\0';
-  state.arname = name;
+  state.arname = arname;
   state.pattern = member_pattern;
   state.size = size;
   state.chain = 0;

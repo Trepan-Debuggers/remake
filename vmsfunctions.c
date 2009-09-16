@@ -34,12 +34,10 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 DIR *
 opendir (char *dspec)
 {
-  struct DIR *dir  = (struct DIR *)xmalloc (sizeof (struct DIR));
-  struct NAM *dnam = (struct NAM *)xmalloc (sizeof (struct NAM));
+  struct DIR *dir  = xcalloc (sizeof (struct DIR));
+  struct NAM *dnam = xmalloc (sizeof (struct NAM));
   struct FAB *dfab = &dir->fab;
   char *searchspec = xmalloc (MAXNAMLEN + 1);
-
-  memset (dir, 0, sizeof *dir);
 
   *dfab = cc$rms_fab;
   *dnam = cc$rms_nam;

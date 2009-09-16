@@ -1312,7 +1312,7 @@ main (int argc, char **argv, char **envp)
       && (strchr (argv[0], '/') != 0 || strchr (argv[0], '\\') != 0)
 # endif
       )
-    argv[0] = xstrdup (concat (current_directory, "/", argv[0]));
+    argv[0] = xstrdup (concat (3, current_directory, "/", argv[0]));
 #else  /* !__MSDOS__ */
   if (current_directory[0] != '\0'
       && argv[0] != 0 && argv[0][0] != '/' && strchr (argv[0], '/') != 0
@@ -1321,7 +1321,7 @@ main (int argc, char **argv, char **envp)
       && strchr (argv[0], '\\') != 0
 #endif
       )
-    argv[0] = xstrdup (concat (current_directory, "/", argv[0]));
+    argv[0] = xstrdup (concat (3, current_directory, "/", argv[0]));
 #endif /* !__MSDOS__ */
 #endif /* WINDOWS32 */
 #endif
@@ -2008,7 +2008,7 @@ main (int argc, char **argv, char **envp)
                       /* This cast is OK since we never modify argv.  */
 		      argv[++i] = (char *) makefiles->list[j];
 		    else
-		      argv[i] = xstrdup (concat ("-f", makefiles->list[j], ""));
+		      argv[i] = xstrdup (concat (2, "-f", makefiles->list[j]));
 		    ++j;
 		  }
 	    }
@@ -2019,7 +2019,7 @@ main (int argc, char **argv, char **envp)
             {
               nargv = xmalloc ((nargc + 2) * sizeof (char *));
               memcpy (nargv, argv, argc * sizeof (char *));
-              nargv[nargc++] = xstrdup (concat ("-o", stdin_nm, ""));
+              nargv[nargc++] = xstrdup (concat (2, "-o", stdin_nm));
               nargv[nargc] = 0;
             }
           else
@@ -2192,8 +2192,7 @@ main (int argc, char **argv, char **envp)
             {
               struct nameseq *ns;
 
-              ns = multi_glob (parse_file_seq (&p, '\0', sizeof (struct nameseq), 1),
-                               sizeof (struct nameseq), 0);
+              ns = parse_file_seq (&p, sizeof (struct nameseq), '\0', NULL, 0);
               if (ns)
                 {
                   /* .DEFAULT_GOAL should contain one target. */
@@ -2670,7 +2669,7 @@ decode_env_switches (char *envar, unsigned int len)
        definition.  Add a dash and pass it along to decode_switches.  We
        need permanent storage for this in case decode_switches saves
        pointers into the value.  */
-    argv[1] = xstrdup (concat ("-", argv[1], ""));
+    argv[1] = xstrdup (concat (2, "-", argv[1]));
 
   /* Parse those words.  */
   decode_switches (argc, argv, 1);
