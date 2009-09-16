@@ -870,7 +870,7 @@ notice_finished_file (struct file *file)
          really check the target's mtime again.  Otherwise, assume the target
          would have been updated. */
 
-      if (question_flag || just_print_flag || touch_flag && file->cmds != 0)
+      if ((question_flag || just_print_flag || touch_flag) && file->cmds)
         {
           for (i = file->cmds->ncommand_lines; i > 0; --i)
             if (! (file->cmds->lines_flags[i-1] & COMMANDS_RECURSE))

@@ -363,7 +363,8 @@ eval_makefile (const char *filename, int flags)
       unsigned int i;
       for (i = 0; include_directories[i] != 0; ++i)
 	{
-	  const char *included = concat (include_directories[i], "/", filename);
+	  const char *included = concat (3, include_directories[i],
+                                         "/", filename);
 	  ebuf.fp = fopen (included, "r");
 	  if (ebuf.fp)
 	    {
@@ -473,7 +474,7 @@ eval_buffer (char *buffer)
    Returns a pointer to the first non-modifier character, and sets VMOD
    based on the modifiers found if any, plus V_ASSIGN is 1.
  */
-char *
+static char *
 parse_var_assignment (const char *line, struct vmodifiers *vmod)
 {
   const char *p;
@@ -833,10 +834,8 @@ eval (struct ebuffer *ebuf, int set_default)
 
 	  /* Parse the list of file names.  */
 	  p2 = p;
-	  files = multi_glob (parse_file_seq (&p2, '\0',
-					      sizeof (struct nameseq),
-					      1),
-			      sizeof (struct nameseq), 0);
+	  files = parse_file_seq (&p2, sizeof (struct nameseq), '\0',
+                                  NULL, 0);
 	  free (p);
 
 	  /* Save the state of conditionals and start
@@ -1020,10 +1019,8 @@ eval (struct ebuffer *ebuf, int set_default)
         /* Make the colon the end-of-string so we know where to stop
            looking for targets.  */
         *colonp = '\0';
-        filenames = multi_glob (parse_file_seq (&p2, '\0',
-                                                sizeof (struct nameseq),
-                                                1),
-                                sizeof (struct nameseq), 0);
+        filenames = parse_file_seq (&p2, sizeof (struct nameseq), '\0',
+                                    NULL, 0);
         *p2 = ':';
 
         if (!filenames)
@@ -1146,7 +1143,8 @@ eval (struct ebuffer *ebuf, int set_default)
         if (p != 0)
           {
             struct nameseq *target;
-            target = parse_file_seq (&p2, ':', sizeof (struct nameseq), 1);
+            target = parse_file_seq (&p2, sizeof (struct nameseq), ':',
+                                     NULL, PARSEFS_NOGLOB|PARSEFS_NOCACHE);
             ++p2;
             if (target == 0)
               fatal (fstart, _("missing target pattern"));
@@ -2302,239 +2300,6 @@ find_percent_cached (const char **string)
   return (*p == '\0') ? NULL : p;
 }
 
-/* Parse a string into a sequence of filenames represented as a
-   chain of struct nameseq's in reverse order and return that chain.
-
-   The string is passed as STRINGP, the address of a string pointer.
-   The string pointer is updated to point at the first character
-   not parsed, which either is a null char or equals STOPCHAR.
-
-   SIZE is how big to construct chain elements.
-   This is useful if we want them actually to be other structures
-   that have room for additional info.
-
-   If STRIP is nonzero, strip `./'s off the beginning.  */
-
-struct nameseq *
-parse_file_seq (char **stringp, int stopchar, unsigned int size, int strip)
-{
-  struct nameseq *new = 0;
-  struct nameseq *new1, *lastnew1;
-  char *p = *stringp;
-
-#ifdef VMS
-# define VMS_COMMA ','
-#else
-# define VMS_COMMA 0
-#endif
-
-  while (1)
-    {
-      const char *name;
-      char *q;
-
-      /* Skip whitespace; see if any more names are left.  */
-      p = next_token (p);
-      if (*p == '\0')
-	break;
-      if (*p == stopchar)
-	break;
-
-      /* There are, so find the end of the next name.  */
-      q = p;
-      p = find_char_unquote (q, stopchar, VMS_COMMA, 1, 0);
-#ifdef VMS
-	/* convert comma separated list to space separated */
-      if (p && *p == ',')
-	*p =' ';
-#endif
-#ifdef _AMIGA
-      if (stopchar == ':' && p && *p == ':'
-          && !(isspace ((unsigned char)p[1]) || !p[1]
-               || isspace ((unsigned char)p[-1])))
-	p = find_char_unquote (p+1, stopchar, VMS_COMMA, 1, 0);
-#endif
-#ifdef HAVE_DOS_PATHS
-    /* For DOS paths, skip a "C:\..." or a "C:/..." until we find the
-       first colon which isn't followed by a slash or a backslash.
-       Note that tokens separated by spaces should be treated as separate
-       tokens since make doesn't allow path names with spaces */
-    if (stopchar == ':')
-      while (p != 0 && !isspace ((unsigned char)*p) &&
-             (p[1] == '\\' || p[1] == '/') && isalpha ((unsigned char)p[-1]))
-        p = find_char_unquote (p + 1, stopchar, VMS_COMMA, 1, 0);
-#endif
-      if (p == 0)
-	p = q + strlen (q);
-
-      if (strip)
-#ifdef VMS
-	/* Skip leading `[]'s.  */
-	while (p - q > 2 && q[0] == '[' && q[1] == ']')
-#else
-	/* Skip leading `./'s.  */
-	while (p - q > 2 && q[0] == '.' && q[1] == '/')
-#endif
-	  {
-	    q += 2;		/* Skip "./".  */
-	    while (q < p && *q == '/')
-	      /* Skip following slashes: ".//foo" is "foo", not "/foo".  */
-	      ++q;
-	  }
-
-      /* Extract the filename just found, and skip it.  */
-
-      if (q == p)
-	/* ".///" was stripped to "". */
-#if defined(VMS)
-	continue;
-#elif defined(_AMIGA)
-        name = "";
-#else
-	name = "./";
-#endif
-      else
-#ifdef VMS
-/* VMS filenames can have a ':' in them but they have to be '\'ed but we need
- *  to remove this '\' before we can use the filename.
- * xstrdup called because q may be read-only string constant.
- */
-	{
-	  char *qbase = xstrdup (q);
-	  char *pbase = qbase + (p-q);
-	  char *q1 = qbase;
-	  char *q2 = q1;
-	  char *p1 = pbase;
-
-	  while (q1 != pbase)
-	    {
-	      if (*q1 == '\\' && *(q1+1) == ':')
-		{
-		  q1++;
-		  p1--;
-		}
-	      *q2++ = *q1++;
-	    }
-	  name = strcache_add_len (qbase, p1 - qbase);
-	  free (qbase);
-	}
-#else
-	name = strcache_add_len (q, p - q);
-#endif
-
-      /* Add it to the front of the chain.  */
-      new1 = xmalloc (size);
-      memset (new1, '\0', size);
-      new1->name = name;
-      new1->next = new;
-      new = new1;
-    }
-
-#ifndef NO_ARCHIVES
-
-  /* Look for multi-word archive references.
-     They are indicated by a elt ending with an unmatched `)' and
-     an elt further down the chain (i.e., previous in the file list)
-     with an unmatched `(' (e.g., "lib(mem").  */
-
-  new1 = new;
-  lastnew1 = 0;
-  while (new1 != 0)
-    if (new1->name[0] != '('	/* Don't catch "(%)" and suchlike.  */
-	&& new1->name[strlen (new1->name) - 1] == ')'
-	&& strchr (new1->name, '(') == 0)
-      {
-	/* NEW1 ends with a `)' but does not contain a `('.
-	   Look back for an elt with an opening `(' but no closing `)'.  */
-
-	struct nameseq *n = new1->next, *lastn = new1;
-	char *paren = 0;
-	while (n != 0 && (paren = strchr (n->name, '(')) == 0)
-	  {
-	    lastn = n;
-	    n = n->next;
-	  }
-	if (n != 0
-	    /* Ignore something starting with `(', as that cannot actually
-	       be an archive-member reference (and treating it as such
-	       results in an empty file name, which causes much lossage).  */
-	    && n->name[0] != '(')
-	  {
-	    /* N is the first element in the archive group.
-	       Its name looks like "lib(mem" (with no closing `)').  */
-
-	    char *libname;
-
-	    /* Copy "lib(" into LIBNAME.  */
-	    ++paren;
-	    libname = alloca (paren - n->name + 1);
-	    memcpy (libname, n->name, paren - n->name);
-	    libname[paren - n->name] = '\0';
-
-	    if (*paren == '\0')
-	      {
-		/* N was just "lib(", part of something like "lib( a b)".
-		   Edit it out of the chain and free its storage.  */
-		lastn->next = n->next;
-		free (n);
-		/* LASTN->next is the new stopping elt for the loop below.  */
-		n = lastn->next;
-	      }
-	    else
-	      {
-		/* Replace N's name with the full archive reference.  */
-		n->name = strcache_add (concat (libname, paren, ")"));
-	      }
-
-	    if (new1->name[1] == '\0')
-	      {
-		/* NEW1 is just ")", part of something like "lib(a b )".
-		   Omit it from the chain and free its storage.  */
-		if (lastnew1 == 0)
-		  new = new1->next;
-		else
-		  lastnew1->next = new1->next;
-		lastn = new1;
-		new1 = new1->next;
-		free (lastn);
-	      }
-	    else
-	      {
-		/* Replace also NEW1->name, which already has closing `)'.  */
-		new1->name = strcache_add (concat (libname, new1->name, ""));
-		new1 = new1->next;
-	      }
-
-	    /* Trace back from NEW1 (the end of the list) until N
-	       (the beginning of the list), rewriting each name
-	       with the full archive reference.  */
-
-	    while (new1 != n)
-	      {
-		new1->name = strcache_add (concat (libname, new1->name, ")"));
-		lastnew1 = new1;
-		new1 = new1->next;
-	      }
-	  }
-	else
-	  {
-	    /* No frobnication happening.  Just step down the list.  */
-	    lastnew1 = new1;
-	    new1 = new1->next;
-	  }
-      }
-    else
-      {
-	lastnew1 = new1;
-	new1 = new1->next;
-      }
-
-#endif
-
-  *stringp = p;
-  return new;
-}
-
 /* Find the next line of text in an eval buffer, combining continuation lines
    into one line.
    Return the number of actual lines read (> 1 if continuation lines).
@@ -3034,7 +2799,7 @@ tilde_expand (const char *name)
 # endif /* !AMIGA && !WINDOWS32 */
       if (home_dir != 0)
 	{
-	  char *new = xstrdup (concat (home_dir, "", name + 1));
+	  char *new = xstrdup (concat (2, home_dir, name + 1));
 	  if (is_variable)
 	    free (home_dir);
 	  return new;
@@ -3053,7 +2818,7 @@ tilde_expand (const char *name)
 	  if (userend == 0)
 	    return xstrdup (pwent->pw_dir);
 	  else
-	    return xstrdup (concat (pwent->pw_dir, "/", userend + 1));
+	    return xstrdup (concat (3, pwent->pw_dir, "/", userend + 1));
 	}
       else if (userend != 0)
 	*userend = '/';
@@ -3062,63 +2827,267 @@ tilde_expand (const char *name)
 #endif /* !VMS */
   return 0;
 }
+
+/* Parse a string into a sequence of filenames represented as a chain of
+   struct nameseq's and return that chain.  Optionally expand the strings via
+   glob().
 
-/* Given a chain of struct nameseq's describing a sequence of filenames,
-   in reverse of the intended order, return a new chain describing the
-   result of globbing the filenames.  The new chain is in forward order.
-   The links of the old chain are freed or used in the new chain.
-   Likewise for the names in the old chain.
+   The string is passed as STRINGP, the address of a string pointer.
+   The string pointer is updated to point at the first character
+   not parsed, which either is a null char or equals STOPCHAR.
 
    SIZE is how big to construct chain elements.
    This is useful if we want them actually to be other structures
    that have room for additional info.
 
-   If EXISTS_ONLY is true only return existing files.  */
+   PREFIX, if non-null, is added to the beginning of each filename.
+
+   FLAGS allows one or more of the following bitflags to be set:
+        PARSEFS_NOSTRIP - Do no strip './'s off the beginning
+        PARSEFS_NOGLOB  - Do not expand globbing characters
+        PARSEFS_EXISTS  - Only return globbed files that actually exist
+                          (cannot also set NOGLOB)
+        PARSEFS_NOCACHE - Do not add filenames to the strcache (caller frees)
+  */
 
 struct nameseq *
-multi_glob (struct nameseq *chain, unsigned int size, int exists_only)
+parse_file_seq (char **stringp, unsigned int size, int stopchar,
+                const char *prefix, int flags)
 {
-  void dir_setup_glob (glob_t *);
+  extern void dir_setup_glob (glob_t *glob);
+
+  /* tmp points to tmpbuf after the prefix, if any.
+     tp is the end of the buffer. */
+  static char *tmpbuf = NULL;
+  static int tmpbuf_len = 0;
+
+  int cachep = (! (flags & PARSEFS_NOCACHE));
+
   struct nameseq *new = 0;
-  struct nameseq *old;
-  struct nameseq *nexto;
+  struct nameseq **newp = &new;
+#define NEWELT(_n)  do { \
+                        const char *__n = (_n); \
+                        *newp = xcalloc (size); \
+                        (*newp)->name = (cachep ? strcache_add (__n) : xstrdup (__n)); \
+                        newp = &(*newp)->next; \
+                    } while(0)
+
+  char *p;
   glob_t gl;
+  char *tp;
 
-  dir_setup_glob (&gl);
+#ifdef VMS
+# define VMS_COMMA ','
+#else
+# define VMS_COMMA 0
+#endif
 
-  for (old = chain; old != 0; old = nexto)
+  if (size < sizeof (struct nameseq))
+    size = sizeof (struct nameseq);
+
+  if (! (flags & PARSEFS_NOGLOB))
+    dir_setup_glob (&gl);
+
+  /* Get enough temporary space to construct the largest possible target.  */
+  {
+    int l = strlen (*stringp) + 1;
+    if (l > tmpbuf_len)
+      {
+        tmpbuf = xrealloc (tmpbuf, l);
+        tmpbuf_len = l;
+      }
+  }
+  tp = tmpbuf;
+
+  /* Parse STRING.  P will always point to the end of the parsed content.  */
+  p = *stringp;
+  while (1)
     {
-      int r;
+      const char *name;
       const char **nlist = 0;
-      int i = 0;
-      const char *gname;
+      char *tildep = 0;
 #ifndef NO_ARCHIVES
       char *arname = 0;
       char *memname = 0;
 #endif
-      nexto = old->next;
-      gname = old->name;
+      char *s;
+      int nlen;
+      int i;
 
-      if (gname[0] == '~')
+      /* Skip whitespace; at the end of the string or STOPCHAR we're done.  */
+      p = next_token (p);
+      if (*p == '\0' || *p == stopchar)
+	break;
+
+      /* There are names left, so find the end of the next name.
+         Throughout this iteration S points to the start.  */
+      s = p;
+      p = find_char_unquote (p, stopchar, VMS_COMMA, 1, 0);
+#ifdef VMS
+	/* convert comma separated list to space separated */
+      if (p && *p == ',')
+	*p =' ';
+#endif
+#ifdef _AMIGA
+      if (stopchar == ':' && p && *p == ':'
+          && !(isspace ((unsigned char)p[1]) || !p[1]
+               || isspace ((unsigned char)p[-1])))
+	p = find_char_unquote (p+1, stopchar, VMS_COMMA, 1, 0);
+#endif
+#ifdef HAVE_DOS_PATHS
+    /* For DOS paths, skip a "C:\..." or a "C:/..." until we find the
+       first colon which isn't followed by a slash or a backslash.
+       Note that tokens separated by spaces should be treated as separate
+       tokens since make doesn't allow path names with spaces */
+    if (stopchar == ':')
+      while (p != 0 && !isspace ((unsigned char)*p) &&
+             (p[1] == '\\' || p[1] == '/') && isalpha ((unsigned char)p[-1]))
+        p = find_char_unquote (p + 1, stopchar, VMS_COMMA, 1, 0);
+#endif
+      if (p == 0)
+	p = s + strlen (s);
+
+      /* Strip leading "this directory" references.  */
+      if (! (flags & PARSEFS_NOSTRIP))
+#ifdef VMS
+	/* Skip leading `[]'s.  */
+	while (p - s > 2 && s[0] == '[' && s[1] == ']')
+#else
+	/* Skip leading `./'s.  */
+	while (p - s > 2 && s[0] == '.' && s[1] == '/')
+#endif
+	  {
+            /* Skip "./" and all following slashes.  */
+	    s += 2;
+	    while (*s == '/')
+	      ++s;
+	  }
+
+      /* Extract the filename just found, and skip it.
+         Set NAME to the string, and NLEN to its length.  */
+
+      if (s == p)
+        {
+	/* The name was stripped to empty ("./"). */
+#if defined(VMS)
+          continue;
+#elif defined(_AMIGA)
+          /* PDS-- This cannot be right!! */
+          tp[0] = '\0';
+          nlen = 0;
+#else
+          tp[0] = '.';
+          tp[1] = '/';
+          tp[2] = '\0';
+          nlen = 2;
+#endif
+        }
+      else
 	{
-	  char *newname = tilde_expand (old->name);
-	  if (newname != 0)
-            gname = newname;
+#ifdef VMS
+/* VMS filenames can have a ':' in them but they have to be '\'ed but we need
+ *  to remove this '\' before we can use the filename.
+ * xstrdup called because S may be read-only string constant.
+ */
+	  char *n = tp;
+	  while (s < p)
+	    {
+	      if (s[0] == '\\' && s[1] == ':')
+                ++s;
+	      *(n++) = *(s++);
+	    }
+          n[0] = '\0';
+          nlen = strlen (tp);
+#else
+          nlen = p - s;
+          memcpy (tp, s, nlen);
+          tp[nlen] = '\0';
+#endif
+        }
+
+      /* At this point, TP points to the element and NLEN is its length.  */
+
+#ifndef NO_ARCHIVES
+      /* If this is the start of an archive group that isn't complete, set up
+         to add the archive prefix for future files.
+
+         TP == TMP means we're not already in an archive group.  Ignore
+         something starting with `(', as that cannot actually be an
+         archive-member reference (and treating it as such results in an empty
+         file name, which causes much lossage).  Also if it ends in ")" then
+         it's a complete reference so we don't need to treat it specially.  */
+
+      if (tp == tmpbuf && tp[0] != '(' && tp[nlen-1] != ')')
+        {
+          char *n = strchr (tp, '(');
+          if (n)
+            {
+              /* This is the first element in an open archive group.  It looks
+                 like "lib(mem".  Remember the close paren.  */
+              nlen -= (n + 1) - tp;
+              tp = n + 1;
+
+              /* If we have just "lib(", part of something like "lib( a b)",
+                 go to the next item.  */
+              if (! nlen)
+                continue;
+            }
+        }
+
+      /* If we are inside an archive group, make sure it has an end.  */
+      if (tp > tmpbuf)
+        {
+          if (tp[nlen-1] == ')')
+            {
+              /* This is the natural end; reset TP.  */
+              tp = tmpbuf;
+
+              /* This is just ")", something like "lib(a b )": skip it.  */
+              if (nlen == 1)
+                continue;
+            }
+          else
+            {
+              /* Not the end, so add a "fake" end.  */
+              tp[nlen++] = ')';
+              tp[nlen] = '\0';
+            }
+        }
+#endif
+
+      /* If we're not globbing we're done: add it to the end of the chain.
+         Go to the next item in the string.  */
+      if (flags & PARSEFS_NOGLOB)
+        {
+          NEWELT (concat (2, prefix, tp));
+          continue;
+        }
+
+      /* If we get here we know we're doing glob expansion.
+         TP is a string in tmpbuf.  NLEN is no longer used.
+         We may need to do more work: after this NAME will be set.  */
+      name = tp;
+
+      /* Expand tilde if applicable.  */
+      if (tp[0] == '~')
+	{
+	  tildep = tilde_expand (tp);
+	  if (tildep != 0)
+            name = tildep;
 	}
 
 #ifndef NO_ARCHIVES
-      if (ar_name (gname))
+      /* If NAME is an archive member reference replace it with the archive
+         file name, and save the member name in MEMNAME.  We will glob on the
+         archive name and then reattach MEMNAME later.  */
+      if (ar_name (name))
 	{
-	  /* OLD->name is an archive member reference.  Replace it with the
-	     archive file name, and save the member name in MEMNAME.  We will
-	     glob on the archive name and then reattach MEMNAME later.  */
-	  ar_parse_name (gname, &arname, &memname);
-	  gname = arname;
+	  ar_parse_name (name, &arname, &memname);
+	  name = arname;
 	}
 #endif /* !NO_ARCHIVES */
 
-      r = glob (gname, GLOB_NOSORT|GLOB_ALTDIRFUNC, NULL, &gl);
-      switch (r)
+      switch (glob (name, GLOB_NOSORT|GLOB_ALTDIRFUNC, NULL, &gl))
 	{
 	case GLOB_NOSPACE:
 	  fatal (NILF, _("virtual memory exhausted"));
@@ -3130,7 +3099,8 @@ multi_glob (struct nameseq *chain, unsigned int size, int exists_only)
           break;
 
         case GLOB_NOMATCH:
-          if (exists_only)
+          /* If we want only existing items, skip this one.  */
+          if (flags & PARSEFS_EXISTS)
             {
               i = 0;
               break;
@@ -3140,8 +3110,8 @@ multi_glob (struct nameseq *chain, unsigned int size, int exists_only)
 	default:
           /* By default keep this name.  */
           i = 1;
-          nlist = &gname;
-	  break;
+          nlist = &name;
+          break;
 	}
 
       /* For each matched element, add it to the list.  */
@@ -3150,58 +3120,46 @@ multi_glob (struct nameseq *chain, unsigned int size, int exists_only)
         if (memname != 0)
           {
             /* Try to glob on MEMNAME within the archive.  */
-            struct nameseq *found
-              = ar_glob (nlist[i], memname, size);
+            struct nameseq *found = ar_glob (nlist[i], memname, size);
             if (! found)
-              {
-                /* No matches.  Use MEMNAME as-is.  */
-                unsigned int alen = strlen (nlist[i]);
-                unsigned int mlen = strlen (memname);
-                char *name;
-                struct nameseq *elt = xmalloc (size);
-                memset (elt, '\0', size);
-
-                name = alloca (alen + 1 + mlen + 2);
-                memcpy (name, nlist[i], alen);
-                name[alen] = '(';
-                memcpy (name+alen+1, memname, mlen);
-                name[alen + 1 + mlen] = ')';
-                name[alen + 1 + mlen + 1] = '\0';
-                elt->name = strcache_add (name);
-                elt->next = new;
-                new = elt;
-              }
+              /* No matches.  Use MEMNAME as-is.  */
+              NEWELT (concat (5, prefix, nlist[i], "(", memname, ")"));
             else
               {
-                /* Find the end of the FOUND chain.  */
-                struct nameseq *f = found;
-                while (f->next != 0)
-                  f = f->next;
+                /* We got a chain of items.  Attach them.  */
+                (*newp)->next = found;
 
-                /* Attach the chain being built to the end of the FOUND
-                   chain, and make FOUND the new NEW chain.  */
-                f->next = new;
-                new = found;
+                /* Find and set the new end.  Massage names if necessary.  */
+                while (1)
+                  {
+                    if (! cachep)
+                      found->name = xstrdup (concat (2, prefix, name));
+                    else if (prefix)
+                      found->name = strcache_add (concat (2, prefix, name));
+
+                    if (found->next == 0)
+                      break;
+
+                    found = found->next;
+                  }
+                newp = &found->next;
               }
           }
         else
 #endif /* !NO_ARCHIVES */
-          {
-            struct nameseq *elt = xmalloc (size);
-            memset (elt, '\0', size);
-            elt->name = strcache_add (nlist[i]);
-            elt->next = new;
-            new = elt;
-          }
+          NEWELT (concat (2, prefix, nlist[i]));
 
-      if (r == 0)
-        globfree (&gl);
-      free (old);
+      globfree (&gl);
+
 #ifndef NO_ARCHIVES
       if (arname)
         free (arname);
 #endif
+
+      if (tildep)
+        free (tildep);
     }
 
+  *stringp = p;
   return new;
 }

@@ -1,3 +1,52 @@
+2009-09-16  Paul Smith  <psmith@gnu.org>
+
+	* misc.c (alloc_dep, free_dep): Now that we have xcalloc(),
+	convert to macros.
+	* dep.h: Create alloc_dep() / free_dep() macros.
+
+	* implicit.c (pattern_search): Take advantage of the new
+	parse_file_seq() to add the directory prefix to each prereq.
+
+	* dep.h: Remove multi_glob() and enhance parse_file_seq() to do it
+	all.  Avoid reversing chains.  Support adding prefixes.
+	* read.c (parse_file_seq): Rewrite to support globbing.  Allow for
+	cached/non-cached results.
+	(eval): Remove multi_glob() & invoke new parse_file_seq().
+	* rule.c (install_pattern_rule): Ditto.
+	* main.c (main): Ditto.
+	* implicit.c (pattern_search): Ditto.
+	* function.c (string_glob): Ditto.
+	* file.c (parse_prereqs): Ditto.
+	* default.c (set_default_suffixes): Ditto.
+
+	* variable.c (parse_variable_definition): Don't run off the end of
+	the string if it ends in whitespace (found with valgrind).
+
+	* commands.c (set_file_variables): Keep space for all targets in
+	$? if -B is given (found with valgrind).
+
+2009-09-15  Paul Smith  <psmith@gnu.org>
+
+	* misc.c (concat): Make concat() variadic so it takes >3 arguments.
+	(xcalloc): Add new function.
+	* make.h: New declarations.
+
+	* ar.c (ar_glob_match): New calling method for concat().
+	* main.c (main): Ditto.
+	(decode_env_switches): Ditto.
+	* read.c (eval_makefile): Ditto.
+	(tilde_expand): Ditto.
+	(parse_file_seq): Ditto.
+	* variable.c (target_environment): Ditto.
+	(sync_Path_environment): Ditto.
+
+	* ar.c (ar_glob_match): Use xcalloc().
+	* dir.c (file_impossible): Ditto.
+	* file.c (enter_file): Ditto.
+	* job.c (new_job): Ditto.
+	* read.c (parse_file_seq): Ditto.
+	* vmsfunctions.c (opendir): Ditto.
+
 2009-09-14  Rafi Einstein  <rafi.einstein@gmail.com>  (tiny patch)
 
 	* w32/subproc/sub_proc.c (process_begin): Check *ep non-NULL

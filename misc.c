@@ -160,31 +160,49 @@ print_spaces (unsigned int n)
 }
 
 
-/* Return a string whose contents concatenate those of s1, s2, s3.
+/* Return a string whose contents concatenate the NUM strings provided
    This string lives in static, re-used memory.  */
 
-char *
-concat (const char *s1, const char *s2, const char *s3)
+const char *
+#if HAVE_ANSI_COMPILER && USE_VARIADIC && HAVE_STDARG_H
+concat (unsigned int num, ...)
+#else
+concat (num, va_alist)
+     unsigned int num;
+     va_dcl
+#endif
 {
-  unsigned int len1, len2, len3;
   static unsigned int rlen = 0;
   static char *result = NULL;
+  int ri = 0;
 
-  len1 = (s1 && *s1 != '\0') ? strlen (s1) : 0;
-  len2 = (s2 && *s2 != '\0') ? strlen (s2) : 0;
-  len3 = (s3 && *s3 != '\0') ? strlen (s3) : 0;
+#if USE_VARIADIC
+  va_list args;
+#endif
 
-  if (len1 + len2 + len3 + 1 > rlen)
-    result = xrealloc (result, (rlen = len1 + len2 + len3 + 10));
+  VA_START (args, num);
 
-  if (len1)
-    memcpy (result, s1, len1);
-  if (len2)
-    memcpy (result + len1, s2, len2);
-  if (len3)
-    memcpy (result + len1 + len2, s3, len3);
+  while (num-- > 0)
+    {
+      const char *s = va_arg (args, const char *);
+      unsigned int l = s ? strlen (s) : 0;
 
-  result[len1+len2+len3] = '\0';
+      if (l == 0)
+        continue;
+
+      if (ri + l > rlen)
+        {
+          rlen = ((rlen ? rlen : 60) + l) * 2;
+          result = xrealloc (result, rlen);
+        }
+
+      memcpy (result + ri, s, l);
+      ri += l;
+    }
+
+  VA_END (args);
+
+  result[ri] = '\0';
 
   return result;
 }
@@ -337,14 +355,26 @@ pfatal_with_name (const char *name)
 #ifndef HAVE_DMALLOC_H
 
 #undef xmalloc
+#undef xcalloc
 #undef xrealloc
 #undef xstrdup
 
 void *
 xmalloc (unsigned int size)
 {
-  /* Make sure we don't allocate 0, for pre-ANSI libraries.  */
+  /* Make sure we don't allocate 0, for pre-ISO implementations.  */
   void *result = malloc (size ? size : 1);
+  if (result == 0)
+    fatal (NILF, _("virtual memory exhausted"));
+  return result;
+}
+
+
+void *
+xcalloc (unsigned int size)
+{
+  /* Make sure we don't allocate 0, for pre-ISO implementations.  */
+  void *result = calloc (size ? size : 1, 1);
   if (result == 0)
     fatal (NILF, _("virtual memory exhausted"));
   return result;
@@ -356,7 +386,7 @@ xrealloc (void *ptr, unsigned int size)
 {
   void *result;
 
-  /* Some older implementations of realloc() don't conform to ANSI.  */
+  /* Some older implementations of realloc() don't conform to ISO.  */
   if (! size)
     size = 1;
   result = ptr ? realloc (ptr, size) : malloc (size);
@@ -493,25 +523,6 @@ find_next_token (const char **ptr, unsigned int *lengthptr)
   return (char *)p;
 }
 
-
-/* Allocate a new `struct dep' with all fields initialized to 0.   */
-
-struct dep *
-alloc_dep ()
-{
-  struct dep *d = xmalloc (sizeof (struct dep));
-  memset (d, '\0', sizeof (struct dep));
-  return d;
-}
-
-
-/* Free `struct dep' along with `name' and `stem'.   */
-
-void
-free_dep (struct dep *d)
-{
-  free (d);
-}
 
 /* Copy a chain of `struct dep', making a new chain
    with the same contents as the old one.  */

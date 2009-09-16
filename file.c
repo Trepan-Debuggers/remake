@@ -415,8 +415,7 @@ struct dep *
 parse_prereqs (char *p)
 {
   struct dep *new = (struct dep *)
-    multi_glob (parse_file_seq (&p, '|', sizeof (struct dep), 1),
-                sizeof (struct dep), 0);
+    parse_file_seq (&p, sizeof (struct dep), '|', NULL, 0);
 
   if (*p)
     {
@@ -426,8 +425,7 @@ parse_prereqs (char *p)
 
       ++p;
       ood = (struct dep *)
-        multi_glob (parse_file_seq (&p, '\0', sizeof (struct dep), 1),
-                    sizeof (struct dep), 0);
+        parse_file_seq (&p, sizeof (struct dep), '\0', NULL, 0);
 
       if (! new)
         new = ood;

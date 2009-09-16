@@ -489,6 +489,7 @@ pattern_search (struct file *file, int archive,
 
               while (1)
                 {
+                  const char *dir = NULL;
                   int add_dir = 0;
                   int had_stem = 0;
 
@@ -570,6 +571,16 @@ pattern_search (struct file *file, int archive,
                        p2 = depname;
                     }
 
+                  /* If we need to add the directory prefix set it up.  */
+                  if (add_dir)
+                    {
+                      unsigned long l = lastslash - filename + 1;
+                      char *n = alloca (l + 1);
+                      memcpy (n, filename, l);
+                      n[l] = '\0';
+                      dir = n;
+                    }
+
                   /* Parse the dependencies. */
 
                   while (1)
@@ -580,32 +591,15 @@ pattern_search (struct file *file, int archive,
                         ;
 
                       *id_ptr = (struct idep *)
-                        multi_glob (
-                          parse_file_seq (&p2,
-                                          order_only ? '\0' : '|',
-                                          sizeof (struct idep),
-                                          1), sizeof (struct idep), 0);
+                        parse_file_seq (&p2, sizeof (struct idep),
+                                        order_only ? '\0' : '|', dir, 0);
 
-                      /* @@ It would be nice to teach parse_file_seq or
-                         multi_glob to add prefix. This would save us some
-                         reallocations. */
-
-                      if (order_only || add_dir || had_stem)
+                      if (order_only || had_stem)
                         {
-                          unsigned long l = lastslash - filename + 1;
-
                           for (d = *id_ptr; d != 0; d = d->next)
                             {
                               if (order_only)
                                 d->ignore_mtime = 1;
-
-                              if (add_dir)
-                                {
-                                  char *n = alloca (strlen (d->name) + l + 1);
-                                  memcpy (n, filename, l);
-                                  memcpy (n+l, d->name, strlen (d->name) + 1);
-                                  d->name = strcache_add (n);
-                                }
 
                               if (had_stem)
                                 d->had_stem = 1;

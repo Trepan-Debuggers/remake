@@ -368,6 +368,7 @@ struct floc
 #endif
 
 #if HAVE_ANSI_COMPILER && USE_VARIADIC && HAVE_STDARG_H
+const char *concat (unsigned int, ...);
 void message (int prefix, const char *fmt, ...)
               __attribute__ ((__format__ (__printf__, 2, 3)));
 void error (const struct floc *flocp, const char *fmt, ...)
@@ -375,6 +376,7 @@ void error (const struct floc *flocp, const char *fmt, ...)
 void fatal (const struct floc *flocp, const char *fmt, ...)
                    __attribute__ ((noreturn, __format__ (__printf__, 2, 3)));
 #else
+const char *concat ();
 void message ();
 void error ();
 void fatal ();
@@ -384,8 +386,8 @@ void die (int) __attribute__ ((noreturn));
 void log_working_directory (int);
 void pfatal_with_name (const char *) __attribute__ ((noreturn));
 void perror_with_name (const char *, const char *);
-char *concat (const char *, const char *, const char *);
 void *xmalloc (unsigned int);
+void *xcalloc (unsigned int);
 void *xrealloc (void *, unsigned int);
 char *xstrdup (const char *);
 char *xstrndup (const char *, unsigned int);

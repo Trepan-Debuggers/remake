@@ -376,9 +376,8 @@ install_pattern_rule (struct pspec *p, int terminal)
   ++r->suffixes[0];
 
   ptr = p->dep;
-  r->deps = (struct dep *) multi_glob (parse_file_seq (&ptr, '\0',
-                                                       sizeof (struct dep), 1),
-				       sizeof (struct dep), 0);
+  r->deps = (struct dep *) parse_file_seq (&ptr, sizeof (struct dep), '\0',
+                                           NULL, 0);
 
   if (new_pattern_rule (r, 0))
     {
