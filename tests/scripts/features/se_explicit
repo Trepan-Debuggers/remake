@@ -24,9 +24,9 @@ run_make_test(undef, 'SE=1', "three\nfour\nbariz\nfoo\$bar : baraz bariz");
 
 # TEST #1: automatic variables.
 #
-run_make_test('
+run_make_test(q!
 .SECONDEXPANSION:
-.DEFAULT: ; @echo $@
+.DEFAULT: ; @echo '$@'
 
 foo: bar baz
 
@@ -39,7 +39,7 @@ foo: $$@.1 \
      $$|.5 \
      $$*.6
 
-',
+!,
 '',
 'bar
 baz
@@ -60,17 +60,16 @@ buz.5
 
 # Test #2: target/pattern -specific variables.
 #
-run_make_test('
+run_make_test(q!
 .SECONDEXPANSION:
-.DEFAULT: ; @echo $@
+.DEFAULT: ; @echo '$@'
 
 foo.x: $$a $$b
 
 foo.x: a := bar
 
 %.x: b := baz
-
-',
+!,
 '',
 'bar
 baz
@@ -79,9 +78,9 @@ baz
 
 # Test #3: order of prerequisites.
 #
-run_make_test('
+run_make_test(q!
 .SECONDEXPANSION:
-.DEFAULT: ; @echo $@
+.DEFAULT: ; @echo '$@'
 
 all: foo bar baz
 
@@ -99,7 +98,7 @@ bar: bar.3
 baz: baz.1
 baz: baz.2
 baz: ; @:
-',
+!,
 '',
 'foo.1
 foo.2
@@ -112,22 +111,23 @@ baz.2
 ');
 
 # TEST #4: eval in a context where there is no reading_file
-run_make_test('
+run_make_test(q!
 .SECONDEXPANSION:
 all : $$(eval $$(info test))
-',            '', "test\n#MAKE#: Nothing to be done for `all'.\n");
+!,
+            '', "test\n#MAKE#: Nothing to be done for `all'.\n");
 
 # TEST #5: (NEGATIVE) catch eval in a prereq list trying to create new
 # target/prereq relationships.
 
-run_make_test('
+run_make_test(q!
 .SECONDEXPANSION:
 proj1.exe : proj1.o $$(eval $$(test))
 define test
 proj1.o : proj1.c
 proj1.c: proj1.h
 endef
-',
+!,
               '', "#MAKE#: *** prerequisites cannot be defined in recipes.  Stop.\n", 512);
 
 # This tells the test driver that the perl test script executed properly.

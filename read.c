@@ -1,6 +1,6 @@
 /* Reading and parsing of makefiles for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007 Free Software
+1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009 Free Software
 Foundation, Inc.
 This file is part of GNU Make.
 
@@ -140,7 +140,7 @@ static struct variable *do_define (char *name, enum variable_origin origin,
                                    struct ebuffer *ebuf);
 static int conditional_line (char *line, int len, const struct floc *flocp);
 static void record_files (struct nameseq *filenames, const char *pattern,
-                          const char *pattern_percent, struct dep *deps,
+                          const char *pattern_percent, char *depstr,
                           unsigned int cmds_started, char *commands,
                           unsigned int commands_idx, int two_colon,
                           const struct floc *flocp);
@@ -549,7 +549,7 @@ eval (struct ebuffer *ebuf, int set_default)
   int ignoring = 0, in_ignored_define = 0;
   int no_targets = 0;		/* Set when reading a rule without targets.  */
   struct nameseq *filenames = 0;
-  struct dep *deps = 0;
+  char *depstr = 0;
   long nlines = 0;
   int two_colon = 0;
   const char *pattern = 0;
@@ -563,7 +563,7 @@ eval (struct ebuffer *ebuf, int set_default)
       if (filenames != 0)						      \
         {                                                                     \
 	  fi.lineno = tgts_started;                                           \
-	  record_files (filenames, pattern, pattern_percent, deps,            \
+	  record_files (filenames, pattern, pattern_percent, depstr,          \
                         cmds_started, commands, commands_idx, two_colon,      \
                         &fi);                                                 \
         }                                                                     \
@@ -834,8 +834,7 @@ eval (struct ebuffer *ebuf, int set_default)
 
 	  /* Parse the list of file names.  */
 	  p2 = p;
-	  files = parse_file_seq (&p2, sizeof (struct nameseq), '\0',
-                                  NULL, 0);
+	  files = PARSE_FILE_SEQ (&p2, struct nameseq, '\0', NULL, 0);
 	  free (p);
 
 	  /* Save the state of conditionals and start
@@ -1019,8 +1018,7 @@ eval (struct ebuffer *ebuf, int set_default)
         /* Make the colon the end-of-string so we know where to stop
            looking for targets.  */
         *colonp = '\0';
-        filenames = parse_file_seq (&p2, sizeof (struct nameseq), '\0',
-                                    NULL, 0);
+        filenames = PARSE_FILE_SEQ (&p2, struct nameseq, '\0', NULL, 0);
         *p2 = ':';
 
         if (!filenames)
@@ -1099,8 +1097,8 @@ eval (struct ebuffer *ebuf, int set_default)
         p = strchr (p2, ':');
         while (p != 0 && p[-1] == '\\')
           {
-            register char *q = &p[-1];
-            register int backslash = 0;
+            char *q = &p[-1];
+            int backslash = 0;
             while (*q-- == '\\')
               backslash = !backslash;
             if (backslash)
@@ -1143,8 +1141,8 @@ eval (struct ebuffer *ebuf, int set_default)
         if (p != 0)
           {
             struct nameseq *target;
-            target = parse_file_seq (&p2, sizeof (struct nameseq), ':',
-                                     NULL, PARSEFS_NOGLOB|PARSEFS_NOCACHE);
+            target = PARSE_FILE_SEQ (&p2, struct nameseq, ':', NULL,
+                                     PARSEFS_NOGLOB|PARSEFS_NOCACHE);
             ++p2;
             if (target == 0)
               fatal (fstart, _("missing target pattern"));
@@ -1164,14 +1162,11 @@ eval (struct ebuffer *ebuf, int set_default)
         end = beg + strlen (beg) - 1;
         strip_whitespace (&beg, &end);
 
+        /* Put all the prerequisites here; they'll be parsed later.  */
         if (beg <= end && *beg != '\0')
-          {
-            /* Put all the prerequisites here; they'll be parsed later.  */
-            deps = alloc_dep ();
-            deps->name = strcache_add_len (beg, end - beg + 1);
-          }
+          depstr = xstrndup (beg, end - beg + 1);
         else
-          deps = 0;
+          depstr = 0;
 
         commands_idx = 0;
         if (cmdleft != 0)
@@ -1870,16 +1865,15 @@ record_target_var (struct nameseq *filenames, char *defn,
 
 static void
 record_files (struct nameseq *filenames, const char *pattern,
-              const char *pattern_percent, struct dep *deps,
+              const char *pattern_percent, char *depstr,
               unsigned int cmds_started, char *commands,
               unsigned int commands_idx, int two_colon,
               const struct floc *flocp)
 {
-  struct nameseq *nextf;
-  int implicit = 0;
-  unsigned int max_targets = 0, target_idx = 0;
-  const char **targets = 0, **target_percents = 0;
   struct commands *cmds;
+  struct dep *deps;
+  const char *implicit_percent;
+  const char *name;
 
   /* If we've already snapped deps, that means we're in an eval being
      resolved after the makefiles have been read in.  We can't add more rules
@@ -1888,6 +1882,11 @@ record_files (struct nameseq *filenames, const char *pattern,
   if (snapped_deps)
     fatal (flocp, _("prerequisites cannot be defined in recipes"));
 
+  /* Determine if this is a pattern rule or not.  */
+  name = filenames->name;
+  implicit_percent = find_percent_cached (&name);
+
+  /* If there's a recipe, set up a struct for it.  */
   if (commands_idx > 0)
     {
       cmds = xmalloc (sizeof (struct commands));
@@ -1897,78 +1896,106 @@ record_files (struct nameseq *filenames, const char *pattern,
       cmds->command_lines = 0;
     }
   else
-    cmds = 0;
+     cmds = 0;
 
-  for (; filenames != 0; filenames = nextf)
+  /* If there's a prereq string then parse it--unless it's eligible for 2nd
+     expansion: if so, snap_deps() will do it.  */
+  if (depstr == 0)
+    deps = 0;
+  else if (second_expansion && strchr (depstr, '$'))
     {
-      const char *name = filenames->name;
+      deps = alloc_dep ();
+      deps->name = depstr;
+      deps->need_2nd_expansion = 1;
+      deps->staticpattern = pattern != 0;
+    }
+  else
+    {
+      deps = split_prereqs (depstr);
+      free (depstr);
+
+      /* We'll enter static pattern prereqs later when we have the stem.  We
+         don't want to enter pattern rules at all so that we don't think that
+         they ought to exist (make manual "Implicit Rule Search Algorithm",
+         item 5c).  */
+      if (! pattern && ! implicit_percent)
+        deps = enter_prereqs (deps, NULL);
+    }
+
+  /* For implicit rules, _all_ the targets must have a pattern.  That means we
+     can test the first one to see if we're working with an implicit rule; if
+     so we handle it specially. */
+
+  if (implicit_percent)
+    {
+      struct nameseq *nextf;
+      const char **targets, **target_pats;
+      unsigned int c;
+
+      if (pattern != 0)
+        fatal (flocp, _("mixed implicit and static pattern rules"));
+
+      /* Create an array of target names */
+      for (c = 1, nextf = filenames->next; nextf; ++c, nextf = nextf->next)
+        ;
+      targets = xmalloc (c * sizeof (const char *));
+      target_pats = xmalloc (c * sizeof (const char *));
+
+      targets[0] = name;
+      target_pats[0] = implicit_percent;
+
+      for (c = 1, nextf = filenames->next; nextf; ++c, nextf = nextf->next)
+        {
+          name = nextf->name;
+          implicit_percent = find_percent_cached (&name);
+
+          if (implicit_percent == 0)
+            fatal (flocp, _("mixed implicit and normal rules"));
+
+	  targets[c] = name;
+	  target_pats[c] = implicit_percent;
+        }
+
+      create_pattern_rule (targets, target_pats, c, two_colon, deps, cmds, 1);
+
+      return;
+    }
+
+
+  /* Walk through each target and create it in the database.
+     We already set up the first target, above.  */
+  while (1)
+    {
+      struct nameseq *nextf = filenames->next;
       struct file *f;
       struct dep *this = 0;
-      const char *implicit_percent;
 
-      nextf = filenames->next;
       free (filenames);
 
       /* Check for special targets.  Do it here instead of, say, snap_deps()
          so that we can immediately use the value.  */
-
       if (streq (name, ".POSIX"))
         posix_pedantic = 1;
       else if (streq (name, ".SECONDEXPANSION"))
         second_expansion = 1;
 
-      implicit_percent = find_percent_cached (&name);
-      implicit |= implicit_percent != 0;
-
-      if (implicit)
-        {
-          if (pattern != 0)
-            fatal (flocp, _("mixed implicit and static pattern rules"));
-
-          if (implicit_percent == 0)
-            fatal (flocp, _("mixed implicit and normal rules"));
-
-	  if (targets == 0)
-	    {
-	      max_targets = 5;
-	      targets = xmalloc (5 * sizeof (char *));
-	      target_percents = xmalloc (5 * sizeof (char *));
-	      target_idx = 0;
-	    }
-	  else if (target_idx == max_targets - 1)
-	    {
-	      max_targets += 5;
-	      targets = xrealloc (targets, max_targets * sizeof (char *));
-	      target_percents = xrealloc (target_percents,
-                                          max_targets * sizeof (char *));
-	    }
-	  targets[target_idx] = name;
-	  target_percents[target_idx] = implicit_percent;
-	  ++target_idx;
-	  continue;
-	}
-
       /* If this is a static pattern rule:
-         `targets: target%pattern: dep%pattern; cmds',
+         `targets: target%pattern: prereq%pattern; recipe',
          make sure the pattern matches this target name.  */
       if (pattern && !pattern_matches (pattern, pattern_percent, name))
         error (flocp, _("target `%s' doesn't match the target pattern"), name);
       else if (deps)
-        {
-          /* If there are multiple filenames, copy the chain DEPS for all but
-             the last one.  It is not safe for the same deps to go in more
-             than one place in the database.  */
-          this = nextf != 0 ? copy_dep_chain (deps) : deps;
-          this->need_2nd_expansion = (second_expansion
-				      && strchr (this->name, '$'));
-        }
+        /* If there are multiple targets, copy the chain DEPS for all but the
+           last one.  It is not safe for the same deps to go in more than one
+           place in the database.  */
+        this = nextf != 0 ? copy_dep_chain (deps) : deps;
 
+      /* Find or create an entry in the file database for this target.  */
       if (!two_colon)
 	{
-	  /* Single-colon.  Combine these dependencies
-	     with others in file's existing record, if any.  */
+	  /* Single-colon.  Combine this rule with the file's existing record,
+	     if any.  */
 	  f = enter_file (strcache_add (name));
-
 	  if (f->double_colon)
 	    fatal (flocp,
                    _("target file `%s' has both : and :: entries"), f->name);
@@ -1993,8 +2020,6 @@ record_files (struct nameseq *filenames, const char *pattern,
                      f->name);
 	    }
 
-	  f->is_target = 1;
-
 	  /* Defining .DEFAULT with no deps or cmds clears it.  */
 	  if (f == default_file && this == 0 && cmds == 0)
 	    f->cmds = 0;
@@ -2008,71 +2033,18 @@ record_files (struct nameseq *filenames, const char *pattern,
               free_dep_chain (f->deps);
 	      f->deps = 0;
 	    }
-          else if (this != 0)
-	    {
-	      /* Add the file's old deps and the new ones in THIS together.  */
-
-              if (f->deps != 0)
-                {
-                  struct dep **d_ptr = &f->deps;
-
-                  while ((*d_ptr)->next != 0)
-                    d_ptr = &(*d_ptr)->next;
-
-                  if (cmds != 0)
-                    {
-                      /* This is the rule with commands, so put its deps
-                         last. The rationale behind this is that $< expands to
-                         the first dep in the chain, and commands use $<
-                         expecting to get the dep that rule specifies.  However
-                         the second expansion algorithm reverses the order thus
-                         we need to make it last here.  */
-                      (*d_ptr)->next = this;
-                      /* This is a hack. I need a way to communicate to
-                         snap_deps() that the last dependency line in this
-                         file came with commands (so that logic in snap_deps()
-                         can put it in front and all this $< -logic works). I
-                         cannot simply rely on file->cmds being not 0 because
-                         of the cases like the following:
-
-                         foo: bar
-                         foo:
-                         ...
-
-                         I am going to temporarily "borrow" UPDATING member in
-                         `struct file' for this.   */
-                      f->updating = 1;
-                    }
-                  else
-                    {
-                      /* This is a rule without commands.  If we already have
-                         a rule with commands and prerequisites (see "hack"
-                         comment above), put these prereqs at the end but
-                         before prereqs from the rule with commands. This way
-                         everything appears in makefile order.  */
-                      if (f->updating)
-                        {
-                          this->next = *d_ptr;
-                          *d_ptr = this;
-                        }
-                      else
-                        (*d_ptr)->next = this;
-                    }
-                }
-              else
-                f->deps = this;
-	    }
 	}
       else
 	{
 	  /* Double-colon.  Make a new record even if there already is one.  */
 	  f = lookup_file (name);
 
-	  /* Check for both : and :: rules.  Check is_target so
-	     we don't lose on default suffix rules or makefiles.  */
+	  /* Check for both : and :: rules.  Check is_target so we don't lose
+	     on default suffix rules or makefiles.  */
 	  if (f != 0 && f->is_target && !f->double_colon)
 	    fatal (flocp,
                    _("target file `%s' has both : and :: entries"), f->name);
+
 	  f = enter_file (strcache_add (name));
 	  /* If there was an existing entry and it was a double-colon entry,
 	     enter_file will have returned a new one, making it the prev
@@ -2082,14 +2054,15 @@ record_files (struct nameseq *filenames, const char *pattern,
 	    /* This is the first entry for this name, so we must set its
 	       double_colon pointer to itself.  */
 	    f->double_colon = f;
-	  f->is_target = 1;
-	  f->deps = this;
+
 	  f->cmds = cmds;
 	}
 
+      f->is_target = 1;
+
       /* If this is a static pattern rule, set the stem to the part of its
          name that matched the `%' in the pattern, so you can use $* in the
-         commands.  */
+         commands.  If we didn't do it before, enter the prereqs now.  */
       if (pattern)
         {
           static const char *percent = "%";
@@ -2099,20 +2072,54 @@ record_files (struct nameseq *filenames, const char *pattern,
           f->stem = strcache_add_len (buffer, o - buffer);
           if (this)
             {
-              this->staticpattern = 1;
-              this->stem = f->stem;
+              if (! this->need_2nd_expansion)
+                this = enter_prereqs (this, f->stem);
+              else
+                this->stem = f->stem;
+            }
+        }
+
+      /* Add the dependencies to this file entry.  */
+      if (this != 0)
+        {
+          /* Add the file's old deps and the new ones in THIS together.  */
+          if (f->deps == 0)
+            f->deps = this;
+          else if (cmds != 0)
+            {
+              struct dep *d = this;
+
+              /* If this rule has commands, put these deps first.  */
+              while (d->next != 0)
+                d = d->next;
+
+              d->next = f->deps;
+              f->deps = this;
+            }
+          else
+            {
+              struct dep *d = f->deps;
+
+              /* A rule without commands: put its prereqs at the end.  */
+              while (d->next != 0)
+                d = d->next;
+
+              d->next = this;
             }
         }
 
       name = f->name;
-    }
 
-  if (implicit)
-    {
-      if (deps)
-        deps->need_2nd_expansion = second_expansion;
-      create_pattern_rule (targets, target_percents, target_idx,
-                           two_colon, deps, cmds, 1);
+      /* All done!  Set up for the next one.  */
+      if (nextf == 0)
+        break;
+
+      filenames = nextf;
+
+      /* Reduce escaped percents.  If there are any unescaped it's an error  */
+      name = filenames->name;
+      if (find_percent_cached (&name))
+        fatal (flocp, _("mixed implicit and normal rules"));
     }
 }
 
@@ -2235,7 +2242,7 @@ find_percent_cached (const char **string)
 {
   const char *p = *string;
   char *new = 0;
-  int slen;
+  int slen = 0;
 
   /* If the first char is a % return now.  This lets us avoid extra tests
      inside the loop.  */
@@ -2330,11 +2337,11 @@ readstring (struct ebuffer *ebuf)
   while (1)
     {
       int backslash = 0;
-      char *bol = eol;
-      char *p;
+      const char *bol = eol;
+      const char *p;
 
       /* Find the next newline.  At EOS, stop.  */
-      eol = p = strchr (eol , '\n');
+      p = eol = strchr (eol , '\n');
       if (!eol)
         {
           ebuf->bufnext = ebuf->bufstart + ebuf->size + 1;
@@ -2850,7 +2857,7 @@ tilde_expand (const char *name)
         PARSEFS_NOCACHE - Do not add filenames to the strcache (caller frees)
   */
 
-struct nameseq *
+void *
 parse_file_seq (char **stringp, unsigned int size, int stopchar,
                 const char *prefix, int flags)
 {

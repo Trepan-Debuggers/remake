@@ -1,3 +1,56 @@
+2009-09-23  Paul  <psmith@gnu.org>
+
+	Rework the way secondary expansion is stored, for efficiency.
+	This changes secondary expansion so that ONLY WHEN we know we have
+	a possibility of needing secondary expansion, do we defer the
+	secondary expansion.  This means more parsing the deps but we use
+	a lot less memory (due to the strcache).  Also, this fixes
+	Savannah bug #18622.
+
+	* read.c (eval): Don't parse the dep string here anymore.
+	(record_files): Take the dep argument as an unparsed string.  If
+	secondary expansion is enabled AND the prereq string has a '$' in
+	it, then set NEED_2ND_EXPANSION and keep the entire string.
+	Otherwise, parse the dep string here to construct the dep list
+	with the names in the strcache.
+
+	* misc.c (copy_dep_chain): For NEED_2ND_EXPANSION, we need to
+	duplicate the name string (others are in the strcache).
+
+	* implicit.c: Remove struct idep and free_idep_chain(): unused.
+	(struct patdeps): New structure to store prereq information.
+	(pattern_search): Use the NEED_2ND_EXPANSION flag to determine
+	which prerequisites need expansion, and expand only those.
+
+	* file.c (split_prereqs): Break parse_prereqs() into two parts: this
+	and enter_prereqs().  split_prereqs() takes a fully-expanded string
+	and splits it into a DEP list, handling order-only prereqs.
+	(enter_prereqs): This function enters a list of DEPs into the file
+	database.  If there's a stem defined, expand any pattern chars.
+	(expand_deps): Only try to expand DEPs which have NEED_2ND_EXPANSION
+	set.  Use the above functions.
+	(snap_deps): Only perform second expansion on prereqs that need it,
+	as defined by the NEED_2ND_EXPANSION flag.
+	(print_prereqs): New function to print the prereqs
+	(print_file): Call print_prereqs() rather than print inline.
+
+	* hash.h (STRING_COMPARE): Take advantage of strcache() by
+	comparing pointers.
+	(STRING_N_COMPARE): Ditto.
+	(ISTRING_COMPARE): Ditto.
+
+	* dep.h (PARSE_FILE_SEQ): New macro to reduce casts.
+	(parse_file_seq): Return void*
+	* read.c (parse_file_seq): Return void*.
+	(eval): Invoke macroized version of parse_file_seq()
+	* default.c (set_default_suffixes): Ditto.
+	* file.c (split_prereqs): Ditto.
+	* function.c (string_glob): Ditto.
+	* main.c (main): Ditto.
+	* rule.c (install_pattern_rule): Ditto.
+
+	* filedef.h: Add split_prereqs(), enter_prereqs(), etc.
+
 2009-09-16  Paul Smith  <psmith@gnu.org>
 
 	* misc.c (alloc_dep, free_dep): Now that we have xcalloc(),

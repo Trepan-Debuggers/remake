@@ -355,7 +355,7 @@ string_glob (char *line)
   struct nameseq *chain;
   unsigned int idx;
 
-  chain = parse_file_seq (&line, sizeof (struct nameseq), '\0', NULL,
+  chain = PARSE_FILE_SEQ (&line, struct nameseq, '\0', NULL,
                           /* We do not want parse_file_seq to strip `./'s.
                              That would break examples like:
                              $(patsubst ./%.c,obj/%.o,$(wildcard ./?*.c)).  */

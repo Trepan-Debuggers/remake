@@ -61,11 +61,14 @@ struct nameseq
 #define PARSEFS_EXISTS  (0x0004)
 #define PARSEFS_NOCACHE (0x0008)
 
+#define PARSE_FILE_SEQ(_s,_t,_c,_p,_f) \
+            (_t *)parse_file_seq ((_s),sizeof (_t),(_c),(_p),(_f))
+
 #ifdef VMS
-struct nameseq *parse_file_seq ();
+void *parse_file_seq ();
 #else
-struct nameseq *parse_file_seq (char **stringp, unsigned int size,
-                                int stopchar, const char *prefix, int flags);
+void *parse_file_seq (char **stringp, unsigned int size,
+                      int stopchar, const char *prefix, int flags);
 #endif
 
 char *tilde_expand (const char *name);

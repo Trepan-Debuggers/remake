@@ -1,3 +1,10 @@
+2009-09-23  Paul  <psmith@gnu.org>
+
+	* scripts/features/patternrules: Test that we can remove pattern
+	rules, both single and multiple prerequisites.  Savannah bug #18622.
+
+	* scripts/features/echoing: Rework for run_make_test().
+
 2009-06-14  Paul Smith  <psmith@gnu.org>
 
 	* scripts/features/vpath: Verify we don't get bogus circular

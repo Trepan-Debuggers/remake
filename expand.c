@@ -407,8 +407,8 @@ variable_expand_string (char *line, const char *string, long length)
 
       if (*p == '\0')
 	break;
-      else
-	++p;
+
+      ++p;
     }
 
   if (abuf)
