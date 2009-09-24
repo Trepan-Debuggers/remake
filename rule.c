@@ -94,19 +94,20 @@ count_implicit_rule_limits (void)
 
       for (dep = rule->deps; dep != 0; dep = dep->next)
 	{
-	  unsigned int len = strlen (dep->name);
+          const char *dname = dep_name (dep);
+          unsigned int len = strlen (dname);
 
 #ifdef VMS
-	  const char *p = strrchr (dep->name, ']');
+          const char *p = strrchr (dname, ']');
           const char *p2;
           if (p == 0)
-            p = strrchr (dep->name, ':');
-          p2 = p != 0 ? strchr (dep->name, '%') : 0;
+            p = strrchr (dname, ':');
+          p2 = p != 0 ? strchr (dname, '%') : 0;
 #else
-	  const char *p = strrchr (dep->name, '/');
-	  const char *p2 = p != 0 ? strchr (dep->name, '%') : 0;
+          const char *p = strrchr (dname, '/');
+          const char *p2 = p != 0 ? strchr (dname, '%') : 0;
 #endif
-	  ndeps++;
+          ndeps++;
 
 	  if (len > max_pattern_dep_length)
 	    max_pattern_dep_length = len;
@@ -115,15 +116,15 @@ count_implicit_rule_limits (void)
 	    {
 	      /* There is a slash before the % in the dep name.
 		 Extract the directory name.  */
-	      if (p == dep->name)
+	      if (p == dname)
 		++p;
-	      if (p - dep->name > namelen)
+	      if (p - dname > namelen)
 		{
-		  namelen = p - dep->name;
+		  namelen = p - dname;
 		  name = xrealloc (name, namelen + 1);
 		}
-	      memcpy (name, dep->name, p - dep->name);
-	      name[p - dep->name] = '\0';
+	      memcpy (name, dname, p - dname);
+	      name[p - dname] = '\0';
 
 	      /* In the deps of an implicit rule the `changed' flag
 		 actually indicates that the dependency is in a
@@ -376,8 +377,7 @@ install_pattern_rule (struct pspec *p, int terminal)
   ++r->suffixes[0];
 
   ptr = p->dep;
-  r->deps = (struct dep *) parse_file_seq (&ptr, sizeof (struct dep), '\0',
-                                           NULL, 0);
+  r->deps = PARSE_FILE_SEQ (&ptr, struct dep, '\0', NULL, 0);
 
   if (new_pattern_rule (r, 0))
     {
@@ -481,7 +481,6 @@ static void			/* Useful to call from gdb.  */
 print_rule (struct rule *r)
 {
   unsigned int i;
-  struct dep *d;
 
   for (i = 0; i < r->num; ++i)
     {
@@ -491,9 +490,7 @@ print_rule (struct rule *r)
   if (r->terminal)
     putchar (':');
 
-  for (d = r->deps; d != 0; d = d->next)
-    printf (" %s", dep_name (d));
-  putchar ('\n');
+  print_prereqs (r->deps);
 
   if (r->cmds != 0)
     print_commands (r->cmds);

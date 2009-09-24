@@ -967,8 +967,9 @@ start_job_command (struct child *child)
 #if !defined(_AMIGA) && !defined(WINDOWS32)
   static int bad_stdin = -1;
 #endif
-  register char *p;
-  int flags;
+  char *p;
+  /* Must be volatile to silence bogus GCC warning about longjmp/vfork.  */
+  volatile int flags;
 #ifdef VMS
   char *argv;
 #else

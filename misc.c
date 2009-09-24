@@ -430,7 +430,8 @@ xstrndup (const char *str, unsigned int length)
     fatal (NILF, _("virtual memory exhausted"));
 #else
   result = xmalloc (length + 1);
-  strncpy (result, str, length);
+  if (length > 0)
+    strncpy (result, str, length);
   result[length] = '\0';
 #endif
 
@@ -524,8 +525,7 @@ find_next_token (const char **ptr, unsigned int *lengthptr)
 }
 
 
-/* Copy a chain of `struct dep', making a new chain
-   with the same contents as the old one.  */
+/* Copy a chain of `struct dep'.  For 2nd expansion deps, dup the name.  */
 
 struct dep *
 copy_dep_chain (const struct dep *d)
@@ -537,6 +537,9 @@ copy_dep_chain (const struct dep *d)
     {
       struct dep *c = xmalloc (sizeof (struct dep));
       memcpy (c, d, sizeof (struct dep));
+
+      if (c->need_2nd_expansion)
+        c->name = xstrdup (c->name);
 
       c->next = 0;
       if (firstnew == 0)

@@ -102,7 +102,8 @@ extern struct file *suffix_file, *default_file;
 
 struct file *lookup_file (const char *name);
 struct file *enter_file (const char *name);
-struct dep *parse_prereqs (char *prereqs);
+struct dep *split_prereqs (char *prereqstr);
+struct dep *enter_prereqs (struct dep *prereqs, const char *stem);
 void remove_intermediates (int sig);
 void snap_deps (void);
 void rename_file (struct file *file, const char *name);
@@ -111,6 +112,8 @@ void set_command_state (struct file *file, enum cmd_state state);
 void notice_finished_file (struct file *file);
 void init_hash_files (void);
 char *build_target_list (char *old_list);
+void print_prereqs (const struct dep *deps);
+void print_file_data_base (void);
 
 #if FILE_TIMESTAMP_HI_RES
 # define FILE_TIMESTAMP_STAT_MODTIME(fname, st) \

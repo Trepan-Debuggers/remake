@@ -56,7 +56,6 @@ RETSIGTYPE fatal_error_signal (int sig);
 void print_variable_data_base (void);
 void print_dir_data_base (void);
 void print_rule_data_base (void);
-void print_file_data_base (void);
 void print_vpath_data_base (void);
 
 void verify_file_data_base (void);
@@ -2192,7 +2191,7 @@ main (int argc, char **argv, char **envp)
             {
               struct nameseq *ns;
 
-              ns = parse_file_seq (&p, sizeof (struct nameseq), '\0', NULL, 0);
+              ns = PARSE_FILE_SEQ (&p, struct nameseq, '\0', NULL, 0);
               if (ns)
                 {
                   /* .DEFAULT_GOAL should contain one target. */

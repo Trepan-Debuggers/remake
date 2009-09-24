@@ -79,6 +79,9 @@ extern void *hash_deleted_item;
 
 /* hash and comparison macros for case-sensitive string keys. */
 
+/* Due to the strcache, it's not uncommon for the string pointers to
+   be identical.  Take advantage of that to short-circuit string compares.  */
+
 #define STRING_HASH_1(KEY, RESULT) do { \
   unsigned char const *_key_ = (unsigned char const *) (KEY) - 1; \
   while (*++_key_) \
@@ -102,10 +105,10 @@ extern void *hash_deleted_item;
 } while (0)
 
 #define STRING_COMPARE(X, Y, RESULT) do { \
-  RESULT = strcmp ((X), (Y)); \
+    RESULT = (X) == (Y) ? 0 : strcmp ((X), (Y)); \
 } while (0)
 #define return_STRING_COMPARE(X, Y) do { \
-  return strcmp ((X), (Y)); \
+  return (X) == (Y) ? 0 : strcmp ((X), (Y)); \
 } while (0)
 
 
@@ -138,10 +141,10 @@ extern void *hash_deleted_item;
 } while (0)
 
 #define STRING_N_COMPARE(X, Y, N, RESULT) do { \
-  RESULT = strncmp ((X), (Y), (N)); \
+  RESULT = (X) == (Y) ? 0 : strncmp ((X), (Y), (N)); \
 } while (0)
 #define return_STRING_N_COMPARE(X, Y, N) do { \
-  return strncmp ((X), (Y), (N)); \
+  return (X) == (Y) ? 0 : strncmp ((X), (Y), (N)); \
 } while (0)
 
 #ifdef HAVE_CASE_INSENSITIVE_FS
@@ -171,10 +174,10 @@ extern void *hash_deleted_item;
 } while (0)
 
 #define ISTRING_COMPARE(X, Y, RESULT) do { \
-  RESULT = strcasecmp ((X), (Y)); \
+  RESULT = (X) == (Y) ? 0 : strcasecmp ((X), (Y)); \
 } while (0)
 #define return_ISTRING_COMPARE(X, Y) do { \
-  return strcasecmp ((X), (Y)); \
+  return (X) == (Y) ? 0 : strcasecmp ((X), (Y)); \
 } while (0)
 
 #else

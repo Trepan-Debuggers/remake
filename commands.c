@@ -116,7 +116,8 @@ set_file_variables (struct file *file)
   for (d = file->deps; d != 0; d = d->next)
     if (!d->ignore_mtime)
       {
-        less = dep_name (d);
+        if (!d->need_2nd_expansion)
+          less = dep_name (d);
         break;
       }
 
@@ -153,7 +154,7 @@ set_file_variables (struct file *file)
 
     plus_len = 0;
     for (d = file->deps; d != 0; d = d->next)
-      if (! d->ignore_mtime)
+      if (! d->ignore_mtime && ! d->need_2nd_expansion)
 	plus_len += strlen (dep_name (d)) + 1;
     if (plus_len == 0)
       plus_len++;
@@ -164,7 +165,7 @@ set_file_variables (struct file *file)
 
     qmark_len = plus_len + 1;	/* Will be this or less.  */
     for (d = file->deps; d != 0; d = d->next)
-      if (! d->ignore_mtime)
+      if (! d->ignore_mtime && ! d->need_2nd_expansion)
         {
           const char *c = dep_name (d);
 
@@ -198,7 +199,7 @@ set_file_variables (struct file *file)
 
     bar_len = 0;
     for (d = file->deps; d != 0; d = d->next)
-      if (d->ignore_mtime)
+      if (d->ignore_mtime && ! d->need_2nd_expansion)
 	bar_len += strlen (dep_name (d)) + 1;
     if (bar_len == 0)
       bar_len++;
@@ -217,8 +218,12 @@ set_file_variables (struct file *file)
 
     for (d = file->deps; d != 0; d = d->next)
       {
-	const char *c = dep_name (d);
+	const char *c;
 
+        if (d->need_2nd_expansion)
+          continue;
+
+        c = dep_name (d);
 #ifndef	NO_ARCHIVES
 	if (ar_name (c))
 	  {
