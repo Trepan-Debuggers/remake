@@ -210,6 +210,17 @@ oo$ba.1
 oo$ba
 ');
 
+# Test #9: Check the value of $^
+run_make_test(q!
+.SECONDEXPANSION:
+
+%.so: | $$(extra) ; @echo $^
+
+foo.so: extra := foo.o
+foo.so:
+foo.o:
+!,
+              '', "\n");
 
 # This tells the test driver that the perl test script executed properly.
 1;

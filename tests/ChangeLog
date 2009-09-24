@@ -1,4 +1,9 @@
-2009-09-23  Paul  <psmith@gnu.org>
+2009-09-24  Paul Smith  <psmith@gnu.org>
+
+	* scripts/features/se_implicit: Add a test for order-only
+	secondary expansion prerequisites.
+
+2009-09-23  Paul Smith  <psmith@gnu.org>
 
 	* scripts/features/patternrules: Test that we can remove pattern
 	rules, both single and multiple prerequisites.  Savannah bug #18622.

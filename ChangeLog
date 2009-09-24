@@ -1,4 +1,14 @@
-2009-09-23  Paul  <psmith@gnu.org>
+2009-09-24  Paul Smith  <psmith@gnu.org>
+
+	* implicit.c (pattern_search): Add back support for order-only
+	prerequisites for secondary expansion implicit rules, that were
+	accidentally dropped.  If we find a "|", enable order-only mode
+	and set IGNORE_MTIME on all deps that are seen afterward.
+	(pattern_search): Fix memory leaks: for intermediate files where
+	we've already set the file variable and pattern variable sets, be
+	sure to either save or free them as appropriate.
+
+2009-09-23  Paul Smith  <psmith@gnu.org>
 
 	Rework the way secondary expansion is stored, for efficiency.
 	This changes secondary expansion so that ONLY WHEN we know we have
