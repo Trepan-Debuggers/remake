@@ -1,5 +1,10 @@
 2009-09-25 Boris Kolpackov  <boris@codesynthesis.com>
 
+	* implicit.c (pattern_search): Terminate early if we haven't
+	found any rules to try (performance improvement).
+
+2009-09-25 Boris Kolpackov  <boris@codesynthesis.com>
+
 	* implicit.c (pattern_search): Merge three parallel arrays,
 	TRYRULES, MATCHES, and CHECKED_LASTSLASH, into one array
 	of struct TRYRULE. In the old version the latter two arrays

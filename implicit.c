@@ -390,6 +390,10 @@ pattern_search (struct file *file, int archive,
         }
     }
 
+  /* Bail out early if we haven't found any rules. */
+  if (nrules == 0)
+    goto done;
+
   /* If we have found a matching rule that won't match all filenames,
      retroactively reject any non-"terminal" rules that do always match.  */
   if (specific_rule_matched)
