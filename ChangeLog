@@ -1,3 +1,10 @@
+2009-09-25 Boris Kolpackov  <boris@codesynthesis.com>
+
+	* implicit.c (pattern_search): Merge three parallel arrays,
+	TRYRULES, MATCHES, and CHECKED_LASTSLASH, into one array
+	of struct TRYRULE. In the old version the latter two arrays
+	had insufficient length.
+
 2009-09-24  Paul Smith  <psmith@gnu.org>
 
 	* implicit.c (pattern_search): Add back support for order-only
