@@ -157,6 +157,20 @@ struct patdeps
     unsigned int ignore_mtime : 1;
   };
 
+/* This structure stores information about pattern rules that we need
+   to try.
+*/
+struct tryrule
+  {
+    struct rule *rule;
+
+    /* Index of the target in this rule that matched the file. */
+    unsigned int matches;
+
+    /* Nonzero if the LASTSLASH logic was used in matching this rule. */
+    char checked_lastslash;
+  };
+
 /* Search the pattern rules for a rule with an existing dependency to make
    FILE.  If a rule is found, the appropriate commands and deps are put in FILE
    and 1 is returned.  If not, 0 is returned.
@@ -206,19 +220,11 @@ pattern_search (struct file *file, int archive,
   unsigned int fullstemlen = 0;
 
   /* Buffer in which we store all the rules that are possibly applicable.  */
-  struct rule **tryrules = xmalloc (num_pattern_rules * max_pattern_targets
-                                    * sizeof (struct rule *));
+  struct tryrule *tryrules = xmalloc (num_pattern_rules * max_pattern_targets
+                                      * sizeof (struct tryrule));
 
   /* Number of valid elements in TRYRULES.  */
   unsigned int nrules;
-
-  /* The numbers of the rule targets of each rule
-     in TRYRULES that matched the target file.  */
-  unsigned int *matches = alloca (num_pattern_rules * sizeof (unsigned int));
-
-  /* Each element is nonzero if LASTSLASH was used in
-     matching the corresponding element of TRYRULES.  */
-  char *checked_lastslash = alloca (num_pattern_rules * sizeof (char));
 
   /* The index in TRYRULES of the rule we found.  */
   unsigned int foundrule;
@@ -377,9 +383,9 @@ pattern_search (struct file *file, int archive,
           /* Record this rule in TRYRULES and the index of the matching
              target in MATCHES.  If several targets of the same rule match,
              that rule will be in TRYRULES more than once.  */
-          tryrules[nrules] = rule;
-          matches[nrules] = ti;
-          checked_lastslash[nrules] = check_lastslash;
+          tryrules[nrules].rule = rule;
+	  tryrules[nrules].matches = ti;
+	  tryrules[nrules].checked_lastslash = check_lastslash;
           ++nrules;
         }
     }
@@ -388,13 +394,13 @@ pattern_search (struct file *file, int archive,
      retroactively reject any non-"terminal" rules that do always match.  */
   if (specific_rule_matched)
     for (ri = 0; ri < nrules; ++ri)
-      if (!tryrules[ri]->terminal)
+      if (!tryrules[ri].rule->terminal)
         {
           unsigned int j;
-          for (j = 0; j < tryrules[ri]->num; ++j)
-            if (tryrules[ri]->targets[j][1] == '\0')
+          for (j = 0; j < tryrules[ri].rule->num; ++j)
+            if (tryrules[ri].rule->targets[j][1] == '\0')
               {
-                tryrules[ri] = 0;
+                tryrules[ri].rule = 0;
                 break;
               }
         }
@@ -421,8 +427,9 @@ pattern_search (struct file *file, int archive,
           const char *nptr = 0;
           const char *dir = NULL;
           int order_only = 0;
+          unsigned int matches;
 
-          rule = tryrules[ri];
+          rule = tryrules[ri].rule;
 
           /* RULE is nil when we discover that a rule, already placed in
              TRYRULES, should not be applied.  */
@@ -436,10 +443,11 @@ pattern_search (struct file *file, int archive,
 
           /* From the lengths of the filename and the matching pattern parts,
              find the stem: the part of the filename that matches the %.  */
-          stem = filename + (rule->suffixes[matches[ri]]
-                             - rule->targets[matches[ri]]) - 1;
-          stemlen = (namelen - rule->lens[matches[ri]]) + 1;
-          check_lastslash = checked_lastslash[ri];
+          matches = tryrules[ri].matches;
+          stem = filename + (rule->suffixes[matches]
+                             - rule->targets[matches]) - 1;
+          stemlen = (namelen - rule->lens[matches]) + 1;
+          check_lastslash = tryrules[ri].checked_lastslash;
           if (check_lastslash)
             {
               stem += pathlen;
@@ -634,7 +642,7 @@ pattern_search (struct file *file, int archive,
                             ? _("Rejecting impossible rule prerequisite `%s'.\n")
                             : _("Rejecting impossible implicit prerequisite `%s'.\n"),
                             d->name));
-                      tryrules[ri] = 0;
+                      tryrules[ri].rule = 0;
 
                       failed = 1;
                       break;
@@ -780,7 +788,7 @@ pattern_search (struct file *file, int archive,
 
   if (recursions > 0)
     /* Kludge-o-matic */
-    file->name = rule->targets[matches[foundrule]];
+    file->name = rule->targets[tryrules[foundrule].matches];
 
   /* DEPLIST lists the prerequisites for the rule we found.  This includes the
      intermediate files, if any.  Convert them into entries on the deps-chain
@@ -845,7 +853,7 @@ pattern_search (struct file *file, int archive,
             dep->file = enter_file (s);
         }
 
-      if (pat->file == 0 && tryrules[foundrule]->terminal)
+      if (pat->file == 0 && tryrules[foundrule].rule->terminal)
         {
           /* If the file actually existed (was not an intermediate file), and
              the rule that found it was a terminal one, then we want to mark
@@ -862,7 +870,7 @@ pattern_search (struct file *file, int archive,
       file->deps = dep;
     }
 
-  if (!checked_lastslash[foundrule])
+  if (!tryrules[foundrule].checked_lastslash)
     {
       /* Always allocate new storage, since STEM might be on the stack for an
          intermediate file.  */
@@ -889,7 +897,7 @@ pattern_search (struct file *file, int archive,
 
   /* Set precious flag. */
   {
-    struct file *f = lookup_file (rule->targets[matches[foundrule]]);
+    struct file *f = lookup_file (rule->targets[tryrules[foundrule].matches]);
     if (f && f->precious)
       file->precious = 1;
   }
@@ -899,7 +907,7 @@ pattern_search (struct file *file, int archive,
 
   if (rule->num > 1)
     for (ri = 0; ri < rule->num; ++ri)
-      if (ri != matches[foundrule])
+      if (ri != tryrules[foundrule].matches)
         {
           char *nm = alloca (rule->lens[ri] + fullstemlen + 1);
           char *p = nm;
