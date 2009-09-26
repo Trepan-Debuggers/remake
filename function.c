@@ -382,6 +382,7 @@ string_glob (char *line)
       idx += len;
       result[idx++] = ' ';
 
+      free (chain->name);
       free (chain);
       chain = next;
     }

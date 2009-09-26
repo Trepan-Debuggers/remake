@@ -566,8 +566,8 @@ eval (struct ebuffer *ebuf, int set_default)
 	  record_files (filenames, pattern, pattern_percent, depstr,          \
                         cmds_started, commands, commands_idx, two_colon,      \
                         &fi);                                                 \
+          filenames = 0;						      \
         }                                                                     \
-      filenames = 0;							      \
       commands_idx = 0;							      \
       no_targets = 0;                                                         \
       pattern = 0;                                                            \
@@ -1935,8 +1935,13 @@ record_files (struct nameseq *filenames, const char *pattern,
       if (pattern != 0)
         fatal (flocp, _("mixed implicit and static pattern rules"));
 
-      /* Create an array of target names */
-      for (c = 1, nextf = filenames->next; nextf; ++c, nextf = nextf->next)
+      /* Count the targets to create an array of target names.
+         We already have the first one.  */
+      nextf = filenames->next;
+      free (filenames);
+      filenames = nextf;
+
+      for (c = 1; nextf; ++c, nextf = nextf->next)
         ;
       targets = xmalloc (c * sizeof (const char *));
       target_pats = xmalloc (c * sizeof (const char *));
@@ -1944,9 +1949,10 @@ record_files (struct nameseq *filenames, const char *pattern,
       targets[0] = name;
       target_pats[0] = implicit_percent;
 
-      for (c = 1, nextf = filenames->next; nextf; ++c, nextf = nextf->next)
+      c = 1;
+      while (filenames)
         {
-          name = nextf->name;
+          name = filenames->name;
           implicit_percent = find_percent_cached (&name);
 
           if (implicit_percent == 0)
@@ -1954,6 +1960,11 @@ record_files (struct nameseq *filenames, const char *pattern,
 
 	  targets[c] = name;
 	  target_pats[c] = implicit_percent;
+          ++c;
+
+          nextf = filenames->next;
+          free (filenames);
+          filenames = nextf;
         }
 
       create_pattern_rule (targets, target_pats, c, two_colon, deps, cmds, 1);

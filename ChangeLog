@@ -1,3 +1,9 @@
+2009-09-26  Paul Smith  <psmith@gnu.org>
+
+	* read.c (record_files): Free FILENAMES chain for implicit rules.
+
+	* function.c (string_glob): Free NAME in the nameseq chain.
+
 2009-09-25 Boris Kolpackov  <boris@codesynthesis.com>
 
 	* implicit.c (pattern_search): Terminate early if we haven't
