@@ -401,15 +401,8 @@ static void
 freerule (struct rule *rule, struct rule *lastrule)
 {
   struct rule *next = rule->next;
-  struct dep *dep;
 
-  dep = rule->deps;
-  while (dep)
-    {
-      struct dep *t = dep->next;
-      free_dep (dep);
-      dep = t;
-    }
+  free_dep_chain (rule->deps);
 
   free (rule->targets);
   free (rule->suffixes);

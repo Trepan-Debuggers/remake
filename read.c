@@ -852,7 +852,7 @@ eval (struct ebuffer *ebuf, int set_default)
 	      const char *name = files->name;
               int r;
 
-	      free (files);
+	      free_ns (files);
 	      files = next;
 
               r = eval_makefile (name,
@@ -1142,7 +1142,7 @@ eval (struct ebuffer *ebuf, int set_default)
           {
             struct nameseq *target;
             target = PARSE_FILE_SEQ (&p2, struct nameseq, ':', NULL,
-                                     PARSEFS_NOGLOB|PARSEFS_NOCACHE);
+                                     PARSEFS_NOGLOB);
             ++p2;
             if (target == 0)
               fatal (fstart, _("missing target pattern"));
@@ -1152,7 +1152,7 @@ eval (struct ebuffer *ebuf, int set_default)
             pattern = target->name;
             if (pattern_percent == 0)
               fatal (fstart, _("target pattern contains no `%%'"));
-            free (target);
+            free_ns (target);
           }
         else
           pattern = 0;
@@ -1779,7 +1779,7 @@ record_target_var (struct nameseq *filenames, char *defn,
       struct pattern_var *p;
 
       nextf = filenames->next;
-      free (filenames);
+      free_ns (filenames);
 
       /* If it's a pattern target, then add it to the pattern-specific
          variable list.  */
@@ -1938,7 +1938,7 @@ record_files (struct nameseq *filenames, const char *pattern,
       /* Count the targets to create an array of target names.
          We already have the first one.  */
       nextf = filenames->next;
-      free (filenames);
+      free_ns (filenames);
       filenames = nextf;
 
       for (c = 1; nextf; ++c, nextf = nextf->next)
@@ -1963,7 +1963,7 @@ record_files (struct nameseq *filenames, const char *pattern,
           ++c;
 
           nextf = filenames->next;
-          free (filenames);
+          free_ns (filenames);
           filenames = nextf;
         }
 
@@ -1981,7 +1981,7 @@ record_files (struct nameseq *filenames, const char *pattern,
       struct file *f;
       struct dep *this = 0;
 
-      free (filenames);
+      free_ns (filenames);
 
       /* Check for special targets.  Do it here instead of, say, snap_deps()
          so that we can immediately use the value.  */

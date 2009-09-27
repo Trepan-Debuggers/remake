@@ -1,6 +1,12 @@
 2009-09-26  Paul Smith  <psmith@gnu.org>
 
+	* read.c (record_files): Use free_ns() to free struct nameseq.
+	(eval): Ditto.
+
+	* rule.c (freerule): Use free_dep_chain().
+
 	* read.c (record_files): Free FILENAMES chain for implicit rules.
+	(eval): Static pattern targets go into the string cache.
 
 	* function.c (string_glob): Free NAME in the nameseq chain.
 
