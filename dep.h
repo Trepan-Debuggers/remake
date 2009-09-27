@@ -80,7 +80,8 @@ struct nameseq *ar_glob (const char *arname, const char *member_pattern, unsigne
 #define dep_name(d)     ((d)->name == 0 ? (d)->file->name : (d)->name)
 
 #define alloc_dep()     (xcalloc (sizeof (struct dep)))
-#define free_dep(_d)    free (_d)
+#define free_ns(_n)     free (_n)
+#define free_dep(_d)    free_ns (_d)
 
 struct dep *copy_dep_chain (const struct dep *d);
 void free_dep_chain (struct dep *d);
