@@ -1,3 +1,35 @@
+2009-09-27  Juan Manuel Guerrero  <juan.guerrero@gmx.de>
+
+	* configh.dos.template: Remove unconditional definition of
+	SYS_SIGLIST_DECLARED.
+	Include <sys/version.h> because ports of GCC 4.3.0 and later no
+	longer include it, so macros like __DJGPP_MINOR__ are no longer
+	defined automatically.
+
+	* Makefile.DOS.template (INCLUDES): Use $(prefix) and the
+	corresponding variables to define LIBDIR, INCLUDEDIR and LOCALEDIR
+	instead of using the hardcoded ones.
+	(SUBDIRS): doc subdir added.
+	(INFO_DEPS, DVIS): Values changed to 'make.info' and 'make.dvi'.
+	(TEXI2HTML, TEXI2HTML_FLAGS): Removed.  Use makeinfo --html to
+	create html formated docs.  texi2html may not be ported to DOS.
+	(make.info, make.dvi, make.ps, make.html): Make targets depend on
+	'make.texi'.
+	(.texi.info, .texi, .texi.dvi): Now recursively invocate.  Change
+	-I switch to look in ./ instead of ./doc.
+	(html): Target depend on html-recursive instead of make_1.html.
+	(make_1.html): Removed.
+	(mostlyclean-aminfo): Use $(srcdir)/doc instead of ./ as prefix.
+	(all-recursive): Allow for more than one subdir in the build
+	process.
+	(mostlyclean-recursive, clean-recursive, distclean-recursive)
+	(maintainer-clean-recursive, check-recursive): Enter in doc/ too.
+	(tags-recursive): Allow for more than one subdir in the build
+	process.
+	(info-recursive, dvi-recursive, ps-recursive, html-recursive): New
+	targets.  Enter into doc/ to produce the targets.
+	(all-am): $(INFO_DEPS) replaced by info.
+
 2009-09-26  Paul Smith  <psmith@gnu.org>
 
 	* read.c (record_files): Use free_ns() to free struct nameseq.

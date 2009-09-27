@@ -16,12 +16,16 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* Include this header to make __DJGPP_MINOR__ available because DJGPP ports
+   of GCC 4.3.0 and later no longer do it automatically.  */
+#include <sys/version.h>
+
 /* Many things are defined already by a system header.  */
 #include <sys/config.h>
 
 #if __DJGPP__ > 2 || __DJGPP_MINOR__ > 1
 
-/* Define to 1 if `sys_siglist' is declared by <signal.h>.  */
+/* Define to 1 if `sys_siglist' is declared by <signal.h> or <unistd.h>. */
 # define SYS_SIGLIST_DECLARED 1
 
 /* Define to 1 if the C library defines the variable `_sys_siglist'.  */
@@ -106,9 +110,6 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* Define to 1 if the C compiler supports function prototypes. */
 #define PROTOTYPES 1
-
-/* Define to 1 if `sys_siglist' is declared by <signal.h> or <unistd.h>. */
-#define SYS_SIGLIST_DECLARED 1
 
 /* Version number of package */
 #define VERSION "%VERSION%"
