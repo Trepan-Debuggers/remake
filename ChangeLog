@@ -15,7 +15,7 @@
 	create html formated docs.  texi2html may not be ported to DOS.
 	(make.info, make.dvi, make.ps, make.html): Make targets depend on
 	'make.texi'.
-	(.texi.info, .texi, .texi.dvi): Now recursively invocate.  Change
+	(.texi.info, .texi, .texi.dvi): Now invoked recursively.  Change
 	-I switch to look in ./ instead of ./doc.
 	(html): Target depend on html-recursive instead of make_1.html.
 	(make_1.html): Removed.
