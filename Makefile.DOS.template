@@ -2,7 +2,7 @@
 # Makefile.in generated automatically by automake 1.2 from Makefile.am
 #
 # Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-# 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+# 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
@@ -85,13 +85,13 @@ make_LDADD =	  glob/libglob.a
 
 man_MANS =	make.1
 
-INCLUDES =	-I$(srcdir)/glob -DLIBDIR=\"c:/djgpp/lib\" -DINCLUDEDIR=\"c:/djgpp/include\" -DLOCALEDIR=\"$(localedir)\"
+INCLUDES =	-I$(srcdir)/glob -DLIBDIR=\"$(prefix)$(libdir)\" -DINCLUDEDIR=\"$(prefix)$(includedir)\" -DLOCALEDIR=\"$(prefix)$(localedir)\"
 
 BUILT_SOURCES =	README build.sh-in
 
 EXTRA_DIST = 	$(BUILT_SOURCES) $(man_MANS) README.customs remote-cstms.c  make-stds.texi texinfo.tex SCOPTIONS SMakefile  Makefile.ami README.Amiga config.ami amiga.c amiga.h  NMakefile README.DOS configh.dos configure.bat makefile.com  README.W32 build_w32.bat config.h-W32 subproc.bat make.lnk  config.h-vms makefile.vms readme.vms vmsdir.h vmsfunctions.c  vmsify.c
 
-SUBDIRS =	glob
+SUBDIRS =	glob doc
 mkinstalldirs = ${exec_prefix}/bin/gmkdir -p
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES =  build.sh
@@ -115,15 +115,12 @@ COMPILE = $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
 LINK = $(CC) $(CFLAGS) $(LDFLAGS) -o $@
 TEXI2DVI = texi2dvi
 TEXINFO_TEX = $(srcdir)/config/texinfo.tex
-INFO_DEPS = make.info
-DVIS = make.dvi
+INFO_DEPS = doc/make.info
+DVIS = doc/make.dvi
 TEXINFOS = doc/make.texi
 noinst_TEXINFOS = doc/fdl.texi doc/make-stds.texi
 man1dir = $(mandir)/man1
 MANS = $(man_MANS)
-
-TEXI2HTML = texi2html
-TEXI2HTML_FLAGS = -split_chapter
 
 NROFF = nroff
 DIST_COMMON =  README ABOUT-NLS AUTHORS COPYING ChangeLog INSTALL Makefile.am  Makefile.in NEWS acconfig.h aclocal.m4 alloca.c build.sh-in config.h-in  configure configure.in getloadavg.c
@@ -191,8 +188,10 @@ make$(EXEEXT): $(make_OBJECTS) $(make_DEPENDENCIES)
 
 # Documentation
 
-make.info: doc/make.texi
-make.dvi: doc/make.texi
+make.info: make.texi
+make.dvi: make.texi
+make.ps: make.dvi make.texi
+make.html: make.texi
 
 
 DVIPS = dvips
@@ -200,32 +199,33 @@ DVIPS = dvips
 .texi.info:
 	@command.com /c if exist make.info* del make.info*
 	@command.com /c if exist make.i* del make.i*
-	$(MAKEINFO) -I$(srcdir)/doc --no-split $< -o ./$@
+	$(MAKEINFO) -I$(srcdir) --no-split $< -o ./$@
 
 .texi:
 	@command.com /c if exist make.info* del make.info*
 	@command.com /c if exist make.i* del make.i*
-	$(MAKEINFO) -I$(srcdir)/doc --no-split $< -o ./$@
+	$(MAKEINFO) -I$(srcdir) --no-split $< -o ./$@
 
 .texi.dvi:
-	TEXINPUTS="$(srcdir)/doc;$$TEXINPUTS"    MAKEINFO='$(MAKEINFO) -I $(srcdir)/doc' $(TEXI2DVI) $<
+	TEXINPUTS="$(srcdir);$$TEXINPUTS"    MAKEINFO='$(MAKEINFO) -I $(srcdir)' $(TEXI2DVI) $<
 
 .dvi.ps:
 	$(DVIPS) $< -o $@
 
 # Other documentation formats
 
-html: make_1.html
+html: html-recursive
 
-make_1.html: $(TEXINFOS) $(noinst_TEXINFOS)
-	$(TEXI2HTML) $(TEXI2HTML_FLAGS) $(srcdir)/doc/make.texi
+.texi.html:
+	@command.com /c if exist make.html* del make.html*
+	$(MAKEINFO) --html -I$(srcdir) --no-split $< -o ./$@
 
 install-info-am: $(INFO_DEPS)
 	@$(NORMAL_INSTALL)
 	$(mkinstalldirs) $(DESTDIR)$(infodir)
-	@for file in $(INFO_DEPS); do    d=$(srcdir);    for ifile in `cd $$d && echo $$file`; do      if test -f $$d/$$ifile; then        echo " $(INSTALL_DATA) $$d/$$ifile $(DESTDIR)$(infodir)/$$ifile"; $(INSTALL_DATA) $$d/$$ifile $(DESTDIR)$(infodir)/$$ifile; else : ; fi;    done;  done
+	@for file in $(INFO_DEPS); do    iifile=`echo $$file | sed "s|doc/||"`;    d=$(srcdir);    for ifile in `cd $$d && echo $$file`; do      if test -f $$d/$$ifile; then        echo " $(INSTALL_DATA) $$d/$$ifile $(DESTDIR)$(infodir)/$$iifile"; $(INSTALL_DATA) $$d/$$ifile $(DESTDIR)$(infodir)/$$iifile; else : ; fi;    done;  done
 	@$(POST_INSTALL)
-	@if $(SHELL) -c 'install-info --version | sed 1q | fgrep -s -v -i debian' >/dev/null 2>&1; then    for file in $(INFO_DEPS); do      echo " install-info --info-dir=$(DESTDIR)$(infodir) $(DESTDIR)$(infodir)/$$file";     install-info --info-dir=$(DESTDIR)$(infodir) $(DESTDIR)$(infodir)/$$file || :;   done;  else : ; fi
+	@if $(SHELL) -c 'install-info --version | sed 1q | fgrep -s -v -i debian' >/dev/null 2>&1; then    for file in $(INFO_DEPS); do    iifile=`echo $$file | sed "s|doc/||"`;      echo " install-info --info-dir=$(DESTDIR)$(infodir) $(DESTDIR)$(infodir)/$$iifile";     install-info --info-dir=$(DESTDIR)$(infodir) $(DESTDIR)$(infodir)/$$iifile || :;   done;  else : ; fi
 
 uninstall-info:
 	$(PRE_UNINSTALL)
@@ -237,9 +237,12 @@ dist-info: $(INFO_DEPS)
 	for base in $(INFO_DEPS); do    d=$(srcdir);    for file in `cd $$d && eval echo $$base*`; do      test -f $(distdir)/$$file      || ln $$d/$$file $(distdir)/$$file 2> /dev/null      || cp -p $$d/$$file $(distdir)/$$file;    done;  done
 
 mostlyclean-aminfo:
-	-rm -f make.aux make.cp make.cps make.dvi make.fn make.fns make.ky \
-	  make.kys make.ps make.log make.pg make.toc make.tp make.tps \
-	  make.vr make.vrs make.op make.tr make.cv make.cn
+	-rm -f $(srcdir)/doc/make.aux $(srcdir)/doc/make.cp $(srcdir)/doc/make.cps $(srcdir)/doc/make.dvi \
+	  $(srcdir)/doc/make.fn $(srcdir)/doc/make.fns $(srcdir)/doc/make.ky $(srcdir)/doc/make.kys \
+	  $(srcdir)/doc/make.ps $(srcdir)/doc/make.log $(srcdir)/doc/make.pg $(srcdir)/doc/make.toc \
+	  $(srcdir)/doc/make.tp $(srcdir)/doc/make.tps $(srcdir)/doc/make.vr $(srcdir)/doc/make.vrs \
+	  $(srcdir)/doc/make.op $(srcdir)/doc/make.tr $(srcdir)/doc/make.cv $(srcdir)/doc/make.cn \
+	  $(srcdir)/doc/make.html
 
 clean-aminfo:
 
@@ -291,13 +294,10 @@ uninstall-man:
 # but do a sanity check: if $SUBDIRS will ever have more than
 # a single directory, yell bloody murder.
 all-recursive:
-ifeq ($(words $(SUBDIRS)), 1)
+ifeq ($(findstring glob, $(SUBDIRS)), glob)
 	@command.com /c if not exist glob\\nul md glob
-	@echo Making all in $(SUBDIRS)
-	$(MAKE) -C $(SUBDIRS) -f ../Makefile INCLUDES='-I$(srcdir) -I$(srcdir)/glob' DEFS='-I.. -I$(srcdir)' VPATH=$(srcdir)/glob libglob.a
-else
-	@echo FATAL: There is more than one directory in "($(SUBDIRS))"
-	@$(EXIT_FAIL)
+	@echo Making all in glob
+	$(MAKE) -C glob -f ../Makefile INCLUDES='-I$(srcdir) -I$(srcdir)/glob' DEFS='-I.. -I$(srcdir)' VPATH=$(srcdir)/glob libglob.a
 endif
 
 $(SUBDIRS):
@@ -310,11 +310,13 @@ libglob.a: $(libglob_a_OBJECTS)
 
 mostlyclean-recursive clean-recursive distclean-recursive \
 maintainer-clean-recursive check-recursive:
-ifeq ($(words $(SUBDIRS)), 1)
-	@echo Making $(shell echo $@ | sed s/-recursive//) in $(SUBDIRS)
-	$(MAKE) -C $(SUBDIRS) -f ../Makefile $(shell echo $@ | sed s/-recursive//)-am
+ifeq ($(words $(SUBDIRS)), 2)
+	@echo Making $(shell echo $@ | sed s/-recursive//) in glob
+	$(MAKE) -C glob -f ../Makefile $(shell echo $@ | sed s/-recursive//)-am
+	@echo Making $(shell echo $@ | sed s/-recursive//) in doc
+	$(MAKE) -C doc -f ../Makefile $(shell echo $@ | sed s/-recursive//)-am
 else
-	@echo FATAL: There is more than one directory in "($(SUBDIRS))"
+	@echo FATAL: There is more than two directory in "($(SUBDIRS))"
 	@$(EXIT_FAIL)
 endif
 
@@ -322,10 +324,10 @@ tags-in-glob: $(libglob_a_SOURCES)
 	etags $(addprefix $(srcdir)/,$^) -o ./glob/TAGS
 
 tags-recursive:
-ifeq ($(words $(SUBDIRS)), 1)
+ifeq ($(words $(SUBDIRS)), 2)
 	$(MAKE) tags-in-glob
 else
-	@echo FATAL: There is more than one directory in "($(SUBDIRS))"
+	@echo FATAL: There is more than two directory in "($(SUBDIRS))"
 	@$(EXIT_FAIL)
 endif
 
@@ -376,15 +378,44 @@ distdir: $(DISTFILES)
 	$(MAKE) top_distdir="$(top_distdir)" distdir="$(distdir)" dist-info
 	$(MAKE) top_distdir="$(top_distdir)" distdir="$(distdir)" dist-hook
 
-info: $(INFO_DEPS) info-recursive
-dvi: $(DVIS) dvi-recursive
+info: info-recursive
+info-recursive:
+ifeq ($(findstring doc, $(SUBDIRS)), doc)
+	@command.com /c if not exist doc\\nul md doc
+	@echo Making all in doc
+	$(MAKE) -C doc -f ../Makefile VPATH=$(srcdir)/doc make.info
+endif
+
+dvi: dvi-recursive
+dvi-recursive:
+ifeq ($(findstring doc, $(SUBDIRS)), doc)
+	@command.com /c if not exist doc\\nul md doc
+	@echo Making all in doc
+	$(MAKE) -C doc -f ../Makefile VPATH=$(srcdir)/doc make.dvi
+endif
+
+ps: ps-recursive
+ps-recursive:
+ifeq ($(findstring doc, $(SUBDIRS)), doc)
+	@command.com /c if not exist doc\\nul md doc
+	@echo Making all in doc
+	$(MAKE) -C doc -f ../Makefile VPATH=$(srcdir)/doc make.ps
+endif
+
+html-recursive:
+ifeq ($(findstring doc, $(SUBDIRS)), doc)
+	@command.com /c if not exist doc\\nul md doc
+	@echo Making all in doc
+	$(MAKE) -C doc -f ../Makefile VPATH=$(srcdir)/doc make.html
+endif
+
 check: all-am check-recursive check-local
 	@:
 installcheck: installcheck-recursive
 all-recursive-am: config.h
 	$(MAKE) all-recursive
 
-all-am: Makefile $(INFO_DEPS) $(PROGRAMS) config.h
+all-am: Makefile $(PROGRAMS) config.h info
 
 install-exec-am: install-binPROGRAMS
 
