@@ -1,3 +1,23 @@
+2009-09-28  Boris Kolpackov  <boris@codesynthesis.com>
+
+	* varible.c (create_pattern_var): Insert variables into the
+	PATTERN_VARS list in the shortest patterns first order.
+
+	* implicit.c (tryrule): Add STEMLEN and ORDER members. These are
+	used to sort the rules.
+	(stemlen_compare): Compare two tryrule elements.
+	(pattern_search): Sort the rules so that they are in the shortest
+	stem first order.
+
+	* main.c (.FEATURES): Add a keyword to indicate the new behavior.
+
+	* doc/make.texi (Pattern-specific Variable Values): Describe the
+	new pattern-specific variables application order.
+	(Introduction to Pattern Rules): Describe the new pattern rules
+	search order.
+
+	* NEWS: Add a note about the new behavior.
+
 2009-09-27  Juan Manuel Guerrero  <juan.guerrero@gmx.de>
 
 	* configh.dos.template: Remove unconditional definition of
@@ -42,12 +62,12 @@
 
 	* function.c (string_glob): Free NAME in the nameseq chain.
 
-2009-09-25 Boris Kolpackov  <boris@codesynthesis.com>
+2009-09-25  Boris Kolpackov  <boris@codesynthesis.com>
 
 	* implicit.c (pattern_search): Terminate early if we haven't
 	found any rules to try (performance improvement).
 
-2009-09-25 Boris Kolpackov  <boris@codesynthesis.com>
+2009-09-25  Boris Kolpackov  <boris@codesynthesis.com>
 
 	* implicit.c (pattern_search): Merge three parallel arrays,
 	TRYRULES, MATCHES, and CHECKED_LASTSLASH, into one array

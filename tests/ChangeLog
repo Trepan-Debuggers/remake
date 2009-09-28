@@ -1,3 +1,11 @@
+2009-09-28  Boris Kolpackov  <boris@codesynthesis.com>
+
+	* scripts/features/patspecific_vars: Add a test for the shortest
+	stem first order.
+
+	* scripts/features/patternrules: Add a test for the shortest stem
+	first order.
+
 2009-09-24  Paul Smith  <psmith@gnu.org>
 
 	* scripts/features/se_implicit: Add a test for order-only

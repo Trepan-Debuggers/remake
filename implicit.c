@@ -167,9 +167,24 @@ struct tryrule
     /* Index of the target in this rule that matched the file. */
     unsigned int matches;
 
+    /* Stem length for this match. */
+    unsigned int stemlen;
+
+    /* Definition order of this rule. Used to implement stable sort.*/
+    unsigned int order;
+
     /* Nonzero if the LASTSLASH logic was used in matching this rule. */
     char checked_lastslash;
   };
+
+int
+stemlen_compare (const void *v1, const void *v2)
+{
+  const struct tryrule *r1 = (const struct tryrule *)v1;
+  const struct tryrule *r2 = (const struct tryrule *)v2;
+  int r = r1->stemlen - r2->stemlen;
+  return r != 0 ? r : (int)(r1->order - r1->order);
+}
 
 /* Search the pattern rules for a rule with an existing dependency to make
    FILE.  If a rule is found, the appropriate commands and deps are put in FILE
@@ -385,6 +400,8 @@ pattern_search (struct file *file, int archive,
              that rule will be in TRYRULES more than once.  */
           tryrules[nrules].rule = rule;
 	  tryrules[nrules].matches = ti;
+          tryrules[nrules].stemlen = stemlen + (check_lastslash ? pathlen : 0);
+          tryrules[nrules].order = nrules;
 	  tryrules[nrules].checked_lastslash = check_lastslash;
           ++nrules;
         }
@@ -393,6 +410,11 @@ pattern_search (struct file *file, int archive,
   /* Bail out early if we haven't found any rules. */
   if (nrules == 0)
     goto done;
+
+  /* Sort the rules to place matches with the shortest stem first. This
+     way the most specific rules will be tried first. */
+  if (nrules > 1)
+    qsort (tryrules, nrules, sizeof (struct tryrule), stemlen_compare);
 
   /* If we have found a matching rule that won't match all filenames,
      retroactively reject any non-"terminal" rules that do always match.  */
