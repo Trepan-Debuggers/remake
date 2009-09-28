@@ -35,27 +35,61 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 static struct pattern_var *pattern_vars;
 
-/* Pointer to last struct in the chain, so we can add onto the end.  */
+/* Pointer to the last struct in the pack of a specific size, from 1 to 255.*/
 
-static struct pattern_var *last_pattern_var;
+static struct pattern_var *last_pattern_vars[256];
 
-/* Create a new pattern-specific variable struct.  */
+/* Create a new pattern-specific variable struct. The new variable is
+   inserted into the PATTERN_VARS list in the shortest patterns first
+   order to support the shortest stem matching (the variables are
+   matched in the reverse order so the ones with the longest pattern
+   will be considered first). Variables with the same pattern length
+   are inserted in the definition order. */
 
 struct pattern_var *
 create_pattern_var (const char *target, const char *suffix)
 {
+  register unsigned int len = strlen (target);
   register struct pattern_var *p = xmalloc (sizeof (struct pattern_var));
 
-  if (last_pattern_var != 0)
-    last_pattern_var->next = p;
+  if (pattern_vars != 0)
+    {
+      if (len < 256 && last_pattern_vars[len] != 0)
+        {
+          p->next = last_pattern_vars[len]->next;
+          last_pattern_vars[len]->next = p;
+        }
+      else
+        {
+          /* Find the position where we can insert this variable. */
+          register struct pattern_var **v;
+
+          for (v = &pattern_vars; ; v = &(*v)->next)
+            {
+              /* Insert at the end of the pack so that patterns with the
+                 same length appear in the order they were defined .*/
+
+              if (*v == 0 || (*v)->len > len)
+                {
+                  p->next = *v;
+                  *v = p;
+                  break;
+                }
+            }
+        }
+    }
   else
-    pattern_vars = p;
-  last_pattern_var = p;
-  p->next = 0;
+    {
+      pattern_vars = p;
+      p->next = 0;
+    }
 
   p->target = target;
-  p->len = strlen (target);
+  p->len = len;
   p->suffix = suffix + 1;
+
+  if (len < 256)
+    last_pattern_vars[len] = p;
 
   return p;
 }

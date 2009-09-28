@@ -1120,7 +1120,8 @@ main (int argc, char **argv, char **envp)
 
   /* Set up .FEATURES */
   define_variable (".FEATURES", 9,
-                   "target-specific order-only second-expansion else-if",
+                   "target-specific order-only second-expansion else-if"
+                   "shortest-stem",
                    o_default, 0);
 #ifndef NO_ARCHIVES
   do_variable_definition (NILF, ".FEATURES", "archives",

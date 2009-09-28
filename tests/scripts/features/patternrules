@@ -207,6 +207,18 @@ CWEAVE := :
 
 unlink(@f);
 
+# TEST #9: Test shortest stem selection in pattern rules.
+
+run_make_test('
+%.x: ;@echo one
+%-mt.x: ;@echo two
+
+all: foo.x foo-mt.x
+',
+'',
+"one\ntwo");
+
+1;
 
 # This tells the test driver that the perl test script executed properly.
 1;

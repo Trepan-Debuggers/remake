@@ -39,6 +39,14 @@ Version 3.81.90
   prerequisites.  This is most useful for target- and pattern-specific
   variables.
 
+* WARNING: Backward-incompatibility!
+  The pattern-specific variables and pattern rules are now applied in the 
+  shortest stem first order instead of the definition order (variables
+  and rules with the same stem length are still applied in the definition
+  order). This produces the usually-desired behavior where more specific
+  patterns are preferred. To detect this feature search for 'shortest-stem'
+  in the .FEATURES special variable.  
+
 
 Version 3.81
 

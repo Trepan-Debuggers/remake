@@ -131,4 +131,18 @@ ab: ; @echo "$(FOO)"
 
 run_make_test(undef, 'FOO=C', "C f1\n");
 
+# TEST #9: Test shortest stem selection in pattern-specific variables.
+
+run_make_test('
+%-mt.x: x := two
+%.x: x := one
+
+all: foo.x foo-mt.x
+
+foo.x: ;@echo $x
+foo-mt.x: ;@echo $x
+',
+'',
+"one\ntwo");
+
 1;

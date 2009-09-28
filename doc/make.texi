@@ -4,7 +4,7 @@
 
 @include version.texi
 @set EDITION 0.70
-@set RCSID $Id: make.texi,v 1.59 2009/09/12 21:28:34 psmith Exp $
+@set RCSID $Id: make.texi,v 1.60 2009/09/28 12:31:56 bosk Exp $
 
 @settitle GNU @code{make}
 @setchapternewpage odd
@@ -5720,12 +5720,7 @@ In addition to target-specific variable values
 (@pxref{Target-specific, ,Target-specific Variable Values}), GNU
 @code{make} supports pattern-specific variable values.  In this form,
 the variable is defined for any target that matches the pattern
-specified.  If a target matches more than one pattern, all the
-matching pattern-specific variables are interpreted in the order in
-which they were defined in the makefile, and collected together into
-one set.  Variables defined in this way are searched after any
-target-specific variables defined explicitly for that target, and
-before target-specific variables defined for the parent target.
+specified.
 
 Set a pattern-specific variable value like this:
 
@@ -5747,6 +5742,31 @@ For example:
 @noindent
 will assign @code{CFLAGS} the value of @samp{-O} for all targets
 matching the pattern @code{%.o}.
+
+If a target matches more than one pattern, the matching pattern-specific
+variables with longer stems are interpreted first. This results in more
+specific variables taking precedence over the more generic ones, for
+example:
+
+@example
+%.o: %.c
+        $(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@@
+
+lib/%.o: CFLAGS := -fPIC -g
+%.o: CFLAGS := -g
+
+all: foo.o lib/bar.o
+@end example
+
+In this example the first definition of the @code{CFLAGS} variable
+will be used to update @file{lib/bar.o} even though the second one
+also applies to this target. Pattern-specific variables which result
+in the same stem length are considered in the order in which they
+were defined in the makefile.
+
+Pattern-specific variables are searched after any target-specific
+variables defined explicitly for that target, and before target-specific
+variables defined for the parent target.
 
 @node Suppressing Inheritance, Special Variables, Pattern-specific, Using Variables
 @section Suppressing Inheritance
@@ -9143,11 +9163,28 @@ updated themselves.
 @cindex multiple targets, in pattern rule
 @cindex target, multiple in pattern rule
 
-The order in which pattern rules appear in the makefile is important
-since this is the order in which they are considered.
-Of equally applicable
-rules, only the first one found is used.  The rules you write take precedence
-over those that are built in.  Note however, that a rule whose
+It is possible that several pattern rules can be used to update a
+target. In this case @code{make} considers rules which produce
+shorter stems first. This results in more specific rules being
+preferred to the more generic ones, for example:
+
+@example
+%.o: %.c
+        $(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@@
+
+lib/%.o: lib/%.c
+        $(CC) -fPIC -c $(CFLAGS) $(CPPFLAGS) $< -o $@@
+
+all: foo.o lib/bar.o
+@end example
+
+In this example the second rule will be used to update @file{lib/bar.o}
+even though the first rule can also be used.
+
+Pattern rules which result in the same stem length are considered in
+the order in which they appear in the makefile. Of equally applicable
+rules, only the first one found is used.  The rules you write take
+precedence over those that are built in. Note however, that a rule whose
 prerequisites actually exist or are mentioned always takes priority over a
 rule with prerequisites that must be made by chaining other implicit rules.
 @cindex pattern rules, order of
