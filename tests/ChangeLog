@@ -1,3 +1,16 @@
+2009-09-28  Paul Smith  <psmith@gnu.org>
+
+	* scripts/functions/shell: Add regression test for Savannah bug
+	#20513 (still open).
+
+	* scripts/features/se_explicit: Add regression tests for Savannah
+	bug #25780 (still open).
+
+	* run_make_tests.pl (valid_option): Add a new flag, -all([-_]?tests)?
+	that runs tests we know will fail.  This allows us to add
+	regression tests to the test suite for bugs that haven't been
+	fixed yet.
+
 2009-09-28  Boris Kolpackov  <boris@codesynthesis.com>
 
 	* scripts/features/patspecific_vars: Add a test for the shortest

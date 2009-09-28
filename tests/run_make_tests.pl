@@ -37,6 +37,8 @@ $pure_log = undef;
 
 $command_string = '';
 
+$all_tests = 0;
+
 require "test_driver.pl";
 
 # Some target systems might not have the POSIX module...
@@ -48,15 +50,18 @@ sub valid_option
 {
    local($option) = @_;
 
-   if ($option =~ /^-make([-_]?path)?$/)
-   {
-      $make_path = shift @argv;
-      if (!-f $make_path)
-      {
-	 print "$option $make_path: Not found.\n";
-	 exit 0;
-      }
-      return 1;
+   if ($option =~ /^-make([-_]?path)?$/i) {
+       $make_path = shift @argv;
+       if (!-f $make_path) {
+           print "$option $make_path: Not found.\n";
+           exit 0;
+       }
+       return 1;
+   }
+
+   if ($option =~ /^-all([-_]?tests)?$/i) {
+       $all_tests = 1;
+       return 1;
    }
 
    if ($option =~ /^-(valgrind|memcheck)$/i) {
