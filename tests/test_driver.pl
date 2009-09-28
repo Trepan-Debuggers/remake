@@ -29,7 +29,7 @@
 # this routine controls the whole mess; each test suite sets up a few
 # variables and then calls &toplevel, which does all the real work.
 
-# $Id: test_driver.pl,v 1.25 2009/06/10 02:21:13 psmith Exp $
+# $Id: test_driver.pl,v 1.26 2009/09/28 23:08:50 psmith Exp $
 
 
 # The number of test categories we've run
@@ -461,6 +461,7 @@ sub run_each_test
     # Run the actual test!
     $tests_run = 0;
     $tests_passed = 0;
+
     $code = do $perl_testname;
 
     $total_tests_run += $tests_run;

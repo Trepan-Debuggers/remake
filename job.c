@@ -2845,8 +2845,11 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
         char *p = new_line;
         char *q = new_line;
         memcpy (new_line, line, line_len + 1);
-        /* replace all backslash-newline combination and also following tabs */
-        while (*q != '\0')
+        /* Replace all backslash-newline combination and also following tabs.
+           Important: stop at the first '\n' because that's what the loop above
+           did. The next line starting at restp[0] will be executed during the
+           next call of this function. */
+        while (*q != '\0' && *q != '\n')
           {
             if (q[0] == '\\' && q[1] == '\n')
               q += 2; /* remove '\\' and '\n' */

@@ -4,7 +4,7 @@
 
 @include version.texi
 @set EDITION 0.70
-@set RCSID $Id: make.texi,v 1.60 2009/09/28 12:31:56 bosk Exp $
+@set RCSID $Id: make.texi,v 1.61 2009/09/28 23:08:49 psmith Exp $
 
 @settitle GNU @code{make}
 @setchapternewpage odd
@@ -3190,9 +3190,11 @@ to precisely the targets specified.
 @cindex multiple rules for one target (@code{::})
 @cindex @code{::} rules (double-colon)
 
-@dfn{Double-colon} rules are rules written with @samp{::} instead of
-@samp{:} after the target names.  They are handled differently from
-ordinary rules when the same target appears in more than one rule.
+@dfn{Double-colon} rules are explicit rules written with @samp{::}
+instead of @samp{:} after the target names.  They are handled
+differently from ordinary rules when the same target appears in more
+than one rule.  Pattern rules with double-colons have an entirely
+different meaning (@pxref{Match-Anything Rules}).
 
 When a target appears in multiple rules, all the rules must be the same
 type: all ordinary, or all double-colon.  If they are double-colon, each
@@ -9148,6 +9150,10 @@ in fact any prerequisites at all.  Such a rule is effectively a general
 wildcard.  It provides a way to make any file that matches the target
 pattern.  @xref{Last Resort}.
 
+More than one pattern rule may match a target.  In this case
+@code{make} will choose the ``best fit'' rule.  @xref{Pattern Match,
+,How Patterns Match}.
+
 @c !!! The end of of this paragraph should be rewritten.  --bob
 Pattern rules may have more than one target.  Unlike normal rules,
 this does not act as many different rules with the same prerequisites
@@ -9162,33 +9168,6 @@ file's recipe is run, the other targets are marked as having been
 updated themselves.
 @cindex multiple targets, in pattern rule
 @cindex target, multiple in pattern rule
-
-It is possible that several pattern rules can be used to update a
-target. In this case @code{make} considers rules which produce
-shorter stems first. This results in more specific rules being
-preferred to the more generic ones, for example:
-
-@example
-%.o: %.c
-        $(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@@
-
-lib/%.o: lib/%.c
-        $(CC) -fPIC -c $(CFLAGS) $(CPPFLAGS) $< -o $@@
-
-all: foo.o lib/bar.o
-@end example
-
-In this example the second rule will be used to update @file{lib/bar.o}
-even though the first rule can also be used.
-
-Pattern rules which result in the same stem length are considered in
-the order in which they appear in the makefile. Of equally applicable
-rules, only the first one found is used.  The rules you write take
-precedence over those that are built in. Note however, that a rule whose
-prerequisites actually exist or are mentioned always takes priority over a
-rule with prerequisites that must be made by chaining other implicit rules.
-@cindex pattern rules, order of
-@cindex order of pattern rules
 
 @node Pattern Examples, Automatic Variables, Pattern Intro, Pattern Rules
 @subsection Pattern Rule Examples
@@ -9501,6 +9480,50 @@ names, the directories from the stem are added at the front, while the
 rest of the stem is substituted for the @samp{%}.  The stem
 @samp{src/a} with a prerequisite pattern @samp{c%r} gives the file name
 @file{src/car}.@refill
+
+@cindex pattern rules, order of
+@cindex order of pattern rules
+A pattern rule can be used to build a given file only if there is a
+target pattern that matches the file name, @emph{and} all
+prerequisites in that rule either exist or can be built.  The rules
+you write take precedence over those that are built in. Note however,
+that a rule whose prerequisites actually exist or are mentioned always
+takes priority over a rule with prerequisites that must be made by
+chaining other implicit rules.
+
+@cindex stem, shortest
+It is possible that more than one pattern rule will meet these
+criteria.  In that case, @code{make} will choose the rule with the
+shortest stem (that is, the pattern that matches most specifically).
+If more than one pattern rule has the shortest stem, @code{make} will
+choose the first one found in the makefile.
+
+This algorithm results in more specific rules being preferred over
+more generic ones; for example:
+
+@example
+%.o: %.c
+        $(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@@
+
+%.o : %.f
+        $(COMPILE.F) $(OUTPUT_OPTION) $<
+
+lib/%.o: lib/%.c
+        $(CC) -fPIC -c $(CFLAGS) $(CPPFLAGS) $< -o $@@
+@end example
+
+Given these rules and asked to build @file{bar.o} where both
+@file{bar.c} and @file{bar.f} exist, @code{make} will choose the first
+rule and compile @file{bar.c} into @file{bar.o}.  In the same
+situation where @file{bar.c} does not exist, then @code{make} will
+choose the second rule and compile @file{bar.f} into @file{bar.o}.
+
+If @code{make} is asked to build @file{lib/bar.o} and both
+@file{lib/bar.c} and @file{lib/bar.f} exist, then the third rule will
+be chosen since the stem for this rule (@samp{bar}) is shorter than
+the stem for the first rule (@samp{lib/bar}).  If @file{lib/bar.c}
+does not exist then the third rule is not eligible and the second rule
+will be used, even though the stem is longer.
 
 @node Match-Anything Rules, Canceling Rules, Pattern Match, Pattern Rules
 @subsection Match-Anything Pattern Rules

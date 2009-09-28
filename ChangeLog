@@ -1,3 +1,14 @@
+2009-09-28  Paul Smith  <psmith@gnu.org>
+
+	* doc/make.texi (Pattern Intro): Move the match algorithm
+	discussion into the "Pattern Match" node.
+	(Pattern Match): Expand on the pattern rule matching algorithm.
+
+2009-09-28  Andreas Buening  <andreas.buening@nexgo.de>
+
+	* job.c (construct_command_argv_internal) [OS2]: Don't eat too
+	much of the command line on a single pass.
+
 2009-09-28  Boris Kolpackov  <boris@codesynthesis.com>
 
 	* varible.c (create_pattern_var): Insert variables into the
@@ -17,6 +28,11 @@
 	search order.
 
 	* NEWS: Add a note about the new behavior.
+
+2009-09-27  Paul Smith  <psmith@gnu.org>
+
+	* doc/make.texi (Double-Colon): Mention that pattern rules with
+	double-colons have a different meaning.  Savannah bug #27497.
 
 2009-09-27  Juan Manuel Guerrero  <juan.guerrero@gmx.de>
 
