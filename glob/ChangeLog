@@ -1,6 +1,12 @@
+2008-09-28  Juan Manuel Guerrero  <juan.guerrero@gmx.de>
+
+	* glob.c (my_realloc) [__DJGPP__]: Don't define, and don't
+	redefine realloc to call it, since the DJGPP's realloc handles
+	NULL pointers correctly.
+
 2007-12-22  Juan Manuel Guerrero  <juan.guerrero@gmx.de>  (tiny change)
 
-	* glob/glob.c [__GNU_LIBRARY__ && __DJGPP__]: Add a realloc
+	* glob.c [__GNU_LIBRARY__ && __DJGPP__]: Add a realloc
 	declaration that matches the one in the DJGPP libc.
 
 2006-02-24  Eli Zaretskii  <eliz@gnu.org>

@@ -182,7 +182,7 @@ extern void bcopy ();
 # define mempcpy(Dest, Src, Len) __mempcpy (Dest, Src, Len)
 #endif
 
-#ifndef	__GNU_LIBRARY__
+#if !defined __GNU_LIBRARY__ && !defined __DJGPP__
 # ifdef	__GNUC__
 __inline
 # endif
@@ -190,9 +190,6 @@ __inline
 #  ifdef WINDOWS32
 static void *
 my_realloc (void *p, unsigned int n)
-#  elif defined(__DJGPP__)
-static void *
-my_realloc (void *p, size_t n)
 #  else
 static char *
 my_realloc (p, n)
@@ -208,7 +205,7 @@ my_realloc (p, n)
 }
 # define	realloc	my_realloc
 # endif /* __SASC */
-#endif /* __GNU_LIBRARY__ */
+#endif /* __GNU_LIBRARY__ || __DJGPP__ */
 
 
 #if !defined __alloca && !defined __GNU_LIBRARY__
