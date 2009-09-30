@@ -1,3 +1,9 @@
+2009-09-30  Boris Kolpackov  <boris@codesynthesis.com>
+
+	* scripts/features/include: Add diagnostics issuing tests for
+	cases where targets have been updated and failed with the
+	dontcare flag. Savannah bugs #15110, #25493, #12686, #17740.
+
 2009-09-28  Paul Smith  <psmith@gnu.org>
 
 	* scripts/functions/shell: Add regression test for Savannah bug

@@ -94,6 +94,8 @@ struct file
                                    pattern-specific variables.  */
     unsigned int considered:1;  /* equal to 'considered' if file has been
                                    considered on current scan of goal chain */
+    unsigned int no_diag:1;     /* True if the file failed to update and no
+                                   diagnostics has been issued (dontcare). */
   };
 
 

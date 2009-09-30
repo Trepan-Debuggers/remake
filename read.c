@@ -384,7 +384,7 @@ eval_makefile (const char *filename, int flags)
   filename = deps->file->name;
   deps->changed = flags;
   if (flags & RM_DONTCARE)
-    deps->file->dontcare = 1;
+    deps->dontcare = 1;
 
   if (expanded)
     free (expanded);
