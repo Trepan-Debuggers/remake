@@ -43,6 +43,7 @@ struct dep
     unsigned int ignore_mtime : 1;
     unsigned int staticpattern : 1;
     unsigned int need_2nd_expansion : 1;
+    unsigned int dontcare : 1;
   };
 
 

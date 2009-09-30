@@ -133,6 +133,9 @@ update_goal_chain (struct dep *goals)
 	    {
 	      unsigned int ocommands_started;
 	      int x;
+
+              file->dontcare = g->dontcare;
+
 	      check_renamed (file);
 	      if (rebuilding_makefiles)
 		{
@@ -205,6 +208,8 @@ update_goal_chain (struct dep *goals)
 	      /* Keep track if any double-colon entry is not finished.
                  When they are all finished, the goal is finished.  */
 	      any_not_updated |= !file->updated;
+
+              file->dontcare = 0;
 
 	      if (stop)
 		break;
@@ -293,8 +298,14 @@ update_file (struct file *file, unsigned int depth)
      change is possible below here until then.  */
   if (f->considered == considered)
     {
-      DBF (DB_VERBOSE, _("Pruning file `%s'.\n"));
-      return f->command_state == cs_finished ? f->update_status : 0;
+      /* Check for the case where a target has been tried and failed but
+         the diagnostics hasn't been issued. If we need the diagnostics
+         then we will have to continue. */
+      if (!(f->updated && f->update_status > 0 && !f->dontcare && f->no_diag))
+        {
+          DBF (DB_VERBOSE, _("Pruning file `%s'.\n"));
+          return f->command_state == cs_finished ? f->update_status : 0;
+        }
     }
 
   /* This loop runs until we start commands for a double colon rule, or until
@@ -311,7 +322,7 @@ update_file (struct file *file, unsigned int depth)
 
       /* If we got an error, don't bother with double_colon etc.  */
       if (status != 0 && !keep_going_flag)
-	return status;
+        return status;
 
       if (f->command_state == cs_running
           || f->command_state == cs_deps_running)
@@ -342,25 +353,48 @@ update_file (struct file *file, unsigned int depth)
 /* Show a message stating the target failed to build.  */
 
 static void
-complain (const struct file *file)
+complain (struct file *file)
 {
   const char *msg_noparent
     = _("%sNo rule to make target `%s'%s");
   const char *msg_parent
     = _("%sNo rule to make target `%s', needed by `%s'%s");
 
-  if (!keep_going_flag)
-    {
-      if (file->parent == 0)
-        fatal (NILF, msg_noparent, "", file->name, "");
+  /* If this file has no_diag set then it means we tried to update it
+     before in the dontcare mode and failed. The target that actually
+     failed is not necessarily this file but could be one of its direct
+     or indirect dependencies. So traverse this file's dependencies and
+     find the one that actually caused the failure. */
 
-      fatal (NILF, msg_parent, "", file->name, file->parent->name, "");
+  struct dep *d;
+
+  for (d = file->deps; d != 0; d = d->next)
+    {
+      if (d->file->updated && d->file->update_status > 0 && file->no_diag)
+        {
+          complain (d->file);
+          break;
+        }
     }
 
-  if (file->parent == 0)
-    error (NILF, msg_noparent, "*** ", file->name, ".");
-  else
-    error (NILF, msg_parent, "*** ", file->name, file->parent->name, ".");
+  if (d == 0)
+    {
+      /* Didn't find any dependencies to complain about. */
+      if (!keep_going_flag)
+        {
+          if (file->parent == 0)
+            fatal (NILF, msg_noparent, "", file->name, "");
+
+          fatal (NILF, msg_parent, "", file->name, file->parent->name, "");
+        }
+
+      if (file->parent == 0)
+        error (NILF, msg_noparent, "*** ", file->name, ".");
+      else
+        error (NILF, msg_parent, "*** ", file->name, file->parent->name, ".");
+
+      file->no_diag = 0;
+    }
 }
 
 /* Consider a single `struct file' and update it as appropriate.  */
@@ -385,15 +419,12 @@ update_file_1 (struct file *file, unsigned int depth)
 	  DBF (DB_VERBOSE,
                _("Recently tried and failed to update file `%s'.\n"));
 
-          /* If the file we tried to make is marked dontcare then no message
+          /* If the file we tried to make is marked no_diag then no message
              was printed about it when it failed during the makefile rebuild.
              If we're trying to build it again in the normal rebuild, print a
              message now.  */
-          if (file->dontcare && !rebuilding_makefiles)
-            {
-              file->dontcare = 0;
+          if (file->no_diag && !file->dontcare)
               complain (file);
-            }
 
 	  return file->update_status;
 	}
@@ -416,6 +447,10 @@ update_file_1 (struct file *file, unsigned int depth)
     default:
       abort ();
     }
+
+  /* Determine whether the diagnostics will be issued should this update
+     fail. */
+  file->no_diag = file->dontcare;
 
   ++depth;
 

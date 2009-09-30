@@ -1,3 +1,25 @@
+2009-09-30  Boris Kolpackov  <boris@codesynthesis.com>
+
+	* dep.h (dep): Add the DONTCARE bitfield.
+
+	* filedef.h (file):Add the NO_DIAG bitfield.
+
+        * read.c (eval_makefile): Set the DONTCARE flag in struct dep,
+	not struct file (a file can be a dependency of many targets,
+	some don't care, some do).
+
+	* remake.c (update_goal_chain): Propagate DONTCARE from struct
+	dep to struct file before updating the goal and restore it
+	afterwards.
+	(update_file): Don't prune the dependency graph if this target
+	has failed but the diagnostics hasn't been issued.
+	(complain): Scan the file's dependency graph to find the file
+	that caused the failure.
+	(update_file_1): Use NO_DIAG instead of DONTCARE to decide
+	whether to print diagnostics.
+
+	Fixes Savannah bugs #15110, #25493, #12686, and #17740.
+
 2009-09-28  Paul Smith  <psmith@gnu.org>
 
 	* doc/make.texi (Pattern Intro): Move the match algorithm
