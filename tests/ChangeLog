@@ -1,3 +1,12 @@
+2009-10-03  Paul Smith  <psmith@gnu.org>
+
+	* scripts/variables/MAKE: Rewrite for new run_make_test() format.
+
+	* scripts/variables/MAKEFLAGS: Created.
+	Add test for Savannah bug #2216 (still open).
+
+	* scripts/features/include: Test for Savannah bug #102 (still open).
+
 2009-09-30  Boris Kolpackov  <boris@codesynthesis.com>
 
 	* scripts/features/include: Add diagnostics issuing tests for

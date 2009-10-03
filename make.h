@@ -23,26 +23,23 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #undef  HAVE_CONFIG_H
 #define HAVE_CONFIG_H 1
 
-/* AIX requires this to be the first thing in the file.  */
-#ifndef __GNUC__
-# if HAVE_ALLOCA_H
-#  include <alloca.h>
-# else
-#  ifdef _AIX
- #pragma alloca
-#  else
-#   ifndef alloca /* predefined by HP cc +Olibcalls */
-char *alloca ();
-#   endif
-#  endif
-# endif
-#endif
-
-
 /* Specify we want GNU source code.  This must be defined before any
    system headers are included.  */
 
 #define _GNU_SOURCE 1
+
+/* AIX requires this to be the first thing in the file.  */
+#if HAVE_ALLOCA_H
+# include <alloca.h>
+#else
+# ifdef _AIX
+ #pragma alloca
+# else
+#  ifndef alloca /* predefined by HP cc +Olibcalls */
+char *alloca ();
+#  endif
+# endif
+#endif
 
 
 #ifdef  CRAY

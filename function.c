@@ -382,7 +382,8 @@ string_glob (char *line)
       idx += len;
       result[idx++] = ' ';
 
-      free (chain->name);
+      /* Because we used PARSEFS_NOCACHE above, we have to free() NAME.  */
+      free ((char *)chain->name);
       free (chain);
       chain = next;
     }
