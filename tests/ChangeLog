@@ -1,5 +1,7 @@
 2009-10-03  Paul Smith  <psmith@gnu.org>
 
+	* scripts/features/parallelism: Test for open Savannah bug #26846.
+
 	* scripts/variables/MAKE: Rewrite for new run_make_test() format.
 
 	* scripts/variables/MAKEFLAGS: Created.

@@ -43,7 +43,7 @@ all: 1 2; \@echo success
               "-j4",
               "ONE.inc\nTHREE.inc\nTWO.inc\nONE\nTHREE\nTWO\nsuccess\n");
 
-unlink('1.inc', '2.inc');
+rmfiles(qw(1.inc 2.inc));
 
 
 # Test parallelism with included files--this time recurse first and make
@@ -62,7 +62,7 @@ endif
               "-j4",
               "ONE.inc\nTHREE.inc\nTWO.inc\nONE\nTHREE\nTWO\nsuccess\n");
 
-unlink('1.inc', '2.inc');
+rmfiles(qw(1.inc 2.inc));
 
 # Grant Taylor reports a problem where tokens can be lost (not written back
 # to the pipe when they should be): this happened when there is a $(shell ...)
@@ -138,7 +138,7 @@ intermed: | phony ; touch $@
 
 .PHONY: phony
 phony: ; : phony', '-rR -j', ': phony');
-unlink('target');
+rmfiles('target');
 
 # TEST #10: Don't put --jobserver-fds into a re-exec'd MAKEFLAGS.
 # We can't test this directly because there's no way a makefile can
@@ -162,7 +162,37 @@ inc.mk:
 !,
               '--no-print-directory -j2', "#MAKE#[1]: warning: -jN forced in submake: disabling jobserver mode.\nall\n");
 
-unlink('inc.mk');
+rmfiles('inc.mk');
+
+if ($all_tests) {
+    # Implicit files aren't properly recreated during parallel builds
+    # Savannah bug #26864
+
+    # The first run works fine
+    run_make_test(q!
+%.bar: %.x foo.y ; cat $^ > $@
+%.x: ; touch $@
+foo.y: foo.y.in ; cp $< $@
+foo.y.in: ; touch $@
+!,
+                  '-j2 main.bar',
+                  "touch foo.y.in
+touch main.x
+cp foo.y.in foo.y
+cat main.x foo.y > main.bar
+rm main.x");
+
+    # Now we touch the .in file and make sure it still works
+    touch('foo.y.in');
+
+    run_make_test(undef, '-j2 main.bar', "cp foo.y.in foo.y
+touch main.x
+cat main.x foo.y > main.bar
+rm main.x");
+
+    # Clean up
+    rmfiles(qw(foo.y foo.y.in main.bar));
+}
 
 # Make sure that all jobserver FDs are closed if we need to re-exec the
 # master copy.
@@ -191,12 +221,12 @@ unlink('inc.mk');
 #               '-j2 INCL=false fdprint',
 #               'bar');
 
-# unlink('dependfile', 'output');
+# rmfiles(qw(dependfile output));
 
 
 # # Do it again, this time where the include is done by the non-master make.
 # run_make_test(undef, '-j2 recurse INCL=false', 'bar');
 
-# unlink('dependfile', 'output');
+# rmfiles(qw(dependfile output));
 
 1;
