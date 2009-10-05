@@ -1,3 +1,8 @@
+2009-10-05  Boris Kolpackov  <boris@codesynthesis.com>
+
+	* implicit.c (pattern_search): Initialize file variables only
+	if we need to parse a rule that requires the second expansion.
+
 2009-10-03  Paul Smith  <psmith@gnu.org>
 
 	* make.h: Include <alloca.h> even on systems where __GNUC__ is

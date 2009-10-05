@@ -247,6 +247,9 @@ pattern_search (struct file *file, int archive,
   /* Nonzero if should consider intermediate files as dependencies.  */
   int intermed_ok;
 
+  /* Nonzero if we have initialized file variables for this target.  */
+  int file_vars_initialized = 0;
+
   /* Nonzero if we have matched a pattern-rule target
      that is not just `%'.  */
   int specific_rule_matched = 0;
@@ -431,10 +434,6 @@ pattern_search (struct file *file, int archive,
               }
         }
 
-  /* We are going to do second expansion so initialize file variables
-     for the rule. */
-  initialize_file_variables (file, 0);
-
   /* Try each rule once without intermediate files, then once with them.  */
   for (intermed_ok = 0; intermed_ok < 2; ++intermed_ok)
     {
@@ -611,6 +610,14 @@ pattern_search (struct file *file, int archive,
 
                       if (check_lastslash)
                         add_dir = 1;
+                    }
+
+                  /* Initialize file variables if we haven't already
+                     done so. */
+                  if (!file_vars_initialized)
+                    {
+                      initialize_file_variables (file, 0);
+                      file_vars_initialized = 1;
                     }
 
                   /* Set file variables. Note that we cannot do it once at the
