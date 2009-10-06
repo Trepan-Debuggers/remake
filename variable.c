@@ -276,6 +276,51 @@ define_variable_in_set (const char *name, unsigned int length,
   return v;
 }
 
+
+/* Undefine variable named NAME in SET. LENGTH is the length of NAME, which
+   does not need to be null-terminated. ORIGIN specifies the origin of the
+   variable (makefile, command line or environment). */
+
+static void
+free_variable_name_and_value (const void *item);
+
+void
+undefine_variable_in_set (const char *name, unsigned int length,
+                          enum variable_origin origin,
+                          struct variable_set *set)
+{
+  struct variable *v;
+  struct variable **var_slot;
+  struct variable var_key;
+
+  if (set == NULL)
+    set = &global_variable_set;
+
+  var_key.name = (char *) name;
+  var_key.length = length;
+  var_slot = (struct variable **) hash_find_slot (&set->table, &var_key);
+
+  if (env_overrides && origin == o_env)
+    origin = o_env_override;
+
+  v = *var_slot;
+  if (! HASH_VACANT (v))
+    {
+      if (env_overrides && v->origin == o_env)
+	/* V came from in the environment.  Since it was defined
+	   before the switches were parsed, it wasn't affected by -e.  */
+	v->origin = o_env_override;
+
+      /* If the definition is from a stronger source than this one, don't
+         undefine it.  */
+      if ((int) origin >= (int) v->origin)
+	{
+          hash_delete_at (&set->table, var_slot);
+          free_variable_name_and_value (v);
+	}
+    }
+}
+
 /* If the variable passed in is "special", handle its special nature.
    Currently there are two such variables, both used for introspection:
    .VARIABLES expands to a list of all the variables defined in this instance

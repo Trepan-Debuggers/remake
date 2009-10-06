@@ -4,7 +4,7 @@
 
 @include version.texi
 @set EDITION 0.70
-@set RCSID $Id: make.texi,v 1.61 2009/09/28 23:08:49 psmith Exp $
+@set RCSID $Id: make.texi,v 1.62 2009/10/06 06:56:57 bosk Exp $
 
 @settitle GNU @code{make}
 @setchapternewpage odd
@@ -4711,6 +4711,8 @@ they have particular specialized uses.  @xref{Automatic Variables}.
                                   the user has set it with a command argument.
 * Multi-Line::                  An alternate way to set a variable
                                   to a multi-line string.
+* Undefine Directive::          How to undefine a variable so that it appears
+                                  as if it was never set.
 * Environment::                 Variable values can come from the environment.
 * Target-specific::             Variable values can be defined on a per-target
                                   basis.
@@ -5518,7 +5520,7 @@ See the next section for information about @code{define}.
 @xref{Multi-Line, ,Defining Multi-Line Variables}.
 @end ifnottex
 
-@node Multi-Line, Environment, Override Directive, Using Variables
+@node Multi-Line, Undefine Directive, Override Directive, Using Variables
 @section Defining Multi-Line Variables
 @findex define
 @findex endef
@@ -5599,7 +5601,42 @@ endef
 @noindent
 @xref{Override Directive, ,The @code{override} Directive}.
 
-@node Environment, Target-specific, Multi-Line, Using Variables
+@node Undefine Directive, Environment, Multi-Line, Using Variables
+@section Undefining Variables
+@findex undefine
+@cindex undefining variable
+
+If you want to clear a variable, setting its value to empty is usually
+sufficient. Expanding such a variable will yield the same result (empty
+string) regardless of whether it was set or not. However, if you are
+using the @code{flavor} (@pxref{Flavor Function}) and
+@code{origin} (@pxref{Origin Function}) functions, there is a difference
+between a variable that was never set and a variable with an empty value.
+In such situations you may want to use the @code{undefine} directive to
+make a variable appear as if it was never set. For example:
+
+@example
+foo := foo
+bar = bar
+
+undefine foo
+undefine bar
+
+$(info $(origin foo))
+$(info $(flavor bar))
+@end example
+
+This example will print ``undefined'' for both variables.
+
+If you want to undefine a command-line variable definition, you can use
+the @code{override} directive together with @code{undefine}, similar to
+how this is done for variable definitions:
+
+@example
+override undefine CFLAGS
+@end example
+
+@node Environment, Target-specific, Undefine Directive, Using Variables
 @section Variables from the Environment
 
 @cindex variables, environment
@@ -10484,6 +10521,10 @@ Here is a summary of the directives GNU @code{make} recognizes:
 @itemx endef
 Define multi-line variables.@*
 @xref{Multi-Line}.
+
+@item undefine @var{variable}
+Undefining variables.@*
+@xref{Undefine Directive}.
 
 @item ifdef @var{variable}
 @itemx ifndef @var{variable}

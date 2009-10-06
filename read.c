@@ -62,6 +62,7 @@ struct vmodifiers
   {
     unsigned int assign_v:1;
     unsigned int define_v:1;
+    unsigned int undefine_v:1;
     unsigned int export_v:1;
     unsigned int override_v:1;
     unsigned int private_v:1;
@@ -136,6 +137,8 @@ static int eval_makefile (const char *filename, int flags);
 static int eval (struct ebuffer *buffer, int flags);
 
 static long readline (struct ebuffer *ebuf);
+static void do_undefine (char *name, enum variable_origin origin,
+                         struct ebuffer *ebuf);
 static struct variable *do_define (char *name, enum variable_origin origin,
                                    struct ebuffer *ebuf);
 static int conditional_line (char *line, int len, const struct floc *flocp);
@@ -464,12 +467,13 @@ eval_buffer (char *buffer)
   return r;
 }
 
-/* Check LINE to see if it's a variable assignment.
+/* Check LINE to see if it's a variable assignment or undefine.
 
    It might use one of the modifiers "export", "override", "private", or it
    might be one of the conditional tokens like "ifdef", "include", etc.
 
-   If it's not a variable assignment, VMOD.V_ASSIGN is 0.  Returns LINE.
+   If it's not a variable assignment or undefine, VMOD.V_ASSIGN is 0.
+   Returns LINE.
 
    Returns a pointer to the first non-modifier character, and sets VMOD
    based on the modifiers found if any, plus V_ASSIGN is 1.
@@ -515,6 +519,13 @@ parse_var_assignment (const char *line, struct vmodifiers *vmod)
           p = next_token (p2);
           break;
         }
+      else if (word1eq ("undefine"))
+        {
+          /* We can't have modifiers after 'undefine' */
+          vmod->undefine_v = 1;
+          p = next_token (p2);
+          break;
+        }
       else
         /* Not a variable or modifier: this is not a variable assignment.  */
         return (char *)line;
@@ -525,7 +536,7 @@ parse_var_assignment (const char *line, struct vmodifiers *vmod)
         return (char *)line;
     }
 
-  /* Found a variable assignment.  */
+  /* Found a variable assignment or undefine.  */
   vmod->assign_v = 1;
   return (char *)p;
 }
@@ -702,7 +713,14 @@ eval (struct ebuffer *ebuf, int set_default)
               continue;
             }
 
-          if (vmod.define_v)
+          if (vmod.undefine_v)
+          {
+            do_undefine (p, origin, ebuf);
+
+            /* This line has been dealt with.  */
+            goto rule_complete;
+          }
+          else if (vmod.define_v)
             v = do_define (p, origin, ebuf);
           else
             v = try_variable_definition (fstart, p, origin, 0);
@@ -1301,6 +1319,28 @@ remove_comments (char *line)
   if (comment != 0)
     /* Cut off the line at the #.  */
     *comment = '\0';
+}
+
+/* Execute a `undefine' directive.
+   The undefine line has already been read, and NAME is the name of
+   the variable to be undefined. */
+
+static void
+do_undefine (char *name, enum variable_origin origin, struct ebuffer *ebuf)
+{
+  char *p, *var;
+
+  /* Expand the variable name and find the beginning (NAME) and end.  */
+  var = allocated_variable_expand (name);
+  name = next_token (var);
+  if (*name == '\0')
+    fatal (&ebuf->floc, _("empty variable name"));
+  p = name + strlen (name) - 1;
+  while (p > name && isblank ((unsigned char)*p))
+    --p;
+  p[1] = '\0';
+
+  undefine_variable_global (name, p - name + 1, origin);
 }
 
 /* Execute a `define' directive.

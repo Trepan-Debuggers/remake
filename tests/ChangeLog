@@ -1,3 +1,7 @@
+2009-10-06  Boris Kolpackov  <boris@codesynthesis.com>
+
+	* scripts/variables/undefine: Tests for the new undefine feature.
+
 2009-10-03  Paul Smith  <psmith@gnu.org>
 
 	* scripts/features/parallelism: Test for open Savannah bug #26846.

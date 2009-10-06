@@ -1,3 +1,21 @@
+2009-10-06  Boris Kolpackov  <boris@codesynthesis.com>
+
+	* variable.h (undefine_variable_in_set): New function declaration.
+	(undefine_variable_global): New macro.
+
+	* variable.c (undefine_variable_in_set): New function implementation.
+
+	* read.c (vmodifiers): Add undefine_v modifier.
+	(parse_var_assignment): Parse undefine.
+	(do_undefine): Handle the undefine directive.
+	(eval): Call do_undefine if undefine_v is set.
+
+	* main.c (.FEATURES): Add a keyword to indicate the new feature.
+
+	* doc/make.texi (Undefine Directive): Describe the new directive.
+
+	* NEWS: Add a note about the new directive.
+
 2009-10-05  Boris Kolpackov  <boris@codesynthesis.com>
 
 	* implicit.c (pattern_search): Initialize file variables only
