@@ -47,6 +47,11 @@ Version 3.81.90
   patterns are preferred. To detect this feature search for 'shortest-stem'
   in the .FEATURES special variable.  
 
+* New make directive: 'undefine' allows you to undefine a variable so
+  that it appears as if it was never set. Both $(flavor) and $(origin)
+  functions will return 'undefined' for such a variable. To detect this 
+  feature search for 'undefine in the .FEATURES special variable.
+
 
 Version 3.81
 

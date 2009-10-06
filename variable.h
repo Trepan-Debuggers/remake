@@ -196,6 +196,15 @@ struct variable *define_variable_in_set (const char *name, unsigned int length,
 #define define_variable_for_file(n,l,v,o,r,f) \
           define_variable_in_set((n),(l),(v),(o),(r),(f)->variables->set,NILF)
 
+void undefine_variable_in_set (const char *name, unsigned int length,
+                               enum variable_origin origin,
+                               struct variable_set *set);
+
+/* Remove variable from the current variable set. */
+
+#define undefine_variable_global(n,l,o) \
+          undefine_variable_in_set((n),(l),(o),NULL)
+
 /* Warn that NAME is an undefined variable.  */
 
 #define warn_undefined(n,l) do{\
