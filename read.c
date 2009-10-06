@@ -1723,71 +1723,7 @@ conditional_line (char *line, int len, const struct floc *flocp)
   return 0;
 }
 
-/* Remove duplicate dependencies in CHAIN.  */
 
-static unsigned long
-dep_hash_1 (const void *key)
-{
-  return_STRING_HASH_1 (dep_name ((struct dep const *) key));
-}
-
-static unsigned long
-dep_hash_2 (const void *key)
-{
-  return_STRING_HASH_2 (dep_name ((struct dep const *) key));
-}
-
-static int
-dep_hash_cmp (const void *x, const void *y)
-{
-  struct dep *dx = (struct dep *) x;
-  struct dep *dy = (struct dep *) y;
-  int cmp = strcmp (dep_name (dx), dep_name (dy));
-
-  /* If the names are the same but ignore_mtimes are not equal, one of these
-     is an order-only prerequisite and one isn't.  That means that we should
-     remove the one that isn't and keep the one that is.  */
-
-  if (!cmp && dx->ignore_mtime != dy->ignore_mtime)
-    dx->ignore_mtime = dy->ignore_mtime = 0;
-
-  return cmp;
-}
-
-
-void
-uniquize_deps (struct dep *chain)
-{
-  struct hash_table deps;
-  register struct dep **depp;
-
-  hash_init (&deps, 500, dep_hash_1, dep_hash_2, dep_hash_cmp);
-
-  /* Make sure that no dependencies are repeated.  This does not
-     really matter for the purpose of updating targets, but it
-     might make some names be listed twice for $^ and $?.  */
-
-  depp = &chain;
-  while (*depp)
-    {
-      struct dep *dep = *depp;
-      struct dep **dep_slot = (struct dep **) hash_find_slot (&deps, dep);
-      if (HASH_VACANT (*dep_slot))
-	{
-	  hash_insert_at (&deps, dep, dep_slot);
-	  depp = &dep->next;
-	}
-      else
-	{
-	  /* Don't bother freeing duplicates.
-	     It's dangerous and little benefit accrues.  */
-	  *depp = dep->next;
-	}
-    }
-
-  hash_free (&deps, 0);
-}
-
 /* Record target-specific variable values for files FILENAMES.
    TWO_COLON is nonzero if a double colon was used.
 

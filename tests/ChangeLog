@@ -1,5 +1,10 @@
 2009-10-06  Boris Kolpackov  <boris@codesynthesis.com>
 
+	* scripts/features/se_explicit: Enable the test for now fixed
+	savannah bug 25780.
+
+2009-10-06  Boris Kolpackov  <boris@codesynthesis.com>
+
 	* scripts/variables/undefine: Tests for the new undefine feature.
 
 2009-10-03  Paul Smith  <psmith@gnu.org>

@@ -131,9 +131,8 @@ endef
               '', "#MAKE#: *** prerequisites cannot be defined in recipes.  Stop.\n", 512);
 
 
-if ($all_tests) {
-    # Automatic $$+ variable expansion issue.  Savannah bug #25780
-    run_make_test(q!
+# Automatic $$+ variable expansion issue.  Savannah bug #25780
+run_make_test(q!
 all : foo foo
 .SECONDEXPANSION:
 all : $$+ ; @echo '$+'
@@ -141,11 +140,9 @@ foo : ;
 !,
                   '', "foo foo foo foo\n");
 
-}
 
-if ($all_tests) {
-    # Automatic $$+ variable expansion issue.  Savannah bug #25780
-    run_make_test(q!
+# Automatic $$+ variable expansion issue.  Savannah bug #25780
+run_make_test(q!
 all : bar bar
 bar : ;
 q%x : ;
@@ -153,8 +150,6 @@ q%x : ;
 a%l: q1x $$+ q2x ; @echo '$+'
 !,
                   '', "q1x bar bar q2x bar bar\n");
-
-}
 
 
 # This tells the test driver that the perl test script executed properly.

@@ -1,5 +1,19 @@
 2009-10-06  Boris Kolpackov  <boris@codesynthesis.com>
 
+	* dep.h (uniquize_deps): Remove.
+
+	* read.c (uniquize_deps): Merge into set_file_variables in
+	commands.c.
+	(dep_hash_1, dep_hash_2, dep_hash_cmp): Move to commands.c.
+
+	* commands.c (set_file_variables): Avoid modifying the dep
+	chain to achieve uniqueness. Fixes savannah bug 25780.
+
+	* implicit.c (pattern_search): Instead of re-setting all automatic
+	variables for each rule we try, just update $*.
+
+2009-10-06  Boris Kolpackov  <boris@codesynthesis.com>
+
 	* variable.h (undefine_variable_in_set): New function declaration.
 	(undefine_variable_global): New macro.
 
