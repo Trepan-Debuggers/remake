@@ -90,4 +90,3 @@ void free_ns_chain (struct nameseq *n);
 struct dep *read_all_makefiles (const char **makefiles);
 int eval_buffer (char *buffer);
 int update_goal_chain (struct dep *goals);
-void uniquize_deps (struct dep *);

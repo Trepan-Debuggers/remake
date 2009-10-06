@@ -612,20 +612,19 @@ pattern_search (struct file *file, int archive,
                         add_dir = 1;
                     }
 
-                  /* Initialize file variables if we haven't already
+                  /* Initialize and set file variables if we haven't already
                      done so. */
                   if (!file_vars_initialized)
                     {
                       initialize_file_variables (file, 0);
+                      set_file_variables (file);
                       file_vars_initialized = 1;
                     }
-
-                  /* Set file variables. Note that we cannot do it once at the
-                     beginning of the function because the stem value changes
-                     for each rule.  */
-                  if (!file_variables_set)
+                  /* Update the stem value in $* for this rule.  */
+                  else if (!file_variables_set)
                     {
-                      set_file_variables (file);
+                      define_variable_for_file (
+                        "*", 1, file->stem, o_automatic, 0, file);
                       file_variables_set = 1;
                     }
 

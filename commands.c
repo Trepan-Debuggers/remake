@@ -39,6 +39,36 @@ int remote_kill (int id, int sig);
 int getpid ();
 #endif
 
+
+static unsigned long
+dep_hash_1 (const void *key)
+{
+  return_STRING_HASH_1 (dep_name ((struct dep const *) key));
+}
+
+static unsigned long
+dep_hash_2 (const void *key)
+{
+  return_STRING_HASH_2 (dep_name ((struct dep const *) key));
+}
+
+static int
+dep_hash_cmp (const void *x, const void *y)
+{
+  struct dep *dx = (struct dep *) x;
+  struct dep *dy = (struct dep *) y;
+  int cmp = strcmp (dep_name (dx), dep_name (dy));
+
+  /* If the names are the same but ignore_mtimes are not equal, one of these
+     is an order-only prerequisite and one isn't.  That means that we should
+     remove the one that isn't and keep the one that is.  */
+
+  if (!cmp && dx->ignore_mtime != dy->ignore_mtime)
+    dx->ignore_mtime = dy->ignore_mtime = 0;
+
+  return cmp;
+}
+
 /* Set FILE's automatic variables up.  */
 
 void
@@ -149,18 +179,34 @@ set_file_variables (struct file *file)
     char *bp;
     unsigned int len;
 
+    struct hash_table dep_hash;
+    void **slot;
+
     /* Compute first the value for $+, which is supposed to contain
        duplicate dependencies as they were listed in the makefile.  */
 
     plus_len = 0;
+    bar_len = 0;
     for (d = file->deps; d != 0; d = d->next)
-      if (! d->ignore_mtime && ! d->need_2nd_expansion)
-	plus_len += strlen (dep_name (d)) + 1;
+      {
+        if (!d->need_2nd_expansion)
+          {
+            if (d->ignore_mtime)
+              bar_len += strlen (dep_name (d)) + 1;
+            else
+              plus_len += strlen (dep_name (d)) + 1;
+          }
+      }
+
+    if (bar_len == 0)
+      bar_len++;
+
     if (plus_len == 0)
       plus_len++;
 
     if (plus_len > plus_max)
       plus_value = xrealloc (plus_value, plus_max = plus_len);
+
     cp = plus_value;
 
     qmark_len = plus_len + 1;	/* Will be this or less.  */
@@ -191,19 +237,6 @@ set_file_variables (struct file *file)
     cp[cp > plus_value ? -1 : 0] = '\0';
     DEFINE_VARIABLE ("+", 1, plus_value);
 
-    /* Make sure that no dependencies are repeated.  This does not
-       really matter for the purpose of updating targets, but it
-       might make some names be listed twice for $^ and $?.  */
-
-    uniquize_deps (file->deps);
-
-    bar_len = 0;
-    for (d = file->deps; d != 0; d = d->next)
-      if (d->ignore_mtime && ! d->need_2nd_expansion)
-	bar_len += strlen (dep_name (d)) + 1;
-    if (bar_len == 0)
-      bar_len++;
-
     /* Compute the values for $^, $?, and $|.  */
 
     cp = caret_value = plus_value; /* Reuse the buffer; it's big enough.  */
@@ -216,16 +249,33 @@ set_file_variables (struct file *file)
       bar_value = xrealloc (bar_value, bar_max = bar_len);
     bp = bar_value;
 
+    /* Make sure that no dependencies are repeated in $^, $?, and $|.  It
+       would be natural to combine the next two loops but we can't do it
+       because of a situation where we have two dep entries, the first
+       is order-only and the second is normal (see dep_hash_cmp).  */
+
+    hash_init (&dep_hash, 500, dep_hash_1, dep_hash_2, dep_hash_cmp);
+
     for (d = file->deps; d != 0; d = d->next)
       {
-	const char *c;
-
         if (d->need_2nd_expansion)
+          continue;
+
+        slot = hash_find_slot (&dep_hash, d);
+        if (HASH_VACANT (*slot))
+          hash_insert_at (&dep_hash, d, slot);
+      }
+
+    for (d = file->deps; d != 0; d = d->next)
+      {
+        const char *c;
+
+        if (d->need_2nd_expansion || hash_find_item (&dep_hash, d) != d)
           continue;
 
         c = dep_name (d);
 #ifndef	NO_ARCHIVES
-	if (ar_name (c))
+        if (ar_name (c))
 	  {
 	    c = strchr (c, '(') + 1;
 	    len = strlen (c) - 1;
@@ -236,12 +286,12 @@ set_file_variables (struct file *file)
 
         if (d->ignore_mtime)
           {
-	    memcpy (bp, c, len);
+            memcpy (bp, c, len);
 	    bp += len;
 	    *bp++ = FILE_LIST_SEPARATOR;
 	  }
 	else
-	  {
+          {
             memcpy (cp, c, len);
             cp += len;
             *cp++ = FILE_LIST_SEPARATOR;
@@ -253,6 +303,8 @@ set_file_variables (struct file *file)
               }
           }
       }
+
+    hash_free (&dep_hash, 0);
 
     /* Kill the last spaces and define the variables.  */
 
