@@ -57,16 +57,7 @@ dep_hash_cmp (const void *x, const void *y)
 {
   struct dep *dx = (struct dep *) x;
   struct dep *dy = (struct dep *) y;
-  int cmp = strcmp (dep_name (dx), dep_name (dy));
-
-  /* If the names are the same but ignore_mtimes are not equal, one of these
-     is an order-only prerequisite and one isn't.  That means that we should
-     remove the one that isn't and keep the one that is.  */
-
-  if (!cmp && dx->ignore_mtime != dy->ignore_mtime)
-    dx->ignore_mtime = dy->ignore_mtime = 0;
-
-  return cmp;
+  return strcmp (dep_name (dx), dep_name (dy));
 }
 
 /* Set FILE's automatic variables up.  */
@@ -74,7 +65,7 @@ dep_hash_cmp (const void *x, const void *y)
 void
 set_file_variables (struct file *file)
 {
-  const struct dep *d;
+  struct dep *d;
   const char *at, *percent, *star, *less;
 
 #ifndef	NO_ARCHIVES
@@ -252,7 +243,7 @@ set_file_variables (struct file *file)
     /* Make sure that no dependencies are repeated in $^, $?, and $|.  It
        would be natural to combine the next two loops but we can't do it
        because of a situation where we have two dep entries, the first
-       is order-only and the second is normal (see dep_hash_cmp).  */
+       is order-only and the second is normal (see below).  */
 
     hash_init (&dep_hash, 500, dep_hash_1, dep_hash_2, dep_hash_cmp);
 
@@ -264,6 +255,16 @@ set_file_variables (struct file *file)
         slot = hash_find_slot (&dep_hash, d);
         if (HASH_VACANT (*slot))
           hash_insert_at (&dep_hash, d, slot);
+        else
+          {
+            /* Check if the two prerequisites have different ignore_mtime.
+               If so then we need to "upgrade" one that is order-only.  */
+
+            struct dep* hd = (struct dep*) *slot;
+
+            if (d->ignore_mtime != hd->ignore_mtime)
+              d->ignore_mtime = hd->ignore_mtime = 0;
+          }
       }
 
     for (d = file->deps; d != 0; d = d->next)

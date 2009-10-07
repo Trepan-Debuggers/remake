@@ -1,3 +1,10 @@
+2009-10-07  Boris Kolpackov  <boris@codesynthesis.com>
+
+	* read.c (do_undefine): Free the expanded variable name.
+
+	* commands.c (dep_hash_cmp, set_file_variables): Move the order-only
+	to normal upgrade logic from  dep_hash_cmp to set_file_variables.
+
 2009-10-06  Boris Kolpackov  <boris@codesynthesis.com>
 
 	* dep.h (uniquize_deps): Remove.
