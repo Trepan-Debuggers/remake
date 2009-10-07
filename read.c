@@ -1341,6 +1341,7 @@ do_undefine (char *name, enum variable_origin origin, struct ebuffer *ebuf)
   p[1] = '\0';
 
   undefine_variable_global (name, p - name + 1, origin);
+  free (var);
 }
 
 /* Execute a `define' directive.
