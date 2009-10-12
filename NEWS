@@ -14,30 +14,18 @@ Version 3.81.90
 * Compiling GNU make now requires a conforming ISO C 1989 compiler and
   standard runtime library.
 
-* The parser for variable assignments has been enhanced to allow multiple
-  modifiers ('export', 'override', 'private' (see below)) on the same line as
-  variables, including define/endef variables, and in any order.  Also, it is
-  possible to create variables and targets named as these modifiers.
+* WARNING: Backward-incompatibility!
+  The '$?' variable now contains all prerequisites that caused the target to
+  be considered out of date, even if they do not exist (previously only
+  existing targets were provided in $?).
 
 * WARNING: Backward-incompatibility!
-  As a result of the parser changes, two backward-compatibility issues exist:
+  As a result of parser enhancements, two backward-compatibility issues exist:
   first, a prerequisite containing an "=" cannot be escaped with a backslash
   any longer.  You must create a variable containing an "=" and use that
   variable in the prerequisite.  Second, variable names can no longer contain
   whitespace, unless you put the whitespace in a variable and use the
   variable.
-
-* New special variable: .RECIPEPREFIX allows you to reset the recipe
-  introduction character from the default (TAB) to something else.  The first
-  character of this variable value is the new recipe introduction character.
-  If the variable is set to the empty string, TAB is used again.  It can be
-  set and reset at will; recipes will use the value active when they were
-  first parsed.
-
-* New variable modifier 'private': prefixing a variable assignment with the
-  modifier 'private' suppresses inheritance of that variable by
-  prerequisites.  This is most useful for target- and pattern-specific
-  variables.
 
 * WARNING: Backward-incompatibility!
   The pattern-specific variables and pattern rules are now applied in the 
@@ -46,6 +34,23 @@ Version 3.81.90
   order). This produces the usually-desired behavior where more specific
   patterns are preferred. To detect this feature search for 'shortest-stem'
   in the .FEATURES special variable.  
+
+* New special variable: .RECIPEPREFIX allows you to reset the recipe
+  introduction character from the default (TAB) to something else.  The first
+  character of this variable value is the new recipe introduction character.
+  If the variable is set to the empty string, TAB is used again.  It can be
+  set and reset at will; recipes will use the value active when they were
+  first parsed.  To detect this feature check the value of $(.RECIPEPREFIX).
+
+* New variable modifier 'private': prefixing a variable assignment with the
+  modifier 'private' suppresses inheritance of that variable by
+  prerequisites.  This is most useful for target- and pattern-specific
+  variables.
+
+* The parser for variable assignments has been enhanced to allow multiple
+  modifiers ('export', 'override', 'private') on the same line as variables,
+  including define/endef variables, and in any order.  Also, it is possible
+  to create variables and targets named as these modifiers.
 
 * New make directive: 'undefine' allows you to undefine a variable so
   that it appears as if it was never set. Both $(flavor) and $(origin)
@@ -1036,9 +1041,8 @@ Version 3.05
 
 -------------------------------------------------------------------------------
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007 Free Software
-Foundation, Inc.
-This file is part of GNU Make.
+1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free
+Software Foundation, Inc.  This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
