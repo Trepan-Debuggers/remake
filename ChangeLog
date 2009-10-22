@@ -1,3 +1,8 @@
+2009-10-22  Boris Kolpackov  <boris@codesynthesis.com>
+
+	* read.c (read_all_makefiles): Mark the default makefile dependency
+	dontcare.
+
 2009-10-07  Boris Kolpackov  <boris@codesynthesis.com>
 
 	* read.c (do_undefine): Free the expanded variable name.
