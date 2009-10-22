@@ -269,7 +269,7 @@ read_all_makefiles (const char **makefiles)
 	    {
 	      struct dep *d = alloc_dep ();
 	      d->file = enter_file (strcache_add (*p));
-	      d->file->dontcare = 1;
+	      d->dontcare = 1;
 	      /* Tell update_goal_chain to bail out as soon as this file is
 		 made, and main not to die if we can't make this file.  */
 	      d->changed = RM_DONTCARE;
