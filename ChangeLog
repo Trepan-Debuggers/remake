@@ -1,3 +1,9 @@
+2009-10-25  Paul Smith  <psmith@gnu.org>
+
+	* implicit.c (stemlen_compare): Fix qsort() compare bug that
+	caused implicit rules with equal stem lengths to be sorted
+	indeterminately.
+
 2009-10-24  Paul Smith  <psmith@gnu.org>
 
 	* main.c (usage): Add --eval to the usage string.

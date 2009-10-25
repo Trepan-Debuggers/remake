@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  12 Oct 2009
+  25 Oct 2009
 
 See the end of this file for copyrights and conditions.
 
@@ -20,12 +20,14 @@ Version 3.81.90
   existing targets were provided in $?).
 
 * WARNING: Backward-incompatibility!
-  As a result of parser enhancements, two backward-compatibility issues exist:
-  first, a prerequisite containing an "=" cannot be escaped with a backslash
-  any longer.  You must create a variable containing an "=" and use that
-  variable in the prerequisite.  Second, variable names can no longer contain
-  whitespace, unless you put the whitespace in a variable and use the
-  variable.
+  As a result of parser enhancements, three backward-compatibility issues
+  exist: first, a prerequisite containing an "=" cannot be escaped with a
+  backslash any longer.  You must create a variable containing an "=" and use
+  that variable in the prerequisite.  Second, variable names can no longer
+  contain whitespace, unless you put the whitespace in a variable and use the
+  variable.  Third, in previous versions of make it was sometimes not flagged
+  as an error for explicit and pattern targets to appear in the same rule.
+  Now this is always reported as an error.
 
 * WARNING: Backward-incompatibility!
   The pattern-specific variables and pattern rules are now applied in the
