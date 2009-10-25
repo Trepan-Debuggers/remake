@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  25 May 2009
+  12 Oct 2009
 
 See the end of this file for copyrights and conditions.
 
@@ -28,12 +28,17 @@ Version 3.81.90
   variable.
 
 * WARNING: Backward-incompatibility!
-  The pattern-specific variables and pattern rules are now applied in the 
+  The pattern-specific variables and pattern rules are now applied in the
   shortest stem first order instead of the definition order (variables
   and rules with the same stem length are still applied in the definition
   order). This produces the usually-desired behavior where more specific
   patterns are preferred. To detect this feature search for 'shortest-stem'
-  in the .FEATURES special variable.  
+  in the .FEATURES special variable.
+
+* New command line option: --eval=STRING causes STRING to be evaluated as
+  makefile syntax (akin to using the $(eval ...) function).  The evaluation is
+  performed after all default rules and variables are defined, but before any
+  makefiles are read.
 
 * New special variable: .RECIPEPREFIX allows you to reset the recipe
   introduction character from the default (TAB) to something else.  The first
@@ -47,15 +52,15 @@ Version 3.81.90
   prerequisites.  This is most useful for target- and pattern-specific
   variables.
 
+* New make directive: 'undefine' allows you to undefine a variable so
+  that it appears as if it was never set. Both $(flavor) and $(origin)
+  functions will return 'undefined' for such a variable. To detect this
+  feature search for 'undefine in the .FEATURES special variable.
+
 * The parser for variable assignments has been enhanced to allow multiple
   modifiers ('export', 'override', 'private') on the same line as variables,
   including define/endef variables, and in any order.  Also, it is possible
   to create variables and targets named as these modifiers.
-
-* New make directive: 'undefine' allows you to undefine a variable so
-  that it appears as if it was never set. Both $(flavor) and $(origin)
-  functions will return 'undefined' for such a variable. To detect this 
-  feature search for 'undefine in the .FEATURES special variable.
 
 
 Version 3.81

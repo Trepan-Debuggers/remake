@@ -1,3 +1,31 @@
+2009-10-24  Paul Smith  <psmith@gnu.org>
+
+	* main.c (usage): Add --eval to the usage string.
+	(switches): Add the --eval switch.
+	(main): If --eval is given, add them to the simply-expanded variable
+	-*-eval-flags-*- (necessary to allow recursion to work properly).
+	(define_makeflags): Add -*-eval-flags-*- to MAKEFLAGS.
+
+	* NEWS: Describe the new --eval command line argument.
+	* doc/make.texi (Options Summary): Document --eval.
+
+	* dep.h: eval_buffer() returns void.
+	* read.c (eval_buffer): Ditto.
+	(eval): Ditto.
+
+	* variable.h (define_variable_cname): New macro for constant
+	variable names.
+	* default.c (set_default_suffixes): Use it.
+	* main.c (main): Ditto.
+	(handle_non_switch_argument): Ditto.
+	(define_makeflags): Ditto.
+	* read.c (read_all_makefiles): Ditto.
+	* variable.c (define_automatic_variables): Ditto.
+
+	* commands.c (dep_hash_cmp): Avoid casts.
+	(dep_hash_1): Ditto.
+	(dep_hash_2): Ditto.
+
 2009-10-22  Boris Kolpackov  <boris@codesynthesis.com>
 
 	* read.c (read_all_makefiles): Mark the default makefile dependency
