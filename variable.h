@@ -180,6 +180,12 @@ struct variable *define_variable_in_set (const char *name, unsigned int length,
           define_variable_in_set((n),(l),(v),(o),(r),\
                                  current_variable_set_list->set,NILF)
 
+/* Define a variable with a constant name in the current variable set.  */
+
+#define define_variable_cname(n,v,o,r) \
+          define_variable_in_set((n),(sizeof (n) - 1),(v),(o),(r),\
+                                 current_variable_set_list->set,NILF)
+
 /* Define a variable with a location in the current variable set.  */
 
 #define define_variable_loc(n,l,v,o,r,f) \

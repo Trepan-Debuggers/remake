@@ -43,20 +43,22 @@ int getpid ();
 static unsigned long
 dep_hash_1 (const void *key)
 {
-  return_STRING_HASH_1 (dep_name ((struct dep const *) key));
+  const struct dep *d = key;
+  return_STRING_HASH_1 (dep_name (d));
 }
 
 static unsigned long
 dep_hash_2 (const void *key)
 {
-  return_STRING_HASH_2 (dep_name ((struct dep const *) key));
+  const struct dep *d = key;
+  return_STRING_HASH_2 (dep_name (d));
 }
 
 static int
 dep_hash_cmp (const void *x, const void *y)
 {
-  struct dep *dx = (struct dep *) x;
-  struct dep *dy = (struct dep *) y;
+  const struct dep *dx = x;
+  const struct dep *dy = y;
   return strcmp (dep_name (dx), dep_name (dy));
 }
 

@@ -134,7 +134,7 @@ const struct floc *reading_file = 0;
 static struct dep *read_makefiles = 0;
 
 static int eval_makefile (const char *filename, int flags);
-static int eval (struct ebuffer *buffer, int flags);
+static void eval (struct ebuffer *buffer, int flags);
 
 static long readline (struct ebuffer *ebuf);
 static void do_undefine (char *name, enum variable_origin origin,
@@ -174,7 +174,7 @@ read_all_makefiles (const char **makefiles)
   /* Create *_LIST variables, to hold the makefiles, targets, and variables
      we will be reading. */
 
-  define_variable ("MAKEFILE_LIST", sizeof ("MAKEFILE_LIST")-1, "", o_file, 0);
+  define_variable_cname ("MAKEFILE_LIST", "", o_file, 0);
 
   DB (DB_BASIC, (_("Reading makefiles...\n")));
 
@@ -323,7 +323,6 @@ eval_makefile (const char *filename, int flags)
   const struct floc *curfile;
   char *expanded = 0;
   int makefile_errno;
-  int r;
 
   filename = strcache_add (filename);
   ebuf.floc.filenm = filename;
@@ -421,7 +420,7 @@ eval_makefile (const char *filename, int flags)
   curfile = reading_file;
   reading_file = &ebuf.floc;
 
-  r = eval (&ebuf, !(flags & RM_NO_DEFAULT_GOAL));
+  eval (&ebuf, !(flags & RM_NO_DEFAULT_GOAL));
 
   reading_file = curfile;
 
@@ -429,17 +428,17 @@ eval_makefile (const char *filename, int flags)
 
   free (ebuf.bufstart);
   alloca (0);
-  return r;
+
+  return 1;
 }
 
-int
+void
 eval_buffer (char *buffer)
 {
   struct ebuffer ebuf;
   struct conditionals *saved;
   struct conditionals new;
   const struct floc *curfile;
-  int r;
 
   /* Evaluate the buffer */
 
@@ -457,14 +456,13 @@ eval_buffer (char *buffer)
 
   saved = install_conditionals (&new);
 
-  r = eval (&ebuf, 1);
+  eval (&ebuf, 1);
 
   restore_conditionals (saved);
 
   reading_file = curfile;
 
   alloca (0);
-  return r;
 }
 
 /* Check LINE to see if it's a variable assignment or undefine.
@@ -540,15 +538,13 @@ parse_var_assignment (const char *line, struct vmodifiers *vmod)
   vmod->assign_v = 1;
   return (char *)p;
 }
-
 
 
 /* Read file FILENAME as a makefile and add its contents to the data base.
 
    SET_DEFAULT is true if we are allowed to set the default goal.  */
 
-
-static int
+static void
 eval (struct ebuffer *ebuf, int set_default)
 {
   char *collapsed = 0;
@@ -1301,8 +1297,6 @@ eval (struct ebuffer *ebuf, int set_default)
   if (collapsed)
     free (collapsed);
   free (commands);
-
-  return 1;
 }
 
 
