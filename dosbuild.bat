@@ -1,6 +1,6 @@
 @echo off
-rem Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
-rem Free Software Foundation, Inc.
+rem Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
+rem 2008, 2009 Free Software Foundation, Inc.
 rem This file is part of GNU Make.
 rem
 rem GNU Make is free software; you can redistribute it and/or modify it under
