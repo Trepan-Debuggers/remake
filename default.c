@@ -538,14 +538,14 @@ set_default_suffixes (void)
   suffix_file = enter_file (strcache_add (".SUFFIXES"));
 
   if (no_builtin_rules_flag)
-    define_variable ("SUFFIXES", 8, "", o_default, 0);
+    define_variable_cname ("SUFFIXES", "", o_default, 0);
   else
     {
       char *p = default_suffixes;
       suffix_file->deps = enter_prereqs(PARSE_FILE_SEQ (&p, struct dep, '\0',
                                                         NULL, 0),
                                         NULL);
-      define_variable ("SUFFIXES", 8, default_suffixes, o_default, 0);
+      define_variable_cname ("SUFFIXES", default_suffixes, o_default, 0);
     }
 }
 

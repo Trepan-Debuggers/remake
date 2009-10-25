@@ -799,7 +799,7 @@ define_automatic_variables (void)
   char buf[200];
 
   sprintf (buf, "%u", makelevel);
-  (void) define_variable (MAKELEVEL_NAME, MAKELEVEL_LENGTH, buf, o_env, 0);
+  define_variable_cname (MAKELEVEL_NAME, buf, o_env, 0);
 
   sprintf (buf, "%s%s%s",
 	   version_string,
@@ -807,7 +807,7 @@ define_automatic_variables (void)
 	   ? "" : "-",
 	   (remote_description == 0 || remote_description[0] == '\0')
 	   ? "" : remote_description);
-  (void) define_variable ("MAKE_VERSION", 12, buf, o_default, 0);
+  define_variable_cname ("MAKE_VERSION", buf, o_default, 0);
 
 #ifdef  __MSDOS__
   /* Allow to specify a special shell just for Make,
@@ -818,13 +818,13 @@ define_automatic_variables (void)
     struct variable *mshp = lookup_variable ("MAKESHELL", 9);
     struct variable *comp = lookup_variable ("COMSPEC", 7);
 
-    /* Make $MAKESHELL override $SHELL even if -e is in effect.  */
+    /* $(MAKESHELL) overrides $(SHELL) even if -e is in effect.  */
     if (mshp)
       (void) define_variable (shell_str, shlen,
 			      mshp->value, o_env_override, 0);
     else if (comp)
       {
-	/* $COMSPEC shouldn't override $SHELL.  */
+	/* $(COMSPEC) shouldn't override $(SHELL).  */
 	struct variable *shp = lookup_variable (shell_str, shlen);
 
 	if (!shp)
@@ -883,7 +883,7 @@ define_automatic_variables (void)
 
   /* This won't override any definition, but it will provide one if there
      isn't one there.  */
-  v = define_variable ("SHELL", 5, default_shell, o_default, 0);
+  v = define_variable_cname ("SHELL", default_shell, o_default, 0);
 #ifdef __MSDOS__
   v->export = v_export;  /*  Export always SHELL.  */
 #endif
@@ -903,36 +903,36 @@ define_automatic_variables (void)
 #endif
 
   /* Make sure MAKEFILES gets exported if it is set.  */
-  v = define_variable ("MAKEFILES", 9, "", o_default, 0);
+  v = define_variable_cname ("MAKEFILES", "", o_default, 0);
   v->export = v_ifset;
 
   /* Define the magic D and F variables in terms of
      the automatic variables they are variations of.  */
 
 #ifdef VMS
-  define_variable ("@D", 2, "$(dir $@)", o_automatic, 1);
-  define_variable ("%D", 2, "$(dir $%)", o_automatic, 1);
-  define_variable ("*D", 2, "$(dir $*)", o_automatic, 1);
-  define_variable ("<D", 2, "$(dir $<)", o_automatic, 1);
-  define_variable ("?D", 2, "$(dir $?)", o_automatic, 1);
-  define_variable ("^D", 2, "$(dir $^)", o_automatic, 1);
-  define_variable ("+D", 2, "$(dir $+)", o_automatic, 1);
+  define_variable_cname ("@D", "$(dir $@)", o_automatic, 1);
+  define_variable_cname ("%D", "$(dir $%)", o_automatic, 1);
+  define_variable_cname ("*D", "$(dir $*)", o_automatic, 1);
+  define_variable_cname ("<D", "$(dir $<)", o_automatic, 1);
+  define_variable_cname ("?D", "$(dir $?)", o_automatic, 1);
+  define_variable_cname ("^D", "$(dir $^)", o_automatic, 1);
+  define_variable_cname ("+D", "$(dir $+)", o_automatic, 1);
 #else
-  define_variable ("@D", 2, "$(patsubst %/,%,$(dir $@))", o_automatic, 1);
-  define_variable ("%D", 2, "$(patsubst %/,%,$(dir $%))", o_automatic, 1);
-  define_variable ("*D", 2, "$(patsubst %/,%,$(dir $*))", o_automatic, 1);
-  define_variable ("<D", 2, "$(patsubst %/,%,$(dir $<))", o_automatic, 1);
-  define_variable ("?D", 2, "$(patsubst %/,%,$(dir $?))", o_automatic, 1);
-  define_variable ("^D", 2, "$(patsubst %/,%,$(dir $^))", o_automatic, 1);
-  define_variable ("+D", 2, "$(patsubst %/,%,$(dir $+))", o_automatic, 1);
+  define_variable_cname ("@D", "$(patsubst %/,%,$(dir $@))", o_automatic, 1);
+  define_variable_cname ("%D", "$(patsubst %/,%,$(dir $%))", o_automatic, 1);
+  define_variable_cname ("*D", "$(patsubst %/,%,$(dir $*))", o_automatic, 1);
+  define_variable_cname ("<D", "$(patsubst %/,%,$(dir $<))", o_automatic, 1);
+  define_variable_cname ("?D", "$(patsubst %/,%,$(dir $?))", o_automatic, 1);
+  define_variable_cname ("^D", "$(patsubst %/,%,$(dir $^))", o_automatic, 1);
+  define_variable_cname ("+D", "$(patsubst %/,%,$(dir $+))", o_automatic, 1);
 #endif
-  define_variable ("@F", 2, "$(notdir $@)", o_automatic, 1);
-  define_variable ("%F", 2, "$(notdir $%)", o_automatic, 1);
-  define_variable ("*F", 2, "$(notdir $*)", o_automatic, 1);
-  define_variable ("<F", 2, "$(notdir $<)", o_automatic, 1);
-  define_variable ("?F", 2, "$(notdir $?)", o_automatic, 1);
-  define_variable ("^F", 2, "$(notdir $^)", o_automatic, 1);
-  define_variable ("+F", 2, "$(notdir $+)", o_automatic, 1);
+  define_variable_cname ("@F", "$(notdir $@)", o_automatic, 1);
+  define_variable_cname ("%F", "$(notdir $%)", o_automatic, 1);
+  define_variable_cname ("*F", "$(notdir $*)", o_automatic, 1);
+  define_variable_cname ("<F", "$(notdir $<)", o_automatic, 1);
+  define_variable_cname ("?F", "$(notdir $?)", o_automatic, 1);
+  define_variable_cname ("^F", "$(notdir $^)", o_automatic, 1);
+  define_variable_cname ("+F", "$(notdir $+)", o_automatic, 1);
 }
 
 int export_all_variables;

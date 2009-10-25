@@ -758,7 +758,7 @@ snap_deps (void)
   /* If .POSIX was defined, remove OUTPUT_OPTION to comply.  */
   /* This needs more work: what if the user sets this in the makefile?
   if (posix_pedantic)
-    define_variable (STRING_SIZE_TUPLE("OUTPUT_OPTION"), "", o_default, 1);
+    define_variable_cname ("OUTPUT_OPTION", "", o_default, 1);
   */
 #endif
 }
