@@ -1,7 +1,7 @@
 /* Argument parsing and main program of GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007 Free Software
-Foundation, Inc.
+1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free
+Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -263,6 +263,9 @@ static struct stringlist *old_files = 0;
 
 static struct stringlist *new_files = 0;
 
+/* List of strings to be eval'd.  */
+static struct stringlist *eval_strings = 0;
+
 /* If nonzero, we should just print usage and exit.  */
 
 static int print_usage_flag = 0;
@@ -312,6 +315,8 @@ static const char *const usage[] =
     N_("\
   -e, --environment-overrides\n\
                               Environment variables override makefiles.\n"),
+    N_("\
+  --eval=STRING               Evaluate STRING as a makefile statement.\n"),
     N_("\
   -f FILE, --file=FILE, --makefile=FILE\n\
                               Read FILE as a makefile.\n"),
@@ -418,6 +423,7 @@ static const struct command_switch switches[] =
     { 'W', filename, &new_files, 0, 0, 0, 0, 0, "what-if" },
     { CHAR_MAX+5, flag, &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
       "warn-undefined-variables" },
+    { CHAR_MAX+6, string, &eval_strings, 1, 0, 0, 0, 0, "eval" },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
@@ -1114,15 +1120,15 @@ main (int argc, char **argv, char **envp)
 #endif
 
   /* Initialize the special variables.  */
-  define_variable (".VARIABLES", 10, "", o_default, 0)->special = 1;
-  /* define_variable (".TARGETS", 8, "", o_default, 0)->special = 1; */
-  define_variable (".RECIPEPREFIX", 13, "", o_default, 0)->special = 1;
+  define_variable_cname (".VARIABLES", "", o_default, 0)->special = 1;
+  /* define_variable_cname (".TARGETS", "", o_default, 0)->special = 1; */
+  define_variable_cname (".RECIPEPREFIX", "", o_default, 0)->special = 1;
 
   /* Set up .FEATURES */
-  define_variable (".FEATURES", 9,
-                   "target-specific order-only second-expansion else-if"
-                   "shortest-stem undefine",
-                   o_default, 0);
+  define_variable_cname (".FEATURES",
+                         "target-specific order-only second-expansion else-if"
+                         "shortest-stem undefine",
+                         o_default, 0);
 #ifndef NO_ARCHIVES
   do_variable_definition (NILF, ".FEATURES", "archives",
                           o_default, f_append, 0);
@@ -1204,9 +1210,8 @@ main (int argc, char **argv, char **envp)
      * either the first mispelled value or an empty string
      */
     if (!unix_path)
-      define_variable("PATH", 4,
-                      windows32_path ? windows32_path : "",
-                      o_env, 1)->export = v_export;
+      define_variable_cname ("PATH", windows32_path ? windows32_path : "",
+                             o_env, 1)->export = v_export;
 #endif
 #else /* For Amiga, read the ENV: device, ignoring all dirs */
     {
@@ -1248,7 +1253,9 @@ main (int argc, char **argv, char **envp)
      and we set the -p, -i and -e switches.  Doesn't seem quite right.  */
   decode_env_switches (STRING_SIZE_TUPLE ("MFLAGS"));
 #endif
+
   decode_switches (argc, argv, 0);
+
 #ifdef WINDOWS32
   if (suspend_flag) {
         fprintf(stderr, "%s (pid = %ld)\n", argv[0], GetCurrentProcessId());
@@ -1328,8 +1335,8 @@ main (int argc, char **argv, char **envp)
 
   /* The extra indirection through $(MAKE_COMMAND) is done
      for hysterical raisins.  */
-  (void) define_variable ("MAKE_COMMAND", 12, argv[0], o_default, 0);
-  (void) define_variable ("MAKE", 4, "$(MAKE_COMMAND)", o_default, 1);
+  define_variable_cname ("MAKE_COMMAND", argv[0], o_default, 0);
+  define_variable_cname ("MAKE", "$(MAKE_COMMAND)", o_default, 1);
 
   if (command_variables != 0)
     {
@@ -1367,8 +1374,7 @@ main (int argc, char **argv, char **envp)
 
       /* Define an unchangeable variable with a name that no POSIX.2
 	 makefile could validly use for its own variable.  */
-      (void) define_variable ("-*-command-variables-*-", 23,
-			      value, o_automatic, 0);
+      define_variable_cname ("-*-command-variables-*-", value, o_automatic, 0);
 
       /* Define the variable; this will not override any user definition.
          Normally a reference to this variable is written into the value of
@@ -1376,8 +1382,8 @@ main (int argc, char **argv, char **envp)
          exported value of MAKEFLAGS.  In POSIX-pedantic mode, we cannot
          allow the user's setting of MAKEOVERRIDES to affect MAKEFLAGS, so
          a reference to this hidden variable is written instead. */
-      (void) define_variable ("MAKEOVERRIDES", 13,
-			      "${-*-command-variables-*-}", o_env, 1);
+      define_variable_cname ("MAKEOVERRIDES", "${-*-command-variables-*-}",
+                             o_env, 1);
     }
 
   /* If there were -C flags, move ourselves about.  */
@@ -1464,7 +1470,7 @@ main (int argc, char **argv, char **envp)
 	starting_directory = current_directory;
     }
 
-  (void) define_variable ("CURDIR", 6, current_directory, o_file, 0);
+  define_variable_cname ("CURDIR", current_directory, o_file, 0);
 
   /* Read any stdin makefiles into temporary files.  */
 
@@ -1604,7 +1610,37 @@ main (int argc, char **argv, char **envp)
 
   default_file = enter_file (strcache_add (".DEFAULT"));
 
-  default_goal_var = define_variable (".DEFAULT_GOAL", 13, "", o_file, 0);
+  default_goal_var = define_variable_cname (".DEFAULT_GOAL", "", o_file, 0);
+
+  /* Evaluate all strings provided with --eval.
+     Also set up the $(-*-eval-flags-*-) variable.  */
+
+  if (eval_strings)
+    {
+      char *p, *value;
+      unsigned int i;
+      unsigned int len = sizeof ("--eval=") * eval_strings->idx;
+
+      for (i = 0; i < eval_strings->idx; ++i)
+        {
+          p = xstrdup (eval_strings->list[i]);
+          len += 2 * strlen (p);
+          eval_buffer (p);
+          free (p);
+        }
+
+      p = value = alloca (len);
+      for (i = 0; i < eval_strings->idx; ++i)
+        {
+          strcpy (p, "--eval=");
+          p += strlen (p);
+          p = quote_for_env (p, eval_strings->list[i]);
+          *(p++) = ' ';
+        }
+      p[-1] = '\0';
+
+      define_variable_cname ("-*-eval-flags-*-", value, o_automatic, 0);
+    }
 
   /* Read all the makefiles.  */
 
@@ -2402,7 +2438,7 @@ handle_non_switch_argument (char *arg, int env)
             memcpy (&vp[oldlen + 1], f->name, newlen + 1);
             value = vp;
           }
-        define_variable ("MAKECMDGOALS", 12, value, o_default, 0);
+        define_variable_cname ("MAKECMDGOALS", value, o_default, 0);
       }
     }
 }
@@ -2504,8 +2540,16 @@ decode_switches (int argc, char **argv, int env)
 		    optarg = xstrdup (cs->noarg_value);
                   else if (*optarg == '\0')
                     {
-                      error (NILF, _("the `-%c' option requires a non-empty string argument"),
-                             cs->c);
+                      char opt[2] = "c";
+                      const char *op = opt;
+
+                      if (short_option (cs->c))
+                        opt[0] = cs->c;
+                      else
+                        op = cs->long_name;
+
+                      error (NILF, _("the `%s%s' option requires a non-empty string argument"),
+                             short_option (cs->c) ? "-" : "--", op);
                       bad = 1;
                     }
 
@@ -2703,9 +2747,10 @@ quote_for_env (char *out, const char *in)
 static const char *
 define_makeflags (int all, int makefile)
 {
-  static const char ref[] = "$(MAKEOVERRIDES)";
-  static const char posixref[] = "$(-*-command-variables-*-)";
-  register const struct command_switch *cs;
+  const char ref[] = "$(MAKEOVERRIDES)";
+  const char posixref[] = "$(-*-command-variables-*-)";
+  const char evalref[] = "$(-*-eval-flags-*-)";
+  const struct command_switch *cs;
   char *flagstring;
   register char *p;
   unsigned int words;
@@ -2726,7 +2771,7 @@ define_makeflags (int all, int makefile)
   unsigned int flagslen = 0;
 #define	ADD_FLAG(ARG, LEN) \
   do {									      \
-    struct flag *new = alloca (sizeof (struct flag));                         \
+    struct flag *new = alloca (sizeof (struct flag));			      \
     new->cs = cs;							      \
     new->arg = (ARG);							      \
     new->next = flags;							      \
@@ -2734,7 +2779,8 @@ define_makeflags (int all, int makefile)
     if (new->arg == 0)							      \
       ++flagslen;		/* Just a single flag letter.  */	      \
     else								      \
-      flagslen += 1 + 1 + 1 + 1 + 3 * (LEN); /* " -x foo" */		      \
+      /* " -x foo", plus space to expand "foo".  */			      \
+      flagslen += 1 + 1 + 1 + 1 + (3 * (LEN));				      \
     if (!short_option (cs->c))						      \
       /* This switch has no single-letter version, so we use the long.  */    \
       flagslen += 2 + strlen (cs->long_name);				      \
@@ -2821,7 +2867,8 @@ define_makeflags (int all, int makefile)
 	  abort ();
 	}
 
-  flagslen += 4 + sizeof posixref; /* Four more for the possible " -- ".  */
+  /* Four more for the possible " -- ".  */
+  flagslen += 4 + sizeof (posixref) + sizeof (evalref);
 
 #undef	ADD_FLAG
 
@@ -2893,7 +2940,20 @@ define_makeflags (int all, int makefile)
 
   /* Since MFLAGS is not parsed for flags, there is no reason to
      override any makefile redefinition.  */
-  (void) define_variable ("MFLAGS", 6, flagstring, o_env, 1);
+  define_variable_cname ("MFLAGS", flagstring, o_env, 1);
+
+  /* Write a reference to -*-eval-flags-*-, which contains all the --eval
+     flag options.  */
+  if (eval_strings)
+    {
+      if (p == &flagstring[1])
+	/* No flags written, so elide the leading dash already written.  */
+	p = flagstring;
+      else
+        *p++ = ' ';
+      memcpy (p, evalref, sizeof (evalref) - 1);
+      p += sizeof (evalref) - 1;
+    }
 
   if (all && command_variables != 0)
     {
@@ -2920,13 +2980,13 @@ define_makeflags (int all, int makefile)
       /* Copy in the string.  */
       if (posix_pedantic)
 	{
-	  memcpy (p, posixref, sizeof posixref - 1);
-	  p += sizeof posixref - 1;
+	  memcpy (p, posixref, sizeof (posixref) - 1);
+	  p += sizeof (posixref) - 1;
 	}
       else
 	{
-	  memcpy (p, ref, sizeof ref - 1);
-	  p += sizeof ref - 1;
+	  memcpy (p, ref, sizeof (ref) - 1);
+	  p += sizeof (ref) - 1;
 	}
     }
   else if (p == &flagstring[1])
@@ -2945,14 +3005,14 @@ define_makeflags (int all, int makefile)
   if (flagstring[0] == '-' && flagstring[1] != '-')
     ++flagstring;
 
-  v = define_variable ("MAKEFLAGS", 9, flagstring,
-		       /* This used to use o_env, but that lost when a
-			  makefile defined MAKEFLAGS.  Makefiles set
-			  MAKEFLAGS to add switches, but we still want
-			  to redefine its value with the full set of
-			  switches.  Of course, an override or command
-			  definition will still take precedence.  */
-		       o_file, 1);
+  v = define_variable_cname ("MAKEFLAGS", flagstring,
+                             /* This used to use o_env, but that lost when a
+                                makefile defined MAKEFLAGS.  Makefiles set
+                                MAKEFLAGS to add switches, but we still want
+                                to redefine its value with the full set of
+                                switches.  Of course, an override or command
+                                definition will still take precedence.  */
+                             o_file, 1);
 
   if (! all)
     /* The first time we are called, set MAKEFLAGS to always be exported.
