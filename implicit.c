@@ -180,10 +180,10 @@ struct tryrule
 int
 stemlen_compare (const void *v1, const void *v2)
 {
-  const struct tryrule *r1 = (const struct tryrule *)v1;
-  const struct tryrule *r2 = (const struct tryrule *)v2;
+  const struct tryrule *r1 = v1;
+  const struct tryrule *r2 = v2;
   int r = r1->stemlen - r2->stemlen;
-  return r != 0 ? r : (int)(r1->order - r1->order);
+  return r != 0 ? r : (int)(r1->order - r2->order);
 }
 
 /* Search the pattern rules for a rule with an existing dependency to make
