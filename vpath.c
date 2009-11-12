@@ -320,11 +320,12 @@ gpath_search (const char *file, unsigned int len)
 /* Search the given VPATH list for a directory where the name pointed to by
    FILE exists.  If it is found, we return a cached name of the existing file
    and set *MTIME_PTR (if MTIME_PTR is not NULL) to its modtime (or zero if no
-   stat call was done).  Otherwise we return NULL.  */
+   stat call was done). Also set the matching directory index in PATH_INDEX
+   if it is not NULL. Otherwise we return NULL.  */
 
 static const char *
 selective_vpath_search (struct vpath *path, const char *file,
-                        FILE_TIMESTAMP *mtime_ptr)
+                        FILE_TIMESTAMP *mtime_ptr, unsigned int* path_index)
 {
   int not_target;
   char *name;
@@ -504,6 +505,9 @@ selective_vpath_search (struct vpath *path, const char *file,
 
           /* Store the name we found and return it.  */
 
+          if (path_index)
+            *path_index = i;
+
           return strcache_add_len (name, (p + 1 - name) + flen);
 	}
     }
@@ -515,10 +519,12 @@ selective_vpath_search (struct vpath *path, const char *file,
 /* Search the VPATH list whose pattern matches FILE for a directory where FILE
    exists.  If it is found, return the cached name of an existing file, and
    set *MTIME_PTR (if MTIME_PTR is not NULL) to its modtime (or zero if no
-   stat call was done).  Otherwise we return 0.  */
+   stat call was done). Also set the matching directory index in VPATH_INDEX
+   and PATH_INDEX if they are not NULL.  Otherwise we return 0.  */
 
 const char *
-vpath_search (const char *file, FILE_TIMESTAMP *mtime_ptr)
+vpath_search (const char *file, FILE_TIMESTAMP *mtime_ptr,
+              unsigned int* vpath_index, unsigned int* path_index)
 {
   struct vpath *v;
 
@@ -532,23 +538,40 @@ vpath_search (const char *file, FILE_TIMESTAMP *mtime_ptr)
       || (vpaths == 0 && general_vpath == 0))
     return 0;
 
+  if (vpath_index)
+    {
+      *vpath_index = 0;
+      *path_index = 0;
+    }
+
   for (v = vpaths; v != 0; v = v->next)
-    if (pattern_matches (v->pattern, v->percent, file))
-      {
-        const char *p = selective_vpath_search (v, file, mtime_ptr);
-        if (p)
-          return p;
-      }
+    {
+      if (pattern_matches (v->pattern, v->percent, file))
+        {
+          const char *p = selective_vpath_search (
+            v, file, mtime_ptr, path_index);
+          if (p)
+            return p;
+        }
+
+      if (vpath_index)
+        ++*vpath_index;
+    }
+
 
   if (general_vpath != 0)
     {
-      const char *p = selective_vpath_search (general_vpath, file, mtime_ptr);
+      const char *p = selective_vpath_search (
+        general_vpath, file, mtime_ptr, path_index);
       if (p)
         return p;
     }
 
   return 0;
 }
+
+
+
 
 /* Print the data base of VPATH search paths.  */
 

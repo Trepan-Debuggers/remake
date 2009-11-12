@@ -1280,7 +1280,7 @@ f_mtime (struct file *file, int search)
       if (mtime == NONEXISTENT_MTIME && search && !file->ignore_vpath)
 	{
 	  /* If name_mtime failed, search VPATH.  */
-	  const char *name = vpath_search (file->name, &mtime);
+	  const char *name = vpath_search (file->name, &mtime, NULL, NULL);
 	  if (name
 	      /* Last resort, is it a library (-lxxx)?  */
 	      || (file->name[0] == '-' && file->name[1] == 'l'
@@ -1533,6 +1533,10 @@ library_search (const char *lib, FILE_TIMESTAMP *mtime_ptr)
   unsigned int len;
   unsigned int liblen;
 
+  /* Information about the earliest (in the vpath sequence) match.  */
+  unsigned int best_vpath, best_path;
+  unsigned int std_dirs = 0;
+
   char **dp;
 
   libpatterns = xstrdup (variable_expand ("$(.LIBPATTERNS)"));
@@ -1541,7 +1545,9 @@ library_search (const char *lib, FILE_TIMESTAMP *mtime_ptr)
   lib += 2;
   liblen = strlen (lib);
 
-  /* Loop through all the patterns in .LIBPATTERNS, and search on each one.  */
+  /* Loop through all the patterns in .LIBPATTERNS, and search on each one.
+     To implement the linker-compatible behavior we have to search through
+     all entries in .LIBPATTERNS and choose the "earliest" one.  */
   p2 = libpatterns;
   while ((p = find_next_token (&p2, &len)) != 0)
     {
@@ -1577,51 +1583,80 @@ library_search (const char *lib, FILE_TIMESTAMP *mtime_ptr)
 	  if (mtime_ptr != 0)
 	    *mtime_ptr = mtime;
 	  file = strcache_add (libbuf);
-          goto fini;
+          /* This by definition will have the best index, so stop now.  */
+          break;
 	}
 
       /* Now try VPATH search on that.  */
 
       {
-        file = vpath_search (libbuf, mtime_ptr);
-        if (file)
-          goto fini;
+        unsigned int vpath_index, path_index;
+        const char* f = vpath_search (libbuf, mtime_ptr ? &mtime : NULL,
+                                      &vpath_index, &path_index);
+        if (f)
+          {
+            /* If we have a better match, record it.  */
+            if (file == 0 ||
+                vpath_index < best_vpath ||
+                (vpath_index == best_vpath && path_index < best_path))
+              {
+                file = f;
+                best_vpath = vpath_index;
+                best_path = path_index;
+
+                if (mtime_ptr != 0)
+                  *mtime_ptr = mtime;
+              }
+          }
       }
 
       /* Now try the standard set of directories.  */
 
       if (!buflen)
-	{
-	  for (dp = dirs; *dp != 0; ++dp)
-	    {
-	      int l = strlen (*dp);
-	      if (l > libdir_maxlen)
-		libdir_maxlen = l;
-	    }
-	  buflen = strlen (libbuf);
-	  buf = xmalloc(libdir_maxlen + buflen + 2);
-	}
+        {
+          for (dp = dirs; *dp != 0; ++dp)
+            {
+              int l = strlen (*dp);
+              if (l > libdir_maxlen)
+                libdir_maxlen = l;
+              std_dirs++;
+            }
+          buflen = strlen (libbuf);
+          buf = xmalloc(libdir_maxlen + buflen + 2);
+        }
       else if (buflen < strlen (libbuf))
-	{
-	  buflen = strlen (libbuf);
-	  buf = xrealloc (buf, libdir_maxlen + buflen + 2);
-	}
+        {
+          buflen = strlen (libbuf);
+          buf = xrealloc (buf, libdir_maxlen + buflen + 2);
+        }
 
-      for (dp = dirs; *dp != 0; ++dp)
-	{
-	  sprintf (buf, "%s/%s", *dp, libbuf);
-	  mtime = name_mtime (buf);
-	  if (mtime != NONEXISTENT_MTIME)
-	    {
-	      if (mtime_ptr != 0)
-		*mtime_ptr = mtime;
-	      file = strcache_add (buf);
-              goto fini;
-	    }
-	}
+      {
+        /* Use the last std_dirs index for standard directories. This
+           was it will always be greater than the VPATH index.  */
+        unsigned int vpath_index = ~((unsigned int)0) - std_dirs;
+
+        for (dp = dirs; *dp != 0; ++dp)
+	  {
+            sprintf (buf, "%s/%s", *dp, libbuf);
+            mtime = name_mtime (buf);
+            if (mtime != NONEXISTENT_MTIME)
+	      {
+                if (file == 0 || vpath_index < best_vpath)
+                  {
+                    file = strcache_add (buf);
+                    best_vpath = vpath_index;
+
+                    if (mtime_ptr != 0)
+                      *mtime_ptr = mtime;
+                  }
+              }
+
+            vpath_index++;
+          }
+      }
+
     }
 
- fini:
   free (libpatterns);
   return file;
 }

@@ -1,3 +1,8 @@
+2009-11-12  Boris Kolpackov  <boris@codesynthesis.com>
+
+	* scripts/features/vpath3: Test for the new library search
+	behavior.
+
 2009-10-06  Boris Kolpackov  <boris@codesynthesis.com>
 
 	* scripts/features/se_explicit: Enable the test for now fixed
