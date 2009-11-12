@@ -1,3 +1,23 @@
+2009-11-12  Boris Kolpackov  <boris@codesynthesis.com>
+
+	* vpath.c (vpath_search, selective_vpath_search): Add index arguments
+	which allows the caller to get the index of the matching directory.
+
+	* make.h (vpath_search): Update prototype.
+
+	* remake.c (library_search): Implement linker-compatible library
+	search. Use the new VPATH_SEARCH index functionality to keep track
+	of the directory index for each match. Select the match with the
+	lowest directory index.
+
+	* implicit.c (pattern_search): Pass NULL for the index arguments in
+	the VPATH_SEARCH call.
+
+	* doc/make.texi (Directory Search for Link Libraries): Describe the
+	new search behavior.
+
+	* NEWS: Add a note about the new behavior.
+
 2009-10-25  Paul Smith  <psmith@gnu.org>
 
 	* AUTHORS, et.al.: Update copyright years.

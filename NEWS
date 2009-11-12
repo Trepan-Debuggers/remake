@@ -37,6 +37,15 @@ Version 3.81.90
   patterns are preferred. To detect this feature search for 'shortest-stem'
   in the .FEATURES special variable.
 
+* WARNING: Backward-incompatibility!
+  The library search behavior has changed to be compatible with the standard
+  linker behavior. Prior to this version for prerequisites specified using
+  the -lfoo syntax make fist searched for libfoo.so in the current directory,
+  vpath directories, and system directories. If that didn't yield a match,
+  make then searched for libfoo.a in these directories. Starting with this
+  version make searches first for libfoo.so and then for libfoo.a in each
+  of these directories in order.
+
 * New command line option: --eval=STRING causes STRING to be evaluated as
   makefile syntax (akin to using the $(eval ...) function).  The evaluation is
   performed after all default rules and variables are defined, but before any

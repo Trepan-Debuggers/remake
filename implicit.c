@@ -721,7 +721,7 @@ pattern_search (struct file *file, int archive,
                      "lib/foo.c", and VPATH=src, searches for
                      "src/lib/foo.c".  */
                   {
-                    const char *vname = vpath_search (d->name, 0);
+                    const char *vname = vpath_search (d->name, 0, NULL, NULL);
                     if (vname)
                       {
                         DBS (DB_IMPLICIT,

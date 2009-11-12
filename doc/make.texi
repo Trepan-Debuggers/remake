@@ -4,7 +4,7 @@
 
 @include version.texi
 @set EDITION 0.70
-@set RCSID $Id: make.texi,v 1.63 2009/10/25 00:46:52 psmith Exp $
+@set RCSID $Id: make.texi,v 1.64 2009/11/12 16:42:36 bosk Exp $
 
 @settitle GNU @code{make}
 @setchapternewpage odd
@@ -2425,16 +2425,14 @@ file, and the @emph{file name} of a library generally looks like
 @file{lib@var{name}.a}, not like @samp{-l@var{name}}.)@refill
 
 When a prerequisite's name has the form @samp{-l@var{name}}, @code{make}
-handles it specially by searching for the file @file{lib@var{name}.so} in
-the current directory, in directories specified by matching @code{vpath}
+handles it specially by searching for the file @file{lib@var{name}.so},
+and, if it is not found, for the file @file{lib@var{name}.a} in the current
+directory, in directories specified by matching @code{vpath}
 search paths and the @code{VPATH} search path, and then in the
 directories @file{/lib}, @file{/usr/lib}, and @file{@var{prefix}/lib}
 (normally @file{/usr/local/lib}, but MS-DOS/MS-Windows versions of
 @code{make} behave as if @var{prefix} is defined to be the root of the
 DJGPP installation tree).
-
-If that file is not found, then the file @file{lib@var{name}.a} is
-searched for, in the same directories as above.
 
 For example, if there is a @file{/usr/lib/libcurses.a} library on your
 system (and no @file{/usr/lib/libcurses.so} file), then
@@ -2457,8 +2455,7 @@ via the @code{.LIBPATTERNS} variable.  Each word in the value of this
 variable is a pattern string.  When a prerequisite like
 @samp{-l@var{name}} is seen, @code{make} will replace the percent in
 each pattern in the list with @var{name} and perform the above directory
-searches using that library filename.  If no library is found, the next
-word in the list will be used.
+searches using each library filename.
 
 The default value for @code{.LIBPATTERNS} is @samp{lib%.so lib%.a},
 which provides the default behavior described above.
