@@ -1,3 +1,33 @@
+2009-11-15  Paul Smith  <psmith@gnu.org>
+
+	Patches for VMS provided by Hartmut Becker <Hartmut.Becker@hp.com>
+
+	* vmsjobs.c (ctrlYPressed) [VMS]: Deal with CTRL-Y.
+	(vmsHandleChildTerm) [VMS]: Ditto.
+	(astYHandler) [VMS]: Ditto.
+	(tryToSetupYAst) [VMS]: Ditto.
+	(child_execute_job) [VMS]: Ditto.
+
+	* vmsify.c (trnlog) [VMS]: Fix const errors.
+	(vmsify) [VMS]: Ditto.
+
+	* readme.vms [VMS]: Update with notes for 3.82.
+
+	* job.h (comname) [VMS]: Remember the temporary command filename
+
+	* dir.c (vmsify) [VMS]: Fix const errors.
+	(vms_hash) [VMS]: Ditto.
+	(vmsstat_dir) [VMS]: Ditto.
+	(find_directory) [VMS]: Fix case-insensitive option for VMS
+	(dir_contents_file_exists_p) [VMS]: Ditto.
+	(file_impossible) [VMS]: Ditto.
+
+	* config.h-vms.template (HAVE_FDOPEN) [VMS]: Have it.
+	(HAVE_STRCASECMP) [VMS]: Ditto.
+
+	* arscan.c (VMS_get_member_info) [VMS]: Fix timezone computation.
+	(ar_scan) [VMS]: Fix const error.
+
 2009-11-12  Boris Kolpackov  <boris@codesynthesis.com>
 
 	* vpath.c (vpath_search, selective_vpath_search): Add index arguments

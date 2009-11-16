@@ -139,6 +139,10 @@ getwd (char *cwd)
     return (getcwd (buf, 512));
 }
 
+#if 0
+/*
+ * Is this used? I don't see any reference, so I suggest to remove it.
+ */
 int
 vms_stat (char *name, struct stat *buf)
 {
@@ -235,6 +239,7 @@ vms_stat (char *name, struct stat *buf)
 
   return 0;
 }
+#endif
 
 char *
 cvt_time (unsigned long tval)

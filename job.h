@@ -53,6 +53,7 @@ struct child
 #ifdef VMS
     int efn;			/* Completion event flag number */
     int cstatus;		/* Completion status */
+    char *comname;              /* Temporary command file name */
 #endif
     char *sh_batch_file;        /* Script file for shell commands */
     unsigned int remote:1;	/* Nonzero if executing remotely.  */

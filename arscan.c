@@ -81,7 +81,28 @@ VMS_get_member_info (struct dsc$descriptor_s *module, unsigned long *rfa)
    * but that decc$fix_time() isn't documented to work this way.  Let me
    * know if this causes problems in other VMS environments.
    */
-  val = decc$fix_time (&mhd->mhd$l_datim) + timezone - daylight*3600;
+  {
+    /* Modified by M. Gehre at 11-JAN-2008 because old formula is wrong:
+     * val = decc$fix_time (&mhd->mhd$l_datim) + timezone - daylight*3600;
+     * a) daylight specifies, if the timezone has daylight saving enabled, not
+     *    if it is active
+     * b) what we need is the information, if daylight saving was active, if
+     *    the library module was replaced. This information we get using the
+     *    localtime function
+     */
+
+    struct tm *tmp;
+
+    /* Conversion from VMS time to C time */
+    val = decc$fix_time (&mhd->mhd$l_datim);
+
+    /*
+     * Conversion from local time (stored in library) to GMT (needed for gmake)
+     * Note: The tm_gmtoff element is a VMS extension to the ANSI standard.
+     */
+    tmp = localtime (&val);
+    val -= tmp->tm_gmtoff;
+  }
 #endif
 
   for (i = 0; i < module->dsc$w_length; i++)
@@ -155,7 +176,8 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
       return -2;
     }
 
-  libdesc.dsc$a_pointer = archive;
+  /* there is no such descriptor with "const char *dsc$a_pointer" */
+  libdesc.dsc$a_pointer = (char *)archive;
   libdesc.dsc$w_length = strlen (archive);
 
   status = lbr$open (&VMS_lib_idx, &libdesc, 0, 0, 0, 0, 0);

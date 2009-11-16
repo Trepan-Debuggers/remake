@@ -120,7 +120,11 @@ trnlog (const char *name)
   struct dsc$descriptor_s name_dsc;
   char *s;
 
-  INIT_DSC_CSTRING (name_dsc, name);
+  /*
+   * the string isn't changed, but there is no string descriptor with
+   * "const char *dsc$a_pointer"
+   */
+  INIT_DSC_CSTRING (name_dsc, (char *)name);
 
   stat = lib$sys_trnlog (&name_dsc, &resltlen, &reslt_dsc);
 
@@ -227,6 +231,9 @@ vmsify (const char *name, int type)
   char *vptr;
   int as_dir;
   int count;
+  const char *s;
+  const char *s1;
+  const char *s2;
 
   if (name == 0)
     return 0;
@@ -239,8 +246,8 @@ vmsify (const char *name, int type)
 
   if (t != 0)
     {
-      const char *s1;
-      const char *s2;
+//      const char *s1;
+//      const char *s2;
 
       if (type == 1)
         {
@@ -272,8 +279,9 @@ vmsify (const char *name, int type)
 
   if (t != 0)
     {
-      const char *s;
-      const char *s1 = strchr (t+1, '[');
+//      const char *s;
+//      const char *s1 = strchr (t+1, '[');
+      s1 = strchr (t+1, '[');
       if (s1 == 0)
 	{
           strcpy (vmsname, name);
@@ -388,8 +396,8 @@ vmsify (const char *name, int type)
 
 	  case 3:				/* '//' at start */
             {
-            const char *s;
-            const char *s1;
+//            const char *s;
+//            const char *s1;
             char *vp;
 	    while (*fptr == '/')	/* collapse all '/' */
 	      fptr++;

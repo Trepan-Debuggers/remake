@@ -76,6 +76,9 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* Define to 1 if you don't have vprintf but do have _doprnt.  */
 /* #undef HAVE_DOPRNT */
 
+/* Define to 1 if you have the fdopen function.  */
+#define HAVE_FDOPEN 1
+
 /* Define to 1 if your system has a working fnmatch function.  */
 /* #undef HAVE_FNMATCH */
 
@@ -289,7 +292,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* #undef HAVE_SOCKET */
 
 /* Define to 1 if you have the strcasecmp function.  */
-/* #undef HAVE_STRCASECMP */
+#define HAVE_STRCASECMP 1
 
 /* Define to 1 if you have the strcmpi function.  */
 /* #undef HAVE_STRCMPI */
