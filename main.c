@@ -1127,20 +1127,17 @@ main (int argc, char **argv, char **envp)
   /* Set up .FEATURES */
   define_variable_cname (".FEATURES",
                          "target-specific order-only second-expansion else-if"
-                         "shortest-stem undefine",
-                         o_default, 0);
+                         "shortest-stem undefine"
 #ifndef NO_ARCHIVES
-  do_variable_definition (NILF, ".FEATURES", "archives",
-                          o_default, f_append, 0);
+                         "archives"
 #endif
 #ifdef MAKE_JOBSERVER
-  do_variable_definition (NILF, ".FEATURES", "jobserver",
-                          o_default, f_append, 0);
+                         "jobserver"
 #endif
 #ifdef MAKE_SYMLINKS
-  do_variable_definition (NILF, ".FEATURES", "check-symlink",
-                          o_default, f_append, 0);
+                         "check-symlink"
 #endif
+                         , o_default, 0);
 
   /* Read in variables from the environment.  It is important that this be
      done before $(MAKE) is figured out so its definitions will not be

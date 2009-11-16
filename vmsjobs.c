@@ -110,8 +110,11 @@ vms_handle_apos (char *p)
   return p;
 }
 
-/* This is called as an AST when a child process dies (it won't get
-   interrupted by anything except a higher level AST).
+static int ctrlYPressed= 0;
+/* This is called at main or AST level. It is at AST level for DONTWAITFORCHILD
+   and at main level otherwise. In any case it is called when a child process
+   terminated. At AST level it won't get interrupted by anything except a
+   inner mode level AST.
 */
 int
 vmsHandleChildTerm(struct child *child)
@@ -123,6 +126,12 @@ vmsHandleChildTerm(struct child *child)
     vms_jobsefnmask &= ~(1 << (child->efn - 32));
 
     lib$free_ef(&child->efn);
+    if (child->comname)
+      {
+        if (!ISDB (DB_JOBS)&&!ctrlYPressed)
+          unlink (child->comname);
+        free (child->comname);
+      }
 
     (void) sigblock (fatal_signal_mask);
 
@@ -219,8 +228,7 @@ vmsHandleChildTerm(struct child *child)
 static int ctrlMask= LIB$M_CLI_CTRLY;
 static int oldCtrlMask;
 static int setupYAstTried= 0;
-static int pidToAbort= 0;
-static int chan= 0;
+static unsigned short int chan= 0;
 
 static void
 reEnableAst(void)
@@ -228,14 +236,15 @@ reEnableAst(void)
 	lib$enable_ctrl (&oldCtrlMask,0);
 }
 
-static void
-astHandler (void)
+static int
+astYHandler (void)
 {
-	if (pidToAbort) {
-		sys$forcex (&pidToAbort, 0, SS$_ABORT);
-		pidToAbort= 0;
-	}
+	struct child *c;
+	for (c = children; c != 0; c = c->next)
+		sys$delprc (&c->pid, 0, 0);
+	ctrlYPressed= 1;
 	kill (getpid(),SIGQUIT);
+	return SS$_NORMAL;
 }
 
 static void
@@ -247,32 +256,28 @@ tryToSetupYAst(void)
 		short int	status, count;
 		int	dvi;
 	} iosb;
+	unsigned short int loc_chan;
 
 	setupYAstTried++;
 
-	if (!chan) {
-		status= sys$assign(&inputDsc,&chan,0,0);
+	if (chan)
+          loc_chan= chan;
+	else {
+		status= sys$assign(&inputDsc,&loc_chan,0,0);
 		if (!(status&SS$_NORMAL)) {
 			lib$signal(status);
 			return;
 		}
 	}
-	status= sys$qiow (0, chan, IO$_SETMODE|IO$M_CTRLYAST,&iosb,0,0,
-		astHandler,0,0,0,0,0);
-	if (status==SS$_NORMAL)
-		status= iosb.status;
-        if (status==SS$_ILLIOFUNC || status==SS$_NOPRIV) {
-		sys$dassgn(chan);
-#ifdef	CTRLY_ENABLED_ANYWAY
-		fprintf (stderr,
-                         _("-warning, CTRL-Y will leave sub-process(es) around.\n"));
-#else
-		return;
-#endif
-	}
-	else if (!(status&SS$_NORMAL)) {
-		sys$dassgn(chan);
-		lib$signal(status);
+	status= sys$qiow (0, loc_chan, IO$_SETMODE|IO$M_CTRLYAST,&iosb,0,0,
+                          astYHandler,0,0,0,0,0);
+        if (status==SS$_NORMAL)
+          	status= iosb.status;
+	if (status!=SS$_NORMAL) {
+		if (!chan)
+			sys$dassgn(loc_chan);
+		if (status!=SS$_ILLIOFUNC && status!=SS$_NOPRIV)
+			lib$signal(status);
 		return;
 	}
 
@@ -287,6 +292,8 @@ tryToSetupYAst(void)
 		lib$signal(status);
 		return;
 	}
+	if (!chan)
+		chan = loc_chan;
 }
 
 int
@@ -299,13 +306,14 @@ child_execute_job (char *argv, struct child *child)
   static struct dsc$descriptor_s ofiledsc;
   static struct dsc$descriptor_s efiledsc;
   int have_redirection = 0;
+  int have_append = 0;
   int have_newline = 0;
 
   int spflags = CLI$M_NOWAIT;
   int status;
   char *cmd = alloca (strlen (argv) + 512), *p, *q;
   char ifile[256], ofile[256], efile[256];
-  char *comname = 0;
+  int comnamelen;
   char procname[100];
   int in_string;
 
@@ -314,6 +322,7 @@ child_execute_job (char *argv, struct child *child)
   ifile[0] = 0;
   ofile[0] = 0;
   efile[0] = 0;
+  child->comname = NULL;
 
   DB (DB_JOBS, ("child_execute_job (%s)\n", argv));
 
@@ -383,6 +392,11 @@ child_execute_job (char *argv, struct child *child)
 	      }
 	    else
 	      {
+                if (*(p+1) == '>')
+                  {
+                    have_append = 1;
+                    p += 1;
+                  }
 		p = vms_redirect (&ofiledsc, ofile, p);
 	      }
 	    *q = ' ';
@@ -481,9 +495,10 @@ child_execute_job (char *argv, struct child *child)
 	  return 0;
 	}
 
-      outfile = open_tmpfile (&comname, "sys$scratch:CMDXXXXXX.COM");
+      outfile = open_tmpfile (&child->comname, "sys$scratch:CMDXXXXXX.COM");
       if (outfile == 0)
 	pfatal_with_name (_("fopen (temporary file)"));
+      comnamelen = strlen (child->comname);
 
       if (ifile[0])
 	{
@@ -501,9 +516,19 @@ child_execute_job (char *argv, struct child *child)
 
       if (ofile[0])
 	{
-	  fprintf (outfile, "$ define sys$output %s\n", ofile);
-	  DB (DB_JOBS, (_("Redirected output to %s\n"), ofile));
-	  ofiledsc.dsc$w_length = 0;
+          if (have_append)
+            {
+              fprintf (outfile, "$ set noon\n");
+              fprintf (outfile, "$ define sys$output %.*s\n", comnamelen-3, child->comname);
+              DB (DB_JOBS, (_("Append output to %s\n"), ofile));
+              ofiledsc.dsc$w_length = 0;
+            }
+          else
+            {
+              fprintf (outfile, "$ define sys$output %s\n", ofile);
+              DB (DB_JOBS, (_("Redirected output to %s\n"), ofile));
+              ofiledsc.dsc$w_length = 0;
+            }
 	}
 
       p = sep = q = cmd;
@@ -558,12 +583,25 @@ child_execute_job (char *argv, struct child *child)
 	    }
   	}
 
-      fwrite (p, 1, q - p, outfile);
+      if (*p)
+        {
+          fwrite (p, 1, --q - p, outfile);
       fputc ('\n', outfile);
+        }
+
+      if (have_append)
+        {
+          fprintf (outfile, "$ deassign sys$output ! 'f$verify(0)\n");
+          fprintf (outfile, "$ append:=append\n");
+          fprintf (outfile, "$ delete:=delete\n");
+          fprintf (outfile, "$ append/new %.*s %s\n", comnamelen-3, child->comname, ofile);
+          fprintf (outfile, "$ delete %.*s;*\n", comnamelen-3, child->comname);
+          DB (DB_JOBS, (_("Append %.*s and cleanup\n"), comnamelen-3, child->comname));
+        }
 
       fclose (outfile);
 
-      sprintf (cmd, "$ @%s", comname);
+      sprintf (cmd, "$ @%s", child->comname);
 
       DB (DB_JOBS, (_("Executing %s instead\n"), cmd));
     }
@@ -578,7 +616,15 @@ child_execute_job (char *argv, struct child *child)
     {
       status = lib$get_ef ((unsigned long *)&child->efn);
       if (!(status & 1))
-	return 0;
+        {
+          if (child->comname)
+            {
+              if (!ISDB (DB_JOBS))
+                unlink (child->comname);
+              free (child->comname);
+            }
+          return 0;
+        }
     }
 
   sys$clref (child->efn);
@@ -647,9 +693,7 @@ child_execute_job (char *argv, struct child *child)
 		      0, 0, 0);
   if (status & 1)
     {
-      pidToAbort= child->pid;
       status= sys$waitfr (child->efn);
-      pidToAbort= 0;
       vmsHandleChildTerm(child);
     }
 #else
@@ -676,9 +720,6 @@ child_execute_job (char *argv, struct child *child)
           errno = EFAIL;
         }
     }
-
-  if (comname && !ISDB (DB_JOBS))
-    unlink (comname);
 
   return (status & 1);
 }

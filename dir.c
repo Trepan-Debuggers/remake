@@ -23,7 +23,8 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 # include <dirent.h>
 # define NAMLEN(dirent) strlen((dirent)->d_name)
 # ifdef VMS
-char *vmsify (char *name, int type);
+/* its prototype is in vmsdir.h, which is not needed for HAVE_DIRENT_H */
+const char *vmsify (const char *name, int type);
 # endif
 #else
 # define dirent direct
@@ -145,7 +146,7 @@ downcase (const char *filename)
 #ifdef VMS
 
 static int
-vms_hash (char *name)
+vms_hash (const char *name)
 {
   int h = 0;
   int g;
@@ -171,7 +172,7 @@ vms_hash (char *name)
 
 /* fake stat entry for a directory */
 static int
-vmsstat_dir (char *name, struct stat *st)
+vmsstat_dir (const char *name, struct stat *st)
 {
   char *s;
   int h;
@@ -184,6 +185,7 @@ vmsstat_dir (char *name, struct stat *st)
   s = strchr (name, ':');	/* find device */
   if (s)
     {
+      /* to keep the compiler happy we said "const char *name", now we cheat */
       *s++ = 0;
       st->st_dev = (char *)vms_hash (name);
       h = vms_hash (s);
@@ -192,8 +194,7 @@ vmsstat_dir (char *name, struct stat *st)
   else
     {
       st->st_dev = 0;
-      s = name;
-      h = vms_hash (s);
+      h = vms_hash (name);
     }
 
   st->st_ino[0] = h & 0xff;
@@ -449,7 +450,11 @@ find_directory (const char *name)
 
       p = name + strlen (name);
       dir = xmalloc (sizeof (struct directory));
+#if defined(HAVE_CASE_INSENSITIVE_FS) && defined(VMS)
+      dir->name = strcache_add_len (downcase(name), p - name);
+#else
       dir->name = strcache_add_len (name, p - name);
+#endif
       hash_insert_at (&directories, dir, dir_slot);
       /* The directory is not in the name hash table.
 	 Find its device and inode numbers, and look it up by them.  */
@@ -706,7 +711,11 @@ dir_contents_file_exists_p (struct directory_contents *dir,
 #endif
 	{
 	  df = xmalloc (sizeof (struct dirfile));
+#if defined(HAVE_CASE_INSENSITIVE_FS) && defined(VMS)
+          df->name = strcache_add_len (downcase(d->d_name), len);
+#else
 	  df->name = strcache_add_len (d->d_name, len);
+#endif
 	  df->length = len;
 	  df->impossible = 0;
 	  hash_insert_at (&dir->dirfiles, df, dirfile_slot);
@@ -880,7 +889,11 @@ file_impossible (const char *filename)
 
   new = xmalloc (sizeof (struct dirfile));
   new->length = strlen (filename);
+#if defined(HAVE_CASE_INSENSITIVE_FS) && defined(VMS)
+  new->name = strcache_add_len (downcase(filename), new->length);
+#else
   new->name = strcache_add_len (filename, new->length);
+#endif
   new->impossible = 1;
   hash_insert (&dir->contents->dirfiles, new);
 }
