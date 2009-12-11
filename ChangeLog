@@ -1,3 +1,8 @@
+2009-12-11  Eli Zaretskii  <eliz@gnu.org>
+
+	* file.c (lookup_file) [HAVE_DOS_PATHS]: Treat '\\' like we do
+	with '/'.
+
 2009-11-15  Paul Smith  <psmith@gnu.org>
 
 	Patches for VMS provided by Hartmut Becker <Hartmut.Becker@hp.com>
