@@ -103,10 +103,20 @@ lookup_file (const char *name)
   while (name[0] == '[' && name[1] == ']' && name[2] != '\0')
       name += 2;
 #endif
-  while (name[0] == '.' && name[1] == '/' && name[2] != '\0')
+  while (name[0] == '.'
+#ifdef HAVE_DOS_PATHS
+	 && (name[1] == '/' || name[1] == '\\')
+#else
+	 && name[1] == '/'
+#endif
+	 && name[2] != '\0')
     {
       name += 2;
-      while (*name == '/')
+      while (*name == '/'
+#ifdef HAVE_DOS_PATHS
+	     || *name == '\\'
+#endif
+	     )
 	/* Skip following slashes: ".//foo" is "foo", not "/foo".  */
 	++name;
     }
