@@ -1,5 +1,9 @@
 2009-12-11  Eli Zaretskii  <eliz@gnu.org>
 
+	* job.c (construct_command_argv_internal) <sh_cmds_dos>
+	[WINDOWS32]: Add "echo." and a few more commands that are built
+	into cmd.exe.  Fixes Savannah bug #28126.
+
 	* file.c (lookup_file) [HAVE_DOS_PATHS]: Treat '\\' like we do
 	with '/'.
 
