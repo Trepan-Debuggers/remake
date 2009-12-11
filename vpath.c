@@ -137,7 +137,7 @@ build_vpath_lists ()
     }
 }
 
-/* Construct the VPATH listing for the pattern and searchpath given.
+/* Construct the VPATH listing for the PATTERN and DIRPATH given.
 
    This function is called to generate selective VPATH lists and also for
    the general VPATH list (which is in fact just a selective VPATH that
@@ -145,9 +145,9 @@ build_vpath_lists ()
    linked list of all selective VPATH lists or in the GENERAL_VPATH
    variable.
 
-   If SEARCHPATH is nil, remove all previous listings with the same
+   If DIRPATH is nil, remove all previous listings with the same
    pattern.  If PATTERN is nil, remove all VPATH listings.  Existing
-   and readable directories that are not "." given in the searchpath
+   and readable directories that are not "." given in the DIRPATH
    separated by the path element separator (defined in make.h) are
    loaded into the directory hash table if they are not there already
    and put in the VPATH searchpath for the given pattern with trailing
