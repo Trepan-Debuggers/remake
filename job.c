@@ -2301,12 +2301,15 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 			     0 };
 #elif defined (WINDOWS32)
   static char sh_chars_dos[] = "\"|&<>";
-  static char *sh_cmds_dos[] = { "break", "call", "cd", "chcp", "chdir", "cls",
-			     "copy", "ctty", "date", "del", "dir", "echo",
-			     "erase", "exit", "for", "goto", "if", "if", "md",
-			     "mkdir", "path", "pause", "prompt", "rd", "rem",
-                             "ren", "rename", "rmdir", "set", "shift", "time",
-                             "type", "ver", "verify", "vol", ":", 0 };
+  static char *sh_cmds_dos[] = { "assoc", "break", "call", "cd", "chcp",
+				 "chdir", "cls", "color", "copy", "ctty",
+				 "date", "del", "dir", "echo", "echo.",
+				 "endlocal", "erase", "exit", "for", "ftype",
+				 "goto", "if", "if", "md", "mkdir", "path",
+				 "pause", "prompt", "rd", "rem", "ren",
+				 "rename", "rmdir", "set", "setlocal",
+				 "shift", "time", "title", "type", "ver",
+				 "verify", "vol", ":", 0 };
   static char sh_chars_sh[] = "#;\"*?[]&|<>(){}$`^";
   static char *sh_cmds_sh[] = { "cd", "eval", "exec", "exit", "login",
 			     "logout", "set", "umask", "wait", "while", "for",
