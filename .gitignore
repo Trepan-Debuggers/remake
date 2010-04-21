@@ -15,6 +15,7 @@
 /make
 /make-*.bz2
 /make-*.gz
+/remake
 /remake-*.bz2
 /remake-*.gz
 /stamp-h1

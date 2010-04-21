@@ -337,6 +337,7 @@ fi
 
 if test "$enable_readline" = yes; then
    VL_LIB_READLINE
+   AC_CHECK_LIB(readline, readline)
    AC_MSG_CHECKING(for history_list() in <readline/readline.h>)
    AC_TRY_RUN([
 #include <stdio.h>
