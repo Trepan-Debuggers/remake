@@ -48,6 +48,8 @@ debug_enter_reason_t last_stop_reason;
 #ifdef HAVE_LIBREADLINE
 #include <stdio.h>
 #include <stdlib.h>
+/* The following line makes Solaris' gcc/cpp not puke. */
+#undef HAVE_READLINE_READLINE_H
 #include <config/readline.h>
 
 /* From readline. ?? Should this be in configure?  */
