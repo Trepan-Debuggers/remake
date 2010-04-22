@@ -1,5 +1,5 @@
 /* 
-Copyright (C) 2004, 2005, 2007, 2008 R. Bernstein rocky@gnu.org
+Copyright (C) 2004, 2005, 2007, 2008, 2010 R. Bernstein rocky@gnu.org
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -34,6 +34,22 @@ Boston, MA 02111-1307, USA.  */
 #endif
 
 #ifdef HAVE_LIBREADLINE
+
+# ifdef bcmp
+#   undef bcmp
+# endif 
+
+
+# ifdef bzero
+#   undef bzero
+# endif 
+
+
+# ifdef bcopy
+#   undef bcopy
+# endif 
+
+
 #include <readline/readline.h>
 #endif
 
