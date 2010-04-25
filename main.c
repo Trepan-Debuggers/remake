@@ -421,8 +421,6 @@ static const char *const usage[] =
   -X [type], --debugger[=TYPE] Enter debugger. TYPE may be\n\
                                \"goal\", \"preread\", \"preaction\",\n\
                                \"full\", \"error\", or \"fatal\".\n"),
-    N_("\
-  --warn-undefined-variables  Warn when an undefined variable is referenced.\n"),
     NULL
   };
 
