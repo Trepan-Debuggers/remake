@@ -1,3 +1,82 @@
+2010-04-21  rocky <rockyb@gnu.org>
+
+	* debugger/cmd.c: More solaris tolerance.
+
+2010-04-21  rocky <rockyb@gnu.org>
+
+	* .gitignore, configure.ac, po/.gitignore: Possibly more Solaris
+	tolerance with respect to readline variation.
+
+2010-04-21  rocky <rockyb@gnu.org>
+
+	* debugger/.gitignore, debugger/Makefile: Administrivia
+
+2010-03-11  rocky <rocky@sanchez.(none)>
+
+	* htdocs/index.html~: How did this get in there?
+
+2010-03-11  rocky <rocky@sanchez.(none)>
+
+	* htdocs/.gitignore, htdocs/index.html, htdocs/index.html~,
+	htdocs/mdb.html: Add homepage and update to include debugger manual
+
+
+2009-03-27  rocky <rocky@sanchez.(none)>
+
+	* doc/Makefile.am: Don't format make.texi - bug 2498089
+
+2009-01-30  R. Bernstein <rocky@gnu.org>
+
+	* configure.ac, debugger/cmd.c, doc/version.texi, main.c: Fix Small
+	bug in 'help set' command. Update to 2009 and new version
+
+2009-01-25  R. Bernstein <rocky@gnu.org>
+
+	* po/stamp-po: Administrivia
+
+2009-01-25  R. Bernstein <rocky@gnu.org>
+
+	* doc/version.texi: This time for sure!
+
+2009-01-25  R. Bernstein <rocky@gnu.org>
+
+	* doc/version.texi: Change date to last release date instead of the
+	one before that. Thanks again to yh.
+
+2009-01-13  R. Bernstein <rocky@gnu.org>
+
+	* .gitignore: Administrivia
+
+2009-01-13  R. Bernstein <rocky@gnu.org>
+
+	* debugger/cmd.c, debugger/info.c, doc/version.texi: Set execute bit
+	when writing target
+
+2009-01-12  R. Bernstein <rocky@gnu.org>
+
+	* ChangeLog: Administrivia
+
+2009-01-12  R. Bernstein <rocky@gnu.org>
+
+	Administrivia
+
+2009-01-12  R. Bernstein <rocky@gnu.org>
+
+	* ChangeLog, emacs/gud.el: Don't need gud.el - It's part of Emacs.
+
+2009-01-11  R. Bernstein <rocky@sanchez.(none)>
+
+	* doc/Makefile.am: Oops - forgot to install manpage. Thanks to
+	Yaroslav Halchenk catching
+
+2009-01-10  R. Bernstein <rocky@sanchez.(none)>
+
+	* ChangeLog, doc/version.texi, po/be.po, po/da.po, po/de.po,
+	po/es.po, po/fi.po, po/fr.po, po/ga.po, po/gl.po, po/he.po,
+	po/hr.po, po/id.po, po/ja.po, po/ko.po, po/nl.po, po/pl.po,
+	po/pt_BR.po, po/ru.po, po/rw.po, po/sv.po, po/tr.po, po/uk.po,
+	po/vi.po, po/zh_CN.po: Get ready for release
+
 2009-01-09  R. Bernstein <rocky@gnu.org>
 
 	* README.mdb: doc fixes
@@ -6625,7 +6704,7 @@
 1996-07-20  roland <roland>
 
 	* config.h-vms.template, makefile.vms, readme.vms, remake.c,
-	vmsify.c: Sat Jul 20 12:32:10 1996  Klaus KÃ¤mpf (kkaempf@progis.de)
+	vmsify.c: Sat Jul 20 12:32:10 1996  Klaus Kämpf (kkaempf@progis.de)
 	* remake.c (f_mtime) [VMS]: Add missing `if' conditional for future
 	modtime check. 	* config.h-vms, makefile.vms, readme.vms, vmsify.c:
 	Update address.

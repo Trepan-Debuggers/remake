@@ -146,9 +146,6 @@ int just_print_flag;
 /*! If 1, we don't give additional error reporting information. */
 int no_extended_errors = 0;
 
-/*! If 1, we print variable definitions. */
-int show_variable_definitions = 0;
-
 /*! If non-null, we are tracing execution */
 stringlist_t *tracing_opts = NULL;
 
@@ -497,8 +494,6 @@ static const command_switch_t switches[] =
       "preaction", 0, "debugger" },
     { 'y', flag, (char *) &no_shell_trace, 1, 1, 0, 0, 0, "noshell" },
     { 'W', string, (char *) &new_files, 0, 0, 0, 0, 0, "what-if" },
-    { 'V', flag, (char *) &show_variable_definitions, 1, 1, 0, 0, 0,
-	"show-variables" },
     { CHAR_MAX+3, flag, (char *) &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
       "no-print-directory" },
     { CHAR_MAX+4, flag, (char *) &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
