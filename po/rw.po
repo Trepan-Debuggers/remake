@@ -16,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.80\n"
 "Report-Msgid-Bugs-To: bug-make@gnu.org\n"
-"POT-Creation-Date: 2008-12-11 23:40-0500\n"
+"POT-Creation-Date: 2010-05-01 22:24-0400\n"
 "PO-Revision-Date: 2005-04-04 10:55-0700\n"
 "Last-Translator: Steven Michael Murphy <murf@e-tools.com>\n"
 "Language-Team: Kinyarwanda <translation-team-rw@lists.sourceforge.net>\n"
@@ -741,89 +741,89 @@ msgid "%s (line %d) Bad shell context (!unixy && !batch_mode_shell)\n"
 msgstr "%s(Umurongo Igikonoshwa Imvugiro"
 
 # crashrep/source\all\crashrep.lng:%OPTIONS_BUTTON%.text
-#: main.c:346
+#: main.c:343
 #, fuzzy
 msgid "Options:\n"
 msgstr "Amahitamo..."
 
-#: main.c:347
+#: main.c:344
 #, fuzzy
 msgid "  -b, -m                       Ignored for compatibility.\n"
 msgstr "-B M kugirango Bihuye neza"
 
-#: main.c:349
+#: main.c:346
 #, fuzzy
 msgid "  -B, --always-make            Unconditionally make all targets.\n"
 msgstr "-Buri gihe Ubwoko Ubwoko Byose"
 
-#: main.c:351
+#: main.c:348
 msgid "  --basename-filenames         Show files as basename only.\n"
 msgstr ""
 
-#: main.c:353
+#: main.c:350
 #, fuzzy
 msgid ""
 "  -C DIRECTORY, --directory=DIRECTORY\n"
 "                               Change to DIRECTORY before doing anything.\n"
 msgstr "-C bushyinguro Kuri Mbere"
 
-#: main.c:356
+#: main.c:353
 #, fuzzy
 msgid "  -d                           Print lots of debugging information.\n"
 msgstr "-D Bya Ibisobanuro"
 
-#: main.c:358
+#: main.c:355
 #, fuzzy
 msgid ""
 "  --debug[=FLAGS]              Print various types of debugging "
 "information.\n"
 msgstr "--Kosora amakosa Bya Ibisobanuro"
 
-#: main.c:360
+#: main.c:357
 #, fuzzy
 msgid ""
 "  -e, --environment-overrides\n"
 "                               Environment variables override makefiles.\n"
 msgstr "-E Ibihinduka"
 
-#: main.c:363
+#: main.c:360
 #, fuzzy
 msgid ""
 "  -f FILE, --file=FILE, --makefile=FILE\n"
 "                               Read FILE as a makefile.\n"
 msgstr "-F IDOSIYE Nka a"
 
-#: main.c:366
+#: main.c:363
 #, fuzzy
 msgid "  -h, --help                   Print this message and exit.\n"
 msgstr "-h Ifashayobora iyi Ubutumwa Na Gusohoka"
 
-#: main.c:368
+#: main.c:365
 #, fuzzy
 msgid "  -i, --ignore-errors          Ignore errors from commands.\n"
 msgstr "-i Kwirengagiza Amakosa Amakosa Bivuye Amabwiriza"
 
-#: main.c:370
+#: main.c:367
 #, fuzzy
 msgid ""
 "  -I DIRECTORY, --include-dir=DIRECTORY\n"
 "                               Search DIRECTORY for included makefiles.\n"
 msgstr "-Gushyiramo kugirango"
 
-#: main.c:373
+#: main.c:370
 #, fuzzy
 msgid ""
 "  -j [N], --jobs[=N]           Allow N jobs at once; infinite jobs with no "
 "arg.\n"
 msgstr "-j ku Rimwe Bidashira Na: Oya"
 
-#: main.c:375
+#: main.c:372
 #, fuzzy
 msgid ""
 "  -k, --keep-going             Keep going when some targets can't be made.\n"
 msgstr "-K Gumana: Ryari:"
 
-#: main.c:377
+#: main.c:374
 #, fuzzy
 msgid ""
 "  -l [N], --load-average[=N], --max-load[=N]\n"
@@ -832,13 +832,13 @@ msgid ""
 msgstr ""
 "-L Ibirimo Impuzandengo KININI Ibirimo Gutangira Igikubo Ibirimo ni munsi"
 
-#: main.c:380
+#: main.c:377
 msgid ""
 "  -L, --check-symlink-times    Use the latest mtime between symlinks and "
 "target.\n"
 msgstr ""
 
-#: main.c:382
+#: main.c:379
 #, fuzzy
 msgid ""
 "  -n, --just-print, --dry-run, --recon\n"
@@ -846,12 +846,12 @@ msgid ""
 "them.\n"
 msgstr "-N Gucapa Gukoresha Gukoresha Amabwiriza Gucapa"
 
-#: main.c:385
+#: main.c:382
 msgid ""
 "  --no-extended-errors         Do not give additional error reporting.\n"
 msgstr ""
 
-#: main.c:387
+#: main.c:384
 #, fuzzy
 msgid ""
 "  -o FILE, --old-file=FILE, --assume-old=FILE\n"
@@ -859,117 +859,110 @@ msgid ""
 "it.\n"
 msgstr "-o ki/ bishaje IDOSIYE ki/ bishaje Kuri ki/ bishaje Na"
 
-#: main.c:390
+#: main.c:387
 #, fuzzy
 msgid "  -p, --print-data-base        Print make's internal database.\n"
 msgstr "-P Gucapa Ibyatanzwe SHINGIRO By'imbere Ububikoshingiro"
 
-#: main.c:392
+#: main.c:389
 #, fuzzy
 msgid ""
 "  -q, --question               Run no commands; exit status says if up to "
 "date.\n"
 msgstr "-Q Oya Amabwiriza Gusohoka Imimerere NIBA Hejuru Kuri Itariki"
 
-#: main.c:394
+#: main.c:391
 #, fuzzy
 msgid "  -r, --no-builtin-rules       Disable the built-in implicit rules.\n"
 msgstr "-R Oya i in"
 
-#: main.c:396
+#: main.c:393
 #, fuzzy
 msgid ""
 "  -R, --no-builtin-variables   Disable the built-in variable settings.\n"
 msgstr "-Oya Ibihinduka i in IMPINDURAGACIRO Amagenamiterere"
 
-#: main.c:398
+#: main.c:395
 #, fuzzy
 msgid "  -s, --silent, --quiet        Don't echo commands.\n"
 msgstr "-S Amabwiriza"
 
-#: main.c:400
+#: main.c:397
 #, fuzzy
 msgid "  -S, --no-keep-going, --stop  Turns off -k.\n"
 msgstr "-Oya Gumana: Bidakora K"
 
-#: main.c:402
+#: main.c:399
 #, fuzzy
 msgid ""
 "  -t, --touch                  Touch targets instead of remaking them.\n"
 msgstr "-T Bya"
 
-#: main.c:404
+#: main.c:401
 #, fuzzy
 msgid ""
 "  -v, --version                Print the version number of make and exit.\n"
 msgstr "-v Verisiyo i Verisiyo Umubare Bya Ubwoko Na Gusohoka"
 
-#: main.c:406
+#: main.c:403
 msgid "  -V, --show-variables         Show variable expansions.\n"
 msgstr ""
 
-#: main.c:408
+#: main.c:405
 #, fuzzy
 msgid "  -w, --print-directory        Print the current directory.\n"
 msgstr "-W Gucapa bushyinguro i KIGEZWEHO bushyinguro"
 
-#: main.c:410
+#: main.c:407
 #, fuzzy
 msgid ""
 "  --no-print-directory         Turn off -w, even if it was turned on "
 "implicitly.\n"
 msgstr "--Oya Gucapa bushyinguro Bidakora W ATARIIGIHARWE NIBA ku"
 
-#: main.c:412
+#: main.c:409
 #, fuzzy
 msgid ""
 "  -W FILE, --what-if=FILE, --new-file=FILE, --assume-new=FILE\n"
 "                               Consider FILE to be infinitely new.\n"
 msgstr "-NIBA Gishya IDOSIYE Gishya Kuri Gishya"
 
-#: main.c:415
+#: main.c:412
 #, fuzzy
 msgid ""
 "  --warn-undefined-variables   Warn when an undefined variable is "
 "referenced.\n"
 msgstr "--kidasobanuye Ibihinduka Ryari: kidasobanuye IMPINDURAGACIRO ni"
 
-#: main.c:417
+#: main.c:414
 msgid ""
 "  -x, --trace[=TYPE]           Trace command execution TYPE may be\n"
 "                               \"command\", \"read\", \"normal\",\"\n"
 "                               \"noshell\", or \"full\".\n"
 msgstr ""
 
-#: main.c:421
+#: main.c:418
 msgid "  -y                           same as --trace=\"noshell\"\n"
 msgstr ""
 
-#: main.c:423
+#: main.c:420
 msgid ""
 "  -X [type], --debugger[=TYPE] Enter debugger. TYPE may be\n"
 "                               \"goal\", \"preread\", \"preaction\",\n"
 "                               \"full\", \"error\", or \"fatal\".\n"
 msgstr ""
 
-#: main.c:427
-#, fuzzy
-msgid ""
-"  --warn-undefined-variables  Warn when an undefined variable is "
-"referenced.\n"
-msgstr "--kidasobanuye Ibihinduka Ryari: kidasobanuye IMPINDURAGACIRO ni"
-
-#: main.c:641
+#: main.c:634
 #, fuzzy
 msgid "empty string invalid as file name"
 msgstr "ubusa Ikurikiranyanyuguti Sibyo Nka IDOSIYE Izina:"
 
-#: main.c:699
+#: main.c:692
 #, fuzzy, c-format
 msgid "%s: Interrupt/Exception caught (code = 0x%lx, addr = 0x%lx)\n"
 msgstr "%s:ITEGEKONGENGA Aderesi"
 
-#: main.c:706
+#: main.c:699
 #, fuzzy, c-format
 msgid ""
 "\n"
@@ -979,194 +972,194 @@ msgid ""
 "ExceptionAddress = %lx\n"
 msgstr "Irengayobora(-) Muyunguruzi... Bivuye Porogaramu"
 
-#: main.c:714
+#: main.c:707
 #, fuzzy, c-format
 msgid "Access violation: write operation at address %lx\n"
 msgstr "Kwandika ku Aderesi"
 
-#: main.c:715
+#: main.c:708
 #, fuzzy, c-format
 msgid "Access violation: read operation at address %lx\n"
 msgstr "Gusoma ku Aderesi"
 
-#: main.c:791 main.c:802
+#: main.c:784 main.c:795
 #, fuzzy, c-format
 msgid "find_and_set_shell setting default_shell = %s\n"
 msgstr "Igenamiterere"
 
-#: main.c:843
+#: main.c:836
 #, fuzzy, c-format
 msgid "find_and_set_shell path search set default_shell = %s\n"
 msgstr "Inzira Gushaka Gushyiraho"
 
-#: main.c:1333
+#: main.c:1326
 #, fuzzy, c-format
 msgid "%s is suspending for 30 seconds..."
 msgstr "%sni kugirango amasogonda"
 
-#: main.c:1335
+#: main.c:1328
 #, fuzzy, c-format
 msgid "done sleep(30). Continuing.\n"
 msgstr "Byakozwe"
 
-#: main.c:1567
+#: main.c:1560
 #, fuzzy
 msgid "Makefile from standard input specified twice."
 msgstr "Bivuye Bisanzwe Iyinjiza"
 
-#: main.c:1606 vmsjobs.c:486
+#: main.c:1599 vmsjobs.c:486
 #, fuzzy
 msgid "fopen (temporary file)"
 msgstr "By'igihe gito IDOSIYE"
 
-#: main.c:1612
+#: main.c:1605
 #, fuzzy
 msgid "fwrite (temporary file)"
 msgstr "By'igihe gito IDOSIYE"
 
-#: main.c:1741
+#: main.c:1734
 #, fuzzy
 msgid "Parallel jobs (-j) are not supported on this platform."
 msgstr "j OYA ku iyi"
 
-#: main.c:1742
+#: main.c:1735
 #, fuzzy
 msgid "Resetting to single job (-j1) mode."
 msgstr "Kuri UMWE Ubwoko"
 
-#: main.c:1757
+#: main.c:1750
 #, fuzzy
 msgid "internal error: multiple --jobserver-fds options"
 msgstr "By'imbere Ikosa Igikubo Amahitamo"
 
-#: main.c:1765
+#: main.c:1758
 #, fuzzy, c-format
 msgid "internal error: invalid --jobserver-fds string `%s'"
 msgstr "By'imbere Ikosa Sibyo Ikurikiranyanyuguti"
 
-#: main.c:1775
+#: main.c:1768
 #, fuzzy
 msgid "warning: -jN forced in submake: disabling jobserver mode."
 msgstr "Iburira in Ubwoko"
 
-#: main.c:1785
+#: main.c:1778
 msgid "dup jobserver"
 msgstr ""
 
-#: main.c:1788
+#: main.c:1781
 #, fuzzy
 msgid ""
 "warning: jobserver unavailable: using -j1.  Add `+' to parent make rule."
 msgstr "Iburira ikoresha Kuri Ubwoko"
 
-#: main.c:1811
+#: main.c:1804
 msgid "creating jobs pipe"
 msgstr ""
 
-#: main.c:1826
+#: main.c:1819
 msgid "init jobserver pipe"
 msgstr ""
 
-#: main.c:1845
+#: main.c:1838
 msgid "Symbolic links not supported: disabling -L."
 msgstr ""
 
-#: main.c:1921
+#: main.c:1914
 msgid "Updating makefiles....\n"
 msgstr ""
 
-#: main.c:1946
+#: main.c:1939
 #, fuzzy, c-format
 msgid "Makefile `%s' might loop; not remaking it.\n"
 msgstr "OYA"
 
-#: main.c:2025
+#: main.c:2018
 #, fuzzy, c-format
 msgid "Failed to remake makefile `%s'."
 msgstr "Kuri"
 
-#: main.c:2042
+#: main.c:2035
 #, fuzzy, c-format
 msgid "Included makefile `%s' was not found."
 msgstr "OYA Byabonetse"
 
-#: main.c:2047
+#: main.c:2040
 #, fuzzy, c-format
 msgid "Makefile `%s' was not found"
 msgstr "OYA Byabonetse"
 
-#: main.c:2117
+#: main.c:2110
 #, fuzzy
 msgid "Couldn't change back to original directory."
 msgstr "Guhindura>> Inyuma Kuri Umwimerere bushyinguro"
 
-#: main.c:2125
+#: main.c:2118
 #, fuzzy, c-format
 msgid "Re-executing[%u]:"
 msgstr "Gukora:%s"
 
-#: main.c:2241
+#: main.c:2234
 #, fuzzy
 msgid "unlink (temporary file): "
 msgstr "Kureka guhuza By'igihe gito IDOSIYE"
 
-#: main.c:2270
+#: main.c:2263
 msgid ".DEFAULT_GOAL contains more than one target"
 msgstr ""
 
-#: main.c:2289
+#: main.c:2282
 #, fuzzy
 msgid "No targets specified and no makefile found"
 msgstr "Na Oya Byabonetse"
 
-#: main.c:2291
+#: main.c:2284
 msgid "No targets"
 msgstr ""
 
-#: main.c:2296
+#: main.c:2289
 msgid "Updating goal targets....\n"
 msgstr ""
 
-#: main.c:2322
+#: main.c:2315
 #, fuzzy
 msgid "warning:  Clock skew detected.  Your build may be incomplete."
 msgstr "Iburira SKEW Gicurasi"
 
-#: main.c:2483
+#: main.c:2476
 #, fuzzy, c-format
 msgid "Usage: %s [options] [target] ...\n"
 msgstr "Amahitamo Intego"
 
-#: main.c:2489
+#: main.c:2482
 #, fuzzy, c-format
 msgid ""
 "\n"
 "This program built for %s\n"
 msgstr "Porogaramu kugirango"
 
-#: main.c:2491
+#: main.c:2484
 #, fuzzy, c-format
 msgid ""
 "\n"
 "This program built for %s (%s)\n"
 msgstr "Porogaramu kugirango"
 
-#: main.c:2494
+#: main.c:2487
 #, fuzzy, c-format
 msgid "Report bugs to <bashdb-remake@lists.sf.net>\n"
 msgstr "Kuri Ubwoko org"
 
-#: main.c:2566
+#: main.c:2559
 #, fuzzy, c-format
 msgid "the `-%c' option requires a non-empty string argument"
 msgstr "i Ihitamo a Umubare Wuzuye"
 
-#: main.c:2618
+#: main.c:2611
 #, fuzzy, c-format
 msgid "the `-%c' option requires a positive integral argument"
 msgstr "i Ihitamo a Umubare Wuzuye"
 
-#: main.c:3042
+#: main.c:3036
 #, fuzzy, c-format
 msgid ""
 "%sThis is free software; see the source for copying conditions.\n"
@@ -1175,28 +1168,28 @@ msgid ""
 msgstr ""
 "%sThisni Kigenga i Inkomoko kugirango ni OYA ATARIIGIHARWE kugirango Cyangwa"
 
-#: main.c:3048
+#: main.c:3042
 #, fuzzy, c-format
 msgid ""
 "\n"
 "%sThis program built for %s\n"
 msgstr "Porogaramu kugirango"
 
-#: main.c:3050
+#: main.c:3044
 #, fuzzy, c-format
 msgid ""
 "\n"
 "%sThis program built for %s (%s)\n"
 msgstr "Porogaramu kugirango"
 
-#: main.c:3068
+#: main.c:3062
 #, fuzzy, c-format
 msgid ""
 "\n"
 "# Make data base, printed on %s"
 msgstr "#Ibyatanzwe SHINGIRO Byacapwe ku"
 
-#: main.c:3078
+#: main.c:3072
 #, fuzzy, c-format
 msgid ""
 "\n"
@@ -2033,6 +2026,12 @@ msgid ""
 "# General (`VPATH' variable) search path:\n"
 "# "
 msgstr "#IMPINDURAGACIRO Gushaka Inzira"
+
+#, fuzzy
+#~ msgid ""
+#~ "  --warn-undefined-variables  Warn when an undefined variable is "
+#~ "referenced.\n"
+#~ msgstr "--kidasobanuye Ibihinduka Ryari: kidasobanuye IMPINDURAGACIRO ni"
 
 #, fuzzy
 #~ msgid "unknown debug level specification `%s'"

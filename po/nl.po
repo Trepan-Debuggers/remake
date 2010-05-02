@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.81-b3\n"
 "Report-Msgid-Bugs-To: bug-make@gnu.org\n"
-"POT-Creation-Date: 2008-12-11 23:40-0500\n"
+"POT-Creation-Date: 2010-05-01 22:24-0400\n"
 "PO-Revision-Date: 2005-06-29 22:55+0200\n"
 "Last-Translator: Benno Schulenberg <benno@nietvergeten.nl>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
@@ -705,38 +705,38 @@ msgstr "Maken van tijdelijk batch-bestand %s\n"
 msgid "%s (line %d) Bad shell context (!unixy && !batch_mode_shell)\n"
 msgstr "%s (regel %d) Onjuiste shell-context (!unixy && !batch_mode_shell)\n"
 
-#: main.c:346
+#: main.c:343
 msgid "Options:\n"
 msgstr "Opties:\n"
 
-#: main.c:347
+#: main.c:344
 #, fuzzy
 msgid "  -b, -m                       Ignored for compatibility.\n"
 msgstr "  -b, -m                      Genegeerd voor compatibiliteit.\n"
 
-#: main.c:349
+#: main.c:346
 #, fuzzy
 msgid "  -B, --always-make            Unconditionally make all targets.\n"
 msgstr "  -B, --always-make           Onvoorwaardelijk alle doelen maken.\n"
 
-#: main.c:351
+#: main.c:348
 msgid "  --basename-filenames         Show files as basename only.\n"
 msgstr ""
 
-#: main.c:353
+#: main.c:350
 #, fuzzy
 msgid ""
 "  -C DIRECTORY, --directory=DIRECTORY\n"
 "                               Change to DIRECTORY before doing anything.\n"
 msgstr "  -C MAP, --directory=MAP     Naar MAP gaan alvorens iets te doen.\n"
 
-#: main.c:356
+#: main.c:353
 #, fuzzy
 msgid "  -d                           Print lots of debugging information.\n"
 msgstr ""
 "  -d                          Veel informatie weergeven voor het debuggen.\n"
 
-#: main.c:358
+#: main.c:355
 #, fuzzy
 msgid ""
 "  --debug[=FLAGS]              Print various types of debugging "
@@ -745,7 +745,7 @@ msgstr ""
 "  --debug[=VLAGGEN]           Verschillende soorten debuginformatie "
 "weergeven.\n"
 
-#: main.c:360
+#: main.c:357
 #, fuzzy
 msgid ""
 "  -e, --environment-overrides\n"
@@ -753,7 +753,7 @@ msgid ""
 msgstr ""
 "  -e, --environment-overrides Omgevingsvariabelen gaan boven makefiles.\n"
 
-#: main.c:363
+#: main.c:360
 #, fuzzy
 msgid ""
 "  -f FILE, --file=FILE, --makefile=FILE\n"
@@ -762,17 +762,17 @@ msgstr ""
 "  -f BESTAND, --file=BESTAND, --makefile=BESTAND\n"
 "                              BESTAND lezen als een makefile.\n"
 
-#: main.c:366
+#: main.c:363
 #, fuzzy
 msgid "  -h, --help                   Print this message and exit.\n"
 msgstr "  -h, --help                  Dit bericht weergeven en stoppen.\n"
 
-#: main.c:368
+#: main.c:365
 #, fuzzy
 msgid "  -i, --ignore-errors          Ignore errors from commands.\n"
 msgstr "  -i, --ignore-errors         Fouten van opdrachten negeren.\n"
 
-#: main.c:370
+#: main.c:367
 #, fuzzy
 msgid ""
 "  -I DIRECTORY, --include-dir=DIRECTORY\n"
@@ -780,7 +780,7 @@ msgid ""
 msgstr ""
 "  -I MAP, --include-dir=MAP   MAP doorzoeken naar ingesloten makefiles.\n"
 
-#: main.c:373
+#: main.c:370
 #, fuzzy
 msgid ""
 "  -j [N], --jobs[=N]           Allow N jobs at once; infinite jobs with no "
@@ -789,7 +789,7 @@ msgstr ""
 "  -j [N], --jobs[=N]          N taken tegelijk toestaan; oneindig bij geen "
 "argument.\n"
 
-#: main.c:375
+#: main.c:372
 #, fuzzy
 msgid ""
 "  -k, --keep-going             Keep going when some targets can't be made.\n"
@@ -797,7 +797,7 @@ msgstr ""
 "  -k, --keep-going            Doorgaan als sommige doelen niet gemaakt "
 "kunnen worden.\n"
 
-#: main.c:377
+#: main.c:374
 #, fuzzy
 msgid ""
 "  -l [N], --load-average[=N], --max-load[=N]\n"
@@ -808,7 +808,7 @@ msgstr ""
 "                              Niet meerdere taken starten, behalve als "
 "systeembelasting lager is dan N.\n"
 
-#: main.c:380
+#: main.c:377
 #, fuzzy
 msgid ""
 "  -L, --check-symlink-times    Use the latest mtime between symlinks and "
@@ -817,7 +817,7 @@ msgstr ""
 "  -L, --check-symlink-times   De laatste mtime tussen symbolische koppeling "
 "en doel gebruiken.\n"
 
-#: main.c:382
+#: main.c:379
 #, fuzzy
 msgid ""
 "  -n, --just-print, --dry-run, --recon\n"
@@ -827,12 +827,12 @@ msgstr ""
 "  -n, --just-print, --dry-run, --recon\n"
 "                              Opdrachten niet uitvoeren, alleen weergeven.\n"
 
-#: main.c:385
+#: main.c:382
 msgid ""
 "  --no-extended-errors         Do not give additional error reporting.\n"
 msgstr ""
 
-#: main.c:387
+#: main.c:384
 #, fuzzy
 msgid ""
 "  -o FILE, --old-file=FILE, --assume-old=FILE\n"
@@ -843,13 +843,13 @@ msgstr ""
 "                              BESTAND als erg oud beschouwen en niet opnieuw "
 "maken.\n"
 
-#: main.c:390
+#: main.c:387
 #, fuzzy
 msgid "  -p, --print-data-base        Print make's internal database.\n"
 msgstr ""
 "  -p, --print-data-base       Interne gegevensbank van 'make' weergeven.\n"
 
-#: main.c:392
+#: main.c:389
 #, fuzzy
 msgid ""
 "  -q, --question               Run no commands; exit status says if up to "
@@ -858,53 +858,53 @@ msgstr ""
 "  -q, --question              Geen opdrachten uitvoeren; afsluitstatus geeft "
 "aan of alles bijgewerkt is.\n"
 
-#: main.c:394
+#: main.c:391
 #, fuzzy
 msgid "  -r, --no-builtin-rules       Disable the built-in implicit rules.\n"
 msgstr ""
 "  -r, --no-builtin-rules      Ingebouwde impliciete regels uitzetten.\n"
 
-#: main.c:396
+#: main.c:393
 #, fuzzy
 msgid ""
 "  -R, --no-builtin-variables   Disable the built-in variable settings.\n"
 msgstr ""
 "  -R, --no-builtin-variables  Ingebouwde variabele-instellingen uitzetten.\n"
 
-#: main.c:398
+#: main.c:395
 #, fuzzy
 msgid "  -s, --silent, --quiet        Don't echo commands.\n"
 msgstr "  -s, --silent, --quiet       Opdrachten niet weergeven.\n"
 
-#: main.c:400
+#: main.c:397
 #, fuzzy
 msgid "  -S, --no-keep-going, --stop  Turns off -k.\n"
 msgstr "  -S, --no-keep-going, --stop Optie -k uitzetten.\n"
 
-#: main.c:402
+#: main.c:399
 #, fuzzy
 msgid ""
 "  -t, --touch                  Touch targets instead of remaking them.\n"
 msgstr ""
 "  -t, --touch                 Doelen aanraken in plaats van opnieuw maken.\n"
 
-#: main.c:404
+#: main.c:401
 #, fuzzy
 msgid ""
 "  -v, --version                Print the version number of make and exit.\n"
 msgstr ""
 "  -v, --version               Versienummer van 'make' weergeven en stoppen.\n"
 
-#: main.c:406
+#: main.c:403
 msgid "  -V, --show-variables         Show variable expansions.\n"
 msgstr ""
 
-#: main.c:408
+#: main.c:405
 #, fuzzy
 msgid "  -w, --print-directory        Print the current directory.\n"
 msgstr "  -w, --print-directory       De huidige map weergeven.\n"
 
-#: main.c:410
+#: main.c:407
 #, fuzzy
 msgid ""
 "  --no-print-directory         Turn off -w, even if it was turned on "
@@ -913,7 +913,7 @@ msgstr ""
 "  --no-print-directory        Optie -w uitzetten, zelfs als het impliciet "
 "aangezet was.\n"
 
-#: main.c:412
+#: main.c:409
 #, fuzzy
 msgid ""
 "  -W FILE, --what-if=FILE, --new-file=FILE, --assume-new=FILE\n"
@@ -922,7 +922,7 @@ msgstr ""
 "  -W BESTAND, --what-if=BESTAND, --new-file=BESTAND, --assume-new=BESTAND\n"
 "                              BESTAND als oneindig nieuw beschouwen.\n"
 
-#: main.c:415
+#: main.c:412
 #, fuzzy
 msgid ""
 "  --warn-undefined-variables   Warn when an undefined variable is "
@@ -931,42 +931,34 @@ msgstr ""
 "  --warn-undefined-variables  Waarschuwen als naar een ongedefinieerde "
 "variabele wordt verwezen.\n"
 
-#: main.c:417
+#: main.c:414
 msgid ""
 "  -x, --trace[=TYPE]           Trace command execution TYPE may be\n"
 "                               \"command\", \"read\", \"normal\",\"\n"
 "                               \"noshell\", or \"full\".\n"
 msgstr ""
 
-#: main.c:421
+#: main.c:418
 msgid "  -y                           same as --trace=\"noshell\"\n"
 msgstr ""
 
-#: main.c:423
+#: main.c:420
 msgid ""
 "  -X [type], --debugger[=TYPE] Enter debugger. TYPE may be\n"
 "                               \"goal\", \"preread\", \"preaction\",\n"
 "                               \"full\", \"error\", or \"fatal\".\n"
 msgstr ""
 
-#: main.c:427
-msgid ""
-"  --warn-undefined-variables  Warn when an undefined variable is "
-"referenced.\n"
-msgstr ""
-"  --warn-undefined-variables  Waarschuwen als naar een ongedefinieerde "
-"variabele wordt verwezen.\n"
-
-#: main.c:641
+#: main.c:634
 msgid "empty string invalid as file name"
 msgstr "lege tekenreeks is ongeldig als bestandsnaam"
 
-#: main.c:699
+#: main.c:692
 #, fuzzy, c-format
 msgid "%s: Interrupt/Exception caught (code = 0x%lx, addr = 0x%lx)\n"
 msgstr "%s: Onderbreking/uitzondering gekregen (code = 0x%x, adres = 0x%x)\n"
 
-#: main.c:706
+#: main.c:699
 #, fuzzy, c-format
 msgid ""
 "\n"
@@ -981,160 +973,160 @@ msgstr ""
 "ExceptionFlags = %x\n"
 "ExceptionAddress = %x\n"
 
-#: main.c:714
+#: main.c:707
 #, fuzzy, c-format
 msgid "Access violation: write operation at address %lx\n"
 msgstr "Toegangsovertreding: schrijfopdracht op adres %x\n"
 
-#: main.c:715
+#: main.c:708
 #, fuzzy, c-format
 msgid "Access violation: read operation at address %lx\n"
 msgstr "Toegangsovertreding: leesopdracht op adres %x\n"
 
-#: main.c:791 main.c:802
+#: main.c:784 main.c:795
 #, c-format
 msgid "find_and_set_shell setting default_shell = %s\n"
 msgstr "find_and_set_shell stelt default_shell = %s in\n"
 
-#: main.c:843
+#: main.c:836
 #, c-format
 msgid "find_and_set_shell path search set default_shell = %s\n"
 msgstr "find_and_set_shell stelt na doorzoeken van pad default_shell = %s in\n"
 
-#: main.c:1333
+#: main.c:1326
 #, c-format
 msgid "%s is suspending for 30 seconds..."
 msgstr "%s slaapt gedurende 30 seconden..."
 
-#: main.c:1335
+#: main.c:1328
 #, c-format
 msgid "done sleep(30). Continuing.\n"
 msgstr "klaar met 30 seconden slapen.  Make gaat verder.\n"
 
-#: main.c:1567
+#: main.c:1560
 msgid "Makefile from standard input specified twice."
 msgstr "Makefile op standaardinvoer is dubbel opgegeven."
 
-#: main.c:1606 vmsjobs.c:486
+#: main.c:1599 vmsjobs.c:486
 msgid "fopen (temporary file)"
 msgstr "fopen (tijdelijk bestand)"
 
-#: main.c:1612
+#: main.c:1605
 msgid "fwrite (temporary file)"
 msgstr "fwrite (tijdelijk bestand)"
 
-#: main.c:1741
+#: main.c:1734
 msgid "Parallel jobs (-j) are not supported on this platform."
 msgstr "Parallele taken (-j) worden op dit platform niet ondersteund."
 
-#: main.c:1742
+#: main.c:1735
 msgid "Resetting to single job (-j1) mode."
 msgstr "Opnieuw instellen op enkele-taakmodus (-j1)."
 
-#: main.c:1757
+#: main.c:1750
 msgid "internal error: multiple --jobserver-fds options"
 msgstr "interne fout: meerdere opties --jobserver-fds"
 
-#: main.c:1765
+#: main.c:1758
 #, c-format
 msgid "internal error: invalid --jobserver-fds string `%s'"
 msgstr "interne fout: ongeldige tekenreeks '%s' voor --jobserver-fds"
 
-#: main.c:1775
+#: main.c:1768
 msgid "warning: -jN forced in submake: disabling jobserver mode."
 msgstr ""
 "Waarschuwing: -jN is afgedwongen in een deelproces: taakserver-modus "
 "uitgezet."
 
-#: main.c:1785
+#: main.c:1778
 msgid "dup jobserver"
 msgstr "dubbele taakserver"
 
-#: main.c:1788
+#: main.c:1781
 msgid ""
 "warning: jobserver unavailable: using -j1.  Add `+' to parent make rule."
 msgstr ""
 "Waarschuwing: taakserver onbeschikbaar: -j1 wordt gebruikt.  Voeg '+' toe "
 "aan de ouderregel."
 
-#: main.c:1811
+#: main.c:1804
 msgid "creating jobs pipe"
 msgstr "maken van taken-pijp"
 
-#: main.c:1826
+#: main.c:1819
 msgid "init jobserver pipe"
 msgstr "initialiseren van taakserver-pijp"
 
-#: main.c:1845
+#: main.c:1838
 msgid "Symbolic links not supported: disabling -L."
 msgstr ""
 "Symbolische koppelingen worden niet ondersteund: -L wordt uitgeschakeld."
 
-#: main.c:1921
+#: main.c:1914
 msgid "Updating makefiles....\n"
 msgstr "Bijwerken van makefiles...\n"
 
-#: main.c:1946
+#: main.c:1939
 #, c-format
 msgid "Makefile `%s' might loop; not remaking it.\n"
 msgstr "Makefile '%s' bevat mogelijk een lus; wordt niet opnieuw gemaakt.\n"
 
-#: main.c:2025
+#: main.c:2018
 #, c-format
 msgid "Failed to remake makefile `%s'."
 msgstr "Opnieuw maken van makefile '%s' is mislukt."
 
-#: main.c:2042
+#: main.c:2035
 #, c-format
 msgid "Included makefile `%s' was not found."
 msgstr "Ingesloten makefile '%s' is niet gevonden."
 
-#: main.c:2047
+#: main.c:2040
 #, c-format
 msgid "Makefile `%s' was not found"
 msgstr "Makefile '%s' is niet gevonden."
 
-#: main.c:2117
+#: main.c:2110
 msgid "Couldn't change back to original directory."
 msgstr "Kan niet terugkeren naar oorspronkelijke map."
 
-#: main.c:2125
+#: main.c:2118
 #, c-format
 msgid "Re-executing[%u]:"
 msgstr "Opnieuw uitvoeren[%u]:"
 
-#: main.c:2241
+#: main.c:2234
 msgid "unlink (temporary file): "
 msgstr "verwijderen (van tijdelijk bestand): "
 
-#: main.c:2270
+#: main.c:2263
 msgid ".DEFAULT_GOAL contains more than one target"
 msgstr ".DEFAULT_GOAL bevat meer dan één doel"
 
-#: main.c:2289
+#: main.c:2282
 msgid "No targets specified and no makefile found"
 msgstr "Geen doelen opgegeven en geen makefile gevonden"
 
-#: main.c:2291
+#: main.c:2284
 msgid "No targets"
 msgstr "Geen doelen"
 
-#: main.c:2296
+#: main.c:2289
 msgid "Updating goal targets....\n"
 msgstr "Bijwerken van doelen...\n"
 
-#: main.c:2322
+#: main.c:2315
 msgid "warning:  Clock skew detected.  Your build may be incomplete."
 msgstr ""
 "Waarschuwing:  Klokafwijking geconstateerd.  Het maken is mogelijk "
 "onvolledig gebeurd."
 
-#: main.c:2483
+#: main.c:2476
 #, c-format
 msgid "Usage: %s [options] [target] ...\n"
 msgstr "Gebruik:  %s [opties] [doel] ...\n"
 
-#: main.c:2489
+#: main.c:2482
 #, c-format
 msgid ""
 "\n"
@@ -1143,7 +1135,7 @@ msgstr ""
 "\n"
 "Dit programma is gemaakt voor %s\n"
 
-#: main.c:2491
+#: main.c:2484
 #, c-format
 msgid ""
 "\n"
@@ -1152,24 +1144,24 @@ msgstr ""
 "\n"
 "Dit programma is gemaakt voor %s (%s)\n"
 
-#: main.c:2494
+#: main.c:2487
 #, fuzzy, c-format
 msgid "Report bugs to <bashdb-remake@lists.sf.net>\n"
 msgstr ""
 "Rapporteer programmafouten aan <bug-make@gnu.org>,\n"
 "meld fouten in de vertaling aan <vertaling@vrijschrift.org>.\n"
 
-#: main.c:2566
+#: main.c:2559
 #, c-format
 msgid "the `-%c' option requires a non-empty string argument"
 msgstr "de optie '-%c' vereist een niet-lege tekenreeks als argument"
 
-#: main.c:2618
+#: main.c:2611
 #, c-format
 msgid "the `-%c' option requires a positive integral argument"
 msgstr "de optie '-%c' vereist een positief, geheel argument"
 
-#: main.c:3042
+#: main.c:3036
 #, c-format
 msgid ""
 "%sThis is free software; see the source for copying conditions.\n"
@@ -1180,7 +1172,7 @@ msgstr ""
 "%sEr is GEEN garantie; zelfs niet voor VERHANDELBAARHEID of\n"
 "%sGESCHIKTHEID VOOR EEN BEPAALD DOEL.\n"
 
-#: main.c:3048
+#: main.c:3042
 #, c-format
 msgid ""
 "\n"
@@ -1189,7 +1181,7 @@ msgstr ""
 "\n"
 "%sDit programma is gemaakt voor %s\n"
 
-#: main.c:3050
+#: main.c:3044
 #, c-format
 msgid ""
 "\n"
@@ -1198,7 +1190,7 @@ msgstr ""
 "\n"
 "%sDit programma is gemaakt voor %s (%s)\n"
 
-#: main.c:3068
+#: main.c:3062
 #, c-format
 msgid ""
 "\n"
@@ -1207,7 +1199,7 @@ msgstr ""
 "\n"
 "# Make-gegevensbank, weergegeven op %s"
 
-#: main.c:3078
+#: main.c:3072
 #, c-format
 msgid ""
 "\n"
@@ -2021,6 +2013,13 @@ msgstr ""
 "\n"
 "# Algemeen zoekpad ('VPATH'-variabele):\n"
 "# "
+
+#~ msgid ""
+#~ "  --warn-undefined-variables  Warn when an undefined variable is "
+#~ "referenced.\n"
+#~ msgstr ""
+#~ "  --warn-undefined-variables  Waarschuwen als naar een ongedefinieerde "
+#~ "variabele wordt verwezen.\n"
 
 #~ msgid "unknown debug level specification `%s'"
 #~ msgstr "onbekende aanduiding '%s' voor debug-niveau"

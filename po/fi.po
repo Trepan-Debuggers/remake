@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.81-b3\n"
 "Report-Msgid-Bugs-To: bug-make@gnu.org\n"
-"POT-Creation-Date: 2008-12-11 23:40-0500\n"
+"POT-Creation-Date: 2010-05-01 22:24-0400\n"
 "PO-Revision-Date: 2005-07-06 21:36+0300\n"
 "Last-Translator: Lauri Nurmi <lanurmi@iki.fi>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
@@ -697,26 +697,26 @@ msgstr "Luodaan väliaikainen komentotiedosto %s\n"
 msgid "%s (line %d) Bad shell context (!unixy && !batch_mode_shell)\n"
 msgstr "%s (rivi %d) Väärä kuoriympäristö (!unixy && !batch_mode_shell)\n"
 
-#: main.c:346
+#: main.c:343
 msgid "Options:\n"
 msgstr "Valitsimet:\n"
 
-#: main.c:347
+#: main.c:344
 #, fuzzy
 msgid "  -b, -m                       Ignored for compatibility.\n"
 msgstr ""
 "  -b, -m                      Yhteensopivuuden vuoksi jätetään huomiotta.\n"
 
-#: main.c:349
+#: main.c:346
 #, fuzzy
 msgid "  -B, --always-make            Unconditionally make all targets.\n"
 msgstr "  -B, --always-make           Tuota kaikki kohteet ehdoitta.\n"
 
-#: main.c:351
+#: main.c:348
 msgid "  --basename-filenames         Show files as basename only.\n"
 msgstr ""
 
-#: main.c:353
+#: main.c:350
 #, fuzzy
 msgid ""
 "  -C DIRECTORY, --directory=DIRECTORY\n"
@@ -725,19 +725,19 @@ msgstr ""
 "  -C HAKEMISTO, --directory=HAKEMISTO\n"
 "                              Siirry HAKEMISTOon ennen jatkamista.\n"
 
-#: main.c:356
+#: main.c:353
 #, fuzzy
 msgid "  -d                           Print lots of debugging information.\n"
 msgstr "  -d                          Näytä runsaasti vianetsintätietoja.\n"
 
-#: main.c:358
+#: main.c:355
 #, fuzzy
 msgid ""
 "  --debug[=FLAGS]              Print various types of debugging "
 "information.\n"
 msgstr "  --debug[=LIPUT]             Näytä monenlaisia vianetsintätietoja.\n"
 
-#: main.c:360
+#: main.c:357
 #, fuzzy
 msgid ""
 "  -e, --environment-overrides\n"
@@ -747,7 +747,7 @@ msgstr ""
 "                              Ympäristömuuttujat kumoavat makefile-"
 "tiedostot.\n"
 
-#: main.c:363
+#: main.c:360
 #, fuzzy
 msgid ""
 "  -f FILE, --file=FILE, --makefile=FILE\n"
@@ -756,19 +756,19 @@ msgstr ""
 "  -f TIEDOSTO, --file=TIEDOSTO, --makefile=TIEDOSTO\n"
 "                              Käytä TIEDOSTOa makefile-tiedostona.\n"
 
-#: main.c:366
+#: main.c:363
 #, fuzzy
 msgid "  -h, --help                   Print this message and exit.\n"
 msgstr "  -h, --help                  Näytä tämä viesti ja poistu.\n"
 
-#: main.c:368
+#: main.c:365
 #, fuzzy
 msgid "  -i, --ignore-errors          Ignore errors from commands.\n"
 msgstr ""
 "  -i, --ignore-errors         Älä huomioi suoritettujen komentojen "
 "virheitä.\n"
 
-#: main.c:370
+#: main.c:367
 #, fuzzy
 msgid ""
 "  -I DIRECTORY, --include-dir=DIRECTORY\n"
@@ -778,7 +778,7 @@ msgstr ""
 "                              Etsi sisällytettäviä makefile:ja "
 "HAKEMISTOsta.\n"
 
-#: main.c:373
+#: main.c:370
 #, fuzzy
 msgid ""
 "  -j [N], --jobs[=N]           Allow N jobs at once; infinite jobs with no "
@@ -787,7 +787,7 @@ msgstr ""
 "  -j [N], --jobs[=N]          Salli N yhtäaikaista työtä; ilman N:ää "
 "ääretön.\n"
 
-#: main.c:375
+#: main.c:372
 #, fuzzy
 msgid ""
 "  -k, --keep-going             Keep going when some targets can't be made.\n"
@@ -795,7 +795,7 @@ msgstr ""
 "  -k, --keep-going            Jatka vaikka joidenkin kohteiden tuottaminen\n"
 "                                epäonnistuisi.\n"
 
-#: main.c:377
+#: main.c:374
 #, fuzzy
 msgid ""
 "  -l [N], --load-average[=N], --max-load[=N]\n"
@@ -806,7 +806,7 @@ msgstr ""
 "                              Älä aloita useita töitä ellei kuormitus alle "
 "N.\n"
 
-#: main.c:380
+#: main.c:377
 #, fuzzy
 msgid ""
 "  -L, --check-symlink-times    Use the latest mtime between symlinks and "
@@ -815,7 +815,7 @@ msgstr ""
 "  -L, --check-symlink-times   Käytä uusinta mtime-aikaa symlinkkien ja\n"
 "                                kohteen välillä.\n"
 
-#: main.c:382
+#: main.c:379
 #, fuzzy
 msgid ""
 "  -n, --just-print, --dry-run, --recon\n"
@@ -826,12 +826,12 @@ msgstr ""
 "                              Näytä ajettavat komennot, älä käynnistä "
 "niitä.\n"
 
-#: main.c:385
+#: main.c:382
 msgid ""
 "  --no-extended-errors         Do not give additional error reporting.\n"
 msgstr ""
 
-#: main.c:387
+#: main.c:384
 #, fuzzy
 msgid ""
 "  -o FILE, --old-file=FILE, --assume-old=FILE\n"
@@ -841,12 +841,12 @@ msgstr ""
 "  -o TIEDOSTO, --old-file=TIEDOSTO, --assume-old=TIEDOSTO\n"
 "                              Käsittele TIEDOSTO vanhana, älä tuota sitä.\n"
 
-#: main.c:390
+#: main.c:387
 #, fuzzy
 msgid "  -p, --print-data-base        Print make's internal database.\n"
 msgstr "  -p, --print-data-base       Näytä make:in sisäinen tietokanta.\n"
 
-#: main.c:392
+#: main.c:389
 #, fuzzy
 msgid ""
 "  -q, --question               Run no commands; exit status says if up to "
@@ -855,53 +855,53 @@ msgstr ""
 "  -q, --question              Älä aja komentoja; paluuarvo kertoo ajan-\n"
 "                                tasaisuuden.\n"
 
-#: main.c:394
+#: main.c:391
 #, fuzzy
 msgid "  -r, --no-builtin-rules       Disable the built-in implicit rules.\n"
 msgstr ""
 "  -r, --no-builtin-rules      Poista käytöstä sisäiset oletussäännöt.\n"
 
-#: main.c:396
+#: main.c:393
 #, fuzzy
 msgid ""
 "  -R, --no-builtin-variables   Disable the built-in variable settings.\n"
 msgstr ""
 "  -R, --no-builtin-variables  Poista käytöstä sisäiset muuttuja-asetukset.\n"
 
-#: main.c:398
+#: main.c:395
 #, fuzzy
 msgid "  -s, --silent, --quiet        Don't echo commands.\n"
 msgstr "  -s, --silent, --quiet       Älä kaiuta komentoja.\n"
 
-#: main.c:400
+#: main.c:397
 #, fuzzy
 msgid "  -S, --no-keep-going, --stop  Turns off -k.\n"
 msgstr ""
 "  -S, --no-keep-going, --stop\n"
 "                              Kumoaa valitsimen -k.\n"
 
-#: main.c:402
+#: main.c:399
 #, fuzzy
 msgid ""
 "  -t, --touch                  Touch targets instead of remaking them.\n"
 msgstr "  -t, --touch                 Kosketa kohteita tuottamisen sijaan.\n"
 
-#: main.c:404
+#: main.c:401
 #, fuzzy
 msgid ""
 "  -v, --version                Print the version number of make and exit.\n"
 msgstr "  -v, --version               Näytä make:in versionumero ja poistu.\n"
 
-#: main.c:406
+#: main.c:403
 msgid "  -V, --show-variables         Show variable expansions.\n"
 msgstr ""
 
-#: main.c:408
+#: main.c:405
 #, fuzzy
 msgid "  -w, --print-directory        Print the current directory.\n"
 msgstr "  -w, --print-directory       Näytä nykyinen hakemisto.\n"
 
-#: main.c:410
+#: main.c:407
 #, fuzzy
 msgid ""
 "  --no-print-directory         Turn off -w, even if it was turned on "
@@ -910,7 +910,7 @@ msgstr ""
 "  --no-print-directory        Kumoa -w, vaikka se olisi käytössä "
 "oletuksena.\n"
 
-#: main.c:412
+#: main.c:409
 #, fuzzy
 msgid ""
 "  -W FILE, --what-if=FILE, --new-file=FILE, --assume-new=FILE\n"
@@ -920,7 +920,7 @@ msgstr ""
 "new=TIEDOSTO\n"
 "                              Käsittele TIEDOSTO aina uutena.\n"
 
-#: main.c:415
+#: main.c:412
 #, fuzzy
 msgid ""
 "  --warn-undefined-variables   Warn when an undefined variable is "
@@ -929,42 +929,34 @@ msgstr ""
 "  --warn-undefined-variables  Varoita viittauksista määrittelemättömiin\n"
 "                                muuttujiin.\n"
 
-#: main.c:417
+#: main.c:414
 msgid ""
 "  -x, --trace[=TYPE]           Trace command execution TYPE may be\n"
 "                               \"command\", \"read\", \"normal\",\"\n"
 "                               \"noshell\", or \"full\".\n"
 msgstr ""
 
-#: main.c:421
+#: main.c:418
 msgid "  -y                           same as --trace=\"noshell\"\n"
 msgstr ""
 
-#: main.c:423
+#: main.c:420
 msgid ""
 "  -X [type], --debugger[=TYPE] Enter debugger. TYPE may be\n"
 "                               \"goal\", \"preread\", \"preaction\",\n"
 "                               \"full\", \"error\", or \"fatal\".\n"
 msgstr ""
 
-#: main.c:427
-msgid ""
-"  --warn-undefined-variables  Warn when an undefined variable is "
-"referenced.\n"
-msgstr ""
-"  --warn-undefined-variables  Varoita viittauksista määrittelemättömiin\n"
-"                                muuttujiin.\n"
-
-#: main.c:641
+#: main.c:634
 msgid "empty string invalid as file name"
 msgstr "tyhjä merkkijono ei kelpaa tiedostonimeksi"
 
-#: main.c:699
+#: main.c:692
 #, fuzzy, c-format
 msgid "%s: Interrupt/Exception caught (code = 0x%lx, addr = 0x%lx)\n"
 msgstr "%s: Keskeytys/poikkeus siepattu (koodi = 0x%x, osoite = 0x%x)\n"
 
-#: main.c:706
+#: main.c:699
 #, fuzzy, c-format
 msgid ""
 "\n"
@@ -979,159 +971,159 @@ msgstr ""
 "Poikkeusliput = %x\n"
 "Poikkeusosoite = %x\n"
 
-#: main.c:714
+#: main.c:707
 #, fuzzy, c-format
 msgid "Access violation: write operation at address %lx\n"
 msgstr "Suojausvirhe: kirjoitusoperaatio osoitteeseen %x\n"
 
-#: main.c:715
+#: main.c:708
 #, fuzzy, c-format
 msgid "Access violation: read operation at address %lx\n"
 msgstr "Suojausvirhe: lukuoperaatio osoitteeseen %x\n"
 
-#: main.c:791 main.c:802
+#: main.c:784 main.c:795
 #, c-format
 msgid "find_and_set_shell setting default_shell = %s\n"
 msgstr "find_and_set_shell asettaa default_shell = %s\n"
 
-#: main.c:843
+#: main.c:836
 #, c-format
 msgid "find_and_set_shell path search set default_shell = %s\n"
 msgstr "find_and_set_shell: polkuhaku asetti default_shell = %s\n"
 
-#: main.c:1333
+#: main.c:1326
 #, c-format
 msgid "%s is suspending for 30 seconds..."
 msgstr "%s keskeytyy 30 sekunniksi..."
 
-#: main.c:1335
+#: main.c:1328
 #, c-format
 msgid "done sleep(30). Continuing.\n"
 msgstr "sleep(30) valmis. Jatketaan.\n"
 
-#: main.c:1567
+#: main.c:1560
 msgid "Makefile from standard input specified twice."
 msgstr "Makefile-tiedosto vakiosyötteestä määritelty kahdesti."
 
-#: main.c:1606 vmsjobs.c:486
+#: main.c:1599 vmsjobs.c:486
 msgid "fopen (temporary file)"
 msgstr "fopen (väliaikaistiedosto)"
 
-#: main.c:1612
+#: main.c:1605
 msgid "fwrite (temporary file)"
 msgstr "fwrite (väliaikaistiedosto)"
 
-#: main.c:1741
+#: main.c:1734
 msgid "Parallel jobs (-j) are not supported on this platform."
 msgstr "Rinnakkaiset työt (-j) eivät ole tuettuja tällä alustalla."
 
-#: main.c:1742
+#: main.c:1735
 msgid "Resetting to single job (-j1) mode."
 msgstr "Palataan yhden työn (-j1) tilaan."
 
-#: main.c:1757
+#: main.c:1750
 msgid "internal error: multiple --jobserver-fds options"
 msgstr "sisäinen virhe: useitan --jobserver-fds -valitsimia"
 
-#: main.c:1765
+#: main.c:1758
 #, c-format
 msgid "internal error: invalid --jobserver-fds string `%s'"
 msgstr "sisäinen virhe: virheellinen --jobserver-fds -merkkijono \"%s\""
 
-#: main.c:1775
+#: main.c:1768
 msgid "warning: -jN forced in submake: disabling jobserver mode."
 msgstr "varoitus: -jN pakotettu ali-make:ssa: poistetaan työpalvelin käytöstä."
 
-#: main.c:1785
+#: main.c:1778
 msgid "dup jobserver"
 msgstr "kaksinkertainen työpalvelin"
 
-#: main.c:1788
+#: main.c:1781
 msgid ""
 "warning: jobserver unavailable: using -j1.  Add `+' to parent make rule."
 msgstr ""
 "varoitus: työpalvelin ei käytettävissä: käytetään -j1. Lisää \"+\" ylemmän "
 "tason make-sääntöön."
 
-#: main.c:1811
+#: main.c:1804
 msgid "creating jobs pipe"
 msgstr "luodaan työputki"
 
-#: main.c:1826
+#: main.c:1819
 msgid "init jobserver pipe"
 msgstr "alustetaan työpalvelimen putki"
 
-#: main.c:1845
+#: main.c:1838
 msgid "Symbolic links not supported: disabling -L."
 msgstr "Ei tukea symbolisille linkeille: poistetaan -L käytöstä."
 
-#: main.c:1921
+#: main.c:1914
 msgid "Updating makefiles....\n"
 msgstr "Päivitetään makefile-tiedostoja....\n"
 
-#: main.c:1946
+#: main.c:1939
 #, c-format
 msgid "Makefile `%s' might loop; not remaking it.\n"
 msgstr ""
 "Ei uudelleentuoteta makefile-tiedostoa \"%s\" - vältetään mahdollinen "
 "ikuinen silmukka.\n"
 
-#: main.c:2025
+#: main.c:2018
 #, c-format
 msgid "Failed to remake makefile `%s'."
 msgstr "Makefile-tiedoston \"%s\" uudelleentuottaminen epäonnistui."
 
-#: main.c:2042
+#: main.c:2035
 #, c-format
 msgid "Included makefile `%s' was not found."
 msgstr "Sisällytettyä makefile-tiedostoa \"%s\" ei löytynyt."
 
-#: main.c:2047
+#: main.c:2040
 #, c-format
 msgid "Makefile `%s' was not found"
 msgstr "Makefile-tiedostoa \"%s\" ei löytynyt"
 
-#: main.c:2117
+#: main.c:2110
 msgid "Couldn't change back to original directory."
 msgstr "Ei voitu siirtyä takaisin alkuperäiseen hakemistoon."
 
-#: main.c:2125
+#: main.c:2118
 #, c-format
 msgid "Re-executing[%u]:"
 msgstr "Uudelleenkäynnistetään[%u]:"
 
-#: main.c:2241
+#: main.c:2234
 msgid "unlink (temporary file): "
 msgstr "unlink (väliaikaistiedosto): "
 
-#: main.c:2270
+#: main.c:2263
 msgid ".DEFAULT_GOAL contains more than one target"
 msgstr ".DEFAULT_GOAL sisältää yli yhden kohteen"
 
-#: main.c:2289
+#: main.c:2282
 msgid "No targets specified and no makefile found"
 msgstr "Kohteita ei ole annettu, eikä makefileä löytynyt"
 
-#: main.c:2291
+#: main.c:2284
 msgid "No targets"
 msgstr "Ei kohteita"
 
-#: main.c:2296
+#: main.c:2289
 msgid "Updating goal targets....\n"
 msgstr ""
 
-#: main.c:2322
+#: main.c:2315
 msgid "warning:  Clock skew detected.  Your build may be incomplete."
 msgstr ""
 "varoitus: Havaittu väärä kellonaika. Käännösversio saattaa olla "
 "epätäydellinen."
 
-#: main.c:2483
+#: main.c:2476
 #, c-format
 msgid "Usage: %s [options] [target] ...\n"
 msgstr "Käyttö: %s [valitsimet] [kohde] ...\n"
 
-#: main.c:2489
+#: main.c:2482
 #, c-format
 msgid ""
 "\n"
@@ -1140,7 +1132,7 @@ msgstr ""
 "\n"
 "Tämä ohjelma on käännetty järjestelmälle %s.\n"
 
-#: main.c:2491
+#: main.c:2484
 #, c-format
 msgid ""
 "\n"
@@ -1149,23 +1141,23 @@ msgstr ""
 "\n"
 "Tämä ohjelma on käännetty järjestelmälle %s (%s).\n"
 
-#: main.c:2494
+#: main.c:2487
 #, fuzzy, c-format
 msgid "Report bugs to <bashdb-remake@lists.sf.net>\n"
 msgstr ""
 "Ilmoita ohjelmistovioista (englanniksi) osoitteeseen <bug-make@gnu.org>.\n"
 
-#: main.c:2566
+#: main.c:2559
 #, c-format
 msgid "the `-%c' option requires a non-empty string argument"
 msgstr "valitsin \"-%c\" vaatii ei-tyhjän merkkijonoargumentin"
 
-#: main.c:2618
+#: main.c:2611
 #, c-format
 msgid "the `-%c' option requires a positive integral argument"
 msgstr "valitsin \"-%c\" vaatii positiivisen kokonaislukuargumentin"
 
-#: main.c:3042
+#: main.c:3036
 #, c-format
 msgid ""
 "%sThis is free software; see the source for copying conditions.\n"
@@ -1176,7 +1168,7 @@ msgstr ""
 "%sTakuuta EI ole, ei edes KAUPALLISESTI HYVÄKSYTTÄVÄSTÄ LAADUSTA tai\n"
 "%sSOPIVUUDESTA TIETTYYN TARKOITUKSEEN.\n"
 
-#: main.c:3048
+#: main.c:3042
 #, c-format
 msgid ""
 "\n"
@@ -1185,7 +1177,7 @@ msgstr ""
 "\n"
 "%sTämä ohjelma on käännetty järjestelmälle %s.\n"
 
-#: main.c:3050
+#: main.c:3044
 #, c-format
 msgid ""
 "\n"
@@ -1194,7 +1186,7 @@ msgstr ""
 "\n"
 "%sTämä ohjelma on käännetty järjestelmälle %s (%s).\n"
 
-#: main.c:3068
+#: main.c:3062
 #, c-format
 msgid ""
 "\n"
@@ -1203,7 +1195,7 @@ msgstr ""
 "\n"
 "# Make-tietokanta, tulostettu %s"
 
-#: main.c:3078
+#: main.c:3072
 #, c-format
 msgid ""
 "\n"
@@ -2017,6 +2009,13 @@ msgstr ""
 "\n"
 "# Yleinen (\"VPATH\"-muuttuja) hakupolku:\n"
 "# "
+
+#~ msgid ""
+#~ "  --warn-undefined-variables  Warn when an undefined variable is "
+#~ "referenced.\n"
+#~ msgstr ""
+#~ "  --warn-undefined-variables  Varoita viittauksista määrittelemättömiin\n"
+#~ "                                muuttujiin.\n"
 
 #~ msgid "unknown debug level specification `%s'"
 #~ msgstr "tuntematon vianetsintätason määritys \"%s\""

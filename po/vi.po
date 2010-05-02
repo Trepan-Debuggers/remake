@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make-3.81-b3\n"
 "Report-Msgid-Bugs-To: bug-make@gnu.org\n"
-"POT-Creation-Date: 2008-12-11 23:40-0500\n"
+"POT-Creation-Date: 2010-05-01 22:24-0400\n"
 "PO-Revision-Date: 2006-02-05 19:19+1030\n"
 "Last-Translator: Clytie Siddall <clytie@riverland.net.au>\n"
 "Language-Team: Vietnamese <gnomevi-list@lists.sourceforge.net>\n"
@@ -712,26 +712,26 @@ msgstr "Đang tạo tập tin bó tạm thời: %s\n"
 msgid "%s (line %d) Bad shell context (!unixy && !batch_mode_shell)\n"
 msgstr "%s (dòng %d) Ngữ cảnh hệ vỏ sai (!unixy && !batch_mode_shell)\n"
 
-#: main.c:346
+#: main.c:343
 msgid "Options:\n"
 msgstr "Tùy chọn:\n"
 
-#: main.c:347
+#: main.c:344
 #, fuzzy
 msgid "  -b, -m                       Ignored for compatibility.\n"
 msgstr "  -b, -m                      Bị bỏ qua để tương thích.\n"
 
-#: main.c:349
+#: main.c:346
 #, fuzzy
 msgid "  -B, --always-make            Unconditionally make all targets.\n"
 msgstr ""
 "  -B, --always-make           _Luôn luôn tạo_ mọi đích (không điều kiện).\n"
 
-#: main.c:351
+#: main.c:348
 msgid "  --basename-filenames         Show files as basename only.\n"
 msgstr ""
 
-#: main.c:353
+#: main.c:350
 #, fuzzy
 msgid ""
 "  -C DIRECTORY, --directory=DIRECTORY\n"
@@ -740,12 +740,12 @@ msgstr ""
 "  -C THƯ_MỤC, --directory=THƯ_MỤC\n"
 "                              Chuyển đổi sang thư mục này, trước hết.\n"
 
-#: main.c:356
+#: main.c:353
 #, fuzzy
 msgid "  -d                           Print lots of debugging information.\n"
 msgstr "  -d                          In ra rất nhiều thông tin _gỡ lỗi_.\n"
 
-#: main.c:358
+#: main.c:355
 #, fuzzy
 msgid ""
 "  --debug[=FLAGS]              Print various types of debugging "
@@ -753,7 +753,7 @@ msgid ""
 msgstr ""
 "  --debug[=CỜ...]             In ra các kiểu thông tin _gỡ lỗi_ khác nhau.\n"
 
-#: main.c:360
+#: main.c:357
 #, fuzzy
 msgid ""
 "  -e, --environment-overrides\n"
@@ -763,7 +763,7 @@ msgstr ""
 "                              Các biến _môi trường có quyền cao hơn_\n"
 "\t\t\t\t\tcác tập tin tạo (makefile).\n"
 
-#: main.c:363
+#: main.c:360
 #, fuzzy
 msgid ""
 "  -f FILE, --file=FILE, --makefile=FILE\n"
@@ -772,17 +772,17 @@ msgstr ""
 "  -f TẬP_TIN, --file=TẬP_TIN, --makefile=TẬP_TIN\n"
 "                              Đọc tập tin này dạng tập tin tạo (makefile).\n"
 
-#: main.c:366
+#: main.c:363
 #, fuzzy
 msgid "  -h, --help                   Print this message and exit.\n"
 msgstr "  -h, --help                  Hiển thị _trợ giúp_ này rồi thoát.\n"
 
-#: main.c:368
+#: main.c:365
 #, fuzzy
 msgid "  -i, --ignore-errors          Ignore errors from commands.\n"
 msgstr "  -i, --ignore-errors         _Bỏ qua các lỗi_ từ các lệnh.\n"
 
-#: main.c:370
+#: main.c:367
 #, fuzzy
 msgid ""
 "  -I DIRECTORY, --include-dir=DIRECTORY\n"
@@ -792,7 +792,7 @@ msgstr ""
 "                              Tìm kiếm tập tin tạo (makefile) đã _bao gồm_\n"
 "\t\t\t\t\ttrong _thư mục_ này.\n"
 
-#: main.c:373
+#: main.c:370
 #, fuzzy
 msgid ""
 "  -j [N], --jobs[=N]           Allow N jobs at once; infinite jobs with no "
@@ -801,14 +801,14 @@ msgstr ""
 "  -j [N], --jobs[=N]          Cho phép N (số) _công việc_ đồng thời;\n"
 "\t\t\t\t\t\tvô hạn khi không có đối số\n"
 
-#: main.c:375
+#: main.c:372
 #, fuzzy
 msgid ""
 "  -k, --keep-going             Keep going when some targets can't be made.\n"
 msgstr ""
 "  -k, --keep-going            _Cứ làm_ khi không thể tạo một số đích.\n"
 
-#: main.c:377
+#: main.c:374
 #, fuzzy
 msgid ""
 "  -l [N], --load-average[=N], --max-load[=N]\n"
@@ -819,7 +819,7 @@ msgstr ""
 "                       Đừng khởi chạy nhiều công việc, trừ trọng tải dưới N "
 "(số).\n"
 
-#: main.c:380
+#: main.c:377
 #, fuzzy
 msgid ""
 "  -L, --check-symlink-times    Use the latest mtime between symlinks and "
@@ -829,7 +829,7 @@ msgstr ""
 "\t\t\tDùng giờ_m cuối cùng giữa liên kết tượng trưng và đích.\n"
 "\t(_kiểm tra giờ liên kết tượng trưng_)\n"
 
-#: main.c:382
+#: main.c:379
 #, fuzzy
 msgid ""
 "  -n, --just-print, --dry-run, --recon\n"
@@ -840,12 +840,12 @@ msgstr ""
 "                             Đừng thật chạy lệnh nào, chỉ in ra hết.\n"
 "\t(_chỉ in, chạy thực hành, sự thăm dò_)\n"
 
-#: main.c:385
+#: main.c:382
 msgid ""
 "  --no-extended-errors         Do not give additional error reporting.\n"
 msgstr ""
 
-#: main.c:387
+#: main.c:384
 #, fuzzy
 msgid ""
 "  -o FILE, --old-file=FILE, --assume-old=FILE\n"
@@ -856,13 +856,13 @@ msgstr ""
 "                             Xem tập tin này là rất cũ nên đừng tạo lại nó.\n"
 "\t(_cũ, tập tin cũ, giả sử cũ_)\n"
 
-#: main.c:390
+#: main.c:387
 #, fuzzy
 msgid "  -p, --print-data-base        Print make's internal database.\n"
 msgstr ""
 "  -p, --print-data-base      _In ra cơ sở dữ liệu_ nội bộ của trình make.\n"
 
-#: main.c:392
+#: main.c:389
 #, fuzzy
 msgid ""
 "  -q, --question               Run no commands; exit status says if up to "
@@ -872,14 +872,14 @@ msgstr ""
 "\tĐừng chạy lệnh nào; trạng thái thoát nói nếu hiện thời hay không.\n"
 "\t(_câu hỏi_)\n"
 
-#: main.c:394
+#: main.c:391
 #, fuzzy
 msgid "  -r, --no-builtin-rules       Disable the built-in implicit rules.\n"
 msgstr ""
 "  -r, --no-builtin-rules      \t\tTắt các quy tắc ngầm có sẵn.\n"
 "\t(_không có quy tắc có sẵn_)\n"
 
-#: main.c:396
+#: main.c:393
 #, fuzzy
 msgid ""
 "  -R, --no-builtin-variables   Disable the built-in variable settings.\n"
@@ -887,21 +887,21 @@ msgstr ""
 "  -R, --no-builtin-variables  \tTắt các thiết lập biến có sẵn.\n"
 "\t(_không có biến có sẵn_)\n"
 
-#: main.c:398
+#: main.c:395
 #, fuzzy
 msgid "  -s, --silent, --quiet        Don't echo commands.\n"
 msgstr ""
 "  -s, --silent, --quiet       Đừng vọng (hiển thị) lệnh.\n"
 "\t(_câm, im_)\n"
 
-#: main.c:400
+#: main.c:397
 #, fuzzy
 msgid "  -S, --no-keep-going, --stop  Turns off -k.\n"
 msgstr ""
 "  -S, --no-keep-going, --stop\t\tTắt « -k ».\n"
 "\t(không cứ làm, dừng)\n"
 
-#: main.c:402
+#: main.c:399
 #, fuzzy
 msgid ""
 "  -t, --touch                  Touch targets instead of remaking them.\n"
@@ -909,7 +909,7 @@ msgstr ""
 "  -t, --touch                 Touch các đích thay vào tạo lại chúng.\n"
 "\t(_sờ_)\n"
 
-#: main.c:404
+#: main.c:401
 #, fuzzy
 msgid ""
 "  -v, --version                Print the version number of make and exit.\n"
@@ -917,16 +917,16 @@ msgstr ""
 "  -v, --version               In ra số thứ tự _phiên bản_ của trình make, "
 "rồi thoát.\n"
 
-#: main.c:406
+#: main.c:403
 msgid "  -V, --show-variables         Show variable expansions.\n"
 msgstr ""
 
-#: main.c:408
+#: main.c:405
 #, fuzzy
 msgid "  -w, --print-directory        Print the current directory.\n"
 msgstr "  -w, --print-directory       _In ra thư mục_ hiện thời.\n"
 
-#: main.c:410
+#: main.c:407
 #, fuzzy
 msgid ""
 "  --no-print-directory         Turn off -w, even if it was turned on "
@@ -935,7 +935,7 @@ msgstr ""
 "  --no-print-directory        Tắt « -w », dù khi nó được bật ngầm\n"
 "\t(_không in ra thư mục_)\n"
 
-#: main.c:412
+#: main.c:409
 #, fuzzy
 msgid ""
 "  -W FILE, --what-if=FILE, --new-file=FILE, --assume-new=FILE\n"
@@ -948,7 +948,7 @@ msgstr ""
 "                              \t\t\tXem là tập tin này là mới vô hạn.\n"
 "\t(_gì nếu, tập tin mới, giả sử mới_)\n"
 
-#: main.c:415
+#: main.c:412
 #, fuzzy
 msgid ""
 "  --warn-undefined-variables   Warn when an undefined variable is "
@@ -957,43 +957,35 @@ msgstr ""
 "  --warn-undefined-variables\n"
 "\t\t_Cảnh báo_ khi tham chiếu một _biến chưa được định nghĩa_.\n"
 
-#: main.c:417
+#: main.c:414
 msgid ""
 "  -x, --trace[=TYPE]           Trace command execution TYPE may be\n"
 "                               \"command\", \"read\", \"normal\",\"\n"
 "                               \"noshell\", or \"full\".\n"
 msgstr ""
 
-#: main.c:421
+#: main.c:418
 msgid "  -y                           same as --trace=\"noshell\"\n"
 msgstr ""
 
-#: main.c:423
+#: main.c:420
 msgid ""
 "  -X [type], --debugger[=TYPE] Enter debugger. TYPE may be\n"
 "                               \"goal\", \"preread\", \"preaction\",\n"
 "                               \"full\", \"error\", or \"fatal\".\n"
 msgstr ""
 
-#: main.c:427
-msgid ""
-"  --warn-undefined-variables  Warn when an undefined variable is "
-"referenced.\n"
-msgstr ""
-"  --warn-undefined-variables\n"
-"\t\t_Cảnh báo_ khi tham chiếu một _biến chưa được định nghĩa_.\n"
-
-#: main.c:641
+#: main.c:634
 msgid "empty string invalid as file name"
 msgstr "chuỗi rỗng không hợp lệ dạng tên tập tin"
 
-#: main.c:699
+#: main.c:692
 #, fuzzy, c-format
 msgid "%s: Interrupt/Exception caught (code = 0x%lx, addr = 0x%lx)\n"
 msgstr ""
 "%s: Mới bắt Interrupt/Exception (ngắt/ngoài lệ) (mã = 0x%x, địa chỉ = 0x%x)\n"
 
-#: main.c:706
+#: main.c:699
 #, fuzzy, c-format
 msgid ""
 "\n"
@@ -1008,171 +1000,171 @@ msgstr ""
 "ExceptionFlags \t\tcác cờ ngoài lệ      %x\n"
 "ExceptionAddress \t\tđịa chỉ ngoài lệ     %x\n"
 
-#: main.c:714
+#: main.c:707
 #, fuzzy, c-format
 msgid "Access violation: write operation at address %lx\n"
 msgstr "Vi phạm truy cập: thao tác ghi tại địa chỉ %x\n"
 
-#: main.c:715
+#: main.c:708
 #, fuzzy, c-format
 msgid "Access violation: read operation at address %lx\n"
 msgstr "Vi phạm truy cập: thao tác đọc tại địa chỉ %x\n"
 
-#: main.c:791 main.c:802
+#: main.c:784 main.c:795
 #, c-format
 msgid "find_and_set_shell setting default_shell = %s\n"
 msgstr ""
 "« find_and_set_shell » (tìm và lập hệ vỏ) đang lập « default_shell » (hệ vỏ "
 "mặc định) = %s\n"
 
-#: main.c:843
+#: main.c:836
 #, c-format
 msgid "find_and_set_shell path search set default_shell = %s\n"
 msgstr ""
 "Việc tìm kiếm đường dẫn « find_and_set_shell » (tìm và lập hệ vỏ) đang lập « "
 "default_shell » (hệ vỏ mặc định) = %s\n"
 
-#: main.c:1333
+#: main.c:1326
 #, c-format
 msgid "%s is suspending for 30 seconds..."
 msgstr "%s đang ngưng được 30 giây..."
 
-#: main.c:1335
+#: main.c:1328
 #, c-format
 msgid "done sleep(30). Continuing.\n"
 msgstr "đã ngủ(30). Đang tiếp tục.\n"
 
-#: main.c:1567
+#: main.c:1560
 msgid "Makefile from standard input specified twice."
 msgstr "Tập tin tạo (makefile) từ thiết bị nhập chuẩn đã được ghi rõ hai lần."
 
-#: main.c:1606 vmsjobs.c:486
+#: main.c:1599 vmsjobs.c:486
 msgid "fopen (temporary file)"
 msgstr ""
 "fopen (tập tin tạm thời)\n"
 "  (_mở tập tin_)"
 
-#: main.c:1612
+#: main.c:1605
 msgid "fwrite (temporary file)"
 msgstr ""
 "fwrite (tập tin tạm thời)\n"
 "  (_ghi tập tin_)"
 
-#: main.c:1741
+#: main.c:1734
 msgid "Parallel jobs (-j) are not supported on this platform."
 msgstr "Công việc song song (-j) không được hỗ trợ trên nền tảng này."
 
-#: main.c:1742
+#: main.c:1735
 msgid "Resetting to single job (-j1) mode."
 msgstr "Đang lập lại thành chế độ công việc đơn (-j1)."
 
-#: main.c:1757
+#: main.c:1750
 msgid "internal error: multiple --jobserver-fds options"
 msgstr ""
 "lỗi nội bộ: có nhiều tùy chọn « --jobserver-fds » (trình phục vụ công việc -"
 "fds)."
 
-#: main.c:1765
+#: main.c:1758
 #, c-format
 msgid "internal error: invalid --jobserver-fds string `%s'"
 msgstr ""
 "lỗi nội bộ: gặp chuỗi « --jobserver-fds » (trình phục vụ công việc -fds) "
 "không hợp lệ « %s »."
 
-#: main.c:1775
+#: main.c:1768
 msgid "warning: -jN forced in submake: disabling jobserver mode."
 msgstr ""
 "cảnh báo : « -jN » bị buộc trong tiến trình submake: nên tắt chế độ trình "
 "phục vụ công việc (jobserver)."
 
-#: main.c:1785
+#: main.c:1778
 msgid "dup jobserver"
 msgstr "dup jobserver (sao lục trình phục vụ công việc)"
 
-#: main.c:1788
+#: main.c:1781
 msgid ""
 "warning: jobserver unavailable: using -j1.  Add `+' to parent make rule."
 msgstr ""
 "cảnh báo : trình phục vụ công việc không sẵn sàng: nên dùng « -j1 ». Hãy thêm "
 "« + » vào quy tắc make mẹ."
 
-#: main.c:1811
+#: main.c:1804
 msgid "creating jobs pipe"
 msgstr "đang tạo ống dẫn công việc"
 
-#: main.c:1826
+#: main.c:1819
 msgid "init jobserver pipe"
 msgstr "init jobserver pipe (sở khởi ống dẫn trình phục vụ công việc)"
 
-#: main.c:1845
+#: main.c:1838
 msgid "Symbolic links not supported: disabling -L."
 msgstr "Không hỗ trợ liên kết tượng trưng: nên tắt « -L »."
 
-#: main.c:1921
+#: main.c:1914
 msgid "Updating makefiles....\n"
 msgstr "Đạng cập nhật các tập tin tạo (makefile)...\n"
 
-#: main.c:1946
+#: main.c:1939
 #, c-format
 msgid "Makefile `%s' might loop; not remaking it.\n"
 msgstr "Tập tin tạo (makefile) « %s » có lẽ sẽ vòng lặp; sẽ không tạo lại nó.\n"
 
-#: main.c:2025
+#: main.c:2018
 #, c-format
 msgid "Failed to remake makefile `%s'."
 msgstr "Việc tạo lại tập tin tạo (makefile) « %s » bị lỗi."
 
-#: main.c:2042
+#: main.c:2035
 #, c-format
 msgid "Included makefile `%s' was not found."
 msgstr "Không tìm thấy tập tin tạo (makefile) đã bao gồm « %s »."
 
-#: main.c:2047
+#: main.c:2040
 #, c-format
 msgid "Makefile `%s' was not found"
 msgstr "Không tìm thấy tập tin tạo (makefile) « %s »."
 
-#: main.c:2117
+#: main.c:2110
 msgid "Couldn't change back to original directory."
 msgstr "Không thể chuyển đổi về thư mục gốc."
 
-#: main.c:2125
+#: main.c:2118
 #, c-format
 msgid "Re-executing[%u]:"
 msgstr "Đang thực hiện lại[%u]:"
 
-#: main.c:2241
+#: main.c:2234
 msgid "unlink (temporary file): "
 msgstr "unlink (bỏ liên kết) (tập tin tạm thời): "
 
-#: main.c:2270
+#: main.c:2263
 msgid ".DEFAULT_GOAL contains more than one target"
 msgstr "« .DEFAULT_GOAL » (đích mặc định) chứa nhiều đích."
 
-#: main.c:2289
+#: main.c:2282
 msgid "No targets specified and no makefile found"
 msgstr "Chưa ghi rõ đích nào, và không tìm thấy tập tin tạo (makefile) nào"
 
-#: main.c:2291
+#: main.c:2284
 msgid "No targets"
 msgstr "Không có đích"
 
-#: main.c:2296
+#: main.c:2289
 msgid "Updating goal targets....\n"
 msgstr "Đạng cập nhật các đích mục tiêu...\n"
 
-#: main.c:2322
+#: main.c:2315
 msgid "warning:  Clock skew detected.  Your build may be incomplete."
 msgstr ""
 "cảnh báo : mới phát hiện đối xứng lệch đồng hồ. Như thế thì bản xây dụng có "
 "lẽ không hoàn toàn."
 
-#: main.c:2483
+#: main.c:2476
 #, c-format
 msgid "Usage: %s [options] [target] ...\n"
 msgstr "Cách sử dụng: %s [tùy_chọn...] [đích] ...\n"
 
-#: main.c:2489
+#: main.c:2482
 #, c-format
 msgid ""
 "\n"
@@ -1181,7 +1173,7 @@ msgstr ""
 "\n"
 "Chương trình này đã được xây dụng cho %s\n"
 
-#: main.c:2491
+#: main.c:2484
 #, c-format
 msgid ""
 "\n"
@@ -1190,22 +1182,22 @@ msgstr ""
 "\n"
 "Chương trình này đã được xây dụng cho %s (%s)\n"
 
-#: main.c:2494
+#: main.c:2487
 #, fuzzy, c-format
 msgid "Report bugs to <bashdb-remake@lists.sf.net>\n"
 msgstr "Hãy thông báo lỗi cho <bug-make@gnu.org>.\n"
 
-#: main.c:2566
+#: main.c:2559
 #, c-format
 msgid "the `-%c' option requires a non-empty string argument"
 msgstr "tùy chọn « -%c » cần đến một đối số dạng chuỗi không rỗng"
 
-#: main.c:2618
+#: main.c:2611
 #, c-format
 msgid "the `-%c' option requires a positive integral argument"
 msgstr "tùy chọn « -%c » cần đến một đối số dạng số nguyên dương"
 
-#: main.c:3042
+#: main.c:3036
 #, c-format
 msgid ""
 "%sThis is free software; see the source for copying conditions.\n"
@@ -1216,7 +1208,7 @@ msgstr ""
 "%sKhông bảo đảm gì cả, dù khả năng bán hay khả năng làm việc dứt khoát.\n"
 "%s\n"
 
-#: main.c:3048
+#: main.c:3042
 #, c-format
 msgid ""
 "\n"
@@ -1225,7 +1217,7 @@ msgstr ""
 "\n"
 "%sChương trình này đã được xây dụng cho %s\n"
 
-#: main.c:3050
+#: main.c:3044
 #, c-format
 msgid ""
 "\n"
@@ -1234,7 +1226,7 @@ msgstr ""
 "\n"
 "%sChương trình này đã được xây dụng cho %s (%s)\n"
 
-#: main.c:3068
+#: main.c:3062
 #, c-format
 msgid ""
 "\n"
@@ -1243,7 +1235,7 @@ msgstr ""
 "\n"
 "# Cơ sở dữ liệu Make, được in ra vào %s"
 
-#: main.c:3078
+#: main.c:3072
 #, c-format
 msgid ""
 "\n"
@@ -2060,6 +2052,13 @@ msgstr ""
 "\n"
 "# Đường dẫn tìm kiếm chung (biến « VPATH »).\n"
 "# "
+
+#~ msgid ""
+#~ "  --warn-undefined-variables  Warn when an undefined variable is "
+#~ "referenced.\n"
+#~ msgstr ""
+#~ "  --warn-undefined-variables\n"
+#~ "\t\t_Cảnh báo_ khi tham chiếu một _biến chưa được định nghĩa_.\n"
 
 #~ msgid "unknown debug level specification `%s'"
 #~ msgstr "không biết đặc tả cấp gỡ lỗi « %s »"

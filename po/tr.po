@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: make 3.80\n"
 "Report-Msgid-Bugs-To: bug-make@gnu.org\n"
-"POT-Creation-Date: 2008-12-11 23:40-0500\n"
+"POT-Creation-Date: 2010-05-01 22:24-0400\n"
 "PO-Revision-Date: 2002-10-05 18:13+0300\n"
 "Last-Translator: Nilgün Belma Bugüner <nilgun@superonline.com>\n"
 "Language-Team: Turkish <gnu-tr-u12a@lists.sourceforge.net>\n"
@@ -700,38 +700,38 @@ msgstr "%s geçici komut-liste dosyasını oluşturuyor\n"
 msgid "%s (line %d) Bad shell context (!unixy && !batch_mode_shell)\n"
 msgstr "%s (satır %d) kabuk bağlamı hatalı (!unixy && !batch_mode_shell)\n"
 
-#: main.c:346
+#: main.c:343
 msgid "Options:\n"
 msgstr "Seçenekler:\n"
 
-#: main.c:347
+#: main.c:344
 #, fuzzy
 msgid "  -b, -m                       Ignored for compatibility.\n"
 msgstr "  -b, -m                      Uyumluluk için yoksayıldı.\n"
 
-#: main.c:349
+#: main.c:346
 #, fuzzy
 msgid "  -B, --always-make            Unconditionally make all targets.\n"
 msgstr ""
 "  -B, --always-make           Tüm hedefler koşulsuz olarak oluşturulur.\n"
 
-#: main.c:351
+#: main.c:348
 msgid "  --basename-filenames         Show files as basename only.\n"
 msgstr ""
 
-#: main.c:353
+#: main.c:350
 #, fuzzy
 msgid ""
 "  -C DIRECTORY, --directory=DIRECTORY\n"
 "                               Change to DIRECTORY before doing anything.\n"
 msgstr "  -C DİZİN, --directory=DIZIN Birşey yapmadan önce DİZİNe geçilir.\n"
 
-#: main.c:356
+#: main.c:353
 #, fuzzy
 msgid "  -d                           Print lots of debugging information.\n"
 msgstr "  -b, -m                      Bir sürü hata ayıklama bilgisi basar.\n"
 
-#: main.c:358
+#: main.c:355
 #, fuzzy
 msgid ""
 "  --debug[=FLAGS]              Print various types of debugging "
@@ -739,7 +739,7 @@ msgid ""
 msgstr ""
 "  --debug[=SEÇENEKLER]        Çeşitli türde hata ayıklama bilgileri basar.\n"
 
-#: main.c:360
+#: main.c:357
 #, fuzzy
 msgid ""
 "  -e, --environment-overrides\n"
@@ -747,7 +747,7 @@ msgid ""
 msgstr ""
 "  -e, --environment-overrides Ortam değişkenleri makefile'ları değiştirir.\n"
 
-#: main.c:363
+#: main.c:360
 #, fuzzy
 msgid ""
 "  -f FILE, --file=FILE, --makefile=FILE\n"
@@ -756,17 +756,17 @@ msgstr ""
 "  -f DOSYA, --file=DOSYA, --makefile=DOSYA\n"
 "                              DOSYAyı bir makefile olarak okur.\n"
 
-#: main.c:366
+#: main.c:363
 #, fuzzy
 msgid "  -h, --help                   Print this message and exit.\n"
 msgstr "  -h, --help                  Bu iletiyi basar ve çıkar.\n"
 
-#: main.c:368
+#: main.c:365
 #, fuzzy
 msgid "  -i, --ignore-errors          Ignore errors from commands.\n"
 msgstr "  -i, --ignore-errors         Komutların ürettiği hataları yoksayar.\n"
 
-#: main.c:370
+#: main.c:367
 #, fuzzy
 msgid ""
 "  -I DIRECTORY, --include-dir=DIRECTORY\n"
@@ -775,7 +775,7 @@ msgstr ""
 "  -I DİZİN, --include-dir=DİZİN\n"
 "                              Eklenecek makefile'ları DİZİNde arar.\n"
 
-#: main.c:373
+#: main.c:370
 #, fuzzy
 msgid ""
 "  -j [N], --jobs[=N]           Allow N jobs at once; infinite jobs with no "
@@ -784,14 +784,14 @@ msgstr ""
 "  -j [N], --jobs[=N]          Bir defada N işe izin verir; argumansız iş\n"
 "                              sayısı sınırsızdır.\n"
 
-#: main.c:375
+#: main.c:372
 #, fuzzy
 msgid ""
 "  -k, --keep-going             Keep going when some targets can't be made.\n"
 msgstr ""
 "  -k, --keep-going            Bazı hedefler yapılmadığında devam eder.\n"
 
-#: main.c:377
+#: main.c:374
 #, fuzzy
 msgid ""
 "  -l [N], --load-average[=N], --max-load[=N]\n"
@@ -802,13 +802,13 @@ msgstr ""
 "                              Yük N'den az olmadıkça çoklu işler "
 "başlatılmaz.\n"
 
-#: main.c:380
+#: main.c:377
 msgid ""
 "  -L, --check-symlink-times    Use the latest mtime between symlinks and "
 "target.\n"
 msgstr ""
 
-#: main.c:382
+#: main.c:379
 #, fuzzy
 msgid ""
 "  -n, --just-print, --dry-run, --recon\n"
@@ -818,12 +818,12 @@ msgstr ""
 "  -n, --just-print, --dry-run, --recon\n"
 "                              Gerçekte komutlar çalıştırılmaz, gösterilir.\n"
 
-#: main.c:385
+#: main.c:382
 msgid ""
 "  --no-extended-errors         Do not give additional error reporting.\n"
 msgstr ""
 
-#: main.c:387
+#: main.c:384
 #, fuzzy
 msgid ""
 "  -o FILE, --old-file=FILE, --assume-old=FILE\n"
@@ -834,12 +834,12 @@ msgstr ""
 "                              DOSYAnın çok eski olduğu varsayılır ve\n"
 "                              yeniden işlem yapılmaz.\n"
 
-#: main.c:390
+#: main.c:387
 #, fuzzy
 msgid "  -p, --print-data-base        Print make's internal database.\n"
 msgstr "  -p, --print-data-base       make'in içsel veritabanını basar.\n"
 
-#: main.c:392
+#: main.c:389
 #, fuzzy
 msgid ""
 "  -q, --question               Run no commands; exit status says if up to "
@@ -847,31 +847,31 @@ msgid ""
 msgstr ""
 "  -q, --question              Komut çalıştırmaz; güncelse çıkışta belirtir\n"
 
-#: main.c:394
+#: main.c:391
 #, fuzzy
 msgid "  -r, --no-builtin-rules       Disable the built-in implicit rules.\n"
 msgstr ""
 "  -r, --no-builtin-rules      Oluşumiçi örtük kuralları etkisizleştirir.\n"
 
-#: main.c:396
+#: main.c:393
 #, fuzzy
 msgid ""
 "  -R, --no-builtin-variables   Disable the built-in variable settings.\n"
 msgstr ""
 "  -R, --no-builtin-variables  Oluşumiçi değişken ayarlarını etkisizleştirir\n"
 
-#: main.c:398
+#: main.c:395
 #, fuzzy
 msgid "  -s, --silent, --quiet        Don't echo commands.\n"
 msgstr "  -s, --silent, --quiet     Komutlar işlenirken gösterilmez.\n"
 
-#: main.c:400
+#: main.c:397
 #, fuzzy
 msgid "  -S, --no-keep-going, --stop  Turns off -k.\n"
 msgstr ""
 "  -S, --no-keep-going, --stop Bazı hedefler yapılmadığında devam etmez.\n"
 
-#: main.c:402
+#: main.c:399
 #, fuzzy
 msgid ""
 "  -t, --touch                  Touch targets instead of remaking them.\n"
@@ -879,22 +879,22 @@ msgstr ""
 "  -t, --touch                 Yeniden derlemek yerine hedeflere bakıp "
 "geçer.\n"
 
-#: main.c:404
+#: main.c:401
 #, fuzzy
 msgid ""
 "  -v, --version                Print the version number of make and exit.\n"
 msgstr "  -v, --version               make sürüm numarasını basar ve çıkar.\n"
 
-#: main.c:406
+#: main.c:403
 msgid "  -V, --show-variables         Show variable expansions.\n"
 msgstr ""
 
-#: main.c:408
+#: main.c:405
 #, fuzzy
 msgid "  -w, --print-directory        Print the current directory.\n"
 msgstr "  -w, --print-directory       Kullanılan dizini basar.\n"
 
-#: main.c:410
+#: main.c:407
 #, fuzzy
 msgid ""
 "  --no-print-directory         Turn off -w, even if it was turned on "
@@ -903,7 +903,7 @@ msgstr ""
 "  --no-print-directory        Dolaylı olarak açılmış olsa bile -w 'yi "
 "kapatır\n"
 
-#: main.c:412
+#: main.c:409
 #, fuzzy
 msgid ""
 "  -W FILE, --what-if=FILE, --new-file=FILE, --assume-new=FILE\n"
@@ -912,7 +912,7 @@ msgstr ""
 "  -W DOSYA, --what-if=DOSYA, --new-file=DOSYA, --assume-new=DOSYA\n"
 "                              DOSYA sonsuz yeni varsayılır.\n"
 
-#: main.c:415
+#: main.c:412
 #, fuzzy
 msgid ""
 "  --warn-undefined-variables   Warn when an undefined variable is "
@@ -921,42 +921,34 @@ msgstr ""
 "  --warn-undefined-variables  Atanmamış bir değişkene bağıntı yapıldığında\n"
 "                              uyarır.\n"
 
-#: main.c:417
+#: main.c:414
 msgid ""
 "  -x, --trace[=TYPE]           Trace command execution TYPE may be\n"
 "                               \"command\", \"read\", \"normal\",\"\n"
 "                               \"noshell\", or \"full\".\n"
 msgstr ""
 
-#: main.c:421
+#: main.c:418
 msgid "  -y                           same as --trace=\"noshell\"\n"
 msgstr ""
 
-#: main.c:423
+#: main.c:420
 msgid ""
 "  -X [type], --debugger[=TYPE] Enter debugger. TYPE may be\n"
 "                               \"goal\", \"preread\", \"preaction\",\n"
 "                               \"full\", \"error\", or \"fatal\".\n"
 msgstr ""
 
-#: main.c:427
-msgid ""
-"  --warn-undefined-variables  Warn when an undefined variable is "
-"referenced.\n"
-msgstr ""
-"  --warn-undefined-variables  Atanmamış bir değişkene bağıntı yapıldığında\n"
-"                              uyarır.\n"
-
-#: main.c:641
+#: main.c:634
 msgid "empty string invalid as file name"
 msgstr "dosyaismi olarak boş dizge geçersiz"
 
-#: main.c:699
+#: main.c:692
 #, fuzzy, c-format
 msgid "%s: Interrupt/Exception caught (code = 0x%lx, addr = 0x%lx)\n"
 msgstr "%s: Kesinti/Olağandışı durum saptandı (kod = 0x%x, adres = 0x%x)\n"
 
-#: main.c:706
+#: main.c:699
 #, fuzzy, c-format
 msgid ""
 "\n"
@@ -971,156 +963,156 @@ msgstr ""
 "OlağandışılıkBayrakları = %x\n"
 "OlağandışılıkAdresi = %x\n"
 
-#: main.c:714
+#: main.c:707
 #, fuzzy, c-format
 msgid "Access violation: write operation at address %lx\n"
 msgstr "Erişim uyumsuzluğu: %x adresine yazma işlemi\n"
 
-#: main.c:715
+#: main.c:708
 #, fuzzy, c-format
 msgid "Access violation: read operation at address %lx\n"
 msgstr "Erişim uyumsuzluğu: %x adresinden okuma işlemi\n"
 
-#: main.c:791 main.c:802
+#: main.c:784 main.c:795
 #, c-format
 msgid "find_and_set_shell setting default_shell = %s\n"
 msgstr "find_and_set_shell default_shell = %s olarak belirliyor\n"
 
-#: main.c:843
+#: main.c:836
 #, c-format
 msgid "find_and_set_shell path search set default_shell = %s\n"
 msgstr ""
 "find_and_set_shell yol aramasını default_shell = %s olarak belirliyor\n"
 
-#: main.c:1333
+#: main.c:1326
 #, c-format
 msgid "%s is suspending for 30 seconds..."
 msgstr "%s 30 saniyeliğine askıya alınıyor..."
 
-#: main.c:1335
+#: main.c:1328
 #, c-format
 msgid "done sleep(30). Continuing.\n"
 msgstr "sleep(30) bitti. Devam ediliyor.\n"
 
-#: main.c:1567
+#: main.c:1560
 msgid "Makefile from standard input specified twice."
 msgstr "Makefile standart girdiden iki kez belirtildi."
 
-#: main.c:1606 vmsjobs.c:486
+#: main.c:1599 vmsjobs.c:486
 msgid "fopen (temporary file)"
 msgstr "fopen (geçici dosya)"
 
-#: main.c:1612
+#: main.c:1605
 msgid "fwrite (temporary file)"
 msgstr "fwrite (geçici dosya)"
 
-#: main.c:1741
+#: main.c:1734
 msgid "Parallel jobs (-j) are not supported on this platform."
 msgstr "Bu platformda paralel işler (-j) desteklenmiyor."
 
-#: main.c:1742
+#: main.c:1735
 msgid "Resetting to single job (-j1) mode."
 msgstr "Tek iş kipi (-j1) için make'i başlatma konumuna alıyor"
 
-#: main.c:1757
+#: main.c:1750
 msgid "internal error: multiple --jobserver-fds options"
 msgstr "içsel hata: çok sayıda --jobserver-fds seçeneği"
 
-#: main.c:1765
+#: main.c:1758
 #, c-format
 msgid "internal error: invalid --jobserver-fds string `%s'"
 msgstr "içsel hata: --jobserver-fds dizgesi `%s' geçersiz"
 
-#: main.c:1775
+#: main.c:1768
 msgid "warning: -jN forced in submake: disabling jobserver mode."
 msgstr "uyarı: alt derlemede -jN zorlandı: iş sunucusu kipi kapatılıyor."
 
-#: main.c:1785
+#: main.c:1778
 msgid "dup jobserver"
 msgstr "çift iş sunucusu"
 
-#: main.c:1788
+#: main.c:1781
 msgid ""
 "warning: jobserver unavailable: using -j1.  Add `+' to parent make rule."
 msgstr ""
 "uyarı: iş sunucusu kullanımdışı: -j1 kullanılıyor. Üst make kuralına `+' "
 "ekle."
 
-#: main.c:1811
+#: main.c:1804
 msgid "creating jobs pipe"
 msgstr "işleri yaratıyor"
 
-#: main.c:1826
+#: main.c:1819
 msgid "init jobserver pipe"
 msgstr "işleri hazırlıyor"
 
-#: main.c:1845
+#: main.c:1838
 msgid "Symbolic links not supported: disabling -L."
 msgstr ""
 
-#: main.c:1921
+#: main.c:1914
 msgid "Updating makefiles....\n"
 msgstr "makefile'ları güncelliyor...\n"
 
-#: main.c:1946
+#: main.c:1939
 #, c-format
 msgid "Makefile `%s' might loop; not remaking it.\n"
 msgstr "`%s' make dosyası çevrime girdi; yeniden derlenemez.\n"
 
-#: main.c:2025
+#: main.c:2018
 #, c-format
 msgid "Failed to remake makefile `%s'."
 msgstr "`%s' make dosyası yeniden derlenemiyor."
 
-#: main.c:2042
+#: main.c:2035
 #, c-format
 msgid "Included makefile `%s' was not found."
 msgstr "İçerilen make dosyası `%s' bulunamadı."
 
-#: main.c:2047
+#: main.c:2040
 #, c-format
 msgid "Makefile `%s' was not found"
 msgstr "`%s' make dosyası bulunamadı"
 
-#: main.c:2117
+#: main.c:2110
 msgid "Couldn't change back to original directory."
 msgstr "Geriye, özgün dizine geçilemiyor."
 
-#: main.c:2125
+#: main.c:2118
 #, fuzzy, c-format
 msgid "Re-executing[%u]:"
 msgstr "Yeniden çalıştırılıyor:"
 
-#: main.c:2241
+#: main.c:2234
 msgid "unlink (temporary file): "
 msgstr "unlink (geçici dosya): "
 
-#: main.c:2270
+#: main.c:2263
 msgid ".DEFAULT_GOAL contains more than one target"
 msgstr ""
 
-#: main.c:2289
+#: main.c:2282
 msgid "No targets specified and no makefile found"
 msgstr "Hedefler belirtilmediğinden make dosyası yok"
 
-#: main.c:2291
+#: main.c:2284
 msgid "No targets"
 msgstr "Hedef yok"
 
-#: main.c:2296
+#: main.c:2289
 msgid "Updating goal targets....\n"
 msgstr "Amaçlanan hedefler güncelleniyor...\n"
 
-#: main.c:2322
+#: main.c:2315
 msgid "warning:  Clock skew detected.  Your build may be incomplete."
 msgstr "uyarı:  Clock skew saptandı. Derleme tamamlanamayabilir."
 
-#: main.c:2483
+#: main.c:2476
 #, c-format
 msgid "Usage: %s [options] [target] ...\n"
 msgstr "Kullanım: %s [seçenekler] [hedef] ...\n"
 
-#: main.c:2489
+#: main.c:2482
 #, c-format
 msgid ""
 "\n"
@@ -1129,7 +1121,7 @@ msgstr ""
 "\n"
 "Bu program %s için kurgulanmış\n"
 
-#: main.c:2491
+#: main.c:2484
 #, c-format
 msgid ""
 "\n"
@@ -1138,24 +1130,24 @@ msgstr ""
 "\n"
 "Bu program %s için kurgulanmış (%s)\n"
 
-#: main.c:2494
+#: main.c:2487
 #, fuzzy, c-format
 msgid "Report bugs to <bashdb-remake@lists.sf.net>\n"
 msgstr ""
 "Yazılım hatalarını <bug-make@gnu.org> adresine,\n"
 "çeviri hatalarını <gnu-tr-u12a@lists.sourceforge.net> adresine bildiriniz.\n"
 
-#: main.c:2566
+#: main.c:2559
 #, fuzzy, c-format
 msgid "the `-%c' option requires a non-empty string argument"
 msgstr "`-%c' seçeneği bir pozitif tümleyici bağımsız değişkenle kullanılır"
 
-#: main.c:2618
+#: main.c:2611
 #, c-format
 msgid "the `-%c' option requires a positive integral argument"
 msgstr "`-%c' seçeneği bir pozitif tümleyici bağımsız değişkenle kullanılır"
 
-#: main.c:3042
+#: main.c:3036
 #, c-format
 msgid ""
 "%sThis is free software; see the source for copying conditions.\n"
@@ -1167,7 +1159,7 @@ msgstr ""
 "%sHiçbir garantisi yoktur; hatta SATILABİLİRLİĞİ veya ŞAHSİ KULLANIMINIZA\n"
 "%sUYGUNLUĞU için bile garanti verilmez.\n"
 
-#: main.c:3048
+#: main.c:3042
 #, fuzzy, c-format
 msgid ""
 "\n"
@@ -1176,7 +1168,7 @@ msgstr ""
 "\n"
 "Bu program %s için kurgulanmış\n"
 
-#: main.c:3050
+#: main.c:3044
 #, fuzzy, c-format
 msgid ""
 "\n"
@@ -1185,7 +1177,7 @@ msgstr ""
 "\n"
 "Bu program %s için kurgulanmış (%s)\n"
 
-#: main.c:3068
+#: main.c:3062
 #, c-format
 msgid ""
 "\n"
@@ -1194,7 +1186,7 @@ msgstr ""
 "\n"
 "# Make veri tabanı, %s üzerine basıldı"
 
-#: main.c:3078
+#: main.c:3072
 #, c-format
 msgid ""
 "\n"
@@ -2011,6 +2003,14 @@ msgstr ""
 "\n"
 "# Genel (`VPATH' çevre değişkeni) arama yolu:\n"
 "# "
+
+#~ msgid ""
+#~ "  --warn-undefined-variables  Warn when an undefined variable is "
+#~ "referenced.\n"
+#~ msgstr ""
+#~ "  --warn-undefined-variables  Atanmamış bir değişkene bağıntı "
+#~ "yapıldığında\n"
+#~ "                              uyarır.\n"
 
 #~ msgid "unknown debug level specification `%s'"
 #~ msgstr "Hata ayıklama düzeyi özelliği `%s' bilinmiyor"
