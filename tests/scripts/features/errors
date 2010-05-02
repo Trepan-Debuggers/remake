@@ -49,7 +49,7 @@ $delete_error_code = $? >> 8;
 
 $answer = "$rm_command cleanit\n"
          . $cleanit_error
-         . "work/features/errors.mk:1: [clean] Error 1 (ignored)\n"
+         . "work/features/errors.mk:1: [clean] Error $delete_error_code (ignored)\n"
          . "\n"
          . "#0  clean at errors.mk:1\n"
          ."$rm_command foo\n";

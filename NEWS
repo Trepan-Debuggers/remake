@@ -1,17 +1,21 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  2008
+
+Version 3.81+dbg-0.3
+2010-05-01
+
+* Bug fixes
+* Compiles on Solaris
 
 Version 3.81+dbg-0.2 - Sam Woodward Release
+2009-01-12
 
 * Bug in trying to fake file information for a .PHONY target
-
 * Some merge cleanup. Add debugger-specific documentation (from 3.80+dbg-0.61)
 
 Version 3.81+dbg-0.1
 
 * Merge in code from 3.80+dbg-0.63cvs. 
-
 * Add "info rules" and "info vpath"
 
 1 April 2006
@@ -20,32 +24,24 @@ Version 3.80+dbg-0.63cvs
 
 * Add a "list" command. Basically same as "target x depends commands" 
   for now. "list -" shows the parent. 
-
 * Help commands now show short usage.
-
 * Ctrl-d leaves debugger 
-
 * Add Emacs regression test and allow space in filename for MS Windows
 
 Version 3.80+dbg-0.62
 2007-02-27
 
 * Changes to make more Debian compatibile. 
-
 * Track some GNU Make 3.81 changes, which include a bugfix
   and making more strings "const". 
-
 * Miscellaneous bugfixes
 
 Version 3.80+dbg-0.61
 2006-03-24
 
 * Add comint shell tracking - taken from python's pdbtrack
-
 * Add gdb's cd and pwd commands.
-  
 * "write" command now adds "cd <directory name>" as a comment.
-  
 * configure options:
    --with-default-shell to specify the default value
      for SHELL (useful on say Solaris), 

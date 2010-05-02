@@ -18,7 +18,7 @@
 # GNU Make; see the file COPYING.  If not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 
-AC_INIT([remake],[3.81+dbg-0.3git],[bashdb-remake@lists.sourceforge.net])
+AC_INIT([remake],[3.81+dbg-0.3],[bashdb-remake@lists.sourceforge.net])
 
 AM_PATH_LISPDIR
 AC_PREREQ(2.59)
