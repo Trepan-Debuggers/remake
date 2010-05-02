@@ -8,7 +8,7 @@ Version 3.81+dbg-0.3
 * Compiles on Solaris
 
 Version 3.81+dbg-0.2 - Sam Woodward Release
-2009-01-12
+2009-01-10
 
 * Bug in trying to fake file information for a .PHONY target
 * Some merge cleanup. Add debugger-specific documentation (from 3.80+dbg-0.61)
