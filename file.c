@@ -181,8 +181,7 @@ enter_file (const char *name)
   if (! HASH_VACANT (f) && !f->double_colon)
     return f;
 
-  new = xmalloc (sizeof (struct file));
-  memset (new, '\0', sizeof (struct file));
+  new = xcalloc (sizeof (struct file));
   new->name = new->hname = name;
   new->update_status = -1;
 

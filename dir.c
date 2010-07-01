@@ -721,7 +721,7 @@ dir_contents_file_exists_p (struct directory_contents *dir,
 	  hash_insert_at (&dir->dirfiles, df, dirfile_slot);
 	}
       /* Check if the name matches the one we're searching for.  */
-      if (filename != 0 && strieq (d->d_name, filename))
+      if (filename != 0 && patheq (d->d_name, filename))
         return 1;
     }
 
@@ -872,12 +872,9 @@ file_impossible (const char *filename)
     }
 
   if (dir->contents == 0)
-    {
-      /* The directory could not be stat'd.  We allocate a contents
-	 structure for it, but leave it out of the contents hash table.  */
-      dir->contents = xmalloc (sizeof (struct directory_contents));
-      memset (dir->contents, '\0', sizeof (struct directory_contents));
-    }
+    /* The directory could not be stat'd.  We allocate a contents
+       structure for it, but leave it out of the contents hash table.  */
+    dir->contents = xcalloc (sizeof (struct directory_contents));
 
   if (dir->contents->dirfiles.ht_vec == 0)
     {

@@ -1,3 +1,12 @@
+2010-01-10  Paul Smith  <psmith@gnu.org>
+
+	* make.h (patheq): Rename strieq() to patheq() for clarity.
+	* dir.c (dir_contents_file_exists_p): Use it.
+
+	* dir.c (file_impossible): Convert xmalloc/memset to xcalloc.
+	* file.c (enter_file): Ditto.
+	* job.c (new_job): Ditto.
+
 2009-12-11  Eli Zaretskii  <eliz@gnu.org>
 
 	* job.c (construct_command_argv_internal) <sh_cmds_dos>
