@@ -1611,8 +1611,7 @@ new_job (struct file *file)
   /* Start the command sequence, record it in a new
      `struct child', and add that to the chain.  */
 
-  c = xmalloc (sizeof (struct child));
-  memset (c, '\0', sizeof (struct child));
+  c = xcalloc (sizeof (struct child));
   c->file = file;
   c->command_lines = lines;
   c->sh_batch_file = NULL;

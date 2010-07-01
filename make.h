@@ -264,23 +264,23 @@ char *strsignal (int signum);
    host does not conform to POSIX.  */
 #define ISDIGIT(c) ((unsigned) (c) - '0' <= 9)
 
-#ifndef iAPX286
-# define streq(a, b) \
+/* Test if two strings are equal. Is this worthwhile?  Should be profiled.  */
+#define streq(a, b) \
    ((a) == (b) || \
     (*(a) == *(b) && (*(a) == '\0' || !strcmp ((a) + 1, (b) + 1))))
-# ifdef HAVE_CASE_INSENSITIVE_FS
-#  define strieq(a, b) \
+
+/* Test if two strings are equal, but match case-insensitively on systems
+   which have case-insensitive filesystems.  Should only be used for
+   filenames!  */
+#ifdef HAVE_CASE_INSENSITIVE_FS
+# define patheq(a, b) \
     ((a) == (b) \
      || (tolower((unsigned char)*(a)) == tolower((unsigned char)*(b)) \
          && (*(a) == '\0' || !strcasecmp ((a) + 1, (b) + 1))))
-# else
-#  define strieq(a, b) streq(a, b)
-# endif
 #else
-/* Buggy compiler can't handle this.  */
-# define streq(a, b) (strcmp ((a), (b)) == 0)
-# define strieq(a, b) (strcmp ((a), (b)) == 0)
+# define patheq(a, b) streq(a, b)
 #endif
+
 #define strneq(a, b, l) (strncmp ((a), (b), (l)) == 0)
 
 #if defined(__GNUC__) || defined(ENUM_BITFIELDS)
