@@ -1,3 +1,8 @@
+2010-07-01  Paul Smith  <psmith@gnu.org>
+
+	* scripts/features/recursion: Add a space to separate command-line
+	args.  Fixes Savannah bug #29968.
+
 2009-11-12  Boris Kolpackov  <boris@codesynthesis.com>
 
 	* scripts/features/vpath3: Test for the new library search
@@ -6,7 +11,7 @@
 2009-10-06  Boris Kolpackov  <boris@codesynthesis.com>
 
 	* scripts/features/se_explicit: Enable the test for now fixed
-	savannah bug 25780.
+	Savannah bug 25780.
 
 2009-10-06  Boris Kolpackov  <boris@codesynthesis.com>
 

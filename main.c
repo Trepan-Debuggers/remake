@@ -1124,20 +1124,25 @@ main (int argc, char **argv, char **envp)
   /* define_variable_cname (".TARGETS", "", o_default, 0)->special = 1; */
   define_variable_cname (".RECIPEPREFIX", "", o_default, 0)->special = 1;
 
-  /* Set up .FEATURES */
+  /* Set up .FEATURES
+     We must do this in multiple calls because define_variable_cname() is
+     a macro and some compilers (MSVC) don't like conditionals in macros.  */
   define_variable_cname (".FEATURES",
                          "target-specific order-only second-expansion else-if"
-                         "shortest-stem undefine"
+                         " shortest-stem undefine",
+                         o_default, 0);
 #ifndef NO_ARCHIVES
-                         "archives"
+  do_variable_definition (NILF, ".FEATURES", "archives",
+                          o_default, f_append, 0);
 #endif
 #ifdef MAKE_JOBSERVER
-                         "jobserver"
+  do_variable_definition (NILF, ".FEATURES", "jobserver",
+                          o_default, f_append, 0);
 #endif
 #ifdef MAKE_SYMLINKS
-                         "check-symlink"
+  do_variable_definition (NILF, ".FEATURES", "check-symlink",
+                          o_default, f_append, 0);
 #endif
-                         , o_default, 0);
 
   /* Read in variables from the environment.  It is important that this be
      done before $(MAKE) is figured out so its definitions will not be
@@ -3182,7 +3187,11 @@ die (int status)
 	 directory.  Must wait until after remove_intermediates(), or unlinks
          of relative pathnames fail.  */
       if (directory_before_chdir != 0)
-	chdir (directory_before_chdir);
+        {
+          /* If it fails we don't care: shut up GCC.  */
+          int _x;
+          _x = chdir (directory_before_chdir);
+        }
 
       log_working_directory (0);
     }
