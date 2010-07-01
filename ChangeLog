@@ -1,3 +1,9 @@
+2010-07-01  Paul Smith  <psmith@gnu.org>
+
+	* main.c (main): Append optional features using separate calls.
+	Not as efficient but not all compilers allow conditionals inside
+	macro calls.  Fixes Savannah bug #29244.
+
 2010-01-10  Paul Smith  <psmith@gnu.org>
 
 	* make.h (patheq): Rename strieq() to patheq() for clarity.
