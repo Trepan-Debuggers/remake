@@ -846,9 +846,10 @@ eval (struct ebuffer *ebuf, int set_default)
               continue;
             }
 
-	  /* Parse the list of file names.  */
+	  /* Parse the list of file names.  Don't expand archive references!  */
 	  p2 = p;
-	  files = PARSE_FILE_SEQ (&p2, struct nameseq, '\0', NULL, 0);
+	  files = PARSE_FILE_SEQ (&p2, struct nameseq, '\0', NULL,
+                                  PARSEFS_NOAR);
 	  free (p);
 
 	  /* Save the state of conditionals and start
@@ -2833,6 +2834,7 @@ tilde_expand (const char *name)
 
    FLAGS allows one or more of the following bitflags to be set:
         PARSEFS_NOSTRIP - Do no strip './'s off the beginning
+        PARSEFS_NOAR    - Do not check filenames for archive references
         PARSEFS_NOGLOB  - Do not expand globbing characters
         PARSEFS_EXISTS  - Only return globbed files that actually exist
                           (cannot also set NOGLOB)
@@ -2998,28 +3000,55 @@ parse_file_seq (char **stringp, unsigned int size, int stopchar,
 
 #ifndef NO_ARCHIVES
       /* If this is the start of an archive group that isn't complete, set up
-         to add the archive prefix for future files.
+         to add the archive prefix for future files.  A file list like:
+         "libf.a(x.o y.o z.o)" needs to be expanded as:
+         "libf.a(x.o) libf.a(y.o) libf.a(z.o)"
 
          TP == TMP means we're not already in an archive group.  Ignore
          something starting with `(', as that cannot actually be an
          archive-member reference (and treating it as such results in an empty
          file name, which causes much lossage).  Also if it ends in ")" then
-         it's a complete reference so we don't need to treat it specially.  */
+         it's a complete reference so we don't need to treat it specially.
 
-      if (tp == tmpbuf && tp[0] != '(' && tp[nlen-1] != ')')
+         Finally, note that archive groups must end with ')' as the last
+         character, so ensure there's some word ending like that before
+         considering this an archive group.  */
+      if (! (flags & PARSEFS_NOAR)
+          && tp == tmpbuf && tp[0] != '(' && tp[nlen-1] != ')')
         {
           char *n = strchr (tp, '(');
           if (n)
             {
-              /* This is the first element in an open archive group.  It looks
-                 like "lib(mem".  Remember the close paren.  */
-              nlen -= (n + 1) - tp;
-              tp = n + 1;
+              /* This looks like the first element in an open archive group.
+                 A valid group MUST have ')' as the last character.  */
+              const char *e = p + nlen;
+              do
+                {
+                  e = next_token (e);
+                  /* Find the end of this word.  We don't want to unquote and
+                     we don't care about quoting since we're looking for the
+                     last char in the word. */
+                  while (*e != '\0' && *e != stopchar && *e != VMS_COMMA
+                         && ! isblank ((unsigned char) *e))
+                    ++e;
+                  if (e[-1] == ')')
+                    {
+                      /* Found the end, so this is the first element in an
+                         open archive group.  It looks like "lib(mem".
+                         Reset TP past the open paren.  */
+                      nlen -= (n + 1) - tp;
+                      tp = n + 1;
 
-              /* If we have just "lib(", part of something like "lib( a b)",
-                 go to the next item.  */
-              if (! nlen)
-                continue;
+                      /* If we have just "lib(", part of something like
+                         "lib( a b)", go to the next item.  */
+                      if (! nlen)
+                        continue;
+
+                      /* We can stop looking now.  */
+                      break;
+                    }
+                }
+              while (*e != '\0');
             }
         }
 
@@ -3069,7 +3098,7 @@ parse_file_seq (char **stringp, unsigned int size, int stopchar,
       /* If NAME is an archive member reference replace it with the archive
          file name, and save the member name in MEMNAME.  We will glob on the
          archive name and then reattach MEMNAME later.  */
-      if (ar_name (name))
+      if (! (flags & PARSEFS_NOAR) && ar_name (name))
 	{
 	  ar_parse_name (name, &arname, &memname);
 	  name = arname;

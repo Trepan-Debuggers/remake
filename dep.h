@@ -58,9 +58,10 @@ struct nameseq
 
 #define PARSEFS_NONE    (0x0000)
 #define PARSEFS_NOSTRIP (0x0001)
-#define PARSEFS_NOGLOB  (0x0002)
-#define PARSEFS_EXISTS  (0x0004)
-#define PARSEFS_NOCACHE (0x0008)
+#define PARSEFS_NOAR    (0x0002)
+#define PARSEFS_NOGLOB  (0x0004)
+#define PARSEFS_EXISTS  (0x0008)
+#define PARSEFS_NOCACHE (0x0010)
 
 #define PARSE_FILE_SEQ(_s,_t,_c,_p,_f) \
             (_t *)parse_file_seq ((_s),sizeof (_t),(_c),(_p),(_f))
