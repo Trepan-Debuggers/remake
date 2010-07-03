@@ -1,3 +1,9 @@
+2010-07-03  Paul Smith  <psmith@gnu.org>
+
+	* read.c (parse_file_seq): All archive groups must end with ')' as
+	the LAST character in a word.  If there is no word ending in ')'
+	then it's not an archive group.  Fixes Savannah bug #28525.
+
 2010-07-01  Paul Smith  <psmith@gnu.org>
 
 	* main.c (main): Append optional features using separate calls.
