@@ -272,6 +272,7 @@ struct ar_hdr
     char ar_fmag[2];		/* Always contains ARFMAG.  */
   };
 # endif
+# define TOCHAR(_m)     (_m)
 #else
 /* These should allow us to read Windows (VC++) libraries (according to Frank
  * Libbrecht <frankl@abzx.belgium.hp.com>)
@@ -288,6 +289,8 @@ struct ar_hdr
 # define ar_date    Date
 # define ar_uid     UserID
 # define ar_gid     GroupID
+/* In Windows the member names have type BYTE so we must cast them.  */
+# define TOCHAR(_m)     ((char *)(_m))
 #endif
 
 /* Cray's <ar.h> apparently defines this.  */
@@ -630,8 +633,8 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
 	}
 
 #ifndef	M_XENIX
-	sscanf (member_header.ar_mode, "%o", &eltmode);
-	eltsize = atol (member_header.ar_size);
+	sscanf (TOCHAR (member_header.ar_mode), "%o", &eltmode);
+	eltsize = atol (TOCHAR (member_header.ar_size));
 #else	/* Xenix.  */
 	eltmode = (unsigned short int) member_header.ar_mode;
 	eltsize = member_header.ar_size;
@@ -641,9 +644,9 @@ ar_scan (const char *archive, ar_member_func_t function, const void *arg)
 	  (*function) (desc, name, ! long_name, member_offset,
 		       member_offset + AR_HDR_SIZE, eltsize,
 #ifndef	M_XENIX
-		       atol (member_header.ar_date),
-		       atoi (member_header.ar_uid),
-		       atoi (member_header.ar_gid),
+		       atol (TOCHAR (member_header.ar_date)),
+		       atoi (TOCHAR (member_header.ar_uid)),
+		       atoi (TOCHAR (member_header.ar_gid)),
 #else	/* Xenix.  */
 		       member_header.ar_date,
 		       member_header.ar_uid,
@@ -812,7 +815,7 @@ ar_member_touch (const char *arname, const char *memname)
   /* Advance member's time to that time */
   for (ui = 0; ui < sizeof ar_hdr.ar_date; ui++)
     ar_hdr.ar_date[ui] = ' ';
-  sprintf (ar_hdr.ar_date, "%ld", (long int) statbuf.st_mtime);
+  sprintf (TOCHAR (ar_hdr.ar_date), "%ld", (long int) statbuf.st_mtime);
 #ifdef AIAMAG
   ar_hdr.ar_date[strlen(ar_hdr.ar_date)] = ' ';
 #endif

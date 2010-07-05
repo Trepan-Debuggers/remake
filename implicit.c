@@ -211,7 +211,7 @@ pattern_search (struct file *file, int archive,
   unsigned int namelen = strlen (filename);
 
   /* The last slash in FILENAME (or nil if there is none).  */
-  char *lastslash;
+  const char *lastslash;
 
   /* This is a file-object used as an argument in
      recursive calls.  It never contains any data

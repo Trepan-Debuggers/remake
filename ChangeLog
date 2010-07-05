@@ -1,3 +1,18 @@
+2010-07-05  Paul Smith  <psmith@gnu.org>
+
+	* implicit.c (pattern_search): lastslash can be const.
+	* dir.c (downcase): Remove unused variable.
+	* hash.c (hash_init): Cast sizeof for error message.
+	* arscan.c (ar_scan): Cast to char* for WINDOWS32.
+	(ar_member_touch): Ditto.
+	* ar.c (glob_pattern_p): Avoid symbol collision: open -> opened
+	* signame.c (strsignal): Ditto: signal -> sig
+	* job.c (create_batch_file): Ditto: error -> error_string
+	(pid2str): Portably convert a pid_t into a string
+	(reap_children): Use it.
+	(start_waiting_job): Use it.
+	Savannah bug #27809.  Patch by Ozkan Sezer <sezeroz@gmail.com>
+
 2010-07-03  Paul Smith  <psmith@gnu.org>
 
 	* read.c (parse_file_seq): All archive groups must end with ')' as

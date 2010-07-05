@@ -186,6 +186,20 @@ int getgid ();
 # endif
 #endif
 
+/* Different systems have different requirements for pid_t.
+   Plus we have to support gettext string translation... Argh.  */
+static const char *
+pid2str (pid_t pid)
+{
+  static char pidstring[100];
+#ifdef WINDOWS32
+  sprintf (pidstring, "%Id", pid);
+#else
+  sprintf (pidstring, "%lu", (unsigned long) pid);
+#endif
+  return pidstring;
+}
+
 int getloadavg (double loadavg[], int nelem);
 int start_remote_job (char **argv, char **envp, int stdin_fd, int *is_remote,
                       int *id_ptr, int *used_stdin);
@@ -246,7 +260,7 @@ static char *
 create_batch_file (char const *base, int unixy, int *fd)
 {
   const char *const ext = unixy ? "sh" : "bat";
-  const char *error = NULL;
+  const char *error_string = NULL;
   char temp_path[MAXPATHLEN]; /* need to know its length */
   unsigned path_size = GetTempPath(sizeof temp_path, temp_path);
   int path_is_dot = 0;
@@ -292,7 +306,7 @@ create_batch_file (char const *base, int unixy, int *fd)
 
           else
             {
-              error = map_windows32_error_to_string (er);
+              error_string = map_windows32_error_to_string (er);
               break;
             }
         }
@@ -315,9 +329,9 @@ create_batch_file (char const *base, int unixy, int *fd)
     }
 
   *fd = -1;
-  if (error == NULL)
-    error = _("Cannot create a temporary file\n");
-  fatal (NILF, error);
+  if (error_string == NULL)
+    error_string = _("Cannot create a temporary file\n");
+  fatal (NILF, error_string);
 
   /* not reached */
   return NULL;
@@ -513,9 +527,9 @@ reap_children (int block, int err)
 	{
 	  any_remote |= c->remote;
 	  any_local |= ! c->remote;
-	  DB (DB_JOBS, (_("Live child 0x%08lx (%s) PID %ld %s\n"),
-                        (unsigned long int) c, c->file->name,
-                        (long) c->pid, c->remote ? _(" (remote)") : ""));
+	  DB (DB_JOBS, (_("Live child %p (%s) PID %s %s\n"),
+                        c, c->file->name, pid2str (c->pid),
+                        c->remote ? _(" (remote)") : ""));
 #ifdef VMS
 	  break;
 #endif
@@ -636,8 +650,7 @@ reap_children (int block, int err)
                              e, map_windows32_error_to_string(e));
                   }
                 else
-                  DB (DB_VERBOSE, ("Main thread handle = 0x%08lx\n",
-                                   (unsigned long)main_thread));
+                  DB (DB_VERBOSE, ("Main thread handle = %p\n", main_thread));
               }
 
             /* wait for anything to finish */
@@ -693,10 +706,9 @@ reap_children (int block, int err)
         continue;
 
       DB (DB_JOBS, (child_failed
-                    ? _("Reaping losing child 0x%08lx PID %ld %s\n")
-                    : _("Reaping winning child 0x%08lx PID %ld %s\n"),
-                    (unsigned long int) c, (long) c->pid,
-                    c->remote ? _(" (remote)") : ""));
+                    ? _("Reaping losing child %p PID %s %s\n")
+                    : _("Reaping winning child %p PID %s %s\n"),
+                    c, pid2str (c->pid), c->remote ? _(" (remote)") : ""));
 
       if (c->sh_batch_file) {
         DB (DB_JOBS, (_("Cleaning up temp batch file %s\n"),
@@ -797,9 +809,8 @@ reap_children (int block, int err)
            update_status to its also_make files.  */
         notice_finished_file (c->file);
 
-      DB (DB_JOBS, (_("Removing child 0x%08lx PID %ld%s from chain.\n"),
-                    (unsigned long int) c, (long) c->pid,
-                    c->remote ? _(" (remote)") : ""));
+      DB (DB_JOBS, (_("Removing child %p PID %s%s from chain.\n"),
+                    c, pid2str (c->pid), c->remote ? _(" (remote)") : ""));
 
       /* Block fatal signals while frobnicating the list, so that
          children and job_slots_used are always consistent.  Otherwise
@@ -842,8 +853,8 @@ static void
 free_child (struct child *child)
 {
   if (!jobserver_tokens)
-    fatal (NILF, "INTERNAL: Freeing child 0x%08lx (%s) but no tokens left!\n",
-           (unsigned long int) child, child->file->name);
+    fatal (NILF, "INTERNAL: Freeing child %p (%s) but no tokens left!\n",
+           child, child->file->name);
 
   /* If we're using the jobserver and this child is not the only outstanding
      job, put a token back into the pipe for it.  */
@@ -859,8 +870,8 @@ free_child (struct child *child)
       if (r != 1)
 	pfatal_with_name (_("write jobserver"));
 
-      DB (DB_JOBS, (_("Released token for child 0x%08lx (%s).\n"),
-                    (unsigned long int) child, child->file->name));
+      DB (DB_JOBS, (_("Released token for child %p (%s).\n"),
+                    child, child->file->name));
     }
 
   --jobserver_tokens;
@@ -1459,9 +1470,9 @@ start_waiting_job (struct child *c)
     {
     case cs_running:
       c->next = children;
-      DB (DB_JOBS, (_("Putting child 0x%08lx (%s) PID %ld%s on the chain.\n"),
-                    (unsigned long int) c, c->file->name,
-                    (long) c->pid, c->remote ? _(" (remote)") : ""));
+      DB (DB_JOBS, (_("Putting child %p (%s) PID %s%s on the chain.\n"),
+                    c, c->file->name, pid2str (c->pid),
+                    c->remote ? _(" (remote)") : ""));
       children = c;
       /* One more job slot is in use.  */
       ++job_slots_used;
@@ -1712,8 +1723,8 @@ new_job (struct file *file)
         /* If we got one, we're done here.  */
 	if (got_token == 1)
           {
-            DB (DB_JOBS, (_("Obtained token for child 0x%08lx (%s).\n"),
-                          (unsigned long int) c, c->file->name));
+            DB (DB_JOBS, (_("Obtained token for child %p (%s).\n"),
+                          c, c->file->name));
             break;
           }
 
@@ -2058,8 +2069,8 @@ exec_command (char **argv, char **envp)
           break;
       else
           fprintf(stderr,
-                  _("make reaped child pid %ld, still waiting for pid %ld\n"),
-                  (DWORD)hWaitPID, (DWORD)hPID);
+                  _("make reaped child pid %Iu, still waiting for pid %Iu\n"),
+                  (DWORD_PTR)hWaitPID, (DWORD_PTR)hPID);
     }
 
   /* return child's exit code as our exit code */

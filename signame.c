@@ -229,7 +229,7 @@ signame_init (void)
 
 
 char *
-strsignal (int signal)
+strsignal (int sig)
 {
   static char buf[] = "Signal 12345678901234567890";
 
@@ -246,10 +246,10 @@ strsignal (int signal)
 # endif
 #endif
 
-  if (signal > 0 || signal < NSIG)
-    return (char *) sys_siglist[signal];
+  if (sig > 0 || sig < NSIG)
+    return (char *) sys_siglist[sig];
 
-  sprintf (buf, "Signal %d", signal);
+  sprintf (buf, "Signal %d", sig);
   return buf;
 }
 
