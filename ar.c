@@ -212,7 +212,7 @@ static int
 glob_pattern_p (const char *pattern, int quote)
 {
   const char *p;
-  int open = 0;
+  int opened = 0;
 
   for (p = pattern; *p != '\0'; ++p)
     switch (*p)
@@ -227,11 +227,11 @@ glob_pattern_p (const char *pattern, int quote)
 	break;
 
       case '[':
-	open = 1;
+	opened = 1;
 	break;
 
       case ']':
-	if (open)
+	if (opened)
 	  return 1;
 	break;
       }

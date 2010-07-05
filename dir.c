@@ -123,14 +123,11 @@ downcase (const char *filename)
 {
   static PATH_VAR (new_filename);
   char *df;
-  int i;
 
   if (filename == 0)
     return 0;
 
   df = new_filename;
-
-  /* First, transform the name part.  */
   while (*filename != '\0')
     {
       *df++ = tolower ((unsigned char)*filename);

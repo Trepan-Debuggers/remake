@@ -194,6 +194,28 @@ rm main.x");
     rmfiles(qw(foo.y foo.y.in main.bar));
 }
 
+if ($all_tests) {
+    # Jobserver FD handling is messed up in some way.
+    # Savannah bug #28189
+    # It doesn't look like that bug anymore but this is the code it runs
+
+    run_make_test(q!
+ifdef EXTRA
+vpath %.dst /
+xxx.dst: ; true
+yyy.dst: ; true
+endif
+
+M := $(MAKE)
+xx: ; $M --no-print-directory -j2 -f $(MAKEFILE_LIST) xxx.dst yyy.dst EXTRA=1
+!,
+                  '-j2',
+                  '#MAKE#[1]: warning: -jN forced in submake: disabling jobserver mode.
+true
+true
+');
+}
+
 # Make sure that all jobserver FDs are closed if we need to re-exec the
 # master copy.
 #
