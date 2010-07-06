@@ -1958,7 +1958,10 @@ record_files (struct nameseq *filenames, const char *pattern,
       /* Check for special targets.  Do it here instead of, say, snap_deps()
          so that we can immediately use the value.  */
       if (streq (name, ".POSIX"))
-        posix_pedantic = 1;
+        {
+          posix_pedantic = 1;
+          define_variable_cname (".SHELLFLAGS", "-ec", o_default, 0);
+        }
       else if (streq (name, ".SECONDEXPANSION"))
         second_expansion = 1;
 

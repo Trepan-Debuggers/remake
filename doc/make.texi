@@ -4,7 +4,7 @@
 
 @include version.texi
 @set EDITION 0.70
-@set RCSID $Id: make.texi,v 1.64 2009/11/12 16:42:36 bosk Exp $
+@set RCSID $Id: make.texi,v 1.65 2010/07/06 06:37:42 psmith Exp $
 
 @settitle GNU @code{make}
 @setchapternewpage odd
@@ -2873,6 +2873,21 @@ of @code{make} will be run serially, even if the @samp{-j} option is
 given.  Any recursively invoked @code{make} command will still run
 recipes in parallel (unless its makefile also contains this target).
 Any prerequisites on this target are ignored.
+
+@findex .POSIX
+@item .POSIX
+@cindex POSIX-conforming mode, setting
+
+If @code{.POSIX} is mentioned as a target, then the makefile will be
+parsed and run in POSIX-conforming mode.  This does @emph{not} mean
+that only POSIX-conforming makefiles will be accepted: all advanced
+GNU @code{make} features are still available.  Rather, this target
+causes @code{make} to behave as required by POSIX in those areas
+where @code{make}'s default behavior differs.
+
+In particular, if this target is mentioned then recipes will be
+invoked as if the shell had been passed the @code{-e} flag: the first
+failing command in a recipe will cause the recipe to fail immediately.
 @end table
 
 Any defined implicit rule suffix also counts as a special target if it
@@ -3713,11 +3728,16 @@ truncated, at least).
 @subsection Choosing the Shell
 @cindex shell, choosing the
 @cindex @code{SHELL}, value of
+@cindex @code{.SHELLFLAGS}, value of
 
 @vindex SHELL
+@vindex .SHELLFLAGS
 The program used as the shell is taken from the variable @code{SHELL}.
 If this variable is not set in your makefile, the program
-@file{/bin/sh} is used as the shell.
+@file{/bin/sh} is used as the shell.  The argument(s) passed to the
+shell are taken from the variable @code{.SHELLFLAGS}.  The default
+value of @code{.SHELLFLAGS} is @code{-c} normally, or @code{-ec} in
+POSIX-conforming mode.
 
 @cindex environment, @code{SHELL} in
 Unlike most variables, the variable @code{SHELL} is never set from the

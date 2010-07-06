@@ -1,3 +1,13 @@
+2010-07-06  Paul Smith  <psmith@gnu.org>
+
+	* main.c (main): Set a default value of "-c" for .SHELLFLAGS.
+	* NEWS: Mention the new behavior of .POSIX and the new .SHELLFLAGS
+	variable.
+	* job.c (construct_command_argv): Retrieve the .SHELLFLAGS value
+	and pass it to construct_command_argv_internal().
+	(construct_command_argv_internal): If .SHELLFLAGS is non-standard
+	use the slow path.  Use that value instead of hard-coded "-c".
+
 2010-07-05  Paul Smith  <psmith@gnu.org>
 
 	* implicit.c (pattern_search): lastslash can be const.
