@@ -2228,7 +2228,7 @@ void clean_tmp (void)
 
 static char **
 construct_command_argv_internal (char *line, char **restp, char *shell,
-                                 char *ifs, int flags,
+                                 char *shellflags, char *ifs, int flags,
 				 char **batch_filename_ptr)
 {
 #ifdef __MSDOS__
@@ -2435,6 +2435,12 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
     for (ap = ifs; *ap != '\0'; ++ap)
       if (*ap != ' ' && *ap != '\t' && *ap != '\n')
 	goto slow;
+
+  if (shellflags != 0)
+    if (shellflags[0] != '-'
+        || ((shellflags[1] != 'c' || shellflags[2] != '\0')
+            && (shellflags[1] != 'e' || shellflags[2] != 'c' || shellflags[3] != '\0')))
+      goto slow;
 
   i = strlen (line) + 1;
 
@@ -2717,34 +2723,33 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
   if (*line == '\0')
     return 0;
 #endif /* WINDOWS32 */
+
   {
     /* SHELL may be a multi-word command.  Construct a command line
-       "SHELL -c LINE", with all special chars in LINE escaped.
+       "$(SHELL) $(.SHELLFLAGS) LINE", with all special chars in LINE escaped.
        Then recurse, expanding this command line to get the final
        argument list.  */
 
     unsigned int shell_len = strlen (shell);
-#ifndef VMS
-    static char minus_c[] = " -c ";
-#else
-    static char minus_c[] = "";
-#endif
     unsigned int line_len = strlen (line);
+    unsigned int sflags_len = strlen (shellflags);
 
-    char *new_line = alloca (shell_len + (sizeof (minus_c)-1)
+    char *new_line = alloca (shell_len + 1 + sflags_len + 1
                              + (line_len*2) + 1);
     char *command_ptr = NULL; /* used for batch_mode_shell mode */
 
 # ifdef __EMX__ /* is this necessary? */
     if (!unixy_shell)
-      minus_c[1] = '/'; /* " /c " */
+      shellflags[0] = '/'; /* "/c" */
 # endif
 
     ap = new_line;
     memcpy (ap, shell, shell_len);
     ap += shell_len;
-    memcpy (ap, minus_c, sizeof (minus_c) - 1);
-    ap += sizeof (minus_c) - 1;
+    *(ap++) = ' ';
+    memcpy (ap, shellflags, sflags_len);
+    ap += sflags_len;
+    *(ap++) = ' ';
     command_ptr = ap;
     for (p = line; *p != '\0'; ++p)
       {
@@ -2794,7 +2799,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 #endif
 	*ap++ = *p;
       }
-    if (ap == new_line + shell_len + sizeof (minus_c) - 1)
+    if (ap == new_line + shell_len + sflags_len + 2)
       /* Line was empty.  */
       return 0;
     *ap = '\0';
@@ -2846,8 +2851,10 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
       new_argv[2] = NULL;
     } else
 #endif /* WINDOWS32 */
+
     if (unixy_shell)
-      new_argv = construct_command_argv_internal (new_line, 0, 0, 0, flags, 0);
+      new_argv = construct_command_argv_internal (new_line, 0, 0, 0, 0, flags, 0);
+
 #ifdef __EMX__
     else if (!unixy_shell)
       {
@@ -2923,10 +2930,10 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
            instead of recursively calling ourselves, because we
            cannot backslash-escape the special characters (see above).  */
         new_argv = xmalloc (sizeof (char *));
-        line_len = strlen (new_line) - shell_len - sizeof (minus_c) + 1;
+        line_len = strlen (new_line) - shell_len - sflags_len - 2;
         new_argv[0] = xmalloc (line_len + 1);
         strncpy (new_argv[0],
-                 new_line + shell_len + sizeof (minus_c) - 1, line_len);
+                 new_line + shell_len + sflags_len + 2, line_len);
         new_argv[0][line_len] = '\0';
       }
 #else
@@ -2958,7 +2965,7 @@ char **
 construct_command_argv (char *line, char **restp, struct file *file,
                         int cmd_flags, char **batch_filename_ptr)
 {
-  char *shell, *ifs;
+  char *shell, *ifs, *shellflags;
   char **argv;
 
 #ifdef VMS
@@ -3063,15 +3070,17 @@ construct_command_argv (char *line, char **restp, struct file *file,
     }
 #endif /* __EMX__ */
 
+    shellflags = allocated_variable_expand_for_file ("$(.SHELLFLAGS)", file);
     ifs = allocated_variable_expand_for_file ("$(IFS)", file);
 
     warn_undefined_variables_flag = save;
   }
 
-  argv = construct_command_argv_internal (line, restp, shell, ifs,
+  argv = construct_command_argv_internal (line, restp, shell, shellflags, ifs,
                                           cmd_flags, batch_filename_ptr);
 
   free (shell);
+  free (shellflags);
   free (ifs);
 #endif /* !VMS */
   return argv;

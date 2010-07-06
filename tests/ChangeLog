@@ -1,3 +1,10 @@
+2010-07-06  Paul Smith  <psmith@gnu.org>
+
+	* scripts/variables/SHELL: Test the new .SHELLFLAGS variable.
+
+	* scripts/targets/POSIX: New file.  Test the .POSIX special target.
+	Verify that enabling .POSIX changes the shell flags to set -e.
+
 2010-07-01  Paul Smith  <psmith@gnu.org>
 
 	* scripts/features/recursion: Add a space to separate command-line

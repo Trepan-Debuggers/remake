@@ -1123,26 +1123,27 @@ main (int argc, char **argv, char **envp)
   define_variable_cname (".VARIABLES", "", o_default, 0)->special = 1;
   /* define_variable_cname (".TARGETS", "", o_default, 0)->special = 1; */
   define_variable_cname (".RECIPEPREFIX", "", o_default, 0)->special = 1;
+  define_variable_cname (".SHELLFLAGS", "-c", o_default, 0);
 
   /* Set up .FEATURES
      We must do this in multiple calls because define_variable_cname() is
      a macro and some compilers (MSVC) don't like conditionals in macros.  */
-  define_variable_cname (".FEATURES",
-                         "target-specific order-only second-expansion else-if"
-                         " shortest-stem undefine",
-                         o_default, 0);
+  {
+    const char *features = "target-specific order-only second-expansion"
+                           " else-if shortest-stem undefine"
 #ifndef NO_ARCHIVES
-  do_variable_definition (NILF, ".FEATURES", "archives",
-                          o_default, f_append, 0);
+                           " archives"
 #endif
 #ifdef MAKE_JOBSERVER
-  do_variable_definition (NILF, ".FEATURES", "jobserver",
-                          o_default, f_append, 0);
+                           " jobserver"
 #endif
 #ifdef MAKE_SYMLINKS
-  do_variable_definition (NILF, ".FEATURES", "check-symlink",
-                          o_default, f_append, 0);
+                           " check-symlink"
 #endif
+                           ;
+
+    define_variable_cname (".FEATURES", features, o_default, 0);
+  }
 
   /* Read in variables from the environment.  It is important that this be
      done before $(MAKE) is figured out so its definitions will not be

@@ -15,6 +15,15 @@ Version 3.81.90
   standard runtime library.
 
 * WARNING: Backward-incompatibility!
+  The POSIX standard for make was changed in the 2008 version in a
+  fundamentally incompatible way: make is required to invoke the shell as if
+  the '-e' flag were provided.  Because this would break many makefiles that
+  have been written to conform to the original text of the standard, the
+  default behavior of GNU make remains to invoke the shell with simply '-c'.
+  However, any makefile specifying the .POSIX special target will follow the
+  new POSIX standard and pass '-e' to the shell.  See also .SHELLFLAGS below.
+
+* WARNING: Backward-incompatibility!
   The '$?' variable now contains all prerequisites that caused the target to
   be considered out of date, even if they do not exist (previously only
   existing targets were provided in $?).
@@ -58,6 +67,10 @@ Version 3.81.90
   set and reset at will; recipes will use the value active when they were
   first parsed.  To detect this feature check the value of $(.RECIPEPREFIX).
 
+* New special variable: .SHELLFLAGS allows you to change the options passed to
+  the shell when it invokes recipes.  By default the value will be "-c" (or
+  "-ec" if .POSIX is set).
+
 * New variable modifier 'private': prefixing a variable assignment with the
   modifier 'private' suppresses inheritance of that variable by
   prerequisites.  This is most useful for target- and pattern-specific
@@ -66,12 +79,16 @@ Version 3.81.90
 * New make directive: 'undefine' allows you to undefine a variable so
   that it appears as if it was never set. Both $(flavor) and $(origin)
   functions will return 'undefined' for such a variable. To detect this
-  feature search for 'undefine in the .FEATURES special variable.
+  feature search for 'undefine' in the .FEATURES special variable.
 
 * The parser for variable assignments has been enhanced to allow multiple
   modifiers ('export', 'override', 'private') on the same line as variables,
   including define/endef variables, and in any order.  Also, it is possible
   to create variables and targets named as these modifiers.
+
+* The 'define' make directive now allows a variable assignment operator after
+  the variable name, to allow for simple, conditional, or appending multi-line
+  variable assignment.
 
 
 Version 3.81
@@ -109,7 +126,6 @@ Version 3.81
   of this SysV feature you will need to update them.
 
 * WARNING: Backward-incompatibility!
-
   In order to comply with POSIX, the way in which GNU make processes
   backslash-newline sequences in recipes has changed.  If your makefiles
   use backslash-newline sequences inside of single-quoted strings in
