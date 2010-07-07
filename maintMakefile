@@ -245,7 +245,7 @@ distsign: $(DIST_ARCHIVES_SIG) $(DIST_ARCHIVES_DIRECTIVE)
 %.directive.asc: %
 	@echo "Creating directive file '$@':"
 	@( \
-	   echo 'verstion: 1.1'; \
+	   echo 'version: 1.1'; \
 	   echo 'directory: make'; \
 	   echo 'filename: $*'; \
 	   echo 'comment: Official upload of GNU make version $(VERSION)'; \
@@ -256,12 +256,14 @@ distsign: $(DIST_ARCHIVES_SIG) $(DIST_ARCHIVES_DIRECTIVE)
 # Upload the artifacts
 
 FTPPUT = ncftpput
-gnu-url = ftp-upload.gnu.org /incoming
+gnu-upload-host = ftp-upload.gnu.org
+gnu-upload-dir  = /incoming
+
 
 UPLOADS = upload-alpha upload-ftp
 .PHONY: $(UPLOADS)
 $(UPLOADS): $(DIST_ARCHIVES) $(DIST_ARCHIVES_SIG) $(DIST_ARCHIVES_DIRECTIVE)
-	$(FTPPUT) "$(gnu-url)/$(@:upload-%=%)" $^
+	$(FTPPUT) "$(gnu-upload-host)" "$(gnu-upload-dir)/$(@:upload-%=%)" $^
 
 
 # Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
