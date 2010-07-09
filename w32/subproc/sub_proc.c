@@ -17,6 +17,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <process.h>  /* for msvc _beginthreadex, _endthreadex */
 #include <signal.h>
 #include <windows.h>
@@ -31,9 +32,9 @@ static char *make_command_line(char *shell_name, char *exec_path, char **argv);
 extern char *xmalloc (unsigned int);
 
 typedef struct sub_process_t {
-	int sv_stdin[2];
-	int sv_stdout[2];
-	int sv_stderr[2];
+	intptr_t sv_stdin[2];
+	intptr_t sv_stdout[2];
+	intptr_t sv_stderr[2];
 	int using_pipes;
 	char *inp;
 	DWORD incnt;
@@ -41,7 +42,7 @@ typedef struct sub_process_t {
 	volatile DWORD outcnt;
 	char * volatile errp;
 	volatile DWORD errcnt;
-	int pid;
+	pid_t pid;
 	int exit_code;
 	int signal;
 	long last_err;
@@ -310,12 +311,12 @@ process_init()
 		pproc->lerrno = E_SCALL;
 		return((HANDLE)pproc);
 	}
-	pproc->sv_stdin[0]  = (int) stdin_pipes[0];
-	pproc->sv_stdin[1]  = (int) stdin_pipes[1];
-	pproc->sv_stdout[0] = (int) stdout_pipes[0];
-	pproc->sv_stdout[1] = (int) stdout_pipes[1];
-	pproc->sv_stderr[0] = (int) stderr_pipes[0];
-	pproc->sv_stderr[1] = (int) stderr_pipes[1];
+	pproc->sv_stdin[0]  = (intptr_t) stdin_pipes[0];
+	pproc->sv_stdin[1]  = (intptr_t) stdin_pipes[1];
+	pproc->sv_stdout[0] = (intptr_t) stdout_pipes[0];
+	pproc->sv_stdout[1] = (intptr_t) stdout_pipes[1];
+	pproc->sv_stderr[0] = (intptr_t) stderr_pipes[0];
+	pproc->sv_stderr[1] = (intptr_t) stderr_pipes[1];
 
 	pproc->using_pipes = 1;
 
@@ -337,9 +338,9 @@ process_init_fd(HANDLE stdinh, HANDLE stdouth, HANDLE stderrh)
 	 * Just pass the provided file handles to the 'child side' of the
 	 * pipe, bypassing pipes altogether.
 	 */
-	pproc->sv_stdin[1]  = (int) stdinh;
-	pproc->sv_stdout[1] = (int) stdouth;
-	pproc->sv_stderr[1] = (int) stderrh;
+	pproc->sv_stdin[1]  = (intptr_t) stdinh;
+	pproc->sv_stdout[1] = (intptr_t) stdouth;
+	pproc->sv_stderr[1] = (intptr_t) stderrh;
 
 	pproc->last_err = pproc->lerrno = 0;
 
@@ -575,7 +576,7 @@ process_begin(
 		}
 	}
 
-	pproc->pid = (int)procInfo.hProcess;
+	pproc->pid = (pid_t)procInfo.hProcess;
 	/* Close the thread handle -- we'll just watch the process */
 	CloseHandle(procInfo.hThread);
 

@@ -1,5 +1,12 @@
 2010-07-09  Eli Zaretskii  <eliz@gnu.org>
 
+	* w32/subproc/sub_proc.c: Include stdint.h.
+	(sub_process_t): Use intptr_t for file handles and pid_t for
+	process ID.
+	(process_pipes, process_init_fd, process_begin): Use intptr_t for
+	file handles and pid_t for process ID.
+	Savannah bug #27809.  Patch by Ozkan Sezer <sezeroz@gmail.com>
+
 	* function.c (abspath): Support absolute file names in UNC format.
 	(Savannah bug #30312.)
 
