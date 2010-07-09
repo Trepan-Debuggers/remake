@@ -426,7 +426,11 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* Define to `int' if <sys/types.h> does not define. */
 /* GCC 4.x reportedly defines pid_t.  */
 #ifndef _PID_T_
+#ifdef _WIN64
+#define pid_t __int64
+#else
 #define pid_t int
+#endif
 #endif
 
 /* Define to `int' if <sys/types.h> doesn't define. */
