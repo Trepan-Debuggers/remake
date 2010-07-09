@@ -1,3 +1,23 @@
+2010-07-09  Eli Zaretskii  <eliz@gnu.org>
+
+	* job.c (pid2str) [WINDOWS32]: Don't use %Id with GCC < 4.x.
+	(exec_command) [WINDOWS32]: Use pid2str instead of non-portable
+	%Id.
+
+	* main.c (handle_runtime_exceptions): Use %p to print addresses,
+	to DTRT on both 32-bit and 64-bit hosts.  Savannah bug #27809.
+
+	* job.c (w32_kill, start_job_command, create_batch_file): Use
+	pid_t for process IDs and intptr_t for the 1st arg of
+	_open_osfhandle.
+	* function.c (windows32_openpipe): Use pid_t for process IDs and
+	intptr_t for the 1st arg of _open_osfhandle.
+	(func_shell): Use pid_t for process IDs.
+	* main.c (main) [WINDOWS32]: Pacify the compiler.
+	* config.h.W32.template (pid_t): Add a definition for 64-bit
+	Windows builds that don't use GCC.
+	Savannah bug #27809.  Patch by Ozkan Sezer <sezeroz@gmail.com>
+
 2010-07-06  Paul Smith  <psmith@gnu.org>
 
 	* main.c (main): Set a default value of "-c" for .SHELLFLAGS.

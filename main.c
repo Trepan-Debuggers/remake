@@ -681,24 +681,24 @@ handle_runtime_exceptions( struct _EXCEPTION_POINTERS *exinfo )
   if (! ISDB (DB_VERBOSE))
     {
       sprintf(errmsg,
-              _("%s: Interrupt/Exception caught (code = 0x%lx, addr = 0x%lx)\n"),
-              prg, exrec->ExceptionCode, (DWORD)exrec->ExceptionAddress);
+              _("%s: Interrupt/Exception caught (code = 0x%lx, addr = 0x%p)\n"),
+              prg, exrec->ExceptionCode, exrec->ExceptionAddress);
       fprintf(stderr, errmsg);
       exit(255);
     }
 
   sprintf(errmsg,
-          _("\nUnhandled exception filter called from program %s\nExceptionCode = %lx\nExceptionFlags = %lx\nExceptionAddress = %lx\n"),
+          _("\nUnhandled exception filter called from program %s\nExceptionCode = %lx\nExceptionFlags = %lx\nExceptionAddress = 0x%p\n"),
           prg, exrec->ExceptionCode, exrec->ExceptionFlags,
-          (DWORD)exrec->ExceptionAddress);
+          exrec->ExceptionAddress);
 
   if (exrec->ExceptionCode == EXCEPTION_ACCESS_VIOLATION
       && exrec->NumberParameters >= 2)
     sprintf(&errmsg[strlen(errmsg)],
             (exrec->ExceptionInformation[0]
-             ? _("Access violation: write operation at address %lx\n")
-             : _("Access violation: read operation at address %lx\n")),
-            exrec->ExceptionInformation[1]);
+             ? _("Access violation: write operation at address 0x%p\n")
+             : _("Access violation: read operation at address 0x%p\n")),
+            (PVOID)exrec->ExceptionInformation[1]);
 
   /* turn this on if we want to put stuff in the event log too */
 #ifdef USE_EVENT_LOG
@@ -967,8 +967,10 @@ main (int argc, char **argv, char **envp)
 
   /* Set up gettext/internationalization support.  */
   setlocale (LC_ALL, "");
-  bindtextdomain (PACKAGE, LOCALEDIR);
-  textdomain (PACKAGE);
+  /* The cast to void shuts up compiler warnings on systems that
+     disable NLS.  */
+  (void)bindtextdomain (PACKAGE, LOCALEDIR);
+  (void)textdomain (PACKAGE);
 
 #ifdef	POSIX
   sigemptyset (&fatal_signal_set);
@@ -1400,7 +1402,7 @@ main (int argc, char **argv, char **envp)
           /* WINDOWS32 chdir() doesn't work if the directory has a trailing '/'
              But allow -C/ just in case someone wants that.  */
           {
-            char *p = dir + strlen (dir) - 1;
+            char *p = (char *)dir + strlen (dir) - 1;
             while (p > dir && (p[0] == '/' || p[0] == '\\'))
               --p;
             p[1] = '\0';
