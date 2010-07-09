@@ -1,5 +1,8 @@
 2010-07-09  Eli Zaretskii  <eliz@gnu.org>
 
+	* function.c (abspath): Support absolute file names in UNC format.
+	(Savannah bug #30312.)
+
 	* job.c (pid2str) [WINDOWS32]: Don't use %Id with GCC < 4.x.
 	(exec_command) [WINDOWS32]: Use pid2str instead of non-portable
 	%Id.
