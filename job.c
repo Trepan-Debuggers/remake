@@ -192,7 +192,7 @@ static const char *
 pid2str (pid_t pid)
 {
   static char pidstring[100];
-#ifdef WINDOWS32
+#if defined(WINDOWS32) && __GNUC__ > 3
   sprintf (pidstring, "%Id", pid);
 #else
   sprintf (pidstring, "%lu", (unsigned long) pid);
@@ -247,7 +247,7 @@ unsigned int jobserver_tokens = 0;
  * The macro which references this function is defined in make.h.
  */
 int
-w32_kill(int pid, int sig)
+w32_kill(pid_t pid, int sig)
 {
   return ((process_kill((HANDLE)pid, sig) == TRUE) ? 0 : -1);
 }
@@ -315,7 +315,7 @@ create_batch_file (char const *base, int unixy, int *fd)
           const unsigned final_size = path_size + size + 1;
           char *const path = xmalloc (final_size);
           memcpy (path, temp_path, final_size);
-          *fd = _open_osfhandle ((long)h, 0);
+          *fd = _open_osfhandle ((intptr_t)h, 0);
           if (unixy)
             {
               char *p;
@@ -1393,7 +1393,7 @@ start_job_command (struct child *child)
       hPID = process_easy(argv, child->environment);
 
       if (hPID != INVALID_HANDLE_VALUE)
-        child->pid = (int) hPID;
+        child->pid = (pid_t) hPID;
       else {
         int i;
         unblock_sigs();
@@ -2068,9 +2068,14 @@ exec_command (char **argv, char **envp)
       if (hWaitPID == hPID)
           break;
       else
+	{
+	  char *pidstr = xstrdup (pid2str ((DWORD_PTR)hWaitPID));
+
           fprintf(stderr,
-                  _("make reaped child pid %Iu, still waiting for pid %Iu\n"),
-                  (DWORD_PTR)hWaitPID, (DWORD_PTR)hPID);
+                  _("make reaped child pid %s, still waiting for pid %s\n"),
+		  pidstr, pid2str ((DWORD_PTR)hPID));
+	  free (pidstr);
+	}
     }
 
   /* return child's exit code as our exit code */

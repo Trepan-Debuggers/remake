@@ -1434,7 +1434,7 @@ int shell_function_pid = 0, shell_function_completed;
 
 
 void
-windows32_openpipe (int *pipedes, int *pid_p, char **command_argv, char **envp)
+windows32_openpipe (int *pipedes, pid_t *pid_p, char **command_argv, char **envp)
 {
   SECURITY_ATTRIBUTES saAttr;
   HANDLE hIn;
@@ -1489,13 +1489,13 @@ windows32_openpipe (int *pipedes, int *pid_p, char **command_argv, char **envp)
     process_register(hProcess);
 
     /* set the pid for returning to caller */
-    *pid_p = (int) hProcess;
+    *pid_p = (pid_t) hProcess;
 
   /* set up to read data from child */
-  pipedes[0] = _open_osfhandle((long) hChildOutRd, O_RDONLY);
+  pipedes[0] = _open_osfhandle((intptr_t) hChildOutRd, O_RDONLY);
 
   /* this will be closed almost right away */
-  pipedes[1] = _open_osfhandle((long) hChildOutWr, O_APPEND);
+  pipedes[1] = _open_osfhandle((intptr_t) hChildOutWr, O_APPEND);
   } else {
     /* reap/cleanup the failed process */
 	process_cleanup(hProcess);
@@ -1510,7 +1510,7 @@ windows32_openpipe (int *pipedes, int *pid_p, char **command_argv, char **envp)
 
     /* set status for return */
     pipedes[0] = pipedes[1] = -1;
-    *pid_p = -1;
+    *pid_p = (pid_t)-1;
   }
 }
 #endif
@@ -1594,7 +1594,7 @@ func_shell (char *o, char **argv, const char *funcname UNUSED)
   const char *error_prefix;
   char **envp;
   int pipedes[2];
-  int pid;
+  pid_t pid;
 
 #ifndef __MSDOS__
   /* Construct the argument list.  */
