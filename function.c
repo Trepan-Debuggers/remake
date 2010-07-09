@@ -1912,6 +1912,13 @@ abspath (const char *name, char *apath)
 #ifdef HAVE_DOS_PATHS
       if (IS_PATHSEP(name[0]))
 	{
+	  if (IS_PATHSEP(name[1]))
+	    {
+	      /* A UNC.  Don't prepend a drive letter.  */
+	      apath[0] = name[0];
+	      apath[1] = name[1];
+	      root_len = 2;
+	    }
 	  /* We have /foo, an absolute file name except for the drive
 	     letter.  Assume the missing drive letter is the current
 	     drive, which we can get if we remove from starting_directory
