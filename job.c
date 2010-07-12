@@ -176,7 +176,9 @@ int wait ();
 
 #ifndef	HAVE_UNISTD_H
 int dup2 ();
+#if !(defined(_MSC_VER) && defined(_WIN64))
 int execve ();
+#endif
 void _exit ();
 # ifndef VMS
 int geteuid ();
