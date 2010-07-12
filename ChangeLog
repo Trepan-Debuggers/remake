@@ -1,8 +1,14 @@
+2010-07-12  Paul Smith  <psmith@gnu.org>
+
+	* build_w32.bat: Support for MSVC Windows x86_64 builds.
+	* job.c: Don't define execve() on MSVC/64bit.
+	Patch by Viktor Szakats.  Fixes Savannah bug #27590.
+
 2010-07-12  Eli Zaretskii  <eliz@gnu.org>
 
 	* make.h (alloca) [!__GNUC__]: Don't define prototype.
 	(int w32_kill): Use pid_t for process ID argument.
-	Savannah bug #27809.
+	Fixes Savannah bug #27809.
 
 2010-07-12  Paul Smith  <psmith@gnu.org>
 
@@ -31,11 +37,11 @@
 	(sub_process_t): Use intptr_t for file handles and pid_t for
 	process ID.
 	(process_pipes, process_init_fd, process_begin): Use intptr_t for
-	file handles and pid_t for process ID.
-	Savannah bug #27809.  Patch by Ozkan Sezer <sezeroz@gmail.com>
+	file handles and pid_t for process ID.  Fixes Savannah bug #27809.
+	Patch by Ozkan Sezer <sezeroz@gmail.com>
 
 	* function.c (abspath): Support absolute file names in UNC format.
-	(Savannah bug #30312.)
+	Fixes Savannah bug #30312.
 
 	* job.c (pid2str) [WINDOWS32]: Don't use %Id with GCC < 4.x.
 	(exec_command) [WINDOWS32]: Use pid2str instead of non-portable
@@ -52,8 +58,8 @@
 	(func_shell): Use pid_t for process IDs.
 	* main.c (main) [WINDOWS32]: Pacify the compiler.
 	* config.h.W32.template (pid_t): Add a definition for 64-bit
-	Windows builds that don't use GCC.
-	Savannah bug #27809.  Patch by Ozkan Sezer <sezeroz@gmail.com>
+	Windows builds that don't use GCC.  Fixes Savannah bug #27809.
+	Patch by Ozkan Sezer <sezeroz@gmail.com>
 
 2010-07-07  Paul Smith  <psmith@gnu.org>
 
