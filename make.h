@@ -35,8 +35,10 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 # ifdef _AIX
  #pragma alloca
 # else
-#  ifndef alloca /* predefined by HP cc +Olibcalls */
+#  ifndef __GNUC__
+#   ifndef alloca /* predefined by HP cc +Olibcalls */
 char *alloca ();
+#   endif
 #  endif
 # endif
 #endif
@@ -326,7 +328,7 @@ char *strsignal (int signum);
 # define kill(_pid,_sig) w32_kill((_pid),(_sig))
 
 void sync_Path_environment (void);
-int w32_kill (int pid, int sig);
+int w32_kill (pid_t pid, int sig);
 char *end_of_token_w32 (const char *s, char stopchar);
 int find_and_set_default_shell (const char *token);
 
@@ -500,7 +502,6 @@ extern int env_overrides, no_builtin_rules_flag, no_builtin_variables_flag;
 extern int print_version_flag, print_directory_flag, check_symlink_flag;
 extern int warn_undefined_variables_flag, posix_pedantic, not_parallel;
 extern int second_expansion, clock_skew_detected, rebuilding_makefiles;
-extern int one_shell;
 
 /* can we run commands via 'sh -c xxx' or must we use batch files? */
 extern int batch_mode_shell;
