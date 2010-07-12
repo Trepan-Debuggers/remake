@@ -122,6 +122,7 @@ sub run_make_test
     $makestring =~ s/#MAKEFILE#/$makefile/g;
     $makestring =~ s/#MAKEPATH#/$mkpath/g;
     $makestring =~ s/#MAKE#/$make_name/g;
+    $makestring =~ s/#PERL#/$perl_name/g;
     $makestring =~ s/#PWD#/$pwd/g;
 
     # Populate the makefile!
@@ -136,6 +137,7 @@ sub run_make_test
   $answer =~ s/#MAKEFILE#/$makefile/g;
   $answer =~ s/#MAKEPATH#/$mkpath/g;
   $answer =~ s/#MAKE#/$make_name/g;
+  $answer =~ s/#PERL#/$perl_name/g;
   $answer =~ s/#PWD#/$pwd/g;
 
   run_make_with_options($makefile, $options, &get_logfile(0),

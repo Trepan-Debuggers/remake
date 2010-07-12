@@ -1964,6 +1964,10 @@ record_files (struct nameseq *filenames, const char *pattern,
         }
       else if (streq (name, ".SECONDEXPANSION"))
         second_expansion = 1;
+#if !defined(WINDOWS32) && !defined (__MSDOS__) && !defined (__EMX__)
+      else if (streq (name, ".ONESHELL"))
+        one_shell = 1;
+#endif
 
       /* If this is a static pattern rule:
          `targets: target%pattern: prereq%pattern; recipe',

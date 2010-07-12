@@ -382,6 +382,53 @@ _is_unixy_shell (const char *path)
 }
 #endif /* __EMX__ */
 
+/* determines whether path looks to be a Bourne-like shell. */
+int
+is_bourne_compatible_shell (const char *path)
+{
+  /* list of known unix (Bourne-like) shells */
+  const char *unix_shells[] = {
+    "sh",
+    "bash",
+    "ksh",
+    "rksh",
+    "zsh",
+    "ash",
+    "dash",
+    NULL
+  };
+  unsigned i, len;
+
+  /* find the rightmost '/' or '\\' */
+  const char *name = strrchr (path, '/');
+  char *p = strrchr (path, '\\');
+
+  if (name && p)    /* take the max */
+    name = (name > p) ? name : p;
+  else if (p)       /* name must be 0 */
+    name = p;
+  else if (!name)   /* name and p must be 0 */
+    name = path;
+
+  if (*name == '/' || *name == '\\') name++;
+
+  /* this should be able to deal with extensions on Windows-like systems */
+  for (i = 0; unix_shells[i] != NULL; i++) {
+    len = strlen(unix_shells[i]);
+#if defined(WINDOWS32) || defined(__MSDOS__)
+    if ((strncasecmp (name, unix_shells[i], len) == 0) &&
+      (strlen(name) >= len && (name[len] == '\0' || name[len] == '.')))
+#else
+    if ((strncmp (name, unix_shells[i], len) == 0) &&
+      (strlen(name) >= len && name[len] == '\0'))
+#endif
+	return 1; /* a known unix-style shell */
+  }
+
+  /* if not on the list, assume it's not a Bourne-like shell */
+  return 0;
+}
+
 
 /* Write an error message describing the exit status given in
    EXIT_CODE, EXIT_SIG, and COREDUMP, for the target TARGET_NAME.
@@ -1117,10 +1164,13 @@ start_job_command (struct child *child)
 #if defined __MSDOS__ || defined (__EMX__)
       unixy_shell	/* the test is complicated and we already did it */
 #else
-      (argv[0] && !strcmp (argv[0], "/bin/sh"))
+      (argv[0] && is_bourne_compatible_shell(argv[0]))
 #endif
-      && (argv[1]
-          && argv[1][0] == '-' && argv[1][1] == 'c' && argv[1][2] == '\0')
+      && (argv[1] && argv[1][0] == '-'
+	&&
+	    ((argv[1][1] == 'c' && argv[1][2] == '\0')
+	  ||
+	     (argv[1][1] == 'e' && argv[1][2] == 'c' && argv[1][3] == '\0')))
       && (argv[2] && argv[2][0] == ':' && argv[2][1] == '\0')
       && argv[3] == NULL)
     {
@@ -2511,6 +2561,9 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
       else if (strchr (sh_chars, *p) != 0)
 	/* Not inside a string, but it's a special char.  */
 	goto slow;
+      else if (one_shell && *p == '\n')
+	/* In .ONESHELL mode \n is a separator like ; or && */
+	goto slow;
 #ifdef  __MSDOS__
       else if (*p == '.' && p[1] == '.' && p[2] == '.' && p[3] != '.')
 	/* `...' is a wildcard in DJGPP.  */
@@ -2738,16 +2791,80 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
     unsigned int shell_len = strlen (shell);
     unsigned int line_len = strlen (line);
     unsigned int sflags_len = strlen (shellflags);
-
-    char *new_line = alloca (shell_len + 1 + sflags_len + 1
-                             + (line_len*2) + 1);
     char *command_ptr = NULL; /* used for batch_mode_shell mode */
+    char *new_line;
 
 # ifdef __EMX__ /* is this necessary? */
     if (!unixy_shell)
       shellflags[0] = '/'; /* "/c" */
 # endif
 
+    /* In .ONESHELL mode we are allowed to throw the entire current
+	recipe string at a single shell and trust that the user
+	has configured the shell and shell flags, and formatted
+	the string, appropriately. */
+    if (one_shell)
+      {
+	/* If the shell is Bourne compatible, we must remove and ignore
+	   interior special chars [@+-] because they're meaningless to
+	   the shell itself. If, however, we're in .ONESHELL mode and
+	   have changed SHELL to something non-standard, we should
+	   leave those alone because they could be part of the
+	   script. In this case we must also leave in place
+	   any leading [@+-] for the same reason.  */
+
+	/* Remove and ignore interior prefix chars [@+-] because they're
+	     meaningless given a single shell. */
+#if defined __MSDOS__ || defined (__EMX__)
+	if (unixy_shell)     /* the test is complicated and we already did it */
+#else
+	if (is_bourne_compatible_shell(shell))
+#endif
+          {
+            const char *f = line;
+            char *t = line;
+
+            /* Copy the recipe, removing and ignoring interior prefix chars
+               [@+-]: they're meaningless in .ONESHELL mode.  */
+            while (f[0] != '\0')
+              {
+                int esc = 0;
+
+                /* This is the start of a new recipe line.
+                   Skip whitespace and prefix characters.  */
+                while (isblank (*f) || *f == '-' || *f == '@' || *f == '+')
+                  ++f;
+
+                /* Copy until we get to the next logical recipe line.  */
+                while (*f != '\0')
+                  {
+                    *(t++) = *(f++);
+                    if (f[-1] == '\\')
+                      esc = !esc;
+                    else
+                      {
+                        /* On unescaped newline, we're done with this line.  */
+                        if (f[-1] == '\n' && ! esc)
+                          break;
+
+                        /* Something else: reset the escape sequence.  */
+                        esc = 0;
+                      }
+                  }
+              }
+            *t = '\0';
+          }
+
+	new_argv = xmalloc (4 * sizeof (char *));
+	new_argv[0] = xstrdup(shell);
+	new_argv[1] = xstrdup(shellflags);
+	new_argv[2] = line;
+	new_argv[3] = NULL;
+	return new_argv;
+      }
+
+    new_line = alloca (shell_len + 1 + sflags_len + 1
+                             + (line_len*2) + 1);
     ap = new_line;
     memcpy (ap, shell, shell_len);
     ap += shell_len;
@@ -3108,7 +3225,7 @@ dup2 (int old, int new)
 
   return fd;
 }
-#endif /* !HAPE_DUP2 && !_AMIGA */
+#endif /* !HAVE_DUP2 && !_AMIGA */
 
 /* On VMS systems, include special VMS functions.  */
 
