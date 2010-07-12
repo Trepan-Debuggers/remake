@@ -496,6 +496,12 @@ int posix_pedantic;
 
 int second_expansion;
 
+/* Nonzero if we have seen the '.ONESHELL' target.
+   This causes the entire recipe to be handed to SHELL
+   as a single string, potentially containing newlines.  */
+
+int one_shell;
+
 /* Nonzero if we have seen the `.NOTPARALLEL' target.
    This turns off parallel builds for this invocation of make.  */
 

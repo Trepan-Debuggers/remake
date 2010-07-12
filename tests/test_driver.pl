@@ -30,7 +30,7 @@
 # this routine controls the whole mess; each test suite sets up a few
 # variables and then calls &toplevel, which does all the real work.
 
-# $Id: test_driver.pl,v 1.27 2009/10/25 18:56:46 psmith Exp $
+# $Id: test_driver.pl,v 1.28 2010/07/12 05:23:20 psmith Exp $
 
 
 # The number of test categories we've run
@@ -54,6 +54,8 @@ $test_passed = 1;
 # Timeout in seconds.  If the test takes longer than this we'll fail it.
 $test_timeout = 5;
 
+# Path to Perl
+$perl_name = $^X;
 
 # %makeENV is the cleaned-out environment.
 %makeENV = ();
@@ -236,8 +238,9 @@ sub toplevel
 sub get_osname
 {
   # Set up an initial value.  In perl5 we can do it the easy way.
-  #
   $osname = defined($^O) ? $^O : '';
+
+  # Find a path to Perl
 
   # See if the filesystem supports long file names with multiple
   # dots.  DOS doesn't.
@@ -273,14 +276,14 @@ sub get_osname
     eval "chop (\$osname = `sh -c 'uname -nmsr 2>&1'`)";
     if ($osname =~ /not found/i)
     {
-	$osname = "(something unixy with no uname)";
+	$osname = "(something posixy with no uname)";
     }
     elsif ($@ ne "" || $?)
     {
         eval "chop (\$osname = `sh -c 'uname -a 2>&1'`)";
         if ($@ ne "" || $?)
         {
-	    $osname = "(something unixy)";
+	    $osname = "(something posixy)";
 	}
     }
     $vos = 0;

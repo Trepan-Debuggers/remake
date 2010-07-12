@@ -1,3 +1,24 @@
+2010-07-12  Paul Smith  <psmith@gnu.org>
+
+	Integrated new .ONESHELL feature.
+	Patch by David Boyce <dsb@boyski.com>.  Modified by me.
+
+	* NEWS: Add a note about the new feature.
+	* job.c (is_bourne_compatible_shell): Determine whether we're
+	using a standard POSIX shell or not.
+	(start_job_command): Accept '-ec' as POSIX shell flags.
+	(construct_command_argv_internal): If one_shell is set and we are
+	using a POSIX shell, remove "interior" prefix characters such as
+	"@", "+", "-".  Also treat "\n" as a special character when
+	choosing the slow path, if ONESHELL is set.
+	* job.h (is_bourne_compatible_argv): Define the new function.
+
+	* make.h (one_shell): New global variable to remember setting.
+	* main.c: Declare it.
+	* read.c (record_files): Set it.
+	* commands.c (chop_commands): If one_shell is set, don't chop
+	commands into multiple lines; just keep one line.
+
 2010-07-09  Eli Zaretskii  <eliz@gnu.org>
 
 	* w32/subproc/sub_proc.c: Include stdint.h.
@@ -27,6 +48,10 @@
 	* config.h.W32.template (pid_t): Add a definition for 64-bit
 	Windows builds that don't use GCC.
 	Savannah bug #27809.  Patch by Ozkan Sezer <sezeroz@gmail.com>
+
+2010-07-07  Paul Smith  <psmith@gnu.org>
+
+	* configure.in: Bump to a new prerelease version 3.81.91.
 
 2010-07-06  Paul Smith  <psmith@gnu.org>
 

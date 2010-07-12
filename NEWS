@@ -71,6 +71,16 @@ Version 3.81.90
   the shell when it invokes recipes.  By default the value will be "-c" (or
   "-ec" if .POSIX is set).
 
+* New special target: .ONESHELL instructs make to invoke a single instance of
+  the shell and provide it with the entire recipe, regardless of how many
+  lines it contains.  As a special feature to allow more straightforward
+  conversion of makefiles to use .ONESHELL, any recipe line control characters
+  ('@', '+', or '-') will be removed from the second and subsequent recipe
+  lines.  This happens _only_ if the SHELL value is deemed to be a standard
+  POSIX-style shell.  If not, then no interior line control characters are
+  removed (as they may be part of the scripting language used with the
+  alternate SHELL).
+
 * New variable modifier 'private': prefixing a variable assignment with the
   modifier 'private' suppresses inheritance of that variable by
   prerequisites.  This is most useful for target- and pattern-specific

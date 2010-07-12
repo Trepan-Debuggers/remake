@@ -67,6 +67,7 @@ struct child
 
 extern struct child *children;
 
+int is_bourne_compatible_shell(const char *path);
 void new_job (struct file *file);
 void reap_children (int block, int err);
 void start_waiting_jobs (void);

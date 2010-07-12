@@ -330,7 +330,6 @@ set_file_variables (struct file *file)
 void
 chop_commands (struct commands *cmds)
 {
-  const char *p;
   unsigned int nlines, idx;
   char **lines;
 
@@ -340,64 +339,82 @@ chop_commands (struct commands *cmds)
   if (!cmds || cmds->command_lines != 0)
     return;
 
-  /* Chop CMDS->commands up into lines in CMDS->command_lines.
-	 Also set the corresponding CMDS->lines_flags elements,
-	 and the CMDS->any_recurse flag.  */
+  /* Chop CMDS->commands up into lines in CMDS->command_lines.  */
 
-  nlines = 5;
-  lines = xmalloc (5 * sizeof (char *));
-  idx = 0;
-  p = cmds->commands;
-  while (*p != '\0')
+  if (one_shell)
     {
-      const char *end = p;
-    find_end:;
-      end = strchr (end, '\n');
-      if (end == 0)
-        end = p + strlen (p);
-      else if (end > p && end[-1] == '\\')
+      int l = strlen (cmds->commands);
+
+      nlines = 1;
+      lines = xmalloc (nlines * sizeof (char *));
+      lines[0] = xstrdup (cmds->commands);
+
+      /* Strip the trailing newline.  */
+      if (l > 0 && lines[0][l-1] == '\n')
+        lines[0][l-1] = '\0';
+    }
+  else
+    {
+      const char *p;
+
+      nlines = 5;
+      lines = xmalloc (nlines * sizeof (char *));
+      idx = 0;
+      p = cmds->commands;
+      while (*p != '\0')
         {
-          int backslash = 1;
-          const char *b;
-          for (b = end - 2; b >= p && *b == '\\'; --b)
-            backslash = !backslash;
-          if (backslash)
+          const char *end = p;
+        find_end:;
+          end = strchr (end, '\n');
+          if (end == 0)
+            end = p + strlen (p);
+          else if (end > p && end[-1] == '\\')
             {
-              ++end;
-              goto find_end;
+              int backslash = 1;
+              const char *b;
+              for (b = end - 2; b >= p && *b == '\\'; --b)
+                backslash = !backslash;
+              if (backslash)
+                {
+                  ++end;
+                  goto find_end;
+                }
             }
+
+          if (idx == nlines)
+            {
+              nlines += 2;
+              lines = xrealloc (lines, nlines * sizeof (char *));
+            }
+          lines[idx++] = xstrndup (p, end - p);
+          p = end;
+          if (*p != '\0')
+            ++p;
         }
 
-      if (idx == nlines)
+      if (idx != nlines)
         {
-          nlines += 2;
+          nlines = idx;
           lines = xrealloc (lines, nlines * sizeof (char *));
         }
-      lines[idx++] = xstrndup (p, end - p);
-      p = end;
-      if (*p != '\0')
-        ++p;
     }
 
-  if (idx != nlines)
-    {
-      nlines = idx;
-      lines = xrealloc (lines, nlines * sizeof (char *));
-    }
+  /* Finally, set the corresponding CMDS->lines_flags elements and the
+     CMDS->any_recurse flag.  */
 
   cmds->ncommand_lines = nlines;
   cmds->command_lines = lines;
 
   cmds->any_recurse = 0;
   cmds->lines_flags = xmalloc (nlines);
+
   for (idx = 0; idx < nlines; ++idx)
     {
       int flags = 0;
+      const char *p = lines[idx];
 
-      for (p = lines[idx];
-           isblank ((unsigned char)*p) || *p == '-' || *p == '@' || *p == '+';
-           ++p)
-        switch (*p)
+      while (isblank (*p) || *p == '-' || *p == '@' || *p == '+')
+        switch (*(p++))
           {
           case '+':
             flags |= COMMANDS_RECURSE;
