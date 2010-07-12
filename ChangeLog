@@ -1,3 +1,9 @@
+2010-07-12  Eli Zaretskii  <eliz@gnu.org>
+
+	* make.h (alloca) [!__GNUC__]: Don't define prototype.
+	(int w32_kill): Use pid_t for process ID argument.
+	Savannah bug #27809.
+
 2010-07-12  Paul Smith  <psmith@gnu.org>
 
 	Integrated new .ONESHELL feature.
