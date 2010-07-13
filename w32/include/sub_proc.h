@@ -1,6 +1,6 @@
 /* Definitions for Windows process invocation.
 Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -21,11 +21,11 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /*
  * Component Name:
  *
- * $Date: 2009/10/25 18:56:46 $
+ * $Date: 2010/07/13 01:20:43 $
  *
  * $Source: /sources/make/make/w32/include/sub_proc.h,v $
  *
- * $Id: sub_proc.h,v 1.11 2009/10/25 18:56:46 psmith Exp $
+ * $Id: sub_proc.h,v 1.12 2010/07/13 01:20:43 psmith Exp $
  */
 
 #define EXTERN_DECL(entry, args) extern entry args

@@ -1,5 +1,7 @@
 2010-07-12  Paul Smith  <psmith@gnu.org>
 
+	Update copyrights to add 2010.
+
 	* build_w32.bat: Support for MSVC Windows x86_64 builds.
 	* job.c: Don't define execve() on MSVC/64bit.
 	Patch by Viktor Szakats.  Fixes Savannah bug #27590.

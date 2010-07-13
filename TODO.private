@@ -65,10 +65,7 @@ The Rest of the List
     what does that mean?
 
  3) Multi-token pattern rule matching (allow %1/%2.c : %1/obj/%2.o,
-    etc., or something like that).  I have an implementation of this
-    already, it just needs some refinement... maybe.  Additionally I
-    think it only works for static pattern rules; it might need to be
-    fixed up to work with normal pattern rules, too.
+    etc., or something like that).  Maybe using regex?
 
  4) Provide a .TARGETS variable, containing the names of the targets
     defined in the makefile.
@@ -128,8 +125,8 @@ The Rest of the List
 
 
 -------------------------------------------------------------------------------
-Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-2008, 2009 Free Software Foundation, Inc.
+Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
+2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
