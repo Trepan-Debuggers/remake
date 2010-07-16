@@ -1,3 +1,7 @@
+2010-07-16  Boris Kolpackov  <boris@codesynthesis.com>
+
+	* misc.c (concat): Fix buffer overrun.
+
 2010-07-12  Paul Smith  <psmith@gnu.org>
 
 	Update copyrights to add 2010.
