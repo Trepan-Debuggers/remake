@@ -202,6 +202,14 @@ concat (num, va_alist)
 
   VA_END (args);
 
+  /* Get some more memory if we don't have enough space for the
+     terminating '\0'.   */
+  if (ri == rlen)
+    {
+      rlen = (rlen ? rlen : 60) * 2;
+      result = xrealloc (result, rlen);
+    }
+
   result[ri] = '\0';
 
   return result;
