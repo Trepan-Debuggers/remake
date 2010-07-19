@@ -273,7 +273,8 @@ ar_glob (const char *arname, const char *member_pattern, unsigned int size)
     names[i++] = n->name;
 
   /* Sort them alphabetically.  */
-  qsort (names, i, sizeof (*names), alpha_compare);
+  /* MSVC erroneously warns without a cast here.  */
+  qsort ((void *)names, i, sizeof (*names), alpha_compare);
 
   /* Put them back into the chain in the sorted order.  */
   i = 0;

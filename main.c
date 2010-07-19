@@ -523,7 +523,7 @@ int fatal_signal_mask;
 # endif
 #endif
 
-#if !defined HAVE_BSD_SIGNAL && !defined bsd_signal
+#if !HAVE_DECL_BSD_SIGNAL && !defined bsd_signal
 # if !defined HAVE_SIGACTION
 #  define bsd_signal signal
 # else
@@ -986,7 +986,7 @@ main (int argc, char **argv, char **envp)
   fatal_signal_mask = 0;
 #define	ADD_SIG(sig)	fatal_signal_mask |= sigmask (sig)
 #else
-#define	ADD_SIG(sig)
+#define	ADD_SIG(sig)    (void)sig      /* Needed to avoid warnings in MSVC.  */
 #endif
 #endif
 
@@ -2577,7 +2577,8 @@ decode_switches (int argc, char **argv, int env)
 		  else if (sl->idx == sl->max - 1)
 		    {
 		      sl->max += 5;
-		      sl->list = xrealloc (sl->list,
+                      /* MSVC erroneously warns without a cast here.  */
+		      sl->list = xrealloc ((void *)sl->list,
                                            sl->max * sizeof (char *));
 		    }
                   if (cs->type == filename)
@@ -3060,7 +3061,7 @@ print_version (void)
      year, and none of the rest of it should be translated (including the
      word "Copyright", so it hardly seems worth it.  */
 
-  printf ("%sCopyright (C) 2009  Free Software Foundation, Inc.\n", precede);
+  printf ("%sCopyright (C) 2010  Free Software Foundation, Inc.\n", precede);
 
   printf (_("%sLicense GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n\
 %sThis is free software: you are free to change and redistribute it.\n\
@@ -3149,7 +3150,8 @@ clean_jobserver (int status)
       job_slots = default_job_slots;
       if (jobserver_fds)
         {
-          free (jobserver_fds->list);
+          /* MSVC erroneously warns without a cast here.  */
+          free ((void *)jobserver_fds->list);
           free (jobserver_fds);
           jobserver_fds = 0;
         }

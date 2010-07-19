@@ -6,10 +6,12 @@ $details = "";
 
 
 # Ensure turning on .POSIX enables the -e flag for the shell
+# We can't just use "false" because on different systems it provides a
+# different exit code.
 
 run_make_test(q!
 .POSIX:
-all: ; @false; true
+all: ; @r() { return 1; }; r; true
 !,
               '', "#MAKE#: *** [all] Error 1\n", 512);
 
@@ -18,9 +20,9 @@ all: ; @false; true
 run_make_test(q!
 .SHELLFLAGS = -xc
 .POSIX:
-all: ; @false; true
+all: ; @r() { return 1; }; r; true
 !,
-              '', "+ false\n+ true\n");
+              '', "+ r\n+ return 1\n+ true\n");
 
 # This tells the test driver that the perl test script executed properly.
 1;

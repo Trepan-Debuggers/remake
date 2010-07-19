@@ -20,7 +20,7 @@
 AC_INIT([GNU make],[3.81.91],[bug-make@gnu.org])
 
 AC_PREREQ(2.59)
-AC_REVISION([[$Id: configure.in,v 1.154 2010/07/13 01:20:38 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.155 2010/07/19 07:10:53 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)
@@ -148,17 +148,22 @@ if test "$ac_cv_func_gettimeofday" = yes; then
 fi
 
 AC_CHECK_FUNCS( strdup strndup mkstemp mktemp fdopen fileno \
-	        bsd_signal dup2 getcwd realpath sigsetmask sigaction \
+	        dup2 getcwd realpath sigsetmask sigaction \
                 getgroups seteuid setegid setlinebuf setreuid setregid \
                 getrlimit setrlimit setvbuf pipe strerror strsignal \
 		lstat readlink atexit)
+
+# We need to check declarations, not just existence, because on Tru64 this
+# function is not declared without special flags, which themselves cause
+# other problems.  We'll just use our own.
+AC_CHECK_DECLS([bsd_signal], [], [], [[#include <signal.h>]])
 
 AC_FUNC_SETVBUF_REVERSED
 
 # Rumor has it that strcasecmp lives in -lresolv on some odd systems.
 # It doesn't hurt much to use our own if we can't find it so I don't
 # make the effort here.
-AC_CHECK_FUNCS(strcasecmp strcmpi stricmp)
+AC_CHECK_FUNCS(strcasecmp strncasecmp strcmpi strncmpi stricmp strnicmp)
 
 # strcoll() is used by the GNU glob library
 AC_FUNC_STRCOLL

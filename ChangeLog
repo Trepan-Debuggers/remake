@@ -1,3 +1,36 @@
+2010-07-18  Paul Smith  <psmith@gnu.org>
+
+	* configure.in: Switch bsd_signal to AC_CHECK_DECLS() to make sure
+	we have a declaration.  Fixes Savannah bug #25713 (maybe?)
+	* doc/make.texi (Complex Makefile): Cleanup variable assignments.
+	(One Shell): New subsection for the .ONESHELL special target.
+
+	Patches by Ozkan Sezer <sezeroz@gmail.com>:
+
+	* misc.c (strncasecmp): Local implementation for systems without.
+	* config.h.W32.template (HAVE_STRNICMP): Define on Windows.
+	* configure.in: Check for strncasecmp/strncmpi/strnicmp.
+	* job.c [WINDOWS32]: Don't define dup2 on Windows.
+	(pid2str): Use "%Id" even with MSVC
+	(exec_command): Cast to pid_t when calling pid2str().
+	* w32/subproc/sub_proc.c [WINDOWS32]: Include config.h first.
+	Use stddef.h on MSVC to get intptr_t.
+	* w32/subproc/misc.c [WINDOWS32]: Include config.h first.
+	* w32/compat/dirent.c [WINDOWS32]: Include config.h first.
+	(readdir): Cast -1 to correct type for d_ino.
+	* w32/pathstuff.c [WINDOWS32]: Ensure make.h is included first.
+	* make.h [WINDOWS32]: Don't prototype alloca() on Windows.
+	Add configuration for strncasecmp().
+	* main.c (ADD_SIG) [WINDOWS32]: Avoid warnings in MSVC.
+	* config.h.W32.template [WINDOWS32]: Don't warn on unsafe
+	functions or variables.
+	* NMakefile.template [WINDOWS32]: Remove /MACHINE:I386.
+	* main.c (clean_jobserver): Cast due to MSVC brokenness.
+	(decode_switches): Ditto.
+	* vpath.c (construct_vpath_list): Ditto.
+	* rule.c (freerule): Ditto.
+	* ar.c (ar_glob): Ditto.
+
 2010-07-16  Boris Kolpackov  <boris@codesynthesis.com>
 
 	* misc.c (concat): Fix buffer overrun.

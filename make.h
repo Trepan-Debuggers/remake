@@ -35,7 +35,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 # ifdef _AIX
  #pragma alloca
 # else
-#  ifndef __GNUC__
+#  if !defined(__GNUC__) && !defined(WINDOWS32)
 #   ifndef alloca /* predefined by HP cc +Olibcalls */
 char *alloca ();
 #   endif
@@ -487,7 +487,18 @@ char *getwd ();
 #  define strcasecmp strcmpi
 # else
 /* Create our own, in misc.c */
-int strcasecmp (const char *s1, const char *s2);
+int strcasecmp (const char *s1, const char *s2, int n);
+# endif
+#endif
+
+#if !HAVE_STRNCASECMP
+# if HAVE_STRNICMP
+#  define strncasecmp strnicmp
+# elif HAVE_STRNCMPI
+#  define strncasecmp strncmpi
+# else
+/* Create our own, in misc.c */
+int strncasecmp (const char *s1, const char *s2);
 # endif
 #endif
 

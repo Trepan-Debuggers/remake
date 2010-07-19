@@ -404,8 +404,9 @@ freerule (struct rule *rule, struct rule *lastrule)
 
   free_dep_chain (rule->deps);
 
-  free (rule->targets);
-  free (rule->suffixes);
+  /* MSVC erroneously warns without a cast here.  */
+  free ((void *)rule->targets);
+  free ((void *)rule->suffixes);
   free (rule->lens);
 
   /* We can't free the storage for the commands because there

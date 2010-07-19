@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
+#include <config.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
@@ -132,7 +133,7 @@ readdir(DIR* pDir)
 	pDir->dir_nNumFiles++;
 
 	/* fill in struct dirent values */
-	pDir->dir_sdReturn.d_ino = -1;
+	pDir->dir_sdReturn.d_ino = (ino_t)-1;
 	strcpy(pDir->dir_sdReturn.d_name, wfdFindData.cFileName);
 
 	return &pDir->dir_sdReturn;

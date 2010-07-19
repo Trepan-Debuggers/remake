@@ -192,7 +192,8 @@ construct_vpath_list (char *pattern, char *dirpath)
 		lastpath->next = next;
 
 	      /* Free its unused storage.  */
-	      free (path->searchpath);
+              /* MSVC erroneously warns without a cast here.  */
+	      free ((void *)path->searchpath);
 	      free (path);
 	    }
 	  else
@@ -297,7 +298,8 @@ construct_vpath_list (char *pattern, char *dirpath)
     }
   else
     /* There were no entries, so free whatever space we allocated.  */
-    free (vpath);
+    /* MSVC erroneously warns without a cast here.  */
+    free ((void *)vpath);
 }
 
 /* Search the GPATH list for a pathname string that matches the one passed

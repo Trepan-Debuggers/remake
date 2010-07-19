@@ -15,9 +15,14 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include <config.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdint.h>
+#ifdef _MSC_VER
+# include <stddef.h>    /* for intptr_t */
+#else
+# include <stdint.h>
+#endif
 #include <process.h>  /* for msvc _beginthreadex, _endthreadex */
 #include <signal.h>
 #include <windows.h>
@@ -25,7 +30,6 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sub_proc.h"
 #include "proc.h"
 #include "w32err.h"
-#include "config.h"
 #include "debug.h"
 
 static char *make_command_line(char *shell_name, char *exec_path, char **argv);
