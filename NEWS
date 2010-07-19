@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  25 Oct 2009
+  16 July 2010
 
 See the end of this file for copyrights and conditions.
 
@@ -9,7 +9,7 @@ manual, which is contained in this distribution as the file doc/make.texi.
 See the README file and the GNU make manual for instructions for
 reporting bugs.
 
-Version 3.81.90
+Version 3.81.91
 
 * Compiling GNU make now requires a conforming ISO C 1989 compiler and
   standard runtime library.
@@ -48,12 +48,12 @@ Version 3.81.90
 
 * WARNING: Backward-incompatibility!
   The library search behavior has changed to be compatible with the standard
-  linker behavior. Prior to this version for prerequisites specified using
-  the -lfoo syntax make fist searched for libfoo.so in the current directory,
+  linker behavior. Prior to this version for prerequisites specified using the
+  -lfoo syntax make first searched for libfoo.so in the current directory,
   vpath directories, and system directories. If that didn't yield a match,
   make then searched for libfoo.a in these directories. Starting with this
-  version make searches first for libfoo.so and then for libfoo.a in each
-  of these directories in order.
+  version make searches first for libfoo.so and then for libfoo.a in each of
+  these directories in order.
 
 * New command line option: --eval=STRING causes STRING to be evaluated as
   makefile syntax (akin to using the $(eval ...) function).  The evaluation is

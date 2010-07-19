@@ -174,11 +174,9 @@ int wait ();
 
 #endif	/* Don't have `union wait'.  */
 
-#ifndef	HAVE_UNISTD_H
+#if !defined(HAVE_UNISTD_H) && !defined(WINDOWS32)
 int dup2 ();
-#if !(defined(_MSC_VER) && defined(_WIN64))
 int execve ();
-#endif
 void _exit ();
 # ifndef VMS
 int geteuid ();
@@ -194,7 +192,7 @@ static const char *
 pid2str (pid_t pid)
 {
   static char pidstring[100];
-#if defined(WINDOWS32) && __GNUC__ > 3
+#ifdef WINDOWS32
   sprintf (pidstring, "%Id", pid);
 #else
   sprintf (pidstring, "%lu", (unsigned long) pid);
@@ -2121,11 +2119,11 @@ exec_command (char **argv, char **envp)
           break;
       else
 	{
-	  char *pidstr = xstrdup (pid2str ((DWORD_PTR)hWaitPID));
+	  char *pidstr = xstrdup (pid2str ((pid_t)hWaitPID));
 
           fprintf(stderr,
                   _("make reaped child pid %s, still waiting for pid %s\n"),
-		  pidstr, pid2str ((DWORD_PTR)hPID));
+		  pidstr, pid2str ((pid_t)hPID));
 	  free (pidstr);
 	}
     }

@@ -62,8 +62,7 @@ all:
 >	   @$$a=5
 >	    +7;
 >	@y=qw(a b c);
->print "a = $$a, \
-y = (@y)\n";
+>print "a = $$a, y = (@y)\n";
 !,
               '', "a = 12, y = (a b c)\n");
 

@@ -3,8 +3,8 @@
 @setfilename make.info
 
 @include version.texi
-@set EDITION 0.70
-@set RCSID $Id: make.texi,v 1.65 2010/07/06 06:37:42 psmith Exp $
+@set EDITION 0.71
+@set RCSID $Id: make.texi,v 1.66 2010/07/19 07:10:54 psmith Exp $
 
 @settitle GNU @code{make}
 @setchapternewpage odd
@@ -25,9 +25,9 @@ and issues the commands to recompile them.
 This is Edition @value{EDITION}, last updated @value{UPDATED},
 of @cite{The GNU Make Manual}, for GNU @code{make} version @value{VERSION}.
 
-Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-1997, 1998, 1999, 2000, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
-Free Software Foundation, Inc.
+Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
+1996, 1997, 1998, 1999, 2000, 2002, 2003, 2004, 2005, 2006, 2007,
+2008, 2009, 2010 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -524,13 +524,13 @@ A @dfn{prerequisite} is a file that is used as input to create the
 target.  A target often depends on several files.
 
 @cindex tabs in rules
-A @dfn{recipe} is an action that @code{make} carries out.
-A recipe may have more than one command, each on its own line.
-@strong{Please note:} you need to put a tab character at the beginning of
-every command line!  This is an obscurity that catches the unwary.  If
-you prefer to prefix your recipes with a character other than tab,
-you can set the @code{.CMDPREFIX} variable to an alternate character
-(@pxref{Special Variables}).
+A @dfn{recipe} is an action that @code{make} carries out.  A recipe
+may have more than one command, either on the same line or each on its
+own line.  @strong{Please note:} you need to put a tab character at
+the beginning of every recipe line!  This is an obscurity that catches
+the unwary.  If you prefer to prefix your recipes with a character
+other than tab, you can set the @code{.RECIPEPREFIX} variable to an
+alternate character (@pxref{Special Variables}).
 
 Usually a recipe is in a rule with prerequisites and serves to create a
 target file if any of the prerequisites change.  However, the rule that
@@ -629,13 +629,13 @@ on the header file @file{defs.h}.
 A recipe may follow each line that contains a target and
 prerequisites.  These recipes say how to update the target file.  A
 tab character (or whatever character is specified by the
-@code{.CMDPREFIX} variable; @pxref{Special Variables}) must come at
+@code{.RECIPEPREFIX} variable; @pxref{Special Variables}) must come at
 the beginning of every line in the recipe to distinguish recipes from
 other lines in the makefile.  (Bear in mind that @code{make} does not
 know anything about how the recipes work.  It is up to you to supply
 recipes that will update the target file properly.  All @code{make}
-does is execute the commands in the recipe you have specified when the
-target file needs to be updated.)@refill
+does is execute the recipe you have specified when the target file
+needs to be updated.)@refill
 @cindex recipe
 
 The target @samp{clean} is not a file, but merely the name of an
@@ -1097,7 +1097,7 @@ include @var{filenames}@dots{}
 
 Extra spaces are allowed and ignored at the beginning of the line, but
 the first character must not be a tab (or the value of
-@code{.CMDPREFIX})---if the line begins with a tab, it will be
+@code{.RECIPEPREFIX})---if the line begins with a tab, it will be
 considered a recipe line.  Whitespace is required between
 @code{include} and the file names, and between file names; extra
 whitespace is ignored there and at the end of the directive.  A
@@ -1768,7 +1768,7 @@ target per rule, but occasionally there is a reason to have more
 @cindex recipes
 @cindex tab character (in commands)
 The @var{recipe} lines start with a tab character (or the first
-character in the value of the @code{.CMDPREFIX} variable;
+character in the value of the @code{.RECIPEPREFIX} variable;
 @pxref{Special Variables}).  The first recipe line may appear on the line
 after the prerequisites, with a tab character, or may appear on the
 same line, with a semicolon.  Either way, the effect is the same.
@@ -1822,12 +1822,12 @@ extra features (@pxref{Recipes, ,Writing Recipes in Rules}).
 There are actually two different types of prerequisites understood by
 GNU @code{make}: normal prerequisites such as described in the
 previous section, and @dfn{order-only} prerequisites.  A normal
-prerequisite makes two statements: first, it imposes an order of
-execution of recipes: any recipes necessary to build any of a
-target's prerequisites will be fully executed before any recipe
-necessary to build the target.  Second, it imposes a dependency
-relationship: if any prerequisite is newer than the target, then the
-target is considered out-of-date and must be rebuilt.
+prerequisite makes two statements: first, it imposes an order in which
+recipes will be invoked: the recipes for all prerequisites of a target
+will be completed before the recipe for the target is run.  Second, it
+imposes a dependency relationship: if any prerequisite is newer than
+the target, then the target is considered out-of-date and must be
+rebuilt.
 
 Normally, this is exactly what you want: if a target's prerequisite is
 updated, then the target should also be updated.
@@ -2874,6 +2874,15 @@ given.  Any recursively invoked @code{make} command will still run
 recipes in parallel (unless its makefile also contains this target).
 Any prerequisites on this target are ignored.
 
+@findex .ONESHELL
+@item .ONESHELL
+@cindex recipe execution, single invocation
+
+If @code{.ONESHELL} is mentioned as a target, then when a target is
+built all lines of the recipe will be given to a single invocation of
+the shell rather than each line being invoked separately
+(@pxref{Execution, ,Recipe Execution}).
+
 @findex .POSIX
 @item .POSIX
 @cindex POSIX-conforming mode, setting
@@ -3387,7 +3396,7 @@ brought up to date.
 
 Users use many different shell programs, but recipes in makefiles are
 always interpreted by @file{/bin/sh} unless the makefile specifies
-otherwise.  @xref{Execution, ,Command Execution}.
+otherwise.  @xref{Execution, ,Recipe Execution}.
 
 @menu
 * Recipe Syntax::               Recipe syntax features and pitfalls.
@@ -3415,7 +3424,7 @@ syntax: it performs only a very few specific translations on the
 content of the recipe before handing it to the shell.
 
 Each line in the recipe must start with a tab (or the first character
-in the value of the @code{.CMDPREFIX} variable; @pxref{Special
+in the value of the @code{.RECIPEPREFIX} variable; @pxref{Special
 Variables}), except that the first recipe line may be attached to the
 target-and-prerequisites line with a semicolon in between.  @emph{Any}
 line in the makefile that begins with a tab and appears in a ``rule
@@ -3690,9 +3699,10 @@ started with @samp{@@}.  A rule in the makefile for the special target
 @vindex @code{SHELL} @r{(recipe execution)}
 
 When it is time to execute recipes to update a target, they are
-executed by invoking a new subshell for each line of the recipe.  (In
-practice, @code{make} may take shortcuts that do not affect the
-results.)
+executed by invoking a new subshell for each line of the recipe,
+unless the @code{.ONESHELL} special target is in effect
+(@pxref{One Shell, ,Using One Shell})  (In practice, @code{make} may
+take shortcuts that do not affect the results.)
 
 @cindex @code{cd} (shell command)
 @cindex shell variables, setting in recipes
@@ -3720,11 +3730,113 @@ problems (in this case it would certainly cause @file{../foo} to be
 truncated, at least).
 
 @menu
+* One Shell::                   One shell for all lines in a recipe
 * Choosing the Shell::          How @code{make} chooses the shell used
                                   to run recipes.
 @end menu
 
-@node Choosing the Shell,  , Execution, Execution
+@node One Shell, Choosing the Shell, Execution, Execution
+@subsection Using One Shell
+@cindex recipe lines, single shell
+@cindex @code{.ONESHELL}, use of
+@findex .ONESHELL
+
+Sometimes you would prefer that all the lines in the recipe be passed
+to a single invocation of the shell.  There are generally two
+situations where this is useful: first, it can improve performance in
+makefiles where recipes consist of many command lines, by avoiding
+extra processes.  Second, you might want newlines to be included in
+your recipe command (for example perhaps you are using a very
+different interpreter as your @code{SHELL}).  If the @code{.ONESHELL}
+special target appears anywhere in the makefile then @emph{all}
+recipe lines for each target will be provided to a single invocation
+of the shell.  Newlines between recipe lines will be preserved.  For
+example:
+
+@example
+.ONESHELL:
+foo : bar/lose
+        cd $(@@D)
+        gobble $(@@F) > ../$@@
+@end example
+
+@noindent
+would now work as expected even though the commands are on different
+recipe lines.
+
+If @code{.ONESHELL} is provided, then only the first line of the
+recipe will be checked for the special prefix characters (@samp{@@},
+@samp{-}, and @samp{+}).  Subsequent lines will include the special
+characters in the recipe line when the @code{SHELL} is invoked.  If
+you want your recipe to start with one of these special characters
+you'll need to arrange for them to not be the first characters on the
+first line, perhaps by adding a comment or similar.  For example, this
+would be a syntax error in Perl because the first @samp{@@} is removed
+by make:
+
+@example
+.ONESHELL:
+SHELL = /usr/bin/perl
+.SHELLFLAGS = -e
+show :
+        @@f = qw(a b c);
+        print "@@f\n";
+@end example
+
+@noindent
+However, either of these alternatives would work properly:
+
+@example
+.ONESHELL:
+SHELL = /usr/bin/perl
+.SHELLFLAGS = -e
+show :
+        # Make sure "@@" is not the first character on the first line
+        @@f = qw(a b c);
+        print "@@f\n";
+@end example
+
+@noindent
+or
+
+@example
+.ONESHELL:
+SHELL = /usr/bin/perl
+.SHELLFLAGS = -e
+show :
+        my @@f = qw(a b c);
+        print "@@f\n";
+@end example
+
+As a special feature, if @code{SHELL} is determined to be a
+POSIX-style shell, the special prefix characters in ``internal''
+recipe lines will @emph{removed} before the recipe is processed.  This
+feature is intended to allow existing makefiles to add the
+@code{.ONESHELL} special target and still run properly without
+extensive modifications.  Since the special prefix characters are not
+legal at the beginning of a line in a POSIX shell script this is not a
+loss in functionality.  For example, this works as expected:
+
+@example
+.ONESHELL:
+foo : bar/lose
+        @@cd $(@@D)
+        @@gobble $(@@F) > ../$@@
+@end example
+
+Even with this special feature, however, makefiles with
+@code{.ONESHELL} will behave differently in ways that could be
+noticeable.  For example, normally if any line in the recipe fails,
+that causes the rule to fail and no more recipe lines are processed.
+Under @code{.ONESHELL} a failure of any but the final recipe line will
+not be noticed by @code{make}.  You can modify @code{.SHELLFLAGS} to
+add the @code{-e} option to the shell which will cause any failure
+anywhere in the command line to cause the shell to fail, but this
+could itself cause your recipe to behave differently.  Ultimately you
+may need to harden your recipe lines to allow them to work with
+@code{.ONESHELL}.
+
+@node Choosing the Shell,  , One Shell, Execution
 @subsection Choosing the Shell
 @cindex shell, choosing the
 @cindex @code{SHELL}, value of
@@ -3827,6 +3939,9 @@ The effect of the above DOS-specific processing is that a Makefile that
 contains @samp{SHELL = /bin/sh} (as many Unix makefiles do), will work
 on MS-DOS unaltered if you have e.g.@: @file{sh.exe} installed in some
 directory along your @code{PATH}.
+
+@vindex SHELL
+@vindex .SHELLFLAGS
 
 @node Parallel, Errors, Execution, Recipes
 @section Parallel Execution
@@ -5964,8 +6079,8 @@ will contain the number of times this instance has restarted.  Note
 this is not the same as recursion (counted by the @code{MAKELEVEL}
 variable).  You should not set, modify, or export this variable.
 
-@vindex .CMDPREFIX @r{(change the recipe prefix character)}
-@item .CMDPREFIX
+@vindex .RECIPEPREFIX @r{(change the recipe prefix character)}
+@item .RECIPEPREFIX
 The first character of the value of this variable is used as the
 character make assumes is introducing a recipe line.  If the variable
 is empty (as it is by default) that character is the standard tab
@@ -5973,13 +6088,13 @@ character.  For example, this is a valid makefile:
 
 @example
 @group
-.CMDPREFIX = >
+.RECIPEPREFIX = >
 all:
 > @@echo Hello, world
 @end group
 @end example
 
-The value of @code{.CMDPREFIX} can be changed multiple times; once set
+The value of @code{.RECIPEPREFIX} can be changed multiple times; once set
 it stays in effect for all rules parsed until it is modified.
 
 @vindex .VARIABLES @r{(list of variables)}
@@ -10941,7 +11056,7 @@ editors) have attempted to indent your recipe lines with spaces
 instead of a tab character.  In this case, @code{make} will use the
 second form of the error above.  Remember that every line in the
 recipe must begin with a tab character (unless you set
-@code{.CMDPREFIX}; @pxref{Special Variables}).  Eight spaces do not
+@code{.RECIPEPREFIX}; @pxref{Special Variables}).  Eight spaces do not
 count.  @xref{Rule Syntax}.
 
 @item recipe commences before first target.  Stop.
@@ -11201,18 +11316,16 @@ infodir = $(prefix)/info
 
 #### End of system configuration section. ####
 
-SRC1 =  tar.c create.c extract.c buffer.c \
-        getoldopt.c update.c gnu.c mangle.c
-SRC2 =  version.c list.c names.c diffarch.c \
-        port.c wildmat.c getopt.c
-SRC3 =  getopt1.c regex.c getdate.y
-SRCS =  $(SRC1) $(SRC2) $(SRC3)
-OBJ1 =  tar.o create.o extract.o buffer.o \
-        getoldopt.o update.o gnu.o mangle.o
-OBJ2 =  version.o list.o names.o diffarch.o \
-        port.o wildmat.o getopt.o
-OBJ3 =  getopt1.o regex.o getdate.o $(RTAPELIB)
-OBJS =  $(OBJ1) $(OBJ2) $(OBJ3)
+@group
+SRCS_C  = tar.c create.c extract.c buffer.c   \
+          getoldopt.c update.c gnu.c mangle.c \
+          version.c list.c names.c diffarch.c \
+          port.c wildmat.c getopt.c getopt1.c \
+          regex.c
+SRCS_Y  = getdate.y
+SRCS    = $(SRCS_C) $(SRCS_Y)
+OBJS    = $(SRCS_C:.c=.o) $(SRCS_Y:.y=.o) $(RTAPELIB)
+@end group
 @group
 AUX =   README COPYING ChangeLog Makefile.in  \
         makefile.pc configure configure.in \

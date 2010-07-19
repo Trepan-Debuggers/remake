@@ -614,6 +614,34 @@ strcasecmp (const char *s1, const char *s2)
     }
 }
 #endif
+
+#if !HAVE_STRNCASECMP && !HAVE_STRNICMP && !HAVE_STRNCMPI
+
+/* If we don't have strncasecmp() (from POSIX), or anything that can
+   substitute for it, define our own version.  */
+
+int
+strncasecmp (const char *s1, const char *s2, int n)
+{
+  while (n-- > 0)
+    {
+      int c1 = (int) *(s1++);
+      int c2 = (int) *(s2++);
+
+      if (isalpha (c1))
+        c1 = tolower (c1);
+      if (isalpha (c2))
+        c2 = tolower (c2);
+
+      if (c1 != '\0' && c1 == c2)
+        continue;
+
+      return (c1 - c2);
+    }
+
+  return 0;
+}
+#endif
 
 #ifdef	GETLOADAVG_PRIVILEGED
 

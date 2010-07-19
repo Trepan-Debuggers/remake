@@ -58,16 +58,27 @@ one two:;@echo "$@: $(SHELL) $$SHELL"
 
 # Test .SHELLFLAGS
 
-run_make_test(q!
-.SHELLFLAGS = -xc
-all: ; @true
-!,
-              '', "+ true\n");
+# We can't assume the value here: on Solaris for example, every line printed
+# by the shell in -x mode has a trailing space (!!)
+my $script = 'true';
+my $out = `/bin/sh -xc '$script' 2>&1`;
 
-run_make_test(q!
-.SHELLFLAGS = -xec
-all: ; @true; false; true
+run_make_test(qq!
+.SHELLFLAGS = -xc
+all: ; \@$script
 !,
-              '', "+ true\n+ false\n#MAKE#: *** [all] Error 1\n", 512);
+              '', $out);
+
+# We can't just use "false" because on different systems it provides a
+# different exit code.
+
+my $script = 'r() { return 1; }; true; r; true';
+my $out = `/bin/sh -xec '$script' 2>&1`;
+
+run_make_test(qq!
+.SHELLFLAGS = -xec
+all: ; \@$script
+!,
+              '', "$out#MAKE#: *** [all] Error 1\n", 512);
 
 1;

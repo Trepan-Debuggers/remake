@@ -24,6 +24,8 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 # pragma warning(disable:4127) /* conditional expression is constant */
 # pragma warning(disable:4131) /* uses old-style declarator */
 # pragma warning(disable:4702) /* unreachable code */
+# define _CRT_SECURE_NO_WARNINGS  /* function or variable may be unsafe */
+# define _CRT_NONSTDC_NO_WARNINGS /* functions w/o a leading underscore */
 #endif
 
 /* Define to 1 if the `closedir' function returns void instead of `int'. */
@@ -227,10 +229,19 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* #undef HAVE_STRCASECMP */
 
 /* Define to 1 if you have the `strcmpi' function. */
-#define HAVE_STRCMPI 1
+/* #undef HAVE_STRCMPI */
 
 /* Define to 1 if you have the `stricmp' function. */
-/* #undef HAVE_STRICMP */
+#define HAVE_STRICMP 1
+
+/* Define to 1 if you have the `strncasecmp' function. */
+/* #undef HAVE_STRNCASECMP */
+
+/* Define to 1 if you have the `strncmpi' function. */
+/* #undef HAVE_STRNCMPI */
+
+/* Define to 1 if you have the `strnicmp' function. */
+#define HAVE_STRNICMP 1
 
 /* Define to 1 if you have the `strchr' function. */
 #define HAVE_STRCHR 1
