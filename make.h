@@ -487,7 +487,7 @@ char *getwd ();
 #  define strcasecmp strcmpi
 # else
 /* Create our own, in misc.c */
-int strcasecmp (const char *s1, const char *s2, int n);
+int strcasecmp (const char *s1, const char *s2);
 # endif
 #endif
 
@@ -498,7 +498,7 @@ int strcasecmp (const char *s1, const char *s2, int n);
 #  define strncasecmp strncmpi
 # else
 /* Create our own, in misc.c */
-int strncasecmp (const char *s1, const char *s2);
+int strncasecmp (const char *s1, const char *s2, int n);
 # endif
 #endif
 
