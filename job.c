@@ -192,7 +192,9 @@ static const char *
 pid2str (pid_t pid)
 {
   static char pidstring[100];
-#ifdef WINDOWS32
+#if defined(WINDOWS32) && (__GNUC__ > 3 || _MSC_VER > 1300)
+  /* %Id is only needed for 64-builds, which were not supported by
+      older versions of Windows compilers.  */
   sprintf (pidstring, "%Id", pid);
 #else
   sprintf (pidstring, "%lu", (unsigned long) pid);
