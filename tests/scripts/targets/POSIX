@@ -6,23 +6,28 @@ $details = "";
 
 
 # Ensure turning on .POSIX enables the -e flag for the shell
-# We can't just use "false" because on different systems it provides a
-# different exit code.
+# We can't assume the exit value of "false" because on different systems it's
+# different.
 
-run_make_test(q!
+my $script = 'false; true';
+my $flags = '-ec';
+my $out = `/bin/sh $flags '$script' 2>&1`;
+my $err = $? >> 8;
+run_make_test(qq!
 .POSIX:
-all: ; @r() { return 1; }; r; true
+all: ; \@$script
 !,
-              '', "#MAKE#: *** [all] Error 1\n", 512);
+              '', "#MAKE#: *** [all] Error $err\n", 512);
 
 # User settings must override .POSIX
-
-run_make_test(q!
-.SHELLFLAGS = -xc
+$flags = '-xc';
+$out = `/bin/sh $flags '$script' 2>&1`;
+run_make_test(qq!
+.SHELLFLAGS = $flags
 .POSIX:
-all: ; @r() { return 1; }; r; true
+all: ; \@$script
 !,
-              '', "+ r\n+ return 1\n+ true\n");
+              '', $out);
 
 # This tells the test driver that the perl test script executed properly.
 1;
