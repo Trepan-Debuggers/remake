@@ -1,3 +1,11 @@
+2010-07-28  Paul Smith  <psmith@gnu.org>
+
+	* scripts/targets/POSIX: Compatibility issues with Solaris (and
+	Tru64?); "false" returns different exit codes, and set -x shows
+	output with extra whitespace.  Run the commands by hand first to
+	find out what the real shell would do, then compare what make does.
+	* scripts/variables/SHELL: Ditto.
+
 2010-07-12  Paul Smith  <psmith@gnu.org>
 
 	* test_driver.pl: Add a new $perl_name containing the path to Perl.

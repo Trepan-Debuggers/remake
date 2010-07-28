@@ -17,10 +17,10 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_INIT([GNU make],[3.81.91],[bug-make@gnu.org])
+AC_INIT([GNU make],[3.82],[bug-make@gnu.org])
 
 AC_PREREQ(2.59)
-AC_REVISION([[$Id: configure.in,v 1.155 2010/07/19 07:10:53 psmith Exp $]])
+AC_REVISION([[$Id: configure.in,v 1.156 2010/07/28 05:39:50 psmith Exp $]])
 
 # Autoconf setup
 AC_CONFIG_AUX_DIR(config)

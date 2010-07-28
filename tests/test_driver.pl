@@ -30,7 +30,7 @@
 # this routine controls the whole mess; each test suite sets up a few
 # variables and then calls &toplevel, which does all the real work.
 
-# $Id: test_driver.pl,v 1.29 2010/07/13 01:20:43 psmith Exp $
+# $Id: test_driver.pl,v 1.30 2010/07/28 05:39:50 psmith Exp $
 
 
 # The number of test categories we've run
@@ -802,7 +802,7 @@ sub _run_command
   eval {
       local $SIG{ALRM} = sub { die "timeout\n"; };
       alarm $test_timeout;
-      $code = system @_;
+      $code = system(@_);
       alarm 0;
   };
   if ($@) {

@@ -1,3 +1,14 @@
+2010-07-28  Paul Smith  <psmith@gnu.org>
+
+	Version 3.82 released.
+
+	* configure.in: Change release version.
+	* NEWS: Change the date.
+
+	* read.c (parse_file_seq): Remove GLOB_NOSORT for
+	backward-compatibility.  We'll add it back in next release.
+	* NEWS: Note it.
+
 2010-07-24  Eli Zaretskii  <eliz@gnu.org>
 
 	* job.c (pid2str) [WINDOWS32]: Fix CPP conditionals for using %Id
@@ -1643,7 +1654,7 @@
 2005-12-12  Paul D. Smith  <psmith@gnu.org>
 
 	* make.1: Fix some display errors and document all existing options.
-	Patch provided by Mike Frysinger <vapier@gentoo.org>.
+	Patch by Mike Frysinger <vapier@gentoo.org>.
 
 2005-12-11  Paul D. Smith  <psmith@gnu.org>
 
