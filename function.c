@@ -1597,11 +1597,24 @@ func_shell (char *o, char **argv, const char *funcname UNUSED)
   pid_t pid;
 
 #ifndef __MSDOS__
+#ifdef WINDOWS32
+  /* Reset just_print_flag.  This is needed on Windows when batch files
+     are used to run the commands, because we normally refrain from
+     creating batch files under -n.  */
+  int j_p_f = just_print_flag;
+
+  just_print_flag = 0;
+#endif
   /* Construct the argument list.  */
   command_argv = construct_command_argv (argv[0], NULL, NULL, 0,
                                          &batch_filename);
   if (command_argv == 0)
-    return o;
+    {
+#ifdef WINDOWS32
+      just_print_flag = j_p_f;
+#endif
+      return o;
+    }
 #endif
 
   /* Using a target environment for `shell' loses in cases like:
@@ -1637,11 +1650,13 @@ func_shell (char *o, char **argv, const char *funcname UNUSED)
     }
 #elif defined(WINDOWS32)
   windows32_openpipe (pipedes, &pid, command_argv, envp);
+  /* Restore the value of just_print_flag.  */
+  just_print_flag = j_p_f;
+
   if (pipedes[0] < 0)
     {
-      /* open of the pipe failed, mark as failed execution */
+      /* Open of the pipe failed, mark as failed execution.  */
       shell_function_completed = -1;
-
       return o;
     }
   else

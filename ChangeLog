@@ -1,3 +1,10 @@
+2010-08-07  Eli Zaretskii  <eliz@gnu.org>
+
+	* function.c (func_shell) [WINDOWS32]: Reset just_print_flag
+	around the call to construct_command_argv, so that a temporary
+	batch file _is_ created when needed for $(shell).  Fixes Savannah
+	bug #16362.
+
 2010-08-07 Juan Manuel Guerrero  <juan.guerrero@gmx.de>
 
 	* configh.dos.template (HAVE_STRNCASECMP): Define.
