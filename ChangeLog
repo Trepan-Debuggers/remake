@@ -1,5 +1,8 @@
 2010-08-07  Eli Zaretskii  <eliz@gnu.org>
 
+	* w32/subproc/build.bat: Make all 3 cl.exe compile command lines
+	use the same /I switches.  Fixes Savannah bug #30662.
+
 	* function.c (func_shell) [WINDOWS32]: Reset just_print_flag
 	around the call to construct_command_argv, so that a temporary
 	batch file _is_ created when needed for $(shell).  Fixes Savannah
