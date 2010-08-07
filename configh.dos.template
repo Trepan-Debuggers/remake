@@ -90,6 +90,9 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* Define to 1 if you have the stricmp function.  */
 #define HAVE_STRICMP 1
 
+/* Define to 1 if you have the `strncasecmp' function. */
+#define HAVE_STRNCASECMP 1
+
 /* Name of the package */
 #define PACKAGE "%PACKAGE%"
 

@@ -1,3 +1,7 @@
+2010-08-07 Juan Manuel Guerrero  <juan.guerrero@gmx.de>
+
+	* configh.dos.template (HAVE_STRNCASECMP): Define.
+
 2010-07-28  Paul Smith  <psmith@gnu.org>
 
 	Version 3.82 released.
