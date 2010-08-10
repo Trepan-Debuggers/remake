@@ -2093,7 +2093,7 @@ main (int argc, char **argv, char **envp)
             const char *pv = define_makeflags (1, 1);
             char *p = alloca (sizeof ("MAKEFLAGS=") + strlen (pv) + 1);
             sprintf (p, "MAKEFLAGS=%s", pv);
-            putenv (p);
+            putenv (allocated_variable_expand (p));
           }
 
 	  if (ISDB (DB_BASIC))

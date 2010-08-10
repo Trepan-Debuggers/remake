@@ -1,3 +1,8 @@
+2010-08-10  Paul Smith  <psmith@gnu.org>
+
+	* main.c (main): Expand MAKEFLAGS before adding it to the
+	environment when re-exec'ing.  Fixes Savannah bug #30723.
+
 2010-08-07  Eli Zaretskii  <eliz@gnu.org>
 
 	* w32/subproc/build.bat: Make all 3 cl.exe compile command lines

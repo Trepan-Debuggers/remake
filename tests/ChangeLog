@@ -1,3 +1,8 @@
+2010-08-10  Paul Smith  <psmith@gnu.org>
+
+	* scripts/features/reinvoke: Ensure command line variable settings
+	are preserved across make re-exec.  Tests Savannah bug #30723.
+
 2010-07-28  Paul Smith  <psmith@gnu.org>
 
 	* scripts/targets/POSIX: Compatibility issues with Solaris (and

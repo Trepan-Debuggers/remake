@@ -57,9 +57,24 @@ include $(F)',
 # Now try with the file we're not updating being the actual file we're
 # including: this and the previous one test different parts of the code.
 
-run_make_test(undef, "F=b", "[ -f b ] || echo >> b\nhello\n")
+run_make_test(undef, 'F=b', "[ -f b ] || echo >> b\nhello\n")
 
 &rmfiles('a','b','c');
+
+# Ensure command line variables are preserved properly across re-exec
+# Tests for Savannah bug #30723
+
+run_make_test('
+ifdef RECURSE
+-include foo30723
+endif
+recurse: ; @$(MAKE) -f $(MAKEFILE_LIST) RECURSE=1 test
+test: ; @echo F.O=$(F.O)
+foo30723: ; @touch $@
+',
+              '--no-print-directory F.O=bar', "F.O=bar\n");
+
+unlink('foo30723');
 
 # This tells the test driver that the perl test script executed properly.
 1;
