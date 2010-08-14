@@ -1,3 +1,17 @@
+2010-08-13  Paul Smith  <psmith@gnu.org>
+
+	* NEWS: Accidentally forgot to back out the sorted wildcard
+	enhancement in 3.82, so update NEWS.
+	Also add NEWS about the error check for explicit and pattern
+	targets in the same rule, added to 3.82.
+
+	* main.c (main): Add "oneshell" to $(.FEATURES) (forgot to add
+	this in 3.82!)
+
+	* read.c (parse_file_seq): Fix various errors parsing archives
+	with multiple objects in the parenthesis, as well as wildcards.
+	Fixes Savannah bug #30612.
+
 2010-08-10  Paul Smith  <psmith@gnu.org>
 
 	* main.c (main): Expand MAKEFLAGS before adding it to the
@@ -10,8 +24,8 @@
 
 	* function.c (func_shell) [WINDOWS32]: Reset just_print_flag
 	around the call to construct_command_argv, so that a temporary
-	batch file _is_ created when needed for $(shell).  Fixes Savannah
-	bug #16362.
+	batch file _is_ created when needed for $(shell).
+	Fixes Savannah bug #16362.
 
 2010-08-07 Juan Manuel Guerrero  <juan.guerrero@gmx.de>
 

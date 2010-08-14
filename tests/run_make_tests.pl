@@ -29,6 +29,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
+%FEATURES = ();
 
 $valgrind = 0;              # invoke make with valgrind
 $valgrind_args = '';
@@ -366,6 +367,8 @@ sub set_more_defaults
    else {
      $parallel_jobs = 1;
    }
+
+   %FEATURES = map { $_ => 1 } split /\s+/, `sh -c "echo '\\\$(info \\\$(.FEATURES))' | $make_path -f- 2>/dev/null"`;
 
    # Set up for valgrind, if requested.
 

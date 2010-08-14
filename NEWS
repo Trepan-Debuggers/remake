@@ -18,14 +18,6 @@ http://sv.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=104&set
 * Compiling GNU make now requires a conforming ISO C 1989 compiler and
   standard runtime library.
 
-* WARNING: Future backward-incompatibility!
-  Wildcards are not documented as returning sorted values, but up to and
-  including this release the results have been sorted and some makefiles are
-  apparently depending on that.  In the next release of GNU make, for
-  performance reasons, we may remove that sorting.  If your makefiles
-  require sorted results from wildcard expansions, use the $(sort ...)
-  function to request it explicitly.
-
 * WARNING: Backward-incompatibility!
   The POSIX standard for make was changed in the 2008 version in a
   fundamentally incompatible way: make is required to invoke the shell as if
@@ -40,6 +32,21 @@ http://sv.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=104&set
   The '$?' variable now contains all prerequisites that caused the target to
   be considered out of date, even if they do not exist (previously only
   existing targets were provided in $?).
+
+* WARNING: Backward-incompatibility!
+  Wildcards were not documented as returning sorted values, but the results
+  have been sorted up until this release..  If your makefiles require sorted
+  results from wildcard expansions, use the $(sort ...)  function to request
+  it explicitly.
+
+* WARNING: Backward-incompatibility!
+  In previous versions of make it was acceptable to list one or more explicit
+  targets followed by one or more pattern targets in the same rule and it
+  worked "as expected".  However, this was not documented as acceptable and if
+  you listed any explicit targets AFTER the pattern targets, the entire rule
+  would be mis-parsed.  This release removes this ability completely: make
+  will generate an error message if you mix explicit and pattern targets in
+  the same rule.
 
 * WARNING: Backward-incompatibility!
   As a result of parser enhancements, three backward-compatibility issues

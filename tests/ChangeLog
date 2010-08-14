@@ -1,3 +1,11 @@
+2010-08-13  Paul Smith  <psmith@gnu.org>
+
+	* scripts/features/archives: New regression tests for archive
+	support.  Test for fix to Savannah bug #30612.
+
+	* run_make_tests.pl (set_more_defaults): Set a %FEATURES hash to
+	the features available in $(.FEATURES).
+
 2010-08-10  Paul Smith  <psmith@gnu.org>
 
 	* scripts/features/reinvoke: Ensure command line variable settings
