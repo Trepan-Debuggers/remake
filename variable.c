@@ -917,7 +917,23 @@ define_automatic_variables (void)
   define_variable_cname ("?D", "$(dir $?)", o_automatic, 1);
   define_variable_cname ("^D", "$(dir $^)", o_automatic, 1);
   define_variable_cname ("+D", "$(dir $+)", o_automatic, 1);
-#else
+#elif defined(__MSDOS__) || defined(WINDOWS32)
+  /* For consistency, remove the trailing backslash as well as slash.  */
+  define_variable_cname ("@D", "$(patsubst %/,%,$(patsubst %\\,%,$(dir $@)))",
+			 o_automatic, 1);
+  define_variable_cname ("%D", "$(patsubst %/,%,$(patsubst %\\,%,$(dir $%)))",
+			 o_automatic, 1);
+  define_variable_cname ("*D", "$(patsubst %/,%,$(patsubst %\\,%,$(dir $*)))",
+			 o_automatic, 1);
+  define_variable_cname ("<D", "$(patsubst %/,%,$(patsubst %\\,%,$(dir $<)))",
+			 o_automatic, 1);
+  define_variable_cname ("?D", "$(patsubst %/,%,$(patsubst %\\,%,$(dir $?)))",
+			 o_automatic, 1);
+  define_variable_cname ("^D", "$(patsubst %/,%,$(patsubst %\\,%,$(dir $^)))",
+			 o_automatic, 1);
+  define_variable_cname ("+D", "$(patsubst %/,%,$(patsubst %\\,%,$(dir $+)))",
+			 o_automatic, 1);
+#else  /* not __MSDOS__, not WINDOWS32 */
   define_variable_cname ("@D", "$(patsubst %/,%,$(dir $@))", o_automatic, 1);
   define_variable_cname ("%D", "$(patsubst %/,%,$(dir $%))", o_automatic, 1);
   define_variable_cname ("*D", "$(patsubst %/,%,$(dir $*))", o_automatic, 1);

@@ -1,3 +1,9 @@
+2010-08-27  Eli Zaretskii  <eliz@gnu.org>
+
+	* variable.c (define_automatic_variables) [__MSDOS__ || WINDOWS32]:
+	Remove trailing backslashes in $(@D), $(<D), etc., for consistency
+	with forward slashes.  Fixes Savannah bug #30795.
+
 2010-08-13  Paul Smith  <psmith@gnu.org>
 
 	* NEWS: Accidentally forgot to back out the sorted wildcard
