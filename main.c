@@ -151,9 +151,9 @@ static int debug_flag = 0;
 
 int db_level = 0;
 
-/* Output level (--verbosity).  */
+/* Tracing (--trace).  */
 
-static struct stringlist *verbosity_flags;
+int trace_flag = 0;
 
 #ifdef WINDOWS32
 /* Suspend make in main for a short time to allow debugger to attach */
@@ -358,6 +358,8 @@ static const char *const usage[] =
     N_("\
   -t, --touch                 Touch targets instead of remaking them.\n"),
     N_("\
+  --trace                     Print tracing information.\n"),
+    N_("\
   -v, --version               Print the version number of make and exit.\n"),
     N_("\
   -w, --print-directory       Print the current directory.\n"),
@@ -414,9 +416,8 @@ static const struct command_switch switches[] =
     { 'S', flag_off, &keep_going_flag, 1, 1, 0, 0, &default_keep_going_flag,
       "no-keep-going" },
     { 't', flag, &touch_flag, 1, 1, 1, 0, 0, "touch" },
+    { CHAR_MAX+3, flag, &trace_flag, 1, 1, 0, 0, 0, "trace" },
     { 'v', flag, &print_version_flag, 1, 1, 0, 0, 0, "version" },
-    { CHAR_MAX+3, string, &verbosity_flags, 1, 1, 0, 0, 0,
-      "verbosity" },
     { 'w', flag, &print_directory_flag, 1, 1, 0, 0, 0, "print-directory" },
     { CHAR_MAX+4, flag, &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
       "no-print-directory" },
@@ -1282,7 +1283,7 @@ main (int argc, char **argv, char **envp)
   always_make_flag = always_make_set && (restarts == 0);
 
   /* Print version information.  */
-  if (print_version_flag || print_data_base_flag || db_level)
+  if (print_version_flag || print_data_base_flag || ISDB (DB_BASIC))
     {
       print_version ();
 

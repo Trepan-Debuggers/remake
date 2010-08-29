@@ -437,27 +437,46 @@ is_bourne_compatible_shell (const char *path)
    Append "(ignored)" if IGNORED is nonzero.  */
 
 static void
-child_error (const char *target_name,
+child_error (const struct file *file,
              int exit_code, int exit_sig, int coredump, int ignored)
 {
+  const char *nm;
+  const char *pre = "*** ";
+  const char *post = "";
+  const char *dump = "";
+  struct floc *flocp = &file->cmds->fileinfo;
+
   if (ignored && silent_flag)
     return;
 
+  if (exit_sig && coredump)
+    dump = _(" (core dumped)");
+
+  if (ignored)
+    {
+      pre = "";
+      post = _(" (ignored)");
+    }
+
+  if (! flocp->filenm)
+    nm = _("<builtin>");
+  else
+    {
+      char *a = alloca (strlen (flocp->filenm) + 1 + 11 + 1);
+      sprintf (a, "%s:%lu", flocp->filenm, flocp->lineno);
+      nm = a;
+    }
+  message (0, _("%s: recipe for target `%s' failed"), nm, file->name);
+
 #ifdef VMS
   if (!(exit_code & 1))
-      error (NILF,
-             (ignored ? _("*** [%s] Error 0x%x (ignored)")
-              : _("*** [%s] Error 0x%x")),
-             target_name, exit_code);
+    error (NILF, _("%s[%s] Error 0x%x%s"), pre, file->name, exit_code, post);
 #else
   if (exit_sig == 0)
-    error (NILF, ignored ? _("[%s] Error %d (ignored)") :
-	   _("*** [%s] Error %d"),
-	   target_name, exit_code);
+    error (NILF, _("%s[%s] Error %d%s"), pre, file->name, exit_code, post);
   else
-    error (NILF, "*** [%s] %s%s",
-	   target_name, strsignal (exit_sig),
-	   coredump ? _(" (core dumped)") : "");
+    error (NILF, _("%s[%s] %s%s%s"),
+           pre, file->name, strsignal (exit_sig), dump, post);
 #endif /* VMS */
 }
 
@@ -533,7 +552,7 @@ reap_children (int block, int err)
       int remote = 0;
       pid_t pid;
       int exit_code, exit_sig, coredump;
-      register struct child *lastc, *c;
+      struct child *lastc, *c;
       int child_failed;
       int any_remote, any_local;
       int dontcare;
@@ -784,7 +803,7 @@ reap_children (int block, int err)
           static int delete_on_error = -1;
 
           if (!dontcare)
-            child_error (c->file->name, exit_code, exit_sig, coredump, 0);
+            child_error (c->file, exit_code, exit_sig, coredump, 0);
 
           c->file->update_status = 2;
           if (delete_on_error == -1)
@@ -800,8 +819,7 @@ reap_children (int block, int err)
           if (child_failed)
             {
               /* The commands failed, but we don't care.  */
-              child_error (c->file->name,
-                           exit_code, exit_sig, coredump, 1);
+              child_error (c->file, exit_code, exit_sig, coredump, 1);
               child_failed = 0;
             }
 
@@ -1143,7 +1161,8 @@ start_job_command (struct child *child)
      can log the working directory before the command's own error messages
      appear.  */
 
-  message (0, (just_print_flag || (!(flags & COMMANDS_SILENT) && !silent_flag))
+  message (0, (just_print_flag || trace_flag
+               || (!(flags & COMMANDS_SILENT) && !silent_flag))
 	   ? "%s" : (char *) 0, p);
 
   /* Tell update_goal_chain that a command has been started on behalf of
@@ -1792,17 +1811,33 @@ new_job (struct file *file)
 
   ++jobserver_tokens;
 
+  /* Trace the build.
+     Use message here so that changes to working directories are logged.  */
+  if (trace_flag)
+    {
+      char *newer = allocated_variable_expand_for_file ("$?", c->file);
+      char *nm;
+
+      if (! cmds->fileinfo.filenm)
+        nm = _("<builtin>");
+      else
+        {
+          nm = alloca (strlen (cmds->fileinfo.filenm) + 1 + 11 + 1);
+          sprintf (nm, "%s:%lu", cmds->fileinfo.filenm, cmds->fileinfo.lineno);
+        }
+
+      if (newer[0] == '\0')
+        message (0, _("%s: target `%s' does not exist"), nm, c->file->name);
+      else
+        message (0, _("%s: update target `%s' due to: %s"), nm,
+                 c->file->name, newer);
+
+      free (newer);
+    }
+
+
   /* The job is now primed.  Start it running.
      (This will notice if there is in fact no recipe.)  */
-  if (cmds->fileinfo.filenm)
-    DB (DB_BASIC, (_("Invoking recipe from %s:%lu to update target `%s'.\n"),
-                   cmds->fileinfo.filenm, cmds->fileinfo.lineno,
-                   c->file->name));
-  else
-    DB (DB_BASIC, (_("Invoking builtin recipe to update target `%s'.\n"),
-                   c->file->name));
-
-
   start_waiting_job (c);
 
   if (job_slots == 1 || not_parallel)

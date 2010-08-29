@@ -4,7 +4,7 @@
 
 @include version.texi
 @set EDITION 0.71
-@set RCSID $Id: make.texi,v 1.66 2010/07/19 07:10:54 psmith Exp $
+@set RCSID $Id: make.texi,v 1.67 2010/08/29 23:05:27 psmith Exp $
 
 @settitle GNU @code{make}
 @setchapternewpage odd
@@ -3286,10 +3286,11 @@ main.o : main.c defs.h
 Thus you no longer have to write all those rules yourself.
 The compiler will do it for you.
 
-Note that such a prerequisite constitutes mentioning @file{main.o} in a
-makefile, so it can never be considered an intermediate file by implicit
-rule search.  This means that @code{make} won't ever remove the file
-after using it; @pxref{Chained Rules, ,Chains of Implicit Rules}.
+Note that such a rule constitutes mentioning @file{main.o} in a
+makefile, so it can never be considered an intermediate file by
+implicit rule search.  This means that @code{make} won't ever remove
+the file after using it; @pxref{Chained Rules, ,Chains of Implicit
+Rules}.
 
 @cindex @code{make depend}
 With old @code{make} programs, it was traditional practice to use this
@@ -7918,9 +7919,12 @@ what you want.  Certain options specify other activities for @code{make}.
 @cindex @code{--recon}
 @cindex @code{-n}
 
-``No-op''.  The activity is to print what recipe would be used to make
-the targets up to date, but not actually execute it.  Some recipes are
-still executed, even with this flag (@pxref{MAKE Variable, ,How the @code{MAKE} Variable Works}).
+``No-op''.  Causes @code{make} to print the recipes that are needed to
+make the targets up to date, but not actually execute them.  Note that
+some recipes are still executed, even with this flag (@pxref{MAKE
+Variable, ,How the @code{MAKE} Variable Works}).  Also any recipes
+needed to update included makefiles are still executed
+(@pxref{Remaking Makefiles, ,How Makefiles Are Remade}).
 
 @item -t
 @itemx --touch
@@ -7929,9 +7933,10 @@ still executed, even with this flag (@pxref{MAKE Variable, ,How the @code{MAKE} 
 @cindex target, touching
 @cindex @code{-t}
 
-``Touch''.  The activity is to mark the targets as up to date without
-actually changing them.  In other words, @code{make} pretends to compile
-the targets but does not really change their contents.
+``Touch''.  Marks targets as up to date without actually changing
+them.  In other words, @code{make} pretends to update the targets but
+does not really change their contents; instead only their modified
+times are updated.
 
 @item -q
 @itemx --question
@@ -7939,9 +7944,9 @@ the targets but does not really change their contents.
 @cindex @code{-q}
 @cindex question mode
 
-``Question''.  The activity is to find out silently whether the targets
-are up to date already; but execute no recipe in either case.  In other
-words, neither compilation nor output will occur.
+``Question''.  Silently check whether the targets are up to date, but
+do not execute recipes; the exit code shows whether any updates are
+needed.
 
 @item -W @var{file}
 @itemx --what-if=@var{file}
@@ -8453,6 +8458,14 @@ Touch files (mark them up to date without really changing them)
 instead of running their recipes.  This is used to pretend that the
 recipes were done, in order to fool future invocations of
 @code{make}.  @xref{Instead of Execution, ,Instead of Executing Recipes}.
+
+@item --trace
+@cindex @code{--trace}
+@c Extra blank line here makes the table look better.
+
+Print the entire recipe to be executed, even for recipes that are
+normally silent (due to @code{.SILENT} or @samp{@@}).  Also print the
+makefile name and linenumber where the recipe was defined.
 
 @item -v
 @cindex @code{-v}
@@ -8986,7 +8999,6 @@ can run @samp{make -p} in a directory with no makefiles.
 
 Here is a table of some of the more common variables used as names of
 programs in built-in rules:
-makefiles.
 
 @table @code
 @item AR
@@ -9142,6 +9154,13 @@ Extra flags to give to the SCCS @code{get} program.
 @vindex LDFLAGS
 Extra flags to give to compilers when they are supposed to invoke the linker,
 @samp{ld}.
+
+@item LDLIBS
+@vindex LDLIBS
+@vindex LOADLIBES
+Library flags or names given to compilers when they are supposed to
+invoke the linker, @samp{ld}.  @code{LOADLIBES} is a deprecated (but
+still supported) alternative to @code{LDLIBS}.
 
 @item LFLAGS
 @vindex LFLAGS

@@ -42,15 +42,17 @@ close(MAKEFILE);
 
 unlink("cleanit");
 $cleanit_error = `sh -c "$rm_command cleanit 2>&1"`;
+chomp $cleanit_error;
 $delete_error_code = $? >> 8;
 
 # TEST #1
 # -------
 
-$answer = "$rm_command cleanit\n"
-         . $cleanit_error
-         ."$make_name: [clean] Error $delete_error_code (ignored)\n"
-         ."$rm_command foo\n";
+$answer = "$rm_command cleanit
+$cleanit_error
+$makefile:2: recipe for target `clean' failed
+$make_name: [clean] Error $delete_error_code (ignored)
+$rm_command foo\n";
 
 &run_make_with_options($makefile,"",&get_logfile);
 
@@ -74,10 +76,11 @@ if (!$vos)
 # TEST #2
 # -------
 
-$answer = "$rm_command cleanit\n"
-         . $cleanit_error
-         ."$make_name: [clean2] Error $delete_error_code (ignored)\n"
-         ."$rm_command foo\n";
+$answer = "$rm_command cleanit
+$cleanit_error
+$makefile:5: recipe for target `clean2' failed
+$make_name: [clean2] Error $delete_error_code (ignored)
+$rm_command foo\n";
 
 &run_make_with_options($makefile,"clean2 -i",&get_logfile);
 

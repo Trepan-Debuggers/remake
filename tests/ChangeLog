@@ -1,3 +1,13 @@
+2010-08-29  Paul Smith  <psmith@gnu.org>
+
+	* scripts/features/errors: Add new error message to output text.
+	* scripts/variables/SHELL: Ditto.
+	* scripts/targets/POSIX: Ditto.
+	* scripts/options/dash-k: Ditto.
+	* scripts/features/vpathplus: Ditto.
+	* scripts/features/patternrules: Ditto.
+	* scripts/features/parallelism: Ditto.
+
 2010-08-13  Paul Smith  <psmith@gnu.org>
 
 	* scripts/features/archives: New regression tests for archive

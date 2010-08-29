@@ -1,5 +1,27 @@
 2010-08-29  Paul Smith  <psmith@gnu.org>
 
+	* doc/make.texi (Implicit Variables): Document LDLIBS and LOADLIBES.
+	Fixes Savannah bug #30807.
+	(Instead of Execution): Mention that included makefiles are still
+	rebuilt even with -n.  Fixes Savannah bug #30762.
+
+	* configure.in: Bump to 3.82.90.
+
+	* make.h: Add trace_flag variable.
+	* main.c (switches): Add --trace option.
+	(trace_flag): Declare variable.
+	* job.c (start_job_command): Show recipe if trace_flag is set.
+	(new_job): Show trace messages if trace_flag is set.
+	* doc/make.texi (Options Summary): Document the new --trace option.
+	* make.1: Add --trace documentation.
+	* NEWS: Mention --trace.
+
+	* job.c	(child_error): Show recipe filename/linenumber on error.
+	Also show "(ignored)" when appropriate even for signals/coredumps.
+	* NEWS: Mention file/linenumber change.
+
+	* main.c (main): Print version info when DB_BASIC is set.
+
 	* job.c (construct_command_argv_internal): If shellflags is not
 	set, choose an appropriate default value.  Fixes Savannah bug #30748.
 

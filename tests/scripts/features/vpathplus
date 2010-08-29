@@ -86,6 +86,7 @@ cat ${VP}foo.c bar.c > foo.b 2>/dev/null || exit 1
 
 $answer = "not creating notarget.c from notarget.d
 cat notarget.c > notarget.b 2>/dev/null || exit 1
+$makefile:16: recipe for target `notarget.b' failed
 $make_name: *** [notarget.b] Error 1
 ";
 

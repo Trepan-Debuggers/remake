@@ -1,6 +1,6 @@
 GNU make NEWS                                               -*-indented-text-*-
   History of user-visible changes.
-  28 July 2010
+  29 August 2010
 
 See the end of this file for copyrights and conditions.
 
@@ -8,6 +8,22 @@ All changes mentioned here are more fully described in the GNU make
 manual, which is contained in this distribution as the file doc/make.texi.
 See the README file and the GNU make manual for instructions for
 reporting bugs.
+
+Version 3.82.90
+
+A complete list of bugs fixed in this version is available here:
+
+http://sv.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=101&set=custom
+
+* New command line option: --trace enables tracing of targets.  When enabled
+  the recipe to be invoked is printed even if it would otherwise be suppressed
+  by .SILENT or a "@" prefix character.  Also before each recipe is run the
+  makefile name and linenumber where it was defined are shown as well as the
+  prerequisites that caused the target to be considered out of date.
+
+* On failure, the makefile name and linenumber of the recipe that failed are
+  shown.
+
 
 Version 3.82
 

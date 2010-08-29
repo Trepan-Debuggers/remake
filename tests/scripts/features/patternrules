@@ -110,7 +110,8 @@ $(dir)/foo.bar:
 
 ',
 "dir=$dir",
-"#MAKE#: *** [$dir/foo.bar] Error 1",
+"#MAKEFILE#:6: recipe for target `$dir/foo.bar' failed
+#MAKE#: *** [$dir/foo.bar] Error 1",
 512);
 
 unlink("$dir/foo.bar");
