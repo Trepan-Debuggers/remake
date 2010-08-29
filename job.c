@@ -2434,6 +2434,9 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
   if (*line == '\0')
     return 0;
 
+  if (shellflags == 0)
+    shellflags = posix_pedantic ? "-ec" : "-c";
+
   /* See if it is safe to parse commands internally.  */
   if (shell == 0)
     shell = default_shell;
@@ -2977,7 +2980,8 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 #endif /* WINDOWS32 */
 
     if (unixy_shell)
-      new_argv = construct_command_argv_internal (new_line, 0, 0, 0, 0, flags, 0);
+      new_argv = construct_command_argv_internal (new_line, 0, 0, 0, 0,
+                                                  flags, 0);
 
 #ifdef __EMX__
     else if (!unixy_shell)

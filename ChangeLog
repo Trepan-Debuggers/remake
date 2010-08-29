@@ -1,3 +1,8 @@
+2010-08-29  Paul Smith  <psmith@gnu.org>
+
+	* job.c (construct_command_argv_internal): If shellflags is not
+	set, choose an appropriate default value.  Fixes Savannah bug #30748.
+
 2010-08-27  Eli Zaretskii  <eliz@gnu.org>
 
 	* variable.c (define_automatic_variables) [__MSDOS__ || WINDOWS32]:
