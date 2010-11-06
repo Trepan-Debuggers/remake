@@ -240,7 +240,7 @@ run_make_test(undef, 'FOO=C', "C f1\n");
 # TEST #20: Check for continuation after semicolons
 
 run_make_test(q!
-a: A = 'hello; \
+a: A = 'hello;\
 world'
 a: ; @echo $(A)
 !,

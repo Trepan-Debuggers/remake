@@ -15,6 +15,13 @@ A complete list of bugs fixed in this version is available here:
 
 http://sv.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=101&set=custom
 
+* WARNING: Backward-incompatibility!
+  This version of make adheres to the POSIX backslash/newline handling,
+  introducing the following differences:
+    * Each backslash/newline in a variable value is replaced with a space;
+      multiple consecutive backslash/newlines do not condense into one space.
+    * In recipes, a recipe prefix following a backslash-newlines is removed.
+
 * New command line option: --trace enables tracing of targets.  When enabled
   the recipe to be invoked is printed even if it would otherwise be suppressed
   by .SILENT or a "@" prefix character.  Also before each recipe is run the
@@ -23,6 +30,12 @@ http://sv.gnu.org/bugs/index.php?group=make&report_id=111&fix_release_id=101&set
 
 * On failure, the makefile name and linenumber of the recipe that failed are
   shown.
+
+* A .RECIPEPREFIX setting is remembered per-recipe and variables expanded
+  in that recipe also use that recipe prefix setting.
+
+* In -p output, .RECIPEPREFIX settings are shown and all target-specific
+  variables are output as if in a makefile, instead of as comments.
 
 
 Version 3.82

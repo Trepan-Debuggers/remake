@@ -23,10 +23,11 @@ struct commands
   {
     struct floc fileinfo;	/* Where commands were defined.  */
     char *commands;		/* Commands text.  */
-    unsigned int ncommand_lines;/* Number of command lines.  */
     char **command_lines;	/* Commands chopped up into lines.  */
     char *lines_flags;		/* One set of flag bits for each line.  */
-    int any_recurse;		/* Nonzero if any `lines_recurse' elt has */
+    unsigned short ncommand_lines;/* Number of command lines.  */
+    char recipe_prefix;         /* Recipe prefix for this command set.  */
+    unsigned int any_recurse:1; /* Nonzero if any `lines_flags' elt has */
 				/* the COMMANDS_RECURSE bit set.  */
   };
 

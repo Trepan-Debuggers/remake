@@ -146,7 +146,7 @@ static void record_files (struct nameseq *filenames, const char *pattern,
                           const char *pattern_percent, char *depstr,
                           unsigned int cmds_started, char *commands,
                           unsigned int commands_idx, int two_colon,
-                          const struct floc *flocp);
+                          char prefix, const struct floc *flocp);
 static void record_target_var (struct nameseq *filenames, char *defn,
                                enum variable_origin origin,
                                struct vmodifiers *vmod,
@@ -559,6 +559,7 @@ eval (struct ebuffer *ebuf, int set_default)
   char *depstr = 0;
   long nlines = 0;
   int two_colon = 0;
+  char prefix;
   const char *pattern = 0;
   const char *pattern_percent;
   struct floc *fstart;
@@ -572,7 +573,7 @@ eval (struct ebuffer *ebuf, int set_default)
 	  fi.lineno = tgts_started;                                           \
 	  record_files (filenames, pattern, pattern_percent, depstr,          \
                         cmds_started, commands, commands_idx, two_colon,      \
-                        &fi);                                                 \
+                        prefix, &fi);                                         \
           filenames = 0;						      \
         }                                                                     \
       commands_idx = 0;							      \
@@ -624,7 +625,7 @@ eval (struct ebuffer *ebuf, int set_default)
       linelen = strlen (line);
 
       /* Check for a shell command line first.
-	 If it is not one, we can stop treating tab specially.  */
+	 If it is not one, we can stop treating cmd_prefix specially.  */
       if (line[0] == cmd_prefix)
 	{
 	  if (no_targets)
@@ -641,32 +642,19 @@ eval (struct ebuffer *ebuf, int set_default)
 		/* Yep, this is a shell command, and we don't care.  */
 		continue;
 
-	      /* Append this command line to the line being accumulated.
-                 Strip command prefix chars that appear after newlines.  */
 	      if (commands_idx == 0)
 		cmds_started = ebuf->floc.lineno;
 
+	      /* Append this command line to the line being accumulated.
+                 Skip the initial command prefix character.  */
 	      if (linelen + commands_idx > commands_len)
 		{
 		  commands_len = (linelen + commands_idx) * 2;
 		  commands = xrealloc (commands, commands_len);
 		}
-              p = &commands[commands_idx];
-              p2 = line + 1;
-              while (--linelen)
-                {
-                  ++commands_idx;
-                  *(p++) = *p2;
-                  if (p2[0] == '\n' && p2[1] == cmd_prefix)
-                    {
-                      ++p2;
-                      --linelen;
-                    }
-                  ++p2;
-                }
-              *p = '\n';
-              ++commands_idx;
-
+	      memcpy (&commands[commands_idx], line + 1, linelen - 1);
+	      commands_idx += linelen - 1;
+	      commands[commands_idx++] = '\n';
 	      continue;
 	    }
 	}
@@ -1088,6 +1076,9 @@ eval (struct ebuffer *ebuf, int set_default)
         /* This is a normal target, _not_ a target-specific variable.
            Unquote any = in the dependency list.  */
         find_char_unquote (lb_next, '=', 0, 0, 0);
+
+        /* Remember the command prefix for this target.  */
+        prefix = cmd_prefix;
 
         /* We have some targets, so don't ignore the following commands.  */
         no_targets = 0;
@@ -1840,7 +1831,7 @@ record_files (struct nameseq *filenames, const char *pattern,
               const char *pattern_percent, char *depstr,
               unsigned int cmds_started, char *commands,
               unsigned int commands_idx, int two_colon,
-              const struct floc *flocp)
+              char prefix, const struct floc *flocp)
 {
   struct commands *cmds;
   struct dep *deps;
@@ -1866,6 +1857,7 @@ record_files (struct nameseq *filenames, const char *pattern,
       cmds->fileinfo.lineno = cmds_started;
       cmds->commands = xstrndup (commands, commands_idx);
       cmds->command_lines = 0;
+      cmds->recipe_prefix = prefix;
     }
   else
      cmds = 0;

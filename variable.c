@@ -1553,6 +1553,9 @@ print_variable (const void *item, void *arg)
 
   switch (v->origin)
     {
+    case o_automatic:
+      origin = _("automatic");
+      break;
     case o_default:
       origin = _("default");
       break;
@@ -1570,9 +1573,6 @@ print_variable (const void *item, void *arg)
       break;
     case o_override:
       origin = _("`override' directive");
-      break;
-    case o_automatic:
-      origin = _("automatic");
       break;
     case o_invalid:
     default:
@@ -1617,13 +1617,34 @@ print_variable (const void *item, void *arg)
 }
 
 
+static void
+print_auto_variable (const void *item, void *arg)
+{
+  const struct variable *v = item;
+
+  if (v->origin == o_automatic)
+    print_variable (item, arg);
+}
+
+
+static void
+print_noauto_variable (const void *item, void *arg)
+{
+  const struct variable *v = item;
+
+  if (v->origin != o_automatic)
+    print_variable (item, arg);
+}
+
+
 /* Print all the variables in SET.  PREFIX is printed before
    the actual variable definitions (everything else is comments).  */
 
 void
-print_variable_set (struct variable_set *set, char *prefix)
+print_variable_set (struct variable_set *set, char *prefix, int pauto)
 {
-  hash_map_arg (&set->table, print_variable, prefix);
+  hash_map_arg (&set->table, (pauto ? print_auto_variable : print_variable),
+                prefix);
 
   fputs (_("# variable set hash-table stats:\n"), stdout);
   fputs ("# ", stdout);
@@ -1638,7 +1659,7 @@ print_variable_data_base (void)
 {
   puts (_("\n# Variables\n"));
 
-  print_variable_set (&global_variable_set, "");
+  print_variable_set (&global_variable_set, "", 0);
 
   puts (_("\n# Pattern-specific Variable Values"));
 
@@ -1667,7 +1688,24 @@ void
 print_file_variables (const struct file *file)
 {
   if (file->variables != 0)
-    print_variable_set (file->variables->set, "# ");
+    print_variable_set (file->variables->set, "# ", 1);
+}
+
+void
+print_target_variables (const struct file *file)
+{
+  if (file->variables != 0)
+    {
+      int l = strlen (file->name);
+      char *t = alloca (l + 3);
+
+      strcpy (t, file->name);
+      t[l] = ':';
+      t[l+1] = ' ';
+      t[l+2] = '\0';
+
+      hash_map_arg (&file->variables->set->table, print_noauto_variable, t);
+    }
 }
 
 #ifdef WINDOWS32

@@ -1,3 +1,11 @@
+2010-11-06  Paul Smith  <psmith@gnu.org>
+
+	* scripts/features/targetvars: Fix known-good output for BS/NL changes.
+	* scripts/functions/call: Ditto.
+	* scripts/variables/special: Ditto.
+
+	* scripts/misc/bs-nl: New test suite for backslash/newline testing.
+
 2010-08-29  Paul Smith  <psmith@gnu.org>
 
 	* scripts/features/errors: Add new error message to output text.

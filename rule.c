@@ -389,6 +389,7 @@ install_pattern_rule (struct pspec *p, int terminal)
 	 anyway because somebody might want to free them later.  */
       r->cmds->commands = xstrdup (p->commands);
       r->cmds->command_lines = 0;
+      r->cmds->recipe_prefix = RECIPEPREFIX_DEFAULT;
     }
 }
 

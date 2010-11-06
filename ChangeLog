@@ -1,3 +1,37 @@
+2010-11-06  Paul Smith  <psmith@gnu.org>
+
+	* variable.c (print_auto_variable): Print auto variables; ignore others.
+	(print_noauto_variable): Print non-auto variables; ignore others.
+	(print_variable_set): Allow the caller to select which type to print.
+	(print_target_variables): Show all the non-auto variables for a target.
+
+	* default.c (install_default_suffix_rules): Initialize recipe_prefix.
+	* rule.c (install_pattern_rule): Ditto.
+	* read.c (record_files): Pass in the current recipe prefix.  Remember
+	it in the struct command for these targets.
+	(eval): Remember the value of RECIPEPREFIX when we start parsing.
+	Do not remove recipe prefixes from the recipe here: we'll do it later.
+	* job.c (start_job_command): Remove recipe prefix characters early,
+	before we print the output or chop it up.
+	* file.c (print_file): If recipe_prefix is not standard, reset it
+	in -p output.  Assign target variables in -p output as well.
+
+	* commands.c (chop_commands): Max command lines is USHRT_MAX.
+	Set any_recurse as a bitfield.
+	* make.h (USHRT_MAX): Define if not set.
+
+2010-10-27  Paul Smith  <psmith@gnu.org>
+
+	* commands.h (struct commands): Rearrange to make better use of
+	memory.  Add new recipe_prefix value.
+
+2010-10-26  Paul Smith  <psmith@gnu.org>
+
+	* doc/make.texi (Setting): Document the treatment of
+	backslash-newline in variable values.
+	* misc.c (collapse_continuations): Do not collapse multiple
+	backslash-newlines into a single space.  Fixes Savannah bug #16670.
+
 2010-08-29  Paul Smith  <psmith@gnu.org>
 
 	* doc/make.texi (Implicit Variables): Document LDLIBS and LOADLIBES.

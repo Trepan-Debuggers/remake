@@ -402,6 +402,9 @@ chop_commands (struct commands *cmds)
   /* Finally, set the corresponding CMDS->lines_flags elements and the
      CMDS->any_recurse flag.  */
 
+  if (nlines > USHRT_MAX)
+    fatal (&cmds->fileinfo, _("Recipe has too many lines (%ud)"), nlines);
+
   cmds->ncommand_lines = nlines;
   cmds->command_lines = lines;
 
@@ -433,7 +436,7 @@ chop_commands (struct commands *cmds)
         flags |= COMMANDS_RECURSE;
 
       cmds->lines_flags[idx] = flags;
-      cmds->any_recurse |= flags & COMMANDS_RECURSE;
+      cmds->any_recurse |= flags & COMMANDS_RECURSE ? 1 : 0;
     }
 }
 
@@ -685,10 +688,16 @@ print_commands (const struct commands *cmds)
   while (*s != '\0')
     {
       const char *end;
+      int bs;
 
-      end = strchr (s, '\n');
-      if (end == 0)
-	end = s + strlen (s);
+      /* Print one full logical recipe line: find a non-escaped newline.  */
+      for (end = s, bs = 0; *end != '\0'; ++end)
+        {
+          if (*end == '\n' && !bs)
+            break;
+
+          bs = *end == '\\' ? !bs : 0;
+        }
 
       printf ("%c%.*s\n", cmd_prefix, (int) (end - s), s);
 

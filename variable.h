@@ -147,7 +147,8 @@ void pop_variable_scope (void);
 void define_automatic_variables (void);
 void initialize_file_variables (struct file *file, int reading);
 void print_file_variables (const struct file *file);
-void print_variable_set (struct variable_set *set, char *prefix);
+void print_file_variables (const struct file *file);
+void print_target_variables (const struct file *file);
 void merge_variable_set_lists (struct variable_set_list **to_list,
                                struct variable_set_list *from_list);
 struct variable *do_variable_definition (const struct floc *flocp,

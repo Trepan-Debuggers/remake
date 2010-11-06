@@ -53,7 +53,7 @@ static char default_suffixes[]
 static struct pspec default_pattern_rules[] =
   {
     { "(%)", "%",
-	"$(AR) $(ARFLAGS) $@ $<" },
+        "$(AR) $(ARFLAGS) $@ $<" },
 
     /* The X.out rules are only in BSD's default set because
        BSD Make has no null-suffix rules, so `foo.out' and
@@ -63,13 +63,13 @@ static struct pspec default_pattern_rules[] =
         "copy $< $@" },
 #else
     { "%.out", "%",
-	"@rm -f $@ \n cp $< $@" },
+        "@rm -f $@ \n cp $< $@" },
 #endif
     /* Syntax is "ctangle foo.w foo.ch foo.c".  */
     { "%.c", "%.w %.ch",
-	"$(CTANGLE) $^ $@" },
+        "$(CTANGLE) $^ $@" },
     { "%.tex", "%.w %.ch",
-	"$(CWEAVE) $^ $@" },
+        "$(CWEAVE) $^ $@" },
 
     { 0, 0, 0 }
   };
@@ -88,21 +88,21 @@ static struct pspec default_terminal_rules[] =
         "if f$$search($@) .nes. \"\" then +$(CHECKOUT,v)" },
 
     /* SCCS.  */
-	/* ain't no SCCS on vms */
+        /* ain't no SCCS on vms */
 #else
     /* RCS.  */
     { "%", "%,v",
-	"$(CHECKOUT,v)" },
+        "$(CHECKOUT,v)" },
     { "%", "RCS/%,v",
-	"$(CHECKOUT,v)" },
+        "$(CHECKOUT,v)" },
     { "%", "RCS/%",
-	"$(CHECKOUT,v)" },
+        "$(CHECKOUT,v)" },
 
     /* SCCS.  */
     { "%", "s.%",
-	"$(GET) $(GFLAGS) $(SCCS_OUTPUT_OPTION) $<" },
+        "$(GET) $(GFLAGS) $(SCCS_OUTPUT_OPTION) $<" },
     { "%", "SCCS/s.%",
-	"$(GET) $(GFLAGS) $(SCCS_OUTPUT_OPTION) $<" },
+        "$(GET) $(GFLAGS) $(SCCS_OUTPUT_OPTION) $<" },
 #endif /* !VMS */
     { 0, 0, 0 }
   };
@@ -293,13 +293,13 @@ static char *default_suffix_rules[] =
     "$(TEXI2DVI) $(TEXI2DVI_FLAGS) $<",
 
     ".w.c",
-    "$(CTANGLE) $< - $@",	/* The `-' says there is no `.ch' file.  */
+    "$(CTANGLE) $< - $@",       /* The `-' says there is no `.ch' file.  */
 
     ".web.p",
     "$(TANGLE) $<",
 
     ".w.tex",
-    "$(CWEAVE) $< - $@",	/* The `-' says there is no `.ch' file.  */
+    "$(CWEAVE) $< - $@",        /* The `-' says there is no `.ch' file.  */
 
     ".web.tex",
     "$(WEAVE) $<",
@@ -401,7 +401,7 @@ static const char *default_variables[] =
 #ifdef GCC_IS_NATIVE
     "CC", "gcc",
 # ifdef __MSDOS__
-    "CXX", "gpp",	/* g++ is an invalid name on MSDOS */
+    "CXX", "gpp",       /* g++ is an invalid name on MSDOS */
 # else
     "CXX", "gcc",
 # endif /* __MSDOS__ */
@@ -419,17 +419,17 @@ static const char *default_variables[] =
     "COFLAGS", "",
 
     "CPP", "$(CC) -E",
-#ifdef	CRAY
+#ifdef  CRAY
     "CF77PPFLAGS", "-P",
     "CF77PP", "/lib/cpp",
     "CFT", "cft77",
     "CF", "cf77",
     "FC", "$(CF)",
-#else	/* Not CRAY.  */
-#ifdef	_IBMR2
+#else   /* Not CRAY.  */
+#ifdef  _IBMR2
     "FC", "xlf",
 #else
-#ifdef	__convex__
+#ifdef  __convex__
     "FC", "fc",
 #else
     "FC", "f77",
@@ -439,7 +439,7 @@ static const char *default_variables[] =
        However, there is no way to make implicit rules use them and FC.  */
     "F77", "$(FC)",
     "F77FLAGS", "$(FFLAGS)",
-#endif	/* Cray.  */
+#endif  /* Cray.  */
     "GET", SCCS_GET,
     "LD", "ld",
 #ifdef GCC_IS_NATIVE
@@ -449,20 +449,20 @@ static const char *default_variables[] =
 #endif
     "LINT", "lint",
     "M2C", "m2c",
-#ifdef	pyr
+#ifdef  pyr
     "PC", "pascal",
 #else
-#ifdef	CRAY
+#ifdef  CRAY
     "PC", "PASCAL",
     "SEGLDR", "segldr",
 #else
     "PC", "pc",
-#endif	/* CRAY.  */
-#endif	/* pyr.  */
+#endif  /* CRAY.  */
+#endif  /* pyr.  */
 #ifdef GCC_IS_NATIVE
     "YACC", "bison -y",
 #else
-    "YACC", "yacc",	/* Or "bison -y"  */
+    "YACC", "yacc",     /* Or "bison -y"  */
 #endif
     "MAKEINFO", "makeinfo",
     "TEX", "tex",
@@ -508,11 +508,11 @@ static const char *default_variables[] =
     "PREPROCESS.r", "$(FC) $(FFLAGS) $(RFLAGS) $(TARGET_ARCH) -F",
     "LINT.c", "$(LINT) $(LINTFLAGS) $(CPPFLAGS) $(TARGET_ARCH)",
 
-#ifndef	NO_MINUS_C_MINUS_O
+#ifndef NO_MINUS_C_MINUS_O
     "OUTPUT_OPTION", "-o $@",
 #endif
 
-#ifdef	SCCS_GET_MINUS_G
+#ifdef  SCCS_GET_MINUS_G
     "SCCS_OUTPUT_OPTION", "-G$@",
 #endif
 
@@ -567,12 +567,13 @@ install_default_suffix_rules (void)
       struct file *f = enter_file (strcache_add (s[0]));
       /* Don't clobber cmds given in a makefile if there were any.  */
       if (f->cmds == 0)
-	{
-	  f->cmds = xmalloc (sizeof (struct commands));
-	  f->cmds->fileinfo.filenm = 0;
-	  f->cmds->commands = s[1];
-	  f->cmds->command_lines = 0;
-	}
+        {
+          f->cmds = xmalloc (sizeof (struct commands));
+          f->cmds->fileinfo.filenm = 0;
+          f->cmds->commands = s[1];
+          f->cmds->command_lines = 0;
+          f->cmds->recipe_prefix = RECIPEPREFIX_DEFAULT;
+        }
     }
 }
 

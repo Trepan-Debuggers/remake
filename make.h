@@ -148,6 +148,10 @@ unsigned int get_path_max (void);
 # define CHAR_BIT 8
 #endif
 
+#ifndef USHRT_MAX
+# define USHRT_MAX 65535
+#endif
+
 /* Nonzero if the integer type T is signed.  */
 #define INTEGER_TYPE_SIGNED(t) ((t) -1 < 0)
 

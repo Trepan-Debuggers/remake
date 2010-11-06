@@ -53,7 +53,7 @@ all:
 # Test the .RECIPEPREFIX variable
 &run_make_test('
 define foo
-: foo-one \
+: foo-one\
 foo-two
 : foo-three
 	: foo-four

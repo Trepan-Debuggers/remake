@@ -63,7 +63,6 @@ struct file
 
     short int update_status;	/* Status of the last attempt to update,
 				   or -1 if none has been made.  */
-
     enum cmd_state		/* State of the commands.  */
       {		/* Note: It is important that cs_not_started be zero.  */
 	cs_not_started,		/* Not yet started.  */

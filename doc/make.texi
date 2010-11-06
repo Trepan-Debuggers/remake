@@ -4,7 +4,7 @@
 
 @include version.texi
 @set EDITION 0.71
-@set RCSID $Id: make.texi,v 1.67 2010/08/29 23:05:27 psmith Exp $
+@set RCSID $Id: make.texi,v 1.68 2010/11/06 21:56:25 psmith Exp $
 
 @settitle GNU @code{make}
 @setchapternewpage odd
@@ -1633,7 +1633,7 @@ expands to @file{bar}, @code{$$^} expands to @file{bar boo},
 Note that the directory prefix (D), as described in @ref{Implicit Rule
 Search, ,Implicit Rule Search Algorithm}, is appended (after
 expansion) to all the patterns in the prerequisites list.  As an
-example:
+example:@refill
 
 @example
 .SECONDEXPANSION:
@@ -1641,12 +1641,14 @@ example:
 /tmp/foo.o:
 
 %.o: $$(addsuffix /%.c,foo bar) foo.h
+        @@echo $^
 @end example
 
-The prerequisite list after the secondary expansion and directory
-prefix reconstruction will be @file{/tmp/foo/foo.c /tmp/var/bar/foo.c
-foo.h}.  If you are not interested in this reconstruction, you can use
-@code{$$*} instead of @code{%} in the prerequisites list.
+The prerequisite list printed, after the secondary expansion and
+directory prefix reconstruction, will be @file{/tmp/foo/foo.c
+/tmp/bar/foo.c foo.h}.  If you are not interested in this
+reconstruction, you can use @code{$$*} instead of @code{%} in the
+prerequisites list.
 
 @node Rules, Recipes, Makefiles, Top
 @chapter Writing Rules
@@ -5422,11 +5424,12 @@ The variable name may contain function and variable references, which
 are expanded when the line is read to find the actual variable name to use.
 
 There is no limit on the length of the value of a variable except the
-amount of swapping space on the computer.  When a variable definition is
-long, it is a good idea to break it into several lines by inserting
-backslash-newline at convenient places in the definition.  This will not
-affect the functioning of @code{make}, but it will make the makefile easier
-to read.
+amount of memory on the computer.  When a variable definition is long,
+it is a good idea to break it into several lines by inserting
+backslash-newline at convenient places in the definition.  This will
+make the makefile easier to read.  Every backslash-newline, along with
+any leading whitespace on the following line, will be replaced by a
+single space in the value of the variable.
 
 Most variable names are considered to have the empty string as a value if
 you have never set them.  Several variables have built-in initial values

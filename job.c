@@ -1088,8 +1088,23 @@ start_job_command (struct child *child)
   child->file->cmds->lines_flags[child->command_line - 1]
     |= flags & COMMANDS_RECURSE;
 
-  /* Figure out an argument list from this command line.  */
+  /* POSIX requires that a recipe prefix after a backslash-newline should
+     be ignored.  Remove it now so the output is correct.  */
+  {
+    char prefix = child->file->cmds->recipe_prefix;
+    char *p1, *p2;
+    p1 = p2 = p;
+    while (*p1 != '\0')
+      {
+        *(p2++) = *p1;
+        if (p1[0] == '\n' && p1[1] == prefix)
+          ++p1;
+        ++p1;
+      }
+    *p2 = *p1;
+  }
 
+  /* Figure out an argument list from this command line.  */
   {
     char *end = 0;
 #ifdef VMS
@@ -1097,7 +1112,7 @@ start_job_command (struct child *child)
 #else
     argv = construct_command_argv (p, &end, child->file,
 				   child->file->cmds->lines_flags[child->command_line - 1],
-				   &child->sh_batch_file);
+                                   &child->sh_batch_file);
 #endif
     if (end == NULL)
       child->command_ptr = NULL;
@@ -2321,7 +2336,7 @@ void clean_tmp (void)
 static char **
 construct_command_argv_internal (char *line, char **restp, char *shell,
                                  char *shellflags, char *ifs, int flags,
-				 char **batch_filename_ptr)
+                                 char **batch_filename_p)
 {
 #ifdef __MSDOS__
   /* MSDOS supports both the stock DOS shell and ports of Unixy shells.
@@ -2567,10 +2582,9 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
             {
               /* Backslash-newline is handled differently depending on what
                  kind of string we're in: inside single-quoted strings you
-                 keep them; in double-quoted strings they disappear.
-	         For DOS/Windows/OS2, if we don't have a POSIX shell,
-		 we keep the pre-POSIX behavior of removing the
-		 backslash-newline.  */
+                 keep them; in double-quoted strings they disappear.  For
+                 DOS/Windows/OS2, if we don't have a POSIX shell, we keep the
+                 pre-POSIX behavior of removing the backslash-newline.  */
               if (instring == '"'
 #if defined (__MSDOS__) || defined (__EMX__) || defined (WINDOWS32)
 		  || !unixy_shell
@@ -3126,7 +3140,7 @@ construct_command_argv_internal (char *line, char **restp, char *shell,
 
 char **
 construct_command_argv (char *line, char **restp, struct file *file,
-                        int cmd_flags, char **batch_filename_ptr)
+                        int cmd_flags, char **batch_filename_p)
 {
   char *shell, *ifs, *shellflags;
   char **argv;
@@ -3240,7 +3254,7 @@ construct_command_argv (char *line, char **restp, struct file *file,
   }
 
   argv = construct_command_argv_internal (line, restp, shell, shellflags, ifs,
-                                          cmd_flags, batch_filename_ptr);
+                                          cmd_flags, batch_filename_p);
 
   free (shell);
   free (shellflags);

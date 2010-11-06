@@ -118,9 +118,6 @@ collapse_continuations (char *line)
       if (backslash)
 	{
 	  in = next_token (in);
-          /* Removing this loop will fix Savannah bug #16670: do we want to? */
-	  while (out > line && isblank ((unsigned char)out[-1]))
-	    --out;
 	  *out++ = ' ';
 	}
       else

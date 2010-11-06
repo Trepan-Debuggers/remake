@@ -38,7 +38,7 @@ two = $(call one,$(1),foo,$(2))
 DEP_foo = bar baz quux
 DEP_baz = quux blarp
 rest = $(wordlist 2,$(words ${1}),${1})
-tclose = $(if $1,$(firstword $1) \
+tclose = $(if $1,$(firstword $1)\
 		$(call tclose,$(sort ${DEP_$(firstword $1)} $(call rest,$1))))
 
 all: ; @echo '$(call reverse,bar,foo)'; \
