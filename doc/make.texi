@@ -4,7 +4,7 @@
 
 @include version.texi
 @set EDITION 0.71
-@set RCSID $Id: make.texi,v 1.68 2010/11/06 21:56:25 psmith Exp $
+@set RCSID $Id: make.texi,v 1.69 2010/11/30 14:48:53 psmith Exp $
 
 @settitle GNU @code{make}
 @setchapternewpage odd
@@ -31,7 +31,7 @@ Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.2 or
+under the terms of the GNU Free Documentation License, Version 1.3 or
 any later version published by the Free Software Foundation; with no
 Invariant Sections, with the Front-Cover Texts being ``A GNU Manual,''
 and with the Back-Cover Texts as in (a) below.  A copy of the
@@ -4295,10 +4295,10 @@ recipes, is propagated to the subsystem.@refill
 
 Variable values of the top-level @code{make} can be passed to the
 sub-@code{make} through the environment by explicit request.  These
-variables are defined in the sub-@code{make} as defaults, but do not
-override what is specified in the makefile used by the sub-@code{make}
-makefile unless you use the @samp{-e} switch (@pxref{Options Summary,
-,Summary of Options}).@refill
+variables are defined in the sub-@code{make} as defaults, but they do
+not override variables defined in the makefile used by
+the sub-@code{make} unless you use the @samp{-e} switch (@pxref{Options
+Summary, ,Summary of Options}).@refill
 
 To pass down, or @dfn{export}, a variable, @code{make} adds the
 variable and its value to the environment for running each line of the

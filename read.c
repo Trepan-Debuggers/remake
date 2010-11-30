@@ -1802,7 +1802,8 @@ record_target_var (struct nameseq *filenames, char *defn,
           int len = strlen(v->name);
 
           gv = lookup_variable (v->name, len);
-          if (gv && (gv->origin == o_env_override || gv->origin == o_command))
+          if (gv && v != gv
+              && (gv->origin == o_env_override || gv->origin == o_command))
             {
               if (v->value != 0)
                 free (v->value);

@@ -237,6 +237,16 @@ a: ; @echo "$(FOO)"
 
 run_make_test(undef, 'FOO=C', "C f1\n");
 
+# TEST #19: Conditional variables with command-line settings
+
+run_make_test('
+a: FOO ?= f1
+a: ; @echo "$(FOO)"
+',
+              '', "f1\n");
+
+run_make_test(undef, 'FOO=C', "C\n");
+
 # TEST #20: Check for continuation after semicolons
 
 run_make_test(q!
