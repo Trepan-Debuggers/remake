@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 #
 # Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-# 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+# 2003, 2004, 2005, 2006, 2010 Free Software Foundation, Inc.
 # Copyright (C) 2008 rocky@gnu.org
 #
 # This file is part of GNU Make (remake variant).
@@ -330,8 +330,9 @@ int main(int argc, char **argv) {
      [AC_MSG_RESULT(no); ac_have_tilde_expand=no],
      [AC_MSG_RESULT(no); ac_have_tilde_expand=no])
 else 
-   AC_MSG_WARN([libreadline is needed for the debugger. I'll build "make"])
-   AC_MSG_WARN([with trace support, but you won't be able enter the])
+   AC_MSG_WARN([The libreadline library and development headers are needed"])
+   AC_MSG_WARN([for the interactive debugger. I'll build "make" with])
+   AC_MSG_WARN([non-interactive trace support, but you won't be able enter the])
    AC_MSG_WARN([debugger.])
 fi
 
