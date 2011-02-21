@@ -43,6 +43,12 @@ char *alloca ();
 # endif
 #endif
 
+/* Disable assert() unless we're a maintainer.
+   Some asserts are compute-intensive.  */
+#ifndef MAKE_MAINTAINER_MODE
+# define NDEBUG 1
+#endif
+
 
 #ifdef  CRAY
 /* This must happen before #include <signal.h> so
@@ -60,13 +66,12 @@ char *alloca ();
 #include <signal.h>
 #include <stdio.h>
 #include <ctype.h>
+
 #ifdef HAVE_SYS_TIMEB_H
 /* SCO 3.2 "devsys 4.2" has a prototype for `ftime' in <time.h> that bombs
-   unless <sys/timeb.h> has been included first.  Does every system have a
-   <sys/timeb.h>?  If any does not, configure should check for it.  */
+   unless <sys/timeb.h> has been included first.  */
 # include <sys/timeb.h>
 #endif
-
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
@@ -456,8 +461,8 @@ void strcache_init (void);
 void strcache_print_stats (const char *prefix);
 int strcache_iscached (const char *str);
 const char *strcache_add (const char *str);
-const char *strcache_add_len (const char *str, int len);
-int strcache_setbufsize (int size);
+const char *strcache_add_len (const char *str, unsigned int len);
+int strcache_setbufsize (unsigned int size);
 
 #ifdef  HAVE_VFORK_H
 # include <vfork.h>

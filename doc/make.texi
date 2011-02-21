@@ -4,7 +4,7 @@
 
 @include version.texi
 @set EDITION 0.71
-@set RCSID $Id: make.texi,v 1.69 2010/11/30 14:48:53 psmith Exp $
+@set RCSID $Id: make.texi,v 1.70 2011/02/21 07:30:12 psmith Exp $
 
 @settitle GNU @code{make}
 @setchapternewpage odd
@@ -1487,11 +1487,11 @@ first (unescaped) variable reference to @var{ONEVAR} is expanded,
 while the second (escaped) variable reference is simply unescaped,
 without being recognized as a variable reference.  Now during the
 secondary expansion the first word is expanded again but since it
-contains no variable or function references it remains the static
-value @file{onefile}, while the second word is now a normal reference
-to the variable @var{TWOVAR}, which is expanded to the value
-@file{twofile}.  The final result is that there are two prerequisites,
-@file{onefile} and @file{twofile}.
+contains no variable or function references it remains the value
+@file{onefile}, while the second word is now a normal reference to the
+variable @var{TWOVAR}, which is expanded to the value @file{twofile}.
+The final result is that there are two prerequisites, @file{onefile}
+and @file{twofile}.
 
 Obviously, this is not a very interesting case since the same result
 could more easily have been achieved simply by having both variables
@@ -5846,13 +5846,13 @@ Multiple @var{target} values create a target-specific variable value for
 each member of the target list individually.
 
 The @var{variable-assignment} can be any valid form of assignment;
-recursive (@samp{=}), static (@samp{:=}), appending (@samp{+=}), or
+recursive (@samp{=}), simple (@samp{:=}), appending (@samp{+=}), or
 conditional (@samp{?=}).  All variables that appear within the
 @var{variable-assignment} are evaluated within the context of the
 target: thus, any previously-defined target-specific variable values
 will be in effect.  Note that this variable is actually distinct from
 any ``global'' value: the two variables do not have to have the same
-flavor (recursive vs.@: static).
+flavor (recursive vs.@: simple).
 
 Target-specific variables have the same priority as any other makefile
 variable.  Variables provided on the command line (and in the
@@ -6512,7 +6512,9 @@ be substituted.
 @cindex arguments of functions
 @cindex functions, syntax of
 
-A function call resembles a variable reference.  It looks like this:
+A function call resembles a variable reference.  It can appear
+anywhere a variable reference can appear, and it is expanded using the
+same rules as variable references.  A function call looks like this:
 
 @example
 $(@var{function} @var{arguments})
@@ -7344,7 +7346,7 @@ The syntax of the @code{value} function is:
 $(value @var{variable})
 @end example
 
-Note that @var{variable} is the @emph{name} of a variable; not a
+Note that @var{variable} is the @emph{name} of a variable, not a
 @emph{reference} to that variable.  Therefore you would not normally
 use a @samp{$} or parentheses when writing it.  (You can, however, use
 a variable reference in the name if you want the name not to be a
@@ -7455,7 +7457,7 @@ The syntax of the @code{origin} function is:
 $(origin @var{variable})
 @end example
 
-Note that @var{variable} is the @emph{name} of a variable to inquire about;
+Note that @var{variable} is the @emph{name} of a variable to inquire about,
 not a @emph{reference} to that variable.  Therefore you would not normally
 use a @samp{$} or parentheses when writing it.  (You can, however, use a
 variable reference in the name if you want the name not to be a constant.)
@@ -7566,7 +7568,7 @@ The syntax of the @code{flavor} function is:
 $(flavor @var{variable})
 @end example
 
-Note that @var{variable} is the @emph{name} of a variable to inquire about;
+Note that @var{variable} is the @emph{name} of a variable to inquire about,
 not a @emph{reference} to that variable.  Therefore you would not normally
 use a @samp{$} or parentheses when writing it.  (You can, however, use a
 variable reference in the name if you want the name not to be a constant.)

@@ -355,11 +355,6 @@ update_file (struct file *file, unsigned int depth)
 static void
 complain (struct file *file)
 {
-  const char *msg_noparent
-    = _("%sNo rule to make target `%s'%s");
-  const char *msg_parent
-    = _("%sNo rule to make target `%s', needed by `%s'%s");
-
   /* If this file has no_diag set then it means we tried to update it
      before in the dontcare mode and failed. The target that actually
      failed is not necessarily this file but could be one of its direct
@@ -379,6 +374,11 @@ complain (struct file *file)
 
   if (d == 0)
     {
+      const char *msg_noparent
+        = _("%sNo rule to make target `%s'%s");
+      const char *msg_parent
+        = _("%sNo rule to make target `%s', needed by `%s'%s");
+
       /* Didn't find any dependencies to complain about. */
       if (!keep_going_flag)
         {

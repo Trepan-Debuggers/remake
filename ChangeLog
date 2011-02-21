@@ -1,3 +1,25 @@
+2011-02-21  Paul Smith  <psmith@gnu.org>
+
+	* strcache.c (various): Increase performance based on comments
+	from Ralf Wildenhues <Ralf.Wildenhues@gmx.de>.  Stop looking for
+	a buffer when we find the first one that fits, not the best fit.
+	If there is not enough free space in a buffer move it to a
+	separate list so we don't have to walk it again.
+	* make.h (NDEBUG): Turn off asserts unless maintainer mode is set.
+	(strcache_add_len, strcache_setbufsize): Use unsigned length/size.
+	* maintMakefile (AM_CPPFLAGS): Enable MAKE_MAINTAINER_MODE.
+
+	* remake.c (complain): Move translation lookups closer to use.
+
+2011-02-13  Paul Smith  <psmith@gnu.org>
+
+	* doc/make.texi: Clean up references to "static" variables and
+	semicolon errors.  Patch from Michael Witten <mfwitten@gmail.com>.
+
+2010-12-27  Paul Smith  <psmith@gnu.org>
+
+	* make.1: Update the header/footer info in the man page.
+
 2010-11-28  Paul Smith  <psmith@gnu.org>
 
 	* read.c (record_target_var): Don't reset v if it's the same as
