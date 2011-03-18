@@ -1,3 +1,5 @@
+/*.gmo
+/*.po
 /*~
 /Makefile
 /Makefile.in
@@ -9,5 +11,7 @@
 /en@boldquot.header
 /en@quot.header
 /insert-header.sin
+/make.pot
 /quot.sed
+/remove-potcdate.sed
 /remove-potcdate.sin
