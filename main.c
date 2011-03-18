@@ -147,7 +147,7 @@ int just_print_flag;
 /* Print debugging info (--debug).  */
 
 static struct stringlist *db_flags;
-static int debug_flag = 0;
+int debug_flag = 0;
 
 int db_level = 0;
 
@@ -464,6 +464,16 @@ char *program;
 
 char *directory_before_chdir;
 
+/*! Value of argv[0] which seems to get modified. Can we merge this with
+    program below? */
+static char *argv0 = NULL;
+
+/*! The name we were invoked with.  */
+char *program = NULL;
+
+/*! Our initial arguments -- used for debugger restart execvp.  */
+char **global_argv;
+
 /* Our current directory after processing all -C options.  */
 
 char *starting_directory;
@@ -602,14 +612,14 @@ expand_command_line_file (char *name)
 /* Toggle -d on receipt of SIGUSR1.  */
 
 #ifdef SIGUSR1
-static RETSIGTYPE
+RETSIGTYPE
 debug_signal_handler (int sig UNUSED)
 {
   db_level = db_level ? DB_NONE : DB_BASIC;
 }
 #endif
 
-static void
+void
 decode_debug_flags (void)
 {
   const char **pp;
@@ -954,6 +964,7 @@ main (int argc, char **argv, char **envp)
   atexit (close_stdout);
 #endif
 
+  global_argv = argv;
   /* Needed for OS/2 */
   initialize_main(&argc, &argv);
 
@@ -1343,6 +1354,7 @@ main (int argc, char **argv, char **envp)
 #endif /* !__MSDOS__ */
 #endif /* WINDOWS32 */
 #endif
+  argv0 = strdup(argv[0]);
 
   /* The extra indirection through $(MAKE_COMMAND) is done
      for hysterical raisins.  */

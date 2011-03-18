@@ -39,6 +39,44 @@ static struct pattern_var *pattern_vars;
 
 static struct pattern_var *last_pattern_vars[256];
 
+/*!
+  Return a string describing origin.
+ */
+const char *
+origin2str(variable_origin_t origin) 
+{
+  switch (origin)
+    {
+    case o_default:
+      return _("default");
+      break;
+    case o_env:
+      return _("environment");
+      break;
+    case o_file:
+      return _("makefile");
+      break;
+    case o_env_override:
+      return _("environment under -e");
+      break;
+    case o_command:
+      return _("command line");
+      break;
+    case o_override:
+      return _("`override' directive");
+      break;
+    case o_automatic:
+      return _("automatic");
+      break;
+    case o_debugger:
+      return _("debugger");
+      break;
+    case o_invalid:
+    default:
+      return _("invalid");
+    }
+}
+
 /* Create a new pattern-specific variable struct. The new variable is
    inserted into the PATTERN_VARS list in the shortest patterns first
    order to support the shortest stem matching (the variables are

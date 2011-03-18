@@ -19,6 +19,9 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* Structure used for pattern (implicit) rules.  */
 
+#ifndef MAKE_RULE_H
+#define MAKE_RULE_H
+
 struct rule
   {
     struct rule *next;
@@ -57,3 +60,4 @@ void install_pattern_rule (struct pspec *p, int terminal);
 void create_pattern_rule (const char **targets, const char **target_percents,
                           unsigned int num, int terminal, struct dep *deps,
                           struct commands *commands, int override);
+#endif /*MAKE_RULE_H*/
