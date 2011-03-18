@@ -19,6 +19,11 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* Structure that gives the commands to make a file
    and information about where these commands came from.  */
 
+#ifndef COMMANDS_H
+#define COMMANDS_H
+
+#include "filedef.h"
+
 struct commands
   {
     struct floc fileinfo;	/* Where commands were defined.  */
@@ -40,3 +45,5 @@ void print_commands (const struct commands *cmds);
 void delete_child_targets (struct child *child);
 void chop_commands (struct commands *cmds);
 void set_file_variables (struct file *file);
+
+#endif /*COMMANDS_H*/

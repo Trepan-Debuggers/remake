@@ -20,6 +20,8 @@
 AUTOMAKE_OPTIONS = 1.8 dist-bzip2 check-news
 ACLOCAL_AMFLAGS	=  -I config
 
+transform = s,make,@MAKE_NAME@,
+
 MAKE_HOST =	@MAKE_HOST@
 
 # Only process if target is MS-Windows
@@ -43,12 +45,19 @@ endif
 make_SOURCES =	ar.c arscan.c commands.c default.c dir.c expand.c file.c \
 		function.c getopt.c getopt1.c implicit.c job.c main.c \
 		misc.c read.c remake.c $(remote) rule.c signame.c \
-		strcache.c variable.c version.c vpath.c hash.c
+		strcache.c variable.c version.c vpath.c hash.c \
+		buildargv.c print.c \
+	        debugger/break.c debugger/cmd.c debugger/fns.c \
+		debugger/info.c debugger/stack.c
 
 EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c
 
 noinst_HEADERS = commands.h dep.h filedef.h job.h make.h rule.h variable.h \
-		debug.h getopt.h gettext.h hash.h
+		debug.h getopt.h gettext.h hash.h \
+		buildargv.h \
+	        debugger/break.h debugger/cmd.h debugger/fns.h \
+		debugger/info.h debugger/stack.h
+
 
 make_LDADD =	@LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@ @LIBINTL@
 # Only process if target is MS-Windows
@@ -77,7 +86,8 @@ EXTRA_DIST =	README build.sh.in $(man_MANS) \
 		README.W32 NMakefile config.h.W32 build_w32.bat subproc.bat \
 		make_msvc_net2003.sln make_msvc_net2003.vcproj \
 		readme.vms makefile.vms makefile.com config.h-vms \
-		vmsdir.h vmsfunctions.c vmsify.c
+		vmsdir.h vmsfunctions.c vmsify.c \
+	        README.mdb REMAKE.todo
 
 # This is built during configure, but behind configure's back
 

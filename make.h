@@ -19,6 +19,9 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* We use <config.h> instead of "config.h" so that a compilation
    using -I. -I$srcdir will use ./config.h rather than $srcdir/config.h
    (which it would do because make.h was found in $srcdir).  */
+#ifndef MAKE_H
+#define MAKE_H
+
 #include <config.h>
 #undef  HAVE_CONFIG_H
 #define HAVE_CONFIG_H 1
@@ -533,6 +536,10 @@ extern int max_load_average;
 #endif
 
 extern char *program;
+
+/*! Our initial arguments -- used for debugger restart execvp.  */
+extern char **global_argv;
+
 extern char *starting_directory;
 extern unsigned int makelevel;
 extern char *version_string, *remote_description, *make_host;
@@ -615,3 +622,4 @@ extern int handling_fatal_signal;
 
 #define ENULLLOOP(_v,_c)   do { errno = 0; (_v) = _c; } \
                            while((_v)==0 && errno==EINTR)
+#endif /*MAKE_H*/

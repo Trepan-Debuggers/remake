@@ -16,7 +16,12 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef VARIABLE_H
+#define VARIABLE_H
+
 #include "hash.h"
+#include "types.h"
+#include "filedef.h"
 
 /* Codes in a variable definition saying where the definition came from.
    Increasing numeric values signify less-overridable definitions.  */
@@ -29,6 +34,7 @@ enum variable_origin
     o_command,		/* Variable given by user.  */
     o_override, 	/* Variable from an `override' directive.  */
     o_automatic,	/* Automatic variable -- cannot be set.  */
+    o_debugger,  	/* Set inside debugger.  */
     o_invalid		/* Core dump time.  */
   };
 
@@ -69,9 +75,9 @@ struct variable
                                 /* If >1, allow this many self-referential
                                    expansions.  */
     enum variable_flavor
-      flavor ENUM_BITFIELD (3);	/* Variable flavor.  */
+      flavor ENUM_BITFIELD (4);	/* Variable flavor.  */
     enum variable_origin
-      origin ENUM_BITFIELD (3);	/* Variable origin.  */
+      origin ENUM_BITFIELD (4);	/* Variable origin.  */
     enum variable_export
       {
 	v_export,		/* Export this variable.  */
@@ -141,6 +147,12 @@ char *recursively_expand_for_file (struct variable *v, struct file *file);
 
 /* variable.c */
 struct variable_set_list *create_new_variable_set (void);
+
+/*!
+  Return a string describing origin.
+ */
+const char *origin2str(variable_origin_t origin);
+
 void free_variable_set (struct variable_set_list *);
 struct variable_set_list *push_new_variable_scope (void);
 void pop_variable_scope (void);
@@ -229,3 +241,5 @@ extern int export_all_variables;
 
 #define MAKELEVEL_NAME "MAKELEVEL"
 #define MAKELEVEL_LENGTH (sizeof (MAKELEVEL_NAME) - 1)
+
+#endif

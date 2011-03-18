@@ -21,13 +21,19 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
    that the makefile says how to make.
    All of these are chained together through `next'.  */
 
+
+#ifndef FILEDEF_H
+#define FILEDEF_H
+
 #include "hash.h"
+#include "types.h"
 
 struct file
   {
     const char *name;
     const char *hname;          /* Hashed filename */
     const char *vpath;          /* VPATH/vpath pathname */
+    floc_t floc;                /* location in Makefile - for tracing */
     struct dep *deps;		/* all dependencies, including duplicates */
     struct commands *cmds;	/* Commands to execute for this target.  */
     int command_flags;		/* Flags OR'd in for cmds; see commands.h.  */
@@ -96,6 +102,7 @@ struct file
                                    considered on current scan of goal chain */
     unsigned int no_diag:1;     /* True if the file failed to update and no
                                    diagnostics has been issued (dontcare). */
+    unsigned int tracing:1;     /* Nonzero if we should trace this target. */
   };
 
 
@@ -203,3 +210,5 @@ FILE_TIMESTAMP f_mtime (struct file *file, int search);
 
 /* Have we snapped deps yet?  */
 extern int snapped_deps;
+
+#endif /*FILEDEF_H*/
