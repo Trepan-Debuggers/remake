@@ -1,3 +1,4 @@
+/*.o
 /*~
 /ABOUT-NLS
 /Makefile
@@ -9,4 +10,6 @@
 /config.log
 /config.status
 /configure
+/loadavg
+/make
 /stamp-h1
