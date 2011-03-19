@@ -65,7 +65,7 @@ file_hash_cmp (const void *x, const void *y)
 #endif
 static struct hash_table files;
 
-/* Whether or not .SECONDARY with no prerequisites was given.  */
+/*! Whether or not .SECONDARY with no prerequisites was given.  */
 static int all_secondary = 0;
 
 /* Access the hash table of all file records.
@@ -1059,105 +1059,14 @@ print_prereqs (const struct dep *deps)
   putchar ('\n');
 }
 
-static void
-print_file (const void *item)
+/*! 
+Print the data base of files.
+*/
+void
+print_target (const void *item)
 {
-  file_t *f = item;
-  int i_mask = 0xfffff;
-
-  putchar ('\n');
-  if (!f->is_target)
-    puts (_("# Not a target:"));
-  printf ("%s:%s", f->name, f->double_colon ? ":" : "");
-  print_prereqs (f->deps);
-
-  if (f->precious)
-    puts (_("#  Precious file (prerequisite of .PRECIOUS)."));
-  if (f->phony)
-    puts (_("#  Phony target (prerequisite of .PHONY)."));
-  if (f->cmd_target)
-    puts (_("#  Command line target."));
-  if (f->dontcare)
-    puts (_("#  A default, MAKEFILES, or -include/sinclude makefile."));
-  puts (f->tried_implicit
-        ? _("#  Implicit rule search has been done.")
-        : _("#  Implicit rule search has not been done."));
-  if (f->stem != 0)
-    printf (_("#  Implicit/static pattern stem: `%s'\n"), f->stem);
-  if (f->intermediate)
-    puts (_("#  File is an intermediate prerequisite."));
-  if (f->also_make != 0)
-    {
-      const struct dep *d;
-      fputs (_("#  Also makes:"), stdout);
-      for (d = f->also_make; d != 0; d = d->next)
-	printf (" %s", dep_name (d));
-      putchar ('\n');
-    }
-  if (f->last_mtime == UNKNOWN_MTIME)
-    puts (_("#  Modification time never checked."));
-  else if (f->last_mtime == NONEXISTENT_MTIME)
-    puts (_("#  File does not exist."));
-  else if (f->last_mtime == OLD_MTIME)
-    puts (_("#  File is very old."));
-  else
-    {
-      char buf[FILE_TIMESTAMP_PRINT_LEN_BOUND + 1];
-      file_timestamp_sprintf (buf, f->last_mtime);
-      printf (_("#  Last modified %s\n"), buf);
-    }
-  puts (f->updated
-        ? _("#  File has been updated.") : _("#  File has not been updated."));
-  switch (f->command_state)
-    {
-    case cs_running:
-      puts (_("#  Recipe currently running (THIS IS A BUG)."));
-      break;
-    case cs_deps_running:
-      puts (_("#  Dependencies recipe running (THIS IS A BUG)."));
-      break;
-    case cs_not_started:
-    case cs_finished:
-      switch (f->update_status)
-	{
-	case -1:
-	  break;
-	case 0:
-	  puts (_("#  Successfully updated."));
-	  break;
-	case 1:
-	  assert (question_flag);
-	  puts (_("#  Needs to be updated (-q is set)."));
-	  break;
-	case 2:
-	  puts (_("#  Failed to be updated."));
-	  break;
-	default:
-	  puts (_("#  Invalid value in `update_status' member!"));
-	  fflush (stdout);
-	  fflush (stderr);
-	  abort ();
-	}
-      break;
-    default:
-      puts (_("#  Invalid value in `command_state' member!"));
-      fflush (stdout);
-      fflush (stderr);
-      abort ();
-    }
-
-  if (f->variables != 0 && i_mask & PRINT_TARGET_VARS)
-      print_file_variables (f, i_mask & PRINT_TARGET_VARS_HASH);
-
-  if (f->cmds != 0 && i_mask & PRINT_TARGET_CMDS)
-      print_commands (f, f->cmds, false);
-
-  if (f->cmds != 0 && i_mask & PRINT_TARGET_CMDS_EXP)
-      print_commands (f, f->cmds, true);
-
-  if (f->prev && i_mask & PRINT_TARGET_PREV)
-      print_file ((const void *) f->prev);
-
+  file_t *p_target = (file_t *) item;
+  print_target_props(p_target, PRINT_TARGET_ALL);
 }
 
 void
@@ -1165,7 +1074,7 @@ print_file_data_base (void)
 {
   puts (_("\n# Files"));
 
-  hash_map (&files, print_file);
+  hash_map (&files, print_target);
 
   fputs (_("\n# files hash-table stats:\n# "), stdout);
   hash_print_stats (&files, stdout);
