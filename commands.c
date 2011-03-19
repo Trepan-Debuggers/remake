@@ -18,6 +18,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "make.h"
 #include "dep.h"
+#include "expand.h"
 #include "filedef.h"
 #include "variable.h"
 #include "job.h"
@@ -668,30 +669,51 @@ delete_child_targets (struct child *child)
 
 /* Print out the commands in CMDS.  */
 
+/*! 
+  Print out the commands.
+
+  @param p_cmds location of commands to print out.
+  @param p_target used to set automatic variables if it is non-null.
+  @param b_expand if true, expand the commands to remove MAKE variables.
+*/
 void
-print_commands (const struct commands *cmds)
+print_commands (file_t *p_target, commands_t *p_cmds, bool b_expand)
 {
-  const char *s;
+  char *s;
 
-  fputs (_("#  recipe to execute"), stdout);
+  fputs (_("#  commands to execute"), stdout);
 
-  if (cmds->fileinfo.filenm == 0)
+  if (p_cmds->fileinfo.filenm == 0)
     puts (_(" (built-in):"));
   else
     printf (_(" (from `%s', line %lu):\n"),
-            cmds->fileinfo.filenm, cmds->fileinfo.lineno);
+            p_cmds->fileinfo.filenm, p_cmds->fileinfo.lineno);
 
-  s = cmds->commands;
+  if (b_expand && p_target) {
+    variable_set_list_t *p_file_vars = NULL;
+    variable_set_t *p_set = NULL;
+    initialize_file_variables (p_target, 0);
+    set_file_variables (p_target);
+    p_file_vars = p_target->variables;
+    p_set = p_file_vars->set;
+    s = variable_expand_set(p_cmds->commands, p_file_vars);
+  } else {
+    s = p_cmds->commands;
+  }
+
   while (*s != '\0')
     {
-      const char *end;
+      char *end;
+
+      while (isspace ((unsigned char)*s))
+	++s;
 
       end = strchr (s, '\n');
       if (end == 0)
 	end = s + strlen (s);
 
-      printf ("%c%.*s\n", cmd_prefix, (int) (end - s), s);
+      printf ("\t%.*s\n", (int) (end - s), s);
 
-      s = end + (end[0] == '\n');
+      s = end;
     }
 }

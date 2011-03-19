@@ -22,6 +22,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "dep.h"
 #include "filedef.h"
+#include "file.h"
 #include "job.h"
 #include "commands.h"
 #include "variable.h"
@@ -543,7 +544,7 @@ set_intermediate (const void *item)
 }
 
 /* Expand and parse each dependency line. */
-static void
+void
 expand_deps (struct file *f)
 {
   struct dep *d;
@@ -888,6 +889,143 @@ file_timestamp_sprintf (char *p, FILE_TIMESTAMP ts)
   *p = '\0';
 }
 
+/*! Print some or all properties of the data base of files.
+*/
+void
+print_target_props (file_t *p_target, print_target_mask_t i_mask)
+{
+  dep_t *d;
+  dep_t *ood = 0;
+
+  putchar ('\n');
+  if (!p_target->is_target)
+    puts (_("# Not a target:"));
+  printf ("%s:%s", p_target->name, p_target->double_colon ? ":" : "");
+
+  if (i_mask & PRINT_TARGET_DEPEND) {
+    
+    /* Print all normal dependencies; note any order-only deps.  */
+    for (d = p_target->deps; d != 0; d = d->next)
+      if (! d->ignore_mtime)
+	printf (" %s", dep_name (d));
+      else if (! ood)
+	ood = d;
+  }
+  
+  if (i_mask & PRINT_TARGET_ORDER) {
+    /* Print order-only deps, if we have any.  */
+    if (ood)
+      {
+	printf (" | %s", dep_name (ood));
+	for (d = ood->next; d != 0; d = d->next)
+	  if (d->ignore_mtime)
+	    printf (" %s", dep_name (d));
+      }
+  }
+  
+  putchar ('\n');
+
+  if (i_mask & PRINT_TARGET_ATTRS) {
+    
+    if (p_target->precious)
+      puts (_("#  Precious file (prerequisite of .PRECIOUS)."));
+    if (p_target->phony)
+      puts (_("#  Phony target (prerequisite of .PHONY)."));
+    if (p_target->cmd_target)
+      puts (_("#  Command-line target."));
+    if (p_target->dontcare)
+      puts (_("#  A default, MAKEFILES, or -include/sinclude makefile."));
+    puts (p_target->tried_implicit
+	  ? _("#  Implicit rule search has been done.")
+	  : _("#  Implicit rule search has not been done."));
+    if (p_target->stem != 0)
+      printf (_("#  Implicit/static pattern stem: `%s'\n"), p_target->stem);
+    if (p_target->intermediate)
+      puts (_("#  File is an intermediate prerequisite."));
+    if (p_target->also_make != 0)
+      {
+	fputs (_("#  Also makes:"), stdout);
+	for (d = p_target->also_make; d != 0; d = d->next)
+	  printf (" %s", dep_name (d));
+	putchar ('\n');
+      }
+  }
+
+  if (i_mask & PRINT_TARGET_TIME) {
+    
+    if (p_target->last_mtime == UNKNOWN_MTIME)
+      puts (_("#  Modification time never checked."));
+    else if (p_target->last_mtime == NONEXISTENT_MTIME)
+      puts (_("#  File does not exist."));
+    else if (p_target->last_mtime == OLD_MTIME)
+      puts (_("#  File is very old."));
+    else
+      {
+	char buf[FILE_TIMESTAMP_PRINT_LEN_BOUND + 1];
+	file_timestamp_sprintf (buf, p_target->last_mtime);
+	printf (_("#  Last modified %s\n"), buf);
+      }
+    puts (p_target->updated
+	  ? _("#  File has been updated.")
+	  : _("#  File has not been updated."));
+  }
+
+  if (i_mask & PRINT_TARGET_STATE) {
+    
+    switch (p_target->command_state)
+      {
+      case cs_running:
+	puts (_("#  Commands currently running (THIS IS A BUG)."));
+	break;
+      case cs_deps_running:
+	puts (_("#  Dependencies commands running (THIS IS A BUG)."));
+	break;
+      case cs_not_started:
+      case cs_finished:
+	switch (p_target->update_status)
+	  {
+	  case -1:
+	    break;
+	  case 0:
+	    puts (_("#  Successfully updated."));
+	    break;
+	  case 1:
+	    assert (question_flag);
+	    puts (_("#  Needs to be updated (-q is set)."));
+	    break;
+	  case 2:
+	    puts (_("#  Failed to be updated."));
+	    break;
+	  default:
+	    puts (_("#  Invalid value in `update_status' member!"));
+	    fflush (stdout);
+	    fflush (stderr);
+	    abort ();
+	  }
+	break;
+      default:
+	puts (_("#  Invalid value in `command_state' member!"));
+	fflush (stdout);
+	fflush (stderr);
+	abort ();
+      }
+  }
+  
+
+  if (p_target->variables != 0 && i_mask & PRINT_TARGET_VARS)
+    print_file_variables (p_target, i_mask & PRINT_TARGET_VARS_HASH);
+
+  if (p_target->cmds != 0 && i_mask & PRINT_TARGET_CMDS)
+    print_commands (p_target, p_target->cmds, false);
+
+  if (p_target->cmds != 0 && i_mask & PRINT_TARGET_CMDS_EXP)
+    print_commands (p_target, p_target->cmds, true);
+
+  if (p_target->prev && i_mask & PRINT_TARGET_PREV)
+    print_target_props (p_target->prev, i_mask);
+}
+
+
 /* Print the data base of files.  */
 
 void
@@ -918,6 +1056,7 @@ static void
 print_file (const void *item)
 {
   const struct file *f = item;
+  int i_mask = 0xfffff;
 
   putchar ('\n');
   if (!f->is_target)
@@ -1000,14 +1139,18 @@ print_file (const void *item)
       abort ();
     }
 
-  if (f->variables != 0)
-    print_file_variables (f);
+  if (f->variables != 0 && i_mask & PRINT_TARGET_VARS)
+      print_file_variables (f, i_mask & PRINT_TARGET_VARS_HASH);
 
-  if (f->cmds != 0)
-    print_commands (f->cmds);
+  if (f->cmds != 0 && i_mask & PRINT_TARGET_CMDS)
+      print_commands (f, f->cmds, false);
 
-  if (f->prev)
-    print_file ((const void *) f->prev);
+  if (f->cmds != 0 && i_mask & PRINT_TARGET_CMDS_EXP)
+      print_commands (f, f->cmds, true);
+
+  if (f->prev && i_mask & PRINT_TARGET_PREV)
+      print_file ((const void *) f->prev);
+
 }
 
 void

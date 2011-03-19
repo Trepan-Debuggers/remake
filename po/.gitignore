@@ -13,6 +13,7 @@
 /insert-header.sin
 /make.pot
 /quot.sed
+/remake.pot
 /remove-potcdate.sed
 /remove-potcdate.sin
 /stamp-po

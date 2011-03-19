@@ -72,6 +72,9 @@ extern int db_level;
 
 extern int debug_flag;
 
+/*! If 1, we don't give additional error reporting information. */
+extern int no_extended_errors;
+
 /*! If 1, we show variable definitions */
 extern int show_variable_definitions;
 

@@ -21,6 +21,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "make.h"
 #include "debug.h"
+#include "file.h"
 #include "print.h"
 #include "break.h"
 #include "cmd.h"
@@ -1248,7 +1249,7 @@ static debug_return_t dbg_cmd_set_var_noexpand (char *psz_string)
 /* Run a shell command. */
 static debug_return_t dbg_cmd_shell (char *psz_varname) 
 {
-  system(psz_varname);
+  int rc=system(psz_varname);
   return debug_readloop;
 }
 

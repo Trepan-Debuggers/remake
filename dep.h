@@ -20,6 +20,9 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
    These flags are saved in the `changed' field of each
    `struct dep' in the chain returned by `read_all_makefiles'.  */
 
+#ifndef REMAKE_DEP_H
+#define REMAKE_DEP_H
+
 #define RM_NO_DEFAULT_GOAL	(1 << 0) /* Do not set default goal.  */
 #define RM_INCLUDED		(1 << 1) /* Search makefile search path.  */
 #define RM_DONTCARE		(1 << 2) /* No error if it doesn't exist.  */
@@ -91,3 +94,5 @@ void free_ns_chain (struct nameseq *n);
 struct dep *read_all_makefiles (const char **makefiles);
 void eval_buffer (char *buffer);
 int update_goal_chain (struct dep *goals);
+
+#endif /*REMAKE_DEP_H*/

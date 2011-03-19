@@ -76,7 +76,6 @@ double atof ();
 
 static void clean_jobserver (int status);
 static void print_data_base (void);
-static void print_version (void);
 static void decode_switches (int argc, char **argv, int env);
 static void decode_env_switches (char *envar, unsigned int len);
 static const char *define_makeflags (int all, int makefile);
@@ -145,6 +144,42 @@ int touch_flag;
 int just_print_flag;
 
 /* Print debugging info (--debug).  */
+
+/*! If 1, we don't give additional error reporting information. */
+int no_extended_errors = 0;
+
+/*! If non-null, we are tracing execution */
+stringlist_t *tracing_opts = NULL;
+
+/*! If nonzero, we are debugging after each "step" for that many times. 
+  When we have a value 1, then we actually run the debugger read loop.
+  Otherwise we decrement the step count.
+
+*/
+unsigned int i_debugger_stepping = 0;
+
+/*! If nonzero, we are debugging after each "next" for that many times. 
+  When we have a value 1, then we actually run the debugger read loop.
+  Otherwise we decrement the step count.
+
+*/
+unsigned int i_debugger_nexting = 0;
+
+/*! If nonzero, enter the debugger if we hit a fatal error.
+*/
+unsigned int debugger_on_error = 0;
+
+/*! If nonzero, we have requested some sort of debugging.
+*/
+unsigned int debugger_enabled;
+
+/*! If nonzero, the basename of filenames is in giving locations. Normally,
+    giving a file directory location helps a debugger frontend
+    when we change directories. For regression tests it is helpful to 
+    list just the basename part as that doesn't change from installation
+    to installation. Users may have their preferences too.
+*/
+int basename_filenames = 0;
 
 static struct stringlist *db_flags;
 int debug_flag = 0;
@@ -477,6 +512,9 @@ char **global_argv;
 /* Our current directory after processing all -C options.  */
 
 char *starting_directory;
+
+/*! Our current directory before processing any -C options.  */
+char *directory_before_chdir = NULL;
 
 /* Value of the MAKELEVEL variable at startup (or 0).  */
 
@@ -3049,7 +3087,7 @@ define_makeflags (int all, int makefile)
 
 /* Print version information.  */
 
-static void
+void
 print_version (void)
 {
   static int printed_version = 0;

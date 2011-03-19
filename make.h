@@ -440,7 +440,10 @@ const char *vpath_search (const char *file, FILE_TIMESTAMP *mtime_ptr,
                           unsigned int* vpath_index, unsigned int* path_index);
 int gpath_search (const char *file, unsigned int len);
 
-void construct_include_path (const char **arg_dirs);
+/*! Construct the list of include directories
+   from the arguments and the default list.  
+*/
+extern void construct_include_path (const char **arg_dirs);
 
 void user_access (void);
 void make_access (void);
@@ -541,13 +544,38 @@ extern char *program;
 extern char **global_argv;
 
 extern char *starting_directory;
+
+/*! Our current directory before processing any -C options.  */
+extern char *directory_before_chdir;
+
+/*! Value of the MAKELEVEL variable at startup (or 0).  */
 extern unsigned int makelevel;
+
+/*! If nonzero, the basename of filenames is in giving locations. Normally,
+    giving a file directory location helps a debugger frontend
+    when we change directories. For regression tests it is helpful to 
+    list just the basename part as that doesn't change from installation
+    to installation. Users may have their preferences too.
+*/
+extern int basename_filenames;
+
 extern char *version_string, *remote_description, *make_host;
 
 extern unsigned int commands_started;
 
 extern int handling_fatal_signal;
 
+/* is default_shell unixy? */
+extern int unixy_shell;
+
+/**! The default value of SHELL and the shell that is used when issuing
+   commands on targets.
+*/
+extern char default_shell[];
+
+/*! Print version information.
+*/
+extern void print_version (void);
 
 #ifndef MIN
 #define MIN(_a,_b) ((_a)<(_b)?(_a):(_b))

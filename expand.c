@@ -20,6 +20,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <assert.h>
 
+#include "expand.h"
 #include "filedef.h"
 #include "job.h"
 #include "commands.h"
@@ -423,7 +424,7 @@ variable_expand_string (char *line, const char *string, long length)
    Return the address of the resulting string, which is null-terminated
    and is valid only until the next time this function is called.  */
 
-char *
+char * 
 variable_expand (const char *line)
 {
   return variable_expand_string(NULL, line, (long)-1);
@@ -491,6 +492,22 @@ variable_expand_for_file (const char *line, struct file *file)
   reading_file = savef;
 
   return result;
+}
+
+/** Expand PSZ_LINE. Expansion uses P_FILE_SET if it is not NULL. */
+char *
+variable_expand_set (char *psz_line, variable_set_list_t *p_file_vars)
+{
+  char *psz_result;
+  variable_set_list_t *p_vars_save;
+
+  p_vars_save = current_variable_set_list;
+  if (p_file_vars)
+    current_variable_set_list = p_file_vars;
+  psz_result = variable_expand (psz_line);
+  current_variable_set_list = p_vars_save;
+
+  return psz_result;
 }
 
 /* Like allocated_variable_expand, but for += target-specific variables.

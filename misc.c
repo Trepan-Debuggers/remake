@@ -214,109 +214,6 @@ concat (num, va_alist)
 
   return result;
 }
-
-/* Print a message on stdout.  */
-
-void
-#if HAVE_ANSI_COMPILER && USE_VARIADIC && HAVE_STDARG_H
-message (int prefix, const char *fmt, ...)
-#else
-message (prefix, fmt, va_alist)
-     int prefix;
-     const char *fmt;
-     va_dcl
-#endif
-{
-#if USE_VARIADIC
-  va_list args;
-#endif
-
-  log_working_directory (1);
-
-  if (fmt != 0)
-    {
-      if (prefix)
-	{
-	  if (makelevel == 0)
-	    printf ("%s: ", program);
-	  else
-	    printf ("%s[%u]: ", program, makelevel);
-	}
-      VA_START (args, fmt);
-      VA_PRINTF (stdout, fmt, args);
-      VA_END (args);
-      putchar ('\n');
-    }
-
-  fflush (stdout);
-}
-
-/* Print an error message.  */
-
-void
-#if HAVE_ANSI_COMPILER && USE_VARIADIC && HAVE_STDARG_H
-error (const struct floc *flocp, const char *fmt, ...)
-#else
-error (flocp, fmt, va_alist)
-     const struct floc *flocp;
-     const char *fmt;
-     va_dcl
-#endif
-{
-#if USE_VARIADIC
-  va_list args;
-#endif
-
-  log_working_directory (1);
-
-  if (flocp && flocp->filenm)
-    fprintf (stderr, "%s:%lu: ", flocp->filenm, flocp->lineno);
-  else if (makelevel == 0)
-    fprintf (stderr, "%s: ", program);
-  else
-    fprintf (stderr, "%s[%u]: ", program, makelevel);
-
-  VA_START(args, fmt);
-  VA_PRINTF (stderr, fmt, args);
-  VA_END (args);
-
-  putc ('\n', stderr);
-  fflush (stderr);
-}
-
-/* Print an error message and exit.  */
-
-void
-#if HAVE_ANSI_COMPILER && USE_VARIADIC && HAVE_STDARG_H
-fatal (const struct floc *flocp, const char *fmt, ...)
-#else
-fatal (flocp, fmt, va_alist)
-     const struct floc *flocp;
-     const char *fmt;
-     va_dcl
-#endif
-{
-#if USE_VARIADIC
-  va_list args;
-#endif
-
-  log_working_directory (1);
-
-  if (flocp && flocp->filenm)
-    fprintf (stderr, "%s:%lu: *** ", flocp->filenm, flocp->lineno);
-  else if (makelevel == 0)
-    fprintf (stderr, "%s: *** ", program);
-  else
-    fprintf (stderr, "%s[%u]: *** ", program, makelevel);
-
-  VA_START(args, fmt);
-  VA_PRINTF (stderr, fmt, args);
-  VA_END (args);
-
-  fputs (_(".  Stop.\n"), stderr);
-
-  die (2);
-}
 
 #ifndef HAVE_STRERROR
 
@@ -338,14 +235,6 @@ strerror (int errnum)
   return buf;
 }
 #endif
-
-/* Print an error message from errno.  */
-
-void
-perror_with_name (const char *str, const char *name)
-{
-  error (NILF, _("%s%s: %s"), str, name, strerror (errno));
-}
 
 /* Print an error message from errno and exit.  */
 
