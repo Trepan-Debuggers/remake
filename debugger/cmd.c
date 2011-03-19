@@ -1,5 +1,6 @@
-/* $Id: dbg_cmd.c,v 1.82 2007/03/01 12:49:59 rockyb Exp $
-Copyright (C) 2004, 2005, 2007, 2008, 2009 R. Bernstein rocky@gnu.org
+/* 
+Copyright (C) 2004, 2005, 2007, 2008, 2009, 2011 R. Bernstein 
+<rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -1069,7 +1070,7 @@ static debug_return_t dbg_cmd_write_cmds (char *psz_args)
 	       psz_target_basename);
     }
     
-    /* Skip leading space, MAKE's comamnd prefixes:
+    /* Skip leading space, MAKE's command prefixes:
           echo suppression  @,
 	  ignore-error  -, 
 	  and recursion +

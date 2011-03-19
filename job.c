@@ -1611,7 +1611,6 @@ new_job (struct file *file, target_stack_node_t *p_call_stack)
   struct commands *cmds = file->cmds;
   struct child *c;
   char **lines;
-  unsigned int i;
 
   /* Let any previously decided-upon jobs that are waiting
      for the load to go down start before this new one.  */
@@ -1625,106 +1624,8 @@ new_job (struct file *file, target_stack_node_t *p_call_stack)
 
   /* Expand the command lines and store the results in LINES.  */
   lines = xmalloc (cmds->ncommand_lines * sizeof (char *));
-  for (i = 0; i < cmds->ncommand_lines; ++i)
-    {
-      /* Collapse backslash-newline combinations that are inside variable
-	 or function references.  These are left alone by the parser so
-	 that they will appear in the echoing of commands (where they look
-	 nice); and collapsed by construct_command_argv when it tokenizes.
-	 But letting them survive inside function invocations loses because
-	 we don't want the functions to see them as part of the text.  */
-
-      char *in, *out, *ref;
-
-      /* IN points to where in the line we are scanning.
-	 OUT points to where in the line we are writing.
-	 When we collapse a backslash-newline combination,
-	 IN gets ahead of OUT.  */
-
-      in = out = cmds->command_lines[i];
-      while ((ref = strchr (in, '$')) != 0)
-	{
-	  ++ref;		/* Move past the $.  */
-
-	  if (out != in)
-	    /* Copy the text between the end of the last chunk
-	       we processed (where IN points) and the new chunk
-	       we are about to process (where REF points).  */
-	    memmove (out, in, ref - in);
-
-	  /* Move both pointers past the boring stuff.  */
-	  out += ref - in;
-	  in = ref;
-
-	  if (*ref == '(' || *ref == '{')
-	    {
-	      char openparen = *ref;
-	      char closeparen = openparen == '(' ? ')' : '}';
-	      int count;
-	      char *p;
-
-	      *out++ = *in++;	/* Copy OPENPAREN.  */
-	      /* IN now points past the opening paren or brace.
-		 Count parens or braces until it is matched.  */
-	      count = 0;
-	      while (*in != '\0')
-		{
-		  if (*in == closeparen && --count < 0)
-		    break;
-		  else if (*in == '\\' && in[1] == '\n')
-		    {
-		      /* We have found a backslash-newline inside a
-			 variable or function reference.  Eat it and
-			 any following whitespace.  */
-
-		      int quoted = 0;
-		      for (p = in - 1; p > ref && *p == '\\'; --p)
-			quoted = !quoted;
-
-		      if (quoted)
-			/* There were two or more backslashes, so this is
-			   not really a continuation line.  We don't collapse
-			   the quoting backslashes here as is done in
-			   collapse_continuations, because the line will
-			   be collapsed again after expansion.  */
-			*out++ = *in++;
-		      else
-			{
-			  /* Skip the backslash, newline and
-			     any following whitespace.  */
-			  in = next_token (in + 2);
-
-			  /* Discard any preceding whitespace that has
-			     already been written to the output.  */
-			  while (out > ref
-				 && isblank ((unsigned char)out[-1]))
-			    --out;
-
-			  /* Replace it all with a single space.  */
-			  *out++ = ' ';
-			}
-		    }
-		  else
-		    {
-		      if (*in == openparen)
-			++count;
-
-		      *out++ = *in++;
-		    }
-		}
-	    }
-	}
-
-      /* There are no more references in this line to worry about.
-	 Copy the remaining uninteresting text to the output.  */
-      if (out != in)
-	memmove (out, in, strlen (in) + 1);
-
-      /* Finally, expand the line.  */
-      lines[i] = allocated_variable_expand_for_file (cmds->command_lines[i],
-						     file);
-    }
-
+  expand_command_lines(cmds, lines, file);
+  
   /* Start the command sequence, record it in a new
      `struct child', and add that to the chain.  */
 

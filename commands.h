@@ -43,6 +43,10 @@ struct commands
 #define	COMMANDS_SILENT		2 /* Silent: @.  */
 #define	COMMANDS_NOERROR	4 /* No errors: -.  */
 
+/*! Expand the command lines and store the results in LINES.  */
+extern void expand_command_lines(struct commands *cmds, /*out*/ char **lines,
+				 struct file *file);
+
 /*! 
   Execute the commands to remake P_FILE.  If they are currently
   executing, return or have already finished executing, just return.
