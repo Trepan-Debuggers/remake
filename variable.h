@@ -130,7 +130,13 @@ void install_variable_buffer (char **bufp, unsigned int *lenp);
 void restore_variable_buffer (char *buf, unsigned int len);
 
 /* function.c */
+/*! Check for a function invocation in *STRINGP.  *STRINGP points at
+   the opening ( or { and is not null-terminated.  If a function
+   invocation is found, expand it into the buffer at *OP, updating
+   *OP, incrementing *STRINGP past the reference and returning
+   nonzero.  If not, return zero.  */
 int handle_function (char **op, const char **stringp);
+
 int pattern_matches (const char *pattern, const char *percent, const char *str);
 char *subst_expand (char *o, const char *text, const char *subst,
                     const char *replace, unsigned int slen, unsigned int rlen,
@@ -138,6 +144,14 @@ char *subst_expand (char *o, const char *text, const char *subst,
 char *patsubst_expand_pat (char *o, const char *text, const char *pattern,
                            const char *replace, const char *pattern_percent,
                            const char *replace_percent);
+
+/*! Store into VARIABLE_BUFFER at O the result of scanning TEXT
+  and replacing strings matching PATTERN with REPLACE.
+  If PATTERN_PERCENT is not nil, PATTERN has already been
+  run through find_percent, and PATTERN_PERCENT is the result.
+  If REPLACE_PERCENT is not nil, REPLACE has already been
+  run through find_percent, and REPLACE_PERCENT is the result.  */
+
 char *patsubst_expand (char *o, const char *text, char *pattern, char *replace);
 
 /* expand.c */

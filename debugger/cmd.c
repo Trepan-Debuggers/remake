@@ -26,9 +26,11 @@ Boston, MA 02111-1307, USA.  */
 #include "break.h"
 #include "cmd.h"
 #include "fns.h"
+#include "function.h"
 #include "info.h"
 #include "stack.h"
 #include "commands.h"
+#include "expand.h"
 #include "debug.h"
 
 /* Think of the below not as an enumeration but as #defines done in a
@@ -152,7 +154,7 @@ alias_cmd_t aliases[] = {
 };
 
 
-short_cmd_t short_command[256] = { { NULL, '\0' }, };
+short_cmd_t short_command[256] = { { NULL, '\0', '\0' }, };
 
 typedef struct {
   const char *name;	/* name of subcommand command. */
@@ -845,11 +847,12 @@ dbg_cmd_quit (char *psz_arg)
 static debug_return_t 
 dbg_cmd_run (char *psz_arg)
 {
-  printf("Changing directory to %s and restarting...\n", 
-	 directory_before_chdir);
-  chdir (directory_before_chdir);
   char **ppsz_argv = global_argv;
   const char *psz_make_cmd = global_argv[0];
+  int rc;
+  printf("Changing directory to %s and restarting...\n", 
+	 directory_before_chdir);
+  rc = chdir (directory_before_chdir);
   if (psz_arg && strlen(psz_arg)) {
     unsigned int len = strlen(global_argv[0]) + strlen(psz_arg) + 2;
     char *psz_full_args = CALLOC(char, len);

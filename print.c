@@ -409,7 +409,7 @@ print_child_cmd (child_t *p_child, target_stack_node_t *p)
 extern void 
 print_target_stack (target_stack_node_t *p, int i_pos, int i_max)
 {
-  unsigned int i=0;
+  int i=0;
   printf("\n");
   for ( ; p && i < i_max ; 
 	i++, p = p->p_parent  ) {
@@ -458,7 +458,7 @@ print_target_stack (target_stack_node_t *p, int i_pos, int i_max)
 extern void 
 print_floc_stack (int i_pos, int i_max)
 {
-  unsigned int i=0;
+  int i=0;
   floc_stack_node_t *p;
   printf("\n");
   for ( p=p_stack_floc_top; p && i < i_max ; 

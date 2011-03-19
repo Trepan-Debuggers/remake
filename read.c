@@ -331,7 +331,7 @@ eval_makefile (const char *filename, int flags)
   ebuf.floc.filenm = filename;
   ebuf.floc.lineno = 1;
 
-  if (ISDB (DB_VERBOSE))
+  if (ISDB (DB_VERBOSE|DB_READ_MAKEFILES))
     {
       printf (_("Reading makefile `%s'"), filename);
       if (flags & RM_NO_DEFAULT_GOAL)
