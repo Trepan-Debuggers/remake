@@ -520,7 +520,7 @@ extern int shell_function_pid, shell_function_completed;
    print an error message first.  */
 
 void
-reap_children (int block, int err, target_stack_node_t *p_call_stack)
+reap_children (int block, int err_code, target_stack_node_t *p_call_stack)
 {
 #ifndef WINDOWS32
   WAIT_T status;
@@ -553,7 +553,7 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
       int any_remote, any_local;
       int dontcare;
 
-      if (err && block)
+      if (err_code && block)
 	{
           static int printed = 0;
 
@@ -924,7 +924,7 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
       
 	/* If the job failed, and the -k flag was not given, die,
 	   unless we are already in the process of dying.  */
-	if (!err && child_failed && !dontcare && !keep_going_flag &&
+	if (!err_code && child_failed && !dontcare && !keep_going_flag &&
 	    /* fatal_error_signal will die with the right signal.  */
 	    !handling_fatal_signal) 
 	{
@@ -1192,8 +1192,13 @@ start_job_command (child_t *child,
      can log the working directory before the command's own error messages
      appear.  */
 
-  message (0, (just_print_flag || (!(flags & COMMANDS_SILENT) && !silent_flag))
-	   ? "%s" : (char *) 0, p);
+  {
+    int print_it = 
+	(just_print_flag || (!(flags & COMMANDS_SILENT) && !silent_flag))
+	|| (db_level & DB_SHELL);
+
+    message (0, print_it ? "%s" : (char *) 0, p);
+  }
 
   /* Tell update_goal_chain that a command has been started on behalf of
      this target.  It is important that this happens here and not in

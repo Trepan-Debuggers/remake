@@ -1328,7 +1328,7 @@ main (int argc, char **argv, char **envp)
 	else if (0 == strcmp(*p, "full"))
 	  db_level |= (DB_VERBOSE|DB_READ_MAKEFILES);
 	else if (0 == strcmp(*p, "normal"))
-	  db_level |= (DB_BASIC | DB_TRACE | DB_SHELL);
+	  db_level |= DB_BASIC;
 	else if (0 == strcmp(*p, "noshell"))
 	  db_level = DB_BASIC | DB_TRACE;
 	else if (0 == strcmp(*p, "read"))
