@@ -34,6 +34,10 @@ Boston, MA 02111-1307, USA.  */
 #include "expand.h"
 #include "debug.h"
 
+#ifdef HAVE_READLINE_READLINE_H
+#include <readline/readline.h>
+#endif
+
 /* Think of the below not as an enumeration but as #defines done in a
    way that we'll be able to use the value in a gdb. */
 enum {
