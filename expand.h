@@ -22,8 +22,8 @@ Boston, MA 02111-1307, USA.  */
  *  \brief Header for variable expansion functions for GNU Make.
  */
 
-#ifndef EXPAND_H
-#define EXPAND_H
+#ifndef REMAKE_EXPAND_H
+#define REMAKE_EXPAND_H
 
 #include "variable.h"
 #include "filedef.h"
@@ -69,4 +69,4 @@ extern void restore_variable_buffer(char *p_buf, unsigned int len);
 extern char *variable_expand_set (char *psz_line, 
 				  variable_set_list_t *p_file_set);
 
-#endif /*EXPAND_H*/
+#endif /*REMAKE_EXPAND_H*/

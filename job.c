@@ -21,6 +21,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <assert.h>
 
 #include "job.h"
+#include "expand.h"
 #include "debug.h"
 #include "filedef.h"
 #include "commands.h"

@@ -21,6 +21,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "config.h"
 #include "commands.h"
+#include "expand.h"
 #include "fns.h"
 #include "stack.h"
 #include "debug.h"
