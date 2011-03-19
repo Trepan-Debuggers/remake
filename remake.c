@@ -18,6 +18,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "make.h"
 #include "filedef.h"
+#include "print.h"
 #include "job.h"
 #include "commands.h"
 #include "dep.h"

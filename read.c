@@ -24,6 +24,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "dep.h"
 #include "filedef.h"
+#include "expand.h"
 #include "job.h"
 #include "commands.h"
 #include "variable.h"

@@ -63,5 +63,6 @@ void create_pattern_rule (const char **targets, const char **target_percents,
 
 /*! Show information about a given rule. Useful from the debugger or gdb.  */
 extern void print_rule (rule_t *r, bool b_verbose);
+extern void print_rule_data_base (bool b_verbose);
 
 #endif /*MAKE_RULE_H*/

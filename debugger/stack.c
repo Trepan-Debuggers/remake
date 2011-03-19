@@ -35,7 +35,7 @@ floc_stack_node_t *p_floc_stack = NULL;
 debug_return_t 
 dbg_cmd_frame_down (char *psz_amount) 
 {
-  unsigned int i=0;
+  int i=0;
   int i_amount = 1;
 
   if (!psz_amount || !*psz_amount) {

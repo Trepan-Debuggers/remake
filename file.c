@@ -1055,7 +1055,7 @@ print_prereqs (const struct dep *deps)
 static void
 print_file (const void *item)
 {
-  const struct file *f = item;
+  file_t *f = item;
   int i_mask = 0xfffff;
 
   putchar ('\n');

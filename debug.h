@@ -70,6 +70,15 @@ extern debug_enter_debugger_t debug_dummy_enter_debugger_mask;
 /** bitmask of debug_level_mask values. */
 extern int db_level;
 
+/** \brief The structure used to hold the list of strings given
+    in command switches of a type that takes string arguments.  */
+struct stringlist
+{
+  const char **list;	/**< Nil-terminated list of strings.  */
+  unsigned int idx;	/**< Index into above.  */
+  unsigned int max;	/**< Number of pointers allocated.  */
+};
+
 extern int debug_flag;
 
 /*! If 1, we don't give additional error reporting information. */
@@ -105,6 +114,8 @@ extern unsigned int debugger_on_error;
 /*! If nonzero, we have requested some sort of debugging.
 */
 extern unsigned int debugger_enabled;
+
+extern stringlist_t *db_flags;
 
 #define ISDB(_l)    ((_l)&db_level)
 

@@ -25,6 +25,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "rule.h"
 #include "debug.h"
 #include "getopt.h"
+#include "vpath.h"
 
 #include <assert.h>
 #ifdef _AMIGA
@@ -55,8 +56,6 @@ RETSIGTYPE fatal_error_signal (int sig);
 
 void print_variable_data_base (void);
 void print_dir_data_base (void);
-void print_rule_data_base (void);
-void print_vpath_data_base (void);
 
 void verify_file_data_base (void);
 
@@ -119,14 +118,6 @@ struct command_switch
 /* The structure used to hold the list of strings given
    in command switches of a type that takes string arguments.  */
 
-struct stringlist
-  {
-    const char **list;	/* Nil-terminated list of strings.  */
-    unsigned int idx;	/* Index into above.  */
-    unsigned int max;	/* Number of pointers allocated.  */
-  };
-
-
 /* The recognized command switches.  */
 
 /* Nonzero means do not print commands to be executed (-s).  */
@@ -180,11 +171,6 @@ unsigned int debugger_enabled;
     to installation. Users may have their preferences too.
 */
 int basename_filenames = 0;
-
-static struct stringlist *db_flags;
-int debug_flag = 0;
-
-int db_level = 0;
 
 /* Output level (--verbosity).  */
 
@@ -241,6 +227,10 @@ int inhibit_print_directory_flag = 0;
 /* Nonzero means print version information.  */
 
 int print_version_flag = 0;
+
+/*! Nonzero means --trace=noshell.  */
+
+int no_shell_trace = 0;
 
 /* List of makefiles given with -f switches.  */
 
@@ -304,6 +294,17 @@ static struct stringlist *eval_strings = 0;
 /* If nonzero, we should just print usage and exit.  */
 
 static int print_usage_flag = 0;
+
+/*! Do we want to go into a debugger or not?
+  Values are "error"     - enter on errors or fatal errors
+              "fatal"     - enter on fatal errors
+              "goal"      - set to enter debugger before updating goal
+              "preread"   - set to enter debugger before reading makefile(s)
+              "preaction" - set to enter debugger before performing any 
+	                    actions(s)
+              "full"     - "enter" + "error" + "fatal"
+*/
+static stringlist_t* debugger_opts = NULL;
 
 /* If nonzero, we should print a warning message
    for each reference to an undefined variable.  */
@@ -403,6 +404,16 @@ static const char *const usage[] =
                               Consider FILE to be infinitely new.\n"),
     N_("\
   --warn-undefined-variables  Warn when an undefined variable is referenced.\n"),
+    N_("\
+  -x, --trace[=TYPE]           Trace command execution TYPE may be\n\
+                               \"command\", \"read\", \"normal\",\"\n\
+                               \"noshell\", or \"full\".\n"),
+    N_("\
+  -y                           same as --trace=\"noshell\"\n"),
+    N_("\
+  -X [type], --debugger[=TYPE] Enter debugger. TYPE may be\n\
+                               \"goal\", \"preread\", \"preaction\",\n\
+                               \"full\", \"error\", or \"fatal\".\n"),
     NULL
   };
 
@@ -455,6 +466,10 @@ static const struct command_switch switches[] =
     { 'w', flag, &print_directory_flag, 1, 1, 0, 0, 0, "print-directory" },
     { CHAR_MAX+4, flag, &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
       "no-print-directory" },
+    { 'x', string, (char *) &tracing_opts, 1, 1, 0, "normal", 0, "trace" },
+    { 'X', string, (char *) &debugger_opts, 1, 1, 0, 
+      "preaction", 0, "debugger" },
+    { 'y', flag, (char *) &no_shell_trace, 1, 1, 0, 0, 0, "noshell" },
     { 'W', filename, &new_files, 0, 0, 0, 0, 0, "what-if" },
     { CHAR_MAX+5, flag, &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
       "warn-undefined-variables" },
@@ -645,69 +660,6 @@ expand_command_line_file (char *name)
     free (expanded);
 
   return cp;
-}
-
-/* Toggle -d on receipt of SIGUSR1.  */
-
-#ifdef SIGUSR1
-RETSIGTYPE
-debug_signal_handler (int sig UNUSED)
-{
-  db_level = db_level ? DB_NONE : DB_BASIC;
-}
-#endif
-
-void
-decode_debug_flags (void)
-{
-  const char **pp;
-
-  if (debug_flag)
-    db_level = DB_ALL;
-
-  if (!db_flags)
-    return;
-
-  for (pp=db_flags->list; *pp; ++pp)
-    {
-      const char *p = *pp;
-
-      while (1)
-        {
-          switch (tolower (p[0]))
-            {
-            case 'a':
-              db_level |= DB_ALL;
-              break;
-            case 'b':
-              db_level |= DB_BASIC;
-              break;
-            case 'i':
-              db_level |= DB_BASIC | DB_IMPLICIT;
-              break;
-            case 'j':
-              db_level |= DB_JOBS;
-              break;
-            case 'm':
-              db_level |= DB_BASIC | DB_MAKEFILES;
-              break;
-            case 'v':
-              db_level |= DB_BASIC | DB_VERBOSE;
-              break;
-            default:
-              fatal (NILF, _("unknown debug level specification `%s'"), p);
-            }
-
-          while (*(++p) != '\0')
-            if (*p == ',' || *p == ' ')
-              break;
-
-          if (*p == '\0')
-            break;
-
-          ++p;
-        }
-    }
 }
 
 #ifdef WINDOWS32
@@ -1316,6 +1268,72 @@ main (int argc, char **argv, char **envp)
 
   decode_switches (argc, argv, 0);
 
+  /* debugging sets some things */
+  if (debugger_opts) {
+    const char **p;
+    for (p = debugger_opts->list; *p != 0; ++p)
+      {
+	if (0 == strcmp(*p, "preread")) {
+	  b_debugger_preread  = true;
+	  db_level           |= DB_READ_MAKEFILES;
+	}
+	
+	if (0 == strcmp(*p, "goal")) {
+	  b_debugger_goal  = true;
+	  db_level           |= DB_UPDATE_GOAL;
+	}
+	
+	if ( 0 == strcmp(*p, "full") || b_debugger_preread
+	     || 0 == strcmp(*p, "preaction") ) {
+	  job_slots            =  1;
+	  i_debugger_stepping  =  1;
+	  i_debugger_nexting   =  0;
+	  debugger_enabled     =  1;
+	  /* For now we'll do basic debugging. Later, "stepping'
+ 	     will stop here while next won't - either way no printing.
+	   */
+	  db_level          |=  DB_BASIC | DB_CALL | DB_SHELL | DB_UPDATE_GOAL
+	                    |   DB_MAKEFILES;
+	} 
+	if ( 0 == strcmp(*p, "full")
+	     || 0 == strcmp(*p, "error") ) {
+	  debugger_on_error  |=  (DEBUGGER_ON_ERROR|DEBUGGER_ON_FATAL);
+	} else if ( 0 == strcmp(*p, "fatal") ) {
+	  debugger_on_error  |=  DEBUGGER_ON_FATAL;
+	}
+      }
+#ifndef HAVE_LIBREADLINE
+    error (NILF, 
+	   "warning: you specified a debugger option, but you don't have readline support");
+    error (NILF, 
+	   "debugger support compiled in. Debugger options will be ignored.");
+    
+#endif
+  }
+
+  if (no_shell_trace) 
+    db_level = DB_BASIC | DB_TRACE;
+    
+  if (tracing_opts) {
+    const char **p;
+    db_level |= (DB_TRACE | DB_SHELL);
+    if (!tracing_opts->list)
+      db_level |= (DB_BASIC);
+    else 
+      for (p = tracing_opts->list; *p != 0; ++p) {
+	if (0 == strcmp(*p, "command"))
+	  ;
+	else if (0 == strcmp(*p, "full"))
+	  db_level |= (DB_VERBOSE|DB_READ_MAKEFILES);
+	else if (0 == strcmp(*p, "normal"))
+	  db_level |= (DB_BASIC | DB_TRACE | DB_SHELL);
+	else if (0 == strcmp(*p, "noshell"))
+	  db_level = DB_BASIC | DB_TRACE;
+	else if (0 == strcmp(*p, "read"))
+	  db_level |= DB_READ_MAKEFILES;
+      }
+  }
+  
 #ifdef WINDOWS32
   if (suspend_flag) {
         fprintf(stderr, "%s (pid = %ld)\n", argv[0], GetCurrentProcessId());
@@ -3137,7 +3155,7 @@ print_data_base ()
 
   print_variable_data_base ();
   print_dir_data_base ();
-  print_rule_data_base ();
+  print_rule_data_base (true);
   print_file_data_base ();
   print_vpath_data_base ();
   strcache_print_stats ("#");
