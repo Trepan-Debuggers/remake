@@ -36,6 +36,7 @@ AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_RANLIB
 AC_PROG_CPP
+AC_PROG_LN_S
 AC_CHECK_PROG(AR, ar, ar, ar)
 # Perl is needed for the test suite (only)
 AC_CHECK_PROG(PERL, perl, perl, perl)
@@ -235,6 +236,14 @@ if test "$make_cv_union_wait" = yes; then
 fi
 AC_MSG_RESULT($make_cv_union_wait)
 
+
+AC_ARG_WITH(make_name,
+[  --with-make-name        name to use as the program name (default remake)],
+make_name="${withval}", make_name="remake")
+MAKE_NAME="$make_name"
+AC_SUBST(MAKE_NAME)
+MAKE_NAME_UPPER=`echo $make_name | tr a-z A-Z`
+AC_SUBST(MAKE_NAME_UPPER)
 
 AC_ARG_WITH(default_shell,
 [  --with-default-shell    program to use for SHELL],
@@ -578,6 +587,9 @@ if test -f "$srcdir/build.sh.in"; then
   ./config.status --file build.sh
   chmod +x build.sh
 fi
+
+AC_MSG_NOTICE([Will install the 'make' binary under the name: $make_name])
+
 
 dnl Local Variables:
 dnl comment-start: "dnl "

@@ -33,7 +33,7 @@ endif
 
 SUBDIRS =	glob config po doc $(MAYBE_W32)
 
-bin_PROGRAMS =	make
+bin_PROGRAMS =	make remake
 
 if USE_CUSTOMS
   remote =	remote-cstms.c
@@ -93,10 +93,15 @@ EXTRA_DIST =	README build.sh.in $(man_MANS) \
 
 DISTCLEANFILES = build.sh
 
+MOSTLYCLEANFILES = *.orig *.rej @MAKE_NAME@
+
 # Forward targets
 
 html:
 	cd doc && $(MAKE) $(AM_MAKEFLAGS) $@
+
+@MAKE_NAME@$(EXEEXT): make$(EXEEXT)
+	$(LN_S) make$(EXEEXT) $@ 
 
 .PHONY: html
 
