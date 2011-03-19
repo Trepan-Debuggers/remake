@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "make.h"
-#include "debugger/cmd.h"
 #include "filedef.h"
 #include "print.h"
 #include "job.h"
@@ -42,18 +41,6 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #endif
 
 extern int try_implicit_rule (struct file *file, unsigned int depth);
-
-
-/* The test for circular dependencies is based on the 'updating' bit in
-   `struct file'.  However, double colon targets have seperate `struct
-   file's; make sure we always use the base of the double colon chain. */
-
-#define start_updating(_f)  (((_f)->double_colon ? (_f)->double_colon : (_f))\
-                             ->updating = 1)
-#define finish_updating(_f) (((_f)->double_colon ? (_f)->double_colon : (_f))\
-                             ->updating = 0)
-#define is_updating(_f)     (((_f)->double_colon ? (_f)->double_colon : (_f))\
-                             ->updating)
 
 
 /* The test for circular dependencies is based on the 'updating' bit in
@@ -127,11 +114,11 @@ update_goal_chain (struct dep *goals)
 
       /* Start jobs that are waiting for the load to go down.  */
 
-      start_waiting_jobs (NULL);
+      start_waiting_jobs ();
 
       /* Wait for a child to die.  */
 
-      reap_children (1, 0, NULL);
+      reap_children (1, 0);
 
       lastgoal = 0;
       g = goals;
@@ -301,8 +288,8 @@ update_goal_chain (struct dep *goals)
 static int
 update_file (struct file *file, unsigned int depth)
 {
-  int status = 0;
-  file_t *f;
+  register int status = 0;
+  register struct file *f;
 
   f = file->double_colon ? file->double_colon : file;
 
@@ -423,7 +410,6 @@ update_file_1 (struct file *file, unsigned int depth)
   struct dep *d, *ad;
   struct dep amake;
   int running = 0;
-  target_stack_node_t *p_call_stack2;
 
   DBF (DB_VERBOSE, _("Considering target file `%s'.\n"));
 
@@ -822,30 +808,8 @@ update_file_1 (struct file *file, unsigned int depth)
       file->ignore_vpath = 1;
     }
 
-  /* In some contexts, we get called twice and in other cases once.
-     Ideally I'd like to figure out where to put the push's and
-     pops to do the right thing. Until then there's the below
-     hackery to test.  */
-  if (p_call_stack && p_call_stack->p_target) {
-    file_t *p_stack_target = p_call_stack->p_target;
-    if ((file->floc.filenm && p_stack_target->floc.filenm
-         && 0 == strcmp(file->floc.filenm, p_stack_target->floc.filenm)) ||
-        (NULL == file->floc.filenm && NULL == p_stack_target->floc.filenm)) 
-      p_call_stack2 = p_call_stack;
-    else 
-      p_call_stack2 = trace_push_target(p_call_stack, file, 1);
-  } else {
-    p_call_stack2 = trace_push_target(p_call_stack, file, 1);
-  }
-
-  if ( i_debugger_stepping || (i_debugger_nexting && file->cmds) ) 
-    enter_debugger(p_call_stack2, file, 0, DEBUG_STEP_HIT);
-
   /* Now, take appropriate actions to remake the file.  */
-  remake_file (file, p_call_stack);
-
-  if (p_call_stack != p_call_stack2) 
-    trace_pop_target(p_call_stack2);
+  remake_file (file);
 
   if (file->command_state != cs_finished)
     {
@@ -1223,7 +1187,7 @@ remake_file (struct file *file)
       /* The normal case: start some commands.  */
       if (!touch_flag || file->cmds->any_recurse)
 	{
-          execute_file_commands (file, p_call_stack);
+	  execute_file_commands (file);
 	  return;
 	}
 

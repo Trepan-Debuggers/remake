@@ -456,13 +456,6 @@ find_directory (const char *name)
       /* The directory is not in the name hash table.
 	 Find its device and inode numbers, and look it up by them.  */
 
-#ifdef WINDOWS32
-      /* Remove any trailing '\'.  Windows32 stat fails even on valid
-         directories if they end in '\'. */
-      if (p[-1] == '\\')
-        p[-1] = '\0';
-#endif
-
 #ifdef VMS
       r = vmsstat_dir (name, &st);
 #elif defined(WINDOWS32)

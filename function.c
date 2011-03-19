@@ -17,12 +17,10 @@ You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "make.h"
-#include "debug.h"
-#include "dep.h"
-#include "expand.h"
 #include "filedef.h"
 #include "expand.h"
 #include "variable.h"
+#include "dep.h"
 #include "job.h"
 #include "commands.h"
 #include "debug.h"
@@ -126,10 +124,7 @@ subst_expand (char *o, const char *text, const char *subst, const char *replace,
 	o = variable_buffer_output (o, replace, rlen);
 
       /* Advance T past the string to be replaced.  */
-      {
-        char *nt = p + slen;
-        t = nt;
-      }
+      t = p + slen;
     } while (*t != '\0');
 
   return o;

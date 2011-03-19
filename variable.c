@@ -1130,7 +1130,6 @@ set_special_var (struct variable *var)
          properly.  */
       cmd_prefix = var->value[0]=='\0' ? RECIPEPREFIX_DEFAULT : var->value[0];
     }
-  v->flavor = flavor;
 
   return var;
 }
@@ -1314,8 +1313,9 @@ do_variable_definition (const struct floc *flocp, const char *varname,
 	  else
 	    v = lookup_variable (varname, strlen (varname));
 
-  if (flocp != 0)
-    v.fileinfo = *flocp;
+	  free (path_string);
+	}
+    }
   else
 #endif /* __MSDOS__ */
 #ifdef WINDOWS32
@@ -1526,9 +1526,7 @@ assign_variable_definition (struct variable *v, char *line)
   if (v->name[0] == '\0')
     fatal (&v->fileinfo, _("empty variable name"));
 
-  free (v.name);
-
-  return vp;
+  return v;
 }
 
 /* Try to interpret LINE (a null-terminated string) as a variable definition.
@@ -1742,10 +1740,6 @@ print_variable_data_base (void)
 
 /* Print all the local variables of FILE.  */
 
-/*! Print all the local variables of P_TARGET.  Lines output have "# "
-    prepended. If you want hash table statistics too, set b_hash_stats
-    true.
-*/
 void
 print_file_variables (const file_t *p_target, bool b_hash_stats)
 {

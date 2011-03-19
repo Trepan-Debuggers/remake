@@ -29,7 +29,6 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "debug.h"
 #include "hash.h"
 
-/** Hash table of files the makefile knows how to make.  */
 
 /* Remember whether snap_deps has been invoked: we need this to be sure we
    don't add new rules (via $(eval ...)) afterwards.  In the future it would
@@ -348,11 +347,6 @@ rename_file (struct file *from_file, const char *to_hname)
    meaning that a different message will be printed, and
    the message will go to stderr rather than stdout.  */
 
-/*!
- Rehash FILE to NAME.  This is not as simple as resetting
- the `hname' member, since it must be put in a new hash bucket,
- and possibly merged with an existing file called NAME.  
-*/
 void
 remove_intermediates (int sig)
 {
@@ -1159,13 +1153,6 @@ print_file (const void *item)
 
 }
 
-/** 
-    Place into the buffer P a printable representation of the file
-    timestamp TS.
-    
-    @param p output buffer for printable timestamp
-    @param ts timestamp to convert.
- */
 void
 print_file_data_base (void)
 {

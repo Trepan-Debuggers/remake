@@ -1,4 +1,4 @@
-@set UPDATED 27 December 2008
-@set UPDATED-MONTH December 2008
-@set EDITION 3.81+dbg-0.3git
-@set VERSION 3.81+dbg-0.3git
+@set UPDATED 18 March 2011
+@set UPDATED-MONTH March 2011
+@set EDITION 3.82+dbg-0.3
+@set VERSION 3.82+dbg-0.3

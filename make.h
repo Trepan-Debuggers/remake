@@ -1,4 +1,4 @@
-/* Miscellaneous global declarations and portability cruft for GNU Make.
+n/* Miscellaneous global declarations and portability cruft for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
 2010 Free Software Foundation, Inc.
@@ -46,10 +46,6 @@ char *alloca ();
 # endif
 #endif
 
-/* Specify we want GNU source code.  This must be defined before any
-   system headers are included.  */
-
-#define _GNU_SOURCE 1
 
 #ifdef  CRAY
 /* This must happen before #include <signal.h> so
@@ -424,10 +420,6 @@ int ar_name_equal (const char *name, const char *mem, int truncated);
 #ifndef VMS
 int ar_member_touch (const char *arname, const char *memname);
 #endif
-
-/* This is needed for getcwd() and chdir().  */
-#if defined(_MSC_VER) || defined(__BORLANDC__)
-# include <direct.h>
 #endif
 
 int dir_file_exists_p (const char *, const char *);

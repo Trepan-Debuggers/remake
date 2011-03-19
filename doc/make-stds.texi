@@ -3,16 +3,15 @@
 
 @node Makefile Conventions
 @chapter Makefile Conventions
-@comment standards.texi does not print an index, but make.texinfo does.
 @cindex makefile, conventions for
 @cindex conventions for makefiles
 @cindex standards for makefiles
 
-@c Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000, 2001,
-@c 2004, 2005 Free Software Foundation, Inc.
-
+@c Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000, 2001,
+@c 2004, 2005, 2006, 2007, 2008, 2010 Free Software Foundation, Inc.
+@c
 @c Permission is granted to copy, distribute and/or modify this document
-@c under the terms of the GNU Free Documentation License, Version 1.1
+@c under the terms of the GNU Free Documentation License, Version 1.3
 @c or any later version published by the Free Software Foundation;
 @c with no Invariant Sections, with no
 @c Front-Cover Texts, and with no Back-Cover Texts.
@@ -33,14 +32,18 @@ chapter
 @end iftex
 describes conventions for writing the Makefiles for GNU programs.
 Using Automake will help you write a Makefile that follows these
-conventions.
+conventions.  For more information on portable Makefiles, see
+@sc{posix} and @ref{Portable Make, Portable Make Programming,, autoconf,
+Autoconf}.
+
 
 @menu
-* Makefile Basics::             General Conventions for Makefiles
-* Utilities in Makefiles::      Utilities in Makefiles
-* Command Variables::           Variables for Specifying Commands
-* Directory Variables::         Variables for Installation Directories
-* Standard Targets::            Standard Targets for Users
+* Makefile Basics::             General conventions for Makefiles.
+* Utilities in Makefiles::      Utilities to be used in Makefiles.
+* Command Variables::           Variables for specifying commands.
+* DESTDIR::                     Supporting staged installs.
+* Directory Variables::         Variables for installation directories.
+* Standard Targets::            Standard targets for users.
 * Install Command Categories::  Three categories of commands in the `install'
                                   rule: normal, pre-install and post-install.
 @end menu
@@ -87,7 +90,7 @@ to @file{configure}.  A rule of the form:
 
 @smallexample
 foo.1 : foo.man sedscript
-        sed -e sedscript foo.man > foo.1
+        sed -f sedscript foo.man > foo.1
 @end smallexample
 
 @noindent
@@ -121,7 +124,7 @@ way to make the rule work well.  For example, the target above for
 
 @smallexample
 foo.1 : foo.man sedscript
-        sed -e $(srcdir)/sedscript $(srcdir)/foo.man > $@@
+        sed -f $(srcdir)/sedscript $(srcdir)/foo.man > $@@
 @end smallexample
 
 GNU distributions usually contain some files which are not source
@@ -143,8 +146,10 @@ subtargets) work correctly with a parallel @code{make}.
 @section Utilities in Makefiles
 
 Write the Makefile commands (and any shell scripts, such as
-@code{configure}) to run in @code{sh}, not in @code{csh}.  Don't use any
-special features of @code{ksh} or @code{bash}.
+@code{configure}) to run under @code{sh} (both the traditional Bourne
+shell and the @sc{posix} shell), not @code{csh}.  Don't use any
+special features of @code{ksh} or @code{bash}, or @sc{posix} features
+not widely supported in traditional Bourne @code{sh}.
 
 The @code{configure} script and the Makefile rules for building and
 installation should not use any utilities directly except these:
@@ -154,18 +159,23 @@ installation should not use any utilities directly except these:
 @c mkfifo mknod tee uname
 
 @example
-cat cmp cp diff echo egrep expr false grep install-info
-ln ls mkdir mv pwd rm rmdir sed sleep sort tar test touch true
+awk cat cmp cp diff echo egrep expr false grep install-info ln ls
+mkdir mv printf pwd rm rmdir sed sleep sort tar test touch tr true
 @end example
 
-The compression program @code{gzip} can be used in the @code{dist} rule.
+Compression programs such as @code{gzip} can be used in the
+@code{dist} rule.
 
-Stick to the generally supported options for these programs.  For
-example, don't use @samp{mkdir -p}, convenient as it may be, because
-most systems don't support it.
+Generally, stick to the widely-supported (usually
+@sc{posix}-specified) options and features of these programs.  For
+example, don't use @samp{mkdir -p}, convenient as it may be, because a
+few systems don't support it at all and with others, it is not safe
+for parallel execution.  For a list of known incompatibilities, see
+@ref{Portable Shell, Portable Shell Programming,, autoconf, Autoconf}.
+
 
 It is a good idea to avoid creating symbolic links in makefiles, since a
-few systems don't support them.
+few file systems don't support them.
 
 The Makefile rules for building and installation can also use compilers
 and related programs, but should do so via @code{make} variables so that the
@@ -263,30 +273,81 @@ Every Makefile should also define the variables @code{INSTALL_PROGRAM}
 and @code{INSTALL_DATA}.  (The default for @code{INSTALL_PROGRAM} should
 be @code{$(INSTALL)}; the default for @code{INSTALL_DATA} should be
 @code{$@{INSTALL@} -m 644}.)  Then it should use those variables as the
-commands for actual installation, for executables and nonexecutables
-respectively.  Use these variables as follows:
+commands for actual installation, for executables and non-executables
+respectively.  Minimal use of these variables is as follows:
 
 @example
 $(INSTALL_PROGRAM) foo $(bindir)/foo
 $(INSTALL_DATA) libfoo.a $(libdir)/libfoo.a
 @end example
 
-Optionally, you may prepend the value of @code{DESTDIR} to the target
-filename.  Doing this allows the installer to create a snapshot of the
-installation to be copied onto the real target filesystem later.  Do not
-set the value of @code{DESTDIR} in your Makefile, and do not include it
-in any installed files.  With support for @code{DESTDIR}, the above
-examples become:
+However, it is preferable to support a @code{DESTDIR} prefix on the
+target files, as explained in the next section.
+
+It is acceptable, but not required, to install multiple files in one
+command, with the final argument being a directory, as in:
+
+@example
+$(INSTALL_PROGRAM) foo bar baz $(bindir)
+@end example
+
+
+@node DESTDIR
+@section @code{DESTDIR}: Support for Staged Installs
+
+@vindex DESTDIR
+@cindex staged installs
+@cindex installations, staged
+
+@code{DESTDIR} is a variable prepended to each installed target file,
+like this:
 
 @example
 $(INSTALL_PROGRAM) foo $(DESTDIR)$(bindir)/foo
 $(INSTALL_DATA) libfoo.a $(DESTDIR)$(libdir)/libfoo.a
 @end example
 
+The @code{DESTDIR} variable is specified by the user on the @code{make}
+command line as an absolute file name.  For example:
+
+@example
+make DESTDIR=/tmp/stage install
+@end example
+
 @noindent
-Always use a file name, not a directory name, as the second argument of
-the installation commands.  Use a separate command for each file to be
-installed.
+@code{DESTDIR} should be supported only in the @code{install*} and
+@code{uninstall*} targets, as those are the only targets where it is
+useful.
+
+If your installation step would normally install
+@file{/usr/local/bin/foo} and @file{/usr/@/local/@/lib/@/libfoo.a}, then an
+installation invoked as in the example above would install
+@file{/tmp/stage/usr/local/bin/foo} and
+@file{/tmp/stage/usr/local/lib/libfoo.a} instead.
+
+Prepending the variable @code{DESTDIR} to each target in this way
+provides for @dfn{staged installs}, where the installed files are not
+placed directly into their expected location but are instead copied
+into a temporary location (@code{DESTDIR}).  However, installed files
+maintain their relative directory structure and any embedded file names
+will not be modified.
+
+You should not set the value of @code{DESTDIR} in your @file{Makefile}
+at all; then the files are installed into their expected locations by
+default.  Also, specifying @code{DESTDIR} should not change the
+operation of the software in any way, so its value should not be
+included in any file contents.
+
+@code{DESTDIR} support is commonly used in package creation.  It is
+also helpful to users who want to understand what a given package will
+install where, and to allow users who don't normally have permissions
+to install into protected areas to build and install before gaining
+those permissions.  Finally, it can be useful with tools such as
+@code{stow}, where code is installed in one place but made to appear
+to be installed somewhere else using symbolic links or special mount
+operations.  So, we strongly recommend GNU packages support
+@code{DESTDIR}, though it is not an absolute requirement.
+
 
 @node Directory Variables
 @section Variables for Installation Directories
@@ -294,7 +355,7 @@ installed.
 Installation directories should always be named by variables, so it is
 easy to install in a nonstandard place.  The standard names for these
 variables and the values they should have in GNU packages are
-described below.  They are based on a standard filesystem layout;
+described below.  They are based on a standard file system layout;
 variants of it are used in GNU/Linux and other modern operating
 systems.
 
@@ -306,9 +367,15 @@ these variables on the system they are being installed onto: use the
 default settings specified here so that all GNU packages behave
 identically, allowing the installer to achieve any desired layout.
 
-These two variables set the root for the installation.  All the other
-installation directories should be subdirectories of one of these two,
-and nothing should be directly installed into these two directories.
+@cindex directories, creating installation
+@cindex installation directories, creating
+All installation directories, and their parent directories, should be
+created (if necessary) before they are installed into.
+
+These first two variables set the root for the installation.  All the
+other installation directories should be subdirectories of one of
+these two, and nothing should be directly installed into these two
+directories.
 
 @table @code
 @item prefix
@@ -411,9 +478,11 @@ the same place as @samp{datarootdir}, but we use the two separate
 variables so that you can move these program-specific files without
 altering the location for Info files, man pages, etc.
 
+@c raggedright  (not until next Texinfo release)
 This should normally be @file{/usr/local/share}, but write it as
 @file{$(datarootdir)}.  (If you are using Autoconf, write it as
 @samp{@@datadir@@}.)
+@c end raggedright
 
 The definition of @samp{datadir} is the same for all packages, so you
 should install your data in a subdirectory thereof.  Most packages
@@ -458,7 +527,6 @@ need @samp{libdir} or @samp{lispdir}.
 
 @table @samp
 @item includedir
-@c rewritten to avoid overfull hbox --roland
 The directory for installing header files to be included by user
 programs with the C @samp{#include} preprocessor directive.  This
 should normally be @file{/usr/local/include}, but write it as
@@ -513,8 +581,7 @@ write it as @samp{@@infodir@@}.)  @code{infodir} is separate from
 @itemx pdfdir
 @itemx psdir
 Directories for installing documentation files in the particular
-format.  (It is not required to support documentation in all these
-formats.)  They should all be set to @code{$(docdir)} by default.  (If
+format.  They should all be set to @code{$(docdir)} by default.  (If
 you are using Autoconf, write them as @samp{@@htmldir@@},
 @samp{@@dvidir@@}, etc.)  Packages which supply several translations
 of their documentation should install them in
@@ -591,7 +658,7 @@ And finally, you should set the following variable:
 @item srcdir
 The directory for the sources being compiled.  The value of this
 variable is normally inserted by the @code{configure} shell script.
-(If you are using Autconf, use @samp{srcdir = @@srcdir@@}.)
+(If you are using Autoconf, use @samp{srcdir = @@srcdir@@}.)
 @end table
 
 For example:
@@ -625,6 +692,15 @@ specify the exact same values for several different GNU packages.  In
 order for this to be useful, all the packages must be designed so that
 they will work sensibly when the user does so.
 
+At times, not all of these variables may be implemented in the current
+release of Autoconf and/or Automake; but as of Autoconf@tie{}2.60, we
+believe all of them are.  When any are missing, the descriptions here
+serve as specifications for what Autoconf will implement.  As a
+programmer, you can either use a development version of Autoconf or
+avoid using these variables until a stable release is made which
+supports them.
+
+
 @node Standard Targets
 @section Standard Targets for Users
 
@@ -634,12 +710,14 @@ All GNU programs should have the following targets in their Makefiles:
 @item all
 Compile the entire program.  This should be the default target.  This
 target need not rebuild any documentation files; Info files should
-normally be included in the distribution, and DVI files should be made
-only when explicitly asked for.
+normally be included in the distribution, and DVI (and other
+documentation format) files should be made only when explicitly asked
+for.
 
 By default, the Make rules should compile and link with @samp{-g}, so
-that executable programs have debugging symbols.  Users who don't mind
-being helpless can strip the executables later if they wish.
+that executable programs have debugging symbols.  Otherwise, you are
+essentially helpless in the face of a crash, and it is often far from
+easy to reproduce with a fresh build.
 
 @item install
 Compile the program and copy the executables, libraries, and so on to
@@ -647,8 +725,11 @@ the file names where they should reside for actual use.  If there is a
 simple test to verify that a program is properly installed, this target
 should run that test.
 
-Do not strip executables when installing them.  Devil-may-care users can
-use the @code{install-strip} target to do that.
+Do not strip executables when installing them.  This helps eventual
+debugging that may be needed later, and nowadays disk space is cheap
+and dynamic loaders typically ensure debug sections are not loaded during
+normal execution.  Users that need stripped binaries may invoke the
+@code{install-strip} target to do that.
 
 If possible, write the @code{install} target rule so that it does not
 modify anything in the directory where the program was built, provided
@@ -671,26 +752,31 @@ with @code{$(INSTALL_DATA)} (@pxref{Command Variables}), and then run
 the @code{install-info} program if it is present.  @code{install-info}
 is a program that edits the Info @file{dir} file to add or update the
 menu entry for the given Info file; it is part of the Texinfo package.
-Here is a sample rule to install an Info file:
+
+Here is a sample rule to install an Info file that also tries to
+handle some additional situations, such as @code{install-info} not
+being present.
 
 @comment This example has been carefully formatted for the Make manual.
-@comment Please do not reformat it without talking to roland@gnu.ai.mit.edu.
+@comment Please do not reformat it without talking to bug-make@gnu.org.
 @smallexample
-$(DESTDIR)$(infodir)/foo.info: foo.info
-        $(POST_INSTALL)
-# There may be a newer info file in . than in srcdir.
-        -if test -f foo.info; then d=.; \
-         else d=$(srcdir); fi; \
-        $(INSTALL_DATA) $$d/foo.info $(DESTDIR)$@@; \
+do-install-info: foo.info installdirs
+        $(NORMAL_INSTALL)
+# Prefer an info file in . to one in srcdir.
+        if test -f foo.info; then d=.; \
+         else d="$(srcdir)"; fi; \
+        $(INSTALL_DATA) $$d/foo.info \
+          "$(DESTDIR)$(infodir)/foo.info"
 # Run install-info only if it exists.
 # Use `if' instead of just prepending `-' to the
 # line so we notice real errors from install-info.
-# We use `$(SHELL) -c' because some shells do not
+# Use `$(SHELL) -c' because some shells do not
 # fail gracefully when there is an unknown command.
+        $(POST_INSTALL)
         if $(SHELL) -c 'install-info --version' \
            >/dev/null 2>&1; then \
-          install-info --dir-file=$(DESTDIR)$(infodir)/dir \
-                       $(DESTDIR)$(infodir)/foo.info; \
+          install-info --dir-file="$(DESTDIR)$(infodir)/dir" \
+                       "$(DESTDIR)$(infodir)/foo.info"; \
         else true; fi
 @end smallexample
 
@@ -716,6 +802,10 @@ manuals, and you wish to install HTML documentation with many files
 (such as the ``split'' mode output by @code{makeinfo --html}), you'll
 certainly want to use subdirectories, or two nodes with the same name
 in different manuals will overwrite each other.
+
+Please make these @code{install-@var{format}} targets invoke the
+commands for the @var{format} target, for example, by making
+@var{format} a dependency.
 
 @item uninstall
 Delete all the installed files---the copies that the @samp{install}
@@ -751,10 +841,7 @@ the program has no bugs.  However, it can be reasonable to install a
 stripped executable for actual execution while saving the unstripped
 executable elsewhere in case there is a bug.
 
-@comment The gratuitous blank line here is to make the table look better
-@comment in the printed Make manual.  Please leave it in.
 @item clean
-
 Delete all files in the current directory that are normally created by
 building the program.  Also delete files in other directories if they
 are created by this makefile.  However, don't delete the files that
@@ -842,7 +929,11 @@ because they will already be up to date.
 @itemx html
 @itemx pdf
 @itemx ps
-Generate documentation files in the given format, if possible.
+Generate documentation files in the given format.  These targets
+should always exist, but any or all can be a no-op if the given output
+format cannot be generated.  These targets should not be dependencies
+of the @code{all} target; the user must manually invoke them.
+
 Here's an example rule for generating DVI files from Texinfo:
 
 @smallexample
@@ -853,11 +944,12 @@ foo.dvi: foo.texi chap1.texi chap2.texi
 @end smallexample
 
 @noindent
-You must define the variable @code{TEXI2DVI} in the Makefile.  It should
-run the program @code{texi2dvi}, which is part of the Texinfo
-distribution.@footnote{@code{texi2dvi} uses @TeX{} to do the real work
-of formatting. @TeX{} is not distributed with Texinfo.}  Alternatively,
-write just the dependencies, and allow GNU @code{make} to provide the command.
+You must define the variable @code{TEXI2DVI} in the Makefile.  It
+should run the program @code{texi2dvi}, which is part of the Texinfo
+distribution.  (@code{texi2dvi} uses @TeX{} to do the real work of
+formatting. @TeX{} is not distributed with Texinfo.)  Alternatively,
+write only the dependencies, and allow GNU @code{make} to provide the
+command.
 
 Here's another example, this one for generating HTML from Texinfo:
 
@@ -888,6 +980,7 @@ then @code{tar} that subdirectory.
 
 Compress the tar file with @code{gzip}.  For example, the actual
 distribution file for GCC version 1.40 is called @file{gcc-1.40.tar.gz}.
+It is ok to support other free compression formats as well.
 
 The @code{dist} target should explicitly depend on all non-source files
 that are in the distribution, to make sure they are up to date in the
@@ -919,8 +1012,7 @@ the program before running the tests.  You should not assume that
 It's useful to add a target named @samp{installdirs} to create the
 directories where files are installed, and their parent directories.
 There is a script called @file{mkinstalldirs} which is convenient for
-this; you can find it in the Texinfo package.
-@c It's in /gd/gnu/lib/mkinstalldirs.
+this; you can find it in the Gnulib package.
 You can use a rule like this:
 
 @comment This has been carefully formatted to look decent in the Make manual.
@@ -935,7 +1027,7 @@ installdirs: mkinstalldirs
 @end smallexample
 
 @noindent
-or, if you wish to support @env{DESTDIR},
+or, if you wish to support @env{DESTDIR} (strongly encouraged),
 
 @smallexample
 # Make sure all installation directories (e.g. $(bindir))

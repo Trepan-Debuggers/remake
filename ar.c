@@ -21,7 +21,6 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #ifndef	NO_ARCHIVES
 
-#include "dir_fns.h"
 #include "filedef.h"
 #include "dep.h"
 #include <fnmatch.h>
@@ -48,12 +47,9 @@ ar_name (const char *name)
   if (p[1] == '(' && end[-1] == ')')
     fatal (NILF, _("attempt to use unsupported feature: `%s'"), name);
 
-  return true;
+  return 1;
 }
 
-/*! 
-   Parse the archive-member reference into the archive and
-   member names.  
 
 /* Parse the archive-member reference NAME into the archive and member names.
    Creates one allocated string containing both names, pointed to by ARNAME_P.
@@ -104,13 +100,13 @@ ar_member_date (const char *name)
      not exist, because pattern_search assumes that files found in the data
      base exist or can be made.  */
   {
-    file_t *arfile;
+    struct file *arfile;
     arfile = lookup_file (arname);
     if (arfile == 0 && file_exists_p (arname))
       arfile = enter_file (strcache_add (arname));
 
     if (arfile != 0)
-      (void) f_mtime (arfile, false);
+      (void) f_mtime (arfile, 0);
   }
 
   val = ar_scan (arname, ar_member_date_1, memname);
@@ -178,14 +174,14 @@ ar_touch (const char *name)
 
 /* State of an `ar_glob' run, passed to `ar_glob_match'.  */
 
-typedef struct ar_glob_state
+struct ar_glob_state
   {
     const char *arname;
     const char *pattern;
     unsigned int size;
     struct nameseq *chain;
     unsigned int n;
-  } ar_glob_state_t;
+  };
 
 /* This function is called by `ar_scan' to match one archive
    element against the pattern in STATE.  */

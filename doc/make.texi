@@ -138,8 +138,6 @@ Writing Makefiles
 * Makefile Names::              How to name your makefile.
 * Include::                     How one makefile can use another makefile.
 * MAKEFILES Variable::          The environment can specify extra makefiles.
-* MAKEFILE_LIST Variable::      Discover which makefiles have been read.
-* Special Variables::           Other special variables.
 * Remaking Makefiles::          How makefiles get remade.
 * Overriding Makefiles::        How to override part of one makefile
                                   with another makefile.
@@ -215,16 +213,6 @@ Recipe Execution
 
 * Choosing the Shell::          How @code{make} chooses the shell used
                                   to run recipes.
-
-Command Syntax
-
-* Splitting Lines::             Breaking long command lines for readability.
-* Variables in Commands::       Using @code{make} variables in commands.
-
-Command Execution
-
-* Choosing the Shell::          How @code{make} chooses the shell used
-                                  to run commands.
 
 Recursive Use of @code{make}
 
@@ -952,8 +940,6 @@ reading a data base called the @dfn{makefile}.
 * Makefile Names::              How to name your makefile.
 * Include::                     How one makefile can use another makefile.
 * MAKEFILES Variable::          The environment can specify extra makefiles.
-* MAKEFILE_LIST Variable::      Discover which makefiles have been read.
-* Special Variables::           Other special variables.
 * Remaking Makefiles::          How makefiles get remade.
 * Overriding Makefiles::        How to override part of one makefile
                                   with another makefile.
@@ -1200,7 +1186,7 @@ remade.
 For compatibility with some other @code{make} implementations,
 @code{sinclude} is another name for @w{@code{-include}}.
 
-@node MAKEFILES Variable, MAKEFILE_LIST Variable, Include, Makefiles
+@node MAKEFILES Variable, Remaking Makefiles, Include, Makefiles
 @section The Variable @code{MAKEFILES}
 @cindex makefile, and @code{MAKEFILES} variable
 @cindex including (@code{MAKEFILES} variable)
@@ -1231,187 +1217,7 @@ This is a very bad idea, because such makefiles will fail to work if run by
 anyone else.  It is much better to write explicit @code{include} directives
 in the makefiles.  @xref{Include, , Including Other Makefiles}.
 
-@node MAKEFILE_LIST Variable, Special Variables, MAKEFILES Variable, Makefiles
-@comment  node-name,  next,  previous,  up
-@section The Variable @code{MAKEFILE_LIST}
-@cindex makefiles, and @code{MAKEFILE_LIST} variable
-@cindex including (@code{MAKEFILE_LIST} variable)
-@vindex MAKEFILE_LIST
-
-As @code{make} reads various makefiles, including any obtained from the
-@code{MAKEFILES} variable, the command line, the default files, or
-from @code{include} directives, their names will be automatically
-appended to the @code{MAKEFILE_LIST} variable.  They are added right
-before @code{make} begins to parse them.
-
-This means that if the first thing a makefile does is examine the last
-word in this variable, it will be the name of the current makefile.
-Once the current makefile has used @code{include}, however, the last
-word will be the just-included makefile.
-
-If a makefile named @code{Makefile} has this content:
-
-@example
-@group
-name1 := $(lastword $(MAKEFILE_LIST))
-
-include inc.mk
-
-name2 := $(lastword $(MAKEFILE_LIST))
-
-all:
-        @@echo name1 = $(name1)
-        @@echo name2 = $(name2)
-@end group
-@end example
-
-@noindent
-then you would expect to see this output:
-
-@example
-@group
-name1 = Makefile
-name2 = inc.mk
-@end group
-@end example
-
-@xref{Text Functions}, for more information on the @code{word} and
-@code{words} functions used above.  @xref{Flavors, The Two Flavors of
-Variables}, for more information on simply-expanded (@code{:=})
-variable definitions.
-
-@node Special Variables, Remaking Makefiles, MAKEFILE_LIST Variable, Makefiles
-@comment  node-name,  next,  previous,  up
-@section Other Special Variables
-@cindex makefiles, and special variables
-@cindex special variables
-
-GNU @code{make} also supports other special variables.  Unless
-otherwise documented here, these values lose their special properties
-if they are set by a makefile or on the command line.
-
-@table @code
-
-@vindex .DEFAULT_GOAL @r{(define default goal)}
-@item .DEFAULT_GOAL
-Sets the default goal to be used if no targets were specified on the
-command line (@pxref{Goals, , Arguments to Specify the Goals}).  The
-@code{.DEFAULT_GOAL} variable allows you to discover the current
-default goal, restart the default goal selection algorithm by clearing
-its value, or to explicitly set the default goal.  The following
-example illustrates these cases:
-
-@example
-@group
-# Query the default goal.
-ifeq ($(.DEFAULT_GOAL),)
-  $(warning no default goal is set)
-endif
-
-.PHONY: foo
-foo: ; @@echo $@@
-
-$(warning default goal is $(.DEFAULT_GOAL))
-
-# Reset the default goal.
-.DEFAULT_GOAL :=
-
-.PHONY: bar
-bar: ; @@echo $@@
-
-$(warning default goal is $(.DEFAULT_GOAL))
-
-# Set our own.
-.DEFAULT_GOAL := foo
-@end group
-@end example
-
-This makefile prints:
-
-@example
-@group
-no default goal is set
-default goal is foo
-default goal is bar
-foo
-@end group
-@end example
-
-Note that assigning more than one target name to @code{.DEFAULT_GOAL} is
-illegal and will result in an error.
-
-@vindex MAKE_RESTARTS @r{(number of times @code{make} has restarted)}
-@item MAKE_RESTARTS
-This variable is set only if this instance of @code{make} has
-restarted (@pxref{Remaking Makefiles, , How Makefiles Are Remade}): it
-will contain the number of times this instance has restarted.  Note
-this is not the same as recursion (counted by the @code{MAKELEVEL}
-variable).  You should not set, modify, or export this variable.
-
-@vindex .VARIABLES @r{(list of variables)}
-@item .VARIABLES
-Expands to a list of the @emph{names} of all global variables defined
-so far.  This includes variables which have empty values, as well as
-built-in variables (@pxref{Implicit Variables, , Variables Used by
-Implicit Rules}), but does not include any variables which are only
-defined in a target-specific context.  Note that any value you assign
-to this variable will be ignored; it will always return its special
-value.
-
-@c @vindex .TARGETS @r{(list of targets)}
-@c @item .TARGETS
-@c The second special variable is @code{.TARGETS}.  When expanded, the
-@c value consists of a list of all targets defined in all makefiles read
-@c up until that point.  Note it's not enough for a file to be simply
-@c mentioned in the makefile to be listed in this variable, even if it
-@c would match an implicit rule and become an ``implicit target''.  The
-@c file must appear as a target, on the left-hand side of a ``:'', to be
-@c considered a target for the purposes of this variable.
-
-@vindex .FEATURES @r{(list of supported features)}
-@item .FEATURES
-Expands to a list of special features supported by this version of
-@code{make}.  Possible values include:
-
-@table @samp
-
-@item archives
-Supports @code{ar} (archive) files using special filename syntax.
-@xref{Archives, ,Using @code{make} to Update Archive Files}.
-
-@item check-symlink
-Supports the @code{-L} (@code{--check-symlink-times}) flag.
-@xref{Options Summary, ,Summary of Options}.
-
-@item else-if
-Supports ``else if'' non-nested conditionals.  @xref{Conditional
-Syntax, ,Syntax of Conditionals}.
-
-@item jobserver
-Supports ``job server'' enhanced parallel builds.  @xref{Parallel,
-,Parallel Execution}.
-
-@item second-expansion
-Supports secondary expansion of prerequisite lists.
-
-@item order-only
-Supports order-only prerequisites.  @xref{Prerequisite Types, ,Types
-of Prerequisites}.
-
-@item target-specific
-Supports target-specific and pattern-specific variable assignments.
-@xref{Target-specific, ,Target-specific Variable Values}.
-
-@end table
-
-@vindex .INCLUDE_DIRS @r{(list of include directories)}
-@item .INCLUDE_DIRS
-Expands to a list of directories that @code{make} searches for
-included makefiles (@pxref{Include, , Including Other Makefiles}).
-
-@end table
-
-@node Remaking Makefiles, Overriding Makefiles, Special Variables, Makefiles
+@node Remaking Makefiles, Overriding Makefiles, MAKEFILES Variable, Makefiles
 @section How Makefiles Are Remade
 
 @cindex updating makefiles
@@ -3035,42 +2841,6 @@ are always low resolution.  You need not list archive members as
 prerequisites of @code{.LOW_RESOLUTION_TIME}, as @command{make} does this
 automatically.
 
-@findex .LOW_RESOLUTION_TIME
-@item .LOW_RESOLUTION_TIME
-
-If you specify prerequisites for @code{.LOW_RESOLUTION_TIME},
-@command{make} assumes that these files are created by commands that
-generate low resolution time stamps.  The commands for
-@code{.LOW_RESOLUTION_TIME} are not meaningful.
-
-The high resolution file time stamps of many modern hosts lessen the
-chance of @command{make} incorrectly concluding that a file is up to
-date.  Unfortunately, these hosts provide no way to set a high
-resolution file time stamp, so commands like @samp{cp -p} that
-explicitly set a file's time stamp must discard its subsecond part.  If
-a file is created by such a command, you should list it as a
-prerequisite of @code{.LOW_RESOLUTION_TIME} so that @command{make} does
-not mistakenly conclude that the file is out of date.  For example:
-
-@example
-@group
-.LOW_RESOLUTION_TIME: dst
-dst: src
-        cp -p src dst
-@end group
-@end example
-
-Since @samp{cp -p} discards the subsecond part of @file{src}'s time
-stamp, @file{dst} is typically slightly older than @file{src} even when
-it is up to date.  The @code{.LOW_RESOLUTION_TIME} line causes
-@command{make} to consider @file{dst} to be up to date if its time stamp
-is at the start of the same second that @file{src}'s time stamp is in.
-
-Due to a limitation of the archive format, archive member time stamps
-are always low resolution.  You need not list archive members as
-prerequisites of @code{.LOW_RESOLUTION_TIME}, as @command{make} does this
-automatically.
-
 @findex .SILENT
 @item .SILENT
 
@@ -3896,10 +3666,9 @@ Typically you would use this for a command whose only effect is to print
 something, such as an @code{echo} command to indicate progress through
 the makefile:
 
-@item
-A variable definition in a ``rule context'' which is indented by a tab
-as the first character on the line, will be considered a command line,
-not a @code{make} variable definition, and passed to the shell.
+@example
+@@echo About to make distribution files
+@end example
 
 @cindex @code{-n}
 @cindex @code{--just-print}
@@ -8703,39 +8472,6 @@ from complicated nests of recursive @code{make} commands.
 rarely need to specify this option since @samp{make} does it for you;
 see @ref{-w Option, ,The @samp{--print-directory} Option}.)
 
-@item -x
-@cindex @code{-x}
-@itemx --trace
-@cindex @code{--touch}
-@c Extra blank line here makes the table look better.
-
-Turn on tracing makefile execution. Various levels of granularity
-debugging can be chosen.  With no arguments, ``basic'' debug tracing
-is turned on and the debugger is entered @code{make} would execute the
-first command.  Possible arguments are below.
-
-@table @code
-@item commands
-Just turn on tracing of commands that are executed. We suppress the
-supression of commands using @samp{@@}. In other words, all commands
-are echoed.
-
-@item normal
-This is the default behavior; ``basic'' debug tracing is turned on,
-command tracing is turned on and the debugger is entered before
-executing the first command.
-
-@item noshell
-Don't run shell commands.
-
-@item read
-A little more verbose than ``normal''. Trace reading Makefiles
-
-@item full
-The most verbose tracing. 
-@end table
-
-
 @itemx --no-print-directory
 @cindex @code{--no-print-directory}
 Disable printing of the working directory under @code{-w}.
@@ -9266,11 +9002,6 @@ Program for compiling assembly files; default @samp{as}.
 @item CC
 @vindex CC
 Program for compiling C programs; default @samp{cc}.
-@pindex cc
-
-@item CO
-@vindex CO
-Program for checking out files from RCS; default @samp{co}.
 @pindex cc
 
 @item CXX
@@ -11609,7 +11340,6 @@ AUX =   README COPYING ChangeLog Makefile.in  \
 all:    tar rmt tar.info
 
 @group
-.PHONY: tar
 tar:    $(OBJS)
         $(CC) $(LDFLAGS) -o $@@ $(OBJS) $(LIBS)
 @end group

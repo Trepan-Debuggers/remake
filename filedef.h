@@ -48,12 +48,12 @@ struct file
 				   entries for the same file.  */
     struct file *last;          /* Last entry for the same file name.  */
 
-    /**< File that this file was renamed to.  After any time that a
+    /* File that this file was renamed to.  After any time that a
        file could be renamed, call `check_renamed' (below).  */
-    file_t *renamed;
+    struct file *renamed;
 
-    /**< List of variable sets used for this file.  */
-    variable_set_list_t *variables;
+    /* List of variable sets used for this file.  */
+    struct variable_set_list *variables;
 
     /* Pattern-specific variable reference for this target, or null if there
        isn't one.  Also see the pat_searched flag, below.  */
@@ -61,11 +61,11 @@ struct file
 
     /* Immediate dependent that caused this target to be remade,
        or nil if there isn't one.  */
-    file_t *parent;
+    struct file *parent;
 
-    /**< For a double-colon entry, this is the first double-colon entry for
+    /* For a double-colon entry, this is the first double-colon entry for
        the same file.  Otherwise this is null.  */
-    file_t *double_colon;
+    struct file *double_colon;
 
     short int update_status;	/* Status of the last attempt to update,
 				   or -1 if none has been made.  */
@@ -170,8 +170,7 @@ void file_timestamp_sprintf (char *p, FILE_TIMESTAMP ts);
 /* Return the mtime of file F (a struct file *), caching it.
    The value is NONEXISTENT_MTIME if the file does not exist.  */
 #define file_mtime(f) file_mtime_1 ((f), 1)
-
-/** Return the mtime of file F (a file_t *), caching it.
+/* Return the mtime of file F (a struct file *), caching it.
    Don't search using vpath for the file--if it doesn't actually exist,
    we don't find it.
    The value is NONEXISTENT_MTIME if the file does not exist.  */

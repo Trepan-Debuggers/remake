@@ -22,10 +22,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef MAKE_RULE_H
 #define MAKE_RULE_H
 
-#ifndef RULE_H
-#define RULE_H
-
-typedef struct rule
+struct rule
   {
     struct rule *next;
     const char **targets;	/* Targets of the rule.  */
@@ -36,7 +33,7 @@ typedef struct rule
     unsigned short num;         /* Number of targets.  */
     char terminal;		/* If terminal (double-colon).  */
     char in_use;		/* If in use by a parent pattern_search.  */
-  } rule_t;
+  };
 
 /* For calling install_pattern_rule.  */
 struct pspec

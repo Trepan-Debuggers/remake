@@ -328,8 +328,6 @@ set_file_variables (struct file *file)
 /* Chop CMDS up into individual command lines if necessary.
    Also set the `lines_flags' and `any_recurse' members.  */
 
-   @param cmds a pointer to the commands to chop up.
-*/
 void
 chop_commands (struct commands *cmds)
 {
@@ -440,18 +438,10 @@ chop_commands (struct commands *cmds)
     }
 }
 
-/*! 
-  Execute the commands to remake FILE.  If they are currently
-  executing, return or have already finished executing, just return.
-  Otherwise, fork off a child process to run the first command line
-  in the sequence.  
-  
-  @param file pointer to file to remake.
+/* Execute the commands to remake FILE.  If they are currently executing,
+   return or have already finished executing, just return.  Otherwise,
+   fork off a child process to run the first command line in the sequence.  */
 
-  @param call_stack pointer to current target call stack. This is
-  passed down for information reporting.
-  
-*/
 void
 execute_file_commands (struct file *file)
 {
@@ -479,7 +469,7 @@ execute_file_commands (struct file *file)
   set_file_variables (file);
 
   /* Start the commands running.  */
-  new_job (file, p_call_stack);
+  new_job (file);
 }
 
 /* This is set while we are inside fatal_error_signal,
@@ -575,12 +565,12 @@ fatal_error_signal (int sig)
       /* Clean up the children.  We don't just use the call below because
 	 we don't want to print the "Waiting for children" message.  */
       while (job_slots_used > 0)
-	reap_children (1, 0, NULL);
+	reap_children (1, 0);
     }
   else
     /* Wait for our children to die.  */
     while (job_slots_used > 0)
-      reap_children (1, 1, NULL);
+      reap_children (1, 1);
 
   /* Delete any non-precious intermediate files that were made.  */
 
@@ -662,23 +652,22 @@ delete_target (struct file *file, const char *on_behalf_of)
 void
 delete_child_targets (struct child *child)
 {
-  dep_t *p_dep;
+  struct dep *d;
 
-  if (p_child->deleted)
+  if (child->deleted)
     return;
 
   /* Delete the target file if it changed.  */
   delete_target (child->file, NULL);
 
   /* Also remove any non-precious targets listed in the `also_make' member.  */
-  for (p_dep = p_child->file->also_make; p_dep != 0; p_dep = p_dep->next)
-    delete_target (p_dep->file, p_child->file->name);
+  for (d = child->file->also_make; d != 0; d = d->next)
+    delete_target (d->file, child->file->name);
 
-  p_child->deleted = 1;
+  child->deleted = 1;
 }
 
-/*! 
-  Print out the commands.
+/* Print out the commands in CMDS.  */
 
 /*! 
   Print out the commands.

@@ -25,7 +25,8 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* Codes in a variable definition saying where the definition came from.
    Increasing numeric values signify less-overridable definitions.  */
-typedef enum variable_origin {
+enum variable_origin
+  {
     o_default,		/* Variable from the default set.  */
     o_env,		/* Variable from environment.  */
     o_file,		/* Variable given in a makefile.  */
@@ -35,16 +36,7 @@ typedef enum variable_origin {
     o_automatic,	/* Automatic variable -- cannot be set.  */
     o_debugger,  	/* Set inside debugger.  */
     o_invalid		/* Core dump time.  */
-  } variable_origin_t;
-
-typedef enum variable_flavor {
-    f_bogus,            /* Bogus (error) */
-    f_simple,           /* Simple definition (:=) */
-    f_recursive,        /* Recursive definition (=) */
-    f_append,           /* Appending definition (+=) */
-    f_conditional       /* Conditional definition (?=) */
-} variable_flavor_t;
-
+  };
 
 enum variable_flavor
   {
@@ -93,7 +85,7 @@ struct variable
 	v_ifset,		/* Export it if it has a non-default value.  */
 	v_default		/* Decide in target_environment.  */
       } export ENUM_BITFIELD (2);
-  } variable_t;
+  };
 
 /* Structure that represents a variable set.  */
 
@@ -285,8 +277,6 @@ char **target_environment (struct file *file);
 
 struct pattern_var *create_pattern_var (const char *target,
                                         const char *suffix);
-
-extern struct pattern_var *create_pattern_var PARAMS ((char *target, char *suffix));
 
 extern int export_all_variables;
 

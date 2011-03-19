@@ -21,7 +21,6 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <assert.h>
 
 #include "dep.h"
-#include "dir_fns.h"
 #include "filedef.h"
 #include "job.h"
 #include "commands.h"
