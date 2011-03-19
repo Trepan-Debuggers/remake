@@ -120,6 +120,9 @@ static const char *default_include_directories[] =
 
 static const char **include_directories;
 
+/*! The chain of makefiles read by read_makefile.  */
+extern dep_t *read_makefiles;
+
 /* Maximum length of an element of the above.  */
 
 static unsigned int max_incl_len;
@@ -130,8 +133,7 @@ static unsigned int max_incl_len;
 const struct floc *reading_file = 0;
 
 /* The chain of makefiles read by read_makefile.  */
-
-static struct dep *read_makefiles = 0;
+struct dep *read_makefiles = NULL;
 
 static int eval_makefile (const char *filename, int flags);
 static void eval (struct ebuffer *buffer, int flags);

@@ -22,6 +22,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "dep.h"
 #include "debug.h"
 #include "variable.h"
+#include "print.h"
 #include "job.h"      /* struct child, used inside commands.h */
 #include "commands.h" /* set_file_variables */
 

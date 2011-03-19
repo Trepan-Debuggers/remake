@@ -21,6 +21,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <assert.h>
 
 #include "dep.h"
+#include "expand.h"
 #include "filedef.h"
 #include "job.h"
 #include "commands.h"
@@ -1639,18 +1640,72 @@ print_variable (const void *item, void *arg)
 }
 
 
+
+/** Print information for variable V, prefixing it with PREFIX.  */
+void
+print_variable_info (const void *item, void *arg)
+{
+  const variable_t *v = (variable_t *) item;
+  const char *prefix = (char *) arg;
+  const char *origin;
+
+  if (o_invalid == v->origin) abort ();
+  origin = origin2str(v->origin);
+
+  if (prefix) {
+    fputs ("# ", stdout);
+    fputs (origin, stdout);
+    if (v->fileinfo.filenm)
+      printf (_(" (from `%s', line %lu)"),
+	      v->fileinfo.filenm, v->fileinfo.lineno);
+    putchar ('\n');
+    fputs (prefix, stdout);
+  }
+
+  /* Is this a `define'?  */
+  if (v->recursive && strchr (v->value, '\n') != 0)
+    printf ("define %s\n%s\nendef\n", v->name, v->value);
+  else
+    {
+      char *p;
+
+      printf ("%s %s= ", v->name, v->recursive ? v->append ? "+" : "" : ":");
+
+      /* Check if the value is just whitespace.  */
+      p = next_token (v->value);
+      if (p != v->value && *p == '\0')
+	/* All whitespace.  */
+	printf ("$(subst ,,%s)", v->value);
+      else if (v->recursive)
+	fputs (v->value, stdout);
+      else
+	/* Double up dollar signs.  */
+	for (p = v->value; *p != '\0'; ++p)
+	  {
+	    if (*p == '$')
+	      putchar ('$');
+	    putchar (*p);
+	  }
+      putchar ('\n');
+    }
+}
+
+
 /* Print all the variables in SET.  PREFIX is printed before
    the actual variable definitions (everything else is comments).  */
 
 void
-print_variable_set (struct variable_set *set, char *prefix)
+print_variable_set (struct variable_set *p_set, char *psz_prefix, bool b_hash_stats)
 {
-  hash_map_arg (&set->table, print_variable, prefix);
+  hash_map_arg (&p_set->table, print_variable, psz_prefix);
 
-  fputs (_("# variable set hash-table stats:\n"), stdout);
-  fputs ("# ", stdout);
-  hash_print_stats (&set->table, stdout);
-  putc ('\n', stdout);
+  if (b_hash_stats) {
+    if (psz_prefix) fputs (psz_prefix, stdout);
+    fputs (_("variable set hash-table stats:\n"), stdout);
+    if (psz_prefix) fputs (psz_prefix, stdout);
+    hash_print_stats (&p_set->table, stdout);
+    putc ('\n', stdout);
+  }
 }
 
 /* Print the data base of variables.  */
@@ -1660,7 +1715,7 @@ print_variable_data_base (void)
 {
   puts (_("\n# Variables\n"));
 
-  print_variable_set (&global_variable_set, "");
+  print_variable_set (&global_variable_set, "", true);
 
   puts (_("\n# Pattern-specific Variable Values"));
 
@@ -1686,10 +1741,10 @@ print_variable_data_base (void)
 /* Print all the local variables of FILE.  */
 
 void
-print_file_variables (const struct file *file)
+print_file_variables (const file_t *p_target, bool b_hash_stats)
 {
-  if (file->variables != 0)
-    print_variable_set (file->variables->set, "# ");
+  if (p_target->variables != 0)
+    print_variable_set (p_target->variables->set, "# ", b_hash_stats);
 }
 
 #ifdef WINDOWS32

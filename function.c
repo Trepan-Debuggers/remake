@@ -18,6 +18,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "make.h"
 #include "filedef.h"
+#include "expand.h"
 #include "variable.h"
 #include "dep.h"
 #include "job.h"
@@ -1360,7 +1361,7 @@ func_wildcard (char *o, char **argv, const char *funcname UNUSED)
   Treat the arguments as a segment of makefile, and parse them.
 */
 
-static char *
+char *
 func_eval (char *o, char **argv, const char *funcname UNUSED)
 {
   char *buf;
