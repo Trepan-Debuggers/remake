@@ -1,3 +1,244 @@
+2010-07-28  Paul Smith  <psmith@gnu.org>
+
+	* scripts/targets/POSIX: Compatibility issues with Solaris (and
+	Tru64?); "false" returns different exit codes, and set -x shows
+	output with extra whitespace.  Run the commands by hand first to
+	find out what the real shell would do, then compare what make does.
+	* scripts/variables/SHELL: Ditto.
+
+2010-07-12  Paul Smith  <psmith@gnu.org>
+
+	* test_driver.pl: Add a new $perl_name containing the path to Perl.
+	* run_make_tests.pl (run_make_test): Replace the special string
+	#PERL# in a makefile etc. with the path the Perl executable so
+	makefiles can use it.
+
+	* scripts/targets/ONESHELL: Add a new set of regression tests for
+	the .ONESHELL feature.
+
+2010-07-06  Paul Smith  <psmith@gnu.org>
+
+	* scripts/variables/SHELL: Test the new .SHELLFLAGS variable.
+
+	* scripts/targets/POSIX: New file.  Test the .POSIX special target.
+	Verify that enabling .POSIX changes the shell flags to set -e.
+
+2010-07-01  Paul Smith  <psmith@gnu.org>
+
+	* scripts/features/recursion: Add a space to separate command-line
+	args.  Fixes Savannah bug #29968.
+
+2009-11-12  Boris Kolpackov  <boris@codesynthesis.com>
+
+	* scripts/features/vpath3: Test for the new library search
+	behavior.
+
+2009-10-06  Boris Kolpackov  <boris@codesynthesis.com>
+
+	* scripts/features/se_explicit: Enable the test for now fixed
+	Savannah bug 25780.
+
+2009-10-06  Boris Kolpackov  <boris@codesynthesis.com>
+
+	* scripts/variables/undefine: Tests for the new undefine feature.
+
+2009-10-03  Paul Smith  <psmith@gnu.org>
+
+	* scripts/features/parallelism: Test for open Savannah bug #26846.
+
+	* scripts/variables/MAKE: Rewrite for new run_make_test() format.
+
+	* scripts/variables/MAKEFLAGS: Created.
+	Add test for Savannah bug #2216 (still open).
+
+	* scripts/features/include: Test for Savannah bug #102 (still open).
+
+2009-09-30  Boris Kolpackov  <boris@codesynthesis.com>
+
+	* scripts/features/include: Add diagnostics issuing tests for
+	cases where targets have been updated and failed with the
+	dontcare flag. Savannah bugs #15110, #25493, #12686, #17740.
+
+2009-09-28  Paul Smith  <psmith@gnu.org>
+
+	* scripts/functions/shell: Add regression test for Savannah bug
+	#20513 (still open).
+
+	* scripts/features/se_explicit: Add regression tests for Savannah
+	bug #25780 (still open).
+
+	* run_make_tests.pl (valid_option): Add a new flag, -all([-_]?tests)?
+	that runs tests we know will fail.  This allows us to add
+	regression tests to the test suite for bugs that haven't been
+	fixed yet.
+
+2009-09-28  Boris Kolpackov  <boris@codesynthesis.com>
+
+	* scripts/features/patspecific_vars: Add a test for the shortest
+	stem first order.
+
+	* scripts/features/patternrules: Add a test for the shortest stem
+	first order.
+
+2009-09-24  Paul Smith  <psmith@gnu.org>
+
+	* scripts/features/se_implicit: Add a test for order-only
+	secondary expansion prerequisites.
+
+2009-09-23  Paul Smith  <psmith@gnu.org>
+
+	* scripts/features/patternrules: Test that we can remove pattern
+	rules, both single and multiple prerequisites.  Savannah bug #18622.
+
+	* scripts/features/echoing: Rework for run_make_test().
+
+2009-06-14  Paul Smith  <psmith@gnu.org>
+
+	* scripts/features/vpath: Verify we don't get bogus circular
+	dependency warnings if we choose a different file via vpath during
+	update.  Savannah bug #13529.
+
+2009-06-13  Paul Smith  <psmith@gnu.org>
+
+	* scripts/variables/MAKEFILES: Verify that MAKEFILES included
+	files (and files included by them) don't set the default goal.
+	Savannah bug #13401.
+
+	* scripts/functions/wildcard: Test that wildcards with
+	non-existent glob matchers return empty.
+
+2009-06-09  Paul Smith  <psmith@gnu.org>
+
+	* scripts/options/dash-B: Test the $? works correctly with -B.
+	Savannah bug #17825.
+
+	* scripts/features/patternrules: Test that dependencies of
+	"also_make" targets are created properly.  Savannah bug #19108.
+
+	* test_driver.pl (compare_output): Create a "run" file for failed
+	tests containing the command that was run.
+	(get_runfile): New function.
+
+	* run_make_tests.pl (valid_option): Enhanced support for valgrind:
+	allow memcheck and massif tools.
+
+	* scripts/features/patternrules: Have to comment out a line in the
+	first test due to backing out a change that broke the implicit
+	rule search algorithm.  Savannah bug #17752.
+	* scripts/misc/general4: Remove a test that is redundant with
+	patternrules.
+
+	* scripts/features/parallelism: Add a test for re-exec with
+	jobserver master override.  Savannah bug #18124.
+
+2009-06-08  Paul Smith  <psmith@gnu.org>
+
+	* scripts/features/targetvars: Add a test for continued target
+	vars after a semicolon.  Savannah bug #17521.
+
+2009-06-07  Paul Smith  <psmith@gnu.org>
+
+	* scripts/features/se_explicit: Make sure we catch defining
+	prereqs during snap_deps().  Savannah bug #24622.
+
+	* scripts/variables/automatic: Check prereq ordering when the
+	target with the recipe has no prereqs.  Savannah bug #21198.
+
+	* scripts/variables/LIBPATTERNS: Add a new set of test for
+	$(.LIBPATTERNS) (previously untested!)
+
+2009-06-04  Paul Smith  <psmith@gnu.org>
+
+	* scripts/variables/SHELL: The export target-specific SHELL test
+	has an incorrect known-good-value.
+
+	* scripts/misc/general4: Check for whitespace (ffeed, vtab, etc.)
+
+	* scripts/features/se_explicit: Add tests for Savannah bug #24588.
+
+2009-05-31  Paul Smith  <psmith@gnu.org>
+
+	* scripts/variables/DEFAULT_GOAL: Add tests for Savannah bug #25697.
+
+	* scripts/features/targetvars: Add tests of overrides for Savannah
+	bug #26207.
+	* scripts/features/patspecific_vars: Ditto.
+
+	* scripts/features/patternrules: Add a test for Savannah bug #26593.
+
+2009-05-30  Paul Smith  <psmith@gnu.org>
+
+	* scripts/variables/flavors: Update with new variable flavor tests.
+	* scripts/variables/define: Create a new set of tests for
+	define/endef and move those aspects of the flavors suite here.
+
+2009-05-25  Paul Smith  <psmith@gnu.org>
+
+	* scripts/features/targetvars: Ditto.
+
+	* scripts/features/export: Test new variable parsing abilities.
+
+2009-02-23  Ramon Garcia  <ramon.garcia.f@gmail.com>
+
+	* scripts/variables/private: Create a new suite of tests for 'private'.
+
+2007-11-04  Paul Smith  <psmith@gnu.org>
+
+	* scripts/functions/eval: Update error message for command -> recipe.
+
+	* test_driver.pl (compare_output): Allow the answer to be a regex,
+	if surrounded by '/'.
+	* scripts/misc/close_stdout: Use a regex for the answer, since
+	sometimes the error will have a description and sometimes it won't.
+
+2007-09-10  Paul Smith  <psmith@gnu.org>
+
+	* scripts/variables/special: Add tests for .RECIPEPREFIX variable.
+
+2007-08-15  Paul Smith  <psmith@gnu.org>
+
+	These test cases were contributed by
+	Icarus Sparry <savannah@icarus.freeuk.com> and J. David Bryan for
+	Savannah bugs #3330 and #15919.
+
+	* scripts/targets/SECONDARY: Add tests for Savannah bugs 3330 and
+	15919.
+
+	* scripts/features/parallelism: Add tests for wrong answer/hang
+	combining INTERMEDIATE, order-only prereqs, and parallelism.
+	See Savannah bugs 3330 and 15919.
+
+2007-07-13  Paul Smith  <psmith@gnu.org>
+
+	Install a timeout so tests can never loop infinitely.
+	Original idea and patch for a single-test version provided by
+	Icarus Sparry <savannah@icarus.freeuk.com>
+
+	* test_driver.pl (_run_command): New function: this is called by
+	other functions to actually run a command.  Before we run it,
+	install a SIGALRM handler and set up a timer to go off in the
+	future (default is 5s; this can be overridden by individual tests).
+	(run_command): Call it.
+	(run_command_with_output): Call it.
+
+	* run_make_tests.pl (run_make_with_options): Override the default
+	timeout if the caller requests it.
+	(run_make_test): Pass any timeout override to run_make_with_options.
+
+	* scripts/features/parallelism: Increase the timeout for long tests.
+	* scripts/options/dash-l: Ditto.
+
+2006-10-01  Paul Smith  <psmith@paulandlesley.org>
+
+	* run_make_tests.pl (set_more_defaults): Remove setting of LANG in
+	ENV here.  This doesn't always work.
+	* test_driver.pl (toplevel): Set LC_ALL to 'C' in the make
+	environment.  Fixes Savannah bug #16698.
+
+2006-09-30  Paul Smith  <psmith@paulandlesley.org>
+
+	* scripts/variables/automatic: Add back the test for bug #8154.
+
 2006-04-01  Paul D. Smith  <psmith@gnu.org>
 
 	* scripts/functions/realpath: Don't run tests with multiple
@@ -822,17 +1063,17 @@
 
 
 Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2, or (at your option) any later version.
+Foundation; either version 3 of the License, or (at your option) any later
+version.
 
 GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-GNU Make; see the file COPYING.  If not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+this program.  If not, see <http://www.gnu.org/licenses/>.

@@ -29,8 +29,6 @@ Boston, MA 02111-1307, USA.  */
 #include "make.h"
 #include "hash.h"
 
-file_t *lookup_file (char *psz_name);
-
 /*! Free memory associated with p_file. */
 void    free_file  (file_t *p_file);
 

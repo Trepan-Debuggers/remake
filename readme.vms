@@ -1,16 +1,13 @@
 This is the VMS version of GNU Make, updated by Hartmut Becker
 
-Changes are based on GNU make 3.80. Latest changes are for OpenVMS/I64
-and new VMS CRTLs.
+Changes are based on GNU make 3.82.
 
-This version was tested on OpenVMS/I64 V8.2 (field test) with hp C
-X7.1-024 OpenVMS/Alpha V7.3-2 with Compaq C V6.5-001 and OpenVMS/VAX 7.1
-with Compaq C V6.2-003 There are still some warning and informational
-message issued by the compilers.
+This version was built and tested on OpenVMS V7.3 (VAX), V7.3-2 (Alpha) and
+V8.3-1H1 (I64).
 
 Build instructions
 Make a 1st version
-       $ @makefile.com
+       $ @makefile.com  ! ignore any compiler and/or linker warning
        $ rena make.exe 1st-make.exe
 Use the 1st version to generate a 2nd version
        $ mc sys$disk:[]1st-make clean
@@ -20,7 +17,89 @@ Verify your 2nd version
        $ mc sys$disk:[]2nd-make clean
        $ mc sys$disk:[]2nd-make
 
-Changes:
+Changes (3.81.90)
+
+Michael Gehre (at VISTEC-SEMI dot COM) supplied a fix for a problem with
+timestamps of object modules in OLBs. The timestamps were not correctly
+adjusted to GMT based time, if the local VMS time was using a daylight saving
+algorithm and if daylight saving was switched off.
+
+John Eisenbraun (at HP dot COM) supplied fixes and and an enhancement to append
+output redirection in action lines.
+
+Rework of ctrl+c and ctrl+y handling.
+
+Fix a problem with cached strings, which showed on case-insensitive file
+systems.
+
+Build fixes for const-ified code in VMS specific sources.
+
+Build notes:
+- Try to avoid HP C V7.2-001, which has an incompatible change
+how __STDC__ is defined. This results at least in compile time warnings.
+
+- On V8.3-1H1, if you press Ctrl+C you may see a traceback, starting with
+%SYSTEM-F-CONTROLC, operation completed under CTRL/C
+%TRACE-F-TRACEBACK, symbolic stack dump follows
+image     module    routine               line      rel PC           abs PC
+
+DECC$SHR  C$SIGNAL  gsignal              27991 0000000000001180
+FFFFFFFF84AB2DA0
+DECC$SHR  C$SIGNAL  raise                28048 0000000000001280
+FFFFFFFF84AB2EA0
+DECC$SHR  C$SIGPENDING  decc$$deliver_signals
+                                         12475 0000000000000890
+FFFFFFFF84C13690
+...
+This looks like an incompatibility to the Alpha and VAX behavior, so it looks
+like a problem in I64 VMS version(s).
+
+- There is no clean build on VAX. In the environment I tested, I had to use GNU
+make's alloca which produced a couple of compile time warnings. It seems too
+much effort to work on a clean build on VAX.
+
+A note on appending the redirected output. With this change, a simple mechanism
+is implemented to make ">>" work in action lines. In VMS there is no simple
+feature like ">>" to have DCL command or program output redirected and appended
+to a file. GNU make for VMS already implements the redirection of output. If
+such a redirection is detected, an ">" on the action line, GNU make creates a
+DCL command procedure to execute the action and to redirect its output. Based
+on that, now ">>" is also recognized and a similar but different command
+procedure is created to implement the append. The main idea here is to create a
+temporary file which collects the output and which is appended to the wanted
+output file. Then the temporary file is deleted. This is all done in the
+command procedure to keep changes in make small and simple. This obviously has
+some limitations but it seems good enough compared with the current ">"
+implementation. (And in my opinion, redirection is not really what GNU make has
+to do.) With this approach, it may happen that the temporary file is not yet
+appended and is left in SYS$SCRATCH. The temporary file names look like
+"CMDxxxxx.". Any time the created command procedure can not complete, this
+happens. Pressing Ctrl+Y to abort make is one case. In case of Ctrl+Y the
+associated command procedure is left in SYS$SCRATCH as well. Its name is
+CMDxxxxx.COM.
+
+Change in the Ctrl+Y handling
+
+Ctrl+Y was: The CtrlY handler called $forcex for the current child.
+
+Ctrl+Y changed: The CtrlY handler uses $delprc to delete all children. This way
+also actions with DCL commands will be stopped. As before Ctrl+Y then sends
+SIGQUIT to itself, which is handled in common code.
+
+Change in deleteing temporary command files
+
+Temporary command files were deleted in the main line, after returning from the
+vms child termination handler. If Ctrl+C was pressed, the handler is called but
+did not return to main line.
+
+Now, temporary command files are deleted in the vms child termination
+handler. That deletes the them even if a Ctrl+C was pressed.
+
+The behavior of pressing Ctrl+C is not changed. It still has only an effect,
+after the current action is terminated. If that doesn't happen or takes too
+long, Ctrl+Y should be used instead.
+
+Changes (3.80)
 
 . In default.c define variable ARCH as IA64 for VMS on Itanium systems.
 
@@ -297,17 +376,17 @@ Comma (',') as a separator is now allowed. See makefile.vms for an example.
 
 -------------------------------------------------------------------------------
 Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-2006 Free Software Foundation, Inc.
+2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2, or (at your option) any later version.
+Foundation; either version 3 of the License, or (at your option) any later
+version.
 
 GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-GNU Make; see the file COPYING.  If not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+this program.  If not, see <http://www.gnu.org/licenses/>.

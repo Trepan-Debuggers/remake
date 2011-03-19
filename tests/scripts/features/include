@@ -90,8 +90,6 @@ all: ; @:
 foo: bar; @:
 ', '', '');
 
-1;
-
 
 # Make sure that we don't die when the command fails but we dontcare.
 # (Savannah bug #13216).
@@ -116,5 +114,66 @@ all:; @:
 include
 -include
 sinclude', '', '');
+
+
+# Test that the diagnostics is issued even if the target has been
+# tried before with the dontcare flag (direct dependency case).
+#
+run_make_test('
+-include foo
+
+all: bar
+
+foo: baz
+bar: baz
+',
+'',
+"#MAKE#: *** No rule to make target `baz', needed by `bar'.  Stop.\n",
+512);
+
+# Test that the diagnostics is issued even if the target has been
+# tried before with the dontcare flag (indirect dependency case).
+#
+run_make_test('
+-include foo
+
+all: bar
+
+foo: baz
+bar: baz
+baz: end
+',
+'',
+"#MAKE#: *** No rule to make target `end', needed by `baz'.  Stop.\n",
+512);
+
+# Test that the diagnostics is issued even if the target has been
+# tried before with the dontcare flag (include/-include case).
+#
+run_make_test('
+include bar
+-include foo
+
+all:
+
+foo: baz
+bar: baz
+baz: end
+',
+'',
+"#MAKEFILE#:2: bar: No such file or directory
+#MAKE#: *** No rule to make target `end', needed by `baz'.  Stop.\n",
+512);
+
+if ($all_tests) {
+    # Test that include of a rebuild-able file doesn't show a warning
+    # Savannah bug #102
+    run_make_test(q!
+include foo
+foo: ; @echo foo = bar > $@
+!,
+                  '', "#MAKE#: `foo' is up to date.\n");
+    rmfiles('foo');
+}
 
 1;

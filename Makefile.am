@@ -1,22 +1,23 @@
 # This is a -*-Makefile-*-, or close enough
 #
-# Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
-# Free Software Foundation, Inc.
+# Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
+# 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
-# GNU Make is free software; you can redistribute it and/or modify it under the
-# terms of the GNU General Public License as published by the Free Software
-# Foundation; either version 2, or (at your option) any later version.
+# GNU Make is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 3 of the License, or (at your option) any later
+# version.
 #
 # GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-# A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
 #
 # You should have received a copy of the GNU General Public License along with
-# GNU Make; see the file COPYING.  If not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+# this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AUTOMAKE_OPTIONS = 1.8 dist-bzip2 check-news ansi2knr
+AUTOMAKE_OPTIONS = 1.8 dist-bzip2 check-news
 ACLOCAL_AMFLAGS	=  -I config
 
 transform = s,make,@MAKE_NAME@,
@@ -30,13 +31,7 @@ if WINDOWSENV
   W32LIB =	-Lw32 -lw32
 endif
 
-if INSTALL_EMACS_LISP
-emacs = emacs
-else
-emacs =
-endif
-
-SUBDIRS =	glob config po doc $(emacs) $(MAYBE_W32)
+SUBDIRS =	glob config po doc $(MAYBE_W32)
 
 bin_PROGRAMS =	make
 
@@ -47,31 +42,30 @@ else
 endif
 
 
-make_SOURCES =	ar.c arscan.c buildargv.c commands.c \
-	        debugger/break.c debugger/cmd.c debugger/fns.c \
-		debugger/info.c debugger/stack.c \
-	        debug.c default.c dir.c expand.c file.c \
+make_SOURCES =	ar.c arscan.c commands.c default.c dir.c expand.c file.c \
 		function.c getopt.c getopt1.c implicit.c job.c main.c \
-		misc.c print.c read.c remake.c $(remote) rule.c signame.c \
-		strcache.c trace.c variable.c version.c vpath.c hash.c
+		misc.c read.c remake.c $(remote) rule.c signame.c \
+		strcache.c variable.c version.c vpath.c hash.c \
+		buildargv.c debug.c print.c trace.c \
+	        debugger/break.c debugger/cmd.c debugger/fns.c \
+		debugger/info.c debugger/stack.c
 
 EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c
 
-noinst_HEADERS = buildargv.h commands.h dep.h filedef.h job.h make.h \
-                 rule.h variable.h \
-	         debugger/break.h debugger/cmd.h debugger/fns.h \
-		 debugger/info.h debugger/stack.h \
-	         debug.h dep.h dir_fns.h expand.h file.h \
-		 function.h getopt.h gettext.h hash.h \
-		 make.h print.h \
-	         read.h rule.h \
-	         trace.h types.h variable.h
+noinst_HEADERS = commands.h dep.h filedef.h job.h make.h rule.h variable.h \
+		debug.h getopt.h gettext.h hash.h \
+		buildargv.h expand.h file.h function.h read.h vpath.h \
+	        debugger/break.h debugger/cmd.h debugger/fns.h \
+		debugger/info.h debugger/stack.h
+
 
 make_LDADD =	@LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@ @LIBINTL@
 # Only process if target is MS-Windows
 if WINDOWSENV
     make_LDADD += $(W32LIB)
 endif
+
+man_MANS =	make.1
 
 DEFS =		-DLOCALEDIR=\"$(localedir)\" -DLIBDIR=\"$(libdir)\" -DINCLUDEDIR=\"$(includedir)\" @DEFS@
 
@@ -92,15 +86,12 @@ EXTRA_DIST =	README build.sh.in $(man_MANS) \
 		README.W32 NMakefile config.h.W32 build_w32.bat subproc.bat \
 		make_msvc_net2003.sln make_msvc_net2003.vcproj \
 		readme.vms makefile.vms makefile.com config.h-vms \
-		vmsdir.h vmsfunctions.c vmsify.c README.mdb TODO
+		vmsdir.h vmsfunctions.c vmsify.c \
+	        README.mdb REMAKE.todo
 
 # This is built during configure, but behind configure's back
 
 DISTCLEANFILES = build.sh
-
-MOSTLYCLEANFILES = make.tgs make.pdf make.html mdb.cps mdb.kys mdb.html mdb.fns mdb.ps.gz mdb.pdf 
-
-CLEANFILES = make*.html make*.info*
 
 # Forward targets
 
@@ -164,7 +155,7 @@ check-local: check-regression check-loadavg
 	echo "$$dashes"; \
 	echo
 
-PHONY = check-loadavg check-regression
+.PHONY: check-loadavg check-regression
 
 check-loadavg: loadavg$(EXEEXT)
 	@echo The system uptime program believes the load average to be:
@@ -177,12 +168,6 @@ check_PROGRAMS = loadavg
 nodist_loadavg_SOURCES = getloadavg.c
 loadavg_CPPFLAGS = -DTEST
 loadavg_LDADD = @GETLOADAVG_LIBS@
-
-loadavg.o: loadavg.c
-	source='$<' object='$@' libtool=no \
-	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' \
-	$(CCDEPMODE) $(depcomp) \
-	$(COMPILE) -DTEST -c `test -f '$<' || echo '$(srcdir)/'`$<
 
 # > check-regression
 #
@@ -219,15 +204,6 @@ check-regression:
 # created before we build a distribution (see maintMakefile in the CVS
 # distribution).
 
-if MAINTAINER_MODE
-
-PHONY += ChangeLog
-ChangeLog:
-	git log --pretty --numstat --summary | git2cl > ChangeLog
-endif
-
 README:
 
 @MAINT_MAKEFILE@
-
-.PHONY: $(PHONY)

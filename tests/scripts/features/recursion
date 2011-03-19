@@ -16,7 +16,7 @@ last:
 	@echo MAKELEVEL = $(MAKELEVEL)
 	@echo THE END
 ',
-              ('CFLAGS=-O -w' . ($parallel_jobs ? '-j 2' : '')),
+              ('CFLAGS=-O -w' . ($parallel_jobs ? ' -j 2' : '')),
               ($vos
                ? "#MAKE#: Entering directory `#PWD#'
 make 'CFLAGS=-O' -f #MAKEFILE# foo

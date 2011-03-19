@@ -20,6 +20,7 @@ Boston, MA 02111-1307, USA.  */
 /* debugger command interface. */
 
 #include "make.h"
+#include "debug.h"
 #include "file.h"
 #include "print.h"
 #include "break.h"
@@ -29,8 +30,6 @@ Boston, MA 02111-1307, USA.  */
 #include "stack.h"
 #include "commands.h"
 #include "debug.h"
-#include "expand.h"
-#include "function.h"
 
 /* Think of the below not as an enumeration but as #defines done in a
    way that we'll be able to use the value in a gdb. */
@@ -1250,7 +1249,7 @@ static debug_return_t dbg_cmd_set_var_noexpand (char *psz_string)
 /* Run a shell command. */
 static debug_return_t dbg_cmd_shell (char *psz_varname) 
 {
-  system(psz_varname);
+  int rc=system(psz_varname);
   return debug_readloop;
 }
 
@@ -1264,9 +1263,9 @@ static debug_return_t dbg_cmd_shell (char *psz_varname)
 */
 #define MAX_NEST_DEPTH 10
 
-debug_return_t
-enter_debugger (target_stack_node_t *p, file_t *p_target, int err,
-		debug_enter_reason_t reason)
+debug_return_t enter_debugger (target_stack_node_t *p, 
+			       file_t *p_target, int errcode,
+			       debug_enter_reason_t reason)
 {
   debug_return_t debug_return = debug_readloop;
 #ifdef HAVE_LIBREADLINE
@@ -1289,7 +1288,7 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err,
     if (!p_target->tracing) return continue_execution;
   } else if ( !debugger_on_error 
 	      && !(i_debugger_stepping || i_debugger_nexting) 
-	      && p_target && !p_target->tracing && -2 != err )
+	      && p_target && !p_target->tracing && -2 != errcode )
     return continue_execution;
   
   if (0 == i_init) {
@@ -1333,10 +1332,10 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err,
 
   in_debugger = true;
 
-  if (err) {
-    if (-1 == err) {
+  if (errcode) {
+    if (-1 == errcode) {
       printf("\n***Entering debugger because we encountered an error.\n");
-    } else if (-2 == err) {
+    } else if (-2 == errcode) {
       if (0 == makelevel) {
 	printf("\nMakefile terminated.\n");
 	printf("Use q to quit or R to restart\n");
@@ -1350,7 +1349,7 @@ enter_debugger (target_stack_node_t *p, file_t *p_target, int err,
     } else {
       printf("\n***Entering debugger because we encountered a fatal error.\n");
       printf("***Exiting the debugger will exit make with exit code %d.\n", 
-	     err);
+	     errcode);
     }
   }
 

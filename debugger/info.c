@@ -19,9 +19,11 @@ Boston, MA 02111-1307, USA.  */
 
 /* debugger command interface. */
 
-#include "file.h"
 #include "print.h"
 #include "cmd.h"
+#include "break.h"
+#include "vpath.h"
+#include "commands.h"
 #include "fns.h"
 #include "info.h"
 #include "stack.h"

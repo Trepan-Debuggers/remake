@@ -1,19 +1,19 @@
 /* VMS functions
-Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-2006 Free Software Foundation, Inc.
+Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
+2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2, or (at your option) any later version.
+Foundation; either version 3 of the License, or (at your option) any later
+version.
 
 GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-GNU Make; see the file COPYING.  If not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
+this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "make.h"
 #include "debug.h"
@@ -34,12 +34,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 DIR *
 opendir (char *dspec)
 {
-  struct DIR *dir  = (struct DIR *)xmalloc (sizeof (struct DIR));
-  struct NAM *dnam = (struct NAM *)xmalloc (sizeof (struct NAM));
+  struct DIR *dir  = xcalloc (sizeof (struct DIR));
+  struct NAM *dnam = xmalloc (sizeof (struct NAM));
   struct FAB *dfab = &dir->fab;
-  char *searchspec = (char *)xmalloc (MAXNAMLEN + 1);
-
-  memset (dir, 0, sizeof *dir);
+  char *searchspec = xmalloc (MAXNAMLEN + 1);
 
   *dfab = cc$rms_fab;
   *dnam = cc$rms_nam;
@@ -91,7 +89,7 @@ readdir (DIR *dir)
 
   if (!((i = sys$search (dfab)) & 1))
     {
-      DB (DB_VERBOSE, (_("sys$search failed with %d\n"), i));
+      DB (DB_VERBOSE, (_("sys$search() failed with %d\n"), i));
       return (NULL);
     }
 
@@ -141,6 +139,10 @@ getwd (char *cwd)
     return (getcwd (buf, 512));
 }
 
+#if 0
+/*
+ * Is this used? I don't see any reference, so I suggest to remove it.
+ */
 int
 vms_stat (char *name, struct stat *buf)
 {
@@ -237,6 +239,7 @@ vms_stat (char *name, struct stat *buf)
 
   return 0;
 }
+#endif
 
 char *
 cvt_time (unsigned long tval)
@@ -256,16 +259,4 @@ cvt_time (unsigned long tval)
   str[26] = '\0';
 
   return (str);
-}
-
-int
-strcmpi (const char *s1, const char *s2)
-{
-  while (*s1 != '\0' && toupper(*s1) == toupper(*s2))
-    {
-      s1++;
-      s2++;
-    }
-
-  return toupper(*(unsigned char *) s1) - toupper(*(unsigned char *) s2);
 }

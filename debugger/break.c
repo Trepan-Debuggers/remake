@@ -22,7 +22,6 @@ Boston, MA 02111-1307, USA.  */
 #include <assert.h>
 #include "break.h"
 #include "filedef.h"
-#include "make.h"
 #include "print.h"
 
 /*! Node for an item in the target call stack */

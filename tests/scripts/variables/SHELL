@@ -49,8 +49,38 @@ all:;@echo "$(SHELL) $$SHELL"
 
 $extraENV{SHELL} = $mshell;
 
-run_make_test("all: export SHELL := /./$mshell\n".'
-all:;@echo "$(SHELL) $$SHELL"
-', '', "/./$mshell $mshell");
+run_make_test("
+SHELL := /././$mshell
+one: two
+two: export SHELL := /./$mshell\n".'
+one two:;@echo "$@: $(SHELL) $$SHELL"
+', '', "two: /./$mshell /./$mshell\none: /././$mshell $mshell\n");
+
+# Test .SHELLFLAGS
+
+# We don't know the output here: on Solaris for example, every line printed
+# by the shell in -x mode has a trailing space (!!)
+my $script = 'true; true';
+my $flags = '-xc';
+my $out = `/bin/sh $flags '$script' 2>&1`;
+
+run_make_test(qq!
+.SHELLFLAGS = $flags
+all: ; \@$script
+!,
+              '', $out);
+
+# We can't just use "false" because on different systems it provides a
+# different exit code--once again Solaris: false exits with 255 not 1
+$script = 'true; false; true';
+$flags = '-xec';
+$out = `/bin/sh $flags '$script' 2>&1`;
+my $err = $? >> 8;
+
+run_make_test(qq!
+.SHELLFLAGS = $flags
+all: ; \@$script
+!,
+              '', "$out#MAKE#: *** [all] Error $err\n", 512);
 
 1;

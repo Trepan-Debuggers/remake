@@ -70,4 +70,16 @@ all');
 
 rmfiles('foo.x', 'blah.x');
 
+# Test that $? is set properly with -B; all prerequisites will be newer!
+
+utouch(-10, 'x.b');
+touch('x.a');
+
+run_make_test(q!
+x.a: x.b ; @echo $?
+!,
+              '-B', "x.b\n");
+
+unlink(qw(x.a x.b));
+
 1;

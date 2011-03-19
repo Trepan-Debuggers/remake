@@ -3,7 +3,7 @@
 $description = "Make sure make exits with an error if stdout is full.";
 
 if (-e '/dev/full') {
-  run_make_test('', '-v > /dev/full', '#MAKE#: write error', 256);
+  run_make_test('', '-v > /dev/full', '/^#MAKE#: write error/', 256);
 }
 
 1;

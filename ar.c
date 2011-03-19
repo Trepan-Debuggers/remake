@@ -1,20 +1,21 @@
 /* Interface to `ar' archives for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software
-Foundation, Inc.
+1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
+2010 Free Software Foundation, Inc.
+
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2, or (at your option) any later version.
+Foundation; either version 3 of the License, or (at your option) any later
+version.
 
 GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-GNU Make; see the file COPYING.  If not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
+this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "make.h"
 
@@ -25,30 +26,24 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 #include "dep.h"
 #include <fnmatch.h>
 
-/* Defined in arscan.c.  */
-extern long int ar_scan PARAMS ((char *archive, long int (*function) (), long int arg));
-extern int ar_name_equal PARAMS ((char *name, char *mem, int truncated));
-#ifndef VMS
-extern int ar_member_touch PARAMS ((char *arname, char *memname));
-#endif
-
-/*! Return nonzero if NAME is an archive-member reference, zero if not.
-   An archive-member reference is a name like `lib(member)'.
+/* Return nonzero if NAME is an archive-member reference, zero if not.  An
+   archive-member reference is a name like `lib(member)' where member is a
+   non-empty string.
    If a name like `lib((entry))' is used, a fatal error is signaled at
    the attempt to use this unsupported feature.  */
 
-bool
-ar_name (char *name)
+int
+ar_name (const char *name)
 {
-  char *p = strchr (name, '(');
-  char *end;
+  const char *p = strchr (name, '(');
+  const char *end;
 
   if (p == 0 || p == name)
-    return false;
+    return 0;
 
   end = p + strlen (p) - 1;
-  if (*end != ')')
-    return false;
+  if (*end != ')' || end == p + 1)
+    return 0;
 
   if (p[1] == '(' && end[-1] == ')')
     fatal (NILF, _("attempt to use unsupported feature: `%s'"), name);
@@ -60,32 +55,42 @@ ar_name (char *name)
    Parse the archive-member reference into the archive and
    member names.  
 
-   @param psz_name archive-member reference to look up.
-   @param arname_p place where the malloc'd archive name if it is non-nil
-   @param memname_p place to put malloc'd member name if it is non-nil
-*/
+/* Parse the archive-member reference NAME into the archive and member names.
+   Creates one allocated string containing both names, pointed to by ARNAME_P.
+   MEMNAME_P points to the member.  */
+
 void
-ar_parse_name (char *name, char **arname_p, char **memname_p)
+ar_parse_name (const char *name, char **arname_p, char **memname_p)
 {
-  char *p = strchr (name, '('), *end = name + strlen (name) - 1;
+  char *p;
 
-  if (arname_p != 0)
-    *arname_p = savestring (name, p - name);
-
-  if (memname_p != 0)
-    *memname_p = savestring (p + 1, end - (p + 1));
+  *arname_p = xstrdup (name);
+  p = strchr (*arname_p, '(');
+  *(p++) = '\0';
+  p[strlen(p) - 1] = '\0';
+  *memname_p = p;
 }
 
-static long int ar_member_date_1 PARAMS ((int desc, char *mem, int truncated, long int hdrpos,
-	long int datapos, long int size, long int date, int uid, int gid, int mode, char *name));
+
+/* This function is called by `ar_scan' to find which member to look at.  */
+
+/* ARGSUSED */
+static long int
+ar_member_date_1 (int desc UNUSED, const char *mem, int truncated,
+		  long int hdrpos UNUSED, long int datapos UNUSED,
+                  long int size UNUSED, long int date,
+                  int uid UNUSED, int gid UNUSED, int mode UNUSED,
+		  const void *name)
+{
+  return ar_name_equal (name, mem, truncated) ? date : 0;
+}
 
 /* Return the modtime of NAME.  */
 
 time_t
-ar_member_date (char *name)
+ar_member_date (const char *name)
 {
   char *arname;
-  int arname_used = 0;
   char *memname;
   long int val;
 
@@ -102,67 +107,43 @@ ar_member_date (char *name)
     file_t *arfile;
     arfile = lookup_file (arname);
     if (arfile == 0 && file_exists_p (arname))
-      {
-	arfile = enter_file (arname, NILF);
-	arname_used = 1;
-      }
+      arfile = enter_file (strcache_add (arname));
 
     if (arfile != 0)
       (void) f_mtime (arfile, false);
   }
 
-  val = ar_scan (arname, ar_member_date_1, (long int) memname);
+  val = ar_scan (arname, ar_member_date_1, memname);
 
-  if (!arname_used)
-    free (arname);
-  free (memname);
+  free (arname);
 
   return (val <= 0 ? (time_t) -1 : (time_t) val);
-}
-
-/* This function is called by `ar_scan' to find which member to look at.  */
-
-/* ARGSUSED */
-static long int
-ar_member_date_1 (int desc UNUSED, char *mem, int truncated,
-		  long int hdrpos UNUSED, long int datapos UNUSED,
-                  long int size UNUSED, long int date,
-                  int uid UNUSED, int gid UNUSED, int mode UNUSED, char *name)
-{
-  return ar_name_equal (name, mem, truncated) ? date : 0;
 }
 
 /* Set the archive-member NAME's modtime to now.  */
 
 #ifdef VMS
 int
-ar_touch (char *name)
+ar_touch (const char *name)
 {
   error (NILF, _("touch archive member is not available on VMS"));
   return -1;
 }
 #else
 int
-ar_touch (char *name)
+ar_touch (const char *name)
 {
   char *arname, *memname;
-  int arname_used = 0;
   int val;
 
   ar_parse_name (name, &arname, &memname);
 
   /* Make sure we know the modtime of the archive itself before we
-     touch the member, since this will change the archive itself.  */
+     touch the member, since this will change the archive modtime.  */
   {
-    file_t *arfile;
-    arfile = lookup_file (arname);
-    if (arfile == 0)
-      {
-	arfile = enter_file (arname, NILF);
-	arname_used = 1;
-      }
-
-    (void) f_mtime (arfile, false);
+    struct file *arfile;
+    arfile = enter_file (strcache_add (arname));
+    f_mtime (arfile, 0);
   }
 
   val = 1;
@@ -189,9 +170,7 @@ ar_touch (char *name)
              _("touch: Bad return code from ar_member_touch on `%s'"), name);
     }
 
-  if (!arname_used)
-    free (arname);
-  free (memname);
+  free (arname);
 
   return val;
 }
@@ -201,8 +180,8 @@ ar_touch (char *name)
 
 typedef struct ar_glob_state
   {
-    char *arname;
-    char *pattern;
+    const char *arname;
+    const char *pattern;
     unsigned int size;
     struct nameseq *chain;
     unsigned int n;
@@ -212,16 +191,18 @@ typedef struct ar_glob_state
    element against the pattern in STATE.  */
 
 static long int
-ar_glob_match (int desc UNUSED, char *mem, int truncated UNUSED,
+ar_glob_match (int desc UNUSED, const char *mem, int truncated UNUSED,
 	       long int hdrpos UNUSED, long int datapos UNUSED,
                long int size UNUSED, long int date UNUSED, int uid UNUSED,
-               int gid UNUSED, int mode UNUSED, struct ar_glob_state *state)
+               int gid UNUSED, int mode UNUSED, const void *arg)
 {
+  struct ar_glob_state *state = (struct ar_glob_state *)arg;
+
   if (fnmatch (state->pattern, mem, FNM_PATHNAME|FNM_PERIOD) == 0)
     {
       /* We have a match.  Add it to the chain.  */
-      struct nameseq *new = (struct nameseq *) xmalloc (state->size);
-      new->name = concat (state->arname, mem, ")");
+      struct nameseq *new = xcalloc (state->size);
+      new->name = strcache_add (concat (4, state->arname, "(", mem, ")"));
       new->next = state->chain;
       state->chain = new;
       ++state->n;
@@ -232,11 +213,11 @@ ar_glob_match (int desc UNUSED, char *mem, int truncated UNUSED,
 
 /* Return nonzero if PATTERN contains any metacharacters.
    Metacharacters can be quoted with backslashes if QUOTE is nonzero.  */
-int
+static int
 glob_pattern_p (const char *pattern, int quote)
 {
   const char *p;
-  int open = 0;
+  int opened = 0;
 
   for (p = pattern; *p != '\0'; ++p)
     switch (*p)
@@ -251,11 +232,11 @@ glob_pattern_p (const char *pattern, int quote)
 	break;
 
       case '[':
-	open = 1;
+	opened = 1;
 	break;
 
       case ']':
-	if (open)
+	if (opened)
 	  return 1;
 	break;
       }
@@ -267,11 +248,11 @@ glob_pattern_p (const char *pattern, int quote)
    Return a malloc'd chain of matching elements (or nil if none).  */
 
 struct nameseq *
-ar_glob (char *arname, char *member_pattern, unsigned int size)
+ar_glob (const char *arname, const char *member_pattern, unsigned int size)
 {
   struct ar_glob_state state;
-  char **names;
   struct nameseq *n;
+  const char **names;
   unsigned int i;
 
   if (! glob_pattern_p (member_pattern, 1))
@@ -279,28 +260,25 @@ ar_glob (char *arname, char *member_pattern, unsigned int size)
 
   /* Scan the archive for matches.
      ar_glob_match will accumulate them in STATE.chain.  */
-  i = strlen (arname);
-  state.arname = (char *) alloca (i + 2);
-  bcopy (arname, state.arname, i);
-  state.arname[i] = '(';
-  state.arname[i + 1] = '\0';
+  state.arname = arname;
   state.pattern = member_pattern;
   state.size = size;
   state.chain = 0;
   state.n = 0;
-  (void) ar_scan (arname, ar_glob_match, (long int) &state);
+  ar_scan (arname, ar_glob_match, &state);
 
   if (state.chain == 0)
     return 0;
 
   /* Now put the names into a vector for sorting.  */
-  names = (char **) alloca (state.n * sizeof (char *));
+  names = alloca (state.n * sizeof (const char *));
   i = 0;
   for (n = state.chain; n != 0; n = n->next)
     names[i++] = n->name;
 
   /* Sort them alphabetically.  */
-  qsort ((char *) names, i, sizeof (*names), alpha_compare);
+  /* MSVC erroneously warns without a cast here.  */
+  qsort ((void *)names, i, sizeof (*names), alpha_compare);
 
   /* Put them back into the chain in the sorted order.  */
   i = 0;

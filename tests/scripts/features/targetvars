@@ -6,9 +6,7 @@ Create a makefile containing various flavors of target-specific variable
 values, override and non-override, and using various variable expansion
 rules, semicolon interference, etc.";
 
-open(MAKEFILE,"> $makefile");
-
-print MAKEFILE <<'EOF';
+run_make_test('
 SHELL = /bin/sh
 export FOO = foo
 export BAR = bar
@@ -17,17 +15,17 @@ one two: ; @echo $(FOO) $(BAR)
 two: BAR = two
 three: ; BAR=1000
 	@echo $(FOO) $(BAR)
-# Some things that shouldn't be target vars
+# Some things that shouldn not be target vars
 funk : override
 funk : override adelic
 adelic override : ; echo $@
 # Test per-target recursive variables
 four:FOO=x
 four:VAR$(FOO)=ok
-four: ; @echo '$(FOO) $(VAR$(FOO)) $(VAR) $(VARx)'
+four: ; @echo "$(FOO) $(VAR$(FOO)) $(VAR) $(VARx)"
 five:FOO=x
 five six : VAR$(FOO)=good
-five six: ;@echo '$(FOO) $(VAR$(FOO)) $(VAR) $(VARx) $(VARfoo)'
+five six: ;@echo "$(FOO) $(VAR$(FOO)) $(VAR) $(VARx) $(VARfoo)"
 # Test per-target variable inheritance
 seven: eight
 seven eight: ; @echo $@: $(FOO) $(BAR)
@@ -41,8 +39,8 @@ nine-a: export BAZ = baz
 nine-a: ; @echo $$BAZ
 # Test = escaping
 EQ = =
-ten: one\=two
-ten: one \= two
+ten: one$(EQ)two
+ten: one $(EQ) two
 ten one$(EQ)two $(EQ):;@echo $@
 .PHONY: one two three four five six seven eight nine ten $(EQ) one$(EQ)two
 # Test target-specific vars with pattern/suffix rules
@@ -54,92 +52,58 @@ foo.q : RVAR += rvar
 %.r %.s %.t: ; @echo $(QVAR) $(RVAR) $(SVAR) $(TVAR)
 foo.r : RVAR += rvar
 foo.t : TVAR := $(QVAR)
-EOF
-
-close(MAKEFILE);
-
-# TEST #1
-
-&run_make_with_options($makefile, "one two three", &get_logfile);
-$answer = "one bar\nfoo two\nBAR=1000\nfoo bar\n";
-&compare_output($answer,&get_logfile(1));
+',
+                 "one two three", "one bar\nfoo two\nBAR=1000\nfoo bar\n");
 
 # TEST #2
 
-&run_make_with_options($makefile, "one two FOO=1 BAR=2", &get_logfile);
-$answer = "one 2\n1 2\n";
-&compare_output($answer,&get_logfile(1));
+run_make_test(undef, "one two FOO=1 BAR=2", "one 2\n1 2\n");
 
 # TEST #3
 
-&run_make_with_options($makefile, "four", &get_logfile);
-$answer = "x ok  ok\n";
-&compare_output($answer,&get_logfile(1));
+run_make_test(undef, "four", "x ok  ok\n");
 
 # TEST #4
 
-&run_make_with_options($makefile, "seven", &get_logfile);
-$answer = "eight: seven eight\nseven: seven seven\n";
-&compare_output($answer,&get_logfile(1));
+run_make_test(undef, "seven", "eight: seven eight\nseven: seven seven\n");
 
 # TEST #5
 
-&run_make_with_options($makefile, "nine", &get_logfile);
-$answer = "wallace bar wallace bar\n";
-&compare_output($answer,&get_logfile(1));
+run_make_test(undef, "nine", "wallace bar wallace bar\n");
 
 # TEST #5-a
 
-&run_make_with_options($makefile, "nine-a", &get_logfile);
-$answer = "baz\n";
-&compare_output($answer,&get_logfile(1));
+run_make_test(undef, "nine-a", "baz\n");
 
 # TEST #6
 
-&run_make_with_options($makefile, "ten", &get_logfile);
-$answer = "one=two\none bar\n=\nfoo two\nten\n";
-&compare_output($answer,&get_logfile(1));
+run_make_test(undef, "ten", "one=two\none bar\n=\nfoo two\nten\n");
 
 # TEST #6
 
-&run_make_with_options($makefile, "foo.q bar.q", &get_logfile);
-$answer = "qvar = rvar\nqvar =\n";
-&compare_output($answer,&get_logfile(1));
+run_make_test(undef, "foo.q bar.q", "qvar = rvar\nqvar =\n");
 
 # TEST #7
 
-&run_make_with_options($makefile, "foo.t bar.s", &get_logfile);
-$answer = "qvar = qvar\nqvar =\n";
-&compare_output($answer,&get_logfile(1));
+run_make_test(undef, "foo.t bar.s", "qvar = qvar\nqvar =\n");
 
 
 # TEST #8
 # For PR/1378: Target-specific vars don't inherit correctly
 
-$makefile2 = &get_tmpfile;
-
-open(MAKEFILE,"> $makefile2");
-print MAKEFILE <<'EOF';
+run_make_test('
 foo: FOO = foo
 bar: BAR = bar
 foo: bar
 bar: baz
 baz: ; @echo $(FOO) $(BAR)
-EOF
-close(MAKEFILE);
-
-&run_make_with_options("$makefile2", "", &get_logfile);
-$answer = "foo bar\n";
-&compare_output($answer, &get_logfile(1));
+', "", "foo bar\n");
 
 # TEST #9
 # For PR/1380: Using += assignment in target-specific variables sometimes fails
 # Also PR/1831
 
-$makefile3 = &get_tmpfile;
-
-open(MAKEFILE,"> $makefile3");
-print MAKEFILE <<'EOF';
+run_make_test('
 .PHONY: all one
 all: FOO += baz
 all: one; @echo $(FOO)
@@ -149,43 +113,27 @@ FOO = bar
 one: FOO += biz
 one: FOO += boz
 one: ; @echo $(FOO)
-EOF
-close(MAKEFILE);
-
-&run_make_with_options("$makefile3", "", &get_logfile);
-$answer = "bar baz biz boz\nbar baz\n";
-&compare_output($answer, &get_logfile(1));
+',
+              '', "bar baz biz boz\nbar baz\n");
 
 # Test #10
 
-&run_make_with_options("$makefile3", "one", &get_logfile);
-$answer = "bar biz boz\n";
-&compare_output($answer, &get_logfile(1));
+run_make_test(undef, 'one', "bar biz boz\n");
 
 # Test #11
 # PR/1709: Test semicolons in target-specific variable values
 
-$makefile4 = &get_tmpfile;
-
-open(MAKEFILE, "> $makefile4");
-print MAKEFILE <<'EOF';
+run_make_test('
 foo : FOO = ; ok
-foo : ; @echo '$(FOO)'
-EOF
-close(MAKEFILE);
-
-&run_make_with_options("$makefile4", "", &get_logfile);
-$answer = "; ok\n";
-&compare_output($answer, &get_logfile(1));
+foo : ; @echo "$(FOO)"
+',
+              '', "; ok\n");
 
 # Test #12
 # PR/2020: More hassles with += target-specific vars.  I _really_ think
 # I nailed it this time :-/.
 
-$makefile5 = &get_tmpfile;
-
-open(MAKEFILE, "> $makefile5");
-print MAKEFILE <<'EOF';
+run_make_test('
 .PHONY: a
 
 BLAH := foo
@@ -195,20 +143,13 @@ a: ; @$(COMMAND)
 
 a: BLAH := bar
 a: COMMAND += snafu $(BLAH)
-EOF
-close(MAKEFILE);
-
-&run_make_with_options("$makefile5", "", &get_logfile);
-$answer = "bar snafu bar\n";
-&compare_output($answer, &get_logfile(1));
+',
+              '', "bar snafu bar\n");
 
 # Test #13
 # Test double-colon rules with target-specific variable values
 
-$makefile6 = &get_tmpfile;
-
-open(MAKEFILE, "> $makefile6");
-print MAKEFILE <<'EOF';
+run_make_test('
 W = bad
 X = bad
 foo: W = ok
@@ -224,48 +165,30 @@ Z = nopat
 ifdef PATTERN
   fo% : Z = pat
 endif
-
-EOF
-close(MAKEFILE);
-
-&run_make_with_options("$makefile6", "foo", &get_logfile);
-$answer = "ok ok foo nopat\nok ok foo nopat\n";
-&compare_output($answer, &get_logfile(1));
+',
+             'foo', "ok ok foo nopat\nok ok foo nopat\n");
 
 # Test #14
 # Test double-colon rules with target-specific variable values and
 # inheritance
 
-&run_make_with_options("$makefile6", "bar", &get_logfile);
-$answer = "ok ok bar nopat\nok ok bar nopat\n";
-&compare_output($answer, &get_logfile(1));
+run_make_test(undef, 'bar', "ok ok bar nopat\nok ok bar nopat\n");
 
 # Test #15
 # Test double-colon rules with pattern-specific variable values
 
-&run_make_with_options("$makefile6", "foo PATTERN=yes", &get_logfile);
-$answer = "ok ok foo pat\nok ok foo pat\n";
-&compare_output($answer, &get_logfile(1));
-
+run_make_test(undef, 'foo PATTERN=yes', "ok ok foo pat\nok ok foo pat\n");
 
 # Test #16
 # Test target-specific variables with very long command line
 # (> make default buffer length)
 
-$makefile7 = &get_tmpfile;
-
-open(MAKEFILE, "> $makefile7");
-print MAKEFILE <<'EOF';
+run_make_test('
 base_metals_fmd_reports.sun5 base_metals_fmd_reports CreateRealPositions        CreateMarginFunds deals_changed_since : BUILD_OBJ=$(shell if [ -f               "build_information.generate" ]; then echo "$(OBJ_DIR)/build_information.o"; else echo "no build information"; fi  )
 
 deals_changed_since: ; @echo $(BUILD_OBJ)
-
-EOF
-close(MAKEFILE);
-
-&run_make_with_options("$makefile7", '', &get_logfile);
-$answer = "no build information\n";
-&compare_output($answer, &get_logfile(1));
+',
+              '', "no build information\n");
 
 # TEST #17
 
@@ -286,8 +209,7 @@ foo.x: FOOVAR = bar
 rules.mk : MYVAR = foo
 .INTERMEDIATE: foo.x rules.mk
 ',
-              '-I t1',
-              'MYVAR= FOOVAR=bar ALLVAR=xxx');
+              '-I t1', 'MYVAR= FOOVAR=bar ALLVAR=xxx');
 
 rmfiles('t1/rules.mk');
 rmdir('t1');
@@ -297,11 +219,45 @@ rmdir('t1');
 # Test appending to a simple variable containing a "$": avoid a
 # double-expansion.  See Savannah bug #15913.
 
-run_make_test("
-VAR := \$\$FOO
+run_make_test('
+VAR := $$FOO
 foo: VAR += BAR
-foo: ; \@echo '\$(VAR)'",
-              '',
-              '$FOO BAR');
+foo: ; @echo '."'".'$(VAR)'."'".'
+',
+              '', '$FOO BAR');
+
+# TEST #19: Override with append variables
+
+run_make_test('
+a: override FOO += f1
+a: FOO += f2
+a: ; @echo "$(FOO)"
+',
+              '', "f1\n");
+
+run_make_test(undef, 'FOO=C', "C f1\n");
+
+# TEST #20: Check for continuation after semicolons
+
+run_make_test(q!
+a: A = 'hello; \
+world'
+a: ; @echo $(A)
+!,
+              '', "hello; world\n");
+
+# TEST #19: Test define/endef variables as target-specific vars
+
+# run_make_test('
+# define b
+# @echo global
+# endef
+# a: define b
+# @echo local
+# endef
+
+# a: ; $(b)
+# ',
+#               '', "local\n");
 
 1;

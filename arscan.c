@@ -1,20 +1,20 @@
 /* Library function for scanning an archive file.
 Copyright (C) 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software Foundation,
-Inc.
+1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
+2010 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2, or (at your option) any later version.
+Foundation; either version 3 of the License, or (at your option) any later
+version.
 
 GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-GNU Make; see the file COPYING.  If not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
+this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "make.h"
 
@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 #endif
 
 #ifndef	NO_ARCHIVES
-
+
 #ifdef VMS
 #include <lbrdef.h>
 #include <mhddef.h>
@@ -66,7 +66,7 @@ VMS_get_member_info (struct dsc$descriptor_s *module, unsigned long *rfa)
 			   &bufdesc.dsc$w_length, 0);
   if (! (status & 1))
     {
-      error (NILF, _("lbr$set_module failed to extract module info, status = %d"),
+      error (NILF, _("lbr$set_module() failed to extract module info, status = %d"),
 	     status);
 
       lbr$close (&VMS_lib_idx);
@@ -81,7 +81,28 @@ VMS_get_member_info (struct dsc$descriptor_s *module, unsigned long *rfa)
    * but that decc$fix_time() isn't documented to work this way.  Let me
    * know if this causes problems in other VMS environments.
    */
-  val = decc$fix_time (&mhd->mhd$l_datim) + timezone - daylight*3600;
+  {
+    /* Modified by M. Gehre at 11-JAN-2008 because old formula is wrong:
+     * val = decc$fix_time (&mhd->mhd$l_datim) + timezone - daylight*3600;
+     * a) daylight specifies, if the timezone has daylight saving enabled, not
+     *    if it is active
+     * b) what we need is the information, if daylight saving was active, if
+     *    the library module was replaced. This information we get using the
+     *    localtime function
+     */
+
+    struct tm *tmp;
+
+    /* Conversion from VMS time to C time */
+    val = decc$fix_time (&mhd->mhd$l_datim);
+
+    /*
+     * Conversion from local time (stored in library) to GMT (needed for gmake)
+     * Note: The tm_gmtoff element is a VMS extension to the ANSI standard.
+     */
+    tmp = localtime (&val);
+    val -= tmp->tm_gmtoff;
+  }
 #endif
 
   for (i = 0; i < module->dsc$w_length; i++)
@@ -134,7 +155,7 @@ VMS_get_member_info (struct dsc$descriptor_s *module, unsigned long *rfa)
    Returns 0 if have scanned successfully.  */
 
 long int
-ar_scan (char *archive, long int (*function) PARAMS ((void)), long int arg)
+ar_scan (const char *archive, ar_member_func_t function, const void *arg)
 {
   char *p;
 
@@ -151,11 +172,12 @@ ar_scan (char *archive, long int (*function) PARAMS ((void)), long int arg)
 
   if (! (status & 1))
     {
-      error (NILF, _("lbr$ini_control failed with status = %d"),status);
+      error (NILF, _("lbr$ini_control() failed with status = %d"), status);
       return -2;
     }
 
-  libdesc.dsc$a_pointer = archive;
+  /* there is no such descriptor with "const char *dsc$a_pointer" */
+  libdesc.dsc$a_pointer = (char *)archive;
   libdesc.dsc$w_length = strlen (archive);
 
   status = lbr$open (&VMS_lib_idx, &libdesc, 0, 0, 0, 0, 0);
@@ -250,6 +272,7 @@ struct ar_hdr
     char ar_fmag[2];		/* Always contains ARFMAG.  */
   };
 # endif
+# define TOCHAR(_m)     (_m)
 #else
 /* These should allow us to read Windows (VC++) libraries (according to Frank
  * Libbrecht <frankl@abzx.belgium.hp.com>)
@@ -266,6 +289,8 @@ struct ar_hdr
 # define ar_date    Date
 # define ar_uid     UserID
 # define ar_gid     GroupID
+/* In Windows the member names have type BYTE so we must cast them.  */
+# define TOCHAR(_m)     ((char *)(_m))
 #endif
 
 /* Cray's <ar.h> apparently defines this.  */
@@ -301,7 +326,7 @@ struct ar_hdr
    Returns 0 if have scanned successfully.  */
 
 long int
-ar_scan (char *archive, long int (*function)(), long int arg)
+ar_scan (const char *archive, ar_member_func_t function, const void *arg)
 {
 #ifdef AIAMAG
   FL_HDR fl_header;
@@ -313,14 +338,14 @@ ar_scan (char *archive, long int (*function)(), long int arg)
   int long_name = 0;
 #endif
   char *namemap = 0;
-  register int desc = open (archive, O_RDONLY, 0);
+  int desc = open (archive, O_RDONLY, 0);
   if (desc < 0)
     return -1;
 #ifdef SARMAG
   {
     char buf[SARMAG];
     register int nread = read (desc, buf, SARMAG);
-    if (nread != SARMAG || bcmp (buf, ARMAG, SARMAG))
+    if (nread != SARMAG || memcmp (buf, ARMAG, SARMAG))
       {
 	(void) close (desc);
 	return -2;
@@ -329,7 +354,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 #else
 #ifdef AIAMAG
   {
-    register int nread = read (desc, (char *) &fl_header, FL_HSZ);
+    register int nread = read (desc, &fl_header, FL_HSZ);
 
     if (nread != FL_HSZ)
       {
@@ -339,7 +364,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 #ifdef AIAMAGBIG
     /* If this is a "big" archive, then set the flag and
        re-read the header into the "big" structure. */
-    if (!bcmp (fl_header.fl_magic, AIAMAGBIG, SAIAMAG))
+    if (!memcmp (fl_header.fl_magic, AIAMAGBIG, SAIAMAG))
       {
 	big_archive = 1;
 
@@ -351,7 +376,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 	  }
 
 	/* re-read the header into the "big" structure */
-	nread = read (desc, (char *) &fl_header_big, FL_HSZ_BIG);
+	nread = read (desc, &fl_header_big, FL_HSZ_BIG);
 	if (nread != FL_HSZ_BIG)
 	  {
 	    (void) close (desc);
@@ -361,7 +386,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
     else
 #endif
        /* Check to make sure this is a "normal" archive. */
-      if (bcmp (fl_header.fl_magic, AIAMAG, SAIAMAG))
+      if (memcmp (fl_header.fl_magic, AIAMAG, SAIAMAG))
 	{
           (void) close (desc);
           return -2;
@@ -455,7 +480,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 #ifdef AIAMAGBIG
 	if (big_archive)
 	  {
-	    nread = read (desc, (char *) &member_header_big,
+	    nread = read (desc, &member_header_big,
 			  AR_MEMHDR_SZ(member_header_big) );
 
 	    if (nread != AR_MEMHDR_SZ(member_header_big))
@@ -487,7 +512,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 	else
 #endif
 	  {
-	    nread = read (desc, (char *) &member_header,
+	    nread = read (desc, &member_header,
 			  AR_MEMHDR_SZ(member_header) );
 
 	    if (nread != AR_MEMHDR_SZ(member_header))
@@ -525,7 +550,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 		       eltmode, arg);
 
 #else	/* Not AIAMAG.  */
-	nread = read (desc, (char *) &member_header, AR_HDR_SIZE);
+	nread = read (desc, &member_header, AR_HDR_SIZE);
 	if (nread == 0)
 	  /* No data left means end of file; that is OK.  */
 	  break;
@@ -534,13 +559,13 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 #if defined(ARFMAG) || defined(ARFZMAG)
 	    || (
 # ifdef ARFMAG
-                bcmp (member_header.ar_fmag, ARFMAG, 2)
+                memcmp (member_header.ar_fmag, ARFMAG, 2)
 # else
                 1
 # endif
                 &&
 # ifdef ARFZMAG
-                bcmp (member_header.ar_fmag, ARFZMAG, 2)
+                memcmp (member_header.ar_fmag, ARFZMAG, 2)
 # else
                 1
 # endif
@@ -553,7 +578,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 	  }
 
 	name = namebuf;
-	bcopy (member_header.ar_name, name, sizeof member_header.ar_name);
+	memcpy (name, member_header.ar_name, sizeof member_header.ar_name);
 	{
 	  register char *p = name + sizeof member_header.ar_name;
 	  do
@@ -563,11 +588,11 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 #ifndef AIAMAG
 	  /* If the member name is "//" or "ARFILENAMES/" this may be
 	     a list of file name mappings.  The maximum file name
- 	     length supported by the standard archive format is 14
- 	     characters.  This member will actually always be the
- 	     first or second entry in the archive, but we don't check
- 	     that.  */
- 	  is_namemap = (!strcmp (name, "//")
+	     length supported by the standard archive format is 14
+	     characters.  This member will actually always be the
+	     first or second entry in the archive, but we don't check
+	     that.  */
+	  is_namemap = (!strcmp (name, "//")
 			|| !strcmp (name, "ARFILENAMES/"));
 #endif	/* Not AIAMAG. */
 	  /* On some systems, there is a slash after each member name.  */
@@ -575,41 +600,41 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 	    *p = '\0';
 
 #ifndef AIAMAG
- 	  /* If the member name starts with a space or a slash, this
- 	     is an index into the file name mappings (used by GNU ar).
- 	     Otherwise if the member name looks like #1/NUMBER the
- 	     real member name appears in the element data (used by
- 	     4.4BSD).  */
- 	  if (! is_namemap
- 	      && (name[0] == ' ' || name[0] == '/')
- 	      && namemap != 0)
+	  /* If the member name starts with a space or a slash, this
+	     is an index into the file name mappings (used by GNU ar).
+	     Otherwise if the member name looks like #1/NUMBER the
+	     real member name appears in the element data (used by
+	     4.4BSD).  */
+	  if (! is_namemap
+	      && (name[0] == ' ' || name[0] == '/')
+	      && namemap != 0)
 	    {
 	      name = namemap + atoi (name + 1);
 	      long_name = 1;
 	    }
- 	  else if (name[0] == '#'
- 		   && name[1] == '1'
- 		   && name[2] == '/')
- 	    {
- 	      int namesize = atoi (name + 3);
+	  else if (name[0] == '#'
+		   && name[1] == '1'
+		   && name[2] == '/')
+	    {
+	      int namesize = atoi (name + 3);
 
- 	      name = (char *) alloca (namesize + 1);
- 	      nread = read (desc, name, namesize);
- 	      if (nread != namesize)
- 		{
- 		  close (desc);
- 		  return -2;
- 		}
- 	      name[namesize] = '\0';
+	      name = alloca (namesize + 1);
+	      nread = read (desc, name, namesize);
+	      if (nread != namesize)
+		{
+		  close (desc);
+		  return -2;
+		}
+	      name[namesize] = '\0';
 
 	      long_name = 1;
- 	    }
+	    }
 #endif /* Not AIAMAG. */
 	}
 
 #ifndef	M_XENIX
-	sscanf (member_header.ar_mode, "%o", &eltmode);
-	eltsize = atol (member_header.ar_size);
+	sscanf (TOCHAR (member_header.ar_mode), "%o", &eltmode);
+	eltsize = atol (TOCHAR (member_header.ar_size));
 #else	/* Xenix.  */
 	eltmode = (unsigned short int) member_header.ar_mode;
 	eltsize = member_header.ar_size;
@@ -619,9 +644,9 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 	  (*function) (desc, name, ! long_name, member_offset,
 		       member_offset + AR_HDR_SIZE, eltsize,
 #ifndef	M_XENIX
-		       atol (member_header.ar_date),
-		       atoi (member_header.ar_uid),
-		       atoi (member_header.ar_gid),
+		       atol (TOCHAR (member_header.ar_date)),
+		       atoi (TOCHAR (member_header.ar_uid)),
+		       atoi (TOCHAR (member_header.ar_gid)),
 #else	/* Xenix.  */
 		       member_header.ar_date,
 		       member_header.ar_uid,
@@ -644,7 +669,7 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 
 #ifdef AIAMAGBIG
 	if (big_archive)
-          sscanf (member_header_big.ar_nxtmem, "%20ld", &member_offset);
+         sscanf (member_header_big.ar_nxtmem, "%20ld", &member_offset);
 	else
 #endif
 	  sscanf (member_header.ar_nxtmem, "%12ld", &member_offset);
@@ -656,38 +681,38 @@ ar_scan (char *archive, long int (*function)(), long int arg)
 	  }
 #else
 
- 	/* If this member maps archive names, we must read it in.  The
- 	   name map will always precede any members whose names must
- 	   be mapped.  */
+	/* If this member maps archive names, we must read it in.  The
+	   name map will always precede any members whose names must
+	   be mapped.  */
 	if (is_namemap)
- 	  {
- 	    char *clear;
- 	    char *limit;
+	  {
+	    char *clear;
+	    char *limit;
 
- 	    namemap = (char *) alloca (eltsize);
- 	    nread = read (desc, namemap, eltsize);
- 	    if (nread != eltsize)
- 	      {
- 		(void) close (desc);
- 		return -2;
- 	      }
+	    namemap = alloca (eltsize);
+	    nread = read (desc, namemap, eltsize);
+	    if (nread != eltsize)
+	      {
+		(void) close (desc);
+		return -2;
+	      }
 
- 	    /* The names are separated by newlines.  Some formats have
- 	       a trailing slash.  Null terminate the strings for
- 	       convenience.  */
- 	    limit = namemap + eltsize;
- 	    for (clear = namemap; clear < limit; clear++)
- 	      {
- 		if (*clear == '\n')
- 		  {
- 		    *clear = '\0';
- 		    if (clear[-1] == '/')
- 		      clear[-1] = '\0';
- 		  }
- 	      }
+	    /* The names are separated by newlines.  Some formats have
+	       a trailing slash.  Null terminate the strings for
+	       convenience.  */
+	    limit = namemap + eltsize;
+	    for (clear = namemap; clear < limit; clear++)
+	      {
+		if (*clear == '\n')
+		  {
+		    *clear = '\0';
+		    if (clear[-1] == '/')
+		      clear[-1] = '\0';
+		  }
+	      }
 
 	    is_namemap = 0;
- 	  }
+	  }
 
 	member_offset += AR_HDR_SIZE + eltsize;
 	if (member_offset % 2 != 0)
@@ -706,9 +731,9 @@ ar_scan (char *archive, long int (*function)(), long int arg)
    sizeof (struct ar_hdr.ar_name) - 1.  */
 
 int
-ar_name_equal (char *name, char *mem, int truncated)
+ar_name_equal (const char *name, const char *mem, int truncated)
 {
-  char *p;
+  const char *p;
 
   p = strrchr (name, '/');
   if (p != 0)
@@ -737,10 +762,10 @@ ar_name_equal (char *name, char *mem, int truncated)
 #ifndef VMS
 /* ARGSUSED */
 static long int
-ar_member_pos (int desc UNUSED, char *mem, int truncated,
+ar_member_pos (int desc UNUSED, const char *mem, int truncated,
 	       long int hdrpos, long int datapos UNUSED, long int size UNUSED,
                long int date UNUSED, int uid UNUSED, int gid UNUSED,
-               int mode UNUSED, char *name)
+               int mode UNUSED, const void *name)
 {
   if (!ar_name_equal (name, mem, truncated))
     return 0;
@@ -755,9 +780,9 @@ ar_member_pos (int desc UNUSED, char *mem, int truncated,
    1 if valid but member MEMNAME does not exist.  */
 
 int
-ar_member_touch (char *arname, char *memname)
+ar_member_touch (const char *arname, const char *memname)
 {
-  long int pos = ar_scan (arname, ar_member_pos, (long int) memname);
+  long int pos = ar_scan (arname, ar_member_pos, memname);
   int fd;
   struct ar_hdr ar_hdr;
   int i;
@@ -775,12 +800,12 @@ ar_member_touch (char *arname, char *memname)
   /* Read in this member's header */
   if (lseek (fd, pos, 0) < 0)
     goto lose;
-  if (AR_HDR_SIZE != read (fd, (char *) &ar_hdr, AR_HDR_SIZE))
+  if (AR_HDR_SIZE != read (fd, &ar_hdr, AR_HDR_SIZE))
     goto lose;
   /* Write back the header, thus touching the archive file.  */
   if (lseek (fd, pos, 0) < 0)
     goto lose;
-  if (AR_HDR_SIZE != write (fd, (char *) &ar_hdr, AR_HDR_SIZE))
+  if (AR_HDR_SIZE != write (fd, &ar_hdr, AR_HDR_SIZE))
     goto lose;
   /* The file's mtime is the time we we want.  */
   EINTRLOOP (i, fstat (fd, &statbuf));
@@ -790,7 +815,7 @@ ar_member_touch (char *arname, char *memname)
   /* Advance member's time to that time */
   for (ui = 0; ui < sizeof ar_hdr.ar_date; ui++)
     ar_hdr.ar_date[ui] = ' ';
-  sprintf (ar_hdr.ar_date, "%ld", (long int) statbuf.st_mtime);
+  sprintf (TOCHAR (ar_hdr.ar_date), "%ld", (long int) statbuf.st_mtime);
 #ifdef AIAMAG
   ar_hdr.ar_date[strlen(ar_hdr.ar_date)] = ' ';
 #endif
@@ -800,7 +825,7 @@ ar_member_touch (char *arname, char *memname)
   /* Write back this member's header */
   if (lseek (fd, pos, 0) < 0)
     goto lose;
-  if (AR_HDR_SIZE != write (fd, (char *) &ar_hdr, AR_HDR_SIZE))
+  if (AR_HDR_SIZE != write (fd, &ar_hdr, AR_HDR_SIZE))
     goto lose;
   close (fd);
   return 0;
@@ -816,9 +841,9 @@ ar_member_touch (char *arname, char *memname)
 #ifdef TEST
 
 long int
-describe_member (int desc, char *name, int truncated,
+describe_member (int desc, const char *name, int truncated,
 		 long int hdrpos, long int datapos, long int size,
-                 long int date, int uid, int gid, int mode)
+                 long int date, int uid, int gid, int mode, const void *arg)
 {
   extern char *ctime ();
 
@@ -834,7 +859,7 @@ describe_member (int desc, char *name, int truncated,
 int
 main (int argc, char **argv)
 {
-  ar_scan (argv[1], describe_member);
+  ar_scan (argv[1], describe_member, NULL);
   return 0;
 }
 

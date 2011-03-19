@@ -29,6 +29,7 @@ Boston, MA 02111-1307, USA.  */
 #define MAKE_TYPES_H
 
 #include "config.h"
+#include "make.h"
 
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
@@ -48,14 +49,9 @@ Boston, MA 02111-1307, USA.  */
 
 typedef unsigned long int lineno_t;
 
-/** \brief File location. 
-    Used in reporting where we are.*/
-struct floc {
-  const char *filenm; /**< The file name */
-  lineno_t lineno;    /**< The line number in the above file. */
-};
 #define NILF ((struct floc *)0)
 
+typedef struct child             child_t;
 typedef struct commands          commands_t;
 typedef struct dep               dep_t;
 typedef struct file              file_t;
@@ -63,8 +59,13 @@ typedef struct floc              floc_t;
 typedef struct nameseq           nameseq_t;
 typedef struct pattern_var       pattern_var_t;
 typedef struct pspec             pspec_t;
+typedef struct rule              rule_t;
 typedef struct stringlist        stringlist_t;
+typedef struct variable          variable_t;
+typedef enum   variable_origin   variable_origin_t;
 typedef struct variable_set      variable_set_t;
 typedef struct variable_set_list variable_set_list_t;
+
+#define	CALLOC(t, n) ((t *) calloc (sizeof (t), (n)))
 
 #endif /*TYPES_H*/

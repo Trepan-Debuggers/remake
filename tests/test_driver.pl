@@ -6,20 +6,22 @@
 # Modified 92-02-11 through 92-02-22 by Chris Arthur to further generalize.
 #
 # Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-# 2001, 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+# 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software
+# Foundation, Inc.
 # This file is part of GNU Make.
 #
-# GNU Make is free software; you can redistribute it and/or modify it under the
-# terms of the GNU General Public License as published by the Free Software
-# Foundation; either version 2, or (at your option) any later version.
+# GNU Make is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 3 of the License, or (at your option) any later
+# version.
 #
 # GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-# A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
 #
 # You should have received a copy of the GNU General Public License along with
-# GNU Make; see the file COPYING.  If not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+# this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 # Test driver routines used by a number of test suites, including
@@ -28,7 +30,7 @@
 # this routine controls the whole mess; each test suite sets up a few
 # variables and then calls &toplevel, which does all the real work.
 
-# $Id: test_driver.pl,v 1.19 2006/03/10 02:20:45 psmith Exp $
+# $Id: test_driver.pl,v 1.30 2010/07/28 05:39:50 psmith Exp $
 
 
 # The number of test categories we've run
@@ -48,6 +50,12 @@ $tests_passed = 0;
 # Yeesh.  This whole test environment is such a hack!
 $test_passed = 1;
 
+
+# Timeout in seconds.  If the test takes longer than this we'll fail it.
+$test_timeout = 5;
+
+# Path to Perl
+$perl_name = $^X;
 
 # %makeENV is the cleaned-out environment.
 %makeENV = ();
@@ -78,9 +86,9 @@ sub resetENV
 sub toplevel
 {
   # Pull in benign variables from the user's environment
-  #
+
   foreach (# UNIX-specific things
-           'TZ', 'LANG', 'TMPDIR', 'HOME', 'USER', 'LOGNAME', 'PATH',
+           'TZ', 'TMPDIR', 'HOME', 'USER', 'LOGNAME', 'PATH',
            # Purify things
            'PURIFYOPTIONS',
            # Windows NT-specific stuff
@@ -91,6 +99,10 @@ sub toplevel
           ) {
     $makeENV{$_} = $ENV{$_} if $ENV{$_};
   }
+
+  # Make sure our compares are not foiled by locale differences
+
+  $makeENV{LC_ALL} = 'C';
 
   # Replace the environment with the new one
   #
@@ -226,8 +238,9 @@ sub toplevel
 sub get_osname
 {
   # Set up an initial value.  In perl5 we can do it the easy way.
-  #
   $osname = defined($^O) ? $^O : '';
+
+  # Find a path to Perl
 
   # See if the filesystem supports long file names with multiple
   # dots.  DOS doesn't.
@@ -263,14 +276,14 @@ sub get_osname
     eval "chop (\$osname = `sh -c 'uname -nmsr 2>&1'`)";
     if ($osname =~ /not found/i)
     {
-	$osname = "(something unixy with no uname)";
+	$osname = "(something posixy with no uname)";
     }
     elsif ($@ ne "" || $?)
     {
         eval "chop (\$osname = `sh -c 'uname -a 2>&1'`)";
         if ($@ ne "" || $?)
         {
-	    $osname = "(something unixy)";
+	    $osname = "(something posixy)";
 	}
     }
     $vos = 0;
@@ -426,16 +439,19 @@ sub run_each_test
       $logext = 'l';
       $diffext = 'd';
       $baseext = 'b';
+      $runext = 'r';
       $extext = '';
     } else {
       $logext = 'log';
       $diffext = 'diff';
       $baseext = 'base';
+      $runext = 'run';
       $extext = '.';
     }
     $log_filename = "$testpath.$logext";
     $diff_filename = "$testpath.$diffext";
     $base_filename = "$testpath.$baseext";
+    $run_filename = "$testpath.$runext";
     $tmp_filename = "$testpath.$tmpfilesuffix";
 
     &setup_for_test;          # suite-defined
@@ -449,6 +465,7 @@ sub run_each_test
     # Run the actual test!
     $tests_run = 0;
     $tests_passed = 0;
+
     $code = do $perl_testname;
 
     $total_tests_run += $tests_run;
@@ -543,12 +560,10 @@ sub print_standard_usage
   local($plname,@moreusage) = @_;
   local($line);
 
-  print "Usage:  perl $plname [testname] [-verbose] [-detail] [-keep]\n";
-  print "                               [-profile] [-usage] [-help] "
-      . "[-debug]\n";
-  foreach $line (@moreusage)
-  {
-    print "                               $line\n";
+  print "usage:\t$plname [testname] [-verbose] [-detail] [-keep]\n";
+  print "\t\t\t[-profile] [-usage] [-help] [-debug]\n";
+  foreach (@moreusage) {
+    print "\t\t\t$_\n";
   }
 }
 
@@ -637,17 +652,11 @@ sub error
 sub compare_output
 {
   local($answer,$logfile) = @_;
-  local($slurp) = ('');
-  $slurp = &read_file_into_string ($logfile);
-  &compare_output_string($answer, $slurp, $logfile);
-}
-
-sub compare_output_string
-{
-  local($answer,$slurp,$logfile) = @_;
-  local($answer_matched) = (0);
+  local($slurp, $answer_matched) = ('', 0);
 
   print "Comparing Output ........ " if $debug;
+
+  $slurp = &read_file_into_string ($logfile);
 
   # For make, get rid of any time skew error before comparing--too bad this
   # has to go into the "generic" driver code :-/
@@ -660,15 +669,23 @@ sub compare_output_string
     $answer_matched = 1;
   } else {
     # See if it is a slash or CRLF problem
-    local ($answer_mod) = $answer;
+    local ($answer_mod, $slurp_mod) = ($answer, $slurp);
 
     $answer_mod =~ tr,\\,/,;
     $answer_mod =~ s,\r\n,\n,gs;
 
-    $slurp =~ tr,\\,/,;
-    $slurp =~ s,\r\n,\n,gs;
+    $slurp_mod =~ tr,\\,/,;
+    $slurp_mod =~ s,\r\n,\n,gs;
 
-    $answer_matched = ($slurp eq $answer_mod);
+    $answer_matched = ($slurp_mod eq $answer_mod);
+
+    # If it still doesn't match, see if the answer might be a regex.
+    if (!$answer_matched && $answer =~ m,^/(.+)/$,) {
+      $answer_matched = ($slurp =~ /$1/);
+      if (!$answer_matched && $answer_mod =~ m,^/(.+)/$,) {
+          $answer_matched = ($slurp_mod =~ /$1/);
+      }
+    }
   }
 
   if ($answer_matched && $test_passed)
@@ -679,13 +696,10 @@ sub compare_output_string
   }
 
   if (! $answer_matched) {
-      if ($debug) {
-	  print "DIFFERENT OUTPUT\n";
-	  print "+++1:\n$answer\n";
-	  print "+++2:\n$slurp\n";
-      }
+    print "DIFFERENT OUTPUT\n" if $debug;
 
     &create_file (&get_basefile, $answer);
+    &create_file (&get_runfile, $command_string);
 
     print "\nCreating Difference File ...\n" if $debug;
 
@@ -693,6 +707,8 @@ sub compare_output_string
 
     local($command) = "diff -c " . &get_basefile . " " . $logfile;
     &run_command_with_output(&get_difffile,$command);
+  } else {
+      &rmfiles ();
   }
 
   $suite_passed = 0;
@@ -773,21 +789,43 @@ sub detach_default_output
          || &error ("ddo: $! closing SAVEDOSerr\n", 1);
 }
 
-# run one command (passed as a list of arg 0 - n), returning 0 on success
-# and nonzero on failure.
-
-sub run_command
+# This runs a command without any debugging info.
+sub _run_command
 {
-  local ($code);
+  my $code;
 
   # We reset this before every invocation.  On Windows I think there is only
   # one environment, not one per process, so I think that variables set in
   # test scripts might leak into subsequent tests if this isn't reset--???
   resetENV();
 
+  eval {
+      local $SIG{ALRM} = sub { die "timeout\n"; };
+      alarm $test_timeout;
+      $code = system(@_);
+      alarm 0;
+  };
+  if ($@) {
+      # The eval failed.  If it wasn't SIGALRM then die.
+      $@ eq "timeout\n" or die;
+
+      # Timed out.  Resend the alarm to our process group to kill the children.
+      $SIG{ALRM} = 'IGNORE';
+      kill -14, $$;
+      $code = 14;
+  }
+
+  return $code;
+}
+
+# run one command (passed as a list of arg 0 - n), returning 0 on success
+# and nonzero on failure.
+
+sub run_command
+{
   print "\nrun_command: @_\n" if $debug;
-  $code = system @_;
-  print "run_command: \"@_\" returned $code.\n" if $debug;
+  my $code = _run_command(@_);
+  print "run_command returned $code.\n" if $debug;
 
   return $code;
 }
@@ -799,19 +837,13 @@ sub run_command
 
 sub run_command_with_output
 {
-  local ($filename) = shift;
-  local ($code);
+  my $filename = shift;
 
-  # We reset this before every invocation.  On Windows I think there is only
-  # one environment, not one per process, so I think that variables set in
-  # test scripts might leak into subsequent tests if this isn't reset--???
-  resetENV();
-
+  print "\nrun_command_with_output($filename,$runname): @_\n" if $debug;
   &attach_default_output ($filename);
-  $code = system @_;
+  my $code = _run_command(@_);
   &detach_default_output;
-
-  print "run_command_with_output: '@_' returned $code.\n" if $debug;
+  print "run_command_with_output returned $code.\n" if $debug;
 
   return $code;
 }
@@ -1178,6 +1210,15 @@ sub get_basefile
 sub get_difffile
 {
   return ($diff_filename . &num_suffix ($num_of_logfiles));
+}
+
+# This subroutine returns a command filename with a number appended
+# to the end corresponding to how many logfiles (and thus command files)
+# have been created in the current running test.
+
+sub get_runfile
+{
+  return ($run_filename . &num_suffix ($num_of_logfiles));
 }
 
 # just like logfile, only a generic tmp filename for use by the test.
