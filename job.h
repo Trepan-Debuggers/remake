@@ -36,17 +36,24 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 # define CLOSE_ON_EXEC(_d) (void) fcntl ((_d), F_SETFD, FD_CLOEXEC)
 #endif
 
+#include "types.h"
+
 /* Structure describing a running or dead child process.  */
 
 struct child
   {
     struct child *next;		/* Link in the chain.  */
 
+    floc_t fileinfo;	        /**< Where commands were defined. Note:
+				   this could be a pattern target.
+				 */
+
     struct file *file;		/* File being remade.  */
 
     char **environment;		/* Environment for commands.  */
 
     char **command_lines;	/* Array of variable-expanded cmd lines.  */
+    unsigned int *line_no;	/**< line # offsets of chopped commands. */
     unsigned int command_line;	/* Index into above.  */
     char *command_ptr;		/* Ptr into command_lines[command_line].  */
 
@@ -63,6 +70,7 @@ struct child
 
     unsigned int good_stdin:1;	/* Nonzero if this child has a good stdin.  */
     unsigned int deleted:1;	/* Nonzero if targets have been deleted.  */
+    unsigned int tracing:1;	/**< Nonzero child should be traced.  */
     unsigned int dontcare:1;    /* Saved dontcare flag.  */
   };
 

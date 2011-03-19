@@ -585,13 +585,17 @@ extern void print_version (void);
 #endif
 
 #ifdef VMS
-#  define MAKE_SUCCESS 1
-#  define MAKE_TROUBLE 2
-#  define MAKE_FAILURE 3
+typedef enum {
+  MAKE_SUCCESS = 1, /**< GNU Make completed okay */
+  MAKE_TROUBLE = 2, /**< A we ran failed */
+  MAKE_FAILURE = 3  /**< GNU Make had an internal error/failure */
+} make_exit_code_t;
 #else
-#  define MAKE_SUCCESS 0
-#  define MAKE_TROUBLE 1
-#  define MAKE_FAILURE 2
+typedef enum {
+  MAKE_SUCCESS = 0, /**< GNU Make completed okay */
+  MAKE_TROUBLE = 1, /**< A we ran failed */
+  MAKE_FAILURE = 2  /**< GNU Make had an internal error/failure */
+} make_exit_code_t;
 #endif
 
 /* Set up heap debugging library dmalloc.  */

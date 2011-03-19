@@ -1676,9 +1676,13 @@ new_job (struct file *file)
      `struct child', and add that to the chain.  */
 
   c = xcalloc (sizeof (struct child));
+  bzero ((char *)c, sizeof (child_t));
+  c->fileinfo      = cmds->fileinfo;
+  c->line_no       = cmds->line_no;
   c->file = file;
   c->command_lines = lines;
   c->sh_batch_file = NULL;
+  c->tracing       = file->tracing;
 
   /* Cache dontcare flag because file->dontcare can be changed once we
      return. Check dontcare inheritance mechanism for details.  */

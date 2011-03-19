@@ -13,6 +13,7 @@
 /SMakefile
 /aclocal.m4
 /autom4te.cache
+/build.sh
 /build.sh.in
 /config.ami
 /config.h

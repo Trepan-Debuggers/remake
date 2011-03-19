@@ -121,7 +121,7 @@ set_file_variables (struct file *file)
 	  len = strlen (name);
 	}
 
-      for (d = enter_file (strcache_add (".SUFFIXES"))->deps; d ; d = d->next)
+      for (d = enter_file (strcache_add (".SUFFIXES"), NILF)->deps; d ; d = d->next)
 	{
 	  unsigned int slen = strlen (dep_name (d));
 	  if (len > slen && strneq (dep_name (d), name + (len - slen), slen))

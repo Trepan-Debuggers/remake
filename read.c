@@ -271,7 +271,7 @@ read_all_makefiles (const char **makefiles)
 	  for (p = default_makefiles; *p != 0; ++p)
 	    {
 	      struct dep *d = alloc_dep ();
-	      d->file = enter_file (strcache_add (*p));
+	      d->file = enter_file (strcache_add (*p), NILF);
 	      d->dontcare = 1;
 	      /* Tell update_goal_chain to bail out as soon as this file is
 		 made, and main not to die if we can't make this file.  */
@@ -385,7 +385,7 @@ eval_makefile (const char *filename, int flags)
   read_makefiles = deps;
   deps->file = lookup_file (filename);
   if (deps->file == 0)
-    deps->file = enter_file (filename);
+    deps->file = enter_file (filename, NILF);
   filename = deps->file->name;
   deps->changed = flags;
   if (flags & RM_DONTCARE)
@@ -1787,7 +1787,7 @@ record_target_var (struct nameseq *filenames, char *defn,
              this situation.  */
           f = lookup_file (name);
           if (!f)
-            f = enter_file (strcache_add (name));
+            f = enter_file (strcache_add (name), NILF);
           else if (f->double_colon)
             f = f->double_colon;
 
@@ -1988,7 +1988,7 @@ record_files (struct nameseq *filenames, const char *pattern,
 	{
 	  /* Single-colon.  Combine this rule with the file's existing record,
 	     if any.  */
-	  f = enter_file (strcache_add (name));
+	  f = enter_file (strcache_add (name), flocp);
 	  if (f->double_colon)
 	    fatal (flocp,
                    _("target file `%s' has both : and :: entries"), f->name);
@@ -2038,7 +2038,7 @@ record_files (struct nameseq *filenames, const char *pattern,
 	    fatal (flocp,
                    _("target file `%s' has both : and :: entries"), f->name);
 
-	  f = enter_file (strcache_add (name));
+	  f = enter_file (strcache_add (name), flocp);
 	  /* If there was an existing entry and it was a double-colon entry,
 	     enter_file will have returned a new one, making it the prev
 	     pointer of the old one, and setting its double_colon pointer to

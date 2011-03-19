@@ -1230,7 +1230,7 @@ f_mtime (struct file *file, int search)
 	 Also allow for its name to be changed via VPATH search.  */
       arfile = lookup_file (arname);
       if (arfile == 0)
-        arfile = enter_file (strcache_add (arname));
+        arfile = enter_file (strcache_add (arname), NILF);
       mtime = f_mtime (arfile, search);
       check_renamed (arfile);
       if (search && strcmp (arfile->hname, arname))

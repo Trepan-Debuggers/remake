@@ -148,7 +148,7 @@ lookup_file (const char *name)
  */
 
 struct file *
-enter_file (const char *name)
+enter_file (const char *name, const floc_t *p_floc)
 {
   struct file *f;
   struct file *new;
@@ -185,6 +185,13 @@ enter_file (const char *name)
   new = xcalloc (sizeof (struct file));
   new->name = new->hname = name;
   new->update_status = -1;
+  new->tracing = 0;
+  if (p_floc) {
+    new->floc = *p_floc;
+  } else {
+    new->floc.lineno = 0;
+    new->floc.filenm = NULL;
+  }
 
   if (HASH_VACANT (f))
     {
@@ -526,7 +533,7 @@ enter_prereqs (struct dep *deps, const char *stem)
 
       d1->file = lookup_file (d1->name);
       if (d1->file == 0)
-        d1->file = enter_file (d1->name);
+        d1->file = enter_file (d1->name, NILF);
       d1->staticpattern = 0;
       d1->name = 0;
     }

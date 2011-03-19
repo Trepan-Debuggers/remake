@@ -329,6 +329,12 @@ struct variable shell_var;
 
 char cmd_prefix = '\t';
 
+/** This variable is trickery to force the above enum symbol values to
+    be recorded in debug symbol tables. It is used to allow one refer
+    to above enumeration values in a debugger and debugger
+    expressions */
+make_exit_code_t make_exit_code;
+
 
 /* The usage output.  We write it this way to make life easier for the
    translators, especially those trying to translate to right-to-left
@@ -506,14 +512,6 @@ struct command_variable
   };
 static struct command_variable *command_variables;
 
-/* The name we were invoked with.  */
-
-char *program;
-
-/* Our current directory before processing any -C options.  */
-
-char *directory_before_chdir;
-
 /*! Value of argv[0] which seems to get modified. Can we merge this with
     program below? */
 static char *argv0 = NULL;
@@ -1620,7 +1618,7 @@ main (int argc, char **argv, char **envp)
 
 	    /* Make sure the temporary file will not be remade.  */
             {
-              struct file *f = enter_file (strcache_add (stdin_nm));
+	      struct file *f = enter_file (strcache_add (stdin_nm), NILF);
               f->updated = 1;
               f->update_status = 0;
               f->command_state = cs_finished;
@@ -1687,7 +1685,7 @@ main (int argc, char **argv, char **envp)
   /* Define the default variables.  */
   define_default_variables ();
 
-  default_file = enter_file (strcache_add (".DEFAULT"));
+  default_file = enter_file (strcache_add (".DEFAULT"), NILF);
 
   default_goal_var = define_variable_cname (".DEFAULT_GOAL", "", o_file, 0);
 
@@ -1922,7 +1920,7 @@ main (int argc, char **argv, char **envp)
       const char **p;
       for (p = old_files->list; *p != 0; ++p)
         {
-          struct file *f = enter_file (*p);
+	  struct file *f = enter_file (*p, NILF);
           f->last_mtime = f->mtime_before_update = OLD_MTIME;
           f->updated = 1;
           f->update_status = 0;
@@ -1935,7 +1933,7 @@ main (int argc, char **argv, char **envp)
       const char **p;
       for (p = new_files->list; *p != 0; ++p)
 	{
-	  struct file *f = enter_file (*p);
+	  struct file *f = enter_file (*p, NILF);
 	  f->last_mtime = f->mtime_before_update = NEW_MTIME;
 	}
     }
@@ -2272,7 +2270,7 @@ main (int argc, char **argv, char **envp)
       const char **p;
       for (p = new_files->list; *p != 0; ++p)
 	{
-	  struct file *f = enter_file (*p);
+	  struct file *f = enter_file (*p, NILF);
 	  f->last_mtime = f->mtime_before_update = NEW_MTIME;
 	}
     }
@@ -2314,7 +2312,7 @@ main (int argc, char **argv, char **envp)
                   if (ns->next != 0)
                     fatal (NILF, _(".DEFAULT_GOAL contains more than one target"));
 
-                  f = enter_file (strcache_add (ns->name));
+                  f = enter_file (strcache_add (ns->name), NILF);
 
                   ns->name = 0; /* It was reused by enter_file(). */
                   free_ns_chain (ns);
@@ -2479,7 +2477,7 @@ handle_non_switch_argument (char *arg, int env)
       /* Not an option or variable definition; it must be a goal
 	 target!  Enter it as a file and add it to the dep chain of
 	 goals.  */
-      struct file *f = enter_file (strcache_add (expand_command_line_file (arg)));
+      struct file *f = enter_file (strcache_add (expand_command_line_file (arg)), NILF);
       f->cmd_target = 1;
 
       if (goals == 0)

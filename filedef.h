@@ -110,7 +110,14 @@ extern struct file *suffix_file, *default_file;
 
 
 struct file *lookup_file (const char *name);
-struct file *enter_file (const char *name);
+
+/*! Enter PSZ_NAME into the file hash table if it is not already
+  there and return a pointer to that.  If the entry is in the file
+  hash table, return that entry.  Some file fields are initialized on
+  new entry.
+ */
+extern struct file *enter_file (const char *psz_name, const floc_t *p_floc);
+
 struct dep *split_prereqs (char *prereqstr);
 struct dep *enter_prereqs (struct dep *prereqs, const char *stem);
 void remove_intermediates (int sig);

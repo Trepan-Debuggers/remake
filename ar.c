@@ -103,7 +103,7 @@ ar_member_date (const char *name)
     struct file *arfile;
     arfile = lookup_file (arname);
     if (arfile == 0 && file_exists_p (arname))
-      arfile = enter_file (strcache_add (arname));
+      arfile = enter_file (strcache_add (arname), NILF);
 
     if (arfile != 0)
       (void) f_mtime (arfile, 0);
@@ -138,7 +138,7 @@ ar_touch (const char *name)
      touch the member, since this will change the archive modtime.  */
   {
     struct file *arfile;
-    arfile = enter_file (strcache_add (arname));
+    arfile = enter_file (strcache_add (arname), NILF);
     f_mtime (arfile, 0);
   }
 

@@ -849,7 +849,7 @@ pattern_search (struct file *file, int archive,
           if (f != 0)
             f->precious = 1;
           else
-            f = enter_file (imf->name);
+            f = enter_file (imf->name, &(imf->floc));
 
           f->deps = imf->deps;
           f->cmds = imf->cmds;
@@ -868,7 +868,7 @@ pattern_search (struct file *file, int archive,
 
           for (dep = f->deps; dep != 0; dep = dep->next)
             {
-              dep->file = enter_file (dep->name);
+              dep->file = enter_file (dep->name, &(file->floc));
               dep->name = 0;
               dep->file->tried_implicit |= dep->changed;
             }
@@ -883,7 +883,7 @@ pattern_search (struct file *file, int archive,
         {
           dep->file = lookup_file (s);
           if (dep->file == 0)
-            dep->file = enter_file (s);
+	    dep->file = enter_file (s, &(file->floc));
         }
 
       if (pat->file == 0 && tryrules[foundrule].rule->terminal)
@@ -956,7 +956,7 @@ pattern_search (struct file *file, int archive,
           memcpy (p, rule->suffixes[ri],
                   rule->lens[ri] - (rule->suffixes[ri] - rule->targets[ri])+1);
           new->name = strcache_add (nm);
-          new->file = enter_file (new->name);
+          new->file = enter_file (new->name, NILF);
           new->next = file->also_make;
 
           /* Set precious flag. */

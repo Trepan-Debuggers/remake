@@ -535,7 +535,7 @@ static const char *default_variables[] =
 void
 set_default_suffixes (void)
 {
-  suffix_file = enter_file (strcache_add (".SUFFIXES"));
+  suffix_file = enter_file (strcache_add (".SUFFIXES"), NILF);
 
   if (no_builtin_rules_flag)
     define_variable_cname ("SUFFIXES", "", o_default, 0);
@@ -564,7 +564,7 @@ install_default_suffix_rules (void)
 
   for (s = default_suffix_rules; *s != 0; s += 2)
     {
-      struct file *f = enter_file (strcache_add (s[0]));
+      struct file *f = enter_file (strcache_add (s[0]), NILF);
       /* Don't clobber cmds given in a makefile if there were any.  */
       if (f->cmds == 0)
 	{
