@@ -379,6 +379,8 @@ static const char *const usage[] =
     N_("\
   -L, --check-symlink-times   Use the latest mtime between symlinks and target.\n"),
     N_("\
+  --no-extended-errors         Do not give additional error reporting.\n"),
+    N_("\
   -n, --just-print, --dry-run, --recon\n\
                               Don't actually run any recipe; just print them.\n"),
     N_("\
@@ -436,6 +438,8 @@ static const struct command_switch switches[] =
     { 'D', flag, &suspend_flag, 1, 1, 0, 0, 0, "suspend-for-debug" },
 #endif
     { 'e', flag, &env_overrides, 1, 1, 0, 0, 0, "environment-overrides", },
+    { CHAR_MAX+7, flag, (char *) &no_extended_errors, 1, 1, 0, 0, 0,
+        "no-extended-errors", },
     { 'f', filename, &makefiles, 0, 0, 0, 0, 0, "file" },
     { 'h', flag, &print_usage_flag, 0, 0, 0, 0, 0, "help" },
     { 'i', flag, &ignore_errors_flag, 1, 1, 0, 0, 0, "ignore-errors" },
@@ -3243,7 +3247,7 @@ die (int status)
       /* Wait for children to die.  */
       err = (status != 0);
       while (job_slots_used > 0)
-	reap_children (1, err);
+	reap_children (1, err, NULL);
 
       /* Let the remote job module clean up its state.  */
       remote_cleanup ();

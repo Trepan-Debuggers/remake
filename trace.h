@@ -23,8 +23,8 @@ Boston, MA 02111-1307, USA.  */
  *  \brief Header for routines related to tracing and debugging support.
  */
 
-#ifndef TRACE_H
-#define TRACE_H
+#ifndef REMAKE_TRACE_H
+#define REMAKE_TRACE_H
 
 #include "filedef.h"
 
@@ -83,4 +83,4 @@ extern void trace_push_floc (floc_t *p_floc);
 /*! Pop the next floc from the call stack.. */
 extern void trace_pop_floc (void);
 
-#endif /*TRACE_H*/
+#endif /*REMAKE_TRACE_H*/

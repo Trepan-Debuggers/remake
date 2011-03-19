@@ -68,7 +68,7 @@ run_make_test(qq!
 .SHELLFLAGS = $flags
 all: ; \@$script
 !,
-              '', $out);
+              '--no-extended-errors', $out);
 
 # We can't just use "false" because on different systems it provides a
 # different exit code--once again Solaris: false exits with 255 not 1
@@ -81,6 +81,7 @@ run_make_test(qq!
 .SHELLFLAGS = $flags
 all: ; \@$script
 !,
-              '', "$out#MAKE#: *** [all] Error $err\n", 512);
+              '--no-extended-errors', 
+"${out}work/variables/SHELL.mk.6:3: *** [all] Error $err\n", 512);
 
 1;

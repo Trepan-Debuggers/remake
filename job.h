@@ -19,6 +19,8 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef SEEN_JOB_H
 #define SEEN_JOB_H
 
+#include "trace.h"
+
 #ifdef HAVE_FCNTL_H
 # include <fcntl.h>
 #else
@@ -36,11 +38,8 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 # define CLOSE_ON_EXEC(_d) (void) fcntl ((_d), F_SETFD, FD_CLOEXEC)
 #endif
 
-#include "types.h"
-
-/* Structure describing a running or dead child process.  */
-
-struct child
+/** \brief Structure describing a running or dead child process.  */
+typedef struct child
   {
     struct child *next;		/* Link in the chain.  */
 
@@ -72,14 +71,17 @@ struct child
     unsigned int deleted:1;	/* Nonzero if targets have been deleted.  */
     unsigned int tracing:1;	/**< Nonzero child should be traced.  */
     unsigned int dontcare:1;    /* Saved dontcare flag.  */
-  };
+  } chlid_t;
 
 extern struct child *children;
 
 int is_bourne_compatible_shell(const char *path);
-void new_job (struct file *file);
-void reap_children (int block, int err);
-void start_waiting_jobs (void);
+
+extern void new_job (file_t *file, target_stack_node_t *p_call_stack);
+extern void reap_children (int block, int err, 
+			   target_stack_node_t *p_call_stack);
+
+extern void start_waiting_jobs (target_stack_node_t *p_call_stack);
 
 char **construct_command_argv (char *line, char **restp, struct file *file,
                                int cmd_flags, char** batch_file);

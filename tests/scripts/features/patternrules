@@ -109,8 +109,8 @@ run_make_test('
 $(dir)/foo.bar:
 
 ',
-"dir=$dir",
-"#MAKE#: *** [$dir/foo.bar] Error 1",
+"--no-extended-errors dir=$dir",
+"work/features/patternrules.mk.3:8: *** [$dir/foo.bar] Error 1",
 512);
 
 unlink("$dir/foo.bar");

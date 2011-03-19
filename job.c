@@ -16,11 +16,14 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include "types.h"
 #include "make.h"
+#include "debugger/cmd.h"
 
 #include <assert.h>
 
 #include "job.h"
+#include "print.h"
 #include "expand.h"
 #include "debug.h"
 #include "filedef.h"
@@ -212,10 +215,12 @@ int remote_status (int *exit_code_ptr, int *signal_ptr, int *coredump_ptr,
 
 RETSIGTYPE child_handler (int);
 static void free_child (struct child *);
-static void start_job_command (struct child *child);
+static void start_job_command (struct child *child,
+			       target_stack_node_t *p_call_stack);
 static int load_too_high (void);
 static int job_next_command (struct child *);
-static int start_waiting_job (struct child *);
+static int start_waiting_job (child_t *c, 
+			      target_stack_node_t *p_call_stack);
 
 /* Chain of all live (or recently deceased) children.  */
 
@@ -438,9 +443,10 @@ is_bourne_compatible_shell (const char *path)
    Append "(ignored)" if IGNORED is nonzero.  */
 
 static void
-child_error (const char *target_name,
+child_error (child_t *p_child, target_stack_node_t *p_call_stack,
              int exit_code, int exit_sig, int coredump, int ignored)
 {
+  const char *target_name = p_child->file->name;
   if (ignored && silent_flag)
     return;
 
@@ -452,14 +458,22 @@ child_error (const char *target_name,
              target_name, exit_code);
 #else
   if (exit_sig == 0)
-    error (NILF, ignored ? _("[%s] Error %d (ignored)") :
-	   _("*** [%s] Error %d"),
-	   target_name, exit_code);
+    err (p_call_stack, ignored ? _("[%s] Error %d (ignored)") :
+	 _("*** [%s] Error %d"),
+	 target_name, exit_code);
   else
-    error (NILF, "*** [%s] %s%s",
-	   target_name, strsignal (exit_sig),
-	   coredump ? _(" (core dumped)") : "");
+    err (p_call_stack, "*** [%s] %s%s",
+	 target_name, strsignal (exit_sig),
+	 coredump ? _(" (core dumped)") : "");
 #endif /* VMS */
+
+  /* If have enabled debugging but haven't entered the debugger above
+     because we haven't set to debug on error, enter the debugger now.
+     FIXME: Add be another variable/option to control entry here as
+     well?
+   */
+  if (! (debugger_on_error & DEBUGGER_ON_ERROR) && debugger_enabled )
+    enter_debugger(p_call_stack, p_child->file, exit_code, DEBUG_ERROR_HIT);
 }
 
 
@@ -506,7 +520,7 @@ extern int shell_function_pid, shell_function_completed;
    print an error message first.  */
 
 void
-reap_children (int block, int err)
+reap_children (int block, int err, target_stack_node_t *p_call_stack)
 {
 #ifndef WINDOWS32
   WAIT_T status;
@@ -778,6 +792,17 @@ reap_children (int block, int err)
 
       dontcare = c->dontcare;
 
+      /* Debugger "quit" takes precedence over --ignore-errors
+	 --keep-going, etc.
+       */
+      if (exit_code == DEBUGGER_QUIT_RC && debugger_enabled) {
+	if (job_slots_used > 0) --job_slots_used;
+	c->file->update_status = 0;
+	free_child (c);
+	in_debugger = DEBUGGER_QUIT_RC;
+	die(DEBUGGER_QUIT_RC);
+      }
+      
       if (child_failed && !c->noerror && !ignore_errors_flag)
         {
           /* The commands failed.  Write an error message,
@@ -785,7 +810,7 @@ reap_children (int block, int err)
           static int delete_on_error = -1;
 
           if (!dontcare)
-            child_error (c->file->name, exit_code, exit_sig, coredump, 0);
+	    child_error (c, p_call_stack, exit_code, exit_sig, coredump, 0);
 
           c->file->update_status = 2;
           if (delete_on_error == -1)
@@ -801,8 +826,7 @@ reap_children (int block, int err)
           if (child_failed)
             {
               /* The commands failed, but we don't care.  */
-              child_error (c->file->name,
-                           exit_code, exit_sig, coredump, 1);
+              child_error (c, p_call_stack, exit_code, exit_sig, coredump, 1);
               child_failed = 0;
             }
 
@@ -824,7 +848,7 @@ reap_children (int block, int err)
                      Also, start_remote_job may need state set up
                      by start_remote_job_p.  */
                   c->remote = start_remote_job_p (0);
-                  start_job_command (c);
+                  start_job_command (c, p_call_stack);
                   /* Fatal signals are left blocked in case we were
                      about to put that child on the chain.  But it is
                      already there, so it is safe for a fatal signal to
@@ -879,16 +903,37 @@ reap_children (int block, int err)
       else
         lastc->next = c->next;
 
-      free_child (c);
+      {
+	/* Save file info in case we need to use it in the debugger
+	 */
+	file_t file;
 
-      unblock_sigs ();
+	memcpy(&file, c->file, sizeof(file_t));
 
-      /* If the job failed, and the -k flag was not given, die,
-         unless we are already in the process of dying.  */
-      if (!err && child_failed && !dontcare && !keep_going_flag &&
-          /* fatal_error_signal will die with the right signal.  */
-          !handling_fatal_signal)
-        die (2);
+	free_child (c);
+
+	unblock_sigs ();
+
+	/* Debugger "quit" takes precedence over --ignore-errors
+	   --keep-going, etc.
+	*/
+	if (exit_code == DEBUGGER_QUIT_RC && debugger_enabled) {
+	    in_debugger = DEBUGGER_QUIT_RC;
+	    die(DEBUGGER_QUIT_RC);
+	}
+      
+	/* If the job failed, and the -k flag was not given, die,
+	   unless we are already in the process of dying.  */
+	if (!err && child_failed && !dontcare && !keep_going_flag &&
+	    /* fatal_error_signal will die with the right signal.  */
+	    !handling_fatal_signal) 
+	{
+	  if ( (debugger_on_error & DEBUGGER_ON_FATAL) 
+	       || i_debugger_stepping || i_debugger_nexting )
+	      enter_debugger(p_call_stack, &file, 2, DEBUG_ERROR_HIT);
+	  die (2);
+	}
+      }
 
       /* Only block for one child.  */
       block = 0;
@@ -952,6 +997,7 @@ free_child (struct child *child)
 extern sigset_t fatal_signal_set;
 #endif
 
+/*! block getting any maskable signals.  */
 void
 block_sigs (void)
 {
@@ -965,6 +1011,7 @@ block_sigs (void)
 }
 
 #ifdef POSIX
+/*! Remove blocks on signals.  */
 void
 unblock_sigs (void)
 {
@@ -1023,7 +1070,8 @@ set_child_handler_action_flags (int set_handler, int set_alarm)
    it can be cleaned up in the event of a fatal signal.  */
 
 static void
-start_job_command (struct child *child)
+start_job_command (child_t *child, 
+		   target_stack_node_t *p_call_stack)
 {
 #if !defined(_AMIGA) && !defined(WINDOWS32)
   static int bad_stdin = -1;
@@ -1128,7 +1176,7 @@ start_job_command (struct child *child)
 #endif
       /* This line has no commands.  Go to the next.  */
       if (job_next_command (child))
-	start_job_command (child);
+	start_job_command (child, p_call_stack);
       else
 	{
 	  /* No more commands.  Make sure we're "running"; we might not be if
@@ -1489,7 +1537,7 @@ start_job_command (struct child *child)
    the load was too high and the child was put on the `waiting_jobs' chain.  */
 
 static int
-start_waiting_job (struct child *c)
+start_waiting_job (struct child *c, target_stack_node_t *p_call_stack)
 {
   struct file *f = c->file;
 
@@ -1517,7 +1565,7 @@ start_waiting_job (struct child *c)
     }
 
   /* Start the first command; reap_children will run later command lines.  */
-  start_job_command (c);
+  start_job_command (c, p_call_stack);
 
   switch (f->command_state)
     {
@@ -1553,7 +1601,7 @@ start_waiting_job (struct child *c)
 /* Create a `struct child' for FILE and start its commands running.  */
 
 void
-new_job (struct file *file)
+new_job (struct file *file, target_stack_node_t *p_call_stack)
 {
   struct commands *cmds = file->cmds;
   struct child *c;
@@ -1562,10 +1610,10 @@ new_job (struct file *file)
 
   /* Let any previously decided-upon jobs that are waiting
      for the load to go down start before this new one.  */
-  start_waiting_jobs ();
+  start_waiting_jobs (p_call_stack);
 
   /* Reap any children that might have finished recently.  */
-  reap_children (0, 0);
+  reap_children (0, 0, p_call_stack);
 
   /* Chop the commands up into lines if they aren't already.  */
   chop_commands (cmds);
@@ -1696,7 +1744,7 @@ new_job (struct file *file)
 
   if (job_slots != 0)
     while (job_slots_used == job_slots)
-      reap_children (1, 0);
+      reap_children (1, 0, p_call_stack);
 
 #ifdef MAKE_JOBSERVER
   /* If we are controlling multiple jobs make sure we have a token before
@@ -1755,11 +1803,11 @@ new_job (struct file *file)
           }
 
         /* Reap anything that's currently waiting.  */
-        reap_children (0, 0);
+        reap_children (0, 0, p_call_stack);
 
         /* Kick off any jobs we have waiting for an opportunity that
            can run now (ie waiting for load). */
-        start_waiting_jobs ();
+        start_waiting_jobs (p_call_stack);
 
         /* If our "free" slot has become available, use it; we don't need an
            actual token.  */
@@ -1808,13 +1856,15 @@ new_job (struct file *file)
                    c->file->name));
 
 
-  start_waiting_job (c);
+  /* The job is now primed.  Start it running.
+     (This will notice if there are in fact no commands.)  */
+  (void) start_waiting_job (c, p_call_stack);
 
   if (job_slots == 1 || not_parallel)
     /* Since there is only one job slot, make things run linearly.
        Wait for the child to die, setting the state to `cs_finished'.  */
     while (file->command_state == cs_running)
-      reap_children (1, 0);
+      reap_children (1, 0, p_call_stack);
 
   return;
 }
@@ -1948,7 +1998,7 @@ load_too_high (void)
 /* Start jobs that are waiting for the load to be lower.  */
 
 void
-start_waiting_jobs (void)
+start_waiting_jobs (target_stack_node_t *p_call_stack)
 {
   struct child *job;
 
@@ -1958,7 +2008,7 @@ start_waiting_jobs (void)
   do
     {
       /* Check for recently deceased descendants.  */
-      reap_children (0, 0);
+      reap_children (0, 0, NULL);
 
       /* Take a job off the waiting list.  */
       job = waiting_jobs;
@@ -1967,7 +2017,7 @@ start_waiting_jobs (void)
       /* Try to start that job.  We break out of the loop as soon
 	 as start_waiting_job puts one back on the waiting list.  */
     }
-  while (start_waiting_job (job) && waiting_jobs != 0);
+  while (start_waiting_job (job, p_call_stack) && waiting_jobs != 0);
 
   return;
 }

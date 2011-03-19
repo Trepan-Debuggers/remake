@@ -17,7 +17,8 @@ run_make_test(qq!
 .POSIX:
 all: ; \@$script
 !,
-              '', "#MAKE#: *** [all] Error $err\n", 512);
+             '--no-extended-errors', 
+"work/targets/POSIX.mk:3: *** [all] Error $err", 512);
 
 # User settings must override .POSIX
 $flags = '-xc';
@@ -27,7 +28,7 @@ run_make_test(qq!
 .POSIX:
 all: ; \@$script
 !,
-              '', $out);
+              '--no-extended-errors', $out);
 
 # This tells the test driver that the perl test script executed properly.
 1;

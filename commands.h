@@ -23,6 +23,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define COMMANDS_H
 
 #include "filedef.h"
+#include "trace.h"
 
 struct commands
   {
@@ -42,7 +43,21 @@ struct commands
 #define	COMMANDS_SILENT		2 /* Silent: @.  */
 #define	COMMANDS_NOERROR	4 /* No errors: -.  */
 
-void execute_file_commands (struct file *file);
+/*! 
+  Execute the commands to remake P_FILE.  If they are currently
+  executing, return or have already finished executing, just return.
+  Otherwise, fork off a child process to run the first command line
+  in the sequence.  
+  
+  @param p_file  pointer to file to remake.
+
+  @param p_call_stack pointer to current target call stack. This is
+  passed down for information reporting.
+  
+*/
+extern void execute_file_commands (file_t *p_file, 
+				   target_stack_node_t *p_call_stack);
+
 
 /*! 
   Print out the commands.

@@ -1723,7 +1723,7 @@ func_shell (char *o, char **argv, const char *funcname UNUSED)
       /* Loop until child_handler or reap_children()  sets
          shell_function_completed to the status of our child shell.  */
       while (shell_function_completed == 0)
-	reap_children (1, 0);
+	reap_children (1, 0, NULL);
 
       if (batch_filename) {
 	DB (DB_VERBOSE, (_("Cleaning up temporary batch file %s\n"),
