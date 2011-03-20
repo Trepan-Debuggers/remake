@@ -139,7 +139,7 @@ get_word(char **ppsz_str)
     looked up.
  */
 file_t *
-get_target(char **ppsz_args, /*out*/ char **ppsz_target) 
+get_target(char **ppsz_args, /*out*/ const char **ppsz_target) 
 {
   if (!*ppsz_args || !**ppsz_args) {
     /* Use current target */

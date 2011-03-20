@@ -511,96 +511,11 @@ help_cmd_set_show(const char *psz_fmt, subcommand_var_info_t *p_subcmd)
   printf("\n");
 }
 
-/* 
-Set a breakpoint at a target.  With a target name, set a break before
-running commands of that target.  Without argument, list all breaks.
-*/
-static debug_return_t 
-dbg_cmd_break (char *psz_target)
-{
-  file_t *p_target;
-
-  if (!psz_target || !*psz_target) {
-    list_breakpoints();
-    return debug_readloop;
-  }
-  
-  p_target = lookup_file (psz_target);
-  if (!p_target) {
-    printf("Can't find target %s; breakpoint not set.\n", psz_target);
-    return debug_cmd_error;
-  }
-
-  add_breakpoint(p_target);
-  
-  return debug_readloop;
-}
-
-/* Comment line - ingore text on line. */
-static debug_return_t 
-dbg_cmd_chdir (char *psz_args)
-{
-  if (!psz_args || 0==strlen(psz_args)) {
-    printf(_("Argument required (new working directory).\n"));
-  } else {
-    if ( 0 != chdir(psz_args) ) {
-      printf("%s: %s\n", psz_args, strerror(1));
-    } else {
-      printf (_("Working directory %s.\n"), psz_args);
-    }
-  }
-  return debug_readloop;
-}
-
-/* Comment line - ingore text on line. */
-static debug_return_t 
-dbg_cmd_comment (char *psz_arg)
-{
-  return debug_readloop;
-}
-
-/* Continue running program. */
-static debug_return_t 
-dbg_cmd_continue (char *psz_arg)
-{
-  if (psz_arg && *psz_arg) {
-    if (debug_cmd_error == dbg_cmd_break(psz_arg)) {
-      printf(_("Not continuing under these circumstatnces.\n"));
-      return debug_cmd_error;
-    }
-  }
-
-  i_debugger_stepping = 0;
-  i_debugger_nexting  = 0;
-  return continue_execution;
-}
-
-/* 
-   Delete some breakpoints. Arguments are breakpoint numbers with spaces 
-   in between."To delete all breakpoints, give no argument.
-*/
-static debug_return_t 
-dbg_cmd_delete (char *psz_args)
-{
-  int i_brkpt;
-  char *psz_word;
-
-  if (!psz_args || !*psz_args) {
-    while(i_breakpoints) 
-      remove_breakpoint(1);
-    return debug_readloop;
-  }
-  
-  psz_word = get_word(&psz_args);
-  while ( psz_word && *psz_word ) {
-    if (get_int(psz_word, &i_brkpt, true)) {
-      remove_breakpoint(i_brkpt);
-    }
-    psz_word = get_word(&psz_args);
-  }
-
-  return debug_readloop;
-}
+#include "command/break.h"
+#include "command/chdir.h"
+#include "command/comment.h"
+#include "command/continue.h"
+#include "command/delete.h"
 
 /* Parse and evaluate buffer and return the results. */
 static debug_return_t 
@@ -644,133 +559,8 @@ dbg_cmd_finish (char *psz_arg)
   return continue_execution;
 }
 
-/* Give some help info. */
-debug_return_t 
-dbg_cmd_help (char *psz_args)
-{
-  unsigned int i;
-
-  if (!psz_args || !*psz_args) {
-    printf ("  Command                  Short Name  Aliases\n");
-    printf ("  ----------------------   ----------  ---------\n");
-    for (i = 0; commands[i].long_name; i++) {
-      unsigned int j;
-      bool b_alias = false;
-      uint8_t s=commands[i].short_name;
-      printf("  %-31s (%c)", 
-	     short_command[s].use, commands[i].short_name);
-      for (j = 0; aliases[j].alias; j++) {
-	if (strcmp (commands[i].long_name, aliases[j].command) == 0) {
-	  if (!b_alias) {
-	    printf("  %s", aliases[j].alias);
-	    b_alias = true;
-	  } else {
-	    printf(", %s", aliases[j].alias);
-	  }
-	}
-      }
-      printf("\n");
-    }
-
-    printf("\nReadline command line editing (emacs/vi mode) is available.\n");
-    printf("For more detailed help, type h <cmd> or consult "
-	   "online-documentation.\n");
-    
-  } else {
-    short_cmd_t *p_command;
-
-    if (1 == strlen(psz_args)) {
-      if ( NULL != short_command[(uint8_t)psz_args[0]].func ) 
-	p_command = &short_command[(uint8_t)psz_args[0]];
-      else
-	p_command = NULL;
-    } else {
-      char *psz_command = get_word(&psz_args);
-      p_command = find_command (psz_command);
-    }
-    if (p_command) {
-      if ( p_command->func == &dbg_cmd_info ) {
-	printf("  %s:\n\t%s\n", p_command->use, p_command->doc);
-	printf ("\tAvailable info subcommands are:\n\t");
-	for (i = 0; info_subcommands[i]; i++) {
-	  printf(" %s", info_subcommands[i]);
-	}
-	printf("\n");
-      } else if ( p_command->func == &dbg_cmd_show ) {
-	for (i = 0; show_subcommands[i].name; i++) {
-	  help_cmd_set_show("show %-15s -- %s", &(show_subcommands[i]));
-	}
-      } else if ( p_command->func == &dbg_cmd_set ) {
-	if (!psz_args || !*psz_args) {
-	  for (i = 0; set_subcommands[i].name; i++) {
-	    help_cmd_set_show("set %s -- %s", &(set_subcommands[i]));
-	  }
-	} else {
-	  for (i = 0; set_subcommands[i].name; i++) {
-	    if ( !strcmp(psz_args, set_subcommands[i].name) ) {
-	      help_cmd_set_show("set %s -- %s", &(set_subcommands[i]));
-	      return debug_readloop;
-	    }
-	  }
-	  printf("There is no \"set %s\" command.\n", psz_args);
-	}
-      } else {
-	printf("%s\n\n", p_command->use);
-	printf("%s\n", p_command->doc);
-      }
-      
-    } else {
-      printf("Undefined command %s. Try help for a list of commands\n", 
-	     psz_args);
-    }
-  }
-  
-  return debug_readloop;
-}
-
-/* Continue until the next command to be executed. */
-#define DEPENDS_COMMANDS " depends commands"
-static debug_return_t 
-dbg_cmd_list (char *psz_arg)
-{
-  char   *psz_target = NULL;
-  char   *target_cmd = NULL;
-  file_t *p_target;
-
-  if (psz_arg && 0 == strcmp(psz_arg, "-")) {
-    /* Show info for parent target. */
-    if (p_stack_top) {
-      /* We have a target stack  */
-      target_stack_node_t *p=p_stack;
-
-      if (!p) {
-	printf(_("We don't seem to have a target to get parent of.\n"));
-	return debug_cmd_error;
-      }
-    
-      p = p->p_parent;
-      if (!p) {
-	printf(_("We don't seem to have a parent target.\n"));
-	return debug_cmd_error;
-      }
-      p_target = p->p_target;
-      psz_target = p_target->name;
-    } else {
-	printf(_("We don't seem to have a target stack to get parent of.\n"));
-	return debug_cmd_error;
-    }
-  } else {
-    p_target = get_target(&psz_arg, &psz_target);
-  }
-
-  if (!p_target) {
-    printf(_("Trouble getting a target name.\n"));
-    return debug_cmd_error;
-  }
-  target_cmd = CALLOC(char, strlen(psz_target) + 1 + strlen(DEPENDS_COMMANDS));
-  sprintf(target_cmd, "%s%s", psz_target, DEPENDS_COMMANDS);
-  return dbg_cmd_target(target_cmd);
-}
+#include "command/help.h"
+#include "command/list.h"
 
 /* Continue until the next command to be executed. */
 static debug_return_t 
@@ -987,7 +777,7 @@ dbg_cmd_step (char *psz_arg)
 debug_return_t dbg_cmd_target (char *psz_args) 
 {
   file_t *p_target;
-  char   *psz_target;
+  const char *psz_target;
 
   p_target = get_target(&psz_args, &psz_target);
   if (p_target) {
@@ -1037,7 +827,7 @@ debug_return_t dbg_cmd_target (char *psz_args)
 static debug_return_t dbg_cmd_write_cmds (char *psz_args) 
 {
   file_t *p_target = NULL;
-  char *psz_target = NULL;
+  const char *psz_target = NULL;
   int b_stdout = 0;
 
   p_target = get_target(&psz_args, &psz_target);

@@ -64,7 +64,8 @@ extern char *get_word(char **ppsz_str);
     of the target name was not found. ppsz_target is to the name
     looked up.
  */
-file_t *get_target(/*in/out*/ char **ppsz_args, /*out*/ char **ppsz_target);
+file_t *get_target(/*in/out*/ char **ppsz_args, 
+		   /*out*/ const char **ppsz_target);
 
 /*! Return true if psz_substr is an initial prefix (abbreviation) of
     psz_word. The empty string is not a valid abbreviation. */

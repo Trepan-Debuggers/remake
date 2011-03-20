@@ -80,7 +80,7 @@ dbg_cmd_info (char *psz_args)
       }
       
     } else if (is_abbrev_of (psz_subcmd, "locals", 2)) {
-      char *psz_target = NULL;
+      const char *psz_target = NULL;
       char *psz_subcmds   = NULL;
       file_t *p_target = get_target(&psz_subcmds, &psz_target);
 
