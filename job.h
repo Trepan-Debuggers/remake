@@ -19,6 +19,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef SEEN_JOB_H
 #define SEEN_JOB_H
 
+#include "types.h"
 #include "trace.h"
 
 #ifdef HAVE_FCNTL_H
@@ -39,7 +40,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #endif
 
 /** \brief Structure describing a running or dead child process.  */
-typedef struct child
+struct child
   {
     struct child *next;		/* Link in the chain.  */
 
@@ -71,7 +72,7 @@ typedef struct child
     unsigned int deleted:1;	/* Nonzero if targets have been deleted.  */
     unsigned int tracing:1;	/**< Nonzero child should be traced.  */
     unsigned int dontcare:1;    /* Saved dontcare flag.  */
-  } chlid_t;
+};
 
 extern struct child *children;
 
