@@ -38,7 +38,7 @@ endif
 
 SUBDIRS =	glob config po doc $(emacs) $(MAYBE_W32)
 
-bin_PROGRAMS =	make
+bin_PROGRAMS =	make remake
 
 if USE_CUSTOMS
   remote =	remote-cstms.c
