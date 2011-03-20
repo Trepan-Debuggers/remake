@@ -26,6 +26,8 @@
 /configure
 /loadavg
 /make
+/remake
 /remake-*.tar.bz2
 /remake-*.tar.gz
 /stamp-h1
+/tmp
