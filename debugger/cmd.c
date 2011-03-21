@@ -516,15 +516,7 @@ help_cmd_set_show(const char *psz_fmt, subcommand_var_info_t *p_subcmd)
 #include "command/comment.h"
 #include "command/continue.h"
 #include "command/delete.h"
-
-/* Parse and evaluate buffer and return the results. */
-static debug_return_t 
-dbg_cmd_eval (char *psz_evalstring)
-{
-  func_eval(NULL, &psz_evalstring, NULL);
-  reading_file = 0;
-  return debug_readloop;
-}
+#include "command/eval.h"
 
 /* Show a string with variable references expanded. */
 static debug_return_t 
