@@ -77,29 +77,6 @@ typedef struct {
 
 static debug_return_t dbg_cmd_set_var (char *psz_arg, int expand);
 
-static debug_return_t dbg_cmd_break            (char *psz_arg);
-static debug_return_t dbg_cmd_chdir            (char *psz_arg);
-static debug_return_t dbg_cmd_comment          (char *psz_arg);
-static debug_return_t dbg_cmd_continue         (char *psz_arg);
-static debug_return_t dbg_cmd_delete           (char *psz_arg);
-static debug_return_t dbg_cmd_eval             (char *psz_arg);
-static debug_return_t dbg_cmd_expand           (char *psz_arg);
-static debug_return_t dbg_cmd_finish           (char *psz_arg);
-static debug_return_t dbg_cmd_next             (char *psz_arg);
-static debug_return_t dbg_cmd_list             (char *psz_arg);
-static debug_return_t dbg_cmd_pwd              (char *psz_arg);
-static debug_return_t dbg_cmd_print            (char *psz_arg);
-static debug_return_t dbg_cmd_quit             (char *psz_arg);
-static debug_return_t dbg_cmd_run              (char *psz_arg);
-static debug_return_t dbg_cmd_set              (char *psz_arg);
-static debug_return_t dbg_cmd_set_var_noexpand (char *psz_arg);
-static debug_return_t dbg_cmd_shell            (char *psz_arg);
-static debug_return_t dbg_cmd_show             (char *psz_arg);
-static debug_return_t dbg_cmd_show_command     (char *psz_arg);
-static debug_return_t dbg_cmd_skip             (char *psz_arg);
-static debug_return_t dbg_cmd_step             (char *psz_arg);
-static debug_return_t dbg_cmd_write_cmds       (char *psz_arg);
-
 typedef struct {
   const char *long_name;	/* long name of command. */
   const char short_name;	/* Index into short_cmd array. */
@@ -235,6 +212,77 @@ subcommand_var_info_t set_subcommands[] = {
     NULL,                false},
   { NULL, NULL, NULL, false }
 };
+
+/* Look up NAME as the name of a command, and return a pointer to that
+   command.  Return a NULL pointer if NAME isn't a command name. */
+static short_cmd_t *
+find_command (const char *psz_name)
+{
+  unsigned int i;
+
+  for (i = 0; aliases[i].alias; i++) {
+    const int cmp = strcmp (psz_name, aliases[i].alias);
+    if ( 0 == cmp ) {
+      psz_name = aliases[i].command;
+      break;
+    } else 
+      /* Words should be in alphabetic order by alias name.
+	 Have we gone too far? */
+      if (cmp < 0) break;
+  }
+  
+  for (i = 0; commands[i].long_name; i++) {
+    const int cmp = strcmp (psz_name, commands[i].long_name);
+    if ( 0 == cmp ) {
+      return (&short_command[(uint8_t) commands[i].short_name]);
+    } else 
+      /* Words should be in alphabetic order by command name.
+	 Have we gone too far? */
+      if (cmp < 0) break;
+  }
+
+  return ((short_cmd_t *)NULL);
+}
+
+#include "command/break.h"
+#include "command/chdir.h"
+#include "command/comment.h"
+#include "command/continue.h"
+#include "command/delete.h"
+#include "command/eval.h"
+#include "command/expand.h"
+static debug_return_t dbg_cmd_finish           (char *psz_arg);
+static debug_return_t dbg_cmd_next             (char *psz_arg);
+#include "command/list.h"
+static debug_return_t dbg_cmd_pwd              (char *psz_arg);
+static debug_return_t dbg_cmd_print            (char *psz_arg);
+static debug_return_t dbg_cmd_quit             (char *psz_arg);
+static debug_return_t dbg_cmd_run              (char *psz_arg);
+static debug_return_t dbg_cmd_set              (char *psz_arg);
+static debug_return_t dbg_cmd_set_var_noexpand (char *psz_arg);
+#include "command/shell.h"
+static debug_return_t dbg_cmd_show             (char *psz_arg);
+static debug_return_t dbg_cmd_show_command     (char *psz_arg);
+static debug_return_t dbg_cmd_skip             (char *psz_arg);
+static debug_return_t dbg_cmd_step             (char *psz_arg);
+#include "command/write.h"
+
+void 
+help_cmd_set_show(const char *psz_fmt, subcommand_var_info_t *p_subcmd) 
+{
+  printf(psz_fmt, p_subcmd->name, p_subcmd->doc );
+  if (p_subcmd->var) {
+    if (p_subcmd->b_onoff)
+      printf(" is %s.", 
+	     var_to_on_off(* (int *) p_subcmd->var));
+    else 
+      printf(" is %d.", *(int *)(p_subcmd->var));
+  }
+  printf("\n");
+}
+
+/* Needs to come after dbg_cmd_show */
+#include "command/help.h"
 
 static void 
 cmd_initialize(void) 
@@ -386,7 +434,7 @@ cmd_initialize(void)
     _("Select and print target that caused this one to be examined.\n"
       "An argument says how many targets up to go.");
 
-  short_command['w'].func = &dbg_cmd_write_cmds;
+  short_command['w'].func = &dbg_cmd_write;
   short_command['w'].use =  _("write [TARGET [FILENAME]]");
   short_command['w'].doc  = 
     _("writes the commands associated of a target to a file with MAKE\n"
@@ -434,37 +482,6 @@ cmd_initialize(void)
       "\tinside VALUE are not expanded before assignment occurs.");
 }
 
-/* Look up NAME as the name of a command, and return a pointer to that
-   command.  Return a NULL pointer if NAME isn't a command name. */
-static short_cmd_t *
-find_command (const char *psz_name)
-{
-  unsigned int i;
-
-  for (i = 0; aliases[i].alias; i++) {
-    const int cmp = strcmp (psz_name, aliases[i].alias);
-    if ( 0 == cmp ) {
-      psz_name = aliases[i].command;
-      break;
-    } else 
-      /* Words should be in alphabetic order by alias name.
-	 Have we gone too far? */
-      if (cmp < 0) break;
-  }
-  
-  for (i = 0; commands[i].long_name; i++) {
-    const int cmp = strcmp (psz_name, commands[i].long_name);
-    if ( 0 == cmp ) {
-      return (&short_command[(uint8_t) commands[i].short_name]);
-    } else 
-      /* Words should be in alphabetic order by command name.
-	 Have we gone too far? */
-      if (cmp < 0) break;
-  }
-
-  return ((short_cmd_t *)NULL);
-}
-
 /* Execute a command line. */
 static debug_return_t
 execute_line (char *psz_line)
@@ -497,50 +514,6 @@ execute_line (char *psz_line)
   return ((*(command->func)) (psz_word));
 }
 
-void 
-help_cmd_set_show(const char *psz_fmt, subcommand_var_info_t *p_subcmd) 
-{
-  printf(psz_fmt, p_subcmd->name, p_subcmd->doc );
-  if (p_subcmd->var) {
-    if (p_subcmd->b_onoff)
-      printf(" is %s.", 
-	     var_to_on_off(* (int *) p_subcmd->var));
-    else 
-      printf(" is %d.", *(int *)(p_subcmd->var));
-  }
-  printf("\n");
-}
-
-#include "command/break.h"
-#include "command/chdir.h"
-#include "command/comment.h"
-#include "command/continue.h"
-#include "command/delete.h"
-#include "command/eval.h"
-
-/* Show a string with variable references expanded. */
-static debug_return_t 
-dbg_cmd_expand (char *psz_string) 
-{
-  static char *psz_last_string = NULL;
-
-  if (!psz_string || !*psz_string) {
-    /* Use last target value */
-    if (psz_last_string)
-      psz_string = psz_last_string;
-    else {
-      printf("No current expand string - must supply something to print\n");
-      return debug_readloop;
-    }
-  }
-  
-  if (dbg_cmd_show_exp(psz_string, true)) {
-    if (psz_last_string) free(psz_last_string);
-    psz_last_string = strdup(psz_string);
-  }
-  return debug_readloop;
-}
-
 /* Terminate execution. */
 static debug_return_t 
 dbg_cmd_finish (char *psz_arg)
@@ -550,9 +523,6 @@ dbg_cmd_finish (char *psz_arg)
   db_level            = 0;
   return continue_execution;
 }
-
-#include "command/help.h"
-#include "command/list.h"
 
 /* Continue until the next command to be executed. */
 static debug_return_t 
@@ -911,15 +881,6 @@ static debug_return_t dbg_cmd_set_var_noexpand (char *psz_string)
   dbg_cmd_set_var(psz_string, 0);
   return debug_readloop;
 }
-
-/* Run a shell command. */
-static debug_return_t dbg_cmd_shell (char *psz_varname) 
-{
-  int rc=system(psz_varname);
-  return debug_readloop;
-}
-
-#include "command/write.h"
 
 #endif /* HAVE_LIBREADLINE */
 

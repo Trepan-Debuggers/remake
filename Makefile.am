@@ -33,7 +33,7 @@ endif
 
 SUBDIRS =	glob config po doc $(MAYBE_W32)
 
-bin_PROGRAMS =	make remake
+bin_PROGRAMS =	make @MAKE_NAME@$(EXEEXT)
 
 if USE_CUSTOMS
   remote =	remote-cstms.c
