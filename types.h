@@ -1,6 +1,6 @@
-/* $Id: types.h,v 1.8 2005/12/25 10:08:35 rockyb Exp $
+/* 
 Miscellaneous types
-Copyright (c) 2005, 2008  Rocky Bernstein <rocky@panix.com>
+Copyright (c) 2005, 2008, 2011  Rocky Bernstein <rocky@gnu.org>
 
 This file is part of GNU Make (remake variant).
 
@@ -25,8 +25,8 @@ Boston, MA 02111-1307, USA.  */
  */
 
 
-#ifndef MAKE_TYPES_H
-#define MAKE_TYPES_H
+#ifndef REMAKE_TYPES_H
+#define REMAKE_TYPES_H
 
 #include "config.h"
 #include "make.h"
@@ -47,6 +47,15 @@ Boston, MA 02111-1307, USA.  */
 #   define bool uint8_t
 #endif /*HAVE_STDBOOL_H*/
 
+/** Debugger breakpoint type */
+typedef enum {
+  BRK_NONE           = 0x00, /**< Mask when none of the below are set. */
+  BRK_BEFORE_PREREQ  = 0x01, /**< Stop after prequisites checking done */
+  BRK_AFTER_PREREQ   = 0x02, /**< Stop after prequisites checking done */
+  BRK_AFTER_CMD      = 0x04, /**< Stop after running commands */
+  BRK_TEMP           = 0x08, /**< Temporary or one-time breakpoint */
+} breakpoint_mask_t;
+    
 typedef unsigned long int lineno_t;
 
 #define NILF ((struct floc *)0)
@@ -68,4 +77,10 @@ typedef struct variable_set_list variable_set_list_t;
 
 #define	CALLOC(t, n) ((t *) calloc (sizeof (t), (n)))
 
-#endif /*TYPES_H*/
+#endif /*REMAKE_TYPES_H*/
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */

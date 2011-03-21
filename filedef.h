@@ -78,6 +78,8 @@ struct file
 	cs_finished		/* Commands finished.  */
       } command_state ENUM_BITFIELD (2);
 
+    breakpoint_mask_t tracing;  /* breakpoint status of target. */
+
     unsigned int precious:1;	/* Non-0 means don't delete file on quit */
     unsigned int low_resolution_time:1;	/* Nonzero if this file's time stamp
 					   has only one-second resolution.  */
@@ -102,7 +104,6 @@ struct file
                                    considered on current scan of goal chain */
     unsigned int no_diag:1;     /* True if the file failed to update and no
                                    diagnostics has been issued (dontcare). */
-    unsigned int tracing:1;     /* Nonzero if we should trace this target. */
   };
 
 

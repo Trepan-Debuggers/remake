@@ -50,7 +50,7 @@ dbg_cmd_where(void)
 
 /* 
  * Local variables:
- *  c-file-style: "gnu"
- *  indent-tabs-mode: nil
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
  * End:
  */

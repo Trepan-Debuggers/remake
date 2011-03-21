@@ -144,7 +144,7 @@ get_target(char **ppsz_args, /*out*/ const char **ppsz_target)
   if (!*ppsz_args || !**ppsz_args) {
     /* Use current target */
     if (p_stack && p_stack->p_target && p_stack->p_target->name) {
-      *ppsz_args = p_stack->p_target->name;
+      *ppsz_args = (char *) p_stack->p_target->name;
     } else {
       printf(_("Default target not found here. You must supply one\n"));
       return NULL;
@@ -333,7 +333,7 @@ dbg_cmd_show_exp (char *psz_varname, bool expand)
     variable_set_t *p_set = NULL;
     variable_set_list_t *p_file_vars = NULL;
     if (p_stack && p_stack->p_target && p_stack->p_target->name) {
-      char *psz_target = p_stack->p_target->name;
+      const char *psz_target = p_stack->p_target->name;
       file_t *p_target = lookup_file (psz_target);
       if (p_target) {
 	initialize_file_variables (p_target, 0);

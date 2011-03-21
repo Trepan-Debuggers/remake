@@ -218,7 +218,6 @@ update_goal_chain (struct dep *goals)
                  When they are all finished, the goal is finished.  */
 	      any_not_updated |= !file->updated;
 
-              trace_pop_target(p_call_stack);
               file->dontcare = 0;
 
 	      if (stop)
@@ -429,6 +428,11 @@ update_file_1 (struct file *file, unsigned int depth,
   target_stack_node_t *p_call_stack2;
 
   DBF (DB_VERBOSE, _("Considering target file `%s'.\n"));
+  if (file->tracing & BRK_BEFORE_PREREQ) {
+      p_call_stack2 = trace_push_target(p_call_stack, file, 0);
+      enter_debugger(p_call_stack2, file, 0, DEBUG_BRKPT_BEFORE_PREREQ);
+      trace_pop_target(p_call_stack2);
+  }
 
   if (file->updated)
     {
@@ -506,10 +510,14 @@ update_file_1 (struct file *file, unsigned int depth,
   noexist = this_mtime == NONEXISTENT_MTIME;
   if (noexist) {
       DBF (DB_BASIC, _("File `%s' does not exist.\n"));
-      if ( i_debugger_stepping || (i_debugger_nexting && file->cmds) ) 
-	enter_debugger(p_call_stack, file, 0, DEBUG_STEP_HIT);
-  } else if (ORDINARY_MTIME_MIN <= this_mtime && this_mtime <= ORDINARY_MTIME_MAX
-	   && file->low_resolution_time)
+      if ( i_debugger_stepping || (i_debugger_nexting && file->cmds) ) {
+	p_call_stack2 = trace_push_target(p_call_stack, file, 0);
+	enter_debugger(p_call_stack2, file, 0, DEBUG_STEP_HIT);
+	trace_pop_target(p_call_stack2);
+      }
+  } else if (ORDINARY_MTIME_MIN <= this_mtime && 
+	     this_mtime <= ORDINARY_MTIME_MAX
+	     && file->low_resolution_time)
     {
       /* Avoid spurious rebuilds due to low resolution time stamps.  */
       int ns = FILE_TIMESTAMP_NS (this_mtime);
@@ -686,6 +694,9 @@ update_file_1 (struct file *file, unsigned int depth,
   finish_updating (ofile);
 
   DBF (DB_VERBOSE, _("Finished prerequisites of target file `%s'.\n"));
+
+  if ( file->tracing & BRK_AFTER_PREREQ )
+      enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_AFTER_PREREQ);
 
   if (running)
     {

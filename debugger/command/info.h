@@ -115,8 +115,11 @@ dbg_cmd_info(void)
       printf(_("Recursion level: %d\n"), makelevel);
       switch (last_stop_reason) 
 	{
-	case DEBUG_BREAKPOINT_HIT:
-	  printf(_("Program stopped at a breakpoint.\n"));
+	case DEBUG_BRKPT_BEFORE_PREREQ:
+	  printf(_("Program stopped at a breakpoint before prequisite checking.\n"));
+	  break;
+	case DEBUG_BRKPT_AFTER_PREREQ:
+	  printf(_("Program is stopped after prequisite checking.\n"));
 	  break;
 	case DEBUG_GOAL_UPDATED_HIT:
 	  printf(_("Program stopped for updating a goal.\n"));
@@ -177,3 +180,9 @@ dbg_cmd_info(void)
   return debug_readloop;
 }
 
+/* 
+ * Local variables:
+ *  c-file-style: "gnu"
+ *  indent-tabs-mode: nil
+ * End:
+ */

@@ -50,6 +50,7 @@ typedef enum {
 typedef struct target_stack_node
   {
     file_t                   *p_target;
+    file_t                   *p_shared_target;
     struct target_stack_node *p_parent;
   } target_stack_node_t; 
 

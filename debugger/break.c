@@ -61,12 +61,12 @@ add_breakpoint (file_t *p_target)
 
 
   /* Finally, note that we are tracing this target. */
-  if (p_target->tracing) {
+  if (p_target->tracing & BRK_BEFORE_PREREQ) {
     printf(_("Breakpoint already set at target %s; nothing done.\n"), 
 	   p_target->name);
     return false;
   } else {
-    p_target->tracing = 1;
+    p_target->tracing = BRK_BEFORE_PREREQ;
     printf(_("Breakpoint %d on target %s"), i_breakpoints, p_target->name);
     if (p_target->floc.filenm)
 	printf(": file %s, line %lu.\n", p_target->floc.filenm,
@@ -114,7 +114,7 @@ remove_breakpoint (unsigned int i)
       if (p_prev) p_prev->p_next = p->p_next;
 
       if (p->p_target->tracing) {
-	p->p_target->tracing = 0;
+	p->p_target->tracing = BRK_NONE;
 	printf(_("Breakpoint %d on target %s cleared\n"), 
 	       i, p->p_target->name);
 	free(p);
@@ -155,4 +155,10 @@ list_breakpoints (void)
     printf("\n");
   }
 }
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */
  

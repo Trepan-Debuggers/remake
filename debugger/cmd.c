@@ -719,3 +719,9 @@ debug_return_t enter_debugger (target_stack_node_t *p,
 #endif /* HAVE_LIBREADLINE */
   return debug_return;
 }
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */

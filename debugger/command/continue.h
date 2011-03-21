@@ -26,6 +26,8 @@ dbg_cmd_continue (void)
       printf(_("Not continuing under these circumstances.\n"));
       return debug_cmd_error;
     }
+  } else  {
+    db_level = 0;
   }
 
   i_debugger_stepping = 0;

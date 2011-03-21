@@ -395,8 +395,14 @@ print_child_cmd (child_t *p_child, target_stack_node_t *p)
   if (!p_child) return continue_execution;
 
   if (i_debugger_stepping || p_child->file->tracing) {
-    debug_enter_reason_t reason = p_child->file->tracing 
-      ? DEBUG_BREAKPOINT_HIT : DEBUG_STEP_HIT;
+    debug_enter_reason_t reason = DEBUG_STEP_HIT;
+    if (i_debugger_stepping)
+      reason = DEBUG_STEP_HIT;
+    else if (p_child->file->tracing & BRK_BEFORE_PREREQ) 
+      reason = DEBUG_BRKPT_BEFORE_PREREQ;
+    else if (p_child->file->tracing & BRK_BEFORE_PREREQ) 
+      reason = DEBUG_BRKPT_AFTER_PREREQ;
+      
     rc=enter_debugger(p, p_child->file, 0, reason);
   }
 
@@ -517,3 +523,10 @@ void print_cmdline (void)
   printf("\n");
 }
 
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End: 
+ */

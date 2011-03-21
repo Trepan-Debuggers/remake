@@ -21,9 +21,33 @@ Boston, MA 02111-1307, USA.  */
 static debug_return_t 
 dbg_cmd_finish(void)
 {
-  i_debugger_stepping = 0;
-  i_debugger_nexting  = 0;
-  db_level            = 0;
+  char *psz_amount=psz_debugger_args;
+  target_stack_node_t *p=p_stack;
+  unsigned int i_amount=0;
+  if ('\0' != *psz_debugger_args) {
+    if (!get_uint(psz_amount, &i_amount))
+      return debug_readloop;
+    
+    if (p_stack_top) {
+      /* We have a target stack  */
+      unsigned int i=0;
+      
+      for (i=0 ; p ; p = p->p_parent, i++ ) {
+        if (i_amount == i) break;
+      }
+      
+    }
+  }
+  if (p) {
+    p->p_shared_target->tracing |= (BRK_AFTER_PREREQ|BRK_TEMP);
+  }
   return continue_execution;
 }
 
+
+/* 
+ * Local variables:
+ *  c-file-style: "gnu"
+ *  indent-tabs-mode: nil
+ * End:
+ */

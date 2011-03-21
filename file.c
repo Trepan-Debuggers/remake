@@ -185,7 +185,7 @@ enter_file (const char *name, const floc_t *p_floc)
   new = xcalloc (sizeof (struct file));
   new->name = new->hname = name;
   new->update_status = -1;
-  new->tracing = 0;
+  new->tracing = BRK_NONE;
   if (p_floc) {
     new->floc = *p_floc;
   } else {

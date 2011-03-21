@@ -45,6 +45,7 @@ trace_push_target (target_stack_node_t *p, file_t *p_target,
    */
   new_node->p_target = CALLOC (file_t, 1);
   memcpy(new_node->p_target, p_target, sizeof(file_t));
+  new_node->p_shared_target = p_target;
 
   new_node->p_parent = p;
 
@@ -62,7 +63,7 @@ trace_push_target (target_stack_node_t *p, file_t *p_target,
     if (b_debugger && i_debugger_stepping && p_target->cmds )
       enter_debugger(new_node, p_target, 0, DEBUG_STEP_HIT);
     else if ( p_target->tracing )
-      enter_debugger(new_node, p_target, 0, DEBUG_BREAKPOINT_HIT);
+      enter_debugger(new_node, p_target, 0, DEBUG_BRKPT_BEFORE_PREREQ);
   }
   
   return new_node;

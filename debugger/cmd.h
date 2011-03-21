@@ -37,11 +37,12 @@ extern int in_debugger;
 
 typedef enum 
   {
-    DEBUG_BREAKPOINT_HIT   = 1,
-    DEBUG_GOAL_UPDATED_HIT = 2,
-    DEBUG_READ_HIT         = 3,
-    DEBUG_ERROR_HIT        = 4,
-    DEBUG_STEP_HIT         = 5
+    DEBUG_BRKPT_BEFORE_PREREQ     = 1,
+    DEBUG_BRKPT_AFTER_PREREQ       = 2,
+    DEBUG_GOAL_UPDATED_HIT        = 3,
+    DEBUG_READ_HIT                = 4,
+    DEBUG_ERROR_HIT               = 5,
+    DEBUG_STEP_HIT                = 6
   } debug_enter_reason_t;
 
 /*!
@@ -59,3 +60,9 @@ extern debug_return_t dbg_cmd_where();
 extern debug_return_t dbg_cmd_show_command();
 
 #endif /* DBG_CMD_H*/
+/* 
+ * Local variables:
+ *  c-file-style: "gnu"
+ *  indent-tabs-mode: nil
+ * End:
+ */
