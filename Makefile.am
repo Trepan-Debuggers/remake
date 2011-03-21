@@ -41,23 +41,59 @@ else
   remote =	remote-stub.c
 endif
 
+DEBUGGER_SRC = 	\
+		debugger/break.c \
+		debugger/cmd.c 	\
+		debugger/fns.c 	\
+		debugger/stack.c
+
+DEBUGGER_H = \
+		debugger/break.h 		\
+		debugger/cmd.h 			\
+		debugger/command/break.h 	\
+		debugger/command/chdir.h  	\
+		debugger/command/comment.h 	\
+		debugger/command/continue.h	\
+		debugger/command/delete.h 	\
+		debugger/command/down.h 	\
+		debugger/command/eval.h 	\
+		debugger/command/expand.h	\
+		debugger/command/finish.h	\
+		debugger/command/frame.h	\
+		debugger/command/help.h		\
+		debugger/command/info.h		\
+		debugger/command/list.h		\
+		debugger/command/next.h		\
+		debugger/command/print.h	\
+		debugger/command/pwd.h		\
+		debugger/command/quit.h		\
+		debugger/command/run.h		\
+		debugger/command/set.h		\
+		debugger/command/setq.h		\
+		debugger/command/shell.h	\
+		debugger/command/show.h		\
+		debugger/command/skip.h		\
+		debugger/command/step.h		\
+		debugger/command/target.h	\
+		debugger/command/up.h		\
+		debugger/command/write.h	\
+		debugger/fns.h 			\
+		debugger/stack.h
 
 make_SOURCES =	ar.c arscan.c commands.c default.c dir.c expand.c file.c \
 		function.c getopt.c getopt1.c implicit.c job.c main.c \
 		misc.c read.c remake.c $(remote) rule.c signame.c \
 		strcache.c variable.c version.c vpath.c hash.c \
 		buildargv.c debug.c print.c trace.c \
-	        debugger/break.c debugger/cmd.c debugger/fns.c \
-		debugger/info.c debugger/stack.c
+	 	$(DEBUGGER_SRC)
 
 EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c
 
 noinst_HEADERS = commands.h dep.h filedef.h job.h make.h rule.h variable.h \
 		debug.h getopt.h gettext.h hash.h \
 		buildargv.h expand.h file.h function.h read.h vpath.h \
-	        debugger/break.h debugger/cmd.h debugger/fns.h \
-		debugger/info.h debugger/stack.h
-
+		print.h trace.h types.h \
+		$(DEBUGGER_H)
 
 make_LDADD =	@LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@ @LIBINTL@
 # Only process if target is MS-Windows

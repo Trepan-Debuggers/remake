@@ -22,9 +22,10 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 static debug_return_t 
-dbg_cmd_break (char *psz_target)
+dbg_cmd_break (void)
 {
   file_t *p_target;
+  char *psz_target=psz_debugger_args;
 
   if (!psz_target || !*psz_target) {
     list_breakpoints();

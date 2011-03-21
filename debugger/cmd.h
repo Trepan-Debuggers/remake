@@ -51,8 +51,11 @@ extern debug_return_t enter_debugger (target_stack_node_t *p,
 				      file_t *p_target, int err,
 				      debug_enter_reason_t reason);
 
-extern debug_return_t dbg_cmd_help   (char *psz_arg);
-extern debug_return_t dbg_cmd_target (char *psz_arg);
-extern debug_return_t dbg_cmd_where  (char *psz_arg);
+extern debug_return_t dbg_cmd_help();
+extern debug_return_t dbg_cmd_info();
+extern debug_return_t dbg_cmd_target();
+extern debug_return_t dbg_cmd_show();
+extern debug_return_t dbg_cmd_where();
+extern debug_return_t dbg_cmd_show_command();
 
 #endif /* DBG_CMD_H*/

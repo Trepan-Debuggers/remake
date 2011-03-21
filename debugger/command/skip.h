@@ -16,10 +16,9 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
-/* Comment line - ingore text on line. */
+/* Skip over next command or action. */
 static debug_return_t 
-dbg_cmd_comment(void)
+dbg_cmd_skip(void)
 {
-  return debug_readloop;
+  return skip_execution;
 }
-

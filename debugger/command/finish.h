@@ -1,5 +1,7 @@
+/* Terminate execution. */
 /* 
-Copyright (C) 2011 R. Bernstein <rocky@gnu.org>
+Copyright (C) 2004, 2005, 2007, 2008, 2009, 2011 R. Bernstein 
+<rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -16,10 +18,12 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
-/* Comment line - ingore text on line. */
 static debug_return_t 
-dbg_cmd_comment(void)
+dbg_cmd_finish(void)
 {
-  return debug_readloop;
+  i_debugger_stepping = 0;
+  i_debugger_nexting  = 0;
+  db_level            = 0;
+  return continue_execution;
 }
 

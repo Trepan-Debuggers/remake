@@ -1,0 +1,67 @@
+/** Move reported target frame postition down by psz_amount. */
+/* 
+Copyright (C) 2011 R. Bernstein <rocky@gnu.org>
+This file is part of GNU Make (remake variant).
+
+GNU Make is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+GNU Make is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU Make; see the file COPYING.  If not, write to
+the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+Boston, MA 02111-1307, USA.  */
+debug_return_t 
+dbg_cmd_frame_down(void) 
+{
+  char *psz_amount = psz_debugger_args;
+  int i=0;
+  int i_amount = 1;
+
+  if (!psz_amount || !*psz_amount) {
+    i_amount = 1;
+  } else if (!get_int(psz_amount, &i_amount, true)) {
+      return debug_readloop;
+  }
+
+  if (i_stack_pos - i_amount < 0) {
+    printf(_("Move down by %d would be below bottom-most frame position.\n"),
+	   i_amount);
+    return debug_readloop;
+  }
+  
+  i_stack_pos -= i_amount;
+
+  if (p_stack_top) {
+    /* We have a target stack  */
+    for ( p_stack=p_stack_top; p_stack ; p_stack = p_stack->p_parent ) {
+      if (i_stack_pos == i)
+	break;
+      i++;
+    }
+
+    p_target_loc    = &(p_stack->p_target->floc);
+    
+    print_debugger_location(p_stack->p_target, NULL);
+    
+  } else if (p_stack_floc_top) {
+    /* We have a Makefile stack */
+    for ( p_floc_stack=p_stack_floc_top; 
+	  p_floc_stack ; p_floc_stack = p_floc_stack->p_parent ) {
+      if (i_stack_pos == i)
+	break;
+      i++;
+    }
+
+    print_debugger_location(NULL, p_floc_stack);
+
+  }
+  
+  return debug_readloop;
+}

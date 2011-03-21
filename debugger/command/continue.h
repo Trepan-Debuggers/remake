@@ -18,11 +18,12 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 /* Continue running program. */
 static debug_return_t 
-dbg_cmd_continue (char *psz_arg)
+dbg_cmd_continue (void)
 {
+  char *psz_arg=psz_debugger_args;
   if (psz_arg && *psz_arg) {
-    if (debug_cmd_error == dbg_cmd_break(psz_arg)) {
-      printf(_("Not continuing under these circumstatnces.\n"));
+    if (debug_cmd_error == dbg_cmd_break()) {
+      printf(_("Not continuing under these circumstances.\n"));
       return debug_cmd_error;
     }
   }

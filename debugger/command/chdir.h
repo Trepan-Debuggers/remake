@@ -19,8 +19,9 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 /* Comment line - ingore text on line. */
 static debug_return_t 
-dbg_cmd_chdir (char *psz_args)
+dbg_cmd_chdir (void)
 {
+  char *psz_args=psz_debugger_args;
   if (!psz_args || 0==strlen(psz_args)) {
     printf(_("Argument required (new working directory).\n"));
   } else {

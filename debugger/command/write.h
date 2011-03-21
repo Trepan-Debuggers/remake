@@ -19,8 +19,9 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 static debug_return_t 
-dbg_cmd_write (char *psz_args) 
+dbg_cmd_write(void) 
 {
+  char *psz_args = psz_debugger_args;
   file_t *p_target = NULL;
   const char *psz_target = NULL;
   int b_stdout = 0;

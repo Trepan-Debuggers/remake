@@ -1,5 +1,5 @@
-/* $Id: dbg_cmd.c,v 1.82 2007/03/01 12:49:59 rockyb Exp $
-Copyright (C) 2008 R. Bernstein rocky@gnu.org
+/*
+Copyright (C) 2008, 2011 R. Bernstein rocky@gnu.org
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -17,18 +17,13 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/* debugger command interface. */
-
-#include "print.h"
-#include "cmd.h"
-#include "break.h"
-#include "vpath.h"
-#include "commands.h"
-#include "fns.h"
-#include "info.h"
-#include "stack.h"
-#include "rule.h"
-#include "debug.h"
+#include "../../file.h"
+#include "../../print.h"
+#include "../info.h"
+#include "../stack.h"
+#include "../../rule.h"
+#include "../../debug.h"
+#include "../../vpath.h"
 
 const char *WARRANTY = 
 "			    NO WARRANTY\n"
@@ -56,9 +51,9 @@ const char *WARRANTY =
 
 /* Give some help info. */
 debug_return_t 
-dbg_cmd_info (char *psz_args)
+dbg_cmd_info(void)
 {
-#ifdef HAVE_LIBREADLINE
+  char *psz_args = psz_debugger_args;
   if (!psz_args || 0==strlen(psz_args)) {
     dbg_cmd_help("info");
   } else {
@@ -179,7 +174,6 @@ dbg_cmd_info (char *psz_args)
     }
   }
   
-#endif /* HAVE_LIBREADLINE */
   return debug_readloop;
 }
 

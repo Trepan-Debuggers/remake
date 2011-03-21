@@ -1,5 +1,5 @@
-/* $Id: dbg_stack.h,v 1.4 2005/12/09 12:11:09 rockyb Exp $
-Copyright (C) 2005 R. Bernstein rocky@gnu.org
+/* 
+Copyright (C) 2005, 2011 R. Bernstein rocky@gnu.org
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -34,14 +34,5 @@ extern int i_stack_pos;
  */
 extern target_stack_node_t *p_stack;
 extern floc_stack_node_t   *p_floc_stack;
-
-/** Move reported target frame postition down by psz_amount. */
-debug_return_t dbg_cmd_frame_down (char *psz_amount);
-
-/** Move reported target frame postition to absolute position psz_frame. */
-debug_return_t dbg_cmd_frame (char *psz_frame);
-
-/** Move reported target frame postition up by psz_amount. */
-debug_return_t dbg_cmd_frame_up (char *psz_amount);
 
 #endif /* DBG_STACK_H */
