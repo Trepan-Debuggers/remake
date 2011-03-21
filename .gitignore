@@ -26,6 +26,7 @@
 /configure
 /loadavg
 /make
+/po-check-*
 /remake
 /remake-*.tar.bz2
 /remake-*.tar.gz

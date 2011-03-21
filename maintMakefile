@@ -135,7 +135,7 @@ move_if_change =  if test -r $(target) && cmp -s $(target).t $(target); then \
 #   http://translation.sf.net/maint/
 #   ftp://tiger.informatik.hu-berlin.de/pub/po/maint/
 
-po_repo = http://translationproject.org/latest/$(PACKAGE)
+po_repo = http://translationproject.org/latest/make
 .PHONY: do-po-update po-update
 do-po-update:
 	tmppo="/tmp/po-$(PACKAGE)-$(VERSION).$$$$" \
