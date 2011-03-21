@@ -282,6 +282,7 @@ find_command (const char *psz_name)
 #include "command/step.h"
 #include "command/target.h"
 #include "command/up.h"
+#include "command/where.h"
 #include "command/write.h"
 
 void 
@@ -548,33 +549,6 @@ dbg_cmd_show_command (void)
     printf("%5d  %s\n", i, hist_list[i]->line);
   }
 #endif
-  return debug_readloop;
-}
-
-/* Show target call stack info. */
-debug_return_t 
-dbg_cmd_where (char *psz_amount)
-{
-  int i_amount;
-  
-  if (!psz_amount || !*psz_amount) {
-    i_amount = MAX_STACK_SHOW;
-  } else if (!get_int(psz_amount, &i_amount, true)) {
-      return debug_readloop;
-  }
-
-  if (p_stack_top)
-    print_target_stack (p_stack_top, i_stack_pos, i_amount);
-
-  if (p_stack_floc_top) 
-    print_floc_stack (i_stack_pos, i_amount);
-  
-  /* If we are in a recursive Make, show the command invocation */
-  if (makelevel > 0) 
-    {
-      printf("Most-recent (level %d) invocation:\n\t", makelevel);
-      dbg_print_invocation();
-    }
   return debug_readloop;
 }
 
