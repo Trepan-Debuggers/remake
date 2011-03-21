@@ -76,6 +76,7 @@ DEBUGGER_H = \
 		debugger/command/step.h		\
 		debugger/command/target.h	\
 		debugger/command/up.h		\
+		debugger/command/where.h	\
 		debugger/command/write.h	\
 		debugger/fns.h 			\
 		debugger/info.h			\
