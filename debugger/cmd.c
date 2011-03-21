@@ -733,9 +733,10 @@ debug_return_t enter_debugger (target_stack_node_t *p,
 	debug_return=dbg_cmd_step();
       }
       free (line);
-    } else 
+    } else {
       psz_debugger_args=NULL;
       dbg_cmd_quit();
+    }
   }
 
   if (in_debugger != DEBUGGER_QUIT_RC)
