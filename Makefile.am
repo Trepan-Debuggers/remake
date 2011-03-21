@@ -78,6 +78,7 @@ DEBUGGER_H = \
 		debugger/command/up.h		\
 		debugger/command/write.h	\
 		debugger/fns.h 			\
+		debugger/info.h			\
 		debugger/stack.h
 
 make_SOURCES =	ar.c arscan.c commands.c default.c dir.c expand.c file.c \
