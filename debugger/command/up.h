@@ -63,7 +63,7 @@ dbg_cmd_frame_up(void)
 	     i_amount);
     }
     
-    print_debugger_location(p_stack->p_target, NULL);
+    print_debugger_location(p_stack->p_target, DEBUG_NOT_GIVEN, NULL);
   } else if (p_floc_stack) {
     /* We don't have a target stack, but we have a Makefile read stack  */
     floc_stack_node_t *p=p_floc_stack;
@@ -79,7 +79,7 @@ dbg_cmd_frame_up(void)
       printf("Can't move up %d - would be beyond top-most frame position.\n",
 	     i_amount);
     }
-    print_debugger_location(NULL, p_floc_stack);
+    print_debugger_location(NULL, DEBUG_NOT_GIVEN, p_floc_stack);
   }
   
   return debug_readloop;

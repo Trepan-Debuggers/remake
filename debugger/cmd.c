@@ -684,7 +684,7 @@ debug_return_t enter_debugger (target_stack_node_t *p,
     }
   }
 
-  print_debugger_location(p_target, NULL);
+  print_debugger_location(p_target, reason, NULL);
 
   /* Loop reading and executing lines until the user quits. */
   for ( debug_return = debug_readloop; 

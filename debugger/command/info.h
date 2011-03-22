@@ -137,7 +137,10 @@ dbg_cmd_info(void)
 	  printf(_("Program stopped in stepping.\n"));
 	  printf("\n");
 	  break;
-	}
+	case DEBUG_NOT_GIVEN:
+	  printf(_("Reason not given.\n"));
+          break;
+        }
     } else if (is_abbrev_of (psz_subcmd, "rules", 1)) {
       if (0 == strlen(psz_args))
 	print_rule_data_base (false);

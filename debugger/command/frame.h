@@ -49,7 +49,7 @@ dbg_cmd_frame(void)
     i_stack_pos     = i_frame;
     p_target_loc    = &(p_stack->p_target->floc);
     
-    print_debugger_location(p_stack->p_target, NULL);
+    print_debugger_location(p_stack->p_target, DEBUG_NOT_GIVEN, NULL);
   } else if (p_stack_floc_top) {
     /* We have a Makefile stack */
     for ( p_floc_stack=p_stack_floc_top; 
@@ -67,7 +67,7 @@ dbg_cmd_frame(void)
     }
     i_stack_pos     = i_frame;
 
-    print_debugger_location(NULL, p_floc_stack);
+    print_debugger_location(NULL, DEBUG_NOT_GIVEN, p_floc_stack);
   }
   
   return debug_readloop;

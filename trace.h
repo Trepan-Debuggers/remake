@@ -42,6 +42,20 @@ typedef enum {
                              used only inside debugger read loop. */
 } debug_return_t;
 
+typedef enum 
+  {
+    DEBUG_BRKPT_BEFORE_PREREQ     = 0,
+    DEBUG_BRKPT_AFTER_PREREQ      = 1,
+    DEBUG_GOAL_UPDATED_HIT        = 2,
+    DEBUG_READ_HIT                = 3,
+    DEBUG_ERROR_HIT               = 4,
+    DEBUG_STEP_HIT                = 5,
+    DEBUG_NOT_GIVEN               = 100
+  } debug_enter_reason_t;
+
+/*!
+  debugger command interface. 
+*/
 /*! A call "stack". Well, since we'll have to deal with multiple child
    "jobs" it's not really a stack but a tree. 
 */

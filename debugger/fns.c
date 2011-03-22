@@ -224,13 +224,27 @@ print_db_level(debug_level_mask_t e_debug_level)
     printf("Tracing function call and returns 0x%x\n", DB_CALL);
 }
 
+static char *reason2str[] = {
+    "->",
+    "..",
+    "||",
+    "rd",
+    "!!",
+    "--"
+};
+
+    
 
 /** Print where we are in the Makefile. */
 void 
-print_debugger_location(const file_t *p_target, 
+print_debugger_location(const file_t *p_target, debug_enter_reason_t reason,
 			const floc_stack_node_t *p_stack_floc)
 {
   if (p_target_loc) {
+    printf("\n", reason2str[reason]);
+    if (reason != DEBUG_NOT_GIVEN)
+      printf("%s ", reason2str[reason]);
+    printf("(");
     if ( !p_target_loc->filenm && !p_target_loc->lineno 
 	 && p_target->name ) {
       /* We don't have file location info in the target floc, but we
@@ -245,15 +259,13 @@ print_debugger_location(const file_t *p_target,
 	   that the command starts on - so we know we've faked the location?
 	*/
 	floc.lineno--;
-	printf("\n(");
 	print_floc_prefix(&floc);
 	printf (")\n");
       } else if (p_target->phony)
 	printf("\n(%s: .PHONY target)\n", p_target->name);
       else 
-	printf("\n(%s:0)\n", p_target->name);
+	printf("%s:0)\n", p_target->name);
     } else {
-      printf("\n(");
       print_floc_prefix(p_target_loc);
       printf (")\n");
     }

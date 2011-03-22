@@ -76,6 +76,7 @@ extern void on_off_toggle(const char *psz_onoff, int *var) ;
 
 /** Print where we are in the Makefile. */
 extern void print_debugger_location(const file_t *p_target, 
+				    debug_enter_reason_t reason,
 				    const floc_stack_node_t *p_stack_floc);
     
 /** Strip whitespace from the start and end of STRING.  Return a pointer

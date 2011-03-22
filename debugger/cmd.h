@@ -35,19 +35,6 @@ Boston, MA 02111-1307, USA.  */
  */
 extern int in_debugger;
 
-typedef enum 
-  {
-    DEBUG_BRKPT_BEFORE_PREREQ     = 1,
-    DEBUG_BRKPT_AFTER_PREREQ       = 2,
-    DEBUG_GOAL_UPDATED_HIT        = 3,
-    DEBUG_READ_HIT                = 4,
-    DEBUG_ERROR_HIT               = 5,
-    DEBUG_STEP_HIT                = 6
-  } debug_enter_reason_t;
-
-/*!
-  debugger command interface. 
-*/
 extern debug_return_t enter_debugger (target_stack_node_t *p, 
 				      file_t *p_target, int err,
 				      debug_enter_reason_t reason);
