@@ -125,7 +125,7 @@ EXTRA_DIST =	README build.sh.in $(man_MANS) \
 		make_msvc_net2003.sln make_msvc_net2003.vcproj \
 		readme.vms makefile.vms makefile.com config.h-vms \
 		vmsdir.h vmsfunctions.c vmsify.c \
-	        README.mdb REMAKE.todo
+	        README.mdb REMAKE.todo Rakefile
 
 # This is built during configure, but behind configure's back
 

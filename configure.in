@@ -41,6 +41,10 @@ AC_CHECK_PROG(AR, ar, ar, ar)
 # Perl is needed for the test suite (only)
 AC_CHECK_PROG(PERL, perl, perl, perl)
 
+# Ruby 1.9 and RSPec are needed for the debugger test suite (only)
+AC_CHECK_PROG(RUBY, ruby, ruby, none)
+AC_CHECK_PROG(RSPEC, rspec, rspec, none)
+
 # Specialized system macros
 AC_CANONICAL_HOST
 AC_AIX
