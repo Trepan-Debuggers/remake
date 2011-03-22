@@ -88,7 +88,8 @@ $answer = "not creating notarget.c from notarget.d
 cat notarget.c > notarget.b 2>/dev/null || exit 1
 $make_name: *** [notarget.b] Error 1
 
-#0  notarget (.PHONY target)
+#0  notarget.b at ??
+#1  notarget (.PHONY target)
 ";
 
 &compare_output($answer,&get_logfile(1));
