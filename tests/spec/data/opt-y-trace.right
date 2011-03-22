@@ -1,0 +1,18 @@
+Reading makefiles...
+Updating goal targets....
+triple.Makefile:1	File `first' does not exist.
+   File `second' does not exist.
+     File `third' does not exist.
+    Must remake target `third'.
+triple.Makefile:6 to update target `third'.
+echo third done
+third done
+    Successfully remade target file `third'.
+  Must remake target `second'.
+triple.Makefile:4 to update target `second'.
+second done
+  Successfully remade target file `second'.
+triple.Makefile:1	Must remake target `first'.
+triple.Makefile:2 to update target `first'.
+first done
+triple.Makefile:1	Successfully remade target file `first'.

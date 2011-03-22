@@ -20,7 +20,14 @@ describe "A simple trace" do
     output.should == expected_output
   end
 
-  it 'should be able to do a simple trace' do
-    run_remake('simple-trace', '--trace -f', 'triple')
+  it 'should be able to do handle --trace (no options)' do
+    ['--trace --file', '-x -f'].each do |opts|
+      run_remake('opt-x-trace', opts, 'triple')
+    end
+  end
+  it 'should be able to do handle -y (--trace=nohshell options)' do
+    ['--trace=noshell -f', '-y -f'].each do |opts|
+      run_remake('opt-y-trace', opts, 'triple')
+    end
   end
 end

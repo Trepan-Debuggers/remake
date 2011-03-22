@@ -1,6 +1,6 @@
 first: second
-	echo first done
+	@echo first done
 second: third
-	echo second done
+	@echo second done
 third: 
 	echo third done
