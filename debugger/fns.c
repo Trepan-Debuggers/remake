@@ -227,6 +227,7 @@ print_db_level(debug_level_mask_t e_debug_level)
 static char *reason2str[] = {
     "->",
     "..",
+    "<-",
     "||",
     "rd",
     "!!",
@@ -241,7 +242,7 @@ print_debugger_location(const file_t *p_target, debug_enter_reason_t reason,
 			const floc_stack_node_t *p_stack_floc)
 {
   if (p_target_loc) {
-    printf("\n", reason2str[reason]);
+    printf("\n");
     if (reason != DEBUG_NOT_GIVEN)
       printf("%s ", reason2str[reason]);
     printf("(");

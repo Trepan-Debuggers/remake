@@ -43,7 +43,7 @@ extern unsigned int i_breakpoints;
 /*! Add "p_target" to the list of breakpoints. Return true if 
     there were no errors
 */
-extern bool add_breakpoint (file_t *p_target);
+extern bool add_breakpoint (file_t *p_target, unsigned int brkp_mask);
 
 /*! Remove breakpoint i from the list of breakpoints. Return true if 
     there were no errors

@@ -42,7 +42,7 @@ unsigned int i_breakpoints = 0;
     there were no errors
 */
 bool 
-add_breakpoint (file_t *p_target) 
+add_breakpoint (file_t *p_target, unsigned int brkpt_mask) 
 {
   breakpoint_node_t *p_new   = CALLOC (breakpoint_node_t, 1);
 
@@ -61,19 +61,25 @@ add_breakpoint (file_t *p_target)
 
 
   /* Finally, note that we are tracing this target. */
-  if (p_target->tracing & BRK_BEFORE_PREREQ) {
-    printf(_("Breakpoint already set at target %s; nothing done.\n"), 
+  if (p_target->tracing & (BRK_BEFORE_PREREQ & brkpt_mask)) {
+    printf(_("Note: prerequisite breakpoint already set at target %s.\n"), 
 	   p_target->name);
-    return false;
-  } else {
-    p_target->tracing = BRK_BEFORE_PREREQ;
-    printf(_("Breakpoint %d on target %s"), i_breakpoints, p_target->name);
-    if (p_target->floc.filenm)
-	printf(": file %s, line %lu.\n", p_target->floc.filenm,
-	       p_target->floc.lineno);
-    else
-	printf(".\n");
+  } 
+  if (p_target->tracing & (BRK_AFTER_PREREQ & brkpt_mask)) {
+    printf(_("Note: command breakpoint already set at target %s.\n"), 
+	   p_target->name);
+  } 
+  if (p_target->tracing & (BRK_AFTER_CMD & brkpt_mask)) {
+    printf(_("Note: target end breakpont set at target %s.\n"), 
+	   p_target->name);
   }
+  p_target->tracing = brkpt_mask;
+  printf(_("Breakpoint %d on target %s"), i_breakpoints, p_target->name);
+  if (p_target->floc.filenm)
+    printf(": file %s, line %lu.\n", p_target->floc.filenm,
+           p_target->floc.lineno);
+  else
+    printf(".\n");
   if (p_target->updated)
       printf("Warning: target is already updated; so it might not get stopped at again\n");
   else if (p_target->updating) {
