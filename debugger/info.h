@@ -31,6 +31,4 @@ Boston, MA 02111-1307, USA.  */
 extern debug_enter_reason_t last_stop_reason;
 extern const char *WARRANTY;
 
-debug_return_t dbg_cmd_info (char *psz_arg);
-
 #endif /* DBG_INFO_H*/

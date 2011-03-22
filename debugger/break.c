@@ -22,7 +22,6 @@ Boston, MA 02111-1307, USA.  */
 #include <assert.h>
 #include "break.h"
 #include "filedef.h"
-#include "make.h"
 #include "print.h"
 
 /*! Node for an item in the target call stack */
@@ -62,13 +61,24 @@ add_breakpoint (file_t *p_target)
 
 
   /* Finally, note that we are tracing this target. */
-  if (p_target->tracing) {
+  if (p_target->tracing & BRK_BEFORE_PREREQ) {
     printf(_("Breakpoint already set at target %s; nothing done.\n"), 
 	   p_target->name);
+    return false;
   } else {
-    p_target->tracing = 1;
-    printf(_("Breakpoint %d on target %s set.\n"), 
-	   i_breakpoints, p_target->name);
+    p_target->tracing = BRK_BEFORE_PREREQ;
+    printf(_("Breakpoint %d on target %s"), i_breakpoints, p_target->name);
+    if (p_target->floc.filenm)
+	printf(": file %s, line %lu.\n", p_target->floc.filenm,
+	       p_target->floc.lineno);
+    else
+	printf(".\n");
+  }
+  if (p_target->updated)
+      printf("Warning: target is already updated; so it might not get stopped at again\n");
+  else if (p_target->updating) {
+      printf("Warning: target is in the process of being updated;\n");
+      printf("so it might not get stopped at again\n");
   }
   return true;
   
@@ -104,7 +114,7 @@ remove_breakpoint (unsigned int i)
       if (p_prev) p_prev->p_next = p->p_next;
 
       if (p->p_target->tracing) {
-	p->p_target->tracing = 0;
+	p->p_target->tracing = BRK_NONE;
 	printf(_("Breakpoint %d on target %s cleared\n"), 
 	       i, p->p_target->name);
 	free(p);
@@ -135,11 +145,20 @@ list_breakpoints (void)
 
   printf(  "Num Type           Disp Enb target     What\n");
   for (p = p_breakpoint_top; p; p = p->p_next) {
-    printf("%3d breakpoint     keep y   in %s at ", 
+    printf("%3d breakpoint     keep y   in %s", 
 	   p->i_num,
 	   p->p_target->name);
-    print_floc_prefix(&(p->p_target->floc));
+    if (p->p_target->floc.filenm) {
+	printf(" at ");
+	print_floc_prefix(&(p->p_target->floc));
+    }
     printf("\n");
   }
 }
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */
  

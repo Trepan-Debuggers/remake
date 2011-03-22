@@ -23,9 +23,8 @@ Boston, MA 02111-1307, USA.  */
 #include "debugger/cmd.h"
 #include "debug.h"
 #include "dep.h"
-#include "expand.h"
-#include "print.h"
 #include "read.h"
+#include "print.h"
 
 /* Think of the below not as an enumeration but as #defines done in a
    way that we'll be able to use the value in a gdb. */
@@ -92,7 +91,7 @@ message (int prefix, const char *fmt, va_alist)
 /* Print an error message.  */
 
 void
-#if __STDC__ && HAVE_STDVARARGS
+#if HAVE_ANSI_COMPILER && USE_VARIADIC && HAVE_STDARG_H
 error (const floc_t *flocp, const char *fmt, ...)
 #else
 error (flocp, fmt, va_alist)
@@ -101,7 +100,7 @@ error (flocp, fmt, va_alist)
      va_dcl
 #endif
 {
-#if HAVE_STDVARARGS
+#if USE_VARIADIC
   va_list args;
 #endif
 
@@ -173,7 +172,7 @@ err (p_call, fmt, va_alist)
 /* Print an error message and exit.  */
 
 void
-#if __STDC__ && HAVE_STDVARARGS
+#if HAVE_ANSI_COMPILER && USE_VARIADIC && HAVE_STDARG_H
 fatal (const floc_t *flocp, const char *fmt, ...)
 #else
 fatal (flocp, fmt, va_alist)
@@ -182,7 +181,7 @@ fatal (flocp, fmt, va_alist)
      va_dcl
 #endif
 {
-#if HAVE_STDVARARGS
+#if USE_VARIADIC
   va_list args;
 #endif
 
@@ -316,60 +315,6 @@ log_access (char *flavor)
   fflush (stderr);
 }
 
-
-/*! Write a message indicating that we've just entered or
-   left (according to ENTERING) the current directory.  */
-void
-log_working_directory (int entering)
-{
-  static int entered = 0;
-
-  /* Print nothing without the flag.  Don't print the entering message
-     again if we already have.  Don't print the leaving message if we
-     haven't printed the entering message.  */
-  if (! print_directory_flag || entering == entered)
-    return;
-
-  entered = entering;
-
-  if (print_data_base_flag)
-    fputs ("# ", stdout);
-
-  /* Use entire sentences to give the translators a fighting chance.  */
-
-  if (makelevel == 0)
-    if (starting_directory == 0)
-      if (entering)
-        printf (_("%s: Entering an unknown directory\n"), program);
-      else
-        printf (_("%s: Leaving an unknown directory\n"), program);
-    else
-      if (entering)
-        printf (_("%s: Entering directory `%s'\n"),
-                program, starting_directory);
-      else
-        printf (_("%s: Leaving directory `%s'\n"),
-                program, starting_directory);
-  else
-    if (starting_directory == 0)
-      if (entering)
-        printf (_("%s[%u]: Entering an unknown directory\n"),
-                program, makelevel);
-      else
-        printf (_("%s[%u]: Leaving an unknown directory\n"),
-                program, makelevel);
-    else
-      if (entering)
-        printf (_("%s[%u]: Entering directory `%s'\n"),
-                program, makelevel, starting_directory);
-      else
-        printf (_("%s[%u]: Leaving directory `%s'\n"),
-                program, makelevel, starting_directory);
-
-  /* Flush stdout to be sure this comes before any stderr output.  */
-  fflush (stdout);
-}
-
 /*! Display a variable and its value. */
 void 
 print_variable (variable_t *p_v)
@@ -450,8 +395,14 @@ print_child_cmd (child_t *p_child, target_stack_node_t *p)
   if (!p_child) return continue_execution;
 
   if (i_debugger_stepping || p_child->file->tracing) {
-    debug_enter_reason_t reason = p_child->file->tracing 
-      ? DEBUG_BREAKPOINT_HIT : DEBUG_STEP_HIT;
+    debug_enter_reason_t reason = DEBUG_STEP_HIT;
+    if (i_debugger_stepping)
+      reason = DEBUG_STEP_HIT;
+    else if (p_child->file->tracing & BRK_BEFORE_PREREQ) 
+      reason = DEBUG_BRKPT_BEFORE_PREREQ;
+    else if (p_child->file->tracing & BRK_BEFORE_PREREQ) 
+      reason = DEBUG_BRKPT_AFTER_PREREQ;
+      
     rc=enter_debugger(p, p_child->file, 0, reason);
   }
 
@@ -464,7 +415,7 @@ print_child_cmd (child_t *p_child, target_stack_node_t *p)
 extern void 
 print_target_stack (target_stack_node_t *p, int i_pos, int i_max)
 {
-  unsigned int i=0;
+  int i=0;
   printf("\n");
   for ( ; p && i < i_max ; 
 	i++, p = p->p_parent  ) {
@@ -513,7 +464,7 @@ print_target_stack (target_stack_node_t *p, int i_pos, int i_max)
 extern void 
 print_floc_stack (int i_pos, int i_max)
 {
-  unsigned int i=0;
+  int i=0;
   floc_stack_node_t *p;
   printf("\n");
   for ( p=p_stack_floc_top; p && i < i_max ; 
@@ -572,3 +523,10 @@ void print_cmdline (void)
   printf("\n");
 }
 
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End: 
+ */

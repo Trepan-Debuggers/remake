@@ -1,6 +1,6 @@
-/* $Id: types.h,v 1.8 2005/12/25 10:08:35 rockyb Exp $
+/* 
 Miscellaneous types
-Copyright (c) 2005, 2008  Rocky Bernstein <rocky@panix.com>
+Copyright (c) 2005, 2008, 2011  Rocky Bernstein <rocky@gnu.org>
 
 This file is part of GNU Make (remake variant).
 
@@ -25,10 +25,11 @@ Boston, MA 02111-1307, USA.  */
  */
 
 
-#ifndef MAKE_TYPES_H
-#define MAKE_TYPES_H
+#ifndef REMAKE_TYPES_H
+#define REMAKE_TYPES_H
 
 #include "config.h"
+#include "make.h"
 
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
@@ -46,16 +47,20 @@ Boston, MA 02111-1307, USA.  */
 #   define bool uint8_t
 #endif /*HAVE_STDBOOL_H*/
 
+/** Debugger breakpoint type */
+typedef enum {
+  BRK_NONE           = 0x00, /**< Mask when none of the below are set. */
+  BRK_BEFORE_PREREQ  = 0x01, /**< Stop after prequisites checking done */
+  BRK_AFTER_PREREQ   = 0x02, /**< Stop after prequisites checking done */
+  BRK_AFTER_CMD      = 0x04, /**< Stop after running commands */
+  BRK_TEMP           = 0x08, /**< Temporary or one-time breakpoint */
+} breakpoint_mask_t;
+    
 typedef unsigned long int lineno_t;
 
-/** \brief File location. 
-    Used in reporting where we are.*/
-struct floc {
-  const char *filenm; /**< The file name */
-  lineno_t lineno;    /**< The line number in the above file. */
-};
 #define NILF ((struct floc *)0)
 
+typedef struct child             child_t;
 typedef struct commands          commands_t;
 typedef struct dep               dep_t;
 typedef struct file              file_t;
@@ -63,8 +68,19 @@ typedef struct floc              floc_t;
 typedef struct nameseq           nameseq_t;
 typedef struct pattern_var       pattern_var_t;
 typedef struct pspec             pspec_t;
+typedef struct rule              rule_t;
 typedef struct stringlist        stringlist_t;
+typedef struct variable          variable_t;
+typedef enum   variable_origin   variable_origin_t;
 typedef struct variable_set      variable_set_t;
 typedef struct variable_set_list variable_set_list_t;
 
-#endif /*TYPES_H*/
+#define	CALLOC(t, n) ((t *) calloc (sizeof (t), (n)))
+
+#endif /*REMAKE_TYPES_H*/
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */

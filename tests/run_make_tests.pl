@@ -12,24 +12,33 @@
 #                        (and others)
 
 # Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-# 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+# 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software
+# Foundation, Inc.
 # This file is part of GNU Make.
 #
-# GNU Make is free software; you can redistribute it and/or modify it under the
-# terms of the GNU General Public License as published by the Free Software
-# Foundation; either version 2, or (at your option) any later version.
+# GNU Make is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 3 of the License, or (at your option) any later
+# version.
 #
 # GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-# A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
 #
 # You should have received a copy of the GNU General Public License along with
-# GNU Make; see the file COPYING.  If not, write to the Free Software
-# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+# this program.  If not, see <http://www.gnu.org/licenses/>.
+
 
 $valgrind = 0;              # invoke make with valgrind
-$valgrind_args = '--num-callers=15 --tool=memcheck --leak-check=full';
+$valgrind_args = '';
+$memcheck_args = '--num-callers=15 --tool=memcheck --leak-check=full';
+$massif_args = '--num-callers=15 --tool=massif --alloc-fn=xmalloc --alloc-fn=xcalloc --alloc-fn=xrealloc --alloc-fn=xstrdup --alloc-fn=xstrndup';
 $pure_log = undef;
+
+$command_string = '';
+
+$all_tests = 0;
 
 require "test_driver.pl";
 
@@ -42,20 +51,30 @@ sub valid_option
 {
    local($option) = @_;
 
-   if ($option =~ /^-make([-_]?path)?$/)
-   {
-      $make_path = shift @argv;
-      if (!-f $make_path)
-      {
-	 print "$option $make_path: Not found.\n";
-	 exit 0;
-      }
-      return 1;
+   if ($option =~ /^-make([-_]?path)?$/i) {
+       $make_path = shift @argv;
+       if (!-f $make_path) {
+           print "$option $make_path: Not found.\n";
+           exit 0;
+       }
+       return 1;
    }
 
-   if ($option =~ /^-valgrind$/i) {
-     $valgrind = 1;
-     return 1;
+   if ($option =~ /^-all([-_]?tests)?$/i) {
+       $all_tests = 1;
+       return 1;
+   }
+
+   if ($option =~ /^-(valgrind|memcheck)$/i) {
+       $valgrind = 1;
+       $valgrind_args = $memcheck_args;
+       return 1;
+   }
+
+   if ($option =~ /^-massif$/i) {
+       $valgrind = 1;
+       $valgrind_args = $massif_args;
+       return 1;
    }
 
 # This doesn't work--it _should_!  Someone badly needs to fix this.
@@ -81,7 +100,7 @@ $old_makefile = undef;
 
 sub run_make_test
 {
-  local ($makestring, $options, $answer, $err_code) = @_;
+  local ($makestring, $options, $answer, $err_code, $timeout) = @_;
 
   # If the user specified a makefile string, create a new makefile to contain
   # it.  If the first value is not defined, use the last one (if there is
@@ -104,6 +123,7 @@ sub run_make_test
     $makestring =~ s/#MAKEFILE#/$makefile/g;
     $makestring =~ s/#MAKEPATH#/$mkpath/g;
     $makestring =~ s/#MAKE#/$make_name/g;
+    $makestring =~ s/#PERL#/$perl_name/g;
     $makestring =~ s/#PWD#/$pwd/g;
 
     # Populate the makefile!
@@ -118,9 +138,11 @@ sub run_make_test
   $answer =~ s/#MAKEFILE#/$makefile/g;
   $answer =~ s/#MAKEPATH#/$mkpath/g;
   $answer =~ s/#MAKE#/$make_name/g;
+  $answer =~ s/#PERL#/$perl_name/g;
   $answer =~ s/#PWD#/$pwd/g;
 
-  &run_make_with_options($makefile, $options, &get_logfile(0), $err_code);
+  run_make_with_options($makefile, $options, &get_logfile(0),
+                        $err_code, $timeout);
   &compare_output($answer, &get_logfile(1));
 
   $old_makefile = $makefile;
@@ -129,7 +151,7 @@ sub run_make_test
 
 # The old-fashioned way...
 sub run_make_with_options {
-  local ($filename,$options,$logname,$expected_code) = @_;
+  local ($filename,$options,$logname,$expected_code,$timeout) = @_;
   local($code);
   local($command) = $make_path;
 
@@ -146,11 +168,24 @@ sub run_make_with_options {
     $command .= " $options";
   }
 
+  $command_string = "$command\n";
+
   if ($valgrind) {
     print VALGRIND "\n\nExecuting: $command\n";
   }
 
-  $code = &run_command_with_output($logname,$command);
+
+  {
+      my $old_timeout = $test_timeout;
+      $timeout and $test_timeout = $timeout;
+
+      # If valgrind is enabled, turn off the timeout check
+      $valgrind and $test_timeout = 0;
+
+      $code = &run_command_with_output($logname,$command);
+
+      $test_timeout = $old_timeout;
+  }
 
   # Check to see if we have Purify errors.  If so, keep the logfile.
   # For this to work you need to build with the Purify flag -exit-status=yes
@@ -173,10 +208,12 @@ sub run_make_with_options {
   if ($code != $expected_code) {
     print "Error running $make_path (expected $expected_code; got $code): $command\n";
     $test_passed = 0;
+    $runf = &get_runfile;
+    &create_file (&get_runfile, $command_string);
     # If it's a SIGINT, stop here
     if ($code & 127) {
       print STDERR "\nCaught signal ".($code & 127)."!\n";
-      exit($code);
+      ($code & 127) == 2 and exit($code);
     }
     return 0;
   }
@@ -185,18 +222,28 @@ sub run_make_with_options {
     system "add_profile $make_path";
   }
 
-  1;
+  return 1;
 }
 
 sub print_usage
 {
-   &print_standard_usage ("run_make_tests", "[-make_path make_pathname]");
+   &print_standard_usage ("run_make_tests",
+                          "[-make_path make_pathname] [-memcheck] [-massif]",);
 }
 
 sub print_help
 {
-   &print_standard_help ("-make_path",
-          "\tYou may specify the pathname of the copy of make to run.");
+   &print_standard_help (
+        "-make_path",
+        "\tYou may specify the pathname of the copy of make to run.",
+        "-valgrind",
+        "-memcheck",
+        "\tRun the test suite under valgrind's memcheck tool.",
+        "\tChange the default valgrind args with the VALGRIND_ARGS env var.",
+        "-massif",
+        "\tRun the test suite under valgrind's massif toool.",
+        "\tChange the default valgrind args with the VALGRIND_ARGS env var."
+       );
 }
 
 sub get_this_pwd {
@@ -227,11 +274,6 @@ sub set_more_defaults
 {
    local($string);
    local($index);
-
-   # Make sure we're in the C locale for those systems that support it,
-   # so sorting, etc. is predictable.
-   #
-   $ENV{LANG} = 'C';
 
    # find the type of the port.  We do this up front to have a single
    # point of change if it needs to be tweaked.
@@ -328,11 +370,12 @@ sub set_more_defaults
    # Set up for valgrind, if requested.
 
    if ($valgrind) {
+     my $args = $valgrind_args;
      open(VALGRIND, "> valgrind.out")
        || die "Cannot open valgrind.out: $!\n";
      #  -q --leak-check=yes
-     exists $ENV{VALGRIND_ARGS} and $valgrind_args = $ENV{VALGRIND_ARGS};
-     $make_path = "valgrind --log-fd=".fileno(VALGRIND)." $valgrind_args $make_path";
+     exists $ENV{VALGRIND_ARGS} and $args = $ENV{VALGRIND_ARGS};
+     $make_path = "valgrind --log-fd=".fileno(VALGRIND)." $args $make_path";
      # F_SETFD is 2
      fcntl(VALGRIND, 2, 0) or die "fcntl(setfd) failed: $!\n";
      system("echo Starting on `date` 1>&".fileno(VALGRIND));

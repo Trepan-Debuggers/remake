@@ -73,6 +73,15 @@ $(call make-rule)
 '',
 'foo');
 
+# TEST #5: .DEFAULT_GOAL containing just whitespace (Savannah bug #25697)
+
+run_make_test('
+N =
+.DEFAULT_GOAL = $N  $N  # Just whitespace
+
+foo: ; @echo "boo"
+',
+              '', "#MAKE#: *** No targets.  Stop.\n", 512);
 
 # This tells the test driver that the perl test script executed properly.
 1;

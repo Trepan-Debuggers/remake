@@ -21,10 +21,10 @@ Boston, MA 02111-1307, USA.  */
 
 #include "config.h"
 #include "commands.h"
+#include "expand.h"
 #include "fns.h"
 #include "stack.h"
 #include "debug.h"
-#include "expand.h"
 #include "print.h"
 #include "rule.h"
 #include "trace.h"
@@ -139,12 +139,12 @@ get_word(char **ppsz_str)
     looked up.
  */
 file_t *
-get_target(char **ppsz_args, /*out*/ char **ppsz_target) 
+get_target(char **ppsz_args, /*out*/ const char **ppsz_target) 
 {
   if (!*ppsz_args || !**ppsz_args) {
     /* Use current target */
     if (p_stack && p_stack->p_target && p_stack->p_target->name) {
-      *ppsz_args = p_stack->p_target->name;
+      *ppsz_args = (char *) p_stack->p_target->name;
     } else {
       printf(_("Default target not found here. You must supply one\n"));
       return NULL;
@@ -224,13 +224,27 @@ print_db_level(debug_level_mask_t e_debug_level)
     printf("Tracing function call and returns 0x%x\n", DB_CALL);
 }
 
+static char *reason2str[] = {
+    "->",
+    "..",
+    "||",
+    "rd",
+    "!!",
+    "--"
+};
+
+    
 
 /** Print where we are in the Makefile. */
 void 
-print_debugger_location(const file_t *p_target, 
+print_debugger_location(const file_t *p_target, debug_enter_reason_t reason,
 			const floc_stack_node_t *p_stack_floc)
 {
   if (p_target_loc) {
+    printf("\n", reason2str[reason]);
+    if (reason != DEBUG_NOT_GIVEN)
+      printf("%s ", reason2str[reason]);
+    printf("(");
     if ( !p_target_loc->filenm && !p_target_loc->lineno 
 	 && p_target->name ) {
       /* We don't have file location info in the target floc, but we
@@ -245,15 +259,13 @@ print_debugger_location(const file_t *p_target,
 	   that the command starts on - so we know we've faked the location?
 	*/
 	floc.lineno--;
-	printf("\n(");
 	print_floc_prefix(&floc);
 	printf (")\n");
       } else if (p_target->phony)
 	printf("\n(%s: .PHONY target)\n", p_target->name);
       else 
-	printf("\n(%s:0)\n", p_target->name);
+	printf("%s:0)\n", p_target->name);
     } else {
-      printf("\n(");
       print_floc_prefix(p_target_loc);
       printf (")\n");
     }
@@ -333,7 +345,7 @@ dbg_cmd_show_exp (char *psz_varname, bool expand)
     variable_set_t *p_set = NULL;
     variable_set_list_t *p_file_vars = NULL;
     if (p_stack && p_stack->p_target && p_stack->p_target->name) {
-      char *psz_target = p_stack->p_target->name;
+      const char *psz_target = p_stack->p_target->name;
       file_t *p_target = lookup_file (psz_target);
       if (p_target) {
 	initialize_file_variables (p_target, 0);

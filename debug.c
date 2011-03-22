@@ -50,7 +50,7 @@ debug_signal_handler (int sig)
 void
 decode_debug_flags (void)
 {
-  char **pp;
+  const char **pp;
 
   if (debug_flag)
     db_level = DB_ALL;

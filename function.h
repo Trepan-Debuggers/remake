@@ -35,27 +35,9 @@ Boston, MA 02111-1307, USA.  */
  */
 extern void fold_newlines (char *buffer, unsigned int *length);
 
-/*! Check for a function invocation in *STRINGP.  *STRINGP points at
-   the opening ( or { and is not null-terminated.  If a function
-   invocation is found, expand it into the buffer at *OP, updating
-   *OP, incrementing *STRINGP past the reference and returning
-   nonzero.  If not, return zero.  */
-extern int handle_function (char **op, char **stringp);
-
 extern void hash_init_function_table (void);
 
 extern void hash_free_function_table (void);
-
-/*! Store into VARIABLE_BUFFER at O the result of scanning TEXT
-  and replacing strings matching PATTERN with REPLACE.
-  If PATTERN_PERCENT is not nil, PATTERN has already been
-  run through find_percent, and PATTERN_PERCENT is the result.
-  If REPLACE_PERCENT is not nil, REPLACE has already been
-  run through find_percent, and REPLACE_PERCENT is the result.  */
-
-extern char *patsubst_expand (char *o, char *text, char *pattern, 
-			      char *replace, char *pattern_percent, 
-			      char *replace_percent);
 
 /*! Set begpp to point to the first non-whitespace character of the string,
   and endpp to point to the last non-whitespace character of the string.

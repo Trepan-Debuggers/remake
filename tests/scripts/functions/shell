@@ -11,6 +11,15 @@ all: ; @echo $(shell echo hi)
 ','','hi');
 
 
+# Test unescaped comment characters in shells.  Savannah bug #20513
+if ($all_tests) {
+    run_make_test(q!
+FOO := $(shell echo '#')
+foo: ; echo '$(FOO)'
+!,
+              '', "#\n");
+}
+
 # Test shells inside exported environment variables.
 # This is the test that fails if we try to put make exported variables into
 # the environment for a $(shell ...) call.

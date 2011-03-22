@@ -1,7 +1,18 @@
+2008-09-28  Juan Manuel Guerrero  <juan.guerrero@gmx.de>
+
+	* glob.c (my_realloc) [__DJGPP__]: Don't define, and don't
+	redefine realloc to call it, since the DJGPP's realloc handles
+	NULL pointers correctly.
+
+2007-12-22  Juan Manuel Guerrero  <juan.guerrero@gmx.de>  (tiny change)
+
+	* glob.c [__GNU_LIBRARY__ && __DJGPP__]: Add a realloc
+	declaration that matches the one in the DJGPP libc.
+
 2006-02-24  Eli Zaretskii  <eliz@gnu.org>
 
 	* glob.c (my_malloc) [WINDOWS32]: Provide a full ISO C prototype,
-        to avoid compiler warnings.
+	to avoid compiler warnings.
 
 2005-06-25  Paul D. Smith  <psmith@gnu.org>
 
@@ -153,22 +164,22 @@ Sat Jun 22 10:44:09 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 Fri Jun 21 00:27:51 1996  Roland McGrath  <roland@delasyd.gnu.ai.mit.edu>
 
 	* posix/fnmatch.c (fnmatch): Fix \*[*?]+ case to increment name ptr
- 	only for ?s, not for *s.  Fix from Chet Ramey.
+	only for ?s, not for *s.  Fix from Chet Ramey.
 
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software
+1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007 Free Software
 Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2, or (at your option) any later version.
+Foundation; either version 3 of the License, or (at your option) any later
+version.
 
 GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-GNU Make; see the file COPYING.  If not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+this program.  If not, see <http://www.gnu.org/licenses/>.

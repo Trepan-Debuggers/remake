@@ -10,16 +10,18 @@ $dir = cwd;
 $dir =~ s,.*/([^/]+)$,../$1,;
 
 
-#  TEST #1: Make sure that multiple patterns where the same target
-#           can be built are searched even if the first one fails
-#           to match properly.
+# TEST #0: Make sure that multiple patterns where the same target
+#          can be built are searched even if the first one fails
+#          to match properly.
 #
 
-run_make_test('
+run_make_test(q!
 .PHONY: all
 
 all: case.1 case.2 case.3
-a: void
+
+# We can't have this, due to "Implicit Rule Search Algorithm" step 5c
+#xxx: void
 
 # 1 - existing file
 %.1: void
@@ -41,11 +43,9 @@ a: void
 	@exit 0
 
 3.implicit-phony:
-',
-'',
-'');
+!, '', '');
 
-# TEST #2: make sure files that are built via implicit rules are marked
+# TEST #1: make sure files that are built via implicit rules are marked
 #          as targets (Savannah bug #12202).
 #
 run_make_test('
@@ -69,7 +69,7 @@ foo.in: ; @:
 foo.out');
 
 
-# TEST #3: make sure intermidite files that also happened to be
+# TEST #2: make sure intermediate files that also happened to be
 #          prerequisites are not removed (Savannah bug #12267).
 #
 run_make_test('
@@ -96,7 +96,7 @@ $dir/foo.o");
 unlink("$dir/foo.c");
 
 
-# TEST #4: make sure precious flag is set properly for targets
+# TEST #3: make sure precious flag is set properly for targets
 #          that are built via implicit rules (Savannah bug #13218).
 #
 run_make_test('
@@ -116,7 +116,7 @@ $(dir)/foo.bar:
 unlink("$dir/foo.bar");
 
 
-# TEST #5: make sure targets of a macthed implicit pattern rule never
+# TEST #4: make sure targets of a matched implicit pattern rule are
 #          never considered intermediate (Savannah bug #13022).
 #
 run_make_test('
@@ -144,6 +144,81 @@ touch foo.c
 echo foo.c foo.h >foo.o');
 
 unlink('foo.in', 'foo.h', 'foo.c', 'foo.o');
+
+# TEST #5: make sure both prefix and suffix patterns work with multiple
+#          target patterns (Savannah bug #26593).
+#
+run_make_test('
+all: foo.s1 foo.s2 p1.foo p2.foo
+
+p1.% p2.%: %.orig
+	@echo $@
+%.s1 %.s2: %.orig
+	@echo $@
+
+.PHONY: foo.orig
+',
+              '', "foo.s1\np1.foo\n");
+
+# TEST 6: Make sure that non-target files are still eligible to be created
+# as part of implicit rule chaining.  Savannah bug #17752.
+
+run_make_test(q!
+BIN = xyz
+COPY = $(BIN).cp
+SRC = $(BIN).c
+allbroken: $(COPY) $(BIN) ; @echo ok
+$(SRC): ; @echo 'main(){}' > $@
+%.cp: % ; @cp $< $@
+% : %.c ; @cp $< $@
+clean: ; @rm -rf $(SRC) $(COPY) $(BIN)
+!,
+              '', "ok\n");
+
+unlink(qw(xyz xyz.cp xyz.c));
+
+# TEST 7: Make sure that all prereqs of all "also_make" targets get created
+# before any of the things that depend on any of them.  Savannah bug #19108.
+
+run_make_test(q!
+final: x ; @echo $@
+x: x.t1 x.t2 ; @echo $@
+x.t2: dep
+dep: ; @echo $@
+%.t1 %.t2: ; @echo $*.t1 ; echo $*.t2
+!,
+              '', "dep\nx.t1\nx.t2\nx\nfinal\n");
+
+
+# TEST 8: Verify we can remove pattern rules.  Savannah bug #18622.
+
+my @f = (qw(foo.w foo.ch));
+touch(@f);
+
+run_make_test(q!
+CWEAVE := :
+
+# Disable builtin rules
+%.tex : %.w
+%.tex : %.w %.ch
+!,
+              'foo.tex',
+              "#MAKE#: *** No rule to make target `foo.tex'.  Stop.", 512);
+
+unlink(@f);
+
+# TEST #9: Test shortest stem selection in pattern rules.
+
+run_make_test('
+%.x: ;@echo one
+%-mt.x: ;@echo two
+
+all: foo.x foo-mt.x
+',
+'',
+"one\ntwo");
+
+1;
 
 # This tells the test driver that the perl test script executed properly.
 1;

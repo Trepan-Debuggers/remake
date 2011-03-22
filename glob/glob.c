@@ -1,4 +1,5 @@
-/* Copyright (C) 1991,92,93,94,95,96,97,98,99 Free Software Foundation, Inc.
+/* Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999 Free
+Software Foundation, Inc.
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Library General Public License as
@@ -181,7 +182,7 @@ extern void bcopy ();
 # define mempcpy(Dest, Src, Len) __mempcpy (Dest, Src, Len)
 #endif
 
-#ifndef	__GNU_LIBRARY__
+#if !defined __GNU_LIBRARY__ && !defined __DJGPP__
 # ifdef	__GNUC__
 __inline
 # endif
@@ -194,7 +195,7 @@ static char *
 my_realloc (p, n)
      char *p;
      unsigned int n;
-# endif
+#  endif
 {
   /* These casts are the for sake of the broken Ultrix compiler,
      which warns of illegal pointer combinations otherwise.  */
@@ -204,7 +205,7 @@ my_realloc (p, n)
 }
 # define	realloc	my_realloc
 # endif /* __SASC */
-#endif /* __GNU_LIBRARY__ */
+#endif /* __GNU_LIBRARY__ || __DJGPP__ */
 
 
 #if !defined __alloca && !defined __GNU_LIBRARY__

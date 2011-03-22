@@ -11,9 +11,9 @@ $dir =~ s,.*/([^/]+)$,../$1,;
 
 # Test #1: automatic variables.
 #
-run_make_test('
+run_make_test(q!
 .SECONDEXPANSION:
-.DEFAULT: ; @echo $@
+.DEFAULT: ; @echo '$@'
 
 foo.a: bar baz
 
@@ -37,9 +37,9 @@ foo.%: 1.$$@ \
 4.biz \
 5.buz \
 6.a:
-	@echo $@
+	@echo '$@'
 
-',
+!,
 '',
 '1.foo.a
 2.bar
@@ -60,7 +60,7 @@ buz
 
 # Test #2: target/pattern -specific variables.
 #
-run_make_test('
+run_make_test(q!
 .SECONDEXPANSION:
 foo.x:
 
@@ -71,20 +71,16 @@ foo.x: x_a := bar
 
 %.x: x_b := baz
 
-bar baz: ; @echo $@
-
-',
-'',
-'bar
-baz
-');
+bar baz: ; @echo '$@'
+!,
+              '', "bar\nbaz\n");
 
 
 # Test #3: order of prerequisites.
 #
-run_make_test('
+run_make_test(q!
 .SECONDEXPANSION:
-.DEFAULT: ; @echo $@
+.DEFAULT: ; @echo '$@'
 
 all: foo bar baz
 
@@ -97,7 +93,7 @@ foo: foo.2
 
 foo: foo.3
 
-foo.1: ; @echo $@
+foo.1: ; @echo '$@'
 
 
 # Subtest #2
@@ -108,7 +104,7 @@ bar: bar.2
 
 bar: bar.3
 
-bar.1: ; @echo $@
+bar.1: ; @echo '$@'
 
 
 # Subtest #3
@@ -118,9 +114,8 @@ baz: baz.1
 baz: baz.2
 
 %az: ; @:
-
-',
-'',
+!,
+              '',
 'foo.1
 foo.2
 foo.3
@@ -134,20 +129,18 @@ baz.2
 
 # Test #4: stem splitting logic.
 #
-run_make_test('
+run_make_test(q!
 .SECONDEXPANSION:
 $(dir)/tmp/bar.o:
 
-$(dir)/tmp/foo/bar.c: ; @echo $@
-$(dir)/tmp/bar/bar.c: ; @echo $@
-foo.h: ; @echo $@
+$(dir)/tmp/foo/bar.c: ; @echo '$@'
+$(dir)/tmp/bar/bar.c: ; @echo '$@'
+foo.h: ; @echo '$@'
 
 %.o: $$(addsuffix /%.c,foo bar) foo.h
-	@echo $@: {$<} $^
-
-',
-"dir=$dir",
-"$dir/tmp/foo/bar.c
+	@echo '$@: {$<} $^'
+!,
+              "dir=$dir", "$dir/tmp/foo/bar.c
 $dir/tmp/bar/bar.c
 foo.h
 $dir/tmp/bar.o: {$dir/tmp/foo/bar.c} $dir/tmp/foo/bar.c $dir/tmp/bar/bar.c foo.h
@@ -156,18 +149,17 @@ $dir/tmp/bar.o: {$dir/tmp/foo/bar.c} $dir/tmp/foo/bar.c $dir/tmp/bar/bar.c foo.h
 
 # Test #5: stem splitting logic and order-only prerequisites.
 #
-run_make_test('
+run_make_test(q!
 .SECONDEXPANSION:
 $(dir)/tmp/foo.o: $(dir)/tmp/foo.c
-$(dir)/tmp/foo.c: ; @echo $@
-bar.h: ; @echo $@
+$(dir)/tmp/foo.c: ; @echo '$@'
+bar.h: ; @echo '$@'
 
 %.o: %.c|bar.h
-	@echo $@: {$<} {$|} $^
+	@echo '$@: {$<} {$|} $^'
 
-',
-"dir=$dir",
-"$dir/tmp/foo.c
+!,
+              "dir=$dir", "$dir/tmp/foo.c
 bar.h
 $dir/tmp/foo.o: {$dir/tmp/foo.c} {bar.h} $dir/tmp/foo.c
 ");
@@ -175,58 +167,60 @@ $dir/tmp/foo.o: {$dir/tmp/foo.c} {bar.h} $dir/tmp/foo.c
 
 # Test #6: lack of implicit prerequisites.
 #
-run_make_test('
+run_make_test(q!
 .SECONDEXPANSION:
 foo.o: foo.c
-foo.c: ; @echo $@
+foo.c: ; @echo '$@'
 
 %.o:
-	@echo $@: {$<} $^
+	@echo '$@: {$<} $^'
+!,
+              '', "foo.c\nfoo.o: {foo.c} foo.c\n");
 
-',
-'',
-'foo.c
-foo.o: {foo.c} foo.c
-');
 
 # Test #7: Test stem from the middle of the name.
 #
-run_make_test('
+run_make_test(q!
 .SECONDEXPANSION:
 foobarbaz:
 
 foo%baz: % $$*.1
-	@echo $*
+	@echo '$*'
 
 bar bar.1:
-	@echo $@
+	@echo '$@'
+!,
+              '', "bar\nbar.1\nbar\n");
 
-',
-'',
-'bar
-bar.1
-bar
-');
 
 # Test #8: Make sure stem triple-expansion does not happen.
 #
-run_make_test('
+run_make_test(q!
 .SECONDEXPANSION:
 foo$$bar:
 
 f%r: % $$*.1
-	@echo \'$*\'
+	@echo '$*'
 
 oo$$ba oo$$ba.1:
-	@echo \'$@\'
-
-',
-'',
-'oo$ba
+	@echo '$@'
+!,
+              '', 'oo$ba
 oo$ba.1
 oo$ba
 ');
 
+# Test #9: Check the value of $^
+run_make_test(q!
+.SECONDEXPANSION:
+
+%.so: | $$(extra) ; @echo $^
+
+foo.so: extra := foo.o
+foo.so:
+foo.o:
+!,
+              '', "\n");
 
 # This tells the test driver that the perl test script executed properly.
 1;
