@@ -46,10 +46,11 @@ typedef enum
   {
     DEBUG_BRKPT_BEFORE_PREREQ     = 0,
     DEBUG_BRKPT_AFTER_PREREQ      = 1,
-    DEBUG_GOAL_UPDATED_HIT        = 2,
-    DEBUG_READ_HIT                = 3,
-    DEBUG_ERROR_HIT               = 4,
-    DEBUG_STEP_HIT                = 5,
+    DEBUG_BRKPT_AFTER_CMD         = 2,
+    DEBUG_GOAL_UPDATED_HIT        = 3,
+    DEBUG_READ_HIT                = 4,
+    DEBUG_ERROR_HIT               = 5,
+    DEBUG_STEP_HIT                = 6,
     DEBUG_NOT_GIVEN               = 100
   } debug_enter_reason_t;
 

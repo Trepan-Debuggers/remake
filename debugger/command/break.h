@@ -24,23 +24,41 @@ Boston, MA 02111-1307, USA.  */
 static debug_return_t 
 dbg_cmd_break (void)
 {
-  file_t *p_target;
-  char *psz_target=psz_debugger_args;
+  char *psz_args=psz_debugger_args;
 
-  if (!psz_target || !*psz_target) {
+  if (!psz_args || !*psz_args) {
     list_breakpoints();
     return debug_readloop;
-  }
-  
-  p_target = lookup_file (psz_target);
-  if (!p_target) {
-    printf("Can't find target %s; breakpoint not set.\n", psz_target);
-    return debug_cmd_error;
+  } else {
+    char *psz_target = get_word(&psz_args);
+    char *psz_break_type; 
+    file_t *p_target;
+    unsigned int i_brkpt_mask = BRK_ALL;
+    
+    p_target = lookup_file (psz_target);
+    if (!p_target) {
+	printf("Can't find target %s; breakpoint not set.\n", psz_target);
+	return debug_cmd_error;
+    }
+    psz_break_type = get_word(&psz_args);
+    if (is_abbrev_of (psz_break_type, "all", 1)) {
+      i_brkpt_mask = BRK_ALL;
+    } else if (is_abbrev_of (psz_break_type, "prerequisite", 3)) {
+      i_brkpt_mask = BRK_BEFORE_PREREQ;
+    } else if (is_abbrev_of (psz_break_type, "run", 1)) {
+      i_brkpt_mask = BRK_BEFORE_PREREQ;
+    } else if (is_abbrev_of (psz_break_type, "end", 1)) {
+      i_brkpt_mask = BRK_AFTER_CMD;
+    }
+    add_breakpoint(p_target, i_brkpt_mask);
   }
 
-  add_breakpoint(p_target);
-  
   return debug_readloop;
 };
 
-
+/* 
+ * Local variables:
+ *  c-file-style: "gnu"
+ *  indent-tabs-mode: nil
+ * End:
+ */

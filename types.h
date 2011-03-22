@@ -53,6 +53,7 @@ typedef enum {
   BRK_BEFORE_PREREQ  = 0x01, /**< Stop after prequisites checking done */
   BRK_AFTER_PREREQ   = 0x02, /**< Stop after prequisites checking done */
   BRK_AFTER_CMD      = 0x04, /**< Stop after running commands */
+  BRK_ALL            = (BRK_BEFORE_PREREQ|BRK_AFTER_PREREQ|BRK_AFTER_CMD),
   BRK_TEMP           = 0x08, /**< Temporary or one-time breakpoint */
 } breakpoint_mask_t;
     

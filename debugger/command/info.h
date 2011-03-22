@@ -115,6 +115,9 @@ dbg_cmd_info(void)
       printf(_("Recursion level: %d\n"), makelevel);
       switch (last_stop_reason) 
 	{
+	case DEBUG_BRKPT_AFTER_CMD:
+	  printf(_("Program is stopped after running commands.\n"));
+	  break;
 	case DEBUG_BRKPT_BEFORE_PREREQ:
 	  printf(_("Program stopped at a breakpoint before prequisite checking.\n"));
 	  break;
