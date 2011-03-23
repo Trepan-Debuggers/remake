@@ -12,20 +12,20 @@ y = $x
 
 all: ; @echo $y
 ',
-              '', '#MAKEFILE#:3: *** unterminated variable reference.  Stop.
+              '', "#MAKEFILE#:3: *** unterminated variable reference.  Stop.
 Command-line arguments:
-	"-f work/variables/negative.mk"
-',
+	\"$make_path -f work/variables/negative.mk\"
+",
               512);
 
 # TEST #1
 # Bogus variable value passed on the command line.
 run_make_test(undef,
               'x=\$\(other',
-              '#MAKEFILE#:4: *** unterminated variable reference.  Stop.
+              "#MAKEFILE#:4: *** unterminated variable reference.  Stop.
 Command-line arguments:
-	"-f work/variables/negative.mk x=$(other"
-',
+	\"$make_path -f work/variables/negative.mk x=\$(other\"
+",
               512);
 
 # TEST #2
@@ -39,20 +39,20 @@ z := $y
 
 all: ; @echo $y
 ',
-              '', '#MAKEFILE#:3: *** unterminated variable reference.  Stop.
+              '', "#MAKEFILE#:3: *** unterminated variable reference.  Stop.
 Command-line arguments:
-	"-f work/variables/negative.mk.1"
-',
+	\"$make_path -f work/variables/negative.mk.1\"
+",
               512);
 
 # TEST #3
 # Bogus variable value passed on the command line.
 run_make_test(undef,
               'x=\$\(other',
-              '#MAKEFILE#:4: *** unterminated variable reference.  Stop.
+              "#MAKEFILE#:4: *** unterminated variable reference.  Stop.
 Command-line arguments:
-	"-f work/variables/negative.mk.1 x=$(other"
-',
+	\"$make_path -f work/variables/negative.mk.1 x=\$(other\"
+",
               512);
 
 1;

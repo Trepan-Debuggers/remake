@@ -64,7 +64,7 @@ all: ; @echo $y',
               '',
               "#MAKEFILE#:2: *** insufficient number of arguments (1) to function `foreach'.  Stop.
 Command-line arguments:
-	\"-f work/functions/foreach.mk.2\"
+	\"$make_path -f work/functions/foreach.mk.2\"
 ",
               512);
 
@@ -76,7 +76,7 @@ all: ; @echo $y',
               '',
               "#MAKEFILE#:2: *** insufficient number of arguments (1) to function `foreach'.  Stop.
 Command-line arguments:
-	\"-f work/functions/foreach.mk.3\"
+	\"$make_path -f work/functions/foreach.mk.3\"
 ",
               512);
 

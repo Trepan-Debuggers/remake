@@ -1,7 +1,8 @@
 /* Output or logging functions for GNU Make.  
 
-Copyright (C) 2004, 2005, 2007, 2008 Free Software Foundation, Inc.  
+Copyright (C) 2005, 2007, 2008 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
+Copyright (C) 2004, 2005, 2007, 2008, Free Software Foundation, Inc.  
 
 GNU Make is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -511,9 +512,10 @@ void print_cmdline (void)
 {
   unsigned int i;
   printf(_("Command-line arguments:"));
+  printf("\n\t\"");
   if (global_argv[1]) {
-    printf("\n\t\"%s", global_argv[1]);
-    for (i = 2; global_argv[i]; i++) {
+    printf("%s", argv0);
+    for (i = 1; global_argv[i]; i++) {
       printf(" %s", global_argv[i]);
     }
     printf("\"");

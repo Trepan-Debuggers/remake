@@ -540,6 +540,10 @@ extern int max_load_average;
 
 extern char *program;
 
+/*! Value of argv[0] which seems to get modified. Can we merge this with
+    program below? */
+extern char *argv0;
+
 /*! Our initial arguments -- used for debugger restart execvp.  */
 extern char **global_argv;
 

@@ -205,7 +205,7 @@ CWEAVE := :
               'foo.tex',
               "#MAKE#: *** No rule to make target `foo.tex'.  Stop.
 Command-line arguments:
-	\"-f work/features/patternrules.mk.8 foo.tex\"", 512);
+	\"$make_path -f work/features/patternrules.mk.8 foo.tex\"", 512);
 
 unlink(@f);
 

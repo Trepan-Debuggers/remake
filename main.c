@@ -518,7 +518,7 @@ static struct command_variable *command_variables;
 
 /*! Value of argv[0] which seems to get modified. Can we merge this with
     program below? */
-static char *argv0 = NULL;
+char *argv0 = NULL;
 
 /*! The name we were invoked with.  */
 char *program = NULL;
@@ -933,6 +933,8 @@ main (int argc, char **argv, char **envp)
   unixy_shell = 0;
   no_default_sh_exe = 1;
 #endif
+
+  argv0 = strdup(argv[0]);
 
 #ifdef SET_STACK_SIZE
  /* Get rid of any avoidable limit on stack size.  */
@@ -1412,7 +1414,6 @@ main (int argc, char **argv, char **envp)
 #endif /* !__MSDOS__ */
 #endif /* WINDOWS32 */
 #endif
-  argv0 = strdup(argv[0]);
 
   /* The extra indirection through $(MAKE_COMMAND) is done
      for hysterical raisins.  */

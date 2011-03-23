@@ -103,7 +103,7 @@ all: ; @echo ouch
 ',
               '', "#MAKEFILE#:3: *** empty variable name.  Stop.
 Command-line arguments:
-	\"-f work/variables/define.mk.4\"
+	\"$make_path -f work/variables/define.mk.4\"
 ", 512);
 
 # TEST 6: NEGATIVE: extra text after define
@@ -139,7 +139,7 @@ endef$(NAME)
 ',
               '', "#MAKEFILE#:4: *** missing `endef', unterminated `define'.  Stop.
 Command-line arguments:
-	\"-f work/variables/define.mk.7\"
+	\"$make_path -f work/variables/define.mk.7\"
 ", 512);
 
 # -------------------------

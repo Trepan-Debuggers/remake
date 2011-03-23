@@ -98,7 +98,7 @@ fail.1 fail.2 fail.3:
 ok:
 	\@sleep 4
 	\@echo Ok done",
-              '-rR -j5', 'Fail
+              '-rR -j5', "Fail
 #MAKE#: *** [fail.1] Error 1
 #MAKE#: *** Waiting for unfinished jobs....
 Fail
@@ -107,7 +107,7 @@ Fail
 #MAKE#: *** [fail.3] Error 1
 Ok done
 Command-line arguments:
-	"-f work/features/parallelism.mk.4 -rR -j5"',
+	\"$make_path -f work/features/parallelism.mk.4 -rR -j5\"",
              512);
 
 

@@ -28,7 +28,10 @@ run_make_test(undef, '-q two', '');
 
 # TEST 2
 
-run_make_test(undef, '-q three', '', 256);
+run_make_test(undef, '-q three', "Command-line arguments:
+	\"$make_path -f work/options/dash-q.mk -q three\"
+", 
+256);
 
 # TEST 3
 
@@ -44,7 +47,9 @@ run_make_test(undef, '-q six', '');
 
 # TEST 6
 
-run_make_test(undef, '-q seven', '', 256);
+run_make_test(undef, '-q seven', "Command-line arguments:
+	\"$make_path -f work/options/dash-q.mk -q seven\"
+", 256);
 
 # TEST 7 : Savannah bug # 7144
 
@@ -52,6 +57,8 @@ run_make_test('
 one:: ; @echo one
 one:: ; @echo two
 ',
-              '-q', '', 256);
+              '-q', "Command-line arguments:
+	\"$make_path -f work/options/dash-q.mk.1 -q\"
+", 256);
 
 1;

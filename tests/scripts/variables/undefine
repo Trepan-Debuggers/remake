@@ -70,7 +70,7 @@ all: ;@echo ouch
 ',
 '', "#MAKEFILE#:3: *** empty variable name.  Stop.
 Command-line arguments:
-	\"-f work/variables/undefine.mk.3\"
+	\"$make_path -f work/variables/undefine.mk.3\"
 ", 512);
 
 1;

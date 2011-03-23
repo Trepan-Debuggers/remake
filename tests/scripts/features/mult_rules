@@ -49,7 +49,7 @@ else
 # Create the answer to what should be produced by this Makefile
 $answer = "$make_name: *** No rule to make target `extra.h', needed by `foo.o'.  Stop.
 Command-line arguments:
-	\"-f work/features/mult_rules.mk extradeps=extra.h\"
+	\"$make_path -f work/features/mult_rules.mk extradeps=extra.h\"
 ";
 
 &compare_output($answer,&get_logfile(1));

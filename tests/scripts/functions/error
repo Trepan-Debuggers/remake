@@ -38,7 +38,7 @@ close(MAKEFILE);
 &run_make_with_options($makefile, "ERROR1=yes", &get_logfile, 512);
 $answer = "$makefile:4: *** error is yes.  Stop.
 Command-line arguments:
-	\"-f work/functions/error.mk ERROR1=yes\"
+	\"$make_path -f work/functions/error.mk ERROR1=yes\"
 ";
 &compare_output($answer,&get_logfile(1));
 
@@ -47,7 +47,7 @@ Command-line arguments:
 &run_make_with_options($makefile, "ERROR2=no", &get_logfile, 512);
 $answer = "$makefile:8: *** error is no.  Stop.
 Command-line arguments:
-	\"-f work/functions/error.mk ERROR2=no\"
+	\"$make_path -f work/functions/error.mk ERROR2=no\"
 ";
 &compare_output($answer,&get_logfile(1));
 
@@ -56,7 +56,7 @@ Command-line arguments:
 &run_make_with_options($makefile, "ERROR3=maybe", &get_logfile, 512);
 $answer = "Some stuff\n$makefile:12: *** error is maybe.  Stop.
 Command-line arguments:
-	\"-f work/functions/error.mk ERROR3=maybe\"
+	\"$make_path -f work/functions/error.mk ERROR3=maybe\"
 ";
 &compare_output($answer,&get_logfile(1));
 
@@ -65,7 +65,7 @@ Command-line arguments:
 &run_make_with_options($makefile, "ERROR4=definitely", &get_logfile, 512);
 $answer = "Some stuff\n$makefile:16: *** error is definitely.  Stop.
 Command-line arguments:
-	\"-f work/functions/error.mk ERROR4=definitely\"
+	\"$make_path -f work/functions/error.mk ERROR4=definitely\"
 ";
 &compare_output($answer,&get_logfile(1));
 
@@ -74,7 +74,7 @@ Command-line arguments:
 &run_make_with_options($makefile, "testvar", &get_logfile, 512);
 $answer = "$makefile:22: *** Error found!.  Stop.
 Command-line arguments:
-	\"-f work/functions/error.mk testvar\"
+	\"$make_path -f work/functions/error.mk testvar\"
 ";
 &compare_output($answer,&get_logfile(1));
 

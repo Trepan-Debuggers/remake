@@ -130,7 +130,7 @@ endef
 !,
               '', "#MAKE#: *** prerequisites cannot be defined in recipes.  Stop.
 Command-line arguments:
-	\"-f work/features/se_explicit.mk.5\"
+	\"$make_path -f work/features/se_explicit.mk.5\"
 ", 512);
 
 
