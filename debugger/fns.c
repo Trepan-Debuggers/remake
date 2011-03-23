@@ -137,12 +137,31 @@ get_word(char **ppsz_str)
   Return the current target from the stack or NULL
   if none set.
  */
-file_t *
+const file_t *
 get_current_target(void)
 {
   if (p_stack && p_stack->p_target)
     return p_stack->p_target;
   else 
+    return NULL;
+}
+
+
+/*!
+  Return the current target from the stack or NULL
+  if none set.
+ */
+const floc_t *
+get_current_floc(void)
+{
+  file_t *p_target = (file_t *) get_current_target();
+  floc_t *p_floc;
+  
+  p_floc = &p_target->floc;
+
+  if (p_floc->filenm && p_floc->lineno != 0)
+    return p_floc;
+  else
     return NULL;
 }
 
@@ -157,7 +176,7 @@ file_t *
 get_target(char **ppsz_args, /*out*/ const char **ppsz_target) 
 {
   if (!*ppsz_args || !**ppsz_args) {
-    file_t *p_target = get_current_target();
+    file_t *p_target = (file_t *) get_current_target();
     /* Use current target */
     if (p_target && p_target->name) {
       *ppsz_args = (char *) p_target->name;
@@ -276,10 +295,12 @@ print_debugger_location(const file_t *p_target, debug_enter_reason_t reason,
 	   that the command starts on - so we know we've faked the location?
 	*/
 	floc.lineno--;
+	p_target_loc->filenm = floc.filenm;
+	p_target_loc->lineno = floc.lineno;
 	print_floc_prefix(&floc);
 	printf (")\n");
       } else if (p_target->phony)
-	printf("\n(%s: .PHONY target)\n", p_target->name);
+	printf("%s: .PHONY target)\n", p_target->name);
       else 
 	printf("%s:0)\n", p_target->name);
     } else {
@@ -423,7 +444,7 @@ void shell_rc_status(int rc)
 {
   if (rc == -1)
     printf(_("Error: %s\n"), strerror(errno));
-  else if (rc != 0)
+  else if (WEXITSTATUS(rc) != 0)
     printf(_("Warning: return code was %d\n"), WEXITSTATUS(rc));
 }
   

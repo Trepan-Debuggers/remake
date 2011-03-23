@@ -103,7 +103,8 @@ long_cmd_t commands[] = {
   { "continue", 'c' },
   { "delete",   'd' },
   { "down",     'D' },
-  { "eval" ,    'e' },
+  { "edit" ,    'e' },
+  { "eval" ,    'E' },
   { "examine" , 'x' },
   { "finish"  , 'F' },
   { "frame"   , 'f' },
@@ -263,6 +264,7 @@ find_command (const char *psz_name)
 #include "command/continue.h"
 #include "command/delete.h"
 #include "command/down.h"
+#include "command/edit.h"
 #include "command/eval.h"
 #include "command/expand.h"
 #include "command/finish.h"
@@ -310,6 +312,7 @@ cmd_initialize(void)
   dbg_cmd_continue_init();
   dbg_cmd_delete_init();
   dbg_cmd_down_init();
+  dbg_cmd_edit_init();
   dbg_cmd_eval_init();
   dbg_cmd_finish_init();
 

@@ -56,6 +56,7 @@ DEBUGGER_H = \
 		debugger/command/continue.h	\
 		debugger/command/delete.h 	\
 		debugger/command/down.h 	\
+		debugger/command/edit.h 	\
 		debugger/command/eval.h 	\
 		debugger/command/expand.h	\
 		debugger/command/finish.h	\

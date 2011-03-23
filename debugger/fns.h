@@ -37,11 +37,13 @@ extern char   *psz_target_name;
    a real one hasn't been recorded on the stack. */
 extern floc_t  fake_floc;
 
+const floc_t *get_current_floc(void);
+
 /*!
   Return the current target from the stack or NULL
   if none set.
  */
-file_t * get_current_target(void);
+const file_t * get_current_target(void);
 
 /*! Parse psz_arg for a signed integer. The value is returned in
     *pi_result. If warn is true, then we'll give a warning if no
@@ -70,8 +72,8 @@ extern char *get_word(char **ppsz_str);
     of the target name was not found. ppsz_target is to the name
     looked up.
  */
-file_t *get_target(/*in/out*/ char **ppsz_args, 
-		   /*out*/ const char **ppsz_target);
+file_t *
+get_target(/*in/out*/ char **ppsz_args, /*out*/ const char **ppsz_target);
 
 /*! Return true if psz_substr is an initial prefix (abbreviation) of
     psz_word. The empty string is not a valid abbreviation. */
