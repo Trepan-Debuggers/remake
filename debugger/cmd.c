@@ -305,23 +305,9 @@ help_cmd_set_show(const char *psz_fmt, subcommand_var_info_t *p_subcmd)
 static void 
 cmd_initialize(void) 
 {
-  short_command['b'].func = &dbg_cmd_break;
-  short_command['b'].use  = _("break TARGET");
-  short_command['b'].doc  = _("Set a breakpoint at a target.\n"
-"With a target name, set a break before running commands\n"
-"of that target.  Without argument, list all breaks.");
-
-  short_command['C'].func = &dbg_cmd_chdir;
-  short_command['C'].use  = _("cd DIR");
-  short_command['C'].doc  = 
-    _("Set the working directory to DIR.");
-
-  short_command['c'].func = &dbg_cmd_continue;
-  short_command['c'].use  = _("continue [TARGET]");
-  short_command['c'].doc  = 
-    _("Continue executing debugged Makefile until another breakpoint\n"
-"or stopping point. If a target is given and valid we set a breakpoint at\n"
-"that target before continuing.");
+  dbg_cmd_break_init();
+  dbg_cmd_chdir_init();
+  dbg_cmd_continue_init();
 
   short_command['d'].func = &dbg_cmd_delete;
   short_command['d'].use  = _("delete breakpoint numbers..");
@@ -478,20 +464,7 @@ cmd_initialize(void)
   short_command['!'].doc  = 
     _("Execute the rest of the line as a shell.");
 
-  short_command['='].func = &dbg_cmd_set;
-  short_command['='].use =  
-    _("set {*option*|variable} VALUE");
-  short_command['='].doc  = 
-    _("set basename {on|off|toggle} - show full name or basename?\n"
-      "set debug debug-mask - like --debug value.\n\n"
-      "set ignore-errors {on|off|toggle} - like --ignore-errors option\n\n"
-      "set keep-going {on|off|toggle} - like --keep-going option\n\n"
-      "set silent {on|off|toggle} - like --silent option\n\n"
-      "set trace {on|off|toggle} - set tracing status\n"
-      "set variable *var* *value*\n"
-      "Set MAKE variable to value. Variable definitions\n"
-      "inside VALUE are expanded before assignment occurs."
-      );
+  dbg_cmd_set_init();
 
   short_command['"'].func = &dbg_cmd_setq;
   short_command['"'].use =  _("setq *variable* VALUE");
@@ -719,6 +692,7 @@ debug_return_t enter_debugger (target_stack_node_t *p,
 #endif /* HAVE_LIBREADLINE */
   return debug_return;
 }
+
 /* 
  * Local variables:
  * eval: (c-set-style "gnu")

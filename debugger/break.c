@@ -82,7 +82,7 @@ add_breakpoint (file_t *p_target, unsigned int brkpt_mask)
     printf(".\n");
   if (p_target->updated)
       printf("Warning: target is already updated; so it might not get stopped at again\n");
-  else if (p_target->updating) {
+  else if (p_target->updating && (brkpt_mask & (BRK_BEFORE_PREREQ | BRK_AFTER_PREREQ))) {
       printf("Warning: target is in the process of being updated;\n");
       printf("so it might not get stopped at again\n");
   }

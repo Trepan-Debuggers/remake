@@ -17,4 +17,18 @@ quit
       run_remake("#{test_name}-#{break_opt}", opts, 'triple')
     end
   end
+  it 'should be able to do set a breakpoint on a target' do
+    opts = {
+      :filter => Filter_filename,
+      :flags  =>'-X -f',
+      :input  => "echo 'break third
+continue
+continue
+continue
+quit
+'"
+    }
+    test_name = File.basename(__FILE__, '.rb')[5..-1]
+    run_remake("#{test_name}-all", opts, 'triple')
+  end
 end

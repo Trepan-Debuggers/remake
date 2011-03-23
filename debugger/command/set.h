@@ -75,3 +75,31 @@ dbg_cmd_set(void)
   }
   return debug_readloop;
 }
+
+static void
+dbg_cmd_set_init(void) 
+{
+    
+  short_command['='].func = &dbg_cmd_set;
+  short_command['='].use =  
+    _("set {*option*|variable} VALUE");
+  short_command['='].doc  = 
+    _("set basename {on|off|toggle} - show full name or basename?\n"
+      "set debug debug-mask - like --debug value.\n\n"
+      "set ignore-errors {on|off|toggle} - like --ignore-errors option\n\n"
+      "set keep-going {on|off|toggle} - like --keep-going option\n\n"
+      "set silent {on|off|toggle} - like --silent option\n\n"
+      "set trace {on|off|toggle} - set tracing status\n"
+      "set variable *var* *value*\n"
+      "Set MAKE variable to value. Variable definitions\n"
+      "inside VALUE are expanded before assignment occurs."
+      );
+}
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */
+

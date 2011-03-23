@@ -33,3 +33,21 @@ dbg_cmd_chdir (void)
   }
   return debug_readloop;
 }
+
+static void
+dbg_cmd_chdir_init(void) 
+{
+  short_command['C'].func = &dbg_cmd_chdir;
+  short_command['C'].use  = _("cd DIR");
+  short_command['C'].doc  = 
+    _("Set the working directory to DIR.");
+}
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */
+
+

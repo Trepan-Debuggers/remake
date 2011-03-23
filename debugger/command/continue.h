@@ -33,4 +33,22 @@ dbg_cmd_continue (void)
   i_debugger_stepping = 0;
   i_debugger_nexting  = 0;
   return continue_execution;
+};
+
+static void
+dbg_cmd_continue_init(void) 
+{
+    short_command['c'].func = &dbg_cmd_continue;
+    short_command['c'].use  = _("continue [TARGET]");
+    short_command['c'].doc  = 
+	_("Continue executing debugged Makefile until another breakpoint\n"
+	  "or stopping point. If a target is given and valid we set a breakpoint at\n"
+	  "that target before continuing.");
 }
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */
