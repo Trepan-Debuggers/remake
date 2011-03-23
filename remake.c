@@ -844,7 +844,7 @@ update_file_1 (struct file *file, unsigned int depth,
   if (file->command_state != cs_finished)
     {
       DBF (DB_VERBOSE, _("Recipe of `%s' is being run.\n"));
-      if ( file->tracing & BRK_AFTER_CMD )
+      if ( file->tracing & BRK_AFTER_CMD || i_debugger_stepping )
 	  enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_AFTER_CMD);
       trace_pop_target(p_call_stack);
       return 0;
@@ -867,7 +867,7 @@ update_file_1 (struct file *file, unsigned int depth,
     }
 
   file->updated = 1;
-  if ( file->tracing & BRK_AFTER_CMD )
+  if ( file->tracing & BRK_AFTER_CMD || i_debugger_stepping )
       enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_AFTER_CMD);
   trace_pop_target(p_call_stack);
   return file->update_status;

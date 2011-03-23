@@ -16,3 +16,21 @@ dbg_cmd_step (void)
     return continue_execution;
 }
 
+static void
+dbg_cmd_step_init(void) 
+{
+  short_command['s'].func = &dbg_cmd_step;
+  short_command['s'].use = _("step [AMOUNT]");
+  short_command['s'].doc = 
+    _("Step execution until another stopping point is reached.\n"
+      "Argument AMOUNT means do this AMOUNT times (or until there's another\n"
+      "reason to stop.");
+}
+
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */

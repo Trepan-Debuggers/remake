@@ -10,6 +10,8 @@ describe "stepping" do
       :input  => "echo 'step
 step
 step
+step
+step
 '"
     }
     test_name = File.basename(__FILE__, '.rb')[5..-1]

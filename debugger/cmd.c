@@ -344,12 +344,7 @@ cmd_initialize(void)
 "the target stack.\n"
  );
 
-  short_command['n'].func = &dbg_cmd_next;
-  short_command['n'].use = _("next [AMOUNT]");
-  short_command['n'].doc = 
-    _("Continue until the next command to be executed.\n"
-      "Argument AMOUNT means do this AMOUNT times (or until there's another\n"
-      "reason to stop.");
+  dbg_cmd_next_init();
 
   short_command['p'].func = &dbg_cmd_print;
   short_command['p'].use = _("print {VARIABLE [attrs...]}");
@@ -382,18 +377,13 @@ cmd_initialize(void)
    "With no arguments, uses arguments last specified (with \"run\")");
   short_command['R'].use = _("run");
 
-  short_command['s'].func = &dbg_cmd_step;
-  short_command['s'].use = _("step [AMOUNT]");
-  short_command['s'].doc = 
-    _("Step execution until another stopping point is reached.\n"
-      "Argument AMOUNT means do this AMOUNT times (or until there's another\n"
-      "reason to stop.");
-
   short_command['S'].func = &dbg_cmd_show;
   short_command['S'].use = _("show [thing]");
   short_command['S'].doc = 
     _("Show the state of thing.\n" \
       "If no 'thing' is specified, show everything there is to show.");
+
+  dbg_cmd_step_init();
 
   short_command['t'].func = &dbg_cmd_target;
   short_command['t'].use = _("target [target-name] [info1 [info2...]]");

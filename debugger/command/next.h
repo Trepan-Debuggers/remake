@@ -32,3 +32,23 @@ dbg_cmd_next(void)
   else 
     return continue_execution;
 }
+
+static void
+dbg_cmd_next_init(void) 
+{
+    
+  short_command['n'].func = &dbg_cmd_next;
+  short_command['n'].use = _("next [AMOUNT]");
+  short_command['n'].doc = 
+    _("Continue until the next command to be executed.\n"
+      "Argument AMOUNT means do this AMOUNT times (or until there's another\n"
+      "reason to stop.");
+
+}
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */
