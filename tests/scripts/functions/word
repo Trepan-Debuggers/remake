@@ -63,27 +63,42 @@ Command-line arguments:
 
 run_make_test(undef,
               'word-e2',
-              "#MAKEFILE#:4: *** non-numeric first argument to `word' function: 'abc '.  Stop.",
+              "#MAKEFILE#:4: *** non-numeric first argument to `word' function: 'abc '.  Stop.
+Command-line arguments:
+	\"-f work/functions/word.mk word-e2\"
+",
               512);
 
 run_make_test(undef,
               'word-e3',
-              "#MAKEFILE#:5: *** non-numeric first argument to `word' function: '1a'.  Stop.",
+              "#MAKEFILE#:5: *** non-numeric first argument to `word' function: '1a'.  Stop.
+Command-line arguments:
+	\"-f work/functions/word.mk word-e3\"
+",
               512);
 
 run_make_test(undef,
               'wordlist-e1',
-              "#MAKEFILE#:7: *** non-numeric first argument to `wordlist' function: ''.  Stop.",
+              "#MAKEFILE#:7: *** non-numeric first argument to `wordlist' function: ''.  Stop.
+Command-line arguments:
+	\"-f work/functions/word.mk wordlist-e1\"
+",
               512);
 
 run_make_test(undef,
               'wordlist-e2',
-              "#MAKEFILE#:8: *** non-numeric first argument to `wordlist' function: 'abc '.  Stop.",
+              "#MAKEFILE#:8: *** non-numeric first argument to `wordlist' function: 'abc '.  Stop.
+Command-line arguments:
+	\"-f work/functions/word.mk wordlist-e2\"
+",
               512);
 
 run_make_test(undef,
               'wordlist-e3',
-              "#MAKEFILE#:9: *** non-numeric second argument to `wordlist' function: ' 12a '.  Stop.",
+              "#MAKEFILE#:9: *** non-numeric second argument to `wordlist' function: ' 12a '.  Stop.
+Command-line arguments:
+	\"-f work/functions/word.mk wordlist-e3\"
+",
               512);
 
 # Test error conditions again, but this time in a variable reference
@@ -96,24 +111,34 @@ WL = $(wordlist $s,$e,$(FOO))
 word-e: ; @echo $(W)
 wordlist-e: ; @echo $(WL)',
               'word-e x=',
-              "#MAKEFILE#:3: *** non-numeric first argument to `word' function: ''.  Stop.",
+              "#MAKEFILE#:3: *** non-numeric first argument to `word' function: ''.  Stop.
+Command-line arguments:
+	\"-f work/functions/word.mk.1 word-e x=\"
+",
               512);
 
 run_make_test(undef,
               'word-e x=abc',
-              "#MAKEFILE#:3: *** non-numeric first argument to `word' function: 'abc'.  Stop.",
+              "#MAKEFILE#:3: *** non-numeric first argument to `word' function: 'abc'.  Stop.
+Command-line arguments:
+	\"-f work/functions/word.mk.1 word-e x=abc\"
+",
               512);
 
 run_make_test(undef,
               'word-e x=0',
-              "#MAKEFILE#:3: *** first argument to `word' function must be greater than 0.  Stop.",
+              "#MAKEFILE#:3: *** first argument to `word' function must be greater than 0.  Stop.
+Command-line arguments:
+	\"-f work/functions/word.mk.1 word-e x=0\"
+",
               512);
 
 run_make_test(undef,
               'wordlist-e s= e=',
               "#MAKEFILE#:4: *** non-numeric first argument to `wordlist' function: ''.  Stop.
 Command-line arguments:
- 	\"-f work/functions/word.mk.1 wordlist-e s= e=\"",
+	\"-f work/functions/word.mk.1 wordlist-e s= e=\"
+",
               512);
 
 run_make_test(undef,
@@ -127,14 +152,16 @@ run_make_test(undef,
               'wordlist-e s=4 e=12a',
               "#MAKEFILE#:4: *** non-numeric second argument to `wordlist' function: '12a'.  Stop.
 Command-line arguments:
-	\"-f work/functions/word.mk.1 wordlist-e s=4 e=12a\"",
+	\"-f work/functions/word.mk.1 wordlist-e s=4 e=12a\"
+",
               512);
 
 run_make_test(undef,
               'wordlist-e s=0 e=12',
               "#MAKEFILE#:4: *** invalid first argument to `wordlist' function: `0'.  Stop.
 Command-line arguments:
-	\"-f work/functions/word.mk.1 wordlist-e s=4 e=12a\"",
+	\"-f work/functions/word.mk.1 wordlist-e s=0 e=12\"
+",
               512);
 
 

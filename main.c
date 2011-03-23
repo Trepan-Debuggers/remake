@@ -3278,7 +3278,8 @@ die (int status)
     }
 
   /* On an error, show how this was invoked. */
-  if (status && (in_debugger != DEBUGGER_QUIT_RC) && !no_extended_errors) {
+  if (status && (in_debugger != DEBUGGER_QUIT_RC) && !no_extended_errors
+      && !silent_flag) {
     print_cmdline();
   }
 

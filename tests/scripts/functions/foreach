@@ -64,7 +64,8 @@ all: ; @echo $y',
               '',
               "#MAKEFILE#:2: *** insufficient number of arguments (1) to function `foreach'.  Stop.
 Command-line arguments:
-	\"-f work/functions/foreach.mk.3\"",
+	\"-f work/functions/foreach.mk.2\"
+",
               512);
 
 run_make_test('
@@ -73,7 +74,10 @@ y := $x
 
 all: ; @echo $y',
               '',
-              "#MAKEFILE#:2: *** insufficient number of arguments (1) to function `foreach'.  Stop.",
+              "#MAKEFILE#:2: *** insufficient number of arguments (1) to function `foreach'.  Stop.
+Command-line arguments:
+	\"-f work/functions/foreach.mk.3\"
+",
               512);
 
 1;

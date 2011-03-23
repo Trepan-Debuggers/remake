@@ -101,7 +101,10 @@ ouch
 endef
 all: ; @echo ouch
 ',
-              '', "#MAKEFILE#:3: *** empty variable name.  Stop.\n", 512);
+              '', "#MAKEFILE#:3: *** empty variable name.  Stop.
+Command-line arguments:
+	\"-f work/variables/define.mk.4\"
+", 512);
 
 # TEST 6: NEGATIVE: extra text after define
 
@@ -134,7 +137,10 @@ define NAME =
 ouch
 endef$(NAME)
 ',
-              '', "#MAKEFILE#:4: *** missing `endef', unterminated `define'.  Stop.\n", 512);
+              '', "#MAKEFILE#:4: *** missing `endef', unterminated `define'.  Stop.
+Command-line arguments:
+	\"-f work/variables/define.mk.7\"
+", 512);
 
 # -------------------------
 # Make sure that prefix characters apply properly to define/endef values.

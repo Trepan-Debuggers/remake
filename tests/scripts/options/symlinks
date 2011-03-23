@@ -56,7 +56,10 @@ if ($port_type eq 'W32' || !( eval { symlink("",""); 1 })) {
 
   symlink("../$dirname/dep", 'sym');
   run_make_test('targ: sym ; @echo make $@ from $<', '',
-                "#MAKE#: *** No rule to make target `sym', needed by `targ'.  Stop.", 512);
+                "#MAKE#: *** No rule to make target `sym', needed by `targ'.  Stop.
+Command-line arguments:
+	\"-f work/options/symlinks.mk.1\"
+", 512);
 
   run_make_test('targ: sym ; @echo make $@ from $<', '-L',
                 'make targ from sym');
