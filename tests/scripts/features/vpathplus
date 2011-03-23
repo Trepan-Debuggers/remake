@@ -90,6 +90,8 @@ $make_name: *** [notarget.b] Error 1
 
 #0  notarget.b at ??
 #1  notarget (.PHONY target)
+Command-line arguments:
+	\"-f work/features/vpathplus.mk notarget\"
 ";
 
 &compare_output($answer,&get_logfile(1));

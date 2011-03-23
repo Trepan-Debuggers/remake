@@ -105,7 +105,9 @@ Fail
 #MAKE#: *** [fail.2] Error 1
 Fail
 #MAKE#: *** [fail.3] Error 1
-Ok done',
+Ok done
+Command-line arguments:
+	"-f work/features/parallelism.mk.4 -rR -j5"',
              512);
 
 

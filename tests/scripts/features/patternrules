@@ -203,7 +203,9 @@ CWEAVE := :
 %.tex : %.w %.ch
 !,
               'foo.tex',
-              "#MAKE#: *** No rule to make target `foo.tex'.  Stop.", 512);
+              "#MAKE#: *** No rule to make target `foo.tex'.  Stop.
+Command-line arguments:
+	\"-f work/features/patternrules.mk.8 foo.tex\"", 512);
 
 unlink(@f);
 

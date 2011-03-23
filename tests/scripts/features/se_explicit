@@ -128,7 +128,10 @@ proj1.o : proj1.c
 proj1.c: proj1.h
 endef
 !,
-              '', "#MAKE#: *** prerequisites cannot be defined in recipes.  Stop.\n", 512);
+              '', "#MAKE#: *** prerequisites cannot be defined in recipes.  Stop.
+Command-line arguments:
+	\"-f work/features/se_explicit.mk.5\"
+", 512);
 
 
 # Automatic $$+ variable expansion issue.  Savannah bug #25780
