@@ -52,7 +52,7 @@ extern void fatal ();
 void err (target_stack_node_t *p_call, const char *fmt, ...)
                    __attribute__ ((__format__ (__printf__, 2, 3)));
 void fatal_err (target_stack_node_t *p_call, const char *fmt, ...)
-                   __attribute__ ((noreturn, __format__ (__printf__, 2, 3)));
+                   __attribute__ ((__format__ (__printf__, 2, 3)));
 #else
 void err();
 void fatal_err();

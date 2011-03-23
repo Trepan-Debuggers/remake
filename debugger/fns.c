@@ -1,5 +1,6 @@
 /* 
-Copyright (C) 2004, 2005, 2007, 2008, 2010 R. Bernstein rocky@gnu.org
+Copyright (C) 2004, 2005, 2007, 2008, 2010, 2011
+R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -17,7 +18,7 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/* Helper rutines for debugger command interface. */
+/* Helper routines for debugger command interface. */
 
 #include "config.h"
 #include "commands.h"
@@ -132,6 +133,20 @@ get_word(char **ppsz_str)
   return psz_word;
 }
 
+/*!
+  Return the current target from the stack or NULL
+  if none set.
+ */
+file_t *
+get_current_target(void)
+{
+  if (p_stack && p_stack->p_target)
+    return p_stack->p_target;
+  else 
+    return NULL;
+}
+
+
 /*! Find the target in first word of psz_args or use $@ (the current
     stack) if none.  We also allow $@ or @ explicitly as a target name
     to mean the current target on the stack. NULL is returned if a lookup 
@@ -142,9 +157,10 @@ file_t *
 get_target(char **ppsz_args, /*out*/ const char **ppsz_target) 
 {
   if (!*ppsz_args || !**ppsz_args) {
+    file_t *p_target = get_current_target();
     /* Use current target */
-    if (p_stack && p_stack->p_target && p_stack->p_target->name) {
-      *ppsz_args = (char *) p_stack->p_target->name;
+    if (p_target && p_target->name) {
+      *ppsz_args = (char *) p_target->name;
     } else {
       printf(_("Default target not found here. You must supply one\n"));
       return NULL;
@@ -403,4 +419,17 @@ rule_t *find_rule (const char *psz_name)
   return NULL;
 }
 
+void shell_rc_status(int rc) 
+{
+  if (rc == -1)
+    printf(_("Error: %s\n"), strerror(errno));
+  else if (rc != 0)
+    printf(_("Warning: return code was %d\n"), WEXITSTATUS(rc));
+}
   
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */

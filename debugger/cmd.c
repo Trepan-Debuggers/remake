@@ -357,10 +357,7 @@ cmd_initialize(void)
       "last value given."				
       );
 
-  short_command['P'].func = &dbg_cmd_pwd;
-  short_command['P'].use = _("pwd");
-  short_command['P'].doc = 
-    _("Print working directory.  This is used for your program as well.");
+  dbg_cmd_pwd_init();
 
   short_command['q'].func = &dbg_cmd_quit;
   short_command['q'].use = _("quit [exit-status]");
@@ -430,12 +427,8 @@ cmd_initialize(void)
   short_command['#'].doc  = 
     _("Ignore this line.");
 
-  short_command['!'].func = &dbg_cmd_shell;
-  short_command['!'].use =  _("shell STRING");
-  short_command['!'].doc  = 
-    _("Execute the rest of the line as a shell.");
-
   dbg_cmd_set_init();
+  dbg_cmd_shell_init();
 
   short_command['"'].func = &dbg_cmd_setq;
   short_command['"'].use =  _("setq *variable* VALUE");

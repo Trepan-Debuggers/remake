@@ -1,5 +1,5 @@
-/* $Id: dbg_fns.h,v 1.11 2006/03/19 12:17:44 rockyb Exp $
-Copyright (C) 2005, 2008 R. Bernstein <rocky@gnu.org>
+/* 
+Copyright (C) 2005, 2008, 2011 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -36,6 +36,12 @@ extern char   *psz_target_name;
 /*! We use the if when we fake a line number because
    a real one hasn't been recorded on the stack. */
 extern floc_t  fake_floc;
+
+/*!
+  Return the current target from the stack or NULL
+  if none set.
+ */
+file_t * get_current_target(void);
 
 /*! Parse psz_arg for a signed integer. The value is returned in
     *pi_result. If warn is true, then we'll give a warning if no
@@ -100,5 +106,6 @@ extern void try_without_dollar(const char *psz_varname);
 extern void dbg_print_invocation(void);
 
 extern rule_t *find_rule (const char *psz_name);
+extern void shell_rc_status(int rc);
 
 #endif /* DBG_FNS_H*/

@@ -376,7 +376,7 @@ void message (int prefix, const char *fmt, ...)
 void error (const struct floc *flocp, const char *fmt, ...)
             __attribute__ ((__format__ (__printf__, 2, 3)));
 void fatal (const struct floc *flocp, const char *fmt, ...)
-                   __attribute__ ((noreturn, __format__ (__printf__, 2, 3)));
+                   __attribute__ ((__format__ (__printf__, 2, 3)));
 #else
 const char *concat ();
 void message ();
@@ -384,9 +384,9 @@ void error ();
 void fatal ();
 #endif
 
-void die (int) __attribute__ ((noreturn));
+void die (int);
 void log_working_directory (int);
-void pfatal_with_name (const char *) __attribute__ ((noreturn));
+void pfatal_with_name (const char *);
 void perror_with_name (const char *, const char *);
 void *xmalloc (unsigned int);
 void *xcalloc (unsigned int);

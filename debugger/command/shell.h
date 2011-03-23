@@ -24,9 +24,23 @@ dbg_cmd_shell(void)
 {
   char *psz_varname = psz_debugger_args;
   int rc=system(psz_varname);
-  if (rc == -1)
-      printf("Error: %s\n", strerror(errno));
-  else if (rc != 0)
-      printf("Warning: return code was %d\n", WEXITSTATUS(rc));
+  shell_rc_status(rc);
   return debug_readloop;
 }
+
+static void
+dbg_cmd_shell_init(void) 
+{
+  short_command['!'].func = &dbg_cmd_shell;
+  short_command['!'].use =  _("shell STRING");
+  short_command['!'].doc  = 
+    _("Execute the rest of the line as a shell.");
+}
+
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */

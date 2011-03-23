@@ -21,10 +21,9 @@ debug_return_t
 dbg_cmd_target(void) 
 {
   char *psz_args = psz_debugger_args;
-  file_t *p_target;
   const char *psz_target;
+  file_t *p_target = get_target(&psz_args, &psz_target);
 
-  p_target = get_target(&psz_args, &psz_target);
   if (p_target) {
     print_target_mask_t i_mask = 0;
     char *psz_word;
