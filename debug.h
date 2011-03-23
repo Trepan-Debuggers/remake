@@ -70,6 +70,13 @@ extern debug_enter_debugger_t debug_dummy_enter_debugger_mask;
 /** bitmask of debug_level_mask values. */
 extern int db_level;
 
+/*! 
+  If 0 (or false) we are not in the debugger command read loop.
+  If 1 (or true) we are in the debugger command read loop.
+  If DEBUGGER_QUIT_RC we've requested to quit.
+ */
+extern int in_debugger;
+
 /** \brief The structure used to hold the list of strings given
     in command switches of a type that takes string arguments.  */
 struct stringlist

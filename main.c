@@ -3277,6 +3277,11 @@ die (int status)
       log_working_directory (0);
     }
 
+  /* On an error, show how this was invoked. */
+  if (status && (in_debugger != DEBUGGER_QUIT_RC) && !no_extended_errors) {
+    print_cmdline();
+  }
+
   exit (status);
 }
 

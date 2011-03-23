@@ -28,13 +28,6 @@ Boston, MA 02111-1307, USA.  */
 #include "../buildargv.h"
 #include "../trace.h"
 
-/*! 
-  If 0 (or false) we are not in the debugger command read loop.
-  If 1 (or true) we are in the debugger command read loop.
-  If DEBUGGER_QUIT_RC we've requested to quit.
- */
-extern int in_debugger;
-
 extern debug_return_t enter_debugger (target_stack_node_t *p, 
 				      file_t *p_target, int err,
 				      debug_enter_reason_t reason);
