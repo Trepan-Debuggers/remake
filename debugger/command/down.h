@@ -65,3 +65,20 @@ dbg_cmd_frame_down(void)
   
   return debug_readloop;
 }
+
+static void
+dbg_cmd_down_init(void) 
+{
+  short_command['D'].func = &dbg_cmd_frame_down;
+  short_command['D'].use  = _("down [AMOUNT]");
+  short_command['D'].doc  = 
+    _("Select and print the target this one caused to be examined.\n"
+      "\tAn argument says how many targets down to go.");
+}
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */

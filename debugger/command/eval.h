@@ -48,3 +48,19 @@ dbg_cmd_eval(void)
 #endif
   return debug_readloop;
 }
+
+static void
+dbg_cmd_eval_init(void) 
+{
+  short_command['e'].func = &dbg_cmd_eval;
+  short_command['e'].use  = _("eval STRING");
+  short_command['e'].doc  = _("parse and evaluate a string.");
+
+}
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */

@@ -308,29 +308,10 @@ cmd_initialize(void)
   dbg_cmd_break_init();
   dbg_cmd_chdir_init();
   dbg_cmd_continue_init();
-
-  short_command['d'].func = &dbg_cmd_delete;
-  short_command['d'].use  = _("delete breakpoint numbers..");
-  short_command['d'].doc  = _("Delete some breakpoints\n."
-"Arguments are breakpoint numbers with spaces in between.\n"
-"To delete all breakpoints, give no argument.");
-
-  short_command['D'].func = &dbg_cmd_frame_down;
-  short_command['D'].use  = _("down [AMOUNT]");
-  short_command['D'].doc  = 
-    _("Select and print the target this one caused to be examined.\n"
-      "\tAn argument says how many targets down to go.");
-
-  short_command['e'].func = &dbg_cmd_eval;
-  short_command['e'].use  = _("eval STRING");
-  short_command['e'].doc  = _("parse and evaluate a string.");
-
-  short_command['F'].func = &dbg_cmd_finish;
-  short_command['F'].use  = _("finish");
-  short_command['F'].doc  = 
-    _("Continue execution until the end of the Makefile without the "
-      "usual tracing\n" 
-      "\tracing that \"continue\" would give.");
+  dbg_cmd_delete_init();
+  dbg_cmd_down_init();
+  dbg_cmd_eval_init();
+  dbg_cmd_finish_init();
 
   short_command['f'].func = &dbg_cmd_frame;
   short_command['f'].use  = _("frame N");

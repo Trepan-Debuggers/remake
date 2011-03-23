@@ -44,3 +44,19 @@ dbg_cmd_delete(void)
   return debug_readloop;
 }
 
+static void
+dbg_cmd_delete_init(void) 
+{
+  short_command['d'].func = &dbg_cmd_delete;
+  short_command['d'].use  = _("delete breakpoint numbers..");
+  short_command['d'].doc  = _("Delete some breakpoints\n."
+"Arguments are breakpoint numbers with spaces in between.\n"
+"To delete all breakpoints, give no argument.");
+}
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */

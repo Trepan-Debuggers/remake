@@ -44,10 +44,21 @@ dbg_cmd_finish(void)
   return continue_execution;
 }
 
+static void
+dbg_cmd_finish_init(void) 
+{
+  short_command['F'].func = &dbg_cmd_finish;
+  short_command['F'].use  = _("finish");
+  short_command['F'].doc  = 
+    _("Continue execution until the end of the Makefile without the "
+      "usual tracing\n" 
+      "\tracing that \"continue\" would give.");
+}
+
 
 /* 
  * Local variables:
- *  c-file-style: "gnu"
- *  indent-tabs-mode: nil
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
  * End:
  */
