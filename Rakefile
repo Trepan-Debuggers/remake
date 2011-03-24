@@ -6,7 +6,16 @@ SPEC_FILES = FileList["#{ROOT_DIR}/tests/spec/test-*.rb"]
 
 task :default => [:test]
 task :check => [:test]
-desc 'Test everything - unit tests for now.'
-task :test do
+
+desc 'Test everything - the default.'
+task :test => [:'test:basic', :'test:dbg']
+
+desc "The normal GNU make test suite"
+task :'test:basic' do
+  sh "make check"
+end
+
+desc "Debugger-specific tests"
+task :'test:dbg' do
   sh "rspec #{SPEC_FILES.to_a.join(' ')}"
 end
