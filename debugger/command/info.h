@@ -51,9 +51,8 @@ const char *WARRANTY =
 
 /* Give some help info. */
 debug_return_t 
-dbg_cmd_info(void)
+dbg_cmd_info(char *psz_args)
 {
-  char *psz_args = psz_debugger_args;
   if (!psz_args || 0==strlen(psz_args)) {
     dbg_cmd_help("info");
   } else {

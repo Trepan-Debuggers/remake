@@ -19,9 +19,8 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 static debug_return_t 
-dbg_cmd_expand(void) 
+dbg_cmd_expand (char *psz_string)
 {
-  char *psz_string=psz_debugger_args;
   static char *psz_last_string = NULL;
 
   if (!psz_string || !*psz_string) {

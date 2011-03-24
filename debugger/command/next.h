@@ -19,9 +19,8 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 /* Continue until the next command to be executed. */
 static debug_return_t 
-dbg_cmd_next(void)
+dbg_cmd_next(char *psz_arg)
 {
-  char *psz_arg = psz_debugger_args;
   if (!psz_arg || !*psz_arg) {
     i_debugger_nexting  = 1;
     i_debugger_stepping = 0;

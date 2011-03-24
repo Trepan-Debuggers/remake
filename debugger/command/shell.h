@@ -20,9 +20,8 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 #include <errno.h>
 static debug_return_t 
-dbg_cmd_shell(void) 
+dbg_cmd_shell(char *psz_varname) 
 {
-  char *psz_varname = psz_debugger_args;
   int rc=system(psz_varname);
   shell_rc_status(rc);
   return debug_readloop;

@@ -2,9 +2,8 @@
    means do this N times (or until there's another reason to stop. */
 
 static debug_return_t 
-dbg_cmd_step (void)
+dbg_cmd_step (char *psz_arg)
 {
-  char *psz_arg = psz_debugger_args;
   if (!psz_arg || !*psz_arg) {
     i_debugger_stepping = 1;
     i_debugger_nexting  = 0;

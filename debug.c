@@ -1,5 +1,5 @@
 /* Debugging macros and interface.
-  Copyright (c) 2005 Rocky Bernstein <rocky@gnu.org>
+  Copyright (c) 2005, 2011 Rocky Bernstein <rocky@gnu.org>
 
 GNU Make is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -40,6 +40,7 @@ stringlist_t *db_flags;
 RETSIGTYPE
 debug_signal_handler (int sig)
 {
+  UNUSED_ARGUMENT(sig);
   db_level = db_level ? DB_NONE : DB_BASIC;
 }
 #endif
@@ -102,3 +103,10 @@ decode_debug_flags (void)
         }
     }
 }
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */

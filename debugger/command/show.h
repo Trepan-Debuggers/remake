@@ -19,17 +19,15 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 debug_return_t 
-dbg_cmd_show(void)
+dbg_cmd_show(char *psz_arg)
 {
-  char *psz_arg = psz_debugger_args;
   if (!psz_arg || 0==strlen(psz_arg)) {
     unsigned int i;
     for (i=0; show_subcommands[i].name; i++) {
       if ( 0 == strcmp(show_subcommands[i].name, "warranty") ||
 	   0 == strcmp(show_subcommands[i].name, "history"))
 	continue;
-      psz_debugger_args = (char *) show_subcommands[i].name;
-      dbg_cmd_show();
+      dbg_cmd_show((char *) show_subcommands[i].name);
     }
   } else {
     if (is_abbrev_of (psz_arg, "args", 3)) {

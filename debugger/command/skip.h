@@ -18,7 +18,8 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 /* Skip over next command or action. */
 static debug_return_t 
-dbg_cmd_skip(void)
+dbg_cmd_skip (char *psz_arg)
 {
+  UNUSED_ARGUMENT(psz_arg);
   return skip_execution;
 }

@@ -20,9 +20,8 @@ Boston, MA 02111-1307, USA.  */
 /* Debugger help command. */
 
 debug_return_t 
-dbg_cmd_help(void)
+dbg_cmd_help(char *psz_args)
 {
-  char *psz_args=psz_debugger_args;
   unsigned int i;
 
   if (!psz_args || !*psz_args) {

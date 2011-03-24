@@ -20,10 +20,8 @@ Boston, MA 02111-1307, USA.  */
 /* Show target call stack info. */
 
 debug_return_t 
-dbg_cmd_where(void)
+dbg_cmd_where (char *psz_amount)
 {
-
-  char *psz_amount = psz_debugger_args;
   int i_amount;
   
   if (!psz_amount || !*psz_amount) {

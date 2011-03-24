@@ -19,9 +19,8 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 static debug_return_t 
-dbg_cmd_finish(void)
+dbg_cmd_finish(char *psz_amount)
 {
-  char *psz_amount=psz_debugger_args;
   target_stack_node_t *p=p_stack;
   unsigned int i_amount=0;
   unsigned int i=0;

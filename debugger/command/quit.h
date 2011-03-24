@@ -19,9 +19,8 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 /* Terminate execution. */
 static debug_return_t 
-dbg_cmd_quit(void)
+dbg_cmd_quit(char *psz_arg)
 {
-  char *psz_arg = psz_debugger_args;
   if (!psz_arg || !*psz_arg) {
     in_debugger = DEBUGGER_QUIT_RC;
     die(DEBUGGER_QUIT_RC);

@@ -31,6 +31,8 @@ Boston, MA 02111-1307, USA.  */
 #include "config.h"
 #include "make.h"
 
+#define UNUSED_ARGUMENT(x) (void)x
+
 #if defined(HAVE_STDINT_H)
 # include <stdint.h>
 #elif defined(HAVE_INTTYPES_H)

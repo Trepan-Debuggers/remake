@@ -18,9 +18,8 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 debug_return_t 
-dbg_cmd_frame_up(void) 
+dbg_cmd_frame_up (char *psz_amount)
 {
-  char *psz_amount = psz_debugger_args;
   unsigned int i_amount=1;
   unsigned int i = 0;
 

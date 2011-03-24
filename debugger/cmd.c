@@ -77,7 +77,7 @@ debug_enter_reason_t last_stop_reason;
 #endif
 
 /* Common debugger command function prototype */
-typedef debug_return_t (*dbg_cmd_t) (void);
+typedef debug_return_t (*dbg_cmd_t) (char *psz_args);
 
 /* A structure which contains information on the commands this program
    can understand. */
@@ -469,14 +469,14 @@ execute_line (char *psz_line)
   psz_debugger_args = psz_line + i;
 
   /* Call the function. */
-  return ((*(command->func)) ());
+  return ((*(command->func)) (psz_debugger_args));
 }
 
 /* Show history. */
 debug_return_t 
-dbg_cmd_show_command (void)
+dbg_cmd_show_command (char *psz_args)
 {
-  /*
+ /*
   if (!psz_arg || *psz_arg) {
     ;
     } */
@@ -484,6 +484,7 @@ dbg_cmd_show_command (void)
 #ifdef HAVE_HISTORY_LIST
   HIST_ENTRY **hist_list = history_list();
   unsigned int i;
+  UNUSED_ARGUMENT(psz_args);
   if (!hist_list) return debug_readloop;
   for (i=0; hist_list[i]; i++) {
     printf("%5d  %s\n", i, hist_list[i]->line);
@@ -657,13 +658,11 @@ debug_return_t enter_debugger (target_stack_node_t *p,
 	add_history (s);
 	debug_return=execute_line(s);
       } else {
-	psz_debugger_args="";
-	debug_return=dbg_cmd_step();
+	debug_return=dbg_cmd_step("");
       }
       free (line);
     } else {
-      psz_debugger_args=NULL;
-      dbg_cmd_quit();
+      dbg_cmd_quit(NULL);
     }
   }
 

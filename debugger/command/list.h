@@ -1,9 +1,8 @@
 /* Continue until the next command to be executed. */
 #define DEPENDS_COMMANDS " depends commands"
 static debug_return_t 
-dbg_cmd_list(void)
+dbg_cmd_list(char *psz_arg)
 {
-  char *psz_arg = psz_debugger_args;
   const char *psz_target = NULL;
   char   *target_cmd = NULL;
   file_t *p_target;

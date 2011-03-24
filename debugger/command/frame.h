@@ -18,9 +18,8 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 debug_return_t 
-dbg_cmd_frame(void) 
+dbg_cmd_frame(char *psz_frame) 
 {
-  char *psz_frame = psz_debugger_args;
   int i, i_frame;
 
   if (!psz_frame || !*psz_frame) {

@@ -1,8 +1,7 @@
 /* Restart/run program. */
 static debug_return_t 
-dbg_cmd_run(void)
+dbg_cmd_run(char *psz_arg)
 {
-  char *psz_arg = psz_debugger_args;
   char **ppsz_argv = global_argv;
   const char *psz_make_cmd = global_argv[0];
   int rc;

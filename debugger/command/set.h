@@ -19,9 +19,8 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 static debug_return_t 
-dbg_cmd_set(void) 
+dbg_cmd_set(char *psz_args) 
 {
-  char *psz_args = psz_debugger_args;
   if (!psz_args || 0==strlen(psz_args)) {
     printf(_("You need to supply a variable name\n"));
   } else {
@@ -42,8 +41,7 @@ dbg_cmd_set(void)
 	on_off_toggle("toggle", &basename_filenames);
       else
 	on_off_toggle(psz_args, &basename_filenames);
-      psz_debugger_args = "basename";
-      dbg_cmd_show();
+      dbg_cmd_show("basename");
     } else if (is_abbrev_of (psz_varname, "debug", 3)) {
       int dbg_mask;
       if (get_int(psz_args, &dbg_mask, true)) {
@@ -54,8 +52,7 @@ dbg_cmd_set(void)
 	on_off_toggle("toggle", &ignore_errors_flag);
       else
 	on_off_toggle(psz_args, &ignore_errors_flag);
-      psz_debugger_args = "ignore_errors";
-      dbg_cmd_show();
+      dbg_cmd_show("ignore_errors");
     } else if (is_abbrev_of (psz_varname, "keep-going", 3)) {
       if (!psz_args || !*psz_args)
 	on_off_toggle("toggle", &keep_going_flag);
