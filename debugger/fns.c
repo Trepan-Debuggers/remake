@@ -266,7 +266,8 @@ static char *reason2str[] = {
     "||",
     "rd",
     "!!",
-    "--"
+    "--",
+    "++"
 };
 
     
@@ -318,8 +319,16 @@ print_debugger_location(const file_t *p_target, debug_enter_reason_t reason,
   }
 
   /* Could/should generalize the below into a prompt string. */
-  dbg_cmd_show_exp("$@: $+", true);
-
+  switch (reason) 
+    {
+    case DEBUG_BRKPT_BEFORE_PREREQ:
+    case DEBUG_STEP_HIT:
+      dbg_cmd_show_exp("$@: $+", true);
+      break;
+    default:
+      dbg_cmd_show_exp("$@", true);
+      break;
+    }
 }
 
 /** Strip whitespace from the start and end of STRING.  Return a pointer

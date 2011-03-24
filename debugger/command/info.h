@@ -139,6 +139,10 @@ dbg_cmd_info(char *psz_args)
 	  printf(_("Program stopped in stepping.\n"));
 	  printf("\n");
 	  break;
+	case DEBUG_STEP_COMMAND:
+	  printf(_("Program stopped in stepping before running a command.\n"));
+	  printf("\n");
+	  break;
 	case DEBUG_NOT_GIVEN:
 	  printf(_("Reason not given.\n"));
           break;

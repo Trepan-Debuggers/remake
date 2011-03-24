@@ -10,5 +10,5 @@ mdb<0> echo third done
 third done
 
 triple.Makefile:5)
-third: 
+third
 mdb<1> 

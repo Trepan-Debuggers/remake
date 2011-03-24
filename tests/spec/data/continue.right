@@ -29,5 +29,5 @@ first done
 triple.Makefile:1	Successfully remade target file `first'.
 
 triple.Makefile:1)
-first: second
+first
 mdb<2> 

@@ -1247,6 +1247,9 @@ start_job_command (child_t *child,
       goto next_command;
     }
 
+  if (i_debugger_stepping)
+    enter_debugger(p_call_stack, child->file, 0, DEBUG_STEP_COMMAND);
+
   /* Flush the output streams so they won't have things written twice.  */
 
   fflush (stdout);
