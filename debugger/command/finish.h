@@ -24,13 +24,13 @@ dbg_cmd_finish(void)
   char *psz_amount=psz_debugger_args;
   target_stack_node_t *p=p_stack;
   unsigned int i_amount=0;
+  unsigned int i=0;
   if ('\0' != *psz_debugger_args) {
     if (!get_uint(psz_amount, &i_amount))
       return debug_readloop;
     
     if (p_stack_top) {
       /* We have a target stack  */
-      unsigned int i=0;
       
       for (i=0 ; p ; p = p->p_parent, i++ ) {
         if (i_amount == i) break;
@@ -39,9 +39,19 @@ dbg_cmd_finish(void)
     }
   }
   if (p) {
-    p->p_shared_target->tracing |= (BRK_AFTER_PREREQ|BRK_TEMP);
+    i_debugger_nexting  = 0;
+    i_debugger_stepping = 0;
+    p->p_shared_target->tracing |= (BRK_AFTER_CMD);
+    return continue_execution;
+  } else {
+    if (i > i_amount)
+      printf("Target level %d not found\n", i_amount);
+    else
+      printf("Level %d is too large; maximum value is %d.\n", 
+             i_amount, i-1);
   }
-  return continue_execution;
+  
+  return debug_readloop;
 }
 
 static void

@@ -31,6 +31,7 @@ dbg_cmd_next(void)
     return continue_execution;
   else 
     return continue_execution;
+  return debug_readloop;
 }
 
 static void

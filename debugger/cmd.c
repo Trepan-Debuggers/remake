@@ -546,6 +546,20 @@ debug_return_t enter_debugger (target_stack_node_t *p,
   unsigned int i = 0;
 
   last_stop_reason = reason;
+  
+  /* Clear temporary breakpoints. */
+  if (p_target->tracing & BRK_TEMP)
+    switch(last_stop_reason) 
+      {
+      case DEBUG_BRKPT_AFTER_CMD:
+      case DEBUG_BRKPT_BEFORE_PREREQ:
+      case DEBUG_BRKPT_AFTER_PREREQ:
+        printf("Clearing tracing");
+        p_target->tracing = BRK_NONE;
+      default:
+        ;
+      }
+  
 
   if ( in_debugger == DEBUGGER_QUIT_RC ) {
     return continue_execution;
@@ -568,6 +582,7 @@ debug_return_t enter_debugger (target_stack_node_t *p,
     i_init = 1;
     using_history ();
   }
+
 
   /* Set initial frame position reporting area: 0 is bottom. */
   p_target_loc    = NULL;

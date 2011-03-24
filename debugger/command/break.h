@@ -49,6 +49,8 @@ dbg_cmd_break (void)
       i_brkpt_mask = BRK_BEFORE_PREREQ;
     } else if (is_abbrev_of (psz_break_type, "end", 1)) {
       i_brkpt_mask = BRK_AFTER_CMD;
+    } else if (is_abbrev_of (psz_break_type, "temp", 1)) {
+      i_brkpt_mask |= BRK_TEMP;
     }
     add_breakpoint(p_target, i_brkpt_mask);
   }

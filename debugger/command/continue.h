@@ -20,12 +20,16 @@ Boston, MA 02111-1307, USA.  */
 static debug_return_t 
 dbg_cmd_continue (void)
 {
-  char *psz_arg=psz_debugger_args;
-  if (psz_arg && *psz_arg) {
-    if (debug_cmd_error == dbg_cmd_break()) {
-      printf(_("Not continuing under these circumstances.\n"));
-      return debug_cmd_error;
+  char *psz_args=psz_debugger_args;
+  if (psz_args && *psz_args) {
+    char *psz_target = get_word(&psz_args);
+    file_t *p_target = lookup_file (psz_target);
+    if (!p_target) {
+      printf("Can't find target %s; breakpoint not set.\n", psz_target);
+	return debug_cmd_error;
     }
+    if (!add_breakpoint(p_target, BRK_ALL))
+      return debug_cmd_error;
   } else  {
     db_level = 0;
   }
