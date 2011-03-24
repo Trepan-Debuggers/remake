@@ -547,20 +547,6 @@ debug_return_t enter_debugger (target_stack_node_t *p,
 
   last_stop_reason = reason;
   
-  /* Clear temporary breakpoints. */
-  if (p_target->tracing & BRK_TEMP)
-    switch(last_stop_reason) 
-      {
-      case DEBUG_BRKPT_AFTER_CMD:
-      case DEBUG_BRKPT_BEFORE_PREREQ:
-      case DEBUG_BRKPT_AFTER_PREREQ:
-        printf("Clearing tracing");
-        p_target->tracing = BRK_NONE;
-      default:
-        ;
-      }
-  
-
   if ( in_debugger == DEBUGGER_QUIT_RC ) {
     return continue_execution;
   }
@@ -576,6 +562,19 @@ debug_return_t enter_debugger (target_stack_node_t *p,
 	      && p_target && !p_target->tracing && -2 != errcode )
     return continue_execution;
   
+  /* Clear temporary breakpoints. */
+  if (p_target->tracing & BRK_TEMP)
+    switch(last_stop_reason) 
+      {
+      case DEBUG_BRKPT_AFTER_CMD:
+      case DEBUG_BRKPT_BEFORE_PREREQ:
+      case DEBUG_BRKPT_AFTER_PREREQ:
+        printf("Clearing tracing");
+        p_target->tracing = BRK_NONE;
+      default:
+        ;
+      }
+
   if (0 == i_init) {
     rl_initialize ();
     cmd_initialize();

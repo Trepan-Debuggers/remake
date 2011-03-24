@@ -28,7 +28,7 @@ dbg_cmd_continue (void)
       printf("Can't find target %s; breakpoint not set.\n", psz_target);
 	return debug_cmd_error;
     }
-    if (!add_breakpoint(p_target, BRK_ALL))
+    if (!add_breakpoint(p_target, BRK_ALL|BRK_TEMP))
       return debug_cmd_error;
   } else  {
     db_level = 0;
