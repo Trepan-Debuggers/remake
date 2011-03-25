@@ -139,7 +139,10 @@ run_make_test('target: intermed ; touch $@
 intermed: | phony ; touch $@
 
 .PHONY: phony
-phony: ; : phony', '-rR -j', ': phony');
+phony: ; : phony', '-rR -j', 
+'##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+: phony
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
 rmfiles('target');
 
 # TEST #10: Don't put --jobserver-fds into a re-exec'd MAKEFLAGS.

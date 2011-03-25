@@ -28,11 +28,15 @@ MAKELEVEL = 0
 THE END
 #MAKE#: Leaving directory `#PWD#'"
                : "#MAKE#: Entering directory `#PWD#'
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #MAKEPATH# -f #MAKEFILE# foo
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 #MAKE#[1]: Entering directory `#PWD#'
 #MAKEPATH#
 MAKELEVEL = 1
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #MAKEPATH# -f #MAKEFILE# last
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 #MAKE#[2]: Entering directory `#PWD#'
 #MAKEPATH#
 MAKELEVEL = 2

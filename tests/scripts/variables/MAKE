@@ -15,7 +15,11 @@ foo:
 	@echo $(MAKE)
 !,
               '',
-              "#MAKEPATH#\n#MAKEPATH# -f #MAKEFILE# foo\n"
+              "#MAKEPATH#
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#MAKEPATH# -f #MAKEFILE# foo
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+"
               . "#MAKE#[1]: Entering directory `#PWD#'\n"
               . "#MAKEPATH#\n#MAKE#[1]: Leaving directory `#PWD#'\n");
 

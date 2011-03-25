@@ -14,7 +14,13 @@ endef
 
 all: ; $(multi)
 ',
-              '', "hi\necho there\nthere\n");
+              '', 
+"hi
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+echo there
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+there
+");
 
 # TEST 1: Various new-style define/endef
 
@@ -52,7 +58,11 @@ all: ; $(multi)
 	$(append)
 	$(cond)
 ',
-              '', "echo hi\nhi\nthere\nfoo\na\nb\nfirst\n");
+              '', 
+"##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+echo hi
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+hi\nthere\nfoo\na\nb\nfirst\n");
 
 # TEST 2: define in true section of conditional (containing conditional)
 
@@ -196,13 +206,17 @@ $(V2)echo world
 endef
 all: ; $(FOO)
 ', 'V1=@', 'hello
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 echo world
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 world');
 
 # TEST #8
 # -------
 
-run_make_test(undef, 'V2=@', 'echo hello
+run_make_test(undef, 'V2=@', '##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+echo hello
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 hello
 world');
 
@@ -231,7 +245,9 @@ all: foo bar
 foo: ; $(FOO)
 bar: ; @$(BAR)
 ', '', 'hello
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 echo world
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 world
 hello
 world

@@ -63,7 +63,9 @@ $answer = "example.1 example.3 example._\n"
 # TEST #3
 # -------
 
-$answer = "$delete_command example.1 example.3 example._ example.for example.two";
+$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+$delete_command example.1 example.3 example._ example.for example.two
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
 if ($vos)
 {
    $answer .= " \n";

@@ -53,7 +53,13 @@ foo.q : RVAR += rvar
 foo.r : RVAR += rvar
 foo.t : TVAR := $(QVAR)
 ',
-                 "one two three", "one bar\nfoo two\nBAR=1000\nfoo bar\n");
+                 "one two three", 
+"one bar
+foo two
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+BAR=1000
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+foo bar\n");
 
 # TEST #2
 

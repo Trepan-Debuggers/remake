@@ -47,12 +47,19 @@ $delete_error_code = $? >> 8;
 # TEST #1
 # -------
 
-$answer = "$rm_command cleanit\n"
+$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+$rm_command cleanit
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+"
          . $cleanit_error
          . "work/features/errors.mk:1: [clean] Error $delete_error_code (ignored)\n"
          . "\n"
-         . "#0  clean at errors.mk:1\n"
-         ."$rm_command foo\n";
+         . "#0  clean at errors.mk:1
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+"
+         ."$rm_command foo
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+";
 
 $logfile = &get_logfile;
 &run_make_with_options($makefile,"",$logfile);
@@ -80,12 +87,18 @@ if (!$vos)
 # TEST #2
 # -------
 
-$answer = "$rm_command cleanit\n"
+$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+$rm_command cleanit
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n"
          . $cleanit_error
          ."$make_name: [clean2] Error $delete_error_code (ignored)\n"
          . "\n"
-         . "#0  clean2 at errors.mk:4\n"
-         ."$rm_command foo\n";
+         . "#0  clean2 at errors.mk:4
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+"
+         ."$rm_command foo
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+";
 
 $logfile = &get_logfile;
 &run_make_with_options($makefile,"clean2 -i",$logfile);

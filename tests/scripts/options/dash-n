@@ -21,13 +21,25 @@ close(MAKEFILE);
 # TEST 0
 
 &run_make_with_options($makefile, "", &get_logfile);
-$answer = "echo >> intermediate\necho >> final\n";
+$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+echo >> intermediate
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+echo >> final
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+";
 &compare_output($answer, &get_logfile(1));
 
 # TEST 1
 
 &run_make_with_options($makefile, "-Worig -n", &get_logfile);
-$answer = "echo >> intermediate\necho >> final\n";
+$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+echo >> intermediate
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+echo >> final
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+";
 &compare_output($answer, &get_logfile(1));
 
 unlink('orig', 'intermediate', 'final');

@@ -95,7 +95,9 @@ close(MAKEFILE);
 $logfile = &get_logfile;
 &run_make_with_options($makefile2, "-k", $logfile, $error_code);
 
-$answer = "exit 1
+$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+exit 1
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 $make_name: *** [foo.o] Error 1
 
 #0  foo.o at dash-k.mk.1:8

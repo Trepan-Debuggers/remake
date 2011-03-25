@@ -73,8 +73,12 @@ sub touchfiles {
 
 push(@touchedfiles, "bar.c");
 
-$answer = "cat bar.d > bar.c
+$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+cat bar.d > bar.c
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 cat ${VP}foo.c bar.c > foo.b 2>/dev/null || exit 1
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ";
 &compare_output($answer,&get_logfile(1));
 
@@ -85,7 +89,9 @@ cat ${VP}foo.c bar.c > foo.b 2>/dev/null || exit 1
 &run_make_with_options($makefile,"notarget",&get_logfile,512);
 
 $answer = "not creating notarget.c from notarget.d
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 cat notarget.c > notarget.b 2>/dev/null || exit 1
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 $make_name: *** [notarget.b] Error 1
 
 #0  notarget.b at ??
@@ -104,9 +110,15 @@ Command-line arguments:
 
 push(@touchedfiles, "inter.a", "inter.b");
 
-$answer = "cat ${VP}inter.d > inter.c
+$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+cat ${VP}inter.d > inter.c
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 cat inter.c > inter.b 2>/dev/null || exit 1
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 cat inter.b > inter.a
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 rm inter.b inter.c
 ";
 &compare_output($answer,&get_logfile(1));
@@ -121,9 +133,15 @@ push(@touchedfiles, "$VP/inter.b", "$VP/inter.d");
 
 &run_make_with_options($makefile,"intermediate",&get_logfile);
 
-$answer = "cat ${VP}inter.d > inter.c
+$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+cat ${VP}inter.d > inter.c
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 cat inter.c > inter.b 2>/dev/null || exit 1
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 cat inter.b > inter.a
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 rm inter.c
 ";
 &compare_output($answer,&get_logfile(1));
