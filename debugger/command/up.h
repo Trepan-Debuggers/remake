@@ -83,3 +83,12 @@ dbg_cmd_frame_up (char *psz_amount)
   
   return debug_readloop;
 }
+
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */
+

@@ -564,7 +564,7 @@ debug_return_t enter_debugger (target_stack_node_t *p,
     return continue_execution;
   
   /* Clear temporary breakpoints. */
-  if (p_target->tracing & BRK_TEMP)
+  if (p_target && p_target->tracing & BRK_TEMP)
     switch(last_stop_reason) 
       {
       case DEBUG_BRKPT_AFTER_CMD:

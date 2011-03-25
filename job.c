@@ -1197,7 +1197,12 @@ start_job_command (child_t *child,
 	(just_print_flag || (!(flags & COMMANDS_SILENT) && !silent_flag))
 	|| (db_level & DB_SHELL);
 
-    message (0, print_it ? "%s" : (char *) 0, p);
+    if (print_it) {
+      // message (0, "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+      message (0, "%s", p);
+      // message (0, "##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+    } else
+      message (0, (char *) 0);
   }
 
   /* Tell update_goal_chain that a command has been started on behalf of
