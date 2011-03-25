@@ -12,7 +12,9 @@ third:
 mdb<1> 
 triple.Makefile:5)
 third
-mdb<2> echo third done
+mdb<2> ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+echo third done
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 third done
 
 triple.Makefile:5)

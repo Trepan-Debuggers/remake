@@ -11,12 +11,14 @@ describe "A simple trace" do
     
   it 'should be able to do handle --trace (no options)' do
     ['--trace --file', '-x -f'].each do |flags|
+      p flags if $DEBUG
       @opts[:flags] = flags
       run_remake('opt-x-trace', @opts, 'triple')
     end
   end
   it 'should be able to do handle -y (--trace=nohshell options)' do
     ['--trace=noshell -f', '-y -f'].each do |flags|
+      p flags if $DEBUG
       @opts[:flags] = flags
       run_remake('opt-y-trace', @opts, 'triple')
     end
