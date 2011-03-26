@@ -32,8 +32,14 @@ dbg_cmd_break (char *psz_args)
     char *psz_break_type; 
     file_t *p_target;
     unsigned int i_brkpt_mask = BRK_ALL;
-    
-    p_target = lookup_file (psz_target);
+
+    /** FIXME: DRY with code in continue.h **/
+    if (p_stack && p_stack->p_target)
+      p_target = lookup_file(variable_expand_set(psz_target, 
+                                                 p_stack->p_target->variables));
+    else
+      p_target = lookup_file(psz_target);
+
     if (!p_target) {
 	printf("Can't find target %s; breakpoint not set.\n", psz_target);
 	return debug_cmd_error;

@@ -1,0 +1,9 @@
+Reading makefiles...
+Updating makefiles....
+Updating goal targets....
+test2.Makefile:3	File `all' does not exist.
+
+test2.Makefile:3)
+all: make.txt
+remake<0> Breakpoint 1 on target make.txt.
+remake<0> 

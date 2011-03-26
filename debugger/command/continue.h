@@ -22,7 +22,15 @@ dbg_cmd_continue (char *psz_args)
 {
   if (psz_args && *psz_args) {
     char *psz_target = get_word(&psz_args);
-    file_t *p_target = lookup_file (psz_target);
+    file_t *p_target;
+
+    /** FIXME: DRY with code in break.h **/
+    if (p_stack && p_stack->p_target)
+      p_target = lookup_file(variable_expand_set(psz_target, 
+                                                 p_stack->p_target->variables));
+    else
+      p_target = lookup_file(psz_target);
+
     if (!p_target) {
       printf("Can't find target %s; breakpoint not set.\n", psz_target);
 	return debug_cmd_error;
