@@ -12,7 +12,7 @@
 @c this file when a new release comes along.
 
 @c %**start of header
-@c makeinfo ignores cmds prev to setfilename, so its arg cannot make use
+@c makeinfo ignores cads Rev to setfilename, so its arg cannot make use
 @c of @set vars.  However, you can override filename with makeinfo -o.
 @setfilename remake.info
 @c 
@@ -456,7 +456,7 @@ Updating goal targets....
 Invoking recipe from test1.mk:6 to update target `foo'.
 ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 case /tmp/remake/src/./make in \
-*/remake|remake) echo "Enlightended!";; \
+*/remake|remake) echo "Enlightened!";; \
 */make|make) echo "This is what most folks use.";; \
 esac
 ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -562,7 +562,7 @@ remake<0>
 
 Before the prompt @code{remake<0>}, we show the position in the file
 @code{(/tmp/remake/Makefile:450)} of the target @code{all}. We also show
-the dependencies of th target @code{all}, namely: @code{config.h}. The
+the dependencies of the target @code{all}, namely: @code{config.h}. The
 ``0'' in the prompt @code{remake<0>} is the command history number it
 increments as we enter commands.
 
@@ -865,7 +865,7 @@ makeinfo --no-headers ../doc/remake.texi > make.txt
 @end group
 @end smallexample
 
-However we need to be careful here because the automatic varaibles right
+However we need to be careful here because the automatic variables right
 now have been set for target @code{all}, not target
 @code{make.text}. Let us step to the @code{make.txt} target before
 proceeding further.
@@ -960,7 +960,7 @@ remake<10>
 @end group
 @end smallexample
 
-We ran the code, and are still at arget @code{make.txt}. The @code{<-}
+We ran the code, and are still at target @code{make.txt}. The @code{<-}
 icon means that have finished with this target and are about to return.
 
 If you are at a target and want to continue to the end of the target you
@@ -1564,7 +1564,7 @@ that occur get run.
 
 @item finish @ovar{count}
 This is a step out, but to the target @emph{count} levels up. A count of
-0 is the current target and that's the same as givg no count.
+0 is the current target and that's the same as giving no count.
 @end table
 
 @node Skip
