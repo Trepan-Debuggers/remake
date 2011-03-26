@@ -1,45 +1,14 @@
-See the file NEWS for the user-visible changes
+See the file NEWS.remake for the user-visible changes
 
-With steady progress, this debugger for make has gotten good enough to
-be called "beta". 
+With steady progress, this debugger for make has gotten decent with
+lots of room for improvement. But since it's only been me working on
+this, this will have to do.
 
-Although there are a number of gaps listed in TODO, (like the ability
-to keep global state global across subshell returns), the debugger is
-very usable -- at least for me. It passes all of the standard GNU Make
-regression tests (to the extent that those work everywhere I think
-they have race conditions in them) I don't recommend this for
-day-to-day production (although that's how I use it ;-). 
+Although there are a number of gaps the debugger is very usable -- at
+least for me. It passes the standard GNU Make regression tests, and I
+have now added tests for the debugger. For that you need RSpec (a ruby
+"gem").
 
-In the process of the small changes to add better support for error
-reporting and debugging. I've tried to isolate debugger code into a
-debugger directory. However code inside GNU Make has to be changed to 
-store more information and call the debugger. There are some small 
-stylistic changes:
-
- - configure.ac rather than configure.in is used, 
- - the prototypes for xxx.c are in xxx.h 
- - typedefs are used
- - "register" removed 
- - documentary comments at are found beginning of a function 
-   are in the headers in doxygen format.
- - headers can be included in any order since they include what they need
- - headers have tests to make sure they are included only once. 
- - gcc -Wall warnings have been removed
-
-I think some of this has been going on in the GNU make source as well
-(albeit more slowly).
-
-Although none of this is strictly needed for better error reporting
-and debugging, any code I may have to comprehend with I tend to make
-more palatable.
-
-On the other hand, what has *not* been all that important has been
-ensuring this builds and runs on a C compiler that isn't
-C99-compliant.  I don't test VMS, AMIGA, EMX, riscos, OS/2 or other
-less-used OS's. There is a bit of specialized conditional compilation,
-custom Makefiles, and build systems on OS's that historically didn't
-support automake and autoconf. If it this still works, great. If not,
-you are on your own.
-
-Documentation for the revised GNU Make and GNU Make Debugger is in the
-doc directory.
+Documentation for the revised GNU Make Debugger is in the
+doc directory under the name "remake". The wiki 
+https://github.com/rocky/remake/wiki will contain other information.
