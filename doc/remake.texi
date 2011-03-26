@@ -204,8 +204,8 @@ to make it easier to pick out from the surrounding output.
 * Tracing::                  Using --trace or -x on a simple example
 * Tracing Makefile Reading:: A real-world trace.
 * Simple Debugging::         Getting into the Debugger (--debugging)
-* Debugging Variables::
-* Debugging Commands::
+* Debugging Make Variables:: Seeing Make variable expansions at various levels
+* Debugging Shell Commands:: Debugging the shell commands that Make runs
 @end menu
 
 @node Tracing Not
@@ -213,7 +213,7 @@ to make it easier to pick out from the surrounding output.
 
 Before we get into debugging proper, we'll discuss tracing and a
 pitfall the author once made in his first attempt to debug a large and
-mysterious @code{Makefile}. Chances you may have have happened to you too.
+mysterious @code{Makefile}. Chances you may have happened to you too.
 
 A simplified form of debugging is @emph{tracing}. Often this may be
 good enough to understand what might have gone wrong. In fact, in the
@@ -309,7 +309,7 @@ helpful. In the midst of the above jumble, the program reports:
 @smallexample
 make: bogus-command: command not found
 @end smallexample
-?? Okay. But where in the source @code{Makefile} did that come from?
+Say what? Okay, but where in the source @code{Makefile} did that come from?
 Since we added the debug output we see ``@code{foo}'' listed
 beforehand after skipping hundreds of lines, but in a normal make,
 there would have been no mention of ``@code{foo}.'' In our simple example
@@ -411,8 +411,11 @@ make: *** [foo] Error 127
 @end smallexample
 
 The @code{--debug=basic} command-line switch also works in
-@value{REMAKE} as well if that's all you want. In addition to 
-the above output, you will get this new information the bottom:
+@value{REMAKE} as well if that's all you want. As before the return code
+(127) is shown when running a shell command that fails.
+
+In addition to the above output, you will get this new information the
+bottom:
 
 @smallexample
 @group
@@ -424,13 +427,9 @@ Command-line arguments:
 @end group
 @end smallexample 
 
-As before the return code (127) is shown when running a shell command
-that fails. 
-
-But new here is the stack of targets is listed. We were
-working on target @code{foo} on line 5 of file @code{/tmp/test1.mk}
-which was rebuilt because we were making target ``phony'' target
-@code{all}.
+Completely new here is the stack of targets is listed. We were working
+on target @code{foo} on line 5 of file @code{/tmp/test1.mk} which was
+rebuilt because we were making target ``phony'' target @code{all}.
 
 In other words, when we hit the error, the above trace gives some idea
 of why we decided to to run line 5 and what got executed before that,
@@ -512,19 +511,19 @@ $ @b{remake --trace}
 ...
 Reading makefiles...
 Updating goal targets....
- /tmp/Makefile:448	File `all' does not exist.
+ /tmp/Makefile:450	File `all' does not exist.
    Prerequisite `stamp-h1' is newer than target `config.h'.
   Must remake target `config.h'.
-Invoking recipe from Makefile:489 to update target `config.h'.
+Invoking recipe from Makefile:490 to update target `config.h'.
 ..
 @end group
 @end smallexample 
 
 So far so good. But notice one new thing. After @code{Reading
-makefiles...} we show the position in the Makefile of where target
-@code{all} appears. That hadn't appeared in the earlier examples only
-due to technical difficulties, that perhaps one day someone will figure
-out and fix. 
+makefiles...} we show the position in the Makefile
+@code{(/tmp/Makefile:450)} of where target @code{all} appears. That hadn't
+appeared in the earlier examples only due to technical difficulties,
+that perhaps one day someone will figure out and fix.
 
 If we want to trace the files that were read in performing the above, we
 can use the sub-option @code{read} on the @code{--trace} option:
@@ -553,24 +552,25 @@ $  @b{remake --debugger}
 Reading makefiles...
 Updating makefiles....
 Updating goal targets....
- /tmp/remake/Makefile:448	File `all' does not exist.
+ /tmp/remake/Makefile:450	File `all' does not exist.
 
--- (/tmp/remake/Makefile:448)
+-- (/tmp/remake/Makefile:450)
 all: config.h
-(/tmp/src/remake/src/Makefile:448)
+(/tmp/remake/Makefile:450)
 remake<0> 
 @end smallexample 
 
-Before the prompt @code{remake<0>}, we show the position in the file,
-the target @code{all}, and the dependencies of this target
-@code{config.h}. The ``0'' in the prompt @code{remake<0>} is the command
-history number it increments as we enter commands.
+Before the prompt @code{remake<0>}, we show the position in the file
+@code{(/tmp/remake/Makefile:450)} of the target @code{all}. We also show
+the dependencies of th target @code{all}, namely: @code{config.h}. The
+``0'' in the prompt @code{remake<0>} is the command history number it
+increments as we enter commands.
 
-Before the position @code{(/tmp/remake/Makefile:448)}
-are two dashes @code{--}. This indicates that we are stepping. Later we
-will come across many other two-character icons like @code{->},
-@code{++}, @code{<-}, to name few. But to get full information about why
-were are stopped, you can use the command @code{info program}:
+Before the position are two dashes @code{--}. This indicates that we are
+stepping. Later we will come across many other two-character icons like
+@code{->}, @code{++}, and @code{<-}, to name few. But to get full
+information about why were are stopped, you can use the command
+@code{info program}:
 
 @smallexample
 Starting directory `/tmp/remake'
@@ -590,7 +590,7 @@ in the interpretation or execution of the makefile:
 remake<2> @b{step}
    Prerequisite `stamp-h1' is newer than target `config.h'.
   Must remake target `config.h'.
-Invoking recipe from Makefile:489 to update target `config.h'.
+Invoking recipe from Makefile:490 to update target `config.h'.
 ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 if test ! -f config.h; then \
   rm -f stamp-h1; \
@@ -615,14 +615,14 @@ And to see the targets that got us here, the @code{where} command,
 @group
 remake<3> @b{where}
 
-=>#0  config.h at /tmp/remake/Makefile:488
-  #1  all at /tmp/remake/Makefile:448
+=>#0  config.h at /tmp/remake/Makefile:490
+  #1  all at /tmp/remake/Makefile:450
 remake<4> 
 @end group
 @end smallexample 
 
 If you want the full details about a target, @code{config.h} here, one
-can use the @code{target} (@ref{Target} command:
+can use the @code{target} (@ref{Target}) command:
 @smallexample
 @group
 remake<4> @b{target}
@@ -706,14 +706,14 @@ This means that we are finished with target @code{Makefile}, but not
 target @code{config.h}.
 
 And rather than stepping to get to @code{config.h}, you can set a
-breakpoint at a particular target or ``continue'',
+breakpoint (@ref{Breakpoints}) at a particular target or continue running,
 @ref{Continue}, to that target:
 
 @smallexample
 remake<4> @b{restart}
 Changing directory to /tmp/remake/src and restarting...
 ...
--- (/tmp/remake/src/Makefile:448)
+-- (/tmp/remake/src/Makefile:450)
 all: config.h
 remake<0> @b{continue config.h}
 Breakpoint 1 on target config.h.
@@ -730,8 +730,8 @@ didn't save anything over stepping. Usually, though you will run
 @code{make} hit an error and want to stop at the target listed in the
 error for investigation.
 
-@node Debugging Variables
-@subsection Debugging Variables
+@node Debugging Make Variables
+@subsection Debugging Make Variables
 
 We've seen we can get information about @value{REMAKE}'s targets.  We
 can also get information about @value{REMAKE}'s variables. That is done
@@ -748,16 +748,16 @@ of the variables. So if I run @code{x} (@code{examine}) instead I get:
 
 @smallexample
   remake<5> @b{examine MAKE}
- (origin default) MAKE := /tmp/remake/src/./make
+  (origin default) MAKE := /tmp/remake/src/./make
 @end smallexample 
 
-Note that in printing expanded values we use ``:='' while non-expanded
-values we use ``=''. This output matches the semantics of these
+Note that in printing expanded values we use @code{:=} while non-expanded
+values we use @code{='} This output matches the semantics of these
 assignment operators.
 
 In fact, @code{examine} doesn't need a variable name, it will work
-with a string. So I could type ``@code{x This is $(MAKE)}'' or
-``@code{x $(bin_PROGRAMS) $(noinst_PROGRAMS)}''. For the latter, I
+with a string. So I could type @code{x This is $(MAKE)} or
+@code{x $(bin_PROGRAMS) $(noinst_PROGRAMS)}. For the latter, I
 get:
 
 @smallexample
@@ -797,13 +797,13 @@ the word "variable" when using @code{set}, one must not supply
 it with "setq."  Down the line, someone (maybe @emph{you!}) will
 probably put in a command parser.  
 
-@node Debugging Commands
-@subsection Debugging Commands
+@node Debugging Shell Commands
+@subsection Debugging Shell Commands
 
 Now consider the following sample Makefile:
 @smallexample
 @group
-$ @b{cat -n test2}
+$ @b{cat -n test2.mk}
 1 PACKAGE=make
 2 
 3 all: $(PACKAGE).txt
@@ -815,49 +815,22 @@ $ @b{cat -n test2}
 
 @smallexample
 @group
-$ @b{remake -X -f test2}
+$ @b{remake -X -f test2.mk}
+...
 Reading makefiles...
+updating makefiles....
 Updating goal targets....
- /tmp/remake/src/test2:3	File `all' does not exist.
+ /tmp/remake/src/test2.mk:3	File `all' does not exist.
 
-(/tmp/remake/src/test2:3): all
+-- (/tmp/remake/src/test2.mk:3): all
 @end group
 @end smallexample
 
-As before we'll use the @code{target} command to show information about
-@code{all}:
-@smallexample
-@group
-remake<0> @b{target}
-
-all: make.txt
-#  Implicit rule search has not been done.
-#  Implicit/static pattern stem: `'
-#  File does not exist.
-#  File has not been updated.
-# automatic
-# @@ := all
-# automatic
-# % := 
-# automatic
-# * := 
-# automatic
-# + := make.txt
-# automatic
-# | := 
-# automatic
-# < := all
-# automatic
-# ^ := make.txt
-# automatic
-# ? := 
-@end group
-@end smallexample
-
-When asking about target information on line 3, we now see that a
-number of automatic variables have been set. We can also get
-information about just these variables using the command @code{target
-all variables} or @code{info locals}:
+We could use the @code{target} command to show information about
+@code{all}, but that returns lots if information. So let us instead
+narrow the information to just the automatic variables that get set. The
+following commands do this are all mean the same thing: @code{target all
+variables}, @code{target @ variables}, and @code{info locals}.
 
 @smallexample
 @group
@@ -873,21 +846,17 @@ remake<1> @b{info locals}
 @end group
 @end smallexample
 
-The target ``all'' doesn't have any commands associated with it. If we
-@code{next} to a target that does, we can see a full expansion of the
-command that is about to be run:
+The target ``all'' doesn't have any shell commands associated with
+it. But the target on line 5, which expands to @code{make.txt} does.
+There is a @code{target} option to list just the shell commands of the
+target:
 
 @smallexample
 @group
-remake<2> @b{next}
-
-   /tmp/remake/src/test2:5	File `make.txt' does not exist.
-
-(/tmp/remake/src/test2:5): make.txt
-remake<3> @b{target make.txt commands}
+remake<2> @b{target make.txt commands}
 
 make.txt:
-#  commands to execute (from `test2', line 6):
+#  commands to execute (from `test2.mk', line 6):
 	makeinfo --no-headers $< > $@@
 
 remake<4> @b{examine makeinfo --no-headers $< > $@@}
@@ -896,47 +865,107 @@ makeinfo --no-headers ../doc/remake.texi > make.txt
 @end group
 @end smallexample
 
-Another way to do the above @code{target} and @code{examine} commands
-in one go is to use the ``expand'' option on the @code{target} command
-rather than the ``commands'' option:
+However we need to be careful here because the automatic varaibles right
+now have been set for target @code{all}, not target
+@code{make.text}. Let us step to the @code{make.txt} target before
+proceeding further.
 
 @smallexample
 @group
+remake<4> @b{next}
+
+   /tmp/remake/src/test2:5	File `make.txt' does not exist.
+
+-- (/tmp/remake/src/test2:5): make.txt
+make.txt: ../doc/remake.texi
+remake<5>
+@end group
+@end smallexample
+
+We can see a full expansion of the command that is about to be run:
+@smallexample
+@group
+
 remake<5> @b{target @@ expand}
 
-make.txt:
-#  commands to execute (from `test2', line 6):
-	-makeinfo --no-headers $< > $@
+#  commands to execute (from `test2.mk', line 6):
+	makeinfo --no-headers $< > $@
 	
-#  commands to execute (from `test2', line 6):
+#  commands to execute (from `test2.mk', line 6):
 	-makeinfo --no-headers ../doc/remake.texi > make.txt
 	
 @end group
 @end smallexample
-
-Notice instead of giving the target name @code{make.txt}, @code{@@}
-works as well. 
 
 Now if we want to write out those commands as a shell script which
 we might want to execute, we can use the @code{write} (@ref{Write})
 command:
 @smallexample
 @group
-(/tmp/remake/src/test2:6): make.txt
+(/tmp/remake/src/test2.mk:6): make.txt
 remake<6> @b{write}
 File "/tmp/make.txt.sh" written.
+@end group
+@end smallexample
+
+We can issue a shell command @code{cat -n /tmp/make.txt.sh} to see what
+was written. (See @ref{Shell}.)
+
+@smallexample
+@group
 remake<7> @b{shell cat -n /tmp/make.txt.sh}
      1	#!/bin/sh
      2  # cd /tmp/remake/src/
-     3	#/tmp/remake/src/test2:5
+     3	#/tmp/remake/src/test2.mk:5
      4	makeinfo --no-headers ../doc/remake.texi > make.txt
      5	
 @end group
 @end smallexample
 
-And last we see that we can even issue a shell command (@code{cat -n
-/tmp/make.txt.sh}) via the debugger command @code{shell}. (See
-@ref{Shell}.)
+If you issue step commands, the debugger runs the each command and
+stops. In this way, you can inspect the result of running that
+particular shell command and decide to continue or not.
+
+@smallexample
+@group
+remake<8> @b{step}
+
+  Must remake target `make.txt'.
+Invoking recipe from test2.mk:6 to update target `make.txt'.
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+makeinfo --no-headers ../doc/remake.texi > make.txt
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+++ (/src/external-vcs/remake/doc/test2.mk:5)
+@end group
+@end smallexample
+
+Notice that we've shown the expansion automatically. One subtle
+difference in the above output, is that we only show the @emph{single}
+shell command that is about to be run when there are several
+commands. In our example though, there is only one command; so there is
+no a difference.
+
+The @code{++} icon means that we are about to run that code.
+
+@smallexample
+@group
+make.txt
+remake<9> @b{step}
+  Successfully remade target file `make.txt'.
+
+<- (/src/external-vcs/remake/doc/test2.mk:5)
+make.txt
+remake<10> 
+@end group
+@end smallexample
+
+We ran the code, and are still at arget @code{make.txt}. The @code{<-}
+icon means that have finished with this target and are about to return.
+
+If you are at a target and want to continue to the end of the target you
+can use the command @code{finish} which is the same as @code{finish
+0}. See @ref{Finish}.
 
 @node Free Software
 @unnumberedsec Free software
@@ -1238,7 +1267,7 @@ remake<0> @b{help}
   continue [TARGET]               (c)
   delete breakpoint numbers..     (d)
   down [AMOUNT]                   (D)
-* edit                            (e)
+  edit                            (e)
   eval STRING                     (E)
   examine STRING                  (x)
   finish [AMOUNT]                 (F)
@@ -1416,7 +1445,7 @@ Example:
 remake<0> @b{break}
 remake<1> info break
 Num Type           Disp Enb target     What
-  1 breakpoint     keep y   in all at /tmp/Makefile:448
+  1 breakpoint     keep y   in all at /tmp/Makefile:450
 @end example
 
 @item break @var{target @var{target @var{all|run|prereq}}}
@@ -1441,7 +1470,7 @@ Example:
 @example
 remake<0> @b{break all}
 
-Breakpoint 1 on target all: file Makefile, line 448.
+Breakpoint 1 on target all: file Makefile, line 450.
 Warning: target is in the process of being updated;
 @end example
 
@@ -1483,6 +1512,7 @@ your script may stop even sooner, due to a breakpoint or a signal.
 @menu
 * Next::          running the next statement (next)
 * Step::          running the next statement in small increments (step)
+* Finish::        step out 
 * Skip::          skipping the next statement (skip)
 * Continue::      continuing execution (continue)
 @end menu
@@ -1520,6 +1550,21 @@ will stop before each one.
 Continue running as in @code{step}, but do so @var{count} times.  If a
 breakpoint is reached, or a signal not related to stepping occurs before
 @var{count} steps, stepping stops right away.
+@end table
+
+@node Finish
+@subsubsection Finish (@samp{finish})
+@table @code
+@kindex finish
+@kindex s @r{(@code{finish})}
+@item finish
+With no arguments we step to the end of the target. Any prerequisite
+checking and building that needs to occur is done and any shell commands
+that occur get run.
+
+@item finish @ovar{count}
+This is a step out, but to the target @emph{count} levels up. A count of
+0 is the current target and that's the same as givg no count.
 @end table
 
 @node Skip
@@ -1882,7 +1927,7 @@ current stack frame.
 @end table
 
 @node Data
-@section Examining Data
+@section Examining Data (@samp{print}, @samp{examine}, @samp{target}, @samp{edit}, @samp{write}, @samp{info})
 
 @menu
 * Print::                  Print variable info
@@ -2127,7 +2172,7 @@ If you want to all list variables, use this command.
 @end table
 
 @node Evaluation/Execution
-@section Evaluation and Execution
+@section Evaluation and Execution (@samp{eval}, @samp{shell})
 
 @menu
 * Eval::                 Evaluate a GNU Makefile string
@@ -2135,7 +2180,7 @@ If you want to all list variables, use this command.
 @end menu
 
 @node Eval
-@subsection Subsection Evaluating GNU MAKE commands ( @samp{eval})
+@subsection Subsection Evaluating GNU MAKE commands (@samp{eval})
 @table @code
 @kindex eval
 @kindex e @r{(@code{eval})}
@@ -2186,7 +2231,6 @@ debugged until the next time it is started.
 @kindex pwd
 @cindex print working directory
 @item pwd
-@itemx !
 
 Prints the working directory as the program sees things.
 
@@ -2566,21 +2610,23 @@ After seeing an article on the auto-configuration mess
 @url{http://freshmeat.net/articles/view/889} I posted a query to ask
 if anyone was interested in writing a debugger for @value{REMAKE}.
 
-Almost year later and no takers, I was reminded of my query by
-accident when I got a query from one of the GNU mailing lists that I
-am on about slow e-mail posting to the @value{MAKE} mailing list.
+Almost year goes by and no takers. To put this in perspective. it was
+over a decade before someone (me) did anything about a debugger for
+bash. I was reminded of my query by accident when I got a query from one
+of the GNU mailing lists that I am on regarding a problem in email on the
+@value{MAKE} mailing list.
 
-I again suggested the idea of a debugger and was told how incredibly
-difficult it would be to write a debugger and how incredibly unique
-@value{MAKE} is. At that point I looked into the code and to my
-surprise and delight I found that in contrast to BASH the code,
-@value{MAKE} is much smaller and written in a more modern coding style
-(although certainly it could use much improvement). In fact, it had
-most of the information stored that would be helpful in a
-debugger. All I would need to do is add a GNU readline for the debug
-loop, extend to save a target stack and track line numbers and report
-line numbers better. But this last part I'd been through with the bash
-debugger.
+That jogged my memory. So I suggested the idea of a debugger to this
+list, and was told how incredibly difficult it would be to write a
+debugger and how incredibly unique @value{MAKE} is. At that point I
+looked into the code and to my surprise and delight I found that in
+contrast to BASH the code, @value{MAKE} is much smaller and written in a
+more modern coding style (although certainly it could use much
+improvement). In fact, it had most of the information stored that would
+be helpful in a debugger. All I would need to do is add a GNU readline
+for the debug loop, extend to save a target stack and track line numbers
+and report line numbers better. But this last part I'd been through with
+the bash debugger.
 
 All in all, I've been very pleased at how far I've been able to get
 with much less effort than needed for the bash debugger. That's not to
@@ -2588,7 +2634,11 @@ say that much work isn't still needed or that the overall design
 couldn't be improved.
 
 This documentation was modified from the GNU Bash Debugger (bashdb) Reference
-manual (which in turn was modified from GNU Bash debugger (gdb).
+manual which in turn was modified from GNU Bash debugger (gdb).
+
+Many thanks to Yaroslav Halchenko who moved the CVS code over to git on
+github. He is also packages this for Debian. And thanks to all the other
+packagers for the other OS distributions.
 
 Additions to this section are particularly welcome.  If you or your
 friends (or enemies, to be evenhanded) have been unfairly omitted from

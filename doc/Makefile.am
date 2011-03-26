@@ -20,6 +20,8 @@ TEXI2HTML = texi2html
 TEXI2HTML_FLAGS = -split_chapter
 TEXI2PDF = texi2dvi --pdf
 
+EXTRA_DIST = test1.mk test2.mk
+
 info_TEXINFOS =	make.texi remake.texi
 make_TEXINFOS = fdl.texi make-stds.texi
 
