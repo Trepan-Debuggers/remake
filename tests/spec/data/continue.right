@@ -7,7 +7,7 @@ triple.Makefile:1)
 first: second
 remake<0> Breakpoint 1 on target third.
    File `second' does not exist.
-Clearing tracing
+
 triple.Makefile:5)
 third: 
 remake<0> Level 10 is too large; maximum value is 2.
