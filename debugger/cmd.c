@@ -403,11 +403,7 @@ cmd_initialize(void)
     _("Print target stack or Makefile include stack.\n" \
       "An argument specifies the maximum amount of entries to show.");
 
-  short_command['u'].func = &dbg_cmd_frame_up;
-  short_command['u'].use  = _("up [AMOUNT]");
-  short_command['u'].doc  = 
-    _("Select and print target that caused this one to be examined.\n"
-      "An argument says how many targets up to go.");
+  dbg_cmd_up_init();
 
   short_command['w'].func = &dbg_cmd_write;
   short_command['w'].use =  _("write [TARGET [FILENAME]]");
@@ -540,7 +536,6 @@ debug_return_t enter_debugger (target_stack_node_t *p,
 			       debug_enter_reason_t reason)
 {
   debug_return_t debug_return = debug_readloop;
-#ifdef HAVE_LIBREADLINE
   static int i_init = 0;
   char open_depth[MAX_NEST_DEPTH];
   char close_depth[MAX_NEST_DEPTH];
@@ -570,14 +565,15 @@ debug_return_t enter_debugger (target_stack_node_t *p,
       case DEBUG_BRKPT_AFTER_CMD:
       case DEBUG_BRKPT_BEFORE_PREREQ:
       case DEBUG_BRKPT_AFTER_PREREQ:
-        printf("Clearing tracing");
         p_target->tracing = BRK_NONE;
       default:
         ;
       }
 
   if (0 == i_init) {
+#ifdef HAVE_LIBREADLINE
     rl_initialize ();
+#endif
     cmd_initialize();
     i_init = 1;
     using_history ();
@@ -645,13 +641,19 @@ debug_return_t enter_debugger (target_stack_node_t *p,
   for ( debug_return = debug_readloop; 
 	debug_return == debug_readloop || debug_return == debug_cmd_error; ) {
     char prompt[PROMPT_LENGTH];
-    char *line;
+    char *line=NULL;
     char *s;
     
-    snprintf(prompt, PROMPT_LENGTH, "mdb%s%d%s ", 
+    snprintf(prompt, PROMPT_LENGTH, "remake%s%d%s ", 
 	     open_depth, where_history(), close_depth);
-    
+
+#ifdef HAVE_LIBREADLINE
     line = readline (prompt);
+#else
+    printf("%s", prompt);
+    if (line == NULL) line = calloc(1, 2048);
+    gets(line);
+#endif
 
     if ( line ) {
       if ( *(s=stripwhite(line)) ) {
@@ -669,7 +671,6 @@ debug_return_t enter_debugger (target_stack_node_t *p,
   if (in_debugger != DEBUGGER_QUIT_RC)
     in_debugger=false;
   
-#endif /* HAVE_LIBREADLINE */
   return debug_return;
 }
 

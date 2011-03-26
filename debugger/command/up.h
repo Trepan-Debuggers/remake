@@ -84,6 +84,17 @@ dbg_cmd_frame_up (char *psz_amount)
   return debug_readloop;
 }
 
+static void
+dbg_cmd_up_init(void) 
+{
+  short_command['u'].func = &dbg_cmd_frame_up;
+  short_command['u'].use  = _("up [AMOUNT]");
+  short_command['u'].doc  = 
+    _("Select and print target that caused this one to be examined.\n"
+      "An argument says how many targets up to go.");
+}
+
+
 
 /* 
  * Local variables:

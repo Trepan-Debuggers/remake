@@ -30,6 +30,7 @@ AC_CONFIG_HEADERS(config.h)
 
 # Automake setup
 AM_INIT_AUTOMAKE([1.9])
+AM_MAINTAINER_MODE
 
 # Checks for programs.
 AC_PROG_CC
@@ -316,11 +317,6 @@ int main(int argc, char **argv) {
      [Define this <readline/readline.h> defines tilde_expand()])],
      [AC_MSG_RESULT(no); ac_have_tilde_expand=no],
      [AC_MSG_RESULT(no); ac_have_tilde_expand=no])
-else 
-   AC_MSG_WARN([The libreadline library and development headers are needed"])
-   AC_MSG_WARN([for the interactive debugger. I'll build "make" with])
-   AC_MSG_WARN([non-interactive trace support, but you won't be able enter the])
-   AC_MSG_WARN([debugger.])
 fi
 
 if test "$enable_readline" = yes; then

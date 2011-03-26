@@ -5,13 +5,13 @@ triple.Makefile:1	File `first' does not exist.
 
 triple.Makefile:1)
 first: second
-mdb<0> Breakpoint 1 on target third.
+remake<0> Breakpoint 1 on target third.
    File `second' does not exist.
 Clearing tracing
 triple.Makefile:5)
 third: 
-mdb<0> Level 10 is too large; maximum value is 2.
-mdb<1>      File `third' does not exist.
+remake<0> Level 10 is too large; maximum value is 2.
+remake<1>      File `third' does not exist.
     Must remake target `third'.
 triple.Makefile:6 to update target `third'.
 ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -36,4 +36,4 @@ triple.Makefile:1	Successfully remade target file `first'.
 
 triple.Makefile:1)
 first
-mdb<2> 
+remake<2> 

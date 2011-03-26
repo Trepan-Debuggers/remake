@@ -126,7 +126,7 @@ EXTRA_DIST =	README build.sh.in $(man_MANS) \
 		make_msvc_net2003.sln make_msvc_net2003.vcproj \
 		readme.vms makefile.vms makefile.com config.h-vms \
 		vmsdir.h vmsfunctions.c vmsify.c \
-	        README.mdb REMAKE.todo Rakefile
+	        debugger/Makefile NEWS.remake README.remake REMAKE.todo Rakefile
 
 # This is built during configure, but behind configure's back
 
@@ -247,6 +247,13 @@ check-regression:
 # Tell automake that I haven't forgotten about this file and it will be
 # created before we build a distribution (see maintMakefile in the CVS
 # distribution).
+
+if MAINTAINER_MODE
+
+ChangeLog:
+	git log --pretty --numstat --summary | $(GIT2CL) > $@
+
+endif
 
 README:
 

@@ -5,12 +5,12 @@ triple.Makefile:1	File `first' does not exist.
 
 triple.Makefile:1)
 first: second
-mdb<0> Breakpoint 1 on target third.
-mdb<0> ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+remake<0> Breakpoint 1 on target third.
+remake<0> ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 echo third done
 ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 third done
 
 triple.Makefile:5)
 third
-mdb<1> 
+remake<1> 

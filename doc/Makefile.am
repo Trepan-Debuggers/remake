@@ -18,11 +18,14 @@
 
 TEXI2HTML = texi2html
 TEXI2HTML_FLAGS = -split_chapter
+TEXI2PDF = texi2dvi --pdf
 
-info_TEXINFOS =	make.texi
+info_TEXINFOS =	make.texi remake.texi
 make_TEXINFOS = fdl.texi make-stds.texi
 
-CLEANFILES = make*.html
+MOSTLYCLEANFILES = make.tgs make.pdf make.html remake.cps rmake.kys remake.html remake.fns remake.ps.gz remake.pdf 
+
+CLEANFILES = make*.html make*.info remake.html remake*.info
 
 ## ----------------------------- ##
 ## Other documentation formats.  ##

@@ -34,6 +34,10 @@ Boston, MA 02111-1307, USA.  */
 #include <string.h>
 #endif
 
+#ifdef HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
+
 #ifdef HAVE_LIBREADLINE
 
 # ifdef bcmp

@@ -63,7 +63,7 @@ dbg_cmd_break_init(void)
   short_command['b'].use  = _("break TARGET [all|run|prereq]");
   short_command['b'].doc  = _("Set a breakpoint at a target.\n"
 "With a target name, set a break before running commands\n"
-"of that target.  Without argument, list all breaks.\n"
+"of that target.  Without argument, list all breakpoints.\n"
 "There are 3 place where one may want to stop at:\n"
 "  before prerequisite checking (prereq)\n"
 "  after prerequisite checking but before running commands (run)\n"

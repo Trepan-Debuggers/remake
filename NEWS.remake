@@ -1,0 +1,233 @@
+Version 3.82+dbg-0.4
+2011-03-25
+
+* Completely revise using GNU make 3.82 as a base. Much 
+  cleaner code, and should support all of GNU make's OS's. 
+* Stepping now stops before each line of code is run.
+* Add debugger "edit" command
+* allow target name on "continue" command
+* breakpoints can now stop after prerequisite checking and after 
+  remaking a target. 
+* Show line number in break command
+* Change semantics of debugger "finish" command. Is now 
+  more similar to gdb, i.e is a "step out" up to a higher-level target
+* Add back in command separator lines ##<<<< and ##>>>>
+* Add stopping-event icons; --, ++, ->, <-, ||, !!
+* Added support for making debugger when GNU Readline is not available
+* Start debugger tests via RSpec (in Ruby).
+* Add "eval" command
+* Start to revise documentation for current release.
+* Remove emacs. Please use emacs-dbgr code.
+  See https://github.com/rocky/emacs-dbgr/wiki
+* mdb<> prompt is now remake<>
+
+* The usual doc fixes after a release
+
+Version 3.81+dbg-0.3
+2010-05-01
+
+* Bug fixes
+* Compiles on Solaris
+
+Version 3.81+dbg-0.2 - Sam Woodward Release
+2009-01-10
+
+* Bug in trying to fake file information for a .PHONY target
+* Some merge cleanup. Add debugger-specific documentation (from 3.80+dbg-0.61)
+
+Version 3.81+dbg-0.1
+2008-10-27	
+
+* Merge in code from 3.80+dbg-0.63cvs. 
+* Add "info rules" and "info vpath"
+
+Version 3.80+dbg-0.63cvs
+2006-04-01
+
+* Add a "list" command. Basically same as "target x depends commands" 
+  for now. "list -" shows the parent. 
+* Help commands now show short usage.
+* Ctrl-d leaves debugger 
+* Add Emacs regression test and allow space in filename for MS Windows
+
+Version 3.80+dbg-0.62
+2007-02-27
+
+* Changes to make more Debian compatibile. 
+* Track some GNU Make 3.81 changes, which include a bugfix
+  and making more strings "const". 
+* Miscellaneous bugfixes
+
+Version 3.80+dbg-0.61
+2006-03-24
+
+* Add comint shell tracking - taken from python's pdbtrack
+* Add gdb's cd and pwd commands.
+* "write" command now adds "cd <directory name>" as a comment.
+* configure options:
+   --with-default-shell to specify the default value
+     for SHELL (useful on say Solaris), 
+   --with-shell-trace to specify the option to turn on tracing, e.g. (-x).
+* Add configure option --with-shell-trace to specify how to turn on
+  tracing when running shell commands.
+* Add --trace=normal. 
+* run wasn't reading any (optional) arguments supplied.
+* Guard against dereferencing NULL pointers.
+* Some 3.81 features and bugfixes have been incorporated. At present
+  not everything is there. 
+* More doxygen documentation and docuementation improvements. Note
+  debugger options in Manual page.
+
+Version 3.80+dbg-0.60
+2005-12-25
+
+* On a fatal error we now show command arguments used to invoke
+  program.
+* tracing now sets shell tracing (+x) when invoking commands
+* The default behavior on error is to show call trace. To turn off use
+  --no-extended-errors. Recently added --extended-errors and -E (not in
+  standard GNU Make) have been removed.
+* "quit" can now terminate several levels of nested make (if "make"
+  was called directly and not via a shell string).
+* prompt now shows target and prerequisites.
+* Fix bugs and memory leaks involving improper use of memory can weak
+  casting.  (shown in the vpath regression test dash-I on cygwin).
+* Reorganize help command. Is more ddd-friendly (and more gdb like).
+* More explicit free's of memory at termination. 
+* Give line numbers and target names on --just-print. Print delmiters
+  around the commands.
+* More debug tracing funnelled through db_level. Debugger command
+  "show debug" shows the debug mask in a more understandable way.
+* Incorporate patches from GNU/Linux make 3.80.
+* Incorporate new functions from GNU Make 3.81: abspath, realpath, lastword
+* Expand documentation.
+* NOTE: the prompt has changed from "makedb" to "mdb" as has the 
+  Emacs Lisp command name to run the debugger. This change was made to 
+  avoid confusion between the Make debugger and a program which
+  creates a DBM file. If you were using ddd-3.3.12-test.tar.gz you
+  will need to get a newer version.
+
+Version 3.80+dbg-0.5
+2005-12-10 
+
+* Errors in eval issued from the debugger no longer cause termination.
+* Separation of "Step" and "Next. "Step" command granularity is now
+  "Next". "Step" stepping is more fine grained.
+* "target" command improvements:
+   - sets file variables when showing is requested
+   - add "target expand" to list target commands with "make" variables
+     expanded.
+   - allow @ or $@ as a target name 
+* Add "info makefiles" to show what Makefiles have been read in.
+* Add "info breakpoints"
+* Breakpoints can now be listed and deleted by number - like gdb.
+  This also helps ddd and should pave the way for more sophisticated
+  kinds of breaking/watching.
+* Add a number of aliases (e.g. backtrace, bt, !!, L)
+  and via an internal alias mechanism
+* Remove hash stats on printing variables -- generally not wanted for
+  users (rather than GNU Make maintainers)
+* Add explicit memory free and reduce reading uninitialized values.
+* Revise testing mechanism for a more modern use of Perl. Can specify 
+  test program file name (./scripts/variables/special) test name
+  (variables/special). The former is works better with command
+  completion. Document some more regression tests.
+* Make build work outside of source tree. "make distcheck" doesn't bomb.
+  It doesn't run the regression tests though :-(
+* More documentation and doxygenization.
+* Remove AMIGA support :-(
+
+Version 3.80+dbg-0.4
+2005-12-10 
+
+* Add eval!
+* Add ability to stop before reading Makefiles - may be useful in 
+  debugging macros and variables --debugger=preread. We can now trace
+  makefile reading activity with -d r or via --trace = {read,full}
+* "where" command expanded to include above new Makefile read stack.
+* Add call tracing.
+* Fix bugs in showing automatic variables 
+* Line number in Makefile commands is more accurate
+* More ddd (gdb/bashdb) compatible: 
+  - "help set" added 
+  - "help show" works like the others
+  - "info locals" added
+  - "show command" (history) added
+  - file/line reporting more like bash/perl
+* write file takes basename of target file (well, at least for POSIX
+  systems)
+* Update documentation quite a bit
+* Start to remove VMS support
+
+Version 3.80+dbg-0.3
+
+* tracing adds GNU Make "basic" debugging. If debugging, then we also
+  enter the debugger read loop. Hopefully this adds more granularity
+  but not the diarrhea that "make -d" gives. To reduce this, "next"
+  could be used to skip over remaking targets that don't have
+  commands.
+* print and examine now show origin status
+* print/examine work for automatic variables. examine still has 
+  problems with automatic variables in strings though.
+* Allow abbreviations of debugger command attributes. As a result some
+  attributes were renamed slighly, e.g. vars -> variables, deps ->
+  depends, cmds -> commands. But note that since substrings are
+  allowed, "command" and "com", and even "c" is the same as
+  "commands".
+* Make option --trace (-x) overrules using the --silent option and
+  not echoing @ commands.
+* "list" command renamed to "target". A future "list" command will 
+  look more like gdb.
+* fixed compilation issue(s) on systems that have readline, but do not
+  have termcap.
+* fixed failure of enter_debugger to exit on an empty line from
+  readline.
+* install program as remake by default (not make).
+* misc bug fixes and compilations fixes for various OS's
+
+
+Version 3.80+dbg-0.2
+
+* Add ability to print specified attributes of a target, e.g. "time",
+  "deps", "vars"...
+* Improve reporting target locations.
+* Improve target stack tracking.
+* Add "write" command - ability to write target commands to a file
+  with MAKE variables expanded, or show that inside a debugger
+  session.
+* Separate info from show. Make these act more like they do in gdb
+* Stay in debugger when a Makefile exits.
+* First debugger documentation.
+
+Version 3.80+dbg-0.1
+
+Fork from version 3.80 
+
+* New options
+  --extended-errors (-E) call stack reporting, extended error reporting
+  --trace (-x) gives tracing information before a command is run.
+* Line numbers of commands in a target as they execute
+* --debugger enters debugger comamnds are
+
+  execution
+   step, next, continue, skip
+   restart, quit, exit
+
+  breakpoints
+   break   target
+   delete  target
+
+  data 
+   print   variable
+   examine string 
+   up, down, frame
+   set, setq
+   where
+
+  debugger   
+   show, info
+   trace {on, off, toggle}
+   help
+
+* Emacs debug interface makedb.el and a patched to gud.el
+
