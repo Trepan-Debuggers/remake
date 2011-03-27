@@ -425,7 +425,8 @@ update_file_1 (struct file *file, unsigned int depth,
 
   DBF (DB_VERBOSE, _("Considering target file `%s'.\n"));
   p_call_stack = trace_push_target(p_call_stack, file, 0);
-  if (file->tracing & BRK_BEFORE_PREREQ) {
+  if ( file->tracing & BRK_BEFORE_PREREQ || 
+       (i_debugger_stepping && file->cmds) ) {
       enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_BEFORE_PREREQ);
   }
 
@@ -492,7 +493,7 @@ update_file_1 (struct file *file, unsigned int depth,
   noexist = this_mtime == NONEXISTENT_MTIME;
   if (noexist) {
       DBF (DB_BASIC, _("File `%s' does not exist.\n"));
-      if ( i_debugger_stepping || (i_debugger_nexting && file->cmds) ) {
+      if (i_debugger_nexting && file->cmds) {
 	enter_debugger(p_call_stack, file, 0, DEBUG_STEP_HIT);
       }
   } else if (ORDINARY_MTIME_MIN <= this_mtime && 

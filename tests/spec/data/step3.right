@@ -1,19 +1,19 @@
 Reading makefiles...
 Updating makefiles....
 Updating goal targets....
-triple.Makefile:1	File `first' does not exist.
 
 triple.Makefile:1)
 first: second
-remake<0>    File `second' does not exist.
+triple.Makefile:1	File `first' does not exist.
 
 triple.Makefile:3)
 second: third
-remake<0>      File `third' does not exist.
+remake<0>    File `second' does not exist.
 
 triple.Makefile:5)
 third: 
-remake<1>     Must remake target `third'.
+remake<1>      File `third' does not exist.
+    Must remake target `third'.
 triple.Makefile:6 to update target `third'.
 ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 echo third done

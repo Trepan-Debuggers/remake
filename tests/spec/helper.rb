@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'rspec'
+require 'tmpdir'
 module RemakeTestHelper
   unless defined?(SPEC_DIR)
     SPEC_DIR = File.dirname(__FILE__)
@@ -23,6 +24,11 @@ module RemakeTestHelper
     cmd = "#{opts[:input]} | #{cmd}" if opts[:input]
     lines = `#{cmd}`.split("\n")[6..-1]
     opts[:filter].call(makefile_short, lines) if opts[:filter]
+    if lines != expected_output
+      File.open(Dir::tmpdir + "/#{test_name}.check", 'w') do |f|
+        lines.map {|l| f.puts(l) }
+      end
+    end
     lines.should == expected_output
   end
 

@@ -3,7 +3,9 @@ Updating makefiles....
 Updating goal targets....
 test2.Makefile:3	File `all' does not exist.
 
-test2.Makefile:3)
-all: make.txt
+test2.Makefile:5)
+make.txt: ../doc/remake.texi
 remake<0> Breakpoint 1 on target make.txt.
+Warning: target is in the process of being updated;
+so it might not get stopped at again
 remake<0> 
