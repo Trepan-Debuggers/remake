@@ -95,12 +95,15 @@ cat notarget.c > notarget.b 2>/dev/null || exit 1
 $make_name: *** [notarget.b] Error 1
 
 #0  notarget.b at ??
-#1  notarget (.PHONY target)
+#1  notarget at vpathplus.mk:31
 Command-line arguments:
 	\"$make_path -f work/features/vpathplus.mk notarget\"
 ";
 
-&compare_output($answer,&get_logfile(1));
+$logfile = &get_logfile(1);
+$slurp = &read_file_into_string ($logfile);
+$slurp =~ s/ at .*vpathplus/ at vpathplus/;
+&compare_output_string($answer, $slurp, $logfile);
 
 # Test intermediate file handling (part 1)
 

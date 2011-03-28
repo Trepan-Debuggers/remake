@@ -179,8 +179,14 @@ enter_file (const char *name, const floc_t *p_floc)
   file_key.hname = name;
   file_slot = (struct file **) hash_find_slot (&files, &file_key);
   f = *file_slot;
-  if (! HASH_VACANT (f) && !f->double_colon)
+  if (! HASH_VACANT (f) && !f->double_colon) {
+    if (f->floc.filenm == '\0' && f->floc.lineno == 0 && p_floc &&
+	p_floc->filenm != '\0' && p_floc->lineno != 0) {
+      f->floc.filenm = strdup(p_floc->filenm);
+      f->floc.lineno = p_floc->lineno;
+    }
     return f;
+  }
 
   new = xcalloc (sizeof (struct file));
   new->name = new->hname = name;

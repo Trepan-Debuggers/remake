@@ -98,11 +98,11 @@ $logfile = &get_logfile;
 $answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 exit 1
 ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-$make_name: *** [foo.o] Error 1
+work/options/dash-k.mk.1:9: *** [foo.o] Error 1
 
-#0  foo.o at dash-k.mk.1:8
-#1  lib at dash-k.mk.1:6
-#2  exe1 at dash-k.mk.1:4
+#0  foo.o at dash-k.mk.1:9
+#1  lib at dash-k.mk.1:7
+#2  exe1 at dash-k.mk.1:5
 #3  all at dash-k.mk.1:3
 $make_name: Target `all' not remade because of errors.
 Command-line arguments:

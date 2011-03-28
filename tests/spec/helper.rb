@@ -10,6 +10,7 @@ module RemakeTestHelper
     Filter_filename = Proc.new{|makefile_short, lines|
       lines.each do |line|
         line.gsub!(/^.*(#{makefile_short}\.Makefile:\d+)/,'\1')
+        line.gsub!(/ file .*(#{makefile_short})\.Makefile, line/,' file \1.Makefile, line')
       end
     }
   end
