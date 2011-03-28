@@ -362,8 +362,7 @@ there had been several targets that had commands, from the output it
 would not be possible to determine which command was associated with
 which target.
 
-One of the goals of @value{REMAKE} is to include reference
-information. Here's what we give instead:
+Here's what we give instead:
 
 @smallexample
 $ @b{remake --just-print -f test.mk1}
@@ -450,9 +449,9 @@ $ @b{remake --trace -f test1.mk}
 ...
 Reading makefiles...
 Updating goal targets....
- File `all' does not exist.
-   File `foo' does not exist.
-  Must remake target `foo'.
+ /tmp/test1.mk:3	File `all' does not exist.
+   /tmp/test1.mk:5	File `foo' does not exist.
+  /tmp/test1.mk:5	Must remake target `foo'.
 Invoking recipe from test1.mk:6 to update target `foo'.
 ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 case /tmp/remake/src/./make in \
@@ -467,7 +466,7 @@ bogus-command
 remake: bogus-command: Command not found
 remake: *** [foo] Error 127
 
-#0  foo at /src/external-vcs/remake/doc/test1.mk:5
+#0  foo at /tmp/test1.mk:5
 #1  all (.PHONY target)
 Command-line arguments:
 	"remake --trace -f test1.mk"
@@ -476,6 +475,10 @@ Command-line arguments:
 
 So in some ways this is just a combination of the @code{--just-print}
 option combined with the enhanced @code{--debug=basic} information.
+
+But one of the goals of @value{REMAKE} is to include reference
+information and that can be seen above. We show @emph{where} in
+the Makefile you can find targets @code{all} and @code{foo}.
 
 One last subtlety that you might not have noticed is that we echoed the
 command @code{bogus-command} even though the original makefile had this
@@ -519,11 +522,9 @@ Invoking recipe from Makefile:490 to update target `config.h'.
 @end group
 @end smallexample 
 
-So far so good. But notice one new thing. After @code{Reading
-makefiles...} we show the position in the Makefile
-@code{(/tmp/Makefile:450)} of where target @code{all} appears. That hadn't
-appeared in the earlier examples only due to technical difficulties,
-that perhaps one day someone will figure out and fix.
+So far so good. As before, after @code{Reading makefiles...} we show the
+position in the Makefile @code{(/tmp/Makefile:450)} of where target
+@code{all} appears.
 
 If we want to trace the files that were read in performing the above, we
 can use the sub-option @code{read} on the @code{--trace} option:
@@ -552,32 +553,31 @@ $  @b{remake --debugger}
 Reading makefiles...
 Updating makefiles....
 Updating goal targets....
- /tmp/remake/Makefile:450	File `all' does not exist.
 
--- (/tmp/remake/Makefile:450)
-all: config.h
-(/tmp/remake/Makefile:450)
+-> (/tmp/remake/Makefile:471)
+Makefile: Makefile.in config.status
 remake<0> 
 @end smallexample 
 
 Before the prompt @code{remake<0>}, we show the position in the file
-@code{(/tmp/remake/Makefile:450)} of the target @code{all}. We also show
-the dependencies of the target @code{all}, namely: @code{config.h}. The
-``0'' in the prompt @code{remake<0>} is the command history number it
-increments as we enter commands.
+@code{(/tmp/remake/Makefile:471)} of the target @code{Makefile}. We also
+show the dependencies of the target @code{Makefile}, namely:
+@code{Makefile.in} and @code{config.status}. The ``0'' in the prompt
+@code{remake<0>} is the command history number it increments as we enter
+commands.
 
-Before the position are two dashes @code{--}. This indicates that we are
-stepping. Later we will come across many other two-character icons like
-@code{->}, @code{++}, and @code{<-}, to name few. But to get full
-information about why were are stopped, you can use the command
-@code{info program}:
+Before the position are two dashes @code{->}. This indicates that we
+have not done prerequisite checking for this target yet.  Later we will
+come across other two-character icons like @code{--}, @code{++}, and
+@code{<-}, to name few. But to get full information about why were are
+stopped, you can use the command @code{info program}:
 
 @smallexample
 Starting directory `/tmp/remake'
 Program invocation:
 	/tmp/remake/./remake  --debugger
 Recursion level: 0
-Program stopped in stepping.
+Program stopped at a breakpoint before prequisite checking.
 remake<1> 
 @end smallexample 
 
@@ -588,41 +588,79 @@ in the interpretation or execution of the makefile:
 @smallexample
 @group
 remake<2> @b{step}
-   Prerequisite `stamp-h1' is newer than target `config.h'.
-  Must remake target `config.h'.
-Invoking recipe from Makefile:490 to update target `config.h'.
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-if test ! -f config.h; then \
-  rm -f stamp-h1; \
-  /tmp/remake./remake  stamp-h1; \
-else :; fi
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-++ (/src/external-vcs/remake/Makefile:488)
-config.h
+-> (/tmp/Makefile:457)
+Makefile.in: Makefile.am config/gettext.m4 ... aclocal.m4
+-> (/tmp/Makefile:488)
+remake<3> @b{step}
+-> (/tmp/Makefile:486)
+aclocal.m4: config/dospaths.m4 config/gettext.m4 ...
+remake<4> @b{step}
 @end group
 @end smallexample 
 
-Target @code{all} needs to build dependency @code{config.h} and we have
-now stepped into that. Before the location we now have two pluses,
-@code{++}. This means that the code shown above in between
-@code{##>>>>}... and @code{##<<<<}... is about to be run.
+Target @code{Makefile} needs to build dependency @code{Makefile.in} and depends
+on target @code{aclocal.m4} and we are now stepped and stopped into that. 
 
-And to see the targets that got us here, the @code{where} command,
-(see @ref{Backtrace}), shows you the target call stack:
+You can see this dependency nesting using the @b{where} command:
 
 @smallexample
 @group
-remake<3> @b{where}
-
-=>#0  config.h at /tmp/remake/Makefile:490
-  #1  all at /tmp/remake/Makefile:450
-remake<4> 
+remake<2> @b{where}
+=>#0  aclocal.m4 at /tmp/remake/Makefile:486
+  #1  Makefile.in at /tmp/remake/Makefile:457
+  #2  Makefile at /tmp/remake/Makefile:471
 @end group
 @end smallexample 
 
-If you want the full details about a target, @code{config.h} here, one
-can use the @code{target} (@ref{Target}) command:
+If stepping is going too slowly, one can use @b{next} or
+set a breakpoint at a target. Let's restart the program
+and then go directly to target @code{config.h.in} which is where
+we will see something else of interest.
+
+@smallexample
+@group
+remake<3> @b{restart}
+Changing directory to /src/external-vcs/remake and restarting...
+GNU Make 3.82+dbg-0.5
+Built for i686-pc-linux-gnu
+...
+Reading makefiles...
+Updating makefiles....
+
+-> (/tmp/remake/Makefile:471)
+Makefile: Makefile.in config.status
+remake<0> @b{continue config.h.in}
+Breakpoint 1 on target config.h.in: file Makefile, line 499.
+Updating goal targets....
+ /tmp/remake/Makefile:450	File `all' does not exist.
+
+-> (/src/external-vcs/remake/Makefile:499)
+config.h.in: config/dospaths.m4 ...
+remake<1> @b{step}
+-> (/src/external-vcs/remake/Makefile:499)
+remake<2> @b{step}
+   Prerequisite `stamp-h1' is newer than target `config.h'.
+  /tmp/Makefile:490	Must remake target `config.h'.
+Invoking recipe from Makefile:491 to update target `config.h'.
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+if test ! -f config.h; then \
+  rm -f stamp-h1; \
+  /src/external-vcs/remake/./remake  stamp-h1; \
+else :; fi
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+++ (/src/external-vcs/remake/Makefile:490)
+config.h
+remake<2> 
+@end group
+@end smallexample 
+
+Before the location we now have two pluses,
+@code{++}. This means that the code shown above in between
+@code{##>>>>}... and @code{##<<<<}... is about to be run.
+
+If you want the full details about a target, @code{config.h.in} at
+this point in time, one can use the @code{target} (@ref{Target}) command:
 @smallexample
 @group
 remake<4> @b{target}
@@ -704,31 +742,6 @@ updated'', while for target @code{Makefile}, we get ``File has been updated''.
 
 This means that we are finished with target @code{Makefile}, but not
 target @code{config.h}.
-
-And rather than stepping to get to @code{config.h}, you can set a
-breakpoint (@ref{Breakpoints}) at a particular target or continue running,
-@ref{Continue}, to that target:
-
-@smallexample
-remake<4> @b{restart}
-Changing directory to /tmp/remake/src and restarting...
-...
--- (/tmp/remake/src/Makefile:450)
-all: config.h
-remake<0> @b{continue config.h}
-Breakpoint 1 on target config.h.
-
--> (/tmp/remake/Makefile:488)
-config.h: stamp-h1
-@end smallexample 
-
-The @code{restart} command was used to restart execution since we've
-already are at target @code{config.h}. 
-
-The use of @code{continue} here is a little bit silly since it really
-didn't save anything over stepping. Usually, though you will run
-@code{make} hit an error and want to stop at the target listed in the
-error for investigation.
 
 @node Debugging Make Variables
 @subsection Debugging Make Variables
@@ -936,7 +949,7 @@ Invoking recipe from test2.mk:6 to update target `make.txt'.
 makeinfo --no-headers ../doc/remake.texi > make.txt
 ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-++ (/src/external-vcs/remake/doc/test2.mk:5)
+++ (/tmp/test2.mk:5)
 @end group
 @end smallexample
 
@@ -954,7 +967,7 @@ make.txt
 remake<9> @b{step}
   Successfully remade target file `make.txt'.
 
-<- (/src/external-vcs/remake/doc/test2.mk:5)
+<- (/tmp/test2.mk:5)
 make.txt
 remake<10> 
 @end group
