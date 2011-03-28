@@ -22,13 +22,16 @@ dbg_cmd_continue (char *psz_args)
 {
   if (psz_args && *psz_args) {
     char *psz_target = get_word(&psz_args);
-    file_t *p_target;
+    file_t *p_target = NULL;
 
     /** FIXME: DRY with code in break.h **/
-    if (p_stack && p_stack->p_target)
-      p_target = lookup_file(variable_expand_set(psz_target, 
-                                                 p_stack->p_target->variables));
-    else
+    if (p_stack && p_stack->p_target) {
+      char *psz_expanded_target = 
+        variable_expand_set(psz_target, p_stack->p_target->variables);
+      if (*psz_expanded_target) {
+        p_target = lookup_file(psz_expanded_target);
+      }
+    } else
       p_target = lookup_file(psz_target);
 
     if (!p_target) {

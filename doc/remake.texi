@@ -349,8 +349,8 @@ In an unpatched @value{MAKE} version 3.81 (and earlier) @value{MAKE},
 @smallexample
 $ @b{make --just-print -f test1.mk}
 case make in \
-   */remake|remake) echo "Enlightended!";; \
-   */make|make) echo "This is what most folks use.";; \
+*/remake|remake) echo "Enlightended!";; \
+*/make|make) echo "This is what most folks use.";; \
 esac
 This is what most folks use.
 bogus-command
@@ -387,65 +387,39 @@ getting run from target @code{foo}: one at line 7 and another at line
 10.
 
 Now let's try @code{--debug=basic} alluded to at the beginning of this
-section. In an unpatched @value{MAKE} version 3.81 (and earlier)
-@value{MAKE} @code{--debug=basic} gives this:
+section. In an unpatched @value{MAKE} version 3.82, we get this:
 
 @smallexample
 $ @b{make --debug=basic -f test1.mk}
-GNU Make 3.81
-Copyright (C) 2006  Free Software Foundation, Inc.
-This is free software; see the source for copying conditions.
-There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE.
-
+GNU Make 3.82
+Built for i686-pc-linux-gnu
+Copyright (C) 2010  Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
 Reading makefiles...
 Updating goal targets....
  File `all' does not exist.
    File `foo' does not exist.
   Must remake target `foo'.
+Invoking recipe from /tmp/test1.mk:6 to update target `foo'.
 This is what most folks use.
 make: bogus-command: Command not found
 make: *** [foo] Error 127
-##########################################################
 @end smallexample
 
 The @code{--debug=basic} command-line switch also works in
-@value{REMAKE} as well if that's all you want. As before the return code
-(127) is shown when running a shell command that fails.
+@value{REMAKE} as well if that's all you want..@footnote{Actually the
+output is a little bit different here since we give a more context
+about the position when a fatal error is encountered.}
 
-In addition to the above output, you will get this new information the
-bottom:
-
-@smallexample
-@group
-#0  foo at /tmp/test1.mk:5
-#1  all (.PHONY target)
-Command-line arguments:
-	"../make --debug=basic -f test1.mk"
-
-@end group
-@end smallexample 
-
-Completely new here is the stack of targets is listed. We were working
-on target @code{foo} on line 5 of file @code{/tmp/test1.mk} which was
-rebuilt because we were making target ``phony'' target @code{all}.
-
-In other words, when we hit the error, the above trace gives some idea
-of why we decided to to run line 5 and what got executed before that,
-what targets were in the process of getting considered at the error, and
-how the program was run. We also show a command-line invocation which
-is especially useful if @code{make} was invoked recursively from
-another @code{make}.
-
-
-Now let's try the new kind of trace we provide in this patched
+But now let's try the new kind of trace we provide in this patched
 @value{REMAKE}.  We use the new option @code{--trace} which has the
 short-form option format @code{-x}.
 
-And here's the trace of it:
 @smallexample
 @group
-$ @b{remake --trace -f test1.mk}
+/usr/local/bin/remake -x -f test1.mk
 ...
 Reading makefiles...
 Updating goal targets....
@@ -454,38 +428,48 @@ Updating goal targets....
   /tmp/test1.mk:5	Must remake target `foo'.
 Invoking recipe from test1.mk:6 to update target `foo'.
 ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-case /tmp/remake/src/./make in \
+case /tmp/../make in \
 */remake|remake) echo "Enlightened!";; \
 */make|make) echo "This is what most folks use.";; \
 esac
 ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-Enlightened!
+This is what most folks use.
 ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 bogus-command
 ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 remake: bogus-command: Command not found
-remake: *** [foo] Error 127
+test1.mk:5: *** [foo] Error 127
 
 #0  foo at /tmp/test1.mk:5
-#1  all (.PHONY target)
+#1  all at /tmp/test1.mk:3
 Command-line arguments:
-	"remake --trace -f test1.mk"
+	"/usr/local/bin/remake -x -f test1.mk"
 @end group
 @end smallexample 
 
-So in some ways this is just a combination of the @code{--just-print}
-option combined with the enhanced @code{--debug=basic} information.
+In some ways this is just a combination of the
+enhanced@code{--just-print} option combined with the location-enhanced
+@code{--debug=basic} information.
 
-But one of the goals of @value{REMAKE} is to include reference
-information and that can be seen above. We show @emph{where} in
-the Makefile you can find targets @code{all} and @code{foo}.
+What is completely new is the shell tracing information and information
+given when we hit an error.  After the error and we report the return
+code (127), the stack of targets is listed. We were working on target
+@code{foo} on line 5 of file @code{/tmp/test1.mk} which was rebuilt
+because we were making target @code{all} on line 3 of file
+@code{/tmp/test1.mk}.
 
-One last subtlety that you might not have noticed is that we echoed the
-command @code{bogus-command} even though the original makefile had this
-set to be silent (in particular by preceding that command with an
-@@). When tracing, we override any silent execution making execution
-more verbose. This information is usually helpful in finding what's
-going on and what got run.
+In other words, when we hit the error, the above trace gives what
+targets were in the process of getting considered at the error, and how
+the program was run.
+
+One last subtlety that you might not have noticed is that we echoed
+the command @code{bogus-command} even though the original makefile had
+this set to be silent, in particular by preceding that command with an
+@@. 
+
+When tracing as with @code{--just-print}, we override any silent
+execution making execution more verbose. This information is usually
+helpful in tracing.
 
 Although I think that the above may be improved, it is far better than
 what has previously been available in GNU make. In my own experience,
@@ -598,8 +582,20 @@ remake<4> @b{step}
 @end group
 @end smallexample 
 
-Target @code{Makefile} needs to build dependency @code{Makefile.in} and depends
-on target @code{aclocal.m4} and we are now stepped and stopped into that. 
+One subtlety in the output above. In the @code{Makefile} at line 486 you
+will see this:
+
+@smallexample
+@group
+$(ACLOCAL_M4):  $(am__aclocal_m4_deps)
+@end group
+@end smallexample 
+
+In the location reported by @value{REMAKE} variables have been expanded. 
+
+Let's recap where we are right now.  Target @code{Makefile} needs to
+build dependency @code{Makefile.in} and depends on target
+@code{aclocal.m4} and we are now stepped and stopped into that.
 
 You can see this dependency nesting using the @b{where} command:
 
@@ -765,7 +761,7 @@ of the variables. So if I run @code{x} (@code{examine}) instead I get:
 @end smallexample 
 
 Note that in printing expanded values we use @code{:=} while non-expanded
-values we use @code{='} This output matches the semantics of these
+values we use @code{=} This output matches the semantics of these
 assignment operators.
 
 In fact, @code{examine} doesn't need a variable name, it will work
@@ -793,22 +789,22 @@ between the two.
 @end smallexample 
 
 So with @code{set}, the value in the expression @code{$(MAKE_COMMAND)}
-is expanded before the variable definition is assigned. With
-@code{setq}, @xref{setq}, the internal variables are kept
-unexpanded. Which you use or want is up to you.
+is expanded before the variable definition is assigned. With @code{setq}
+the internal variables are kept unexpanded. Which you use or want is up
+to you.
 
-Note the irregular syntax of @code{set} and @code{"setq}. Don't put an
+Note the irregular syntax of @code{set} and @code{setq}. Don't put an
 equal sign (@code{=}) between the variable and the expression. That
-is, @code{set MAKE = $(MAKE_COMMAND)}" gives:
+is, @code{set MAKE = $(MAKE_COMMAND)} gives:
 
 @smallexample
   Variable MAKE now has value '= /tmp/remake/src/./make'
 @end smallexample 
 
-which is probably not what you want.  One may optionally put in the 
-the word "variable" when using @code{set}, one must not supply
-it with "setq."  Down the line, someone (maybe @emph{you!}) will
-probably put in a command parser.  
+which is probably not what you want.  One may optionally put in the the
+word "variable" when using @code{set}, one must not supply it with
+@code{setq}.  Down the line, someone (maybe @emph{you!}) will probably
+put in a command parser.
 
 @node Debugging Shell Commands
 @subsection Debugging Shell Commands

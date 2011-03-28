@@ -142,6 +142,16 @@ int no_extended_errors = 0;
 /*! If non-null, we are tracing execution */
 stringlist_t *tracing_opts = NULL;
 
+/*! Nonzero means use GNU readline in the debugger. */
+
+int use_readline_flag = 
+#ifdef HAVE_READLINE_READLINE_H
+    1
+#else
+    0
+#endif
+    ;
+
 /*! If nonzero, we are debugging after each "step" for that many times. 
   When we have a value 1, then we actually run the debugger read loop.
   Otherwise we decrement the step count.
@@ -422,6 +432,8 @@ static const char *const usage[] =
   -X [type], --debugger[=TYPE] Enter debugger. TYPE may be\n\
                                \"goal\", \"preread\", \"preaction\",\n\
                                \"full\", \"error\", or \"fatal\".\n"),
+    N_("\
+   --readline                  Try to use GNU ReadLine\n"),
     NULL
   };
 
@@ -440,6 +452,8 @@ static const struct command_switch switches[] =
     { 'e', flag, &env_overrides, 1, 1, 0, 0, 0, "environment-overrides", },
     { CHAR_MAX+7, flag, (char *) &no_extended_errors, 1, 1, 0, 0, 0,
         "no-extended-errors", },
+    { CHAR_MAX+8, flag_off, (char *) &use_readline_flag, 1, 0, 0, 0, 0,
+        "no-readline", },
     { 'f', filename, &makefiles, 0, 0, 0, 0, 0, "file" },
     { 'h', flag, &print_usage_flag, 0, 0, 0, 0, 0, "help" },
     { 'i', flag, &ignore_errors_flag, 1, 1, 0, 0, 0, "ignore-errors" },

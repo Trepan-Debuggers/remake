@@ -644,16 +644,24 @@ debug_return_t enter_debugger (target_stack_node_t *p,
     char *line=NULL;
     char *s;
     
-    snprintf(prompt, PROMPT_LENGTH, "remake%s%d%s ", 
-	     open_depth, where_history(), close_depth);
-
 #ifdef HAVE_LIBREADLINE
-    line = readline (prompt);
-#else
-    printf("%s", prompt);
-    if (line == NULL) line = calloc(1, 2048);
-    gets(line);
+    if (use_readline_flag) {
+      snprintf(prompt, PROMPT_LENGTH, "remake%s%d%s ", 
+               open_depth, where_history(), close_depth);
+      
+      line = readline (prompt);
+    } else 
 #endif
+      {
+        unsigned int len;
+        snprintf(prompt, PROMPT_LENGTH, "remake%s0%s ", open_depth, 
+                 close_depth);
+        printf("%s", prompt);
+        if (line == NULL) line = calloc(1, 2048);
+        fgets(line, 2048, stdin);
+        len = strlen(line);
+        if (line[len-1] == '\n') line[len-1] = '\0';
+      }
 
     if ( line ) {
       if ( *(s=stripwhite(line)) ) {
