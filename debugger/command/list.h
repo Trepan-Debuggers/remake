@@ -41,3 +41,23 @@ dbg_cmd_list(char *psz_arg)
   sprintf(target_cmd, "%s%s", psz_target, DEPENDS_COMMANDS);
   return dbg_cmd_target(target_cmd);
 }
+
+static void
+dbg_cmd_list_init(void) 
+{
+  short_command['l'].func = &dbg_cmd_list;
+  short_command['l'].use = _("list [TARGET]");
+  short_command['l'].doc = 
+    _("List target dependencies and commands. Without a target name we\n"
+"use the current target. A target name of '-' will use the parent target on\n"
+"the target stack.\n"
+ );
+}
+
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */

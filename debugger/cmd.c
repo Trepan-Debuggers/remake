@@ -120,6 +120,7 @@ long_cmd_t commands[] = {
   { "setq"    , '"' },
   { "shell"   , '!' },
   { "show"    , 'S' },
+  { "source"  , '<' },
   { "skip"    , 'k' },
   { "step"    , 's' },
   { "target"  , 't' },
@@ -281,6 +282,7 @@ find_command (const char *psz_name)
 #include "command/shell.h"
 #include "command/show.h"
 #include "command/skip.h"
+#include "command/source.h"
 #include "command/step.h"
 #include "command/target.h"
 #include "command/up.h"
@@ -339,14 +341,7 @@ cmd_initialize(void)
   short_command['k'].doc = 
     _("Skip execution of next command or action." );
 
-  short_command['l'].func = &dbg_cmd_list;
-  short_command['l'].use = _("list [TARGET]");
-  short_command['l'].doc = 
-    _("List target dependencies and commands. Without a target name we\n"
-"use the current target. A target name of '-' will use the parent target on\n"
-"the target stack.\n"
- );
-
+  dbg_cmd_list_init();
   dbg_cmd_next_init();
 
   short_command['p'].func = &dbg_cmd_print;
@@ -377,6 +372,8 @@ cmd_initialize(void)
    "With no arguments, uses arguments last specified (with \"run\")");
   short_command['R'].use = _("run");
 
+  dbg_cmd_source_init();
+  
   short_command['S'].func = &dbg_cmd_show;
   short_command['S'].use = _("show [thing]");
   short_command['S'].doc = 
@@ -437,7 +434,7 @@ cmd_initialize(void)
 }
 
 /* Execute a command line. */
-static debug_return_t
+extern debug_return_t
 execute_line (char *psz_line)
 {
   unsigned int i = 0;
@@ -653,14 +650,12 @@ debug_return_t enter_debugger (target_stack_node_t *p,
     } else 
 #endif
       {
-        unsigned int len;
         snprintf(prompt, PROMPT_LENGTH, "remake%s0%s ", open_depth, 
                  close_depth);
         printf("%s", prompt);
         if (line == NULL) line = calloc(1, 2048);
         fgets(line, 2048, stdin);
-        len = strlen(line);
-        if (line[len-1] == '\n') line[len-1] = '\0';
+        chomp(line);
       }
 
     if ( line ) {

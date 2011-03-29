@@ -110,4 +110,6 @@ extern void dbg_print_invocation(void);
 extern rule_t *find_rule (const char *psz_name);
 extern void shell_rc_status(int rc);
 
+extern void chomp(char * line);
+
 #endif /* DBG_FNS_H*/

@@ -26,7 +26,7 @@
 @set dBG The @value{REMAKE} debugger
 @set DDD @acronym{DDD}
 
-@settitle @value{REMAKE} Debugger
+@settitle @value{MAKE} Debugger, Remake
 @setchapternewpage odd
 @c @setcontentsaftertitlepage
 
@@ -73,7 +73,7 @@
 @end direntry
 
 @ifinfo
-This file documents the @sc{gnu} MAKE debugger
+This file documents the @sc{gnu} MAKE debugger, Remake
 
 
 This is the @value{EDITION} Edition, @value{UPDATED-MONTH},
@@ -123,9 +123,9 @@ development.''
 @ifnottex
 @node Top, Summary, (dir), (dir)
 
-@top Using @value{DBG}
+@top Using @value{DBG}, Remake
 
-This file describes @value{DBG}
+This file describes @value{DBG}, Remake
 
 This is the @value{EDITION} Edition, @value{UPDATED-MONTH}
 
@@ -1222,7 +1222,7 @@ just @key{RET}. Some commands which require a parameter, such as
 * Stack::                 Examining the stack (where, up, down, frame)
 * Data::                  Examining data (print, target, examine, info variables)
 * Evaluation/Execution::  Arbitrary execution (eval, shell)
-* Interfacing to the OS:: Interfacing to the OS (cd, pwd)
+* Interfacing to the OS:: Interfacing to the OS (cd, pwd, source)
 * Controlling Make::      Controlling make (annotate, file, prompt...)
 @end menu
 
@@ -1293,6 +1293,7 @@ remake<0> @b{help}
   setq *variable* VALUE           (")
   shell STRING                    (!)  !!
   show [thing]                    (S)
+  source FILENAME                 (<)
   skip                            (k)
   step [AMOUNT]                   (s)
   target [target-name] [info1 [info2...]] (t)
@@ -2226,7 +2227,7 @@ Invoke a shell to execute @var{command string}.
 @end table
 
 @node Interfacing to the OS
-@section Interfacing to the OS (@samp{cd}, @samp{pwd})
+@section Interfacing to the OS (@samp{cd}, @samp{pwd}, @samp{source})
 
 @table @code
 @kindex cd @var{directory}
@@ -2242,6 +2243,11 @@ debugged until the next time it is started.
 @item pwd
 
 Prints the working directory as the program sees things.
+
+@kindex source @var{filename}
+@item source @var{filename}
+
+Reads each line of @emph{filename} and runs that as a debugger command.
 
 @end table
 

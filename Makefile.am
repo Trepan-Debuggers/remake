@@ -74,6 +74,7 @@ DEBUGGER_H = \
 		debugger/command/shell.h	\
 		debugger/command/show.h		\
 		debugger/command/skip.h		\
+		debugger/command/source.h	\
 		debugger/command/step.h		\
 		debugger/command/target.h	\
 		debugger/command/up.h		\

@@ -453,6 +453,13 @@ rule_t *find_rule (const char *psz_name)
   return NULL;
 }
 
+void chomp(char * line) 
+{
+  unsigned int len = strlen(line);
+  if (line[len-1] == '\n') line[len-1] = '\0';
+}
+
+
 void shell_rc_status(int rc) 
 {
   if (rc == -1)
