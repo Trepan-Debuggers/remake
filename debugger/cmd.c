@@ -654,7 +654,7 @@ debug_return_t enter_debugger (target_stack_node_t *p,
                  close_depth);
         printf("%s", prompt);
         if (line == NULL) line = calloc(1, 2048);
-        fgets(line, 2048, stdin);
+        (void) fgets(line, 2048, stdin);
         chomp(line);
       }
 
