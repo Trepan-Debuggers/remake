@@ -11,7 +11,7 @@ dbg_cmd_source(char *psz_filename)
       while (!feof(p_source_file) && debug_return == debug_readloop)
 	{
 	  char *s;
-	  fgets(line, 2048, p_source_file);
+	  (void) fgets(line, 2048, p_source_file);
 	  if (feof(p_source_file)) break;
 	  chomp(line);
 	  if ( *(s=stripwhite(line)) ) debug_return=execute_line(s);
