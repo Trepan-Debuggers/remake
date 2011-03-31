@@ -34,12 +34,12 @@ dbg_cmd_next(char *psz_arg)
 }
 
 static void
-dbg_cmd_next_init(void) 
+dbg_cmd_next_init(unsigned int c) 
 {
     
-  short_command['n'].func = &dbg_cmd_next;
-  short_command['n'].use = _("next [AMOUNT]");
-  short_command['n'].doc = 
+  short_command[c].func = &dbg_cmd_next;
+  short_command[c].use = _("next [AMOUNT]");
+  short_command[c].doc = 
     _("Continue until the next command to be executed.\n"
       "Argument AMOUNT means do this AMOUNT times (or until there's another\n"
       "reason to stop.");

@@ -54,11 +54,11 @@ dbg_cmd_finish(char *psz_amount)
 }
 
 static void
-dbg_cmd_finish_init(void) 
+dbg_cmd_finish_init(unsigned int c) 
 {
-  short_command['F'].func = &dbg_cmd_finish;
-  short_command['F'].use  = _("finish [AMOUNT]");
-  short_command['F'].doc  = 
+  short_command[c].func = &dbg_cmd_finish;
+  short_command[c].use  = _("finish [AMOUNT]");
+  short_command[c].doc  = 
     _("Run (step out) until finishing AMOUNT target levels up.\n"
       "The default value is 0, or after commands have been run.\n" 
       );

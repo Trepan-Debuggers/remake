@@ -63,11 +63,11 @@ dbg_cmd_break (char *psz_args)
 };
 
 static void
-dbg_cmd_break_init(void) 
+dbg_cmd_break_init(unsigned int c) 
 {
-  short_command['b'].func = &dbg_cmd_break;
-  short_command['b'].use  = _("break TARGET [all|run|prereq]");
-  short_command['b'].doc  = _("Set a breakpoint at a target.\n"
+  short_command[c].func = &dbg_cmd_break;
+  short_command[c].use  = _("break TARGET [all|run|prereq]");
+  short_command[c].doc  = _("Set a breakpoint at a target.\n"
 "With a target name, set a break before running commands\n"
 "of that target.  Without argument, list all breakpoints.\n"
 "There are 3 place where one may want to stop at:\n"

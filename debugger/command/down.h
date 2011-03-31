@@ -66,11 +66,11 @@ dbg_cmd_frame_down(char *psz_amount)
 }
 
 static void
-dbg_cmd_down_init(void) 
+dbg_cmd_down_init(unsigned int c) 
 {
-  short_command['D'].func = &dbg_cmd_frame_down;
-  short_command['D'].use  = _("down [AMOUNT]");
-  short_command['D'].doc  = 
+  short_command[c].func = &dbg_cmd_frame_down;
+  short_command[c].use  = _("down [AMOUNT]");
+  short_command[c].doc  = 
     _("Select and print the target this one caused to be examined.\n"
       "\tAn argument says how many targets down to go.");
 }

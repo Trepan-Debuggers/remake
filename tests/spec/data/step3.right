@@ -21,7 +21,7 @@ echo third done
 
 triple.Makefile:5)
 third
-remake<2> third done
+remake<3> third done
 triple.Makefile:5	Successfully remade target file `third'.
 
 triple.Makefile:5)
@@ -34,9 +34,9 @@ echo second done
 
 triple.Makefile:3)
 second
-remake<4> second done
+remake<5> second done
 triple.Makefile:3	Successfully remade target file `second'.
 
 triple.Makefile:3)
 second
-remake<5> 
+remake<6> 

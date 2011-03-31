@@ -44,11 +44,11 @@ dbg_cmd_delete(char *psz_args)
 }
 
 static void
-dbg_cmd_delete_init(void) 
+dbg_cmd_delete_init(unsigned int c) 
 {
-  short_command['d'].func = &dbg_cmd_delete;
-  short_command['d'].use  = _("delete breakpoint numbers..");
-  short_command['d'].doc  = _("Delete some breakpoints\n."
+  short_command[c].func = &dbg_cmd_delete;
+  short_command[c].use  = _("delete breakpoint numbers..");
+  short_command[c].doc  = _("Delete some breakpoints\n."
 "Arguments are breakpoint numbers with spaces in between.\n"
 "To delete all breakpoints, give no argument.");
 }

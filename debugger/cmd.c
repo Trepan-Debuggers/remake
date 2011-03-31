@@ -309,40 +309,20 @@ help_cmd_set_show(const char *psz_fmt, subcommand_var_info_t *p_subcmd)
 static void 
 cmd_initialize(void) 
 {
-  dbg_cmd_break_init();
-  dbg_cmd_chdir_init();
-  dbg_cmd_continue_init();
-  dbg_cmd_delete_init();
-  dbg_cmd_down_init();
-  dbg_cmd_edit_init();
-  dbg_cmd_eval_init();
-  dbg_cmd_finish_init();
-
-  short_command['f'].func = &dbg_cmd_frame;
-  short_command['f'].use  = _("frame N");
-  short_command['f'].doc  = 
-    _("Move target frame to N; In contrast to \"up\" or \"down\",\n"
-      "\tthis sets to an absolute position. 0 is the top.");
-
-  short_command['h'].func = &dbg_cmd_help;
-  short_command['h'].use  = _("help [COMMAND]");
-  short_command['h'].doc = 
-    _("Display list of commands (i.e. this help text.)\n"		\
-      "\twith an command name, give only the help for that command.");
-
-  short_command['i'].func = &dbg_cmd_info;
-  short_command['i'].use = _("info [THING]");
-  short_command['i'].doc = 
-    _("Show the state of thing.\n" \
-      "\tIf no 'thing' is specified, show everything there is to show.");
-
-  short_command['k'].func = &dbg_cmd_skip;
-  short_command['k'].use = _("skip");
-  short_command['k'].doc = 
-    _("Skip execution of next command or action." );
-
-  dbg_cmd_list_init();
-  dbg_cmd_next_init();
+  dbg_cmd_break_init('b');
+  dbg_cmd_chdir_init('C');
+  dbg_cmd_continue_init('c');
+  dbg_cmd_delete_init('d');
+  dbg_cmd_down_init('D');
+  dbg_cmd_edit_init('e');
+  dbg_cmd_eval_init('E');
+  dbg_cmd_finish_init('F');
+  dbg_cmd_frame_init('f');
+  dbg_cmd_help_init('h');
+  dbg_cmd_info_init('i');
+  dbg_cmd_skip_init('k');
+  dbg_cmd_list_init('l');
+  dbg_cmd_next_init('n');
 
   short_command['p'].func = &dbg_cmd_print;
   short_command['p'].use = _("print {VARIABLE [attrs...]}");
@@ -570,10 +550,11 @@ debug_return_t enter_debugger (target_stack_node_t *p,
   if (0 == i_init) {
 #ifdef HAVE_LIBREADLINE
     rl_initialize ();
+    using_history ();
+    add_history ("");
 #endif
     cmd_initialize();
     i_init = 1;
-    using_history ();
   }
 
 
@@ -663,6 +644,7 @@ debug_return_t enter_debugger (target_stack_node_t *p,
 	add_history (s);
 	debug_return=execute_line(s);
       } else {
+	add_history ("step");
 	debug_return=dbg_cmd_step("");
       }
       free (line);

@@ -189,6 +189,16 @@ dbg_cmd_info(char *psz_args)
   return debug_readloop;
 }
 
+static void
+dbg_cmd_info_init(unsigned int c) 
+{
+  short_command[c].func = &dbg_cmd_info;
+  short_command[c].use = _("info [THING]");
+  short_command[c].doc = 
+    _("Show the state of thing.\n" \
+      "\tIf no 'thing' is specified, show everything there is to show.");
+}
+
 /* 
  * Local variables:
  *  c-file-style: "gnu"

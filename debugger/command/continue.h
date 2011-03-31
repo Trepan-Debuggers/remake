@@ -50,11 +50,11 @@ dbg_cmd_continue (char *psz_args)
 };
 
 static void
-dbg_cmd_continue_init(void) 
+dbg_cmd_continue_init(unsigned int c) 
 {
-    short_command['c'].func = &dbg_cmd_continue;
-    short_command['c'].use  = _("continue [TARGET]");
-    short_command['c'].doc  = 
+    short_command[c].func = &dbg_cmd_continue;
+    short_command[c].use  = _("continue [TARGET]");
+    short_command[c].doc  = 
 	_("Continue executing debugged Makefile until another breakpoint\n"
 	  "or stopping point. If a target is given and valid we set a breakpoint at\n"
 	  "that target before continuing.");

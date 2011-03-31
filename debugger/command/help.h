@@ -102,3 +102,20 @@ dbg_cmd_help(char *psz_args)
   return debug_readloop;
 }
 
+static void
+dbg_cmd_help_init(unsigned int c) 
+{
+  short_command[c].func = &dbg_cmd_help;
+  short_command[c].use  = _("help [COMMAND]");
+  short_command[c].doc  = 
+    _("Display list of commands (i.e. this help text.)\n"		\
+      "\twith an command name, give only the help for that command.");
+}
+
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */

@@ -43,11 +43,11 @@ dbg_cmd_list(char *psz_arg)
 }
 
 static void
-dbg_cmd_list_init(void) 
+dbg_cmd_list_init(unsigned int c) 
 {
-  short_command['l'].func = &dbg_cmd_list;
-  short_command['l'].use = _("list [TARGET]");
-  short_command['l'].doc = 
+  short_command[c].func = &dbg_cmd_list;
+  short_command[c].use = _("list [TARGET]");
+  short_command[c].doc = 
     _("List target dependencies and commands. Without a target name we\n"
 "use the current target. A target name of '-' will use the parent target on\n"
 "the target stack.\n"

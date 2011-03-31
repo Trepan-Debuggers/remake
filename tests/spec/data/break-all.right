@@ -5,13 +5,13 @@ Updating goal targets....
 triple.Makefile:1)
 first: second
 remake<0> Breakpoint 1 on target third: file triple.Makefile, line 5.
-remake<0> 
-triple.Makefile:5)
-third: 
 remake<1> 
 triple.Makefile:5)
 third: 
 remake<2> 
 triple.Makefile:5)
-third
+third: 
 remake<3> 
+triple.Makefile:5)
+third
+remake<4> 
