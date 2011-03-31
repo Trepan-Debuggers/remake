@@ -33,7 +33,9 @@ endif
 
 SUBDIRS =	glob config po doc $(MAYBE_W32)
 
-bin_PROGRAMS =	make @MAKE_NAME@$(EXEEXT)
+bin_PROGRAMS =	make
+
+# PROGRAMS = @MAKE_NAME@$(EXEEXT) $(bin_PROGRAMS)
 
 if USE_CUSTOMS
   remote =	remote-cstms.c
@@ -141,8 +143,10 @@ MOSTLYCLEANFILES = *.orig *.rej @MAKE_NAME@
 html:
 	cd doc && $(MAKE) $(AM_MAKEFLAGS) $@
 
-@MAKE_NAME@$(EXEEXT): make$(EXEEXT)
-	$(LN_S) make$(EXEEXT) $@ 
+make$(EXEEXT): $(make_OBJECTS) $(make_DEPENDENCIES) 
+	@rm -f make$(EXEEXT) @MAKE_NAME@$(EXEEXT)
+	$(LINK) $(make_OBJECTS) $(make_LDADD) $(LIBS)
+	$(LN_S) make$(EXEEXT) @MAKE_NAME@$(EXEEXT)
 
 .PHONY: html
 
