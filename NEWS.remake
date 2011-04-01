@@ -1,10 +1,13 @@
 Version 3.82+dbg-0.5
+2011-04-01
 * Track updating goal targets and more targets in general
 * We track more target locations earlier and show that in tracing
 * Add debugger "source" command
 * Add --no-readline option to disable use of GNU Readline
 * variable names are expanded on "break" and "continue" target names
+* bug in history count fixed.
 * Update manual to reflect the various changes.
+* Don't unstall reremake
 
 Version 3.82+dbg-0.4
 2011-03-25
