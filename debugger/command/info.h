@@ -49,7 +49,21 @@ const char *WARRANTY =
 "POSSIBILITY OF SUCH DAMAGES.\n";
 
 
-/* Give some help info. */
+static void
+dbg_cmd_info_target_entry (const void *item)
+{
+  file_t *p_target = (file_t *) item;
+  print_target_props(p_target, 0);
+}
+
+
+static void
+dbg_cmd_info_targets(void)  
+{
+    hash_map (&files, dbg_cmd_info_target_entry);
+}
+
+/* Give some info regarding the running program. */
 debug_return_t 
 dbg_cmd_info(char *psz_args)
 {
@@ -162,19 +176,8 @@ dbg_cmd_info(char *psz_args)
 	}
     } else if (is_abbrev_of (psz_subcmd, "stack", 1)) {
       print_target_stack(p_stack_top, i_stack_pos, MAX_STACK_SHOW);
-    } else if (is_abbrev_of (psz_subcmd, "target", 1)) {
-      if (0 == strlen(psz_args))
-	{
-	  if (p_stack_top && p_stack_top->p_target && 
-	      p_stack_top->p_target->name)
-	    printf("target: %s\n", p_stack_top->p_target->name);
-	  else 
-	    {
-	      printf("target unknown\n");
-	    }
-	} 
-      else
-	dbg_cmd_target(psz_args);
+    } else if (is_abbrev_of (psz_subcmd, "targets", 1)) {
+	dbg_cmd_info_targets ();
     } else if (is_abbrev_of (psz_subcmd, "variables", 1)) {
       print_variable_data_base();
     } else if (is_abbrev_of (psz_subcmd, "vpath", 1)) {

@@ -63,7 +63,7 @@ file_hash_cmp (const void *x, const void *y)
 #ifndef	FILE_BUCKETS
 #define FILE_BUCKETS	1007
 #endif
-static struct hash_table files;
+struct hash_table files;
 
 /*! Whether or not .SECONDARY with no prerequisites was given.  */
 static int all_secondary = 0;
