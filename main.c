@@ -433,7 +433,7 @@ static const char *const usage[] =
                                \"goal\", \"preread\", \"preaction\",\n\
                                \"full\", \"error\", or \"fatal\".\n"),
     N_("\
-   --readline                  Try to use GNU ReadLine\n"),
+   --no-readline               Do not use GNU ReadLine in debugger\n"),
     NULL
   };
 
