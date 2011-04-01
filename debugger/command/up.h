@@ -18,7 +18,7 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 debug_return_t 
-dbg_cmd_frame_up (char *psz_amount)
+dbg_cmd_up (char *psz_amount)
 {
   unsigned int i_amount=1;
   unsigned int i = 0;
@@ -85,11 +85,11 @@ dbg_cmd_frame_up (char *psz_amount)
 }
 
 static void
-dbg_cmd_up_init(void) 
+dbg_cmd_up_init(unsigned int c) 
 {
-  short_command['u'].func = &dbg_cmd_frame_up;
-  short_command['u'].use  = _("up [AMOUNT]");
-  short_command['u'].doc  = 
+  short_command[c].func = &dbg_cmd_up;
+  short_command[c].use  = _("up [AMOUNT]");
+  short_command[c].doc  = 
     _("Select and print target that caused this one to be examined.\n"
       "An argument says how many targets up to go.");
 }

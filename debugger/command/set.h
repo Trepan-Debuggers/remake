@@ -74,13 +74,13 @@ dbg_cmd_set(char *psz_args)
 }
 
 static void
-dbg_cmd_set_init(void) 
+dbg_cmd_set_init(unsigned int c) 
 {
     
-  short_command['='].func = &dbg_cmd_set;
-  short_command['='].use =  
+  short_command[c].func = &dbg_cmd_set;
+  short_command[c].use =  
     _("set {*option*|variable} VALUE");
-  short_command['='].doc  = 
+  short_command[c].doc  = 
     _("set basename {on|off|toggle} - show full name or basename?\n"
       "set debug debug-mask - like --debug value.\n\n"
       "set ignore-errors {on|off|toggle} - like --ignore-errors option\n\n"

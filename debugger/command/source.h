@@ -26,11 +26,11 @@ dbg_cmd_source(char *psz_filename)
 }
 
 static void
-dbg_cmd_source_init(void) 
+dbg_cmd_source_init(unsigned int c) 
 {
-  short_command['<'].func = &dbg_cmd_source;
-  short_command['<'].use = _("source FILENAME");
-  short_command['<'].doc = _("Execute debugger commands from FILENAME.\n");
+  short_command[c].func = &dbg_cmd_source;
+  short_command[c].use = _("source FILENAME");
+  short_command[c].doc = _("Execute debugger commands from FILENAME.\n");
 }
 
 

@@ -58,3 +58,21 @@ dbg_cmd_show(char *psz_arg)
   
   return debug_readloop;
 }
+
+static void
+dbg_cmd_show_init(unsigned int c) 
+{
+  short_command[c].func = &dbg_cmd_show;
+  short_command[c].use = _("show [thing]");
+  short_command[c].doc = 
+    _("Show the state of thing.\n" \
+      "If no 'thing' is specified, show everything there is to show.");
+}
+
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */

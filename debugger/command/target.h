@@ -65,3 +65,27 @@ dbg_cmd_target(char *psz_args)
   }
   return debug_readloop;
 }
+
+static void
+dbg_cmd_target_init(unsigned int c) 
+{
+  short_command[c].func = &dbg_cmd_target;
+  short_command[c].use =  _("target [target-name] [info1 [info2...]]");
+  short_command[c].doc  = 
+    _("Show information about a target.\n" 
+      "target information is printed.\n"
+      "The following attributes names can be given after a target name:\n"
+      "\t'attributes', 'commands', 'expand', 'depends', 'nonorder',\n"
+      "\t'previous', 'state', 'time', 'variables'\n"
+      "If no variable or target name is supplied, we try to use the\n"
+      "current target name.\n"				
+      );
+}
+
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */

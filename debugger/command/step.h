@@ -16,11 +16,11 @@ dbg_cmd_step (char *psz_arg)
 }
 
 static void
-dbg_cmd_step_init(void) 
+dbg_cmd_step_init(unsigned int c) 
 {
-  short_command['s'].func = &dbg_cmd_step;
-  short_command['s'].use = _("step [AMOUNT]");
-  short_command['s'].doc = 
+  short_command[c].func = &dbg_cmd_step;
+  short_command[c].use = _("step [AMOUNT]");
+  short_command[c].doc = 
     _("Step execution until another stopping point is reached.\n"
       "Argument AMOUNT means do this AMOUNT times (or until there's another\n"
       "reason to stop.");

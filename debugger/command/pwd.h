@@ -35,11 +35,11 @@ dbg_cmd_pwd(char *psz_args)
 }
 
 static void
-dbg_cmd_pwd_init(void) 
+dbg_cmd_pwd_init(unsigned int c) 
 {
-  short_command['P'].func = &dbg_cmd_pwd;
-  short_command['P'].use = _("pwd");
-  short_command['P'].doc = 
+  short_command[c].func = &dbg_cmd_pwd;
+  short_command[c].use = _("pwd");
+  short_command[c].doc = 
     _("Print working directory.  This is used for your program as well.");
 }
 

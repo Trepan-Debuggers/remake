@@ -309,108 +309,36 @@ help_cmd_set_show(const char *psz_fmt, subcommand_var_info_t *p_subcmd)
 static void 
 cmd_initialize(void) 
 {
-  dbg_cmd_break_init('b');
-  dbg_cmd_chdir_init('C');
+  dbg_cmd_break_init   ('b');
+  dbg_cmd_chdir_init   ('C');
   dbg_cmd_continue_init('c');
-  dbg_cmd_delete_init('d');
-  dbg_cmd_down_init('D');
-  dbg_cmd_edit_init('e');
-  dbg_cmd_eval_init('E');
-  dbg_cmd_finish_init('F');
-  dbg_cmd_frame_init('f');
-  dbg_cmd_help_init('h');
-  dbg_cmd_info_init('i');
-  dbg_cmd_skip_init('k');
-  dbg_cmd_list_init('l');
-  dbg_cmd_next_init('n');
-
-  short_command['p'].func = &dbg_cmd_print;
-  short_command['p'].use = _("print {VARIABLE [attrs...]}");
-  short_command['p'].doc = 
-    _("Show a variable definition.\n"
-      "The value is shown with embedded\n"
-      "variable-references unexpanded. Don't include $ before a variable\n"
-      "name. See also \"examine\".\n\n"
-      "If no variable is supplied, we try to use the\n"
-      "last value given."				
-      );
-
-  dbg_cmd_pwd_init();
-
-  short_command['q'].func = &dbg_cmd_quit;
-  short_command['q'].use = _("quit [exit-status]");
-  short_command['q'].doc = 
-    _("Exit make. If a numeric argument is given, it will be the exit\n"
-      "status reported back. A status of 77 in a nested make will signals\n"
-      "termination in the parent. So if no numeric argument is given and\n"
-      "MAKELEVEL is 0, then status 0 is set; otherwise it is 77."
-      );
-
-  short_command['R'].func = &dbg_cmd_run;
-  short_command['R'].doc = _("Run Makefile from the beginning.\n"
-   "You may specify arguments to give it.\n" \
-   "With no arguments, uses arguments last specified (with \"run\")");
-  short_command['R'].use = _("run");
-
-  dbg_cmd_source_init();
-  
-  short_command['S'].func = &dbg_cmd_show;
-  short_command['S'].use = _("show [thing]");
-  short_command['S'].doc = 
-    _("Show the state of thing.\n" \
-      "If no 'thing' is specified, show everything there is to show.");
-
-  dbg_cmd_step_init();
-
-  short_command['t'].func = &dbg_cmd_target;
-  short_command['t'].use = _("target [target-name] [info1 [info2...]]");
-  short_command['t'].doc = 
-    _("Show information about a target.\n" 
-      "target information is printed.\n"
-      "The following attributes names can be given after a target name:\n"
-      "\t'attributes', 'commands', 'expand', 'depends', 'nonorder',\n"
-      "\t'previous', 'state', 'time', 'variables'\n"
-      "If no variable or target name is supplied, we try to use the\n"
-      "current target name.\n"				
-      );
-
-  short_command['T'].func = &dbg_cmd_where;
-  short_command['T'].use  = _("where");
-  short_command['T'].doc  = 
-    _("Print target stack or Makefile include stack.\n" \
-      "An argument specifies the maximum amount of entries to show.");
-
-  dbg_cmd_up_init();
-
-  short_command['w'].func = &dbg_cmd_write;
-  short_command['w'].use =  _("write [TARGET [FILENAME]]");
-  short_command['w'].doc  = 
-    _("writes the commands associated of a target to a file with MAKE\n"
-      "variables expanded. If no target given, the basename of the current\n"
-      "is used. If a filename is supplied it is used. If it is the string\n"
-      "\"here\", we write the output to stdout. If no filename is\n"
-      "given then create the filename by prepending a directory name to\n"
-      "the target name and then append \".sh\".");
-
-  short_command['x'].func = &dbg_cmd_expand;
-  short_command['x'].use =  _("examine STRING");
-  short_command['x'].doc  = 
-    _("Show string with internal variables references expanded. See also \n"
-      "\t\"print\".");
-
-  short_command['#'].func = &dbg_cmd_comment;
-  short_command['#'].use =  _("comment TEXT");
-  short_command['#'].doc  = 
-    _("Ignore this line.");
-
-  dbg_cmd_set_init();
-  dbg_cmd_shell_init();
-
-  short_command['"'].func = &dbg_cmd_setq;
-  short_command['"'].use =  _("setq *variable* VALUE");
-  short_command['"'].doc  = 
-    _("Set MAKE variable to value. Variable definitions\n"
-      "\tinside VALUE are not expanded before assignment occurs.");
+  dbg_cmd_delete_init  ('d');
+  dbg_cmd_down_init    ('D');
+  dbg_cmd_edit_init    ('e');
+  dbg_cmd_eval_init    ('E');
+  dbg_cmd_finish_init  ('F');
+  dbg_cmd_frame_init   ('f');
+  dbg_cmd_help_init    ('h');
+  dbg_cmd_info_init    ('i');
+  dbg_cmd_skip_init    ('k');
+  dbg_cmd_list_init    ('l');
+  dbg_cmd_next_init    ('n');
+  dbg_cmd_print_init   ('p');
+  dbg_cmd_pwd_init     ('P');
+  dbg_cmd_quit_init    ('q');
+  dbg_cmd_run_init     ('R');
+  dbg_cmd_source_init  ('<');
+  dbg_cmd_show_init    ('S');
+  dbg_cmd_step_init    ('s');
+  dbg_cmd_target_init  ('t');
+  dbg_cmd_up_init      ('u');
+  dbg_cmd_where_init   ('T');
+  dbg_cmd_write_init   ('w');
+  dbg_cmd_expand_init  ('w');
+  dbg_cmd_comment_init ('#');
+  dbg_cmd_set_init     ('=');
+  dbg_cmd_setq_init    ('"');
+  dbg_cmd_shell_init   ('!');
 }
 
 /* Execute a command line. */
