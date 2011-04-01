@@ -105,7 +105,7 @@ long_cmd_t commands[] = {
   { "down",     'D' },
   { "edit" ,    'e' },
   { "eval" ,    'E' },
-  { "examine" , 'x' },
+  { "expand" ,  'x' },
   { "finish"  , 'F' },
   { "frame"   , 'f' },
   { "help"    , 'h' },
@@ -334,7 +334,7 @@ cmd_initialize(void)
   dbg_cmd_up_init      ('u');
   dbg_cmd_where_init   ('T');
   dbg_cmd_write_init   ('w');
-  dbg_cmd_expand_init  ('w');
+  dbg_cmd_expand_init  ('x');
   dbg_cmd_comment_init ('#');
   dbg_cmd_set_init     ('=');
   dbg_cmd_setq_init    ('"');
