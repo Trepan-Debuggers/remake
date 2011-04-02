@@ -19,11 +19,12 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../../file.h"
 #include "../../print.h"
-#include "../info.h"
-#include "../stack.h"
 #include "../../rule.h"
 #include "../../debug.h"
 #include "../../vpath.h"
+#include "../info.h"
+#include "../msg.h"
+#include "../stack.h"
 
 const char *WARRANTY = 
 "			    NO WARRANTY\n"
@@ -74,18 +75,84 @@ dbg_target_compare(const void *p1, const void *p2)
 static void
 dbg_cmd_info_targets(bool b_verbose)
 {
-    struct file **file_slot_0 = (struct file **) hash_dump (&files, 0, 
-                                                            dbg_target_compare);
-    struct file **file_end = file_slot_0 + files.ht_fill;
-    struct file **pp_file_slot;
-    struct file *p_target;
-     
-    for (pp_file_slot = file_slot_0; pp_file_slot < file_end; pp_file_slot++) {
-        if ((p_target = *pp_file_slot) != NULL)
-            dbg_cmd_info_target_entry(p_target, b_verbose);
+  struct file **file_slot_0 = (struct file **) hash_dump (&files, 0, 
+                                                          dbg_target_compare);
+  struct file **file_end = file_slot_0 + files.ht_fill;
+  struct file **pp_file_slot;
+  struct file *p_target;
+  
+  for (pp_file_slot = file_slot_0; pp_file_slot < file_end; pp_file_slot++) {
+    if ((p_target = *pp_file_slot) != NULL)
+      dbg_cmd_info_target_entry(p_target, b_verbose);
+  }
+}
+
+/* Show line information. We want output to be compatible with gdb output.*/
+void
+dbg_cmd_info_line() 
+{
+  if (p_stack_top && p_stack_top->p_target && 
+      p_stack_top->p_target->floc.filenm) {
+    const floc_t *p_floc = &p_stack_top->p_target->floc;
+    if (!basename_filenames && strlen(p_floc->filenm) 
+        && p_floc->filenm[0] != '/') 
+      dbg_msg("Line %lu of \"%s/%s\"", 
+              p_floc->lineno, starting_directory,
+              p_floc->filenm);
+    else 
+      dbg_msg("Line %lu of \"%s\"", p_floc->lineno, p_floc->filenm);
+  } else {
+    dbg_msg("No line number info recorded.\n");
+  }
+}
+
+void 
+dbg_cmd_info_program() 
+{
+  printf(_("Starting directory `%s'\n"), starting_directory);
+  printf(_("Program invocation:\n"));
+  printf("\t");
+  dbg_print_invocation();
+  printf(_("Recursion level: %d\n"), makelevel);
+  dbg_cmd_info_line();
+  switch (last_stop_reason) 
+    {
+    case DEBUG_BRKPT_AFTER_CMD:
+      printf(_("Program is stopped after running commands.\n"));
+      break;
+    case DEBUG_BRKPT_BEFORE_PREREQ:
+      printf(_("Program stopped at a breakpoint before prequisite checking.\n"));
+	  break;
+    case DEBUG_BRKPT_AFTER_PREREQ:
+      printf(_("Program is stopped after prequisite checking.\n"));
+      break;
+    case DEBUG_GOAL_UPDATED_HIT:
+      printf(_("Program stopped for updating a goal.\n"));
+      printf("\n");
+      break;
+    case DEBUG_READ_HIT:
+      printf(_("Program stopped for reading a file.\n"));
+      printf("\n");
+      break;
+	case DEBUG_ERROR_HIT:
+	  printf(_("Program stopped after an error encountered.\n"));
+	  printf("\n");
+	  break;
+    case DEBUG_STEP_HIT:
+      printf(_("Program stopped in stepping.\n"));
+      printf("\n");
+      break;
+    case DEBUG_STEP_COMMAND:
+      printf(_("Program stopped in stepping before running a command.\n"));
+      printf("\n");
+	  break;
+    case DEBUG_NOT_GIVEN:
+      printf(_("Reason not given.\n"));
+      break;
     }
 }
 
+  
 /* Give some info regarding the running program. */
 debug_return_t 
 dbg_cmd_info(char *psz_args)
@@ -95,21 +162,7 @@ dbg_cmd_info(char *psz_args)
   } else {
     char *psz_subcmd = get_word(&psz_args);
     if (is_abbrev_of (psz_subcmd, "line", 2)) {
-      /* We want output to be compatible with gdb output.*/
-      if (p_stack_top && p_stack_top->p_target && 
-	  p_stack_top->p_target->floc.filenm) {
-	const floc_t *p_floc = &p_stack_top->p_target->floc;
-	if (!basename_filenames && strlen(p_floc->filenm) 
-	    && p_floc->filenm[0] != '/') 
-	  printf("Line %lu of \"%s/%s\"\n", 
-		 p_floc->lineno, starting_directory,
-		 p_floc->filenm);
-	else 
-	  printf("Line %lu of \"%s\"\n", p_floc->lineno, p_floc->filenm);
-      } else {
-	printf("No line number info recorded.\n");
-      }
-      
+      dbg_cmd_info_line();
     } else if (is_abbrev_of (psz_subcmd, "locals", 2)) {
       const char *psz_target = NULL;
       char *psz_subcmds   = NULL;
@@ -144,46 +197,7 @@ dbg_cmd_info(char *psz_args)
     } else if (is_abbrev_of (psz_subcmd, "frame", 2)) {
       dbg_cmd_where(psz_args);
     } else if (is_abbrev_of (psz_subcmd, "program", 1)) {
-      printf(_("Starting directory `%s'\n"), starting_directory);
-      printf(_("Program invocation:\n"));
-      printf("\t");
-      dbg_print_invocation();
-      printf(_("Recursion level: %d\n"), makelevel);
-      switch (last_stop_reason) 
-	{
-	case DEBUG_BRKPT_AFTER_CMD:
-	  printf(_("Program is stopped after running commands.\n"));
-	  break;
-	case DEBUG_BRKPT_BEFORE_PREREQ:
-	  printf(_("Program stopped at a breakpoint before prequisite checking.\n"));
-	  break;
-	case DEBUG_BRKPT_AFTER_PREREQ:
-	  printf(_("Program is stopped after prequisite checking.\n"));
-	  break;
-	case DEBUG_GOAL_UPDATED_HIT:
-	  printf(_("Program stopped for updating a goal.\n"));
-	  printf("\n");
-	  break;
-	case DEBUG_READ_HIT:
-	  printf(_("Program stopped for reading a file.\n"));
-	  printf("\n");
-	  break;
-	case DEBUG_ERROR_HIT:
-	  printf(_("Program stopped after an error encountered.\n"));
-	  printf("\n");
-	  break;
-	case DEBUG_STEP_HIT:
-	  printf(_("Program stopped in stepping.\n"));
-	  printf("\n");
-	  break;
-	case DEBUG_STEP_COMMAND:
-	  printf(_("Program stopped in stepping before running a command.\n"));
-	  printf("\n");
-	  break;
-	case DEBUG_NOT_GIVEN:
-	  printf(_("Reason not given.\n"));
-          break;
-        }
+      dbg_cmd_info_program();
     } else if (is_abbrev_of (psz_subcmd, "rules", 1)) {
       if (0 == strlen(psz_args))
 	print_rule_data_base (false);
