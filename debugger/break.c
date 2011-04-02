@@ -21,6 +21,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <assert.h>
 #include "break.h"
+#include "msg.h"
 #include "filedef.h"
 #include "print.h"
 
@@ -62,29 +63,29 @@ add_breakpoint (file_t *p_target, unsigned int brkpt_mask)
 
   /* Finally, note that we are tracing this target. */
   if (p_target->tracing & (BRK_BEFORE_PREREQ & brkpt_mask)) {
-    printf(_("Note: prerequisite breakpoint already set at target %s.\n"), 
-	   p_target->name);
+    dbg_msg(_("Note: prerequisite breakpoint already set at target %s."), 
+            p_target->name);
   } 
   if (p_target->tracing & (BRK_AFTER_PREREQ & brkpt_mask)) {
-    printf(_("Note: command breakpoint already set at target %s.\n"), 
-	   p_target->name);
+    dbg_msg(_("Note: command breakpoint already set at target %s."), 
+            p_target->name);
   } 
   if (p_target->tracing & (BRK_AFTER_CMD & brkpt_mask)) {
-    printf(_("Note: target end breakpont set at target %s.\n"), 
-	   p_target->name);
+    dbg_msg(_("Note: target end breakpont set at target %s."), 
+            p_target->name);
   }
   p_target->tracing = brkpt_mask;
   printf(_("Breakpoint %d on target %s"), i_breakpoints, p_target->name);
   if (p_target->floc.filenm)
-    printf(": file %s, line %lu.\n", p_target->floc.filenm,
-           p_target->floc.lineno);
+    dbg_msg(": file %s, line %lu.", p_target->floc.filenm,
+            p_target->floc.lineno);
   else
     printf(".\n");
   if (p_target->updated)
-      printf("Warning: target is already updated; so it might not get stopped at again\n");
+      dbg_msg("Warning: target is already updated; so it might not get stopped at again.");
   else if (p_target->updating && (brkpt_mask & (BRK_BEFORE_PREREQ | BRK_AFTER_PREREQ))) {
-      printf("Warning: target is in the process of being updated;\n");
-      printf("so it might not get stopped at again\n");
+      dbg_msg("Warning: target is in the process of being updated;");
+      dbg_msg("so it might not get stopped at again.");
   }
   return true;
   
@@ -97,12 +98,12 @@ bool
 remove_breakpoint (unsigned int i) 
 {
   if (!i) {
-    printf(_("Invalid Breakpoint number 0.\n"));
+    dbg_msg(_("Invalid Breakpoint number 0."));
     return false;
   }
   if (i > i_breakpoints) {
-    printf(_("Breakpoint number %d is too high. " 
-	   "%d is the highest breakpoint number.\n"), i, i_breakpoints);
+    dbg_msg(_("Breakpoint number %d is too high. " 
+	   "%d is the highest breakpoint number."), i, i_breakpoints);
     return false;
   } else {
     /* Find breakpoint i */
@@ -121,18 +122,18 @@ remove_breakpoint (unsigned int i)
 
       if (p->p_target->tracing) {
 	p->p_target->tracing = BRK_NONE;
-	printf(_("Breakpoint %d on target %s cleared\n"), 
+	dbg_msg(_("Breakpoint %d on target %s cleared"),
 	       i, p->p_target->name);
 	free(p);
 	return true;
       } else {
-	printf(_("No breakpoint at target %s; nothing cleared.\n"), 
+	dbg_msg(_("No breakpoint at target %s; nothing cleared."),
 	       p->p_target->name);
 	free(p);
 	return false;
       }
     } else {
-      printf(_("No Breakpoint number %d set.\n"), i);
+      dbg_msg(_("No Breakpoint number %d set."), i);
       return false;
     }
   }
@@ -145,11 +146,11 @@ list_breakpoints (void)
   breakpoint_node_t *p;
 
   if (!p_breakpoint_top) {
-    printf(_("No breakpoints.\n"));
+    dbg_msg(_("No breakpoints."));
     return;
   }
 
-  printf(  "Num Type           Disp Enb target     What\n");
+  dbg_msg(  "Num Type           Disp Enb target     What");
   for (p = p_breakpoint_top; p; p = p->p_next) {
     printf("%3d breakpoint     keep y   in %s", 
 	   p->i_num,

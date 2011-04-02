@@ -47,11 +47,14 @@ DEBUGGER_SRC = 	\
 		debugger/break.c \
 		debugger/cmd.c 	\
 		debugger/fns.c 	\
+		debugger/msg.c 	\
 		debugger/stack.c
 
 DEBUGGER_H = \
 		debugger/break.h 		\
 		debugger/cmd.h 			\
+		debugger/fns.h 			\
+		debugger/msg.h 			\
 		debugger/command/break.h 	\
 		debugger/command/chdir.h  	\
 		debugger/command/comment.h 	\

@@ -20,7 +20,7 @@ Boston, MA 02111-1307, USA.  */
 
 /* debugger command interface. */
 
-#include "make.h"
+#include "msg.h"
 #include "debug.h"
 #include "file.h"
 #include "print.h"
@@ -357,7 +357,7 @@ execute_line (char *psz_line)
   }
   if (!command)
     {
-      fprintf (stderr, _("No such debugger command: %s.\n"), psz_word);
+      dbg_errmsg(_("No such debugger command: %s."), psz_word);
       return debug_readloop;
     }
 
@@ -386,7 +386,7 @@ dbg_cmd_show_command (char *psz_args)
   UNUSED_ARGUMENT(psz_args);
   if (!hist_list) return debug_readloop;
   for (i=0; hist_list[i]; i++) {
-    printf("%5d  %s\n", i, hist_list[i]->line);
+    dbg_msg("%5d  %s", i, hist_list[i]->line);
   }
 #endif
   return debug_readloop;
@@ -398,7 +398,7 @@ dbg_cmd_show_command (char *psz_args)
 static debug_return_t dbg_cmd_set_var (char *psz_args, int expand) 
 {
   if (!psz_args || 0==strlen(psz_args)) {
-    printf(_("You need to supply a variable name.\n"));
+    dbg_msg(_("You need to supply a variable name."));
   } else {
     variable_t *p_v;
     char *psz_varname = get_word(&psz_args);
@@ -415,7 +415,7 @@ static debug_return_t dbg_cmd_set_var (char *psz_args, int expand)
       define_variable_in_set(p_v->name, u_len, psz_value,
 			     o_debugger, 0, NULL,
 			     &(p_v->fileinfo));
-      printf(_("Variable %s now has value '%s'\n"), psz_varname,
+      dbg_msg(_("Variable %s now has value '%s'\n"), psz_varname,
 	     psz_value);
     } else {
       try_without_dollar(psz_varname);
@@ -524,18 +524,18 @@ debug_return_t enter_debugger (target_stack_node_t *p,
     } else if (-2 == errcode) {
       if (0 == makelevel) {
 	printf("\nMakefile terminated.\n");
-	printf("Use q to quit or R to restart\n");
+	dbg_msg("Use q to quit or R to restart");
       } else {
 	printf("\nMakefile finished at level %d. Use R to restart\n", 
 	       makelevel);
-	printf("the makefile at this level or 's', 'n', or 'F' to continue "
-	       "in parent\n");
+	dbg_msg("the makefile at this level or 's', 'n', or 'F' to continue "
+	       "in parent");
 	in_debugger = DEBUGGER_QUIT_RC;
       }
     } else {
       printf("\n***Entering debugger because we encountered a fatal error.\n");
-      printf("***Exiting the debugger will exit make with exit code %d.\n", 
-	     errcode);
+      dbg_errmsg("Exiting the debugger will exit make with exit code %d.", 
+                 errcode);
     }
   }
 
