@@ -65,6 +65,12 @@ dbg_cmd_set(char *psz_args)
       else
 	on_off_toggle(psz_args, &silent_flag);
       dbg_cmd_show("silent");
+    } else if (is_abbrev_of (psz_varname, "trace", 3)) {
+      if (!psz_args || !*psz_args)
+	on_off_toggle("toggle", &no_shell_trace);
+      else
+	on_off_toggle(psz_args, &silent_flag);
+      dbg_cmd_show("silent");
     } else {
       /* Treat as set variable */
       return dbg_cmd_set_var(psz_args, 1);
@@ -81,15 +87,8 @@ dbg_cmd_set_init(unsigned int c)
   short_command[c].use =  
     _("set {*option*|variable} VALUE");
   short_command[c].doc  = 
-    _("set basename {on|off|toggle} - show full name or basename?\n"
-      "set debug debug-mask - like --debug value.\n\n"
-      "set ignore-errors {on|off|toggle} - like --ignore-errors option\n\n"
-      "set keep-going {on|off|toggle} - like --keep-going option\n\n"
-      "set silent {on|off|toggle} - like --silent option\n\n"
-      "set trace {on|off|toggle} - set tracing status\n"
-      "set variable *var* *value*\n"
-      "Set MAKE variable to value. Variable definitions\n"
-      "inside VALUE are expanded before assignment occurs."
+    _("Change debugger setting or GNU Make variable\n"
+      "If \"set\" is given by itself a list of \"set\" subcommands is listed.\n"
       );
 }
 

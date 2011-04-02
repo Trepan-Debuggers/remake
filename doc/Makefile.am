@@ -22,7 +22,8 @@ TEXI2PDF = texi2dvi --pdf
 
 EXTRA_DIST = test1.mk test2.mk
 
-info_TEXINFOS =	make.texi remake.texi
+# info_TEXINFOS =	make.texi remake.texi
+info_TEXINFOS =	remake.texi
 make_TEXINFOS = fdl.texi make-stds.texi
 
 MOSTLYCLEANFILES = make.tgs make.pdf make.html remake.cps rmake.kys remake.html remake.fns remake.ps.gz remake.pdf 

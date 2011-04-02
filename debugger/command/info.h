@@ -224,10 +224,10 @@ static void
 dbg_cmd_info_init(unsigned int c) 
 {
   short_command[c].func = &dbg_cmd_info;
-  short_command[c].use = _("info [THING]");
+  short_command[c].use = _("info [SUBCOMMAND]");
   short_command[c].doc = 
-    _("Show the state of THING.\n" \
-      "\tIf THING is not specified, give list of info subcommands.");
+    _("Show program information regarding SUBCOMMAND.\n" \
+      "\tIf SUBCOMMAND is not specified, give list of \"info\" subcommands.");
 }
 
 /* 

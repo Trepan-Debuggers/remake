@@ -166,28 +166,30 @@ typedef struct {
   bool b_onoff;         /* True if on/off variable, false if int. 
 			   FIXME: generalize into enumeration.
 			 */
+  unsigned int min_abbrev; /* Fewest number of characters needed
+                              to match name. */
 } subcommand_var_info_t;
 
 subcommand_var_info_t show_subcommands[] = {
   { "args",     "Show argument list to give program when it is started",
-    NULL, false},
+    NULL, false, 1},
   { "basename", "Show if we are to show short or long filenames",
-    &basename_filenames, true},
+    &basename_filenames, true, 1},
   { "commands", "Show the history of commands you typed.",
-    NULL, false},
+    NULL, false, 1},
   { "debug",    "GNU Make debug mask (set via --debug or -d)",
-    &db_level, false},
+    &db_level, false, 1},
   { "ignore-errors", "Value of GNU Make --ignore-errors (or -i) flag",
-    &ignore_errors_flag, true},
+    &ignore_errors_flag, true, 1},
   { "keep-going",    "Value of GNU Make --keep-going (or -k) flag",
-    &keep_going_flag,    true},
+    &keep_going_flag,    true, 1},
   { "silent",        "Value of GNU Make --silent (or -s) flags",
-    &silent_flag,        true},
+    &silent_flag,        true, 1},
   { "version",       "Show the version of GNU Make + dbg.",
-    NULL,                false},
+    NULL,                false, 1},
   { "warranty",      "Various kinds of warranty you do not have.",
-    NULL,                false},
-  { NULL, NULL, NULL,    false}
+    NULL,                false, 1},
+  { NULL, NULL, NULL,    false, 0}
 };
 
 /* Documentation for help set, and help set xxx. Note the format has
@@ -198,44 +200,44 @@ subcommand_var_info_t show_subcommands[] = {
 */
 subcommand_var_info_t set_subcommands[] = {
   { "basename", "Set if we are to show short or long filenames",
-    &basename_filenames, true},
-  { "debug",    "Set GNU Make debug mask (set via --debug or -d)",
-    &db_level, false},
-  { "ignore-errors", "Set value of GNU Make --ignore-errors (or -i) flag",
-    &ignore_errors_flag, true},
-  { "keep-going",    "Set value of GNU Make --keep-going (or -k) flag",
-    &keep_going_flag,    true},
-  { "silent",        "Set value of GNU Make --silent (or -s) flags",
-    &silent_flag,        true},
-  { "variable",      "Set a GNU Make variable",
-    NULL,                false},
-  { NULL, NULL, NULL, false }
+    &basename_filenames, true, 1},
+  { "debug",    "Set GNU Make debug mask (set via --debug or -d).",
+    &db_level, false, 1},
+  { "ignore-errors", "Set value of GNU Make --ignore-errors (or -i) flag.",
+    &ignore_errors_flag, true, 1},
+  { "keep-going",    "Set value of GNU Make --keep-going (or -k) flag.",
+    &keep_going_flag,    true, 1},
+  { "silent",        "Set value of GNU Make --silent (or -s) flags.",
+    &silent_flag,        true, 1},
+  { "trace",        "Set value of shell_tracing.",
+    &no_shell_trace,    false, 3},
+  { "variable",      "Set a GNU Make variable.",
+    NULL,                false, 0},
+  { NULL, NULL, NULL, false, 0}
 };
 
 subcommand_var_info_t info_subcommands[] = {
   { "break",     "Show list of target breakpoints",
-    NULL, false},
+    NULL, false, 1},
   { "line", "Show line and Makefile name of where we are currently stopped ",
-    NULL, true},
+    NULL, true, 2},
   { "locals", "Show target local variables and their values",
-    NULL, true},
+    NULL, true, 2},
   { "files",    "Show read-in Makefiles. The last is the one initially named",
-    NULL, false},
+    NULL, false, 2},
   { "frame",    "Show target-stack frame",
-    NULL, false},
+    NULL, false, 2},
   { "rules", "Value of GNU Make --ignore-errors (or -i) flag",
-    NULL, true},
+    NULL, true, 1},
   { "program",    "Show program information and why we are stopped",
-    NULL,    true},
+    NULL,    true, 1},
   { "targets", "Show the explicitly-named targets found in read Makefiles.",
-    NULL, false},
+    NULL, false, 1},
   { "variables",  "Show all GNU Make variables",
-    NULL,        true},
-  { "version",       "Show the version of GNU Make + dbg.",
-    NULL,                false},
+    NULL,        true, 2},
   { "warranty",      "Various kinds of warranty you do not have.",
-    NULL,                false},
-  { NULL, NULL, NULL,    false}
+    NULL,                false, 1},
+  { NULL, NULL, NULL,    false, 0}
 };
 
 /* Look up NAME as the name of a command, and return a pointer to that
@@ -298,20 +300,6 @@ find_command (const char *psz_name)
 #include "command/up.h"
 #include "command/where.h"
 #include "command/write.h"
-
-void 
-help_cmd_set_show(const char *psz_fmt, subcommand_var_info_t *p_subcmd) 
-{
-  printf(psz_fmt, p_subcmd->name, p_subcmd->doc );
-  if (p_subcmd->var) {
-    if (p_subcmd->b_onoff)
-      printf(" is %s.", 
-	     var_to_on_off(* (int *) p_subcmd->var));
-    else 
-      printf(" is %d.", *(int *)(p_subcmd->var));
-  }
-  printf("\n");
-}
 
 /* Needs to come after dbg_cmd_show */
 #include "command/help.h"

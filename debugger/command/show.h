@@ -46,8 +46,7 @@ dbg_cmd_show(char *psz_arg)
     } else if (is_abbrev_of (psz_arg, "silent", 3)) {
       printf("silent is %s.\n", var_to_on_off(silent_flag));
     } else if (is_abbrev_of (psz_arg, "version", 3)) {
-      printf("version: ");
-      print_version();
+      printf("version: %s\n", version_string);
     } else if (is_abbrev_of (psz_arg, "warranty", 3)) {
       printf("warranty: ");
       printf("%s", WARRANTY);
@@ -63,10 +62,10 @@ static void
 dbg_cmd_show_init(unsigned int c) 
 {
   short_command[c].func = &dbg_cmd_show;
-  short_command[c].use = _("show [thing]");
+  short_command[c].use = _("show [SUBCOMMAND]");
   short_command[c].doc = 
-    _("Show the state of thing.\n" \
-      "If no 'thing' is specified, show everything there is to show.");
+    _("Show debugger information regarding SUBCOMMAND.\n" \
+      "If no SUBCOMMAND is specified, give a list of \"show\" subcommands.\n");
 }
 
 
