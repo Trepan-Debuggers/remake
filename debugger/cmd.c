@@ -439,7 +439,8 @@ debug_return_t enter_debugger (target_stack_node_t *p,
 			       debug_enter_reason_t reason)
 {
   debug_return_t debug_return = debug_readloop;
-  static int i_init = 0;
+  static bool b_init = false;
+  static bool b_readline_init = false;
   char open_depth[MAX_NEST_DEPTH];
   char close_depth[MAX_NEST_DEPTH];
   unsigned int i = 0;
@@ -473,14 +474,17 @@ debug_return_t enter_debugger (target_stack_node_t *p,
         ;
       }
 
-  if (0 == i_init) {
 #ifdef HAVE_LIBREADLINE
-    rl_initialize ();
-    using_history ();
-    add_history ("");
+  if (use_readline_flag && !b_readline_init) {
+      rl_initialize ();
+      using_history ();
+      add_history ("");
+      b_readline_init = true;
+  }
 #endif
+  if (!b_init) {
     cmd_initialize();
-    i_init = 1;
+    b_init = true;
   }
 
 
@@ -562,7 +566,7 @@ debug_return_t enter_debugger (target_stack_node_t *p,
         printf("%s", prompt);
         if (line == NULL) line = calloc(1, 2048);
         line = fgets(line, 2048, stdin);
-        chomp(line);
+        if (NULL != line) chomp(line);
       }
 
     if ( line ) {
