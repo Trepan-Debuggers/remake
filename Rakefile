@@ -15,6 +15,11 @@ task :'test:basic' do
   sh "make check"
 end
 
+desc "Install via make"
+task :'install' do
+  sh "make install"
+end
+
 desc "Debugger-specific tests"
 task :'test:dbg' do
   sh "rspec #{SPEC_FILES.to_a.join(' ')}"

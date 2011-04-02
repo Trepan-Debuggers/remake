@@ -118,13 +118,13 @@ dbg_cmd_info_program()
   switch (last_stop_reason) 
     {
     case DEBUG_BRKPT_AFTER_CMD:
-      printf(_("Program is stopped after running commands.\n"));
+      printf(_("Program is stopped after running rule command(s).\n"));
       break;
     case DEBUG_BRKPT_BEFORE_PREREQ:
-      printf(_("Program stopped at a breakpoint before prequisite checking.\n"));
+      printf(_("Program stopped at a breakpoint before rule prequisite checking.\n"));
 	  break;
     case DEBUG_BRKPT_AFTER_PREREQ:
-      printf(_("Program is stopped after prequisite checking.\n"));
+      printf(_("Program is stopped after rule prequisite checking.\n"));
       break;
     case DEBUG_GOAL_UPDATED_HIT:
       printf(_("Program stopped for updating a goal.\n"));
@@ -143,7 +143,7 @@ dbg_cmd_info_program()
       printf("\n");
       break;
     case DEBUG_STEP_COMMAND:
-      printf(_("Program stopped in stepping before running a command.\n"));
+      printf(_("Program stopped in stepping before running rule command(s).\n"));
       printf("\n");
 	  break;
     case DEBUG_NOT_GIVEN:

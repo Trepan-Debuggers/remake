@@ -1,6 +1,6 @@
-.TH MAKE 1 "22 August 1989" "GNU" "LOCAL USER COMMANDS"
+.TH REMAKE 1 "April 2011" "GNU" "LOCAL USER COMMANDS"
 .SH NAME
-make \- GNU make utility to maintain groups of programs
+remake \- GNU make utility with enhanced debugger
 .SH SYNOPSIS
 .B "make "
 [
@@ -25,7 +25,8 @@ recompile them.
 The manual describes the GNU implementation of
 .IR make ,
 which was written by Richard Stallman and Roland McGrath, and is
-currently maintained by Paul Smith.
+currently maintained by Paul Smith. Extended error reporting and
+debugger extensions were written by Rocky Bernstein.
 Our examples show C programs, since they are most common, but you can use
 .I make
 with any programming language whose compiler can be run with a
@@ -159,6 +160,60 @@ for showing implicit rules,
 for details on invocation of commands, and
 .I m
 for debugging while remaking makefiles.
+
+.TP 0.5i
+.B \-x, " \-\-trace"
+Print trace information. Commands in rules which are normally
+silent are shown, same as if \fB\-\-just\-print\fR were given.
+.TP 0.5i
+.BI \-\-trace "[=FLAGS]"
+Set trace flags
+If the
+.I FLAGS
+are omitted, then the behavior is the same as if
+.B \-d
+was specified.
+.I FLAGS
+may be
+.I read
+for all tracing Makefiles,
+.I noshell
+which is like \fInormal\fR but shell tracing
+is disabled, or
+.I full
+for maximum tracing.
+
+
+
+.TP 0.5i
+.B \-X, " \-\-debugger"
+Enter debugger
+.TP 0.5i
+.BI \-\-debugger "[=TYPE]"
+Enter debugger with 
+If the
+.I TYPE
+are omitted, then the behavior is the same as if
+.B \-X
+was specified.
+.I TYPE
+may be
+.I goal
+for all tracing Makefiles read
+.BR \-d ),
+.I preread
+which is the same as given no option
+.I preaction
+which is like \fInormal\fR but shell tracing
+is disabled
+.I full
+for maximum tracing.
+.I fatal
+for entering the debugger on a fatal error, 
+.I error
+for entering the debugger on an error
+
+
 .TP 0.5i
 .BR \-e , " \-\-environment\-overrides"
 Give variables taken from the environment precedence
