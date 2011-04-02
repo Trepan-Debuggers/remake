@@ -1295,7 +1295,7 @@ just @key{RET}. Some commands which require a parameter, such as
 * Help::                  How to ask for help (help)
 * Quit::                  Leaving the debugger (quit)
 * Stopping::              Stopping and continuing (break, watch, step, cont...)
-* Information::           Status and Debugger settings (info, show)
+* Information::           Status and Debugger settings (info, set, show)
 * Stack::                 Examining the stack (where, up, down, frame)
 * Data::                  Examining data (print, target, expand, info variables)
 * Evaluation/Execution::  Arbitrary execution (eval, shell)
@@ -1407,9 +1407,13 @@ point to all the sub-commands.  @xref{Command Index}.
 @kindex i @r{(@code{info})}
 @item info
 This command (abbreviated @code{i}) is for describing the state of
-your program.  For example, you can list the arguments given to your
-script with @code{info args}.  You can get a complete list of the
+your program.  You can get a complete list of the
 @code{info} sub-commands with @w{@code{help info}}.
+
+Subcommands can be abbreviated with the minimum number of letters to
+make that subcommand distinct from another. For example @code{info lo}
+is the same as @code{info locals} and @code{info li} is the same as
+@code{info line}.
 
 @example
 remake<0> @b{help info}
@@ -1418,38 +1422,8 @@ remake<0> @b{help info}
 	If no 'thing' is specified, show everything there is to show.
 
 	Available info subcommands are:
-	 line locals makefiles target variables warranty
+	 line locals makefiles targets variables warranty
 @end example
-@end table
-
-Subcommands can be abbreviated with the minimum number of letters to
-make that subcommand distinct from another. For example @code{info lo}
-is the same as @code{info locals} and @code{info li} is the same as
-@code{info line}.
-
-@table @code
-@kindex info line
-@item info line
-Shows the line number and file of for the place that you are currently
-stopped.
-
-@kindex info locals
-@item info locals
-Displays a the values of the automatic variables.
-
-@kindex info makefiles
-@item info makefiles
-Displays the list of Makefiles read in the order that they were read
-in. The last Makefile listed is the one you started with (e.g. Makefile).
-
-@kindex info target
-@item info target
-Displays target information.
-
-@kindex info warranty
-@item info warranty
-Displays GNU Warranty
-
 @end table
 
 @node Quit
@@ -1521,7 +1495,8 @@ your script should stop by target name.
 @kindex b @r{(@code{break})}
 @cindex latest breakpoint
 Breakpoints are set with the @code{break} command (abbreviated
-@code{b}).  
+@code{b}).  Use @code{info targets} to get a list of target names that
+you can break at.
 
 @table @code
 @item break
@@ -1679,7 +1654,7 @@ a Makefile.
 @kindex c @r{(@code{continue}) @ovar{@var{target}}} 
 Resume program execution until the next breakpoint or recursive make is
 called. If a target name is given, a temporary breakpoint is set
-there. 
+there. Use @code{info target} to get a list of target names you can use.
 
 A common mistake is giving a target already updated, so we will warn
 about that situation. It is possible to set a breakpoint on a target
@@ -1716,28 +1691,101 @@ of the interrupt: to kill the program.
 @node Information
 @section Status and Debugger Settings (@samp{info}, @samp{show}, @samp{set})
 
-In addition to @code{help}, you can use @value{DBG} commands
-@code{info} and @code{show} to inquire about the state of your
-program, or the state of @value{REMAKE} itself.  Each command supports
-many topics of inquiry; here we introduce each of them in the
-appropriate context.  The listings under @code{info} in the Index
-point to all the sub-commands.  @xref{Command Index}.
+@menu
+* Info::        Showing information about the program being debugged
+* Set::         Change debugger settings
+* Show::        Show debugger settings
+@end menu
+
+In addition to @code{help}, you can use @value{DBG} commands @code{info}
+and @code{show} to inquire about the state of your program, or the state
+of @value{REMAKE} itself.  The @code{set} command allow you to change
+debugger behavior and in some cases program behavior.
+
+@node Info
+@subsection Showing information about the program being debugged (@samp{info})
+@c @group
+This @code{info} command (abbreviated @code{i}) is for describing the state of
+your program.  For example, you can list the current @code{$1}, @code{$2}
+parameters with @code{info args}, or list the breakpoints you have set
+with @code{info breakpoints} or @code{info watchpoints}.  You can get
+a complete list of the @code{info} sub-commands with @w{@code{help
+info}}.
 
 @c @group
 @table @code
-@kindex info
-@kindex i @r{(@code{info})}
-@item info
-This command (abbreviated @code{i}) is for describing the state of
-your debugger setting.  For example, you can show whether @value{REMAKE}
-has set to ignore errors or not. 
+@kindex info targets
+@kindex i t @r{(@code{info targets})}
+@item info targets @r{@ovar{verbose}}
+Use @code{info targets} to get a list of all the targets explicitly
+mentioned in the makefiles that are read. The location of each target is
+given before the target name.
 
+The result of running this on the sample makefile used in
+@ref{Tracing Not}:
+
+@smallexample
+@group
+remake<0> info targets
+info targets
+test1.mk:2:
+	.PHONY
+test1.mk:3:
+	all
+test1.mk:5:
+	foo
+remake<1> 
+@end group
+@end smallexample 
+
+@item info program
+@kindex info program
+@kindex i p @r{(@code{info files})}
+Use @code{info program} to give information about the state of the
+stopping point.
+
+@item info break
+@kindex info break
+@kindex i b @r{(@code{info files})}
+Use @code{info break} to give a list of breakpoint currently in effect.
+
+@item info line
+@kindex info line
+Shows the line number and file of for the place that you are currently
+stopped.
+
+@item info locals
+@kindex info locals
+Displays a the values of the automatic variables.
+
+@item info makefiles
+@kindex info makefiles
+Displays the list of Makefiles read in the order that they were read
+in. The last Makefile listed is the one you started with (e.g. Makefile).
+
+@item info warranty
+@kindex info warranty
+Displays GNU Warranty
+
+@end table
+
+@c @end group
+
+@node Set
+@subsection Change debugger settings (@samp{set})
+
+@table @code
 @kindex set
 @item set
 In addition to showing @value{REMAKE} settings you can change them or
 change @value{REMAKE} variables with @code{set}.  For example, you can
 change setting @value{REMAKE} has whether to ignore errors.
+@end table
 
+@node Show
+@subsection Show information about the debugger (@samp{show})
+
+@table @code
 @kindex show
 @item show
 In contrast to @code{info}, @code{show} is for describing the state of

@@ -64,25 +64,25 @@ dbg_cmd_help(char *psz_args)
     }
     if (p_command) {
       if ( p_command->func == &dbg_cmd_info ) {
-	printf("  %s:\n\t%s\n", p_command->use, p_command->doc);
-	printf ("\tAvailable info subcommands are:\n\t");
-	for (i = 0; info_subcommands[i]; i++) {
-	  printf(" %s", info_subcommands[i]);
+	printf("%s:\n\t%s\n", p_command->use, p_command->doc);
+	printf ("Available info subcommands are:\n");
+	for (i = 0; info_subcommands[i].name; i++) {
+	    help_cmd_set_show("info %-10s -- %s", &(info_subcommands[i]));
 	}
 	printf("\n");
       } else if ( p_command->func == &dbg_cmd_show ) {
 	for (i = 0; show_subcommands[i].name; i++) {
-	  help_cmd_set_show("show %-15s -- %s", &(show_subcommands[i]));
+	  help_cmd_set_show("show %-10s -- %s", &(show_subcommands[i]));
 	}
       } else if ( p_command->func == &dbg_cmd_set ) {
 	if (!psz_args || !*psz_args) {
 	  for (i = 0; set_subcommands[i].name; i++) {
-	    help_cmd_set_show("set %s -- %s", &(set_subcommands[i]));
+	    help_cmd_set_show("set %-10s -- %s", &(set_subcommands[i]));
 	  }
 	} else {
 	  for (i = 0; set_subcommands[i].name; i++) {
 	    if ( !strcmp(psz_args, set_subcommands[i].name) ) {
-	      help_cmd_set_show("set %s -- %s", &(set_subcommands[i]));
+	      help_cmd_set_show("set %-10s -- %s", &(set_subcommands[i]));
 	      return debug_readloop;
 	    }
 	  }

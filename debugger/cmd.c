@@ -158,22 +158,6 @@ typedef struct {
   const char *doc;	/* short description of subcommand */
 } subcommand_info_t;
 
-char *info_subcommands[] = {
-  "break",
-  "line",
-  "locals",
-  "files",
-  "frame",
-  "makefiles",
-  "program",
-  "rules",
-  "target",
-  "variables",
-  "warranty",
-  NULL
-};
-
-
 typedef struct {
   const char *name;	/* name of subcommand command. */
   const char *doc;	/* short description of subcommand */
@@ -226,6 +210,32 @@ subcommand_var_info_t set_subcommands[] = {
   { "variable",      "Set a GNU Make variable",
     NULL,                false},
   { NULL, NULL, NULL, false }
+};
+
+subcommand_var_info_t info_subcommands[] = {
+  { "break",     "Show list of target breakpoints",
+    NULL, false},
+  { "line", "Show line and Makefile name of where we are currently stopped ",
+    NULL, true},
+  { "locals", "Show target local variables and their values",
+    NULL, true},
+  { "files",    "Show read-in Makefiles. The last is the one initially named",
+    NULL, false},
+  { "frame",    "Show target-stack frame",
+    NULL, false},
+  { "rules", "Value of GNU Make --ignore-errors (or -i) flag",
+    NULL, true},
+  { "program",    "Show program information and why we are stopped",
+    NULL,    true},
+  { "targets", "Show the explicitly-named targets found in read Makefiles.",
+    NULL, false},
+  { "variables",  "Show all GNU Make variables",
+    NULL,        true},
+  { "version",       "Show the version of GNU Make + dbg.",
+    NULL,                false},
+  { "warranty",      "Various kinds of warranty you do not have.",
+    NULL,                false},
+  { NULL, NULL, NULL,    false}
 };
 
 /* Look up NAME as the name of a command, and return a pointer to that

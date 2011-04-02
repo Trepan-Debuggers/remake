@@ -49,18 +49,41 @@ const char *WARRANTY =
 "POSSIBILITY OF SUCH DAMAGES.\n";
 
 
-static void
-dbg_cmd_info_target_entry (const void *item)
+/*! Show target information: location and name. */
+static void 
+dbg_cmd_info_target_entry (const file_t *p_target, bool b_verbose) 
 {
-  file_t *p_target = (file_t *) item;
-  print_target_props(p_target, 0);
+    const floc_t *p_floc = &p_target->floc;
+    if (p_floc) {
+        if (p_floc->filenm)
+            printf("%s:%lu:\n", p_floc->filenm, p_floc->lineno);
+        else if (!b_verbose)
+            return;
+        printf("\t%s\n", p_target->name);
+    }
 }
 
+int
+dbg_target_compare(const void *p1, const void *p2) 
+{
+    const struct file *p_target1 = *(const file_t **) p1;
+    const struct file *p_target2 = *(const file_t **) p2;
+    return strcmp(p_target1->name, p_target2->name);
+}
 
 static void
-dbg_cmd_info_targets(void)  
+dbg_cmd_info_targets(bool b_verbose)
 {
-    hash_map (&files, dbg_cmd_info_target_entry);
+    struct file **file_slot_0 = (struct file **) hash_dump (&files, 0, 
+                                                            dbg_target_compare);
+    struct file **file_end = file_slot_0 + files.ht_fill;
+    struct file **pp_file_slot;
+    struct file *p_target;
+     
+    for (pp_file_slot = file_slot_0; pp_file_slot < file_end; pp_file_slot++) {
+        if ((p_target = *pp_file_slot) != NULL)
+            dbg_cmd_info_target_entry(p_target, b_verbose);
+    }
 }
 
 /* Give some info regarding the running program. */
@@ -175,9 +198,14 @@ dbg_cmd_info(char *psz_args)
 	    printf(_("Rule %s not found.\n"), psz_args);
 	}
     } else if (is_abbrev_of (psz_subcmd, "stack", 1)) {
-      print_target_stack(p_stack_top, i_stack_pos, MAX_STACK_SHOW);
+        print_target_stack(p_stack_top, i_stack_pos, MAX_STACK_SHOW);
     } else if (is_abbrev_of (psz_subcmd, "targets", 1)) {
-	dbg_cmd_info_targets ();
+        if (0 == strlen(psz_args))
+            dbg_cmd_info_targets (false);
+        else if (is_abbrev_of (psz_args, "verbose", 1))
+            dbg_cmd_info_targets (true);
+        else
+            printf("Expecting verbose or nothing\n");
     } else if (is_abbrev_of (psz_subcmd, "variables", 1)) {
       print_variable_data_base();
     } else if (is_abbrev_of (psz_subcmd, "vpath", 1)) {
@@ -198,8 +226,8 @@ dbg_cmd_info_init(unsigned int c)
   short_command[c].func = &dbg_cmd_info;
   short_command[c].use = _("info [THING]");
   short_command[c].doc = 
-    _("Show the state of thing.\n" \
-      "\tIf no 'thing' is specified, show everything there is to show.");
+    _("Show the state of THING.\n" \
+      "\tIf THING is not specified, give list of info subcommands.");
 }
 
 /* 

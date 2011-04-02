@@ -1,5 +1,14 @@
 2011-04-01  rocky <rocky@gnu.org>
 
+	* main.c: Revise bug reporting location
+
+2011-04-01  rocky <rocky@gnu.org>
+
+	* ChangeLog, main.c: Help option --readline is really --no-readline
+
+
+2011-04-01  rocky <rocky@gnu.org>
+
 	* tests/scripts/features/recursion, tests/scripts/variables/MAKE: In
 	tests, $make_path works better than #MAKEFILE# on cygwin.
 

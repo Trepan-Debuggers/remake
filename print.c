@@ -361,7 +361,7 @@ print_target_prefix (const char *p_name)
   }
 }
 
-/*! Show a command before executing it. */
+/*! Show target information: location and name. */
 extern void 
 print_file_target_prefix (const file_t *p_target) 
 {
