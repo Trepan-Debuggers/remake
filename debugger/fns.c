@@ -271,7 +271,8 @@ static char *reason2str[] = {
     "rd",
     "!!",
     "--",
-    "++"
+    "++",
+    ":o"
 };
 
     
@@ -282,12 +283,11 @@ print_debugger_location(const file_t *p_target, debug_enter_reason_t reason,
 			const floc_stack_node_t *p_stack_floc)
 {
   if (p_target_loc) {
-    printf("\n");
     if (reason != DEBUG_NOT_GIVEN)
       printf("%s ", reason2str[reason]);
     printf("(");
-    if ( !p_target_loc->filenm && !p_target_loc->lineno 
-	 && p_target->name ) {
+    if ( !p_target_loc->filenm && p_target_loc->lineno != 0 
+	 && p_target && p_target->name ) {
       /* We don't have file location info in the target floc, but we
 	 do have it as part of the name, so use that. This happens for
 	 example with we've stopped before reading a Makefile.

@@ -24,6 +24,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "job.h"
 #include "commands.h"
 #include "debug.h"
+#include "debugger/cmd.h"
 
 #ifdef _AMIGA
 #include "amiga.h"
@@ -1380,6 +1381,23 @@ func_eval (char *o, char **argv, const char *funcname UNUSED)
 }
 
 
+/*
+  $(debugger)
+
+  Always resolves to the empty string.
+
+  Treat the arguments as a segment of makefile, and parse them.
+*/
+
+#ifdef DEBUGGER_FIXED
+static char *
+func_debugger (char *o, char **argv UNUSED, const char *funcname UNUSED)
+{
+  enter_debugger(p_stack_top, NULL, 0, DEBUG_EXPLICIT_CALL);
+  return o;
+}
+#endif
+
 static char *
 func_value (char *o, char **argv, const char *funcname UNUSED)
 {
@@ -2131,6 +2149,9 @@ static struct function_table_entry function_table_init[] =
   { STRING_SIZE_TUPLE("and"),           1,  0,  0,  func_and},
   { STRING_SIZE_TUPLE("value"),         0,  1,  1,  func_value},
   { STRING_SIZE_TUPLE("eval"),          0,  1,  1,  func_eval},
+#ifdef DEBUGGER_FIXED
+  { STRING_SIZE_TUPLE("debugger"),      0,  1,  0,  func_debugger},
+#endif
 #ifdef EXPERIMENTAL
   { STRING_SIZE_TUPLE("eq"),            2,  2,  1,  func_eq},
   { STRING_SIZE_TUPLE("not"),           0,  1,  1,  func_not},

@@ -422,6 +422,8 @@ print_target_stack (target_stack_node_t *p, int i_pos, int i_max)
 	i++, p = p->p_parent  ) {
     floc_t floc;
     file_t *p_target = p->p_target;
+    const char *psz_target_name = 
+      (p_target && p_target->name) ? p_target->name : "(null)";
 
     /* If we don't have a line recorded for the target,
        but we do have one for the commands it runs,
@@ -444,16 +446,16 @@ print_target_stack (target_stack_node_t *p, int i_pos, int i_max)
       if (i_pos != -1) {
 	printf("%s", (i == i_pos) ? "=>" : "  ");
       }
-      printf ("#%u  %s at ", i, p_target->name);
+      printf ("#%u  %s at ", i, psz_target_name);
       print_floc_prefix(&floc);
     } else {
       if (i_pos != -1) {
 	printf("%s", (i == i_pos) ? "=>" : "  ");
       }
       if (p_target->phony)
-	printf ("#%u  %s (.PHONY target)", i, p_target->name);
+	printf ("#%u  %s (.PHONY target)", i, psz_target_name);
       else 
-	printf ("#%u  %s at ??", i, p_target->name);
+	printf ("#%u  %s at ??", i, psz_target_name);
 
     }
     printf ("\n");

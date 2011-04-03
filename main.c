@@ -26,6 +26,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "debug.h"
 #include "getopt.h"
 #include "vpath.h"
+#include "print.h"
 
 #include <assert.h>
 #ifdef _AMIGA

@@ -52,6 +52,7 @@ typedef enum
     DEBUG_ERROR_HIT               = 5,
     DEBUG_STEP_HIT                = 6,
     DEBUG_STEP_COMMAND            = 7,
+    DEBUG_EXPLICIT_CALL           = 8,
     DEBUG_NOT_GIVEN               = 100
   } debug_enter_reason_t;
 

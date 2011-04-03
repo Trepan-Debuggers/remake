@@ -1,13 +1,11 @@
 Reading makefiles...
 Updating makefiles....
 Updating goal targets....
-
 triple.Makefile:1)
 first: second
 remake<0> Breakpoint 1 on target third: file triple.Makefile, line 5.
 triple.Makefile:1	File `first' does not exist.
 triple.Makefile:3	File `second' does not exist.
-
 triple.Makefile:5)
 third: 
 triple.Makefile:5	File `third' does not exist.
@@ -32,7 +30,6 @@ echo first done
 ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 first done
 triple.Makefile:1	Successfully remade target file `first'.
-
 triple.Makefile:1)
 first
 remake<0> 

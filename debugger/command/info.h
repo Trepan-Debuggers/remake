@@ -121,10 +121,10 @@ dbg_cmd_info_program()
       printf(_("Program is stopped after running rule command(s).\n"));
       break;
     case DEBUG_BRKPT_BEFORE_PREREQ:
-      printf(_("Program stopped at a breakpoint before rule prequisite checking.\n"));
+      printf(_("Program stopped at a breakpoint before rule-prequisite checking.\n"));
 	  break;
     case DEBUG_BRKPT_AFTER_PREREQ:
-      printf(_("Program is stopped after rule prequisite checking.\n"));
+      printf(_("Program is stopped after rule-prequisite checking.\n"));
       break;
     case DEBUG_GOAL_UPDATED_HIT:
       printf(_("Program stopped for updating a goal.\n"));
@@ -146,6 +146,10 @@ dbg_cmd_info_program()
       printf(_("Program stopped in stepping before running rule command(s).\n"));
       printf("\n");
 	  break;
+    case DEBUG_EXPLICIT_CALL:
+      printf(_("Program stopped from explicit debugger function call.\n"));
+      printf("\n");
+      break;
     case DEBUG_NOT_GIVEN:
       printf(_("Reason not given.\n"));
       break;

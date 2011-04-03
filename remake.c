@@ -424,7 +424,7 @@ update_file_1 (struct file *file, unsigned int depth,
   int running = 0;
 
   DBF (DB_VERBOSE, _("Considering target file `%s'.\n"));
-  p_call_stack = trace_push_target(p_call_stack, file, 0);
+  p_stack_top = p_call_stack = trace_push_target(p_call_stack, file, 0);
   if ( file->tracing & BRK_BEFORE_PREREQ || 
        (i_debugger_stepping && file->cmds) ) {
       enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_BEFORE_PREREQ);
