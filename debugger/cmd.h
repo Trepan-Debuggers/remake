@@ -29,7 +29,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../trace.h"
 
 extern debug_return_t enter_debugger (target_stack_node_t *p, 
-				      file_t *p_target, int err,
+				      file_t *p_target, int errcode,
 				      debug_enter_reason_t reason);
 
 extern debug_return_t execute_line (char *psz_line);
