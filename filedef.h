@@ -34,6 +34,8 @@ struct file
     const char *hname;          /* Hashed filename */
     const char *vpath;          /* VPATH/vpath pathname */
     floc_t floc;                /* location in Makefile - for tracing */
+    unsigned int nlines;	/* Number of lines in file - for debugging. */
+
     struct dep *deps;		/* all dependencies, including duplicates */
     struct commands *cmds;	/* Commands to execute for this target.  */
     int command_flags;		/* Flags OR'd in for cmds; see commands.h.  */

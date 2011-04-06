@@ -109,7 +109,7 @@ extern void print_target_stack (target_stack_node_t *p, int i_pos, int i_max);
 extern void print_floc_stack (int i_pos, int i_max);
 
 /*! Print the list makefiles read by read_makefiles().  */
-extern void print_read_makefiles(void);
+extern bool print_read_makefiles(const char *psz_filename);
 
 /*! Print the command line used to invode this program */
 extern void print_cmdline (void);

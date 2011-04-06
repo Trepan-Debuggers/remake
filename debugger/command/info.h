@@ -183,7 +183,7 @@ dbg_cmd_info(char *psz_args)
 	  }
 	}
       } else {
-	printf("No target information.\n");
+	dbg_errmsg("No target information for %s.", psz_target);
 	return debug_readloop;
       }
       hash_map_arg (&p_target->variables->set->table, 
@@ -193,11 +193,11 @@ dbg_cmd_info(char *psz_args)
     } else if (is_abbrev_of (psz_subcmd, "makefiles", 1) ||
 	       is_abbrev_of (psz_subcmd, "files", 2)) {
       if (0 == strlen(psz_args))
-	print_read_makefiles();
-      else if (0 == strcmp(psz_args, "verbose"))
-	print_file_data_base ();
-      else 
-	dbg_cmd_target(psz_args);
+	print_read_makefiles(NULL);
+      else {
+        if (!print_read_makefiles(psz_args))
+          dbg_errmsg("File %s not in list of read-in files.", psz_args);
+      }
     } else if (is_abbrev_of (psz_subcmd, "frame", 2)) {
       dbg_cmd_where(psz_args);
     } else if (is_abbrev_of (psz_subcmd, "program", 1)) {

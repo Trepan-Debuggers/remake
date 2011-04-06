@@ -492,21 +492,30 @@ void print_file (file_t *p_file)
   printf("\tLast modified: %s\n",  buf);
   file_timestamp_sprintf (buf, p_file->mtime_before_update);
   printf("\tBefore update: %s\n",  buf);
+  printf("\tNumber of lines: %u\n",  p_file->nlines);
 }
 
 /*! Print the list makefiles read by read_makefiles().  */
-void print_read_makefiles(void)
+bool print_read_makefiles(const char *psz_filename)
 {
   dep_t *p_dep;
-  if (!read_makefiles) return;
-  for (p_dep = read_makefiles; p_dep; p_dep = p_dep->next) {
-    if (p_dep->file) {
-      if (p_dep != read_makefiles)
-	printf(", ");
-      printf("%s", p_dep->file->name);
+  if (!read_makefiles) return false;
+  if (NULL == psz_filename) {
+    for (p_dep = read_makefiles; p_dep; p_dep = p_dep->next) {
+      if (p_dep->file) {
+        print_file(p_dep->file);
+      }
+    }
+    return true;
+  } else {
+    for (p_dep = read_makefiles; p_dep; p_dep = p_dep->next) {
+      if (p_dep->file && 0 == strcmp(p_dep->file->name, psz_filename)) {
+        print_file(p_dep->file);
+        return true;
+      }
     }
   }
-  printf("\n");
+  return false;
 }
 
 /*! Print the command line used to invoke Make. */

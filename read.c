@@ -426,6 +426,7 @@ eval_makefile (const char *filename, int flags)
   eval (&ebuf, !(flags & RM_NO_DEFAULT_GOAL));
 
   reading_file = curfile;
+  deps->file->nlines = ebuf.floc.lineno;
 
   fclose (ebuf.fp);
 
