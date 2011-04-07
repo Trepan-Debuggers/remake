@@ -129,12 +129,13 @@ void file2lines_print_entry(const void *item)
     const lineno_array_t *p_linenos = (lineno_array_t *) item;
     unsigned int i;
     file_t *p_target;
+    printf("%s\n", p_linenos->hname);
     for (i=0; i<p_linenos->size; i++) 
       {
 	p_target = p_linenos->array[i];
 	if (p_target)
-	  printf("%s at file %s, line %lu\n",
-		 p_target->name, p_target->floc.filenm, p_target->floc.lineno);
+	  printf("%8lu: %s\n",
+		 p_target->floc.lineno, p_target->name);
       }
 }
 

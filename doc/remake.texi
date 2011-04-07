@@ -1069,7 +1069,7 @@ Fundamentally, the General Public License is a license which says that
 you have these freedoms and that you cannot take these freedoms away
 from anyone else.
 
-@unnumberedsec Free Software Needs Free Documentation
+@c @unnumberedsec Free Software Needs Free Documentation
 
 The biggest deficiency in the free software community today is not in
 the software---it is the lack of good free documentation that we can
@@ -1510,8 +1510,9 @@ Num Type           Disp Enb target     What
   1 breakpoint     keep y   in all at /tmp/Makefile:450
 @end example
 
-@item break @var{target @var{target @var{all|run|prereq}}}
-Set a breakpoint at @var{target} in the current Makefile.
+@item break @var{target|line-number} @ovar{all|run|prereq}
+Set a breakpoint at @var{target} or at line @var{line-number} in the
+current Makefile.
 
 There are 3 place where one may want to stop at:
 
@@ -1737,22 +1738,69 @@ test1.mk:5:
 remake<1> 
 @end group
 @end smallexample 
-
 @item info program
 @kindex info program
 @kindex i p @r{(@code{info files})}
 Use @code{info program} to give information about the state of the
 stopping point.
 
+@smallexample
+@group
+Starting directory `/tmp
+Program invocation:
+	/usr/bin/remake -f /tmp/test1.mk
+Recursion level: 0
+Line 5 of "/tmp/test1.mk"
+Program stopped at a breakpoint before rule-prequisite checking.
+@end group
+@end smallexample 
+
 @item info break
 @kindex info break
 @kindex i b @r{(@code{info files})}
 Use @code{info break} to give a list of breakpoint currently in effect.
 
+@smallexample
+@group
+remake<0> info break
+Num Type           Disp Enb target     What
+  1 breakpoint     keep y   in all at /tmp/test1.mk:3
+  2 breakpoint     keep y   in foo at /tmp/test1.mk:5
+remake<1> 
+@end group
+@end smallexample 
+
 @item info line
 @kindex info line
 Shows the line number and file of for the place that you are currently
 stopped.
+
+@smallexample
+@group
+w$ @b{remake -X -f test1.mk}
+...
+remake<0> @b{info line}
+Line 5 of "/tmp/test1.mk"
+remake<1> 
+@end group
+@end smallexample 
+
+@item info lines
+@kindex info lines
+Shows for each Makefile the line numbers that targets appear.
+
+@smallexample
+@group
+$ @b{remake -X -f test1.mk}
+...
+remake<0> @b{info lines}
+test1.mk
+       2: .PHONY
+       3: all
+       5: foo
+remake<1> 
+@end group
+@end smallexample 
 
 @item info locals
 @kindex info locals
@@ -2487,7 +2535,6 @@ mode perform this SHELL reassignment trick of adding @code{-x}.}
 
 @node setq
 @subsection Setting a variable to an unexpanded string (@samp{setq})
-@subsection Basename (@samp{setq})
 
 @table @code
 @kindex setq @var{variable} @var{string}

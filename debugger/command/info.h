@@ -166,7 +166,9 @@ dbg_cmd_info(char *psz_args)
     dbg_cmd_help("info");
   } else {
     char *psz_subcmd = get_word(&psz_args);
-    if (is_abbrev_of (psz_subcmd, "line", 2)) {
+    if (0 == strcmp(psz_subcmd, "lines")) {
+      file2lines_dump();
+    } else if (is_abbrev_of (psz_subcmd, "line", 2)) {
       dbg_cmd_info_line();
     } else if (is_abbrev_of (psz_subcmd, "locals", 2)) {
       const char *psz_target = NULL;
@@ -191,8 +193,6 @@ dbg_cmd_info(char *psz_args)
 		    print_variable_info, NULL);
     } else if (is_abbrev_of (psz_subcmd, "breakpoints", 1)) {
       list_breakpoints();
-    } else if (is_abbrev_of (psz_subcmd, "test", 1)) {
-      file2lines_dump();
     } else if (is_abbrev_of (psz_subcmd, "makefiles", 1) ||
 	       is_abbrev_of (psz_subcmd, "files", 2)) {
       if (0 == strlen(psz_args))

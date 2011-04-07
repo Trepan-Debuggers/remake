@@ -220,7 +220,9 @@ subcommand_var_info_t set_subcommands[] = {
 subcommand_var_info_t info_subcommands[] = {
   { "break",     "Show list of target breakpoints",
     NULL, false, 1},
-  { "line", "Show line and Makefile name of where we are currently stopped ",
+  { "line", "Show line and Makefile name of where we are currently stopped",
+    NULL, true, 2},
+  { "lines", "Show possible breakpoint lines for all targets",
     NULL, true, 2},
   { "locals", "Show target local variables and their values",
     NULL, true, 2},
