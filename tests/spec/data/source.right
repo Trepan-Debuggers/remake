@@ -1,0 +1,9 @@
+Reading makefiles...
+Updating makefiles....
+Updating goal targets....
+triple.Makefile:1)
+first: second
+remake<0> "This is a test of the source system."
+
+first: second
+remake<1> 

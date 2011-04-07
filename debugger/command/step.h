@@ -9,7 +9,7 @@ dbg_cmd_step (char *psz_arg)
     i_debugger_nexting  = 0;
     return continue_execution;
   } 
-  if (get_uint(psz_arg, &i_debugger_stepping)) 
+  if (get_uint(psz_arg, &i_debugger_stepping, true))
     return continue_execution;
   else 
     return continue_execution;

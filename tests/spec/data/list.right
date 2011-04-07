@@ -1,0 +1,22 @@
+Reading makefiles...
+Updating makefiles....
+Updating goal targets....
+triple.Makefile:1)
+first: second
+triple.Makefile:1
+first: second
+#  commands to execute (from `triple.Makefile', line 2):
+	@echo first done
+	
+triple.Makefile:5
+third:
+#  commands to execute (from `triple.Makefile', line 6):
+	echo third done
+	
+triple.Makefile:3
+second: third
+#  commands to execute (from `triple.Makefile', line 4):
+	@echo second done
+	
+remake<3> ** Can't find target on line 6.
+remake<4> 

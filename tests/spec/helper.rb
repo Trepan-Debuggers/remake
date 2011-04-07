@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'rspec'
 require 'tmpdir'
+# require 'trepanning'
 module RemakeTestHelper
   unless defined?(SPEC_DIR)
     SPEC_DIR = File.dirname(__FILE__)
@@ -11,6 +12,9 @@ module RemakeTestHelper
       lines.each do |line|
         line.gsub!(/^.*(#{makefile_short}\.Makefile:\d+)/,'\1')
         line.gsub!(/ file .*(#{makefile_short})\.Makefile, line/,' file \1.Makefile, line')
+        # debugger if line =~ /^#/
+        line.gsub!(/^#  commands to execute \(from `.*#{makefile_short}/,
+                   "#  commands to execute (from `#{makefile_short}")
       end
     }
   end

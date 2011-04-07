@@ -17,34 +17,27 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
-/* Continue until the next command to be executed. */
-static debug_return_t 
-dbg_cmd_next(char *psz_arg)
-{
-  if (!psz_arg || !*psz_arg) {
-    i_debugger_nexting  = 1;
-    i_debugger_stepping = 0;
-    return continue_execution;
-  } 
-  if (get_uint(psz_arg, &i_debugger_nexting, true)) 
-    return continue_execution;
-  else 
-    return continue_execution;
-  return debug_readloop;
-}
+#ifndef REMAKE_FILE2LINE
+#define REMAKE_FILE2LINE
+struct hash_table file2lines;
 
-static void
-dbg_cmd_next_init(unsigned int c) 
+typedef struct lineo_array_s 
 {
-    
-  short_command[c].func = &dbg_cmd_next;
-  short_command[c].use = _("next [AMOUNT]");
-  short_command[c].doc = 
-    _("Continue until the next command to be executed.\n"
-      "Argument AMOUNT means do this AMOUNT times (or until there's another\n"
-      "reason to stop.");
+  const char *hname; /**< Name stored in hash table */
+  unsigned int size; /**< Number of entries in array */
+  file_t **array;    /**< target name or NULL. */
+} lineno_array_t;
 
-}
+/*!
+  Initializes hash table file2lines. file2lines is used in breakpoints
+  only. So we do this on demand.
+*/
+extern bool file2lines_init(void);
+extern file_t *target_for_file_and_line (const char *psz_filename, 
+					 unsigned int lineno);
+
+extern void file2lines_dump(void);
+#endif
 
 /* 
  * Local variables:

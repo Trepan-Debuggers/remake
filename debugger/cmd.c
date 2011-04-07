@@ -33,6 +33,7 @@ Boston, MA 02111-1307, USA.  */
 #include "commands.h"
 #include "expand.h"
 #include "debug.h"
+#include "file2line.h"
 
 #ifdef HAVE_READLINE_READLINE_H
 #include <readline/readline.h>
@@ -484,6 +485,7 @@ debug_return_t enter_debugger (target_stack_node_t *p,
 #endif
   if (!b_init) {
     cmd_initialize();
+    file2lines.ht_size = 0;
     b_init = true;
   }
 

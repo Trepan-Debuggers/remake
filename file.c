@@ -70,7 +70,7 @@ static int all_secondary = 0;
 
 /* Access the hash table of all file records.
    lookup_file  given a name, return the struct file * for that name,
-                or nil if there is none.
+                or NULL if there is none.
 */
 
 struct file *

@@ -47,6 +47,7 @@ DEBUGGER_SRC = 	\
 		debugger/break.c \
 		debugger/cmd.c 	\
 		debugger/fns.c 	\
+		debugger/file2line.c 	\
 		debugger/msg.c 	\
 		debugger/stack.c
 
@@ -85,6 +86,7 @@ DEBUGGER_H = \
 		debugger/command/up.h		\
 		debugger/command/where.h	\
 		debugger/command/write.h	\
+		debugger/file2line.h 	        \
 		debugger/fns.h 			\
 		debugger/info.h			\
 		debugger/stack.h

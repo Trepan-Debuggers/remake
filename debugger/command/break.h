@@ -34,14 +34,26 @@ dbg_cmd_break (char *psz_args)
     unsigned int i_brkpt_mask = BRK_ALL;
 
     /** FIXME: DRY with code in continue.h **/
-    if (p_stack && p_stack->p_target)
-      p_target = lookup_file(variable_expand_set(psz_target, 
-                                                 p_stack->p_target->variables));
-    else
+    if (p_stack && p_stack->p_target) {
+      unsigned int u_lineno=0;
+      if (get_uint(psz_target, &u_lineno, false)) {
+        p_target = target_for_file_and_line(p_stack->p_target->floc.filenm,
+                                            u_lineno);
+        if (!p_target) {
+          dbg_errmsg("Can't find target on line %s; breakpoint not set.\n", 
+                     psz_target);
+          return debug_cmd_error;
+        }
+      } else
+        p_target = 
+          lookup_file(variable_expand_set(psz_target, 
+                                          p_stack->p_target->variables));
+    } else {
       p_target = lookup_file(psz_target);
+    }
 
     if (!p_target) {
-	printf("Can't find target %s; breakpoint not set.\n", psz_target);
+	dbg_errmsg("Can't find target %s; breakpoint not set.\n", psz_target);
 	return debug_cmd_error;
     }
     psz_break_type = get_word(&psz_args);
@@ -66,11 +78,12 @@ static void
 dbg_cmd_break_init(unsigned int c) 
 {
   short_command[c].func = &dbg_cmd_break;
-  short_command[c].use  = _("break TARGET [all|run|prereq|end]");
+  short_command[c].use  = _("break [TARGET|LINENUM] [all|run|prereq|end]");
   short_command[c].doc  = _("Set a breakpoint at a target.\n"
-"With a target name, set a break before running commands\n"
-"of that target.  Without argument, list all breakpoints.\n"
-"There are 3 place where one may want to stop at:\n"
+"With a target name or a line number, set a break before running commands\n"
+"of that target or line number.  Without argument, list all breakpoints.\n"
+"There are 3 place where one may want to stop at and that name can\n"
+"be given as a last option. The stopping points are:\n"
 " - before prerequisite checking (prereq)\n"
 " - after prerequisite checking but before running commands (run)\n"
 " - after target is complete (end)\n"
@@ -78,7 +91,6 @@ dbg_cmd_break_init(unsigned int c)
 "To see a list of targets run \"info targets\"\n"
 "See also \"continue\".\n");
 }
-
 
 /* 
  * Local variables:

@@ -14,29 +14,46 @@ dbg_cmd_list(char *psz_arg)
       target_stack_node_t *p=p_stack;
 
       if (!p) {
-	printf(_("We don't seem to have a target to get parent of.\n"));
+	dbg_errmsg(_("We don't seem to have a target to get parent of."));
 	return debug_cmd_error;
       }
     
       p = p->p_parent;
       if (!p) {
-	printf(_("We don't seem to have a parent target.\n"));
+	dbg_errmsg(_("We don't seem to have a parent target."));
 	return debug_cmd_error;
       }
       p_target = p->p_target;
       psz_target = p_target->name;
     } else {
-	printf(_("We don't seem to have a target stack to get parent of.\n"));
+	dbg_errmsg(_("We don't seem to have a target stack to get parent of."));
 	return debug_cmd_error;
     }
   } else {
-    p_target = get_target(&psz_arg, &psz_target);
+    unsigned int u_lineno=0;
+    if (get_uint(psz_arg, &u_lineno, false)) {
+      if (p_stack) {
+        p_target = target_for_file_and_line(p_stack->p_target->floc.filenm,
+                                            u_lineno);
+        if (!p_target) {
+          dbg_errmsg("Can't find target on line %s.", 
+                     psz_arg);
+          return debug_cmd_error;
+        }
+        psz_target = p_target->name;
+      } else {
+	dbg_errmsg(_("We don't seem to have a target stack to get parent of."));
+	return debug_cmd_error;
+      }
+    } else 
+      p_target = get_target(&psz_arg, &psz_target);
   }
 
   if (!p_target) {
-    printf(_("Trouble getting a target name.\n"));
+    dbg_errmsg(_("Trouble getting a target name for %s."), psz_target);
     return debug_cmd_error;
   }
+  print_floc_prefix(&p_target->floc);
   target_cmd = CALLOC(char, strlen(psz_target) + 1 + strlen(DEPENDS_COMMANDS));
   sprintf(target_cmd, "%s%s", psz_target, DEPENDS_COMMANDS);
   return dbg_cmd_target(target_cmd);
@@ -46,11 +63,11 @@ static void
 dbg_cmd_list_init(unsigned int c) 
 {
   short_command[c].func = &dbg_cmd_list;
-  short_command[c].use = _("list [TARGET]");
+  short_command[c].use = _("list [TARGET|LINE-NUMBER]");
   short_command[c].doc = 
-    _("List target dependencies and commands. Without a target name we\n"
-"use the current target. A target name of '-' will use the parent target on\n"
-"the target stack.\n"
+    _("List target dependencies and commands for TARGET or LINE NUMBER.\n"
+"Without a target name or line number, use the current target.\n"
+"A target name of '-' will use the parent target on the target stack.\n"
  );
 }
 

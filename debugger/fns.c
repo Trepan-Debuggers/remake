@@ -20,15 +20,16 @@ Boston, MA 02111-1307, USA.  */
 
 /* Helper routines for debugger command interface. */
 
-#include "config.h"
-#include "commands.h"
-#include "expand.h"
+#include "../config.h"
+#include "../commands.h"
+#include "../expand.h"
 #include "fns.h"
 #include "stack.h"
 #include "debug.h"
 #include "print.h"
-#include "rule.h"
-#include "trace.h"
+#include "../rule.h"
+#include "../trace.h"
+#include "msg.h"
 
 #ifdef HAVE_STRING_H
 #include <string.h>
@@ -86,7 +87,7 @@ get_int(const char *psz_arg, int *pi_result, bool b_warn)
   i = strtol(psz_arg, &endptr, 10);
   if (*endptr != '\0') {
     if (b_warn) 
-      printf("expecting %s to be an integer\n", psz_arg);
+      dbg_errmsg("expecting %s to be an integer", psz_arg);
     return false;
   }
   *pi_result = i;
@@ -94,7 +95,7 @@ get_int(const char *psz_arg, int *pi_result, bool b_warn)
 }
 
 bool
-get_uint(const char *psz_arg, unsigned int *result) 
+get_uint(const char *psz_arg, unsigned int *result, bool b_warn) 
 {
   unsigned int i;
   char *endptr;
@@ -103,7 +104,8 @@ get_uint(const char *psz_arg, unsigned int *result)
 
   i = strtol(psz_arg, &endptr, 10);
   if (*endptr != '\0') {
-    printf("expecting %s to be an integer\n", psz_arg);
+    if (b_warn)
+      dbg_errmsg("expecting %s to be an integer", psz_arg);
     return false;
   }
   *result = i;

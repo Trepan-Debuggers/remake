@@ -26,7 +26,7 @@ dbg_cmd_up (char *psz_amount)
   if (!psz_amount || !*psz_amount) {
     i_amount = 1;
   } else {
-    if (!get_uint(psz_amount, &i_amount))
+    if (!get_uint(psz_amount, &i_amount, true))
       return debug_readloop;
   }
 

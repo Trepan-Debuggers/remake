@@ -56,7 +56,8 @@ extern bool get_int(const char *psz_arg, /*out*/ int *pi_result,
 /*! Parse psz_arg for a unsigned integer. The value is returned in 
     *pi_result. The retun value is true if parsing succeeded.
  */
-extern bool get_uint(const char *psz_arg, /*out*/ unsigned int *pi_result);
+extern bool get_uint(const char *psz_arg, /*out*/ unsigned int *pi_result,
+    bool b_warn);
 
 /*! Find the next "word" - skip leading blanks and the "word" is the
    largest non-blank characters after that. ppsz_str is modified to

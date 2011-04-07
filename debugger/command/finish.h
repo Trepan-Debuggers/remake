@@ -25,7 +25,7 @@ dbg_cmd_finish(char *psz_amount)
   unsigned int i_amount=0;
   unsigned int i=0;
   if ('\0' != *psz_debugger_args) {
-    if (!get_uint(psz_amount, &i_amount))
+    if (!get_uint(psz_amount, &i_amount, true))
       return debug_readloop;
     
     if (p_stack_top) {

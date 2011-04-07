@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../info.h"
 #include "../msg.h"
 #include "../stack.h"
+#include "../file2line.h"
 
 const char *WARRANTY = 
 "			    NO WARRANTY\n"
@@ -184,12 +185,14 @@ dbg_cmd_info(char *psz_args)
 	}
       } else {
 	dbg_errmsg("No target information for %s.", psz_target);
-	return debug_readloop;
+	return debug_cmd_error;
       }
       hash_map_arg (&p_target->variables->set->table, 
 		    print_variable_info, NULL);
     } else if (is_abbrev_of (psz_subcmd, "breakpoints", 1)) {
       list_breakpoints();
+    } else if (is_abbrev_of (psz_subcmd, "test", 1)) {
+      file2lines_dump();
     } else if (is_abbrev_of (psz_subcmd, "makefiles", 1) ||
 	       is_abbrev_of (psz_subcmd, "files", 2)) {
       if (0 == strlen(psz_args))

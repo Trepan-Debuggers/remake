@@ -17,7 +17,7 @@ dbg_cmd_source(char *psz_filename)
       int ret = stat(psz_filename, &stat_buf);
       if (ret != 0) {
         dbg_errmsg("Can't find file %s:\n\t%s", psz_filename, strerror(errno));
-        return debug_readloop;
+        return debug_cmd_error;
       }
       psz_expanded_file = psz_filename;
       
@@ -25,7 +25,7 @@ dbg_cmd_source(char *psz_filename)
       dbg_errmsg("Expansion of %s doesn't lead to a single filename. \n"
                  "Got %d matches", 
                  psz_filename, p.we_wordc);
-      return debug_readloop;
+      return debug_cmd_error;
       
     } else {
       psz_expanded_file = p.we_wordv[0];
@@ -51,6 +51,7 @@ dbg_cmd_source(char *psz_filename)
     wordfree(&p);
   }  else {
     dbg_errmsg("Expecting a file name");
+    return debug_cmd_error;
   }
   return debug_readloop;
 }
