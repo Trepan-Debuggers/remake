@@ -21,11 +21,18 @@ Boston, MA 02111-1307, USA.  */
 #define REMAKE_FILE2LINE
 struct hash_table file2lines;
 
+typedef enum {
+  F2L_TARGET,
+  F2L_PATTERN
+} f2l_entry_t;
+
+  
 typedef struct lineo_array_s 
 {
-  const char *hname; /**< Name stored in hash table */
-  unsigned int size; /**< Number of entries in array */
-  file_t **array;    /**< target name or NULL. */
+  const char *hname;   /**< Name stored in hash table */
+  unsigned int size;   /**< Number of entries in array */
+  f2l_entry_t  *type;  /**< type[i] determines what object array[i] points to */
+  void **array;        /**< target or implicit rule name or NULL. */
 } lineno_array_t;
 
 /*!
@@ -34,8 +41,8 @@ typedef struct lineo_array_s
 */
 extern bool file2lines_init(void);
 extern file_t *target_for_file_and_line (const char *psz_filename, 
-					 unsigned int lineno);
-
+					 unsigned int lineno,
+					 /*out*/ f2l_entry_t *entry_type);
 extern void file2lines_dump(void);
 #endif
 

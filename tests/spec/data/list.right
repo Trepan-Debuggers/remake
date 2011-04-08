@@ -18,5 +18,6 @@ second: third
 #  commands to execute (from `triple.Makefile', line 4):
 	@echo second done
 	
-remake<3> ** Can't find target on line 6.
+remake<3> ** Can't find target or pattern on line 6.
+Use 'info lines' to get a list of and pattern lines.
 remake<4> 

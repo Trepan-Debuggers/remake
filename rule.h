@@ -21,6 +21,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #ifndef MAKE_RULE_H
 #define MAKE_RULE_H
+#include "types.h"
 
 struct rule
   {
@@ -33,6 +34,8 @@ struct rule
     unsigned short num;         /* Number of targets.  */
     char terminal;		/* If terminal (double-colon).  */
     char in_use;		/* If in use by a parent pattern_search.  */
+    floc_t floc;                /* Location of rule */
+    breakpoint_mask_t tracing;  /* breakpoint status of target. */
   };
 
 /* For calling install_pattern_rule.  */

@@ -150,9 +150,9 @@ list_breakpoints (void)
     return;
   }
 
-  dbg_msg(  "Num Type           Disp Enb target     What");
+  dbg_msg(  "Num Type           Disp Enb Target     Location");
   for (p = p_breakpoint_top; p; p = p->p_next) {
-    printf("%3d breakpoint     keep y   in %s", 
+    printf("%3d breakpoint     keep y   %s", 
 	   p->i_num,
 	   p->p_target->name);
     if (p->p_target->floc.filenm) {

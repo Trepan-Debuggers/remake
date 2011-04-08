@@ -25,6 +25,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "job.h"
 #include "commands.h"
 #include "variable.h"
+#include "print.h"
 #include "rule.h"
 
 static void freerule (struct rule *rule, struct rule *lastrule);
@@ -373,6 +374,8 @@ install_pattern_rule (struct pspec *p, int terminal)
   r->lens[0] = strlen (p->target);
   r->targets[0] = p->target;
   r->suffixes[0] = find_percent_cached (&r->targets[0]);
+  r->floc.filenm = NULL;
+  r->floc.lineno = 0;
   assert (r->suffixes[0] != NULL);
   ++r->suffixes[0];
 
@@ -457,7 +460,15 @@ create_pattern_rule (const char **targets, const char **target_percents,
   r->targets = targets;
   r->suffixes = target_percents;
   r->lens = xmalloc (n * sizeof (unsigned int));
-
+  r->tracing = BRK_NONE;
+  if (commands) {
+      r->floc.filenm = commands->fileinfo.filenm;
+      r->floc.lineno = commands->fileinfo.lineno - 1;
+  } else {
+    r->floc.filenm = NULL;
+    r->floc.lineno = 0;
+  }
+  
   for (i = 0; i < n; ++i)
     {
       r->lens[i] = strlen (targets[i]);
@@ -490,8 +501,12 @@ print_rule (rule_t *r, bool b_verbose)
   for (d = r->deps; d != 0; d = d->next)
     printf (" %s", dep_name (d));
 
-  if (!b_verbose) return;
+  if (r->floc.filenm) {
+    printf(" from ");
+    print_floc_prefix(&r->floc);
+  }
   putchar ('\n');
+  if (!b_verbose) return;
   if (r->cmds != 0)
     print_commands (NULL, r->cmds, false);
 }
@@ -510,7 +525,6 @@ print_rule_data_base (bool b_verbose)
     {
       ++rules;
 
-      putchar ('\n');
       print_rule (r, b_verbose);
 
       if (r->terminal)

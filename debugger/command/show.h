@@ -18,6 +18,29 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
+
+subcommand_var_info_t show_subcommands[] = {
+  { "args",     "Show argument list to give program when it is started",
+    NULL, false, 1},
+  { "basename", "Show if we are to show short or long filenames",
+    &basename_filenames, true, 1},
+  { "commands", "Show the history of commands you typed.",
+    NULL, false, 1},
+  { "debug",    "GNU Make debug mask (set via --debug or -d)",
+    &db_level, false, 1},
+  { "ignore-errors", "Value of GNU Make --ignore-errors (or -i) flag",
+    &ignore_errors_flag, true, 1},
+  { "keep-going",    "Value of GNU Make --keep-going (or -k) flag",
+    &keep_going_flag,    true, 1},
+  { "silent",        "Value of GNU Make --silent (or -s) flags",
+    &silent_flag,        true, 1},
+  { "version",       "Show the version of GNU Make + dbg.",
+    NULL,                false, 1},
+  { "warranty",      "Various kinds of warranty you do not have.",
+    NULL,                false, 1},
+  { NULL, NULL, NULL,    false, 0}
+};
+
 debug_return_t 
 dbg_cmd_show(char *psz_arg)
 {

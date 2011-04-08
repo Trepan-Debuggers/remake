@@ -18,6 +18,31 @@ You should have received a copy of the GNU General Public License
 along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
+
+/* Documentation for help set, and help set xxx. Note the format has
+   been customized to make ddd work. In particular for "basename" it should
+   be 
+     set basename -- Set if were are to show shor or long filenames is off.
+   (or "is on").
+*/
+subcommand_var_info_t set_subcommands[] = {
+  { "basename", "Set if we are to show short or long filenames",
+    &basename_filenames, true, 1},
+  { "debug",    "Set GNU Make debug mask (set via --debug or -d).",
+    &db_level, false, 1},
+  { "ignore-errors", "Set value of GNU Make --ignore-errors (or -i) flag.",
+    &ignore_errors_flag, true, 1},
+  { "keep-going",    "Set value of GNU Make --keep-going (or -k) flag.",
+    &keep_going_flag,    true, 1},
+  { "silent",        "Set value of GNU Make --silent (or -s) flags.",
+    &silent_flag,        true, 1},
+  { "trace",        "Set value of shell_tracing.",
+    &no_shell_trace,    false, 3},
+  { "variable",      "Set a GNU Make variable.",
+    NULL,                false, 0},
+  { NULL, NULL, NULL, false, 0}
+};
+
 static debug_return_t 
 dbg_cmd_set(char *psz_args) 
 {
@@ -98,4 +123,3 @@ dbg_cmd_set_init(unsigned int c)
  * indent-tabs-mode: nil
  * End:
  */
-

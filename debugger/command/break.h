@@ -36,16 +36,18 @@ dbg_cmd_break (char *psz_args)
     /** FIXME: DRY with code in continue.h **/
     if (p_stack && p_stack->p_target) {
       unsigned int u_lineno=0;
+      f2l_entry_t entry_type;
       if (get_uint(psz_target, &u_lineno, false)) {
         p_target = target_for_file_and_line(p_stack->p_target->floc.filenm,
-                                            u_lineno);
+                                            u_lineno, &entry_type);
         if (!p_target) {
-          dbg_errmsg("Can't find target on line %s; breakpoint not set.\n" 
-                     "Use 'info lines' to get a list of breakpoint lines.\n", 
+          dbg_errmsg("Can't find target or pattern on line %s.\n" 
+                     "Use 'info lines' to get a list of breakpoint lines.", 
                      psz_target);
           return debug_cmd_error;
         }
       } else
+        /* FIXME: test entry_type for target */
         p_target = 
           lookup_file(variable_expand_set(psz_target, 
                                           p_stack->p_target->variables));

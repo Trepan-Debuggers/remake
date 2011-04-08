@@ -50,6 +50,31 @@ const char *WARRANTY =
 "PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE\n"
 "POSSIBILITY OF SUCH DAMAGES.\n";
 
+subcommand_var_info_t info_subcommands[] = {
+  { "break",     "Show list of target breakpoints",
+    NULL, false, 1},
+  { "line", "Show line and Makefile name of where we are currently stopped",
+    NULL, true, 2},
+  { "lines", "Show possible breakpoint lines for all targets",
+    NULL, true, 2},
+  { "locals", "Show target local variables and their values",
+    NULL, true, 2},
+  { "files",    "Show read-in Makefiles. The last is the one initially named",
+    NULL, false, 2},
+  { "frame",    "Show target-stack frame",
+    NULL, false, 2},
+  { "rules", "Show implicit or pattern rules",
+    NULL, true, 1},
+  { "program",    "Show program information and why we are stopped",
+    NULL,    true, 1},
+  { "targets", "Show the explicitly-named targets found in read Makefiles.",
+    NULL, false, 1},
+  { "variables",  "Show all GNU Make variables",
+    NULL,        true, 2},
+  { "warranty",      "Various kinds of warranty you do not have.",
+    NULL,                false, 1},
+  { NULL, NULL, NULL,    false, 0}
+};
 
 /*! Show target information: location and name. */
 static void 

@@ -31,12 +31,14 @@ dbg_cmd_list(char *psz_arg)
     }
   } else {
     unsigned int u_lineno=0;
+    f2l_entry_t entry_type;
     if (get_uint(psz_arg, &u_lineno, false)) {
       if (p_stack) {
         p_target = target_for_file_and_line(p_stack->p_target->floc.filenm,
-                                            u_lineno);
+                                            u_lineno, &entry_type);
         if (!p_target) {
-          dbg_errmsg("Can't find target on line %s.", 
+          dbg_errmsg("Can't find target or pattern on line %s.\n" 
+                     "Use 'info lines' to get a list of and pattern lines.", 
                      psz_arg);
           return debug_cmd_error;
         }

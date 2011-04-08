@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../filedef.h"
 #include "../file.h"
 #include "../read.h"
+#include "../rule.h"
 #include "./file2line.h"
 
 unsigned long
@@ -53,7 +54,8 @@ lookup_file2lines (const char *psz_filename)
 
 /* FIXME return a status code when we fail. */
 file_t *
-target_for_file_and_line (const char *psz_filename, unsigned int lineno)
+target_for_file_and_line (const char *psz_filename, unsigned int lineno,
+                          /*out*/ f2l_entry_t *entry_type)
 {
   lineno_array_t **pp_linenos;
   lineno_array_t lookup_linenos;
@@ -65,6 +67,7 @@ target_for_file_and_line (const char *psz_filename, unsigned int lineno)
 
   if (NULL == *pp_linenos) return NULL;
   if (lineno > (*pp_linenos)->size) return NULL;
+  *entry_type = (*pp_linenos)->type[lineno];
   return (*pp_linenos)->array[lineno];
 }
 
@@ -90,13 +93,17 @@ enter_lineno (const char *psz_filename, unsigned int lineno,
   }
     
   if (HASH_VACANT(*pp_linenos)) {
-    file_t **new_array = calloc (sizeof(file_t *), p_file->nlines+1);
+    const unsigned int nlines = p_file->nlines+1;
+    void **new_array = calloc (sizeof(void *), nlines);
+    f2l_entry_t *new_type = calloc (sizeof(f2l_entry_t *), nlines);
     lineno_array_t *p_new_linenos = calloc (sizeof(lineno_array_t), 1);
     *pp_linenos = p_new_linenos;
     (*pp_linenos)->hname = psz_filename;
+    (*pp_linenos)->type = new_type;
     (*pp_linenos)->array = new_array;
-    (*pp_linenos)->size = p_file->nlines+1;
+    (*pp_linenos)->size = nlines;
   }
+  (*pp_linenos)->type[lineno]  = F2L_TARGET;
   (*pp_linenos)->array[lineno] = p_target;
 }
 
@@ -133,9 +140,16 @@ void file2lines_print_entry(const void *item)
     for (i=0; i<p_linenos->size; i++) 
       {
 	p_target = p_linenos->array[i];
-	if (p_target)
-	  printf("%8lu: %s\n",
-		 p_target->floc.lineno, p_target->name);
+        if (p_target) {
+          if (p_linenos->type[i] == F2L_TARGET) {
+            printf("%8lu: %s\n",
+                   p_target->floc.lineno, p_target->name);
+          } else  {
+            rule_t *p_rule = (rule_t *) p_target;
+            printf("%8lu: %s\n",
+                   p_rule->floc.lineno, p_rule->targets[0]);
+          }
+        }
       }
 }
 
