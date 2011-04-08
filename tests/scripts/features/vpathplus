@@ -92,9 +92,9 @@ $answer = "not creating notarget.c from notarget.d
 ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 cat notarget.c > notarget.b 2>/dev/null || exit 1
 ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-$make_name: *** [notarget.b] Error 1
+work/features/vpathplus.mk:15: *** [notarget.b] Error 1
 
-#0  notarget.b at ??
+#0  notarget.b at vpathplus.mk:15
 #1  notarget at vpathplus.mk:31
 Command-line arguments:
 	\"$make_path -f work/features/vpathplus.mk notarget\"
@@ -102,7 +102,7 @@ Command-line arguments:
 
 $logfile = &get_logfile(1);
 $slurp = &read_file_into_string ($logfile);
-$slurp =~ s/ at .*vpathplus/ at vpathplus/;
+$slurp =~ s/ at .*vpathplus/ at vpathplus/g;
 &compare_output_string($answer, $slurp, $logfile);
 
 # Test intermediate file handling (part 1)

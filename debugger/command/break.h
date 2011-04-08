@@ -40,7 +40,8 @@ dbg_cmd_break (char *psz_args)
         p_target = target_for_file_and_line(p_stack->p_target->floc.filenm,
                                             u_lineno);
         if (!p_target) {
-          dbg_errmsg("Can't find target on line %s; breakpoint not set.\n", 
+          dbg_errmsg("Can't find target on line %s; breakpoint not set.\n" 
+                     "Use 'info lines' to get a list of breakpoint lines.\n", 
                      psz_target);
           return debug_cmd_error;
         }

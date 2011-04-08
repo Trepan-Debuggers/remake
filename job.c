@@ -1762,11 +1762,21 @@ new_job (struct file *file, target_stack_node_t *p_call_stack)
 
   /* The job is now primed.  Start it running.
      (This will notice if there is in fact no recipe.)  */
-  if (cmds->fileinfo.filenm)
+  if (cmds->fileinfo.filenm) {
     DB (DB_BASIC, (_("Invoking recipe from %s:%lu to update target `%s'.\n"),
                    cmds->fileinfo.filenm, cmds->fileinfo.lineno,
-                   c->file->name));
-  else
+                   file->name));
+    /* FIXME: The below is a sign that we need update location somewhere else
+     */
+    if (!file->floc.filenm) {
+	file->floc.filenm = cmds->fileinfo.filenm;
+	file->floc.lineno = cmds->fileinfo.lineno - 1;
+	if (!p_call_stack->p_target->floc.filenm) {
+	    p_call_stack->p_target->floc.filenm = file->floc.filenm;
+	    p_call_stack->p_target->floc.lineno = file->floc.lineno;
+	}
+    }
+  } else
     DB (DB_BASIC, (_("Invoking builtin recipe to update target `%s'.\n"),
                    c->file->name));
 
