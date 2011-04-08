@@ -37,6 +37,6 @@ CLEANFILES = make*.html make*.info remake.html remake*.info
 html: remake_1.html
 
 remake_1.html: $(info_TEXINFOS) $(make_TEXINFOS)
-	$(TEXI2HTML) $(TEXI2HTML_FLAGS) $(srcdir)/remake.texi
+	$(TEXI2HTML) $(TEXI2HTML_FLAGS) $(srcdir)/remake.texi --output remake
 
 .PHONY: html
