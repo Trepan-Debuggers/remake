@@ -1727,8 +1727,7 @@ The result of running this on the sample makefile used in
 
 @smallexample
 @group
-remake<0> info targets
-info targets
+remake<0> @b{info targets}
 test1.mk:2:
 	.PHONY
 test1.mk:3:
@@ -1746,7 +1745,8 @@ stopping point.
 
 @smallexample
 @group
-Starting directory `/tmp
+remake<0> @b{info program}
+Starting directory `/tmp'
 Program invocation:
 	/usr/bin/remake -f /tmp/test1.mk
 Recursion level: 0
@@ -1762,7 +1762,7 @@ Use @code{info break} to give a list of breakpoint currently in effect.
 
 @smallexample
 @group
-remake<0> info break
+remake<0> @b{info break}
 Num Type           Disp Enb target     What
   1 breakpoint     keep y   in all at /tmp/test1.mk:3
   2 breakpoint     keep y   in foo at /tmp/test1.mk:5
@@ -1777,7 +1777,7 @@ stopped.
 
 @smallexample
 @group
-w$ @b{remake -X -f test1.mk}
+$ @b{remake -X -f test1.mk}
 ...
 remake<0> @b{info line}
 Line 5 of "/tmp/test1.mk"
@@ -2366,16 +2366,15 @@ If you want to all list variables, use this command.
 @table @code
 @kindex eval
 @kindex e @r{(@code{eval})}
-@cindex shell escape
 @item eval @var{command string}
 @itemx e
 
 A powerful command is the ability to enter MAKE fragments and have
 them interpreted on the fly. This can be done using the @code{eval}
 command. For example to ``include'' a makefile, you might enter
-@code{eval include ...}. Some of the other commands given
+@code{eval include test1.mk}. Some of the other commands given
 elsewhere can be performed by @code{eval}. In particular, instead of
-using the ``setq'' debugger command, one could issue the command as
+using the @code{setq} debugger command, one could issue the command as
 @code{eval VAR=value}.
 
 @end table
@@ -2529,9 +2528,6 @@ else :; fi
 
 Above we see the script source code followed by the trace information
 -- we took the ``else'' branch which has the null statement ``:''.
-
-@emph{Probably in the future, we'll arrange some stepping or tracing
-mode perform this SHELL reassignment trick of adding @code{-x}.}
 
 @node setq
 @subsection Setting a variable to an unexpanded string (@samp{setq})
