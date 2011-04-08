@@ -1,0 +1,103 @@
+Reading makefiles...
+Updating makefiles....
+Updating goal targets....
+implicit.Makefile:2	File `foo.x' does not exist.
+implicit.Makefile:11)
+bar: 
+remake<0> 
+# Implicit Rules
+
+foo.%  $(%_a) $(%_b) bar
+%.out:
+%.a 
+%.ln 
+%.o 
+%  %.o
+%.c 
+%  %.c
+%.ln  %.c
+%.o  %.c
+%.cc 
+%: %.cc
+%.o: %.cc
+%.C:
+%: %.C
+%.o: %.C
+%.cpp:
+%: %.cpp
+%.o: %.cpp
+%.p:
+%: %.p
+%.o: %.p
+%.f:
+%: %.f
+%.o: %.f
+%.F:
+%: %.F
+%.o: %.F
+%.f: %.F
+%.m:
+%: %.m
+%.o: %.m
+%.r:
+%: %.r
+%.o: %.r
+%.f: %.r
+%.y:
+%.ln: %.y
+%.c: %.y
+%.l:
+%.ln: %.l
+%.c: %.l
+%.r: %.l
+%.ym:
+%.m: %.ym
+%.yl:
+%.s:
+%: %.s
+%.o: %.s
+%.S:
+%: %.S
+%.o: %.S
+%.s: %.S
+%.mod:
+%: %.mod
+%.o: %.mod
+%.sym:
+%.def:
+%.sym: %.def
+%.h:
+%.info:
+%.dvi:
+%.tex:
+%.dvi: %.tex
+%.texinfo:
+%.info: %.texinfo
+%.dvi: %.texinfo
+%.texi:
+%.info: %.texi
+%.dvi: %.texi
+%.txinfo:
+%.info: %.txinfo
+%.dvi: %.txinfo
+%.w:
+%.c: %.w
+%.tex: %.w
+%.ch:
+%.web:
+%.p: %.web
+%.tex: %.web
+%.sh:
+%: %.sh
+%.elc:
+%.el:
+(%): %
+%.out: %
+%.c: %.w %.ch
+%.tex: %.w %.ch
+%:: %,v
+%:: RCS/%,v
+%:: RCS/%
+%:: s.%
+%:: SCCS/s.%
+remake<1> 

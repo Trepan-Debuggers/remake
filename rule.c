@@ -476,7 +476,7 @@ print_rule (rule_t *r, bool b_verbose)
   int i;
   dep_t *d;
 
-  for (i = 0; r->targets[i] != 0; ++i)
+  for (i = 0; r->targets[i] != 0 && i < r->num; ++i)
     {
       fputs (r->targets[i], stdout);
       if (r->targets[i + 1] != 0)
