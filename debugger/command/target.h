@@ -32,6 +32,8 @@ dbg_cmd_target(char *psz_args)
 	break;
       } else if (is_abbrev_of(psz_word, "depends", 1)) {
 	i_mask |= PRINT_TARGET_DEPEND;
+      } else if (is_abbrev_of(psz_word, "order", 1)) {
+	i_mask |= PRINT_TARGET_ORDER;
       } else if (is_abbrev_of(psz_word, "nonorder", 1)) {
 	i_mask |= PRINT_TARGET_NONORDER;
       } else if (is_abbrev_of(psz_word, "attributes", 1)) {
@@ -45,7 +47,7 @@ dbg_cmd_target(char *psz_args)
       } else if (is_abbrev_of(psz_word, "commands", 1)) {
 	i_mask |= PRINT_TARGET_CMDS;
       } else if (is_abbrev_of(psz_word, "expand", 1)) {
-	i_mask |= (PRINT_TARGET_CMDS|PRINT_TARGET_CMDS_EXP);
+	i_mask |= (PRINT_TARGET_CMDS_EXP);
       } else if (is_abbrev_of(psz_word, "previous", 1)) {
 	i_mask |= PRINT_TARGET_PREV;
       } else {
@@ -70,15 +72,24 @@ static void
 dbg_cmd_target_init(unsigned int c) 
 {
   short_command[c].func = &dbg_cmd_target;
-  short_command[c].use =  _("target [target-name] [info1 [info2...]]");
+  short_command[c].use =  _("target [TARGET-NAME] [info1 [info2...]]");
   short_command[c].doc  = 
     _("Show information about a target.\n" 
-      "target information is printed.\n"
-      "The following attributes names can be given after a target name:\n"
-      "\t'attributes', 'commands', 'expand', 'depends', 'nonorder',\n"
-      "\t'previous', 'state', 'time', 'variables'\n"
-      "If no variable or target name is supplied, we try to use the\n"
-      "current target name.\n"				
+"\nThe following attributes names can be given after a target name:\n"
+"  attributes - rule attributes: precious, rule search, and pattern stem\n"
+"  commands   - shell commands that are run to update the target\n"
+"  expand     - like 'commands', but Makefile variables are expanded\n"
+"  nonorder   - order dependenciesa\n"
+"  nonorder   - non-order dependencies\n"
+"  depends    - all target dependencies, i.e. order and non-order\n"
+"  previous   - previous target name hwen there are multiple double-colons\n"
+"  state      - shell command state\n"
+"  time       - last modification time and whether file has been updated\n"
+"  variables  - automatically set variables such as  @ or  <\n"
+"\n"
+"TARGET-NAME can be a variable like `@' (current target) or `<'\n" 
+"(first dependency). If no variable or target name is supplied\n"
+"we to use the current target name.\n"				
       );
 }
 

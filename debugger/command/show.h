@@ -22,25 +22,47 @@ Boston, MA 02111-1307, USA.  */
 #include "../subcmd.h"
 
 subcommand_var_info_t show_subcommands[] = {
-  { "args",     "Show argument list to give program when it is started",
-    NULL, false, 1},
-  { "basename", "Show if we are to show short or long filenames",
+  { "args",     
+    "Show argument list to give program when it is started",
+    NULL,
+    NULL, 
+    false, 1},
+  { "basename",
+    "Show if we are to show short or long filenames",
+    NULL,
     &basename_filenames, true, 1},
   { "commands", "Show the history of commands you typed.",
-    NULL, false, 1},
-  { "debug",    "GNU Make debug mask (set via --debug or -d)",
+    NULL, 
+    NULL,
+    false, 1},
+  { "debug",
+    "GNU Make debug mask (set via --debug or -d)",
+    NULL,
     &db_level, false, 1},
-  { "ignore-errors", "Value of GNU Make --ignore-errors (or -i) flag",
+  { "ignore-errors",
+    "Value of GNU Make --ignore-errors (or -i) flag",
+    NULL,
     &ignore_errors_flag, true, 1},
-  { "keep-going",    "Value of GNU Make --keep-going (or -k) flag",
-    &keep_going_flag,    true, 1},
-  { "silent",        "Value of GNU Make --silent (or -s) flags",
-    &silent_flag,        true, 1},
+  { "keep-going",    
+    "Value of GNU Make --keep-going (or -k) flag",
+    NULL,
+    &keep_going_flag,
+    true, 1},
+  { "silent",
+    "Value of GNU Make --silent (or -s) flags",
+    NULL,
+    &silent_flag,
+    true, 1},
   { "version",       "Show the version of GNU Make + dbg.",
-    NULL,                false, 1},
+    NULL,
+    NULL,
+    false, 1},
   { "warranty",      "Various kinds of warranty you do not have.",
-    NULL,                false, 1},
-  { NULL, NULL, NULL,    false, 0}
+    NULL,
+    NULL,
+    false, 1},
+  { NULL, NULL, NULL, NULL,
+    false, 0}
 };
 
 debug_return_t 
@@ -52,7 +74,8 @@ dbg_cmd_show(char *psz_arg)
       if ( 0 == strcmp(show_subcommands[i].name, "warranty") ||
 	   0 == strcmp(show_subcommands[i].name, "history"))
 	continue;
-      dbg_cmd_show((char *) show_subcommands[i].name);
+      dbg_help_subcmd_entry("show", "%-10s -- %s", 
+                            &(show_subcommands[i]), false);
     }
   } else {
     if (is_abbrev_of (psz_arg, "args", 3)) {
@@ -89,8 +112,8 @@ dbg_cmd_show_init(unsigned int c)
   short_command[c].func = &dbg_cmd_show;
   short_command[c].use = _("show [SUBCOMMAND]");
   short_command[c].doc = 
-    _("Show debugger information regarding SUBCOMMAND.\n" \
-      "If no SUBCOMMAND is specified, give a list of \"show\" subcommands.\n");
+    _("Show debugger information regarding SUBCOMMAND.\n"
+      "If no SUBCOMMAND is specified, give a list of \"show\" subcommands.");
 }
 
 

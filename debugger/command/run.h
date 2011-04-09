@@ -24,7 +24,7 @@ static void
 dbg_cmd_run_init(unsigned int c) 
 {
   short_command[c].func = &dbg_cmd_run;
-  short_command[c].use = _("Run Makefile from the beginning");
+  short_command[c].use = _("run [ARGS]");
   short_command[c].doc = 
     _("Run Makefile from the beginning.\n"
       "You may specify arguments to give it.\n"

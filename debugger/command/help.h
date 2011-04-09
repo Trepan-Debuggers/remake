@@ -22,10 +22,20 @@ Boston, MA 02111-1307, USA.  */
 
 void 
 dbg_help_subcmd_entry(const char *psz_subcmd_name, const char *psz_fmt,
-		      subcommand_var_info_t *p_subcmd)
+		      subcommand_var_info_t *p_subcmd, bool full_info)
 {
-    printf("%s ", psz_subcmd_name);
-    printf(psz_fmt, p_subcmd->name, p_subcmd->short_doc );
+    if (full_info) {
+	if (p_subcmd->doc)
+	    printf("%s%s", p_subcmd->name, p_subcmd->doc);
+	else {
+	    printf("%s ", psz_subcmd_name);
+	    printf("%s\n\n%s", p_subcmd->name, p_subcmd->short_doc);
+	}
+    } else {
+	printf("%s ", psz_subcmd_name);
+	printf(psz_fmt, p_subcmd->name, p_subcmd->short_doc);
+    }
+    
     if (p_subcmd->var) {
 	if (p_subcmd->b_onoff)
 	    printf(" is %s.", 
@@ -43,15 +53,13 @@ dbg_help_subcmd(const char *psz_subcmd_name,
 {
     unsigned int i;
     if (!psz_args || !*psz_args) {
-	printf("%s:\n\t%s\n", p_command->use, p_command->doc);
-	printf ("Available info subcommands are:\n");
-	for (i = 0; subcommands[i].name; i++) {
-	    dbg_help_subcmd_entry(psz_subcmd_name, "%-10s -- %s", &(subcommands[i]));
-	}
+	printf("%s\n\n%s\n", p_command->use, p_command->doc);
     } else {
 	for (i = 0; subcommands[i].name; i++) {
-	    if (is_abbrev_of(psz_args, subcommands[i].name, subcommands[i].min_abbrev)) {
-		dbg_help_subcmd_entry(psz_subcmd_name, "%-10s -- %s", &(subcommands[i]));
+	    if (is_abbrev_of(psz_args, subcommands[i].name, 
+			     subcommands[i].min_abbrev)) {
+		dbg_help_subcmd_entry(psz_subcmd_name, "%s%s",
+				      &(subcommands[i]), true);
 		return debug_readloop;
 	    }
 	}
@@ -87,9 +95,9 @@ dbg_cmd_help(char *psz_args)
       printf("\n");
     }
 
-    printf("\nReadline command line editing (emacs/vi mode) is available.\n");
-    printf("For more detailed help, type h <cmd> or consult "
-	   "online-documentation.\n");
+    printf("\nReadline command line editing (emacs/vi mode) is available.\n"
+"For more detailed help, type 'help COMAMND-NAME' or consult\n"
+"the online-documentation.\n");
     
   } else {
       short_cmd_t *p_command;

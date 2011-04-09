@@ -29,28 +29,48 @@ Boston, MA 02111-1307, USA.  */
 #include "../subcmd.h"
 
 subcommand_var_info_t set_subcommands[] = {
-  { "basename", "Set if we are to show short or long filenames",
+  { "basename",
+    "Set if we are to show short or long filenames",
+    NULL,
     &basename_filenames, true, 1},
-  { "debug",    "Set GNU Make debug mask (set via --debug or -d).",
+  { "debug",
+    "Set GNU Make debug mask (set via --debug or -d).",
+    NULL,
     &db_level, false, 1},
-  { "ignore-errors", "Set value of GNU Make --ignore-errors (or -i) flag.",
+  { "ignore-errors", 
+    "Set value of GNU Make --ignore-errors (or -i) flag.",
+    NULL,
     &ignore_errors_flag, true, 1},
-  { "keep-going",    "Set value of GNU Make --keep-going (or -k) flag.",
+  { "keep-going",
+    "Set value of GNU Make --keep-going (or -k) flag.",
+    NULL,
     &keep_going_flag,    true, 1},
-  { "silent",        "Set value of GNU Make --silent (or -s) flags.",
+  { "silent",
+    "Set value of GNU Make --silent (or -s) flags.",
+    NULL,
     &silent_flag,        true, 1},
-  { "trace",        "Set value of shell_tracing.",
+  { "trace",
+    "Set value of shell_tracing.",
+    NULL, 
     &no_shell_trace,    false, 3},
-  { "variable",      "Set a GNU Make variable.",
-    NULL,                false, 0},
-  { NULL, NULL, NULL, false, 0}
+  { "VARIABLE",      
+    "Set a GNU Make variable VARIABLE.",
+    NULL,
+    NULL,
+    false, 0},
+  { NULL, NULL, NULL, NULL, false, 0}
 };
 
 static debug_return_t 
 dbg_cmd_set(char *psz_args) 
 {
   if (!psz_args || 0==strlen(psz_args)) {
-    printf(_("You need to supply a variable name\n"));
+    unsigned int i;
+    for (i = 0; set_subcommands[i].name; i++) {
+      dbg_help_subcmd_entry("set", "%-10s -- %s", 
+                            &(set_subcommands[i]), false);
+    }
+    return debug_readloop;
   } else {
     char *psz_varname = get_word(&psz_args);
 
@@ -113,10 +133,12 @@ dbg_cmd_set_init(unsigned int c)
     
   short_command[c].func = &dbg_cmd_set;
   short_command[c].use =  
-    _("set {*option*|variable} VALUE");
+    _("set OPTION {on|off|toggle}\n"
+"set VARIABLE-NAME VALUE");
   short_command[c].doc  = 
-    _("Change debugger setting or GNU Make variable\n"
-      "If \"set\" is given by itself a list of \"set\" subcommands is listed.\n"
+    _("In the first form, set debugger OPTION.\n"
+"Run `set' for a list of options and current values\n\n"
+"In the second form change the value of a GNU Make variable."
       );
 }
 

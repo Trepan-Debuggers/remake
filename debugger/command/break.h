@@ -38,19 +38,23 @@ dbg_cmd_break (char *psz_args)
       unsigned int u_lineno=0;
       f2l_entry_t entry_type;
       if (get_uint(psz_target, &u_lineno, false)) {
-        p_target = target_for_file_and_line(p_stack->p_target->floc.filenm,
-                                            u_lineno, &entry_type);
-        if (!p_target) {
-          dbg_errmsg("Can't find target or pattern on line %s.\n" 
-                     "Use 'info lines' to get a list of breakpoint lines.", 
-                     psz_target);
-          return debug_cmd_error;
-        }
+          p_target = target_for_file_and_line(p_stack->p_target->floc.filenm,
+                                              u_lineno, &entry_type);
+          if (F2L_TARGET == entry_type) {
+            if (!p_target) {
+              dbg_errmsg("Can't find target or pattern on line %s.\n" 
+                         "Use 'info lines' to get a list of breakpoint lines.", 
+                         psz_target);
+              return debug_cmd_error;
+            }
+          } else {
+            dbg_errmsg("No support of breakpoints on target patterns yet.");
+            return debug_cmd_error;
+          }
       } else
-        /* FIXME: test entry_type for target */
         p_target = 
           lookup_file(variable_expand_set(psz_target, 
-                                          p_stack->p_target->variables));
+                                            p_stack->p_target->variables));
     } else {
       p_target = lookup_file(psz_target);
     }

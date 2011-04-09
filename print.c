@@ -490,8 +490,10 @@ void print_file (file_t *p_file)
   printf("File %s:\n", p_file->name);
   file_timestamp_sprintf (buf, p_file->last_mtime);
   printf("\tLast modified: %s\n",  buf);
-  file_timestamp_sprintf (buf, p_file->mtime_before_update);
-  printf("\tBefore update: %s\n",  buf);
+  if (p_file->mtime_before_update != p_file->last_mtime) {
+    file_timestamp_sprintf (buf, p_file->mtime_before_update);
+    printf("\tBefore update: %s\n",  buf);
+  }
   printf("\tNumber of lines: %u\n",  p_file->nlines);
 }
 

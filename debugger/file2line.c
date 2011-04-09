@@ -72,7 +72,7 @@ target_for_file_and_line (const char *psz_filename, unsigned int lineno,
 }
 
 void
-enter_lineno (const char *psz_filename, unsigned int lineno, 
+enter_target_lineno (const char *psz_filename, unsigned int lineno, 
 	      file_t *p_target)
 {
   lineno_array_t lookup_linenos;
@@ -114,9 +114,48 @@ file2line_init (const void *item)
   file_t *p_target = (file_t *) item;
   const floc_t *p_floc = &p_target->floc;
   if (p_floc && p_floc->filenm) {
-    enter_lineno(p_floc->filenm, p_floc->lineno, p_target);
+    enter_target_lineno(p_floc->filenm, p_floc->lineno, p_target);
   }
 }
+
+static void
+enter_rule_lineno (rule_t *r)
+{
+  lineno_array_t lookup_linenos;
+  lineno_array_t **pp_linenos;
+  const char *psz_filename = r->floc.filenm;
+  const unsigned int lineno = r->floc.lineno;
+  file_t *p_file;
+
+  if (!psz_filename) return;
+  lookup_linenos.hname = psz_filename;
+  pp_linenos = (lineno_array_t **) 
+    hash_find_slot(&file2lines, &lookup_linenos);
+  p_file = lookup_file(psz_filename);
+
+  if (p_file == NULL) {
+    printf("Could not find file %s\n", psz_filename);
+    return;
+  }
+  if (p_file->nlines == 0) {
+    printf("Warning: %s shows no lines\n", psz_filename);
+  }
+    
+  if (HASH_VACANT(*pp_linenos)) {
+    const unsigned int nlines = p_file->nlines+1;
+    void **new_array = calloc (sizeof(void *), nlines);
+    f2l_entry_t *new_type = calloc (sizeof(f2l_entry_t *), nlines);
+    lineno_array_t *p_new_linenos = calloc (sizeof(lineno_array_t), 1);
+    *pp_linenos = p_new_linenos;
+    (*pp_linenos)->hname = psz_filename;
+    (*pp_linenos)->type = new_type;
+    (*pp_linenos)->array = new_array;
+    (*pp_linenos)->size = nlines;
+  }
+  (*pp_linenos)->type[lineno]  = F2L_PATTERN;
+  (*pp_linenos)->array[lineno] = r;
+}
+
 
 /*!
   Initializes hash table file2lines. file2lines is used in breakpoints
@@ -128,6 +167,14 @@ bool file2lines_init(void)
   hash_init (&file2lines, files.ht_size, file2lines_hash_1, file2lines_hash_2, 
 	     file2lines_hash_cmp);
   hash_map (&files, file2line_init);
+
+  {
+    rule_t *r;
+    for (r = pattern_rules; r != 0; r = r->next) {
+      enter_rule_lineno(r);
+    }
+  }
+  
   return true;
 }
 
@@ -136,7 +183,7 @@ void file2lines_print_entry(const void *item)
     const lineno_array_t *p_linenos = (lineno_array_t *) item;
     unsigned int i;
     file_t *p_target;
-    printf("%s\n", p_linenos->hname);
+    printf("%s:\n", p_linenos->hname);
     for (i=0; i<p_linenos->size; i++) 
       {
 	p_target = p_linenos->array[i];
@@ -146,7 +193,7 @@ void file2lines_print_entry(const void *item)
                    p_target->floc.lineno, p_target->name);
           } else  {
             rule_t *p_rule = (rule_t *) p_target;
-            printf("%8lu: %s\n",
+            printf("%8lu: %s (pattern)\n",
                    p_rule->floc.lineno, p_rule->targets[0]);
           }
         }

@@ -53,29 +53,61 @@ const char *WARRANTY =
 #include "../subcmd.h"
 
 subcommand_var_info_t info_subcommands[] = {
-  { "break",     "Show list of target breakpoints",
-    NULL, false, 1},
-  { "line", "Show line and Makefile name of where we are currently stopped",
-    NULL, true, 2},
-  { "lines", "Show possible breakpoint lines for all targets",
-    NULL, true, 2},
-  { "locals", "Show target local variables and their values",
-    NULL, true, 2},
-  { "files",    "Show read-in Makefiles. The last is the one initially named",
-    NULL, false, 2},
-  { "frame",    "Show target-stack frame",
-    NULL, false, 2},
-  { "rules", "Show implicit or pattern rules",
-    NULL, true, 1},
-  { "program",    "Show program information and why we are stopped",
-    NULL,    true, 1},
-  { "targets", "Show the explicitly-named targets found in read Makefiles.",
-    NULL, false, 1},
-  { "variables",  "Show all GNU Make variables",
-    NULL,        true, 2},
-  { "warranty",      "Various kinds of warranty you do not have.",
-    NULL,                false, 1},
-  { NULL, NULL, NULL,    false, 0}
+  { "break",
+    "Show list of target breakpoints",
+    NULL, NULL, false,
+    1},
+  { "line",
+    "Show line and Makefile name of where we are currently stopped",
+    NULL, NULL, false,
+    2},
+  { "lines",
+    "Show possible breakpoint lines for all targets",
+    NULL, NULL, false,
+    2},
+  { "locals",
+    "Show target local variables and their values",
+    NULL, NULL, false,
+    2},
+  { "files",
+    "Show read-in Makefiles. The last is the one initially named",
+    NULL, NULL, false,
+    2},
+  { "frame",
+    "Show target-stack frame",
+    NULL, NULL, false,
+    2},
+  { "rules",
+    "Show implicit or pattern rules",
+    " [VERBOSE]\n\n"
+"Show implicit or pattern rules. Add VERBOSE if you want more info."
+    ,
+    NULL, false,
+    1},
+  { "program",
+    "Show program information and why we are stopped",
+    NULL, NULL, false,
+    1},
+  { "target",
+    "Same as 'target'",
+    "\n\nShow specific target information. See 'help target'.",
+    NULL, false,
+    1},
+  { "targets",    "Show a list of target names with their file locations",
+    " [VERBOSE]\n\n"
+"Show the explicitly-named targets found in read Makefiles.\n"
+"Add VERBOSE if you want more info.",
+     NULL, false,
+    7},
+  { "variables",
+    "Show all GNU Make variables",
+    NULL, NULL, false,
+    2},
+  { "warranty",
+    "Various kinds of warranty you do not have",
+    NULL, NULL, false,
+    1},
+  { NULL, NULL, NULL, NULL, false, 0}
 };
 
 /*! Show target information: location and name. */
@@ -190,7 +222,12 @@ debug_return_t
 dbg_cmd_info(char *psz_args)
 {
   if (!psz_args || 0==strlen(psz_args)) {
-    dbg_cmd_help("info");
+    unsigned int i;
+    for (i = 0; info_subcommands[i].name; i++) {
+      dbg_help_subcmd_entry("info", "%-10s -- %s", 
+                            &(info_subcommands[i]), false);
+    }
+    return debug_readloop;
   } else {
     char *psz_subcmd = get_word(&psz_args);
     if (0 == strcmp(psz_subcmd, "lines")) {
@@ -247,13 +284,27 @@ dbg_cmd_info(char *psz_args)
 	}
     } else if (is_abbrev_of (psz_subcmd, "stack", 1)) {
         print_target_stack(p_stack_top, i_stack_pos, MAX_STACK_SHOW);
-    } else if (is_abbrev_of (psz_subcmd, "targets", 1)) {
-        if (0 == strlen(psz_args))
-            dbg_cmd_info_targets (false);
-        else if (is_abbrev_of (psz_args, "verbose", 1))
-            dbg_cmd_info_targets (true);
-        else
-            printf("Expecting verbose or nothing\n");
+    } else if (0 == strcmp(psz_subcmd, "targets")) {
+      /* Note: "targets" has to come before "target" */
+      if (0 == strlen(psz_args))
+        dbg_cmd_info_targets (false);
+      else if (is_abbrev_of (psz_args, "verbose", 1))
+        dbg_cmd_info_targets (true);
+      else
+        printf("Expecting verbose or nothing\n");
+    } else if (is_abbrev_of (psz_subcmd, "target", 1)) {
+      if (0 == strlen(psz_args)) {
+        if (p_stack_top && p_stack_top->p_target && 
+            p_stack_top->p_target->name)
+          printf("target: %s\n", p_stack_top->p_target->name);
+        else 
+          {
+            printf("target unknown\n");
+          }
+      } 
+      else
+        dbg_cmd_target(psz_args);
+      
     } else if (is_abbrev_of (psz_subcmd, "variables", 1)) {
       print_variable_data_base();
     } else if (is_abbrev_of (psz_subcmd, "vpath", 1)) {
@@ -275,8 +326,8 @@ dbg_cmd_info_init(unsigned int c)
   short_command[c].func = &dbg_cmd_info;
   short_command[c].use = _("info [SUBCOMMAND]");
   short_command[c].doc = 
-    _("Show program information regarding SUBCOMMAND.\n" \
-      "\tIf SUBCOMMAND is not specified, give list of \"info\" subcommands.");
+    _("Show program information regarding SUBCOMMAND.\n"
+      "If SUBCOMMAND is not specified, give list of \"info\" subcommands.");
 }
 
 /* 

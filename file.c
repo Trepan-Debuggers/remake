@@ -994,6 +994,8 @@ print_target_props (file_t *p_target, print_target_mask_t i_mask)
 	puts (_("#  Dependencies commands running (THIS IS A BUG)."));
 	break;
       case cs_not_started:
+	puts (_("#  Commands not yet started."));
+	break;
       case cs_finished:
 	switch (p_target->update_status)
 	  {
