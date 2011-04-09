@@ -50,6 +50,8 @@ const char *WARRANTY =
 "PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE\n"
 "POSSIBILITY OF SUCH DAMAGES.\n";
 
+#include "../subcmd.h"
+
 subcommand_var_info_t info_subcommands[] = {
   { "break",     "Show list of target breakpoints",
     NULL, false, 1},

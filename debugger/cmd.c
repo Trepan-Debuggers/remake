@@ -154,23 +154,6 @@ alias_cmd_t aliases[] = {
 
 short_cmd_t short_command[256] = { { NULL, '\0', '\0' }, };
 
-typedef struct {
-  const char *name;	/* name of subcommand command. */
-  const char *doc;	/* short description of subcommand */
-} subcommand_info_t;
-
-typedef struct {
-  const char *name;	/* name of subcommand command. */
-  const char *doc;	/* short description of subcommand */
-  void *var;	        /* address of variable setting. NULL if no
-			   setting. */
-  bool b_onoff;         /* True if on/off variable, false if int. 
-			   FIXME: generalize into enumeration.
-			 */
-  unsigned int min_abbrev; /* Fewest number of characters needed
-                              to match name. */
-} subcommand_var_info_t;
-
 /* Look up NAME as the name of a command, and return a pointer to that
    command.  Return a NULL pointer if NAME isn't a command name. */
 static short_cmd_t *

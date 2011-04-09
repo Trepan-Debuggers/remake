@@ -27,12 +27,19 @@ module RemakeTestHelper
     cmd = "#{opts[:input]} | #{cmd}" if opts[:input]
     lines = `#{cmd}`.split("\n")[6..-1]
     opts[:filter].call(makefile_short, lines) if opts[:filter]
-    if lines != expected_output
-      File.open(Dir::tmpdir + "/#{test_name}.check", 'w') do |f|
-        lines.map {|l| f.puts(l) }
-      end
+    exit_status = opts[:exitstatus] || 77
+    if $?.exitstatus != exit_status
+      puts expected_output
     end
-    lines.should == expected_output
+    $?.exitstatus.should == exit_status
+    unless opts[:no_check_output]
+      if lines != expected_output
+        File.open(Dir::tmpdir + "/#{test_name}.check", 'w') do |f|
+          lines.map {|l| f.puts(l) }
+        end
+      end
+      lines.should == expected_output
+    end
   end
 
 

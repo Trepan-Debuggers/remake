@@ -25,7 +25,7 @@ dbg_help_subcmd_entry(const char *psz_subcmd_name, const char *psz_fmt,
 		      subcommand_var_info_t *p_subcmd)
 {
     printf("%s ", psz_subcmd_name);
-    printf(psz_fmt, p_subcmd->name, p_subcmd->doc );
+    printf(psz_fmt, p_subcmd->name, p_subcmd->short_doc );
     if (p_subcmd->var) {
 	if (p_subcmd->b_onoff)
 	    printf(" is %s.", 

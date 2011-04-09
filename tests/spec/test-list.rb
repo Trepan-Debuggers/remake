@@ -6,8 +6,9 @@ describe "list" do
   it 'should be able to run plain list, list with line number, and target' do
     opts = {
       :filter => Filter_filename,
-      :flags  =>'-X -f',
-      :input  => "echo 'list
+      :exitstatus  => 77,
+      :flags       =>'-X -f',
+      :input       => "echo 'list
 list third
 list 3
 list 6

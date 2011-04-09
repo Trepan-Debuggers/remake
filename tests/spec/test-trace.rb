@@ -6,6 +6,7 @@ describe "A simple trace" do
   before(:each) do
     @opts = {
       :filter => Filter_filename,
+      :exitstatus => 0,
     }
   end
     

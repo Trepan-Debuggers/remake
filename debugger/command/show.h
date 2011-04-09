@@ -19,6 +19,8 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#include "../subcmd.h"
+
 subcommand_var_info_t show_subcommands[] = {
   { "args",     "Show argument list to give program when it is started",
     NULL, false, 1},

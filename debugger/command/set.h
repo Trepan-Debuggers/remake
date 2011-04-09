@@ -25,6 +25,9 @@ Boston, MA 02111-1307, USA.  */
      set basename -- Set if were are to show shor or long filenames is off.
    (or "is on").
 */
+
+#include "../subcmd.h"
+
 subcommand_var_info_t set_subcommands[] = {
   { "basename", "Set if we are to show short or long filenames",
     &basename_filenames, true, 1},

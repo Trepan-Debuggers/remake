@@ -22,8 +22,8 @@ Boston, MA 02111-1307, USA.  */
  *  \brief GNU Make debugger interface
  */
 
-#ifndef DBG_CMD_H
-#define DBG_CMD_H
+#ifndef REMAKE_DBG_CMD_H
+#define REMAKE_DBG_CMD_H
 #include "../job.h"
 #include "../buildargv.h"
 #include "../trace.h"

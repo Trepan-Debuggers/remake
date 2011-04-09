@@ -5,9 +5,10 @@ describe "stepping" do
   include RemakeTestHelper
   it 'should be able to do work without readline support' do
     opts = {
-      :filter => Filter_filename, 
-      :flags  => '-X --no-readline -f',
-      :input  => "echo 'continue third
+      :filter     => Filter_filename, 
+      :exitstatus => 0,
+      :flags      => '-X --no-readline -f',
+      :input      => "echo 'continue third
 finish 2
 '"
     }

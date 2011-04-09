@@ -6,6 +6,7 @@ describe "stepping" do
   it 'should be able to do handle simple debugger stepping' do
     opts = {
       :filter => Filter_filename, 
+      :exitstatus  => 0,
       :flags  => '-X -f',
       :input  => "echo 'continue third
 finish 10

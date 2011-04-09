@@ -5,9 +5,10 @@ describe "stepping" do
   include RemakeTestHelper
   it 'should be able to do run an "info rule" command' do
     opts = {
-      :filter => Filter_filename, 
-      :flags  => '-X  -f',
-      :input  => "echo 'info rule
+      :filter          => Filter_filename, 
+      :no_check_output => true,
+      :flags           => '-X  -f',
+      :input           => "echo 'info rule
 quit
 '"
     }

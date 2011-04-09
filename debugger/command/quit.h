@@ -25,7 +25,7 @@ dbg_cmd_quit(char *psz_arg)
     in_debugger = DEBUGGER_QUIT_RC;
     die(DEBUGGER_QUIT_RC);
   } else {
-    int rc;
+    int rc=0;
     if (get_int(psz_arg, &rc, true)) 
       die(rc);
   }
