@@ -915,16 +915,14 @@ print_target_props (file_t *p_target, print_target_mask_t i_mask)
     puts (_("# Not a target:"));
   printf ("%s:%s", p_target->name, p_target->double_colon ? ":" : "");
 
-  if (i_mask & PRINT_TARGET_DEPEND) {
-    
     /* Print all normal dependencies; note any order-only deps.  */
     for (d = p_target->deps; d != 0; d = d->next)
-      if (! d->ignore_mtime)
-	printf (" %s", dep_name (d));
-      else if (! ood)
+      if (! d->ignore_mtime) {
+	if (i_mask & PRINT_TARGET_NONORDER)
+	  printf (" %s", dep_name (d));
+      } else if (! ood)
 	ood = d;
-  }
-  
+
   if (i_mask & PRINT_TARGET_ORDER) {
     /* Print order-only deps, if we have any.  */
     if (ood)

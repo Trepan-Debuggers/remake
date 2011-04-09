@@ -1,0 +1,12 @@
+Reading makefiles...
+Updating makefiles....
+Updating goal targets....
+order-only.Makefile:1)
+foo: bar
+remake<0> 
+foo: | baz
+remake<1> 
+foo: bar
+remake<2> 
+foo: bar | baz
+remake<3> 
