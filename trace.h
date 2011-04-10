@@ -79,8 +79,7 @@ extern target_stack_node_t *p_stack_top;
     if b_debugger is true we might enter the debugger.
 */
 extern target_stack_node_t *trace_push_target (target_stack_node_t *p, 
-					       file_t *p_target,
-					       int b_debugger);
+					       file_t *p_target);
 
 /*! Pop the next target from the call stack.. */
 extern void trace_pop_target (target_stack_node_t *p);

@@ -25,24 +25,22 @@ dbg_help_subcmd_entry(const char *psz_subcmd_name, const char *psz_fmt,
 		      subcommand_var_info_t *p_subcmd, bool full_info)
 {
     if (full_info) {
-	if (p_subcmd->doc)
-	    printf("%s%s", p_subcmd->name, p_subcmd->doc);
-	else {
-	    printf("%s ", psz_subcmd_name);
-	    printf("%s\n\n%s", p_subcmd->name, p_subcmd->short_doc);
-	}
+      const char *doc = p_subcmd->doc ? 
+	p_subcmd->doc : p_subcmd->short_doc;
+      printf("%s ", psz_subcmd_name);
+      printf("%s%s", p_subcmd->name, doc);
     } else {
-	printf("%s ", psz_subcmd_name);
-	printf(psz_fmt, p_subcmd->name, p_subcmd->short_doc);
+      printf("%s ", psz_subcmd_name);
+      printf(psz_fmt, p_subcmd->name, p_subcmd->short_doc);
+      if (p_subcmd->var) {
+	if (p_subcmd->b_onoff)
+	  printf(" is %s.", 
+		 var_to_on_off(* (int *) p_subcmd->var));
+	else 
+	  printf(" is %d.", *(int *)(p_subcmd->var));
+      }
     }
     
-    if (p_subcmd->var) {
-	if (p_subcmd->b_onoff)
-	    printf(" is %s.", 
-		   var_to_on_off(* (int *) p_subcmd->var));
-	else 
-	    printf(" is %d.", *(int *)(p_subcmd->var));
-    }
     printf("\n");
 }
 
@@ -124,7 +122,7 @@ dbg_cmd_help(char *psz_args)
 	      printf("%s\n", p_command->doc);
 	  }
       } else {
-	  printf("Undefined command %s. Try help for a list of commands\n", 
+	  printf("Undefined command `%s'. Try help for a list of commands.\n", 
 		 psz_command);
       }
   }

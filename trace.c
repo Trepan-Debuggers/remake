@@ -34,8 +34,8 @@ floc_stack_node_t *p_stack_floc_top = NULL;
 
 /*! Push "target" to the call stack. */
 extern target_stack_node_t *
-trace_push_target (target_stack_node_t *p, file_t *p_target,
-		   int b_debugger) {
+trace_push_target (target_stack_node_t *p, file_t *p_target) 
+{
   target_stack_node_t *new_node = CALLOC(target_stack_node_t, 1);
 
   /* We allocate and make a copy of p_target in case we want to
@@ -49,21 +49,12 @@ trace_push_target (target_stack_node_t *p, file_t *p_target,
 
   new_node->p_parent = p;
 
-  /* We don't want to trace file dependencies -- there or too often
-     too many of them. Instead if the dependency has commands to run
-     or is a phony target, then we'll call that interesting.
-  */
   if (p_target && p_target->floc.filenm != NULL) {
 
     if ( db_level & DB_VERBOSE ) {
       print_file_target_prefix(p_target);
       printf("\n");
     } 
-
-    if (b_debugger && i_debugger_stepping && p_target->cmds )
-      enter_debugger(new_node, p_target, 0, DEBUG_STEP_HIT);
-    else if ( p_target->tracing & BRK_BEFORE_PREREQ )
-      enter_debugger(new_node, p_target, 0, DEBUG_BRKPT_BEFORE_PREREQ);
   }
   
   return new_node;

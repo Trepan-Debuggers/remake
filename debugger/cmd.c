@@ -329,7 +329,7 @@ static debug_return_t dbg_cmd_set_var (char *psz_args, int expand)
       define_variable_in_set(p_v->name, u_len, psz_value,
 			     o_debugger, 0, NULL,
 			     &(p_v->fileinfo));
-      dbg_msg(_("Variable %s now has value '%s'\n"), psz_varname,
+      dbg_msg(_("Variable %s now has value '%s'"), psz_varname,
 	     psz_value);
     } else {
       try_without_dollar(psz_varname);

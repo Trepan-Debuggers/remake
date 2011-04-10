@@ -31,23 +31,23 @@ Boston, MA 02111-1307, USA.  */
 subcommand_var_info_t set_subcommands[] = {
   { "basename",
     "Set if we are to show short or long filenames",
-    NULL,
+    " {on|off|toggle} \n\nSet if we are to show short or long filenames.",
     &basename_filenames, true, 1},
   { "debug",
-    "Set GNU Make debug mask (set via --debug or -d).",
-    NULL,
+    "Set GNU Make debug mask (set via --debug or -d)",
+    " VALUE \n\nSet GNU Make debug mask (set via --debug or -d).",
     &db_level, false, 3},
   { "ignore-errors", 
-    "Set value of GNU Make --ignore-errors (or -i) flag.",
-    NULL,
+    "Set value of GNU Make --ignore-errors (or -i) flag",
+    " {on|off|toggle} \n\nSet value of GNU Make --ignore-errors (or -i) flag.",
     &ignore_errors_flag, true, 3},
   { "keep-going",
-    "Set value of GNU Make --keep-going (or -k) flag.",
-    NULL,
+    "Set value of GNU Make --keep-going (or -k) flag",
+    " {on|off|toggle}\n\nSet value of GNU Make --keep-going (or -k) flag.",
     &keep_going_flag,    true, 1},
   { "silent",
     "Set value of GNU Make --silent (or -s) flags.",
-    NULL,
+    " {on|off|toggle} \n\nSet value of GNU Make --silent (or -s) flags.",
     &silent_flag,        true, 1},
 #ifdef FIXED
   { "trace",
@@ -55,6 +55,15 @@ subcommand_var_info_t set_subcommands[] = {
     NULL, 
     &no_shell_trace,    false, 3},
 #endif
+  { "variable",      
+    "Set a GNU Make variable VARIABLE",
+    " VARIABLE VALUE\n\n"
+"Set GNU Make variable VARIABLE to value VALUE\n"
+"VALUE is expanded before assignment.\n"
+"\n"
+"See also 'setq'.",
+    NULL,
+    false, 0},
   { NULL, NULL, NULL, NULL, false, 0}
 };
 
@@ -100,6 +109,9 @@ dbg_cmd_set(char *psz_args)
       }
       dbg_cmd_show(psz_varname);
       return debug_readloop;
+    } else if (is_abbrev_of (psz_varname, "variable", 3)) {
+      /* Treat as set variable */
+      return dbg_cmd_set_var(psz_args, 1);
 #if FIXME_SET_ARGS
     } else if (is_abbrev_of (psz_varname, "args", 3)) {
         ...
@@ -114,7 +126,6 @@ dbg_cmd_set(char *psz_args)
       }
     dbg_errmsg("Unknown set option %s\n", psz_varname);
     return debug_cmd_error;
-    
   }
 }
 
@@ -124,11 +135,14 @@ dbg_cmd_set_init(unsigned int c)
     
   short_command[c].func = &dbg_cmd_set;
   short_command[c].use =  
-    _("set OPTION {on|off|toggle}");
+    _("set OPTION {on|off|toggle}\n"
+"  set variable VARIABLE VALUE    ");
   short_command[c].doc  = 
-    _("Set debugger value for OPTION.\n"
+    _("In the first form, Set debugger value for OPTION.\n"
+"In the second form, set a GNU make variable\n"
 "Run `set' for a list of options and current values\n"
-"See also 'setq'.\n"
+"\n"
+"See also 'setq'."
       );
 }
 

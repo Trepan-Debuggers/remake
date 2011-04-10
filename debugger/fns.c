@@ -74,7 +74,6 @@ floc_t  fake_floc;
 brkpt_mask_t 
 get_brkpt_option(const char *psz_break_type)
 {
-  brkpt_mask_t i_brkpt_mask;
   if (is_abbrev_of (psz_break_type, "all", 1)) {
     return BRK_ALL;
   } else if (is_abbrev_of (psz_break_type, "prerequisite", 3)) {

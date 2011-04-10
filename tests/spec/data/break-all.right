@@ -7,7 +7,11 @@ remake<0> Breakpoint 1 on target third: file triple.Makefile, line 5.
 triple.Makefile:5)
 third: 
 triple.Makefile:5)
-third: 
+third
+remake<3> ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+echo third done
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+third done
 triple.Makefile:5)
 third
 remake<4> 
