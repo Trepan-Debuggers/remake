@@ -287,7 +287,7 @@ execute_line (char *psz_line)
 
 /* Show history. */
 debug_return_t 
-dbg_cmd_show_command (char *psz_args)
+dbg_cmd_show_command (const char *psz_args)
 {
  /*
   if (!psz_arg || *psz_arg) {

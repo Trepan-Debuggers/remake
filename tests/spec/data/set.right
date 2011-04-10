@@ -9,7 +9,6 @@ set debug      -- Set GNU Make debug mask (set via --debug or -d). is 3361.
 set ignore-errors -- Set value of GNU Make --ignore-errors (or -i) flag. is off.
 set keep-going -- Set value of GNU Make --keep-going (or -k) flag. is off.
 set silent     -- Set value of GNU Make --silent (or -s) flags. is off.
-set VARIABLE   -- Set a GNU Make variable VARIABLE.
 remake<1> silent is on.
 remake<2> silent is off.
 remake<3> keep-going is off.

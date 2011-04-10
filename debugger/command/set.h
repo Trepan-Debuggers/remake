@@ -36,11 +36,11 @@ subcommand_var_info_t set_subcommands[] = {
   { "debug",
     "Set GNU Make debug mask (set via --debug or -d).",
     NULL,
-    &db_level, false, 1},
+    &db_level, false, 3},
   { "ignore-errors", 
     "Set value of GNU Make --ignore-errors (or -i) flag.",
     NULL,
-    &ignore_errors_flag, true, 1},
+    &ignore_errors_flag, true, 3},
   { "keep-going",
     "Set value of GNU Make --keep-going (or -k) flag.",
     NULL,
@@ -55,16 +55,11 @@ subcommand_var_info_t set_subcommands[] = {
     NULL, 
     &no_shell_trace,    false, 3},
 #endif
-  { "VARIABLE",      
-    "Set a GNU Make variable VARIABLE.",
-    NULL,
-    NULL,
-    false, 0},
   { NULL, NULL, NULL, NULL, false, 0}
 };
 
 static bool
-dbg_cmd_set_bool(const char *psz_varname, char *psz_flag_name,
+dbg_cmd_set_bool(const char *psz_varname, const char *psz_flag_name,
                  const char *psz_flag_value, 
                  unsigned int min, int *p_bool_flag) 
 {
@@ -73,7 +68,7 @@ dbg_cmd_set_bool(const char *psz_varname, char *psz_flag_name,
 	on_off_toggle(psz_flag_value, p_bool_flag);
       else
 	on_off_toggle(psz_flag_value, p_bool_flag);
-      dbg_cmd_show(psz_flag_name);
+      dbg_cmd_show((char *) psz_flag_name);
       return true;
   }
   return false;
@@ -92,44 +87,35 @@ dbg_cmd_set(char *psz_args)
     return debug_readloop;
   } else {
     char *psz_varname = get_word(&psz_args);
+    subcommand_var_info_t *p_subcmd_info;
 
     while (*psz_args && whitespace (*psz_args))
       *psz_args +=1;
 
     /* FIXME, add min to above table and DRY below code. */
-    if (is_abbrev_of (psz_varname, "variable", 3)) {
-      return dbg_cmd_set_var(psz_args, 3);
-#if FIXME_SET_ARGS
-    }
-    else if (is_abbrev_of (psz_varname, "args", 3)) {
-      ...
-#endif
-    } else if (dbg_cmd_set_bool(psz_varname, "basename", psz_args, 4,
-                                &basename_filenames))
-      ;
-    else if (is_abbrev_of (psz_varname, "debug", 3)) {
+    if (is_abbrev_of (psz_varname, "debug", 3)) {
       int dbg_mask;
       if (get_int(psz_args, &dbg_mask, true)) {
 	db_level = dbg_mask;
       }
-    } else if (dbg_cmd_set_bool(psz_varname, "ignore-errors", psz_args, 4,
-                                &ignore_errors_flag))
-      ;
-    else if (dbg_cmd_set_bool(psz_varname, "keep-going", psz_args, 3, 
-                              &keep_going_flag))
-      ;
-    else if (dbg_cmd_set_bool(psz_varname, "silent", psz_args, 3,
-                              &silent_flag))
-      ;
-    else if (dbg_cmd_set_bool(psz_varname, "trace", psz_args, 3,
-                              &no_shell_trace))
-      ;
-    else {
-      /* Treat as set variable */
-      return dbg_cmd_set_var(psz_args, 1);
-    }
+      dbg_cmd_show(psz_varname);
+      return debug_readloop;
+#if FIXME_SET_ARGS
+    } else if (is_abbrev_of (psz_varname, "args", 3)) {
+        ...
+#endif
+    } else 
+      for (p_subcmd_info = set_subcommands; *p_subcmd_info->name; 
+           p_subcmd_info++) {
+        if (dbg_cmd_set_bool(psz_varname, p_subcmd_info->name, 
+                             psz_args, p_subcmd_info->min_abbrev,
+                             p_subcmd_info->var))
+          return debug_readloop;
+      }
+    dbg_errmsg("Unknown set option %s\n", psz_varname);
+    return debug_cmd_error;
+    
   }
-  return debug_readloop;
 }
 
 static void
@@ -138,12 +124,11 @@ dbg_cmd_set_init(unsigned int c)
     
   short_command[c].func = &dbg_cmd_set;
   short_command[c].use =  
-    _("set OPTION {on|off|toggle}\n"
-"set VARIABLE-NAME VALUE");
+    _("set OPTION {on|off|toggle}");
   short_command[c].doc  = 
-    _("In the first form, set debugger OPTION.\n"
-"Run `set' for a list of options and current values\n\n"
-"In the second form change the value of a GNU Make variable."
+    _("Set debugger value for OPTION.\n"
+"Run `set' for a list of options and current values\n"
+"See also 'setq'.\n"
       );
 }
 

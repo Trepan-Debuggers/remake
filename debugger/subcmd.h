@@ -5,7 +5,7 @@ typedef struct {
   const char *name;	  /* name of subcommand command. */
   const char *short_doc;  /* short description of subcommand */
   const char *doc;	  /* full description of subcommand */ 
-  void *var;	          /* address of variable setting. NULL if no
+  int *var;	          /* address of variable setting. NULL if no
 			     setting. */
   bool b_onoff;           /* True if on/off variable, false if int. 
 			     FIXME: generalize into enumeration.
