@@ -49,7 +49,7 @@ extern void fatal ();
 
 /*! Versions of error and fatal with the ability to show call-stack. */
 #if defined __STDC__ && __STDC__
-void err (target_stack_node_t *p_call, const char *fmt, ...)
+void err_with_stack (target_stack_node_t *p_call, const char *fmt, ...)
                    __attribute__ ((__format__ (__printf__, 2, 3)));
 void fatal_err (target_stack_node_t *p_call, const char *fmt, ...)
                    __attribute__ ((__format__ (__printf__, 2, 3)));

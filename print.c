@@ -126,9 +126,9 @@ error (flocp, fmt, va_alist)
 
 void
 #if __STDC__ && HAVE_STDVARARGS
-err (target_stack_node_t *p_call, const char *fmt, ...)
+err_with_stack (target_stack_node_t *p_call, const char *fmt, ...)
 #else
-err (p_call, fmt, va_alist)
+err_with_stack (p_call, fmt, va_alist)
      target_stack_node_t *p_call;
      const char *fmt;
      va_dcl
@@ -214,7 +214,8 @@ fatal (flocp, fmt, va_alist)
   case DEBUGGER_QUIT_RC:
     die(DEBUGGER_QUIT_RC);
   default:
-  case 1: ;
+  case 1: 
+    longjmp(debugger_loop, 0);
     break;
     
   }

@@ -458,13 +458,13 @@ child_error (child_t *p_child, target_stack_node_t *p_call_stack,
              target_name, exit_code);
 #else
   if (exit_sig == 0)
-    err (p_call_stack, ignored ? _("[%s] Error %d (ignored)") :
-	 _("*** [%s] Error %d"),
-	 target_name, exit_code);
+    err_with_stack(p_call_stack, ignored ? _("[%s] Error %d (ignored)") :
+		   _("*** [%s] Error %d"),
+		   target_name, exit_code);
   else
-    err (p_call_stack, "*** [%s] %s%s",
-	 target_name, strsignal (exit_sig),
-	 coredump ? _(" (core dumped)") : "");
+    err_with_stack(p_call_stack, "*** [%s] %s%s",
+		   target_name, strsignal (exit_sig),
+		   coredump ? _(" (core dumped)") : "");
 #endif /* VMS */
 
   /* If have enabled debugging but haven't entered the debugger above

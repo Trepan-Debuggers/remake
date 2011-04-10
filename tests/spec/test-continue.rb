@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 require_relative 'helper'
 
-describe "stepping" do
+describe "continue" do
   include RemakeTestHelper
   it 'should be able to do handle simple debugger stepping' do
     opts = {

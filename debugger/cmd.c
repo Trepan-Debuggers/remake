@@ -342,6 +342,9 @@ static debug_return_t dbg_cmd_set_var (char *psz_args, int expand)
 
 #define PROMPT_LENGTH 300
 
+#include <setjmp.h>
+jmp_buf debugger_loop;
+
 /* Should be less that PROMPT_LENGTH / 2 - strlen("remake ") + log(history) 
    We will make it much less that since people can't count more than
    10 or so nested <<<<>>>>'s easily.
@@ -466,35 +469,40 @@ debug_return_t enter_debugger (target_stack_node_t *p,
     char prompt[PROMPT_LENGTH];
     char *line=NULL;
     char *s;
+
+    if (setjmp(debugger_loop))
+      dbg_errmsg("Internal error jumped back to debugger loop");
+    else {
     
 #ifdef HAVE_LIBREADLINE
-    if (use_readline_flag) {
-      snprintf(prompt, PROMPT_LENGTH, "remake%s%d%s ", 
-               open_depth, where_history(), close_depth);
-      
-      line = readline (prompt);
-    } else 
+      if (use_readline_flag) {
+        snprintf(prompt, PROMPT_LENGTH, "remake%s%d%s ", 
+                 open_depth, where_history(), close_depth);
+        
+        line = readline (prompt);
+      } else 
 #endif
-      {
-        snprintf(prompt, PROMPT_LENGTH, "remake%s0%s ", open_depth, 
-                 close_depth);
-        printf("%s", prompt);
-        if (line == NULL) line = calloc(1, 2048);
-        line = fgets(line, 2048, stdin);
-        if (NULL != line) chomp(line);
-      }
-
-    if ( line ) {
-      if ( *(s=stripwhite(line)) ) {
-	add_history (s);
-	debug_return=execute_line(s);
+        {
+          snprintf(prompt, PROMPT_LENGTH, "remake%s0%s ", open_depth, 
+                   close_depth);
+          printf("%s", prompt);
+          if (line == NULL) line = calloc(1, 2048);
+          line = fgets(line, 2048, stdin);
+          if (NULL != line) chomp(line);
+        }
+      
+      if ( line ) {
+        if ( *(s=stripwhite(line)) ) {
+          add_history (s);
+          debug_return=execute_line(s);
+        } else {
+          add_history ("step");
+          debug_return=dbg_cmd_step("");
+        }
+        free (line);
       } else {
-	add_history ("step");
-	debug_return=dbg_cmd_step("");
+        dbg_cmd_quit(NULL);
       }
-      free (line);
-    } else {
-      dbg_cmd_quit(NULL);
     }
   }
 

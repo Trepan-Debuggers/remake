@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 require_relative 'helper'
 
-describe "stepping" do
+describe "info target" do
   include RemakeTestHelper
   it 'should run info target order, nonorder, and depend command' do
     opts = {

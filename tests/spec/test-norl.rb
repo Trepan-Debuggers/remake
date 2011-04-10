@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 require_relative 'helper'
 
-describe "stepping" do
+describe "no readline" do
   include RemakeTestHelper
   it 'should be able to do work without readline support' do
     opts = {

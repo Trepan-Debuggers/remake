@@ -1,14 +1,17 @@
 #!/usr/bin/env ruby
 require_relative 'helper'
 
-describe "info rule" do
+describe "test-set" do
   include RemakeTestHelper
-  it 'should be able to do run an "info rule" command' do
+  it 'should be able to do run a "set" command' do
     opts = {
       :filter          => Filter_filename, 
-      :no_check_output => true,
       :flags           => '-X  -f',
-      :input           => "echo 'info rule
+      :input           => "echo 'set
+set silent on
+set silent off
+set keep-going off
+expand $(word 2)
 quit
 '"
     }

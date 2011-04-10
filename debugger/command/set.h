@@ -49,10 +49,12 @@ subcommand_var_info_t set_subcommands[] = {
     "Set value of GNU Make --silent (or -s) flags.",
     NULL,
     &silent_flag,        true, 1},
+#ifdef FIXED
   { "trace",
     "Set value of shell_tracing.",
     NULL, 
     &no_shell_trace,    false, 3},
+#endif
   { "VARIABLE",      
     "Set a GNU Make variable VARIABLE.",
     NULL,
@@ -60,6 +62,23 @@ subcommand_var_info_t set_subcommands[] = {
     false, 0},
   { NULL, NULL, NULL, NULL, false, 0}
 };
+
+static bool
+dbg_cmd_set_bool(const char *psz_varname, char *psz_flag_name,
+                 const char *psz_flag_value, 
+                 unsigned int min, int *p_bool_flag) 
+{
+  if (is_abbrev_of (psz_varname, psz_flag_name, min)) {
+      if (!psz_flag_value || 0==strlen(psz_flag_value))
+	on_off_toggle(psz_flag_value, p_bool_flag);
+      else
+	on_off_toggle(psz_flag_value, p_bool_flag);
+      dbg_cmd_show(psz_flag_name);
+      return true;
+  }
+  return false;
+}
+
 
 static debug_return_t 
 dbg_cmd_set(char *psz_args) 
@@ -77,49 +96,35 @@ dbg_cmd_set(char *psz_args)
     while (*psz_args && whitespace (*psz_args))
       *psz_args +=1;
 
+    /* FIXME, add min to above table and DRY below code. */
     if (is_abbrev_of (psz_varname, "variable", 3)) {
       return dbg_cmd_set_var(psz_args, 3);
 #if FIXME_SET_ARGS
-    } else if (is_abbrev_of (psz_varname, "args", 3)) {
+    }
+    else if (is_abbrev_of (psz_varname, "args", 3)) {
       ...
-      }
 #endif
-    } else if (is_abbrev_of (psz_varname, "basename", 4)) {
-      if (!psz_args || 0==strlen(psz_args))
-	on_off_toggle("toggle", &basename_filenames);
-      else
-	on_off_toggle(psz_args, &basename_filenames);
-      dbg_cmd_show("basename");
-    } else if (is_abbrev_of (psz_varname, "debug", 3)) {
+    } else if (dbg_cmd_set_bool(psz_varname, "basename", psz_args, 4,
+                                &basename_filenames))
+      ;
+    else if (is_abbrev_of (psz_varname, "debug", 3)) {
       int dbg_mask;
       if (get_int(psz_args, &dbg_mask, true)) {
 	db_level = dbg_mask;
       }
-    } else if (is_abbrev_of (psz_varname, "ignore-errors", 3)) {
-      if (!psz_args || 0==strlen(psz_args))
-	on_off_toggle("toggle", &ignore_errors_flag);
-      else
-	on_off_toggle(psz_args, &ignore_errors_flag);
-      dbg_cmd_show("ignore_errors");
-    } else if (is_abbrev_of (psz_varname, "keep-going", 3)) {
-      if (!psz_args || !*psz_args)
-	on_off_toggle("toggle", &keep_going_flag);
-      else
-	on_off_toggle(psz_args, &keep_going_flag);
-      dbg_cmd_show("keep-going");
-    } else if (is_abbrev_of (psz_varname, "silent", 3)) {
-      if (!psz_args || !*psz_args)
-	on_off_toggle("toggle", &silent_flag);
-      else
-	on_off_toggle(psz_args, &silent_flag);
-      dbg_cmd_show("silent");
-    } else if (is_abbrev_of (psz_varname, "trace", 3)) {
-      if (!psz_args || !*psz_args)
-	on_off_toggle("toggle", &no_shell_trace);
-      else
-	on_off_toggle(psz_args, &silent_flag);
-      dbg_cmd_show("silent");
-    } else {
+    } else if (dbg_cmd_set_bool(psz_varname, "ignore-errors", psz_args, 4,
+                                &ignore_errors_flag))
+      ;
+    else if (dbg_cmd_set_bool(psz_varname, "keep-going", psz_args, 3, 
+                              &keep_going_flag))
+      ;
+    else if (dbg_cmd_set_bool(psz_varname, "silent", psz_args, 3,
+                              &silent_flag))
+      ;
+    else if (dbg_cmd_set_bool(psz_varname, "trace", psz_args, 3,
+                              &no_shell_trace))
+      ;
+    else {
       /* Treat as set variable */
       return dbg_cmd_set_var(psz_args, 1);
     }

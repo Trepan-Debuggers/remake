@@ -53,6 +53,13 @@ subcommand_var_info_t show_subcommands[] = {
     NULL,
     &silent_flag,
     true, 1},
+#ifdef FIXED
+  { "trace",
+    "Value of GNU Make --silent (or -s) flags",
+    NULL,
+    &no_shell_trace,
+    true, 1},
+#endif
   { "version",       "Show the version of GNU Make + dbg.",
     NULL,
     NULL,
