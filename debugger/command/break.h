@@ -31,7 +31,7 @@ dbg_cmd_break (char *psz_args)
     char *psz_target = get_word(&psz_args);
     char *psz_break_type; 
     file_t *p_target;
-    unsigned int i_brkpt_mask = BRK_ALL;
+    unsigned int i_brkpt_mask = BRK_NONE;
 
     /** FIXME: DRY with code in continue.h **/
     if (p_stack && p_stack->p_target) {
@@ -69,12 +69,13 @@ dbg_cmd_break (char *psz_args)
     } else if (is_abbrev_of (psz_break_type, "prerequisite", 3)) {
       i_brkpt_mask = BRK_BEFORE_PREREQ;
     } else if (is_abbrev_of (psz_break_type, "run", 1)) {
-      i_brkpt_mask = BRK_BEFORE_PREREQ;
+      i_brkpt_mask = BRK_AFTER_PREREQ;
     } else if (is_abbrev_of (psz_break_type, "end", 1)) {
       i_brkpt_mask = BRK_AFTER_CMD;
     } else if (is_abbrev_of (psz_break_type, "temp", 1)) {
       i_brkpt_mask |= BRK_TEMP;
-    }
+    } else 
+      i_brkpt_mask = BRK_ALL;
     add_breakpoint(p_target, i_brkpt_mask);
   }
 

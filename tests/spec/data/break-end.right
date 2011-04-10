@@ -4,6 +4,10 @@ Updating goal targets....
 triple.Makefile:1)
 first: second
 remake<0> Breakpoint 1 on target third: file triple.Makefile, line 5.
+remake<1> ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+echo third done
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+third done
 triple.Makefile:5)
-third: 
+third
 remake<2> 
