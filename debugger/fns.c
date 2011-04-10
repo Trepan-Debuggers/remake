@@ -71,6 +71,26 @@ floc_t  fake_floc;
 #define whitespace(c) (((c) == ' ') || ((c) == '\t'))
 #endif
 
+brkpt_mask_t 
+get_brkpt_option(const char *psz_break_type)
+{
+  brkpt_mask_t i_brkpt_mask;
+  if (is_abbrev_of (psz_break_type, "all", 1)) {
+    return BRK_ALL;
+  } else if (is_abbrev_of (psz_break_type, "prerequisite", 3)) {
+    return BRK_BEFORE_PREREQ;
+  } else if (is_abbrev_of (psz_break_type, "run", 1)) {
+    return BRK_AFTER_PREREQ;
+  } else if (is_abbrev_of (psz_break_type, "end", 1)) {
+    return BRK_AFTER_CMD;
+  } else if (is_abbrev_of (psz_break_type, "temp", 1)) {
+    return BRK_TEMP;
+  } else {
+    dbg_errmsg("Unknown breakpoint modifier %s", psz_break_type);
+    return BRK_NONE;
+  }
+}
+
 /*! Parse psz_arg for a signed integer. The value is returned in
     *pi_result. If warn is true, then we'll give a warning if no
     integer found. The return value is true if parsing succeeded in

@@ -63,19 +63,16 @@ dbg_cmd_break (char *psz_args)
 	dbg_errmsg("Can't find target %s; breakpoint not set.\n", psz_target);
 	return debug_cmd_error;
     }
-    psz_break_type = get_word(&psz_args);
-    if (is_abbrev_of (psz_break_type, "all", 1)) {
+
+    /* FIXME: Combine with code in continue. */
+    if (!(psz_args && *psz_args))
       i_brkpt_mask = BRK_ALL;
-    } else if (is_abbrev_of (psz_break_type, "prerequisite", 3)) {
-      i_brkpt_mask = BRK_BEFORE_PREREQ;
-    } else if (is_abbrev_of (psz_break_type, "run", 1)) {
-      i_brkpt_mask = BRK_AFTER_PREREQ;
-    } else if (is_abbrev_of (psz_break_type, "end", 1)) {
-      i_brkpt_mask = BRK_AFTER_CMD;
-    } else if (is_abbrev_of (psz_break_type, "temp", 1)) {
-      i_brkpt_mask |= BRK_TEMP;
-    } else 
-      i_brkpt_mask = BRK_ALL;
+    else {
+      while ((psz_break_type = get_word(&psz_args))) {
+        if (!(psz_break_type && *psz_break_type)) break;
+        i_brkpt_mask |= get_brkpt_option(psz_break_type) ;
+      }
+    }
     add_breakpoint(p_target, i_brkpt_mask);
   }
 
@@ -86,7 +83,7 @@ static void
 dbg_cmd_break_init(unsigned int c) 
 {
   short_command[c].func = &dbg_cmd_break;
-  short_command[c].use  = _("break [TARGET|LINENUM] [all|run|prereq|end]");
+  short_command[c].use  = _("break [TARGET|LINENUM] [all|run|prereq|end]*");
   short_command[c].doc  = _("Set a breakpoint at a target.\n"
 "With a target name or a line number, set a break before running commands\n"
 "of that target or line number.  Without argument, list all breakpoints.\n"

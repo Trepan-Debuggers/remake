@@ -58,6 +58,8 @@ typedef enum {
   BRK_ALL            = (BRK_BEFORE_PREREQ|BRK_AFTER_PREREQ|BRK_AFTER_CMD),
   BRK_TEMP           = 0x08, /**< Temporary or one-time breakpoint */
 } breakpoint_mask_t;
+
+typedef  unsigned int brkpt_mask_t;
     
 typedef unsigned long int lineno_t;
 

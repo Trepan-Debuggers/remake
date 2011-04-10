@@ -37,13 +37,13 @@ struct breakpoint_node
 breakpoint_node_t *p_breakpoint_top    = NULL;
 breakpoint_node_t *p_breakpoint_bottom = NULL;
 
-unsigned int i_breakpoints = 0;
+brkpt_mask_t i_breakpoints = BRK_NONE;
 
 /*! Add "p_target" to the list of breakpoints. Return true if 
     there were no errors
 */
 bool 
-add_breakpoint (file_t *p_target, unsigned int brkpt_mask) 
+add_breakpoint (file_t *p_target, const brkpt_mask_t brkpt_mask) 
 {
   breakpoint_node_t *p_new   = CALLOC (breakpoint_node_t, 1);
 

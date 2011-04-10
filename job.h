@@ -64,13 +64,14 @@ struct child
     char *comname;              /* Temporary command file name */
 #endif
     char *sh_batch_file;        /* Script file for shell commands */
+    brkpt_mask_t tracing;	/**< Nonzero child should be traced.  */
+
     unsigned int remote:1;	/* Nonzero if executing remotely.  */
 
     unsigned int noerror:1;	/* Nonzero if commands contained a `-'.  */
 
     unsigned int good_stdin:1;	/* Nonzero if this child has a good stdin.  */
     unsigned int deleted:1;	/* Nonzero if targets have been deleted.  */
-    unsigned int tracing:1;	/**< Nonzero child should be traced.  */
     unsigned int dontcare:1;    /* Saved dontcare flag.  */
 };
 

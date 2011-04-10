@@ -37,6 +37,7 @@ extern char   *psz_target_name;
    a real one hasn't been recorded on the stack. */
 extern floc_t  fake_floc;
 
+brkpt_mask_t get_brkpt_option(const char *psz_break_type);
 const floc_t *get_current_floc(void);
 
 /*!
