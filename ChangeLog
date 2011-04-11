@@ -1,3 +1,205 @@
+2011-04-10  rocky <rocky@gnu.org>
+
+	* debugger/cmd.c, debugger/command/help.h, debugger/command/info.h,
+	debugger/command/set.h, debugger/fns.c, remake.c,
+	tests/spec/data/break-all.right, tests/spec/data/set.right,
+	trace.c, trace.h: Remove duplicate stops in stepping and
+	breakpoints. Go over help yet again.
+
+2011-04-10  rocky <rocky@gnu.org>
+
+	* debugger/command/setq.h: Update setq doc.
+
+2011-04-10  rocky <rocky@gnu.org>
+
+	* debugger/cmd.c, debugger/cmd.h, debugger/command/set.h,
+	debugger/subcmd.h, tests/spec/data/set.right: Remove set variable
+	var-name. Use setq for that. Start to DRY set code.
+
+2011-04-10  rocky <rocky@gnu.org>
+
+	* debugger/break.c, debugger/command/break.h,
+	debugger/command/continue.h, debugger/fns.c, debugger/fns.h, job.h,
+	types.h: continue.h: Add optional breakpoint properties for
+	"continue". fns.h, break.h: Start to dry breakpoint code although
+	more work is needed. types.h: Define breakpoint mask type job.h:
+	this field is *not* one bit!
+
+2011-04-09  rocky <rocky@gnu.org>
+
+	* debug.h, debugger/cmd.c, debugger/command/set.h,
+	debugger/command/show.h, job.c, print.c, print.h,
+	tests/spec/data/set.right, tests/spec/helper.rb,
+	tests/spec/test-continue.rb, tests/spec/test-info-rule.rb,
+	tests/spec/test-info-target.rb, tests/spec/test-norl.rb,
+	tests/spec/test-set.rb, tests/spec/test-source.rb,
+	tests/spec/test-step3.rb: Add setjmp/longjmp in debugger read loop.
+	Remove "set trace" for now. Start "set" tests. Specialize some rspec
+	describe's.
+
+2011-04-09  rocky <rocky@gnu.org>
+
+	* debugger/command/break.h, doc/test1.mk,
+	tests/spec/data/break-end.right, tests/spec/data/break-run.right,
+	trace.c: break <xx> run now works properly now.
+
+2011-04-09  rocky <rocky@gnu.org>
+
+	* file.c, tests/spec/data/info-target.right,
+	tests/spec/example/order-only.Makefile,
+	tests/spec/test-info-target.rb: Correct order-only display.
+
+2011-04-08  rocky <rocky@gnu.org>
+
+	* debugger/command/target.h: Correct target option help
+
+2011-04-08  rocky <rocky@gnu.org>
+
+	* debugger/command/break.h, debugger/command/help.h,
+	debugger/command/info.h, debugger/command/run.h,
+	debugger/command/set.h, debugger/command/show.h,
+	debugger/command/target.h, debugger/file2line.c, debugger/subcmd.h,
+	file.c, print.c: Start adding long help. Go over help system to make
+	more usable.
+
+2011-04-08  rocky <rocky@gnu.org>
+
+	* debugger/cmd.c, debugger/cmd.h, debugger/command/help.h,
+	debugger/command/info.h, debugger/command/quit.h,
+	debugger/command/set.h, debugger/command/show.h, debugger/subcmd.h,
+	tests/spec/helper.rb, tests/spec/test-continue.rb,
+	tests/spec/test-info-rule.rb, tests/spec/test-list.rb,
+	tests/spec/test-norl.rb, tests/spec/test-trace.rb: Add exit status
+	testing.
+
+2011-04-08  rocky <rocky@gnu.org>
+
+	* debugger/break.c, debugger/cmd.c, debugger/command/break.h,
+	debugger/command/info.h, debugger/command/list.h,
+	debugger/command/set.h, debugger/command/show.h,
+	debugger/file2line.c, debugger/file2line.h, rule.c, rule.h,
+	tests/spec/data/info-rule.right, tests/spec/data/list.right: Prepare
+	for implicit rule pattern breakpoints. Prepare for longer subcommand
+	help. Correct "info rules" (short) help. Initialize file locations
+	for pre-defined rule patterns.
+
+2011-04-08  rocky <rocky@gnu.org>
+
+	* rule.c, tests/spec/data/info-rule.right,
+	tests/spec/example/implicit.Makefile, tests/spec/test-info-rule.rb: 
+	Fix bug in print_rule_data_base which we see from "info rule".
+
+2011-04-08  rocky <rocky@gnu.org>
+
+	* debugger/command/break.h, job.c, tests/scripts/features/vpathplus: 
+	Improve location saving for implicit targets. break.h: suggests
+	"info lines"
+
+2011-04-07  rocky <rocky@gnu.org>
+
+	* doc/.gitignore, doc/Makefile.am: Some small changes.
+
+2011-04-07  rocky <rocky@gnu.org>
+
+	* debugger/command/info.h, doc/remake.texi: Small changes
+
+2011-04-07  rocky <rocky@gnu.org>
+
+	* debugger/cmd.c, debugger/command/info.h, debugger/file2line.c,
+	doc/Makefile.am, doc/remake.texi, tests/spec/helper.rb: Add "info
+	lines". Update reference guide to reflect recent changes and to add
+	more examples of output.
+
+2011-04-06  rocky <rocky@gnu.org>
+
+	* Makefile.am, debugger/cmd.c, debugger/command/break.h,
+	debugger/command/finish.h, debugger/command/info.h,
+	debugger/command/list.h, debugger/command/next.h,
+	debugger/command/source.h, debugger/command/step.h,
+	debugger/command/up.h, debugger/file2line.c, debugger/file2line.h,
+	debugger/fns.c, debugger/fns.h, file.c, file.h,
+	tests/spec/data/list.right, tests/spec/data/remakerc,
+	tests/spec/data/source.right, tests/spec/helper.rb,
+	tests/spec/test-list.rb, tests/spec/test-source.rb: Add break
+	LINE-NUMBER and list LINE-NUMBER.
+
+2011-04-05  rocky <rocky@gnu.org>
+
+	* debugger/command/info.h, filedef.h, print.c, print.h, read.c: Save
+	number of lines for each read in file. Will be useful if we do
+	breakpoint by number. Revise "info files" output to be more useful.
+
+
+2011-04-02  rocky <rocky@gnu.org>
+
+	* debugger/command/info.h, debugger/fns.c, function.c, job.c,
+	main.c, print.c, remake.c, tests/spec/data/break-all.right,
+	tests/spec/data/break-end.right,
+	tests/spec/data/break-expand.right,
+	tests/spec/data/break-prereq.right,
+	tests/spec/data/break-run.right, tests/spec/data/continue.right,
+	tests/spec/data/norl.right, tests/spec/data/step3.right, trace.h: 
+	Toward getting a debugger function working. More derefrencing
+	guards.
+
+2011-04-03  rocky <rocky@gnu.org>
+
+	* debugger/cmd.h: Remove another gcc warning
+
+2011-04-02  rocky <rocky@gnu.org>
+
+	* debugger/command/source.h: Work around cygwin's lack of a working
+	wordexp()
+
+2011-04-02  rocky <rocky@gnu.org>
+
+	* debugger/cmd.c: Better --no-readline handling. Remove SEGV on EOF
+	in read.
+
+2011-04-02  rocky <rocky@gnu.org>
+
+	* Rakefile, debugger/command/info.h, make.1: Update manual page for
+	debugger/trace options. Change "info program" stopping reason text.
+	Add "rake install"
+
+2011-04-02  rocky <rocky@gnu.org>
+
+	* debugger/cmd.c, debugger/command/info.h,
+	debugger/command/source.h: Expand file name in source. Remove those
+	unused return value messages in fgets.
+
+2011-04-02  rocky <rocky@gnu.org>
+
+	* Makefile.am, debugger/break.c, debugger/cmd.c, debugger/msg.c,
+	debugger/msg.h, tests/spec/data/break-expand.right: Start to use
+	specialized debugger output messages dbg_errmsg and dbg_msg
+
+2011-04-02  rocky <rocky@gnu.org>
+
+	* debugger/cmd.c, debugger/command/break.h,
+	debugger/command/continue.h, debugger/command/help.h,
+	debugger/command/info.h, debugger/command/set.h,
+	debugger/command/show.h, doc/Makefile.am, make.h: Refactor help
+	subcommands and expand/fix help.
+
+2011-04-01  rocky <rocky@gnu.org>
+
+	* ChangeLog, debugger/cmd.c, debugger/command/help.h,
+	debugger/command/info.h, doc/remake.texi, print.c: Revise info help.
+	And make "info target" useable.
+
+2011-04-01  rocky <rocky@gnu.org>
+
+	* configure.in, debugger/command/info.h, file.c, file.h: Info
+	targets gives a list of targets rather that redo the "target"
+	command. Need more cleanup though
+
+2011-04-01  rocky <rocky@gnu.org>
+
+	* debugger/cmd.c, doc/remake.texi: Reread reference manual which is
+	a mistake because I find lots of errors. examine->expand. Will get a
+	SEGV of 0.5 without this change.
+
 2011-04-01  rocky <rocky@gnu.org>
 
 	* main.c: Revise bug reporting location

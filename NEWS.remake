@@ -1,3 +1,16 @@
+Version 3.82+dbg-0.6
+2011-04-10
+* Allow breakpoints on line numbers. "info lines" shows
+  the lines.
+* List also allows line numbers now.
+* Remove duplicate stops in stepping and breakpoints
+* Help and error message text greatly improved
+* Documentation updated
+* break/continue *target* run fixed
+* "info files" more user friendly
+* Correct order-only target display
+* Recover from a fatal error when inside the debugger
+
 Version 3.82+dbg-0.5
 2011-04-01
 * Track updating goal targets and more targets in general

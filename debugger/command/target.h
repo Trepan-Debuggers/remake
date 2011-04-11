@@ -80,7 +80,7 @@ dbg_cmd_target_init(unsigned int c)
 "  commands   - shell commands that are run to update the target\n"
 "  expand     - like 'commands', but Makefile variables are expanded\n"
 "  nonorder   - non-order dependencies\n"
-"  order      - order dependenciesa\n"
+"  order      - order dependencies\n"
 "  depends    - all target dependencies, i.e. order and non-order\n"
 "  previous   - previous target name hwen there are multiple double-colons\n"
 "  state      - shell command state\n"
