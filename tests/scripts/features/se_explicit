@@ -129,7 +129,7 @@ proj1.c: proj1.h
 endef
 !,
               '', "#MAKE#: *** prerequisites cannot be defined in recipes.  Stop.
-Command-line arguments:
+Command-line invocation:
 	\"$make_path -f work/features/se_explicit.mk.5\"
 ", 512);
 

@@ -61,7 +61,7 @@ error: foo.mk ; @echo $@
 ',
    '',
    "#MAKE#: *** No rule to make target `foo.mk', needed by `error'.  Stop.
-Command-line arguments:
+Command-line invocation:
 	\"$make_path -f work/features/include.mk.2\"",
    512
   );
@@ -131,7 +131,7 @@ bar: baz
 ',
 '',
 "#MAKE#: *** No rule to make target `baz', needed by `bar'.  Stop.
-Command-line arguments:
+Command-line invocation:
 	\"$make_path -f work/features/include.mk.7\"",
 512);
 
@@ -149,7 +149,7 @@ baz: end
 ',
 '',
 "#MAKE#: *** No rule to make target `end', needed by `baz'.  Stop.
-Command-line arguments:
+Command-line invocation:
 	\"$make_path -f work/features/include.mk.8\"",
 512);
 
@@ -169,7 +169,7 @@ baz: end
 '',
 "#MAKEFILE#:2: bar: No such file or directory
 #MAKE#: *** No rule to make target `end', needed by `baz'.  Stop.
-Command-line arguments:
+Command-line invocation:
 	\"$make_path -f work/features/include.mk.9\"",
 512);
 

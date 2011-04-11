@@ -191,7 +191,7 @@ dbg_cmd_info_program()
       printf(_("Program is stopped after running rule command(s).\n"));
       break;
     case DEBUG_BRKPT_BEFORE_PREREQ:
-      printf(_("Program stopped at a breakpoint before rule-prequisite checking.\n"));
+      printf(_("Program stopped before rule-prequisite checking.\n"));
 	  break;
     case DEBUG_BRKPT_AFTER_PREREQ:
       printf(_("Program is stopped after rule-prequisite checking.\n"));

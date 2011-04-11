@@ -164,7 +164,7 @@ world');
 
 run_make_test('deps: ; $(eval deps: foo)', '',
               "#MAKEFILE#:1: *** prerequisites cannot be defined in recipes.  Stop.
-Command-line arguments:
+Command-line invocation:
 	\"$make_path -f work/functions/eval.mk.7\"
 ",
               512);
