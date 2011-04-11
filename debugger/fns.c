@@ -20,15 +20,14 @@ Boston, MA 02111-1307, USA.  */
 
 /* Helper routines for debugger command interface. */
 
-#include "../config.h"
+#include "../rule.h"
+#include "../trace.h"
 #include "../commands.h"
 #include "../expand.h"
 #include "fns.h"
 #include "stack.h"
 #include "debug.h"
 #include "print.h"
-#include "../rule.h"
-#include "../trace.h"
 #include "msg.h"
 
 #ifdef HAVE_STRING_H

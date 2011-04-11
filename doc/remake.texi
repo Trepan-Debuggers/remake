@@ -12,7 +12,7 @@
 @c this file when a new release comes along.
 
 @c %**start of header
-@c makeinfo ignores cads Rev to setfilename, so its arg cannot make use
+@c makeinfo ignores cmds prev to setfilename, so its arg cannot make use
 @c of @set vars.  However, you can override filename with makeinfo -o.
 @setfilename remake.info
 @c 
@@ -1347,10 +1347,10 @@ display a short list of named classes of commands:
 remake<0> @b{help}
   Command                  Short Name  Aliases
   ----------------------   ----------  ---------
-  break TARGET [all|run|prereq]   (b)  L
+  break [TARGET|LINENUM] [all|run|prereq|end]* (b)  L
   cd DIR                          (C)
   comment TEXT                    (#)
-  continue [TARGET]               (c)
+  continue [TARGET [all|run|prereq|end]*] (c)
   delete breakpoint numbers..     (d)
   down [AMOUNT]                   (D)
   edit                            (e)
@@ -1358,22 +1358,23 @@ remake<0> @b{help}
   expand STRING                   (x)
   finish [AMOUNT]                 (F)
   frame N                         (f)
-  help [COMMAND]                  (h)  ?
-  info [THING]                    (i)
-  list [TARGET]                   (l)
+  help [COMMAND]                  (h)  ?, ??
+  info [SUBCOMMAND]               (i)
+  list [TARGET|LINE-NUMBER]       (l)
   next [AMOUNT]                   (n)
   print @{VARIABLE [attrs...]@}     (p)
   pwd                             (P)
   quit [exit-status]              (q)  exit, return
-  run                             (R)  restart
-  set @{*option*|variable@} VALUE   (=)
-  setq *variable* VALUE           (")
+  run [ARGS]                      (R)  restart
+  set OPTION @{on|off|toggle@}
+  set variable VARIABLE VALUE     (=)
+  setq VARIABLE VALUE             (")
   shell STRING                    (!)  !!
-  show [thing]                    (S)
+  show [SUBCOMMAND]               (S)
   source FILENAME                 (<)
   skip                            (k)
   step [AMOUNT]                   (s)
-  target [target-name] [info1 [info2...]] (t)
+  target [TARGET-NAME] [info1 [info2...]] (t)
   up [AMOUNT]                     (u)
   where                           (T)  backtrace, bt
   write [TARGET [FILENAME]]       (w)
@@ -1651,8 +1652,8 @@ a Makefile.
 @node Continue
 @subsubsection Continue (@samp{continue})
 @table @code
-@item continue @ovar{@var{target}}
-@kindex c @r{(@code{continue}) @ovar{@var{target}}} 
+@item continue @ovar{@var{target @{all|run|prereq@}*}}
+@kindex c @r{(@code{continue})}
 Resume program execution until the next breakpoint or recursive make is
 called. If a target name is given, a temporary breakpoint is set
 there. Use @code{info target} to get a list of target names you can use.
@@ -1662,7 +1663,7 @@ about that situation. It is possible to set a breakpoint on a target
 that subsequently never gets updated. In that situation the
 @code{remake} will also not stop. This is another cause of constant
 confusion, as you may expected (erroneously) that the program should
-have decided to update the target.
+have decided to update the target. See also @xref{Breakpoints}.
 @end table
 
 @node Signals

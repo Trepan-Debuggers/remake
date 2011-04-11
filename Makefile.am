@@ -89,7 +89,8 @@ DEBUGGER_H = \
 		debugger/file2line.h 	        \
 		debugger/fns.h 			\
 		debugger/info.h			\
-		debugger/stack.h
+		debugger/stack.h		\
+		debugger/subcmd.h
 
 make_SOURCES =	ar.c arscan.c commands.c default.c dir.c expand.c file.c \
 		function.c getopt.c getopt1.c implicit.c job.c main.c \
