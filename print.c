@@ -525,7 +525,7 @@ bool print_read_makefiles(const char *psz_filename)
 void print_cmdline (void) 
 {
   unsigned int i;
-  printf(_("Command-line arguments:"));
+  printf(_("Command-line invocation:"));
   printf("\n\t\"");
   if (global_argv[1]) {
     printf("%s", argv0);

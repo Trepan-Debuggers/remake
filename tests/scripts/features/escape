@@ -27,7 +27,7 @@ foo\#bar.ext: ; @echo "foo#bar.ext = ($@)"',
 run_make_test(undef,
 	      'path=pre:',
 	      "#MAKEFILE#:2: *** target pattern contains no `%'.  Stop.
-Command-line arguments:
+Command-line invocation:
 	\"$make_path -f work/features/escape.mk path=pre:\"",
 	      512);
 
@@ -42,7 +42,7 @@ run_make_test(undef,
 run_make_test(undef,
 	      "'path=pre\\\\:'",
 	      "#MAKEFILE#:2: *** target pattern contains no `%'.  Stop.
-Command-line arguments:
+Command-line invocation:
 	\"$make_path -f work/features/escape.mk path=pre\\\\:\"",
 	      512);
 

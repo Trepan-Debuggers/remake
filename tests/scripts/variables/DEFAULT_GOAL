@@ -43,7 +43,7 @@ run_make_test('
 ',
 '',
 "#MAKE#: *** No rule to make target `foo\'.  Stop.
-Command-line arguments:
+Command-line invocation:
 	\"$make_path -f work/variables/DEFAULT_GOAL.mk.1\"
 ",
 512);
@@ -56,7 +56,7 @@ run_make_test('
 ',
 '',
 "#MAKE#: *** .DEFAULT_GOAL contains more than one target.  Stop.
-Command-line arguments:
+Command-line invocation:
 	\"$make_path -f work/variables/DEFAULT_GOAL.mk.2\"
 ",
 512);
@@ -88,7 +88,7 @@ N =
 foo: ; @echo "boo"
 ',
               '', "#MAKE#: *** No targets.  Stop.
-Command-line arguments:
+Command-line invocation:
 	\"$make_path -f work/variables/DEFAULT_GOAL.mk.4\"
 ", 512);
 

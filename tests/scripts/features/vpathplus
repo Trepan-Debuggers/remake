@@ -96,7 +96,7 @@ work/features/vpathplus.mk:15: *** [notarget.b] Error 1
 
 #0  notarget.b at vpathplus.mk:15
 #1  notarget at vpathplus.mk:31
-Command-line arguments:
+Command-line invocation:
 	\"$make_path -f work/features/vpathplus.mk notarget\"
 ";
 

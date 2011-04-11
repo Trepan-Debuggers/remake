@@ -112,7 +112,7 @@ endef
 all: ; @echo ouch
 ',
               '', "#MAKEFILE#:3: *** empty variable name.  Stop.
-Command-line arguments:
+Command-line invocation:
 	\"$make_path -f work/variables/define.mk.4\"
 ", 512);
 
@@ -148,7 +148,7 @@ ouch
 endef$(NAME)
 ',
               '', "#MAKEFILE#:4: *** missing `endef', unterminated `define'.  Stop.
-Command-line arguments:
+Command-line invocation:
 	\"$make_path -f work/variables/define.mk.7\"
 ", 512);
 

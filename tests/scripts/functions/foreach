@@ -63,7 +63,7 @@ y = $x
 all: ; @echo $y',
               '',
               "#MAKEFILE#:2: *** insufficient number of arguments (1) to function `foreach'.  Stop.
-Command-line arguments:
+Command-line invocation:
 	\"$make_path -f work/functions/foreach.mk.2\"
 ",
               512);
@@ -75,7 +75,7 @@ y := $x
 all: ; @echo $y',
               '',
               "#MAKEFILE#:2: *** insufficient number of arguments (1) to function `foreach'.  Stop.
-Command-line arguments:
+Command-line invocation:
 	\"$make_path -f work/functions/foreach.mk.3\"
 ",
               512);

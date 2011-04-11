@@ -106,7 +106,7 @@ Fail
 Fail
 #MAKE#: *** [fail.3] Error 1
 Ok done
-Command-line arguments:
+Command-line invocation:
 	\"$make_path -f work/features/parallelism.mk.4 -rR -j5\"",
              512);
 

@@ -13,7 +13,7 @@ y = $x
 all: ; @echo $y
 ',
               '', "#MAKEFILE#:3: *** unterminated variable reference.  Stop.
-Command-line arguments:
+Command-line invocation:
 	\"$make_path -f work/variables/negative.mk\"
 ",
               512);
@@ -23,7 +23,7 @@ Command-line arguments:
 run_make_test(undef,
               'x=\$\(other',
               "#MAKEFILE#:4: *** unterminated variable reference.  Stop.
-Command-line arguments:
+Command-line invocation:
 	\"$make_path -f work/variables/negative.mk x=\$(other\"
 ",
               512);
@@ -40,7 +40,7 @@ z := $y
 all: ; @echo $y
 ',
               '', "#MAKEFILE#:3: *** unterminated variable reference.  Stop.
-Command-line arguments:
+Command-line invocation:
 	\"$make_path -f work/variables/negative.mk.1\"
 ",
               512);
@@ -50,7 +50,7 @@ Command-line arguments:
 run_make_test(undef,
               'x=\$\(other',
               "#MAKEFILE#:4: *** unterminated variable reference.  Stop.
-Command-line arguments:
+Command-line invocation:
 	\"$make_path -f work/variables/negative.mk.1 x=\$(other\"
 ",
               512);
