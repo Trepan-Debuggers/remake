@@ -654,6 +654,7 @@ come across other two-character icons like @code{--}, @code{++}, and
 stopped, you can use the command @code{info program}:
 
 @smallexample
+remake<0> @b{info program}
 Starting directory `/tmp/remake'
 Program invocation:
 	/tmp/remake/./remake  --debugger
