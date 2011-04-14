@@ -645,7 +645,7 @@ expand_command_line_file (char *name)
 
   if (name[0] == '~')
     {
-      expanded = tilde_expand (name);
+      expanded = remake_tilde_expand (name);
       if (expanded != 0)
 	name = expanded;
     }

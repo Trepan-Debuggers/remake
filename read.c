@@ -351,7 +351,7 @@ eval_makefile (const char *filename, int flags)
      in which case it was already done.  */
   if (!(flags & RM_NO_TILDE) && filename[0] == '~')
     {
-      expanded = tilde_expand (filename);
+      expanded = remake_tilde_expand (filename);
       if (expanded != 0)
 	filename = expanded;
     }
@@ -2684,7 +2684,7 @@ construct_include_path (const char **arg_dirs)
 
 	if (dir[0] == '~')
 	  {
-	    expanded = tilde_expand (dir);
+	    expanded = remake_tilde_expand (dir);
 	    if (expanded != 0)
 	      dir = expanded;
 	  }
@@ -2759,7 +2759,7 @@ construct_include_path (const char **arg_dirs)
    Return a newly malloc'd string or 0.  */
 
 char *
-tilde_expand (const char *name)
+remake_tilde_expand (const char *name)
 {
 #ifndef VMS
   if (name[1] == '/' || name[1] == '\0')
@@ -3100,7 +3100,7 @@ parse_file_seq (char **stringp, unsigned int size, int stopchar,
       /* Expand tilde if applicable.  */
       if (tp[0] == '~')
 	{
-	  tildep = tilde_expand (tp);
+	  tildep = remake_tilde_expand (tp);
 	  if (tildep != 0)
             name = tildep;
 	}
