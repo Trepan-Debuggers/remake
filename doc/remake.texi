@@ -2676,8 +2676,8 @@ The type of machine you are using, and the operating system name and
 version number.
 
 @item
-What compiler (and its version) was used to compile BASH---e.g.
-``@code{gcc}--3.1''.
+What compiler (and its version) was used to compile @value{REMAKE}---e.g.
+``@code{gcc}--4.4.3-4ubuntu5''.
 
 @item
 The command arguments you gave the compiler to compile your example and
