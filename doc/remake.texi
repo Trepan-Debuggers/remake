@@ -2633,17 +2633,8 @@ for improvement of @value{REMAKE} are welcome in any case.
 @cindex bug reports
 @cindex debugger bugs, reporting
 
-Submit bug reports for @value{REMAKE}.  Until better mechanism is set up
-the preferred method is to submit them directly using
-@email{rocky@@panix.com}. There are also a bug tracking system
-and, help, developer and open discussion forums which can be found via
-@uref{http://http://sourceforge.net/forum/?group_id=37260}.
-
-Although this code shares a lot with BASH, the debugger is of course
-not yet supported by the BASH team, so if there is a debugger problem 
-reporting it via bashbug or to @email{bug-bash@@gnu.org} or posted to
-the newsgroup @code{gnu.bash.bug} probably won't help, unless you are
-sure the bug resides in the vanilla bash code and and show that. 
+Submit bug reports for @value{REMAKE}
+to @url{https://github.com/rocky/remake/issues}
 
 The fundamental principle of reporting bugs usefully is this:
 @strong{report all the facts}.  If you are not sure whether to state a
