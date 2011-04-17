@@ -39,10 +39,10 @@ dbg_cmd_frame(char *psz_frame)
     }
 
     if (0 != i) {
-      printf(_("Can't set frame to position %d; "
+     dbg_errmsg(_("Can't set frame to position %d; "
 	       "%d is the highest position.\n"),
 	     i_frame, i_frame - i);
-      return debug_readloop;
+      return debug_cmd_error;
     }
     
     i_stack_pos     = i_frame;
