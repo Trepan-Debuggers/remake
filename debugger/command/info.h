@@ -145,7 +145,6 @@ dbg_cmd_info_target_entry (const file_t *p_target,
         printf("\t%s\n", p_target->name);
       } else if (output_mask & INFO_TARGET_TASKS \
                  && p_target->cmds && p_floc->filenm) {
-        if (p_target->phony || !(try_implicit_rule((file_t *)p_target, 5)))
           printf("%s\n", p_target->name);
       }
     }
