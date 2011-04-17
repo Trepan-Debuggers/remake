@@ -122,12 +122,6 @@ subcommand_var_info_t info_subcommands[] = {
   { NULL, NULL, NULL, NULL, false, 0}
 };
 
-typedef enum {
-    INFO_TARGET_POSITION = 1,
-    INFO_TARGET_NAME     = 2,
-    INFO_TARGET_POSITION_AND_NAME = 3,
-} info_target_output_mask_t;
-
 /*! Show target information: location and name. */
 static void 
 dbg_cmd_info_target_entry (const file_t *p_target, 
@@ -155,8 +149,8 @@ dbg_target_compare(const void *p1, const void *p2)
     return strcmp(p_target1->name, p_target2->name);
 }
 
-static void
-dbg_cmd_info_targets(bool b_verbose)
+void
+dbg_cmd_info_targets(info_target_output_mask_t output_mask)
 {
   struct file **file_slot_0 = (struct file **) hash_dump (&files, 0, 
                                                           dbg_target_compare);
@@ -166,7 +160,7 @@ dbg_cmd_info_targets(bool b_verbose)
   
   for (pp_file_slot = file_slot_0; pp_file_slot < file_end; pp_file_slot++) {
     if ((p_target = *pp_file_slot) != NULL)
-      dbg_cmd_info_target_entry(p_target, b_verbose);
+      dbg_cmd_info_target_entry(p_target, output_mask);
   }
 }
 

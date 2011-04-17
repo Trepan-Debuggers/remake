@@ -137,6 +137,11 @@ which files actually need to be remade, which implicit rules are
 considered and which are applied---everything interesting about how
 .I make
 decides what to do.
+
+.TP 0.5i
+.BR \-\-tasks , " \-\-targets"
+Print a list of explicitly named targets found in read-in makefiles.
+
 .TP 0.5i
 .BI \-\-debug "[=FLAGS]"
 Print debugging information in addition to normal processing.
@@ -165,6 +170,7 @@ for debugging while remaking makefiles.
 .B \-x, " \-\-trace"
 Print trace information. Commands in rules which are normally
 silent are shown, same as if \fB\-\-just\-print\fR were given.
+
 .TP 0.5i
 .BI \-\-trace "[=FLAGS]"
 Set trace flags
@@ -182,8 +188,6 @@ which is like \fInormal\fR but shell tracing
 is disabled, or
 .I full
 for maximum tracing.
-
-
 
 .TP 0.5i
 .B \-X, " \-\-debugger"
@@ -213,7 +217,6 @@ for entering the debugger on a fatal error,
 .I error
 for entering the debugger on an error
 
-
 .TP 0.5i
 .BR \-e , " \-\-environment\-overrides"
 Give variables taken from the environment precedence
@@ -223,6 +226,7 @@ over variables from makefiles.
 Use
 .I file
 as a makefile.
+
 .TP 0.5i
 .BR \-i , " \-\-ignore\-errors"
 Ignore all errors in commands executed to remake files.
@@ -337,12 +341,14 @@ instead of running their commands.
 This is used to pretend that the commands were done, in order to fool
 future invocations of
 .IR make .
+
 .TP 0.5i
 .BR \-v , " \-\-version"
 Print the version of the
 .I make
 program plus a copyright, a list of authors and a notice that there
 is no warranty.
+
 .TP 0.5i
 .BR \-w , " \-\-print\-directory"
 Print a message containing the working directory
@@ -351,6 +357,7 @@ This may be useful for tracking down errors from complicated nests of
 recursive
 .I make
 commands.
+
 .TP 0.5i
 .B \-\-no\-print\-directory
 Turn off

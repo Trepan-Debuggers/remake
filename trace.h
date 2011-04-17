@@ -56,6 +56,12 @@ typedef enum
     DEBUG_NOT_GIVEN               = 100
   } debug_enter_reason_t;
 
+typedef enum {
+    INFO_TARGET_POSITION = 1,
+    INFO_TARGET_NAME     = 2,
+    INFO_TARGET_POSITION_AND_NAME = 3,
+} info_target_output_mask_t;
+
 /*!
   debugger command interface. 
 */
@@ -100,5 +106,8 @@ extern void trace_push_floc (floc_t *p_floc);
 
 /*! Pop the next floc from the call stack.. */
 extern void trace_pop_floc (void);
+
+/*! Show just a list of targets */
+extern void dbg_cmd_info_targets(info_target_output_mask_t output_mask);
 
 #endif /*REMAKE_TRACE_H*/
