@@ -21,3 +21,4 @@ remake<4> expand $(word 2)
 remake: *** insufficient number of arguments (1) to function `word'.  Stop.
 ** Internal error jumped back to debugger loop
 remake<5> quit
+remake: That's all, folks...

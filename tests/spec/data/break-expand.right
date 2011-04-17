@@ -9,3 +9,4 @@ Breakpoint 1 on target make.txt: file test2.Makefile, line 5.
 Warning: target is in the process of being updated;
 so it might not get stopped at again.
 remake<1> quit
+remake: That's all, folks...

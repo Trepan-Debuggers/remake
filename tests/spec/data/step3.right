@@ -38,4 +38,4 @@ second done
 triple.Makefile:3	Successfully remade target file `second'.
 triple.Makefile:3)
 second
-remake<6> 
+remake<6> remake: That's all, folks...

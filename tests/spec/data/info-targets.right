@@ -165,3 +165,4 @@ triple.Makefile:1
 triple.Makefile:3
 triple.Makefile:5
 remake<3> quit
+remake: That's all, folks...

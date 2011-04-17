@@ -8,3 +8,4 @@ remake<0> source /src/external-vcs/remake/tests/spec/data/remakerc
 
 first: second
 remake<1> quit
+remake: That's all, folks...

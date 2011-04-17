@@ -23,11 +23,14 @@ dbg_cmd_quit(char *psz_arg)
 {
   if (!psz_arg || !*psz_arg) {
     in_debugger = DEBUGGER_QUIT_RC;
+    dbg_msg("remake: That's all, folks...");
     die(DEBUGGER_QUIT_RC);
   } else {
     int rc=0;
-    if (get_int(psz_arg, &rc, true)) 
+    if (get_int(psz_arg, &rc, true)) {
+      dbg_msg("remake: That's all, folks...");
       die(rc);
+    }
   }
   return debug_readloop;
 }

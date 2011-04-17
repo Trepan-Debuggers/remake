@@ -13,3 +13,4 @@ remake<2> target @ depend
 
 foo: bar | baz
 remake<3> quit
+remake: That's all, folks...
