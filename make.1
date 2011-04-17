@@ -139,8 +139,13 @@ considered and which are applied---everything interesting about how
 decides what to do.
 
 .TP 0.5i
-.BR \-\-tasks , " \-\-targets"
+.BR " \-\-targets"
 Print a list of explicitly named targets found in read-in makefiles.
+
+.TP 0.5i
+.BR \-\-tasks
+Print a list of explicitly named targets found in read-in makefiles which
+have commands associated with them and are either phony or are not implicit.
 
 .TP 0.5i
 .BI \-\-debug "[=FLAGS]"

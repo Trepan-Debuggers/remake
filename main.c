@@ -253,6 +253,12 @@ int no_shell_trace = 0;
 
 int show_targets_flag = 0;
 
+/*! Nonzero gives a list of explicit target names and exits. Set by option
+  --tasks
+ */
+
+int show_tasks_flag = 0;
+
 /* List of makefiles given with -f switches.  */
 
 static struct stringlist *makefiles = 0;
@@ -421,7 +427,10 @@ static const char *const usage[] =
   -S, --no-keep-going, --stop\n\
                               Turns off -k.\n"),
     N_("\
-  --tasks, --targets          Give a list of explicitly-named targets.\n"),
+  --targets                   Give list of explicitly-named targets.\n"),
+    N_("\
+  --tasks                     Give list of explicitly-named targets which\n\n"
+"                               have commands associated with them\n"),
     N_("\
   -t, --touch                 Touch targets instead of remaking them.\n"),
     N_("\
@@ -510,11 +519,11 @@ static const struct command_switch switches[] =
     { 'W', filename, &new_files, 0, 0, 0, 0, 0, "what-if" },
     { CHAR_MAX+7, flag, &show_targets_flag, 0, 0, 0, 0, 0,
       "targets" },
-    { CHAR_MAX+7, flag, &show_targets_flag, 0, 0, 0, 0, 0,
+    { CHAR_MAX+8, flag, &show_tasks_flag, 0, 0, 0, 0, 0,
       "tasks" },
-    { CHAR_MAX+8, flag, &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
+    { CHAR_MAX+9, flag, &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
       "warn-undefined-variables" },
-    { CHAR_MAX+9, string, &eval_strings, 1, 0, 0, 0, 0, "eval" },
+    { CHAR_MAX+10, string, &eval_strings, 1, 0, 0, 0, 0, "eval" },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
@@ -2374,7 +2383,10 @@ main (int argc, char **argv, char **envp)
       fatal (NILF, _("No targets"));
     }
 
-  if (show_targets_flag) {
+  if (show_tasks_flag) {
+      dbg_cmd_info_targets(INFO_TARGET_TASKS);
+      die(0);
+  } else if (show_targets_flag) {
       dbg_cmd_info_targets(INFO_TARGET_NAME);
       die(0);
   }

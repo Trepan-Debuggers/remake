@@ -3,12 +3,15 @@ Updating makefiles....
 Updating goal targets....
 triple.Makefile:1)
 first: second
+remake<0> step
 triple.Makefile:1	File `first' does not exist.
 triple.Makefile:3)
 second: third
+remake<1> step
 triple.Makefile:3	File `second' does not exist.
 triple.Makefile:5)
 third: 
+remake<2> step
 triple.Makefile:5	File `third' does not exist.
 triple.Makefile:5	Must remake target `third'.
 triple.Makefile:6 to update target `third'.
@@ -17,10 +20,12 @@ echo third done
 ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 triple.Makefile:5)
 third
-remake<3> third done
+remake<3> step
+third done
 triple.Makefile:5	Successfully remade target file `third'.
 triple.Makefile:5)
 third
+remake<4> step
 triple.Makefile:3	Must remake target `second'.
 triple.Makefile:4 to update target `second'.
 ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -28,7 +33,8 @@ echo second done
 ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 triple.Makefile:3)
 second
-remake<5> second done
+remake<5> 
+second done
 triple.Makefile:3	Successfully remade target file `second'.
 triple.Makefile:3)
 second

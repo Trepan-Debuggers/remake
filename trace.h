@@ -60,6 +60,7 @@ typedef enum {
     INFO_TARGET_POSITION = 1,
     INFO_TARGET_NAME     = 2,
     INFO_TARGET_POSITION_AND_NAME = 3,
+    INFO_TARGET_TASKS             = 4,
 } info_target_output_mask_t;
 
 /*!

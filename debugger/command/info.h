@@ -18,6 +18,7 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 #include "../../file.h"
+#include "../../implicit.h"
 #include "../../print.h"
 #include "../../rule.h"
 #include "../../debug.h"
@@ -102,11 +103,15 @@ subcommand_var_info_t info_subcommands[] = {
     1},
   { "targets",    
     "Show a list of target names and file locations",
-    " [NAMES|POSITIONS|ALL]\n\n"
+    " [NAMES|POSITIONS|TASKS|ALL]\n\n"
 "Show the explicitly-named targets found in read Makefiles.\n"
-"NAMES just shows target names, POSITIONS just shows the location in the\n"
-"Makefile without the target name, and ALL shows both target name and\n"
-"its position in the Makefile. The default is ALL.",
+"Suboptions are as follows:\n"
+"  NAMES      -- shows target names,\n"
+"  POSITIONS  -- shows the location in the Makefile\n"
+"  ALL        -- shows names and location\n"
+"  TASKS      -- shows target name if it has commands associated with it\n"
+"\n"
+"The default is ALL.",
      NULL, false,
     7},
   { "variables",
@@ -136,8 +141,13 @@ dbg_cmd_info_target_entry (const file_t *p_target,
         else
           printf("\n");
       }
-      if (output_mask & INFO_TARGET_NAME)
+      if (output_mask & INFO_TARGET_NAME) {
         printf("\t%s\n", p_target->name);
+      } else if (output_mask & INFO_TARGET_TASKS \
+                 && p_target->cmds && p_floc->filenm) {
+        if (p_target->phony || !(try_implicit_rule((file_t *)p_target, 5)))
+          printf("%s\n", p_target->name);
+      }
     }
 }
 
@@ -312,8 +322,10 @@ dbg_cmd_info(char *psz_args)
         output_type = INFO_TARGET_POSITION;
       else if (is_abbrev_of (psz_args, "names", 1))
         output_type = INFO_TARGET_NAME;
+      else if (is_abbrev_of (psz_args, "tasks", 1))
+        output_type = INFO_TARGET_TASKS;
       else {
-        printf("Expecting 'all', 'positions', 'names', or nothing; got %s.\n",
+        printf("Expecting 'all', 'positions', 'names', 'tasks', or nothing; got %s.\n",
                psz_args);
         return debug_cmd_error;
       }

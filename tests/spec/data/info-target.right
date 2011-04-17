@@ -3,10 +3,13 @@ Updating makefiles....
 Updating goal targets....
 order-only.Makefile:1)
 foo: bar
-remake<0> 
+remake<0> target @ order
+
 foo: | baz
-remake<1> 
+remake<1> target @ nonorder
+
 foo: bar
-remake<2> 
+remake<2> target @ depend
+
 foo: bar | baz
-remake<3> 
+remake<3> quit

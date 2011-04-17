@@ -3,7 +3,8 @@ Updating makefiles....
 Updating goal targets....
 triple.Makefile:1)
 first: second
-remake<0> 	.C
+remake<0> info targets
+	.C
 	.C.o
 	.DEFAULT
 	.F
@@ -82,7 +83,8 @@ triple.Makefile:3:
 	second
 triple.Makefile:5:
 	third
-remake<1> 	.C
+remake<1> info targets names
+	.C
 	.C.o
 	.DEFAULT
 	.F
@@ -158,7 +160,8 @@ remake<1> 	.C
 	first
 	second
 	third
+remake<2> info targets positions
 triple.Makefile:1
 triple.Makefile:3
 triple.Makefile:5
-remake<3> 
+remake<3> quit

@@ -3,12 +3,15 @@ Updating makefiles....
 Updating goal targets....
 triple.Makefile:1)
 first: second
-remake<0> Breakpoint 1 on target third: file triple.Makefile, line 5.
+remake<0> continue third
+Breakpoint 1 on target third: file triple.Makefile, line 5.
 triple.Makefile:1	File `first' does not exist.
 triple.Makefile:3	File `second' does not exist.
 triple.Makefile:5)
 third: 
-remake<1> Level 10 is too large; maximum value is 2.
+remake<1> finish 10
+Level 10 is too large; maximum value is 2.
+remake<2> finish 2
 triple.Makefile:5	File `third' does not exist.
 triple.Makefile:5	Must remake target `third'.
 triple.Makefile:6 to update target `third'.

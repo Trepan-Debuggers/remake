@@ -3,7 +3,9 @@ Updating makefiles....
 Updating goal targets....
 triple.Makefile:1)
 first: second
-remake<0> Breakpoint 1 on target third: file triple.Makefile, line 5.
+remake<0> break third run
+Breakpoint 1 on target third: file triple.Makefile, line 5.
+remake<1> continue
 triple.Makefile:5)
 third
-remake<2> 
+remake<2> quit

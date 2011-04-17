@@ -3,7 +3,8 @@ Updating makefiles....
 Updating goal targets....
 triple.Makefile:1)
 first: second
-remake<0> "This is a test of the source system."
+remake<0> source /src/external-vcs/remake/tests/spec/data/remakerc
+"This is a test of the source system."
 
 first: second
-remake<1> 
+remake<1> quit
