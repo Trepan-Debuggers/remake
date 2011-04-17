@@ -102,9 +102,11 @@ subcommand_var_info_t info_subcommands[] = {
     1},
   { "targets",    
     "Show a list of target names and file locations",
-    " [VERBOSE]\n\n"
+    " [NAMES|POSITIONS|ALL]\n\n"
 "Show the explicitly-named targets found in read Makefiles.\n"
-"Add VERBOSE if you want more info.",
+"NAMES just shows target names, POSITIONS just shows the location in the\n"
+"Makefile without the target name, and ALL shows both target name and\n"
+"its position in the Makefile. The default is ALL.",
      NULL, false,
     7},
   { "variables",
@@ -122,14 +124,19 @@ subcommand_var_info_t info_subcommands[] = {
 
 /*! Show target information: location and name. */
 static void 
-dbg_cmd_info_target_entry (const file_t *p_target, bool b_verbose) 
+dbg_cmd_info_target_entry (const file_t *p_target, 
+                           info_target_output_mask_t output_mask) 
 {
     const floc_t *p_floc = &p_target->floc;
     if (p_floc) {
-        if (p_floc->filenm)
-            printf("%s:%lu:\n", p_floc->filenm, p_floc->lineno);
-        else if (!b_verbose)
-            return;
+      if ((p_floc->filenm) && (output_mask & INFO_TARGET_POSITION)) {
+        printf("%s:%lu", p_floc->filenm, p_floc->lineno);
+        if (output_mask & INFO_TARGET_NAME)
+          printf(":\n");
+        else
+          printf("\n");
+      }
+      if (output_mask & INFO_TARGET_NAME)
         printf("\t%s\n", p_target->name);
     }
 }
@@ -142,8 +149,8 @@ dbg_target_compare(const void *p1, const void *p2)
     return strcmp(p_target1->name, p_target2->name);
 }
 
-static void
-dbg_cmd_info_targets(bool b_verbose)
+void
+dbg_cmd_info_targets(info_target_output_mask_t output_mask)
 {
   struct file **file_slot_0 = (struct file **) hash_dump (&files, 0, 
                                                           dbg_target_compare);
@@ -153,7 +160,7 @@ dbg_cmd_info_targets(bool b_verbose)
   
   for (pp_file_slot = file_slot_0; pp_file_slot < file_end; pp_file_slot++) {
     if ((p_target = *pp_file_slot) != NULL)
-      dbg_cmd_info_target_entry(p_target, b_verbose);
+      dbg_cmd_info_target_entry(p_target, output_mask);
   }
 }
 
@@ -296,12 +303,22 @@ dbg_cmd_info(char *psz_args)
         print_target_stack(p_stack_top, i_stack_pos, MAX_STACK_SHOW);
     } else if (0 == strcmp(psz_subcmd, "targets")) {
       /* Note: "targets" has to come before "target" */
+      info_target_output_mask_t output_type;
       if (0 == strlen(psz_args))
-        dbg_cmd_info_targets (false);
-      else if (is_abbrev_of (psz_args, "verbose", 1))
-        dbg_cmd_info_targets (true);
-      else
-        printf("Expecting verbose or nothing\n");
+        output_type = INFO_TARGET_POSITION_AND_NAME;
+      else if (is_abbrev_of (psz_args, "all", 1))
+        output_type = INFO_TARGET_POSITION_AND_NAME;
+      else if (is_abbrev_of (psz_args, "positions", 1))
+        output_type = INFO_TARGET_POSITION;
+      else if (is_abbrev_of (psz_args, "names", 1))
+        output_type = INFO_TARGET_NAME;
+      else {
+        printf("Expecting 'all', 'positions', 'names', or nothing; got %s.\n",
+               psz_args);
+        return debug_cmd_error;
+      }
+      dbg_cmd_info_targets(output_type);
+
     } else if (is_abbrev_of (psz_subcmd, "target", 1)) {
       if (0 == strlen(psz_args)) {
         if (p_stack_top && p_stack_top->p_target && 

@@ -230,18 +230,28 @@ int check_symlink_flag = 0;
 
 int print_directory_flag = 0;
 
-/* Nonzero means ignore print_directory_flag and never print the directory.
-   This is necessary because print_directory_flag is set implicitly.  */
+/*!
+  Nonzero means ignore print_directory_flag and never print the directory.
+  This is necessary because print_directory_flag is set implicitly.  
+  Set by option --print-directory.
+*/
 
 int inhibit_print_directory_flag = 0;
 
-/* Nonzero means print version information.  */
+/*! Nonzero means print version information.  Set by option --version.
+*/
 
 int print_version_flag = 0;
 
 /*! Nonzero means --trace=noshell.  */
 
 int no_shell_trace = 0;
+
+/*! Nonzero gives a list of explicit target names and exits. Set by option
+  --targets
+ */
+
+int show_targets_flag = 0;
 
 /* List of makefiles given with -f switches.  */
 
@@ -411,6 +421,8 @@ static const char *const usage[] =
   -S, --no-keep-going, --stop\n\
                               Turns off -k.\n"),
     N_("\
+  --tasks, --targets          Give a list of explicitly-named targets.\n"),
+    N_("\
   -t, --touch                 Touch targets instead of remaking them.\n"),
     N_("\
   -v, --version               Print the version number of make and exit.\n"),
@@ -451,9 +463,9 @@ static const struct command_switch switches[] =
     { 'D', flag, &suspend_flag, 1, 1, 0, 0, 0, "suspend-for-debug" },
 #endif
     { 'e', flag, &env_overrides, 1, 1, 0, 0, 0, "environment-overrides", },
-    { CHAR_MAX+7, flag, (char *) &no_extended_errors, 1, 1, 0, 0, 0,
+    { CHAR_MAX+2, flag, (char *) &no_extended_errors, 1, 1, 0, 0, 0,
         "no-extended-errors", },
-    { CHAR_MAX+8, flag_off, (char *) &use_readline_flag, 1, 0, 0, 0, 0,
+    { CHAR_MAX+3, flag_off, (char *) &use_readline_flag, 1, 0, 0, 0, 0,
         "no-readline", },
     { 'f', filename, &makefiles, 0, 0, 0, 0, 0, "file" },
     { 'h', flag, &print_usage_flag, 0, 0, 0, 0, 0, "help" },
@@ -462,7 +474,7 @@ static const struct command_switch switches[] =
       "include-dir" },
     { 'j', positive_int, &job_slots, 1, 1, 0, &inf_jobs, &default_job_slots,
       "jobs" },
-    { CHAR_MAX+2, string, &jobserver_fds, 1, 1, 0, 0, 0, "jobserver-fds" },
+    { CHAR_MAX+4, string, &jobserver_fds, 1, 1, 0, 0, 0, "jobserver-fds" },
     { 'k', flag, &keep_going_flag, 1, 1, 0, 0, &default_keep_going_flag,
       "keep-going" },
 #ifndef NO_FLOAT
@@ -486,19 +498,23 @@ static const struct command_switch switches[] =
       "no-keep-going" },
     { 't', flag, &touch_flag, 1, 1, 1, 0, 0, "touch" },
     { 'v', flag, &print_version_flag, 1, 1, 0, 0, 0, "version" },
-    { CHAR_MAX+3, string, &verbosity_flags, 1, 1, 0, 0, 0,
+    { CHAR_MAX+5, string, &verbosity_flags, 1, 1, 0, 0, 0,
       "verbosity" },
     { 'w', flag, &print_directory_flag, 1, 1, 0, 0, 0, "print-directory" },
-    { CHAR_MAX+4, flag, &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
+    { CHAR_MAX+6, flag, &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
       "no-print-directory" },
     { 'x', string, (char *) &tracing_opts, 1, 1, 0, "normal", 0, "trace" },
     { 'X', string, (char *) &debugger_opts, 1, 1, 0, 
       "preaction", 0, "debugger" },
     { 'y', flag, (char *) &no_shell_trace, 1, 1, 0, 0, 0, "noshell" },
     { 'W', filename, &new_files, 0, 0, 0, 0, 0, "what-if" },
-    { CHAR_MAX+5, flag, &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
+    { CHAR_MAX+7, flag, &show_targets_flag, 0, 0, 0, 0, 0,
+      "targets" },
+    { CHAR_MAX+7, flag, &show_targets_flag, 0, 0, 0, 0, 0,
+      "tasks" },
+    { CHAR_MAX+8, flag, &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
       "warn-undefined-variables" },
-    { CHAR_MAX+6, string, &eval_strings, 1, 0, 0, 0, 0, "eval" },
+    { CHAR_MAX+9, string, &eval_strings, 1, 0, 0, 0, 0, "eval" },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
@@ -2358,6 +2374,11 @@ main (int argc, char **argv, char **envp)
       fatal (NILF, _("No targets"));
     }
 
+  if (show_targets_flag) {
+      dbg_cmd_info_targets(INFO_TARGET_NAME);
+      die(0);
+  }
+  
   /* Update the goals.  */
 
   DB (DB_BASIC, (_("Updating goal targets....\n")));

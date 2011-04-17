@@ -253,6 +253,11 @@ check-regression:
 	  echo "Can't find the GNU Make test suite ($(srcdir)/tests)."; \
 	 fi
 
+tasks:
+	remake --tasks | grep -v '/' | grep -v '\.'
+
+%.short:
+	$(MAKE) $(@:.short=) 2>&1 >/dev/null
 
 # --------------- Maintainer's Section
 
