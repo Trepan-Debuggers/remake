@@ -303,7 +303,7 @@ print_debugger_location(const file_t *p_target, debug_enter_reason_t reason,
 			const floc_stack_node_t *p_stack_floc)
 {
   if (p_target_loc) {
-    if (reason != DEBUG_NOT_GIVEN)
+    if (reason != DEBUG_NOT_GIVEN && reason != DEBUG_STACK_CHANGING)
       printf("%s ", reason2str[reason]);
     printf("(");
     if ( !p_target_loc->filenm && p_target_loc->lineno != 0 
@@ -348,6 +348,8 @@ print_debugger_location(const file_t *p_target, debug_enter_reason_t reason,
     case DEBUG_BRKPT_BEFORE_PREREQ:
     case DEBUG_STEP_HIT:
       dbg_cmd_show_exp("$@: $+", true);
+      break;
+    case DEBUG_STACK_CHANGING:
       break;
     default:
       dbg_cmd_show_exp("$@", true);

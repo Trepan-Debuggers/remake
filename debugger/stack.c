@@ -65,7 +65,8 @@ dbg_adjust_frame(int i_amount, int b_absolute)
     i_stack_pos     = i_try_frame_pos;
     p_target_loc    = &(p_stack->p_target->floc);
     
-    print_debugger_location(p_stack->p_target, DEBUG_NOT_GIVEN, NULL);
+    print_target_stack_entry(p_stack->p_target, i_stack_pos, i_stack_pos);
+    print_debugger_location(p_stack->p_target, DEBUG_STACK_CHANGING, NULL);
   } else if (p_stack_floc_top) {
     /* We have a Makefile stack */
     for ( p_floc_stack=p_stack_floc_top; 

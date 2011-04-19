@@ -160,11 +160,15 @@ err_with_stack (p_call, fmt, va_alist)
 
   putc ('\n', stderr);
   if (!no_extended_errors) {
-    if (p_call) 
+    if (p_call)  {
+      putc ('\n', stdout);
       print_target_stack(p_call, -1, MAX_STACK_SHOW);
-    else if (p_stack_floc_top)
+    } else if (p_stack_floc_top) {
+      putc ('\n', stdout);
       print_floc_stack(-1, MAX_STACK_SHOW);
+    }
   }
+  fflush (stdout);
   fflush (stderr);
   if (debugger_on_error & DEBUGGER_ON_ERROR) 
     enter_debugger(p_call, p_target, -1, DEBUG_ERROR_HIT);
@@ -411,6 +415,50 @@ print_child_cmd (child_t *p_child, target_stack_node_t *p)
   return rc;
 }
 
+void
+print_target_stack_entry (const file_t *p_target, int i, int i_pos) 
+{
+  floc_t floc;
+  const char *psz_target_name = 
+    (p_target && p_target->name) ? p_target->name : "(null)";
+  
+  /* If we don't have a line recorded for the target,
+     but we do have one for the commands it runs,
+     use that.
+  */
+  if (p_target->floc.filenm) {
+    memcpy(&floc, &(p_target->floc), sizeof(floc_t));
+  } else if (p_target->cmds) {
+    memcpy(&floc, &(p_target->cmds->fileinfo.filenm), sizeof(floc_t));
+    /* HACK: is it okay to assume that the target is on the line
+       before the first command? Or should we list the line
+       that the command starts on - so we know we've faked the location?
+    */
+    floc.lineno--;
+  } else {
+    floc.filenm = NULL;
+  }
+  
+  if (floc.filenm) {
+    if (i_pos != -1) {
+      printf("%s", (i == i_pos) ? "=>" : "  ");
+    }
+    printf ("#%u  %s at ", i, psz_target_name);
+    print_floc_prefix(&floc);
+  } else {
+    if (i_pos != -1) {
+      printf("%s", (i == i_pos) ? "=>" : "  ");
+    }
+    if (p_target->phony)
+      printf ("#%u  %s (.PHONY target)", i, psz_target_name);
+    else 
+      printf ("#%u  %s at ??", i, psz_target_name);
+    
+  }
+  printf ("\n");
+}
+
+
 /*! Display the target stack. i_pos is the position we are currently.
   i_max is the maximum number of entries to show.
  */
@@ -418,48 +466,9 @@ extern void
 print_target_stack (target_stack_node_t *p, int i_pos, int i_max)
 {
   int i=0;
-  printf("\n");
   for ( ; p && i < i_max ; 
 	i++, p = p->p_parent  ) {
-    floc_t floc;
-    file_t *p_target = p->p_target;
-    const char *psz_target_name = 
-      (p_target && p_target->name) ? p_target->name : "(null)";
-
-    /* If we don't have a line recorded for the target,
-       but we do have one for the commands it runs,
-       use that.
-    */
-    if (p_target->floc.filenm) {
-      memcpy(&floc, &(p_target->floc), sizeof(floc_t));
-    } else if (p_target->cmds) {
-      memcpy(&floc, &(p_target->cmds->fileinfo.filenm), sizeof(floc_t));
-      /* HACK: is it okay to assume that the target is on the line
-	 before the first command? Or should we list the line
-	 that the command starts on - so we know we've faked the location?
-      */
-      floc.lineno--;
-    } else {
-	floc.filenm = NULL;
-    }
-    
-    if (floc.filenm) {
-      if (i_pos != -1) {
-	printf("%s", (i == i_pos) ? "=>" : "  ");
-      }
-      printf ("#%u  %s at ", i, psz_target_name);
-      print_floc_prefix(&floc);
-    } else {
-      if (i_pos != -1) {
-	printf("%s", (i == i_pos) ? "=>" : "  ");
-      }
-      if (p_target->phony)
-	printf ("#%u  %s (.PHONY target)", i, psz_target_name);
-      else 
-	printf ("#%u  %s at ??", i, psz_target_name);
-
-    }
-    printf ("\n");
+    print_target_stack_entry (p->p_target, i, i_pos);
   }
 }
 

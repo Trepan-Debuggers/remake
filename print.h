@@ -99,6 +99,8 @@ extern void print_floc_prefix (const floc_t *p_floc);
 extern debug_return_t print_child_cmd (child_t *p_child, 
 				       target_stack_node_t *p);
 
+extern void print_target_stack_entry(const file_t *p_target, int i, int i_pos);
+
 /*! Display the target stack i_pos is the position we are currently.
   i_max is the maximum number of entries to show.
  */
