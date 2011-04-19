@@ -1,5 +1,5 @@
 /* 
-Copyright (C) 2005, 2008, 2009 R. Bernstein rocky@gnu.org
+Copyright (C) 2005, 2008, 2009, 2011 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -20,6 +20,7 @@ Boston, MA 02111-1307, USA.  */
 /* debugger command interface. */
 
 #include "fns.h"
+#include "msg.h"
 #include "stack.h"
 #include "commands.h"
 
@@ -30,3 +31,61 @@ int i_stack_pos = 0;
  */
 target_stack_node_t *p_stack = NULL;
 floc_stack_node_t *p_floc_stack = NULL;
+
+
+debug_return_t 
+dbg_adjust_frame(int i_amount, int b_absolute) 
+{
+  int i=0;
+  int i_try_frame_pos;
+
+  i_try_frame_pos = b_absolute ? i_amount : i_stack_pos + i_amount;
+
+  if (i_try_frame_pos < 0) {
+    dbg_errmsg(_("Moving target would go beyond bottom-most target position."));
+    return debug_cmd_error;
+  }
+
+  i = i_try_frame_pos + 1;
+
+  if (p_stack_top) {
+    for ( p_stack=p_stack_top; p_stack ; p_stack = p_stack->p_parent ) {
+      i--;
+      if (0 == i)
+	break;
+    }
+
+    if (0 != i) {
+     dbg_errmsg(_("Can't set frame to position %d; "
+	       "%d is the highest target position."),
+	     i_try_frame_pos, i_try_frame_pos - i);
+      return debug_cmd_error;
+    }
+    
+    i_stack_pos     = i_try_frame_pos;
+    p_target_loc    = &(p_stack->p_target->floc);
+    
+    print_debugger_location(p_stack->p_target, DEBUG_NOT_GIVEN, NULL);
+  } else if (p_stack_floc_top) {
+    /* We have a Makefile stack */
+    for ( p_floc_stack=p_stack_floc_top; 
+	  p_floc_stack ; p_floc_stack = p_floc_stack->p_parent ) {
+      i--;
+      if (0 == i)
+	break;
+    }
+
+    if (0 != i) {
+      dbg_errmsg(_("Can't set frame to position %d; "
+	       "%d is the highest target position."),
+	     i_try_frame_pos, i_try_frame_pos - i);
+      return debug_cmd_error;
+    }
+    i_stack_pos     = i_try_frame_pos;
+
+    print_debugger_location(NULL, DEBUG_NOT_GIVEN, p_floc_stack);
+  }
+  
+  return debug_readloop;
+}
+

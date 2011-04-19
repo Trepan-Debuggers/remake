@@ -21,7 +21,6 @@ debug_return_t
 dbg_cmd_up (char *psz_amount)
 {
   unsigned int i_amount=1;
-  unsigned int i = 0;
 
   if (!psz_amount || !*psz_amount) {
     i_amount = 1;
@@ -29,59 +28,7 @@ dbg_cmd_up (char *psz_amount)
     if (!get_uint(psz_amount, &i_amount, true))
       return debug_readloop;
   }
-
-  if (p_stack_top) {
-    /* We have a target stack  */
-    target_stack_node_t *p=p_stack;
-
-    for ( ; p ; p = p->p_parent, i++ ) {
-      if (i_amount == i) break;
-    }
-    
-    if (p) {
-      i_stack_pos    += i_amount;
-      p_stack         = p;
-      
-      p_target_loc    = &(p->p_target->floc);
-      if (!p->p_target->floc.filenm && p->p_target->cmds &&
-	  p->p_target->cmds->fileinfo.filenm) {
-	/* Fake the location based on the commands - it's better than
-	   nothing...
-	*/
-	memcpy(&fake_floc, &(p->p_target->cmds->fileinfo),
-	       sizeof(floc_t));
-	/* HACK: is it okay to assume that the target is on the line
-	   before the first command? Or should we list the line
-	   that the command starts on - so we know we've faked the location?
-	*/
-	fake_floc.lineno--;
-	p_target_loc = &fake_floc;
-      }
-    } else {
-      printf("Can't move up %d - would be beyond top-most frame position.\n",
-	     i_amount);
-    }
-    
-    print_debugger_location(p_stack->p_target, DEBUG_NOT_GIVEN, NULL);
-  } else if (p_floc_stack) {
-    /* We don't have a target stack, but we have a Makefile read stack  */
-    floc_stack_node_t *p=p_floc_stack;
-    for ( ; p ; p = p->p_parent, i++ ) {
-      if (i_amount == i) break;
-    }
-    
-    if (p) {
-      i_stack_pos    += i_amount;
-      p_floc_stack   = p;
-      
-    } else {
-      printf("Can't move up %d - would be beyond top-most frame position.\n",
-	     i_amount);
-    }
-    print_debugger_location(NULL, DEBUG_NOT_GIVEN, p_floc_stack);
-  }
-  
-  return debug_readloop;
+  return dbg_adjust_frame(i_amount, false);
 }
 
 static void

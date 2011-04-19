@@ -60,7 +60,7 @@ dbg_cmd_break (char *psz_args)
     }
 
     if (!p_target) {
-	dbg_errmsg("Can't find target %s; breakpoint not set.\n", psz_target);
+	dbg_errmsg("Can't find target %s; breakpoint not set.", psz_target);
 	return debug_cmd_error;
     }
 

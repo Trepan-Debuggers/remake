@@ -20,7 +20,6 @@ Boston, MA 02111-1307, USA.  */
 debug_return_t 
 dbg_cmd_frame_down(char *psz_amount) 
 {
-  int i=0;
   int i_amount = 1;
 
   if (!psz_amount || !*psz_amount) {
@@ -28,41 +27,7 @@ dbg_cmd_frame_down(char *psz_amount)
   } else if (!get_int(psz_amount, &i_amount, true)) {
       return debug_readloop;
   }
-
-  if (i_stack_pos - i_amount < 0) {
-    printf(_("Move down by %d would be below bottom-most frame position.\n"),
-	   i_amount);
-    return debug_readloop;
-  }
-  
-  i_stack_pos -= i_amount;
-
-  if (p_stack_top) {
-    /* We have a target stack  */
-    for ( p_stack=p_stack_top; p_stack ; p_stack = p_stack->p_parent ) {
-      if (i_stack_pos == i)
-	break;
-      i++;
-    }
-
-    p_target_loc    = &(p_stack->p_target->floc);
-    
-    print_debugger_location(p_stack->p_target, DEBUG_NOT_GIVEN, NULL);
-    
-  } else if (p_stack_floc_top) {
-    /* We have a Makefile stack */
-    for ( p_floc_stack=p_stack_floc_top; 
-	  p_floc_stack ; p_floc_stack = p_floc_stack->p_parent ) {
-      if (i_stack_pos == i)
-	break;
-      i++;
-    }
-
-    print_debugger_location(NULL, DEBUG_NOT_GIVEN, p_floc_stack);
-
-  }
-  
-  return debug_readloop;
+  return dbg_adjust_frame(-i_amount, false);
 }
 
 static void

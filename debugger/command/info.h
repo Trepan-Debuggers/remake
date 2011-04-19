@@ -350,7 +350,7 @@ dbg_cmd_info(char *psz_args)
     } else if (is_abbrev_of (psz_subcmd, "warranty", 1)) {
       printf("%s", WARRANTY);
     } else {
-      dbg_errmsg(_("Undefined command \"%s\". Try \"help info\"\n"), 
+      dbg_errmsg(_("Undefined command \"%s\". Try \"help info\"."), 
                  psz_subcmd);
     }
   }
