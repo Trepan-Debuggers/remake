@@ -33,13 +33,40 @@ target_stack_node_t *p_stack = NULL;
 floc_stack_node_t *p_floc_stack = NULL;
 
 
+unsigned int dbg_stack_size() 
+{
+  int i=0;
+  
+  if (p_stack_top) {
+    for ( p_stack=p_stack_top; p_stack ; p_stack = p_stack->p_parent ) {
+      i++;
+    }
+    return i;
+  } else if (p_stack_floc_top) {
+    /* We have a Makefile stack */
+    for ( p_floc_stack=p_stack_floc_top; 
+	  p_floc_stack ; p_floc_stack = p_floc_stack->p_parent ) {
+      i++;
+    }
+
+  }
+  return i;
+}
+
+
 debug_return_t 
 dbg_adjust_frame(int i_amount, int b_absolute) 
 {
   int i=0;
   int i_try_frame_pos;
 
-  i_try_frame_pos = b_absolute ? i_amount : i_stack_pos + i_amount;
+  if (b_absolute) {
+    if (i_amount < 0)
+      i_try_frame_pos = dbg_stack_size() + i_amount;
+    else    
+      i_try_frame_pos = i_amount;
+  } else
+    i_try_frame_pos = i_stack_pos + i_amount;
 
   if (i_try_frame_pos < 0) {
     dbg_errmsg(_("Moving target would go beyond bottom-most target position."));
