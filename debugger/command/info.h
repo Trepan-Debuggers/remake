@@ -144,7 +144,8 @@ dbg_cmd_info_target_entry (const file_t *p_target,
       if (output_mask & INFO_TARGET_NAME) {
         printf("\t%s\n", p_target->name);
       } else if (output_mask & INFO_TARGET_TASKS \
-                 && p_target->cmds && p_floc->filenm) {
+                 && (p_target->cmds || p_target->phony) \
+                 && p_floc->filenm) {
           printf("%s\n", p_target->name);
       }
     }
