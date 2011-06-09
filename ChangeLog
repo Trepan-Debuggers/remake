@@ -1,3 +1,140 @@
+2011-04-25  rocky <rocky@gnu.org>
+
+	* Makefile.am, NEWS, debugger/command/info.h: If a target is phony,
+	then it doesn't have to have commands to be listed in --tasks.
+	Automake targets like "check" or "install" work this way.
+
+2011-04-21  rocky <rocky@gnu.org>
+
+	* debugger/stack.c: Allow frame <negative number> to count from the
+	other end.
+
+2011-04-19  rocky <rocky@gnu.org>
+
+	* debugger/fns.c, debugger/stack.c, print.c, print.h, trace.h: Show
+	frame number when switching frames.
+
+2011-04-19  rocky <rocky@gnu.org>
+
+	* debugger/command/break.h, debugger/command/down.h,
+	debugger/command/frame.h, debugger/command/info.h,
+	debugger/command/up.h, debugger/stack.c, debugger/stack.h: DRY
+	up/down/frame code.
+
+2011-04-18  rocky <rocky@gnu.org>
+
+	* implicit.h: Header for implicit C file
+
+2011-04-17  rocky <rocky@gnu.org>
+
+	* debugger/command/quit.h, tests/spec/data/.gitignore,
+	tests/spec/data/break-all.right, tests/spec/data/break-end.right,
+	tests/spec/data/break-expand.right,
+	tests/spec/data/break-prereq.right,
+	tests/spec/data/break-run.right, tests/spec/data/info-target.right,
+	tests/spec/data/info-targets.right, tests/spec/data/list.right,
+	tests/spec/data/set.right, tests/spec/data/source.right,
+	tests/spec/data/step3.right: Add termination message. This helps
+	front-ends know we've quit.
+
+2011-04-17  rocky <rocky@gnu.org>
+
+	* debugger/command/info.h: More futzing with --tasks
+
+2011-04-17  rocky <rocky@gnu.org>
+
+	* debugger/command/info.h, main.c, make.1,
+	tests/spec/data/break-all.right, tests/spec/data/break-end.right,
+	tests/spec/data/break-expand.right,
+	tests/spec/data/break-prereq.right,
+	tests/spec/data/break-run.right, tests/spec/data/continue.right,
+	tests/spec/data/info-target.right,
+	tests/spec/data/info-targets.right, tests/spec/data/list.right,
+	tests/spec/data/set.right, tests/spec/data/source.right,
+	tests/spec/data/step3.right, trace.h: Separate make --targets from
+	make --tasks. Ditto for "info targets name" and "info targets
+	tasks".
+
+2011-04-17  rocky <rocky@gnu.org>
+
+	Merge branch 'master' of github.com:rocky/remake
+
+2011-04-17  rocky <rocky@gnu.org>
+
+	* htdocs/index.html: Change remake github to point to wiki,
+	sourceforge project, and not kshdb
+
+2011-04-17  rocky <rocky@gnu.org>
+
+	Merge branch 'master' of github.com:rocky/remake
+
+2011-04-17  rocky <rocky@gnu.org>
+
+	* Makefile.am, debugger/command/info.h, main.c, make.1, trace.h: Add
+	options --targets and --tasks akin to "rake --tasks". May do more on
+	--tasks to filter out file names and suffix patterns leaving only
+	targets with commands in them.
+
+2011-04-17  rocky <rocky@gnu.org>
+
+	* debugger/command/frame.h, debugger/command/info.h,
+	tests/spec/data/info-targets.right, tests/spec/test-info-targets.rb: 
+	Add subopions to "info targets {position, name, all}. Sometimes we
+	just want the target names. This is a poor-man's "rake --tasks".
+
+2011-04-14  rocky <rocky@gnu.org>
+
+	* doc/remake.texi: One more small doc correction
+
+2011-04-14  rocky <rocky@gnu.org>
+
+	* doc/remake.texi: Remove one more bash reference
+
+2011-04-14  rocky <rocky@gnu.org>
+
+	* NEWS, doc/Makefile.am, doc/remake.texi: Update where to report
+	errors. Make html in remake.html directory, not remake .
+
+2011-04-13  rocky <rocky@gnu.org>
+
+	* configure.in: Dump version number
+
+2011-04-14  rocky <rocky@gnu.org>
+
+	* dep.h, main.c, read.c: make's tilde_expand renamed to
+	remake_tilde_expand so it doesn't conflict with GNU readline's
+	tilde_expand. Problem reported by Ron Sluiter for Solaris 10.
+
+2011-04-10  rocky <rocky@gnu.org>
+
+	* Makefile.am, debugger/fns.c, doc/remake.texi: Adminstrivia for
+	release
+
+2011-04-10  rocky <rocky@gnu.org>
+
+	Merge branch 'master' of github.com:rocky/remake
+
+2011-04-10  rocky <rocky@gnu.org>
+
+	* ChangeLog, NEWS, NEWS.remake, configure.in,
+	debugger/command/target.h: Get ready for release.
+
+2011-04-10  rocky <rocky@gnu.org>
+
+	* debugger/command/info.h, print.c, tests/scripts/features/escape,
+	tests/scripts/features/include, tests/scripts/features/mult_rules,
+	tests/scripts/features/parallelism,
+	tests/scripts/features/patternrules,
+	tests/scripts/features/se_explicit,
+	tests/scripts/features/vpathplus, tests/scripts/functions/error,
+	tests/scripts/functions/eval, tests/scripts/functions/foreach,
+	tests/scripts/functions/word, tests/scripts/options/dash-k,
+	tests/scripts/options/dash-q, tests/scripts/options/general,
+	tests/scripts/options/symlinks,
+	tests/scripts/variables/DEFAULT_GOAL,
+	tests/scripts/variables/define, tests/scripts/variables/negative,
+	tests/scripts/variables/undefine: Improve some output text
+
 2011-04-10  rocky <rocky@gnu.org>
 
 	* debugger/cmd.c, debugger/command/help.h, debugger/command/info.h,
