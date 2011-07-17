@@ -482,9 +482,6 @@ update_file_1 (struct file *file, unsigned int depth,
   /* Notice recursive update of the same file.  */
   start_updating (file);
 
-  /* Here depth returns to the value it had when we were called.  */
-  depth--;
-
   /* We might change file if we find a different one via vpath;
      remember this one to turn off updating.  */
   ofile = file;
@@ -690,6 +687,7 @@ update_file_1 (struct file *file, unsigned int depth,
   if (running)
     {
       set_command_state (file, cs_deps_running);
+      --depth;
       DBF (DB_VERBOSE, _("The prerequisites of `%s' are being made.\n"));
       trace_pop_target(p_call_stack);
       return 0;
@@ -701,6 +699,8 @@ update_file_1 (struct file *file, unsigned int depth,
     {
       file->update_status = dep_status;
       notice_finished_file (file);
+
+      --depth;
 
       DBF (DB_VERBOSE, _("Giving up on target file `%s'.\n"));
 
@@ -1027,7 +1027,6 @@ check_dep (struct file *file, unsigned int depth,
   struct dep *d;
   int dep_status = 0;
 
-  ++depth;
   start_updating (file);
 
   /* We might change file if we find a different one via vpath;
@@ -1114,7 +1113,7 @@ check_dep (struct file *file, unsigned int depth,
 
 	      d->file->parent = file;
               maybe_make = *must_make_ptr;
-              dep_status |= check_dep (d->file, depth, this_mtime,
+              dep_status |= check_dep (d->file, depth+1, this_mtime,
                                        &maybe_make, p_call_stack);
               if (! d->ignore_mtime)
                 *must_make_ptr = maybe_make;
