@@ -240,6 +240,9 @@ dbg_cmd_info_program()
     case DEBUG_NOT_GIVEN:
       printf(_("Reason not given.\n"));
       break;
+    case DEBUG_STACK_CHANGING:
+      /* Should not happen? */
+      break;
     }
 }
 
