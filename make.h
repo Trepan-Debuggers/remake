@@ -519,8 +519,7 @@ extern int env_overrides, no_builtin_rules_flag, no_builtin_variables_flag;
 extern int print_version_flag, print_directory_flag, check_symlink_flag;
 extern int warn_undefined_variables_flag, posix_pedantic, not_parallel;
 extern int second_expansion, clock_skew_detected, rebuilding_makefiles;
-extern int one_shell, no_shell_trace;
-extern int use_readline_flag;
+extern int one_shell;
 
 /* can we run commands via 'sh -c xxx' or must we use batch files? */
 extern int batch_mode_shell;
@@ -555,32 +554,12 @@ extern char *directory_before_chdir;
 
 /*! Value of the MAKELEVEL variable at startup (or 0).  */
 extern unsigned int makelevel;
-
-/*! If nonzero, the basename of filenames is in giving locations. Normally,
-    giving a file directory location helps a debugger frontend
-    when we change directories. For regression tests it is helpful to 
-    list just the basename part as that doesn't change from installation
-    to installation. Users may have their preferences too.
-*/
-extern int basename_filenames;
-
 extern char *version_string, *remote_description, *make_host;
 
 extern unsigned int commands_started;
 
 extern int handling_fatal_signal;
 
-/* is default_shell unixy? */
-extern int unixy_shell;
-
-/**! The default value of SHELL and the shell that is used when issuing
-   commands on targets.
-*/
-extern char default_shell[];
-
-/*! Print version information.
-*/
-extern void print_version (void);
 
 #ifndef MIN
 #define MIN(_a,_b) ((_a)<(_b)?(_a):(_b))

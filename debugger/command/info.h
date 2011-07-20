@@ -20,6 +20,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../../file.h"
 #include "../../implicit.h"
 #include "../../print.h"
+#include "../../main.h"
 #include "../../rule.h"
 #include "../../debug.h"
 #include "../../vpath.h"
@@ -146,7 +147,10 @@ dbg_cmd_info_target_entry (const file_t *p_target,
       } else if (output_mask & INFO_TARGET_TASKS \
                  && (p_target->cmds || p_target->phony) \
                  && p_floc->filenm) {
-          printf("%s\n", p_target->name);
+          printf("%s", p_target->name);
+          if (p_target->description)
+              printf("\t# %s", p_target->description);
+          printf("\n");
       }
     }
 }
