@@ -25,7 +25,8 @@ module RemakeTestHelper
     expected_output = File.open(rightfile, 'r').readlines.map{|l| l.chomp}
     cmd = "#{MAKE_PROG} #{opts[:flags]} #{makefile}"
     cmd = "#{opts[:input]} | #{cmd}" if opts[:input]
-    lines = `#{cmd} 2>&1`.split("\n")[6..-1]
+    lines = `#{cmd} 2>&1`.split("\n")
+    lines = lines[6..-1] unless opts[:full]
     opts[:filter].call(makefile_short, lines) if opts[:filter]
     exit_status = opts[:exitstatus] || 77
     if $?.exitstatus != exit_status

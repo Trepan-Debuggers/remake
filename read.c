@@ -568,8 +568,17 @@ eval (struct ebuffer *ebuf, int set_default)
   int two_colon = 0;
   const char *pattern = 0;
   const char *pattern_percent;
-  char *target_description;
-  char *prev_target_description;
+  char *target_description; /* Place to store most recent target description */
+  char *prev_target_description; /* Most of the time, we read two targets before
+				    processing the first. I think this happens
+				    because the second target signals the end
+				    of the first target. As a result, 
+				    we need to save two descriptions to 
+				    be able to use the previous description 
+				    for the first target. For the last
+				    target of the file though, EOF signals
+				    the end of the target so we don't 
+				    use prev_target_description. */ 
   struct floc *fstart;
   struct floc fi;
 
@@ -578,11 +587,15 @@ eval (struct ebuffer *ebuf, int set_default)
     {									      \
       if (filenames != 0)						      \
         {                                                                     \
+	  /* Have we seen two descriptions since this target or one? */       \
+	  char *description = prev_target_description ?			      \
+	      prev_target_description : target_description;		      \
 	  fi.lineno = tgts_started;                                           \
 	  record_files (filenames, pattern, pattern_percent, depstr,          \
                         cmds_started, commands, commands_idx, two_colon,      \
-			prev_target_description, 			      \
-			&fi);						      \
+			description, &fi);				      \
+	  /* Don't use the prev_target_description value more than once. */   \
+	  prev_target_description = NULL;				      \
           filenames = 0;						      \
         }                                                                     \
       commands_idx = 0;							      \
