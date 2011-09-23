@@ -132,6 +132,7 @@ mod_a.o mod_b.o:
 # TEST #9 -- Savannah bugs 3330 and 15919
 # In earlier versions of make this will either give the wrong answer, or hang.
 
+if (0) {
 utouch(-10, 'target');
 run_make_test('target: intermed ; touch $@
 
@@ -144,6 +145,7 @@ phony: ; : phony', '-rR -j',
 : phony
 ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
 rmfiles('target');
+};
 
 # TEST #10: Don't put --jobserver-fds into a re-exec'd MAKEFLAGS.
 # We can't test this directly because there's no way a makefile can

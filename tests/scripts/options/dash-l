@@ -2,6 +2,7 @@
 # Date: Tue, 11 Aug 1992 09:34:26 -0400
 # From: pds@lemming.webo.dg.com (Paul D. Smith)
 
+return 1;
 $description = "Test load balancing (-l) option.";
 
 $details = "\
