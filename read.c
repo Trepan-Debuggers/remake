@@ -1351,7 +1351,7 @@ remove_comments (char *line, char **target_description,
   comment = find_char_unquote (line, '#', 0, 0, 0);
 
   if (comment != 0) {
-      if (show_tasks_flag) {
+      if (show_tasks_flag || show_targets_flag) {
  	  if (0 == strncmp(comment, "#: ", 3) && target_description) {
 	      *prev_target_description = *target_description;
 	      prev_target_description_lineno = target_description_lineno;

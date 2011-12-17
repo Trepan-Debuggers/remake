@@ -1,4 +1,4 @@
-Version 3.82+dbg-0.8
+Version 3.82+dbg-0.9dev
 2011-10-27
 * Add --tasks descriptions
 * Fix indentation bug in --trace

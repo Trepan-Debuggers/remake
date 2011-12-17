@@ -128,7 +128,7 @@ subcommand_var_info_t info_subcommands[] = {
   { NULL, NULL, NULL, NULL, false, 0}
 };
 
-/*! Show target information: location and name. */
+/*! Show target information: location, name, and description. */
 static void 
 dbg_cmd_info_target_entry (const file_t *p_target, 
                            info_target_output_mask_t output_mask) 
@@ -142,16 +142,21 @@ dbg_cmd_info_target_entry (const file_t *p_target,
         else
           printf("\n");
       }
-      if (output_mask & INFO_TARGET_NAME) {
-        printf("\t%s\n", p_target->name);
-      } else if (output_mask & INFO_TARGET_TASKS \
-                 && (p_target->cmds || p_target->phony) \
-                 && p_floc->filenm) {
-          printf("%s", p_target->name);
-          if (p_target->description)
-              printf("\t# %s", p_target->description);
-          printf("\n");
-      }
+    }
+    if (output_mask & INFO_TARGET_NAME) {
+      printf("\t%s", p_target->name);
+      if (p_target->description)
+        printf("\t# %s", p_target->description);
+      printf("\n");
+    } else if 
+        ( (output_mask & INFO_TARGET_TASKS
+           && (p_target->cmds || p_target->phony)
+           && p_floc->filenm)  
+          || (output_mask & INFO_TARGET_NAME) ) {
+      printf("%s", p_target->name);
+      if (p_target->description)
+        printf("\t# %s", p_target->description);
+      printf("\n");
     }
 }
 
