@@ -13,8 +13,16 @@ But if you want the full debugger, use --debugger or -X:
 To build:
 
     $ autoreconf -i
-    $ ./configure
+    $ ./configure --enable-maintainer-mode
     $ make -k update
+
+If make -k fails (because a updates from translator site has moved or
+is no longer available) then:
+
+    $ make -k && make -k check && sudo make -k install
+
+Otherwise:
+
     $ make && make check && sudo make install
 
 See README.CVS for more detail regarding the above and for 
