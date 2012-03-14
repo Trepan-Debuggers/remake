@@ -128,13 +128,11 @@ endif
 # Extra stuff to include in the distribution.
 
 EXTRA_DIST =	README build.sh.in $(man_MANS) \
-		README.customs README.OS2 \
+		README.customs  \
 		SCOPTIONS SMakefile \
-		README.Amiga Makefile.ami config.ami make.lnk amiga.c amiga.h \
-		README.DOS Makefile.DOS configure.bat dosbuild.bat configh.dos\
-		README.W32 NMakefile config.h.W32 build_w32.bat subproc.bat \
+		 make.lnk amiga.c amiga.h \
+		NMakefile  \
 		make_msvc_net2003.sln make_msvc_net2003.vcproj \
-		readme.vms makefile.vms makefile.com config.h-vms \
 		vmsdir.h vmsfunctions.c vmsify.c \
 	        debugger/Makefile \
 		NEWS.remake README.remake REMAKE.todo Rakefile

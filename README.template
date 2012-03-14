@@ -144,31 +144,6 @@ system contains rules that depend on proper behavior of tools like "cp
 -p", you should consider using the .LOW_RESOLUTION_TIME pseudo-target to
 force make to treat them properly.  See the manual for details.
 
-
-Ports
------
-
-  - See README.customs for details on integrating GNU make with the
-    Customs distributed build environment from the Pmake distribution.
-
-  - See readme.vms for details about GNU Make on OpenVMS.
-
-  - See README.Amiga for details about GNU Make on AmigaDOS.
-
-  - See README.W32 for details about GNU Make on Windows NT, 95, or 98.
-
-  - See README.DOS for compilation instructions on MS-DOS and MS-Windows
-    using DJGPP tools.
-
-    A precompiled binary of the MSDOS port of GNU Make is available as part
-    of DJGPP; see the WWW page http://www.delorie.com/djgpp/ for more
-    information.
-
-Please note there are two _separate_ ports of GNU make for Microsoft
-systems: a native Windows tool built with (for example) MSVC or Cygwin,
-and a DOS-based tool built with DJGPP.  Please be sure you are looking
-at the right README!
-
 
 -------------------------------------------------------------------------------
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
