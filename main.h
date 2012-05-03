@@ -50,7 +50,7 @@ extern int unixy_shell;
 /**! The default value of SHELL and the shell that is used when issuing
    commands on targets.
 */
-extern char default_shell[];
+extern char *default_shell;
 
 /*! Print version information. */
 extern void print_version (void);

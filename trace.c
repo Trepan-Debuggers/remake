@@ -1,6 +1,6 @@
 /* $Id: trace.c,v 1.6 2005/12/20 15:11:24 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
-Copyright (C) 2008 R. Bernstein <rocky@gnu.org>
+Copyright (C) 2008, 2012 R. Bernstein <rocky@gnu.org>
 
 This file is part of GNU Make.
 
@@ -20,6 +20,11 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 /* Header for routines related to tracing and debugging support */
+
+/* AIX likes this: */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "trace.h"
 #include "print.h"
