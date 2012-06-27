@@ -24,4 +24,11 @@ describe "A simple trace" do
       run_remake('opt-y-trace', @opts, 'triple')
     end
   end
+  it 'should be give a warning for -x and -y' do
+    flags = ['-x -y', '-y -x'].each do |flags|
+      p flags if $DEBUG
+      @opts[:flags] = flags
+      run_remake('opt-x-y-trace', @opts, 'simple')
+    end
+  end
 end

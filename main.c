@@ -141,7 +141,11 @@ int just_print_flag;
 /*! If 1, we don't give additional error reporting information. */
 int no_extended_errors = 0;
 
-/*! If non-null, we are tracing execution */
+/*! If 1 same as --trace=normal */
+int tracing_flag;
+
+/*! If non-null, contains the type of tracing we are to do. 
+  This is coordinated with tracing_flag. */
 stringlist_t *tracing_opts = NULL;
 
 /*! Nonzero means use GNU readline in the debugger. */
@@ -254,11 +258,17 @@ int no_shell_trace = 0;
 
 int show_targets_flag = 0;
 
-/*! Nonzero gives a list of explicit target names and exits. Set by option
-  --tasks
+/*! Nonzero gives a list of explicit target names that have commands
+  associated with them and exits. Set by option --tasks
  */
 
 int show_tasks_flag = 0;
+
+/*! Nonzero gives a list of explicit target names that have commands
+   AND comments associated with them and exits. Set by option --task-comments
+ */
+
+int show_task_comments_flag = 0;
 
 /* List of makefiles given with -f switches.  */
 
@@ -430,8 +440,13 @@ static const char *const usage[] =
     N_("\
   --targets                   Give list of explicitly-named targets.\n"),
     N_("\
-  --tasks                     Give list of explicitly-named targets which\n\n"
-"                               have commands associated with them\n"),
+  --tasks                     Give list of explicitly-named targets which\n"
+"                              have commands associated with them.\n"),
+/*
+    N_("\
+  --task-comments             Give list of explicitly-named targets which.\n"
+"                              have commands AND comments associated with them.\n"),
+*/
     N_("\
   -t, --touch                 Touch targets instead of remaking them.\n"),
     N_("\
@@ -446,17 +461,19 @@ static const char *const usage[] =
     N_("\
   --warn-undefined-variables  Warn when an undefined variable is referenced.\n"),
     N_("\
-  -x, --trace[=TYPE]           Trace command execution TYPE may be\n\
-                               \"command\", \"read\", \"normal\",\"\n\
-                               \"noshell\", or \"full\".\n"),
+  --trace[=TYPE]              Trace command execution TYPE may be\n\
+                              \"command\", \"read\", \"normal\",\"\n\
+                              \"noshell\", or \"full\".\n"),
     N_("\
-  -y                           same as --trace=\"noshell\"\n"),
+  -x                          Same as --trace=\"normal\"\n"),
+    N_("\
+  -y                          Same as --trace=\"noshell\"\n"),
     N_("\
   -X [type], --debugger[=TYPE] Enter debugger. TYPE may be\n\
                                \"goal\", \"preread\", \"preaction\",\n\
                                \"full\", \"error\", or \"fatal\".\n"),
     N_("\
-   --no-readline               Do not use GNU ReadLine in debugger\n"),
+   --no-readline               Do not use GNU ReadLine in debugger.\n"),
     NULL
   };
 
@@ -513,18 +530,22 @@ static const struct command_switch switches[] =
     { 'w', flag, &print_directory_flag, 1, 1, 0, 0, 0, "print-directory" },
     { CHAR_MAX+6, flag, &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
       "no-print-directory" },
-    { 'x', string, (char *) &tracing_opts, 1, 1, 0, "normal", 0, "trace" },
+    { 'x', flag, &tracing_flag, 1, 1, 0, 0, 0, 0 },
+    { CHAR_MAX+7, string, (char *) &tracing_opts, 1, 1, 0, "normal", 
+      0, "trace" },
     { 'X', string, (char *) &debugger_opts, 1, 1, 0, 
       "preaction", 0, "debugger" },
     { 'y', flag, (char *) &no_shell_trace, 1, 1, 0, 0, 0, "noshell" },
     { 'W', filename, &new_files, 0, 0, 0, 0, 0, "what-if" },
-    { CHAR_MAX+7, flag, &show_targets_flag, 0, 0, 0, 0, 0,
+    { CHAR_MAX+9, flag,  &show_targets_flag, 0, 0, 0, 0, 0,
       "targets" },
-    { CHAR_MAX+8, flag, &show_tasks_flag, 0, 0, 0, 0, 0,
+    { CHAR_MAX+10,  flag, &show_tasks_flag, 0, 0, 0, 0, 0,
       "tasks" },
-    { CHAR_MAX+9, flag, &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
+/*    { CHAR_MAX+11,  flag, &show_task_comments_flag, 0, 0, 0, 0, 0,
+      "task-comments" }, */
+    { CHAR_MAX+12, flag, &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
       "warn-undefined-variables" },
-    { CHAR_MAX+10, string, &eval_strings, 1, 0, 0, 0, 0, "eval" },
+    { CHAR_MAX+13, string, &eval_strings, 1, 0, 0, 0, 0, "eval" },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
@@ -649,6 +670,54 @@ bsd_signal (int sig, bsd_signal_ret_t func)
 }
 # endif
 #endif
+
+void
+decode_trace_flags (void)
+{
+  char trace_seen='\0';
+  if (tracing_flag) {
+    db_level = DB_BASIC | DB_TRACE | DB_SHELL;
+    trace_seen='x';
+  }
+  
+  if (no_shell_trace) {
+    if (tracing_flag)
+      error (NILF, 
+	     "warning: have -x flag which supercedes -y flag; -y flag ignored");
+    else {
+      db_level = DB_BASIC | DB_TRACE;
+      trace_seen = 'y';
+    }
+  }
+
+  if (trace_seen != '\0') {
+    if (tracing_opts)
+      error (NILF, 
+	     "warning: have already seen -%c; --tracing options ignored",
+	  trace_seen);
+    return;
+  }
+  
+  if (tracing_opts) {
+    const char **p;
+    db_level |= (DB_TRACE | DB_SHELL);
+    if (!tracing_opts->list)
+      db_level |= (DB_BASIC);
+    else 
+      for (p = tracing_opts->list; *p != 0; ++p) {
+	if (0 == strcmp(*p, "command"))
+	  ;
+	else if (0 == strcmp(*p, "full"))
+	  db_level |= (DB_VERBOSE|DB_READ_MAKEFILES);
+	else if (0 == strcmp(*p, "normal"))
+	  db_level |= DB_BASIC;
+	else if (0 == strcmp(*p, "noshell"))
+	  db_level = DB_BASIC | DB_TRACE;
+	else if (0 == strcmp(*p, "read"))
+	  db_level |= DB_READ_MAKEFILES;
+      }
+  }
+}
 
 static void
 initialize_global_hash_tables (void)
@@ -1356,28 +1425,6 @@ main (int argc, char **argv, char **envp)
 #endif
   }
 
-  if (no_shell_trace) 
-    db_level = DB_BASIC | DB_TRACE;
-    
-  if (tracing_opts) {
-    const char **p;
-    db_level |= (DB_TRACE | DB_SHELL);
-    if (!tracing_opts->list)
-      db_level |= (DB_BASIC);
-    else 
-      for (p = tracing_opts->list; *p != 0; ++p) {
-	if (0 == strcmp(*p, "command"))
-	  ;
-	else if (0 == strcmp(*p, "full"))
-	  db_level |= (DB_VERBOSE|DB_READ_MAKEFILES);
-	else if (0 == strcmp(*p, "normal"))
-	  db_level |= DB_BASIC;
-	else if (0 == strcmp(*p, "noshell"))
-	  db_level = DB_BASIC | DB_TRACE;
-	else if (0 == strcmp(*p, "read"))
-	  db_level |= DB_READ_MAKEFILES;
-      }
-  }
   
 #ifdef WINDOWS32
   if (suspend_flag) {
@@ -1388,6 +1435,7 @@ main (int argc, char **argv, char **envp)
   }
 #endif
 
+  decode_trace_flags ();
   decode_debug_flags ();
 
   /* Set always_make_flag if -B was given and we've not restarted already.  */
@@ -2384,8 +2432,10 @@ main (int argc, char **argv, char **envp)
       fatal (NILF, _("No targets"));
     }
 
-  if (show_tasks_flag) {
-      dbg_cmd_info_targets(INFO_TARGET_TASKS);
+  if (show_tasks_flag || show_task_comments_flag) {
+      dbg_cmd_info_targets(show_task_comments_flag 
+			   ? INFO_TARGET_TASKS_WITH_COMMENTS 
+			   : INFO_TARGET_TASKS);
       die(0);
   } else if (show_targets_flag) {
       dbg_cmd_info_targets(INFO_TARGET_NAME);
