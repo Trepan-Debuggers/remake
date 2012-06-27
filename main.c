@@ -678,16 +678,17 @@ bsd_signal (int sig, bsd_signal_ret_t func)
 #endif
 
 void
-decode_trace_flags (void)
+decode_trace_flags (int b_tracing_flag, int b_no_shell_trace, 
+		    stringlist_t *ppsz_tracing_opts)
 {
   char trace_seen='\0';
-  if (tracing_flag) {
+  if (b_tracing_flag) {
     db_level = DB_BASIC | DB_TRACE | DB_SHELL;
     trace_seen='x';
   }
   
-  if (no_shell_trace) {
-    if (tracing_flag)
+  if (b_no_shell_trace) {
+    if (b_tracing_flag)
       error (NILF, 
              "warning: have -x flag which supercedes -y flag; -y flag ignored");
     else {
@@ -704,13 +705,13 @@ decode_trace_flags (void)
     return;
   }
   
-  if (tracing_opts) {
+  if (ppsz_tracing_opts) {
     const char **p;
     db_level |= (DB_TRACE | DB_SHELL);
-    if (!tracing_opts->list)
+    if (!ppsz_tracing_opts->list)
       db_level |= (DB_BASIC);
     else 
-      for (p = tracing_opts->list; *p != 0; ++p) {
+      for (p = ppsz_tracing_opts->list; *p != 0; ++p) {
         if (0 == strcmp(*p, "command"))
           ;
         else if (0 == strcmp(*p, "full"))
@@ -1455,8 +1456,8 @@ main (int argc, char **argv, char **envp)
   }
 #endif
 
-  decode_trace_flags ();
-  decode_debug_flags ();
+  decode_trace_flags (tracing_flag, no_shell_trace, tracing_opts);
+  decode_debug_flags (debug_flag, db_flags);
 
   /* Set always_make_flag if -B was given and we've not restarted already.  */
   always_make_flag = always_make_set && (restarts == 0);
