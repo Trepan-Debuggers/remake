@@ -1,7 +1,7 @@
 Version 3.82+dbg-0.9dev
 * More aggressive on showing --target descriptions
 * -X and -x are boolean options only use --trace and --debugger to supply
-  and optional parameter
+  an optional parameter
 * readline headers are no longer optional
 * small packaging changes
 
