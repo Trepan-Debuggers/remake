@@ -175,6 +175,7 @@ inst_setgid = @NEED_SETGID@
 #
 inst_group = @KMEM_GROUP@
 
+#: install executables (e.g. remake)
 install-exec-local:
 	@if $(inst_setgid); then \
 	   app=$(DESTDIR)$(bindir)/`echo $(bin_PROGRAMS)|sed '$(transform)'`; \
@@ -190,8 +191,7 @@ install-exec-local:
 
 # --------------- Local DIST Section
 
-# Install the w32 and tests subdirectories
-#
+#: Include the entire w32 and tests subdirectories in distribution
 dist-hook:
 	(cd $(srcdir); \
 	 sub=`find w32 tests -follow \( -name CVS -prune -o -name .cvsignore -o -name work -prune \) -o \( -name \*.orig -o -name \*.rej -o -name \*~ -prune \) -o -type f -print`; \
@@ -212,11 +212,17 @@ check-local: check-regression check-loadavg
 
 .PHONY: check-loadavg check-regression
 
+#: Check internal load average routine against 'uptime'
 check-loadavg: loadavg$(EXEEXT)
 	@echo The system uptime program believes the load average to be:
 	-uptime
 	@echo The GNU load average checking code thinks:
 	-./loadavg$(EXEEXT)
+
+# FIXME: doesn't work.
+##: Run remake-specific tests using Ruby rspec
+#check-rspec: 
+#	$(SHELL) -c 'ruby tests/spec/run-tests.rb'
 
 # The loadavg function is invoked during "make check" to test getloadavg.
 check_PROGRAMS = loadavg
@@ -232,6 +238,7 @@ loadavg_LDADD = @GETLOADAVG_LIBS@
 #
 MAKETESTFLAGS =
 
+#: run regression tests in tests/scripts
 check-regression:
 	@if test -f "$(srcdir)/tests/run_make_tests"; then \
 	  if $(PERL) -v >/dev/null 2>&1; then \
@@ -263,6 +270,7 @@ check-regression:
 
 if MAINTAINER_MODE
 
+#: create ChangeLog for distirbution from 'git log'
 ChangeLog:
 	git log --pretty --numstat --summary | $(GIT2CL) > $@
 

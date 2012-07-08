@@ -33,8 +33,6 @@ bool b_debugger_goal = false;
 bool b_debugger_preread = false;
 stringlist_t *db_flags;
 
-stringlist_t *db_flags;
-
 /** Toggle -d on receipt of SIGUSR1.  */
 #ifdef SIGUSR1
 RETSIGTYPE
@@ -49,17 +47,17 @@ debug_signal_handler (int sig)
   db_flags.
  */
 void
-decode_debug_flags (void)
+decode_debug_flags (int b_debug_flag, stringlist_t *ppsz_db_flags)
 {
   const char **pp;
 
-  if (debug_flag)
+  if (b_debug_flag)
     db_level = DB_ALL;
 
-  if (!db_flags)
+  if (!ppsz_db_flags)
     return;
 
-  for (pp=db_flags->list; *pp; ++pp)
+  for (pp=ppsz_db_flags->list; *pp; ++pp)
     {
       const char *p = *pp;
 

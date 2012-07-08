@@ -60,8 +60,10 @@ typedef enum
 typedef enum {
     INFO_TARGET_POSITION = 1,
     INFO_TARGET_NAME     = 2,
-    INFO_TARGET_POSITION_AND_NAME = 3,
-    INFO_TARGET_TASKS             = 4,
+    INFO_TARGET_POSITION_AND_NAME   = 3, /* 1 & 2 */
+    INFO_TARGET_TASKS               = 4,
+    INFO_TARGET_TASK_COMMENT        = 8,
+    INFO_TARGET_TASKS_WITH_COMMENTS = 12, /* 4 & 8 */
 } info_target_output_mask_t;
 
 /*!

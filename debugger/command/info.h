@@ -151,12 +151,14 @@ dbg_cmd_info_target_entry (const file_t *p_target,
     } else if 
         ( (output_mask & INFO_TARGET_TASKS
            && (p_target->cmds || p_target->phony)
-           && p_floc->filenm)  
+           && p_floc->filenm)
           || (output_mask & INFO_TARGET_NAME) ) {
-      printf("%s", p_target->name);
-      if (p_target->description)
-        printf("\t# %s", p_target->description);
-      printf("\n");
+      if (p_target->description) {
+        printf("%s", p_target->name);
+        printf("\t# %s\n", p_target->description);
+      } else if (!(output_mask & INFO_TARGET_TASK_COMMENT)) {
+        printf("%s\n", p_target->name);
+      }
     }
 }
 
