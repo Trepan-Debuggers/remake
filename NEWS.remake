@@ -1,4 +1,9 @@
 Version 3.82+dbg-0.9dev
+* More aggressive on showing --target descriptions
+* readline headers are no longer optional
+* small packaging changes
+ 
+Version 3.82+dbg-0.8
 2011-10-27
 * Add --tasks descriptions
 * Fix indentation bug in --trace
