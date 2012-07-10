@@ -299,7 +299,7 @@ AC_DEFINE_UNQUOTED(DEFAULT_SHELL, ["$default_shell"],
 AC_CHECK_HEADER(readline/readline.h, [have_readline=yes], [have_readline=no])
 
 if test "$have_readline" != yes; then
-   AC_MSG_ERROR([libreadline headers are needed for the debugger.])
+   AC_MSG_ERROR([GNU Readline and its headers files are needed. See http://cnswww.cns.cwru.edu/php/chet/readline/rltop.html])
 fi
 
 VL_LIB_READLINE
