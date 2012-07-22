@@ -1,5 +1,5 @@
 \input texinfo      @c -*-texinfo-*-
-@c Copyright 2004, 2005, 2006, 2011
+@c Copyright 2004, 2005, 2006, 2011, 2012
 @c Rocky Bernstein for the Free Software Foundation
 @c
 @c TODO: 
@@ -79,7 +79,7 @@ This file documents the @sc{gnu} MAKE debugger, Remake
 This is the @value{EDITION} Edition, @value{UPDATED-MONTH},
 of @cite{Debugging with REMAKE: the @sc{gnu} Make Debugger}
 
-Copyright (C) 2004, 2005, 2011 Rocky Bernstein for the Free Software Foundation.
+Copyright (C) 2004, 2005, 2011, 2012 Rocky Bernstein for the Free Software Foundation.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
@@ -103,7 +103,7 @@ development.''
 @page
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 2004, 2005, 2006 Rocky Bernstein for the Free
+Copyright @copyright{} 2004, 2005, 2006, 2012 Rocky Bernstein for the Free
 Software Foundation.
 
 Permission is granted to copy, distribute and/or modify this document
@@ -129,7 +129,7 @@ This file describes @value{DBG}, Remake
 
 This is the @value{EDITION} Edition, @value{UPDATED-MONTH}
 
-Copyright (C) 2004, 2005, 2006, 2011 Rocky Bernstein
+Copyright (C) 2004, 2005, 2006, 2011, 2012 Rocky Bernstein
 
 @menu
 * Summary::                     Overview of Debugger with a sample session
@@ -184,7 +184,6 @@ processing a Makefile.
 
 @menu
 * Sample Sessions::             Sample GNU Make Debugger sessions
-* Free Software::               Freely redistributable software
 @end menu
 
 @node Sample Sessions
@@ -200,7 +199,7 @@ to make it easier to pick out from the surrounding output.
 @end iftex
 
 @menu
-* Tracing Not::              How NOT to debug your program
+* Tracing Not::              How NOT to debug your Makefile
 * Tracing::                  Using --trace or -x on a simple example
 * Tracing a Real Makefile::  A Larger Real-World Makefile Trace.
 * Simple Debugging::         Getting into the Debugger (--debugging)
@@ -209,7 +208,7 @@ to make it easier to pick out from the surrounding output.
 @end menu
 
 @node Tracing Not
-@subsection How NOT to debug @value{MAKE}
+@subsection How @emph{not} to debug your Makefile
 
 Before we get into debugging proper, we'll discuss tracing and a
 pitfall the author once made in his first attempt to debug a large and
@@ -238,7 +237,7 @@ To elaborate upon this, here is a simple small @code{Makefile} with an
 invalid shell command in it:
 
 @smallexample
-!: # Makefile to show off tracing
+1: # Makefile to show off tracing
 2: .PHONY: all
 3: all: foo
 4: 
@@ -414,8 +413,8 @@ output is a little bit different here since we give a more context
 about the position when a fatal error is encountered.}
 
 But now let's try the new kind of trace we provide in this patched
-@value{REMAKE}.  We use the new option @code{--trace} which has the
-short-form option format @code{-x}.
+@value{REMAKE}.  We use the new option @code{--trace}.
+The short-form option format @code{-x} is the same as @code{--trace} and @code{--trace=normal}
 
 @smallexample
 @group
@@ -1054,130 +1053,30 @@ If you are at a target and want to continue to the end of the target you
 can use the command @code{finish} which is the same as @code{finish
 0}. See @ref{Finish}.
 
-@node Free Software
-@unnumberedsec Free software
-
-@value{DBG} is @dfn{free software}, protected by the @sc{gnu}
-General Public License
-(GPL).  The GPL gives you the freedom to copy or adapt a licensed
-program---but every person getting a copy also gets with it the
-freedom to modify that copy (which means that they must get access to
-the source code), and the freedom to distribute further copies.
-Typical software companies use copyrights to limit your freedoms; the
-Free Software Foundation uses the GPL to preserve these freedoms.
-
-Fundamentally, the General Public License is a license which says that
-you have these freedoms and that you cannot take these freedoms away
-from anyone else.
-
-@c @unnumberedsec Free Software Needs Free Documentation
-
-The biggest deficiency in the free software community today is not in
-the software---it is the lack of good free documentation that we can
-include with the free software.  Many of our most important
-programs do not come with free reference manuals and free introductory
-texts.  Documentation is an essential part of any software package;
-when an important free software package does not come with a free
-manual and a free tutorial, that is a major gap.  We have many such
-gaps today.
-
-Consider Perl, for instance.  The tutorial manuals that people
-normally use are non-free.  How did this come about?  Because the
-authors of those manuals published them with restrictive terms---no
-copying, no modification, source files not available---which exclude
-them from the free software world.
-
-That wasn't the first time this sort of thing happened, and it was far
-from the last.  Many times we have heard a GNU user eagerly describe a
-manual that he is writing, his intended contribution to the community,
-only to learn that he had ruined everything by signing a publication
-contract to make it non-free.
-
-Free documentation, like free software, is a matter of freedom, not
-price.  The problem with the non-free manual is not that publishers
-charge a price for printed copies---that in itself is fine.  (The Free
-Software Foundation sells printed copies of manuals, too.)  The
-problem is the restrictions on the use of the manual.  Free manuals
-are available in source code form, and give you permission to copy and
-modify.  Non-free manuals do not allow this.
-
-The criteria of freedom for a free manual are roughly the same as for
-free software.  Redistribution (including the normal kinds of
-commercial redistribution) must be permitted, so that the manual can
-accompany every copy of the program, both on-line and on paper.
-
-Permission for modification of the technical content is crucial too.
-When people modify the software, adding or changing features, if they
-are conscientious they will change the manual too---so they can
-provide accurate and clear documentation for the modified program.  A
-manual that leaves you no choice but to write a new manual to document
-a changed version of the program is not really available to our
-community.
-
-Some kinds of limits on the way modification is handled are
-acceptable.  For example, requirements to preserve the original
-author's copyright notice, the distribution terms, or the list of
-authors, are ok.  It is also no problem to require modified versions
-to include notice that they were modified.  Even entire sections that
-may not be deleted or changed are acceptable, as long as they deal
-with nontechnical topics (like this one).  These kinds of restrictions
-are acceptable because they don't obstruct the community's normal use
-of the manual.
-
-However, it must be possible to modify all the @emph{technical}
-content of the manual, and then distribute the result in all the usual
-media, through all the usual channels.  Otherwise, the restrictions
-obstruct the use of the manual, it is not free, and we need another
-manual to replace it.
-
-Please spread the word about this issue.  Our community continues to
-lose manuals to proprietary publishing.  If we spread the word that
-free software needs free reference manuals and free tutorials, perhaps
-the next person who wants to contribute by writing documentation will
-realize, before it is too late, that only free manuals contribute to
-the free software community.
-
-If you are writing documentation, please insist on publishing it under
-the GNU Free Documentation License or another free documentation
-license.  Remember that this decision requires your approval---you
-don't have to let the publisher decide.  Some commercial publishers
-will use a free license if you insist, but they will not propose the
-option; it is up to you to raise the issue and say firmly that this is
-what you want.  If the publisher you are dealing with refuses, please
-try other publishers.  If you're not sure whether a proposed license
-is free, write to @email{licensing@@gnu.org}.
-
-You can encourage commercial publishers to sell more free, copylefted
-manuals and tutorials by buying them, and particularly by buying
-copies from the publishers that paid for their writing or for major
-improvements.  Meanwhile, try to avoid buying non-free documentation
-at all.  Check the distribution terms of a manual before you buy it,
-and insist that whoever seeks your business must respect your freedom.
-Check the history of the book, and try to reward the publishers that
-have paid or pay the authors to work on it.
-
-The Free Software Foundation maintains a list of free documentation
-published by other publishers, at
-@url{http://www.fsf.org/doc/other-free-books.html}.
-
 @node Invocation
 @chapter Getting in and out and new @value{REMAKE} Command Options
 
 This chapter discusses how to start @value{DBG}, and how to get out of it.
-The essentials are:
+
+There are a couple ways you could get into the debugger
+
 @itemize @bullet
 @item
-type @samp{make --debugger @emph{make options}} to start @value{DBG}.
+invoke from the outset, using option @code{-X} or @code{--debugger}.
 @item
-and type @kbd{quit} or @kbd{C-d} inside the debugger to exit.
+enter when there is a fatal error using option @code{--debugger=error}
+or @code{debugger=fatal}
+@item
+through an explicit call inside the debugger using built-in function @code{debugger}
 @end itemize
 
+Once inside the debugger, and type @kbd{quit} or @kbd{C-d} inside the
+debugger to exit.
+
 You don't have to use the command-line interface. At present there is
-a front-end available via GNU Emacs which can be entered
-via the Emacs command @code{M-x remake} after loading Emacs' Grand
-Unified Debugger, @code{gud}. See @ref{Emacs,,Using @value{DBG} from
-@sc{gnu} Emacs}. In the future there may be support in a @value{DDD}
-as well.
+a front-end available via GNU Emacs which can be entered via the Emacs
+command @code{M-x remake} after loading @code{dbgr}. See
+@ref{Emacs,,Using @value{DBG} from @sc{gnu} Emacs}.
 
 @menu
 * Starting the GNU Make debugger::    How to enter the @value{DBG}
@@ -1197,12 +1096,12 @@ As mentioned above, one can enter @value{DBG} via Emacs (and perhaps
 later DDD). However you don't have to use either of these. And these still
 need a way on their own to get things started.
 
-The enter @value{DBG} from a command line, use the @samp{--debugger}
-or it's short form @samp{-X} option:
+The enter @value{DBG} from a command line, use the @samp{--debugger}.
+The short form @samp{-X} option is short for @samp{--debugger} or @samp{--debugger=preaction}
 
 @example
 make --debugger @var{other-make-arguments...}
-make -X @var{other-make-arguments...}
+make -X
 @end example
 
 This runs @value{REMAKE} as it would normally do; that is Makefiles are
@@ -1216,14 +1115,14 @@ under what conditions to enter the debugger; it is specified by
 putting an equals sign (`=') and then the sub-option; for example:
 
 @example
-make -X=preread @var{other-make-arguments...}
+make --debugger=preread @var{other-make-arguments...}
 @end example
 
 Here is a full list of debugger options and sub-options...
 
 @table @code
 @item --debugger @ovar{preread | preaction | full | error | fatal}
-@itemx -X @ovar{preread | preaction | full | error | fatal}
+@itemx -X
 @cindex @code{-X}
 The ``preread'' sub-option enters the debugger after command-line
 options are parsed but before any Makefiles have been read. It also
@@ -1271,6 +1170,18 @@ in conjunction with it. Inside the debugger one can have the same
 effect by issuing the debugger @code{set trace on} command.
 
 @end table
+
+@subsection Explicit call to the GNU Make debugger
+
+Another way to get into the debugger is to make a specific all inside
+your Makefile using the @code{debugger} built-in function.
+
+@smallexample
+# Makefile to show an explicit call to the debugger
+all:
+ 	$(debugger ) 
+ 	echo "all here"
+@end smallexample 
 
 @node Quitting the GNU Make debugger
 @section Quitting the GNU Make debugger
