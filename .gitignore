@@ -1,4 +1,6 @@
-/*.o
+*.o
+*.a
+.deps
 /*~
 /.dep_segment
 /ABOUT-NLS
