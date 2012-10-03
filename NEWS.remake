@@ -1,5 +1,5 @@
-Version 3.82+dbg-0.9dev
-* Add debugger built-in function
+Version 3.82+dbg-0.9
+2012-10-3
 * More aggressive on showing --target descriptions
 * -X and -x are boolean options only use --trace and --debugger to supply
   an optional parameter
