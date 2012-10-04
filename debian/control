@@ -7,7 +7,7 @@ Build-Depends: debhelper (>= 5), autotools-dev, libreadline-dev, gettext,
 Homepage: http://bashdb.sourceforge.net/remake/
 Vcs-Browser: http://github.com/rocky/remake
 Vcs-git: git://github.com/rocky/remake.git -b debian
-Standards-Version: 3.8.0
+Standards-Version: 3.9.4
 
 Package: remake
 Architecture: any
