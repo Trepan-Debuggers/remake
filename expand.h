@@ -22,8 +22,8 @@ Boston, MA 02111-1307, USA.  */
  *  \brief Header for variable expansion functions for GNU Make.
  */
 
-#ifndef EXPAND_H
-#define EXPAND_H
+#ifndef REMAKE_EXPAND_H
+#define REMAKE_EXPAND_H
 
 #include "variable.h"
 #include "filedef.h"
@@ -31,7 +31,7 @@ Boston, MA 02111-1307, USA.  */
 /*! Like variable_expand_for_file, but the returned string is malloc'd.
    This function is called a lot.  It wants to be efficient.  */
 
-extern char *allocated_variable_expand_for_file(char *psz_line, 
+extern char *allocated_variable_expand_for_file(const char *psz_line, 
 						file_t *p_file);
 
 
@@ -65,23 +65,8 @@ extern char *recursively_expand_for_file(variable_t *v, file_t *file);
 
 extern void restore_variable_buffer(char *p_buf, unsigned int len);
 
-extern char *variable_buffer_output(char *ptr, char *psz_string, 
-				    unsigned int length);
-
 /** Expand PSZ_LINE. Expansion uses P_FILE_SET if it is not NULL. */
 extern char *variable_expand_set (char *psz_line, 
 				  variable_set_list_t *p_file_set);
 
-/*! Scan STRING for variable references and expansion-function calls.  Only
-   LENGTH bytes of STRING are actually scanned.  If LENGTH is -1, scan until
-   a null byte is found.
-
-   Write the results to PSZ_LINE, which must point into `variable_buffer'.  If
-   LINE is NULL, start at the beginning of the buffer.
-   Return a pointer to PSZ_LINE, or to the beginning of the buffer if 
-   PSZ_LINE is NULL.  */
-
-char *variable_expand_string(char *line, char *string, 
-			     long int length);
-
-#endif /*EXPAND_H*/
+#endif /*REMAKE_EXPAND_H*/

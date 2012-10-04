@@ -1,5 +1,5 @@
-/* $Id: dbg_break.h,v 1.3 2005/12/10 02:50:32 rockyb Exp $
-Copyright (C) 2005, 2008 R. Bernstein <rocky@gnu.org>
+/* 
+Copyright (C) 2005, 2008, 2011 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -43,7 +43,7 @@ extern unsigned int i_breakpoints;
 /*! Add "p_target" to the list of breakpoints. Return true if 
     there were no errors
 */
-extern bool add_breakpoint (file_t *p_target);
+extern bool add_breakpoint (file_t *p_target, unsigned int brkp_mask);
 
 /*! Remove breakpoint i from the list of breakpoints. Return true if 
     there were no errors

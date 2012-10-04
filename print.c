@@ -1,7 +1,8 @@
 /* Output or logging functions for GNU Make.  
 
-Copyright (C) 2004, 2005, 2007, 2008 Free Software Foundation, Inc.  
+Copyright (C) 2005, 2007, 2008 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
+Copyright (C) 2004, 2005, 2007, 2008, Free Software Foundation, Inc.  
 
 GNU Make is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,13 +20,13 @@ the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 #include "make.h"
+#include "main.h"
 #include "commands.h"
 #include "debugger/cmd.h"
 #include "debug.h"
 #include "dep.h"
-#include "expand.h"
-#include "print.h"
 #include "read.h"
+#include "print.h"
 
 /* Think of the below not as an enumeration but as #defines done in a
    way that we'll be able to use the value in a gdb. */
@@ -92,7 +93,7 @@ message (int prefix, const char *fmt, va_alist)
 /* Print an error message.  */
 
 void
-#if __STDC__ && HAVE_STDVARARGS
+#if HAVE_ANSI_COMPILER && USE_VARIADIC && HAVE_STDARG_H
 error (const floc_t *flocp, const char *fmt, ...)
 #else
 error (flocp, fmt, va_alist)
@@ -101,7 +102,7 @@ error (flocp, fmt, va_alist)
      va_dcl
 #endif
 {
-#if HAVE_STDVARARGS
+#if USE_VARIADIC
   va_list args;
 #endif
 
@@ -126,9 +127,9 @@ error (flocp, fmt, va_alist)
 
 void
 #if __STDC__ && HAVE_STDVARARGS
-err (target_stack_node_t *p_call, const char *fmt, ...)
+err_with_stack (target_stack_node_t *p_call, const char *fmt, ...)
 #else
-err (p_call, fmt, va_alist)
+err_with_stack (p_call, fmt, va_alist)
      target_stack_node_t *p_call;
      const char *fmt;
      va_dcl
@@ -160,11 +161,15 @@ err (p_call, fmt, va_alist)
 
   putc ('\n', stderr);
   if (!no_extended_errors) {
-    if (p_call) 
+    if (p_call)  {
+      putc ('\n', stdout);
       print_target_stack(p_call, -1, MAX_STACK_SHOW);
-    else if (p_stack_floc_top)
+    } else if (p_stack_floc_top) {
+      putc ('\n', stdout);
       print_floc_stack(-1, MAX_STACK_SHOW);
+    }
   }
+  fflush (stdout);
   fflush (stderr);
   if (debugger_on_error & DEBUGGER_ON_ERROR) 
     enter_debugger(p_call, p_target, -1, DEBUG_ERROR_HIT);
@@ -173,7 +178,7 @@ err (p_call, fmt, va_alist)
 /* Print an error message and exit.  */
 
 void
-#if __STDC__ && HAVE_STDVARARGS
+#if HAVE_ANSI_COMPILER && USE_VARIADIC && HAVE_STDARG_H
 fatal (const floc_t *flocp, const char *fmt, ...)
 #else
 fatal (flocp, fmt, va_alist)
@@ -182,7 +187,7 @@ fatal (flocp, fmt, va_alist)
      va_dcl
 #endif
 {
-#if HAVE_STDVARARGS
+#if USE_VARIADIC
   va_list args;
 #endif
 
@@ -214,7 +219,8 @@ fatal (flocp, fmt, va_alist)
   case DEBUGGER_QUIT_RC:
     die(DEBUGGER_QUIT_RC);
   default:
-  case 1: ;
+  case 1: 
+    longjmp(debugger_loop, 0);
     break;
     
   }
@@ -316,60 +322,6 @@ log_access (char *flavor)
   fflush (stderr);
 }
 
-
-/*! Write a message indicating that we've just entered or
-   left (according to ENTERING) the current directory.  */
-void
-log_working_directory (int entering)
-{
-  static int entered = 0;
-
-  /* Print nothing without the flag.  Don't print the entering message
-     again if we already have.  Don't print the leaving message if we
-     haven't printed the entering message.  */
-  if (! print_directory_flag || entering == entered)
-    return;
-
-  entered = entering;
-
-  if (print_data_base_flag)
-    fputs ("# ", stdout);
-
-  /* Use entire sentences to give the translators a fighting chance.  */
-
-  if (makelevel == 0)
-    if (starting_directory == 0)
-      if (entering)
-        printf (_("%s: Entering an unknown directory\n"), program);
-      else
-        printf (_("%s: Leaving an unknown directory\n"), program);
-    else
-      if (entering)
-        printf (_("%s: Entering directory `%s'\n"),
-                program, starting_directory);
-      else
-        printf (_("%s: Leaving directory `%s'\n"),
-                program, starting_directory);
-  else
-    if (starting_directory == 0)
-      if (entering)
-        printf (_("%s[%u]: Entering an unknown directory\n"),
-                program, makelevel);
-      else
-        printf (_("%s[%u]: Leaving an unknown directory\n"),
-                program, makelevel);
-    else
-      if (entering)
-        printf (_("%s[%u]: Entering directory `%s'\n"),
-                program, makelevel, starting_directory);
-      else
-        printf (_("%s[%u]: Leaving directory `%s'\n"),
-                program, makelevel, starting_directory);
-
-  /* Flush stdout to be sure this comes before any stderr output.  */
-  fflush (stdout);
-}
-
 /*! Display a variable and its value. */
 void 
 print_variable (variable_t *p_v)
@@ -415,7 +367,7 @@ print_target_prefix (const char *p_name)
   }
 }
 
-/*! Show a command before executing it. */
+/*! Show target information: location and name. */
 extern void 
 print_file_target_prefix (const file_t *p_target) 
 {
@@ -450,13 +402,63 @@ print_child_cmd (child_t *p_child, target_stack_node_t *p)
   if (!p_child) return continue_execution;
 
   if (i_debugger_stepping || p_child->file->tracing) {
-    debug_enter_reason_t reason = p_child->file->tracing 
-      ? DEBUG_BREAKPOINT_HIT : DEBUG_STEP_HIT;
+    debug_enter_reason_t reason = DEBUG_STEP_HIT;
+    if (i_debugger_stepping)
+      reason = DEBUG_STEP_HIT;
+    else if (p_child->file->tracing & BRK_BEFORE_PREREQ) 
+      reason = DEBUG_BRKPT_BEFORE_PREREQ;
+    else if (p_child->file->tracing & BRK_BEFORE_PREREQ) 
+      reason = DEBUG_BRKPT_AFTER_PREREQ;
+      
     rc=enter_debugger(p, p_child->file, 0, reason);
   }
 
   return rc;
 }
+
+void
+print_target_stack_entry (const file_t *p_target, int i, int i_pos) 
+{
+  floc_t floc;
+  const char *psz_target_name = 
+    (p_target && p_target->name) ? p_target->name : "(null)";
+  
+  /* If we don't have a line recorded for the target,
+     but we do have one for the commands it runs,
+     use that.
+  */
+  if (p_target->floc.filenm) {
+    memcpy(&floc, &(p_target->floc), sizeof(floc_t));
+  } else if (p_target->cmds) {
+    memcpy(&floc, &(p_target->cmds->fileinfo.filenm), sizeof(floc_t));
+    /* HACK: is it okay to assume that the target is on the line
+       before the first command? Or should we list the line
+       that the command starts on - so we know we've faked the location?
+    */
+    floc.lineno--;
+  } else {
+    floc.filenm = NULL;
+  }
+  
+  if (floc.filenm) {
+    if (i_pos != -1) {
+      printf("%s", (i == i_pos) ? "=>" : "  ");
+    }
+    printf ("#%u  %s at ", i, psz_target_name);
+    print_floc_prefix(&floc);
+  } else {
+    if (i_pos != -1) {
+      printf("%s", (i == i_pos) ? "=>" : "  ");
+    }
+    if (p_target->phony)
+      printf ("#%u  %s (.PHONY target)", i, psz_target_name);
+    else 
+      printf ("#%u  %s at ??", i, psz_target_name);
+    
+  }
+  printf ("\n");
+}
+
 
 /*! Display the target stack. i_pos is the position we are currently.
   i_max is the maximum number of entries to show.
@@ -464,47 +466,10 @@ print_child_cmd (child_t *p_child, target_stack_node_t *p)
 extern void 
 print_target_stack (target_stack_node_t *p, int i_pos, int i_max)
 {
-  unsigned int i=0;
-  printf("\n");
+  int i=0;
   for ( ; p && i < i_max ; 
 	i++, p = p->p_parent  ) {
-    floc_t floc;
-    file_t *p_target = p->p_target;
-
-    /* If we don't have a line recorded for the target,
-       but we do have one for the commands it runs,
-       use that.
-    */
-    if (p_target->floc.filenm) {
-      memcpy(&floc, &(p_target->floc), sizeof(floc_t));
-    } else if (p_target->cmds) {
-      memcpy(&floc, &(p_target->cmds->fileinfo.filenm), sizeof(floc_t));
-      /* HACK: is it okay to assume that the target is on the line
-	 before the first command? Or should we list the line
-	 that the command starts on - so we know we've faked the location?
-      */
-      floc.lineno--;
-    } else {
-	floc.filenm = NULL;
-    }
-    
-    if (floc.filenm) {
-      if (i_pos != -1) {
-	printf("%s", (i == i_pos) ? "=>" : "  ");
-      }
-      printf ("#%u  %s at ", i, p_target->name);
-      print_floc_prefix(&floc);
-    } else {
-      if (i_pos != -1) {
-	printf("%s", (i == i_pos) ? "=>" : "  ");
-      }
-      if (p_target->phony)
-	printf ("#%u  %s (.PHONY target)", i, p_target->name);
-      else 
-	printf ("#%u  %s at ??", i, p_target->name);
-
-    }
-    printf ("\n");
+    print_target_stack_entry (p->p_target, i, i_pos);
   }
 }
 
@@ -513,7 +478,7 @@ print_target_stack (target_stack_node_t *p, int i_pos, int i_max)
 extern void 
 print_floc_stack (int i_pos, int i_max)
 {
-  unsigned int i=0;
+  int i=0;
   floc_stack_node_t *p;
   printf("\n");
   for ( p=p_stack_floc_top; p && i < i_max ; 
@@ -536,33 +501,45 @@ void print_file (file_t *p_file)
   printf("File %s:\n", p_file->name);
   file_timestamp_sprintf (buf, p_file->last_mtime);
   printf("\tLast modified: %s\n",  buf);
-  file_timestamp_sprintf (buf, p_file->mtime_before_update);
-  printf("\tBefore update: %s\n",  buf);
+  if (p_file->mtime_before_update != p_file->last_mtime) {
+    file_timestamp_sprintf (buf, p_file->mtime_before_update);
+    printf("\tBefore update: %s\n",  buf);
+  }
+  printf("\tNumber of lines: %u\n",  p_file->nlines);
 }
 
 /*! Print the list makefiles read by read_makefiles().  */
-void print_read_makefiles(void)
+bool print_read_makefiles(const char *psz_filename)
 {
   dep_t *p_dep;
-  if (!read_makefiles) return;
-  for (p_dep = read_makefiles; p_dep; p_dep = p_dep->next) {
-    if (p_dep->file) {
-      if (p_dep != read_makefiles)
-	printf(", ");
-      printf("%s", p_dep->file->name);
+  if (!read_makefiles) return false;
+  if (NULL == psz_filename) {
+    for (p_dep = read_makefiles; p_dep; p_dep = p_dep->next) {
+      if (p_dep->file) {
+        print_file(p_dep->file);
+      }
+    }
+    return true;
+  } else {
+    for (p_dep = read_makefiles; p_dep; p_dep = p_dep->next) {
+      if (p_dep->file && 0 == strcmp(p_dep->file->name, psz_filename)) {
+        print_file(p_dep->file);
+        return true;
+      }
     }
   }
-  printf("\n");
+  return false;
 }
 
 /*! Print the command line used to invoke Make. */
 void print_cmdline (void) 
 {
   unsigned int i;
-  printf(_("Command-line arguments:"));
+  printf(_("Command-line invocation:"));
+  printf("\n\t\"");
   if (global_argv[1]) {
-    printf("\n\t\"%s", global_argv[1]);
-    for (i = 2; global_argv[i]; i++) {
+    printf("%s", argv0);
+    for (i = 1; global_argv[i]; i++) {
       printf(" %s", global_argv[i]);
     }
     printf("\"");
@@ -572,3 +549,10 @@ void print_cmdline (void)
   printf("\n");
 }
 
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End: 
+ */

@@ -1,5 +1,5 @@
 /* Debugging macros and interface.
-  Copyright (c) 2005 Rocky Bernstein <rocky@gnu.org>
+  Copyright (c) 2005, 2011 Rocky Bernstein <rocky@gnu.org>
 
 GNU Make is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -33,13 +33,12 @@ bool b_debugger_goal = false;
 bool b_debugger_preread = false;
 stringlist_t *db_flags;
 
-stringlist_t *db_flags;
-
 /** Toggle -d on receipt of SIGUSR1.  */
 #ifdef SIGUSR1
 RETSIGTYPE
 debug_signal_handler (int sig)
 {
+  UNUSED_ARGUMENT(sig);
   db_level = db_level ? DB_NONE : DB_BASIC;
 }
 #endif
@@ -48,17 +47,17 @@ debug_signal_handler (int sig)
   db_flags.
  */
 void
-decode_debug_flags (void)
+decode_debug_flags (int b_debug_flag, stringlist_t *ppsz_db_flags)
 {
-  char **pp;
+  const char **pp;
 
-  if (debug_flag)
+  if (b_debug_flag)
     db_level = DB_ALL;
 
-  if (!db_flags)
+  if (!ppsz_db_flags)
     return;
 
-  for (pp=db_flags->list; *pp; ++pp)
+  for (pp=ppsz_db_flags->list; *pp; ++pp)
     {
       const char *p = *pp;
 
@@ -102,3 +101,10 @@ decode_debug_flags (void)
         }
     }
 }
+
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */

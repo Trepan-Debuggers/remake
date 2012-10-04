@@ -1,0 +1,28 @@
+Reading makefiles...
+Updating makefiles....
+Updating goal targets....
+triple.Makefile:1)
+first: second
+remake<0> list
+triple.Makefile:1
+first: second
+#  commands to execute (from `triple.Makefile', line 2):
+	@echo first done
+	
+remake<1> list third
+triple.Makefile:5
+third:
+#  commands to execute (from `triple.Makefile', line 6):
+	echo third done
+	
+remake<2> list 3
+triple.Makefile:3
+second: third
+#  commands to execute (from `triple.Makefile', line 4):
+	@echo second done
+	
+remake<3> list 6
+** Can't find target or pattern on line 6.
+Use 'info lines' to get a list of and pattern lines.
+remake<4> quit
+remake: That's all, folks...

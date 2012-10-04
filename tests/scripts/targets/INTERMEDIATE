@@ -36,7 +36,13 @@ close(MAKEFILE);
 &utouch(-20, 'foo.f', 'bar.f');
 
 &run_make_with_options($makefile,'foo.d',&get_logfile);
-$answer = "cp foo.f foo.e\ncp foo.e foo.d\nrm foo.e\n";
+$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+cp foo.f foo.e
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+cp foo.e foo.d
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+rm foo.e\n";
 &compare_output($answer, &get_logfile(1));
 
 # TEST #1
@@ -51,13 +57,29 @@ $answer = "$make_name: `foo.d' is up to date.\n";
 &touch('foo.f');
 
 &run_make_with_options($makefile,'foo.d',&get_logfile);
-$answer = "cp foo.f foo.e\ncp foo.e foo.d\nrm foo.e\n";
+$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+cp foo.f foo.e
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+cp foo.e foo.d
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+rm foo.e\n";
 &compare_output($answer, &get_logfile(1));
 
 # TEST #3
 
 &run_make_with_options($makefile,'foo.c',&get_logfile);
-$answer = "cp foo.f foo.e\ncp bar.f bar.e\ncat foo.e bar.e > foo.c\nrm bar.e foo.e\n";
+$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+cp foo.f foo.e
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+cp bar.f bar.e
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+cat foo.e bar.e > foo.c
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+rm bar.e foo.e
+";
 &compare_output($answer, &get_logfile(1));
 
 # TEST #4
@@ -72,13 +94,25 @@ $answer = "$make_name: `foo.c' is up to date.\n";
 &touch('foo.f');
 
 &run_make_with_options($makefile,'foo.c',&get_logfile);
-$answer = "cp foo.f foo.e\ncp bar.f bar.e\ncat foo.e bar.e > foo.c\nrm bar.e foo.e\n";
+$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+cp foo.f foo.e
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+cp bar.f bar.e
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+cat foo.e bar.e > foo.c
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+rm bar.e foo.e\n";
 &compare_output($answer, &get_logfile(1));
 
 # TEST #6 -- added for PR/1669: don't remove files mentioned on the cmd line.
 
 &run_make_with_options($makefile,'foo.e',&get_logfile);
-$answer = "cp foo.f foo.e\n";
+$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+cp foo.f foo.e
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+";
 &compare_output($answer, &get_logfile(1));
 
 unlink('foo.f', 'foo.e', 'foo.d', 'foo.c', 'bar.f', 'bar.e', 'bar.d', 'bar.c');
@@ -99,7 +133,14 @@ EOF
 close(MAKEFILE);
 
 &run_make_with_options($makefile2, '-R', &get_logfile);
-$answer = "touch foo.a\ntouch foo\nrm foo.a\n";
+$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+touch foo.a
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+touch foo
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+rm foo.a
+";
 &compare_output($answer, &get_logfile(1));
 
 unlink('foo');

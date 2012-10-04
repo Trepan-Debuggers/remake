@@ -2,6 +2,7 @@
 # Date: Tue, 11 Aug 1992 09:34:26 -0400
 # From: pds@lemming.webo.dg.com (Paul D. Smith)
 
+return 1;
 $description = "Test load balancing (-l) option.";
 
 $details = "\
@@ -45,7 +46,8 @@ close(MAKEFILE);
 $mkoptions = "-l 0.0001";
 $mkoptions .= " -j 4" if ($parallel_jobs);
 
-&run_make_with_options($makefile, $mkoptions, &get_logfile);
+# We have to wait longer than the default (5s).
+&run_make_with_options($makefile, $mkoptions, &get_logfile, 0, 8);
 
 $slurp = &read_file_into_string (&get_logfile(1));
 if ($slurp !~ /cannot enforce load limit/) {

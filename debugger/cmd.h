@@ -1,5 +1,5 @@
-/* $Id: dbg_cmd.h,v 1.8 2006/01/21 13:40:21 rockyb Exp $
-Copyright (C) 2005, 2008 R. Bernstein <rocky@gnu.org>
+/* 
+Copyright (C) 2005, 2008, 2011 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -22,37 +22,28 @@ Boston, MA 02111-1307, USA.  */
  *  \brief GNU Make debugger interface
  */
 
-#ifndef DBG_CMD_H
-#define DBG_CMD_H
-#include "job.h"
-#include "buildargv.h"
-#include "trace.h"
+#ifndef REMAKE_DBG_CMD_H
+#define REMAKE_DBG_CMD_H
+#include "../job.h"
+#include "../buildargv.h"
+#include "../trace.h"
 
-/*! 
-  If 0 (or false) we are not in the debugger command read loop.
-  If 1 (or true) we are in the debugger command read loop.
-  If DEBUGGER_QUIT_RC we've requested to quit.
- */
-extern int in_debugger;
-
-typedef enum 
-  {
-    DEBUG_BREAKPOINT_HIT   = 1,
-    DEBUG_GOAL_UPDATED_HIT = 2,
-    DEBUG_READ_HIT         = 3,
-    DEBUG_ERROR_HIT        = 4,
-    DEBUG_STEP_HIT         = 5
-  } debug_enter_reason_t;
-
-/*!
-  debugger command interface. 
-*/
 extern debug_return_t enter_debugger (target_stack_node_t *p, 
-				      file_t *p_target, int err,
+				      file_t *p_target, int errcode,
 				      debug_enter_reason_t reason);
 
-extern debug_return_t dbg_cmd_help   (char *psz_arg);
-extern debug_return_t dbg_cmd_target (char *psz_arg);
-extern debug_return_t dbg_cmd_where  (char *psz_arg);
+extern debug_return_t execute_line (char *psz_line);
+extern debug_return_t dbg_cmd_help(char *psz_args);
+extern debug_return_t dbg_cmd_info(char *psz_args);
+extern debug_return_t dbg_cmd_target(char *psz_args);
+extern debug_return_t dbg_cmd_show(char *psz_args);
+extern debug_return_t dbg_cmd_where(char *psz_args);
+extern debug_return_t dbg_cmd_show_command(const char *psz_args);
 
 #endif /* DBG_CMD_H*/
+/* 
+ * Local variables:
+ *  c-file-style: "gnu"
+ *  indent-tabs-mode: nil
+ * End:
+ */

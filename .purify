@@ -1,0 +1,12 @@
+# Solaris (2.5.1) has a couple if issues.
+#
+suppress plk malloc; setvbuf "libc*"; main "main.c"
+suppress umr kstat_read; kstat_chain_update; kstat_open; getloadavg
+suppress umr kstat_chain_update; kstat_open; getloadavg
+
+# The command line options stuff leaks a little bit.  No big deal.
+#
+suppress mlk malloc; xmalloc "misc.c"; decode_env_switches "main.c"
+suppress plk malloc; xmalloc "misc.c"; decode_env_switches "main.c"
+suppress mlk malloc; xmalloc "misc.c"; concat "misc.c"; decode_env_switches "main.c"
+suppress plk malloc; xmalloc "misc.c"; concat "misc.c"; decode_env_switches "main.c"

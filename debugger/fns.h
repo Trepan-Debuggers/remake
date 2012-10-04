@@ -1,5 +1,5 @@
-/* $Id: dbg_fns.h,v 1.11 2006/03/19 12:17:44 rockyb Exp $
-Copyright (C) 2005, 2008 R. Bernstein <rocky@gnu.org>
+/* 
+Copyright (C) 2005, 2008, 2011 R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -37,6 +37,15 @@ extern char   *psz_target_name;
    a real one hasn't been recorded on the stack. */
 extern floc_t  fake_floc;
 
+brkpt_mask_t get_brkpt_option(const char *psz_break_type);
+const floc_t *get_current_floc(void);
+
+/*!
+  Return the current target from the stack or NULL
+  if none set.
+ */
+const file_t * get_current_target(void);
+
 /*! Parse psz_arg for a signed integer. The value is returned in
     *pi_result. If warn is true, then we'll give a warning if no
     integer found. The return value is true if parsing succeeded in
@@ -48,7 +57,8 @@ extern bool get_int(const char *psz_arg, /*out*/ int *pi_result,
 /*! Parse psz_arg for a unsigned integer. The value is returned in 
     *pi_result. The retun value is true if parsing succeeded.
  */
-extern bool get_uint(const char *psz_arg, /*out*/ unsigned int *pi_result);
+extern bool get_uint(const char *psz_arg, /*out*/ unsigned int *pi_result,
+    bool b_warn);
 
 /*! Find the next "word" - skip leading blanks and the "word" is the
    largest non-blank characters after that. ppsz_str is modified to
@@ -64,7 +74,8 @@ extern char *get_word(char **ppsz_str);
     of the target name was not found. ppsz_target is to the name
     looked up.
  */
-file_t *get_target(/*in/out*/ char **ppsz_args, /*out*/ char **ppsz_target);
+file_t *
+get_target(/*in/out*/ char **ppsz_args, /*out*/ const char **ppsz_target);
 
 /*! Return true if psz_substr is an initial prefix (abbreviation) of
     psz_word. The empty string is not a valid abbreviation. */
@@ -75,6 +86,7 @@ extern void on_off_toggle(const char *psz_onoff, int *var) ;
 
 /** Print where we are in the Makefile. */
 extern void print_debugger_location(const file_t *p_target, 
+				    debug_enter_reason_t reason,
 				    const floc_stack_node_t *p_stack_floc);
     
 /** Strip whitespace from the start and end of STRING.  Return a pointer
@@ -98,5 +110,8 @@ extern void try_without_dollar(const char *psz_varname);
 extern void dbg_print_invocation(void);
 
 extern rule_t *find_rule (const char *psz_name);
+extern void shell_rc_status(int rc);
+
+extern void chomp(char * line);
 
 #endif /* DBG_FNS_H*/

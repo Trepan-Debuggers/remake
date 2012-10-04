@@ -120,5 +120,29 @@ run_make_test(undef, # reuse previous makefile
 'normal: global: new $t pattern: good $t inherit: good $t;
 pattrn: global: new $t pattern: good $t inherit: good $t;');
 
+# TEST #8: override in pattern-specific variables
+
+run_make_test('
+a%: override FOO += f1
+a%: FOO += f2
+ab: ; @echo "$(FOO)"
+',
+              '', "f1\n");
+
+run_make_test(undef, 'FOO=C', "C f1\n");
+
+# TEST #9: Test shortest stem selection in pattern-specific variables.
+
+run_make_test('
+%-mt.x: x := two
+%.x: x := one
+
+all: foo.x foo-mt.x
+
+foo.x: ;@echo $x
+foo-mt.x: ;@echo $x
+',
+'',
+"one\ntwo");
 
 1;
