@@ -4,6 +4,8 @@ remake (3.82+dbg0.9+dfsg-1) UNRELEASED; urgency=low
   * Switched to use +dfsg to assure proper version
     comparison going e.g. from 0.9+dfsg to 0.9.1+dfsg
   * Moved .gbp.conf under debian/gbp.conf
+  * Added '-b debian' for Vcs-Git field since we ship Debian
+    packaging within upstream repository
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 04 Oct 2012 08:40:56 -0400
 

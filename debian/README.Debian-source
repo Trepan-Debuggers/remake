@@ -11,19 +11,12 @@ master-dfsg: upstream sources with non-DFSG compliant materials
 debian: branch which is based on master-dfsg and provides Debian
         packaging
 
-.gbp.conf file is included in the debian branch (as well as shipped as
-a part of .diff.gz) to ease building of the package using
-git-buildpackage.
+debian/gbp.conf file is included in the debian branch to ease building of
+the package using git-buildpackage.
 
-Fresh releases mentioned in changelog.Debian.gz should explicitly
-state on what treeish in master branch, current packaging is based
-upon, and it should be the same as output of
+On a debcheckout'ed tree
 
-git-merge-base debian master
-
-hence a construct
-
-git diff `git-merge-base debian master`
+git diff origin/master...origin/debian
 
 in bash should show the summary of the changes from the full upstream
 version, without non-DFSG compliant materials being removed.
