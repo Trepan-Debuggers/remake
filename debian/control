@@ -2,8 +2,8 @@ Source: remake
 Section: devel
 Priority: extra
 Maintainer: Yaroslav Halchenko <debian@onerussian.com>
-Build-Depends: debhelper (>= 5), autotools-dev, libreadline-dev, gettext,
- autoconf, automake, texinfo
+Build-Depends: debhelper (>= 9), autotools-dev, libreadline-dev, gettext,
+ autoconf, automake, texinfo, dh-autoreconf
 Homepage: http://bashdb.sourceforge.net/remake/
 Vcs-Browser: http://github.com/rocky/remake
 Vcs-git: git://github.com/rocky/remake.git -b debian
