@@ -1,6 +1,8 @@
-remake (3.82+dbg0.9+dfsg-1) UNRELEASED; urgency=low
+remake (3.82+dbg0.9+dfsg-1) unstable; urgency=low
 
   * Fresh upstream release
+    - dropped emacs mode (moved into a separate project
+      https://github.com/rocky/emacs-dbgr)
   * Switched to use +dfsg to assure proper version
     comparison going e.g. from 0.9+dfsg to 0.9.1+dfsg
   * Moved .gbp.conf under debian/gbp.conf
@@ -8,8 +10,9 @@ remake (3.82+dbg0.9+dfsg-1) UNRELEASED; urgency=low
     packaging within upstream repository
   * Boosted policy to 3.9.4
   * Switched to source package 3.0 (quilt) format
+  * Switched to minimalistic dh 9.0 debian/rules
 
- -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 04 Oct 2012 08:40:56 -0400
+ -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 04 Oct 2012 10:45:49 -0400
 
 remake (3.81+dbg0.2~dfsg.1-1) unstable; urgency=low
 
