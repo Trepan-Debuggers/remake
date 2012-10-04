@@ -1,20 +1,18 @@
 /* hash.h -- decls for hash table
-Copyright (C) 1995, 1999, 2002 Free Software Foundation, Inc.
+Copyright (C) 1995, 1999, 2002, 2010 Free Software Foundation, Inc.
 Written by Greg McGary <gkm@gnu.org> <greg@mcgary.org>
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+GNU Make is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation; either version 3 of the License, or (at your option) any later
+version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program; see the file COPYING.  If not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
+this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #ifndef _hash_h_
 #define _hash_h_
@@ -81,6 +79,9 @@ extern void *hash_deleted_item;
 
 /* hash and comparison macros for case-sensitive string keys. */
 
+/* Due to the strcache, it's not uncommon for the string pointers to
+   be identical.  Take advantage of that to short-circuit string compares.  */
+
 #define STRING_HASH_1(KEY, RESULT) do { \
   unsigned char const *_key_ = (unsigned char const *) (KEY) - 1; \
   while (*++_key_) \
@@ -104,10 +105,10 @@ extern void *hash_deleted_item;
 } while (0)
 
 #define STRING_COMPARE(X, Y, RESULT) do { \
-  RESULT = strcmp ((X), (Y)); \
+    RESULT = (X) == (Y) ? 0 : strcmp ((X), (Y)); \
 } while (0)
 #define return_STRING_COMPARE(X, Y) do { \
-  return strcmp ((X), (Y)); \
+  return (X) == (Y) ? 0 : strcmp ((X), (Y)); \
 } while (0)
 
 
@@ -140,10 +141,10 @@ extern void *hash_deleted_item;
 } while (0)
 
 #define STRING_N_COMPARE(X, Y, N, RESULT) do { \
-  RESULT = strncmp ((X), (Y), (N)); \
+  RESULT = (X) == (Y) ? 0 : strncmp ((X), (Y), (N)); \
 } while (0)
 #define return_STRING_N_COMPARE(X, Y, N) do { \
-  return strncmp ((X), (Y), (N)); \
+  return (X) == (Y) ? 0 : strncmp ((X), (Y), (N)); \
 } while (0)
 
 #ifdef HAVE_CASE_INSENSITIVE_FS
@@ -173,10 +174,10 @@ extern void *hash_deleted_item;
 } while (0)
 
 #define ISTRING_COMPARE(X, Y, RESULT) do { \
-  RESULT = strcmpi ((X), (Y)); \
+  RESULT = (X) == (Y) ? 0 : strcasecmp ((X), (Y)); \
 } while (0)
 #define return_ISTRING_COMPARE(X, Y) do { \
-  return strcmpi ((X), (Y)); \
+  return (X) == (Y) ? 0 : strcasecmp ((X), (Y)); \
 } while (0)
 
 #else

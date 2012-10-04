@@ -34,14 +34,19 @@ close(MAKEFILE);
 &utouch(-10, qw(foo.x baz.z));
 
 &run_make_with_options($makefile, "", &get_logfile);
-$answer = "touch $dir/bar.y
+$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+touch $dir/bar.y
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 \$\@ = $dir/foo.x, \$(\@D) = $dir, \$(\@F) = foo.x
 \$* = $dir/foo, \$(*D) = $dir, \$(*F) = foo
 \$< = baz.z, \$(<D) = ., \$(<F) = baz.z
 \$^ = baz.z $dir/bar.y, \$(^D) = . $dir, \$(^F) = baz.z bar.y
 \$+ = baz.z $dir/bar.y baz.z, \$(+D) = . $dir ., \$(+F) = baz.z bar.y baz.z
 \$? = $dir/bar.y, \$(?D) = $dir, \$(?F) = bar.y
-touch $dir/foo.x\n";
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+touch $dir/foo.x
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+";
 &compare_output($answer, &get_logfile(1));
 
 unlink(qw(foo.x bar.y baz.z));
@@ -95,17 +100,28 @@ mbr.src: ; @:',
 # Make sure that nonexistent prerequisites are listed in $?, since they are
 # considered reasons for the target to be rebuilt.
 #
-# This was undone due to Savannah bug #16002.  We'll re-do it in the next
-# release.  See Savannah bug #16051.
+# See also Savannah bugs #16002 and #16051.
 
-#touch('foo');
-#
-#run_make_test('
-#foo: bar ; @echo "\$$? = $?"
-#bar: ;',
-#              '',
-#              '$? = bar');
-#
-#unlink('foo');
+touch('foo');
+
+run_make_test('
+foo: bar ; @echo "\$$? = $?"
+bar: ;',
+              '',
+              '$? = bar');
+
+unlink('foo');
+
+# TEST #4: ensure prereq ordering is correct when the commmand target has none
+# See Savannah bug #21198
+
+run_make_test('
+all : A B
+all : ; @echo $@ -- $^ -- $<
+all : C D
+all : E F
+A B C D E F G H : ; @:
+',
+              '', "all -- A B C D E F -- A\n");
 
 1;

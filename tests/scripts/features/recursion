@@ -3,6 +3,7 @@ $description = "Test recursion.";
 
 $details = "DETAILS";
 
+if (0) {
 # Test some basic recursion.
 run_make_test('
 all:
@@ -16,7 +17,7 @@ last:
 	@echo MAKELEVEL = $(MAKELEVEL)
 	@echo THE END
 ',
-              ('CFLAGS=-O -w' . ($parallel_jobs ? '-j 2' : '')),
+              ('CFLAGS=-O -w' . ($parallel_jobs ? ' -j 2' : '')),
               ($vos
                ? "#MAKE#: Entering directory `#PWD#'
 make 'CFLAGS=-O' -f #MAKEFILE# foo
@@ -28,19 +29,23 @@ MAKELEVEL = 0
 THE END
 #MAKE#: Leaving directory `#PWD#'"
                : "#MAKE#: Entering directory `#PWD#'
-#MAKEPATH# -f #MAKEFILE# foo
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+$make_path -f #MAKEFILE# foo
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 #MAKE#[1]: Entering directory `#PWD#'
-#MAKEPATH#
+$make_path
 MAKELEVEL = 1
-#MAKEPATH# -f #MAKEFILE# last
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+$make_path -f #MAKEFILE# last
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 #MAKE#[2]: Entering directory `#PWD#'
-#MAKEPATH#
+$make_path
 MAKELEVEL = 2
 THE END
 #MAKE#[2]: Leaving directory `#PWD#'
 #MAKE#[1]: Leaving directory `#PWD#'
 #MAKE#: Leaving directory `#PWD#'"));
-
+};
 
 # Test command line overrides.
 run_make_test('

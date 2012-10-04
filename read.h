@@ -34,9 +34,6 @@ extern stringlist_t *include_directories;
 /*! The chain of makefiles read by read_makefile.  */
 extern dep_t *read_makefiles;
 
-int eval_buffer (char *buffer);
-
-
 /*! Search STRING for an unquoted STOPCHAR or blank (if BLANK is nonzero).
    Backslashes quote STOPCHAR, blanks if BLANK is nonzero, and backslash.
    Quoting backslashes are removed from STRING by compacting it into
@@ -48,11 +45,6 @@ char *find_char_unquote (char *string, int stop1, int stop2,
 
 /*! Search PATTERN for an unquoted %.  */
 char *find_percent (char *pattern);
-
-/*! Construct the list of include directories
-   from the arguments and the default list.  
-*/
-extern void construct_include_path (char **arg_dirs);
 
 /*! Expand ~ or ~USER at the beginning of NAME.
    Return a newly malloc'd string or 0.  

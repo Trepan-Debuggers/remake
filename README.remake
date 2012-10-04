@@ -1,0 +1,14 @@
+See the file NEWS.remake for the user-visible changes
+
+With steady progress, this debugger for make has gotten decent with
+lots of room for improvement. But since it's only been me working on
+this, this will have to do.
+
+Although there are a number of gaps the debugger is very usable -- at
+least for me. It passes the standard GNU Make regression tests, and I
+have now added tests for the debugger. For that you need RSpec (a ruby
+"gem").
+
+Documentation for the revised GNU Make Debugger is in the
+doc directory under the name "remake". The wiki 
+https://github.com/rocky/remake/wiki will contain other information.

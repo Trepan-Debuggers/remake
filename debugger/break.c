@@ -21,8 +21,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include <assert.h>
 #include "break.h"
+#include "msg.h"
 #include "filedef.h"
-#include "make.h"
 #include "print.h"
 
 /*! Node for an item in the target call stack */
@@ -37,13 +37,13 @@ struct breakpoint_node
 breakpoint_node_t *p_breakpoint_top    = NULL;
 breakpoint_node_t *p_breakpoint_bottom = NULL;
 
-unsigned int i_breakpoints = 0;
+brkpt_mask_t i_breakpoints = BRK_NONE;
 
 /*! Add "p_target" to the list of breakpoints. Return true if 
     there were no errors
 */
 bool 
-add_breakpoint (file_t *p_target) 
+add_breakpoint (file_t *p_target, const brkpt_mask_t brkpt_mask) 
 {
   breakpoint_node_t *p_new   = CALLOC (breakpoint_node_t, 1);
 
@@ -62,13 +62,30 @@ add_breakpoint (file_t *p_target)
 
 
   /* Finally, note that we are tracing this target. */
-  if (p_target->tracing) {
-    printf(_("Breakpoint already set at target %s; nothing done.\n"), 
-	   p_target->name);
-  } else {
-    p_target->tracing = 1;
-    printf(_("Breakpoint %d on target %s set.\n"), 
-	   i_breakpoints, p_target->name);
+  if (p_target->tracing & (BRK_BEFORE_PREREQ & brkpt_mask)) {
+    dbg_msg(_("Note: prerequisite breakpoint already set at target %s."), 
+            p_target->name);
+  } 
+  if (p_target->tracing & (BRK_AFTER_PREREQ & brkpt_mask)) {
+    dbg_msg(_("Note: command breakpoint already set at target %s."), 
+            p_target->name);
+  } 
+  if (p_target->tracing & (BRK_AFTER_CMD & brkpt_mask)) {
+    dbg_msg(_("Note: target end breakpont set at target %s."), 
+            p_target->name);
+  }
+  p_target->tracing = brkpt_mask;
+  printf(_("Breakpoint %d on target %s"), i_breakpoints, p_target->name);
+  if (p_target->floc.filenm)
+    dbg_msg(": file %s, line %lu.", p_target->floc.filenm,
+            p_target->floc.lineno);
+  else
+    printf(".\n");
+  if (p_target->updated)
+      dbg_msg("Warning: target is already updated; so it might not get stopped at again.");
+  else if (p_target->updating && (brkpt_mask & (BRK_BEFORE_PREREQ | BRK_AFTER_PREREQ))) {
+      dbg_msg("Warning: target is in the process of being updated;");
+      dbg_msg("so it might not get stopped at again.");
   }
   return true;
   
@@ -81,12 +98,12 @@ bool
 remove_breakpoint (unsigned int i) 
 {
   if (!i) {
-    printf(_("Invalid Breakpoint number 0.\n"));
+    dbg_msg(_("Invalid Breakpoint number 0."));
     return false;
   }
   if (i > i_breakpoints) {
-    printf(_("Breakpoint number %d is too high. " 
-	   "%d is the highest breakpoint number.\n"), i, i_breakpoints);
+    dbg_msg(_("Breakpoint number %d is too high. " 
+	   "%d is the highest breakpoint number."), i, i_breakpoints);
     return false;
   } else {
     /* Find breakpoint i */
@@ -104,19 +121,19 @@ remove_breakpoint (unsigned int i)
       if (p_prev) p_prev->p_next = p->p_next;
 
       if (p->p_target->tracing) {
-	p->p_target->tracing = 0;
-	printf(_("Breakpoint %d on target %s cleared\n"), 
+	p->p_target->tracing = BRK_NONE;
+	dbg_msg(_("Breakpoint %d on target %s cleared"),
 	       i, p->p_target->name);
 	free(p);
 	return true;
       } else {
-	printf(_("No breakpoint at target %s; nothing cleared.\n"), 
+	dbg_msg(_("No breakpoint at target %s; nothing cleared."),
 	       p->p_target->name);
 	free(p);
 	return false;
       }
     } else {
-      printf(_("No Breakpoint number %d set.\n"), i);
+      dbg_msg(_("No Breakpoint number %d set."), i);
       return false;
     }
   }
@@ -129,17 +146,26 @@ list_breakpoints (void)
   breakpoint_node_t *p;
 
   if (!p_breakpoint_top) {
-    printf(_("No breakpoints.\n"));
+    dbg_msg(_("No breakpoints."));
     return;
   }
 
-  printf(  "Num Type           Disp Enb target     What\n");
+  dbg_msg(  "Num Type           Disp Enb Target     Location");
   for (p = p_breakpoint_top; p; p = p->p_next) {
-    printf("%3d breakpoint     keep y   in %s at ", 
+    printf("%3d breakpoint     keep y   %s", 
 	   p->i_num,
 	   p->p_target->name);
-    print_floc_prefix(&(p->p_target->floc));
+    if (p->p_target->floc.filenm) {
+	printf(" at ");
+	print_floc_prefix(&(p->p_target->floc));
+    }
     printf("\n");
   }
 }
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */
  

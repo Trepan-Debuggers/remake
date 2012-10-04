@@ -1,0 +1,35 @@
+*.gz *.Z *.tar *.tgz
+=*
+TODO COPYING* ABOUT-NLS
+make-3* make-test*
+*.info *.info-*
+stamp-*
+makebook*
+
+.*gdbinit
+.gdb_history
+
+*.dep *.dvi *.toc *.aux *.log
+*.cp *.cps *.fn *.fns *.vr *.vrs *.tp *.tps *.ky *.kys *.pg *.pgs
+
+README README.DOS README.W32 README.OS2
+aclocal.m4 autom4te.cache
+config.h.in config.h config.status config.cache configure
+Makefile.in Makefile
+build.sh.in build.sh
+SMakefile NMakefile Makefile.DOS
+config.ami configh.dos config.h.W32 config.h-vms
+
+loadavg loadavg.c make
+
+.deps .dep_segment ID TAGS
+
+_*
+sun4 i386 i386-netbsd hp300-netbsd hp300 rs6000 sun3 news800 amiga
+hp700 hp834 mips sol2 i486-linux
+
+customs
+
+install-sh mkinstalldirs
+
+.directive.asc

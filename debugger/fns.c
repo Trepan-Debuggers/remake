@@ -1,5 +1,6 @@
 /* 
-Copyright (C) 2004, 2005, 2007, 2008 R. Bernstein rocky@gnu.org
+Copyright (C) 2004, 2005, 2007, 2008, 2010, 2011
+R. Bernstein <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
 GNU Make is free software; you can redistribute it and/or modify
@@ -17,23 +18,43 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/* Helper rutines for debugger command interface. */
+/* Helper routines for debugger command interface. */
 
-#include "config.h"
-#include "commands.h"
+#include "../rule.h"
+#include "../trace.h"
+#include "../commands.h"
+#include "../expand.h"
 #include "fns.h"
 #include "stack.h"
 #include "debug.h"
-#include "expand.h"
 #include "print.h"
-#include "rule.h"
-#include "trace.h"
+#include "msg.h"
 
 #ifdef HAVE_STRING_H
 #include <string.h>
 #endif
 
+#ifdef HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
+
 #ifdef HAVE_LIBREADLINE
+
+# ifdef bcmp
+#   undef bcmp
+# endif 
+
+
+# ifdef bzero
+#   undef bzero
+# endif 
+
+
+# ifdef bcopy
+#   undef bcopy
+# endif 
+
+
 #include <readline/readline.h>
 #endif
 
@@ -48,6 +69,25 @@ floc_t  fake_floc;
 #ifndef whitespace
 #define whitespace(c) (((c) == ' ') || ((c) == '\t'))
 #endif
+
+brkpt_mask_t 
+get_brkpt_option(const char *psz_break_type)
+{
+  if (is_abbrev_of (psz_break_type, "all", 1)) {
+    return BRK_ALL;
+  } else if (is_abbrev_of (psz_break_type, "prerequisite", 3)) {
+    return BRK_BEFORE_PREREQ;
+  } else if (is_abbrev_of (psz_break_type, "run", 1)) {
+    return BRK_AFTER_PREREQ;
+  } else if (is_abbrev_of (psz_break_type, "end", 1)) {
+    return BRK_AFTER_CMD;
+  } else if (is_abbrev_of (psz_break_type, "temp", 1)) {
+    return BRK_TEMP;
+  } else {
+    dbg_errmsg("Unknown breakpoint modifier %s", psz_break_type);
+    return BRK_NONE;
+  }
+}
 
 /*! Parse psz_arg for a signed integer. The value is returned in
     *pi_result. If warn is true, then we'll give a warning if no
@@ -65,7 +105,7 @@ get_int(const char *psz_arg, int *pi_result, bool b_warn)
   i = strtol(psz_arg, &endptr, 10);
   if (*endptr != '\0') {
     if (b_warn) 
-      printf("expecting %s to be an integer\n", psz_arg);
+      dbg_errmsg("expecting %s to be an integer", psz_arg);
     return false;
   }
   *pi_result = i;
@@ -73,7 +113,7 @@ get_int(const char *psz_arg, int *pi_result, bool b_warn)
 }
 
 bool
-get_uint(const char *psz_arg, unsigned int *result) 
+get_uint(const char *psz_arg, unsigned int *result, bool b_warn) 
 {
   unsigned int i;
   char *endptr;
@@ -82,7 +122,8 @@ get_uint(const char *psz_arg, unsigned int *result)
 
   i = strtol(psz_arg, &endptr, 10);
   if (*endptr != '\0') {
-    printf("expecting %s to be an integer\n", psz_arg);
+    if (b_warn)
+      dbg_errmsg("expecting %s to be an integer", psz_arg);
     return false;
   }
   *result = i;
@@ -116,6 +157,39 @@ get_word(char **ppsz_str)
   return psz_word;
 }
 
+/*!
+  Return the current target from the stack or NULL
+  if none set.
+ */
+const file_t *
+get_current_target(void)
+{
+  if (p_stack && p_stack->p_target)
+    return p_stack->p_target;
+  else 
+    return NULL;
+}
+
+
+/*!
+  Return the current target from the stack or NULL
+  if none set.
+ */
+const floc_t *
+get_current_floc(void)
+{
+  file_t *p_target = (file_t *) get_current_target();
+  floc_t *p_floc;
+  
+  p_floc = &p_target->floc;
+
+  if (p_floc->filenm && p_floc->lineno != 0)
+    return p_floc;
+  else
+    return NULL;
+}
+
+
 /*! Find the target in first word of psz_args or use $@ (the current
     stack) if none.  We also allow $@ or @ explicitly as a target name
     to mean the current target on the stack. NULL is returned if a lookup 
@@ -123,12 +197,13 @@ get_word(char **ppsz_str)
     looked up.
  */
 file_t *
-get_target(char **ppsz_args, /*out*/ char **ppsz_target) 
+get_target(char **ppsz_args, /*out*/ const char **ppsz_target) 
 {
   if (!*ppsz_args || !**ppsz_args) {
+    file_t *p_target = (file_t *) get_current_target();
     /* Use current target */
-    if (p_stack && p_stack->p_target && p_stack->p_target->name) {
-      *ppsz_args = p_stack->p_target->name;
+    if (p_target && p_target->name) {
+      *ppsz_args = (char *) p_target->name;
     } else {
       printf(_("Default target not found here. You must supply one\n"));
       return NULL;
@@ -208,15 +283,31 @@ print_db_level(debug_level_mask_t e_debug_level)
     printf("Tracing function call and returns 0x%x\n", DB_CALL);
 }
 
+static char *reason2str[] = {
+    "->",
+    "..",
+    "<-",
+    "||",
+    "rd",
+    "!!",
+    "--",
+    "++",
+    ":o"
+};
+
+    
 
 /** Print where we are in the Makefile. */
 void 
-print_debugger_location(const file_t *p_target, 
+print_debugger_location(const file_t *p_target, debug_enter_reason_t reason,
 			const floc_stack_node_t *p_stack_floc)
 {
   if (p_target_loc) {
-    if ( !p_target_loc->filenm && !p_target_loc->lineno 
-	 && p_target->name ) {
+    if (reason != DEBUG_NOT_GIVEN && reason != DEBUG_STACK_CHANGING)
+      printf("%s ", reason2str[reason]);
+    printf("(");
+    if ( !p_target_loc->filenm && p_target_loc->lineno != 0 
+	 && p_target && p_target->name ) {
       /* We don't have file location info in the target floc, but we
 	 do have it as part of the name, so use that. This happens for
 	 example with we've stopped before reading a Makefile.
@@ -229,15 +320,15 @@ print_debugger_location(const file_t *p_target,
 	   that the command starts on - so we know we've faked the location?
 	*/
 	floc.lineno--;
-	printf("\n(");
+	p_target_loc->filenm = floc.filenm;
+	p_target_loc->lineno = floc.lineno;
 	print_floc_prefix(&floc);
 	printf (")\n");
       } else if (p_target->phony)
-	printf("\n(%s: .PHONY target)\n", p_target->name);
+	printf("%s: .PHONY target)\n", p_target->name);
       else 
-	printf("\n(%s:0)\n", p_target->name);
+	printf("%s:0)\n", p_target->name);
     } else {
-      printf("\n(");
       print_floc_prefix(p_target_loc);
       printf (")\n");
     }
@@ -252,8 +343,18 @@ print_debugger_location(const file_t *p_target,
   }
 
   /* Could/should generalize the below into a prompt string. */
-  dbg_cmd_show_exp("$@: $+", true);
-
+  switch (reason) 
+    {
+    case DEBUG_BRKPT_BEFORE_PREREQ:
+    case DEBUG_STEP_HIT:
+      dbg_cmd_show_exp("$@: $+", true);
+      break;
+    case DEBUG_STACK_CHANGING:
+      break;
+    default:
+      dbg_cmd_show_exp("$@", true);
+      break;
+    }
 }
 
 /** Strip whitespace from the start and end of STRING.  Return a pointer
@@ -317,7 +418,7 @@ dbg_cmd_show_exp (char *psz_varname, bool expand)
     variable_set_t *p_set = NULL;
     variable_set_list_t *p_file_vars = NULL;
     if (p_stack && p_stack->p_target && p_stack->p_target->name) {
-      char *psz_target = p_stack->p_target->name;
+      const char *psz_target = p_stack->p_target->name;
       file_t *p_target = lookup_file (psz_target);
       if (p_target) {
 	initialize_file_variables (p_target, 0);
@@ -374,4 +475,24 @@ rule_t *find_rule (const char *psz_name)
   return NULL;
 }
 
+void chomp(char * line) 
+{
+  unsigned int len = strlen(line);
+  if (line[len-1] == '\n') line[len-1] = '\0';
+}
+
+
+void shell_rc_status(int rc) 
+{
+  if (rc == -1)
+    printf(_("Error: %s\n"), strerror(errno));
+  else if (WEXITSTATUS(rc) != 0)
+    printf(_("Warning: return code was %d\n"), WEXITSTATUS(rc));
+}
   
+/* 
+ * Local variables:
+ * eval: (c-set-style "gnu")
+ * indent-tabs-mode: nil
+ * End:
+ */

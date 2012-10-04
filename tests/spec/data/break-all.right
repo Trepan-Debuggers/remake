@@ -1,0 +1,22 @@
+Reading makefiles...
+Updating makefiles....
+Updating goal targets....
+triple.Makefile:1)
+first: second
+remake<0> break third
+Breakpoint 1 on target third: file triple.Makefile, line 5.
+remake<1> continue
+triple.Makefile:5)
+third: 
+remake<2> continue
+triple.Makefile:5)
+third
+remake<3> continue
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+echo third done
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+third done
+triple.Makefile:5)
+third
+remake<4> quit
+remake: That's all, folks...

@@ -31,7 +31,10 @@ $answer = "This makefile did not clean the dir... good\n";
 &compare_output($answer,&get_logfile(1)) || &error ("abort");
 
 
-$answer = "$delete_command $example\n";
+$answer = "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+$delete_command $example
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+";
 &run_make_with_options($makefile,"clean",&get_logfile,0);
 if (-f $example) {
   $test_passed = 0;

@@ -1,3 +1,5 @@
+#                                                                     -*-perl-*-
+
 $description = "The following test creates a makefile to test the \n"
               ."vpath directive which allows you to specify a search \n"
               ."path for a particular class of filenames, those that\n"
@@ -58,5 +60,22 @@ if (&compare_output($answer,&get_logfile(1)))
 {
   unlink @files_to_touch;
 }
+
+# TEST 2: after vpath lookup ensure we don't get incorrect circular dependency
+# warnings due to change of struct file ptr.  Savannah bug #13529.
+
+mkdir('vpath-d', 0777);
+
+run_make_test(q!
+vpath %.te vpath-d/
+.SECONDARY:
+default: vpath-d/a vpath-d/b
+vpath-d/a: fail.te
+vpath-d/b : fail.te
+vpath-d/fail.te:
+!,
+              '', "#MAKE#: Nothing to be done for `default'.\n");
+
+rmdir('vpath-d');
 
 1;

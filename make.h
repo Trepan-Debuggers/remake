@@ -1,27 +1,24 @@
 /* Miscellaneous global declarations and portability cruft for GNU Make.
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software
-Foundation, Inc.
-Copyright (C) 2008 R. Bernstein <rocky@gnu.org>
-
+1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
+2010 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2, or (at your option) any later version.
+Foundation; either version 3 of the License, or (at your option) any later
+version.
 
 GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-GNU Make; see the file COPYING.  If not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
+this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* We use <config.h> instead of "config.h" so that a compilation
    using -I. -I$srcdir will use ./config.h rather than $srcdir/config.h
    (which it would do because make.h was found in $srcdir).  */
-
 #ifndef MAKE_H
 #define MAKE_H
 
@@ -29,14 +26,19 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 #undef  HAVE_CONFIG_H
 #define HAVE_CONFIG_H 1
 
+/* Specify we want GNU source code.  This must be defined before any
+   system headers are included.  */
+
+#define _GNU_SOURCE 1
+
 /* AIX requires this to be the first thing in the file.  */
-#ifndef __GNUC__
-# if HAVE_ALLOCA_H
-#  include <alloca.h>
-# else
-#  ifdef _AIX
+#if HAVE_ALLOCA_H
+# include <alloca.h>
+#else
+# ifdef _AIX
  #pragma alloca
-#  else
+# else
+#  if !defined(__GNUC__) && !defined(WINDOWS32)
 #   ifndef alloca /* predefined by HP cc +Olibcalls */
 char *alloca ();
 #   endif
@@ -44,22 +46,6 @@ char *alloca ();
 # endif
 #endif
 
-
-/* Use prototypes if available.  */
-#if defined (__cplusplus) || defined (__STDC__)
-# undef  PARAMS
-# define PARAMS(protos)  protos
-#else /* Not C++ or ANSI C.  */
-# undef  PARAMS
-# define PARAMS(protos)  ()
-#endif /* C++ or ANSI C.  */
-
-/* Specify we want GNU source code.  This must be defined before any
-   system headers are included.  */
-
-#define _GNU_SOURCE 1
-
-#include "types.h"
 
 #ifdef  CRAY
 /* This must happen before #include <signal.h> so
@@ -157,8 +143,8 @@ extern int errno;
 #else
 # define NEED_GET_PATH_MAX 1
 # define GET_PATH_MAX   (get_path_max ())
-# define PATH_VAR(var)  char *var = (char *) alloca (GET_PATH_MAX)
-extern unsigned int get_path_max PARAMS ((void));
+# define PATH_VAR(var)  char *var = alloca (GET_PATH_MAX)
+unsigned int get_path_max (void);
 #endif
 
 #ifndef CHAR_BIT
@@ -234,12 +220,12 @@ extern unsigned int get_path_max PARAMS ((void));
 # ifdef HAVE_STDLIB_H
 #  include <stdlib.h>
 # else
-extern char *malloc PARAMS ((int));
-extern char *realloc PARAMS ((char *, int));
-extern void free PARAMS ((char *));
+void *malloc (int);
+void *realloc (void *, int);
+void free (void *);
 
-extern void abort PARAMS ((void)) __attribute__ ((noreturn));
-extern void exit PARAMS ((int)) __attribute__ ((noreturn));
+void abort (void) __attribute__ ((noreturn));
+void exit (int) __attribute__ ((noreturn));
 # endif /* HAVE_STDLIB_H.  */
 
 #endif /* Standard headers.  */
@@ -249,42 +235,15 @@ extern void exit PARAMS ((int)) __attribute__ ((noreturn));
 # define EXIT_SUCCESS 0
 #endif
 #ifndef EXIT_FAILURE
-# define EXIT_FAILURE 0
+# define EXIT_FAILURE 1
 #endif
 
-#ifdef  ANSI_STRING
-
-# ifndef bcmp
-#  define bcmp(s1, s2, n)   memcmp ((s1), (s2), (n))
-# endif
-# ifndef bzero
-#  define bzero(s, n)       memset ((s), 0, (n))
-# endif
-# if defined(HAVE_MEMMOVE) && !defined(bcopy)
-#  define bcopy(s, d, n)    memmove ((d), (s), (n))
-# endif
-
-#else   /* Not ANSI_STRING.  */
-
-# ifndef HAVE_STRCHR
-#  define strchr(s, c)      index((s), (c))
-#  define strrchr(s, c)     rindex((s), (c))
-# endif
-
-# ifndef bcmp
-extern int bcmp PARAMS ((const char *, const char *, int));
-# endif
-# ifndef bzero
-extern void bzero PARAMS ((char *, int));
-#endif
-# ifndef bcopy
-extern void bcopy PARAMS ((const char *b1, char *b2, int));
-# endif
+#ifndef  ANSI_STRING
 
 /* SCO Xenix has a buggy macro definition in <string.h>.  */
 #undef  strerror
 #if !defined(__DECC)
-extern char *strerror PARAMS ((int errnum));
+char *strerror (int errnum);
 #endif
 
 #endif  /* !ANSI_STRING.  */
@@ -296,7 +255,7 @@ extern char *strerror PARAMS ((int errnum));
 #define FILE_TIMESTAMP uintmax_t
 
 #if !defined(HAVE_STRSIGNAL)
-extern char *strsignal PARAMS ((int signum));
+char *strsignal (int signum);
 #endif
 
 /* ISDIGIT offers the following features:
@@ -310,28 +269,24 @@ extern char *strsignal PARAMS ((int signum));
    host does not conform to POSIX.  */
 #define ISDIGIT(c) ((unsigned) (c) - '0' <= 9)
 
-#ifndef iAPX286
-# define streq(a, b) \
+/* Test if two strings are equal. Is this worthwhile?  Should be profiled.  */
+#define streq(a, b) \
    ((a) == (b) || \
     (*(a) == *(b) && (*(a) == '\0' || !strcmp ((a) + 1, (b) + 1))))
-# ifdef HAVE_CASE_INSENSITIVE_FS
-/* This is only used on Windows/DOS platforms, so we assume strcmpi().  */
-#  define strieq(a, b) \
+
+/* Test if two strings are equal, but match case-insensitively on systems
+   which have case-insensitive filesystems.  Should only be used for
+   filenames!  */
+#ifdef HAVE_CASE_INSENSITIVE_FS
+# define patheq(a, b) \
     ((a) == (b) \
      || (tolower((unsigned char)*(a)) == tolower((unsigned char)*(b)) \
-         && (*(a) == '\0' || !strcmpi ((a) + 1, (b) + 1))))
-# else
-#  define strieq(a, b) streq(a, b)
-# endif
+         && (*(a) == '\0' || !strcasecmp ((a) + 1, (b) + 1))))
 #else
-/* Buggy compiler can't handle this.  */
-# define streq(a, b) (strcmp ((a), (b)) == 0)
-# define strieq(a, b) (strcmp ((a), (b)) == 0)
+# define patheq(a, b) streq(a, b)
 #endif
+
 #define strneq(a, b, l) (strncmp ((a), (b), (l)) == 0)
-#ifdef  VMS
-extern int strcmpi (const char *,const char *);
-#endif
 
 #if defined(__GNUC__) || defined(ENUM_BITFIELDS)
 # define ENUM_BITFIELD(bits)    :bits
@@ -354,29 +309,31 @@ extern int strcmpi (const char *,const char *);
 #define S_(msg1,msg2,num)   ngettext (msg1,msg2,num)
 
 /* Handle other OSs.  */
-#if defined(HAVE_DOS_PATHS)
-# define PATH_SEPARATOR_CHAR ';'
-#elif defined(VMS)
-# define PATH_SEPARATOR_CHAR ','
-#else
-# define PATH_SEPARATOR_CHAR ':'
+#ifndef PATH_SEPARATOR_CHAR
+# if defined(HAVE_DOS_PATHS)
+#  define PATH_SEPARATOR_CHAR ';'
+# elif defined(VMS)
+#  define PATH_SEPARATOR_CHAR ','
+# else
+#  define PATH_SEPARATOR_CHAR ':'
+# endif
 #endif
 
-/* This is needed for getcwd() and chdir().  */
-#if defined(_MSC_VER) || defined(__BORLANDC__)
+/* This is needed for getcwd() and chdir(), on some W32 systems.  */
+#if defined(HAVE_DIRECT_H)
 # include <direct.h>
 #endif
 
 #ifdef WINDOWS32
 # include <fcntl.h>
 # include <malloc.h>
-# define pipe(p) _pipe(p, 512, O_BINARY)
-# define kill(pid,sig) w32_kill(pid,sig)
+# define pipe(_p)        _pipe((_p), 512, O_BINARY)
+# define kill(_pid,_sig) w32_kill((_pid),(_sig))
 
-extern void sync_Path_environment(void);
-extern int kill(int pid, int sig);
-extern char *end_of_token_w32(char *s, char stopchar);
-extern int find_and_set_default_shell(char *token);
+void sync_Path_environment (void);
+int w32_kill (pid_t pid, int sig);
+char *end_of_token_w32 (const char *s, char stopchar);
+int find_and_set_default_shell (const char *token);
 
 /* indicates whether or not we have Bourne shell */
 extern int no_default_sh_exe;
@@ -385,11 +342,22 @@ extern int no_default_sh_exe;
 extern int unixy_shell;
 #endif  /* WINDOWS32 */
 
+#if defined(HAVE_SYS_RESOURCE_H) && defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
+# define SET_STACK_SIZE
+#endif
+#ifdef SET_STACK_SIZE
+# include <sys/resource.h>
+struct rlimit stack_limit;
+#endif
+
+struct floc
+  {
+    const char *filenm;
+    unsigned long lineno;
+  };
+#define NILF ((struct floc *)0)
+
 #define STRING_SIZE_TUPLE(_s) (_s), (sizeof (_s)-1)
-#define	CALLOC(t, n) ((t *) calloc  (sizeof (t), (n)))
-#define MALLOC(t, n) ((t *) xmalloc (sizeof (t) * (n)))
-#define REALLOC(o, t, n) ((t *) xrealloc ((void *) (o), sizeof (t) * (n)))
-#define FREE(p) if (p) { free(p); p = NULL;}
 
 
 /* We have to have stdarg.h or varargs.h AND v*printf or doprnt to use
@@ -401,58 +369,97 @@ extern int unixy_shell;
 # endif
 #endif
 
-extern void die PARAMS ((int)) __attribute__ ((noreturn));
-extern void log_working_directory PARAMS ((int));
-extern void perror_with_name PARAMS ((const char *, const char *));
-extern char *savestring PARAMS ((const char *, unsigned int));
-extern char *concat PARAMS ((const char *, const char *, const char *));
-extern char *xmalloc PARAMS ((unsigned int));
-extern char *xrealloc PARAMS ((char *, unsigned int));
-extern char *xstrdup PARAMS ((const char *));
-extern char *find_next_token PARAMS ((char **, unsigned int *));
-extern char *next_token PARAMS ((const char *));
-extern char *end_of_token PARAMS ((const char *));
-extern void collapse_continuations PARAMS ((char *));
-extern char *lindex PARAMS ((const char *, const char *, int));
-extern int alpha_compare PARAMS ((const void *, const void *));
-extern void print_spaces PARAMS ((unsigned int));
-extern char *find_percent PARAMS ((char *));
-extern FILE *open_tmpfile PARAMS ((char **, const char *));
-
-#ifndef NO_ARCHIVES
-extern bool ar_name PARAMS ((char *));
-extern void ar_parse_name PARAMS ((char *, char **, char **));
-extern int ar_touch PARAMS ((char *));
-extern time_t ar_member_date PARAMS ((char *));
+#if HAVE_ANSI_COMPILER && USE_VARIADIC && HAVE_STDARG_H
+const char *concat (unsigned int, ...);
+void message (int prefix, const char *fmt, ...)
+              __attribute__ ((__format__ (__printf__, 2, 3)));
+void error (const struct floc *flocp, const char *fmt, ...)
+            __attribute__ ((__format__ (__printf__, 2, 3)));
+void fatal (const struct floc *flocp, const char *fmt, ...)
+                   __attribute__ ((__format__ (__printf__, 2, 3)));
+#else
+const char *concat ();
+void message ();
+void error ();
+void fatal ();
 #endif
 
-extern void define_default_variables PARAMS ((void));
-extern void set_default_suffixes PARAMS ((void));
-extern void install_default_suffix_rules PARAMS ((void));
-extern void install_default_implicit_rules PARAMS ((void));
+void die (int);
+void log_working_directory (int);
+void pfatal_with_name (const char *);
+void perror_with_name (const char *, const char *);
+void *xmalloc (unsigned int);
+void *xcalloc (unsigned int);
+void *xrealloc (void *, unsigned int);
+char *xstrdup (const char *);
+char *xstrndup (const char *, unsigned int);
+char *find_next_token (const char **, unsigned int *);
+char *next_token (const char *);
+char *end_of_token (const char *);
+void collapse_continuations (char *);
+char *lindex (const char *, const char *, int);
+int alpha_compare (const void *, const void *);
+void print_spaces (unsigned int);
+char *find_percent (char *);
+const char *find_percent_cached (const char **);
+FILE *open_tmpfile (char **, const char *);
 
-extern void build_vpath_lists PARAMS ((void));
-extern void construct_vpath_list PARAMS ((char *pattern, char *dirpath));
-extern int vpath_search PARAMS ((char **file, FILE_TIMESTAMP *mtime_ptr));
-extern int gpath_search PARAMS ((char *file, unsigned int len));
+#ifndef NO_ARCHIVES
+int ar_name (const char *);
+void ar_parse_name (const char *, char **, char **);
+int ar_touch (const char *);
+time_t ar_member_date (const char *);
 
-extern void construct_include_path PARAMS ((char **arg_dirs));
+typedef long int (*ar_member_func_t) (int desc, const char *mem, int truncated,
+				      long int hdrpos, long int datapos,
+				      long int size, long int date, int uid,
+				      int gid, int mode, const void *arg);
 
-extern void user_access PARAMS ((void));
-extern void make_access PARAMS ((void));
-extern void child_access PARAMS ((void));
+long int ar_scan (const char *archive, ar_member_func_t function, const void *arg);
+int ar_name_equal (const char *name, const char *mem, int truncated);
+#ifndef VMS
+int ar_member_touch (const char *arname, const char *memname);
+#endif
+#endif
 
-extern void close_stdout PARAMS ((void));
+int dir_file_exists_p (const char *, const char *);
+int file_exists_p (const char *);
+int file_impossible_p (const char *);
+void file_impossible (const char *);
+const char *dir_name (const char *);
+void hash_init_directories (void);
 
-extern char *strip_whitespace PARAMS ((const char **begpp, const char **endpp));
+void define_default_variables (void);
+void set_default_suffixes (void);
+void install_default_suffix_rules (void);
+void install_default_implicit_rules (void);
+
+void build_vpath_lists (void);
+void construct_vpath_list (char *pattern, char *dirpath);
+const char *vpath_search (const char *file, FILE_TIMESTAMP *mtime_ptr,
+                          unsigned int* vpath_index, unsigned int* path_index);
+int gpath_search (const char *file, unsigned int len);
+
+/*! Construct the list of include directories
+   from the arguments and the default list.  
+*/
+extern void construct_include_path (const char **arg_dirs);
+
+void user_access (void);
+void make_access (void);
+void child_access (void);
+
+void close_stdout (void);
+
+char *strip_whitespace (const char **begpp, const char **endpp);
 
 /* String caching  */
-extern void strcache_init PARAMS ((void));
-extern void strcache_print_stats PARAMS ((const char *prefix));
-extern int strcache_iscached PARAMS ((const char *str));
-extern const char *strcache_add PARAMS ((const char *str));
-extern const char *strcache_add_len PARAMS ((const char *str, int len));
-extern int strcache_setbufsize PARAMS ((int size));
+void strcache_init (void);
+void strcache_print_stats (const char *prefix);
+int strcache_iscached (const char *str);
+const char *strcache_add (const char *str);
+const char *strcache_add_len (const char *str, int len);
+int strcache_setbufsize (int size);
 
 #ifdef  HAVE_VFORK_H
 # include <vfork.h>
@@ -463,20 +470,42 @@ extern int strcache_setbufsize PARAMS ((int size));
 
 #if !defined (__GNU_LIBRARY__) && !defined (POSIX) && !defined (_POSIX_VERSION) && !defined(WINDOWS32)
 
-extern long int atol ();
+long int atol ();
 # ifndef VMS
-extern long int lseek ();
+long int lseek ();
 # endif
 
 #endif  /* Not GNU C library or POSIX.  */
 
 #ifdef  HAVE_GETCWD
 # if !defined(VMS) && !defined(__DECC)
-extern char *getcwd ();
+char *getcwd ();
 # endif
 #else
-extern char *getwd ();
+char *getwd ();
 # define getcwd(buf, len)       getwd (buf)
+#endif
+
+#if !HAVE_STRCASECMP
+# if HAVE_STRICMP
+#  define strcasecmp stricmp
+# elif HAVE_STRCMPI
+#  define strcasecmp strcmpi
+# else
+/* Create our own, in misc.c */
+int strcasecmp (const char *s1, const char *s2);
+# endif
+#endif
+
+#if !HAVE_STRNCASECMP
+# if HAVE_STRNICMP
+#  define strncasecmp strnicmp
+# elif HAVE_STRNCMPI
+#  define strncasecmp strncmpi
+# else
+/* Create our own, in misc.c */
+int strncasecmp (const char *s1, const char *s2, int n);
+# endif
 #endif
 
 extern const struct floc *reading_file;
@@ -484,83 +513,20 @@ extern const struct floc **expanding_var;
 
 extern char **environ;
 
-/*! The recognized command switches.  */
-
-/*! Nonzero means do not print commands to be executed (-s).  */
-extern int silent_flag;
-
-/*! Nonzero means just touch the files
-   that would appear to need remaking (-t)  */
-extern int touch_flag;
-
-/*! Nonzero means just print what commands would need to be executed,
-   don't actually execute them (-n).  */
-extern int just_print_flag;
-
-/*! Environment variables override makefile definitions.  */
-extern int env_overrides;
-
-/*! Nonzero means ignore status codes returned by commands
-   executed to remake files.  Just treat them all as successful (-i).  */
-
-extern int ignore_errors_flag;
-
-/*! Nonzero means don't remake anything, just print the data base
-   that results from reading the makefile (-p).  */
-
-extern int print_data_base_flag;
-
-/*! Nonzero means don't remake anything; just return a nonzero status
-   if the specified targets are not up to date (-q).  */
-
-extern int question_flag;
-
-/*! Nonzero means do not use any of the builtin rules (-r) / variables
-  (-R).  */
-extern int no_builtin_rules_flag;
-extern int no_builtin_variables_flag;
-
-/*! Nonzero means keep going even if remaking some file fails
-  (-k).  */
-extern int keep_going_flag;
-
-/*! Nonzero means check symlink mtimes. (-L) */
-int check_symlink_flag;
-
-/*! Nonzero means print directory before starting and when done
-  (-w).  */
-extern int print_directory_flag;
-
-extern int always_make_flag;
-extern int print_directory_flag;
-extern int warn_undefined_variables_flag;
-extern int rebuilding_makefiles;
-
-/*! True if some rule detected clock skew; we keep track so (a) we only
-   print one warning about it during the run, and (b) we can print a final
-   warning at the end of the run. */
-
-extern bool clock_skew_detected;
-
-extern int print_version_flag;
-extern bool not_parallel;
-
-/*! True if we have seen the magic `.POSIX' target.
-   This turns on pedantic compliance with POSIX.2.  */
-
-extern bool posix_pedantic;
-
-/*! True if we have seen the '.SECONDEXPANSION' target.
-   This turns on secondary expansion of prerequisites.  */
-
-extern bool second_expansion;
+extern int just_print_flag, silent_flag, ignore_errors_flag, keep_going_flag;
+extern int print_data_base_flag, question_flag, touch_flag, always_make_flag;
+extern int env_overrides, no_builtin_rules_flag, no_builtin_variables_flag;
+extern int print_version_flag, print_directory_flag, check_symlink_flag;
+extern int warn_undefined_variables_flag, posix_pedantic, not_parallel;
+extern int second_expansion, clock_skew_detected, rebuilding_makefiles;
+extern int one_shell;
 
 /* can we run commands via 'sh -c xxx' or must we use batch files? */
-extern bool batch_mode_shell;
+extern int batch_mode_shell;
 
-/*! This character introduces a command: it's the first char on the
-    line.  */
-
+/* Resetting the command script introduction prefix character.  */
+#define RECIPEPREFIX_NAME          ".RECIPEPREFIX"
+#define RECIPEPREFIX_DEFAULT       '\t'
 extern char cmd_prefix;
 
 extern unsigned int job_slots;
@@ -574,6 +540,10 @@ extern int max_load_average;
 
 extern char *program;
 
+/*! Value of argv[0] which seems to get modified. Can we merge this with
+    program below? */
+extern char *argv0;
+
 /*! Our initial arguments -- used for debugger restart execvp.  */
 extern char **global_argv;
 
@@ -584,32 +554,12 @@ extern char *directory_before_chdir;
 
 /*! Value of the MAKELEVEL variable at startup (or 0).  */
 extern unsigned int makelevel;
-
-/*! If nonzero, the basename of filenames is in giving locations. Normally,
-    giving a file directory location helps a debugger frontend
-    when we change directories. For regression tests it is helpful to 
-    list just the basename part as that doesn't change from installation
-    to installation. Users may have their preferences too.
-*/
-extern int basename_filenames;
-
 extern char *version_string, *remote_description, *make_host;
 
 extern unsigned int commands_started;
 
 extern int handling_fatal_signal;
 
-/* is default_shell unixy? */
-extern int unixy_shell;
-
-/**! The default value of SHELL and the shell that is used when issuing
-   commands on targets.
-*/
-extern char default_shell[];
-
-/*! Print version information.
-*/
-extern void print_version (void);
 
 #ifndef MIN
 #define MIN(_a,_b) ((_a)<(_b)?(_a):(_b))
@@ -618,18 +568,19 @@ extern void print_version (void);
 #define MAX(_a,_b) ((_a)>(_b)?(_a):(_b))
 #endif
 
-/* \brief the exit codes that the GNU Make gives. */
+#ifdef VMS
+typedef enum {
+  MAKE_SUCCESS = 1, /**< GNU Make completed okay */
+  MAKE_TROUBLE = 2, /**< A we ran failed */
+  MAKE_FAILURE = 3  /**< GNU Make had an internal error/failure */
+} make_exit_code_t;
+#else
 typedef enum {
   MAKE_SUCCESS = 0, /**< GNU Make completed okay */
   MAKE_TROUBLE = 1, /**< A we ran failed */
   MAKE_FAILURE = 2  /**< GNU Make had an internal error/failure */
 } make_exit_code_t;
-
-/** This variable is trickery to force the above enum symbol values to
-    be recorded in debug symbol tables. It is used to allow one refer
-    to above enumeration values in a debugger and debugger
-    expressions */
-extern make_exit_code_t make_exit_code;
+#endif
 
 /* Set up heap debugging library dmalloc.  */
 
@@ -646,12 +597,7 @@ extern make_exit_code_t make_exit_code;
 # endif
 #endif
 
-
 #ifdef __EMX__
-# if !HAVE_STRCASECMP
-#  define strcasecmp stricmp
-# endif
-
 # if !defined chdir
 #  define chdir _chdir2
 # endif
@@ -690,7 +636,6 @@ extern make_exit_code_t make_exit_code;
    NULL at the end of the directory--and _doesn't_ reset errno.  So, we have
    to do it ourselves here.  */
 
-#define ENULLLOOP(_v,_c)   do{ errno = 0; \
-                               while (((_v)=_c)==0 && errno==EINTR); }while(0)
-
+#define ENULLLOOP(_v,_c)   do { errno = 0; (_v) = _c; } \
+                           while((_v)==0 && errno==EINTR)
 #endif /*MAKE_H*/

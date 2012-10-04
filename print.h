@@ -49,10 +49,10 @@ extern void fatal ();
 
 /*! Versions of error and fatal with the ability to show call-stack. */
 #if defined __STDC__ && __STDC__
-void err (target_stack_node_t *p_call, const char *fmt, ...)
+void err_with_stack (target_stack_node_t *p_call, const char *fmt, ...)
                    __attribute__ ((__format__ (__printf__, 2, 3)));
 void fatal_err (target_stack_node_t *p_call, const char *fmt, ...)
-                   __attribute__ ((noreturn, __format__ (__printf__, 2, 3)));
+                   __attribute__ ((__format__ (__printf__, 2, 3)));
 #else
 void err();
 void fatal_err();
@@ -99,6 +99,8 @@ extern void print_floc_prefix (const floc_t *p_floc);
 extern debug_return_t print_child_cmd (child_t *p_child, 
 				       target_stack_node_t *p);
 
+extern void print_target_stack_entry(const file_t *p_target, int i, int i_pos);
+
 /*! Display the target stack i_pos is the position we are currently.
   i_max is the maximum number of entries to show.
  */
@@ -109,7 +111,7 @@ extern void print_target_stack (target_stack_node_t *p, int i_pos, int i_max);
 extern void print_floc_stack (int i_pos, int i_max);
 
 /*! Print the list makefiles read by read_makefiles().  */
-extern void print_read_makefiles(void);
+extern bool print_read_makefiles(const char *psz_filename);
 
 /*! Print the command line used to invode this program */
 extern void print_cmdline (void);

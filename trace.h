@@ -23,8 +23,8 @@ Boston, MA 02111-1307, USA.  */
  *  \brief Header for routines related to tracing and debugging support.
  */
 
-#ifndef TRACE_H
-#define TRACE_H
+#ifndef REMAKE_TRACE_H
+#define REMAKE_TRACE_H
 
 #include "filedef.h"
 
@@ -42,6 +42,34 @@ typedef enum {
                              used only inside debugger read loop. */
 } debug_return_t;
 
+typedef enum 
+  {
+    DEBUG_BRKPT_BEFORE_PREREQ     = 0,
+    DEBUG_BRKPT_AFTER_PREREQ      = 1,
+    DEBUG_BRKPT_AFTER_CMD         = 2,
+    DEBUG_GOAL_UPDATED_HIT        = 3,
+    DEBUG_READ_HIT                = 4,
+    DEBUG_ERROR_HIT               = 5,
+    DEBUG_STEP_HIT                = 6,
+    DEBUG_STEP_COMMAND            = 7,
+    DEBUG_EXPLICIT_CALL           = 8,
+    DEBUG_STACK_CHANGING          = 99,
+    DEBUG_NOT_GIVEN               = 100
+  } debug_enter_reason_t;
+
+typedef enum {
+    INFO_TARGET_POSITION = 1,
+    INFO_TARGET_NAME     = 2,
+    INFO_TARGET_POSITION_AND_NAME   = 3, /* 1 & 2 */
+    INFO_TARGET_TASKS               = 4,
+    INFO_TARGET_TASK_COMMENT        = 8,
+    INFO_TARGET_TASKS_WITH_COMMENTS = 12, /* 4 & 8 */
+} info_target_output_mask_t;
+
+/*!
+  debugger command interface. 
+*/
+
 /*! A call "stack". Well, since we'll have to deal with multiple child
    "jobs" it's not really a stack but a tree. 
 */
@@ -50,6 +78,7 @@ typedef enum {
 typedef struct target_stack_node
   {
     file_t                   *p_target;
+    file_t                   *p_shared_target;
     struct target_stack_node *p_parent;
   } target_stack_node_t; 
 
@@ -60,8 +89,7 @@ extern target_stack_node_t *p_stack_top;
     if b_debugger is true we might enter the debugger.
 */
 extern target_stack_node_t *trace_push_target (target_stack_node_t *p, 
-					       file_t *p_target,
-					       int b_debugger);
+					       file_t *p_target);
 
 /*! Pop the next target from the call stack.. */
 extern void trace_pop_target (target_stack_node_t *p);
@@ -83,4 +111,7 @@ extern void trace_push_floc (floc_t *p_floc);
 /*! Pop the next floc from the call stack.. */
 extern void trace_pop_floc (void);
 
-#endif /*TRACE_H*/
+/*! Show just a list of targets */
+extern void dbg_cmd_info_targets(info_target_output_mask_t output_mask);
+
+#endif /*REMAKE_TRACE_H*/

@@ -1,22 +1,28 @@
 /* Process handling for Windows.
 Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-2006 Free Software Foundation, Inc.
+2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2, or (at your option) any later version.
+Foundation; either version 3 of the License, or (at your option) any later
+version.
 
 GNU Make is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-GNU Make; see the file COPYING.  If not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
+this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include <config.h>
 #include <stdlib.h>
 #include <stdio.h>
+#ifdef _MSC_VER
+# include <stddef.h>    /* for intptr_t */
+#else
+# include <stdint.h>
+#endif
 #include <process.h>  /* for msvc _beginthreadex, _endthreadex */
 #include <signal.h>
 #include <windows.h>
@@ -24,15 +30,15 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.  */
 #include "sub_proc.h"
 #include "proc.h"
 #include "w32err.h"
-#include "config.h"
 #include "debug.h"
 
 static char *make_command_line(char *shell_name, char *exec_path, char **argv);
+extern char *xmalloc (unsigned int);
 
 typedef struct sub_process_t {
-	int sv_stdin[2];
-	int sv_stdout[2];
-	int sv_stderr[2];
+	intptr_t sv_stdin[2];
+	intptr_t sv_stdout[2];
+	intptr_t sv_stderr[2];
 	int using_pipes;
 	char *inp;
 	DWORD incnt;
@@ -40,7 +46,7 @@ typedef struct sub_process_t {
 	volatile DWORD outcnt;
 	char * volatile errp;
 	volatile DWORD errcnt;
-	int pid;
+	pid_t pid;
 	int exit_code;
 	int signal;
 	long last_err;
@@ -309,12 +315,12 @@ process_init()
 		pproc->lerrno = E_SCALL;
 		return((HANDLE)pproc);
 	}
-	pproc->sv_stdin[0]  = (int) stdin_pipes[0];
-	pproc->sv_stdin[1]  = (int) stdin_pipes[1];
-	pproc->sv_stdout[0] = (int) stdout_pipes[0];
-	pproc->sv_stdout[1] = (int) stdout_pipes[1];
-	pproc->sv_stderr[0] = (int) stderr_pipes[0];
-	pproc->sv_stderr[1] = (int) stderr_pipes[1];
+	pproc->sv_stdin[0]  = (intptr_t) stdin_pipes[0];
+	pproc->sv_stdin[1]  = (intptr_t) stdin_pipes[1];
+	pproc->sv_stdout[0] = (intptr_t) stdout_pipes[0];
+	pproc->sv_stdout[1] = (intptr_t) stdout_pipes[1];
+	pproc->sv_stderr[0] = (intptr_t) stderr_pipes[0];
+	pproc->sv_stderr[1] = (intptr_t) stderr_pipes[1];
 
 	pproc->using_pipes = 1;
 
@@ -336,9 +342,9 @@ process_init_fd(HANDLE stdinh, HANDLE stdouth, HANDLE stderrh)
 	 * Just pass the provided file handles to the 'child side' of the
 	 * pipe, bypassing pipes altogether.
 	 */
-	pproc->sv_stdin[1]  = (int) stdinh;
-	pproc->sv_stdout[1] = (int) stdouth;
-	pproc->sv_stderr[1] = (int) stderrh;
+	pproc->sv_stdin[1]  = (intptr_t) stdinh;
+	pproc->sv_stdout[1] = (intptr_t) stdouth;
+	pproc->sv_stderr[1] = (intptr_t) stderrh;
 
 	pproc->last_err = pproc->lerrno = 0;
 
@@ -347,53 +353,54 @@ process_init_fd(HANDLE stdinh, HANDLE stdouth, HANDLE stderrh)
 
 
 static HANDLE
-find_file(char *exec_path, LPOFSTRUCT file_info)
+find_file(const char *exec_path, const char *path_var,
+	  char *full_fname, DWORD full_len)
 {
 	HANDLE exec_handle;
 	char *fname;
 	char *ext;
+	DWORD req_len;
+	int i;
+	static const char *extensions[] =
+	  /* Should .com come before no-extension case?  */
+	  { ".exe", ".cmd", ".bat", "", ".com", NULL };
 
-	fname = malloc(strlen(exec_path) + 5);
+	fname = xmalloc(strlen(exec_path) + 5);
 	strcpy(fname, exec_path);
 	ext = fname + strlen(fname);
 
-	strcpy(ext, ".exe");
-	if ((exec_handle = (HANDLE)OpenFile(fname, file_info,
-			OF_READ | OF_SHARE_COMPAT)) != (HANDLE)HFILE_ERROR) {
-		free(fname);
-		return(exec_handle);
-	}
-
-	strcpy(ext, ".cmd");
-	if ((exec_handle = (HANDLE)OpenFile(fname, file_info,
-			OF_READ | OF_SHARE_COMPAT)) != (HANDLE)HFILE_ERROR) {
-		free(fname);
-		return(exec_handle);
-	}
-
-	strcpy(ext, ".bat");
-	if ((exec_handle = (HANDLE)OpenFile(fname, file_info,
-			OF_READ | OF_SHARE_COMPAT)) != (HANDLE)HFILE_ERROR) {
-		free(fname);
-		return(exec_handle);
-	}
-
-	/* should .com come before this case? */
-	if ((exec_handle = (HANDLE)OpenFile(exec_path, file_info,
-			OF_READ | OF_SHARE_COMPAT)) != (HANDLE)HFILE_ERROR) {
-		free(fname);
-		return(exec_handle);
-	}
-
-	strcpy(ext, ".com");
-	if ((exec_handle = (HANDLE)OpenFile(fname, file_info,
-			OF_READ | OF_SHARE_COMPAT)) != (HANDLE)HFILE_ERROR) {
-		free(fname);
-		return(exec_handle);
+	for (i = 0; extensions[i]; i++) {
+		strcpy(ext, extensions[i]);
+		if (((req_len = SearchPath (path_var, fname, NULL, full_len,
+					    full_fname, NULL)) > 0
+		     /* For compatibility with previous code, which
+			used OpenFile, and with Windows operation in
+			general, also look in various default
+			locations, such as Windows directory and
+			Windows System directory.  Warning: this also
+			searches PATH in the Make's environment, which
+			might not be what the Makefile wants, but it
+			seems to be OK as a fallback, after the
+			previous SearchPath failed to find on child's
+			PATH.  */
+		     || (req_len = SearchPath (NULL, fname, NULL, full_len,
+					       full_fname, NULL)) > 0)
+		    && req_len <= full_len
+		    && (exec_handle =
+				CreateFile(full_fname,
+					   GENERIC_READ,
+					   FILE_SHARE_READ | FILE_SHARE_WRITE,
+					   NULL,
+					   OPEN_EXISTING,
+					   FILE_ATTRIBUTE_NORMAL,
+					   NULL)) != INVALID_HANDLE_VALUE) {
+			free(fname);
+			return(exec_handle);
+		}
 	}
 
 	free(fname);
-	return(exec_handle);
+	return INVALID_HANDLE_VALUE;
 }
 
 
@@ -416,6 +423,9 @@ process_begin(
 	char *shell_name = 0;
 	int file_not_found=0;
 	HANDLE exec_handle;
+	char exec_fname[MAX_PATH];
+	const char *path_var = NULL;
+	char **ep;
 	char buf[256];
 	DWORD bytes_returned;
 	DWORD flags;
@@ -423,8 +433,6 @@ process_begin(
 	STARTUPINFO startInfo;
 	PROCESS_INFORMATION procInfo;
 	char *envblk=NULL;
-	OFSTRUCT file_info;
-
 
 	/*
 	 *  Shell script detection...  if the exec_path starts with #! then
@@ -433,16 +441,27 @@ process_begin(
 	 *  hard-code the path to the shell or perl or whatever:  Instead, we
 	 *  assume it's in the path somewhere (generally, the NT tools
 	 *  bin directory)
-	 *  We use OpenFile here because it is capable of searching the Path.
 	 */
 
-	exec_handle = find_file(exec_path, &file_info);
+	/* Use the Makefile's value of PATH to look for the program to
+	   execute, because it could be different from Make's PATH
+	   (e.g., if the target sets its own value.  */
+	if (envp)
+		for (ep = envp; *ep; ep++) {
+			if (strncmp (*ep, "PATH=", 5) == 0
+			    || strncmp (*ep, "Path=", 5) == 0) {
+				path_var = *ep + 5;
+				break;
+			}
+		}
+	exec_handle = find_file(exec_path, path_var,
+				exec_fname, sizeof(exec_fname));
 
 	/*
-	 * If we couldn't open the file, just assume that Windows32 will be able
-	 * to find and execute it.
+	 * If we couldn't open the file, just assume that Windows will be
+	 * somehow able to find and execute it.
 	 */
-	if (exec_handle == (HANDLE)HFILE_ERROR) {
+	if (exec_handle == INVALID_HANDLE_VALUE) {
 		file_not_found++;
 	}
 	else {
@@ -496,8 +515,7 @@ process_begin(
 	if (file_not_found)
 		command_line = make_command_line( shell_name, exec_path, argv);
 	else
-		command_line = make_command_line( shell_name, file_info.szPathName,
-				 argv);
+		command_line = make_command_line( shell_name, exec_fname, argv);
 
 	if ( command_line == NULL ) {
 		pproc->last_err = 0;
@@ -517,7 +535,7 @@ process_begin(
 	if ((shell_name) || (file_not_found)) {
 		exec_path = 0;	/* Search for the program in %Path% */
 	} else {
-		exec_path = file_info.szPathName;
+		exec_path = exec_fname;
 	}
 
 	/*
@@ -562,7 +580,7 @@ process_begin(
 		}
 	}
 
-	pproc->pid = (int)procInfo.hProcess;
+	pproc->pid = (pid_t)procInfo.hProcess;
 	/* Close the thread handle -- we'll just watch the process */
 	CloseHandle(procInfo.hThread);
 
