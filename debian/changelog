@@ -11,6 +11,7 @@ remake (3.82+dbg0.9+dfsg-1) unstable; urgency=low
   * Boosted policy to 3.9.4
   * Switched to source package 3.0 (quilt) format
   * Switched to minimalistic dh 9.0 debian/rules
+    - use dh-autoreconf (added also needed for it 'autopoint' build-dependency)
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 04 Oct 2012 10:45:49 -0400
 

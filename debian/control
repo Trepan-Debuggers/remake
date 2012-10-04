@@ -5,7 +5,7 @@ Maintainer: Yaroslav Halchenko <debian@onerussian.com>
 Build-Depends: debhelper (>= 9),
                dh-autoreconf,
                autotools-dev,
-               gettext,
+               gettext, autopoint,
                autoconf, automake, texinfo,
                libreadline6-dev | libreadline-dev (>= 6),
 Homepage: http://bashdb.sourceforge.net/remake
