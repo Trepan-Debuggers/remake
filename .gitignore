@@ -1,9 +1,10 @@
-*.o
 *.a
+*.o
 .deps
 /*~
 /.dep_segment
 /ABOUT-NLS
+/ChangeLog
 /Makefile
 /Makefile.DOS
 /Makefile.in

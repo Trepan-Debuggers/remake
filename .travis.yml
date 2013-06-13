@@ -1,0 +1,8 @@
+language: C
+
+install:
+  # Prerequisite is readline-devel and wget
+  - "sudo apt-get install readline-devel wget"
+
+# run the tests
+script: autoreconf -i && ./configure && make update && make && make check
