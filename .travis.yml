@@ -2,7 +2,7 @@ language: C
 
 install:
   # Prerequisite is readline-devel and wget
-  - "sudo apt-get install readline-devel wget"
+  - "sudo apt-get install libreadline-dev wget"
 
 # run the tests
 script: autoreconf -i && ./configure && make update && make && make check
