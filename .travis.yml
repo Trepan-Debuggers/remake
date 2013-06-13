@@ -2,7 +2,7 @@ language: C
 
 install:
   # Prerequisites
-  - "sudo apt-get install autopoint libreadline-dev wget"
+  - "sudo apt-get install autopoint libreadline-dev wget texi2html"
 
 # run the tests
 script: autoreconf -i && ./configure && make update && make && make check
