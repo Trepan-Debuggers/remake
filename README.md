@@ -41,4 +41,6 @@ GNU Make CVS source instructions.
 
 See also https://github.com/rocky/remake/wiki
 
-Author for debugger portion: Rocky Bernstein <rocky@gnu.org> [![endorse](https://api.coderwall.com/rocky/endorsecount.png)](https://coderwall.com/rocky)
+Author for debugger portion:<br>
+Rocky Bernstein <rocky@gnu.org></br>
+[![endorse](https://api.coderwall.com/rocky/endorsecount.png)](https://coderwall.com/rocky)
