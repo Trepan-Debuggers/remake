@@ -150,7 +150,7 @@ static void record_files (struct nameseq *filenames, const char *pattern,
                           const char *pattern_percent, char *depstr,
                           unsigned int cmds_started, char *commands,
                           unsigned int commands_idx, int two_colon,
-			  char *target_description, 
+			  char *target_description,
                           const struct floc *flocp);
 static void record_target_var (struct nameseq *filenames, char *defn,
                                enum variable_origin origin,
@@ -158,7 +158,7 @@ static void record_target_var (struct nameseq *filenames, char *defn,
                                const struct floc *flocp);
 static enum make_word_type get_next_mword (char *buffer, char *delim,
                                            char **startp, unsigned int *length);
-static void remove_comments (char *line, char **description, 
+static void remove_comments (char *line, char **description,
                              char **prev_description, unsigned long lineno);
 static char *find_char_unquote (char *string, int stop1, int stop2,
                                 int blank, int ignorevars);
@@ -181,6 +181,9 @@ read_all_makefiles (const char **makefiles)
      we will be reading. */
 
   define_variable_cname ("MAKEFILE_LIST", "", o_file, 0);
+
+  if (b_debugger_preread && i_debugger_stepping && !in_debugger)
+    enter_debugger (NULL, NULL, 0, DEBUG_READ_HIT);
 
   DB (DB_BASIC, (_("Reading makefiles...\n")));
 
@@ -418,6 +421,10 @@ eval_makefile (const char *filename, int flags)
   do_variable_definition (&ebuf.floc, "MAKEFILE_LIST", filename, o_file,
                           f_append, 0);
 
+  if (b_debugger_preread && i_debugger_stepping && !in_debugger) {
+      enter_debugger (NULL, NULL, 0, DEBUG_READ_HIT);
+  }
+
   /* Evaluate the makefile */
 
   ebuf.size = 200;
@@ -589,7 +596,7 @@ eval (struct ebuffer *ebuf, int set_default)
 					   of the file though, EOF
 					   signals the end of the
 					   target so we don't use
-					   prev_target_description. */ 
+					   prev_target_description. */
 
 #define record_waiting_files()						      \
   do									      \
@@ -723,7 +730,7 @@ eval (struct ebuffer *ebuf, int set_default)
       strcpy (collapsed, line);
       /* Collapse continuation lines.  */
       collapse_continuations (collapsed);
-      remove_comments (collapsed, &target_description, 
+      remove_comments (collapsed, &target_description,
 		       &prev_target_description, ebuf->floc.lineno);
 
       /* Get rid if starting space (including formfeed, vtab, etc.)  */
