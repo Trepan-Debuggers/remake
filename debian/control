@@ -1,0 +1,29 @@
+Source: remake
+Section: devel
+Priority: extra
+Maintainer: Yaroslav Halchenko <debian@onerussian.com>
+Build-Depends: debhelper (>= 9),
+               dh-autoreconf,
+               autotools-dev,
+               gettext, autopoint,
+               autoconf, automake, texinfo,
+               libreadline6-dev | libreadline-dev (>= 6),
+Homepage: http://bashdb.sourceforge.net/remake
+Vcs-Browser: http://github.com/rocky/remake
+Vcs-git: git://github.com/rocky/remake.git -b debian
+Standards-Version: 3.9.4
+
+Package: remake
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: GNU make fork with improved error reporting and debugging
+ Modernized version of GNU make utility that adds improved error
+ reporting, the ability to trace execution in a comprehensible way, and
+ a debugger. Some of the features of the debugger are:
+  * see the target call stack
+  * set breakpoints on targets
+  * show and set variables
+  * execute arbitrary "make" code
+  * issue shell commands while stopped in the middle of execution
+  * inspect target descriptions
+  * write a file with the commands of the target expanded

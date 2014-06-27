@@ -1,0 +1,5 @@
+version=3
+
+opts="versionmangle=s/-//,dversionmangle=s/~dfsg\.\d+$//" \
+  http://sf.net/bashdb/remake-(.*)\.tar\.gz debian dh_wraporig
+

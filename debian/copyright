@@ -1,0 +1,54 @@
+This package was debianized by Yaroslav Halchenko <debian@onerussian.com> on
+Sat, 24 Feb 2007 19:49:34 -0500.
+
+It was downloaded from http://bashdb.sourceforge.net/remake/.
+
+See README.Debian-source for more information on packaging
+
+Upstream Author: Rocky Bernstein <rocky@panix.com>
+
+Copyright:
+ Original GNU Make: 1988-2012 Free Software Foundation, Inc
+ ansi2knr:          1989, 2000 Aladdin Enterprises
+ elk-test.el:       2006 Nikolaj Schumacher
+ remake patchset:   2004-2012 Rocky Bernstein <rocky@panix.com>
+
+License:
+
+   This package is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+
+   This package is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this package; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+
+On Debian systems, the complete text of the GNU General
+Public License can be found in `/usr/share/common-licenses/GPL'.
+
+----------------------------------------------------------------------
+
+remake documentation (mdb.info) copyright 2004-2009 Rocky Bernstein
+<rocky@panix.com> is distributed under adjusted GNU GDL license.
+
+ Permission is granted to copy, distribute and/or modify this document
+ under the terms of the GNU Free Documentation License, Version 1.1 or
+ any later version published by the Free Software Foundation; with no
+ Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+
+Due to agreement that FDL 1.2 with no IS, FCT and no BCT is
+DFSG-compatible, text of FDL 1.2 can be found in
+`/usr/share/common-licenses/GFDL'.
+
+----------------------------------------------------------------------
+
+The Debian packaging is (C) 2007-2012, Yaroslav Halchenko
+<debian@onerussian.com> and is licensed under the GPL, see above.
+
+

@@ -1,0 +1,24 @@
+README on source packaging of remake:
+-------------------------------------
+
+remake is packaged for Debian directly from the upstream's git
+repository hosted on github which is listed in Vcs fields of
+debian/control. Two branches in the repository are used for building
+this package
+
+master-dfsg: upstream sources with non-DFSG compliant materials
+             removed
+debian: branch which is based on master-dfsg and provides Debian
+        packaging
+
+debian/gbp.conf file is included in the debian branch to ease building of
+the package using git-buildpackage.
+
+On a debcheckout'ed tree
+
+git diff origin/master...origin/debian
+
+in bash should show the summary of the changes from the full upstream
+version, without non-DFSG compliant materials being removed.
+
+

@@ -1,0 +1,57 @@
+remake (3.82+dbg0.9+dfsg-2) unstable; urgency=medium
+
+  * debian/patches/up_texi_fixes to fix building documentation (Closes: #712346)
+  * debian/remake.{pre,post}* files to remove obsolete emacs el conf file
+    (Closes: #707003)
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 27 Jun 2014 13:28:19 -0400
+
+remake (3.82+dbg0.9+dfsg-1) unstable; urgency=low
+
+  * Fresh upstream release
+    - dropped emacs mode (moved into a separate project
+      https://github.com/rocky/emacs-dbgr)
+  * Switched to use +dfsg to assure proper version
+    comparison going e.g. from 0.9+dfsg to 0.9.1+dfsg
+  * Moved .gbp.conf under debian/gbp.conf
+  * Added '-b debian' for Vcs-Git field since we ship Debian
+    packaging within upstream repository
+  * Boosted policy to 3.9.4
+  * Switched to source package 3.0 (quilt) format
+  * Switched to minimalistic dh 9.0 debian/rules
+    - use dh-autoreconf (added also needed for it 'autopoint' build-dependency)
+      (Closes: #536004)
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 04 Oct 2012 10:45:49 -0400
+
+remake (3.81+dbg0.2~dfsg.1-1) unstable; urgency=low
+
+  * New upstream release(s): resolved issue with deprecated emacs
+    list syntax (Closes: #499956)
+  * Using upstream checkout 43ea2cdf4a8cec7c1c1b9827046e71258b77008f
+    instead of the latest release, since there were few fixes introduced
+    since the release
+  * Due to upstream switch to git, remake git repository now contains
+    sources for vanilla make, remake, and Debian packaging.
+  * Added VCS fields into the header.
+  * Extended list of copyright holders due to added pieces.
+  * Not using dpatch any longer.
+  * Redoing DFSG compliance of a new remake:
+    - documents with GFDL with cover pages (info/html) are removed
+      and FDL license is no longer shipped
+    - remake-specific info file is no longer present/shipped
+    - vanilla make changelog is no longer shipped separate,
+      please refer to /usr/share/doc/make/changelog.gz which contains
+      entries for both make and remake
+  * Updated compliance to policy 3.8.0
+  * Using autotools at package build time, it required also custom clean
+    up in clean rule of debian/rules
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 08 Jan 2009 21:48:42 -0500
+
+remake (3.80+dbg0.62~dfsg.1-1) unstable; urgency=low
+
+  * Initial release (Closes: #411174)
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Sat, 24 Feb 2007 19:49:34 -0500
+
