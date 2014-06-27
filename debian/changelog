@@ -1,3 +1,9 @@
+remake (3.82+dbg0.9+dfsg-2) unstable; urgency=medium
+
+  * debian/patches/up_texi_fixes to fix building documentation (Closes: #712346)
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 27 Jun 2014 13:28:19 -0400
+
 remake (3.82+dbg0.9+dfsg-1) unstable; urgency=low
 
   * Fresh upstream release

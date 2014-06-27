@@ -1,0 +1,22 @@
+Index: remake-3.82+dbg0.9+dfsg/doc/remake.texi
+===================================================================
+--- remake-3.82+dbg0.9+dfsg.orig/doc/remake.texi
++++ remake-3.82+dbg0.9+dfsg/doc/remake.texi
+@@ -2752,7 +2752,7 @@ this list, we would like to add your nam
+ @printindex cp
+ 
+ @tex
+-% I think something like @colophon should be in texinfo.  In the
++% I think something like @@colophon should be in texinfo.  In the
+ % meantime:
+ \long\def\colophon{\hbox to0pt{}\vfill
+ \centerline{The body of this manual is set in}
+@@ -2764,7 +2764,7 @@ this list, we would like to add your nam
+ \centerline{{\sl\fontname\tensl\/}}
+ \centerline{are used for emphasis.}\vfill}
+ \page\colophon
+-% Blame: doc@cygnus.com, 1991.
++% Blame: doc@@cygnus.com, 1991.
+ @end tex
+ 
+ @bye
