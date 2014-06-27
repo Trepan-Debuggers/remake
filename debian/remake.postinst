@@ -1,0 +1,9 @@
+#!/bin/sh
+set -e
+
+dpkg-maintscript-helper rm_conffile /etc/emacs/site-start.d/50remake.el 3.82+dbg0.9+dfsg-1 remake -- "$@"
+
+#DEBHELPER#
+
+exit 0
+

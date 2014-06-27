@@ -1,6 +1,8 @@
 remake (3.82+dbg0.9+dfsg-2) unstable; urgency=medium
 
   * debian/patches/up_texi_fixes to fix building documentation (Closes: #712346)
+  * debian/remake.{pre,post}* files to remove obsolete emacs el conf file
+    (Closes: #707003)
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 27 Jun 2014 13:28:19 -0400
 
