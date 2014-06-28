@@ -27,6 +27,7 @@
 /config.status
 /configh.dos
 /configure
+/debian/remake.debhelper.log
 /loadavg
 /make
 /po-check-*
