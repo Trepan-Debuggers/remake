@@ -2,11 +2,11 @@
 @c Copyright 2004, 2005, 2006, 2011, 2012
 @c Rocky Bernstein for the Free Software Foundation
 @c
-@c TODO: 
+@c TODO:
 @c   - add examples for commands
 @c   - clean up/improve sample session
 @c   - help text is inaccurate and formatted too much to right.
-@c 
+@c
 
 @c Sets version and release names and dates. Frees us from changing
 @c this file when a new release comes along.
@@ -15,7 +15,7 @@
 @c makeinfo ignores cmds prev to setfilename, so its arg cannot make use
 @c of @set vars.  However, you can override filename with makeinfo -o.
 @setfilename remake.info
-@c 
+@c
 
 @c
 @c Name of debugger program.  Used also for prompt string.
@@ -166,7 +166,7 @@ Have @value{REMAKE} stop at specified places such as targets.
 
 @item
 Examine what has happened, when @value{REMAKE} has stopped or encounters
-an error. 
+an error.
 
 @item
 Change the internal state of things inside @value{REMAKE}, so you can
@@ -176,7 +176,7 @@ discover another.
 
 Although you can use the @value{DBG} to debug Makefiles, it can also
 be used just as a front-end for learning more about Makefiles and
-writing them with @value{REMAKE}. 
+writing them with @value{REMAKE}.
 
 A degenerate and less-interactive form of debugging is @emph{tracing}
 in which one passively watches some of the steps that go on in
@@ -218,8 +218,8 @@ A simplified form of debugging is @emph{tracing}. Often this may be
 good enough to understand what might have gone wrong. In fact, in the
 Unix shell world (@code{tcsh}, @code{csh}, @code{bash}, @code{sh})
 prior to my debugger for bash (@url{http://bashdb.sourceforge.net})
-tracing along with print statements was about all that was available 
-to debug a program. 
+tracing along with print statements was about all that was available
+to debug a program.
 
 @value{MAKE} has had for a long time a ``debug'' flag (@code{--debug}
 or @code{-d}) which prints ``lots of debugging information.'' For the
@@ -240,14 +240,14 @@ invalid shell command in it:
 1: # Makefile to show off tracing
 2: .PHONY: all
 3: all: foo
-4: 
+4:
 5: foo:
 6: 	@@case $(MAKE) in \
 7: 	*/remake|remake) echo "Enlightened!";; \
 8: 	*/make|make) echo "This is what most folks use.";; \
 9: 	esac
 10: 	@@bogus-command
-@end smallexample 
+@end smallexample
 
 But now let's see what happens when we run ``debug'' from an unpatched
 @value{MAKE}:
@@ -281,19 +281,19 @@ Considering target file `all'.
    Finished prerequisites of target file `foo'.
   Must remake target `foo'.
 Putting child 0x08acced8 (foo) PID 307 on the chain.
-Live child 0x08acced8 (foo) PID 307 
+Live child 0x08acced8 (foo) PID 307
 This is what most folks use.
 Got a SIGCHLD; 1 unreaped children.
 Putting child 0x095b1310 (foo) PID 13440 on the chain.
-Live child 0x095b1310 (foo) PID 13440 
-Reaping winning child 0x095b1310 PID 13440 
+Live child 0x095b1310 (foo) PID 13440
+Reaping winning child 0x095b1310 PID 13440
 make: bogus-command: Command not found
 Got a SIGCHLD; 1 unreaped children.
-Live child 0x095b1310 (foo) PID 13441 
-Reaping losing child 0x095b1310 PID 13441 
+Live child 0x095b1310 (foo) PID 13441
+Reaping losing child 0x095b1310 PID 13441
 make: *** [foo] Error 127
 Removing child 0x095b1310 PID 13441 from chain.
-@end smallexample 
+@end smallexample
 
 The output would have been about twice as long were it not for the
 fact that we declared @code{all} a ``phony'' target!
@@ -333,14 +333,14 @@ Again here's the sample Makefile:
 !: # Makefile to show off tracing
 2: .PHONY: all
 3: all: foo
-4: 
+4:
 5: foo:
 6: 	@@case $(MAKE) in \
 7: 	*/remake|remake) echo "Enlightended!";; \
 8: 	*/make|make) echo "This is what most folks use.";; \
 9: 	esac
 10: 	@@bogus-command
-@end smallexample 
+@end smallexample
 
 In an unpatched @value{MAKE} version 3.81 (and earlier) @value{MAKE},
 @code{--just-print} gives this:
@@ -444,7 +444,7 @@ test1.mk:5: *** [foo] Error 127
 Command-line arguments:
 	"/usr/local/bin/remake -x -f test1.mk"
 @end group
-@end smallexample 
+@end smallexample
 
 In some ways this is just a combination of the
 enhanced@code{--just-print} option combined with the location-enhanced
@@ -464,7 +464,7 @@ the program was run.
 One last subtlety that you might not have noticed is that we echoed
 the command @code{bogus-command} even though the original makefile had
 this set to be silent, in particular by preceding that command with an
-@@. 
+@@.
 
 When tracing as with @code{--just-print}, we override any silent
 execution making execution more verbose. This information is usually
@@ -510,7 +510,7 @@ Reading makefile `.deps/buildargv.Po' (search path) (no ~ expansion)...
 Reading makefile `.deps/cmd.Po' (search path) (no ~ expansion)...
 ...
 @end group
-@end smallexample 
+@end smallexample
 
 Now let's do a simple trace on a real example --- the Makefile the @code{doc}
 directory for the GNU Make + Debugger. Here it is in its entirety:
@@ -532,9 +532,9 @@ Updating goal targets....
 /tmp/remake/doc/Makefile:245	Must remake target `all'.
 /tmp/remake/doc/Makefile:245	Successfully remade target file `all'.
 remake: Nothing to be done for `all'.
-$ 
+$
 @end group
-@end smallexample 
+@end smallexample
 
 As before, after @code{Updating goal targets...} we show the position in
 the Makefile @code{(/tmp/remake/doc/Makefile:245)} of where target
@@ -576,9 +576,9 @@ else \
 fi
 ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 /tmp/remake/doc/Makefile:369	Successfully remade target file `remake.html'.
-$ 
+$
 @end group
-@end smallexample 
+@end smallexample
 
 To make @code{remake.html} we need to make @code{remake.texi}, but
 that file exists already. Then we remove file @code{remake.htp}. That is shown
@@ -590,15 +590,15 @@ in the lines:
 rm -rf remake.htp
 ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 @end group
-@end smallexample 
+@end smallexample
 
 There is no output from running this command which would appear next.
-Instead, we see: 
+Instead, we see:
 @smallexample
 @group
 ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 @end group
-@end smallexample 
+@end smallexample
 which means we are about to runn a second shell command for this target:
 
 @smallexample
@@ -615,7 +615,7 @@ else \
   exit 1; \
 fi
 @end group
-@end smallexample 
+@end smallexample
 
 The backslashes in the above are there because this multi-line
 @code{if} statement is passed off to the shell as one command.
@@ -636,8 +636,8 @@ Updating goal targets....
 
 -> (/tmp/remake/Makefile:471)
 Makefile: Makefile.in config.status
-remake<0> 
-@end smallexample 
+remake<0>
+@end smallexample
 
 Before the prompt @code{remake<0>}, we show the position in the file
 @code{(/tmp/remake/Makefile:471)} of the target @code{Makefile}. We also
@@ -659,8 +659,8 @@ Program invocation:
 	/tmp/remake/./remake  --debugger
 Recursion level: 0
 Program stopped at a breakpoint before prequisite checking.
-remake<1> 
-@end smallexample 
+remake<1>
+@end smallexample
 
 Notice that the prompt now lists ``1'' since we entered a command.
 
@@ -677,7 +677,7 @@ remake<3> @b{step}
 aclocal.m4: config/dospaths.m4 config/gettext.m4 ...
 remake<4> @b{step}
 @end group
-@end smallexample 
+@end smallexample
 
 One subtlety in the output above. In the @code{Makefile} at line 486 you
 will see this:
@@ -686,7 +686,7 @@ will see this:
 @group
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 @end group
-@end smallexample 
+@end smallexample
 
 In the location and dependent targets reported by @value{REMAKE} above,
 variables have been expanded.
@@ -704,7 +704,7 @@ remake<2> @b{where}
   #1  Makefile.in at /tmp/remake/Makefile:457
   #2  Makefile at /tmp/remake/Makefile:471
 @end group
-@end smallexample 
+@end smallexample
 
 If stepping is going too slowly, one can use @code{next} or
 set a breakpoint at a target. Let's restart the program
@@ -745,9 +745,9 @@ else :; fi
 
 ++ (/tmp/remake/Makefile:490)
 config.h
-remake<2> 
+remake<2>
 @end group
-@end smallexample 
+@end smallexample
 
 Before the location we now have two pluses,
 @code{++}. This means that the code shown above in between
@@ -767,13 +767,13 @@ config.h: stamp-h1
 # automatic
 # @@ := config.h
 # automatic
-# % := 
+# % :=
 # automatic
-# * := 
+# * :=
 # automatic
 # + := stamp-h1
 # automatic
-# | := 
+# | :=
 # automatic
 # < := stamp-h1
 # automatic
@@ -786,7 +786,7 @@ config.h: stamp-h1
 	$(MAKE) $(AM_MAKEFLAGS) stamp-h1; \
 	else :; fi
 @end group
-@end smallexample 
+@end smallexample
 
 I could have gotten the same output explicitly giving a target name
 such as @code{target config.h}, or used the @value{MAKE}
@@ -806,19 +806,19 @@ Makefile: Makefile.in config.status
 # automatic
 # @ := Makefile
 # automatic
-# % := 
+# % :=
 # automatic
-# * := 
+# * :=
 # automatic
 # + := Makefile.in config.status
 # automatic
-# | := 
+# | :=
 # automatic
 # < := Makefile.in
 # automatic
 # ^ := Makefile.in config.status
 # automatic
-# ? := 
+# ? :=
 #  commands to execute (from `Makefile', line 470):
 	@@case '$?' in \
 	*config.status*) \
@@ -828,7 +828,7 @@ Makefile: Makefile.in config.status
 	echo ' cd $(top_builddir) && $(SHELL) ./config.status $@@ $(am__depfiles_maybe)'; \
 	cd $(top_builddir) && $(SHELL) ./config.status $@@ $(am__depfiles_maybe);; \
 	esac;
-@end smallexample 
+@end smallexample
 
 However information may change depending on where @code{remake} is. In
 particular note that for target @code{config.h} we see ``File has not been
@@ -847,7 +847,7 @@ with the @code{print} command. (See @ref{Print}.)
 @smallexample
   remake<4> @b{print MAKE}
   (origin default) MAKE = $(MAKE_COMMAND)
-@end smallexample 
+@end smallexample
 
 The @code{(origin default)} means this is a built-in
 definition. There is another print which does full expansion
@@ -856,7 +856,7 @@ of the variables. So if I run @code{x} (@code{expand}) instead I get:
 @smallexample
   remake<5> @b{expand MAKE}
   (origin default) MAKE := /tmp/remake/src/./make
-@end smallexample 
+@end smallexample
 
 Note that in printing expanded values we use @code{:=} while non-expanded
 values we use @code{=} This output matches the semantics of these
@@ -870,7 +870,7 @@ get:
 @smallexample
   remake<6> @b{x $(bin_PROGRAMS) $(noinst_PROGRAMS)}
   make remake
-@end smallexample 
+@end smallexample
 
 No location identification is given here since what I put in
 isn't a variable.
@@ -884,7 +884,7 @@ between the two.
   Variable MAKE now has value '/tmp/remake/src/./make'
   remake<8> @b{setq MAKE $(MAKE_COMMAND)}
   Variable MAKE now has value '$(MAKE_COMMAND)'
-@end smallexample 
+@end smallexample
 
 So with @code{set}, the value in the expression @code{$(MAKE_COMMAND)}
 is expanded before the variable definition is assigned. With @code{setq}
@@ -897,7 +897,7 @@ is, @code{set MAKE = $(MAKE_COMMAND)} gives:
 
 @smallexample
   Variable MAKE now has value '= /tmp/remake/src/./make'
-@end smallexample 
+@end smallexample
 
 which is probably not what you want.  One may optionally put in the the
 word "variable" when using @code{set}, one must not supply it with
@@ -912,9 +912,9 @@ Now consider the following sample Makefile:
 @group
 $ @b{cat -n test2.mk}
 1 PACKAGE=make
-2 
+2
 3 all: $(PACKAGE).txt
-4 
+4
 5 $(PACKAGE).txt: ../doc/remake.texi
 6 	makeinfo --no-headers $< > $@
 @end group
@@ -944,13 +944,13 @@ variables}, @code{target @ variables}, and @code{info locals}.
 @group
 remake<1> @b{info locals}
 @@ := all
-% := 
-* := 
+% :=
+* :=
 + := make.txt
-| := 
+| :=
 < := all
 ^ := make.txt
-? := 
+? :=
 @end group
 @end smallexample
 
@@ -976,10 +976,10 @@ remake<5> @b{target @@ expand}
 
 #  commands to execute (from `test2.mk', line 6):
 	makeinfo --no-headers $< > $@
-	
+
 #  commands to execute (from `test2.mk', line 6):
 	-makeinfo --no-headers ../doc/remake.texi > make.txt
-	
+
 @end group
 @end smallexample
 
@@ -1004,7 +1004,7 @@ remake<7> @b{shell cat -n /tmp/make.txt.sh}
      2  # cd /tmp/remake/src/
      3	#/tmp/remake/src/test2.mk:5
      4	makeinfo --no-headers ../doc/remake.texi > make.txt
-     5	
+     5
 @end group
 @end smallexample
 
@@ -1042,7 +1042,7 @@ remake<9> @b{step}
 
 <- (/tmp/test2.mk:5)
 make.txt
-remake<10> 
+remake<10>
 @end group
 @end smallexample
 
@@ -1159,7 +1159,7 @@ Causes target names which have commands associated with them to get
 printed before they are considered. If a target has multiple commands
 each one is printed before they are run whether or not the command has
 the @value{REMAKE} @@ specifier which would otherwise cause them not to
-echo. 
+echo.
 
 This option also allows for sub-options, @code{read}, @code{normal},
 and @code{full}. The default is @code{normal}; @code{read} adds
@@ -1179,9 +1179,9 @@ your Makefile using the @code{debugger} built-in function.
 @smallexample
 # Makefile to show an explicit call to the debugger
 all:
- 	$(debugger ) 
+ 	$(debugger )
  	echo "all here"
-@end smallexample 
+@end smallexample
 
 @node Quitting the GNU Make debugger
 @section Quitting the GNU Make debugger
@@ -1199,8 +1199,8 @@ the Make debugger}).
 You can abbreviate the long name of @value{DBG} command to the first
 few letters of the command name, if that abbreviation is unambiguous;
 and you can repeat the @code{next} or @code{step} commands by typing
-just @key{RET}. Some commands which require a parameter, such as 
-@code{print} remember the argument that was given to them. 
+just @key{RET}. Some commands which require a parameter, such as
+@code{print} remember the argument that was given to them.
 
 @menu
 * Command Syntax::        How to give commands to the @value{DBG}
@@ -1232,12 +1232,12 @@ abbreviated to the minimum string that makes it unique. For example
 @cindex repeating next/step commands
 @kindex RET @r{(repeat last command)}
 A blank line as input to @value{DBG} (typing just @key{RET}) means to
-repeat the previous next or step command.  
+repeat the previous next or step command.
 
 @kindex # @r{@code{comment}}
 @cindex comment
 Any text from a @kbd{#} to the end of the line is a comment; it does
-nothing.  This is useful mainly in command files 
+nothing.  This is useful mainly in command files
 
 @node Help
 @section Getting help (@samp{help})
@@ -1252,7 +1252,7 @@ commands, using the command @code{help}.
 @itemx h
 You can use @code{help} (abbreviated @code{h}) with no arguments to
 display a short list of named classes of commands:
-@end table 
+@end table
 
 @flushleft
 @smallexample
@@ -1299,7 +1299,7 @@ For more detailed help, type h <cmd> or consult online-documentation.
 
 @table @code
 @item help @var{command}
-With a command name as @code{help} argument, @value{REMAKE} displays 
+With a command name as @code{help} argument, @value{REMAKE} displays
 short information on how to use that command.
 
 @example
@@ -1351,7 +1351,7 @@ remake<0> @b{help info}
 To exit @value{DBG}, use the @code{quit} command (abbreviated
 @code{q}), or type an end-of-file character (usually @kbd{C-d}).  If
 you do not supply @var{return-code}, @value{DBG} will terminate
-normally or with exit code 0. Otherwise it use the value of the 
+normally or with exit code 0. Otherwise it use the value of the
 @var{return-code} as the exit code. Usually a 0 exit is a normal exit.
 
 Often when running @value{REMAKE}, a recursive call is made or made in
@@ -1377,7 +1377,7 @@ Inside @value{DBG}, your script may stop for any of several reasons,
 such as a signal, a breakpoint, or reaching a new line after a
 debugger command such as @code{step}.  You may then expand and
 change variables, set new breakpoints or remove old ones, and then
-continue execution.  
+continue execution.
 
 @menu
 * Breakpoints::          Breakpoints, watchpoints (break, clear)
@@ -1390,7 +1390,7 @@ continue execution.
 
 @cindex breakpoints
 A @dfn{breakpoint} arranges for @value{REMAKE} to stop whenever a
-certain point in the Makefile is reached.  
+certain point in the Makefile is reached.
 
 You can set breakpoints with the @code{break} command and its variants
 (@pxref{Set Breaks, ,Setting breakpoints}), to specify the place where
@@ -1433,7 +1433,7 @@ There are 3 place where one may want to stop at:
 @item
 before prerequisite checking (prereq)
 
-@item 
+@item
 after prerequisite checking but before running commands (run)
 
 @item
@@ -1469,7 +1469,7 @@ when you continue execution.
 @kindex delete
 @kindex d @r{(@code{delete})}
 @item delete @var{breakpoint-number}...
-Delete the breakpoints by breakpoint-number specified as arguments. 
+Delete the breakpoints by breakpoint-number specified as arguments.
 
 @end table
 
@@ -1488,7 +1488,7 @@ your script may stop even sooner, due to a breakpoint or a signal.
 @menu
 * Next::          running the next target (next)
 * Step::          running the next target in smaller increments (step)
-* Finish::        step out 
+* Finish::        step out
 * Skip::          skipping the next statement (skip)
 * Continue::      continuing execution (continue)
 @end menu
@@ -1558,7 +1558,7 @@ This is a step out, but to the target @emph{count} levels up. A count of
 @item skip @ovar{count}
 Skip executing the remaining commands of the target you are stopped at.
 This may be useful if you have an action that ``fixes'' existing code in
-a Makefile. 
+a Makefile.
 @end table
 
 @node Continue
@@ -1647,9 +1647,9 @@ test1.mk:3:
 	all
 test1.mk:5:
 	foo
-remake<1> 
+remake<1>
 @end group
-@end smallexample 
+@end smallexample
 @item info program
 @kindex info program
 @kindex i p @r{(@code{info files})}
@@ -1666,7 +1666,7 @@ Recursion level: 0
 Line 5 of "/tmp/test1.mk"
 Program stopped at a breakpoint before rule-prequisite checking.
 @end group
-@end smallexample 
+@end smallexample
 
 @item info break
 @kindex info break
@@ -1679,9 +1679,9 @@ remake<0> @b{info break}
 Num Type           Disp Enb target     What
   1 breakpoint     keep y   in all at /tmp/test1.mk:3
   2 breakpoint     keep y   in foo at /tmp/test1.mk:5
-remake<1> 
+remake<1>
 @end group
-@end smallexample 
+@end smallexample
 
 @item info line
 @kindex info line
@@ -1694,9 +1694,9 @@ $ @b{remake -X -f test1.mk}
 ...
 remake<0> @b{info line}
 Line 5 of "/tmp/test1.mk"
-remake<1> 
+remake<1>
 @end group
-@end smallexample 
+@end smallexample
 
 @item info lines
 @kindex info lines
@@ -1711,9 +1711,9 @@ test1.mk
        2: .PHONY
        3: all
        5: foo
-remake<1> 
+remake<1>
 @end group
-@end smallexample 
+@end smallexample
 
 @item info locals
 @kindex info locals
@@ -1752,7 +1752,7 @@ change setting @value{REMAKE} has whether to ignore errors.
 In contrast to @code{info}, @code{show} is for describing the state of
 @value{REMAKE} itself.
 You can change most of the things you can @code{show}, by using the
-related command @code{set}; 
+related command @code{set};
 
 The distinction between @code{info} and @code{show} however is a bit
 fuzzy and is kept here to try to follow the GDB interface.
@@ -1954,7 +1954,7 @@ Updating goal targets....
  /tmp/remake/src/Makefile:254	File `all' does not exist.
 
 (/tmp/remake/src/Makefile:254): all
-remake<3> 
+remake<3>
 @end group
 @end smallexample
 
@@ -2100,7 +2100,7 @@ remake<2> @b{expand $(MAKE)}   # Note using $( ) doesn't matter here...
 /tmp/remake/src/Makefile:264: Makefile.in
 
 remake<2> @b{p COMPILE}
-Makefile:104 (origin: makefile) COMPILE := $(CC) $(DEFS) $(DEFAULT_INCLUDES) 
+Makefile:104 (origin: makefile) COMPILE := $(CC) $(DEFS) $(DEFAULT_INCLUDES)
 
 /tmp/remake/src/Makefile:264: Makefile.in
 remake<10> @b{x compile starts: $(CC) $(DEFS) $(DEFAULT_INCLUDES)}
@@ -2116,7 +2116,7 @@ compile starts: gcc -DLOCALEDIR=\"\" -DLIBDIR=\"/usr/local/lib\" -DINCLUDEDIR=\"
 @value{DBG} can print information about targets.  When your script
 stops, @value{DBG} spontaneously prints the line and target name
 where it stopped.  Likewise, when you select a stack frame
-(@pxref{Selection, ,Selecting a frame}), @value{DBG} the default 
+(@pxref{Selection, ,Selecting a frame}), @value{DBG} the default
 target name is changed.
 
 As with debugging any program, the value shown at a particular point in
@@ -2132,7 +2132,7 @@ print information about the current target.
 @item target @var{target}
 @itemx t @var{target}
 Print information about @var{target}. A list of attributes can be
-specified after the target name. The list of attributes names are 
+specified after the target name. The list of attributes names are
 
 @table @kbd
 @item attributes
@@ -2141,7 +2141,7 @@ can be:
 @itemize @bullet
 @item implicit rule search has been done
 @item phony: has no file associated with it
-@item precious: 
+@item precious:
 @item a command-line target
 @end itemize
 
@@ -2339,12 +2339,12 @@ Reads each line of @emph{filename} and runs that as a debugger command.
 @section Controlling @DBG (@samp{set})
 
 You can alter the way @value{REMAKE}
-interacts with you in various ways given below. 
+interacts with you in various ways given below.
 
 @menu
 * set basename::      Annotation Level (set basename)
 * set ignore-errors:: Ignoring errors
-* set trace::         Set tracing 
+* set trace::         Set tracing
 * set variable::      Set a variable to an expanded string
 * setq::              Set a variable to an unexpanded string
 @end menu
@@ -2358,7 +2358,7 @@ interacts with you in various ways given below.
 The basename level controls how much information @value{DBG} prints
 when it has to show a file name. When this is on we just show the base
 filename part an not the path info. When @value{DBG} is run as a
-subprocess of @sc{gnu} Emacs of @value{DDD}, it is important 
+subprocess of @sc{gnu} Emacs of @value{DDD}, it is important
 to show full pathnames.
 @end table
 
@@ -2400,8 +2400,8 @@ One nice use of set variable in debugging is to set the value of
 @smallexample
 remake<0> @b{set variable SHELL $(SHELL) -x}
 Variable SHELL now has value '/bin/sh -x'
-remake<1> 
-@end smallexample 
+remake<1>
+@end smallexample
 
 Now we'll show this in a real example - stepping (or actually
 ``next''ing though the top-level makefile in the source distribution
@@ -2437,7 +2437,7 @@ else :; fi
 + test '!' -f config.h
 + :
   /tmp/remake/Makefile:288	Successfully remade target file `config.h'.
-@end smallexample 
+@end smallexample
 
 Above we see the script source code followed by the trace information
 -- we took the ``else'' branch which has the null statement ``:''.
@@ -2752,7 +2752,7 @@ this list, we would like to add your names!
 @printindex cp
 
 @tex
-% I think something like @colophon should be in texinfo.  In the
+% I think something like @@colophon should be in texinfo.  In the
 % meantime:
 \long\def\colophon{\hbox to0pt{}\vfill
 \centerline{The body of this manual is set in}
@@ -2764,7 +2764,7 @@ this list, we would like to add your names!
 \centerline{{\sl\fontname\tensl\/}}
 \centerline{are used for emphasis.}\vfill}
 \page\colophon
-% Blame: doc@cygnus.com, 1991.
+% Blame: doc@@cygnus.com, 1991.
 @end tex
 
 @bye
