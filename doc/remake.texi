@@ -1082,9 +1082,6 @@ command @code{M-x remake} after loading @code{dbgr}. See
 * Starting the GNU Make debugger::    How to enter the @value{DBG}
 * Quitting the GNU Make debugger::    How to leave the @value{DBG}
 @end menu
-@menu
-@end menu
-
 
 @node Starting the GNU Make debugger
 @section Starting the GNU Make debugger
@@ -2388,6 +2385,7 @@ as though you started @value{REMAKE} with the @code{--trace} option.
 @subsection Setting a variable to an expanded string (@samp{set variable})
 
 @table @code
+@item set varible @var{variable} @var{string}
 @kindex set variable @var{variable} @var{string}
 
 Sets @var{variable} to the value @var{string}, but @var{string} is
