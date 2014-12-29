@@ -121,14 +121,6 @@ struct command_switch
 /* The structure used to hold the list of strings given
    in command switches of a type that takes strlist arguments.  */
 
-struct stringlist
-  {
-    const char **list;  /* Nil-terminated list of strings.  */
-    unsigned int idx;   /* Index into above.  */
-    unsigned int max;   /* Number of pointers allocated.  */
-  };
-
-
 /* The recognized command switches.  */
 
 /* Nonzero means do extra verification (that may slow things down).  */
@@ -148,13 +140,6 @@ int touch_flag;
    don't actually execute them (-n).  */
 
 int just_print_flag;
-
-/* Print debugging info (--debug).  */
-
-static struct stringlist *db_flags = 0;
-static int debug_flag = 0;
-
-int db_level = 0;
 
 /* Synchronize output (--output-sync).  */
 

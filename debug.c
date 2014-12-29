@@ -16,6 +16,7 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#include "makeint.h"
 #include "make.h"
 #include "debug.h"
 #include "print.h"
@@ -87,7 +88,7 @@ decode_debug_flags (int b_debug_flag, stringlist_t *ppsz_db_flags)
               db_level |= DB_BASIC | DB_VERBOSE;
               break;
             default:
-              fatal (NILF, _("unknown debug level specification `%s'"), p);
+              OS ( fatal, NILF, _("unknown debug level specification `%s'"), p);
             }
 
           while (*(++p) != '\0')
@@ -102,7 +103,7 @@ decode_debug_flags (int b_debug_flag, stringlist_t *ppsz_db_flags)
     }
 }
 
-/* 
+/*
  * Local variables:
  * eval: (c-set-style "gnu")
  * indent-tabs-mode: nil

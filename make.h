@@ -151,9 +151,6 @@ unsigned int get_path_max (void);
 # define CHAR_BIT 8
 #endif
 
-/* Nonzero if the integer type T is signed.  */
-#define INTEGER_TYPE_SIGNED(t) ((t) -1 < 0)
-
 /* The minimum and maximum values for the integer type T.
    Use ~ (t) 0, not -1, for portability to 1's complement hosts.  */
 #define INTEGER_TYPE_MINIMUM(t) \
@@ -355,9 +352,6 @@ struct floc
     const char *filenm;
     unsigned long lineno;
   };
-#define NILF ((struct floc *)0)
-
-#define STRING_SIZE_TUPLE(_s) (_s), (sizeof (_s)-1)
 
 
 /* We have to have stdarg.h or varargs.h AND v*printf or doprnt to use
@@ -367,21 +361,6 @@ struct floc
 # if HAVE_VPRINTF || HAVE_DOPRNT
 #  define USE_VARIADIC 1
 # endif
-#endif
-
-#if HAVE_ANSI_COMPILER && USE_VARIADIC && HAVE_STDARG_H
-const char *concat (unsigned int, ...);
-void message (int prefix, const char *fmt, ...)
-              __attribute__ ((__format__ (__printf__, 2, 3)));
-void error (const struct floc *flocp, const char *fmt, ...)
-            __attribute__ ((__format__ (__printf__, 2, 3)));
-void fatal (const struct floc *flocp, const char *fmt, ...)
-                   __attribute__ ((__format__ (__printf__, 2, 3)));
-#else
-const char *concat ();
-void message ();
-void error ();
-void fatal ();
 #endif
 
 void die (int);
@@ -441,7 +420,7 @@ const char *vpath_search (const char *file, FILE_TIMESTAMP *mtime_ptr,
 int gpath_search (const char *file, unsigned int len);
 
 /*! Construct the list of include directories
-   from the arguments and the default list.  
+   from the arguments and the default list.
 */
 extern void construct_include_path (const char **arg_dirs);
 
@@ -458,8 +437,6 @@ void strcache_init (void);
 void strcache_print_stats (const char *prefix);
 int strcache_iscached (const char *str);
 const char *strcache_add (const char *str);
-const char *strcache_add_len (const char *str, int len);
-int strcache_setbufsize (int size);
 
 #ifdef  HAVE_VFORK_H
 # include <vfork.h>
@@ -508,9 +485,6 @@ int strncasecmp (const char *s1, const char *s2, int n);
 # endif
 #endif
 
-extern const struct floc *reading_file;
-extern const struct floc **expanding_var;
-
 extern char **environ;
 
 extern int just_print_flag, silent_flag, ignore_errors_flag, keep_going_flag;
@@ -538,8 +512,6 @@ extern double max_load_average;
 extern int max_load_average;
 #endif
 
-extern char *program;
-
 /*! Value of argv[0] which seems to get modified. Can we merge this with
     program below? */
 extern char *argv0;
@@ -566,20 +538,6 @@ extern int handling_fatal_signal;
 #endif
 #ifndef MAX
 #define MAX(_a,_b) ((_a)>(_b)?(_a):(_b))
-#endif
-
-#ifdef VMS
-typedef enum {
-  MAKE_SUCCESS = 1, /**< GNU Make completed okay */
-  MAKE_TROUBLE = 2, /**< A we ran failed */
-  MAKE_FAILURE = 3  /**< GNU Make had an internal error/failure */
-} make_exit_code_t;
-#else
-typedef enum {
-  MAKE_SUCCESS = 0, /**< GNU Make completed okay */
-  MAKE_TROUBLE = 1, /**< A we ran failed */
-  MAKE_FAILURE = 2  /**< GNU Make had an internal error/failure */
-} make_exit_code_t;
 #endif
 
 /* Set up heap debugging library dmalloc.  */

@@ -1,4 +1,4 @@
-/* 
+/*
 Miscellaneous types
 Copyright (c) 2005, 2008, 2011  Rocky Bernstein <rocky@gnu.org>
 
@@ -19,7 +19,7 @@ along with GNU Make; see the file COPYING.  If not, write to
 the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/** \file types.h 
+/** \file types.h
  *
  *  \brief Miscellaneous types
  */
@@ -43,7 +43,7 @@ Boston, MA 02111-1307, USA.  */
 # include <stdbool.h>
 #else
    /* ISO/IEC 9899:1999 <stdbool.h> missing -- enabling workaround */
-  
+
 #   define false   0
 #   define true    1
 #   define bool uint8_t
@@ -60,10 +60,8 @@ typedef enum {
 } breakpoint_mask_t;
 
 typedef  unsigned int brkpt_mask_t;
-    
-typedef unsigned long int lineno_t;
 
-#define NILF ((struct floc *)0)
+typedef unsigned long int lineno_t;
 
 typedef struct child             child_t;
 typedef struct commands          commands_t;
@@ -83,7 +81,7 @@ typedef struct variable_set_list variable_set_list_t;
 #define	CALLOC(t, n) ((t *) calloc (sizeof (t), (n)))
 
 #endif /*REMAKE_TYPES_H*/
-/* 
+/*
  * Local variables:
  * eval: (c-set-style "gnu")
  * indent-tabs-mode: nil

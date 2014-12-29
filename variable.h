@@ -14,6 +14,10 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef VARIABLE_H
+#define VARIABLE_H
+
+#include "gnumake.h"
 #include "hash.h"
 
 /* Codes in a variable definition saying where the definition came from.
@@ -148,7 +152,6 @@ void pop_variable_scope (void);
 void define_automatic_variables (void);
 void initialize_file_variables (struct file *file, int reading);
 void print_file_variables (const struct file *file);
-void print_file_variables (const struct file *file);
 void print_target_variables (const struct file *file);
 void merge_variable_set_lists (struct variable_set_list **to_list,
                                struct variable_set_list *from_list);
@@ -234,3 +237,5 @@ extern int export_all_variables;
 
 #define MAKELEVEL_NAME "MAKELEVEL"
 #define MAKELEVEL_LENGTH (CSTRLEN (MAKELEVEL_NAME))
+
+#endif /*VARIABLE_H*/
