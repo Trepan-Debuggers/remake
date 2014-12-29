@@ -2,6 +2,7 @@
 #
 # Copyright (C) 1993-2014 Free Software Foundation, Inc.
 # This file is part of GNU Make.
+# Copyright (C) 2008, 2011, 2014 rocky@gnu.org
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -16,7 +17,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_INIT([GNU make],[4.1],[bug-make@gnu.org])
+AC_INIT([remake],[4.1+dbg0.9],[https://github.com/rocky/remake/issues])
 
 AC_PREREQ([2.62])
 
@@ -30,6 +31,7 @@ AC_CONFIG_HEADERS([config.h])
 # We cannot enable -Werror because gettext 0.18.1 has invalid content
 # When we update gettext to 0.18.3 or better we can add it again.
 AM_INIT_AUTOMAKE([1.11.1 silent-rules foreign -Wall])
+AM_MAINTAINER_MODE
 
 # Checks for programs.
 AC_USE_SYSTEM_EXTENSIONS
@@ -37,9 +39,14 @@ AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_RANLIB
 AC_PROG_CPP
+AC_PROG_LN_S
 AC_CHECK_PROG([AR], [ar], [ar], [ar])
 # Perl is needed for the test suite (only)
 AC_CHECK_PROG([PERL], [perl], [perl], [perl])
+
+# Ruby 1.9 and RSPec are needed for the debugger test suite (only)
+AC_CHECK_PROG(RUBY, ruby, ruby, none)
+AC_CHECK_PROG(RSPEC, rspec, rspec, none)
 
 # Needed for w32/Makefile.am
 AM_PROG_AR
@@ -49,6 +56,8 @@ AC_CANONICAL_HOST
 AC_AIX
 AC_ISC_POSIX
 AC_MINIX
+
+AM_MISSING_PROG(GIT2CL, git2cl, $missing_dir)
 
 # Enable gettext, in "external" mode.
 AM_GNU_GETTEXT_VERSION([0.18.1])
@@ -238,6 +247,105 @@ AS_IF([test "$make_cv_union_wait" = yes],
             [Define to 1 if you have the 'union wait' type in <sys/wait.h>.])
 ])
 
+AC_ARG_WITH(make_name,
+[  --with-make-name        name to use as the program name (default remake)],
+make_name="${withval}", make_name="remake")
+MAKE_NAME="$make_name"
+AC_SUBST(MAKE_NAME)
+MAKE_NAME_UPPER=`echo $make_name | tr a-z A-Z`
+AC_SUBST(MAKE_NAME_UPPER)
+
+AC_ARG_WITH(default_shell,
+[  --with-default-shell    program to use for SHELL],
+default_shell="${withval}", default_shell="/bin/sh")
+DEFAULT_SHELL="$default_shell"
+
+AC_ARG_WITH(shell_trace,
+[  --with-shell-trace     option to pass to shell to have it trace commands (default -x)],
+shell_trace="${withval}", shell_trace="-x")
+
+## Set OS-specific default shell.
+case $host_os in
+    cygwin*|mingw*) ;;
+    solaris*)
+      ## The System V Release 4 /bin/sh can't handle
+      ## -x -c in that order.
+      for sh in /bin/bash /usr/xpg4/bin/sh; do
+        if test -x "$sh" ; then
+          default_shell=$sh
+	  break
+        fi
+      done
+      ;;
+
+     *) ;;
+esac
+
+AC_MSG_CHECKING(if $default_shell can be used to trace commands using $shell_trace)
+sh_is_ok=`$default_shell $shell_trace -c ':' 2>&1`
+if test "+ :" != "$sh_is_ok" ; then
+   AC_MSG_RESULT(no)
+   AC_MSG_WARN([Disabling shell tracing. Run again using --with-default_shell])
+   AC_MSG_WARN([or using --with-shell_trace if you know of a shell that])
+   AC_MSG_WARN([supports tracing with *sh* *shell_option* -c (in that order)"])
+else
+   AC_MSG_RESULT(yes)
+fi
+
+AC_DEFINE_UNQUOTED(SHELL_TRACE, ["$shell_trace"],
+     [Define this to be what you need to add to turn on shell tracing])
+
+AC_DEFINE_UNQUOTED(DEFAULT_SHELL, ["$default_shell"],
+     [Define this to the default  to be used $(SHELL)])
+
+#
+# Check for readline to see if we can add debugging support.
+#
+AC_CHECK_HEADER(readline/readline.h, [have_readline=yes], [have_readline=no])
+
+if test "$have_readline" != yes; then
+   AC_MSG_ERROR([GNU Readline and its headers files are needed. See http://cnswww.cns.cwru.edu/php/chet/readline/rltop.html])
+fi
+
+VL_LIB_READLINE
+AC_MSG_CHECKING(for tilde_expand() in <readline/readline.h>)
+AC_TRY_RUN([
+#include <stdio.h>
+#include <readline/readline.h>
+
+int main(int argc, char **argv) {
+  char *s = tilde_expand ("~");
+  return 0;
+}], [AC_MSG_RESULT(yes); ac_have_tilde_expand=yes;
+     AC_DEFINE(HAVE_TILDE_EXPAND, [],
+     [Define this <readline/readline.h> defines tilde_expand()])],
+     [AC_MSG_RESULT(no); ac_have_tilde_expand=no],
+     [AC_MSG_RESULT(no); ac_have_tilde_expand=no])
+
+AC_CHECK_LIB(readline, readline)
+AC_MSG_CHECKING(for history_list() in <readline/readline.h>)
+AC_TRY_RUN([
+#include <stdio.h>
+#include <readline/readline.h>
+#include <readline/history.h>
+
+int main(int argc, char **argv) {
+  HIST_ENTRY **hist_list;
+
+      rl_initialize ();
+   hist_list = history_list();
+  return 0;
+}], [AC_MSG_RESULT(yes); ac_have_history_list=yes;
+     AC_DEFINE(HAVE_HISTORY_LIST, [],
+     [Define this <readline/readline.h> defines history_list()])],
+     [AC_MSG_RESULT(no); ac_have_history_list=no],
+     [AC_MSG_RESULT(no); ac_have_history_list=no])
+
+AC_SUBST(HAVE_READLINE)
+REMAKE_SOURCE_PATH="`pwd`"
+AC_DEFINE_UNQUOTED(REMAKE_SOURCE_PATH, "$REMAKE_SOURCE_PATH",
+	[Full path to remake top_sourcedir.])
+AC_SUBST(REMAKE_SOURCE_PATH)
 
 # If we're building on Windows/DOS/OS/2, add some support for DOS drive specs.
 AS_IF([test "$PATH_SEPARATOR" = ';'],
@@ -516,6 +624,8 @@ AS_IF([test -f "$srcdir/build.sh.in"],
 [ ./config.status --file build.sh
   chmod +x build.sh
 ])
+
+AC_MSG_NOTICE([Will install the 'make' binary under the name: $make_name])
 
 dnl Local Variables:
 dnl comment-start: "dnl "

@@ -19,6 +19,8 @@
 AUTOMAKE_OPTIONS = 1.8 dist-bzip2 check-news
 ACLOCAL_AMFLAGS	=  -I config
 
+transform = s,make,@MAKE_NAME@,
+
 MAKE_HOST =	@MAKE_HOST@
 
 # Only process if target is MS-Windows
@@ -38,6 +40,55 @@ if USE_CUSTOMS
 else
   remote =	remote-stub.c
 endif
+
+DEBUGGER_SRC = 	\
+		debugger/break.c \
+		debugger/cmd.c 	\
+		debugger/fns.c 	\
+		debugger/file2line.c 	\
+		debugger/msg.c 	\
+		debugger/stack.c
+
+DEBUGGER_H = \
+		debugger/break.h 		\
+		debugger/cmd.h 			\
+		debugger/fns.h 			\
+		debugger/msg.h 			\
+		debugger/command/break.h 	\
+		debugger/command/chdir.h  	\
+		debugger/command/comment.h 	\
+		debugger/command/continue.h	\
+		debugger/command/delete.h 	\
+		debugger/command/down.h 	\
+		debugger/command/edit.h 	\
+		debugger/command/eval.h 	\
+		debugger/command/expand.h	\
+		debugger/command/finish.h	\
+		debugger/command/frame.h	\
+		debugger/command/help.h		\
+		debugger/command/info.h		\
+		debugger/command/list.h		\
+		debugger/command/next.h		\
+		debugger/command/print.h	\
+		debugger/command/pwd.h		\
+		debugger/command/quit.h		\
+		debugger/command/run.h		\
+		debugger/command/set.h		\
+		debugger/command/setq.h		\
+		debugger/command/shell.h	\
+		debugger/command/show.h		\
+		debugger/command/skip.h		\
+		debugger/command/source.h	\
+		debugger/command/step.h		\
+		debugger/command/target.h	\
+		debugger/command/up.h		\
+		debugger/command/where.h	\
+		debugger/command/write.h	\
+		debugger/file2line.h 	        \
+		debugger/fns.h 			\
+		debugger/info.h			\
+		debugger/stack.h		\
+		debugger/subcmd.h
 
 make_SOURCES =	ar.c arscan.c commands.c default.c dir.c expand.c file.c \
 		function.c getopt.c getopt1.c guile.c implicit.c job.c load.c \
@@ -86,6 +137,20 @@ EXTRA_DIST =	README build.sh.in $(man_MANS) \
 
 DISTCLEANFILES = build.sh
 
+MOSTLYCLEANFILES = *.orig *.rej @MAKE_NAME@
+
+# Forward targets
+
+html-local:
+	cd doc && $(MAKE) $(AM_MAKEFLAGS) $@
+
+make$(EXEEXT): $(make_OBJECTS) $(make_DEPENDENCIES)
+	@rm -f make$(EXEEXT) @MAKE_NAME@$(EXEEXT)
+	$(LINK) $(make_OBJECTS) $(make_LDADD) $(LIBS)
+	$(LN_S) make$(EXEEXT) @MAKE_NAME@$(EXEEXT)
+
+.PHONY: html
+
 # --------------- Internationalization Section
 
 localedir =	$(datadir)/locale
@@ -106,6 +171,7 @@ inst_setgid = @NEED_SETGID@
 #
 inst_group = @KMEM_GROUP@
 
+#: install executables (e.g. remake)
 install-exec-local:
 	@if $(inst_setgid); then \
 	   app=$(DESTDIR)$(bindir)/`echo $(bin_PROGRAMS)|sed '$(transform)'`; \
@@ -130,7 +196,7 @@ gmk-default.h: $(srcdir)/gmk-default.scm
 
 # --------------- Local DIST Section
 
-# Install the w32 and tests subdirectories
+#: Install the w32 and tests subdirectories
 #
 dist-hook:
 	(cd $(srcdir); \
@@ -152,11 +218,17 @@ check-local: check-regression check-loadavg
 
 .PHONY: check-loadavg check-regression
 
+#: Check internal load average routine against 'uptime'
 check-loadavg: loadavg$(EXEEXT)
 	@echo The system uptime program believes the load average to be:
 	-uptime
 	@echo The GNU load average checking code thinks:
 	-./loadavg$(EXEEXT)
+
+# FIXME: doesn't work.
+##: Run remake-specific tests using Ruby rspec
+#check-rspec:
+#	$(SHELL) -c 'ruby tests/spec/run-tests.rb'
 
 # The loadavg function is invoked during "make check" to test getloadavg.
 check_PROGRAMS = loadavg
@@ -172,6 +244,7 @@ loadavg_LDADD = @GETLOADAVG_LIBS@
 #
 MAKETESTFLAGS =
 
+#: run regression tests in tests/scripts
 check-regression: tests/config-flags.pm
 	@if test -f '$(srcdir)/tests/run_make_tests'; then \
 	  if $(PERL) -v >/dev/null 2>&1; then \
@@ -192,12 +265,22 @@ check-regression: tests/config-flags.pm
 	  echo "Can't find the GNU Make test suite ($(srcdir)/tests)."; \
 	 fi
 
+%.short:
+	$(MAKE) $(@:.short=) 2>&1 >/dev/null
 
 # --------------- Maintainer's Section
 
 # Tell automake that I haven't forgotten about this file and it will be
 # created before we build a distribution (see maintMakefile in the Git
 # distribution).
+
+if MAINTAINER_MODE
+
+#: create ChangeLog for distirbution from 'git log'
+ChangeLog:
+	git log --pretty --numstat --summary | $(GIT2CL) > $@
+
+endif
 
 README:
 
