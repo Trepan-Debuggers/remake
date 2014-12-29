@@ -1,5 +1,5 @@
-/* 
-Copyright (C) 2004, 2005, 2007, 2008, 2009, 2011 R. Bernstein 
+/*
+Copyright (C) 2004-2005, 2007-2009, 2011, 2014 R. Bernstein
 <rocky@gnu.org>
 This file is part of GNU Make (remake variant).
 
@@ -20,6 +20,7 @@ Boston, MA 02111-1307, USA.  */
 
 /* debugger command interface. */
 
+#include "makeint.h"
 #include "msg.h"
 #include "debug.h"
 #include "file.h"
@@ -45,13 +46,13 @@ Boston, MA 02111-1307, USA.  */
 
 /**
    Think of the below not as an enumeration but as #defines done in a
-   way that we'll be able to use the value in a gdb. 
+   way that we'll be able to use the value in a gdb.
  **/
 enum {
   MAX_FILE_LENGTH   = 1000,
 } debugger_enum1;
 
-  
+
 
 /** True if we are inside the debugger, false otherwise. */
 int in_debugger = false;
@@ -60,7 +61,7 @@ int in_debugger = false;
    Command-line args after the command-name part. For example in:
    break foo
    the below will be "foo".
- **/ 
+ **/
 char *psz_debugger_args;
 
 debug_enter_reason_t last_stop_reason;
@@ -166,17 +167,17 @@ find_command (const char *psz_name)
     if ( 0 == cmp ) {
       psz_name = aliases[i].command;
       break;
-    } else 
+    } else
       /* Words should be in alphabetic order by alias name.
 	 Have we gone too far? */
       if (cmp < 0) break;
   }
-  
+
   for (i = 0; commands[i].long_name; i++) {
     const int cmp = strcmp (psz_name, commands[i].long_name);
     if ( 0 == cmp ) {
       return (&short_command[(uint8_t) commands[i].short_name]);
-    } else 
+    } else
       /* Words should be in alphabetic order by command name.
 	 Have we gone too far? */
       if (cmp < 0) break;
@@ -218,8 +219,8 @@ find_command (const char *psz_name)
 /* Needs to come after dbg_cmd_show */
 #include "command/help.h"
 
-static void 
-cmd_initialize(void) 
+static void
+cmd_initialize(void)
 {
   dbg_cmd_break_init   ('b');
   dbg_cmd_chdir_init   ('C');
@@ -262,7 +263,7 @@ execute_line (char *psz_line)
   char *psz_word = get_word(&psz_line);
 
   if (1 == strlen(psz_word)) {
-    if ( NULL != short_command[(uint8_t) psz_word[0]].func ) 
+    if ( NULL != short_command[(uint8_t) psz_word[0]].func )
       command = &short_command[(uint8_t) psz_word[0]];
     else
       command = NULL;
@@ -286,7 +287,7 @@ execute_line (char *psz_line)
 }
 
 /* Show history. */
-debug_return_t 
+debug_return_t
 dbg_cmd_show_command (const char *psz_args)
 {
  /*
@@ -306,10 +307,10 @@ dbg_cmd_show_command (const char *psz_args)
   return debug_readloop;
 }
 
-/* Set a variable. Set "expand' to 1 if you want variable 
+/* Set a variable. Set "expand' to 1 if you want variable
    definitions inside the value getting passed in to be expanded
    before assigment. */
-static debug_return_t dbg_cmd_set_var (char *psz_args, int expand) 
+static debug_return_t dbg_cmd_set_var (char *psz_args, int expand)
 {
   if (!psz_args || 0==strlen(psz_args)) {
     dbg_msg(_("You need to supply a variable name."));
@@ -325,7 +326,7 @@ static debug_return_t dbg_cmd_set_var (char *psz_args, int expand)
 
     if (p_v) {
       char *psz_value =  expand ? variable_expand(psz_args) : psz_args;
-      
+
       define_variable_in_set(p_v->name, u_len, psz_value,
 			     o_debugger, 0, NULL,
 			     &(p_v->fileinfo));
@@ -345,13 +346,13 @@ static debug_return_t dbg_cmd_set_var (char *psz_args, int expand)
 #include <setjmp.h>
 jmp_buf debugger_loop;
 
-/* Should be less that PROMPT_LENGTH / 2 - strlen("remake ") + log(history) 
+/* Should be less that PROMPT_LENGTH / 2 - strlen("remake ") + log(history)
    We will make it much less that since people can't count more than
    10 or so nested <<<<>>>>'s easily.
 */
 #define MAX_NEST_DEPTH 10
 
-debug_return_t enter_debugger (target_stack_node_t *p, 
+debug_return_t enter_debugger (target_stack_node_t *p,
 			       file_t *p_target, int errcode,
 			       debug_enter_reason_t reason)
 {
@@ -363,25 +364,25 @@ debug_return_t enter_debugger (target_stack_node_t *p,
   unsigned int i = 0;
 
   last_stop_reason = reason;
-  
+
   if ( in_debugger == DEBUGGER_QUIT_RC ) {
     return continue_execution;
   }
-  
+
   if ( i_debugger_stepping > 1 || i_debugger_nexting > 1 ) {
     /* Don't stop unless we are here from a breakpoint. But
        do decrement the step count. */
     if (i_debugger_stepping)  i_debugger_stepping--;
     if (i_debugger_nexting)   i_debugger_nexting--;
     if (!p_target->tracing) return continue_execution;
-  } else if ( !debugger_on_error 
-	      && !(i_debugger_stepping || i_debugger_nexting) 
+  } else if ( !debugger_on_error
+	      && !(i_debugger_stepping || i_debugger_nexting)
 	      && p_target && !p_target->tracing && -2 != errcode )
     return continue_execution;
-  
+
   /* Clear temporary breakpoints. */
   if (p_target && p_target->tracing & BRK_TEMP)
-    switch(last_stop_reason) 
+    switch(last_stop_reason)
       {
       case DEBUG_BRKPT_AFTER_CMD:
       case DEBUG_BRKPT_BEFORE_PREREQ:
@@ -418,7 +419,7 @@ debug_return_t enter_debugger (target_stack_node_t *p,
      the passed in target.
    */
   if (p && p->p_target) {
-    p_target_loc    = &(p->p_target->floc);  
+    p_target_loc    = &(p->p_target->floc);
     psz_target_name = (char *) p->p_target->name;
   } else if (p_target) {
     p_target_loc    = &(p_target->floc);
@@ -435,7 +436,7 @@ debug_return_t enter_debugger (target_stack_node_t *p,
     close_depth[i] = open_depth[i]  = '.'; i++;
     close_depth[i] = open_depth[i]  = '.'; i++;
   }
-  
+
   open_depth[i] = close_depth[i] = '\0';
 
   in_debugger = true;
@@ -448,7 +449,7 @@ debug_return_t enter_debugger (target_stack_node_t *p,
 	printf("\nMakefile terminated.\n");
 	dbg_msg("Use q to quit or R to restart");
       } else {
-	printf("\nMakefile finished at level %d. Use R to restart\n", 
+	printf("\nMakefile finished at level %d. Use R to restart\n",
 	       makelevel);
 	dbg_msg("the makefile at this level or 's', 'n', or 'F' to continue "
 	       "in parent");
@@ -456,7 +457,7 @@ debug_return_t enter_debugger (target_stack_node_t *p,
       }
     } else {
       printf("\n***Entering debugger because we encountered a fatal error.\n");
-      dbg_errmsg("Exiting the debugger will exit make with exit code %d.", 
+      dbg_errmsg("Exiting the debugger will exit make with exit code %d.",
                  errcode);
     }
   }
@@ -464,7 +465,7 @@ debug_return_t enter_debugger (target_stack_node_t *p,
   print_debugger_location(p_target, reason, NULL);
 
   /* Loop reading and executing lines until the user quits. */
-  for ( debug_return = debug_readloop; 
+  for ( debug_return = debug_readloop;
 	debug_return == debug_readloop || debug_return == debug_cmd_error; ) {
     char prompt[PROMPT_LENGTH];
     char *line=NULL;
@@ -473,24 +474,24 @@ debug_return_t enter_debugger (target_stack_node_t *p,
     if (setjmp(debugger_loop))
       dbg_errmsg("Internal error jumped back to debugger loop");
     else {
-    
+
 #ifdef HAVE_LIBREADLINE
       if (use_readline_flag) {
-        snprintf(prompt, PROMPT_LENGTH, "remake%s%d%s ", 
+        snprintf(prompt, PROMPT_LENGTH, "remake%s%d%s ",
                  open_depth, where_history(), close_depth);
-        
+
         line = readline (prompt);
-      } else 
+      } else
 #endif
         {
-          snprintf(prompt, PROMPT_LENGTH, "remake%s0%s ", open_depth, 
+          snprintf(prompt, PROMPT_LENGTH, "remake%s0%s ", open_depth,
                    close_depth);
           printf("%s", prompt);
           if (line == NULL) line = calloc(1, 2048);
           line = fgets(line, 2048, stdin);
           if (NULL != line) chomp(line);
         }
-      
+
       if ( line ) {
         if ( *(s=stripwhite(line)) ) {
           add_history (s);
@@ -508,11 +509,11 @@ debug_return_t enter_debugger (target_stack_node_t *p,
 
   if (in_debugger != DEBUGGER_QUIT_RC)
     in_debugger=false;
-  
+
   return debug_return;
 }
 
-/* 
+/*
  * Local variables:
  * eval: (c-set-style "gnu")
  * indent-tabs-mode: nil

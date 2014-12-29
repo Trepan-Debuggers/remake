@@ -21,6 +21,8 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef REMAKE_DEP_H
 #define REMAKE_DEP_H
 
+#include "gnumake.h"
+
 #define RM_NO_DEFAULT_GOAL      (1 << 0) /* Do not set default goal.  */
 #define RM_INCLUDED             (1 << 1) /* Search makefile search path.  */
 #define RM_DONTCARE             (1 << 2) /* No error if it doesn't exist.  */

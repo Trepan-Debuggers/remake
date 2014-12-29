@@ -17,6 +17,10 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* Structure used for pattern (implicit) rules.  */
 
+#ifndef _REMAKE_RULE_H
+#define _REMAKE_RULE_H
+#include "types.h"
+
 struct rule
   {
     struct rule *next;
@@ -28,6 +32,8 @@ struct rule
     unsigned short num;         /* Number of targets.  */
     char terminal;              /* If terminal (double-colon).  */
     char in_use;                /* If in use by a parent pattern_search.  */
+    floc_t floc;                /* Location of rule */
+    breakpoint_mask_t tracing;  /* breakpoint status of target. */
   };
 
 /* For calling install_pattern_rule.  */
@@ -55,3 +61,9 @@ void install_pattern_rule (struct pspec *p, int terminal);
 void create_pattern_rule (const char **targets, const char **target_percents,
                           unsigned int num, int terminal, struct dep *deps,
                           struct commands *commands, int override);
+
+/*! Show information about a given rule. Useful from the debugger or gdb.  */
+extern void print_rule (rule_t *r, bool b_verbose);
+extern void print_rule_data_base (bool b_verbose);
+
+#endif /*REMAKE_RULE_H*/

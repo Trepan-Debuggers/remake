@@ -55,7 +55,7 @@ RETSIGTYPE fatal_error_signal (int sig);
 
 void print_variable_data_base (void);
 void print_dir_data_base (void);
-void print_rule_data_base (void);
+void print_rule_data_base (bool b_verbose);
 void print_vpath_data_base (void);
 
 void verify_file_data_base (void);
@@ -251,6 +251,28 @@ int inhibit_print_directory_flag = 0;
 
 int print_version_flag = 0;
 
+/*! Nonzero means --trace=noshell.  */
+
+int no_shell_trace = 0;
+
+/*! Nonzero gives a list of explicit target names and exits. Set by option
+  --targets
+ */
+
+int show_targets_flag = 0;
+
+/*! Nonzero gives a list of explicit target names that have commands
+  associated with them and exits. Set by option --tasks
+ */
+
+int show_tasks_flag = 0;
+
+/*! Nonzero gives a list of explicit target names that have commands
+   AND comments associated with them and exits. Set by option --task-comments
+ */
+
+int show_task_comments_flag = 0;
+
 /* List of makefiles given with -f switches.  */
 
 static struct stringlist *makefiles = 0;
@@ -386,6 +408,8 @@ static const char *const usage[] =
     N_("\
   -L, --check-symlink-times   Use the latest mtime between symlinks and target.\n"),
     N_("\
+  --no-extended-errors         Do not give additional error reporting.\n"),
+    N_("\
   -n, --just-print, --dry-run, --recon\n\
                               Don't actually run any recipe; just print them.\n"),
     N_("\
@@ -408,6 +432,11 @@ static const char *const usage[] =
   -S, --no-keep-going, --stop\n\
                               Turns off -k.\n"),
     N_("\
+  --targets                   Give list of explicitly-named targets.\n"),
+    N_("\
+  --tasks                     Give list of explicitly-named targets which\n"
+"                              have commands associated with them.\n"),
+    N_("\
   -t, --touch                 Touch targets instead of remaking them.\n"),
     N_("\
   --trace                     Print tracing information.\n"),
@@ -422,6 +451,22 @@ static const char *const usage[] =
                               Consider FILE to be infinitely new.\n"),
     N_("\
   --warn-undefined-variables  Warn when an undefined variable is referenced.\n"),
+    N_("\
+  --trace[=TYPE]              Trace command execution TYPE may be\n\
+                              \"command\", \"read\", \"normal\",\"\n\
+                              \"noshell\", or \"full\".\n"),
+    N_("\
+  -x                          Same as --trace=\"normal\"\n"),
+    N_("\
+  -y                          Same as --trace=\"noshell\"\n"),
+    N_("\
+  --debugger[=TYPE]            Enter debugger. TYPE may be\n\
+                               \"goal\", \"preread\", \"preaction\",\n\
+                               \"full\", \"error\", or \"fatal\".\n"),
+    N_("\n\
+  -X                           Same as \"--debugger=preaction\"\n"),
+    N_("\
+   --no-readline               Do not use GNU ReadLine in debugger.\n"),
     NULL
   };
 
@@ -455,8 +500,6 @@ static const struct command_switch switches[] =
       "no-keep-going" },
     { 't', flag, &touch_flag, 1, 1, 1, 0, 0, "touch" },
     { 'v', flag, &print_version_flag, 1, 1, 0, 0, 0, "version" },
-    { CHAR_MAX+8, string, &verbosity_flags, 1, 1, 0, 0, 0,
-      "verbosity" },
     { 'w', flag, &print_directory_flag, 1, 1, 0, 0, 0, "print-directory" },
 
     /* These options take arguments.  */
@@ -487,6 +530,16 @@ static const struct command_switch switches[] =
       "warn-undefined-variables" },
     { CHAR_MAX+6, strlist, &eval_strings, 1, 0, 0, 0, 0, "eval" },
     { CHAR_MAX+7, string, &sync_mutex, 1, 1, 0, 0, 0, "sync-mutex" },
+    { CHAR_MAX+8, string, &verbosity_flags, 1, 1, 0, 0, 0,
+      "verbosity" },
+    { CHAR_MAX+9, flag, (char *) &no_extended_errors, 1, 1, 0, 0, 0,
+        "no-extended-errors", },
+    { CHAR_MAX+10, flag_off, (char *) &use_readline_flag, 1, 0, 0, 0, 0,
+        "no-readline", },
+    { CHAR_MAX+11, flag,  &show_targets_flag, 0, 0, 0, 0, 0,
+      "targets" },
+    { CHAR_MAX+12,  flag, &show_tasks_flag, 0, 0, 0, 0, 0,
+      "tasks" },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
@@ -519,45 +572,42 @@ struct command_variable
   };
 static struct command_variable *command_variables;
 
-/* The name we were invoked with.  */
+/*! The name we were invoked with.  */
 
 #ifdef WINDOWS32
 /* On MS-Windows, we chop off the .exe suffix in 'main', so this
    cannot be 'const'.  */
-char *program;
+char *program = NULL;
 #else
-const char *program;
+const char *program = NULL;
 #endif
 
-/* Our current directory before processing any -C options.  */
+/*! Our initial arguments -- used for debugger restart execvp.  */
+char **global_argv;
 
-char *directory_before_chdir;
+/*! Our current directory before processing any -C options.  */
+char *directory_before_chdir = NULL;
 
-/* Our current directory after processing all -C options.  */
-
+/*! Our current directory after processing all -C options.  */
 char *starting_directory;
 
-/* Value of the MAKELEVEL variable at startup (or 0).  */
-
+/*! Value of the MAKELEVEL variable at startup (or 0).  */
 unsigned int makelevel;
 
-/* Pointer to the value of the .DEFAULT_GOAL special variable.
-   The value will be the name of the goal to remake if the command line
-   does not override it.  It can be set by the makefile, or else it's
-   the first target defined in the makefile whose name does not start
-   with '.'.  */
-
+/*! Pointer to the value of the .DEFAULT_GOAL special variable.
+  The value will be the name of the goal to remake if the command line
+  does not override it.  It can be set by the makefile, or else it's
+  the first target defined in the makefile whose name does not start
+  with '.'.  */
 struct variable * default_goal_var;
 
-/* Pointer to structure for the file .DEFAULT
+/*! Pointer to structure for the file .DEFAULT
    whose commands are used for any file that has none of its own.
    This is zero if the makefiles do not define .DEFAULT.  */
-
 struct file *default_file;
 
-/* Nonzero if we have seen the magic '.POSIX' target.
+/*! Nonzero if we have seen the magic '.POSIX' target.
    This turns on pedantic compliance with POSIX.2.  */
-
 int posix_pedantic;
 
 /* Nonzero if we have seen the '.SECONDEXPANSION' target.
@@ -2552,6 +2602,18 @@ main (int argc, char **argv, char **envp)
       O (fatal, NILF, _("No targets"));
     }
 
+#ifdef ROCKY_FINISHED
+  if (show_tasks_flag || show_task_comments_flag) {
+      dbg_cmd_info_targets(show_task_comments_flag
+                           ? INFO_TARGET_TASKS_WITH_COMMENTS
+                           : INFO_TARGET_TASKS);
+      die(0);
+  } else if (show_targets_flag) {
+      dbg_cmd_info_targets(INFO_TARGET_NAME);
+      die(0);
+  }
+#endif
+
   /* Update the goals.  */
 
   DB (DB_BASIC, (_("Updating goal targets....\n")));
@@ -3345,7 +3407,7 @@ print_data_base ()
 
   print_variable_data_base ();
   print_dir_data_base ();
-  print_rule_data_base ();
+  print_rule_data_base (true);
   print_file_data_base ();
   print_vpath_data_base ();
   strcache_print_stats ("#");

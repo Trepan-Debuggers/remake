@@ -20,6 +20,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef REMAKE_COMMANDS_H
 #define REMAKE_COMMANDS_H
 
+#include "makeint.h"
 #include "filedef.h"
 #include "trace.h"
 

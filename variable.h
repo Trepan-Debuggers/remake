@@ -31,6 +31,7 @@ enum variable_origin
     o_command,          /* Variable given by user.  */
     o_override,         /* Variable from an 'override' directive.  */
     o_automatic,        /* Automatic variable -- cannot be set.  */
+    o_debugger,  	/* Set inside debugger.  */
     o_invalid           /* Core dump time.  */
   };
 
@@ -72,9 +73,9 @@ struct variable
                                 /* If >1, allow this many self-referential
                                    expansions.  */
     enum variable_flavor
-      flavor ENUM_BITFIELD (3); /* Variable flavor.  */
+      flavor ENUM_BITFIELD (4); /* Variable flavor.  */
     enum variable_origin
-      origin ENUM_BITFIELD (3); /* Variable origin.  */
+      origin ENUM_BITFIELD (4); /* Variable origin.  */
     enum variable_export
       {
         v_export,               /* Export this variable.  */
@@ -153,12 +154,54 @@ struct variable_set_list *create_new_variable_set (void);
 const char *origin2str(variable_origin_t origin);
 
 void free_variable_set (struct variable_set_list *);
+
+/*! Create a new variable set, push it on the current setlist,
+  and assign current_variable_set_list to it.
+ */
 struct variable_set_list *push_new_variable_scope (void);
+
+/*! Pop the top set off the current_variable_set_list, and free all
+   its storage.  If b_toplevel set we have the top-most global scope
+   and some things don't get freed because they weren't malloc'd.
+*/
 void pop_variable_scope (void);
+
+/*! Define the automatic variables, and record the addresses of their
+  structures so we can change their values quickly.  */
 void define_automatic_variables (void);
+
+/*! Initialize FILE's variable set list.  If FILE already has a
+   variable set list, the topmost variable set is left intact, but the
+   the rest of the chain is replaced with FILE->parent's setlist.  If
+   FILE is a double-colon rule, then we will use the "root"
+   double-colon target's variable set as the parent of FILE's variable
+   set.
+
+   If we're READing a makefile, don't do the pattern variable search now,
+   since the pattern variable might not have been defined yet.  */
 void initialize_file_variables (struct file *file, int reading);
+
+/*! Print all the local variables of P_TARGET.  Lines output have "# "
+    prepended. If you want hash table statistics too, set b_hash_stats
+    true.
+*/
 void print_file_variables (const struct file *file);
+
+/*! Print the data base of variables.  */
+
+extern void print_variable_data_base (void);
+
+/** Print information for variable V, prefixing it with PREFIX.  */
+extern void print_variable_info (const void *item, void *arg);
+
 void print_target_variables (const struct file *file);
+
+/*! Print all the variables in SET.  PREFIX is printed before the
+   actual variable definitions (everything else is comments).  If you
+   want hash table statistics too, set b_hash_stats true.
+*/
+void print_variable_set (struct variable_set *set, const char *prefix, int pauto);
+
 void merge_variable_set_lists (struct variable_set_list **to_list,
                                struct variable_set_list *from_list);
 struct variable *do_variable_definition (const gmk_floc *flocp,

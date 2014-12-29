@@ -171,8 +171,20 @@ void print_file_data_base (void);
     * 302 / 1000) \
    + 1 + 1 + 4 + 25)
 
-FILE_TIMESTAMP file_timestamp_cons (char const *, time_t, long int);
-FILE_TIMESTAMP file_timestamp_now (int *);
+/** Convert an external file timestamp to internal form.  */
+extern FILE_TIMESTAMP file_timestamp_cons (char const *, time_t, long int);
+
+/** Return the current time as a file timestamp, setting *RESOLUTION to
+   its resolution.  */
+extern FILE_TIMESTAMP file_timestamp_now (int *);
+
+/**
+    Place into the buffer P a printable representation of the file
+    timestamp TS.
+
+    @param p output buffer for printable timestamp
+    @param ts timestamp to convert.
+ */
 void file_timestamp_sprintf (char *p, FILE_TIMESTAMP ts);
 
 /* Return the mtime of file F (a struct file *), caching it.
