@@ -83,7 +83,7 @@ _outputs (struct output *out, int is_err, const char *msg)
 /* Write a message indicating that we've just entered or
    left (according to ENTERING) the current directory.  */
 
-static int
+int
 log_working_directory (int entering)
 {
   static char *buf = NULL;

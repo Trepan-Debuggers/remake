@@ -571,6 +571,11 @@ struct command_variable
     struct variable *variable;
   };
 static struct command_variable *command_variables;
+
+/*! Value of argv[0] which seems to get modified. Can we merge this with
+    program below? */
+char *argv0 = NULL;
+
 
 /*! The name we were invoked with.  */
 
@@ -1118,7 +1123,6 @@ main (int argc, char **argv, char **envp)
 {
   static char *stdin_nm = 0;
   int makefile_status = MAKE_SUCCESS;
-  struct dep *read_files;
   PATH_VAR (current_directory);
   unsigned int restarts = 0;
   unsigned int syncing = 0;
@@ -1133,6 +1137,7 @@ main (int argc, char **argv, char **envp)
   no_default_sh_exe = 1;
 #endif
 
+  argv0 = strdup(argv[0]);
   output_init (&make_sync);
 
   initialize_stopchar_map();
@@ -1983,7 +1988,7 @@ main (int argc, char **argv, char **envp)
 
   /* Read all the makefiles.  */
 
-  read_files = read_all_makefiles (makefiles == 0 ? 0 : makefiles->list);
+  read_makefiles = read_all_makefiles (makefiles == 0 ? 0 : makefiles->list);
 
 #ifdef WINDOWS32
   /* look one last time after reading all Makefiles */
@@ -2206,7 +2211,7 @@ main (int argc, char **argv, char **envp)
   OUTPUT_UNSET ();
   output_close (&make_sync);
 
-  if (read_files != 0)
+  if (read_makefiles != 0)
     {
       /* Update any makefiles if necessary.  */
 
@@ -2228,7 +2233,7 @@ main (int argc, char **argv, char **envp)
       {
         register struct dep *d, *last;
         last = 0;
-        d = read_files;
+        d = read_makefiles;
         while (d != 0)
           {
             struct file *f = d->file;
@@ -2250,14 +2255,14 @@ main (int argc, char **argv, char **envp)
                            f->name));
 
                       if (last == 0)
-                        read_files = d->next;
+                        read_makefiles = d->next;
                       else
                         last->next = d->next;
 
                       /* Free the storage.  */
                       free_dep (d);
 
-                      d = last == 0 ? read_files : last->next;
+                      d = last == 0 ? read_makefiles : last->next;
 
                       break;
                     }
@@ -2278,7 +2283,7 @@ main (int argc, char **argv, char **envp)
       define_makeflags (1, 1);
 
       rebuilding_makefiles = 1;
-      status = update_goal_chain (read_files);
+      status = update_goal_chain (read_makefiles);
       rebuilding_makefiles = 0;
 
       switch (status)
@@ -2305,7 +2310,7 @@ main (int argc, char **argv, char **envp)
             unsigned int i;
             struct dep *d;
 
-            for (i = 0, d = read_files; d != 0; ++i, d = d->next)
+            for (i = 0, d = read_makefiles; d != 0; ++i, d = d->next)
               {
                 /* Reset the considered flag; we may need to look at the file
                    again to print an error.  */
@@ -2356,7 +2361,7 @@ main (int argc, char **argv, char **envp)
                     }
               }
             /* Reset this to empty so we get the right error message below.  */
-            read_files = 0;
+            read_makefiles = 0;
 
             if (any_remade)
               goto re_exec;
@@ -2596,7 +2601,7 @@ main (int argc, char **argv, char **envp)
 
   if (!goals)
     {
-      if (read_files == 0)
+      if (read_makefiles == 0)
         O (fatal, NILF, _("No targets specified and no makefile found"));
 
       O (fatal, NILF, _("No targets"));

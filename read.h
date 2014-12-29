@@ -1,4 +1,4 @@
-/* $Id: read.h,v 1.7 2007/01/04 12:03:20 rockyb Exp $ 
+/* $Id: read.h,v 1.7 2007/01/04 12:03:20 rockyb Exp $
 Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 Copyright (C) 2008 R. Bernstein <rocky@gnu.org>
 
@@ -24,15 +24,12 @@ Boston, MA 02111-1307, USA.  */
  *  \brief Header for Reading and parsing of makefiles for GNU Make.
  */
 
-#ifndef READ_H
-#define READ_H
+#ifndef REMAKE_READ_H
+#define REMAKE_READ_H
 
 #include "dep.h"
 
 extern stringlist_t *include_directories;
-
-/*! The chain of makefiles read by read_makefile.  */
-extern dep_t *read_makefiles;
 
 /*! Search STRING for an unquoted STOPCHAR or blank (if BLANK is nonzero).
    Backslashes quote STOPCHAR, blanks if BLANK is nonzero, and backslash.
@@ -40,14 +37,14 @@ extern dep_t *read_makefiles;
    itself.  Returns a pointer to the first unquoted STOPCHAR if there is
    one, or nil if there are none.  */
 
-char *find_char_unquote (char *string, int stop1, int stop2, 
+char *find_char_unquote (char *string, int stop1, int stop2,
 			 int blank);
 
 /*! Search PATTERN for an unquoted %.  */
 char *find_percent (char *pattern);
 
 /*! Expand ~ or ~USER at the beginning of NAME.
-   Return a newly malloc'd string or 0.  
+   Return a newly malloc'd string or 0.
 */
 char *make_tilde_expand (char *name);
 
@@ -63,4 +60,4 @@ char *make_tilde_expand (char *name);
 */
 nameseq_t * multi_glob (struct nameseq *chain, unsigned int size);
 
-#endif /*READ_H*/
+#endif /*REMAKE_READ_H*/

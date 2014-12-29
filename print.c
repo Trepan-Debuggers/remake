@@ -29,50 +29,17 @@ Boston, MA 02111-1307, USA.  */
 #include "read.h"
 #include "print.h"
 
-#ifdef ROCKY_FINISHED
+#include <stdarg.h>
 
 /* Think of the below not as an enumeration but as #defines done in a
    way that we'll be able to use the value in a gdb. */
 enum debug_print_enums_e debug_print_enums1;
 
-#if HAVE_VPRINTF || HAVE_DOPRNT
-# define HAVE_STDVARARGS 1
-# if __STDC__
-#  include <stdarg.h>
-#  define VA_START(args, lastarg) va_start(args, lastarg)
-# else
-#  include <varargs.h>
-#  define VA_START(args, lastarg) va_start(args)
-# endif
-# if HAVE_VPRINTF
-#  define VA_PRINTF(fp, lastarg, args) vfprintf((fp), (lastarg), (args))
-# else
-#  define VA_PRINTF(fp, lastarg, args) _doprnt((lastarg), (args), (fp))
-# endif
-# define VA_END(args) va_end(args)
-#else
-/* # undef HAVE_STDVARARGS */
-# define va_alist a1, a2, a3, a4, a5, a6, a7, a8
-# define va_dcl char *a1, *a2, *a3, *a4, *a5, *a6, *a7, *a8;
-# define VA_START(args, lastarg)
-# define VA_PRINTF(fp, lastarg, args) fprintf((fp), (lastarg), va_alist)
-# define VA_END(args)
-#endif
-
 
 void
-#if __STDC__ && HAVE_STDVARARGS
 err_with_stack (target_stack_node_t *p_call, const char *fmt, ...)
-#else
-err_with_stack (p_call, fmt, va_alist)
-     target_stack_node_t *p_call;
-     const char *fmt;
-     va_dcl
-#endif
 {
-#if HAVE_STDVARARGS
   va_list args;
-#endif
   floc_t *p_floc   = NULL;
   file_t *p_target = NULL;
 
@@ -90,9 +57,9 @@ err_with_stack (p_call, fmt, va_alist)
   else
     fprintf (stderr, "%s[%u]: ", program, makelevel);
 
-  VA_START(args, fmt);
-  VA_PRINTF (stderr, fmt, args);
-  VA_END (args);
+  va_start (args, fmt);
+  vfprintf (stderr, fmt, args);
+  va_end (args);
 
   putc ('\n', stderr);
   if (!no_extended_errors) {
@@ -111,20 +78,10 @@ err_with_stack (p_call, fmt, va_alist)
 }
 
 /* Print an error message and exit.  */
-
 void
-#if __STDC__ && HAVE_STDVARARGS
 fatal_err(target_stack_node_t *p_call, const char *fmt, ...)
-#else
-fatal_err (flocp, fmt, va_alist)
-     target_stack_node_t *p_call;
-     const char *fmt;
-     va_dcl
-#endif
 {
-#if HAVE_STDVARARGS
   va_list args;
-#endif
   floc_t *p_floc   = NULL;
   file_t *p_target = NULL;
 
@@ -142,9 +99,9 @@ fatal_err (flocp, fmt, va_alist)
   else
     fprintf (stderr, "%s[%u]: *** ", program, makelevel);
 
-  VA_START(args, fmt);
-  VA_PRINTF (stderr, fmt, args);
-  VA_END (args);
+  va_start (args, fmt);
+  vfprintf (stderr, fmt, args);
+  va_end (args);
 
   fputs (_(".  Stop.\n"), stderr);
   if (!no_extended_errors) {
@@ -231,7 +188,6 @@ print_variable_expand (variable_t *p_v)
     }
   }
 }
-#endif /*ROCKY_FINISHED*/
 
 /*! Show a command before executing it. */
 extern void
@@ -268,8 +224,6 @@ print_floc_prefix (const floc_t *p_floc)
   }
 }
 
-#ifdef ROCKY_FINISHED3
-
 /*! Show a command before executing it. */
 extern debug_return_t
 print_child_cmd (child_t *p_child, target_stack_node_t *p)
@@ -293,7 +247,6 @@ print_child_cmd (child_t *p_child, target_stack_node_t *p)
 
   return rc;
 }
-#endif /*ROCKY_FINISHED3*/
 
 void
 print_target_stack_entry (const file_t *p_target, int i, int i_pos)
@@ -387,7 +340,6 @@ void print_file (file_t *p_file)
   printf("\tNumber of lines: %u\n",  p_file->nlines);
 }
 
-#ifdef ROCKY_FINISHED2
 /*! Print the list makefiles read by read_makefiles().  */
 bool print_read_makefiles(const char *psz_filename)
 {
@@ -429,7 +381,6 @@ void print_cmdline (void)
   printf("\n");
 }
 
-#endif /*ROCKY_FINISHED2*/
 
 /*
  * Local variables:
