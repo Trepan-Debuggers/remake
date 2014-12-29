@@ -58,12 +58,16 @@ unsigned int commands_started = 0;
 /* Current value for pruning the scan of the goal chain (toggle 0/1).  */
 static unsigned int considered;
 
-static enum update_status update_file (struct file *file, unsigned int depth);
-static enum update_status update_file_1 (struct file *file, unsigned int depth);
+static enum update_status update_file (struct file *file, unsigned int depth,
+				       target_stack_node_t *p_call_stack);
+static enum update_status update_file_1 (struct file *file, unsigned int depth,
+					 target_stack_node_t *p_call_stack);
 static enum update_status check_dep (struct file *file, unsigned int depth,
-                                     FILE_TIMESTAMP this_mtime, int *must_make);
+                                     FILE_TIMESTAMP this_mtime, int *must_make_ptr,
+				     target_stack_node_t *p_call_stack);
 static enum update_status touch_file (struct file *file);
-static void remake_file (struct file *file);
+static void remake_file (struct file *file,
+			 target_stack_node_t *p_call_stack);
 static FILE_TIMESTAMP name_mtime (const char *name);
 static const char *library_search (const char *lib, FILE_TIMESTAMP *mtime_ptr);
 
@@ -111,11 +115,11 @@ update_goal_chain (struct dep *goals)
 
       /* Start jobs that are waiting for the load to go down.  */
 
-      start_waiting_jobs ();
+      start_waiting_jobs (NULL);
 
       /* Wait for a child to die.  */
 
-      reap_children (1, 0);
+      reap_children (1, 0, NULL);
 
       lastgoal = 0;
       g = goals;
@@ -152,7 +156,7 @@ update_goal_chain (struct dep *goals)
                  actually run.  */
               ocommands_started = commands_started;
 
-              fail = update_file (file, rebuilding_makefiles ? 1 : 0);
+	      fail = update_file (file, rebuilding_makefiles ? 1 : 0, NULL);
               check_renamed (file);
 
               /* Set the goal's 'changed' flag if any commands were started
@@ -281,7 +285,8 @@ update_goal_chain (struct dep *goals)
    each is considered in turn.  */
 
 static enum update_status
-update_file (struct file *file, unsigned int depth)
+update_file (struct file *file, unsigned int depth,
+	     target_stack_node_t *p_call_stack)
 {
   enum update_status status = us_success;
   struct file *f;
@@ -313,7 +318,7 @@ update_file (struct file *file, unsigned int depth)
 
       f->considered = considered;
 
-      new = update_file_1 (f, depth);
+      new = update_file_1 (f, depth, p_call_stack);
       check_renamed (f);
 
       /* Clean up any alloca() used during the update.  */
@@ -347,7 +352,7 @@ update_file (struct file *file, unsigned int depth)
 
         for (d = f->deps; d != 0; d = d->next)
           {
-            enum update_status new = update_file (d->file, depth + 1);
+	      enum update_status new = update_file (d->file, depth + 1, p_call_stack);
             if (new > status)
               new = status;
           }
@@ -413,7 +418,8 @@ complain (struct file *file)
    Return 0 on success, or non-0 on failure.  */
 
 static enum update_status
-update_file_1 (struct file *file, unsigned int depth)
+update_file_1 (struct file *file, unsigned int depth,
+               target_stack_node_t *p_call_stack)
 {
   enum update_status dep_status = us_success;
   FILE_TIMESTAMP this_mtime;
@@ -570,7 +576,8 @@ update_file_1 (struct file *file, unsigned int depth)
               d->file->dontcare = file->dontcare;
             }
 
-          new = check_dep (d->file, depth, this_mtime, &maybe_make);
+          new = check_dep (d->file, depth, this_mtime, &maybe_make,
+				   p_call_stack);
           if (new > dep_status)
             dep_status = new;
 
@@ -637,7 +644,7 @@ update_file_1 (struct file *file, unsigned int depth)
                not prune it.  */
             d->file->considered = !considered;
 
-            new = update_file (d->file, depth);
+            new = update_file (d->file, depth, p_call_stack);
             if (new > dep_status)
               dep_status = new;
 
@@ -833,7 +840,7 @@ update_file_1 (struct file *file, unsigned int depth)
     }
 
   /* Now, take appropriate actions to remake the file.  */
-  remake_file (file);
+  remake_file (file, p_call_stack);
 
   if (file->command_state != cs_finished)
     {
@@ -1004,7 +1011,8 @@ notice_finished_file (struct file *file)
 
 static enum update_status
 check_dep (struct file *file, unsigned int depth,
-           FILE_TIMESTAMP this_mtime, int *must_make_ptr)
+           FILE_TIMESTAMP this_mtime, int *must_make_ptr,
+	   target_stack_node_t *p_call_stack)
 {
   struct file *ofile;
   struct dep *d;
@@ -1022,7 +1030,7 @@ check_dep (struct file *file, unsigned int depth,
       /* If this is a non-intermediate file, update it and record whether it
          is newer than THIS_MTIME.  */
       FILE_TIMESTAMP mtime;
-      dep_status = update_file (file, depth);
+      dep_status = update_file (file, depth, p_call_stack);
       check_renamed (file);
       mtime = file_mtime (file);
       check_renamed (file);
@@ -1105,7 +1113,7 @@ check_dep (struct file *file, unsigned int depth,
 
               d->file->parent = file;
               maybe_make = *must_make_ptr;
-              new = check_dep (d->file, depth, this_mtime, &maybe_make);
+              new = check_dep (d->file, depth, this_mtime, &maybe_make, p_call_stack);
               if (new > dep_status)
                 dep_status = new;
 
@@ -1199,7 +1207,7 @@ touch_file (struct file *file)
    Return the status from executing FILE's commands.  */
 
 static void
-remake_file (struct file *file)
+remake_file (file_t *file, target_stack_node_t *p_call_stack)
 {
   if (file->cmds == 0)
     {
@@ -1225,7 +1233,7 @@ remake_file (struct file *file)
       /* The normal case: start some commands.  */
       if (!touch_flag || file->cmds->any_recurse)
         {
-          execute_file_commands (file);
+          execute_file_commands (file, p_call_stack);
           return;
         }
 

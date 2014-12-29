@@ -481,6 +481,22 @@ variable_expand_for_file (const char *line, struct file *file)
   return result;
 }
 
+/** Expand PSZ_LINE. Expansion uses P_FILE_SET if it is not NULL. */
+char *
+variable_expand_set (char *psz_line, variable_set_list_t *p_file_vars)
+{
+  char *psz_result;
+  variable_set_list_t *p_vars_save;
+
+  p_vars_save = current_variable_set_list;
+  if (p_file_vars)
+    current_variable_set_list = p_file_vars;
+  psz_result = variable_expand (psz_line);
+  current_variable_set_list = p_vars_save;
+
+  return psz_result;
+}
+
 /* Like allocated_variable_expand, but for += target-specific variables.
    First recursively construct the variable value from its appended parts in
    any upper variable sets.  Then expand the resulting value.  */

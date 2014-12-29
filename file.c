@@ -1031,8 +1031,10 @@ print_file (const void *item)
   if (f->variables != 0)
     print_file_variables (f);
 
-  if (f->cmds != 0)
-    print_commands (f->cmds);
+  if (f->cmds != 0) {
+      print_commands (NULL, f->cmds, false);
+      // print_commands (p_target, p_target->cmds, false);
+  }
 
   if (f->prev)
     print_file ((const void *) f->prev);

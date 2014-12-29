@@ -94,7 +94,7 @@ make_SOURCES =	ar.c arscan.c commands.c default.c dir.c expand.c file.c \
 		function.c getopt.c getopt1.c guile.c implicit.c job.c load.c \
 		loadapi.c main.c misc.c output.c print.c read.c remake.c rule.c \
 		signame.c strcache.c variable.c version.c vpath.c hash.c \
-		debug.c trace.c \
+		buildargv.c debug.c trace.c \
 		$(remote)
 
 EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c

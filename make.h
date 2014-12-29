@@ -364,7 +364,6 @@ struct floc
 #endif
 
 void die (int);
-void log_working_directory (int);
 void pfatal_with_name (const char *);
 void perror_with_name (const char *, const char *);
 void *xmalloc (unsigned int);
@@ -427,8 +426,6 @@ extern void construct_include_path (const char **arg_dirs);
 void user_access (void);
 void make_access (void);
 void child_access (void);
-
-void close_stdout (void);
 
 char *strip_whitespace (const char **begpp, const char **endpp);
 

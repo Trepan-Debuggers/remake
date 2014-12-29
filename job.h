@@ -18,6 +18,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define _REMAKE_JOB_H_
 
 #include "output.h"
+#include "trace.h"
 
 #ifdef HAVE_FCNTL_H
 # include <fcntl.h>
@@ -117,9 +118,10 @@ struct child
 extern struct child *children;
 
 int is_bourne_compatible_shell(const char *path);
-void new_job (struct file *file);
-void reap_children (int block, int err);
-void start_waiting_jobs (void);
+extern void new_job (file_t *file, target_stack_node_t *p_call_stack);
+extern void reap_children (int block, int err,
+			   target_stack_node_t *p_call_stack);
+extern void start_waiting_jobs (target_stack_node_t *p_call_stack);
 
 char **construct_command_argv (char *line, char **restp, struct file *file,
                                int cmd_flags, char** batch_file);

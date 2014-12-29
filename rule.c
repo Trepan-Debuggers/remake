@@ -483,7 +483,7 @@ print_rule (struct rule *r)
   print_prereqs (r->deps);
 
   if (r->cmds != 0)
-    print_commands (r->cmds);
+    print_commands (NULL, r->cmds, false);
 }
 
 void

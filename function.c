@@ -21,6 +21,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "job.h"
 #include "commands.h"
 #include "debug.h"
+#include "expand.h"
 
 #ifdef _AMIGA
 #include "amiga.h"
@@ -1825,7 +1826,7 @@ func_shell_base (char *o, char **argv, int trim_newlines)
       /* Loop until child_handler or reap_children()  sets
          shell_function_completed to the status of our child shell.  */
       while (shell_function_completed == 0)
-        reap_children (1, 0);
+	reap_children (1, 0, NULL);
 
       if (batch_filename)
         {

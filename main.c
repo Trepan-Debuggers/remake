@@ -3449,7 +3449,7 @@ die (int status)
       /* Wait for children to die.  */
       err = (status != 0);
       while (job_slots_used > 0)
-        reap_children (1, err);
+        reap_children (1, err, NULL);
 
       /* Let the remote job module clean up its state.  */
       remote_cleanup ();
