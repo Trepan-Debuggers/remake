@@ -40,7 +40,7 @@ void
 err_with_stack (target_stack_node_t *p_call, const char *fmt, ...)
 {
   va_list args;
-  floc_t *p_floc   = NULL;
+  gmk_floc *p_floc   = NULL;
   file_t *p_target = NULL;
 
   log_working_directory (1);
@@ -82,7 +82,7 @@ void
 fatal_err(target_stack_node_t *p_call, const char *fmt, ...)
 {
   va_list args;
-  floc_t *p_floc   = NULL;
+  gmk_floc *p_floc   = NULL;
   file_t *p_target = NULL;
 
   log_working_directory (1);
@@ -209,7 +209,7 @@ print_file_target_prefix (const file_t *p_target)
 
 /*! Show a command before executing it. */
 extern void
-print_floc_prefix (const floc_t *p_floc)
+print_floc_prefix (const gmk_floc *p_floc)
 {
   if (!p_floc) return;
   if (p_floc->filenm) {
@@ -251,7 +251,7 @@ print_child_cmd (child_t *p_child, target_stack_node_t *p)
 void
 print_target_stack_entry (const file_t *p_target, int i, int i_pos)
 {
-  floc_t floc;
+  gmk_floc floc;
   const char *psz_target_name =
     (p_target && p_target->name) ? p_target->name : "(null)";
 
@@ -260,9 +260,9 @@ print_target_stack_entry (const file_t *p_target, int i, int i_pos)
      use that.
   */
   if (p_target->floc.filenm) {
-    memcpy(&floc, &(p_target->floc), sizeof(floc_t));
+    memcpy(&floc, &(p_target->floc), sizeof(gmk_floc));
   } else if (p_target->cmds) {
-    memcpy(&floc, &(p_target->cmds->fileinfo.filenm), sizeof(floc_t));
+    memcpy(&floc, &(p_target->cmds->fileinfo.filenm), sizeof(gmk_floc));
     /* HACK: is it okay to assume that the target is on the line
        before the first command? Or should we list the line
        that the command starts on - so we know we've faked the location?

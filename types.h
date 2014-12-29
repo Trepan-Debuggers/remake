@@ -67,7 +67,6 @@ typedef struct child             child_t;
 typedef struct commands          commands_t;
 typedef struct dep               dep_t;
 typedef struct file              file_t;
-typedef struct floc              floc_t;
 typedef struct nameseq           nameseq_t;
 typedef struct pattern_var       pattern_var_t;
 typedef struct pspec             pspec_t;

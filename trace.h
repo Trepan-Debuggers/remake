@@ -98,7 +98,7 @@ extern void trace_pop_target (target_stack_node_t *p);
 /*! \brief Node for an item in the "include Makefile" stack */
 typedef struct floc_stack_node
   {
-    floc_t                 *p_floc;
+    gmk_floc               *p_floc;
     struct floc_stack_node *p_parent;
   } floc_stack_node_t;
 
@@ -107,7 +107,7 @@ extern floc_stack_node_t *p_stack_floc_top;
 
 /*! Push "p_floc" to the floc stack. Return the new stack top.
 */
-extern void trace_push_floc (floc_t *p_floc);
+extern void trace_push_floc (gmk_floc *p_floc);
 
 /*! Pop the next floc from the call stack.. */
 extern void trace_pop_floc (void);

@@ -368,6 +368,8 @@ install_pattern_rule (struct pspec *p, int terminal)
   r->lens[0] = strlen (p->target);
   r->targets[0] = p->target;
   r->suffixes[0] = find_percent_cached (&r->targets[0]);
+  r->floc.filenm = NULL;
+  r->floc.lineno = 0;
   assert (r->suffixes[0] != NULL);
   ++r->suffixes[0];
 
@@ -453,6 +455,15 @@ create_pattern_rule (const char **targets, const char **target_percents,
   r->targets = targets;
   r->suffixes = target_percents;
   r->lens = xmalloc (n * sizeof (unsigned int));
+
+  r->tracing = BRK_NONE;
+  if (commands) {
+      r->floc.filenm = commands->fileinfo.filenm;
+      r->floc.lineno = commands->fileinfo.lineno - 1;
+  } else {
+    r->floc.filenm = NULL;
+    r->floc.lineno = 0;
+  }
 
   for (i = 0; i < n; ++i)
     {

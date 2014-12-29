@@ -347,13 +347,6 @@ extern int unixy_shell;
 struct rlimit stack_limit;
 #endif
 
-struct floc
-  {
-    const char *filenm;
-    unsigned long lineno;
-  };
-
-
 /* We have to have stdarg.h or varargs.h AND v*printf or doprnt to use
    variadic versions of these functions.  */
 

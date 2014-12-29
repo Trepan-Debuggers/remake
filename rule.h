@@ -19,6 +19,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #ifndef _REMAKE_RULE_H
 #define _REMAKE_RULE_H
+#include "gnumake.h"
 #include "types.h"
 
 struct rule
@@ -32,7 +33,7 @@ struct rule
     unsigned short num;         /* Number of targets.  */
     char terminal;              /* If terminal (double-colon).  */
     char in_use;                /* If in use by a parent pattern_search.  */
-    floc_t floc;                /* Location of rule */
+    gmk_floc floc;              /* Location of rule */
     breakpoint_mask_t tracing;  /* breakpoint status of target. */
   };
 

@@ -23,6 +23,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define _REMAKE_FILEDEF_H
 
 #include "hash.h"
+#include "gnumake.h"
 #include "types.h"
 
 struct file
@@ -30,7 +31,7 @@ struct file
     const char *name;
     const char *hname;          /* Hashed filename */
     const char *vpath;          /* VPATH/vpath pathname */
-    floc_t floc;                /* location in Makefile - for tracing */
+    gmk_floc floc;              /* location in Makefile - for tracing */
     unsigned int nlines;	/* Number of lines in file - for debugging. */
 
     const char *description;    /* Description of target taken from comment.

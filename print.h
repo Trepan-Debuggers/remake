@@ -78,7 +78,7 @@ extern void print_file_target_prefix (const file_t *p_target);
 extern void print_target_prefix (const char *p_name);
 
 /*! Display common prefix message output file target. */
-extern void print_floc_prefix (const floc_t *p_floc);
+extern void print_floc_prefix (const gmk_floc *p_floc);
 
 /*! Display common prefix message output file target. */
 extern debug_return_t print_child_cmd (child_t *p_child,

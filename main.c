@@ -538,10 +538,10 @@ static const struct command_switch switches[] =
         "no-readline", },
     { CHAR_MAX+11, flag,  &show_targets_flag, 0, 0, 0, 0, 0,
       "targets" },
-    { CHAR_MAX+12,  flag, &show_task_comments_flag, 0, 0, 0, 0, 0,
-      "tasks" },
-/*    { CHAR_MAX+12,  flag, &show_tasks_flag, 0, 0, 0, 0, 0,
+/*    { CHAR_MAX+12,  flag, &show_task_comments_flag, 0, 0, 0, 0, 0,
       "tasks" }, */
+    { CHAR_MAX+12,  flag, &show_tasks_flag, 0, 0, 0, 0, 0,
+      "tasks" },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
