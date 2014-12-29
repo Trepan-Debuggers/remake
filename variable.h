@@ -146,6 +146,12 @@ char *recursively_expand_for_file (struct variable *v, struct file *file);
 
 /* variable.c */
 struct variable_set_list *create_new_variable_set (void);
+
+/*!
+  Return a string describing origin.
+ */
+const char *origin2str(variable_origin_t origin);
+
 void free_variable_set (struct variable_set_list *);
 struct variable_set_list *push_new_variable_scope (void);
 void pop_variable_scope (void);

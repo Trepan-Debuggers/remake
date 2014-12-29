@@ -14,6 +14,9 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef _REMAKE_JOB_H_
+#define _REMAKE_JOB_H_
+
 #include "output.h"
 
 #ifdef HAVE_FCNTL_H
@@ -157,3 +160,5 @@ extern int fatal_signal_mask;
 #endif
 
 extern unsigned int jobserver_tokens;
+
+#endif  /* _REMAKE_JOB_H_ */

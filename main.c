@@ -145,6 +145,60 @@ int just_print_flag;
 
 char *output_sync_option = 0;
 
+/*! If 1, we don't give additional error reporting information. */
+int no_extended_errors = 0;
+
+/*! If 1 same as --trace=normal */
+int tracing_flag;
+
+/*! If non-null, contains the type of tracing we are to do.
+  This is coordinated with tracing_flag. */
+stringlist_t *tracing_opts = NULL;
+
+/*! Nonzero means use GNU readline in the debugger. */
+
+int use_readline_flag =
+#ifdef HAVE_READLINE_READLINE_H
+    1
+#else
+    0
+#endif
+    ;
+
+/*! If nonzero, we are debugging after each "step" for that many times.
+  When we have a value 1, then we actually run the debugger read loop.
+  Otherwise we decrement the step count.
+
+*/
+unsigned int i_debugger_stepping = 0;
+
+/*! If nonzero, we are debugging after each "next" for that many times.
+  When we have a value 1, then we actually run the debugger read loop.
+  Otherwise we decrement the step count.
+
+*/
+unsigned int i_debugger_nexting = 0;
+
+/*! If nonzero, enter the debugger if we hit a fatal error.
+*/
+unsigned int debugger_on_error = 0;
+
+/*! If nonzero, we have requested some sort of debugging.
+*/
+unsigned int debugger_enabled;
+
+/*! If nonzero, the basename of filenames is in giving locations. Normally,
+    giving a file directory location helps a debugger frontend
+    when we change directories. For regression tests it is helpful to
+    list just the basename part as that doesn't change from installation
+    to installation. Users may have their preferences too.
+*/
+int basename_filenames = 0;
+
+/* Output level (--verbosity).  */
+
+static struct stringlist *verbosity_flags;
+
 #ifdef WINDOWS32
 /* Suspend make in main for a short time to allow debugger to attach */
 
@@ -401,6 +455,8 @@ static const struct command_switch switches[] =
       "no-keep-going" },
     { 't', flag, &touch_flag, 1, 1, 1, 0, 0, "touch" },
     { 'v', flag, &print_version_flag, 1, 1, 0, 0, 0, "version" },
+    { CHAR_MAX+8, string, &verbosity_flags, 1, 1, 0, 0, 0,
+      "verbosity" },
     { 'w', flag, &print_directory_flag, 1, 1, 0, 0, 0, "print-directory" },
 
     /* These options take arguments.  */

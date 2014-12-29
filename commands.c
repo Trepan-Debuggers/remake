@@ -678,7 +678,7 @@ delete_child_targets (struct child *child)
 /* Print out the commands in CMDS.  */
 
 void
-print_commands (const struct commands *cmds)
+print_commands (commands_t *cmds)
 {
   const char *s;
 

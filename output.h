@@ -14,6 +14,9 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef REMAKE_OUTPUT_H
+#define REMAKE_OUTPUT_H
+
 struct output
   {
     int out;
@@ -49,3 +52,5 @@ int output_tmpfd (void);
 /* Dump any child output content to stdout, and reset it.  */
 void output_dump (struct output *out);
 #endif
+
+#endif /*REMAKE_OUTPUT_H*/

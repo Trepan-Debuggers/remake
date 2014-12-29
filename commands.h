@@ -17,6 +17,12 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* Structure that gives the commands to make a file
    and information about where these commands came from.  */
 
+#ifndef REMAKE_COMMANDS_H
+#define REMAKE_COMMANDS_H
+
+#include "filedef.h"
+#include "trace.h"
+
 struct commands
   {
     gmk_floc fileinfo;          /* Where commands were defined.  */
@@ -34,8 +40,10 @@ struct commands
 #define COMMANDS_SILENT         2 /* Silent: @.  */
 #define COMMANDS_NOERROR        4 /* No errors: -.  */
 
-void execute_file_commands (struct file *file);
-void print_commands (const struct commands *cmds);
+void execute_file_commands (file_t *p_file);
+void print_commands (commands_t *p_cmds);
 void delete_child_targets (struct child *child);
 void chop_commands (struct commands *cmds);
 void set_file_variables (struct file *file);
+
+#endif /*REMAKE_COMMANDS_H*/

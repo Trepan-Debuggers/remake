@@ -16,8 +16,8 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef _GNUMAKE_H_
-#define _GNUMAKE_H_
+#ifndef _REMAKE_GNUMAKE_H_
+#define _REMAKE_GNUMAKE_H_
 
 /* Specify the location of elements read from makefiles.  */
 typedef struct
@@ -76,4 +76,4 @@ GMK_EXPORT void gmk_add_function (const char *name, gmk_func_ptr func,
 #define GMK_FUNC_DEFAULT    0x00
 #define GMK_FUNC_NOEXPAND   0x01
 
-#endif  /* _GNUMAKE_H_ */
+#endif  /* _REMAKE_GNUMAKE_H_ */

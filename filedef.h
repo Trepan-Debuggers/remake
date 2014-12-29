@@ -19,13 +19,22 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
    that the makefile says how to make.
    All of these are chained together through 'next'.  */
 
+#ifndef _REMAKE_FILEDEF_H
+#define _REMAKE_FILEDEF_H
+
 #include "hash.h"
+#include "types.h"
 
 struct file
   {
     const char *name;
     const char *hname;          /* Hashed filename */
     const char *vpath;          /* VPATH/vpath pathname */
+    floc_t floc;                /* location in Makefile - for tracing */
+    unsigned int nlines;	/* Number of lines in file - for debugging. */
+
+    const char *description;    /* Description of target taken from comment.
+				   Part after #:  */
     struct dep *deps;           /* all dependencies, including duplicates */
     struct commands *cmds;      /* Commands to execute for this target.  */
     const char *stem;           /* Implicit stem, if an implicit
@@ -73,6 +82,8 @@ struct file
         cs_running,             /* Commands running.  */
         cs_finished             /* Commands finished.  */
       } command_state ENUM_BITFIELD (2);
+
+    breakpoint_mask_t tracing;  /* breakpoint status of target. */
 
     unsigned int builtin:1;     /* True if the file is a builtin rule. */
     unsigned int precious:1;    /* Non-0 means don't delete file on quit */
@@ -207,3 +218,5 @@ FILE_TIMESTAMP f_mtime (struct file *file, int search);
 
 /* Have we snapped deps yet?  */
 extern int snapped_deps;
+
+#endif /*FILEDEF_H*/
