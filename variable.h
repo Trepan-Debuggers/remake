@@ -185,7 +185,7 @@ void initialize_file_variables (struct file *file, int reading);
     prepended. If you want hash table statistics too, set b_hash_stats
     true.
 */
-void print_file_variables (const struct file *file);
+extern void print_file_variables(const file_t *p_target, bool b_hash_stats);
 
 /*! Print the data base of variables.  */
 

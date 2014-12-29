@@ -14,7 +14,9 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include "types.h"
 #include "makeint.h"
+#include "debugger/cmd.h"
 
 #include <assert.h>
 
@@ -26,15 +28,6 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "debug.h"
 
 #include <string.h>
-
-/* FIXME: until we include debugger/cmd.c and cmd.h, we need to stub this out. */
-debug_return_t enter_debugger (target_stack_node_t *p,
-			       file_t *p_target, int errcode,
-			       debug_enter_reason_t reason)
-{
-    printf("++stub %p, %p, %d, %u\n", p, p_target, errcode, reason);
-    return 0;
-}
 
 /* Default shell to use.  */
 #ifdef WINDOWS32

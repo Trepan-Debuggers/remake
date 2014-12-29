@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "makeint.h"
+#include "main.h"
+#include "debugger/cmd.h"
 
 #include <assert.h>
 
@@ -147,6 +149,7 @@ static void record_files (struct nameseq *filenames, const char *pattern,
                           const char *pattern_percent, char *depstr,
                           unsigned int cmds_started, char *commands,
                           unsigned int commands_idx, int two_colon,
+			  char *target_description,
                           char prefix, const gmk_floc *flocp);
 static void record_target_var (struct nameseq *filenames, char *defn,
                                enum variable_origin origin,
@@ -154,7 +157,8 @@ static void record_target_var (struct nameseq *filenames, char *defn,
                                const gmk_floc *flocp);
 static enum make_word_type get_next_mword (char *buffer, char *delim,
                                            char **startp, unsigned int *length);
-static void remove_comments (char *line);
+static void remove_comments (char *line, char **description,
+                             char **prev_description, unsigned long lineno);
 static char *find_char_unquote (char *string, int map);
 static char *unescape_char (char *string, int c);
 
@@ -176,6 +180,9 @@ read_all_makefiles (const char **makefiles)
      we will be reading. */
 
   define_variable_cname ("MAKEFILE_LIST", "", o_file, 0);
+
+  if (b_debugger_preread && i_debugger_stepping && !in_debugger)
+    enter_debugger (NULL, NULL, 0, DEBUG_READ_HIT);
 
   DB (DB_BASIC, (_("Reading makefiles...\n")));
 
@@ -330,7 +337,7 @@ eval_makefile (const char *filename, int flags)
   ebuf.floc.filenm = filename; /* Use the original file name.  */
   ebuf.floc.lineno = 1;
 
-  if (ISDB (DB_VERBOSE))
+  if (ISDB (DB_VERBOSE|DB_READ_MAKEFILES))
     {
       printf (_("Reading makefile '%s'"), filename);
       if (flags & RM_NO_DEFAULT_GOAL)
@@ -350,7 +357,7 @@ eval_makefile (const char *filename, int flags)
      in which case it was already done.  */
   if (!(flags & RM_NO_TILDE) && filename[0] == '~')
     {
-      expanded = tilde_expand (filename);
+      expanded = remake_tilde_expand (filename);
       if (expanded != 0)
         filename = expanded;
     }
@@ -434,6 +441,10 @@ eval_makefile (const char *filename, int flags)
   do_variable_definition (&ebuf.floc, "MAKEFILE_LIST", filename, o_file,
                           f_append, 0);
 
+  if (b_debugger_preread && i_debugger_stepping && !in_debugger) {
+      enter_debugger (NULL, NULL, 0, DEBUG_READ_HIT);
+  }
+
   /* Evaluate the makefile */
 
   ebuf.size = 200;
@@ -445,6 +456,7 @@ eval_makefile (const char *filename, int flags)
   eval (&ebuf, !(flags & RM_NO_DEFAULT_GOAL));
 
   reading_file = curfile;
+  deps->file->nlines = ebuf.floc.lineno;
 
   fclose (ebuf.fp);
 
@@ -567,6 +579,9 @@ parse_var_assignment (const char *line, struct vmodifiers *vmod)
 }
 
 
+static unsigned long int target_description_lineno = 0;
+static unsigned long int prev_target_description_lineno = 0;
+
 /* Read file FILENAME as a makefile and add its contents to the data base.
 
    SET_DEFAULT is true if we are allowed to set the default goal.  */
@@ -592,16 +607,42 @@ eval (struct ebuffer *ebuf, int set_default)
   gmk_floc *fstart;
   gmk_floc fi;
 
+  static char *target_description;      /* Place to store most recent
+					 * target description */
+  static char *prev_target_description; /* Most of the time, we read
+					   two targets before
+					   processing the first. I
+					   think this happens because
+					   the second target signals
+					   the end of the first
+					   target. As a result, we
+					   need to save two
+					   descriptions to be able to
+					   use the previous
+					   description for the first
+					   target. For the last target
+					   of the file though, EOF
+					   signals the end of the
+					   target so we don't use
+					   prev_target_description. */
 #define record_waiting_files()                                                \
   do                                                                          \
     {                                                                         \
       if (filenames != 0)                                                     \
         {                                                                     \
+	  /* Have we seen two descriptions since this target or one? */       \
+	  char *description = target_description_lineno > tgts_started	?     \
+	      prev_target_description : target_description;		      \
           fi.lineno = tgts_started;                                           \
           record_files (filenames, pattern, pattern_percent, depstr,          \
                         cmds_started, commands, commands_idx, two_colon,      \
-                        prefix, &fi);                                         \
-          filenames = 0;                                                      \
+			description, prefix, &fi);			      \
+	  /* Don't use the target_description values more than once. */       \
+	  if (target_description_lineno > tgts_started)		      	      \
+	      prev_target_description = NULL;				      \
+	  else								      \
+	      target_description = NULL;				      \
+          filenames = 0;						      \
         }                                                                     \
       commands_idx = 0;                                                       \
       no_targets = 0;                                                         \
@@ -624,6 +665,8 @@ eval (struct ebuffer *ebuf, int set_default)
      we are parsing also finishes the previous rule.  */
 
   commands = xmalloc (200);
+  prev_target_description = NULL;
+  target_description = NULL;
 
   while (1)
     {
@@ -715,7 +758,8 @@ eval (struct ebuffer *ebuf, int set_default)
       strcpy (collapsed, line);
       /* Collapse continuation lines.  */
       collapse_continuations (collapsed);
-      remove_comments (collapsed);
+      remove_comments (collapsed, &target_description,
+		       &prev_target_description, ebuf->floc.lineno);
 
       /* Get rid if starting space (including formfeed, vtab, etc.)  */
       p = collapsed;
@@ -1409,15 +1453,25 @@ eval (struct ebuffer *ebuf, int set_default)
    This is done by copying the text at LINE onto itself.  */
 
 static void
-remove_comments (char *line)
+remove_comments (char *line, char **target_description,
+                 char **prev_target_description, unsigned long lineno)
 {
   char *comment;
 
   comment = find_char_unquote (line, MAP_COMMENT);
 
-  if (comment != 0)
+  if (comment != 0) {
+    if (show_tasks_flag || show_targets_flag) {
+      if (0 == strncmp(comment, "#: ", 3) && target_description) {
+	  *prev_target_description = *target_description;
+	  prev_target_description_lineno = target_description_lineno;
+	  *target_description = xstrdup(&comment[3]);
+	  target_description_lineno = lineno;
+      }
+    }
     /* Cut off the line at the #.  */
     *comment = '\0';
+  }
 }
 
 /* Execute a 'undefine' directive.
@@ -1518,7 +1572,7 @@ do_define (char *name, enum variable_origin origin, struct ebuffer *ebuf)
                    && strneq (p, "endef", 5))
             {
               p += 5;
-              remove_comments (p);
+              remove_comments (p, NULL, NULL, 0);
               if (*(next_token (p)) != '\0')
                 O (error, &ebuf->floc,
                    _("extraneous text after 'endef' directive"));
@@ -1942,6 +1996,7 @@ record_files (struct nameseq *filenames, const char *pattern,
               const char *pattern_percent, char *depstr,
               unsigned int cmds_started, char *commands,
               unsigned int commands_idx, int two_colon,
+	      char *target_description,
               char prefix, const gmk_floc *flocp)
 {
   struct commands *cmds;
@@ -2101,6 +2156,7 @@ record_files (struct nameseq *filenames, const char *pattern,
           /* Single-colon.  Combine this rule with the file's existing record,
              if any.  */
           f = enter_file (strcache_add (name));
+	  f->description = target_description;
           if (f->double_colon)
             OS (fatal, flocp,
                 _("target file '%s' has both : and :: entries"), f->name);
@@ -2152,6 +2208,7 @@ record_files (struct nameseq *filenames, const char *pattern,
                 _("target file '%s' has both : and :: entries"), f->name);
 
           f = enter_file (strcache_add (name));
+	  f->description = target_description;
           /* If there was an existing entry and it was a double-colon entry,
              enter_file will have returned a new one, making it the prev
              pointer of the old one, and setting its double_colon pointer to
@@ -2834,7 +2891,7 @@ construct_include_path (const char **arg_dirs)
 
         if (dir[0] == '~')
           {
-            expanded = tilde_expand (dir);
+            expanded = remake_tilde_expand (dir);
             if (expanded != 0)
               dir = expanded;
           }
@@ -2908,7 +2965,7 @@ construct_include_path (const char **arg_dirs)
    Return a newly malloc'd string or 0.  */
 
 char *
-tilde_expand (const char *name)
+remake_tilde_expand (const char *name)
 {
 #ifndef VMS
   if (name[1] == '/' || name[1] == '\0')
@@ -3250,7 +3307,7 @@ parse_file_seq (char **stringp, unsigned int size, int stopmap,
       /* Expand tilde if applicable.  */
       if (tmpbuf[0] == '~')
         {
-          tildep = tilde_expand (tmpbuf);
+          tildep = remake_tilde_expand (tmpbuf);
           if (tildep != 0)
             name = tildep;
         }

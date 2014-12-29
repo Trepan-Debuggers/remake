@@ -1814,10 +1814,10 @@ print_variable_data_base (void)
 /* Print all the local variables of FILE.  */
 
 void
-print_file_variables (const struct file *file)
+print_file_variables (const file_t *p_target, bool b_hash_stats)
 {
-  if (file->variables != 0)
-    print_variable_set (file->variables->set, "# ", 1);
+  if (p_target->variables != 0)
+    print_variable_set (p_target->variables->set, "# ", b_hash_stats);
 }
 
 void

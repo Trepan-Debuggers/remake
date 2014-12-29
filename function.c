@@ -16,12 +16,13 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "makeint.h"
 #include "filedef.h"
+#include "expand.h"
 #include "variable.h"
 #include "dep.h"
 #include "job.h"
 #include "commands.h"
 #include "debug.h"
-#include "expand.h"
+#include "debugger/cmd.h"
 
 #ifdef _AMIGA
 #include "amiga.h"
@@ -1377,7 +1378,7 @@ func_wildcard (char *o, char **argv, const char *funcname UNUSED)
   Treat the arguments as a segment of makefile, and parse them.
 */
 
-static char *
+char *
 func_eval (char *o, char **argv, const char *funcname UNUSED)
 {
   char *buf;
@@ -1395,6 +1396,21 @@ func_eval (char *o, char **argv, const char *funcname UNUSED)
   return o;
 }
 
+
+/*
+  $(debugger )
+
+  Always resolves to the empty string.
+
+  Treat the arguments as a segment of makefile, and parse them.
+*/
+
+static char *
+func_debugger (char *o, char **argv UNUSED, const char *funcname UNUSED)
+{
+  enter_debugger(p_stack_top, NULL, 0, DEBUG_EXPLICIT_CALL);
+  return o;
+}
 
 static char *
 func_value (char *o, char **argv, const char *funcname UNUSED)
@@ -2303,6 +2319,7 @@ static struct function_table_entry function_table_init[] =
   FT_ENTRY ("value",         0,  1,  1,  func_value),
   FT_ENTRY ("eval",          0,  1,  1,  func_eval),
   FT_ENTRY ("file",          1,  2,  1,  func_file),
+  FT_ENTRY ("debugger",      0,  0,  0,  func_debugger),
 #ifdef EXPERIMENTAL
   FT_ENTRY ("eq",            2,  2,  1,  func_eq),
   FT_ENTRY ("not",           0,  1,  1,  func_not),

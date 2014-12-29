@@ -538,8 +538,10 @@ static const struct command_switch switches[] =
         "no-readline", },
     { CHAR_MAX+11, flag,  &show_targets_flag, 0, 0, 0, 0, 0,
       "targets" },
-    { CHAR_MAX+12,  flag, &show_tasks_flag, 0, 0, 0, 0, 0,
+    { CHAR_MAX+12,  flag, &show_task_comments_flag, 0, 0, 0, 0, 0,
       "tasks" },
+/*    { CHAR_MAX+12,  flag, &show_tasks_flag, 0, 0, 0, 0, 0,
+      "tasks" }, */
     { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
@@ -751,7 +753,7 @@ expand_command_line_file (const char *name)
 
   if (name[0] == '~')
     {
-      expanded = tilde_expand (name);
+      expanded = remake_tilde_expand (name);
       if (expanded && expanded[0] != '\0')
         name = expanded;
     }
@@ -2607,7 +2609,6 @@ main (int argc, char **argv, char **envp)
       O (fatal, NILF, _("No targets"));
     }
 
-#ifdef ROCKY_FINISHED
   if (show_tasks_flag || show_task_comments_flag) {
       dbg_cmd_info_targets(show_task_comments_flag
                            ? INFO_TARGET_TASKS_WITH_COMMENTS
@@ -2617,7 +2618,6 @@ main (int argc, char **argv, char **envp)
       dbg_cmd_info_targets(INFO_TARGET_NAME);
       die(0);
   }
-#endif
 
   /* Update the goals.  */
 
