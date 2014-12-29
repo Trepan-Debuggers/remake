@@ -34,5 +34,6 @@
 /remake
 /remake-*.tar.bz2
 /remake-*.tar.gz
+/*.log
 /stamp-h1
 /tmp

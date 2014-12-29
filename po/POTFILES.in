@@ -18,6 +18,7 @@
 ar.c
 arscan.c
 commands.c
+debug.c
 dir.c
 expand.c
 file.c
@@ -30,8 +31,10 @@ job.c
 job.h
 load.c
 main.c
+makeint.h
 misc.c
 output.c
+print.c
 read.c
 remake.c
 remote-cstms.c
