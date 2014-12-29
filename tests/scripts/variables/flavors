@@ -73,4 +73,24 @@ all: ; @echo $(foo)
 ',
               '', "Hello\n");
 
+# TEST 6: Simple using POSIX syntax
+run_make_test('
+bar = Goodbye
+foo ::= $(bar)
+bar = ${ugh}
+ugh = Hello
+all: ; @echo $(foo)
+',
+              '', "Goodbye\n");
+
+# TEST 7: POSIX syntax no spaces
+run_make_test('
+bar = Goodbye
+foo::=$(bar)
+bar = ${ugh}
+ugh = Hello
+all: ; @echo $(foo)
+',
+              '', "Goodbye\n");
+
 1;

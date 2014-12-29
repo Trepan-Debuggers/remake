@@ -68,7 +68,23 @@ run_make_test(qq!
 .SHELLFLAGS = $flags
 all: ; \@$script
 !,
-              '--no-extended-errors', $out);
+              '', $out);
+
+# Do it again but add spaces to SHELLFLAGS
+
+# Some shells (*shakes fist at Solaris*) cannot handle multiple flags in
+# separate arguments.
+my $t = `/bin/sh -e -c true 2>/dev/null`;
+my $multi_ok = $? == 0;
+
+if ($multi_ok) {
+    $flags = '-x -c';
+    run_make_test(qq!
+.SHELLFLAGS = $flags
+all: ; \@$script
+!,
+              '', $out);
+}
 
 # We can't just use "false" because on different systems it provides a
 # different exit code--once again Solaris: false exits with 255 not 1
@@ -81,7 +97,7 @@ run_make_test(qq!
 .SHELLFLAGS = $flags
 all: ; \@$script
 !,
-              '--no-extended-errors', 
-"${out}work/variables/SHELL.mk.6:3: *** [all] Error $err\n", 512);
+              '', "$out#MAKEFILE#:3: recipe for target 'all' failed
+#MAKE#: *** [all] Error $err\n", 512);
 
 1;

@@ -1,7 +1,5 @@
 /* Command processing for GNU Make.
-Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-2010 Free Software Foundation, Inc.
+Copyright (C) 1988-2014 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -16,10 +14,9 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "make.h"
-#include "dep.h"
-#include "expand.h"
+#include "makeint.h"
 #include "filedef.h"
+#include "dep.h"
 #include "variable.h"
 #include "job.h"
 #include "commands.h"
@@ -36,7 +33,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 int remote_kill (int id, int sig);
 
-#ifndef	HAVE_UNISTD_H
+#ifndef HAVE_UNISTD_H
 int getpid ();
 #endif
 
@@ -71,9 +68,9 @@ set_file_variables (struct file *file)
   struct dep *d;
   const char *at, *percent, *star, *less;
 
-#ifndef	NO_ARCHIVES
-  /* If the target is an archive member `lib(member)',
-     then $@ is `lib' and $% is `member'.  */
+#ifndef NO_ARCHIVES
+  /* If the target is an archive member 'lib(member)',
+     then $@ is 'lib' and $% is 'member'.  */
 
   if (ar_name (file->name))
     {
@@ -93,7 +90,7 @@ set_file_variables (struct file *file)
       percent = p;
     }
   else
-#endif	/* NO_ARCHIVES.  */
+#endif  /* NO_ARCHIVES.  */
     {
       at = file->name;
       percent = "";
@@ -103,35 +100,35 @@ set_file_variables (struct file *file)
   if (file->stem == 0)
     {
       /* In Unix make, $* is set to the target name with
-	 any suffix in the .SUFFIXES list stripped off for
-	 explicit rules.  We store this in the `stem' member.  */
+         any suffix in the .SUFFIXES list stripped off for
+         explicit rules.  We store this in the 'stem' member.  */
       const char *name;
       unsigned int len;
 
-#ifndef	NO_ARCHIVES
+#ifndef NO_ARCHIVES
       if (ar_name (file->name))
-	{
-	  name = strchr (file->name, '(') + 1;
-	  len = strlen (name) - 1;
-	}
+        {
+          name = strchr (file->name, '(') + 1;
+          len = strlen (name) - 1;
+        }
       else
 #endif
-	{
-	  name = file->name;
-	  len = strlen (name);
-	}
+        {
+          name = file->name;
+          len = strlen (name);
+        }
 
-      for (d = enter_file (strcache_add (".SUFFIXES"), NILF)->deps; d ; d = d->next)
-	{
-	  unsigned int slen = strlen (dep_name (d));
-	  if (len > slen && strneq (dep_name (d), name + (len - slen), slen))
-	    {
-	      file->stem = strcache_add_len (name, len - slen);
-	      break;
-	    }
-	}
+      for (d = enter_file (strcache_add (".SUFFIXES"))->deps; d ; d = d->next)
+        {
+          unsigned int slen = strlen (dep_name (d));
+          if (len > slen && strneq (dep_name (d), name + (len - slen), slen))
+            {
+              file->stem = strcache_add_len (name, len - slen);
+              break;
+            }
+        }
       if (d == 0)
-	file->stem = "";
+        file->stem = "";
     }
   star = file->stem;
 
@@ -150,7 +147,7 @@ set_file_variables (struct file *file)
        In this case $< is the same as $@.  */
     less = at;
 
-#define	DEFINE_VARIABLE(name, len, value) \
+#define DEFINE_VARIABLE(name, len, value) \
   (void) define_variable_for_file (name,len,value,o_automatic,0,file)
 
   /* Define the variables.  */
@@ -203,13 +200,13 @@ set_file_variables (struct file *file)
 
     cp = plus_value;
 
-    qmark_len = plus_len + 1;	/* Will be this or less.  */
+    qmark_len = plus_len + 1;   /* Will be this or less.  */
     for (d = file->deps; d != 0; d = d->next)
       if (! d->ignore_mtime && ! d->need_2nd_expansion)
         {
           const char *c = dep_name (d);
 
-#ifndef	NO_ARCHIVES
+#ifndef NO_ARCHIVES
           if (ar_name (c))
             {
               c = strchr (c, '(') + 1;
@@ -223,7 +220,7 @@ set_file_variables (struct file *file)
           cp += len;
           *cp++ = FILE_LIST_SEPARATOR;
           if (! (d->changed || always_make_flag))
-            qmark_len -= len + 1;	/* Don't space in $? for this one.  */
+            qmark_len -= len + 1;       /* Don't space in $? for this one.  */
         }
 
     /* Kill the last space and define the variable.  */
@@ -278,23 +275,23 @@ set_file_variables (struct file *file)
           continue;
 
         c = dep_name (d);
-#ifndef	NO_ARCHIVES
+#ifndef NO_ARCHIVES
         if (ar_name (c))
-	  {
-	    c = strchr (c, '(') + 1;
-	    len = strlen (c) - 1;
-	  }
-	else
+          {
+            c = strchr (c, '(') + 1;
+            len = strlen (c) - 1;
+          }
+        else
 #endif
-	  len = strlen (c);
+          len = strlen (c);
 
         if (d->ignore_mtime)
           {
             memcpy (bp, c, len);
-	    bp += len;
-	    *bp++ = FILE_LIST_SEPARATOR;
-	  }
-	else
+            bp += len;
+            *bp++ = FILE_LIST_SEPARATOR;
+          }
+        else
           {
             memcpy (cp, c, len);
             cp += len;
@@ -322,11 +319,11 @@ set_file_variables (struct file *file)
     DEFINE_VARIABLE ("|", 1, bar_value);
   }
 
-#undef	DEFINE_VARIABLE
+#undef  DEFINE_VARIABLE
 }
 
 /* Chop CMDS up into individual command lines if necessary.
-   Also set the `lines_flags' and `any_recurse' members.  */
+   Also set the 'lines_flags' and 'any_recurse' members.  */
 
 void
 chop_commands (struct commands *cmds)
@@ -403,6 +400,9 @@ chop_commands (struct commands *cmds)
   /* Finally, set the corresponding CMDS->lines_flags elements and the
      CMDS->any_recurse flag.  */
 
+  if (nlines > USHRT_MAX)
+    ON (fatal, &cmds->fileinfo, _("Recipe has too many lines (%ud)"), nlines);
+
   cmds->ncommand_lines = nlines;
   cmds->command_lines = lines;
 
@@ -434,126 +434,16 @@ chop_commands (struct commands *cmds)
         flags |= COMMANDS_RECURSE;
 
       cmds->lines_flags[idx] = flags;
-      cmds->any_recurse |= flags & COMMANDS_RECURSE;
+      cmds->any_recurse |= flags & COMMANDS_RECURSE ? 1 : 0;
     }
 }
-
-/* Expand the command lines and store the results in LINES.  */
-void expand_command_lines(struct commands *cmds, /*out*/ char **lines,
-			  struct file *file)
-{
-  unsigned int i;
-
-  for (i = 0; i < cmds->ncommand_lines; ++i)
-    {
-      /* Collapse backslash-newline combinations that are inside variable
-	 or function references.  These are left alone by the parser so
-	 that they will appear in the echoing of commands (where they look
-	 nice); and collapsed by construct_command_argv when it tokenizes.
-	 But letting them survive inside function invocations loses because
-	 we don't want the functions to see them as part of the text.  */
-
-      char *in, *out, *ref;
-
-      /* IN points to where in the line we are scanning.
-	 OUT points to where in the line we are writing.
-	 When we collapse a backslash-newline combination,
-	 IN gets ahead of OUT.  */
-
-      in = out = cmds->command_lines[i];
-      while ((ref = strchr (in, '$')) != 0)
-	{
-	  ++ref;		/* Move past the $.  */
-
-	  if (out != in)
-	    /* Copy the text between the end of the last chunk
-	       we processed (where IN points) and the new chunk
-	       we are about to process (where REF points).  */
-	    memmove (out, in, ref - in);
-
-	  /* Move both pointers past the boring stuff.  */
-	  out += ref - in;
-	  in = ref;
-
-	  if (*ref == '(' || *ref == '{')
-	    {
-	      char openparen = *ref;
-	      char closeparen = openparen == '(' ? ')' : '}';
-	      int count;
-	      char *p;
-
-	      *out++ = *in++;	/* Copy OPENPAREN.  */
-	      /* IN now points past the opening paren or brace.
-		 Count parens or braces until it is matched.  */
-	      count = 0;
-	      while (*in != '\0')
-		{
-		  if (*in == closeparen && --count < 0)
-		    break;
-		  else if (*in == '\\' && in[1] == '\n')
-		    {
-		      /* We have found a backslash-newline inside a
-			 variable or function reference.  Eat it and
-			 any following whitespace.  */
-
-		      int quoted = 0;
-		      for (p = in - 1; p > ref && *p == '\\'; --p)
-			quoted = !quoted;
-
-		      if (quoted)
-			/* There were two or more backslashes, so this is
-			   not really a continuation line.  We don't collapse
-			   the quoting backslashes here as is done in
-			   collapse_continuations, because the line will
-			   be collapsed again after expansion.  */
-			*out++ = *in++;
-		      else
-			{
-			  /* Skip the backslash, newline and
-			     any following whitespace.  */
-			  in = next_token (in + 2);
-
-			  /* Discard any preceding whitespace that has
-			     already been written to the output.  */
-			  while (out > ref
-				 && isblank ((unsigned char)out[-1]))
-			    --out;
-
-			  /* Replace it all with a single space.  */
-			  *out++ = ' ';
-			}
-		    }
-		  else
-		    {
-		      if (*in == openparen)
-			++count;
-
-		      *out++ = *in++;
-		    }
-		}
-	    }
-	}
-
-      /* There are no more references in this line to worry about.
-	 Copy the remaining uninteresting text to the output.  */
-      if (out != in)
-	memmove (out, in, strlen (in) + 1);
-
-      /* Finally, expand the line.  */
-      lines[i] = allocated_variable_expand_for_file (cmds->command_lines[i],
-						     file);
-    }
-    
-}
-
-
 
 /* Execute the commands to remake FILE.  If they are currently executing,
    return or have already finished executing, just return.  Otherwise,
    fork off a child process to run the first command line in the sequence.  */
 
 void
-execute_file_commands (file_t *file, target_stack_node_t *p_call_stack)
+execute_file_commands (struct file *file)
 {
   const char *p;
 
@@ -567,7 +457,7 @@ execute_file_commands (file_t *file, target_stack_node_t *p_call_stack)
     {
       /* If there are no commands, assume everything worked.  */
       set_command_state (file, cs_running);
-      file->update_status = 0;
+      file->update_status = us_success;
       notice_finished_file (file);
       return;
     }
@@ -578,8 +468,13 @@ execute_file_commands (file_t *file, target_stack_node_t *p_call_stack)
 
   set_file_variables (file);
 
+  /* If this is a loaded dynamic object, unload it before remaking.
+     Some systems don't support overwriting a loaded object.  */
+  if (file->loaded)
+    unload_file (file->name);
+
   /* Start the commands running.  */
-  new_job (file, p_call_stack);
+  new_job (file);
 }
 
 /* This is set while we are inside fatal_error_signal,
@@ -622,14 +517,14 @@ fatal_error_signal (int sig)
       DWORD susp_count = SuspendThread (main_thread);
 
       if (susp_count != 0)
-	fprintf (stderr, "SuspendThread: suspend count = %ld\n", susp_count);
+        fprintf (stderr, "SuspendThread: suspend count = %ld\n", susp_count);
       else if (susp_count == (DWORD)-1)
-	{
-	  DWORD ierr = GetLastError ();
+        {
+          DWORD ierr = GetLastError ();
 
-	  fprintf (stderr, "SuspendThread: error %ld: %s\n",
-		   ierr, map_windows32_error_to_string (ierr));
-	}
+          fprintf (stderr, "SuspendThread: error %ld: %s\n",
+                   ierr, map_windows32_error_to_string (ierr));
+        }
     }
 #endif
   handling_fatal_signal = 1;
@@ -645,8 +540,8 @@ fatal_error_signal (int sig)
     {
       struct child *c;
       for (c = children; c != 0; c = c->next)
-	if (!c->remote)
-	  (void) kill (c->pid, SIGTERM);
+        if (!c->remote)
+          (void) kill (c->pid, SIGTERM);
     }
 
   /* If we got a signal that means the user
@@ -664,23 +559,23 @@ fatal_error_signal (int sig)
       struct child *c;
 
       /* Remote children won't automatically get signals sent
-	 to the process group, so we must send them.  */
+         to the process group, so we must send them.  */
       for (c = children; c != 0; c = c->next)
-	if (c->remote)
-	  (void) remote_kill (c->pid, sig);
+        if (c->remote)
+          (void) remote_kill (c->pid, sig);
 
       for (c = children; c != 0; c = c->next)
-	delete_child_targets (c);
+        delete_child_targets (c);
 
       /* Clean up the children.  We don't just use the call below because
-	 we don't want to print the "Waiting for children" message.  */
+         we don't want to print the "Waiting for children" message.  */
       while (job_slots_used > 0)
-	reap_children (1, 0, NULL);
+        reap_children (1, 0);
     }
   else
     /* Wait for our children to die.  */
     while (job_slots_used > 0)
-      reap_children (1, 1, NULL);
+      reap_children (1, 1);
 
   /* Delete any non-precious intermediate files that were made.  */
 
@@ -690,7 +585,7 @@ fatal_error_signal (int sig)
   if (sig == SIGQUIT)
     /* We don't want to send ourselves SIGQUIT, because it will
        cause a core dump.  Just exit instead.  */
-    exit (EXIT_FAILURE);
+    exit (MAKE_TROUBLE);
 #endif
 
 #ifdef WINDOWS32
@@ -725,17 +620,19 @@ delete_target (struct file *file, const char *on_behalf_of)
   if (ar_name (file->name))
     {
       time_t file_date = (file->last_mtime == NONEXISTENT_MTIME
-			  ? (time_t) -1
-			  : (time_t) FILE_TIMESTAMP_S (file->last_mtime));
+                          ? (time_t) -1
+                          : (time_t) FILE_TIMESTAMP_S (file->last_mtime));
       if (ar_member_date (file->name) != file_date)
-	{
-	  if (on_behalf_of)
-	    error (NILF, _("*** [%s] Archive member `%s' may be bogus; not deleted"),
-		   on_behalf_of, file->name);
-	  else
-	    error (NILF, _("*** Archive member `%s' may be bogus; not deleted"),
-		   file->name);
-	}
+        {
+          if (on_behalf_of)
+            OSS (error, NILF,
+                 _("*** [%s] Archive member '%s' may be bogus; not deleted"),
+                 on_behalf_of, file->name);
+          else
+            OS (error, NILF,
+                _("*** Archive member '%s' may be bogus; not deleted"),
+                file->name);
+        }
       return;
     }
 #endif
@@ -746,12 +643,13 @@ delete_target (struct file *file, const char *on_behalf_of)
       && FILE_TIMESTAMP_STAT_MODTIME (file->name, st) != file->last_mtime)
     {
       if (on_behalf_of)
-	error (NILF, _("*** [%s] Deleting file `%s'"), on_behalf_of, file->name);
+        OSS (error, NILF,
+             _("*** [%s] Deleting file '%s'"), on_behalf_of, file->name);
       else
-	error (NILF, _("*** Deleting file `%s'"), file->name);
+        OS (error, NILF, _("*** Deleting file '%s'"), file->name);
       if (unlink (file->name) < 0
-	  && errno != ENOENT)	/* It disappeared; so what.  */
-	perror_with_name ("unlink: ", file->name);
+          && errno != ENOENT)   /* It disappeared; so what.  */
+        perror_with_name ("unlink: ", file->name);
     }
 }
 
@@ -770,7 +668,7 @@ delete_child_targets (struct child *child)
   /* Delete the target file if it changed.  */
   delete_target (child->file, NULL);
 
-  /* Also remove any non-precious targets listed in the `also_make' member.  */
+  /* Also remove any non-precious targets listed in the 'also_make' member.  */
   for (d = child->file->also_make; d != 0; d = d->next)
     delete_target (d->file, child->file->name);
 
@@ -779,51 +677,36 @@ delete_child_targets (struct child *child)
 
 /* Print out the commands in CMDS.  */
 
-/*! 
-  Print out the commands.
-
-  @param p_cmds location of commands to print out.
-  @param p_target used to set automatic variables if it is non-null.
-  @param b_expand if true, expand the commands to remove MAKE variables.
-*/
 void
-print_commands (file_t *p_target, commands_t *p_cmds, bool b_expand)
+print_commands (const struct commands *cmds)
 {
-  char *s;
+  const char *s;
 
-  fputs (_("#  commands to execute"), stdout);
+  fputs (_("#  recipe to execute"), stdout);
 
-  if (p_cmds->fileinfo.filenm == 0)
+  if (cmds->fileinfo.filenm == 0)
     puts (_(" (built-in):"));
   else
-    printf (_(" (from `%s', line %lu):\n"),
-            p_cmds->fileinfo.filenm, p_cmds->fileinfo.lineno);
+    printf (_(" (from '%s', line %lu):\n"),
+            cmds->fileinfo.filenm, cmds->fileinfo.lineno);
 
-  if (b_expand && p_target) {
-    variable_set_list_t *p_file_vars = NULL;
-    variable_set_t *p_set = NULL;
-    initialize_file_variables (p_target, 0);
-    set_file_variables (p_target);
-    p_file_vars = p_target->variables;
-    p_set = p_file_vars->set;
-    s = variable_expand_set(p_cmds->commands, p_file_vars);
-  } else {
-    s = p_cmds->commands;
-  }
-
+  s = cmds->commands;
   while (*s != '\0')
     {
-      char *end;
+      const char *end;
+      int bs;
 
-      while (isspace ((unsigned char)*s))
-	++s;
+      /* Print one full logical recipe line: find a non-escaped newline.  */
+      for (end = s, bs = 0; *end != '\0'; ++end)
+        {
+          if (*end == '\n' && !bs)
+            break;
 
-      end = strchr (s, '\n');
-      if (end == 0)
-	end = s + strlen (s);
+          bs = *end == '\\' ? !bs : 0;
+        }
 
-      printf ("\t%.*s\n", (int) (end - s), s);
+      printf ("%c%.*s\n", cmd_prefix, (int) (end - s), s);
 
-      s = end;
+      s = end + (end[0] == '\n');
     }
 }

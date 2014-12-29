@@ -1,6 +1,5 @@
 /* Definitions for Windows
-Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+Copyright (C) 1996-2014 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -20,11 +19,11 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 typedef int bool_t;
 
-#define E_SCALL		101
-#define E_IO		102
-#define E_NO_MEM	103
-#define E_FORK		104
+#define E_SCALL         101
+#define E_IO            102
+#define E_NO_MEM        103
+#define E_FORK          104
 
-extern bool_t arr2envblk(char **arr, char **envblk_out);
+extern bool_t arr2envblk(char **arr, char **envblk_out, int *envsize_needed);
 
 #endif

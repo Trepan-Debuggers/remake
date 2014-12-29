@@ -1,6 +1,6 @@
 #                                                                    -*-perl-*-
 
-$description = "Test the behaviour of the .PHONY target.";
+$description = "Test the behaviour of the .POSIX target.";
 
 $details = "";
 
@@ -17,8 +17,8 @@ run_make_test(qq!
 .POSIX:
 all: ; \@$script
 !,
-             '--no-extended-errors', 
-"work/targets/POSIX.mk:3: *** [all] Error $err", 512);
+              '', "#MAKEFILE#:3: recipe for target 'all' failed
+#MAKE#: *** [all] Error $err\n", 512);
 
 # User settings must override .POSIX
 $flags = '-xc';
@@ -28,7 +28,30 @@ run_make_test(qq!
 .POSIX:
 all: ; \@$script
 !,
-              '--no-extended-errors', $out);
+              '', $out);
+
+# Test the default value of various POSIX-specific variables
+my %POSIX = (AR => 'ar', ARFLAGS => '-rv',
+             YACC => 'yacc', YFLAGS => '',
+             LEX => 'lex', LFLAGS => '',
+             LDFLAGS => '',
+             CC => 'c99', CFLAGS => '-O',
+             FC => 'fort77', FFLAGS => '-O 1',
+             GET => 'get', GFLAGS => '',
+             SCCSFLAGS => '', SCCSGETFLAGS => '-s');
+my $make = join('', map { "\t\@echo '$_=\$($_)'\n" } sort keys %POSIX);
+my $r = join('', map { "$_=$POSIX{$_}\n"} sort keys %POSIX);
+run_make_test(qq!
+.POSIX:
+all:
+$make
+!,
+              '', $r);
+
+# Make sure that local settings take precedence
+%extraENV = map { $_ => "xx-$_" } keys %POSIX;
+$r = join('', map { "$_=xx-$_\n"} sort keys %POSIX);
+run_make_test(undef, '', $r);
 
 # This tells the test driver that the perl test script executed properly.
 1;

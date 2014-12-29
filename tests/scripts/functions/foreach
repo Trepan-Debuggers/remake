@@ -1,5 +1,5 @@
 #                                                                    -*-perl-*-
-# $Id: foreach,v 1.5 2006/03/10 02:20:46 psmith Exp $
+# $Id$
 
 $description = "Test the foreach function.";
 
@@ -62,10 +62,7 @@ y = $x
 
 all: ; @echo $y',
               '',
-              "#MAKEFILE#:2: *** insufficient number of arguments (1) to function `foreach'.  Stop.
-Command-line invocation:
-	\"$make_path -f work/functions/foreach.mk.2\"
-",
+              "#MAKEFILE#:2: *** insufficient number of arguments (1) to function 'foreach'.  Stop.",
               512);
 
 run_make_test('
@@ -74,10 +71,7 @@ y := $x
 
 all: ; @echo $y',
               '',
-              "#MAKEFILE#:2: *** insufficient number of arguments (1) to function `foreach'.  Stop.
-Command-line invocation:
-	\"$make_path -f work/functions/foreach.mk.3\"
-",
+              "#MAKEFILE#:2: *** insufficient number of arguments (1) to function 'foreach'.  Stop.",
               512);
 
 1;

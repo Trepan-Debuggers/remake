@@ -41,7 +41,7 @@ all: 1 2; \@echo success
 1.inc: ; \@echo ONE.inc; $sleep_command 2; echo TWO.inc; echo '1: ; \@echo ONE; $sleep_command 2; echo TWO' > \$\@
 2.inc: ; \@$sleep_command 1; echo THREE.inc; echo '2: ; \@$sleep_command 1; echo THREE' > \$\@",
               "-j4",
-              "ONE.inc\nTHREE.inc\nTWO.inc\nONE\nTHREE\nTWO\nsuccess\n");
+              "ONE.inc\nTHREE.inc\nTWO.inc\nONE\nTHREE\nTWO\nsuccess\n", 0, 7);
 
 rmfiles(qw(1.inc 2.inc));
 
@@ -60,7 +60,7 @@ endif
 1.inc: ; \@echo ONE.inc; $sleep_command 2; echo TWO.inc; echo '1: ; \@echo ONE; $sleep_command 2; echo TWO' > \$\@
 2.inc: ; \@$sleep_command 1; echo THREE.inc; echo '2: ; \@$sleep_command 1; echo THREE' > \$\@",
               "-j4",
-              "ONE.inc\nTHREE.inc\nTWO.inc\nONE\nTHREE\nTWO\nsuccess\n");
+              "ONE.inc\nTHREE.inc\nTWO.inc\nONE\nTHREE\nTWO\nsuccess\n", 0, 7);
 
 rmfiles(qw(1.inc 2.inc));
 
@@ -91,23 +91,24 @@ run_make_test("
 all: fail.1 ok fail.2 fail.3
 
 fail.1 fail.2 fail.3:
-	\@sleep \$(patsubst fail.%,%,\$\@)
+	\@$sleep_command \$(patsubst fail.%,%,\$\@)
 	\@echo Fail
 	\@exit 1
 
 ok:
-	\@sleep 4
+	\@$sleep_command 4
 	\@echo Ok done",
               '-rR -j5', "Fail
+#MAKEFILE#:6: recipe for target 'fail.1' failed
 #MAKE#: *** [fail.1] Error 1
 #MAKE#: *** Waiting for unfinished jobs....
 Fail
+#MAKEFILE#:6: recipe for target 'fail.2' failed
 #MAKE#: *** [fail.2] Error 1
 Fail
+#MAKEFILE#:6: recipe for target 'fail.3' failed
 #MAKE#: *** [fail.3] Error 1
-Ok done
-Command-line invocation:
-	\"$make_path -f work/features/parallelism.mk.4 -rR -j5\"",
+Ok done",
              512);
 
 
@@ -132,7 +133,6 @@ mod_a.o mod_b.o:
 # TEST #9 -- Savannah bugs 3330 and 15919
 # In earlier versions of make this will either give the wrong answer, or hang.
 
-if (0) {
 utouch(-10, 'target');
 run_make_test('target: intermed ; touch $@
 
@@ -140,88 +140,43 @@ run_make_test('target: intermed ; touch $@
 intermed: | phony ; touch $@
 
 .PHONY: phony
-phony: ; : phony', '-rR -j', 
-'##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-: phony
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
+phony: ; : phony', '-rR -j', ': phony');
 rmfiles('target');
-};
 
-# TEST #10: Don't put --jobserver-fds into a re-exec'd MAKEFLAGS.
-# We can't test this directly because there's no way a makefile can
-# show the value of MAKEFLAGS we were re-exec'd with.  We can intuit it
-# by looking for "disabling jobserver mode" warnings; we should only
-# get one from the original invocation and none from the re-exec.
-# See Savannah bug #18124
+# TEST #11: Make sure -jN from MAKEFLAGS is processed even when we re-exec
+# See Savannah bug #33873
+
+$extraENV{MAKEFLAGS} = '-j4';
 
 run_make_test(q!
+things = thing1 thing2
+all: $(things)
+thing1:; @sleep 1; echo '$@ start'; sleep 2; echo '$@ end'
+thing2:; @echo '$@ start'; sleep 2; echo '$@ end'
 -include inc.mk
-recur:
-#	@echo 'MAKEFLAGS = $(MAKEFLAGS)'
-	@rm -f inc.mk
-	@$(MAKE) -j2 -f #MAKEFILE# all
-all:
-#	@echo 'MAKEFLAGS = $(MAKEFLAGS)'
-	@echo $@
-inc.mk:
-#	@echo 'MAKEFLAGS = $(MAKEFLAGS)'
-	@echo 'FOO = bar' > $@
+inc.mk: ; @touch $@
 !,
-              '--no-print-directory -j2', "#MAKE#[1]: warning: -jN forced in submake: disabling jobserver mode.\nall\n");
+              '', "thing2 start\nthing1 start\nthing2 end\nthing1 end\n");
 
+delete $extraENV{MAKEFLAGS};
 rmfiles('inc.mk');
 
-if ($all_tests) {
-    # Implicit files aren't properly recreated during parallel builds
-    # Savannah bug #26864
+# Ensure intermediate/secondary files are not pruned incorrectly.
+# See Savannah bug #30653
 
-    # The first run works fine
-    run_make_test(q!
-%.bar: %.x foo.y ; cat $^ > $@
-%.x: ; touch $@
-foo.y: foo.y.in ; cp $< $@
-foo.y.in: ; touch $@
+utouch(-15, 'file2');
+utouch(-10, 'file4');
+utouch(-5,  'file1');
+
+run_make_test(q!
+.INTERMEDIATE: file3
+file4: file3 ; @mv -f $< $@
+file3: file2 ; touch $@
+file2: file1 ; @touch $@
 !,
-                  '-j2 main.bar',
-                  "touch foo.y.in
-touch main.x
-cp foo.y.in foo.y
-cat main.x foo.y > main.bar
-rm main.x");
+              '--no-print-directory -j2', "touch file3");
 
-    # Now we touch the .in file and make sure it still works
-    touch('foo.y.in');
-
-    run_make_test(undef, '-j2 main.bar', "cp foo.y.in foo.y
-touch main.x
-cat main.x foo.y > main.bar
-rm main.x");
-
-    # Clean up
-    rmfiles(qw(foo.y foo.y.in main.bar));
-}
-
-if ($all_tests) {
-    # Jobserver FD handling is messed up in some way.
-    # Savannah bug #28189
-    # It doesn't look like that bug anymore but this is the code it runs
-
-    run_make_test(q!
-ifdef EXTRA
-vpath %.dst /
-xxx.dst: ; true
-yyy.dst: ; true
-endif
-
-M := $(MAKE)
-xx: ; $M --no-print-directory -j2 -f $(MAKEFILE_LIST) xxx.dst yyy.dst EXTRA=1
-!,
-                  '-j2',
-                  '#MAKE#[1]: warning: -jN forced in submake: disabling jobserver mode.
-true
-true
-');
-}
+rmfiles('file1', 'file2', 'file3', 'file4');
 
 # Make sure that all jobserver FDs are closed if we need to re-exec the
 # master copy.

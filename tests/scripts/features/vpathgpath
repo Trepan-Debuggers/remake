@@ -57,7 +57,7 @@ sub touchfiles {
 
 push(@touchedfiles, "bar.c");
 
-$answer = "$make_name: Nothing to be done for `general'.\n";
+$answer = "$make_name: Nothing to be done for 'general'.\n";
 
 &compare_output($answer,&get_logfile(1));
 

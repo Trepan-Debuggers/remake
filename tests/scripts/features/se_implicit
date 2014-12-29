@@ -222,5 +222,39 @@ foo.o:
 !,
               '', "\n");
 
+# Test #10: Test second expansion with second expansion prerequisites
+# Ensures pattern_search() recurses with SE prereqs.
+touch('a');
+run_make_test(q!
+.SECONDEXPANSION:
+sim_base_rgg := just_a_name
+sim_base_src := a
+sim_base_f := a a a
+sim_%.f: $${sim_$$*_f}
+	echo $@
+sim_%.src: $${sim_$$*_src}
+	echo $@
+sim_%: \
+	$$(if $$(sim_$$*_src),sim_%.src) \
+	$$(if $$(sim_$$*_f),sim_%.f) \
+	$$(if $$(sim_$$*_rgg),$$(sim_$$*_rgg).s)
+	echo $@
+!,
+              '-s sim_base', "#MAKE#: *** No rule to make target 'sim_base'.  Stop.", 512);
+
+unlink('a');
+
+# Ensure that order-only tokens embedded in second expansions are parsed
+run_make_test(q!
+.SECONDEXPANSION:
+PREREQS=p1|p2
+P2=p2
+all : foo bar
+f%o: $$(PREREQS) ; @echo '$@' from '$^' and '$|'
+b%r: p1|$$(P2)   ; @echo '$@' from '$^' and '$|'
+p% : ; : $@
+!,
+              "", ": p1\n: p2\nfoo from p1 and p2\nbar from p1 and p2\n");
+
 # This tells the test driver that the perl test script executed properly.
 1;

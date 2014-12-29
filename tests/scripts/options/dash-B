@@ -22,13 +22,13 @@ foo: bar.x
 ',
               '', 'cp bar.x foo');
 
-run_make_test(undef, '', "#MAKE#: Nothing to be done for `all'.");
+run_make_test(undef, '', "#MAKE#: Nothing to be done for 'all'.");
 run_make_test(undef, '-B', 'cp bar.x foo');
 
 # Put the timestamp for foo into the future; it should still be remade.
 
 utouch(1000, 'foo');
-run_make_test(undef, '', "#MAKE#: Nothing to be done for `all'.");
+run_make_test(undef, '', "#MAKE#: Nothing to be done for 'all'.");
 run_make_test(undef, '-B', 'cp bar.x foo');
 
 # Clean up

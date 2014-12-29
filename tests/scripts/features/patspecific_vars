@@ -81,7 +81,7 @@ all: bar baz
 
 b%: pattern := good $$t
 
-global := orginal $$t
+global := original $$t
 
 
 # normal target
@@ -103,14 +103,14 @@ else
 %z: a := global: $(global) pattern: $(pattern) inherit: $(inherit)
 endif
 
-%z: ; @echo \'pattrn: $a;\'
+%z: ; @echo \'pattern: $a;\'
 
 
 global := new $$t
 ',
 '',
-'normal: global: orginal $t pattern:  inherit: ;
-pattrn: global: orginal $t pattern:  inherit: ;');
+'normal: global: original $t pattern:  inherit: ;
+pattern: global: original $t pattern:  inherit: ;');
 
 
 # TEST #7 -- test expansion of pattern-specific recursive variables
@@ -118,7 +118,7 @@ pattrn: global: orginal $t pattern:  inherit: ;');
 run_make_test(undef, # reuse previous makefile
 'rec=1',
 'normal: global: new $t pattern: good $t inherit: good $t;
-pattrn: global: new $t pattern: good $t inherit: good $t;');
+pattern: global: new $t pattern: good $t inherit: good $t;');
 
 # TEST #8: override in pattern-specific variables
 

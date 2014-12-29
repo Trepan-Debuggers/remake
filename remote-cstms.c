@@ -3,9 +3,7 @@
    Please do not send bug reports or questions about it to
    the Make maintainers.
 
-Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-2010 Free Software Foundation, Inc.
+Copyright (C) 1988-2014 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -20,8 +18,7 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "make.h"
-#include "job.h"
+#include "makeint.h"
 #include "filedef.h"
 #include "commands.h"
 #include "job.h"
@@ -34,9 +31,9 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 char *remote_description = "Customs";
 
-/* File name of the Customs `export' client command.
+/* File name of the Customs 'export' client command.
    A full path name can be used to avoid some path-searching overhead.  */
-#define	EXPORT_COMMAND	"/usr/local/bin/export"
+#define EXPORT_COMMAND  "/usr/local/bin/export"
 
 /* ExportPermit gotten by start_remote_job_p, and used by start_remote_job.  */
 static ExportPermit permit;
@@ -78,11 +75,11 @@ start_remote_job_p (int first_p)
         }
 
       /* For secure Customs, make is installed setuid root and
-	 Customs requires a privileged source port be used.  */
+         Customs requires a privileged source port be used.  */
       make_access ();
 
       if (ISDB (DB_JOBS))
-        Rpc_Debug(1);
+        Rpc_Debug (1);
 
       /* Ping the daemon once to see if it is there.  */
       inited = Customs_Ping () == RPC_SUCCESS ? 1 : -1;
@@ -91,20 +88,20 @@ start_remote_job_p (int first_p)
       user_access ();
 
       if (starting_directory == 0)
-	/* main couldn't figure it out.  */
-	inited = -1;
+        /* main couldn't figure it out.  */
+        inited = -1;
       else
-	{
-	  /* Normalize the current directory path name to something
-	     that should work on all machines exported to.  */
+        {
+          /* Normalize the current directory path name to something
+             that should work on all machines exported to.  */
 
-	  normalized_cwd = xmalloc (GET_PATH_MAX);
-	  strcpy (normalized_cwd, starting_directory);
-	  if (Customs_NormPath (normalized_cwd, GET_PATH_MAX) < 0)
-	    /* Path normalization failure means using Customs
-	       won't work, but it's not really an error.  */
-	    inited = -1;
-	}
+          normalized_cwd = xmalloc (GET_PATH_MAX);
+          strcpy (normalized_cwd, starting_directory);
+          if (Customs_NormPath (normalized_cwd, GET_PATH_MAX) < 0)
+            /* Path normalization failure means using Customs
+               won't work, but it's not really an error.  */
+            inited = -1;
+        }
     }
 
   if (inited < 0)
@@ -112,7 +109,7 @@ start_remote_job_p (int first_p)
 
   njobs = job_slots_used;
   if (!first_p)
-    njobs -= 1;		/* correction for being called from reap_children() */
+    njobs -= 1;         /* correction for being called from reap_children() */
 
   /* the first job should run locally, or, if the -l flag is given, we use
      that as clue as to how many local jobs should be scheduled locally */
@@ -154,7 +151,7 @@ start_remote_job (char **argv, char **envp, int stdin_fd,
   retsock = Rpc_UdpCreate (True, 0);
   if (retsock < 0)
     {
-      error (NILF, "exporting: Couldn't create return socket.");
+      O (error, NILF, "exporting: Couldn't create return socket.");
       return 1;
     }
 
@@ -173,9 +170,9 @@ start_remote_job (char **argv, char **envp, int stdin_fd,
 
   /* Create a WayBill to give to the server.  */
   len = Customs_MakeWayBill (&permit, normalized_cwd, argv[0], argv,
-			     envp, retport, waybill);
+                             envp, retport, waybill);
 
-  /* Modify the waybill as if the remote child had done `child_access ()'.  */
+  /* Modify the waybill as if the remote child had done 'child_access ()'.  */
   {
     WayBill *wb = (WayBill *) waybill;
     wb->ruid = wb->euid;
@@ -189,53 +186,55 @@ start_remote_job (char **argv, char **envp, int stdin_fd,
   sin.sin_port = htons (Customs_Port ());
   sin.sin_addr = permit.addr;
   status = Rpc_Call (sock, &sin, (Rpc_Proc) CUSTOMS_IMPORT,
-		     len, (Rpc_Opaque) waybill,
-		     sizeof(msg), (Rpc_Opaque) msg,
-		     1, &timeout);
+                     len, (Rpc_Opaque) waybill,
+                     sizeof (msg), (Rpc_Opaque) msg,
+                     1, &timeout);
 
-  host = gethostbyaddr((char *)&permit.addr, sizeof(permit.addr), AF_INET);
+  host = gethostbyaddr ((char *)&permit.addr, sizeof(permit.addr), AF_INET);
 
-  if (status != RPC_SUCCESS)
-    {
-      (void) close (retsock);
-      (void) close (sock);
-      error (NILF, "exporting to %s: %s",
-             host ? host->h_name : inet_ntoa (permit.addr),
-             Rpc_ErrorMessage (status));
-      return 1;
-    }
-  else if (msg[0] != 'O' || msg[1] != 'k' || msg[2] != '\0')
-    {
-      (void) close (retsock);
-      (void) close (sock);
-      error (NILF, "exporting to %s: %s",
-             host ? host->h_name : inet_ntoa (permit.addr),
-             msg);
-      return 1;
-    }
-  else
-    {
-      error (NILF, "*** exported to %s (id %u)",
-	      host ? host->h_name : inet_ntoa (permit.addr),
-	      permit.id);
-    }
+  {
+    const char *hnm = host ? host->h_name : inet_ntoa (permit.addr);
+    size_t hlen = strlen (hnm);
 
-  fflush (stdout);
-  fflush (stderr);
+    if (status != RPC_SUCCESS)
+      {
+        const char *err = Rpc_ErrorMessage (status);
+        (void) close (retsock);
+        (void) close (sock);
+        error (NILF, hlen + strlen (err),
+               "exporting to %s: %s", hnm, err);
+        return 1;
+      }
+    else if (msg[0] != 'O' || msg[1] != 'k' || msg[2] != '\0')
+      {
+        (void) close (retsock);
+        (void) close (sock);
+        error (NILF, hlen + strlen (msg), "exporting to %s: %s", hnm, msg);
+        return 1;
+      }
+    else
+      {
+        error (NILF, hlen + INTSTR_LENGTH,
+               "*** exported to %s (id %u)", hnm, permit.id);
+      }
 
-  pid = vfork ();
+    fflush (stdout);
+    fflush (stderr);
+  }
+
+  pid = fork ();
   if (pid < 0)
     {
       /* The fork failed!  */
-      perror_with_name ("vfork", "");
+      perror_with_name ("fork", "");
       return 1;
     }
   else if (pid == 0)
     {
-      /* Child side.  Run `export' to handle the connection.  */
+      /* Child side.  Run 'export' to handle the connection.  */
       static char sock_buf[20], retsock_buf[20], id_buf[20];
       static char *new_argv[6] =
-	{ EXPORT_COMMAND, "-id", sock_buf, retsock_buf, id_buf, 0 };
+        { EXPORT_COMMAND, "-id", sock_buf, retsock_buf, id_buf, 0 };
 
       /* Set up the arguments.  */
       (void) sprintf (sock_buf, "%d", sock);
@@ -244,7 +243,7 @@ start_remote_job (char **argv, char **envp, int stdin_fd,
 
       /* Get the right stdin.  */
       if (stdin_fd != 0)
-	(void) dup2 (stdin_fd, 0);
+        (void) dup2 (stdin_fd, 0);
 
       /* Unblock signals in the child.  */
       unblock_sigs ();
@@ -253,7 +252,7 @@ start_remote_job (char **argv, char **envp, int stdin_fd,
       exec_command (new_argv, envp);
     }
 
-  /* Parent side.  Return the `export' process's ID.  */
+  /* Parent side.  Return the 'export' process's ID.  */
   (void) close (retsock);
   (void) close (sock);
   *is_remote = 0;

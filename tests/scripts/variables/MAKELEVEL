@@ -24,12 +24,7 @@ close(MAKEFILE);
 
 # SET ANSWER
 
-$answer = "MAKELEVEL is 0
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-echo \$MAKELEVEL
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-1
-";
+$answer = "MAKELEVEL is 0\necho \$MAKELEVEL\n1\n";
 
 # COMPARE RESULTS
 

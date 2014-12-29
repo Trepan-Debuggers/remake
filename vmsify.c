@@ -1,6 +1,5 @@
 /* vmsify.c -- Module for vms <-> unix file name conversion
-Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
-2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+Copyright (C) 1996-2014 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -22,6 +21,8 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+
+#include "makeint.h"
 
 #if VMS
 #include <unixlib.h>
@@ -138,9 +139,7 @@ trnlog (const char *name)
     }
   reslt[resltlen] = '\0';
 
-  s = malloc (resltlen+1);
-  if (s == 0)
-    return "";
+  s = xmalloc (resltlen+1);
   strcpy (s, reslt);
   return s;
 }
@@ -222,10 +221,11 @@ vmsify (const char *name, int type)
    max 39 filetype
    max 5 version
 */
-#define MAXPATHLEN 512
+/* todo: VMSMAXPATHLEN is defined for ODS2 names: it needs to be adjusted. */
+#define VMSMAXPATHLEN 512
 
   enum namestate nstate;
-  static char vmsname[MAXPATHLEN+1];
+  static char vmsname[VMSMAXPATHLEN+1];
   const char *fptr;
   const char *t;
   char *vptr;
@@ -403,9 +403,9 @@ vmsify (const char *name, int type)
 	      fptr++;
 	    if (*fptr == 0)		/* just // */
 	      {
-		char cwdbuf[MAXPATHLEN+1];
+		char cwdbuf[VMSMAXPATHLEN+1];
 
-		s1 = getcwd(cwdbuf, MAXPATHLEN);
+		s1 = getcwd(cwdbuf, VMSMAXPATHLEN);
 		if (s1 == 0)
 		  {
                     vmsname[0] = '\0';
@@ -797,9 +797,9 @@ vmsify (const char *name, int type)
 	      }
 	    {					/* got '..' or '../' */
               char *vp;
-	      char cwdbuf[MAXPATHLEN+1];
+	      char cwdbuf[VMSMAXPATHLEN+1];
 
-	      vp = getcwd(cwdbuf, MAXPATHLEN);
+	      vp = getcwd(cwdbuf, VMSMAXPATHLEN);
 	      if (vp == 0)
 		{
                   vmsname[0] = '\0';
@@ -857,9 +857,9 @@ vmsify (const char *name, int type)
 
 	    {
               char *vp;
-	      char cwdbuf[MAXPATHLEN+1];
+	      char cwdbuf[VMSMAXPATHLEN+1];
 
-	      vp = getcwd(cwdbuf, MAXPATHLEN);
+	      vp = getcwd(cwdbuf, VMSMAXPATHLEN);
 	      if (vp == 0)
 		{
                   vmsname[0] = '\0';

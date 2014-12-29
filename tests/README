@@ -7,8 +7,7 @@ This entire test suite, including all test files, are copyright and
 distributed under the following terms:
 
  -----------------------------------------------------------------------------
- Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
- 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+ Copyright (C) 1992-2014 Free Software Foundation, Inc.
  This file is part of GNU Make.
 
  GNU Make is free software; you can redistribute it and/or modify it under the
@@ -39,7 +38,7 @@ To run the test suite on Windows NT or DOS systems, use
 "perl.exe ./run_make-tests.pl".
 
 By default, the test engine picks up the first executable called "make"
-that it finds in your path.  You may use the -make_path option (ie,
+that it finds in your path.  You may use the -make_path option (i.e.,
 "perl run_make_tests -make_path /usr/local/src/make-3.78/make") if
 you want to run a particular copy.  This now works correctly with
 relative paths and when make is called something other than "make" (like
@@ -59,7 +58,7 @@ The options/dash-l test will not really test anything if the copy of
 make you are using can't obtain the system load.  Some systems require
 make to be setgid sys or kmem for this; if you don't want to install
 make just to test it, make it setgid to kmem or whatever group /dev/kmem
-is (ie, "chgrp kmem make;chmod g+s make" as root).  In any case, the
+is (i.e., "chgrp kmem make;chmod g+s make" as root).  In any case, the
 options/dash-l test should no longer *fail* because make can't read
 /dev/kmem.
 

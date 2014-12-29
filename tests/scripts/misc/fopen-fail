@@ -1,0 +1,15 @@
+#                                                                    -*-perl-*-
+
+$description = "Make sure make exits with an error if fopen fails.";
+
+# Recurse infinitely until we run out of open files, and ensure we
+# fail with a non-zero exit code.  Don't bother to test the output
+# since it's hard to know what it will be, exactly.
+# See Savannah bug #27374.
+
+run_make_test(q!
+include $(lastword $(MAKEFILE_LIST))
+!,
+              '', undef, 512);
+
+1;

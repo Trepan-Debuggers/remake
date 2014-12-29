@@ -8,35 +8,21 @@ run_make_test('
 a.x: b.x
 a.x b.x: ; echo >> $@
 ',
-              '', "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-echo >> b.x
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-echo >> a.x
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-");
+              '', "echo >> b.x\necho >> a.x");
 
 # Run it again: nothing should happen
 
-run_make_test(undef, '', "#MAKE#: `a.x' is up to date.");
+run_make_test(undef, '', "#MAKE#: 'a.x' is up to date.");
 
 # Now run it with -W b.x: should rebuild a.x
 
-run_make_test(undef, '-W b.x', "##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-echo >> a.x
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-");
+run_make_test(undef, '-W b.x', 'echo >> a.x');
 
 # Put the timestamp for a.x into the future; it should still be remade.
 
 utouch(1000, 'a.x');
-run_make_test(undef, '', "#MAKE#: `a.x' is up to date.");
-# run_make_test(undef, '-W b.x', "make: Warning: File `a.x' has modification time 999 s in the future
-# ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# echo >> a.x
-# ##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-# make: warning:  Clock skew detected.  Your build may be incomplete.
-# ");
+run_make_test(undef, '', "#MAKE#: 'a.x' is up to date.");
+run_make_test(undef, '-W b.x', 'echo >> a.x');
 
 # Clean up
 
@@ -57,9 +43,7 @@ bar.x: ; echo >> $@
 baz.x: bar.x ; @echo "touch $@"
 ',
               '', '#MAKEFILE#:3: foo.x: No such file or directory
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 echo >> bar.x
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 touch foo.x
 restarts=1
 touch baz.x');

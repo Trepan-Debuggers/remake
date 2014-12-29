@@ -26,7 +26,7 @@ if ($port_type eq 'W32' || !( eval { symlink("",""); 1 })) {
   # Without -L, nothing should happen
   # With -L, it should update targ
   run_make_test('targ: sym ; @echo make $@ from $<', '',
-                "#MAKE#: `targ' is up to date.");
+                "#MAKE#: 'targ' is up to date.");
   run_make_test(undef, '-L', "make targ from sym");
 
   # Now update dep; in all cases targ should be out of date.
@@ -36,8 +36,8 @@ if ($port_type eq 'W32' || !( eval { symlink("",""); 1 })) {
 
   # Now update targ; in all cases targ should be up to date.
   &touch('targ');
-  run_make_test(undef, '', "#MAKE#: `targ' is up to date.");
-  run_make_test(undef, '-L', "#MAKE#: `targ' is up to date.");
+  run_make_test(undef, '', "#MAKE#: 'targ' is up to date.");
+  run_make_test(undef, '-L', "#MAKE#: 'targ' is up to date.");
 
   # Add in a new link between sym and dep.  Be sure it's newer than targ.
   sleep(1);
@@ -46,7 +46,7 @@ if ($port_type eq 'W32' || !( eval { symlink("",""); 1 })) {
 
   # Without -L, nothing should happen
   # With -L, it should update targ
-  run_make_test(undef, '', "#MAKE#: `targ' is up to date.");
+  run_make_test(undef, '', "#MAKE#: 'targ' is up to date.");
   run_make_test(undef, '-L', "make targ from sym");
 
   rmfiles('targ', 'dep', 'sym', 'dep1');
@@ -56,10 +56,7 @@ if ($port_type eq 'W32' || !( eval { symlink("",""); 1 })) {
 
   symlink("../$dirname/dep", 'sym');
   run_make_test('targ: sym ; @echo make $@ from $<', '',
-                "#MAKE#: *** No rule to make target `sym', needed by `targ'.  Stop.
-Command-line invocation:
-	\"$make_path -f work/options/symlinks.mk.1\"
-", 512);
+                "#MAKE#: *** No rule to make target 'sym', needed by 'targ'.  Stop.", 512);
 
   run_make_test('targ: sym ; @echo make $@ from $<', '-L',
                 'make targ from sym');

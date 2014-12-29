@@ -154,6 +154,11 @@
 			<File
 				RelativePath=".\getopt1.c">
 			</File>
+
+			<File
+				RelativePath=".\guile.c">
+			</File>
+
 			<File
 				RelativePath=".\hash.c">
 			</File>
@@ -165,6 +170,12 @@
 			</File>
 			<File
 				RelativePath=".\job.c">
+			</File>
+			<File
+				RelativePath=".\load.c">
+			</File>
+			<File
+				RelativePath=".\output.c">
 			</File>
 			<File
 				RelativePath=".\main.c">
@@ -201,6 +212,9 @@
 				Filter="">
 				<File
 					RelativePath=".\w32\compat\dirent.c">
+				</File>
+				<File
+					RelativePath=".\w32\compat\posixfcn.c">
 				</File>
 				<File
 					RelativePath=".\w32\subproc\misc.c">
@@ -264,13 +278,19 @@
 				RelativePath=".\gettext.h">
 			</File>
 			<File
+				RelativePath=".\gmk-default.h">
+			</File>
+			<File
 				RelativePath=".\hash.h">
 			</File>
 			<File
 				RelativePath=".\job.h">
 			</File>
 			<File
-				RelativePath=".\make.h">
+				RelativePath=".\output.h">
+			</File>
+			<File
+				RelativePath=".\makeint.h">
 			</File>
 			<File
 				RelativePath=".\rule.h">

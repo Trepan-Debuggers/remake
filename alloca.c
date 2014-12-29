@@ -116,7 +116,7 @@ static int stack_dir;		/* 1 or -1 once known.  */
 static void
 find_stack_direction (void)
 {
-  static char *addr = NULL;	/* Address of first `dummy', once known.  */
+  static char *addr = NULL;	/* Address of first 'dummy', once known.  */
   auto char dummy;		/* To get stack address.  */
 
   if (addr == NULL)

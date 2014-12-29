@@ -11,9 +11,7 @@
 #                         [-make <make prog>]
 #                        (and others)
 
-# Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-# 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software
-# Foundation, Inc.
+# Copyright (C) 1992-2014 Free Software Foundation, Inc.
 # This file is part of GNU Make.
 #
 # GNU Make is free software; you can redistribute it and/or modify it under
@@ -29,18 +27,39 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
+%FEATURES = ();
 
 $valgrind = 0;              # invoke make with valgrind
 $valgrind_args = '';
-$memcheck_args = '--num-callers=15 --tool=memcheck --leak-check=full';
+$memcheck_args = '--num-callers=15 --tool=memcheck --leak-check=full --suppressions=guile.supp';
 $massif_args = '--num-callers=15 --tool=massif --alloc-fn=xmalloc --alloc-fn=xcalloc --alloc-fn=xrealloc --alloc-fn=xstrdup --alloc-fn=xstrndup';
 $pure_log = undef;
+
+# The location of the GNU make source directory
+$srcdir = '';
 
 $command_string = '';
 
 $all_tests = 0;
 
+# rmdir broken in some Perls on VMS.
+if ($^O eq 'VMS')
+{
+  require VMS::Filespec;
+  VMS::Filespec->import();
+
+  sub vms_rmdir {
+    my $vms_file = vmspath($_[0]);
+    $vms_file = fileify($vms_file);
+    my $ret = unlink(vmsify($vms_file));
+    return $ret
+  };
+
+  *CORE::GLOBAL::rmdir = \&vms_rmdir;
+}
+
 require "test_driver.pl";
+require "config-flags.pm";
 
 # Some target systems might not have the POSIX module...
 $has_POSIX = eval { require "POSIX.pm" };
@@ -55,6 +74,15 @@ sub valid_option
        $make_path = shift @argv;
        if (!-f $make_path) {
            print "$option $make_path: Not found.\n";
+           exit 0;
+       }
+       return 1;
+   }
+
+   if ($option =~ /^-srcdir$/i) {
+       $srcdir = shift @argv;
+       if (! -f "$srcdir/gnumake.h") {
+           print "$option $srcdir: Not a valid GNU make source directory.\n";
            exit 0;
        }
        return 1;
@@ -98,6 +126,17 @@ sub valid_option
 
 $old_makefile = undef;
 
+sub subst_make_string
+{
+    local $_ = shift;
+    $makefile and s/#MAKEFILE#/$makefile/g;
+    s/#MAKEPATH#/$mkpath/g;
+    s/#MAKE#/$make_name/g;
+    s/#PERL#/$perl_name/g;
+    s/#PWD#/$pwd/g;
+    return $_;
+}
+
 sub run_make_test
 {
   local ($makestring, $options, $answer, $err_code, $timeout) = @_;
@@ -115,16 +154,9 @@ sub run_make_test
       $makefile = &get_tmpfile();
     }
 
-    # Make sure it ends in a newline.
+    # Make sure it ends in a newline and substitute any special tokens.
     $makestring && $makestring !~ /\n$/s and $makestring .= "\n";
-
-    # Replace @MAKEFILE@ with the makefile name and @MAKE@ with the path to
-    # make
-    $makestring =~ s/#MAKEFILE#/$makefile/g;
-    $makestring =~ s/#MAKEPATH#/$mkpath/g;
-    $makestring =~ s/#MAKE#/$make_name/g;
-    $makestring =~ s/#PERL#/$perl_name/g;
-    $makestring =~ s/#PWD#/$pwd/g;
+    $makestring = subst_make_string($makestring);
 
     # Populate the makefile!
     open(MAKEFILE, "> $makefile") || die "Failed to open $makefile: $!\n";
@@ -133,13 +165,10 @@ sub run_make_test
   }
 
   # Do the same processing on $answer as we did on $makestring.
-
-  $answer && $answer !~ /\n$/s and $answer .= "\n";
-  $answer =~ s/#MAKEFILE#/$makefile/g;
-  $answer =~ s/#MAKEPATH#/$mkpath/g;
-  $answer =~ s/#MAKE#/$make_name/g;
-  $answer =~ s/#PERL#/$perl_name/g;
-  $answer =~ s/#PWD#/$pwd/g;
+  if (defined $answer) {
+      $answer && $answer !~ /\n$/s and $answer .= "\n";
+      $answer = subst_make_string($answer);
+  }
 
   run_make_with_options($makefile, $options, &get_logfile(0),
                         $err_code, $timeout);
@@ -165,6 +194,40 @@ sub run_make_with_options {
   }
 
   if ($options) {
+    if ($^O eq 'VMS') {
+      # Try to make sure arguments are properly quoted.
+      # This does not handle all cases.
+
+      # VMS uses double quotes instead of single quotes.
+      $options =~ s/\'/\"/g;
+
+      # If the leading quote is inside non-whitespace, then the
+      # quote must be doubled, because it will be enclosed in another
+      # set of quotes.
+      $options =~ s/(\S)(\".*\")/$1\"$2\"/g;
+
+      # Options must be quoted to preserve case if not already quoted.
+      $options =~ s/(\S+)/\"$1\"/g;
+
+      # Special fixup for embedded quotes.
+      $options =~ s/(\"\".+)\"(\s+)\"(.+\"\")/$1$2$3/g;
+
+      $options =~ s/(\A)(?:\"\")(.+)(?:\"\")/$1\"$2\"/g;
+
+      # Special fixup for misc/general4 test.
+      $options =~ s/""\@echo" "cc""/\@echo cc"/;
+      $options =~ s/"\@echo link"""/\@echo link"/;
+
+      # Remove shell escapes expected to be removed by bash
+      if ($options !~ /path=pre/) {
+        $options =~ s/\\//g;
+      }
+
+      # special fixup for options/eval
+      $options =~ s/"--eval=\$\(info" "eval/"--eval=\$\(info eval/;
+
+      print ("Options fixup = -$options-\n") if $debug;
+    }
     $command .= " $options";
   }
 
@@ -183,7 +246,6 @@ sub run_make_with_options {
       $valgrind and $test_timeout = 0;
 
       $code = &run_command_with_output($logname,$command);
-
       $test_timeout = $old_timeout;
   }
 
@@ -228,14 +290,16 @@ sub run_make_with_options {
 sub print_usage
 {
    &print_standard_usage ("run_make_tests",
-                          "[-make_path make_pathname] [-memcheck] [-massif]",);
+                          "[-make MAKE_PATHNAME] [-srcdir SRCDIR] [-memcheck] [-massif]",);
 }
 
 sub print_help
 {
    &print_standard_help (
-        "-make_path",
+        "-make",
         "\tYou may specify the pathname of the copy of make to run.",
+        "-srcdir",
+        "\tSpecify the make source directory.",
         "-valgrind",
         "-memcheck",
         "\tRun the test suite under valgrind's memcheck tool.",
@@ -312,29 +376,34 @@ sub set_more_defaults
 
    # Find the full pathname of Make.  For DOS systems this is more
    # complicated, so we ask make itself.
-   my $mk = `sh -c 'echo "all:;\@echo \\\$(MAKE)" | $make_path -f-'`;
-   chop $mk;
-   $mk or die "FATAL ERROR: Cannot determine the value of \$(MAKE):\n
+   if ($osname eq 'VMS') {
+     # On VMS pre-setup make to be found with simply 'make'.
+     $make_path = 'make';
+   } else {
+     my $mk = `sh -c 'echo "all:;\@echo \\\$(MAKE)" | $make_path -f-'`;
+     chop $mk;
+     $mk or die "FATAL ERROR: Cannot determine the value of \$(MAKE):\n
 'echo \"all:;\@echo \\\$(MAKE)\" | $make_path -f-' failed!\n";
-   $make_path = $mk;
-   print "Make\t= `$make_path'\n" if $debug;
+     $make_path = $mk;
+   }
+   print "Make\t= '$make_path'\n" if $debug;
 
-   $string = `$make_path -v -f /dev/null 2> /dev/null`;
+   my $redir2 = '2> /dev/null';
+   $redir2 = '' if os_name eq 'VMS';
+   $string = `$make_path -v -f /dev/null $redir2`;
 
    $string =~ /^(GNU Make [^,\n]*)/;
    $testee_version = "$1\n";
 
-   $string = `sh -c "$make_path -f /dev/null 2>&1"`;
+   my $redir = '2>&1';
+   $redir = '' if os_name eq 'VMS';
+   $string = `sh -c "$make_path -f /dev/null $redir"`;
    if ($string =~ /(.*): \*\*\* No targets\.  Stop\./) {
      $make_name = $1;
    }
    else {
-     if ($make_path =~ /$pathsep([^\n$pathsep]*)$/) {
-       $make_name = $1;
-     }
-     else {
-       $make_name = $make_path;
-     }
+     $make_path =~ /^(?:.*$pathsep)?(.+)$/;
+     $make_name = $1;
    }
 
    # prepend pwd if this is a relative path (ie, does not
@@ -350,6 +419,24 @@ sub set_more_defaults
       $mkpath = $make_path;
    }
 
+   # If srcdir wasn't provided on the command line, see if the
+   # location of the make program gives us a clue.  Don't fail if not;
+   # we'll assume it's been installed into /usr/include or wherever.
+   if (! $srcdir) {
+       $make_path =~ /^(.*$pathsep)?/;
+       my $d = $1 || '../';
+       -f "${d}gnumake.h" and $srcdir = $d;
+   }
+
+   # Not with the make program, so see if we can get it out of the makefile
+   if (! $srcdir && open(MF, "< ../Makefile")) {
+       local $/ = undef;
+       $_ = <MF>;
+       close(MF);
+       /^abs_srcdir\s*=\s*(.*?)\s*$/m;
+       -f "$1/gnumake.h" and $srcdir = $1;
+   }
+
    # Get Purify log info--if any.
 
    if (exists $ENV{PURIFYOPTIONS}
@@ -359,13 +446,15 @@ sub set_more_defaults
      $purify_errors = 0;
    }
 
-   $string = `sh -c "$make_path -j 2 -f /dev/null 2>&1"`;
+   $string = `sh -c "$make_path -j 2 -f /dev/null $redir"`;
    if ($string =~ /not supported/) {
      $parallel_jobs = 0;
    }
    else {
      $parallel_jobs = 1;
    }
+
+   %FEATURES = map { $_ => 1 } split /\s+/, `sh -c "echo '\\\$(info \\\$(.FEATURES))' | $make_path -f- 2>/dev/null"`;
 
    # Set up for valgrind, if requested.
 

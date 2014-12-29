@@ -16,4 +16,14 @@ recurse: ; @$(MAKE) -f #MAKEFILE# && echo recurse!,
 run_make_test(undef, '--no-print-directory --eval=\$\(info\ eval\) recurse',
               "eval\neval\nall\nrecurse");
 
+# Make sure that --eval is handled correctly during restarting
+run_make_test(q!
+all: ; @echo $@
+-include gen.mk
+gen.mk: ; @echo > $@
+!,
+              '--eval=\$\(info\ eval\)', "eval\neval\nall");
+
+unlink('gen.mk');
+
 1;

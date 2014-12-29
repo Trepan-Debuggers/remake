@@ -1,7 +1,5 @@
 /* Target file management for GNU Make.
-Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-2010 Free Software Foundation, Inc.
+Copyright (C) 1988-2014 Free Software Foundation, Inc.
 This file is part of GNU Make.
 
 GNU Make is free software; you can redistribute it and/or modify it under the
@@ -16,13 +14,12 @@ A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "make.h"
+#include "makeint.h"
 
 #include <assert.h>
 
-#include "dep.h"
 #include "filedef.h"
-#include "file.h"
+#include "dep.h"
 #include "job.h"
 #include "commands.h"
 #include "variable.h"
@@ -57,20 +54,20 @@ static int
 file_hash_cmp (const void *x, const void *y)
 {
   return_ISTRING_COMPARE (((struct file const *) x)->hname,
-			  ((struct file const *) y)->hname);
+                          ((struct file const *) y)->hname);
 }
 
-#ifndef	FILE_BUCKETS
-#define FILE_BUCKETS	1007
+#ifndef FILE_BUCKETS
+#define FILE_BUCKETS    1007
 #endif
-struct hash_table files;
+static struct hash_table files;
 
-/*! Whether or not .SECONDARY with no prerequisites was given.  */
+/* Whether or not .SECONDARY with no prerequisites was given.  */
 static int all_secondary = 0;
 
 /* Access the hash table of all file records.
    lookup_file  given a name, return the struct file * for that name,
-                or NULL if there is none.
+                or nil if there is none.
 */
 
 struct file *
@@ -106,20 +103,20 @@ lookup_file (const char *name)
 #endif
   while (name[0] == '.'
 #ifdef HAVE_DOS_PATHS
-	 && (name[1] == '/' || name[1] == '\\')
+         && (name[1] == '/' || name[1] == '\\')
 #else
-	 && name[1] == '/'
+         && name[1] == '/'
 #endif
-	 && name[2] != '\0')
+         && name[2] != '\0')
     {
       name += 2;
       while (*name == '/'
 #ifdef HAVE_DOS_PATHS
-	     || *name == '\\'
+             || *name == '\\'
 #endif
-	     )
-	/* Skip following slashes: ".//foo" is "foo", not "/foo".  */
-	++name;
+             )
+        /* Skip following slashes: ".//foo" is "foo", not "/foo".  */
+        ++name;
     }
 
   if (*name == '\0')
@@ -148,7 +145,7 @@ lookup_file (const char *name)
  */
 
 struct file *
-enter_file (const char *name, const floc_t *p_floc)
+enter_file (const char *name)
 {
   struct file *f;
   struct file *new;
@@ -156,7 +153,7 @@ enter_file (const char *name, const floc_t *p_floc)
   struct file file_key;
 
   assert (*name != '\0');
-  assert (strcache_iscached (name));
+  assert (! verify_flag || strcache_iscached (name));
 
 #if defined(VMS) && !defined(WANT_CASE_SENSITIVE_TARGETS)
   if (*name != '.')
@@ -179,25 +176,15 @@ enter_file (const char *name, const floc_t *p_floc)
   file_key.hname = name;
   file_slot = (struct file **) hash_find_slot (&files, &file_key);
   f = *file_slot;
-  if (! HASH_VACANT (f) && !f->double_colon) {
-    if (f->floc.filenm == '\0' && f->floc.lineno == 0 && p_floc &&
-	p_floc->filenm != '\0' && p_floc->lineno != 0) {
-      f->floc.filenm = strdup(p_floc->filenm);
-      f->floc.lineno = p_floc->lineno;
+  if (! HASH_VACANT (f) && !f->double_colon)
+    {
+      f->builtin = 0;
+      return f;
     }
-    return f;
-  }
 
   new = xcalloc (sizeof (struct file));
   new->name = new->hname = name;
-  new->update_status = -1;
-  new->tracing = BRK_NONE;
-  if (p_floc) {
-    new->floc = *p_floc;
-  } else {
-    new->floc.lineno = 0;
-    new->floc.filenm = NULL;
-  }
+  new->update_status = us_none;
 
   if (HASH_VACANT (f))
     {
@@ -216,7 +203,7 @@ enter_file (const char *name, const floc_t *p_floc)
 }
 
 /* Rehash FILE to NAME.  This is not as simple as resetting
-   the `hname' member, since it must be put in a new hash bucket,
+   the 'hname' member, since it must be put in a new hash bucket,
    and possibly merged with an existing file called NAME.  */
 
 void
@@ -229,6 +216,7 @@ rehash_file (struct file *from_file, const char *to_hname)
   struct file *f;
 
   /* If it's already that name, we're done.  */
+  from_file->builtin = 0;
   file_key.hname = to_hname;
   if (! file_hash_cmp (from_file, &file_key))
     return;
@@ -273,23 +261,26 @@ rehash_file (struct file *from_file, const char *to_hname)
         to_file->cmds = from_file->cmds;
       else if (from_file->cmds != to_file->cmds)
         {
+          size_t l = strlen (from_file->name);
           /* We have two sets of commands.  We will go with the
              one given in the rule explicitly mentioning this name,
              but give a message to let the user know what's going on.  */
           if (to_file->cmds->fileinfo.filenm != 0)
             error (&from_file->cmds->fileinfo,
-                   _("Recipe was specified for file `%s' at %s:%lu,"),
+                   l + strlen (to_file->cmds->fileinfo.filenm) + INTSTR_LENGTH,
+                   _("Recipe was specified for file '%s' at %s:%lu,"),
                    from_file->name, to_file->cmds->fileinfo.filenm,
                    to_file->cmds->fileinfo.lineno);
           else
-            error (&from_file->cmds->fileinfo,
-                   _("Recipe for file `%s' was found by implicit rule search,"),
+            error (&from_file->cmds->fileinfo, l,
+                   _("Recipe for file '%s' was found by implicit rule search,"),
                    from_file->name);
-          error (&from_file->cmds->fileinfo,
-                 _("but `%s' is now considered the same file as `%s'."),
+          l += strlen (to_hname);
+          error (&from_file->cmds->fileinfo, l,
+                 _("but '%s' is now considered the same file as '%s'."),
                  from_file->name, to_hname);
-          error (&from_file->cmds->fileinfo,
-                 _("Recipe for `%s' will be ignored in favor of the one for `%s'."),
+          error (&from_file->cmds->fileinfo, l,
+                 _("Recipe for '%s' will be ignored in favor of the one for '%s'."),
                  to_hname, from_file->name);
         }
     }
@@ -309,13 +300,14 @@ rehash_file (struct file *from_file, const char *to_hname)
   merge_variable_set_lists (&to_file->variables, from_file->variables);
 
   if (to_file->double_colon && from_file->is_target && !from_file->double_colon)
-    fatal (NILF, _("can't rename single-colon `%s' to double-colon `%s'"),
-           from_file->name, to_hname);
+    OSS (fatal, NILF, _("can't rename single-colon '%s' to double-colon '%s'"),
+         from_file->name, to_hname);
   if (!to_file->double_colon  && from_file->double_colon)
     {
       if (to_file->is_target)
-        fatal (NILF, _("can't rename double-colon `%s' to single-colon `%s'"),
-               from_file->name, to_hname);
+        OSS (fatal, NILF,
+             _("can't rename double-colon '%s' to single-colon '%s'"),
+             from_file->name, to_hname);
       else
         to_file->double_colon = from_file->double_colon;
     }
@@ -334,14 +326,16 @@ rehash_file (struct file *from_file, const char *to_hname)
   MERGE (is_target);
   MERGE (cmd_target);
   MERGE (phony);
+  MERGE (loaded);
   MERGE (ignore_vpath);
 #undef MERGE
 
+  to_file->builtin = 0;
   from_file->renamed = to_file;
 }
 
 /* Rename FILE to NAME.  This is not as simple as resetting
-   the `name' member, since it must be put in a new hash bucket,
+   the 'name' member, since it must be put in a new hash bucket,
    and possibly merged with an existing file called NAME.  */
 
 void
@@ -379,52 +373,53 @@ remove_intermediates (int sig)
   for ( ; file_slot < file_end; file_slot++)
     if (! HASH_VACANT (*file_slot))
       {
-	struct file *f = *file_slot;
+        struct file *f = *file_slot;
         /* Is this file eligible for automatic deletion?
            Yes, IFF: it's marked intermediate, it's not secondary, it wasn't
            given on the command line, and it's either a -include makefile or
            it's not precious.  */
-	if (f->intermediate && (f->dontcare || !f->precious)
-	    && !f->secondary && !f->cmd_target)
-	  {
-	    int status;
-	    if (f->update_status == -1)
-	      /* If nothing would have created this file yet,
-		 don't print an "rm" command for it.  */
-	      continue;
-	    if (just_print_flag)
-	      status = 0;
-	    else
-	      {
-		status = unlink (f->name);
-		if (status < 0 && errno == ENOENT)
-		  continue;
-	      }
-	    if (!f->dontcare)
-	      {
-		if (sig)
-		  error (NILF, _("*** Deleting intermediate file `%s'"), f->name);
-		else
-		  {
-		    if (! doneany)
-		      DB (DB_BASIC, (_("Removing intermediate files...\n")));
-		    if (!silent_flag)
-		      {
-			if (! doneany)
-			  {
-			    fputs ("rm ", stdout);
-			    doneany = 1;
-			  }
-			else
-			  putchar (' ');
-			fputs (f->name, stdout);
-			fflush (stdout);
-		      }
-		  }
-		if (status < 0)
-		  perror_with_name ("unlink: ", f->name);
-	      }
-	  }
+        if (f->intermediate && (f->dontcare || !f->precious)
+            && !f->secondary && !f->cmd_target)
+          {
+            int status;
+            if (f->update_status == us_none)
+              /* If nothing would have created this file yet,
+                 don't print an "rm" command for it.  */
+              continue;
+            if (just_print_flag)
+              status = 0;
+            else
+              {
+                status = unlink (f->name);
+                if (status < 0 && errno == ENOENT)
+                  continue;
+              }
+            if (!f->dontcare)
+              {
+                if (sig)
+                  OS (error, NILF,
+                      _("*** Deleting intermediate file '%s'"), f->name);
+                else
+                  {
+                    if (! doneany)
+                      DB (DB_BASIC, (_("Removing intermediate files...\n")));
+                    if (!silent_flag)
+                      {
+                        if (! doneany)
+                          {
+                            fputs ("rm ", stdout);
+                            doneany = 1;
+                          }
+                        else
+                          putchar (' ');
+                        fputs (f->name, stdout);
+                        fflush (stdout);
+                      }
+                  }
+                if (status < 0)
+                  perror_with_name ("unlink: ", f->name);
+              }
+          }
       }
 
   if (doneany && !sig)
@@ -440,7 +435,8 @@ remove_intermediates (int sig)
 struct dep *
 split_prereqs (char *p)
 {
-  struct dep *new = PARSE_FILE_SEQ (&p, struct dep, '|', NULL, 0);
+  struct dep *new = PARSE_FILE_SEQ (&p, struct dep, MAP_PIPE, NULL,
+                                    PARSEFS_NONE);
 
   if (*p)
     {
@@ -449,7 +445,7 @@ split_prereqs (char *p)
       struct dep *ood;
 
       ++p;
-      ood = PARSE_FILE_SEQ (&p, struct dep, '\0', NULL, 0);
+      ood = PARSE_SIMPLE_SEQ (&p, struct dep);
 
       if (! new)
         new = ood;
@@ -539,7 +535,7 @@ enter_prereqs (struct dep *deps, const char *stem)
 
       d1->file = lookup_file (d1->name);
       if (d1->file == 0)
-        d1->file = enter_file (d1->name, NILF);
+        d1->file = enter_file (d1->name);
       d1->staticpattern = 0;
       d1->name = 0;
     }
@@ -557,7 +553,7 @@ set_intermediate (const void *item)
 }
 
 /* Expand and parse each dependency line. */
-void
+static void
 expand_deps (struct file *f)
 {
   struct dep *d;
@@ -589,12 +585,11 @@ expand_deps (struct file *f)
          "$*" so they'll expand properly.  */
       if (d->staticpattern)
         {
-          char *o;
-          d->name = o = variable_expand ("");
+          char *o = variable_expand ("");
           o = subst_expand (o, name, "%", "$*", 1, 2, 0);
           *o = '\0';
           free (name);
-          d->name = name = xstrdup (d->name);
+          d->name = name = xstrdup (variable_buffer);
           d->staticpattern = 0;
         }
 
@@ -651,8 +646,8 @@ reset_updating (const void *item)
   f->updating = 0;
 }
 
-/* For each dependency of each file, make the `struct dep' point
-   at the appropriate `struct file' (which may have to be created).
+/* For each dependency of each file, make the 'struct dep' point
+   at the appropriate 'struct file' (which may have to be created).
 
    Also mark the files depended on by .PRECIOUS, .PHONY, .SILENT,
    and various other special targets.  */
@@ -707,23 +702,23 @@ snap_deps (void)
   for (f = lookup_file (".PRECIOUS"); f != 0; f = f->prev)
     for (d = f->deps; d != 0; d = d->next)
       for (f2 = d->file; f2 != 0; f2 = f2->prev)
-	f2->precious = 1;
+        f2->precious = 1;
 
   for (f = lookup_file (".LOW_RESOLUTION_TIME"); f != 0; f = f->prev)
     for (d = f->deps; d != 0; d = d->next)
       for (f2 = d->file; f2 != 0; f2 = f2->prev)
-	f2->low_resolution_time = 1;
+        f2->low_resolution_time = 1;
 
   for (f = lookup_file (".PHONY"); f != 0; f = f->prev)
     for (d = f->deps; d != 0; d = d->next)
       for (f2 = d->file; f2 != 0; f2 = f2->prev)
-	{
-	  /* Mark this file as phony nonexistent target.  */
-	  f2->phony = 1;
+        {
+          /* Mark this file as phony nonexistent target.  */
+          f2->phony = 1;
           f2->is_target = 1;
-	  f2->last_mtime = NONEXISTENT_MTIME;
-	  f2->mtime_before_update = NONEXISTENT_MTIME;
-	}
+          f2->last_mtime = NONEXISTENT_MTIME;
+          f2->mtime_before_update = NONEXISTENT_MTIME;
+        }
 
   for (f = lookup_file (".INTERMEDIATE"); f != 0; f = f->prev)
     /* Mark .INTERMEDIATE deps as intermediate files.  */
@@ -755,22 +750,22 @@ snap_deps (void)
   if (f != 0 && f->is_target)
     {
       if (f->deps == 0)
-	ignore_errors_flag = 1;
+        ignore_errors_flag = 1;
       else
-	for (d = f->deps; d != 0; d = d->next)
-	  for (f2 = d->file; f2 != 0; f2 = f2->prev)
-	    f2->command_flags |= COMMANDS_NOERROR;
+        for (d = f->deps; d != 0; d = d->next)
+          for (f2 = d->file; f2 != 0; f2 = f2->prev)
+            f2->command_flags |= COMMANDS_NOERROR;
     }
 
   f = lookup_file (".SILENT");
   if (f != 0 && f->is_target)
     {
       if (f->deps == 0)
-	silent_flag = 1;
+        silent_flag = 1;
       else
-	for (d = f->deps; d != 0; d = d->next)
-	  for (f2 = d->file; f2 != 0; f2 = f2->prev)
-	    f2->command_flags |= COMMANDS_SILENT;
+        for (d = f->deps; d != 0; d = d->next)
+          for (f2 = d->file; f2 != 0; f2 = f2->prev)
+            f2->command_flags |= COMMANDS_SILENT;
     }
 
   f = lookup_file (".NOTPARALLEL");
@@ -786,7 +781,7 @@ snap_deps (void)
 #endif
 }
 
-/* Set the `command_state' member of FILE and all its `also_make's.  */
+/* Set the 'command_state' member of FILE and all its 'also_make's.  */
 
 void
 set_command_state (struct file *file, enum cmd_state state)
@@ -802,20 +797,22 @@ set_command_state (struct file *file, enum cmd_state state)
 /* Convert an external file timestamp to internal form.  */
 
 FILE_TIMESTAMP
-file_timestamp_cons (const char *fname, time_t s, int ns)
+file_timestamp_cons (const char *fname, time_t stamp, long int ns)
 {
   int offset = ORDINARY_MTIME_MIN + (FILE_TIMESTAMP_HI_RES ? ns : 0);
+  FILE_TIMESTAMP s = stamp;
   FILE_TIMESTAMP product = (FILE_TIMESTAMP) s << FILE_TIMESTAMP_LO_BITS;
   FILE_TIMESTAMP ts = product + offset;
 
   if (! (s <= FILE_TIMESTAMP_S (ORDINARY_MTIME_MAX)
-	 && product <= ts && ts <= ORDINARY_MTIME_MAX))
+         && product <= ts && ts <= ORDINARY_MTIME_MAX))
     {
       char buf[FILE_TIMESTAMP_PRINT_LEN_BOUND + 1];
+      const char *f = fname ? fname : _("Current time");
       ts = s <= OLD_MTIME ? ORDINARY_MTIME_MIN : ORDINARY_MTIME_MAX;
       file_timestamp_sprintf (buf, ts);
-      error (NILF, _("%s: Timestamp out of range; substituting %s"),
-	     fname ? fname : _("Current time"), buf);
+      OSS (error, NILF,
+           _("%s: Timestamp out of range; substituting %s"), f, buf);
     }
 
   return ts;
@@ -839,10 +836,10 @@ file_timestamp_now (int *resolution)
     struct timespec timespec;
     if (clock_gettime (CLOCK_REALTIME, &timespec) == 0)
       {
-	r = 1;
-	s = timespec.tv_sec;
-	ns = timespec.tv_nsec;
-	goto got_time;
+        r = 1;
+        s = timespec.tv_sec;
+        ns = timespec.tv_nsec;
+        goto got_time;
       }
   }
 # endif
@@ -851,10 +848,10 @@ file_timestamp_now (int *resolution)
     struct timeval timeval;
     if (gettimeofday (&timeval, 0) == 0)
       {
-	r = 1000;
-	s = timeval.tv_sec;
-	ns = timeval.tv_usec * 1000;
-	goto got_time;
+        r = 1000;
+        s = timeval.tv_sec;
+        ns = timeval.tv_usec * 1000;
+        goto got_time;
       }
   }
 # endif
@@ -881,8 +878,8 @@ file_timestamp_sprintf (char *p, FILE_TIMESTAMP ts)
 
   if (tm)
     sprintf (p, "%04d-%02d-%02d %02d:%02d:%02d",
-	     tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-	     tm->tm_hour, tm->tm_min, tm->tm_sec);
+             tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+             tm->tm_hour, tm->tm_min, tm->tm_sec);
   else if (t < 0)
     sprintf (p, "%ld", (long) t);
   else
@@ -902,143 +899,6 @@ file_timestamp_sprintf (char *p, FILE_TIMESTAMP ts)
   *p = '\0';
 }
 
-/*! Print some or all properties of the data base of files.
-*/
-void
-print_target_props (file_t *p_target, print_target_mask_t i_mask)
-{
-  dep_t *d;
-  dep_t *ood = 0;
-
-  putchar ('\n');
-  if (!p_target->is_target)
-    puts (_("# Not a target:"));
-  printf ("%s:%s", p_target->name, p_target->double_colon ? ":" : "");
-
-    /* Print all normal dependencies; note any order-only deps.  */
-    for (d = p_target->deps; d != 0; d = d->next)
-      if (! d->ignore_mtime) {
-	if (i_mask & PRINT_TARGET_NONORDER)
-	  printf (" %s", dep_name (d));
-      } else if (! ood)
-	ood = d;
-
-  if (i_mask & PRINT_TARGET_ORDER) {
-    /* Print order-only deps, if we have any.  */
-    if (ood)
-      {
-	printf (" | %s", dep_name (ood));
-	for (d = ood->next; d != 0; d = d->next)
-	  if (d->ignore_mtime)
-	    printf (" %s", dep_name (d));
-      }
-  }
-  
-  putchar ('\n');
-
-  if (i_mask & PRINT_TARGET_ATTRS) {
-    
-    if (p_target->precious)
-      puts (_("#  Precious file (prerequisite of .PRECIOUS)."));
-    if (p_target->phony)
-      puts (_("#  Phony target (prerequisite of .PHONY)."));
-    if (p_target->cmd_target)
-      puts (_("#  Command-line target."));
-    if (p_target->dontcare)
-      puts (_("#  A default, MAKEFILES, or -include/sinclude makefile."));
-    puts (p_target->tried_implicit
-	  ? _("#  Implicit rule search has been done.")
-	  : _("#  Implicit rule search has not been done."));
-    if (p_target->stem != 0)
-      printf (_("#  Implicit/static pattern stem: `%s'\n"), p_target->stem);
-    if (p_target->intermediate)
-      puts (_("#  File is an intermediate prerequisite."));
-    if (p_target->also_make != 0)
-      {
-	fputs (_("#  Also makes:"), stdout);
-	for (d = p_target->also_make; d != 0; d = d->next)
-	  printf (" %s", dep_name (d));
-	putchar ('\n');
-      }
-  }
-
-  if (i_mask & PRINT_TARGET_TIME) {
-    
-    if (p_target->last_mtime == UNKNOWN_MTIME)
-      puts (_("#  Modification time never checked."));
-    else if (p_target->last_mtime == NONEXISTENT_MTIME)
-      puts (_("#  File does not exist."));
-    else if (p_target->last_mtime == OLD_MTIME)
-      puts (_("#  File is very old."));
-    else
-      {
-	char buf[FILE_TIMESTAMP_PRINT_LEN_BOUND + 1];
-	file_timestamp_sprintf (buf, p_target->last_mtime);
-	printf (_("#  Last modified %s\n"), buf);
-      }
-    puts (p_target->updated
-	  ? _("#  File has been updated.")
-	  : _("#  File has not been updated."));
-  }
-
-  if (i_mask & PRINT_TARGET_STATE) {
-    
-    switch (p_target->command_state)
-      {
-      case cs_running:
-	puts (_("#  Commands currently running (THIS IS A BUG)."));
-	break;
-      case cs_deps_running:
-	puts (_("#  Dependencies commands running (THIS IS A BUG)."));
-	break;
-      case cs_not_started:
-	puts (_("#  Commands not yet started."));
-	break;
-      case cs_finished:
-	switch (p_target->update_status)
-	  {
-	  case -1:
-	    break;
-	  case 0:
-	    puts (_("#  Successfully updated."));
-	    break;
-	  case 1:
-	    assert (question_flag);
-	    puts (_("#  Needs to be updated (-q is set)."));
-	    break;
-	  case 2:
-	    puts (_("#  Failed to be updated."));
-	    break;
-	  default:
-	    puts (_("#  Invalid value in `update_status' member!"));
-	    fflush (stdout);
-	    fflush (stderr);
-	    abort ();
-	  }
-	break;
-      default:
-	puts (_("#  Invalid value in `command_state' member!"));
-	fflush (stdout);
-	fflush (stderr);
-	abort ();
-      }
-  }
-  
-
-  if (p_target->variables != 0 && i_mask & PRINT_TARGET_VARS)
-    print_file_variables (p_target, i_mask & PRINT_TARGET_VARS_HASH);
-
-  if (p_target->cmds != 0 && i_mask & PRINT_TARGET_CMDS)
-    print_commands (p_target, p_target->cmds, false);
-
-  if (p_target->cmds != 0 && i_mask & PRINT_TARGET_CMDS_EXP)
-    print_commands (p_target, p_target->cmds, true);
-
-  if (p_target->prev && i_mask & PRINT_TARGET_PREV)
-    print_target_props (p_target->prev, i_mask);
-}
-
-
 /* Print the data base of files.  */
 
 void
@@ -1065,14 +925,117 @@ print_prereqs (const struct dep *deps)
   putchar ('\n');
 }
 
-/*! 
-Print the data base of files.
-*/
-void
-print_target (const void *item)
+static void
+print_file (const void *item)
 {
-  file_t *p_target = (file_t *) item;
-  print_target_props(p_target, PRINT_TARGET_ALL);
+  const struct file *f = item;
+
+  /* If we're not using builtin targets, don't show them.
+
+     Ideally we'd be able to delete them altogether but currently there's no
+     facility to ever delete a file once it's been added.  */
+  if (no_builtin_rules_flag && f->builtin)
+    return;
+
+  putchar ('\n');
+
+  if (f->cmds && f->cmds->recipe_prefix != cmd_prefix)
+    {
+      fputs (".RECIPEPREFIX = ", stdout);
+      cmd_prefix = f->cmds->recipe_prefix;
+      if (cmd_prefix != RECIPEPREFIX_DEFAULT)
+        putchar (cmd_prefix);
+      putchar ('\n');
+    }
+
+  if (f->variables != 0)
+    print_target_variables (f);
+
+  if (!f->is_target)
+    puts (_("# Not a target:"));
+  printf ("%s:%s", f->name, f->double_colon ? ":" : "");
+  print_prereqs (f->deps);
+
+  if (f->precious)
+    puts (_("#  Precious file (prerequisite of .PRECIOUS)."));
+  if (f->phony)
+    puts (_("#  Phony target (prerequisite of .PHONY)."));
+  if (f->cmd_target)
+    puts (_("#  Command line target."));
+  if (f->dontcare)
+    puts (_("#  A default, MAKEFILES, or -include/sinclude makefile."));
+  if (f->builtin)
+    puts (_("#  Builtin rule"));
+  puts (f->tried_implicit
+        ? _("#  Implicit rule search has been done.")
+        : _("#  Implicit rule search has not been done."));
+  if (f->stem != 0)
+    printf (_("#  Implicit/static pattern stem: '%s'\n"), f->stem);
+  if (f->intermediate)
+    puts (_("#  File is an intermediate prerequisite."));
+  if (f->also_make != 0)
+    {
+      const struct dep *d;
+      fputs (_("#  Also makes:"), stdout);
+      for (d = f->also_make; d != 0; d = d->next)
+        printf (" %s", dep_name (d));
+      putchar ('\n');
+    }
+  if (f->last_mtime == UNKNOWN_MTIME)
+    puts (_("#  Modification time never checked."));
+  else if (f->last_mtime == NONEXISTENT_MTIME)
+    puts (_("#  File does not exist."));
+  else if (f->last_mtime == OLD_MTIME)
+    puts (_("#  File is very old."));
+  else
+    {
+      char buf[FILE_TIMESTAMP_PRINT_LEN_BOUND + 1];
+      file_timestamp_sprintf (buf, f->last_mtime);
+      printf (_("#  Last modified %s\n"), buf);
+    }
+  puts (f->updated
+        ? _("#  File has been updated.") : _("#  File has not been updated."));
+  switch (f->command_state)
+    {
+    case cs_running:
+      puts (_("#  Recipe currently running (THIS IS A BUG)."));
+      break;
+    case cs_deps_running:
+      puts (_("#  Dependencies recipe running (THIS IS A BUG)."));
+      break;
+    case cs_not_started:
+    case cs_finished:
+      switch (f->update_status)
+        {
+        case us_none:
+          break;
+        case us_success:
+          puts (_("#  Successfully updated."));
+          break;
+        case us_question:
+          assert (question_flag);
+          puts (_("#  Needs to be updated (-q is set)."));
+          break;
+        case us_failed:
+          puts (_("#  Failed to be updated."));
+          break;
+        }
+      break;
+    default:
+      puts (_("#  Invalid value in 'command_state' member!"));
+      fflush (stdout);
+      fflush (stderr);
+      abort ();
+    }
+
+  if (f->variables != 0)
+    print_file_variables (f);
+
+  if (f->cmds != 0)
+    print_commands (f->cmds);
+
+  if (f->prev)
+    print_file ((const void *) f->prev);
 }
 
 void
@@ -1080,7 +1043,7 @@ print_file_data_base (void)
 {
   puts (_("\n# Files"));
 
-  hash_map (&files, print_target);
+  hash_map (&files, print_file);
 
   fputs (_("\n# files hash-table stats:\n# "), stdout);
   hash_print_stats (&files, stdout);
@@ -1089,9 +1052,10 @@ print_file_data_base (void)
 /* Verify the integrity of the data base of files.  */
 
 #define VERIFY_CACHED(_p,_n) \
-    do{\
-        if (_p->_n && _p->_n[0] && !strcache_iscached (_p->_n)) \
-          error (NULL, "%s: Field '%s' not cached: %s\n", _p->name, # _n, _p->_n); \
+    do{                                                                       \
+        if (_p->_n && _p->_n[0] && !strcache_iscached (_p->_n))               \
+          error (NULL, strlen (_p->name) + CSTRLEN (# _n) + strlen (_p->_n),  \
+                 _("%s: Field '%s' not cached: %s"), _p->name, # _n, _p->_n); \
     }while(0)
 
 static void

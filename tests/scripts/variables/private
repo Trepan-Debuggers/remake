@@ -75,4 +75,48 @@ a b: ; @echo $@=$(private)
 ',
                '', "b=a\na=a\n");
 
+# 9: make sure private suppresses inheritance
+run_make_test(q!
+DEFS = FOO
+all: bar1
+bar1: private DEFS += 1
+bar3: private DEFS += 3
+bar1: bar2
+bar2: bar3
+bar1 bar2 bar3: ; @echo '$@: $(DEFS)'
+!,
+              '', "bar3: FOO 3\nbar2: FOO\nbar1: FOO 1\n");
+
+# 10: Test append with pattern-specific variables and private
+
+run_make_test(q!
+IA = global
+PA = global
+PS = global
+S = global
+PS = global
+SV = global
+b%: IA += b%
+b%: private PA += b%
+b%: private PS = b%
+bar: all
+bar: IA += bar
+bar: private PA += bar
+bar: private PS = bar
+a%: IA += a%
+a%: private PA += a%
+a%: private PS = a%
+all: IA += all
+all: private PA += all
+all: private PS = all
+
+bar all: ; @echo '$@: IA=$(IA)'; echo '$@: PA=$(PA)'; echo '$@: PS=$(PS)'
+!,
+              '', "all: IA=global b% bar a% all
+all: PA=global a% all
+all: PS=all
+bar: IA=global b% bar
+bar: PA=global b% bar
+bar: PS=bar\n");
+
 1;

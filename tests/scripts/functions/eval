@@ -163,10 +163,7 @@ world');
 # See Savannah bug # 12124.
 
 run_make_test('deps: ; $(eval deps: foo)', '',
-              "#MAKEFILE#:1: *** prerequisites cannot be defined in recipes.  Stop.
-Command-line invocation:
-	\"$make_path -f work/functions/eval.mk.7\"
-",
+              '#MAKEFILE#:1: *** prerequisites cannot be defined in recipes.  Stop.',
               512);
 
 1;

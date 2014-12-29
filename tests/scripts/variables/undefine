@@ -68,9 +68,6 @@ a =
 undefine $a
 all: ;@echo ouch
 ',
-'', "#MAKEFILE#:3: *** empty variable name.  Stop.
-Command-line invocation:
-	\"$make_path -f work/variables/undefine.mk.3\"
-", 512);
+'', "#MAKEFILE#:3: *** empty variable name.  Stop.\n", 512);
 
 1;

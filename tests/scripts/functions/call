@@ -13,7 +13,7 @@ print MAKEFILE <<'EOMAKE';
 #
 reverse = $2 $1
 
-# A complex `map' function, using recursive `call'.
+# A complex 'map' function, using recursive 'call'.
 #
 map = $(foreach a,$2,$(call $1,$a))
 
@@ -38,7 +38,7 @@ two = $(call one,$(1),foo,$(2))
 DEP_foo = bar baz quux
 DEP_baz = quux blarp
 rest = $(wordlist 2,$(words ${1}),${1})
-tclose = $(if $1,$(firstword $1) \
+tclose = $(if $1,$(firstword $1)\
 		$(call tclose,$(sort ${DEP_$(firstword $1)} $(call rest,$1))))
 
 all: ; @echo '$(call reverse,bar,foo)'; \
@@ -95,5 +95,16 @@ close(MAKEFILE);
 &run_make_with_options($makefile2, "", &get_logfile);
 $answer = "1 2 3 4 5 6 7 8 9\n1 2 3 4 5\n1 2 3\n1 2 3\n";
 &compare_output($answer,&get_logfile(1));
+
+# Ensure that variables are defined in global scope even in a $(call ...)
+
+delete $ENV{X123};
+
+run_make_test('
+tst = $(eval export X123)
+$(call tst)
+all: ; @echo "$${X123-not set}"
+',
+              '', "\n");
 
 1;

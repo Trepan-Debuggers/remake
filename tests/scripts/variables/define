@@ -14,13 +14,7 @@ endef
 
 all: ; $(multi)
 ',
-              '', 
-"hi
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-echo there
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-there
-");
+              '', "hi\necho there\nthere\n");
 
 # TEST 1: Various new-style define/endef
 
@@ -33,6 +27,10 @@ echo hi
 endef # this is the end
 
 define simple :=
+@echo $(FOO)
+endef
+
+define posix ::=
 @echo $(FOO)
 endef
 
@@ -55,14 +53,54 @@ FOO = there
 
 all: ; $(multi)
 	$(simple)
+	$(posix)
 	$(append)
 	$(cond)
 ',
-              '', 
-"##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+              '', "echo hi\nhi\nthere\nfoo\nfoo\na\nb\nfirst\n");
+
+# TEST 1a: Various new-style define/endef, with no spaces
+
+run_make_test('
+FOO = foo
+
+define multi=
 echo hi
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-hi\nthere\nfoo\na\nb\nfirst\n");
+@echo $(FOO)
+endef # this is the end
+
+define simple:=
+@echo $(FOO)
+endef
+
+define posix::=
+@echo $(FOO)
+endef
+
+append = @echo a
+
+define append+=
+
+@echo b
+endef
+
+define cond?= # this is a conditional
+@echo first
+endef
+
+define cond?=
+@echo second
+endef
+
+FOO = there
+
+all: ; $(multi)
+	$(simple)
+	$(posix)
+	$(append)
+	$(cond)
+',
+              '', "echo hi\nhi\nthere\nfoo\nfoo\na\nb\nfirst\n");
 
 # TEST 2: define in true section of conditional (containing conditional)
 
@@ -111,10 +149,7 @@ ouch
 endef
 all: ; @echo ouch
 ',
-              '', "#MAKEFILE#:3: *** empty variable name.  Stop.
-Command-line invocation:
-	\"$make_path -f work/variables/define.mk.4\"
-", 512);
+              '', "#MAKEFILE#:3: *** empty variable name.  Stop.\n", 512);
 
 # TEST 6: NEGATIVE: extra text after define
 
@@ -125,7 +160,7 @@ ouch
 endef
 all: ; @echo ok
 ',
-              '', "#MAKEFILE#:3: extraneous text after `define' directive\nok\n");
+              '', "#MAKEFILE#:3: extraneous text after 'define' directive\nok\n");
 
 # TEST 7: NEGATIVE: extra text after endef
 
@@ -136,7 +171,7 @@ ouch
 endef $(NAME)
 all: ; @echo ok
 ',
-              '', "#MAKEFILE#:5: extraneous text after `endef' directive\nok\n");
+              '', "#MAKEFILE#:5: extraneous text after 'endef' directive\nok\n");
 
 # TEST 8: NEGATIVE: missing endef
 
@@ -147,10 +182,7 @@ define NAME =
 ouch
 endef$(NAME)
 ',
-              '', "#MAKEFILE#:4: *** missing `endef', unterminated `define'.  Stop.
-Command-line invocation:
-	\"$make_path -f work/variables/define.mk.7\"
-", 512);
+              '', "#MAKEFILE#:4: *** missing 'endef', unterminated 'define'.  Stop.\n", 512);
 
 # -------------------------
 # Make sure that prefix characters apply properly to define/endef values.
@@ -206,17 +238,13 @@ $(V2)echo world
 endef
 all: ; $(FOO)
 ', 'V1=@', 'hello
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 echo world
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 world');
 
 # TEST #8
 # -------
 
-run_make_test(undef, 'V2=@', '##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-echo hello
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+run_make_test(undef, 'V2=@', 'echo hello
 hello
 world');
 
@@ -245,9 +273,7 @@ all: foo bar
 foo: ; $(FOO)
 bar: ; @$(BAR)
 ', '', 'hello
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 echo world
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 world
 hello
 world

@@ -28,9 +28,9 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #else /* Not C++ or ANSI C.  */
 # undef	__P
 # define __P(protos)	()
-/* We can get away without defining `const' here only because in this file
-   it is used only inside the prototype for `fnmatch', which is elided in
-   non-ANSI C where `const' is problematical.  */
+/* We can get away without defining 'const' here only because in this file
+   it is used only inside the prototype for 'fnmatch', which is elided in
+   non-ANSI C where 'const' is problematical.  */
 #endif /* C++ or ANSI C.  */
 
 typedef unsigned long (*hash_func_t) __P((void const *key));
@@ -41,6 +41,9 @@ typedef void (*hash_map_arg_func_t) __P((void const *item, void *arg));
 struct hash_table
 {
   void **ht_vec;
+  hash_func_t ht_hash_1;	/* primary hash function */
+  hash_func_t ht_hash_2;	/* secondary hash function */
+  hash_cmp_func_t ht_compare;	/* comparison function */
   unsigned long ht_size;	/* total number of slots (power of 2) */
   unsigned long ht_capacity;	/* usable slots, limited by loading-factor */
   unsigned long ht_fill;	/* items in table */
@@ -48,9 +51,6 @@ struct hash_table
   unsigned long ht_collisions;	/* # of failed calls to comparison function */
   unsigned long ht_lookups;	/* # of queries */
   unsigned int ht_rehashes;	/* # of times we've expanded table */
-  hash_func_t ht_hash_1;	/* primary hash function */
-  hash_func_t ht_hash_2;	/* secondary hash function */
-  hash_cmp_func_t ht_compare;	/* comparison function */
 };
 
 typedef int (*qsort_cmp_t) __P((void const *, void const *));

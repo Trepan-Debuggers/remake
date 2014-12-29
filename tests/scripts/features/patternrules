@@ -90,9 +90,7 @@ install: $(dir)/foo.c
 ',
 "dir=$dir",
 "$dir/foo.y
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 touch $dir/foo.c
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 $dir/foo.o");
 
 unlink("$dir/foo.c");
@@ -111,8 +109,9 @@ run_make_test('
 $(dir)/foo.bar:
 
 ',
-"--no-extended-errors dir=$dir",
-"work/features/patternrules.mk.3:8: *** [$dir/foo.bar] Error 1",
+"dir=$dir",
+"#MAKEFILE#:6: recipe for target '$dir/foo.bar' failed
+#MAKE#: *** [$dir/foo.bar] Error 1",
 512);
 
 unlink("$dir/foo.bar");
@@ -140,19 +139,10 @@ foo.in:
 
 ',
 '',
-'##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-touch foo.in
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+'touch foo.in
 touch foo.h
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 touch foo.c
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-echo foo.c foo.h >foo.o
-##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-');
+echo foo.c foo.h >foo.o');
 
 unlink('foo.in', 'foo.h', 'foo.c', 'foo.o');
 
@@ -214,9 +204,7 @@ CWEAVE := :
 %.tex : %.w %.ch
 !,
               'foo.tex',
-              "#MAKE#: *** No rule to make target `foo.tex'.  Stop.
-Command-line invocation:
-	\"$make_path -f work/features/patternrules.mk.8 foo.tex\"", 512);
+              "#MAKE#: *** No rule to make target 'foo.tex'.  Stop.", 512);
 
 unlink(@f);
 

@@ -1,6 +1,6 @@
 #                                     -*-mode: perl; rm-trailing-spaces: nil-*-
 
-$description = "Test various forms of the GNU make `include' command.";
+$description = "Test various forms of the GNU make 'include' command.";
 
 $details = "\
 Test include, -include, sinclude and various regressions involving them.
@@ -60,9 +60,7 @@ run_make_test
 error: foo.mk ; @echo $@
 ',
    '',
-   "#MAKE#: *** No rule to make target `foo.mk', needed by `error'.  Stop.
-Command-line invocation:
-	\"$make_path -f work/features/include.mk.2\"",
+   "#MAKE#: *** No rule to make target 'foo.mk', needed by 'error'.  Stop.\n",
    512
   );
 
@@ -130,9 +128,7 @@ foo: baz
 bar: baz
 ',
 '',
-"#MAKE#: *** No rule to make target `baz', needed by `bar'.  Stop.
-Command-line invocation:
-	\"$make_path -f work/features/include.mk.7\"",
+"#MAKE#: *** No rule to make target 'baz', needed by 'bar'.  Stop.\n",
 512);
 
 # Test that the diagnostics is issued even if the target has been
@@ -148,9 +144,7 @@ bar: baz
 baz: end
 ',
 '',
-"#MAKE#: *** No rule to make target `end', needed by `baz'.  Stop.
-Command-line invocation:
-	\"$make_path -f work/features/include.mk.8\"",
+"#MAKE#: *** No rule to make target 'end', needed by 'baz'.  Stop.\n",
 512);
 
 # Test that the diagnostics is issued even if the target has been
@@ -168,9 +162,7 @@ baz: end
 ',
 '',
 "#MAKEFILE#:2: bar: No such file or directory
-#MAKE#: *** No rule to make target `end', needed by `baz'.  Stop.
-Command-line invocation:
-	\"$make_path -f work/features/include.mk.9\"",
+#MAKE#: *** No rule to make target 'end', needed by 'baz'.  Stop.\n",
 512);
 
 if ($all_tests) {
@@ -180,7 +172,7 @@ if ($all_tests) {
 include foo
 foo: ; @echo foo = bar > $@
 !,
-                  '', "#MAKE#: `foo' is up to date.\n");
+                  '', "#MAKE#: 'foo' is up to date.\n");
     rmfiles('foo');
 }
 

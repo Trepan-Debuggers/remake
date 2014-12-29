@@ -56,7 +56,7 @@ typedef __SIZE_TYPE__ __size_t;
 #  else
 /* This is a guess.  */
 /*hb
- *	Conflicts with DECCs aready defined type __size_t.
+ *	Conflicts with DECCs already defined type __size_t.
  *	Defining an own type with a name beginning with '__' is no good.
  *	Anyway if DECC is used and __SIZE_T is defined then __size_t is
  *	already defined (and I hope it's exactly the one we need here).

@@ -74,7 +74,7 @@ vpath-d/a: fail.te
 vpath-d/b : fail.te
 vpath-d/fail.te:
 !,
-              '', "#MAKE#: Nothing to be done for `default'.\n");
+              '', "#MAKE#: Nothing to be done for 'default'.\n");
 
 rmdir('vpath-d');
 

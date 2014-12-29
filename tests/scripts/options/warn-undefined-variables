@@ -18,8 +18,8 @@ all: ; @echo ref $(EREF) $(UREF)',
 
 # With --warn-undefined-variables, it should warn me
 run_make_test(undef, '--warn-undefined-variables',
-              "#MAKEFILE#:7: warning: undefined variable `UNDEFINED'
-#MAKEFILE#:9: warning: undefined variable `UNDEFINED'
+              "#MAKEFILE#:7: warning: undefined variable 'UNDEFINED'
+#MAKEFILE#:9: warning: undefined variable 'UNDEFINED'
 ref");
 
 1;
