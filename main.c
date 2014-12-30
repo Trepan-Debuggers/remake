@@ -341,6 +341,20 @@ static struct stringlist *eval_strings = 0;
 
 static int print_usage_flag = 0;
 
+/*! Do we want to go into a debugger or not?
+  Values are "error"     - enter on errors or fatal errors
+              "fatal"     - enter on fatal errors
+              "goal"      - set to enter debugger before updating goal
+              "preread"   - set to enter debugger before reading makefile(s)
+              "preaction" - set to enter debugger before performing any
+                            actions(s)
+              "full"     - "enter" + "error" + "fatal"
+*/
+static stringlist_t* debugger_opts = NULL;
+
+/*! If 1, same as --debugger=preaction */
+int debugger_flag;
+
 /* If nonzero, we should print a warning message
    for each reference to an undefined variable.  */
 
@@ -501,6 +515,8 @@ static const struct command_switch switches[] =
     { 't', flag, &touch_flag, 1, 1, 1, 0, 0, "touch" },
     { 'v', flag, &print_version_flag, 1, 1, 0, 0, 0, "version" },
     { 'w', flag, &print_directory_flag, 1, 1, 0, 0, 0, "print-directory" },
+    { 'x', flag, &tracing_flag, 1, 1, 0, 0, 0, 0 },
+    { 'X', flag, &debugger_flag, 1, 1, 0, 0, 0, 0 },
 
     /* These options take arguments.  */
     { 'C', filename, &directories, 0, 0, 0, 0, 0, "directory" },
@@ -542,6 +558,8 @@ static const struct command_switch switches[] =
       "tasks" }, */
     { CHAR_MAX+12,  flag, &show_tasks_flag, 0, 0, 0, 0, 0,
       "tasks" },
+    { CHAR_MAX+13, string, (char *) &debugger_opts, 1, 1, 0, "preaction",
+      0, "debugger" },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
@@ -691,6 +709,55 @@ bsd_signal (int sig, bsd_signal_ret_t func)
 }
 # endif
 #endif
+
+void
+decode_trace_flags (int b_tracing_flag, int b_no_shell_trace,
+		    stringlist_t *ppsz_tracing_opts)
+{
+  char trace_seen='\0';
+  if (b_tracing_flag) {
+    db_level = DB_BASIC | DB_TRACE | DB_SHELL;
+    trace_seen='x';
+  }
+
+  if (b_no_shell_trace) {
+    if (b_tracing_flag)
+	O (error, NILF,
+	   _("warning: have -x flag which supercedes -y flag; -y flag ignored"));
+    else {
+      db_level = DB_BASIC | DB_TRACE;
+      trace_seen = 'y';
+    }
+  }
+
+  if (trace_seen != '\0') {
+    if (tracing_opts)
+	error(NILF, 0,
+	     _("warning: have already seen -%c; --tracing options ignored"),
+	     trace_seen);
+    return;
+  }
+
+  if (ppsz_tracing_opts) {
+    const char **p;
+    db_level |= (DB_TRACE | DB_SHELL);
+    if (!ppsz_tracing_opts->list)
+      db_level |= (DB_BASIC);
+    else
+      for (p = ppsz_tracing_opts->list; *p != 0; ++p) {
+        if (0 == strcmp(*p, "command"))
+          ;
+        else if (0 == strcmp(*p, "full"))
+          db_level |= (DB_VERBOSE|DB_READ_MAKEFILES);
+        else if (0 == strcmp(*p, "normal"))
+          db_level |= DB_BASIC;
+        else if (0 == strcmp(*p, "noshell"))
+          db_level = DB_BASIC | DB_TRACE;
+        else if (0 == strcmp(*p, "read"))
+          db_level |= DB_READ_MAKEFILES;
+      }
+  }
+}
 
 static void
 initialize_global_hash_tables (void)
@@ -1495,6 +1562,62 @@ main (int argc, char **argv, char **envp)
 
   decode_switches (argc, (const char **)argv, 0);
 
+  /* FIXME: put into a subroutine like decode_trace_flags */
+  if (debugger_flag) {
+    b_debugger_preread   = true;
+    job_slots            =  1;
+    i_debugger_stepping  =  1;
+    i_debugger_nexting   =  0;
+    debugger_enabled     =  1;
+    /* For now we'll do basic debugging. Later, "stepping'
+       will stop here while next won't - either way no printing.
+    */
+    db_level            |=  DB_BASIC | DB_CALL | DB_SHELL | DB_UPDATE_GOAL
+        | DB_MAKEFILES;
+  } else {
+    /* debugging sets some things */
+    if (debugger_opts) {
+      const char **p;
+      for (p = debugger_opts->list; *p != 0; ++p)
+        {
+          if (0 == strcmp(*p, "preread")) {
+            b_debugger_preread  = true;
+            db_level           |= DB_READ_MAKEFILES;
+          }
+
+          if (0 == strcmp(*p, "goal")) {
+            b_debugger_goal  = true;
+            db_level           |= DB_UPDATE_GOAL;
+          }
+
+          if ( 0 == strcmp(*p, "full") || b_debugger_preread
+               || 0 == strcmp(*p, "preaction") ) {
+            job_slots            =  1;
+            i_debugger_stepping  =  1;
+            i_debugger_nexting   =  0;
+            debugger_enabled     =  1;
+            /* For now we'll do basic debugging. Later, "stepping'
+               will stop here while next won't - either way no printing.
+             */
+            db_level          |=  DB_BASIC | DB_CALL | DB_SHELL | DB_UPDATE_GOAL
+                              |   DB_MAKEFILES;
+          }
+          if ( 0 == strcmp(*p, "full")
+               || 0 == strcmp(*p, "error") ) {
+            debugger_on_error  |=  (DEBUGGER_ON_ERROR|DEBUGGER_ON_FATAL);
+          } else if ( 0 == strcmp(*p, "fatal") ) {
+            debugger_on_error  |=  DEBUGGER_ON_FATAL;
+          }
+        }
+#ifndef HAVE_LIBREADLINE
+      error (NILF,
+             "warning: you specified a debugger option, but you don't have readline support");
+      error (NILF,
+             "debugger support compiled in. Debugger options will be ignored.");
+#endif
+    }
+  }
+
     /* Set a variable specifying whether stdout/stdin is hooked to a TTY.  */
 #ifdef HAVE_ISATTY
     if (isatty (fileno (stdout)))
@@ -1536,6 +1659,8 @@ main (int argc, char **argv, char **envp)
       fprintf (stderr, _("done sleep(30). Continuing.\n"));
     }
 #endif
+
+  decode_trace_flags (tracing_flag, no_shell_trace, tracing_opts);
 
   /* Set always_make_flag if -B was given and we've not restarted already.  */
   always_make_flag = always_make_set && (restarts == 0);
