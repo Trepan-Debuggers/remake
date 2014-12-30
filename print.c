@@ -36,6 +36,64 @@ Boston, MA 02111-1307, USA.  */
 enum debug_print_enums_e debug_print_enums1;
 
 
+/* Write a message indicating what directory we are in
+   and the make level number.  */
+
+static void
+err_log_working_directory (void)
+{
+  static char *buf = NULL;
+  static unsigned int len = 0;
+  unsigned int need;
+  const char *fmt;
+  char *p;
+
+  /* Get enough space for the longest possible output.  */
+  need = strlen (program) + INTSTR_LENGTH + 2 + 1;
+  if (starting_directory)
+    need += strlen (starting_directory);
+
+  /* Use entire sentences to give the translators a fighting chance.  */
+  if (makelevel == 0)
+    if (starting_directory == 0)
+        fmt = _("%s\n");
+    else
+        fmt = _("%s: directory '%s'\n");
+  else
+    if (starting_directory == 0)
+        fmt = _("%s[%u]: unknown directory\n");
+    else
+        fmt = _("%s[%u]: directory '%s'\n");
+
+  need += strlen (fmt);
+
+  if (need > len)
+    {
+      buf = xrealloc (buf, need);
+      len = need;
+    }
+
+  p = buf;
+  if (print_data_base_flag)
+    {
+      *(p++) = '#';
+      *(p++) = ' ';
+    }
+
+  if (makelevel == 0)
+    if (starting_directory == 0)
+      sprintf (p, fmt , program);
+    else
+      sprintf (p, fmt, program, starting_directory);
+  else if (starting_directory == 0)
+    sprintf (p, fmt, program, makelevel);
+  else
+    sprintf (p, fmt, program, makelevel, starting_directory);
+
+  outputs (0, buf);
+}
+
+
 void
 err_with_stack (target_stack_node_t *p_call, const char *fmt, ...)
 {
@@ -43,7 +101,7 @@ err_with_stack (target_stack_node_t *p_call, const char *fmt, ...)
   gmk_floc *p_floc   = NULL;
   file_t *p_target = NULL;
 
-  log_working_directory (1);
+  err_log_working_directory ();
 
   if (p_call && p_call->p_target) {
     p_target = p_call->p_target;
@@ -85,7 +143,7 @@ fatal_err(target_stack_node_t *p_call, const char *fmt, ...)
   gmk_floc *p_floc   = NULL;
   file_t *p_target = NULL;
 
-  log_working_directory (1);
+  err_log_working_directory ();
 
   if (p_call && p_call->p_target) {
     p_target = p_call->p_target;

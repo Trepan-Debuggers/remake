@@ -21,6 +21,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <assert.h>
 
 #include "job.h"
+#include "print.h"
 #include "debug.h"
 #include "filedef.h"
 #include "commands.h"
@@ -524,14 +525,12 @@ child_error (child_t *p_child, target_stack_node_t *p_call_stack,
         exit_code, post);
 #else
   if (exit_sig == 0)
-    error (NILF, l + INTSTR_LENGTH,
-           _("%s[%s] Error %d%s"), pre, f->name, exit_code, post);
+    err_with_stack(p_call_stack, ignored ? _("[%s] Error %d%s") :
+		   _("*** [%s] Error %d"),
+		   f->name, exit_code, post);
   else
-    {
-      const char *s = strsignal (exit_sig);
-      error (NILF, l + strlen (s) + strlen (dump),
-             _("%s[%s] %s%s%s"), pre, f->name, s, dump, post);
-    }
+    err_with_stack(p_call_stack, "*** [%s] %s%s",
+		   f->name, strsignal (exit_sig), dump);
 #endif /* VMS */
 
   OUTPUT_UNSET ();

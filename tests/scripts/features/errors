@@ -48,13 +48,18 @@ $delete_error_code = $? >> 8;
 # TEST #1
 # -------
 
-$answer = "$rm_command cleanit
+my $answer = qq{$rm_command cleanit
 $cleanit_error
-$makefile:2: recipe for target 'clean' failed
-$make_name: [clean] Error $delete_error_code (ignored)
-$rm_command foo\n";
+work/features/errors.mk:2: recipe for target 'clean' failed
+make: directory 'tests'
+work/features/errors.mk:1: [clean] Error 1 (ignored)
 
-&run_make_with_options($makefile,"",&get_logfile);
+#0  clean at errors.mk:1
+$rm_command foo
+};
+
+$logfile = &get_logfile;
+&run_make_with_options($makefile,"",$logfile);
 
 # If make acted as planned, it should ignore the error from the first
 # command in the target and execute the second which deletes the file "foo"
@@ -67,29 +72,41 @@ if (-f "foo") {
 # on unix.
 if (!$vos)
 {
-   &compare_output($answer,&get_logfile(1));
+  $slurp = &read_file_into_string ($logfile);
+  $slurp =~ s{^\S+: directory '.+'}{make: directory 'tests'}gm;
+  $slurp =~ s:^#0  clean at .*work/features/errors:#0  clean at errors:gm;
+  $slurp =~ s:^.*work/features/errors:work/features/errors:gm;
+  &compare_output_string($answer, $slurp, $logfile);
 }
-
 
 &touch("foo");
 
 # TEST #2
 # -------
 
-$answer = "$rm_command cleanit
+$answer = qq{$rm_command cleanit
 $cleanit_error
-$makefile:5: recipe for target 'clean2' failed
-$make_name: [clean2] Error $delete_error_code (ignored)
-$rm_command foo\n";
+work/features/errors.mk:5: recipe for target 'clean2' failed
+make: directory 'tests'
+work/features/errors.mk:4: [clean2] Error 1 (ignored)
 
-&run_make_with_options($makefile,"clean2 -i",&get_logfile);
+#0  clean2 at errors.mk:4
+$rm_command foo
+};
+
+$logfile = &get_logfile;
+&run_make_with_options($makefile,"clean2 -i",$logfile);
 
 if (-f "foo") {
   $test_passed = 0;
 }
 
 if (!$vos) {
-   &compare_output($answer,&get_logfile(1));
+  $slurp = &read_file_into_string ($logfile);
+  $slurp =~ s{^\S+: directory '.+'}{make: directory 'tests'}gm;
+  $slurp =~ s:^#0  clean2 at .*work/features/errors:#0  clean2 at errors:gm;
+  $slurp =~ s:^.*work/features/errors:work/features/errors:gm;
+  &compare_output_string($answer, $slurp, $logfile);
 }
 
 1;

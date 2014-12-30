@@ -93,11 +93,27 @@ $flags = '-xec';
 $out = `/bin/sh $flags '$script' 2>&1`;
 my $err = $? >> 8;
 
-run_make_test(qq!
+setup_for_test();
+open(MAKEFILE,"> $makefile");
+print MAKEFILE qq{
 .SHELLFLAGS = $flags
 all: ; \@$script
-!,
-              '', "$out#MAKEFILE#:3: recipe for target 'all' failed
-#MAKE#: *** [all] Error $err\n", 512);
+};
+
+my $answer = qq|${out}work/variables/SHELL.mk.7:3: recipe for target 'all' failed
+make: directory 'tests'
+work/variables/SHELL.mk.7:3: *** [all] Error $err
+
+#0 all at SHELL.mk.7:3
+|;
+
+$logfile = &get_logfile;
+run_make_with_options($makefile, '', $logfile, 512);
+
+my $slurp = &read_file_into_string ($logfile);
+$slurp =~ s:^#0  all at .*work/variables/:#0 all at :gm;
+$slurp =~ s{^\S+: directory '.+'}{make: directory 'tests'}gm;
+$slurp =~ s:^.*work/variables/SHELL:work/variables/SHELL:gm;
+&compare_output_string($answer, $slurp, $logfile);
 
 1;
