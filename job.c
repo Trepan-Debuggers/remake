@@ -990,16 +990,36 @@ reap_children (int block, int err, target_stack_node_t *p_call_stack)
       else
         lastc->next = c->next;
 
-      free_child (c);
+      {
+	/* Save file info in case we need to use it in the debugger
+	 */
+	file_t file;
 
-      unblock_sigs ();
+	memcpy(&file, c->file, sizeof(file_t));
 
-      /* If the job failed, and the -k flag was not given, die,
-         unless we are already in the process of dying.  */
-      if (!err && child_failed && !dontcare && !keep_going_flag &&
-          /* fatal_error_signal will die with the right signal.  */
-          !handling_fatal_signal)
-        die (MAKE_FAILURE);
+	free_child (c);
+
+	unblock_sigs ();
+
+	/* Debugger "quit" takes precedence over --ignore-errors
+	   --keep-going, etc.
+	*/
+	if (exit_code == DEBUGGER_QUIT_RC && debugger_enabled) {
+	    in_debugger = DEBUGGER_QUIT_RC;
+	  die(DEBUGGER_QUIT_RC);
+	}
+
+	/* If the job failed, and the -k flag was not given, die,
+	   unless we are already in the process of dying.  */
+	if (!err && child_failed && !dontcare && !keep_going_flag &&
+	    /* fatal_error_signal will die with the right signal.  */
+	    !handling_fatal_signal) {
+	    if ( (debugger_on_error & DEBUGGER_ON_FATAL)
+		 || i_debugger_stepping || i_debugger_nexting )
+		enter_debugger(p_call_stack, &file, 2, DEBUG_ERROR_HIT);
+	    die (MAKE_FAILURE);
+	}
+      }
 
       /* Only block for one child.  */
       block = 0;
@@ -2077,6 +2097,19 @@ new_job (struct file *file, target_stack_node_t *p_call_stack)
 
       free (newer);
     }
+
+  if (cmds->fileinfo.filenm) {
+    /* FIXME: The below is a sign that we need update location somewhere else
+     */
+    if (!file->floc.filenm) {
+	file->floc.filenm = cmds->fileinfo.filenm;
+	file->floc.lineno = cmds->fileinfo.lineno - 1;
+	if (!p_call_stack->p_target->floc.filenm) {
+	    p_call_stack->p_target->floc.filenm = file->floc.filenm;
+	    p_call_stack->p_target->floc.lineno = file->floc.lineno;
+	}
+    }
+  }
 
   /* The job is now primed.  Start it running.
      (This will notice if there is in fact no recipe.)  */

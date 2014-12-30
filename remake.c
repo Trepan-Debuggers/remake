@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License along with
 this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "makeint.h"
+#include "debugger/cmd.h"
 #include "filedef.h"
 #include "job.h"
 #include "commands.h"
@@ -430,6 +431,14 @@ update_file_1 (struct file *file, unsigned int depth,
   int running = 0;
 
   DBF (DB_VERBOSE, _("Considering target file '%s'.\n"));
+  p_stack_top = p_call_stack = trace_push_target(p_call_stack, file);
+
+  /* We don't want to step into file dependencies when there are
+     no associated commands. There or too often too many of them.
+  */
+  if ( (i_debugger_stepping && file->cmds) ||
+       (file->tracing & BRK_BEFORE_PREREQ) )
+      enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_BEFORE_PREREQ);
 
   if (file->updated)
     {
