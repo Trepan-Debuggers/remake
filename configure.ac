@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_INIT([remake],[3.82+dbg0.9],[https://github.com/rocky/remake/issues])
+AC_INIT([remake],[3.82+dbg0.91],[https://github.com/rocky/remake/issues])
 
 AC_PREREQ(2.59)
 AC_REVISION([[$Id: configure.in,v 1.156 2010/07/28 05:39:50 psmith Exp $]])
@@ -287,7 +287,7 @@ else
    AC_MSG_RESULT(yes)
 fi
 
-AC_DEFINE_UNQUOTED(SHELL_TRACE, ["$shell_trace"], 
+AC_DEFINE_UNQUOTED(SHELL_TRACE, ["$shell_trace"],
      [Define this to be what you need to add to turn on shell tracing])
 
 AC_DEFINE_UNQUOTED(DEFAULT_SHELL, ["$default_shell"],
@@ -311,8 +311,8 @@ AC_TRY_RUN([
 int main(int argc, char **argv) {
   char *s = tilde_expand ("~");
   return 0;
-}], [AC_MSG_RESULT(yes); ac_have_tilde_expand=yes; 
-     AC_DEFINE(HAVE_TILDE_EXPAND, [], 
+}], [AC_MSG_RESULT(yes); ac_have_tilde_expand=yes;
+     AC_DEFINE(HAVE_TILDE_EXPAND, [],
      [Define this <readline/readline.h> defines tilde_expand()])],
      [AC_MSG_RESULT(no); ac_have_tilde_expand=no],
      [AC_MSG_RESULT(no); ac_have_tilde_expand=no])
@@ -330,8 +330,8 @@ int main(int argc, char **argv) {
       rl_initialize ();
    hist_list = history_list();
   return 0;
-}], [AC_MSG_RESULT(yes); ac_have_history_list=yes; 
-     AC_DEFINE(HAVE_HISTORY_LIST, [], 
+}], [AC_MSG_RESULT(yes); ac_have_history_list=yes;
+     AC_DEFINE(HAVE_HISTORY_LIST, [],
      [Define this <readline/readline.h> defines history_list()])],
      [AC_MSG_RESULT(no); ac_have_history_list=no],
      [AC_MSG_RESULT(no); ac_have_history_list=no])
