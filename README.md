@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/rocky/remake.png)](https://travis-ci.org/rocky/remake)
 
-Patched GNU Make 3.82 sources to add improved error reporting, tracing,
-and a debugger.
+Patched GNU Make 4.1 sources to add improved error reporting, tracing,
+target listing, and a debugger.
 
 Although there's a full debugger here, most of the time I can get by
 using no options since normal output is a little more verbose and detailed.
@@ -35,9 +35,6 @@ To build:
     $ ./configure
     $ make update
     $ make && make check && sudo make install
-
-See README.cvs for more detail regarding the above and for
-GNU Make CVS source instructions.
 
 See also https://github.com/rocky/remake/wiki
 
