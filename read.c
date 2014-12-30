@@ -123,6 +123,10 @@ static const char *default_include_directories[] =
 
 static const char **include_directories;
 
+/*! The chain of makefiles read by read_makefile.  */
+extern dep_t *read_makefiles;
+dep_t *read_makefiles = NULL;
+
 /* Maximum length of an element of the above.  */
 
 static unsigned int max_incl_len;
@@ -131,10 +135,6 @@ static unsigned int max_incl_len;
    makefile currently being read in.  */
 
 const gmk_floc *reading_file = 0;
-
-/* The chain of files read by read_all_makefiles.  */
-
-static struct dep *read_files = 0;
 
 static int eval_makefile (const char *filename, int flags);
 static void eval (struct ebuffer *buffer, int flags);
@@ -224,14 +224,14 @@ read_all_makefiles (const char **makefiles)
   if (makefiles != 0)
     while (*makefiles != 0)
       {
-        struct dep *tail = read_files;
+        struct dep *tail = read_makefiles;
         struct dep *d;
 
         if (! eval_makefile (*makefiles, 0))
           perror_with_name ("", *makefiles);
 
         /* Find the first element eval_makefile() added to read_files.  */
-        d = read_files;
+        d = read_makefiles;
         while (d->next != tail)
           d = d->next;
 
@@ -273,7 +273,7 @@ read_all_makefiles (const char **makefiles)
         {
           /* No default makefile was found.  Add the default makefiles to the
              'read_files' chain so they will be updated if possible.  */
-          struct dep *tail = read_files;
+          struct dep *tail = read_makefiles;
           /* Add them to the tail, after any MAKEFILES variable makefiles.  */
           while (tail != 0 && tail->next != 0)
             tail = tail->next;
@@ -286,7 +286,7 @@ read_all_makefiles (const char **makefiles)
                  made, and main not to die if we can't make this file.  */
               d->changed = RM_DONTCARE;
               if (tail == 0)
-                read_files = d;
+                read_makefiles = d;
               else
                 tail->next = d;
               tail = d;
@@ -296,7 +296,7 @@ read_all_makefiles (const char **makefiles)
         }
     }
 
-  return read_files;
+  return read_makefiles;
 }
 
 /* Install a new conditional and return the previous one.  */
@@ -408,8 +408,8 @@ eval_makefile (const char *filename, int flags)
 
   /* Add FILENAME to the chain of read makefiles.  */
   deps = alloc_dep ();
-  deps->next = read_files;
-  read_files = deps;
+  deps->next = read_makefiles;
+  read_makefiles = deps;
   deps->file = lookup_file (filename);
   if (deps->file == 0)
     deps->file = enter_file (filename);
@@ -1018,8 +1018,8 @@ eval (struct ebuffer *ebuf, int set_default)
 
               /* It succeeded, so add it to the list "to be rebuilt".  */
               deps = alloc_dep ();
-              deps->next = read_files;
-              read_files = deps;
+              deps->next = read_makefiles;
+              read_makefiles = deps;
               deps->file = lookup_file (name);
               if (deps->file == 0)
                 deps->file = enter_file (name);
@@ -2157,6 +2157,9 @@ record_files (struct nameseq *filenames, const char *pattern,
              if any.  */
           f = enter_file (strcache_add (name));
 	  f->description = target_description;
+	  f->floc.filenm = flocp->filenm;
+	  f->floc.lineno = flocp->lineno;
+
           if (f->double_colon)
             OS (fatal, flocp,
                 _("target file '%s' has both : and :: entries"), f->name);
@@ -2209,6 +2212,8 @@ record_files (struct nameseq *filenames, const char *pattern,
 
           f = enter_file (strcache_add (name));
 	  f->description = target_description;
+	  f->floc.filenm = flocp->filenm;
+	  f->floc.lineno = flocp->lineno;
           /* If there was an existing entry and it was a double-colon entry,
              enter_file will have returned a new one, making it the prev
              pointer of the old one, and setting its double_colon pointer to
