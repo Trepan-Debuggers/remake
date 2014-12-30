@@ -201,13 +201,15 @@ $sleep_command 1 ; #MAKEPATH# -C bar bar
 bar: start
 bar: end
 #MAKE#[1]: Leaving directory '#PWD#/bar'
+#MAKE#[1]: *** [foo-fail] Error 1
 #MAKE#[1]: Entering directory '#PWD#/foo'
 foo-fail: start
 foo-fail: end
 Makefile:20: recipe for target 'foo-fail' failed
-#MAKE#[1]: *** [foo-fail] Error 1
+make[1]: directory '#PWD#/foo'
 #MAKE#[1]: Leaving directory '#PWD#/foo'
 #MAKEFILE#:4: recipe for target 'make-foo-fail' failed
+#MAKE#: directory '#PWD#'
 #MAKE#: *** [make-foo-fail] Error 2\n",
 512);
 
@@ -326,7 +328,7 @@ run_make_test(qq!
 all: t1
 t1: ; -\@\$(MAKE) -f $m1
 !,
-              "-j -Oline", "#MAKE#[1]: Entering directory '#PWD#'\nd1 stderr\nd1 stdout\n$m1:3: *** d1 failed.  Stop.\n#MAKE#[1]: Leaving directory '#PWD#'\n#MAKEFILE#:3: recipe for target 't1' failed\n#MAKE#: [t1] Error 2 (ignored)\n");
+              "-j -Oline", "#MAKE#[1]: Entering directory '#PWD#'\nd1 stderr\nd1 stdout\n$m1:3: *** d1 failed.  Stop.\n#MAKE#[1]: Leaving directory '#PWD#'\n#MAKEFILE#:3: recipe for target 't1' failed\n#MAKE#: directory '#PWD#'\n#MAKE#: [t1] Error 2 (ignored)\n");
 
 rmfiles($m1);
 

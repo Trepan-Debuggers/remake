@@ -99,7 +99,10 @@ unlink("$dir/foo.c");
 # TEST #3: make sure precious flag is set properly for targets
 #          that are built via implicit rules (Savannah bug #13218).
 #
-run_make_test('
+
+setup_for_test();
+open(MAKEFILE,"> $makefile");
+print MAKEFILE '
 .DELETE_ON_ERROR:
 
 .PRECIOUS: %.bar
@@ -108,11 +111,20 @@ run_make_test('
 
 $(dir)/foo.bar:
 
-',
-"dir=$dir",
-"#MAKEFILE#:6: recipe for target '$dir/foo.bar' failed
-#MAKE#: *** [$dir/foo.bar] Error 1",
-512);
+';
+
+my $answer = qq{$makefile:6: recipe for target '$dir/foo.bar' failed
+$makefile:8: *** [../tests/foo.bar] Error 1
+
+#0  ../tests/foo.bar at $makefile:8
+};
+close(MAKEFILE);
+
+my $logfile = &get_logfile;
+&run_make_with_options($makefile, "dir=$dir", $logfile, 512);
+my $slurp = &read_file_into_string ($logfile);
+$slurp =~ s: at .*work/features/: at work/features/:gm;
+&compare_output_string($answer, $slurp, $logfile);
 
 unlink("$dir/foo.bar");
 

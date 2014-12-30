@@ -13,22 +13,27 @@ my $script = 'false; true';
 my $flags = '-ec';
 my $out = `/bin/sh $flags '$script' 2>&1`;
 my $err = $? >> 8;
-run_make_test(qq!
-.POSIX:
-all: ; \@$script
-!,
-              '', "#MAKEFILE#:3: recipe for target 'all' failed
-#MAKE#: *** [all] Error $err\n", 512);
 
-# User settings must override .POSIX
-$flags = '-xc';
-$out = `/bin/sh $flags '$script' 2>&1`;
-run_make_test(qq!
+setup_for_test();
+open(MAKEFILE,"> $makefile");
+print MAKEFILE qq{
 .SHELLFLAGS = $flags
 .POSIX:
 all: ; \@$script
-!,
-              '', $out);
+};
+
+my $out = `/bin/sh $flags '$script' 2>&1`;
+my $answer = qq{#MAKEFILE#:4: recipe for target 'all' failed
+#MAKEFILE#:4: *** [all] Error $err
+
+#0 all at #MAKEFILE#:4
+};
+
+$logfile = &get_logfile;
+run_make_with_options($makefile, '', $logfile, 512);
+my $slurp = &read_file_into_string ($logfile);
+$slurp =~ s:^#0  all at .*work/targets/:#0 all at work/targets/:gm;
+&compare_output_string($answer, $slurp, $logfile);
 
 # Test the default value of various POSIX-specific variables
 my %POSIX = (AR => 'ar', ARFLAGS => '-rv',

@@ -101,8 +101,6 @@ err_with_stack (target_stack_node_t *p_call, const char *fmt, ...)
   gmk_floc *p_floc   = NULL;
   file_t *p_target = NULL;
 
-  err_log_working_directory ();
-
   if (p_call && p_call->p_target) {
     p_target = p_call->p_target;
     p_floc   = &(p_target->floc);
@@ -110,10 +108,13 @@ err_with_stack (target_stack_node_t *p_call, const char *fmt, ...)
 
   if (p_floc && p_floc->filenm)
     fprintf (stderr, "%s:%lu: ", p_floc->filenm, p_floc->lineno);
-  else if (makelevel == 0)
-    fprintf (stderr, "%s: ", program);
-  else
-    fprintf (stderr, "%s[%u]: ", program, makelevel);
+  else {
+    err_log_working_directory ();
+    if (makelevel == 0)
+      fprintf (stderr, "%s: ", program);
+    else
+      fprintf (stderr, "%s[%u]: ", program, makelevel);
+  }
 
   va_start (args, fmt);
   vfprintf (stderr, fmt, args);

@@ -51,7 +51,6 @@ $delete_error_code = $? >> 8;
 my $answer = qq{$rm_command cleanit
 $cleanit_error
 work/features/errors.mk:2: recipe for target 'clean' failed
-make: directory 'tests'
 work/features/errors.mk:1: [clean] Error 1 (ignored)
 
 #0  clean at errors.mk:1
@@ -73,7 +72,6 @@ if (-f "foo") {
 if (!$vos)
 {
   $slurp = &read_file_into_string ($logfile);
-  $slurp =~ s{^\S+: directory '.+'}{make: directory 'tests'}gm;
   $slurp =~ s:^#0  clean at .*work/features/errors:#0  clean at errors:gm;
   $slurp =~ s:^.*work/features/errors:work/features/errors:gm;
   &compare_output_string($answer, $slurp, $logfile);
@@ -87,7 +85,6 @@ if (!$vos)
 $answer = qq{$rm_command cleanit
 $cleanit_error
 work/features/errors.mk:5: recipe for target 'clean2' failed
-make: directory 'tests'
 work/features/errors.mk:4: [clean2] Error 1 (ignored)
 
 #0  clean2 at errors.mk:4
@@ -103,7 +100,6 @@ if (-f "foo") {
 
 if (!$vos) {
   $slurp = &read_file_into_string ($logfile);
-  $slurp =~ s{^\S+: directory '.+'}{make: directory 'tests'}gm;
   $slurp =~ s:^#0  clean2 at .*work/features/errors:#0  clean2 at errors:gm;
   $slurp =~ s:^.*work/features/errors:work/features/errors:gm;
   &compare_output_string($answer, $slurp, $logfile);

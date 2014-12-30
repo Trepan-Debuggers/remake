@@ -82,15 +82,20 @@ cat ${VP}foo.c bar.c > foo.b 2>/dev/null || exit 1
 
 &touchfiles("$VP/notarget.c", "notarget.b", "notarget.d");
 
-&run_make_with_options($makefile,"notarget",&get_logfile,512);
-
 $answer = "not creating notarget.c from notarget.d
 cat notarget.c > notarget.b 2>/dev/null || exit 1
 $makefile:16: recipe for target 'notarget.b' failed
-$make_name: *** [notarget.b] Error 1
+$makefile:15: *** [notarget.b] Error 1
+
+#0  notarget.b at work/features/vpathplus.mk:15
+#1  notarget at work/features/vpathplus.mk:31
 ";
 
-&compare_output($answer,&get_logfile(1));
+my $logfile = &get_logfile;
+&run_make_with_options($makefile, "notarget", $logfile, 512);
+my $slurp = &read_file_into_string ($logfile);
+$slurp =~ s{at .*work/features/}{at work/features/}gm;
+&compare_output_string($answer, $slurp, $logfile);
 
 # Test intermediate file handling (part 1)
 

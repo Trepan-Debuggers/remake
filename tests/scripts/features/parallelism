@@ -100,13 +100,16 @@ ok:
 	\@echo Ok done",
               '-rR -j5', "Fail
 #MAKEFILE#:6: recipe for target 'fail.1' failed
+#MAKE#: directory '#PWD#'
 #MAKE#: *** [fail.1] Error 1
 #MAKE#: *** Waiting for unfinished jobs....
 Fail
 #MAKEFILE#:6: recipe for target 'fail.2' failed
+#MAKE#: directory '#PWD#'
 #MAKE#: *** [fail.2] Error 1
 Fail
 #MAKEFILE#:6: recipe for target 'fail.3' failed
+#MAKE#: directory '#PWD#'
 #MAKE#: *** [fail.3] Error 1
 Ok done",
              512);
