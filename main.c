@@ -2,7 +2,7 @@
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
 2010 Free Software Foundation, Inc.
-Copyright (C) 2012 Rocky Bernstein
+Copyright (C) 2012, 2014 Rocky Bernstein
 
 GNU Make is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -144,13 +144,13 @@ int no_extended_errors = 0;
 /*! If 1 same as --trace=normal */
 int tracing_flag;
 
-/*! If non-null, contains the type of tracing we are to do. 
+/*! If non-null, contains the type of tracing we are to do.
   This is coordinated with tracing_flag. */
 stringlist_t *tracing_opts = NULL;
 
 /*! Nonzero means use GNU readline in the debugger. */
 
-int use_readline_flag = 
+int use_readline_flag =
 #ifdef HAVE_READLINE_READLINE_H
     1
 #else
@@ -158,14 +158,14 @@ int use_readline_flag =
 #endif
     ;
 
-/*! If nonzero, we are debugging after each "step" for that many times. 
+/*! If nonzero, we are debugging after each "step" for that many times.
   When we have a value 1, then we actually run the debugger read loop.
   Otherwise we decrement the step count.
 
 */
 unsigned int i_debugger_stepping = 0;
 
-/*! If nonzero, we are debugging after each "next" for that many times. 
+/*! If nonzero, we are debugging after each "next" for that many times.
   When we have a value 1, then we actually run the debugger read loop.
   Otherwise we decrement the step count.
 
@@ -182,7 +182,7 @@ unsigned int debugger_enabled;
 
 /*! If nonzero, the basename of filenames is in giving locations. Normally,
     giving a file directory location helps a debugger frontend
-    when we change directories. For regression tests it is helpful to 
+    when we change directories. For regression tests it is helpful to
     list just the basename part as that doesn't change from installation
     to installation. Users may have their preferences too.
 */
@@ -237,7 +237,7 @@ int print_directory_flag = 0;
 
 /*!
   Nonzero means ignore print_directory_flag and never print the directory.
-  This is necessary because print_directory_flag is set implicitly.  
+  This is necessary because print_directory_flag is set implicitly.
   Set by option --print-directory.
 */
 
@@ -338,7 +338,7 @@ static int print_usage_flag = 0;
               "fatal"     - enter on fatal errors
               "goal"      - set to enter debugger before updating goal
               "preread"   - set to enter debugger before reading makefile(s)
-              "preaction" - set to enter debugger before performing any 
+              "preaction" - set to enter debugger before performing any
                             actions(s)
               "full"     - "enter" + "error" + "fatal"
 */
@@ -536,10 +536,10 @@ static const struct command_switch switches[] =
     { CHAR_MAX+6, flag, &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
       "no-print-directory" },
     { 'x', flag, &tracing_flag, 1, 1, 0, 0, 0, 0 },
-    { CHAR_MAX+7, string, (char *) &tracing_opts, 1, 1, 0, "normal", 
+    { CHAR_MAX+7, string, (char *) &tracing_opts, 1, 1, 0, "normal",
       0, "trace" },
     { 'X', flag, &debugger_flag, 1, 1, 0, 0, 0, 0 },
-    { CHAR_MAX+8, string, (char *) &debugger_opts, 1, 1, 0, "preaction", 
+    { CHAR_MAX+8, string, (char *) &debugger_opts, 1, 1, 0, "preaction",
       0, "debugger" },
     { 'y', flag, (char *) &no_shell_trace, 1, 1, 0, 0, 0, "noshell" },
     { 'W', filename, &new_files, 0, 0, 0, 0, 0, "what-if" },
@@ -678,7 +678,7 @@ bsd_signal (int sig, bsd_signal_ret_t func)
 #endif
 
 void
-decode_trace_flags (int b_tracing_flag, int b_no_shell_trace, 
+decode_trace_flags (int b_tracing_flag, int b_no_shell_trace,
 		    stringlist_t *ppsz_tracing_opts)
 {
   char trace_seen='\0';
@@ -686,10 +686,10 @@ decode_trace_flags (int b_tracing_flag, int b_no_shell_trace,
     db_level = DB_BASIC | DB_TRACE | DB_SHELL;
     trace_seen='x';
   }
-  
+
   if (b_no_shell_trace) {
     if (b_tracing_flag)
-      error (NILF, 
+      error (NILF,
              "warning: have -x flag which supercedes -y flag; -y flag ignored");
     else {
       db_level = DB_BASIC | DB_TRACE;
@@ -699,18 +699,18 @@ decode_trace_flags (int b_tracing_flag, int b_no_shell_trace,
 
   if (trace_seen != '\0') {
     if (tracing_opts)
-      error (NILF, 
+      error (NILF,
              "warning: have already seen -%c; --tracing options ignored",
           trace_seen);
     return;
   }
-  
+
   if (ppsz_tracing_opts) {
     const char **p;
     db_level |= (DB_TRACE | DB_SHELL);
     if (!ppsz_tracing_opts->list)
       db_level |= (DB_BASIC);
-    else 
+    else
       for (p = ppsz_tracing_opts->list; *p != 0; ++p) {
         if (0 == strcmp(*p, "command"))
           ;
@@ -1391,7 +1391,7 @@ main (int argc, char **argv, char **envp)
 
   /* FIXME: put into a subroutine like decode_trace_flags */
   if (debugger_flag) {
-    b_debugger_preread   = true;
+    b_debugger_preread   = false;
     job_slots            =  1;
     i_debugger_stepping  =  1;
     i_debugger_nexting   =  0;
@@ -1411,12 +1411,12 @@ main (int argc, char **argv, char **envp)
             b_debugger_preread  = true;
             db_level           |= DB_READ_MAKEFILES;
           }
-        
+
           if (0 == strcmp(*p, "goal")) {
             b_debugger_goal  = true;
             db_level           |= DB_UPDATE_GOAL;
           }
-        
+
           if ( 0 == strcmp(*p, "full") || b_debugger_preread
                || 0 == strcmp(*p, "preaction") ) {
             job_slots            =  1;
@@ -1428,7 +1428,7 @@ main (int argc, char **argv, char **envp)
              */
             db_level          |=  DB_BASIC | DB_CALL | DB_SHELL | DB_UPDATE_GOAL
                               |   DB_MAKEFILES;
-          } 
+          }
           if ( 0 == strcmp(*p, "full")
                || 0 == strcmp(*p, "error") ) {
             debugger_on_error  |=  (DEBUGGER_ON_ERROR|DEBUGGER_ON_FATAL);
@@ -1437,16 +1437,16 @@ main (int argc, char **argv, char **envp)
           }
         }
 #ifndef HAVE_LIBREADLINE
-      error (NILF, 
+      error (NILF,
              "warning: you specified a debugger option, but you don't have readline support");
-      error (NILF, 
+      error (NILF,
              "debugger support compiled in. Debugger options will be ignored.");
 #endif
     }
   }
 
 
-  
+
 #ifdef WINDOWS32
   if (suspend_flag) {
         fprintf(stderr, "%s (pid = %ld)\n", argv[0], GetCurrentProcessId());
@@ -2454,15 +2454,15 @@ main (int argc, char **argv, char **envp)
     }
 
   if (show_tasks_flag || show_task_comments_flag) {
-      dbg_cmd_info_targets(show_task_comments_flag 
-                           ? INFO_TARGET_TASKS_WITH_COMMENTS 
+      dbg_cmd_info_targets(show_task_comments_flag
+                           ? INFO_TARGET_TASKS_WITH_COMMENTS
                            : INFO_TARGET_TASKS);
       die(0);
   } else if (show_targets_flag) {
       dbg_cmd_info_targets(INFO_TARGET_NAME);
       die(0);
   }
-  
+
   /* Update the goals.  */
 
   DB (DB_BASIC, (_("Updating goal targets....\n")));

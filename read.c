@@ -18,6 +18,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "make.h"
 #include "main.h"
+#include "debugger/cmd.h"
 
 #include <assert.h>
 
@@ -1801,7 +1802,6 @@ record_target_var (struct nameseq *filenames, char *defn,
     {
       struct variable *v;
       const char *name = filenames->name;
-      const char *fname;
       const char *percent;
       struct pattern_var *p;
 
@@ -1826,8 +1826,6 @@ record_target_var (struct nameseq *filenames, char *defn,
             v->value = allocated_variable_expand (v->value);
           else
             v->value = xstrdup (v->value);
-
-          fname = p->target;
         }
       else
         {
@@ -1844,7 +1842,6 @@ record_target_var (struct nameseq *filenames, char *defn,
             f = f->double_colon;
 
           initialize_file_variables (f, 1);
-          fname = f->name;
 
           current_variable_set_list = f->variables;
           v = try_variable_definition (flocp, defn, origin, 1);
@@ -2043,6 +2040,8 @@ record_files (struct nameseq *filenames, const char *pattern,
 	     if any.  */
 	  f = enter_file (strcache_add (name), flocp);
 	  f->description = target_description;
+	  f->floc.filenm = flocp->filenm;
+	  f->floc.lineno = flocp->lineno;
 	  if (f->double_colon)
 	    fatal (flocp,
                    _("target file `%s' has both : and :: entries"), f->name);
@@ -2094,6 +2093,8 @@ record_files (struct nameseq *filenames, const char *pattern,
 
 	  f = enter_file (strcache_add (name), flocp);
 	  f->description = target_description;
+	  f->floc.filenm = flocp->filenm;
+	  f->floc.lineno = flocp->lineno;
 	  /* If there was an existing entry and it was a double-colon entry,
 	     enter_file will have returned a new one, making it the prev
 	     pointer of the old one, and setting its double_colon pointer to
