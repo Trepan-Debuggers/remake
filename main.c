@@ -558,7 +558,7 @@ static const struct command_switch switches[] =
       "tasks" }, */
     { CHAR_MAX+12,  flag, &show_tasks_flag, 0, 0, 0, 0, 0,
       "tasks" },
-    { CHAR_MAX+13, string, (char *) &debugger_opts, 1, 1, 0, "preaction",
+    { CHAR_MAX+13, strlist, &debugger_opts, 1, 1, 0, "preaction",
       0, "debugger" },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
@@ -1564,7 +1564,7 @@ main (int argc, char **argv, char **envp)
 
   /* FIXME: put into a subroutine like decode_trace_flags */
   if (debugger_flag) {
-    b_debugger_preread   = true;
+    b_debugger_preread   = false;
     job_slots            =  1;
     i_debugger_stepping  =  1;
     i_debugger_nexting   =  0;
