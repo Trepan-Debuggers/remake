@@ -1,3 +1,11 @@
+Version 4.1+dbg-0.91
+2015-01-1
+
+* Code now based on GNU Make 4.1
+* add -verbosity option. Can be used to suppress version information;
+  version info only shown at level 0.
+* More targets should have file locations now
+
 Version 3.82+dbg-0.9
 2012-10-3
 * More aggressive on showing --target descriptions
@@ -19,7 +27,7 @@ Version 3.82+dbg-0.7
   --targets is similar
 * Allow negative frame numbers to count from the other end
 * Output changes to make it easier for front-ends like the emacs-dbgr
-* builds better on OS's with various versions of GNU readline 
+* builds better on OS's with various versions of GNU readline
 
 Version 3.82+dbg-0.6
 2011-04-10
@@ -48,15 +56,15 @@ Version 3.82+dbg-0.5
 Version 3.82+dbg-0.4
 2011-03-25
 
-* Completely revise using GNU make 3.82 as a base. Much 
-  cleaner code, and should support all of GNU make's OS's. 
+* Completely revise using GNU make 3.82 as a base. Much
+  cleaner code, and should support all of GNU make's OS's.
 * Stepping now stops before each line of code is run.
 * Add debugger "edit" command
 * allow target name on "continue" command
-* breakpoints can now stop after prerequisite checking and after 
-  remaking a target. 
+* breakpoints can now stop after prerequisite checking and after
+  remaking a target.
 * Show line number in break command
-* Change semantics of debugger "finish" command. Is now 
+* Change semantics of debugger "finish" command. Is now
   more similar to gdb, i.e is a "step out" up to a higher-level target
 * Add back in command separator lines ##<<<< and ##>>>>
 * Add stopping-event icons; --, ++, ->, <-, ||, !!
@@ -83,26 +91,26 @@ Version 3.81+dbg-0.2 - Sam Woodward Release
 * Some merge cleanup. Add debugger-specific documentation (from 3.80+dbg-0.61)
 
 Version 3.81+dbg-0.1
-2008-10-27	
+2008-10-27
 
-* Merge in code from 3.80+dbg-0.63cvs. 
+* Merge in code from 3.80+dbg-0.63cvs.
 * Add "info rules" and "info vpath"
 
 Version 3.80+dbg-0.63cvs
 2006-04-01
 
-* Add a "list" command. Basically same as "target x depends commands" 
-  for now. "list -" shows the parent. 
+* Add a "list" command. Basically same as "target x depends commands"
+  for now. "list -" shows the parent.
 * Help commands now show short usage.
-* Ctrl-d leaves debugger 
+* Ctrl-d leaves debugger
 * Add Emacs regression test and allow space in filename for MS Windows
 
 Version 3.80+dbg-0.62
 2007-02-27
 
-* Changes to make more Debian compatibile. 
+* Changes to make more Debian compatibile.
 * Track some GNU Make 3.81 changes, which include a bugfix
-  and making more strings "const". 
+  and making more strings "const".
 * Miscellaneous bugfixes
 
 Version 3.80+dbg-0.61
@@ -113,15 +121,15 @@ Version 3.80+dbg-0.61
 * "write" command now adds "cd <directory name>" as a comment.
 * configure options:
    --with-default-shell to specify the default value
-     for SHELL (useful on say Solaris), 
+     for SHELL (useful on say Solaris),
    --with-shell-trace to specify the option to turn on tracing, e.g. (-x).
 * Add configure option --with-shell-trace to specify how to turn on
   tracing when running shell commands.
-* Add --trace=normal. 
+* Add --trace=normal.
 * run wasn't reading any (optional) arguments supplied.
 * Guard against dereferencing NULL pointers.
 * Some 3.81 features and bugfixes have been incorporated. At present
-  not everything is there. 
+  not everything is there.
 * More doxygen documentation and docuementation improvements. Note
   debugger options in Manual page.
 
@@ -140,7 +148,7 @@ Version 3.80+dbg-0.60
 * Fix bugs and memory leaks involving improper use of memory can weak
   casting.  (shown in the vpath regression test dash-I on cygwin).
 * Reorganize help command. Is more ddd-friendly (and more gdb like).
-* More explicit free's of memory at termination. 
+* More explicit free's of memory at termination.
 * Give line numbers and target names on --just-print. Print delmiters
   around the commands.
 * More debug tracing funnelled through db_level. Debugger command
@@ -148,14 +156,14 @@ Version 3.80+dbg-0.60
 * Incorporate patches from GNU/Linux make 3.80.
 * Incorporate new functions from GNU Make 3.81: abspath, realpath, lastword
 * Expand documentation.
-* NOTE: the prompt has changed from "makedb" to "mdb" as has the 
-  Emacs Lisp command name to run the debugger. This change was made to 
+* NOTE: the prompt has changed from "makedb" to "mdb" as has the
+  Emacs Lisp command name to run the debugger. This change was made to
   avoid confusion between the Make debugger and a program which
   creates a DBM file. If you were using ddd-3.3.12-test.tar.gz you
   will need to get a newer version.
 
 Version 3.80+dbg-0.5
-2005-12-10 
+2005-12-10
 
 * Errors in eval issued from the debugger no longer cause termination.
 * Separation of "Step" and "Next. "Step" command granularity is now
@@ -164,7 +172,7 @@ Version 3.80+dbg-0.5
    - sets file variables when showing is requested
    - add "target expand" to list target commands with "make" variables
      expanded.
-   - allow @ or $@ as a target name 
+   - allow @ or $@ as a target name
 * Add "info makefiles" to show what Makefiles have been read in.
 * Add "info breakpoints"
 * Breakpoints can now be listed and deleted by number - like gdb.
@@ -175,7 +183,7 @@ Version 3.80+dbg-0.5
 * Remove hash stats on printing variables -- generally not wanted for
   users (rather than GNU Make maintainers)
 * Add explicit memory free and reduce reading uninitialized values.
-* Revise testing mechanism for a more modern use of Perl. Can specify 
+* Revise testing mechanism for a more modern use of Perl. Can specify
   test program file name (./scripts/variables/special) test name
   (variables/special). The former is works better with command
   completion. Document some more regression tests.
@@ -185,18 +193,18 @@ Version 3.80+dbg-0.5
 * Remove AMIGA support :-(
 
 Version 3.80+dbg-0.4
-2005-12-10 
+2005-12-10
 
 * Add eval!
-* Add ability to stop before reading Makefiles - may be useful in 
+* Add ability to stop before reading Makefiles - may be useful in
   debugging macros and variables --debugger=preread. We can now trace
   makefile reading activity with -d r or via --trace = {read,full}
 * "where" command expanded to include above new Makefile read stack.
 * Add call tracing.
-* Fix bugs in showing automatic variables 
+* Fix bugs in showing automatic variables
 * Line number in Makefile commands is more accurate
-* More ddd (gdb/bashdb) compatible: 
-  - "help set" added 
+* More ddd (gdb/bashdb) compatible:
+  - "help set" added
   - "help show" works like the others
   - "info locals" added
   - "show command" (history) added
@@ -214,7 +222,7 @@ Version 3.80+dbg-0.3
   could be used to skip over remaking targets that don't have
   commands.
 * print and examine now show origin status
-* print/examine work for automatic variables. examine still has 
+* print/examine work for automatic variables. examine still has
   problems with automatic variables in strings though.
 * Allow abbreviations of debugger command attributes. As a result some
   attributes were renamed slighly, e.g. vars -> variables, deps ->
@@ -223,7 +231,7 @@ Version 3.80+dbg-0.3
   "commands".
 * Make option --trace (-x) overrules using the --silent option and
   not echoing @ commands.
-* "list" command renamed to "target". A future "list" command will 
+* "list" command renamed to "target". A future "list" command will
   look more like gdb.
 * fixed compilation issue(s) on systems that have readline, but do not
   have termcap.
@@ -248,7 +256,7 @@ Version 3.80+dbg-0.2
 
 Version 3.80+dbg-0.1
 
-Fork from version 3.80 
+Fork from version 3.80
 
 * New options
   --extended-errors (-E) call stack reporting, extended error reporting
@@ -264,17 +272,16 @@ Fork from version 3.80
    break   target
    delete  target
 
-  data 
+  data
    print   variable
-   examine string 
+   examine string
    up, down, frame
    set, setq
    where
 
-  debugger   
+  debugger
    show, info
    trace {on, off, toggle}
    help
 
 * Emacs debug interface makedb.el and a patched to gud.el
-

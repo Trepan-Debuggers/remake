@@ -1408,7 +1408,11 @@ func_eval (char *o, char **argv, const char *funcname UNUSED)
 static char *
 func_debugger (char *o, char **argv UNUSED, const char *funcname UNUSED)
 {
-  enter_debugger(p_stack_top, NULL, 0, DEBUG_EXPLICIT_CALL);
+  debug_return_t rc;
+  static char buffer[10];
+  rc = enter_debugger(p_stack_top, NULL, 0, DEBUG_EXPLICIT_CALL);
+  snprintf(buffer, sizeof(buffer), "%d", rc);
+  o = buffer;
   return o;
 }
 
@@ -2319,7 +2323,7 @@ static struct function_table_entry function_table_init[] =
   FT_ENTRY ("value",         0,  1,  1,  func_value),
   FT_ENTRY ("eval",          0,  1,  1,  func_eval),
   FT_ENTRY ("file",          1,  2,  1,  func_file),
-  FT_ENTRY ("debugger",      0,  0,  0,  func_debugger),
+  FT_ENTRY ("debugger",      0,  1,  1,  func_debugger),
 #ifdef EXPERIMENTAL
   FT_ENTRY ("eq",            2,  2,  1,  func_eq),
   FT_ENTRY ("not",           0,  1,  1,  func_not),
