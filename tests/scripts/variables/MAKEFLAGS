@@ -14,9 +14,17 @@ all: ; @echo $(MAKEFLAGS)
 run_make_test(q!
 all: ; @echo $(MAKEFLAGS)
 !,
-              '--no-print-directory -e -r -R --trace', "#MAKEFILE#:2: target 'all' does not exist
-echo erR --trace --no-print-directory
-erR --trace --no-print-directory");
+              '--no-print-directory -e -r -R --trace', "Reading makefiles...
+Updating goal targets....
+ File 'all' does not exist.
+Must remake target 'all'.
+#MAKEFILE#:2: target 'all' does not exist
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+echo erR -xnormal --no-print-directory
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+erR -xnormal --no-print-directory
+Successfully remade target file 'all'.
+");
 
 
 # Recursive invocations of make should accumulate MAKEFLAGS values.

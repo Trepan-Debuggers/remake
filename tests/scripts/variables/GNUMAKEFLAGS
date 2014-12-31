@@ -19,9 +19,17 @@ $extraENV{'GNUMAKEFLAGS'} = '--no-print-directory -e -r -R --trace';
 run_make_test(q!
 all: ; @echo $(MAKEFLAGS)
 !,
-              '', "#MAKEFILE#:2: target 'all' does not exist
-echo erR --trace --no-print-directory
-erR --trace --no-print-directory");
+              '', "Reading makefiles...
+Updating goal targets....
+ File 'all' does not exist.
+Must remake target 'all'.
+#MAKEFILE#:2: target 'all' does not exist
+##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+echo erR -xnormal --no-print-directory
+##<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+erR -xnormal --no-print-directory
+Successfully remade target file 'all'.
+");
 
 # Verify that re-exec / recursion doesn't duplicate flags from GNUMAKEFLAGS
 

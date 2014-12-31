@@ -148,8 +148,8 @@ char *output_sync_option = 0;
 /*! If 1, we don't give additional error reporting information. */
 int no_extended_errors = 0;
 
-/*! If 1 same as --trace=normal */
-int tracing_flag;
+/*! If true, show version information on entry. */
+bool b_show_version = false;
 
 /*! If non-null, contains the type of tracing we are to do.
   This is coordinated with tracing_flag. */
@@ -197,7 +197,7 @@ int basename_filenames = 0;
 
 /* Output level (--verbosity).  */
 
-static struct stringlist *verbosity_flags;
+static struct stringlist *verbosity_opts;
 
 #ifdef WINDOWS32
 /* Suspend make in main for a short time to allow debugger to attach */
@@ -251,9 +251,9 @@ int inhibit_print_directory_flag = 0;
 
 int print_version_flag = 0;
 
-/*! Nonzero means --trace=noshell.  */
+/*! Nonzero means --trace and shell trace with input.  */
 
-int no_shell_trace = 0;
+int shell_trace = 0;
 
 /*! Nonzero gives a list of explicit target names and exits. Set by option
   --targets
@@ -449,13 +449,16 @@ static const char *const usage[] =
   --targets                   Give list of explicitly-named targets.\n"),
     N_("\
   --tasks                     Give list of explicitly-named targets which\n"
-"                              have commands associated with them.\n"),
+"                             have commands associated with them.\n"),
     N_("\
   -t, --touch                 Touch targets instead of remaking them.\n"),
     N_("\
   --trace                     Print tracing information.\n"),
     N_("\
   -v, --version               Print the version number of make and exit.\n"),
+    N_("\
+  --verbosity[=LEVEL]         Set verbosity level. LEVEL may be \"terse\" \"no-header\" or\n"
+                              "\full\"\n. The default is \"full\".\n"),
     N_("\
   -w, --print-directory       Print the current directory.\n"),
     N_("\
@@ -466,13 +469,9 @@ static const char *const usage[] =
     N_("\
   --warn-undefined-variables  Warn when an undefined variable is referenced.\n"),
     N_("\
-  --trace[=TYPE]              Trace command execution TYPE may be\n\
+  -x --trace[=TYPE]           Trace command execution TYPE may be\n\
                               \"command\", \"read\", \"normal\",\"\n\
-                              \"noshell\", or \"full\".\n"),
-    N_("\
-  -x                          Same as --trace=\"normal\"\n"),
-    N_("\
-  -y                          Same as --trace=\"noshell\"\n"),
+                              \"noshell\", or \"full\". Default is \"normal\"\n"),
     N_("\
   --debugger[=TYPE]            Enter debugger. TYPE may be\n\
                                \"goal\", \"preread\", \"preaction\",\n\
@@ -515,7 +514,8 @@ static const struct command_switch switches[] =
     { 't', flag, &touch_flag, 1, 1, 1, 0, 0, "touch" },
     { 'v', flag, &print_version_flag, 1, 1, 0, 0, 0, "version" },
     { 'w', flag, &print_directory_flag, 1, 1, 0, 0, 0, "print-directory" },
-    { 'x', flag, &tracing_flag, 1, 1, 0, 0, 0, 0 },
+    { 'x', strlist, &tracing_opts,  1, 1, 0, "normal",    0, "trace" },
+    { 'X', strlist, &debugger_opts, 1, 1, 0, "preaction", 0, "debugger" },
     { 'X', flag, &debugger_flag, 1, 1, 0, 0, 0, 0 },
 
     /* These options take arguments.  */
@@ -539,14 +539,15 @@ static const struct command_switch switches[] =
     /* These are long-style options.  */
     { CHAR_MAX+1, strlist, &db_flags, 1, 1, 0, "basic", 0, "debug" },
     { CHAR_MAX+2, string, &jobserver_fds, 1, 1, 0, 0, 0, "jobserver-fds" },
-    { CHAR_MAX+3, flag, &trace_flag, 1, 1, 0, 0, 0, "trace" },
+    { CHAR_MAX+3,  flag, &show_tasks_flag, 0, 0, 0, 0, 0,
+      "tasks" },
     { CHAR_MAX+4, flag, &inhibit_print_directory_flag, 1, 1, 0, 0, 0,
       "no-print-directory" },
     { CHAR_MAX+5, flag, &warn_undefined_variables_flag, 1, 1, 0, 0, 0,
       "warn-undefined-variables" },
     { CHAR_MAX+6, strlist, &eval_strings, 1, 0, 0, 0, 0, "eval" },
     { CHAR_MAX+7, string, &sync_mutex, 1, 1, 0, 0, 0, "sync-mutex" },
-    { CHAR_MAX+8, string, &verbosity_flags, 1, 1, 0, 0, 0,
+    { CHAR_MAX+8, strlist, &verbosity_opts, 1, 1, 0, 0, 0,
       "verbosity" },
     { CHAR_MAX+9, flag, (char *) &no_extended_errors, 1, 1, 0, 0, 0,
         "no-extended-errors", },
@@ -554,12 +555,6 @@ static const struct command_switch switches[] =
         "no-readline", },
     { CHAR_MAX+11, flag,  &show_targets_flag, 0, 0, 0, 0, 0,
       "targets" },
-/*    { CHAR_MAX+12,  flag, &show_task_comments_flag, 0, 0, 0, 0, 0,
-      "tasks" }, */
-    { CHAR_MAX+12,  flag, &show_tasks_flag, 0, 0, 0, 0, 0,
-      "tasks" },
-    { CHAR_MAX+13, strlist, &debugger_opts, 1, 1, 0, "preaction",
-      0, "debugger" },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
   };
 
@@ -652,10 +647,6 @@ int one_shell;
 
 int output_sync = OUTPUT_SYNC_NONE;
 
-/* Nonzero if the "--trace" option was given.  */
-
-int trace_flag = 0;
-
 /* Nonzero if we have seen the '.NOTPARALLEL' target.
    This turns off parallel builds for this invocation of make.  */
 
@@ -711,33 +702,8 @@ bsd_signal (int sig, bsd_signal_ret_t func)
 #endif
 
 void
-decode_trace_flags (int b_tracing_flag, int b_no_shell_trace,
-		    stringlist_t *ppsz_tracing_opts)
+decode_trace_flags (stringlist_t *ppsz_tracing_opts)
 {
-  char trace_seen='\0';
-  if (b_tracing_flag) {
-    db_level = DB_BASIC | DB_TRACE | DB_SHELL;
-    trace_seen='x';
-  }
-
-  if (b_no_shell_trace) {
-    if (b_tracing_flag)
-	O (error, NILF,
-	   _("warning: have -x flag which supercedes -y flag; -y flag ignored"));
-    else {
-      db_level = DB_BASIC | DB_TRACE;
-      trace_seen = 'y';
-    }
-  }
-
-  if (trace_seen != '\0') {
-    if (tracing_opts)
-	error(NILF, 0,
-	     _("warning: have already seen -%c; --tracing options ignored"),
-	     trace_seen);
-    return;
-  }
-
   if (ppsz_tracing_opts) {
     const char **p;
     db_level |= (DB_TRACE | DB_SHELL);
@@ -755,6 +721,26 @@ decode_trace_flags (int b_tracing_flag, int b_no_shell_trace,
           db_level = DB_BASIC | DB_TRACE;
         else if (0 == strcmp(*p, "read"))
           db_level |= DB_READ_MAKEFILES;
+      }
+  }
+}
+
+void
+decode_verbosity_flags (stringlist_t *ppsz_verbosity_opts)
+{
+  if (ppsz_verbosity_opts) {
+    const char **p;
+    if (ppsz_verbosity_opts->list)
+      for (p = ppsz_verbosity_opts->list; *p != 0; ++p) {
+        if (0 == strcmp(*p, "no-header"))
+          b_show_version = false;
+        else if (0 == strcmp(*p, "full")) {
+          db_level |= (DB_VERBOSE);
+	  b_show_version = true;
+	} else if (0 == strcmp(*p, "terse")) {
+	  db_level &= (~DB_VERBOSE);
+	  b_show_version = false;
+	}
       }
   }
 }
@@ -1562,63 +1548,7 @@ main (int argc, char **argv, char **envp)
 
   decode_switches (argc, (const char **)argv, 0);
 
-  /* FIXME: put into a subroutine like decode_trace_flags */
-  if (debugger_flag) {
-    b_debugger_preread   = false;
-    job_slots            =  1;
-    i_debugger_stepping  =  1;
-    i_debugger_nexting   =  0;
-    debugger_enabled     =  1;
-    /* For now we'll do basic debugging. Later, "stepping'
-       will stop here while next won't - either way no printing.
-    */
-    db_level            |=  DB_BASIC | DB_CALL | DB_SHELL | DB_UPDATE_GOAL
-        | DB_MAKEFILES;
-  } else {
-    /* debugging sets some things */
-    if (debugger_opts) {
-      const char **p;
-      for (p = debugger_opts->list; *p != 0; ++p)
-        {
-          if (0 == strcmp(*p, "preread")) {
-            b_debugger_preread  = true;
-            db_level           |= DB_READ_MAKEFILES;
-          }
-
-          if (0 == strcmp(*p, "goal")) {
-            b_debugger_goal  = true;
-            db_level           |= DB_UPDATE_GOAL;
-          }
-
-          if ( 0 == strcmp(*p, "full") || b_debugger_preread
-               || 0 == strcmp(*p, "preaction") ) {
-            job_slots            =  1;
-            i_debugger_stepping  =  1;
-            i_debugger_nexting   =  0;
-            debugger_enabled     =  1;
-            /* For now we'll do basic debugging. Later, "stepping'
-               will stop here while next won't - either way no printing.
-             */
-            db_level          |=  DB_BASIC | DB_CALL | DB_SHELL | DB_UPDATE_GOAL
-                              |   DB_MAKEFILES;
-          }
-          if ( 0 == strcmp(*p, "full")
-               || 0 == strcmp(*p, "error") ) {
-            debugger_on_error  |=  (DEBUGGER_ON_ERROR|DEBUGGER_ON_FATAL);
-          } else if ( 0 == strcmp(*p, "fatal") ) {
-            debugger_on_error  |=  DEBUGGER_ON_FATAL;
-          }
-        }
-#ifndef HAVE_LIBREADLINE
-      error (NILF,
-             "warning: you specified a debugger option, but you don't have readline support");
-      error (NILF,
-             "debugger support compiled in. Debugger options will be ignored.");
-#endif
-    }
-  }
-
-    /* Set a variable specifying whether stdout/stdin is hooked to a TTY.  */
+  /* Set a variable specifying whether stdout/stdin is hooked to a TTY.  */
 #ifdef HAVE_ISATTY
     if (isatty (fileno (stdout)))
       if (! lookup_variable (STRING_SIZE_TUPLE ("MAKE_TERMOUT")))
@@ -1660,7 +1590,65 @@ main (int argc, char **argv, char **envp)
     }
 #endif
 
-  decode_trace_flags (tracing_flag, no_shell_trace, tracing_opts);
+  decode_trace_flags (tracing_opts);
+  decode_verbosity_flags (verbosity_opts);
+
+  /* FIXME: put into a subroutine like decode_trace_flags */
+  if (debugger_flag) {
+    b_debugger_preread   = false;
+    job_slots            =  1;
+    i_debugger_stepping  =  1;
+    i_debugger_nexting   =  0;
+    debugger_enabled     =  1;
+    /* For now we'll do basic debugging. Later, "stepping'
+       will stop here while next won't - either way no printing.
+    */
+    db_level            |=  DB_BASIC | DB_CALL | DB_SHELL | DB_UPDATE_GOAL
+        | DB_MAKEFILES;
+  } else {
+    /* debugging sets some things */
+    if (debugger_opts) {
+      const char **p;
+      b_show_version = true;
+      for (p = debugger_opts->list; *p != 0; ++p)
+        {
+          if (0 == strcmp(*p, "preread")) {
+            b_debugger_preread  = true;
+            db_level           |= DB_READ_MAKEFILES;
+          }
+
+          if (0 == strcmp(*p, "goal")) {
+            b_debugger_goal  = true;
+            db_level           |= DB_UPDATE_GOAL;
+          }
+
+          if ( 0 == strcmp(*p, "full") || b_debugger_preread
+               || 0 == strcmp(*p, "preaction") ) {
+            job_slots            =  1;
+            i_debugger_stepping  =  1;
+            i_debugger_nexting   =  0;
+            debugger_enabled     =  1;
+            /* For now we'll do basic debugging. Later, "stepping'
+               will stop here while next won't - either way no printing.
+             */
+            db_level          |=  DB_BASIC | DB_CALL | DB_SHELL | DB_UPDATE_GOAL
+                              |   DB_MAKEFILES;
+          }
+          if ( 0 == strcmp(*p, "full")
+               || 0 == strcmp(*p, "error") ) {
+            debugger_on_error  |=  (DEBUGGER_ON_ERROR|DEBUGGER_ON_FATAL);
+          } else if ( 0 == strcmp(*p, "fatal") ) {
+            debugger_on_error  |=  DEBUGGER_ON_FATAL;
+          }
+        }
+#ifndef HAVE_LIBREADLINE
+      error (NILF,
+             "warning: you specified a debugger option, but you don't have readline support");
+      error (NILF,
+             "debugger support compiled in. Debugger options will be ignored.");
+#endif
+    }
+  }
 
   /* Set always_make_flag if -B was given and we've not restarted already.  */
   always_make_flag = always_make_set && (restarts == 0);
@@ -1672,7 +1660,7 @@ main (int argc, char **argv, char **envp)
       die (MAKE_SUCCESS);
     }
 
-  if (ISDB (DB_BASIC))
+  if (ISDB (DB_BASIC) && makelevel == 0 && b_show_version)
     print_version ();
 
 #ifndef VMS

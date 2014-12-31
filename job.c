@@ -1356,9 +1356,26 @@ start_job_command (child_t *child,
 #endif
 
   /* Print the command if appropriate.  */
-  if (just_print_flag || trace_flag
-      || (!(flags & COMMANDS_SILENT) && !silent_flag))
-    OS (message, 0, "%s", p);
+  {
+    bool print_it =
+	(just_print_flag
+	 || (!(flags & COMMANDS_SILENT) && !silent_flag)
+	 || (db_level & DB_SHELL));
+
+    if (print_it) {
+	if (db_level & DB_SHELL) {
+	    char pid_str[20] = ">>";
+	    if (job_slots != 1)
+		snprintf(pid_str, sizeof(pid_str), "%d", child->pid);
+	    OS (message, 0, "##>>>>>>>>>>>>>>>>>>>>>>>>>>%s>>>>>>>>>>>>>>>>>>>>>>>>>>>>",
+		pid_str);
+	    OS (message, 0, "%s", p);
+	    OS (message, 0, "##<<<<<<<<<<<<<<<<<<<<<<<<<<%s<<<<<<<<<<<<<<<<<<<<<<<<<<<<",
+		job_slots != 1 ? pid_str : "<<");
+	} else
+	    OS (message, 0, "%s", p);
+    }
+  }
 
   /* Tell update_goal_chain that a command has been started on behalf of
      this target.  It is important that this happens here and not in
@@ -2072,7 +2089,7 @@ new_job (struct file *file, target_stack_node_t *p_call_stack)
 
   /* Trace the build.
      Use message here so that changes to working directories are logged.  */
-  if (trace_flag)
+  if (db_level & DB_SHELL)
     {
       char *newer = allocated_variable_expand_for_file ("$?", c->file);
       const char *nm;
