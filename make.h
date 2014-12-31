@@ -381,16 +381,6 @@ void ar_parse_name (const char *, char **, char **);
 int ar_touch (const char *);
 time_t ar_member_date (const char *);
 
-typedef long int (*ar_member_func_t) (int desc, const char *mem, int truncated,
-				      long int hdrpos, long int datapos,
-				      long int size, long int date, int uid,
-				      int gid, int mode, const void *arg);
-
-long int ar_scan (const char *archive, ar_member_func_t function, const void *arg);
-int ar_name_equal (const char *name, const char *mem, int truncated);
-#ifndef VMS
-int ar_member_touch (const char *arname, const char *memname);
-#endif
 #endif
 
 int dir_file_exists_p (const char *, const char *);
@@ -584,6 +574,4 @@ extern int handling_fatal_signal;
    NULL at the end of the directory--and _doesn't_ reset errno.  So, we have
    to do it ourselves here.  */
 
-#define ENULLLOOP(_v,_c)   do { errno = 0; (_v) = _c; } \
-                           while((_v)==0 && errno==EINTR)
 #endif /*MAKE_H*/

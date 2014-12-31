@@ -17,6 +17,10 @@ this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* We use <config.h> instead of "config.h" so that a compilation
    using -I. -I$srcdir will use ./config.h rather than $srcdir/config.h
    (which it would do because makeint.h was found in $srcdir).  */
+
+#ifndef REMAKE_MAKEINT_H
+#define REMAKE_MAKEINT_H
+
 #include <config.h>
 #undef  HAVE_CONFIG_H
 #define HAVE_CONFIG_H 1
@@ -712,3 +716,5 @@ extern int handling_fatal_signal;
 
 #define ENULLLOOP(_v,_c)   do { errno = 0; (_v) = _c; } \
                            while((_v)==0 && errno==EINTR)
+
+#endif /* REMAKE_MAKEINT_H */

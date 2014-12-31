@@ -103,7 +103,7 @@ EXTRA_make_SOURCES = vmsjobs.c remote-stub.c remote-cstms.c
 noinst_HEADERS = commands.h dep.h filedef.h job.h makeint.h rule.h variable.h \
 		debug.h getopt.h gettext.h hash.h output.h implicit.h \
 		buildargv.h expand.h file.h function.h read.h main.h make.h \
-		print.h trace.h types.h  \
+		print.h trace.h types.h vpath.h  \
 		$(DEBUGGER_H)
 
 make_LDADD =	@LIBOBJS@ @ALLOCA@ $(GLOBLIB) @GETLOADAVG_LIBS@ @LIBINTL@ \

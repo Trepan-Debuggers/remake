@@ -2939,7 +2939,7 @@ print_usage (int bad)
     fprintf (usageto, _("\nThis program built for %s (%s)\n"),
              make_host, remote_description);
 
-  fprintf (usageto, _("Report bugs to <bug-make@gnu.org>\n"));
+  fprintf (usageto, _("Report bugs to https://github.com/rocky/remake/issues\n"));
 }
 
 /* Decode switches from ARGC and ARGV.
@@ -3497,7 +3497,8 @@ print_version (void)
      year, and none of the rest of it should be translated (including the
      word "Copyright"), so it hardly seems worth it.  */
 
-  printf ("%sCopyright (C) 1988-2014 Free Software Foundation, Inc.\n",
+  printf ("%sCopyright (C) 1988-2014 Free Software Foundation, Inc.\n"
+	  "Copyright (C) 2015 Rocky Bernstein.\n",
           precede);
 
   printf (_("%sLicense GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n\
