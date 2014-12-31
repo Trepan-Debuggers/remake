@@ -230,11 +230,14 @@ update_goal_chain (struct dep *goals)
                      any commands were actually started for this goal.  */
                   && file->update_status == us_success && !g->changed
                   /* Never give a message under -s or -q.  */
-                  && !silent_flag && !question_flag)
+                  && !silent_flag && !question_flag) {
                 OS (message, 1, ((file->phony || file->cmds == 0)
                                  ? _("Nothing to be done for '%s'.")
                                  : _("'%s' is up to date.")),
                     file->name);
+		if ( debugger_enabled && b_debugger_goal )
+		  enter_debugger(NULL, file, -2, DEBUG_GOAL_UPDATED_HIT);
+	      }
 
               /* This goal is finished.  Remove it from the chain.  */
               if (lastgoal == 0)
@@ -458,6 +461,7 @@ update_file_1 (struct file *file, unsigned int depth,
         }
 
       DBF (DB_VERBOSE, _("File '%s' was considered already.\n"));
+      trace_pop_target(p_call_stack);
       return 0;
     }
 
@@ -468,9 +472,11 @@ update_file_1 (struct file *file, unsigned int depth,
       break;
     case cs_running:
       DBF (DB_VERBOSE, _("Still updating file '%s'.\n"));
+      trace_pop_target(p_call_stack);
       return 0;
     case cs_finished:
       DBF (DB_VERBOSE, _("Finished updating file '%s'.\n"));
+      trace_pop_target(p_call_stack);
       return file->update_status;
     default:
       abort ();
@@ -498,9 +504,12 @@ update_file_1 (struct file *file, unsigned int depth,
   this_mtime = file_mtime (file);
   check_renamed (file);
   noexist = this_mtime == NONEXISTENT_MTIME;
-  if (noexist)
+  if (noexist) {
     DBF (DB_BASIC, _("File '%s' does not exist.\n"));
-  else if (ORDINARY_MTIME_MIN <= this_mtime && this_mtime <= ORDINARY_MTIME_MAX
+    if (i_debugger_nexting && file->cmds) {
+	enter_debugger(p_call_stack, file, 0, DEBUG_STEP_HIT);
+    }
+  } else if (ORDINARY_MTIME_MIN <= this_mtime && this_mtime <= ORDINARY_MTIME_MAX
            && file->low_resolution_time)
     {
       /* Avoid spurious rebuilds due to low resolution time stamps.  */
@@ -690,11 +699,15 @@ update_file_1 (struct file *file, unsigned int depth,
 
   DBF (DB_VERBOSE, _("Finished prerequisites of target file '%s'.\n"));
 
+  if ( file->tracing & BRK_AFTER_PREREQ )
+      enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_AFTER_PREREQ);
+
   if (running)
     {
       set_command_state (file, cs_deps_running);
       --depth;
       DBF (DB_VERBOSE, _("The prerequisites of '%s' are being made.\n"));
+      trace_pop_target(p_call_stack);
       return 0;
     }
 
@@ -715,6 +728,7 @@ update_file_1 (struct file *file, unsigned int depth,
         OS (error, NILF,
             _("Target '%s' not remade because of errors."), file->name);
 
+      trace_pop_target(p_call_stack);
       return dep_status;
     }
 
@@ -835,6 +849,7 @@ update_file_1 (struct file *file, unsigned int depth,
           file = file->prev;
         }
 
+      trace_pop_target(p_call_stack);
       return 0;
     }
 
@@ -854,6 +869,9 @@ update_file_1 (struct file *file, unsigned int depth,
   if (file->command_state != cs_finished)
     {
       DBF (DB_VERBOSE, _("Recipe of '%s' is being run.\n"));
+      if ( file->tracing & BRK_AFTER_CMD || i_debugger_stepping )
+	  enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_AFTER_CMD);
+      trace_pop_target(p_call_stack);
       return 0;
     }
 
@@ -873,6 +891,9 @@ update_file_1 (struct file *file, unsigned int depth,
     }
 
   file->updated = 1;
+  if ( file->tracing & BRK_AFTER_CMD || i_debugger_stepping )
+      enter_debugger(p_call_stack, file, 0, DEBUG_BRKPT_AFTER_CMD);
+  trace_pop_target(p_call_stack);
   return file->update_status;
 }
 

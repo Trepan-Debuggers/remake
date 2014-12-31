@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_INIT([remake],[4.1+dbg0.9],[https://github.com/rocky/remake/issues])
+AC_INIT([remake],[4.1+dbg0.91],[https://github.com/rocky/remake/issues])
 
 AC_PREREQ([2.62])
 

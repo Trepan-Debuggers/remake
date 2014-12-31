@@ -2026,7 +2026,7 @@ new_job (struct file *file, target_stack_node_t *p_call_stack)
         /* There must be at least one child already, or we have no business
            waiting for a token. */
         if (!children)
-          O (fatal, NILF, "INTERNAL: no children as we go to sleep on read\n");
+	  fatal_err(p_call_stack, "INTERNAL: no children as we go to sleep on read");
 
 #ifdef WINDOWS32
         /* On Windows we simply wait for the jobserver semaphore to become
@@ -2037,9 +2037,8 @@ new_job (struct file *file, target_stack_node_t *p_call_stack)
           {
             DWORD err = GetLastError ();
             const char *estr = map_windows32_error_to_string (err);
-            ONS (fatal, NILF,
-                 _("semaphore or child process wait: (Error %ld: %s)"),
-                 err, estr);
+            fatal_err(_("semaphore or child process wait: (Error %ld: %s)"),
+		      err, estr);
           }
 #else
         /* Set interruptible system calls, and read() for a job token.  */

@@ -33,15 +33,9 @@ Boston, MA 02111-1307, USA.  */
 #include "trace.h"
 
 /*! Versions of error and fatal with the ability to show call-stack. */
-#if defined __STDC__ && __STDC__
 void err_with_stack (target_stack_node_t *p_call, const char *fmt, ...)
                    __attribute__ ((__format__ (__printf__, 2, 3)));
-void fatal_err (target_stack_node_t *p_call, const char *fmt, ...)
-                   __attribute__ ((__format__ (__printf__, 2, 3)));
-#else
-void err();
-void fatal_err();
-#endif
+void fatal_err (target_stack_node_t *p_call, const char *fmt, ...);
 
 /* Think of the below not as an enumeration but as #defines done in a
    way that we'll be able to use the value in a gdb. */

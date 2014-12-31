@@ -138,7 +138,7 @@ err_with_stack (target_stack_node_t *p_call, const char *fmt, ...)
 
 /* Print an error message and exit.  */
 void
-fatal_err(target_stack_node_t *p_call, const char *fmt, ...)
+fatal_err (target_stack_node_t *p_call, const char *fmt, ...)
 {
   va_list args;
   gmk_floc *p_floc   = NULL;
@@ -171,7 +171,7 @@ fatal_err(target_stack_node_t *p_call, const char *fmt, ...)
   }
   if ( (debugger_on_error & DEBUGGER_ON_FATAL) || debugger_enabled )
     enter_debugger(p_call, p_target, 2, DEBUG_ERROR_HIT);
-  die (2);
+  die (MAKE_FAILURE);
 }
 
 #ifndef HAVE_STRERROR
