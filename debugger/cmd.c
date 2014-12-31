@@ -356,7 +356,7 @@ debug_return_t enter_debugger (target_stack_node_t *p,
 			       file_t *p_target, int errcode,
 			       debug_enter_reason_t reason)
 {
-  debug_return_t debug_return = debug_readloop;
+  volatile debug_return_t debug_return = debug_readloop;
   static bool b_init = false;
   static bool b_readline_init = false;
   char open_depth[MAX_NEST_DEPTH];
